@@ -3,7 +3,7 @@
  *  \author Lee Barnby (University of Birmingham) May 2006.
  *  \brief StGenericVertexFinder implementation for fixing vertex.
  *
- *  $Id: StFixedVertexFinder.h,v 1.7 2018/03/24 20:10:41 jwebb Exp $
+ *  $Id: StFixedVertexFinder.h,v 1.7.2.1 2018/04/13 23:59:20 didenko Exp $
  *
  *  Modified J.Lauret for MC vertex
  *
@@ -57,14 +57,18 @@ private:
      * Vertex constraint not useful for this VF but is part of base class so implementation just
      * displays warning to this effect
      */
-    virtual void UseVertexConstraint();
+  void UseVertexConstraint(double, double, double, double, double);
 
 };
 
 /***************************************************************************
 *
 * $Log: StFixedVertexFinder.h,v $
+* Revision 1.7.2.1  2018/04/13 23:59:20  didenko
+* updated for SL16d_embed
+*
 * Revision 1.7  2018/03/24 20:10:41  jwebb
+*
 * Added option for user to specify the uncertainties on the vertex.  Useful
 * in embedding jobs in order to get the track association with primary
 * vertex correct (especially when tracks are from precision tracking, eg

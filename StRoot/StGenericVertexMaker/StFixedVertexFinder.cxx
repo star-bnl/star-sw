@@ -1,6 +1,6 @@
 /*
  *  StFixedVertexFinder.cxx
- *  $Id: StFixedVertexFinder.cxx,v 1.8 2018/03/24 20:10:41 jwebb Exp $
+ *  $Id: StFixedVertexFinder.cxx,v 1.8.2.1 2018/04/13 23:59:13 didenko Exp $
  *
  *  Author Lee Barnby (University of Birmingham) May 2006.
  *
@@ -79,7 +79,7 @@ int StFixedVertexFinder::fit(StEvent* event)
   prim.setFlag(1);                    // So that we know its the primary vertex
   prim.setRanking(-5);                // Have to have something
   prim.setVertexFinderId(VFId);       // Id depends on MC or fixed position used
-  addVertex(prim);
+  addVertex(&prim);
 
   return size();
 }
@@ -89,7 +89,7 @@ void StFixedVertexFinder::printInfo(ostream& os)const{
     os << "Fixed position: x=" << mFixedX << " y=" << mFixedY << " z=" << mFixedZ << endl;
 }
 
-void StFixedVertexFinder::UseVertexConstraint(){
+void StFixedVertexFinder::UseVertexConstraint(double, double, double, double, double){
     LOG_WARN << "StFixedVertexFinder::UseVertexConstraint() - vertex beam constraint NOT implemented in context of fixed vertex finder" << endm;
 
 }
@@ -107,7 +107,11 @@ void StFixedVertexFinder::SetVertexError(double x, double y, double z){
 
 /*
  * $Log: StFixedVertexFinder.cxx,v $
+ * Revision 1.8.2.1  2018/04/13 23:59:13  didenko
+ * updated for SL16d_embed
+ *
  * Revision 1.8  2018/03/24 20:10:41  jwebb
+ *
  * Added option for user to specify the uncertainties on the vertex.  Useful
  * in embedding jobs in order to get the track association with primary
  * vertex correct (especially when tracks are from precision tracking, eg
