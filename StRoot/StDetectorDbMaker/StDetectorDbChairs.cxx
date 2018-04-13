@@ -36,6 +36,8 @@ MakeChairOptionalInstance2(TpcSecRowCor,St_TpcSecRowCC,Calibrations/tpc/TpcSecRo
 MakeChairInstance2(TpcSecRowCor,St_TpcSecRowXC,Calibrations/tpc/TpcSecRowX);
 #include "St_tpcCorrectionC.h"
 ClassImp(St_tpcCorrectionC);
+#include "St_tpcCalibResolutionsC.h"
+MakeChairInstance(tpcCalibResolutions,Calibrations/tpc/tpcCalibResolutions);
 //________________________________________________________________________________
 Double_t St_tpcCorrectionC::CalcCorrection(Int_t i, Double_t x, Double_t z, Int_t NparMax) {
   tpcCorrection_st *cor =  ((St_tpcCorrection *) Table())->GetTable() + i;
@@ -1197,6 +1199,8 @@ Float_t  St_vpdTotCorrC::Corr(Int_t i, Float_t x) {
   }
   return dcorr;
 }
+#include "St_vpdSimParamsC.h"
+MakeChairInstance(vpdSimParams,Calibrations/tof/vpdSimParams);
 //____________________________Calibrations/emc____________________________________________________
 #include "St_emcPedC.h"
 MakeChairInstance2(emcPed,St_bemcPedC,Calibrations/emc/y3bemc/bemcPed);
