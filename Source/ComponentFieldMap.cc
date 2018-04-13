@@ -10,10 +10,7 @@
 
 namespace Garfield {
 
-ComponentFieldMap::ComponentFieldMap() : ComponentBase() {
-
-  m_className = "ComponentFieldMap";
-}
+ComponentFieldMap::ComponentFieldMap() : ComponentBase() { m_className = "ComponentFieldMap"; }
 
 ComponentFieldMap::~ComponentFieldMap() {
   if (m_tetTree) delete m_tetTree;
@@ -113,8 +110,7 @@ void ComponentFieldMap::SetMedium(const unsigned int imat, Medium* m) {
   }
 
   if (m_debug) {
-    std::cout << m_className << "::SetMedium:\n    Associated material "
-              << imat << " with medium " << m->GetName() << ".\n";
+    std::cout << m_className << "::SetMedium:\n    Associated material " << imat << " with medium " << m->GetName() << ".\n";
   }
 
   materials[imat].medium = m;
@@ -131,8 +127,7 @@ Medium* ComponentFieldMap::GetMedium(const unsigned int imat) const {
   return materials[imat].medium;
 }
 
-bool ComponentFieldMap::GetElement(const unsigned int i, double& vol,
-                                   double& dmin, double& dmax) {
+bool ComponentFieldMap::GetElement(const unsigned int i, double& vol, double& dmin, double& dmax) {
 
   if ((int)i >= nElements) {
     std::cerr << m_className << "::GetElement:\n";
@@ -145,10 +140,7 @@ bool ComponentFieldMap::GetElement(const unsigned int i, double& vol,
   return true;
 }
 
-int ComponentFieldMap::FindElement5(const double x, const double y,
-                                    double const z, double& t1, double& t2,
-                                    double& t3, double& t4, double jac[4][4],
-                                    double& det) {
+int ComponentFieldMap::FindElement5(const double x, const double y, double const z, double& t1, double& t2, double& t3, double& t4, double jac[4][4], double& det) {
 
   // Check if bounding boxes of elements have been computed
   if (!m_cacheElemBoundingBoxes) {
@@ -201,20 +193,13 @@ int ComponentFieldMap::FindElement5(const double x, const double y,
 
   // Number of elements to scan.
   // With tetra tree disabled, all elements are scanned.
-  const int numElemToSearch =
-      m_useTetrahedralTree ? tetList.size() : nElements;
+  const int numElemToSearch = m_useTetrahedralTree ? tetList.size() : nElements;
   for (int i = 0; i < numElemToSearch; ++i) {
     const int idxToElemList = m_useTetrahedralTree ? tetList[i] : i;
     const Element& element = elements[idxToElemList];
-    // Tolerance
-    const double f = 0.2;
-    const double tolx = f * (element.xmax - element.xmin);
-    if (x < element.xmin - tolx || x > element.xmax + tolx) continue;
-    const double toly = f * (element.ymax - element.ymin);
-    if (y < element.ymin - toly || y > element.ymax + toly) continue;
-    const double tolz = f * (element.zmax - element.zmin);
-    if (z < element.zmin - tolz || z > element.zmax + tolz) continue;
-
+    if (x < element.xmin || x > element.xmax ||
+        y < element.ymin || y > element.ymax ||
+        z < element.zmin || z > element.zmax) continue;
     if (element.degenerate) {
       // Degenerate element
       if (Coordinates3(x, y, z, t1, t2, t3, t4, jac, det, element) != 0) {
@@ -226,8 +211,7 @@ int ComponentFieldMap::FindElement5(const double x, const double y,
       m_lastElement = idxToElemList;
       if (m_debug) {
         std::cout << m_className << "::FindElement5:\n";
-        std::cout << "    Found matching degenerate element " << idxToElemList
-                  << ".\n";
+        std::cout << "    Found matching degenerate element " << idxToElemList << ".\n";
       }
       if (!m_checkMultipleElement) return idxToElemList;
       for (int j = 0; j < 4; ++j) {
@@ -253,8 +237,7 @@ int ComponentFieldMap::FindElement5(const double x, const double y,
       m_lastElement = idxToElemList;
       if (m_debug) {
         std::cout << m_className << "::FindElement5:\n";
-        std::cout << "    Found matching non-degenerate element "
-                  << idxToElemList << ".\n";
+        std::cout << "    Found matching non-degenerate element " << idxToElemList << ".\n";
       }
       if (!m_checkMultipleElement) return idxToElemList;
       for (int j = 0; j < 4; ++j) {
@@ -277,16 +260,14 @@ int ComponentFieldMap::FindElement5(const double x, const double y,
     if (nfound < 1) {
       if (m_debug) {
         std::cout << m_className << "::FindElement5:\n";
-        std::cout << "    No element matching point (" << x << ", " << y
-                  << ") found.\n";
+        std::cout << "    No element matching point (" << x << ", " << y << ") found.\n";
       }
       m_lastElement = -1;
       return -1;
     }
     if (nfound > 1) {
       std::cout << m_className << "::FindElement5:\n";
-      std::cout << "    Found " << nfound << " elements matching point (" << x
-                << ", " << y << ").\n";
+      std::cout << "    Found " << nfound << " elements matching point (" << x << ", " << y << ").\n";
     }
     if (nfound > 0) {
       for (int j = 0; j < 4; ++j) {
@@ -305,16 +286,12 @@ int ComponentFieldMap::FindElement5(const double x, const double y,
 
   if (m_debug) {
     std::cout << m_className << "::FindElement5:\n";
-    std::cout << "    No element matching point (" << x << ", " << y
-              << ") found.\n";
+    std::cout << "    No element matching point (" << x << ", " << y << ") found.\n";
   }
   return -1;
 }
 
-int ComponentFieldMap::FindElement13(const double x, const double y,
-                                     const double z, double& t1, double& t2,
-                                     double& t3, double& t4, double jac[4][4],
-                                     double& det) {
+int ComponentFieldMap::FindElement13(const double x, const double y, const double z, double& t1, double& t2, double& t3, double& t4, double jac[4][4], double& det) {
   // Check if bounding boxes of elements have been computed
   if (!m_cacheElemBoundingBoxes) {
     std::cout << m_className << "::FindElement13:\n"
@@ -337,8 +314,7 @@ int ComponentFieldMap::FindElement13(const double x, const double y,
   if (m_lastElement > -1 && !m_checkMultipleElement) {
     const Element& element = elements[m_lastElement];
     if (Coordinates13(x, y, z, t1, t2, t3, t4, jac, det, element) == 0) {
-      if (t1 >= 0 && t1 <= +1 && t2 >= 0 && t2 <= +1 && t3 >= 0 && t3 <= +1 &&
-          t4 >= 0 && t4 <= +1) {
+      if (t1 >= 0 && t1 <= +1 && t2 >= 0 && t2 <= +1 && t3 >= 0 && t3 <= +1 && t4 >= 0 && t4 <= +1) {
         return m_lastElement;
       }
     }
@@ -358,8 +334,7 @@ int ComponentFieldMap::FindElement13(const double x, const double y,
   }
   // Number of elements to scan.
   // With tetra tree disabled, all elements are scanned.
-  const int numElemToSearch =
-      m_useTetrahedralTree ? tetList.size() : nElements;
+  const int numElemToSearch = m_useTetrahedralTree ? tetList.size() : nElements;
   // Verify the count of volumes that contain the point.
   int nfound = 0;
   int imap = -1;
@@ -368,19 +343,13 @@ int ComponentFieldMap::FindElement13(const double x, const double y,
   for (int i = 0; i < numElemToSearch; i++) {
     const int idxToElemList = m_useTetrahedralTree ? tetList[i] : i;
     const Element& element = elements[idxToElemList];
-    // Tolerance
-    const double f = 0.2;
-    const double tolx = f * (element.xmax - element.xmin);
-    if (x < element.xmin - tolx || x > element.xmax + tolx) continue;
-    const double toly = f * (element.ymax - element.ymin);
-    if (y < element.ymin - toly || y > element.ymax + toly) continue;
-    const double tolz = f * (element.zmax - element.zmin);
-    if (z < element.zmin - tolz || z > element.zmax + tolz) continue;
+    if (x < element.xmin || x > element.xmax ||
+        y < element.ymin || y > element.ymax ||
+        z < element.zmin || z > element.zmax) continue;
     if (Coordinates13(x, y, z, t1, t2, t3, t4, jac, det, element) != 0) {
       continue;
     }
-    if (t1 < 0 || t1 > 1 || t2 < 0 || t2 > 1 || t3 < 0 || t3 > 1 || t4 < 0 ||
-        t4 > 1) {
+    if (t1 < 0 || t1 > 1 || t2 < 0 || t2 > 1 || t3 < 0 || t3 > 1 || t4 < 0 || t4 > 1) {
       continue;
     }
     ++nfound;
@@ -410,16 +379,14 @@ int ComponentFieldMap::FindElement13(const double x, const double y,
     if (nfound < 1) {
       if (m_debug) {
         std::cout << m_className << "::FindElement13:\n";
-        std::cout << "    No element matching point (" << x << ", " << y << ", "
-                  << z << ") found.\n";
+        std::cout << "    No element matching point (" << x << ", " << y << ", " << z << ") found.\n";
       }
       m_lastElement = -1;
       return -1;
     }
     if (nfound > 1) {
       std::cerr << m_className << "::FindElement13:\n";
-      std::cerr << "    Found << " << nfound << " elements matching point ("
-                << x << ", " << y << ", " << z << ").\n";
+      std::cerr << "    Found << " << nfound << " elements matching point (" << x << ", " << y << ", " << z << ").\n";
     }
     if (nfound > 0) {
       for (int j = 0; j < 4; ++j) {
@@ -438,16 +405,12 @@ int ComponentFieldMap::FindElement13(const double x, const double y,
 
   if (m_debug) {
     std::cout << m_className << "::FindElement13:\n";
-    std::cout << "    No element matching point (" << x << ", " << y << ", "
-              << z << ") found.\n";
+    std::cout << "    No element matching point (" << x << ", " << y << ", " << z << ") found.\n";
   }
   return -1;
 }
 
-int ComponentFieldMap::FindElementCube(const double x, const double y,
-                                       const double z, double& t1, double& t2,
-                                       double& t3, TMatrixD*& jac,
-                                       std::vector<TMatrixD*>& dN) {
+int ComponentFieldMap::FindElementCube(const double x, const double y, const double z, double& t1, double& t2, double& t3, TMatrixD*& jac, std::vector<TMatrixD*>& dN) {
 
   int imap = -1;
   if (m_lastElement >= 0) {
@@ -482,27 +445,20 @@ int ComponentFieldMap::FindElementCube(const double x, const double y,
   if (imap < 0) {
     if (m_debug) {
       std::cout << m_className << "::FindElementCube:\n";
-      std::cout << "    Point (" << x << "," << y << "," << z
-                << ") not in the mesh, it is background or PEC.\n";
-      const Node& first0 = nodes[elements.front().emap[0]]; 
-      const Node& first2 = nodes[elements.front().emap[2]]; 
-      const Node& first3 = nodes[elements.front().emap[3]]; 
-      const Node& first7 = nodes[elements.front().emap[7]]; 
-      std::cout << "    First node (" << first3.x << ","
-                << first3.y << "," << first3.z << ") in the mesh.\n";
-      std::cout << "  dx= " << (first0.x - first3.x)
-                << ", dy= " << (first2.y - first3.y)
-                << ", dz= " << (first7.z - first3.z) << "\n";
+      std::cout << "    Point (" << x << "," << y << "," << z << ") not in the mesh, it is background or PEC.\n";
+      const Node& first0 = nodes[elements.front().emap[0]];
+      const Node& first2 = nodes[elements.front().emap[2]];
+      const Node& first3 = nodes[elements.front().emap[3]];
+      const Node& first7 = nodes[elements.front().emap[7]];
+      std::cout << "    First node (" << first3.x << "," << first3.y << "," << first3.z << ") in the mesh.\n";
+      std::cout << "  dx= " << (first0.x - first3.x) << ", dy= " << (first2.y - first3.y) << ", dz= " << (first7.z - first3.z) << "\n";
       const Node& last0 = nodes[elements.back().emap[0]];
       const Node& last2 = nodes[elements.back().emap[2]];
       const Node& last3 = nodes[elements.back().emap[3]];
       const Node& last5 = nodes[elements.back().emap[5]];
       const Node& last7 = nodes[elements.back().emap[7]];
-      std::cout << "    Last node (" << last5.x << ","
-                << last5.y << "," << last5.z << ") in the mesh.\n";
-      std::cout << "  dx= " << (last0.x - last3.x)
-                << ", dy= " << (last2.y - last3.y)
-                << ", dz= " << (last7.z - last3.z) << "\n";
+      std::cout << "    Last node (" << last5.x << "," << last5.y << "," << last5.z << ") in the mesh.\n";
+      std::cout << "  dx= " << (last0.x - last3.x) << ", dy= " << (last2.y - last3.y) << ", dz= " << (last7.z - last3.z) << "\n";
     }
     return -1;
   }
@@ -513,9 +469,7 @@ int ComponentFieldMap::FindElementCube(const double x, const double y,
   return imap;
 }
 
-void ComponentFieldMap::Jacobian3(const Element& element, const double u,
-                                  const double v, const double w, double& det,
-                                  double jac[4][4]) const {
+void ComponentFieldMap::Jacobian3(const Element& element, const double u, const double v, const double w, double& det, double jac[4][4]) const {
 
   // Initial values
   det = 0;
@@ -532,46 +486,21 @@ void ComponentFieldMap::Jacobian3(const Element& element, const double u,
   const Node& n5 = nodes[element.emap[5]];
 
   // Determinant of the quadratic triangular Jacobian
-  det = -(((-1 + 4 * v) * n1.x + n2.x - 4 * w * n2.x + 4 * u * n3.x -
-           4 * u * n4.x - 4 * v * n5.x + 4 * w * n5.x) *
-          (-n0.y + 4 * u * n0.y + 4 * v * n3.y + 4 * w * n4.y)) -
-        ((-1 + 4 * u) * n0.x + n1.x - 4 * v * n1.x - 4 * u * n3.x +
-         4 * v * n3.x + 4 * w * n4.x - 4 * w * n5.x) *
-            (-n2.y + 4 * w * n2.y + 4 * u * n4.y + 4 * v * n5.y) +
-        ((-1 + 4 * u) * n0.x + n2.x - 4 * w * n2.x + 4 * v * n3.x -
-         4 * u * n4.x + 4 * w * n4.x - 4 * v * n5.x) *
-            (-n1.y + 4 * v * n1.y + 4 * u * n3.y + 4 * w * n5.y);
+  det = -(((-1 + 4 * v) * n1.x + n2.x - 4 * w * n2.x + 4 * u * n3.x - 4 * u * n4.x - 4 * v * n5.x + 4 * w * n5.x) * (-n0.y + 4 * u * n0.y + 4 * v * n3.y + 4 * w * n4.y)) - ((-1 + 4 * u) * n0.x + n1.x - 4 * v * n1.x - 4 * u * n3.x + 4 * v * n3.x + 4 * w * n4.x - 4 * w * n5.x) * (-n2.y + 4 * w * n2.y + 4 * u * n4.y + 4 * v * n5.y) + ((-1 + 4 * u) * n0.x + n2.x - 4 * w * n2.x + 4 * v * n3.x - 4 * u * n4.x + 4 * w * n4.x - 4 * v * n5.x) * (-n1.y + 4 * v * n1.y + 4 * u * n3.y + 4 * w * n5.y);
 
   // Terms of the quadratic triangular Jacobian
-  jac[0][0] = (-n1.x + 4 * v * n1.x + 4 * u * n3.x + 4 * w * n5.x) *
-                  (-n2.y + 4 * w * n2.y + 4 * u * n4.y + 4 * v * n5.y) -
-              (-n2.x + 4 * w * n2.x + 4 * u * n4.x + 4 * v * n5.x) *
-                  (-n1.y + 4 * v * n1.y + 4 * u * n3.y + 4 * w * n5.y);
-  jac[0][1] = (-1 + 4 * v) * n1.y + n2.y - 4 * w * n2.y + 4 * u * n3.y -
-              4 * u * n4.y - 4 * v * n5.y + 4 * w * n5.y;
-  jac[0][2] = n1.x - 4 * v * n1.x + (-1 + 4 * w) * n2.x - 4 * u * n3.x +
-              4 * u * n4.x + 4 * v * n5.x - 4 * w * n5.x;
-  jac[1][0] = (-n2.x + 4 * w * n2.x + 4 * u * n4.x + 4 * v * n5.x) *
-                  (-n0.y + 4 * u * n0.y + 4 * v * n3.y + 4 * w * n4.y) -
-              (-n0.x + 4 * u * n0.x + 4 * v * n3.x + 4 * w * n4.x) *
-                  (-n2.y + 4 * w * n2.y + 4 * u * n4.y + 4 * v * n5.y);
-  jac[1][1] = n0.y - 4 * u * n0.y - n2.y + 4 * w * n2.y - 4 * v * n3.y +
-              4 * u * n4.y - 4 * w * n4.y + 4 * v * n5.y;
-  jac[1][2] = (-1 + 4 * u) * n0.x + n2.x - 4 * w * n2.x + 4 * v * n3.x -
-              4 * u * n4.x + 4 * w * n4.x - 4 * v * n5.x;
-  jac[2][0] = -((-n1.x + 4 * v * n1.x + 4 * u * n3.x + 4 * w * n5.x) *
-                (-n0.y + 4 * u * n0.y + 4 * v * n3.y + 4 * w * n4.y)) +
-              (-n0.x + 4 * u * n0.x + 4 * v * n3.x + 4 * w * n4.x) *
-                  (-n1.y + 4 * v * n1.y + 4 * u * n3.y + 4 * w * n5.y);
-  jac[2][1] = (-1 + 4 * u) * n0.y + n1.y - 4 * v * n1.y - 4 * u * n3.y +
-              4 * v * n3.y + 4 * w * n4.y - 4 * w * n5.y;
-  jac[2][2] = n0.x - 4 * u * n0.x - n1.x + 4 * v * n1.x + 4 * u * n3.x -
-              4 * v * n3.x - 4 * w * n4.x + 4 * w * n5.x;
+  jac[0][0] = (-n1.x + 4 * v * n1.x + 4 * u * n3.x + 4 * w * n5.x) * (-n2.y + 4 * w * n2.y + 4 * u * n4.y + 4 * v * n5.y) - (-n2.x + 4 * w * n2.x + 4 * u * n4.x + 4 * v * n5.x) * (-n1.y + 4 * v * n1.y + 4 * u * n3.y + 4 * w * n5.y);
+  jac[0][1] = (-1 + 4 * v) * n1.y + n2.y - 4 * w * n2.y + 4 * u * n3.y - 4 * u * n4.y - 4 * v * n5.y + 4 * w * n5.y;
+  jac[0][2] = n1.x - 4 * v * n1.x + (-1 + 4 * w) * n2.x - 4 * u * n3.x + 4 * u * n4.x + 4 * v * n5.x - 4 * w * n5.x;
+  jac[1][0] = (-n2.x + 4 * w * n2.x + 4 * u * n4.x + 4 * v * n5.x) * (-n0.y + 4 * u * n0.y + 4 * v * n3.y + 4 * w * n4.y) - (-n0.x + 4 * u * n0.x + 4 * v * n3.x + 4 * w * n4.x) * (-n2.y + 4 * w * n2.y + 4 * u * n4.y + 4 * v * n5.y);
+  jac[1][1] = n0.y - 4 * u * n0.y - n2.y + 4 * w * n2.y - 4 * v * n3.y + 4 * u * n4.y - 4 * w * n4.y + 4 * v * n5.y;
+  jac[1][2] = (-1 + 4 * u) * n0.x + n2.x - 4 * w * n2.x + 4 * v * n3.x - 4 * u * n4.x + 4 * w * n4.x - 4 * v * n5.x;
+  jac[2][0] = -((-n1.x + 4 * v * n1.x + 4 * u * n3.x + 4 * w * n5.x) * (-n0.y + 4 * u * n0.y + 4 * v * n3.y + 4 * w * n4.y)) + (-n0.x + 4 * u * n0.x + 4 * v * n3.x + 4 * w * n4.x) * (-n1.y + 4 * v * n1.y + 4 * u * n3.y + 4 * w * n5.y);
+  jac[2][1] = (-1 + 4 * u) * n0.y + n1.y - 4 * v * n1.y - 4 * u * n3.y + 4 * v * n3.y + 4 * w * n4.y - 4 * w * n5.y;
+  jac[2][2] = n0.x - 4 * u * n0.x - n1.x + 4 * v * n1.x + 4 * u * n3.x - 4 * v * n3.x - 4 * w * n4.x + 4 * w * n5.x;
 }
 
-void ComponentFieldMap::Jacobian5(const Element& element, const double u,
-                                  const double v, double& det,
-                                  double jac[4][4]) const {
+void ComponentFieldMap::Jacobian5(const Element& element, const double u, const double v, double& det, double jac[4][4]) const {
 
   // Initial values
   det = 0;
@@ -589,144 +518,15 @@ void ComponentFieldMap::Jacobian5(const Element& element, const double u,
   const Node& n6 = nodes[element.emap[6]];
   const Node& n7 = nodes[element.emap[7]];
   // Determinant of the quadrilateral serendipity Jacobian
-  det =
-      (-2 * u * u * u * ((n2.x + n3.x - 2 * n6.x) * (n0.y + n1.y - 2 * n4.y) -
-                         (n0.x + n1.x - 2 * n4.x) * (n2.y + n3.y - 2 * n6.y)) +
-       2 * v * v * v * (-((n0.x + n3.x - 2 * n7.x) * (n1.y + n2.y - 2 * n5.y)) +
-                        (n1.x + n2.x - 2 * n5.x) * (n0.y + n3.y - 2 * n7.y)) +
-       2 * (-((n5.x - n7.x) * (n4.y - n6.y)) + (n4.x - n6.x) * (n5.y - n7.y)) +
-       v * (-(n6.x * n0.y) - 2 * n7.x * n0.y + n6.x * n1.y - 2 * n7.x * n1.y -
-            n6.x * n2.y - 2 * n7.x * n2.y + n4.x * (n0.y - n1.y + n2.y - n3.y) +
-            n6.x * n3.y - 2 * n7.x * n3.y - n0.x * n4.y + n1.x * n4.y -
-            n2.x * n4.y + n3.x * n4.y - 2 * n0.x * n5.y - 2 * n1.x * n5.y -
-            2 * n2.x * n5.y - 2 * n3.x * n5.y + 8 * n7.x * n5.y + n0.x * n6.y -
-            n1.x * n6.y + n2.x * n6.y - n3.x * n6.y +
-            2 * n5.x * (n0.y + n1.y + n2.y + n3.y - 4 * n7.y) +
-            2 * (n0.x + n1.x + n2.x + n3.x) * n7.y) +
-       v * v *
-           (-(n4.x * n0.y) + 2 * n5.x * n0.y + n6.x * n0.y + 2 * n7.x * n0.y +
-            n4.x * n1.y - 2 * n5.x * n1.y - n6.x * n1.y - 2 * n7.x * n1.y +
-            n4.x * n2.y + 2 * n5.x * n2.y - n6.x * n2.y + 2 * n7.x * n2.y -
-            n4.x * n3.y - 2 * n5.x * n3.y + n6.x * n3.y - 2 * n7.x * n3.y +
-            2 * n2.x * (n1.y + n3.y) - n2.x * n4.y + 2 * n5.x * n4.y -
-            2 * n7.x * n4.y - 2 * n2.x * n5.y - 2 * n4.x * n5.y +
-            2 * n6.x * n5.y + n2.x * n6.y - 2 * n5.x * n6.y + 2 * n7.x * n6.y +
-            n0.x * (2 * n1.y + 2 * n3.y + n4.y - 2 * n5.y - n6.y - 2 * n7.y) -
-            2 * (n2.x - n4.x + n6.x) * n7.y +
-            n3.x * (-2 * n0.y - 2 * n2.y + n4.y + 2 * n5.y - n6.y + 2 * n7.y) +
-            n1.x * (-2 * n0.y - 2 * n2.y - n4.y + 2 * n5.y + n6.y + 2 * n7.y)) +
-       u * (n5.x * n0.y - 2 * n6.x * n0.y - n7.x * n0.y - n5.x * n1.y -
-            2 * n6.x * n1.y + n7.x * n1.y + n5.x * n2.y - 2 * n6.x * n2.y -
-            n7.x * n2.y - n5.x * n3.y - 2 * n6.x * n3.y + n7.x * n3.y -
-            2 * n1.x * n4.y - 2 * n2.x * n4.y - 2 * n3.x * n4.y +
-            8 * n6.x * n4.y + n1.x * n5.y - n2.x * n5.y + n3.x * n5.y +
-            2 * n4.x * (n0.y + n1.y + n2.y + n3.y - 4 * n6.y) +
-            2 * n1.x * n6.y + 2 * n2.x * n6.y + 2 * n3.x * n6.y -
-            (n1.x - n2.x + n3.x) * n7.y +
-            n0.x * (-2 * n4.y - n5.y + 2 * n6.y + n7.y) +
-            v * v * (4 * n4.x * n0.y - 3 * n5.x * n0.y - 4 * n6.x * n0.y -
-                     5 * n7.x * n0.y + 4 * n4.x * n1.y - 5 * n5.x * n1.y -
-                     4 * n6.x * n1.y - 3 * n7.x * n1.y + 4 * n4.x * n2.y +
-                     5 * n5.x * n2.y - 4 * n6.x * n2.y + 3 * n7.x * n2.y +
-                     4 * n4.x * n3.y + 3 * n5.x * n3.y - 4 * n6.x * n3.y +
-                     5 * n7.x * n3.y + 8 * n5.x * n4.y + 8 * n7.x * n4.y -
-                     8 * n4.x * n5.y + 8 * n6.x * n5.y - 8 * n5.x * n6.y -
-                     8 * n7.x * n6.y + n3.x * (5 * n0.y + 3 * n1.y - 4 * n4.y -
-                                               3 * n5.y + 4 * n6.y - 5 * n7.y) +
-                     n2.x * (3 * n0.y + 5 * n1.y - 4 * n4.y - 5 * n5.y +
-                             4 * n6.y - 3 * n7.y) -
-                     8 * n4.x * n7.y + 8 * n6.x * n7.y +
-                     n1.x * (-5 * n2.y - 3 * n3.y - 4 * n4.y + 5 * n5.y +
-                             4 * n6.y + 3 * n7.y) +
-                     n0.x * (-3 * n2.y - 5 * n3.y - 4 * n4.y + 3 * n5.y +
-                             4 * n6.y + 5 * n7.y)) -
-            2 * v * (n6.x * n0.y - 3 * n7.x * n0.y + n6.x * n1.y - n7.x * n1.y +
-                     3 * n6.x * n2.y - n7.x * n2.y + 3 * n6.x * n3.y -
-                     3 * n7.x * n3.y - 3 * n0.x * n4.y - 3 * n1.x * n4.y -
-                     n2.x * n4.y - n3.x * n4.y + 4 * n7.x * n4.y + n0.x * n5.y +
-                     3 * n1.x * n5.y + 3 * n2.x * n5.y + n3.x * n5.y -
-                     4 * n6.x * n5.y - n0.x * n6.y - n1.x * n6.y -
-                     3 * n2.x * n6.y - 3 * n3.x * n6.y + 4 * n7.x * n6.y -
-                     n5.x * (n0.y + 3 * n1.y + 3 * n2.y + n3.y -
-                             4 * (n4.y + n6.y)) +
-                     (3 * n0.x + n1.x + n2.x + 3 * n3.x - 4 * n6.x) * n7.y +
-                     n4.x * (3 * n0.y + 3 * n1.y + n2.y + n3.y -
-                             4 * (n5.y + n7.y)))) +
-       u * u *
-           (2 * n3.x * n0.y - 2 * n4.x * n0.y - n5.x * n0.y - 2 * n6.x * n0.y +
-            n7.x * n0.y - 2 * n0.x * n1.y + 2 * n4.x * n1.y - n5.x * n1.y +
-            2 * n6.x * n1.y + n7.x * n1.y + 2 * n3.x * n2.y - 2 * n4.x * n2.y +
-            n5.x * n2.y - 2 * n6.x * n2.y - n7.x * n2.y + 2 * n4.x * n3.y +
-            n5.x * n3.y + 2 * n6.x * n3.y - n7.x * n3.y - 2 * n3.x * n4.y +
-            2 * n5.x * n4.y - 2 * n7.x * n4.y - n3.x * n5.y - 2 * n4.x * n5.y +
-            2 * n6.x * n5.y - 2 * n3.x * n6.y - 2 * n5.x * n6.y +
-            2 * n7.x * n6.y +
-            n0.x * (-2 * n3.y + 2 * n4.y + n5.y + 2 * n6.y - n7.y) +
-            (n3.x + 2 * n4.x - 2 * n6.x) * n7.y +
-            n2.x * (-2 * n1.y - 2 * n3.y + 2 * n4.y - n5.y + 2 * n6.y + n7.y) -
-            3 * v * v *
-                (n5.x * n0.y - n6.x * n0.y - n7.x * n0.y + n5.x * n1.y +
-                 n6.x * n1.y - n7.x * n1.y - n5.x * n2.y + n6.x * n2.y +
-                 n7.x * n2.y - n5.x * n3.y - n6.x * n3.y + n7.x * n3.y -
-                 2 * n5.x * n4.y + 2 * n7.x * n4.y - 2 * n6.x * n5.y +
-                 2 * n5.x * n6.y - 2 * n7.x * n6.y +
-                 n4.x * (n0.y - n1.y - n2.y + n3.y + 2 * n5.y - 2 * n7.y) +
-                 n3.x * (n0.y - n2.y - n4.y + n5.y + n6.y - n7.y) +
-                 2 * n6.x * n7.y +
-                 (n0.x - n2.x) * (n1.y - n3.y - n4.y - n5.y + n6.y + n7.y)) +
-            v * (4 * n5.x * n0.y + 3 * n6.x * n0.y - 4 * n7.x * n0.y +
-                 4 * n5.x * n1.y - 3 * n6.x * n1.y - 4 * n7.x * n1.y +
-                 4 * n5.x * n2.y - 5 * n6.x * n2.y - 4 * n7.x * n2.y +
-                 4 * n5.x * n3.y + 5 * n6.x * n3.y - 4 * n7.x * n3.y -
-                 8 * n5.x * n4.y + 8 * n7.x * n4.y + 8 * n6.x * n5.y -
-                 8 * n5.x * n6.y + 8 * n7.x * n6.y +
-                 n4.x * (5 * n0.y - 5 * n1.y - 3 * n2.y + 3 * n3.y + 8 * n5.y -
-                         8 * n7.y) -
-                 8 * n6.x * n7.y + n3.x * (3 * n1.y + 5 * n2.y - 3 * n4.y -
-                                           4 * n5.y - 5 * n6.y + 4 * n7.y) +
-                 n0.x * (5 * n1.y + 3 * n2.y - 5 * n4.y - 4 * n5.y - 3 * n6.y +
-                         4 * n7.y) +
-                 n2.x * (-3 * n0.y - 5 * n3.y + 3 * n4.y - 4 * n5.y + 5 * n6.y +
-                         4 * n7.y)) +
-            n1.x * ((-1 + v) * (-2 + 3 * v) * n0.y + 2 * n2.y - 2 * n4.y +
-                    n5.y - 2 * n6.y - n7.y +
-                    v * (-3 * n3.y + 5 * n4.y - 4 * n5.y + 3 * n6.y + 4 * n7.y -
-                         3 * v * (n2.y + n4.y - n5.y - n6.y + n7.y))))) /
-      8;
+  det = (-2 * u * u * u * ((n2.x + n3.x - 2 * n6.x) * (n0.y + n1.y - 2 * n4.y) - (n0.x + n1.x - 2 * n4.x) * (n2.y + n3.y - 2 * n6.y)) + 2 * v * v * v * (-((n0.x + n3.x - 2 * n7.x) * (n1.y + n2.y - 2 * n5.y)) + (n1.x + n2.x - 2 * n5.x) * (n0.y + n3.y - 2 * n7.y)) + 2 * (-((n5.x - n7.x) * (n4.y - n6.y)) + (n4.x - n6.x) * (n5.y - n7.y)) + v * (-(n6.x * n0.y) - 2 * n7.x * n0.y + n6.x * n1.y - 2 * n7.x * n1.y - n6.x * n2.y - 2 * n7.x * n2.y + n4.x * (n0.y - n1.y + n2.y - n3.y) + n6.x * n3.y - 2 * n7.x * n3.y - n0.x * n4.y + n1.x * n4.y - n2.x * n4.y + n3.x * n4.y - 2 * n0.x * n5.y - 2 * n1.x * n5.y - 2 * n2.x * n5.y - 2 * n3.x * n5.y + 8 * n7.x * n5.y + n0.x * n6.y - n1.x * n6.y + n2.x * n6.y - n3.x * n6.y + 2 * n5.x * (n0.y + n1.y + n2.y + n3.y - 4 * n7.y) + 2 * (n0.x + n1.x + n2.x + n3.x) * n7.y) + v * v * (-(n4.x * n0.y) + 2 * n5.x * n0.y + n6.x * n0.y + 2 * n7.x * n0.y + n4.x * n1.y - 2 * n5.x * n1.y - n6.x * n1.y - 2 * n7.x * n1.y + n4.x * n2.y + 2 * n5.x * n2.y - n6.x * n2.y + 2 * n7.x * n2.y - n4.x * n3.y - 2 * n5.x * n3.y + n6.x * n3.y - 2 * n7.x * n3.y + 2 * n2.x * (n1.y + n3.y) - n2.x * n4.y + 2 * n5.x * n4.y - 2 * n7.x * n4.y - 2 * n2.x * n5.y - 2 * n4.x * n5.y + 2 * n6.x * n5.y + n2.x * n6.y - 2 * n5.x * n6.y + 2 * n7.x * n6.y + n0.x * (2 * n1.y + 2 * n3.y + n4.y - 2 * n5.y - n6.y - 2 * n7.y) - 2 * (n2.x - n4.x + n6.x) * n7.y + n3.x * (-2 * n0.y - 2 * n2.y + n4.y + 2 * n5.y - n6.y + 2 * n7.y) + n1.x * (-2 * n0.y - 2 * n2.y - n4.y + 2 * n5.y + n6.y + 2 * n7.y)) + u * (n5.x * n0.y - 2 * n6.x * n0.y - n7.x * n0.y - n5.x * n1.y - 2 * n6.x * n1.y + n7.x * n1.y + n5.x * n2.y - 2 * n6.x * n2.y - n7.x * n2.y - n5.x * n3.y - 2 * n6.x * n3.y + n7.x * n3.y - 2 * n1.x * n4.y - 2 * n2.x * n4.y - 2 * n3.x * n4.y + 8 * n6.x * n4.y + n1.x * n5.y - n2.x * n5.y + n3.x * n5.y + 2 * n4.x * (n0.y + n1.y + n2.y + n3.y - 4 * n6.y) + 2 * n1.x * n6.y + 2 * n2.x * n6.y + 2 * n3.x * n6.y - (n1.x - n2.x + n3.x) * n7.y + n0.x * (-2 * n4.y - n5.y + 2 * n6.y + n7.y) + v * v * (4 * n4.x * n0.y - 3 * n5.x * n0.y - 4 * n6.x * n0.y - 5 * n7.x * n0.y + 4 * n4.x * n1.y - 5 * n5.x * n1.y - 4 * n6.x * n1.y - 3 * n7.x * n1.y + 4 * n4.x * n2.y + 5 * n5.x * n2.y - 4 * n6.x * n2.y + 3 * n7.x * n2.y + 4 * n4.x * n3.y + 3 * n5.x * n3.y - 4 * n6.x * n3.y + 5 * n7.x * n3.y + 8 * n5.x * n4.y + 8 * n7.x * n4.y - 8 * n4.x * n5.y + 8 * n6.x * n5.y - 8 * n5.x * n6.y - 8 * n7.x * n6.y + n3.x * (5 * n0.y + 3 * n1.y - 4 * n4.y - 3 * n5.y + 4 * n6.y - 5 * n7.y) + n2.x * (3 * n0.y + 5 * n1.y - 4 * n4.y - 5 * n5.y + 4 * n6.y - 3 * n7.y) - 8 * n4.x * n7.y + 8 * n6.x * n7.y + n1.x * (-5 * n2.y - 3 * n3.y - 4 * n4.y + 5 * n5.y + 4 * n6.y + 3 * n7.y) + n0.x * (-3 * n2.y - 5 * n3.y - 4 * n4.y + 3 * n5.y + 4 * n6.y + 5 * n7.y)) - 2 * v * (n6.x * n0.y - 3 * n7.x * n0.y + n6.x * n1.y - n7.x * n1.y + 3 * n6.x * n2.y - n7.x * n2.y + 3 * n6.x * n3.y - 3 * n7.x * n3.y - 3 * n0.x * n4.y - 3 * n1.x * n4.y - n2.x * n4.y - n3.x * n4.y + 4 * n7.x * n4.y + n0.x * n5.y + 3 * n1.x * n5.y + 3 * n2.x * n5.y + n3.x * n5.y - 4 * n6.x * n5.y - n0.x * n6.y - n1.x * n6.y - 3 * n2.x * n6.y - 3 * n3.x * n6.y + 4 * n7.x * n6.y - n5.x * (n0.y + 3 * n1.y + 3 * n2.y + n3.y - 4 * (n4.y + n6.y)) + (3 * n0.x + n1.x + n2.x + 3 * n3.x - 4 * n6.x) * n7.y + n4.x * (3 * n0.y + 3 * n1.y + n2.y + n3.y - 4 * (n5.y + n7.y)))) + u * u * (2 * n3.x * n0.y - 2 * n4.x * n0.y - n5.x * n0.y - 2 * n6.x * n0.y + n7.x * n0.y - 2 * n0.x * n1.y + 2 * n4.x * n1.y - n5.x * n1.y + 2 * n6.x * n1.y + n7.x * n1.y + 2 * n3.x * n2.y - 2 * n4.x * n2.y + n5.x * n2.y - 2 * n6.x * n2.y - n7.x * n2.y + 2 * n4.x * n3.y + n5.x * n3.y + 2 * n6.x * n3.y - n7.x * n3.y - 2 * n3.x * n4.y + 2 * n5.x * n4.y - 2 * n7.x * n4.y - n3.x * n5.y - 2 * n4.x * n5.y + 2 * n6.x * n5.y - 2 * n3.x * n6.y - 2 * n5.x * n6.y + 2 * n7.x * n6.y + n0.x * (-2 * n3.y + 2 * n4.y + n5.y + 2 * n6.y - n7.y) + (n3.x + 2 * n4.x - 2 * n6.x) * n7.y + n2.x * (-2 * n1.y - 2 * n3.y + 2 * n4.y - n5.y + 2 * n6.y + n7.y) - 3 * v * v * (n5.x * n0.y - n6.x * n0.y - n7.x * n0.y + n5.x * n1.y + n6.x * n1.y - n7.x * n1.y - n5.x * n2.y + n6.x * n2.y + n7.x * n2.y - n5.x * n3.y - n6.x * n3.y + n7.x * n3.y - 2 * n5.x * n4.y + 2 * n7.x * n4.y - 2 * n6.x * n5.y + 2 * n5.x * n6.y - 2 * n7.x * n6.y + n4.x * (n0.y - n1.y - n2.y + n3.y + 2 * n5.y - 2 * n7.y) + n3.x * (n0.y - n2.y - n4.y + n5.y + n6.y - n7.y) + 2 * n6.x * n7.y + (n0.x - n2.x) * (n1.y - n3.y - n4.y - n5.y + n6.y + n7.y)) + v * (4 * n5.x * n0.y + 3 * n6.x * n0.y - 4 * n7.x * n0.y + 4 * n5.x * n1.y - 3 * n6.x * n1.y - 4 * n7.x * n1.y + 4 * n5.x * n2.y - 5 * n6.x * n2.y - 4 * n7.x * n2.y + 4 * n5.x * n3.y + 5 * n6.x * n3.y - 4 * n7.x * n3.y - 8 * n5.x * n4.y + 8 * n7.x * n4.y + 8 * n6.x * n5.y - 8 * n5.x * n6.y + 8 * n7.x * n6.y + n4.x * (5 * n0.y - 5 * n1.y - 3 * n2.y + 3 * n3.y + 8 * n5.y - 8 * n7.y) - 8 * n6.x * n7.y + n3.x * (3 * n1.y + 5 * n2.y - 3 * n4.y - 4 * n5.y - 5 * n6.y + 4 * n7.y) + n0.x * (5 * n1.y + 3 * n2.y - 5 * n4.y - 4 * n5.y - 3 * n6.y + 4 * n7.y) + n2.x * (-3 * n0.y - 5 * n3.y + 3 * n4.y - 4 * n5.y + 5 * n6.y + 4 * n7.y)) + n1.x * ((-1 + v) * (-2 + 3 * v) * n0.y + 2 * n2.y - 2 * n4.y + n5.y - 2 * n6.y - n7.y + v * (-3 * n3.y + 5 * n4.y - 4 * n5.y + 3 * n6.y + 4 * n7.y - 3 * v * (n2.y + n4.y - n5.y - n6.y + n7.y))))) / 8;
   // Jacobian terms
-  jac[0][0] =
-      (u * u * (-n0.y - n1.y + n2.y + n3.y + 2 * n4.y - 2 * n6.y) +
-       2 * (-n4.y + n6.y +
-            v * (n0.y + n1.y + n2.y + n3.y - 2 * n5.y - 2 * n7.y)) +
-       u * (n0.y - 2 * v * n0.y - n1.y + 2 * v * n1.y + n2.y + 2 * v * n2.y -
-            n3.y - 2 * v * n3.y - 4 * v * n5.y + 4 * v * n7.y)) /
-      4;
-  jac[0][1] =
-      (u * u * (n0.x + n1.x - n2.x - n3.x - 2 * n4.x + 2 * n6.x) -
-       2 * (-n4.x + n6.x +
-            v * (n0.x + n1.x + n2.x + n3.x - 2 * n5.x - 2 * n7.x)) +
-       u * ((-1 + 2 * v) * n0.x + n1.x - 2 * v * n1.x - n2.x - 2 * v * n2.x +
-            n3.x + 2 * v * n3.x + 4 * v * n5.x - 4 * v * n7.x)) /
-      4;
-  jac[1][0] =
-      (v * (-n0.y + n1.y - n2.y + n3.y) - 2 * n5.y +
-       2 * u * ((-1 + v) * n0.y + (-1 + v) * n1.y - n2.y - v * n2.y - n3.y -
-                v * n3.y + 2 * n4.y - 2 * v * n4.y + 2 * n6.y + 2 * v * n6.y) +
-       v * v * (n0.y - n1.y - n2.y + n3.y + 2 * n5.y - 2 * n7.y) + 2 * n7.y) /
-      4;
-  jac[1][1] =
-      (v * (n0.x - n1.x + n2.x - n3.x) +
-       2 * u * (n0.x - v * n0.x + n1.x - v * n1.x + n2.x + v * n2.x + n3.x +
-                v * n3.x - 2 * n4.x + 2 * v * n4.x - 2 * n6.x - 2 * v * n6.x) +
-       2 * (n5.x - n7.x) +
-       v * v * (-n0.x + n1.x + n2.x - n3.x - 2 * n5.x + 2 * n7.x)) /
-      4;
+  jac[0][0] = (u * u * (-n0.y - n1.y + n2.y + n3.y + 2 * n4.y - 2 * n6.y) + 2 * (-n4.y + n6.y + v * (n0.y + n1.y + n2.y + n3.y - 2 * n5.y - 2 * n7.y)) + u * (n0.y - 2 * v * n0.y - n1.y + 2 * v * n1.y + n2.y + 2 * v * n2.y - n3.y - 2 * v * n3.y - 4 * v * n5.y + 4 * v * n7.y)) / 4;
+  jac[0][1] = (u * u * (n0.x + n1.x - n2.x - n3.x - 2 * n4.x + 2 * n6.x) - 2 * (-n4.x + n6.x + v * (n0.x + n1.x + n2.x + n3.x - 2 * n5.x - 2 * n7.x)) + u * ((-1 + 2 * v) * n0.x + n1.x - 2 * v * n1.x - n2.x - 2 * v * n2.x + n3.x + 2 * v * n3.x + 4 * v * n5.x - 4 * v * n7.x)) / 4;
+  jac[1][0] = (v * (-n0.y + n1.y - n2.y + n3.y) - 2 * n5.y + 2 * u * ((-1 + v) * n0.y + (-1 + v) * n1.y - n2.y - v * n2.y - n3.y - v * n3.y + 2 * n4.y - 2 * v * n4.y + 2 * n6.y + 2 * v * n6.y) + v * v * (n0.y - n1.y - n2.y + n3.y + 2 * n5.y - 2 * n7.y) + 2 * n7.y) / 4;
+  jac[1][1] = (v * (n0.x - n1.x + n2.x - n3.x) + 2 * u * (n0.x - v * n0.x + n1.x - v * n1.x + n2.x + v * n2.x + n3.x + v * n3.x - 2 * n4.x + 2 * v * n4.x - 2 * n6.x - 2 * v * n6.x) + 2 * (n5.x - n7.x) + v * v * (-n0.x + n1.x + n2.x - n3.x - 2 * n5.x + 2 * n7.x)) / 4;
 }
 
-void ComponentFieldMap::Jacobian13(const Element& element, const double t,
-                                   const double u, const double v,
-                                   const double w, double& det,
-                                   double jac[4][4]) const {
+void ComponentFieldMap::Jacobian13(const Element& element, const double t, const double u, const double v, const double w, double& det, double jac[4][4]) const {
 
   // Initial values
   det = 0;
@@ -744,281 +544,93 @@ void ComponentFieldMap::Jacobian13(const Element& element, const double t,
   const Node& n7 = nodes[element.emap[7]];
   const Node& n8 = nodes[element.emap[8]];
   const Node& n9 = nodes[element.emap[9]];
+
+  // Shorthands.
+  const double fourt = 4 * t;
+  const double fouru = 4 * u;
+  const double fourv = 4 * v;
+  const double fourw = 4 * w;
+
+  const double ttx = (-1 + fourt) * n0.x + 4 * (u * n4.x + v * n5.x + w * n6.x);
+  const double tty = (-1 + fourt) * n0.y + 4 * (u * n4.y + v * n5.y + w * n6.y);
+  const double ttz = (-1 + fourt) * n0.z + 4 * (u * n4.z + v * n5.z + w * n6.z);
+
+  const double uux = (-1 + fouru) * n1.x + 4 * (t * n4.x + v * n7.x + w * n8.x);
+  const double uuy = (-1 + fouru) * n1.y + 4 * (t * n4.y + v * n7.y + w * n8.y);
+  const double uuz = (-1 + fouru) * n1.z + 4 * (t * n4.z + v * n7.z + w * n8.z);
+
+  const double vvx = fourv * n9.x - n3.x + fourw * n3.x + fourt * n6.x + fouru * n8.x;
+  const double vvy = fourv * n9.y - n3.y + fourw * n3.y + fourt * n6.y + fouru * n8.y;
+  const double vvz = fourv * n9.z - n3.z + fourw * n3.z + fourt * n6.z + fouru * n8.z;
+
+  const double wwx = fourw * n9.x - n2.x + fourv * n2.x + fourt * n5.x + fouru * n7.x;
+  const double wwy = fourw * n9.y - n2.y + fourv * n2.y + fourt * n5.y + fouru * n7.y;
+  const double wwz = fourw * n9.z - n2.z + fourv * n2.z + fourt * n5.z + fouru * n7.z;
+
+  const double aax = n1.x - fouru * n1.x - n3.x + fourw * n3.x - fourt * n4.x + fourt * n6.x + fourv * (n9.x - n7.x) + fouru * n8.x - fourw * n8.x;
+  const double anx = -fourv * n9.x - n1.x + fouru * n1.x + n3.x - fourw * n3.x + fourt * n4.x - fourt * n6.x + fourv * n7.x - fouru * n8.x + fourw * n8.x;
+  const double aay = n1.y - fouru * n1.y - n3.y + fourw * n3.y - fourt * n4.y + fourt * n6.y + fourv * (n9.y - n7.y) + fouru * n8.y - fourw * n8.y;
+  const double any = -fourv * n9.y - n1.y + fouru * n1.y + n3.y - fourw * n3.y + fourt * n4.y - fourt * n6.y + fourv * n7.y - fouru * n8.y + fourw * n8.y;
+
+  const double bbx = -fourw * n9.x - n1.x + fouru * n1.x + n2.x - fourv * n2.x + fourt * n4.x - fourt * n5.x - fouru * n7.x + fourv * n7.x + fourw * n8.x;
+  const double bnx = n1.x - fouru * n1.x - n2.x + fourv * n2.x - fourt * n4.x + fourt * n5.x + fouru * n7.x - fourv * n7.x + fourw * (n9.x - n8.x);
+  const double bby = -fourw * n9.y - n1.y + fouru * n1.y + n2.y - fourv * n2.y + fourt * n4.y - fourt * n5.y - fouru * n7.y + fourv * n7.y + fourw * n8.y;
+  const double bny = n1.y - fouru * n1.y - n2.y + fourv * n2.y - fourt * n4.y + fourt * n5.y + fouru * n7.y - fourv * n7.y + fourw * (n9.y - n8.y);
+
+  const double ccx = -fourv * n9.x + fourw * n9.x - n2.x + fourv * n2.x + n3.x - fourw * n3.x + fourt * n5.x - fourt * n6.x + fouru * n7.x - fouru * n8.x;
+  const double cnx = -fourw * n9.x + fourv * (n9.x - n2.x) + n2.x - n3.x + fourw * n3.x - fourt * n5.x + fourt * n6.x - fouru * n7.x + fouru * n8.x;
+  const double ccy = -fourv * n9.y + fourw * n9.y - n2.y + fourv * n2.y + n3.y - fourw * n3.y + fourt * n5.y - fourt * n6.y + fouru * n7.y - fouru * n8.y;
+  const double cny = -fourw * n9.y + fourv * (n9.y - n2.y) + n2.y - n3.y + fourw * n3.y - fourt * n5.y + fourt * n6.y - fouru * n7.y + fouru * n8.y;
+
+  const double ddy = (-1 + fourt) * n0.y - fourv * n9.y + n3.y - fourw * n3.y + fouru * n4.y + fourv * n5.y - fourt * n6.y + fourw * n6.y - fouru * n8.y;
+  const double ddx = (-1 + fourt) * n0.x - fourv * n9.x + n3.x - fourw * n3.x + fouru * n4.x + fourv * n5.x - fourt * n6.x + fourw * n6.x - fouru * n8.x;
+
+  const double eex = (-1 + fourt) * n0.x - fourw * n9.x + n2.x - fourv * n2.x + fouru * n4.x - fourt * n5.x + fourv * n5.x + fourw * n6.x - fouru * n7.x;
+  const double eey = (-1 + fourt) * n0.y - fourw * n9.y + n2.y - fourv * n2.y + fouru * n4.y - fourt * n5.y + fourv * n5.y + fourw * n6.y - fouru * n7.y;
+
+  const double ffx = (-1 + fourt) * n0.x + n1.x - fouru * n1.x + 4 * (-(t * n4.x) + u * n4.x + v * n5.x + w * n6.x - v * n7.x - w * n8.x);
+  const double ffy = (-1 + fourt) * n0.y + n1.y - fouru * n1.y + 4 * (-(t * n4.y) + u * n4.y + v * n5.y + w * n6.y - v * n7.y - w * n8.y);
+
   // Determinant of the quadrilateral serendipity Jacobian
-  det =
-      -(((-4 * v * n9.x - n1.x + 4 * u * n1.x + n3.x - 4 * w * n3.x +
-          4 * t * n4.x - 4 * t * n6.x + 4 * v * n7.x - 4 * u * n8.x +
-          4 * w * n8.x) *
-             (4 * w * n9.y - n2.y + 4 * v * n2.y + 4 * t * n5.y +
-              4 * u * n7.y) +
-         (n1.x - 4 * u * n1.x - n2.x + 4 * v * n2.x - 4 * t * n4.x +
-          4 * t * n5.x + 4 * u * n7.x - 4 * v * n7.x + 4 * w * (n9.x - n8.x)) *
-             (4 * v * n9.y - n3.y + 4 * w * n3.y + 4 * t * n6.y +
-              4 * u * n8.y) +
-         (-4 * w * n9.x + 4 * v * (n9.x - n2.x) + n2.x - n3.x + 4 * w * n3.x -
-          4 * t * n5.x + 4 * t * n6.x - 4 * u * n7.x + 4 * u * n8.x) *
-             ((-1 + 4 * u) * n1.y + 4 * (t * n4.y + v * n7.y + w * n8.y))) *
-        ((-1 + 4 * t) * n0.z + 4 * (u * n4.z + v * n5.z + w * n6.z))) -
-      ((n1.x - 4 * u * n1.x - n3.x + 4 * w * n3.x - 4 * t * n4.x +
-        4 * t * n6.x + 4 * v * (n9.x - n7.x) + 4 * u * n8.x - 4 * w * n8.x) *
-           ((-1 + 4 * t) * n0.y + 4 * (u * n4.y + v * n5.y + w * n6.y)) -
-       ((-1 + 4 * t) * n0.x + n1.x - 4 * u * n1.x +
-        4 * (-(t * n4.x) + u * n4.x + v * n5.x + w * n6.x - v * n7.x -
-             w * n8.x)) *
-           (4 * v * n9.y - n3.y + 4 * w * n3.y + 4 * t * n6.y + 4 * u * n8.y) +
-       ((-1 + 4 * t) * n0.x - 4 * v * n9.x + n3.x - 4 * w * n3.x +
-        4 * u * n4.x + 4 * v * n5.x - 4 * t * n6.x + 4 * w * n6.x -
-        4 * u * n8.x) *
-           ((-1 + 4 * u) * n1.y + 4 * (t * n4.y + v * n7.y + w * n8.y))) *
-          (4 * w * n9.z - n2.z + 4 * v * n2.z + 4 * t * n5.z + 4 * u * n7.z) +
-      ((n1.x - 4 * u * n1.x - n2.x + 4 * v * n2.x - 4 * t * n4.x +
-        4 * t * n5.x + 4 * u * n7.x - 4 * v * n7.x + 4 * w * (n9.x - n8.x)) *
-           ((-1 + 4 * t) * n0.y + 4 * (u * n4.y + v * n5.y + w * n6.y)) -
-       ((-1 + 4 * t) * n0.x + n1.x - 4 * u * n1.x +
-        4 * (-(t * n4.x) + u * n4.x + v * n5.x + w * n6.x - v * n7.x -
-             w * n8.x)) *
-           (4 * w * n9.y - n2.y + 4 * v * n2.y + 4 * t * n5.y + 4 * u * n7.y) +
-       ((-1 + 4 * t) * n0.x - 4 * w * n9.x + n2.x - 4 * v * n2.x +
-        4 * u * n4.x - 4 * t * n5.x + 4 * v * n5.x + 4 * w * n6.x -
-        4 * u * n7.x) *
-           ((-1 + 4 * u) * n1.y + 4 * (t * n4.y + v * n7.y + w * n8.y))) *
-          (4 * v * n9.z - n3.z + 4 * w * n3.z + 4 * t * n6.z + 4 * u * n8.z) +
-      ((-4 * w * n9.x + 4 * v * (n9.x - n2.x) + n2.x - n3.x + 4 * w * n3.x -
-        4 * t * n5.x + 4 * t * n6.x - 4 * u * n7.x + 4 * u * n8.x) *
-           ((-1 + 4 * t) * n0.y + 4 * (u * n4.y + v * n5.y + w * n6.y)) +
-       ((-1 + 4 * t) * n0.x - 4 * v * n9.x + n3.x - 4 * w * n3.x +
-        4 * u * n4.x + 4 * v * n5.x - 4 * t * n6.x + 4 * w * n6.x -
-        4 * u * n8.x) *
-           (4 * w * n9.y - n2.y + 4 * v * n2.y + 4 * t * n5.y + 4 * u * n7.y) -
-       ((-1 + 4 * t) * n0.x - 4 * w * n9.x + n2.x - 4 * v * n2.x +
-        4 * u * n4.x - 4 * t * n5.x + 4 * v * n5.x + 4 * w * n6.x -
-        4 * u * n7.x) *
-           (4 * v * n9.y - n3.y + 4 * w * n3.y + 4 * t * n6.y + 4 * u * n8.y)) *
-          ((-1 + 4 * u) * n1.z + 4 * (t * n4.z + v * n7.z + w * n8.z));
+  det = -(anx * wwy + bnx * vvy + cnx * uuy) * ttz - 
+         (aax * tty - ffx * vvy + ddx * uuy) * wwz + 
+         (bnx * tty - ffx * wwy + eex * uuy) * vvz + 
+         (cnx * tty + ddx * wwy - eex * vvy) * uuz;
 
-  jac[0][0] =
-      -((((-1 + 4 * u) * n1.x + 4 * (t * n4.x + v * n7.x + w * n8.x)) *
-             (4 * v * n9.y - n3.y + 4 * w * n3.y + 4 * t * n6.y +
-              4 * u * n8.y) -
-         (4 * v * n9.x - n3.x + 4 * w * n3.x + 4 * t * n6.x + 4 * u * n8.x) *
-             ((-1 + 4 * u) * n1.y + 4 * (t * n4.y + v * n7.y + w * n8.y))) *
-        (4 * w * n9.z - n2.z + 4 * v * n2.z + 4 * t * n5.z + 4 * u * n7.z)) +
-      (((-1 + 4 * u) * n1.x + 4 * (t * n4.x + v * n7.x + w * n8.x)) *
-           (4 * w * n9.y - n2.y + 4 * v * n2.y + 4 * t * n5.y + 4 * u * n7.y) -
-       (4 * w * n9.x - n2.x + 4 * v * n2.x + 4 * t * n5.x + 4 * u * n7.x) *
-           ((-1 + 4 * u) * n1.y + 4 * (t * n4.y + v * n7.y + w * n8.y))) *
-          (4 * v * n9.z - n3.z + 4 * w * n3.z + 4 * t * n6.z + 4 * u * n8.z) +
-      (-((4 * v * n9.x - n3.x + 4 * w * n3.x + 4 * t * n6.x + 4 * u * n8.x) *
-         (4 * w * n9.y - n2.y + 4 * v * n2.y + 4 * t * n5.y + 4 * u * n7.y)) +
-       (4 * w * n9.x - n2.x + 4 * v * n2.x + 4 * t * n5.x + 4 * u * n7.x) *
-           (4 * v * n9.y - n3.y + 4 * w * n3.y + 4 * t * n6.y + 4 * u * n8.y)) *
-          ((-1 + 4 * u) * n1.z + 4 * (t * n4.z + v * n7.z + w * n8.z));
+  jac[0][0] = -( uux * vvy - vvx * uuy) * wwz + 
+               ( uux * wwy - wwx * uuy) * vvz + 
+               (-vvx * wwy + wwx * vvy) * uuz;
 
-  jac[0][1] =
-      (n1.y - 4 * u * n1.y - n3.y + 4 * w * n3.y - 4 * t * n4.y + 4 * t * n6.y +
-       4 * v * (n9.y - n7.y) + 4 * u * n8.y - 4 * w * n8.y) *
-          (4 * w * n9.z - n2.z + 4 * v * n2.z + 4 * t * n5.z + 4 * u * n7.z) +
-      (-4 * w * n9.y - n1.y + 4 * u * n1.y + n2.y - 4 * v * n2.y +
-       4 * t * n4.y - 4 * t * n5.y - 4 * u * n7.y + 4 * v * n7.y +
-       4 * w * n8.y) *
-          (4 * v * n9.z - n3.z + 4 * w * n3.z + 4 * t * n6.z + 4 * u * n8.z) +
-      (-4 * v * n9.y + 4 * w * n9.y - n2.y + 4 * v * n2.y + n3.y -
-       4 * w * n3.y + 4 * t * n5.y - 4 * t * n6.y + 4 * u * n7.y -
-       4 * u * n8.y) *
-          ((-1 + 4 * u) * n1.z + 4 * (t * n4.z + v * n7.z + w * n8.z));
+  jac[0][1] = aay * wwz + bby * vvz + ccy * uuz;
+  jac[0][2] = anx * wwz + bnx * vvz + cnx * uuz;
+  jac[0][3] = aax * wwy + bbx * vvy + ccx * uuy;
 
-  jac[0][2] =
-      (-4 * v * n9.x - n1.x + 4 * u * n1.x + n3.x - 4 * w * n3.x +
-       4 * t * n4.x - 4 * t * n6.x + 4 * v * n7.x - 4 * u * n8.x +
-       4 * w * n8.x) *
-          (4 * w * n9.z - n2.z + 4 * v * n2.z + 4 * t * n5.z + 4 * u * n7.z) +
-      (n1.x - 4 * u * n1.x - n2.x + 4 * v * n2.x - 4 * t * n4.x + 4 * t * n5.x +
-       4 * u * n7.x - 4 * v * n7.x + 4 * w * (n9.x - n8.x)) *
-          (4 * v * n9.z - n3.z + 4 * w * n3.z + 4 * t * n6.z + 4 * u * n8.z) +
-      (-4 * w * n9.x + 4 * v * (n9.x - n2.x) + n2.x - n3.x + 4 * w * n3.x -
-       4 * t * n5.x + 4 * t * n6.x - 4 * u * n7.x + 4 * u * n8.x) *
-          ((-1 + 4 * u) * n1.z + 4 * (t * n4.z + v * n7.z + w * n8.z));
+  jac[1][0] = -(-vvx * wwy + wwx * vvy) * ttz + 
+               (-vvx * tty + ttx * vvy) * wwz - 
+               (-wwx * tty + ttx * wwy) * vvz;
 
-  jac[0][3] =
-      (n1.x - 4 * u * n1.x - n3.x + 4 * w * n3.x - 4 * t * n4.x + 4 * t * n6.x +
-       4 * v * (n9.x - n7.x) + 4 * u * n8.x - 4 * w * n8.x) *
-          (4 * w * n9.y - n2.y + 4 * v * n2.y + 4 * t * n5.y + 4 * u * n7.y) +
-      (-4 * w * n9.x - n1.x + 4 * u * n1.x + n2.x - 4 * v * n2.x +
-       4 * t * n4.x - 4 * t * n5.x - 4 * u * n7.x + 4 * v * n7.x +
-       4 * w * n8.x) *
-          (4 * v * n9.y - n3.y + 4 * w * n3.y + 4 * t * n6.y + 4 * u * n8.y) +
-      (-4 * v * n9.x + 4 * w * n9.x - n2.x + 4 * v * n2.x + n3.x -
-       4 * w * n3.x + 4 * t * n5.x - 4 * t * n6.x + 4 * u * n7.x -
-       4 * u * n8.x) *
-          ((-1 + 4 * u) * n1.y + 4 * (t * n4.y + v * n7.y + w * n8.y));
+  jac[1][1] = cny * ttz + ddy * wwz - eey * vvz;
+  jac[1][2] = ccx * ttz - ddx * wwz + eex * vvz;
+  jac[1][3] = cnx * tty + ddx * wwy - eex * vvy;
 
-  jac[1][0] =
-      -((-((4 * v * n9.x - n3.x + 4 * w * n3.x + 4 * t * n6.x + 4 * u * n8.x) *
-           (4 * w * n9.y - n2.y + 4 * v * n2.y + 4 * t * n5.y + 4 * u * n7.y)) +
-         (4 * w * n9.x - n2.x + 4 * v * n2.x + 4 * t * n5.x + 4 * u * n7.x) *
-             (4 * v * n9.y - n3.y + 4 * w * n3.y + 4 * t * n6.y +
-              4 * u * n8.y)) *
-        ((-1 + 4 * t) * n0.z + 4 * (u * n4.z + v * n5.z + w * n6.z))) +
-      (-((4 * v * n9.x - n3.x + 4 * w * n3.x + 4 * t * n6.x + 4 * u * n8.x) *
-         ((-1 + 4 * t) * n0.y + 4 * (u * n4.y + v * n5.y + w * n6.y))) +
-       ((-1 + 4 * t) * n0.x + 4 * (u * n4.x + v * n5.x + w * n6.x)) *
-           (4 * v * n9.y - n3.y + 4 * w * n3.y + 4 * t * n6.y + 4 * u * n8.y)) *
-          (4 * w * n9.z - n2.z + 4 * v * n2.z + 4 * t * n5.z + 4 * u * n7.z) -
-      (-((4 * w * n9.x - n2.x + 4 * v * n2.x + 4 * t * n5.x + 4 * u * n7.x) *
-         ((-1 + 4 * t) * n0.y + 4 * (u * n4.y + v * n5.y + w * n6.y))) +
-       ((-1 + 4 * t) * n0.x + 4 * (u * n4.x + v * n5.x + w * n6.x)) *
-           (4 * w * n9.y - n2.y + 4 * v * n2.y + 4 * t * n5.y + 4 * u * n7.y)) *
-          (4 * v * n9.z - n3.z + 4 * w * n3.z + 4 * t * n6.z + 4 * u * n8.z);
+  jac[2][0] = ( uux * vvy - vvx * uuy) * ttz + 
+              (-uux * tty + ttx * uuy) * vvz - 
+              (-vvx * tty + ttx * vvy) * uuz;
 
-  jac[1][1] =
-      (-4 * w * n9.y + 4 * v * (n9.y - n2.y) + n2.y - n3.y + 4 * w * n3.y -
-       4 * t * n5.y + 4 * t * n6.y - 4 * u * n7.y + 4 * u * n8.y) *
-          ((-1 + 4 * t) * n0.z + 4 * (u * n4.z + v * n5.z + w * n6.z)) +
-      ((-1 + 4 * t) * n0.y - 4 * v * n9.y + n3.y - 4 * w * n3.y + 4 * u * n4.y +
-       4 * v * n5.y - 4 * t * n6.y + 4 * w * n6.y - 4 * u * n8.y) *
-          (4 * w * n9.z - n2.z + 4 * v * n2.z + 4 * t * n5.z + 4 * u * n7.z) -
-      ((-1 + 4 * t) * n0.y - 4 * w * n9.y + n2.y - 4 * v * n2.y + 4 * u * n4.y -
-       4 * t * n5.y + 4 * v * n5.y + 4 * w * n6.y - 4 * u * n7.y) *
-          (4 * v * n9.z - n3.z + 4 * w * n3.z + 4 * t * n6.z + 4 * u * n8.z);
+  jac[2][1] = any * ttz + ffy * vvz - ddy * uuz;
+  jac[2][2] = aax * ttz - ffx * vvz + ddx * uuz;
+  jac[2][3] = anx * tty + ffx * vvy - ddx * uuy;
 
-  jac[1][2] =
-      (-4 * v * n9.x + 4 * w * n9.x - n2.x + 4 * v * n2.x + n3.x -
-       4 * w * n3.x + 4 * t * n5.x - 4 * t * n6.x + 4 * u * n7.x -
-       4 * u * n8.x) *
-          ((-1 + 4 * t) * n0.z + 4 * (u * n4.z + v * n5.z + w * n6.z)) -
-      ((-1 + 4 * t) * n0.x - 4 * v * n9.x + n3.x - 4 * w * n3.x + 4 * u * n4.x +
-       4 * v * n5.x - 4 * t * n6.x + 4 * w * n6.x - 4 * u * n8.x) *
-          (4 * w * n9.z - n2.z + 4 * v * n2.z + 4 * t * n5.z + 4 * u * n7.z) +
-      ((-1 + 4 * t) * n0.x - 4 * w * n9.x + n2.x - 4 * v * n2.x + 4 * u * n4.x -
-       4 * t * n5.x + 4 * v * n5.x + 4 * w * n6.x - 4 * u * n7.x) *
-          (4 * v * n9.z - n3.z + 4 * w * n3.z + 4 * t * n6.z + 4 * u * n8.z);
+  jac[3][0] = -( uux * wwy - wwx * uuy) * ttz - 
+               (-uux * tty + ttx * uuy) * wwz + 
+               (-wwx * tty + ttx * wwy) * uuz;
 
-  jac[1][3] =
-      (-4 * w * n9.x + 4 * v * (n9.x - n2.x) + n2.x - n3.x + 4 * w * n3.x -
-       4 * t * n5.x + 4 * t * n6.x - 4 * u * n7.x + 4 * u * n8.x) *
-          ((-1 + 4 * t) * n0.y + 4 * (u * n4.y + v * n5.y + w * n6.y)) +
-      ((-1 + 4 * t) * n0.x - 4 * v * n9.x + n3.x - 4 * w * n3.x + 4 * u * n4.x +
-       4 * v * n5.x - 4 * t * n6.x + 4 * w * n6.x - 4 * u * n8.x) *
-          (4 * w * n9.y - n2.y + 4 * v * n2.y + 4 * t * n5.y + 4 * u * n7.y) -
-      ((-1 + 4 * t) * n0.x - 4 * w * n9.x + n2.x - 4 * v * n2.x + 4 * u * n4.x -
-       4 * t * n5.x + 4 * v * n5.x + 4 * w * n6.x - 4 * u * n7.x) *
-          (4 * v * n9.y - n3.y + 4 * w * n3.y + 4 * t * n6.y + 4 * u * n8.y);
-
-  jac[2][0] =
-      (((-1 + 4 * u) * n1.x + 4 * (t * n4.x + v * n7.x + w * n8.x)) *
-           (4 * v * n9.y - n3.y + 4 * w * n3.y + 4 * t * n6.y + 4 * u * n8.y) -
-       (4 * v * n9.x - n3.x + 4 * w * n3.x + 4 * t * n6.x + 4 * u * n8.x) *
-           ((-1 + 4 * u) * n1.y + 4 * (t * n4.y + v * n7.y + w * n8.y))) *
-          ((-1 + 4 * t) * n0.z + 4 * (u * n4.z + v * n5.z + w * n6.z)) +
-      (-(((-1 + 4 * u) * n1.x + 4 * (t * n4.x + v * n7.x + w * n8.x)) *
-         ((-1 + 4 * t) * n0.y + 4 * (u * n4.y + v * n5.y + w * n6.y))) +
-       ((-1 + 4 * t) * n0.x + 4 * (u * n4.x + v * n5.x + w * n6.x)) *
-           ((-1 + 4 * u) * n1.y + 4 * (t * n4.y + v * n7.y + w * n8.y))) *
-          (4 * v * n9.z - n3.z + 4 * w * n3.z + 4 * t * n6.z + 4 * u * n8.z) -
-      (-((4 * v * n9.x - n3.x + 4 * w * n3.x + 4 * t * n6.x + 4 * u * n8.x) *
-         ((-1 + 4 * t) * n0.y + 4 * (u * n4.y + v * n5.y + w * n6.y))) +
-       ((-1 + 4 * t) * n0.x + 4 * (u * n4.x + v * n5.x + w * n6.x)) *
-           (4 * v * n9.y - n3.y + 4 * w * n3.y + 4 * t * n6.y + 4 * u * n8.y)) *
-          ((-1 + 4 * u) * n1.z + 4 * (t * n4.z + v * n7.z + w * n8.z));
-
-  jac[2][1] =
-      (-4 * v * n9.y - n1.y + 4 * u * n1.y + n3.y - 4 * w * n3.y +
-       4 * t * n4.y - 4 * t * n6.y + 4 * v * n7.y - 4 * u * n8.y +
-       4 * w * n8.y) *
-          ((-1 + 4 * t) * n0.z + 4 * (u * n4.z + v * n5.z + w * n6.z)) +
-      ((-1 + 4 * t) * n0.y + n1.y - 4 * u * n1.y +
-       4 * (-(t * n4.y) + u * n4.y + v * n5.y + w * n6.y - v * n7.y -
-            w * n8.y)) *
-          (4 * v * n9.z - n3.z + 4 * w * n3.z + 4 * t * n6.z + 4 * u * n8.z) -
-      ((-1 + 4 * t) * n0.y - 4 * v * n9.y + n3.y - 4 * w * n3.y + 4 * u * n4.y +
-       4 * v * n5.y - 4 * t * n6.y + 4 * w * n6.y - 4 * u * n8.y) *
-          ((-1 + 4 * u) * n1.z + 4 * (t * n4.z + v * n7.z + w * n8.z));
-
-  jac[2][2] =
-      (n1.x - 4 * u * n1.x - n3.x + 4 * w * n3.x - 4 * t * n4.x + 4 * t * n6.x +
-       4 * v * (n9.x - n7.x) + 4 * u * n8.x - 4 * w * n8.x) *
-          ((-1 + 4 * t) * n0.z + 4 * (u * n4.z + v * n5.z + w * n6.z)) -
-      ((-1 + 4 * t) * n0.x + n1.x - 4 * u * n1.x +
-       4 * (-(t * n4.x) + u * n4.x + v * n5.x + w * n6.x - v * n7.x -
-            w * n8.x)) *
-          (4 * v * n9.z - n3.z + 4 * w * n3.z + 4 * t * n6.z + 4 * u * n8.z) +
-      ((-1 + 4 * t) * n0.x - 4 * v * n9.x + n3.x - 4 * w * n3.x + 4 * u * n4.x +
-       4 * v * n5.x - 4 * t * n6.x + 4 * w * n6.x - 4 * u * n8.x) *
-          ((-1 + 4 * u) * n1.z + 4 * (t * n4.z + v * n7.z + w * n8.z));
-
-  jac[2][3] =
-      (-4 * v * n9.x - n1.x + 4 * u * n1.x + n3.x - 4 * w * n3.x +
-       4 * t * n4.x - 4 * t * n6.x + 4 * v * n7.x - 4 * u * n8.x +
-       4 * w * n8.x) *
-          ((-1 + 4 * t) * n0.y + 4 * (u * n4.y + v * n5.y + w * n6.y)) +
-      ((-1 + 4 * t) * n0.x + n1.x - 4 * u * n1.x +
-       4 * (-(t * n4.x) + u * n4.x + v * n5.x + w * n6.x - v * n7.x -
-            w * n8.x)) *
-          (4 * v * n9.y - n3.y + 4 * w * n3.y + 4 * t * n6.y + 4 * u * n8.y) -
-      ((-1 + 4 * t) * n0.x - 4 * v * n9.x + n3.x - 4 * w * n3.x + 4 * u * n4.x +
-       4 * v * n5.x - 4 * t * n6.x + 4 * w * n6.x - 4 * u * n8.x) *
-          ((-1 + 4 * u) * n1.y + 4 * (t * n4.y + v * n7.y + w * n8.y));
-
-  jac[3][0] =
-      -((((-1 + 4 * u) * n1.x + 4 * (t * n4.x + v * n7.x + w * n8.x)) *
-             (4 * w * n9.y - n2.y + 4 * v * n2.y + 4 * t * n5.y +
-              4 * u * n7.y) -
-         (4 * w * n9.x - n2.x + 4 * v * n2.x + 4 * t * n5.x + 4 * u * n7.x) *
-             ((-1 + 4 * u) * n1.y + 4 * (t * n4.y + v * n7.y + w * n8.y))) *
-        ((-1 + 4 * t) * n0.z + 4 * (u * n4.z + v * n5.z + w * n6.z))) -
-      (-(((-1 + 4 * u) * n1.x + 4 * (t * n4.x + v * n7.x + w * n8.x)) *
-         ((-1 + 4 * t) * n0.y + 4 * (u * n4.y + v * n5.y + w * n6.y))) +
-       ((-1 + 4 * t) * n0.x + 4 * (u * n4.x + v * n5.x + w * n6.x)) *
-           ((-1 + 4 * u) * n1.y + 4 * (t * n4.y + v * n7.y + w * n8.y))) *
-          (4 * w * n9.z - n2.z + 4 * v * n2.z + 4 * t * n5.z + 4 * u * n7.z) +
-      (-((4 * w * n9.x - n2.x + 4 * v * n2.x + 4 * t * n5.x + 4 * u * n7.x) *
-         ((-1 + 4 * t) * n0.y + 4 * (u * n4.y + v * n5.y + w * n6.y))) +
-       ((-1 + 4 * t) * n0.x + 4 * (u * n4.x + v * n5.x + w * n6.x)) *
-           (4 * w * n9.y - n2.y + 4 * v * n2.y + 4 * t * n5.y + 4 * u * n7.y)) *
-          ((-1 + 4 * u) * n1.z + 4 * (t * n4.z + v * n7.z + w * n8.z));
-
-  jac[3][1] =
-      (n1.y - 4 * u * n1.y - n2.y + 4 * v * n2.y - 4 * t * n4.y + 4 * t * n5.y +
-       4 * u * n7.y - 4 * v * n7.y + 4 * w * (n9.y - n8.y)) *
-          ((-1 + 4 * t) * n0.z + 4 * (u * n4.z + v * n5.z + w * n6.z)) -
-      ((-1 + 4 * t) * n0.y + n1.y - 4 * u * n1.y +
-       4 * (-(t * n4.y) + u * n4.y + v * n5.y + w * n6.y - v * n7.y -
-            w * n8.y)) *
-          (4 * w * n9.z - n2.z + 4 * v * n2.z + 4 * t * n5.z + 4 * u * n7.z) +
-      ((-1 + 4 * t) * n0.y - 4 * w * n9.y + n2.y - 4 * v * n2.y + 4 * u * n4.y -
-       4 * t * n5.y + 4 * v * n5.y + 4 * w * n6.y - 4 * u * n7.y) *
-          ((-1 + 4 * u) * n1.z + 4 * (t * n4.z + v * n7.z + w * n8.z));
-
-  jac[3][2] =
-      (-4 * w * n9.x - n1.x + 4 * u * n1.x + n2.x - 4 * v * n2.x +
-       4 * t * n4.x - 4 * t * n5.x - 4 * u * n7.x + 4 * v * n7.x +
-       4 * w * n8.x) *
-          ((-1 + 4 * t) * n0.z + 4 * (u * n4.z + v * n5.z + w * n6.z)) +
-      ((-1 + 4 * t) * n0.x + n1.x - 4 * u * n1.x +
-       4 * (-(t * n4.x) + u * n4.x + v * n5.x + w * n6.x - v * n7.x -
-            w * n8.x)) *
-          (4 * w * n9.z - n2.z + 4 * v * n2.z + 4 * t * n5.z + 4 * u * n7.z) -
-      ((-1 + 4 * t) * n0.x - 4 * w * n9.x + n2.x - 4 * v * n2.x + 4 * u * n4.x -
-       4 * t * n5.x + 4 * v * n5.x + 4 * w * n6.x - 4 * u * n7.x) *
-          ((-1 + 4 * u) * n1.z + 4 * (t * n4.z + v * n7.z + w * n8.z));
-
-  jac[3][3] =
-      (n1.x - 4 * u * n1.x - n2.x + 4 * v * n2.x - 4 * t * n4.x + 4 * t * n5.x +
-       4 * u * n7.x - 4 * v * n7.x + 4 * w * (n9.x - n8.x)) *
-          ((-1 + 4 * t) * n0.y + 4 * (u * n4.y + v * n5.y + w * n6.y)) -
-      ((-1 + 4 * t) * n0.x + n1.x - 4 * u * n1.x +
-       4 * (-(t * n4.x) + u * n4.x + v * n5.x + w * n6.x - v * n7.x -
-            w * n8.x)) *
-          (4 * w * n9.y - n2.y + 4 * v * n2.y + 4 * t * n5.y + 4 * u * n7.y) +
-      ((-1 + 4 * t) * n0.x - 4 * w * n9.x + n2.x - 4 * v * n2.x + 4 * u * n4.x -
-       4 * t * n5.x + 4 * v * n5.x + 4 * w * n6.x - 4 * u * n7.x) *
-          ((-1 + 4 * u) * n1.y + 4 * (t * n4.y + v * n7.y + w * n8.y));
+  jac[3][1] = bny * ttz - ffy * wwz + eey * uuz;
+  jac[3][2] = bbx * ttz + ffx * wwz - eex * uuz;
+  jac[3][3] = bnx * tty - ffx * wwy + eex * uuy;
 }
 
-void ComponentFieldMap::JacobianCube(const Element& element, const double t1,
-                                     const double t2, const double t3,
-                                     TMatrixD*& jac,
-                                     std::vector<TMatrixD*>& dN) const {
+void ComponentFieldMap::JacobianCube(const Element& element, const double t1, const double t2, const double t3, TMatrixD*& jac, std::vector<TMatrixD*>& dN) const {
   if (!jac) {
     std::cerr << m_className << "::JacobianCube:\n";
     std::cerr << "    Pointer to Jacobian matrix is empty!\n";
@@ -1027,22 +639,14 @@ void ComponentFieldMap::JacobianCube(const Element& element, const double t1,
   dN.clear();
 
   // Here the partial derivatives of the 8 shaping functions are calculated
-  double N1[3] = {-1 * (1 - t2) * (1 - t3), (1 - t1) * -1 * (1 - t3),
-                  (1 - t1) * (1 - t2) * -1};
-  double N2[3] = {+1 * (1 - t2) * (1 - t3), (1 + t1) * -1 * (1 - t3),
-                  (1 + t1) * (1 - t2) * -1};
-  double N3[3] = {+1 * (1 + t2) * (1 - t3), (1 + t1) * +1 * (1 - t3),
-                  (1 + t1) * (1 + t2) * -1};
-  double N4[3] = {-1 * (1 + t2) * (1 - t3), (1 - t1) * +1 * (1 - t3),
-                  (1 - t1) * (1 + t2) * -1};
-  double N5[3] = {-1 * (1 - t2) * (1 + t3), (1 - t1) * -1 * (1 + t3),
-                  (1 - t1) * (1 - t2) * +1};
-  double N6[3] = {+1 * (1 - t2) * (1 + t3), (1 + t1) * -1 * (1 + t3),
-                  (1 + t1) * (1 - t2) * +1};
-  double N7[3] = {+1 * (1 + t2) * (1 + t3), (1 + t1) * +1 * (1 + t3),
-                  (1 + t1) * (1 + t2) * +1};
-  double N8[3] = {-1 * (1 + t2) * (1 + t3), (1 - t1) * +1 * (1 + t3),
-                  (1 - t1) * (1 + t2) * +1};
+  double N1[3] = {-1 * (1 - t2) * (1 - t3), (1 - t1) * -1 * (1 - t3), (1 - t1) * (1 - t2) * -1};
+  double N2[3] = {+1 * (1 - t2) * (1 - t3), (1 + t1) * -1 * (1 - t3), (1 + t1) * (1 - t2) * -1};
+  double N3[3] = {+1 * (1 + t2) * (1 - t3), (1 + t1) * +1 * (1 - t3), (1 + t1) * (1 + t2) * -1};
+  double N4[3] = {-1 * (1 + t2) * (1 - t3), (1 - t1) * +1 * (1 - t3), (1 - t1) * (1 + t2) * -1};
+  double N5[3] = {-1 * (1 - t2) * (1 + t3), (1 - t1) * -1 * (1 + t3), (1 - t1) * (1 - t2) * +1};
+  double N6[3] = {+1 * (1 - t2) * (1 + t3), (1 + t1) * -1 * (1 + t3), (1 + t1) * (1 - t2) * +1};
+  double N7[3] = {+1 * (1 + t2) * (1 + t3), (1 + t1) * +1 * (1 + t3), (1 + t1) * (1 + t2) * +1};
+  double N8[3] = {-1 * (1 + t2) * (1 + t3), (1 - t1) * +1 * (1 + t3), (1 - t1) * (1 + t2) * +1};
   // Partial derivatives are stored in dN
   TMatrixD* m_N1 = new TMatrixD(3, 1, N1);
   *m_N1 = (1. / 8. * (*m_N1));
@@ -1088,23 +692,16 @@ void ComponentFieldMap::JacobianCube(const Element& element, const double t1,
     std::cout << "   Det.: " << jac->Determinant() << std::endl;
     std::cout << "   Jacobian matrix.: " << std::endl;
     jac->Print("%11.10g");
-    std::cout << "   Hexahedral coordinates (t, u, v) = (" << t1 << "," << t2
-              << "," << t3 << ")" << std::endl;
+    std::cout << "   Hexahedral coordinates (t, u, v) = (" << t1 << "," << t2 << "," << t3 << ")" << std::endl;
     std::cout << "   Node xyzV" << std::endl;
     for (int j = 0; j < 8; ++j) {
       const Node& node = nodes[element.emap[j]];
-      std::cout << "         " << element.emap[j] << "          " << node.x
-                << "         " << node.y << "         " << node.z << "         "
-                << node.v << std::endl;
+      std::cout << "         " << element.emap[j] << "          " << node.x << "         " << node.y << "         " << node.z << "         " << node.v << std::endl;
     }
   }
 }
 
-int ComponentFieldMap::Coordinates3(const double x, const double y,
-                                    const double z, double& t1, double& t2,
-                                    double& t3, double& t4, double jac[4][4],
-                                    double& det,
-                                    const Element& element) const {
+int ComponentFieldMap::Coordinates3(const double x, const double y, const double z, double& t1, double& t2, double& t3, double& t4, double jac[4][4], double& det, const Element& element) const {
 
   if (m_debug) {
     std::cout << m_className << "::Coordinates3:\n";
@@ -1125,7 +722,7 @@ int ComponentFieldMap::Coordinates3(const double x, const double y,
   const double tt2 = (x - n2.x) * (n0.y - n2.y) - (y - n2.y) * (n0.x - n2.x);
   const double tt3 = (x - n0.x) * (n1.y - n0.y) - (y - n0.y) * (n1.x - n0.x);
   const double f1 = (n0.x - n1.x) * (n2.y - n1.y) - (n2.x - n1.x) * (n0.y - n1.y);
-  const double f2 = (n1.x - n2.x) * (n0.y - n2.y) - (n0.x - n2.x) * (n1.y - n2.y); 
+  const double f2 = (n1.x - n2.x) * (n0.y - n2.y) - (n0.x - n2.x) * (n1.y - n2.y);
   const double f3 = (n2.x - n0.x) * (n1.y - n0.y) - (n1.x - n0.x) * (n2.y - n0.y);
   if (f1 == 0 || f2 == 0 || f3 == 0) {
     std::cerr << m_className << "::Coordinates3:\n";
@@ -1146,17 +743,11 @@ int ComponentFieldMap::Coordinates3(const double x, const double y,
   for (int iter = 0; iter < 10; iter++) {
     if (m_debug) {
       std::cout << m_className << "::Coordinates3:\n";
-      std::cout << "    Iteration " << iter << ":     (u, v, w) = (" << td1
-                << ", " << td2 << ", " << td3 << "), sum = " << td1 + td2 + td3
-                << "\n";
+      std::cout << "    Iteration " << iter << ":     (u, v, w) = (" << td1 << ", " << td2 << ", " << td3 << "), sum = " << td1 + td2 + td3 << "\n";
     }
     // Re-compute the (x,y,z) position for this coordinate.
-    const double xr = n0.x * td1 * (2 * td1 - 1) + n1.x * td2 * (2 * td2 - 1) +
-                      n2.x * td3 * (2 * td3 - 1) + n3.x * 4 * td1 * td2 +
-                      n4.x * 4 * td1 * td3 + n5.x * 4 * td2 * td3;
-    const double yr = n0.y * td1 * (2 * td1 - 1) + n1.y * td2 * (2 * td2 - 1) +
-                      n2.y * td3 * (2 * td3 - 1) + n3.y * 4 * td1 * td2 +
-                      n4.y * 4 * td1 * td3 + n5.y * 4 * td2 * td3;
+    const double xr = n0.x * td1 * (2 * td1 - 1) + n1.x * td2 * (2 * td2 - 1) + n2.x * td3 * (2 * td3 - 1) + n3.x * 4 * td1 * td2 + n4.x * 4 * td1 * td3 + n5.x * 4 * td2 * td3;
+    const double yr = n0.y * td1 * (2 * td1 - 1) + n1.y * td2 * (2 * td2 - 1) + n2.y * td3 * (2 * td3 - 1) + n3.y * 4 * td1 * td2 + n4.y * 4 * td1 * td3 + n5.y * 4 * td2 * td3;
     const double sr = td1 + td2 + td3;
     // Compute the Jacobian.
     Jacobian3(element, td1, td2, td3, det, jac);
@@ -1173,18 +764,15 @@ int ComponentFieldMap::Coordinates3(const double x, const double y,
     // Debugging
     if (m_debug) {
       std::cout << m_className << "::Coordinates3:\n";
-      std::cout << "    Difference vector:  (1, x, y)  = (" 
-                << diff[0] << ", " << diff[1] << ", " << diff[2] << ").\n";
-      std::cout << "    Correction vector:  (u, v, w) = (" 
-                << corr[0] << ", " << corr[1] << ", " << corr[2] << ").\n";
+      std::cout << "    Difference vector:  (1, x, y)  = (" << diff[0] << ", " << diff[1] << ", " << diff[2] << ").\n";
+      std::cout << "    Correction vector:  (u, v, w) = (" << corr[0] << ", " << corr[1] << ", " << corr[2] << ").\n";
     }
     // Update the vector.
     td1 += corr[0];
     td2 += corr[1];
     td3 += corr[2];
     // Check for convergence.
-    if (fabs(corr[0]) < 1.0e-5 && fabs(corr[1]) < 1.0e-5 &&
-        fabs(corr[2]) < 1.0e-5) {
+    if (fabs(corr[0]) < 1.0e-5 && fabs(corr[1]) < 1.0e-5 && fabs(corr[2]) < 1.0e-5) {
       if (m_debug) {
         std::cout << m_className << "::Coordinates3: Convergence reached.";
       }
@@ -1194,19 +782,10 @@ int ComponentFieldMap::Coordinates3(const double x, const double y,
   }
   // No convergence reached
   if (!converged) {
-    double xmin = n0.x;
-    double xmax = n0.x;
-    if (n1.x < xmin) xmin = n1.x;
-    if (n1.x > xmax) xmax = n1.x;
-    if (n2.x < xmin) xmin = n2.x;
-    if (n2.x > xmax) xmax = n2.x;
-    double ymin = n0.y;
-    double ymax = n0.y;
-    if (n1.y < ymin) ymin = n1.y;
-    if (n1.y > ymax) ymax = n1.y;
-    if (n2.y < ymin) ymin = n2.y;
-    if (n2.y > ymax) ymax = n2.y;
-
+    const double xmin = std::min({n0.x, n1.x, n2.x});
+    const double xmax = std::max({n0.x, n1.x, n2.x});
+    const double ymin = std::min({n0.y, n1.y, n2.y});
+    const double ymax = std::max({n0.y, n1.y, n2.y});
     if (x >= xmin && x <= xmax && y >= ymin && y <= ymax) {
       std::cout << m_className << "::Coordinates3:\n";
       std::cout << "    No convergence achieved "
@@ -1224,24 +803,18 @@ int ComponentFieldMap::Coordinates3(const double x, const double y,
   t4 = 0;
   if (m_debug) {
     std::cout << m_className << "::Coordinates3:\n";
-    std::cout << "    Convergence reached at (t1, t2, t3) = (" << t1 << ", "
-              << t2 << ", " << t3 << ").\n";
+    std::cout << "    Convergence reached at (t1, t2, t3) = (" << t1 << ", " << t2 << ", " << t3 << ").\n";
   }
 
   // For debugging purposes, show position
   if (m_debug) {
-    double xr = n0.x * td1 * (2 * td1 - 1) + n1.x * td2 * (2 * td2 - 1) +
-                n2.x * td3 * (2 * td3 - 1) + n3.x * 4 * td1 * td2 +
-                n4.x * 4 * td1 * td3 + n5.x * 4 * td2 * td3;
-    double yr = n0.y * td1 * (2 * td1 - 1) + n1.y * td2 * (2 * td2 - 1) +
-                n2.y * td3 * (2 * td3 - 1) + n3.y * 4 * td1 * td2 +
-                n4.y * 4 * td1 * td3 + n5.y * 4 * td2 * td3;
+    double xr = n0.x * td1 * (2 * td1 - 1) + n1.x * td2 * (2 * td2 - 1) + n2.x * td3 * (2 * td3 - 1) + n3.x * 4 * td1 * td2 + n4.x * 4 * td1 * td3 + n5.x * 4 * td2 * td3;
+    double yr = n0.y * td1 * (2 * td1 - 1) + n1.y * td2 * (2 * td2 - 1) + n2.y * td3 * (2 * td3 - 1) + n3.y * 4 * td1 * td2 + n4.y * 4 * td1 * td3 + n5.y * 4 * td2 * td3;
     double sr = td1 + td2 + td3;
     std::cout << m_className << "::Coordinates3:\n";
     std::cout << "    Position requested:     (" << x << ", " << y << ")\n";
     std::cout << "    Reconstructed:          (" << xr << ", " << yr << ")\n";
-    std::cout << "    Difference:             (" << x - xr << ", " << y - yr
-              << ")\n";
+    std::cout << "    Difference:             (" << x - xr << ", " << y - yr << ")\n";
     std::cout << "    Checksum - 1:           " << sr - 1 << "\n";
   }
 
@@ -1250,11 +823,7 @@ int ComponentFieldMap::Coordinates3(const double x, const double y,
   return ifail;
 }
 
-int ComponentFieldMap::Coordinates4(const double x, const double y,
-                                    const double z, double& t1, double& t2,
-                                    double& t3, double& t4, double jac[4][4],
-                                    double& det,
-                                    const Element& element) const {
+int ComponentFieldMap::Coordinates4(const double x, const double y, const double z, double& t1, double& t2, double& t3, double& t4, double jac[4][4], double& det, const Element& element) const {
 
   // Debugging
   if (m_debug) {
@@ -1273,14 +842,7 @@ int ComponentFieldMap::Coordinates4(const double x, const double y,
   const Node& n2 = nodes[element.emap[2]];
   const Node& n3 = nodes[element.emap[3]];
   // Compute determinant.
-  det = -(-((n0.x - n3.x) * (n1.y - n2.y)) + (n1.x - n2.x) * (n0.y - n3.y)) *
-            (2 * x * (-n0.y + n1.y + n2.y - n3.y) -
-             (n0.x + n3.x) * (n1.y + n2.y - 2 * y) +
-             n1.x * (n0.y + n3.y - 2 * y) + n2.x * (n0.y + n3.y - 2 * y)) +
-        pow(-(n0.x * n1.y) + n3.x * n2.y - n2.x * n3.y +
-                x * (-n0.y + n1.y - n2.y + n3.y) + n1.x * (n0.y - y) +
-                (n0.x + n2.x - n3.x) * y,
-            2);
+  det = -(-((n0.x - n3.x) * (n1.y - n2.y)) + (n1.x - n2.x) * (n0.y - n3.y)) * (2 * x * (-n0.y + n1.y + n2.y - n3.y) - (n0.x + n3.x) * (n1.y + n2.y - 2 * y) + n1.x * (n0.y + n3.y - 2 * y) + n2.x * (n0.y + n3.y - 2 * y)) + pow(-(n0.x * n1.y) + n3.x * n2.y - n2.x * n3.y + x * (-n0.y + n1.y - n2.y + n3.y) + n1.x * (n0.y - y) + (n0.x + n2.x - n3.x) * y, 2);
 
   // Check that the determinant is non-negative
   // (this can happen if the point is out of range).
@@ -1295,14 +857,8 @@ int ComponentFieldMap::Coordinates4(const double x, const double y,
 
   // Vector products for evaluation of T1.
   double prod = ((n2.x - n3.x) * (n0.y - n1.y) - (n0.x - n1.x) * (n2.y - n3.y));
-  if (prod * prod >
-      1.0e-12 *
-          ((n0.x - n1.x) * (n0.x - n1.x) + (n0.y - n1.y) * (n0.y - n1.y)) *
-          ((n2.x - n3.x) * (n2.x - n3.x) + (n2.y - n3.y) * (n2.y - n3.y))) {
-    t1 = (-(n3.x * n0.y) + x * n0.y + n2.x * n1.y - x * n1.y - n1.x * n2.y +
-          x * n2.y + n0.x * n3.y - x * n3.y - n0.x * y + n1.x * y - n2.x * y +
-          n3.x * y + sqrt(det)) /
-         prod;
+  if (prod * prod > 1.0e-12 * ((n0.x - n1.x) * (n0.x - n1.x) + (n0.y - n1.y) * (n0.y - n1.y)) * ((n2.x - n3.x) * (n2.x - n3.x) + (n2.y - n3.y) * (n2.y - n3.y))) {
+    t1 = (-(n3.x * n0.y) + x * n0.y + n2.x * n1.y - x * n1.y - n1.x * n2.y + x * n2.y + n0.x * n3.y - x * n3.y - n0.x * y + n1.x * y - n2.x * y + n3.x * y + sqrt(det)) / prod;
   } else {
     double xp = n0.y - n1.y;
     double yp = n1.x - n0.x;
@@ -1337,14 +893,8 @@ int ComponentFieldMap::Coordinates4(const double x, const double y,
 
   // Vector products for evaluation of T2.
   prod = ((n0.x - n3.x) * (n1.y - n2.y) - (n1.x - n2.x) * (n0.y - n3.y));
-  if (prod * prod >
-      1.0e-12 *
-          ((n0.x - n3.x) * (n0.x - n3.x) + (n0.y - n3.y) * (n0.y - n3.y)) *
-          ((n1.x - n2.x) * (n1.x - n2.x) + (n1.y - n2.y) * (n1.y - n2.y))) {
-    t2 = (-(n1.x * n0.y) + x * n0.y + n0.x * n1.y - x * n1.y - n3.x * n2.y +
-          x * n2.y + n2.x * n3.y - x * n3.y - n0.x * y + n1.x * y - n2.x * y +
-          n3.x * y - sqrt(det)) /
-         prod;
+  if (prod * prod > 1.0e-12 * ((n0.x - n3.x) * (n0.x - n3.x) + (n0.y - n3.y) * (n0.y - n3.y)) * ((n1.x - n2.x) * (n1.x - n2.x) + (n1.y - n2.y) * (n1.y - n2.y))) {
+    t2 = (-(n1.x * n0.y) + x * n0.y + n0.x * n1.y - x * n1.y - n3.x * n2.y + x * n2.y + n2.x * n3.y - x * n3.y - n0.x * y + n1.x * y - n2.x * y + n3.x * y - sqrt(det)) / prod;
   } else {
     double xp = n0.y - n3.y;
     double yp = n3.x - n0.x;
@@ -1383,19 +933,12 @@ int ComponentFieldMap::Coordinates4(const double x, const double y,
 
   // Re-compute the (x,y,z) position for this coordinate.
   if (m_debug) {
-    double xr = n0.x * (1 - t1) * (1 - t2) * 0.25 +
-                n1.x * (1 + t1) * (1 - t2) * 0.25 +
-                n2.x * (1 + t1) * (1 + t2) * 0.25 + 
-                n3.x * (1 - t1) * (1 + t2) * 0.25;
-    double yr = n0.y * (1 - t1) * (1 - t2) * 0.25 +
-                n1.y * (1 + t1) * (1 - t2) * 0.25 +
-                n2.y * (1 + t1) * (1 + t2) * 0.25 + 
-                n3.y * (1 - t1) * (1 + t2) * 0.25;
+    double xr = n0.x * (1 - t1) * (1 - t2) * 0.25 + n1.x * (1 + t1) * (1 - t2) * 0.25 + n2.x * (1 + t1) * (1 + t2) * 0.25 + n3.x * (1 - t1) * (1 + t2) * 0.25;
+    double yr = n0.y * (1 - t1) * (1 - t2) * 0.25 + n1.y * (1 + t1) * (1 - t2) * 0.25 + n2.y * (1 + t1) * (1 + t2) * 0.25 + n3.y * (1 - t1) * (1 + t2) * 0.25;
     std::cout << m_className << "::Coordinates4: \n";
     std::cout << "    Position requested:     (" << x << ", " << y << ")\n";
     std::cout << "    Reconstructed:          (" << xr << ", " << yr << ")\n";
-    std::cout << "    Difference:             (" << x - xr << ", " << y - yr
-              << ")\n";
+    std::cout << "    Difference:             (" << x - xr << ", " << y - yr << ")\n";
   }
 
   // This should have worked if we get this far.
@@ -1409,11 +952,7 @@ int ComponentFieldMap::Coordinates4(const double x, const double y,
   jac[3][0] = jac[3][1] = jac[3][2] = jac[3][3] = 0.;
 }
 
-int ComponentFieldMap::Coordinates5(const double x, const double y,
-                                    const double z, double& t1, double& t2,
-                                    double& t3, double& t4, double jac[4][4],
-                                    double& det,
-                                    const Element& element) const {
+int ComponentFieldMap::Coordinates5(const double x, const double y, const double z, double& t1, double& t2, double& t3, double& t4, double jac[4][4], double& det, const Element& element) const {
 
   // Debugging
   if (m_debug) {
@@ -1451,8 +990,7 @@ int ComponentFieldMap::Coordinates5(const double x, const double y,
   if (t1 < -(1 + f) || t1 > (1 + f) || t2 < -(1 + f) || t2 > (1 + f)) {
     if (m_debug) {
       std::cout << m_className << "::Coordinates5:\n";
-      std::cout << "    Point far outside, (t1,t2) = (" << t1 << ", " << t2
-                << ").\n";
+      std::cout << "    Point far outside, (t1,t2) = (" << t1 << ", " << t2 << ").\n";
     }
     return ifail;
   }
@@ -1471,26 +1009,11 @@ int ComponentFieldMap::Coordinates5(const double x, const double y,
   for (int iter = 0; iter < 10; iter++) {
     if (m_debug) {
       std::cout << m_className << "::Coordinates5:\n";
-      std::cout << "    Iteration " << iter << ":     (t1, t2) = (" << td1
-                << ", " << td2 << ").\n";
+      std::cout << "    Iteration " << iter << ":     (t1, t2) = (" << td1 << ", " << td2 << ").\n";
     }
     // Re-compute the (x,y,z) position for this coordinate.
-    double xr = n0.x * (-(1 - td1) * (1 - td2) * (1 + td1 + td2)) * 0.25 +
-                n1.x * (-(1 + td1) * (1 - td2) * (1 - td1 + td2)) * 0.25 +
-                n2.x * (-(1 + td1) * (1 + td2) * (1 - td1 - td2)) * 0.25 +
-                n3.x * (-(1 - td1) * (1 + td2) * (1 + td1 - td2)) * 0.25 +
-                n4.x * (1 - td1) * (1 + td1) * (1 - td2) * 0.5 +
-                n5.x * (1 + td1) * (1 + td2) * (1 - td2) * 0.5 +
-                n6.x * (1 - td1) * (1 + td1) * (1 + td2) * 0.5 +
-                n7.x * (1 - td1) * (1 + td2) * (1 - td2) * 0.5;
-    double yr = n0.y * (-(1 - td1) * (1 - td2) * (1 + td1 + td2)) * 0.25 +
-                n1.y * (-(1 + td1) * (1 - td2) * (1 - td1 + td2)) * 0.25 +
-                n2.y * (-(1 + td1) * (1 + td2) * (1 - td1 - td2)) * 0.25 +
-                n3.y * (-(1 - td1) * (1 + td2) * (1 + td1 - td2)) * 0.25 +
-                n4.y * (1 - td1) * (1 + td1) * (1 - td2) * 0.5 +
-                n5.y * (1 + td1) * (1 + td2) * (1 - td2) * 0.5 +
-                n6.y * (1 - td1) * (1 + td1) * (1 + td2) * 0.5 +
-                n7.y * (1 - td1) * (1 + td2) * (1 - td2) * 0.5;
+    double xr = n0.x * (-(1 - td1) * (1 - td2) * (1 + td1 + td2)) * 0.25 + n1.x * (-(1 + td1) * (1 - td2) * (1 - td1 + td2)) * 0.25 + n2.x * (-(1 + td1) * (1 + td2) * (1 - td1 - td2)) * 0.25 + n3.x * (-(1 - td1) * (1 + td2) * (1 + td1 - td2)) * 0.25 + n4.x * (1 - td1) * (1 + td1) * (1 - td2) * 0.5 + n5.x * (1 + td1) * (1 + td2) * (1 - td2) * 0.5 + n6.x * (1 - td1) * (1 + td1) * (1 + td2) * 0.5 + n7.x * (1 - td1) * (1 + td2) * (1 - td2) * 0.5;
+    double yr = n0.y * (-(1 - td1) * (1 - td2) * (1 + td1 + td2)) * 0.25 + n1.y * (-(1 + td1) * (1 - td2) * (1 - td1 + td2)) * 0.25 + n2.y * (-(1 + td1) * (1 + td2) * (1 - td1 - td2)) * 0.25 + n3.y * (-(1 - td1) * (1 + td2) * (1 + td1 - td2)) * 0.25 + n4.y * (1 - td1) * (1 + td1) * (1 - td2) * 0.5 + n5.y * (1 + td1) * (1 + td2) * (1 - td2) * 0.5 + n6.y * (1 - td1) * (1 + td1) * (1 + td2) * 0.5 + n7.y * (1 - td1) * (1 + td2) * (1 - td2) * 0.5;
     // Compute the Jacobian.
     Jacobian5(element, td1, td2, det, jac);
     // Compute the difference vector.
@@ -1505,10 +1028,8 @@ int ComponentFieldMap::Coordinates5(const double x, const double y,
     // Debugging
     if (m_debug) {
       std::cout << m_className << "::Coordinates5:\n";
-      std::cout << "    Difference vector: (x, y)   = (" << diff[0] << ", "
-                << diff[1] << ").\n";
-      std::cout << "    Correction vector: (t1, t2) = (" << corr[0] << ", "
-                << corr[1] << ").\n";
+      std::cout << "    Difference vector: (x, y)   = (" << diff[0] << ", " << diff[1] << ").\n";
+      std::cout << "    Correction vector: (t1, t2) = (" << corr[0] << ", " << corr[1] << ").\n";
     }
     // Update the vector.
     td1 += corr[0];
@@ -1525,39 +1046,10 @@ int ComponentFieldMap::Coordinates5(const double x, const double y,
   }
   // No convergence reached.
   if (!converged) {
-    double xmin = n0.x;
-    double xmax = n0.x;
-    if (n1.x < xmin) xmin = n1.x;
-    if (n1.x > xmax) xmax = n1.x;
-    if (n2.x < xmin) xmin = n2.x;
-    if (n2.x > xmax) xmax = n2.x;
-    if (n3.x < xmin) xmin = n3.x;
-    if (n3.x > xmax) xmax = n3.x;
-    if (n4.x < xmin) xmin = n4.x;
-    if (n4.x > xmax) xmax = n4.x;
-    if (n5.x < xmin) xmin = n5.x;
-    if (n5.x > xmax) xmax = n5.x;
-    if (n6.x < xmin) xmin = n6.x;
-    if (n6.x > xmax) xmax = n6.x;
-    if (n7.x < xmin) xmin = n7.x;
-    if (n7.x > xmax) xmax = n7.x;
-    double ymin = n0.y;
-    double ymax = n0.y;
-    if (n1.y < ymin) ymin = n1.y;
-    if (n1.y > ymax) ymax = n1.y;
-    if (n2.y < ymin) ymin = n2.y;
-    if (n2.y > ymax) ymax = n2.y;
-    if (n3.y < ymin) ymin = n3.y;
-    if (n3.y > ymax) ymax = n3.y;
-    if (n4.y < ymin) ymin = n4.y;
-    if (n4.y > ymax) ymax = n4.y;
-    if (n5.y < ymin) ymin = n5.y;
-    if (n5.y > ymax) ymax = n5.y;
-    if (n6.y < ymin) ymin = n6.y;
-    if (n6.y > ymax) ymax = n6.y;
-    if (n7.y < ymin) ymin = n7.y;
-    if (n7.y > ymax) ymax = n7.y;
-
+    double xmin = std::min({n0.x, n1.x, n2.x, n3.x, n4.x, n5.x, n6.x, n7.x});
+    double xmax = std::max({n0.x, n1.x, n2.x, n3.x, n4.x, n5.x, n6.x, n7.x});
+    double ymin = std::min({n0.y, n1.y, n2.y, n3.y, n4.y, n5.y, n6.y, n7.y});
+    double ymax = std::max({n0.y, n1.y, n2.y, n3.y, n4.y, n5.y, n6.y, n7.y});
     if (x >= xmin && x <= xmax && y >= ymin && y <= ymax) {
       std::cout << m_className << "::Coordinates5:\n"
                 << "    No convergence achieved "
@@ -1575,33 +1067,17 @@ int ComponentFieldMap::Coordinates5(const double x, const double y,
   t4 = 0;
   if (m_debug) {
     std::cout << m_className << "::Coordinates5:\n";
-    std::cout << "    Convergence reached at (t1, t2) = (" << t1 << ", " << t2
-              << ").\n";
+    std::cout << "    Convergence reached at (t1, t2) = (" << t1 << ", " << t2 << ").\n";
   }
 
   // For debugging purposes, show position.
   if (m_debug) {
-    double xr = n0.x * (-(1 - t1) * (1 - t2) * (1 + t1 + t2)) * 0.25 +
-                n1.x * (-(1 + t1) * (1 - t2) * (1 - t1 + t2)) * 0.25 +
-                n2.x * (-(1 + t1) * (1 + t2) * (1 - t1 - t2)) * 0.25 +
-                n3.x * (-(1 - t1) * (1 + t2) * (1 + t1 - t2)) * 0.25 +
-                n4.x * (1 - t1) * (1 + t1) * (1 - t2) * 0.5 +
-                n5.x * (1 + t1) * (1 + t2) * (1 - t2) * 0.5 +
-                n6.x * (1 - t1) * (1 + t1) * (1 + t2) * 0.5 +
-                n7.x * (1 - t1) * (1 + t2) * (1 - t2) * 0.5;
-    double yr = n0.y * (-(1 - t1) * (1 - t2) * (1 + t1 + t2)) * 0.25 +
-                n1.y * (-(1 + t1) * (1 - t2) * (1 - t1 + t2)) * 0.25 +
-                n2.y * (-(1 + t1) * (1 + t2) * (1 - t1 - t2)) * 0.25 +
-                n3.y * (-(1 - t1) * (1 + t2) * (1 + t1 - t2)) * 0.25 +
-                n4.y * (1 - t1) * (1 + t1) * (1 - t2) * 0.5 +
-                n5.y * (1 + t1) * (1 + t2) * (1 - t2) * 0.5 +
-                n6.y * (1 - t1) * (1 + t1) * (1 + t2) * 0.5 +
-                n7.y * (1 - t1) * (1 + t2) * (1 - t2) * 0.5;
+    double xr = n0.x * (-(1 - t1) * (1 - t2) * (1 + t1 + t2)) * 0.25 + n1.x * (-(1 + t1) * (1 - t2) * (1 - t1 + t2)) * 0.25 + n2.x * (-(1 + t1) * (1 + t2) * (1 - t1 - t2)) * 0.25 + n3.x * (-(1 - t1) * (1 + t2) * (1 + t1 - t2)) * 0.25 + n4.x * (1 - t1) * (1 + t1) * (1 - t2) * 0.5 + n5.x * (1 + t1) * (1 + t2) * (1 - t2) * 0.5 + n6.x * (1 - t1) * (1 + t1) * (1 + t2) * 0.5 + n7.x * (1 - t1) * (1 + t2) * (1 - t2) * 0.5;
+    double yr = n0.y * (-(1 - t1) * (1 - t2) * (1 + t1 + t2)) * 0.25 + n1.y * (-(1 + t1) * (1 - t2) * (1 - t1 + t2)) * 0.25 + n2.y * (-(1 + t1) * (1 + t2) * (1 - t1 - t2)) * 0.25 + n3.y * (-(1 - t1) * (1 + t2) * (1 + t1 - t2)) * 0.25 + n4.y * (1 - t1) * (1 + t1) * (1 - t2) * 0.5 + n5.y * (1 + t1) * (1 + t2) * (1 - t2) * 0.5 + n6.y * (1 - t1) * (1 + t1) * (1 + t2) * 0.5 + n7.y * (1 - t1) * (1 + t2) * (1 - t2) * 0.5;
     std::cout << m_className << "::Coordinates5:\n";
     std::cout << "    Position requested:     (" << x << ", " << y << ")\n";
     std::cout << "    Reconstructed:          (" << xr << ", " << yr << ")\n";
-    std::cout << "    Difference:             (" << x - xr << ", " << y - yr
-              << ")\n";
+    std::cout << "    Difference:             (" << x - xr << ", " << y - yr << ")\n";
   }
 
   // Success
@@ -1609,10 +1085,7 @@ int ComponentFieldMap::Coordinates5(const double x, const double y,
   return ifail;
 }
 
-int ComponentFieldMap::Coordinates12(const double x, const double y,
-                                     const double z, double& t1, double& t2,
-                                     double& t3, double& t4,
-                                     const Element& element) const {
+int ComponentFieldMap::Coordinates12(const double x, const double y, const double z, double& t1, double& t2, double& t3, double& t4, const Element& element) const {
 
   if (m_debug) {
     std::cout << m_className << "::Coordinates12:\n"
@@ -1633,26 +1106,24 @@ int ComponentFieldMap::Coordinates12(const double x, const double y,
   t1 = t1 / ((n0.x - n1.x) * f1x + (n0.y - n1.y) * f1y + (n0.z - n1.z) * f1z);
   const double f2x = (n0.y - n2.y) * (n3.z - n2.z) - (n3.y - n2.y) * (n0.z - n2.z);
   const double f2y = (n0.z - n2.z) * (n3.x - n2.x) - (n3.z - n2.z) * (n0.x - n2.x);
-  const double f2z = (n0.x - n2.x) * (n3.y - n2.y) - (n3.x - n2.x) * (n0.y - n2.y); 
+  const double f2z = (n0.x - n2.x) * (n3.y - n2.y) - (n3.x - n2.x) * (n0.y - n2.y);
   t2 = (x - n2.x) * f2x + (y - n2.y) * f2y + (z - n2.z) * f2z;
   t2 = t2 / ((n1.x - n2.x) * f2x + (n1.y - n2.y) * f2y + (n1.z - n2.z) * f2z);
   const double f3x = (n0.y - n3.y) * (n1.z - n3.z) - (n1.y - n3.y) * (n0.z - n3.z);
-  const double f3y = (n0.z - n3.z) * (n1.x - n3.x) - (n1.z - n3.z) * (n0.x - n3.x); 
-  const double f3z = (n0.x - n3.x) * (n1.y - n3.y) - (n1.x - n3.x) * (n0.y - n3.y); 
+  const double f3y = (n0.z - n3.z) * (n1.x - n3.x) - (n1.z - n3.z) * (n0.x - n3.x);
+  const double f3z = (n0.x - n3.x) * (n1.y - n3.y) - (n1.x - n3.x) * (n0.y - n3.y);
   t3 = (x - n3.x) * f3x + (y - n3.y) * f3y + (z - n3.z) * f3z;
   t3 = t3 / ((n2.x - n3.x) * f3x + (n2.y - n3.y) * f3y + (n2.z - n3.z) * f3z);
   const double f4x = (n2.y - n0.y) * (n1.z - n0.z) - (n1.y - n0.y) * (n2.z - n0.z);
   const double f4y = (n2.z - n0.z) * (n1.x - n0.x) - (n1.z - n0.z) * (n2.x - n0.x);
-  const double f4z = (n2.x - n0.x) * (n1.y - n0.y) - (n1.x - n0.x) * (n2.y - n0.y); 
+  const double f4z = (n2.x - n0.x) * (n1.y - n0.y) - (n1.x - n0.x) * (n2.y - n0.y);
   t4 = (x - n0.x) * f4x + (y - n0.y) * f4y + (z - n0.z) * f4z;
   t4 = t4 / ((n3.x - n0.x) * f4x + (n3.y - n0.y) * f4y + (n3.z - n0.z) * f4z);
 
   // Result
   if (m_debug) {
     std::cout << m_className << "::Coordinates12:\n";
-    std::cout << "    Tetrahedral coordinates (t, u, v, w) = (" << t1 << ", "
-              << t2 << ", " << t3 << ", " << t4
-              << ") sum = " << t1 + t2 + t3 + t4 << ".\n";
+    std::cout << "    Tetrahedral coordinates (t, u, v, w) = (" << t1 << ", " << t2 << ", " << t3 << ", " << t4 << ") sum = " << t1 + t2 + t3 + t4 << ".\n";
   }
   // Re-compute the (x,y,z) position for this coordinate.
   if (m_debug) {
@@ -1661,12 +1132,9 @@ int ComponentFieldMap::Coordinates12(const double x, const double y,
     const double zr = n0.z * t1 + n1.z * t2 + n2.z * t3 + n3.z * t4;
     const double sr = t1 + t2 + t3 + t4;
     std::cout << m_className << "::Coordinates12:\n";
-    std::cout << "    Position requested:     (" << x << ", " << y << ", " << z
-              << ")\n";
-    std::cout << "    Reconstructed:          (" << xr << ", " << yr << ", "
-              << zr << ")\n";
-    std::cout << "    Difference:             (" << x - xr << ", " << y - yr
-              << ", " << z - zr << ")\n";
+    std::cout << "    Position requested:     (" << x << ", " << y << ", " << z << ")\n";
+    std::cout << "    Reconstructed:          (" << xr << ", " << yr << ", " << zr << ")\n";
+    std::cout << "    Difference:             (" << x - xr << ", " << y - yr << ", " << z - zr << ")\n";
     std::cout << "    Checksum - 1:           " << sr - 1 << "\n";
   }
 
@@ -1675,11 +1143,7 @@ int ComponentFieldMap::Coordinates12(const double x, const double y,
   return ifail;
 }
 
-int ComponentFieldMap::Coordinates13(const double x, const double y,
-                                     const double z, double& t1, double& t2,
-                                     double& t3, double& t4, double jac[4][4],
-                                     double& det,
-                                     const Element& element) const {
+int ComponentFieldMap::Coordinates13(const double x, const double y, const double z, double& t1, double& t2, double& t3, double& t4, double jac[4][4], double& det, const Element& element) const {
 
   if (m_debug) {
     std::cout << m_className << "::Coordinates13:\n";
@@ -1704,8 +1168,7 @@ int ComponentFieldMap::Coordinates13(const double x, const double y,
 
   // Set tolerance parameter.
   const double f = 0.5;
-  if (t1 < -f || t2 < -f || t3 < -f || t4 < -f || t1 > 1 + f || t2 > 1 + f ||
-      t3 > 1 + f || t4 > 1 + f) {
+  if (t1 < -f || t2 < -f || t3 < -f || t4 < -f || t1 > 1 + f || t2 > 1 + f || t3 > 1 + f || t4 > 1 + f) {
     if (m_debug) {
       std::cout << m_className << "::Coordinates13:\n";
       std::cout << "    Linear isoparametric coordinates more than\n";
@@ -1719,8 +1182,7 @@ int ComponentFieldMap::Coordinates13(const double x, const double y,
   double td1 = t1, td2 = t2, td3 = t3, td4 = t4;
   if (m_debug) {
     std::cout << m_className << "::Coordinates13:\n";
-    std::cout << "    Iteration starts at (t1,t2,t3,t4) = (" << td1 << ", "
-              << td2 << ", " << td3 << ", " << td4 << ").\n";
+    std::cout << "    Iteration starts at (t1,t2,t3,t4) = (" << td1 << ", " << td2 << ", " << td3 << ", " << td4 << ").\n";
   }
   const Node& n0 = nodes[element.emap[0]];
   const Node& n1 = nodes[element.emap[1]];
@@ -1739,25 +1201,12 @@ int ComponentFieldMap::Coordinates13(const double x, const double y,
   for (int iter = 0; iter < 10; iter++) {
     if (m_debug) {
       std::cout << m_className << "::Coordinates13:\n";
-      std::cout << "    Iteration " << iter << ":      (t1,t2,t3,t4) = (" << td1
-                << ", " << td2 << ", " << td3 << ", " << td4 << ").\n";
+      std::cout << "    Iteration " << iter << ":      (t1,t2,t3,t4) = (" << td1 << ", " << td2 << ", " << td3 << ", " << td4 << ").\n";
     }
     // Re-compute the (x,y,z) position for this coordinate.
-    const double xr = n0.x * td1 * (2 * td1 - 1) + n1.x * td2 * (2 * td2 - 1) +
-                      n2.x * td3 * (2 * td3 - 1) + n3.x * td4 * (2 * td4 - 1) +
-                      n4.x * 4 * td1 * td2 + n5.x * 4 * td1 * td3 +
-                      n6.x * 4 * td1 * td4 + n7.x * 4 * td2 * td3 +
-                      n8.x * 4 * td2 * td4 + n9.x * 4 * td3 * td4;
-    const double yr = n0.y * td1 * (2 * td1 - 1) + n1.y * td2 * (2 * td2 - 1) +
-                      n2.y * td3 * (2 * td3 - 1) + n3.y * td4 * (2 * td4 - 1) +
-                      n4.y * 4 * td1 * td2 + n5.y * 4 * td1 * td3 +
-                      n6.y * 4 * td1 * td4 + n7.y * 4 * td2 * td3 +
-                      n8.y * 4 * td2 * td4 + n9.y * 4 * td3 * td4;
-    const double zr = n0.z * td1 * (2 * td1 - 1) + n1.z * td2 * (2 * td2 - 1) +
-                      n2.z * td3 * (2 * td3 - 1) + n3.z * td4 * (2 * td4 - 1) +
-                      n4.z * 4 * td1 * td2 + n5.z * 4 * td1 * td3 +
-                      n6.z * 4 * td1 * td4 + n7.z * 4 * td2 * td3 +
-                      n8.z * 4 * td2 * td4 + n9.z * 4 * td3 * td4;
+    const double xr = n0.x * td1 * (2 * td1 - 1) + n1.x * td2 * (2 * td2 - 1) + n2.x * td3 * (2 * td3 - 1) + n3.x * td4 * (2 * td4 - 1) + n4.x * 4 * td1 * td2 + n5.x * 4 * td1 * td3 + n6.x * 4 * td1 * td4 + n7.x * 4 * td2 * td3 + n8.x * 4 * td2 * td4 + n9.x * 4 * td3 * td4;
+    const double yr = n0.y * td1 * (2 * td1 - 1) + n1.y * td2 * (2 * td2 - 1) + n2.y * td3 * (2 * td3 - 1) + n3.y * td4 * (2 * td4 - 1) + n4.y * 4 * td1 * td2 + n5.y * 4 * td1 * td3 + n6.y * 4 * td1 * td4 + n7.y * 4 * td2 * td3 + n8.y * 4 * td2 * td4 + n9.y * 4 * td3 * td4;
+    const double zr = n0.z * td1 * (2 * td1 - 1) + n1.z * td2 * (2 * td2 - 1) + n2.z * td3 * (2 * td3 - 1) + n3.z * td4 * (2 * td4 - 1) + n4.z * 4 * td1 * td2 + n5.z * 4 * td1 * td3 + n6.z * 4 * td1 * td4 + n7.z * 4 * td2 * td3 + n8.z * 4 * td2 * td4 + n9.z * 4 * td3 * td4;
     const double sr = td1 + td2 + td3 + td4;
 
     // Compute the Jacobian.
@@ -1780,12 +1229,8 @@ int ComponentFieldMap::Coordinates13(const double x, const double y,
     // Debugging
     if (m_debug) {
       std::cout << m_className << "::Coordinates13:\n";
-      std::cout << "    Difference vector:  (1, x, y, z)  = (" << diff[0]
-                << ", " << diff[1] << ", " << diff[2] << ", " << diff[3]
-                << ").\n";
-      std::cout << "    Correction vector:  (t1,t2,t3,t4) = (" << corr[0]
-                << ", " << corr[1] << ", " << corr[2] << ", " << corr[3]
-                << ").\n";
+      std::cout << "    Difference vector:  (1, x, y, z)  = (" << diff[0] << ", " << diff[1] << ", " << diff[2] << ", " << diff[3] << ").\n";
+      std::cout << "    Correction vector:  (t1,t2,t3,t4) = (" << corr[0] << ", " << corr[1] << ", " << corr[2] << ", " << corr[3] << ").\n";
     }
 
     // Update the vector.
@@ -1795,8 +1240,7 @@ int ComponentFieldMap::Coordinates13(const double x, const double y,
     td4 += corr[3];
 
     // Check for convergence.
-    if (fabs(corr[0]) < 1.0e-5 && fabs(corr[1]) < 1.0e-5 &&
-        fabs(corr[2]) < 1.0e-5 && fabs(corr[3]) < 1.0e-5) {
+    if (fabs(corr[0]) < 1.0e-5 && fabs(corr[1]) < 1.0e-5 && fabs(corr[2]) < 1.0e-5 && fabs(corr[3]) < 1.0e-5) {
       if (m_debug) {
         std::cout << m_className << "::Coordinates13: Convergence reached.\n";
       }
@@ -1807,33 +1251,14 @@ int ComponentFieldMap::Coordinates13(const double x, const double y,
 
   // No convergence reached.
   if (!converged) {
-    double xmin = n0.x;
-    double xmax = n0.x;
-    if (n1.x < xmin) xmin = n1.x;
-    if (n1.x > xmax) xmax = n1.x;
-    if (n2.x < xmin) xmin = n2.x;
-    if (n2.x > xmax) xmax = n2.x;
-    if (n3.x < xmin) xmin = n3.x;
-    if (n3.x > xmax) xmax = n3.x;
-    double ymin = n0.y;
-    double ymax = n0.y;
-    if (n1.y < ymin) ymin = n1.y;
-    if (n1.y > ymax) ymax = n1.y;
-    if (n2.y < ymin) ymin = n2.y;
-    if (n2.y > ymax) ymax = n2.y;
-    if (n3.y < ymin) ymin = n3.y;
-    if (n3.y > ymax) ymax = n3.y;
-    double zmin = n0.z;
-    double zmax = n0.z;
-    if (n1.z < zmin) zmin = n1.z;
-    if (n1.z > zmax) zmax = n1.z;
-    if (n2.z < zmin) zmin = n2.z;
-    if (n2.z > zmax) zmax = n2.z;
-    if (n3.z < zmin) zmin = n3.z;
-    if (n3.z > zmax) zmax = n3.z;
-
-    if (x >= xmin && x <= xmax && y >= ymin && y <= ymax && z >= zmin &&
-        z <= zmax) {
+    const double xmin = std::min({n0.x, n1.x, n2.x, n3.x});
+    const double xmax = std::max({n0.x, n1.x, n2.x, n3.x});
+    const double ymin = std::min({n0.y, n1.y, n2.y, n3.y});
+    const double ymax = std::max({n0.y, n1.y, n2.y, n3.y});
+    const double zmin = std::min({n0.z, n1.z, n2.z, n3.z});
+    const double zmax = std::max({n0.z, n1.z, n2.z, n3.z});
+    if (x >= xmin && x <= xmax && y >= ymin && y <= ymax && 
+        z >= zmin && z <= zmax) {
       std::cout << m_className << "::Coordinates13:\n"
                 << "    No convergence achieved "
                 << "when refining internal isoparametric coordinates\n"
@@ -1850,36 +1275,20 @@ int ComponentFieldMap::Coordinates13(const double x, const double y,
   t4 = td4;
   if (m_debug) {
     std::cout << m_className << "::Coordinates13:\n";
-    std::cout << "    Convergence reached at (t1, t2, t3, t4) = (" << t1 << ", "
-              << t2 << ", " << t3 << ", " << t4 << ").\n";
+    std::cout << "    Convergence reached at (t1, t2, t3, t4) = (" << t1 << ", " << t2 << ", " << t3 << ", " << t4 << ").\n";
   }
 
   // For debugging purposes, show position.
   if (m_debug) {
     // Re-compute the (x,y,z) position for this coordinate.
-    double xr = n0.x * td1 * (2 * td1 - 1) + n1.x * td2 * (2 * td2 - 1) +
-                n2.x * td3 * (2 * td3 - 1) + n3.x * td4 * (2 * td4 - 1) +
-                n4.x * 4 * td1 * td2 + n5.x * 4 * td1 * td3 +
-                n6.x * 4 * td1 * td4 + n7.x * 4 * td2 * td3 +
-                n8.x * 4 * td2 * td4 + n9.x * 4 * td3 * td4;
-    double yr = n0.y * td1 * (2 * td1 - 1) + n1.y * td2 * (2 * td2 - 1) +
-                n2.y * td3 * (2 * td3 - 1) + n3.y * td4 * (2 * td4 - 1) +
-                n4.y * 4 * td1 * td2 + n5.y * 4 * td1 * td3 +
-                n6.y * 4 * td1 * td4 + n7.y * 4 * td2 * td3 +
-                n8.y * 4 * td2 * td4 + n9.y * 4 * td3 * td4;
-    double zr = n0.z * td1 * (2 * td1 - 1) + n1.z * td2 * (2 * td2 - 1) +
-                n2.z * td3 * (2 * td3 - 1) + n3.z * td4 * (2 * td4 - 1) +
-                n4.z * 4 * td1 * td2 + n5.z * 4 * td1 * td3 +
-                n6.z * 4 * td1 * td4 + n7.z * 4 * td2 * td3 +
-                n8.z * 4 * td2 * td4 + n9.z * 4 * td3 * td4;
+    double xr = n0.x * td1 * (2 * td1 - 1) + n1.x * td2 * (2 * td2 - 1) + n2.x * td3 * (2 * td3 - 1) + n3.x * td4 * (2 * td4 - 1) + n4.x * 4 * td1 * td2 + n5.x * 4 * td1 * td3 + n6.x * 4 * td1 * td4 + n7.x * 4 * td2 * td3 + n8.x * 4 * td2 * td4 + n9.x * 4 * td3 * td4;
+    double yr = n0.y * td1 * (2 * td1 - 1) + n1.y * td2 * (2 * td2 - 1) + n2.y * td3 * (2 * td3 - 1) + n3.y * td4 * (2 * td4 - 1) + n4.y * 4 * td1 * td2 + n5.y * 4 * td1 * td3 + n6.y * 4 * td1 * td4 + n7.y * 4 * td2 * td3 + n8.y * 4 * td2 * td4 + n9.y * 4 * td3 * td4;
+    double zr = n0.z * td1 * (2 * td1 - 1) + n1.z * td2 * (2 * td2 - 1) + n2.z * td3 * (2 * td3 - 1) + n3.z * td4 * (2 * td4 - 1) + n4.z * 4 * td1 * td2 + n5.z * 4 * td1 * td3 + n6.z * 4 * td1 * td4 + n7.z * 4 * td2 * td3 + n8.z * 4 * td2 * td4 + n9.z * 4 * td3 * td4;
     double sr = td1 + td2 + td3 + td4;
     std::cout << m_className << "::Coordinates13:\n";
-    std::cout << "    Position requested:     (" << x << ", " << y << ", " << z
-              << ")\n";
-    std::cout << "    Reconstructed:          (" << xr << ", " << yr << ", "
-              << zr << ")\n";
-    std::cout << "    Difference:             (" << x - xr << ", " << y - yr
-              << ", " << z - zr << ")\n";
+    std::cout << "    Position requested:     (" << x << ", " << y << ", " << z << ")\n";
+    std::cout << "    Reconstructed:          (" << xr << ", " << yr << ", " << zr << ")\n";
+    std::cout << "    Difference:             (" << x - xr << ", " << y - yr << ", " << z - zr << ")\n";
     std::cout << "    Checksum - 1:           " << sr - 1 << "\n";
   }
 
@@ -1888,11 +1297,7 @@ int ComponentFieldMap::Coordinates13(const double x, const double y,
   return ifail;
 }
 
-int ComponentFieldMap::CoordinatesCube(const double x, const double y,
-                                       const double z, double& t1, double& t2,
-                                       double& t3, TMatrixD*& jac,
-                                       std::vector<TMatrixD*>& dN,
-                                       const Element& element) const {
+int ComponentFieldMap::CoordinatesCube(const double x, const double y, const double z, double& t1, double& t2, double& t3, TMatrixD*& jac, std::vector<TMatrixD*>& dN, const Element& element) const {
 
   /*
   global coordinates   7__ _ _ 6     t3    t2
@@ -1948,14 +1353,10 @@ int ComponentFieldMap::CoordinatesCube(const double x, const double y,
     }
     double sr = n[0] + n[1] + n[2] + n[3] + n[4] + n[5] + n[6] + n[7];
     std::cout << m_className << "::CoordinatesCube:\n";
-    std::cout << "    Position requested:     (" << x << "," << y << "," << z
-              << ")\n";
-    std::cout << "    Position reconstructed: (" << xr << "," << yr << "," << zr
-              << ")\n";
-    std::cout << "    Difference:             (" << (x - xr) << "," << (y - yr)
-              << "," << (z - zr) << ")\n";
-    std::cout << "    Hexahedral coordinates (t, u, v) = (" << t1 << "," << t2
-              << "," << t3 << ")\n";
+    std::cout << "    Position requested:     (" << x << "," << y << "," << z << ")\n";
+    std::cout << "    Position reconstructed: (" << xr << "," << yr << "," << zr << ")\n";
+    std::cout << "    Difference:             (" << (x - xr) << "," << (y - yr) << "," << (z - zr) << ")\n";
+    std::cout << "    Hexahedral coordinates (t, u, v) = (" << t1 << "," << t2 << "," << t3 << ")\n";
     std::cout << "    Checksum - 1:           " << (sr - 1) << "\n";
   }
   if (jac != 0) JacobianCube(element, t1, t2, t3, jac, dN);
@@ -2001,9 +1402,7 @@ void ComponentFieldMap::UpdatePeriodicityCommon() {
   }
 
   // Not more than 1 rotational symmetry
-  if ((m_rotationSymmetric[0] && m_rotationSymmetric[1]) ||
-      (m_rotationSymmetric[0] && m_rotationSymmetric[2]) ||
-      (m_rotationSymmetric[1] && m_rotationSymmetric[2])) {
+  if ((m_rotationSymmetric[0] && m_rotationSymmetric[1]) || (m_rotationSymmetric[0] && m_rotationSymmetric[2]) || (m_rotationSymmetric[1] && m_rotationSymmetric[2])) {
     std::cerr << m_className << "::UpdatePeriodicityCommon:\n";
     std::cerr << "    Only 1 rotational symmetry allowed; reset.\n";
     m_rotationSymmetric.fill(false);
@@ -2011,8 +1410,7 @@ void ComponentFieldMap::UpdatePeriodicityCommon() {
   }
 
   // No rotational symmetry as well as axial periodicity
-  if ((m_rotationSymmetric[0] || m_rotationSymmetric[1] || m_rotationSymmetric[2]) &&
-      (m_axiallyPeriodic[0] || m_axiallyPeriodic[1] || m_axiallyPeriodic[2])) {
+  if ((m_rotationSymmetric[0] || m_rotationSymmetric[1] || m_rotationSymmetric[2]) && (m_axiallyPeriodic[0] || m_axiallyPeriodic[1] || m_axiallyPeriodic[2])) {
     std::cerr << m_className << "::UpdatePeriodicityCommon:\n";
     std::cerr << "    Not allowed to combine rotational symmetry\n";
     std::cerr << "    and axial periodicity; reset.\n";
@@ -2062,32 +1460,20 @@ void ComponentFieldMap::UpdatePeriodicityCommon() {
   }
 
   if (m_axiallyPeriodic[0]) {
-    m_minBoundingBox[1] = -std::max(std::max(fabs(m_mapmin[1]), fabs(m_mapmax[1])),
-                                std::max(fabs(m_mapmin[2]), fabs(m_mapmax[2])));
-    m_maxBoundingBox[1] = +std::max(std::max(fabs(m_mapmin[1]), fabs(m_mapmax[1])),
-                                std::max(fabs(m_mapmin[2]), fabs(m_mapmax[2])));
-    m_minBoundingBox[2] = -std::max(std::max(fabs(m_mapmin[1]), fabs(m_mapmax[1])),
-                                std::max(fabs(m_mapmin[2]), fabs(m_mapmax[2])));
-    m_maxBoundingBox[2] = +std::max(std::max(fabs(m_mapmin[1]), fabs(m_mapmax[1])),
-                                std::max(fabs(m_mapmin[2]), fabs(m_mapmax[2])));
+    m_minBoundingBox[1] = -std::max(std::max(fabs(m_mapmin[1]), fabs(m_mapmax[1])), std::max(fabs(m_mapmin[2]), fabs(m_mapmax[2])));
+    m_maxBoundingBox[1] = +std::max(std::max(fabs(m_mapmin[1]), fabs(m_mapmax[1])), std::max(fabs(m_mapmin[2]), fabs(m_mapmax[2])));
+    m_minBoundingBox[2] = -std::max(std::max(fabs(m_mapmin[1]), fabs(m_mapmax[1])), std::max(fabs(m_mapmin[2]), fabs(m_mapmax[2])));
+    m_maxBoundingBox[2] = +std::max(std::max(fabs(m_mapmin[1]), fabs(m_mapmax[1])), std::max(fabs(m_mapmin[2]), fabs(m_mapmax[2])));
   } else if (m_axiallyPeriodic[1]) {
-    m_minBoundingBox[0] = -std::max(std::max(fabs(m_mapmin[0]), fabs(m_mapmax[0])),
-                                std::max(fabs(m_mapmin[2]), fabs(m_mapmax[2])));
-    m_maxBoundingBox[0] = +std::max(std::max(fabs(m_mapmin[0]), fabs(m_mapmax[0])),
-                                std::max(fabs(m_mapmin[2]), fabs(m_mapmax[2])));
-    m_minBoundingBox[2] = -std::max(std::max(fabs(m_mapmin[0]), fabs(m_mapmax[0])),
-                                std::max(fabs(m_mapmin[2]), fabs(m_mapmax[2])));
-    m_maxBoundingBox[2] = +std::max(std::max(fabs(m_mapmin[0]), fabs(m_mapmax[0])),
-                                std::max(fabs(m_mapmin[2]), fabs(m_mapmax[2])));
+    m_minBoundingBox[0] = -std::max(std::max(fabs(m_mapmin[0]), fabs(m_mapmax[0])), std::max(fabs(m_mapmin[2]), fabs(m_mapmax[2])));
+    m_maxBoundingBox[0] = +std::max(std::max(fabs(m_mapmin[0]), fabs(m_mapmax[0])), std::max(fabs(m_mapmin[2]), fabs(m_mapmax[2])));
+    m_minBoundingBox[2] = -std::max(std::max(fabs(m_mapmin[0]), fabs(m_mapmax[0])), std::max(fabs(m_mapmin[2]), fabs(m_mapmax[2])));
+    m_maxBoundingBox[2] = +std::max(std::max(fabs(m_mapmin[0]), fabs(m_mapmax[0])), std::max(fabs(m_mapmin[2]), fabs(m_mapmax[2])));
   } else if (m_axiallyPeriodic[2]) {
-    m_minBoundingBox[0] = -std::max(std::max(fabs(m_mapmin[0]), fabs(m_mapmax[0])),
-                                std::max(fabs(m_mapmin[1]), fabs(m_mapmax[1])));
-    m_maxBoundingBox[0] = +std::max(std::max(fabs(m_mapmin[0]), fabs(m_mapmax[0])),
-                                std::max(fabs(m_mapmin[1]), fabs(m_mapmax[1])));
-    m_minBoundingBox[1] = -std::max(std::max(fabs(m_mapmin[0]), fabs(m_mapmax[0])),
-                                std::max(fabs(m_mapmin[1]), fabs(m_mapmax[1])));
-    m_maxBoundingBox[1] = +std::max(std::max(fabs(m_mapmin[0]), fabs(m_mapmax[0])),
-                                std::max(fabs(m_mapmin[1]), fabs(m_mapmax[1])));
+    m_minBoundingBox[0] = -std::max(std::max(fabs(m_mapmin[0]), fabs(m_mapmax[0])), std::max(fabs(m_mapmin[1]), fabs(m_mapmax[1])));
+    m_maxBoundingBox[0] = +std::max(std::max(fabs(m_mapmin[0]), fabs(m_mapmax[0])), std::max(fabs(m_mapmin[1]), fabs(m_mapmax[1])));
+    m_minBoundingBox[1] = -std::max(std::max(fabs(m_mapmin[0]), fabs(m_mapmax[0])), std::max(fabs(m_mapmin[1]), fabs(m_mapmax[1])));
+    m_maxBoundingBox[1] = +std::max(std::max(fabs(m_mapmin[0]), fabs(m_mapmax[0])), std::max(fabs(m_mapmin[1]), fabs(m_mapmax[1])));
   }
 
   for (unsigned int i = 0; i < 3; ++i) {
@@ -2254,16 +1640,12 @@ void ComponentFieldMap::PrintRange() {
       std::cout << " axial " << int(0.5 + m_mapna[i]) << "-fold repetition";
     }
     if (m_rotationSymmetric[i]) std::cout << " rotational symmetry";
-    if (!(m_periodic[i] || m_mirrorPeriodic[i] || m_axiallyPeriodic[i] ||
-          m_rotationSymmetric[i]))
-      std::cout << " none";
+    if (!(m_periodic[i] || m_mirrorPeriodic[i] || m_axiallyPeriodic[i] || m_rotationSymmetric[i])) std::cout << " none";
     std::cout << "\n";
   }
 }
 
-bool ComponentFieldMap::GetBoundingBox(double& xmin, double& ymin, double& zmin,
-                                       double& xmax, double& ymax,
-                                       double& zmax) {
+bool ComponentFieldMap::GetBoundingBox(double& xmin, double& ymin, double& zmin, double& xmax, double& ymax, double& zmax) {
 
   if (!m_ready) return false;
 
@@ -2276,10 +1658,7 @@ bool ComponentFieldMap::GetBoundingBox(double& xmin, double& ymin, double& zmin,
   return true;
 }
 
-void ComponentFieldMap::MapCoordinates(double& xpos, double& ypos, double& zpos,
-                                       bool& xmirrored, bool& ymirrored,
-                                       bool& zmirrored, double& rcoordinate,
-                                       double& rotation) const {
+void ComponentFieldMap::MapCoordinates(double& xpos, double& ypos, double& zpos, bool& xmirrored, bool& ymirrored, bool& zmirrored, double& rcoordinate, double& rotation) const {
 
   // Initial values
   rotation = 0;
@@ -2303,13 +1682,9 @@ void ComponentFieldMap::MapCoordinates(double& xpos, double& ypos, double& zpos,
   if (m_axiallyPeriodic[0] && (zpos != 0 || ypos != 0)) {
     auxr = sqrt(zpos * zpos + ypos * ypos);
     auxphi = atan2(zpos, ypos);
-    rotation = (m_mapamax[0] - m_mapamin[0]) *
-               floor(0.5 + (auxphi - 0.5 * (m_mapamin[0] + m_mapamax[0])) /
-                               (m_mapamax[0] - m_mapamin[0]));
-    if (auxphi - rotation < m_mapamin[0])
-      rotation = rotation - (m_mapamax[0] - m_mapamin[0]);
-    if (auxphi - rotation > m_mapamax[0])
-      rotation = rotation + (m_mapamax[0] - m_mapamin[0]);
+    rotation = (m_mapamax[0] - m_mapamin[0]) * floor(0.5 + (auxphi - 0.5 * (m_mapamin[0] + m_mapamax[0])) / (m_mapamax[0] - m_mapamin[0]));
+    if (auxphi - rotation < m_mapamin[0]) rotation = rotation - (m_mapamax[0] - m_mapamin[0]);
+    if (auxphi - rotation > m_mapamax[0]) rotation = rotation + (m_mapamax[0] - m_mapamin[0]);
     auxphi = auxphi - rotation;
     ypos = auxr * cos(auxphi);
     zpos = auxr * sin(auxphi);
@@ -2332,13 +1707,9 @@ void ComponentFieldMap::MapCoordinates(double& xpos, double& ypos, double& zpos,
   if (m_axiallyPeriodic[1] && (xpos != 0 || zpos != 0)) {
     auxr = sqrt(xpos * xpos + zpos * zpos);
     auxphi = atan2(xpos, zpos);
-    rotation = (m_mapamax[1] - m_mapamin[1]) *
-               floor(0.5 + (auxphi - 0.5 * (m_mapamin[1] + m_mapamax[1])) /
-                               (m_mapamax[1] - m_mapamin[1]));
-    if (auxphi - rotation < m_mapamin[1])
-      rotation = rotation - (m_mapamax[1] - m_mapamin[1]);
-    if (auxphi - rotation > m_mapamax[1])
-      rotation = rotation + (m_mapamax[1] - m_mapamin[1]);
+    rotation = (m_mapamax[1] - m_mapamin[1]) * floor(0.5 + (auxphi - 0.5 * (m_mapamin[1] + m_mapamax[1])) / (m_mapamax[1] - m_mapamin[1]));
+    if (auxphi - rotation < m_mapamin[1]) rotation = rotation - (m_mapamax[1] - m_mapamin[1]);
+    if (auxphi - rotation > m_mapamax[1]) rotation = rotation + (m_mapamax[1] - m_mapamin[1]);
     auxphi = auxphi - rotation;
     zpos = auxr * cos(auxphi);
     xpos = auxr * sin(auxphi);
@@ -2361,13 +1732,9 @@ void ComponentFieldMap::MapCoordinates(double& xpos, double& ypos, double& zpos,
   if (m_axiallyPeriodic[2] && (ypos != 0 || xpos != 0)) {
     auxr = sqrt(ypos * ypos + xpos * xpos);
     auxphi = atan2(ypos, xpos);
-    rotation = (m_mapamax[2] - m_mapamin[2]) *
-               floor(0.5 + (auxphi - 0.5 * (m_mapamin[2] + m_mapamax[2])) /
-                               (m_mapamax[2] - m_mapamin[2]));
-    if (auxphi - rotation < m_mapamin[2])
-      rotation = rotation - (m_mapamax[2] - m_mapamin[2]);
-    if (auxphi - rotation > m_mapamax[2])
-      rotation = rotation + (m_mapamax[2] - m_mapamin[2]);
+    rotation = (m_mapamax[2] - m_mapamin[2]) * floor(0.5 + (auxphi - 0.5 * (m_mapamin[2] + m_mapamax[2])) / (m_mapamax[2] - m_mapamin[2]));
+    if (auxphi - rotation < m_mapamin[2]) rotation = rotation - (m_mapamax[2] - m_mapamin[2]);
+    if (auxphi - rotation > m_mapamax[2]) rotation = rotation + (m_mapamax[2] - m_mapamin[2]);
     auxphi = auxphi - rotation;
     xpos = auxr * cos(auxphi);
     ypos = auxr * sin(auxphi);
@@ -2394,11 +1761,7 @@ void ComponentFieldMap::MapCoordinates(double& xpos, double& ypos, double& zpos,
   }
 }
 
-void ComponentFieldMap::UnmapFields(double& ex, double& ey, double& ez,
-                                    double& xpos, double& ypos, double& zpos,
-                                    bool& xmirrored, bool& ymirrored,
-                                    bool& zmirrored, double& rcoordinate,
-                                    double& rotation) const {
+void ComponentFieldMap::UnmapFields(double& ex, double& ey, double& ez, double& xpos, double& ypos, double& zpos, bool& xmirrored, bool& ymirrored, bool& zmirrored, double& rcoordinate, double& rotation) const {
 
   // Apply mirror imaging.
   if (xmirrored) ex = -ex;
@@ -2498,18 +1861,28 @@ void ComponentFieldMap::CalculateElementBoundingBoxes(void) {
   }
 
   // Calculate the bounding boxes of all elements
-  for (int i = 0; i < nElements; ++i) {
-    Element& elem = elements[i];
-    const Node& n0 = nodes[elem.emap[0]];
-    const Node& n1 = nodes[elem.emap[1]];
-    const Node& n2 = nodes[elem.emap[2]];
-    const Node& n3 = nodes[elem.emap[3]];
-    elem.xmin = std::min(std::min(n0.x, n1.x), std::min(n2.x, n3.x));
-    elem.xmax = std::max(std::max(n0.x, n1.x), std::max(n2.x, n3.x));
-    elem.ymin = std::min(std::min(n0.y, n1.y), std::min(n2.y, n3.y));
-    elem.ymax = std::max(std::max(n0.y, n1.y), std::max(n2.y, n3.y));
-    elem.zmin = std::min(std::min(n0.z, n1.z), std::min(n2.z, n3.z));
-    elem.zmax = std::max(std::max(n0.z, n1.z), std::max(n2.z, n3.z));
+  for (auto& element : elements) {
+    const Node& n0 = nodes[element.emap[0]];
+    const Node& n1 = nodes[element.emap[1]];
+    const Node& n2 = nodes[element.emap[2]];
+    const Node& n3 = nodes[element.emap[3]];
+    element.xmin = std::min({n0.x, n1.x, n2.x, n3.x});
+    element.xmax = std::max({n0.x, n1.x, n2.x, n3.x});
+    element.ymin = std::min({n0.y, n1.y, n2.y, n3.y});
+    element.ymax = std::max({n0.y, n1.y, n2.y, n3.y});
+    element.zmin = std::min({n0.z, n1.z, n2.z, n3.z});
+    element.zmax = std::max({n0.z, n1.z, n2.z, n3.z});
+    // Add tolerances.
+    constexpr double f = 0.2;
+    const double tolx = f * (element.xmax - element.xmin);
+    element.xmin -= tolx;
+    element.xmax += tolx;
+    const double toly = f * (element.ymax - element.ymin);
+    element.ymin -= toly;
+    element.ymax += toly;
+    const double tolz = f * (element.zmax - element.zmin);
+    element.zmin -= tolz;
+    element.zmax += tolz;
   }
 }
 
@@ -2524,31 +1897,37 @@ bool ComponentFieldMap::InitializeTetrahedralTree() {
   std::cout << m_className << "::InitializeTetrahedralTree:\n"
             << "    About to initialize the tetrahedral tree.\n";
 
-  // check if the caching has not been done before
+  // Cache the bounding boxes if it has not been done yet.
   if (!m_cacheElemBoundingBoxes) CalculateElementBoundingBoxes();
 
-  // Determine the bounding box
-  double xmin = 0., ymin = 0., zmin = 0., xmax = 0., ymax = 0., zmax = 0.;
-  for (unsigned int i = 0; i < nodes.size(); i++) {
-    const Node& n = nodes[i];
-    if (n.x <= xmin) xmin = n.x;
-    if (n.x > xmax) xmax = n.x;
-    if (n.y <= ymin) ymin = n.y;
-    if (n.y > ymax) ymax = n.y;
-    if (n.z <= zmin) zmin = n.z;
-    if (n.z > zmax) zmax = n.z;
+  if (nodes.empty()) {
+    std::cerr << m_className << "::InitializeTetrahedralTree: Empty mesh.\n";
+    return false;
   }
 
-  std::cout << "    Bounding box:\n"
-            << std::scientific << "\tx: " << xmin << " -> " << xmax << "\n"
-            << std::scientific << "\ty: " << ymin << " -> " << ymax << "\n"
-            << std::scientific << "\tz: " << zmin << " -> " << zmax << "\n";
+  // Determine the bounding box
+  double xmin = nodes.front().x;
+  double ymin = nodes.front().y;
+  double zmin = nodes.front().z;
+  double xmax = xmin;
+  double ymax = ymin;
+  double zmax = zmin;
+  for (unsigned int i = 0; i < nodes.size(); i++) {
+    const Node& n = nodes[i];
+    xmin = std::min(xmin, n.x);
+    xmax = std::max(xmax, n.x);
+    ymin = std::min(ymin, n.y);
+    ymax = std::max(ymax, n.y);
+    zmin = std::min(zmin, n.z);
+    zmax = std::max(zmax, n.z);
+  }
+
+  std::cout << "    Bounding box:\n" << std::scientific << "\tx: " << xmin << " -> " << xmax << "\n" << std::scientific << "\ty: " << ymin << " -> " << ymax << "\n" << std::scientific << "\tz: " << zmin << " -> " << zmax << "\n";
 
   const double hx = 0.5 * (xmax - xmin);
   const double hy = 0.5 * (ymax - ymin);
   const double hz = 0.5 * (zmax - zmin);
-  m_tetTree = new TetrahedralTree(Vec3(xmin + hx, ymin + hy, zmin + hz),
-                                  Vec3(hx, hy, hz));
+  m_tetTree = new TetrahedralTree(Vec3(xmin + hx, ymin + hy, zmin + hz), Vec3(hx, hy, hz));
 
   std::cout << "    Tree instantiated.\n";
 
@@ -2575,24 +1954,17 @@ bool ComponentFieldMap::InitializeTetrahedralTree() {
   return true;
 }
 
-void ComponentFieldMap::PrintElement(const std::string& header, const double x,
-                                     const double y, const double z,
-                                     const double t1, const double t2,
-                                     const double t3, const double t4,
-                                     const Element& element, const unsigned int n,
-                                     const int iw) const {
+void ComponentFieldMap::PrintElement(const std::string& header, const double x, const double y, const double z, const double t1, const double t2, const double t3, const double t4, const Element& element, const unsigned int n, const int iw) const {
 
   std::cout << m_className << "::" << header << ":\n"
             << "    Global = (" << x << ", " << y << ", " << z << ")\n"
-            << "    Local = (" << t1 << ", " << t2 << ", " << t3 << ", " << t4
-            << ")\n";
+            << "    Local = (" << t1 << ", " << t2 << ", " << t3 << ", " << t4 << ")\n";
   if (element.degenerate) std::cout << "    Element is degenerate.\n";
   std::cout << " Node             x            y            z            V\n";
   for (unsigned int ii = 0; ii < n; ++ii) {
     const Node& node = nodes[element.emap[ii]];
     const double v = iw < 0 ? node.v : node.w[iw];
-    printf("      %-5d %12g %12g %12g %12g\n", element.emap[ii], node.x, node.y,
-           node.z, v);
+    printf("      %-5d %12g %12g %12g %12g\n", element.emap[ii], node.x, node.y, node.z, v);
   }
 }
 }
