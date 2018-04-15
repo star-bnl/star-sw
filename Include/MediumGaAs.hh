@@ -69,17 +69,6 @@ class MediumGaAs : public Medium {
   // Models
   bool m_hasUserMobility;
 
-  // Optical data
-  bool m_hasOpticalData;
-  std::string opticalDataFile;
-  struct opticalData {
-    // Energy [eV]
-    double energy;
-    // Dielectric function
-    double eps1, eps2;
-  };
-  std::vector<opticalData> opticalDataTable;
-  bool LoadOpticalData(const std::string filename);
 };
 }
 

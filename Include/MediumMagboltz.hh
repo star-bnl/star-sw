@@ -201,8 +201,8 @@ class MediumMagboltz : public MediumGas {
   // Null-collision frequency
   double m_cfNull;
   // Collision frequencies
-  double m_cf[nEnergySteps][nMaxLevels];
-  double m_cfLog[nEnergyStepsLog][nMaxLevels];
+  std::vector<std::vector<double> > m_cf;
+  std::vector<std::vector<double> > m_cfLog;
 
   // Collision counters
   // 0: elastic
@@ -299,7 +299,7 @@ class MediumMagboltz : public MediumGas {
   // Energy spacing of photon collision rates table
   double m_eFinalGamma, m_eStepGamma;
   // Number of photon collision cross-section terms
-  int nPhotonTerms;
+  int m_nPhotonTerms;
   // Total photon collision frequencies
   std::vector<double> m_cfTotGamma;
   // Photon collision frequencies

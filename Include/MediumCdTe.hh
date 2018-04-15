@@ -74,17 +74,6 @@ class MediumCdTe : public Medium {
   bool m_hasUserMobility;
   bool m_hasUserSaturationVelocity;
 
-  // Optical data
-  std::string m_opticalDataFile;
-  struct opticalData {
-    // Energy [eV]
-    double energy;
-    // Dielectric function
-    double eps1, eps2;
-  };
-  std::vector<opticalData> m_opticalDataTable;
-
-  bool LoadOpticalData(const std::string& filename);
 };
 }
 

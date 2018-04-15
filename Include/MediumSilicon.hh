@@ -298,13 +298,16 @@ class MediumSilicon : public Medium {
 
   // Optical data
   std::string m_opticalDataFile = "OpticalData_Si.txt";
+  std::vector<double> m_opticalDataEnergies;
+  std::vector<std::pair<double, double> > m_opticalDataEpsilon;
+  /*
   struct opticalData {
     // Energy [eV]
     double energy;
     // Dielectric function
     double eps1, eps2;
   };
-  std::vector<opticalData> m_opticalDataTable;
+  std::vector<opticalData> m_opticalDataTable;*/
 
   bool UpdateTransportParameters();
   void UpdateLatticeMobilityMinimos();

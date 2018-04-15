@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <fstream>
 #include <cmath>
+#include <algorithm>
 
 #include <map>
 
@@ -79,6 +80,9 @@ MediumMagboltz::MediumMagboltz()
   m_csType.assign(nMaxLevels, 0);
   m_scatModel.assign(nMaxLevels, 0);
   m_description.assign(nMaxLevels, std::string(50, ' '));
+
+  m_cf.assign(nEnergySteps, std::vector<double>(nMaxLevels, 0.));
+  m_cfLog.assign(nEnergyStepsLog, std::vector<double>(nMaxLevels, 0.));
 
   m_isChanged = true;
 
@@ -679,23 +683,13 @@ bool MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
 
     // Sample the scattering process.
     const double r = RndmUniform();
-    int iLow = 0;
-    int iUp = m_nTerms - 1;
-    if (r <= m_cf[iE][iLow]) {
-      level = iLow;
-    } else if (r >= m_cf[iE][iUp]) {
-      level = iUp;
+    if (r <= m_cf[iE][0]) {
+      level = 0;
+    } else if (r >= m_cf[iE][m_nTerms -1]) {
+      level = m_nTerms - 1; 
     } else {
-      int iMid;
-      while (iUp - iLow > 1) {
-        iMid = (iLow + iUp) >> 1;
-        if (r < m_cf[iE][iMid]) {
-          iUp = iMid;
-        } else {
-          iLow = iMid;
-        }
-      }
-      level = iUp;
+      const auto begin = m_cf[iE].cbegin();
+      level = std::lower_bound(begin, begin + m_nTerms, r) - begin;
     }
     // Get the angular distribution parameters.
     angCut = m_scatCut[iE][level];
@@ -708,23 +702,13 @@ bool MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
     if (iE >= nEnergyStepsLog) iE = nEnergyStepsLog - 1;
     // Sample the scattering process.
     const double r = RndmUniform();
-    int iLow = 0;
-    int iUp = m_nTerms - 1;
-    if (r <= m_cfLog[iE][iLow]) {
-      level = iLow;
-    } else if (r >= m_cfLog[iE][iUp]) {
-      level = iUp;
+    if (r <= m_cfLog[iE][0]) {
+      level = 0;
+    } else if (r >= m_cfLog[iE][m_nTerms - 1]) {
+      level = m_nTerms - 1;
     } else {
-      int iMid;
-      while (iUp - iLow > 1) {
-        iMid = (iLow + iUp) >> 1;
-        if (r < m_cfLog[iE][iMid]) {
-          iUp = iMid;
-        } else {
-          iLow = iMid;
-        }
-      }
-      level = iUp;
+      const auto begin = m_cfLog[iE].cbegin();
+      level = std::lower_bound(begin, begin + m_nTerms, r) - begin;
     }
     // Get the angular distribution parameters.
     angCut = m_scatCutLog[iE][level];
@@ -1029,23 +1013,13 @@ bool MediumMagboltz::GetPhotonCollision(const double e, int& type, int& level,
     r *= RndmUniform();
   }
 
-  int iLow = 0;
-  int iUp = nPhotonTerms - 1;
-  if (r <= m_cfGamma[iE][iLow]) {
-    level = iLow;
-  } else if (r >= m_cfGamma[iE][iUp]) {
-    level = iUp;
+  if (r <= m_cfGamma[iE][0]) {
+    level = 0;
+  } else if (r >= m_cfGamma[iE][m_nPhotonTerms - 1]) {
+    level = m_nPhotonTerms - 1;
   } else {
-    int iMid;
-    while (iUp - iLow > 1) {
-      iMid = (iLow + iUp) >> 1;
-      if (r < m_cfGamma[iE][iMid]) {
-        iUp = iMid;
-      } else {
-        iLow = iMid;
-      }
-    }
-    level = iUp;
+    const auto begin = m_cfGamma[iE].cbegin();
+    level = std::lower_bound(begin, begin + m_nPhotonTerms, r) - begin;
   }
 
   nsec = 0;
@@ -5105,7 +5079,7 @@ bool MediumMagboltz::ComputePhotonCollisionTable(const bool verbose) {
   for (int j = nEnergyStepsGamma; j--;) m_cfGamma[j].clear();
   csTypeGamma.clear();
 
-  nPhotonTerms = 0;
+  m_nPhotonTerms = 0;
   for (unsigned int i = 0; i < m_nComponents; ++i) {
     const double prefactor = dens * SpeedOfLight * m_fraction[i];
     // Check if optical data for this gas is available.
@@ -5122,7 +5096,7 @@ bool MediumMagboltz::ComputePhotonCollisionTable(const bool verbose) {
     if (!data.IsAvailable(gasname)) return false;
     csTypeGamma.push_back(i * nCsTypesGamma + PhotonCollisionTypeIonisation);
     csTypeGamma.push_back(i * nCsTypesGamma + PhotonCollisionTypeInelastic);
-    nPhotonTerms += 2;
+    m_nPhotonTerms += 2;
     for (int j = 0; j < nEnergyStepsGamma; ++j) {
       // Retrieve total photoabsorption cross-section and ionisation yield.
       data.GetPhotoabsorptionCrossSection(gasname, (j + 0.5) * m_eStepGamma, cs,
@@ -5141,7 +5115,7 @@ bool MediumMagboltz::ComputePhotonCollisionTable(const bool verbose) {
     csfile.open("csgamma.txt", std::ios::out);
     for (int j = 0; j < nEnergyStepsGamma; ++j) {
       csfile << (j + 0.5) * m_eStepGamma << "  ";
-      for (int i = 0; i < nPhotonTerms; ++i) csfile << m_cfGamma[j][i] << "  ";
+      for (int i = 0; i < m_nPhotonTerms; ++i) csfile << m_cfGamma[j][i] << "  ";
       csfile << "\n";
     }
     csfile.close();
@@ -5149,7 +5123,7 @@ bool MediumMagboltz::ComputePhotonCollisionTable(const bool verbose) {
 
   // Calculate the cumulative rates.
   for (int j = 0; j < nEnergyStepsGamma; ++j) {
-    for (int i = 0; i < nPhotonTerms; ++i) {
+    for (int i = 0; i < m_nPhotonTerms; ++i) {
       if (i > 0) m_cfGamma[j][i] += m_cfGamma[j][i - 1];
     }
   }

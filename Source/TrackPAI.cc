@@ -169,23 +169,17 @@ double TrackPAI::SampleEnergyDeposit(const double u, double& f) const {
   if (u >= 1.) return m_energies.back();
 
   // Find the energy loss by interpolation
-  // from the cumulative distribution table
-  int iLow = 0;
-  int iUp = m_cdf.size();
-  while (iUp - iLow > 1) {
-    const int iMid = (iUp + iLow) >> 1;
-    if (u >= m_cdf[iMid]) {
-      iLow = iMid;
-    } else {
-      iUp = iMid;
-    }
-  }
-  const double e0 = m_energies[iLow];
-  const double e1 = m_energies[iUp];
-  const double c0 = m_cdf[iLow]; 
-  const double c1 = m_cdf[iUp];
-  const double r0 = m_rutherford[iLow];
-  const double r1 = m_rutherford[iUp]; 
+  // from the cumulative distribution table.
+  const auto begin = m_cdf.cbegin();
+  const auto it1 = std::upper_bound(begin, m_cdf.cend(), u);
+  if (it1 == m_cdf.cbegin()) return m_energies[0]; 
+  const auto it0 = std::prev(it1);
+  const double c0 = *it0;
+  const double c1 = *it1;
+  const double e0 = m_energies[it0 - begin];
+  const double e1 = m_energies[it1 - begin];
+  const double r0 = m_rutherford[it0 - begin];
+  const double r1 = m_rutherford[it1 - begin]; 
   if (e0 < 100.) {
     const double edep = e0 + (u - c0) * (e1 - e0) / (c1 - c0);
     f = r0 + (edep - e0) * (r1 - r0) / (e1 - e0);

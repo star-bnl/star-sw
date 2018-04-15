@@ -11,19 +11,23 @@ namespace Garfield {
 class OpticalData {
 
  public:
-  // Constructor
+  /// Constructor
   OpticalData();
-  // Destructor
+  /// Destructor
   ~OpticalData() {}
 
+  /// Check whether optical data have been implemented for a given gas.
   bool IsAvailable(const std::string& material) const;
-
+  /// Photo-absorption cross-section and ionisation yield at a given energy.
   bool GetPhotoabsorptionCrossSection(const std::string& material,
                                       const double e, double& cs, double& eta);
 
   void EnableDebugging(const bool on = true) { m_debug = on; }
 
  private:
+  static constexpr double OscToPacs = 8.067283e-18;
+  static constexpr double Mbarn = 1.e-18;
+
   bool m_debug = false;
 
   bool PhotoAbsorptionCsNeon(const double e, double& cs, double& eta);

@@ -15,6 +15,19 @@ void PrintNotImplemented(const std::string& cls, const std::string& fcn) {
   std::cerr << cls << "::" << fcn << ": Function is not implemented.\n";
 }
 
+void PrintOutOfRange(const std::string& cls, const std::string& fcn,
+                     const unsigned int i, const unsigned int j,
+                     const unsigned int k) {
+
+  std::cerr << cls << "::" << fcn << ": Index (" << i << ", " << j << ", " << k
+            << ") out of range.\n";
+}
+
+void PrintDataNotAvailable(const std::string& cls, const std::string& fcn) {
+
+  std::cerr << cls << "::" << fcn << ": Data not available.\n";
+}
+
 }
 
 namespace Garfield {
@@ -76,8 +89,7 @@ void Medium::GetComponent(const unsigned int i,
                           std::string& label, double& f) {
 
   if (i >= m_nComponents) {
-    std::cerr << m_className << "::GetComponent:\n";
-    std::cerr << "    Index out of range.\n";
+    std::cerr << m_className << "::GetComponent: Index out of range.\n";
   }
 
   label = m_name;
@@ -1613,20 +1625,14 @@ void Medium::GetFieldGrid(std::vector<double>& efields,
 bool Medium::GetElectronVelocityE(const unsigned int ie, 
                                   const unsigned int ib, 
                                   const unsigned int ia, double& v) {
-
-  if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetElectronVelocityE:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    v = 0.;
+  v = 0.;
+  if (ie >= m_eFields.size() || ib >= m_bFields.size() || 
+      ia >= m_bAngles.size()) {
+    PrintOutOfRange(m_className, "GetElectronVelocityE", ie, ib, ia);
     return false;
   }
   if (!m_hasElectronVelocityE) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetElectronVelocityE:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    v = 0.;
+    if (m_debug) PrintDataNotAvailable(m_className, "GetElectronVelocityE");
     return false;
   }
 
@@ -1638,19 +1644,14 @@ bool Medium::GetElectronVelocityExB(const unsigned int ie,
                                     const unsigned int ib, 
                                     const unsigned int ia, double& v) {
 
-  if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetElectronVelocityExB:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    v = 0.;
+  v = 0.;
+  if (ie >= m_eFields.size() || ib >= m_bFields.size() || 
+      ia >= m_bAngles.size()) {
+    PrintOutOfRange(m_className, "GetElectronVelocityExB", ie, ib, ia);
     return false;
   }
   if (!m_hasElectronVelocityExB) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetElectronVelocityExB:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    v = 0.;
+    if (m_debug) PrintDataNotAvailable(m_className, "GetElectronVelocityExB");
     return false;
   }
 
@@ -1661,20 +1662,13 @@ bool Medium::GetElectronVelocityExB(const unsigned int ie,
 bool Medium::GetElectronVelocityB(const unsigned int ie, 
                                   const unsigned int ib, 
                                   const unsigned int ia, double& v) {
-
+  v = 0.;
   if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetElectronVelocityB:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    v = 0.;
+    PrintOutOfRange(m_className, "GetElectronVelocityB", ie, ib, ia);
     return false;
   }
   if (!m_hasElectronVelocityB) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetElectronVelocityB:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    v = 0.;
+    if (m_debug) PrintDataNotAvailable(m_className, "GetElectronVelocityB");
     return false;
   }
 
@@ -1687,19 +1681,15 @@ bool Medium::GetElectronLongitudinalDiffusion(const unsigned int ie,
                                               const unsigned int ia, 
                                               double& dl) {
 
+  dl = 0.;
   if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetElectronLongitudinalDiffusion:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    dl = 0.;
+    PrintOutOfRange(m_className, "GetElectronLongitudinalDiffusion", ie, ib, ia);
     return false;
   }
   if (!m_hasElectronDiffLong) {
     if (m_debug) {
-      std::cerr << m_className << "::GetElectronLongitudinalDiffusion:\n";
-      std::cerr << "    Data not available.\n";
+      PrintDataNotAvailable(m_className, "GetElectronLongitudinalDiffusion");
     }
-    dl = 0.;
     return false;
   }
 
@@ -1712,19 +1702,15 @@ bool Medium::GetElectronTransverseDiffusion(const unsigned int ie,
                                             const unsigned int ia, 
                                             double& dt) {
 
+  dt = 0.;
   if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetElectronTransverseDiffusion:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    dt = 0.;
+    PrintOutOfRange(m_className, "GetElectronTransverseDiffusion", ie, ib, ia);
     return false;
   }
   if (!m_hasElectronDiffTrans) {
     if (m_debug) {
-      std::cerr << m_className << "::GetElectronTransverseDiffusion:\n";
-      std::cerr << "    Data not available.\n";
+      PrintDataNotAvailable(m_className, "GetElectronTransverseDiffusion");
     }
-    dt = 0.;
     return false;
   }
 
@@ -1735,20 +1721,13 @@ bool Medium::GetElectronTransverseDiffusion(const unsigned int ie,
 bool Medium::GetElectronTownsend(const unsigned int ie, 
                                  const unsigned int ib, 
                                  const unsigned int ia, double& alpha) {
-
+  alpha = 0.;
   if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetElectronTownsend:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    alpha = 0.;
+    PrintOutOfRange(m_className, "GetElectronTownsend", ie, ib, ia);
     return false;
   }
   if (tabElectronTownsend.empty()) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetElectronTownsend:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    alpha = 0.;
+    if (m_debug) PrintDataNotAvailable(m_className, "GetElectronTownsend");
     return false;
   }
 
@@ -1759,20 +1738,13 @@ bool Medium::GetElectronTownsend(const unsigned int ie,
 bool Medium::GetElectronAttachment(const unsigned int ie, 
                                    const unsigned int ib, 
                                    const unsigned int ia, double& eta) {
-
+ eta = 0.;
   if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetElectronAttachment:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    eta = 0.;
+    PrintOutOfRange(m_className, "GetElectronAttachment", ie, ib, ia);
     return false;
   }
   if (!m_hasElectronAttachment) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetElectronAttachment:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    eta = 0.;
+    if (m_debug) PrintDataNotAvailable(m_className, "GetElectronAttachment");
     return false;
   }
 
@@ -1783,20 +1755,13 @@ bool Medium::GetElectronAttachment(const unsigned int ie,
 bool Medium::GetElectronLorentzAngle(const unsigned int ie, 
                                      const unsigned int ib, 
                                      const unsigned int ia, double& lor) {
-
+  lor = 0.;
   if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetElectronLorentzAngle:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    lor = 0.;
+    PrintOutOfRange(m_className, "GetElectronLorentzAngle", ie, ib, ia);
     return false;
   }
   if (!m_hasElectronLorentzAngle) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetElectronLorentzAngle:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    lor = 0.;
+    if (m_debug) PrintDataNotAvailable(m_className, "GetElectronLorentzAngle");
     return false;
   }
 
@@ -1807,20 +1772,13 @@ bool Medium::GetElectronLorentzAngle(const unsigned int ie,
 bool Medium::GetHoleVelocityE(const unsigned int ie, 
                               const unsigned int ib, 
                               const unsigned int ia, double& v) {
-
+  v = 0.;
   if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetHoleVelocityE:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    v = 0.;
+    PrintOutOfRange(m_className, "GetHoleVelocityE", ie, ib, ia);
     return false;
   }
   if (!m_hasHoleVelocityE) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetHoleVelocityE:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    v = 0.;
+    if (m_debug) PrintDataNotAvailable(m_className, "GetHoleVelocityE");
     return false;
   }
 
@@ -1831,20 +1789,13 @@ bool Medium::GetHoleVelocityE(const unsigned int ie,
 bool Medium::GetHoleVelocityExB(const unsigned int ie, 
                                 const unsigned int ib, 
                                 const unsigned int ia, double& v) {
-
+  v = 0.;
   if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetHoleVelocityExB:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    v = 0.;
+    PrintOutOfRange(m_className, "GetHoleVelocityExB", ie, ib, ia);
     return false;
   }
   if (!m_hasHoleVelocityExB) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetHoleVelocityExB:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    v = 0.;
+    if (m_debug) PrintDataNotAvailable(m_className, "GetHoleVelocityExB");
     return false;
   }
 
@@ -1855,20 +1806,13 @@ bool Medium::GetHoleVelocityExB(const unsigned int ie,
 bool Medium::GetHoleVelocityB(const unsigned int ie, 
                               const unsigned int ib, 
                               const unsigned int ia, double& v) {
-
+  v = 0.;
   if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetHoleVelocityB:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    v = 0.;
+    PrintOutOfRange(m_className, "GetHoleVelocityB", ie, ib, ia);
     return false;
   }
   if (!m_hasHoleVelocityB) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetHoleVelocityB:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    v = 0.;
+    if (m_debug) PrintDataNotAvailable(m_className, "GetHoleVelocityB");
     return false;
   }
 
@@ -1879,20 +1823,15 @@ bool Medium::GetHoleVelocityB(const unsigned int ie,
 bool Medium::GetHoleLongitudinalDiffusion(const unsigned int ie, 
                                           const unsigned int ib,
                                           const unsigned int ia, double& dl) {
-
+  dl = 0.;
   if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetHoleLongitudinalDiffusion:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    dl = 0.;
+    PrintOutOfRange(m_className, "GetHoleLongitudinalDiffusion", ie, ib, ia);
     return false;
   }
   if (!m_hasHoleDiffLong) {
     if (m_debug) {
-      std::cerr << m_className << "::GetHoleLongitudinalDiffusion:\n";
-      std::cerr << "    Data not available.\n";
+      PrintDataNotAvailable(m_className, "GetHoleLongitudinalDiffusion");
     }
-    dl = 0.;
     return false;
   }
 
@@ -1903,20 +1842,15 @@ bool Medium::GetHoleLongitudinalDiffusion(const unsigned int ie,
 bool Medium::GetHoleTransverseDiffusion(const unsigned int ie, 
                                         const unsigned int ib,
                                         const unsigned int ia, double& dt) {
-
+  dt = 0.;
   if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetHoleTransverseDiffusion:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    dt = 0.;
+    PrintOutOfRange(m_className, "GetHoleTransverseDiffusion", ie, ib, ia);
     return false;
   }
   if (!m_hasHoleDiffTrans) {
     if (m_debug) {
-      std::cerr << m_className << "::GetHoleTransverseDiffusion:\n";
-      std::cerr << "    Data not available.\n";
+      PrintDataNotAvailable(m_className, "GetHoleTransverseDiffusion");
     }
-    dt = 0.;
     return false;
   }
 
@@ -1927,19 +1861,13 @@ bool Medium::GetHoleTransverseDiffusion(const unsigned int ie,
 bool Medium::GetHoleTownsend(const unsigned int ie, 
                              const unsigned int ib, 
                              const unsigned int ia, double& alpha) {
-
+  alpha = 0.;
   if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetHoleTownsend:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    alpha = 0.;
+    PrintOutOfRange(m_className, "GetHoleTownsend", ie, ib, ia);
     return false;
   }
   if (!m_hasHoleTownsend) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetHoleTownsend:\n";
-      std::cerr << "    Data not available.\n";
-    }
+    if (m_debug) PrintDataNotAvailable(m_className, "GetHoleTownsend");
     alpha = 0.;
     return false;
   }
@@ -1951,20 +1879,13 @@ bool Medium::GetHoleTownsend(const unsigned int ie,
 bool Medium::GetHoleAttachment(const unsigned int ie, 
                                const unsigned int ib, 
                                const unsigned int ia, double& eta) {
-
+  eta = 0.;
   if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetHoleAttachment:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    eta = 0.;
+    PrintOutOfRange(m_className, "GetHoleAttachment", ie, ib, ia);
     return false;
   }
   if (!m_hasHoleAttachment) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetHoleAttachment:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    eta = 0.;
+    if (m_debug) PrintDataNotAvailable(m_className, "GetHoleAttachment");
     return false;
   }
 
@@ -1974,20 +1895,13 @@ bool Medium::GetHoleAttachment(const unsigned int ie,
 
 bool Medium::GetIonMobility(const unsigned int ie, const unsigned int ib, 
                             const unsigned int ia, double& mu) {
-
+  mu = 0.;
   if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetIonMobility:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    mu = 0.;
+    PrintOutOfRange(m_className, "GetIonMobility", ie, ib, ia);
     return false;
   }
   if (!m_hasIonMobility) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetIonMobility:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    mu = 0.;
+    if (m_debug) PrintDataNotAvailable(m_className, "GetIonMobility");
     return false;
   }
 
@@ -1998,20 +1912,15 @@ bool Medium::GetIonMobility(const unsigned int ie, const unsigned int ib,
 bool Medium::GetIonLongitudinalDiffusion(const unsigned int ie, 
                                          const unsigned int ib,
                                          const unsigned int ia, double& dl) {
-
+  dl = 0.;
   if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetIonLongitudinalDiffusion:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    dl = 0.;
+    PrintOutOfRange(m_className, "GetIonLongitudinalDiffusion", ie, ib, ia);
     return false;
   }
   if (!m_hasIonDiffLong) {
     if (m_debug) {
-      std::cerr << m_className << "::GetIonLongitudinalDiffusion:\n";
-      std::cerr << "    Data not available.\n";
+      PrintDataNotAvailable(m_className, "GetIonLongitudinalDiffusion");
     }
-    dl = 0.;
     return false;
   }
 
@@ -2022,20 +1931,15 @@ bool Medium::GetIonLongitudinalDiffusion(const unsigned int ie,
 bool Medium::GetIonTransverseDiffusion(const unsigned int ie, 
                                        const unsigned int ib, 
                                        const unsigned int ia, double& dt) {
-
+  dt = 0.;
   if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetIonTransverseDiffusion:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    dt = 0.;
+    PrintOutOfRange(m_className, "GetIonTransverseDiffusion", ie, ib, ia);
     return false;
   }
   if (!m_hasIonDiffTrans) {
     if (m_debug) {
-      std::cerr << m_className << "::GetIonTransverseDiffusion:\n";
-      std::cerr << "    Data not available.\n";
+      PrintDataNotAvailable(m_className, "GetIonTransverseDiffusion");
     }
-    dt = 0.;
     return false;
   }
 
@@ -2046,20 +1950,13 @@ bool Medium::GetIonTransverseDiffusion(const unsigned int ie,
 bool Medium::GetIonDissociation(const unsigned int ie, 
                                 const unsigned int ib, 
                                 const unsigned int ia, double& diss) {
-
+  diss = 0.;
   if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetIonDissociation:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    diss = 0.;
+    PrintOutOfRange(m_className, "GetIonDissociation", ie, ib, ia);
     return false;
   }
   if (!m_hasIonDissociation) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetIonDissociation:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    diss = 0.;
+    if (m_debug) PrintDataNotAvailable(m_className, "GetIonDissociation");
     return false;
   }
 
@@ -2205,9 +2102,7 @@ bool Medium::SetIonMobility(const unsigned int ie, const unsigned int ib,
   // Check the index.
   if (ie >= m_eFields.size() || ib >= m_bFields.size() || 
       ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::SetIonMobility:\n";
-    std::cerr << "    Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
+    PrintOutOfRange(m_className, "SetIonMobility", ie, ib, ia);
     return false;
   }
 

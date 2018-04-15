@@ -287,13 +287,13 @@ class AvalancheMicroscopic {
   bool m_hasUserHandleInelastic = false;
   bool m_hasUserHandleIonisation = false;
   void (*m_userHandleStep)(double x, double y, double z, double t, double e,
-                         double dx, double dy, double dz, bool hole);
+                         double dx, double dy, double dz, bool hole) = nullptr;
   void (*m_userHandleAttachment)(double x, double y, double z, double t, int type,
-                               int level, Medium* m);
+                               int level, Medium* m) = nullptr;
   void (*m_userHandleInelastic)(double x, double y, double z, double t, int type,
-                              int level, Medium* m);
+                              int level, Medium* m) = nullptr;
   void (*m_userHandleIonisation)(double x, double y, double z, double t, int type,
-                               int level, Medium* m);
+                               int level, Medium* m) = nullptr;
 
   // Switch on/off debugging messages
   bool m_debug = false;

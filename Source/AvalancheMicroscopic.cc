@@ -22,12 +22,7 @@ void PrintStatus(const std::string& hdr, const std::string& status,
 
 namespace Garfield {
 
-AvalancheMicroscopic::AvalancheMicroscopic()
-    : 
-      m_userHandleStep(0),
-      m_userHandleAttachment(0),
-      m_userHandleInelastic(0),
-      m_userHandleIonisation(0) {
+AvalancheMicroscopic::AvalancheMicroscopic() {
 
   m_endpointsElectrons.reserve(10000);
   m_endpointsHoles.reserve(10000);
@@ -37,7 +32,7 @@ AvalancheMicroscopic::AvalancheMicroscopic()
 void AvalancheMicroscopic::SetSensor(Sensor* s) {
 
   if (!s) {
-    std::cerr << m_className << "::SetSensor:\n    Null pointer.\n";
+    std::cerr << m_className << "::SetSensor: Null pointer.\n";
     return;
   }
   m_sensor = s;
@@ -46,7 +41,7 @@ void AvalancheMicroscopic::SetSensor(Sensor* s) {
 void AvalancheMicroscopic::EnablePlotting(ViewDrift* view) {
 
   if (!view) {
-    std::cerr << m_className << "::EnablePlotting:\n    Null pointer.\n";
+    std::cerr << m_className << "::EnablePlotting: Null pointer.\n";
     return;
   }
 
@@ -90,7 +85,7 @@ void AvalancheMicroscopic::EnableHoleEnergyHistogramming(TH1* histo) {
 void AvalancheMicroscopic::SetDistanceHistogram(TH1* histo, const char opt) {
 
   if (!histo) {
-    std::cerr << m_className << "::SetDistanceHistogram:\n    Null pointer.\n";
+    std::cerr << m_className << "::SetDistanceHistogram: Null pointer.\n";
     return;
   }
 
@@ -376,7 +371,7 @@ void AvalancheMicroscopic::GetPhoton(const unsigned int i, double& e, double& x0
                                      double& t1, int& status) const {
 
   if (i >= m_photons.size()) {
-    std::cerr << m_className << "::GetPhoton:\n    Index out of range.\n";
+    std::cerr << m_className << "::GetPhoton: Index out of range.\n";
     return;
   }
 
@@ -397,8 +392,7 @@ void AvalancheMicroscopic::SetUserHandleStep(
               double dy, double dz, bool hole)) {
 
   if (!f) {
-    std::cerr << m_className << "::SetUserHandleStep:\n";
-    std::cerr << "    Function pointer is a null pointer.\n";
+    std::cerr << m_className << "::SetUserHandleStep: Null pointer.\n";
     return;
   }
   m_userHandleStep = f;
@@ -407,7 +401,7 @@ void AvalancheMicroscopic::SetUserHandleStep(
 
 void AvalancheMicroscopic::UnsetUserHandleStep() {
 
-  m_userHandleStep = 0;
+  m_userHandleStep = nullptr;
   m_hasUserHandleStep = false;
 }
 
@@ -420,7 +414,7 @@ void AvalancheMicroscopic::SetUserHandleAttachment(void (*f)(
 
 void AvalancheMicroscopic::UnsetUserHandleAttachment() {
 
-  m_userHandleAttachment = 0;
+  m_userHandleAttachment = nullptr;
   m_hasUserHandleAttachment = false;
 }
 
@@ -433,7 +427,7 @@ void AvalancheMicroscopic::SetUserHandleInelastic(void (*f)(
 
 void AvalancheMicroscopic::UnsetUserHandleInelastic() {
 
-  m_userHandleInelastic = 0;
+  m_userHandleInelastic = nullptr;
   m_hasUserHandleInelastic = false;
 }
 
@@ -446,7 +440,7 @@ void AvalancheMicroscopic::SetUserHandleIonisation(void (*f)(
 
 void AvalancheMicroscopic::UnsetUserHandleIonisation() {
 
-  m_userHandleIonisation = 0;
+  m_userHandleIonisation = nullptr;
   m_hasUserHandleIonisation = false;
 }
 
@@ -602,7 +596,9 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
         stackNew.resize(m_sizeCut - stackOld.size()); 
       }
     }
-    stackOld.insert(stackOld.end(), stackNew.begin(), stackNew.end()); 
+    stackOld.insert(stackOld.end(), 
+                    std::make_move_iterator(stackNew.begin()), 
+                    std::make_move_iterator(stackNew.end())); 
     stackNew.clear();
     // If the list of electrons/holes is exhausted, we're done.
     if (stackOld.empty()) break;

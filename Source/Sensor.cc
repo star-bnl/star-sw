@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <algorithm>
 
 #include "Sensor.hh"
 #include "GarfieldConstants.hh"
@@ -621,21 +622,15 @@ double Sensor::InterpolateTransferFunctionTable(double t) {
     return 0.;
   }
   // Find the proper interval in the table.
-  int iLow = 0;
-  int iUp = m_transferFunctionTimes.size() - 1;
-  while (iUp - iLow > 1) {
-    const int iM = (iUp + iLow) >> 1;
-    if (t >= m_transferFunctionTimes[iM]) {
-      iLow = iM;
-    } else {
-      iUp = iM;
-    }
-  }
+  const auto begin = m_transferFunctionTimes.cbegin();
+  const auto it1 = std::upper_bound(begin, m_transferFunctionTimes.cend(), t);
+  if (it1 == begin) return m_transferFunctionValues.front();
+  const auto it0 = std::prev(it1);
+  const auto f0 = m_transferFunctionValues[it0 - begin];
+  const auto f1 = m_transferFunctionValues[it1 - begin];
+
   // Linear interpolation.
-  return m_transferFunctionValues[iLow] +
-         (t - m_transferFunctionTimes[iLow]) *
-             (m_transferFunctionValues[iUp] - m_transferFunctionValues[iLow]) /
-             (m_transferFunctionTimes[iUp] - m_transferFunctionTimes[iLow]);
+  return f0 + (t - *it0) * (f1 - f0) / (*it1 - *it0);
 }
 
 double Sensor::GetTransferFunction(const double t) {

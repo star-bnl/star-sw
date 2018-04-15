@@ -886,23 +886,13 @@ bool MediumSilicon::GetElectronCollision(const double e, int& type, int& level,
     if (iE < 0) iE = 0;
     // Select the scattering process.
     const double r = RndmUniform();
-    int iLow = 0;
-    int iUp = m_nLevelsX - 1;
-    if (r <= m_cfElectronsX[iE][iLow]) {
-      level = iLow;
+    if (r <= m_cfElectronsX[iE][0]) {
+      level = 0;
     } else if (r >= m_cfElectronsX[iE][m_nLevelsX - 1]) {
-      level = iUp;
+      level = m_nLevelsX - 1;
     } else {
-      int iMid;
-      while (iUp - iLow > 1) {
-        iMid = (iLow + iUp) >> 1;
-        if (r < m_cfElectronsX[iE][iMid]) {
-          iUp = iMid;
-        } else {
-          iLow = iMid;
-        }
-      }
-      level = iUp;
+      const auto begin = m_cfElectronsX[iE].cbegin();
+      level = std::lower_bound(begin, begin + m_nLevelsX, r) - begin;
     }
 
     // Get the collision type.
@@ -986,23 +976,13 @@ bool MediumSilicon::GetElectronCollision(const double e, int& type, int& level,
     if (iE < m_ieMinL) iE = m_ieMinL;
     // Select the scattering process.
     const double r = RndmUniform();
-    int iLow = 0;
-    int iUp = m_nLevelsL - 1;
-    if (r <= m_cfElectronsL[iE][iLow]) {
-      level = iLow;
+    if (r <= m_cfElectronsL[iE][0]) {
+      level = 0;
     } else if (r >= m_cfElectronsL[iE][m_nLevelsL - 1]) {
-      level = iUp;
+      level = m_nLevelsL - 1;
     } else {
-      int iMid;
-      while (iUp - iLow > 1) {
-        iMid = (iLow + iUp) >> 1;
-        if (r < m_cfElectronsL[iE][iMid]) {
-          iUp = iMid;
-        } else {
-          iLow = iMid;
-        }
-      }
-      level = iUp;
+      const auto begin = m_cfElectronsL[iE].cbegin();
+      level = std::lower_bound(begin, begin + m_nLevelsL, r) - begin;
     }
 
     // Get the collision type.
@@ -1050,23 +1030,13 @@ bool MediumSilicon::GetElectronCollision(const double e, int& type, int& level,
     if (iE < m_ieMinG) iE = m_ieMinG;
     // Select the scattering process.
     const double r = RndmUniform();
-    int iLow = 0;
-    int iUp = m_nLevelsG - 1;
-    if (r <= m_cfElectronsG[iE][iLow]) {
-      level = iLow;
+    if (r <= m_cfElectronsG[iE][0]) {
+      level = 0;
     } else if (r >= m_cfElectronsG[iE][m_nLevelsG - 1]) {
-      level = iUp;
+      level = m_nLevelsG - 1;
     } else {
-      int iMid;
-      while (iUp - iLow > 1) {
-        iMid = (iLow + iUp) >> 1;
-        if (r < m_cfElectronsG[iE][iMid]) {
-          iUp = iMid;
-        } else {
-          iLow = iMid;
-        }
-      }
-      level = iUp;
+      const auto begin = m_cfElectronsG[iE].cbegin();
+      level = std::lower_bound(begin, begin + m_nLevelsG, r) - begin;
     }
 
     // Get the collision type.
@@ -1279,21 +1249,20 @@ bool MediumSilicon::GetOpticalDataRange(double& emin, double& emax,
                                         const unsigned int i) {
 
   if (i != 0) {
-    std::cerr << m_className << "::GetOpticalDataRange:\n";
-    std::cerr << "    Medium has only one component.\n";
+    std::cerr << m_className << "::GetOpticalDataRange: Index out of range.\n";
   }
 
   // Make sure the optical data table has been loaded.
-  if (m_opticalDataTable.empty()) {
+  if (m_opticalDataEnergies.empty()) {
     if (!LoadOpticalData(m_opticalDataFile)) {
-      std::cerr << m_className << "::GetOpticalDataRange:\n";
-      std::cerr << "    Optical data table could not be loaded.\n";
+      std::cerr << m_className << "::GetOpticalDataRange:\n"
+                << "    Optical data table could not be loaded.\n";
       return false;
     }
   }
 
-  emin = m_opticalDataTable[0].energy;
-  emax = m_opticalDataTable.back().energy;
+  emin = m_opticalDataEnergies.front();
+  emax = m_opticalDataEnergies.back();
   if (m_debug) {
     std::cout << m_className << "::GetOpticalDataRange:\n"
               << "    " << emin << " < E [eV] < " << emax << "\n";
@@ -1305,13 +1274,12 @@ bool MediumSilicon::GetDielectricFunction(const double e, double& eps1,
                                           double& eps2, const unsigned int i) {
 
   if (i != 0) {
-    std::cerr << m_className << "::GetDielectricFunction:\n";
-    std::cerr << "    Medium has only one component.\n";
+    std::cerr << m_className + "::GetDielectricFunction: Index out of range.\n";
     return false;
   }
 
   // Make sure the optical data table has been loaded.
-  if (m_opticalDataTable.empty()) {
+  if (m_opticalDataEnergies.empty()) {
     if (!LoadOpticalData(m_opticalDataFile)) {
       std::cerr << m_className << "::GetDielectricFunction:\n";
       std::cerr << "    Optical data table could not be loaded.\n";
@@ -1320,8 +1288,8 @@ bool MediumSilicon::GetDielectricFunction(const double e, double& eps1,
   }
 
   // Make sure the requested energy is within the range of the table.
-  const double emin = m_opticalDataTable.front().energy;
-  const double emax = m_opticalDataTable.back().energy;
+  const double emin = m_opticalDataEnergies.front();
+  const double emax = m_opticalDataEnergies.back();
   if (e < emin || e > emax) {
     std::cerr << m_className << "::GetDielectricFunction:\n"
               << "    Requested energy (" << e << " eV) "
@@ -1332,42 +1300,39 @@ bool MediumSilicon::GetDielectricFunction(const double e, double& eps1,
   }
 
   // Locate the requested energy in the table.
-  int iLow = 0;
-  int iUp = m_opticalDataTable.size() - 1;
-  int iM;
-  while (iUp - iLow > 1) {
-    iM = (iUp + iLow) >> 1;
-    if (e >= m_opticalDataTable[iM].energy) {
-      iLow = iM;
-    } else {
-      iUp = iM;
-    }
-  }
+  const auto begin = m_opticalDataEnergies.cbegin();
+  const auto it1 = std::upper_bound(begin, m_opticalDataEnergies.cend(), e);
+  if (it1 == begin) {
+    eps1 = m_opticalDataEpsilon.front().first;  
+    eps2 = m_opticalDataEpsilon.front().second;
+    return true;
+  } 
+  const auto it0 = std::prev(it1);
 
   // Interpolate the real part of dielectric function.
-  // Use linear interpolation if one of the values is negative,
-  // Otherwise use log-log interpolation.
-  const double logX0 = log(m_opticalDataTable[iLow].energy);
-  const double logX1 = log(m_opticalDataTable[iUp].energy);
-  const double logX = log(e);
-  if (m_opticalDataTable[iLow].eps1 <= 0. || 
-      m_opticalDataTable[iUp].eps1 <= 0.) {
-    eps1 = m_opticalDataTable[iLow].eps1 +
-           (e - m_opticalDataTable[iLow].energy) *
-           (m_opticalDataTable[iUp].eps1 - m_opticalDataTable[iLow].eps1) /
-           (m_opticalDataTable[iUp].energy - m_opticalDataTable[iLow].energy);
+  const double x0 = *it0;
+  const double x1 = *it1;
+  const double lnx0 = log(*it0);
+  const double lnx1 = log(*it1);
+  const double lnx = log(e);
+  const double y0 = m_opticalDataEpsilon[it0 - begin].first;
+  const double y1 = m_opticalDataEpsilon[it1 - begin].first;
+  if (y0 <= 0. || y1 <= 0.) {
+    // Use linear interpolation if one of the values is negative.
+    eps1 = y0 + (e - x0) * (y1 - y0) / (x1 - x0);
   } else {
-    const double logY0 = log(m_opticalDataTable[iLow].eps1);
-    const double logY1 = log(m_opticalDataTable[iUp].eps1);
-    eps1 = logY0 + (logX - logX0) * (logY1 - logY0) / (logX1 - logX0);
+    // Otherwise use log-log interpolation.
+    const double lny0 = log(y0);
+    const double lny1 = log(y1);
+    eps1 = lny0 + (lnx - lnx0) * (lny1 - lny0) / (lnx1 - lnx0);
     eps1 = exp(eps1);
   }
 
   // Interpolate the imaginary part of dielectric function,
   // using log-log interpolation.
-  const double logY0 = log(m_opticalDataTable[iLow].eps2);
-  const double logY1 = log(m_opticalDataTable[iUp].eps2);
-  eps2 = logY0 + (log(e) - logX0) * (logY1 - logY0) / (logX1 - logX0);
+  const double lnz0 = log(m_opticalDataEpsilon[it0 - begin].second);
+  const double lnz1 = log(m_opticalDataEpsilon[it1 - begin].second);
+  eps2 = lnz0 + (lnx - lnx0) * (lnz1 - lnz0) / (lnx1 - lnx0);
   eps2 = exp(eps2);
   return true;
 }
@@ -1376,12 +1341,12 @@ bool MediumSilicon::Initialise() {
 
   if (!m_isChanged) {
     if (m_debug) {
-      std::cerr << m_className << "::Initialise:\n    Nothing changed.\n";
+      std::cerr << m_className << "::Initialise: Nothing changed.\n";
     }
     return true;
   }
   if (!UpdateTransportParameters()) {
-    std::cerr << m_className << "::Initialise:    Error preparing "
+    std::cerr << m_className << "::Initialise:\n    Error preparing "
               << "transport parameters/calculating collision rates.\n";
     return false;
   }
@@ -1924,7 +1889,8 @@ bool MediumSilicon::HoleImpactIonisationGrant(const double e,
 bool MediumSilicon::LoadOpticalData(const std::string& filename) {
 
   // Clear the optical data table.
-  m_opticalDataTable.clear();
+  m_opticalDataEnergies.clear();
+  m_opticalDataEpsilon.clear();
 
   // Get the path to the data directory.
   char* pPath = getenv("GARFIELD_HOME");
@@ -1947,7 +1913,6 @@ bool MediumSilicon::LoadOpticalData(const std::string& filename) {
 
   double lastEnergy = -1.;
   double energy, eps1, eps2, loss;
-  opticalData data;
   // Read the file line by line.
   std::string line;
   std::istringstream dataStream;
@@ -1995,15 +1960,12 @@ bool MediumSilicon::LoadOpticalData(const std::string& filename) {
     // Ignore negative photon energies.
     if (energy <= 0.) continue;
     // Add the values to the list.
-    data.energy = energy;
-    data.eps1 = eps1;
-    data.eps2 = eps2;
-    m_opticalDataTable.push_back(data);
+    m_opticalDataEnergies.emplace_back(energy);
+    m_opticalDataEpsilon.emplace_back(std::make_pair(eps1, eps2));
     lastEnergy = energy;
   }
 
-  const unsigned int nEntries = m_opticalDataTable.size();
-  if (m_opticalDataTable.empty()) {
+  if (m_opticalDataEnergies.empty()) {
     std::cerr << m_className << "::LoadOpticalData:\n"
               << "    Import of data from file " << filepath << "failed.\n"
               << "    No valid data found.\n";
@@ -2011,8 +1973,9 @@ bool MediumSilicon::LoadOpticalData(const std::string& filename) {
   }
 
   if (m_debug) {
-    std::cout << m_className << "::LoadOpticalData:    Read \n"
-              << nEntries << " values from file " << filepath << "\n";
+    std::cout << m_className << "::LoadOpticalData:\n    Read " 
+              << m_opticalDataEnergies.size() << " values from file " 
+              << filepath << "\n";
   }
   return true;
 }

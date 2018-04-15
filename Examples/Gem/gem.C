@@ -20,6 +20,7 @@ int main(int argc, char * argv[]) {
 
   TApplication app("app", &argc, argv);
   plottingEngine.SetDefaultStyle();
+  randomEngine.Seed(12345);
 
   const bool debug = true;
 
@@ -29,13 +30,15 @@ int main(int argc, char * argv[]) {
   fm->EnableMirrorPeriodicityX();
   fm->EnableMirrorPeriodicityY();
   fm->PrintRange();
+  fm->EnableTetrahedralTreeForElementSearch();
 
   // Dimensions of the GEM [cm]
   const double pitch = 0.014;
   const double kapton = 50.e-4;
   const double metal = 5.e-4;
 
-  const bool plotField = true;
+  // const bool plotField = true;
+  const bool plotField = false;
   if (plotField) {
     ViewField* fieldView = new ViewField();
     fieldView->SetComponent(fm);
@@ -83,7 +86,8 @@ int main(int argc, char * argv[]) {
   drift->SetSensor(sensor);
   drift->SetDistanceSteps(2.e-4);
 
-  const bool plotDrift = true;
+  // const bool plotDrift = true;
+  const bool plotDrift = false;
   ViewDrift* driftView = new ViewDrift();
   if (plotDrift) {
     driftView->SetArea(-2 * pitch, -2 * pitch, -0.02,
@@ -92,7 +96,12 @@ int main(int argc, char * argv[]) {
     drift->EnablePlotting(driftView);
   }
 
-  const int nEvents = 10;
+  int dummy = 0;
+  std::cin >> dummy;
+  TH1F* hNe = new TH1F("hNe", "Nbr. of electrons", 500, -0.5, 500);
+  TH1F* hXe = new TH1F("hXe", "x", 100, -pitch, pitch);
+  TH1F* hXi = new TH1F("hXi", "x", 100, -pitch, pitch);
+  const int nEvents = 100;
   for (int i = nEvents; i--;) { 
     if (debug || i % 10 == 0) std::cout << i << "/" << nEvents << "\n";
     // Randomize the initial position. 
@@ -104,6 +113,7 @@ int main(int argc, char * argv[]) {
     aval->AvalancheElectron(x0, y0, z0, t0, e0, 0., 0., 0.);
     int ne = 0, ni = 0;
     aval->GetAvalancheSize(ne, ni);
+    hNe->Fill(ne);
     const int np = aval->GetNumberOfElectronEndpoints();
     double xe1, ye1, ze1, te1, e1;
     double xe2, ye2, ze2, te2, e2;
@@ -113,9 +123,11 @@ int main(int argc, char * argv[]) {
     for (int j = np; j--;) {
       aval->GetElectronEndpoint(j, xe1, ye1, ze1, te1, e1, 
                                    xe2, ye2, ze2, te2, e2, status);
+      hXe->Fill(xe2);
       drift->DriftIon(xe1, ye1, ze1, te1);
       drift->GetIonEndpoint(0, xi1, yi1, zi1, ti1, 
                                xi2, yi2, zi2, ti2, status);
+      hXi->Fill(xi2);
     }
   }
   
@@ -125,6 +137,16 @@ int main(int argc, char * argv[]) {
     driftView->Plot();
   }
 
+  TCanvas c("c", "", 1200, 600);
+  c.Divide(2, 1);
+  c.cd(1);
+  hNe->Draw();
+  c.cd(2);
+  hXe->SetLineColor(kOrange + 2);
+  hXe->Draw();
+  hXi->SetLineColor(kRed + 2);
+  hXi->Draw("same");
+  c.Update();
   app.Run(kTRUE);
 
 }
