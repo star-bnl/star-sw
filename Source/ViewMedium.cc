@@ -28,7 +28,7 @@ void ViewMedium::SetCanvas(TCanvas* c) {
   }
   if (!m_hasExternalCanvas && m_canvas) {
     delete m_canvas;
-    m_canvas = NULL;
+    m_canvas = nullptr;
   }
   m_canvas = c;
   m_hasExternalCanvas = true;

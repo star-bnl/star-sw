@@ -875,7 +875,13 @@ int ComponentFieldMap::Coordinates4(const double x, const double y, const double
   const Node& n2 = nodes[element.emap[2]];
   const Node& n3 = nodes[element.emap[3]];
   // Compute determinant.
-  det = -(-((n0.x - n3.x) * (n1.y - n2.y)) + (n1.x - n2.x) * (n0.y - n3.y)) * (2 * x * (-n0.y + n1.y + n2.y - n3.y) - (n0.x + n3.x) * (n1.y + n2.y - 2 * y) + n1.x * (n0.y + n3.y - 2 * y) + n2.x * (n0.y + n3.y - 2 * y)) + pow(-(n0.x * n1.y) + n3.x * n2.y - n2.x * n3.y + x * (-n0.y + n1.y - n2.y + n3.y) + n1.x * (n0.y - y) + (n0.x + n2.x - n3.x) * y, 2);
+  const double dd = -(n0.x * n1.y) + n3.x * n2.y - n2.x * n3.y + 
+    x * (-n0.y + n1.y - n2.y + n3.y) + n1.x * (n0.y - y) + 
+    (n0.x + n2.x - n3.x) * y;
+  det = -(-((n0.x - n3.x) * (n1.y - n2.y)) + (n1.x - n2.x) * (n0.y - n3.y)) * 
+    (2 * x * (-n0.y + n1.y + n2.y - n3.y) - 
+     (n0.x + n3.x) * (n1.y + n2.y - 2 * y) + 
+     n1.x * (n0.y + n3.y - 2 * y) + n2.x * (n0.y + n3.y - 2 * y)) + dd * dd;
 
   // Check that the determinant is non-negative
   // (this can happen if the point is out of range).

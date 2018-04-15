@@ -71,7 +71,7 @@ void ViewField::SetSensor(Sensor* s) {
   }
 
   m_sensor = s;
-  m_component = NULL;
+  m_component = nullptr;
 }
 
 void ViewField::SetComponent(ComponentBase* c) {
@@ -82,7 +82,7 @@ void ViewField::SetComponent(ComponentBase* c) {
   }
 
   m_component = c;
-  m_sensor = NULL;
+  m_sensor = nullptr;
 }
 
 void ViewField::SetCanvas(TCanvas* c) {
@@ -90,7 +90,7 @@ void ViewField::SetCanvas(TCanvas* c) {
   if (!c) return;
   if (!m_hasExternalCanvas && m_canvas) {
     delete m_canvas;
-    m_canvas = NULL;
+    m_canvas = nullptr;
   }
   m_canvas = c;
   m_hasExternalCanvas = true;
@@ -297,7 +297,7 @@ double ViewField::Evaluate2D(double* pos, double* par) {
   int status = 0;
   if (par[0] > 0.) {
     // "Drift" electric field.
-    Medium* medium = NULL;
+    Medium* medium = nullptr;
     if (!m_sensor) {
       m_component->ElectricField(x, y, z, ex, ey, ez, volt, medium, status);
     } else {
@@ -378,7 +378,7 @@ double ViewField::EvaluateProfile(double* pos, double* par) {
   double ex = 0., ey = 0., ez = 0., volt = 0.;
   int status = 0;
   if (par[6] > 0.) {
-    Medium* medium = NULL;
+    Medium* medium = nullptr;
     // "Drift" electric field.
     if (!m_sensor) {
       m_component->ElectricField(x, y, z, ex, ey, ez, volt, medium, status);
