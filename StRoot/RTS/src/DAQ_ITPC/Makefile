@@ -59,6 +59,7 @@ daq_itpc.o: ../DAQ_READER/daq_det.h
 daq_itpc.o: itpcCore.h
 daq_itpc.o: ../DAQ_READER/daq_dta_structs.h
 daq_itpc.o: itpcInterpreter.h
+daq_itpc.o: ../../../../StRoot/RTS/include/I386/atomic.h
 daq_itpc.o: itpcPed.h
 daq_itpc.o: itpcFCF.h
 daq_itpc.o: ../../../../StRoot/RTS/trg/include/trgDataDefs.h
@@ -98,6 +99,7 @@ itpcInterpreter.o: ../../../../StRoot/RTS/include/rtsLog.h
 itpcInterpreter.o: ../DAQ_READER/daq_dta.h
 itpcInterpreter.o: ../../../../StRoot/RTS/include/rts.h
 itpcInterpreter.o: ../DAQ_READER/daq_dta_structs.h
+itpcInterpreter.o: ../../../../StRoot/RTS/include/I386/atomic.h
 itpcInterpreter.o: itpcInterpreter.h
 itpcInterpreter.o: itpcPed.h
 itpcPed.o: ../../../../StRoot/RTS/include/rtsLog.h
@@ -122,3 +124,4 @@ itpcFCF.o: ../DAQ_ITPC/itpcCore.h
 itpcFCF.o: ../DAQ_ITPC/itpcPed.h
 itpcFCF.o: ../DAQ_ITPC/itpcInterpreter.h
 itpcFCF.o: ../DAQ_ITPC/itpc_rowlen.h
+itpcInterpreter.o: ../../../../StRoot/RTS/include/I386/atomic.h

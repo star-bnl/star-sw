@@ -81,8 +81,10 @@ public:
 	} fee[17] ;	// index is RDO port starting from 1!
 
 	// electronics format versions
-	u_int rdo_version ;
-	u_int fee_version ;
+	int rdo_version ;
+	int expected_rdo_version ;
+	int fee_version ;
+	int expected_fee_version ;
 
 	// filled in fee_scan
 	int fee_port ;	// from 1..16

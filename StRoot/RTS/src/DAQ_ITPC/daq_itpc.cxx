@@ -335,7 +335,8 @@ daq_dta *daq_itpc::handle_sampa(int sec, int rdo, int in_adc)
 //		ret = it->rdo_scan(dta,words) ;
 		ret = it->rdo_scan_top(dta,words) ;
 
-		LOG(NOTE,"rdo_scan %d:%d, words %d, ret %d",s,r,words,ret) ;
+		if(ret < 0) LOG(ERR,"rdo_scan S%d:%d, words %d, ret %d",s,r,words,ret) ;
+		else LOG(NOTE,"rdo_scan S%d:%d, words %d, ret %d",s,r,words,ret) ;
 
 
 	}}
