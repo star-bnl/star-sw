@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.175.2.1 2018/02/17 02:01:00 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.175.2.2 2018/04/16 00:53:44 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.175.2.2  2018/04/16 00:53:44  perev
+ * Replace numerical return codes by enum
+ *
  * Revision 2.175.2.1  2018/02/17 02:01:00  perev
  * CleanupOnly
  *
@@ -627,7 +630,7 @@ using namespace std;
 // x[3] = C  (local) curvature of the track
 // x[4] = tan(l) 
 
-static const double kMaxEta = 1.25; // 72 degrees for laser tracks
+static const double kMaxEta = 1.5; // 72 degrees for laser tracks
 static const double kMaxSinEta = sin(kMaxEta);
 static const double kMaxCur = 0.2;
 static const double kFarFromBeam = 10.;
@@ -1047,7 +1050,7 @@ StiDebug::Break(nCall);
   int position = 0;
   setState(pNode);
   setDetector(tDet);
-  if (mFP._cosCA <-1e-5) return -1; 
+  if (mFP._cosCA <-1e-5) return kMissed; 
   if (debug()) ResetComment(::Form("%40s ",tDet->getName().c_str()));
 
   StiPlacement * place = tDet->getPlacement();
@@ -1064,9 +1067,9 @@ StiDebug::Break(nCall);
       dAlpha = nice(dAlpha - _alpha);
       // bail out if the rotation fails...
       position = rotate(dAlpha);
-      if (position) 			return -10;
+      assert(!position);
     }
-    					break;
+    break;
   case kDisk:  							
   case kCylindrical: endVal = nNormalRadius;
     {
@@ -1075,7 +1078,7 @@ StiDebug::Break(nCall);
       double rxy2P = mFP.rxy2();
       int outside = (rxy2P>rxy*rxy);
       int nSol = StiTrackNode::cylCross(mFP.P,&mFP._cosCA,mFP.curv(),rxy,dir,out);
-      if (!nSol) 			return -11;
+      if (!nSol) 			return kOutRxy;
       double *ou = out[0];
       if (nSol==2) {
          int kaze = outside + 2*dir;
@@ -1088,17 +1091,19 @@ StiDebug::Break(nCall);
 
       dAlpha = atan2(ou[1],ou[0]);
       position = rotate(dAlpha);
-      if (position) 			return -11;
+      assert(!position);
     }
-   					break;
+    break;
   default: assert(0);
   }
    
   position = propagate(endVal,shapeCode,dir); 
+StiDebug::Count("insideL",position); 		
 
   if (position) return position;
   assert(mFP.x() > 0.);
   if (mFP[0]*mFP._cosCA+mFP[1]*mFP._sinCA<0) return kEnded;
+
   propagateError();
   if (debug() & 8) { PrintpT("E");}
 
@@ -1170,7 +1175,7 @@ int StiKalmanTrackNode::propagateToRadius(StiKalmanTrackNode *pNode, double radi
   setState(pNode);
   if (debug()) ResetComment(::Form("%40s ",pNode->getDetector()->getName().c_str()));
   position = propagate(radius,kCylindrical,dir);
-  if (position<0) return position;
+  if (position) return position;
   propagateError();
   if (debug() & 8) { PrintpT("R"); PrintStep();}
   _detector = 0;
@@ -1207,7 +1212,7 @@ StiDebug::Break(nCall);
   double dsin = mFP.curv()*mgP.dx;
   mgP.sinCA2=mgP.sinCA1 + dsin; 
 //	Orientation is bad. Fit is non reliable
-  if (fabs(mgP.sinCA2)>kMaxSinEta) 				return -4;
+  if (fabs(mgP.sinCA2)>kMaxSinEta) 		return kTouch;
   mgP.cosCA2   = ::sqrt((1.-mgP.sinCA2)*(1.+mgP.sinCA2));
 //	Check what sign of cosCA2 must be
   test = (2*dir-1)*mgP.dx*mgP.cosCA1;
@@ -1217,12 +1222,12 @@ StiDebug::Break(nCall);
   int ians = 0;
   StiNodePars save = mFP;
   for (int iIt=0; iIt<nIt; iIt++) {//try 2 cases, +ve and -ve cosCA
-    ians = -1;
     mFP = save;
     mgP.cosCA2 = (!iIt)? fabs(mgP.cosCA2):-fabs(mgP.cosCA2);
     mgP.sumSin   = mgP.sinCA1+mgP.sinCA2;
     mgP.sumCos   = mgP.cosCA1+mgP.cosCA2;
-    if (fabs(mgP.sumCos)<1e-6) continue;
+    ians = -1;
+    if (fabs(mgP.sumCos)<1e-6) 				continue;
     mgP.dy = mgP.dx*(mgP.sumSin/mgP.sumCos);
     mgP.y2 = mgP.y1+mgP.dy;
 
@@ -1237,19 +1242,18 @@ StiDebug::Break(nCall);
       double cosd = mgP.cosCA2*mgP.cosCA1+mgP.sinCA2*mgP.sinCA1;
       mgP.dl = atan2(sind,cosd)/rho;
     }
-    if (mgP.y2*mgP.y2+mgP.x2*mgP.x2>kMaxR*kMaxR)	return -5;
+    if (mgP.y2*mgP.y2+mgP.x2*mgP.x2>kMaxR*kMaxR)	return kBigRxy;
     mFP.z() += mgP.dl*mFP.tanl();
-    if (fabs(mFP.z()) > kMaxZ) 				return -6;
+    if (fabs(mFP.z()) > kMaxZ) 				return kBigZ;
     mFP.y() = mgP.y2;
     mFP.eta() = nice(mFP.eta()+rho*mgP.dl);  					/*VP*/
     mFP.x()       = mgP.x2;
     mFP._sinCA   = mgP.sinCA2;
     mFP._cosCA   = mgP.cosCA2;
-    ians = locate();
-    if (!ians) break;
+    ians = locate(); if (!ians) 			break;
   }
-  if (ians) 						return kFailed;
-  if (fabs(mFP.eta())>kMaxEta) 				return kFailed;
+
+  if (ians) 						return ians;
   if (mFP.x()> kFarFromBeam) {
     if (mFP.x()*mgP.cosCA2+mFP.y()*mgP.sinCA2<=0)	return kEnded; 
   }
@@ -1801,7 +1805,7 @@ assert(mFE.zign()>0); ///???
   <li>Avoid undue rotations as they are CPU intensive...</li>
   </ol>
 */
-int StiKalmanTrackNode::rotate (double alpha) 
+int StiKalmanTrackNode::rotate(double alpha) 
 {
   mMtx().A[0][0]=0;
   if (fabs(alpha)<1.e-6) return 0;
@@ -1918,10 +1922,11 @@ StThreeVector<double> StiKalmanTrackNode::getHelixCenter() const
   double sinAlpha = sin(_alpha);
   return (StThreeVector<double>(cosAlpha*xt0-sinAlpha*yt0,sinAlpha*xt0+cosAlpha*yt0,zt0));
 }
-#if 1
 //______________________________________________________________________________
 int StiKalmanTrackNode::locate()
 {
+//static const double kYFactor = 1.2, kZFactor=1.2;
+static const double kYFactor = 1.0, kZFactor=1.0;
   double yOff, zOff,ang;
   //fast way out for projections going out of fiducial volume
   const StiDetector *tDet = getDetector();
@@ -1929,7 +1934,8 @@ int StiKalmanTrackNode::locate()
   const StiPlacement *place = tDet->getPlacement();
   const StiShape     *sh    = tDet->getShape();
 
-  if (fabs(mFP.z())>kMaxZ || mFP.rxy()> kMaxR) return -1;
+  if (fabs(mFP.z())>kMaxZ) return kBigZ;
+  if (    mFP.rxy()>kMaxR) return kBigRxy;
   
   
   //YF edge is tolerance when we consider that detector is hit. //  edge = 0; //VP the meaning of edge is not clear
@@ -1941,19 +1947,18 @@ int StiKalmanTrackNode::locate()
   case kSector: 	// cylinder sector
     ang = atan2(mFP.y(),mFP.x());
     yOff    = nice(ang +_alpha - place->getLayerAngle());
-    if (fabs(yOff)>sh->getOpeningAngle()/2) return -1;
+    if (fabs(yOff)>kYFactor*sh->getOpeningAngle()/2)	return kOutY;
     break;
   case kPlanar: 
     yOff = mFP.y() - place->getNormalYoffset();
-    if (fabs(yOff)> sh->getHalfWidth()) return -1;
+    if (fabs(yOff)> kYFactor*sh->getHalfWidth()) 	return kOutY;
     break;
   default: assert(0 && "Wrong Shape code");
   }
   zOff = mFP.z() - place->getZcenter();
-  if (fabs(zOff)>sh->getHalfDepth()) return -1;
+  if (fabs(zOff)>kZFactor*sh->getHalfDepth()) 		return kOutZ;
   return 0;
  }
-#endif //1
 
 //______________________________________________________________________________
 void StiKalmanTrackNode::initialize(StiHit *h)
