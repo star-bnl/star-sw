@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.148.2.4 2018/03/08 22:33:48 smirnovd Exp $
- * $Id: StiKalmanTrack.cxx,v 2.148.2.4 2018/03/08 22:33:48 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.148.2.5 2018/04/16 00:49:03 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.148.2.5 2018/04/16 00:49:03 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.148.2.5  2018/04/16 00:49:03  perev
+ * Add legal(...) method
+ *
  * Revision 2.148.2.4  2018/03/08 22:33:48  smirnovd
  * Revert addition of StiKalmanTrack::legal()
  *
@@ -1925,4 +1928,78 @@ int StiKalmanTrack::idTruth(int *qa) const
   }
   if (qa) *qa = 100*ut.GetQua();  
   return ut.GetIdTru();
+}
+//_____________________________________________________________________________
+int StiKalmanTrack::legal(const StiHit *hit)  const
+{
+  enum {kNear= 50};
+  int ans[]={
+/* 0 00000 G G+ G+*/ 1
+/* 1 00001 G G+ G-*/,1
+/* 2 00010 G G+ B+*/,0
+/* 3 00011 G G+ B-*/,1
+/* 4 00100 G G- G+*/,0
+/* 5 00101 G G- G-*/,1
+/* 6 00110 G G- B+*/,0
+/* 7 00111 G G- B-*/,1
+/* 8 01000 G B+ G+*/,0
+/* 9 01001 G B+ G-*/,0
+/*10 01010 G B+ B+*/,0
+/*11 01011 G B- B-*/,1
+/*12 01100 G B- G+*/,0
+/*13 01101 G B- G-*/,0
+/*14 01110 G B- B+*/,0
+/*15 01111 G B- B-*/,1
+/*16 10000 B G+ G+*/,0
+/*17 10001 B G+ G-*/,0
+/*18 10010 B G+ B+*/,0
+/*19 10011 B G+ B-*/,0
+/*20 10100 B G+ B+*/,0
+/*21 10101 B G- G-*/,1
+/*22 10110 B G- B+*/,0
+/*23 10111 B G- B-*/,0
+/*24 11000 B B+ G+*/,0
+/*25 11001 B B+ G-*/,1
+/*26 11010 B B+ B+*/,1
+/*27 11011 B B+ B-*/,0
+/*28 11100 B B- G+*/,0
+/*29 11101 B B- G-*/,0
+/*30 11110 B B- B+*/,0
+/*31 11111 B B- B-*/,0
+};  
+  for (auto it=begin();it!=end();it++)  {
+    StiKalmanTrackNode *node = &(*it);
+    if (!node->isValid()) 	continue;
+    const StiHit *myhit = node->getHit();
+    if (!myhit) 		continue;
+    if ( node->getChi2()>100)	continue;
+    if ( myhit==hit) 		return 0;
+  }
+  double zH = hit->z(); if (fabs(zH)>kNear)	return 1; //Too far from memb
+  double vH = hit->vz();if (fabs(vH)<=   0) 	return 1; //Non TPC hit
+//		Hit info
+  int qH = (zH*vH<0); //hit quality
+
+  const auto *fstHit = getInnerMostHitNode(1)->getHit();
+  const auto *lstHit = getOuterMostHitNode(1)->getHit();
+  double zF = fstHit->z();
+  double zL = lstHit->z();
+
+  if (fabs(zF-zH) < fabs(zL-zH)) {
+    const auto *swap = fstHit; fstHit = lstHit; lstHit = swap;
+          auto  zwap = zF;     zF     = zL;     zL = zwap;
+  }
+  
+  double vF = fstHit->vz(); int qF = (zF*vF<0); //first hit quality
+  double vL = lstHit->vz(); int qL = (zL*vL<0); // last hit quality
+  if (fabs(vF*vL)<=0) return 1;
+  int kase = 0;
+  if (zH*zF<0) kase|= 1; 	//new hit in opposite side
+  if (qH     ) kase|= 2;	//new hit is bad
+  if (zL*zF<0) kase|= 4; 	//lst hit in opposite side
+  if (qL     ) kase|= 8;	//lst hit is bad
+  if (qF     ) kase|=16;	//fst hit is bad
+  if (!ans[kase]) StiDebug::Count("legal0",kase);
+  return 1; ///????????????????????????????????
+  return ans[kase];
 }
