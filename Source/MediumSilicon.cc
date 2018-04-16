@@ -187,7 +187,7 @@ bool MediumSilicon::ElectronVelocity(const double ex, const double ey,
     m_isChanged = false;
   }
 
-  if (m_hasElectronVelocityE) {
+  if (!m_eVelocityE.empty()) {
     // Interpolation in user table.
     return Medium::ElectronVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
   }
@@ -245,7 +245,7 @@ bool MediumSilicon::ElectronTownsend(const double ex, const double ey,
     m_isChanged = false;
   }
 
-  if (!tabElectronTownsend.empty()) {
+  if (!m_eTownsend.empty()) {
     // Interpolation in user table.
     return Medium::ElectronTownsend(ex, ey, ez, bx, by, bz, alpha);
   }
@@ -282,7 +282,7 @@ bool MediumSilicon::ElectronAttachment(const double ex, const double ey,
     m_isChanged = false;
   }
 
-  if (m_hasElectronAttachment) {
+  if (!m_eAttachment.empty()) {
     // Interpolation in user table.
     return Medium::ElectronAttachment(ex, ey, ez, bx, by, bz, eta);
   }
@@ -322,7 +322,7 @@ bool MediumSilicon::HoleVelocity(const double ex, const double ey,
     m_isChanged = false;
   }
 
-  if (m_hasHoleVelocityE) {
+  if (!m_hVelocityE.empty()) {
     // Interpolation in user table.
     return Medium::HoleVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
   }
@@ -378,7 +378,7 @@ bool MediumSilicon::HoleTownsend(const double ex, const double ey,
     m_isChanged = false;
   }
 
-  if (m_hasHoleTownsend) {
+  if (!m_hTownsend.empty()) {
     // Interpolation in user table.
     return Medium::HoleTownsend(ex, ey, ez, bx, by, bz, alpha);
   }
@@ -415,7 +415,7 @@ bool MediumSilicon::HoleAttachment(const double ex, const double ey,
     m_isChanged = false;
   }
 
-  if (m_hasHoleAttachment) {
+  if (!m_hAttachment.empty()) {
     // Interpolation in user table.
     return Medium::HoleAttachment(ex, ey, ez, bx, by, bz, eta);
   }

@@ -11,14 +11,15 @@ namespace Garfield {
 class MediumMagboltz : public MediumGas {
 
  public:
-  // Constructor
+  /// Constructor
   MediumMagboltz();
-  // Destructor
+  /// Destructor
   virtual ~MediumMagboltz() {}
 
-  // Set/get the highest electron energy to be included
-  // in the scattering rates table
+  /// Set the highest electron energy to be included
+  //// in the scattering rates table.
   bool SetMaxElectronEnergy(const double e);
+  /// Get the highest electron energy in the scattering rates table.
   double GetMaxElectronEnergy() const { return m_eFinal; }
 
   // Set/get the highest photon energy to be included
@@ -73,31 +74,31 @@ class MediumMagboltz : public MediumGas {
   void PrintGas();
 
   // Get the overall null-collision rate [ns-1]
-  double GetElectronNullCollisionRate(const int band);
+  double GetElectronNullCollisionRate(const int band) override;
   // Get the (real) collision rate [ns-1] at a given electron energy e [eV]
-  double GetElectronCollisionRate(const double e, const int band);
+  double GetElectronCollisionRate(const double e, const int band) override;
   // Get the collision rate [ns-1] for a specific level
   double GetElectronCollisionRate(const double e, const unsigned int level,
                                   const int band);
   // Sample the collision type
   bool GetElectronCollision(const double e, int& type, int& level, double& e1,
                             double& dx, double& dy, double& dz, int& nion,
-                            int& ndxc, int& band);
-  unsigned int GetNumberOfIonisationProducts() const { 
+                            int& ndxc, int& band) override ;
+  unsigned int GetNumberOfIonisationProducts() const override { 
     return m_ionProducts.size(); 
   }
   bool GetIonisationProduct(const unsigned int i, int& type, 
-                            double& energy) const;
+                            double& energy) const override;
   void ComputeDeexcitation(int iLevel, int& fLevel);
-  unsigned int GetNumberOfDeexcitationProducts() const { 
+  unsigned int GetNumberOfDeexcitationProducts() const override { 
     return m_dxcProducts.size();
   }
   bool GetDeexcitationProduct(const unsigned int i, double& t, double& s, 
-                              int& type, double& energy) const;
+                              int& type, double& energy) const override;
 
-  double GetPhotonCollisionRate(const double e);
+  double GetPhotonCollisionRate(const double e) override;
   bool GetPhotonCollision(const double e, int& type, int& level, double& e1,
-                          double& ctheta, int& nsec, double& esec);
+                          double& ctheta, int& nsec, double& esec) override;
 
   // Reset the collision counters
   void ResetCollisionCounters();

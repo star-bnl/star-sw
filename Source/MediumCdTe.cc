@@ -122,7 +122,7 @@ bool MediumCdTe::ElectronVelocity(const double ex, const double ey,
                                   double& vy, double& vz) {
 
   vx = vy = vz = 0.;
-  if (m_hasElectronVelocityE) {
+  if (!m_eVelocityE.empty()) {
     // Interpolation in user table.
     return Medium::ElectronVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
   }
@@ -153,7 +153,7 @@ bool MediumCdTe::ElectronTownsend(const double ex, const double ey,
                                   double& alpha) {
 
   alpha = 0.;
-  if (!tabElectronTownsend.empty()) {
+  if (!m_eTownsend.empty()) {
     // Interpolation in user table.
     return Medium::ElectronTownsend(ex, ey, ez, bx, by, bz, alpha);
   }
@@ -166,7 +166,7 @@ bool MediumCdTe::ElectronAttachment(const double ex, const double ey,
                                     double& eta) {
 
   eta = 0.;
-  if (m_hasElectronAttachment) {
+  if (!m_eAttachment.empty()) {
     // Interpolation in user table.
     return Medium::ElectronAttachment(ex, ey, ez, bx, by, bz, eta);
   }
@@ -196,7 +196,7 @@ bool MediumCdTe::HoleVelocity(const double ex, const double ey, const double ez,
                               double& vx, double& vy, double& vz) {
 
   vx = vy = vz = 0.;
-  if (m_hasHoleVelocityE) {
+  if (!m_hVelocityE.empty()) {
     // Interpolation in user table.
     return Medium::HoleVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
   }
@@ -226,7 +226,7 @@ bool MediumCdTe::HoleTownsend(const double ex, const double ey, const double ez,
                               double& alpha) {
 
   alpha = 0.;
-  if (m_hasHoleTownsend) {
+  if (!m_hTownsend.empty()) {
     // Interpolation in user table.
     return Medium::HoleTownsend(ex, ey, ez, bx, by, bz, alpha);
   }
@@ -238,7 +238,7 @@ bool MediumCdTe::HoleAttachment(const double ex, const double ey,
                                 const double by, const double bz, double& eta) {
 
   eta = 0.;
-  if (m_hasHoleAttachment) {
+  if (!m_hAttachment.empty()) {
     // Interpolation in user table.
     return Medium::HoleAttachment(ex, ey, ez, bx, by, bz, eta);
   }

@@ -5436,35 +5436,20 @@ void MediumMagboltz::GenerateGasTable(const int numColl, const bool verbose) {
   const unsigned int nEfields = m_eFields.size();
   const unsigned int nBfields = m_bFields.size();
   const unsigned int nAngles = m_bAngles.size();
-  InitParamArrays(nEfields, nBfields, nAngles, tabElectronVelocityE, 0.);
-  InitParamArrays(nEfields, nBfields, nAngles, tabElectronVelocityB, 0.);
-  InitParamArrays(nEfields, nBfields, nAngles, tabElectronVelocityExB, 0.);
-  InitParamArrays(nEfields, nBfields, nAngles, tabElectronDiffLong, 0.);
-  InitParamArrays(nEfields, nBfields, nAngles, tabElectronDiffTrans, 0.);
-  InitParamArrays(nEfields, nBfields, nAngles, tabElectronLorentzAngle, 0.);
-  InitParamArrays(nEfields, nBfields, nAngles, tabElectronTownsend, -30.);
-  InitParamArrays(nEfields, nBfields, nAngles, m_tabTownsendNoPenning, -30.);
-  InitParamArrays(nEfields, nBfields, nAngles, tabElectronAttachment, -30.);
+  InitTable(nEfields, nBfields, nAngles, m_eVelocityE, 0.);
+  InitTable(nEfields, nBfields, nAngles, m_eVelocityB, 0.);
+  InitTable(nEfields, nBfields, nAngles, m_eVelocityExB, 0.);
+  InitTable(nEfields, nBfields, nAngles, m_eDiffLong, 0.);
+  InitTable(nEfields, nBfields, nAngles, m_eDiffTrans, 0.);
+  InitTable(nEfields, nBfields, nAngles, m_eLorentzAngle, 0.);
+  InitTable(nEfields, nBfields, nAngles, m_eTownsend, -30.);
+  InitTable(nEfields, nBfields, nAngles, m_eTownsendNoPenning, -30.);
+  InitTable(nEfields, nBfields, nAngles, m_eAttachment, -30.);
 
-  m_hasElectronVelocityE = true;
-  m_hasElectronVelocityB = true;
-  m_hasElectronVelocityExB = true;
-  m_hasElectronDiffLong = true;
-  m_hasElectronDiffTrans = true;
-  m_hasElectronAttachment = true;
-  m_hasElectronLorentzAngle = true;
-
-  m_hasExcRates = false;
-  m_tabExcRates.clear();
+  m_excRates.clear();
   m_excitationList.clear();
-  m_hasIonRates = false;
-  m_tabIonRates.clear();
+  m_ionRates.clear();
   m_ionisationList.clear();
-
-  m_hasIonMobility = false;
-  m_hasIonDissociation = false;
-  m_hasIonDiffLong = false;
-  m_hasIonDiffTrans = false;
 
   // gasBits = "TFTTFTFTTTFFFFFF";
   // The version number is 11 because there are slight
@@ -5495,23 +5480,23 @@ void MediumMagboltz::GenerateGasTable(const int numColl, const bool verbose) {
         RunMagboltz(m_eFields[i], m_bFields[k], m_bAngles[j], numColl, verbose, vx,
                     vy, vz, difl, dift, alpha, eta, lor, vxerr, vyerr, vzerr,
                     diflerr, difterr, alphaerr, etaerr, lorerr, alphatof);
-        tabElectronVelocityE[j][k][i] = vz;
-        tabElectronVelocityExB[j][k][i] = vy;
-        tabElectronVelocityB[j][k][i] = vx;
-        tabElectronDiffLong[j][k][i] = difl;
-        tabElectronDiffTrans[j][k][i] = dift;
-        tabElectronLorentzAngle[j][k][i] = lor;
+        m_eVelocityE[j][k][i] = vz;
+        m_eVelocityExB[j][k][i] = vy;
+        m_eVelocityB[j][k][i] = vx;
+        m_eDiffLong[j][k][i] = difl;
+        m_eDiffTrans[j][k][i] = dift;
+        m_eLorentzAngle[j][k][i] = lor;
         if (alpha > 0.) {
-          tabElectronTownsend[j][k][i] = log(alpha);
-          m_tabTownsendNoPenning[j][k][i] = log(alpha);
+          m_eTownsend[j][k][i] = log(alpha);
+          m_eTownsendNoPenning[j][k][i] = log(alpha);
         } else {
-          tabElectronTownsend[j][k][i] = -30.;
-          m_tabTownsendNoPenning[j][k][i] = -30.;
+          m_eTownsend[j][k][i] = -30.;
+          m_eTownsendNoPenning[j][k][i] = -30.;
         }
         if (eta > 0.) {
-          tabElectronAttachment[j][k][i] = log(eta);
+          m_eAttachment[j][k][i] = log(eta);
         } else {
-          tabElectronAttachment[j][k][i] = -30.;
+          m_eAttachment[j][k][i] = -30.;
         }
       }
     }
