@@ -32,6 +32,10 @@ itpcInterpreter::itpcInterpreter()
 	fee_version = 0 ;	// original pre-Mar 2018
 	rdo_version = 0 ;
 
+	expected_rdo_version = -1 ;	// uknown; don't check
+	expected_fee_version = -1 ;	// unknown; don't check
+
+
 	memset(fee,0,sizeof(fee)) ;
 	ped_c = 0 ;
 }
@@ -1227,10 +1231,60 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 
 
 
+
+
 	if((data[0] & 0xFFC0FFFF)==0x80000001) {
 		fee_version = 0 ;
 		fee_id = (data[0]>>16) & 0xFF ;
 	}
+	else {	
+		u_int f_id[3], d_x[3] ;
+		u_int f_ok = 0 ;
+
+		// gotta be fee_version 1
+		fee_version = 1 ;
+
+		// I have to have
+		//   0x80ff0010
+		//   0x00ff4321
+		//   0x00ff8765 ;
+
+		// get fee_ids
+		f_id[0] = (data[0]>>16) & 0x3F ;
+		f_id[1] = (data[1]>>16) & 0x3F ;
+		f_id[2] = (data[2]>>16) & 0x3F ;
+
+		// get decoded
+		d_x[0] = data[0] & 0xFFC0FFFF ;
+		d_x[1] = data[1] & 0xFFC0FFFF ;
+		d_x[2] = data[2] & 0xFFC0FFFF ;
+
+		if(d_x[0]==0x80000010) {
+			f_ok |= 1 ;
+			if(d_x[1]==0x00004321) f_ok |= 2 ;
+			if(d_x[2]==0x00008765) f_ok |= 4 ;
+
+			if(f_id[0]==f_id[1]) f_ok |= 8 ;
+			if(f_id[1]==f_id[2]) f_ok |= 0x10 ;
+			if(f_id[0]==f_id[2]) f_ok |= 0x20 ;
+		}
+
+		if(f_ok!=0x3F) {	// all was NOT OK
+			run_err_add(rdo_id,0) ;
+		}
+
+
+		for(int i=0;i<3;i++) {	// hunt for 0x4321
+			if(d_x[i]==0x00004321) {
+				data = data+i ;
+			}
+		}
+	}
+#if 0		
+
+
+		
+
 	//data is now at the first 0x80xx0010 of the FEE
 	else if((data[0] & 0xFFC0FFFF)!=0x80000010) {
 		// THIS CAN happen and I get instead bits scrambled
@@ -1297,21 +1351,29 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		}
 	}
 
+#endif
 	
-		
+	if(expected_fee_version >= 0) {
+		if(fee_version != expected_fee_version) {	
+			LOG(ERR,"FEE version %d, expected %d",fee_version,expected_fee_version) ;
+		}
+	}
+	
+	//at this point data[0]==0x00004321 ;
+	fee_id = (data[0]>>16) & 0x3F ;
 		
 	switch(fee_version) {
 	case 1 :
-		if(data[1] != ((fee_id<<16)|0x4321)) err |= 0x10000 ;
-		if(data[2] != ((fee_id<<16)|0x8765)) err |= 0x20000 ;
+		if(data[0] != ((fee_id<<16)|0x4321)) err |= 0x10000 ;
+		if(data[1] != ((fee_id<<16)|0x8765)) err |= 0x20000 ;
 
-		if(fee_version != (data[3] & 0xFFFF)) err |= 0x40000 ;
-		if(data[4]&0xFFF0) err |= 0x40000 ; 
+		if(fee_version != (data[2] & 0xFFFF)) err |= 0x40000 ;
 
-		fee_port = (data[4] & 0xF) + 1 ;
-		//data[5] & data[6] are BX
+		if(data[3]&0xFFF0) err |= 0x40000 ; 
+		fee_port = (data[3] & 0xF) + 1 ;
+		//data[4] & data[5] are BX
 
-		if(data[7] != ((fee_id<<16)|0x60000010)) err |= 0x80000 ;	// end of FEE hdr
+		if(data[6] != ((fee_id<<16)|0x60000010)) err |= 0x80000 ;	// end of FEE hdr
 
 		if(err) {
 			run_err_add(rdo_id,3) ;
@@ -1323,16 +1385,16 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		break ;
 	}
 
-	//for(int i=0;i<10;i++) {
-	//	LOG(TERR,"... fee V%d hdr: %d = 0x%08X",fee_version,i,data[i]) ;
-	//}
+//	for(int i=0;i<10;i++) {
+//		LOG(TERR,"... fee V%d hdr: %d = 0x%08X",fee_version,i,data[i]) ;
+//	}
 	
 	// I need fee_port here!!!
 
 
 
-	//data[8] is the lane!!!
-	data += 8 ;
+	//data[7] is the start of lane data!!!
+	data += 7 ;
 
 //	LOG(TERR,"into sampa_lane_scan: fee_id %d",fee_id) ;
 
@@ -1342,7 +1404,7 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 
 		if((*data & 0xFC000000) != 0xB0000000) {
 			run_err_add(rdo_id,1) ;
-			LOG(ERR,"%d:#%02d: SAMPA %d: bad sig 0x%08X",rdo_id,fee_port,i+1,*data) ;
+			LOG(ERR,"%d:#%02d: lane %d: bad sig 0x%08X",rdo_id,fee_port,i,*data) ;
 			run_err_add(rdo_id,4) ;
 			err |= 0x100 ;
 			goto done ;
@@ -1464,7 +1526,7 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		run_err_add(rdo_id,7) ;
 
 		LOG(ERR,"%d:#%02d(id %d,cou %d) evt %d: error 0x%X 0x%X",rdo_id,fee_port,fee_id,fee_cou,evt_ix,err,soft_err) ;
-		for(int i=-4;i<4;i++) {
+		for(int i=-4;i<8;i++) {
 			LOG(ERR,".... %d = 0x%08X",i,data[i]) ;	
 		}
 		
