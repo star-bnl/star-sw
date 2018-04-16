@@ -213,11 +213,15 @@ class ComponentAnalyticField : public ComponentBase {
   double m_sx, m_sy;
 
   // Signals
-  int nFourier;
-  std::string m_scellTypeFourier;
-  bool fperx, fpery;
-  int mxmin, mxmax, mymin, mymax;
-  int mfexp;
+  int m_nFourier = 1;
+  Cell m_cellTypeFourier = A00;
+  bool m_fperx = false;
+  bool m_fpery = false;
+  int m_mxmin = 0;
+  int m_mxmax = 0;
+  int m_mymin = 0;
+  int m_mymax = 0;
+  int m_mfexp = 0;
 
   std::vector<std::string> m_readout;
 

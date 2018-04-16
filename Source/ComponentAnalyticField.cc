@@ -966,11 +966,15 @@ void ComponentAnalyticField::CellInit() {
   m_sx = m_sy = 1.;
 
   // Signals
-  nFourier = 1;
-  m_scellTypeFourier = "A  ";
-  fperx = fpery = false;
-  mxmin = mxmax = mymin = mymax = 0;
-  mfexp = 0;
+  m_nFourier = 1;
+  m_cellTypeFourier = A00;
+  m_fperx = false;
+  m_fpery = false;
+  m_mxmin = 0;
+  m_mxmax = 0;
+  m_mymin = 0;
+  m_mymax = 0;
+  m_mfexp = 0;
 
   m_readout.clear();
 
@@ -4308,21 +4312,21 @@ bool ComponentAnalyticField::PrepareSignals() {
 
   // If using natural periodicity, copy the cell type.
   // Otherwise, eliminate true periodicities.
-  if (nFourier == 0) {
-    m_scellTypeFourier = m_scellType;
+  if (m_nFourier == 0) {
+    m_cellTypeFourier = m_cellType;
   } else if (m_scellType == "A  " || m_scellType == "B1X" ||
              m_scellType == "B1Y" || m_scellType == "C1 ") {
-    m_scellTypeFourier = "A  ";
+    m_cellTypeFourier = A00;
   } else if (m_scellType == "B2X" || m_scellType == "C2X") {
-    m_scellTypeFourier = "B2X";
+    m_cellTypeFourier = B2X;
   } else if (m_scellType == "B2Y" || m_scellType == "C2Y") {
-    m_scellTypeFourier = "B2Y";
+    m_cellTypeFourier = B2Y;
   } else if (m_scellType == "C3 ") {
-    m_scellTypeFourier = "C3 ";
+    m_cellTypeFourier = C30;
   } else if (m_scellType == "D1 ") {
-    m_scellTypeFourier = "D1 ";
+    m_cellTypeFourier = D20;
   } else if (m_scellType == "D3 ") {
-    m_scellTypeFourier = "D3 ";
+    m_cellTypeFourier = D30;
   } else {
     // Other cases.
     std::cerr << m_className << "::PrepareSignals:\n";
@@ -4332,41 +4336,41 @@ bool ComponentAnalyticField::PrepareSignals() {
   }
 
   // Establish the directions in which convolutions occur.
-  fperx = fpery = false;
-  if (nFourier == 0) {
-    mfexp = 0;
+  m_fperx = m_fpery = false;
+  if (m_nFourier == 0) {
+    m_mfexp = 0;
   } else {
     if (m_scellType == "B1X" || m_scellType == "C1 " || m_scellType == "C2Y") {
-      fperx = true;
+      m_fperx = true;
     }
     if (m_scellType == "B1Y" || m_scellType == "C1 " || m_scellType == "C2X") {
-      fpery = true;
+      m_fpery = true;
     }
-    mfexp = int(0.1 + log(1. * nFourier) / log(2.));
-    if (mfexp == 0) {
-      fperx = fpery = false;
+    m_mfexp = int(0.1 + log(1. * m_nFourier) / log(2.));
+    if (m_mfexp == 0) {
+      m_fperx = m_fpery = false;
     }
   }
   // Set maximum and minimum Fourier terms.
-  mxmin = mymin = mxmax = mymax = 0;
-  if (fperx) {
-    mxmin = std::min(0, 1 - nFourier / 2);
-    mxmax = nFourier / 2;
+  m_mxmin = m_mymin = m_mxmax = m_mymax = 0;
+  if (m_fperx) {
+    m_mxmin = std::min(0, 1 - m_nFourier / 2);
+    m_mxmax = m_nFourier / 2;
   }
-  if (fpery) {
-    mymin = std::min(0, 1 - nFourier / 2);
-    mymax = nFourier / 2;
+  if (m_fpery) {
+    m_mymin = std::min(0, 1 - m_nFourier / 2);
+    m_mymax = m_nFourier / 2;
   }
 
   // Print some debugging output if requested.
   if (m_debug) {
     std::cout << m_className << "::PrepareSignals:\n";
     std::cout << "    Cell type:           " << m_scellType << "\n";
-    std::cout << "    Fourier cell type:   " << m_scellTypeFourier << "\n";
-    std::cout << "    x convolutions:      " << fperx << "\n";
-    std::cout << "    y convolutions:      " << fpery << "\n";
-    std::cout << "    No of Fourier terms: " << nFourier << " (= 2**" << mfexp
-              << ")\n";
+    std::cout << "    Fourier cell type:   " << m_cellTypeFourier << "\n";
+    std::cout << "    x convolutions:      " << m_fperx << "\n";
+    std::cout << "    y convolutions:      " << m_fpery << "\n";
+    std::cout << "    No of Fourier terms: " << m_nFourier 
+              << " (= 2**" << m_mfexp << ")\n";
   }
 
   // Prepare the signal matrices.
@@ -4426,23 +4430,18 @@ bool ComponentAnalyticField::SetupWireSignals() {
   //   (Last changed on  4/10/06.)
   //-----------------------------------------------------------------------
 
-  m_sigmat.resize(m_nWires);
-  for (unsigned int i = 0; i < m_nWires; ++i) {
-    m_sigmat[i].clear();
-    m_sigmat[i].resize(m_nWires);
-  }
+  m_sigmat.assign(m_nWires, std::vector<std::complex<double> >(m_nWires));
 
   std::vector<std::vector<std::complex<double> > > fftmat;
-  fftmat.clear();
 
-  if (fperx || fpery) {
-    fftmat.resize(nFourier);
-    for (int i = 0; i < nFourier; ++i) {
+  if (m_fperx || m_fpery) {
+    fftmat.resize(m_nFourier);
+    for (int i = 0; i < m_nFourier; ++i) {
       fftmat[i].resize(m_nWires);
     }
   }
 
-  if (fperx || fpery) {
+  if (m_fperx || m_fpery) {
     // CALL IONBGN(IFAIL)
     // IF(IFAIL.EQ.1)THEN
     //     PRINT *,' !!!!!! SIGIPR WARNING : No storage'
@@ -4453,28 +4452,28 @@ bool ComponentAnalyticField::SetupWireSignals() {
   }
 
   // Have the matrix/matrices filled (and stored).
-  for (int mx = mxmin; mx <= mxmax; ++mx) {
-    for (int my = mymin; my <= mymax; ++my) {
+  for (int mx = m_mxmin; mx <= m_mxmax; ++mx) {
+    for (int my = m_mymin; my <= m_mymax; ++my) {
       // Select layer to be produced.
-      if (m_scellTypeFourier == "A  ") {
+      if (m_cellTypeFourier == A00) {
         IprA00(mx, my);
-      } else if (m_scellTypeFourier == "B2X") {
+      } else if (m_cellTypeFourier == B2X) {
         IprB2X(my);
-      } else if (m_scellTypeFourier == "B2Y") {
+      } else if (m_cellTypeFourier == B2Y) {
         IprB2Y(mx);
-      } else if (m_scellTypeFourier == "C2X") {
+      } else if (m_cellTypeFourier == C2X) {
         IprC2X();
-      } else if (m_scellTypeFourier == "C2Y") {
+      } else if (m_cellTypeFourier == C2Y) {
         IprC2Y();
-      } else if (m_scellTypeFourier == "C3 ") {
+      } else if (m_cellTypeFourier == C30) {
         IprC30();
-      } else if (m_scellTypeFourier == "D1 ") {
+      } else if (m_cellTypeFourier == D10) {
         IprD10();
-      } else if (m_scellTypeFourier == "D3 ") {
+      } else if (m_cellTypeFourier == D30) {
         IprD30();
       } else {
         std::cerr << m_className << "::SetupWireSignals:\n";
-        std::cerr << "    Unknown signal cell type " << m_scellTypeFourier
+        std::cerr << "    Unknown signal cell type " << m_cellTypeFourier
                   << "\n";
         return false;
       }
@@ -4483,7 +4482,7 @@ bool ComponentAnalyticField::SetupWireSignals() {
         std::cout << "    Signal matrix MX = " << mx << ", MY = " << my
                   << " has been calculated.\n";
       }
-      if (fperx || fpery) {
+      if (m_fperx || m_fpery) {
         // Store the matrix.
         // CALL IONIO(MX,MY,1,0,IFAIL)
         // Quit if storing failed.
@@ -4526,23 +4525,23 @@ bool ComponentAnalyticField::SetupWireSignals() {
   }
 
   // Have them fourier transformed (singly periodic case).
-  if ((fperx && !fpery) || (fpery && !fperx)) {
+  if ((m_fperx && !m_fpery) || (m_fpery && !m_fperx)) {
     for (unsigned int i = 0; i < m_nWires; ++i) {
-      for (int m = -nFourier / 2; m < nFourier / 2; ++m) {
+      for (int m = -m_nFourier / 2; m < m_nFourier / 2; ++m) {
         // CALL IONIO(M,M,2,I,IFAIL)
         //  IF(IFAIL.NE.0)GOTO 2010
         for (unsigned int j = 0; j < m_nWires; ++j) {
-          fftmat[m + nFourier / 2][j] = m_sigmat[i][j];
+          fftmat[m + m_nFourier / 2][j] = m_sigmat[i][j];
         }
       }
       for (unsigned int j = 0; j < m_nWires; ++j) {
         // CALL CFFT(FFTMAT(1,J),MFEXP)
       }
-      for (int m = -nFourier / 2; m < nFourier / 2; ++m) {
+      for (int m = -m_nFourier / 2; m < m_nFourier / 2; ++m) {
         // CALL IONIO(M,M,2,I,IFAIL)
         // IF(IFAIL.NE.0)GOTO 2010
         for (unsigned int j = 0; j < m_nWires; ++j) {
-          m_sigmat[i][j] = fftmat[m + nFourier / 2][j];
+          m_sigmat[i][j] = fftmat[m + m_nFourier / 2][j];
         }
         // CALL IONIO(M,M,1,I,IFAIL)
         // IF(IFAIL.NE.0)GOTO 2010
@@ -4550,45 +4549,45 @@ bool ComponentAnalyticField::SetupWireSignals() {
     }
   }
   // Have them fourier transformed (doubly periodic case).
-  if (fperx || fpery) {
+  if (m_fperx || m_fpery) {
     for (unsigned int i = 0; i < m_nWires; ++i) {
-      for (int mx = mxmin; mx <= mxmax; ++mx) {
-        for (int my = mymin; my <= mymax; ++my) {
+      for (int mx = m_mxmin; mx <= m_mxmax; ++mx) {
+        for (int my = m_mymin; my <= m_mymax; ++my) {
           // CALL IONIO(MX,MY,2,I,IFAIL)
           // IF(IFAIL.NE.0)GOTO 2010
           for (unsigned int j = 0; j < m_nWires; ++j) {
-            fftmat[my + nFourier / 2 - 1][j] = m_sigmat[i][j];
+            fftmat[my + m_nFourier / 2 - 1][j] = m_sigmat[i][j];
           }
         }
         for (unsigned int j = 0; j < m_nWires; ++j) {
           // CALL CFFT(FFTMAT(1,J),MFEXP)
         }
-        for (int my = mymin; my <= mymax; ++my) {
+        for (int my = m_mymin; my <= m_mymax; ++my) {
           // CALL IONIO(MX,MY,2,I,IFAIL)
           // IF(IFAIL.NE.0)GOTO 2010
           for (unsigned int j = 0; j < m_nWires; ++j) {
-            m_sigmat[i][j] = fftmat[my + nFourier / 2 - 1][j];
+            m_sigmat[i][j] = fftmat[my + m_nFourier / 2 - 1][j];
           }
           // CALL IONIO(MX,MY,1,I,IFAIL)
           // IF(IFAIL.NE.0)GOTO 2010
         }
       }
-      for (int my = mymin; my <= mymax; ++my) {
-        for (int mx = mxmin; mx <= mxmax; ++mx) {
+      for (int my = m_mymin; my <= m_mymax; ++my) {
+        for (int mx = m_mxmin; mx <= m_mxmax; ++mx) {
           // CALL IONIO(MX,MY,2,I,IFAIL)
           // IF(IFAIL.NE.0)GOTO 2010
           for (unsigned int j = 0; j < m_nWires; ++j) {
-            fftmat[mx + nFourier / 2 - 1][j] = m_sigmat[i][j];
+            fftmat[mx + m_nFourier / 2 - 1][j] = m_sigmat[i][j];
           }
         }
         for (unsigned int j = 0; j < m_nWires; ++j) {
           // CALL CFFT(FFTMAT(1,J),MFEXP)
         }
-        for (int mx = mxmin; mx <= mxmax; ++mx) {
+        for (int mx = m_mxmin; mx <= m_mxmax; ++mx) {
           // CALL IONIO(MX,MY,2,I,IFAIL)
           // IF(IFAIL.NE.0)GOTO 2010
           for (unsigned int j = 0; j < m_nWires; ++j) {
-            m_sigmat[i][j] = fftmat[mx + nFourier / 2 - 1][j];
+            m_sigmat[i][j] = fftmat[mx + m_nFourier / 2 - 1][j];
           }
           // CALL IONIO(MX,MY,1,I,IFAIL)
           // IF(IFAIL.NE.0)GOTO 2010
@@ -4598,10 +4597,10 @@ bool ComponentAnalyticField::SetupWireSignals() {
   }
 
   // Invert the matrices.
-  for (int mx = mxmin; mx <= mxmax; ++mx) {
-    for (int my = mymin; my <= mymax; ++my) {
+  for (int mx = m_mxmin; mx <= m_mxmax; ++mx) {
+    for (int my = m_mymin; my <= m_mymax; ++my) {
       // Retrieve the layer.
-      if (fperx || fpery) {
+      if (m_fperx || m_fpery) {
         // CALL IONIO(MX,MY,2,0,IFAIL)
         // IF(IFAIL.NE.0)GOTO 2010
       }
@@ -4619,7 +4618,7 @@ bool ComponentAnalyticField::SetupWireSignals() {
         }
       }
       // Store the matrix back.
-      if (fperx || fpery) {
+      if (m_fperx || m_fpery) {
         // CALL IONIO(MX,MY,1,0,IFAIL)
         // IF(IFAIL.NE.0)GOTO 2010
       }
@@ -4628,23 +4627,23 @@ bool ComponentAnalyticField::SetupWireSignals() {
   }
 
   // And transform the matrices back to the original domain.
-  if ((fperx && !fpery) || (fpery && !fperx)) {
+  if ((m_fperx && !m_fpery) || (m_fpery && !m_fperx)) {
     for (unsigned int i = 0; i < m_nWires; ++i) {
-      for (int m = -nFourier / 2; m < nFourier / 2; ++m) {
+      for (int m = -m_nFourier / 2; m < m_nFourier / 2; ++m) {
         // CALL IONIO(M,M,2,I,IFAIL)
         // IF(IFAIL.NE.0)GOTO 2010
         for (unsigned int j = 0; j < m_nWires; ++j) {
-          fftmat[m + nFourier / 2][j] = m_sigmat[i][j];
+          fftmat[m + m_nFourier / 2][j] = m_sigmat[i][j];
         }
       }
       for (unsigned int j = 0; j < m_nWires; ++j) {
         // CALL CFFT(FFTMAT(1,J),-MFEXP)
       }
-      for (int m = -nFourier / 2; m < nFourier / 2; ++m) {
+      for (int m = -m_nFourier / 2; m < m_nFourier / 2; ++m) {
         // CALL IONIO(M,M,2,I,IFAIL)
         // IF(IFAIL.NE.0)GOTO 2010
         for (unsigned int j = 0; j < m_nWires; ++j) {
-          m_sigmat[i][j] = fftmat[m + nFourier / 2][j] / double(nFourier);
+          m_sigmat[i][j] = fftmat[m + m_nFourier / 2][j] / double(m_nFourier);
         }
         // CALL IONIO(M,M,1,I,IFAIL)
         // IF(IFAIL.NE.0)GOTO 2010
@@ -4652,47 +4651,47 @@ bool ComponentAnalyticField::SetupWireSignals() {
     }
   }
   // Have them transformed to the original domain (doubly periodic).
-  if (fperx && fpery) {
+  if (m_fperx && m_fpery) {
     for (unsigned int i = 0; i < m_nWires; ++i) {
-      for (int mx = mxmin; mx <= mxmax; ++mx) {
-        for (int my = mymin; my <= mymax; ++my) {
+      for (int mx = m_mxmin; mx <= m_mxmax; ++mx) {
+        for (int my = m_mymin; my <= m_mymax; ++my) {
           // CALL IONIO(MX,MY,2,I,IFAIL)
           // IF(IFAIL.NE.0)GOTO 2010
           for (unsigned int j = 0; j < m_nWires; ++j) {
-            fftmat[my + nFourier / 2 - 1][j] = m_sigmat[i][j];
+            fftmat[my + m_nFourier / 2 - 1][j] = m_sigmat[i][j];
           }
         }
         for (unsigned int j = 0; j < m_nWires; ++j) {
           // CFFT(FFTMAT(1,J),-MFEXP)
         }
-        for (int my = mymin; my <= mymax; ++my) {
+        for (int my = m_mymin; my <= m_mymax; ++my) {
           // CALL IONIO(MX,MY,2,I,IFAIL)
           // IF(IFAIL.NE.0)GOTO 2010
           for (unsigned int j = 0; j < m_nWires; ++j) {
             m_sigmat[i][j] =
-                fftmat[my + nFourier / 2 - 1][j] / double(nFourier);
+                fftmat[my + m_nFourier / 2 - 1][j] / double(m_nFourier);
           }
           // CALL IONIO(MX,MY,1,I,IFAIL)
           // IF(IFAIL.NE.0)GOTO 2010
         }
       }
-      for (int my = mymin; my <= mymax; ++my) {
-        for (int mx = mxmin; mx <= mxmax; ++mx) {
+      for (int my = m_mymin; my <= m_mymax; ++my) {
+        for (int mx = m_mxmin; mx <= m_mxmax; ++mx) {
           // CALL IONIO(MX,MY,2,I,IFAIL)
           // IF(IFAIL.NE.0)GOTO 2010
           for (unsigned int j = 0; j < m_nWires; ++j) {
-            fftmat[mx + nFourier / 2 - 1][j] = m_sigmat[i][j];
+            fftmat[mx + m_nFourier / 2 - 1][j] = m_sigmat[i][j];
           }
         }
         for (unsigned int j = 0; j < m_nWires; ++j) {
           // CALL CFFT(FFTMAT(1,J),-MFEXP)
         }
-        for (int mx = mxmin; mx <= mxmax; ++mx) {
+        for (int mx = m_mxmin; mx <= m_mxmax; ++mx) {
           // CALL IONIO(MX,MY,2,I,IFAIL)
           // IF(IFAIL.NE.0)GOTO 2010
           for (unsigned int j = 0; j < m_nWires; ++j) {
             m_sigmat[i][j] =
-                fftmat[mx + nFourier / 2 - 1][j] / double(nFourier);
+                fftmat[mx + m_nFourier / 2 - 1][j] / double(m_nFourier);
           }
           // CALL IONIO(MX,MY,1,I,IFAIL)
           // IF(IFAIL.NE.0)GOTO 2010
@@ -4703,8 +4702,8 @@ bool ComponentAnalyticField::SetupWireSignals() {
 
   // Dump the signal matrix after inversion, if DEBUG is requested.
   if (m_debug) {
-    for (int mx = mxmin; mx <= mxmax; ++mx) {
-      for (int my = mymin; my <= mymax; ++my) {
+    for (int mx = m_mxmin; mx <= m_mxmax; ++mx) {
+      for (int my = m_mymin; my <= m_mymax; ++my) {
         std::cout << m_className << "::SetupWireSignals:\n";
         std::cout << "    Dump of signal matrix (" << mx << ", " << my
                   << ") after inversion:\n";
@@ -4754,8 +4753,8 @@ bool ComponentAnalyticField::SetupPlaneSignals() {
   double vw;
 
   // Loop over the signal layers.
-  for (int mx = mxmin; mx <= mxmax; ++mx) {
-    for (int my = mymin; my <= mymax; ++my) {
+  for (int mx = m_mxmin; mx <= m_mxmax; ++mx) {
+    for (int my = m_mymin; my <= m_mymax; ++my) {
       // Load the layers of the signal matrices.
       // CALL IONIO(MX,MY,2,0,IFAIL1)
       // IF(IFAIL1.NE.0)THEN
@@ -5266,14 +5265,13 @@ bool ComponentAnalyticField::Wfield(const double xpos, const double ypos,
   }
 
   if (label.empty()) return volt;
-  std::vector<std::string>::const_iterator it =
-      std::find(m_readout.begin(), m_readout.end(), label);
+  const auto it = std::find(m_readout.cbegin(), m_readout.cend(), label);
   if (it == m_readout.end()) return false;
-  const int isw = it - m_readout.begin();
+  const auto isw = it - m_readout.begin();
 
   // Loop over the signal layers.
-  for (int mx = mxmin; mx <= mxmax; ++mx) {
-    for (int my = mymin; my <= mymax; ++my) {
+  for (int mx = m_mxmin; mx <= m_mxmax; ++mx) {
+    for (int my = m_mymin; my <= m_mymax; ++my) {
       // Load the layers of the wire matrices.
       // CALL IONIO(MX,MY,2,0,IFAIL)
       // if (!LoadWireLayers(mx, my)) {
@@ -5286,38 +5284,37 @@ bool ComponentAnalyticField::Wfield(const double xpos, const double ypos,
       // Loop over all wires.
       for (int iw = m_nWires; iw--;) {
         // Pick out those wires that are part of this read out group.
-        if (m_w[iw].ind == isw) {
-          ex = ey = ez = 0.;
-          if (m_scellTypeFourier == "A  ") {
-            WfieldWireA00(xpos, ypos, ex, ey, volt, mx, my, iw, opt);
-          } else if (m_scellTypeFourier == "B2X") {
-            WfieldWireB2X(xpos, ypos, ex, ey, volt, my, iw, opt);
-          } else if (m_scellTypeFourier == "B2Y") {
-            WfieldWireB2Y(xpos, ypos, ex, ey, volt, mx, iw, opt);
-          } else if (m_scellTypeFourier == "C2X") {
-            WfieldWireC2X(xpos, ypos, ex, ey, volt, iw, opt);
-          } else if (m_scellTypeFourier == "C2Y") {
-            WfieldWireC2Y(xpos, ypos, ex, ey, volt, iw, opt);
-          } else if (m_scellTypeFourier == "C3 ") {
-            WfieldWireC30(xpos, ypos, ex, ey, volt, iw, opt);
-          } else if (m_scellTypeFourier == "D1 ") {
-            WfieldWireD10(xpos, ypos, ex, ey, volt, iw, opt);
-          } else if (m_scellTypeFourier == "D3 ") {
-            WfieldWireD30(xpos, ypos, ex, ey, volt, iw, opt);
-          } else {
-            std::cerr << m_className << "::Wfield:\n";
-            std::cerr << "    Unknown signal field type " << m_scellTypeFourier
-                      << " received. Program error!\n";
-            std::cerr << "    Encountered for wire " << iw
-                      << ", readout group = " << m_w[iw].ind << "\n";
-            exsum = eysum = ezsum = vsum = 0.;
-            return false;
-          }
-          exsum += ex;
-          eysum += ey;
-          ezsum += ez;
-          if (opt) vsum += volt;
+        if (m_w[iw].ind != isw) continue;
+        ex = ey = ez = 0.;
+        if (m_cellTypeFourier == A00) {
+          WfieldWireA00(xpos, ypos, ex, ey, volt, mx, my, iw, opt);
+        } else if (m_cellTypeFourier == B2X) {
+          WfieldWireB2X(xpos, ypos, ex, ey, volt, my, iw, opt);
+        } else if (m_cellTypeFourier == B2Y) {
+          WfieldWireB2Y(xpos, ypos, ex, ey, volt, mx, iw, opt);
+        } else if (m_cellTypeFourier == C2X) {
+          WfieldWireC2X(xpos, ypos, ex, ey, volt, iw, opt);
+        } else if (m_cellTypeFourier == C2Y) {
+          WfieldWireC2Y(xpos, ypos, ex, ey, volt, iw, opt);
+        } else if (m_cellTypeFourier == C30) {
+          WfieldWireC30(xpos, ypos, ex, ey, volt, iw, opt);
+        } else if (m_cellTypeFourier == D10) {
+          WfieldWireD10(xpos, ypos, ex, ey, volt, iw, opt);
+        } else if (m_cellTypeFourier == D30) {
+          WfieldWireD30(xpos, ypos, ex, ey, volt, iw, opt);
+        } else {
+          std::cerr << m_className << "::Wfield:\n";
+          std::cerr << "    Unknown signal field type " << m_cellTypeFourier
+                    << " received. Program error!\n";
+          std::cerr << "    Encountered for wire " << iw
+                    << ", readout group = " << m_w[iw].ind << "\n";
+          exsum = eysum = ezsum = vsum = 0.;
+          return false;
         }
+        exsum += ex;
+        eysum += ey;
+        ezsum += ez;
+        if (opt) vsum += volt;
       }
       // Load the layers of the plane matrices.
       // CALL IPLIO(MX,MY,2,IFAIL)
@@ -5331,64 +5328,61 @@ bool ComponentAnalyticField::Wfield(const double xpos, const double ypos,
       // Loop over all planes.
       for (int ip = 0; ip < 5; ++ip) {
         // Pick out those that are part of this read out group.
-        if (m_planes[ip].ind == isw) {
-          ex = ey = ez = 0.;
-          if (m_scellTypeFourier == "A  ") {
-            WfieldPlaneA00(xpos, ypos, ex, ey, volt, mx, my, ip, opt);
-          } else if (m_scellTypeFourier == "B2X") {
-            WfieldPlaneB2X(xpos, ypos, ex, ey, volt, my, ip, opt);
-          } else if (m_scellTypeFourier == "B2Y") {
-            WfieldPlaneB2Y(xpos, ypos, ex, ey, volt, mx, ip, opt);
-          } else if (m_scellTypeFourier == "C2X") {
-            WfieldPlaneC2X(xpos, ypos, ex, ey, volt, ip, opt);
-          } else if (m_scellTypeFourier == "C2Y") {
-            WfieldPlaneC2Y(xpos, ypos, ex, ey, volt, ip, opt);
-          } else if (m_scellTypeFourier == "D1 ") {
-            WfieldPlaneD10(xpos, ypos, ex, ey, volt, ip, opt);
-          } else if (m_scellTypeFourier == "D3 ") {
-            WfieldPlaneD30(xpos, ypos, ex, ey, volt, ip, opt);
-          } else {
-            std::cerr << m_className << "::Wfield:\n";
-            std::cerr << "    Unkown field type " << m_scellTypeFourier
-                      << " received. Program error!\n";
-            std::cerr << "    Encountered for plane " << ip
-                      << ", readout group = " << m_planes[ip].ind << "\n";
-            exsum = eysum = ezsum = 0.;
-            return false;
-          }
-          exsum += ex;
-          eysum += ey;
-          ezsum += ez;
-          if (opt) vsum += volt;
+        if (m_planes[ip].ind != isw) continue;
+        ex = ey = ez = 0.;
+        if (m_cellTypeFourier == A00) {
+          WfieldPlaneA00(xpos, ypos, ex, ey, volt, mx, my, ip, opt);
+        } else if (m_cellTypeFourier == B2X) {
+          WfieldPlaneB2X(xpos, ypos, ex, ey, volt, my, ip, opt);
+        } else if (m_cellTypeFourier == B2Y) {
+          WfieldPlaneB2Y(xpos, ypos, ex, ey, volt, mx, ip, opt);
+        } else if (m_cellTypeFourier == C2X) {
+          WfieldPlaneC2X(xpos, ypos, ex, ey, volt, ip, opt);
+        } else if (m_cellTypeFourier == C2Y) {
+          WfieldPlaneC2Y(xpos, ypos, ex, ey, volt, ip, opt);
+        } else if (m_cellTypeFourier == D10) {
+          WfieldPlaneD10(xpos, ypos, ex, ey, volt, ip, opt);
+        } else if (m_cellTypeFourier == D30) {
+          WfieldPlaneD30(xpos, ypos, ex, ey, volt, ip, opt);
+        } else {
+          std::cerr << m_className << "::Wfield:\n";
+          std::cerr << "    Unkown field type " << m_cellTypeFourier
+                    << " received. Program error!\n";
+          std::cerr << "    Encountered for plane " << ip
+                    << ", readout group = " << m_planes[ip].ind << "\n";
+          exsum = eysum = ezsum = 0.;
+          return false;
         }
+        exsum += ex;
+        eysum += ey;
+        ezsum += ez;
+        if (opt) vsum += volt;
       }
       // Next signal layer.
     }
   }
   // Add the field due to the planes themselves.
   for (int ip = 0; ip < 5; ++ip) {
-    if (m_planes[ip].ind == isw) {
-      exsum += m_planes[ip].ewxcor;
-      eysum += m_planes[ip].ewycor;
-      if (opt) {
-        if (ip == 0 || ip == 1) {
-          double xx = xpos;
-          if (m_perx) {
-            xx -= m_sx * int(round(xpos / m_sx));
-            if (m_ynplan[0] && xx <= m_coplan[0]) xx += m_sx;
-            if (m_ynplan[1] && xx >= m_coplan[1]) xx -= m_sx;
-          }
-          vsum += 1. - m_planes[ip].ewxcor * (xx - m_coplan[ip]);
-        } else if (ip == 2 || ip == 3) {
-          double yy = ypos;
-          if (m_pery) {
-            yy -= m_sy * int(round(ypos / m_sy));
-            if (m_ynplan[2] && yy <= m_coplan[2]) yy += m_sy;
-            if (m_ynplan[3] && yy >= m_coplan[3]) yy -= m_sy;
-          }
-          vsum += 1. - m_planes[ip].ewycor * (yy - m_coplan[ip]);
-        }
+    if (m_planes[ip].ind != isw) continue;
+    exsum += m_planes[ip].ewxcor;
+    eysum += m_planes[ip].ewycor;
+    if (!opt) continue;
+    if (ip == 0 || ip == 1) {
+      double xx = xpos;
+      if (m_perx) {
+        xx -= m_sx * int(round(xpos / m_sx));
+        if (m_ynplan[0] && xx <= m_coplan[0]) xx += m_sx;
+        if (m_ynplan[1] && xx >= m_coplan[1]) xx -= m_sx;
       }
+      vsum += 1. - m_planes[ip].ewxcor * (xx - m_coplan[ip]);
+    } else if (ip == 2 || ip == 3) {
+      double yy = ypos;
+      if (m_pery) {
+        yy -= m_sy * int(round(ypos / m_sy));
+        if (m_ynplan[2] && yy <= m_coplan[2]) yy += m_sy;
+        if (m_ynplan[3] && yy >= m_coplan[3]) yy -= m_sy;
+      }
+      vsum += 1. - m_planes[ip].ewycor * (yy - m_coplan[ip]);
     }
   }
 
