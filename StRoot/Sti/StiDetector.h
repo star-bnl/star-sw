@@ -101,7 +101,7 @@ public:
     void   getDetPlane(double plane[4]) const;
 
  static int    mgIndex;
- static double mgValue[2];
+ static double mgValue[3];
 
  protected:
     
