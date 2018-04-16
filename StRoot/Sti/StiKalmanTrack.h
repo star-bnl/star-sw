@@ -273,7 +273,7 @@ class StiKalmanTrack : public StiTrack
   StiTrackNode *extendToVertex(StiHit* vertex);
   void setFlag(long v);
   long getFlag() const;
-
+  int  legal(const StiHit* stiHit) const;
   StiKalmanTrackNode * extrapolateToBeam();
   StiKalmanTrackNode * extrapolateToRadius(double radius);
   int approx(int mode=0,int nNodes=999);
