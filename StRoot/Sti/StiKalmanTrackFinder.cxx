@@ -473,6 +473,8 @@ assert(direction || leadNode==track->getLastNode());
   double xg = leadNode->x_g();
   double yg = leadNode->y_g();
   double projAngle = atan2(yg,xg);
+  StiHit *leadHit = leadNode->getHit();
+  
   if(debug() > 2)cout << "Projection Angle:"<<projAngle*180/3.1415<<endl;
     
   vector<StiDetectorNode*>::const_iterator layer;
@@ -525,6 +527,7 @@ assert(direction || leadNode==track->getLastNode());
        if (fabs(diff) > OpenAngle)	continue;
        detectors.push_back(detector);
     }
+
 //		list of detectors candidates created
     int nDets = detectors.size(); 
     if (!nDets) continue;
@@ -568,7 +571,12 @@ assert(direction || leadNode==track->getLastNode());
 	for (hitIter=candidateHits.begin();hitIter!=candidateHits.end();++hitIter)
 	{
 	  stiHit = *hitIter;
-//VP          if (stiHit->detector() && stiHit->detector()!=tDet) 	continue;
+//       if (stiHit->detector()!=tDet) 	continue;
+//assert(!stiHit->detector() || stiHit->detector()==tDet);
+          if (leadHit == stiHit) 				continue;
+          if (leadHit && leadHit->stHit()==stiHit->stHit())	continue;
+          if (!track->legal(stiHit))				continue;
+
           status = testNode.nudge(stiHit);
           testNode.setReady();
           if (status)		continue;
