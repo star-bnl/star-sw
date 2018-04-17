@@ -299,7 +299,19 @@ int itpcPed::to_cache(const char *fname)
 				ped_t *pt = ped_p[s][r][p][c] ;
 
 				for(int t=0;t<512;t++) {
-					fprintf(outf,"%2d %d %2d %2d %3d %.3f %.3f\n",s+1,r+1,p+1,c,t,pt->ped[t],pt->rms[t]) ;
+					double ped = pt->ped[t] ;
+
+					if(run_type==5) {
+						ped -= pt->c_ped ;
+
+						if(ped<0.0) ped = 0.0 ;
+
+						if(ped==0.0) continue ;
+
+						if(pt->rms[t]>1000.0) continue ;	
+					}
+
+					fprintf(outf,"%2d %d %2d %2d %3d %.3f %.3f\n",s+1,r+1,p+1,c,t,ped,pt->rms[t]) ;
 				}
 			}
 		}
