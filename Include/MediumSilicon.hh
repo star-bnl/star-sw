@@ -14,7 +14,7 @@ class MediumSilicon : public Medium {
   /// Destructor
   virtual ~MediumSilicon() {}
 
-  bool IsSemiconductor() const { return true; }
+  bool IsSemiconductor() const override { return true; }
 
   /// Doping concentration [cm-3] and type ('i', 'n', 'p')
   void SetDoping(const char type, const double c);
@@ -28,23 +28,23 @@ class MediumSilicon : public Medium {
   // Electron transport parameters
   bool ElectronVelocity(const double ex, const double ey, const double ez,
                         const double bx, const double by, const double bz,
-                        double& vx, double& vy, double& vz);
+                        double& vx, double& vy, double& vz) override;
   bool ElectronTownsend(const double ex, const double ey, const double ez,
                         const double bx, const double by, const double bz,
-                        double& alpha);
+                        double& alpha) override;
   bool ElectronAttachment(const double ex, const double ey, const double ez,
                           const double bx, const double by, const double bz,
-                          double& eta);
+                          double& eta) override;
   // Hole transport parameters
   bool HoleVelocity(const double ex, const double ey, const double ez,
                     const double bx, const double by, const double bz,
-                    double& vx, double& vy, double& vz);
+                    double& vx, double& vy, double& vz) override;
   bool HoleTownsend(const double ex, const double ey, const double ez,
                     const double bx, const double by, const double bz,
-                    double& alpha);
+                    double& alpha) override;
   bool HoleAttachment(const double ex, const double ey, const double ez,
                       const double bx, const double by, const double bz,
-                      double& eta);
+                      double& eta) override;
 
   void SetLowFieldMobility(const double mue, const double muh);
   void SetLatticeMobilityModelMinimos();
@@ -69,9 +69,7 @@ class MediumSilicon : public Medium {
 
 
   // Scaling 
-  void SetDiffusionScaling(const double d) {
-    m_diffScale = d;
-  }
+  void SetDiffusionScaling(const double d) { m_diffScale = d; }
 
   // Microscopic transport properties
   bool SetMaxElectronEnergy(const double e);
@@ -95,24 +93,20 @@ class MediumSilicon : public Medium {
   // for a given (crystal) momentum
   double GetElectronEnergy(const double px, const double py, const double pz,
                            double& vx, double& vy, double& vz,
-                           const int band = 0);
+                           const int band = 0) override;
   // Get the electron (crystal) momentum for a given kinetic energy
   void GetElectronMomentum(const double e, double& px, double& py, double& pz,
-                           int& band);
+                           int& band) override;
 
   // Get the null-collision rate [ns-1]
-  double GetElectronNullCollisionRate(const int band);
+  double GetElectronNullCollisionRate(const int band) override;
   // Get the (real) collision rate [ns-1] at a given electron energy
-  double GetElectronCollisionRate(const double e, const int band);
+  double GetElectronCollisionRate(const double e, const int band) override;
   // Sample the collision type
   bool GetElectronCollision(const double e, int& type, int& level, double& e1,
-                            double& dx, double& dy, double& dz, int& nion,
-                            int& ndxc, int& band);
-  unsigned int GetNumberOfIonisationProducts() const { 
-    return m_ionProducts.size(); 
-  }
-  bool GetIonisationProduct(const unsigned int i, int& type, 
-                            double& energy) const;
+                            double& dx, double& dy, double& dz, 
+                            std::vector<std::pair<int, double> >& secondaries,
+                            int& ndxc, int& band) override;
 
   // Density of states
   double GetConductionBandDensityOfStates(const double e, const int band = 0);
@@ -131,9 +125,9 @@ class MediumSilicon : public Medium {
   int GetElectronBandPopulation(const int band);
 
   bool GetOpticalDataRange(double& emin, double& emax, 
-                           const unsigned int i = 0);
+                           const unsigned int i = 0) override;
   bool GetDielectricFunction(const double e, double& eps1, double& eps2,
-                             const unsigned int i = 0);
+                             const unsigned int i = 0) override;
 
   void ComputeSecondaries(const double e0, double& ee, double& eh);
 
@@ -284,12 +278,6 @@ class MediumSilicon : public Medium {
   std::vector<unsigned int> m_nCollElectronDetailed;
   std::vector<unsigned int> m_nCollElectronBand;
 
-  struct ionProd {
-    int type;
-    double energy;
-  };
-  std::vector<ionProd> m_ionProducts;
-
   // Density of states tables
   double m_eStepDos;
   std::vector<double> m_fbDosValence;
@@ -300,14 +288,6 @@ class MediumSilicon : public Medium {
   std::string m_opticalDataFile = "OpticalData_Si.txt";
   std::vector<double> m_opticalDataEnergies;
   std::vector<std::pair<double, double> > m_opticalDataEpsilon;
-  /*
-  struct opticalData {
-    // Energy [eV]
-    double energy;
-    // Dielectric function
-    double eps1, eps2;
-  };
-  std::vector<opticalData> m_opticalDataTable;*/
 
   bool UpdateTransportParameters();
   void UpdateLatticeMobilityMinimos();

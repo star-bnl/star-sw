@@ -516,23 +516,16 @@ double Medium::GetElectronCollisionRate(const double /*e*/,
 
 bool Medium::GetElectronCollision(const double e, int& type, int& level,
                                   double& e1, double& dx, double& dy,
-                                  double& dz, int& nion, int& ndxc, int& band) {
+                                  double& dz, 
+                                  std::vector<std::pair<int, double> >& /*secondaries*/, 
+                                  int& ndxc, int& band) {
 
   type = level = -1;
   e1 = e;
-  nion = ndxc = band = 0;
+  ndxc = band = 0;
   RndmDirection(dx, dy, dz);
 
   if (m_debug) PrintNotImplemented(m_className, "GetElectronCollision");
-  return false;
-}
-
-bool Medium::GetIonisationProduct(const unsigned int /*i*/, 
-                                  int& type, double& energy) const {
-
-  if (m_debug) PrintNotImplemented(m_className, "GetIonisationProduct");
-  type = 0;
-  energy = 0.;
   return false;
 }
 

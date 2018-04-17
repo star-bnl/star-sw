@@ -71,8 +71,6 @@ MediumSilicon::MediumSilicon()
   // Initialize the collision counters.
   m_nCollElectronDetailed.clear();
   m_nCollElectronBand.clear();
-
-  m_ionProducts.clear();
 }
 
 void MediumSilicon::SetDoping(const char type, const double c) {
@@ -851,8 +849,9 @@ double MediumSilicon::GetElectronCollisionRate(const double e, const int band) {
 
 bool MediumSilicon::GetElectronCollision(const double e, int& type, int& level,
                                          double& e1, double& px, double& py,
-                                         double& pz, int& nion, int& ndxc,
-                                         int& band) {
+                                         double& pz, 
+                                         std::vector<std::pair<int, double> >& secondaries,
+                                         int& ndxc, int& band) {
 
   if (e > m_eFinalG) {
     std::cerr << m_className << "::GetElectronCollision:\n"
@@ -1080,23 +1079,16 @@ bool MediumSilicon::GetElectronCollision(const double e, int& type, int& level,
   }
 
   // Secondaries
-  nion = ndxc = 0;
+  ndxc = 0;
   // Ionising collision
   if (type == ElectronCollisionTypeIonisation) {
     double ee = 0., eh = 0.;
     ComputeSecondaries(e, ee, eh);
     loss = ee + eh + m_bandGap;
-    m_ionProducts.clear();
     // Add the secondary electron.
-    ionProd newIonProd;
-    newIonProd.type = IonProdTypeElectron;
-    newIonProd.energy = ee;
-    m_ionProducts.push_back(newIonProd);
+    secondaries.emplace_back(std::make_pair(IonProdTypeElectron, ee));
     // Add the hole.
-    newIonProd.type = IonProdTypeHole;
-    newIonProd.energy = eh;
-    m_ionProducts.push_back(newIonProd);
-    nion = 2;
+    secondaries.emplace_back(std::make_pair(IonProdTypeHole, eh));
   }
 
   if (e < loss) loss = e - 0.00001;
@@ -1175,20 +1167,6 @@ bool MediumSilicon::GetElectronCollision(const double e, int& type, int& level,
   e1 = e;
   type = 0;
   return false;
-}
-
-bool MediumSilicon::GetIonisationProduct(const unsigned int i, int& type,
-                                         double& energy) const {
-
-  if (i >= m_ionProducts.size()) {
-    std::cerr << m_className << "::GetIonisationProduct:\n"
-              << "    Index (" << i << ") out of range.\n";
-    return false;
-  }
-
-  type = m_ionProducts[i].type;
-  energy = m_ionProducts[i].energy;
-  return true;
 }
 
 void MediumSilicon::ResetCollisionCounters() {

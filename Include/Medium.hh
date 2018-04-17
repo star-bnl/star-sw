@@ -113,13 +113,10 @@ class Medium {
   virtual double GetElectronCollisionRate(const double e, const int band = 0);
   virtual bool GetElectronCollision(const double e, int& type, int& level,
                                     double& e1, double& dx, double& dy,
-                                    double& dz, int& nion, int& ndxc,
+                                    double& dz, 
+                                    std::vector<std::pair<int, double> >& secondaries, 
+                                    int& ndxc,
                                     int& band);
-
-  virtual unsigned int GetNumberOfIonisationProducts() const { return 0; }
-  virtual bool GetIonisationProduct(const unsigned int i, 
-                                    int& type, double& energy) const;
-
   virtual unsigned int GetNumberOfDeexcitationProducts() const { return 0; }
   virtual bool GetDeexcitationProduct(const unsigned int i, double& t, 
                                       double& s,

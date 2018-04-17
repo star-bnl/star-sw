@@ -543,6 +543,7 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
   stackOld.reserve(10000);
   stackNew.reserve(1000);
   std::vector<std::pair<double, double> > stackPhotons;
+  std::vector<std::pair<int, double> > secondaries;
 
   // Put the initial electron on the stack.
   if (useBandStructure) {
@@ -603,9 +604,7 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
     // If the list of electrons/holes is exhausted, we're done.
     if (stackOld.empty()) break;
     // Loop over all electrons/holes in the avalanche.
-    const std::vector<Electron>::const_iterator end = stackOld.end();
-    std::vector<Electron>::iterator it;
-    for (it = stackOld.begin(); it != end; ++it) {
+    for (auto it = stackOld.begin(), end = stackOld.end(); it != end; ++it) {
       // Get an electron/hole from the stack.
       double x = (*it).x;
       double y = (*it).y;
@@ -952,11 +951,9 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
         // Get the collision type and parameters.
         int cstype = 0;
         int level = 0;
-        int nion = 0;
         int ndxc = 0;
         medium->GetElectronCollision(newEnergy, cstype, level, energy, newKx,
-                                     newKy, newKz, nion, ndxc, band);
-
+                                     newKy, newKz, secondaries, ndxc, band);
         // If activated, histogram the distance with respect to the
         // last collision.
         if (m_histDistance && !m_distanceHistogramType.empty()) {
@@ -1005,12 +1002,9 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
             if (m_hasUserHandleIonisation) {
               m_userHandleIonisation(x, y, z, t, cstype, level, medium);
             }
-            for (int j = nion; j--;) {
-              int itype;
-              double esec;
-              medium->GetIonisationProduct(j, itype, esec);
-              if (itype == IonProdTypeElectron) {
-                esec = std::max(esec, Small);
+            for (const auto& secondary : secondaries) {
+              if (secondary.first == IonProdTypeElectron) {
+                const double esec = std::max(secondary.second, Small);
                 if (m_histSecondary) m_histSecondary->Fill(esec);
                 // Increment the electron counter.
                 ++m_nElectrons;
@@ -1024,8 +1018,8 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
                 } else {
                   AddToStack(x, y, z, t, esec, false, stackNew);
                 }
-              } else if (itype == IonProdTypeHole) {
-                esec = std::max(esec, Small);
+              } else if (secondary.first == IonProdTypeHole) {
+                const double esec = std::max(secondary.second, Small);
                 // Increment the hole counter.
                 ++m_nHoles;
                 if (!aval) continue;
@@ -1038,10 +1032,11 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
                 } else {
                   AddToStack(x, y, z, t, esec, true, stackNew);
                 }
-              } else if (itype == IonProdTypeIon) {
+              } else if (secondary.first == IonProdTypeIon) {
                 ++m_nIons;
               }
             }
+            secondaries.clear();
             if (m_debug) PrintStatus(hdr, "ionised", x, y, z, hole);
             break;
           // Attachment

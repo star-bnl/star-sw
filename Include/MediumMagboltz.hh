@@ -82,13 +82,9 @@ class MediumMagboltz : public MediumGas {
                                   const int band);
   // Sample the collision type
   bool GetElectronCollision(const double e, int& type, int& level, double& e1,
-                            double& dx, double& dy, double& dz, int& nion,
-                            int& ndxc, int& band) override ;
-  unsigned int GetNumberOfIonisationProducts() const override { 
-    return m_ionProducts.size(); 
-  }
-  bool GetIonisationProduct(const unsigned int i, int& type, 
-                            double& energy) const override;
+                            double& dx, double& dy, double& dz, 
+                            std::vector<std::pair<int, double> >& secondaries,
+                            int& ndxc, int& band) override;
   void ComputeDeexcitation(int iLevel, int& fLevel);
   unsigned int GetNumberOfDeexcitationProducts() const override { 
     return m_dxcProducts.size();
@@ -264,13 +260,6 @@ class MediumMagboltz : public MediumGas {
   std::vector<deexcitation> m_deexcitations;
   // Mapping between deexcitations and cross-section terms.
   int m_iDeexcitation[nMaxLevels];
-
-  // List of ionisation products.
-  struct ionProd {
-    int type;
-    double energy;
-  };
-  std::vector<ionProd> m_ionProducts;
 
   // List of de-excitation products
   int nDeexcitationProducts;

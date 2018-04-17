@@ -3,7 +3,6 @@
 #include <fstream>
 #include <cmath>
 #include <algorithm>
-
 #include <map>
 
 #include <TMath.h>
@@ -640,8 +639,9 @@ double MediumMagboltz::GetElectronCollisionRate(const double e,
 
 bool MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
                                           double& e1, double& dx, double& dy,
-                                          double& dz, int& nion, int& ndxc,
-                                          int& band) {
+                                          double& dz, 
+                                          std::vector<std::pair<int, double> >& secondaries, 
+                                          int& ndxc, int& band) {
 
   // Check if the electron energy is within the currently set range.
   if (e > m_eFinal && m_useAutoAdjust) {
@@ -724,7 +724,7 @@ bool MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
 
   // Get the energy loss for this process.
   double loss = m_energyLoss[level];
-  nion = ndxc = 0;
+  ndxc = 0;
 
   if (type == ElectronCollisionTypeIonisation) {
     // Sample the secondary electron energy according to
@@ -748,17 +748,10 @@ bool MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
     }
     if (esec <= 0) esec = Small;
     loss += esec;
-    m_ionProducts.clear();
     // Add the secondary electron.
-    ionProd newIonProd;
-    newIonProd.type = IonProdTypeElectron;
-    newIonProd.energy = esec;
-    m_ionProducts.push_back(newIonProd);
+    secondaries.emplace_back(std::make_pair(IonProdTypeElectron, esec));
     // Add the ion.
-    newIonProd.type = IonProdTypeIon;
-    newIonProd.energy = 0.;
-    m_ionProducts.push_back(newIonProd);
-    nion = 2;
+    secondaries.emplace_back(std::make_pair(IonProdTypeIon, 0.));
   } else if (type == ElectronCollisionTypeExcitation) {
     // if (m_gas[igas] == "CH4" && loss * m_rgas[igas] < 13.35 && e > 12.65) {
     //   if (RndmUniform() < 0.5) {
@@ -820,9 +813,9 @@ bool MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
         ctheta0 = (ctheta0 + angPar) / (1. + angPar * ctheta0);
         break;
       default:
-        std::cerr << m_className << "::GetElectronCollision:\n";
-        std::cerr << "    Unknown scattering model. \n";
-        std::cerr << "    Using isotropic distribution.\n";
+        std::cerr << m_className << "::GetElectronCollision:\n"
+                  << "    Unknown scattering model.\n"
+                  << "    Using isotropic distribution.\n";
         break;
     }
   }
@@ -851,7 +844,6 @@ bool MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
   const double phi = TwoPi * RndmUniform();
   const double cphi = cos(phi);
   const double sphi = sin(phi);
-
   if (argZ == 0.) {
     dz = ctheta;
     dx = cphi * stheta;
@@ -879,20 +871,6 @@ bool MediumMagboltz::GetDeexcitationProduct(const unsigned int i, double& t, dou
   s = m_dxcProducts[i].s;
   type = m_dxcProducts[i].type;
   energy = m_dxcProducts[i].energy;
-  return true;
-}
-
-bool MediumMagboltz::GetIonisationProduct(const unsigned int i, int& type,
-                                          double& energy) const {
-
-  if (i >= m_ionProducts.size()) {
-    std::cerr << m_className << "::GetIonisationProduct:\n"
-              << "    Index (" << i << ") out of range.\n";
-    return false;
-  }
-
-  type = m_ionProducts[i].type;
-  energy = m_ionProducts[i].energy;
   return true;
 }
 
