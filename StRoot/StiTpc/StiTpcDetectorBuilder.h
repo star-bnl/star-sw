@@ -1,5 +1,8 @@
 #ifndef StiTpcDetectorBuilder_H
 #define StiTpcDetectorBuilder_H
+
+#include <set>
+
 #include "Sti/StiDetectorBuilder.h"
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
 
@@ -18,6 +21,9 @@ public:
     double phiForEastSector(UInt_t iSector, UInt_t nSectors) const;
     void         useVMCGeometry();		
     //    virtual void AverageVolume(TGeoPhysicalNode *nodeP);
+
+    static std::pair<int, int>  toStiLayer(const int tpc_sector, const int tpc_padrow);
+
  protected:
     StiMaterial * _fcMaterial;    
 
@@ -26,8 +32,42 @@ public:
 
 private:
 
+    struct StiLayer
+    {
+      enum TpcHalf { West = 0, East = 1 };
+
+      StiLayer(int tpc_sector, int tpc_padrow) :
+        sti_sector_id(tpc_sector <= 12 ? tpc_sector-1 : 12 - (tpc_sector-12)%12 - 1),
+        sti_padrow_id(-1)
+        {
+          TpcHalf tpc_half_id = (tpc_sector <= 12 ? West : East);
+          tpc_sector_id[tpc_half_id] = tpc_sector;
+          tpc_padrow_id[tpc_half_id] = tpc_padrow;
+        }
+
+               int sti_sector_id;
+      mutable  int sti_padrow_id;
+      mutable  int tpc_sector_id[2] = {-1, -1}; /// East and/or West if available
+      mutable  int tpc_padrow_id[2] = {-1, -1}; /// East and/or West if available
+
+              void update(int tpc_sector, int tpc_padrow) const {
+                     TpcHalf tpc_half_id = (tpc_sector <= 12 ? West : East);
+                     tpc_sector_id[tpc_half_id] = tpc_sector;
+                     tpc_padrow_id[tpc_half_id] = tpc_padrow;
+                   }
+               int tpc_sector() const { return tpc_sector_id[West] > 0 ? tpc_sector_id[West] : tpc_sector_id[East]; }
+               int tpc_padrow() const { return tpc_padrow_id[West] > 0 ? tpc_padrow_id[West] : tpc_padrow_id[East]; }
+               //int tpc_sector(TpcHalf half) const { return tpc_sector_id[half]; }
+              bool represents(TpcHalf half) const { return tpc_sector_id[half] > 0; }
+              bool operator< (const StiLayer& other) const;
+    };
+
+    void fillStiLayersMap();
+
     StiPlanarShape* constructTpcPadrowShape(int sector, int row) const;
     StiDetector*    constructTpcPadrowDetector(int row, int sector, StiPlanarShape* pShape) const;
+
+    static std::set<StiLayer> sStiLayers;
 };
 
 /// Get the azimuthal angle of the given sector
