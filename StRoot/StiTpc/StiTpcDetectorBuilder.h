@@ -26,7 +26,7 @@ public:
 
 private:
 
-    StiPlanarShape* constructTpcPadrowShape(int row) const;
+    StiPlanarShape* constructTpcPadrowShape(int sector, int row) const;
     StiDetector*    constructTpcPadrowDetector(int row, int sector, StiPlanarShape* pShape) const;
 };
 
