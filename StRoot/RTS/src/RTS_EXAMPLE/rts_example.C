@@ -105,6 +105,9 @@ int altro_override[256] ;
 extern int *tpx_altro_to_row_override ;
 
 
+static double det_raw_bytes[6] ;
+static u_int det_events ;
+
 int main(int argc, char *argv[])
 {
 	extern char *optarg ;
@@ -2330,8 +2333,8 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 	if(strcasestr(do_print,"itpc")) ;	// leave as is...
 	else do_print = 0 ;
 
-	for(int s=1;s<=24;s++) {
-
+	for(int s=20;s<=20;s++) {
+		
 #if 1
 		dd = rdr->det("itpc")->get("raw",s) ;
 
@@ -2341,18 +2344,21 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 
 				rdos[dd->row-1] = 1 ;
 
-#if 0
+				det_raw_bytes[dd->rdo-1] += dd->ncontent ;
+				
+#if 1
 				if(do_print) {
 					printf("ITPC RAW: sector %2d, RDO %d: %d rawbytes\n",dd->sec,dd->row,dd->ncontent) ;
 
-					u_int *d32 = (u_int *)dd->Void ;
+					//u_int *d32 = (u_int *)dd->Void ;
 
-					for(u_int i=0;i<dd->ncontent/4;i++) {
-						printf("%4d = 0x%08X\n",i,d32[i]) ;
-					}
+					//for(u_int i=0;i<dd->ncontent/4;i++) {
+					//	printf("%4d = 0x%08X\n",i,d32[i]) ;
+					//}
 				}
 #endif
 			}
+			if(adc_found) det_events++ ;
 		}
 #endif
 
@@ -2488,6 +2494,9 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 
 	if(found) {
 		LOG(INFO,"ITPC found [%s] pixels %d, clusters %d",fstr,pixels,clusters) ;
+		for(int i=0;i<4;i++) {
+			LOG(TERR,"   RDO %d: ave words %.1f",i+1,det_raw_bytes[i]/det_events/4) ;
+		}
 	}
 	
 
