@@ -1715,6 +1715,7 @@ Bfc_st BFC[] = { // standard chains
   {"PxlIT"  ,""  ,"","ITTF",""                               ,"","Sti tracking: Pixel geom",kFALSE},
   {"IstIT"  ,""  ,"","ITTF",""                               ,"","Sti tracking: Ist geom",kFALSE},
   {"SstIT"  ,""  ,"","ITTF",""                               ,"","Sti tracking: Sst geom",kFALSE},
+  {"iTpcIT" ,""  ,"","ITTF",""                               ,"","Sti tracking: iTpc geom + hits",kFALSE},
 
   {"BTofIT"  ,""  ,"","ITTF",""                            ,"","Sti tracking: BTof geom",kFALSE},
   {"NoSvtIT"     ,""  ,"","-SvtIT",""                    ,"","ITTF: track with switch off SVT geom",kFALSE},
@@ -1722,7 +1723,6 @@ Bfc_st BFC[] = { // standard chains
   {"NoSstIT"     ,""  ,"","-SstIT",""                    ,"","ITTF: track with switch off SST geom",kFALSE},
   {"NoPxlIT"     ,""  ,"","-PxlIT",""                    ,"","ITTF: track with switch off PXL geom",kFALSE},
   {"NoIstIT"     ,""  ,"","-IstIT",""                    ,"","ITTF: track with switch off IST geom",kFALSE},
-  {"NoiTpcIT"    ,""  ,"","",""                         ,"","ITTF: track with switch off iTPC geom",kFALSE},
   {"skip1row"    ,""  ,"","",""                           ,"","ITTF: skip the first pad row in TPC",kFALSE},
   {"StiRnD"   ,"","","",                                  "","StiRnD", "Load StiRnD shared library",kFALSE},
   {"Alignment"   ,"","","",                   "","", "Sti Tpc Alignment, reconstruction per sector",kFALSE},

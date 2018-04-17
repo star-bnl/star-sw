@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.651 2018/04/12 18:43:59 smirnovd Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.652 2018/04/17 22:56:30 smirnovd Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -480,7 +480,7 @@ Int_t StBFChain::Instantiate()
       }
 
       // By default iTpc hits are used in tracking
-      mk->SetAttr("activeiTpc", GetOption("NoiTpcIT") ? kFALSE : kTRUE);
+      mk->SetAttr("activeiTpc", GetOption("iTpcIT") ? kTRUE : kFALSE);
 
       // old logic for svt and ssd
       if (GetOption("NoSvtIT")){
