@@ -107,9 +107,9 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
   StThreeVectorD RowPosition;
   for(row = 0; row < nRows; row++)    {
 
-    StiPlanarShape* pShape = constructTpcPadrowShape(row);
-
     for(UInt_t sector = 0; sector<getNSectors(); sector++) {
+
+      StiPlanarShape* pShape = constructTpcPadrowShape(sector, row);
       StiDetector* pDetector = constructTpcPadrowDetector(row, sector, pShape);
       add(row,sector,pDetector); if (debug>1) cout << *pDetector << endl;
     }// for sector
@@ -247,12 +247,12 @@ StiDetector* StiTpcDetectorBuilder::constructTpcPadrowDetector(int row, int sect
 }
 
 
-StiPlanarShape* StiTpcDetectorBuilder::constructTpcPadrowShape(int row) const
+StiPlanarShape* StiTpcDetectorBuilder::constructTpcPadrowShape(int sector, int row) const
 {
   Int_t NoStiSectors = 12;
   UInt_t nInnerPadrows = St_tpcPadPlanesC::instance()->numberOfInnerRows();
 
-    TString name(Form("Tpc/Padrow_%d", row));
+    TString name = Form("Tpc/Padrow_%d/Sector_%d", row, sector);
     StiPlanarShape* pShape = new StiPlanarShape;
     if (!pShape)
       throw runtime_error("StiTpcDetectorBuilder::buildDetectors() - FATAL - pShape==0||ofcShape==0");
