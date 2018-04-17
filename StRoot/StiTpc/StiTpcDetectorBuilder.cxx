@@ -30,8 +30,8 @@
 #include "StDetectorDbMaker/St_tpcPadGainT0BC.h"
 //#define TPC_IDEAL_GEOM
 
-StiTpcDetectorBuilder::StiTpcDetectorBuilder(Bool_t active)
-  : StiDetectorBuilder("Tpc",active), _fcMaterial(0){}
+StiTpcDetectorBuilder::StiTpcDetectorBuilder(Bool_t active, bool active_iTpc)
+  : StiDetectorBuilder("Tpc",active), _fcMaterial(0), _active_iTpc(active_iTpc) {}
 
 StiTpcDetectorBuilder::~StiTpcDetectorBuilder() {}
 
