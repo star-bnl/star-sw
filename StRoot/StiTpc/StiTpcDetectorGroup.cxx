@@ -14,8 +14,8 @@ StiTpcDetectorGroup::StiTpcDetectorGroup(bool active)
 /** Constructor to control TPC hit usage in Sti tracking */
 StiTpcDetectorGroup::StiTpcDetectorGroup(bool active_Tpc, bool active_iTpc)
   : StiDetectorGroup<StEvent>("TPC",
-                              active_Tpc ? new StiTpcHitLoader(active_iTpc) : nullptr,
-                              new StiTpcDetectorBuilder(active_Tpc))
+                              active_Tpc ? new StiTpcHitLoader() : nullptr,
+                              new StiTpcDetectorBuilder(active_Tpc, active_iTpc))
 {}
 
 

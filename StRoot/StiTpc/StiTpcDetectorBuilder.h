@@ -7,7 +7,8 @@ class StiTpcDetectorBuilder : public StiDetectorBuilder
 {
 
 public:
-    StiTpcDetectorBuilder(bool active);
+    StiTpcDetectorBuilder(bool active) : StiTpcDetectorBuilder(active, false) {}
+    StiTpcDetectorBuilder(bool active, bool active_iTpc);
     virtual ~StiTpcDetectorBuilder(); 	
     virtual void buildDetectors(StMaker&s);
     /// returns the azimuthal angle [-pi, pi) for tpc sector [1-24]
@@ -19,6 +20,9 @@ public:
     //    virtual void AverageVolume(TGeoPhysicalNode *nodeP);
  protected:
     StiMaterial * _fcMaterial;    
+
+    /// Option to use iTPC hits in Sti tracking. By default hits are not used in Sti tracking
+    bool  _active_iTpc = false;
 };
 
 /// Get the azimuthal angle of the given sector
