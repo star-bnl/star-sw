@@ -19,8 +19,7 @@ class StTpcHit;
 class StiTpcHitLoader : public StiHitLoader<StEvent,StiDetectorBuilder>
 {
  public:
-  StiTpcHitLoader() : StiTpcHitLoader(true) {}
-  StiTpcHitLoader(bool active_iTpc);
+  StiTpcHitLoader();
   StiTpcHitLoader(StiHitContainer * hitContainer,
 		  Factory<StiHit> * hitFactory,
 		  StiDetectorBuilder * detector);
@@ -41,9 +40,6 @@ class StiTpcHitLoader : public StiHitLoader<StEvent,StiDetectorBuilder>
   UInt_t         _maxRow;
   UInt_t         _minSector;
   UInt_t         _maxSector;
-
-  /// Option to use iTPC hits in Sti tracking. By default hits are loaded
-  bool  _active_iTpc = true;
 };
 
 #endif
