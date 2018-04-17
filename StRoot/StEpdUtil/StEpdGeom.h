@@ -50,6 +50,7 @@ class StEpdGeom{
   /// z coordinate of the wheel in STAR coordinate system
   /// depends on internal parameter mEW
   double GetZwheel();
+
   /// phi of the center of the tile in STAR coordinate syste
   /// depends on internal parameters mPP, mTT, mEW
   //--------- obsolete (always the plan; that's why it was private)  double GetPhiCenter();
@@ -59,6 +60,7 @@ class StEpdGeom{
   /// the "tile row" of the tile.  Row = [1,16]
   /// depends on internal parameter mTT
   short  Row();
+
   /// given the uniqueID of a tile (uniqueID = sign*(100*PP+TT) where sign=+1/-1 for West/East wheel
   /// this sets the internal parameters mPP, mTT, and mEW
   void     SetPpTtEw(short uniqueID);
@@ -66,17 +68,20 @@ class StEpdGeom{
   /// center of the tile in STAR coordinate system
   /// depends on internal parameters mPP, mTT, mEW
   TVector3 TileCenter();
+
   /// returns a random point somewhere on the tile.
   /// assumes a uniform hit density
   /// this is very useful for calculating things like dN/deta
   /// depends on internal parameters mPP, mTT, mEW
   TVector3 RandomPointOnTile();
+
   /// returns the corners of the tile in the plane of the wheel, in STAR coordinate system
   /// \param *nCorners   this is a RETURNED value. Number of corners the tile has (TT01 has 5, others have 4)
   /// \param x           this is a RETURNED values.  x-coordinates of corners
   /// \param y           this is a RETURNED values.  y-coordinates of corners
   /// depends on internal parameters mPP, mTT, mEW
   void     GetCorners(int* nCorners, double* x, double* y);
+
   /// returns true if (x,y) lies within the tile.  Assumes z=zWheel
   /// useful if the user would like to project a track (using straight line of helix or whatever)
   /// to the plane of the wheel and determine whether it hit a given tile
@@ -106,6 +111,7 @@ class StEpdGeom{
   /// center of the tile in STAR coordinate system
   /// \param uniqueID    identifier of the tile = sign*(100*PP+TT) where sign=+/- for West/East
   TVector3 TileCenter(short uniqueID);
+
   /// center of the tile in STAR coordinate system
   /// \param position   position of supersector [1,12]
   /// \param tilenumber tile on supsersector [1,31]
@@ -117,6 +123,7 @@ class StEpdGeom{
   /// this is very useful for calculating things like dN/deta
   /// \param uniqueID    identifier of the tile = sign*(100*PP+TT) where sign=+/- for West/East
   TVector3 RandomPointOnTile(short uniqueID);
+
   /// returns a random point somewhere on the tile.
   /// assumes a uniform hit density
   /// this is very useful for calculating things like dN/deta
@@ -141,7 +148,6 @@ class StEpdGeom{
   /// \param y           this is a RETURNED values.  y-coordinates of corners
   void GetCorners(short position, short tilenumber, short eastwest,
 		  int* nCorners, double* x, double* y);
-
 
   /// returns a list of (the IDs of) BBC tiles that overlap with a given EPD tile
   /// \param uniqueID                     identifier of the EPD tile = sign*(100*PP+TT) where sign=+/- for West/East
@@ -169,6 +175,7 @@ class StEpdGeom{
   /// \param y    y-coordinate of projected hit
   bool IsInTile(short uniqueID,
 		  double x, double y);
+
   /// returns true if (x,y) lies within the tile.  Assumes z=zWheel
   /// useful if the user would like to project a track (using straight line of helix or whatever)
   /// to the plane of the wheel and determine whether it hit a given tile
@@ -183,6 +190,7 @@ class StEpdGeom{
   /// true if this tile is on west side
   /// \param uniqueID    identifier of the tile = sign*(100*PP+TT) where sign=+/- for West/East
   bool IsWest(short uniqueID);
+
   /// true if this tile is on west side
   /// \param position   position of supersector [1,12]
   /// \param tilenumber tile on supsersector [1,31]
@@ -201,6 +209,7 @@ class StEpdGeom{
   /// the "tile row" of the tile.  Row = [1,16]
   /// \param uniqueID    identifier of the tile = sign*(100*PP+TT) where sign=+/- for West/East
   short Row(short uniqueID);
+
   /// the "tile row" of the tile.  Row = [1,16]
   /// \param position   position of supersector [1,12]
   /// \param tilenumber tile on supsersector [1,31]
