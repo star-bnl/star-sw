@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <assert.h>
 #include <stdio.h>
 #include "Stiostream.h"
@@ -29,6 +30,9 @@
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_tpcPadGainT0BC.h"
 //#define TPC_IDEAL_GEOM
+
+std::set<StiTpcDetectorBuilder::StiLayer> StiTpcDetectorBuilder::sStiLayers{};
+
 
 StiTpcDetectorBuilder::StiTpcDetectorBuilder(Bool_t active, bool active_iTpc)
   : StiDetectorBuilder("Tpc",active), _fcMaterial(0), _active_iTpc(active_iTpc) {}
@@ -270,4 +274,74 @@ StiPlanarShape* StiTpcDetectorBuilder::constructTpcPadrowShape(int sector, int r
     pShape->setName(name.Data()); if (StiVMCToolKit::Debug()>1) cout << *pShape << endl;
 
     return pShape;
+}
+
+
+
+bool StiTpcDetectorBuilder::StiLayer::operator< (const StiLayer& other) const
+{
+  St_tpcPadConfigC& padCfg = *St_tpcPadConfigC::instance();
+
+  bool result =
+         ( padCfg.radialDistanceAtRow(tpc_sector(), tpc_padrow()) <
+           padCfg.radialDistanceAtRow(other.tpc_sector(), other.tpc_padrow()) ) ||
+         ( padCfg.radialDistanceAtRow(tpc_sector(), tpc_padrow()) ==
+           padCfg.radialDistanceAtRow(other.tpc_sector(), other.tpc_padrow()) &&
+           sti_sector_id < other.sti_sector_id );
+
+   return result;
+}
+
+
+
+std::pair<int, int> StiTpcDetectorBuilder::toStiLayer(const int tpc_sector, const int tpc_padrow)
+{
+  auto find_tpc_sector = [tpc_sector, tpc_padrow](const StiLayer& sl)
+  {
+    StiLayer::TpcHalf half = (tpc_sector <= 12 ? StiLayer::West : StiLayer::East);
+    return sl.tpc_sector_id[half] == tpc_sector && sl.tpc_padrow_id[half] == tpc_padrow;
+  };
+
+  auto stiLayerIter = std::find_if(sStiLayers.begin(), sStiLayers.end(), find_tpc_sector);
+
+  return stiLayerIter != sStiLayers.end() ?
+    std::make_pair(stiLayerIter->sti_sector_id, stiLayerIter->sti_padrow_id) :
+    std::pair<int, int>(-1, -1);
+}
+
+
+
+void StiTpcDetectorBuilder::fillStiLayersMap()
+{
+  St_tpcPadConfigC& padCfg = *St_tpcPadConfigC::instance();
+
+  sStiLayers.clear();
+
+  for(int sector = 1; sector <= 24; sector++)
+  {
+    for(int row = 1; row <= padCfg.numberOfRows(sector); row++)
+    {
+      std::set<StiLayer>::iterator stiLayerIter;
+      bool inserted;
+      std::tie(stiLayerIter, inserted) = sStiLayers.insert( StiLayer(sector, row) );
+
+      if (!inserted) stiLayerIter->update(sector, row);
+    }
+  }
+
+  int curr_padrow_id = -1;
+  double curr_radius = 0;
+  auto fill_sti_padrow_id = [&curr_padrow_id, &curr_radius, &padCfg](const StiLayer& stiLayer)
+  {
+    double radius = padCfg.radialDistanceAtRow(stiLayer.tpc_sector(), stiLayer.tpc_padrow());
+
+    if (curr_radius != radius ) {
+      curr_padrow_id++;
+      curr_radius = radius;
+    }
+
+    stiLayer.sti_padrow_id = curr_padrow_id;
+  };
+
+  std::for_each(sStiLayers.begin(), sStiLayers.end(), fill_sti_padrow_id);
 }
