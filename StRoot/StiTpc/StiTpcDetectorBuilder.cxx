@@ -102,21 +102,12 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
 //  Double_t ionization = _gasMat->getIonization();
 //   StiElossCalculator *gasElossCalculator =  new StiElossCalculator(_gasMat->getZOverA(), ionization*ionization,
 // 								   _gasMat->getA(), _gasMat->getZ(), _gasMat->getDensity());
-  StDetectorDbTpcRDOMasks *s_pRdoMasks = StDetectorDbTpcRDOMasks::instance();
   //Active TPC padrows
   //  Double_t radToDeg = 180./3.1415927;
-  StTpcCoordinateTransform transform(gStTpcDb);
-  StMatrixD  local2GlobalRotation;
-  StMatrixD  unit(3,3,1);
   StThreeVectorD RowPosition;
-  UInt_t nInnerPadrows = St_tpcPadPlanesC::instance()->numberOfInnerRows();
   for(row = 0; row < nRows; row++)    {
-    //Nominal pad row information.
-    // create properties shared by all sectors in this padrow
-    float fRadius = St_tpcPadPlanesC::instance()->radialDistanceAtRow(row+1);
 
     StiPlanarShape* pShape = constructTpcPadrowShape(row);
-    Double_t dZ = pShape->getHalfDepth()*NoStiSectors/24.;
 
     for(UInt_t sector = 0; sector<getNSectors(); sector++) {
       StiDetector* pDetector = constructTpcPadrowDetector(row, sector, pShape);
@@ -142,6 +133,18 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
 
 StiDetector* StiTpcDetectorBuilder::constructTpcPadrowDetector(int row, int sector, StiPlanarShape* pShape) const
 {
+  Int_t NoStiSectors = 12;
+  StDetectorDbTpcRDOMasks *s_pRdoMasks = StDetectorDbTpcRDOMasks::instance();
+  UInt_t nRows = St_tpcPadPlanesC::instance()->numberOfRows();// Only sensitive detectors
+  UInt_t nInnerPadrows = St_tpcPadPlanesC::instance()->numberOfInnerRows();
+  //Nominal pad row information.
+  // create properties shared by all sectors in this padrow
+  float fRadius = St_tpcPadPlanesC::instance()->radialDistanceAtRow(row+1);
+  StTpcCoordinateTransform transform(gStTpcDb);
+  StMatrixD  local2GlobalRotation;
+  StMatrixD  unit(3,3,1);
+  Double_t dZ = pShape->getHalfDepth()*NoStiSectors/24.;
+
       //Retrieve position and orientation of the TPC pad rows from the database.
       StTpcLocalSectorDirection  dirLS[3];
       dirLS[0] = StTpcLocalSectorDirection(1.,0.,0.,sector+1,row+1);
