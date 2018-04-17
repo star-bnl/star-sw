@@ -2,7 +2,7 @@
    root.exe -b -q  lmysql.C 'MakeTpcAvgPowerSupply.C+(2018)' >& MakeTpcAvgPowerSupply.`date +%m%d%y`.log &
    mv MakeTpcAvgPowerSupply.2018.root MakeTpcAvgPowerSupply.2018.`date +%m%d%y`.root
    cd ../
-   put2DB.pl 'StarDb/Calibrations/tpc/TpcAvg*.root' | tee 2017/put2DB.`date +%m%d%y`.log
+   put2DB.pl 'StarDb/Calibrations/tpc/TpcAvg*.root' | tee put2DB.`date +%m%d%y`.log
    put2DB.pl 'StarDb/Calibrations/tpc/TpcAvg*.root'
    root.exe  'Db.C("StarDb/Calibrations/tpc/TpcAvgPowerSupply")'
 Test

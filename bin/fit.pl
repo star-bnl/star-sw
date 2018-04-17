@@ -58,7 +58,7 @@ setenv NODEBUG yes
 starver .DEV2
 csh -x $INPUTFILE0
          </command>
-	<stdout URL="file:./shed$JOBID.log" />
+	<stdout URL="file:./sched$JOBID.log" />
 ';
 foreach my $rootfile (@rootfiles) {
   foreach my $fitype (@opt) {
