@@ -23,6 +23,10 @@ public:
 
     /// Option to use iTPC hits in Sti tracking. By default hits are not used in Sti tracking
     bool  _active_iTpc = false;
+
+private:
+
+    StiPlanarShape* constructTpcPadrowShape(int row) const;
 };
 
 /// Get the azimuthal angle of the given sector
