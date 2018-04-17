@@ -103,7 +103,6 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
 //   StiElossCalculator *gasElossCalculator =  new StiElossCalculator(_gasMat->getZOverA(), ionization*ionization,
 // 								   _gasMat->getA(), _gasMat->getZ(), _gasMat->getDensity());
   StDetectorDbTpcRDOMasks *s_pRdoMasks = StDetectorDbTpcRDOMasks::instance();
-  StiPlanarShape *pShape;
   //Active TPC padrows
   //  Double_t radToDeg = 180./3.1415927;
   StTpcCoordinateTransform transform(gStTpcDb);
@@ -115,22 +114,10 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
     //Nominal pad row information.
     // create properties shared by all sectors in this padrow
     float fRadius = St_tpcPadPlanesC::instance()->radialDistanceAtRow(row+1);
-    TString name(Form("Tpc/Padrow_%d", row));
-    pShape = new StiPlanarShape;
-    if (!pShape)
-      throw runtime_error("StiTpcDetectorBuilder::buildDetectors() - FATAL - pShape==0||ofcShape==0");
-    Double_t dZ = 0;
-    if(row < nInnerPadrows) {
-      pShape->setThickness(St_tpcPadPlanesC::instance()->innerSectorPadLength());
-      dZ = St_tpcPadPlanesC::instance()->innerSectorPadPlaneZ();
-    }
-    else {
-      pShape->setThickness(St_tpcPadPlanesC::instance()->outerSectorPadLength());
-      dZ = St_tpcPadPlanesC::instance()->outerSectorPadPlaneZ();
-    }
-    pShape->setHalfDepth(dZ*24/NoStiSectors);
-    pShape->setHalfWidth(St_tpcPadPlanesC::instance()->PadPitchAtRow(row+1) * St_tpcPadPlanesC::instance()->numberOfPadsAtRow(row+1) / 2.);
-    pShape->setName(name.Data()); if (debug>1) cout << *pShape << endl;
+
+    StiPlanarShape* pShape = constructTpcPadrowShape(row);
+    Double_t dZ = pShape->getHalfDepth()*NoStiSectors/24.;
+
     for(UInt_t sector = 0; sector<getNSectors(); sector++) {
       //Retrieve position and orientation of the TPC pad rows from the database.
       StTpcLocalSectorDirection  dirLS[3];
@@ -185,7 +172,7 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
       pPlacement->setLayerAngle(phi);
       pPlacement->setRegion(StiPlacement::kMidRapidity);
       pPlacement->setNormalRep(phiD, r*TMath::Cos(phi-phiD), r*TMath::Sin(phi-phiD));
-      name = Form("Tpc/Padrow_%d/Sector_%d", row, sector);
+      TString name = Form("Tpc/Padrow_%d/Sector_%d", row, sector);
       // fill in the detector object and save it in our vector
       StiDetector *pDetector = _detectorFactory->getInstance();
       pDetector->setName(name.Data());
@@ -246,4 +233,30 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
     StiVMCToolKit::LoopOverNodes(nodeT, path, TpcVolumes[i].name, MakeAverageVolume);
   }
   cout << "StiTpcDetectorBuilder::buildDetectors() -I- Done" << endl;
+}
+
+
+StiPlanarShape* StiTpcDetectorBuilder::constructTpcPadrowShape(int row) const
+{
+  Int_t NoStiSectors = 12;
+  UInt_t nInnerPadrows = St_tpcPadPlanesC::instance()->numberOfInnerRows();
+
+    TString name(Form("Tpc/Padrow_%d", row));
+    StiPlanarShape* pShape = new StiPlanarShape;
+    if (!pShape)
+      throw runtime_error("StiTpcDetectorBuilder::buildDetectors() - FATAL - pShape==0||ofcShape==0");
+    Double_t dZ = 0;
+    if(row < nInnerPadrows) {
+      pShape->setThickness(St_tpcPadPlanesC::instance()->innerSectorPadLength());
+      dZ = St_tpcPadPlanesC::instance()->innerSectorPadPlaneZ();
+    }
+    else {
+      pShape->setThickness(St_tpcPadPlanesC::instance()->outerSectorPadLength());
+      dZ = St_tpcPadPlanesC::instance()->outerSectorPadPlaneZ();
+    }
+    pShape->setHalfDepth(dZ*24/NoStiSectors);
+    pShape->setHalfWidth(St_tpcPadPlanesC::instance()->PadPitchAtRow(row+1) * St_tpcPadPlanesC::instance()->numberOfPadsAtRow(row+1) / 2.);
+    pShape->setName(name.Data()); if (StiVMCToolKit::Debug()>1) cout << *pShape << endl;
+
+    return pShape;
 }
