@@ -14,6 +14,8 @@ public:
 	virtual void ch_done(int err) {;} ;
 	virtual int do_ch(int fee_id, int fee_ch, u_int *data, int words) { return 0 ; } ;
 
+	int run_type ;
+
 	int want_data ;
 	u_int data ;
 	int words ;
