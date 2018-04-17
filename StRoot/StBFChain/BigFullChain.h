@@ -45,6 +45,7 @@ y2020      tpx    btow    bsmd    etow    esmd    tof    mtd   	       gmt      
 ______________________________________________________________________________________________________________     
  */
 #endif
+#define STAR_CHAIN_OBSOLETE "WARNING *** Option is OBSOLETE ***"
 #if ROOT_VERSION_CODE > 393216 || defined(__NO_STRANGE_MUDST__) /*  ROOT_VERSION(6,0,0) */
 #define __NoStrangeMuDst__
 #endif
@@ -916,10 +917,16 @@ Bfc_st BFC[] = { // standard chains
    ,                                                          "Base chain for 2005 ITTF (tpc only)",kFALSE},
   {"B2005b"      ,"" ,"","ry2005f,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout,ssdDb","",""
    ,                                                "Base chain for 2005 ITTF Geo f (tpc+svt only)",kFALSE},
+  {"B2005c"      ,"" ,"","ry2005g,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout,ssdDb","",""
+   ,                                "Base chain for 2005 ITTF Geo g (tpc+svt only + dead material)",kFALSE},
+
   {"P2005"       ,"" ,"",   "B2005,IAna,fcf,VFMinuit,emcDY2,ftpc,trgd,ZDCvtx,svtIT,Corr3"
    ,                   "","","Production chain for 2004/2005 data (+ l3, tof, ftpc, e/b-emc, trgd)",kFALSE},
   {"P2005b"      ,"" ,"",   "B2005b,IAna,fcf,VFMinuit,emcDY2,ftpc,trgd,ZDCvtx,svtIT,Corr3"
    ,                   "","","Production chain for 2004/2005 data (+ l3, tof, ftpc, e/b-emc, trgd)",kFALSE},
+  {"P2005c"      ,"" ,"",   "B2005c,IAna,fcf,VFMinuit,emcDY2,ftpc,trgd,ZDCvtx,svtIT,Corr3"
+   ,                   "","","Production chain for 2004/2005 data (+ l3, tof, ftpc, e/b-emc, trgd)",kFALSE},
+
   {"pp2005","" ,"","B2005,IAna,fcf,ppOpt,VFppLMV5,CtbMatchVtx,emcDY2,ftpc,trgd,ZDCvtx,svtIT,Corr3"
    ,                     "","","Production chain for 2005 pp data (+ l3, tof, ftpc, e/b-emc, trgd)",kFALSE},
   {"pp2005a","","","B2005a,IAna,fcf,ppOpt,VFPPV,beamline,CtbMatchVtx,emcDY2,ftpc,trgd,ZDCvtx,Corr4"
@@ -1269,7 +1276,8 @@ Bfc_st BFC[] = { // standard chains
   {"OGridLeakFull","" ,"","",""                                     ,"","Full Grid Leak correction",kFALSE},
   {"OGGVoltErr"  ,""  ,"","",""                                   ,"","GG voltage error correction",kFALSE},
   {"OSectorAlign",""  ,"","",""                        ,"","Sector alignment distortion correction",kFALSE},
-  {"AlignSectors",""  ,"","",                            "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"ODistoSmear" ,""  ,"","",""    ,"","Distortion smearing accounting for calibration resolutions",kFALSE},
+  {"AlignSectors",""  ,"","",""                                             ,"",STAR_CHAIN_OBSOLETE,kFALSE},
   {"DbRichSca"   ,""  ,"","detdb","","",                    "Force reading of Rich scalers from DB",kFALSE},
   {"EastOff"     ,""  ,"","",""                                  ,"","Disactivate East part of tpc",kFALSE},
   {"WestOff"     ,""  ,"","",""                                  ,"","Disactivate West part of tpc",kFALSE},
@@ -1794,6 +1802,7 @@ Bfc_st BFC[] = { // standard chains
   {"NoSstIT"     ,""  ,"","-SstIT",""                    ,"","ITTF: track with switch off SST geom",kFALSE},
   {"NoPxlIT"     ,""  ,"","-PxlIT",""                    ,"","ITTF: track with switch off PXL geom",kFALSE},
   {"NoIstIT"     ,""  ,"","-IstIT",""                    ,"","ITTF: track with switch off IST geom",kFALSE},
+  {"NoiTpcIT"    ,""  ,"","",""                         ,"","ITTF: track with switch off iTPC geom",kFALSE},
   {"skip1row"    ,""  ,"","",""                           ,"","ITTF: skip the first pad row in TPC",kFALSE},
   {"StiRnD"   ,"","","",                                  "","StiRnD", "Load StiRnD shared library",kFALSE},
   {"Alignment"   ,"","","",                   "","", "Sti Tpc Alignment, reconstruction per sector",kFALSE},

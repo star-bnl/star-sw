@@ -194,7 +194,7 @@ int gl3Event::readFromEvpReader(daqReader *rdr,
       }
 #else /* OLD_DAQ_READER */
     if(!pTPC->has_clusters) {
-      LOG(WARN, "TPC sector %d has no clusters",i);
+      LOG(DBG, "TPC sector %d has no clusters",i);
       continue;
 #endif /* OLD_DAQ_READER */
     }

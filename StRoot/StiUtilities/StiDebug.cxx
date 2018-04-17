@@ -199,7 +199,6 @@ static const char *opt[]={"AP","Same CP","Same *"};
   while(!gSystem->ProcessEvents()){}; 
 }  
 
-ClassImp(StiAux)
 //______________________________________________________________________________
 StiAux::StiAux():TDataSet("StiAux")
 {

@@ -27,8 +27,6 @@ const Char_t *StKFVertex::GeNames[52] = {
   "LambC+"  ,"W+"   ,"W-"  ,"Z0"   ,"H2"    ,"H3"    ,"alpha","geanti","He3"      ,"Cerenk",
   "??????"};
 //________________________________________________________________________________
-ClassImp(StKFVertex);
-//________________________________________________________________________________
 ostream&  operator<<(ostream& os,  const StKFVertex& v) {
   os << Form("%3i with %4i tracks Q:%3i", v.ID(),v.NoTracks(),v.Charge());
   for (Int_t i = 0; i < 3; i++) {

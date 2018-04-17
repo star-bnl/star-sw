@@ -18,7 +18,8 @@
  */
 #ifndef StiKalmanTrack_H
 #define StiKalmanTrack_H 1
-#include <assert.h>
+
+#include <cassert>
 //STD
 #include <vector>
 using namespace std;
@@ -213,9 +214,6 @@ class StiKalmanTrack : public StiTrack
 
 	double getTrackRadLength() const;
 
-  double getTpcDedx() const;
-  double getSvtDedx() const;
-
 	StiKTNBidirectionalIterator  begin()  const;
   const StiKTNBidirectionalIterator& end()    const;
 	StiKTNBidirectionalIterator  rbegin() const;
@@ -237,6 +235,7 @@ class StiKalmanTrack : public StiTrack
    		/// Accessor method returns the inner most hit node associated with the track.
    StiKalmanTrackNode * getInnerMostHitNode(int qua=0)   const;
    StiKalmanTrackNode * getInnerMostTPCHitNode(int qua=0)   const;
+   StiKalmanTrackNode * getInnerMostDetHitNode(int detectorId)   const;
    int                  getNNodes(int qua=0) const;
    int                  releaseHits(double rMin=0,double rMax=50);
    /// Accessor method returns the first node associated with the track.
@@ -271,7 +270,6 @@ class StiKalmanTrack : public StiTrack
   double  getDca2(StiTrack *t) const;   // distance of closest approach to given track - 2D calc
   double  getDca3(StiTrack *t) const;   // distance of closest approach to given track - 3D calc
 
-  bool find(int direction=kOutsideIn);
   int  refit();
   int  refitL();
   void reserveHits(int yes=1);
@@ -426,19 +424,9 @@ inline double  StiKalmanTrack::getRapidity()       const
   StiKalmanTrackNode *  inner = getInnerMostHitNode();
   inner->getMomentum(p,0);
   double mass = getMass();
-#if 0
-  if (mass<0)
-    throw runtime_error("StiKalmanTrack::getRapidity() - particle mass unknown");
-#else
   assert(mass >= 0);
-#endif
   double e = ::sqrt(mass*mass+p[0]*p[0]+p[1]*p[1]+p[2]*p[2]);
-#if 0
-  if (e<=p[2])
-    throw runtime_error("StiKalmanTrack::getRapidity() - Error: e<=pz");
-#else
-  assert(e >= p[2]);
-#endif
+  assert(e > p[2]);
   return 0.5*::log(e+p[2]/e-p[2]);
 }
 
@@ -457,12 +445,7 @@ inline double  StiKalmanTrack::getPseudoRapidity() const
   // which may (or not) be the primary vertex. 
   double tanTheta = tan(M_PI/4.- getInnerMostHitNode()->getDipAngle()/2. );
   assert(tanTheta>0.);
-  if (tanTheta>0.)
-    return -::log(tanTheta);
-#if 0
-  else
-    throw runtime_error("StiKalmanTrack::getPseudoRapidity() -E- Attempting ::log(non positive number)");
-#endif
+  return -::log(tanTheta);
 }
 
 /*! 
@@ -487,15 +470,6 @@ inline double  StiKalmanTrack::getTanL()           const
   return getInnerMostHitNode()->getTanL();
 }
 
-inline double StiKalmanTrack::getTpcDedx() const
-{
-  return 0.; // to be changed...
-}
-
-inline double StiKalmanTrack::getSvtDedx() const
-{
-  return 0.; // to be changed...
-}
 /*! Calculate and return the distance of closest approach to given hit
    <h3>Notes</h3> 
    <ol>
@@ -557,28 +531,12 @@ inline double  StiKalmanTrack::getDca3(StiTrack *t)   const
 */
 inline StiKTNBidirectionalIterator StiKalmanTrack::begin() const 
 {
-  if (!firstNode)
-		{
-			cout << "StiKTNBidirectionalIterator StiKalmanTrack::begin() -F- firstNode==0"<<endl;
-#if 0
-			throw runtime_error("StiKalmanTrack::begin() - ERROR - firstNode==0");
-#else
-			assert(0);
-#endif
-		}
+  assert(firstNode);
   return StiKTNBidirectionalIterator::begin(firstNode);
 }
 inline StiKTNBidirectionalIterator StiKalmanTrack::rbegin() const 
 {
-  if (!lastNode)
-		{
-			cout << "StiKTNBidirectionalIterator StiKalmanTrack::rbegin() -F- lastNode==0"<<endl;
-#if 0
-			throw runtime_error("StiKalmanTrack::rbegin() - ERROR - lastNode==0");
-#else
-			assert(0);
-#endif
-		}
+  assert(lastNode);
   return StiKTNBidirectionalIterator::rbegin(lastNode);
 }
 

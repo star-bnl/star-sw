@@ -11,7 +11,6 @@
 #include "StDetectorDbMaker/St_vertexSeedC.h"
 #include "StG2TrackVertexMap.h"
 using namespace std;
-ClassImp(StKFVerticesCollection);
 Double_t StKFVerticesCollection::fgVxPenaltyFactor = 1000;
 #define PrPP(A,B) if (StKFVertex::Debug()) {cout << "StKFVerticesCollection::" << (#A) << "\t" << (#B) << " = \t" << (B) << endl;}
 //________________________________________________________________________________

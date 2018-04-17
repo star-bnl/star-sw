@@ -3,6 +3,7 @@
 
 #include <sys/types.h>
 #include <stdio.h>
+#include <I386/atomic.h>
 
 class itpcData ;
 
@@ -27,17 +28,24 @@ public:
 	void fee_dbase(const char *fname=0) ;
 
 
+	int rdo_scan_top(u_int *ddata, int words) ;	// new!
+
+	int ana_send_config(u_int *data, u_int *data_end) ;
+	int ana_pedestal(u_int *data, u_int *data_end) ;
+	int ana_triggered(u_int *data, u_int *data_end) ;
+
 	int rdo_scan(u_int *ddata, int words) ;
-//	int get_l2(char *ddata, int words, struct daq_trg_word *trgs, int do_log) ;
+
 
 	u_int *fee_scan(u_int *start, u_int *end) ;
 	u_int *sampa_lane_scan(u_int *start, u_int *end) ;
 	u_int *sampa_ch_hunt(u_int *start, u_int *end) ;
 	int sampa_ch_scan() ;
 
-	
+	void run_err_add(int rdo1, int type) ;
 
 	// filled by client
+	int id ;
 	int dbg_level ;
 	int realtime ;	// running in realtime
 	u_int run_number ;
@@ -56,7 +64,10 @@ public:
 
 	itpcData *ped_c ;
 
-	u_int evt_err[8] ;
+	u_int evt_err[8] ;	// zapped before every event, logged after
+
+	//run errors, for all RDOs, for all workers!
+	static atomic_t run_errors[4][8] ;
 
 	// various variables filled in as we go
 	u_int rdo_wire1_id ;
@@ -68,6 +79,12 @@ public:
 		u_int pedestal_errs ;
 		u_int ch_errs ;
 	} fee[17] ;	// index is RDO port starting from 1!
+
+	// electronics format versions
+	int rdo_version ;
+	int expected_rdo_version ;
+	int fee_version ;
+	int expected_fee_version ;
 
 	// filled in fee_scan
 	int fee_port ;	// from 1..16

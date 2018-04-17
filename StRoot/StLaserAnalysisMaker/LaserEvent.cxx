@@ -1,5 +1,12 @@
-//$Id: LaserEvent.cxx,v 1.9 2014/03/13 21:59:44 fisyak Exp $
+//$Id: LaserEvent.cxx,v 1.10 2018/04/11 02:43:21 smirnovd Exp $
 // $Log: LaserEvent.cxx,v $
+// Revision 1.10  2018/04/11 02:43:21  smirnovd
+// Enable TPC/iTPC switch via St_tpcPadConfig
+//
+// This is accomplished by substituting St_tpcPadPlanes with St_tpcPadConfig.
+// A sector ID is passed to St_tpcPadConfig in order to extract parameters for
+// either TPC or iTPC
+//
 // Revision 1.9  2014/03/13 21:59:44  fisyak
 // add cluster position in Local Sector Coordinate System
 //

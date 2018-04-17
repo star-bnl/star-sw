@@ -3,9 +3,25 @@
 
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.h,v 1.12 2014/08/06 11:43:50 jeromel Exp $
+ * $Id: StTpcRTSHitMaker.h,v 1.14 2018/04/10 11:38:44 smirnovd Exp $
  * StTpcRTSHitMaker - class to runonline (RTS) cluster maker over StTpcRawData
  * $Log: StTpcRTSHitMaker.h,v $
+ * Revision 1.14  2018/04/10 11:38:44  smirnovd
+ * StTpcHitMaker: Modified for iTPC era (Yuri and Irakli)
+ *
+ * Revision 1.13  2018/04/10 11:32:09  smirnovd
+ * Minor corrections across multiple files
+ *
+ * - Remove ClassImp macro
+ * - Change white space
+ * - Correct windows newlines to unix
+ * - Remove unused debugging
+ * - Correct StTpcRTSHitMaker header guard
+ * - Remove unused preprocessor directives in StiCA
+ * - Minor changes in status and debug print out
+ * - Remove using std namespace from StiKalmanTrackFinder
+ * - Remove includes for unused headers
+ *
  * Revision 1.12  2014/08/06 11:43:50  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
  *

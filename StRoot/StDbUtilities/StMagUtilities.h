@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.61 2017/10/26 02:47:42 genevb Exp $
+ * $Id: StMagUtilities.h,v 1.62 2018/04/11 02:35:57 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.62  2018/04/11 02:35:57  genevb
+ * Distortion smearing by calibration resolutions
+ *
  * Revision 1.61  2017/10/26 02:47:42  genevb
  * Allow FullGridLeak to work on specific sheets via sheet widths
  *
@@ -213,7 +216,8 @@ enum   DistortSelect
   kGGVoltError       = 0x10000,  // Bit 17
   kSectorAlign       = 0x20000,  // Bit 18
   kDisableTwistClock = 0x40000,  // Bit 19
-  kFullGridLeak      = 0x80000   // Bit 20
+  kFullGridLeak      = 0x80000,  // Bit 20
+  kDistoSmearing     = 0x100000  // Bit 21
 } ;
 enum   CorrectSelect
 {
@@ -239,6 +243,8 @@ enum   EBMapSizes
 class StTpcDb ;
 class TDataSet ;
 class St_tpcHVPlanesC;
+class St_tpcCalibResolutionsC;
+class TRandom;
 #include "StDetectorDbMaker/StDetectorDbSpaceCharge.h"
 #include "StDetectorDbMaker/StDetectorDbTpcVoltages.h"
 #include "StDetectorDbMaker/StDetectorDbTpcOmegaTau.h"
@@ -257,7 +263,9 @@ class StMagUtilities {
   StDetectorDbTpcOmegaTau*   fOmegaTau      ;
   StDetectorDbGridLeak*      fGridLeak      ;
   St_tpcHVPlanesC*           fHVPlanes      ;
+  St_tpcCalibResolutionsC*   fCalibResolutions ;
 
+  virtual void    GetDistoSmearing ( Int_t mode) ;
   virtual void    GetMagFactor ()     ;
   virtual void    GetTPCParams ()     ;
   virtual void    GetTPCVoltages ( Int_t mode ) ;
@@ -363,7 +371,11 @@ class StMagUtilities {
   Bool_t   useManualSCForPredict      ; // Flag on using fixed SC value or manually set one for Predict()
   Bool_t   iterateDistortion          ; // Flag on whether to iterate in determining distortions
   Int_t    iterationFailCounter       ; // Count of number of iteration fails
+  Bool_t   doingDistortion            ; // Flag on whether doing or undoing distortions
   Bool_t   usingCartesian             ; // Using Cartesian or cylindrical coordinates
+  TRandom* mRandom                    ; // Random number generator (used in distortion smearing)
+  Float_t  SmearCoefSC                ; // Distortion smearing coefficient for SpaceCharge
+  Float_t  SmearCoefGL                ; // Distortion smearing coefficient for GridLeak
 
 
   Float_t  shiftEr[EMap_nZ][EMap_nR] ;
@@ -455,7 +467,7 @@ class StMagUtilities {
 						 Float_t RowMaskErrorRPhi[64], 
 						 Float_t &pSpace ) ;
 
-  virtual void    ManualShortedRing ( Int_t EastWest, Int_t InnerOuter, 
+  virtual void     ManualShortedRing ( Int_t EastWest, Int_t InnerOuter, 
 				      Float_t RingNumber, Float_t MissingRValue, Float_t ExtraRValue) ;
 
   virtual Int_t    GetSpaceChargeMode();

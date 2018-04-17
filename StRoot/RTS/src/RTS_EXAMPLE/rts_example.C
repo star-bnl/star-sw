@@ -100,6 +100,14 @@ static int run_number ;
 //trigger related globals
 u_int rcc_timestamp ;
 
+int altro_override[256] ;
+
+extern int *tpx_altro_to_row_override ;
+
+
+static double det_raw_bytes[6] ;
+static u_int det_events ;
+
 int main(int argc, char *argv[])
 {
 	extern char *optarg ;
@@ -112,6 +120,11 @@ int main(int argc, char *argv[])
 	rtsLogOutput(RTS_LOG_STDERR) ;
 	rtsLogLevel((char *)WARN) ;
 
+
+//	LOG(WARN,"Special override for TPX!") ;
+//	altro_override[50] = 1 ;
+//	altro_override[56] = 2 ;
+//	tpx_altro_to_row_override = altro_override ;
 
 	run_number = -1 ;
 
@@ -197,6 +210,8 @@ int main(int argc, char *argv[])
 		    break ;
 		  }
 		}
+
+//		if(good>1000) break ;
 
 		if(run_number < 0) {
 			
@@ -626,24 +641,66 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 				//if(dd->row > 8) continue ;
 				
 				if(do_print) {
-					printf("TPX: sec %02d, row %2d, pad %3d: %3d pixels\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
+					//printf("TPX: sec %02d, row %2d, pad %3d: %3d pixels\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
 				}
 
 				pixel_count[dd->row] += dd->ncontent ;
 
+				int seq = 0 ;
+				int last_tb = -1 ;
+				int first_i = 0 ;
+
+				for(u_int i=0;i<dd->ncontent;i++) {
+					int tb = dd->adc[i].tb ;
+					int adc = dd->adc[i].adc ;
+
+					if(adc > 80) {
+						//printf("ADC %d: tb %d, last_tb %d: seq %d\n",adc,tb,last_tb,seq) ;
+						if(seq==0) first_i = i ;
+
+						if(tb==(last_tb-1)) {
+							seq++ ;
+							if(seq>=5) {
+								//printf("%d %d %d %d %d\n",good,dd->row,dd->pad,dd->adc[i].tb,dd->adc[i].adc) ;
+							}
+						}
+						else {
+							if(seq>=5 && (dd->adc[first_i].tb<30)) {
+								for(u_int j=first_i;j<i;j++) {
+									//printf("%d %d %d %d %d\n",good,dd->row,dd->pad,dd->adc[j].tb,dd->adc[j].adc) ;
+								}
+							}
+							seq = 0 ;
+						}
+					}
+					else {
+						if(seq>=5 && (dd->adc[first_i].tb<30)) {
+							for(u_int j=first_i;j<i;j++) {
+								//printf("%d %d %d %d %d\n",good,dd->row,dd->pad,dd->adc[j].tb,dd->adc[j].adc) ;
+							}
+						}
+
+						seq = 0 ;
+					}
+
+					last_tb = tb ;
+				}
+
+#if 0				
 				for(u_int i=0;i<dd->ncontent;i++) {
 					if(do_print) {
-						printf("\ttb %3d = %4d ADC\n",dd->adc[i].tb, dd->adc[i].adc) ;
+						//printf("\ttb %3d = %4d ADC\n",dd->adc[i].tb, dd->adc[i].adc) ;
 					}
 				}
+#endif		
 			}
-		
+
 
 			if(sec_found) {
 
 				s_mask[dd->sec-1]=1 ;
-
-				if(do_print) {
+				if(0) {
+				//if(do_print) {
 
 					for(int row=0;row<=45;row++) {
 						int max_cou = tpc_rowlen[row] * 400 ;
@@ -717,16 +774,18 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 			}
 		}
 
+#if 0
 		//new ALTRO bank, for a test
 		for(int r=1;r<=6;r++) {
 			dd = rdr->det("tpx")->get("altro",s,r) ;
 			while(dd && dd->iterate()) {
+				found = 1 ;
 				if(do_print) {
 					printf("TPX ALTRO: sec %02d, RDO %d: ALTRO %3d, ch %2d: %3d pixels\n",dd->sec,r,dd->row,dd->pad,dd->ncontent) ;
 				}
 			}
 		}
-
+#endif
 				
 
 	}
@@ -1655,8 +1714,6 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	fpost_sz = ((fps_evt_hdr_t *)(dd->meta))->words * 4;
     }
     
-
-
     dd = rdr->det("trg")->get("raw") ;
     if(dd) {
 	if(dd->iterate()) {
@@ -1710,6 +1767,8 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 
 	    bunches |= bunches_h << 16;
 
+	    double bx_sec = bunches/9.3e6;
+	   
 	    TrgSumData *trgSum = (TrgSumData *)(((char *)trg) + swap32(trg->Summary_ofl.offset));
 
 	    UINT32 tms[32];
@@ -1724,6 +1783,7 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	    }
 	    printf("CONFNUM_TM\n");
 
+	    
 		
 	    // Get FPS timing...
 	    if(fpre_bx && fpost_bx) 
@@ -1773,7 +1833,7 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 		   );
 
 
-            printf("tinfo: seq = #%d  token = %d detectors = 0x%x triggers = 0x%llx/0x%llx/0x%llx  evpgroups=0x%x flags=0x%x trgDet=0x%x trgCrate=0x%x\n",
+            printf("tinfo: seq = #%d  token = %d detectors = 0x%x triggers = 0x%llx/0x%llx/0x%llx  evpgroups=0x%x flags=0x%x trgDet=0x%x trgCrate=0x%x bx_sec=%lf\n",
 		   rdr->seq,
 		   rdr->token,
 		   rdr->detectors,
@@ -1783,7 +1843,8 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 		   rdr->evpgroups,
 		   rdr->flags,
 		   trgDetMask,
-		   trgCrateMask);
+		   trgCrateMask,
+		   bx_sec);
 
 	    printf("EvtDescData %d %d %d\n",evtDesc->tcuCtrBunch_hi,evtDesc->DSMAddress,0) ;
 
@@ -2272,8 +2333,8 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 	if(strcasestr(do_print,"itpc")) ;	// leave as is...
 	else do_print = 0 ;
 
-	for(int s=1;s<=24;s++) {
-
+	for(int s=20;s<=20;s++) {
+		
 #if 1
 		dd = rdr->det("itpc")->get("raw",s) ;
 
@@ -2283,32 +2344,40 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 
 				rdos[dd->row-1] = 1 ;
 
-#if 0
+				det_raw_bytes[dd->rdo-1] += dd->ncontent ;
+				
+#if 1
 				if(do_print) {
 					printf("ITPC RAW: sector %2d, RDO %d: %d rawbytes\n",dd->sec,dd->row,dd->ncontent) ;
 
-					u_int *d32 = (u_int *)dd->Void ;
+					//u_int *d32 = (u_int *)dd->Void ;
 
-					for(u_int i=0;i<dd->ncontent/4;i++) {
-						printf("%4d = 0x%08X\n",i,d32[i]) ;
-					}
+					//for(u_int i=0;i<dd->ncontent/4;i++) {
+					//	printf("%4d = 0x%08X\n",i,d32[i]) ;
+					//}
 				}
 #endif
 			}
+			if(adc_found) det_events++ ;
 		}
 #endif
 
-#if 0
+#if 1
 		// In SAMPA form
 		dd = rdr->det("itpc")->get("sampa",s) ;
 		if(dd) {
 			while(dd->iterate()) {
 				adc_found = 1 ;
-
+				
 
 			
 				if(do_print) {
-					printf("ITPC SAMPA: sector %2d, FEE %3d, CH %2d: %3d timebins\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
+					int rdo = (dd->row >> 4)+1;
+					int port = (dd->row & 0xF)+1 ;
+					int ch = (dd->pad) & 0xFF ;
+					int fee_id = (dd->pad >> 8) ;
+
+					printf("ITPC SAMPA: sector %2d, RDO %d, FEE #%02d (padplane %02d), CH %2d: %3d timebins\n",dd->sec,rdo,port,fee_id,ch,dd->ncontent) ;
 
 					for(u_int i=0;i<dd->ncontent;i++) {
 						printf("\ttb %3d = %4d ADC\n",dd->adc[i].tb,dd->adc[i].adc) ;
@@ -2425,6 +2494,9 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 
 	if(found) {
 		LOG(INFO,"ITPC found [%s] pixels %d, clusters %d",fstr,pixels,clusters) ;
+		for(int i=0;i<4;i++) {
+			LOG(TERR,"   RDO %d: ave words %.1f",i+1,det_raw_bytes[i]/det_events/4) ;
+		}
 	}
 	
 

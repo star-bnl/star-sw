@@ -1,4 +1,4 @@
-// $Id: StAnneling.cxx,v 2.2 2015/12/20 01:06:39 fisyak Exp $
+// $Id: StAnneling.cxx,v 2.2 2018/04/10 11:32:09 smirnovd Exp $
 #include "StAnneling.h"
 Double_t StAnneling::fChi2CutUniq = 13.81551055; // Prob = 1e-3
 Double_t StAnneling::fChi2Cut     = 32.2;        // Prob = 1e-7

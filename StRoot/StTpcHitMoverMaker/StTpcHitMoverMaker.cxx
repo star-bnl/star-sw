@@ -167,8 +167,15 @@ void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StGlobalCoordinate &
   moveTpcHit(coorL,coorLTD);
   transform(coorLTD,coorG); PrPP(moveTpcHit,coorLTD); PrPP(moveTpcHit,coorG); 
 }
-// $Id: StTpcHitMoverMaker.cxx,v 1.27 2014/07/27 13:23:09 fisyak Exp $
+// $Id: StTpcHitMoverMaker.cxx,v 1.28 2018/04/11 02:43:22 smirnovd Exp $
 // $Log: StTpcHitMoverMaker.cxx,v $
+// Revision 1.28  2018/04/11 02:43:22  smirnovd
+// Enable TPC/iTPC switch via St_tpcPadConfig
+//
+// This is accomplished by substituting St_tpcPadPlanes with St_tpcPadConfig.
+// A sector ID is passed to St_tpcPadConfig in order to extract parameters for
+// either TPC or iTPC
+//
 // Revision 1.27  2014/07/27 13:23:09  fisyak
 // Add cast for c++11 option
 //

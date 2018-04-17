@@ -141,14 +141,21 @@ int StEvtVtxSeedMaker::GetEventData() {
 //_____________________________________________________________________________
 void StEvtVtxSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.14 2016/08/02 21:17:16 genevb Exp $"
+           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.15 2018/04/11 02:43:21 smirnovd Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StEvtVtxSeedMaker.cxx,v 1.14 2016/08/02 21:17:16 genevb Exp $
+// $Id: StEvtVtxSeedMaker.cxx,v 1.15 2018/04/11 02:43:21 smirnovd Exp $
 // $Log: StEvtVtxSeedMaker.cxx,v $
+// Revision 1.15  2018/04/11 02:43:21  smirnovd
+// Enable TPC/iTPC switch via St_tpcPadConfig
+//
+// This is accomplished by substituting St_tpcPadPlanes with St_tpcPadConfig.
+// A sector ID is passed to St_tpcPadConfig in order to extract parameters for
+// either TPC or iTPC
+//
 // Revision 1.14  2016/08/02 21:17:16  genevb
 // Added tDay,tFill to resNtuple, and improved C++11 compliance
 //

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.cxx,v 2.15 2018/02/18 23:04:49 perev Exp $
+ * $Id: StTpcRawData.cxx,v 2.18 2018/04/10 11:32:08 smirnovd Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,28 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.cxx,v $
+ * Revision 2.18  2018/04/10 11:32:08  smirnovd
+ * Minor corrections across multiple files
+ *
+ * - Remove ClassImp macro
+ * - Change white space
+ * - Correct windows newlines to unix
+ * - Remove unused debugging
+ * - Correct StTpcRTSHitMaker header guard
+ * - Remove unused preprocessor directives in StiCA
+ * - Minor changes in status and debug print out
+ * - Remove using std namespace from StiKalmanTrackFinder
+ * - Remove includes for unused headers
+ *
+ * Revision 2.17  2018/04/07 03:32:06  smirnovd
+ * Set default sector id to 20
+ *
+ * Is should not matter which sector to use for past data but 20 is the one with
+ * iTPC in 2018
+ *
+ * Revision 2.16  2018/04/05 03:16:20  smirnovd
+ * Make StTpcDigitalSector compatible with iTPC
+ *
  * Revision 2.15  2018/02/18 23:04:49  perev
  * Put back iTPC update
  *
@@ -59,8 +81,6 @@
 #include "TMath.h"
 #include "StDaqLib/TPC/trans_table.hh"
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
-ClassImp(StTpcDigitalSector);
-ClassImp(StTpcRawData);
 //________________________________________________________________________________
 StTpcDigitalSector::StTpcDigitalSector(Int_t sector) : mSector(sector) {
   StDigitalTimeBins  timeBins;

@@ -195,7 +195,6 @@ bool StiLocalTrackSeedFinder::extrapolate()
   double dy = y2-y1;
   double dz = z2-z1;
   if (fabs(dr) <1.e-3) return kFALSE;
-//    throw logic_error("StiLocalTrackSeedFinder::extrapolate() -E- Seed aborted because dr==0 ");
   //Now look for a hit in the next layer in:
   _detectorContainer->setToDetector( hit2->detector());
   //Test to see if move in worked
@@ -285,23 +284,6 @@ bool StiLocalTrackSeedFinder::fit(StiKalmanTrack* track)
   int ierr = track->initialize(_seedHits);
   return (ierr==0);
 }
-
-//______________________________________________________________________________
-/*
-//sort in descending order in radius, and ascending order in phi
-bool RPhiLessThan::operator()(const StiDetector* lhs, const StiDetector* rhs)
-{
-  StiPlacement* lhsp = lhs->getPlacement();
-  StiPlacement* rhsp = rhs->getPlacement();
-    
-  if (lhsp->getNormalRadius()<rhsp->getNormalRadius())
-    return false;
-  else if (lhsp->getNormalRadius()>rhsp->getNormalRadius()) 
-    return true;
-  else
-    return (lhsp->getNormalRefAngle()<rhsp->getNormalRefAngle());
-}
-*/
 
 //______________________________________________________________________________
 void StiLocalTrackSeedFinder::print() const

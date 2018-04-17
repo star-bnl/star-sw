@@ -1,6 +1,5 @@
 // $Id: StKFTrack.cxx,v 2.3 2015/12/20 01:06:39 fisyak Exp $
 #include "StKFTrack.h"
-ClassImp(StKFTrack);
 //________________________________________________________________________________
 StKFTrack::StKFTrack(const KFParticle *particle, Double_t chi2, Int_t iWE) : 
   fWeight(-1), fW(-1), fOrigKFParticle(particle), fWestOrEast(iWE) {

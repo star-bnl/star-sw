@@ -1,5 +1,4 @@
-#include <assert.h>
-#include "Riostream.h"
+#include <cassert>
 #include "StiMasterDetectorBuilder.h"
 #include "TGeoManager.h"
 #include "StiDetector.h"
@@ -37,20 +36,12 @@ void StiMasterDetectorBuilder::build(StMaker&source)
     LOG_INFO << "Timestamp check - Date/Time from chain is " << t.GetDate() << "/" << t.GetTime() << endm;
   }
 
-#if 1
   if ( gGeoManagerSV ){
     LOG_INFO << "Create a clone of VmcGeometry for reconstruction" << endm;
     gGeoManagerSV->Clone("CloneGeom");
   } else {
     LOG_INFO << "Could not get a pointer to gGeoManager " << endm;
   }
-#else
-  if ( chain ) {
-    LOG_INFO << "StiMasterDetectorBuilder::build() -I- Create clone of VmcGeometry by reinitialization for reconstruction" <<endm;
-    TDataSet *set = chain->GetDataBase("VmcGeometry/Geometry", &chain->StMaker::GetDBTime());
-    delete set;
-  }
-#endif
 #endif /* ! __Physics_Node_Clear__ */
   LOG_INFO << "StiMasterDetectorBuilder::build() -I- Started"<<endm;
   vector<StiDetectorBuilder*>::iterator iter;
@@ -147,13 +138,11 @@ void StiMasterDetectorBuilder::build(StMaker&source)
  */
 bool StiMasterDetectorBuilder::hasMore() const
 { 
-  //LOG_INFO << "StiMasterDetectorBuilder::build() -I- Started"<<endm;
   vector<StiDetectorBuilder*>::const_iterator iter;
   for (iter=begin();
        iter!=end();
        iter++)
     {
-      //LOG_INFO << "StiMasterDetectorBuilder::hasMore() -I- Calling Group Builder named:" << (*iter)->getName()<<endm;
       if((*iter)->hasMore()) return true;
     }
   return false;
@@ -164,7 +153,6 @@ no detector object left to server.
  */
 StiDetector * StiMasterDetectorBuilder::next()
 {
-  //LOG_INFO << "StiMasterDetectorBuilder::next() -I- Started"<<endm;
   vector<StiDetectorBuilder*>::const_iterator iter;
   for (iter=begin();
        iter!=end();
@@ -188,13 +176,8 @@ StiDetectorBuilder * StiMasterDetectorBuilder::get(const string & name)
        iter!=end();
        iter++)
     {
-      //LOG_INFO << "StiMasterDetectorBuilder::next() -I- Calling Group Builder named:" << (*iter)->getName()<<endm;
       if((*iter)->isName(name)) return *iter;
     }
-#if 0
-	throw runtime_error("StiMasterDetectorBuilder::get(const string & name) -E- Requested object not found");
-#else
 	cout << "StiMasterDetectorBuilder::get(const string & name) -E- Requested object not found" << endl;
 	assert(0);
-#endif
 }

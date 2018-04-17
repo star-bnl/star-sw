@@ -605,8 +605,15 @@ void StSpaceChargeDistMaker::GeomFill(Float_t z) {
 
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeDistMaker.cxx,v 1.9 2017/02/14 23:38:38 fisyak Exp $
+// $Id: StSpaceChargeDistMaker.cxx,v 1.10 2018/04/11 02:43:21 smirnovd Exp $
 // $Log: StSpaceChargeDistMaker.cxx,v $
+// Revision 1.10  2018/04/11 02:43:21  smirnovd
+// Enable TPC/iTPC switch via St_tpcPadConfig
+//
+// This is accomplished by substituting St_tpcPadPlanes with St_tpcPadConfig.
+// A sector ID is passed to St_tpcPadConfig in order to extract parameters for
+// either TPC or iTPC
+//
 // Revision 1.9  2017/02/14 23:38:38  fisyak
 // Adjustment to structure changes in StTpcdEdxCorrection
 //

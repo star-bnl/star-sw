@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.40 2015/04/09 19:54:03 genevb Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.44 2018/04/10 11:39:03 smirnovd Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -11,8 +11,6 @@
 #include <stdio.h>
 #include "StTpcHitMaker.h"
 #include "StTpcRTSHitMaker.h"
-
-#include "TString.h"
 
 #include "StTpcRawData.h"
 #include "StEvent/StTpcRawData.h"
@@ -306,6 +304,7 @@ Int_t StTpcRTSHitMaker::Make() {
 		     (Double_t) St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
 	}
 	UInt_t hw = 1;   // detid_tpc
+	//yf        if (isiTpcSector) hw += 1U << 1;
 	hw += dta->sec << 4;     // (row/100 << 4);   // sector
 	hw += dta->row << 9;     // (row%100 << 9);   // row
 #if 0	

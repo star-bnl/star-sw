@@ -20,14 +20,15 @@
 #include "RTS/src/DAQ_TPX/tpxFCF_flags.h" // for FCF flag definition
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
 //________________________________________________________________________________
-StiTpcHitLoader::StiTpcHitLoader(): StiHitLoader<StEvent,StiDetectorBuilder>("TpcHitLoader"), 
-				    _minRow(1), _maxRow(100), _minSector(1), _maxSector(24) {}
+StiTpcHitLoader::StiTpcHitLoader(): StiHitLoader<StEvent,StiDetectorBuilder>("TpcHitLoader"),
+                                 _minRow(1), _maxRow(72), _minSector(1), _maxSector(24) { }
+
 //________________________________________________________________________________
 StiTpcHitLoader::StiTpcHitLoader(StiHitContainer* hitContainer,
                                  Factory<StiHit>*hitFactory,
                                  StiDetectorBuilder * detector)
 : StiHitLoader<StEvent,StiDetectorBuilder>("TpcHitLoader",hitContainer,hitFactory,detector), 
-				    _minRow(1), _maxRow(100), _minSector(1), _maxSector(24) {}
+				    _minRow(1), _maxRow(72), _minSector(1), _maxSector(24) {}
 //________________________________________________________________________________
 void StiTpcHitLoader::loadHits(StEvent* source,
                                Filter<StiTrack> * trackFilter,
@@ -35,15 +36,8 @@ void StiTpcHitLoader::loadHits(StEvent* source,
 {
   static Int_t debug = 0;
 //  cout << "StiTpcHitLoader::loadHits(StEvent*) -I- Started" << endl;
-#if 0
-  if (!_detector)
-    throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) - FATAL - _detector==0");
-  if(!_hitContainer)
-    throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) - FATAL - _hitContainer==0");
-#else
   assert(_detector);
   assert(_hitContainer);
-#endif
   StiDetector * detector;
   StiHit* stiHit;
   const StTpcHitCollection* tpcHits = source->tpcHitCollection();
@@ -67,10 +61,6 @@ void StiTpcHitLoader::loadHits(StEvent* source,
       if (!padrowHits) break;
       const StSPtrVecTpcHit& hitvec = padrowHits->hits();
       if (! hitvec.size()) continue;
-#if 0
-      detector = _detector->getDetector(row,stiSector);
-      if (!detector) throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) -E- Detector element not found");
-#endif
       const_StTpcHitIterator iter;
       StiHitTest hitTest;
       Int_t StiRow = StiTpcDetectorBuilder::StiRow(sector+1,row+1)-1;
@@ -82,17 +72,9 @@ void StiTpcHitLoader::loadHits(StEvent* source,
 	if (StiKalmanTrackNode::IsLaser() && hit->flag()) continue;
 	if (hit->flag() & FCF_CHOPPED || hit->flag() & FCF_SANITY)     continue; // ignore hits marked by AfterBurner as chopped or bad sanity
 	if (hit->pad() > 182 || hit->timeBucket() > 511) continue; // some garbadge  for y2001 daq
-#if 0
-        if(!_hitFactory) throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) -E- _hitFactory==0");
-#else
-	assert(_hitFactory);
-#endif
+        assert(_hitFactory);
         stiHit = _hitFactory->getInstance();
-#if 0
-        if(!stiHit)   throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) -E- stiHit==0");
-#else
-	assert(stiHit);
-#endif
+        assert(stiHit);
         stiHit->reset();
         stiHit->setGlobal(detector,hit,hit->position().x(),hit->position().y(), hit->position().z(),hit->charge());
         hitTest.add(hit->position().x(),hit->position().y(), hit->position().z());
@@ -111,6 +93,5 @@ void StiTpcHitLoader::loadHits(StEvent* source,
       
     }
   }
-//    cout << "StiTpcHitLoader::loadHits(StEvent*) -I- Done with " << noHitsLoaded << " hits" <<  endl;
 }
 //________________________________________________________________________________

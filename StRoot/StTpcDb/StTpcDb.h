@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.41 2014/06/27 14:04:25 fisyak Exp $
+ * $Id: StTpcDb.h,v 1.42 2018/04/11 02:43:22 smirnovd Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,13 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.42  2018/04/11 02:43:22  smirnovd
+ * Enable TPC/iTPC switch via St_tpcPadConfig
+ *
+ * This is accomplished by substituting St_tpcPadPlanes with St_tpcPadConfig.
+ * A sector ID is passed to St_tpcPadConfig in order to extract parameters for
+ * either TPC or iTPC
+ *
  * Revision 1.41  2014/06/27 14:04:25  fisyak
  * Add env. NewTpcAlignment to switch between new and old scheme
  *

@@ -94,7 +94,8 @@
 
 #ifndef StiHitContainer_HH
 #define StiHitContainer_HH
-#include <assert.h>
+
+#include <cassert>
 #include <vector>
 #include <map>
 #include <time.h>
@@ -286,12 +287,6 @@ inline Factory<StiHit> * StiHitContainer::getHitFactory()
 {  
   assert(_hitFactory);
   return _hitFactory;
-#if 0
-  if (_hitFactory) 
-    return _hitFactory;
-  else
-    throw runtime_error("StiHitContainer::getHitFactory() -I- _hitFactory is null");
-#endif
 }
 
 inline StiHit * StiHitContainer::getHit()

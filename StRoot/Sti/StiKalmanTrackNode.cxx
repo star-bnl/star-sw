@@ -1,10 +1,29 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.175 2018/01/16 22:46:09 smirnovd Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.178 2018/04/10 11:38:34 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.178  2018/04/10 11:38:34  smirnovd
+ * Replace thrown exceptions with runtime asserts
+ *
+ * Revision 2.177  2018/04/10 11:32:09  smirnovd
+ * Minor corrections across multiple files
+ *
+ * - Remove ClassImp macro
+ * - Change white space
+ * - Correct windows newlines to unix
+ * - Remove unused debugging
+ * - Correct StTpcRTSHitMaker header guard
+ * - Remove unused preprocessor directives in StiCA
+ * - Minor changes in status and debug print out
+ * - Remove using std namespace from StiKalmanTrackFinder
+ * - Remove includes for unused headers
+ *
+ * Revision 2.176  2018/04/10 11:31:24  smirnovd
+ * Remove dead code
+ *
  * Revision 2.175  2018/01/16 22:46:09  smirnovd
  * Remove inline attribute to match the declaration
  *
@@ -581,7 +600,8 @@
  * Added several functions for radlength calculation.
  *
  */
-#include <assert.h>
+
+#include <cassert>
 #include <Stiostream.h>
 #include <stdexcept>
 #include <math.h>
@@ -1920,11 +1940,7 @@ double StiKalmanTrackNode::getWindowZ()
 //______________________________________________________________________________
 StThreeVector<double> StiKalmanTrackNode::getHelixCenter() const
 {
-#if 0
-  if (mFP.curv()==0) throw logic_error("StiKalmanTrackNode::getHelixCenter() -F- _curv==0 ");
-#else
   assert(mFP.curv());
-#endif
   double xt0 = mFP.x()-mFP._sinCA/mFP.curv();   /*VP*/
   double yt0 = mFP.y()+mFP._cosCA/(mFP.curv());
   double zt0 = mFP.z()+mFP.tanl()*asin(mFP._sinCA)/mFP.curv();
@@ -1968,85 +1984,6 @@ int StiKalmanTrackNode::locate()
   return 0;
  }
 #endif //1
-#if 0
-//______________________________________________________________________________
-int StiKalmanTrackNode::locate()
-{
-  int position;
-  double yOff, yAbsOff, detHW, detHD,edge,innerY, outerY, innerZ, outerZ, zOff, zAbsOff;
-  //fast way out for projections going out of fiducial volume
-  const StiDetector *tDet = getDetector();
-  if (!tDet) return 0;
-  const StiPlacement *place = tDet->getPlacement();
-  const StiShape     *sh    = tDet->getShape();
-  double kNStd = (tDet->isActive() ? 5 : 0 ); // GVB: avoid seeing too much inactive material
-
-  if (fabs(mFP.z())>kMaxZ || mFP.rxy()> kMaxR) return -1;
-  
-#ifndef DO_TPCCATRACKER // insensible region on a detector plane
-  edge  = 2.;
-  if (mFP.x()<50.)      edge  = 0.3;
-#else /* DO_TPCCATRACKER */
-  edge = 0.;
-#endif /* !DO_TPCCATRACKER */
-  
-  //YF edge is tolerance when we consider that detector is hit. //  edge = 0; //VP the meaning of edge is not clear
-  Int_t shapeCode  = sh->getShapeCode();
-  switch (shapeCode) {
-  case kDisk:
-  case kCylindrical: // cylinder
-    yOff    = nice(_alpha - place->getLayerAngle());
-    yAbsOff = fabs(yOff);
-    yAbsOff -=kNStd*sqrt((mFE._cXX+mFE._cYY)/(mFP.x()*mFP.x()+mFP.y()*mFP.y()));
-    if (yAbsOff<0) yAbsOff=0;
-    detHW = ((StiCylindricalShape *) sh)->getOpeningAngle()/2.;
-    innerY = outerY = detHW;
-    break;
-  case kPlanar: 
-  default:
-    yOff = mFP.y() - place->getNormalYoffset();
-    yAbsOff = fabs(yOff) - kNStd*sqrt(mFE._cYY);
-    if (yAbsOff<0) yAbsOff=0;
-    detHW = sh->getHalfWidth();
-    innerY = detHW - edge;
-    //outerY = innerY + 2*edge;
-    //outerZ = innerZ + 2*edge;
-    outerY = innerY + edge;
-    break;
-  }
-  zOff = mFP.z() - place->getZcenter();
-  zAbsOff = fabs(zOff);
-  detHD = sh->getHalfDepth();
-  innerZ = detHD - edge;
-  outerZ = innerZ + edge;
-  if (yAbsOff<innerY && zAbsOff<innerZ)
-    position = kHit; 
-  else if (yAbsOff>outerY && (yAbsOff-outerY)>(zAbsOff-outerZ))
-    // outside detector to positive or negative y (phi)
-    // if the track is essentially tangent to the plane, terminate it.
-      position = yOff>0 ? kMissPhiPlus : kMissPhiMinus;
-  else if (zAbsOff>outerZ && (zAbsOff-outerZ)>(yAbsOff-outerY))
-    // outside detector to positive or negative z (west or east)
-    position = zOff>0 ? kMissZplus : kMissZminus;
-  else if ((yAbsOff-innerY)>(zAbsOff-innerZ))
-    // positive or negative phi edge
-    position = yOff>0 ? kEdgePhiPlus : kEdgePhiMinus;
-  else
-    // positive or negative z edge
-    position = zOff>0 ? kEdgeZplus : kEdgeZminus;
-  if (debug()&8) {
-    comment += ::Form("R %8.3f y/z %8.3f/%8.3f", 
-		      mFP.x(), mFP.y(), mFP.z());
-    if (position>kEdgeZplus || position<0)  
-      comment += ::Form(" missed %2d y0/z0 %8.3f/%8.3f dY/dZ %8.3f/%8.3f",
-			position, yOff, zOff, detHW, detHD);
-    else 
-      comment += ::Form(" hitted %2d y0/z0 %8.3f/%8.3f dY/dZ %8.3f/%8.3f",
-                       position, yOff, zOff, detHW, detHD);
-  }
-  return position;
- }
-#endif //0
 
 //______________________________________________________________________________
 void StiKalmanTrackNode::initialize(StiHit *h)

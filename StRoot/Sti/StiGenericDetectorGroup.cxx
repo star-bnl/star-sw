@@ -1,6 +1,7 @@
-// $Id: StiGenericDetectorGroup.cxx,v 2.3 2014/08/22 16:29:14 perev Exp $
+// $Id: StiGenericDetectorGroup.cxx,v 2.5 2018/04/10 11:38:34 smirnovd Exp $
 // Author: Valeri Fine, Dec 2006
-#include <assert.h>
+
+#include <cassert>
 #include <stdexcept>
 #include "StiGenericDetectorGroup.h"
 #include "Sti/StiDetectorBuilder.h"
@@ -32,14 +33,6 @@ StiGenericDetectorGroup::~StiGenericDetectorGroup()
 StiDetectorBuilder *StiGenericDetectorGroup::getDetectorBuilder()
 {
   assert(_detectorBuilder);
-#if 0
-  if (_detectorBuilder==0)
-    {
-      string message = "StiDetectorGroup::getDetectorBuilder() - ERROR - builder == 0 for detector:";
-      message += getName();
-      throw logic_error(message.c_str());
-    }
-#endif
   return _detectorBuilder; 
 }
 

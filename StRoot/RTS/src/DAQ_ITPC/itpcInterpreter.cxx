@@ -9,6 +9,7 @@
 #include <rtsLog.h>
 #include <DAQ_READER/daq_dta.h>
 
+#include <I386/atomic.h>
 
 #include "itpcInterpreter.h"
 #include "itpcPed.h"
@@ -17,6 +18,8 @@ static void hammingdecode(unsigned int buffer[2], bool& error, bool& uncorrectab
 
 itpcInterpreter::itpcInterpreter()
 {
+	id = 0 ;	// not valid
+
 	evt_ix = 0 ;
 	realtime = 0 ;
 	dbg_level = 0 ;
@@ -26,9 +29,18 @@ itpcInterpreter::itpcInterpreter()
 
 	fout = 0 ;
 
+	fee_version = 0 ;	// original pre-Mar 2018
+	rdo_version = 0 ;
+
+	expected_rdo_version = -1 ;	// uknown; don't check
+	expected_fee_version = -1 ;	// unknown; don't check
+
+
 	memset(fee,0,sizeof(fee)) ;
 	ped_c = 0 ;
 }
+
+atomic_t itpcInterpreter::run_errors[4][8] ;
 
 void itpcInterpreter::run_start(u_int run)
 {
@@ -41,7 +53,14 @@ void itpcInterpreter::run_start(u_int run)
 		fflush(fout) ;
 	}
 
+	if(id==1) memset(run_errors,0,sizeof(run_errors)) ;
+
 	LOG(DBG,"Starting run %08u",run_number) ;
+}
+
+void itpcInterpreter::run_err_add(int rdo1, int type)
+{
+	atomic_inc(&run_errors[rdo1-1][type]) ;
 }
 
 void itpcInterpreter::run_stop()
@@ -54,8 +73,17 @@ void itpcInterpreter::run_stop()
 		fout = 0 ;
 	}
 
-	LOG(INFO,"Stopping run %08u after %d/%d events",run_number,fee_evt_cou,evt_ix) ;
-	
+	LOG(INFO,"%d: stopping run %08u after %d/%d events",id,run_number,fee_evt_cou,evt_ix) ;
+
+	if(id==1) {
+		for(int i=0;i<4;i++) {
+			for(int j=0;j<8;j++) {
+				if(atomic_read(&run_errors[i][j])) {
+					LOG(ERR,"RDO %d: error type %d = %u",i+1,j,atomic_read(&run_errors[i][j])) ;
+				}
+			}
+		}
+	}
 }
 
 
@@ -104,139 +132,10 @@ static inline u_int sw16(u_int d)
 }
 
 
-#if 0
-int itpcInterpreter::get_l2(char *addr, int words, struct daq_trg_word *trg, int do_log)
-{
-	u_int err = 0 ;
-	u_int trg_fired ;
-	u_int v_fired ;
-	int trl_ix = -1 ;
-	int trg_cou ;
-	int t_cou = 0 ;
-	u_int evt_status ;
 
-	u_int *d = (u_int *)addr + 4 ;	// skip header
-
-	// NOTE that since Dec 2017 the 16 bit words are swapped!!!
-
-	if(sw16(d[0]) != 0x001CCCCC) {	// expect start-comma
-		err |= 1 ;
-		goto err_end ;
-	}
-
-//	LOG(TERR,"   0x%08X 0x%08X 0x%08X", sw16(d[1]),sw16(d[2]),sw16(d[words-1])) ;
-	
-	if(sw16(d[1]) != 0x98000004) { // not a triggered event
-		trg[0].t = 4096 ;	// a "log" event
-		trg[0].daq = 0 ;
-		trg[0].trg = 0 ;
-	
-		return 1 ;	
-	}
-
-	if(sw16(d[2]) != 0x12340000) {	// wrong version
-		err |= 2 ;
-		goto err_end ;
-	}
-
-	trg_fired = sw16(d[3]) ;
-	v_fired = sw16(d[4]) ;	// if 0, no prompt trigger	
-
-
-
-	// this gets messy so we won't check
-	/*
-	if(sw16(d[words-1]) != 0xFFFF005C) {	// expect stop-comma
-		err |= 0x10 ;
-		goto err_end ;
-	}
-	*/
-
-	//find trailer
-
-	for(int i=(words-1);i>=0;i--) {
-		if(sw16(d[i]) == 0x98001000) {
-			trl_ix = i ;
-			break ;
-		}
-	}
-
-
-	if(trl_ix < 0) {
-		err |= 0x20 ;
-		goto err_end ;
-	}
-
-	trl_ix++ ;
-
-	if(sw16(d[trl_ix++]) != 0xABCD0000) {
-		err |= 0x40 ;
-		goto err_end ;
-	}
-
-	evt_status = sw16(d[trl_ix++]) ;
-	trg_cou = sw16(d[trl_ix++]) ;
-
-	trg[t_cou].reserved[0] = trg_fired ;
-	t_cou++ ;
-	for(int i=0;i<trg_cou;i++) {
-		trg[t_cou].reserved[0] = sw16(d[trl_ix++]) ;
-		t_cou++ ;
-	}
-	
-
-	if(evt_status) {
-		LOG(ERR,"%d: %d/%d -- evt status 0x%08X",rdo_id,d[6],d[5],evt_status) ;
-
-	}
-
-	for(int i=0;i<t_cou;i++) {
-		u_int v = trg[i].reserved[0] ;
-		u_int t ;
-
-		t = ((v>>8)&0xF)<<8 ;
-		t |= ((v>>12)&0xF)<<4 ;
-		t |= ((v>>16)&0xF) ;
-
-		trg[i].trg = v & 0xF ;
-		trg[i].daq = (v>>4) & 0xF ;
-		trg[i].t = t ; 
-
-		if(trg[i].reserved[0]==0) {
-			trg[i].t = 4097 ;	// event without L0
-		}
-
-
-		if(trg[i].trg>=4 && trg[i].trg<=13) {
-			if((v&0xFFF00000) != 0x04300000) {
-				LOG(WARN,"... %d/%d = 0x%08X: %d %d %d",i,t_cou,trg[i].reserved[0],trg[i].t,trg[i].trg,trg[i].daq) ;
-			}
-		}
-
-#if 0
-		if(i==0) {
-			LOG(OPER,"... %d/%d [%d/%d] = 0x%08X: %d %d %d [%d words]",d[6],d[5],i,t_cou,trg[i].reserved[0],trg[i].t,trg[i].trg,trg[i].daq,words) ;
-		}
-		else {
-			LOG(TERR,"... %d/%d [%d/%d] = 0x%08X: %d %d %d [%d words]",d[6],d[5],i,t_cou,trg[i].reserved[0],trg[i].t,trg[i].trg,trg[i].daq,words) ;
-		}
-#endif
-	}
-
-	
-
-	return t_cou ;
-
-	err_end:;
-
-	LOG(ERR,"%d: Error in get_l2 %d",rdo_id,err) ;
-
-	return 0 ;
-	
-}
-#endif
-
-
+/*
+	This is the pre-April 2018 version for rdo_version = fee_version = 0 ;
+*/
 /* We start with 0x980000008 */
 u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 {
@@ -284,11 +183,13 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 		u_int dd_a ;
 
 		LOG(NOTE,"FEE #%d: %u 0x%08X",fee_port,d-start,dd) ;
-
+		
 		// let's get non-FEE headers out of the way first
 		switch(dd_x) {
 		case 0x980000F8 :	// End-of-FEE status (from RDO)
-			if(d[1]) {
+			//LOG(TERR,"0x%08X 0x%08X 0x%08X 0x%08X 0x%08X",dd,d[0],d[1],d[-1],d[-2]) ;
+
+			if(d[1]) {	// fee_status (from RDO)
 				LOG(ERR,"%d: FEE #%d[%d] END: 0x%08X 0x%08X 0x%08X 0x%08X 0x%08X 0x%08X 0x%08X",rdo_id,fee_port,fee_id,
 				    d[0],d[1],d[2],d[3],d[4],d[5],d[6]) ;
 			}
@@ -297,10 +198,11 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 				    d[0],d[1],d[2],d[3],d[4],d[5],d[6]) ;
 			}
 
+			// check word _before_ the RDO header; should come from a FEE
 			if((d[-2]&0xFFC00000) != 0x40000000) {
 				// might fire due to a bug in readout
 				if((d[-2]&0xFFC00000) != 0x80000000) {				
-					LOG(ERR,"%d: FEE #%d: Before END 0x%08X",rdo_id,fee_port,d[-2]) ;
+					//LOG(ERR,"%d: FEE #%d: Before END 0x%08X",rdo_id,fee_port,d[-2]) ;
 				}
 				else {
 					//OFTEN
@@ -540,8 +442,8 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 	stop_loop: ; 
 
 
-	if(fee_id < 0) {
-		LOG(ERR,"%d: fee_id %d, FEE #%d [0x%08X]: format error [%u 0x%08X]",rdo_id,fee_id,fee_port,(u_int)fee_port,d-start,*d) ;
+	if(fee_id < 0) {	// Hm, never seen any FEE data really...
+//		LOG(ERR,"%d: fee_id %d, FEE #%d [0x%08X]: format error [%u 0x%08X]",rdo_id,fee_id,fee_port,(u_int)fee_port,d-start,*d) ;
 		return d ;
 	}
 
@@ -557,10 +459,15 @@ int itpcInterpreter::sampa_ch_scan()
 	
 //	LOG(TERR,"sampa_ch_scan") ;
 
+
+	s = sector_id - 1 ;	// from 0
+	r = rdo_id - 1 ;
+	p = fee_port - 1 ;
+
 	if(ped_c) {
-		ped_c->sector = s = sector_id - 1 ;
-		ped_c->rdo = r = rdo_id - 1 ;
-		ped_c->port = p = fee_port - 1 ;
+		ped_c->sector = s  ;
+		ped_c->rdo = r  ;
+		ped_c->port = p  ;
 		ped_c->fee_id = fee_id ;
 
 		ped_c->ch_start(fee_ch) ;
@@ -778,6 +685,7 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 	bool uncorrectable ;
 	int p_cou ;
 	u_int hdr[2] ;
+	u_int first_b ;
 
 	data = start ;
 
@@ -786,10 +694,16 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 	d = *data++ ;
 	lane_hdr = d ;
 
+	first_b = d ;
+
 	fee_id = (d >> 16) & 0x3F ;
 	lane = (d>>24) & 0x3 ;
 
-	//LOG(TERR,"SAMPA lane: FEE %3d, lane %d [0x%08X]",fee_id,lane,d) ;
+	if((first_b & 0xFC000000)!=0xB0000000) {
+		LOG(ERR,"SAMPA FIFO overwrite 0x%08X!",first_b) ;
+	}
+
+//	LOG(TERR,"SAMPA lane: FEE %3d, lane %d [0x%08X]",fee_id,lane,d) ;
 
 	new_ch:;		// start of channel data
 
@@ -800,6 +714,9 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 	hdr[0] = d ;
 
 	if(d & 0xC0000000) {
+		hdr[1] = 0xAABBCCDD ;
+		memset(h,0xAB,sizeof(h)) ;
+
 		err |= 0x100 ;
 		LOG(ERR,"%d: Bad Hdr 1",rdo_id) ;
 		goto err_ret ;
@@ -813,6 +730,7 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 	hdr[1] = d ;
 
 	if(d & 0xC0000000) {
+		h[3] = h[4] = h[5] = 0x11223344 ;
 		err |= 0x200 ;
 		LOG(ERR,"%d: Bad Hdr 2",rdo_id) ;
 		goto err_ret ;
@@ -820,7 +738,6 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 
 	h[3] = (d >> 20) & 0x3FF ;
 	h[4] = (d >> 10) & 0x3FF ;
-
 	h[5] = d & 0x3FF ;
 
 //	if(h[5] != 0xAB) {
@@ -834,6 +751,39 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 	sampa_id = h[2] & 0xF ;
 	sampa_ch = (h[2]>>4) & 0x1F ;
 
+
+	switch(lane) {
+	case 0 :
+	case 1 :
+		if((sampa_id&1)) {
+			LOG(ERR,"sampa_id %d, lane %d",sampa_id,lane) ;
+		}
+		break ;
+	case 2 :
+	case 3 :
+		if(!(sampa_id&1)) {
+			LOG(ERR,"sampa_id %d, lane %d",sampa_id,lane) ;
+		}
+		break ;
+	}
+		
+	if(ch_loop_cou==1) {
+		switch(lane) {
+		case 0 :
+		case 2 :
+			if(sampa_ch != 0) {
+				LOG(WARN,"sampa_ch %d",sampa_ch) ;
+			}
+			break ;
+		case 1 :
+		case 3 :
+			if(sampa_ch != 16) {
+				LOG(WARN,"sampa_ch %d",sampa_ch) ;
+			}
+			break ;
+		}
+	}
+
 	if(sampa_id & 1) fee_ch = sampa_ch + 32 ;
 	else fee_ch = sampa_ch ;
 
@@ -842,7 +792,7 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 	l_sampa_bx |= (h[4]&0x1FF)<<11 ;
 
 
-	//LOG(TERR,"+++ %d %d %u",sampa_id,sampa_ch,l_sampa_bx) ;
+//	LOG(TERR,"+++ %d %d %u",sampa_id,sampa_ch,l_sampa_bx) ;
 
 	// check parity
 	p_cou = 0 ;
@@ -876,7 +826,7 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 		goto err_ret ;
 	}
 	else {
-		//LOG(TERR,"Type %d, words %d, SAMPA %d:%d, BX %u, errors %d:%d, fee_port %d",type,words,sampa_id,sampa_ch,l_sampa_bx,parity_err,hamming_err,fee_port) ;
+//		LOG(TERR,"Type %d, words %d, SAMPA %d:%d, BX %u, errors %d:%d, fee_port %d",type,words,sampa_id,sampa_ch,l_sampa_bx,parity_err,hamming_err,fee_port) ;
 	}
 
 
@@ -892,7 +842,7 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 		}
 		break ;
 	case 4 :	// physics
-//		LOG(WARN,"Type %d, words %d, SAMPA %d:%d, BX %u",type,words,sampa_id,sampa_ch,l_sampa_bx) ;
+		//if(dbg_level) LOG(WARN,"Type %d, words %d, SAMPA %d:%d, BX %u",type,words,sampa_id,sampa_ch,l_sampa_bx) ;
 		break ;
 	case 1 :	// trigger overrun
 		LOG(ERR,"%d: Type %d, words %d, SAMPA %d:%d, BX %u [lane_hdr 0x%08X],fee_port %d",rdo_id,type,words,sampa_id,sampa_ch,l_sampa_bx,lane_hdr,fee_port) ;
@@ -910,7 +860,7 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 		sampa_bx = l_sampa_bx ;
 	}
 	else if(sampa_bx != l_sampa_bx) {
-		LOG(NOTE,"Expect %u, got %u",sampa_bx,l_sampa_bx) ;
+		LOG(WARN,"%d:#%02d:%d expect %u, got %u",rdo_id,fee_port,fee_ch,sampa_bx,l_sampa_bx) ;
 	}
 
 
@@ -970,14 +920,31 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 		LOG(ERR,"%d: Last SAMPA: FEE #%d: %d:%d = 0x%08X [err 0x%0x]",rdo_id,fee_port,sampa_id,sampa_ch,*data,err) ;
 	}
 	else {
+		if(found_ch_mask & (1<<sampa_ch)) {
+			LOG(ERR,"SAMPA ch %d already found!",sampa_ch) ;
+		}
 		found_ch_mask |= (1<<sampa_ch) ;
 		LOG(NOTE,"Last SAMPA %d:%d = 0x%08X [err 0x%0x]",sampa_id,sampa_ch,*data,err) ;
 	}
 		
 	err = 0 ;	// clear error before we go into a new channel
 
+
+//	LOG(TERR,"Data at end is now 0x%08X",*data) ;
+
 	if(*data & 0xC0000000) {
-		data++ ;
+		// this must be 0x7xxxxxxx
+		if((data[0] & 0xFC000000)!=0x70000000) {
+			LOG(ERR,"bad end 0x%08X",data[0]) ;
+		}
+		//if((data[0] & 0x0FFFFFFF)!=(first_b & 0x0FFFFFFF)) {
+		//	LOG(ERR,"bad start/stop 0x%08X 0x%08X",first_b,data[0]) ;
+		//}
+		if(ch_loop_cou != 16) {
+			LOG(ERR,"Found only %d channels; datum is 0x%08X 0x%08X, last ch is %d, bx %u",ch_loop_cou,data[0],data[1],sampa_ch,sampa_bx) ;
+			LOG(ERR,"   first_b 0x%08X, 0x%08X 0x%08X",first_b,data[-2],data[-1]) ;
+		}
+		data++ ;	// move to the 0xB... of the next lane!
 		return data ;	//keep the signature
 	}
 	else {
@@ -1048,7 +1015,758 @@ void itpcInterpreter::fee_dbase(const char *fname)
 
 }
 
+int itpcInterpreter::ana_send_config(u_int *data, u_int *data_end)
+{
+	u_int d ;
 
+	data++ ;	// skip FD71
+
+	data++ ;	// skip "version"??
+
+	if(*data != 0x98000066) {
+		LOG(ERR,"data is 0x%08X",*data) ;
+		return -1 ;
+	}
+
+	data++ ;	// skip 0066
+
+	ascii_cou = 0 ;
+	while(data<data_end) {
+		d = *data++ ;
+
+		if((d & 0xFFFFFF00)==0x9800F500) {	//ASCII
+			int c = d & 0xFF ;
+			if(c=='\n' || ascii_cou==120) {
+				ascii_dta[ascii_cou++] = 0 ;
+
+				LOG(INFO,"%d: \"%s\"",rdo_id,ascii_dta) ;
+				ascii_cou = 0 ;
+			}
+			else {
+				ascii_dta[ascii_cou++] = c ;
+			}
+		}
+		else {
+			if(d==0x58000067) ;
+			else LOG(ERR,"end at 0x%08X [%d]",d,data_end-data) ;
+
+			break ;
+		}
+	}
+
+	// I should now be at the RDO configuration
+	d = *data++ ;
+
+	if(d != 0x980000FA) {
+		LOG(ERR,"%d: Bad FA 0x%08X",rdo_id,d) ;
+		return -1 ;
+	}
+	
+//	for(int i=0;i<16;i++) {
+//		LOG(TERR,"FA: %d: 0x%08X",i,data[i]) ;
+//	}
+
+
+	rdo_wire1_id = data[7] ;
+
+	data += 10 ;
+
+	d = *data++ ;
+
+	// I should ne at the end of RDO configuraion
+	if(d != 0x580000FB) {
+		LOG(ERR,"%d: Bad FB 0x%08X",rdo_id,d) ;
+		return -1 ;
+	}
+
+	d = *data++ ;
+
+	// I should be now at start of RDO monitoring
+	if(d != 0x980000FC) {
+		LOG(ERR,"%d: Bad FC 0x%08X",rdo_id,d) ;
+		return -1 ;
+	}
+
+	ascii_cou = 0 ;
+	while(data<data_end) {
+		d = *data++ ;
+
+		if((d & 0xFFFFFF00)==0x9800F500) {	//ASCII
+			int c = d & 0xFF ;
+			if(c=='\n' || ascii_cou==120) {
+				ascii_dta[ascii_cou++] = 0 ;
+
+				LOG(INFO,"%d: \"%s\"",rdo_id,ascii_dta) ;
+				ascii_cou = 0 ;
+			}
+			else {
+				ascii_dta[ascii_cou++] = c ;
+			}
+		}
+		else {
+			if(d==0x580000FD) ;
+			else LOG(ERR,"end at 0x%08X [%d]",d,data_end-data) ;
+
+			break ;
+		}
+	}
+
+#if 0
+	// I should now be at the start of FEE stuff
+	d = *data++ ;
+
+	if(d != 0x98000018) {
+		LOG(ERR,"%d: Bad 18 0x%08X",rdo_id,d) ;
+		return -1 ;
+	}
+
+	// now the data is from FEE e.g. 0xA03600A0 
+	d = *data++ ;
+
+	if((d & 0xFF00FFFF)!=0xA00000A0) {
+		LOG(ERR,"%d: bad FEE ASCII 0x%08X",rdo_id,d) ;
+	}
+#endif
+
+	fee_port = -1 ;
+	ascii_cou = 0 ;
+	
+	while(data<data_end) {
+		u_int dd_a, dd_b, dd_c ;
+		u_int fee_id ;
+
+		d = *data++ ;
+
+		fee_id = (d>>16) & 0xFF ;
+
+		dd_a = d & 0xFFC0FF00 ;
+		dd_b = d & 0xFFC000FF ;
+		dd_c = d & 0xFFC0000F ;
+
+		if(dd_c==0x98000008) {	// start of FEE in fee_dump() ;
+			fee_port = (d >> 4) & 0xFF ;
+			//LOG(WARN,"fee_port %d",fee_port) ;
+		}
+		else if(dd_a==0x0000F500 || dd_a==0x00800000) {	//ASCII
+			int c = d & 0xFF ;
+			if(c=='\n' || ascii_cou==120) {
+				ascii_dta[ascii_cou++] = 0 ;
+
+
+				u_int id1 = 0 ;
+				if(strncmp(ascii_dta,"1Wire:",6)==0) {
+					char *id = strstr(ascii_dta,"ID") ;
+					if(id) {
+						if(sscanf(id,"ID 0x%X",&id1)==1) {
+							fee[fee_port].wire1_id = id1 ;
+						}
+					}
+				}
+				else if(strncmp(ascii_dta,"Padplane ",9)==0) {
+					if(sscanf(ascii_dta,"Padplane %d",&id1)==1) {
+						fee[fee_port].padplane_id = id1 ;
+					}
+				}
+
+	
+				if(strstr(ascii_dta,"ERROR")) {
+					LOG(ERR,"FEE_asc %d:#%02d: \"%s\"",rdo_id,fee_port,ascii_dta) ;
+				}
+				else {
+					LOG(TERR,"FEE_asc %d:#%02d: \"%s\"",rdo_id,fee_port,ascii_dta) ;
+				}
+
+
+				ascii_cou = 0 ;
+			}
+			else {
+				ascii_dta[ascii_cou++] = c ;
+			}
+		}
+		else if(dd_b==0xA00000A0 || dd_b==0x600000A0) {	// ASCII start/stop
+
+		}
+		else {
+			//LOG(ERR,"end at 0x%08X [%d]",d,data_end-data) ;
+
+			//break ;
+		}
+	}
+		
+
+	if((data_end-data)==0) ;
+	else LOG(ERR,"at end 0x%08X [%d]",*data,data_end-data) ;
+
+	return 0 ;
+}
+
+int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
+{
+	u_int trg ;
+	u_int err = 0 ;
+	u_int soft_err = 0 ;
+	int fee_cou = 0 ;
+
+	fee_port = 0 ;
+
+	//data[0] is 0x98000vv4
+
+	trg = data[1] ;
+	if(trg==0) return 0 ;	// no triggers
+
+	// start of FEE is at data[2] ;
+	data += 2 ;
+	
+
+	fee_start:;
+
+	// start of FEE is 0x80ff0010 ;
+
+	fee_version = 0 ;
+	if(data[0] == 0x98001000) return 0 ;	// no FEEs
+
+	fee_port = 0 ;	// claim unknown
+	fee_id = 0 ;	// claim unknown
+	fee_cou++ ;	// so it starts from 1
+
+
+
+
+
+	if((data[0] & 0xFFC0FFFF)==0x80000001) {
+		fee_version = 0 ;
+		fee_id = (data[0]>>16) & 0xFF ;
+	}
+	else {	
+		u_int f_id[3], d_x[3] ;
+		u_int f_ok = 0 ;
+
+		// gotta be fee_version 1
+		fee_version = 1 ;
+
+		// I have to have
+		//   0x80ff0010
+		//   0x00ff4321
+		//   0x00ff8765 ;
+
+		// get fee_ids
+		f_id[0] = (data[0]>>16) & 0x3F ;
+		f_id[1] = (data[1]>>16) & 0x3F ;
+		f_id[2] = (data[2]>>16) & 0x3F ;
+
+		// get decoded
+		d_x[0] = data[0] & 0xFFC0FFFF ;
+		d_x[1] = data[1] & 0xFFC0FFFF ;
+		d_x[2] = data[2] & 0xFFC0FFFF ;
+
+		if(d_x[0]==0x80000010) {
+			f_ok |= 1 ;
+			if(d_x[1]==0x00004321) f_ok |= 2 ;
+			if(d_x[2]==0x00008765) f_ok |= 4 ;
+
+			if(f_id[0]==f_id[1]) f_ok |= 8 ;
+			if(f_id[1]==f_id[2]) f_ok |= 0x10 ;
+			if(f_id[0]==f_id[2]) f_ok |= 0x20 ;
+		}
+
+		if(f_ok!=0x3F) {	// all was NOT OK
+			run_err_add(rdo_id,0) ;
+		}
+
+
+		for(int i=0;i<3;i++) {	// hunt for 0x4321
+			if(d_x[i]==0x00004321) {
+				data = data+i ;
+			}
+		}
+	}
+#if 0		
+
+
+		
+
+	//data is now at the first 0x80xx0010 of the FEE
+	else if((data[0] & 0xFFC0FFFF)!=0x80000010) {
+		// THIS CAN happen and I get instead bits scrambled
+		/// e.g. 0xC02F0010 ;
+		// OR this datum is just not there and the event ends
+		//  with previous FEEs 0x40yy0010
+		//  and the first word is the 0x4321 signature already
+
+		/* Alright: I can have
+			option A:  0x80000010 is garbled, data[1] should be 0x1234
+			option B:  0x80000010 is missing, data[0] _is_ 0x1234
+			option C:  0x80000010 is there but is from the previous event!
+					data[1] is again 0x80000010 but this time correct
+
+		*/
+
+		run_err_add(rdo_id,0) ;
+
+
+		if((data[0]&0x0000FFFF)==0x00004321) {	// this is for the case 0x800 is missing
+			if((data[1]&0x0000FFFF)==0x00008765) {
+				fee_id = (data[1]>>16) & 0xFF ;
+				fee_version = 1 ;
+				data = data - 1 ;	// go back one!
+			}
+			else {
+
+				LOG(ERR,"evt %d: port %d: fee sig bad 0x%08X, expect 0x80000010",evt_ix,fee_port,data[0]) ;
+				err |= 1 ;
+				goto done ;
+			}
+		}
+		else if((data[1]&0x0000FFFF)==0x00004321) {	// this is if it's corrupted
+			if((data[2]&0x0000FFFF)==0x00008765) {
+				fee_id = (data[2]>>16) & 0xFF ;
+				fee_version = 1 ;
+			}
+			else {
+				LOG(ERR,"evt %d: port %d: fee sig bad 0x%08X, expect 0x80000010",evt_ix,fee_port,data[0]) ;
+				err |= 2 ;
+				goto done ;
+			}
+		}
+		else {
+			LOG(ERR,"evt %d: port %d: fee sig bad 0x%08X, expect 0x80000010",evt_ix,fee_port,data[0]) ;
+			err |= 4 ;
+			goto done ;
+
+		}
+
+	}
+	else {
+		fee_version = 1 ;
+		
+		// looks OK but I need one more check!
+		u_int fee_id_1 = (data[1]>>16) & 0xFF ;
+
+		fee_id = (data[0]>>16) & 0xFF ;
+
+		if(fee_id != fee_id_1) {	// data[0] was from a previous event!!!
+			//LOG(WARN,"FEE id odd: 0x%08X 0x%08X 0x%08X 0x%08X",data[-1],data[0],data[1],data[2]) ;
+			fee_id = fee_id_1 ;
+			data = data + 1 ;
+		}
+	}
+
+#endif
+	
+	if(expected_fee_version >= 0) {
+		if(fee_version != expected_fee_version) {	
+			LOG(ERR,"FEE version %d, expected %d",fee_version,expected_fee_version) ;
+		}
+	}
+	
+	//at this point data[0]==0x00004321 ;
+	fee_id = (data[0]>>16) & 0x3F ;
+		
+	switch(fee_version) {
+	case 1 :
+		if(data[0] != ((fee_id<<16)|0x4321)) err |= 0x10000 ;
+		if(data[1] != ((fee_id<<16)|0x8765)) err |= 0x20000 ;
+
+		if(fee_version != (data[2] & 0xFFFF)) err |= 0x40000 ;
+
+		if(data[3]&0xFFF0) err |= 0x40000 ; 
+		fee_port = (data[3] & 0xF) + 1 ;
+		//data[4] & data[5] are BX
+
+		if(data[6] != ((fee_id<<16)|0x60000010)) err |= 0x80000 ;	// end of FEE hdr
+
+		if(err) {
+			run_err_add(rdo_id,3) ;
+			goto done ;
+		}
+
+		break ;
+	default :
+		break ;
+	}
+
+//	for(int i=0;i<10;i++) {
+//		LOG(TERR,"... fee V%d hdr: %d = 0x%08X",fee_version,i,data[i]) ;
+//	}
+	
+	// I need fee_port here!!!
+
+
+
+	//data[7] is the start of lane data!!!
+	data += 7 ;
+
+//	LOG(TERR,"into sampa_lane_scan: fee_id %d",fee_id) ;
+
+	
+	for(int i=0;i<4;i++) {
+		u_int expect_mask ;
+
+		if((*data & 0xFC000000) != 0xB0000000) {
+			run_err_add(rdo_id,1) ;
+			LOG(ERR,"%d:#%02d: lane %d: bad sig 0x%08X",rdo_id,fee_port,i,*data) ;
+			run_err_add(rdo_id,4) ;
+			err |= 0x100 ;
+			goto done ;
+		}
+
+		switch(i) {
+		case 0 :
+		case 2 :
+			expect_mask = 0x0000FFFF ;
+			break ;
+		default :
+			expect_mask = 0xFFFF0000 ;
+			break ;
+		}
+
+		found_ch_mask = 0 ;
+		data = sampa_lane_scan(data,data_end) ;
+
+		if(found_ch_mask != expect_mask) {
+			run_err_add(rdo_id,2) ;
+			dbg_level = 1 ;
+			LOG(ERR,"%d: fee_port %d: missing channels in lane %d: expect 0x%08X, got 0x%08X",
+				rdo_id,fee_port,i,expect_mask,found_ch_mask) ;
+			soft_err |= 0x100 ;
+		}
+
+		if(data==0) {
+			LOG(ERR,"data 0!!!!") ;
+			err |= 0x200 ;
+			goto done ;
+		}
+	}
+
+
+//	for(int i=0;i<10;i++) {
+//		LOG(TERR,"fee trl %d = 0x%08X",i,data[i]) ;
+//	}
+
+	// I expect 8 words of end-of-event from the FEE
+	switch(fee_version) {
+	default :
+		break ;
+	case 1 :
+		// I can have a normal 0xA0000010 trailer or
+		// monitoring 0xA00000EC header
+		if(data[0] == ((fee_id<<16)|0xA00000EC)) {	// monitoring
+			//LOG(WARN,"Monitoring...") ;
+
+			int found_end = 0 ;
+			while(data<data_end) {
+				if(*data == ((fee_id<<16)|0xA0000010)) {
+					found_end = 1 ;
+					break ;
+				}
+					
+				u_int dd_a = data[0] & 0xFFC0FF00 ;
+
+				if(dd_a==0x0000F500 || dd_a==0x00800000) {	//ASCII				
+					int c = data[0] & 0xFF ;
+
+					if(c=='\n' || ascii_cou==120) {
+						ascii_dta[ascii_cou++] = 0 ;
+
+						if(strstr(ascii_dta,"ERROR")) {
+							LOG(ERR,"FEE_asc %d:#%02d: \"%s\"",rdo_id,fee_port,ascii_dta) ;
+						}
+						else {
+							LOG(TERR,"FEE_asc %d:#%02d: \"%s\"",rdo_id,fee_port,ascii_dta) ;
+						}
+
+
+						ascii_cou = 0 ;
+					}
+					else {
+						ascii_dta[ascii_cou++] = c ;
+					}
+				}
+				data++ ;
+			}
+
+			if(found_end) {
+				//LOG(WARN,"monitoring end") ;
+			}
+			else {
+				LOG(ERR,"No monitoring end?") ;
+				err |= 0x100000 ;
+			}
+					
+		}
+
+		if(data[0] != ((fee_id<<16)|0xA0000010)) err |= 0x10 ;
+		if(data[7] != ((fee_id<<16)|0x40000010)) err |= 0x20 ;
+		if((data[1] & 0xFFFF)||(data[2]&0xFFFF)||(data[3]&0xFFFF)||(data[4]&0xFFFF)) {
+			LOG(WARN,"%d:#%02d: event errors",rdo_id,fee_port) ;
+		}
+		if(err) {
+			run_err_add(rdo_id,5) ;
+			goto done ;
+		}
+		break ;
+	}
+
+
+
+	data += 8 ;	// start of new FEE
+
+	if(data > data_end) goto done ;
+	if(data[0]==0x98001000) goto done ;	// end of FEE section marker!!!
+	if(data[0]==0x980000FC) goto done ;	// RDO-mon start
+
+	goto fee_start ;
+
+
+	done:;
+
+	// end of FEE
+	
+	if(err || soft_err) {
+		run_err_add(rdo_id,7) ;
+
+		LOG(ERR,"%d:#%02d(id %d,cou %d) evt %d: error 0x%X 0x%X",rdo_id,fee_port,fee_id,fee_cou,evt_ix,err,soft_err) ;
+		for(int i=-4;i<8;i++) {
+			LOG(ERR,".... %d = 0x%08X",i,data[i]) ;	
+		}
+		
+		if(err || soft_err) return -1 ;
+	}
+
+	after_fee:;
+
+	switch(data[0]) {
+	case 0x98001000 :	// trigger data
+		if(data[1]!=0) {
+			LOG(ERR,"bad event status 0x%08X",data[1]) ;
+		}
+		break ;
+	case 0x980000FC :	// RDO_mon
+		data++ ;
+		ascii_cou = 0 ;
+		while(data<data_end) {
+			u_int d = *data++ ;
+
+			if((d&0xFFFFFF00)==0x9800F500) {
+				int c = d & 0xFF ;
+
+				if(c=='\n' || ascii_cou==120) {
+					ascii_dta[ascii_cou++] = 0 ;
+
+					LOG(INFO,"RDO_asc %d: \"%s\"",rdo_id,ascii_dta) ;
+
+					ascii_cou = 0 ;
+				}
+				else {
+					ascii_dta[ascii_cou++] = c ;
+				}
+
+			}
+			else if(d==0x580000FD) goto after_fee ;
+			else LOG(WARN,".... %d 0x%08X",data_end-data,d) ;
+		}
+	
+
+		break ;
+	default :	
+		for(int i=0;i<16;i++) {
+			LOG(ERR,"After FEE: %d [%d] = 0x%08X",i,data_end-data,*data) ;
+			data++ ;
+		}
+		break ;
+	}
+
+	return 0 ;
+}
+
+int itpcInterpreter::ana_pedestal(u_int *data, u_int *data_end)
+{
+	int fee_port = 0 ;
+
+	data++ ;	// skip 9800FD60
+	
+	while(data<data_end) {
+		u_int dd_f = data[0] & 0xFF00FFFF ;
+		u_int dd_r = data[0] & 0xFF00000F ;
+
+		if(data[0]==0x5800FD61) {
+			LOG(INFO,"pedestal packet done") ;
+			break ;
+		}
+
+		if((data[0] & 0xFFFFFF00)==0x98AAAA00) {
+			LOG(TERR,"-> Done port %d",(data[0]&0xFF)+1) ;
+		}
+		else if((data[0] & 0xFFFFFF00)==0x98BBBB00) {
+			LOG(TERR,"--> Done channel %d",data[0]&0xFF) ;
+		}
+		else if(dd_r==0x98000008) {
+			fee_port = ((data[0])>>4)&0x1F ;
+		}
+		else if(dd_r==0x58000009) {
+
+		}
+		else if(dd_f==0x80000003) {
+			u_int s[7] ;
+			
+			int fee_id = (data[0] >> 16) & 0xFF ;
+			
+			for(int i=0;i<7;i++) {
+				s[i] = data[1+i] & 0xFFFF ;
+			}
+
+			int for_me = s[0]&1 ;
+			int my_port = (s[0]>>8) & 0xFF ;
+
+			int len = s[1] & 0x3FF ;
+			int ch = (s[1]>>10)&0x3F ;
+
+			u_int ticks1 = (s[4]<<16)|s[3] ;
+			u_int ticks2 = (s[6]<<16)|s[5] ;
+			LOG(TERR,"#%02d(%02d): fee_id %02d: for_me %d: ch %2d, len %3d",fee_port,my_port,fee_id,for_me,ch,len) ;
+			LOG(TERR,"       chsum 0x%04X, ticks %u %u",s[2],ticks1,ticks2) ;
+			
+
+
+			data += 7 ;			
+	
+		}
+		else {
+			LOG(TERR,"... 0x%08X",data[0]) ;
+		}		
+		data++ ;
+	}
+
+	return 0 ;
+}
+
+int itpcInterpreter::rdo_scan_top(u_int *data, int words)
+{
+	u_int *data_end = data + words ;
+	u_int *data_start = data ;
+	u_int d ;
+	int ret = 0 ;
+
+	//some preliminaries which used to be in start_event
+	evt_ix++ ;
+	evt_bytes = words*4 ;
+	word_ix = 0 ;
+	status = 0 ;
+	state = S_IDLE ;
+	fee_port = -1 ;
+	d_cou = 01 ;
+	sampa_bx = -1 ;
+	ascii_cou = 0 ;
+	memset(evt_err,0,sizeof(evt_err)) ;
+
+	// move forward until I hit start-comma
+	int w_cou = (words<16)?words:16 ;
+
+	// the data is already SWAPPED if processed in the sector brokers!!!
+	for(int i=0;i<w_cou;i++) {
+		LOG(NOTE,"...%d/%d = 0x%08X",i,words,data[i]) ;
+
+		if((data[i] == 0xCCCC001C)||(data[i] == 0x001CCCCC)) {
+			data = data + i ;
+			break ;
+		}
+	}
+
+	w_cou = data_end - data ;
+
+	if(data[0]==0xCCCC001C) {	// need swapping!!!!
+		LOG(NOTE,"swapping") ;
+		for(int i=0;i<w_cou;i++) {
+			data[i] = sw16(data[i]) ;
+		}
+	}
+
+	d = *data++ ;	// now at start comma
+
+	switch(d) {
+	case 0xFFFF001C :
+	case 0x001CCCCC :
+		break ;
+	default :
+		LOG(ERR,"%d: First word is not a START comma!? [0x%08X 0x%08X 0x%08X]",rdo_id,data[-1],data[0],data[1]) ;
+		return -1 ;
+	}
+
+	
+//	for(int i=0;i<16;i++) {
+//		LOG(TERR,"%d/%d = 0x%08X",i,words,data[i]) ;
+//	}
+
+	d = *data ;	// now at start packet word from RDO
+
+	switch(d) {
+	case 0x9800FD71 :	// send config packet
+		// dump to special handler
+		// but fish the rdo_version, eh?
+		ret = ana_send_config(data,data_end) ;
+		break ;
+	case 0x9800FD80 :	// start run
+		// check some basics immediatelly here
+		LOG(TERR,"%d: run_start packet: 0x%08X 0x%08X 0x%08X",rdo_id,data[0],data[1],data[2]) ;
+
+		if(data[2] != 0x11223344) {
+			LOG(ERR,"%d: run_start: bad signature 0x%08X",rdo_id,data[2]) ;
+			goto err_ret ;
+		}
+
+		if(data[1]) {
+			LOG(ERR,"%d: run_start: already bad status 0x%08X",rdo_id,data[1]) ;
+			goto err_ret ;
+		}
+
+		return 0 ;
+
+		break ;
+	case 0x9800FD60 :	// pedestal response from FEE
+		ret = ana_pedestal(data,data_end) ;
+		break ;
+	default :
+		if((d & 0xFF00000F)==0x98000004) {	// triggered event
+			rdo_version = (d >> 4) & 0xFF ;
+
+			LOG(NOTE,"rdo_version %d",rdo_version) ;
+
+			if(rdo_version==0) {	// used the old code (which remains frozen)
+				ret = rdo_scan(data_start,words) ;				
+			}
+			else {
+				ret = ana_triggered(data,data_end) ;
+			}
+			break ;
+		}
+		LOG(ERR,"Unknown packet 0x%08X",d) ;
+		goto err_ret ;
+	}
+
+
+	done:;
+
+	// from stop_event
+	for(int i=0;i<8;i++) {
+		if(evt_err[i]) LOG(ERR,"%d: event errors[%d] = %u",rdo_id,i,evt_err[i]) ;
+	}
+
+
+	return ret ;	
+
+
+	err_ret:;
+
+	for(int i=0;i<16;i++) {
+		LOG(TERR,".... bad evt: %d = 0x%08X",i,data[i]) ;
+	}
+
+	return -1 ;
+}
+
+/*
+	This is the frozen, pre-April 2018 unpacker for rdo_version=0
+*/
 int itpcInterpreter::rdo_scan(u_int *data, int words)
 {
 //	int status = 0 ;
@@ -1064,6 +1782,13 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 	char mon_string[512] ;
 	int mon_cou = 0 ;
 
+	if(data[0] != 0xDDDDDDDD) {
+		LOG(ERR,"%d: words %d = 0x%08X",rdo_id,words,data[0]) ;
+	}
+
+//	for(int i=(words-16);i<(words+32);i++) {
+//		LOG(TERR,"E %d/%d = 0x%08X",i,words,data[i]) ;
+//	}
 
 	// the data is already SWAPPED if processed in the sector brokers!!!
 	for(int i=0;i<16;i++) {
@@ -1071,8 +1796,19 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 
 		if((data[i] == 0xCCCC001C)||(data[i] == 0x001CCCCC)) {
 			data = data + i ;
+			words-- ;
 			break ;
 		}
+	}
+
+
+	if(words<=0) {
+		LOG(ERR,"%d: words %d = 0x%08X",rdo_id,words,data[0]) ;
+	}
+
+	if((data[0] == 0xCCCC001C)||(data[0] == 0x001CCCCC)) ;	//as it should be
+	else {
+		LOG(ERR,"%d: words %d = 0x%08X",rdo_id,words,data[0]) ;
 	}
 
 	if(data[0]==0xCCCC001C) {	// need swapping!!!!
@@ -1080,6 +1816,9 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 		for(int i=0;i<words;i++) {
 			data[i] = sw16(data[i]) ;
 		}
+	}
+	else {
+		LOG(NOTE,"%d: words %d = 0x%08X",rdo_id,words,data[0]) ;
 	}
 
 	d = *data++ ;
