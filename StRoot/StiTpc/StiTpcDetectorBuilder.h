@@ -27,6 +27,7 @@ public:
 private:
 
     StiPlanarShape* constructTpcPadrowShape(int row) const;
+    StiDetector*    constructTpcPadrowDetector(int row, int sector, StiPlanarShape* pShape) const;
 };
 
 /// Get the azimuthal angle of the given sector

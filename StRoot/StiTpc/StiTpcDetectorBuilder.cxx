@@ -119,6 +119,29 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
     Double_t dZ = pShape->getHalfDepth()*NoStiSectors/24.;
 
     for(UInt_t sector = 0; sector<getNSectors(); sector++) {
+      StiDetector* pDetector = constructTpcPadrowDetector(row, sector, pShape);
+      add(row,sector,pDetector); if (debug>1) cout << *pDetector << endl;
+    }// for sector
+  }// for row
+  for (Int_t i = 0; i < 4; i++) {
+    gGeoManager->RestoreMasterVolume();
+    gGeoManager->CdTop();
+    TGeoNode *nodeT = gGeoManager->GetCurrentNode();
+    path = TpcVolumes[i].path;
+    if (  newRefSystem && ! path.Contains("TpcRefSys")) continue;
+    if (! newRefSystem &&   path.Contains("TpcRefSys")) continue;
+    if (! gGeoManager->cd(path)) continue;
+    nodeT = gGeoManager->GetCurrentNode();
+    if (! nodeT) continue;
+    path = gGeoManager->GetPath();
+    StiVMCToolKit::LoopOverNodes(nodeT, path, TpcVolumes[i].name, MakeAverageVolume);
+  }
+  cout << "StiTpcDetectorBuilder::buildDetectors() -I- Done" << endl;
+}
+
+
+StiDetector* StiTpcDetectorBuilder::constructTpcPadrowDetector(int row, int sector, StiPlanarShape* pShape) const
+{
       //Retrieve position and orientation of the TPC pad rows from the database.
       StTpcLocalSectorDirection  dirLS[3];
       dirLS[0] = StTpcLocalSectorDirection(1.,0.,0.,sector+1,row+1);
@@ -216,23 +239,8 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
 //      pDetector->setElossCalculator(gasElossCalculator);
       pDetector->setKey(1,row);
       pDetector->setKey(2,sector);
-      add(row,sector,pDetector); if (debug>1) cout << *pDetector << endl;
-    }// for sector
-  }// for row
-  for (Int_t i = 0; i < 4; i++) {
-    gGeoManager->RestoreMasterVolume();
-    gGeoManager->CdTop();
-    TGeoNode *nodeT = gGeoManager->GetCurrentNode();
-    path = TpcVolumes[i].path;
-    if (  newRefSystem && ! path.Contains("TpcRefSys")) continue;
-    if (! newRefSystem &&   path.Contains("TpcRefSys")) continue;
-    if (! gGeoManager->cd(path)) continue;
-    nodeT = gGeoManager->GetCurrentNode();
-    if (! nodeT) continue;
-    path = gGeoManager->GetPath();
-    StiVMCToolKit::LoopOverNodes(nodeT, path, TpcVolumes[i].name, MakeAverageVolume);
-  }
-  cout << "StiTpcDetectorBuilder::buildDetectors() -I- Done" << endl;
+
+  return pDetector;
 }
 
 
