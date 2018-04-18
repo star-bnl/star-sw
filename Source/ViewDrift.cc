@@ -292,7 +292,7 @@ void ViewDrift::Plot2d(const bool axis) {
     }
     t.SetLineColor(driftLine.n);
     t.SetLineWidth(1);
-    if (&driftLine == &m_driftLines.front() == 0) {
+    if (&driftLine == &m_driftLines.front()) {
       t.GetXaxis()->SetLimits(m_xMin, m_xMax);
       t.GetHistogram()->SetMaximum(m_yMax);
       t.GetHistogram()->SetMinimum(m_yMin);
