@@ -16,8 +16,9 @@ StarParticleData &pdb = StarParticleData::instance();
 
 //__________________________________________________________________________________________________
 // Useful exceptions for debugging
-struct EnergyNotConserved : public std::runtime_error { EnergyNotConserved( std::string const& message ) : std::runtime_error( message ) { /* nada */ } };
-struct StopOnParticle     : public std::runtime_error { StopOnParticle    ( std::string const& message ) : std::runtime_error( message ) { /* nada */ } };
+struct EnergyNotConserved : public std::runtime_error { EnergyNotConserved( std::string const& message ) : std::runtime_error( message ) { LOG_ERROR << message << endm; } };
+struct StopOnParticle     : public std::runtime_error { StopOnParticle    ( std::string const& message ) : std::runtime_error( message ) { LOG_ERROR << message << endm; } };
+struct MissingPdgEntry    : public std::runtime_error { MissingPdgEntry   ( std::string const& message ) : std::runtime_error( message ) { LOG_ERROR << message << endm; } };
 //__________________________________________________________________________________________________
 
 
@@ -61,8 +62,6 @@ Int_t AgUDecay::operator()()
   if (0==mDecayer) return 0; // no decayer registerd
 
   //  int np = 0;
-
-  mArray   -> Clear();
   mDecayer -> ForceDecay();
 
   int idGeant3 = geant3->Gckine()->ipart;
@@ -79,10 +78,32 @@ Int_t AgUDecay::operator()()
   int idPdg = pdb.GetParticleG3( idGeant3 )->PdgCode();
 
   // Perform the decay
-  mDecayer -> Decay( idPdg, &mP );
+  int  nretry = 0;
+  int  np = 0;
+ AGAIN: while ( true ) {
+    if ( nretry ) {
+      LOG_WARN << "Decay chain rejected (all or in part) due to unknown PDG" << endm;
+      mArray->Print();
+      if ( nretry > 1000 ) throw MissingPdgEntry("No path to decay after 1000 attempts...");
+    }
+    mArray   -> Clear();
+    
+    // Perform the decay
+    mDecayer -> Decay( idPdg, &mP );
 
-  // Retrieve the particles into the clones array
-  int np = mDecayer -> ImportParticles( mArray ); if ( np<1 ) return np;
+    // Retrieve the particles into the clones array
+    np = mDecayer -> ImportParticles( mArray ); if ( np<1 ) return np;
+
+    // Possible that one or more particles are unknown to the PDG DB
+    // If so, we will repeat (and warn).
+
+    for ( int ip = 0; ip<np; ip++ ) {
+      TParticle* part = (TParticle *)mArray->At(ip);
+      if ( 0 == part->GetPDG() && ++nretry  ) goto AGAIN;
+    }
+
+    break; // Reach here only on a valid decay chain
+  }
 
 
 
