@@ -160,6 +160,7 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   Chain->SetAttr(".Privilege",1,"StVMCMaker::*"); 	//It is also IO maker
   StMaker::lsMakers(Chain);
   StVMCMaker::instance()->SetVxSigma(-1);
+  StVMCMaker::instance()->SetAttr("SmearVertex",1); // To smear production vertex accoudingly vertex errors
   Int_t iInit = Chain->Init();
   if (iInit >=  kStEOF) {Chain->FatalErr(iInit,"on init"); return;}
   if (First <= Last) {

@@ -547,7 +547,17 @@ Int_t StVMCMaker::SetVertex() {
 	return kStSKIP;
       }
     }
-    StarMCPrimaryGenerator::Instance()->SetVertex(V);
+    if (IAttr("SmearVertex")) {
+      TVector3 Vs(gRandom->Gaus(V.X(),E.X()),
+		  gRandom->Gaus(V.Y(),E.Y()),
+		  gRandom->Gaus(V.Y(),E.Y()));
+      LOG_INFO << "Smear production vertex from to " << endm;
+      cout << "From \t"; V.Print();
+      cout << "To   \t"; Vs.Print();
+      StarMCPrimaryGenerator::Instance()->SetVertex(Vs);
+    } else {
+      StarMCPrimaryGenerator::Instance()->SetVertex(V);
+    }
     TString Opt(StarMCPrimaryGenerator::Instance()->GetOption());
     if (Opt.Contains("PerCent",TString::kIgnoreCase)) {
       Double_t perCent = 0;
