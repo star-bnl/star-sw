@@ -227,6 +227,8 @@ int* StSstStripList::getListAdc(Int_t idStrip, Int_t sizeCluster)
     }
     if(CurrentStrip!=last()){
       CurrentStrip = next(CurrentStrip);
+    } else {
+      CurrentStrip = 0;
     }
   }
   if (!CurrentStrip) return localListAdc;
