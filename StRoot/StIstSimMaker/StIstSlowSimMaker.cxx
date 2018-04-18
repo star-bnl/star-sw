@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StIstSlowSimMaker.cxx,v 1.5 2018/04/05 22:30:36 jwebb Exp $
+ * $Id: StIstSlowSimMaker.cxx,v 1.6 2018/04/18 18:10:19 jwebb Exp $
  *
  * Author: Leszek Kosarzewski, March 2014
  ****************************************************************************
@@ -294,6 +294,10 @@ void StIstSlowSimMaker::generateRawHits(const StMcIstHit *istMChit) const
 
 	checkPadCrossing(inPos, outPos, mcLocalDir, dS, crossVec);
 	LOG_DEBUG<<"StIstSlowSimMaker::generateRawHits crossVec.size() = "<<crossVec.size()<<endm;
+	if(crossVec.size()==1) {
+		LOG_WARN<<"StIstSlowSimMaker: McHit is outside of active area -> skip!"<<endm;
+		return;
+	}
 
 	StThreeVectorD totalPath = crossVec[crossVec.size()-1]-crossVec[0];		
 	Double_t pathLengthTotal = totalPath.mag();
@@ -351,7 +355,8 @@ void StIstSlowSimMaker::generateRawHits(const StMcIstHit *istMChit) const
 				}
 
 				LOG_DEBUG<<"dE = "<<1e6*istMChit->dE()<<" keV \tpathLength = "<<pathLength<<"\tpathLengthTotal = "<<pathLengthTotal<<endm;
-				Float_t charge = istMChit->dE() * pathLength / pathLengthTotal;
+				Float_t charge = 0;
+				if(pathLengthTotal>1e-6) charge = istMChit->dE() * pathLength / pathLengthTotal;
 				if(kIstTimeBinFrac[maxTB]>0) charge *= kIstTimeBinFrac[t]*kIstMPV/kIstTimeBinFrac[maxTB]; //translate energy Int_to ADC with GeV-to-ADC factor
 				if ( charge > adcSum ) {
 					rawHit->setIdTruth(idTruth);
@@ -398,6 +403,8 @@ void StIstSlowSimMaker::checkPadCrossing(const StThreeVectorD inPos, const StThr
 	LOG_DEBUG<<"StIstSlowSimMaker::checkPadCrossing"<<endm;
 	LOG_DEBUG<<"\tcolumn_out = "<<column_out<<"\trow_out = "<<row_out<<endm;
 	LOG_DEBUG<<"\tcolumn_in = "<<column<<"\trow_in = "<<row<<endm;
+
+	if(column==65535||column_out==65535) return;
 
 	mcLocalDir.setX(-mcLocalDir.x());
 
