@@ -22,8 +22,6 @@ ViewCell::ViewCell() {
 ViewCell::~ViewCell() {
 
   if (!m_hasExternalCanvas && m_canvas) delete m_canvas;
-  if (m_geo) delete m_geo;
-
 }
 
 void ViewCell::SetComponent(ComponentAnalyticField* comp) {
@@ -155,7 +153,7 @@ bool ViewCell::Plot(const bool use3d) {
 
   if (use3d) {
     if (!m_geo) {
-      m_geo = new TGeoManager("ViewCellGeoManager", m_label.c_str());
+      m_geo.reset(new TGeoManager("ViewCellGeoManager", m_label.c_str()));
       TGeoMaterial* matVacuum = new TGeoMaterial("Vacuum", 0., 0., 0.); 
       TGeoMaterial* matMetal = new TGeoMaterial("Metal", 63.546, 29., 8.92);
       TGeoMedium* medVacuum = new TGeoMedium("Vacuum", 0, matVacuum);

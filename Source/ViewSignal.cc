@@ -8,18 +8,11 @@
 
 namespace Garfield {
 
-ViewSignal::ViewSignal() {
-
-  plottingEngine.SetDefaultStyle();
-}
+ViewSignal::ViewSignal() { plottingEngine.SetDefaultStyle(); }
 
 ViewSignal::~ViewSignal() {
 
   if (!m_hasExternalCanvas && m_canvas) delete m_canvas;
-  if (m_hSignal) delete m_hSignal;
-  if (m_hSignalElectrons) delete m_hSignalElectrons;
-  if (m_hSignalIons) delete m_hSignalIons;
-  if (m_gCrossings) delete m_gCrossings;
 }
 
 void ViewSignal::SetSensor(Sensor* s) {
@@ -61,57 +54,43 @@ void ViewSignal::PlotSignal(const std::string& label, const bool total,
   unsigned int nBins = 100;
   double t0 = 0., dt = 1.;
   m_sensor->GetTimeWindow(t0, dt, nBins);
+  const double t1 = t0 + nBins * dt;
 
+  const auto title = label.c_str();
   if (total) {
-    if (m_hSignal) {
-      delete m_hSignal;
-      m_hSignal = nullptr;
-    }
-    const std::string hname = FindHistogramName("hSignal_");
-    m_hSignal = new TH1D(hname.c_str(), label.c_str(), nBins, t0, t0 + nBins * dt);
+    const auto hname = FindHistogramName("hSignal_").c_str();
+    m_hSignal.reset(new TH1D(hname, title, nBins, t0, t1));
     m_hSignal->SetLineColor(plottingEngine.GetRootColorLine1());
     m_hSignal->GetXaxis()->SetTitle("time [ns]");
     m_hSignal->GetYaxis()->SetTitle("signal [fC / ns]");
-
     for (unsigned int i = 0; i < nBins; ++i) {
       const double sig = m_sensor->GetSignal(label, i);
       m_hSignal->SetBinContent(i + 1, sig);
     }
-  
-    if (m_gCrossings) {
-      delete m_gCrossings;
-      m_gCrossings = nullptr;
-    }
-  
-    // Get threshold crossings.
-    const int nCrossings = m_sensor->GetNumberOfThresholdCrossings();
+    m_hSignal->Draw("");
+
+    // Get and plot threshold crossings.
+    const auto nCrossings = m_sensor->GetNumberOfThresholdCrossings();
     if (nCrossings > 0) {
-      m_gCrossings = new TGraph(nCrossings);
+      m_gCrossings.reset(new TGraph(nCrossings));
       m_gCrossings->SetMarkerStyle(20);
       m_gCrossings->SetMarkerColor(plottingEngine.GetRootColorLine1());
       double time = 0., level = 0.;
       bool rise = true;
-      for (int i = nCrossings; i--;) {
+      for (unsigned int i = 0; i < nCrossings; ++i) {
         if (m_sensor->GetThresholdCrossing(i, time, level, rise)) {
           m_gCrossings->SetPoint(i, time, level);
         }
       }
+      m_gCrossings->Draw("psame");
     }
-  
-    m_hSignal->Draw("");
-    if (nCrossings > 0) m_gCrossings->Draw("psame");
     m_canvas->Update();
   }
 
   // Plot the electron and ion signals if requested.
   if (electron) {
-    if (m_hSignalElectrons) {
-      delete m_hSignalElectrons;
-      m_hSignalElectrons = nullptr;
-    }
-    const std::string hname = FindHistogramName("hSignalElectrons_");
-    m_hSignalElectrons = new TH1D(hname.c_str(), 
-                                  label.c_str(), nBins, t0, t0 + nBins * dt);
+    const auto hname = FindHistogramName("hSignalElectrons_").c_str();
+    m_hSignalElectrons.reset(new TH1D(hname, title, nBins, t0, t1));
     m_hSignalElectrons->SetLineColor(plottingEngine.GetRootColorElectron());
     m_hSignalElectrons->GetXaxis()->SetTitle("time [ns]");
     m_hSignalElectrons->GetYaxis()->SetTitle("signal [fC / ns]");
@@ -123,13 +102,8 @@ void ViewSignal::PlotSignal(const std::string& label, const bool total,
     m_canvas->Update();
   }
   if (ion) {
-    if (m_hSignalIons) {
-      delete m_hSignalIons;
-      m_hSignalIons = nullptr;
-    }
-    const std::string hname = FindHistogramName("hSignalIons_");
-    m_hSignalIons = new TH1D(hname.c_str(), 
-                                  label.c_str(), nBins, t0, t0 + nBins * dt);
+    const auto hname = FindHistogramName("hSignalIons_").c_str();
+    m_hSignalIons.reset(new TH1D(hname, title, nBins, t0, t1));
     m_hSignalIons->SetLineColor(plottingEngine.GetRootColorIon());
     m_hSignalIons->GetXaxis()->SetTitle("time [ns]");
     m_hSignalIons->GetYaxis()->SetTitle("signal [fC / ns]");
@@ -152,5 +126,4 @@ std::string ViewSignal::FindHistogramName(const std::string& base) const {
   }
   return hname;
 }
-
 }

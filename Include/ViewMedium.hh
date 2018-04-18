@@ -132,7 +132,7 @@ class ViewMedium {
                    const std::string& xlabel, const std::string& ylabel, 
                    const int type, const char xaxis,
                    const double e, const double b, const double a);
-  int GetColor(const unsigned int property) const;
+  int GetColor(const Property property) const;
 };
 }
 #endif

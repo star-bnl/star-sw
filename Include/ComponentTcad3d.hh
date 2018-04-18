@@ -27,20 +27,21 @@ class ComponentTcad3d : public ComponentBase {
   bool GetBoundingBox(double& xmin, double& ymin, double& zmin, double& xmax,
                       double& ymax, double& zmax) override;
 
-  // Import mesh and field map from files.
+  /// Import mesh and field map from files.
   bool Initialise(const std::string& gridfilename,
                   const std::string& datafilename);
 
-  // List all currently defined regions.
+  /// List all currently defined regions.
   void PrintRegions();
-  // Get the number of regions in the device.
+  /// Get the number of regions in the device.
   unsigned int GetNumberOfRegions() const { return m_regions.size(); }
   void GetRegion(const unsigned int ireg, std::string& name, 
                  bool& active) const;
   void SetDriftRegion(const unsigned int ireg);
   void UnsetDriftRegion(const unsigned int ireg);
-  // Set/get the medium for a given region
+  /// Set the medium for a given region
   void SetMedium(const unsigned int ireg, Medium* m);
+  /// Get the medium for a given region
   bool GetMedium(const unsigned int ireg, Medium*& m) const;
 
   int GetNumberOfElements() const { return m_elements.size(); }
@@ -55,7 +56,7 @@ class ComponentTcad3d : public ComponentBase {
 
  private:
   // Max. number of vertices per element
-  static const int nMaxVertices = 7;
+  static constexpr int nMaxVertices = 7;
 
   // Regions
   struct Region {

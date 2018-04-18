@@ -2,6 +2,7 @@
 #define G_VIEW_CELL
 
 #include <string>
+#include <memory>
 
 #include <TCanvas.h>
 #include <TGeoManager.h>
@@ -65,7 +66,7 @@ class ViewCell {
   ComponentAnalyticField* m_component = nullptr;
 
   // 3D geometry.
-  TGeoManager* m_geo = nullptr;
+  std::unique_ptr<TGeoManager> m_geo;
 
   bool Plot(const bool use3d);
   void PlotWire(const double x, const double y, const double d, 

@@ -126,8 +126,8 @@ class ViewFEMesh {
   bool m_drawAxes = false;
 
   // The mesh, stored as a vector of TPolyLine(3D) objects
-  std::vector<TPolyLine*> m_mesh;
-  std::vector<TPolyLine*> m_driftLines;
+  std::vector<TPolyLine> m_mesh;
+  std::vector<TPolyLine> m_driftLines;
 
 // The color map
 #ifndef __CINT__
@@ -140,7 +140,12 @@ class ViewFEMesh {
   // Element plotting methods
   void DrawElements();
   void DrawCST(ComponentCST* componentCST);
-  bool InView(double x, double y);
+
+  /// Return true if the specified point is in the view region.
+  bool InView(const double x, const double y) const {
+    return (x >= m_xMin && x <= m_xMax && y >= m_yMin && y <= m_yMax);
+  }
+
   bool LinesCrossed(double x1, double y1, double x2, double y2, double u1,
                     double v1, double u2, double v2, double& xc, double& yc);
   bool OnLine(double x1, double y1, double x2, double y2, double u, double v);

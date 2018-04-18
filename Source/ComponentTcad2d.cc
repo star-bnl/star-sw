@@ -146,7 +146,7 @@ void ComponentTcad2d::ElectricField(const double xin, const double yin,
 
   // Initialise.
   ex = ey = ez = p = 0.;
-  m = NULL;
+  m = nullptr;
 
   // Make sure the field map has been loaded.
   if (!m_ready) {
@@ -253,7 +253,7 @@ void ComponentTcad2d::ElectronVelocity(const double xin, const double yin,
 
   // Initialise.
   vx = vy = vz = 0.;
-  m = NULL;
+  m = nullptr;
   // Make sure the field map has been loaded.
   if (!m_ready) {
     std::cerr << m_className << "::ElectronVelocity:\n";
@@ -355,7 +355,7 @@ void ComponentTcad2d::HoleVelocity(const double xin, const double yin,
 
   // Initialise.
   vx = vy = vz = 0.;
-  m = NULL;
+  m = nullptr;
 
   // Make sure the field map has been loaded.
   if (!m_ready) {
@@ -460,7 +460,7 @@ Medium* ComponentTcad2d::GetMedium(const double xin, const double yin,
   if (!m_ready) {
     std::cerr << m_className << "::GetMedium:\n"
               << "    Field map not available for interpolation.\n";
-    return NULL;
+    return nullptr;
   }
 
   double x = xin, y = yin, z = zin;
@@ -469,9 +469,9 @@ Medium* ComponentTcad2d::GetMedium(const double xin, const double yin,
   MapCoordinates(x, y, xmirr, ymirr);
   // Check if the point is inside the bounding box.
   if (x < m_xMinBB || x > m_xMaxBB || y < m_yMinBB || y > m_yMaxBB) {
-    return NULL;
+    return nullptr;
   }
-  if (m_hasRangeZ && (z < m_zMinBB || z > m_zMaxBB)) return NULL;
+  if (m_hasRangeZ && (z < m_zMinBB || z > m_zMaxBB)) return nullptr;
 
   // Shape functions
   double w[nMaxVertices] = {0};
@@ -509,7 +509,7 @@ Medium* ComponentTcad2d::GetMedium(const double xin, const double yin,
   }
 
   // Point is outside the mesh.
-  return NULL;
+  return nullptr; 
 }
 
 bool ComponentTcad2d::GetElectronLifetime(const double xin, const double yin, 
@@ -959,18 +959,17 @@ bool ComponentTcad2d::Initialise(const std::string& gridfilename,
   m_xMaxBB = m_xMinBB = m_vertices[m_elements[0].vertex[0]].x;
   m_yMaxBB = m_yMinBB = m_vertices[m_elements[0].vertex[0]].y;
   m_pMax = m_pMin = m_vertices[m_elements[0].vertex[0]].p;
-  const unsigned int nElements = m_elements.size();
-  for (unsigned int i = 0; i < nElements; ++i) {
-    const Vertex& v0 = m_vertices[m_elements[i].vertex[0]];
-    const Vertex& v1 = m_vertices[m_elements[i].vertex[1]];
+  for (auto& element : m_elements) {
+    const Vertex& v0 = m_vertices[element.vertex[0]];
+    const Vertex& v1 = m_vertices[element.vertex[1]];
     double xmin = std::min(v0.x, v1.x);
     double xmax = std::max(v0.x, v1.x);
     double ymin = std::min(v0.y, v1.y);
     double ymax = std::max(v0.y, v1.y);
     m_pMin = std::min(m_pMin, std::min(v0.p, v1.p));
     m_pMax = std::max(m_pMax, std::max(v0.p, v1.p));
-    if (m_elements[i].type > 1) {
-      const Vertex& v2 = m_vertices[m_elements[i].vertex[2]];
+    if (element.type > 1) {
+      const Vertex& v2 = m_vertices[element.vertex[2]];
       xmin = std::min(xmin, v2.x); 
       xmax = std::max(xmax, v2.x); 
       ymin = std::min(ymin, v2.y); 
@@ -978,8 +977,8 @@ bool ComponentTcad2d::Initialise(const std::string& gridfilename,
       m_pMin = std::min(m_pMin, v2.p);
       m_pMax = std::max(m_pMax, v2.p);
     }
-    if (m_elements[i].type > 2) {
-      const Vertex& v3 = m_vertices[m_elements[i].vertex[3]];
+    if (element.type > 2) {
+      const Vertex& v3 = m_vertices[element.vertex[3]];
       xmin = std::min(xmin, v3.x); 
       xmax = std::max(xmax, v3.x); 
       ymin = std::min(ymin, v3.y); 
@@ -988,10 +987,10 @@ bool ComponentTcad2d::Initialise(const std::string& gridfilename,
       m_pMax = std::max(m_pMax, v3.p);
     } 
     const double tol = 1.e-6;
-    m_elements[i].xmin = xmin - tol;
-    m_elements[i].xmax = xmax + tol;
-    m_elements[i].ymin = ymin - tol;
-    m_elements[i].ymax = ymax + tol;
+    element.xmin = xmin - tol;
+    element.xmax = xmax + tol;
+    element.ymin = ymin - tol;
+    element.ymax = ymax + tol;
     m_xMinBB = std::min(m_xMinBB, xmin);
     m_xMaxBB = std::max(m_xMaxBB, xmax);
     m_yMinBB = std::min(m_yMinBB, ymin);
@@ -1056,6 +1055,7 @@ bool ComponentTcad2d::Initialise(const std::string& gridfilename,
   unsigned int nDegenerate = 0;
   std::vector<int> degenerateElements;
 
+  const unsigned int nElements = m_elements.size();
   for (unsigned int i = 0; i < nElements; ++i) {
     const Element& element = m_elements[i];
     if (element.type == 1) {
@@ -1292,7 +1292,7 @@ Medium* ComponentTcad2d::GetMedium(const unsigned int i) const {
   if (i >= m_regions.size()) {
     std::cerr << m_className << "::GetMedium:\n"
               << "    Region " << i << " does not exist.\n";
-    return NULL;
+    return nullptr;
   }
 
   return m_regions[i].medium;
@@ -1302,8 +1302,7 @@ bool ComponentTcad2d::GetElement(const unsigned int i, double& vol, double& dmin
                                  double& dmax, int& type) const {
 
   if (i >= m_elements.size()) {
-    std::cerr << m_className << "::GetElement:\n"
-              << "    Element index (" << i << ") out of range.\n";
+    std::cerr << m_className << "::GetElement: Index out of range.\n";
     return false;
   }
 
@@ -1363,8 +1362,7 @@ bool ComponentTcad2d::GetNode(const unsigned int i,
                               double& ex, double& ey) const {
 
   if (i >= m_vertices.size()) {
-    std::cerr << m_className << "::GetNode:\n"
-              << "    Node index (" << i << ") out of range.\n";
+    std::cerr << m_className << "::GetNode: Index out of range.\n";
     return false;
   }
 

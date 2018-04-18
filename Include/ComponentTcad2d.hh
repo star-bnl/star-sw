@@ -10,9 +10,9 @@ namespace Garfield {
 class ComponentTcad2d : public ComponentBase {
 
  public:
-  // Constructor
+  /// Constructor
   ComponentTcad2d();
-  // Destructor
+  /// Destructor
   ~ComponentTcad2d() {}
 
   void ElectricField(const double x, const double y, const double z, double& ex,
@@ -37,19 +37,20 @@ class ComponentTcad2d : public ComponentBase {
                       double& ymax, double& zmax) override;
   void SetRangeZ(const double zmin, const double zmax);
 
-  // Import mesh and field map from files.
+  /// Import mesh and field map from files.
   bool Initialise(const std::string& gridfilename,
                   const std::string& datafilename);
 
-  // List all currently defined regions.
+  /// List all currently defined regions.
   void PrintRegions() const;
-  // Get the number of regions in the device.
+  /// Get the number of regions in the device.
   unsigned int GetNumberOfRegions() const { return m_regions.size(); }
   void GetRegion(const unsigned int i, std::string& name, bool& active) const;
   void SetDriftRegion(const unsigned int ireg);
   void UnsetDriftRegion(const unsigned int ireg);
-  // Set/get the medium for a given region.
+  /// Set the medium for a given region.
   void SetMedium(const unsigned int ireg, Medium* m);
+  /// Get the medium for a given region.
   Medium* GetMedium(const unsigned int ireg) const;
 
   // Retrieve information about the mesh.
@@ -105,7 +106,7 @@ class ComponentTcad2d : public ComponentBase {
 
  private:
   // Max. number of vertices per element
-  static const int nMaxVertices = 4;
+  static constexpr unsigned int nMaxVertices = 4;
 
   // Regions
   struct Region {

@@ -579,11 +579,8 @@ void ViewMedium::AddFunction(const double xmin, const double xmax,
     m_functions.back().GetYaxis()->SetTitleOffset(1.5);
     m_functions.back().Draw("");
   }
-  if (!m_graphs.empty()) {
-    const unsigned int nGraphs = m_graphs.size();
-    for (unsigned int i = 0; i < nGraphs; ++i) {
-      m_graphs[i].Draw("p");
-    }
+  for (auto& graph : m_graphs) {
+    graph.Draw("p");
   }
 }
 
@@ -762,7 +759,7 @@ double ViewMedium::EvaluateFunction(double* pos, double* par) {
   return y;
 }
 
-int ViewMedium::GetColor(const unsigned int prop) const {
+int ViewMedium::GetColor(const Property prop) const {
 
   if (prop == ElectronLongitudinalDiffusion || prop == ElectronAttachment ||
       prop == ElectronLorentzAngle) {

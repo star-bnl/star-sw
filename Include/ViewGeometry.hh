@@ -2,6 +2,8 @@
 #define G_VIEW_GEOMETRY
 
 #include <string>
+#include <vector>
+#include <memory>
 
 #include <TCanvas.h>
 #include <TGeoManager.h>
@@ -45,7 +47,7 @@ class ViewGeometry {
   std::vector<TGeoVolume*> m_volumes;
   std::vector<TGeoMedium*> m_media;
 
-  TGeoManager* m_geoManager = nullptr;
+  std::unique_ptr<TGeoManager> m_geoManager;
 
   void Reset();
 
