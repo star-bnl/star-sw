@@ -378,8 +378,10 @@ char *JevpPlot::GetPlotName()
   PlotHisto *curr = (PlotHisto *)histos.First();
 
   if(!curr) {
-      return "serv_JevpSummary";
+    strcpy(myname, "serv_JevpSummary");
+    return(myname);
   }
+
   //  LOG(ERR, "No PlotHisto\n");
   //  return NULL;
   // }
