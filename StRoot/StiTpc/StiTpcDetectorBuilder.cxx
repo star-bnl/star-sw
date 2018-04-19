@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <assert.h>
 #include <stdio.h>
-#include "Stiostream.h"
 #include <stdexcept>
 #include "StDbUtilities/StTpcLocalCoordinate.hh"
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
@@ -13,15 +12,11 @@
 #include "Sti/StiDetector.h"
 #include "Sti/Base/Factory.h"
 #include "Sti/StiToolkit.h"
-#include "Sti/StiIsActiveFunctor.h"
 #include "Rtypes.h"
-#include "Stiostream.h"
-#include "Sti/StiNeverActiveFunctor.h"
 #include "StDetectorDbMaker/StiTpcInnerHitErrorCalculator.h"
 #include "StDetectorDbMaker/StiTpcOuterHitErrorCalculator.h"
 #include "StiTpcDetectorBuilder.h"
 #include "StiTpc/StiTpcIsActiveFunctor.h"
-//#include "Sti/StiElossCalculator.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StDbUtilities/StCoordinates.hh"
