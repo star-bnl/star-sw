@@ -20,7 +20,7 @@
 #include "StDetectorDbMaker/StiTpcInnerHitErrorCalculator.h"
 #include "StDetectorDbMaker/StiTpcOuterHitErrorCalculator.h"
 #include "StiTpcDetectorBuilder.h"
-#include "StiTpcIsActiveFunctor.h"
+#include "StiTpc/StiTpcIsActiveFunctor.h"
 //#include "Sti/StiElossCalculator.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
@@ -233,7 +233,18 @@ StiDetector* StiTpcDetectorBuilder::constructTpcPadrowDetector(StiLayer stiLayer
 	         St_tpcPadGainT0BC::instance()->livePadrow(tpc_sector_id_east,tpc_padrow_id);
 	}
       }
-      pDetector->setIsActive(new StiTpcIsActiveFunctor(_active,west,east));
+
+      StiIsActiveFunctor* activator = nullptr;
+
+      if ( St_tpcPadConfigC::instance()->isiTpcPadRow(tpc_sector_id, tpc_padrow_id) && !_active_iTpc) {
+        pDetector->setGroupId(kiTpcId);
+        activator = new StiTpcIsActiveFunctor(false,west,east);
+      }
+      else {
+        activator = new StiTpcIsActiveFunctor(_active,west,east);
+      }
+
+      pDetector->setIsActive(activator);
       pDetector->setIsContinuousMedium(kTRUE);
       pDetector->setIsDiscreteScatterer(kFALSE);
       pDetector->setMaterial(_gasMat);
