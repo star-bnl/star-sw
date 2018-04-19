@@ -101,6 +101,8 @@ class DisplayNode {
     void insertChildAlpha(DisplayNode *node);
 
     static DisplayNode *copyTree(DisplayNode *src, DisplayNode *parent=NULL, int requireTags=0, const char *tags=NULL);
+
+    void getTabName(char *destination);
 };
 
 

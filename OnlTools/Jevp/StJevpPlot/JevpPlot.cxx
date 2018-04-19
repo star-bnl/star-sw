@@ -378,9 +378,11 @@ char *JevpPlot::GetPlotName()
   PlotHisto *curr = (PlotHisto *)histos.First();
 
   if(!curr) {
-    LOG(ERR, "No PlotHisto\n");
-    return NULL;
+      return "serv_JevpSummary";
   }
+  //  LOG(ERR, "No PlotHisto\n");
+  //  return NULL;
+  // }
   
   if(!curr->histo) {
     LOG(ERR, "No curr histo\n");
@@ -460,6 +462,8 @@ void JevpPlot::draw()
     // Get the plot dimension!
     int dimension = 0;
     curr = (PlotHisto *)histos.First();
+
+    dimension = 1;
     if(curr && curr->histo) dimension = curr->histo->GetDimension();
 
     //printf("dimension = %d\n", dimension);

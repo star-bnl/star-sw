@@ -21,7 +21,7 @@ class JLatex : public TLatex {
   void SetY(Double_t y);
   
   JLatex();
-  JLatex(Double_t x, Double_t y, const char *text);
+  JLatex(Double_t x, Double_t y, const char *text, int ndcX=0, int ndcY=1);
   JLatex(JLatex &l); 
   virtual ~JLatex() {
     //LOG("JEFF", "Deleting a jlatex");

@@ -99,6 +99,24 @@ DisplayNode::~DisplayNode()
   }
 }
 
+void DisplayNode::getTabName(char *result) {
+    char *names[25];
+    int nidx=0;
+    result[0] = '\0';
+
+    DisplayNode *pnode = this;
+    while((pnode = pnode->parent)) {
+	names[nidx++] = pnode->name;
+    }
+    
+    for(int i=nidx-1;i>=0;i--) {
+	strcat(result, names[i]);
+	if(i != 0) strcat(result, " -> ");
+    }
+    strcat(result, ":");
+
+}
+
 void DisplayNode::dump(int indent, const char *str)
 {
     if(str) {

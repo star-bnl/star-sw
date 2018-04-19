@@ -470,6 +470,16 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    log_level = (char *)WARN;
 	    throttle_time = .005;
 	}
+	else if (strcmp(argv[i], "-buildpdf")) {
+	    LOG("JEFF", "-buildpdf");
+	    log_output = RTS_LOG_STDERR;
+	    nodb = 1;
+	    myport = JEVP_PORT+10;
+	    die = 1;
+	    log_level = (char *)WARN;
+	    throttle_time = .005;
+	    pdfdir = (char *)".";	    
+	}
 	else if (strcmp(argv[i], "-l4updatedb")==0) {
 	    nodb = 0;
 	    myport = JEVP_PORT+10;
@@ -640,7 +650,7 @@ int JevpServer::init(int port, int argc, char *argv[]) {
     updateDisplayDefs();
 
     // Create daq reader...
-    LOG(DBG, "Reader filename is %s",daqfilename ? daqfilename : "none");
+    LOG("JEFF", "Reader filename is %s",daqfilename ? daqfilename : "none");
     if(ndaqfilenames) daqfilename = daqfilenames[cdaqfilename];
 
     rdr = new daqReader(daqfilename);
@@ -714,7 +724,8 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 // returns delay in milliseconds
 void JevpServer::handleNewEvent(EvpMessage *m)
 {
-  
+    //LOG("JEFF", "Maxevts = %d evtsInRun = %d", maxevts, evtsInRun);
+
     if(((maxevts > 0) && (evtsInRun > maxevts)) ||
        strcmp(m->cmd,"stoprun") == 0) {
 	LOG(DBG, "SERVThread: Got stoprun from reader");
@@ -1074,6 +1085,8 @@ void JevpServer::writeRootFiles()
     LOG(NOTE, "Writing to rootfile: %s",filename);
     TFile *rootfile = new TFile(filename, "recreate");
   
+    rootfile->cd();
+
     // Got through all histos...
     JevpPlotSet *curr;
     JevpPlot *currplot = NULL;
@@ -1362,6 +1375,8 @@ JevpPlot *JevpServer::getJevpSummaryPlot()
     jevpSummaryPlot = new JevpPlot();
     jevpSummaryPlot->needsdata = 0;
     jevpSummaryPlot->setParent((char *)"serv");
+
+    /*
     TH1I *h = new TH1I("JevpSummary", "JevpSummary", 64,0,63);
     //h->GetXaxis()->SetAxisColor(kWhite);
     h->GetXaxis()->SetTickLength(0);
@@ -1372,8 +1387,9 @@ JevpPlot *JevpServer::getJevpSummaryPlot()
     //h->SetLineColor(kWhite);
     //h->SetAxisColor(kWhite);
     //h->SetLabelColor(kWhite);
-
-    jevpSummaryPlot->addHisto(h);
+    */
+    
+    //jevpSummaryPlot->addHisto(h);
 
     jevpSummaryPlot->setOptStat(0);
     jevpSummaryPlot->gridx = 0;
@@ -1388,17 +1404,17 @@ JevpPlot *JevpServer::getJevpSummaryPlot()
     char tmp[512];
 
     sprintf(tmp,"Run #%d: (%s for %ld seconds)",runStatus.run, runStatus.status, time(NULL) - runStatus.timeOfLastChange);
-    l = new JLatex(2, liney(i++), tmp);
+    l = new JLatex(.05, liney(i++), tmp, 1, 1);
     //l->SetTextFont(8);   // courier new
     i++;
     l->SetTextSize(.05);
     jevpSummaryPlot->addElement(l);
 
     sprintf(tmp, "Tags:   %s", serverTags);
-    l = new JLatex(2, liney(i++), tmp);
-    //l->SetTextFont(8);
+    l = new JLatex(.05, liney(i++), tmp, 1, 1);
+    l->SetTextFont(82);
     i++;
-    l->SetTextSize(.035);
+    l->SetTextSize(.03);
     jevpSummaryPlot->addElement(l);
 
     CP;
@@ -1422,12 +1438,12 @@ JevpPlot *JevpServer::getJevpSummaryPlot()
 		curr->name, curr->events, obj->getAverageProcessingTime());
     
 	LOG(DBG, "here %s",tmp);
-	int xpos = ((i > 11) ? 32 : 0);
-	int ypos = 5 + ((i > 11) ? i-12 : i);
-       
+	float xpos = ((i > 11) ? .5 : .05);
+	float ypos = 5 + ((i > 11) ? i-12 : i);
+
 	i++;
 
-	l = new JLatex(xpos, liney(ypos), tmp);
+	l = new JLatex(xpos, liney(ypos), tmp, 1, 1);
 	l->SetTextFont(82);
 	l->SetTextSize(.03);
 	l->SetLineColor(4);
@@ -1441,7 +1457,7 @@ JevpPlot *JevpServer::getJevpSummaryPlot()
     CP;
     if(n == 0) {
 	sprintf(tmp,"There are no builders");
-	l = new JLatex(2, liney(10), tmp);
+	l = new JLatex(2, liney(10), tmp, 1 , 1);
 	l->SetTextSize(.035);
 	jevpSummaryPlot->addElement(l);
     }

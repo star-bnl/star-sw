@@ -3,6 +3,12 @@
 #include <TROOT.h>
 #include <TStyle.h>
 #include <TCanvas.h>
+#include <TPaveText.h>
+
+#define TITLEBGCOLOR 14
+#define BGCOLOR 17
+#define HISTOCOLOR 10
+#define BLACKCOLOR 1
 
 JevpPlot *PdfFileBuilder::getPlotByName(char *name) {
   if(server) {
@@ -17,6 +23,7 @@ JevpPlot *PdfFileBuilder::getPlotByName(char *name) {
 void PdfFileBuilder::write(char *filename, int displayNumber, int ignoreServerTags, char *serverTags)
 {    
     //printf("Start..\n");
+    //LOG(DBG, "pdffilebuilder write[%s], %d %d (%s)", filename, displayNumber, ignoreServerTags, serverTags);
     displays->setIgnoreServerTags(ignoreServerTags);
     displays->setServerTags(serverTags);
     displays->setDisplay(displays->getDisplayNodeFromIndex(displayNumber));
@@ -108,7 +115,12 @@ int PdfFileBuilder::writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry
 int PdfFileBuilder::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page)
 {
   LOG(DBG, "Write histogram leaves: %s",node->name);
+  	
+  char fullName[1000];
+  node->getTabName(fullName);
   
+
+
   //if((node->prev != NULL) || (!node->leaf)) {
   //LOG(ERR, "Shouldn't happen: prev=0x%x leaf=%d", node->prev, node->leaf);
   //}
@@ -122,8 +134,22 @@ int PdfFileBuilder::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, 
   }
   
   // Now draw histograms...
-  gStyle->SetCanvasColor(19);
-  TCanvas *c1 = new TCanvas("c1","c1",1000,800);
+  gStyle->SetCanvasColor(BGCOLOR);
+
+  TCanvas *outerCanvas = new TCanvas("outerCanvas", "outerCanvas", 1000, 800);
+  outerCanvas->SetFillColor(BGCOLOR);
+  outerCanvas->cd();
+  TPaveText *title = new TPaveText(0,.96,1,1, "NDC");
+  title->SetFillColor(TITLEBGCOLOR);
+  title->SetBorderSize(0);
+  title->SetTextAlign(12);
+  title->AddText(fullName);
+  title->Draw();
+
+  TPad *c1 = new TPad("c1","c1", 0,0 ,1, .96, BLACKCOLOR);
+  //c1->SetCanvasColor(1);
+  c1->Draw();
+  //TCanvas *c1 = new TCanvas("c1","c1",1000,800);
 
   char fname[256];
   strcpy(fname, filename);
@@ -139,7 +165,7 @@ int PdfFileBuilder::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, 
   if(scaley <= 0) scaley = 0;
   
   c1->Clear();
-  c1->Divide(wide, deep);
+  c1->Divide(wide, deep, .002, .002);
   int pad = 1;
   
   if(scaley) {
@@ -179,6 +205,10 @@ int PdfFileBuilder::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, 
   while(cnode) {
     c1->cd(pad);
     
+    gPad->SetFillColor(BGCOLOR);
+    gPad->SetFrameFillColor(HISTOCOLOR);
+    gPad->SetTopMargin(.10);
+    //gStyle->SetOptTitle(0);
 
     LOG(DBG, "Plotting %s on page %d / pad %d",cnode->name, page, pad);
 
@@ -186,31 +216,39 @@ int PdfFileBuilder::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, 
     plot = getPlotByName(cnode->name);
     
     if(plot) {
-      LOG(DBG, "Found plot %s",cnode->name);
-      plot->draw();
+	//LOG("JEFF", "Plot");
+	//LOG("JEFF", "cname: %s", cnode->name);
+	
+	plot->draw();
     }
     else {
-      LOG(DBG, "Can't find plot %s",cnode->name);
-      DrawCrossOfDeath(cnode->name);
+	//LOG("JEFF", "No Plot");
+	LOG(DBG, "Can't find plot %s",cnode->name);
+	DrawCrossOfDeath(cnode->name);
     }
-
+    
     cnode = cnode->next;
     pad++;
   }
   
   while(pad <= wide*deep) {
     c1->cd(pad);
-    TLatex *x = new TLatex(.5,.5," ");
-    x->Draw();
+    gPad->SetFillColor(BGCOLOR);
+    gPad->Draw();
+    //TLatex *x = new TLatex(.5,.5," ");
+    //x->Draw();
     //gPad->Draw();
     // printf("Drawing jeff %d\n",pad);
     pad++;
   }
   
   
-  c1->Print(fname, "pdf,Portrait");
+  outerCanvas->Print(fname, "pdf,Portrait");
 
   delete c1;
+  delete title;
+  delete outerCanvas;
+
   return 1;
 }
 
