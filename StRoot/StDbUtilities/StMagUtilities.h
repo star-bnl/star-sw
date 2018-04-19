@@ -340,9 +340,9 @@ class StMagUtilities {
   Float_t  OUTERGGLast ;                // Radius of the last Outer Gating Grid Wire
   Float_t  GAPRADIUS ;                  // Radius of the gap between the inner and outer grids (cm)
   Float_t  WIREGAP ;                    // Width of the gap between the inner and outer grids (cm)
-  Double_t TPCROWR[128] ;               // Radii of TPC rows along the sector centerlines
-  Int_t    INNER ;                      // Number of TPC rows in the inner sectors
-  Int_t    TPCROWS ;                    // Total number of TPC rows per sector (Inner + Outer)
+  Double_t TPCROWR[24][128] ;           // Radii of TPC rows along the sector centerlines
+  Int_t    INNER[24];                   // Number of TPC rows in the inner sectors
+  Int_t    TPCROWS[24];                 // Total number of TPC rows per sector (Inner + Outer)
   Float_t  StarMagE ;                   // STAR Electric Field (V/cm) Magnitude
   Float_t  IFCShift ;                   // Shift of the IFC towards the West Endcap (cm)
   Float_t  TensorV1 ;                   // Omega Tau tensor parameter - in the ExB direction
@@ -446,7 +446,8 @@ class StMagUtilities {
 					       const unsigned int RowMask2 = 0x1FFFFF,
 					       const Float_t VertexError = 0.0200 ) ;
 
-  virtual Int_t   PredictSpaceChargeDistortion ( Int_t   Charge, 
+  virtual Int_t   PredictSpaceChargeDistortion (Int_t  sec,
+						Int_t   Charge, 
 						 Float_t Pt, 
 						 Float_t VertexZ, 
 						 Float_t PseudoRapidity, 
@@ -455,7 +456,8 @@ class StMagUtilities {
 						 const unsigned int RowMask2, 
 						 Float_t &pSpace ) ;
 
-  virtual Int_t   PredictSpaceChargeDistortion ( Int_t   Charge, 
+  virtual Int_t   PredictSpaceChargeDistortion (Int_t  sec,
+						Int_t   Charge, 
 						 Float_t Pt, 
 						 Float_t VertexZ, 
 						 Float_t PseudoRapidity, 

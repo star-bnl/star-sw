@@ -1492,7 +1492,11 @@ Bfc_st BFC[] = { // standard chains
   {"LaserAvEv"          ,"","",""             ,"StLaserAvEventMaker","StLaserAvEventMaker","Hejrad",kFALSE},
   {"LaserAvCl"          ,"","",""               ,"StLaserAvClusterMaker","StLaserAvClusterMaker","",kFALSE},
   {"l0"          ,"l0Chain","","globT,ctf,trg"                              ,"StMaker","StChain","",kFALSE},
+#if 0
   {"ctf"     ,"ctf","l0Chain","ctf_T,db" ,"St_ctf_Maker","ctf,St_ctf,St_ctf_Maker","ToF simulation",kFALSE},
+#else
+  {"ctf"         ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+#endif
   {"mwc"         ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"ppMCTrig"    ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"pp2pp"       ,"","","",                              "St_pp2pp_Maker","St_pp2pp_Maker","pp->pp",kFALSE},
