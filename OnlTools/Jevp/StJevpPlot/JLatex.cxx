@@ -10,10 +10,10 @@ JLatex::JLatex() {
     ndcX = 0;   // user coordinates for X
 }
 
-JLatex::JLatex(Double_t x, Double_t y, const char *text) : TLatex(x,y,text) {
+JLatex::JLatex(Double_t x, Double_t y, const char *text, int _ndcX, int _ndcY) : TLatex(x,y,text) {
     SetBit(kNoContextMenu | kCannotPick);
-    ndcY = 1;
-    ndcX = 0;
+    ndcY = _ndcY;
+    ndcX = _ndcX;
     jx = x;
     jy = y;
 }
