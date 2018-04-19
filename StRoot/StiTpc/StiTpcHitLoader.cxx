@@ -72,7 +72,6 @@ void StiTpcHitLoader::loadHits(StEvent* source,
 	if (hit->pad() > 182 || hit->timeBucket() > 511) continue; // some garbadge  for y2001 daq
         assert(_hitFactory);
         StiHit* stiHit = _hitFactory->getInstance();
-        assert(stiHit);
         stiHit->reset();
         stiHit->setGlobal(detector,hit,hit->position().x(),hit->position().y(), hit->position().z(),hit->charge());
         hitTest.add(hit->position().x(),hit->position().y(), hit->position().z());
