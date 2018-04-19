@@ -2,7 +2,7 @@
 #include "TMath.h"
 #include "TDatabasePDG.h"
 TDataSet *CreateTable() {
-  Double_t pTlow  =    1;
+  Double_t pTlow  =    0;
   Double_t pThigh =   10;
   Double_t Ylow   =  -1; 
   Double_t Yhigh  =   1;
