@@ -19,5 +19,5 @@ foreach my $line (@list) {
   if (-r $mudst) {next;}
   print "string:$line\n";
   $no++;
-  if ($no >= 10) {last;}
+#  if ($no >= 10) {last;}
 }
