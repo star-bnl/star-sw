@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.237 2018/04/12 18:43:59 smirnovd Exp $
+// $Id: StiMaker.cxx,v 1.238 2018/04/19 15:48:28 smirnovd Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -83,6 +83,7 @@ More detailed: 				<br>
 #include "StEventTypes.h"
 #include "Sti/Base/EditableFilter.h"
 #include "Sti/StiKalmanTrackFinder.h"
+#include "Sti/StiKalmanTrackFitter.h"
 #include "Sti/StiTrackContainer.h"
 #include "Sti/StiDefaultTrackFilter.h"
 #include "Sti/StiMasterDetectorBuilder.h"
@@ -95,7 +96,6 @@ More detailed: 				<br>
 #include "StiPxl/StiPxlDetectorGroup.h"
 #include "Sti/StiKalmanTrackNode.h"
 #include "Sti/StiKalmanTrack.h"
-#include "Sti/StiHitLoader.h"
 #include "Sti/StiVertexFinder.h"
 #include "Sti/StiDetectorContainer.h"
 #include "StiMaker/StiStEventFiller.h"
@@ -106,8 +106,6 @@ More detailed: 				<br>
 #include "StDetectorDbMaker/StiKalmanTrackFinderParameters.h"
 #include "StDetectorDbMaker/StiKalmanTrackFitterParameters.h"
 
-#include "StiTpc/StiTpcDetectorBuilder.h"
-#include "StiSvt/StiSvtDetectorBuilder.h"
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
 // #include "StiRnD/Ist/StiIstDetectorGroup.h"
 // #include "StiRnD/Ist/StiIstDetectorGroup.h"
@@ -736,8 +734,11 @@ void StiMaker::FinishTracks (int gloPri)
 }
 
 
-// $Id: StiMaker.cxx,v 1.237 2018/04/12 18:43:59 smirnovd Exp $
+// $Id: StiMaker.cxx,v 1.238 2018/04/19 15:48:28 smirnovd Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.238  2018/04/19 15:48:28  smirnovd
+// [Cosmetic] Remove unused include statements
+//
 // Revision 1.237  2018/04/12 18:43:59  smirnovd
 // Add new option to deactivate iTpc hits
 //
