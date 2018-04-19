@@ -951,7 +951,6 @@ void ComponentAnalyticField::CellInit() {
   m_polar = false;
 
   // Cell type
-  m_scellType = "A  ";
   m_cellType = A00;
 
   // Bounding box and voltage range.
@@ -1059,13 +1058,13 @@ bool ComponentAnalyticField::Prepare() {
 
   // Determine the cell type.
   if (!CellType()) {
-    std::cerr << m_className << "::Prepare:\n";
-    std::cerr << "    Type identification of the cell failed.\n";
+    std::cerr << m_className << "::Prepare:\n"
+              << "    Type identification of the cell failed.\n";
     return false;
   }
   if (m_debug) {
-    std::cout << m_className << "::Prepare:\n";
-    std::cout << "    Cell is of type " << m_scellType << ".\n";
+    std::cout << m_className << "::Prepare:\n"
+              << "    Cell is of type " << CellType() << ".\n";
   }
 
   // Calculate the charges.
@@ -1637,18 +1636,14 @@ bool ComponentAnalyticField::CellType() {
   if (m_tube) {
     if (m_ntube == 0) {
       if (m_pery) {
-        m_scellType = "D2 ";
         m_cellType = D20;
       } else {
-        m_scellType = "D1 ";
         m_cellType = D10;
       }
     } else if (m_ntube >= 3 && m_ntube <= 8) {
       if (m_pery) {
-        m_scellType = "D4 ";
         m_cellType = D40;
       } else {
-        m_scellType = "D3 ";
         m_cellType = D30;
       }
     } else {
@@ -1656,7 +1651,6 @@ bool ComponentAnalyticField::CellType() {
                 << "    Potentials for tube with " << m_ntube
                 << " edges are not yet available.\n"
                 << "    Using a round tube instead.\n";
-      m_scellType = "D3 ";
       m_ntube = 0;
       m_cellType = D30;
     }
@@ -1666,7 +1660,6 @@ bool ComponentAnalyticField::CellType() {
   // Find the 'A' type cell.
   if (!(m_perx || m_pery) && !(m_ynplan[0] && m_ynplan[1]) &&
       !(m_ynplan[2] && m_ynplan[3])) {
-    m_scellType = "A  ";
     m_cellType = A00;
     return true;
   }
@@ -1674,7 +1667,6 @@ bool ComponentAnalyticField::CellType() {
   // Find the 'B1X' type cell.
   if (m_perx && !m_pery && !(m_ynplan[0] || m_ynplan[1]) &&
       !(m_ynplan[2] && m_ynplan[3])) {
-    m_scellType = "B1X";
     m_cellType = B1X;
     return true;
   }
@@ -1682,14 +1674,12 @@ bool ComponentAnalyticField::CellType() {
   // Find the 'B1Y' type cell.
   if (m_pery && !m_perx && !(m_ynplan[0] && m_ynplan[1]) &&
       !(m_ynplan[2] || m_ynplan[3])) {
-    m_scellType = "B1Y";
     m_cellType = B1Y;
     return true;
   }
 
   // Find the 'B2X' type cell.
   if (m_perx && !m_pery && !(m_ynplan[2] && m_ynplan[3])) {
-    m_scellType = "B2X";
     m_cellType = B2X;
     return true;
   }
@@ -1697,14 +1687,12 @@ bool ComponentAnalyticField::CellType() {
   if (!(m_perx || m_pery) && !(m_ynplan[2] && m_ynplan[3]) &&
       (m_ynplan[0] && m_ynplan[1])) {
     m_sx = fabs(m_coplan[1] - m_coplan[0]);
-    m_scellType = "B2X";
     m_cellType = B2X;
     return true;
   }
 
   // Find the 'B2Y' type cell.
   if (m_pery && !m_perx && !(m_ynplan[0] && m_ynplan[1])) {
-    m_scellType = "B2Y";
     m_cellType = B2Y;
     return true;
   }
@@ -1712,14 +1700,12 @@ bool ComponentAnalyticField::CellType() {
   if (!(m_perx || m_pery) && !(m_ynplan[0] && m_ynplan[1]) &&
       (m_ynplan[2] && m_ynplan[3])) {
     m_sy = fabs(m_coplan[3] - m_coplan[2]);
-    m_scellType = "B2Y";
     m_cellType = B2Y;
     return true;
   }
 
   // Find the 'C1 ' type cell.
   if (!(m_ynplan[0] || m_ynplan[1] || m_ynplan[2] || m_ynplan[3]) && m_perx && m_pery) {
-    m_scellType = "C1 ";
     m_cellType = C10;
     return true;
   }
@@ -1728,12 +1714,10 @@ bool ComponentAnalyticField::CellType() {
   if (!((m_ynplan[2] && m_pery) || (m_ynplan[2] && m_ynplan[3]))) {
     if (m_ynplan[0] && m_ynplan[1]) {
       m_sx = fabs(m_coplan[1] - m_coplan[0]);
-      m_scellType = "C2X";
       m_cellType = C2X;
       return true;
     }
     if (m_perx && m_ynplan[0]) {
-      m_scellType = "C2X";
       m_cellType = C2X;
       return true;
     }
@@ -1743,12 +1727,10 @@ bool ComponentAnalyticField::CellType() {
   if (!((m_ynplan[0] && m_perx) || (m_ynplan[0] && m_ynplan[1]))) {
     if (m_ynplan[2] && m_ynplan[3]) {
       m_sy = fabs(m_coplan[3] - m_coplan[2]);
-      m_scellType = "C2Y";
       m_cellType = C2Y;
       return true;
     }
     if (m_pery && m_ynplan[2]) {
-      m_scellType = "C2Y";
       m_cellType = C2Y;
       return true;
     }
@@ -1756,27 +1738,23 @@ bool ComponentAnalyticField::CellType() {
 
   // Find the 'C3 ' type cell.
   if (m_perx && m_pery) {
-    m_scellType = "C3 ";
     m_cellType = C30;
     return true;
   }
 
   if (m_perx) {
     m_sy = fabs(m_coplan[3] - m_coplan[2]);
-    m_scellType = "C3 ";
     m_cellType = C30;
     return true;
   }
 
   if (m_pery) {
     m_sx = fabs(m_coplan[1] - m_coplan[0]);
-    m_scellType = "C3 ";
     m_cellType = C30;
     return true;
   }
 
   if (m_ynplan[0] && m_ynplan[1] && m_ynplan[2] && m_ynplan[3]) {
-    m_scellType = "C3 ";
     m_sx = fabs(m_coplan[1] - m_coplan[0]);
     m_sy = fabs(m_coplan[3] - m_coplan[2]);
     m_cellType = C30;
@@ -1785,6 +1763,41 @@ bool ComponentAnalyticField::CellType() {
 
   // Cell is not recognised.
   return false;
+}
+
+std::string ComponentAnalyticField::GetCellType(const Cell) const {
+
+  switch (m_cellType) {
+    case A00:
+      return "A  ";
+    case B1X:
+      return "B1X";
+    case B1Y:
+      return "B1Y";
+    case B2X:
+      return "B2X";
+    case B2Y:
+      return "B2Y";
+    case C10:
+      return "C1 ";
+    case C2X:
+      return "C2X";
+    case C2Y:
+      return "C2Y";
+    case C30:
+      return "C3 ";
+    case D10:
+      return "D1 ";
+    case D20:
+      return "D2 ";
+    case D30:
+      return "D3 ";
+    case D40:
+      return "D4 ";
+    default:
+      break;
+  }
+  return "Unknown";
 }
 
 bool ComponentAnalyticField::PrepareStrips() {
@@ -2007,18 +2020,47 @@ bool ComponentAnalyticField::Setup() {
   bool ok = true;
 
   // Call the set routine appropriate for the present cell type.
-  if (m_scellType == "A  ") ok = SetupA00();
-  if (m_scellType == "B1X") ok = SetupB1X();
-  if (m_scellType == "B1Y") ok = SetupB1Y();
-  if (m_scellType == "B2X") ok = SetupB2X();
-  if (m_scellType == "B2Y") ok = SetupB2Y();
-  if (m_scellType == "C1 ") ok = SetupC10();
-  if (m_scellType == "C2X") ok = SetupC2X();
-  if (m_scellType == "C2Y") ok = SetupC2Y();
-  if (m_scellType == "C3 ") ok = SetupC30();
-  if (m_scellType == "D1 ") ok = SetupD10();
-  if (m_scellType == "D2 ") ok = SetupD20();
-  if (m_scellType == "D3 ") ok = SetupD30();
+  switch (m_cellType) {
+    case A00:
+      ok = SetupA00();
+      break;
+    case B1X:
+      ok = SetupB1X();
+      break;
+    case B1Y:
+      ok = SetupB1Y();
+      break;
+    case B2X:
+      ok = SetupB2X();
+      break;
+    case B2Y:
+      ok = SetupB2Y();
+      break;
+    case C10:
+      ok = SetupC10();
+      break;
+    case C2X:
+      ok = SetupC2X();
+      break;
+    case C2Y:
+      ok = SetupC2Y();
+      break;
+    case C30:
+      ok = SetupC30();
+      break;
+    case D10:
+      ok = SetupD10();
+      break;
+    case D20:
+      ok = SetupD20();
+      break;
+    case D30:
+      ok = SetupD30();
+      break;
+    default:
+      std::cerr << m_className << "::Setup: Unknown cell type.\n";
+      break;
+  }
 
   // Add dipole terms if required
   if (ok && dipole) {
@@ -4314,24 +4356,24 @@ bool ComponentAnalyticField::PrepareSignals() {
   // Otherwise, eliminate true periodicities.
   if (m_nFourier == 0) {
     m_cellTypeFourier = m_cellType;
-  } else if (m_scellType == "A  " || m_scellType == "B1X" ||
-             m_scellType == "B1Y" || m_scellType == "C1 ") {
+  } else if (m_cellType == A00 || m_cellType == B1X ||
+             m_cellType == B1Y || m_cellType == C10) {
     m_cellTypeFourier = A00;
-  } else if (m_scellType == "B2X" || m_scellType == "C2X") {
+  } else if (m_cellType == B2X || m_cellType == C2X) {
     m_cellTypeFourier = B2X;
-  } else if (m_scellType == "B2Y" || m_scellType == "C2Y") {
+  } else if (m_cellType == B2Y || m_cellType == C2Y) {
     m_cellTypeFourier = B2Y;
-  } else if (m_scellType == "C3 ") {
+  } else if (m_cellType == C30) {
     m_cellTypeFourier = C30;
-  } else if (m_scellType == "D1 ") {
-    m_cellTypeFourier = D20;
-  } else if (m_scellType == "D3 ") {
+  } else if (m_cellType == D10) {
+    m_cellTypeFourier = D10;
+  } else if (m_cellType == D30) {
     m_cellTypeFourier = D30;
   } else {
     // Other cases.
-    std::cerr << m_className << "::PrepareSignals:\n";
-    std::cerr << "    No potentials available to handle cell type "
-              << m_scellType << ".\n";
+    std::cerr << m_className << "::PrepareSignals:\n"
+              << "    No potentials available to handle cell type "
+              << GetCellType(m_cellType) << "\n.";
     return false;
   }
 
@@ -4340,10 +4382,10 @@ bool ComponentAnalyticField::PrepareSignals() {
   if (m_nFourier == 0) {
     m_mfexp = 0;
   } else {
-    if (m_scellType == "B1X" || m_scellType == "C1 " || m_scellType == "C2Y") {
+    if (m_cellType == B1X || m_cellType == C10 || m_cellType == C2Y) {
       m_fperx = true;
     }
-    if (m_scellType == "B1Y" || m_scellType == "C1 " || m_scellType == "C2X") {
+    if (m_cellType == B1Y || m_cellType == C10 || m_cellType == C2X) {
       m_fpery = true;
     }
     m_mfexp = int(0.1 + log(1. * m_nFourier) / log(2.));
@@ -4364,11 +4406,12 @@ bool ComponentAnalyticField::PrepareSignals() {
 
   // Print some debugging output if requested.
   if (m_debug) {
-    std::cout << m_className << "::PrepareSignals:\n";
-    std::cout << "    Cell type:           " << m_scellType << "\n";
-    std::cout << "    Fourier cell type:   " << m_cellTypeFourier << "\n";
-    std::cout << "    x convolutions:      " << m_fperx << "\n";
-    std::cout << "    y convolutions:      " << m_fpery << "\n";
+    std::cout << m_className << "::PrepareSignals:\n"
+              << "    Cell type:           " << GetCellType(m_cellType) << "\n"
+              << "    Fourier cell type:   " << GetCellType(m_cellTypeFourier) 
+              << "\n";
+    std::cout << "    x convolutions:      " << m_fperx << "\n"
+              << "    y convolutions:      " << m_fpery << "\n";
     std::cout << "    No of Fourier terms: " << m_nFourier 
               << " (= 2**" << m_mfexp << ")\n";
   }
@@ -6844,14 +6887,15 @@ void ComponentAnalyticField::WfieldPixel(const double xpos, const double ypos,
         x1 * y2 * (x1s + y2s + 2 * zs) / ((x1s + zs) * (y2s + zs) * x1y2) -
         x2 * y1 * (x2s + y1s + 2 * zs) / ((x2s + zs) * (y1s + zs) * x2y1);
 
-  ex /= TwoPi;
-  ey /= TwoPi;
-  ez /= TwoPi;
+  constexpr double invTwoPi = 1. / TwoPi;
+  ex *= invTwoPi;
+  ey *= invTwoPi;
+  ez *= invTwoPi;
 
   if (opt) {
     volt += atan(x1 * y1 / (z * x1y1)) + atan(x2 * y2 / (z * x2y2)) -
             atan(x1 * y2 / (z * x1y2)) - atan(x2 * y1 / (z * x2y1)); 
-    volt /= TwoPi;
+    volt *= invTwoPi;
   }
 
   // Rotate the field back to the original coordinates.

@@ -148,7 +148,7 @@ class ComponentAnalyticField : public ComponentBase {
     if (!m_cellset) {
       if (CellCheck()) CellType();
     }
-    return m_scellType;
+    return GetCellType(m_cellType); 
   }
 
   /// Setup the weighting field for a given group of wires or planes.
@@ -196,8 +196,7 @@ class ComponentAnalyticField : public ComponentBase {
 
   bool m_polar = false;
 
-  // Cell type (as string and number)
-  std::string m_scellType;
+  // Cell type.
   Cell m_cellType;
 
   // Bounding box
@@ -337,6 +336,7 @@ class ComponentAnalyticField : public ComponentBase {
   bool Prepare();
   bool CellCheck();
   bool CellType();
+  std::string GetCellType(const Cell) const;
   bool PrepareStrips();
 
   bool PrepareSignals();

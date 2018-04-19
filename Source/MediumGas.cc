@@ -5,6 +5,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <algorithm>
+#include <array>
 #include <ctime>
 
 #include "MediumGas.hh"
@@ -768,9 +769,10 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
   if (m_debug) std::cout << "    Done with gas tables.\n";
 
   // Extrapolation methods
-  int hExtrap[13], lExtrap[13];
+  std::array<unsigned int, 13> hExtrap = {{0}};
+  std::array<unsigned int, 13> lExtrap = {{1}};
   // Interpolation methods
-  int interpMeth[13];
+  std::array<unsigned int, 13> interpMeth = {{2}};
 
   // Moving on to the file footer
   bool done = false;

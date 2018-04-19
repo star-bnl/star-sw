@@ -160,12 +160,12 @@ class MediumMagboltz : public MediumGas {
   double m_eFinal, m_eStep;
   double m_eHigh, m_eHighLog;
   double m_lnStep;
-  bool m_useAutoAdjust;
+  bool m_useAutoAdjust = true;
 
   // Flag enabling/disabling output of cross-section table to file
-  bool m_useCsOutput;
+  bool m_useCsOutput = false;
   // Number of different cross-section types in the current gas mixture
-  unsigned int m_nTerms;
+  unsigned int m_nTerms = 0;
   // Recoil energy parameter
   double m_rgas[m_nMaxGases];
   // Opal-Beaty-Peterson splitting parameter [eV]
@@ -182,7 +182,7 @@ class MediumMagboltz : public MediumGas {
   // Cross-section type
   std::vector<int> m_csType;
   // Parameters for calculation of scattering angles
-  bool m_useAnisotropic;
+  bool m_useAnisotropic = true;
   double m_scatParameter[nEnergySteps][nMaxLevels];
   double m_scatParameterLog[nEnergyStepsLog][nMaxLevels];
   std::vector<int> m_scatModel;
@@ -193,8 +193,8 @@ class MediumMagboltz : public MediumGas {
   std::vector<std::string> m_description;
 
   // Total collision frequency
-  double m_cfTot[nEnergySteps];
-  double m_cfTotLog[nEnergyStepsLog];
+  std::vector<double> m_cfTot;
+  std::vector<double> m_cfTotLog;
   // Null-collision frequency
   double m_cfNull;
   // Collision frequencies
@@ -218,14 +218,14 @@ class MediumMagboltz : public MediumGas {
   // Mean distance of Penning ionisation (by level)
   std::vector<double> m_lambdaPenning;
   // Number of Penning ionisations
-  unsigned int m_nPenning;
+  unsigned int m_nPenning = 0;
 
   // Deexcitation
   // Flag enabling/disabling detailed simulation of de-excitation process
-  bool m_useDeexcitation;
+  bool m_useDeexcitation = false;
   // Flag enabling/disable radiation trapping
   // (absorption of photons discrete excitation lines)
-  bool m_useRadTrap;
+  bool m_useRadTrap = true;
 
   struct deexcitation {
     // Gas component
@@ -283,8 +283,8 @@ class MediumMagboltz : public MediumGas {
   // Scaling factor for excitation cross-sections
   double m_scaleExc[m_nMaxGases];
   // Flag selecting secondary electron energy distribution model
-  bool m_useOpalBeaty;
-  bool m_useGreenSawada;
+  bool m_useOpalBeaty = true;
+  bool m_useGreenSawada = false;
 
   // Energy spacing of photon collision rates table
   double m_eFinalGamma, m_eStepGamma;

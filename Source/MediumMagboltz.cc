@@ -27,15 +27,6 @@ MediumMagboltz::MediumMagboltz()
       m_eHigh(1.e4),
       m_eHighLog(log(m_eHigh)),
       m_lnStep(1.),
-      m_useAutoAdjust(true),
-      m_useCsOutput(false),
-      m_nTerms(0),
-      m_useAnisotropic(true),
-      m_nPenning(0),
-      m_useDeexcitation(false),
-      m_useRadTrap(true),
-      m_useOpalBeaty(true),
-      m_useGreenSawada(false),
       m_eFinalGamma(20.),
       m_eStepGamma(m_eFinalGamma / nEnergyStepsGamma) {
  
@@ -80,6 +71,8 @@ MediumMagboltz::MediumMagboltz()
   m_scatModel.assign(nMaxLevels, 0);
   m_description.assign(nMaxLevels, std::string(50, ' '));
 
+  m_cfTot.assign(nEnergySteps, 0.);
+  m_cfTotLog.assign(nEnergyStepsLog, 0.);
   m_cf.assign(nEnergySteps, std::vector<double>(nMaxLevels, 0.));
   m_cfLog.assign(nEnergyStepsLog, std::vector<double>(nMaxLevels, 0.));
 
@@ -1488,16 +1481,16 @@ bool MediumMagboltz::Mixer(const bool verbose) {
   const double prefactor = dens * SpeedOfLight * sqrt(2. / ElectronMass);
 
   // Fill the electron energy array, reset the collision rates.
+  m_cfTot.assign(nEnergySteps, 0.);
   for (int i = nEnergySteps; i--;) {
-    m_cfTot[i] = 0.;
     for (int j = nMaxLevels; j--;) {
       m_cf[i][j] = 0.;
       m_scatParameter[i][j] = 0.5;
       m_scatCut[i][j] = 1.;
     }
   }
+  m_cfTotLog.assign(nEnergyStepsLog, 0.);
   for (int i = nEnergyStepsLog; i--;) {
-    m_cfTotLog[i] = 0.;
     for (int j = nMaxLevels; j--;) {
       m_cfLog[i][j] = 0.;
       m_scatParameter[i][j] = 0.5;
@@ -2129,7 +2122,7 @@ void MediumMagboltz::ComputeAngularCut(const double parIn, double& cut,
     return;
   }
 
-  const double rads = 2. / Pi;
+  constexpr double rads = 2. / Pi;
   const double cns = parIn - 0.5;
   const double thetac = asin(2. * sqrt(cns - cns * cns));
   const double fac = (1. - cos(thetac)) / pow(sin(thetac), 2.);
@@ -5448,15 +5441,17 @@ void MediumMagboltz::GenerateGasTable(const int numColl, const bool verbose) {
 
   // Run through the grid of E- and B-fields and angles.
   for (unsigned int i = 0; i < nEfields; ++i) {
+    const double e = m_eFields[i];
     for (unsigned int j = 0; j < nAngles; ++j) {
+      const double a = m_bAngles[j];
       for (unsigned int k = 0; k < nBfields; ++k) {
+        const double b = m_bFields[k];
         if (m_debug) {
-          std::cout << m_className << "::GenerateGasTable:\n"
-                    << "    E = " << m_eFields[i] << " V/cm, B = " 
-                    << m_bFields[k] << " T, angle: " << m_bAngles[j] << " rad\n";
+          std::cout << m_className << "::GenerateGasTable: E = " << e 
+                    << " V/cm, B = " << b << " T, angle: " << a << " rad\n";
         }
-        RunMagboltz(m_eFields[i], m_bFields[k], m_bAngles[j], numColl, verbose, vx,
-                    vy, vz, difl, dift, alpha, eta, lor, vxerr, vyerr, vzerr,
+        RunMagboltz(e, b, a, numColl, verbose, vx, vy, vz, difl, dift, 
+                    alpha, eta, lor, vxerr, vyerr, vzerr,
                     diflerr, difterr, alphaerr, etaerr, lorerr, alphatof);
         m_eVelocityE[j][k][i] = vz;
         m_eVelocityExB[j][k][i] = vy;

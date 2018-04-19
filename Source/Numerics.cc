@@ -799,6 +799,8 @@ bool Boxin3(const std::vector<std::vector<std::vector<double> > >& value,
   if (iOrder < 0 || iOrder > 2 || nx < 1 || ny < 1 || nz < 1) {
     std::cerr << "Boxin3:\n";
     std::cerr << "    Incorrect order or number of points.\n";
+    std::cerr << "    Order = " << iOrder << "\n";
+    std::cerr << "    " << nx << ", " << ny << ", " << nz << "\n";
     std::cerr << "    No interpolation.\n";
     f = 0.;
     return false;
