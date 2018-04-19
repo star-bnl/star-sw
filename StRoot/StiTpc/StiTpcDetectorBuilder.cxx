@@ -93,12 +93,6 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
 				mat->GetDensity(),
 				mat->GetDensity()*mat->GetRadLen(),
 				PotI));
-//  Double_t ionization = _gasMat->getIonization();
-//   StiElossCalculator *gasElossCalculator =  new StiElossCalculator(_gasMat->getZOverA(), ionization*ionization,
-// 								   _gasMat->getA(), _gasMat->getZ(), _gasMat->getDensity());
-  //Active TPC padrows
-  //  Double_t radToDeg = 180./3.1415927;
-  StThreeVectorD RowPosition;
 
   fillStiLayersMap();
 
@@ -123,7 +117,6 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
     path = gGeoManager->GetPath();
     StiVMCToolKit::LoopOverNodes(nodeT, path, TpcVolumes[i].name, MakeAverageVolume);
   }
-  cout << "StiTpcDetectorBuilder::buildDetectors() -I- Done" << endl;
 }
 
 
@@ -217,13 +210,6 @@ StiDetector* StiTpcDetectorBuilder::constructTpcPadrowDetector(StiLayer stiLayer
 	Bool_t west = tpc_sector_id_west > 0 && s_pRdoMasks->isOn(tpc_sector_id_west, iRdo);
 	Bool_t east = tpc_sector_id_east > 0 && s_pRdoMasks->isOn(tpc_sector_id_east, iRdo);
 	
-#if 0
-	if (row==12) {
-	  east = kFALSE;
-	  west = kFALSE;
-	}
-#endif
-	
 	if (west) {
 	  west = St_tpcAnodeHVavgC::instance()->livePadrow(tpc_sector_id_west,tpc_padrow_id) &&
 	         St_tpcPadGainT0BC::instance()->livePadrow(tpc_sector_id_west,tpc_padrow_id);
@@ -251,11 +237,12 @@ StiDetector* StiTpcDetectorBuilder::constructTpcPadrowDetector(StiLayer stiLayer
       pDetector->setGas(_gasMat);
       pDetector->setShape(pShape);
       pDetector->setPlacement(pPlacement);
+
       if (tpc_padrow_id <= nInnerPadrows)
 	pDetector->setHitErrorCalculator(StiTpcInnerHitErrorCalculator::instance());
       else
 	pDetector->setHitErrorCalculator(StiTpcOuterHitErrorCalculator::instance());
-//      pDetector->setElossCalculator(gasElossCalculator);
+
       pDetector->setKey(1,stiLayer.sti_padrow_id);
       pDetector->setKey(2,stiLayer.sti_sector_id);
 

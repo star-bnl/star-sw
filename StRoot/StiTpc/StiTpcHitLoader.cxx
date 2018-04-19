@@ -63,7 +63,6 @@ void StiTpcHitLoader::loadHits(StEvent* source,
       if (!padrowHits) break;
       const StSPtrVecTpcHit& hitvec = padrowHits->hits();
       detector = _detector->getDetector(stiRow,stiSector);
-
       if (!detector) throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) -E- Detector element not found");
       const_StTpcHitIterator iter;
       StiHitTest hitTest;
