@@ -37,8 +37,6 @@ void StiTpcHitLoader::loadHits(StEvent* source,
 //  cout << "StiTpcHitLoader::loadHits(StEvent*) -I- Started" << endl;
   assert(_detector);
   assert(_hitContainer);
-  StiDetector * detector;
-  StiHit* stiHit;
   const StTpcHitCollection* tpcHits = source->tpcHitCollection();
   if (!tpcHits) return;
   UInt_t noHitsLoaded = 0;
@@ -62,7 +60,7 @@ void StiTpcHitLoader::loadHits(StEvent* source,
       const StTpcPadrowHitCollection* padrowHits = secHits->padrow(row);
       if (!padrowHits) break;
       const StSPtrVecTpcHit& hitvec = padrowHits->hits();
-      detector = _detector->getDetector(stiRow,stiSector);
+      StiDetector * detector = _detector->getDetector(stiRow,stiSector);
       if (!detector) throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) -E- Detector element not found");
       const_StTpcHitIterator iter;
       StiHitTest hitTest;
@@ -73,7 +71,7 @@ void StiTpcHitLoader::loadHits(StEvent* source,
 	if (hit->flag() & FCF_CHOPPED || hit->flag() & FCF_SANITY)     continue; // ignore hits marked by AfterBurner as chopped or bad sanity
 	if (hit->pad() > 182 || hit->timeBucket() > 511) continue; // some garbadge  for y2001 daq
         assert(_hitFactory);
-        stiHit = _hitFactory->getInstance();
+        StiHit* stiHit = _hitFactory->getInstance();
         assert(stiHit);
         stiHit->reset();
         stiHit->setGlobal(detector,hit,hit->position().x(),hit->position().y(), hit->position().z(),hit->charge());
