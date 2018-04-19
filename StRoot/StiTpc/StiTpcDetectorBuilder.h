@@ -64,8 +64,8 @@ private:
 
     void fillStiLayersMap();
 
-    StiPlanarShape* constructTpcPadrowShape(int sector, int row) const;
-    StiDetector*    constructTpcPadrowDetector(int row, int sector, StiPlanarShape* pShape) const;
+    StiPlanarShape* constructTpcPadrowShape(StiLayer stiLayer) const;
+    StiDetector*    constructTpcPadrowDetector(StiLayer stiLayer, StiPlanarShape* pShape) const;
 
     static std::set<StiLayer> sStiLayers;
 };
