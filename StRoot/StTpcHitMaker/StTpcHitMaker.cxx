@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.61 2018/04/10 11:39:11 smirnovd Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.62 2018/04/19 15:47:42 smirnovd Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.62  2018/04/19 15:47:42  smirnovd
+ * Change hardware Id for hits originated in iTpc padrow rather than iTpc sector
+ *
  * Revision 1.61  2018/04/10 11:39:11  smirnovd
  * StTpcHitMaker: Match logic in pre-iTPC code
  *
@@ -628,7 +631,7 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t
   transform(local,global);
     
   UInt_t hw = 1U;   // detid_tpc
-  if (St_tpcPadConfigC::instance()->numberOfRows(sector) != 45) hw += 1U << 1; // iTPC
+  if (St_tpcPadConfigC::instance()->isiTpcPadRow(sector, row)) hw += 1U << 1; // iTPC
   hw += sector << 4;     // (row/100 << 4);   // sector
   hw += row    << 9;     // (row%100 << 9);   // row
 #if 0  
@@ -687,7 +690,7 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
   transform(local,global);
     
   UInt_t hw = 1U;   // detid_tpc
-  if (St_tpcPadConfigC::instance()->numberOfRows(sector) != 45) hw += 1U << 1; // iTPC
+  if (St_tpcPadConfigC::instance()->isiTpcPadRow(sector, row)) hw += 1U << 1; // iTPC
   hw += sector << 4;     // (row/100 << 4);   // sector
   hw += row    << 9;     // (row%100 << 9);   // row
 #if 0  
