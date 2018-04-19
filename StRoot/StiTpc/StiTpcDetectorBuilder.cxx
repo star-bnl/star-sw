@@ -215,9 +215,13 @@ StiDetector* StiTpcDetectorBuilder::constructTpcPadrowDetector(StiLayer stiLayer
       Bool_t west = kTRUE;
       Bool_t east = kTRUE;
       if (nRows == 45) { // ! iTpx
-	Int_t iRdo  = s_pRdoMasks->rdoForPadrow(row+1);
-	Bool_t west = s_pRdoMasks->isOn(sector+1, iRdo);
-	Bool_t east = s_pRdoMasks->isOn( 24-(sector+1)%12, iRdo);
+
+        int tpc_sector_id_west = stiLayer.tpc_sector(StiLayer::West);
+        int tpc_sector_id_east = stiLayer.tpc_sector(StiLayer::East);
+
+	Int_t iRdo  = s_pRdoMasks->rdoForPadrow(tpc_padrow_id);
+	Bool_t west = tpc_sector_id_west > 0 && s_pRdoMasks->isOn(tpc_sector_id_west, iRdo);
+	Bool_t east = tpc_sector_id_east > 0 && s_pRdoMasks->isOn(tpc_sector_id_east, iRdo);
 	
 #if 0
 	if (row==12) {
@@ -227,12 +231,12 @@ StiDetector* StiTpcDetectorBuilder::constructTpcPadrowDetector(StiLayer stiLayer
 #endif
 	
 	if (west) {
-	  west = St_tpcAnodeHVavgC::instance()->livePadrow(tpc_sector_id,tpc_padrow_id) &&
-	    St_tpcPadGainT0BC::instance()->livePadrow(tpc_sector_id,tpc_padrow_id);
+	  west = St_tpcAnodeHVavgC::instance()->livePadrow(tpc_sector_id_west,tpc_padrow_id) &&
+	         St_tpcPadGainT0BC::instance()->livePadrow(tpc_sector_id_west,tpc_padrow_id);
 	}
 	if (east) {
-	  east = St_tpcAnodeHVavgC::instance()->livePadrow(tpc_sector_id,tpc_padrow_id) &&
-	    St_tpcPadGainT0BC::instance()->livePadrow(tpc_sector_id,tpc_padrow_id);
+	  east = St_tpcAnodeHVavgC::instance()->livePadrow(tpc_sector_id_east,tpc_padrow_id) &&
+	         St_tpcPadGainT0BC::instance()->livePadrow(tpc_sector_id_east,tpc_padrow_id);
 	}
       }
       pDetector->setIsActive(new StiTpcIsActiveFunctor(_active,west,east));
