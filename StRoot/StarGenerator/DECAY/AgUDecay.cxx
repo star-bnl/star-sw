@@ -285,7 +285,4 @@ AgUDecay::AgUDecay() : mDecayer( 0 ),
 }
 //_____________________________________________________________________________________
 AgUDecay::~AgUDecay() {
-  if ( mNonConservation ) {
-    LOG_ERROR << "Energy was not conserved in " << mNonConservation << " decays" << endm; 
-  }
 }
