@@ -62,10 +62,9 @@ void StiTpcHitLoader::loadHits(StEvent* source,
       const StSPtrVecTpcHit& hitvec = padrowHits->hits();
       StiDetector * detector = _detector->getDetector(stiRow,stiSector);
       if (!detector) throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) -E- Detector element not found");
-      const_StTpcHitIterator iter;
       StiHitTest hitTest;
-      for (iter = hitvec.begin();iter != hitvec.end();++iter)        {
-        StTpcHit*hit=*iter;
+      for (const StTpcHit* hit : hitvec)
+      {
         if (hit->detector() == kiTpcId) continue;
 	if (StiKalmanTrackNode::IsLaser() && hit->flag()) continue;
 	if (hit->flag() & FCF_CHOPPED || hit->flag() & FCF_SANITY)     continue; // ignore hits marked by AfterBurner as chopped or bad sanity
