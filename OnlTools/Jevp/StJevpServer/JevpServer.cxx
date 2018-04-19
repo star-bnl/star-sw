@@ -1462,7 +1462,9 @@ JevpPlot *JevpServer::getJevpSummaryPlot()
 	jevpSummaryPlot->addElement(l);
     }
     CP;
-
+    
+    char *nm = jevpSummaryPlot->GetPlotName();
+    LOG("JEFF", "nm = %s", nm);
     return jevpSummaryPlot;
 }
 

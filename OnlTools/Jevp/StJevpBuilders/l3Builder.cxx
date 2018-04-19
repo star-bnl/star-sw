@@ -49,7 +49,7 @@ void l3Builder::initialize(int argc, char *argv[]) {
   contents.h88_l3_tracks = new TH1D("h88_l3_tracks","L3 Number of tracks",200,0,800);
   contents.h89_l3_Xvertex = new TH1D("h89_l3_Xvertex","L3 X vertex",100,-4,4);
   contents.h90_l3_Yvertex = new TH1D("h90_l3_Yvertex","L3 Y vertex",100,-4,4);
-  contents.h91_l3_Zvertex = new TH1D(",h91_l3_Zvertex","L3 Z vertex",100,-200,200);
+  contents.h91_l3_Zvertex = new TH1D(",h91_l3_Zvertex","L3 Z vertex",100,-300,300);
   contents.h100_l3_zdc_zvertex = new TH2D("h100_l3_zdc_zvertex","ZDC Vertex vs L3 Vertex",100,-200,200,100,-100,100);
   contents.h230_l3_bbc_zvertex = new TH2D("h230_l3_bbc_zvertex","BBC Vertex vs L3 Vertex",100,-100,100,100,-100,100);
   contents.h101_l3_x_y = new TH2D("h101_l3_x_y","L3 Vertex Y vs X",100,-10,10,100,-10,10);
