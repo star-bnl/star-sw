@@ -1,5 +1,0 @@
-<Document file="StarVMC/Geometry/Compat/hpdtgeo.xml">
-<Export language="Mortran">
-<Import file="pams/geometry/hpdtgeo/hpdtgeo.g" verbatim="true" />
-</Export>
-</Document>
