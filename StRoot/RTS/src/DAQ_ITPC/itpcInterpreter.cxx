@@ -16,6 +16,76 @@
 
 static void hammingdecode(unsigned int buffer[2], bool& error, bool& uncorrectable, bool fix_data) ;
 
+struct itpcInterpreter::itpc_config_t itpcInterpreter::itpc_config[25] ;
+
+int itpcInterpreter::parse_config(const char *fname) 
+{
+	if(fname==0) fname = "/RTS/conf/itpc/itpc_config.txt" ;
+
+	FILE *f = fopen(fname,"r") ;
+	if(f==0) {
+		LOG(ERR,"%s: %s [%s]",__PRETTY_FUNCTION__,fname,strerror(errno)) ;
+		return -1 ;
+	}
+
+	memset(&itpc_config,0,sizeof(itpc_config)) ;
+
+	while(!feof(f)) {
+		char line[128] ;
+		int sec,rdo,rb,phase,port,padplane ;
+		u_int wire1, mask ;
+		int ret ;
+
+		if(fgets(line,sizeof(line),f)==0) continue ;
+
+		if(strncmp(line,"R ",2)==0) {	// RDO section
+			ret = sscanf(line,"R %d %d %d %X %X %d",&sec,&rdo,&rb,&wire1,&mask,&phase) ;
+			if(ret != 6) {
+				LOG(ERR,"%s: malformed line [%s]",fname,line) ;
+				continue ;
+			}
+
+			itpc_config[sec].rdo[rb].rdo_id = rdo ;
+			itpc_config[sec].rdo[rb].wire1 = wire1 ;
+			itpc_config[sec].rdo[rb].fee_mask  = mask ;
+			itpc_config[sec].rdo[rb].phase = phase ;
+
+		}
+		else if(strncmp(line,"F ",2)==0) {	// FEE section
+			int v ;
+
+			ret = sscanf(line,"F %d %d %X %d %d",&sec,&rdo,&wire1,&port,&padplane) ;
+			if(ret != 5) {
+				LOG(ERR,"%s: malformed line [%s]",fname,line) ;
+				continue ;
+			}
+			
+			// special deal for SAMPA version
+			if(strstr(line,"V3")) v = 3 ;
+			else if(strstr(line,"V4")) v = 4 ;
+			else v = 2 ;
+
+			for(int i=0;i<4;i++) {
+				if(itpc_config[sec].rdo[i].rdo_id == rdo) {
+					itpc_config[sec].rdo[i].fee[port].wire1 = wire1 ;
+					itpc_config[sec].rdo[i].fee[port].padplane_id = padplane ;
+					itpc_config[sec].rdo[i].fee[port].sampa_version = v ;
+					if(v != 2) {
+						LOG(WARN,"S%02d:%2d:#%02d: 0x%X SAMPA is V%d",sec+1,i+1,port,wire1,v) ;
+					}
+				}
+			}
+					
+
+		}
+	}
+
+	fclose(f) ;
+
+	return 0 ;
+}
+
+
 itpcInterpreter::itpcInterpreter()
 {
 	id = 0 ;	// not valid
@@ -226,7 +296,7 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 
 
 		
-		int t_fee_id = (dd >> 16) & 0x3F ;
+		u_int t_fee_id = (dd >> 16) & 0x3F ;
 		if(fee_id<0) {
 			if((dd_x & 0xFF000000)==0x80000000) fee_id = t_fee_id ;
 		}
@@ -1280,78 +1350,6 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 			}
 		}
 	}
-#if 0		
-
-
-		
-
-	//data is now at the first 0x80xx0010 of the FEE
-	else if((data[0] & 0xFFC0FFFF)!=0x80000010) {
-		// THIS CAN happen and I get instead bits scrambled
-		/// e.g. 0xC02F0010 ;
-		// OR this datum is just not there and the event ends
-		//  with previous FEEs 0x40yy0010
-		//  and the first word is the 0x4321 signature already
-
-		/* Alright: I can have
-			option A:  0x80000010 is garbled, data[1] should be 0x1234
-			option B:  0x80000010 is missing, data[0] _is_ 0x1234
-			option C:  0x80000010 is there but is from the previous event!
-					data[1] is again 0x80000010 but this time correct
-
-		*/
-
-		run_err_add(rdo_id,0) ;
-
-
-		if((data[0]&0x0000FFFF)==0x00004321) {	// this is for the case 0x800 is missing
-			if((data[1]&0x0000FFFF)==0x00008765) {
-				fee_id = (data[1]>>16) & 0xFF ;
-				fee_version = 1 ;
-				data = data - 1 ;	// go back one!
-			}
-			else {
-
-				LOG(ERR,"evt %d: port %d: fee sig bad 0x%08X, expect 0x80000010",evt_ix,fee_port,data[0]) ;
-				err |= 1 ;
-				goto done ;
-			}
-		}
-		else if((data[1]&0x0000FFFF)==0x00004321) {	// this is if it's corrupted
-			if((data[2]&0x0000FFFF)==0x00008765) {
-				fee_id = (data[2]>>16) & 0xFF ;
-				fee_version = 1 ;
-			}
-			else {
-				LOG(ERR,"evt %d: port %d: fee sig bad 0x%08X, expect 0x80000010",evt_ix,fee_port,data[0]) ;
-				err |= 2 ;
-				goto done ;
-			}
-		}
-		else {
-			LOG(ERR,"evt %d: port %d: fee sig bad 0x%08X, expect 0x80000010",evt_ix,fee_port,data[0]) ;
-			err |= 4 ;
-			goto done ;
-
-		}
-
-	}
-	else {
-		fee_version = 1 ;
-		
-		// looks OK but I need one more check!
-		u_int fee_id_1 = (data[1]>>16) & 0xFF ;
-
-		fee_id = (data[0]>>16) & 0xFF ;
-
-		if(fee_id != fee_id_1) {	// data[0] was from a previous event!!!
-			//LOG(WARN,"FEE id odd: 0x%08X 0x%08X 0x%08X 0x%08X",data[-1],data[0],data[1],data[2]) ;
-			fee_id = fee_id_1 ;
-			data = data + 1 ;
-		}
-	}
-
-#endif
 	
 	if(expected_fee_version >= 0) {
 		if(fee_version != expected_fee_version) {	
@@ -1367,7 +1365,7 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		if(data[0] != ((fee_id<<16)|0x4321)) err |= 0x10000 ;
 		if(data[1] != ((fee_id<<16)|0x8765)) err |= 0x20000 ;
 
-		if(fee_version != (data[2] & 0xFFFF)) err |= 0x40000 ;
+		if((u_int)fee_version != (data[2] & 0xFFFF)) err |= 0x40000 ;
 
 		if(data[3]&0xFFF0) err |= 0x40000 ; 
 		fee_port = (data[3] & 0xF) + 1 ;
@@ -1429,6 +1427,8 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 			LOG(ERR,"%d: fee_port %d: missing channels in lane %d: expect 0x%08X, got 0x%08X",
 				rdo_id,fee_port,i,expect_mask,found_ch_mask) ;
 			soft_err |= 0x100 ;
+			err |= 0x400 ;
+			goto done ;
 		}
 
 		if(data==0) {
@@ -1496,9 +1496,10 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		}
 
 		if(data[0] != ((fee_id<<16)|0xA0000010)) err |= 0x10 ;
-		if(data[7] != ((fee_id<<16)|0x40000010)) err |= 0x20 ;
+//		if(data[7] != ((fee_id<<16)|0x40000010)) err |= 0x20 ;	// this is the last guy
 		if((data[1] & 0xFFFF)||(data[2]&0xFFFF)||(data[3]&0xFFFF)||(data[4]&0xFFFF)) {
-			LOG(WARN,"%d:#%02d: event errors",rdo_id,fee_port) ;
+			LOG(ERR,"%d:#%02d: event errors: 0x%X 0x%X 0x%X 0x%X",rdo_id,fee_port,
+			    data[1],data[2],data[3],data[4]) ;
 		}
 		if(err) {
 			run_err_add(rdo_id,5) ;
@@ -1744,7 +1745,7 @@ int itpcInterpreter::rdo_scan_top(u_int *data, int words)
 	}
 
 
-	done:;
+//	done:;
 
 	// from stop_event
 	for(int i=0;i<8;i++) {
