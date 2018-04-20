@@ -610,7 +610,7 @@ if ( $ThisYear == 2005 ){
        $DCHAIN{"AuAu"} = "P2017,btof,mtd,fmsDat,fmsPoint,fpsDat,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt";
 
    } elsif ($ThisYear == 2018) {
-       $DCHAIN{"ZrZr"} = $DCHAIN{"RuRu"} = "P2018a,StiCA,btof,mtd,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeak3D,-hitfilt";
+        $DCHAIN{"AuAu"} = $DCHAIN{"AuZr"} = $DCHAIN{"ZrZr"} = $DCHAIN{"RuRu"} = "P2018a,StiCA,btof,mtd,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeak3D,-hitfilt";
 
    } else {
         $DCHAIN{"PPPP"} =
@@ -2184,7 +2184,7 @@ file = $prefix$mfile.MuDst.root
 [output-1]
 path = $SCRATCH
 type = $stagedon
-file = $prefix$mfile.picoDST.root
+file = $prefix$mfile.picoDst.root
 
 [output-2]
 path = $SCRATCH
