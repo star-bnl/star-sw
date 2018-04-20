@@ -93,6 +93,8 @@ void itpcPed::accum(int sector, int rdo, int port,int fee_id, int ch, int tb, in
 //	}
 
 	ped_t *pt = ped_p[sector][rdo][port][ch] ;
+
+//if(tb==185) printf("GAGA %d %d %d %d = %d\n",sector,rdo,port,ch,adc_val) ;
 	
 	pt->ped[tb] += adc_val ;
 	pt->rms[tb] += adc_val*adc_val ;
@@ -140,9 +142,11 @@ void itpcPed::calc()
 
 					pt->ped[t] /= pt->cou[t] ;
 					pt->rms[t] /= pt->cou[t] ;
+
 					pt->rms[t] = pt->rms[t] - pt->ped[t]*pt->ped[t] ;
+			
 					if(pt->rms[t] <= 0.0) pt->rms[t] = 0.0 ;
-					else sqrt(pt->rms[t]) ;
+					else pt->rms[t] = sqrt(pt->rms[t]) ;
 				}
 			}
 		}
@@ -276,7 +280,13 @@ int itpcPed::to_cache(const char *fname)
 				m_ped /= m_cou ;
 				m_rms /= m_cou ;
 
+
 				fprintf(outf,"%2d %d %2d %2d %2d %2d %2d %3d %3d %.3f %.3f %.3f %.3f \n",s+1,r+1,p+1,c,fee_id,pin,row,pad,-1,pt->c_ped,pt->c_rms, m_ped, m_rms) ;
+
+				// NOTE HACK!!!!
+				pt->c_ped = m_ped ;
+				pt->c_rms = m_rms ;
+
 			}
 		}
 	}
@@ -301,10 +311,12 @@ int itpcPed::to_cache(const char *fname)
 				for(int t=0;t<512;t++) {
 					double ped = pt->ped[t] ;
 
+					//if(t==185 || t==186) printf("YADA %f %f %f\n",ped,pt->c_ped,pt->rms[t]) ;
+
 					if(run_type==5) {
 						ped -= pt->c_ped ;
 
-						if(ped<0.0) ped = 0.0 ;
+						if(ped<2.0) ped = 0.0 ;	// kill low lying pulses
 
 						if(ped==0.0) continue ;
 
