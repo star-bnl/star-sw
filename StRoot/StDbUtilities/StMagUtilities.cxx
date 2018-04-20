@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.106.4.1 2018/04/13 16:23:29 didenko Exp $
+ * $Id: StMagUtilities.cxx,v 1.106.4.1.2.1 2018/04/20 13:53:13 didenko Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.106.4.1.2.1  2018/04/20 13:53:13  didenko
+ * patch for SL16d_embed library
+ *
  * Revision 1.106.4.1  2018/04/13 16:23:29  didenko
  * updates for SL16d_embed library
  *
@@ -641,7 +644,8 @@ void StMagUtilities::GetSpaceChargeR2 ()
   spaceTable = new_spaceTable;
   scalers = new_scalers;
 
-  SpaceChargeR2  =  fSpaceChargeR2->getSpaceChargeCoulombs((double)gFactor) ;
+  SpaceChargeR2      = fSpaceChargeR2->getSpaceChargeCoulombs((double)gFactor) ;
+  SmearCoefSC        = (fCalibResolutions ? mRandom->Gaus(1,fCalibResolutions->SpaceCharge()) : 1.0);
   SpaceChargeEWRatio = fSpaceChargeR2->getEWRatio() ;
 }
 
@@ -1262,6 +1266,7 @@ void StMagUtilities::DoDistortion( const Float_t x[], Float_t Xprime[] , Int_t S
     D.zLC = Xprime[2];
     fgDoDistortion->Fill(&D.sector);
   }
+  doingDistortion = tempDoingDist;
 }
 
 
