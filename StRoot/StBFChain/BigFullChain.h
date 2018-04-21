@@ -1944,7 +1944,7 @@ Bfc_st BFC[] = { // standard chains
   {"Jet"         ,"","","gen_T","", "StJetEvent,StJetSkimEvent,StJets,StRandomSelector,StUeEvent,"
    "StSpinDbMaker,StMCAsymMaker,StJetFinder,fastjet,StJetMaker"                                 ,"",kFALSE},
   {"VecBos","" ,"","fastjet","","boost_program_options,StJets,StVecBosAna", "Vector Boson analysis",kFALSE},
-  {"LAna"        ,"","","in,detDb,StEvent,tpcDb","StLaserAnalysisMaker"
+  {"LAna"        ,"","","in,detDb,StEvent,tpcDb,TpcHitMover","StLaserAnalysisMaker"
    ,                                                   "StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"MuD0Anal"    ,"","","","StMuD0AnalysisMaker",         "StMuD0AnalysisMaker","MuDst D0 Analysis",kFALSE},
   {"KFPInter"    ,"","","","KFParticle,picoEvt", "KFParticlePerformance,StPicoEvent,StPicoDstMaker,"
