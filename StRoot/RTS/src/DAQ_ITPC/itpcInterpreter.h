@@ -88,7 +88,7 @@ public:
 
 	// filled in fee_scan
 	int fee_port ;	// from 1..16
-	int fee_id ;	// padplane id: 0..63 (although 55 is the last valid value)
+	u_int fee_id ;	// padplane id: 0..63 (although 55 is the last valid value)
 	u_int fee_bx ;
 
 	// filled in sampa_lane_scan
@@ -108,6 +108,31 @@ public:
 	// for various ASCII packets from RDO or FEE
 	int ascii_cou ;
 	char ascii_dta[1024] ;
+
+
+	static struct itpc_config_t {
+		struct {
+			int rdo_id ;
+			u_int wire1 ;
+			u_int fee_mask ;	// if 0: whole RDO is masked!
+			int phase ;
+
+			struct {
+				u_int wire1 ;
+				u_char padplane_id ;
+				u_char sampa_version ;	// 2, 3 or 4
+				u_char lane_dead_mask ;	// 4 bits; normally 0
+				u_char sampa_dead_mask ;	// 2 bits; normally 0
+			} fee[17] ;	// index is port (from 1)
+
+
+		} rdo[4] ;	// index is rb/gtp (from 0)
+
+	} itpc_config[25] ;	// index is sector (from 1)
+
+	static int parse_config(const char *fname) ;
+
+
 } ;
 
 

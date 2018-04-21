@@ -6,6 +6,7 @@
 #include <time.h>
 #include <arpa/inet.h>
 #include <sys/time.h>
+#include <errno.h>
 
 
 #include <rtsLog.h>	// for my LOG() call
@@ -31,6 +32,8 @@
 
 #include <DAQ_ITPC/itpcFCF.h>
 
+#define VERSION		0x20180001
+
 //#define DO_DBG1	1
 
 static double mark(void)
@@ -47,13 +50,184 @@ static double delta(double v)
 	return mark() - v ;
 }
 
+itpc_fcf_c::itpc_fcf_c()
+{	
+        want_data = 1 ;		// ALWAYS!
+        my_id = 0 ;		// normally starts from 1 so 0 is "un-initialized"
+
+        version = VERSION ;
+	sector_id = 0 ;		// 0 is ALL sectors
+
+        words_per_cluster = 2 ; 
+
+
+	// just in case
+	run_start() ;
+
+	s1_found = 0 ;
+	blob_id = 0 ;
+
+} ;
+
+itpc_fcf_c::~itpc_fcf_c()
+{
+	LOG(TERR,"%s: destructor %d",__PRETTY_FUNCTION__,my_id) ;
+
+	for(int i=0;i<=MAX_SEC;i++) {
+		if(sec_gains[i]) free(sec_gains[i]) ;
+		sec_gains[i] = 0 ;
+	}
+} ;
+
+//static member
+int itpc_fcf_c::rowlen[MAX_ROW+1] ;
+
+itpc_fcf_c::gain_rp_t *itpc_fcf_c::sec_gains[MAX_SEC+1] ;
+
+int itpc_fcf_c::get_bad(int sec1, int row1, int pad1)
+{
+	gain_rp_t (*gain_p)[MAX_PAD+1] ;
+	
+	if(sec_gains[sec1]==0) return 0 ;	// good
+
+	gain_p = (gain_rp_t (*)[MAX_PAD+1]) sec_gains[sec1] ;
+
+	if(gain_p[row1][pad1].gain==0.0) return 1 ;
+
+	return 0 ;
+}
+	
+//also static member
+int itpc_fcf_c::init(int sec, const char *fname)
+{
+	int s_min, s_max ;
+	gain_rp_t (*gain_p)[MAX_PAD+1] ;
+
+	if(sec>MAX_SEC) return -1 ;
+
+	// set the rowlen
+	for(int r=1;r<=MAX_ROW;r++) {
+		rowlen[r] = itpc_rowlen[r] ;
+	}
+
+	if(sec<=0) {
+		s_min = 1 ;
+		s_max = MAX_SEC ;
+	}
+	else {
+		s_min = s_max = sec ;
+	}
+
+
+	//alocation first
+	for(int s=s_min;s<=s_max;s++) {
+
+		if(sec_gains[s]) continue ;	// silently continue ;
+
+		sec_gains[s] = (gain_rp_t *) malloc((MAX_ROW+1)*(MAX_PAD+1)*sizeof(gain_rp_t)) ;
+		
+		//defaults now
+		gain_p = (gain_rp_t (*)[MAX_PAD+1]) sec_gains[s] ;
+
+		for(int r=1;r<=MAX_ROW;r++) {
+
+		for(int p=1;p<=MAX_PAD;p++) {
+
+			gain_p[r][p].gain = 1.0 ;
+			gain_p[r][p].t0 = 0.0 ;
+
+			if(p==1 || p==itpc_rowlen[r]) gain_p[r][p].flags = 0x2 ;	// edge
+			else gain_p[r][p].flags = 0 ;
+
+		}
+		}
+
+
+	}
 
 
 
+	// do we have a file?
+	if(fname==0) return 0 ;
+
+
+
+	// yes, open it
+	FILE *f = fopen(fname,"r") ;
+	if(f==0) {
+		LOG(ERR,"%s: %s [%s]",__FUNCTION__,fname,strerror(errno)) ;
+		return -1 ;
+	}
+
+	LOG(INFO,"Using gain file %s",fname) ;
+
+	int ch_bad = 0 ;
+	int ch_all = 0 ;
+
+	// we now have an opened gain file
+	while(!feof(f)) {
+		int sec,rdo,port,ch,row,pad ;
+		float g, t ;
+
+		char buff[128] ;
+
+		if(fgets(buff,sizeof(buff),f)==0) continue ;
+
+		if(buff[0]=='#') continue ;
+		if(strlen(buff)<1) continue ;
+
+		int ret = sscanf(buff,"%d %d %d %d %d %d %f %f",&sec,&rdo,&port,&ch,&row,&pad,&g,&t) ;
+
+		if(ret != 8) continue ;
+		
+		if(sec_gains[sec]==0) continue ;	// not for me!
+
+
+
+		gain_rp_t (*sr)[MAX_PAD+1] = (gain_rp_t (*)[MAX_PAD+1]) sec_gains[sec] ;
+
+		sr[row][pad].gain = g ;
+		sr[row][pad].t0 = t ;
+
+		ch_all++ ;
+
+		if(g<0.01) {	// some really small number close to 0.0
+			int p1 = pad - 1;
+			int p2 = pad + 1 ;
+
+			if(p1<1) p1 = 1;
+			if(p2>itpc_rowlen[row]) p2 = itpc_rowlen[row] ;
+
+			// mark this and neighbours as bad
+			sr[row][pad].flags |= 3 ;	// bad and edge
+			sr[row][p1].flags |= 2 ;	// just edge
+			sr[row][p2].flags |= 2 ;	// just edge
+
+			ch_bad++ ;
+		}
+
+	}
+
+	fclose(f) ;
+
+	if(ch_bad) LOG(WARN,"...with %d/%d bad channels",ch_bad,ch_all) ;
+
+	return 0 ;
+}
+
+
+
+
+
+#if 0
 // At start of epoch, as soon as we know the sector
 int itpc_fcf_c::init(int sec)
 {
 	LOG(TERR,"%s: sector %d; sizeof(rp)=%u, sizeof class %u",__FUNCTION__,sec,sizeof(row_pad),sizeof(itpc_fcf_c)) ;
+
+#ifdef DO_DBG1
+	LOG(WARN,"DO_DBG1 is ON!") ;
+#endif
 
 	sector = sec ;
 
@@ -75,12 +249,17 @@ int itpc_fcf_c::init(int sec)
 
 	return 0 ;
 }
+#endif
+
 
 // At start event
 void itpc_fcf_c::event_start()
 {
+	//for statistics, so not really necessary
 	s1_found = 0 ;
 
+	blob_id = 0 ;
+	evt_id++ ;
 }
 
 
@@ -171,19 +350,32 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 {
 	int row, pad ;
 	u_short tb_buff[MAX_TB] ;
-	int seq_cou = 0 ;
+	int seq_cou ;
 	int s_count ;
 	int t_stop_last ;
 	u_short *s1_data ;
 	int t_cou ;
 
-	itpc_ifee_to_rowpad(fee_id, fee_ch, row, pad) ;
-
-
+	seq_cou = 0;
 	int word32 = (words/3) + (words%3?1:0) ;
 
+	itpc_ifee_to_rowpad(fee_id, fee_ch, row, pad) ;
+
+	gain_rp_t (*gain_row_pad)[MAX_PAD+1] = (gain_rp_t (*)[MAX_PAD+1]) sec_gains[sector_id] ;
+
+	if(row==0) goto err_ret ;	// unphysical pad
+
+
+//	LOG(TERR,"RP %d:%d = %d %d",row,pad,gain_row_pad[row][pad].flags,word32) ;
+
+	if(gain_row_pad[row][pad].flags & 1) {
+		//LOG(WARN,"RP %d:%d killed",row,pad) ;
+		goto err_ret ;	// skip dead pads!
+	}
+
+
+
 	if((word32*3)>=MAX_TB) {
-		seq_cou = 0 ;
 		LOG(ERR,"%d:#%d: FEE %d:%d, words %d",rdo,port,fee_id,fee_ch,words) ;
 		goto err_ret ;
 	}
@@ -216,12 +408,12 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 		int t_stop = t_start + t_cou - 1 ;
 
 		if(t_start <= t_stop_last) {
-			LOG(WARN,"%d:#%d: FEE %d:%d, words %d",rdo,port,fee_id,fee_ch,words) ;
+			LOG(WARN,"%d:#%d: FEE %d:%d, words %d: %d <= %d",rdo,port,fee_id,fee_ch,words,t_start,t_stop_last) ;
 			seq_cou = 0 ;
 			goto err_ret ;
 		}
 		if(t_stop > 511) {
-			LOG(WARN,"%d:#%d: FEE %d:%d, words %d",fee_id,rdo,port,fee_ch,words) ;
+			LOG(WARN,"%d:#%d: FEE %d:%d, words %d: %d > 511",fee_id,rdo,port,fee_ch,words,t_stop) ;
 			seq_cou = 0 ;
 			goto err_ret ;
 		}
@@ -274,6 +466,7 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 
 	s1_found += seq_cou ;
 	
+//	if(seq_cou) LOG(TERR,"RP %d:%d = seq_cou %d",row,pad,seq_cou) ;
 
 	err_ret:;
 
@@ -351,16 +544,19 @@ int itpc_fcf_c::do_fcf(void *v_store, int bytes)
 
 void itpc_fcf_c::run_start()
 {
-	LOG(TERR,"%s",__PRETTY_FUNCTION__) ;
+	// all just for statistics and monitoring...
+	LOG(TERR,"%s: %d",__PRETTY_FUNCTION__,my_id) ;
 
 	memset(&f_stat,0,sizeof(f_stat)) ;
 
+	evt_id = 0 ;
 }
 
 void itpc_fcf_c::run_stop()
 {
+	// all just for statistics and moniroing
 
-//	LOG(TERR,"%s",__PRETTY_FUNCTION__) ;
+//	LOG(TERR,"%s: %d",__PRETTY_FUNCTION__,my_id) ;
 
 	for(int i=0;i<10;i++) {
 		f_stat.tm[i] /= f_stat.evt_cou ;
@@ -378,9 +574,7 @@ void itpc_fcf_c::run_stop()
 	if(f_stat.toobigs) {
 		LOG(WARN,"   toobigs %d",f_stat.toobigs) ;
 	}
-	else {
-		LOG(INFO,"   toobigs %d",f_stat.toobigs) ;
-	}
+
 }
 
 
@@ -402,7 +596,8 @@ int itpc_fcf_c::do_blobs_stage1(int row)
 		u_short *ix2_p ;
 
 		if(rp[p].s1_len==0) continue ;
-		
+//		LOG(TERR,"Row %d: s1_len %d",row,rp[p].s1_len) ;
+
 		u_short *d1 = rp[p].s1_data ;
 
 		for(int i=0;i<rp[p].s1_len;i++) {
@@ -503,7 +698,7 @@ int itpc_fcf_c::do_blobs_stage1(int row)
 	}
 
 
-//	LOG(TERR,"Row: got %d pads, %d blobs, %d late merges",pads,blob_cou,late_merges) ;
+//	LOG(TERR,"Row %d: got %d pads, %d blobs, %d late merges",row,pads,blob_cou,late_merges) ;
 
 
 	return blob_cou ;
@@ -652,11 +847,17 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 	double tm ;
 	
 	u_int *obuff = (u_int *)out_store ;
+
+	gain_rp_t (*gain_row_pad)[MAX_PAD+1] = (gain_rp_t (*)[MAX_PAD+1]) sec_gains[sector_id] ;
+
 	int clusters_cou = 0 ;
 
+//	LOG(TERR,"stage3: row %d, blob_cou %d",row,blob_cou) ;
 
 	for(int ix=0;ix<blob_cou;ix++) {
 		if(blob[ix].seq_cou==0) continue ;
+
+
 
 		tm = mark() ;
 
@@ -848,18 +1049,24 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 		f_stat.tm[6] += delta(tm) ;
 
 		//LOG(TERR,"Blob %d: peaks %d",ix,peaks_cou) ;
-		
+		blob_id++ ;
 
-		words_per_cluster = 3 ;
+//		words_per_cluster = 2 ;
 
 		if(peaks_cou <= 1) {	// do usual averaging!
 			double f_charge = 0.0 ;
 			double f_t_ave = 0.0 ;
 			double f_p_ave = 0.0 ;
+			int flags = 0 ;
 
 			int adc_max = 0 ;
 
 			for(int i=1;i<=dp;i++) {
+				int pad = p1 + i - 1 ;
+
+				//LOG(TERR,"Gain RP %d:%d = %f %d",row,pad,gain_row_pad[row][pad].gain,gain_row_pad[row][pad].flags) ;
+
+				flags |= gain_row_pad[row][pad].flags ;
 
 				short *adc_p = smooth_dta + dt_2 * i + 1;
 
@@ -880,7 +1087,7 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 
 				if(i_charge==0) continue ;
 
-				int pad = p1 + i - 1 ;
+
 				
 				double corr_charge = (double) i_charge * gain_row_pad[row][pad].gain ;
 				
@@ -934,13 +1141,16 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 
 			if(cha > 0x7FFF) cha = 0x8000 | (cha/1024) ;
 
-			if(blob[ix].p1==1 || blob[ix].p2==rowlen[row]-1) tmp_fl |= 0x8000 ;	// ROW EDGE
+			if(flags & 3) tmp_fl |= 0x8000 ;	// ROW_EDGE
+//			if(blob[ix].p1==1 || blob[ix].p2==rowlen[row]) tmp_fl |= 0x8000 ;	// ROW EDGE
 
 			*obuff++ = (time_c << 16) | pad_c ;
 			*obuff++ = (cha << 16) | tmp_fl ;
-			*obuff++ = adc_max ;
 
-			words_per_cluster = 3 ;
+			if(words_per_cluster>2) {
+				*obuff++ = adc_max ;
+			}
+
 
 #ifdef DO_DBG1
 //			LOG(TERR,"**** S %d: row %d: %f %f %f",clusters_cou,row,f_p_ave,f_t_ave,f_charge) ;
@@ -957,7 +1167,8 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 				double f_charge = 0.0 ;
 				double f_t_ave = 0.0 ;
 				double f_p_ave = 0.0 ;
-				
+				int flags = 0 ;
+
 				int adc_max = 0 ;
 
 				ip1 = peaks[pk].i - 1 ;
@@ -975,6 +1186,10 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 				printf("from %d:%d %d:%d\n",ip1,ip2,it1,it2) ;
 #endif
 				for(int i=ip1;i<=ip2;i++) {
+					int pad = p1 + i - 1 ;
+
+					flags |= gain_row_pad[row][pad].flags ;
+
 					short *adc_p = smooth_dta + dt_2 * i + it1 ;
 
 					u_int i_charge = 0 ;
@@ -996,8 +1211,6 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 					}
 
 					if(i_charge==0) continue ;
-
-					int pad = p1 + i - 1 ;
 				
 					double corr_charge = (double) i_charge * gain_row_pad[row][pad].gain ;
 				
@@ -1043,14 +1256,17 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 
 				// add flags here
 				pad_c |= 0x8000 ;					// merged flag
-				if((ip1==1)||(ip2==rowlen[row]-1)) tmp_fl |= 0x8000 ;	// ROW_EDGE
+				if(flags & 3) tmp_fl |= 0x8000 ;			// ROW_EDGE
+
+				//if((ip1==1)||(ip2==rowlen[row])) tmp_fl |= 0x8000 ;	// ROW_EDGE
 
 				*obuff++ = (time_c << 16) | pad_c ;
 				*obuff++ = (cha << 16) | tmp_fl ;
-				*obuff++ = adc_max ;
-				
-				words_per_cluster = 3 ;
 
+				if(words_per_cluster > 2) {
+					*obuff++ = adc_max ;
+				}
+				
 #ifdef DO_DBG1
 //				LOG(TERR,"0x%X 0x%X 0x%X 0x%X - 0x%X 0x%X",pad_c,time_c,cha,tmp_fl, (time_c<16)|pad_c,(cha<<16)|tmp_fl) ;
 //				LOG(TERR,"**** D %d: %f %f %f",clusters_cou,f_p_ave,f_t_ave,f_charge) ;
@@ -1071,9 +1287,15 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 		printf("TB %3d ",blob[ix].t1+j-1) ;
 		for(int i=1;i<=dp;i++) {
 			short *adc_s_p = dta_s + dt_2 * i + j ;	// smoothed
+
 			short *adc_p = smooth_dta + dt_2 * i + j ;	// real
 
-			printf("%4d(%4d) ",*adc_p,*adc_s_p) ;
+			if(*adc_s_p < 0) {
+				printf("%s%4d(%4d)%s ",ANSI_RED,*adc_p,*adc_s_p,ANSI_RESET) ;
+			}
+			else {
+				printf("%4d(%4d) ",*adc_p,*adc_s_p) ;
+			}
 		}
 		printf("\n") ;
 		}

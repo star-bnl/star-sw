@@ -35,38 +35,31 @@
 
 class itpc_fcf_c : public itpcPed {
 public:
-	itpc_fcf_c() { 
-		want_data = 1 ; 
-		my_id = -1 ;
-
-		init(-1) ; 
-		run_start() ;	// just in case
-
-		s1_found = 0 ;
-
-		version = 0x20180000 ;
-		words_per_cluster = 0 ;	// set in stage3!
-	} ;
-
-	~itpc_fcf_c() { ; } ;
+	itpc_fcf_c() ;
+	~itpc_fcf_c() ;
 
 
-	int init(int sector) ;
+
 	void run_start() ;
 	void run_stop() ;
-
 	void event_start() ;	// mostly to zap some debugging counters
 
         int do_ch(int fee_id, int fee_ch, u_int *data, int words) ;
 
-	int version ;
-
 	int do_fcf(void *storage, int bytes) ;
 
 
+	static int init(int sector, const char *fname=0) ;
+	static int get_bad(int sec1, int row1, int pad1) ;
 	static int fcf_decode(unsigned int *p_buff, daq_cld *dc, unsigned int version) ;
 
 	int my_id ;
+	int version ;
+	int sector_id ;
+
+	int words_per_cluster ;
+
+	// statistics
 
 	struct f_stat_t {
 		double tm[10] ;
@@ -81,6 +74,7 @@ public:
 
 private:
 
+	static const int MAX_SEC = 24 ;		// sectors
 	static const int MAX_ROW = 40 ;		// row or timebin
 	static const int MAX_PAD = 120 ;	// pad or pad
 	static const int MAX_TB = 512 ;		// tb or row
@@ -92,9 +86,9 @@ private:
 	static const int MAX_PHYS_ROW	= 45 ;
 	static const int MAX_PHYS_PAD	= 182 ;
 
-	int words_per_cluster ;
 
-	int rowlen[MAX_ROW+1] ;
+
+	static int rowlen[MAX_ROW+1] ;
 
 	u_short blob_ix[MAX_BLOB] ;
 
@@ -136,7 +130,11 @@ private:
 		float t0 ;
 		u_char flags ;
 
-	} gain_row_pad[MAX_ROW+1][MAX_PAD+1] ;
+	} ;
+
+	//gain_row_pad[MAX_ROW+1][MAX_PAD+1] ;
+
+	static gain_rp_t *sec_gains[MAX_SEC+1] ;
 
 	// this is where I recopy over data
 	struct rp_t {
@@ -145,6 +143,9 @@ private:
 	} row_pad[MAX_ROW+1][MAX_PAD+1] ;	// [row-like][pad-like]
 
 	int s1_found ;
+
+	u_int blob_id ;	// for debugging
+	u_int evt_id ;
 
 //	int max_s1_len ;
 //	int max_s1_found ;
