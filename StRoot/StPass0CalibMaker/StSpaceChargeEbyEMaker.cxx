@@ -614,7 +614,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
           }
 
           Float_t space = 10000.;
-          Int_t predictFailed = m_ExB->PredictSpaceChargeDistortion(ch,oldPt,vtxPos.z(),
+          Int_t predictFailed = m_ExB->PredictSpaceChargeDistortion(sec,ch,oldPt,vtxPos.z(),
             eta,phi,DCA2,map.data(0),map.data(1),rerrors,rphierrors,space);
           if (predictFailed) {
             if (QAmode) cutshist->Fill(40+predictFailed);

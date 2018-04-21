@@ -550,7 +550,7 @@ Int_t StVMCMaker::SetVertex() {
     if (IAttr("SmearVertex")) {
       TVector3 Vs(gRandom->Gaus(V.X(),E.X()),
 		  gRandom->Gaus(V.Y(),E.Y()),
-		  gRandom->Gaus(V.Y(),E.Y()));
+		  gRandom->Gaus(V.Z(),E.Z()));
       LOG_INFO << "Smear production vertex from to " << endm;
       cout << "From \t"; V.Print();
       cout << "To   \t"; Vs.Print();

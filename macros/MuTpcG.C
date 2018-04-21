@@ -1,5 +1,5 @@
 /* Global Alignment
-   root.exe 'lMuDst.C(-1,"*MuDst.root","RMuDst,mysql,magF,nodefault","Mu.root")'  MuTpcG.C+
+   root.exe 'lMuDst.C(-1,"./*MuDst.root","RMuDst,mysql,magF,nodefault","MuTpcG.root")'  MuTpcG.C+
    root.exe lMuDst.C MuTpcG.root
    .L MuTpcG.C+
    Draw();
@@ -656,12 +656,14 @@ void MuTpcG(Long64_t nEvents = 10000000) {
   tree->SetCacheSize(-1);        //by setting the read cache to -1 we set it to the AutoFlush value when writing
   tree->SetCacheLearnEntries(1); //one entry is sufficient to learn
   tree->SetCacheEntryRange(0,nEvents);
-  
+  Int_t iok = 0;
   for (Long64_t ev = 0; ev < nEvents; ev++) {
-    if (chain->MakeEvent()) break;
+    iok = chain->MakeEvent();
+    if (iok) break;
     StMuDst* mu = MuDstMaker->muDst();   // get a pointer to the StMuDst class, the class that points to all the data
     Process1Event(mu,ev);
   }
+  return;
 }
 //________________________________________________________________________________
 Double_t g2g(Double_t *xx, Double_t *par) {

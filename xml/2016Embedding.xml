@@ -41,7 +41,7 @@
   set file = ${base}.MuDst.root
   set logFile  = ${base}B.log
   echo "${file}"
-  setenv StarEndMakerShell
+#  setenv StarEndMakerShell
   if ( ! -r ${file}) then
 #    root.exe -q -b -x 'bfcMixerVMC.C(10000,"Vmc,Lc3pi,VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
 #    root.exe -q -b -x 'bfcMixerVMC.C(10000,"Vmc,'${name}',VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}

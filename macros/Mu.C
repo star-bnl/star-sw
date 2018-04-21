@@ -79,6 +79,19 @@ static Int_t _debug = 0;
 void SetDebug(Int_t k) {_debug = k;}
 Int_t Debug() {return _debug;}
 //________________________________________________________________________________
+Int_t SectorNumber(Float_t x, Float_t y, Float_t z) {
+  Double_t phi = TMath::RadToDeg()*TMath::ATan2(y,x);
+  Int_t iphi = TMath::Nint(phi/30.);
+  Int_t Sector;
+  if (z > 0) {
+    Sector = 3 - iphi;
+    if (Sector <=  0) Sector += 12;
+  } else {
+    Sector = 21 + iphi;
+    if (Sector > 24) Sector -= 12;
+  }
+  return Sector;
+}
 //________________________________________________________________________________
 Bool_t Accept(const StMuTrack *gTrack = 0) {
   if (! gTrack)            return kFALSE;
@@ -103,12 +116,14 @@ void Mu(Long64_t nevent = 9999999,
 	//	const char* file="MuDstSel.lis",
 	const char* file="*.MuDst.root",
 	const char* filter="st:MuDst.root",
-	const  char* outFile="Mu.root") {
+	const  char* outFile="MupTES.root") {
 #if 1
   TFile *fOut = new TFile(outFile,"recreate");
-  TH1D *hpT[kTotalSigns];
+  TH1F *hpT[kTotalSigns];
+  TH3F *hpTES[kTotalSigns];
   for (Int_t s = kPositive; s < kTotalSigns; s++) {
-    hpT[s] = new TH1D(Form("pT%s",NameCharge[s]),Form("pT for %s",TitleCharge[s]),200,0,200);
+    hpT[s] = new TH1F(Form("pT%s",NameCharge[s]),Form("pT for %s",TitleCharge[s]),200,0,200);
+    hpTES[s] = new TH3F(Form("pTES%s",NameCharge[s]),Form("pT and #eta versus sector for %s",TitleCharge[s]),24,0.5,24.5,200,0.,2.0,50,-2.5,2.5);
   }
 #endif
   StMuDebug::setLevel(0);  
@@ -122,8 +137,8 @@ void Mu(Long64_t nevent = 9999999,
   const Char_t *ActiveBranches[] = {"MuEvent"
 				    ,"PrimaryVertices"
 				    ,"PrimaryTracks"
-#if 1
 				    ,"GlobalTracks"
+#if 0
 				    ,"CovPrimTrack"
 				    ,"CovGlobTrack"
 				    ,"StStMuMcVertex"
@@ -158,26 +173,32 @@ void Mu(Long64_t nevent = 9999999,
     TClonesArray *GlobalTracks     = mu->array(muGlobal);  
     Int_t NoGlobalTracks = GlobalTracks->GetEntriesFast();        if (Debug()) {cout << "\tGlobalTracks " << NoGlobalTracks;}
     TClonesArray *CovPrimTrack     = mu->covPrimTrack();          if (Debug()) {cout << "\tCovPrimTrack " << CovPrimTrack->GetEntriesFast();}
+#if 0
     TClonesArray *CovGlobTrack     = mu->covGlobTrack();          if (Debug()) {cout << "\tCovGlobTrack " << CovGlobTrack->GetEntriesFast();}
+#endif
     for (Int_t l = 0; l < NoPrimaryVertices; l++) {
       StMuPrimaryVertex *Vtx = (StMuPrimaryVertex *) PrimaryVertices->UncheckedAt(l);
       if (l) continue;
+#if 0
       cout << *Vtx << endl;
+#endif
       for (Int_t k = 0; k < NoPrimaryTracks; k++) {
 	StMuTrack *pTrack = (StMuTrack *) PrimaryTracks->UncheckedAt(k);
 	if (! pTrack) continue;
         if (pTrack->vertexIndex() != l) continue;
 	if (! Accept(pTrack)) continue;
-	cout << *pTrack << endl;
 	TrackMatchType s = kPositive;
 	if (pTrack->charge() < 0) s = kNegative;
+	Int_t kg = pTrack->index2Global();
+	if (kg < 0 || kg > NoGlobalTracks) continue;
+	StMuTrack *gTrack = (StMuTrack *) GlobalTracks->UncheckedAt(kg);
+	if (! gTrack) continue;
+#if 0
+	cout << *pTrack << endl;
 	Int_t kpc = pTrack->index2Cov();
 	if (kpc < 0) continue;
 	StMuPrimaryTrackCovariance *cov = (StMuPrimaryTrackCovariance *) CovPrimTrack->UncheckedAt(kpc);
 	TRSymMatrix Cp(3,cov->errMatrix());
-	Int_t kg = pTrack->index2Global();
-	if (kg < 0 || kg > NoGlobalTracks) continue;
-	StMuTrack *gTrack = (StMuTrack *) GlobalTracks->UncheckedAt(kg);
 	Int_t kgc = gTrack->index2Cov();
 	if (kgc < 0) continue;
 	StDcaGeometry *dcaG = (StDcaGeometry *) CovGlobTrack->UncheckedAt(kgc);
@@ -191,13 +212,16 @@ void Mu(Long64_t nevent = 9999999,
 	if (VV[0][0] > 0.05) {
 	  pTrack->Print(); dcaG->Print(); gTrack->Print();
 	}
+#endif
 #if 1
 	hpT[s]->Fill(pTrack->pt());
+	Int_t sec = SectorNumber(gTrack->firstPoint().x(), gTrack->firstPoint().y(), gTrack->firstPoint().z());
+	hpTES[s]->Fill(sec, pTrack->pt(), pTrack->eta());
 #endif
       }
     }
   }
-#if 0
+#if 1
   if (fOut) fOut->Write();
 #endif
 }

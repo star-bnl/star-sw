@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.61 2018/04/10 11:39:11 smirnovd Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.63 2018/04/19 22:38:25 smirnovd Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,14 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.63  2018/04/19 22:38:25  smirnovd
+ * Revert iTPC related changes committed on 2018-04-19
+ *
+ * ...except cosmetic ones
+ *
+ * Revision 1.62  2018/04/19 15:47:42  smirnovd
+ * Change hardware Id for hits originated in iTpc padrow rather than iTpc sector
+ *
  * Revision 1.61  2018/04/10 11:39:11  smirnovd
  * StTpcHitMaker: Match logic in pre-iTPC code
  *

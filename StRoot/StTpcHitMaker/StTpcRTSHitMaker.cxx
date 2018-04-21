@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.44 2018/04/10 11:39:03 smirnovd Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.47 2018/04/19 22:38:26 smirnovd Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -27,11 +27,11 @@
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StMessMgr.h" 
-#  include "StDAQMaker/StDAQReader.h"
-#  include "StRtsTable.h"
-#  include "DAQ_TPX/daq_tpx.h"
-#  include "DAQ_READER/daq_dta.h"
-#  include "DAQ_READER/daqReader.h"
+#include "StDAQMaker/StDAQReader.h"
+#include "StRtsTable.h"
+#include "DAQ_TPX/daq_tpx.h"
+#include "DAQ_READER/daq_dta.h"
+#include "DAQ_READER/daqReader.h"
 #include "RTS/src/DAQ_TPX/tpxFCF_flags.h" // for FCF flag definition
 #include "TBenchmark.h"
 ClassImp(StTpcRTSHitMaker); 
