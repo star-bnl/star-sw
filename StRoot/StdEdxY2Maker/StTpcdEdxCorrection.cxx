@@ -290,11 +290,12 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       } else if (k == kdXCorrection) {
 	xL2 = TMath::Log2(dx);
 	dXCorr = ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,xL2); 
-	if (nrows == 7) {// old schema withour iTPC
+	if (nrows == 7) {// old schema without iTPC
 	  dXCorr += ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2,xL2);
 	  dXCorr += ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(5+kTpcOutIn,xL2);
 	}
 	CdEdx.dxC = TMath::Exp(dXCorr)*CdEdx.F.dx;
+	dE *= TMath::Exp(-dXCorr);
 	goto ENDL;
       } else if (k == kSpaceCharge) {
 	if (cor[2*l  ].min <= CdEdx.QRatio && CdEdx.QRatio <= cor[2*l  ].max &&
