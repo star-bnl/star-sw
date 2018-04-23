@@ -535,11 +535,6 @@ Int_t            St_tpcPadConfigC::indexForRowPad(Int_t sector, Int_t row, Int_t
 #include "St_TpcAvgPowerSupplyC.h"
 //________________________________________________________________________________
 void  St_tpcAnodeHVC::sockets(Int_t sector, Int_t padrow, Int_t &e1, Int_t &e2, Float_t &f2) {
-  if (St_tpcPadConfigC::instance()->padRows(sector) != 45) {
-    if (padrow <= St_tpcPadConfigC::instance()->innerPadRows(sector)) {e1 = e2 = 8; f2 = 0;}
-    else                                                              {e1 = e2 = 9; f2 = 0;}
-    return;
-  }
   e1 = (sector-1)*19;
   e2 = e1;
   f2 = 0;
@@ -872,7 +867,7 @@ MakeChairInstance(TpcAvgCurrent,Calibrations/tpc/TpcAvgCurrent);
 //________________________________________________________________________________
 Int_t St_TpcAvgCurrentC::ChannelFromRow(Int_t sector, Int_t row) {
   if (row <  1 || row > St_tpcPadConfigC::instance()->padRows(sector)) return -1;
-  if (St_tpcPadConfigC::instance()->padRows(sector) == 45) {
+  if (!  St_tpcPadConfigC::instance()->iTPC(sector)) {
     if (row <  3) return 1;
     if (row <  7) return 2;
     if (row < 10) return 3;
@@ -881,7 +876,7 @@ Int_t St_TpcAvgCurrentC::ChannelFromRow(Int_t sector, Int_t row) {
     if (row < 30) return 6;
     if (row < 38) return 7;
     return 8;
-  } else if (St_tpcPadConfigC::instance()->padRows(sector) == 72) { // iTPC
+  } else { // iTPC
     // Jim Thomas, mail from 09/27/17
     if (row < 10) return 1; //  9 shared 1&2
     if (row < 20) return 2; // 19 shared 2&3
@@ -890,9 +885,7 @@ Int_t St_TpcAvgCurrentC::ChannelFromRow(Int_t sector, Int_t row) {
     if (row < 22 - 13 + 40) return 5;
     if (row < 30 - 13 + 40) return 6;
     if (row < 38 - 13 + 40) return 7;
-    return 9;
-  } else {
-    LOG_ERROR << "St_TpcAvgCurrentC::ChannelFromRow: unknown configuration with no. pad row at sector = " << sector << " = " << St_tpcPadConfigC::instance()->padRows(sector) << endm;
+    return 8;
   }
   return -1;
 }

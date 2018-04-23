@@ -50,6 +50,11 @@ int itpcInterpreter::parse_config(const char *fname)
 			itpc_config[sec].rdo[rb].fee_mask  = mask ;
 			itpc_config[sec].rdo[rb].phase = phase ;
 
+			for(int i=0;i<16;i++) {
+				if(mask & (1<<i)) itpc_config[sec].rdo[rb].fee_count++ ;
+			}
+			LOG(TERR,"RDO %d: fee mask 0x%04X, fee_count %d",rb+1,mask,itpc_config[sec].rdo[rb].fee_count) ;
+
 		}
 		else if(strncmp(line,"F ",2)==0) {	// FEE section
 			int v ;
@@ -107,6 +112,8 @@ itpcInterpreter::itpcInterpreter()
 
 
 	memset(fee,0,sizeof(fee)) ;
+	memset(itpc_config,0,sizeof(itpc_config)) ;
+
 	ped_c = 0 ;
 }
 

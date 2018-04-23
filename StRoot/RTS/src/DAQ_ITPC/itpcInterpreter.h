@@ -116,6 +116,7 @@ public:
 			u_int wire1 ;
 			u_int fee_mask ;	// if 0: whole RDO is masked!
 			int phase ;
+			int fee_count ;
 
 			struct {
 				u_int wire1 ;
