@@ -215,7 +215,20 @@ StiDetector* StiTpcDetectorBuilder::constructTpcPadrowDetector(StiLayer stiLayer
 	         St_tpcPadGainT0BC::instance()->livePadrow(tpc_sector_id_east,tpc_padrow_id);
 	}
       }
-      pDetector->setIsActive(new StiTpcIsActiveFunctor(_active,west,east));
+
+      StiIsActiveFunctor* activator = nullptr;
+
+      if ( St_tpcPadConfigC::instance()->isiTpcPadRow(tpc_sector_id, tpc_padrow_id) ) {
+        pDetector->setGroupId(kiTpcId);
+        activator = _active_iTpc ? new StiTpcIsActiveFunctor(true,west,east) :
+                                   new StiTpcIsActiveFunctor(false,west,east);
+      }
+      else {
+        pDetector->setGroupId(kTpcId);
+        activator = new StiTpcIsActiveFunctor(_active,west,east);
+      }
+
+      pDetector->setIsActive(activator);
       pDetector->setIsContinuousMedium(kTRUE);
       pDetector->setIsDiscreteScatterer(kFALSE);
       pDetector->setMaterial(_gasMat);
