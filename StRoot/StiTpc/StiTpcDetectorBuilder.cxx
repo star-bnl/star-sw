@@ -76,16 +76,6 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
   TString path("HALL_1/CAVE_1/TpcRefSys_1/TPCE_1");
   if (! gGeoManager->cd(path)) newRefSystem = kFALSE;
 
-  // change to +1 instead of +2 to remove the ofc.
-  UInt_t nRows = St_tpcPadPlanesC::instance()->numberOfRows();// Only sensitive detectors
-  setNRows(nRows);
-  UInt_t row;
-#if 0
-  Int_t NoStiSectors = 24;
-#else
-  Int_t NoStiSectors = 12;
-#endif
-  for (row = 0; row < nRows; row++) setNSectors(row,NoStiSectors);
   // Get Materials
   TGeoVolume *volT = gGeoManager->GetVolume("TPAD"); 
   if (! volT) volT = gGeoManager->GetVolume("tpad"); 
