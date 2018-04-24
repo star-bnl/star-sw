@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.64 2018/04/24 16:44:41 smirnovd Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.65 2018/04/24 16:45:05 smirnovd Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.65  2018/04/24 16:45:05  smirnovd
+ * Expand interface for iTPC slewing correction
+ *
  * Revision 1.64  2018/04/24 16:44:41  smirnovd
  * Change hardware Id for hits originated in iTpc padrow rather than iTpc sector
  *
@@ -688,7 +691,7 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
 
   // Correct for slewing (needs corrected q, and time in microsec)
   Double_t freq = gStTpcDb->Electronics()->samplingFrequency();
-  time = freq * St_tpcSlewingC::instance()->correctedT(row,q,time/freq);
+  time = freq * St_tpcSlewingC::instance()->correctedT(sector,row,q,time/freq);
 
   static StTpcCoordinateTransform transform(gStTpcDb);
   static StTpcLocalSectorCoordinate local;
