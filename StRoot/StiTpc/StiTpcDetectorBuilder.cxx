@@ -99,15 +99,17 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
 				mat->GetDensity()*mat->GetRadLen(),
 				PotI));
   StThreeVectorD RowPosition;
-  for(row = 0; row < nRows; row++)    {
 
-    for(UInt_t sector = 0; sector<getNSectors(); sector++) {
+  fillStiLayersMap();
 
-      StiPlanarShape* pShape = constructTpcPadrowShape(sector, row);
-      StiDetector* pDetector = constructTpcPadrowDetector(row, sector, pShape);
-      add(row,sector,pDetector); if (debug>1) cout << *pDetector << endl;
-    }// for sector
-  }// for row
+  for(const StiLayer& stiLayer : sStiLayers)
+  {
+    StiPlanarShape* pShape = constructTpcPadrowShape(stiLayer);
+    StiDetector* pDetector = constructTpcPadrowDetector(stiLayer, pShape);
+
+    add(stiLayer.sti_padrow_id, stiLayer.sti_sector_id, pDetector); if (debug>1) cout << *pDetector << endl;
+  }
+
   for (Int_t i = 0; i < 4; i++) {
     gGeoManager->RestoreMasterVolume();
     gGeoManager->CdTop();
