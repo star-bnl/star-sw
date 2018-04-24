@@ -30,7 +30,6 @@ void StiDetector::reset()
   setName("");
   memset(mBeg,0,mEnd-mBeg+1);
   _key1 = _key2 = -1;
-  _groupId = -1;
 }
 
 //______________________________________________________________________________
@@ -209,7 +208,7 @@ do {
      mgValue[1] = shape->getHalfDepth();
      double z = xl[2]-placement->getZcenter();  
      mgValue[0] = (fabs(z)-mgValue[1]);
-     if (mgValue[0]>acc && fabs(xl[2]) > 100)	return 0;
+     if (mgValue[0]>acc)	return 0;
      
    return 1;
  } while(0);
