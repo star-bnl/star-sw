@@ -3,7 +3,6 @@
 
 #include "TChair.h"
 #include "tables/St_tpcSlewing_Table.h"
-#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 
 class St_tpcSlewingC : public TChair {
  public:
@@ -22,23 +21,10 @@ class St_tpcSlewingC : public TChair {
     }
     return 0;
   }
-
-  double        slewing(int sector, int i, double q) {
-    if (St_tpcPadConfigC::instance()->iTpc(sector)) return 0;
-    return slewing(i, q);
-  }
-
   double        correctedT(int padrow = 1, double q = 0, double T = 0) { // T [microsec]
     int inout = (padrow <= 13 ? 0 : 1); // padrow = 1..45
     return T - (T > minT(inout) ? slewing(inout,q) : 0);
   }
-
-  double        correctedT(int sector, int padrow, double q, double T) { // T [microsec]
-    if (St_tpcPadConfigC::instance()->iTpc(sector)) return T;
-    int inout = (St_tpcPadConfigC::instance()->isInnerPadRow(sector,padrow) ? 0 : 1); // padrow = 1..45
-    return T - (T > minT(inout) ? slewing(sector,inout,q) : 0);
-  }
-
  protected:
   St_tpcSlewingC(St_tpcSlewing *table=0) : TChair(table) {}
   virtual ~St_tpcSlewingC() {fgInstance = 0;}
