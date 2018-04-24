@@ -191,6 +191,10 @@ StiDetector* StiTpcDetectorBuilder::constructTpcPadrowDetector(StiLayer stiLayer
       StiPlacement *pPlacement = new StiPlacement;
       Double_t zc = 0;
       if (NoStiSectors != 12) zc = centerVector.z();
+
+      if ( stiLayer.tpc_sector_id[StiLayer::East] < 0 ) zc =  2*dZ;
+      if ( stiLayer.tpc_sector_id[StiLayer::West] < 0 ) zc = -2*dZ;
+
       pPlacement->setZcenter(zc);
       pPlacement->setLayerRadius(fRadius);
       pPlacement->setLayerAngle(phi);
@@ -262,6 +266,14 @@ StiPlanarShape* StiTpcDetectorBuilder::constructTpcPadrowShape(StiLayer stiLayer
       pShape->setThickness(St_tpcPadConfigC::instance()->outerSectorPadLength(tpc_sector_id));
       dZ = St_tpcPadConfigC::instance()->outerSectorPadPlaneZ(tpc_sector_id);
     }
+
+    // Check if stiLayer represents only one half of TPC layer
+    if ( stiLayer.tpc_sector_id[StiLayer::West] < 0 ||
+         stiLayer.tpc_sector_id[StiLayer::East] < 0 )
+    {
+      dZ *= 0.5;
+    }
+
     pShape->setHalfDepth(dZ*24/NoStiSectors);
     pShape->setHalfWidth(St_tpcPadConfigC::instance()->PadPitchAtRow(tpc_sector_id, tpc_padrow_id) * St_tpcPadConfigC::instance()->numberOfPadsAtRow(tpc_sector_id, tpc_padrow_id) / 2.);
     pShape->setName(name.Data()); if (StiVMCToolKit::Debug()>1) cout << *pShape << endl;
