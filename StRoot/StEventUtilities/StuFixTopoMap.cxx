@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuFixTopoMap.cxx,v 1.8 2018/03/27 02:42:23 genevb Exp $
+ * $Id: StuFixTopoMap.cxx,v 1.9 2018/04/24 16:45:26 smirnovd Exp $
  *
  * Author: Thomas Ullrich, May 2000
  ***************************************************************************
@@ -97,6 +97,8 @@
  * $Log
  **************************************************************************/
 #include "StEventTypes.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
+
 
 bool StuFixTopoMap(StTrack* track)
 {
@@ -196,7 +198,10 @@ bool StuFixTopoMap(StTrack* track)
                 LOG_DEBUG<<"word1: "<<word1<<endm;
             }
             else if (hits[i]->detector() == kTpcId) {
-                k = dynamic_cast<const StTpcHit*>(hits[i])->padrow();
+                unsigned int sector = static_cast<const StTpcHit*>(hits[i])->sector();
+                unsigned int padrow = static_cast<const StTpcHit*>(hits[i])->padrow();
+                k = St_tpcPadConfigC::instance()->isiTpcSector(sector) &&
+                   !St_tpcPadConfigC::instance()->isInnerPadRow(sector, padrow) ? padrow - 40 + 13 : padrow;
                 if (k < 25) {
                     if (word1 & 1U<<(k+7)) word2 |= 1U<<30; // turnaround flag    
                     word1 |= 1U<<(k+7);
