@@ -30,6 +30,7 @@ void StiDetector::reset()
   setName("");
   memset(mBeg,0,mEnd-mBeg+1);
   _key1 = _key2 = -1;
+  _groupId = -1;
 }
 
 //______________________________________________________________________________
