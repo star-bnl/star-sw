@@ -18,7 +18,7 @@
 #include "StiTpcDetectorBuilder.h"
 #include "StiTpc/StiTpcIsActiveFunctor.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
-#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StDbUtilities/StCoordinates.hh"
 #include "StTpcDb/StTpcDb.h"
 #include "StMatrixD.hh"
@@ -133,11 +133,11 @@ StiDetector* StiTpcDetectorBuilder::constructTpcPadrowDetector(StiLayer stiLayer
 
   Int_t NoStiSectors = 12;
   StDetectorDbTpcRDOMasks *s_pRdoMasks = StDetectorDbTpcRDOMasks::instance();
-  UInt_t nRows = St_tpcPadPlanesC::instance()->numberOfRows();// Only sensitive detectors
-  UInt_t nInnerPadrows = St_tpcPadPlanesC::instance()->numberOfInnerRows();
+  UInt_t nRows = St_tpcPadConfigC::instance()->numberOfRows(tpc_sector_id);// Only sensitive detectors
+  UInt_t nInnerPadrows = St_tpcPadConfigC::instance()->numberOfInnerRows(tpc_sector_id);
   //Nominal pad row information.
   // create properties shared by all sectors in this padrow
-  float fRadius = St_tpcPadPlanesC::instance()->radialDistanceAtRow(tpc_padrow_id);
+  float fRadius = St_tpcPadConfigC::instance()->radialDistanceAtRow(tpc_sector_id, tpc_padrow_id);
   StTpcCoordinateTransform transform(gStTpcDb);
   StMatrixD  local2GlobalRotation;
   StMatrixD  unit(3,3,1);
@@ -167,7 +167,7 @@ StiDetector* StiTpcDetectorBuilder::constructTpcPadrowDetector(StiLayer stiLayer
 	local2GlobalRotation(i+1,3) = dirG.position().z();
       }
       //      if (debug>1) cout << "Local2GlobalRotation = " << local2GlobalRotation << endl;
-      Double_t y  = transform.yFromRow(tpc_padrow_id);
+      Double_t y  = transform.yFromRow(tpc_sector_id, tpc_padrow_id);
       StTpcLocalSectorCoordinate  lsCoord(0., y, dZ, tpc_sector_id, tpc_padrow_id);// if (debug>1) cout << lsCoord << endl;
 #ifndef TPC_IDEAL_GEOM
       StTpcLocalSectorAlignedCoordinate lsCoordA;
@@ -243,7 +243,7 @@ StiPlanarShape* StiTpcDetectorBuilder::constructTpcPadrowShape(StiLayer stiLayer
   int tpc_padrow_id = stiLayer.tpc_padrow();
 
   Int_t NoStiSectors = 12;
-  UInt_t nInnerPadrows = St_tpcPadPlanesC::instance()->numberOfInnerRows();
+  UInt_t nInnerPadrows = St_tpcPadConfigC::instance()->numberOfInnerRows(tpc_sector_id);
 
     TString name = Form("Tpc/Padrow_%d/Sector_%d", stiLayer.sti_padrow_id, stiLayer.sti_sector_id);
     StiPlanarShape* pShape = new StiPlanarShape;
@@ -251,15 +251,15 @@ StiPlanarShape* StiTpcDetectorBuilder::constructTpcPadrowShape(StiLayer stiLayer
       throw runtime_error("StiTpcDetectorBuilder::buildDetectors() - FATAL - pShape==0||ofcShape==0");
     Double_t dZ = 0;
     if(tpc_padrow_id <= nInnerPadrows) {
-      pShape->setThickness(St_tpcPadPlanesC::instance()->innerSectorPadLength());
-      dZ = St_tpcPadPlanesC::instance()->innerSectorPadPlaneZ();
+      pShape->setThickness(St_tpcPadConfigC::instance()->innerSectorPadLength(tpc_sector_id));
+      dZ = St_tpcPadConfigC::instance()->innerSectorPadPlaneZ(tpc_sector_id);
     }
     else {
-      pShape->setThickness(St_tpcPadPlanesC::instance()->outerSectorPadLength());
-      dZ = St_tpcPadPlanesC::instance()->outerSectorPadPlaneZ();
+      pShape->setThickness(St_tpcPadConfigC::instance()->outerSectorPadLength(tpc_sector_id));
+      dZ = St_tpcPadConfigC::instance()->outerSectorPadPlaneZ(tpc_sector_id);
     }
     pShape->setHalfDepth(dZ*24/NoStiSectors);
-    pShape->setHalfWidth(St_tpcPadPlanesC::instance()->PadPitchAtRow(tpc_padrow_id) * St_tpcPadPlanesC::instance()->numberOfPadsAtRow(tpc_padrow_id) / 2.);
+    pShape->setHalfWidth(St_tpcPadConfigC::instance()->PadPitchAtRow(tpc_sector_id, tpc_padrow_id) * St_tpcPadConfigC::instance()->numberOfPadsAtRow(tpc_sector_id, tpc_padrow_id) / 2.);
     pShape->setName(name.Data()); if (StiVMCToolKit::Debug()>1) cout << *pShape << endl;
 
     return pShape;
