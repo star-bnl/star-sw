@@ -1,8 +1,11 @@
 /********************************************************************
- * $Id: StMtdGeometry.cxx,v 1.19 2017/03/08 20:40:38 marr Exp $
+ * $Id: StMtdGeometry.cxx,v 1.20 2018/04/25 15:58:35 marr Exp $
  ********************************************************************
  *
  * $Log: StMtdGeometry.cxx,v $
+ * Revision 1.20  2018/04/25 15:58:35  marr
+ * Fix the bug of converting projected localy to cellId
+ *
  * Revision 1.19  2017/03/08 20:40:38  marr
  * Add back the old implementation of GetCellLocalYCenter() function to make
  * the class backward compatible.
@@ -350,8 +353,8 @@ StMtdGeoModule::~StMtdGeoModule()
 Int_t StMtdGeoModule::FindCellId(const Double_t *local){
 	Int_t cellId = -99;
 	if ( IsLocalPointIn(local[0],local[1],local[2]) ) {
-		cellId = (int)((local[1]+(gMtdCellWidth+gMtdCellGap)*gMtdNCells/2.)/(gMtdCellWidth+gMtdCellGap));
-	}
+   		cellId = TMath::FloorNint((local[1]+(gMtdCellWidth+gMtdCellGap)*gMtdNCells/2.)/(gMtdCellWidth+gMtdCellGap));
+        }
 	return cellId;
 }
 
