@@ -72,7 +72,7 @@ void StiDetectorContainer::initialize()
       for (int sector=0; sector<nSectors; sector++)
         {
         StiDetector* detector = (*bIter)->getDetector(row,sector);
-        if (!detector) throw runtime_error("StiDetectorContainer::build() -F- detector==0 ");
+        if (!detector) continue;
         if (detector->isActive()) 
 	  add(detector);
         else 

@@ -85,7 +85,7 @@ public:
     void setHitErrorCalculator(const StiHitErrorCalculator * calculator) {_hitErrorCalculator = calculator;}
     const StiHitErrorCalculator * getHitErrorCalculator() const {return _hitErrorCalculator;}
 
-    void setGroupId(int id) {  _groupId = id;}
+    void setGroupId(int id) { _groupId = _groupId < 0 ? id : _groupId; }
     int  getGroupId() const {return _groupId;}
 
     void setTrackingParameters(const StiTrackingParameters * pars) {_pars = pars;}
@@ -132,7 +132,7 @@ public:
     /// Convenience storage of sin(refAngle)
     double _sin;
     /// Detector group identifier.
-    int _groupId;
+    int _groupId = -1;
     const StiTrackingParameters * _pars;
     int _key1, _key2;
 

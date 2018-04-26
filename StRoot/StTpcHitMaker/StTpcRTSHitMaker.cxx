@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.49 2018/04/24 20:39:21 smirnovd Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.50 2018/04/26 17:09:41 smirnovd Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -301,7 +301,7 @@ Int_t StTpcRTSHitMaker::Make() {
 		     (Double_t) St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
 	}
 	UInt_t hw = 1U;   // detid_tpc
-        if (isiTpcSector) hw += 1U << 1;
+        if (St_tpcPadConfigC::instance()->isiTpcPadRow(dta->sec, dta->row)) hw += 1U << 1;
 	hw += dta->sec << 4;     // (row/100 << 4);   // sector
 	hw += dta->row << 9;     // (row%100 << 9);   // row
 #if 0	

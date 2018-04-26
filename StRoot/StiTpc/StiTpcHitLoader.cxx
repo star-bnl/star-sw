@@ -16,8 +16,9 @@
 #include "StiTpcHitLoader.h"
 #include "Sti/StiHitTest.h"
 #include "Sti/StiKalmanTrackNode.h"
+#include "StiTpc/StiTpcDetectorBuilder.h"
 #include "RTS/src/DAQ_TPX/tpxFCF_flags.h" // for FCF flag definition
-#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 //________________________________________________________________________________
 StiTpcHitLoader::StiTpcHitLoader(): StiHitLoader<StEvent,StiDetectorBuilder>("TpcHitLoader"), 
 				    _minRow(1), _maxRow(100), _minSector(1), _maxSector(24) {}
@@ -33,38 +34,37 @@ void StiTpcHitLoader::loadHits(StEvent* source,
                                Filter<StiHit> * hitFilter)
 {
   static Int_t debug = 0;
-  _maxRow = St_tpcPadPlanesC::instance()->padRows();
 //  cout << "StiTpcHitLoader::loadHits(StEvent*) -I- Started" << endl;
   assert(_detector);
   assert(_hitContainer);
   const StTpcHitCollection* tpcHits = source->tpcHitCollection();
   if (!tpcHits) return;
-  UInt_t stiSector;
   UInt_t noHitsLoaded = 0;
   for (UInt_t sector=_minSector-1; sector<_maxSector; sector++)    {
-#if 0
-    stiSector = sector;
-#else
-    if (sector<12)      stiSector = sector;
-    else                stiSector = 11 - (sector-11)%12;
-#endif
     const StTpcSectorHitCollection* secHits = tpcHits->sector(sector);
     if (!secHits) {
       cout << "StiTpcHitLoader::loadHits(StEvent* source) -W- no hits for sector:"<<sector<<endl;
       break;
     }
     Float_t driftvel = 1e-6*gStTpcDb->DriftVelocity(sector+1); // cm/mkmsec
+
+    _maxRow = St_tpcPadConfigC::instance()->numberOfRows(sector+1);
+
     for (UInt_t row=_minRow-1; row<_maxRow; row++) {
       //cout << "StiTpcHitLoader:loadHits() -I- Loading row:"<<row<<" sector:"<<sector<<endl;
+
+      // Negative Sti indices indicate a problem with Sti TPC geometry layout
+      int stiSector, stiRow;
+      std::tie(stiSector, stiRow) = StiTpcDetectorBuilder::toStiLayer(sector+1, row+1);
+
       const StTpcPadrowHitCollection* padrowHits = secHits->padrow(row);
       if (!padrowHits) break;
       const StSPtrVecTpcHit& hitvec = padrowHits->hits();
-      StiDetector * detector = _detector->getDetector(row,stiSector);
+      StiDetector * detector = _detector->getDetector(stiRow,stiSector);
       if (!detector) throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) -E- Detector element not found");
       StiHitTest hitTest;
       for (const StTpcHit* hit : hitvec)
       {
-        if (hit->detector() == kiTpcId) continue;
 	if (StiKalmanTrackNode::IsLaser() && hit->flag()) continue;
 	if (hit->flag() & FCF_CHOPPED || hit->flag() & FCF_SANITY)     continue; // ignore hits marked by AfterBurner as chopped or bad sanity
 	if (hit->pad() > 182 || hit->timeBucket() > 511) continue; // some garbadge  for y2001 daq

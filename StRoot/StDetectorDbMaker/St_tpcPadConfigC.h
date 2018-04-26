@@ -57,7 +57,9 @@ class St_tpcPadConfigC : public TChair {
   Double_t 	   PadPitchAtRow(Int_t sector, Int_t row);		   
   Double_t 	   RowPitchAtRow(Int_t sector, Int_t row);		   
   Int_t            indexForRowPad(Int_t sector, Int_t row, Int_t pad);
-  UChar_t          isiTpcPadRow(Int_t sector, Int_t row) { return iTpc(sector) && row >= 1 && row <= numberOfInnerRows(sector); }
+  bool             isiTpcSector(Int_t sector) { return iTpc(sector) == 1; }
+  bool             isiTpcPadRow(Int_t sector, Int_t row) { return iTpc(sector) && row >= 1 && row <= numberOfInnerRows(sector); }
+  bool             isInnerPadRow(Int_t sector, Int_t row) { return row <= numberOfInnerRows(sector); }
  protected:
   St_tpcPadConfigC(St_tpcPadConfig *table=0) : TChair(table) {}
   virtual ~St_tpcPadConfigC() {fgInstance = 0;}
