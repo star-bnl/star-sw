@@ -466,7 +466,15 @@ int StiTrackNodeHelper::join()
      }//end Switch
   } while(kase>=0);
 
-   assert(fabs(mJoinPars.hz()-mTargetHz)<=1e-10);
+   if (std::fabs(mJoinPars.hz() - mTargetHz) > 1e-10)
+   {
+     LOG_WARN << "Expected |mJoinPars.hz() - mTargetHz| <= 1e-10 "
+              << "instead |" << mJoinPars.hz() << " - " << mTargetHz << "| = "
+              << std::fabs(mJoinPars.hz() - mTargetHz) << ". "
+              << "Will set mJoinPars.hz to " << mTargetHz << endm;
+     mJoinPars.hz() = mTargetHz;
+   }
+
    assert(fabs(mTargetNode->getHz()-mTargetHz)<=1e-10);
 
 
