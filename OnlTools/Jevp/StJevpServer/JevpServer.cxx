@@ -463,12 +463,15 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    log_output = RTS_LOG_STDERR;
 	}
 	else if (strcmp(argv[i], "-updatedb")==0) {
-	    log_output = RTS_LOG_STDERR;
-	    nodb = 0;
-	    myport = JEVP_PORT+10;
-	    die = 1;
-	    log_level = (char *)WARN;
-	    throttle_time = .005;
+	  log_output = RTS_LOG_STDERR;
+	  nodb = 0;
+	  myport = JEVP_PORT+10;
+	  die = 1;
+	  log_level = (char *)WARN;
+	  throttle_time = .005;
+	}
+	else if (strcmp(argv[i], "-nodie") == 0) {
+	  die = 0;
 	}
 	else if (strcmp(argv[i], "-buildpdf")) {
 	    LOG("JEFF", "-buildpdf");
