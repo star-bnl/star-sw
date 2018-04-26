@@ -57,15 +57,14 @@ private:
                    }
                int tpc_sector() const { return tpc_sector_id[West] > 0 ? tpc_sector_id[West] : tpc_sector_id[East]; }
                int tpc_padrow() const { return tpc_padrow_id[West] > 0 ? tpc_padrow_id[West] : tpc_padrow_id[East]; }
-               //int tpc_sector(TpcHalf half) const { return tpc_sector_id[half]; }
-              bool represents(TpcHalf half) const { return tpc_sector_id[half] > 0; }
+               int tpc_sector(TpcHalf half) const { return tpc_sector_id[half]; }
               bool operator< (const StiLayer& other) const;
     };
 
     void fillStiLayersMap();
 
-    StiPlanarShape* constructTpcPadrowShape(int sector, int row) const;
-    StiDetector*    constructTpcPadrowDetector(int row, int sector, StiPlanarShape* pShape) const;
+    StiPlanarShape* constructTpcPadrowShape(StiLayer stiLayer) const;
+    StiDetector*    constructTpcPadrowDetector(StiLayer stiLayer, StiPlanarShape* pShape) const;
 
     static std::set<StiLayer> sStiLayers;
 };

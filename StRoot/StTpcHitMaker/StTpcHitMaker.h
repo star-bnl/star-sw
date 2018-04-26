@@ -3,15 +3,14 @@
 
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.h,v 1.23 2018/04/24 20:39:21 smirnovd Exp $
+ * $Id: StTpcHitMaker.h,v 1.24 2018/04/26 17:09:41 smirnovd Exp $
  * StTpcHitMaker - class to fill the StEvent with TPC clusters from DAQ reader
  * $Log: StTpcHitMaker.h,v $
- * Revision 1.23  2018/04/24 20:39:21  smirnovd
- * Revert iTPC related changes committed on 2018-04-24
+ * Revision 1.24  2018/04/26 17:09:41  smirnovd
+ * Revert "Revert iTPC related changes committed on 2018-04-24"
  *
- * There is an assert that fails when the StiCA option is used:
- *
- * StRoot/Sti/StiTrackNodeHelper.cxx:469: int StiTrackNodeHelper::join(): Assertion `fabs(mJoinPars.hz()-mTargetHz)<=1e-10' failed.
+ * Revision 1.22  2018/04/24 16:45:39  smirnovd
+ * Correct outter row numbers for sectors with iTPC
  *
  * Revision 1.21  2018/04/10 11:38:54  smirnovd
  * StTpcHitMaker: Fixes to properly read the real data (Yuri and Irakli)
@@ -154,7 +153,7 @@ class StTpcHitMaker : public StRTSBaseMaker {
   TH1F        *fSectCounts;
   Int_t    NoRows;
   Int_t    NoInnerPadRows;
-  Int_t    mRowOffSet4iTPC;
+  Int_t    RowNumber();
  protected:
   StTpcHit *CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t row);
   StTpcHit *CreateTpcHit(const daq_cld  &cluster, Int_t sector, Int_t row);
