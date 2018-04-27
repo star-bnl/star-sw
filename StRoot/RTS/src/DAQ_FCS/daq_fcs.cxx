@@ -73,7 +73,7 @@ daq_fcs::~daq_fcs()
 
 
 
-daq_dta *daq_fcs::get(const char *bank, int sec, int row, int pad, void *p1, void *p2) 
+daq_dta *daq_fcs::get(const char *bank, int sec, int raw, int pad, void *p1, void *p2) 
 {
 	Make() ;
 
@@ -103,90 +103,103 @@ daq_dta *daq_fcs::get(const char *bank, int sec, int row, int pad, void *p1, voi
 daq_dta *daq_fcs::handle_raw()
 {
 	char str[128] ;
+	int min_rdo = 1 ;
+	int max_rdo = 2 ;
+	char *full_name ;
+	int got_any = 0 ;
 
 	// bring in the bacon from the SFS file....
 	assert(caller) ;
 
 	
 	sprintf(str,"%s/sec01/rb01/raw",sfs_name) ;
-	char *full_name = caller->get_sfs_name(str) ;
+	full_name = caller->get_sfs_name(str) ;
 	
 	LOG(DBG,"%s: trying sfs on \"%s\"",name,str) ;
-	if(full_name == 0) return 0 ;
-
-	int size = caller->sfs->fileSize(full_name) ;	// this is bytes
-
-	LOG(DBG,"Got size %d",size) ;
-	if(size <= 0) {
-		LOG(DBG,"%s: %s: not found in this event",name,str) ;
-		return 0 ;
+	if(full_name) {	// FY17 version
+		min_rdo = 1 ;
+		max_rdo = 1 ;
+		version = 2017 ;
 	}
 
-	raw->create(size,"fcs_raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
-	char *st = (char *) raw->request(size) ;
+	raw->create(1024,"fcs_raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
 
-	caller->sfs->read(full_name, st, size) ;
+	for(int r=min_rdo;r<=max_rdo;r++) {
+		if(full_name==0) {
+			sprintf(str,"%s/sec01/rdo%d/raw",sfs_name,r) ;
+			full_name = caller->get_sfs_name(str) ;
+			if(full_name) version = 2018 ;
+		}
 
-	LOG(DBG,"sfs read succeeded") ;
 
-        raw->finalize(size,1,1,0) ;
+		if(full_name==0) continue ;
+		
+		int size = caller->sfs->fileSize(full_name) ;	// this is bytes
+
+		LOG(DBG,"Got size %d",size) ;
+		if(size <= 0) {
+			LOG(DBG,"%s: %s: not found in this event",name,str) ;
+			return 0 ;
+		}
+
+		got_any = 1 ;
+
+		char *st = (char *) raw->request(size) ;
+
+		caller->sfs->read(full_name, st, size) ;
+
+		LOG(DBG,"sfs read succeeded") ;
+
+		raw->finalize(size,1,r,0) ;
+
+		full_name = 0 ;
+	}
 
 	raw->rewind() ;
 
-	return raw ;
+	if(got_any) {
+		return raw ;
+	}
+	else return 0 ;
 
 }
 
 daq_dta *daq_fcs::handle_adc()
 {
-	char str[128] ;
+	daq_dta *dta ;
 
 	// bring in the bacon from the SFS file....
 	assert(caller) ;
 
-	
-	sprintf(str,"%s/sec01/rb01/raw",sfs_name) ;
-	char *full_name = caller->get_sfs_name(str) ;
-	
-	LOG(DBG,"%s: trying sfs on \"%s\"",name,str) ;
-	if(full_name == 0) return 0 ;
+	dta = handle_raw() ;
 
-	int size = caller->sfs->fileSize(full_name) ;	// this is bytes
-
-	LOG(DBG,"Got size %d",size) ;
-	if(size <= 0) {
-		LOG(DBG,"%s: %s: not found in this event",name,str) ;
-		return 0 ;
-	}
-
-	char *ptr = (char *) malloc(size) ;
-	LOG(DBG,"Malloc at %p",ptr) ;
-
-	caller->sfs->read(full_name, ptr, size) ;
-
-	LOG(DBG,"sfs read succeeded") ;
+	if(dta==0) return 0 ;
 
 	adc->create(1000,"adc",rts_id,DAQ_DTA_STRUCT(u_short)) ;
 
-	fcs_data_c fcs_c ;
-	fcs_c.start((u_short *)ptr,size/2) ;
-
 	
-	while(fcs_c.event()) {
+	while(dta && dta->iterate()) {
+		u_short *ptr = (u_short *) dta->Void ;
 		
-		u_short *at = (u_short *)adc->request(fcs_c.tb_cou) ;
+		fcs_data_c fcs_c ;
 
-		for(int i=0;i<fcs_c.tb_cou;i++) {
-			at[i] = fcs_c.adc[i] ;
-		}
+		fcs_c.start(ptr,dta->ncontent/2) ;
 
-		if(fcs_c.first_rhic_strobe_tick!=0 || fcs_c.trigger_tick != 142) {
-			LOG(WARN,"RHIC %d, Trg %d",fcs_c.first_rhic_strobe_tick,fcs_c.trigger_tick) ;
+		while(fcs_c.event()) {
+
+			u_short *at = (u_short *)adc->request(fcs_c.tb_cou) ;
+
+			for(int i=0;i<fcs_c.tb_cou;i++) {
+				at[i] = fcs_c.adc[i] ;
+			}
+
+			//if(fcs_c.first_rhic_strobe_tick!=0 || fcs_c.trigger_tick != 142) {
+			//	LOG(WARN,"RHIC %d, Trg %d",fcs_c.first_rhic_strobe_tick,fcs_c.trigger_tick) ;
+			//}
+
+			adc->finalize(fcs_c.tb_cou, fcs_c.sector, fcs_c.rdo, fcs_c.ch) ;			
 		}
-		adc->finalize(fcs_c.tb_cou, fcs_c.sector, fcs_c.rdo, fcs_c.ch) ;
 	}
-
-	free(ptr) ;
 
 	adc->rewind() ;
 
@@ -210,15 +223,88 @@ int daq_fcs::get_token(char *addr, int words)
 	return trg[0].t ;
 }
 
+static inline u_int sw16(u_int d)
+{
+        u_int tmp = d ;
+
+        d >>= 16 ;
+
+        d |= (tmp & 0xFFFF)<<16 ;
+
+        return d ;
+}
+
 
 
 // knows how to get a/the L2 command out of the event...
 int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 {
-	int err = 0 ;
+	u_int err = 0 ;
 	int t_cou = 0 ;
+	u_int *d = (u_int *)addr ;
+	u_int trg_word ;
 
-	
+	int trg_cmd, daq_cmd ;
+	int t_hi, t_mid, t_lo ;
+
+	//LOG(WARN,"get_l2") ;
+//	for(int i=0;i<16;i++) {
+//		LOG(TERR,"... %d/%d = 0x%08X",i,words,d[i]) ;
+//	}
+
+	d += 4 ;	// skip GTP header
+
+	if(d[0] != 0xCCCC001C) {
+		LOG(ERR,"First word 0x%X bad",d[0]) ;
+		err |= 1 ;
+		goto err_end ;
+	}
+
+	if(sw16(d[1]) != 0x98000004) {
+		LOG(WARN,"Not a triggered event 0x%08X",sw16(d[1])) ;
+		trg[0].t = 4096 ;
+		trg[0].trg = 0 ;
+		trg[0].daq = 0 ;
+
+		return 1 ;
+	}
+
+
+	trg_word = sw16(d[3]) ;	// trigger
+
+//	LOG(TERR,"Trigger 0x%08X 0x%08X",trg_word,sw16(d[4])) ;
+
+	trg_cmd = trg_word & 0xF ;
+	daq_cmd = (trg_word >> 4) & 0xF ;
+	t_hi = (trg_word >> 8) & 0xF ;
+	t_mid = (trg_word >> 12) & 0xF ;
+	t_lo = (trg_word >> 16) & 0xF ;
+
+	t_lo |= (t_hi<<8) | (t_mid << 4) ;
+
+//	if(trg_word & 0x00A00000) {	//L0 fired
+		trg[t_cou].t = t_lo ;
+		trg[t_cou].trg = trg_cmd ;
+		trg[t_cou].daq = daq_cmd ;
+		trg[t_cou].rhic = 0 ;
+		trg[t_cou].rhic_delta = 0 ;
+		t_cou++ ;
+
+		//LOG(INFO,"T %4d, trg_cmd %d, daq_cmd %d [%s]",t_lo,trg_cmd,daq_cmd,trg_word&0x00A00000?"FIRED":"Not fired") ;
+//	}
+
+	return 1 ;
+
+	err_end:;
+
+	trg[0].t = 4096 ;
+	trg[0].trg = 0 ;
+	trg[0].daq = 0 ;
+
+	return 1 ;
+
+
+#if 0
 	u_short *d = (u_short *)addr ;
 //	u_short s_words = words/2 ;
 
@@ -267,19 +353,52 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 
 
 	return t_cou ;
+#endif
 }
 
 
 /*******************************/
 int fcs_data_c::start(u_short *d16, int shorts)
 {
+	u_int *d ;
 	dta_p = d16 ;
 	dta_stop = d16 + shorts ;
 
+	d = (u_int *)d16 ;
+
+	//check version
+	if(d[0]==0xDDDDDDDD) {	// new FY18 data!
+		d += 4 ;	// skip GTP header
+
+		//for(int i=0;i<32;i++) {
+		//	LOG(TERR,"...%d = 0x%08X",i,d[i]) ;
+		//}
+
+		d += 12 ;	// skip event header
+
+		dta_p = (u_short *) d ;
+
+
+		//for(int i=0;i<16;i++) {
+		//	LOG(TERR,"...%d = 0x%04X",i,dta_p[i]) ;
+		//}
+		return 1 ;
+	}
+
+	//LOG(TERR,"start: 0x%08X 0x%08X",d[0],d[1]) ;
+
 	//move to start-of-ADC marker
 	while(dta_p < dta_stop) {
-		if(*dta_p++ == 0xFD06) return 1 ;
+		if(*dta_p++ == 0xFD06) {
+			//for(int i=0;i<16;i++) {
+			//	LOG(TERR,"...%d = 0x%04X",i,dta_p[i]) ;
+			//}
+
+
+			return 1 ;
+		}
 	}
+
 
 	return -1 ;
 }
@@ -298,7 +417,7 @@ int fcs_data_c::event()
 
 
 		h[0] = *dta_p++ ;
-		if(h[0]==0xFD07) {	//end of event
+		if(h[0]==0xFD07 || h[0]==0x5800) {	//end of event
 			return 0 ;
 		}
 
@@ -307,15 +426,29 @@ int fcs_data_c::event()
 
 		ch = h[0] & 0xF ;
 
+		//LOG(TERR,"H 0x%X 0x%X 0x%X (ch %2d)",h[0],h[1],h[2],ch) ;
+
 		while(dta_p<dta_stop) {
 			u_short d = *dta_p++ ;
-			if(d==0xFFFF) break ;
+
+			//LOG(TERR,".... 0x%X",d) ;
+
+			if(d==0xFFFF) {
+				//LOG(TERR,"... tb_cou %d",tb_cou) ;
+				break ;
+			}
 
 			if(d & 0x2000) {
-				if(first_rhic_strobe_tick < 0) first_rhic_strobe_tick = tb_cou ;
+				if(first_rhic_strobe_tick < 0) {
+					first_rhic_strobe_tick = tb_cou ;
+					//LOG(TERR,"... first rhic strobe at %d",tb_cou) ;
+				}
 			}
 			if(d & 0x8000) {
-				if(trigger_tick < 0) trigger_tick = tb_cou ;
+				if(trigger_tick < 0) {
+					trigger_tick = tb_cou ;
+					//LOG(TERR,"... trigger tick at %d",tb_cou) ;
+				}
 			}
 
 //			accum(ch,tb_cou,d&0xFFF) ;
@@ -339,7 +472,8 @@ int fcs_data_c::accum(int ch, int tb, u_short sadc)
 	sadc &= 0xFFF ;	//zap the flags
 
 	if(ped_run) {
-		
+		//if(tb==0) LOG(TERR,"Accum: ch %d = %d",ch,sadc) ;
+
 		ped.mean[ch] += (double)sadc ;
 		ped.rms[ch] += (double)sadc * (double)sadc ;
 		ped.cou[ch]++ ;

@@ -35,6 +35,7 @@ public:
                 static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
 	}
 
+	u_int version ;
 } ;
 
 
