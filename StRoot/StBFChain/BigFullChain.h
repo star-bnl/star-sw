@@ -1165,15 +1165,15 @@ Bfc_st BFC[] = { // standard chains
    "B2018,StiCA,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
    ,                 "","","Production chain for year 2018 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 #if 0 /* y2018a is not ready yet */
-  {"B2018a"  ,"","","ry2018a,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite","",""
+  {"B2018a"  ,"","","ry2018a,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree","",""
    ,                                                           "Base chain for run 2018 data (tpc)",kFALSE},
 #else
-  {"B2018a"  ,"","","ry2018,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite","",""
+  {"B2018a"  ,"","","ry2018,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree","",""
    ,                                                           "Base chain for run 2018 data (tpc)",kFALSE},
 #endif
   
   {"P2018a","" ,"",
-   "B2018a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,beamline3D,l3onl,emcDY2,epdHit,fpd,trgd,ZDCvtx,analysis"
+   "B2018a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,beamline3D,emcDY2,epdHit,fpd,trgd,ZDCvtx,analysis"
    ,                    "","","Base chain for year 2018 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   {"B2019"  ,"","","r2019,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                     "Production chain for run 2019 data (tpc)",kFALSE},
@@ -1781,10 +1781,11 @@ Bfc_st BFC[] = { // standard chains
   {"StiCA"    ,"","","Sti,StiCALib",                                    "","libEG","Sti+CA tracker",kFALSE},
   {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,Stu,StEvent,StDbT,TpcIT,compend,sim_T,tbutil,TMVARank","StiMaker"
    ,                                                          "StiUtilities,StiMaker","Sti tracker",kFALSE},
+  {"HLTCA","","-Sti,-StiCA,-Stv","","StHLTCAMaker","TPCCATracker,StHLTCAMaker","HLT reconstruction",kFALSE},
   {"Stx"    ,"","","-Sti,-StiCA,-Stv","StxMaker","TPCCATracker,StxMaker",  "eXpress reconstruction",kFALSE},
   {"KFVertex" ,""  ,"Sti","-VFMinuit,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2"
    ,"StKFVertexMaker",      "MathMore,Spectrum",  "...KFParticle based multi vertex reconstruction",kFALSE},
-  {"Stv"     ,"Stv","","-xgeometry,-Sti,-StiTpc,-StiSsd,-StiSvt,-StiPxl,-StiSsd,-StiSst,-StiIst,-StiLibs,-StiLibsHft"
+  {"Stv","Stv","","-xgeometry,-Sti,-StiTpc,-StiSsd,-StiSvt,-StiPxl,-StiSsd,-StiSst,-StiIst,-StiLibs,-StiLibsHft"
    ,"StvMaker","libHist,libHistPainter,libVMC,geant3,GeoTestMaker,StvUtil,Stv,StvSeed,StvMaker,StEventUtilities,"
    ,"Stv"                                                                                          ,kFALSE},
   {"StvCA"    ,"StvCA","","Stv","",""                                                      ,"StvCA",kFALSE},
