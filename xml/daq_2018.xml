@@ -37,12 +37,14 @@
   if ( -r $logFile) exit 0;
   set muFile = ${filel}.MuDst.root
   if (-r $muFile) exit 0;
-  root.exe -q -b 'bfc.C(100000,"P2018,useCDV,Tpx,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX,dEdxCalib","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+  root.exe -q -b 'bfc.C(100,"P2018,useCDV,Tpx,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX,dEdxCalib","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
 <!-- <input URL="file:/star/data03/daq/2018/073/19073049/st_physics_adc_19073049_raw_*.daq" /> -->
 <!-- <input URL="file:/star/data03/daq/2018/078/19078015/st_physics_adc_19078015_raw_*.daq" /> -->
 <!-- <input URL="file:/star/data03/daq/2018/086/19086040/*.daq" /> -->
-<input URL="file:/star/data03/daq/2018/106/1910602*/*adc*.daq" />
+<!-- <input URL="file:/star/data03/daq/2018/106/1910602*/*adc*.daq" /> -->
+<!-- <input URL="file:/star/data03/daq/2018/113/19113018/st_itpc*.daq" /> -->
+<input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/1911602*/*.daq" /> 
 </job>

@@ -21,13 +21,16 @@
   set output  = ${filel}.event.root
   if (! -r ${evtsFile}) exit 1;
   set logFile  = ${filel}B.log
-  if ( -r $logFile) exit 0;
+#  if ( -r $logFile) exit 0;
   set muFile = ${filel}.MuDst.root
   if (-r $muFile) exit 0;
 #root.exe -q -b 'bfc.C(1000,"P2014,TpxRaw,TpxClu2D,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,CorrX,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
-root.exe -q -b 'bfc.C(1000,"P2018,TpxRaw,TpxClu,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,CorrX,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+#root.exe -q -b 'bfc.C(1000,"P2018,TpxRaw,TpxClu,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,CorrX,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+root.exe -q -b 'bfc.C(100000,"P2018a,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,OGridLeak3D,useCDV,CorrX,-evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
-<input URL="file:/star/data03/daq/2018/*/*/st_cosmic_adc_*.daq" />
+<!-- <input URL="file:/star/data03/daq/2018/*/*/st_cosmic_adc_*.daq" /> -->
+<input URL="file:/star/data03/daq/2018/108/*/st_cosmic*.daq" /> 
+<!-- <input URL="file:/star/data03/daq/2018/108/19108054/st_cosmic_adc_19108054_raw_5500008.daq" /> -->
 </job>
