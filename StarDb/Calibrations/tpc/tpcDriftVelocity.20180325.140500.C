@@ -3,8 +3,8 @@ TDataSet *CreateTable() {
   St_tpcDriftVelocity *tableSet = new St_tpcDriftVelocity("tpcDriftVelocity",1);
   tpcDriftVelocity_st row;// Laser Run 84028
   memset(&row, 0, tableSet->GetRowSize());
-  row.laserDriftVelocityEast	 =   5.53241; // +/- 9.40717e-06 cm/us All: East = -0.194508 +/- 0.00618468
-  row.laserDriftVelocityWest	 =   5.53241; // +/- 9.40717e-06 cm/us All: West = 0.220961 +/- 0.00173922
-  tableSet->AddAt(&row);// 1e3*Delta: All = 5.53241 +/- 9.40717e-06
-  return (TDataSet *)tableSet;// West = 5.53224 +/- 9.78904e-06 East = 5.53448 +/- 3.40121e-05
+  row.laserDriftVelocityEast	 =   5.52251; // +/- 9.16175e-06 cm/us All: East = 1.60119 +/- 0.005197
+  row.laserDriftVelocityWest	 =   5.52251; // +/- 9.16175e-06 cm/us All: West = 2.04387 +/- 0.00174252
+  tableSet->AddAt(&row);// 1e3*Delta: All = 5.52251 +/- 9.16175e-06
+  return (TDataSet *)tableSet;// West = 5.52226 +/- 9.68504e-06 East = 5.52463 +/- 2.82548e-05
 };
