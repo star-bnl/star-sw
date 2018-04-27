@@ -651,8 +651,10 @@ void StMagUtilities::GetTPCVoltages (Int_t mode)
     cout << "StMagUtilities assigning common anode voltages as " << cmnInner << " , " << cmnOuter << endl;
     for (Int_t i = 1 ; i < 25; i++ ) {
       int inner = St_tpcPadConfigC::instance()->innerPadRows(i);
-      GLWeights[i] = ( ( TMath::Abs(anodeVolts->voltagePadrow(i,inner  ) - cmnInner) < stepsInner/2. ) &&
-                       ( TMath::Abs(anodeVolts->voltagePadrow(i,inner+1) - cmnOuter) < stepsOuter/2. ) ? 1 : -1 );
+      //      GLWeights[i] = ( ( TMath::Abs(anodeVolts->voltagePadrow(i,inner  ) - cmnInner) < stepsInner/2. ) &&
+      GLWeights[i] = inner > 13 ? 0 :
+	( ( TMath::Abs(anodeVolts->voltagePadrow(i,inner)   - cmnInner) < stepsInner/2. ) &&
+                      ( TMath::Abs(anodeVolts->voltagePadrow(i,inner+1) - cmnOuter) < stepsOuter/2. ) ? 1 : -1 );
     }
   } else if (mode & kFullGridLeak) {
 
@@ -667,9 +669,15 @@ void StMagUtilities::GetTPCVoltages (Int_t mode)
     for (Int_t i = 0 ; i < 24; i++ ) {
       int inner = St_tpcPadConfigC::instance()->innerPadRows(i+1);
       int lastrow = St_tpcPadConfigC::instance()->padRows(i+1);
-      GLWeights[i   ] = GL_rho_inner_of_innerSec(anodeVolts->voltagePadrow(i+1,      1)) * norm ;
-      GLWeights[i+24] = GL_rho_outer_of_innerSec(anodeVolts->voltagePadrow(i+1,inner  )) * norm ;
-      GLWeights[i+48] = GL_rho_inner_of_outerSec(anodeVolts->voltagePadrow(i+1,inner+1)) * norm ;
+//       GLWeights[i   ] = GL_rho_inner_of_innerSec(anodeVolts->voltagePadrow(i+1,      1)) * norm ;
+//       GLWeights[i+24] = GL_rho_outer_of_innerSec(anodeVolts->voltagePadrow(i+1,inner  )) * norm ;
+//       GLWeights[i+48] = GL_rho_inner_of_outerSec(anodeVolts->voltagePadrow(i+1,inner+1)) * norm ;
+      GLWeights[i   ] = inner > 13 ? 0 :
+                        GL_rho_inner_of_innerSec(anodeVolts->voltagePadrow(i+1,      1)) * norm ;
+      GLWeights[i+24] = inner > 13 ? 0 :
+                        GL_rho_outer_of_innerSec(anodeVolts->voltagePadrow(i+1,inner  )) * norm ;
+      GLWeights[i+48] = inner > 13 ? 0 :
+                        GL_rho_inner_of_outerSec(anodeVolts->voltagePadrow(i+1,inner+1)) * norm ;
       GLWeights[i+72] = GL_rho_outer_of_outerSec(anodeVolts->voltagePadrow(i+1,lastrow)) * norm ;
     }
   }
