@@ -51,8 +51,8 @@ using std::map;
 using namespace TMVA;
 ClassImp(StKFVertexMaker);
 #ifdef StTrackMassFit_hh
-#define __V0__
-#define __UseMakeV0__
+//#define __V0__
+//#define __UseMakeV0__
 #endif
 StKFVerticesCollection *StKFVertexMaker::fgcVertices = 0;
 #define PrP(A,B)                    {LOG_INFO << "StKFVertexMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
