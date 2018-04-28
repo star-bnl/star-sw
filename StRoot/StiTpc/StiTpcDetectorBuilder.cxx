@@ -46,18 +46,19 @@ TPC, the field cage are artificially segmented into 12 sectors each.
 void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
 {
   cout << "StiTpcDetectorBuilder::buildDetectors() -I- Started" << endl;
-#if 0
-  if (!gStTpcDb)
-    throw runtime_error("StiTpcDetectorBuilder::buildDetectors() -E- gStTpcDb==0");
-#else
   assert(gStTpcDb);
-#endif
   useVMCGeometry();
   cout << "StiTpcDetectorBuilder::buildDetectors() -I- Done" << endl;
 }
 //________________________________________________________________________________
-void StiTpcDetectorBuilder::useVMCGeometry() {
-  Int_t debug = 0;
+void StiTpcDetectorBuilder::useVMCGeometry() 
+{
+  int debug = 0;
+
+  int buildFlagDef = 0; // 0 - long, West+East together
+  			// 1 - split,West&East separately
+  St_tpcPadConfigC *tpcPadConfigC = St_tpcPadConfigC::instance();
+
 
   if (debug>1) StiVMCToolKit::SetDebug(1);
   cout << "StiTpcDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endl;
@@ -78,159 +79,195 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
   if (gGeoManager->GetVolume("TpcRefSys")) newRefSystem = kTRUE;
 
   // change to +1 instead of +2 to remove the ofc.
-  Int_t nRows = St_tpcPadConfigC::instance()->numberOfRows(20);// Only sensitive detectors; iTPC sector 20
+  int nRows = St_tpcPadConfigC::instance()->numberOfRows(20);// Only sensitive detectors; iTPC sector 20
   setNRows(nRows);
-  Int_t row;
-  Int_t NoStiSectors = 12;
-  //  if (nRows != St_tpcPadConfigC::instance()->numberOfRows(1)) NoStiSectors = 24;
-  //  for (row = 1; row <= nRows; row++) setNSectors(row-1 ,NoStiSectors);
+  int NostiSectors = 12;
+  //  if (nRows != St_tpcPadConfigC::instance()->numberOfRows(1)) NostiSectors = 24;
+  //  for (row = 1; row <= nRows; row++) setNSectors(row-1 ,NostiSectors);
   // Get Materials
   TGeoVolume *volT = gGeoManager->GetVolume("TPAD"); 
   if (! volT) volT = gGeoManager->GetVolume("tpad"); 
   assert (volT);
   TGeoMaterial *mat = volT->GetMaterial(); assert(mat); if (debug>1) mat->Print();
-  Double_t PotI = StiVMCToolKit::GetPotI(mat); if (debug>1) cout << "PotI " << PotI << endl;
+  double PotI = StiVMCToolKit::GetPotI(mat); if (debug>1) cout << "PotI " << PotI << endl;
   _gasMat = add(new StiMaterial(mat->GetName(),
 				mat->GetZ(),
 				mat->GetA(),
 				mat->GetDensity(),
 				mat->GetDensity()*mat->GetRadLen(),
 				PotI));
-//  Double_t ionization = _gasMat->getIonization();
+//  double ionization = _gasMat->getIonization();
 //   StiElossCalculator *gasElossCalculator =  new StiElossCalculator(_gasMat->getZOverA(), ionization*ionization,
 // 								   _gasMat->getA(), _gasMat->getZ(), _gasMat->getDensity());
   StDetectorDbTpcRDOMasks *s_pRdoMasks = StDetectorDbTpcRDOMasks::instance();
   StiPlanarShape *pShape;
   //Active TPC padrows
-  //  Double_t radToDeg = 180./3.1415927;
+  //  double radToDeg = 180./3.1415927;
   StTpcCoordinateTransform transform(gStTpcDb);
   StMatrixD  local2GlobalRotation;
   StMatrixD  unit(3,3,1);
   StThreeVectorD RowPosition;
-  for(Int_t StiSector = 1; StiSector <= NoStiSectors; StiSector++) {
-    Int_t sectorW = StiSector;
-    Int_t sectorE = 24-(StiSector)%12;
-    Int_t nRowsW = St_tpcPadConfigC::instance()->numberOfRows(sectorW);
-    Int_t nRowsE = St_tpcPadConfigC::instance()->numberOfRows(sectorE);
-    nRows = TMath::Max(nRowsW, nRowsE);
-    for(Int_t rowW = nRowsW, rowE = nRowsE; rowW > 0 || rowE > 0; rowW--, rowE--) {
-      Int_t StiRowW = StiRow(sectorW,rowW);
-      Int_t StiRowE = StiRow(sectorE,rowE);
-      Int_t StiRows[2] = {StiRowW, StiRowE}; 
-      Int_t sectors[2] = {sectorW, sectorE};
-      Int_t rows[2]= {rowW, rowE}; 
-      Int_t Nsectors = 1;
-      if (rowW > 0 && rowE > 0 && StiRowW != StiRowE) Nsectors = 2;
-      if (rowW <= 0) {sectors[0] = sectorE; StiRows[0] = StiRowE; rows[0] = rowE;}
-      for (Int_t k = 0; k < Nsectors; k++) {
-	Int_t sector = sectors[k];
-	Int_t StiRow = StiRows[k];
-	row = rows[k];
-	assert(row > 0);
 #if 0
-	if (StiRow-1 < (Int_t) _detectors.size()) {
-	  if (_detectors[StiRow-1].size() && _detectors[StiRow-1][StiSector-1]) {
-	    static Int_t skipped = 0;
-	    skipped++;
-	    continue;
-	  }
+{
+      int myInnNRows4  = tpcPadConfigC->innerPadRows(4);
+      int myOutNRows4  = tpcPadConfigC->outerPadRows(4);
+      int myInnNRows20  = tpcPadConfigC->innerPadRows(20);
+      int myOutNRows20  = tpcPadConfigC->outerPadRows(20);
+      int myNRows4  = tpcPadConfigC->numberOfRows(4);
+      int myNRows10  = tpcPadConfigC->numberOfRows(20);
+
+printf("4=%d %d 20=%d %d\n",myInnNRows4,myOutNRows4, myInnNRows20, myOutNRows20); 
+printf("nRows 4=%d 20=%d\n",myNRows4,myNRows10);
+
+      double fRadius413 = St_tpcPadConfigC::instance()->radialDistanceAtRow(4,13);
+      double fRadius414 = St_tpcPadConfigC::instance()->radialDistanceAtRow(4,14);
+      double fRadius2013 = St_tpcPadConfigC::instance()->radialDistanceAtRow(20,13);
+      double fRadius2014 = St_tpcPadConfigC::instance()->radialDistanceAtRow(20,14);
+      printf("Rad 413=%g 414=%g 2013=%g 2014=%g \n",fRadius413,fRadius414,fRadius2013,fRadius2014); 
+
+      double innThick4  = tpcPadConfigC->innerSectorPadLength(4);
+      double innThick20 = tpcPadConfigC->innerSectorPadLength(20);
+      double outThick4  = tpcPadConfigC->outerSectorPadLength(4);
+      double outThick20 = tpcPadConfigC->outerSectorPadLength(20);
+
+printf("Thick 4=%g 20=%g 4=%g 20=%g\n",innThick4, innThick20,outThick4,outThick20);
+      double dZInn4  = tpcPadConfigC->innerSectorPadPlaneZ(4);
+      double dZInn20 = tpcPadConfigC->innerSectorPadPlaneZ(20);
+      double dZOut4  = tpcPadConfigC->outerSectorPadPlaneZ(4);
+      double dZOut20 = tpcPadConfigC->outerSectorPadPlaneZ(20);
+      double dZInn10  = tpcPadConfigC->innerSectorPadPlaneZ(10);
+      double dZOut14  = tpcPadConfigC->outerSectorPadPlaneZ(14);
+
+printf("dZ inn4=%g inn20=%g out4=%g out20=%g inn10=%g out14=%g\n",dZInn4,dZInn20 ,dZOut4 ,dZOut20,dZInn10,dZOut14 );
+
+///	pShape->setHalfWidth(St_tpcPadConfigC::instance()->PadPitchAtRow(sector,row) * St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row) / 2.);
+      double pitch413  = tpcPadConfigC->PadPitchAtRow( 4,13);
+      double pitch2013 = tpcPadConfigC->PadPitchAtRow(20,13);
+      double pitch443  = tpcPadConfigC->PadPitchAtRow( 4,43);
+      double pitch2043 = tpcPadConfigC->PadPitchAtRow(20,43);
+printf("Pitch 413=%g 2013=%g 443=%g 2043=%g\n",pitch413, pitch2013, pitch443, pitch2043  );
+      int nPads413  = tpcPadConfigC->numberOfPadsAtRow( 4,13);
+      int nPads2013 = tpcPadConfigC->numberOfPadsAtRow(20,13);
+      int nPads443  = tpcPadConfigC->numberOfPadsAtRow( 4,43);
+      int nPads2043 = tpcPadConfigC->numberOfPadsAtRow(20,43);
+printf("nPads 413=%d 2013=%d 443=%d 2043=%d\n",nPads413, nPads2013, nPads443, nPads2043  );
+
+  for (int s:{4,20}) {
+    int nR = tpcPadConfigC->numberOfRows(s);
+    for(int iR=1;iR<=nR;iR++) {
+      printf(" %d - %d  %d\n",s,iR,tpcPadConfigC->numberOfPadsAtRow(s,iR));
+  } }
+assert(0);
+}
+#endif //0
+  int nRowsWE[2],sectorWE[2];
+  for(int stiSector = 1; stiSector <= NostiSectors; stiSector++) {
+    sectorWE[0] = stiSector;
+    sectorWE[1] = 24-(stiSector)%12;
+    nRowsWE[0]  = tpcPadConfigC->numberOfRows(sectorWE[0]);
+    nRowsWE[1]  = tpcPadConfigC->numberOfRows(sectorWE[1]);
+    int buildFlag = buildFlagDef;
+    if (nRowsWE[0]!=nRowsWE[1]) buildFlag|=1;
+    int nWE = (buildFlag) ? 2:1;
+
+    for (int iWE=0;iWE<nWE;iWE++) {
+      int mySector = sectorWE[iWE];
+      int myInnNRows  = tpcPadConfigC->innerPadRows(mySector);
+      for (int iRow=1;iRow<= nRowsWE[iWE];iRow++) {   
+	float fRadius = St_tpcPadConfigC::instance()->radialDistanceAtRow(mySector,iRow);
+	TString name(Form("Tpc/Sector_%d,Padrow_%d",mySector,iRow));
+        int inner = (iRow<=myInnNRows);
+        double dZ,Zshift=0,thick;
+        if (inner) {
+	  dZ= tpcPadConfigC->innerSectorPadPlaneZ(mySector);
+          thick  = tpcPadConfigC->innerSectorPadLength(mySector);
+        } else {
+	  dZ= tpcPadConfigC->outerSectorPadPlaneZ(mySector);
+          thick  = tpcPadConfigC->outerSectorPadLength(mySector);
+        }
+        double pitch = tpcPadConfigC->PadPitchAtRow(mySector,iRow);
+        int nPads    = tpcPadConfigC->numberOfPadsAtRow(mySector,iRow);
+        if (buildFlag&1) { //Split case
+          dZ/=2;
+	  Zshift = (iWE)? -dZ:dZ;  
 	}
-#endif
-	//Nominal pad row information.
-	// create properties shared by all sectors in this padrow
-	float fRadius = St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,row);
-	TString name(Form("Tpc/Sector_%d,Padrow_%d", StiSector,StiRow));
 	pShape = new StiPlanarShape;
-	assert(pShape);
-	Double_t dZ = 0;
-	Double_t Zshift = 0; // 
-	Double_t Zdepth = dZ;
-	Double_t zc = 0;
-	pShape->setThickness(St_tpcPadConfigC::instance()->innerSectorPadLength(sector));
-	dZ = St_tpcPadConfigC::instance()->innerSectorPadPlaneZ(sector);
-	if(Nsectors == 2) {
-	  Zdepth = (dZ + Zshift)/2;
-	  zc     = (dZ - Zshift)/2;
-	  if (sector > 12) zc = -zc;
-	} else {
-	  Zdepth = dZ;
-	  zc     =  0;
-	}
-	pShape->setHalfDepth(Zdepth);
-	pShape->setHalfWidth(St_tpcPadConfigC::instance()->PadPitchAtRow(sector,row) * St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row) / 2.);
-	pShape->setName(name.Data()); if (debug>1) cout << *pShape << endl;
+	pShape->setThickness(thick);
+	pShape->setHalfDepth(dZ);
+	pShape->setHalfWidth(pitch*nPads/2.);
+	pShape->setName(name.Data()); 
+
+	StiPlacement *pPlacement = new StiPlacement;
+	pPlacement->setZcenter(Zshift);
+	pPlacement->setLayerRadius(fRadius);
+        double phi = angle(mySector);
+	pPlacement->setLayerAngle(phi);
+	pPlacement->setRegion(StiPlacement::kMidRapidity);
+	pPlacement->setNormalRep(phi, fRadius, 0);
+#if 0
 	//Retrieve position and orientation of the TPC pad rows from the database.
 	StTpcLocalSectorDirection  dirLS[3];
-	dirLS[0] = StTpcLocalSectorDirection(1.,0.,0.,sector,row);
-	dirLS[1] = StTpcLocalSectorDirection(0.,1.,0.,sector,row);
-	dirLS[2] = StTpcLocalSectorDirection(0.,0.,1.,sector,row);
+	dirLS[0] = StTpcLocalSectorDirection(1.,0.,0.,mySector,iRow);
+	dirLS[1] = StTpcLocalSectorDirection(0.,1.,0.,mySector,iRow);
+	dirLS[2] = StTpcLocalSectorDirection(0.,0.,1.,mySector,iRow);
 	local2GlobalRotation = unit;
-	for (Int_t i = 0; i < 3; i++) {
+	for (int i = 0; i < 3; i++) {
 	  //	if (debug>1) cout << "dirLS\t" << dirLS[i] << endl;
-#ifndef TPC_IDEAL_GEOM
-	  StTpcLocalDirection        dirL;
-	  StTpcLocalSectorAlignedDirection  dirLSA;
-	  transform(dirLS[i],dirLSA);//   if (debug>1) cout << "dirLSA\t" << dirLSA << endl;
-	  transform(dirLSA,dirL);    //   if (debug>1) cout << "dirL\t" << dirL << endl;
-	  StGlobalDirection          dirG;
-	  transform(dirL,dirG);//      if (debug>1) cout << "dirG\t" << dirG << endl;
-#else
 	  StTpcLocalDirection  dirG;
 	  transform(dirLS[i],dirG);
-#endif
 	  local2GlobalRotation(i+1,1) = dirG.position().x();
 	  local2GlobalRotation(i+1,2) = dirG.position().y();
 	  local2GlobalRotation(i+1,3) = dirG.position().z();
 	}
 	//      if (debug>1) cout << "Local2GlobalRotation = " << local2GlobalRotation << endl;
-	Double_t y  = transform.yFromRow(sector,row);
-	StTpcLocalSectorCoordinate  lsCoord(0., y, dZ, sector, row);// if (debug>1) cout << lsCoord << endl;
-#ifndef TPC_IDEAL_GEOM
-	StTpcLocalSectorAlignedCoordinate lsCoordA;
-	transform(lsCoord,lsCoordA);//                       if (debug>1) cout << lsCoordA << endl;
-	StGlobalCoordinate  gCoord;
-	transform(lsCoordA, gCoord);//                       if (debug>1) cout << gCoord << endl;
-#else  // Ideal geom
+	double y  = transform.yFromRow(mySector,iRow);
+	StTpcLocalSectorCoordinate  lsCoord(0., y, dZ, mySector, iRow);// if (debug>1) cout << lsCoord << endl;
+ // Ideal geom
 	StTpcLocalCoordinate gCoord;
 	transform(lsCoord, gCoord);
-#endif
 	//unit vector normal to the pad plane
 	StThreeVectorD centerVector(gCoord.position().x(),gCoord.position().y(),gCoord.position().z());
 	StThreeVectorD normalVector(local2GlobalRotation(2,1),
 				    local2GlobalRotation(2,2),
 				    local2GlobalRotation(2,3));
-	Double_t prod = centerVector*normalVector;
+	double prod = centerVector*normalVector;
 	if (prod < 0) normalVector *= -1;
-	Double_t phi  = centerVector.phi();
-	Double_t phiD = normalVector.phi();
-	Double_t r = centerVector.perp();
+	double phi  = centerVector.phi();
+	double phiD = normalVector.phi();
+	double r = centerVector.perp();
 	StiPlacement *pPlacement = new StiPlacement;
-	pPlacement->setZcenter(zc);
+	pPlacement->setZcenter(Zshift);
 	pPlacement->setLayerRadius(fRadius);
 	pPlacement->setLayerAngle(phi);
 	pPlacement->setRegion(StiPlacement::kMidRapidity);
 	pPlacement->setNormalRep(phiD, r*TMath::Cos(phi-phiD), r*TMath::Sin(phi-phiD));
-	name = Form("Tpc/Padrow_%d/Sector_%d", row, sector);
+        int mySector = sector(pPlacement->getNormalRefAngle(),stiSector>12);
+        assert(stiSector==mySector);
+	assert(fabs(pPlacement->getNormalRefAngle()-pPlacement->getCenterRefAngle())<1e-2);
+#endif	
+	name = Form("Tpc/Padrow_%d/Sector_%d", iRow, mySector);
 	// fill in the detector object and save it in our vector
 	StiDetector *pDetector = _detectorFactory->getInstance();
 	pDetector->setName(name.Data());
 	pDetector->setIsOn(kTRUE);
 	Bool_t west = kTRUE;
 	Bool_t east = kTRUE;
-	if (NoStiSectors == 12 && nRows == 45) { // ! iTpx
-	  Bool_t west = s_pRdoMasks->isRowOn(sector, row);
-	  Bool_t east = s_pRdoMasks->isRowOn( 24-(sector)%12, row);
+#if 0
+	if (NostiSectors == 12 && nRows == 45) { // ! iTpx
+	  Bool_t west = s_pRdoMasks->isRowOn(mySector, iRow);
+	  Bool_t east = s_pRdoMasks->isRowOn( 24-(mySector)%12, iRow);
 	  if (west) {
-	    Int_t sec = sector;
+	    int sec = sector;
 	    west = St_tpcAnodeHVavgC::instance()->livePadrow(sec,row) &&
 	      St_tpcPadGainT0BC::instance()->livePadrow(sec,row);
 	  }
 	  if (east) {
-	    Int_t sec = 24-(sector)%12;
+	    int sec = 24-(sector)%12;
 	    east = St_tpcAnodeHVavgC::instance()->livePadrow(sec,row) &&
 	      St_tpcPadGainT0BC::instance()->livePadrow(sec,row);
 	  }
 	}
+#endif
 	pDetector->setIsActive(new StiTpcIsActiveFunctor(_active,west,east));
 	pDetector->setIsContinuousMedium(kTRUE);
 	pDetector->setIsDiscreteScatterer(kFALSE);
@@ -238,19 +275,28 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
 	pDetector->setGas(_gasMat);
 	pDetector->setShape(pShape);
 	pDetector->setPlacement(pPlacement);
-	Int_t nInnerPadrows = St_tpcPadConfigC::instance()->numberOfInnerRows(sector);
-	if (row <= nInnerPadrows)
+	if (inner)
 	  pDetector->setHitErrorCalculator(StiTpcInnerHitErrorCalculator::instance());
 	else
 	  pDetector->setHitErrorCalculator(StiTpcOuterHitErrorCalculator::instance());
 	//      pDetector->setElossCalculator(gasElossCalculator);
-	pDetector->setKey(1,StiRow);
-	pDetector->setKey(2,StiSector);
-	add(StiRow-1,StiSector-1,pDetector); if (debug>1) cout << *pDetector << endl;
+	pDetector->setKey(1,iRow);
+	pDetector->setKey(2,mySector);
+
+printf("TpcName = %s sect=%d raw=%d Zc = %g Zl = %g\n"
+       ,pDetector->getName().c_str(),mySector,iRow,Zshift,dZ);
+
+
+
+	add(iRow-1,mySector-1,pDetector); 
+        if (nWE==2) continue;
+        name+="*";
+        pDetector->setName(name.Data());
+	add(iRow-1,sectorWE[1]-1,pDetector); 
       }// for row
     }// Tpc halves
   }// for sector
-  for (Int_t i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++) {
     if (! gGeoManager->GetVolume(TpcVolumes[i].name)) continue;
     gGeoManager->RestoreMasterVolume();
     gGeoManager->CdTop();
@@ -269,35 +315,20 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
   cout << "StiTpcDetectorBuilder::buildDetectors() -I- Done" << endl;
 }
 //________________________________________________________________________________
-Int_t StiTpcDetectorBuilder::StiRow(Int_t sector, Int_t padrow) {
-  // StiRow : [1 ; nInnerPadrowsW] 
-  //          [nInnerPadrowsW+1: nInnerPadrowsW+nInnerPadrowsE]
-  //          [nInnerPadrowsW+nInnerPadrowsE+1:nInnerPadrowsW+nInnerPadrowsE+nOuterPadrowsW]
-  Int_t StiSector = sector;
-  if (sector > 12) StiSector = 12 - (sector-12)%12;
-  Int_t sectorW = StiSector;
-  Int_t sectorE = 24-(StiSector)%12;
-  Int_t nInnerPadrowsW = St_tpcPadConfigC::instance()->numberOfInnerRows(sectorW);
-  Int_t nInnerPadrowsE = St_tpcPadConfigC::instance()->numberOfInnerRows(sectorE);
-  Int_t nOuterPadrowsW = St_tpcPadConfigC::instance()->numberOfOuterRows(sectorW);
-  //  Int_t nOuterPadrowsE = St_tpcPadConfigC::instance()->numberOfOuterRows(sectorE);
-  if (nInnerPadrowsW == nInnerPadrowsE) return padrow;
-  if (sector <= 12) {
-    if (padrow <= nInnerPadrowsW) return padrow;
-    if (padrow > nInnerPadrowsW + nOuterPadrowsW) return 0;
-    return nInnerPadrowsW + nInnerPadrowsE + (padrow - nInnerPadrowsW);
-  } else {
-    if (padrow <= nInnerPadrowsE) return padrow + nInnerPadrowsW;
-    return padrow + nInnerPadrowsW;
-  }
-  return 0;
+int StiTpcDetectorBuilder::sector(double ang,int east)
+{
+  double gang = ang/M_PI*180;
+  double d = -(gang)/30+3;
+  if (d<0.5) d+=12; if (d>12.5) d-=12;
+  int sec = d+0.5;
+  if (east) sec = 24-(sec)%12;
+  return sec;
 }
 //________________________________________________________________________________
-void StiTpcDetectorBuilder::testStiRow() {
-  for (Int_t row = 72; row > 0; row--) {
-    Int_t StiRow4  = StiRow(4,row);
-    Int_t StiRow20 = StiRow(20,row);
-    cout << "row = " << row << "\tStiRow4 = " << StiRow4 << "\tStiRow20 = " << StiRow20 << endl;
-    
-  }
+double StiTpcDetectorBuilder::angle(int sec)
+{
+  if (sec>12) sec = 12-sec%12;
+  double ang = (3-sec)*(M_PI/6);
+  return ang;
 }
+
