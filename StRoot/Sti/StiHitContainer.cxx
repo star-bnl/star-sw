@@ -86,6 +86,7 @@ StiHitContainer::~StiHitContainer()
   container.  Thus, once all hits have been added to the container, then one
   must call sortHits().
  */
+#if 1
 void StiHitContainer::add(StiHit* hit)
 {
   const StiDetector* det = hit->detector();
@@ -95,6 +96,65 @@ void StiHitContainer::add(StiHit* hit)
   _map[_key].push_back(hit);
   return;
 }
+#endif//0
+#if 0
+void StiHitContainer::add(StiHit* hit)
+{
+  const StiDetector* det = hit->detector();
+  assert(det);
+  _key.refangle = det->getPlacement()->getLayerAngle();
+  _key.position = det->getPlacement()->getLayerRadius();
+
+  do {
+
+double iTpc[] = {
+55.7773 ,57.371 ,58.9653 ,60.5578 ,62.1931 ,63.7754 ,65.3978 ,66.9594 ,68.5583 ,70.1953 ,
+71.762 ,73.3636 ,74.9439 ,76.5581 ,78.1476 ,79.77 ,81.3641 ,82.99 ,84.584 ,86.143 ,
+87.7975 ,89.3476 ,90.9943 ,92.5304 ,94.164 ,95.7536 ,97.3699 ,98.9382 ,100.532 ,102.151 ,
+103.796 ,105.388 ,106.922 ,108.561 ,110.142 ,111.746 ,113.373 ,114.936 ,116.52 ,118.127 ,
+0};
+double iiTpc[] = {
+59.9613 ,59.9613 ,59.9613 ,59.9613 ,59.9613 ,64.7538 ,64.7538 ,64.7538 ,69.557 ,69.557 ,
+69.557 ,74.3756 ,74.3756 ,74.3756 ,79.1652 ,79.1652 ,79.1652 ,83.9428 ,83.9428 ,83.9428 ,
+88.7378 ,88.7378 ,88.7378 ,93.5926 ,93.5926 ,93.5926 ,98.7878 ,98.7878 ,98.7878 ,103.954 ,
+103.954 ,103.954 ,109.141 ,109.141 ,109.141 ,114.325 ,114.325 ,114.325 ,114.325 ,119.574 ,
+0};
+double rTpc[] = {
+59.9613 ,64.7538 ,69.557 ,74.3756 ,79.1652 ,83.9428 ,88.7378 ,93.5926 ,98.7878 ,103.954 ,
+109.141 ,114.325 ,119.574 ,0};
+double rrTpc[] = {
+60.5578 ,65.3978 ,70.1953 ,74.9439 ,79.77 ,84.584 ,89.3476 ,94.164 ,98.9382 ,103.796 ,
+108.561 ,114.936 ,118.127 ,0};
+
+    if (hit->x() > 123)				break;
+    if (!strstr(det->getName().c_str(),"Tpc"))	break;    
+    if ( strstr(det->getName().c_str(),"Sector_20")) {
+      if (hit->z()<0) 				break;
+      assert(hit->z()<50);
+      for(int i = 0;iTpc[i];i++) {
+        if (fabs(iTpc[i]-_key.position)>0.01) continue;
+        _key.position = iiTpc[i]; 		break;
+      } 
+      						break;
+    }
+
+    if ( strstr(det->getName().c_str(),"Sector_4")) {
+      if (hit->z()>0) 				break;
+      assert(hit->z()>-50);
+      for(int i = 0;iTpc[i];i++) {
+        if (fabs(rTpc[i]-_key.position)>0.01) 	continue;
+        _key.position = rrTpc[i]; 		break;
+      } 
+      						break;
+    }
+  } while(0);
+
+
+  _map[_key].push_back(hit);
+  return;
+}
+#endif//1
+
 
 //________________________________________________________________________________
 void StiHitContainer::reset()
