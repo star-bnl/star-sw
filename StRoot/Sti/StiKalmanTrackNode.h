@@ -25,11 +25,12 @@ typedef enum {
   kOutY   =  2,
   kOutZ   =  3,
   kOutRxy =  4,
-  kBigRxy =  5,
-  kBigZ   =  6,
-  kTouch  =  7,
-  kEnded  =  8,
-  kMissed =  9,
+  kOutAng =  5,
+  kBigRxy =  6,
+  kBigZ   =  7,
+  kTouch  =  8,
+  kEnded  =  9,
+  kMissed = 10,
   kFailed = -1
 } StiIntersection;
   

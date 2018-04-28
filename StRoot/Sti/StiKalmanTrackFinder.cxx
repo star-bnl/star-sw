@@ -571,8 +571,7 @@ assert(direction || leadNode==track->getLastNode());
 	for (hitIter=candidateHits.begin();hitIter!=candidateHits.end();++hitIter)
 	{
 	  stiHit = *hitIter;
-//       if (stiHit->detector()!=tDet) 	continue;
-//assert(!stiHit->detector() || stiHit->detector()==tDet);
+////if (stiHit->detector()!=tDet) 	continue; //?????????????????????????????
           if (leadHit == stiHit) 				continue;
           if (leadHit && leadHit->stHit()==stiHit->stHit())	continue;
           if (!track->legal(stiHit))				continue;

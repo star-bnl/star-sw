@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.175.2.2 2018/04/16 00:53:44 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.175.2.3 2018/04/28 02:05:25 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.175.2.3  2018/04/28 02:05:25  perev
+ * Cleanup
+ *
  * Revision 2.175.2.2  2018/04/16 00:53:44  perev
  * Replace numerical return codes by enum
  *
@@ -1939,7 +1942,8 @@ static const double kYFactor = 1.0, kZFactor=1.0;
   
   
   //YF edge is tolerance when we consider that detector is hit. //  edge = 0; //VP the meaning of edge is not clear
-  Int_t shapeCode  = sh->getShapeCode();
+  int ians = 0;
+  int shapeCode  = sh->getShapeCode();
   switch (shapeCode) {
   case kDisk:
   case kCylindrical: // cylinder
@@ -1947,17 +1951,19 @@ static const double kYFactor = 1.0, kZFactor=1.0;
   case kSector: 	// cylinder sector
     ang = atan2(mFP.y(),mFP.x());
     yOff    = nice(ang +_alpha - place->getLayerAngle());
-    if (fabs(yOff)>kYFactor*sh->getOpeningAngle()/2)	return kOutY;
+    ians = kOutAng;
+    if (fabs(yOff)>kYFactor*sh->getOpeningAngle()/2)ians = kOutAng;
     break;
   case kPlanar: 
     yOff = mFP.y() - place->getNormalYoffset();
-    if (fabs(yOff)> kYFactor*sh->getHalfWidth()) 	return kOutY;
+    if (fabs(yOff)> kYFactor*sh->getHalfWidth()) 	ians = kOutY;
     break;
   default: assert(0 && "Wrong Shape code");
   }
+  if (ians) return ians;
   zOff = mFP.z() - place->getZcenter();
-  if (fabs(zOff)>kZFactor*sh->getHalfDepth()) 		return kOutZ;
-  return 0;
+  if (fabs(zOff)>kZFactor*sh->getHalfDepth()) 		ians = kOutZ;
+  return ians;
  }
 
 //______________________________________________________________________________
