@@ -12,6 +12,7 @@
 #include "StThreeVector.hh"
 #include "StiVMCToolKit.h"
 #include "TMath.h"
+#include "TString.h"
 using namespace std;
 class StiDetector;
 class StiMaterial;
@@ -105,6 +106,7 @@ public:
   StiTrackingParameters *_trackingParameters;
   static StiDetectorBuilder* fCurrentDetectorBuilder;
   StiMaterial    * _gasMat; // Mother Volume material
+  TString          _opt;
   static   int     _debug;
 };
 
