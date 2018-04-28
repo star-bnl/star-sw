@@ -155,21 +155,21 @@ int StiDetector::insideL(const double xl[3],int mode,double fakt) const
 static int nCall = 0; nCall++;
 if (!mode) mode = 1;
 double rN = placement->getNormalRadius();
-
+double myErr = 0.1+ rN/20;
 double thick = shape->getThickness();
 do {
  if (shape->getShapeCode()==1) { //Planar
    if (mode&1) { 
      mgIndex = 1;
      mgValue[1] = thick/2*fakt;
-     mgValue[0] = fabs(xl[0]-rN)-mgValue[1];
+     mgValue[0] = fabs(xl[0]-rN)-mgValue[1]-myErr;
      if (mgValue[0]>0) break;
    }
    if (mode&2) {
      mgIndex = 2;
      double y = xl[1]-placement->getNormalYoffset();
      mgValue[1] = shape->getHalfWidth()*fakt;
-     mgValue[0]  = fabs(y)-mgValue[1];
+     mgValue[0]  = fabs(y)-mgValue[1]-myErr;
      if (mgValue[0]>0) break;
    }
  } else {
@@ -177,7 +177,7 @@ do {
      mgIndex = 1;
      mgValue[1] = thick/2*fakt;
      double rxy = sqrt(xl[0]*xl[0]+xl[1]*xl[1]);
-     mgValue[0] = (fabs(rxy-rN)-mgValue[1]);
+     mgValue[0] = (fabs(rxy-rN)-mgValue[1]-myErr);
      if (mgValue[0]>0) break;
    }
 
@@ -187,7 +187,7 @@ do {
      if (ang<-M_PI) ang +=M_PI*2;
      if (ang> M_PI) ang -=M_PI*2;
      mgValue[1] = shape->getOpeningAngle()/2 *fakt;
-     mgValue[0] = (fabs(ang)-mgValue[1]);
+     mgValue[0] = (fabs(ang)-mgValue[1]-myErr/rN);
      if (mgValue[0]>0)	break;
    }
  } 
@@ -195,7 +195,7 @@ do {
      mgIndex = 3;
      mgValue[1] = shape->getHalfDepth()*fakt;
      double z = xl[2]-placement->getZcenter();  
-     mgValue[0] = (fabs(z)-mgValue[1]);
+     mgValue[0] = (fabs(z)-mgValue[1]-myErr);
      if (mgValue[0]>0)	break;
    }
    mgIndex = 0;
