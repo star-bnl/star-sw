@@ -63,15 +63,32 @@ void StiTpcHitLoader::loadHits(StEvent* source,
       if (! hitvec.size()) continue;
       const_StTpcHitIterator iter;
       StiHitTest hitTest;
-      Int_t StiRow = StiTpcDetectorBuilder::StiRow(sector+1,row+1)-1;
-      detector = _detector->getDetector(StiRow,stiSector);
+//      detector = _detector->getDetector(StiRow,stiSector);
+      detector = _detector->getDetector(row,sector);
       assert(detector);
+printf("HitLoad %s sect=%d row=%d\n",detector->getName().c_str(),sector+1,row+1);
       
       for (iter = hitvec.begin();iter != hitvec.end();++iter)        {
-        StTpcHit*hit=*iter;
+        StTpcHit *hit=*iter;
 	if (StiKalmanTrackNode::IsLaser() && hit->flag()) continue;
 	if (hit->flag() & FCF_CHOPPED || hit->flag() & FCF_SANITY)     continue; // ignore hits marked by AfterBurner as chopped or bad sanity
 	if (hit->pad() > 182 || hit->timeBucket() > 511) continue; // some garbadge  for y2001 daq
+{        
+        double x = hit->position().x();
+        double y = hit->position().y();
+//      double z = hit->position().y();
+#if 0
+        double ang = atan2(y,x)/M_PI*180;
+	double d = -(ang)/30+3;
+        if (d<0.5) d+=12; if (d>12.5) d-=12;
+	int sec = d+0.5;
+        if (hit->sector()>12) sec = 24-(sec)%12;
+#endif
+        double ang = atan2(y,x);
+        int sec = StiTpcDetectorBuilder::sector(ang,hit->sector()>12);
+        assert((int)hit->sector()==sec);
+
+}
 	assert(_hitFactory);
         stiHit = _hitFactory->getInstance();
 	assert(stiHit);
