@@ -56,6 +56,7 @@ ostream& operator<<(ostream& os, const StiDetector& d)
 {
     os << "StiDetector:" << endl
        << d.getName()
+       << "\t_groupId: " << d.getGroupId()
        <<"\tR:"<<d.getPlacement()->getNormalRadius()<<"cm\tA:"
        <<d.getPlacement()->getNormalRefAngle()<< " radians" << endl;
 
