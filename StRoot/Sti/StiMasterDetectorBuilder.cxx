@@ -43,44 +43,44 @@ void StiMasterDetectorBuilder::build(StMaker&source)
   }
 #else
   if ( chain ) {
-    cout << "StiMasterDetectorBuilder::build() -I- Create clone of VmcGeometry by reinitialization for reconstruction" <<endl;
+    LOG_INFO << "StiMasterDetectorBuilder::build() : Create clone of VmcGeometry by reinitialization for reconstruction" <<endm;
     TDataSet *set = chain->GetDataBase("VmcGeometry/Geometry", &chain->StMaker::GetDBTime());
     delete set;
   }
 #endif
-  cout << "StiMasterDetectorBuilder::build() -I- Started"<<endl;
+  LOG_INFO << "StiMasterDetectorBuilder::build() : Started"<<endm;
   vector<StiDetectorBuilder*>::iterator iter;
   unsigned int nRows=0;
   for (iter=begin();
        iter!=end();
        iter++)
     {
-      cout << "StiMasterDetectorBuilder::build() -I- Calling Group Builder named:" << (*iter)->getName()<<endl;
-      if (!*iter) cout <<"   pointer is corrupted!!!!!!!!!!!!!!!!!!!"<<endl;
+      LOG_INFO << "StiMasterDetectorBuilder::build() : Calling Group Builder named: " << (*iter)->getName() << endm;
+      if (!*iter) { LOG_INFO << "   pointer is corrupted!!!!!!!!!!!!!!!!!!!" << endm; }
       (*iter)->build(source);
       nRows+=(*iter)->getNRows();
     }
-  cout << "StiMasterDetectorBuilder::build() -I- Will build local array"<<endl;
+  LOG_INFO << "StiMasterDetectorBuilder::build() : Will build local array" << endm;
   setNRows(nRows);
   unsigned int row=0;
   for (iter=begin();
        iter!=end();
        iter++)
     {
-      cout << "StiMasterDetectorBuilder::build() -I- Builder:"<<(*iter)->getName()<<endl;
+      LOG_INFO << "StiMasterDetectorBuilder::build() : Builder: " << (*iter)->getName() << endm;
       for (unsigned int i=0;i<(*iter)->getNRows();i++)
 	{
-	  cout << "StiMasterDetectorBuilder::build() -I- row:"<<row;
+	  LOG_INFO << "StiMasterDetectorBuilder::build() : row: " << row;
 	  unsigned int nSectors = (*iter)->getNSectors(i);
 	  setNSectors(row,nSectors);
 	  Int_t ifrow = 0;
 	  for (unsigned int sector=0;sector<nSectors;sector++)
 	    {
 	      StiDetector *detector = (*iter)->getDetector(i,sector);
-	      if (!ifrow && detector) {cout << "\t" << detector->getName(); ifrow++;}
+	      if (!ifrow && detector) { LOG_INFO << "\t" << detector->getName(); ifrow++; }
 	      setDetector(row,sector,detector);
 	    }
-	  cout << endl;
+	  LOG_INFO << endm;
 	  row++;
 	}
     }
