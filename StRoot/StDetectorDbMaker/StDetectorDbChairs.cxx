@@ -1263,7 +1263,7 @@ St_tofTotbCorrC::St_tofTotbCorrC(St_tofTotbCorr *table) : St_tofCorrC(table) {
     Int_t j = Index(trayId(i), moduleId(i), cellId(i));
     if (_debug) {
       Table()->Print(i,1);
-      cout << "i = " << i << "\ttray = " << trayId(i) << "\tmodule = " << moduleId(i) << "\tcellId = " << cellId(i) << "\tindex = " << j << endl;
+      LOG_INFO << "i = " << i << "\ttray = " << trayId(i) << "\tmodule = " << moduleId(i) << "\tcellId = " << cellId(i) << "\tindex = " << j << endm;
     }
     if (j >= 0) {
       if (! mIndxArray[j]) mIndxArray[j] = i;

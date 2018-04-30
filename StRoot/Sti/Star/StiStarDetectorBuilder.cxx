@@ -1,5 +1,7 @@
 #include <assert.h>
 #include <stdexcept>
+
+#include "St_base/StMessMgr.h"
 #include "Sti/Base/Factory.h"
 #include "Sti/StiPlanarShape.h"
 #include "Sti/StiCylindricalShape.h"
@@ -16,7 +18,7 @@ void StiStarDetectorBuilder::buildDetectors(StMaker&s) {
   TGeoManager *geo = StiVMCToolKit::GetVMC();
   assert(geo);
   useVMCGeometry(); 
-  cout << "StiStarDetectorBuilder::buildDetectors() -I- Done" << endl;
+  LOG_INFO << "StiStarDetectorBuilder::buildDetectors() : Done" << endm;
 }
 //________________________________________________________________________________
 void StiStarDetectorBuilder::useVMCGeometry() {
@@ -43,7 +45,7 @@ void StiStarDetectorBuilder::useVMCGeometry() {
 }
 //________________________________________________________________________________
 void StiStarDetectorBuilder::OldBeamPipe() {
-  cout << "StiStarDetectorBuilder::buildDetectors() -I- Use VMC old beam pipe geometry" << endl;
+  LOG_INFO << "StiStarDetectorBuilder::buildDetectors() : Use VMC old beam pipe geometry" << endm;
   SetCurrentDetectorBuilder(this);
   const VolumeMap_t PipeVolumes[] = { 
     {"PIPE","the STAR beam pipe mother volume","HALL_1/CAVE_1/PIPE_%d","",""}, // pcon
@@ -82,7 +84,7 @@ void StiStarDetectorBuilder::OldBeamPipe() {
 }
 //________________________________________________________________________________
 void StiStarDetectorBuilder::HftBeamPipe() {
-  cout << "StiStarDetectorBuilder::buildDetectors() -I- Use VMC HFT beam pipe geometry" << endl;
+  LOG_INFO << "StiStarDetectorBuilder::buildDetectors() : Use VMC HFT beam pipe geometry" << endm;
   SetCurrentDetectorBuilder(this);
   const VolumeMap_t PipeVolumes[] = { 
     /* new beam pipe in IDSM
@@ -221,9 +223,10 @@ void StiStarDetectorBuilder::HftBeamPipe() {
     Double_t Rmax, Rmin, radius, dZ, Z;
     Int_t Nz = pcon->GetNz();
 #if 0
-    cout << pathT.Data() << "\t" << PipeVolumes[i].name << endl;
+    LOG_INFO << pathT.Data() << "\t" << PipeVolumes[i].name << endm;
     for (Int_t k = 0; k < Nz; k++) {
-      cout << k << "\tZ\t" << pcon->GetZ(k) << "\tRmin\t" << pcon->GetRmin(k) << "\tRmax\t" << pcon->GetRmax(k) << endl;
+      LOG_INFO << k << "\tZ\t" << pcon->GetZ(k) << "\tRmin\t" << pcon->GetRmin(k) << "\tRmax\t" << pcon->GetRmax(k) <<
+	 endm;
     }    
 #endif
     Int_t section = 0;
@@ -290,7 +293,7 @@ void StiStarDetectorBuilder::HftBeamPipe() {
 }
 //________________________________________________________________________________
 void StiStarDetectorBuilder::NewSuppCone() {
-  cout << "StiStarDetectorBuilder::buildDetectors() -I- Use VMC Support Cone geometry" << endl;
+  LOG_INFO << "StiStarDetectorBuilder::buildDetectors() : Use VMC Support Cone geometry" << endm;
   SetCurrentDetectorBuilder(this);
   const VolumeMap_t PipeVolumes[] = { 
     // cone 
@@ -403,7 +406,7 @@ void StiStarDetectorBuilder::MakePipe(Int_t iflag, const VolumeMap_t *ptube,cons
 }
 //________________________________________________________________________________
 void StiStarDetectorBuilder::Fgt() {
-  cout << "StiStarDetectorBuilder::buildDetectors() -I- Use VMC old beam pipe geometry" << endl;
+  LOG_INFO << "StiStarDetectorBuilder::buildDetectors() : Use VMC old beam pipe geometry" << endm;
   SetCurrentDetectorBuilder(this);
   const VolumeMap_t FgtVolumes[] = { 
     //{"FGTM", "Beampipe support mother","HALL_1/CAVE_1/FGTM_1","",""},
