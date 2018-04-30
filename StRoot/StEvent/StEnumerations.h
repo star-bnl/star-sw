@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.65 2018/03/27 02:40:12 genevb Exp $
+ * $Id: StEnumerations.h,v 2.66 2018/04/30 23:18:10 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,13 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.66  2018/04/30 23:18:10  smirnovd
+ * [Cosmetic] Minor changes in various files
+ *
+ * - Renamed data member s/m/mMass/ in StikalmanTrack
+ * - Changes in white space
+ * - Return STAR code
+ *
  * Revision 2.65  2018/03/27 02:40:12  genevb
  * Introduce kiTpcId
  *
@@ -279,8 +286,8 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kRpsId       = kRpsIdentifier,
                    kMtdId       = kMtdIdentifier,
                    kSstId       = kSstIdentifier,
-		           kGmtId       = kGmtIdentifier,
-		           kFtsId       = kFtsIdentifier,
+                   kGmtId       = kGmtIdentifier,
+                   kFtsId       = kFtsIdentifier,
                    kiTpcId      = kiTpcIdentifier,
                    kMaxDetectorId = 41};
 

@@ -22,7 +22,6 @@
 #include <cassert>
 //STD
 #include <vector>
-using namespace std;
 //Sti
 #include "Sti/Base/Factory.h"
 #include "Sti/StiKTNIterator.h"
@@ -97,7 +96,7 @@ class StiKalmanTrack : public StiTrack
     lastNode(0),
     mSeedHitCount(0),
     mFlag(0),
-    m(-1.)
+    mMass(-1.)
     {  /* nops */ }
   
   /*! 
@@ -243,7 +242,6 @@ class StiKalmanTrack : public StiTrack
    /// Accessor method returns the last node associated with the track.
    // Assumes the track has been pruned.
    StiKalmanTrackNode * getLastNode()   const { return  lastNode; };
-
    void  setLastNode (StiKalmanTrackNode *n) { lastNode  = n; };
    void  setFirstNode(StiKalmanTrackNode *n) { firstNode = n; };   
    void  setFirstLastNode(StiKalmanTrackNode *n);   
@@ -284,7 +282,7 @@ class StiKalmanTrack : public StiTrack
   void reduce();
 
   void print(const char *opt="") const;
-  static void setDebug(int m = 0) {_debug = m;}
+  static void setDebug(int d = 0) {_debug = d;}
   static int  debug() {return _debug;}
   StiKalmanTrack &operator=(const StiKalmanTrack &tk);
   int rejectByHitSet()  const;
@@ -332,8 +330,7 @@ protected:
   char      mCombUsed; 	  // save which combinatoric style was used
   int     mVertex;
   long    mFlag;         //A flag to pack w/ topo info
-  double  m;             // mass hypothesis
-
+  double  mMass;         // mass hypothesis
   double  _dca;
 
  public:
@@ -346,7 +343,7 @@ protected:
 */
 inline double  StiKalmanTrack::getMass() const
 { 
-  return m;  
+  return mMass;  
 }
 
 inline void StiKalmanTrack::setFlag(long v) 
