@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.638 2016/09/26 17:15:26 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.638.2.1 2018/04/30 15:16:35 didenko Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -755,6 +755,7 @@ Int_t StBFChain::Instantiate()
 	if( GetOption("OGridLeak3D")) mk->SetAttr("OGridLeak3D", kTRUE);
 	if( GetOption("OGGVoltErr") ) mk->SetAttr("OGGVoltErr" , kTRUE);
 	if( GetOption("OSectorAlign"))mk->SetAttr("OSectorAlign",kTRUE);
+	if( GetOption("ODistoSmear")) mk->SetAttr("ODistoSmear", kTRUE);
       }
       mk->PrintAttr();
     }
@@ -788,6 +789,12 @@ Int_t StBFChain::Instantiate()
          GetOption("pmdRaw"))                  mk->SetAttr("pmdRaw",kTRUE);
     // PMD
 
+    // HFT
+    if (maker == "StPxlSimMaker") {
+      if (GetOption("pxlSlowSim")) mk->SetAttr("useDIGMAPSSim",kTRUE);
+    }
+    // HFT
+ 
     // Hit filtering will be made from a single maker in
     // future with flexible filtering method
     if (maker == "StHitFilterMaker") {
@@ -916,6 +923,16 @@ Int_t StBFChain::Init() {
       SetAttr(".call","SetActive(0)","StStrangeMuDstMaker::");
     }
 #if 1
+
+
+    if (fNoChainOptions) {
+      if (GetOption("misalign") && TClass::GetClass("AgPosition") ) 
+	gROOT->ProcessLine("AgPosition::SetReal();");
+      else if ( TClass::GetClass("AgPosition") )                        
+	gROOT->ProcessLine("AgPosition::SetIdeal();");
+    }
+
+
     // force load of geometry for VMC and Sti
     
     if (GetOption("Sti") || GetOption("StiCA") || 
