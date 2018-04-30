@@ -1,6 +1,6 @@
 /*
  *  StFixedVertexFinder.cxx
- *  $Id: StFixedVertexFinder.cxx,v 1.5 2016/08/18 17:46:14 smirnovd Exp $
+ *  $Id: StFixedVertexFinder.cxx,v 1.5.4.1 2018/04/30 15:24:49 didenko Exp $
  *
  *  Author Lee Barnby (University of Birmingham) May 2006.
  *
@@ -61,7 +61,7 @@ int StFixedVertexFinder::fit(StEvent* event)
   prim.setFlag(1);                    // So that we know its the primary vertex
   prim.setRanking(-5);                // Have to have something
   prim.setVertexFinderId(VFId);       // Id depends on MC or fixed position used
-  addVertex(&prim);
+  addVertex(prim);
 
   return size();
 }
@@ -84,6 +84,9 @@ void StFixedVertexFinder::SetVertexPosition(double x, double y, double z){
 
 /*
  * $Log: StFixedVertexFinder.cxx,v $
+ * Revision 1.5.4.1  2018/04/30 15:24:49  didenko
+ * revision for SL16j_embed library
+ *
  * Revision 1.5  2016/08/18 17:46:14  smirnovd
  * Squashed commit of the following refactoring changes:
  *
