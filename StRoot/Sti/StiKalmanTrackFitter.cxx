@@ -18,7 +18,7 @@ Int_t StiKalmanTrackFitter::_debug = 0;
       and updates are performed only if nodes hold a hit.
 	</ol>
 */
-Int_t StiKalmanTrackFitter::fit(StiTrack * stiTrack, Int_t fitDirection) //throw (Exception)
+Int_t StiKalmanTrackFitter::fit(StiTrack * stiTrack, Int_t fitDirection)  
 {
   enum {kMaxNErr=333};
   static Int_t nCall=0; nCall++;

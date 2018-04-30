@@ -216,7 +216,6 @@ vector<StiHit*> & StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bo
 
   vector<StiHit*>::iterator tempend = _map[_key].TheEffectiveEnd();
 
-#if 1
    //sanity check block
    vector<StiHit*>::iterator  tmptest = tempvec.begin();
    vector<StiHit*>::iterator  tmpend  = tempvec.end();
@@ -226,7 +225,6 @@ vector<StiHit*> & StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bo
             << " " << tempvec.size() << " --> " << endl;
        assert(0);
    }
-#endif   
 
    //Search first by distance along z
   _start = lower_bound(tempvec.begin(), tempend, &_minPoint, StizHitLessThan());
@@ -253,13 +251,6 @@ vector<StiHit*> & StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bo
        // cout << "Warning: Fix me, please !" << endl; 
     }
   }    //  NO _key was provided
-#if 0
- else {
-     cout << "-- Go ahead to test thing ------------------ last id =" << id << endl;
-     id = _map[_key].fId;
-     cout << "-- Go ahead to test thing ------------------ next id =" << id << endl;
-  }
-#endif  
   return _selectedHits;
 }
 

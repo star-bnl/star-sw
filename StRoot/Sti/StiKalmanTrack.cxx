@@ -1,11 +1,18 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.151 2018/04/11 02:41:08 smirnovd Exp $
- * $Id: StiKalmanTrack.cxx,v 2.151 2018/04/11 02:41:08 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.152 2018/04/30 23:18:11 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.152 2018/04/30 23:18:11 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.152  2018/04/30 23:18:11  smirnovd
+ * [Cosmetic] Minor changes in various files
+ *
+ * - Renamed data member s/m/mMass/ in StikalmanTrack
+ * - Changes in white space
+ * - Return STAR code
+ *
  * Revision 2.151  2018/04/11 02:41:08  smirnovd
  * Remove deprecated methods in StikalmanTrack
  *
@@ -629,7 +636,7 @@ static int mIdCount = 0;
   mSeedHitCount = 0;
   mCombUsed = 0;
   mVertex = 0;
-  m      = -1.;
+  mMass  = -1.;
   mFlag  = 0;
   _dca   = 0;
   _vChi2=-2;
@@ -1825,7 +1832,7 @@ double Xi2=0;
 }    
 //_____________________________________________________________________________
 double StiKalmanTrack::diff(const StiNodePars &p1,const StiNodeErrs &e1
-           ,const StiNodePars &p2,const StiNodeErrs &e2,int &igor) 
+                           ,const StiNodePars &p2,const StiNodeErrs &e2,int &igor) 
 {
   double est=0;
   for (int i=0;i<kNPars;i++) {
@@ -1845,7 +1852,7 @@ StiKalmanTrack &StiKalmanTrack::operator=(const StiKalmanTrack &tk)
 
   mSeedHitCount=tk.mSeedHitCount; 	//number of points used to seed the track
   mFlag        =tk.mFlag;         	//A flag to pack w/ topo info
-  m            =tk.m;             	// mass hypothesis
+  mMass        =tk.mMass;             	// mass hypothesis
   _dca	       =tk._dca;
   _vChi2       =tk._vChi2;		//
   mVertex      =tk.mVertex;

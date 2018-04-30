@@ -1,11 +1,18 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.120 2018/04/10 11:32:10 smirnovd Exp $
+ * $Id: StiStEventFiller.cxx,v 2.121 2018/04/30 23:18:11 smirnovd Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.121  2018/04/30 23:18:11  smirnovd
+ * [Cosmetic] Minor changes in various files
+ *
+ * - Renamed data member s/m/mMass/ in StikalmanTrack
+ * - Changes in white space
+ * - Return STAR code
+ *
  * Revision 2.120  2018/04/10 11:32:10  smirnovd
  * Minor corrections across multiple files
  *
@@ -944,7 +951,8 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
 	if (nTotHits>=15) {
           if (mUsedGits[0]<gid) mUsedGits[0]=gid;
           mUsedGits[gid]++;
-      } }
+        }
+      }
       StHit *hh = (StHit*)stiHit->stHit();
       if (!hh) 			continue;
       assert(detector->getGroupId()==hh->detector());

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.68 2018/04/11 02:39:49 genevb Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.69 2018/04/30 23:18:11 smirnovd Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,13 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.69  2018/04/30 23:18:11  smirnovd
+ * [Cosmetic] Minor changes in various files
+ *
+ * - Renamed data member s/m/mMass/ in StikalmanTrack
+ * - Changes in white space
+ * - Return STAR code
+ *
  * Revision 1.68  2018/04/11 02:39:49  genevb
  * Distortion smearing by calibration resolutions
  *
@@ -342,7 +349,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     }
   }
 #endif /* StTpc_STATIC_ARRAYS */
-  return 0;
+  return kStOK;
 }
 //_____________________________________________________________________________
 Int_t StTpcDbMaker::Make(){
