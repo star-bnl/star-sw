@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.68 2018/04/26 17:09:41 smirnovd Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.69 2018/04/30 23:18:54 smirnovd Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,12 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.69  2018/04/30 23:18:54  smirnovd
+ * Try different DAQ readers when reading TPC data
+ *
+ * Selecting one reader type is not enough in the iTPC era cause the outter and
+ * inner sectors may have different formats
+ *
  * Revision 1.68  2018/04/26 17:09:41  smirnovd
  * Revert "Revert iTPC related changes committed on 2018-04-24"
  *
@@ -487,8 +493,6 @@ Int_t StTpcHitMaker::Make() {
       daqTpcTable = GetNextDaqElement(mQuery);
       if (! daqTpcTable) continue;
       kReaderType = (EReaderType) k;
-      break;
-    }
 
       while (daqTpcTable) {
 	if (Sector() == sector) {
@@ -523,6 +527,7 @@ Int_t StTpcHitMaker::Make() {
 	}
 	daqTpcTable = GetNextDaqElement(mQuery);
       }
+    }
 
     if (maxHits[sector-1] && hitsAdded > maxHits[sector-1]) {
       LOG_ERROR << "Too many hits (" << hitsAdded << ") in one sector ("
