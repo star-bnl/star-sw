@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StVpdCalibMaker.cxx,v 1.13 2017/03/02 18:26:50 jeromel Exp $
+ * $Id: StVpdCalibMaker.cxx,v 1.14 2018/04/30 23:18:00 smirnovd Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StVpdCalibMaker.cxx,v $
+ * Revision 1.14  2018/04/30 23:18:00  smirnovd
+ * Reduce excessive output
+ *
  * Revision 1.13  2017/03/02 18:26:50  jeromel
  * Updates to StVpdCalibMaker after review - changes by jdb, nl
  *
@@ -587,13 +590,10 @@ void StVpdCalibMaker::vzVpdFinder()
       }
     else if(mVPDLeTime[i]<1.e-4 || !mFlag[i]) continue;
       
-      LOG_INFO << "mTruncation is set to: " << mTruncation << endm;
-      
     double vpdtime;
     if(i<NVPD&&mNWest>1) {  // west VPD
       vpdtime = (mVPDLeTime[i]*mNWest-mTSumWest)/(mNWest-1);    // Cuts on times with a significant deviation from the average.
       if(fabs(vpdtime)>TDIFFCUT) {
-          LOG_INFO << "Cut out West" << endm;
         mTSumWest -= mVPDLeTime[i];
         mVPDLeTime[i] = 0.;
         mNWest--;
@@ -604,7 +604,6 @@ void StVpdCalibMaker::vzVpdFinder()
     if(i>=NVPD&&mNEast>1) {  // east VPD
       vpdtime = (mVPDLeTime[i]*mNEast-mTSumEast)/(mNEast-1);    // Cuts on times with a significant deviation from the average.
       if(fabs(vpdtime)>TDIFFCUT) {
-          LOG_INFO << "Cut out East" << endm;
         mTSumEast -= mVPDLeTime[i];
         mVPDLeTime[i] = 0.;
         mNEast--; 
@@ -616,12 +615,12 @@ void StVpdCalibMaker::vzVpdFinder()
 
   // remove slower hit in low energy runs.
   if(mTruncation ) {
-      LOG_INFO << "Uh-oh, stepped into the truncation block!" << endm;
+    LOG_DEBUG << "Uh-oh, stepped into the truncation block!" << endm;
     Int_t hitIndex[2*NVPD];
     Int_t nTube = NVPD;
     TMath::Sort(nTube, &mVPDLeTime[0], &hitIndex[0]);
     int nRejectedWest = (int)(FracTruncated*mNWest+0.5);
-    LOG_INFO << " NWest before = " << mNWest << " rejected = " << nRejectedWest << endm;
+    LOG_DEBUG << " NWest before = " << mNWest << " rejected = " << nRejectedWest << endm;
     for(int i=0;i<nRejectedWest;i++) {
       int index = hitIndex[i];
       mTSumWest -= mVPDLeTime[index];
@@ -633,7 +632,7 @@ void StVpdCalibMaker::vzVpdFinder()
 
     TMath::Sort(nTube, &mVPDLeTime[NVPD], &hitIndex[NVPD]);
     int nRejectedEast = (int)(FracTruncated*mNEast+0.5);
-    LOG_INFO << " NEast before = " << mNEast << " rejected = " << nRejectedEast << endm;
+    LOG_DEBUG << " NEast before = " << mNEast << " rejected = " << nRejectedEast << endm;
     for(int i=0;i<nRejectedEast;i++) {
       int index = hitIndex[i+NVPD] + NVPD;
       mTSumEast -= mVPDLeTime[index];
@@ -647,7 +646,7 @@ void StVpdCalibMaker::vzVpdFinder()
   // calculate the vertex z from vpd
   if ( mNEast>=mVPDEastHitsCut && mNWest>=mVPDWestHitsCut ) {
     mVPDVtxZ[0] = (mTSumEast/mNEast - mTSumWest/mNWest)/2.*(C_C_LIGHT/1.e9);
-      LOG_INFO << "Vertex is at: " << mVPDVtxZ[0] << endm;
+    LOG_DEBUG << "Vertex is at: " << mVPDVtxZ[0] << endm;
     mNVzVpd++;
   }
 }
