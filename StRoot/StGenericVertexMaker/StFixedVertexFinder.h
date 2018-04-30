@@ -3,7 +3,7 @@
  *  \author Lee Barnby (University of Birmingham) May 2006.
  *  \brief StGenericVertexFinder implementation for fixing vertex.
  *
- *  $Id: StFixedVertexFinder.h,v 1.7.2.1 2018/04/13 23:59:20 didenko Exp $
+ *  $Id: StFixedVertexFinder.h,v 1.7.2.1.2.1 2018/04/30 16:42:16 didenko Exp $
  *
  *  Modified J.Lauret for MC vertex
  *
@@ -57,13 +57,16 @@ private:
      * Vertex constraint not useful for this VF but is part of base class so implementation just
      * displays warning to this effect
      */
-  void UseVertexConstraint(double, double, double, double, double);
+  void UseVertexConstraint();
 
 };
 
 /***************************************************************************
 *
 * $Log: StFixedVertexFinder.h,v $
+* Revision 1.7.2.1.2.1  2018/04/30 16:42:16  didenko
+* revision for SL16j_embed library
+*
 * Revision 1.7.2.1  2018/04/13 23:59:20  didenko
 * updated for SL16d_embed
 *
