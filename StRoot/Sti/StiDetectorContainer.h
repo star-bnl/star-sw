@@ -4,52 +4,39 @@
 
 /*! \class StiDetectorContainer
   StiDetectorContainer is an interface to the representation of the STAR
-  detector
-  material.  It is an implementation of the 'facade' pattern.  That is, it is
-  meant
-  to provide an unchanging interface to the detector model while the actual
-  underlying
-  reperesntation of the detector itself can change.  In reality, the underlying
-  model
-  has undergone at least five significant changes, while the public interface of
-  StiDetectorContainer has remained constant.
+  detector material. It is an implementation of the 'facade' pattern. That is,
+  it is meant to provide an unchanging interface to the detector model while the
+  actual underlying reperesntation of the detector itself can change. In
+  reality, the underlying model has undergone at least five significant changes,
+  while the public interface of StiDetectorContainer has remained constant.
   <p>
   Because there is only one STAR detector, there is also only one instance of
-  StiDetectorContainer.  This is guarunteed by implementing
-  StiDetectorContainer via
-  the singelton design pattern.  See the example below for more information on
-  singleton
-  access.
+  StiDetectorContainer. This is guarunteed by implementing StiDetectorContainer
+  via the singelton design pattern. See the example below for more information
+  on singleton access.
   <p>
-  StiDetectorContainer behaves as an iterator.  That is, once built it always
-  points to
-  a valid StiDetector object, which can be accessed via:
-  <code>*(StiDetectorContainer::instance())</code>.  One can set the location
-  of the
-  current detector position via the setToDetector() methods.
+  StiDetectorContainer behaves as an iterator. That is, once built it always
+  points to a valid StiDetector object, which can be accessed via:
+  <code>*(StiDetectorContainer::instance())</code>. One can set the location of
+  the current detector position via the setToDetector() methods.
   <p>
   Internally, the STAR detector is modeld as a sorted tree structurere
-  implemented
-  via StiCompositeTreeNode objects.  Additionally, StiDetectorContainer uses an
-  instance of StiCompositeLeafIterator to implement the setToDetector() methods.
-  However, the navigation methods (e.g., moveIn()) are implemented by using
-  the sorted
-  nature of the tree structure.  As such, moveIn(), moveOut(), movePlusPhi(),
-  and
-  moveMinusPhi() require no searching or expensive computation.  Instead, they
-  are
-  implemented via simple increment (++) or decrement (--) of STL random access
-  iterators
-  provided by StiCompositeTreeNode.  Therefore, once StiDetectorContainer is
-  initialized
-  for propogation via a setToDetector() call, navigation should be extremely
+  implemented via StiCompositeTreeNode objects. Additionally,
+  StiDetectorContainer uses an instance of StiCompositeLeafIterator to implement
+  the setToDetector() methods. However, the navigation methods (e.g., moveIn())
+  are implemented by using the sorted nature of the tree structure.  As such,
+  moveIn(), moveOut(), movePlusPhi(), and moveMinusPhi() require no searching or
+  expensive computation. Instead, they are implemented via simple increment (++)
+  or decrement (--) of STL random access iterators provided by
+  StiCompositeTreeNode. Therefore, once StiDetectorContainer is initialized for
+  propogation via a setToDetector() call, navigation should be extremely
   efficient.
   
   \author M.L. Miller (Yale Software)
   
-  \warning You do not have to call StiDetectorContainer::kill() to avoid a
-  memory leak. When you call kill(), you invalidate all pre-existing pointers to
-  instance().  Because termination of program execution will automatically
+  \warning You do not have to call StiDetectorContainer::kill() to avoid
+  a memory leak. When you call kill(), you invalidate all pre-existing pointers
+  to instance(). Because termination of program execution will automatically
   clean up the heap, it <b>is</b> generally good practice not to call kill().
 */
 
