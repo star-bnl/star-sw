@@ -21,7 +21,6 @@ class StiDetector;
 typedef std::vector<StiDetector*> StiDetVect;
 
 
-
 /*!
    StiDetector represents a detector for the purposes of ITTF tracking.
    It contains all information about the geometry of the detector and
@@ -140,14 +139,14 @@ public:
 };
 
 
-
-
 inline void StiDetector::setPlacement(StiPlacement *val)
 { 
   placement = val; 
   _cos = cos(val->getNormalRefAngle());
   _sin = sin(val->getNormalRefAngle());
 }
+
+
 inline void StiDetector::setKey(int index,int value)
 {
 switch (index)
@@ -156,6 +155,7 @@ switch (index)
   case 2: _key2 = value; break;
   }
 }
+
 
 inline int StiDetector::getKey(int index) const 
 {
@@ -166,29 +166,5 @@ switch (index)
   }
 return -1;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #endif

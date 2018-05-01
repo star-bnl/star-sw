@@ -92,7 +92,6 @@ void StiHitLoader<Source1, Detector>::loadEvent(Source1 *source1,
 							Filter<StiTrack> * trackFilter, 
 							Filter<StiHit> * hitFilter)
 {
-//  cout << "Loader "<<_name<<" loading event"<<endl;
 }
 
 template<class Source1, class Detector>
@@ -126,7 +125,6 @@ void StiHitLoader<Source1,Detector>::loadHits(Source1 * source,
 						       Filter<StiTrack> * trackFilter, 
 						       Filter<StiHit> * hitFilter)
 {
-//  cout << "StiHitLoader<Source1,Detector>::loadHits( ... ) -E- Called for "<<_name<<endl;
 }
 
 #endif

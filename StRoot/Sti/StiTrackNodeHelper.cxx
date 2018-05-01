@@ -362,6 +362,7 @@ int StiTrackNodeHelper::makeFit(int smooth)
     }
     mChi2 = chi2; if (mChi2>999) mChi2=999;
     ians = updateNode();
+    if (debug() & 8) { LOG_INFO << Form("%5d ",ians); StiKalmanTrackNode::PrintStep();}
     if (!ians) 	break;
     if (mTargetNode == mVertexNode)	return 15;
     mState = StiTrackNode::kTNReady;
