@@ -101,66 +101,8 @@ void StiTpcDetectorBuilder::useVMCGeometry()
 // 								   _gasMat->getA(), _gasMat->getZ(), _gasMat->getDensity());
   StDetectorDbTpcRDOMasks *s_pRdoMasks = StDetectorDbTpcRDOMasks::instance();
   StiPlanarShape *pShape;
-  //Active TPC padrows
-  //  double radToDeg = 180./3.1415927;
-  StTpcCoordinateTransform transform(gStTpcDb);
-  StMatrixD  local2GlobalRotation;
-  StMatrixD  unit(3,3,1);
-  StThreeVectorD RowPosition;
-#if 0
-{
-      int myInnNRows4  = tpcPadConfigC->innerPadRows(4);
-      int myOutNRows4  = tpcPadConfigC->outerPadRows(4);
-      int myInnNRows20  = tpcPadConfigC->innerPadRows(20);
-      int myOutNRows20  = tpcPadConfigC->outerPadRows(20);
-      int myNRows4  = tpcPadConfigC->numberOfRows(4);
-      int myNRows10  = tpcPadConfigC->numberOfRows(20);
-
-printf("4=%d %d 20=%d %d\n",myInnNRows4,myOutNRows4, myInnNRows20, myOutNRows20); 
-printf("nRows 4=%d 20=%d\n",myNRows4,myNRows10);
-
-      double fRadius413 = St_tpcPadConfigC::instance()->radialDistanceAtRow(4,13);
-      double fRadius414 = St_tpcPadConfigC::instance()->radialDistanceAtRow(4,14);
-      double fRadius2013 = St_tpcPadConfigC::instance()->radialDistanceAtRow(20,13);
-      double fRadius2014 = St_tpcPadConfigC::instance()->radialDistanceAtRow(20,14);
-      printf("Rad 413=%g 414=%g 2013=%g 2014=%g \n",fRadius413,fRadius414,fRadius2013,fRadius2014); 
-
-      double innThick4  = tpcPadConfigC->innerSectorPadLength(4);
-      double innThick20 = tpcPadConfigC->innerSectorPadLength(20);
-      double outThick4  = tpcPadConfigC->outerSectorPadLength(4);
-      double outThick20 = tpcPadConfigC->outerSectorPadLength(20);
-
-printf("Thick 4=%g 20=%g 4=%g 20=%g\n",innThick4, innThick20,outThick4,outThick20);
-      double dZInn4  = tpcPadConfigC->innerSectorPadPlaneZ(4);
-      double dZInn20 = tpcPadConfigC->innerSectorPadPlaneZ(20);
-      double dZOut4  = tpcPadConfigC->outerSectorPadPlaneZ(4);
-      double dZOut20 = tpcPadConfigC->outerSectorPadPlaneZ(20);
-      double dZInn10  = tpcPadConfigC->innerSectorPadPlaneZ(10);
-      double dZOut14  = tpcPadConfigC->outerSectorPadPlaneZ(14);
-
-printf("dZ inn4=%g inn20=%g out4=%g out20=%g inn10=%g out14=%g\n",dZInn4,dZInn20 ,dZOut4 ,dZOut20,dZInn10,dZOut14 );
-
-///	pShape->setHalfWidth(St_tpcPadConfigC::instance()->PadPitchAtRow(sector,row) * St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row) / 2.);
-      double pitch413  = tpcPadConfigC->PadPitchAtRow( 4,13);
-      double pitch2013 = tpcPadConfigC->PadPitchAtRow(20,13);
-      double pitch443  = tpcPadConfigC->PadPitchAtRow( 4,43);
-      double pitch2043 = tpcPadConfigC->PadPitchAtRow(20,43);
-printf("Pitch 413=%g 2013=%g 443=%g 2043=%g\n",pitch413, pitch2013, pitch443, pitch2043  );
-      int nPads413  = tpcPadConfigC->numberOfPadsAtRow( 4,13);
-      int nPads2013 = tpcPadConfigC->numberOfPadsAtRow(20,13);
-      int nPads443  = tpcPadConfigC->numberOfPadsAtRow( 4,43);
-      int nPads2043 = tpcPadConfigC->numberOfPadsAtRow(20,43);
-printf("nPads 413=%d 2013=%d 443=%d 2043=%d\n",nPads413, nPads2013, nPads443, nPads2043  );
-
-  for (int s:{4,20}) {
-    int nR = tpcPadConfigC->numberOfRows(s);
-    for(int iR=1;iR<=nR;iR++) {
-      printf(" %d - %d  %d\n",s,iR,tpcPadConfigC->numberOfPadsAtRow(s,iR));
-  } }
-assert(0);
-}
-#endif //0
   int nRowsWE[2],sectorWE[2];
+
   for(int stiSector = 1; stiSector <= NostiSectors; stiSector++) {
     sectorWE[0] = stiSector;
     sectorWE[1] = 24-(stiSector)%12;
@@ -204,47 +146,6 @@ assert(0);
 	pPlacement->setLayerAngle(phi);
 	pPlacement->setRegion(StiPlacement::kMidRapidity);
 	pPlacement->setNormalRep(phi, fRadius, 0);
-#if 0
-	//Retrieve position and orientation of the TPC pad rows from the database.
-	StTpcLocalSectorDirection  dirLS[3];
-	dirLS[0] = StTpcLocalSectorDirection(1.,0.,0.,mySector,iRow);
-	dirLS[1] = StTpcLocalSectorDirection(0.,1.,0.,mySector,iRow);
-	dirLS[2] = StTpcLocalSectorDirection(0.,0.,1.,mySector,iRow);
-	local2GlobalRotation = unit;
-	for (int i = 0; i < 3; i++) {
-	  //	if (debug>1) cout << "dirLS\t" << dirLS[i] << endl;
-	  StTpcLocalDirection  dirG;
-	  transform(dirLS[i],dirG);
-	  local2GlobalRotation(i+1,1) = dirG.position().x();
-	  local2GlobalRotation(i+1,2) = dirG.position().y();
-	  local2GlobalRotation(i+1,3) = dirG.position().z();
-	}
-	//      if (debug>1) cout << "Local2GlobalRotation = " << local2GlobalRotation << endl;
-	double y  = transform.yFromRow(mySector,iRow);
-	StTpcLocalSectorCoordinate  lsCoord(0., y, dZ, mySector, iRow);// if (debug>1) cout << lsCoord << endl;
- // Ideal geom
-	StTpcLocalCoordinate gCoord;
-	transform(lsCoord, gCoord);
-	//unit vector normal to the pad plane
-	StThreeVectorD centerVector(gCoord.position().x(),gCoord.position().y(),gCoord.position().z());
-	StThreeVectorD normalVector(local2GlobalRotation(2,1),
-				    local2GlobalRotation(2,2),
-				    local2GlobalRotation(2,3));
-	double prod = centerVector*normalVector;
-	if (prod < 0) normalVector *= -1;
-	double phi  = centerVector.phi();
-	double phiD = normalVector.phi();
-	double r = centerVector.perp();
-	StiPlacement *pPlacement = new StiPlacement;
-	pPlacement->setZcenter(Zshift);
-	pPlacement->setLayerRadius(fRadius);
-	pPlacement->setLayerAngle(phi);
-	pPlacement->setRegion(StiPlacement::kMidRapidity);
-	pPlacement->setNormalRep(phiD, r*TMath::Cos(phi-phiD), r*TMath::Sin(phi-phiD));
-        int mySector = sector(pPlacement->getNormalRefAngle(),stiSector>12);
-        assert(stiSector==mySector);
-	assert(fabs(pPlacement->getNormalRefAngle()-pPlacement->getCenterRefAngle())<1e-2);
-#endif	
 	name = Form("Tpc/Padrow_%d/Sector_%d", iRow, mySector);
 	// fill in the detector object and save it in our vector
 	StiDetector *pDetector = _detectorFactory->getInstance();
@@ -290,9 +191,8 @@ printf("TpcName = %s sect=%d raw=%d Zc = %g Zl = %g\n"
 
 	add(iRow-1,mySector-1,pDetector); 
         if (nWE==2) continue;
-        name+="*";
-        pDetector->setName(name.Data());
-	add(iRow-1,sectorWE[1]-1,pDetector); 
+        name+="*"; pDetector->setName(name.Data());
+        add(iRow-1,sectorWE[1]-1,pDetector); 
       }// for row
     }// Tpc halves
   }// for sector
