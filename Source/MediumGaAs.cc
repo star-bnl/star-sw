@@ -11,21 +11,7 @@
 
 namespace Garfield {
 
-MediumGaAs::MediumGaAs()
-    : Medium(),
-      // bandGap(1.42),
-      eMobility(8.8e-6),
-      hMobility(3.2e-6),
-      eHallFactor(1.05),
-      hHallFactor(1.25),
-      eTrapCs(1.e-15),
-      hTrapCs(1.e-15),
-      eTrapDensity(1.e13),
-      hTrapDensity(1.e13),
-      eTrapTime(0.),
-      hTrapTime(0.),
-      trappingModel(0),
-      m_hasUserMobility(false) {
+MediumGaAs::MediumGaAs() : Medium() {
 
   m_className = "MediumGaAs";
   m_name = "GaAs";

@@ -21,7 +21,7 @@ class ComponentAnalyticField : public ComponentBase {
   ~ComponentAnalyticField() {}
 
   void ElectricField(const double x, const double y, const double z, double& ex,
-                     double& ey, double& ez, Medium*& m, int& status) { 
+                     double& ey, double& ez, Medium*& m, int& status) override { 
     
     m = nullptr;
     // Calculate the field.
@@ -36,11 +36,11 @@ class ComponentAnalyticField : public ComponentBase {
         status = -5;
       }
     }
-  }
+  } 
 
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, double& v, Medium*& m,
-                     int& status) {
+                     int& status) override {
     m = nullptr;
     // Calculate the field.
     status = Field(x, y, z, ex, ey, ez, v, true);
@@ -55,18 +55,18 @@ class ComponentAnalyticField : public ComponentBase {
     }
   }
 
-  bool GetVoltageRange(double& pmin, double& pmax);
+  bool GetVoltageRange(double& pmin, double& pmax) override;
 
   void WeightingField(const double x, const double y, const double z,
                       double& wx, double& wy, double& wz,
-                      const std::string& label) {
+                      const std::string& label) override {
     wx = wy = wz = 0.;
     double volt = 0.;
     if (!m_sigset) PrepareSignals();
     Wfield(x, y, z, wx, wy, wz, volt, label, false);
   }
   double WeightingPotential(const double x, const double y, const double z,
-                            const std::string& label) {
+                            const std::string& label) override {
     double wx = 0., wy = 0., wz = 0.;
     double volt = 0.;
     if (!m_sigset) PrepareSignals();
@@ -75,14 +75,14 @@ class ComponentAnalyticField : public ComponentBase {
   }
 
   bool GetBoundingBox(double& x0, double& y0, double& z0, double& x1,
-                      double& y1, double& z1);
+                      double& y1, double& z1) override;
 
   bool IsWireCrossed(const double x0, const double y0, const double z0, 
                      const double x1, const double y1, const double z1,
-                     double& xc, double& yc, double& zc);
+                     double& xc, double& yc, double& zc) override;
 
   bool IsInTrapRadius(const double q0, const double x0, const double y0,
-                      const double z0, double& xw, double& yx, double& rw);
+                      const double z0, double& xw, double& yx, double& rw) override;
 
   /// Add a wire at (x, y) .
   void AddWire(const double x, const double y, const double diameter,
@@ -329,8 +329,8 @@ class ComponentAnalyticField : public ComponentBase {
   // Gravity
   double down[3];
 
-  void UpdatePeriodicity();
-  void Reset() { CellInit(); }
+  void UpdatePeriodicity() override;
+  void Reset() override { CellInit(); }
 
   void CellInit();
   bool Prepare();

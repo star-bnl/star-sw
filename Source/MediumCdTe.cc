@@ -12,24 +12,7 @@
 
 namespace Garfield {
 
-MediumCdTe::MediumCdTe()
-    : Medium(),
-      // m_bandGap(1.44),
-      m_eMobility(1.1e-6),
-      m_hMobility(0.1e-6),
-      m_eSatVel(1.02e-2),
-      m_hSatVel(0.72e-2),
-      m_eHallFactor(1.15),
-      m_hHallFactor(0.7),
-      m_eTrapCs(1.e-15),
-      m_hTrapCs(1.e-15),
-      m_eTrapDensity(1.e13),
-      m_hTrapDensity(1.e13),
-      m_eTrapTime(0.),
-      m_hTrapTime(0.),
-      m_trappingModel(0),
-      m_hasUserMobility(false),
-      m_hasUserSaturationVelocity(false) {
+MediumCdTe::MediumCdTe() : Medium() {
 
   m_className = "MediumCdTe";
   m_name = "CdTe";
