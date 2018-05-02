@@ -1,6 +1,7 @@
+//#define IRAK
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.42.6.1 2018/02/16 22:14:56 perev Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.42.6.2 2018/05/02 19:41:33 perev Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,8 +17,8 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
- * Revision 1.42.6.1  2018/02/16 22:14:56  perev
- * iTPC
+ * Revision 1.42.6.2  2018/05/02 19:41:33  perev
+ * Supress some Irakli correction
  *
  * Revision 1.42  2015/07/19 22:20:42  fisyak
  * Add recalculation of pad row during transformation
@@ -246,7 +247,6 @@
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
 using namespace units;
 #endif
-static Int_t _debug = 0;
 StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* /* globalDbPointer */)
  {
     if (St_tpcPadConfigC::instance() 
@@ -358,7 +358,13 @@ Double_t StTpcCoordinateTransform::zFromTB(Double_t tb, Int_t sector, Int_t row)
   Double_t elecT0 = StTpcDb::instance()->Electronics()->tZero();          // units are us 
   Double_t sectT0 = St_tpcPadrowT0C::instance()->T0(sector,row);// units are us 
   Double_t t0 = trigT0 + elecT0 + sectT0;
-  Double_t time = t0 + (tb + St_tpcSectorT0offsetC::instance()->t0offset(sector))*mTimeBinWidth; 
+#ifndef IRAK
+  Double_t time = t0 + (tb + St_tpcSectorT0offsetC::instance()->t0offset(sector))*mTimeBinWidth;
+#else
+  Int_t l = sector;
+  if ( St_tpcPadConfigC::instance()->IsRowInner(sector,row)) l += 24;
+  Double_t time = t0 + (tb + St_tpcSectorT0offsetC::instance()->t0offset(l))*mTimeBinWidth; 
+#endif
   Double_t z = StTpcDb::instance()->DriftVelocity(sector)*1e-6*time;
   return z;
 }
@@ -374,7 +380,13 @@ Double_t StTpcCoordinateTransform::tBFromZ(Double_t z, Int_t sector, Int_t row) 
   Double_t sectT0 = St_tpcPadrowT0C::instance()->T0(sector,row);// units are us 
   Double_t t0 = trigT0 + elecT0 + sectT0;
   Double_t time = z / (StTpcDb::instance()->DriftVelocity(sector)*1e-6);
+#ifndef IRAK
   Double_t tb = (time - t0)/mTimeBinWidth - St_tpcSectorT0offsetC::instance()->t0offset(sector);
+#else
+  Int_t l = sector;
+  if ( St_tpcPadConfigC::instance()->IsRowInner(sector,row)) l += 24;
+  Double_t tb = (time - t0)/mTimeBinWidth - St_tpcSectorT0offsetC::instance()->t0offset(l);
+#endif
   return tb;
 }
 //________________________________________________________________________________
