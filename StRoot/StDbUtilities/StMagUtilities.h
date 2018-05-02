@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.61.2.2 2018/02/23 23:25:26 smirnovd Exp $
+ * $Id: StMagUtilities.h,v 1.61.2.3 2018/05/02 19:43:01 perev Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,14 +11,8 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
- * Revision 1.61.2.2  2018/02/23 23:25:26  smirnovd
- * Changes from Gene with some corrections from Dmitri
- *
- * The default sector Id has changed from 20 to 1
- * Some code in StMagUtilities has been reverted
- *
- * Revision 1.61.2.1  2018/02/16 22:14:56  perev
- * iTPC
+ * Revision 1.61.2.3  2018/05/02 19:43:01  perev
+ * Gene corrections
  *
  * Revision 1.60  2017/04/12 19:47:02  genevb
  * Generic SpaceCharge and GridLeak functions independent of specific modes
@@ -271,7 +265,7 @@ class StMagUtilities {
   virtual void    GetSpaceChargeR2 () ;  
   virtual void    GetShortedRing ()   ;  
   virtual void    GetOmegaTau ()      ;
-  virtual void    GetGridLeak ( Int_t mode ) ;
+  virtual void    GetGridLeak()       ;
   virtual void    GetHVPlanes()       ;
   virtual void    GetE()              ;
 

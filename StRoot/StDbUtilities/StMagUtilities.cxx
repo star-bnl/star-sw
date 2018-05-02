@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.110.2.2 2018/02/23 23:25:26 smirnovd Exp $
+ * $Id: StMagUtilities.cxx,v 1.110.2.3 2018/05/02 19:43:24 perev Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,14 +11,8 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
- * Revision 1.110.2.2  2018/02/23 23:25:26  smirnovd
- * Changes from Gene with some corrections from Dmitri
- *
- * The default sector Id has changed from 20 to 1
- * Some code in StMagUtilities has been reverted
- *
- * Revision 1.110.2.1  2018/02/16 22:09:36  perev
- * iTPC
+ * Revision 1.110.2.3  2018/05/02 19:43:24  perev
+ * Gene corrections
  *
  * Revision 1.109  2017/04/12 19:47:02  genevb
  * Generic SpaceCharge and GridLeak functions independent of specific modes
@@ -511,7 +505,7 @@ StMagUtilities::StMagUtilities (StTpcDb* /* dbin */, Int_t mode )
   GetSpaceCharge()      ;    // Get the spacecharge variable from the DB
   GetSpaceChargeR2()    ;    // Get the spacecharge variable R2 from the DB and EWRatio
   GetShortedRing()      ;    // Get the parameters that describe the shorted ring on the field cage
-  GetGridLeak( mode )   ;    // Get the parameters that describe the gating grid leaks
+  GetGridLeak()         ;    // Get the parameters that describe the gating grid leaks
   CommonStart( mode )   ;    // Read the Magnetic and Electric Field Data Files, set constants
   UseManualSCForPredict(kFALSE) ; // Initialize use of Predict() functions;
 }
@@ -569,8 +563,8 @@ void StMagUtilities::GetTPCParams ()
   StarDriftV     =  1e-6*StTpcDb::instance()->DriftVelocity() ;        
   TPC_Z0         =  dims->gatingGridZ() ;
   IFCShift       =      cages->InnerFieldCageShift();
-  INNER          =  pads->innerPadRows(1); // Use Sector 1 for default values
-  TPCROWS        =  pads->padRows(1);
+  INNER          =  pads->innerPadRows(20);
+  TPCROWS        =  pads->padRows(20);
   IFCRadius      =    47.90 ;  // Radius of the Inner Field Cage (GVB: not sure where in DB?)
   OFCRadius      =  dims->senseGasOuterRadius();
   INNERGGFirst   =  wires->firstInnerSectorGatingGridWire();
@@ -584,7 +578,7 @@ void StMagUtilities::GetTPCParams ()
   //                    (by 25 microns) from non-DB value (121.8000)
   WIREGAP        =  OUTERGGFirst - INNERGGLast;
   for ( Int_t i = 0 ; i < TPCROWS ; i++ )
-    TPCROWR[i] = pads->radialDistanceAtRow(1,i+1); // Use Sector 1 for default values
+    TPCROWR[i] = pads->radialDistanceAtRow(20,i+1);
 }
 
 void StMagUtilities::GetE()
@@ -627,17 +621,15 @@ void StMagUtilities::GetTPCVoltages (Int_t mode)
     TH1I innerVs("innerVs","innerVs",5,maxInner-3.5*stepsInner,maxInner+1.5*stepsInner);
     TH1I outerVs("outerVs","outerVs",5,maxOuter-3.5*stepsOuter,maxOuter+1.5*stepsOuter);
     for (Int_t i = 1 ; i < 25; i++ ) {
-      int inner = St_tpcPadConfigC::instance()->innerPadRows(i);
-      innerVs.Fill(anodeVolts->voltagePadrow(i,inner));
-      outerVs.Fill(anodeVolts->voltagePadrow(i,inner+1));
+      innerVs.Fill(anodeVolts->voltagePadrow(i,INNER));
+      outerVs.Fill(anodeVolts->voltagePadrow(i,INNER+1));
     }
     double cmnInner = innerVs.GetBinCenter(innerVs.GetMaximumBin());
     double cmnOuter = outerVs.GetBinCenter(outerVs.GetMaximumBin());
     cout << "StMagUtilities assigning common anode voltages as " << cmnInner << " , " << cmnOuter << endl;
     for (Int_t i = 1 ; i < 25; i++ ) {
-      int inner = St_tpcPadConfigC::instance()->innerPadRows(i);
-      GLWeights[i] = ( ( TMath::Abs(anodeVolts->voltagePadrow(i,inner)   - cmnInner) < stepsInner/2. ) &&
-                       ( TMath::Abs(anodeVolts->voltagePadrow(i,inner+1) - cmnOuter) < stepsOuter/2. ) ? 1 : -1 );
+      GLWeights[i] = ( ( TMath::Abs(anodeVolts->voltagePadrow(i,INNER) - cmnInner) < stepsInner/2. ) &&
+                       ( TMath::Abs(anodeVolts->voltagePadrow(i,INNER+1) - cmnOuter) < stepsOuter/2. ) ? 1 : -1 );
     }
   } else if (mode & kFullGridLeak) {
 
@@ -650,12 +642,10 @@ void StMagUtilities::GetTPCVoltages (Int_t mode)
                      (GL_charge_y_hi[2]*GL_charge_y_hi[2] - GL_charge_y_lo[2]*GL_charge_y_lo[2]) ) ;
 
     for (Int_t i = 0 ; i < 24; i++ ) {
-      int inner = St_tpcPadConfigC::instance()->innerPadRows(i+1);
-      int lastrow = St_tpcPadConfigC::instance()->padRows(i+1);
       GLWeights[i   ] = GL_rho_inner_of_innerSec(anodeVolts->voltagePadrow(i+1,      1)) * norm ;
-      GLWeights[i+24] = GL_rho_outer_of_innerSec(anodeVolts->voltagePadrow(i+1,inner  )) * norm ;
-      GLWeights[i+48] = GL_rho_inner_of_outerSec(anodeVolts->voltagePadrow(i+1,inner+1)) * norm ;
-      GLWeights[i+72] = GL_rho_outer_of_outerSec(anodeVolts->voltagePadrow(i+1,lastrow)) * norm ;
+      GLWeights[i+24] = GL_rho_outer_of_innerSec(anodeVolts->voltagePadrow(i+1,INNER  )) * norm ;
+      GLWeights[i+48] = GL_rho_inner_of_outerSec(anodeVolts->voltagePadrow(i+1,INNER+1)) * norm ;
+      GLWeights[i+72] = GL_rho_outer_of_outerSec(anodeVolts->voltagePadrow(i+1,TPCROWS)) * norm ;
     }
   }
   
@@ -781,7 +771,7 @@ Int_t StMagUtilities::GetSpaceChargeMode()
    return 0;
 }
 
-void StMagUtilities::GetGridLeak ( Int_t mode )
+void StMagUtilities::GetGridLeak ()
 {
    fGridLeak   =  StDetectorDbGridLeak::instance()  ;
    InnerGridLeakStrength  =  fGridLeak -> getGridLeakStrength ( kGLinner )  ;  // Relative strength of the Inner grid leak
@@ -793,11 +783,6 @@ void StMagUtilities::GetGridLeak ( Int_t mode )
    OuterGridLeakStrength  =  fGridLeak -> getGridLeakStrength ( kGLouter )  ;  // Relative strength of the Outer grid leak
    OuterGridLeakRadius    =  fGridLeak -> getGridLeakRadius   ( kGLouter )  ;  // Location (in local Y coordinates) of Outer grid leak 
    OuterGridLeakWidth     =  fGridLeak -> getGridLeakWidth    ( kGLouter )  ;  // Half-width of the Outer grid leak.  
-   if (mode & kFullGridLeak) {
-     if (InnerGridLeakWidth <= 0) memset(  GLWeights     ,0,24*sizeof(Float_t));
-     if (MiddlGridLeakWidth <= 0) memset(&(GLWeights[24]),0,48*sizeof(Float_t));
-     if (OuterGridLeakWidth <= 0) memset(&(GLWeights[72]),0,24*sizeof(Float_t));
-   }
 }
 
 void StMagUtilities::ManualGridLeakStrength (Double_t inner, Double_t middle, Double_t outer)
@@ -1492,8 +1477,7 @@ void StMagUtilities::FastUndo2DBDistortion( const Float_t x[], Float_t Xprime[] 
 
   Float_t r,phi;
   if (usingCartesian) Cart2Polar(x,r,phi);
-  else { r = x[0]; phi = x[1]; }
-  if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
+  else { r = x[0]; phi = x[1]; }  if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
   Float_t z = LimitZ( Sector, x ) ;                 // Protect against discontinuity at CM
 
   if ( DoOnce )
