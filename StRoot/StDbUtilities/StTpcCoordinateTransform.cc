@@ -238,6 +238,7 @@
 #include "StDetectorDbMaker/St_tpcPadGainT0BC.h"
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_iTPCSurveyC.h"
 #include "TMath.h"
 #include "StThreeVectorD.hh"
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
@@ -327,27 +328,62 @@ Double_t StTpcCoordinateTransform::padFromX(Double_t x, Int_t sector, Int_t row)
     St_tpcPadConfigC::instance()->outerSectorPadPitch(sector);
   // x coordinate in sector 12
   Int_t npads = St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row);
-  Double_t probablePad = (npads+1.)/2. - x/pitch;
-  if (_debug) {
-    cout << "StTpcCoordinateTransform::padFromX(" << x << "," << sector << "," << row << "); npads = " << npads << ", pitch = " << pitch << endl;
+  Double_t xL = x;
+  Int_t NiRows = St_tpcPadConfigC::instance()->numberOfInnerRows(sector);
+  if (NiRows != 13 && row <= NiRows) {
+    // iTPC Survey
+    Double_t yRef = St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,NiRows) - 0.565;
+    Double_t xHit = xL;
+    Double_t yHit = St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,row) - yRef;
+    St_iTPCSurveyC *sur = St_iTPCSurveyC::instance();
+    Double_t dx = sur->dx(sector-1);
+//  Double_t dy = sur->dy(sector-1);
+    Double_t Xscale = sur->ScaleX(sector-1);
+//  Double_t Yscale = sur->ScaleY(sector-1);
+    Double_t theta  = sur->Angle(sector-1);
+             xL = xHit*(1. - Xscale) - dx + theta*yHit;
+//  Double_t yL = yHit*(1. - Yscale) - dy - theta*xHit + yRef;
   }
+  Double_t probablePad = (npads+1.)/2. - xL/pitch;
   // CAUTION: pad cannot be <1
   if(probablePad<0.500001) {
     probablePad=0.500001;
   }
+  if (_debug) {
+    cout << "StTpcCoordinateTransform::padFromX(" << x << "," << sector << "," << row << "); npads = " << npads << ", pitch = " << pitch 
+	 << "\tprobablePad " << probablePad << endl;
+  }
   return (probablePad);
 }
 //________________________________________________________________________________
-Double_t StTpcCoordinateTransform::xFromPad(Int_t sector, Int_t row, Double_t pad)          const {    // x coordinate in sector 12
+Double_t StTpcCoordinateTransform::xFromPad(Int_t sector, Int_t row, Double_t pad) const {    // x coordinate in sector 12
   if (row > St_tpcPadConfigC::instance()->numberOfRows(sector)) row = St_tpcPadConfigC::instance()->numberOfRows(sector);
   Double_t pitch = (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) ?	
     St_tpcPadConfigC::instance()->innerSectorPadPitch(sector) : 
     St_tpcPadConfigC::instance()->outerSectorPadPitch(sector);
   Int_t npads = St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row);
+  Double_t xPad = -pitch*(pad - (npads+1.)/2.);
   if (_debug) {
-    cout << "StTpcCoordinateTransform::xFromPad(" << sector << "," << row << "," << pad << "); npads = " << npads << ", pitch = " << pitch << endl;
+    cout << "StTpcCoordinateTransform::xFromPad(" << sector << "," << row << "," << pad << "); npads = " << npads << ", pitch = " << pitch 
+	 << "\txPad = " << xPad << endl;
   }
-  return -pitch*(pad - (npads+1.)/2.);
+  Int_t NiRows = St_tpcPadConfigC::instance()->numberOfInnerRows(sector);
+  if (NiRows == 13 || row > NiRows) {
+    return xPad;
+  }
+  // iTPC Survey
+  Double_t yRef = St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,NiRows) - 0.565;
+  Double_t xL = xPad;
+  Double_t yL = St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,row) - yRef;
+  St_iTPCSurveyC *sur = St_iTPCSurveyC::instance();
+  Double_t dx = sur->dx(sector-1);
+//Double_t dy = sur->dy(sector-1);
+  Double_t Xscale = sur->ScaleX(sector-1);
+//Double_t Yscale = sur->ScaleY(sector-1);
+  Double_t theta  = sur->Angle(sector-1);
+  Double_t xHit = xL*(1. + Xscale) + dx - theta*yL;
+//Double_t yHit = yL*(1. + Yscale) + dy + theta*xL + yRef;
+  return xHit;
 }
 // Coordinate from Row
 //

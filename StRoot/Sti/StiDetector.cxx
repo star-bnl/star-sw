@@ -55,10 +55,17 @@ void StiDetector::copy(StiDetector &detector){
 ostream& operator<<(ostream& os, const StiDetector& d)
 {
   //    os << "StiDetector:" << endl
-  os   << d.getName()
-       << Form("\tR: %7.3f cm ",d.getPlacement()->getNormalRadius()) 
-       << Form("\tA: %7.3f degree", TMath::RadToDeg()*d.getPlacement()->getNormalRefAngle());
-  //       << endl;
+  os << d.getName()
+     << "\t_groupId: " << d.getGroupId()
+     <<"\tR:"<<d.getPlacement()->getNormalRadius()<<"cm\tA:"
+     <<d.getPlacement()->getNormalRefAngle()<< " radians"; // << endl;
+  if (d.material)
+    os << *d.material;
+  if (d.shape)
+    os << *d.shape;
+  if (d.placement)
+    os << *d.placement;
+  os << endl;
   return os;
 }
 //______________________________________________________________________________

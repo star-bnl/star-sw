@@ -220,7 +220,9 @@ void Res(const Char_t *select="x", const Char_t *name="sigma") {
       if (Title.Contains("GPrcf9108.zC"))      Title = " pp200 (Run IX, TpcRS)";
       //      if (Title.Contains("602P03ih"))  Title.ReplaceAll("602P03ih"," default ");
       if (plot == "sigma") {
-	Title += Form(" : #sigma(@76cm) = %5.2f%\%",100*powfit->Eval(76));
+	//	Title += Form(" : #sigma(@76cm) = %5.2f%\%",100*powfit->Eval(76));
+	Title += Form(" : #sigma(@79.6cm) = %5.2f%\%",100*powfit->Eval(79.6));
+	Title += Form(" : #sigma(@112cm) = %5.2f%\%",100*powfit->Eval(112));
       } else {
 	Title += Form(" : #mu = %5.2f%\%",100*powfit->GetParameter(0));
       }
@@ -231,18 +233,19 @@ void Res(const Char_t *select="x", const Char_t *name="sigma") {
     }
   }
   if (plot == "sigma") {
-    Double_t PositionX = 76.2, PositionY = 0.076;
+    //    Double_t PositionX = 76.2, PositionY = 0.076;
+    Double_t PositionX = 79.6, PositionY = 0.067; // TPC
     TPolyMarker *pm = new TPolyMarker(1, &PositionX, &PositionY);
     frame->GetListOfFunctions()->Add(pm);
     pm->SetMarkerStyle(20);
     pm->SetMarkerColor(kRed);
     pm->SetMarkerSize(2.3);
-    PositionX = 62.4; PositionY = 0.091;
-    //   pm = new TPolyMarker(1, &PositionX, &PositionY);
-    //   frame->GetListOfFunctions()->Add(pm);
-    //   pm->SetMarkerStyle(20);
-    //   pm->SetMarkerColor(kBlue);
-    //   pm->SetMarkerSize(2.3);
+    PositionX = 112; PositionY = 0.053;
+    pm = new TPolyMarker(1, &PositionX, &PositionY);
+    frame->GetListOfFunctions()->Add(pm);
+    pm->SetMarkerStyle(20);
+    pm->SetMarkerColor(kBlue);
+    pm->SetMarkerSize(2.3);
   }
   leg->Draw();
   delete [] FitFiles;

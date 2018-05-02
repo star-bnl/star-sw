@@ -1,4 +1,5 @@
-/* cd ~/work/Tpc/Current/2018
+/*
+   cd ~/work/Tpc/Current/2018
    root.exe -b -q  lmysql.C 'MakeTpcAvgPowerSupply.C+(2018)' >& MakeTpcAvgPowerSupply.`date +%m%d%y`.log &
    mv MakeTpcAvgPowerSupply.2018.root MakeTpcAvgPowerSupply.2018.`date +%m%d%y`.root
    put2DB.pl 'StarDb/Calibrations/tpc/TpcAvg*.root' | tee put2DB.`date +%m%d%y`.log

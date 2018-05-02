@@ -93,9 +93,9 @@ void Draw(const Char_t *tag = "New") {
   const Char_t *Cuts[3]  = {"sector<=12","sector>12&&sector!=20","sector==20"};
   for (Int_t i = 0; i < 3; i++) {
     if (i < 2) {
-      TpcHit->Draw(Form("abs(z):row>>%sR%s(45,0.5,45.5,60,208,213)",tag,Sides[i]),Cuts[i],"colz");
+      TpcHit->Draw(Form("abs(z):row>>%sR%s(45,0.5,45.5,130,200,213)",tag,Sides[i]),Cuts[i],"colz");
     } else {
-      TpcHit->Draw(Form("abs(z):row>>%sR%s(72,0.5,72.5,60,208,213)",tag,Sides[i]),Cuts[i],"colz");
+      TpcHit->Draw(Form("abs(z):row>>%sR%s(72,0.5,72.5,130,200,213)",tag,Sides[i]),Cuts[i],"colz");
     }
     TH2 *R = (TH2 *) gDirectory->Get(Form("%sR%s",tag,Sides[i]));
     if (R) {
