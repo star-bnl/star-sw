@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.175.2.3 2018/04/28 02:05:25 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.175.2.4 2018/05/02 15:33:49 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.175.2.4  2018/05/02 15:33:49  perev
+ * kMaxEta 1.5==>1.25
+ *
  * Revision 2.175.2.3  2018/04/28 02:05:25  perev
  * Cleanup
  *
@@ -633,7 +636,8 @@ using namespace std;
 // x[3] = C  (local) curvature of the track
 // x[4] = tan(l) 
 
-static const double kMaxEta = 1.5; // 72 degrees for laser tracks
+//static const double kMaxEta = 1.5; // 72 degrees for laser tracks
+static const double kMaxEta = 1.25; // 72 degrees for laser tracks
 static const double kMaxSinEta = sin(kMaxEta);
 static const double kMaxCur = 0.2;
 static const double kFarFromBeam = 10.;
