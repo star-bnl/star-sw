@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.40.6.2 2018/02/28 01:42:13 perev Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.40.6.3 2018/05/02 20:48:47 perev Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -36,6 +36,8 @@
 #  include "DAQ_READER/daqReader.h"
 #include "RTS/src/DAQ_TPX/tpxFCF_flags.h" // for FCF flag definition
 #include "TBenchmark.h"
+#include "StiUtilities/StiDebug.h"
+
 ClassImp(StTpcRTSHitMaker); 
 #define __DEBUG__
 #ifdef __DEBUG__
@@ -339,6 +341,19 @@ Int_t StTpcRTSHitMaker::Make() {
 						    , dta->sim_cld[i].cld.flags);
 	assert(dta->sim_cld[i].cld.pad >  0 && dta->sim_cld[i].cld.pad <= 182 && 
 	       dta->sim_cld[i].cld.tb  >= 0 && dta->sim_cld[i].cld.tb  <  512);
+{
+  int sector = hit->sector();
+  double myZ = hit->position()[2];
+  int L = 10;
+  int bad = (sector<=12 && myZ<-L) || (sector>12 && myZ>L);
+  if (bad) StiDebug::Count("RtsHitBad",fabs(myZ));
+  
+  double timb = hit->timeBucket();
+         myZ  = LS.position()[2];
+  StiDebug::Count("RtsHit_ZvsTime",timb,myZ);
+
+//  assert(!bad);
+}
 	hitsAdded++;
         if (hit->minTmbk() == 0) bin0Hits++;
 	if (Debug()) hit->Print();
@@ -399,5 +414,29 @@ Int_t StTpcRTSHitMaker::Make() {
   gBenchmark->Stop("StTpcRTSHitMaker::Make");
   gBenchmark->Show("StTpcRTSHitMaker::Make");
   gBenchmark->Show("StTpcRTSHitMaker::Make::finalize");
+
+{
+  UInt_t numberOfSectors = hitCollection->numberOfSectors();
+  for (UInt_t sec = 1; sec <= numberOfSectors; sec++) {
+    StTpcSectorHitCollection* sectorCollection = hitCollection->sector(sec-1);
+    if (!sectorCollection) continue;
+    UInt_t numberOfPadrows = sectorCollection->numberOfPadrows();
+    for (UInt_t row = 1; row <= numberOfPadrows; row++) {
+      StTpcPadrowHitCollection *rowCollection = sectorCollection->padrow(row-1);
+      if (!rowCollection) continue;
+      UInt_t NoHits = rowCollection->hits().size();
+	for (UInt_t k = 0; k < NoHits; k++) {
+	    StTpcHit* hit = rowCollection->hits().at(k);
+{
+  int sector = hit->sector();
+  double myZ = hit->position()[2];
+  int L = 10;
+  int bad = (sector<=12 && myZ<-L) || (sector>12 && myZ>L);
+  if (bad) StiDebug::Count("RtsHitOutBad",fabs(myZ));
+//  assert(!bad);
+}
+
+  } } }
+}
   return kStOK;
 }
