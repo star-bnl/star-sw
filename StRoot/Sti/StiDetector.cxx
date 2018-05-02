@@ -152,10 +152,10 @@ return shape->getVolume()*material->getDensity();
 //______________________________________________________________________________
 int StiDetector::insideL(const double xl[3],int mode,double fakt) const 
 {
-static int nCall = 0; nCall++;
-if (!mode) mode = 1;
 double rN = placement->getNormalRadius();
-double myErr = 0.1+ rN/20;
+double myErr = rN*(fakt-1);
+if (myErr<0.1) myErr = 0.1;
+if (myErr>10.) myErr = 10.;
 double thick = shape->getThickness();
 do {
  if (shape->getShapeCode()==1) { //Planar
