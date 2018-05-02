@@ -25,7 +25,7 @@ class St_tpcSlewingC : public TChair {
   }
   double        correctedT(int sector, int padrow, double q, double T) { // T [microsec]
     if (St_tpcPadConfigC::instance()->iTpc(sector)) return T;
-    int inout = (St_tpcPadConfigC::instance()->IsRowInner(sector,padrow) ? 0 : 1); // padrow = 1..45
+    int inout = (St_tpcPadConfigC::instance()->isInnerPadRow(sector,padrow) ? 0 : 1); // padrow = 1..45
     return T - (T > minT(inout) ? slewing(sector,inout,q) : 0);
   }
  protected:
