@@ -9,7 +9,9 @@ void lMuDst(Int_t opt = -2, const Char_t *input = "", const Char_t *copt = "StEv
   bfc(opt,Chain,input,ofile,tfile);
   //  gROOT->LoadMacro("FitP_t.h+");
   gSystem->Load("libEG");
+#if 0
   gSystem->Load("libKFParticlePerformance");
   gSystem->AddIncludePath(" -I$ROOTROOT/root/tmva/test");
+#endif
 #endif
 }
