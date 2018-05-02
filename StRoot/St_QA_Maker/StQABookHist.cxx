@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.77 2017/02/25 03:24:30 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.78 2018/05/02 21:07:40 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.78  2018/05/02 21:07:40  genevb
+// Initial accomodation for iTPC
+//
 // Revision 2.77  2017/02/25 03:24:30  genevb
 // Run 17: remove HFT
 //
@@ -1008,9 +1011,9 @@ void StQABookHist::BookHistGlob(){
 
 // 1D tpc
 
-  m_pointT      = QAH::H1F("QaGtrkNPntT",   "globtrk: N points on trk,tpc", 50, 0.,50.);
-  m_max_pointT  = QAH::H1F("QaGtrkNPntMaxT","globtrk: N max pnts on trk, tpc", 50, 0.,100.);
-  m_fit_pointT  = QAH::H1F("QaGtrkNPntFitT","globtrk: N fit pnts on trk, tpc", 50, 0.,50.);
+  m_pointT      = QAH::H1F("QaGtrkNPntT",   "globtrk: N points on trk,tpc", 81,-0.5, 80.5);
+  m_max_pointT  = QAH::H1F("QaGtrkNPntMaxT","globtrk: N max pnts on trk, tpc", 76, -1, 151);
+  m_fit_pointT  = QAH::H1F("QaGtrkNPntFitT","globtrk: N fit pnts on trk, tpc", 81, -0.5, 80.5);
   m_glb_ratiomT = QAH::H1F("QaGtrkRnmT",    "globtrk: ratio Nfit/max pnt, tpc", 55, 0., 1.1);
   m_glb_chargeT = QAH::H1F("QaGtrkChrgT",   "globtrk: charge, tpc ", 20,-2.,2.);
   m_glb_r0T     = QAH::H1F("QaGtrkR0T",     "globtrk: radius at start (cm), tpc ", 50,0.,200.);
@@ -1019,11 +1022,11 @@ void StQABookHist::BookHistGlob(){
   m_glb_z0T     = QAH::H1F("QaGtrkZ0T",     "globtrk: z-coord at start (cm), tpc ", 50, -300.,300.);
     m_glb_z0T->SetMinimum(500);
   m_glb_curvT   = QAH::H1F("QaGtrkCurvT",   "globtrk: log10 curvature (1/cm), tpc ", 80,-3.5,0.5);
-  m_glb_padfTEW = QAH::MH1F("QaGtrkPadfTEW","globtrk: padrow of first hit on trk, tpc", 45,0.5,45.5,2);
+  m_glb_padfTEW = QAH::MH1F("QaGtrkPadfTEW","globtrk: padrow of first hit on trk, tpc", 72,0.5,72.5,2);
   m_glb_padfTEW->Rebin(0,"East");
   m_glb_padfTEW->Rebin(1,"West");
   m_glb_padfTEW->SetStats(kFALSE);
-  m_glb_padfT   = QAH::H1F("QaGtrkPadfT",   "globtrk: padrow of first hit on trk, tpc", 45,0.5,45.5);
+  m_glb_padfT   = QAH::H1F("QaGtrkPadfT",   "globtrk: padrow of first hit on trk, tpc", 72,0.5,72.5);
   m_glb_f0      = QAH::MH1F("QaGtrkf0",     "globtrk: first point: hit-helix, tpc",60,-3.,3.,3);
   m_glb_f0->Rebin(0,"X");
   m_glb_f0->Rebin(1,"Y");
@@ -1100,12 +1103,12 @@ void StQABookHist::BookHistGlob(){
     m_eta_trklengthT->SetYTitle("length");
 
   m_npoint_lengthT = QAH::H2F("QaGtrkNPntLengthT","globtrk: N pnts vs length, tpc",
-			     25,0.,250.,25,0.,50.);
+			     25,0.,250.,40,1.,81.);
     m_npoint_lengthT->SetXTitle("trk length");
     m_npoint_lengthT->SetYTitle("Npoints on trk");
 
   m_fpoint_lengthT = QAH::H2F("QaGtrkFitPntLengthT","globtrk: N fit pnts vs length, tpc",
-			     25,0.,250.,25,0.,50.);
+			     25,0.,250.,40,1.,81.);
     m_fpoint_lengthT->SetXTitle("trk length");
     m_fpoint_lengthT->SetYTitle("Npoints on trk");
 
@@ -1472,9 +1475,9 @@ void StQABookHist::BookHistPrim(){
   }
 
 // 1D tpc
-  m_ppointT      = QAH::H1F("QaPtrkNPntT",   "primtrk: N points on trk,tpc", 60, 0.,60.);
-  m_pmax_pointT  = QAH::H1F("QaPtrkNPntMaxT","primtrk: N max pnts on trk, tpc", 50, 0.,100.);
-  m_pfit_pointT  = QAH::H1F("QaPtrkNPntFitT","primtrk: N fit pnts on trk, tpc", 60, 0.,60.);
+  m_ppointT      = QAH::H1F("QaPtrkNPntT",   "primtrk: N points on trk,tpc", 81, -0.5,80.5);
+  m_pmax_pointT  = QAH::H1F("QaPtrkNPntMaxT","primtrk: N max pnts on trk, tpc", 76, -1,151);
+  m_pfit_pointT  = QAH::H1F("QaPtrkNPntFitT","primtrk: N fit pnts on trk, tpc", 81, -0.5,80.5);
   m_prim_ratiomT = QAH::H1F("QaPtrkRnmT",    "primtrk: ratio Nfit/max pnt, tpc", 55, 0., 1.1);
   m_prim_chargeT = QAH::H1F("QaPtrkChrgT",   "primtrk: charge, tpc ", 20,-2.,2.);
   m_prim_r0T     = QAH::H1F("QaPtrkR0T",     "primtrk: radius at start (cm), tpc ", 50,0.,.1);
@@ -1528,10 +1531,10 @@ void StQABookHist::BookHistPrim(){
   m_peta_trklengthT = QAH::H2F("QaPtrkLengthVEtaT","primtrk: trk length vs eta, tpc",20,-2.,2.,50,70.,350.);
     m_peta_trklengthT->SetXTitle("eta");
     m_peta_trklengthT->SetYTitle("length");
-  m_pnpoint_lengthT = QAH::H2F("QaPtrkNPntLengthT","primtrk: N pnts vs length, tpc",25,70.,350.,25,0.,50.);
+  m_pnpoint_lengthT = QAH::H2F("QaPtrkNPntLengthT","primtrk: N pnts vs length, tpc",25,70.,350.,40,1.,81.);
     m_pnpoint_lengthT->SetXTitle("trk length");
     m_pnpoint_lengthT->SetYTitle("Npoints on trk");
-  m_pfpoint_lengthT = QAH::H2F("QaPtrkFitPntLengthT","primtrk: N fit pnts vs length, tpc",25,70.,350.,25,0.,50.);
+  m_pfpoint_lengthT = QAH::H2F("QaPtrkFitPntLengthT","primtrk: N fit pnts vs length, tpc",25,70.,350.,40,1.,81.);
     m_pfpoint_lengthT->SetXTitle("trk length");
     m_pfpoint_lengthT->SetYTitle("Npoints on trk");
   m_pchisq0_momT = QAH::H2F("QaPtrkChi0MomT","primtrk: Chisq0 vs log10 mom, tpc",40,1.,4.,50,0.,5.);
@@ -1917,7 +1920,7 @@ void StQABookHist::BookHistPoint(){
   m_pnt_phiT->Rebin(0,"East");
   m_pnt_phiT->Rebin(1,"West");
   m_pnt_phiT->SetStats(kFALSE);
-  m_pnt_padrowT = QAH::MH1F("QaPointPadrowT","point: padrow distribution of hits, tpc",45,0.5,45.5,2);
+  m_pnt_padrowT = QAH::MH1F("QaPointPadrowT","point: padrow distribution of hits, tpc",72,0.5,72.5,2);
   m_pnt_padrowT->Rebin(0,"East");
   m_pnt_padrowT->Rebin(1,"West");
   m_pnt_padrowT->SetStats(kFALSE);

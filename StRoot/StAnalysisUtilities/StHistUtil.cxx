@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.99 2016/06/13 20:31:10 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.100 2018/05/02 21:06:32 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.100  2018/05/02 21:06:32  genevb
+// Initial accomodation for iTPC
+//
 // Revision 2.99  2016/06/13 20:31:10  genevb
 // Resolve Coverity BUFFER_SIZE_WARNING with careful copy function
 //
@@ -873,7 +876,11 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             // try: full name
             TString onamebase = oname;
 #define SingleTpcSectorReference false
-            if (SingleTpcSectorReference && onamebase.Contains("TpcSector")) {
+            if (SingleTpcSectorReference && onamebase.Contains("iTpcSector")) {
+              // last parameter is the single sector to use for reference:
+              // e.g. TpcSector14 => TpcSector20 if the number is "20"
+              onamebase.Replace(onamebase.Index("iTpcSector")+10,2,"20");
+            } else if (SingleTpcSectorReference && onamebase.Contains("TpcSector")) {
               // last parameter is the single sector to use for reference:
               // e.g. TpcSector20 => TpcSector14 if the number is "14"
               onamebase.Replace(onamebase.Index("TpcSector")+9,2,"14");
@@ -1051,10 +1058,11 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
                       (oName.Contains("PointXYTpc") &&  // Unfortunately was polar for a short time
                        TMath::Abs((hobj->GetYaxis()->GetXmax()/TMath::Pi())-2)<1e-5))) {
             TH2F* htmp = new TH2F(Form("%s.",hobj->GetName()),hobj->GetTitle(),1,-200,200,1,-200,200);
-            htmp->Fill(0.,0.,.1);htmp->SetMinimum(1);
+            float hmin = (oName.Contains("PointRPTpcQ") ? 1e-4 : 1.0);
+            htmp->Fill(0.,0.,hmin); htmp->SetMinimum(hmin);
             htmp->SetStats(kFALSE);
             htmp->Draw();
-            hobj->SetMinimum(0.9);
+            hobj->SetMinimum(0.9*hmin);
             if (gROOT->GetVersionInt() < 52800) {
               hobj->Draw("Pol ZCol Same");
             } else {
@@ -1148,7 +1156,55 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
                      << fndVtx << " / " << totVtx << endm;
           }
 
-          if (oName.Contains("TpcSector")) {
+          if (oName.Contains("iTpcSector")) {
+            // Draw RDO boundaries
+            ruler.SetLineColor(1);
+            ruler.SetLineWidth(1);
+            // between RDOs 2-6, draw +/- (npads_row1+npads_row2)/2 * (pitch/2)
+            float pitch = 0.67/2.0; // 6.7mm pitch
+            ruler.DrawLine(-137*pitch,64.5,137*pitch,64.5);
+            ruler.DrawLine(-123*pitch,56.5,123*pitch,56.5);
+            ruler.DrawLine(-111*pitch,48.5,111*pitch,48.5);
+            ruler.DrawLine( -97*pitch,40.5, 97*pitch,40.5);
+            // between RDOs 1-2, outer X pads [X/2 at each end] are in RDO 1
+            //pitch = 0.50/2.0; // 3.35mm pitch
+            //int row_width = 134; int in_step = 68; float row1=6.5;
+            //float row2 = row1+1.0;
+            //ruler.DrawLine(-(row_width-in_step)*pitch,row2,(row_width-in_step)*pitch,row2);
+            //ruler.DrawLine(-row_width*pitch,row1,-(row_width-in_step)*pitch,row1);
+            //ruler.DrawLine((row_width-in_step)*pitch,row1,row_width*pitch,row1);
+            //ruler.DrawLine(-(row_width-in_step)*pitch,row1,-(row_width-in_step)*pitch,row2);
+            //ruler.DrawLine((row_width-in_step)*pitch,row1,(row_width-in_step)*pitch,row2);
+            latex.SetTextAngle(0);
+            latex.SetTextAlign(32);
+            latex.DrawLatex(50,4,"RDO 1");
+            latex.DrawLatex(50,28,"2");
+            latex.DrawLatex(50,44,"3");
+            latex.DrawLatex(50,52,"4");
+            latex.DrawLatex(50,60,"5");
+            latex.DrawLatex(50,68,"6");
+
+            // Draw Anode guides
+            ruler.SetLineColor(2);
+            //ruler.DrawLine(-52,2.9,-47,2.9);
+            //ruler.DrawLine(-52,6.2,-47,6.2);
+            //ruler.DrawLine(-52,9.4,-47,9.4);
+            ruler.DrawLine(-52,40.5,-47,40.5);
+            ruler.DrawLine(-52,48.1,-47,48.1);
+            ruler.DrawLine(-52,56.1,-47,56.1);
+            ruler.DrawLine(-52,64.1,-47,64.1);
+            latex.SetTextAlign(12);
+            latex.SetTextColor(2);
+            latex.DrawLatex(-50, 5.1,"1 Anode");
+            latex.DrawLatex(-50,15.1,"2");
+            latex.DrawLatex(-50,25.1,"3");
+            latex.DrawLatex(-50,35.1,"4");
+            latex.DrawLatex(-50,44.1,"5");
+            latex.DrawLatex(-50,52.1,"6");
+            latex.DrawLatex(-50,60.1,"7");
+            latex.DrawLatex(-50,68.1,"8");
+            latex.SetTextColor(1);
+          } else if (oName.Contains("TpcSector")) {
             // Draw RDO boundaries
             ruler.SetLineColor(1);
             ruler.SetLineWidth(1);
@@ -1158,13 +1214,16 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             ruler.DrawLine(-123*pitch,29.5,123*pitch,29.5);
             ruler.DrawLine(-111*pitch,21.5,111*pitch,21.5);
             ruler.DrawLine( -97*pitch,13.5, 97*pitch,13.5);
-            // between RDOs 1-2, outer 24 pads (12 at each end) are in RDO 1
+            // between RDOs 1-2, outer 24(68) pads [12(34) at each end] are in RDO 1
             pitch = 0.335/2.0; // 3.35mm pitch
-            ruler.DrawLine(-(142-24)*pitch,8.5,(142-24)*pitch,8.5);
-            ruler.DrawLine(-138*pitch,7.5,-(138-24)*pitch,7.5);
-            ruler.DrawLine((142-24)*pitch,7.5,146*pitch,7.5);
-            ruler.DrawLine(-(142-24)*pitch,7.5,-(142-24)*pitch,8.5);
-            ruler.DrawLine((142-24)*pitch,7.5,(142-24)*pitch,8.5);
+            int row_width = 134; int in_step = 68; float row1=6.5;
+            if (m_RunYear < 17) { row_width = 142; in_step = 24; row1=7.5; }
+            float row2 = row1+1.0;
+            ruler.DrawLine(-(row_width-in_step)*pitch,row2,(row_width-in_step)*pitch,row2);
+            ruler.DrawLine(-row_width*pitch,row1,-(row_width-in_step)*pitch,row1);
+            ruler.DrawLine((row_width-in_step)*pitch,row1,row_width*pitch,row1);
+            ruler.DrawLine(-(row_width-in_step)*pitch,row1,-(row_width-in_step)*pitch,row2);
+            ruler.DrawLine((row_width-in_step)*pitch,row1,(row_width-in_step)*pitch,row2);
             latex.SetTextAngle(0);
             latex.SetTextAlign(32);
             latex.DrawLatex(50,4,"RDO 1");

@@ -606,7 +606,12 @@ void StEventQAMaker::MakeHistGlob() {
 	
 	// TPC padrow histogram
 	Int_t minpadrow = 0;
-	while (minpadrow < 45) if (map.hasHitInRow(kTpcId,++minpadrow)) break;
+	while (minpadrow < 72) {
+          minpadrow++;
+          if ((minpadrow <= 45 && map.hasHitInRow(kTpcId,minpadrow)) ||
+              map.hasHitInRow(kiTpcId,minpadrow))
+            break;
+        }
         hists->m_glb_padfT->Fill(minpadrow);
 	
         hists->m_pointT->Fill(detInfo->numberOfPoints());
@@ -1766,6 +1771,7 @@ void StEventQAMaker::MakeHistPoint() {
     // z and phi dist of hits
     for (UInt_t i=0; i<tpcHits->numberOfSectors(); i++) {
       StTpcSectorHitCollection* tpcHitsSector = tpcHits->sector(i);
+      unsigned int innerRows = St_tpcPadConfigC::instance()->numberOfInnerRows(i+1);
       for (UInt_t j=0; j<tpcHitsSector->numberOfPadrows(); j++) {
         StSPtrVecTpcHit& tpcHitsVec = tpcHitsSector->padrow(j)->hits();
 	for (UInt_t k=0; k<tpcHitsVec.size(); k++) {
@@ -1778,10 +1784,11 @@ void StEventQAMaker::MakeHistPoint() {
              tpcHitsVec[k]->sector(),tpcHitsVec[k]->padrow(),
              hitPos.x(),hitPos.y(),hitPos.z(),
              tpcHitsVec[k]->pad(),tb,tpcHitsVec[k]->flag());
-          // correct for padrow density (1/4.8cm and 1/2.0cm) for polar xy plots
-          float density_correction = (j>12 ? 1 : 2.4);
-          // scale charge by length of pads (1/1.15cm and 1/1.95cm)
-          float hit_charge = tpcHitsVec[k]->charge() * density_correction * (j>12 ? 1 : 1.95/1.15);
+          // Normalize scalings to outer sectors:
+          // correct for padrow density (1/1.6cm, 1/4.8cm, and 1/2.0cm) for polar xy plots
+          float density_correction = (j<innerRows ? (innerRows == 13 ? 4.8/2.0 : 1.6/2.0) : 2.0/2.0);
+          // scale charge by length of pads (1/1.55cm, 1/1.15cm, and 1/1.95cm)
+          float hit_charge = tpcHitsVec[k]->charge() * density_correction * (j<innerRows ? (innerRows == 13 ? 1.95/1.15 : 1.95/1.55) : 1.95/1.95);
           // TPC East is sectors 13-24, and (generally) z<0
           // TPC West is sectors  1-12, and (generally) z>0
           // In StEvent, sectors are mapped starting at 0 instead of 1
@@ -2815,8 +2822,11 @@ void StEventQAMaker::MakeHistRP() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.129 2017/02/25 03:24:30 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.130 2018/05/02 21:07:40 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.130  2018/05/02 21:07:40  genevb
+// Initial accomodation for iTPC
+//
 // Revision 2.129  2017/02/25 03:24:30  genevb
 // Run 17: remove HFT
 //
