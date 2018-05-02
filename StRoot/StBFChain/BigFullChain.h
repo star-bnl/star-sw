@@ -284,7 +284,8 @@ Bfc_st BFC[] = { // standard chains
   {"MC2017.Ideal","","","MC.2017,MC.StiCA"                                                ,"","","",kFALSE},
   {"MC2017",      "","","MC2017.Ideal"                                                    ,"","","",kFALSE},
   {"MC2018.Ideal","","","MC.2018,MC.StiCA"                                                ,"","","",kFALSE},
-  {"MC2018",      "","","MC2018.Ideal"                                                    ,"","","",kFALSE},
+  {"MC2018",      "","","MC2018.Ideal,VMCAlignment,sdt20180426.122000"                    ,"","","",kFALSE},
+  {"XC2018",      "","","MC2018.Ideal,VMCAlignment,sdt20180426.122000,Stx"                ,"","","",kFALSE},
   {"MC2019.Ideal","","","MC.2019,MC.StiCA"                                                ,"","","",kFALSE},
   {"MC2019",      "","","MC2019.Ideal"                                                    ,"","","",kFALSE},
   {"RC----------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1782,9 +1783,9 @@ Bfc_st BFC[] = { // standard chains
   {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,Stu,StEvent,StDbT,TpcIT,compend,sim_T,tbutil,TMVARank","StiMaker"
    ,                                                          "StiUtilities,StiMaker","Sti tracker",kFALSE},
   {"HLTCA","","-Sti,-StiCA,-Stv","","StHLTCAMaker","TPCCATracker,StHLTCAMaker","HLT reconstruction",kFALSE},
-  {"Stx"    ,"","","-Sti,-StiCA,-Stv","StxMaker","TPCCATracker,StxMaker",  "eXpress reconstruction",kFALSE},
-  {"KFVertex" ,""  ,"Sti","-VFMinuit,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2"
-   ,"StKFVertexMaker",      "MathMore,Spectrum",  "...KFParticle based multi vertex reconstruction",kFALSE},
+  {"Stx"  ,"","","-Sti,-StiCA,-Stv,StiLibs,StiCALib","StxMaker","StxMaker","eXpress reconstruction",kFALSE},
+  {"KFVertex" ,""  ,"Sti","StiLibs,-VFMinuit,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2"
+   ,"StKFVertexMaker","MathMore,Spectrum,StiMaker",  "KFParticle based multi vertex reconstruction",kFALSE},
   {"Stv","Stv","","-xgeometry,-Sti,-StiTpc,-StiSsd,-StiSvt,-StiPxl,-StiSsd,-StiSst,-StiIst,-StiLibs,-StiLibsHft"
    ,"StvMaker","libHist,libHistPainter,libVMC,geant3,GeoTestMaker,StvUtil,Stv,StvSeed,StvMaker,StEventUtilities,"
    ,"Stv"                                                                                          ,kFALSE},
