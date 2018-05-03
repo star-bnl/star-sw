@@ -404,6 +404,7 @@ void StiCATpcTrackerInterface::MakeHits()
 
         // get local coordinates. take into account distortion
       StiHit *hit = *cit;
+      if ( !(hit->detector()->isActive()) ) continue;
       if (! hit->stHit()) 	continue;
       if (  hit->timesUsed()) 	continue;//VP
       
