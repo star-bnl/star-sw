@@ -44,6 +44,10 @@ class StMultiH1F : public TH2F {
   virtual        void SavePrimitive(std::ostream& out, Option_t* option = "");
   virtual       TH1F* GetSubHist(Int_t ybin) { return (subHists ? subHists[ybin] : 0); }
   virtual       TH1F* GetAHist() { return aHist; }
+
+  /// Saves subhistograms (TH1F) along with this composite object
+  virtual       Int_t Write(const char *name=0, Int_t option=0, Int_t bufsize=0);
+
  protected:
   TString names[StMultiH1FMaxBins];
   Float_t fMOffset;
@@ -55,8 +59,11 @@ class StMultiH1F : public TH2F {
 
 #endif
 
-// $Id: StMultiH1F.h,v 1.11 2016/05/27 18:02:41 genevb Exp $
+// $Id: StMultiH1F.h,v 1.12 2018/05/03 16:04:58 smirnovd Exp $
 // $Log: StMultiH1F.h,v $
+// Revision 1.12  2018/05/03 16:04:58  smirnovd
+// Override Write() to save sub histograms in StMultiH1F
+//
 // Revision 1.11  2016/05/27 18:02:41  genevb
 // Garbage collection (Coverity), remove unnecessary ROOT types
 //
