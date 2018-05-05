@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.100 2018/05/02 21:06:32 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.101 2018/05/05 04:00:54 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.101  2018/05/05 04:00:54  genevb
+// iTPC RDO outlines
+//
 // Revision 2.100  2018/05/02 21:06:32  genevb
 // Initial accomodation for iTPC
 //
@@ -1167,28 +1170,101 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             ruler.DrawLine(-111*pitch,48.5,111*pitch,48.5);
             ruler.DrawLine( -97*pitch,40.5, 97*pitch,40.5);
             // between RDOs 1-2, outer X pads [X/2 at each end] are in RDO 1
-            //pitch = 0.50/2.0; // 3.35mm pitch
-            //int row_width = 134; int in_step = 68; float row1=6.5;
-            //float row2 = row1+1.0;
-            //ruler.DrawLine(-(row_width-in_step)*pitch,row2,(row_width-in_step)*pitch,row2);
-            //ruler.DrawLine(-row_width*pitch,row1,-(row_width-in_step)*pitch,row1);
-            //ruler.DrawLine((row_width-in_step)*pitch,row1,row_width*pitch,row1);
-            //ruler.DrawLine(-(row_width-in_step)*pitch,row1,-(row_width-in_step)*pitch,row2);
-            //ruler.DrawLine((row_width-in_step)*pitch,row1,(row_width-in_step)*pitch,row2);
+            pitch = 0.50/2.0; // 5.0mm pitch
+            int row_width = 70; int in_step1 = 52; int in_step2 = 54;
+            float row1=10.5; float row2 = row1+1.0; float row3 = row1+2.0;
+            ruler.DrawLine(-(row_width-in_step2)*pitch,row3,(row_width-in_step2)*pitch,row3);
+            ruler.DrawLine(-(row_width-in_step2)*pitch,row2,-(row_width-in_step1)*pitch,row2);
+            ruler.DrawLine((row_width-in_step2)*pitch,row2,(row_width-in_step1)*pitch,row2);
+            ruler.DrawLine(-row_width*pitch,row1,-(row_width-in_step1)*pitch,row1);
+            ruler.DrawLine((row_width-in_step1)*pitch,row1,row_width*pitch,row1);
+            ruler.DrawLine(-(row_width-in_step1)*pitch,row1,-(row_width-in_step1)*pitch,row2);
+            ruler.DrawLine((row_width-in_step1)*pitch,row1,(row_width-in_step1)*pitch,row2);
+            ruler.DrawLine(-(row_width-in_step2)*pitch,row3,-(row_width-in_step2)*pitch,row2);
+            ruler.DrawLine((row_width-in_step2)*pitch,row3,(row_width-in_step2)*pitch,row2);
+            bool east = (atoi(&(oName.Data()[oName.Last('r')+1])) > 12);
+            pitch = (east ? -0.50 : 0.50); // 5.0mm pitch, switch orientation for east
+            float p01 = -46*pitch; float row01 = 22.5;
+            float p02 = -36*pitch; float row02 = 22.5;
+            float p03 = -36*pitch; float row03 = 21.5;
+            float p04 = -39*pitch; float row04 = 21.5;
+            float p05 = -39*pitch; float row05 = 20.5;
+            float p06 = -19*pitch; float row06 = 20.5;
+            float p07 = -19*pitch; float row07 = 22.5;
+            float p08 =  -9*pitch; float row08 = 22.5;
+            float p09 =  -9*pitch; float row09 = 23.5;
+            float p10 =  -2*pitch; float row10 = 23.5;
+            float p11 =  -2*pitch; float row11 = 24.5;
+            float p12 =   2*pitch; float row12 = 24.5;
+            float p13 =   2*pitch; float row13 = 23.5;
+            float p14 =   9*pitch; float row14 = 23.5;
+            float p15 =   9*pitch; float row15 = 22.5;
+            float p16 =  35*pitch; float row16 = 22.5;
+            float p17 =  35*pitch; float row17 = 23.5;
+            float p18 =  31*pitch; float row18 = 23.5;
+            float p19 =  31*pitch; float row19 = 24.5;
+            float p20 =  46*pitch; float row20 = 24.5;
+            ruler.DrawLine(p01,row01,p02,row02);
+            ruler.DrawLine(p02,row02,p03,row03);
+            ruler.DrawLine(p03,row03,p04,row04);
+            ruler.DrawLine(p04,row04,p05,row05);
+            ruler.DrawLine(p05,row05,p06,row06);
+            ruler.DrawLine(p06,row06,p07,row07);
+            ruler.DrawLine(p07,row07,p08,row08);
+            ruler.DrawLine(p08,row08,p09,row09);
+            ruler.DrawLine(p09,row09,p10,row10);
+            ruler.DrawLine(p10,row10,p11,row11);
+            ruler.DrawLine(p11,row11,p12,row12);
+            ruler.DrawLine(p12,row12,p13,row13);
+            ruler.DrawLine(p13,row13,p14,row14);
+            ruler.DrawLine(p14,row14,p15,row15);
+            ruler.DrawLine(p15,row15,p16,row16);
+            ruler.DrawLine(p16,row16,p17,row17);
+            ruler.DrawLine(p17,row17,p18,row18);
+            ruler.DrawLine(p18,row18,p19,row19);
+            ruler.DrawLine(p19,row19,p20,row20);
+            p01 =   0*pitch; row01 = 24.5;
+            p02 =   0*pitch; row02 = 26.5;
+            p03 =  -7*pitch; row03 = 26.5;
+            p04 =  -7*pitch; row04 = 28.5;
+            p05 =  -8*pitch; row05 = 28.5;
+            p06 =  -8*pitch; row06 = 30.5;
+            p07 =  10*pitch; row07 = 30.5;
+            p08 =  10*pitch; row08 = 32.5;
+            p09 =  11*pitch; row09 = 32.5;
+            p10 =  11*pitch; row10 = 35.5;
+            p11 =  10*pitch; row11 = 35.5;
+            p12 =  10*pitch; row12 = 36.5;
+            p13 =   0*pitch; row13 = 36.5;
+            p14 =   0*pitch; row14 = 40.5;
+            ruler.DrawLine(p01,row01,p02,row02);
+            ruler.DrawLine(p02,row02,p03,row03);
+            ruler.DrawLine(p03,row03,p04,row04);
+            ruler.DrawLine(p04,row04,p05,row05);
+            ruler.DrawLine(p05,row05,p06,row06);
+            ruler.DrawLine(p06,row06,p07,row07);
+            ruler.DrawLine(p07,row07,p08,row08);
+            ruler.DrawLine(p08,row08,p09,row09);
+            ruler.DrawLine(p09,row09,p10,row10);
+            ruler.DrawLine(p10,row10,p11,row11);
+            ruler.DrawLine(p11,row11,p12,row12);
+            ruler.DrawLine(p12,row12,p13,row13);
+            ruler.DrawLine(p13,row13,p14,row14);
             latex.SetTextAngle(0);
             latex.SetTextAlign(32);
-            latex.DrawLatex(50,4,"RDO 1");
-            latex.DrawLatex(50,28,"2");
-            latex.DrawLatex(50,44,"3");
-            latex.DrawLatex(50,52,"4");
-            latex.DrawLatex(50,60,"5");
-            latex.DrawLatex(50,68,"6");
+            latex.DrawLatex(50,5,"RDO 1");
+            latex.DrawLatex(50,18,"2");
+            latex.DrawLatex(50,33,(east ? "4 , 3" : "3 , 4"));
+            latex.DrawLatex(50,44,"5");
+            latex.DrawLatex(50,52,"6");
+            latex.DrawLatex(50,60,"7");
+            latex.DrawLatex(50,68,"8");
 
             // Draw Anode guides
             ruler.SetLineColor(2);
-            //ruler.DrawLine(-52,2.9,-47,2.9);
-            //ruler.DrawLine(-52,6.2,-47,6.2);
-            //ruler.DrawLine(-52,9.4,-47,9.4);
+            ruler.DrawLine(-52,10.5,-47,10.5);
+            ruler.DrawLine(-52,20.5,-47,20.5);
+            ruler.DrawLine(-52,30.5,-47,30.5);
             ruler.DrawLine(-52,40.5,-47,40.5);
             ruler.DrawLine(-52,48.1,-47,48.1);
             ruler.DrawLine(-52,56.1,-47,56.1);
