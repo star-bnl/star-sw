@@ -1,5 +1,8 @@
-// $Id: QAhlist_tpcSectors.h,v 2.2 2007/03/13 18:37:54 genevb Exp $
+// $Id: QAhlist_tpcSectors.h,v 2.3 2018/05/05 04:11:53 genevb Exp $
 // $Log: QAhlist_tpcSectors.h,v $
+// Revision 2.3  2018/05/05 04:11:53  genevb
+// iTpc sectors
+//
 // Revision 2.2  2007/03/13 18:37:54  genevb
 // simplified names
 //
@@ -37,4 +40,28 @@
   "QaTpcSector21",
   "QaTpcSector22",
   "QaTpcSector23",
-  "QaTpcSector24"
+  "QaTpcSector24",
+  "QaiTpcSector1",
+  "QaiTpcSector2",
+  "QaiTpcSector3",
+  "QaiTpcSector4",
+  "QaiTpcSector5",
+  "QaiTpcSector6",
+  "QaiTpcSector7",
+  "QaiTpcSector8",
+  "QaiTpcSector9",
+  "QaiTpcSector10",
+  "QaiTpcSector11",
+  "QaiTpcSector12",
+  "QaiTpcSector13",
+  "QaiTpcSector14",
+  "QaiTpcSector15",
+  "QaiTpcSector16",
+  "QaiTpcSector17",
+  "QaiTpcSector18",
+  "QaiTpcSector19",
+  "QaiTpcSector20",
+  "QaiTpcSector21",
+  "QaiTpcSector22",
+  "QaiTpcSector23",
+  "QaiTpcSector24"
