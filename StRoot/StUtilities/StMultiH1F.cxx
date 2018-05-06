@@ -285,8 +285,25 @@ void StMultiH1F::SavePrimitive(ostream& out, Option_t* option) {
   TH1::SavePrimitiveHelp(out, option);
 }
 
-// $Id: StMultiH1F.cxx,v 1.17 2016/05/27 18:02:41 genevb Exp $
+
+Int_t StMultiH1F::Write(const char *name, Int_t option, Int_t bufsize)
+{
+  int ybins = TMath::Min(GetNbinsY(),StMultiH1FMaxBins);
+
+  for (int ybin=0; ybin<ybins; ybin++)
+  {
+    TString projection_name( names[ybin].IsNull() ? GetName() : names[ybin].Data() );
+    XProjection(projection_name.Data(), ybin+1)->Write();
+  }
+
+  return TH2F::Write();
+}
+
+// $Id: StMultiH1F.cxx,v 1.18 2018/05/03 16:04:58 smirnovd Exp $
 // $Log: StMultiH1F.cxx,v $
+// Revision 1.18  2018/05/03 16:04:58  smirnovd
+// Override Write() to save sub histograms in StMultiH1F
+//
 // Revision 1.17  2016/05/27 18:02:41  genevb
 // Garbage collection (Coverity), remove unnecessary ROOT types
 //
