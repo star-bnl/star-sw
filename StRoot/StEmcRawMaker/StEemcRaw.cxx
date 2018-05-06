@@ -145,8 +145,12 @@ Bool_t StEemcRaw::headersAreSick(StEmcRawMaker* maker, StEmcRawData *raw, int to
 {
     if (! raw)
     {
+      static Int_t count = 0;
+      count++;
+      if (count < 20) {
         gMessMgr->Message("","W") << "StEemcRaw::headersAreSick() no EEMC raw data" << endm;
-        return true;
+      }
+      return true;
     }
 
 
