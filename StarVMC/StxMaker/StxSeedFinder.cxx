@@ -16,7 +16,7 @@
 //#define KINK_REJECTION  
 #define OVERLAP_REJECTION
 //________________________________________________________________________________
-Bool_t StxSeedFinder::SeedsCompareStatus(const Seed_t a, const Seed_t b) {
+Bool_t StxSeedFinder::SeedsCompareStatus(const Seedx_t a, const Seedx_t b) {
   return (a.vhit.size() < b.vhit.size());
 }
 #if 0
@@ -40,7 +40,7 @@ StxTrack *StxSeedFinder::findTrack(double rMin) {
   int begEndFail=0;
   while (mSeeds->size()) {
   
-    Seed_t &aSeed = mSeeds->back();
+    Seedx_t &aSeed = mSeeds->back();
     vector<StxHit*>        _seedHits;
     int nHits = aSeed.vhit.size();
 //	Workaround for bug in CA.  Sometimes:

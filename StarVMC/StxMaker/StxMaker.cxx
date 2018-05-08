@@ -10,6 +10,9 @@
 #include "StEvent/StTrackNode.h"
 	       //#include "StxMaker/StxStEventFiller.h"
 #include "TMath.h"
+#include "Sti/StiKalmanTrack.h"
+#include "Sti/StiDefaultToolkit.h"
+#include "StiMaker/StiStEventFiller.h"
 
 ClassImp(StxMaker);
 //_____________________________________________________________________________
@@ -20,9 +23,7 @@ Int_t StxMaker::Init(){
 }
 //_____________________________________________________________________________
 Int_t StxMaker::Make(){
-#if 0
-  StxStEventFiller *filler = StxStEventFiller::instance();
-#endif
+  StiStEventFiller *filler = StiStEventFiller::instance();
   StEvent   *mEvent = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
   // zero all banks before filling !!! 
   if (! mEvent) {return kStWarn;};
@@ -30,20 +31,17 @@ Int_t StxMaker::Make(){
   caTrackerInt.SetNewEvent();
   // Run reconstruction by the CA Tracker
   caTrackerInt.Run(mEvent);
-  vector<Seed_t> &seeds = caTrackerInt.GetSeeds();
-#if 0
-  caTrackerInt.SetStxTracks(StxToolkit::instance()->getTrackContainer());
-#endif
+  vector<Seedx_t> &seeds = caTrackerInt.GetSeeds();
   caTrackerInt.RunPerformance();
   Int_t key = 1;
   sort(seeds.begin(), seeds.end(),StxSeedFinder::SeedsCompareStatus );
-  //#define PRINT_SEED_STATISTIC
+#define PRINT_SEED_STATISTIC
 #ifdef PRINT_SEED_STATISTIC
   Int_t nSeed = 0;
 #endif // PRINT_SEED_STATISTIC
   
   while (! seeds.empty()) {
-    Seed_t &aSeed = seeds.back();
+    Seedx_t &aSeed = seeds.back();
     vector<const StTpcHit*>        _seedHits;
     for (vector<const StTpcHit *>::iterator hitb = aSeed.vhit.begin(); hitb != aSeed.vhit.end(); hitb++) {
       const StTpcHit *hit = (*hitb);
@@ -62,12 +60,12 @@ Int_t StxMaker::Make(){
       continue;
     }
 #if 0    
-    StxKalmanTrack* kTrack = StxToolkit::instance()->getTrackFactory()->getInstance();
+    StiKalmanTrack* kTrack = StiToolkit::instance()->getTrackFactory()->getInstance();
 //   if (kTrack->initialize(_seedHits)) {cout << " initialization failed" << endl; continue;} // use helix approximation
    kTrack->initialize0(_seedHits, &aSeed.firstNodePars, &aSeed.lastNodePars, &aSeed.firstNodeErrs, &aSeed.lastNodeErrs ); // use CATracker parameters. P.S errors should not be copied, they'd be initialized.
    kTrack->setSeedHitCount(kTrack->getSeedHitCount()+100);
    StHit dcaHit; dcaHit.makeDca();
-   StxTrackNode *extenDca = kTrack->extendToVertex(&dcaHit);
+   StiTrackNode *extenDca = kTrack->extendToVertex(&dcaHit);
    if (extenDca) {
      kTrack->add(extenDca,kOutsideIn);
    }
@@ -90,7 +88,7 @@ Int_t StxMaker::Make(){
      StSPtrVecTrackDetectorInfo& detInfoVec = l3Trigger->trackDetectorInfo();
      // track node where the new StTrack will reside
      StTrackNode* trackNode = new StTrackNode;
-     // actual filling of StTrack from StxKalmanTrack
+     // actual filling of StTrack from StiKalmanTrack
      StGlobalTrack* gTrack = new StGlobalTrack;
      // filling successful, set up relationships between objects
      //     filler->detInfoVec.push_back(detInfo);
@@ -120,7 +118,7 @@ Int_t StxMaker::Make(){
 #endif
  } // while (! seeds.empty())
 #if 0
-   StxToolkit::instance()->getHitContainer()->reset();
+   StiToolkit::instance()->getHitContainer()->reset();
 #endif
    return kStOK;
 }

@@ -3,7 +3,7 @@
 #include <vector>
 #include "StEvent/StTpcHit.h"
 class StxInterface;
-class Seed_t {
+class Seedx_t {
  public:
   vector<const StTpcHit *> vhit;
 #if 0
@@ -28,10 +28,10 @@ class StxSeedFinder {
 #if 0
   virtual StxTrack *findTrack(double rMin=0); 
 #endif
-  static Bool_t   SeedsCompareStatus(const Seed_t a, const Seed_t b);
+  static Bool_t   SeedsCompareStatus(const Seedx_t a, const Seedx_t b);
 //??  static void     findTpcTracks(StxInterface &caTrackerInt);
   protected:
   int mEnded;
-  std::vector<Seed_t> *mSeeds;
+  std::vector<Seedx_t> *mSeeds;
 };
 #endif
