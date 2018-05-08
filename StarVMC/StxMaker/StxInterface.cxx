@@ -453,7 +453,7 @@ void StxInterface::MakeSeeds() {
   for ( int iTr = 0; iTr < NRecoTracks; iTr++ ) {
     // get seed
     const AliHLTTPCCAGBTrack tr = fTracker->Track( iTr );
-    Seed_t seed;
+    Seedx_t seed;
     const int NHits = tr.NHits();
     //VP    float last_x = 1e10; // for check
     for ( int iHit = NHits-1; iHit >= 0; iHit-- ){ 

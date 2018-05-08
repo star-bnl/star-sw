@@ -19,7 +19,7 @@ class StxInterface {
   void SetStxTracks( StxTrackContainer *fStxTracks_){ fStxTracks = fStxTracks_; };
 #endif
   void Run(StEvent *event=0);
-  vector<Seed_t> &GetSeeds() { return *&fSeeds; }
+  vector<Seedx_t> &GetSeeds() { return *&fSeeds; }
   void RunPerformance();
  protected:
   void MakeSettings(); // fill fCaParam
@@ -32,7 +32,7 @@ class StxInterface {
   void ConvertPars(const AliHLTTPCCATrackParam& caPar, double _alpha, StxNodePars& nodePars, StxNodeErrs& nodeErrs); // convert caPars into NodePars
   HitMapToVectorAndEndType *fHitsMap;
 #endif
-  vector<Seed_t> fSeeds;
+  vector<Seedx_t> fSeeds;
   StxSeedFinder *fSeedFinder;
   AliHLTTPCCAGBTracker *fTracker;
   vector<int> fIdTruth; // id of the Track, which has created CaHit

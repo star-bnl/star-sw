@@ -250,33 +250,6 @@ Bfc_st BFC[] = { // standard chains
   {"MC.2019","","","y2019,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
-  {"MC.devT","","","TpcRS,TpxClu,dev2019,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
-   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
-   ,                                                                                      "","","/",kFALSE},
-  {"MC.devTA","","","TpcRS,TpxClu,devTA,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
-   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
-   ,                                                                                      "","","/",kFALSE},
-  {"MC.devTB","","","TpcRS,TpxClu,devTB,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
-   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
-   ,                                                                                      "","","/",kFALSE},
-  {"MC.devTC","","","TpcRS,TpxClu,devTC,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
-   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
-   ,                                                                                      "","","/",kFALSE},
-  {"MC.devTD","","","TpcRS,TpxClu,devTD,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
-   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
-   ,                                                                                      "","","/",kFALSE},
-  {"MC.devTE","","","TpcRS,TpxClu,devTE,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
-   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
-   ,                                                                                      "","","/",kFALSE},
-  {"MC.devTF","","","TpcRS,TpxClu,devTF,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
-   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
-   ,                                                                                      "","","/",kFALSE},
-  {"MC.devTX","","","TpcRS,TpxClu,devTX,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
-   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
-   ,                                                                                      "","","/",kFALSE},
-  {"MC.devTY","","","TpcRS,TpxClu,devTY,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
-   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
-   ,                                                                                      "","","/",kFALSE},
   {"MC.StiCA",   "","","StiCA,-hitfilt,KFVertex,geantOut,noRunco,noHistos,20Muons,OSpaceZ2,"
    "OGridLeak3D,StiPulls,picoWrite,PicoVtxVpd,RunG.1,McTpcAna,tags"                        ,"","","",kFALSE},
   {"MC2016.Ideal","","","MC.2016a,istSlowSim,pxlSlowSim,StiHftC,MC.StiCA"                 ,"","","",kFALSE},
@@ -285,7 +258,9 @@ Bfc_st BFC[] = { // standard chains
   {"MC2017",      "","","MC2017.Ideal"                                                    ,"","","",kFALSE},
   {"MC2018.Ideal","","","MC.2018,MC.StiCA"                                                ,"","","",kFALSE},
   {"MC2018",      "","","MC2018.Ideal,VMCAlignment,sdt20180426.122000"                    ,"","","",kFALSE},
-  {"XC2018",      "","","MC2018.Ideal,VMCAlignment,sdt20180426.122000,Stx"                ,"","","",kFALSE},
+  {"XC2018",      "","","y2018,TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,OSpaceZ2,tpcDB,TpcHitMover"
+   ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,,sdt20180426.122000,Stx,Idst,BAna"       
+   ,                                                                                       "","","",kFALSE},
   {"MC2019.Ideal","","","MC.2019,MC.StiCA"                                                ,"","","",kFALSE},
   {"MC2019",      "","","MC2019.Ideal"                                                    ,"","","",kFALSE},
   {"RC----------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1783,8 +1758,8 @@ Bfc_st BFC[] = { // standard chains
   {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,Stu,StEvent,StDbT,TpcIT,compend,sim_T,tbutil,TMVARank","StiMaker"
    ,                                                          "StiUtilities,StiMaker","Sti tracker",kFALSE},
   {"HLTCA","","-Sti,-StiCA,-Stv","","StHLTCAMaker","TPCCATracker,StHLTCAMaker","HLT reconstruction",kFALSE},
-  {"Stx"  ,"","","-Sti,-StiCA,-Stv,StiLibs,StiCALib","StxMaker","StxMaker","eXpress reconstruction",kFALSE},
-  {"KFVertex" ,""  ,"Sti","StiLibs,-VFMinuit,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2"
+  {"Stx", "","","-Sti,-StiCA,-Stv","StxMaker"     ,"TPCCATracker,StxMaker","eXpress reconstruction",kFALSE},
+  {"KFVertex",""  ,"Sti","StiLibs,-VFMinuit,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2"
    ,"StKFVertexMaker","MathMore,Spectrum,StiMaker",  "KFParticle based multi vertex reconstruction",kFALSE},
   {"Stv","Stv","","-xgeometry,-Sti,-StiTpc,-StiSsd,-StiSvt,-StiPxl,-StiSsd,-StiSst,-StiIst,-StiLibs,-StiLibsHft"
    ,"StvMaker","libHist,libHistPainter,libVMC,geant3,GeoTestMaker,StvUtil,Stv,StvSeed,StvMaker,StEventUtilities,"

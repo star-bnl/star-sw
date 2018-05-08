@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.48 2017/02/25 03:24:30 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.49 2018/05/02 21:07:40 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.49  2018/05/02 21:07:40  genevb
+// Initial accomodation for iTPC
+//
 // Revision 2.48  2017/02/25 03:24:30  genevb
 // Run 17: remove HFT
 //
@@ -156,6 +159,7 @@
 #include "StQABookHist.h"
 #include "QAH.h"
 #include "TList.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 
 ClassImp(StQAMakerBase)
 
@@ -416,10 +420,11 @@ void StQAMakerBase::BookHistGeneral(){
   char namebuf[32];
   char titlebuf[64];
   for (Int_t i=0; i<24; i++) {
-    sprintf(namebuf ,"QaTpcSector%d",i+1);
-    sprintf(titlebuf,"Hits in TPC Sector %d",i+1);
+    int numOfRows = St_tpcPadConfigC::instance()->numberOfRows(i+1);
+    sprintf(namebuf ,"Qa%sTpcSector%d",(numOfRows > 45 ? "i" : ""),i+1);
+    sprintf(titlebuf,"Hits in %sTPC Sector %d",(numOfRows > 45 ? "i" : ""),i+1);
     //mTpcSectorPlot[i] = QAH::H2F(namebuf,titlebuf,104,-52.,52.,150,50.,200.);
-    mTpcSectorPlot[i] = QAH::H2F(namebuf,titlebuf,104,-52.,52.,47,-0.5,46.5);
+    mTpcSectorPlot[i] = QAH::H2F(namebuf,titlebuf,104,-52.,52.,numOfRows+2,-0.5,((float) numOfRows)+1.5);
     mTpcSectorPlot[i]->SetXTitle("along padrows [cm]");
     //mTpcSectorPlot[i]->SetYTitle("across padrows [cm]");
     mTpcSectorPlot[i]->SetYTitle("padrow");

@@ -1684,6 +1684,9 @@ $hist = "RunXVII26"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/AuAu54_pr
 # 19086040B/dEdx4 : switched off dEdx corrections (TpcZCorrectionB, TpcTanL, tpcPressureB), reinstall TPC alignment(no difference ?)  03/29/18 
 # 19086040B/dEdx5 : switched off dEdx corrections (TpcZCorrectionB, TpcTanL), switch on  tpcPressureB), add hitograms for iTPC  03/30/18 
 # 19086040.DEV2/dEdx11 : switched on dX correction 04/05/18
+# AltroThresh2 : runs "0" 19116020(old Altro threshold : 3), "1" 19116021 (new Altro thresold : 4)
+# dEdx30 : only dx Correction, Adc correction, no SecRow  05/02/18 => strange bump at pad row 44 ?
+# dEdx31 : remove dx and Z correction, back with sockets, 05/03/18
 my $prod = $hist; #$Production;
 $prod =~ s/\*//g;
 $prod =~ s/\//_/g;
