@@ -753,15 +753,24 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 #endif
   static TH1F *hdEI = 0, *hdEUI = 0, *hdERI = 0, *hdEPI = 0, *hdETI = 0, *hdESI = 0, *hdEZI = 0, *hdEMI = 0;
   static TH1F *hdEO = 0, *hdEUO = 0, *hdERO = 0, *hdEPO = 0, *hdETO = 0, *hdESO = 0, *hdEZO = 0, *hdEMO = 0;
-  static TH3F *TPoints[6] = {0}; // *N[6] = {"B","70B","BU","70BU","N", "NU"};
-  static TH2F *Pulls[6] = {0};
-  static StDedxMethod kTPoints[6] = {// {"F","70","FU","70U","N", "NU"};
+#ifdef     __Use_dNdx__
+  enum  {kTotalMethods = 6};
+#else
+  enum  {kTotalMethods = 4};
+#endif
+  static TH3F *TPoints[kTotalMethods] = {0}; // *N[6] = {"B","70B","BU","70BU","N", "NU"};
+  static TH2F *Pulls[kTotalMethods] = {0};
+  static TH3F *TPointsiTPC[kTotalMethods] = {0}; // *N[6] = {"B","70B","BU","70BU","N", "NU"};
+  static TH2F *PullsiTPC[kTotalMethods] = {0};
+  static StDedxMethod kTPoints[kTotalMethods] = {// {"F","70","FU","70U","N", "NU"};
     kLikelihoodFitId,         // F
     kTruncatedMeanId,         // 70
     kWeightedTruncatedMeanId, // FU
-    kEnsembleTruncatedMeanId, // 70U
-    kOtherMethodId,           // N
-    kOtherMethodId2           // NU
+    kEnsembleTruncatedMeanId  // 70U
+#ifdef     __Use_dNdx__
+    ,kOtherMethodId           // N
+    ,kOtherMethodId2          // NU
+#endif
   };
 #if 0
   static Hists2D I70("I70");
@@ -810,7 +819,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 			    100,0,10,nZBins,ZdEdxMin,ZdEdxMax);
 #endif
     // TPoints block
-    for (Int_t t = 0; t < 6; t++) {
+    for (Int_t t = 0; t < kTotalMethods; t++) {
       const Char_t *N[6] = {"F","70","FU","70U","N", "NU"};
       const Char_t *T[6] = {"dEdx(fit)/Pion",
 			    "dEdx(I70)/Pion",
@@ -823,6 +832,12 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 			      190,10,200., Nlog2dx, log2dxLow, log2dxHigh, 500,-1.,4.);
       Pulls[t] = new TH2F(Form("Pull%s",N[t]),
 			  Form("Pull %s versus Length in Tpc",T[t]),
+			  190,10.,200,nZBins,ZdEdxMin,ZdEdxMax);
+      TPointsiTPC[t]   = new TH3F(Form("TPoints%siTPC",N[t]),
+			      Form("%s versus Length in Tpc and <log_{2}(dX)> in iTPC",T[t]),
+			      190,10,200., Nlog2dx, log2dxLow, log2dxHigh, 500,-1.,4.);
+      PullsiTPC[t] = new TH2F(Form("Pull%siTPC",N[t]),
+			  Form("Pull %s versus Length in iTPC",T[t]),
 			  190,10.,200,nZBins,ZdEdxMin,ZdEdxMax);
     }
     TDatime t1(tMin,0); // min Time and
@@ -967,10 +982,18 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 			<< " is wrong = " << PiD.fFit.Pred[kPidPion] << " <<<<<<<<<<<<<" << endl;
     return;
   };
-  for (Int_t j = 0; j < 6; j++) {
+  Bool_t iTPCOnly = kTRUE;
+  for (Int_t k = 0; k < NdEdx; k++) {
+    if (St_tpcPadConfigC::instance()->iTPC(FdEdx[k].sector)) {iTPCOnly = kFALSE; break;}
+  }
+  for (Int_t j = 0; j < kTotalMethods; j++) {
     if (PiD.Status(kTPoints[j])) {
       TPoints[j]->Fill(PiD.fFit.TrackLength(),PiD.fFit.log2dX(),PiD.Status(kTPoints[j])->dev[kPidPion]);
       Pulls[j]->Fill(PiD.fFit.TrackLength(),PiD.Status(kTPoints[j])->devS[kPidPion]);
+      if (iTPCOnly) {
+	TPointsiTPC[j]->Fill(PiD.fFit.TrackLength(),PiD.fFit.log2dX(),PiD.Status(kTPoints[j])->dev[kPidPion]);
+	PullsiTPC[j]->Fill(PiD.fFit.TrackLength(),PiD.Status(kTPoints[j])->devS[kPidPion]);
+      }
     }
   }
   if (PiD.fFit.TrackLength() > 20) { 
@@ -1422,7 +1445,12 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
       fTracklengthInTpcTotal = new TH1F("TracklengthInTpcTotal","Total track in TPC",100,0,200);         
       fTracklengthInTpc = new TH1F("TracklengthInTpc","Track length in TPC used for dE/dx",100,0,200);   
       const Char_t *FitName[3] = {"I70","F","N"};
-      for (Int_t k = 0; k < 3; k++) {
+#ifdef     __Use_dNdx__
+      enum  {kTotalMethods = 6};
+#else
+      enum  {kTotalMethods = 4};
+#endif
+      for (Int_t k = 0; k < kTotalMethods/2; k++) {
 	const Char_t *parN[5] = {"","pi","e","K","P"};
 	const Char_t *parT[5] = {"All","|nSigmaPion| < 1","|nSigmaElectron| < 1","|nSigmaKaon| < 1","|nSigmaProton| < 1"};
 	Double_t ymin = 0, ymax = 2.5;
