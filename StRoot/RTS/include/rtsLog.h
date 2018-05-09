@@ -49,6 +49,7 @@ extern "C" {
 #define RTS_LOG_PORT_DET	8010
 #define RTS_LOG_PORT_EMAIL	8013
 #define RTS_LOG_PORT_DCS	8014
+#define RTS_LOG_PORT_ITPC	8015
 
 #define RTS_LOG_PORT	RTS_LOG_PORT_TEST	/* default, test.log, port */
 
