@@ -467,7 +467,7 @@ void tpxGain::calc()
 			rdo-- ;	// we want from 0
 			if(bad_rdo_mask[s] & (1<<rdo)) {
 				// kill all the rows & pads in this RDO
-				//LOG(WARN,"Masked Sector %d, RDO %d, row %d, pad %d",s,rdo+1,r,p) ;
+				LOG(WARN,"Masked Sector %d, RDO %d, row %d, pad %d",s,rdo+1,r,p) ;
 				get_gains(s,r,p)->t0 = -9.990 ;
 
 			}
@@ -517,14 +517,18 @@ void tpxGain::calc()
 
 			get_gains(s,r,p)->g = charge ;		// this might be small or even negative in case the pad is not connected
 
-			if(charge) {
+			if(charge>1) {	// some arbitrary cutoff
 				get_gains(s,r,p)->t0 = t0/charge ;
 			}
 			else {
 				get_gains(s,r,p)->t0 = 0.0 ;	// *shrug* what else... 
+				get_gains(s,r,p)->g = 0.0 ;	// *shrug* what else... 
 			}
 
+
 		}
+
+		//LOG(TERR,"S%d: RP %d:%d = %f %f",s,r,p,get_gains(s,r,p)->g,get_gains(s,r,p)->t0) ;
 	}
 	
 	/*
@@ -594,11 +598,20 @@ void tpxGain::calc()
 
 	tot_pads_cou = good_pads_cou = 0 ;
 
+	//LOG(TERR,"S%d, row %d = charge row_mean %f",s,r,row_means) ;
+
 	for(p=4;p<=(tpc_rowlen[r]-3);p++) {
 		double g = get_gains(s,r,p)->g ;
+		double t0 = get_gains(s,r,p)->t0 ;
+
 
 		// skip pads which are outside of the narrow window...
 		if( (g>(row_means*0.9)) && (g<(row_means*1.1))) {
+			
+			if(t0 < -1.0) {
+				LOG(WARN,"TO: %d %d %d = %f %f",s,r,p,g,t0) ;
+			}
+
 
 			get_means(s,r)->g += g ;
 			get_means(s,r)->g_rms += g * g ;
@@ -627,7 +640,18 @@ void tpxGain::calc()
 		get_means(s,r)->t0 /= c ;
 		get_means(s,r)->t0_rms /= c ;
 
-		get_means(s,r)->t0_rms = sqrt(get_means(s,r)->t0_rms - get_means(s,r)->t0 * get_means(s,r)->t0) ;
+		double tmp = get_means(s,r)->t0_rms - get_means(s,r)->t0 * get_means(s,r)->t0 ;
+		if(tmp < 0.0) {
+			get_means(s,r)->t0_rms = 0.0 ;
+		}
+		else {
+			get_means(s,r)->t0_rms = sqrt(tmp) ;
+		}
+		
+//		LOG(TERR,"Sector %d, row %d: gain %f +- %f, t0 %f +- %f",s,r,
+//		    get_means(s,r)->g,get_means(s,r)->g_rms,
+//		    get_means(s,r)->t0,get_means(s,r)->t0_rms
+//		    ) ;
 	}
 
 
@@ -647,9 +671,19 @@ void tpxGain::calc()
 
 		if(ofile) fprintf(ofile,"%d %d %d %.3f %.3f ",s,r,p,get_gains(s,r,p)->g,get_gains(s,r,p)->t0) ;
 
-		if(get_gains(s,r,p)->g) {			
+		if(get_gains(s,r,p)->g>0.0001) {			
+			double t0 = get_gains(s,r,p)->t0 ;
+
+			if(t0<0) {
+				LOG(WARN,"T0 S%d %d %d = %f %f",s,r,p,get_gains(s,r,p)->g,t0) ;
+			}
+
+
 			// this is the actual correction...
 			get_gains(s,r,p)->g = get_means(s,r)->g / get_gains(s,r,p)->g ;	// relative to row
+
+
+
 
 			if((p==1) || (p==2) || (p==tpc_rowlen[r]) || (p==(tpc_rowlen[r]-1))) ;
 			else {
@@ -665,7 +699,7 @@ void tpxGain::calc()
 	
 
 	if(get_means(s,r)->g != 0.0) {
-		LOG(NOTE,"Sector %2d, row %2d: charge %.3f +- %.3f; t0 %.3f +- %.3f; rough mean %.3f; good/acc/all pads %d/%d/%d",
+		LOG(TERR,"Sector %2d, row %2d: charge %.3f +- %.3f; t0 %.3f +- %.3f; rough mean %.3f; good/acc/all pads %d/%d/%d",
 		    s,r,
 		    get_means(s,r)->g, get_means(s,r)->g_rms,
 		    get_means(s,r)->t0, get_means(s,r)->t0_rms,
@@ -713,7 +747,7 @@ void tpxGain::calc()
 				t0_all_mean += t0_mean[s] ;
 				t0_all_mean_count++ ;
 			}
-			//LOG(TERR,"sector %d: t0_mean %f",s,t0_mean[s]) ;
+			LOG(TERR,"Sector %d: t0_mean %f, count was %d",s,t0_mean[s],t0_mean_count[s]) ;
 		}
 	}
 
@@ -1002,7 +1036,7 @@ int tpxGain::to_file(char *fname)
 	    s_start,s_stop,
 	    c_run, c_date, c_time) ;
 
-	fprintf(f,"# $Id: tpxGain.cxx,v 1.32 2016/01/12 16:20:23 tonko Exp $\n") ;	// CVS id!
+	fprintf(f,"# $Id: tpxGain.cxx,v 1.33 2018/05/09 21:45:50 tonko Exp $\n") ;	// CVS id!
 	fprintf(f,"# Run %u\n",c_run) ;
 
 	for(s=s_start;s<=s_stop;s++) {
