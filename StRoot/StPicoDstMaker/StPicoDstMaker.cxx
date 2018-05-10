@@ -81,6 +81,7 @@ StPicoDstMaker::StPicoDstMaker(char const* name) : StMaker(name),
   mEmcGeom{}, mEmcIndex{},
   mTpcVpdVzDiffCut(6.),
   mBField(0),
+  mVtxMode(PicoVtxMode::NotSet), // This should always be ::NotSet, do not change it, see ::Init()
   mInputFileName(), mOutputFileName(), mOutputFile(nullptr),
   mChain(nullptr), mTTree(nullptr), mEventCounter(0), mSplit(99), mCompression(9), mBufferSize(65536 * 4),
   mModuleToQT{}, mModuleToQTPos{}, mQTtoModule{}, mQTSlewBinEdge{}, mQTSlewCorr{},
@@ -743,8 +744,11 @@ Int_t StPicoDstMaker::fillTracks() {
 #endif /* __HIST_PV__ */
       if (dca3D > StMuDst::dca3Dmax()) continue;
     }
+
+    double magneticField = mMuDst->event()->magneticField(); // in kiloGauss
+
     int counter = mPicoArrays[StPicoArrays::Track]->GetEntries();
-    new((*(mPicoArrays[StPicoArrays::Track]))[counter]) StPicoTrack(gTrk, pTrk, mBField, mMuDst->primaryVertex()->position(), *dcaG);
+    new((*(mPicoArrays[StPicoArrays::Track]))[counter]) StPicoTrack(gTrk, pTrk, magneticField, mMuDst->primaryVertex()->position(), *dcaG);
 
     StPicoTrack* picoTrk = (StPicoTrack*)mPicoArrays[StPicoArrays::Track]->At(counter);
     if (_debug) {
@@ -806,7 +810,9 @@ bool StPicoDstMaker::getBEMC(const StMuTrack* t, int* id, int* adc, float* ene, 
   StThreeVectorD positionBSMDE, momentumBSMDE;
   StThreeVectorD positionBSMDP, momentumBSMDP;
 
-  double magneticField = mBField * kilogauss / tesla; // in Tesla
+  // The value of magnetic field is in kiloGauss'es
+  // 1 kiloGauss = 1e3 Gauss = 0.1 Tesla
+  double magneticField = mMuDst->event()->magneticField() * 0.1; // in Tesla
 
   Bool_t ok       = false;
   Bool_t okBSMDE  = false;
