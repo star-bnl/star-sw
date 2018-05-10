@@ -65,7 +65,9 @@ daq_itpc::daq_itpc(daqReader *rts_caller)
 	ped = new daq_dta ;
 	cld = new daq_dta ;
 
-	adc_sim = new daq_dta;;
+	adc_sim = new daq_dta;
+	cld_sim = new daq_dta ;
+	gain = new daq_dta ;
 
 	it = new itpcInterpreter ;
 
@@ -86,6 +88,8 @@ daq_itpc::~daq_itpc()
 	delete cld ;
 
 	delete adc_sim ;
+	delete gain ;
+	delete cld_sim ;
 
 	delete it ;
 
@@ -101,6 +105,10 @@ daq_dta *daq_itpc::put(const char *in_bank, int sec, int row, int pad, void *p1,
 	if(strcasecmp(in_bank,"adc_sim")==0) {
 		adc_sim->create(32*1024,(char *)"adc_sim",rts_id,DAQ_DTA_STRUCT(daq_sim_adc_tb)) ;
 		return adc_sim ;
+	}
+	else if(strcasecmp(in_bank,"gain")==0) {
+		gain->create(32*1024,(char *)"gain",rts_id,DAQ_DTA_STRUCT(daq_det_gain)) ;
+		return gain ;
 	}
 
 	LOG(ERR,"%s: unknown bank type \"%s\"",name,in_bank) ;
@@ -134,6 +142,19 @@ daq_dta *daq_itpc::get(const char *bank, int sec, int row, int pad, void *p1, vo
 	else if(strcasecmp(bank,"cld")==0) {
 		return handle_cld(sec) ;		// actually sec, rdo; r1 is the number of bytes
 	}
+	else if(strcasecmp(bank,"cld_sim")==0) {
+		return handle_cld_sim(sec) ;		// actually sec, rdo; r1 is the number of bytes
+	}
+	else if(strcasecmp(bank,"adc_sim")==0) {
+		if(adc_sim->is_empty()) return 0 ;
+		adc_sim->rewind() ;
+		return adc_sim ;
+	}
+	else if(strcasecmp(bank,"gain")==0) {
+		if(gain->is_empty()) return 0 ;
+		gain->rewind() ;
+		return gain ;
+	}
 	
 	// ********************************************
 	// ************ these are FY17 banks!
@@ -151,6 +172,125 @@ daq_dta *daq_itpc::get(const char *bank, int sec, int row, int pad, void *p1, vo
 	return 0 ;
 }
 
+daq_dta *daq_itpc::handle_cld_sim(int sec)
+{
+	int min_sec, max_sec ;
+	u_char evt_started[25] ;
+
+	memset(evt_started,0,sizeof(evt_started)) ;
+
+	if(sec <= 0) {
+		min_sec = 1 ;
+		max_sec = 24 ;
+	}
+	else {
+		min_sec = sec ;
+		max_sec = sec ;
+	}
+
+
+	daq_dta *sim = get("adc_sim") ;
+
+	//LOG(TERR,"%s: %d",__PRETTY_FUNCTION__,sec) ;
+
+	while(sim && sim->iterate()) {
+		int s = sim->sec ;	//shorthand
+		u_short sim_array[512] ;
+
+		//LOG(TERR,"Here %d",s) ;
+
+		if((min_sec<=s) && (s<=max_sec)) ;
+		else continue ;
+
+
+
+		if(fcf[s]==0) {
+			fcf[s] = new itpc_fcf_c ;	// implicit run start within constructor
+
+			fcf[s]->my_id = s ;
+			fcf[s]->sector_id = s ;
+			fcf[s]->offline = 1 ;
+			fcf[s]->init(s,0) ;	// in all cases
+
+
+			// I think I will load gains here...
+			daq_dta *g = get("gain") ;
+			if(g) fcf[s]->init(g) ;
+
+
+		}
+
+		if(!evt_started[s]) {
+			fcf[s]->event_start() ;
+			evt_started[s] = 1 ;
+		}
+
+
+		daq_sim_adc_tb *sim_dta = (daq_sim_adc_tb *) sim->Void ;
+
+		memset(sim_array,0,sizeof(sim_array)) ;
+
+		for(u_int i=0;i<sim->ncontent;i++) {
+			sim_array[sim_dta[i].tb] = sim_dta[i].adc ;
+
+			//LOG(TERR,"%d %d = %d %d",sim->row,sim->pad,sim_dta[i].adc,sim_dta[i].tb) ;
+		}
+
+		fcf[s]->do_ch_sim(sim->row,sim->pad,sim_array) ;
+	}
+
+	//LOG(TERR,"After loading of data") ;
+
+	cld_sim->create(1024,(char *)"cld_sim",rts_id,DAQ_DTA_STRUCT(daq_sim_cld)) ;
+
+	char *buff = (char *) malloc(1024*1024) ;
+	for(int s=min_sec;s<=max_sec;s++) {
+		if(fcf[s]) ;
+		else {
+			//LOG(ERR,"What? No sector %d?",s) ;
+			continue ;
+		}
+
+		int bytes = fcf[s]->do_fcf(buff,1024*1024) ;	// returns words really
+		//LOG(TERR,"Sector %d: %d words",s,bytes) ;
+
+		bytes *= 4 ;	// and now it's bytes
+
+
+		u_int *end_buff = (u_int *)(buff + bytes) ;
+		u_int *p_buff = (u_int *)buff ;
+
+		while(p_buff < end_buff) {
+			u_int row = *p_buff++ ;
+			u_int version = *p_buff++ ;
+			u_int int_cou = *p_buff++ ;
+
+			int ints_per_cluster = (row>>16) ;
+			row &= 0xFFF ;
+
+			int clusters = int_cou/ints_per_cluster ;
+
+			//LOG(TERR,"clusters %d, sector %d, row %d",clusters,s,row) ;
+
+			daq_sim_cld *dc = (daq_sim_cld *) cld_sim->request(clusters) ;
+			
+			for(int i=0;i<clusters;i++) {
+				fcf[s]->fcf_decode(p_buff,(daq_cld *)dc,version) ;
+				
+				p_buff += ints_per_cluster ;
+				dc++ ;
+			}
+
+			cld_sim->finalize(clusters,s,row) ;
+		}
+	}
+
+	cld_sim->rewind() ;
+
+	free(buff) ;
+
+	return cld_sim ;
+}
 
 daq_dta *daq_itpc::handle_raw(int sec, int rdo)
 {
@@ -742,6 +882,9 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 
 	if(evt_status) {
 		LOG(ERR,"RDO %d: get_l2: evt status 0x%08X, trg_fired 0x%08X, trg_cou %d",rdo,evt_status,trg_fired,trg_cou) ;
+		trg[0].t = -ETIMEDOUT ;
+		trg[0].daq = trg[0].trg = 0 ;
+		return 1 ;
 	}
 
 	//LOG(TERR,"trg_cou %d, fired %d",trg_cou,trg_fired) ;

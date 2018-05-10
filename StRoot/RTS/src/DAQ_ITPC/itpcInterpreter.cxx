@@ -1210,11 +1210,11 @@ int itpcInterpreter::ana_send_config(u_int *data, u_int *data_end)
 	
 	while(data<data_end) {
 		u_int dd_a, dd_b, dd_c ;
-		u_int fee_id ;
+		//u_int fee_id ;
 
 		d = *data++ ;
 
-		fee_id = (d>>16) & 0xFF ;
+		//fee_id = (d>>16) & 0xFF ;
 
 		dd_a = d & 0xFFC0FF00 ;
 		dd_b = d & 0xFFC000FF ;
@@ -1503,7 +1503,7 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		}
 
 		if(data[0] != ((fee_id<<16)|0xA0000010)) err |= 0x10 ;
-//		if(data[7] != ((fee_id<<16)|0x40000010)) err |= 0x20 ;	// this is the last guy
+//		if(data[7] != ((fee_id<<16)|0x40000010)) err |= 0x20 ;	// this is the last guy and can misfire
 		if((data[1] & 0xFFFF)||(data[2]&0xFFFF)||(data[3]&0xFFFF)||(data[4]&0xFFFF)) {
 			LOG(ERR,"%d:#%02d: event errors: 0x%X 0x%X 0x%X 0x%X",rdo_id,fee_port,
 			    data[1],data[2],data[3],data[4]) ;
@@ -1521,6 +1521,11 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 
 	if(data > data_end) goto done ;
 	if(data[0]==0x98001000) goto done ;	// end of FEE section marker!!!
+	if(data[1]==0x98001000) {
+		//LOG(WARN,"%d:#%d, fee_count %d -- delayed end-event marker?",rdo_id,fee_port,fee_cou) ;
+		data++ ;	// advance so not to confuse further checks
+		goto done ;	// occassionally a "delayed FEE" is the last one
+	}
 	if(data[0]==0x980000FC) goto done ;	// RDO-mon start
 
 	goto fee_start ;
@@ -1546,7 +1551,7 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 	switch(data[0]) {
 	case 0x98001000 :	// trigger data
 		if(data[1]!=0) {
-			LOG(ERR,"bad event status 0x%08X",data[1]) ;
+			LOG(ERR,"RDO %d: bad event status 0x%08X",rdo_id,data[1]) ;
 		}
 		break ;
 	case 0x980000FC :	// RDO_mon
