@@ -55,6 +55,21 @@ struct daq_sim_cld {
 	short quality ;
 } ;
 
+struct daq_sim_cld_x {
+	// same as from file
+	struct daq_cld cld ;
+
+	// embedding info
+	unsigned short track_id ;
+	short quality ;
+
+	// other data
+	unsigned short pixels ;
+	unsigned short max_adc ;
+
+	unsigned int reserved[4] ;
+} ;
+
 
 struct daq_det_gain {
 	float gain ;
