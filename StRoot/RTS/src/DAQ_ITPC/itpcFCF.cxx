@@ -57,6 +57,7 @@ itpc_fcf_c::itpc_fcf_c()
 
         version = VERSION ;
 	sector_id = 0 ;		// 0 is ALL sectors
+	offline = 0 ;		// not Offline!
 
         words_per_cluster = 2 ; 
 
@@ -96,7 +97,57 @@ int itpc_fcf_c::get_bad(int sec1, int row1, int pad1)
 
 	return 0 ;
 }
-	
+
+//static too
+int itpc_fcf_c::init(daq_dta *gain)
+{
+	if(gain==0) return -1 ;
+
+	int bad_ch = 0 ;
+
+	while(gain->iterate()) {
+		int s = gain->sec ;
+		int row = gain->row ;
+
+		if(sec_gains[s]==0) continue ;	// not for me
+		if(row==0) continue ;
+
+		gain_rp_t (*sr)[MAX_PAD+1] = (gain_rp_t (*)[MAX_PAD+1]) sec_gains[s] ;
+
+		daq_det_gain *gp = (daq_det_gain *) gain->Void ;
+
+		for(u_int p=0;p<gain->ncontent;p++) {
+			if(p==0) continue ;
+
+			sr[row][p].gain = gp[p].gain ;
+			sr[row][p].t0 = gp[p].t0 ;
+
+			if(gp[p].gain < 0.01) {
+				int p1 = p - 1;
+				int p2 = p + 1 ;
+
+				if(p1<1) p1 = 1;
+				if(p2>itpc_rowlen[row]) p2 = itpc_rowlen[row] ;
+
+				// mark this and neighbours as bad
+				sr[row][p].flags |= 3 ;	// bad and edge
+				sr[row][p1].flags |= 2 ;	// just edge
+				sr[row][p2].flags |= 2 ;	// just edge
+
+				bad_ch++ ;
+			}
+		}
+		
+
+	}
+
+	if(bad_ch) {
+		LOG(WARN,"%d bad channels",bad_ch) ;
+	}
+
+	return 0 ;
+}
+
 //also static member
 int itpc_fcf_c::init(int sec, const char *fname)
 {
@@ -475,6 +526,107 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 	return 0 ;	
 }
 
+// Called by the raw data unpacker: fee_id and fee_ch are _physical_ channels
+// Main purpose is unpack the raw data into the canonical form ready for FCF.
+// Canonical form is:
+//	seq_ix		(set to 0 before cluster finder begins)
+//	timebin_count
+//	timebin_start
+//	adc...
+//	adc...
+
+int itpc_fcf_c::do_ch_sim(int row, int pad, u_short *tb_buff) 
+{
+	int seq_cou ;
+	int s_count ;
+
+	u_short *s1_data ;
+
+	int t_start ;
+	int t_cou ;
+	u_short *p_start ;
+
+	seq_cou = 0;
+
+	gain_rp_t (*gain_row_pad)[MAX_PAD+1] = (gain_rp_t (*)[MAX_PAD+1]) sec_gains[sector_id] ;
+
+	if(row==0) goto err_ret ;	// unphysical pad
+
+
+	if(gain_row_pad[row][pad].flags & 1) {
+		goto err_ret ;	// skip dead pads!
+	}
+
+
+	s1_data = (u_short *)row_pad[row][pad].s1_data ;
+	
+
+	t_start = -1 ;
+	t_cou = 0 ;
+
+	//condition data ala cuts
+	for(int i=0;i<512;i++) {
+		if(i>425) tb_buff[i] = 0 ;
+		else if((i>=26)&&(i<=31)) tb_buff[i]= 0 ;
+		else {
+			if(tb_buff[i]<=4) tb_buff[i] = 0 ;
+		}
+	}
+
+
+	for(int i=0;i<512;i++) {
+		if(tb_buff[i]) {
+			if(t_start<0) {
+				*s1_data++ = 0 ;
+				p_start = s1_data ;
+				*s1_data++ = 0 ;	//t_cou
+				*s1_data++ = i ;	//t_start ;
+
+				t_start = i ;
+				seq_cou++ ;
+			}
+			*s1_data++ = tb_buff[i] ;
+			t_cou++ ;
+		}
+		else {
+			if(t_start >= 0) {	//was started
+				*p_start = t_cou ;
+				t_start = -1 ;
+				t_cou = 0 ;
+			}
+		}
+	}
+				
+	if(t_start >= 0) {
+		*p_start = t_cou ;
+		t_start = -1 ;
+	}
+
+
+	*s1_data++ = 0xFFFF ;	// end sentinel
+
+	// check for data overrun!
+	s_count = s1_data - (u_short *)row_pad[row][pad].s1_data ;
+	if(s_count >= MAX_TB) {
+		LOG(ERR,"In trouble at RP %d:%d",row,pad) ;
+	}
+
+	// for later optimization!
+	if(s_count >= (int)f_stat.max_s1_len) {
+		f_stat.max_s1_len = s_count ;
+	}
+
+	s1_found += seq_cou ;
+	
+//	if(seq_cou) LOG(TERR,"RP %d:%d = seq_cou %d",row,pad,seq_cou) ;
+
+	err_ret:;
+
+	row_pad[row][pad].s1_len = seq_cou ;	// sequence count!
+
+	return 0 ;	
+}
+
 
 // Returns words(ints) of storage.
 int itpc_fcf_c::do_fcf(void *v_store, int bytes)
@@ -545,7 +697,7 @@ int itpc_fcf_c::do_fcf(void *v_store, int bytes)
 void itpc_fcf_c::run_start()
 {
 	// all just for statistics and monitoring...
-	LOG(TERR,"%s: %d",__PRETTY_FUNCTION__,my_id) ;
+	LOG(NOTE,"%s: %d",__PRETTY_FUNCTION__,my_id) ;
 
 	memset(&f_stat,0,sizeof(f_stat)) ;
 

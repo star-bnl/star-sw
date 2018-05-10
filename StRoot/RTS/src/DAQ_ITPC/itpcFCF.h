@@ -45,17 +45,21 @@ public:
 	void event_start() ;	// mostly to zap some debugging counters
 
         int do_ch(int fee_id, int fee_ch, u_int *data, int words) ;
+        int do_ch_sim(int row, int pad, u_short *tb_buff) ;
 
 	int do_fcf(void *storage, int bytes) ;
 
 
 	static int init(int sector, const char *fname=0) ;
+	static int init(daq_dta *gain) ;
+
 	static int get_bad(int sec1, int row1, int pad1) ;
 	static int fcf_decode(unsigned int *p_buff, daq_cld *dc, unsigned int version) ;
 
 	int my_id ;
 	int version ;
 	int sector_id ;
+	int offline ;
 
 	int words_per_cluster ;
 
