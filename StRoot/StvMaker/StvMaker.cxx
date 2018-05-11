@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.60.2.1 2017/12/02 00:40:36 perev Exp $
+// $Id: StvMaker.cxx,v 1.60.2.2 2018/05/11 17:37:48 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -182,6 +182,11 @@ Int_t StvMaker::InitDetectors()
       hec->SetPars((double*)tt->GetArray());
       StvTpcSelector*sel = new StvTpcSelector(innOut);
       int nHP = tgh->SetHitErrCalc(kTpcId,hec,sel);
+      if (!nHP) {// Problem, geo volumes not found
+        Warning("InitDetectors:","No volumes for %s",innOut);
+        continue;
+      } 
+      
       Info("Init","%s: %d HitPlanes",innOut,nHP);
       assert(nHP);
     }

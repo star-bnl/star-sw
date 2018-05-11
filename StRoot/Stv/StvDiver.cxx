@@ -502,8 +502,10 @@ int StvMCStepping::EndVolume()
             (*fDeriv)*=*fHelix->Der();
             dS = fHelix->Path(fTarget[0],fTarget[1],0);
             dL +=dS;
-            assert(dL>=0 && dL <= deltaL);
-            
+            if (!(dL>=0 && dL <= deltaL)) {
+              Error("EndVolume","%g>0 && %g < %g is WRONG",dL,dL, deltaL);          
+              return StvDiver::kDiveBreak;
+	    }
             fHelix->Move();
             (*fDeriv)*=*fHelix->Der();
             ans |= StvDiver::kDiveDca ; break;
