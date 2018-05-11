@@ -8,6 +8,7 @@
 #include "Random.hh"
 #include "GarfieldConstants.hh"
 #include "FundamentalConstants.hh"
+#include "Utilities.hh"
 
 namespace Garfield {
 
@@ -1900,9 +1901,8 @@ bool MediumSilicon::LoadOpticalData(const std::string& filename) {
     // Read the next line.
     std::getline(infile, line);
     // Strip white space from the beginning of the line.
-    line.erase(line.begin(),
-               std::find_if(line.begin(), line.end(),
-                            not1(std::ptr_fun<int, int>(isspace))));
+    ltrim(line);
+    if (line.empty()) continue;
     // Skip comments.
     if (line[0] == '#' || line[0] == '*' || (line[0] == '/' && line[1] == '/'))
       continue;

@@ -10,6 +10,7 @@
 #include "FundamentalConstants.hh"
 #include "GarfieldConstants.hh"
 #include "Random.hh"
+#include "Utilities.hh"
 
 namespace Garfield {
 
@@ -299,9 +300,8 @@ bool TrackBichsel::LoadCrossSectionTable(const std::string& filename) {
     // Read the line.
     std::getline(infile, line);
     // Strip white space from the beginning of the line.
-    line.erase(line.begin(),
-               std::find_if(line.begin(), line.end(),
-                            not1(std::ptr_fun<int, int>(isspace))));
+    ltrim(line);
+    if (line.empty()) continue;
     // Skip comments.
     if (line[0] == '#' || line[0] == '*' || (line[0] == '/' && line[1] == '/'))
       continue;

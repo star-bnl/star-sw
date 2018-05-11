@@ -6,15 +6,7 @@
 #include <cmath>
 
 #include "ComponentTcad2d.hh"
-
-namespace {
-
-void ltrim(std::string& line) {
-  line.erase(line.begin(), find_if(line.begin(), line.end(),
-                                   not1(std::ptr_fun<int, int>(isspace))));
-}
-
-}
+#include "Utilities.hh"
 
 namespace Garfield {
 

@@ -6,6 +6,7 @@
 #include <cmath>
 
 #include "ComponentVoxel.hh"
+#include "Utilities.hh"
 
 namespace Garfield {
 
@@ -286,9 +287,7 @@ bool ComponentVoxel::LoadData(const std::string& filename, std::string format,
     std::getline(infile, line);
     ++nLines;
     // Strip white space from beginning of line.
-    line.erase(line.begin(),
-               std::find_if(line.begin(), line.end(),
-                            not1(std::ptr_fun<int, int>(isspace))));
+    ltrim(line);
     // Skip empty lines.
     if (line.empty()) continue;
     // Skip comments.
