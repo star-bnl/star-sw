@@ -166,7 +166,7 @@ void StvNodePars::set(const TRungeKutta *th)
   memcpy(_d,th->Dir(),sizeof(_d));   
 assert(fabs(dot(_d,_d)-1)<1e-4);
   set(th->Mag());   
-  int iQ = th->GetCharge();
+  int iQ = th->Charge();
   _pinv = -iQ/th->MomTot();
   THelix3d::MakeTkDir(_d,_h,_tkdir);
 
@@ -207,11 +207,11 @@ const StvFitPars &StvNodePars::operator-(const StvNodePars& what) const
 static StvFitPars fp;
   double dif[3];
   sub(_x,what._x,dif);
-  fp.mU = dot(dif,_tkdir[0]);
-  fp.mV = dot(dif,_tkdir[1]);
+  fp.mU = dot(dif,_tkdir[kKU]);
+  fp.mV = dot(dif,_tkdir[kKV]);
   sub(_d,what._d,dif);
-  fp.mFita = dot(dif,_tkdir[0]);
-  fp.mLama = dot(dif,_tkdir[1]);
+  fp.mFita = dot(dif,_tkdir[kKU]);
+  fp.mLama = dot(dif,_tkdir[kKV]);
   return fp;
 }
 //______________________________________________________________________________
@@ -220,8 +220,8 @@ void StvNodePars::operator+=(const StvFitPars &fp)
   
   if (_tkdir[0][0]>1) THelix3d::MakeTkDir(_d,_h,_tkdir);
   for (int i=0;i<3;i++) {
-    _x[i]+= _tkdir[0][i]*fp.mU    + _tkdir[1][i]*fp.mV; 
-    _d[i]+= _tkdir[0][i]*fp.mFita + _tkdir[1][i]*fp.mLama;  
+    _x[i]+= _tkdir[kKU][i]*fp.mU    + _tkdir[kKV][i]*fp.mV; 
+    _d[i]+= _tkdir[kKU][i]*fp.mFita + _tkdir[kKV][i]*fp.mLama;  
   }
   _pinv += fp.mPinv;  
   double nor = dot(_d,_d);
@@ -314,10 +314,10 @@ void StvFitErrs::Add(const StvELossTrak *el,double len)
 void StvFitErrs::Update(const TkDir_t &tkdir)
 {
 
-  double U0U1 = dot(tkdir[0],mTkDir[0]); 
-  double U0V1 = dot(tkdir[0],mTkDir[1]); 
-  double V0U1 = dot(tkdir[1],mTkDir[0]); 
-  double V0V1 = dot(tkdir[1],mTkDir[1]); 
+  double U0U1 = dot(tkdir[kKU],mTkDir[kKU]); 
+  double U0V1 = dot(tkdir[kKU],mTkDir[kKV]); 
+  double V0U1 = dot(tkdir[kKV],mTkDir[kKU]); 
+  double V0V1 = dot(tkdir[kKV],mTkDir[kKV]); 
   
   double T[5][5] = {{U0U1, U0V1,    0,    0, 0}
                    ,{V0U1, V0V1,    0,    0, 0}
@@ -336,10 +336,10 @@ double StvNodePars::diff(const StvNodePars &other,const StvFitErrs &otherr) cons
   double dx[3],dn[3],p[5];
   TCL::vsub(other._x,_x,dx,3);
   TCL::vsub(other._d,_d,dn,3);
-  p[0] = TCL::vdot(dx,(_tkdir)[0],3);
-  p[1] = TCL::vdot(dx,(_tkdir)[1],3);
-  p[2] = TCL::vdot(dn,(_tkdir)[0],3);
-  p[3] = TCL::vdot(dn,(_tkdir)[1],3);
+  p[0] = TCL::vdot(dx,(_tkdir)[kKU],3);
+  p[1] = TCL::vdot(dx,(_tkdir)[kKV],3);
+  p[2] = TCL::vdot(dn,(_tkdir)[kKU],3);
+  p[3] = TCL::vdot(dn,(_tkdir)[kKV],3);
   p[4] = other._pinv - _pinv;
 
   double myMax=0;
@@ -598,39 +598,39 @@ void StvNodePars::GetRadial(double radPar[6],double radErr[15],const StvFitErrs 
 //double mLama;	// Angle lambda in Rxy/Z
 //double mPinv;	// 1/p with curvature sign
 
-// X = X0 + tkDir[0][0]*mU+tkDir[1][0]*mV
-// Y = Y0 + tkDir[0][1]*mU+tkDir[1][1]*mV
-// Z = Z0 + tkDir[0][2]*mU+tkDir[1][2]*mV
+// X = X0 + tkDir[kKU][0]*mU+tkDir[kKV][0]*mV
+// Y = Y0 + tkDir[kKU][1]*mU+tkDir[kKV][1]*mV
+// Z = Z0 + tkDir[kKU][2]*mU+tkDir[kKV][2]*mV
 // Phi = atan2(Y,X)
 // 
-// Dx = tkDir[2][0] + tkDir[0][0]*mFita+ tkDir[1][0]*mLama
-// Dy = tkDir[2][1] + tkDir[0][1]*mFita+ tkDir[1][1]*mLama
-// Dz = tkDir[2][2] + tkDir[0][2]*mFita+ tkDir[1][2]*mLama
+// Dx = tkDir[kKT][0] + tkDir[kKU][0]*mFita+ tkDir[kKV][0]*mLama
+// Dy = tkDir[kKT][1] + tkDir[kKU][1]*mFita+ tkDir[kKV][1]*mLama
+// Dz = tkDir[kKT][2] + tkDir[kKU][2]*mFita+ tkDir[kKV][2]*mLama
 // 
 // Tan = Dz/sqrt(Dx*Dx+Dy*Dy)
 // Psi = atan2(Dy,Dx);
 // cosL = 1./sqrt(1+tanL*tanL)
 // Pti = Pinv/cosL;
 
-//   dXdU = tkDir[0][0]
-//   dXdV = tkDir[1][0]
-//   dYdU = tkDir[0][1]
-//   dYdV = tkDir[1][1]
-//   dZdU = tkDir[0][2]
-//   dZdV = tkDir[1][2]
+//   dXdU = tkDir[kKU][0]
+//   dXdV = tkDir[kKV][0]
+//   dYdU = tkDir[kKU][1]
+//   dYdV = tkDir[kKV][1]
+//   dZdU = tkDir[kKU][2]
+//   dZdV = tkDir[kKV][2]
 //   dPhi_dX = -Y/(X*X+Y*Y)
 //   dPhi_dY =  X/(X*X+Y*Y)
 //   dPhi_dU = dPhi_dX*dXdU + dPhi_dY*dYdU
 //   dPhi_dV = dPhi_dX*dXdV + dPhi_dY*dYdV
 // 
-//   dDx_dFita = tkDir[0][0]
-//   dDx_dLama = tkDir[1][0]
+//   dDx_dFita = tkDir[kKU][0]
+//   dDx_dLama = tkDir[kKV][0]
 // 
-//   dDy_dFita = tkDir[0][1]
-//   dDy_dLama = tkDir[1][1]
+//   dDy_dFita = tkDir[kKU][1]
+//   dDy_dLama = tkDir[kKV][1]
 // 
-//   dDz_dFita = tkDir[0][2]
-//   dDz_dLama = tkDir[1][2]
+//   dDz_dFita = tkDir[kKU][2]
+//   dDz_dLama = tkDir[kKV][2]
 // 
 //   D2xy = (Dx*Dx+Dy*Dy);  Dxy = sqrt(D2xy)
 //   Dxy_dFita = -(Dx_dFita*Dx+Dy_dFita*Dy)/Dxy
@@ -672,33 +672,33 @@ void StvNodePars::GetRadial(double radPar[6],double radErr[15],const StvFitErrs 
   double  X  = _x[0],Y =_x[1];
   double  Dx = _d[0],Dy=_d[1],Dz=_d[2];
   double  Tan  = tanL, Pinv = _pinv;
-  double  XTk0 = dot2(_x,_tkdir[0]);
-  double  XTk1 = dot2(_x,_tkdir[1]);
-  double  XTk2 = dot2(_x,_tkdir[2]);
+  double  XTk0 = dot2(_x,_tkdir[kKU]);
+  double  XTk1 = dot2(_x,_tkdir[kKV]);
+  double  XTk2 = dot2(_x,_tkdir[kKT]);
   double  sub0 = XTk0/XTk2;
   double  sub1 = XTk1/XTk2;
 
-  double  dXdU = _tkdir[0][0]-sub0*_tkdir[2][0];
-  double  dYdU = _tkdir[0][1]-sub0*_tkdir[2][1];
-  double  dZdU = _tkdir[0][2]-sub0*_tkdir[2][2];
+  double  dXdU = _tkdir[kKU][0]-sub0*_tkdir[kKT][0];
+  double  dYdU = _tkdir[kKU][1]-sub0*_tkdir[kKT][1];
+  double  dZdU = _tkdir[kKU][2]-sub0*_tkdir[kKT][2];
  
-  double  dXdV = _tkdir[1][0]-sub1*_tkdir[2][0];
-  double  dYdV = _tkdir[1][1]-sub1*_tkdir[2][1];
-  double  dZdV = _tkdir[1][2]-sub1*_tkdir[2][2];
+  double  dXdV = _tkdir[kKV][0]-sub1*_tkdir[kKT][0];
+  double  dYdV = _tkdir[kKV][1]-sub1*_tkdir[kKT][1];
+  double  dZdV = _tkdir[kKV][2]-sub1*_tkdir[kKT][2];
 
   double  dPhi_dX = -Y/(X*X+Y*Y);
   double  dPhi_dY =  X/(X*X+Y*Y);
   double  dPhi_dU = dPhi_dX*dXdU + dPhi_dY*dYdU;
   double  dPhi_dV = dPhi_dX*dXdV + dPhi_dY*dYdV;
 
-  double  dDx_dFita = _tkdir[0][0];
-  double  dDx_dLama = _tkdir[1][0];
+  double  dDx_dFita = _tkdir[kKU][0];
+  double  dDx_dLama = _tkdir[kKV][0];
 
-  double  dDy_dFita = _tkdir[0][1];
-  double  dDy_dLama = _tkdir[1][1];
+  double  dDy_dFita = _tkdir[kKU][1];
+  double  dDy_dLama = _tkdir[kKV][1];
 
-  double  dDz_dFita = _tkdir[0][2];
-  double  dDz_dLama = _tkdir[1][2];
+  double  dDz_dFita = _tkdir[kKU][2];
+  double  dDz_dLama = _tkdir[kKV][2];
 
   double  D2xy = (Dx*Dx+Dy*Dy),  Dxy = sqrt(D2xy);
   double  dDxy_dFita = (dDx_dFita*Dx+dDy_dFita*Dy)/Dxy;
@@ -1336,9 +1336,9 @@ static const double kMaxStp=1e-4, kRefStp = 1e-2;
   double T[5][5]={{0}};
 
 //		Now d/dU
-  double dXdU = _tkdir[0][0];
-  double dYdU = _tkdir[0][1];
-  double dZdU = _tkdir[0][2];
+  double dXdU = _tkdir[kKU][0];
+  double dYdU = _tkdir[kKU][1];
+  double dZdU = _tkdir[kKU][2];
 
   double dTdU = -((dXdU*cosP+dYdU*sinP))/cosL;
 
@@ -1355,9 +1355,9 @@ static const double kMaxStp=1e-4, kRefStp = 1e-2;
 
 //		Now d/dV
 //===========================
-  double dXdV = _tkdir[1][0];
-  double dYdV = _tkdir[1][1];
-  double dZdV = _tkdir[1][2];
+  double dXdV = _tkdir[kKV][0];
+  double dYdV = _tkdir[kKV][1];
+  double dZdV = _tkdir[kKV][2];
 
   double dTdV = -((dXdV*cosP+dYdV*sinP));
 
@@ -1373,9 +1373,9 @@ static const double kMaxStp=1e-4, kRefStp = 1e-2;
 
 //		Now d/dFita
 //===========================
-  double dDx_dFita = _tkdir[0][0];
-  double dDy_dFita = _tkdir[0][1];
-  double dDz_dFita = _tkdir[0][2];
+  double dDx_dFita = _tkdir[kKU][0];
+  double dDy_dFita = _tkdir[kKU][1];
+  double dDz_dFita = _tkdir[kKU][2];
 
 
   double dPsi_dFita = (-dDx_dFita*sinP+dDy_dFita*cosP)/cosL;
@@ -1394,9 +1394,9 @@ static const double kMaxStp=1e-4, kRefStp = 1e-2;
   
 //		Now d/dLama
 //===========================
-  double dDx_dLama = _tkdir[1][0];
-  double dDy_dLama = _tkdir[1][1];
-  double dDz_dLama = _tkdir[1][2];
+  double dDx_dLama = _tkdir[kKV][0];
+  double dDy_dLama = _tkdir[kKV][1];
+  double dDz_dLama = _tkdir[kKV][2];
 
 
   double dPsi_dLama = (-dDx_dLama*sinP+dDy_dLama*cosP)/cosL;

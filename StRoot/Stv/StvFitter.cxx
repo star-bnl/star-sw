@@ -641,9 +641,12 @@ void StvFitter::Prep()
   mTkPars = *mInPars;
 //		Track Frame
   const TkDir_t &tkd = mTkPars.getTkDir();
-  TCL::ucopy(tkd[0],mDcaFrame[1],6);
-  TCL::ucopy(tkd[2],mDcaFrame[0],3);
-
+  if (kKT) {
+    TCL::ucopy(tkd[0],mDcaFrame[1],6);
+    TCL::ucopy(tkd[2],mDcaFrame[0],3);
+  }else{
+    TCL::ucopy(tkd[0],mDcaFrame[0],9);
+  }
 }
 //______________________________________________________________________________
 double StvFitter::Xi2(const StvHit *hit)
@@ -680,11 +683,6 @@ double StvFitter::Xi2(const StvHit *hit)
       assert(mHitErrCalc);
       mHitErrCalc->SetTkDir(tkd);
       int ans = mHitErrCalc->CalcDcaErrs(hit,mHitErrs);
-if(BOTOHO) {
-//BOTOHO
-printf("\tBOTOHO: DcaErrs = %g %g %g\n",mHitErrs[0],mHitErrs[1],mHitErrs[2]);
-}//BOTOHOend
-
       if (ans) {mXi2 = 1e11; return mXi2;}
       assert(mHitErrs[0]>=1e-8);
       assert(mHitErrs[1]*mHitErrs[1]<=mHitErrs[0]*mHitErrs[2]);
@@ -696,7 +694,7 @@ printf("\tBOTOHO: DcaErrs = %g %g %g\n",mHitErrs[0],mHitErrs[1],mHitErrs[2]);
     case 2: {
       double d[6]={errMtx[0],errMtx[1],errMtx[2]
                   ,errMtx[3],errMtx[4],errMtx[5]};
-      TCL::trasat(mDcaFrame[1],d,mHitErrs,2,3); }
+      TCL::trasat(mDcaFrame[kKU],d,mHitErrs,2,3); }
   }
   assert(mHitErrs[0]>0);
   assert(mHitErrs[2]>0);
