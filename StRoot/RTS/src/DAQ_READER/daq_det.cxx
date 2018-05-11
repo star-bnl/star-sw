@@ -233,7 +233,7 @@ int daq_det::presence()
 	int pres = 0 ;
 
 	if(caller==0) {	// in case we are running online, there is no "caller" so assume presence!
-		LOG(TERR,"no caller? %s",name) ;
+		LOG(NOTE,"no caller? %s",name) ;
 		pres = 1 ;
 		goto ret_here;
 	}

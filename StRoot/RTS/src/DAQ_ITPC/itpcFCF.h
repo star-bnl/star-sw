@@ -45,17 +45,22 @@ public:
 	void event_start() ;	// mostly to zap some debugging counters
 
         int do_ch(int fee_id, int fee_ch, u_int *data, int words) ;
+        int do_ch_sim(int row, int pad, u_short *tb_buff, u_short *track_id) ;
 
 	int do_fcf(void *storage, int bytes) ;
 
 
 	static int init(int sector, const char *fname=0) ;
+	static int init(daq_dta *gain) ;
+
 	static int get_bad(int sec1, int row1, int pad1) ;
 	static int fcf_decode(unsigned int *p_buff, daq_cld *dc, unsigned int version) ;
+	static int fcf_decode(unsigned int *p_buff, daq_sim_cld_x *dc, unsigned int version) ;
 
 	int my_id ;
 	int version ;
 	int sector_id ;
+	int offline ;
 
 	int words_per_cluster ;
 
@@ -123,6 +128,7 @@ private:
 
 
 	short smooth_dta[64*1024] ;	// for smoothing
+	u_short *track_dta ;	// for Offline simulation
 
 	// ACTUAL: physical electronics gains!!!
 	struct gain_rp_t {
@@ -132,15 +138,19 @@ private:
 
 	} ;
 
-	//gain_row_pad[MAX_ROW+1][MAX_PAD+1] ;
 
 	static gain_rp_t *sec_gains[MAX_SEC+1] ;
 
 	// this is where I recopy over data
+	int s1_data_length ;
 	struct rp_t {
-		u_short s1_data[MAX_TB] ;
 		u_short s1_len ;
-	} row_pad[MAX_ROW+1][MAX_PAD+1] ;	// [row-like][pad-like]
+		u_short s1_data[] ;
+	} ;
+
+	u_short *row_pad_store ;
+	inline struct rp_t *get_row_pad(int row, int pad) ;
+
 
 	int s1_found ;
 
