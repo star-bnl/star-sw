@@ -196,6 +196,7 @@ daq_dta *daq_itpc::handle_cld_sim(int sec)
 	while(sim && sim->iterate()) {
 		int s = sim->sec ;	//shorthand
 		u_short sim_array[512] ;
+		u_short track_array[512] ;
 
 		//LOG(TERR,"Here %d",s) ;
 
@@ -229,19 +230,20 @@ daq_dta *daq_itpc::handle_cld_sim(int sec)
 		daq_sim_adc_tb *sim_dta = (daq_sim_adc_tb *) sim->Void ;
 
 		memset(sim_array,0,sizeof(sim_array)) ;
+		memset(track_array,0,sizeof(track_array)) ;
 
 		for(u_int i=0;i<sim->ncontent;i++) {
 			sim_array[sim_dta[i].tb] = sim_dta[i].adc ;
+			track_array[sim_dta[i].tb] = sim_dta[i].track_id ;
 
-			//LOG(TERR,"%d %d = %d %d",sim->row,sim->pad,sim_dta[i].adc,sim_dta[i].tb) ;
 		}
 
-		fcf[s]->do_ch_sim(sim->row,sim->pad,sim_array) ;
+		fcf[s]->do_ch_sim(sim->row,sim->pad,sim_array,track_array) ;
 	}
 
 	//LOG(TERR,"After loading of data") ;
 
-	cld_sim->create(1024,(char *)"cld_sim",rts_id,DAQ_DTA_STRUCT(daq_sim_cld)) ;
+	cld_sim->create(1024,(char *)"cld_sim",rts_id,DAQ_DTA_STRUCT(daq_sim_cld_x)) ;
 
 	char *buff = (char *) malloc(1024*1024) ;
 	for(int s=min_sec;s<=max_sec;s++) {
@@ -272,10 +274,10 @@ daq_dta *daq_itpc::handle_cld_sim(int sec)
 
 			//LOG(TERR,"clusters %d, sector %d, row %d",clusters,s,row) ;
 
-			daq_sim_cld *dc = (daq_sim_cld *) cld_sim->request(clusters) ;
+			daq_sim_cld_x *dc = (daq_sim_cld_x *) cld_sim->request(clusters) ;
 			
 			for(int i=0;i<clusters;i++) {
-				fcf[s]->fcf_decode(p_buff,(daq_cld *)dc,version) ;
+				fcf[s]->fcf_decode(p_buff,dc,version) ;
 				
 				p_buff += ints_per_cluster ;
 				dc++ ;
@@ -550,7 +552,7 @@ daq_dta *daq_itpc::handle_cld(int sec)
 			int ints_per_cluster = (row>>16) ;
 			row &= 0xFFFF ;
 
-			LOG(NOTE,"ROW %d: cou %d[0x%X], version 0x%04X, ints_per_cluster %d",row,int_cou,int_cou,version,ints_per_cluster) ;
+			//LOG(TERR,"ROW %d: cou %d[0x%X], version 0x%04X, ints_per_cluster %d",row,int_cou,int_cou,version,ints_per_cluster) ;
 
 			int clusters = int_cou/ints_per_cluster ;	
 
@@ -563,7 +565,6 @@ daq_dta *daq_itpc::handle_cld(int sec)
 				dc++ ;
 			}
 
-			
 			cld->finalize(clusters,s,row,0) ;
 		}
 

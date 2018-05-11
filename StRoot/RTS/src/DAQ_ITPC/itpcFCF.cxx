@@ -7,7 +7,7 @@
 #include <arpa/inet.h>
 #include <sys/time.h>
 #include <errno.h>
-
+#include <assert.h>
 
 #include <rtsLog.h>	// for my LOG() call
 #include <rtsSystems.h>
@@ -59,8 +59,10 @@ itpc_fcf_c::itpc_fcf_c()
 	sector_id = 0 ;		// 0 is ALL sectors
 	offline = 0 ;		// not Offline!
 
+	row_pad_store = 0 ;
         words_per_cluster = 2 ; 
 
+	track_dta = 0 ;
 
 	// just in case
 	run_start() ;
@@ -77,6 +79,16 @@ itpc_fcf_c::~itpc_fcf_c()
 	for(int i=0;i<=MAX_SEC;i++) {
 		if(sec_gains[i]) free(sec_gains[i]) ;
 		sec_gains[i] = 0 ;
+	}
+
+	if(track_dta) {
+		free(track_dta) ;
+		track_dta = 0 ;
+	}
+
+	if(row_pad_store) {
+		free(row_pad_store) ;
+		row_pad_store = 0 ;
 	}
 } ;
 
@@ -98,12 +110,35 @@ int itpc_fcf_c::get_bad(int sec1, int row1, int pad1)
 	return 0 ;
 }
 
+struct itpc_fcf_c::rp_t *itpc_fcf_c::get_row_pad(int row, int pad)
+{
+
+	int max_row_all = MAX_ROW + 1 ;
+	int max_pad_all = MAX_PAD + 1 ;
+
+	if(offline) s1_data_length = 1 + MAX_TB * 2 ;
+	else s1_data_length = 1 + MAX_TB ;
+
+	if(row_pad_store==0) {	// initialize on first use...
+		int chunks = max_row_all * max_pad_all ;
+
+		row_pad_store = (u_short *) valloc(chunks *s1_data_length * sizeof(u_short)) ;
+		assert(row_pad_store) ;
+	}
+
+	u_short *p = row_pad_store + ((row*max_pad_all) + pad)*s1_data_length ;
+
+	return (rp_t *)p ;
+}
+
+
 //static too
 int itpc_fcf_c::init(daq_dta *gain)
 {
 	if(gain==0) return -1 ;
 
 	int bad_ch = 0 ;
+	int tot_ch = 0 ;
 
 	while(gain->iterate()) {
 		int s = gain->sec ;
@@ -118,6 +153,9 @@ int itpc_fcf_c::init(daq_dta *gain)
 
 		for(u_int p=0;p<gain->ncontent;p++) {
 			if(p==0) continue ;
+			if(p>itpc_rowlen[row]) continue ;
+			
+			tot_ch++ ;
 
 			sr[row][p].gain = gp[p].gain ;
 			sr[row][p].t0 = gp[p].t0 ;
@@ -142,7 +180,7 @@ int itpc_fcf_c::init(daq_dta *gain)
 	}
 
 	if(bad_ch) {
-		LOG(WARN,"%d bad channels",bad_ch) ;
+		LOG(WARN,"%d/%d bad channels",bad_ch,tot_ch) ;
 	}
 
 	return 0 ;
@@ -270,38 +308,6 @@ int itpc_fcf_c::init(int sec, const char *fname)
 
 
 
-#if 0
-// At start of epoch, as soon as we know the sector
-int itpc_fcf_c::init(int sec)
-{
-	LOG(TERR,"%s: sector %d; sizeof(rp)=%u, sizeof class %u",__FUNCTION__,sec,sizeof(row_pad),sizeof(itpc_fcf_c)) ;
-
-#ifdef DO_DBG1
-	LOG(WARN,"DO_DBG1 is ON!") ;
-#endif
-
-	sector = sec ;
-
-	// set defaults
-
-	for(int i=0;i<=MAX_ROW;i++) {
-		rowlen[i] = itpc_rowlen[i] ;
-		
-		for(int j=0;j<=MAX_PAD;j++) {
-			gain_row_pad[i][j].gain = 1.0 ;
-			gain_row_pad[i][j].t0 = 0.0 ;
-			gain_row_pad[i][j].flags = 0 ;
-		}
-	}
-
-	//bring in the gain & T0 corrections from file
-	if(sector < 0) return 0 ;
-
-
-	return 0 ;
-}
-#endif
-
 
 // At start event
 void itpc_fcf_c::event_start()
@@ -313,6 +319,29 @@ void itpc_fcf_c::event_start()
 	evt_id++ ;
 }
 
+
+int itpc_fcf_c::fcf_decode(u_int *p_buff, daq_sim_cld_x *dc, u_int version)
+{
+	daq_cld cld ;
+	int words_used ;
+
+	words_used = fcf_decode(p_buff,&cld,version) ;
+
+	memcpy(&dc->cld,&cld,sizeof(cld)) ;
+
+	p_buff += words_used ;	// point to track id
+
+	dc->track_id = *p_buff & 0xFFFF ;
+	dc->quality = (*p_buff)>>16 ;
+	
+	p_buff++ ;		// point to adc
+
+	dc->max_adc = *p_buff & 0xFFFF ;
+	dc->pixels = (*p_buff)>>16 ;
+
+	return words_used + 2 ;
+	
+}
 
 int itpc_fcf_c::fcf_decode(u_int *p_buff, daq_cld *dc, u_int version)
 {
@@ -448,8 +477,9 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 
 
 
-	s1_data = (u_short *)row_pad[row][pad].s1_data ;
-	
+//	s1_data = row_pad[row][pad].s1_data ;
+	s1_data = get_row_pad(row,pad)->s1_data ;
+
 	// I MUST put protection against broken data!!!
 	t_stop_last = -1 ;
 
@@ -505,7 +535,8 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 	*s1_data++ = 0xFFFF ;	// end sentinel
 
 	// check for data overrun!
-	s_count = s1_data - (u_short *)row_pad[row][pad].s1_data ;
+//	s_count = s1_data - row_pad[row][pad].s1_data ;
+	s_count = s1_data - get_row_pad(row,pad)->s1_data ;
 	if(s_count >= MAX_TB) {
 		LOG(ERR,"In trouble at RP %d:%d",row,pad) ;
 	}
@@ -521,7 +552,8 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 
 	err_ret:;
 
-	row_pad[row][pad].s1_len = seq_cou ;	// sequence count!
+//	row_pad[row][pad].s1_len = seq_cou ;
+	get_row_pad(row,pad)->s1_len = seq_cou ;	// sequence count!
 
 	return 0 ;	
 }
@@ -535,7 +567,7 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 //	adc...
 //	adc...
 
-int itpc_fcf_c::do_ch_sim(int row, int pad, u_short *tb_buff) 
+int itpc_fcf_c::do_ch_sim(int row, int pad, u_short *tb_buff, u_short *track_id) 
 {
 	int seq_cou ;
 	int s_count ;
@@ -545,6 +577,12 @@ int itpc_fcf_c::do_ch_sim(int row, int pad, u_short *tb_buff)
 	int t_start ;
 	int t_cou ;
 	u_short *p_start ;
+
+	offline = 1 ;	// juuuuust in case!
+	words_per_cluster = 4 ;	// added stuff
+	if(track_dta==0) {
+		track_dta = (u_short *)malloc(64*1024*2) ;
+	}
 
 	seq_cou = 0;
 
@@ -558,8 +596,8 @@ int itpc_fcf_c::do_ch_sim(int row, int pad, u_short *tb_buff)
 	}
 
 
-	s1_data = (u_short *)row_pad[row][pad].s1_data ;
-	
+//	s1_data = row_pad[row][pad].s1_data ;
+	s1_data = get_row_pad(row,pad)->s1_data ;
 
 	t_start = -1 ;
 	t_cou = 0 ;
@@ -586,6 +624,7 @@ int itpc_fcf_c::do_ch_sim(int row, int pad, u_short *tb_buff)
 				seq_cou++ ;
 			}
 			*s1_data++ = tb_buff[i] ;
+			*s1_data++ = track_id[i] ;
 			t_cou++ ;
 		}
 		else {
@@ -606,10 +645,13 @@ int itpc_fcf_c::do_ch_sim(int row, int pad, u_short *tb_buff)
 	*s1_data++ = 0xFFFF ;	// end sentinel
 
 	// check for data overrun!
-	s_count = s1_data - (u_short *)row_pad[row][pad].s1_data ;
-	if(s_count >= MAX_TB) {
-		LOG(ERR,"In trouble at RP %d:%d",row,pad) ;
+//	s_count = s1_data - row_pad[row][pad].s1_data ;
+	s_count = s1_data - get_row_pad(row,pad)->s1_data ;
+	if(s_count >= s1_data_length) {
+		LOG(ERR,"Data too big at RP %d:%d",row,pad) ;
 	}
+
+//	LOG(TERR,"RP %d %d = %d",row,pad,s_count) ;
 
 	// for later optimization!
 	if(s_count >= (int)f_stat.max_s1_len) {
@@ -622,7 +664,8 @@ int itpc_fcf_c::do_ch_sim(int row, int pad, u_short *tb_buff)
 
 	err_ret:;
 
-	row_pad[row][pad].s1_len = seq_cou ;	// sequence count!
+//	row_pad[row][pad].s1_len = seq_cou ;	// sequence count!
+	get_row_pad(row,pad)->s1_len = seq_cou ;
 
 	return 0 ;	
 }
@@ -735,11 +778,14 @@ int itpc_fcf_c::do_blobs_stage1(int row)
 	int pads = 0 ;
 	int late_merges = 0 ;
 
-	rp_t *rp = &(row_pad[row][0]) ;
+//	rp_t *rp = &(row_pad[row][0]) ;
+//	rp_t *rp = get_row_pad(row,0) ;
+
 	int rl = rowlen[row] ;
 
 	blob_cou = 1 ;
 
+//	LOG(TERR,"stage1: row %d",row) ;
 
 	for(int p=1;p<=rl;p++) {	// < is on purpose!!!
 		int t1_cou, t1_lo, t1_hi ;
@@ -747,13 +793,18 @@ int itpc_fcf_c::do_blobs_stage1(int row)
 		u_short *ix1_p ;
 		u_short *ix2_p ;
 
-		if(rp[p].s1_len==0) continue ;
-//		LOG(TERR,"Row %d: s1_len %d",row,rp[p].s1_len) ;
+		rp_t *rp1 = get_row_pad(row,p) ;
 
-		u_short *d1 = rp[p].s1_data ;
+		if(rp1->s1_len==0) continue ;
 
-		for(int i=0;i<rp[p].s1_len;i++) {
+		//LOG(TERR,"Row %d: s1_len %d",row,rp[p].s1_len) ;
+
+		u_short *d1 = rp1->s1_data ;
+
+		for(int i=0;i<rp1->s1_len;i++) {
 			u_short *d2 ;
+
+			rp_t *rp2 = get_row_pad(row,p+1) ;
 
 			ix1_p = d1++ ;	
 			
@@ -764,13 +815,18 @@ int itpc_fcf_c::do_blobs_stage1(int row)
 
 			t1_hi = t1_lo + t1_cou - 1 ;	// now is really
 
-			d1 += t1_cou ;			// advance to next 
+			if(offline) {
+				d1 += t1_cou * 2 ;	// also track_id!
+			}
+			else {
+				d1 += t1_cou ;			// advance to next 
+			}
 
 			if(p==rl) goto sweep_unmerged ;	// since there is no pad after that
 
-			d2 = rp[p+1].s1_data ;
+			d2 = rp2->s1_data ;
 
-			for(int j=0;j<rp[p+1].s1_len;j++) {
+			for(int j=0;j<rp2->s1_len;j++) {
 				ix2_p = d2++ ;
 
 				t2_cou = *d2++ ;
@@ -778,7 +834,8 @@ int itpc_fcf_c::do_blobs_stage1(int row)
 
 				t2_hi = t2_lo + t2_cou - 1 ;
 
-				d2 += t2_cou ;
+				if(offline) d2 += t2_cou * 2 ;
+				else d2 += t2_cou ;
 
 				int merge = 0 ;
 
@@ -858,17 +915,20 @@ int itpc_fcf_c::do_blobs_stage1(int row)
 
 int itpc_fcf_c::do_blobs_stage2(int row)
 {
-	rp_t *rp = &(row_pad[row][0]) ;
+//	rp_t *rp = &(row_pad[row][0]) ;
+//	rp_t *rp = get_row_pad(row,0) ;
+
 	int rl = rowlen[row] ;
+
+	//LOG(TERR,"stage2: row %d",row) ;
 
 	for(int i=0;i<blob_cou;i++) {
 		blob[i].seq_cou = 0 ;	// mark as unused
 
 		// initialize extents
-//		blob[i].p1 = MAX_PAD+1 ;
 		blob[i].p1 = 10000 ;
 		blob[i].p2 = 0 ;
-//		blob[i].t1 = MAX_TB+1 ;
+
 		blob[i].t1 = 10000 ;
 		blob[i].t2 = 0 ;
 
@@ -876,11 +936,13 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 	}
 
 	for(int p=1;p<=rl;p++) {
-		if(rp[p].s1_len==0) continue ;
+		rp_t *rp = get_row_pad(row,p) ;
 
-		u_short *d = rp[p].s1_data ;
+		if(rp->s1_len==0) continue ;
 
-		for(int i=0;i<rp[p].s1_len;i++) {	// loop over sequnces
+		u_short *d = rp->s1_data ;
+
+		for(int i=0;i<rp->s1_len;i++) {	// loop over sequnces
 			int t_cou, t_start, t_stop ;
 
 			int ix = *d++ ;
@@ -899,7 +961,8 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 			t_start = *d++ ;
 			t_stop = t_start + t_cou - 1 ;
 
-			d += t_cou ;
+			if(offline) d += 2*t_cou ;
+			else d += t_cou ;
 
 
 			//LOG(TERR,"%d %d: %d %d",t_start,t_cou,bl->t1,bl->t2) ;
@@ -995,10 +1058,13 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 int itpc_fcf_c::do_blobs_stage3(int row)
 {
 	short *dta_s ;
-	rp_t *rp = &(row_pad[row][0]) ;
+//	rp_t *rp = &(row_pad[row][0]) ;
+//	rp_t *rp = get_row_pad(row,0) ;
 	double tm ;
 	
 	u_int *obuff = (u_int *)out_store ;
+
+	//LOG(TERR,"stage3: row %d",row) ;
 
 	gain_rp_t (*gain_row_pad)[MAX_PAD+1] = (gain_rp_t (*)[MAX_PAD+1]) sec_gains[sector_id] ;
 
@@ -1031,6 +1097,10 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 #endif
 		memset(smooth_dta,0,dt_2*(dp+2)*sizeof(short)*2) ;	// clear both storages which is why there's a 2
 
+		if(offline) {
+			memset(track_dta,0xFF,dt_2*(dp+2)*sizeof(short)*2) ;	// set to 0xFF!
+		}
+
 		dta_s = smooth_dta + (dp+2)*dt_2 ;	// for smoothed data
 
 		int p1 = blob[ix].p1 ;
@@ -1041,14 +1111,18 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 #endif
 		// now let's rip though the data and bring it in our XY structure
 		for(int p=p1;p<=p2;p++) {
-			if(rp[p].s1_len==0) continue ;
+			rp_t *rp = get_row_pad(row,p) ;
 
-			u_short *d = rp[p].s1_data ;
+			if(rp->s1_len==0) continue ;
+
+			u_short *d = rp->s1_data ;
 
 			int pp = p - p1 + 1 ;
-			short *adc_p = smooth_dta + dt_2 * pp ;
 
-			for(int j=0;j<rp[p].s1_len;j++) {	// loop over sequnces
+			short *adc_p = smooth_dta + dt_2 * pp ;
+			u_short *track_p = track_dta + dt_2 * pp ;
+
+			for(int j=0;j<rp->s1_len;j++) {	// loop over sequnces
 				int t_cou, t_start ;
 
 				int ixx = *d++ ;
@@ -1059,10 +1133,11 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 				t_cou = *d++ ;
 				t_start = *d++ ;
 
-				//d += t_cou ;
 
 				if(b_ix != ix) {
-					d += t_cou ;
+					if(offline) d += 2*t_cou ;
+					else d += t_cou ;
+
 					continue ;
 				}
 
@@ -1072,20 +1147,15 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 				// d now points to ADC
 				for(int t=0;t<t_cou;t++) {
 					u_short adc = *d++ ;
+
 					u_short tb = t_start++ ;
-
-					//TB & ADC cuts
-					//if((tb>=26)&&(tb<=31)) continue ;
-					//if((tb>430)) continue ;
-
-					//if(adc<=4) continue ;
-					
-					//if(adc <= 2) continue ;
-					//printf("... %d %d = %d\n",p,tb,adc) ;
 
 					int ttb = tb - bl->t1 + 1 ;
 					adc_p[ttb] = adc ;
-
+					
+					if(offline) {
+						track_p[ttb] = *d++ ;
+					}
 
 					bl->tot_charge += adc ;
 					bl->pixels++ ;
@@ -1203,7 +1273,7 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 		//LOG(TERR,"Blob %d: peaks %d",ix,peaks_cou) ;
 		blob_id++ ;
 
-//		words_per_cluster = 2 ;
+
 
 		if(peaks_cou <= 1) {	// do usual averaging!
 			double f_charge = 0.0 ;
@@ -1212,6 +1282,66 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 			int flags = 0 ;
 
 			int adc_max = 0 ;
+			int pixels = 0 ;
+			u_short track_id = 0xFFFF ;
+			u_short quality = 0 ;
+
+			if(offline) {	// various track id things
+				u_int i_charge = 0 ;
+				u_int t_charge = 0 ;
+
+				for(int i=1;i<=dp;i++) {
+
+					short *adc_p = smooth_dta + dt_2 * i + 1;
+					u_short *track_p = track_dta + dt_2 * i + 1 ;
+
+
+					for(int j=1;j<=dt;j++) {
+					
+						int adc = *adc_p++ ;
+						u_short t_id = *track_p++ ;
+
+						// count pixels
+						if(adc) pixels++ ;
+						else continue ;
+
+						// find the ADC max and asign its trackid
+						if(adc > adc_max) {
+							//also asign the trackid!
+							track_id = t_id ;
+							adc_max = adc ;
+						}
+
+						//sum up the pixels as well
+						i_charge += adc ;
+						
+					}
+				}
+
+				//now sum up the only pixels which belong to the trackid
+				for(int i=1;i<=dp;i++) {
+
+					short *adc_p = smooth_dta + dt_2 * i + 1;
+					u_short *track_p = track_dta + dt_2 * i + 1 ;
+
+
+					for(int j=1;j<=dt;j++) {
+					
+						int adc = *adc_p++ ;
+						u_short t_id = *track_p++ ;
+
+						if(t_id == track_id) t_charge += adc ;
+						
+					}
+				}
+				
+				if(i_charge) {
+					quality = (u_short)(100.0*(double)t_charge/(double)i_charge+0.5) ;
+				}
+
+				
+				
+			}
 
 			for(int i=1;i<=dp;i++) {
 				int pad = p1 + i - 1 ;
@@ -1229,16 +1359,13 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 					
 					int adc = *adc_p++ ;
 
-
-					if(adc > adc_max) adc_max = adc ;
-
+					if(!adc) continue ;
 
 					i_charge += adc ;
 					i_t_ave += j * adc ;
 				}
 
 				if(i_charge==0) continue ;
-
 
 				
 				double corr_charge = (double) i_charge * gain_row_pad[row][pad].gain ;
@@ -1300,9 +1427,11 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 			*obuff++ = (cha << 16) | tmp_fl ;
 
 			if(words_per_cluster>2) {
-				*obuff++ = adc_max ;
+				*obuff++ = (quality<<16)|track_id ;
 			}
-
+			if(words_per_cluster>3) {
+				*obuff++ = (pixels<<16)|adc_max ;
+			}
 
 #ifdef DO_DBG1
 //			LOG(TERR,"**** S %d: row %d: %f %f %f",clusters_cou,row,f_p_ave,f_t_ave,f_charge) ;
@@ -1322,6 +1451,9 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 				int flags = 0 ;
 
 				int adc_max = 0 ;
+				int pixels = 0 ;
+				u_short track_id = 0xFFFF ;
+				u_short quality = 0 ;
 
 				ip1 = peaks[pk].i - 1 ;
 				if(ip1 < 1) ip1 = 1 ;
@@ -1352,9 +1484,13 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 					for(int j=it1;j<=it2;j++) {
 					
 						int adc = *adc_p++ ;
+
+						
 #ifdef DO_DBG1						
 						printf("%d %d = %d\n",i,j,adc) ;
 #endif
+						if(!adc) continue ;
+						else pixels++ ;
 
 						if(adc>adc_max) adc_max = adc ;
 
@@ -1416,7 +1552,10 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 				*obuff++ = (cha << 16) | tmp_fl ;
 
 				if(words_per_cluster > 2) {
-					*obuff++ = adc_max ;
+					*obuff++ = (quality<<16)|track_id ;
+				}
+				if(words_per_cluster > 3) {
+					*obuff++ = (pixels<<16)|adc_max ;
 				}
 				
 #ifdef DO_DBG1
@@ -1462,24 +1601,28 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 
 int itpc_fcf_c::do_row_check(int row)
 {
-	rp_t *rp = &(row_pad[row][0]) ;
+//	rp_t *rp = &(row_pad[row][0]) ;
+//	rp_t *rp = get_row_pad(row,0) ;
+
 	int rl = rowlen[row] ;
 
 	for(int p=1;p<=rl;p++) {	// < is on purpose!!!
 		int t1_cou, t1_lo ;
 		u_short *ix1_p ;
+		rp_t *rp = get_row_pad(row,p) ;
 
-		if(rp[p].s1_len==0) continue ;
+		if(rp->s1_len==0) continue ;
 		
-		u_short *d1 = rp[p].s1_data ;
+		u_short *d1 = rp->s1_data ;
 
-		for(int i=0;i<rp[p].s1_len;i++) {
+		for(int i=0;i<rp->s1_len;i++) {
 			ix1_p = d1++ ;	
 			
 			t1_cou = *d1++ ;	// actually tb_cou
 			t1_lo = *d1++ ;	// actually t_start ;
 
-			d1 += t1_cou ;			// advance to next 
+			if(offline) d1 += 2*t1_cou ;
+			else d1 += t1_cou ;			// advance to next 
 
 			if(*ix1_p==0 || *ix1_p==0xFFFF) {
 				LOG(ERR,"sequence unassigned %d:%d %d:%d = %u [%d]",p,rowlen,i,rp[p].s1_len,*ix1_p,t1_lo) ;
