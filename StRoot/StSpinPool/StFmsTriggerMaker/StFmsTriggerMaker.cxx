@@ -712,8 +712,8 @@ void StFmsTriggerMaker::writeFmsLayer1ToFpdLayer2(Crate& sim, int t)
 int StFmsTriggerMaker::loadRegisters(int runNumber)
 {
   MYSQL mysql;
-  char* host1 = "dbbak.starp.bnl.gov";
-  char* host2 = "onldb2.starp.bnl.gov";
+  char* host1 = "db04.star.bnl.gov"; //offline DB which has online DB copies from past year (a hack! don't tell Dmitry!)
+  char* host2 = "onldb2.starp.bnl.gov";  //this is online DB for current run, cannot access from ofl/rcas
   const char* user = "";
   const char* pass = "";
   // See http://drupal.star.bnl.gov/STAR/comp/db/onlinedb/online-sever-port-map
@@ -729,8 +729,8 @@ int StFmsTriggerMaker::loadRegisters(int runNumber)
     LOG_INFO << Form("DB Year=%d forceYear=%d\n",mDBTime.GetYear(),year) <<endm;
   }
   unsigned int port = 3400+year%100-1; 
-  if(year==2017) {port=3501; host=host2;}
-  if(year>2018) {printf("NO RUN16 DB yet.... Skip for now...\n"); return kStOK; }
+  if(year==2018) {port=3501; host=host2;}  //only works at online machines
+  if(year>2018) {printf("NO RUN19 DB yet.... Skip for now...\n"); return kStOK; }
   
   const char* database = "Conditions_rts";
   const char* unix_socket = NULL;
