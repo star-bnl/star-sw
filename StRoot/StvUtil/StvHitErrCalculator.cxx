@@ -4,6 +4,7 @@
 #include <assert.h>
 #include "TVector3.h"
 #include "TCernLib.h"
+#include "StarRoot/THelix3d.h"
 #include "StvHitErrCalculator.h"
 #include "StvUtil/StvDebug.h"
 #include "Stv/StvHit.h"
@@ -92,9 +93,13 @@ void StvHitErrCalculator::SetTrack(const double tkDir[3])
 //______________________________________________________________________________
 void StvHitErrCalculator::SetTkDir(const double tkDir[3][3])
 {  
-  TCL::ucopy(tkDir[2],mTG[0],3);
-  TCL::ucopy(tkDir[0],mTG[1],3);
-  TCL::ucopy(tkDir[1],mTG[2],3);
+  if (kKT) {
+    TCL::ucopy(tkDir[2],mTG[0],3);
+    TCL::ucopy(tkDir[0],mTG[1],3);
+    TCL::ucopy(tkDir[1],mTG[2],3);
+  } else {
+    TCL::ucopy(tkDir[0],mTG[0],3*3);
+  }
 }
 //______________________________________________________________________________
 int StvHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRr[3])
@@ -132,6 +137,7 @@ static const double c45 = cos(3.14/180*45);
     mCpCl = mCp*mCl;
     return 0;
   }
+//	fill mTL - local track direction
   for (int j=0;j<3;j++) {
     mTL[j] = (hiDir[j][0]*mTG[0][0]+hiDir[j][1]*mTG[0][1]+hiDir[j][2]*mTG[0][2]);}
 
