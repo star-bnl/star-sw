@@ -317,7 +317,7 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
     Float_t  x,y,z,q,adc,pad,timebucket,IdTruth,npads,ntbks,xL,yL,zL;
     Int_t    trigId, us,fl;
   };
-  static const Char_t *vname = "sector/I:row/I:x:y:z:q:adc:pad:timebucket:IdTruth:npads:ntbks:xL:yL:zL:trigId/I:us/I:fl:I";
+  static const Char_t *vname = "sector/I:row/I:x:y:z:q:adc:pad:timebucket:IdTruth:npads:ntbks:xL:yL:zL:trigId/I:us/I:fl/I";
   BPoint_t BPoint;
   static TNtuple *Nt = 0;
   if (plot && Nt == 0) {
@@ -400,6 +400,8 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
 		    BPoint.yL = 0;
 		    BPoint.zL = 0;
 #endif /* __TPC_LOCAL_COORDINATES__ */
+		    assert(tpcHit->sector() == i+1);
+		    assert(tpcHit->padrow() == (UInt_t) (j+1));
 		    BPoint.sector = i+1;
 		    BPoint.row = j+1;
 		    BPoint.x = xyz.x();
