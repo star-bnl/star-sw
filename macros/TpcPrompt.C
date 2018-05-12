@@ -10,11 +10,8 @@
 // code that should always be seen
 #endif
 #endif
-#if ROOT_VERSION_CODE >= ROOT_VERSION(5,34,18)
-//#define __USE_ROOFIT__
-#endif
 //________________________________________________________________________________
-#if !defined(__CINT__) || defined(__MAKECINT__)
+#if !defined(__CINT__)
 #include "Riostream.h"
 #include <stdio.h>
 #include "TROOT.h"
@@ -48,6 +45,9 @@
 #include "TPolyMarker.h"
 #include "TKey.h"
 #include "TLegend.h"
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,34,18)
+//#define __USE_ROOFIT__
+#endif
 #ifdef __USE_ROOFIT__
 #include "RooRealVar.h"
 #include "RooDataSet.h"
@@ -67,233 +67,63 @@
 using namespace RooFit ;
 #endif /* __USE_ROOFIT__ */
 #include "TObjectTable.h"
-//////////////////////////////////////////////////////////
-// This class has been automatically generated on
-// Tue May  8 13:40:36 2018 by ROOT version 5.34/39
-// from TTree TpcHit/TpcHit
-// found on file: TpcHit19116021.root
-//////////////////////////////////////////////////////////
-
-#ifndef TpcHit_h
-#define TpcHit_h
-
-#include <TROOT.h>
-#include <TChain.h>
-#include <TFile.h>
-
-// Header file for the classes stored in the TTree if any.
-
-// Fixed size dimensions of array or collections stored in the TTree if any.
-
-class TpcHit {
-public :
-   TTree          *fChain;   //!pointer to the analyzed TTree or TChain
-   Int_t           fCurrent; //!current Tree number in a TChain
-
-   // Declaration of leaf types
-   Int_t           sector;
-   Int_t           row;
-   Float_t         x;
-   Float_t         y;
-   Float_t         z;
-   Float_t         q;
-   Float_t         adc;
-   Float_t         pad;
-   Float_t         timebucket;
-   Float_t         IdTruth;
-   Float_t         npads;
-   Float_t         ntbks;
-   Float_t         xL;
-   Float_t         yL;
-   Float_t         zL;
-   Int_t           trigId;
-   Int_t           us;
-   Float_t         fl;
-   Float_t         I;
-
-   // List of branches
-   TBranch        *b_sector;   //!
-   TBranch        *b_row;   //!
-   TBranch        *b_x;   //!
-   TBranch        *b_y;   //!
-   TBranch        *b_z;   //!
-   TBranch        *b_q;   //!
-   TBranch        *b_adc;   //!
-   TBranch        *b_pad;   //!
-   TBranch        *b_timebucket;   //!
-   TBranch        *b_IdTruth;   //!
-   TBranch        *b_npads;   //!
-   TBranch        *b_ntbks;   //!
-   TBranch        *b_xL;   //!
-   TBranch        *b_yL;   //!
-   TBranch        *b_zL;   //!
-   TBranch        *b_trigId;   //!
-   TBranch        *b_us;   //!
-   TBranch        *b_fl;   //!
-   TBranch        *b_I;   //!
-
-   TpcHit(TTree *tree=0);
-   virtual ~TpcHit();
-   virtual Int_t    Cut(Long64_t entry);
-   virtual Int_t    GetEntry(Long64_t entry);
-  //   virtual 
-   Long64_t LoadTree(Long64_t entry);
-   virtual void     Init(TTree *tree);
-   virtual void     Loop();
-   virtual Bool_t   Notify();
-   virtual void     Show(Long64_t entry = -1);
-};
-
 #endif
 #define TpcHit_cxx
-#include <TH2.h>
-#include <TStyle.h>
-#include <TCanvas.h>
-
-void TpcHit::Loop()
-{
-//   In a ROOT session, you can do:
-//      Root > .L TpcHit.C
-//      Root > TpcHit t
-//      Root > t.GetEntry(12); // Fill t data members with entry number 12
-//      Root > t.Show();       // Show values of entry 12
-//      Root > t.Show(16);     // Read and show values of entry 16
-//      Root > t.Loop();       // Loop on all entries
-//
-
-//     This is the loop skeleton where:
-//    jentry is the global entry number in the chain
-//    ientry is the entry number in the current Tree
-//  Note that the argument to GetEntry must be:
-//    jentry for TChain::GetEntry
-//    ientry for TTree::GetEntry and TBranch::GetEntry
-//
-//       To read only selected branches, Insert statements like:
-// METHOD1:
-//    fChain->SetBranchStatus("*",0);  // disable all branches
-//    fChain->SetBranchStatus("branchname",1);  // activate branchname
-// METHOD2: replace line
-//    fChain->GetEntry(jentry);       //read all branches
-//by  b_branchname->GetEntry(ientry); //read only this branch
-   if (fChain == 0) return;
-
-   Long64_t nentries = fChain->GetEntriesFast();
-
-   Long64_t nbytes = 0, nb = 0;
-   for (Long64_t jentry=0; jentry<nentries;jentry++) {
-      Long64_t ientry = LoadTree(jentry);
-      if (ientry < 0) break;
-      nb = fChain->GetEntry(jentry);   nbytes += nb;
-      // if (Cut(ientry) < 0) continue;
-   }
+#include "TpcHit.h"
+void  TpcHit::Fill(Long64_t entry) {
+  static TH3F *hist3DZ = 0, *hist3DT = 0;
+  if (! hist3DZ) {
+    TDirectory *old = gDirectory;
+    TString fName(gDirectory->GetName());
+    fName.ReplaceAll(".root","ZT.root");
+    TFile *f = new TFile(fName,"recreate");
+    hist3DZ = new TH3F("Z","|z| versus sector and row",24,0.5,24.5,72,0.5,72.5,130,200,213);
+    hist3DT = new TH3F("T","time bucket versus sector and row",24,0.5,24.5,72,0.5,72.5,200,0,20);
+    gDirectory = old;
+  }
+  hist3DZ->Fill(sector,row,TMath::Abs(z));
+  hist3DT->Fill(sector,row,timebucket);
 }
-
-#ifdef TpcHit_cxx
-TpcHit::TpcHit(TTree *tree) : fChain(0) 
-{
-// if parameter tree is not specified (or zero), connect the file
-// used to generate this class and read the Tree.
-   if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("TpcHit19116021.root");
-      if (!f || !f->IsOpen()) {
-         f = new TFile("TpcHit19116021.root");
-      }
-      f->GetObject("TpcHit",tree);
-
-   }
-   Init(tree);
+//________________________________________________________________________________
+void TpcHit::Loop() {
+  //   In a ROOT session, you can do:
+  //      Root > .L TpcHit.C
+  //      Root > TpcHit t
+  //      Root > t.GetEntry(12); // Fill t data members with entry number 12
+  //      Root > t.Show();       // Show values of entry 12
+  //      Root > t.Show(16);     // Read and show values of entry 16
+  //      Root > t.Loop();       // Loop on all entries
+  //
+  
+  //     This is the loop skeleton where:
+  //    jentry is the global entry number in the chain
+  //    ientry is the entry number in the current Tree
+  //  Note that the argument to GetEntry must be:
+  //    jentry for TChain::GetEntry
+  //    ientry for TTree::GetEntry and TBranch::GetEntry
+  //
+  //       To read only selected branches, Insert statements like:
+  // METHOD1:
+  //    fChain->SetBranchStatus("*",0);  // disable all branches
+  //    fChain->SetBranchStatus("branchname",1);  // activate branchname
+  // METHOD2: replace line
+  //    fChain->GetEntry(jentry);       //read all branches
+  //by  b_branchname->GetEntry(ientry); //read only this branch
+  if (fChain == 0) return;
+  
+  Long64_t nentries = fChain->GetEntriesFast();
+  cout << "Total no. of events = " << nentries << endl;
+  Long64_t nbytes = 0, nb = 0;
+  for (Long64_t jentry=0; jentry<nentries;jentry++) {
+    Long64_t ientry = LoadTree(jentry);
+    if (ientry < 0) break;
+    nb = fChain->GetEntry(jentry);   nbytes += nb;
+    // if (Cut(ientry) < 0) continue;
+    Fill(ientry);
+    if (ientry%100000 == 0) { cout << "read event " << ientry << endl;}
+  }
 }
-
-TpcHit::~TpcHit()
-{
-   if (!fChain) return;
-   delete fChain->GetCurrentFile();
-}
-
-Int_t TpcHit::GetEntry(Long64_t entry)
-{
-// Read contents of entry.
-   if (!fChain) return 0;
-   return fChain->GetEntry(entry);
-}
-Long64_t TpcHit::LoadTree(Long64_t entry)
-{
-// Set the environment to read one entry
-   if (!fChain) return -5;
-   Long64_t centry = fChain->LoadTree(entry);
-   if (centry < 0) return centry;
-   if (fChain->GetTreeNumber() != fCurrent) {
-      fCurrent = fChain->GetTreeNumber();
-      Notify();
-   }
-   return centry;
-}
-
-void TpcHit::Init(TTree *tree)
-{
-   // The Init() function is called when the selector needs to initialize
-   // a new tree or chain. Typically here the branch addresses and branch
-   // pointers of the tree will be set.
-   // It is normally not necessary to make changes to the generated
-   // code, but the routine can be extended by the user if needed.
-   // Init() will be called many times when running on PROOF
-   // (once per file to be processed).
-
-   // Set branch addresses and branch pointers
-   if (!tree) return;
-   fChain = tree;
-   fCurrent = -1;
-   fChain->SetMakeClass(1);
-
-   fChain->SetBranchAddress("sector", &sector, &b_sector);
-   fChain->SetBranchAddress("row", &row, &b_row);
-   fChain->SetBranchAddress("x", &x, &b_x);
-   fChain->SetBranchAddress("y", &y, &b_y);
-   fChain->SetBranchAddress("z", &z, &b_z);
-   fChain->SetBranchAddress("q", &q, &b_q);
-   fChain->SetBranchAddress("adc", &adc, &b_adc);
-   fChain->SetBranchAddress("pad", &pad, &b_pad);
-   fChain->SetBranchAddress("timebucket", &timebucket, &b_timebucket);
-   fChain->SetBranchAddress("IdTruth", &IdTruth, &b_IdTruth);
-   fChain->SetBranchAddress("npads", &npads, &b_npads);
-   fChain->SetBranchAddress("ntbks", &ntbks, &b_ntbks);
-   fChain->SetBranchAddress("xL", &xL, &b_xL);
-   fChain->SetBranchAddress("yL", &yL, &b_yL);
-   fChain->SetBranchAddress("zL", &zL, &b_zL);
-   fChain->SetBranchAddress("trigId", &trigId, &b_trigId);
-   fChain->SetBranchAddress("us", &us, &b_us);
-   fChain->SetBranchAddress("fl", &fl, &b_fl);
-   fChain->SetBranchAddress("I", &I, &b_I);
-   Notify();
-}
-
-Bool_t TpcHit::Notify()
-{
-   // The Notify() function is called when a new file is opened. This
-   // can be either for a new TTree in a TChain or when when a new TTree
-   // is started when using PROOF. It is normally not necessary to make changes
-   // to the generated code, but the routine can be extended by the
-   // user if needed. The return value is currently not used.
-
-   return kTRUE;
-}
-
-void TpcHit::Show(Long64_t entry)
-{
-// Print contents of entry.
-// If entry is not specified, print current entry
-   if (!fChain) return;
-   fChain->Show(entry);
-}
-Int_t TpcHit::Cut(Long64_t entry)
-{
-// This function may be called from Loop.
-// returns  1 if entry is accepted.
-// returns -1 otherwise.
-   return 1;
-}
-#endif // #ifdef TpcHit_cxx
-#else
+#ifdef __CINT__
 class TMinuit;
 class TF1;
 class TH1F;
@@ -310,27 +140,16 @@ class Bichsel;
 #ifdef __USE_ROOFIT__
 class Roo2DKeysPdf;
 #endif /* __USE_ROOFIT__ */
+class TpcHit;
 #endif
+#if !defined(__CINT__) || defined(__MAKECINT__)
 //________________________________________________________________________________
 void Draw(const Char_t *tag = "New") {
-  TNtuple *TpcHit = (TNtuple *) gDirectory->Get("TpcHit");
-  if (! TpcHit) return;
-  const Char_t *Sides[3] = {"W","E","I"};
-  const Char_t *Cuts[3]  = {"sector<=12","sector>12&&sector!=20","sector==20"};
-  for (Int_t i = 0; i < 3; i++) {
-    if (i < 2) {
-      TpcHit->Draw(Form("abs(z):row>>%sR%s(45,0.5,45.5,130,200,213)",tag,Sides[i]),Cuts[i],"colz");
-    } else {
-      TpcHit->Draw(Form("abs(z):row>>%sR%s(72,0.5,72.5,130,200,213)",tag,Sides[i]),Cuts[i],"colz");
-    }
-    TH2 *R = (TH2 *) gDirectory->Get(Form("%sR%s",tag,Sides[i]));
-    if (R) {
-      R->FitSlicesY();
-      TH1 *R1 = (TH1 *) gDirectory->Get(Form("%s_1",R->GetName()));
-      if (R1) R1->SetMarkerColor(i+1);
-    }
-  }
-  
+  TNtuple *tree = (TNtuple *) gDirectory->Get("TpcHit");
+  if (! tree) return;
+  TpcHit hit(tree);
+  hit.Loop();
+  gDirectory->Write();
 }
 //________________________________________________________________________________
 void ClusterSize(const Char_t *f0 = "AuAu200AltroDef/st_physics_adc_15152001_raw_1000013.TpcHit.root",
@@ -407,9 +226,10 @@ Double_t gmp(Double_t *x, Double_t *p) {
   Double_t sigma = p[2];
   Double_t gamma = p[3];
   Double_t grass = p[4];
+  Double_t sign  = p[5];
   Double_t val   = grass;
   if (sigma > 0 && gamma > 1) {
-    Double_t t = (x[0] - nu)/sigma + (gamma - 1);
+    Double_t t = sign*(x[0] - nu)/sigma + (gamma - 1);
     if (t > 0) { 
       val += TMath::Exp(normL)*TMath::GammaDist(t,gamma,0.,1.);
     }
@@ -418,29 +238,30 @@ Double_t gmp(Double_t *x, Double_t *p) {
 }
 //________________________________________________________________________________
 TF1 *GMP() {
-  TF1 * f = new TF1("GMP",gmp,0.5,15.5,5);
-  f->SetParNames("normL", "nu", "sigma", "gamma", "grass");
+  TF1 * f = new TF1("GMP",gmp,0.5,15.5,6);
+  f->SetParNames("normL", "mu", "sigma", "gamma", "grass","sign");
   f->SetParameters(4.17880, 2.86452, 0.2, 6.0, 2.1);
   f->SetParLimits(0,0,50);
-  f->SetParLimits(1,2,6);
+  f->SetParLimits(1,2,26);
   f->SetParLimits(2,0.1,2);
-  f->SetParLimits(3,5,20);
+  f->SetParLimits(3,2,50);
   f->SetParLimits(4,0,1e3);
+  f->FixParameter(5,1.);
   return f;
 }
 //________________________________________________________________________________
-void T0Fit(TChain *TpcHit = 0) {
+void T0Fit(TChain *tree) {
   TH2D *D = (TH2D *) gDirectory->Get("D");
   if (! D) {
-    if (! TpcHit) {
-      TpcHit = (TChain *) gDirectory->Get("TpcHit");
+    if (! tree) {
+      tree = (TChain *) gDirectory->Get("TpcHit");
     }
-    if (! TpcHit) return;
+    if (! tree) return;
     TString Out(gSystem->BaseName(gDirectory->GetName()));
     Out.ReplaceAll(".root",".Fit.root");
     TFile *fOut = new TFile(Out,"recreate");
     TH2D *D = new TH2D("D","z of Cluster versus row",91,-45.5,45.5,300,0.5,15.5);
-    TpcHit->Draw("timebucket:(sector <= 12) ? row : -row >> D","trigId==0","colz");
+    tree->Draw("timebucket:(sector <= 12) ? row : -row >> D","trigId==0","colz");
     fOut->Write();
   }
   TString Out(gSystem->BaseName(gDirectory->GetName()));
@@ -453,6 +274,7 @@ void T0Fit(TChain *TpcHit = 0) {
   TF1 *f = GMP();
   Double_t params[6];
   f->GetParameters(params);
+  
   Int_t np = f->GetNpar();
   Int_t nx = D->GetXaxis()->GetNbins();
   Int_t ny = D->GetXaxis()->GetNbins();
@@ -469,6 +291,8 @@ void T0Fit(TChain *TpcHit = 0) {
     TH1D *proj = D->ProjectionY(Form("%s_%i",D->GetName(),ix),ix,ix);
     if (proj->GetEntries() < 100) continue;
     cout << "Fit: " << proj->GetName() << endl;
+    if (ix != 20) f->SetParameter(1,  3.);
+    else          f->SetParameter(1, 10.);
     f->FixParameter(0,params[0]);
     f->FixParameter(1,params[1]);
     f->FixParameter(2,params[2]);
@@ -481,9 +305,9 @@ void T0Fit(TChain *TpcHit = 0) {
     params[4] = f->GetParameter(4);
     f->FixParameter(4,params[4]);
     f->ReleaseParameter(0);         f->SetParLimits(0,0,50);
-    f->ReleaseParameter(1);         f->SetParLimits(1,2,6);
+    f->ReleaseParameter(1); //      f->SetParLimits(1,2,26);
     f->ReleaseParameter(2);         f->SetParLimits(2,0.1,2);
-    f->ReleaseParameter(3);         f->SetParLimits(3,5,20);
+    f->ReleaseParameter(3);         f->SetParLimits(3,2,50);
     res = proj->Fit(f,"erm","",0.5,5.5);
     //    if (res) continue;
     c1->Modified();
@@ -525,11 +349,123 @@ void T0Fit(TChain *TpcHit = 0) {
   Double_t dt0I = 1./TMath::Sqrt(ww); 
   cout << "\tInner t0 = " << t0I << " +/- " << dt0I << endl;
 }
-#if defined(__CINT__) && !defined(__MAKECINT__)
+//________________________________________________________________________________
+void T0Fit(TH3F *D = 0, Int_t iX = 0, Int_t iY = 0) {
+  if (! D) return;
+  TString Out(D->GetDirectory()->GetName());
+  Out.ReplaceAll(".root","");
+  Out += D->GetName();
+  if (iX) {Out += "_x"; Out += iX;}
+  if (iY) {Out += "_y"; Out += iY;}
+  Double_t sign = 1;
+  if (TString(D->GetName()).BeginsWith("Z")) sign = -1;
+  
+  Out += ".root";
+  TFile *fOut = new TFile(Out,"recreate");
+  struct BPoint_t {
+    Float_t sector, row, norm, mu, sigma, gamma, grass,dnorm, sign, dmu, dsigma, dgamma, dgrass, dsign, chisq;
+  };
+  TNtuple *FitP = new TNtuple("FitP","FitP","sector:row:norm:mu:sigma:gamma:grass:dnorm:sign:dmu:dsigma:dgamma:dgrass:dsign:chisq");
+  BPoint_t B;
+  TF1 *f = GMP();
+  Double_t params[6];
+  f->GetParameters(params);
+  Int_t np = f->GetNpar();
+  Int_t nx = D->GetXaxis()->GetNbins();
+  Int_t ny = D->GetYaxis()->GetNbins();
+  Int_t nz = D->GetZaxis()->GetNbins();
+  Double_t xmin = D->GetXaxis()->GetXmin();
+  Double_t xmax = D->GetXaxis()->GetXmax();
+  Double_t ymin = D->GetYaxis()->GetXmin();
+  Double_t ymax = D->GetYaxis()->GetXmax();
+  TCanvas *c1 = new TCanvas();
+  Int_t ix1 = 1; Int_t ix2 = nx;
+  Int_t iy1 = 1; Int_t iy2 = ny;
+  if (iX > 0 && iX <= nx) {ix1 = ix2 = iX;}
+  if (iY > 0 && iY <= ny) {iy1 = iy2 = iY;}
+  for (Int_t ix = ix1; ix <= ix2; ix++) {
+    D->GetXaxis()->SetRange(ix,ix);
+    for (Int_t iy = iy1; iy <= iy2; iy++) {
+      D->GetYaxis()->SetRange(iy,iy);
+      TH1 *proj = D->Project3D(Form("z_%i_%i",ix,iy));
+      if (proj->GetEntries() < 100) continue;
+      cout << "Fit: " << proj->GetName() << endl;
+      Int_t bin = proj->GetMaximumBin();
+      params[1] = proj->GetXaxis()->GetBinCenter(bin);
+      f->FixParameter(0,params[0]);
+      f->FixParameter(1,params[1]);
+      f->FixParameter(2,params[2]);
+      f->FixParameter(3,params[3]);
+      f->FixParameter(5,sign);
+      f->ReleaseParameter(4);         f->SetParLimits(4,0,1e3);
+      Int_t res = proj->Fit(f,"er","",params[1]-20,params[1]+20);
+      //    if (res) continue;
+      //      c1->Modified();
+      //      c1->Update();
+      params[4] = f->GetParameter(4);
+      f->FixParameter(4,params[4]);
+      f->ReleaseParameter(0);         f->SetParLimits(0,0,50);
+      f->ReleaseParameter(1);         f->SetParLimits(1,params[1]-20,params[1]+20);
+      f->ReleaseParameter(2);         f->SetParLimits(2,0.1,2);
+      f->ReleaseParameter(3);         f->SetParLimits(3,2,50);
+      res = proj->Fit(f,"erm","",0.5,5.5);
+      //    if (res) continue;
+      //      c1->Modified();
+      //      c1->Update();
+      f->ReleaseParameter(4);         f->SetParLimits(4,0,1e3);
+      res = proj->Fit(f,"erm","",params[1]-20,params[1]+20);
+      //    if (res) continue;
+      c1->Modified();
+      c1->Update();
+      B.sector = ix;
+      B.row    = iy;
+      B.chisq = f->GetChisquare();
+      Float_t *xx = &B.norm;
+      for (Int_t p = 0; p < np; p++) {
+	xx[p]    = f->GetParameter(p);
+	xx[np+p] = f->GetParError(p);
+      }
+      FitP->Fill(&B.sector);
+    }
+  }
+#if 0
+  TH2D *mu = hist[1];
+  if (! mu) return;
+  TF1 *pol0 = 0;
+  Double_t xmx[6] = {-45.5, -13.5, -0.5, 0.5, 13.5, 45.5};
+  Double_t t0[4], dt0[4], w[4];
+  for (Int_t i = 0; i < 4; i++) {
+    Int_t i1 = i;
+    if (i >= 2) i1++;
+    Int_t i2 = i1+1;
+    mu->Fit("pol0","er+","",xmx[i1],xmx[i2]);
+    pol0 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol0"); 
+    t0[i] = pol0->GetParameter(0);
+    dt0[i] = pol0->GetParError(0);
+    w[i] = 1./(dt0[i]*dt0[i]);
+    cout << gDirectory->GetName() << "\trange = [" << xmx[i1] << "," << xmx[i2] << "] t0 " << t0[i] << " +/- " << dt0[i] << endl;
+  }
+  Double_t ww = w[0] + w[3];
+  Double_t t0O = (t0[0]*w[0] + t0[3]*w[3])/ww; 
+  Double_t dt0O = 1./TMath::Sqrt(ww); 
+  cout << gDirectory->GetName();
+  cout << "\tOuter t0 = " << t0O << " +/- " << dt0O;
+  ww = w[1] + w[2];
+  Double_t t0I = (t0[1]*w[1] + t0[2]*w[2])/ww; 
+  Double_t dt0I = 1./TMath::Sqrt(ww); 
+  cout << "\tInner t0 = " << t0I << " +/- " << dt0I << endl;
+#endif
+  fOut->Write();
+}
+//________________________________________________________________________________
+void TpcPrompt(Int_t Nevents= 0, const Char_t *daqfile = "", const Char_t *treefile = "") {
+  T0Fit();
+}
+#else /* __CINT__ */
 //________________________________________________________________________________
 void TpcPrompt(Int_t Nevents = 9999999, 
 	       //	       const Char_t *daqfile = "/star/data03/daq/2014/100/15100085/st_physics_15100085_raw_2500013.daq",
-	       const Char_t *daqfile = "./st_physics_adc_19*.*event.root",
+	       const Char_t *daqfile = "./*.*event.root",
 	       const Char_t *treefile = "TpcHit.root") {
   gROOT->LoadMacro("bfc.C");
 
@@ -552,9 +488,5 @@ void TpcPrompt(Int_t Nevents = 9999999,
     //    StAnalysisMaker::PrintTpcHits(0,0,2);
     StAnalysisMaker::PrintTpcHits(0,0,1);
   }
-}
-#else
-void TpcPrompt(Int_t Nevents= 0, const Char_t *daqfile = "", const Char_t *treefile = "") {
-  T0Fit();
 }
 #endif 

@@ -48,5 +48,21 @@
 <!-- <input URL="file:/star/data03/daq/2018/106/1910602*/*adc*.daq" /> -->
 <!-- <input URL="file:/star/data03/daq/2018/113/19113018/st_itpc*.daq" /> -->
 <!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/1911602*/*.daq" />  -->
-<input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/1911602*/*adc*.daq" /> 
+<!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/1911602*/*adc*.daq" /> -->
+<input URL="file:/star/data03/daq/2018/047/19047016/st_physics_19047016_raw_0000001.daq" />
+<input URL="file:/star/data03/daq/2018/070/19070006/st_physics_19070006_raw_0000001.daq" />
+<input URL="file:/star/data03/daq/2018/071/19071031/st_physics_19071031_raw_0000001.daq" />
+<input URL="file:/star/data03/daq/2018/072/19072023/st_physics_19072023_raw_0000001.daq" />
+<input URL="file:/star/data03/daq/2018/073/19073007/st_physics_19073007_raw_0000001.daq" />
+<input URL="file:/star/data03/daq/2018/074/19074046/st_physics_19074046_raw_0000001.daq" />
+<input URL="file:/star/data03/daq/2018/075/19075034/st_physics_19075034_raw_0000001.daq" />
+<input URL="file:/star/data03/daq/2018/076/19076035/st_physics_19076035_raw_0000001.daq" />
+<input URL="file:/star/data03/daq/2018/077/19077032/st_physics_19077032_raw_0000001.daq" />
+<input URL="file:/star/data03/daq/2018/078/19078004/st_physics_19078004_raw_0000001.daq" />
+<input URL="file:/star/data03/daq/2018/079/19079008/st_physics_19079008_raw_0000001.daq" />
+<input URL="file:/star/data03/daq/2018/080/19080061/st_physics_19080061_raw_0000001.daq" />
+<input URL="file:/star/data03/daq/2018/081/19081030/st_physics_19081030_raw_0000001.daq" />
+<input URL="file:/star/data03/daq/2018/082/19082024/st_physics_19082024_raw_0000001.daq" />
+<input URL="file:/star/data03/daq/2018/083/19083030/st_physics_19083030_raw_0000001.daq" />
+<input URL="file:/star/data03/daq/2018/084/19084004/st_physics_19084004_raw_0000001.daq" />
 </job>
