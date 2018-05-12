@@ -771,8 +771,11 @@ Float_t St_tpcAnodeHVavgC::voltagePadrow(Int_t sector, Int_t padrow) const {
 //________________________________________________________________________________
 #include "St_tpcPadGainT0C.h"
 MakeChairInstance(tpcPadGainT0,Calibrations/tpc/tpcPadGainT0);
+#include "St_itpcPadGainT0C.h"
+MakeChairInstance(itpcPadGainT0,Calibrations/tpc/itpcPadGainT0);
 #include "St_tpcPadGainT0BC.h"
-MakeChairInstance(tpcPadGainT0B,Calibrations/tpc/tpcPadGainT0B);
+St_tpcPadGainT0BC *St_tpcPadGainT0BC::fgInstance = 0;
+St_tpcPadGainT0BC *St_tpcPadGainT0BC::instance() {if (! fgInstance) fgInstance = new St_tpcPadGainT0BC(); return fgInstance;}
 #include "St_tpcSlewingC.h"
 MakeChairInstance(tpcSlewing,Calibrations/tpc/tpcSlewing);
 #include "St_tpcAcChargeC.h"
