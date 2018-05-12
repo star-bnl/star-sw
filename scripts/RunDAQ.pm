@@ -1587,7 +1587,7 @@ sub rdaq_file2hpss
 	my($base)=$HPSSBASE;
 	if ( $y == 2018 ) {  
 	    # this path is used for runs >= 19073057
-	    if ( $code >= 19073057){
+	    if ( $code >= 19073057 && $code < 19129018 ){
 		$base .= "/restricted";
 	    }
 	}
