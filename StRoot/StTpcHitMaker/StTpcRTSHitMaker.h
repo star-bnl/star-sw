@@ -74,21 +74,23 @@ class StTpcDigitalSector;
 
 #include "StDAQMaker/StRtsReaderMaker.h"
 class daq_tpx;
+class daq_itpc;
 class StTpcRTSHitMaker : public StMaker {
  public:
-  StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0), fminCharge(0) {memset(mTpx_RowLen, 0, sizeof(mTpx_RowLen));}
+ StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0), fiTpc(0), fminCharge(0) {memset(mTpx_RowLen, 0, sizeof(mTpx_RowLen));}
   virtual ~StTpcRTSHitMaker();
   
   Int_t               Init();
   Int_t               InitRun(Int_t runnumber);
   Int_t               Make();
  private:
-  daq_tpx *fTpx; //!
-  Double_t fminCharge; // ! minimum cluster charge in ADC
-  Int_t    maxHits[24];
-  Int_t    maxBin0Hits;
-  Int_t    bin0Hits;
-  UChar_t *mTpx_RowLen[24];
+  daq_tpx  *fTpx; //!
+  daq_itpc *fiTpc; //!
+  Double_t  fminCharge; // ! minimum cluster charge in ADC
+  Int_t     maxHits[24];
+  Int_t     maxBin0Hits;
+  Int_t     bin0Hits;
+  UChar_t  *mTpx_RowLen[24];
   // cvs
   virtual const char *GetCVS() const    {
     static const char cvs[]="Tag $Name:  $ $Id: $  built " __DATE__ " " __TIME__ ; return cvs;
