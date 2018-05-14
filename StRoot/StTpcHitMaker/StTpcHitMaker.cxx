@@ -518,7 +518,7 @@ Int_t StTpcHitMaker::Make() {
                 << ") starting at time bin 0. Skipping event." << endm;
       return kStSkip;
   }
-  if (kMode == kTpc || kMode == kTpx || kMode == kiTPC) {
+  if (kMode == kTpc || kMode == kTpx) { // || kMode == kiTPC) { --> no after burner for iTpc
     StEvent *pEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));
     if (Debug()) {LOG_INFO << "StTpcHitMaker::Make : StEvent has been retrieved " <<pEvent<< endm;}
     if (! pEvent) {LOG_INFO << "StTpcHitMaker::Make : StEvent has not been found " << endm; return kStWarn;}
