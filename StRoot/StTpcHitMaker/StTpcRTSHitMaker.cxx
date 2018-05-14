@@ -205,7 +205,9 @@ Int_t StTpcRTSHitMaker::Make() {
     if (! digitalSector) continue;
     UShort_t Id = 0;
     Int_t hitsAdded = 0;
+#if 0
     Int_t nup = 0;
+#endif
     Int_t NoAdcs = 0;
     daq_dta *dtas[2] = {
       fTpx ?  fTpx->put("adc_sim",0,St_tpcPadConfigC::instance()->numberOfRows(sec)+1,0,mTpx_RowLen[sec-1]) : 0,
@@ -291,32 +293,41 @@ Int_t StTpcRTSHitMaker::Make() {
 	  LOG_INFO << Form("CLD sec %2d: row %2d: %d clusters",dd->sec, dd->row, dd->ncontent) << endm;
 	}
 	for(UInt_t i=0;i<dd->ncontent;i++) {
-#if 0
-	  daq_sim_cld_x *dc_x = (daq_sim_cld_x *) dd->Void ;
-	  daq_sim_cld   *dc   = (daq_sim_cld   *) dd->Void ;
-#endif
+	  daq_cld cld;
+	  Int_t IdTruth = 0;
+	  UShort_t quality  = 0;
+	  if (iTpcType) {
+	    daq_sim_cld   &dc   = ((daq_sim_cld   *) dd->Void)[i] ;
+	    cld      = dc.cld;
+	    IdTruth = dc.track_id;
+	    quality  = dc.quality;
+	  } else {
+	    daq_sim_cld_x &dc_x = ((daq_sim_cld_x *) dd->Void)[i] ;
+	    cld      = dc_x.cld;
+	    IdTruth = dc_x.track_id;
+	    quality  = dc_x.quality;
+	  }
 	  if (Debug()) {
-	    //	  if (Debug() > 1 || ( dd->sim_cld[i].cld.p2 - dd->sim_cld[i].cld.p1 <= 1 )) {
 	    LOG_INFO << Form("    pad %f[%d:%d], tb %f[%d:%d], cha %d, fla 0x%X, Id %d, Q %d ",
-			     dd->sim_cld[i].cld.pad,
-			     dd->sim_cld[i].cld.p1,
-			     dd->sim_cld[i].cld.p2,
-			     dd->sim_cld[i].cld.tb,
-			     dd->sim_cld[i].cld.t1,
-			     dd->sim_cld[i].cld.t2,
-			     dd->sim_cld[i].cld.charge,
-			     dd->sim_cld[i].cld.flags,
-			     dd->sim_cld[i].track_id,
-			     dd->sim_cld[i].quality
+			     cld.pad,
+			     cld.p1,
+			     cld.p2,
+			     cld.tb,
+			     cld.t1,
+			     cld.t2,
+			     cld.charge,
+			     cld.flags,
+			     IdTruth,
+			     quality
 			     ) << endm;
 	    iBreak++;
 	  }
-	  if (dd->sim_cld[i].cld.p1 > dd->sim_cld[i].cld.p2) continue;
-	  if (dd->sim_cld[i].cld.t1 > dd->sim_cld[i].cld.t2) continue;
-	  if (dd->sim_cld[i].cld.tb >= __MaxNumberOfTimeBins__) continue;
-	  if (dd->sim_cld[i].cld.charge < fminCharge) continue;
-	  if ( ! (dd->sim_cld[i].cld.pad >  0 && dd->sim_cld[i].cld.pad <= 182 && 
-		  dd->sim_cld[i].cld.tb  >= 0 && dd->sim_cld[i].cld.tb  <  512)) continue;
+	  if (cld.p1 > cld.p2) continue;
+	  if (cld.t1 > cld.t2) continue;
+	  if (cld.tb >= __MaxNumberOfTimeBins__) continue;
+	  if (cld.charge < fminCharge) continue;
+	  if ( ! (cld.pad >  0 && cld.pad <= 182 && 
+		  cld.tb  >= 0 && cld.tb  <  512)) continue;
 	  /*tpxFCF.h
 	    #define FCF_ONEPAD              1
 	    #define FCF_DOUBLE_PAD          2       // offline: merged
@@ -326,13 +337,13 @@ Int_t StTpcRTSHitMaker::Make() {
 	    #define FCF_BROKEN_EDGE        32      // 0x20 touches one of the mezzanine edges
 	    #define FCF_DEAD_EDGE          64      // 0x40 touches a dead pad 
 	  */
-	  if ( dd->sim_cld[i].cld.flags &&
-	       (dd->sim_cld[i].cld.flags & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE))) continue;
+	  if ( cld.flags &&
+	       (cld.flags & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE))) continue;
 	  if (! hitCollection )  {
 	    hitCollection = new StTpcHitCollection();
 	    rEvent->setTpcHitCollection(hitCollection);
 	  }
-	  StTpcPadCoordinate Pad(dd->sec, dd->row, dd->sim_cld[i].cld.pad, dd->sim_cld[i].cld.tb); PrPP(Make,Pad);
+	  StTpcPadCoordinate Pad(dd->sec, dd->row, cld.pad, cld.tb); PrPP(Make,Pad);
 	  static StTpcLocalSectorCoordinate LS;
 	  static StTpcLocalCoordinate L;
 	  transform(Pad,LS,kFALSE,kTRUE); PrPP(Make,LS); // don't useT0, useTau                  
@@ -352,27 +363,21 @@ Int_t StTpcRTSHitMaker::Make() {
 	  //yf        if (isiTpcSector) hw += 1U << 1;
 	  hw += dd->sec << 4;     // (row/100 << 4);   // sector
 	  hw += dd->row << 9;     // (row%100 << 9);   // row
-	  Double_t q = ADC2GeV*dd->sim_cld[i].cld.charge;
-	  UShort_t idTruth = 0;
-	  UShort_t quality = 0;
-	  //yf 12/26/13 bug 2741	if (dd->sim_cld[i].track_id < 10000) {
-	  idTruth = dd->sim_cld[i].track_id;
-	  quality = dd->sim_cld[i].quality;
-	  //yf 12/26/13 bug 2741 }
+	  Double_t q = ADC2GeV*cld.charge;
 	  Id++;
 	  StTpcHit *hit = StTpcHitMaker::StTpcHitFlag(L.position(),hard_coded_errors,hw,q
 						      , (UChar_t ) 0  // counter 
-						      , idTruth
+						      , IdTruth
 						      , quality
 						      , Id                                   // id =0,
-						      , dd->sim_cld[i].cld.p1 //  mnpad
-						      , dd->sim_cld[i].cld.p2 //  mxpad
-						      , dd->sim_cld[i].cld.t1 //  mntmbk
-						      , dd->sim_cld[i].cld.t2 //  mxtmbk
-						      , dd->sim_cld[i].cld.pad
-						      , dd->sim_cld[i].cld.tb 
-						      , dd->sim_cld[i].cld.charge
-						      , dd->sim_cld[i].cld.flags);
+						      , cld.p1 //  mnpad
+						      , cld.p2 //  mxpad
+						      , cld.t1 //  mntmbk
+						      , cld.t2 //  mxtmbk
+						      , cld.pad
+						      , cld.tb 
+						      , cld.charge
+						      , cld.flags);
 	  hitsAdded++;
 	  if (hit->minTmbk() == 0) bin0Hits++;
 	  if (Debug()) hit->Print();
