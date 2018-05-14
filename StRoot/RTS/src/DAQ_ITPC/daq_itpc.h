@@ -40,7 +40,8 @@ private:
 	// for Offline cluster finder and gain loaded...
 	itpc_fcf_c *fcf[25] ;	// one per sector
 	int fcf_gains_loaded ;	// 
-
+	int fcf_det_type ;
+	int fcf_det_orient ;
 	
 
 	static const char *help_string ;
@@ -59,6 +60,9 @@ public:
 	int get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int prompt) ;
 	int get_token(char *buff, int buff_bytes) ;
 
+
+	void run_stop() ;
+	void setup_fcf(int det, int orient) ;
 
 	virtual const char *GetCVS() const {	// Offline
                 static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
