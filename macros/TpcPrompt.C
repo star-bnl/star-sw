@@ -490,3 +490,9 @@ void TpcPrompt(Int_t Nevents = 9999999,
   }
 }
 #endif 
+/* 
+   foreach f (`ls -1d *event.root `)
+      set run = `echo $f | awk -F\_ '{print $3}'`;
+      root.exe -q -b 'TpcPrompt.C(100000,"'${f}'","TpcHit'${run}'.root")' >& ${run}.log &
+   end
+ */
