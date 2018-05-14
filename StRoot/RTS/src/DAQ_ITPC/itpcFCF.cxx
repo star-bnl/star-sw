@@ -13,16 +13,17 @@
 #include <rtsSystems.h>
 
 // this needs to be always included
-#include <DAQ_READER/daqReader.h>
+//#include <DAQ_READER/daqReader.h>
 #include <DAQ_READER/daq_dta.h>
 
-#include <trgDataDefs.h>
-#include "trgConfNum.h"
+//#include <trgDataDefs.h>
+//#include "trgConfNum.h"
 
 // only the detectors we will use need to be included
 // for their structure definitions...
 #include <DAQ_TPX/daq_tpx.h>
 #include <DAQ_TPX/tpxFCF_flags.h>
+#include <TPC/rowlen.h>
 
 #include <DAQ_ITPC/daq_itpc.h>
 #include <DAQ_ITPC/itpcCore.h>
@@ -59,6 +60,15 @@ itpc_fcf_c::itpc_fcf_c()
 	sector_id = 0 ;		// 0 is ALL sectors
 	offline = 0 ;		// not Offline!
 
+
+	det_type = 1 ;		// ITPC
+	y_is_timebin = 1 ;	// normal
+	max_x = 120 ;
+	max_y = 512 ;
+	max_slice = 40 ;
+
+	use_gain = 1 ;
+
 	row_pad_store = 0 ;
         words_per_cluster = 2 ; 
 
@@ -67,7 +77,7 @@ itpc_fcf_c::itpc_fcf_c()
 	// just in case
 	run_start() ;
 
-	s1_found = 0 ;
+	f_stat.s1_found = 0 ;
 	blob_id = 0 ;
 
 } ;
@@ -92,18 +102,98 @@ itpc_fcf_c::~itpc_fcf_c()
 	}
 } ;
 
+// generic "rowlen" function
+int itpc_fcf_c::x_max(int slice, int y)
+{
+	if(det_type == 0) {	// TPX
+		if(y_is_timebin) {	// normal
+			if(slice>45) return -1 ;
+			return tpc_rowlen[slice] ;
+		}
+		else {			// y is row
+			if(y>45) return -1 ;
+			return 182 ; // tpc_rowlen[y] ;
+		}
+	}
+	else if(det_type == 1) {
+		if(y_is_timebin) {
+			if(slice>40) return -1 ;
+			return itpc_rowlen[slice] ;
+		}
+		else {
+			if(y>40) return -1 ;
+			return 120 ; //itpc_rowlen[slice] ;
+		}
+	}
+	else {	// generic
+		return max_x ;
+	}
+}
+
+int itpc_fcf_c::x_min(int slice, int y)
+{
+	switch(det_type) {
+	case 0 :		
+	case 1 :
+		if(y_is_timebin) return 1 ;
+		break ;
+	}
+
+	return 1 ;	// generic case
+}
+
+int itpc_fcf_c::y_min()
+{
+	return 0 ;	// always!
+}
+
+int itpc_fcf_c::y_max()
+{
+	switch(det_type) {
+	case 0 :
+		if(y_is_timebin) return 512 ;
+		return 45 ;
+	case 1:
+		if(y_is_timebin) return 425 ;
+		return 40 ;
+	}
+
+	return max_y ;
+}
+
+		
+	
+// Go from raw channel (aka pad) to x position
+// Needed for reverse clusterfinding because of the pizza shape
+int itpc_fcf_c::pad_to_x(int pad, int row)
+{
+	switch(det_type) {
+	case 0 :
+		if(y_is_timebin) return pad ;
+		return (182/2 - tpc_rowlen[row]/2 + pad) ;
+	case 1 :
+		if(y_is_timebin) return pad ;
+		return (120/2 - itpc_rowlen[row]/2 + pad) ;
+	}
+
+	// all other detectors are assumed to be square
+	return pad ;
+}
+
+	
+
 //static member
-int itpc_fcf_c::rowlen[MAX_ROW+1] ;
+//int itpc_fcf_c::rowlen[45+1] ;
 
 itpc_fcf_c::gain_rp_t *itpc_fcf_c::sec_gains[MAX_SEC+1] ;
 
 int itpc_fcf_c::get_bad(int sec1, int row1, int pad1)
 {
-	gain_rp_t (*gain_p)[MAX_PAD+1] ;
+	gain_rp_t (*gain_p)[MAX_PHYS_PAD+1] ;
 	
 	if(sec_gains[sec1]==0) return 0 ;	// good
 
-	gain_p = (gain_rp_t (*)[MAX_PAD+1]) sec_gains[sec1] ;
+	gain_p = (gain_rp_t (*)[MAX_PHYS_PAD+1]) sec_gains[sec1] ;
 
 	if(gain_p[row1][pad1].gain==0.0) return 1 ;
 
@@ -112,14 +202,13 @@ int itpc_fcf_c::get_bad(int sec1, int row1, int pad1)
 
 struct itpc_fcf_c::rp_t *itpc_fcf_c::get_row_pad(int row, int pad)
 {
+	int max_pad_all = max_x + 1 ;
 
-	int max_row_all = MAX_ROW + 1 ;
-	int max_pad_all = MAX_PAD + 1 ;
-
-	if(offline) s1_data_length = 1 + MAX_TB * 2 ;
-	else s1_data_length = 1 + MAX_TB ;
+	if(offline) s1_data_length = 1 + max_y * 2 ;	// need more for track_id
+	else s1_data_length = 1 + max_y ;
 
 	if(row_pad_store==0) {	// initialize on first use...
+		int max_row_all = max_slice + 1 ;
 		int chunks = max_row_all * max_pad_all ;
 
 		row_pad_store = (u_short *) valloc(chunks *s1_data_length * sizeof(u_short)) ;
@@ -132,7 +221,7 @@ struct itpc_fcf_c::rp_t *itpc_fcf_c::get_row_pad(int row, int pad)
 }
 
 
-//static too
+// This is only called if I'm in Offline and AFTER the usual init(sector,"")!!!
 int itpc_fcf_c::init(daq_dta *gain)
 {
 	if(gain==0) return -1 ;
@@ -147,14 +236,15 @@ int itpc_fcf_c::init(daq_dta *gain)
 		if(sec_gains[s]==0) continue ;	// not for me
 		if(row==0) continue ;
 
-		gain_rp_t (*sr)[MAX_PAD+1] = (gain_rp_t (*)[MAX_PAD+1]) sec_gains[s] ;
+		gain_rp_t (*sr)[MAX_PHYS_PAD+1] = (gain_rp_t (*)[MAX_PHYS_PAD+1]) sec_gains[s] ;
 
 		daq_det_gain *gp = (daq_det_gain *) gain->Void ;
 
 		for(u_int p=0;p<gain->ncontent;p++) {
 			if(p==0) continue ;
-			if(p>itpc_rowlen[row]) continue ;
-			
+//			if(p>(u_int)rowlen[row]) continue ;
+			if(p>(u_int)x_max(row,0)) continue ;
+
 			tot_ch++ ;
 
 			sr[row][p].gain = gp[p].gain ;
@@ -165,7 +255,8 @@ int itpc_fcf_c::init(daq_dta *gain)
 				int p2 = p + 1 ;
 
 				if(p1<1) p1 = 1;
-				if(p2>itpc_rowlen[row]) p2 = itpc_rowlen[row] ;
+				//if(p2>rowlen[row]) p2 = rowlen[row] ;
+				if(p2>x_max(row,0)) p2 = x_max(row,0) ;
 
 				// mark this and neighbours as bad
 				sr[row][p].flags |= 3 ;	// bad and edge
@@ -186,18 +277,14 @@ int itpc_fcf_c::init(daq_dta *gain)
 	return 0 ;
 }
 
-//also static member
+// det_type and various other max_x,max_y,max_slice etc HAVE to be set before!!!!
 int itpc_fcf_c::init(int sec, const char *fname)
 {
+
 	int s_min, s_max ;
-	gain_rp_t (*gain_p)[MAX_PAD+1] ;
+	gain_rp_t (*gain_p)[MAX_PHYS_PAD+1] ;
 
 	if(sec>MAX_SEC) return -1 ;
-
-	// set the rowlen
-	for(int r=1;r<=MAX_ROW;r++) {
-		rowlen[r] = itpc_rowlen[r] ;
-	}
 
 	if(sec<=0) {
 		s_min = 1 ;
@@ -207,25 +294,77 @@ int itpc_fcf_c::init(int sec, const char *fname)
 		s_min = s_max = sec ;
 	}
 
+	const char *s_type, *s_orient ;
+
+
+	switch(det_type) {
+	case 0 :
+		s_type = "TPX" ;
+		if(y_is_timebin) {
+			use_gain = 1 ;
+
+			max_x = 182 ;
+			max_y = 512 ;
+			max_slice = 45 ;
+			
+		}
+		else {
+			use_gain = 0 ;
+
+			max_x = 182 ;
+			max_y = 45 ;
+			max_slice = 512;
+		}
+		break ;
+	case 1 :
+		s_type = "ITPC" ;
+		if(y_is_timebin) {
+			use_gain = 1 ;
+
+			max_x = 120 ;
+			max_y = 512 ;
+			max_slice = 40 ;
+		}
+		else {
+			use_gain = 0 ;
+
+			max_x = 120 ;
+			max_y = 40 ;
+			max_slice = 512 ;
+		}
+		break ;
+	default :
+		s_type = "OTHER" ;
+		use_gain = 0 ;
+		break ;
+	}
+
+	if(y_is_timebin) s_orient="across-rows" ;
+	else s_orient = "across-timebins" ;
+
+	LOG(INFO,"%s: det_type %s(%s): max_x(pad) %d, max_y(timebin) %d, max_slice(row) %d",__FUNCTION__,
+	    s_type,s_orient,
+	    max_x, max_y, max_slice) ;
 
 	//alocation first
 	for(int s=s_min;s<=s_max;s++) {
 
 		if(sec_gains[s]) continue ;	// silently continue ;
 
-		sec_gains[s] = (gain_rp_t *) malloc((MAX_ROW+1)*(MAX_PAD+1)*sizeof(gain_rp_t)) ;
+		sec_gains[s] = (gain_rp_t *) malloc((MAX_PHYS_ROW+1)*(MAX_PHYS_PAD+1)*sizeof(gain_rp_t)) ;
 		
 		//defaults now
-		gain_p = (gain_rp_t (*)[MAX_PAD+1]) sec_gains[s] ;
+		gain_p = (gain_rp_t (*)[MAX_PHYS_PAD+1]) sec_gains[s] ;
 
-		for(int r=1;r<=MAX_ROW;r++) {
+		for(int r=1;r<=MAX_PHYS_ROW;r++) {
 
-		for(int p=1;p<=MAX_PAD;p++) {
+		for(int p=1;p<=MAX_PHYS_PAD;p++) {
 
 			gain_p[r][p].gain = 1.0 ;
 			gain_p[r][p].t0 = 0.0 ;
 
-			if(p==1 || p==itpc_rowlen[r]) gain_p[r][p].flags = 0x2 ;	// edge
+			//if(p==1 || p==rowlen[r]) gain_p[r][p].flags = 0x2 ;	// edge
+			if(p==1 || p==x_max(r,0)) gain_p[r][p].flags = 0x2 ;	// edge
 			else gain_p[r][p].flags = 0 ;
 
 		}
@@ -273,7 +412,7 @@ int itpc_fcf_c::init(int sec, const char *fname)
 
 
 
-		gain_rp_t (*sr)[MAX_PAD+1] = (gain_rp_t (*)[MAX_PAD+1]) sec_gains[sec] ;
+		gain_rp_t (*sr)[MAX_PHYS_PAD+1] = (gain_rp_t (*)[MAX_PHYS_PAD+1]) sec_gains[sec] ;
 
 		sr[row][pad].gain = g ;
 		sr[row][pad].t0 = t ;
@@ -285,7 +424,8 @@ int itpc_fcf_c::init(int sec, const char *fname)
 			int p2 = pad + 1 ;
 
 			if(p1<1) p1 = 1;
-			if(p2>itpc_rowlen[row]) p2 = itpc_rowlen[row] ;
+			//if(p2>rowlen[row]) p2 = rowlen[row] ;
+			if(p2>x_max(row,0)) p2 = x_max(row,0) ;
 
 			// mark this and neighbours as bad
 			sr[row][pad].flags |= 3 ;	// bad and edge
@@ -313,10 +453,9 @@ int itpc_fcf_c::init(int sec, const char *fname)
 void itpc_fcf_c::event_start()
 {
 	//for statistics, so not really necessary
-	s1_found = 0 ;
+	f_stat.s1_found = 0 ;
 
-	blob_id = 0 ;
-	evt_id++ ;
+
 }
 
 
@@ -429,7 +568,6 @@ int itpc_fcf_c::fcf_decode(u_int *p_buff, daq_cld *dc, u_int version)
 int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words) 
 {
 	int row, pad ;
-	u_short tb_buff[MAX_TB] ;
 	int seq_cou ;
 	int s_count ;
 	int t_stop_last ;
@@ -441,7 +579,7 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 
 	itpc_ifee_to_rowpad(fee_id, fee_ch, row, pad) ;
 
-	gain_rp_t (*gain_row_pad)[MAX_PAD+1] = (gain_rp_t (*)[MAX_PAD+1]) sec_gains[sector_id] ;
+	gain_rp_t (*gain_row_pad)[MAX_PHYS_PAD+1] = (gain_rp_t (*)[MAX_PHYS_PAD+1]) sec_gains[sector_id] ;
 
 	if(row==0) goto err_ret ;	// unphysical pad
 
@@ -455,7 +593,7 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 
 
 
-	if((word32*3)>=MAX_TB) {
+	if((word32*3)>=MAX_TB_EVER) {
 		LOG(ERR,"%d:#%d: FEE %d:%d, words %d",rdo,port,fee_id,fee_ch,words) ;
 		goto err_ret ;
 	}
@@ -537,7 +675,7 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 	// check for data overrun!
 //	s_count = s1_data - row_pad[row][pad].s1_data ;
 	s_count = s1_data - get_row_pad(row,pad)->s1_data ;
-	if(s_count >= MAX_TB) {
+	if(s_count >= s1_data_length) {
 		LOG(ERR,"In trouble at RP %d:%d",row,pad) ;
 	}
 
@@ -546,7 +684,7 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 		f_stat.max_s1_len = s_count ;
 	}
 
-	s1_found += seq_cou ;
+	f_stat.s1_found += seq_cou ;
 	
 //	if(seq_cou) LOG(TERR,"RP %d:%d = seq_cou %d",row,pad,seq_cou) ;
 
@@ -581,20 +719,21 @@ int itpc_fcf_c::do_ch_sim(int row, int pad, u_short *tb_buff, u_short *track_id)
 	offline = 1 ;	// juuuuust in case!
 	words_per_cluster = 4 ;	// added stuff
 	if(track_dta==0) {
-		track_dta = (u_short *)malloc(64*1024*2) ;
+		track_dta = (u_short *)malloc(MAX_BLOB_SIZE*2) ;
 	}
 
 	seq_cou = 0;
 
-	gain_rp_t (*gain_row_pad)[MAX_PAD+1] = (gain_rp_t (*)[MAX_PAD+1]) sec_gains[sector_id] ;
+
 
 	if(row==0) goto err_ret ;	// unphysical pad
 
-
-	if(gain_row_pad[row][pad].flags & 1) {
-		goto err_ret ;	// skip dead pads!
+	if(use_gain) {
+		gain_rp_t (*gain_row_pad)[MAX_PHYS_PAD+1] = (gain_rp_t (*)[MAX_PHYS_PAD+1]) sec_gains[sector_id] ;
+		if(gain_row_pad[row][pad].flags & 1) {
+			goto err_ret ;	// skip dead pads!
+		}
 	}
-
 
 //	s1_data = row_pad[row][pad].s1_data ;
 	s1_data = get_row_pad(row,pad)->s1_data ;
@@ -603,16 +742,18 @@ int itpc_fcf_c::do_ch_sim(int row, int pad, u_short *tb_buff, u_short *track_id)
 	t_cou = 0 ;
 
 	//condition data ala cuts
-	for(int i=0;i<512;i++) {
-		if(i>425) tb_buff[i] = 0 ;
-		else if((i>=26)&&(i<=31)) tb_buff[i]= 0 ;
-		else {
-			if(tb_buff[i]<=4) tb_buff[i] = 0 ;
+	if(det_type==1 && y_is_timebin) {	// only for ITPC in normal orientation!
+
+		for(int i=0;i<512;i++) {
+			if(i>425) tb_buff[i] = 0 ;
+			else if((i>=26)&&(i<=31)) tb_buff[i]= 0 ;
+			else {
+				if(tb_buff[i]<=4) tb_buff[i] = 0 ;
+			}
 		}
 	}
 
-
-	for(int i=0;i<512;i++) {
+	for(int i=0;i<MAX_TB_EVER;i++) {
 		if(tb_buff[i]) {
 			if(t_start<0) {
 				*s1_data++ = 0 ;
@@ -658,7 +799,7 @@ int itpc_fcf_c::do_ch_sim(int row, int pad, u_short *tb_buff, u_short *track_id)
 		f_stat.max_s1_len = s_count ;
 	}
 
-	s1_found += seq_cou ;
+	f_stat.s1_found += seq_cou ;
 	
 //	if(seq_cou) LOG(TERR,"RP %d:%d = seq_cou %d",row,pad,seq_cou) ;
 
@@ -680,8 +821,10 @@ int itpc_fcf_c::do_fcf(void *v_store, int bytes)
 	u_int *store_start = out_store ;
 		
 	f_stat.evt_cou++ ;
+	
+	blob_id = 0 ;
 
-	for(int row=1;row<=MAX_ROW;row++) {
+	for(int row=1;row<=max_slice;row++) {
 		double tmx ;
 		int found_ints ;
 
@@ -730,8 +873,8 @@ int itpc_fcf_c::do_fcf(void *v_store, int bytes)
 	}
 
 
-	if(s1_found > (int)f_stat.max_s1_found) {
-		f_stat.max_s1_found = s1_found ;
+	if(f_stat.s1_found > f_stat.max_s1_found) {
+		f_stat.max_s1_found = f_stat.s1_found ;
 	}
 
 	return (out_store-store_start) ;	// in ints
@@ -744,7 +887,7 @@ void itpc_fcf_c::run_start()
 
 	memset(&f_stat,0,sizeof(f_stat)) ;
 
-	evt_id = 0 ;
+
 }
 
 void itpc_fcf_c::run_stop()
@@ -781,11 +924,12 @@ int itpc_fcf_c::do_blobs_stage1(int row)
 //	rp_t *rp = &(row_pad[row][0]) ;
 //	rp_t *rp = get_row_pad(row,0) ;
 
-	int rl = rowlen[row] ;
+//	int rl = rowlen[row] ;
+	int rl = x_max(row,0) ;
 
 	blob_cou = 1 ;
 
-//	LOG(TERR,"stage1: row %d",row) ;
+//	LOG(TERR,"stage1: row %d, x_max %d",row,rl) ;
 
 	for(int p=1;p<=rl;p++) {	// < is on purpose!!!
 		int t1_cou, t1_lo, t1_hi ;
@@ -918,7 +1062,8 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 //	rp_t *rp = &(row_pad[row][0]) ;
 //	rp_t *rp = get_row_pad(row,0) ;
 
-	int rl = rowlen[row] ;
+//	int rl = rowlen[row] ;
+	int rl = x_max(row,0) ;
 
 	//LOG(TERR,"stage2: row %d",row) ;
 
@@ -926,10 +1071,10 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 		blob[i].seq_cou = 0 ;	// mark as unused
 
 		// initialize extents
-		blob[i].p1 = 10000 ;
+		blob[i].p1 = 0xFFFF ;
 		blob[i].p2 = 0 ;
 
-		blob[i].t1 = 10000 ;
+		blob[i].t1 = 0xFFFF ;
 		blob[i].t2 = 0 ;
 
 		blob[i].flags = 0 ;
@@ -1005,7 +1150,7 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 //			continue ;
 //		}
 
-		if(dp==1) {	// one pad
+		if(dp<=1) {	// one pad
 			//LOG(WARN,"%d: 1pad %d %d: %d",i,dp,dt,blob[i].seq_cou) ;
 			//LOG(WARN,"%d %d %d %d",blob[i].p1,blob[i].p2,blob[i].t1,blob[i].t2) ;
 			blob[i].seq_cou = 0 ;	// kill it
@@ -1014,7 +1159,7 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 
 
 
-		if(dt<=3) {	// tb range < 3
+		if(dt<=1 || (dt<=3 && y_is_timebin)) {	// tb range < 3
 			//LOG(WARN,"%d: 3tb %d %d %d",i,dp,dt,blob[i].seq_cou) ;
 			//LOG(WARN,"%d %d %d %d",blob[i].p1,blob[i].p2,blob[i].t1,blob[i].t2) ;
 			blob[i].seq_cou = 0 ;	// kill it
@@ -1066,7 +1211,9 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 
 	//LOG(TERR,"stage3: row %d",row) ;
 
-	gain_rp_t (*gain_row_pad)[MAX_PAD+1] = (gain_rp_t (*)[MAX_PAD+1]) sec_gains[sector_id] ;
+
+	gain_rp_t (*gain_row_pad)[MAX_PHYS_PAD+1] = (gain_rp_t (*)[MAX_PHYS_PAD+1]) sec_gains[sector_id] ;
+
 
 	int clusters_cou = 0 ;
 
@@ -1348,7 +1495,7 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 
 				//LOG(TERR,"Gain RP %d:%d = %f %d",row,pad,gain_row_pad[row][pad].gain,gain_row_pad[row][pad].flags) ;
 
-				flags |= gain_row_pad[row][pad].flags ;
+				if(use_gain) flags |= gain_row_pad[row][pad].flags ;
 
 				short *adc_p = smooth_dta + dt_2 * i + 1;
 
@@ -1367,12 +1514,20 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 
 				if(i_charge==0) continue ;
 
+
+
+				if(use_gain) {
+					double corr_charge = (double) i_charge * gain_row_pad[row][pad].gain ;
 				
-				double corr_charge = (double) i_charge * gain_row_pad[row][pad].gain ;
-				
-				f_charge += corr_charge ;
-				f_t_ave += i_t_ave * gain_row_pad[row][pad].gain + gain_row_pad[row][pad].t0 * corr_charge ;
-				f_p_ave += i * corr_charge ;
+					f_charge += corr_charge ;
+					f_t_ave += i_t_ave * gain_row_pad[row][pad].gain + gain_row_pad[row][pad].t0 * corr_charge ;
+					f_p_ave += i * corr_charge ;
+				}
+				else {
+					f_charge += (double) i_charge ;
+					f_p_ave += i * (double) i_charge ;
+					f_t_ave += (double) i_t_ave ;
+				}
 			}
 
 			if(f_charge<0.1) {
@@ -1421,7 +1576,7 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 			if(cha > 0x7FFF) cha = 0x8000 | (cha/1024) ;
 
 			if(flags & 3) tmp_fl |= 0x8000 ;	// ROW_EDGE
-//			if(blob[ix].p1==1 || blob[ix].p2==rowlen[row]) tmp_fl |= 0x8000 ;	// ROW EDGE
+
 
 			*obuff++ = (time_c << 16) | pad_c ;
 			*obuff++ = (cha << 16) | tmp_fl ;
@@ -1472,7 +1627,9 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 				for(int i=ip1;i<=ip2;i++) {
 					int pad = p1 + i - 1 ;
 
-					flags |= gain_row_pad[row][pad].flags ;
+					if(use_gain) {
+						flags |= gain_row_pad[row][pad].flags ;
+					}
 
 					short *adc_p = smooth_dta + dt_2 * i + it1 ;
 
@@ -1500,11 +1657,18 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 
 					if(i_charge==0) continue ;
 				
-					double corr_charge = (double) i_charge * gain_row_pad[row][pad].gain ;
+					if(use_gain) {
+						double corr_charge = (double) i_charge * gain_row_pad[row][pad].gain ;
 				
-					f_charge += corr_charge ;
-					f_t_ave += (double) i_t_ave * gain_row_pad[row][pad].gain + gain_row_pad[row][pad].t0 * corr_charge ;
-					f_p_ave += i * corr_charge ;
+						f_charge += corr_charge ;
+						f_t_ave += (double) i_t_ave * gain_row_pad[row][pad].gain + gain_row_pad[row][pad].t0 * corr_charge ;
+						f_p_ave += i * corr_charge ;
+					}
+					else {
+						f_charge += (double) i_charge ;
+						f_p_ave += i * (double)i_charge ;
+						f_t_ave += (double) i_t_ave ;
+					}
 				}
 
 
@@ -1546,7 +1710,7 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 				pad_c |= 0x8000 ;					// merged flag
 				if(flags & 3) tmp_fl |= 0x8000 ;			// ROW_EDGE
 
-				//if((ip1==1)||(ip2==rowlen[row])) tmp_fl |= 0x8000 ;	// ROW_EDGE
+
 
 				*obuff++ = (time_c << 16) | pad_c ;
 				*obuff++ = (cha << 16) | tmp_fl ;
@@ -1604,7 +1768,8 @@ int itpc_fcf_c::do_row_check(int row)
 //	rp_t *rp = &(row_pad[row][0]) ;
 //	rp_t *rp = get_row_pad(row,0) ;
 
-	int rl = rowlen[row] ;
+//	int rl = rowlen[row] ;
+	int rl = x_max(row,0) ;
 
 	for(int p=1;p<=rl;p++) {	// < is on purpose!!!
 		int t1_cou, t1_lo ;
@@ -1625,7 +1790,7 @@ int itpc_fcf_c::do_row_check(int row)
 			else d1 += t1_cou ;			// advance to next 
 
 			if(*ix1_p==0 || *ix1_p==0xFFFF) {
-				LOG(ERR,"sequence unassigned %d:%d %d:%d = %u [%d]",p,rowlen,i,rp[p].s1_len,*ix1_p,t1_lo) ;
+				LOG(ERR,"sequence unassigned %d:%d %d:%d = %u [%d]",p,rl,i,rp[p].s1_len,*ix1_p,t1_lo) ;
 			}
 		}
 		

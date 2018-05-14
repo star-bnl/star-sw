@@ -71,6 +71,10 @@ daq_itpc::daq_itpc(daqReader *rts_caller)
 
 	it = new itpcInterpreter ;
 
+	memset(fcf,0,sizeof(fcf)) ;
+	fcf_det_type = 1 ;	// ITPC
+	fcf_det_orient = 1 ;	// normal
+
 	LOG(DBG,"%s: constructor: caller %p",name,rts_caller) ;
 	return ;
 }
@@ -96,6 +100,19 @@ daq_itpc::~daq_itpc()
 	return ;
 }
 
+void daq_itpc::setup_fcf(int det, int orient)
+{
+	fcf_det_type = det ;
+	fcf_det_orient = orient ;
+}
+
+void daq_itpc::run_stop() 
+{
+	for(int s=1;s<=24;s++) {
+		if(fcf[s]) fcf[s]->run_stop() ;
+	}
+
+}
 
 daq_dta *daq_itpc::put(const char *in_bank, int sec, int row, int pad, void *p1, void *p2) 
 {
@@ -211,6 +228,9 @@ daq_dta *daq_itpc::handle_cld_sim(int sec)
 			fcf[s]->my_id = s ;
 			fcf[s]->sector_id = s ;
 			fcf[s]->offline = 1 ;
+			fcf[s]->det_type = fcf_det_type ;
+			fcf[s]->y_is_timebin = fcf_det_orient ;
+
 			fcf[s]->init(s,0) ;	// in all cases
 
 
