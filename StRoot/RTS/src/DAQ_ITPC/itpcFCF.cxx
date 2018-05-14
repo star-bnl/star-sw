@@ -84,7 +84,7 @@ itpc_fcf_c::itpc_fcf_c()
 
 itpc_fcf_c::~itpc_fcf_c()
 {
-	LOG(TERR,"%s: destructor %d",__PRETTY_FUNCTION__,my_id) ;
+//	LOG(TERR,"%s: destructor %d",__PRETTY_FUNCTION__,my_id) ;
 
 	for(int i=0;i<=MAX_SEC;i++) {
 		if(sec_gains[i]) free(sec_gains[i]) ;
@@ -213,6 +213,7 @@ struct itpc_fcf_c::rp_t *itpc_fcf_c::get_row_pad(int row, int pad)
 
 		row_pad_store = (u_short *) valloc(chunks *s1_data_length * sizeof(u_short)) ;
 		assert(row_pad_store) ;
+		memset(row_pad_store,0,chunks *s1_data_length * sizeof(u_short)) ;	// superstition...
 	}
 
 	u_short *p = row_pad_store + ((row*max_pad_all) + pad)*s1_data_length ;
@@ -455,6 +456,13 @@ void itpc_fcf_c::event_start()
 	//for statistics, so not really necessary
 	f_stat.s1_found = 0 ;
 
+	if(offline) {
+		for(int r=0;r<=max_slice;r++) {
+		for(int p=0;p<=max_x;p++) {
+			get_row_pad(r,p)->s1_len = 0 ;
+		}
+		}
+	}
 
 }
 

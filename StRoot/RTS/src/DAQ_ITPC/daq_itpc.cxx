@@ -48,7 +48,7 @@ static daq_det_itpc_factory itpc_factory ;
 
 daq_itpc::daq_itpc(daqReader *rts_caller) 
 {
-	LOG(DBG,"%s",__PRETTY_FUNCTION__) ;
+//	LOG(TERR,"%s",__PRETTY_FUNCTION__) ;
 
 	rts_id = ITPC_ID ;
 	name = rts2name(rts_id) ;
@@ -81,7 +81,7 @@ daq_itpc::daq_itpc(daqReader *rts_caller)
 
 daq_itpc::~daq_itpc() 
 {
-	LOG(DBG,"%s",__PRETTY_FUNCTION__) ;
+//	LOG(TERR,"%s",__PRETTY_FUNCTION__) ;
 
 	delete ifee_fy17_raw ;
 	delete ifee_fy17_sampa ;
@@ -96,6 +96,10 @@ daq_itpc::~daq_itpc()
 	delete cld_sim ;
 
 	delete it ;
+
+	for(int i=0;i<25;i++) {
+		if(fcf[i]) delete fcf[i] ;
+	}
 
 	return ;
 }

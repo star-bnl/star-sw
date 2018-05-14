@@ -18,7 +18,10 @@ struct itpc_ped_t {
 class itpc_data_c {
 public:
 	itpc_data_c() { rdo_p = 0 ; next_word = 0 ;} ;
-	~itpc_data_c() {;} ;
+	~itpc_data_c() { 
+		if(rdo_p) free(rdo_p) ;
+		rdo_p = 0 ;
+	}
 
 	//per FEE
 	struct fee_ch_t {
@@ -55,11 +58,12 @@ public:
 	void rdo_start(int sector, int irdo, int rb) {
 		next_word = 0 ;
 
-//		if(rdo_p) {
-//			LOG(ERR,"rdo_p not free!") ;
-//		}
-
-		rdo_p = (rdo_t *)malloc(sizeof(rdo_t)) ;
+		if(rdo_p) {
+			LOG(ERR,"rdo_p not free!") ;
+		}
+		else {
+			rdo_p = (rdo_t *)malloc(sizeof(rdo_t)) ;
+		}
 
 		rdo_p->sector = sector ;
 		rdo_p->rdo = irdo ;
