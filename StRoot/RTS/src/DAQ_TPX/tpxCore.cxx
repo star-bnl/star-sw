@@ -106,6 +106,8 @@ void tpx_from_altro(int rdo, int a, int ch, int &row, int &pad)
 		return ;
 	}
 
+//LOG(WARN,"Change for sTGC") ;
+#if 1
 	if(tpx_fy16_map) {
 		int remap = 0 ;
 
@@ -144,13 +146,24 @@ void tpx_from_altro(int rdo, int a, int ch, int &row, int &pad)
 	else {
 //		LOG(WARN,"Not FY16 Map????") ;
 	}
+#endif
 
 	row = tpx_altro_to_pad[rdo][a][ch].row ;
 	pad = tpx_altro_to_pad[rdo][a][ch].pad ;
 
 	if(tpx_altro_to_row_override) {
-		row = tpx_altro_to_row_override[a] ;
-		pad = ch + 1 ;
+		row = tpx_altro_to_row_override[a&0xFE] ;
+
+		if(a&1) pad = 1 + 16 + ch ;
+		else pad = 1 + ch ;
+
+//		LOG(TERR,"A %d: row %d, pad %d",a,row,pad) ;
+
+		if(row<=0) {
+			row = 255 ;
+			pad = 255 ;
+		}
+
 		return ;
 	}
 
@@ -197,6 +210,8 @@ int tpx_altro_to_fee(int rdo, int a)
 //	LOG(WARN,"tpx_altro_to_fee: %d %d (map %d)",rdo,a,tpx_fy16_map) ;
 
 	rdo-- ;	// to start from 0
+
+	a &= 0xFE ;	// make it even
 
 	for(int i=0;i<36;i++) {
 		int fee, altro ;
@@ -720,6 +735,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
 
   if((a->row > 45) || (a->pad > 182)) {
 	if(log) LOG(ERR,"row:pad %d:%d illegal for altro %d:%d",a->row,a->pad,a->id,a->ch) ;
+//LOG(WARN,"Change for sTGC: altro %d",a->id) ;
 	return 0 ;
   }
 

@@ -2367,6 +2367,7 @@ double StiKalmanTrackNode::getTime() const
   double time = 0;
   if (! _laser) {
     double d = sqrt(mFP.x()*mFP.x()+mFP.y()*mFP.y());
+    Double_t z = mFP.z() - d*mFP.tanl();
     double sn = fabs(mFP._cosCA*mFP.y() - mFP._sinCA*mFP.x())/d;
     if (sn> 0.99) sn =  0.99;
     if (sn<0.2) {
@@ -2386,7 +2387,7 @@ double StiKalmanTrackNode::getTime() const
       double beta2=p2/e2;
       beta = TMath::Sqrt(beta2);
     }
-    time = d/(TMath::Ccgs()*beta*1e-6); // mksec  
+    time = (d/beta - z)/(TMath::Ccgs()*1e-6); // mksec  
   } else {
     if (TMath::Abs(mFP.z()) > 20.0) {
 static const double Radius = 197.;

@@ -1449,6 +1449,7 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
   SignalSum_t *SignalSum = GetSignalSum(sector);
   Double_t ped    = 0; 
   Double_t pedRMS = St_TpcResponseSimulatorC::instance()->AveragePedestalRMS();
+  if (! St_tpcPadConfigC::instance()->iTPC(sector)) pedRMS = St_TpcResponseSimulatorC::instance()->AveragePedestalRMSX();
   Int_t adc = 0;
   Int_t index = 0;
   Double_t gain = 1;

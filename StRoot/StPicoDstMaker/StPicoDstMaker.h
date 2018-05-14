@@ -142,6 +142,7 @@ class StPicoDstMaker : public StMaker {
 
   Float_t    mBField;
 
+  PicoVtxMode mVtxMode;
 
   TString   mInputFileName;        //! *.list - MuDst or picoDst
   TString   mOutputFileName;       //! FileName

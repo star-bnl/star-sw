@@ -5,6 +5,7 @@
    setenv NODEBUG yes
    setenv STARFPE NO
    setup 64b
+   starver .DEV2
 #  echo $INPUTFILE0 | grep ':'
 #  if (! $?) then
 #    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
@@ -27,7 +28,7 @@
 #  root.exe -q -b -x 'bfc.C(10000,"B2016,BAna,emcDY2,fpd,trgd,ZDCvtx,StiHftC,NosvtIT,NossdIT,analysis,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,pxlHit,istHit","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
 # starndard chain
 #root.exe -q -b -x 'bfc.C(1000,"DbV20170726 P2016a StiCA -VFMinuit mtd mtdCalib btof PxlHit IstHit SstHit VFPPVnoCTB beamline VFStoreX picoWrite PicoVtxVpd BEmcChkStat -evout CorrX OSpaceZ2 OGridLeak3D -hitfilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
-root.exe -q -b -x 'bfc.C(1000,"P2014a btof mtd mtdCalib BEmcChkStat CorrX OSpaceZ2 OGridLeak3D -hitfilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+root.exe -q -b -x 'bfc.C(1000,"P2016a btof mtd mtdCalib BEmcChkStat CorrX OSpaceZ2 OGridLeak3D -hitfilt evout","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
@@ -41,5 +42,6 @@ root.exe -q -b -x 'bfc.C(1000,"P2014a btof mtd mtdCalib BEmcChkStat CorrX OSpace
 <!-- <input URL="file:/star/data03/daq/2016/035/17035170/st_physics_adc_17035170_raw_*.daq" /> -->
 <!-- <input URL="file:/star/institutions/lbl_scratch/hft/daq/Run16/039/17039018/st_physics_17039018_raw_40000*.daq" /> -->
 <!-- <input URL="file:/star/data03/daq/2016/042/17042027/st_mtd_17042027_raw_*.daq" /> -->
-<input URL="file:/star/data03/daq/2016/041/17041013/st_mtd_17041013_raw_*.daq" />
+<!-- <input URL="file:/star/data03/daq/2016/041/17041013/st_mtd_17041013_raw_*.daq" /> -->
+<input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2016/125/17125034/st_physics_adc_17125034_*.daq" />
 </job>
