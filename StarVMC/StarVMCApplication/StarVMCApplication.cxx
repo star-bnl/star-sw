@@ -377,12 +377,14 @@ void StarVMCApplication::GeometryDb(TDataSet *Detectors) {
 }
 //________________________________________________________________________________
 Bool_t StarVMCApplication::MisalignGeometry() {
+#if 0
   if (! fAlignment || St_tpcPadConfigC::instance()->numberOfRows(20) != 45) {
     cout << "No MisalignGeometry has been applied" << endl;
     if (St_tpcPadConfigC::instance()->numberOfRows(20) != 45) 
       cout << "Alignmnet for iTPC configuration has not been implemented yet." << endl;
     return fAlignmentDone;
   } 
+#endif
   //  TGeoParallelWorld *pw = 
   gGeoManager->CreateParallelWorld("priority_sensors");
   //  SetDebug(3);
