@@ -7,7 +7,6 @@
  */                                                                      
 #ifndef STAR_StMuMcAnalysisMaker
 #define STAR_StMuMcAnalysisMaker
-//#define __DEVT__
 #include <assert.h>
 #include <map>
 #include <utility>
@@ -79,11 +78,7 @@ enum EChargeType {
 };
 enum EPlotType {
   kTotalQA = 16, kTotalQAll,                                             // no. of plots for Global and Primary tracks
-#ifndef __DEVT__
-  noFit =  50,
-#else
   noFit = 100,
-#endif
   NHYPS = 18, NHypTypes = NHYPS/2, 
   kVariables = 2                                                         // x = 0 vs No. fit and No. bad points, x = 1 vs Eta and pT 
 };

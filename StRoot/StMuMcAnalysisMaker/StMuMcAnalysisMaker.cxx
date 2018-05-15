@@ -98,7 +98,7 @@ static const Char_t *HistNames70[NHYPS] = {"eN70B","protonN70B","kaonN70B","piN7
 static const Char_t *HistNameP[NHYPS] = {"eNzB","protonNzB","kaonNzB","piNzB","muNzB","deuteronNzB","tritonNzB","He3NzB","alphaNzB",
           "ePzB","protonPzB","kaonPzB","piPzB","muPzB","deuteronPzB","tritonPzB","He3PzB","alphaPzB"};
 #endif
-static const Char_t *HitName = "vs NoFitPnts and no. bad hits";
+static const Char_t *HitName = "vs NoFitPnts and Quality";
 static const Char_t *KinName = "vs   #eta and pT/|q|";
 static const Char_t *KinPionName = "vs   #eta and pT/|q| for pion";
 static const Char_t *proj[5] = {"zx","zy","x","y","yx"};
@@ -296,13 +296,8 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
     }
   }
   phiBins[nphi] = 180.;
-#ifdef __DEVT__
   Int_t    neta   = 100; 
   Double_t etamax = 2.5;
-#else
-  Int_t    neta   =  60; 
-  Double_t etamax = 1.5;
-#endif
   Double_t deta = 2*etamax/neta;
   TArrayD EtaBins(neta+1);
   Double_t *etaBins = EtaBins.GetArray();
@@ -372,23 +367,23 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
      //                /GlobalTracks/Mc/All/(+)/NoHits
      TString dir(Form("/%s/%s/%s/%s/%s/%s",TracksVertices[0],TitleTrType[gp],
           plotNameMatch[t].Name,ParticleType[particle],TitleCharge[pm],VarSet[x]));
-     const VarName_t plotVar[kTotalQAll] = {         //no.fit                      no.bad,                               
-       {"ChiSqXY",   "#chi^{2}_{Track}/NDF",          noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50,  0.,  10., 0.000, 6.000, 1},
-       {"ChiSqZ",    "#chi^{2}_{Vx} ",                noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50,  0., 100., 0.000,10.000,-1},
-       {"dDcaXY",    "difference in Dca_{XY}",        noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -5.,   5., -.250, 1.500, 0},
-       {"dDcaZ",     "difference in Dca_{Z}",         noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -5.,   5., -.250, 1.500, 0},
-       {"dPsi",      "difference in  #Psi ",          noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -0.1, 0.1, -.004, 0.040, 1},
-       {"dPti" ,     "difference in q/pT",            noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -0.1, 0.1, -.020, 0.200, 1},
-       {"dPtiR" ,    "difference in relative q/pT",   noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -0.1, 0.1, -.004, 0.040, 1},
-       {"dTanL",     "difference in tan( #lambda )",  noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -0.1, 0.1, -.004, 0.040, 1},
-       {"deta",      "difference in  #eta",           noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -0.1, 0.1, -.002, 0.025,-1},
-       {"pDcaXY",    "pull in Dca_{XY}",              noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10., -.300, 3.000, 0},
-       {"pDcaZ",     "pull in Dca_{Z}",               noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10., -.100,10.000, 0},
-       {"pPsi",      "pull in  #Psi ",                noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10., -.300, 3.000, 1},
-       {"pPti" ,     "pull in q/pT",                  noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10., -.250, 2.500, 1},
-       {"pPtiR" ,    "pull in relative q/pT",         noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10., -.230, 3.500, 1},
-       {"pTanL",     "pull in tan( #lambda )",        noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10., -.600, 6.000, 0},
-       {"peta",      "pull for  #eta",                noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10.,-1.000,10.000,-1},
+     const VarName_t plotVar[kTotalQAll] = {         //no.fit                      quality,                               
+       {"ChiSqXY",   "#chi^{2}_{Track}/NDF",          noFit-9, 9.5, noFit + 0.5, 22,-5, 105,  50,  0.,  10., 0.000, 6.000, 1},
+       {"ChiSqZ",    "#chi^{2}_{Vx} ",                noFit-9, 9.5, noFit + 0.5, 22,-5, 105,  50,  0., 100., 0.000,10.000,-1},
+       {"dDcaXY",    "difference in Dca_{XY}",        noFit-9, 9.5, noFit + 0.5, 22,-5, 105,  50, -5.,   5., -.250, 1.500, 0},
+       {"dDcaZ",     "difference in Dca_{Z}",         noFit-9, 9.5, noFit + 0.5, 22,-5, 105,  50, -5.,   5., -.250, 1.500, 0},
+       {"dPsi",      "difference in  #Psi ",          noFit-9, 9.5, noFit + 0.5, 22,-5, 105,  50, -0.1, 0.1, -.004, 0.040, 1},
+       {"dPti" ,     "difference in q/pT",            noFit-9, 9.5, noFit + 0.5, 22,-5, 105,  50, -0.1, 0.1, -.020, 0.200, 1},
+       {"dPtiR" ,    "difference in relative q/pT",   noFit-9, 9.5, noFit + 0.5, 22,-5, 105,  50, -0.1, 0.1, -.004, 0.040, 1},
+       {"dTanL",     "difference in tan( #lambda )",  noFit-9, 9.5, noFit + 0.5, 22,-5, 105,  50, -0.1, 0.1, -.004, 0.040, 1},
+       {"deta",      "difference in  #eta",           noFit-9, 9.5, noFit + 0.5, 22,-5, 105,  50, -0.1, 0.1, -.002, 0.025,-1},
+       {"pDcaXY",    "pull in Dca_{XY}",              noFit-9, 9.5, noFit + 0.5, 22,-5, 105,  50, -10., 10., -.300, 3.000, 0},
+       {"pDcaZ",     "pull in Dca_{Z}",               noFit-9, 9.5, noFit + 0.5, 22,-5, 105,  50, -10., 10., -.100,10.000, 0},
+       {"pPsi",      "pull in  #Psi ",                noFit-9, 9.5, noFit + 0.5, 22,-5, 105,  50, -10., 10., -.300, 3.000, 1},
+       {"pPti" ,     "pull in q/pT",                  noFit-9, 9.5, noFit + 0.5, 22,-5, 105,  50, -10., 10., -.250, 2.500, 1},
+       {"pPtiR" ,    "pull in relative q/pT",         noFit-9, 9.5, noFit + 0.5, 22,-5, 105,  50, -10., 10., -.230, 3.500, 1},
+       {"pTanL",     "pull in tan( #lambda )",        noFit-9, 9.5, noFit + 0.5, 22,-5, 105,  50, -10., 10., -.600, 6.000, 0},
+       {"peta",      "pull for  #eta",                noFit-9, 9.5, noFit + 0.5, 22,-5, 105,  50, -10., 10.,-1.000,10.000,-1},
        {"Phi",       "#phi (degrees)",                      0,   0,           0,  0,   0,    0,  60,-180.,180.,-1.000,10.000, 1}
      };
      Int_t i1 = 0;
@@ -402,10 +397,10 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
    fHistsT[gp][type][particle][pm][x][i] = new TH3F(plotVar[i].Name,
                 Form("%s for %s %s %s %s %s", plotVar[i].Title,
                      TitleTrType[gp],plotNameMatch[t].Name,ParticleType[particle],TitleCharge[pm],VarSet[x]),
-                noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,
+                noFit-9, 9.5, noFit + 0.5, 22,-5, 105,
                 plotVar[i].nz, plotVar[i].zmin, plotVar[i].zmax);
    fHistsT[gp][type][particle][pm][x][i]->GetXaxis()->SetTitle("No. of Fit Points");
-   fHistsT[gp][type][particle][pm][x][i]->GetYaxis()->SetTitle("No. of Bad Points");
+   fHistsT[gp][type][particle][pm][x][i]->GetYaxis()->SetTitle("Quality");
    fHistsT[gp][type][particle][pm][x][i]->GetZaxis()->SetTitle(plotVar[i].Title);
    fHistsT[gp][type][particle][pm][x][i]->SetMarkerColor(pm+1); 
    fHistsT[gp][type][particle][pm][x][i]->SetLineColor(pm+1); 
@@ -1710,7 +1705,8 @@ void StMuMcAnalysisMaker::FillQAGl(TrackMatchType type,const StMuTrack *gTrack, 
   for (Int_t particle = 0; particle < Npart; particle++) {
     for (Int_t i = 0; i < kTotalQA; i++) {
       if (fHistsT[kGlobal][type][particle][pm][0][i])
-  fHistsT[kGlobal][type][particle][pm][0][i]->Fill(gTrack->nHitsFit(), gTrack->nHitsFit()*(100.-gTrack->qaTruth())/100., x[i]);
+	//  fHistsT[kGlobal][type][particle][pm][0][i]->Fill(gTrack->nHitsFit(), gTrack->nHitsFit()*(100.-gTrack->qaTruth())/100., x[i]);
+  fHistsT[kGlobal][type][particle][pm][0][i]->Fill(gTrack->nHitsFit(), gTrack->qaTruth(), x[i]);
       if (fHistsT[kGlobal][type][particle][pm][1][i])
   fHistsT[kGlobal][type][particle][pm][1][i]->Fill(eta, pT, x[i]);
     }
@@ -1760,7 +1756,7 @@ void StMuMcAnalysisMaker::FillQAPr(TrackMatchType type,const StMuTrack *pTrack, 
   for (Int_t particle = 0; particle < Npart; particle++) {
     for (Int_t i = 0; i < kTotalQAll; i++) {
       if (fHistsT[kPrimary][type][particle][pm][0][i])
-  fHistsT[kPrimary][type][particle][pm][0][i]->Fill(pTrack->nHitsFit(), pTrack->nHitsFit()*(100.-pTrack->qaTruth())/100., x[i]);
+  fHistsT[kPrimary][type][particle][pm][0][i]->Fill(pTrack->nHitsFit(), pTrack->qaTruth(), x[i]);
       if (fHistsT[kPrimary][type][particle][pm][1][i])
        fHistsT[kPrimary][type][particle][pm][1][i]->Fill(mcTrack->Pxyz().pseudoRapidity(), mcTrack->Pxyz().perp(), x[i]);
     }
@@ -1808,7 +1804,7 @@ void StMuMcAnalysisMaker::FillQAPr(TrackMatchType type,const StMuTrack *pTrack, 
   for (Int_t particle = 0; particle < Npart; particle++) {
     for (Int_t i = 0; i < kTotalQAll; i++) {
       if (fHistsT[kPrimary][type][particle][pm][0][i])
-  fHistsT[kPrimary][type][particle][pm][0][i]->Fill(pTrack->nHitsFit(), pTrack->nHitsFit()*(100.-pTrack->qaTruth())/100., x[i]);
+  fHistsT[kPrimary][type][particle][pm][0][i]->Fill(pTrack->nHitsFit(), pTrack->qaTruth(), x[i]);
       if (fHistsT[kPrimary][type][particle][pm][1][i])
   fHistsT[kPrimary][type][particle][pm][1][i]->Fill(mcTrack->Pxyz().pseudoRapidity(), mcTrack->Pxyz().perp(), x[i]);
     }
@@ -2112,7 +2108,7 @@ void StMuMcAnalysisMaker::DrawQA(Int_t gp, Int_t pp, Int_t xx, Int_t ii) {// ver
   if (particle == kallP) tag += " All.";
   else                   tag += " Pions.";
   h4line += tag;
-  if (x == 0)            {tag += "NoHits"; h4line += " No. of fit and bad points.";}
+  if (x == 0)            {tag += "NoHits"; h4line += " No. of fit and quality.";}
   else                   {tag += "Kinema"; h4line += "Track parameters";}
   subsection++;
   SubSection = Section; SubSection += "."; SubSection += subsection;
@@ -2395,7 +2391,7 @@ void StMuMcAnalysisMaker::BeginHtml() {
   out << "    <h2>Legend</h2>" << endl;
   out << "<p>The plots are designed to answer on the following questions:" << endl;
   out << "  <ul>" << endl;
-  out << "      <li> What tracks (globals and primaries) can be considered as \"good\" ones depending on total no. of fit points and no. of bad hits ? </li>" << endl;
+  out << "      <li> What tracks (globals and primaries) can be considered as \"good\" ones depending on total no. of fit points and no. of quality ? </li>" << endl;
   out << "      <li> What is the track parameters and their errors dependence on the track kinematics (&phi;, &eta;, 1/pT) ? </li>" << endl;
   out << "      <li> What is the track paramerer pulls dependence on above kinematics ? </li>" << endl;
   out << "      <li> What is the track reconstruction efficiencies for : </li>" << endl;
