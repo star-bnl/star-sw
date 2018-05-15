@@ -62,6 +62,7 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   SetAttr("minSector",1);
   SetAttr("maxSector",24);
   SetAttr("minRow",1);
+  static Bool_t fNoiTPCLu  = IAttr("NoiTPCLu");
   for (Int_t sec = 0; sec < 24; sec++) {
     Int_t sector = sec + 1;
     // Fill no. of pad per row 
@@ -78,10 +79,12 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   if (GetDate() <= 20090101) fminCharge = 40;
   // Check presence iTPC
   SafeDelete(fiTpc);
-  for(Int_t sector=1;sector<=24;sector++) {
-    if (St_tpcPadConfigC::instance()->iTPC(sector)) {
-      fiTpc = new daq_itpc() ;
-      break;
+  if (! fNoiTPCLu) {
+    for(Int_t sector=1;sector<=24;sector++) {
+      if (St_tpcPadConfigC::instance()->iTPC(sector)) {
+	fiTpc = new daq_itpc() ;
+	break;
+      }
     }
   }
   StMaker* maskMk = GetMakerInheritsFrom("StMtdTrackingMaskMaker");
@@ -192,11 +195,10 @@ Int_t StTpcRTSHitMaker::Make() {
   }
   // create (or reuse) the adc_sim bank...
   // add a bunch of adc data for a specific sector:row:pad
-  Int_t minSector = IAttr("minSector");
-  Int_t maxSector = IAttr("maxSector");
-  Int_t minRow    = IAttr("minRow");
-  Int_t maxRow    = IAttr("maxRow");
-
+  static Int_t  minSector = IAttr("minSector");
+  static Int_t  maxSector = IAttr("maxSector");
+  static Int_t  minRow    = IAttr("minRow");
+  static Int_t  maxRow    = IAttr("maxRow");
   bin0Hits = 0;
   daq_dta *dta  = 0;
   daq_dta *dtaX = 0;

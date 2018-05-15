@@ -86,6 +86,7 @@ class StTpcRTSHitMaker : public StMaker {
  private:
   daq_tpx  *fTpx; //!
   daq_itpc *fiTpc; //!
+  Bool_t    fNoiTPCLu; //!
   Double_t  fminCharge; // ! minimum cluster charge in ADC
   Int_t     maxHits[24];
   Int_t     maxBin0Hits;
