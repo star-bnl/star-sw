@@ -833,6 +833,7 @@ Int_t StBFChain::Instantiate()
     // TPC
     if (maker == "StTpcRTSHitMaker") {
       if ( GetOption("TpxClu2D")) mk->SetAttr("TpxClu2D", 1);
+      if ( GetOption("NoiTPCLu")) mk->SetAttr("NoiTPCLu", 1);
     }
     if (GetOption("NoTpxAfterBurner") && (maker == "StTpcHitMaker" || maker == "StTpcRTSHitMaker")) {
       mk->SetAttr("NoTpxAfterBurner", 1);
