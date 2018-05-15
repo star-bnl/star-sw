@@ -26,5 +26,5 @@
  TFG18f introduce StGoodTrigger                                      2018-03-16 12:05:56 -0400  (tag: TFG18f)
  TFG18g Reshape Sti for sector 20                                    2018-04-03 14:52:45 -0400  (tag: TFG18g_2)
  TFG18i Fix infinit loop in StSstUtil, add smearing of origin vx     2018-04-18 12:32:48 -0400  (HEAD, tag: TFG18i, origin/master, origin/HEAD, master)
- TFG18j iTPC Cluster Finder offline                                  2018-05-14 12:32:48 -0400  (HEAD, tag: TFG18j, origin/master, origin/HEAD, master)
+ TFG18j iTPC Cluster Finder offline                                  2018-05-14 18:33:18 -0400  (HEAD -> master, tag: TFG18j)
  .DEV2  head of TFG git repository, no V5          
