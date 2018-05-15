@@ -108,7 +108,8 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
       Int_t numPadsAtRow = St_tpcPadConfigC::instance()->padsPerRow(sector,row);
       daq_det_gain *gain = 0;
       daq_dta *dta = 0;
-      if (St_tpcPadConfigC::instance()->iTPC(sector) && 
+      if (dta_iTpc &&
+	  St_tpcPadConfigC::instance()->iTPC(sector) && 
 	  St_tpcPadConfigC::instance()->IsRowInner(sector,row)) {// iTPC
 	dta = dta_iTpc;
       } else {// Tpx
