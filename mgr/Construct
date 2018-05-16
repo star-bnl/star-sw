@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.181 2013/01/21 22:53:39 jeromel Exp $
+# $Id: Construct,v 1.182 2018/05/16 19:04:32 jeromel Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -364,12 +364,20 @@ my @sysdirlist = qw(asps/Simulation/agetof
 if ($STAR_SYS !~ /x86_darwin/) {
   push @sysdirlist, "asps/DAQBrowser";
 }
-if (!($USE_64BITS and $USE_64BITS != "0") && $STAR_SYS !~ /x86_darwin/){
+
+#
+# TODO: This excludes the build of root4star, Geant etc ... under a 654bits target
+#       Need investigation at some stage. 
+#       A comment character before !($USE_64BITS and $USE_64BITS != "0") would reenable
+#       compilation but other parts of this code excludes more directories.
+#
+if ( !($USE_64BITS and $USE_64BITS != "0") && 
+     $STAR_SYS !~ /x86_darwin/){
   push @sysdirlist, "asps/Simulation/geant321";
   push @sysdirlist, "asps/Simulation/gcalor";
   push @sysdirlist, "asps/rexe";
   push @sysdirlist, "asps/Simulation/starsim";
-  if ($STAR_HOST_SYS !~ /sl61_gcc445/) {# broken Qt
+  if ($STAR_HOST_SYS !~ /sl61_gcc445/) { # broken Qt
     push @sysdirlist, "OnlTools/OnlinePlots";
     push @sysdirlist, "OnlTools/PDFUtil";
     push @sysdirlist, "OnlTools/StOnlineDisplay";
