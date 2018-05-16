@@ -375,7 +375,6 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
         status = StatusCalculationAbandoned;
         return false;
     }
-
     // Compute the proposed end-point of this step.
     x += dt * vx;
     y += dt * vy;
@@ -686,7 +685,7 @@ bool AvalancheMC::AddDiffusion(const int type, Medium* medium,
   const double dy = step * RndmGaussian(0., dt);
   const double dz = step * RndmGaussian(0., dt);
   if (m_debug) {
-    std::cout << m_className << "::AddDiffusion:\n    Adding diffusion step "
+    std::cout << m_className << "::AddDiffusion: Adding diffusion step "
               << dx << ", " << dy << ", " << dz << "\n";
   }
   // Compute the rotation angles to align diffusion and drift velocity vectors.
@@ -856,18 +855,19 @@ bool AvalancheMC::ComputeAlphaEta(const int type, std::vector<double>& alphas,
                             0.360761573048138608, 0.171324492379170345};
 
   const unsigned int nPoints = m_drift.size();
-  alphas.resize(nPoints, 0.);
-  etas.resize(nPoints, 0.);
+  alphas.assign(nPoints, 0.);
+  etas.assign(nPoints, 0.);
   if (nPoints < 2) return true;
   // Loop over the drift line.
   for (unsigned int i = 0; i < nPoints - 1; ++i) {
-    const DriftPoint& p0 = m_drift[i];
-    const DriftPoint& p1 = m_drift[i + 1];
+    const auto& p0 = m_drift[i];
+    const auto& p1 = m_drift[i + 1];
     // Compute the step length.
     const double delx = p1.x - p0.x;
     const double dely = p1.y - p0.y;
     const double delz = p1.z - p0.z;
     const double del = sqrt(delx * delx + dely * dely + delz * delz);
+    if (del < Small) continue;
     // Integrate drift velocity and Townsend and attachment coefficients.
     double vdx = 0.;
     double vdy = 0.;
@@ -886,9 +886,9 @@ bool AvalancheMC::ComputeAlphaEta(const int type, std::vector<double>& alphas,
       if (status != 0) {
         // Check if this point is the last but one.
         if (i < nPoints - 2) {
-          std::cerr << m_className << "::ComputeAlphaEta:    Got status \n"
-                    << status << " at segment " << j + 1 
-                    << "/6, drift point " << i + 1 << "/" << nPoints << ".\n";
+          std::cerr << m_className << "::ComputeAlphaEta: Got status " << status
+                    << " at segment " << j + 1 << "/6, drift point " 
+                    << i + 1 << "/" << nPoints << ".\n";
           return false;
         }
         continue;
@@ -1076,6 +1076,7 @@ void AvalancheMC::ComputeSignal(const double q,
     const auto& p0 = driftLine[i];
     const auto& p1 = driftLine[i + 1];
     const double dt = p1.t - p0.t;
+    if (dt < Small) continue;
     const double dx = p1.x - p0.x;
     const double dy = p1.y - p0.y;
     const double dz = p1.z - p0.z;

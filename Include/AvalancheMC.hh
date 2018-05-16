@@ -176,7 +176,7 @@ class AvalancheMC {
   /// Fixed distance step
   double m_dMc = 0.001;
   /// Sample step size according to collision time
-  unsigned int m_nMc = 100;
+  int m_nMc = 100;
 
   /// Flag whether a time window should be used.
   bool m_hasTimeWindow = false;
