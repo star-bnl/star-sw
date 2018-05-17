@@ -79,15 +79,12 @@ class MediumSilicon : public Medium {
 
   // When enabled, the scattering rates table is written to file
   // when loaded into memory.
-  void EnableScatteringRateOutput() { m_useCfOutput = true; }
-  void DisableScatteringRateOutput() { m_useCfOutput = false; }
-
-  void EnableNonParabolicity() { m_useNonParabolicity = true; }
-  void DisableNonParabolicity() { m_useNonParabolicity = false; }
-  void EnableFullBandDensityOfStates() { m_useFullBandDos = true; }
-  void DisableFullBandDensityOfStates() { m_useFullBandDos = false; }
-  void EnableAnisotropy() { m_useAnisotropy = true; }
-  void DisableAnisotropy() { m_useAnisotropy = false; }
+  void EnableScatteringRateOutput(const bool on = true) { m_cfOutput = on; }
+  void EnableNonParabolicity(const bool on = true) { m_nonParabolic = on; }
+  void EnableFullBandDensityOfStates(const bool on = true) { 
+    m_fullBandDos = on; 
+  }
+  void EnableAnisotropy(const bool on = true) { m_anisotropic = on; }
 
   // Get the electron energy (and its gradient)
   // for a given (crystal) momentum
@@ -132,20 +129,30 @@ class MediumSilicon : public Medium {
   void ComputeSecondaries(const double e0, double& ee, double& eh);
 
  private:
-  static const int LatticeMobilityModelSentaurus = 0;
-  static const int LatticeMobilityModelMinimos = 1;
-  static const int LatticeMobilityModelReggiani = 2;
-  static const int DopingMobilityModelMinimos = 0;
-  static const int DopingMobilityModelMasetti = 1;
-  static const int SaturationVelocityModelMinimos = 0;
-  static const int SaturationVelocityModelCanali = 1;
-  static const int SaturationVelocityModelReggiani = 2;
-  static const int HighFieldMobilityModelMinimos = 0;
-  static const int HighFieldMobilityModelCanali = 1;
-  static const int HighFieldMobilityModelReggiani = 2;
-  static const int HighFieldMobilityModelConstant = 3;
-  static const int ImpactIonisationModelVanOverstraeten = 0;
-  static const int ImpactIonisationModelGrant = 1;
+  enum class LatticeMobility {
+    Sentaurus = 0,
+    Minimos,
+    Reggiani 
+  };
+  enum class DopingMobility {
+    Minimos = 0,
+    Masetti
+  };
+  enum class SaturationVelocity {
+    Minimos = 0,
+    Canali,
+    Reggiani
+  };
+  enum class HighFieldMobility {
+    Minimos = 0,
+    Canali,
+    Reggiani,
+    Constant
+  };
+  enum class ImpactIonisation {
+    VanOverstraeten = 0,
+    Grant
+  };
 
   // Diffusion scaling factor
   double m_diffScale = 1.;
@@ -174,7 +181,8 @@ class MediumSilicon : public Medium {
   // High-field mobility parameters
   double m_eBetaCanali = 1.109;
   double m_hBetaCanali = 1.213;
-  double m_eBetaCanaliInv, m_hBetaCanaliInv;
+  double m_eBetaCanaliInv = 1. / 1.109;
+  double m_hBetaCanaliInv = 1. / 1.213;
   // Saturation velocity
   double m_eSatVel = 1.02e-2;
   double m_hSatVel = 0.72e-2;
@@ -206,17 +214,17 @@ class MediumSilicon : public Medium {
   // Models
   bool m_hasUserMobility = false;
   bool m_hasUserSaturationVelocity = false;
-  int m_latticeMobilityModel;
-  int m_dopingMobilityModel;
-  int m_saturationVelocityModel;
-  int m_highFieldMobilityModel;
-  int m_impactIonisationModel;
+  LatticeMobility m_latticeMobilityModel = LatticeMobility::Sentaurus;
+  DopingMobility m_dopingMobilityModel = DopingMobility::Masetti;
+  SaturationVelocity m_saturationVelocityModel = SaturationVelocity::Canali;
+  HighFieldMobility m_highFieldMobilityModel = HighFieldMobility::Canali;
+  ImpactIonisation m_impactIonisationModel = ImpactIonisation::VanOverstraeten;
 
   // Options
-  bool m_useCfOutput = false;
-  bool m_useNonParabolicity = true;
-  bool m_useFullBandDos = true;
-  bool m_useAnisotropy = true;
+  bool m_cfOutput = false;
+  bool m_nonParabolic = true;
+  bool m_fullBandDos = true;
+  bool m_anisotropic = true;
 
   // Energy range of scattering rates
   double m_eFinalXL = 4.;
