@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.69 2018/04/30 23:18:54 smirnovd Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.70 2018/05/17 22:41:26 smirnovd Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,12 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.70  2018/05/17 22:41:26  smirnovd
+ * Set TPC row number for legacy TPC DAQ records
+ *
+ * This fix restores part of the logic replaced by the following commit:
+ * "Correct outer row numbers for sectors with iTPC"
+ *
  * Revision 1.69  2018/04/30 23:18:54  smirnovd
  * Try different DAQ readers when reading TPC data
  *
@@ -1367,6 +1373,11 @@ Int_t StTpcHitMaker::RowNumber()
 {
   int sector = DaqDta()->Sector();
   int row = DaqDta()->Row();
+
+  // It appears that for old data (pre 2009) the row information should reflect
+  // the total number of rows in TPC sector
+  row = (kReaderType == kLegacyTpc && row == 0 ?
+        St_tpcPadConfigC::instance()->numberOfRows(sector) : row);
 
   return kReaderType != kStandardiTPC &&
          St_tpcPadConfigC::instance()->isiTpcSector(sector) &&
