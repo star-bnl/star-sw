@@ -47,6 +47,7 @@ public:
 		rdo = 1 ;
 		ch = -1 ;
 		tb_cou = 0 ;
+		version = 0 ;
 	} ;
 
 	~fcs_data_c() {;} ;
@@ -78,11 +79,14 @@ public:
 	int first_rhic_strobe_tick ;
 	int trigger_tick ;
 
+	u_int version ;
+	u_int rhic_start ;
+
 	int sector ;
 	int rdo ;
 	int ch ;
 	int tb_cou ;
-	u_short adc[16*1024] ;
+	u_short adc[32*1024] ;
 } ;
 
 

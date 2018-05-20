@@ -181,11 +181,17 @@ daq_dta *daq_fcs::handle_adc()
 	while(dta && dta->iterate()) {
 		u_short *ptr = (u_short *) dta->Void ;
 		
+		//LOG(TERR,"Hello %d",dta->ncontent) ;
+
 		fcs_data_c fcs_c ;
 
 		fcs_c.start(ptr,dta->ncontent/2) ;
 
+		//LOG(TERR,"Hello again") ;
+
 		while(fcs_c.event()) {
+
+			//LOG(TERR,"Request %d",fcs_c.tb_cou) ;
 
 			u_short *at = (u_short *)adc->request(fcs_c.tb_cou) ;
 
@@ -242,7 +248,9 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	u_int err = 0 ;
 	int t_cou = 0 ;
 	u_int *d = (u_int *)addr ;
+	u_short *d16  ;
 	u_int trg_word ;
+	u_int hdr ;
 
 	int trg_cmd, daq_cmd ;
 	int t_hi, t_mid, t_lo ;
@@ -254,25 +262,42 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 
 	d += 4 ;	// skip GTP header
 
+	d16 = (u_short *)d ;
+
 	if(d[0] != 0xCCCC001C) {
 		LOG(ERR,"First word 0x%X bad",d[0]) ;
 		err |= 1 ;
 		goto err_end ;
 	}
 
-	if(sw16(d[1]) != 0x98000004) {
-		LOG(WARN,"Not a triggered event 0x%08X",sw16(d[1])) ;
-		trg[0].t = 4096 ;
-		trg[0].trg = 0 ;
-		trg[0].daq = 0 ;
+	hdr = sw16(d[1]) ;
 
-		return 1 ;
+	if(hdr != 0x98000004) {
+		if((hdr & 0xFFFF0000)!=0x98010000) {
+			LOG(WARN,"Not a triggered event 0x%08X",sw16(d[1])) ;
+			trg[0].t = 4096 ;
+			trg[0].trg = 0 ;
+			trg[0].daq = 0 ;
+
+			return 1 ;
+		}
 	}
 
+	if((hdr & 0xFFFF0000)==0x98010000) {
+		//for(int i=0;i<16;i++) {
+		//	LOG(TERR,"... %2d = 0x%04X",i,d16[i]) ;
+		//}
+		
+		trg_word = (d16[4]<<16) | d16[3] ;
+	}
+	else {			
+		trg_word = sw16(d[3]) ;	// trigger
+	}
 
-	trg_word = sw16(d[3]) ;	// trigger
+//	LOG(TERR,"Trg 0x%08X 0x%08X 0x%08X 0x%08X",
+//	    sw16(d[2]),trg_word,sw16(d[4]),sw16(d[5])) ;
 
-//	LOG(TERR,"Trigger 0x%08X 0x%08X",trg_word,sw16(d[4])) ;
+
 
 	trg_cmd = trg_word & 0xF ;
 	daq_cmd = (trg_word >> 4) & 0xF ;
@@ -303,57 +328,6 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 
 	return 1 ;
 
-
-#if 0
-	u_short *d = (u_short *)addr ;
-//	u_short s_words = words/2 ;
-
-	if(d[0] != 0xFD04) {
-		LOG(ERR,"Trigger error",d[0]) ;
-		err |= 1 ;
-	}
-
-
-	int trg_word ;
-	int trg_cmd, daq_cmd ;
-	int t_hi, t_mid, t_lo ;
-
-	trg_word = d[2]<<16 | d[1] ;
-
-	trg_cmd = trg_word & 0xF ;
-	daq_cmd = (trg_word >> 4) & 0xF ;
-	t_hi = (trg_word >> 8) & 0xF ;
-	t_mid = (trg_word >> 12) & 0xF ;
-	t_lo = (trg_word >> 16) & 0xF ;
-
-	t_lo |= (t_hi<<8) | (t_mid << 4) ;
-
-	if(trg_word & 0x00A00000) {	//L0 fired
-		trg[t_cou].t = t_lo ;
-		trg[t_cou].trg = trg_cmd ;
-		trg[t_cou].daq = daq_cmd ;
-		trg[t_cou].rhic = 0 ;
-		trg[t_cou].rhic_delta = 0 ;
-		t_cou++ ;
-
-		//LOG(TERR,"T %4d, trg_cmd %d, daq_cmd %d",t_lo,trg_cmd,daq_cmd) ;
-	}
-
-	if(d[3] != 0xFD05) {
-		LOG(ERR,"Trigger error 0x%04X",d[3]) ;
-		err |= 2 ;
-	}
-
-
-	if(err) {
-		trg[0].t = 4097 ;
-		trg[0].trg = 4 ;
-		trg[0].daq = 0 ;
-	}
-
-
-	return t_cou ;
-#endif
 }
 
 
@@ -366,15 +340,35 @@ int fcs_data_c::start(u_short *d16, int shorts)
 
 	d = (u_int *)d16 ;
 
+	rhic_start = 0;
+
 	//check version
 	if(d[0]==0xDDDDDDDD) {	// new FY18 data!
 		d += 4 ;	// skip GTP header
+		d16 += 8 ;
 
-		//for(int i=0;i<32;i++) {
-		//	LOG(TERR,"...%d = 0x%08X",i,d[i]) ;
+		//for(int i=0;i<64;i++) {
+		//	printf("--- %d = 0x%04X\n",i,d16[i]) ;
+		//	//LOG(TERR,"...%d = 0x%08X",i,d[i]) ;
 		//}
 
-		d += 12 ;	// skip event header
+		// d[0] is start comma
+
+		version = sw16(d[2]) ;
+		
+		switch(version) {
+		case 0x12340000 :	// pre-May-15-2018
+			d += 12 ;	// skip event header to go to ADC data
+			break ;
+		default :		// nre
+			//rhic_start = sw16(d[4]) ;
+			//d += 5 ;
+
+			dta_p = ((u_short *)d)+6 ;
+			return 1 ;
+
+			break ;
+		}
 
 		dta_p = (u_short *) d ;
 
@@ -382,9 +376,11 @@ int fcs_data_c::start(u_short *d16, int shorts)
 		//for(int i=0;i<16;i++) {
 		//	LOG(TERR,"...%d = 0x%04X",i,dta_p[i]) ;
 		//}
+
 		return 1 ;
 	}
 
+	// old 2017 format here
 	//LOG(TERR,"start: 0x%08X 0x%08X",d[0],d[1]) ;
 
 	//move to start-of-ADC marker
@@ -413,27 +409,49 @@ int fcs_data_c::event()
 	first_rhic_strobe_tick = -1 ;
 
 	while(dta_p<dta_stop) {
+
+#if 0
 		u_short h[3] ;
 
 
-		h[0] = *dta_p++ ;
-		if(h[0]==0xFD07 || h[0]==0x5800) {	//end of event
-			return 0 ;
+		for(int i=0;i<128;i++) printf("%d 0x%04X\n",i,dta_p[i]) ;
+
+		
+
+		h[0] = *dta_p++ ;	// adc_single ID
+
+		if(h[0]==0xFD07 || h[0]==0x5800) {	//end of adc_single stream at 0x580000007
+			break ;
 		}
 
-		h[1] = *dta_p++ ;
-		h[2] = *dta_p++ ;
+		if(version==0x28010518) dta_p++ ;	// the ID is doubled always...
+
+		h[1] = *dta_p++ ;	// adc_single token
+		h[2] = *dta_p++ ;	// adc_single rhic
 
 		ch = h[0] & 0xF ;
+#else
+		//printf("+++ 0x%04X 0x%04X\n",dta_p[0],dta_p[1]) ;
+		if((dta_p[0]==0xFD07) || (dta_p[0]==0x5800)) break ;
+		if((dta_p[0]==0x0066) && (dta_p[1]==0x7788)) break ;
 
+
+		ch = *dta_p & 0xF ;
+		dta_p += 1 ;
+
+		// and also skip the token for now
+		dta_p += 2 ;
+#endif
 		//LOG(TERR,"H 0x%X 0x%X 0x%X (ch %2d)",h[0],h[1],h[2],ch) ;
 
 		while(dta_p<dta_stop) {
 			u_short d = *dta_p++ ;
 
-			//LOG(TERR,".... 0x%X",d) ;
+			//printf("... %d = 0x%04X [%u]\n",tb_cou,d,d) ;
 
-			if(d==0xFFFF) {
+			//LOG(TERR,".... %d = 0x%X",tb_cou,d) ;
+
+			if(d==0xFFFF) {		// last item of adc_single
 				//LOG(TERR,"... tb_cou %d",tb_cou) ;
 				break ;
 			}
@@ -452,21 +470,33 @@ int fcs_data_c::event()
 			}
 
 //			accum(ch,tb_cou,d&0xFFF) ;
-			accum(ch,tb_cou,d) ;
+			if(accum(ch,tb_cou,d)<0) {
+				LOG(ERR,"Event too big, ch %d, tb %d",ch,tb_cou) ;
+				return 0 ;
+			}
 			tb_cou++ ;
 		}
+
+		//LOG(TERR,"0x%08X 0x%08X 0x%08X",dta_p[0],dta_p[1],dta_p[2]) ;
 
 		//LOG(TERR,"Ch %d, %d ADCs",ch,tb_cou) ;
 		return 1 ;
 	}
 
-	
+//	u_int rhic_end = (dta_p[1]<<16)|dta_p[2] ;
+//	LOG(TERR,"RHIC ticks %u",rhic_end-rhic_start) ;
+
+	//LOG(TERR,"0x%08X 0x%08X 0x%08X: 0x%08X",dta_p[0],dta_p[1],dta_p[2],rhic_end) ;	
 
 	return 0 ;
 }
 
 int fcs_data_c::accum(int ch, int tb, u_short sadc)
 {
+	if((u_int)tb>=sizeof(adc)/sizeof(adc[0])) {
+		return -1 ;
+	}
+
 	adc[tb] = sadc ;	//but store the full data, with flags
 
 	sadc &= 0xFFF ;	//zap the flags
