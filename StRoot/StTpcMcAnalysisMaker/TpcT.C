@@ -1033,14 +1033,18 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
 #if 0
   TF1* off = new TF1("off","exp(log(1.+[0]/exp(x)))",3,10);
 #endif
-  TProfile2D *inout[4];
+  TProfile2D *inout[6];
   inout[0] = new TProfile2D("inner","log(simulated ADC) versus log(recon. ADC) and Z",
 			    70,3.,10.,210,-210,210,"");
   inout[1] = new TProfile2D("outer","log(simulated ADC) versus log(recon. ADC) and Z",
 			    70,3.,10.,210,-210,210,"");
-  inout[2] = new TProfile2D("innerR","log(simulated ADC)-log(recon. ADC) versus log(recon. ADC) and Z",
+  inout[2] = new TProfile2D("itpc","log(simulated ADC) versus log(recon. ADC) and Z",
 			    70,3.,10.,210,-210,210,"");
-  inout[3] = new TProfile2D("outerR","log(simulated ADC)-log(recon. ADC) versus log(recon. ADC) and Z",
+  inout[3] = new TProfile2D("innerR","log(simulated ADC)-log(recon. ADC) versus log(recon. ADC) and Z",
+			    70,3.,10.,210,-210,210,"");
+  inout[4] = new TProfile2D("outerR","log(simulated ADC)-log(recon. ADC) versus log(recon. ADC) and Z",
+			    70,3.,10.,210,-210,210,"");
+  inout[5] = new TProfile2D("itpcR","log(simulated ADC)-log(recon. ADC) versus log(recon. ADC) and Z",
 			    70,3.,10.,210,-210,210,"");
   Double_t dsCut[2] = {1., 2.};
   while (iter.Next()) {
@@ -1052,13 +1056,14 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
       if (fRcHit_mQuality[k] < 95) continue;
       Int_t io = 0;
       if (fMcHit_mVolumeId[k]%100 > NoInnerRows) io = 1;
+      if ((fMcHit_mVolumeId[k]/100)%100 == 20 && fMcHit_mVolumeId[k]%100 <= 40) io = 2;
       if (fMcHit_mdS[k] < dsCut[io]) continue;
       if (fMcHit_mdE[k] <= 0 || fMcHit_mdE[k] > 1e-3) continue;
       if (fMcHit_mAdc[k] <= 0) continue;
       Double_t ratio = fMcHit_mAdc[k]/fAdcSum;
       if (ratio < 0.1 || ratio > 10) continue;
       inout[io]->Fill(TMath::Log(fAdcSum),fMcHit_mPosition_mX3[k], TMath::Log(fMcHit_mAdc[k]));
-      inout[io+2]->Fill(TMath::Log(fAdcSum),fMcHit_mPosition_mX3[k], TMath::Log(fMcHit_mAdc[k])-TMath::Log(fAdcSum));
+      inout[io+3]->Fill(TMath::Log(fAdcSum),fMcHit_mPosition_mX3[k], TMath::Log(fMcHit_mAdc[k])-TMath::Log(fAdcSum));
     }
   }
   fOut->Write();
