@@ -32,7 +32,7 @@ class StiMaker : public StMaker
  public:
     
     StiMaker(const char* name = "Sti");
-    virtual ~StiMaker();
+    virtual ~StiMaker() {}
     virtual void  Clear(const char* opt="");
     virtual Int_t Init();
             Int_t InitDetectors();

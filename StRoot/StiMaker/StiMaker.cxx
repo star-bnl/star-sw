@@ -126,6 +126,8 @@ More detailed: 				<br>
 #include "StSsdDbMaker/StSstDbMaker.h"
 #include "StSvtDbMaker/StSvtDbMaker.h"
 #include "StEventUtilities/StEventHelper.h"
+#include "StBTofCollection.h"
+#include "StEvent/StBTofHeader.h"
 /// Definion of minimal primary vertex errors.
 /// Typical case,vertex got from simulations with zero errors.
 /// But zero errors could to unpredicted problems
@@ -154,7 +156,7 @@ StiMaker::StiMaker(const Char_t *name) :
 {
   mMaxTimes = 0;
   memset(mTimg,0,sizeof(mTimg));
-  cout <<"StiMaker::StiMaker() -I- Starting"<<endl;
+  LOG_INFO << "Starting"<<endm;
   mPullFile=0; mPullEvent=0;mPullTTree=0;
   memset(mPullHits,0,sizeof(mPullHits));
   mTotPrimTks[0]=mTotPrimTks[1]=0;
@@ -181,13 +183,6 @@ StiMaker::StiMaker(const Char_t *name) :
       ! strstr(gSystem->Getenv("STAR"),".DEV2") )
      SetAttr("useAux",kTRUE); // Auxiliary info added to output for evaluation
 }
-
-//_____________________________________________________________________________
-StiMaker::~StiMaker()
-{
-  cout <<"StiMaker::~StiMaker() -I- Started/Done"<<endl;
-}
-
 //_____________________________________________________________________________
 void StiMaker::Clear(const char*)
 {
@@ -252,11 +247,11 @@ Int_t StiMaker::Init()
 Int_t StiMaker::InitDetectors()
 {
   StiDetectorGroup<StEvent> * group;
-  cout<<"StiMaker::InitDetectors() -I- Adding detector group:Star"<<endl;
+  LOG_INFO << "InitDetectors() -I- Adding detector group:Star"<<endm;
   _toolkit->add(new StiStarDetectorGroup(false));
   if (IAttr("useTpc") && gStTpcDb)
     {
-      cout<<"StiMaker::InitDetectors() -I- Adding detector group:TPC"<<endl;
+      LOG_INFO << "InitDetectors() -I- Adding detector group:TPC"<<endm;
       _toolkit->add(group = new StiTpcDetectorGroup(IAttr("activeTpc")));
       group->setGroupId(kTpcId);
       StiTpcHitLoader* hitLoader = (StiTpcHitLoader*) group->hitLoader();
@@ -271,28 +266,28 @@ Int_t StiMaker::InitDetectors()
 	hitLoader->setMinSector(13);
 	hitLoader->setMaxSector(24);
       }
-      cout << "StiMaker::InitDetectors() -I- use hits in sectors["
+      LOG_INFO << "InitDetectors() -I- use hits in sectors["
 	   << hitLoader->minSector() << "," << hitLoader->maxSector() << "] and rows["
-	   << hitLoader->minRow() << ",*]" << endl;
+	   << hitLoader->minRow() << ",*]" << endm;
       if (IAttr("laserIT")) {
 	StiKalmanTrackNode::SetLaser(1);
-	cout << "StiMaker::InitDetectors() -I- set laser time of flight correction" << endl;
+	LOG_INFO << "InitDetectors() -I- set laser time of flight correction" << endm;
       }
     }
   if (IAttr("useSvt") && gStSvtDbMaker)
     {
-    cout<<"StiMaker::Init() -I- Adding detector group:SVT"<<endl;
+    LOG_INFO << "Init() -I- Adding detector group:SVT"<<endm;
     _toolkit->add(group = new StiSvtDetectorGroup(IAttr("activeSvt")));
     group->setGroupId(kSvtId);
     }
 
   // SSD or SST - they share the db and the kSsdId
   if (IAttr("useSst") && StSstDbMaker::instance()){
-    cout<<"StiMaker::Init() -I- Adding detector group:Sst (ssd)"<<endl;
+    LOG_INFO << "Init() -I- Adding detector group:Sst (ssd)"<<endm;
     _toolkit->add(group = new StiSstDetectorGroup(IAttr("activeSst")));
     group->setGroupId(kSstId);
   } else if ( IAttr("useSsd") && StSsdDbMaker::instance()){
-    cout<<"StiMaker::Init() -I- Adding detector group:Ssd"<<endl;
+    LOG_INFO << "Init() -I- Adding detector group:Ssd"<<endm;
     _toolkit->add(group = new StiSsdDetectorGroup(IAttr("activeSsd")));
     group->setGroupId(kSsdId);
   }
@@ -300,19 +295,19 @@ Int_t StiMaker::InitDetectors()
 
   if (IAttr("usePixel"))
     {
-      cout<<"StiMaker::Init() -I- Adding detector group:PIXEL"<<endl;
+      LOG_INFO << "Init() -I- Adding detector group:PIXEL"<<endm;
       _toolkit->add(group = new StiPxlDetectorGroup(IAttr("activePixel")));
       group->setGroupId(kPxlId);
     }
  if (IAttr("useIst"))
     {
-      cout<<"StiMaker::Init() -I- Adding detector group:Ist"<<endl;
+      LOG_INFO << "Init() -I- Adding detector group:Ist"<<endm;
       _toolkit->add(group = new StiIstDetectorGroup(IAttr("activeIst")));
       group->setGroupId(kIstId);
     }
  if (IAttr("useBTof"))
     {
-      cout<<"StiMaker::Init() -I- Adding detector group:BTof"<<endl;
+      LOG_INFO << "Init() -I- Adding detector group:BTof"<<endm;
       _toolkit->add(group = new StiBTofDetectorGroup(IAttr("activeBTof")));
       group->setGroupId(kBTofId);
     }
@@ -323,7 +318,7 @@ Int_t StiMaker::InitDetectors()
 Int_t StiMaker::InitRun(int run)
 {
   if (!_initialized)    {
-      cout <<"StiMaker::InitRun() -I- Initialization Segment Started"<<endl;
+      LOG_INFO << "InitRun() -I- Initialization Segment Started"<<endm;
       InitDetectors();
       // Load Detector related parameters
       StiMasterDetectorBuilder * masterBuilder = _toolkit->getDetectorBuilder();
@@ -421,7 +416,7 @@ Int_t StiMaker::InitRun(int run)
         _tracker->clear();
       }
       _initialized=true;
-      cout <<"StiMaker::InitRun() -I- Initialization Segment Completed"<<endl;
+      LOG_INFO << "InitRun() -I- Initialization Segment Completed"<<endm;
 
   return StMaker::InitRun(run);
 }
@@ -429,7 +424,7 @@ Int_t StiMaker::InitRun(int run)
 //_____________________________________________________________________________
 Int_t StiMaker::Make()
 {
-  cout <<"StiMaker::Make() -I- Starting on new event"<<endl;
+  LOG_INFO << "Make() -I- Starting on new event"<<endm;
   Int_t iAns=kStOK,iAnz=0; if (iAns){};
   if (! _tracker) return kStWarn;
   StEvent   * event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
@@ -440,8 +435,18 @@ Int_t StiMaker::Make()
   StEventHelper::Remove(event,"StSPtrVecV0Vertex");
   StEventHelper::Remove(event,"StSPtrVecXiVertex");
   StEventHelper::Remove(event,"StSPtrVecKinkVertex");
-
-
+  StiKalmanTrackNode::SetExternalZofPVX(0);
+  StBTofCollection *btofcol = event->btofCollection();
+  if (btofcol) {
+    StBTofHeader *btofHeader = btofcol->tofHeader();
+    if (btofHeader) {
+      Float_t vpdVz = btofHeader->vpdVz();
+      if (TMath::Abs(vpdVz) < 200) {
+	StiKalmanTrackNode::SetExternalZofPVX(vpdVz);
+	LOG_INFO << "Make:: Set external z of primary interaction " << vpdVz << endm;
+      }
+    }
+  }
   St_g2t_track  *g2t_track  = (St_g2t_track  *) GetDataSet("geant/g2t_track");  
   St_g2t_vertex *g2t_vertex = (St_g2t_vertex *) GetDataSet("geant/g2t_vertex"); 
   StG2TrackVertexMap::instance(g2t_track,g2t_vertex);
@@ -472,7 +477,7 @@ Int_t StiMaker::Make()
     }
   }
   if (mPullTTree) {iAns = FillPulls();}
-  cout<< "StiMaker::Make() -I- Done"<<endl;
+  LOG_INFO << "Make() -I- Done"<<endm;
   MyClear();
   if (iAnz) return iAnz;
   if (mTotPrimTks[1] && mTotPrimTks[0]>mTotPrimTks[1]) return kStStop;
@@ -523,7 +528,7 @@ Int_t StiMaker::MakePrimaryTracks(StEvent   * event) {
     FinishTracks(1);
     if (mTimg[kPriTimg]) mTimg[kPriTimg]->Stop();
 
-    //cout << "StiMaker::Make() -I- Primary Filling"<<endl;
+    //LOG_INFO << "Make() -I- Primary Filling"<<endm;
     if (mTimg[kFilTimg]) mTimg[kFilTimg]->Start(0);
     if (_eventFiller) {_eventFiller->fillEventPrimaries(); /* fillVxFlags(); */}
     if (mTimg[kFilTimg]) mTimg[kFilTimg]->Stop();
@@ -534,7 +539,7 @@ Int_t StiMaker::MakePrimaryTracks(StEvent   * event) {
 //_____________________________________________________________________________
 void StiMaker::MyClear()
 {
-//    cout << "StiMaker -I- Perform Yuri's clear... ;-)" << endl;
+//    LOG_INFO << " -I- Perform Yuri's clear... ;-)" << endm;
 //      StMemStat::PrintMem("Before StiFactory clear()");
       _toolkit->getHitFactory()->clear();
       _toolkit->getTrackNodeFactory()->clear();

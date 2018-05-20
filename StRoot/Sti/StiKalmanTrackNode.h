@@ -249,7 +249,8 @@ const StiNodeInf *getInfo() const 	{return _inf;}
   static const Char_t *Comment() 		{return comment.Data();}
   /// rotation angle of local coordinates wrt global coordinates
   int   print(const char *opt) const;
-  
+  static void  SetExternalZofPVX(Float_t z) {fExternalZofPVX= z;}
+  static Float_t ExternalZofPVX() {return fExternalZofPVX;}
  private:   
   void   extinf();				//add inf block
   void static saveStatics(double *sav);
@@ -304,6 +305,7 @@ const StiNodeInf *getInfo() const 	{return _inf;}
   static TString comment;
   static TString commentdEdx;
   static int   _laser;
+  static Float_t fExternalZofPVX;
 public:
   int mId;  //for debug only 
 };
