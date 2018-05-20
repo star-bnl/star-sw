@@ -123,7 +123,7 @@ class StPicoEvent : public TObject {
 
   Int_t     mTime;//To set timestamp for St_db_Maker. This is what StMuDstMaker used to GetEvtHddr()->SetGMTime(cast into unsigned int). Peifeng Liu
 
-  Float16_t mPrimaryVertex[3];      //
+  Float_t   mPrimaryVertex[3];      //
   Float16_t mPrimaryVertexError[3]; //
   Float16_t mPrimaryVertexCorr[3];  //
   Float16_t mRanking;
