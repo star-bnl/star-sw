@@ -202,7 +202,9 @@ switch ($pkg)
 	    setenv G4PATH ${OPTSTAR}/geant4$v
 	    if ( -e $G4PATH/bin/geant4.csh ) then
 		setenv G4BIN ${G4PATH}/bin
-		(cd $G4PATH/bin/ && source geant4.csh)
+		setenv saved_path $cwd
+		cd $G4PATH/bin/ && source geant4.csh
+		cd $saved_path
 	    else
 		if ( $?DECHO ) echo "Geant4 setup script was not found"
 	    endif
