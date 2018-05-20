@@ -448,6 +448,7 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].resXYZ[1] = localSect[3].position().y() - localSect[0].position().y();
 	CdEdx[NdEdx].resXYZ[2] = localSect[3].position().z() - localSect[0].position().z();
 	TrackLengthTotal += dx;
+	tpcHit->setdX(dx);
 	if (! tpcHit->usedInFit()) {
 	  BadHit(0,tpcHit->position());
 	  continue;}
