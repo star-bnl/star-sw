@@ -213,8 +213,8 @@ public:
   {StTpcLocalCoordinate c; this->operator()(a,c,useT0,useTau); this->operator()(c,b);}
   void  operator()(const StGlobalCoordinate& a, StTpcPadCoordinate& b,Int_t sector, Int_t row, Bool_t useT0=kFALSE, Bool_t useTau=kTRUE)
   {StTpcLocalCoordinate c; this->operator()(a,c,sector,row); this->operator()(c,b,useT0,useTau);}
-  Double_t   tBFromZ(Double_t z, Int_t sector, Int_t row) const;
-  Double_t  zFromTB(Double_t tb, Int_t sector, Int_t row) const;
+  Double_t   tBFromZ(Double_t z, Int_t sector, Int_t row, Int_t pad = 0) const;
+  Double_t  zFromTB(Double_t tb, Int_t sector, Int_t row, Int_t pad = 0) const;
   // Transformation Routines!!
   // Raw Data (pad row timebin or drift L From tpc local sector Coordinates
   static Int_t       rowFromLocalY(Double_t y, Int_t sector);

@@ -954,6 +954,31 @@ Float_t St_TpcAvgCurrentC::AcCharge(Int_t sector, Int_t channel) {
   return (sector > 0 && sector <= 24 && channel > 0 && channel <= 8) ?
     Struct()->AcCharge[8*(sector-1)+channel-1] :     0;
 }
+#include "St_tpcRDOMapC.h"
+MakeChairInstance(tpcRDOMap,Calibrations/tpc/tpcRDOMap);
+//________________________________________________________________________________
+Int_t St_tpcRDOMapC::rdo(Int_t padrow, Int_t pad) const {
+  Int_t rdo = 0;
+  Int_t N = nrows(0);
+  for (Int_t i = 0; i < N; i++) {
+    if (padrow != row(i)) continue;
+    if (pad < padMin(i) || pad > padMax(i)) continue;
+    rdo = rdoI(i);
+    
+    break;
+  }
+  return rdo;
+}
+#include "St_tpcRDOT0offsetC.h"
+MakeChairInstance(tpcRDOT0offset,Calibrations/tpc/tpcRDOT0offset);
+Float_t St_tpcRDOT0offsetC::T0(Int_t sector, Int_t padrow, Int_t pad) const {
+  Float_t t0 = 0;
+  if (! IsShfited(sector)) return t0;
+  if (St_tpcPadConfigC::instance()->iTPC(sector) && padrow <= 40)  return t0; // no shift in iTPC
+  Int_t rdo = St_tpcRDOMapC::instance()->rdo(padrow,pad);
+  if (!rdo) return t0;
+  return Struct()->t0[sector-1][rdo-1];
+}
 //__________________Calibrations/trg______________________________________________________________
 #include "St_defaultTrgLvlC.h"
 MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);

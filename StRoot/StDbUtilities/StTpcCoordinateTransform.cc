@@ -234,6 +234,7 @@
 #include "StMessMgr.h"
 #include "StDetectorDbMaker/St_tpcPadrowT0C.h"
 #include "StDetectorDbMaker/St_tpcSectorT0offsetC.h"
+#include "StDetectorDbMaker/St_tpcRDOT0offsetC.h"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "StDetectorDbMaker/St_tpcPadGainT0BC.h"
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
@@ -293,7 +294,7 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
   if (! useT0 && useTau) // for cluster
     t0offset -= 3.0 * St_tss_tssparC::instance()->tau();   // correct for convolution lagtime
   Double_t t0zoffset = t0offset*StTpcDb::instance()->DriftVelocity(sector)*1e-6;
-  Double_t tb = tBFromZ(a.position().z()+zoffset-t0zoffset,sector,row);
+  Double_t tb = tBFromZ(a.position().z()+zoffset-t0zoffset,sector,row,probablePad);
   b = StTpcPadCoordinate(sector, row, probablePad, tb);
 }
 //________________________________________________________________________________
@@ -316,7 +317,7 @@ void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLoc
     t0offset -= 3.0 * St_tss_tssparC::instance()->tau();   // correct for convolution lagtime
   Double_t t0zoffset = t0offset*StTpcDb::instance()->DriftVelocity(a.sector())*1e-6;
   //t0 offset -- DH  27-Mar-00
-  Double_t z = zFromTB(a.timeBucket(),a.sector(),a.row())-zoffset+t0zoffset;
+  Double_t z = zFromTB(a.timeBucket(),a.sector(),a.row(),a.pad())-zoffset+t0zoffset;
   tmp.setZ(z);
   b = StTpcLocalSectorCoordinate(tmp,a.sector(),a.row());
 }
@@ -389,7 +390,7 @@ Double_t StTpcCoordinateTransform::xFromPad(Int_t sector, Int_t row, Double_t pa
 //
 //Local Transformation...
 //________________________________________________________________________________
-Double_t StTpcCoordinateTransform::zFromTB(Double_t tb, Int_t sector, Int_t row) const {
+Double_t StTpcCoordinateTransform::zFromTB(Double_t tb, Int_t sector, Int_t row, Int_t pad) const {
   if (row > St_tpcPadConfigC::instance()->numberOfRows(sector)) row = St_tpcPadConfigC::instance()->numberOfRows(sector);
   Double_t trigT0 = StTpcDb::instance()->triggerTimeOffset()*1e6;         // units are s
 #if 0
@@ -401,12 +402,14 @@ Double_t StTpcCoordinateTransform::zFromTB(Double_t tb, Int_t sector, Int_t row)
   Double_t t0 = trigT0 + elecT0 + sectT0;
   Int_t l = sector;
   if ( St_tpcPadConfigC::instance()->IsRowInner(sector,row)) l += 24;
-  Double_t time = t0 + (tb + St_tpcSectorT0offsetC::instance()->t0offset(l))*mTimeBinWidth; 
+  Double_t tbx = tb + St_tpcSectorT0offsetC::instance()->t0offset(l);
+  if (St_tpcRDOT0offsetC::instance()->IsShfited(sector)) tbx += St_tpcRDOT0offsetC::instance()->T0(sector,row,pad);
+  Double_t time = t0 + tbx*mTimeBinWidth; 
   Double_t z = StTpcDb::instance()->DriftVelocity(sector)*1e-6*time;
   return z;
 }
 //________________________________________________________________________________
-Double_t StTpcCoordinateTransform::tBFromZ(Double_t z, Int_t sector, Int_t row) const {
+Double_t StTpcCoordinateTransform::tBFromZ(Double_t z, Int_t sector, Int_t row, Int_t pad) const {
   if (row > St_tpcPadConfigC::instance()->numberOfRows(sector)) row = St_tpcPadConfigC::instance()->numberOfRows(sector);
   Double_t trigT0 = StTpcDb::instance()->triggerTimeOffset()*1e6;         // units are s
 #if 0
@@ -420,6 +423,7 @@ Double_t StTpcCoordinateTransform::tBFromZ(Double_t z, Int_t sector, Int_t row) 
   Int_t l = sector;
   if ( St_tpcPadConfigC::instance()->IsRowInner(sector,row)) l += 24;
   Double_t tb = (time - t0)/mTimeBinWidth - St_tpcSectorT0offsetC::instance()->t0offset(l);
+  if (St_tpcRDOT0offsetC::instance()->IsShfited(sector)) tb -= St_tpcRDOT0offsetC::instance()->T0(sector,row,pad);
   return tb;
 }
 //________________________________________________________________________________
