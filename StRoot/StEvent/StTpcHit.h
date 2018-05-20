@@ -111,20 +111,21 @@
 #include "TMath.h"
 
 class StTpcHit : public StHit {
+  
+ public:
+ StTpcHit() : StHit() {mMinpad = mMaxpad = mMintmbk = mMaxtmbk = 0; mMcl_x = mMcl_t = 0; mAdc =0; mChargeModified = 0; mdX = 0;}
+ StTpcHit(const StThreeVectorF& p,
+	  const StThreeVectorF& e,
+	  UInt_t hw, float q, UChar_t c = 0,
+	  Int_t IdTruth=0, UShort_t quality=0,
+	  UShort_t Id =0,
+	  Short_t mnpad=0, Short_t mxpad=0, Short_t mntmbk=0,
+	  Short_t mxtmbk=0, Float_t cl_x = 0, Float_t cl_t = 0, UShort_t Adc = 0) 
+   :  StHit(p, e, hw, q, c, IdTruth, quality, Id), mAdc(Adc) {
+    setExtends(cl_x, cl_t, mnpad, mxpad, mntmbk, mxtmbk); mChargeModified = 0; mdX = 0;}
+  ~StTpcHit() {}
     
-public:
-    StTpcHit() : StHit() {mMinpad = mMaxpad = mMintmbk = mMaxtmbk = 0; mMcl_x = mMcl_t = 0; mAdc =0; mChargeModified = 0;}
-    StTpcHit(const StThreeVectorF& p,
-             const StThreeVectorF& e,
-             UInt_t hw, float q, UChar_t c = 0,
-	     Int_t IdTruth=0, UShort_t quality=0,
-	     UShort_t Id =0,
-	     Short_t mnpad=0, Short_t mxpad=0, Short_t mntmbk=0,
-	     Short_t mxtmbk=0, Float_t cl_x = 0, Float_t cl_t = 0, UShort_t Adc = 0) 
-      :  StHit(p, e, hw, q, c, IdTruth, quality, Id), mAdc(Adc) {setExtends(cl_x, cl_t, mnpad, mxpad, mntmbk, mxtmbk); mChargeModified = 0;}
-    ~StTpcHit() {}
-    
-    StDetectorId   detector() const;
+  StDetectorId   detector() const;
 
     void* operator new(size_t /* sz */,void *p) { return p;}
     void* operator new(size_t) { return mPool.alloc(); }
@@ -134,6 +135,7 @@ public:
     void     setPadTmbk(Float_t cl_x, Float_t cl_t) { mMcl_x = TMath::Nint(cl_x*64);  mMcl_t = TMath::Nint(cl_t*64);}
     void     setExtends(Float_t cl_x, Float_t cl_t, Short_t mnpad, Short_t mxpad, Short_t mntmbk, Short_t mxtmbk);
     void     setAdc(UShort_t Adc = 0) {mAdc = Adc;}
+    void     setdX(Float_t dX) {mdX = dX;}
     UInt_t   sector() const {return bits(4, 5);}   // bits 4-8  -> 1-24
     UInt_t   padrow() const {return bits(9, 7);}   // bits 9-15 -> 1-128
     UInt_t   padsInHit()   const {return maxPad() - minPad() + 1;}
@@ -148,6 +150,7 @@ public:
     Float_t  pad() const {return static_cast<float>(mMcl_x)/64.;}
     UShort_t adc() const {return mAdc;}
     Float_t  chargeModified() const {return mChargeModified;}
+    Float_t  dX() {return mdX;}
     void     Print(Option_t *option="") const;
     virtual Bool_t   IsSortable() const { return kTRUE; }
     virtual Int_t    Compare(const TObject *obj) const {
@@ -172,9 +175,10 @@ protected:
     Short_t     mMcl_t;      /* average timebucket*64 */
     UShort_t    mAdc;        /* cluster ADC sum */
     Float_t     mChargeModified; //!
-    StThreeVectorF mPositionU; //! upper position = y_local + padlength/2.
-    StThreeVectorF mPositionL; //! lower position = y_local - padlength/2.
-    ClassDef(StTpcHit,9)
+    StThreeVectorF mPositionU; //  upper position = y_local + padlength/2.
+    StThreeVectorF mPositionL; //  lower position = y_local - padlength/2.
+    Float_t        mdX;        //  estimated dX from StdEdxY2Maker
+    ClassDef(StTpcHit,10)
 };
 ostream&              operator<<(ostream& os, StTpcHit const & v);
 
