@@ -52,6 +52,21 @@ void itpc_ifee_to_rowpad(int fee_id, int ch, int &row, int &pad)
 	return ;
 }
 
+// NOT FINISHED YET
+#if 0
+void itpc_rowpad_to_rdo(int row, int pad, int &rdo)
+{
+	int fee_id, fee_ch ;
+
+	itpc_rowpad_to_ifee(row,pad,fee_id,fee_ch) ;
+
+	if(fee_id<1 || fee_id>55) {
+		rdo = 0 ;	// what?
+	}
+	else return ifee_to_irdo_map[fee_id] ;
+}
+#endif ;
+
 void itpc_rowpad_to_ifee(int row, int pad, int &fee_id, int &fee_ch)
 {
 	static int first ;
