@@ -25,7 +25,7 @@ Double_t TF1F::GetSaveL(Double_t *xx) {
 //________________________________________________________________________________
 Double_t TF1F::GetSaveL(Int_t N, Double_t x, Double_t *y) {
   // Get values y[N] corresponding to x+i, i = [0, ..., N-1];
-  memset(y, 0, N*sizeof(Double_t));
+  //  memset(y, 0, N*sizeof(Double_t));
   Int_t bin     = TMath::Nint((x-fXmin)/fdX);
   Int_t i1 = 0;
   while (bin < 0) {i1++; bin += fStep;}
