@@ -225,13 +225,14 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
   const static Int_t tZero= 19950101;
   const static TDatime t0(tZero,0);
   const static Int_t timeOffSet = t0.Convert();
-  const Int_t nZ = 500;
 #ifdef __FIXED_TARGET__
+  const Int_t nZ = 500;
   const Double_t Zmin = 200;
   const Double_t Zmax = 250;
 #else
-  const Double_t Zmin = -25;
-  const Double_t Zmax =  25;
+  const Int_t nZ = 2000;
+  const Double_t Zmin = -100;
+  const Double_t Zmax =  100;
 #endif  
   if (! dZ) {
     NPART = new TH1D("npart","no accepted particles",500,0,5000);
@@ -1056,4 +1057,7 @@ void Draw() {
   out.close();
   outC.close();
 }
+/*
+  dZ->FitSlicesY(0,0,-1,0,"QNRG3S")
+ */
   

@@ -23,8 +23,10 @@
   set tagf     = ${name}.root
   setenv StarEndMakerShell
   set sdt = "";
-  echo $Name | grep -i Ideal
-  if ($?) set sdt = ",sdt20180426.122000";
+  echo $Name | grep -i Altro3
+  if (! $?) set sdt = ",sdt20180426.122000";
+  echo $Name | grep -i Altro4
+  if (! $?) set sdt = ",sdt20180426.135000";
   set KFVertex = "";
   echo $Name | grep -i KFV
   if (! $?) set KFVertex = ",KFVertex";
