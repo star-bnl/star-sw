@@ -126,54 +126,6 @@ class absvol : virtual public absref, public RegPassivePtr {
   virtual std::vector<manip_absvol*> Gamanip_embed() const;
 };
 
-/*
-class absref_transmit_2fixsyscoor : public absref_transmit {
- public:
-  fixsyscoor* asys1;
-  fixsyscoor* asys2;
-  virtual absref* get_other(int n) {
-    if (n == 0) return asys1;
-    if (n == 1) return asys2;
-    mcerr << "absref_transmit_2fixsyscoor::get_other: should never happen\n";
-    spexit(mcerr);
-    return NULL;  // to quiet compiler
-  }
-  absref_transmit_2fixsyscoor(void) : absref_transmit() { ; }
-  absref_transmit_2fixsyscoor(fixsyscoor* fasys1, fixsyscoor* fasys2)
-      : absref_transmit(), asys1(fasys1), asys2(fasys2) {
-    qaref_other = 2;
-  }
-  macro_copy_total(absref_transmit_2fixsyscoor);
-  virtual ~absref_transmit_2fixsyscoor() { ; }
-};
-
-class absref_transmit_fixsyscoor : public absref_transmit {
- public:
-  std::vector<fixsyscoor>* asys;
-  virtual absref* get_other(int n) { return &((*asys)[n]); }
-  absref_transmit_fixsyscoor(void) : absref_transmit() { ; }
-  absref_transmit_fixsyscoor(std::vector<fixsyscoor>* fasys)
-      : absref_transmit(), asys(fasys) {
-    qaref_other = asys->size();
-  }
-  macro_copy_total(absref_transmit_fixsyscoor);
-  virtual ~absref_transmit_fixsyscoor() { ; }
-};
-
-class absref_transmit_absvol : public absref_transmit {
- public:
-  std::vector<ActivePtr<absvol> >* avol;
-  virtual absref* get_other(int n) { return (*avol)[n].get(); }
-  absref_transmit_absvol(void) : absref_transmit() { ; }
-  absref_transmit_absvol(std::vector<ActivePtr<absvol> >* favol)
-      : absref_transmit(), avol(favol) {
-    qaref_other = avol->size();
-  }
-  macro_copy_total(absref_transmit_absvol);
-  virtual ~absref_transmit_absvol() { ; }
-};
-*/
-
 /// Abstract base classs for volume "manipulators".
 class manip_absvol : virtual public absref, public RegPassivePtr {
  public:
@@ -208,7 +160,7 @@ class manip_absvol : virtual public absref, public RegPassivePtr {
   }
   void m_chname(char* nm) const;
   virtual void m_print(std::ostream& file, int l) const;
-  virtual manip_absvol* copy() const;
+  virtual manip_absvol* copy() const override;
   virtual ~manip_absvol() {}
 };
 
@@ -218,11 +170,11 @@ class sh_manip_absvol : public manip_absvol {
   fixsyscoor csys;
 
  public:
-  virtual const abssyscoor* Gasc() const;
+  virtual const abssyscoor* Gasc() const override;
   void Psc(const fixsyscoor& fcsys) { csys = fcsys; }
 
  protected:
-  virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
+  virtual absref_transmit get_components() override;
   absref* aref_ptr[1];
 
  public:
@@ -234,46 +186,9 @@ class sh_manip_absvol : public manip_absvol {
   virtual ~sh_manip_absvol() {}
 
   virtual void m_chname(char* nm) const;
-  virtual void m_print(std::ostream& file, int l) const;
-  virtual sh_manip_absvol* copy() const;
+  virtual void m_print(std::ostream& file, int l) const override;
+  virtual sh_manip_absvol* copy() const override;
 };
-
-/*
-class absref_transmit_2manip : public absref_transmit {
- public:
-  ActivePtr<manip_absvol>* amvol1;
-  ActivePtr<manip_absvol>* amvol2;
-  virtual absref* get_other(int n) {
-    absref* vol = 0;
-    if (n == 0) vol = amvol1->get();
-    if (n == 1) vol = amvol2->get();
-    mcerr << "absref_transmit_2manip::get_other: should never happen\n";
-    spexit(mcerr);
-    return vol;
-  }
-  absref_transmit_2manip(void) : absref_transmit() { ; }
-  absref_transmit_2manip(ActivePtr<manip_absvol>* famvol1,
-                         ActivePtr<manip_absvol>* famvol2)
-      : absref_transmit(), amvol1(famvol1), amvol2(famvol2) {
-    qaref_other = 2;
-  }
-  macro_copy_total(absref_transmit_2manip);
-  virtual ~absref_transmit_2manip() { ; }
-};
-
-class absref_transmit_manip : public absref_transmit {
- public:
-  std::vector<ActivePtr<manip_absvol> >* amvol;
-  virtual absref* get_other(int n) { return (*amvol)[n].get(); }
-  absref_transmit_manip(void) : absref_transmit() { ; }
-  absref_transmit_manip(std::vector<ActivePtr<manip_absvol> >* famvol)
-      : absref_transmit(), amvol(famvol) {
-    qaref_other = amvol->size();
-  }
-  macro_copy_total(absref_transmit_manip);
-  virtual ~absref_transmit_manip() { ; }
-};
-*/
 
 }
 

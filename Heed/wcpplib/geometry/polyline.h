@@ -49,7 +49,7 @@ class polyline : public absref {
 
  protected:
   absref** aref;
-  virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
+  virtual absref_transmit get_components() override;
 
  public:
   /// Return whether a point is inside.
@@ -126,7 +126,7 @@ class polyline_pl : public polyline {
 
  protected:
   static absref(absref::*aref_pl);
-  virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
+  virtual absref_transmit get_components() override;
 
  public:
   polyline_pl() : polyline(), pn() { ; }
@@ -193,7 +193,7 @@ class rectangle : public polygon {
   // at initing of the polygon via straight lines.
  protected:
   static absref(absref::*aref_rct[4]);
-  virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
+  virtual absref_transmit get_components() override;
 };
 std::ostream& operator<<(std::ostream& file, const rectangle& f);
 
@@ -215,7 +215,7 @@ class spquadr : public polygon {
 
  protected:
   static absref(absref::*aref_sp[4]);
-  virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
+  virtual absref_transmit get_components() override;
 
  public:
   /// Position in units of radians.

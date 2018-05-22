@@ -27,8 +27,8 @@ circumf::circumf(const point& fpiv, const vec& fdir, vfloat frad)
 circumf::circumf(const circumf& f)
     : absref(f), piv(f.piv), dir(f.dir), rad(f.rad) {}
 
-void circumf::get_components(ActivePtr<absref_transmit>& aref_tran) {
-  aref_tran.pass(new absref_transmit(2, aref));
+absref_transmit circumf::get_components() {
+  return absref_transmit(2, aref);
 }
 
 int operator==(const circumf& f1, const circumf& f2) {

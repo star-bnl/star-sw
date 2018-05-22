@@ -41,7 +41,7 @@ class HeedMatterDef : public RegPassivePtr {
 
   // The physical definition of two previous arrays of values:
   // mean values of cross sections for each energy interval.
-  std::vector<double> ACS;  ///< Photoabsorbtion cross section per one atom(Mb).
+  std::vector<double> ACS;  ///< Photoabsorption cross section per one atom(Mb).
   std::vector<double> ICS;  ///< Photoionization cross section per one atom(Mb).
   /// Some plasma dielectric constant (not used, but just initialized for print)
   // In order to take into account bounds,

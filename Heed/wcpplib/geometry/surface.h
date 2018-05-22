@@ -1,6 +1,8 @@
 #ifndef SURFACE_H
 #define SURFACE_H
 #include <iostream>
+#include <array>
+#include <memory>
 #include "wcpplib/geometry/polyline.h"
 #include "wcpplib/geometry/volume.h"
 /*
@@ -18,9 +20,6 @@ The file is provided "as is" without express or implied warranty.
 */
 
 namespace Heed {
-
-const int pqqsurf = 10;
-const int pqcrossurf = 4;
 
 /// Surface base class.
 
@@ -71,7 +70,7 @@ class splane : public surface {
   plane pn;
   vec dir_ins;  // direction to inside, supposed to be unit length (What for?)
  protected:
-  virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
+  absref_transmit get_components() override;
   static absref(absref::*aref_splane[2]);
 
  public:
@@ -83,8 +82,8 @@ class splane : public surface {
   /// Destructor
   virtual ~splane() {}
 
-  int check_point_inside(const point& fpt, const vec& dir, vfloat fprec) const;
-  int check_point_inside1(const point& fpt, int s_ext, vfloat fprec) const;
+  int check_point_inside(const point& fpt, const vec& dir, vfloat fprec) const override;
+  int check_point_inside1(const point& fpt, int s_ext, vfloat fprec) const override;
   // s_ext=0 - entering
   //       1 - exiting
   // 15.02.2006: Remark on check_point_inside vs. check_point_inside1.
@@ -101,22 +100,22 @@ class splane : public surface {
   // all the surfaces, thus faking the entering even if the particle is
   // actually exiting. This allows to make a stop there.
 
-  int range(const trajestep& fts, vfloat* crange, point* cpt, int* s_ext) const;
+  int range(const trajestep& fts, vfloat* crange, point* cpt, int* s_ext) const override;
   // Does not change fts
   // If no cross, returns 0 a
   // If there are crosses, returns number of them and
   // assign crange and cpt
 
   int cross(const polyline& fpl, point* cntrpt, int& qcntrpt,
-            vfloat prec) const {
+            vfloat prec) const override {
     polyline* plh = new polyline[fpl.Gqsl()];
     int qplh;
     int i = pn.cross(fpl, cntrpt, qcntrpt, plh, qplh, prec);
     delete[] plh;
     return i;
   }
-  virtual void print(std::ostream& file, int l) const;
-  virtual splane* copy() const { return new splane(*this); }
+  void print(std::ostream& file, int l) const override;
+  splane* copy() const override { return new splane(*this); }
 };
 
 /// Unlimited surfaces volume.
@@ -141,38 +140,43 @@ class ulsvolume : public absvol {
   // It allows to make cylinders, tubes and many other complicated shapes.
 
  public:
-  int qsurf;
-  ActivePtr<surface> surf[pqqsurf];
-  std::string name;
+  static constexpr int pqqsurf = 10; 
+  int qsurf = 0;
+  std::array<std::shared_ptr<surface>, pqqsurf> surf;
+  std::string name = "non-initialized ulsvolume";
 
  protected:
-  surface* adrsurf[pqqsurf];  // used only for get_components
-  virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
+  // Array of raw pointers used used in get_components.
+  surface* adrsurf[pqqsurf];
+
+  absref_transmit get_components() override;
 
  public:
   /// Default constructor.
-  ulsvolume();
-  ulsvolume(surface* fsurf[pqqsurf], int fqsurf, char* fname, vfloat fprec);
+  ulsvolume() {};
+  /// Constructor from surfaces.
+  ulsvolume(const std::vector<std::shared_ptr<surface> >& fsurf, char* fname, vfloat fprec);
   ulsvolume(ulsvolume& f);
   ulsvolume(const ulsvolume& fv);
   /// Destructor
   virtual ~ulsvolume() {}
 
-  int check_point_inside(const point& fpt, const vec& dir) const;
+  int check_point_inside(const point& fpt, const vec& dir) const override;
 
-  int range_ext(trajestep& fts, int s_ext) const;
+  int range_ext(trajestep& fts, int s_ext) const override;
   // If no cross, returns 0 and does not change fts
   // If there is cross, returns 1 and assign fts.mrange and fts.mpoint
-  void ulsvolume_init(surface* fsurf[pqqsurf], int fqsurf,
+
+  void ulsvolume_init(const std::vector<std::shared_ptr<surface> >& fsurf,
                       const std::string& fname, vfloat fprec);
 
-  virtual void income(gparticle* /*gp*/) {}
-  virtual void chname(char* nm) const {
+  void income(gparticle* /*gp*/) override {}
+  void chname(char* nm) const override {
     strcpy(nm, "ulsvolume: ");
     strcat(nm, name.c_str());
   }
-  virtual void print(std::ostream& file, int l) const;
-  virtual ulsvolume* copy() const { return new ulsvolume(*this); }
+  void print(std::ostream& file, int l) const override;
+  ulsvolume* copy() const override { return new ulsvolume(*this); }
 };
 
 class manip_ulsvolume : public manip_absvol, public ulsvolume {

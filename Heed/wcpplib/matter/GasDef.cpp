@@ -120,7 +120,7 @@ GasDef::GasDef(const std::string& fname, const std::string& fnotation,
                    "No molecule with such notation: " << fmolec_not[n] << '\n',
                    mcerr)
     // Van der Waals correction currently not used.
-    // VanDerWaals* aw = amolec[n]->awls().get();
+    // VanDerWaals* aw = amolec[n]->vdw().get();
   }
   // first normalize volumes to total unity
   std::vector<double> fw(fqmolec);
@@ -139,7 +139,7 @@ GasDef::GasDef(const std::string& fname, const std::string& fnotation,
   double mass_t = 0.0;
   double ridberg = k_Boltzmann * Avogadro;  // more precise
   for (long n = 0; n < fqmolec; ++n) {
-    VanDerWaals* aw = amolec[n]->awls().get();
+    VanDerWaals* aw = amolec[n]->vdw().get();
     if (aw == NULL) {
       // ideal gas case
       fweight_quan_molec[n] = fw[n] * fpressure / (ridberg * ftemperature);

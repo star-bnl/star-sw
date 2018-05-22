@@ -78,41 +78,28 @@ AtomDef Bismuth("Bismuth", "Bi", 83, 208.9804 * gram / mole);
 AtomDef Uranium("Uranium", "U", 92, 238.0289 * gram / mole);
 AtomDef Plutonium("Plutonium", "Pu", 94, 244.0 * gram / mole);
 
-VanDerWaals Argon_VanDerWaals(48.6 * bar, 150.7 * kelvin);
-VanDerWaals Krypton_VanDerWaals(55.0 * bar, 209.4 * kelvin);
-VanDerWaals Xenon_VanDerWaals(55.0 * bar, 209.4 * kelvin);
-VanDerWaals Water_VanDerWaals(22.9e6 * hep_pascal, (273.15 + 374.15) * kelvin);
-VanDerWaals CH4_VanDerWaals(4.64e6 * hep_pascal, (273.15 - 82.5) * kelvin);
-VanDerWaals CF4_VanDerWaals(42.5 * bar, 369.8 * kelvin);
-VanDerWaals C3H8_VanDerWaals(42.5 * bar, 369.8 * kelvin);
-VanDerWaals C4H10_VanDerWaals(40.0 * bar, 418.3 * kelvin);
-VanDerWaals Methylal_VanDerWaals(39.5 * bar, 480.6 * kelvin);
-
 MoleculeDef Hydrogen2("Hydrogen", "H2", "H", 2);
 MoleculeDef Helium_molec("Helium", "He", "He", 1);
 MoleculeDef Nitrogen_molec("Nitrogen", "N2", "N", 2);
 MoleculeDef Oxygen_molec("Oxygen", "O2", "O", 2);
 MoleculeDef Neon_molec("Neon", "Ne", "Ne", 1);
-// MoleculeDef Argon_molec(     "Argon",      "Ar", "Ar", 1,
-// &Argon_VanDerWaals);
 // MoleculeDef Argon_without_K_molec("Argon_without_K", "Ar_without_K",
 // "Ar_without_K", 1);
 MoleculeDef Argon_molec("Argon", "Ar", "Ar", 1,
-                        ActivePtr<VanDerWaals>(&Argon_VanDerWaals, do_clone));
+                    std::make_shared<VanDerWaals>(48.6 * bar, 150.7 * kelvin));
 MoleculeDef Krypton_molec("Krypton", "Kr", "Kr", 1,
-                          ActivePtr<VanDerWaals>(&Krypton_VanDerWaals,
-                                                 do_clone));
+                    std::make_shared<VanDerWaals>(55.0 * bar, 209.4 * kelvin));
 MoleculeDef Xenon_molec("Xenon", "Xe", "Xe", 1,
-                        ActivePtr<VanDerWaals>(&Xenon_VanDerWaals, do_clone));
+                    std::make_shared<VanDerWaals>(55.0 * bar, 209.4 * kelvin));
 
 MoleculeDef NH3("NH3", "NH3", "N", 1, "H", 3);
 MoleculeDef N2O("N2O", "N2O", "N", 2, "O", 1);
 MoleculeDef CO2("CO2", "CO2", "C", 1, "O", 2);
 MoleculeDef CH4("CH4", "CH4", "C", 1, "H", 4,
-                ActivePtr<VanDerWaals>(&CH4_VanDerWaals, do_clone));
+  std::make_shared<VanDerWaals>(4.64e6 * hep_pascal, (273.15 - 82.5) * kelvin));
 // MoleculeDef CH4(CH4", "CH4", "C", 1, "H", 4);
 MoleculeDef CF4("CF4", "CF4", "C", 1, "F", 4,
-                ActivePtr<VanDerWaals>(&CF4_VanDerWaals, do_clone));
+  std::make_shared<VanDerWaals>(42.5 * bar, 369.8 * kelvin));
 // MoleculeDef CF4("CF4", "CF4", "C", 1, "F", 4);
 MoleculeDef SF4("SF4", "SF4", "S", 1, "F", 4);
 MoleculeDef SF6("SF6", "SF6", "S", 1, "F", 6);
@@ -120,17 +107,16 @@ MoleculeDef C2H2("C2H2", "C2H2", "C", 2, "H", 2);
 MoleculeDef C2H4("C2H4", "C2H4", "C", 2, "H", 4);
 MoleculeDef C2H6("C2H6", "C2H6", "C", 2, "H", 6);
 MoleculeDef C3H8("C3H8", "C3H8", "C", 3, "H", 8,
-                 ActivePtr<VanDerWaals>(&C3H8_VanDerWaals, do_clone));
+  std::make_shared<VanDerWaals>(42.5 * bar, 369.8 * kelvin));
 // MoleculeDef C3H8( "C3H8", "C3H8", "C", 3, "H", 8);
 MoleculeDef C4H10("C4H10", "C4H10", "C", 4, "H", 10,
-                  ActivePtr<VanDerWaals>(&C4H10_VanDerWaals, do_clone));
+  std::make_shared<VanDerWaals>(40.0 * bar, 418.3 * kelvin));
 // MoleculeDef C4H10( "C4H10",  "C4H10",  "C", 4, "H", 10);
 MoleculeDef C2H2F4("C2H2F4", "C2H2F4", "C", 2, "F", 4, "H", 2);
 MoleculeDef Water_molec("Water", "Water", "H", 2, "O", 1,
-                        ActivePtr<VanDerWaals>(&Water_VanDerWaals, do_clone));
+  std::make_shared<VanDerWaals>(22.9e6 * hep_pascal, (273.15 + 374.15) * kelvin));
 MoleculeDef Methylal_molec("Methylal", "Methylal", "O", 2, "C", 3, "H", 8,
-                           ActivePtr<VanDerWaals>(&Methylal_VanDerWaals,
-                                                  do_clone));
+  std::make_shared<VanDerWaals>(39.5 * bar, 480.6 * kelvin));
 
 // Additional molecule definitions for compatibility with Magboltz
 MoleculeDef C5H12_molec("C5H12", "C5H12", "C", 5, "H", 12);

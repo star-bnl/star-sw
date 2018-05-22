@@ -31,8 +31,8 @@ absref absref::*(trajestep::aref[4]) = {(absref absref::*)&trajestep::currpos,
                                         (absref absref::*)&trajestep::relcen,
                                         (absref absref::*)&trajestep::mpoint};
 
-void trajestep::get_components(ActivePtr<absref_transmit>& aref_tran) {
-  aref_tran.pass(new absref_transmit(4, aref));
+absref_transmit trajestep::get_components() {
+  return absref_transmit(4, aref);
 }
 
 trajestep::trajestep(trajestep_limit* ftl, const point& fcurrpos,

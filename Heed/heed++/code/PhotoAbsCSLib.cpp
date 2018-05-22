@@ -98,22 +98,17 @@ const std::string shelllist_dir_name = getDataBasePath() + "/";
 const std::string pacs_table_dir_name = shelllist_dir_name + "henke/";
 
 // Hydrogen
-HydrogenPhotoAbsCS Hydrogen_shell_PACS;
-SimpleAtomPhotoAbsCS Hydrogen_PACS(1, Hydrogen_shell_PACS);
-
-PhenoPhotoAbsCS Hydrogen_for_H2_shell_PACS("Hydrogen_for_H2", 1, 15.43e-6,
-                                           3.228);
-PhenoPhotoAbsCS Hydrogen_for_CH4_shell_PACS("Hydrogen_for_CH4", 1, 12.65e-06,
-                                            3.228);
-PhenoPhotoAbsCS Hydrogen_for_NH4_shell_PACS("Hydrogen_for_NH4", 1, 10.0e-06,
-                                            3.228);
+SimpleAtomPhotoAbsCS Hydrogen_PACS(1, std::make_shared<HydrogenPhotoAbsCS>());
 
 // SimpleTablePhotoAbsCS Hydrogen_for_CH4_shell_PACS("Hydrogen_for_CH4",
 //                                       1, 12.65e-6,
 //                                       shelllist_dir_name + "H_for_CH4.dat");
-SimpleAtomPhotoAbsCS Hydrogen_for_H2_PACS(1, Hydrogen_for_H2_shell_PACS);
-SimpleAtomPhotoAbsCS Hydrogen_for_CH4_PACS(1, Hydrogen_for_CH4_shell_PACS);
-SimpleAtomPhotoAbsCS Hydrogen_for_NH4_PACS(1, Hydrogen_for_NH4_shell_PACS);
+SimpleAtomPhotoAbsCS Hydrogen_for_H2_PACS(1, 
+    std::make_shared<PhenoPhotoAbsCS>("Hydrogen_for_H2", 1, 15.43e-6, 3.228));
+SimpleAtomPhotoAbsCS Hydrogen_for_CH4_PACS(1, 
+    std::make_shared<PhenoPhotoAbsCS>("Hydrogen_for_CH4", 1, 12.65e-06, 3.228));
+SimpleAtomPhotoAbsCS Hydrogen_for_NH4_PACS(1, 
+    std::make_shared<PhenoPhotoAbsCS>("Hydrogen_for_NH4", 1, 10.0e-06, 3.228)); 
 
 // ExAtomPhotoAbsCS Hydrogen_for_H2_PACS(1,
 //                                       shelllist_dir_name + "shelllist.dat",

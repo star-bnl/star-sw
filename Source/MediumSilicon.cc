@@ -229,8 +229,7 @@ bool MediumSilicon::ElectronTownsend(const double ex, const double ey,
       return ElectronImpactIonisationGrant(e, alpha);
       break;
     default:
-      std::cerr << m_className << "::ElectronTownsend:\n"
-                << "    Unknown model. Program bug!\n";
+      std::cerr << m_className << "::ElectronTownsend: Unknown model. Bug!\n";
       break;
   }
   return false;
@@ -267,8 +266,7 @@ bool MediumSilicon::ElectronAttachment(const double ex, const double ey,
       if (eta > 0.) eta = 1. / eta;
       break;
     default:
-      std::cerr << m_className << "::ElectronAttachment:\n"
-                << "    Unknown model. Program bug!\n";
+      std::cerr << m_className << "::ElectronAttachment: Unknown model. Bug!\n";
       return false;
       break;
   }
@@ -364,8 +362,7 @@ bool MediumSilicon::HoleTownsend(const double ex, const double ey,
       return HoleImpactIonisationGrant(e, alpha);
       break;
     default:
-      std::cerr << m_className << "::HoleTownsend:\n"
-                << "    Unknown model. Program bug!\n";
+      std::cerr << m_className << "::HoleTownsend: Unknown model. Bug!\n";
       break;
   }
   return false;
@@ -402,8 +399,7 @@ bool MediumSilicon::HoleAttachment(const double ex, const double ey,
       if (eta > 0.) eta = 1. / eta;
       break;
     default:
-      std::cerr << m_className << "::HoleAttachment:\n"
-                << "    Unknown model. Program bug!\n";
+      std::cerr << m_className << "::HoleAttachment: Unknown model. Bug!\n";
       return false;
       break;
   }
@@ -3073,8 +3069,7 @@ void MediumSilicon::InitialiseDensityOfStates() {
 
   m_eStepDos = 0.1;
 
-  const unsigned int nFbDosEntriesV = 83;
-  const double m_fbDosV[nFbDosEntriesV] = {
+  m_fbDosValence = {{
       0.,      1.28083,  2.08928, 2.70763, 3.28095, 3.89162, 4.50547, 5.15043,
       5.89314, 6.72667,  7.67768, 8.82725, 10.6468, 12.7003, 13.7457, 14.0263,
       14.2731, 14.5527,  14.8808, 15.1487, 15.4486, 15.7675, 16.0519, 16.4259,
@@ -3085,11 +3080,9 @@ void MediumSilicon::InitialiseDensityOfStates() {
       4.3046,  4.56219,  4.81553, 5.09909, 5.37616, 5.67297, 6.04611, 6.47252,
       6.9256,  7.51254,  8.17923, 8.92351, 10.0309, 11.726,  16.2853, 18.2457,
       12.8879, 7.86019,  6.02275, 5.21777, 4.79054, 3.976,   3.11855, 2.46854,
-      1.65381, 0.830278, 0.217735};
+      1.65381, 0.830278, 0.217735}};
 
-  // Total (full-band) density of states.
-  const unsigned int nFbDosEntriesC = 101;
-  const double m_fbDosC[nFbDosEntriesC] = {
+  m_fbDosConduction = {{
       0.,      1.5114,  2.71026,  3.67114,  4.40173, 5.05025, 5.6849,  6.28358,
       6.84628, 7.43859, 8.00204,  8.80658,  9.84885, 10.9579, 12.0302, 13.2051,
       14.6948, 16.9879, 18.4492,  18.1933,  17.6747, 16.8135, 15.736,  14.4965,
@@ -3102,19 +3095,11 @@ void MediumSilicon::InitialiseDensityOfStates() {
       7.67306, 7.18925, 6.79675,  6.40713,  6.21687, 6.33267, 6.5223,  6.17877,
       5.48659, 4.92208, 4.44239,  4.02941,  3.5692,  3.05953, 2.6428,  2.36979,
       2.16273, 2.00627, 1.85206,  1.71265,  1.59497, 1.46681, 1.34913, 1.23951,
-      1.13439, 1.03789, 0.924155, 0.834962, 0.751017};
+      1.13439, 1.03789, 0.924155, 0.834962, 0.751017}};
 
-  m_fbDosValence.resize(nFbDosEntriesV);
-  m_fbDosConduction.resize(nFbDosEntriesC);
-  m_fbDosMaxV = m_fbDosV[nFbDosEntriesV - 1];
-  m_fbDosMaxC = m_fbDosC[nFbDosEntriesC - 1];
-  for (int i = nFbDosEntriesV; i--;) {
-    m_fbDosValence[i] = m_fbDosV[i];
-    if (m_fbDosV[i] > m_fbDosMaxV) m_fbDosMaxV = m_fbDosV[i];
-  }
-  for (int i = nFbDosEntriesC; i--;) {
-    m_fbDosConduction[i] = m_fbDosC[i];
-    if (m_fbDosC[i] > m_fbDosMaxC) m_fbDosMaxC = m_fbDosC[i];
-  }
+  auto it = std::max_element(m_fbDosValence.begin(), m_fbDosValence.end());
+  m_fbDosMaxV = *it;
+  it = std::max_element(m_fbDosConduction.begin(), m_fbDosConduction.end());
+  m_fbDosMaxC = *it;
 }
 }

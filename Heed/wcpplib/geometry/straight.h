@@ -33,7 +33,7 @@ class straight : public absref {
   vec Gdir(void) const { return dir; }
 
  protected:
-  virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
+  virtual absref_transmit get_components() override;
   static absref(absref::*aref[2]);
 
  public:

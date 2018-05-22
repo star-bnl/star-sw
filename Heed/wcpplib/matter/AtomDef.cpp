@@ -38,11 +38,8 @@ AtomDef::AtomDef(const std::string& fnameh, const std::string& fnotationh,
 
 double AtomDef::get_A(int fZ) {
   mfunnamep("double AtomDef::get_A(int fZ)");
-  const std::list<AtomDef*>& logbook = AtomDef::get_logbook();
-  std::list<AtomDef*>::const_iterator it;
-  std::list<AtomDef*>::const_iterator end = logbook.end();
-  for (it = logbook.begin(); it != end; ++it) {
-    if ((*it)->Z() == fZ) return (*it)->A();
+  for (auto atom : AtomDef::get_logbook()) {
+    if (atom->Z() == fZ) return atom->A();
   }
   funnw.ehdr(mcerr);
   mcerr << "Atom is not found, Z=" << fZ << '\n';
@@ -52,31 +49,24 @@ double AtomDef::get_A(int fZ) {
 
 AtomDef* AtomDef::get_AtomDef(int fZ) {
   mfunnamep("AtomDef* AtomDef::get_AtomDef(int fZ)");
-  const std::list<AtomDef*>& logbook = AtomDef::get_logbook();
-  std::list<AtomDef*>::const_iterator it;
-  std::list<AtomDef*>::const_iterator end = logbook.end();
-  for (it = logbook.begin(); it != end; ++it) {
-    if ((*it)->Z() == fZ) return *it;
+  for (auto atom : AtomDef::get_logbook()) {
+    if (atom->Z() == fZ) return atom;
   }
   funnw.ehdr(mcerr);
   mcerr << "Atom is not found, Z=" << fZ << '\n';
   spexit(mcerr);
-  return NULL;
+  return nullptr;
 }
 
 void AtomDef::verify() {
   mfunnamep("void AtomDef::verify()");
   if (nameh == "none" && notationh == "none") return;
-  const std::list<AtomDef*>& logbook = AtomDef::get_logbook();
-  std::list<AtomDef*>::const_iterator it;
-  std::list<AtomDef*>::const_iterator end = logbook.end();
-  for (it = logbook.begin(); it != end; ++it) {
-    if ((*it)->nameh == nameh || (*it)->notationh == notationh) {
-      funnw.ehdr(mcerr);
-      mcerr << "cannot initialize two atoms with the same name or notation\n";
-      mcerr << "name=" << nameh << " notation=" << notationh << '\n';
-      spexit(mcerr);
-    }
+  for (auto atom : AtomDef::get_logbook()) {
+    if (atom->nameh != nameh && atom->notationh != notationh) continue;
+    funnw.ehdr(mcerr);
+    mcerr << "cannot initialize two atoms with the same name or notation\n";
+    mcerr << "name=" << nameh << " notation=" << notationh << '\n';
+    spexit(mcerr);
   }
 }
 
@@ -98,13 +88,10 @@ const std::list<AtomDef*>& AtomDef::get_const_logbook() {
 }
 
 AtomDef* AtomDef::get_AtomDef(const std::string& fnotation) {
-  const std::list<AtomDef*>& logbook = AtomDef::get_logbook();
-  std::list<AtomDef*>::const_iterator it;
-  std::list<AtomDef*>::const_iterator end = logbook.end();
-  for (it = logbook.begin(); it != end; ++it) {
-    if ((*it)->notation() == fnotation) return *it;
+  for (auto atom : AtomDef::get_logbook()) {
+    if (atom->notation() == fnotation) return atom;
   }
-  return NULL;
+  return nullptr;
 }
 
 AtomDef::~AtomDef() { AtomDef::get_logbook().remove(this); }

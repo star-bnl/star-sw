@@ -254,9 +254,9 @@ manip_absvol* manip_absvol::copy() const {
 }                   
 
 // *********  sh_manip_absvol  *********
-void sh_manip_absvol::get_components(ActivePtr<absref_transmit>& aref_tran) {
+absref_transmit sh_manip_absvol::get_components() {
   aref_ptr[0] = &csys;
-  aref_tran.pass(new absref_transmit(1, aref_ptr));
+  return absref_transmit(1, aref_ptr);
 }
 
 const abssyscoor* sh_manip_absvol::Gasc() const { return &csys; }

@@ -124,7 +124,7 @@ class trajestep : public absref {
   virtual ~trajestep() {}
 
  protected:
-  virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
+  virtual absref_transmit get_components() override;
   static absref(absref::*aref[4]);
 };
 std::ostream& operator<<(std::ostream& file, const trajestep& f);
