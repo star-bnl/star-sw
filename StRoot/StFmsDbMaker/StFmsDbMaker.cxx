@@ -1,5 +1,5 @@
  /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.36 2018/03/09 21:37:06 smirnovd Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.37 2018/05/22 20:04:45 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.37  2018/05/22 20:04:45  akio
+ * fix not dumping last detector Id to dump file
+ *
  * Revision 1.36  2018/03/09 21:37:06  smirnovd
  * Remove inline keyword from source file
  *
@@ -655,7 +658,7 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
       LOG_INFO << "StFmsDbMaker::InitRun - Found no Calibration/fms/fmsBitShiftGain or B, defaulted to zero"<<endm;
   }  
   if(mForceUniformGain>0.0){
-      for(int d=0; d<maxDetectorId(); d++){
+      for(int d=0; d<=maxDetectorId(); d++){
 	  for(int c=1; c<=maxChannel(d); c++){
 	      static int first=0;
 	      if(first<3){
@@ -1545,7 +1548,7 @@ void StFmsDbMaker::dumpFmsGain(const Char_t* filename) {
 	fprintf(fp,"maxGain = %d\n",maxGain());
 	fprintf(fp,"    i DetId    ch    gain\n");
 	int i=0;
-	for(int d=0; d<mMaxDetectorId; d++){
+	for(int d=0; d<=mMaxDetectorId; d++){
 	    if(mmGain[d]){
 		for(int c=0; c<maxChannel(d); c++){
 		    Int_t dd=mmGain[d][c].detectorId;
@@ -1571,7 +1574,7 @@ void StFmsDbMaker::dumpFmsGainCorrection(const Char_t* filename) {
 	fprintf(fp,"maxGainCorrection = %d\n",maxGainCorrection());
 	fprintf(fp,"    i DetId    ch    gain\n");
 	int i=0;
-        for(int d=0; d<mMaxDetectorId; d++){
+        for(int d=0; d<=mMaxDetectorId; d++){
             if(mmGainCorrection[d]){
                 for(int c=0; c<maxChannel(d); c++){
 		    Int_t dd=mmGainCorrection[d][c].detectorId;
@@ -1597,7 +1600,7 @@ void StFmsDbMaker::dumpFmsBitShiftGain(const Char_t* filename) {
 	fprintf(fp,"maxGain = %d\n",maxBitShiftGain());
 	fprintf(fp,"    i DetId    ch    bitshiftgain\n");
 	int i=0;
-        for(int d=0; d<mMaxDetectorId; d++){
+        for(int d=0; d<=mMaxDetectorId; d++){
             if(mmBitShiftGain[d]){
                 for(int c=0; c<maxChannel(d); c++){
                     Int_t dd=mmBitShiftGain[d][c].detectorId;
