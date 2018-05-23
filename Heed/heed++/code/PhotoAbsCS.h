@@ -7,7 +7,6 @@
 #include <cfloat>
 #include <climits>
 #include <memory>
-#include "wcpplib/safetl/AbsPtr.h"
 #include "wcpplib/clhep_units/WPhysicalConstants.h"
 #include "heed++/code/PhysicalConstants.h"
 
@@ -75,7 +74,7 @@ class PhotoAbsCS {
 
  protected:
   std::string name;
-  int number;
+  int number = 0;
   int Z;
   double threshold;  // in MeV
 };
@@ -87,7 +86,7 @@ class AveragePhotoAbsCS : public PhotoAbsCS {
   /// Max. number of integration steps (in get_integral_CS).
   /// If real q is more, the function calls PhotoAbsCs::get_integral_CS.
   long max_q_step;
-  /// Integration step, for example, 1/20 from width.
+  /// Integration step, for example, 1/20 of the width.
   double step;
 
  public:
@@ -137,7 +136,7 @@ class HydrogenPhotoAbsCS : public PhotoAbsCS {
   }
 
  private:
-  double prefactor;
+  double prefactor = 1.;
 };
 
 /// Typically this is for reading Experimental CS, for example of argon,
@@ -161,7 +160,7 @@ class HydrogenPhotoAbsCS : public PhotoAbsCS {
 class SimpleTablePhotoAbsCS : public PhotoAbsCS {
  public:
   /// Default constructor.
-  SimpleTablePhotoAbsCS();
+  SimpleTablePhotoAbsCS() = default;
   /// Constructor for reading table from file.
   SimpleTablePhotoAbsCS(const std::string& fname, int fZ, double fthreshold,
                         const std::string& ffile_name);

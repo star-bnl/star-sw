@@ -5,8 +5,6 @@
 #include <vector>
 #include <list>
 
-#include "wcpplib/safetl/AbsPtr.h"
-
 namespace Heed {
 
 /// Definition of atoms.

@@ -4,6 +4,7 @@
 #include "wcpplib/ioniz/e_cont_enloss.h"
 #include "wcpplib/clhep_units/WPhysicalConstants.h"
 #include "wcpplib/math/lorgamma.h"
+#include "wcpplib/util/FunNameStack.h"
 
 // 2003, I. Smirnov
 

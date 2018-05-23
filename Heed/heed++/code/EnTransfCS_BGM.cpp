@@ -1,5 +1,6 @@
 #include <iomanip>
 
+#include "wcpplib/util/FunNameStack.h"
 #include "heed++/code/EnTransfCS_BGM.h"
 
 namespace Heed {

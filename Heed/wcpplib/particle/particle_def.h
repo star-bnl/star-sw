@@ -1,9 +1,8 @@
 #ifndef PARTICLE_DEF_H
 #define PARTICLE_DEF_H
 
+#include <string>
 #include <list>
-
-#include "wcpplib/safetl/AbsPtr.h"
 
 namespace Heed {
 

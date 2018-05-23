@@ -24,7 +24,6 @@ The file is provided "as is" without express or implied warranty.
 */
 #include <string>
 #include "wcpplib/util/FunNameStack.h"
-#include "wcpplib/safetl/AbsPtr.h"
 
 #define pvecerror(string)                                      \
   mfunname(string);                                            \

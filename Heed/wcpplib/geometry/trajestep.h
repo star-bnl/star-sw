@@ -1,7 +1,6 @@
 #ifndef TRAJESTEP_H
 #define TRAJESTEP_H
 #include "wcpplib/geometry/vec.h"
-#include "wcpplib/safetl/AbsPtr.h"
 
 /*
 Copyright (c) 2000 Igor B. Smirnov

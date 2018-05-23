@@ -159,7 +159,7 @@ void AveragePhotoAbsCS::print(std::ostream& file, int l) const {
 //---------------------------------------------------------
 
 HydrogenPhotoAbsCS::HydrogenPhotoAbsCS()
-    : PhotoAbsCS("H", 1, 15.43e-6), prefactor(1.) {
+    : PhotoAbsCS("H", 1, 15.43e-6) {
   number = 1;
 }
 
@@ -169,16 +169,15 @@ double HydrogenPhotoAbsCS::get_CS(double energy) const {
   return 0.5 * prefactor * 0.0535 * (pow(100.0e-6 / energy, 3.228));
 }
 
-double HydrogenPhotoAbsCS::get_integral_CS(double energy1,
-                                           double energy2) const {
-  if (energy2 < threshold) return 0.;
-  if (energy1 < threshold) energy1 = threshold;
-  if (energy2 == DBL_MAX) {
-    return 0.5 * prefactor * 0.0535 * pow(100.0e-6, 3.228) / 2.228 *
-           (1.0 / pow(energy1, 2.228));
+double HydrogenPhotoAbsCS::get_integral_CS(double e1,
+                                           double e2) const {
+  if (e2 < threshold) return 0.;
+  if (e1 < threshold) e1 = threshold;
+  const double c1 = 0.5 * 0.0535 * pow(100.0e-6, 3.228) / 2.228;
+  if (e2 == DBL_MAX) {
+    return prefactor * c1 * (1. / pow(e1, 2.228));
   } else {
-    return 0.5 * prefactor * 0.0535 * pow(100.0e-6, 3.228) / 2.228 *
-           (1.0 / pow(energy1, 2.228) - 1.0 / pow(energy2, 2.228));
+    return prefactor * c1 * (1. / pow(e1, 2.228) - 1. / pow(e2, 2.228));
   }
 }
 

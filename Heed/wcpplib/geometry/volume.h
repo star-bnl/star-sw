@@ -5,7 +5,6 @@
 
 #include "wcpplib/geometry/vec.h"
 #include "wcpplib/geometry/trajestep.h"
-#include "wcpplib/safetl/AbsPtr.h"
 
 /*
 The main definitions related to volume.
