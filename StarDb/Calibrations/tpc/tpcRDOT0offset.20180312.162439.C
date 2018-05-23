@@ -6,7 +6,7 @@ TDataSet *CreateTable() {
   memset(&row, 0, tableSet->GetRowSize());
   Int_t sector = 17;
   Int_t rdo    =  1;
-  Int_t t0     = -0.89;
+  Float_t t0     = -0.89;
   row.isShifted[sector-1] = kTRUE;
   row.t0[sector-1][rdo-1] = t0;
   tableSet->AddAt(&row);
