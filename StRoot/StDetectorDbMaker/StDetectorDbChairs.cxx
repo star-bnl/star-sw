@@ -977,7 +977,8 @@ Float_t St_tpcRDOT0offsetC::T0(Int_t sector, Int_t padrow, Int_t pad) const {
   if (St_tpcPadConfigC::instance()->iTPC(sector) && padrow <= 40)  return t0; // no shift in iTPC
   Int_t rdo = St_tpcRDOMapC::instance()->rdo(padrow,pad);
   if (!rdo) return t0;
-  return Struct()->t0[sector-1][rdo-1];
+  t0 = Struct()->t0[sector-1][rdo-1];
+  return t0;
 }
 //__________________Calibrations/trg______________________________________________________________
 #include "St_defaultTrgLvlC.h"
@@ -1278,6 +1279,7 @@ St_SurveyC::St_SurveyC(St_Survey *table) : TChair(table), fRotations(0)  {
     rot.SetRotation(Rotation(i));
     rot.SetTranslation(Translation(i));
     Normalize(rot);
+    assert(TMath::Abs(rot.Determinant())-1 < 1.e-3);
   }
 }
 //________________________________________________________________________________
@@ -1355,16 +1357,19 @@ void St_SurveyC::Normalize(TGeoHMatrix &R) {
     if (_debug) {LOG_INFO << "Qn:" << endl << Qn << endm;}
   }
   R.SetRotation(Qn.Array()); cout << "New\t"; R.Print();
+#endif
   if (_debug) {
+    LOG_INFO << "Matrix:" << endm; R.Print("");
     LOG_INFO << "Determinant-1 = " << R.Determinant()-1 << endm;
     const Double_t *rr = R.GetRotationMatrix();
     LOG_INFO << "Ortogonality " << IsOrtogonal(rr) << endm;
   }
-#endif
+  return;
 }
 //________________________________________________________________________________
 const TGeoHMatrix &St_SurveyC::GetMatrix(Int_t i) {
   assert(fRotations || fRotations[i]);
+  assert(TMath::Abs(fRotations[i]->Determinant())-1 < 1.e-3);
   return *fRotations[i];
 }
 //________________________________________________________________________________
