@@ -23,7 +23,7 @@ class EnTransfCS {
   /// Default constructor
   EnTransfCS() = default;
   /// Constructor
-  EnTransfCS(double fparticle_mass, double fgamma_1, int fs_primary_electron,
+  EnTransfCS(double fparticle_mass, double fgamma_1, bool fs_primary_electron,
              HeedMatterDef* fhmd, long fparticle_charge = 1);
 
   void print(std::ostream& file, int l) const;
@@ -47,8 +47,8 @@ class EnTransfCS {
   /// Simple form means that there are two terms.
   /// The third term is assumed zero.
   bool s_simple_form = true;
-  /// Flag that the primary particle is the electron
-  int s_primary_electron = false;
+  /// Flag indicating whether the primary particle is an electron.
+  bool s_primary_electron = false;
 
   HeedMatterDef* hmd = nullptr;
 

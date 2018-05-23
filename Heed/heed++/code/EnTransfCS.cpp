@@ -17,7 +17,7 @@ using CLHEP::hbarc;
 using CLHEP::cm;
 
 EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
-                       int fs_primary_electron, HeedMatterDef* fhmd,
+                       bool fs_primary_electron, HeedMatterDef* fhmd,
                        long fparticle_charge)
     : particle_mass(fparticle_mass),
       particle_charge(fparticle_charge),
@@ -34,7 +34,7 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
   const double tkin = particle_mass * gamma_1;
   particle_ener = particle_mass * gamma;
   // Calculate the max. energy transfer.
-  if (s_primary_electron == 1) {
+  if (s_primary_electron) {
     max_etransf = 0.5 * tkin;
   } else {
     double rm2 = particle_mass * particle_mass;
@@ -134,13 +134,13 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
   for (long ne = 0; ne < qe; ne++) {
     const double ec = hmd->energy_mesh->get_ec(ne);
     if (s_simple_form) {
-      if (s_primary_electron == 0) {
+      if (!s_primary_electron) {
         Rruth[ne] = 1. / (ec * ec) * (1. - beta2 * ec / max_etransf);
       } else {
         Rruth[ne] = 1. / (ec * ec);
       }
     } else {
-      if (s_primary_electron == 0) {
+      if (!s_primary_electron) {
         Rruth[ne] =
             1. / (ec * ec) * (1. - beta2 * ec / max_etransf +
                               ec * ec / (2. * particle_ener * particle_ener));
@@ -316,7 +316,7 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
   const double coef = fine_structure_const * fine_structure_const * q2 * twopi /
                       (electron_mass_c2 * beta2) * hmd->xeldens;
   if (s_simple_form) {
-    if (s_primary_electron == 0) {
+    if (!s_primary_electron) {
       if (max_etransf > hmd->energy_mesh->get_e(qe)) {
         double e1 = hmd->energy_mesh->get_e(qe);
         double e2 = max_etransf;
@@ -330,7 +330,7 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
       }
     }
   } else {
-    if (s_primary_electron == 0) {
+    if (!s_primary_electron) {
       if (max_etransf > hmd->energy_mesh->get_e(qe)) {
         double e1 = hmd->energy_mesh->get_e(qe);
         double e2 = max_etransf;
@@ -418,6 +418,7 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
 #ifdef DEBUG_EnTransfCS
   truth.clear();
 #endif
+  /*
   std::ofstream dcsfile;
   dcsfile.open("dcs.txt", std::ios::out);
   dcsfile << "# energy [MeV] vs. diff. cs per electron [Mbarn / MeV]\n";
@@ -426,7 +427,7 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
             << "\n";
   }
   dcsfile.close();
-
+  */
   addaC.clear();
 #ifndef EXCLUDE_A_VALUES
   addaC_a.clear();

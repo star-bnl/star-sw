@@ -776,11 +776,9 @@ bool TrackHeed::Setup(Medium* medium) {
 
   // Energy transfer cross-section
   // Set a flag indicating whether the primary particle is an electron.
-  const int sel = m_isElectron ? 1 : 0;
-  const double gamma = GetGamma();
-
-  m_transferCs.reset(new Heed::EnTransfCS(1.e-6 * m_mass, gamma - 1, sel, 
-                                          m_matter.get(), long(m_q)));
+  m_transferCs.reset(new Heed::EnTransfCS(1.e-6 * m_mass, GetGamma() - 1., 
+                                          m_isElectron, m_matter.get(), 
+                                          long(m_q)));
 
   if (!SetupDelta(databasePath)) return false;
 
