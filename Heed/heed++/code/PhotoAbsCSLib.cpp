@@ -254,57 +254,58 @@ ExAtomPhotoAbsCS Mercury_PACS(80, shelllist_dir_name + "shelllist.dat",
 ExAtomPhotoAbsCS Uranium_PACS(92, shelllist_dir_name + "shelllist.dat",
                               pacs_table_dir_name + "U.dat");
 
-MolecPhotoAbsCS H2_MPACS(Hydrogen_for_H2_PACS, 2);
+MolecPhotoAbsCS H2_MPACS(&Hydrogen_for_H2_PACS, 2);
 // MolecPhotoAbsCS H2_MPACS(Hydrogen_PACS, 2);
-MolecPhotoAbsCS He_MPACS(Helium_PACS, 1, 41.3e-6);
-MolecPhotoAbsCS N2_MPACS(Nitrogen_PACS, 2, 34.8e-6);
-MolecPhotoAbsCS O2_MPACS(Oxygen_PACS, 2, 30.8e-6);
-MolecPhotoAbsCS Ne_MPACS(Neon_PACS, 1, 35.4e-6);
-MolecPhotoAbsCS Ar_MPACS(Argon_PACS, 1, 26.4e-6);
-MolecPhotoAbsCS Kr_MPACS(Krypton_PACS, 1, 24.4e-6);
-MolecPhotoAbsCS Xe_MPACS(Xenon_PACS, 1, 22.1e-6);
-MolecPhotoAbsCS NH3_MPACS(Nitrogen_PACS, 1, Hydrogen_for_NH4_PACS, 3, 26.6e-6);
-MolecPhotoAbsCS N2O_MPACS(Nitrogen_PACS, 2, Oxygen_PACS, 1, 34.8e-6);
-MolecPhotoAbsCS CO2_MPACS(Carbon_for_CO2_PACS, 1, Oxygen_for_CO2_PACS, 2,
+MolecPhotoAbsCS He_MPACS(&Helium_PACS, 1, 41.3e-6);
+MolecPhotoAbsCS N2_MPACS(&Nitrogen_PACS, 2, 34.8e-6);
+MolecPhotoAbsCS O2_MPACS(&Oxygen_PACS, 2, 30.8e-6);
+MolecPhotoAbsCS Ne_MPACS(&Neon_PACS, 1, 35.4e-6);
+MolecPhotoAbsCS Ar_MPACS(&Argon_PACS, 1, 26.4e-6);
+MolecPhotoAbsCS Kr_MPACS(&Krypton_PACS, 1, 24.4e-6);
+MolecPhotoAbsCS Xe_MPACS(&Xenon_PACS, 1, 22.1e-6);
+MolecPhotoAbsCS NH3_MPACS(&Nitrogen_PACS, 1, &Hydrogen_for_NH4_PACS, 3, 26.6e-6);
+MolecPhotoAbsCS N2O_MPACS(&Nitrogen_PACS, 2, &Oxygen_PACS, 1, 34.8e-6);
+MolecPhotoAbsCS CO2_MPACS(&Carbon_for_CO2_PACS, 1, &Oxygen_for_CO2_PACS, 2,
                           33.0e-6);
 
-// MolecPhotoAbsCS CH4_MPACS(Carbon_for_CH4_PACS, 1,
-//                           Hydrogen_for_H2_PACS, 4, 27.3e-6);
-MolecPhotoAbsCS CH4_MPACS(Carbon_for_CH4_PACS, 1, Hydrogen_for_CH4_PACS, 4,
+// MolecPhotoAbsCS CH4_MPACS(&Carbon_for_CH4_PACS, 1,
+//                           &Hydrogen_for_H2_PACS, 4, 27.3e-6);
+MolecPhotoAbsCS CH4_MPACS(&Carbon_for_CH4_PACS, 1, &Hydrogen_for_CH4_PACS, 4,
                           27.3e-6);
-MolecPhotoAbsCS CF4_MPACS(Carbon_for_CF4_PACS, 1, Fluorine_PACS, 4);
+MolecPhotoAbsCS CF4_MPACS(&Carbon_for_CF4_PACS, 1, &Fluorine_PACS, 4);
 
 // !!! The following line may need to be refined
 // (to adjust outer shell energies).
-MolecPhotoAbsCS SF4_MPACS(Sulfur_PACS, 1, Fluorine_PACS, 4);
+MolecPhotoAbsCS SF4_MPACS(&Sulfur_PACS, 1, &Fluorine_PACS, 4);
 // !!! The following line may need to be refined
 // (to adjust outer shell energies).
-MolecPhotoAbsCS SF6_MPACS(Sulfur_PACS, 1, Fluorine_PACS, 6);
+MolecPhotoAbsCS SF6_MPACS(&Sulfur_PACS, 1, &Fluorine_PACS, 6);
 
-MolecPhotoAbsCS C2H2_MPACS(Carbon_for_CH4_PACS, 2, Hydrogen_for_H2_PACS, 2,
+MolecPhotoAbsCS C2H2_MPACS(&Carbon_for_CH4_PACS, 2, &Hydrogen_for_H2_PACS, 2,
                            25.8e-6);
-MolecPhotoAbsCS C2H4_MPACS(Carbon_for_C2H4_PACS, 2, Hydrogen_for_H2_PACS, 4,
+MolecPhotoAbsCS C2H4_MPACS(&Carbon_for_C2H4_PACS, 2, &Hydrogen_for_H2_PACS, 4,
                            25.8e-6);
-MolecPhotoAbsCS C2H6_MPACS(Carbon_for_C2H6_PACS, 2, Hydrogen_for_H2_PACS, 6,
+MolecPhotoAbsCS C2H6_MPACS(&Carbon_for_C2H6_PACS, 2, &Hydrogen_for_H2_PACS, 6,
                            25.0e-6);
-MolecPhotoAbsCS C3H8_MPACS(Carbon_for_CH4_PACS, 3, Hydrogen_for_H2_PACS, 8,
+MolecPhotoAbsCS C3H8_MPACS(&Carbon_for_CH4_PACS, 3, &Hydrogen_for_H2_PACS, 8,
                            24.0e-6);
-MolecPhotoAbsCS C4H10_MPACS(Carbon_for_C4H10_PACS, 4, Hydrogen_for_H2_PACS, 10,
+MolecPhotoAbsCS C4H10_MPACS(&Carbon_for_C4H10_PACS, 4, 
+                            &Hydrogen_for_H2_PACS, 10,
                             23.4e-6);
 
 // !!! The following line may need to be refined
 // (to adjust outer shell energies).
-MolecPhotoAbsCS C2F4H2_MPACS(Carbon_for_CF4_PACS, 2, Fluorine_PACS, 4,
-                             Hydrogen_for_H2_PACS, 2);
+MolecPhotoAbsCS C2F4H2_MPACS(&Carbon_for_CF4_PACS, 2, &Fluorine_PACS, 4,
+                             &Hydrogen_for_H2_PACS, 2);
 
-// MolecPhotoAbsCS C2H2_MPACS(Carbon_for_CH4_PACS, 2, Hydrogen_for_CH4_PACS, 2);
-// MolecPhotoAbsCS C2H4_MPACS(Carbon_for_CH4_PACS, 2, Hydrogen_for_CH4_PACS, 4);
-// MolecPhotoAbsCS C2H6_MPACS(Carbon_for_CH4_PACS, 2, Hydrogen_for_CH4_PACS, 6);
-// MolecPhotoAbsCS C3H8_MPACS(Carbon_for_CH4_PACS, 3, Hydrogen_for_CH4_PACS, 8);
-// MolecPhotoAbsCS C4H10_MPACS(Carbon_for_CH4_PACS, 4, Hydrogen_for_CH4_PACS,
+// MolecPhotoAbsCS C2H2_MPACS(&Carbon_for_CH4_PACS, 2, &Hydrogen_for_CH4_PACS, 2);
+// MolecPhotoAbsCS C2H4_MPACS(&Carbon_for_CH4_PACS, 2, &Hydrogen_for_CH4_PACS, 4);
+// MolecPhotoAbsCS C2H6_MPACS(&Carbon_for_CH4_PACS, 2, &Hydrogen_for_CH4_PACS, 6);
+// MolecPhotoAbsCS C3H8_MPACS(&Carbon_for_CH4_PACS, 3, &Hydrogen_for_CH4_PACS, 8);
+// MolecPhotoAbsCS C4H10_MPACS(&Carbon_for_CH4_PACS, 4, &Hydrogen_for_CH4_PACS,
 // 10);
-MolecPhotoAbsCS Methylal_MPACS(Oxygen_PACS, 2, Carbon_for_Methylal_PACS, 3,
-                               Hydrogen_for_H2_PACS, 8,
+MolecPhotoAbsCS Methylal_MPACS(&Oxygen_PACS, 2, &Carbon_for_Methylal_PACS, 3,
+                               &Hydrogen_for_H2_PACS, 8,
                                10.0e-6 * 23.4 / 10.55);  // similar to C4H10
 /*
 The value of W for noble gases is slightly less than
@@ -318,39 +319,39 @@ as in pure molecular hydrogen H2.
 // Additional molecular photoabsorption-cross sections
 // for consistency with Magboltz
 // Where available, the W values are taken from ICRU report 31
-MolecPhotoAbsCS C5H12_MPACS(Carbon_for_C4H10_PACS, 5, Hydrogen_for_H2_PACS, 12,
+MolecPhotoAbsCS C5H12_MPACS(&Carbon_for_C4H10_PACS, 5, &Hydrogen_for_H2_PACS, 12,
                             23.2e-6);
-MolecPhotoAbsCS H2O_MPACS(Hydrogen_for_H2_PACS, 2, Oxygen_PACS, 1, 29.6e-6);
-MolecPhotoAbsCS NO_MPACS(Nitrogen_PACS, 1, Oxygen_PACS, 1);
-MolecPhotoAbsCS CO_MPACS(Carbon_for_CO2_PACS, 1, Oxygen_PACS, 1);
-MolecPhotoAbsCS DME_MPACS(Carbon_for_Methylal_PACS, 2, Hydrogen_for_H2_PACS, 6,
-                          Oxygen_PACS, 1);
-MolecPhotoAbsCS C2F6_MPACS(Carbon_for_C2H6_PACS, 2, Fluorine_PACS, 6);
-MolecPhotoAbsCS C3H6_MPACS(Carbon_for_C2H6_PACS, 3, Hydrogen_for_H2_PACS, 6);
-MolecPhotoAbsCS CH3OH_MPACS(Carbon_for_C2H6_PACS, 1, Hydrogen_for_H2_PACS, 4,
-                            Oxygen_PACS, 1, 24.7e-6);
-MolecPhotoAbsCS C2H5OH_MPACS(Carbon_for_C2H6_PACS, 2, Hydrogen_for_H2_PACS, 6,
-                             Oxygen_PACS, 1, 24.8e-6);
-MolecPhotoAbsCS C3H7OH_MPACS(Carbon_for_C2H6_PACS, 3, Hydrogen_for_H2_PACS, 8,
-                             Oxygen_PACS, 1);
-MolecPhotoAbsCS Cs_MPACS(Caesium_PACS, 1);
-MolecPhotoAbsCS F2_MPACS(Fluorine_PACS, 2);
-MolecPhotoAbsCS CS2_MPACS(Carbon_for_CO2_PACS, 1, Sulfur_PACS, 2);
-MolecPhotoAbsCS COS_MPACS(Carbon_for_CO2_PACS, 1, Oxygen_PACS, 1, Sulfur_PACS,
+MolecPhotoAbsCS H2O_MPACS(&Hydrogen_for_H2_PACS, 2, &Oxygen_PACS, 1, 29.6e-6);
+MolecPhotoAbsCS NO_MPACS(&Nitrogen_PACS, 1, &Oxygen_PACS, 1);
+MolecPhotoAbsCS CO_MPACS(&Carbon_for_CO2_PACS, 1, &Oxygen_PACS, 1);
+MolecPhotoAbsCS DME_MPACS(&Carbon_for_Methylal_PACS, 2, &Hydrogen_for_H2_PACS, 6,
+                          &Oxygen_PACS, 1);
+MolecPhotoAbsCS C2F6_MPACS(&Carbon_for_C2H6_PACS, 2, &Fluorine_PACS, 6);
+MolecPhotoAbsCS C3H6_MPACS(&Carbon_for_C2H6_PACS, 3, &Hydrogen_for_H2_PACS, 6);
+MolecPhotoAbsCS CH3OH_MPACS(&Carbon_for_C2H6_PACS, 1, &Hydrogen_for_H2_PACS, 4,
+                            &Oxygen_PACS, 1, 24.7e-6);
+MolecPhotoAbsCS C2H5OH_MPACS(&Carbon_for_C2H6_PACS, 2, &Hydrogen_for_H2_PACS, 6,
+                             &Oxygen_PACS, 1, 24.8e-6);
+MolecPhotoAbsCS C3H7OH_MPACS(&Carbon_for_C2H6_PACS, 3, &Hydrogen_for_H2_PACS, 8,
+                             &Oxygen_PACS, 1);
+MolecPhotoAbsCS Cs_MPACS(&Caesium_PACS, 1);
+MolecPhotoAbsCS F2_MPACS(&Fluorine_PACS, 2);
+MolecPhotoAbsCS CS2_MPACS(&Carbon_for_CO2_PACS, 1, &Sulfur_PACS, 2);
+MolecPhotoAbsCS COS_MPACS(&Carbon_for_CO2_PACS, 1, &Oxygen_PACS, 1, &Sulfur_PACS,
                           1);
-MolecPhotoAbsCS BF3_MPACS(Boron_PACS, 1, Fluorine_PACS, 3);
-MolecPhotoAbsCS C2HF5_MPACS(Carbon_for_C2H6_PACS, 2, Hydrogen_for_H2_PACS, 1,
-                            Fluorine_PACS, 5);
-MolecPhotoAbsCS C2H2F4_MPACS(Carbon_for_C2H6_PACS, 2, Fluorine_PACS, 4,
-                             Hydrogen_for_H2_PACS, 2);
-MolecPhotoAbsCS CHF3_MPACS(Carbon_for_CF4_PACS, 1, Hydrogen_for_H2_PACS, 1,
-                           Fluorine_PACS, 3);
-MolecPhotoAbsCS CF3Br_MPACS(Carbon_for_CF4_PACS, 1, Fluorine_PACS, 3,
-                            Bromine_PACS, 1);
-MolecPhotoAbsCS C3F8_MPACS(Carbon_for_CF4_PACS, 3, Fluorine_PACS, 8);
-MolecPhotoAbsCS O3_MPACS(Oxygen_PACS, 3);
-MolecPhotoAbsCS Hg_MPACS(Mercury_PACS, 1);
-MolecPhotoAbsCS H2S_MPACS(Hydrogen_for_H2_PACS, 2, Sulfur_PACS, 1);
-MolecPhotoAbsCS GeH4_MPACS(Germanium_PACS, 1, Hydrogen_for_H2_PACS, 4);
-MolecPhotoAbsCS SiH4_MPACS(Silicon_PACS, 1, Hydrogen_for_H2_PACS, 4);
+MolecPhotoAbsCS BF3_MPACS(&Boron_PACS, 1, &Fluorine_PACS, 3);
+MolecPhotoAbsCS C2HF5_MPACS(&Carbon_for_C2H6_PACS, 2, &Hydrogen_for_H2_PACS, 1,
+                            &Fluorine_PACS, 5);
+MolecPhotoAbsCS C2H2F4_MPACS(&Carbon_for_C2H6_PACS, 2, &Fluorine_PACS, 4,
+                             &Hydrogen_for_H2_PACS, 2);
+MolecPhotoAbsCS CHF3_MPACS(&Carbon_for_CF4_PACS, 1, &Hydrogen_for_H2_PACS, 1,
+                           &Fluorine_PACS, 3);
+MolecPhotoAbsCS CF3Br_MPACS(&Carbon_for_CF4_PACS, 1, &Fluorine_PACS, 3,
+                            &Bromine_PACS, 1);
+MolecPhotoAbsCS C3F8_MPACS(&Carbon_for_CF4_PACS, 3, &Fluorine_PACS, 8);
+MolecPhotoAbsCS O3_MPACS(&Oxygen_PACS, 3);
+MolecPhotoAbsCS Hg_MPACS(&Mercury_PACS, 1);
+MolecPhotoAbsCS H2S_MPACS(&Hydrogen_for_H2_PACS, 2, &Sulfur_PACS, 1);
+MolecPhotoAbsCS GeH4_MPACS(&Germanium_PACS, 1, &Hydrogen_for_H2_PACS, 4);
+MolecPhotoAbsCS SiH4_MPACS(&Silicon_PACS, 1, &Hydrogen_for_H2_PACS, 4);
 }

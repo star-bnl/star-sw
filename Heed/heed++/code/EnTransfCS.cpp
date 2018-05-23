@@ -22,14 +22,8 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
     : particle_mass(fparticle_mass),
       particle_charge(fparticle_charge),
       gamma_1(fgamma_1),
-      s_simple_form(true),
       s_primary_electron(fs_primary_electron),
-      hmd(fhmd),
-      quanC(0.0),
-      meanC(0.0),
-      meanC1(0.0),
-      meaneleC(0.0),
-      meaneleC1(0.0) {
+      hmd(fhmd) {
   mfunnamep("EnTransfCS::EnTransfCS(...)");
 
   const double beta = lorbeta(fgamma_1);
@@ -163,7 +157,7 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
 
   double Z_mean = hmd->matter->Z_mean();
   for (long na = 0; na < qa; na++) {
-    PassivePtr<const AtomPhotoAbsCS> pacs = hmd->apacs[na];
+    auto pacs = hmd->apacs[na];
     const double awq = hmd->matter->weight_quan(na);
     const long qs = pacs->get_qshell();
     for (long ns = 0; ns < qs; ns++) {
@@ -237,7 +231,7 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
     double sqepsi = pow((1 + hmd->epsi1[ne]), 2) + pow(hmd->epsi2[ne], 2);
     for (long na = 0; na < qa; na++) {
       double awq = hmd->matter->weight_quan(na);
-      PassivePtr<const AtomPhotoAbsCS> pacs = hmd->apacs[na];
+      auto pacs = hmd->apacs[na];
       const long qs = pacs->get_qshell();
       for (long ns = 0; ns < qs; ns++) {
         double ics;

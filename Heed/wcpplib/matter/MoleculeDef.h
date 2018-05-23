@@ -17,7 +17,6 @@ class VanDerWaals {
 
  public:
   VanDerWaals(double fPk, double fTk);
-  virtual ~VanDerWaals() {}
   double a() const { return ah; }
   double b() const { return bh; }
   double Vk() const { return Vkh; }
@@ -34,7 +33,7 @@ class VanDerWaals {
   // Return number of moles in the unit volume
   double volume_of_mole(double T, double p, int& s_not_single);
 
-  virtual VanDerWaals* copy() const;
+  VanDerWaals* copy() const;
 };
 std::ostream& operator<<(std::ostream& file, const VanDerWaals& f);
 
@@ -49,18 +48,18 @@ std::ostream& operator<<(std::ostream& file, const VanDerWaals& f);
 /// 1998-2004 I. Smirnov
 
 class MoleculeDef : public AtomMixDef {
-  std::string nameh;
-  std::string notationh;
+  std::string nameh = "none";
+  std::string notationh = "none";
   /// Number of atoms of particular sort in the molecule.
   /// Obviously it is not normalized to one, but instead
   /// the sum is equal to tqatomh
   std::vector<long> qatom_psh;
-  long Z_totalh;
-  double A_totalh;
+  long Z_totalh = 0;
+  double A_totalh = 0.;
   /// Total number of atoms in molecule
   /// Attention: this is not the number of different sorts of atoms
   /// The latter is qatom() from AtomMixDef
-  long tqatomh;
+  long tqatomh = 0;
   std::shared_ptr<VanDerWaals> m_vdw;
 
  public:
@@ -104,7 +103,7 @@ class MoleculeDef : public AtomMixDef {
   /// but does not terminate the program as that for AtomDef. Be careful.
   static MoleculeDef* get_MoleculeDef(const std::string& fnotation);
 
-  virtual MoleculeDef* copy() const { return new MoleculeDef(*this); }
+  MoleculeDef* copy() const { return new MoleculeDef(*this); }
 };
 std::ostream& operator<<(std::ostream& file, const MoleculeDef& f);
 }

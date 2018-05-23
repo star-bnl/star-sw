@@ -59,20 +59,7 @@ std::ostream& operator<<(std::ostream& file, const VanDerWaals& f) {
   return file;
 }
 
-/*
-//This is not finished
-double VanDerWaals::pressure(double M, // the number of moles
-                             double volume,
-                             double T)
-{
-  mfunname("double VanDerWaals::pressure(double M, double volume, double T)");
-  const double rydberg = k_Boltzmann * Avogadro;
-  double pa = M * (
-  Parabol par(
-}
-*/
-
-MoleculeDef::MoleculeDef() : nameh("none"), notationh("none") {
+MoleculeDef::MoleculeDef() {
   MoleculeDef::get_logbook().push_back(this);
 }
 
@@ -83,10 +70,7 @@ MoleculeDef::MoleculeDef(const std::string& fname, const std::string& fnotation,
     : AtomMixDef(fqatom, fatom_not, fqatom_ps),
       nameh(fname),
       notationh(fnotation),
-      qatom_psh(fqatom_ps),
-      Z_totalh(0),
-      A_totalh(0.0),
-      tqatomh(0) {
+      qatom_psh(fqatom_ps) {
   mfunname("MoleculeDef::MoleculeDef(...)");
   m_vdw = std::move(fvdw);
   for (long n = 0; n < qatom(); n++) {
@@ -107,8 +91,6 @@ MoleculeDef::MoleculeDef(const std::string& fname, const std::string& fnotation,
       nameh(fname),
       notationh(fnotation),
       qatom_psh(1, fqatom_ps),
-      Z_totalh(0),
-      A_totalh(0.0),
       tqatomh(fqatom_ps) {
   mfunname("MoleculeDef::MoleculeDef(...)");
   m_vdw = std::move(fvdw);
@@ -126,10 +108,7 @@ MoleculeDef::MoleculeDef(const std::string& fname, const std::string& fnotation,
     : AtomMixDef(fatom_not1, fqatom_ps1, fatom_not2, fqatom_ps2),
       nameh(fname),
       notationh(fnotation),
-      qatom_psh(2),
-      Z_totalh(0),
-      A_totalh(0.0),
-      tqatomh(0) {
+      qatom_psh(2) {
   mfunname("MoleculeDef::MoleculeDef(...)");
   m_vdw = std::move(fvdw);
   qatom_psh[0] = fqatom_ps1;
@@ -154,10 +133,7 @@ MoleculeDef::MoleculeDef(const std::string& fname, const std::string& fnotation,
                  fqatom_ps3),
       nameh(fname),
       notationh(fnotation),
-      qatom_psh(3),
-      Z_totalh(0),
-      A_totalh(0.0),
-      tqatomh(0) {
+      qatom_psh(3) {
   mfunname("MoleculeDef::MoleculeDef(...)");
   m_vdw = std::move(fvdw);
   qatom_psh[0] = fqatom_ps1;
@@ -213,13 +189,13 @@ MoleculeDef* MoleculeDef::get_MoleculeDef(const std::string& fnotation) {
 }
 
 std::ostream& operator<<(std::ostream& file, const MoleculeDef& f) {
-  mfunnamep(
-      "std::ostream& operator << (std::ostream& file, const MoleculeDef& f)");
+  mfunnamep("std::ostream& operator << (std::ostream&, const MoleculeDef&)");
+  constexpr double gpm = gram / mole;
   Ifile << "MoleculeDef: name=" << std::setw(10) << f.name()
         << " notation=" << std::setw(3) << f.notation() << '\n';
   indn.n += 2;
   Ifile << "Z_total()=" << std::setw(3) << f.Z_total()
-        << " A_total()/(gram/mole)=" << f.A_total() / (gram / mole)
+        << " A_total()/(gram/mole)=" << f.A_total() / gpm 
         << " tqatom()=" << f.tqatom() << '\n';
   Iprintn(file, f.qatom());
   indn.n += 2;

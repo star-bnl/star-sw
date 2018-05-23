@@ -1823,16 +1823,16 @@ void ExAtomPhotoAbsCS::replace_shells_by_average(double fwidth, double fstep,
 
 //---------------------------------------------------------
 
-MolecPhotoAbsCS::MolecPhotoAbsCS(const AtomPhotoAbsCS& fatom, int fqatom,
+MolecPhotoAbsCS::MolecPhotoAbsCS(const AtomPhotoAbsCS* fatom, int fqatom,
                                  double fW, double fF)
     : qatom(fqatom), W(fW), F(fF) {
   qatom_ps.push_back(qatom);
-  atom.push_back(PassivePtr<const AtomPhotoAbsCS>(&fatom));
+  atom.push_back(fatom);
   if (W == 0.0) W = coef_I_to_W * atom[0]->get_I_min();
 }
 
-MolecPhotoAbsCS::MolecPhotoAbsCS(const AtomPhotoAbsCS& fatom1, int fqatom_ps1,
-                                 const AtomPhotoAbsCS& fatom2, int fqatom_ps2,
+MolecPhotoAbsCS::MolecPhotoAbsCS(const AtomPhotoAbsCS* fatom1, int fqatom_ps1,
+                                 const AtomPhotoAbsCS* fatom2, int fqatom_ps2,
                                  double fW, double fF)
     : qatom(fqatom_ps1 + fqatom_ps2), W(fW), F(fF) {
   qatom_ps.push_back(fqatom_ps1);
@@ -1851,9 +1851,9 @@ MolecPhotoAbsCS::MolecPhotoAbsCS(const AtomPhotoAbsCS& fatom1, int fqatom_ps1,
 #endif
 }
 
-MolecPhotoAbsCS::MolecPhotoAbsCS(const AtomPhotoAbsCS& fatom1, int fqatom_ps1,
-                                 const AtomPhotoAbsCS& fatom2, int fqatom_ps2,
-                                 const AtomPhotoAbsCS& fatom3, int fqatom_ps3,
+MolecPhotoAbsCS::MolecPhotoAbsCS(const AtomPhotoAbsCS* fatom1, int fqatom_ps1,
+                                 const AtomPhotoAbsCS* fatom2, int fqatom_ps2,
+                                 const AtomPhotoAbsCS* fatom3, int fqatom_ps3,
                                  double fW, double fF)
     : qatom(fqatom_ps1 + fqatom_ps2 + fqatom_ps3), W(fW), F(fF) {
   qatom_ps.push_back(fqatom_ps1);

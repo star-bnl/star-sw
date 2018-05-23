@@ -87,9 +87,7 @@ void MatterDef::verify() {
 }
 
 void MatterDef::verify(const std::string& fname, const std::string& fnotation) {
-  mfunnamep(
-      "void MatterDef::verify(const std::string& fname, const std::string& "
-      "fnotation)");
+  mfunnamep("void MatterDef::verify(const std::string& const std::string&)");
   for (auto matter : MatterDef::get_logbook()) {
     if (matter->nameh != fname && matter->notationh != fnotation) continue;
     funnw.ehdr(mcerr);

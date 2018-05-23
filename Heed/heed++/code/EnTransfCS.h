@@ -18,38 +18,39 @@ namespace Heed {
 ///
 /// 2003, I. Smirnov
 
-class EnTransfCS : public RegPassivePtr {
+class EnTransfCS {
  public:
   /// Default constructor
-  EnTransfCS() {}
+  EnTransfCS() = default;
   /// Constructor
   EnTransfCS(double fparticle_mass, double fgamma_1, int fs_primary_electron,
              HeedMatterDef* fhmd, long fparticle_charge = 1);
-  virtual void print(std::ostream& file, int l) const;
-  virtual EnTransfCS* copy() const { return new EnTransfCS(*this); }
+
+  void print(std::ostream& file, int l) const;
+  EnTransfCS* copy() const { return new EnTransfCS(*this); }
 
   /// Particle mass [MeV]
-  double particle_mass;
+  double particle_mass = 0.;
   /// Total energy [MeV]
-  double particle_ener;
+  double particle_ener = 0.;
   /// Charge in units of electron charge (used square, sign does not matter).
-  long particle_charge;
+  long particle_charge = 0;
 
   /// Lorentz factor - 1 (the best dimensionless measurement of speed).
-  double gamma_1;
+  double gamma_1 = 0.;
 
   /// Max. energy transfer [MeV]
-  double max_etransf;
+  double max_etransf = 0.;
   /// Flag controlling the form of Rutherford scattering.
   /// For our purposes it is good to have simple form,
   /// so this variable is initialized to 1.
   /// Simple form means that there are two terms.
   /// The third term is assumed zero.
-  bool s_simple_form;
+  bool s_simple_form = true;
   /// Flag that the primary particle is the electron
-  int s_primary_electron;
+  int s_primary_electron = false;
 
-  PassivePtr<HeedMatterDef> hmd;
+  HeedMatterDef* hmd = nullptr;
 
   /// In the following arrays there is the only index: the energy.
   /// The meaning: the average value on the energy interval.
@@ -67,27 +68,27 @@ class EnTransfCS : public RegPassivePtr {
   /// Sum of (ionization) differential cross-section terms
   std::vector<double> addaC;
   /// Integrated (ionization) cross-section
-  double quanC;
+  double quanC = 0.;
 
 #ifndef EXCLUDE_A_VALUES
   /// Sum of (absorption) differential cross-section terms
   std::vector<double> addaC_a;
   /// Integrated (absorption) cross-section
-  double quanC_a;
+  double quanC_a = 0.;
 #endif
 
   // First moment (mean restricted energy loss) [MeV]
-  double meanC;
+  double meanC = 0.;
   // First moment with additional tail to max. kinematically allowed transfer,
   // calculated only for heavy particles (integral for electrons non-trivial).
-  double meanC1;
+  double meanC1 = 0.;
 #ifndef EXCLUDE_A_VALUES
-  double meanC1_a;
-  double meanC_a;
+  double meanC1_a = 0.;
+  double meanC_a = 0.;
 #endif
   // Secondary ionization
-  double meaneleC;
-  double meaneleC1;
+  double meaneleC = 0.;
+  double meaneleC1 = 0.;
 
   /// In the following arrays there are three indices:
   /// atom number in the matter, shell number in atom, energy

@@ -184,7 +184,7 @@ class vec : public absref {
     z = zz;
   }
   /// Default constructor.
-  vec() {}
+  vec() = default;
   /// Destructor
   virtual ~vec() {}
  
@@ -196,15 +196,18 @@ class vec : public absref {
   vfloat length2() const { return x * x + y * y + z * z; }
 
   vec down_new(const basis* fabas);
-  void down(const basis* fabas);
   vec up_new(const basis* fabas_new);
+
+  void down(const basis* fabas);
   void up(const basis* fabas_new);
+
   vec down_new(const abssyscoor* fasc);
-  void down(const abssyscoor* fasc) override;
   vec up_new(const abssyscoor* fasc);
+
+  void down(const abssyscoor* fasc) override;
   void up(const abssyscoor* fasc) override;
 
-  // make new turned vector and leave this unchanged
+  /// Make new turned vector and leave this one unchanged.
   vec turn_new(const vec& dir, vfloat angle);
   /// Turn this vector
   void turn(const vec& dir, vfloat angle) override;
@@ -373,7 +376,6 @@ class point : public absref {
   void down(const abssyscoor* fasc) override;
   void up(const abssyscoor* fasc) override;
   void shift(const vec& dir) override {
-    // not defined for vectors, but defined for points
     v += dir;
   }
   /// Default constructor (coordinates are not initialised).
@@ -415,10 +417,10 @@ std::ostream& operator<<(std::ostream& file, const point& p);
 #define vec_syscoor_index 0
 class abssyscoor {
  public:
-  std::string name;
+  std::string name = "none";
   virtual const point* Gapiv() const = 0;
   virtual const basis* Gabas() const = 0;
-  abssyscoor() : name("none") {}
+  abssyscoor() = default;
   abssyscoor(char* fname) : name(fname) {}
   abssyscoor(const std::string& fname) : name(fname) {}
   virtual void print(std::ostream& file, int l) const;
@@ -427,14 +429,14 @@ class abssyscoor {
 };
 extern std::ostream& operator<<(std::ostream& file, const abssyscoor& s);
 
-class fixsyscoor : public absref, public abssyscoor, public RegPassivePtr {
+class fixsyscoor : public absref, public abssyscoor {
  public:
   const point* Gapiv() const override { return &piv; }
   const basis* Gabas() const override { return &bas; }
   void Ppiv(const point& fpiv);
   void Pbas(const basis& fbas);
   // nominal system
-  fixsyscoor() {}                                     
+  fixsyscoor() = default;
   fixsyscoor(char* fname) : abssyscoor(fname) {}          
   fixsyscoor(const std::string& fname) : abssyscoor(fname) {}
   fixsyscoor(const point& fpiv, const basis& fbas, const std::string& fname)
@@ -449,7 +451,7 @@ class fixsyscoor : public absref, public abssyscoor, public RegPassivePtr {
         piv((f.Gapiv() != NULL) ? (*(f.Gapiv())) : point()),
         bas((f.Gabas() != NULL) ? (*(f.Gabas())) : basis()) {}
   void print(std::ostream& file, int l) const override;
-  fixsyscoor* copy() const override { return new fixsyscoor(*this); }
+  fixsyscoor* copy() const { return new fixsyscoor(*this); }
   virtual ~fixsyscoor() {}
 
  protected:

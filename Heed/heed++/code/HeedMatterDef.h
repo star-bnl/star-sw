@@ -10,7 +10,6 @@
 
 namespace Heed {
 
-
 /// Definition of matter parameters necessary for HEED.
 /// This is photoabsorption cross section, dielectric constant
 /// and other parameters related to these.
@@ -24,20 +23,20 @@ namespace Heed {
 ///
 // 2003, I. Smirnov
 
-class HeedMatterDef : public RegPassivePtr {
+class HeedMatterDef {
  public:
-  PassivePtr<MatterDef> matter;
-  std::vector<PassivePtr<const AtomPhotoAbsCS> > apacs;
+  MatterDef* matter = nullptr;
+  std::vector<const AtomPhotoAbsCS*> apacs;
   // Each element of this array corresponds to component of matter
-  double eldens_cm_3;       ///< Electron density cm**-3
-  double eldens;            ///< Electron density MeV**3
-  double xeldens;           ///< Long. electron density MeV**2/cm (for x=1 cm).
-  double wpla;              ///< Squared plasma energy;
-  double radiation_length;  ///< Radiation Length.
-  double Rutherford_const;  ///< Const for Rutherford cross section (1/cm3).
-  double W;                 ///< Mean work per pair production, MeV
-  double F;                 ///< Fano factor
-  PassivePtr<EnergyMesh> energy_mesh;
+  double eldens_cm_3 = 0.; ///< Electron density cm**-3
+  double eldens = 0.;      ///< Electron density MeV**3
+  double xeldens = 0.;     ///< Long. electron density MeV**2/cm (for x=1 cm).
+  double wpla = 0.;        ///< Squared plasma energy;
+  double radiation_length = 0.;  ///< Radiation Length.
+  double Rutherford_const = 0.;  ///< Const for Rutherford cross section (1/cm3).
+  double W = 0.;           ///< Mean work per pair production, MeV
+  double F = 0.;           ///< Fano factor
+  EnergyMesh* energy_mesh = nullptr;
 
   // The physical definition of two previous arrays of values:
   // mean values of cross sections for each energy interval.
@@ -56,7 +55,7 @@ class HeedMatterDef : public RegPassivePtr {
   double min_ioniz_pot;
 
   /// Default constructor.
-  HeedMatterDef();
+  HeedMatterDef() = default;
   /// Constructor.
   /// If fW == 0.0, the program takes mean W from
   /// molecules for gas or from atoms for matters.
@@ -80,8 +79,8 @@ class HeedMatterDef : public RegPassivePtr {
   // Replace permeability (epsi1 and epsi2) by the numbers
   // calculated by another program and written to a file (only for debug)
   void replace_epsi12(const std::string& file_name);
-  virtual void print(std::ostream& file, int l) const;
-  virtual HeedMatterDef* copy() const { return new HeedMatterDef(*this); }
+  void print(std::ostream& file, int l) const;
+  HeedMatterDef* copy() const { return new HeedMatterDef(*this); }
 
   /// Flag affecting mixtures of atoms with different ionization potentials.
   /// If 1, all energy transfers what is absorbed even with the energy less than

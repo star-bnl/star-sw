@@ -17,7 +17,7 @@ The file is provided "as is" without express or implied warranty.
 
 namespace Heed {
 
-class trajestep_limit : public RegPassivePtr {
+class trajestep_limit {
  public:
   /// Constructor.
   trajestep_limit(vfloat fmax_range, vfloat frad_for_straight,
@@ -26,7 +26,6 @@ class trajestep_limit : public RegPassivePtr {
         rad_for_straight(frad_for_straight),
         max_straight_arange(fmax_straight_arange),
         max_circumf_arange(fmax_circumf_arange) {}
-
 
    vfloat max_range;  
 
@@ -64,7 +63,7 @@ class trajestep_limit : public RegPassivePtr {
 
 class trajestep : public absref {
  public:
-  PassivePtr<trajestep_limit> tl;
+  trajestep_limit* m_tl = nullptr;
   point currpos;
   /// Unit vector.
   vec dir;     
@@ -72,7 +71,7 @@ class trajestep : public absref {
   ///  0 - the track is straight,
   ///  1 - curved track (but the range may anyway be calculated 
   /// as straight line, depending on s_range_cf)
-  int s_cf; 
+  int s_cf = 0; 
 
   // Position of the center of circumf. relatively currpos
   // Used only if s_cf=1; otherwise ignored.
@@ -81,13 +80,13 @@ class trajestep : public absref {
 
   // 0 - range have been calculated via straight line
   // 1 - via circle
-  int s_range_cf;  
+  int s_range_cf = 0; 
 
   // 1 - range is limited by precision
-  int s_prec;      
+  int s_prec = 0; 
 
   /// Maximal possible range
-  vfloat mrange;   
+  vfloat mrange = 0.;
 
   // Finishing point
   // It looks like that at s_prec=1 mpoint is not initiated
@@ -110,16 +109,7 @@ class trajestep : public absref {
     */ 
   trajestep(const trajestep& fts, vfloat fmrange);
   /// Default constructor.
-  trajestep() : 
-        tl(),
-        currpos(),
-        dir(),
-        s_cf(0),
-        relcen(),
-        s_range_cf(0),
-        s_prec(0),
-        mrange(0),
-        mpoint() {}
+  trajestep() = default;
   /// Destructor
   virtual ~trajestep() {}
 

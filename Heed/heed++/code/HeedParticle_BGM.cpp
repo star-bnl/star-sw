@@ -51,9 +51,9 @@ void HeedParticle_BGM::physics(std::vector<gparticle*>& secondaries) {
   const EnTransfCS_BGM* etcs = dynamic_cast<const EnTransfCS_BGM*>(av);
   // Check if dynamic cast was successful.
   if (!etcs) return;
-  HeedMatterDef* hmd = etcs->hmd.getver();
-  MatterDef* matter = hmd->matter.getver();
-  EnergyMesh* emesh = hmd->energy_mesh.getver();
+  HeedMatterDef* hmd = etcs->hmd;
+  MatterDef* matter = hmd->matter;
+  EnergyMesh* emesh = hmd->energy_mesh;
   const double* aetemp = hmd->energy_mesh->get_ae();
   PointCoorMesh<double, const double*> pcm_e(emesh->get_q() + 1, &(aetemp));
 
@@ -147,7 +147,7 @@ void HeedParticle_BGM::physics(std::vector<gparticle*>& secondaries) {
         vel *= c_light;
         if (s_print_listing) mcout << "generating new virtual photon\n";
         HeedPhoton* hp =
-            new HeedPhoton(currpos.tid.eid[0].getver(), pt, vel, currpos.time,
+            new HeedPhoton(currpos.tid.eid[0], pt, vel, currpos.time,
                            particle_number, et, m_fieldMap);
         hp->s_photon_absorbed = true;
         hp->s_delta_generated = false;

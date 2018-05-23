@@ -34,10 +34,10 @@ class manip_absvol_treeid {
   /// Constructor
   manip_absvol_treeid() {}
   /// List of volumes
-  std::vector<PassivePtr<manip_absvol> > eid;
+  std::vector<manip_absvol*> eid;
   /// Get last address of manipulator
   manip_absvol* G_lamvol() const {
-    return eid.empty() ? NULL : eid.back().get();
+    return eid.empty() ? nullptr : eid.back();
   }
   /// Get last address of volume
   absvol* G_lavol() const;
@@ -67,9 +67,7 @@ inline int operator!=(manip_absvol_treeid& tid1, manip_absvol_treeid& tid2) {
 /// The functions accept and return parameters expressed in the internal
 /// coordinate system inherent to this volume.
 /// For interface with external system please use manip_absvol.
-class absvol : virtual public absref, public RegPassivePtr {
-  // public RegPassivePtr is not necessary for general package
-  // but may be useful in applications
+class absvol : virtual public absref {
  public:
   vfloat prec;
   bool s_sensitive;
@@ -112,7 +110,7 @@ class absvol : virtual public absref, public RegPassivePtr {
   /// In the last case *faeid is filled by its id.
   /// Otherwise *faeid is filled by NULL.
   virtual int range(trajestep& fts, int s_ext, int& sb,
-                    PassivePtr<manip_absvol>& faeid) const;
+                    manip_absvol*& faeid) const;
 
   /// Find cross with current volume ignoring embraced ones.
   /// s_ext=1 exit, now point is inside, but embraced volumes are ingnored.
@@ -127,7 +125,7 @@ class absvol : virtual public absref, public RegPassivePtr {
 };
 
 /// Abstract base classs for volume "manipulators".
-class manip_absvol : virtual public absref, public RegPassivePtr {
+class manip_absvol : virtual public absref {
  public:
   /// Get the volume.
   virtual absvol* Gavol() const = 0;
@@ -144,7 +142,7 @@ class manip_absvol : virtual public absref, public RegPassivePtr {
   // The two following functions changes syscoor if necessary and
   // calls similar named functions of absvol
   virtual int m_range(trajestep& fts, int s_ext, int& sb,
-                    PassivePtr<manip_absvol>& faeid) const;
+                      manip_absvol*& faeid) const;
   virtual int m_range_ext(trajestep& fts, int s_ext) const;
   // s_ext=1 inside, but embraced volumes are ingnored.
   // s_ext=0 outside
@@ -160,7 +158,7 @@ class manip_absvol : virtual public absref, public RegPassivePtr {
   }
   void m_chname(char* nm) const;
   virtual void m_print(std::ostream& file, int l) const;
-  virtual manip_absvol* copy() const override;
+  manip_absvol* copy() const;
   virtual ~manip_absvol() {}
 };
 
@@ -187,7 +185,7 @@ class sh_manip_absvol : public manip_absvol {
 
   virtual void m_chname(char* nm) const;
   virtual void m_print(std::ostream& file, int l) const override;
-  virtual sh_manip_absvol* copy() const override;
+  sh_manip_absvol* copy() const;
 };
 
 }

@@ -482,7 +482,6 @@ void fixsyscoor::print(std::ostream& file, int l) const {
     Ifile << "fixsyscoor::print(l=" << l << ")\n";
     if (l > 1) {
       indn.n += 2;
-      RegPassivePtr::print(file, l);
       abssyscoor::print(file, l);
     }
   }
@@ -490,7 +489,6 @@ void fixsyscoor::print(std::ostream& file, int l) const {
 
 std::ostream& operator<<(std::ostream& file, const fixsyscoor& f) {
   Ifile << "fixsyscoor:\n";
-  f.RegPassivePtr::print(file, 2);
   f.abssyscoor::print(file, 2);
   return file;
 }

@@ -20,8 +20,6 @@ using CLHEP::gram;
 using CLHEP::mole;
 using CLHEP::Avogadro;
 
-const double HeedDeltaElectronCS::low_cut_angle_deg = 20.0;
-
 HeedDeltaElectronCS::HeedDeltaElectronCS(HeedMatterDef* fhmd,
                                          ElElasticScat* fees,
                                          ElElasticScatLowSigma* feesls,

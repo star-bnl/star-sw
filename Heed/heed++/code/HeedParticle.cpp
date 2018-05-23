@@ -49,10 +49,10 @@ void HeedParticle::physics(std::vector<gparticle*>& secondaries) {
   const absvol* av = currpos.tid.G_lavol();
   auto etcs = dynamic_cast<const EnTransfCS*>(av);
   if (!etcs) return;
-  HeedMatterDef* hmd = etcs->hmd.getver();
-  MatterDef* matter = hmd->matter.getver();
-  EnergyMesh* emesh = hmd->energy_mesh.getver();
-  const double* aetemp = hmd->energy_mesh->get_ae();
+  HeedMatterDef* hmd = etcs->hmd;
+  MatterDef* matter = hmd->matter;
+  EnergyMesh* emesh = hmd->energy_mesh;
+  const double* aetemp = emesh->get_ae();
   PointCoorMesh<double, const double*> pcm(emesh->get_q() + 1, &(aetemp));
   const long qa = matter->qatom();
   if (s_print_listing) Iprintn(mcout, qa);
@@ -117,7 +117,7 @@ void HeedParticle::physics(std::vector<gparticle*>& secondaries) {
         double speed = vel.length();
         double time = arange / speed;
         if (s_print_listing) mcout << "generating new virtual photon\n";
-        HeedPhoton* hp = new HeedPhoton(currpos.tid.eid[0].getver(), pt, vel,
+        HeedPhoton* hp = new HeedPhoton(currpos.tid.eid[0], pt, vel,
                                         time, particle_number, et, m_fieldMap);
         hp->s_photon_absorbed = true;
         hp->s_delta_generated = false;

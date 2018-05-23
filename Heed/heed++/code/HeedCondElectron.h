@@ -20,8 +20,8 @@ class HeedCondElectron {
   /// Position (in the local system).
   point ptloc;
   /// Time
-  double time;
-  HeedCondElectron() : ptloc(), time(0.) {}
+  double time = 0.;
+  HeedCondElectron() = default;
   /// Constructor
   HeedCondElectron(const point& fptloc, const double ftime)
       : ptloc(fptloc), time(ftime) {}

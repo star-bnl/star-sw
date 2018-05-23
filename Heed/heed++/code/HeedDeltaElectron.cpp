@@ -83,7 +83,7 @@ void HeedDeltaElectron::physics_mrange(double& fmrange) {
   if (s_print_listing) Iprintnf(mcout, fmrange);
   const double ek = curr_kin_energy / MeV;
   // Get the dE/dx at this kinetic energy.
-  EnergyMesh* emesh = hdecs->hmd->energy_mesh.get();
+  EnergyMesh* emesh = hdecs->hmd->energy_mesh;
   const double dedx = interpolate(emesh, ek, hdecs->eLoss);
   // Min. loss 50 eV.
   double eloss = std::max(0.1 * ek, 0.00005);
@@ -181,7 +181,7 @@ void HeedDeltaElectron::physics_after_new_speed(
     curr_kin_energy = 0.0;
     dedx = Eloss / currpos.prange / (MeV / cm);
   } else {
-    EnergyMesh* emesh = hdecs->hmd->energy_mesh.get();
+    EnergyMesh* emesh = hdecs->hmd->energy_mesh;
     dedx = interpolate(emesh, ek, hdecs->eLoss);
     Eloss = std::min(currpos.prange * dedx * MeV / cm, curr_kin_energy);
     total_Eloss += Eloss;
@@ -206,7 +206,7 @@ void HeedDeltaElectron::physics_after_new_speed(
       mcout << "volume is sensitive\n";
       Iprint2nf(mcout, Eloss / eV, necessary_energy / eV);
     }
-    if (Eloss > 0.0) ionisation(Eloss, dedx, hdecs->pairprod.get());
+    if (Eloss > 0.0) ionisation(Eloss, dedx, hdecs->pairprod);
   }
   if (s_print_listing) {
     mcout << '\n';
@@ -230,7 +230,7 @@ void HeedDeltaElectron::physics_after_new_speed(
     // recalculate scatterings
     s_path_length = false;
     if (s_low_mult_scattering) {
-      EnergyMesh* emesh = hdecs->hmd->energy_mesh.get();
+      EnergyMesh* emesh = hdecs->hmd->energy_mesh;
       const double low_path_length = interpolate(emesh, ek_restr, hdecs->low_lambda) * cm;
       if (s_print_listing) Iprintnf(mcout, low_path_length / cm);
       s_mult_low_path_length = false;
@@ -261,7 +261,7 @@ void HeedDeltaElectron::physics_after_new_speed(
         mcout << "direct modeling of low scatterings\n";
         Iprint(mcout, currpos.dir);
       }
-      EnergyMesh* emesh = hdecs->hmd->energy_mesh.get();
+      EnergyMesh* emesh = hdecs->hmd->energy_mesh;
       const long n1r = findInterval(emesh, ek_restr);
       for (long nscat = 0; nscat < q_low_path_length; ++nscat) {
         if (s_print_listing) Iprintn(mcout, nscat);
@@ -334,7 +334,7 @@ void HeedDeltaElectron::physics_after_new_speed(
       mcout << "\nstarting to rotate by large angle" << std::endl;
       Iprintnf(mcout, s_path_length);
     }
-    EnergyMesh* emesh = hdecs->hmd->energy_mesh.get();
+    EnergyMesh* emesh = hdecs->hmd->energy_mesh;
     const long n1r = findInterval(emesh, ek_restr);
     double theta_rot = hdecs->angular_points_ran[n1r].ran(SRANLUX()) * degree;
     if (s_print_listing) Iprintnf(mcout, theta_rot);

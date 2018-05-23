@@ -4,7 +4,7 @@
 
 namespace Heed {
 
-EnTransfCS_BGM::EnTransfCS_BGM(double fparticle_mass, PassivePtr<BGMesh> fmesh,
+EnTransfCS_BGM::EnTransfCS_BGM(double fparticle_mass, BGMesh* fmesh,
                                int fs_primary_electron, HeedMatterDef* fhmd,
                                long fparticle_charge)
     : particle_mass(fparticle_mass),

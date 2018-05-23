@@ -14,7 +14,7 @@ namespace Heed {
 ///
 /// 2003, I. Smirnov
 
-class PairProd : public RegPassivePtr {
+class PairProd {
  public:
   PairProd() {}
   PairProd(const std::string& file_name, double fwa, double ffactorFano = 0.19);
@@ -23,7 +23,7 @@ class PairProd : public RegPassivePtr {
   /// Calculate energy loss (in eV) assuming V = wa / 2.
   double get_eloss(const double ecur) const;
 
-  virtual void print(std::ostream& file, int l) const;
+  void print(std::ostream& file, int l) const;
 
  private:
   double wa;

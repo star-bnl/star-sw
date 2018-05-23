@@ -248,13 +248,13 @@ class PhenoPhotoAbsCS : public PhotoAbsCS {
 /// in this class, get_channel returns 0, which must be interpreted as
 /// the use of standard channel.
 
-class AtomicSecondaryProducts : public RegPassivePtr {
+class AtomicSecondaryProducts {
  public:
   /// Constructor
   AtomicSecondaryProducts()
       : channel_prob_dens(), electron_energy(), photon_energy() {}
   /// Destructor
-  virtual ~AtomicSecondaryProducts() {}
+  ~AtomicSecondaryProducts() {}
   /// Sample a channel (photon and electron energies in MeV).
   /// Return 1 if the channel is generated and 0 if not.
   int get_channel(std::vector<double>& felectron_energy,
@@ -273,7 +273,7 @@ class AtomicSecondaryProducts : public RegPassivePtr {
                    const std::vector<double>& fphoton_energy,
                    int s_all_rest = 0);
 
-  void print(std::ostream& file, int l) const override;
+  void print(std::ostream& file, int l) const;
 
  protected:
   // Probability of specific channel.
@@ -284,7 +284,7 @@ class AtomicSecondaryProducts : public RegPassivePtr {
 };
 
 /// Atomic photoabsorption cross-section abstract base class.
-class AtomPhotoAbsCS : public RegPassivePtr {
+class AtomPhotoAbsCS {
  public:
   /// Default constructor.
   AtomPhotoAbsCS();
@@ -589,13 +589,13 @@ constexpr double coef_I_to_W = 2.0;
 /// Molecules refer to atoms by passive pointers.
 /// If atom is changed, its image for molecule is also changed.
 
-class MolecPhotoAbsCS : public RegPassivePtr {
+class MolecPhotoAbsCS {
  public:
   /// Total number of atoms of all sorts in the molecule.
   int get_qatom() const { return qatom; }
   /// Number of atoms of a particular sort in the molecule.
   int get_qatom_ps(const int n) const { return qatom_ps[n]; }
-  const PassivePtr<const AtomPhotoAbsCS> get_atom(const int n) { 
+  const AtomPhotoAbsCS* get_atom(const int n) { 
     return atom[n]; 
   }
 
@@ -616,21 +616,21 @@ class MolecPhotoAbsCS : public RegPassivePtr {
   double get_F() const { return F; }
 
   /// Default constructor.
-  MolecPhotoAbsCS() : qatom(0) {}
+  MolecPhotoAbsCS() = default;
   /// Constructor for one sort of atoms.
   /// If fW == 0.0, the program assigns it as 2 * mean(I_min).
-  MolecPhotoAbsCS(const AtomPhotoAbsCS& fatom, int fqatom, double fW = 0.0,
+  MolecPhotoAbsCS(const AtomPhotoAbsCS* fatom, int fqatom, double fW = 0.0,
                   double fF = standard_factor_Fano);
   /// Constructor for two sorts of atoms.
   /// If fW == 0.0, the program assigns it as 2 * mean(I_min).
-  MolecPhotoAbsCS(const AtomPhotoAbsCS& fatom1, int fqatom_ps1,
-                  const AtomPhotoAbsCS& fatom2, int fqatom_ps2, double fW = 0.0,
+  MolecPhotoAbsCS(const AtomPhotoAbsCS* fatom1, int fqatom_ps1,
+                  const AtomPhotoAbsCS* fatom2, int fqatom_ps2, double fW = 0.0,
                   double fF = standard_factor_Fano);
   /// Constructor for three sorts of atoms.
   /// If fW == 0.0, the program assigns it as 2 * mean(I_min).
-  MolecPhotoAbsCS(const AtomPhotoAbsCS& fatom1, int fqatom_ps1,
-                  const AtomPhotoAbsCS& fatom2, int fqatom_ps2,
-                  const AtomPhotoAbsCS& fatom3, int fqatom_ps3, double fW = 0.0,
+  MolecPhotoAbsCS(const AtomPhotoAbsCS* fatom1, int fqatom_ps1,
+                  const AtomPhotoAbsCS* fatom2, int fqatom_ps2,
+                  const AtomPhotoAbsCS* fatom3, int fqatom_ps3, double fW = 0.0,
                   double fF = standard_factor_Fano);
   /// Destructor
   virtual ~MolecPhotoAbsCS() {}
@@ -638,13 +638,13 @@ class MolecPhotoAbsCS : public RegPassivePtr {
 
  private:
   /// Total number of atoms, NOT number of sorts, NOT qel in atom.
-  int qatom;
+  int qatom = 0;
   std::vector<int> qatom_ps;
-  std::vector<PassivePtr<const AtomPhotoAbsCS> > atom;
+  std::vector<const AtomPhotoAbsCS*> atom;
   /// Mean work per pair production [MeV].
-  double W;
+  double W = 0.;
   /// Fano factor.
-  double F;
+  double F = standard_factor_Fano;
 };
 std::ostream& operator<<(std::ostream& file, const MolecPhotoAbsCS& f);
 }

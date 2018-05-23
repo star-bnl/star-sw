@@ -52,7 +52,7 @@ class HeedPhoton : public gparticle {
  private:
   /// Flag to print internal algorithms of a selected event
   bool s_print_listing;
-  HeedFieldMap* m_fieldMap;
+  HeedFieldMap* m_fieldMap = nullptr;
 };
 }
 
