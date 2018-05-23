@@ -30,9 +30,7 @@ namespace {
 
 void ClearBank(std::vector<Heed::gparticle*>& bank) {
 
-  std::vector<Heed::gparticle*>::iterator it;
-  std::vector<Heed::gparticle*>::const_iterator end = bank.end();
-  for (it = bank.begin(); it != end; ++it) if (*it) delete *it;
+  for (auto particle : bank) if (particle) delete particle;
   bank.clear();
 }
 
@@ -63,21 +61,7 @@ TrackHeed::TrackHeed() : Track() {
   m_conductionIons.reserve(1000);
 }
 
-TrackHeed::~TrackHeed() {
-
-  if (m_matter) delete m_matter;
-  if (m_gas) delete m_gas;
-  if (m_material) delete m_material;
-  if (m_atPacs) delete m_atPacs;
-  if (m_molPacs) delete m_molPacs;
-  if (m_energyMesh) delete m_energyMesh;
-  if (m_transferCs) delete m_transferCs;
-  if (m_elScat) delete m_elScat;
-  if (m_lowSigma) delete m_lowSigma;
-  if (m_pairProd) delete m_pairProd;
-  if (m_deltaCs) delete m_deltaCs;
-  if (m_chamber) delete m_chamber;
-}
+TrackHeed::~TrackHeed() {}
 
 bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
                          const double t0, const double dx0, const double dy0,
@@ -198,7 +182,7 @@ bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
     }
   }
 
-  Heed::HeedParticle particle(m_chamber, p0, velocity, t0,
+  Heed::HeedParticle particle(m_chamber.get(), p0, velocity, t0,
                               particleType, &m_fieldMap);
   // Transport the particle.
   particle.fly(m_particleBank);
@@ -323,11 +307,9 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
   while (!secondaries.empty()) {
     std::vector<Heed::gparticle*> newSecondaries;
     // Loop over the secondaries.
-    std::vector<Heed::gparticle*>::iterator it;
-    std::vector<Heed::gparticle*>::const_iterator send = secondaries.end();
-    for (it = secondaries.begin(); it != send; ++it) {
+    for (auto secondary : secondaries) {
       // Check if it is a delta electron.
-      auto delta = dynamic_cast<Heed::HeedDeltaElectron*>(*it);
+      auto delta = dynamic_cast<Heed::HeedDeltaElectron*>(secondary);
       if (delta) {
         extra += delta->curr_kin_energy * 1.e6;
         const double x = delta->currpos.pt.v.x * 0.1 + m_cX;
@@ -360,7 +342,7 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
         continue;
       } 
       // Check if it is a real photon.
-      auto photon = dynamic_cast<Heed::HeedPhoton*>(*it);
+      auto photon = dynamic_cast<Heed::HeedPhoton*>(secondary);
       if (!photon) {
         std::cerr << m_className << "::GetCluster:\n"
                   << "    Particle is neither an electron nor a photon.\n";
@@ -373,9 +355,7 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
       // Transport the photon.
       if (m_usePhotonReabsorption) photon->fly(newSecondaries);
     }
-    for (it = secondaries.begin(); it != secondaries.end(); ++it) {
-      if (*it) delete *it;
-    }
+    for (auto secondary : secondaries) if (secondary) delete secondary;
     secondaries.clear();
     secondaries.swap(newSecondaries);
   }
@@ -551,7 +531,7 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
 
   // Transport the electron.
   std::vector<Heed::gparticle*> secondaries;
-  Heed::HeedDeltaElectron delta(m_chamber, p0, velocity, t0, 0, &m_fieldMap);
+  Heed::HeedDeltaElectron delta(m_chamber.get(), p0, velocity, t0, 0, &m_fieldMap);
   delta.fly(secondaries);
   ClearBank(secondaries);
 
@@ -652,7 +632,7 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
   Heed::point p0((x0 - m_cX) * 10., (y0 - m_cY) * 10., (z0 - m_cZ) * 10.);
 
   // Create and transport the photon.
-  Heed::HeedPhoton photon(m_chamber, p0, velocity, t0, 0, e0 * 1.e-6, 
+  Heed::HeedPhoton photon(m_chamber.get(), p0, velocity, t0, 0, e0 * 1.e-6, 
                           &m_fieldMap);
   std::vector<Heed::gparticle*> secondaries;
   photon.fly(secondaries);
@@ -786,11 +766,7 @@ bool TrackHeed::Setup(Medium* medium) {
   }
 
   // Setup the energy mesh.
-  if (m_energyMesh) {
-    delete m_energyMesh;
-    m_energyMesh = nullptr;
-  }
-  m_energyMesh = new Heed::EnergyMesh(m_emin, m_emax, m_nEnergyIntervals);
+  m_energyMesh.reset(new Heed::EnergyMesh(m_emin, m_emax, m_nEnergyIntervals));
 
   if (medium->IsGas()) {
     if (!SetupGas(medium)) return false;
@@ -803,12 +779,8 @@ bool TrackHeed::Setup(Medium* medium) {
   const int sel = m_isElectron ? 1 : 0;
   const double gamma = GetGamma();
 
-  if (m_transferCs) {
-    delete m_transferCs;
-    m_transferCs = nullptr;
-  }
-  m_transferCs =
-      new Heed::EnTransfCS(1.e-6 * m_mass, gamma - 1, sel, m_matter, long(m_q));
+  m_transferCs.reset(new Heed::EnTransfCS(1.e-6 * m_mass, gamma - 1, sel, 
+                                          m_matter.get(), long(m_q)));
 
   if (!SetupDelta(databasePath)) return false;
 
@@ -830,12 +802,8 @@ bool TrackHeed::Setup(Medium* medium) {
 
   Heed::fixsyscoor primSys(Heed::point(0., 0., 0.), 
                            Heed::basis("primary"), "primary");
-  if (m_chamber) {
-    delete m_chamber;
-    m_chamber = nullptr;
-  }
-  m_chamber = new HeedChamber(primSys, m_lX, m_lY, m_lZ, 
-                              *m_transferCs, *m_deltaCs);
+  m_chamber.reset(new HeedChamber(primSys, m_lX, m_lY, m_lZ, 
+                                  *m_transferCs.get(), *m_deltaCs.get()));
   m_fieldMap.SetSensor(m_sensor);
   return true;
 }
@@ -854,11 +822,7 @@ bool TrackHeed::SetupGas(Medium* medium) {
     return false;
   }
 
-  if (m_molPacs) {
-    delete m_molPacs;
-    m_molPacs = nullptr;
-  }
-  m_molPacs = new Heed::MolecPhotoAbsCS* [nComponents];
+  std::vector<Heed::MolecPhotoAbsCS*> molPacs(nComponents, nullptr);
   std::vector<std::string> notations;
   std::vector<double> fractions;
 
@@ -876,97 +840,97 @@ bool TrackHeed::SetupGas(Medium* medium) {
     if (gasname == "cC3H6") gasname = "C3H6";
     // Find the corresponding photoabsorption cross-section.
     if (gasname == "CF4")
-      m_molPacs[i] = &Heed::CF4_MPACS;
+      molPacs[i] = &Heed::CF4_MPACS;
     else if (gasname == "Ar")
-      m_molPacs[i] = &Heed::Ar_MPACS;
+      molPacs[i] = &Heed::Ar_MPACS;
     else if (gasname == "He")
-      m_molPacs[i] = &Heed::He_MPACS;
+      molPacs[i] = &Heed::He_MPACS;
     else if (gasname == "Ne")
-      m_molPacs[i] = &Heed::Ne_MPACS;
+      molPacs[i] = &Heed::Ne_MPACS;
     else if (gasname == "Kr")
-      m_molPacs[i] = &Heed::Kr_MPACS;
+      molPacs[i] = &Heed::Kr_MPACS;
     else if (gasname == "Xe")
-      m_molPacs[i] = &Heed::Xe_MPACS;
+      molPacs[i] = &Heed::Xe_MPACS;
     else if (gasname == "CH4")
-      m_molPacs[i] = &Heed::CH4_MPACS;
+      molPacs[i] = &Heed::CH4_MPACS;
     else if (gasname == "C2H6")
-      m_molPacs[i] = &Heed::C2H6_MPACS;
+      molPacs[i] = &Heed::C2H6_MPACS;
     else if (gasname == "C3H8")
-      m_molPacs[i] = &Heed::C3H8_MPACS;
+      molPacs[i] = &Heed::C3H8_MPACS;
     else if (gasname == "C4H10")
-      m_molPacs[i] = &Heed::C4H10_MPACS;
+      molPacs[i] = &Heed::C4H10_MPACS;
     else if (gasname == "CO2")
-      m_molPacs[i] = &Heed::CO2_MPACS;
+      molPacs[i] = &Heed::CO2_MPACS;
     else if (gasname == "C5H12")
-      m_molPacs[i] = &Heed::C5H12_MPACS;
+      molPacs[i] = &Heed::C5H12_MPACS;
     else if (gasname == "Water")
-      m_molPacs[i] = &Heed::H2O_MPACS;
+      molPacs[i] = &Heed::H2O_MPACS;
     else if (gasname == "O2")
-      m_molPacs[i] = &Heed::O2_MPACS;
+      molPacs[i] = &Heed::O2_MPACS;
     else if (gasname == "N2" || gasname == "N2 (Phelps)")
-      m_molPacs[i] = &Heed::N2_MPACS;
+      molPacs[i] = &Heed::N2_MPACS;
     else if (gasname == "NO")
-      m_molPacs[i] = &Heed::NO_MPACS;
+      molPacs[i] = &Heed::NO_MPACS;
     else if (gasname == "N2O")
-      m_molPacs[i] = &Heed::N2O_MPACS;
+      molPacs[i] = &Heed::N2O_MPACS;
     else if (gasname == "C2H4")
-      m_molPacs[i] = &Heed::C2H4_MPACS;
+      molPacs[i] = &Heed::C2H4_MPACS;
     else if (gasname == "C2H2")
-      m_molPacs[i] = &Heed::C2H2_MPACS;
+      molPacs[i] = &Heed::C2H2_MPACS;
     else if (gasname == "H2")
-      m_molPacs[i] = &Heed::H2_MPACS;
+      molPacs[i] = &Heed::H2_MPACS;
     else if (gasname == "CO")
-      m_molPacs[i] = &Heed::CO_MPACS;
+      molPacs[i] = &Heed::CO_MPACS;
     else if (gasname == "Methylal")
-      m_molPacs[i] = &Heed::Methylal_MPACS;
+      molPacs[i] = &Heed::Methylal_MPACS;
     else if (gasname == "DME")
-      m_molPacs[i] = &Heed::DME_MPACS;
+      molPacs[i] = &Heed::DME_MPACS;
     else if (gasname == "C2F6")
-      m_molPacs[i] = &Heed::C2F6_MPACS;
+      molPacs[i] = &Heed::C2F6_MPACS;
     else if (gasname == "SF6")
-      m_molPacs[i] = &Heed::SF6_MPACS;
+      molPacs[i] = &Heed::SF6_MPACS;
     else if (gasname == "NH3")
-      m_molPacs[i] = &Heed::NH3_MPACS;
+      molPacs[i] = &Heed::NH3_MPACS;
     else if (gasname == "C3H6")
-      m_molPacs[i] = &Heed::C3H6_MPACS;
+      molPacs[i] = &Heed::C3H6_MPACS;
     else if (gasname == "CH3OH")
-      m_molPacs[i] = &Heed::CH3OH_MPACS;
+      molPacs[i] = &Heed::CH3OH_MPACS;
     else if (gasname == "C2H5OH")
-      m_molPacs[i] = &Heed::C2H5OH_MPACS;
+      molPacs[i] = &Heed::C2H5OH_MPACS;
     else if (gasname == "C3H7OH")
-      m_molPacs[i] = &Heed::C3H7OH_MPACS;
+      molPacs[i] = &Heed::C3H7OH_MPACS;
     else if (gasname == "Cs")
-      m_molPacs[i] = &Heed::Cs_MPACS;
+      molPacs[i] = &Heed::Cs_MPACS;
     else if (gasname == "F2")
-      m_molPacs[i] = &Heed::F2_MPACS;
+      molPacs[i] = &Heed::F2_MPACS;
     else if (gasname == "CS2")
-      m_molPacs[i] = &Heed::CS2_MPACS;
+      molPacs[i] = &Heed::CS2_MPACS;
     else if (gasname == "COS")
-      m_molPacs[i] = &Heed::COS_MPACS;
+      molPacs[i] = &Heed::COS_MPACS;
     else if (gasname == "CD4")
-      m_molPacs[i] = &Heed::CH4_MPACS;
+      molPacs[i] = &Heed::CH4_MPACS;
     else if (gasname == "BF3")
-      m_molPacs[i] = &Heed::BF3_MPACS;
+      molPacs[i] = &Heed::BF3_MPACS;
     else if (gasname == "C2HF5")
-      m_molPacs[i] = &Heed::C2HF5_MPACS;
+      molPacs[i] = &Heed::C2HF5_MPACS;
     else if (gasname == "C2H2F4")
-      m_molPacs[i] = &Heed::C2H2F4_MPACS;
+      molPacs[i] = &Heed::C2H2F4_MPACS;
     else if (gasname == "CHF3")
-      m_molPacs[i] = &Heed::CHF3_MPACS;
+      molPacs[i] = &Heed::CHF3_MPACS;
     else if (gasname == "CF3Br")
-      m_molPacs[i] = &Heed::CF3Br_MPACS;
+      molPacs[i] = &Heed::CF3Br_MPACS;
     else if (gasname == "C3F8")
-      m_molPacs[i] = &Heed::C3F8_MPACS;
+      molPacs[i] = &Heed::C3F8_MPACS;
     else if (gasname == "O3")
-      m_molPacs[i] = &Heed::O3_MPACS;
+      molPacs[i] = &Heed::O3_MPACS;
     else if (gasname == "Hg")
-      m_molPacs[i] = &Heed::Hg_MPACS;
+      molPacs[i] = &Heed::Hg_MPACS;
     else if (gasname == "H2S")
-      m_molPacs[i] = &Heed::H2S_MPACS;
+      molPacs[i] = &Heed::H2S_MPACS;
     else if (gasname == "GeH4")
-      m_molPacs[i] = &Heed::GeH4_MPACS;
+      molPacs[i] = &Heed::GeH4_MPACS;
     else if (gasname == "SiH4")
-      m_molPacs[i] = &Heed::SiH4_MPACS;
+      molPacs[i] = &Heed::SiH4_MPACS;
     else {
       std::cerr << m_className << "::SetupGas:\n    Photoabsorption "
                 << "cross-section for " << gasname << " not available.\n";
@@ -984,8 +948,8 @@ bool TrackHeed::SetupGas(Medium* medium) {
         double e = m_energyMesh->get_e(i);
         pacsfile << 1.e6 * e << "  ";
         for (int j = 0; j < nComponents; ++j) {
-          pacsfile << m_molPacs[j]->get_ACS(e) << "  "
-                   << m_molPacs[j]->get_ICS(e) << "  ";
+          pacsfile << molPacs[j]->get_ACS(e) << "  "
+                   << molPacs[j]->get_ICS(e) << "  ";
         }
         pacsfile << "\n";
       }
@@ -994,23 +958,15 @@ bool TrackHeed::SetupGas(Medium* medium) {
   }
 
   const std::string gasname = FindUnusedMaterialName(medium->GetName());
-  if (m_gas) {
-    delete m_gas;
-    m_gas = nullptr;
-  }
-
-  m_gas = new Heed::GasDef(gasname, gasname, nComponents, notations, fractions,
-                           pressure, temperature, -1.);
+  m_gas.reset(new Heed::GasDef(gasname, gasname, nComponents, notations, 
+                               fractions, pressure, temperature, -1.));
 
   const double w = std::max(medium->GetW() * 1.e-6, 0.);
   double f = medium->GetFanoFactor();
   if (f <= 0.) f = Heed::standard_factor_Fano;
 
-  if (m_matter) {
-    delete m_matter;
-    m_matter = nullptr;
-  }
-  m_matter = new Heed::HeedMatterDef(m_energyMesh, m_gas, m_molPacs, w, f);
+  m_matter.reset(new Heed::HeedMatterDef(m_energyMesh.get(), m_gas.get(), 
+                                         molPacs, w, f));
 
   return true;
 }
@@ -1023,11 +979,7 @@ bool TrackHeed::SetupMaterial(Medium* medium) {
                          Heed::CLHEP::cm3;
 
   const int nComponents = medium->GetNumberOfComponents();
-  if (m_atPacs) {
-    delete m_atPacs;
-    m_atPacs = nullptr;
-  }
-  m_atPacs = new Heed::AtomPhotoAbsCS* [nComponents];
+  std::vector<Heed::AtomPhotoAbsCS*> atPacs(nComponents, nullptr);
 
   std::vector<std::string> notations;
   std::vector<double> fractions;
@@ -1036,20 +988,20 @@ bool TrackHeed::SetupMaterial(Medium* medium) {
     double frac;
     medium->GetComponent(i, materialName, frac);
     if (materialName == "C")
-      m_atPacs[i] = &Heed::Carbon_PACS;
+      atPacs[i] = &Heed::Carbon_PACS;
     else if (materialName == "Si")
-      m_atPacs[i] = &Heed::Silicon_crystal_PACS;
-    // else if (materialName == "Si") m_atPacs[i] = &Heed::Silicon_G4_PACS;
+      atPacs[i] = &Heed::Silicon_crystal_PACS;
+    // else if (materialName == "Si") atPacs[i] = &Heed::Silicon_G4_PACS;
     else if (materialName == "Ga")
-      m_atPacs[i] = &Heed::Gallium_PACS;
+      atPacs[i] = &Heed::Gallium_PACS;
     else if (materialName == "Ge")
-      m_atPacs[i] = &Heed::Germanium_PACS;
+      atPacs[i] = &Heed::Germanium_PACS;
     else if (materialName == "As")
-      m_atPacs[i] = &Heed::Arsenic_PACS;
+      atPacs[i] = &Heed::Arsenic_PACS;
     else if (materialName == "Cd")
-      m_atPacs[i] = &Heed::Cadmium_PACS;
+      atPacs[i] = &Heed::Cadmium_PACS;
     else if (materialName == "Te")
-      m_atPacs[i] = &Heed::Tellurium_PACS;
+      atPacs[i] = &Heed::Tellurium_PACS;
     else {
       std::cerr << m_className << "::SetupMaterial:\n";
       std::cerr << "    Photoabsorption cross-section data for " << materialName
@@ -1068,7 +1020,7 @@ bool TrackHeed::SetupMaterial(Medium* medium) {
         double e = m_energyMesh->get_e(i);
         pacsfile << 1.e6 * e << "  ";
         for (int j = 0; j < nComponents; ++j) {
-          pacsfile << m_atPacs[j]->get_ACS(e) << "  " << m_atPacs[j]->get_ICS(e)
+          pacsfile << atPacs[j]->get_ACS(e) << "  " << atPacs[j]->get_ICS(e)
                    << "  ";
         }
         pacsfile << "\n";
@@ -1076,24 +1028,17 @@ bool TrackHeed::SetupMaterial(Medium* medium) {
     }
     pacsfile.close();
   }
-  if (m_material) {
-    delete m_material;
-    m_material = nullptr;
-  }
   const std::string materialName = FindUnusedMaterialName(medium->GetName());
-  m_material = new Heed::MatterDef(materialName, materialName, nComponents,
-                                   notations, fractions, density, temperature);
+  m_material.reset(new Heed::MatterDef(materialName, materialName, nComponents,
+                                       notations, fractions, density, 
+                                       temperature));
 
   double w = medium->GetW() * 1.e-6;
   if (w < 0.) w = 0.;
   double f = medium->GetFanoFactor();
   if (f <= 0.) f = Heed::standard_factor_Fano;
 
-  if (m_matter) {
-    delete m_matter;
-    m_matter = nullptr;
-  }
-  m_matter = new Heed::HeedMatterDef(m_energyMesh, m_material, m_atPacs, w, f);
+  m_matter.reset(new Heed::HeedMatterDef(m_energyMesh.get(), m_material.get(), atPacs, w, f));
 
   return true;
 }
@@ -1102,35 +1047,19 @@ bool TrackHeed::SetupDelta(const std::string& databasePath) {
 
   // Load elastic scattering data.
   std::string filename = databasePath + "cbdel.dat";
-  if (m_elScat) {
-    delete m_elScat;
-    m_elScat = nullptr;
-  }
-  m_elScat = new Heed::ElElasticScat(filename);
+  m_elScat.reset(new Heed::ElElasticScat(filename));
 
   filename = databasePath + "elastic_disp.dat";
-  if (m_lowSigma) {
-    delete m_lowSigma;
-    m_lowSigma = nullptr;
-  }
-  m_lowSigma = new Heed::ElElasticScatLowSigma(m_elScat, filename);
+  m_lowSigma.reset(new Heed::ElElasticScatLowSigma(m_elScat.get(), filename));
 
   // Load data for calculation of ionization.
   // Get W value and Fano factor.
   const double w = m_matter->W * 1.e6;
   const double f = m_matter->F;
   filename = databasePath + "delta_path.dat";
-  if (m_pairProd) {
-    delete m_pairProd;
-    m_pairProd = nullptr;
-  }
-  m_pairProd = new Heed::PairProd(filename, w, f);
+  m_pairProd.reset(new Heed::PairProd(filename, w, f));
 
-  if (m_deltaCs) {
-    delete m_deltaCs;
-    m_deltaCs = nullptr;
-  }
-  m_deltaCs = new Heed::HeedDeltaElectronCS(m_matter, m_elScat, m_lowSigma, m_pairProd);
+  m_deltaCs.reset(new Heed::HeedDeltaElectronCS(m_matter.get(), m_elScat.get(), m_lowSigma.get(), m_pairProd.get()));
   return true;
 }
 

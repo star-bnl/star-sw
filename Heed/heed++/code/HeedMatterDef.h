@@ -52,7 +52,7 @@ class HeedMatterDef {
   std::vector<double> epsi2;
   /// Minimum ionization potential.
   /// It is used only for switching off the Cherenkov radiation below it.
-  double min_ioniz_pot;
+  double min_ioniz_pot = 0.;
 
   /// Default constructor.
   HeedMatterDef() = default;
@@ -62,8 +62,7 @@ class HeedMatterDef {
   /// If fF is input as 0.0, it is assigned to be mean for gas.
   /// For matters this is the terminating error.
   HeedMatterDef(EnergyMesh* fenergy_mesh, MatterDef* amatter,
-                AtomPhotoAbsCS* faapacs[],  // array of size corresponding
-                                            // matter
+                const std::vector<AtomPhotoAbsCS*>& faapacs,
                 double fW = 0.0, double fF = standard_factor_Fano);
   // Gas consists of molecules, molecules of atoms
   // The order in which molecules appear in fampacs should correspond
@@ -71,10 +70,10 @@ class HeedMatterDef {
   // The order in which atoms appear in fampacs[n] should correspond to that
   // of molecules in gas.
   HeedMatterDef(EnergyMesh* fenergy_mesh, GasDef* agas,
-                MolecPhotoAbsCS* fampacs[],  // array of size corresponding gas
+                const std::vector<MolecPhotoAbsCS*>& fampacs,
                 double fW = 0.0, double fF = standard_factor_Fano);
   HeedMatterDef(EnergyMesh* fenergy_mesh, const std::string& gas_notation,
-                MolecPhotoAbsCS* fampacs[],  // array of size corresponding gas
+                const std::vector<MolecPhotoAbsCS*>& fampacs,
                 double fW = 0.0, double fF = standard_factor_Fano);
   // Replace permeability (epsi1 and epsi2) by the numbers
   // calculated by another program and written to a file (only for debug)
@@ -88,7 +87,7 @@ class HeedMatterDef {
   /// potential of ionization of the mixture, should ionize.
   /// This is emulation of Jesse effect in extreme case.
   /// It is likely not realistic. So the recommended value is 0.
-  static const int s_use_mixture_thresholds = 0;
+  static constexpr int s_use_mixture_thresholds = 0;
 
  private:
   // Initialization after assignment of matter and apacs

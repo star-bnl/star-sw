@@ -15,22 +15,22 @@ namespace Heed {
 class eparticle : public mparticle, public particle_type {
  public:
   /// Default constructor
-  eparticle() : mparticle(), particle_type(), m_fieldMap(NULL) {}
+  eparticle()  = default;
   /// Constructor using velocity vector.
   eparticle(manip_absvol* primvol, const point& pt, const vec& vel, vfloat time,
             particle_def* fpardef, HeedFieldMap* fieldmap);
   /// Destructor
   virtual ~eparticle() {}
 
-  virtual eparticle* copy() const { return new eparticle(*this); }
-  virtual void print(std::ostream& file, int l) const;
+  eparticle* copy() const override { return new eparticle(*this); }
+  void print(std::ostream& file, int l) const override;
 
   /// Calculate force components.
-  virtual int force(const point& pt, vec& f, vec& f_perp, vfloat& mrange);
+  int force(const point& pt, vec& f, vec& f_perp, vfloat& mrange) override;
   // mrange - distance at which the force should not change much
 
  protected:
-  HeedFieldMap* m_fieldMap;
+  HeedFieldMap* m_fieldMap = nullptr;
 };
 }
 

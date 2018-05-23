@@ -17,7 +17,8 @@ using CLHEP::fine_structure_const;
 using CLHEP::Avogadro;
 
 HeedMatterDef::HeedMatterDef(EnergyMesh* fenergy_mesh, MatterDef* amatter,
-                             AtomPhotoAbsCS* faapacs[], double fW, double fF)
+                             const std::vector<AtomPhotoAbsCS*>& faapacs, 
+                             double fW, double fF)
     : matter(amatter), W(fW), F(fF), energy_mesh(fenergy_mesh) {
   mfunname("HeedMatterDef::HeedMatterDef(...)");
   check_econd11(matter, == nullptr, mcerr);
@@ -51,7 +52,8 @@ HeedMatterDef::HeedMatterDef(EnergyMesh* fenergy_mesh, MatterDef* amatter,
 }
 
 HeedMatterDef::HeedMatterDef(EnergyMesh* fenergy_mesh, GasDef* agas,
-                             MolecPhotoAbsCS* fampacs[], double fW, double fF)
+                             const std::vector<MolecPhotoAbsCS*>& fampacs, 
+                             double fW, double fF)
     : matter(agas), W(fW), F(fF), energy_mesh(fenergy_mesh) {
   mfunname("HeedMatterDef::HeedMatterDef(...)");
   check_econd11(agas, == nullptr, mcerr);
@@ -110,7 +112,8 @@ HeedMatterDef::HeedMatterDef(EnergyMesh* fenergy_mesh, GasDef* agas,
 
 HeedMatterDef::HeedMatterDef(EnergyMesh* fenergy_mesh,
                              const std::string& gas_notation,
-                             MolecPhotoAbsCS* fampacs[], double fW, double fF)
+                             const std::vector<MolecPhotoAbsCS*>& fampacs, 
+                             double fW, double fF)
     : W(fW), F(fF), energy_mesh(fenergy_mesh) {
   mfunnamep("HeedMatterDef::HeedMatterDef(...)");
   MatterDef* amat = MatterDef::get_MatterDef(gas_notation);

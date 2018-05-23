@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <list>
+#include <memory>
 
 #include "Track.hh"
 #ifndef __CINT__
@@ -134,33 +135,26 @@ class TrackHeed : public Track {
   std::vector<Heed::HeedCondElectron> m_conductionElectrons;
   std::vector<Heed::HeedCondElectron> m_conductionIons;
 
-  // Primary particle
-  Heed::HeedParticle* m_particle = nullptr;
-
   // Material properties
-  Heed::HeedMatterDef* m_matter = nullptr;
-  Heed::GasDef* m_gas = nullptr;
-  Heed::MatterDef* m_material = nullptr;
-
-  // Photoabsorption cross-sections
-  Heed::AtomPhotoAbsCS** m_atPacs = nullptr;
-  Heed::MolecPhotoAbsCS** m_molPacs = nullptr;
+  std::unique_ptr<Heed::HeedMatterDef> m_matter;
+  std::unique_ptr<Heed::GasDef> m_gas;
+  std::unique_ptr<Heed::MatterDef> m_material;
 
   // Energy mesh
   double m_emin = 2.e-6;
   double m_emax = 2.e-1;
   unsigned int m_nEnergyIntervals = 200;
-  Heed::EnergyMesh* m_energyMesh = nullptr;
+  std::unique_ptr<Heed::EnergyMesh> m_energyMesh;
 
   // Cross-sections
-  Heed::EnTransfCS* m_transferCs = nullptr;
-  Heed::ElElasticScat* m_elScat = nullptr;
-  Heed::ElElasticScatLowSigma* m_lowSigma = nullptr;
-  Heed::PairProd* m_pairProd = nullptr;
-  Heed::HeedDeltaElectronCS* m_deltaCs = nullptr;
+  std::unique_ptr<Heed::EnTransfCS> m_transferCs;
+  std::unique_ptr<Heed::ElElasticScat> m_elScat;
+  std::unique_ptr<Heed::ElElasticScatLowSigma> m_lowSigma;
+  std::unique_ptr<Heed::PairProd> m_pairProd;
+  std::unique_ptr<Heed::HeedDeltaElectronCS> m_deltaCs;
 
   // Interface classes
-  HeedChamber* m_chamber = nullptr;
+  std::unique_ptr<HeedChamber> m_chamber;
   Heed::HeedFieldMap m_fieldMap;
 
   // Bounding box
