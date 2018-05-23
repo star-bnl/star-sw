@@ -403,7 +403,9 @@ Double_t StTpcCoordinateTransform::zFromTB(Double_t tb, Int_t sector, Int_t row,
   Int_t l = sector;
   if ( St_tpcPadConfigC::instance()->IsRowInner(sector,row)) l += 24;
   Double_t tbx = tb + St_tpcSectorT0offsetC::instance()->t0offset(l);
-  if (St_tpcRDOT0offsetC::instance()->IsShfited(sector)) tbx += St_tpcRDOT0offsetC::instance()->T0(sector,row,pad);
+  if (St_tpcRDOT0offsetC::instance()->IsShfited(sector)) {
+    tbx += St_tpcRDOT0offsetC::instance()->T0(sector,row,pad);
+  }
   Double_t time = t0 + tbx*mTimeBinWidth; 
   Double_t z = StTpcDb::instance()->DriftVelocity(sector)*1e-6*time;
   return z;
