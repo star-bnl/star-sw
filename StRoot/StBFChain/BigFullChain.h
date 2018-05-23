@@ -251,15 +251,15 @@ Bfc_st BFC[] = { // standard chains
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
   {"MC.StiCA",   "","","StiCA,-hitfilt,KFVertex,geantOut,noRunco,noHistos,20Muons,OSpaceZ2,"
-   "OGridLeak3D,StiPulls,picoWrite,PicoVtxVpd,RunG.1,McTpcAna,tags"                        ,"","","",kFALSE},
+   "OGridLeak3D,CorrX,StiPulls,picoWrite,PicoVtxVpd,RunG.1,McTpcAna,tags"                  ,"","","",kFALSE},
   {"MC2016.Ideal","","","MC.2016a,istSlowSim,pxlSlowSim,StiHftC,MC.StiCA"                 ,"","","",kFALSE},
   {"MC2016",      "","","MC2016.Ideal,VMCAlignment,sdt20160301"                           ,"","","",kFALSE},
   {"MC2017.Ideal","","","MC.2017,MC.StiCA"                                                ,"","","",kFALSE},
   {"MC2017",      "","","MC2017.Ideal"                                                    ,"","","",kFALSE},
-  {"MC2018.Ideal","","","MC.2018,MC.StiCA"                                                ,"","","",kFALSE},
+  {"MC2018.Ideal","","","MC.2018,MC.StiCA,NewTpcAlignment"                                ,"","","",kFALSE},
   {"MC2018",      "","","MC2018.Ideal,VMCAlignment,sdt20180426.122000"                    ,"","","",kFALSE},
   {"XC2018",      "","","y2018,TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,OSpaceZ2,tpcDB,TpcHitMover"
-   ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,,sdt20180426.122000,Stx,Idst,BAna"       
+   ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,sdt20180426.122000,Stx,Idst,BAna"       
    ,                                                                                       "","","",kFALSE},
   {"MC2019.Ideal","","","MC.2019,MC.StiCA"                                                ,"","","",kFALSE},
   {"MC2019",      "","","MC2019.Ideal"                                                    ,"","","",kFALSE},
