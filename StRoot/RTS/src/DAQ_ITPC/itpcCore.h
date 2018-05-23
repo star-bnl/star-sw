@@ -59,7 +59,7 @@ public:
 		next_word = 0 ;
 
 		if(rdo_p) {
-			LOG(ERR,"rdo_p not free!") ;
+			//LOG(ERR,"rdo_p not free!") ;
 		}
 		else {
 			rdo_p = (rdo_t *)malloc(sizeof(rdo_t)) ;
