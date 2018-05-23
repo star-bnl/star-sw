@@ -24,7 +24,7 @@
 #  setenv StarEndMakerShell
   set sdt = "";
   echo $Name | grep -i Ideal
-#  if ($?) set sdt = ",sdt20160301";
+  if ($?) set sdt = ",sdt20160301";
   set KFVertex = "";
   echo $Name | grep -i KFV
   if (! $?) set KFVertex = ",KFVertex";

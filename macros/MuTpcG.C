@@ -1,5 +1,6 @@
 /* Global Alignment
-   root.exe 'lMuDst.C(-1,"./*MuDst.root","RMuDst,mysql,magF,nodefault","MuTpcG.root")'  MuTpcG.C+
+   FPE_OFF
+   root.exe -q -b 'lMuDst.C(-1,"./*MuDst.root","RMuDst,mysql,magF,nodefault","MuTpcG.root")'  MuTpcG.C+
    root.exe lMuDst.C MuTpcG.root
    .L MuTpcG.C+
    Draw();
