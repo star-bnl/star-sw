@@ -1120,7 +1120,7 @@ map<StMuPrimaryVertex*,StMuMcVertex *>      &StMuDst::RcVx2McVx() {
       if (! Accept(RcVx)) continue;
       //      PrPPD(*RcVx);
       Int_t IdMc = RcVx->idTruth();
-      if (IdMc > 0) {
+      if (IdMc > 0 && IdMc <= numberOfMcTracks()) {
 	StMuMcVertex *McVx = Id2McVx()[IdMc]; 
 	if (McVx) {
 	  //	PrPPD(*McVx);
@@ -1226,7 +1226,7 @@ vector<StMuPrimaryVertex *>                 &StMuDst::GhostVx() { //  no Mc matc
       if (! Accept(RcVx)) continue;
       //      PrPPD(*RcVx);
       Int_t IdMc = RcVx->idTruth();
-      if (! IdMc) {
+      if (! IdMc && IdMc <= numberOfMcVertices()) {
 	mGhostVxVec.push_back(RcVx);
       }
     }
@@ -1355,7 +1355,7 @@ multimap<Int_t,StMuTrack *>                 &StMuDst::IdMc2RcTk() { // Reconstuc
       StMuTrack *gTrack = (StMuTrack *) globalTracks()->UncheckedAt(kg);
       if (! Accept(gTrack)) continue;
       Int_t IdTruth = gTrack->idTruth();
-      if (! IdTruth) continue;
+      if (! IdTruth && IdTruth <= numberOfMcTracks()) continue;
       mIdMc2RcTkMap.insert(pair<Int_t,StMuTrack *>(IdTruth,gTrack));
     }
   }
@@ -1464,7 +1464,7 @@ multimap<StMuMcTrack*,StMuTrack *>                 &StMuDst::McTrack2GlobalTrack
       StMuTrack *gTrack = (StMuTrack *) globalTracks()->UncheckedAt(kg);
       if (! Accept(gTrack)) continue;
       Int_t IdTruth = gTrack->idTruth();
-      if (! IdTruth) continue;
+      if (! IdTruth || IdTruth > numberOfMcTracks()) continue;
       StMuMcTrack *mcTrack = MCtrack(IdTruth-1);
       if (mcTrack) mMcTrack2GlobalTrackMap.insert(pair<StMuMcTrack*,StMuTrack *>(mcTrack,gTrack));
     }
@@ -1480,7 +1480,7 @@ multimap<StMuMcTrack*,StMuTrack *>                 &StMuDst::McTrack2PrimaryTrac
       StMuTrack *pTrack = (StMuTrack *) arrays[muPrimary]->UncheckedAt(k);
       if (! Accept(pTrack)) continue;
       Int_t IdTruth = pTrack->idTruth();
-      if (! IdTruth) continue;
+      if (! IdTruth || IdTruth > numberOfMcTracks()) continue;
       StMuMcTrack *mcTrack = MCtrack(IdTruth-1);
       if (mcTrack) mMcTrack2PrimaryTrackMap.insert(pair<StMuMcTrack*,StMuTrack *>(mcTrack,pTrack));
     }
@@ -1494,7 +1494,7 @@ multimap<StMuMcTrack*,KFParticle *>                 &StMuDst::McTrack2KFParticle
       KFParticle *pTrack = KFtrack(k);
       if (! pTrack) continue;
       Int_t IdTruth = pTrack->IdTruth();
-      if (! IdTruth) continue;
+      if (! IdTruth || IdTruth > numberOfMcTracks()) continue;
       StMuMcTrack *mcTrack = MCtrack(IdTruth-1);
       if (mcTrack) mMcTrack2KFParticleMap.insert(pair<StMuMcTrack*,KFParticle *>(mcTrack,pTrack));
     }
@@ -1861,7 +1861,7 @@ UInt_t StMuDst::numberOfCovPrimTracks()  { return instance()->arrays[muCovPrimTr
 UInt_t StMuDst::numberOfKFTracks()       { return instance()->arrays[muKFTracks]->GetEntriesFast(); }
 UInt_t StMuDst::numberOfKFVertices()     { return instance()->arrays[muKFVertices]->GetEntriesFast(); }
 UInt_t StMuDst::numberOfMcVertices()     { return instance()->mcVertices()->GetEntriesFast(); }
-UInt_t StMuDst::numberOfMcTracks()     { return instance()->mcTracks()->GetEntriesFast(); }
+UInt_t StMuDst::numberOfMcTracks()       { return instance()->mcTracks()->GetEntriesFast(); }
 #ifndef __NO_STRANGE_MUDST__
 UInt_t StMuDst::numberOfV0s()            { return instance()->strangeArrays[smuV0]->GetEntriesFast(); }
 UInt_t StMuDst::numberOfV0sMc()          { return instance()->strangeArrays[smuV0Mc]->GetEntriesFast(); }
