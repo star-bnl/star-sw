@@ -410,6 +410,8 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 17      HALL[1]/CAVE[1]/FBOX[2]/FSHM[1]/FHMS[100]
 18      HALL[1]/CAVE[1]/FBOX[4]/FLXF[394]
 19      HALL[1]/CAVE[1]/FPRS[1]/FPLY[4]/FPSC[80]
+  y2018
+ 1    HALL[1]/CAVE[1]/TpcRefSys[1]/TPCE[1]/TPGV[2]/TPSS[12]/TPAD[76]
    */
   Int_t NoOfInnerRows = -1;
   Int_t NoOfRows = -1;
@@ -434,7 +436,7 @@ Bool_t StarVMCApplication::MisalignGeometry() {
   static const listOfDetectorToAlign_t listOfDet2Align[] = {                                                                
     {"TpcRefSys-%d",   kTpcRefSys,"/HALL_1/CAVE_1/TpcRefSys_%d",                                       	 1, { 1, 0, 0}, 0},    
     {"TpcHalf-%d",     kTpcHalf  ,"/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_%d",         	       	       	 1, { 2, 0, 0}, 0},  
-    {"TpcPad-%02d",       kTpcPad,"/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_%d/TPSS_%d/TPAD_%d",	       	 3, { 2,12,73}, 0},
+    {"TpcPad-%02d",       kTpcPad,"/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_%d/TPSS_%d/TPAD_%d",	       	 3, { 2,12,76}, 0}, // 73 -> TPC; 76 -> iTPC
     {"Hft-%d",               kHft,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_%d",                                	 1, { 1, 0, 0}, 0},
     {"Pixel-%d",             kPxl,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_%d",                        	 1, { 1, 0, 0}, 0},
     {"PxlSector-%d",   kPxlSector,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d",                 	 1, {10, 0, 0}, 0},
