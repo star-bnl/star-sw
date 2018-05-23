@@ -31,7 +31,7 @@ Int_t St_g2t_Chair::fDebug = 0;
   Int_t  nok = table->GetNRows()+1; 
 #define G2TFillNextTrack(A) \
   g2t_ ## A ## _hit_st *row = table->GetTable(); \
-  for (Int_t i = nok - 2; i >= 0; i--) if ((row+i)->track_p == vect.iTrack) {g2t_ ## A ## _hit.next_tr_hit_p = i+1; break;} 
+  for (Int_t i = nok - 2; i >= 0; i--) if ((row+i)->track_p == vect.iTrack) {(row+i)->next_tr_hit_p = nok; break;} 
 #define G2UpdateTrack(A,B)						\
   g2t_track_st *track = StarMCHits::instance()->Current_g2t_track();	\
   g2t_ ## A ## _hit.next_tr_hit_p = track->hit_ ## B ## _p;		\
