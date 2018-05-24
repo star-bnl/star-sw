@@ -1,6 +1,6 @@
  /***************************************************************************
   *
-  * $Id: StMuFmsUtil.h,v 1.3 2017/08/14 16:22:36 smirnovd Exp $
+  * $Id: StMuFmsUtil.h,v 1.4 2018/05/24 01:13:37 jdb Exp $
   *
   * Author: Jingguo Ma, Jan 2010
   ***************************************************************************
@@ -10,6 +10,9 @@
   ***************************************************************************
   *
   * $Log: StMuFmsUtil.h,v $
+  * Revision 1.4  2018/05/24 01:13:37  jdb
+  * Move fillFmsHits to public
+  *
   * Revision 1.3  2017/08/14 16:22:36  smirnovd
   * Recover FMS hits using StTriggerData
   *
@@ -60,6 +63,7 @@ public:
   StFmsCollection*   getFms(StMuFmsCollection*);
   void               fillMuFms(StMuFmsCollection*,StFmsCollection*);
   void               fillFms(StFmsCollection*,StMuFmsCollection*);
+  void               fillFmsHits(StFmsCollection*, StMuFmsCollection*);
 
   /**
    * Creates `StMuFmsHit`s from the StTriggerData object and appends them to the
@@ -83,8 +87,7 @@ private:
   void fillMuFmsPoints(StMuFmsCollection*, StFmsCollection*);
   /** Set the parent clusters of StMuFmsPoints */
   void setMuFmsPointParentClusters(StMuFmsCollection*, StFmsCollection*);
-  /** Create StFmsHits from StMuFmsHits and fill StFmsCollection */
-  void fillFmsHits(StFmsCollection*, StMuFmsCollection*);
+
   /** Create StFmsClusters from StMuFmsClusters and fill StFmsCollection */
   void fillFmsClusters(StFmsCollection*, StMuFmsCollection*);
   /** Create StFmsPoints from StMuFmsPoints and fill StFmsCollection */
