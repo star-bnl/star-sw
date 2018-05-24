@@ -5,11 +5,7 @@
 
 namespace Heed {
 
-//#define DEBUG_EnTransfCS  // allows to print additional information
-// and keeps it in class, which makes it bigger
-
 #define EXCLUDE_A_VALUES   // exclude absorption values
-#define EXCLUDE_VAL_FADDA  // exclude values not necessary for MC
 
 /// The PAI cross section of energy transfers from charged particle to media.
 /// The particle has fixed parameters (energy, speed, etc.), which
@@ -31,8 +27,6 @@ class EnTransfCS {
 
   /// Particle mass [MeV]
   double particle_mass = 0.;
-  /// Total energy [MeV]
-  double particle_ener = 0.;
   /// Charge in units of electron charge (used square, sign does not matter).
   long particle_charge = 0;
 
@@ -59,11 +53,6 @@ class EnTransfCS {
   std::vector<double> chereC;       ///< Cherenkov's radiation
   std::vector<double> chereCangle;  ///< angle of Cherenkov's radiation
   std::vector<double> Rruth;        ///< term called R in my paper
-#ifdef DEBUG_EnTransfCS
-  // Total Rutherford, sum of fruth by atoms and shells, per one electron
-  // (in the paper it is per atom).
-  std::vector<double> truth;
-#endif
 
   /// Sum of (ionization) differential cross-section terms
   std::vector<double> addaC;
@@ -86,9 +75,6 @@ class EnTransfCS {
   double meanC1_a = 0.;
   double meanC_a = 0.;
 #endif
-  // Secondary ionization
-  double meaneleC = 0.;
-  double meaneleC1 = 0.;
 
   /// In the following arrays there are three indices:
   /// atom number in the matter, shell number in atom, energy
@@ -101,25 +87,22 @@ class EnTransfCS {
   /// Integral, normalised to unity
   std::vector<std::vector<std::vector<double> > > fadda;
 #ifndef EXCLUDE_A_VALUES
+  /// Cherenkov term (total absorption)
   std::vector<std::vector<std::vector<double> > > cher_a;
+  /// Sum (total absorption)
   std::vector<std::vector<std::vector<double> > > adda_a;
+  /// Integral (total absorption), normalised to unity
   std::vector<std::vector<std::vector<double> > > fadda_a;
 #endif
 
-#ifndef EXCLUDE_VAL_FADDA
-  /// The true values of the integral (should be equal to quan)
-  std::vector<std::vector<double> > val_fadda;  // integral * hmd->xeldens;
-#ifndef EXCLUDE_A_VALUES
-  std::vector<std::vector<double> > val_fadda_a;  // integral * hmd->xeldens;
-#endif
-#endif
-
-  /// In the following arrays there are two indices:
-  /// atom number in the matter, shell number in atom.
-  std::vector<std::vector<double> > quan;  // per 1 cm, used for path length
+  /// Number of collisions / cm, for each atom and shell.
+  std::vector<std::vector<double> > quan;
+  /// First moment, for each atom and shell.
   std::vector<std::vector<double> > mean;
 #ifndef EXCLUDE_A_VALUES
+  /// Number of collisions / cm (total absorption), for each atom and shell.
   std::vector<std::vector<double> > quan_a;
+  /// First moment (total absorption), for each atom and shell.
   std::vector<std::vector<double> > mean_a;
 #endif
 

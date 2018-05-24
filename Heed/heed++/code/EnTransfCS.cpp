@@ -1,5 +1,6 @@
 #include <iomanip>
 #include <fstream>
+#include <algorithm>
 #include "wcpplib/clhep_units/WSystemOfUnits.h"
 #include "wcpplib/math/lorgamma.h"
 #include "wcpplib/math/tline.h"
@@ -7,6 +8,98 @@
 #include "heed++/code/HeedMatterDef.h"
 
 // 2003, I. Smirnov
+
+namespace {
+
+double integrate(const Heed::PointCoorMesh<double, const double*>& mesh,
+                 const std::vector<double>& y,
+                 double x1, double x2, const unsigned int xpower) {
+
+  if (xpower > 1) return 0.;
+  if (x1 >= x2) return 0.;
+  const long qi = mesh.get_qi();
+  if (qi < 1) return 0.;
+  const double xmin = mesh.get_xmin();
+  const double xmax = mesh.get_xmax();
+  if (x2 <= xmin || x1 >= xmax) return 0.;
+
+  double s = 0.;
+  long ibeg = 0;
+  if (x1 <= xmin) {
+    x1 = xmin;
+  } else {
+    long n1, n2;
+    double b1, b2;
+    if (mesh.get_interval(x1, n1, b1, n2, b2) != 1) return 0.;
+    if (b2 - x1 > 0) {
+      if (x2 <= b2) {
+        if (xpower == 0) {
+          s = (x2 - x1) * y[n1];
+        } else {
+          s = 0.5 * (x2 * x2 - x1 * x1) * y[n1];
+        }
+        return s;
+      }
+      if (xpower == 0) {
+        s += (b2 - x1) * y[n1];
+     } else {
+        s += 0.5 * (b2 * b2 - x1 * x1) * y[n1];
+      }
+    }
+    ibeg = n2;
+  }
+  long iend = qi;
+  if (x2 >= xmax) {
+    x2 = xmax;
+  } else {
+    long n1, n2;
+    double b1, b2;
+    if (mesh.get_interval(x2, n1, b1, n2, b2) != 1) return 0.;
+    if (x2 - b1 > 0) {
+      if (xpower == 0) {
+        s += (x2 - b1) * y[n1];
+      } else {
+        s += 0.5 * (x2 * x2 - b1 * b1) * y[n1];
+      }
+    }
+    iend = n1;
+  }
+  double b;
+  mesh.get_scoor(ibeg, b);
+  for (long i = ibeg; i < iend; ++i) {
+    const double a = b;
+    mesh.get_scoor(i + 1, b);
+    if (xpower == 0) {
+      s += (b - a) * y[i];
+    } else {
+      s += 0.5 * (b * b - a * a) * y[i];
+    }
+  }
+  return s;
+}
+
+double cdf(const Heed::PointCoorMesh<double, const double*>& mesh,
+          const std::vector<double>& y, std::vector<double>& integ_y) {
+
+  const long qi = mesh.get_qi();
+  if (qi < 1) return 0.;
+
+  double s = 0.0;
+  double xp2 = 0.0;
+  mesh.get_scoor(0, xp2);
+  for (long n = 0; n < qi; n++) {
+    const double xp1 = xp2;
+    mesh.get_scoor(n + 1, xp2);
+    const double step = xp2 - xp1;
+    if (y[n] < 0.0) return 0.;
+    s += y[n] * step;
+    integ_y[n] = s;
+  }
+  for (long n = 0; n < qi; n++) integ_y[n] /= s;
+  return s;
+}
+
+}
 
 namespace Heed {
 
@@ -32,7 +125,7 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
   const double gamma = fgamma_1 + 1.;
   // Particle kinetic energy.
   const double tkin = particle_mass * gamma_1;
-  particle_ener = particle_mass * gamma;
+  const double ener = particle_mass * gamma;
   // Calculate the max. energy transfer.
   if (s_primary_electron) {
     max_etransf = 0.5 * tkin;
@@ -54,9 +147,6 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
   chereC.resize(qe, 0.0);
   chereCangle.resize(qe, 0.0);
   Rruth.resize(qe, 0.0);
-#ifdef DEBUG_EnTransfCS
-  truth.resize(qe, 0.0);
-#endif
   addaC.resize(qe, 0.0);
 #ifndef EXCLUDE_A_VALUES
   addaC_a.resize(qe, 0.0);
@@ -77,33 +167,20 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
   mean_a.resize(qa);
 #endif
 
-#ifndef EXCLUDE_VAL_FADDA
-  val_fadda.resize(qa);
-#ifndef EXCLUDE_A_VALUES
-  val_fadda_a.resize(qa);
-#endif
-#endif
-
   for (long na = 0; na < qa; na++) {
     const long qs = hmd->apacs[na]->get_qshell();
     cher[na].resize(qs, std::vector<double>(qe, 0.));
     fruth[na].resize(qs, std::vector<double>(qe, 0.));
     adda[na].resize(qs, std::vector<double>(qe, 0.));
     fadda[na].resize(qs, std::vector<double>(qe, 0.));
-    quan[na].resize(qs);
-    mean[na].resize(qs);
+    quan[na].resize(qs, 0.);
+    mean[na].resize(qs, 0.);
 #ifndef EXCLUDE_A_VALUES
     cher_a[na].resize(qs, std::vector<double>(qe, 0.));
     adda_a[na].resize(qs, std::vector<double>(qe, 0.));
     fadda_a[na].resize(qs, std::vector<double>(qe, 0.));
-    quan_a[na].resize(qs);
-    mean_a[na].resize(qs);
-#endif
-#ifndef EXCLUDE_VAL_FADDA
-    val_fadda[na].resize(qs);
-#ifndef EXCLUDE_A_VALUES
-    val_fadda_a[na].resize(qs);
-#endif
+    quan_a[na].resize(qs, 0.);
+    mean_a[na].resize(qs, 0.);
 #endif
   }
 
@@ -141,9 +218,8 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
       }
     } else {
       if (!s_primary_electron) {
-        Rruth[ne] =
-            1. / (ec * ec) * (1. - beta2 * ec / max_etransf +
-                              ec * ec / (2. * particle_ener * particle_ener));
+        Rruth[ne] = 1. / (ec * ec) * (1. - beta2 * ec / max_etransf +
+                                      ec * ec / (2. * ener * ener));
       } else {
         const double delta = ec / particle_mass;
         const double pg2 = gamma * gamma;
@@ -179,7 +255,7 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
         }
 #ifndef EXCLUDE_A_VALUES
         double acs =
-            pac->get_integral_ACS(ns, e1, e2) / (e2 - e1) * C1_MEV2_MBN;
+            pacs->get_integral_ACS(ns, e1, e2) / (e2 - e1) * C1_MEV2_MBN;
 #endif
         check_econd11a(ics, < 0,
                        "na=" << na << " ns=" << ns << " ne=" << ne << '\n',
@@ -214,9 +290,6 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
           afruth[ne] = 0.0;
         }
         s += r;
-#ifdef DEBUG_EnTransfCS
-        truth[ne] += afruth[ne];
-#endif
       }
     }
   }
@@ -241,21 +314,16 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
         } else {
           ics = pacs->get_integral_ICS(ns, e1, e2) / (e2 - e1) * C1_MEV2_MBN;
         }
-        double r1 = awq * log1C[ne] * coefpa * ics / (ec * Z_mean * sqepsi);
-        double r2 = awq * log2C[ne] * coefpa * ics / (ec * Z_mean * sqepsi);
+        const double r0 = awq * coefpa * ics / (ec * Z_mean * sqepsi); 
         double& r_adda = adda[na][ns][ne];
         double& r_fruth = fruth[na][ns][ne];
-        r_adda = r1 + r2 + r_fruth;
-        if (r_adda < 0.0) r_adda = 0.0;
-
+        r_adda = std::max(r0 * (log1C[ne] + log2C[ne]) + r_fruth, 0.);
 #ifndef EXCLUDE_A_VALUES
         double acs =
             pacs->get_integral_ACS(ns, e1, e2) / (e2 - e1) * C1_MEV2_MBN;
-        double r1_a = awq * log1C[ne] * coefpa * acs / (ec * Z_mean * sqepsi);
-        double r2_a = awq * log2C[ne] * coefpa * acs / (ec * Z_mean * sqepsi);
+        const double r0_a = awq * coefpa * acs / (ec * Z_mean * sqepsi);
         double& r_adda_a = adda_a[na][ns][ne];
-        r_adda_a = r1_a + r2_a + fruth;
-        if (r_adda_a < 0.0) r_adda_a = 0.0;
+        r_adda_a = std::max(r0 * (log1C[ne] + log2C[ne]) + fruth, 0.);
 #endif
         if (ec > hmd->min_ioniz_pot) {
           r_adda += cher[na][ns][ne];
@@ -289,32 +357,17 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
   double emin = hmd->energy_mesh->get_emin();
   double emax = hmd->energy_mesh->get_emax();
 
-  quanC = t_integ_step_ar<double, std::vector<double>,
-                          PointCoorMesh<double, const double*> >(
-              pcm_e, addaC, emin, emax, 0) *
-          hmd->xeldens;
+  const double rho = hmd->xeldens;
+  quanC = integrate(pcm_e, addaC, emin, emax, 0) * rho;
+  meanC = integrate(pcm_e, addaC, emin, emax, 1) * rho;
 
 #ifndef EXCLUDE_A_VALUES
-  quanC_a = t_integ_step_ar<double, std::vector<double>,
-                            PointCoorMesh<double, const double*> >(
-                pcm_e, addaC_a, emin, emax, 0) *
-            hmd->xeldens;
-#endif
-
-  meanC = t_integ_step_ar<double, std::vector<double>,
-                          PointCoorMesh<double, const double*> >(
-              pcm_e, addaC, emin, emax, 1) *
-          hmd->xeldens;
-
-#ifndef EXCLUDE_A_VALUES
-  meanC_a = t_integ_step_ar<double, std::vector<double>,
-                            PointCoorMesh<double, const double*> >(
-                pcm_e, addaC_a, emin, emax, 1) *
-            hmd->xeldens;
+  quanC_a = integrate(pcm_e, addaC_a, emin, emax, 0) * rho;
+  meanC_a = integrate(pcm_e, addaC_a, emin, emax, 1) * rho;
 #endif
   meanC1 = meanC;
   const double coef = fine_structure_const * fine_structure_const * q2 * twopi /
-                      (electron_mass_c2 * beta2) * hmd->xeldens;
+                      (electron_mass_c2 * beta2) * rho;
   if (s_simple_form) {
     if (!s_primary_electron) {
       if (max_etransf > hmd->energy_mesh->get_e(qe)) {
@@ -336,7 +389,7 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
         double e2 = max_etransf;
         meanC1 += coef *
                   (log(e2 / e1) - beta2 / max_etransf * (e2 - e1) +
-                   (e2 * e2 - e1 * e1) / (4.0 * particle_ener * particle_ener));
+                   (e2 * e2 - e1 * e1) / (4.0 * ener * ener));
       }
 #ifndef EXCLUDE_A_VALUES
       meanC1_a = meanC_a;
@@ -345,60 +398,40 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
         double e2 = max_etransf;
         meanC1_a += coef * (log(e2 / e1) - beta2 / max_etransf * (e2 - e1) +
                             (e2 * e2 - e1 * e1) /
-                                (4.0 * particle_ener * particle_ener));
+                                (4.0 * ener * ener));
       }
 #endif
     }
   }
 
-  meaneleC = meanC / hmd->W;
-  meaneleC1 = meanC1 / hmd->W;
-
   for (long na = 0; na < qa; na++) {
-    long qs = hmd->apacs[na]->get_qshell();
+    const long qs = hmd->apacs[na]->get_qshell();
     for (long ns = 0; ns < qs; ns++) {
-      quan[na][ns] = t_integ_step_ar<double, std::vector<double>,
-                                     PointCoorMesh<double, const double*> >(
-                         pcm_e, adda[na][ns], emin, emax, 0) *
-                     hmd->xeldens;
+      quan[na][ns] = integrate(pcm_e, adda[na][ns], emin, emax, 0) * rho;
+      mean[na][ns] = integrate(pcm_e, adda[na][ns], emin, emax, 1) * rho;
 #ifndef EXCLUDE_A_VALUES
-      quan_a[na][ns] = t_integ_step_ar<double, std::vector<double>,
-                                       PointCoorMesh<double, const double*> >(
-                           pcm_e, adda_a[na][ns], emin, emax, 0) *
-                       hmd->xeldens;
-#endif
-      mean[na][ns] = t_integ_step_ar<double, std::vector<double>,
-                                     PointCoorMesh<double, const double*> >(
-                         pcm_e, adda[na][ns], emin, emax, 1) *
-                     hmd->xeldens;
-#ifndef EXCLUDE_A_VALUES
-      mean_a[na][ns] = t_integ_step_ar<double, std::vector<double>,
-                                       PointCoorMesh<double, const double*> >(
-                           pcm_e, adda_a[na][ns], emin, emax, 1) *
-                       hmd->xeldens;
+      quan_a[na][ns] = integrate(pcm_e, adda_a[na][ns], emin, emax, 0) * rho;
+      mean_a[na][ns] = integrate(pcm_e, adda_a[na][ns], emin, emax, 1) * rho;
 #endif
     }
   }
 
   for (long na = 0; na < qa; na++) {
-    long qs = hmd->apacs[na]->get_qshell();
+    const long qs = hmd->apacs[na]->get_qshell();
     for (long ns = 0; ns < qs; ns++) {
-      if (quan[na][ns] > 0.0)
-#ifndef EXCLUDE_VAL_FADDA
-        val_fadda[na][ns] =
-#endif
-            t_hispre_step_ar<double, std::vector<double>,
-                             PointCoorMesh<double, const double*> >(
-                pcm_e, adda[na][ns], fadda[na][ns]);
-
+      if (quan[na][ns] > 0.0) {
+        const double s = cdf(pcm_e, adda[na][ns], fadda[na][ns]);
+        if (fabs(s * rho - quan[na][ns]) > 1.e-10) {
+          std::cerr << "Heed::EnTransfCS: Integrals differ (warning).\n";
+        }
+      }
 #ifndef EXCLUDE_A_VALUES
-      if (quan_a[na][ns] > 0.0)
-#ifndef EXCLUDE_VAL_FADDA
-        val_fadda_a[na][ns] =
-#endif
-            t_hispre_step_ar<double, std::vector<double>,
-                             PointCoorMesh<double, const double*> >(
-                pcm_e, adda_a[na][ns], fadda_a[na][ns]);
+      if (quan_a[na][ns] > 0.0) {
+        const double s = cdf(pcm_e, adda_a[na][ns], fadda_a[na][ns]);
+        if (fabs(s * rho - quan_a[na][ns]) > 1.e-10) {
+          std::cerr << "Heed::EnTransfCS: Integrals differ (warning).\n";
+        }
+      }
 #endif
     }
   }
@@ -415,9 +448,6 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
   chereC.clear();
   chereCangle.clear();
   Rruth.clear();
-#ifdef DEBUG_EnTransfCS
-  truth.clear();
-#endif
   /*
   std::ofstream dcsfile;
   dcsfile.open("dcs.txt", std::ios::out);
@@ -429,29 +459,15 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
   dcsfile.close();
   */
   addaC.clear();
-#ifndef EXCLUDE_A_VALUES
-  addaC_a.clear();
-#endif
   cher.clear();
-#ifndef EXCLUDE_A_VALUES
-  cher_a.clear();
-#endif
   fruth.clear();
   adda.clear();
-#ifndef EXCLUDE_A_VALUES
-  adda_a.clear();
-#endif
-#ifndef EXCLUDE_A_VALUES
-  fadda_a.clear();
-#endif
-#ifndef EXCLUDE_VAL_FADDA
-  val_fadda.clear();
-#ifndef EXCLUDE_A_VALUES
-  val_fadda_a.clear();
-#endif
-#endif
   mean.clear();
 #ifndef EXCLUDE_A_VALUES
+  addaC_a.clear();
+  cher_a.clear();
+  adda_a.clear();
+  fadda_a.clear();
   mean_a.clear();
 #endif
 }
@@ -461,7 +477,7 @@ void EnTransfCS::print(std::ostream& file, int l) const {
   Ifile << "EnTransfCS(l=" << l << "):\n";
   indn.n += 2;
   Ifile << "particle_mass=" << particle_mass
-        << " particle_ener=" << particle_ener
+        << "particle_ener=" << particle_mass * (gamma_1 + 1.)
         << " particle_charge=" << particle_charge << std::endl;
   Ifile << "max_etransf=" << max_etransf << std::endl;
   Ifile << "s_primary_electron=" << s_primary_electron << std::endl;
@@ -470,34 +486,23 @@ void EnTransfCS::print(std::ostream& file, int l) const {
 #ifndef EXCLUDE_A_VALUES
   Ifile << "quanC=" << quanC << " quanC_a=" << quanC_a << '\n';
   Ifile << "meanC=" << meanC << " meanC_a=" << meanC_a << '\n';
-  Ifile << "meaneleC=" << meaneleC << '\n';
   Ifile << "meanC1=" << meanC1 << " meanC1_a=" << meanC1_a << '\n';
 #else
   Ifile << "quanC=" << quanC << '\n';
   Ifile << "meanC=" << meanC << '\n';
-  Ifile << "meaneleC=" << meaneleC << '\n';
   Ifile << "meanC1=" << meanC1 << '\n';
 #endif
-  Ifile << " meaneleC1=" << meaneleC1 << '\n';
   if (l > 2) {
     long qe = hmd->energy_mesh->get_q();
     long ne;
     if (l > 4) {
-#ifdef DEBUG_EnTransfCS
-      Ifile << "       enerc,      log1C,      log2C,      chereC,     addaC, "
-               "chereCangle     Rruth      truth    length_y0\n";
-#else
       Ifile << "       enerc,      log1C,      log2C,      chereC,     addaC, "
                "chereCangle   Rruth   length_y0\n";
-#endif
       for (ne = 0; ne < qe; ne++) {
         Ifile << std::setw(12) << hmd->energy_mesh->get_ec(ne) << std::setw(12)
               << log1C[ne] << std::setw(12) << log2C[ne] << std::setw(12)
               << chereC[ne] << std::setw(12) << addaC[ne] << std::setw(12)
               << chereCangle[ne] << std::setw(12) << Rruth[ne]
-#ifdef DEBUG_EnTransfCS
-              << std::setw(12) << truth[ne]
-#endif
               << std::setw(12) << length_y0[ne] << '\n';
       }
     }
@@ -518,26 +523,16 @@ void EnTransfCS::print(std::ostream& file, int l) const {
           Ifile << "quan_a    =" << std::setw(13) << quan_a[na][ns]
                 << " mean_a=" << std::setw(13) << mean_a[na][ns] << '\n';
 #endif
-#ifndef EXCLUDE_VAL_FADDA
-          Ifile << "val_fadda=" << std::setw(13) << val_fadda[na][ns]
-#ifndef EXCLUDE_A_VALUES
-                << " val_fadda_a=" << std::setw(13) << val_fadda_a[na][ns]
-#endif
-                << '\n';
-#endif
           if (l > 5) {
             Ifile << "   enerc,        cher,       cher_a,     fruth,   adda, "
                      "  adda_a,  fadda,   fadda_a\n";
             for (ne = 0; ne < qe; ne++) {
               Ifile << std::setw(12)
                     << hmd->energy_mesh->get_ec(ne)
-                       //    << std::setw(12) << flog1[na][ns][ne]
-                       //    << std::setw(12) << flog2[na][ns][ne]
                     << std::setw(12) << cher[na][ns][ne]
 #ifndef EXCLUDE_A_VALUES
                     << std::setw(12) << cher_a[na][ns][ne]
 #endif
-                  //    << std::setw(12) << ruth[na][ns][ne]
                     << std::setw(12) << fruth[na][ns][ne] << std::setw(12)
                     << adda[na][ns][ne]
 #ifndef EXCLUDE_A_VALUES
