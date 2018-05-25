@@ -2,6 +2,7 @@
 #define VOLUME_H
 #include <iostream>
 #include <vector>
+#include <cstring>
 
 #include "wcpplib/geometry/vec.h"
 #include "wcpplib/geometry/trajestep.h"
