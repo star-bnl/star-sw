@@ -456,6 +456,7 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
   }
   dirs[1] = dirs[0]->GetDirectory(TracksVertices[0]); assert(dirs[1]);
   dirs[1]->cd(); 
+  if (IAttr("PiDPlots")) {
   // PiD block
   // dE/dx and ToF block for matched global and  primary tracks
   for (Int_t gp = kGlobal; gp < kTotalT; gp++) { // TODO
@@ -550,6 +551,7 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
  }
       }
     }
+  }
   }
   PlotName_t geant[4] = {
     {kNotDefined, "GiD",    "Geant ID for all MC tracks"},
@@ -884,6 +886,7 @@ void StMuMcAnalysisMaker::FillTrackPlots()
       }
     }
   }
+ if (IAttr("PiDPlots")) {
   // dE/dx && ToF block
   StThreeVectorD momentum = Track->helix().momentum(field);
   Double_t pMomentum = momentum.mag();
@@ -927,6 +930,7 @@ void StMuMcAnalysisMaker::FillTrackPlots()
       break;
     }
   }
+ }
       }
 #endif /* __NoOfPoint__ */
     }
@@ -2054,12 +2058,14 @@ void StMuMcAnalysisMaker::Draw(Option_t *option){
   Chapter = "1.2"; // nPng = 0;
   out << "<H2>" << Chapter.Data() << ". Track reconstuction efficiencies.</H2>" << endl;
   DrawEff();
+  if (IAttr("PiDPlots")) {
   Chapter = "1.3"; // nPng = 0;
   out << "<H2>" << Chapter.Data() << ". TPC dE/dx PiD.</H2>" << endl;
   DrawdEdx();
   Chapter = "1.4"; // nPng = 0;
   out << "<H2>" << Chapter.Data() << ". ToF PiD</H2>" << endl;
   DrawToF();
+    }
   out << "<H1>2. Vertices</H1>" << endl;
   Chapter = "2.1"; // nPng = 0;
   EndHtml();

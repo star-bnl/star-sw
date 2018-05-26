@@ -6,8 +6,8 @@
 <command> 
   cd ${SUBMITTINGDIRECTORY}  
   set Name = `basename $PWD`
-  setenv NODEBUG yes
-  setup 64b
+#  setenv NODEBUG yes
+#  setup 64b
 #  starver TFG18g
   starver .DEV2 
 #  starver TFG17u 

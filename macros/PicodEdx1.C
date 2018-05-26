@@ -1,5 +1,6 @@
 /*
   root.exe 'lMuDst.C(-2,"","RpicoDst","PicoOut.root")' 'PicodEdx1.C+("/net/l404/data/fisyak/Pico/2016/125/17125034/st_physics_17125034_raw_5500079.picoDst.root")'
+  root.exe 'lMuDst.C(-2,"","RpicoDst","PicoOut.root")' 'PicodEdx1.C+(")/gpfs01/star/pwg/fisyak/Pico/2016/113/17113001/st_physics_17113001_raw_4000028.picoDst.root")'
 */
 #define DEBUG
 //#define __SPARSE__
@@ -42,7 +43,7 @@
 #define ClassStMessMgr
 #define StMessMgr Int_t
 #include "StPicoDstMaker/StPicoDstMaker.h"
-#include "StPicoDstMaker/StPicoDst.h"
+#include "StPicoEvent/StPicoDst.h"
 #include "StdEdxY2Maker/dEdxHist.h"
 #include "StdEdxY2Maker/StPidStatus.h"
 #undef  StMessMgr
