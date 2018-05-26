@@ -776,12 +776,12 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	tof += tpc_hit->tof;
 	Double_t driftLength = TrackSegmentHits[nSegHits].coorLS.position().z() + tof*gStTpcDb->DriftVelocity(sector); 
 	// Ignore hits outside of drift region with off ser margin
-	if (driftLength > 250. || driftLength < -1.0) {continue;}
+	if (driftLength > 250. || driftLength < -1.0) {sortedIndex++; continue;} 
 	if (driftLength <= 0) {
 	  if ((row >  St_tpcPadConfigC::instance()->numberOfInnerRows(sector) && driftLength > -gStTpcDb->WirePlaneGeometry()->outerSectorAnodeWirePadPlaneSeparation()) ||
 	      (row <= St_tpcPadConfigC::instance()->numberOfInnerRows(sector) && driftLength > -gStTpcDb->WirePlaneGeometry()->innerSectorAnodeWirePadPlaneSeparation())) 
 	    driftLength = TMath::Abs(driftLength);
-	  else {continue;}
+	  else {sortedIndex++; continue;}
 	}
 	TrackSegmentHits[nSegHits].coorLS.position().setZ(driftLength); PrPP(Make,TrackSegmentHits[nSegHits].coorLS);
 	// useT0, don't useTau
