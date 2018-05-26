@@ -274,6 +274,8 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
     gMessMgr->Warning() << "No TPC Hits found for this event!" << endm;
     return kStWarn;
   }
+  Float_t DVW = gStTpcDb->DriftVelocity(1), DVE = gStTpcDb->DriftVelocity(13);
+  Float_t freq  = gStTpcDb->Electronics()->samplingFrequency();
   StMcTpcHitCollection* mcHits = 0;
   if (mEvent)  mcHits = mEvent->tpcHitCollection();
   StSPtrVecTrackNode& trackNode = rEvent->trackNodes();
@@ -354,8 +356,8 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
       fCluster->SetEventNo(GetEventNumber());
       fCluster->AddRcTrack(&track);
       fCluster->AddRcHit(rHit);
-      fCluster->SetDriftVelocities(gStTpcDb->DriftVelocity(1),gStTpcDb->DriftVelocity(13));
-      fCluster->SetFrequency(gStTpcDb->Electronics()->samplingFrequency());
+      fCluster->SetDriftVelocities(DVW,DVE);
+      fCluster->SetFrequency(freq);
       fCluster->SetNofPV(rEvent->numberOfPrimaryVertices());
       fCluster->SetNoTracksAtBestPV(NoTracks);
       if (primVtx)
