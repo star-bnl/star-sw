@@ -61,8 +61,8 @@ void Load() {
     gSystem->Load("StDbBroker.so"); 
     gSystem->Load("St_db_Maker.so");
   }
-  dbMk = new St_db_Maker("db","MySQL:StarDb");
-  //  dbMk = new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","$PWD/StarDb");
+  //  dbMk = new St_db_Maker("db","MySQL:StarDb");
+  dbMk = new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","$PWD/StarDb");
   dbMk->SetDebug(1);
   //  dbMk->SetFlavor("ofl+sim");
 //   dbMk->SetFlavor("simu","svtWafersPosition"); 
@@ -75,6 +75,7 @@ void Load() {
 //________________________________________________________________________________
 void TpcSecRowB2Nt(const Char_t *tabNam  = 	"Calibrations/tpc/TpcSecRowB"	){ 
   Date_t dates[] = {
+#if 0
     { 19980101,      0},
     { 20000614, 175430},
     { 20010701,      0},
@@ -168,6 +169,11 @@ void TpcSecRowB2Nt(const Char_t *tabNam  = 	"Calibrations/tpc/TpcSecRowB"	){
     { 20151220,    100},
     { 20201210,    100},
     { 20201215,    100},
+#else
+    { 20180225,      31},
+    { 20180426,  121831},
+    { 20180426,  124731},
+#endif
     {        0,      0}
   }; 
   //  dbMk = (St_db_Maker*) chain->Maker("db");
@@ -201,13 +207,14 @@ void TpcSecRowB2Nt(const Char_t *tabNam  = 	"Calibrations/tpc/TpcSecRowB"	){
       TpcSecRowCor_st *gains = table->GetTable();
       for (Int_t sector = 1; sector <= 24; sector++, gains++) {
 	row.sector = sector;
-	for (Int_t r = 1; r <= 45; r++) {
+	for (Int_t r = 1; r <= 72; r++) {
 	  row.row = r;
 	  row.gain = gains->GainScale[r-1];
 	  row.rms  = gains->GainRms[r-1];
 	  FitP->Fill(&row.time);
-	  if (sector == 1 && r == 1) {
-	    cout << "time " << t.AsString() << " s/r " << sector << "/" << r << " gain " <<  row.gain << row.rms << endl;
+	  //	  if (sector == 1 && r == 1) {
+	  if (sector == 20 || sector == 19) {
+	    cout << "time " << t.AsString() << " s/r " << sector << "/" << r << " gain " <<  row.gain << " +/- " << row.rms << endl;
 	  }
 	}
       }
