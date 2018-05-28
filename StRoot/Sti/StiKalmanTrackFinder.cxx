@@ -56,6 +56,10 @@ enum {kMaxTrackPerm = 10000,kMaxEventPerm=10000000};
 
 static const double kRMinTpc =55;
 int StiKalmanTrackFinder::_debug = 0;
+
+//static void printIt(const StiKalmanTrack* trak,const StiKalmanTrackNode *node);
+//static void printSeed(const StiKalmanTrack* trak);
+
 ostream& operator<<(ostream&, const StiTrack&);
 int gLevelOfFind = 0;
 //______________________________________________________________________________
@@ -429,7 +433,6 @@ static int nCall=0; nCall++;
   qa.setNits(track->getGapCount()   );
   if (direction && qa.hits()<5) 	return 0;
   find(track,direction,leadNode,qa);
-assert(qa.hits()==track->getPointCount());
 
   track->setCombUsed(mUseComb);
   track->setFirstLastNode(leadNode);
@@ -571,7 +574,6 @@ assert(direction || leadNode==track->getLastNode());
 	for (hitIter=candidateHits.begin();hitIter!=candidateHits.end();++hitIter)
 	{
 	  stiHit = *hitIter;
-////if (stiHit->detector()!=tDet) 	continue; //?????????????????????????????
           if (leadHit == stiHit) 				continue;
           if (leadHit && leadHit->stHit()==stiHit->stHit())	continue;
           if (!track->legal(stiHit))				continue;
@@ -610,8 +612,8 @@ assert(direction || leadNode==track->getLastNode());
           node->setIHitCand(jHit);
           node->setHit(stiHit);
           status = node->updateNode();
-          if (status)  break;
-          node->setChi2(hitCont.getChi2(jHit));
+          if (status)  break; 
+	  node->setChi2(hitCont.getChi2(jHit));
           if (!direction && node->getX()< kRMinTpc) node->saveInfo(); //Save info for pulls 
         }while(0);
         if (status)  {_trackNodeFactory->free(node); continue;}
@@ -710,4 +712,39 @@ bool CloserAngle::operator()(const StiDetector*lhs, const StiDetector* rhs)
   double rhsda = fabs(rhsa-_refAngle); if (rhsda>3.1415) rhsda-=3.1415;
   return lhsda<rhsda;
 }
-
+#if 0
+//______________________________________________________________________________
+static void printIt(const StiKalmanTrack* trak,const StiKalmanTrackNode *node)
+{
+static int numb=0;
+ const auto* det = node->getDetector();
+ const auto* pla =det->getPlacement(); 
+ double rad = pla->getNormalRadius();
+ if (rad > 190 || rad <50) return;
+ const char *na = det->getName().c_str();
+ const char *se = strstr(na,"Sector_"); if (!se   ) return;
+ int sek = atoi(se+7); 			if (sek<=0) return;
+ if (sek>12) sek = 12-sek%12;
+ numb++;
+ printf("BOTOHO.fit %d Sek=%d TkId=%d Z=%g Xi2=%g\t //%s\n"
+       ,numb,sek,trak->getIdDb(),node->z(),node->getChi2(),na);
+}
+//______________________________________________________________________________
+static void printSeed(const StiKalmanTrack* trak)
+{
+static int numb=0;
+ 
+ int n = trak->getNNodes();
+ const StiKalmanTrackNode *node = trak->getFirstNode();
+ double z = node->z();
+ const auto* det = node->getDetector();  
+ const char *na = det->getName().c_str();
+ const char *se = strstr(na,"Sector_"); if (!se   ) return;
+ int sek = atoi(se+7); 			if (sek<=0) return;
+ if (sek>12) sek = 12-sek%12;
+ numb++;
+ printf("BOTOHO\n");
+ printf("BOTOHO.see %d Sek=%d Nhit=%d Z=%g TanL=%g\t //%s\n"  
+       ,numb,sek,n,z,node->getTanL(),na);
+}
+#endif
