@@ -103,8 +103,10 @@ void StiPlacement::setLayerAngle(float layerAng)
   layerAngle = layerAng;
   while (layerAngle< -M_PI) {layerAngle+=2*M_PI;}	
   while (layerAngle>  M_PI) {layerAngle-=2*M_PI;}	
-  int grad = layerAngle/M_PI*1800;
-  layerAngle = grad*M_PI/1800;
+  layerAngle*=1800./M_PI;
+  if (layerAngle<0) layerAngle-=0.5;
+  else              layerAngle+=0.5;
+  layerAngle = int(layerAngle)*M_PI/1800;
 }
 	
 	
