@@ -336,8 +336,8 @@ UInt_t  StiDetectorBuilder::getNSectors(UInt_t row) const
 //________________________________________________________________________________
 StiDetector * StiDetectorBuilder::getDetector(UInt_t row, UInt_t sector) const
 {
-  assert(row<_detectors.size());
-  assert(sector<_detectors[row].size());
+  if(row   >=_detectors.size()) 	return 0;
+  if(sector>=_detectors[row].size()) 	return 0;;
   return _detectors[row][sector];
 }
 
@@ -350,6 +350,7 @@ assert(!_detectors[row][sector]);
 }
 
 
+//________________________________________________________________________________
 void StiDetectorBuilder::Print() const
 {
    std::cout << "StiDetectorBuilder::Print(): " << getName() << std::endl;
@@ -357,7 +358,16 @@ void StiDetectorBuilder::Print() const
 }
 
 
+//________________________________________________________________________________
 ostream& operator<<(ostream& os, const DetectorMapPair& detMapEntry)
 {
    return os << *detMapEntry.second;
+}
+//________________________________________________________________________________
+const char* StiDetectorBuilder::getOpt(const char* opt) const
+{
+
+  TString ts(" "); ts+=opt; ts+=" ";
+  const char *c = strstr(_opt.Data(),ts.Data());
+  return (c)? c+1:0;
 }
