@@ -63,7 +63,7 @@ public:
   virtual UInt_t  getNRows() const {return _detectors.size();}
   virtual UInt_t  getNSectors(UInt_t row=0) const;
   virtual void setNSectors(UInt_t row, UInt_t nSectors) {
-    setNRows(row+1);if (_detectors[row].size() < nSectors) _detectors[row].resize(nSectors);
+    setNRows(row+1);if (_detectors[row].size() < nSectors) _detectors[row].resize(nSectors+1,0);
   }
   virtual bool hasMore() const;
   virtual StiDetector* next();
@@ -71,8 +71,11 @@ public:
   virtual void buildDetectors(StMaker&source);
 
   double nice(double angle) const;
-  void setGroupId(int id) 				{ _groupId = id;}
-  int  getGroupId() const 				{return _groupId;}
+  void setGroupId(int id) 		{ _groupId = id;}
+  int  getGroupId() const 		{return _groupId;}
+  void setOpt(const char *opt)		{_opt+=" ";_opt+=opt;_opt+=" ";};
+  const char* getOpt() const		{return _opt.Data();};
+  const char* getOpt(const char* opt) const;
   void setTrackingParameters(const StiTrackingParameters & pars);
   StiTrackingParameters *getTrackingParameters() 	{ return  _trackingParameters;}
   Factory<StiDetector>* getDetectorFactory() 		{return _detectorFactory;}
