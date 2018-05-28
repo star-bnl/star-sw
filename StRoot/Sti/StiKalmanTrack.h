@@ -287,7 +287,7 @@ class StiKalmanTrack : public StiTrack
   int rejectByHitSet()  const;
   int idTruth(int *qu=0) const;
 
- void test(const char *txt="")  const;
+ void test(const char *txt="Qwerty")  const;
   
   typedef enum{ // type of return value for the refit() procedure
     kNoErrors = 0,
