@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.175.2.4 2018/05/02 15:33:49 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.175.2.5 2018/05/28 22:59:50 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.175.2.5  2018/05/28 22:59:50  perev
+ * Implement gemini
+ *
  * Revision 2.175.2.4  2018/05/02 15:33:49  perev
  * kMaxEta 1.5==>1.25
  *
@@ -1105,7 +1108,6 @@ StiDebug::Break(nCall);
   }
    
   position = propagate(endVal,shapeCode,dir); 
-StiDebug::Count("insideL",position); 		
 
   if (position) return position;
   assert(mFP.x() > 0.);
@@ -1257,7 +1259,15 @@ StiDebug::Break(nCall);
     mFP.x()       = mgP.x2;
     mFP._sinCA   = mgP.sinCA2;
     mFP._cosCA   = mgP.cosCA2;
-    ians = locate(); if (!ians) 			break;
+    ians = locate(); 
+    do {
+      if (ians!=kOutZ)	break;
+      const auto *gemini = getDetector()->getSplit(); 
+      if (!gemini) 	break;
+      ians = 0;
+    } while(0);
+    		
+    if (!ians ) 	break;
   }
 
   if (ians) 						return ians;
