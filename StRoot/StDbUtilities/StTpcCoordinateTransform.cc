@@ -1,7 +1,7 @@
 //#define IRAK
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.42.6.2 2018/05/02 19:41:33 perev Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.42.6.3 2018/05/28 23:56:26 perev Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -17,6 +17,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.42.6.3  2018/05/28 23:56:26  perev
+ * Add backward compatibility
+ *
  * Revision 1.42.6.2  2018/05/02 19:41:33  perev
  * Supress some Irakli correction
  *
@@ -243,6 +246,7 @@
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "TMath.h"
+#include "TSystem.h"
 #include "StThreeVectorD.hh"
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
 using namespace units;
@@ -348,7 +352,10 @@ Double_t StTpcCoordinateTransform::xFromPad(Int_t sector, Int_t row, Double_t pa
 //
 //Local Transformation...
 //________________________________________________________________________________
-Double_t StTpcCoordinateTransform::zFromTB(Double_t tb, Int_t sector, Int_t row) const {
+Double_t StTpcCoordinateTransform::zFromTB(Double_t tb, Int_t sector, Int_t row) const 
+{
+static const char *zFromTBcorr = gSystem->Getenv("zFromTBcorr");
+
   if (row > St_tpcPadConfigC::instance()->numberOfRows(sector)) row = St_tpcPadConfigC::instance()->numberOfRows(sector);
   Double_t trigT0 = StTpcDb::instance()->triggerTimeOffset()*1e6;         // units are s
 #if 0
@@ -358,18 +365,19 @@ Double_t StTpcCoordinateTransform::zFromTB(Double_t tb, Int_t sector, Int_t row)
   Double_t elecT0 = StTpcDb::instance()->Electronics()->tZero();          // units are us 
   Double_t sectT0 = St_tpcPadrowT0C::instance()->T0(sector,row);// units are us 
   Double_t t0 = trigT0 + elecT0 + sectT0;
-#ifndef IRAK
   Double_t time = t0 + (tb + St_tpcSectorT0offsetC::instance()->t0offset(sector))*mTimeBinWidth;
-#else
+if (zFromTBcorr) {
   Int_t l = sector;
-  if ( St_tpcPadConfigC::instance()->IsRowInner(sector,row)) l += 24;
-  Double_t time = t0 + (tb + St_tpcSectorT0offsetC::instance()->t0offset(l))*mTimeBinWidth; 
-#endif
+  if ( St_tpcPadConfigC::instance()->isInnerPadRow(sector,row)) l += 24;
+  time = t0 + (tb + St_tpcSectorT0offsetC::instance()->t0offset(l))*mTimeBinWidth; 
+}
   Double_t z = StTpcDb::instance()->DriftVelocity(sector)*1e-6*time;
   return z;
 }
 //________________________________________________________________________________
-Double_t StTpcCoordinateTransform::tBFromZ(Double_t z, Int_t sector, Int_t row) const {
+Double_t StTpcCoordinateTransform::tBFromZ(Double_t z, Int_t sector, Int_t row) const 
+{
+static const char *tbFromZcorr = gSystem->Getenv("tbFromZcorr");
   if (row > St_tpcPadConfigC::instance()->numberOfRows(sector)) row = St_tpcPadConfigC::instance()->numberOfRows(sector);
   Double_t trigT0 = StTpcDb::instance()->triggerTimeOffset()*1e6;         // units are s
 #if 0
@@ -380,13 +388,12 @@ Double_t StTpcCoordinateTransform::tBFromZ(Double_t z, Int_t sector, Int_t row) 
   Double_t sectT0 = St_tpcPadrowT0C::instance()->T0(sector,row);// units are us 
   Double_t t0 = trigT0 + elecT0 + sectT0;
   Double_t time = z / (StTpcDb::instance()->DriftVelocity(sector)*1e-6);
-#ifndef IRAK
   Double_t tb = (time - t0)/mTimeBinWidth - St_tpcSectorT0offsetC::instance()->t0offset(sector);
-#else
+if(tbFromZcorr) {
   Int_t l = sector;
-  if ( St_tpcPadConfigC::instance()->IsRowInner(sector,row)) l += 24;
-  Double_t tb = (time - t0)/mTimeBinWidth - St_tpcSectorT0offsetC::instance()->t0offset(l);
-#endif
+  if ( St_tpcPadConfigC::instance()->isInnerPadRow(sector,row)) l += 24;
+  tb = (time - t0)/mTimeBinWidth - St_tpcSectorT0offsetC::instance()->t0offset(l);
+}
   return tb;
 }
 //________________________________________________________________________________
