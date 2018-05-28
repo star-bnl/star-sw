@@ -57,7 +57,8 @@ void StiTpcDetectorBuilder::useVMCGeometry()
 
   int buildFlagDef = 0; // 0 - long, West+East together
   			// 1 - split,West&East separately
-  St_tpcPadConfigC *tpcPadConfigC = St_tpcPadConfigC::instance();
+  if (getOpt("split")) buildFlagDef|=1;
+static St_tpcPadConfigC *tpcPadConfigC = St_tpcPadConfigC::instance();
 
 
   if (debug>1) StiVMCToolKit::SetDebug(1);
@@ -79,12 +80,8 @@ void StiTpcDetectorBuilder::useVMCGeometry()
   if (gGeoManager->GetVolume("TpcRefSys")) newRefSystem = kTRUE;
 
   // change to +1 instead of +2 to remove the ofc.
-  int nRows = St_tpcPadConfigC::instance()->numberOfRows(20);// Only sensitive detectors; iTPC sector 20
+  int nRows = tpcPadConfigC->numberOfRows(20);// Only sensitive detectors; iTPC sector 20
   setNRows(nRows);
-  int NostiSectors = 12;
-  //  if (nRows != St_tpcPadConfigC::instance()->numberOfRows(1)) NostiSectors = 24;
-  //  for (row = 1; row <= nRows; row++) setNSectors(row-1 ,NostiSectors);
-  // Get Materials
   TGeoVolume *volT = gGeoManager->GetVolume("TPAD"); 
   if (! volT) volT = gGeoManager->GetVolume("tpad"); 
   assert (volT);
@@ -99,37 +96,44 @@ void StiTpcDetectorBuilder::useVMCGeometry()
 //  double ionization = _gasMat->getIonization();
 //   StiElossCalculator *gasElossCalculator =  new StiElossCalculator(_gasMat->getZOverA(), ionization*ionization,
 // 								   _gasMat->getA(), _gasMat->getZ(), _gasMat->getDensity());
-  StDetectorDbTpcRDOMasks *s_pRdoMasks = StDetectorDbTpcRDOMasks::instance();
   StiPlanarShape *pShape;
   int nRowsWE[2],sectorWE[2];
 
-  for(int stiSector = 1; stiSector <= NostiSectors; stiSector++) {
+  for(int stiSector = 1; stiSector <= 12; stiSector++) {
     sectorWE[0] = stiSector;
     sectorWE[1] = 24-(stiSector)%12;
     nRowsWE[0]  = tpcPadConfigC->numberOfRows(sectorWE[0]);
     nRowsWE[1]  = tpcPadConfigC->numberOfRows(sectorWE[1]);
     int buildFlag = buildFlagDef;
     if (nRowsWE[0]!=nRowsWE[1]) buildFlag|=1;
-    int nWE = (buildFlag) ? 2:1;
-
-    for (int iWE=0;iWE<nWE;iWE++) {
+    for (int iWE=0;iWE<2;iWE++) {
       int mySector = sectorWE[iWE];
       int myInnNRows  = tpcPadConfigC->innerPadRows(mySector);
       for (int iRow=1;iRow<= nRowsWE[iWE];iRow++) {   
-	float fRadius = St_tpcPadConfigC::instance()->radialDistanceAtRow(mySector,iRow);
+        if (iWE && getDetector(iRow-1,mySector-1)) continue;
+	float fRadius = tpcPadConfigC->radialDistanceAtRow(mySector,iRow);
 	TString name(Form("Tpc/Sector_%d,Padrow_%d",mySector,iRow));
-        int inner = (iRow<=myInnNRows);
+        if (iRow<=myInnNRows && myInnNRows!=13) 
+           name = Form("iTpc/Sector_%d,Padrow_%d",mySector,iRow);
+	int inner = (iRow<=myInnNRows);
+        int active = isActive(mySector,iRow);
+        int myBuildFlag = buildFlag|iWE;
+        myBuildFlag |= !active;
+        if (!(myBuildFlag&1)) {
+	  int activeNex = isActive(sectorWE[1],iRow);
+          myBuildFlag|=!activeNex;
+        }
         double dZ,Zshift=0,thick;
         if (inner) {
-	  dZ= tpcPadConfigC->innerSectorPadPlaneZ(mySector);
+	  dZ     = tpcPadConfigC->innerSectorPadPlaneZ(mySector);
           thick  = tpcPadConfigC->innerSectorPadLength(mySector);
         } else {
-	  dZ= tpcPadConfigC->outerSectorPadPlaneZ(mySector);
+	  dZ     = tpcPadConfigC->outerSectorPadPlaneZ(mySector);
           thick  = tpcPadConfigC->outerSectorPadLength(mySector);
         }
         double pitch = tpcPadConfigC->PadPitchAtRow(mySector,iRow);
         int nPads    = tpcPadConfigC->numberOfPadsAtRow(mySector,iRow);
-        if (buildFlag&1) { //Split case
+        if (myBuildFlag&1) { //Split case
           dZ/=2;
 	  Zshift = (iWE)? -dZ:dZ;  
 	}
@@ -146,30 +150,13 @@ void StiTpcDetectorBuilder::useVMCGeometry()
 	pPlacement->setLayerAngle(phi);
 	pPlacement->setRegion(StiPlacement::kMidRapidity);
 	pPlacement->setNormalRep(phi, fRadius, 0);
+	pPlacement->setLayerAngle(phi);
 	name = Form("Tpc/Padrow_%d/Sector_%d", iRow, mySector);
 	// fill in the detector object and save it in our vector
 	StiDetector *pDetector = _detectorFactory->getInstance();
 	pDetector->setName(name.Data());
 	pDetector->setIsOn(kTRUE);
-	Bool_t west = kTRUE;
-	Bool_t east = kTRUE;
-#if 0
-	if (NostiSectors == 12 && nRows == 45) { // ! iTpx
-	  Bool_t west = s_pRdoMasks->isRowOn(mySector, iRow);
-	  Bool_t east = s_pRdoMasks->isRowOn( 24-(mySector)%12, iRow);
-	  if (west) {
-	    int sec = sector;
-	    west = St_tpcAnodeHVavgC::instance()->livePadrow(sec,row) &&
-	      St_tpcPadGainT0BC::instance()->livePadrow(sec,row);
-	  }
-	  if (east) {
-	    int sec = 24-(sector)%12;
-	    east = St_tpcAnodeHVavgC::instance()->livePadrow(sec,row) &&
-	      St_tpcPadGainT0BC::instance()->livePadrow(sec,row);
-	  }
-	}
-#endif
-	pDetector->setIsActive(new StiTpcIsActiveFunctor(_active,west,east));
+	pDetector->setIsActive(new StiIsActiveFunctor(active));
 	pDetector->setIsContinuousMedium(kTRUE);
 	pDetector->setIsDiscreteScatterer(kFALSE);
 	pDetector->setMaterial(_gasMat);
@@ -181,16 +168,33 @@ void StiTpcDetectorBuilder::useVMCGeometry()
 	else
 	  pDetector->setHitErrorCalculator(StiTpcOuterHitErrorCalculator::instance());
 	//      pDetector->setElossCalculator(gasElossCalculator);
+{
+	double myPhi = fabs(pPlacement->getLayerAngle()*180/M_PI);
+           int iiPhi = myPhi+0.5;
+	   iiPhi =  (iiPhi/30)*30;      
+        assert (fabs(myPhi-iiPhi)<1e-1);
+}
 	pDetector->setKey(1,iRow);
 	pDetector->setKey(2,mySector);
+        do {		//define gemini
+          if (!iWE) 							break;
+	  auto *qDetector = getDetector(iRow-1,sectorWE[0]-1);
+          auto *qShape = qDetector->getShape();
+          if (fabs(qShape->getThickness()-thick)>0.1*thick) 		break;
+          auto *qPlacement = qDetector->getPlacement();
+          if (fabs(qPlacement->getLayerRadius()-fRadius)>0.1*fRadius) 	break;
+          pDetector->setSplit(qDetector);
+        } while(0);
 
-printf("TpcName = %s sect=%d raw=%d Zc = %g Zl = %g\n"
-       ,pDetector->getName().c_str(),mySector,iRow,Zshift,dZ);
+//         const char *act = (active)? " ":"#";
+// printf("TpcName = %s%s sect=%d row=%d Zc = %g Zl = %g\n"
+//        ,pDetector->getName().c_str(),act,mySector,iRow,Zshift,dZ);
 
 
 
 	add(iRow-1,mySector-1,pDetector); 
-        if (nWE==2) continue;
+        if (myBuildFlag&1) continue;
+        assert(!iWE);
         name+="*"; pDetector->setName(name.Data());
         add(iRow-1,sectorWE[1]-1,pDetector); 
       }// for row
@@ -231,4 +235,24 @@ double StiTpcDetectorBuilder::angle(int sec)
   double ang = (3-sec)*(M_PI/6);
   return ang;
 }
-
+//________________________________________________________________________________
+int StiTpcDetectorBuilder::isActive(int sector,int row) const
+{
+static St_tpcPadConfigC        *tpcPadConfigC = St_tpcPadConfigC::instance();
+static StDetectorDbTpcRDOMasks *s_pRdoMasks   = StDetectorDbTpcRDOMasks::instance();
+  int myInnNRows  = tpcPadConfigC->innerPadRows(sector);
+  if (row<=myInnNRows) {
+    TString ts("deadInner="); ts+=sector;
+    if (getOpt(ts.Data())) return 0;
+  } else {
+    TString ts("deadOuter="); ts+=sector;
+    if (getOpt(ts.Data())) return 0;
+  }
+  int nRows = tpcPadConfigC->numberOfRows(sector);
+  if (nRows != 45) return 1;
+  int we = s_pRdoMasks->isRowOn(sector,row);
+  if (!we) return 0;
+  we = St_tpcAnodeHVavgC::instance()->livePadrow(sector,row) &&
+       St_tpcPadGainT0BC::instance()->livePadrow(sector,row);
+  return we;
+}
