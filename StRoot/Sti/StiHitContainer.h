@@ -182,6 +182,7 @@ public:
   StiHit * getHit();
   bool hasKey(double refangle, double position);
   bool hasDetector(const StiDetector* layer);
+  void print();
  protected:
   // Utility key used in hit retrieval (avoid constructor call per search)
   HitMapToVectorAndEndType::key_type _key; 
