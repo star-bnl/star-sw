@@ -47,12 +47,6 @@ void StiTpcHitLoader::loadHits(StEvent* source,
     const StTpcSectorHitCollection* secHits = tpcHits->sector(sector);
     if (! secHits->numberOfHits()) continue;
     stiSector = toStiSect(sector);
-//     if (_detector->getNSectors() == 24) {
-//       stiSector = sector;
-//     } else {
-//       if (sector<12)      stiSector = sector;
-//       else                stiSector = 11 - (sector-11)%12;
-//     }
     _maxRow = St_tpcPadConfigC::instance()->padRows(sector+1);
     Float_t driftvel = 1e-6*gStTpcDb->DriftVelocity(sector+1); // cm/mkmsec
     for (UInt_t row=_minRow-1; row<_maxRow; row++) {
@@ -63,10 +57,11 @@ void StiTpcHitLoader::loadHits(StEvent* source,
       if (! hitvec.size()) continue;
       const_StTpcHitIterator iter;
       StiHitTest hitTest;
-//      detector = _detector->getDetector(StiRow,stiSector);
       detector = _detector->getDetector(row,sector);
       assert(detector);
-printf("HitLoad %s sect=%d row=%d\n",detector->getName().c_str(),sector+1,row+1);
+      if (!detector->isActive()) continue;
+
+// printf("HitLoad %s sect=%d row=%d\n",detector->getName().c_str(),sector+1,row+1);
       
       for (iter = hitvec.begin();iter != hitvec.end();++iter)        {
         StTpcHit *hit=*iter;
@@ -97,8 +92,8 @@ printf("HitLoad %s sect=%d row=%d\n",detector->getName().c_str(),sector+1,row+1)
         hitTest.add(hit->position().x(),hit->position().y(), hit->position().z());
 	if (hit->sector() <= 12) stiHit->setVz( driftvel);
 	else                     stiHit->setVz(-driftvel);
-//??        _hitContainer->add( stiHit );
-        giveOut(detector,stiSector,row,stiHit);
+       _hitContainer->add( stiHit );
+///     giveOut(detector,stiSector,row,stiHit);
 	noHitsLoaded++;
 	if (debug) {
 	  cout << "add hit S/R =" << sector + 1 << "/" << row + 1 << " to detector " << *detector << endl;
@@ -108,9 +103,9 @@ printf("HitLoad %s sect=%d row=%d\n",detector->getName().c_str(),sector+1,row+1)
 	printf("**** TPC hits too wide (%g) sector=%d row%d\n"
 	       ,hitTest.width(),sector,row);
       }
-      
     }
   }
+//  _hitContainer->print(); 
 //    cout << "StiTpcHitLoader::loadHits(StEvent*) -I- Done with " << noHitsLoaded << " hits" <<  endl;
 }
 //________________________________________________________________________________
