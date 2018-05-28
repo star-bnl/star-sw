@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.148.2.5 2018/04/16 00:49:03 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.148.2.5 2018/04/16 00:49:03 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.148.2.6 2018/05/28 22:23:40 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.148.2.6 2018/05/28 22:23:40 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.148.2.6  2018/05/28 22:23:40  perev
+ * Debug++
+ *
  * Revision 2.148.2.5  2018/04/16 00:49:03  perev
  * Add legal(...) method
  *
@@ -878,7 +881,7 @@ int StiKalmanTrack::getMaxPointCount(int detectorId) const
     if (!detector)						continue;
     StiHit* h = node->getHit();
     if (!h && !detector->isActive(node->getY(),node->getZ()))	continue;
-    if (detectorId && detector->getGroupId() != detectorId) 	continue;
+///VP    if (detectorId && detector->getGroupId() != detectorId) 	continue;
     nPts++;
   }
   return nPts;
@@ -950,7 +953,7 @@ int StiKalmanTrack::getFitPointCount(int detectorId)    const
     if (!node->isFitted())		continue;
     const StiDetector *det = hit->detector();
     if (!det)				continue;  
-    if (detectorId && detectorId!=det->getGroupId())continue;
+///VP    if (detectorId && detectorId!=det->getGroupId())continue;
     fitPointCount++;
   }
   return fitPointCount;
@@ -1503,7 +1506,6 @@ void StiKalmanTrack::removeLastNode()
 int StiKalmanTrack::refit()
 {
   int errType = kNoErrors;
-  
   enum {kMaxIter=30,kPctLoss=10,kHitLoss=3};
   static double defConfidence = StiDebug::dFlag("StiConfidence",0.01);
   int nNBeg = getNNodes(3), nNEnd = nNBeg;
@@ -1593,7 +1595,7 @@ int StiKalmanTrack::refit()
       node->setHit(0);
     }
   }
-  if (fail) setFlag(-1);
+  if ( fail) setFlag(-1);
   return errType;
 }
 //_____________________________________________________________________________
@@ -1902,12 +1904,11 @@ void StiKalmanTrack::test(const char *txt) const
     if (!node->isValid()) continue;
     const StiDetector *det = node->getDetector();
     if  (!det) continue;
-    const auto &P = node->fitPars();
-    double tst = P[0]*P._cosCA+P[1]*P._sinCA;
-    if (tst>=0) continue;
-    tst /= sqrt(P[0]*P[0]+P[1]*P[1]);
-//    assert (tst>=-1e-5);
-//StiDebug::Count("OverKill",tst);
+    const auto* hit = node->getHit();
+    if (!hit) continue;
+    TString ts(txt);ts+="_Fellow";
+  
+    if (hit->detector()!=det) {ts=txt;ts+="_Alien";}
   }
 }
 //_____________________________________________________________________________
@@ -1999,7 +2000,8 @@ int StiKalmanTrack::legal(const StiHit *hit)  const
   if (zL*zF<0) kase|= 4; 	//lst hit in opposite side
   if (qL     ) kase|= 8;	//lst hit is bad
   if (qF     ) kase|=16;	//fst hit is bad
-  if (!ans[kase]) StiDebug::Count("legal0",kase);
-  return 1; ///????????????????????????????????
+
+return 1; ///????????????????????????????????
+
   return ans[kase];
 }
