@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.119.6.2 2018/03/26 23:52:19 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.119.6.3 2018/05/28 23:17:47 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.119.6.3  2018/05/28 23:17:47  perev
+ * Cleanup
+ *
  * Revision 2.119.6.2  2018/03/26 23:52:19  perev
  * Remove wrong asserts
  *
@@ -740,7 +743,7 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
           }
 	  fillTrackCount2++;
 if (kTrack->getPointCount(kTpcId)>10)
-StiHftHits::hftHist("HFTAfterAll",kTrack);//???????????????????????
+StiHftHits::hftHist("HFTAfterAll",kTrack);
           fillPulls(kTrack,gTrack,0);
           if (kTrack->getPointCount()<15) continue;
 	  fillTrackCountG++;

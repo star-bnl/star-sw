@@ -4,13 +4,16 @@
 #include "TGeoManager.h"
 #include "StiDetector.h"
 #include "StMaker.h"
+//_____________________________________________________________________________
 StiMasterDetectorBuilder::StiMasterDetectorBuilder(bool active)
   : StiDetectorBuilder("MasterDetectorBuilder",active)
 {}
 
+//_____________________________________________________________________________
 StiMasterDetectorBuilder::~StiMasterDetectorBuilder()
 {}
 
+//_____________________________________________________________________________
 /*! Reset this builder to a  null state. 
  <p>
  A reset erases all detectors held by this builder.
@@ -20,9 +23,11 @@ void StiMasterDetectorBuilder::reset()
   clear();
 }
 
-/*! Build all the detector groups and their elementary detector components registered with this builder.
+//_____________________________________________________________________________
+/*! Build all the detector groups and their elementary detector components 
+    registered with this builder.
  */
-void StiMasterDetectorBuilder::build(StMaker&source)
+void StiMasterDetectorBuilder::build(StMaker& source)
 {
   //#define __Physics_Node_Clear__
 #ifndef __Physics_Node_Clear__
@@ -56,10 +61,15 @@ void StiMasterDetectorBuilder::build(StMaker&source)
   vector<StiDetectorBuilder*>::iterator iter;
   UInt_t nRows=0;
   for (iter=begin();       iter!=end();       iter++)    {
+    auto *balda = (*iter);
+    assert(balda);
     LOG_INFO << "StiMasterDetectorBuilder::build() -I- Calling Group Builder named:" << (*iter)->getName()<<endm;
-    if (!*iter) {LOG_INFO <<"   pointer is corrupted!!!!!!!!!!!!!!!!!!!"<<endm;}
-    (*iter)->build(source);
-    nRows+=(*iter)->getNRows();
+
+    const char *att = source.SAttr(balda->getName().c_str());
+    if (att) balda->setOpt(att);
+
+    balda->build(source);
+    nRows+=balda->getNRows();
   }
   LOG_INFO << "StiMasterDetectorBuilder::build() -I- Will build local array"<<endm;
   setNRows(nRows);
@@ -92,6 +102,7 @@ void StiMasterDetectorBuilder::build(StMaker&source)
 #endif /* !  __Physics_Node_Clear__ */
   LOG_INFO << "StiMasterDetectorBuilder::build() -I- Done"<<endm;
 }
+//_____________________________________________________________________________
 
 /*! Return true if this builder has not served all detector objects currently registered with it.
  */
@@ -108,7 +119,7 @@ bool StiMasterDetectorBuilder::hasMore() const
     }
   return false;
 }
-
+//_____________________________________________________________________________
 /*! Find and return the next available detector object registered with this builder. Return a null pointer if there are 
 no detector object left to server.
  */
@@ -125,11 +136,13 @@ StiDetector * StiMasterDetectorBuilder::next()
   return 0;
 }
 
+//_____________________________________________________________________________
 void StiMasterDetectorBuilder::add(StiDetectorBuilder *builder)
 {
   push_back(builder);
 }
 
+//_____________________________________________________________________________
 StiDetectorBuilder * StiMasterDetectorBuilder::get(const string & name)
 {
 	// iterate through the list to find the requested object.
@@ -141,10 +154,6 @@ StiDetectorBuilder * StiMasterDetectorBuilder::get(const string & name)
       //LOG_INFO << "StiMasterDetectorBuilder::next() -I- Calling Group Builder named:" << (*iter)->getName()<<endm;
       if((*iter)->isName(name)) return *iter;
     }
-#if 0
-	throw runtime_error("StiMasterDetectorBuilder::get(const string & name) -E- Requested object not found");
-#else
 	cout << "StiMasterDetectorBuilder::get(const string & name) -E- Requested object not found" << endl;
 	assert(0);
-#endif
 }

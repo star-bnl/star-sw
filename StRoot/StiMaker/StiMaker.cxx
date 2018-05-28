@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.235.4.1 2018/02/28 01:49:15 perev Exp $
+// $Id: StiMaker.cxx,v 1.235.4.2 2018/05/28 23:16:58 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -723,33 +723,17 @@ void StiMaker::FinishTracks (int gloPri)
 	nNodes++;
 	if ( hit && node->getChi2()<100) nHits++;
 	node->nudge();
-	if (1 /*node->inside()*/) {
-	  nInside++;
-//          StiDebug::Count(elNames[gloPri],node->getELoss()[0].mELoss);
-        }
      }
      int qa,idt = track->idTruth(&qa);if(idt){};
-//     if (!gloPri) {
-//        StiDebug::Count("GloIdQa",qa);
-//        StiDebug::Count("GloIdQa_vs_nHits",nHits                     ,qa);
-//        StiDebug::Count("GloIdQa_vs_Pt"   ,track->getPt()            ,qa);
-//        StiDebug::Count("GloIdQa_vs_Eta"  ,track->getPseudoRapidity(),qa);
-//      } else {
-//        StiDebug::Count("PriIdQa",qa);
-//        StiDebug::Count("PriIdQa_vs_nHits",nHits                     ,qa);
-//        StiDebug::Count("PriIdQa_vs_Pt"   ,track->getPt()            ,qa);
-//        StiDebug::Count("PriIdQa_vs_Eta"  ,track->getPseudoRapidity(),qa);
-//     }
-//      StiDebug::Count(noNames[gloPri],nNodes );
-//      StiDebug::Count(inNames[gloPri],nInside);
-//      StiDebug::Count(hiNames[gloPri],nHits  );
   }
-//  StiDebug::Count(tkNames[gloPri],nTk );
 }
 
 
-// $Id: StiMaker.cxx,v 1.235.4.1 2018/02/28 01:49:15 perev Exp $
+// $Id: StiMaker.cxx,v 1.235.4.2 2018/05/28 23:16:58 perev Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.235.4.2  2018/05/28 23:16:58  perev
+// Cleanup
+//
 // Revision 1.235.4.1  2018/02/28 01:49:15  perev
 // Debug--
 //
