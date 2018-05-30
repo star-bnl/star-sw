@@ -519,7 +519,7 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].xpad = 2*(CdEdx[NdEdx].pad - 0.5)/Npads - 1.0;
 	CdEdx[NdEdx].yrow = sector + 0.5*((row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) ? 
 					  (row - St_tpcPadConfigC::instance()->innerPadRows(sector) - 0.5)/St_tpcPadConfigC::instance()->innerPadRows(sector) : 
-					  (row - St_tpcPadConfigC::instance()->innerPadRows(sector) - 0.5) / (St_tpcPadConfigC::instance()->numberOfRows(sector) - St_tpcPadConfigC::instance()->innerPadRows(sector)));
+					  (row - St_tpcPadConfigC::instance()->innerPadRows(sector) - 0.5)/(St_tpcPadConfigC::instance()->numberOfRows(sector) - St_tpcPadConfigC::instance()->innerPadRows(sector)));
 	CdEdx[NdEdx].Npads  = tpcHit->padsInHit();
 	CdEdx[NdEdx].Ntbins = tpcHit->pixelsInHit();
 	//	CdEdx[NdEdx].dE     = tpcHit->chargeModified();
