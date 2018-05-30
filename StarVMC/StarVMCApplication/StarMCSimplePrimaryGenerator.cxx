@@ -89,11 +89,9 @@ void StarMCSimplePrimaryGenerator::GeneratePrimary() {
   Double_t pT        = 0;
   if (fOption.Contains("BL",TString::kIgnoreCase)) {
     Double_t p = -1;
-    while (p <= 0 || p > 100) {
-      Double_t bgL10   = fpT_min + (fpT_max - fpT_min)*gRandom->Rndm();
-      Double_t bg      = TMath::Power(10.,bgL10);
-      p       = mass*bg;
-    }
+    Double_t bgL10   = fpT_min + (fpT_max - fpT_min)*gRandom->Rndm();
+    Double_t bg      = TMath::Power(10.,bgL10);
+    p       = mass*bg;
     pT               = p/TMath::CosH(eta);
   } else if (fOption.Contains("mtsq",TString::kIgnoreCase)) {
     if (! dNdpT) {
