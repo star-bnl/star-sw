@@ -97,6 +97,7 @@ TDataSet *CreateTable() {
   row.OmegaTauScaleO        = 1.8  *1.201;  //HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
   // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
   // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
+#if 0
   row.SecRowCorIW[0] = row.SecRowCorIE[0] = 6.99114715017355337e-01;//- TMath::Log(0.533*0.843485) -5.84129e-01 + 4.52885e-01 + 3.09117e-02;
   row.SecRowCorOW[0] = row.SecRowCorOE[0] = 9.79357470004933006e-01;//- TMath::Log(0.512*0.725267) -5.47141e-01 + 5.23937e-01 + 1.19154e-02;
   // SecRow3CGFdaq_2011_pp500LowLum => Inner: 3.26428e-01 - -5.01720e-04*y; Outer: 2.68883e-01 + 1.23403e-04*y
@@ -111,6 +112,7 @@ TDataSet *CreateTable() {
   for (Int_t i = 0; i < 8; i++) {
     b[i] = RowSigmaTrs[i%4];
   }
+#endif
   row.PolyaInner = 1.38;
   row.PolyaOuter = 1.38;
   //  row.T0offset   = 0.50; // From  Lokesh Kumar for Run X
