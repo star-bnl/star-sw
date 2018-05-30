@@ -429,7 +429,7 @@ inline double  StiKalmanTrack::getRapidity()       const
   assert(mass >= 0);
   double e = ::sqrt(mass*mass+p[0]*p[0]+p[1]*p[1]+p[2]*p[2]);
   assert(e >= p[2]);
-  return 0.5*::log(e+p[2]/e-p[2]);
+  return 0.5*::log((e+p[2])/(e-p[2]));
 }
 
 /*!
