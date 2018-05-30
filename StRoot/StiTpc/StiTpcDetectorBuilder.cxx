@@ -30,11 +30,14 @@
 #include "StDetectorDbMaker/St_tpcPadGainT0BC.h"
 //#define TPC_IDEAL_GEOM
 
+//________________________________________________________________________________
 StiTpcDetectorBuilder::StiTpcDetectorBuilder(Bool_t active)
   : StiDetectorBuilder("Tpc",active), _fcMaterial(0){}
 
+//________________________________________________________________________________
 StiTpcDetectorBuilder::~StiTpcDetectorBuilder() {}
 
+//________________________________________________________________________________
 /*! Build all detector components of the TPC.
 The material currently used are P10, and NOMEX. The properties
 of these materials are extracted from the Particle Data Book.
@@ -43,7 +46,7 @@ the inner and outer field cage of the TPC. The padrows  are polygonal with 12  s
 whereas  the field cage are cylindrical. However to match the 12 fold symmetry of the
 TPC, the field cage are artificially segmented into 12 sectors each.
 */
-void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
+void StiTpcDetectorBuilder::buildDetectors(StMaker &source)
 {
   cout << "StiTpcDetectorBuilder::buildDetectors() -I- Started" << endl;
   assert(gStTpcDb);
