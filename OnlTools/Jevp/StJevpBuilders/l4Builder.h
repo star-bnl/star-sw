@@ -43,13 +43,13 @@ class l4Builder : public JevpBuilder {
 		 * @see 
 		 * @author 
 		 */  
-		JevpPlot *HltPlots[45];
+		JevpPlot *HltPlots[47];
 		JevpPlot *BeamPlots[3];
 		JevpPlot *BesGoodPlots[5];
 		JevpPlot *HLTGood2Plots[4];
 		JevpPlot *BesMontinorPlots[2];
-		JevpPlot *FixedTargetPlots[5];
-		JevpPlot *FixedTargetMonitorPlots[5];
+		JevpPlot *FixedTargetPlots[6];
+		JevpPlot *FixedTargetMonitorPlots[6];
 		JevpPlot *HeavyFragmentPlots[1];
 		JevpPlot *DiElectronPlots[10];
 		JevpPlot *DiElectron2TwrPlots[10];
@@ -207,6 +207,9 @@ class l4Builder : public JevpBuilder {
 		TH1D *hLm_VertexZ;
 		TH1I *hglobalMult;
 		TH1I *hprimaryMult;
+		TH1D *hFixed_VertexZ;
+		TH2D* hFixed_VertexXY;
+
 		/*   TH1I *hLmPrimaryMult; */
 
 		TH1D *hVertexX_UPC; 
@@ -402,11 +405,13 @@ class l4Builder : public JevpBuilder {
 
 		//Fixed Target
 		TH2D *hFixedTargetVertexXY;
+		TH2D *hFixedTargetVertexYZ;
 		TH1D *hFixedTargetVr;
 		TH1D *hFixedTarget_VertexZ;
 		TH1D *hFixedTarget_Prim_Eta;
 		TH1D *hFixedTarget_Glob_Eta;
 		TH2D *hFixedTargetMonitorVertexXY;
+		TH2D *hFixedTargetMonitorVertexYZ;
 		TH1D *hFixedTargetMonitorVr;
 		TH1D *hFixedTargetMonitor_VertexZ;
 		TH1D *hFixedTargetMonitor_Prim_Eta;
