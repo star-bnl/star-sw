@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.111 2018/04/11 02:35:57 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.112 2018/06/01 18:21:17 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.112  2018/06/01 18:21:17  jhthomas
+ * Update to UndoPadRow13Distortion() in order to move #define's inside the function as const Int_t's
+ *
  * Revision 1.111  2018/04/11 02:35:57  genevb
  * Distortion smearing by calibration resolutions
  *
@@ -1607,8 +1610,6 @@ void StMagUtilities::UndoTwistDistortion( const Float_t x[], Float_t Xprime[] , 
 //________________________________________
 
 
-#define  NYARRAY       37               // Dimension of the vector to contain the YArray
-#define  NZDRIFT       19               // Dimension of the vector to contain ZDriftArray
 
 /// Pad row 13 distortion
 /*!
@@ -1625,6 +1626,8 @@ void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] , 
   const Float_t SCALE    = 0.192 ;               // Set the scale for the correction
   const Float_t BOX      = 200.0 - GAPRADIUS ;   // Size of the box in which to work
   const Float_t PI       = TMath::Pi() ;
+  const Int_t NZDRIFT =     19 ;              // Dimension of the vector to contain ZDriftArray
+  const Int_t NYARRAY =     37 ;             // Dimension of the vector to contain the YArray
 
   // Note custom grids in R and Z
   // PadRow13 corrections highly focussed near pad row 13 with weak Z dependence.  Radial points on YARRAY
