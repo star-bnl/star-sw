@@ -1,4 +1,5 @@
 TDataSet *CreateTable() { 
+
 // -----------------------------------------------------------------
 // StvTpcOuterHitErrs Allocated rows: 1  Used rows: 1  Row size: 48 bytes
 //  Table: StvKonst_st[0]--> StvKonst_st[0]
@@ -44,9 +45,9 @@ memset(&row,0,tableSet->GetRowSize());
 //		ForwEta version
   row.mMinSeedHitsFw = 4;	/*Min number of seed hits allowed*/
   row.mMaxSeedHitsFw = 6;	/*Max number of seed hits allowed*/
-  row.mMinHitsFw = 4;		/*Min number of hits allowed*/
-  row.mNorHitsFw = 5;		/*Normal number of hits allowed*/
-  row.mGoodHitsFw =5;		/*Good number of hits */
+  row.mMinHitsFw = 3;		/*Min number of hits allowed*/
+  row.mNorHitsFw = 4;		/*Normal number of hits allowed*/
+  row.mGoodHitsFw =4;		/*Good number of hits */
 
 //		ForwEta hitCount hitCount hitCount hitCount hitCount 
   row.mMinTotHitsFw =3;       	/*Min number hits for track*/
@@ -57,8 +58,8 @@ memset(&row,0,tableSet->GetRowSize());
   row.mRxyMaxFw = 207;		//Max radius for tracking
   row.mZMaxFw   = 700;		//Max Z      for tracking
 
-
 tableSet->AddAt(&row);
+tableSet->Print(0,1); 
 // ----------------- end of code ---------------
  return (TDataSet *)tableSet;
 }
