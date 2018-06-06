@@ -1938,6 +1938,14 @@ class Create_and_Position(Position):
         self.block = None
         Position.__init__(self)
 
+
+class Misalign(Operator):
+    def __init__(self):
+        Operator.__init__(self,firstKey='table')
+    def setParent(self,p):
+        self.parent = p        
+
+
 class For(Container):
     """
     For loops in AgML take the form
