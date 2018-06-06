@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2018.cxx,v 2.2 2018/02/22 16:47:20 ullrich Exp $
+ * $Id: StTriggerData2018.cxx,v 2.3 2018/06/06 18:03:59 ullrich Exp $
  *
  * Author: Akio Ogawa, October 13, 2017
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2018.cxx,v $
+ * Revision 2.3  2018/06/06 18:03:59  ullrich
+ * Added fcts: epdNHits, vpdADCSum, vpdMeanTimeDifference (Akio)
+ *
  * Revision 2.2  2018/02/22 16:47:20  ullrich
  * Changes for blind analysis and EPD
  *
@@ -572,6 +575,26 @@ unsigned short StTriggerData2018::epdLayer1(int ch, int prepost) const
     return 0;
 }
 
+unsigned short StTriggerData2018::epdNHits(StBeamDirection eastwest, int prepost) const
+{
+    int buffer = prepostAddress(prepost);
+    if (buffer>=0){
+	if(eastwest==east){
+	    unsigned short dsmEP001OutR = epdLayer1(0, 0);
+	    unsigned short dsmEP001OutL = epdLayer1(1, 0);
+	    unsigned int dsmEP001Out = (dsmEP001OutL<<16) + dsmEP001OutR;
+	    return (dsmEP001Out >> 24) & 0xff;
+	}else{
+	    unsigned short dsmEP002OutR = epdLayer1(2, 0);
+	    unsigned short dsmEP002OutL = epdLayer1(3, 0);
+	    unsigned int dsmEP002Out = (dsmEP002OutL<<16) + dsmEP002OutR;
+	    return (dsmEP002Out >> 24) & 0xff;
+        }
+    }
+    return 0;
+}
+
+
 unsigned short StTriggerData2018::epdLayer0a(int ch, int prepost) const
 {
     int dsmmap[16] = {3,2,1,0,7,6,5,4};
@@ -801,7 +824,7 @@ bool StTriggerData2018::zdcBackADCaboveThreshold(StBeamDirection eastwest, int p
 
 unsigned short StTriggerData2018::zdcTimeDifference() const
 {
-    return L1_DSM->VTX[1]%1024;
+    return L1_DSM->VTX[1]%256;
 }
 
 bool StTriggerData2018::zdcSumADCaboveThresholdL2(StBeamDirection eastwest) const {
@@ -1234,11 +1257,28 @@ unsigned short StTriggerData2018::vpdEarliestTDCHighThr(StBeamDirection eastwest
     return 0;
 }
 
-unsigned short StTriggerData2018::vpdTimeDifference() const
+unsigned short StTriggerData2018::vpdADCSum(StBeamDirection eastwest, int prepost) const
 {
-    return L1_DSM->VTX[7]%8192;
+    if(eastwest==east){
+	return (bbcVP101(4,prepost) & 0x7ff);
+    }else{
+	return (bbcVP101(6,prepost) & 0x7ff);
+    }	
 }
 
+float StTriggerData2018::vpdMeanTimeDifference(int prepost) const
+{
+    //    return L1_DSM->VTX[7]%8192;
+    unsigned int ne=(bbcVP101(4,prepost) >> 11) & 0x1f;
+    unsigned int nw=(bbcVP101(6,prepost) >> 11) & 0x1f;
+    unsigned int se=bbcVP101(5,prepost);
+    unsigned int sw=bbcVP101(7,prepost);
+    int nwse=nw*se;
+    int nesw=ne*sw;
+    int nenw=ne*nw;
+    if(nenw>0) return float(nwse-nesw)/float(nenw);
+    return -2000.0;
+}
 
 unsigned short StTriggerData2018::bbcVP101(int ch, int prepost) const
 {
