@@ -1687,6 +1687,10 @@ $hist = "RunXVII26"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/AuAu54_pr
 # AltroThresh2 : runs "0" 19116020(old Altro threshold : 3), "1" 19116021 (new Altro thresold : 4)
 # dEdx30 : only dx Correction, Adc correction, no SecRow  05/02/18 => strange bump at pad row 44 ?
 # dEdx31 : remove dx and Z correction, back with sockets, 05/03/18
+# dEdx40: correct default TpcAdcCorrection, 05/31/18
+# dEdx42: add correction to TpcAdcCorrection, 06/01/18
+#2018/AltroThresh5/dEdx43 : add ADC histogram 06/02/18
+# dEdx46 reset TcpSecRowB to 1, 06/03/18
 my $prod = $hist; #$Production;
 $prod =~ s/\*//g;
 $prod =~ s/\//_/g;
@@ -1917,3 +1921,4 @@ close (XML);
 my $GB = $Total_Size/1024/1024/1024;
 print "Total size = $GB GB\n"; 
 }
+]

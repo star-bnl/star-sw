@@ -38,8 +38,9 @@
   set muFile = ${filel}.MuDst.root
   if (-r $muFile) exit 0;
 #  root.exe -q -b 'bfc.C(1000,"P2018,useCDV,Tpx,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX,dEdxCalib","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
-  root.exe -q -b 'bfc.C(10000,"P2018,useCDV,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(10000,"P2018,useCDV,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  root.exe -q -b 'bfc.C(1000,"P2018,useCDV,Tpx,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+  root.exe -q -b 'bfc.C(1000,"P2018,useCDV,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
@@ -51,5 +52,5 @@
 <!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/1911602*/*.daq" />  -->
 <!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/1911602*/*adc*.daq" />  -->
 <!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/1911602*/*.daq" />  -->
-<input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/19116021/*.daq" /> 
+<input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/19116021/*adc*.daq" /> 
 </job>
