@@ -8,7 +8,7 @@ TDataSet *CreateTable() {
   itpcPadPlanes_st row;
   St_itpcPadPlanes *tableSet = new St_itpcPadPlanes("itpcPadPlanes",1);
   /* 
-     Jim Thomas 04/02/15 
+     Jim Thomas 04/02/15 http://rnc.lbl.gov/~jhthomas/public/iTPC/PadPlane/PadRow2HVandWire.pdf
      pads = 2*(row + 24 - Int_t ((row - 1)/7)); // row = 1 - 40;
 
 Pads are spaced 0.5 x 1.6 cm with a 0.5 mm gap.
