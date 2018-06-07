@@ -436,15 +436,18 @@ double StvTrack::GetQua() const
     if ( node->GetXi2()>1000) 			continue;
     int idTru = hit->idTru();   
 #ifdef kFtsIdentifier
-    if (!idTru && hit->detectorId()==kFtsId) {
-      auto *rndHit = (StRnDHit*)hit->stHit();
-      int id0 = rndHit->extraByte0();
-      int id1 = rndHit->extraByte1();
-      assert (id0 && id1);
-      idt.Add(id0,50);
-      idt.Add(id1,50);
-      continue;
-    }       
+    //
+    // 06/07/2018 JCW Remove this code for now... 
+    //
+    // if (!idTru && hit->detectorId()==kFtsId) {
+    //   auto *rndHit = (StRnDHit*)hit->stHit();
+    //   int id0 = rndHit->extraByte0();
+    //   int id1 = rndHit->extraByte1();
+    //   assert (id0 && id1);
+    //   idt.Add(id0,50);
+    //   idt.Add(id1,50);
+    //   continue;
+    // }       
 #endif
     idt.Add(idTru);
   }
