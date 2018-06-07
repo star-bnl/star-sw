@@ -2921,7 +2921,8 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
 *  09/30/03, MP: converted the sub into a MODULE to allow for ZEBRA access*
 ***************************************************************************
 
-   Integer stop_on_fail / 1 / ! Full stop if missing modules
+!   Integer stop_on_fail / 1 / ! Full stop if missing modules
+   Integer stop_on_fail / 0 / ! Full stop if missing modules
 
    Structure  GDAT {real mfscale, char gtag(2)}
 
