@@ -728,25 +728,30 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 #ifndef __Use_dNdx__
   Hists3D::NtotHist = 2;
 #endif
-  static Hists3D Pressure("Pressure","log(dE/dx)","row","Log(Pressure)",St_tpcPadConfigC::instance()->numberOfRows(20),150, 6.84, 6.99); // ? mix of inner and outer
-  //  static Hists3D PressureT("PressureT","log(dE/dx)","row","Log(Pressure*298.2/inputGasTemperature)",St_tpcPadConfigC::instance()->numberOfRows(20),150, 6.84, 6.99);
+  Int_t NoRowss = St_tpcPadConfigC::instance()->numberOfRows(20);
+  static Hists3D Pressure("Pressure","log(dE/dx)","row","Log(Pressure)",NoRowss,150, 6.84, 6.99); // ? mix of inner and outer
+  //  static Hists3D PressureT("PressureT","log(dE/dx)","row","Log(Pressure*298.2/inputGasTemperature)",NoRowss,150, 6.84, 6.99);
   
   static Hists3D Voltage("Voltage","log(dE/dx)","Sector*Channels","Voltage - Voltage_{nominal}", numberOfSectors*NumberOfChannels,22,-210,10);
   //  static Hists3D Volt("Volt","log(dE/dx)","Sector*Channels","Voltage", numberOfSectors*NumberOfChannels,410,990.,1400.);
 
   static Hists3D AvCurrent("AvCurrent","log(dEdx/Pion)","Sector*Channels","Average Current [#{mu}A]",numberOfSectors*NumberOfChannels,200,0.,1.0);
   static Hists3D Qcm("Qcm","log(dEdx/Pion)","Sector*Channels","Accumulated Charge [uC/cm]",numberOfSectors*NumberOfChannels,200,0.,1000);
-  static Hists3D SecRow3("SecRow3","<log(dEdx/Pion)>","sector","row",numberOfSectors,St_tpcPadConfigC::instance()->numberOfRows(20));
-  static Hists3D TanL3D("TanL3D","log(dEdx/Pion)","row","Tan(#lambda)",St_tpcPadConfigC::instance()->numberOfRows(20),200,-2.,2.); // ? mix of inner and outer
-  static Hists3D TanL3DiTPC("TanL3DiTPC","log(dEdx/Pion)","row","Tan(#lambda)",St_tpcPadConfigC::instance()->numberOfRows(20),200,-2.,2.); // ? mix of inner and outer
+  static Hists3D SecRow3("SecRow3","<log(dEdx/Pion)>","sector","row",numberOfSectors,NoRowss);
+  static Hists3D ADC3("ADC3","<logADC)>","sector","row",numberOfSectors,
+		      NoRowss,0,-1, 
+		      100,0.,10.,
+		      0,-1,1);
+  static Hists3D TanL3D("TanL3D","log(dEdx/Pion)","row","Tan(#lambda)",NoRowss,200,-2.,2.); // ? mix of inner and outer
+  static Hists3D TanL3DiTPC("TanL3DiTPC","log(dEdx/Pion)","row","Tan(#lambda)",NoRowss,200,-2.,2.); // ? mix of inner and outer
   //  static Hists3D Zdc3("Zdc3","<log(dEdx/Pion)>","row","log10(ZdcCoincidenceRate)",St_tpcPadConfigC::instance()->numberOfRows(sector),100,0.,10.);
-  static Hists3D Z3("Z3","<log(dEdx/Pion)>","row","Drift Distance",St_tpcPadConfigC::instance()->numberOfRows(20),105,0,210);
-  static Hists3D Z3iTPC("Z3iTPC","<log(dEdx/Pion)>","row","Drift Distance",St_tpcPadConfigC::instance()->numberOfRows(20),105,0,210);
+  static Hists3D Z3("Z3","<log(dEdx/Pion)>","row","Drift Distance",NoRowss,105,0,210);
+  static Hists3D Z3iTPC("Z3iTPC","<log(dEdx/Pion)>","row","Drift Distance",NoRowss,105,0,210);
   //  static Hists3D Z3O("Z3O","<log(dEdx/Pion)>","row","(Drift)*ppmO2In",St_tpcPadConfigC::instance()->numberOfRows(sector),100,0,1e4);
-  static Hists3D Edge3("Edge3","log(dEdx/Pion)","sector*row"," Edge",numberOfSectors*St_tpcPadConfigC::instance()->numberOfRows(20), 201,-100.5,100.5);
+  static Hists3D Edge3("Edge3","log(dEdx/Pion)","sector*row"," Edge",numberOfSectors*NoRowss, 201,-100.5,100.5);
   static Hists3D xyPad3("xyPad3","log(dEdx/Pion)","sector+yrow[-0.5,0.5] and xpad [-1,1]"," xpad",numberOfSectors*20, 32,-1,1, 200, -5., 5., 0.5, 24.5);
-  static Hists3D dX3("dX3","log(dEdx/Pion)","row"," dX(cm)",St_tpcPadConfigC::instance()->numberOfRows(20), 100,0,10.);
-  static Hists3D dX3iTPC("dX3iTPC","log(dEdx/Pion)","row"," dX(cm)",St_tpcPadConfigC::instance()->numberOfRows(20), 100,0,10.);
+  static Hists3D dX3("dX3","log(dEdx/Pion)","row"," dX(cm)",NoRowss, 100,0,10.);
+  static Hists3D dX3iTPC("dX3iTPC","log(dEdx/Pion)","row"," dX(cm)",NoRowss, 100,0,10.);
   static TH2F *ZdcCP = 0, *BBCP = 0;
   //  static TH2F *ctbWest = 0, *ctbEast = 0, *ctbTOFp = 0, *zdcWest = 0, *zdcEast = 0;
 #if 0
@@ -1122,6 +1127,10 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	Double_t Pad2Edge = FdEdx[k].edge;
 	if (TMath::Abs(Pad2Edge) > 5) {
 	  SecRow3.Fill(FdEdx[k].sector,FdEdx[k].row,Vars);
+	  if (FdEdx[k].adc > 0) {
+	    Double_t ADCL = TMath::Log(FdEdx[k].adc);
+	    ADC3.Fill(FdEdx[k].sector,FdEdx[k].row,&ADCL);
+	  }
 	}
 	//	if (FdEdx[k].Zdc > 0) Zdc3.Fill(FdEdx[k].row,TMath::Log10(FdEdx[k].Zdc),Vars);
 	//Double_t xyz[3]  = {FdEdx[k].xyz[0],FdEdx[k].xyz[1],FdEdx[k].xyz[2]};
