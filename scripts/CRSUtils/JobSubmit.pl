@@ -839,7 +839,7 @@ if ($TARGET !~ m/^\d+$/){
 $LIBV = $LIB;
 if($LIB eq "cal"){ $LIB = "dev";}
 
-$PAT = "$LIB"."_*_st_*";
+#$PAT = "$LIB"."_*_st_*";
 
 # lock file mechanism prevents multiple execution of this
 # script. However, prevent from crash and left over lock
@@ -1965,6 +1965,13 @@ sub Submit
 	print "$SELF : Found status = $items[$#items] (??)\n";
 	return;
     }
+
+    # little hack for BES in 2018 
+    if ( $trgsn =~ m/fixedtarget/i && $ThisYear == 2018){
+	$chain .= ",-beamline3D";
+	print "$SELF : Altering chain to $chain\n";
+    }
+
 
     # Otherwise, we do have a valid entry
     $Hfile = rdaq_file2hpss($file,3);

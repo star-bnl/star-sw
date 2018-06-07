@@ -30,7 +30,7 @@
 use lib "/afs/rhic.bnl.gov/star/packages/.DEV2/scripts";
 use strict;
 use FileCatalog;
-use XML::Simple qw(:strict);
+#use XML::Simple qw(:strict);
 my @output;
 my $i;
 my $count;
