@@ -5,8 +5,9 @@ TDataSet *CreateTable() {
 // ====================================================================
 // ------  Test whether this table share library was loaded ------
   if (!gROOT->GetClass("St_tpcCorrection")) return 0;
-tpcCorrection_st row;
-St_tpcCorrection *tableSet = new St_tpcCorrection("TpcAdcCorrectionB",2);
+  tpcCorrection_st row;
+ Int_t nrows = 3;
+ St_tpcCorrection *tableSet = new St_tpcCorrection("TpcAdcCorrectionB",nrows);
 /* TpcT::AdcCorrections()
 07/21/2016 TpcRS_2016/gstar_heed_PhysicsOff_triton:9_1_1000.ADC.root
 Fit innerM      log(simulated ADC) versus log(recon. ADC) and Z
@@ -32,26 +33,31 @@ Fit outerM      log(simulated ADC) versus log(recon. ADC) and Z
    5  adcL2       -1.47919e-02   1.37668e-05   1.37668e-05   2.66830e+00
    6  scale        0.00000e+00     fixed    
 */
-memset(&row,0,tableSet->GetRowSize());
-    row.type	 =         11; // ;
-    row.idx	 =          1; // ;
-    row.nrows	 =          2; // ;
-    row.npar	 =          6; // ;
-    row.min	 =          0; // ;
-    row.max	 =          0; // ;
-    row.a[0]     = -0.75;
-    row.a[4]	 =  1.; //   adcL  
-    tableSet->AddAt(&row);     // Outer
-memset(&row,0,tableSet->GetRowSize());
-    row.type	 =         11; // ;
-    row.idx	 =          2; // ;
-    row.nrows	 =          2; // ;
-    row.npar	 =          6; // ;
-    row.min	 =          0; // ;
-    row.max	 =          0; // ;
-    row.a[0]     = -0.75;
-    row.a[4]	 =  1.; //   adcL  
-tableSet->AddAt(&row); // Inner
-// ----------------- end of code ---------------
+ memset(&row,0,tableSet->GetRowSize());
+ row.type	 =         11; //  Outer Tpx
+ row.idx	 =          1; // 
+ row.nrows	 =      nrows; // 
+ row.npar	 =          6; // 
+ row.a[0]	 =   -1.17241-1.36830e-01; //   scale
+ row.a[4]	 =         1.; //   adcL  
+ tableSet->AddAt(&row);        // Outer
+ memset(&row,0,tableSet->GetRowSize());
+ row.type	 =         11; // Inner Tpx  
+ row.idx	 =          2; //
+ row.nrows	 =      nrows; //
+ row.npar	 =          6; //
+ row.a[0]	 =   -1.11660-6.13316e-02; //   scale
+ row.a[4]	 =         1.; //   adcL  
+ tableSet->AddAt(&row);        // Inner
+ tableSet->AddAt(&row);     // Outer
+ memset(&row,0,tableSet->GetRowSize());
+ row.type	 =         11; // iTPC  
+ row.idx	 =          3; //
+ row.nrows	 =      nrows; //
+ row.npar	 =          6; //
+ row.a[0]	 =    -0.5975+4.64170e-01; //   scale
+ row.a[4]	 =         1.; //   adcL  
+ tableSet->AddAt(&row);        // iTPC
+ // ----------------- end of code ---------------
  return (TDataSet *)tableSet;
 }
