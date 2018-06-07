@@ -287,7 +287,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
 !//  sector of padrows
 !//  YF temporary off
 !//YF  structure TPRS {sec, nRow, pitch, width,  dAnode, Npads(50), Rpads(50)}
-Structure TPRS { sec,Nrow,pitch,width,super,dAnode,Rpads(50),Npads(50) }
+Structure TPRS { sec,Nrow,pitch,width,super,dAnode,Rpads(50),Npads(50), Y1stAnode, YlastAnode }
 
 !// EC trapezoid and support Wheel
  structure TECW {sec, GapWidI, GapWidO, GapHeit, GapRad, inwidth, ouwidth,
@@ -368,13 +368,15 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
       sec    = 1                ! sector number: 1 for inner, 2 for outer
       nRow   = 13               ! number of padrows in the sector
       pitch  = 0.335            ! tpc padrow pitch width
-      width  = 1.15             ! tpc padrow thickness
+      width  = 1.20             ! tpc padrow pitch
       super  = 3                ! number of padrows in a superpadrow
       dAnode = 0.2              !// distance to anode wire from pad plane
       Npads  = { 88, 96, 104, 112, 118, 126, 134, 142, 150,
                 158, 166, 174, 182 }        ! number of pads in row
       Rpads  = {60.0, 64.8, 69.6, 74.4, 79.2, 84.0, 88.8, 93.6, 98.8,
                104.0,109.2,114.4,119.6 }    ! tpc padrow radii
+      Y1stAnode  =  53.2        ! the first anode wire positon
+      YlastAnode = 120.8        ! the last  anode 
    EndFill
         }	
 	else if (TPCG_TpadConfig => 1 & TPCG_TpadConfig <= 8) {
@@ -382,7 +384,7 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
       sec    = 1                ! sector number: 1 for inner, 2 for outer  
       nRow   = 40               ! number of padrows in the sector  
       pitch  = 0.5              ! tpc padrow pitch width  
-      width  = 1.6              ! tpc padrow (pitch) thickness 
+      width  = 1.6              ! tpc padrow pitch
       super  = 0                ! number of padrows in a superpadrow  
       dAnode = 0.2              ! distance to anode wire from pad plane
       Npads  = {     52, 54, 56, 58, 60, 62, 62, 64, 66, 68,
@@ -393,6 +395,8 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
                 71.8,  73.4,    75,  76.6,  78.2,  79.8,  81.4,    83,  84.6,  86.2,
                 87.8,  89.4,    91,  92.6,  94.2,  95.8,  97.4,    99, 100.6, 102.2,
                103.8, 105.4,   107, 108.6, 110.2, 111.8, 113.4,   115, 116.6, 118.2} ! tpc padrow radii
+      Y1stAnode  =  53.2        ! the first anode wire positon
+      YlastAnode = 120.8        ! the last  anode 
    EndFill
         }
 	else if (TPCG_TpadConfig == 9) { ! iTPC only in sector 20
@@ -400,13 +404,15 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
       sec    = 1                ! sector number: 1 for inner, 2 for outer
       nRow   = 13               ! number of padrows in the sector
       pitch  = 0.335            ! tpc padrow pitch width
-      width  = 1.15             ! tpc padrow thickness
+      width  = 1.20             ! tpc padrow pitch
       super  = 3                ! number of padrows in a superpadrow
       dAnode = 0.2              !// distance to anode wire from pad plane
       Npads  = { 88, 96, 104, 112, 118, 126, 134, 142, 150,
                 158, 166, 174, 182 }        ! number of pads in row
       Rpads  = {60.0, 64.8, 69.6, 74.4, 79.2, 84.0, 88.8, 93.6, 98.8,
                104.0,109.2,114.4,119.6 }    ! tpc padrow radii
+      Y1stAnode  =  53.2        ! the first anode wire positon
+      YlastAnode = 120.8        ! the last  anode 
    EndFill
    Fill TPRS                    ! devTY: sector of padrows  
       sec    = 3                ! sector number: 1 for inner, 2 for outer  
@@ -423,6 +429,8 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
                 71.8,  73.4,    75,  76.6,  78.2,  79.8,  81.4,    83,  84.6,  86.2,
                 87.8,  89.4,    91,  92.6,  94.2,  95.8,  97.4,    99, 100.6, 102.2,
                103.8, 105.4,   107, 108.6, 110.2, 111.8, 113.4,   115, 116.6, 118.2} ! tpc padrow radii
+      Y1stAnode  =  54.0        ! the first anode wire positon, two first wires removed
+      YlastAnode = 120.0        ! the last  anode, two last wires removed
    EndFill
         }
 *
@@ -431,7 +439,7 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
       nRow   = 32               ! number of padrows in the sector
       nRow   = 32               ! number of padrows in outer sector
       pitch  = 0.67             ! outer tpc padrow pitch width
-      width  = 1.95             ! outer tpc padrow thickness
+      width  = 2.00             ! outer tpc padrow pitch
       super  = 1                ! number of padrows in a superpadrow
       dAnode = 0.4              !// distance to anode wire from pad plane
       Npads  = { 98, 100, 102, 104, 106, 106, 108, 110, 112,
@@ -445,6 +453,8 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
                 167.195, 169.195, 171.195, 173.195, 175.195,
                 177.195, 179.195, 181.195, 183.195, 185.195,
                 187.195, 189.195 }        ! tpc padrow radii
+      Y1stAnode  = 122.795        ! the first anode wire positon
+      YlastAnode = 191.195        ! the last  anode 
    EndFill
 *
   USE TPRS
@@ -1764,22 +1774,39 @@ Block  TPSS is a division of gas volume corresponding to a supersectors
 !//        write(*,*) 'zBeg,zDed,Zpmt,zEnd,dz1,z1 = ',zBeg,zDed,Zpmt,zEnd,dz1,z1;
 *        position within supersector (this assumes rectangular padrows)
            do i_row = 1,nint(tprs_nRow)
-              if ((nint(tprs_super)==3 | i_row==1)) then
-                 dy=tprs_npads(i_row)*tprs_pitch/2;
-                 x=tprs_Rpads(i_row)-tprs_width;
-                 Create and Position TPAD  x=x z=z dx=dx dy=dy dz=dz
-!//                 write(*,*) 'TPAD.A Sec=',i_sec,AG_NCOPY,'row=',i_row,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
+              dy=tprs_npads(i_row)*tprs_pitch/2;
+	      if (i_row==1) then
+	        r1  = tprs_Y1stAnode
+	        r2  = tprs_Rpads(i_row)-tprs_width/2
+                dx1 = (r2 - r1)/2
+		x   = (r2 + r1)/2
+	        dy2  = r1*tan15;
+	        if (dy > dy2) dy = dy2
+                Create and Position TPAD  x=x z=z dx=dx1 dy=dy dz=dz
+              else if (nint(tprs_super) .eq. 3) then
+	        r1  = tprs_Rpads(i_row-1)+tprs_width/2
+                r2  = tprs_Rpads(i_row  )-tprs_width/2
+	        dx1 = (r2 - r1)/4;
+	        x   = (r2 + r1)/2 + dx1;
+                Create and Position TPAD  x=x z=z dx=dx1 dy=dy dz=dz
+!//              write(*,*) 'TPAD.A Sec=',i_sec,AG_NCOPY,'row=',i_row,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
               endif
-                 dy=tprs_npads(i_row)*tprs_pitch/2;
-                 x=tprs_Rpads(i_row);
-                 create and position TPAD  x=x z=z dx=dx dy=dy dz=dz
-!//                 write(*,*) 'TPAD.B Sec=',i_sec,AG_NCOPY,'row=',i_row,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
-              if ((nint(tprs_super)==3 | i_row==nint(tprs_nRow)))  then
-                 x=tprs_Rpads(i_row)+tprs_width
-                 dy=tprs_npads(i_row)*tprs_pitch/2;
-                 Create and Position TPAD  x=x z=z dx=dx dy=dy dz=dz
-!//                 write(*,*) 'TPAD.C Sec=',i_sec,AG_NCOPY,'row=',i_row,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
-              endif
+              x=tprs_Rpads(i_row);
+              Create and Position TPAD  x=x z=z dx=dx dy=dy dz=dz
+!//           write(*,*) 'TPAD.B Sec=',i_sec,AG_NCOPY,'row=',i_row,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
+	      if (i_row==nint(tprs_nRow)) then
+	        r1 = tprs_Rpads(i_row)+tprs_width/2
+                r2 = tprs_YlastAnode
+	        dx1 = (r2 - r1)/2;
+	        x   = (r2 + r1)/2;
+                Create and Position TPAD  x=x z=z dx=dx1 dy=dy dz=dz
+              else if (nint(tprs_super)==3 ) then
+	        r1 = tprs_Rpads(i_row  )+tprs_width/2
+                r2 = tprs_Rpads(i_row+1)-tprs_width/2
+	        dx1 = (r2 - r1)/4;
+                x   = (r2 + r1)/2 - dx1
+                Create and Position TPAD  x=x z=z dx=dx1 dy=dy dz=dz
+	      endif
            enddo
       enddo
 Endblock
