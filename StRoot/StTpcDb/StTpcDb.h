@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.42 2018/04/11 02:43:22 smirnovd Exp $
+ * $Id: StTpcDb.h,v 1.43 2018/06/07 04:30:35 genevb Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.43  2018/06/07 04:30:35  genevb
+ * Remove unnecessary dependence on StMagUtilities.h
+ *
  * Revision 1.42  2018/04/11 02:43:22  smirnovd
  * Enable TPC/iTPC switch via St_tpcPadConfig
  *
@@ -126,6 +129,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
+class StMagUtilities;
 #include "StMessMgr.h"
 #include "StEnumerations.h"
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
@@ -140,7 +144,6 @@
 #include "StDetectorDbMaker/St_tpcPedestalC.h"
 #include "StDetectorDbMaker/St_tpcPadResponseC.h"
 #include "StDetectorDbMaker/St_tpcPadGainT0BC.h"
-#include "StDbUtilities/StMagUtilities.h"
 #include "StDetectorDbMaker/St_trgTimeOffsetC.h"
 #include "TGeoMatrix.h"
 #include "TString.h"
