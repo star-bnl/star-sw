@@ -532,7 +532,7 @@ TF1 *FitRL5(TH1 *hist, Bool_t outer = kFALSE)
   l5xg_mult->SetParent(hist);
   l5xg_mult->SetParName(0,"norm");  //l5xg_mult->SetParLimits(0,-80,80);
   l5xg_mult->SetParName(1,"mu");    //l5xg_mult->SetParLimits(1,-1.5,1.5);
-  l5xg_mult->SetParName(2,"Sigma"); //l5xg_mult->SetParLimits(2,0.2,0.8);
+  l5xg_mult->SetParName(2,"Sigma"); //l5xg_mult->SetParLimits(2,0.05,0.8);
   l5xg_mult->SetParName(3,"P"); 
   l5xg_mult->SetParName(4,"K");     //l5xg_mult->SetParLimits(4,0.0,0.5);
   l5xg_mult->SetParName(5,"e");     //l5xg_mult->SetParLimits(5,0.0,0.5);
@@ -723,7 +723,7 @@ TF1 *FitR5(TH1 *proj, Option_t *opt="", Int_t nhyps = 5) { // fit by 5 landau co
     g2 = new TF1("R5",gfR5Func, -5, 5, 10);
     g2->SetParName(0,"norm"); g2->SetParLimits(0,-80,80);
     g2->SetParName(1,"mu");     //g2->SetParLimits(1,-1.5,1.5);
-    g2->SetParName(2,"Sigma");  g2->SetParLimits(2,0.2,0.8);
+    g2->SetParName(2,"Sigma");  g2->SetParLimits(2,0.05,0.8);
     g2->SetParName(3,"P"); 
     g2->SetParName(4,"K");      g2->SetParLimits(4,0.0,0.5);
     g2->SetParName(5,"e");      g2->SetParLimits(5,0.0,0.5);
@@ -1303,7 +1303,7 @@ TF1 *FitGF(TH1 *proj, Option_t *opt="") {
     g2 = new TF1("GF",gfFunc, -5, 5, 9);
     g2->SetParName(0,"norm"); g2->SetParLimits(0,-80,80);
     g2->SetParName(1,"mu");     g2->SetParLimits(1,-2.5,2.5);
-    g2->SetParName(2,"Sigma");  g2->SetParLimits(2,0.2,0.8);
+    g2->SetParName(2,"Sigma");  g2->SetParLimits(2,0.05,0.8);
     g2->SetParName(3,"P");      g2->SetParLimits(3,0,0.5);
     g2->SetParName(4,"K");      g2->SetParLimits(4,0.0,0.5);
     g2->SetParName(5,"e");      g2->SetParLimits(5,0.0,0.5);
@@ -1478,7 +1478,7 @@ TF1 *FitL5(TH1 *proj, Option_t *opt="", Int_t nhyps = 5) { // fit by 5 landau co
     g2 = new TF1("L5",gfL5Func, -5, 5, 10);
     g2->SetParName(0,"norm"); g2->SetParLimits(0,-80,80);
     g2->SetParName(1,"mu");     //g2->SetParLimits(1,-1.5,1.5);
-    g2->SetParName(2,"Sigma");  g2->SetParLimits(2,0.2,0.8);
+    g2->SetParName(2,"Sigma");  g2->SetParLimits(2,0.05,0.8);
     g2->SetParName(3,"P"); 
     g2->SetParName(4,"K");      g2->SetParLimits(4,0.0,0.5);
     g2->SetParName(5,"e");      g2->SetParLimits(5,0.0,0.5);

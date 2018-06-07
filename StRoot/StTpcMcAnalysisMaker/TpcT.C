@@ -1024,121 +1024,52 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
   const Float_t*&    fMcHit_mdS                               = iter("fMcHit.mdS");
   const Long_t*&     fMcHit_mKey                              = iter("fMcHit.mKey");
   const Long_t*&     fMcHit_mVolumeId                         = iter("fMcHit.mVolumeId");
-  const Float_t*&    fMcHit_mAdc                           = iter("fMcHit.mAdc");
-  //  const Int_t*&      fRcHit_mId                               = iter("fRcHit.mId");
-  const Int_t*&   fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
-  const UShort_t*&   fRcHit_mQuality                          = iter("fRcHit.mQuality");
-  if (! fOut) fOut = new TFile(output,"recreate");
-  fOut->cd();
-#if 0
-  TF1* off = new TF1("off","exp(log(1.+[0]/exp(x)))",3,10);
-#endif
-  TProfile2D *inout[6];
-  inout[0] = new TProfile2D("inner","log(simulated ADC) versus log(recon. ADC) and Z",
-			    70,3.,10.,210,-210,210,"");
-  inout[1] = new TProfile2D("outer","log(simulated ADC) versus log(recon. ADC) and Z",
-			    70,3.,10.,210,-210,210,"");
-  inout[2] = new TProfile2D("itpc","log(simulated ADC) versus log(recon. ADC) and Z",
-			    70,3.,10.,210,-210,210,"");
-  inout[3] = new TProfile2D("innerR","log(simulated ADC)-log(recon. ADC) versus log(recon. ADC) and Z",
-			    70,3.,10.,210,-210,210,"");
-  inout[4] = new TProfile2D("outerR","log(simulated ADC)-log(recon. ADC) versus log(recon. ADC) and Z",
-			    70,3.,10.,210,-210,210,"");
-  inout[5] = new TProfile2D("itpcR","log(simulated ADC)-log(recon. ADC) versus log(recon. ADC) and Z",
-			    70,3.,10.,210,-210,210,"");
-  Double_t dsCut[2] = {1., 2.};
-  while (iter.Next()) {
-    if (fNoRcHit != 1) continue;
-    if (fNoMcHit != 1 && fNoMcHit != 3) continue;
-    if (fAdcSum <= 0) continue;
-    for (Int_t k = 0; k < fNoMcHit; k++) {
-      if (fMcHit_mKey[k] != fRcHit_mIdTruth[k]) continue;
-      if (fRcHit_mQuality[k] < 95) continue;
-      Int_t io = 0;
-      if (fMcHit_mVolumeId[k]%100 > NoInnerRows) io = 1;
-      if ((fMcHit_mVolumeId[k]/100)%100 == 20 && fMcHit_mVolumeId[k]%100 <= 40) io = 2;
-      if (fMcHit_mdS[k] < dsCut[io]) continue;
-      if (fMcHit_mdE[k] <= 0 || fMcHit_mdE[k] > 1e-3) continue;
-      if (fMcHit_mAdc[k] <= 0) continue;
-      Double_t ratio = fMcHit_mAdc[k]/fAdcSum;
-      if (ratio < 0.1 || ratio > 10) continue;
-      inout[io]->Fill(TMath::Log(fAdcSum),fMcHit_mPosition_mX3[k], TMath::Log(fMcHit_mAdc[k]));
-      inout[io+3]->Fill(TMath::Log(fAdcSum),fMcHit_mPosition_mX3[k], TMath::Log(fMcHit_mAdc[k])-TMath::Log(fAdcSum));
-    }
-  }
-  fOut->Write();
-}
-//________________________________________________________________________________
-void TpcTAdcTanL(const Char_t *files="*.root", const Char_t *Out = "") {
-  TDirIter Dir(files);
-  Char_t *file = 0;
-  Char_t *file1 = 0;
-  Int_t NFiles = 0;
-  TTreeIter iter("TpcT");
-  while ((file = (Char_t *) Dir.NextFile())) {
-    TString File(file);
-    if (File.Contains("Plot") || File.Contains("Fit") || File.Contains("ADC") || File.Contains("Pads") || 
-	File.Contains("hist") || File.Contains("tags") || File.Contains("MuMc") ||
-	File.Contains("minimc") || File.Contains("event") ||
-	File.Contains("All") || File.Contains("Sparse") ||
-	File.Contains("MuDst.root")) continue;
-    TFile *f = new TFile (File);
-    if (f) {
-      TTree *tree = (TTree *) f->Get("TpcT");
-      if (! tree ) continue;
-      //    tree->Show(0);
-      iter.AddFile(file); 
-      NFiles++; 
-      file1 = file;
-      SetInnerPadrows();
-    }
-    delete f;
-  }
-  cout << files << "\twith " << NFiles << " files" << endl; 
-  if (! file1 ) return;
-  TString output(Out);
-  if (output == "") {
-    output = file1;
-    output.ReplaceAll(".root",".ADCTanL3D.root");
-  }
-  cout << "Output for " << output << endl;
-  const Int_t&       fNoRcHit                                 = iter("fNoRcHit");
-  const Int_t&       fNoMcHit                                 = iter("fNoMcHit");
-  const Int_t&       fAdcSum                                  = iter("fAdcSum");
-//  const Float_t*&    fMcHit_mPosition_mX3                     = iter("fMcHit.mPosition.mX3");
-  const Float_t*&    fMcHit_mdE                               = iter("fMcHit.mdE");
-  const Float_t*&    fMcHit_mdS                               = iter("fMcHit.mdS");
-  const Long_t*&     fMcHit_mKey                              = iter("fMcHit.mKey");
-  const Long_t*&     fMcHit_mVolumeId                         = iter("fMcHit.mVolumeId");
-  const Float_t*&    fMcHit_mAdc                           = iter("fMcHit.mAdc");
+  const Float_t*&    fMcHit_mAdc                              = iter("fMcHit.mAdc");
   const Float_t*&    fMcHit_mLocalMomentum_mX1                = iter("fMcHit.mLocalMomentum.mX1");
   const Float_t*&    fMcHit_mLocalMomentum_mX2                = iter("fMcHit.mLocalMomentum.mX2");
   const Float_t*&    fMcHit_mLocalMomentum_mX3                = iter("fMcHit.mLocalMomentum.mX3");
   //  const Int_t*&      fRcHit_mId                               = iter("fRcHit.mId");
-  const Int_t*&   fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
+  const Int_t*&      fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
   const UShort_t*&   fRcHit_mQuality                          = iter("fRcHit.mQuality");
-//   const Int_t*&      fRcTrack_fifPrim                         = iter("fRcTrack.fifPrim");
-//   const Float_t*&    fRcTrack_fpx                             = iter("fRcTrack.fpx");
-//   const Float_t*&    fRcTrack_fpy                             = iter("fRcTrack.fpy");
-//   const Float_t*&    fRcTrack_fpz                             = iter("fRcTrack.fpz");
+  const Float_t*&    fRcHit_mdX                               = iter("fRcHit.mdX");
+  const UShort_t*&   fRcHit_mAdc                              = iter("fRcHit.mAdc");
   if (! fOut) fOut = new TFile(output,"recreate");
   fOut->cd();
 #if 0
   TF1* off = new TF1("off","exp(log(1.+[0]/exp(x)))",3,10);
 #endif
-  TH3F *inout[6];
-  inout[0] = new TH3F("inner","log(simulated ADC) versus log(recon. ADC) and TanL",
-		            80,3.5,7.5,80,-2,2,80,3.5,7.5);
-  inout[1] = new TH3F("outer","log(simulated ADC) versus log(recon. ADC) and TanL",
-			    80,3.5,7.5,80,-2,2,80,3.5,7.5);
-  inout[2] = new TH3F("innerR","log(simulated ADC)-log(recon. ADC) versus log(recon. ADC) and TanL",
-			    80,3.5,7.5,80,-2,2,100,-2.,2.);
-  inout[3] = new TH3F("outerR","log(simulated ADC)-log(recon. ADC) versus log(recon. ADC) and TanL",
-		            80,3.5,7.5,80,-2,2,100,-2.,2.);
-  inout[4] = new TH3F("innerA","(simulated ADC)/(recon. ADC) versus log(recon. ADC) and TanL",
-			    80,3.5,7.5,80,-2,2,100,0.1,10.1);
-  inout[5] = new TH3F("outerA","(simulated ADC)/(recon. ADC) versus log(recon. ADC) and TanL",
-		            80,3.5,7.5,80,-2,2,100,0.1,10.1);
+  enum {kTPC = 6, kVar = 3, kOpt = 2};
+  const Char_t *tpcName[kTPC] = {"I","O","X","IC","OC","XC"};
+  const Char_t *vName[kVar] = {"Z","TanL","dX"};
+  const Char_t *opName[kOpt] = {"","3D"};
+  const Char_t *zName[kOpt] = {"log(simulated ADC)", "log(simulated ADC/recon. ADC)"};
+  TProfile2D *profs[kTPC][kVar];
+  TH3F       *hists[kTPC][kVar];
+  for (Int_t i = 0; i < kTPC; i++) 
+    for (Int_t j = 0; j < kVar; j++) 
+      for (Int_t k = 0; k < kOpt; k++) {
+	Int_t ny = 210;
+        Double_t ymin = -210;
+	Double_t ymax = - ymin;
+	if (j == 1) {
+	  ny = 80;;
+	  ymin = 3.5;
+	  ymax = 7.5;
+	} else if (j == 2) {
+	  ny = 80;;
+	  ymin = 1.0;
+	  ymax = 5.0;
+	}
+	if (! k) {
+	  profs[i][j] = new TProfile2D(Form("%s%s%s",tpcName[i],opName[k],vName[j]),
+					  Form("log(simulated ADC) versus log(recon. ADC) and %s",vName[j]),
+					  70,3.,10.,ny,ymin,ymax,"");
+	} else {
+	  hists[i][j] = new TH3F(Form("%s%s%s",tpcName[i],opName[k],vName[j]),
+				    Form("log(simulated ADC) versus log(recon. ADC) and %s",vName[j]),
+				    70,3.,10.,ny,ymin,ymax,100,-1,1);
+	}
+      }
   Double_t dsCut[2] = {1., 2.};
   while (iter.Next()) {
     if (fNoRcHit != 1) continue;
@@ -1147,18 +1078,37 @@ void TpcTAdcTanL(const Char_t *files="*.root", const Char_t *Out = "") {
     for (Int_t k = 0; k < fNoMcHit; k++) {
       if (fMcHit_mKey[k] != fRcHit_mIdTruth[k]) continue;
       if (fRcHit_mQuality[k] < 95) continue;
+      Int_t sector = (fMcHit_mVolumeId[k]/100)%100;
+      Int_t row    =  fMcHit_mVolumeId[k]%100;
       Int_t io = 0;
-      if (fMcHit_mVolumeId[k]%100 > NoInnerRows) io = 1;
+      if (row > 13) io = 1;
+      if (sector == 20) {
+	if (row <= 40) io = 2; // iTPC
+	else           io = 1;
+      }
       if (fMcHit_mdS[k] < dsCut[io]) continue;
       if (fMcHit_mdE[k] <= 0 || fMcHit_mdE[k] > 1e-3) continue;
       if (fMcHit_mAdc[k] <= 0) continue;
-      Double_t ratio = fMcHit_mAdc[k]/fAdcSum;
+      Double_t ratio = fMcHit_mAdc[k]/fRcHit_mAdc[0];
       if (ratio < 0.1 || ratio > 10) continue;
       TVector3 pxyzL(fMcHit_mLocalMomentum_mX1[k],fMcHit_mLocalMomentum_mX2[k],fMcHit_mLocalMomentum_mX3[k]);
       Double_t TanL = pxyzL.z()/pxyzL.Perp();
-      inout[io]->Fill(TMath::Log(fAdcSum),TanL, TMath::Log(fMcHit_mAdc[k]));
-      inout[io+2]->Fill(TMath::Log(fAdcSum),TanL, TMath::Log(fMcHit_mAdc[k])-TMath::Log(fAdcSum));
-      inout[io+4]->Fill(TMath::Log(fAdcSum),TanL, fMcHit_mAdc[k]/fAdcSum);
+      Double_t y[3] = { fMcHit_mPosition_mX3[k], TanL, fRcHit_mdX[0]};
+      Double_t lADCr = TMath::Log(fRcHit_mAdc[0]);
+      Double_t lADCs = TMath::Log(fMcHit_mAdc[k]);
+      Double_t params[3][2] = {
+	{   6.81054e-01,  -9.48271e-04}, // Inner
+	{   6.07395e-01,  -3.72945e-04}, // Outer
+	{   5.05106e-01,  -5.44289e-04}  // iTPC
+      };
+      Double_t dADC = params[io][0] + params[io][1]*TMath::Abs(y[0]);
+      Double_t z[4] = {lADCs, lADCs-lADCr, lADCs - dADC, lADCs-lADCr - dADC};
+      for (Int_t j = 0; j < kVar; j++) {
+	profs[io][j]->Fill(lADCr, y[j], z[0]);
+	hists[io][j]->Fill(lADCr, y[j], z[1]);
+	profs[io+3][j]->Fill(lADCr, y[j], z[2]);
+	hists[io+3][j]->Fill(lADCr, y[j], z[3]);
+      }
     }
   }
   fOut->Write();

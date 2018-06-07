@@ -5,7 +5,7 @@ Hists3D::Hists3D(const Char_t *Name, const Char_t *Title,
 		 Int_t nXBins, 
 		 Int_t nYBins,  Double_t ymin, Double_t ymax,
 		 Int_t nZBins, Double_t ZdEdxMin, Double_t ZdEdxMax,
-		 Double_t xmin, Double_t xmax) {
+		 Double_t xmin, Double_t xmax, Int_t nh = NtotHist) : fNHist(nh) {
   const Char_t *Names[9] = {"","C","N","Ne","Npi","NK","NP","Nd","dX"};
   const Char_t *Titles[9] = {"uncorrected", "correctred","nP measured","nP for e","nP for pi","nP for K","nP for P","nP for d","dX"};
   memset(hists, 0, 9*sizeof(TH1*));
@@ -17,7 +17,7 @@ Hists3D::Hists3D(const Char_t *Name, const Char_t *Title,
     ymin = 0.5;
     ymax = nYBins+0.5;
   }
-  for (Int_t j = 0; j < NtotHist; j++) {
+  for (Int_t j = 0; j < fNHist; j++) {
     TString name(Name); 
     name += Names[j];
     TString title(Title); 
@@ -49,7 +49,7 @@ Hists3D::Hists3D(const Char_t *Name, const Char_t *Title,
 }
 //________________________________________________________________________________
 void Hists3D::Fill(Double_t x, Double_t y, Double_t *z) {
-  for (Int_t i = 0; i < NtotHist; i++) {
+  for (Int_t i = 0; i < fNHist; i++) {
     if (hists[i]) {
       if (i < 8) ((TH3F *) hists[i])->Fill(x,y,z[i]);
       else       ((TProfile2D *) hists[i])->Fill(x,y,z[i]);

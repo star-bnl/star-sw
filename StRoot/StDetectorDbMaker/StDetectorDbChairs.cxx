@@ -776,6 +776,41 @@ MakeChairInstance(itpcPadGainT0,Calibrations/tpc/itpcPadGainT0);
 #include "St_tpcPadGainT0BC.h"
 St_tpcPadGainT0BC *St_tpcPadGainT0BC::fgInstance = 0;
 St_tpcPadGainT0BC *St_tpcPadGainT0BC::instance() {if (! fgInstance) fgInstance = new St_tpcPadGainT0BC(); return fgInstance;}
+//________________________________________________________________________________
+Float_t 	St_tpcPadGainT0BC::Gain(Int_t sector, Int_t row, Int_t pad) const {
+  Float_t gain = 0;
+  if (St_tpcPadConfigC::instance()->iTPC(sector)) {
+    if (row <= 40) 
+      gain = St_itpcPadGainT0C::instance()->Gain(sector,row,pad);
+    else
+      gain = St_tpcPadGainT0C::instance()->Gain(sector,row-40,pad);
+  } else 
+    gain = St_tpcPadGainT0C::instance()->Gain(sector,row,pad);
+  return gain;
+}
+//________________________________________________________________________________
+Float_t 	  St_tpcPadGainT0BC::T0(Int_t sector, Int_t row, Int_t pad) const {
+  Float_t T0 = 0;
+  if (St_tpcPadConfigC::instance()->iTPC(sector)) {
+    if (row <= 40) 
+      T0 = St_itpcPadGainT0C::instance()->T0(sector,row,pad);
+    else 
+      T0 = St_tpcPadGainT0C::instance()->T0(sector,row-40,pad);
+  } else 
+    T0 = St_tpcPadGainT0C::instance()->T0(sector,row,pad);
+  return T0;
+}
+//________________________________________________________________________________
+Bool_t    St_tpcPadGainT0BC::livePadrow(Int_t sector, Int_t row) const {
+  if (St_tpcPadConfigC::instance()->iTPC(sector)) {
+    if (row <= 40)
+      return St_itpcPadGainT0C::instance()->livePadrow(sector,row);
+    else 
+      return St_tpcPadGainT0C::instance()->livePadrow(sector,row-40);
+  }
+  return St_tpcPadGainT0C::instance()->livePadrow(sector,row);
+}
+//________________________________________________________________________________
 #include "St_tpcSlewingC.h"
 MakeChairInstance(tpcSlewing,Calibrations/tpc/tpcSlewing);
 #include "St_tpcAcChargeC.h"

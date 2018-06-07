@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2018.h,v 2.2 2018/02/22 16:47:20 ullrich Exp $
+ * $Id: StTriggerData2018.h,v 2.3 2018/06/06 18:03:59 ullrich Exp $
  *
  * Author: Akio Ogawa, October 13, 2017
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2018.h,v $
+ * Revision 2.3  2018/06/06 18:03:59  ullrich
+ * Added fcts: epdNHits, vpdADCSum, vpdMeanTimeDifference (Akio)
+ *
  * Revision 2.2  2018/02/22 16:47:20  ullrich
  * Changes for blind analysis and EPD
  *
@@ -131,7 +134,8 @@ public:
     unsigned short epdLayer0a(int ch, int prepost=0) const;
     unsigned short epdADC(int crt, int adr, int ch, int prepost=0) const;
     unsigned short epdTDC(int crt, int adr, int ch, int prepost=0) const;
-    
+    unsigned short epdNHits(StBeamDirection eastwest, int prepost=0) const;
+
     //ZDC
     bool zdcPresent(int prepost=0) const;
     unsigned short zdcAtChannel(int channel, int prepost=0) const;
@@ -179,8 +183,8 @@ public:
     unsigned short vpdTDCHighThr(StBeamDirection eastwest, int pmt, int prepost=0) const;
     unsigned short vpdEarliestTDC(StBeamDirection eastwest, int prepost=0) const;
     unsigned short vpdEarliestTDCHighThr(StBeamDirection eastwest, int prepost=0) const;
-    unsigned short vpdTimeDifference() const;
-
+    float          vpdMeanTimeDifference(int prepost=0) const;
+    unsigned short vpdADCSum(StBeamDirection eastwest, int prepost=0) const;
     unsigned short bbcVP101(int ch, int prepost = 0) const;
 
     //MXQ crate

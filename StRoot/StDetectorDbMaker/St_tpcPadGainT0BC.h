@@ -7,27 +7,9 @@
 class St_tpcPadGainT0BC : public TObject {
  public:
   static St_tpcPadGainT0BC* 	instance();
-  Float_t 	Gain(Int_t sector, Int_t row, Int_t pad) const {
-    if (St_tpcPadConfigC::instance()->iTPC(sector)) {
-      if (row <= 40) return St_itpcPadGainT0C::instance()->Gain(sector,row,pad);
-      St_tpcPadGainT0C::instance()->Gain(sector,row-40,pad);
-    }
-    return St_tpcPadGainT0C::instance()->Gain(sector,row,pad);
-  }
-  Float_t 	  T0(Int_t sector, Int_t row, Int_t pad) const {
-    if (St_tpcPadConfigC::instance()->iTPC(sector)) {
-      if (row <= 40) return St_itpcPadGainT0C::instance()->T0(sector,row,pad);
-      St_tpcPadGainT0C::instance()->T0(sector,row-40,pad);
-    }
-    return St_tpcPadGainT0C::instance()->T0(sector,row,pad);
-  }
-  Bool_t    livePadrow(Int_t sector, Int_t row) {
-    if (St_tpcPadConfigC::instance()->iTPC(sector)) {
-      if (row <= 40) return St_itpcPadGainT0C::instance()->livePadrow(sector,row);
-      St_tpcPadGainT0C::instance()->livePadrow(sector,row-40);
-    }
-    return St_tpcPadGainT0C::instance()->livePadrow(sector,row);
-  }
+  Float_t 	Gain(Int_t sector, Int_t row, Int_t pad) const;
+  Float_t 	  T0(Int_t sector, Int_t row, Int_t pad) const;
+  Bool_t    livePadrow(Int_t sector, Int_t row) const;
  protected:
   St_tpcPadGainT0BC() {}
   virtual ~St_tpcPadGainT0BC() {fgInstance = 0;}

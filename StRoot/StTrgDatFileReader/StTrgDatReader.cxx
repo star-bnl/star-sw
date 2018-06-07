@@ -1,6 +1,9 @@
-// $Id: StTrgDatReader.cxx,v 1.10 2010/01/25 17:41:53 akio Exp $
+// $Id: StTrgDatReader.cxx,v 1.11 2018/05/29 20:01:36 akio Exp $
 //
 // $Log: StTrgDatReader.cxx,v $
+// Revision 1.11  2018/05/29 20:01:36  akio
+// Fixing run# problem when running with StFile list
+//
 // Revision 1.10  2010/01/25 17:41:53  akio
 // Remove RecordSize, and RecordUnixTime to return 2019686401 (Sat Dec 31 19:00:01 2033)
 //
@@ -108,7 +111,13 @@ fstream &StTrgDatReader::Read(){
 //__________________________________________________________________________
 int StTrgDatReader::RunNumber()  const  {
    if (mRunNumber == -1) { 
-      string f = filename();
+      TString ts(filename());
+      ts.ReplaceAll("_",".");
+      Ssiz_t last=ts.Last('/'); 
+      if(last>0) {last++; ts.Remove(0,last);}
+      string f = ts.Data();
+      //string f = filename();
+      //cout << "filename ="<<f<<endl;
       regex_t rx;
       const   char    *pattern =  "^.*run([0-9]+)\\..+\\.dat$";
       int     rc;
@@ -121,11 +130,14 @@ int StTrgDatReader::RunNumber()  const  {
                 << endm;
          assert(0&&"Can not extract the event number from the file name");
       } else {
-         regmatch_t matchptr[2];
+	//cout << "1filename ="<<f<<" run#="<<mRunNumber<<endl;
+         regmatch_t matchptr[2];	 
          if ( !(regexec (&rx, f.c_str(), sizeof(matchptr)/sizeof(regmatch_t), matchptr, 0)) ) {
            ((StTrgDatReader*) this)->mRunNumber = atoi(f.substr(matchptr[1].rm_so,matchptr[1].rm_eo).c_str());
+	   //cout << "2filename ="<<f<<" run#="<<mRunNumber<<endl;
          }
       }
+      //cout << "3filename ="<<f<<" run#="<<mRunNumber<<endl;
    }
    return mRunNumber;  
 }
