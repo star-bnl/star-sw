@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.hh,v 1.23 2018/04/11 02:43:44 smirnovd Exp $
+ * $Id: StTpcCoordinateTransform.hh,v 1.24 2018/06/07 04:28:42 genevb Exp $
  *
  * Author: brian made this on  Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.hh,v $
+ * Revision 1.24  2018/06/07 04:28:42  genevb
+ * Explicit include for TMath needed
+ *
  * Revision 1.23  2018/04/11 02:43:44  smirnovd
  * StTpcCoordinateTransform: Extend interface to accept TPC sector + use padConfig
  *
@@ -141,6 +144,7 @@
 #define ST_COORDINATE_TRANSFORM_HH
 
 #include <stdlib.h>
+#include "TMath.h"
 // SCL
 #include "StGlobals.hh"
 #include "SystemOfUnits.h"
