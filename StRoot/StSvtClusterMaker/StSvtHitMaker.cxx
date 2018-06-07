@@ -142,7 +142,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "Stiostream.h"
-
+#include "TROOT.h"
 #include "StSvtHitMaker.h"
 
 #include "TDataSetIter.h"

@@ -11,6 +11,7 @@
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StDetectorDbMaker/St_tpcEffectiveGeomC.h"
 #include "StDetectorDbMaker/St_tpcTimeBucketCorC.h"
+#include "StDetectorDbMaker/St_spaceChargeCorC.h"
 #include "TMath.h"
 ClassImp(StTpcHitMover)
 #define __DEBUG__
@@ -45,7 +46,7 @@ void StTpcHitMover::FlushDB() {
 //________________________________________________________________________________
 Int_t StTpcHitMover::Make() {
   if (StMagUtilities::Instance() && StMagUtilities::Instance()->GetSpaceChargeMode() &&
-      StDetectorDbSpaceChargeR2::instance()->IsMarked()) {
+      St_spaceChargeCorR2C::instance()->IsMarked()) {
     gMessMgr->Error() << "StTpcHitMover::Make questionable hit corrections" << endm;
     return kStSkip;
   }
@@ -167,8 +168,11 @@ void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StGlobalCoordinate &
   moveTpcHit(coorL,coorLTD);
   transform(coorLTD,coorG); PrPP(moveTpcHit,coorLTD); PrPP(moveTpcHit,coorG); 
 }
-// $Id: StTpcHitMoverMaker.cxx,v 1.28 2018/04/11 02:43:22 smirnovd Exp $
+// $Id: StTpcHitMoverMaker.cxx,v 1.29 2018/06/07 04:48:28 genevb Exp $
 // $Log: StTpcHitMoverMaker.cxx,v $
+// Revision 1.29  2018/06/07 04:48:28  genevb
+// Explicit include for spaceChargeCor needed
+//
 // Revision 1.28  2018/04/11 02:43:22  smirnovd
 // Enable TPC/iTPC switch via St_tpcPadConfig
 //

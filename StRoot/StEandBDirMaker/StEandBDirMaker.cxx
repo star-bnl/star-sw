@@ -45,6 +45,7 @@
 #include "TRMatrix.h"
 	       // ROOT
 #include "Riostream.h"
+#include "TROOT.h"
 #include "TSpectrum2.h"
 #include "TCanvas.h"
 #include "TFile.h"
