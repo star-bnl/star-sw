@@ -1197,6 +1197,7 @@ Bfc_st BFC[] = { // standard chains
   {"OTwist"      ,""  ,"","",""                                          ,"","ExB twist correction",kFALSE},
   {"OClock"      ,""  ,"","",""                                     ,"","Clock/tpc rot. correction",kFALSE},
   {"OPr13"       ,""  ,"","",""                                          ,"","PadRow 13 distortion",kFALSE},
+  {"OPr40"       ,""  ,"","",""                                          ,"","PadRow 40 distortion",kFALSE},
   {"OCentm"      ,""  ,"","",""                                   ,"","Central membrane correction",kFALSE},
   {"OECap"       ,""  ,"","",""                                    ,"","EndCap (curved) correction",kFALSE},
   {"OIFC"        ,""  ,"","",""                                         ,"","Field Cage correction",kFALSE},
