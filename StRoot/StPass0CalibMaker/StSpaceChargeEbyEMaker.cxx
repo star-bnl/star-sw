@@ -6,6 +6,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
+#include "TSystem.h"
 #include "StSpaceChargeEbyEMaker.h"
 #include "StDbUtilities/StMagUtilities.h"
 #include "StEvent/StEventTypes.h"
@@ -1553,8 +1554,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.67 2018/02/15 03:25:29 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.68 2018/06/08 15:35:06 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.68  2018/06/08 15:35:06  genevb
+// Needs explicity include of TSystem.h
+//
 // Revision 1.67  2018/02/15 03:25:29  genevb
 // Restore prepass settings for old data
 //

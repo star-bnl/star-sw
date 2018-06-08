@@ -1,9 +1,10 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: StSteeringModule.cxx,v 1.16 2010/03/11 00:38:41 fine Exp $
+// $Id: StSteeringModule.cxx,v 1.17 2018/06/08 15:36:08 genevb Exp $
 
 
 #include "StSteeringModule.h"
+#include "TSystem.h"
 #include "TROOT.h"
 #include "TPad.h"
 #include "TDataSetIter.h"
