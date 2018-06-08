@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.62 2018/04/11 02:35:57 genevb Exp $
+ * $Id: StMagUtilities.h,v 1.63 2018/06/08 18:18:37 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.63  2018/06/08 18:18:37  genevb
+ * Introduce padrow 40 correction for iTPC GridLeak Wall, reduce includes dependencies
+ *
  * Revision 1.62  2018/04/11 02:35:57  genevb
  * Distortion smearing by calibration resolutions
  *
@@ -185,8 +188,6 @@
 #include <stdlib.h>
 #include <Stiostream.h>
 
-#include "TSystem.h"
-#include "TROOT.h"        // Stop at this point and put further includes in .cxx file
 #include "TMatrix.h"      // TMatrix keeps changing ... keep it here until proven otherwise.
 #include "StarMagField/StarMagField.h"
 class TFile;
@@ -217,7 +218,8 @@ enum   DistortSelect
   kSectorAlign       = 0x20000,  // Bit 18
   kDisableTwistClock = 0x40000,  // Bit 19
   kFullGridLeak      = 0x80000,  // Bit 20
-  kDistoSmearing     = 0x100000  // Bit 21
+  kDistoSmearing     = 0x100000, // Bit 21
+  kPadrow40          = 0x200000  // Bit 22
 } ;
 enum   CorrectSelect
 {
@@ -244,11 +246,11 @@ class StTpcDb ;
 class TDataSet ;
 class St_tpcHVPlanesC;
 class St_tpcCalibResolutionsC;
+class St_tpcHighVoltagesC;
+class St_tpcOmegaTauC;
+class St_tpcGridLeakC;
+class St_spaceChargeCorC;
 class TRandom;
-#include "StDetectorDbMaker/StDetectorDbSpaceCharge.h"
-#include "StDetectorDbMaker/StDetectorDbTpcVoltages.h"
-#include "StDetectorDbMaker/StDetectorDbTpcOmegaTau.h"
-#include "StDetectorDbMaker/StDetectorDbGridLeak.h"
 
 //class TMatrix ;
 
@@ -257,11 +259,11 @@ class StMagUtilities {
 
  private:
   static StMagUtilities *fgInstance;
-  StDetectorDbSpaceCharge*   fSpaceCharge   ;
-  StDetectorDbSpaceChargeR2* fSpaceChargeR2 ;  
-  StDetectorDbTpcVoltages*   fTpcVolts      ;
-  StDetectorDbTpcOmegaTau*   fOmegaTau      ;
-  StDetectorDbGridLeak*      fGridLeak      ;
+  St_spaceChargeCorC*        fSpaceCharge   ;
+  St_spaceChargeCorC*        fSpaceChargeR2 ;  
+  St_tpcHighVoltagesC*       fTpcVolts      ;
+  St_tpcOmegaTauC*           fOmegaTau      ;
+  St_tpcGridLeakC*           fGridLeak      ;
   St_tpcHVPlanesC*           fHVPlanes      ;
   St_tpcCalibResolutionsC*   fCalibResolutions ;
 
@@ -283,6 +285,7 @@ class StMagUtilities {
   virtual Int_t   IsPowerOfTwo (Int_t i) ;
   virtual void    SectorNumber ( Int_t& Sector , const Float_t x[] ) ;
   virtual void    SectorNumber ( Int_t& Sector , Float_t phi, const Float_t z ) ;
+  virtual void    GetGLWallData( const Int_t select, Float_t DataInTheGap[] ) ; 
   virtual Int_t   SectorSide   ( Int_t& Sector , const Float_t x[] ) ; // -1 for east, +1 for west
   virtual Int_t   SectorSide   ( Int_t& Sector , const Float_t z   ) ;
   virtual Float_t LimitZ (Int_t& Sector, const Float_t x[] ) ;
@@ -325,6 +328,8 @@ class StMagUtilities {
   Double_t CathodeV ;                   // Cathode Potential (volts)
   Double_t GG ;                         // Gating Grid voltage (volts)
   Float_t  GGideal ;                    // Ideal set GG voltage, not effective voltage
+  Float_t  Inner_GLW_Voltage[24] ;      // Voltage on the inside of the Grid Leak Wall facing the GG (~GG effective voltage)
+  Float_t  Outer_GLW_Voltage[24] ;      // Voltage on the outside surface of the Grid Leak Wall facing the outer sector
   Float_t  Rtot ;                       // Total resistance of the (normal) resistor chain
   Float_t  Rfrac ;                      // Fraction of full resistor chain inside TPC drift volume (~1.0)
   Float_t  RPitch ;                     // Field Cage Ring to Ring pitch (cm)
@@ -415,6 +420,7 @@ class StMagUtilities {
   virtual void    FastUndoBDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    FastUndo2DBDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    UndoPad13Distortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
+  virtual void    UndoPad40Distortion ( const Float_t x[], Float_t Xprime[], Int_t Sector = -1 ) ;
   virtual void    UndoTwistDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    UndoClockDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    UndoMembraneDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
@@ -482,6 +488,7 @@ class StMagUtilities {
   virtual Double_t CurrentSpaceCharge()   {return SpaceCharge  ;}
   virtual Double_t CurrentSpaceChargeR2() {return SpaceChargeR2;}
   virtual Float_t  CurrentSpaceChargeEWRatio() { return SpaceChargeEWRatio ; }
+  virtual Bool_t   UpdateTPCHighVoltages();
   virtual Bool_t   UpdateShortedRing();
   virtual void     UseManualSCForPredict(Bool_t flag=kTRUE) { useManualSCForPredict=flag; }
   virtual void     ManualGGVoltError(Double_t east, Double_t west);
