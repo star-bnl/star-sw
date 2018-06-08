@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.652 2018/04/17 22:56:30 smirnovd Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.653 2018/06/08 04:03:56 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -755,6 +755,7 @@ Int_t StBFChain::Instantiate()
 	//            kIFCShift,kSpaceCharge,kSpaceChargeR2);
 	if( GetOption("OBmap")      ) mk->SetAttr("OBmap"      , kTRUE);
 	if( GetOption("OPr13")      ) mk->SetAttr("OPr13"      , kTRUE);
+	if( GetOption("OPr40")      ) mk->SetAttr("OPr40"      , kTRUE);
 	if( GetOption("OTwist")     ) mk->SetAttr("OTwist"     , kTRUE);
 	if( GetOption("OClock")     ) mk->SetAttr("OClock"     , kTRUE);
 	if( GetOption("OCentm")     ) mk->SetAttr("OCentm"     , kTRUE);
