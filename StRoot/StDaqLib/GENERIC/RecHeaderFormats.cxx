@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: RecHeaderFormats.cxx,v 1.7 2014/06/25 15:33:16 jeromel Exp $
+ * $Id: RecHeaderFormats.cxx,v 1.8 2018/06/10 17:16:01 smirnovd Exp $
  * Author: M.W. Schulz, Jeff Landgraf, M.J. LeVine
  ***************************************************************************
  * Description: Bank header formats common to all detectors in STAR:
@@ -13,6 +13,9 @@
  *
  ***************************************************************************
  * $Log: RecHeaderFormats.cxx,v $
+ * Revision 1.8  2018/06/10 17:16:01  smirnovd
+ * Add missing namespace OLDEVP
+ *
  * Revision 1.7  2014/06/25 15:33:16  jeromel
  * Code not used but erradicated use of flush
  *
@@ -56,7 +59,7 @@ char* OLDEVP::name2str(char* type) /* for everyone !!!! */
 };
 
 // first some trash can functions 
-void dump_data(char* buffer,int size,int width )
+void OLDEVP::dump_data(char* buffer,int size,int width )
 {
   uint* data_base = (uint*)buffer ;
   uint* data ;
