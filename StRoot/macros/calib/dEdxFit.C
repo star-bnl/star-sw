@@ -2354,6 +2354,36 @@ void Fit4G(Int_t ng=2, Int_t hyp=-1, Int_t bin=0,
   }
   if (f) {delete f;}
 }
+//________________________________________________________________________________
+Double_t gmp(Double_t *x, Double_t *p) {
+  Double_t normL = p[0];
+  Double_t nu    = p[1];
+  Double_t sigma = p[2];
+  Double_t gamma = p[3];
+  Double_t grass = p[4];
+  Double_t sign  = p[5];
+  Double_t val   = grass;
+  if (sigma > 0 && gamma > 1) {
+    Double_t t = sign*(x[0] - nu)/sigma + (gamma - 1);
+    if (t > 0) { 
+      val += TMath::Exp(normL)*TMath::GammaDist(t,gamma,0.,1.);
+    }
+  }
+  return val;
+}
+//________________________________________________________________________________
+TF1 *GMP() { // Fit Gamma + grass
+  TF1 * f = new TF1("GMP",gmp,0.5,15.5,6);
+  f->SetParNames("normL", "mu", "sigma", "gamma", "grass","sign");
+  f->SetParameters(4.17880, 2.86452, 0.2, 6.0, 2.1);
+  f->SetParLimits(0,0,50);
+  f->SetParLimits(1,2,26);
+  f->SetParLimits(2,0.1,2);
+  f->SetParLimits(3,2,50);
+  f->SetParLimits(4,0,1e3);
+  f->FixParameter(5,1.);
+  return f;
+}
 //#define DEBUG
 //________________________________________________________________________________
 TList *ListOfKeys() {
@@ -3375,6 +3405,223 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
 	//      }
       printf("%i/%i %f/%f mean %f rms = %f entries = %f mu = %f sigma = %f chisq = %f prob = %f\n",
 	    i,j,Fit.x,Fit.y,Fit.mean,Fit.rms,Fit.entries,Fit.mu,Fit.sigma,Fit.chisq,Fit.prob);
+      if (FitP)  FitP->Fill(&Fit.i);
+      if (canvas) {
+	canvas->Update();
+      }
+      fOut->cd();
+      proj->Write();
+      SafeDelete(proj);
+    }
+  }
+  fOut->cd();
+  FitP->Write();
+  mean->Write();
+  rms->Write();
+  entries->Write();
+  mu->Write();
+  sigma->Write();
+  chisq->Write();
+} 
+//________________________________________________________________________________
+void FitH3D(TH1 *hist, TF1 *fun,
+	     Option_t *opt="R", 
+	     Int_t ix = -1, Int_t jy = -1, 
+	     Int_t mergeX=1, Int_t mergeY=1, 
+	     Double_t nSigma=3, Int_t pow=1) {
+  if (! fun) return;
+  TCanvas *canvas = 0;
+  TString Opt(opt);
+  if (! Opt.Contains("Q",TString::kIgnoreCase)) {
+    canvas = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("Fit");
+    if (! canvas) canvas = new TCanvas("Fit","Fit results");
+    else          canvas->Clear();
+  }
+  if (! hist) return;
+  TAxis *xax = hist->GetXaxis();
+  Int_t nx = xax->GetNbins(); printf ("nx = %i",nx);
+  Axis_t xmin = xax->GetXmin(); printf (" xmin = %f",xmin);
+  Axis_t xmax = xax->GetXmax(); printf (" xmax = %f\n",xmax);
+  TAxis *yax = hist->GetYaxis();
+  Int_t dim = hist->GetDimension();
+  Int_t ny = yax->GetNbins();
+  Int_t NX = nx;
+  Int_t NY = ny;
+  if (dim < 3) ny = 1;  printf ("ny = %i",ny);
+  Axis_t ymin = yax->GetXmin(); printf (" ymin = %f",ymin);
+  Axis_t ymax = yax->GetXmax(); printf (" ymax = %f\n",ymax);
+  struct Fit_t {
+    Float_t i;
+    Float_t j;
+    Float_t x;
+    Float_t y;
+    Float_t mean;
+    Float_t rms;
+    Float_t peak;
+    Float_t entries;
+    Float_t chisq;
+    Float_t prob;
+    Float_t Npar;
+    Float_t params[20]; // params & errors
+  };
+  Fit_t Fit;
+  TDirectory *fRootFile = hist->GetDirectory();
+  //  TString NewRootFile(gSystem->DirName(fRootFile->GetName()));
+  TString NewRootFile(gSystem->DirName(gSystem->BaseName(fRootFile->GetName())));
+  NewRootFile += "/";
+  NewRootFile += hist->GetName();
+  NewRootFile += fun->GetName();
+  if (ix >= 0) NewRootFile += Form("_X%i",ix);
+  if (jy >= 0) NewRootFile += Form("_Y%i",jy);
+  if (mergeX != 1) NewRootFile += Form("_x%i",mergeX);
+  if (mergeY != 1) NewRootFile += Form("_y%i",mergeY);
+  //  NewRootFile += "_2_";
+  NewRootFile += gSystem->BaseName(fRootFile->GetName());
+  if (! FitP) {
+    if (! fOut) {
+      fOut = new TFile(NewRootFile.Data(),"update");
+      if (! fOut) fOut = new TFile(NewRootFile.Data(),"new");
+      if (fOut) cout << NewRootFile << " has been opened." << endl;
+      else {cout << "Failed to open " << NewRootFile << endl; return;}
+    }
+    FitP = (TNtuple *) fOut->Get("FitP");
+  }
+  Double_t params[10] = {0};
+  Double_t parerr[10] = {0};
+  TString  parNames[10];
+  Int_t imu = -1, isigma = -1;
+  TString VarN("i:j:x:y:mean:rms:peak:entries:chisq:prob:Npar");
+  TString ParN, dParN;
+  Int_t npar = fun->GetNpar();
+  for (Int_t p = 0; p < npar; p++) {
+    parNames[p] = fun->GetParName(p);;
+    VarN += ":"; VarN += parNames[p];
+    VarN += ":d"; VarN += parNames[p];
+    if        (parNames[p].Contains("mu",TString::kIgnoreCase)) {
+      imu = p;
+    } else if (parNames[p].Contains("sigma",TString::kIgnoreCase)) {
+      isigma = p;
+    }
+  }
+  if (! FitP) {
+    FitP = new TNtuple("FitP","Fit results",VarN);
+    FitP->SetMarkerStyle(20);
+    FitP->SetLineWidth(2);
+  }
+  TH1 *mean = (TH1 *) fOut->Get("mean");
+  TH1 *rms  = (TH1 *) fOut->Get("rms");    
+  TH1 *entries = (TH1 *) fOut->Get("entries");
+  TH1 *mu   = (TH1 *) fOut->Get("mu");
+  TH1 *sigma= (TH1 *) fOut->Get("sigma");
+  TH1 *chisq= (TH1 *) fOut->Get("chisq");
+  if (! mu) {
+    if (dim == 3) {
+      mean    = new TH2D("mean",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
+      rms     = new TH2D("rms",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
+      entries = new TH2D("entries",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
+      mu      = new TH2D("mu",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
+      sigma   = new TH2D("sigma",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
+      chisq   = new TH2D("chisq",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
+    }
+    else {
+      if (dim == 2 || dim == 1) {
+	mean    = new TH1D("mean",hist->GetTitle(),nx,xmin,xmax);
+	rms     = new TH1D("rms",hist->GetTitle(),nx,xmin,xmax);
+	entries = new TH1D("entries",hist->GetTitle(),nx,xmin,xmax);
+	mu      = new TH1D("mu",hist->GetTitle(),nx,xmin,xmax);
+	sigma   = new TH1D("sigma",hist->GetTitle(),nx,xmin,xmax);
+	chisq   = new TH1D("chisq",hist->GetTitle(),nx,xmin,xmax);
+      }
+      else {
+	printf("Histogram %s has wrong dimension %i\n", hist->GetName(),dim);
+	return;
+      }
+    }
+  }
+  TH1 *proj = 0;
+  TF1 *g = 0;
+  Int_t ix1 = ix, jy1 = jy;
+  if (ix >= 0) nx = ix;
+  if (jy >= 0) ny = jy;
+  if (ix1 < 0) ix1 = 0;
+  if (jy1 < 0) jy1 = 0;
+  for (int i=ix1;i<=nx-mergeX+1;i++){
+    Int_t ir0 = i;
+    Int_t ir1=i+mergeX-1;
+    if (i == 0) {ir0 = 1; ir1 = nx;}
+    for (int j=jy1;j<=ny-mergeY+1;j++){
+      Int_t jr0 = j;
+      Int_t jr1 = j+mergeY-1;
+      if (j == 0) {jr0 = 1; jr1 = ny;}
+      if (dim == 3) {
+	if (ir0 == ir1 && jr0 == jr1) {
+	  proj = ((TH3 *) hist)->ProjectionZ(Form("f%i_%i",      ir0,    jr0    ),ir0,ir1,jr0,jr1); 
+	  cout<<"Histogram "<<proj->GetName()<<" was created"<<endl;
+	} else {  
+	  proj = ((TH3 *) hist)->ProjectionZ(Form("f%i_%i_%i_%i",ir0,ir1,jr0,jr1),ir0,ir1,jr0,jr1);
+	  cout<<"Histogram "<<proj->GetName()<<" was created"<<endl;
+	}
+	if (! proj) continue;
+	TString title(proj->GetTitle());
+	title += Form(" in x [%5.1f,%5.1f] and y [%5.1f,%5.1f] range",
+		      xax->GetBinLowEdge(ir0), xax->GetBinUpEdge(ir1),
+		      yax->GetBinLowEdge(jr0), yax->GetBinUpEdge(jr1));
+	proj->SetTitle(title.Data());
+      }
+      else {
+	if (ir0 == ir1) 
+	  {  proj = ((TH2 *) hist)->ProjectionY(Form("f%i",   ir0),    ir0,ir1);cout<<"Histogram "<<proj->GetName()<<" was created"<<endl;}
+	else 
+	  {  proj = ((TH2 *) hist)->ProjectionY(Form("f%i_%i",ir0,ir1),ir0,ir1);cout<<"Histogram "<<proj->GetName()<<" was created"<<endl;}
+	if (! proj) continue;
+	TString title(proj->GetTitle());
+	title += Form("in x [%5.1f,%5.1f] range",
+		      xax->GetBinLowEdge(ir0), xax->GetBinUpEdge(ir1));
+	proj->SetTitle(title.Data());
+      }
+      cout << "i/j\t" << i << "/" << j << "\t" <<  proj->GetName() << "\t" << proj->GetTitle() << "\t" <<  proj->Integral() << endl;
+      //      continue;
+      memset (&Fit, 0, sizeof(Fit_t));
+      Fit.i = (2.*i+mergeX-1.)/2;
+      Fit.j = (2.*j+mergeY-1.)/2;
+      Fit.x = 0.5*(xax->GetBinLowEdge(i) + xax->GetBinUpEdge(i+mergeX-1));
+      Fit.y = 0.5*(yax->GetBinLowEdge(j) + yax->GetBinUpEdge(j+mergeY-1));
+      Fit.mean = proj->GetMean();
+      Fit.rms  = proj->GetRMS();
+      Fit.chisq = -100;
+      Fit.prob  = 0;
+      Fit.entries = proj->Integral();
+      mean->SetBinContent(i,j,Fit.mean);
+      rms->SetBinContent(i,j,Fit.rms);
+      entries->SetBinContent(i,j,Fit.entries);
+      chisq->SetBinContent(i,j,Fit.chisq);
+      if (Fit.entries < 100) {delete proj; continue;}
+      fun->SetParameter(imu,Fit.mean);
+      fun->SetParameter(isigma,Fit.rms);
+      proj->Fit(fun,opt);
+      fun->GetParameters(params);
+      const Double_t *params = fun->GetParameters();
+      const Double_t *parerr = fun->GetParErrors();
+      Int_t Npar = fun->GetNpar();
+      Fit.Npar  = Npar;
+      Fit.chisq = fun->GetChisquare();
+      Fit.prob  = fun->GetProb();
+      for (Int_t p = 0; p < Npar; p++) {
+	Fit.params[2*p+0] = params[p];
+	Fit.params[2*p+1] = parerr[p];
+	if        (parNames[p].Contains("mu",TString::kIgnoreCase)) {
+	  mu->SetBinContent(i,j,params[p]);
+	  mu->SetBinError(i,j,parerr[p]);
+	  //	  imu = p;
+	} else if (parNames[p].Contains("sigma",TString::kIgnoreCase)) {
+	  sigma->SetBinContent(i,j,params[p]);
+	  sigma->SetBinError(i,j,parerr[p]);
+	  //	  isigma = p;
+	}
+      }
+      if (imu >= 0 && isigma >= 0) 
+      printf("%i/%i %f/%f mean %f rms = %f entries = %f mu = %f sigma = %f chisq = %f prob = %f\n",
+	    i,j,Fit.x,Fit.y,Fit.mean,Fit.rms,Fit.entries,Fit.params[imu],Fit.params[isigma],Fit.chisq,Fit.prob);
       if (FitP)  FitP->Fill(&Fit.i);
       if (canvas) {
 	canvas->Update();

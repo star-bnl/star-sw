@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.43 2009/11/23 16:44:55 fisyak Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.44 2018/06/08 16:38:23 genevb Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.44  2018/06/08 16:38:23  genevb
+ * Needs explicit include of TROOT.h
+ *
  * Revision 1.43  2009/11/23 16:44:55  fisyak
  * Remove references to tables
  *
@@ -150,6 +153,7 @@
 #include "StMessMgr.h"
 #include "StMCTruth.h"
 
+#include "TROOT.h"
 #include "TFile.h"
 #include "TNtuple.h"
 

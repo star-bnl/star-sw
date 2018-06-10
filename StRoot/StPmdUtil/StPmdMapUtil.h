@@ -4,7 +4,7 @@
  */
 /*********************************************************
  *
- * $Id: StPmdMapUtil.h,v 1.5 2010/05/02 13:14:00 rashmi Exp $
+ * $Id: StPmdMapUtil.h,v 1.6 2018/06/08 03:33:09 smirnovd Exp $
  *
  * Author: Dipak Mishra
  *
@@ -15,6 +15,9 @@
  *************************************************************
  *
  * $Log: StPmdMapUtil.h,v $
+ * Revision 1.6  2018/06/08 03:33:09  smirnovd
+ * Fix typo in header include guards
+ *
  * Revision 1.5  2010/05/02 13:14:00  rashmi
  *  removed some couts
  *
@@ -32,7 +35,7 @@
  *
  *************************************************************/
 #ifndef STAR_StPmdMapUtil
-#define STAR_StPmdmapUtil
+#define STAR_StPmdMapUtil
 #include <stdlib.h>
 #include <TMatrix.h>
 #include <sstream>

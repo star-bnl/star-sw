@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.68 2018/04/11 02:39:49 genevb Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.70 2018/06/08 18:18:37 genevb Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,16 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.70  2018/06/08 18:18:37  genevb
+ * Introduce padrow 40 correction for iTPC GridLeak Wall, reduce includes dependencies
+ *
+ * Revision 1.69  2018/04/30 23:18:11  smirnovd
+ * [Cosmetic] Minor changes in various files
+ *
+ * - Renamed data member s/m/mMass/ in StikalmanTrack
+ * - Changes in white space
+ * - Return STAR code
+ *
  * Revision 1.68  2018/04/11 02:39:49  genevb
  * Distortion smearing by calibration resolutions
  *
@@ -205,9 +215,9 @@
 
 #include <assert.h>
 #include "StTpcDbMaker.h"
-#include "StTpcDb.h"
 #include "StDbUtilities/StCoordinates.hh"
 #include "StDbUtilities/StTpcPadCoordinate.hh"
+#include "StDbUtilities/StMagUtilities.h"
 #include "StarMagField.h"
 #include "math_constants.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
@@ -280,6 +290,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     //            kIFCShift,kSpaceCharge,kSpaceChargeR2);
     if( IAttr("OBmap")      ) mask |= ( kBMap         << 1);
     if( IAttr("OPr13")      ) mask |= ( kPadrow13     << 1);
+    if( IAttr("OPr40")      ) mask |= ( kPadrow40     << 1);
     if( IAttr("OTwist")     ) mask |= ( kTwist        << 1);
     if( IAttr("OClock")     ) mask |= ( kClock        << 1);
     if( IAttr("OCentm")     ) mask |= ( kMembrane     << 1);

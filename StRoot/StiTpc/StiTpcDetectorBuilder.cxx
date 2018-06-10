@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include "Stiostream.h"
+#include "TSystem.h"
 #include <stdexcept>
 #include "StDbUtilities/StTpcLocalCoordinate.hh"
 #include "StDbUtilities/StTpcCoordinateTransform.hh"

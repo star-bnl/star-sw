@@ -9,6 +9,7 @@
 #include "tables/St_MagFactor_Table.h"
 #include "StarMagField/StarMagField.h"
 #include "StDetectorDbMaker/St_MagFactorC.h"
+#include "StDetectorDbMaker/StDetectorDbSpaceCharge.h"
 
 //#include "online/RTS/src/L4_HLT/online_tracking_TpcHitMap.h"
 #include "online_tracking_TpcHitMap.h"

@@ -1067,7 +1067,7 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
 	} else {
 	  hists[i][j] = new TH3F(Form("%s%s%s",tpcName[i],opName[k],vName[j]),
 				    Form("log(simulated ADC) versus log(recon. ADC) and %s",vName[j]),
-				    70,3.,10.,ny,ymin,ymax,100,-1,1);
+				    70,3.,10.,ny,ymin,ymax,400,-2,2);
 	}
       }
   Double_t dsCut[2] = {1., 2.};
