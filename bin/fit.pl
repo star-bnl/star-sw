@@ -11,6 +11,7 @@ my @histGP = ();
 my @histRL5 = ();
 my @histNF = ();
 my @histXF = ();
+my @histADC = ();
 my @rootfiles = ();
 my $all = 0;
 #my $all = 1;
@@ -40,6 +41,7 @@ if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0)
 	      );
   @histNF = qw(PressureN VoltageN AvCurrentN QcmN Z3N SecRow3N dX3N TanL3DN); # Edge3N Edge3N PressureTN VoltN Zdc3N  Z3ON 
 #  @histXF = @histNF;
+  @histADC = qw(I3DZ O3DZ X3DZ I3DTanL O3DTanL X3DTanLI3DdX O3DdX X3DdX IC3DZ OC3DZ XC3DZ IC3DTanL OC3DTanL XC3DTanLIC3DdX OC3DdX XC3DdX);
 }
 print "fit.pl for  @rootfiles \n";
 if ($#histGF >= 0) {print " with GF: @histGF \n";}
@@ -48,7 +50,8 @@ if ($#histRL5 >= 0){print " with RL5:@histRL5\n";}
 if ($#histNF >= 0) {print " with NF: @histNF \n";}
 if ($#histXF >= 0) {print " with NF: @histXF \n";}
 exit if $#rootfiles < 0;
-my @opt = qw (GF GP NF);# XF);# RL5);
+#my @opt = qw (GF GP NF);# XF);# RL5);
+my @opt = qw (ADC);
 my $XML = "fit.xml";
 open (XML,">$XML") or die "Can't open $XML";
 print XML '<?xml version="1.0" encoding="utf-8" ?>
@@ -66,6 +69,7 @@ foreach my $rootfile (@rootfiles) {
     my @histos = ();
     my $NoSectors =  -1;
     if    ($fitype eq 'GP') {@histos = @histGP;}
+    elsif ($fitype eq 'ADC') {@histos = @histADC;}
     elsif ($fitype eq 'GF') {@histos = @histGF;}
     elsif ($fitype eq 'RL5'){@histos = @histRL5;}
     elsif ($fitype eq 'NF') {
@@ -73,11 +77,13 @@ foreach my $rootfile (@rootfiles) {
 			     $NoSectors = 24;}
     elsif ($fitype eq 'XF') {@histos = @histNF;} 
     else {next;}
-    print "FitType : $fitype , histos = @histos\n";
+    my $fittype = $fitype;
+    if ($fitype eq 'ADC') {$fittype = "GP";}
+    print "FitType : $fittype , histos = @histos\n";
     foreach my $hist (@histos) {
       my $sec1 = -1;
       my $sec2 = -1;
-#      if ($fitype eq 'NF') {
+#      if ($fittype eq 'NF') {
 #	$sec1 = 0;
 #	if ($hist eq 'SecRow3N') {
 #          $sec2 = 24;
@@ -90,10 +96,10 @@ foreach my $rootfile (@rootfiles) {
 	if ($sec >= 0) {$ext = "_X" . $sec;}
 	my $dir = File::Basename::dirname($rootfile);
 	my $fil = File::Basename::basename($rootfile);
-	my $SCRIPT = $hist . $fitype . $ext . $fil;
+	my $SCRIPT = $hist . $fittype . $ext . $fil;
 	$SCRIPT =~ s/\.root/\.csh/;
-	my $newfilew = $dir . "/" . $hist . $fitype . $ext . $fil;
-	print "$rootfile -> $hist => $fitype new file: $newfilew\n";
+	my $newfilew = $dir . "/" . $hist . $fittype . $ext . $fil;
+	print "$rootfile -> $hist => $fittype new file: $newfilew\n";
 	next if -r $newfilew;
 	my $log = $newfilew;
 	$log =~ s/\.root/\.log/;
@@ -101,7 +107,7 @@ foreach my $rootfile (@rootfiles) {
 	my $rootcmd =  "root.exe -q -b lBichsel.C " . $rootfile;
 	$rootcmd .= " 'dEdxFit.C+(\"";
 	$rootcmd .= $hist;
-	$rootcmd .= "\",\"" . $fitype ;
+	$rootcmd .= "\",\"" . $fittype ;
 	if ($sec >= 0) {
 	  $rootcmd .= "\",\"R\"," . $sec . ")'";
 	} else {
