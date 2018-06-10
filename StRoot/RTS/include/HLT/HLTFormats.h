@@ -7,11 +7,12 @@
 #define _HLT_FORMATS_H
 
 // #define HLT_GL3_VERSION 0x20100107
-// #define HLT_GL3_VERSION 0x20110114  // add di-electron selection method bits
-// #define HLT_GL3_VERSION 0x20130117  // optimazed mamoty layout
+// #define HLT_GL3_VERSION 0x20110114 // add di-electron selection method bits
+// #define HLT_GL3_VERSION 0x20130117 // optimazed mamoty layout
 // #define HLT_GL3_VERSION 0x20140522 // add MTD data structure
 // #define HLT_GL3_VERSION 0x20160120 // add MTDQuarkonium
-#define HLT_GL3_VERSION 0x20160210 // add isTrigger to hlt_MtdHit
+// #define HLT_GL3_VERSION 0x20160210 // add isTrigger to hlt_MtdHit
+#define HLT_GL3_VERSION 0x20180607    // add bField in HLT_EVE
 
 struct hlt_track {
     int            id ;         //primary key
@@ -155,6 +156,7 @@ struct HLT_EVE {
     float        outerSectorGain;
     float        beamlineX;
     float        beamlineY;
+    float        bField;
 };
 
 struct hlt_diElectronPair {
@@ -196,7 +198,6 @@ struct HLT_RHO {
     unsigned int          nRhos;
     struct hlt_diPionPair PionPair[1000];
 };
-
 
 // high pt bank
 struct HLT_HIPT {
