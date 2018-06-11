@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: CRC.cxx,v 1.5 2007/12/24 06:04:16 fine Exp $
+ * $Id: CRC.cxx,v 1.6 2018/06/10 17:16:01 smirnovd Exp $
  * Author: M.W. Schulz
  ***************************************************************************
  * Description: calculate and check the CRC
@@ -11,6 +11,9 @@
  *
  ***************************************************************************
  * $Log: CRC.cxx,v $
+ * Revision 1.6  2018/06/10 17:16:01  smirnovd
+ * Add missing namespace OLDEVP
+ *
  * Revision 1.5  2007/12/24 06:04:16  fine
  * introduce OLDEVP namespace to allow ole and new EVP library concurrently
  *
@@ -40,7 +43,7 @@ using namespace OLDEVP;
 /* in memory everything has to be done like this !!!!!*/
 /* if you read the data from file, we have to use the variable routine
    for some of the banks */
-unsigned int compute_crc_bank(Bank* d,unsigned int lcrc )
+unsigned int OLDEVP::compute_crc_bank(Bank* d,unsigned int lcrc )
 {
   /* first do the header, but not the crc  */
   int i ;
@@ -85,7 +88,7 @@ unsigned int compute_crc_bank(Bank* d,unsigned int lcrc )
     }
 };
 //**************************************************************************
-unsigned int compute_crc_block(int* p,unsigned int ByteOrder,int Length,unsigned int lcrc ) 
+unsigned int OLDEVP::compute_crc_block(int* p,unsigned int ByteOrder,int Length,unsigned int lcrc ) 
 {
   int i ;
   if(ByteOrder == 0x04030201)  /* fine no swap */
