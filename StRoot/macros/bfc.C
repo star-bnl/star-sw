@@ -210,7 +210,7 @@ StBFChain *bfc(Int_t First, Int_t Last,
     }
     if (typeC) {
       if ( TString(gProgName) == "root4star") {
-	tChain += ".Ideal,gstar,useXgeom,Corr4"; 
+	tChain += ".Ideal,gstar,useXgeom,CorrX"; 
       } else                                   {
 	tChain += ",vmc,CorrX";
       }
