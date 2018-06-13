@@ -614,7 +614,7 @@ void StEventQAMaker::MakeHistGlob() {
         }
         hists->m_glb_padfT->Fill(minpadrow);
 	
-        hists->m_pointT->Fill(detInfo->numberOfPoints());
+        hists->m_pointT->Fill(detInfo->numberOfReferencedPoints());
         hists->m_max_pointT->Fill(globtrk->numberOfPossiblePoints());
         hists->m_fit_pointT->Fill(fTraits.numberOfFitPoints());
         if (silHists)
@@ -2822,8 +2822,16 @@ void StEventQAMaker::MakeHistRP() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.130 2018/05/02 21:07:40 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.131 2018/06/13 00:14:24 smirnovd Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.131  2018/06/13 00:14:24  smirnovd
+// StEventQAMaker: Use the number of hits associated with the track
+//
+// The class StEvent/StTrackDetectorInfo looks very confusing to me. But what we
+// are interested here is the total number of hits on track which is just the size
+// of the internal vector of track hits returned by
+// StTrackDetectorInfo::numberOfReferencedPoints()
+//
 // Revision 2.130  2018/05/02 21:07:40  genevb
 // Initial accomodation for iTPC
 //
