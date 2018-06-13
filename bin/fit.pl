@@ -5,6 +5,7 @@ use Cwd;
 use Env;
 my $DIR = Cwd::cwd();
 # list of all histogram to be fitted
+`ln -s ~/macros/.sl* .`;
 $ENV{STARFPE} = "NO";
 my @histGF = ();
 my @histGP = ();
@@ -41,7 +42,7 @@ if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0)
 	      );
   @histNF = qw(PressureN VoltageN AvCurrentN QcmN Z3N SecRow3N dX3N TanL3DN); # Edge3N Edge3N PressureTN VoltN Zdc3N  Z3ON 
 #  @histXF = @histNF;
-  @histADC = qw(I3DZ O3DZ X3DZ I3DTanL O3DTanL X3DTanLI3DdX O3DdX X3DdX IC3DZ OC3DZ XC3DZ IC3DTanL OC3DTanL XC3DTanLIC3DdX OC3DdX XC3DdX);
+  @histADC = qw(I3DZ O3DZ X3DZ I3DTanL O3DTanL X3DTanL I3DdX O3DdX X3DdX IC3DZ OC3DZ XC3DZ IC3DTanL OC3DTanL XC3DTanL IC3DdX OC3DdX XC3DdX);
 }
 print "fit.pl for  @rootfiles \n";
 if ($#histGF >= 0) {print " with GF: @histGF \n";}
@@ -50,8 +51,8 @@ if ($#histRL5 >= 0){print " with RL5:@histRL5\n";}
 if ($#histNF >= 0) {print " with NF: @histNF \n";}
 if ($#histXF >= 0) {print " with NF: @histXF \n";}
 exit if $#rootfiles < 0;
-#my @opt = qw (GF GP NF);# XF);# RL5);
-my @opt = qw (ADC);
+my @opt = qw (GF GP NF);# XF);# RL5);
+#my @opt = qw (ADC);
 my $XML = "fit.xml";
 open (XML,">$XML") or die "Can't open $XML";
 print XML '<?xml version="1.0" encoding="utf-8" ?>
