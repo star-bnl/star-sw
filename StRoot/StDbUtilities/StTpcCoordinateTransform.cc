@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.43 2018/04/11 02:43:43 smirnovd Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.44 2018/06/13 00:14:35 smirnovd Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,12 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.44  2018/06/13 00:14:35  smirnovd
+ * Apply T0 offset to inner TPC sectors
+ *
+ * The number of T0 constants increased from 24 to 48 to accommodate inner iTPC
+ * sectors. The sector index is updated according to the requested sector/row
+ *
  * Revision 1.43  2018/04/11 02:43:43  smirnovd
  * StTpcCoordinateTransform: Extend interface to accept TPC sector + use padConfig
  *
@@ -383,6 +389,9 @@ Double_t StTpcCoordinateTransform::zFromTB(Double_t tb, Int_t sector, Int_t row)
   Double_t elecT0 = StTpcDb::instance()->Electronics()->tZero();          // units are us 
   Double_t sectT0 = St_tpcPadrowT0C::instance()->T0(sector,row);// units are us 
   Double_t t0 = trigT0 + elecT0 + sectT0;
+  bool isiTpcInnerSector = St_tpcPadConfigC::instance()->isiTpcSector(sector) &&
+                           St_tpcPadConfigC::instance()->isInnerPadRow(sector,row);
+  sector += isiTpcInnerSector ? 24 : 0;
   Double_t time = t0 + (tb + St_tpcSectorT0offsetC::instance()->t0offset(sector))*mTimeBinWidth; 
   Double_t z = StTpcDb::instance()->DriftVelocity(sector)*1e-6*time;
   return z;
@@ -399,6 +408,9 @@ Double_t StTpcCoordinateTransform::tBFromZ(Double_t z, Int_t sector, Int_t row) 
   Double_t sectT0 = St_tpcPadrowT0C::instance()->T0(sector,row);// units are us 
   Double_t t0 = trigT0 + elecT0 + sectT0;
   Double_t time = z / (StTpcDb::instance()->DriftVelocity(sector)*1e-6);
+  bool isiTpcInnerSector = St_tpcPadConfigC::instance()->isiTpcSector(sector) &&
+                           St_tpcPadConfigC::instance()->isInnerPadRow(sector,row);
+  sector += isiTpcInnerSector ? 24 : 0;
   Double_t tb = (time - t0)/mTimeBinWidth - St_tpcSectorT0offsetC::instance()->t0offset(sector);
   return tb;
 }
