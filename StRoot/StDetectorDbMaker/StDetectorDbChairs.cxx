@@ -27,7 +27,6 @@ using namespace ROOT::Math;
     if (! strcmp(makeSTRING(C_STRUCT),"Survey")) {shift = 4; NrowSize = 12*8;}\
     if (! strcmp(makeSTRING(C_STRUCT),"tpcSectorT0offset")) {for (Int_t i = 0; i < 24; i++) def->t0[i] = -22.257;} \
     if (! strcmp(makeSTRING(C_STRUCT),"tofTrayConfig")) {def->entries = 120; for (Int_t i = 0; i < 120; i++) {def->iTray[i] = i+1; def->nModules[i] = 32;} \
-
     for (Int_t i = 0; i < table->GetNRows(); i++, s++) {	      \
       if (memcmp(&def+shift, s+shift,  NrowSize)) {iprt = kTRUE; break;}   \
     }								      \
@@ -780,12 +779,14 @@ St_tpcPadGainT0BC *St_tpcPadGainT0BC::instance() {if (! fgInstance) fgInstance =
 Float_t 	St_tpcPadGainT0BC::Gain(Int_t sector, Int_t row, Int_t pad) const {
   Float_t gain = 0;
   if (St_tpcPadConfigC::instance()->iTPC(sector)) {
-    if (row <= 40) 
+    if (row <= 40) {
       gain = St_itpcPadGainT0C::instance()->Gain(sector,row,pad);
-    else
-      gain = St_tpcPadGainT0C::instance()->Gain(sector,row-40,pad);
-  } else 
+    } else {
+      gain = St_tpcPadGainT0C::instance()->Gain(sector,row-40+13,pad);
+    }
+  } else { // Tpx
     gain = St_tpcPadGainT0C::instance()->Gain(sector,row,pad);
+  }
   return gain;
 }
 //________________________________________________________________________________
@@ -795,9 +796,10 @@ Float_t 	  St_tpcPadGainT0BC::T0(Int_t sector, Int_t row, Int_t pad) const {
     if (row <= 40) 
       T0 = St_itpcPadGainT0C::instance()->T0(sector,row,pad);
     else 
-      T0 = St_tpcPadGainT0C::instance()->T0(sector,row-40,pad);
-  } else 
+      T0 = St_tpcPadGainT0C::instance()->T0(sector,row-40+13,pad);
+  } else { // Tpx
     T0 = St_tpcPadGainT0C::instance()->T0(sector,row,pad);
+  }
   return T0;
 }
 //________________________________________________________________________________
@@ -806,7 +808,7 @@ Bool_t    St_tpcPadGainT0BC::livePadrow(Int_t sector, Int_t row) const {
     if (row <= 40)
       return St_itpcPadGainT0C::instance()->livePadrow(sector,row);
     else 
-      return St_tpcPadGainT0C::instance()->livePadrow(sector,row-40);
+      return St_tpcPadGainT0C::instance()->livePadrow(sector,row-40+13);
   }
   return St_tpcPadGainT0C::instance()->livePadrow(sector,row);
 }

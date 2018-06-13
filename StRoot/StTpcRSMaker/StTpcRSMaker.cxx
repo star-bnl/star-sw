@@ -582,15 +582,21 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
   }
   delete [] pbins;
   delete [] pbinsL;
+  SetAttr("minSector",1);
+  SetAttr("maxSector",24);
+  SetAttr("minRow",1);
+  SetAttr("maxRow",St_tpcPadConfigC::instance()->numberOfRows(20));
   return kStOK;
 }
 //________________________________________________________________________________
 Int_t StTpcRSMaker::Make(){  //  PrintInfo();
+  static Int_t minSector = IAttr("minSector");
+  static Int_t maxSector = IAttr("maxSector");
+  static Int_t minRow    = IAttr("minRow");
+  static Int_t maxRow    = IAttr("maxRow");
   // constants
 #ifdef __DEBUG__
   static Int_t iBreak = 0;
-  static Int_t selectedSector = -1;
-  static Int_t selectedRow = -1;
   if (Debug()%10) {
     gBenchmark->Reset();
     gBenchmark->Start("TpcRS");
@@ -635,7 +641,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   TTableSorter sorter(g2t_tpc_hit,&SearchT,&CompareT);//, 0, no_tpc_hits);
   Int_t sortedIndex = 0;
   tpc_hit = tpc_hit_begin;
-  for (Int_t sector = 1; sector <= NoOfSectors; sector++) {
+  for (Int_t sector = minSector; sector <= maxSector; sector++) {
     Int_t NoHitsInTheSector = 0;
     free(m_SignalSum); m_SignalSum = 0;
     SignalSum_t *SignalSum = ResetSignalSum(sector);
@@ -652,11 +658,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	assert( iSector > sector );
 	break;
       }
-#ifdef __DEBUG__
-      if (selectedSector > 0 && iSector != selectedSector) continue;
-      Int_t iRow = volId%100;
-      if (selectedRow > 0 && iRow != selectedRow) continue;
-#endif
       if (tpc_hit->volume_id <= 0 || tpc_hit->volume_id > 1000000) continue;
       Int_t Id         = tpc_hit->track_p;
       Int_t id3 = 0, ipart = 8, charge = 1;
@@ -754,10 +755,10 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	static StTpcLocalSectorCoordinate coorS;
 	transform(coorG, coorS,sector,0); PrPP(Make,coorS);
 	Int_t row = coorS.fromRow();
-	transform(coorG, coorLT,sector,row); PrPP(Make,coorLT);
 #ifdef __DEBUG__
-	if (selectedRow > 0 && row != selectedRow) {break;}
+	if (row < minRow || row > maxRow) continue;
 #endif
+	transform(coorG, coorLT,sector,row); PrPP(Make,coorLT);
 	Int_t ior = (row <= St_tpcPadConfigC::instance()->numberOfInnerRows(sector)) ? 0 : 1;
 	//	if (io >= 0 && io != ior) break;
 	io = ior;
@@ -1253,8 +1254,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 		St_TpcResponseSimulatorC::instance()->T0offsetO();
 	      if (sigmaJitterT) dT += gRandom->Gaus(0,sigmaJitterT);  // #1
 #if 1
-	      Double_t dely[1]      = {transform.yFromRow(sector,r)-yOnWire};            
-	      Double_t localYDirectionCoupling = mChargeFraction[io][sector-1]->GetSaveL(dely);
+	      Double_t dely      = {transform.yFromRow(sector,r)-yOnWire};    
+	      Double_t localYDirectionCoupling = mChargeFraction[io][sector-1]->GetSaveL(&dely);
 #else
 	      Int_t idWire = TMath::Abs(TMath::Nint((transform.yFromRow(sector,r)-yOnWire)/anodeWirePitch));
 	      if (idWire > 6) continue;
