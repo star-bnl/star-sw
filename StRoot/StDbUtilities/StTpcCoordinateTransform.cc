@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.44 2018/06/13 00:14:35 smirnovd Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.45 2018/06/14 21:22:54 smirnovd Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,14 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.45  2018/06/14 21:22:54  smirnovd
+ * Slight refactoring of "Apply T0 offset to inner TPC sectors"
+ *
+ * Avoid modifying the input TPC sector ID [1, 24] inside of
+ * StTpcCoordinateTransform::zFromTB() as was mistakenly done in the previous
+ * commit. The input sector ID should be passed to StTpcDb::DriftVelocity(sector)
+ * unmodified.
+ *
  * Revision 1.44  2018/06/13 00:14:35  smirnovd
  * Apply T0 offset to inner TPC sectors
  *
@@ -391,8 +399,8 @@ Double_t StTpcCoordinateTransform::zFromTB(Double_t tb, Int_t sector, Int_t row)
   Double_t t0 = trigT0 + elecT0 + sectT0;
   bool isiTpcInnerSector = St_tpcPadConfigC::instance()->isiTpcSector(sector) &&
                            St_tpcPadConfigC::instance()->isInnerPadRow(sector,row);
-  sector += isiTpcInnerSector ? 24 : 0;
-  Double_t time = t0 + (tb + St_tpcSectorT0offsetC::instance()->t0offset(sector))*mTimeBinWidth; 
+  double t0offset = St_tpcSectorT0offsetC::instance()->t0offset(isiTpcInnerSector ? sector + 24 : sector);
+  Double_t time = t0 + (tb + t0offset)*mTimeBinWidth;
   Double_t z = StTpcDb::instance()->DriftVelocity(sector)*1e-6*time;
   return z;
 }
@@ -410,8 +418,8 @@ Double_t StTpcCoordinateTransform::tBFromZ(Double_t z, Int_t sector, Int_t row) 
   Double_t time = z / (StTpcDb::instance()->DriftVelocity(sector)*1e-6);
   bool isiTpcInnerSector = St_tpcPadConfigC::instance()->isiTpcSector(sector) &&
                            St_tpcPadConfigC::instance()->isInnerPadRow(sector,row);
-  sector += isiTpcInnerSector ? 24 : 0;
-  Double_t tb = (time - t0)/mTimeBinWidth - St_tpcSectorT0offsetC::instance()->t0offset(sector);
+  double t0offset = St_tpcSectorT0offsetC::instance()->t0offset(isiTpcInnerSector ? sector + 24 : sector);
+  Double_t tb = (time - t0)/mTimeBinWidth - t0offset;
   return tb;
 }
 //________________________________________________________________________________
