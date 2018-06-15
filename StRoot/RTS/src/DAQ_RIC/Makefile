@@ -41,7 +41,7 @@ ric_reader.o: ../../../../StRoot/RTS/include/rtsLog.h
 ric_reader.o: ../../../../StRoot/RTS/include/rtsSystems.h
 ric_reader.o: ../../../../StRoot/RTS/include/daqFormats.h
 ric_reader.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-ric_reader.o: ../../../../StRoot/RTS/trg/include/trgDataDefs.h
+ric_reader.o: ../../../../StRoot/RTS/trg/include/trgDataDefs_45.h
 ric_reader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 ric_reader.o: ../../../../StRoot/RTS/include/rts.h
 ric_reader.o: daq_ric.h
