@@ -98,7 +98,10 @@ static int run_number ;
 
 
 //trigger related globals
+u_int bunch_xing ;
 u_int rcc_timestamp ;
+
+
 
 int altro_override[256] ;
 
@@ -107,6 +110,9 @@ extern int *tpx_altro_to_row_override ;
 
 static double det_raw_bytes[6] ;
 static u_int det_events ;
+
+
+static class daqReader *evp = 0 ;			// tha main guy
 
 int main(int argc, char *argv[])
 {
@@ -146,7 +152,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	class daqReader *evp = 0 ;			// tha main guy
+
 
 	if(optind >= argc) {	// no arguments -- NFS
 
@@ -233,10 +239,10 @@ int main(int argc, char *argv[])
 		LOG(INFO,"evt %d: sequence %d: token %4d, trgcmd %d, daqcmd %d, time \"%s\", detectors 0x%08X (status 0x%X), evpgroups 0x%X",good,evp->seq, evp->token, evp->trgcmd, evp->daqcmd,
 		    date, evp->detectors, evp->status,evp->evpgroups) ;
 
-		if(strlen(print_det)) {	// if any detector full printout is requested
-			printf("*** Event %d, sequence %d: token %d, trgcmd %d, daqcmd %d\n",good,
-			       evp->seq,evp->token,evp->trgcmd,evp->daqcmd) ;
-		}
+//		if(strlen(print_det)) {	// if any detector full printout is requested
+//			printf("*** Event %d, sequence %d: token %d, trgcmd %d, daqcmd %d\n",good,
+//			       evp->seq,evp->token,evp->trgcmd,evp->daqcmd) ;
+//		}
 			       
 
 		//printf("tinfo evt %d: sequence %d: token %4d, trgcmd %d, daqcmd %d, time \"%s\", detectors 0x%08X (status 0x%X), evpgroups 0x%X\n",good,evp->seq, evp->token, evp->trgcmd, evp->daqcmd,
@@ -345,7 +351,6 @@ int main(int argc, char *argv[])
 		if(tpc_doer(evp,print_det)) LOG(INFO,"TPC found (legacy)") ;
 
 		/********************** TPX ***************************/
-		// logging is done in the tpx_doer...
 		tpx_doer(evp,print_det) ;
 
 
@@ -596,7 +601,7 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 	int cld_found = 0 ;
 	int ped_found = 0 ;
 	char s_mask[24] ;
-
+	u_int tot_pixels = 0 ;
 	daq_dta *dd ;
 
 	if(strcasestr(do_print,"tpx")) ;	// leave as is...
@@ -686,9 +691,10 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 					last_tb = tb ;
 				}
 
-#if 0				
+#if 1			
 				for(u_int i=0;i<dd->ncontent;i++) {
 					if(do_print) {
+						printf("%d %d %d %d %d\n",dd->sec,dd->row,dd->pad,dd->adc[i].tb,dd->adc[i].adc) ;
 						//printf("\ttb %3d = %4d ADC\n",dd->adc[i].tb, dd->adc[i].adc) ;
 					}
 				}
@@ -724,9 +730,11 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 
 
 			if(do_print) {
-				printf("TPX: sec %02d, row %2d: %3d clusters (evt %d)\n",dd->sec,dd->row,dd->ncontent,good) ;
+				//printf("TPX: sec %02d, row %2d: %3d clusters (evt %d)\n",dd->sec,dd->row,dd->ncontent,good) ;
 			}
 			
+			tot_pixels += dd->ncontent ;
+
 			for(u_int i=0;i<dd->ncontent;i++) {
 				if(do_print) {
 					int p1,p2,t1,t2 ;
@@ -746,11 +754,13 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 					if(t2<t1) bad = 1 ;
 					if((t2-t1)>30) bad = 1 ;
 
-					if(bad) printf("BAD: ") ;
-					printf("\tpad %7.3f[%d,%d], time %7.3f[%d,%d], charge %5d, flags 0x%02X\n",
-					       dd->cld[i].pad,dd->cld[i].p1,dd->cld[i].p2,
-					       dd->cld[i].tb,dd->cld[i].t1,dd->cld[i].t2,
-					       dd->cld[i].charge,dd->cld[i].flags) ;
+					//if(bad) printf("BAD: ") ;
+					//printf("\tpad %7.3f[%d,%d], time %7.3f[%d,%d], charge %5d, flags 0x%02X\n",
+					//     dd->cld[i].pad,dd->cld[i].p1,dd->cld[i].p2,
+					//       dd->cld[i].tb,dd->cld[i].t1,dd->cld[i].t2,
+					//       dd->cld[i].charge,dd->cld[i].flags) ;
+
+					printf("-%d %d %f %f %d\n",dd->sec,dd->row,dd->cld[i].pad,dd->cld[i].tb,dd->cld[i].charge) ;
 					
 				}
 			}
@@ -816,7 +826,11 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 
 	if(found) {
 		LOG(INFO,"TPX found [%s;%d]",fstr,s_cou) ;
+		printf("TPX pixels %u xing %d\n",tot_pixels,bunch_xing) ;
 	}
+
+
+
 
 	return found ;
 
@@ -1698,6 +1712,8 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	   rdr->evpgroups,
 	   rdr->flags);
     
+
+
     UINT32 fpre_bx=0;
     UINT32 fpost_bx=0;
     UINT32 fpre_sz=0;
@@ -1752,7 +1768,9 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 
 	    EvtDescData *evtDesc = (EvtDescData *)(((char *)trg) + swap32(trg->EventDesc_ofl.offset));
 
-	    
+	    bunch_xing = swap32(evtDesc->bunchXing_lo) ;
+	    bunch_xing = bunch_xing % 120 ;
+
 
 	    int trgDetMask = swap16(evtDesc->trgDetMask);
       
@@ -2512,8 +2530,31 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 	if(strcasestr(do_print,"fcs")) ;	// leave as is...
 	else do_print = 0 ;
 
-	dd = rdr->det("fcs")->get("adc") ;
+
 	
+
+#if 0
+
+	dd = rdr->det("fcs")->get("raw") ;
+	
+
+	if(dd) {
+		while(dd->iterate()) {	//per xing and per RDO
+			raw_found = 1 ;
+
+			if(do_print) {
+				u_short *d = (u_short *)dd->Void ;
+				for(u_int i=0;i<dd->ncontent/2;i++) {
+					printf("%d = 0x%04X\n",i,d[i]) ;
+				}
+			}
+
+		}
+
+	}
+#endif
+
+	dd = rdr->det("fcs")->get("adc") ;	
 
 	if(dd) {
 		while(dd->iterate()) {	//per xing and per RDO
