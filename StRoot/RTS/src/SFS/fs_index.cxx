@@ -326,21 +326,31 @@ int fs_index::initmount()
   if(oflags & O_WRONLY) {   // filedescriptor
     wfile.fstat(&stat);
     
+    LOG(TERR,"stat.st_size %d",stat.st_size) ;
+
     if(stat.st_size > 0) {
       if(!(oflags & O_APPEND)) {   // if not append do not allow...
 	wfile.close();    
+	LOG(ERR,"no APPEND") ;
 	return -1;  
       }
     }
     else {    // writing file, but already exists...
       ret = writeFsHeader();
-      if(ret < 0) return ret;
+      if(ret < 0) {
+	LOG(ERR,"writeFsHeader %d",ret) ;
+	return ret;
+      }
     }
   }
   else {  // O_RDONLY = 0
     ret = _create();
 
-    if(ret < 0) return ret;
+    
+    if(ret < 0) {
+	LOG(ERR,"_create() %d",ret) ;
+	return ret;
+    }
     index_created = 1;
   }
   return 0;
