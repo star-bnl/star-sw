@@ -79,7 +79,7 @@ foreach my $rootfile (@rootfiles) {
     elsif ($fitype eq 'XF') {@histos = @histNF;} 
     else {next;}
     my $fittype = $fitype;
-    if ($fitype eq 'ADC') {$fittype = "GP";}
+#    if ($fitype eq 'ADC') {$fittype = "GP";}
     print "FitType : $fittype , histos = @histos\n";
     foreach my $hist (@histos) {
       my $sec1 = -1;

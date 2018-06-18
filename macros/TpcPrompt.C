@@ -434,7 +434,7 @@ void TpcPrompt(Int_t Nevents= 0, const Char_t *daqfile = "", const Char_t *treef
 }
 #else /* __CINT__ */
 //________________________________________________________________________________
-void TpcPrompt(Int_t Nevents = 9999999, 
+void TpcPrompt(Int_t Nevents = 1000000, 
 	       //	       const Char_t *daqfile = "/star/data03/daq/2014/100/15100085/st_physics_15100085_raw_2500013.daq",
 	       const Char_t *daqfile = "./*.*event.root",
 	       const Char_t *treefile = "TpcHit.root") {
@@ -442,7 +442,7 @@ void TpcPrompt(Int_t Nevents = 9999999,
 
   //  TString Chain("in,StEvent,tpcDb,analysis,magF,NoDefault,tpcHitMover,OSpaceZ2,OGridLeak3D,Corr4,mysql");
   //  TString Chain("in,StEvent,trgD,tpcDb,analysis,magF,NoDefault,mysql");
-  TString Chain("in,StEvent,analysis,mysql,NoDefault");
+  TString Chain("in,StEvent,tpcDb,detDb,CorrX,quiet,analysis,mysql,NoDefault");
   //  TString Chain("in,StEvent,tpcDb,analysis,magF,NoDefault,tpcHitMover,OSpaceZ2,OGridLeak3D,CorrX");
   if (TString(daqfile).EndsWith(".daq")) Chain += ",tpx,TpcHitMover,CorrX";
   TString TreeFile(treefile);
