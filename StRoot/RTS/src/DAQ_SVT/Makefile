@@ -39,7 +39,7 @@ daq_svt.o: daq_svt.h
 daq_svt.o: ../DAQ_READER/daq_det.h
 svt_reader.o: ../../../../StRoot/RTS/include/daqFormats.h
 svt_reader.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-svt_reader.o: ../../../../StRoot/RTS/trg/include/trgDataDefs.h
+svt_reader.o: ../../../../StRoot/RTS/trg/include/trgDataDefs_45.h
 svt_reader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 svt_reader.o: ../../../../StRoot/RTS/include/rtsSystems.h
 svt_reader.o: ../../../../StRoot/RTS/include/rtsLog.h

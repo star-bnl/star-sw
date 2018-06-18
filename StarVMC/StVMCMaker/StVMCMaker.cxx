@@ -161,7 +161,7 @@ Int_t StVMCMaker::Init() {
   fgStarVMCApplication = new StarVMCApplication("StarVMC", "The STAR VMC application");
   fgGeant3 = (TGeant3TGeo *) TVirtualMC::GetMC();
   if (! fgGeant3) {
-    fgGeant3 = new TGeant3TGeo("TGeant3TGeo");
+    fgGeant3 = new TGeant3TGeo("TGeant3TGeo",4000000);
   }
   LOG_INFO << "Init Geant3 has been created." << endm;
   fgGeant3->SetExternalDecayer(TPythia6Decayer::Instance());

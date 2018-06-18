@@ -33,7 +33,9 @@
 
 #include <DAQ_ITPC/itpcFCF.h>
 
-#define VERSION		0x20180001
+#define VERSION		0x20180002
+// 0x20180001 until Jun 6 -- had cuts in do_ch()
+
 
 //#define DO_DBG1	1
 
@@ -657,7 +659,7 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 
 		for(int t=t_start;t<=t_stop;t++) {
 			// initial cuts, where I blow of data
-#if 1
+#if 0
 			// cut timebin due to gating grid pickup
 			if(t>425) {
 				*s1_data = 0 ;

@@ -43,7 +43,7 @@ tof_reader.o: ../../../../StRoot/RTS/include/rtsSystems.h
 tof_reader.o: ../../../../StRoot/RTS/include/rts.h
 tof_reader.o: ../../../../StRoot/RTS/include/daqFormats.h
 tof_reader.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-tof_reader.o: ../../../../StRoot/RTS/trg/include/trgDataDefs.h
+tof_reader.o: ../../../../StRoot/RTS/trg/include/trgDataDefs_45.h
 tof_reader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 tof_reader.o: daq_tof.h
 tof_reader.o: ../DAQ_READER/daq_det.h

@@ -3,9 +3,9 @@
         <command>
          cd ${SUBMITTINGDIRECTORY}
    setenv STARFPE NO
-   setenv NODEBUG yes
+#   setenv NODEBUG yes
 #.DEV2
-   setup 64b
+#   setup 64b
    starver .DEV2
 #   starver TFG18g
 #dev
@@ -52,5 +52,10 @@
 <!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/1911602*/*adc*.daq" />  -->
 <!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/1911602*/*.daq" />  -->
 <!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/19116021/*.daq" />  -->
+<<<<<<< HEAD
 <input URL="file:/net/l401/data/scratch1/daq/2018/151/19151066/*.daq" />
+=======
+<!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/19116020/*.daq" />  -->
+<input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/1911602?/*.daq" />
+>>>>>>> 8c9b60f0387bfab236da6360acc624334c430cbf
 </job>
