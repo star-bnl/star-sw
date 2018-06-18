@@ -1135,23 +1135,23 @@ Bfc_st BFC[] = { // standard chains
   {"P2017a","" ,"",
    "B2017a,Sti,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
    ,              "","","Production chain for year 2017 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
-  {"B2018"  ,"","","r2018,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+  {"B2018"  ,"","","r2018,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout,CorrY","",""
    ,                                                     "Production chain for run 2018 data (tpc)",kFALSE},
   {"P2018","" ,"",
    "B2018,StiCA,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
    ,                 "","","Production chain for year 2018 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 #if 0 /* y2018a is not ready yet */
-  {"B2018a"  ,"","","ry2018a,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree","",""
+  {"B2018a"  ,"","","ry2018a,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,CorrY","",""
    ,                                                           "Base chain for run 2018 data (tpc)",kFALSE},
 #else
-  {"B2018a"  ,"","","ry2018,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree","",""
+  {"B2018a"  ,"","","ry2018,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,CorrY","",""
    ,                                                           "Base chain for run 2018 data (tpc)",kFALSE},
 #endif
   
   {"P2018a","" ,"",
    "B2018a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,beamline3D,emcDY2,epdHit,fpd,trgd,ZDCvtx,analysis"
    ,                    "","","Base chain for year 2018 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
-  {"B2019"  ,"","","r2019,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+  {"B2019"  ,"","","r2019,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout,CorrY","",""
    ,                                                     "Production chain for run 2019 data (tpc)",kFALSE},
   {"P2019","" ,"",
    "B2019,StiCA,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
@@ -1210,6 +1210,7 @@ Bfc_st BFC[] = { // standard chains
   {"big"         ,""  ,"",""                                         ,"","","Set NwGEANT =20Mwords",kFALSE},
   {"bigbig"      ,""  ,"",""                                         ,"","","Set NwGEANT =40Mwords",kFALSE},
   {"verybig"      ,""  ,"",""                                        ,"","","Set NwGEANT =80Mwords",kFALSE},
+  {"huge"        ,""  ,"",""                                         ,"","","Set NwGEANT =80Mwords",kFALSE},
   {"clearmem"    ,""  ,"",""                           				  ,"","","Obsolete",kFALSE},
   {"adcOnly"     ,""  ,"",""                          ,"","","DAQMaker selects only TPC ADC events",kFALSE},
   {"InTree"      ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
@@ -1230,9 +1231,10 @@ Bfc_st BFC[] = { // standard chains
    ,                                    "... AlignSectors,ExB,OBmap2D,OClock,OPr13,OTwist,OIFC ...",kFALSE},
   {"Corr4"       ,""  ,"","Corr3,OShortR"                             ,"","","... Corr3+OShortR...",kFALSE},
   {"Corr5"       ,""  ,"","Corr4,SCEbyE,OGridLeak3D,OSpaceZ2","",""
-   ,                                                     "... Corr4+SCEbyE,OGridLeak3D,OSpaceZ2...",kFALSE},
+   ,                                                     "... Corr4+SCEbyE,OGridLeak3D,OSpaceZ2"   ,kFALSE},
   {"CorrX"       ,"" ,"","ExB,OShortR,OBmap,OPr13,OIFC,OSectorAlign,NewTpcAlignment" // TPC Alignment
    ",-AlignSectors,-OBmap2D,-OClock,-OTwist"                             ,"","","New Tpc Alignment",kFALSE},
+  {"CorrY"       ,"" ,"","CorrX,OPr40"                                   ,"","","New Tpc Alignment",kFALSE},
   {"ExB"         ,""  ,"","",""                                       ,"","Activate ExB correction",kFALSE},
   {"EB1"         ,""  ,"","",""                                     ,"","Force ExB configuration 1",kFALSE},
   {"EB2"         ,""  ,"","",""                                     ,"","Force ExB configuration 2",kFALSE},
@@ -1241,7 +1243,7 @@ Bfc_st BFC[] = { // standard chains
   {"OTwist"      ,""  ,"","",""                                          ,"","ExB twist correction",kFALSE},
   {"OClock"      ,""  ,"","",""                                     ,"","Clock/tpc rot. correction",kFALSE},
   {"OPr13"       ,""  ,"","",""                                          ,"","PadRow 13 distortion",kFALSE},
-  {"OPr40"       ,""  ,"","",""                                          ,"","PadRow 40 distortion",kFALSE},
+  {"OPr40"       ,""  ,"","-OPr13",""                                    ,"","PadRow 40 distortion",kFALSE},
   {"OCentm"      ,""  ,"","",""                                   ,"","Central membrane correction",kFALSE},
   {"OECap"       ,""  ,"","",""                                    ,"","EndCap (curved) correction",kFALSE},
   {"OIFC"        ,""  ,"","",""                                         ,"","Field Cage correction",kFALSE},
@@ -1385,6 +1387,7 @@ Bfc_st BFC[] = { // standard chains
   {"picoRead"  ,"","","RpicoDST","",""                                 ,"WritesRead picoDST format",kFALSE},
   {"RpicoDST"  ,"RPicoDst","","PicoDeps"                        ,"StPicoDstMaker","","read PicoDST",kFALSE},
   {"picoWrite" ,"","","picoDst",""                                      ,"","Writes picoDST format",kFALSE},
+  {"NoPiCovMtx","","","",""                                      ,"","Don't write Pico Cov. Matrix",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Db makers   ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
