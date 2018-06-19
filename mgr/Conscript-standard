@@ -1,0 +1,1822 @@
+#!/usr/bin/env perl -d
+Import qw ( env CWD INCLUDE LIB BIN BUILD OBJ);
+( my $build = $OBJ ) =~ s/\#//g;                        # print "CWD = $CWD\n";
+$build =~ s/\\/\//g;                                    # print "OBJ = $OBJ build = $build\n";
+# print "MAIN = $MAIN\n";
+my $DirPath = DirPath '.';                              # print "DirPath = $DirPath\n";
+( my $obj_dir = $DirPath ) =~ s/\\/\//g;                # print "obj_dir = $obj_dir\n";
+( my $Dir = $obj_dir ) =~ s/$build\///g;                # print "Dir = $Dir\n";
+my $ObjDir       = "#" . $obj_dir;                      # print "ObjDir = $ObjDir\n";
+my $STAR_SYS     = $env->{ENV}->{STAR_SYS};
+my $STAR_VERSION = $env->{ENV}->{STAR_VERSION};         # print "#####  $STAR_VER\n";
+my $AFS_RHIC     = $env->{ENV}->{AFS_RHIC};
+@Repo   = Repository_List unless $param::noRepository;#   print "Repositories = |@Repo|\n";
+print "+-+-+- STAR=".$env->{ENV}->{STAR}."\n"  if $param::debug;
+print "+-+-+- cwd=".$CWD."\n"                  if $param::debug;
+my $IsDotDev = 0;
+if ($env->{ENV}->{STAR} =~ /\.(dev|DEV)/) {$IsDotDev = 1;}
+my $IsRepo = (stat($env->{ENV}->{STAR}."/."))[1] == (stat($CWD."/."))[1];
+if ($param::debug) {
+  if ( $IsRepo && ! $IsDotDev ){
+    print "... REPOSITORY compilation  ...\n";
+  } else {
+    print "... USER area compilation   ...\n";
+  }
+}
+my $SO_PKG  = "";
+my $SO_PKG_lib = "";
+my $SO_PKG_PLAIN = "";
+my $SO_PKGT = "";
+my $SO_MAP  = "";
+my $SO_MAPT = "";
+my $pkg;
+my $PKG;
+my $OnlinePackage=0;
+my @LinkDefs = ();
+my @LinkDefsT = (); # for tables if any
+my @PlainObj = ();
+#my $libPrefix = "";
+#if ($env->{Packages}->{ROOT}->{ROOTCLING}) {
+my  $libPrefix = "lib";
+##  print "set libPrefix = $libPrefix ================================================================================\n";
+#}
+my $DEBUG   = $env->{DEBUG};
+my $FDEBUG  = $env->{FDEBUG};
+my $NOOPTIMIZED = $DEBUG; $NOOPTIMIZED =~ s/-O2//g; $NOOPTIMIZED =~ s/-O//g; 
+my $CXXFLAGS= $env->{CXXFLAGS}; #print "CXXFLAGS = $CXXFLAGS --------------------------------------------------------------------------------\n";
+my $CFLAGS  = $env->{CFLAGS};
+my $FC      = $env->{FC};
+my $CC      = $env->{CC};
+my $CXXCOM  = $env->{CXXCOM};
+my $FFLAGS  = $env->{FFLAGS};
+my $FCPATH  = $env->{FCPATH};
+my $FEXTEND = $env->{FEXTEND};
+my $FPPFLAGS= $env->{FPPFLAGS};
+my $FCCOM   = $env->{FCCOM};
+my $AGETOFCOM   = $env->{AGETOFCOM};
+my $AGETOFLAGS   = $env->{AGETOFLAGS};
+my $LIBS    = $env->{LIBS}; #  print "LIBS  = $LIBS ========================================\n";
+my $LDIRS   = $env->{_LDIRS};#  print "LDIRS = $LDIRS, LIB = $LIB  ========================================\n";
+my $SOFLAGS = $env->{SOFLAGS};
+my $STIC    = $env->{STIC};
+my $LD      = $env->{LD};
+my $EXTRA_CPPFLAGS = $env->{EXTRA_CPPFLAGS};
+my $CPPFLAGS = $env->{CPPFLAGS};
+my $CPPPATH  = $env->{CPPPATH};# 
+
+my $LIBPATH = $env->{LIBPATH};
+if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR;}
+$LIBPATH   .= $LIB;
+#ifndef __NEW__
+#my $LIBPATH = $LIB .  $main::PATH_SEPARATOR . $env->{ENV}->{ROOTSYS} . "/lib";
+#else /* __NEW__ */
+ my $LIBPATH = $LIB .  $main::PATH_SEPARATOR . $env->{ENV}->{ROOTSYS} . "/lib" . $main::PATH_SEPARATOR . $env->{ENV}->{OPTSTAR} . "/lib";
+ if ($STAR_SYS =~ /x8664/) {
+   $LIBPATH .= $main::PATH_SEPARATOR . "/usr/lib64/mysql";
+ } else {
+   $LIBPATH .= $main::PATH_SEPARATOR . "/usr/lib/mysql";
+ }
+#endif /* __NEW__ */
+$env1 = $env->clone('Package'  => $pkg, 'LIBPATH' => $LIBPATH);
+
+if ( ($Dir =~ m/StRoot.*Pool\//   && $Dir !~ /StRoot.*Pool\/St/)   ||
+     ($Dir =~ m/StRoot.*Client\// && $Dir !~ /StRoot.*Client\/St/) ||
+     ($Dir =~ m/StarVMC\/minicern/  || $Dir =~ m/StarGenerator/ )
+   ) {
+  # Added 2003. In Construct, the logic is such
+  # that the Pool directories have their sub-directories
+  # set as targets (n sub-dir => n libraries). That's
+  # fine ... apart from name clash we try to resolve
+  # here.
+  $pkg = $Dir;
+  $pkg =~ s/StRoot\///;
+  if ( $Dir =~ m/StarGenerator/ ){
+    if ( $Dir =~ m/(StarGenerator)(\/)([A-Z]+$)/ ){
+      # camel case
+      $pkg =  $1.substr($3,0,1).lc(substr($3,1,length($3)));
+    } else {
+      # normal case, use subdir name
+      $pkg =~ s/.*StarGenerator\///;
+    }
+    $CPPPATH .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator";
+  } else {
+    $pkg =~ s/Pool\//Pool/      if ($pkg =~ m/Pool/  );
+    $pkg =~ s/Client\//Client/  if ($pkg =~ m/Client/);
+    $pkg = "StarMiniCern"       if ($pkg =~ m/minicern/);
+    print "\t[".File::Basename::basename($Dir)."] (possible name clash) changed to $pkg\n";
+  }
+  $PKG = $pkg;
+} else {
+  $pkg = File::Basename::basename($Dir);               # print "Run cons in $Dir for $PKG\n";
+  $PKG = $pkg;
+  $OnlinePackage=true if $Dir =~ /^OnlTools/;# and $pkg ne "OnlinePlots";
+}
+#print "pkg = $pkg =======\n";
+if ($env-{ENV}-{ROOT_LEVEL} =~ /^6/) {
+  if ($pkg eq 'StMuDSTMaker' or $pkg eq 'StHbtMaker' or $pkg eq 'StBFChain') {
+    $CPPFLAGS .= " -D__NO_STRANGE_MUDST__";
+  }
+}
+if ($pkg eq "RTS") {
+  if ($STAR_SYS =~ /darwin/) {}
+  else {
+    $CPPFLAGS .= ' -D_LARGEFILE64_SOURCE'; # __USE_LARGEFILE64
+  }
+  $CPPFLAGS .= ' -DNEW_DAQ_READER -DRTS_PROJECT_STAR -DTPXREADER '
+    .  '-DRTS_LITTLE_ENDIAN -DEVP_VERSION="\"EVP_VERSION=2.0\""';
+  $CPPFLAGS =~ s/-D__ROOT__//;# print " ------------  CPPFLAGS ==== " .  $CPPFLAGS . "\n";
+  $CFLAGS =~   s/-D__ROOT__//;# print " ------------  CFLAGS WHERE \"__ROOT__\" coming from ??? ==== " .  $CFLAGS . "\n";
+  $CPPPATH = $main::PATH_SEPARATOR . "#StRoot/RTS/include" 
+    .  $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include" 
+      .  $main::PATH_SEPARATOR . "#StRoot/RTS/include/TPC" 
+	.  $main::PATH_SEPARATOR . "#StRoot/RTS/src/SFS" 
+	  .  $main::PATH_SEPARATOR . "#StRoot/RTS/src" 
+	    .  $main::PATH_SEPARATOR . "#StRoot/RTS/src/EVP_READER" 
+	      .  $main::PATH_SEPARATOR . $CPPPATH;
+#  print "RTS: CPPPATH = $CPPPATH\n"; # if $param::debug;
+  if ($DEBUG =~ /-O/ and $STAR_SYS =~ /gcc482/) { # hack for  FtfUtilities with gcc482
+    $envNoDeb = $env1->clone('DEBUG' => $NOOPTIMIZED);
+    for ($i = 0; $i < $#srcL; $i++) {
+      if ($srcL[$i] =~ /FtfUtilities\.cxx/) {
+	my @objfiles = Objects $envNoDeb ($srcL[$i]);
+	$srcL[$i] = $objfiles[0];
+	last;
+      }
+    }
+  }
+}
+# Some directories will need extra includes for the RTS DAQ reader
+my @DAQ_pkgs = qw(StDAQMaker StTofHitMaker StTpcHitMaker StEEmcPoolmuEztPanitkin  
+		  StBEMCPlots StBTofHitMaker StMtdHitMaker StPmdReadMaker St_pp2pp_Maker StSstDaqMaker StPP2PPMaker
+		  StFmsTriggerMaker StDaqLib Stl3Util StTriggerUtilities  StHLTPCCATracker
+		); 
+
+#		  StTriggerUtilities 
+# But any *Raw* in StRoot/ would have this automatically done / handled
+if ( $pkg =~ m/Raw/ ){
+  #    print "Found [$pkg] as Raw package\n";
+  push(@DAQ_pkgs,$pkg);
+}
+my $DAQ_pkgs = join('|',@DAQ_pkgs);
+my $RTS_READER_PATH =  $main::PATH_SEPARATOR . "#StRoot/RTS/src" 
+  . $main::PATH_SEPARATOR . "#StRoot/RTS/include"
+  . $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include";
+if ($OnlinePackage) {
+  $CPPPATH = $main::PATH_SEPARATOR . "#OnlTools" . $RTS_READER_PATH . $main::PATH_SEPARATOR . $CPPPATH;
+}
+#  print "RTS2: CPPPATH = $CPPPATH\n"; # if $param::debug;
+
+my @New_Daq_Readers = qw(muEztPanitkin StPmdReadMaker StBEMCPlots);
+my $New_Daq_Readers = join('|',@New_Daq_Readers);
+if ($pkg =~ /$New_Daq_Readers/) {
+  $CPPFLAGS .= " -DNEW_DAQ_READER";
+}
+if ( $pkg =~ /$DAQ_pkgs/ )  {
+  $CPPPATH = $main::PATH_SEPARATOR . "#" . $Dir . $RTS_READER_PATH . $main::PATH_SEPARATOR . $CPPPATH; 
+}
+#  print "RTS 4: CPPPATH = $CPPPATH\n"; # if $param::debug;
+if ( $pkg eq "OnlinePlots") {
+  $CPPPATH  .=  $main::PATH_SEPARATOR . "#OnlTools/OnlinePlots/Infrastructure"
+    .   $main::PATH_SEPARATOR . "#OnlTools/OnlinePlots/HistogramGroups"
+      .   $main::PATH_SEPARATOR . "#OnlTools/OnlinePlots/Infrastructure/EEmcDb"
+	.   $main::PATH_SEPARATOR . "#OnlTools/OnlinePlots/QEvpClient"
+	  .   $main::PATH_SEPARATOR . "#StRoot/RTS/EventTracker"
+	    .   $main::PATH_SEPARATOR .  $CPPPATH;
+  $CPPFLAGS .= " -DQT_THREAD_SUPPORT -DQT_SHARED -DQT_NO_DEBUG ";
+}
+if ( $pkg eq "Jevp") {
+  $CPPPATH  .=  $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpPlot"
+    .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpPresenter"
+      .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpServer"
+	.   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpData"
+	  .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpBuilders"
+	    .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpViewer"
+	      .   $main::PATH_SEPARATOR .  $CPPPATH;
+  $CPPFLAGS .= " -DQT_THREAD_SUPPORT -DQT_SHARED -DQT_NO_DEBUG ";
+} 
+if ( $pkg eq "GeoTestMaker") {
+  $LIBS = "-lQtGui"; 
+}
+
+if ( $pkg eq "StVecBosAna") {
+  $EXTRA_CPPFLAGS .= " -IStRoot/StVecBosAna/utils";
+}
+my ($i, $obj);
+my $LIBPKG = "";
+
+my @g77pkgs = qw(geometry sim);# gen  tls minicern geant3);
+my $g77pkgs = join('|', @g77pkgs); print "FC = $FC pkg = $pkg DirPath = $DirPath\n" if $param::debug;
+
+
+#+
+# some compiler specific treatments below, global or conditional
+#-
+if ( $FC ne 'ifort' and ($DirPath =~ /pams/ and
+			 (#$DirPath =~ /$g77pkgs/ or
+			  $DirPath =~ /crs/ or
+			  $DirPath =~ /g2t/ or
+			  $DirPath =~ /hij/) or
+			 $DirPath =~ /StarVMCApplication/ or
+			 $DirPath =~ /St_geant_Maker/)){
+  $FCCOM    = $env1->{FCviaAGETOFCOM};
+  if ($DirPath =~ /StarVMCApplication/ or $DirPath =~ /St_geant_Maker/) {
+    $FCCOM    = "test -f %>:b.g && rm %>:b.g; %FPP %FPPFLAGS %EXTRA_FPPFLAGS %_IFLAGS %EXTRA_FCPATH %<:b.F -o %>:b.g;";
+    $FCCOM   .= "cd %>:d; test -f %>:F.for && /bin/rm %>:F.for;";
+    $FCCOM   .= "%AGETOF %AGETOFLAGS %<:F.g -o %>:F.for && cd - &&";
+    $FCCOM   .= "%FC %FPPFLAGS %FFLAGS %EXTRA_FPPFLAGS %FDEBUG %_IFLAGS %EXTRA_FCPATH -c";
+    $FCCOM   .= " %>:b.for %Fout%>";
+  }
+}
+# If fortran, grab the -lg2c or -lgfortran for linking
+if ( $DirPath =~ /StarVMC/ or
+     $DirPath =~ /Herwig/ or 
+     $DirPath =~ /Hijing/ or
+     $DirPath =~ /Pepsi/ or
+     $DirPath =~ /Pythia6/ or
+     $DirPath =~ /StarLight/ or
+     $DirPath =~ /UrQMD/ or 
+     $DirPath =~ /UTIL/ ){
+  $LIBS .= " " . $env1->{FLIBS};
+}
+
+#+
+# Now we treat anything which is neither sim nor gen
+# This will include all makers
+#-
+# print "Geom = @xmlGeo\n";
+
+
+
+print "find in $Dir ========\n" if $param::debug;
+my (@src, @h_files, @idlM, @idlL, @srcL, @h_filesL, @h_filesX, @srcX, @uiQT, @qrcQT);
+my @idlL     = script::find_idl($Dir); #print "pkg = $pkg; idlL = @idlL =======\n";
+foreach my $Rep(@Repo) {
+  my $RepDir = $Rep . "/" . $Dir;
+  print "RepDir = $RepDir\n" if $param::debug;
+  if ( -d $RepDir ) {
+    my @idlR = script::find_idl($RepDir); # print "find_idlL: ======== @idlR ======\n";
+    foreach my $i(@idlR) { push @idlL, $i; }
+  }
+}
+@idlL = script::sortu(@idlL);          print "In Dir = $Dir idlL = @idlL\n" if $param::debug;
+@idlML    = script::find_idlM($Dir);   print "find_idl in $Dir ======== @idlML ======\n" if $param::debug;
+@srcL     = script::find_sources($Dir);print "find_sources in in $Dir ======== @srcL ======\n" if $param::debug;
+@h_filesL = script::find_hfiles($Dir); print "find_hfiles in $Dir ======== @h_filesL ======\n" if $param::debug;
+@h_filesX = ();
+@srcX     = ();
+@uiQT     = script::find_ui($Dir);     print "find_ui in $Dir ======== @uiQT ====== |@uiQT|\n" if $param::debug;
+@xpmQT    = script::find_xpm($Dir);    print "find_xpm in $Dir ======== @xpmQT ======\n" if $param::debug;
+@qrcQT    = script::find_qrc($Dir);    print "find_qrc in $Dir ======== @qrcQT ======\n" if $param::debug;
+foreach my $Rep(@Repo) {
+  my $RepDir = $Rep . "/" . $Dir;
+  print "RepDir = $RepDir\n" if $param::debug;
+  if ( -d $RepDir and $pkg ne "RTS") {
+    my @srcR =
+      script::find_sources($RepDir); # print "find_sources: ======== @srcR ======\n";
+    foreach my $i(@srcR) { push @srcL, $i; }
+    my @idlMR = script::find_idlM($RepDir); # print "find_idlM: ======== @idlMR ======\n";
+    foreach my $i(@idlMR) { push @idlML, $i; }
+    my @h_filesR = script::find_hfiles($RepDir); # print "find_hfiles: ======== @h_filesR ======\n";
+    foreach my $i(@h_filesR) { push @h_filesL, $i; }
+  }
+}
+@src     = script::sortu(@srcL); # print "src : @src\n";
+@h_files = script::sortu(@h_filesL);
+@idlM    = script::sortu(@idlML);
+
+print "idlL = @idlL\n"   if $param::debug;
+if ( $pkg eq 'sim' or $pkg eq 'gen' ) {
+#  $i = 0;
+#  foreach my $s(@idlL) { print "i=", $i++, " idlL = ", $s, "\n"; }
+  @idlM = ();
+  @src = ();
+  @h_files = ();
+  if ($env->{Packages}->{ROOT}->{ROOTCLING}) {
+#    print "290:script::TablesCLING($env, $pkg,  @idlL)\n";
+    script::TablesCLING($env, $pkg,  @idlL);
+  } else { 
+    script::Tables($env, $pkg,  @idlL);
+  }
+  return;
+} else { #if ( $pkg ne 'sim' and $pkg ne 'gen' ) {
+  if ($param::debug) {
+    print "\t--- Regular case treatment (not gen not sim) ---\n";
+    # if user requested debug, print some info on what was found
+    $i = 0;
+    foreach my $s(@idlL) { print "i=", $i++, " idl = ", $s, "\n"; }
+    $i = 0;
+    foreach my $s(@idlML) { print "i=", $i++, " idlM = ", $s, "\n"; }
+    $i = 0;
+    foreach my $s(@srcL) { print "i=", $i++, " src = ", $s, "\n"; }
+    $i = 0;
+    foreach my $s(@h_filesL) { print "i=", $i++, " h_files = ", $s, "\n"; }
+  }
+  #+
+  # Generate geometries first - this will be hit on any $Dir
+  # xgeometry and StarGeometry may not be created however
+  #-
+  my($agM,$agE,$agX,$agH);
+  my($trgt);
+  if ( $pkg eq 'Geometry' ){
+    my @xmlGeo   = script::find_xml($Dir); print "find_xml: ======== @xmlGeo ======\n" if $param::debug;
+    #print "DEBUG Found ".($#xmlGeo+1)." XML files in $Dir\n";
+    if ($#xmlGeo > -1){
+      # for the geometry package, generate the geom
+      # print join(";",@xmlGeo);
+      my @srcE = ();
+      my($agD,$agL,$agM,$agE,$agX,$agH);
+      my($trgt);
+      my($agml_cmd);
+      # Below if() was added to prevent compilation in non-local but
+      # allow development in .dev - commented for integration
+      # local or global install
+      if ( -e "mgr/agmlParser.py") {	
+	$agml_cmd = "mgr/agmlParser.py";
+      } else {
+	$agml_cmd = $env->{ENV}->{STAR}."/mgr/agmlParser.py";
+      }
+      foreach $xml (@xmlGeo){
+	$agL   = $xml; $agL =~ s/$Dir//; $agL =~ s/^\///; 	    print "xml = $xml Dir = $Dir => $agL\n" if $param::debug; 
+	$agD   = File::Basename::basename($xml);
+	$agM   = $agD; $agM =~ s/\.xml//;
+	$agX   = $agM.".cxx";
+	$agH   = $agM.".h";
+	$agE   = $agM."G.age";
+	print "\tDEBUG $agX $agH $agE $agM agL = $agL $xml\n" if $param::debug;
+	# generally enable all warnings for now
+	$env->{ENV}->{AGML_WARNINGS} = 1==1; # $param::debug;
+	#	    Depends $env [$agE], ("$agL", "#$agml_cmd");
+	if ( $agL =~ m/Compat/ ){
+	  if (-r $xml) {
+	    sub xmlscan {
+	      #		print "xmlscan: @_\n";
+	      my $file = $_[0];
+	      open (SCAN, $file) or die "Can't open $file";
+	      my $line;
+	      my @includes = ();
+	      my $skip = 0;
+	      while ($line = <SCAN>) {
+		if ($line =~ /-->/) {$skip = 0;}
+		if ($line =~ /<!--/) {$sip = 1;}
+		next if $skip;
+		#		    print "============SCAN: $line $_\n";
+		next if ($line !~ /Import file/);
+		my @words = split('"',$line);
+		$line = $words[1];
+		#	  print "============SCAN: $line $_";
+		next if (! $line);
+		push(@includes, "#" . $line);
+		#		  print "============SCAN: @includes\n";
+	      } 
+	      close(SCAN);
+	      @includes
+	    };
+	    my @includes = xmlscan($xml);
+	    print "xml = $xml\tincludes : @includes\n" if $param::debug;
+	    Depends $env [$agE], (@includes);
+	  }
+	} else {
+	Command $env [$agX, $agH], ("$agL"), qq($agml_cmd --file=%1 --module=$agM --export=AgROOT --path=%>:d);
+	push @srcX, $agX;
+	push @h_filesX, $agH;
+      }
+      Command $env [$agE], ("$agL"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
+      push @srcE, $agE;
+    }
+    my $xgeometry = "xgeometry" . "." . $env1->{SUFSOLIB};
+    if (-r "StarVMC/xgeometry/xgeometry.age") {
+      InstallAs $env1 "xgeometry.age", "#StarVMC/xgeometry/xgeometry.age";
+      push @srcE, "xgeometry.age";
+    }
+    LinkedModule $env1 $xgeometry, @srcE;
+    Install $env1 $LIB, $xgeometry;
+    $lib = $LIB . "/lib" . $xgeometry;
+    InstallAs $env1 $lib, $xgeometry;
+    $LIBPKG = "libxgeometry." . $env1->{SUFLIB};
+    Library   $env1 $LIBPKG, @srcE;
+    Install $env1 $LIB,    $LIBPKG;
+    $LIBPKG = "";
+  }
+}  
+print "idlL at the end = @idlL\n"   if $param::debug;
+print "h_files at the end = @h_files\n"   if $param::debug;
+# <-- end generating geometries
+
+my $uic = $env->{Packages}->{QT}->{BINDIR} . "/uic";
+my $qt4 = ($env->{Packages}->{QT}->{QT_VERSION} == 4);
+my $rcc =$uic;
+$rcc =  $env->{Packages}->{QT}->{BINDIR} . "/rcc" if ($qt4);
+my @QtDefs = ();
+my @uih = ();#   print "h_files: @h_files\n";
+foreach my $h (@h_files) {
+  if ((!$qt4 && ($h =~ /\.ui\.h$/)) || ($qt4 && ($h =~ /ui_.+\.h$/))) {
+    print "uih: $h\n";
+    push @uih, $h;
+  }
+}
+foreach my $ui (@uiQT) {
+  if (! $ui) {next;}
+  my $dir     = File::Basename::dirname( $ui );
+  my $dirbase = $dir;
+  $dirbase =~ s/$Dir//;
+  my $stem    = File::Basename::basename( $ui, ".ui" );
+  if ($dirbase) {
+    $dirbase =~ s|^/||;
+    $dirbase .= "/";
+  }
+  my $uilocal = $dirbase . File::Basename::basename( $ui );
+  my @dep = ($uilocal, @uih);
+  if ($qt4) {
+    my $out = "$dirbase". "ui_". $stem . ".h"; 
+    print "Qt4: out : $out ==> $uilocal\n" if $param::debug ;
+    Depends $env [$out], ($uilocal);
+    Command $env [$out], ($uilocal), qq(cd %1:d; $uic %1:f -o %>:f );
+    push @QtDefs, $out;    print "Qt4/QtDefs from $ui -> $out\n"; # if $param::debug;
+  } else {
+    my @out = ($dirbase . $stem . ".cxx", $dirbase . $stem . ".h") ; 
+    Depends $env [$out[1]], (@dep); 
+    Depends $env [@out[0]], ($uilocal,$out[1]);
+    Command $env [$out[1]], @dep, qq(cd %1:d; $uic %1:f -o %>:f );
+    Command $env [@out[0]], ($uilocal,$out[1]), qq(cd %1:d; $uic %1:f  -i %2:f -o %>:f);
+    push @src, $out[0];
+    push @QtDefs, $out[1]; print "Qt3/QtDefs from $ui -> $out[1]\n"; # if $param::debug;
+  }
+}
+if ($#xpmQT >= 0) {
+  my $out = $PKG . "_image_collection.cxx";
+  if (!$qt4) {
+    my $dir     = File::Basename::dirname( $xpmQT[0] );
+    my $dirbase = $dir;
+    $dirbase =~ s/$Dir//;
+    if ($dirbase) {
+      $dirbase =~ s|^/||;
+      $dirbase .= "/";
+    }
+    my @xpm = map ($dirbase . File::Basename::basename( $_), @xpmQT);
+    #	  my @xpm = @xpmQT;
+    print "Command $uic -embed ".join(" ",@xpm)." -o $out \n";
+    Command $env [$out], @xpm, qq($uic -embed %< -o %> );
+    push @src, $out
+  }
+}
+if ($qt4) {
+  foreach my $qrc (@qrcQT) {
+    my $dir     = File::Basename::dirname( $qrc );
+    my $dirbase = $dir;
+    $dirbase =~ s/$Dir//;
+    my $stem    = File::Basename::basename( $qrc);
+    if ($dirbase) {
+      $dirbase =~ s|^/||;
+      $dirbase .= "/";
+    }
+    my $qrclocal = $dirbase . File::Basename::basename( $qrc );
+    my @xpm = map ($dirbase . File::Basename::basename( $_), @xpmQT);
+    my @dep = ($qrclocal,@xpm );
+    my $out = "$dirbase". "qrc_". $stem . ".cxx"; # print "Qt4:  ut : $out ==> $qrclocal\n@xpmQT\n"; # if $param::debug ;
+    Command $env [$out], @dep, qq(cd %1:d; $rcc %1:f -o %>:f );
+    push @src, $out
+  }
+}
+#ifndef __NEW__
+#$SO_PKG = $PKG . "." . $env1->{SUFSOLIB};
+#else /* __NEW__ */
+$SO_PKG = $PKG . "." . $env1->{SUFSOLIB};
+$SO_PKG_lib = $libPrefix . $SO_PKG;
+#endif /* __NEW__ */
+$SO_PKG_PLAIN = $SO_PKG;
+#ifndef __NEW__
+# if ( $#idlM > -1 and $PKG !~ "^St" ) { $PKG = "St_" . $PKG; @PlainObj = @src; $SO_PKG = $PKG . "." . $env1->{SUFSOLIB};}
+# $SO_PKG_lib = "lib" . $SO_PKG;
+# $SO_PKG_PLAIN_lib = "lib" . $SO_PKG_PLAIN;
+#else /* __NEW__ */
+ if ( $#idlM > -1 and $PKG !~ "^St" ) { $PKG = "St_" . $PKG; @PlainObj = @src; $SO_PKG =$libPrefix . $PKG . "." . $env1->{SUFSOLIB};}
+ $SO_PKG_lib = $libPrefix . $PKG . "." . $env1->{SUFSOLIB}; #"lib" . $SO_PKG;
+ $SO_PKG_PLAIN_lib = $SO_PKG_lib;
+#endif /* __NEW__ */
+$obj = $ObjDir;
+print "obj = $obj\n" if $param::debug;
+print "SO_PKG = $SO_PKG\n" if $param::debug;
+#$SO_MAP = $PKG . ".rootmap";
+print "SO_MAP = $SO_MAP\n" if $param::debug;
+#+
+# Additional flag treatment for specific makers
+# Search path depth for Makers.
+#-
+print "-=-=-=-=- Will now test $pkg\n" if ($param::debug);
+if ( $pkg =~ m/^StEventDisplay/ || $#uiQT >= 0 || $OnlinePackage ) {
+  # This make requires both ROOT Qt and QT libraries
+  if ( defined($env1->{Packages}->{QT}->{DIR})) {# && (-r $ENV{ROOTSYS} . "/include/TQt.h" || -r $ENV{ROOTSYS} . "/include/TGQt.h")){
+    $CPPPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{QT}->{INCDIR};
+    $LIBPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{QT}->{LIBDIR};
+    #$LIBS ... should come loaded from ROOT
+    $CXXFLAGS.= " " . $env1->{Packages}->{QT}->{FLAGS};
+  }
+} elsif ( $pkg =~ m/^apythia$/ ||  $pkg =~ m/^bpythia$/) {
+  $FPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{FPPFLAGS};
+  $CPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{CPPFLAGS};
+  my $CERN_ROOT = $env1->{ENV}->{CERN_ROOT};
+  print "CERN_ROOT = $CERN_ROOT\n" if $param::debug;
+  if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }
+  $LIBPATH .= $CERN_ROOT . "/lib";
+  $LIBS .= " " . $env->{LDALL};
+  foreach my $py ("pythia6205","pythia","pythia6152","pythia6136") {
+    my $file = $CERN_ROOT . "/lib/lib" . $py . ".a";
+    if (-f $file) {$LIBS .= " "  . $file; last;}
+  }
+  foreach my $py ("pdflib804") {
+    my $file = $CERN_ROOT . "/lib/lib" . $py . ".a";
+    if (-f $file) {$LIBS .= " " . $file; last;}
+  }
+  $LIBS  .= " " . $env->{LDNONE};
+} elsif ( $pkg =~ m/^StTrsMaker$/ or $pkg =~ m/^pythia8/ ){
+  $CPPPATH =
+    "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/include";
+  if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
+  print "CPPPATH = $CPPPATH\n" if $param::debug;
+} elsif ( $pkg =~ m/^Pythia8/ and $Dir =~ m/StarGenerator/ ){
+  # Append pythia 8 include path and define version
+  $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/include"; 
+  $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/include/Pythia8";
+  #  if ($CXXCOM =~ /gccfilt/) {
+  #    $CXXFLAGS .= ' -DPythia8_version=\\\\\"' . $pkg . '\\\\\" ';
+  #  } else {
+  $CXXFLAGS .= " -DPythia8_version=\\\"$pkg\\\" ";
+  #  }
+  # Do not compile hepmc support, rootexamples
+  @src = ();
+  foreach my $s (@srcL) {
+    next if ($s =~ m/example/ ||
+	     $s =~ m/hepmc/i      );
+    #print "Including $s\n";
+    push(@src,$s);
+  }
+  @srcL = @src;
+} elsif ( $pkg =~ m/^EvtGen/ and $Dir =~ m/StarGenerator/ ){
+  # Append EvtGen include path and define version
+  # Set pythia 8 version here
+  my $py8ver = "Pythia8_1_86";
+  $FCPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg";
+  $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg";
+  $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/HepMC2_06_09";
+  #  $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/Pythia8_1_86/include";
+  $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/${py8ver}/include";
+  $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/Photos3_61/include";
+  $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/Tauola1_1_5/include";
+  $CXXFLAGS .= "-DEVTGEN_EXTERNAL=1 -DEVTGEN_PYTHIA=1 -DEVTGEN_PHOTOS=1 -DEVTGEN_TAUOLA=1 -DEvtGen_version=\\\"$pkg\\\" ";
+  $CXXFLAGS .= " -DPythia8_version=\\\"$py8ver\\\" ";
+  print "CPPPATH = $CPPPATH\n" if $param::debug;
+  # Do not compile test, validation
+  @src = ();
+  foreach my $s (@srcL) {
+    next if ($s =~ m/test/ ||
+	     $s =~ m/validation/      );
+    push(@src,$s);
+  }
+  @srcL = @src;
+} elsif ( $pkg =~ m/^HepMC/ and $Dir =~ m/StarGenerator/ ){
+  # Append HepMC include path and define version
+  $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg";
+  $CXXFLAGS .= " -Dmomentum=GEV -Dlength=MM -DHepMC_version=\\\"$pkg\\\" ";
+  print "CPPPATH = $CPPPATH\n" if $param::debug;
+  # Do not compile test, examples
+  @src = ();
+  foreach my $s (@srcL) {
+    next if ($s =~ m/test/ ||
+	     $s =~ m/examples/      );
+    push(@src,$s);
+  }
+  @srcL = @src;
+} elsif ( $pkg =~ m/^Photos/ and $Dir =~ m/StarGenerator/ ){
+  # Append Photos include path and define version
+  $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/src/eventRecordInterfaces";
+  $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/src/photos-C";
+  $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/src/photosCInterfaces";
+  $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/src/utilities";
+  $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/HepMC2_06_09";
+  $CXXFLAGS .= " -DPhotos_version=\\\"$pkg\\\" ";
+  print "CPPPATH = $CPPPATH\n" if $param::debug;
+  # Do not compile test, examples
+  @src = ();
+  foreach my $s (@srcL) {
+    next if ($s =~ m/examples/      );
+    push(@src,$s);
+  }
+  @srcL = @src;
+} elsif ( $pkg =~ m/^Tauola/ and $Dir =~ m/StarGenerator/ ){
+  # Append Tauola include path and define version
+  $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/HepMC2_06_09";
+  $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/Tauola1_1_5/include/Tauola";
+  $FCPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/tauola-fortran/tauola-modified/new-currents/RChL-currents/rcht_3pi";
+  $CXXFLAGS .= " -DTauola_version=\\\"$pkg\\\" ";
+  $CPPFLAGS .= " -x c++";
+  print "CPPPATH = $CPPPATH\n" if $param::debug;
+  # Do not compile test, examples
+  @src = ();
+  foreach my $s (@srcL) {
+    next if ($s =~ m/SANC/ ||
+	     $s =~ m/tauola-fortran\/glibk/ ||
+	     $s =~ m/tauola-fortran\/jetset/ ||
+	     $s =~ m/tauola-fortran\/jetset2/ ||
+	     $s =~ m/tauola-fortran\/tauola-F/ ||
+	     $s =~ m/tauola-fortran\/photos-F/ ||
+	     $s =~ m/tauola-fortran\/demo-factory/ ||
+	     $s =~ m/tauola-fortran\/tauola-factory/ ||
+	     $s =~ m/tauola-fortran\/tauola-BBB/ ||
+	     #$s =~ m/src/ ||
+	     $s =~ m/TauSpinner/ ||
+	     $s =~ m/examples/     );
+    push(@src,$s);
+  }
+  @srcL = @src;
+} elsif ( $pkg =~ m/^StHbtMaker$/ ) {
+  $CPPPATH = "#" . $Dir;
+  foreach my $subdir( "Base", "Infrastructure", "Reader", "Cut",
+		      "CorrFctn", "Fit", "ThCorrFctn")	{
+    $CPPPATH .= $main::PATH_SEPARATOR . "#" . $Dir . "/" . $subdir;
+  }
+  if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
+  print "CPPPATH = $CPPPATH\n" if $param::debug;
+  # According to description, all client requirering this
+  # should be added here.
+  if ($DEBUG =~ /-O/ and $STAR_SYS =~ /gcc482/) { # hack for  FtfUtilitieswith gcc482
+    $envNoDeb = $env->clone('DEBUG' => $NOOPTIMIZED, 
+			    'CPPPATH'  => $CPPPATH
+			   );
+    for ($i = 0; $i < $#src; $i++) {
+      if ($src[$i] =~ /StHbtCorrFctnDirectYlm\.cxx/) {
+	my @objfiles = Objects $envNoDeb ($src[$i]);
+	$src[$i] = $objfiles[0];
+	last;
+      }
+    }
+  }
+} elsif ( $pkg =~ m/^StAssociationMaker$/ ||
+	  $pkg =~ m/EmcUtil$/             ||
+	  $pkg =~ m/St_geant_Maker$/      ||
+	  $pkg =~ m/^StMuDSTMaker$/       ||
+	  $pkg =~ m/^StJetMaker$/         ||
+	  $pkg =~ m/^StEmcPool$/          ||
+	  $pkg =~ m/^StEEmcPool$/         ||
+	  $pkg =~ m/^StTofPool$/          ||
+	  $pkg =~ m/^StRichPool$/         ||
+	  $pkg =~ m/^StGeneri/            ||
+	  $pkg =~ m/^St.*Utilities/       ||
+	  $pkg =~ m/^StTriggerUtilities$/ ||
+	  $pkg =~ m/^Stv$/                ||
+	  $pkg =~ m/^Sti/ && $pkg !~ m/StiVMC/) {
+  # This block can be used for ANY Maker or Pool having a 2 level
+  # directory structure using auto-globbing for include purposes
+  $CPPPATH .=  $main::PATH_SEPARATOR . "#" . $Dir; 
+  print "WARNING Package $pkg requires a glob() to be called\n" if $param::debug;
+  foreach my $subdir ( glob("$Dir/*") ){
+    if( -d $subdir &&
+	$subdir ne "$Dir/\."       &&
+	$subdir ne "$Dir/\.\."     &&
+	$subdir ne "$Dir/CVS"      &&
+	$subdir ne "$Dir/macros"   &&
+	$subdir ne "$Dir/examples" &&
+	$subdir ne "$Dir/doc" ){
+      $CPPPATH  .= $main::PATH_SEPARATOR . "#"  . $subdir;
+    }
+  }
+  if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
+  print "CPPPATH = $CPPPATH\n" if $param::debug;
+} elsif ( $pkg =~ m/^gcalor$/ || $pkg =~ m/^geant321$/) {
+  $LIBPKG = "lib" . $pkg . "." . $env1->{SUFLIB};
+  $SO_PKG = "";
+  $SO_MAP = "";
+  $FCPATH = "#" . $Dir . "/../geant321" .
+    $main::PATH_SEPARATOR . "#" . $Dir . "/../starsim/include" .
+      $main::PATH_SEPARATOR . "#" . $Dir . "/../gcalor/include" .
+	$main::PATH_SEPARATOR . $env1->{FCPATH};
+  $FPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{FPPFLAGS};
+  $CPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{CPPFLAGS};
+  $FPPFLAGS = " -DATLAS_UNIX -DCOMMONS_CONFIG_H -DCERNLIB_LINUX -DCPP_VERS=\"'W'\"";
+} elsif ( $pkg =~ m/^g2t/ || $pkg =~ m/^gstar/ || $pkg =~ m/^geometry/){# ||  $pkg =~ m/^apythia/ ||  $pkg =~ m/^bpythia/) {
+  $LIBPKG = "lib" . $pkg . "." . $env1->{SUFLIB};
+  $SO_MAP  = "";
+  $FCPATH  = $INCLUDE;
+  $FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/starsim/include";
+  $FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/geant321/include";
+  $FCPATH .= $main::PATH_SEPARATOR . $env1->{ENV}->{CERN_ROOT} . "/include";
+  $FPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{FPPFLAGS};
+  $CPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{CPPFLAGS};
+} elsif ($pkg =~ m/TGeant3|StarVMCApplication|StVMCMaker/) {
+  $CPPPATH =  $env1->{ENV}->{ROOT} . "/" . $env1->{ENV}->{ROOT_LEVEL} . "/geant3/TGeant3"
+    . $main::PATH_SEPARATOR . $CPPPATH;
+  $FPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{FPPFLAGS};
+  $CPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{CPPFLAGS};
+#  print "====================== FPPFLAGS = $FPPFLAGS\n====================== CPPFLAGS = $CPPFLAGS\n";
+} elsif ($pkg eq 'StarMiniCern') {
+  $FPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{FPPFLAGS};
+  $CPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{CPPFLAGS};
+  $FCPATH = "#StarVMC/minicern" . $main::PATH_SEPARATOR . $INCLUDE;
+  $CPPPATH .= $main::PATH_SEPARATOR . "#StarVMC/minicern";
+  my @srcC = ();
+  foreach my $s (@src) {
+    my $dirL  = File::Basename::dirname($s);
+    my $sdir = File::Basename::basename($dirL);
+    next if $s eq 'uset.F' and $STAR_SYS =~ /sun4x_/;
+    next if $sdir eq 'hpxgs'; # hpux macos
+    next if $sdir eq 'sungs'; # sun
+    next if $sdir eq 'allgs';
+    next if $sdir eq 'lnxgs';
+    next if $sdir eq 'lnxppcgs';
+    next if $sdir eq 'qutyinv';
+    next if $sdir eq 'qutyz32';
+    push @srcC, $s;
+  }
+  @src = @srcC;
+  if ($#src >= 0) {
+    push @src, "lnxgs/rdmin.F"  if $STAR_SYS =~ /^rh/ or $STAR_SYS =~ /^i386/ or $STAR_SYS =~ /^sl/;
+  }
+  if ($FC eq 'g77') {
+    $LIBS .= " -lg2c";
+  }
+} elsif ($pkg eq 'geant3') { 
+#  $SO_PKG = "";
+#  $LIB_PKG = "lib" . $pkg . "." . $env1->{SUFLIB};
+  $FPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{FPPFLAGS};
+  $CPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{CPPFLAGS};
+  $FCPATH = "#StarVMC/geant3" . $main::PATH_SEPARATOR . "#StarVMC/geant3/minicern" . $main::PATH_SEPARATOR . $INCLUDE .
+    $main::PATH_SEPARATOR . $env1->{Packages}->{CERNLIB}->{INCDIR};
+  if ($FC eq 'ifort') {
+    $FCPATH .= $main::PATH_SEPARATOR . "#StarVMC/geant3/minicern/kerngen"; # bug in ifort with include path
+  }
+  $CPPPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{CERNLIB}->{INCDIR};
+  my @dirs = qw (added gbase gcons geocad ggeom gheisha ghits ghrout ghutils 
+		 giface giopa gkine gparal gphys gscan gstrag gtrak matx55 miface 
+		 miguti neutron peanut fiface cgpack fluka block comad erdecks erpremc 
+		 minicern gdraw TGeant3);
+  
+  my $dirs = join '|', @dirs;
+  my @srcC = ();
+  foreach my $s (@src) {
+    my $dirL = File::Basename::dirname($s);
+    my $sdir = File::Basename::basename($dirL);
+    next if $dirL !~ /$dirs/;
+    next if $s eq 'uset.F' and $STAR_SYS =~ /sun4x_/;
+    next if $sdir eq 'hpxgs'; # hpux macos
+    next if $sdir eq 'sungs'; # sun
+    next if $sdir eq 'allgs';
+    next if $sdir eq 'lnxgs';
+    next if $sdir eq 'lnxppcgs';
+    next if $sdir eq 'qutyinv';
+    next if $sdir eq 'qutyz32';
+    next if $s =~ /gtrak\/grndm.*\.F/;
+    push @srcC, $s;
+  }
+  @src = @srcC;
+  push @src, "gcinit.F";
+} elsif ( $Dir =~ m/StarVMC/ && $pkg =~ /ecal|Tpc|star/) {
+  $CPPPATH .= $main::PATH_SEPARATOR . "#" . $Dir . "/include";
+} elsif ( $pkg =~ m/^StBFChain$/ && (! $IsRepo || $IsDotDev) ) {
+  my($cmd)="BFCOpt2Html.pl";
+  $cmd = "mgr/BFCOpt2Html.pl" if ( -e "mgr/BFCOpt2Html.pl");
+  print "\t add documentation for $pkg\n";
+  Command $env ["#StRoot/StBFChain/doc/BFC.h"], ("#StRoot/StBFChain/BigFullChain.h"), qq (%CPP            %< > %>);
+  Command $env ["#StRoot/StBFChain/doc/BFC2.h"],("#StRoot/StBFChain/BigFullChain.h"), qq (%CPP -D__BFC2__ %< > %>);
+  Command $env [("#StRoot/StBFChain/doc/index.html","#StRoot/StBFChain/doc/StBFChain.cxx_doc")],
+    ("#StRoot/StBFChain/doc/BFC.h","#StRoot/StBFChain/doc/BFC.h", "#StRoot/StBFChain/doc/BFC2.h"),
+      qq($cmd);
+}
+# mysql and Db related linking separate
+if ( $pkg =~ m/^St.*Db/             ||
+     $pkg =~ m/^StStarLogger/       ||
+     $pkg =~ m/^StUCMApi/           ||
+     $pkg =~ m/^StTriggerUtilities/ ||
+     $pkg =~ m/Jevp/
+   ){
+  $CPPPATH .= $main::PATH_SEPARATOR .  $env1->{Packages}->{MYSQL}->{INCDIR};
+  if ($pkg eq 'StDbLib' || 
+      $pkg =~ m/Jevp/   ) {
+    $CPPPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{XML}->{INCDIR};
+    $LIBPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{XML}->{LIBDIR};
+    $LIBS .=  " " . $env1->{Packages}->{XML}->{LIBS};
+    if ($env1->{Packages}->{XML}->{CPP}) {
+      $EXTRA_CPPFLAGS .= $env1->{Packages}->{XML}->{CPP};
+    }
+  }
+  if ($pkg eq 'StTpcDb') {
+    Depends $env $SO_PKG, $LIB . "/libStarMagField.so";
+    $LIBS .=  " -lStarMagField";
+  }
+  print "EXPANDING CPPPATH = $CPPPATH\n" if $param::debug;
+} elsif ( $Dir =~ m/StarVMC/ and $pkg =~ m/StiVMC/) {
+  $CPPPATH = "#StarVMC" . $main::PATH_SEPARATOR . $CPPPATH;
+} elsif ( $pkg =~ m/StPxlSimMaker/) {
+  $CPPPATH .= $main::PATH_SEPARATOR . "#StRoot/StPxlSimMaker/DIGMAPS"; 
+} elsif ($pkg =~ m/^StHLTCAMaker$/ || $pkg =~ m/^StvMaker$/ || $pkg =~ m/^StvSeed$/ ){ #  
+  $CXXFLAGS .= " -DNVALGRIND -DDO_TPCCATRACKER -DNODEBUG -DENABLE_VECTORIZATION";# . $SSE_FLAGS; #" -msse -msse2";
+  if ($CC ne 'icc') {
+    $CXXFLAGS .= " -Wno-pragmas";
+  }
+  $CXXFLAGS .= " -Wno-parentheses"; # new flags needed for Vc
+}  elsif ( $pkg eq 'TPCCATracker' or $pkg eq 'TPCCATrackerPerformance' or $pkg eq 'StiCA' or $pkg eq 'StxMaker') {
+  $CPPPATH .=
+    $main::PATH_SEPARATOR . "#" . $Dir . "/../TPCCATrackerPerformance"
+      . $main::PATH_SEPARATOR . "#" . $Dir . "/../TPCCATracker";
+  $extraCXXFLAGS = "-DNODEBUG -DNVALGRIND ";
+  if ($STAR_SYS eq 'sl64_gcc447' or $STAR_SYS eq 'sl64_x8664_gcc447') {$extraCXXFLAGS .= " --param large-function-growth=500";}
+  $extraCXXFLAGS .= " -DNODEBUG";
+  $extraCXXFLAGS .= "  -Wno-parentheses"; # new flags
+  $CXXFLAGS .= $extraCXXFLAGS;
+  $CXXFLAGS .= $env->{Packages}->{Vc}->{CPP};
+  $LIBS = "-lVc";
+  $LIBPATH .=  $main::PATH_SEPARATOR . $env->{ENV}->{OPTSTAR} . "/lib";
+  if ($extraCXXFLAGS =~ /USE_TBB/) {$LIBS .= " -lTBB";}
+  if ($pkg =~ m/^TPCCATracker$/ and $extraCXXFLAGS =~ /DO_TPCCATRACKER_EFF_PERFORMANCE/) {$LIBS .= " -lTPCCATrackerPerformance";}
+  # stand - alone in .DEV2 only
+#   if ($env->{STAR_VERSION} eq '.DEV2') {
+#     Depends $env [$SO_PKG], [($LIB . "/libTPCCATracker.so")];
+#     my $libs = "-lTPCCATracker " . $LIBS . $env->{Packages}->{ROOT}->{LIBS} . " -lEG";
+#     $LIBPATH .=  $main::PATH_SEPARATOR . $env->{ENV}->{OPTSTAR} . "/lib";
+#     $envTPCCA = $env->clone('Package' => $pkg,
+# 			    'EXTRA_CXXFLAGS' => $extraCXXFLAGS,# . " -DDRAW", # -DHLTCA_STANDALONE
+# 			    'CPPPATH'  => $CPPPATH,
+# 			    'LIBPATH'  => $LIBPATH,
+# 			    'LIBS'     => $libs,
+# 			    'DEBUG'    => $DEBUG
+# 			   );
+#     my @programs = glob($Dir . "/*.C");# print "programs: @programs\n";
+#     foreach my $progD (@programs) {
+#       my $prog = File::Basename::basename($progD,".C");
+#       next if $prog eq 'MakeSettings';
+#       Program      $envTPCCA $prog, ($prog . ".C");
+#       Install $envTPCCA $BIN, $prog;
+#     }
+#   }
+}  elsif ( $pkg =~ m/KFParticle/) {
+  $CPPFLAGS .= " -DDO_TPCCATRACKER_EFF_PERFORMANCE";
+  $CPPPATH .=
+    $main::PATH_SEPARATOR . "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/../TPCCATracker" . $main::PATH_SEPARATOR . "#" .
+      Dir . "/../TPCCATrackerPerformance" . $main::PATH_SEPARATOR . "#" . $Dir . "/../KFParticle";
+  my $extraCXXFLAGS = " -DNVALGRIND -DSTAR_STANDALONE";# -W -Wall -Wswitch -Wformat -Wchar-subscripts";
+  if ($STAR_SYS eq 'sl64_gcc447' or $STAR_SYS eq 'sl64_x8664_gcc447') {$extraCXXFLAGS .= " --param large-function-growth=500";}
+  $extraCXXFLAGS .= " -DNODEBUG";
+  $CXXFLAGS .= $extraCXXFLAGS;
+  $CXXFLAGS .= $env->{Packages}->{Vc}->{CPP};
+  $LIBPATH .=  $main::PATH_SEPARATOR . $env->{ENV}->{OPTSTAR} . "/lib";
+  $LIBS = "-lVc";
+}
+if ( $pkg =~ m/^Sti$/   ) {
+  if ($CC ne 'icc') {
+    $CXXFLAGS .= " -Wno-pragmas"; # new flags needed for Vc
+  }
+  $CXXFLAGS .= " -Wno-parentheses";
+  #   # uncomment these lines to run CATracker performance (same for TPCCATracker lib)
+  # $CXXFLAGS .= " -DDO_TPCCATRACKER_EFF_PERFORMANCE ";
+  # $CPPPATH .=
+  # 	$main::PATH_SEPARATOR . "#" . $Dir . "/../TPCCATrackerPerformance"
+  # 	. $main::PATH_SEPARATOR . "#" . $Dir . "/../TPCCATracker";
+  if ($DEBUG =~ /-O/ and $STAR_SYS =~ /gcc432/) { # hack for Sti with gcc432
+    $envNoDeb = $env->clone('DEBUG' => '-g');
+    for ($i = 0; $i < $#src; $i++) {
+      if ($src[$i] =~ /StiVMCToolKit\.cxx/) {
+	my @objfiles = Objects $envNoDeb ($src[$i]);
+	$src[$i] = $objfiles[0];
+	last;
+      }
+    }
+  } elsif ($DEBUG =~ /-O/ and $STAR_SYS =~ /gcc492/) { # hack for Sti with gcc432
+    $envNoDeb = $env->clone('DEBUG' => '-g');
+    for ($i = 0; $i < $#src; $i++) {
+      if ($src[$i] =~ /StiTrackNode\.cxx/) {
+	my @objfiles = Objects $envNoDeb ($src[$i]);
+	$src[$i] = $objfiles[0];
+	last;
+      }
+    }
+  }
+}
+if ( $pkg =~ m/^StChain$/) {  
+  if ($STAR_SYS =~ /gcc471/) { # hack for StRtsTable gcc471
+    my $cxxflags = $env->{CXXFLAGS} . " -fpermissive"; print "cxxflags = $cxxflags\n";
+    $envHack = $env->clone('CXXFLAGS' => $cxxflags); print "==> $envHack->{CXXFLAGS}\n";
+    for ($i = 0; $i <= $#src; $i++) {
+      if ($src[$i] =~ /StRtsTable\.cxx/) {# print "========= hack for StRtsTable.cxx =========\n";
+	my @objfiles = Objects $envHack ($src[$i]);
+	$src[$i] = $objfiles[0];
+	last;
+      }
+    }
+  }
+}
+if ( $pkg =~ m/^StiMaker/) {  
+  if ($DEBUG =~ /-O/ and $STAR_SYS =~ /gcc432/) { # hack for StiMaker with gcc432
+    $DEBUG = "-g";
+  }
+}
+if ( $#idlM > -1 ) {
+  $CPPPATH = $INCLUDE . "/" . $pkg . $main::PATH_SEPARATOR . $CPPPATH;
+  print "CPPPATH = $CPPPATH\n" if $param::debug;
+} elsif ( $#idlL > -1 ) {
+  $CPPPATH .= $main::PATH_SEPARATOR . $INCLUDE . "/tables" . $main::PATH_SEPARATOR . "#";;
+  print "CPPPATH = $CPPPATH\n" if $param::debug;
+}
+if ($pkg =~ /^St_base$/) {
+  if ( $STAR_SYS =~ /^hp_ux102$/) {
+    $CPPPATH .= $main::PATH_SEPARATOR . "/usr/local/include";
+  }
+}
+if (($pkg eq 'StHbtMaker' or $pkg eq 'StMuDSTMaker') and $CC ne 'gcc' and $CC ne 'icc') {
+  # fight with __PRETTY_FUNCTION__
+  $EXTRA_CPPFLAGS .= " -DDEBUGMESSAGE\\\(x\\\)=\"\"  -DDEBUGMESSAGE1\\\(x\\\)=\"\"  "
+    .  " -DDEBUGMESSAGE2\\\(x\\\)=\"\"  -DDEBUGMESSAGE3\\\(x\\\)=\"\" "
+      .  " -DFORCEDDEBUGMESSAGE\\\(x\\\)=\"\"";
+}
+#  if ($pkg eq 'StMuDSTMaker') {
+#    $CPPFLAGS .= " -D__NO_STRANGE_MUDST__";
+#  }
+if ($pkg =~ /^StUCMApi$/ or $pkg =~ /^StStarLogger$/) {
+  $EXTRA_CPPFLAGS .=" -D_UCMLOGGER_";
+  $CPPPATH .= $main::PATH_SEPARATOR . "StRoot/StUCMApi/data/base"
+    . $main::PATH_SEPARATOR . "StRoot/StUCMApi"
+      . $main::PATH_SEPARATOR . "StRoot/StUCMApi/data"
+	. $main::PATH_SEPARATOR . "StRoot/StUCMApi/data/modules";
+  $CPPPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{Logger}->{INCDIR};
+}
+if ($pkg =~ /^StStarLogger$/) {
+  $CPPPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{Logger}->{INCDIR};
+  $LIBPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{Logger}->{LIBDIR};
+  $LIBS    .= " " . $env1->{Packages}->{Logger}->{LIBS};
+}
+if ($pkg =~ /^Ag.*Geometry/) {
+  printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir,
+	  $pkg )	unless ($param::quiet);
+  my @versionList = ();
+  my %tagList = ();
+  my %xgeomList = ();
+  my %AgMLList = ();
+  my $GeometryDbAliasesh = "StRoot/StChain/GeometryDbAliases.h";
+  my $GeometryDbAliases = $GeometryDbAliasesh;
+  if (! -r $GeometryDbAliases) {
+    @Repo   = Repository_List;#   print "Repositories = |@Repo|\n";
+    foreach my $Rep( @Repo) {
+      $GeometryDbAliases = $Rep . "/" . $GeometryDbAliases; # !!! require  Chain
+      if ( -r $GeometryDbAliases) {last;}
+    }
+  }
+  if (-r $GeometryDbAliases) {
+    open(SCAN, $GeometryDbAliases);
+    while (<SCAN>) {
+      next if (/^\s*\//);
+      my @words = split('"',$_);
+      next if (! $words[1]);
+      my $geom = $words[3];
+      if ($geom =~ /y2010x$/) {next;} # take out for them moment all geometies which ends with x
+      $geom =~ s/ear//;
+      push @versionList, $geom;
+      $tagList{$words[1]} = $geom;
+      if ($words[5] =~ /xgeometry/) {
+	$xgeomList{$words[1]} = $geom; #print " xgeomList{$words[1]} =  $xgeomList{$words[1]}\n";
+      }
+      if ($words[5] =~ /AgML/) {
+	$AgMLList{$words[1]} = $geom; #print " AgMLList{$words[1]} =  $AgMLList{$words[1]}\n";
+      }
+    }
+    close(SCAN);
+    @versionList = script::sortu(@versionList);
+    if ($param::debug) {
+      print "versionList = @versionList\n";
+    }
+    if ($pkg eq 'AgMLGeometry') {#print "pkg = $pkg\n ";
+      foreach my $tag ( sort keys %tagList ) {
+	my $geom = $AgMLList{$tag};
+	next if ! $geom;
+	print "Build $geometry for $tag\n" if $param::debug;
+	my $geometry = "Geometry." . $tag . ".root";# print "geometry = $geometry\n";
+	Command $env1 [$geometry], ($LIB . "/" . "StarAgmlLib" . "." . $env1->{SUFSOLIB},
+				    $LIB . "/" . "Geometry" . "." . $env1->{SUFSOLIB}),
+				      qq(root.exe -q -b 'AgML.C("$tag","$geom")' >& /dev/null; mv %>:f %>:d);
+      }
+    }	else { # AgiGeometry
+      if ( -d "./StarDb/starsim") {
+	my %geomList = ();
+	foreach my $tag ( sort keys %tagList ) {
+	  my $geom = $tagList{$tag}; #print "AgiGeometry: tag = $tag, geom = $geom, geomList{$geom} = $geomList{$geom}\n";
+	  next if ! $geom;
+	  next if $geomList{$geom};
+	  $geomList{$geom} = $geom;
+	  my $starsim_geom = "./StarDb/starsim/geometry." . $tag . ".C";
+	  if (! -r $starsim_geom) {
+	    open (Out, ">$starsim_geom") or die "Can't open $starsim_geom";
+	    print Out "
+TDataSet *CreateTable() {
+  if (!gROOT->GetClass(\"St_geant_Maker\")) return 0;
+  St_geant_Maker *geant = (St_geant_Maker *) StMaker::GetChain()->Maker(\"geant\");
+  if (! geant) return 0;
+  TDataSet *geom = new TDataSet(\"geometry\");
+  geant->Do(\"detp geom $geom\");
+  return geom;
+};";
+	    close(Out);
+	  }
+	  my $geom_h = $geom . ".h";
+	  my $geometry = "Geometry." . $geom . ".C";
+	  my $hall = "HALL." . $geom . ".root";
+	  my $NoAst2Root = $STAR_SYS =~ /x86/ || $STAR_SYS =~ /darwin/ || $CC eq 'icc';
+	  if ($NoAst2Root) {# platform with no root4star or icc
+	    my $glob = ".sl*/obj/StarDb/AgiGeometry/" .$geom_h ;
+	    my @dirs = glob $glob;# print "glob = $glob $dirs = @dirs\n"; 
+	    my $dir;
+	    foreach $dir (@dirs) {
+	      if ($NoAst2Root) {next;} #$dir =~ /x86/ || $dir =~ /darwin/) {next;}
+	      if ($dir) {
+		my $file = "#" . $dir;
+		Command $env1 [$geom_h], ($file), qq(cd %>:d; ln -s %<:a %>:f;);
+		last;
+	      }
+	    }
+	    # HALL
+	    $glob = ".sl*/obj/StarDb/AgiGeometry/" . $hall;
+	    @dirs = glob $glob;# print "glob = $glob $dirs = @dirs\n"; 
+	    foreach $dir (@dirs) {
+	      if ($NoAst2Root) {next;} # if ($dir =~ /x86/ || $dir =~ /darwin/) {next;}
+	      if ($dir) {
+		my $file = "#" . $dir;
+		Command $env1 [$hall], ($file), qq(cd %>:d; ln -s %<:a %>:f;);
+		last;
+	      }
+	    }
+	    # geometry
+	    $glob = ".sl*/obj/StarDb/AgiGeometry/" . $geometry;
+	    @dirs = glob $glob;# print "glob = $glob $dirs = @dirs\n"; 
+	    foreach $dir (@dirs) {
+	      if ($NoAst2Root) {next;} # if ($dir =~ /x86/ || $dir =~ /darwin/ || $FC eq 'icc') {next;} 
+	      if ($dir) {
+		my $file = "#" . $dir;
+		Depends $env1 [$geometry], qw(CreateGeometry.h Material.h Media.h);# Rotations.h);
+		Command $env1 [$geometry], ($file), qq(cd %>:d; ln -s %<:a %>:f;);
+		last;
+	      }
+	    }
+	  } else {
+	    my $bin = $BIN; $bin =~ s|#||;
+	    my $root4star = $CWD . "/" . $bin . "/" . "root4star";
+	    if (! -x $root4star) {
+	      $root4star = $env->{ENV}->{STAR} . "/" . $bin . "/" . "root4star";
+	    }
+	    Depends $env1 [$geometry], ($LIB . "/St_geant_Maker." .  $env1->{SUFSOLIB});
+	    if (! $xgeomList{$geom}) {
+	      Depends $env1 [$geom_h,$hall], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB});
+	      Depends $env1 [$geometry], qw(CreateGeometry.h Material.h Media.h);# Rotations.h);
+	      Command $env1 [$geom_h,$geometry,$hall], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB}),
+		qq (cd  %>:d; $root4star -q -b 'Ast2Root.C("$geom","UseXgeom")' > /dev/null 2>&1;); #   mv geom.rz %>:f;
+	    } else{
+	      Depends $env1 [$geom_h], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB});
+	      Command $env1 [$geom_h,$geometry,$hall], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB}),
+		qq (cd  %>:d; $root4star -q -b 'Ast2Root.C("$geom","UseXgeom")' > /dev/null 2>&1;); #   mv geom.rz %>:f;
+	    }
+	  }
+	  if ($geomlist) { $geomlist .= "|";}
+	  $geomlist .= $geom;
+	}
+      }
+    }
+  }
+}
+if ($pkg =~ m/^MillepedeII$/) { #  Module dependencies
+  $SO_PKG_lib = "lib" . $SO_PKG;
+  @src = ();
+  foreach my $s (@srcL) {
+    next if $s =~ /^pede\.f90/;
+    next if $s =~ /^Mille\.cc/;
+    push @src, $s;
+  }
+  if ($STAR_SYS =~ /_gcc447/) {
+    $FDEBUG = "-g";
+  }
+  @srcL = @src;#  print "srcL = @srcL\n";
+  Depends $env ["minresModule.o"], qw(minresDataModule.o);
+  Depends $env ["Dbandmatrix.o"], qw(mpdef.o);
+  Depends $env ["minresqlpModule.o"], qw(minresqlpDataModule.o minresqlpBlasModule.o);
+  Depends $env ["minresqlpBlasModule.o"], qw(minresqlpDataModule.o);
+  Depends $env ["mpbits.o"], qw(mpdef.o mpdalc.o);
+  Depends $env ["mpdalc.o"], qw(mpdef.o);
+  Depends $env ["mpmod.o"],  qw(mpdef.o);
+  Depends $env ["mpnum.o"],  qw(mpdef.o);
+  $CPPFLAGS .= " -Df2cFortran -DUSE_ZLIB"; 
+  $FFLAGS   .= " -DREAD_C_FILES -fopenmp";
+}
+my $libpath = $LIBPATH;
+if (! $LIBS) {$libpath = "";}
+#  print "RTS3: CPPPATH = $CPPPATH\n"; # if $param::debug;
+$env2 = $env1->clone('Package'  => $pkg,
+		     'EXTRA_CPPFLAGS' => $EXTRA_CPPFLAGS,
+		     'CPPPATH'  => $CPPPATH,
+		     'CFLAGS'   => $CFLAGS,
+		     'CXXFLAGS' => $CXXFLAGS,
+		     'FC'       => $FC,
+		     'FFLAGS'   => $FFLAGS,
+		     'FCPATH'   => $FCPATH,
+		     'FEXTEND'  => $FEXTEND,
+		     'FPPFLAGS' => $FPPFLAGS,
+		     'CPPFLAGS' => $CPPFLAGS,
+		     'FCCOM'    => $FCCOM,
+		     'AGETOFCOM'=> $AGETOFCOM,
+		     'AGETOFLAGS'=> $AGETOFLAGS,
+		     'LIBS'     => $LIBS,
+		     'SOFLAGS'  => $SOFLAGS,
+		     'LIBPATH'  => $libpath,
+		     'ObjDir'   => $obj_dir,
+		     'DEBUG'    => $DEBUG,
+		     'FDEBUG'   => $FDEBUG
+		    );
+my $Cint_CPPPATH = $CPPPATH . $main::PATH_SEPARATOR . "#";
+$envCint = $env2->clone('DEBUG' => $env2->{NOOPT},
+			'CXXFLAGS' => "-fpermissive " . $CXXFLAGS,
+			'CPPPATH'  => $Cint_CPPPATH,
+			'CPPFLAGS' => $CPPFLAGS,
+			'EXTRA_CPPFLAGS' => $EXTRA_CPPFLAGS);
+print "LIBPATH = |", $env2->{LIBPATH}, "|\n LIBS = |", $env2->{LIBS},
+  "|\n CPPPATH = |", $env2->{CPPPATH}, "|\n" if $param::debug;
+print "LINKMODULECOM |", $env2->{LINKMODULECOM}, "|\n" if $param::debug;
+my $cscanner = find scan::cpp( $env2->{_cwd}, $env2->{CPPPATH} );
+my @cpps = split /$main::PATH_SEPARATOR/, $env2->{CPPPATH};
+my $ROOTCINT_CPP = "";
+my $STIC_CPP     = "";
+foreach my $cpp( $Dir, @cpps ) {
+  if ( $cpp =~ /cern/ || $cpp eq "/usr/include" || $cpp =~ /ospace/ ||
+       $cpp =~ /openwin/ ){
+    next;
+  }
+  if ($ROOTCINT_CPP) { $ROOTCINT_CPP .= $main::PATH_SEPARATOR . $cpp; }
+  else { $ROOTCINT_CPP = $cpp; }
+  if ( $cpp =~ /ROOT/ ) {next}
+  if ($STIC_CPP) { $STIC_CPP .= $main::PATH_SEPARATOR . $cpp; }
+  else { $STIC_CPP = $cpp; }
+}
+$cscanner = find scan::cpp( $env2->{_cwd}, $ROOTCINT_CPP );
+print "ROOTCINT_CPP = $ROOTCINT_CPP\n" if $param::debug;
+my $ROOTCINT_CPPPATH = $cscanner->iflags($env2);
+if ($env2->{EXTRA_CPPFLAGS}) {
+  $ROOTCINT_CPPPATH .= " " . $env2->{EXTRA_CPPFLAGS}; # Requested By Frank Laue
+}
+print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n" if $param::debug;
+$cscanner = find scan::cpp( $env2->{_cwd}, $STIC_CPP );
+my $STIC_CPPPATH =
+  $cscanner->iflags($env2);    # print "STIC_CPPPATH  = $STIC_CPPPATH\n";
+my $DIR = Cwd::cwd();
+print "DIR = $DIR\n" if $param::debug;
+my $line;
+my @Defs = ();
+if ( $#idlM > -1 ) {
+  my $include = $INCLUDE . "/" . $pkg;
+  print "include = $include\n" if $param::debug;
+  foreach my $idl(@idlM) {
+    my $stem = File::Basename::basename( $idl, ".idl" );
+    print "idl = $idl  stem = $stem\n" if $param::debug;
+    my $idm  = $stem . ".idl";
+    my $idMM = $DIR . "/" . $Dir . "/" . $idl;
+    print "idMM = $idMM\n" if $param::debug;
+    my $idM = "#" . $Dir . "/" . $idl;
+    print "idM = $idM\n" if $param::debug;
+    my @idlS = ($idM);
+    my $modh = $INCLUDE . "/" . $stem . ".h";
+    my $modi = $INCLUDE . "/" . $stem . ".inc";
+    my $modH = $include . "/" . "St_" . $stem . "_Module.h";
+    print "modH = $modH\n" if $param::debug;
+    my $modC = "St_" . $stem . "_Module.cxx";
+    print "modC = $modC\n" if $param::debug;
+    $env2->{ENV}->{STICTMP} = "/tmp/$<$$";
+    my $stic_cmd =
+      "test -d \$STICTMP && /bin/rm -rf \$STICTMP ; ".
+	"/bin/mkdir -m 777 \$STICTMP && cd \$STICTMP && ".
+	  "/bin/cp %<:a . && $STIC -s -r $STIC_CPPPATH -q %<:f && ".
+	    "(/bin/mv %>:f %>:a ; cd /tmp  &&  /bin/rm -rf \$STICTMP)";
+    Command $env2 [$modh], @idlS, qq($stic_cmd);
+    Command $env2 [$modi], @idlS, qq($stic_cmd);
+    Command $env2 [$modH], @idlS, qq($stic_cmd);
+    Command $env2 [$modC], @idlS, qq($stic_cmd);
+    my @objmod = ($modC);
+    print "Install @objmod in $ObjDir\n" if $param::debug;
+    push @src, $modC;
+    print "src + $mod: @src\n" if $param::debug;
+    push @Defs, $modH;
+  }
+} else {
+  foreach $h (@h_files) {
+    if ( $h =~ /LinkDef/) { push @LinkDefs, $h;}
+    if ( $h =~ /LinkDef/ || $h =~ /Stypes/ ) { push @Defs, $h; next; }
+    my $hh = $h;#  print "hh = $hh\n";
+    if (! -r $hh)  {
+      $hh = $Dir . "/" . $h;# print "hh = $hh\n";
+    }
+    if (! -r $hh) {
+      $hh = $DirPath .  "/" . $h;# print "hh = $hh\n";
+    }
+    if ( -r $hh ) {
+      open( In, $hh ) or die "Can't open $hh";
+      my $classDefFlag = 1;
+      my $qtFlag       = 1;
+      while ( $line = <In> ) {
+	if ( ( $line =~ /ClassDef/ || $line =~ /StCollectionDef/) ) {
+	  if ($classDefFlag) {
+	    push @Defs, $h;#  print "$h <==========\n";
+	    $classDefFlag = 0;
+	  }
+	} elsif ( $line =~ /Q_OBJECT/ && defined($env1->{Packages}->{QT}->{BINDIR}) && $qtFlag ) {
+	  push @QtDefs, $h; print "QtDefs from Q_OBJECT  @QtDefs\n" if $param::debug;
+	  $qtFlag = 0;
+	}
+	last if ( $classDefFlag + $qtFlag == 0 );
+      }
+      close(In);
+    } else {
+      foreach my $Rep(@Repo) {
+	my $RepDir = $Rep . "/" . $Dir;
+	print "RepDir = $RepDir\n" if $param::debug;
+	if ( -d $RepDir ) {
+	  my $hh = $RepDir . "/" . $h;
+	  if ( -r $hh ) {
+	    open( In, $hh ) or die "Can't open $hh";
+	    while ( $line = <In> ) {
+	      if ( $line =~ /ClassDef/
+		   || $line =~ /StCollectionDef/ )
+		{
+		  push @Defs, $h;
+		  goto ENDL;
+		}
+	    }
+	    close(In);
+	  }
+	}
+      }
+    }
+  ENDL:
+  }
+  foreach $h (@h_filesX) {
+    push @Defs, $h;
+  }
+}
+if ($#srcX >= 0) {
+  push @src, @srcX;
+}
+if ( $#Defs > -1 ) {
+  my @CintFiles = ( $PKG . "_Cint.cxx", $PKG . "_Cint.h", "LinkDef.h" );
+  @Defs = script::sortu(@Defs);
+  my @defs = ();
+  foreach my $def(@Defs) {    
+    if ( $def =~ /^\#/ || $pkg eq 'Geometry') { push @defs, $def; }
+    else { push @defs, "#" . $Dir . "/" . $def; }
+  }
+  foreach my $def (@LinkDefs) {
+    open (In, $Dir . "/" . $def) or die "Can't open $def";
+    while (my $line = <In>) {
+      if (($line  =~ /^\/\/IncFile *=/))	{
+	my @words = split /(=)/, $line;
+	chomp(@words[2]);
+	my $h = $words[2];
+	# remove the quotation surrounding the file name if any
+	$h =~ s/^\"// ; $h =~ s/\"$// ;
+	if (! -r $Dir . "/" . $h) {
+	  $h = "#StRoot/" . $h;
+	}
+	print "Add $Dir ========= $h \n" if $param::debug;
+	if (! -r $h) {push @defs, $h;}
+      }
+    }
+    close(in);
+  }
+#ifndef __NEW__
+  Depends $env2 [@CintFiles], @h_files;
+#else /* __NEW__ */
+#   if ($#h_files > -1) {
+#     Depends $env2 [@CintFiles], @h_files;
+#   }
+# #  print "CintFiles = @CintFiles\n";
+#endif /* __NEW__ */
+  Depends $env2 [@CintFiles], ($env2->{Packages}->{ROOT}->{ROOTCINT});
+  my $RCINTPL;
+  # use local if available
+#ifndef __NEW__
+   if (! $env->{Packages}->{ROOT}->{ROOTCLING}) {
+     if ( -e "mgr/RootCint.pl") {
+       $RCINTPL = "mgr/RootCint.pl";
+     } else {
+       $RCINTPL = "RootCint.pl";
+     }
+     Command $env2 [@CintFiles], @defs,
+       qq($RCINTPL "%>" "%<" "$ROOTCINT_CPPPATH $CPPFLAGS" );
+   } else {
+#else /* __NEW__ */
+     #  print "rootcling = $env->{Packages}->{ROOT}->{ROOTCLING}, defs = @defs\n";
+     #   if ($env->{Packages}->{ROOT}->{ROOTCLING}) {
+     if ( -e "mgr/RootCling.pl") {
+       $RCINTPL = "mgr/RootCling.pl";
+     } else {
+       $RCINTPL = "RootCling.pl";
+     }
+     my $Package = $Dir . "/PACKAGE";# print "Package = $Package\n";
+     my $LIBST   = $env2->{LIBS};
+     my $LIBSP   = "";
+     if ($Package and -r $Package) {
+       open(IN,"$Package") or die "Can't open $Package\n";
+       while (my $line = <IN>) {
+	 next if $line =~ m/^\s*#/;# print "$line";
+	   my ($dummy,$lib,$libst) = split /:/, $line;
+#	 print "Read PACKAGE;\t |$dummy| \t |$lib| \t|$libst| for SO_PKG = |$SO_PKG|\n";
+	 next if $lib !~ /$SO_PKG/;
+	 my ($d,$l) = split /\=/, $libst;# print "d = $d \t l = $l\n";
+	 if ($d =~ m/\+/) {$LIBSP .= " " . $l;}
+	 else             {$LIBSP = $l;}
+	 my @libs = split(' ',$LIBSP);
+	 foreach my $lib (@libs) {
+	   my $fullname = $lib; $fullname =~ s/-l/lib/;# print "lib = $lib => fullname = $fullname\n";
+	   my @pathes = split($main::PATH_SEPARATOR, $env->{LIBPATH});
+	   my $found_path = "";
+	   foreach my $path (@pathes) {
+	     foreach my $suffix ($env2->{SUFSOLIB}, $env2->{SUFLIBS}) {
+	       my $checkpath = $path . "/" . $fullname . "." . $suffix;# print "checkpath = $checkpath\n";
+	       if (-r $checkpath) {$found_path = $checkpath; last;}
+	     }
+	     if ($found_path) {last;}
+	   }
+	   if (! $found_path) {
+	     my $libpkg = $LIB . "/" . $fullname . "." . $env2->{SUFSOLIB};# print "Depends $SO_PKG, $libpkg;\n";
+	     Depends $env $SO_PKG, $libpkg;
+	   }
+	 }
+       }
+       close(IN);
+       chomp($LIBSP);# print "LIBSP = $LIBSP ================================================================================\n";
+       if ($LIBSP) {
+	 $env2->{LIBS} = $LIBST . $LIBSP; 
+	 $env2->{LIBPATH} .= $main::PATH_SEPARATOR . $LIBPATH;
+	 #	  print "env2->{LIBPATH} = $env2->{LIBPATH} $env2->{LIBS} = $env2->{LIBS} \n";}
+       }
+       Depends $env2 $CintFiles[0], "#" . $Package;
+     }
+     #endif /* __NEW__ */
+     my $LLIB = $LIB; $LLIB =~ s/^\#//;
+     my $loclib = $SO_PKG;
+     if ($loclib !~ /^lib/) {$loclib = "lib" . $loclib;}
+     my $lib = $LLIB . "/" . $loclib;
+     my $rootmap = $LLIB . "/lib" . File::Basename::basename($PKG, $env1->{SUFSOLIB}) . ".rootmap";
+     my $cintfile = $build . "/" .  $CintFiles[0];
+     my $pcmfile = "lib" . $CintFiles[0];
+     $pcmfile =~ s/\.cxx/_rdict\.pcm/; #print "pcmfile = $pcmfile ==================\n";
+     #    print "lib = $lib, rootmap = $rootmap, cintfile = $cintfile  ================================================================================\n";
+     push @CintFiles, $pcmfile; #print "CintFiles = @CintFiles\n";
+     #else /* __NEW__ */
+     my $libs = $env2->{LIBS}; chomp($libs); # print "libs = $libs\n";
+     Command $env2 [$CintFiles[0]], @defs,
+       qq($RCINTPL $lib "$libs" $rootmap "%>" "%<" "$ROOTCINT_CPPPATH $CPPFLAGS" );
+#     Intstall $env2 $LIB, $pcmfile;
+   }
+  @LinkDefs = ("LinkDef.h");
+  my @objfiles = Objects $envCint ($CintFiles[0]);
+  push @src, @objfiles[0];
+  print "+==========add cint $CintFiles[0]\n" if $param::debug;
+}
+if ( $#QtDefs > -1 ) {
+  my $mocheaders = join $main::PATH_SEPARATOR, @QtDefs;
+  my @mocs = script::MakeMoc( $env2, $pkg, $done, $mocheaders);
+  print "mocheaders: $mocheaders \tmocs: @mocs\n";# if $param::debug;
+  foreach $m(@mocs) { push @src, $m;}
+}
+#____________________________________Tables____________________________
+# Tables:
+if ($#idlL > -1) {
+#   if ($#idlL > -1 && $#src > -1) {
+#     print "idlL = @idlL\nsrc = @src\n";
+#     die "Sources and idl are mixed";
+#   }
+  if ($env->{Packages}->{ROOT}->{ROOTCLING}) {
+#    print "1359:script::TablesCLING($env, $pkg,  @idlL)\n";
+    script::TablesCLING($env, $pkg,  @idlL);
+  } else { 
+    script::Tables($env, $pkg,  @idlL);
+  }
+}
+if ( $#src > -1 ) {
+  my  $envPlain = $env2;
+#ifndef __NEW__
+   printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $PKG )
+     unless ($param::quiet);
+#  $LIBPKG = "lib" . $pkg . "." . $env1->{SUFLIB};
+#  if (!$SO_PKG_lib) {$SO_PKG_lib = "lib" . $SO_PKG;}
+#  if (!$SO_PKG_lib && $pkg =~ /Agml/) {$SO_PKG_lib = "lib" . $SO_PKG;}
+#  print "Dir = $Dir, PKG = $PKG, LIBPKG = $LIBPKG, SO_PKG_lib = $SO_PKG_lib ================\n";
+#else /* __NEW__ */
+#   printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $PKG )    unless ($param::quiet);
+#   foreach my $idl(@idlL) {
+#    my ($idlh, $idli, $idlH, $idlC, $LinkDef, $idlCintH, $idlCintC) = script::RunStic($idl);
+#    print "idl = $idl => $idlh, $idli, $idlH, $idlC, $LinkDef, $idlCintH, $idlCintC \n";
+#    push @src, $idlC;
+#    push @src, $idlCintC;
+#   }
+#endif /* __NEW__ */
+  if ($LIBPKG) {
+    Library $env2 $LIBPKG, @src;
+    Install $env2 $LIB,    $LIBPKG;
+    print "Install $env2 $LIB, $LIBPKG\n" if $param::debug;
+    if ($SO_PKG) {
+      my $libpkg = $LIB . "/" . File::Basename::basename($LIBPKG);
+      Depends $env2 $SO_PKG, $libpkg;
+    }
+  }
+  if ($SO_PKG) {
+    script::Keep $SO_PKG;
+    if ($pkg =~ m/StarMagField/) {
+      #      my @o = Objects $env2 (@src);
+      #      @src = @o;
+      $envNoROOT = $env->clone('CPPFLAGS' => "", 'SUFOBJ'   => "NoDict.o",);
+      @PlainObj =  Objects $envNoROOT(qw(StarMagField.cxx));
+      #      foreach my $s (@o) {
+      #	if ($s !~ /Cint/) {push @PlainObj, $s;}
+      #      }
+#ifndef __NEW__
+#      $SO_PKG_PLAIN = $pkg . "NoDict";
+#else /* __NEW__ */
+      $SO_PKG_PLAIN = $libPrefix . $pkg . "NoDict";
+#endif /* __NEW__ */
+      printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
+      $SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
+    }
+    if ($pkg =~ m/^geometry/ ){
+      if ($STAR_SYS =~ /darwin/) {
+	$SO_PKG = ""; # due name clash with Geometry on mac
+      }
+#ifndef __NEW__
+#     $SO_PKG_PLAIN = $pkg . "NoField";
+#else /* __NEW__ */
+      $SO_PKG_PLAIN = $libPrefix . $pkg . "NoField";
+#endif /* __NEW__ */
+      printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
+      $SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
+      my @ss = ();
+      foreach my $s (@src) {
+	if ($s !~ /mfldgeo/ ) {push @ss, $s}
+      }
+      @src = @ss;
+      @PlainObj = Objects $env2 (@src);
+      @src = @PlainObj;
+      #      print "PlainObj = @PlainObj\n";
+#       my $libs = "-lStarMagFieldNoDict";
+#       $envg = $env2->clone('LIBPATH'  => $LIB, 'LIBS'     => $libs);
+#       $libs =~ s/-l/lib/;
+#       $libs = $LIB . "/" . $libs;
+#       $libs .= "." . $env2->{SUFSOLIB};
+#       Depends $envg [($SO_PKG)], ($LIB . "/libStarMagFieldNoDict.so");# $libs); #print "libs = $libs\n";
+    }
+#     if ($pkg =~ m/StHLTCAMaker/) {
+#       #      $CPPFLAGS .= " -D__NEW_TPCCATracker__";
+#     }
+#       if ($pkg =~ m/^StiCA$/ ) { 
+# 	$CXXFLAGS .= " -DNVALGRIND -DDO_TPCCATRACKER -DNODEBUG -DENABLE_VECTORIZATION";
+# 	print "StiCA => CXXFLAGS = $CXXFLAGS\n";
+#       }
+#     if ($pkg =~ m/^Sti$/) { #print "check  For use CATracker\n";
+#       my $locf = "./StRoot/TPCCATracker";
+#       my $libf = $env->{ENV}->{STAR} . "/StRoot/TPCCATracker";
+#       my $libv = $env->{ENV}->{ROOTSYS} . "/lib/libVc.a";
+#       #      if ( -r $locf) {print "$locf\n";}	
+#       #      if ( -r $libf) {print "$libf\n";}	
+#       #      if ( -r $libv) {print "$libv\n";}	
+#       if ((  -r $locf or -r $libf) and -r $libv ) {
+# 	$SO_PKG_PLAIN = $pkg . "CA";
+# 	printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
+# 	$SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
+# 	$envCA = $env2->clone('CPPFLAGS' => $CPPFLAGS,
+# 			      'SUFOBJ'   => "CA.o",
+# 			      'CXXFLAGS' => $CXXFLAGS . " -DNVALGRIND -DDO_TPCCATRACKER -DNODEBUG -DENABLE_VECTORIZATION");# . $SSE_FLAGS); # -msse -msse2"
+# 	my @ListCA = qw( StiKalmanTrack.cxx StiKalmanTrackFinder.cxx StiKalmanTrackNode.cxx StiTPCCATrackerInterface.cxx StiTpcSeedFinder.cxx StiHit.cxx);
+# 	my $ListCA = join('|',@ListCA);
+# 	@PlainObj = ();
+# 	@Obj = ();
+# 	my @o;
+# 	foreach my $s (@src) {
+# 	  $o[0] = $s;
+# 	  if ($s !~ m/\.o$/) {@o = Objects $env2 ($s);}
+# 	  push  @Obj, $o[0];
+# 	  if ($s =~ m/$ListCA/) {@o = Objects $envCA ($s); push @PlainObj, $o[0];}
+# 	  else                  {push @PlainObj, $o[0];}
+# 	}
+# 	@src = @Obj;
+# 	#	print "$#src => @src \n";
+# 	#	print "$#PlainObj => @PlainObj \n";
+# 	$envPlain = $env2->clone('LIBPATH'  => $LIB, 
+# 				 'LIBS'     => "-lTPCCATracker ");# . $env->{Packages}->{ROOT}->{LIBS} . " -lEG");
+# 	Depends $envPlain $SO_PKG_PLAIN, $LIB . "/libTPCCATracker.so";
+#       }
+#     }
+    #________________________________________________________________________________
+    if ($pkg =~ m/^StGenericVertexMaker$/) { # For Stv no Sti 
+      $SO_PKG_PLAIN = $libPrefix . $pkg . "NoSti";
+      printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
+      $SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
+      @PlainObj = ();
+      @Obj = Objects $env2  (@src);
+      #      print "$#src => @src \n";
+      #      print "$#Obj => @Obj \n";
+      foreach my $o (@Obj) {
+	#	print "o ++++++> $o\n";
+	if ($o =~ m/\/StiPPVertex\//) {next;}
+	push @PlainObj, $o;
+      }
+      @src = @Obj;
+      #      print "$#src => @src \n";
+      #      print "$#PlainObj => @PlainObj \n";
+    }
+    if ($SO_PKG and $SO_PKG !~ /xgeometry/) {
+#      print "====================== FPPFLAGS = $FPPFLAGS\n====================== CPPFLAGS = $CPPFLAGS\n";
+      LinkedModule $env2 $SO_PKG, @src;
+      Install $env2 $LIB,         $SO_PKG;
+#ifndef __NEW__
+#      print "================== SO_MAP = $SO_MAP env2->{Packages}->{ROOT}->{RLIBMAP} = $env2->{Packages}->{ROOT}->{RLIBMAP}\n";
+#endif /* ! __NEW__ */
+      if ($env2->{Packages}->{ROOT}->{RLIBMAP} and $SO_MAP and $#LinkDefs > -1) {
+	Command $env2 [ $SO_MAP ], ($LIB . "/" . $SO_PKG, @LinkDefs),
+	  qq($env2->{Packages}->{ROOT}->{RLIBMAP} -r %> -l %1 -c %<);
+	Install $env2 $LIB, $SO_MAP;
+      }
+      my $lib = $LIB . "/" . $SO_PKG;
+      if ($SO_PKG ne $SO_PKG_lib) {
+	$lib = $LIB . "/" . $SO_PKG_lib;# print "$lib ================\n";
+	InstallAs $env2 $lib, $SO_PKG;
+#	my $so_map = $LIB . "/" . $SO_MAP;
+#	InstallAs $env2 $so_map, $SO_MAP;
+      }
+    }
+    if ($SO_PKG ne $SO_PKG_PLAIN and $#PlainObj > -1) {#print "============================\n";
+      script::Keep $SO_PKG_PLAIN;
+      LinkedModule $envPlain $SO_PKG_PLAIN, @PlainObj;
+      Install $envPlain $LIB,         $SO_PKG_PLAIN;
+      if ($SO_PKG_PLAIN !~ /^lib/) {
+	my $lib = $LIB . "/lib" . $SO_PKG_PLAIN;
+	InstallAs $envPlain $lib, $SO_PKG_PLAIN;
+      }
+    }
+    if ($pkg eq "RTS") {
+      my $cppflags = "-DRTS_PROJECT_STAR -DTPXREADER -DRTS_LITTLE_ENDIAN";
+      my $cpppath  = $main::PATH_SEPARATOR . "#StRoot/RTS/include"
+	. $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include"
+	  . $main::PATH_SEPARATOR . "#StRoot/RTS/include/TPC"
+	    . $main::PATH_SEPARATOR . "#StRoot/RTS/src/SFS"
+	      . $main::PATH_SEPARATOR . "#StRoot/RTS/src"
+		. $main::PATH_SEPARATOR . "StRoot/RTS/src/EVP_READER";
+      ##else /* ____MAC_____ */
+      #		. $main::PATH_SEPARATOR . "StRoot/RTS/src/EVP_READER"
+      #		  . $main::PATH_SEPARATOR . $env->{ENV}->{ROOTSYS} . "/include";
+      ##endif /* ____MAC_____ */
+      $envRTS = $env2->clone('Package'  => $pkg,
+			     'EXTRA_CPPFLAGS' => $EXTRA_CPPFLAGS,
+			     'CPPPATH'  => $cpppath,
+			     'CPPFLAGS' => $cppflags,
+			     'LIBPATH'  => $LIB,
+			     'LIBS'     => "-lRTS"
+			    );
+      my @programs = glob "./StRoot/RTS/src/RTS_EXAMPLE/*.C"; #("RTS_EX/Reader","EVP_READER/special","RTS_EXAMPLE/daqFileChopper");
+      foreach my $progD (@programs) {
+	my $prog = File::Basename::basename($progD,".C");
+	Depends      $envRTS $prog, $LIB . "/libRTS.so";
+	Program      $envRTS $prog, ("src/RTS_EXAMPLE/" . $prog . ".C");
+	Install $envRTS $BIN, $prog;
+      }
+    }
+    if ($pkg =~ m/^MillepedeII$/) { #  Module dependencies
+      my $prog = "pede";
+      #    Depends $env [$prog], ($LIB . "/" . $SO_PKG_lib);
+      Depends $env ["pede.o"],   qw(mpdef.o mpmod.o mpdalc.o mptest1.o mptest2.o mptext.o minresModule.o minresqlpModule.o);
+      my $libs = "-lMillepedeII -lz -lgfortran -lm -lgomp";
+      #      print "CXX_MAJOR = $env->{CXX_MAJOR} CXX_MINOR = $env->{CXX_MINOR}\n";
+      if ($env->{CXX_MAJOR} < 4 or $env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} < 8) {
+	$libs .= "  -lgfortranbegin";
+      }
+      $LD = $FC;
+      $envP = $env2->clone('Package'  => $pkg,
+			   'LD'       => $LD,
+			   'LIBPATH'  => $LIB,
+			   'LIBS'     => $libs,
+			   'FDEBUG'   => $FDEBUG
+			  );
+      script::Keep $prog;
+      Depends      $envP $prog, $LIB . "/libMillepedeII.so";
+      Program      $envP $prog, ("pede.f90");
+      Install $envP $BIN, $prog;
+    }
+  }
+}
+}
+#_________________________________________________________________________________
+sub script::MakeMoc {
+  my $envQt  = shift;
+  my $pkg  = shift;
+  my $done = shift;
+  my @includes = split $main::PATH_SEPARATOR,shift;
+  my $Dir  = $envQt->{Dir};
+  my $ROOTCINTFLAGS = "-I" . $Dir . "/inc";
+  my @src      = ();
+  my @Defs     = ();
+  my $PLATFORM = $envQt->{PLATFORM};
+  foreach my $header (@includes) {
+    my $dd = $d;
+    my $G__name = "moc_" . $header;
+    $G__name =~ s/\.h$/\.cxx/;
+    my $moc = $envQt->{Packages}->{QT}->{BINDIR} . "/moc";
+    Command $envQt ($G__name), ($header), qq($moc -o %>  %<);
+    push @src, $G__name;
+#    print "+==========add moc file: $G__name\n" if $param::debug;
+  }
+  return @src;
+}
+#____________________________________________________________
+sub script::alpha_arcom { #
+  my ($lib,$src) = @_;
+  my $input = "input" . File::Basename::dirname($lib);
+  open (OUTPUT, ">$input") or die "Can't open $input\n";
+  print OUTPUT $src;
+  close(OUTPUT);
+  my $cmd = "ar $lib -input $input'; ranlib $lib"; print "$cmd\n";
+  my $flag = `$cmd`; if ($?) {exit 2;}
+  return 1;
+}
+#_________________________________________________________________________________
+sub script::RunStic {
+#  $param::debug = 1;
+  my ($idll) = @_;
+  my $stem = File::Basename::basename( $idll, ".idl" );	print "stem = $stem; idll: $idll\n" if $param::debug;
+  my $dir = File::Basename::dirname($idll);     	print "dir = $dir\n" if $param::debug;
+  my $idl  = File::Basename::basename($idll);
+  my $idlh = $INCLUDE . "/" . $stem . ".h";        	print "idlh: $idlh\n" if $param::debug;
+  my $idli = $INCLUDE . "/" . $stem . ".inc";      	print "idli: $idli\n" if $param::debug;
+  my $includeT = $INCLUDE . "/tables";                  print "includeT = $includeT\n" if $param::debug;
+  my $idlH = $includeT . "/St_" . $stem . "_Table.h";	print "idlH: $idlH\n" if $param::debug;
+  my $idlC = "St_" . $stem . "_Table.cxx";       	print "idlC: $idlC\n" if $param::debug;
+  my $LinkDef = $stem . "LinkDef.h";
+  my $idlCintH = "St_" . $stem . "_TableCint.h";
+  my $idlCintC = "St_" . $stem . "_TableCint.cxx";
+#   ( my $IDL = $idll ) =~ s/^\#//g;                      print "IDL = $IDL\n" if $param::debug;
+#   if ( -r $IDL ) {
+    my @Deps = ($idll);                                 print "Deps: $Deps[0]\n" if $param::debug;
+    my $stic_cmd  =
+      "test -d \$STICTMP && /bin/rm -rf \$STICTMP ; ".
+	"/bin/mkdir -p -m 777 \$STICTMP && cd \$STICTMP && ".
+	  "/bin/cp %<:a . && $STIC -q %<:f && ".
+	    "(/bin/mv %>:f %>:a ; cd /tmp ; /bin/rm -rf \$STICTMP)";
+    Command $env3 [$idlh], @Deps, qq ($stic_cmd);
+    Command $env3 [$idli], @Deps, qq ($stic_cmd);
+    push @Deps, $idlh;
+    Command $env3 [$idlH], @Deps, qq (ConstructTable.pl %1 %>);
+    push @Deps, $idlH;
+    Command $env3 [$idlC], @Deps, qq (ConstructTable.pl %1 %>);
+#   }
+  return ($idlh, $idli, $idlH, $idlC, $LinkDef, $idlCintH, $idlCintC);
+}
+#_________________________________________________________________________________
+sub script::Tables {
+  my ($env, $pkg, @idlL) = @_;
+  my @sourcesT = ();
+  my @LinkDefsT = ();
+  #print "Tables: @idlL\n";
+  if ( $#idlL > -1 ) {
+    my @idlT = ();
+    my $objT = $OBJ . "/pams/tables";
+    ( my $objT_dir = $objT ) =~ s/^\#//g;    print "objT_dir = $objT_dir\n" if $param::debug;
+    my $includeT = $INCLUDE . "/tables";     print "includeT = $includeT\n" if $param::debug;
+    foreach my $idl(@idlL) {
+      print "$idl\n" if $param::debug;
+      my $IDL =	"#" . $Dir . "/" . $idl;    # print "i=",$i++," idl = $idl IDL=$IDL\n";
+      my $stem = File::Basename::basename( $IDL, ".idl" );
+      print "stem = $stem\n" if $param::debug;
+      my $idlt = $includeT . "/" . File::Basename::basename($idl);
+      push @idlT, $IDL;
+    }
+    print "idlT = @idlT\n" if $param::debug;
+    if ( $#idlT > -1 ) {
+      $PKGT    = "lib" . $pkg . "_Tables";
+      $SO_PKGT = $PKGT . "." . $env1->{SUFSOLIB};      print "SO_PKGT = $SO_PKGT\n" if $param::debug;
+      my $LIBPKGT = $SO_PKGT;
+      printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir,
+	      $PKGT )	unless ($param::quiet);
+      my $ROOTCINT_CPP =
+	$INCLUDE . $main::PATH_SEPARATOR . $INCLUDE . "/tables";
+      $ROOTCINT_CPP .= $main::PATH_SEPARATOR . $env1->{ENV}->{ROOTSRC};
+      my $tobj_dir = $obj_dir . "/Tables";
+      $CPPPATH = "";
+      if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
+      $CPPPATH .= $main::PATH_SEPARATOR . $INCLUDE . "/tables";
+      #    if ($#QtDefs >= 0) {$CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{QTDIR} . "/include";}
+      $env3 = $env1->clone('DEBUG'   => $env1->{NOOPT},
+			   'CPPPATH' => $CPPPATH,
+			   'CXXFLAGS' => $CXXFLAGS,
+			   'ObjDir'  => $tobj_dir,
+			   'LIBPATH' => ''
+			  );
+      my $cscanner =
+	find scan::cpp( $env1->{_cwd}, $ROOTCINT_CPP );
+      my $ROOTCINT_CPPPATH = $cscanner->iflags($env3); #print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n"; die;
+      foreach my $idll(@idlT) {
+	my ($idlh, $idli, $idlH, $idlC, $LinkDef, $idlCintH, $idlCintC) = script::RunStic($idll);
+#	print "idll = $idll => idlh = $idlh, idli = $idli, idlH = $idlH, idlC = $idlC, LinkDef = $LinkDef, idlCintH = $idlCintH, idlCintC = $idlCintC\n";
+	( my $IDL = $idll ) =~ s/^\#//g;	print "IDL = $IDL\n" if $param::debug;
+	if ( -r $IDL ) {
+	  my @Deps = ($idll);               	print "Deps: $Deps[0]\n" if $param::debug;
+#	  print "LinkDef = $LinkDef <= @Deps\n";
+	  Command $env3 [$LinkDef], @Deps, qq (ConstructTable.pl %1 %>);
+	  @Deps = ();
+	  push @Deps, $idlH;
+	  push @Deps, $LinkDef;
+	  push @LinkDefsT, $LinkDef;
+	  push @Deps, $idlh;
+	  push @Deps, $idli;
+	  Command $env3 [ ($idlCintC , $idlCintH) ], @Deps,
+	    qq (rootcint -f %> -c $ROOTCINT_CPPPATH -D__ROOT__ %1 %2);
+	}
+	push @sourcesT, $idlC;
+	push @sourcesT, $idlCintC;
+      }
+      print "sourcesT = @sourcesT\n" if $param::debug;
+    }
+  }
+  
+  if ( $#sourcesT > -1 ) {
+    script::Keep $SO_PKGT;
+    LinkedModule $env3 $SO_PKGT, @sourcesT;
+    Install $env3 $LIB, $SO_PKGT;
+    #  $lib = $LIB . "/lib" . $SO_PKGT;
+    #  InstallAs $env3 $lib, $SO_PKGT;
+#     if ($env3->{Packages}->{ROOT}->{RLIBMAP} and $SO_MAPT and $#LinkDefsT > -1) {
+#       Command $env3 [ $SO_MAPT ], ($LIB . "/" . $SO_PKGT, @LinkDefsT),
+# 	qq($env3->{Packages}->{ROOT}->{RLIBMAP} -r %> -l %1 -c %<);
+#       Install $env3 $LIB, $SO_MAPT;
+#     }
+  }
+}
+#_________________________________________________________________________________
+sub script::TablesCLING {
+  my ($env, $pkg, @idlL) = @_;
+#  print " script::Tables ($pkg, @idlL)\n";
+  my $ROOTCINT_CPP =
+    $INCLUDE . $main::PATH_SEPARATOR . $INCLUDE . "/tables";
+  $ROOTCINT_CPPPATH .= $main::PATH_SEPARATOR . $env1->{ENV}->{ROOTSRC};
+   my $cscanner =
+     find scan::cpp( $env->{_cwd}, $ROOTCINT_CPP );
+  my $ROOTCINT_CPPPATH = $cscanner->iflags($env);# print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n"; die;
+  $PKG    = "lib" . $pkg;
+  $SO_PKG = $PKG . "." . $env1->{SUFSOLIB};
+  $PKGT    = "lib" . $pkg . "_Tables";
+  $SO_PKGT = $PKGT . "." . $env1->{SUFSOLIB};
+  #    $SO_MAPT = $PKGT . ".rootmap";
+  print "SO_PKGT = $SO_PKGT\n" if $param::debug;
+  my @sourcesT = ();
+  my @depsH = ();
+  if ( $#idlL > -1 ) {
+    if ( $Dir =~ /StRoot\//  ||  $Dir =~ /OnlTools\//) {
+      $SO_PKGT = $SO_PKG;
+      $SO_MAPT = $SO_MAP;
+    } else {
+      printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir,
+	      $PKGT )	unless ($param::quiet);
+    }
+  } else {
+    return;
+  }
+  my $objT = $OBJ . "/pams/tables";
+  ( my $objT_dir = $objT ) =~ s/^\#//g;
+  print "objT_dir = $objT_dir\n" if $param::debug;
+  my $tobj_dir = $obj_dir . "/Tables";
+  $CPPPATH = "";
+  if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
+  $CPPPATH .= $main::PATH_SEPARATOR . $INCLUDE . $main::PATH_SEPARATOR . $INCLUDE . "/tables";
+  #    if ($#QtDefs >= 0) {$CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{QTDIR} . "/include";}
+  $env3 = $env1->clone('DEBUG'    => $env1->{NOOPT},
+ 		       'CPPPATH'  => $CPPPATH,
+ 		       'CXXFLAGS' => $CXXFLAGS,
+ 		       'ObjDir'   => $tobj_dir,
+ 		       'LIBS'     => "-lTable"
+ 		      );
+  my @depH = ();
+  foreach my $idl(@idlL) {
+    my ($idlh, $idli, $idlH, $idlC, $dummy, $idlCintH, $idlCintC) = script::RunStic($idl);
+#     ( my $IDL = $idl ) =~ s/^\#//g;
+#     print "IDL = $IDL\n";# if $param::debug;
+#     if ( -r $IDL ) {
+      push @depH, $idlH;
+#     }
+    push @sourcesT, $idlC;
+  }
+  print "sourcesT = @sourcesT\n" if $param::debug;
+  if ( $#sourcesT > -1 ) {
+    my $LinkDef = $pkg . "LinkDef.h";
+    Command $env3 [$LinkDef], @depH,	qq (FullLinkDef.pl %> %<);
+    push @depH, $LinkDef;
+    my $idlCintC = $pkg . "_Cint.cxx";
+    my $idlCintH = $pkg . "_Cint.h";
+    my $LLIB = $LIB; $LLIB =~ s/^\#//;
+    my $lib = $LLIB . "/" . $SO_PKGT;
+    my $rootmap = $LLIB . "/" . $PKGT . ".rootmap";
+    #    print "idlCintC = $idlCintC, idlCintH = $idlCintH, depH = @depH\n";
+    #    print "SO_PKGT = $SO_PKGT, rootmap = $rootmap, ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n";
+    #      die;
+    Command $env3 [ ($idlCintC) ], @depH, 
+      qq (rootcling -v2 -f %> -s $lib -rmf $rootmap -m libTable -c $ROOTCINT_CPPPATH -D__ROOT__ %<);
+#      qq (rootcling -v2 -f %> -s $lib -rml $SO_PKGT -rmf $rootmap -m libTable -c $ROOTCINT_CPPPATH -D__ROOT__ %<);
+    push @sourcesT, $idlCintC;
+    script::Keep $SO_PKGT;
+    LinkedModule $env3 $SO_PKGT, @sourcesT;
+    Install $env3 $LIB, $SO_PKGT;
+  }
+}
