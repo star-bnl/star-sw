@@ -1135,23 +1135,23 @@ Bfc_st BFC[] = { // standard chains
   {"P2017a","" ,"",
    "B2017a,Sti,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
    ,              "","","Production chain for year 2017 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
-  {"B2018"  ,"","","r2018,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout,CorrY","",""
+  {"B2018"  ,"","","r2018,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout,CorrX","",""
    ,                                                     "Production chain for run 2018 data (tpc)",kFALSE},
   {"P2018","" ,"",
    "B2018,StiCA,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
    ,                 "","","Production chain for year 2018 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 #if 0 /* y2018a is not ready yet */
-  {"B2018a"  ,"","","ry2018a,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,CorrY","",""
+  {"B2018a"  ,"","","ry2018a,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,CorrX","",""
    ,                                                           "Base chain for run 2018 data (tpc)",kFALSE},
 #else
-  {"B2018a"  ,"","","ry2018,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,CorrY","",""
+  {"B2018a"  ,"","","ry2018,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,CorrX","",""
    ,                                                           "Base chain for run 2018 data (tpc)",kFALSE},
 #endif
   
   {"P2018a","" ,"",
    "B2018a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,beamline3D,emcDY2,epdHit,fpd,trgd,ZDCvtx,analysis"
    ,                    "","","Base chain for year 2018 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
-  {"B2019"  ,"","","r2019,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout,CorrY","",""
+  {"B2019"  ,"","","r2019,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout,CorrX","",""
    ,                                                     "Production chain for run 2019 data (tpc)",kFALSE},
   {"P2019","" ,"",
    "B2019,StiCA,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
@@ -1966,7 +1966,8 @@ Bfc_st BFC[] = { // standard chains
   {"EvOutOnly"   ,""  ,"","EvOut,Tree,noTags"                        ,"","","Only event.root files",kFALSE},
   {"NoDefault"   ,""  ,"",""                                  ,"","","No Default consistency check",kFALSE},
   {"Notpc_daq"   ,""  ,"","-tpc_daq"                                            ,"","","No tpc_daq",kFALSE},
-  {"analysis"    ,"","","StEvent"        ,"StAnalysisMaker","StAnalysisMaker","Example of Analysis",kFALSE},
+  {"analysis"    ,""  ,"","StEvent,mysql,tpcDb,detDb","StAnalysisMaker"
+   ,"StAnalysisMaker",                                                        "Example of Analysis",kFALSE},
   {"NewTpcAlignment","","",""                           ,"","","Switch on new Tpc Alignment schema",kFALSE},
   {"quiet","","","","","",                                                      "make chain quiet", kFALSE},
   {"empty","","","","","",                                                          "place holder", kFALSE},
