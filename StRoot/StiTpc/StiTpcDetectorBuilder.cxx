@@ -19,6 +19,7 @@
 #include "Sti/StiNeverActiveFunctor.h"
 #include "StDetectorDbMaker/StiTpcInnerHitErrorCalculator.h"
 #include "StDetectorDbMaker/StiTpcOuterHitErrorCalculator.h"
+#include "StDetectorDbMaker/StiTPCHitErrorCalculator.h"
 #include "StiTpcDetectorBuilder.h"
 #include "StiTpcIsActiveFunctor.h"
 //#include "Sti/StiElossCalculator.h"
@@ -235,10 +236,15 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
 	pDetector->setShape(pShape);
 	pDetector->setPlacement(pPlacement);
 	Int_t nInnerPadrows = St_tpcPadConfigC::instance()->numberOfInnerRows(sector);
-	if (row <= nInnerPadrows)
-	  pDetector->setHitErrorCalculator(StiTpcInnerHitErrorCalculator::instance());
-	else
+	if (row <= nInnerPadrows) {
+	  if (! St_tpcPadConfigC::instance()->iTPC(sector)) {
+	    pDetector->setHitErrorCalculator(StiTpcInnerHitErrorCalculator::instance());
+	  } else {
+	    pDetector->setHitErrorCalculator(StiTPCHitErrorCalculator::instance());
+	  }
+	} else {
 	  pDetector->setHitErrorCalculator(StiTpcOuterHitErrorCalculator::instance());
+	}
 	//      pDetector->setElossCalculator(gasElossCalculator);
 	pDetector->setKey(1,StiRow);
 	pDetector->setKey(2,StiSector);
