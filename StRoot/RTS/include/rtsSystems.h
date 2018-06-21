@@ -75,7 +75,7 @@
 #define TCD_BBC         7	//0x11, trigger-only; unused
 #define TCD_ETOW        8	//0x12,
 #define TCD_MTD_QT      9	//0x13, trigger-only; unused
-#define TCD_RHICF       10	//0x14, Sep 16: was IST, Jun 2013: was FGT before; Aug 26, 2009: was FPD's before
+#define TCD_STGC        10	//0x14, was RHICF; Sep 16: was IST, Jun 2013: was FGT before; Aug 26, 2009: was FPD's before
 #define TCD_TOF         11      //0x15,
 #define TCD_PP          12      //0x16
 #define TCD_MTD         13      //0x17
@@ -100,7 +100,7 @@
 #define ESMD_GRP	6
 #define TPX_GRP		7
 #define FCS_GRP		8
-#define RHICF_GRP        9
+#define STGC_GRP        9	// was RHICF
 //#define xxx_GRP		10	// unused
 //#define xxx_GRP		11	// but still unused
 //#define xxx_GRP		12	// unused
@@ -287,7 +287,10 @@ so we keep it here for source compatibility
 #define ITPC_SYSTEM       31
 #define ITPC_ID           ITPC_SYSTEM
 
-#define RTS_NUM_SYSTEMS	32	/* current maximum. Can not be greater than 32! */
+#define STGC_SYSTEM		32
+#define STGC_ID			STGC_SYSTEM
+
+#define RTS_NUM_SYSTEMS	33	/* current maximum. NOTE: above 32 from 2018/19! */
 
 #define PP_SEQE_INSTANCE  1
 #define PP_SEQW_INSTANCE  2
@@ -654,6 +657,9 @@ extern inline const char *getTrgDetBitName(int x) {
 
 #define ITPC_NODES(x)  ((EXT2_SYSTEM<<12) | (ITPC_SYSTEM<<7) | (x))
 
+// NOTE: new scheme for detectors above 32!
+#define STGC_NODES(x)  ((FPD_SYSTEM<<12) | (STGC_SYSTEM<<6) | (x))
+
 extern inline const char *rts2name(int rts_id)
 {
 	switch(rts_id) {
@@ -717,6 +723,8 @@ extern inline const char *rts2name(int rts_id)
 		return "ITPC" ;
 	case RHICF_SYSTEM :
 		return "RHICF" ;
+	case STGC_SYSTEM :
+		return "STGC" ;
 	default :
 	  return (const char *)NULL ;	// unknown!
 	}
@@ -785,6 +793,8 @@ extern inline const char *rts2sfs_name(int rts_id)
 		return "fcs";
 	case ITPC_SYSTEM :
 		return "itpc";
+	case STGC_SYSTEM :
+		return "stgc" ;
 	default :
 	  return (const char *)NULL ;	// unknown!
 	}
@@ -793,7 +803,7 @@ extern inline const char *rts2sfs_name(int rts_id)
 #ifndef __vxworks
 extern inline int name2rts(const char *name)
 {
-	for(int rts_id=0;rts_id<32;rts_id++) {
+	for(int rts_id=0;rts_id<48;rts_id++) {	// increased from 32 to 48!
 		const char *r_name = rts2name(rts_id) ;
 		if(r_name && name && (strncasecmp(name,r_name,strlen(r_name))==0)) return rts_id ;
 	}
@@ -802,7 +812,7 @@ extern inline int name2rts(const char *name)
 }
 #endif
 
-
+#if 0
 /* return >= 0 only in case of real detectors */
 /* Why do we need this?? Tonko. */
 extern inline int rts2det(int ix)
@@ -833,110 +843,110 @@ extern inline int rts2det(int ix)
 	case RHICF_ID:
 	case FCS_ID:
 	case ITPC_ID:
+	case STGC_ID :
 		return ix ;
 	default :
 		return -1 ;
 	}
 
 }
+#endif
+
+// NEW for FY19: returns a pseudo-rts less than 32 for local use
+// within transient code which can change yearly e.g. TCD or Monitoring
+extern inline int rts2_32(int rts)
+{
+	switch(rts) {
+	case STGC_ID :
+		return FPD_ID ;
+	default :
+		return rts ;
+	}
+	
+}
 
 extern inline int rts2tcd(int rts)
 {
-	static const int map[32] = {
-		-1,		//0 TPC gone...
-		-1,		//1 SVT gone...
-		TCD_TOF,	//2
-		TCD_BTOW,	//3
-		-1,		//4: FPD gone...
-		-1,		//5: FTPC gone
-		-1,		//6
-		-1,		//7
-		-1,		//8
-		-1,		//9
-		-1,		//10
-		-1,		//11
-		-1,		//12: PMD gone
-		-1,		//13: SSD gone...
-		TCD_ETOW,	//14
-		-1,		//15: generic DAQ
-		-1,		//16: was FGT...
-		TCD_PP,		//17
-		TCD_BSMD,	//18
-		TCD_ESMD,	//19
-		TCD_TPX,	//20
-		-1,		//21 PXL
-		TCD_MTD,	//22 MTD
-		-1,		//23 IST
-		-1,		//24 SST
-		TCD_ETOF,	//25 
-		TCD_GMT,	//26 GMT
-		-1,		//27
-		-1,		//28
-		TCD_RHICF,	//29
-		TCD_FCS,	//30
-		TCD_TPX,	//31	// iTPC repeats TPC TCD!
-	} ;
-
-	if(rts < 0) return -1 ;
-	if(rts >31) return -1 ;
-
-	return map[rts] ;
+	//new
+	switch(rts) {
+	case TOF_ID :
+		return TCD_TOF ;
+	case BTOW_ID :
+		return TCD_BTOW ;
+	case ETOW_ID :
+		return TCD_ETOW ;
+	case PP_ID :
+		return TCD_PP ;
+	case BSMD_ID :
+		return TCD_BSMD ;
+	case ESMD_ID :
+		return TCD_ESMD ;
+	case TPX_ID :
+	case ITPC_ID :
+		return TCD_TPX ;
+	case MTD_ID :
+		return TCD_MTD ;
+	case ETOF_ID :
+		return TCD_ETOF ;
+	case GMT_ID :
+		return TCD_GMT ;
+	case STGC_ID :
+		return TCD_STGC ;
+	case FCS_ID :
+		return TCD_FCS ;
+	default :
+		return -1 ;
+	}
 
 }
 
 // This is actually bad. I really want grp2rts!!! Should remove it...
 extern inline int tcd2rts(int tcd)
 {
-	static int map[32] = {
-        -1,		//0
-        -1,		//1
-        -1,		//2
-        -1,		//3
-        -1,		//4
-        -1,		//5
-        ESMD_SYSTEM,	//6
-        -1,		//7 BBC
-        ETOW_SYSTEM,	//8 was IST
-        -1,		//9 ; used for MTD_QT, was SSD?
-        RHICF_SYSTEM,	//10 was IST; moved from FGT; moved from FPD
-        TOF_SYSTEM,	//11
-        PP_SYSTEM,	//12 ; moved from SVT_SYSTem to PP!
-        MTD_SYSTEM,	//13 was EMPTY in FY10, MTD in FY11
-        TPX_SYSTEM,	//14
-        BSMD_SYSTEM,	//15
-        -1,		//16 CTB aka ZDC
-        BTOW_SYSTEM,	//17
-        ETOF_SYSTEM,	//18 was SST
-        FCS_SYSTEM,	//19 was PXL
-        GMT_SYSTEM,	//20 GMT; EMPTY until Aug 11; TPC was here... removed Sep 08
-        -1,		//21 VPD
-        -1,		//22
-        -1,		//23
-        -1,		//24
-        -1,		//25
-        -1,		//26
-        -1,		//27
-        -1,		//28
-        -1,		//29
-        -1,		//30
-        -1		//31
-	};
-
-//	LOG(WARN,"tcd2rts: tcd %d, rts %d",tcd,map[tcd],0,0,0) ;
-	return map[tcd] ;
+	switch(tcd) {
+	case TCD_TOF :
+		return TOF_ID ;
+	case TCD_BTOW :
+		return BTOW_ID ;
+	case TCD_ETOW :
+		return ETOW_ID ;
+	case TCD_PP :
+		return PP_ID ;
+	case TCD_BSMD :
+		return BSMD_ID ;
+	case TCD_ESMD :
+		return ESMD_ID ;
+	case TCD_TPX :
+		return TPX_ID ;
+	case TCD_MTD :
+		return MTD_ID ;
+	case TCD_ETOF :
+		return ETOF_ID ;
+	case TCD_GMT :
+		return GMT_ID ;
+	case TCD_STGC :
+		return STGC_ID ;
+	case TCD_FCS :
+		return FCS_ID ;
+	default :
+		return -1 ;
+	}
 } ;
 
 
 // BTOW, ETOW now part of trigger:   jan 2008
 #define LEGACY_DETS (1<<FTP_ID)
-#define DAQ1000_DETS ((1<<TPX_ID) | (1<<TOF_ID) | (1<<RHICF_ID) | (1<<PMD_ID) | (1<<ESMD_ID) | (1<<PP_ID) | (1<<FGT_ID) | \
+
+// NOTE that this is now 64 bits!!! Also note that there are a bunch (but not all) of unused systems here...
+#define DAQ1000_DETS ((1<<TPX_ID) | (1<<TOF_ID) | (1<<PMD_ID) | (1<<ESMD_ID) | (1<<PP_ID) | (1<<FGT_ID) | \
 		      (1<<L3_ID) | (1 << BSMD_ID) | (1 << MTD_ID) | (1<<ETOF_ID) | (1<<GMT_ID) | (1<<BTOW_ID) | (1<<ETOW_ID)) | (1<<FPS_ID) |\
-			(1<<FCS_ID) | (1<<ITPC_ID) 
+			(1<<FCS_ID) | (1<<ITPC_ID) | (1<<RHICF_ID) | (1LL<<STGC_ID)
 
 // 2009... unused dets:  SSD/SVT/TPC/PMD/HFT --->  FTPGROUP
-extern inline u_int grp2rts_mask(int grp)
+// 2018/19 NOTE return of a 64 bit quantity!!!
+extern inline unsigned long long grp2rts_mask(int grp)
 {
-	u_int ret ;
+	unsigned long long ret ;
 
 	ret = 0 ;
 
@@ -965,8 +975,8 @@ extern inline u_int grp2rts_mask(int grp)
 	  ret |= (1 << TPX_SYSTEM);
 	  ret |= (1 << ITPC_SYSTEM);
 	}
-	if(grp & (1 << RHICF_GRP)) {
-	  ret |= (1 << RHICF_SYSTEM);
+	if(grp & (1 << STGC_GRP)) {
+	  ret |= (1LL << STGC_SYSTEM);	// NOTE 1LL!
 	}
 	if(grp & (1 << FCS_GRP)) {
 	  ret |= (1 << FCS_SYSTEM);
@@ -1007,12 +1017,11 @@ extern inline int rts2grp(int rts)
 		return GMT_GRP;
 	case ETOF_ID :
 		return ETOF_GRP;
-	case RHICF_ID :
-		return RHICF_GRP;
+	case STGC_ID :
+		return STGC_GRP;
 	case FCS_ID :
 		return FCS_GRP ;
         case TPC_ID:                    // Shares the TPC TCD...
-	        return TPX_GRP;
         case ITPC_ID:                    // Shares the TPC TCD...
 	        return TPX_GRP;
 	default:
@@ -1021,11 +1030,6 @@ extern inline int rts2grp(int rts)
 }
 
 
-/*
-  Inverse's...
-
-  MODIFIED FOR POST-APRIL02 EXT. DETECTORS! Tonko
-*/
 
 extern inline int GET_NODE(int sys, int subsys, int inst)
 {
@@ -1037,8 +1041,11 @@ extern inline int GET_NODE(int sys, int subsys, int inst)
   else if (sys < 20) {
     node = (EXT_SYSTEM << 12) | (sys<<4) | (inst);   
   }
-  else {
+  else if(sys < 32) {
     node = (EXT2_SYSTEM << 12) | (sys<<7) | (inst);
+  }
+  else {	// NEW for id's >=32
+    node = (FPD_SYSTEM<<12) | (sys<<6) | (inst) ;
   }
 
   return node ;
@@ -1046,11 +1053,17 @@ extern inline int GET_NODE(int sys, int subsys, int inst)
 
 extern inline int GET_SYSTEM(unsigned short node)
 {
-  int id;
-  id = (node & 0xf000) >> 12;
+  int id = (node & 0xf000) >> 12;
   
   if(id == EXT_SYSTEM) return (node & 0x03f0) >> 4;
   if(id == EXT2_SYSTEM) return (node & 0x0f80) >> 7;
+  if(id == FPD_SYSTEM) {	// new FY19 extension
+	u_int sys = node & 0x0FC0 ;
+	sys >>= 6 ;
+	if(sys) return sys ;	// non-zero "system"
+	else return FPD_SYSTEM ;	// if 0, must be our old FPD
+  }
+
   return id;
 }
 
@@ -1061,6 +1074,8 @@ extern inline int GET_INSTANCE(unsigned short node)
   id = (node & 0xf000) >> 12;
   if(id == EXT_SYSTEM) return node & 0xf;
   if(id == EXT2_SYSTEM) return node & 0x7f;
+  if(id == FPD_SYSTEM) return node & 0x3F ;
+
   return node & 0xff;
 }
 
@@ -1070,9 +1085,12 @@ extern inline int GET_SUBSYSTEM(unsigned short node)
   
   if(id == EXT_SYSTEM) return 0;
   if(id == EXT2_SYSTEM) return 0;
+  if(id == FPD_SYSTEM) return 0 ;
+
   return (node & 0x0300) >> 8;
 }
-	
+
+/* Tonko: I don't think anyone needs this??? */	
 #define GET_NODE_PRE_APR2002(sys,subsys,inst)  ((sys<<12) | (subsys<<8) | (inst))
 #define GET_SYSTEM_PRE_APR2002(x)    (((x) >> 12) & 0xf)
 #define GET_INSTANCE_PRE_APR2002(x)  ((x) & 0xff)
