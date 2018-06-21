@@ -956,6 +956,8 @@ int tpxGain::from_file(char *fname, int sec)
 	}
 	fclose(f) ;
 
+	if(tpx_is_stgc) goto skip_per_pad ;
+
 	// now kill the pads where we had the bad fees!
 	for(s=1;s<=24;s++) {
 
@@ -989,6 +991,8 @@ int tpxGain::from_file(char *fname, int sec)
 			}
 		}
 	}
+
+	skip_per_pad:;
 
 	LOG(TERR,"Gains read: run %08u, date %08u [%08u], time %06u [%06u]",c_run,c_date,f_date,c_time,f_time) ;
 	return 1 ;	// changed!
@@ -1036,7 +1040,7 @@ int tpxGain::to_file(char *fname)
 	    s_start,s_stop,
 	    c_run, c_date, c_time) ;
 
-	fprintf(f,"# $Id: tpxGain.cxx,v 1.33 2018/05/09 21:45:50 tonko Exp $\n") ;	// CVS id!
+	fprintf(f,"# $Id: tpxGain.cxx,v 1.34 2018/06/21 19:02:55 tonko Exp $\n") ;	// CVS id!
 	fprintf(f,"# Run %u\n",c_run) ;
 
 	for(s=s_start;s<=s_stop;s++) {
