@@ -1,10 +1,7 @@
 /***************************************************************************
  *
-<<<<<<< StTpcDbMaker.cxx
- * $Id: StTpcDbMaker.cxx,v 1.71 2018/06/21 01:47:18 perev Exp $
-=======
- * $Id: StTpcDbMaker.cxx,v 1.71 2018/06/21 01:47:18 perev Exp $
->>>>>>> 1.70
+ * $Id: StTpcDbMaker.cxx,v 1.72 2018/06/21 15:46:21 perev Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.72 2018/06/21 15:46:21 perev Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -15,19 +12,19 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.72  2018/06/21 15:46:21  perev
+ * Restore removed by mistake line
+ *
  * Revision 1.71  2018/06/21 01:47:18  perev
  * iTPCheckIn
  *
-<<<<<<< StTpcDbMaker.cxx
  * Revision 1.67.2.1  2018/02/16 22:14:59  perev
  * iTPC
-=======
  * Revision 1.70  2018/06/08 18:18:37  genevb
  * Introduce padrow 40 correction for iTPC GridLeak Wall, reduce includes dependencies
  *
  * Revision 1.69  2018/04/30 23:18:11  smirnovd
  * [Cosmetic] Minor changes in various files
->>>>>>> 1.70
  *
  * Revision 1.65  2017/01/30 17:54:18  fisyak
  * Remove dependce on StEvent
@@ -285,6 +282,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     if( IAttr("OGridLeakFull")) mask |= ( kFullGridLeak   << 1);
     if( IAttr("OGGVoltErr") ) mask |= ( kGGVoltError  << 1);
     if( IAttr("OSectorAlign"))mask |= ( kSectorAlign  << 1);
+    if( IAttr("ODistoSmear")) mask |= ( kDistoSmearing<< 1);
     LOG_QA << "Instantiate ExB The option passed will be " << Form("%d 0x%X\n",mask,mask) << endm;
     // option handling needs some clean up, but right now we stay compatible
     Int_t option = (mask & 0x7FFFFFFE) >> 1;
