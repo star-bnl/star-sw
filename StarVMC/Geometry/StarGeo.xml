@@ -6,9 +6,11 @@
   <Geometry tag="y2019"  check="false" comment="Y2019 rough cut geometry">
 
     <Construct sys="cave" config="CAVE06"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDon"  />
+    <Construct sys="zcal" config="ZCALon"  />
     <Construct sys="scon" config="SCON14"  />
     <Construct sys="pipe" config="PIPE12"  />
-    <Construct sys="upst" config="UPSTon"  />
     <Construct sys="tpce" config="TPCE31"  />
     <Construct sys="btof" config="BTOFv8"  />
     <Construct sys="vpdd" config="VPDD08"  />
@@ -17,7 +19,6 @@
     <Construct sys="bbcm" config="BBCMin"  />
     <Construct sys="epdm" config="EPDMv1"  />
     <Construct sys="fpdm" config="FPDMv4"  />
-    <Construct sys="zcal" config="ZCALon"  />
     <Construct sys="magp" config="MAGPon"  />
     <Construct sys="mutd" config="MUTD16"  />
     <Construct sys="etof" config="ETOFv14f"  />
@@ -27,9 +28,11 @@
   <Geometry tag="y2018"  check="false" comment="Y2018 rough cut geometry">
 
     <Construct sys="cave" config="CAVE05"  />
+    <Construct sys="upst" config="UPSTon"  /> 
+    <Construct sys="shld" config="SHLDon"  />
+    <Construct sys="zcal" config="ZCALon"  />
     <Construct sys="scon" config="SCON14"  />
     <Construct sys="pipe" config="PIPE12"  />
-    <Construct sys="upst" config="UPSTon"  />
     <Construct sys="tpce" config="TPCE31"  />
     <Construct sys="btof" config="BTOFv8"  />
     <Construct sys="vpdd" config="VPDD08"  />
@@ -38,7 +41,6 @@
     <Construct sys="bbcm" config="BBCMin"  />
     <Construct sys="epdm" config="EPDMv1"  />
     <Construct sys="fpdm" config="FPDMv4"  />
-    <Construct sys="zcal" config="ZCALon"  />
     <Construct sys="magp" config="MAGPon"  />
     <Construct sys="mutd" config="MUTD16"  />
     <Construct sys="etof" config="ETOFv14s"  />
@@ -63,9 +65,11 @@
 
     -->
     <Construct sys="cave" config="CAVE05"  />
+    <Construct sys="upst" config="UPSTon"  /> 
+    <Construct sys="shld" config="SHLDon"  />
+    <Construct sys="zcal" config="ZCALon"  />
     <Construct sys="scon" config="SCON14"  />
     <Construct sys="pipe" config="PIPE12"  />
-    <Construct sys="upst" config="UPSTon"  />
     <Construct sys="tpce" config="TPCE31"  />
     <Construct sys="btof" config="BTOFv8"  />
     <Construct sys="vpdd" config="VPDD08"  />
@@ -74,7 +78,6 @@
     <Construct sys="bbcm" config="BBCMin"  />
     <Construct sys="epdm" config="EPDMv1"  />
     <Construct sys="fpdm" config="FPDMv4"  />
-    <Construct sys="zcal" config="ZCALon"  />
     <Construct sys="magp" config="MAGPon"  />
     <Construct sys="mutd" config="MUTD16"  />
     <Construct sys="etof" config="ETOFv14s"  />
@@ -83,9 +86,11 @@
   <Geometry tag="y2018x"  check="false" comment="Y2018 with experimental TPC">
 
     <Construct sys="cave" config="CAVE05"  />
+    <Construct sys="upst" config="UPSTon"  /> 
+    <Construct sys="shld" config="SHLDon"  />
+    <Construct sys="zcal" config="ZCALon"  />
     <Construct sys="scon" config="SCON14"  />
     <Construct sys="pipe" config="PIPE12"  />
-    <Construct sys="upst" config="UPSTon"  />
     <Construct sys="tpce" config="TPCEv5"  />
     <Construct sys="btof" config="BTOFv8"  />
     <Construct sys="vpdd" config="VPDD08"  />
@@ -94,7 +99,6 @@
     <Construct sys="bbcm" config="BBCMin"  />
     <Construct sys="epdm" config="EPDMv1"  />
     <Construct sys="fpdm" config="FPDMv4"  />
-    <Construct sys="zcal" config="ZCALon"  />
     <Construct sys="magp" config="MAGPon"  />
     <Construct sys="mutd" config="MUTD16"  />
     <Construct sys="etof" config="ETOFv14s"  />
