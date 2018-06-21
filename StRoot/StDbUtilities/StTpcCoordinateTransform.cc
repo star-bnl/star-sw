@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.42 2015/07/19 22:20:42 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.46 2018/06/21 01:46:54 perev Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,15 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.46  2018/06/21 01:46:54  perev
+ * iTPCheckIn
+ *
+ * Revision 1.42.6.3  2018/05/28 23:56:26  perev
+ * Add backward compatibility
+ *
+ * Revision 1.42.6.2  2018/05/02 19:41:33  perev
+ * Supress some Irakli correction
+ *
  * Revision 1.42  2015/07/19 22:20:42  fisyak
  * Add recalculation of pad row during transformation
  *
