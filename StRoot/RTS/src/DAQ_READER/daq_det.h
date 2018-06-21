@@ -45,8 +45,8 @@ public:
 
 	static daq_det *make_det(int wh) ;
 protected:
-	static daq_det_factory *det_factories[32] ;	// for real dets
-	static daq_det_factory *pseudo_factories[32] ;	// for pseudo/internal dets such as whole EMC
+	static daq_det_factory *det_factories[48] ;	// for real dets
+	static daq_det_factory *pseudo_factories[48] ;	// for pseudo/internal dets such as whole EMC
 	virtual daq_det *create() = 0 ;
 } ;
 
@@ -127,7 +127,7 @@ public:
 	} ;
 
 	virtual const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: daq_det.h,v 1.10 2014/08/06 11:42:49 jeromel Exp $: built " __DATE__ " " __TIME__ ; 
+		static const char cvs[]="Tag $Name:  $: $Id: daq_det.h,v 1.11 2018/06/21 13:48:44 tonko Exp $: built " __DATE__ " " __TIME__ ; 
 		return cvs;
 	} ;
 
