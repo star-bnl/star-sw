@@ -1,7 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.92 2018/02/20 22:45:53 smirnovd Exp $
+// $Id: StTrsMaker.cxx,v 1.93 2018/06/21 22:23:08 perev Exp $
 //
 
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.93  2018/06/21 22:23:08  perev
+// TpcGroup fixes
+//
 // Revision 1.92  2018/02/20 22:45:53  smirnovd
 // Revert "Changes from Irakli's directory to make the code compile"
 //
@@ -414,7 +417,7 @@ using std::max;
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.92 2018/02/20 22:45:53 smirnovd Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.93 2018/06/21 22:23:08 perev Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -1052,7 +1055,7 @@ Int_t StTrsMaker::Make(){
 	//
 	// First make a sector where the data can go...
 	StTrsDigitalSector* aDigitalSector =
-	  new StTrsDigitalSector(mGeometryDb);
+	  new StTrsDigitalSector(20);
 	aDigitalSector->setSector(currentSectorProcessed);
 	//
 	// Point to the object you want to fill
