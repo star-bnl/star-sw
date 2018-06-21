@@ -21,8 +21,8 @@ class StiNodePars {
   void rotate(double alfa);
   int  nan() const;
     /// accessors
-  double  operator[](Int_t idx) const {return P[idx];}
-  double &operator[](Int_t idx)       {return P[idx];}
+  operator const double *() const	{return P;}
+  operator       double *() 		{return P;}
   double x()    const 	{return P[kX];} 
   double y()    const 	{return P[kY];}//  local Y-coordinate of this track (reference plane)           		     
   double z()    const 	{return P[kZ];}//  local Z-coordinate of this track (reference plane)			     
@@ -43,7 +43,7 @@ class StiNodePars {
   double &curv() 	{return P[kCurv];}
   double &hz()   	{return P[kHz];}
   double *A(Int_t i)    {return &P[i];}
-  
+  double *A()           {return P;}
   Int_t     check(const char *pri=0) const;
   void      print() const;
 

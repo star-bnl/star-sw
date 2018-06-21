@@ -9,6 +9,7 @@
 #endif
 #include <Stiostream.h>
 #include "StEventTypes.h"
+#include "StEnumerations.h"
 #include "StiHit.h"
 #include "StiDetector.h"
 #include "StiPlacement.h"
@@ -147,8 +148,11 @@ static int nCall =0; nCall++;
       mz = gz;
       double dd[3]={mx,my,mz};
 
-
-      if (!detector->insideL(dd,7,1.2)) {
+//		Special TPC case. Paylap tracks could be very far
+//              from volume in Z for splitted sectors
+      int mask = 7;
+      if (detector->getGroupId()==kTpcId) mask = 3;
+      if (!detector->insideL(dd,mask,1.2)) {
          LOG_ERROR <<
            Form("**** StiHit.%s outside (%d) by %g (%g) ****"
            ,detector->getName().c_str()

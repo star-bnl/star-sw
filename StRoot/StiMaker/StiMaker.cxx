@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.238 2018/04/19 15:48:28 smirnovd Exp $
+// $Id: StiMaker.cxx,v 1.239 2018/06/21 01:48:42 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -83,7 +83,6 @@ More detailed: 				<br>
 #include "StEventTypes.h"
 #include "Sti/Base/EditableFilter.h"
 #include "Sti/StiKalmanTrackFinder.h"
-#include "Sti/StiKalmanTrackFitter.h"
 #include "Sti/StiTrackContainer.h"
 #include "Sti/StiDefaultTrackFilter.h"
 #include "Sti/StiMasterDetectorBuilder.h"
@@ -96,6 +95,7 @@ More detailed: 				<br>
 #include "StiPxl/StiPxlDetectorGroup.h"
 #include "Sti/StiKalmanTrackNode.h"
 #include "Sti/StiKalmanTrack.h"
+#include "Sti/StiHitLoader.h"
 #include "Sti/StiVertexFinder.h"
 #include "Sti/StiDetectorContainer.h"
 #include "StiMaker/StiStEventFiller.h"
@@ -106,6 +106,8 @@ More detailed: 				<br>
 #include "StDetectorDbMaker/StiKalmanTrackFinderParameters.h"
 #include "StDetectorDbMaker/StiKalmanTrackFitterParameters.h"
 
+#include "StiTpc/StiTpcDetectorBuilder.h"
+#include "StiSvt/StiSvtDetectorBuilder.h"
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
 // #include "StiRnD/Ist/StiIstDetectorGroup.h"
 // #include "StiRnD/Ist/StiIstDetectorGroup.h"
@@ -133,6 +135,7 @@ static const float MIN_VTX_ERR2 = 1e-4*1e-4;
 enum { kHitTimg,kGloTimg,kVtxTimg,kPriTimg,kFilTimg};
 
 void CountHits();
+ClassImp(StiMaker)
 
 //_____________________________________________________________________________
 StiMaker::StiMaker(const Char_t *name) :
@@ -254,7 +257,8 @@ Int_t StiMaker::InitDetectors()
   if (IAttr("useTpc") && gStTpcDb)
     {
       cout<<"StiMaker::InitDetectors() -I- Adding detector group:TPC"<<endl;
-      _toolkit->add(group = new StiTpcDetectorGroup(IAttr("activeTpc"), IAttr("activeiTpc")));
+      _toolkit->add(group = new StiTpcDetectorGroup(IAttr("activeTpc")));
+      if (IAttr("activeiTpc")) SetAttr("tpcBuilder","activeiTpc");
       group->setGroupId(kTpcId);
       StiTpcHitLoader* hitLoader = (StiTpcHitLoader*) group->hitLoader();
       if (IAttr("activeSvt") || IAttr("activeSsd") || IAttr("skip1row")) {// skip 1 row
@@ -720,40 +724,22 @@ void StiMaker::FinishTracks (int gloPri)
 	nNodes++;
 	if ( hit && node->getChi2()<100) nHits++;
 	node->nudge();
-	if (1 /*node->inside()*/) {
-	  nInside++;
-//          StiDebug::Count(elNames[gloPri],node->getELoss()[0].mELoss);
-        }
      }
      int qa,idt = track->idTruth(&qa);if(idt){};
-//      StiDebug::Count(noNames[gloPri],nNodes );
-//      StiDebug::Count(inNames[gloPri],nInside);
-//      StiDebug::Count(hiNames[gloPri],nHits  );
   }
-//  StiDebug::Count(tkNames[gloPri],nTk );
 }
 
 
-// $Id: StiMaker.cxx,v 1.238 2018/04/19 15:48:28 smirnovd Exp $
+// $Id: StiMaker.cxx,v 1.239 2018/06/21 01:48:42 perev Exp $
 // $Log: StiMaker.cxx,v $
-// Revision 1.238  2018/04/19 15:48:28  smirnovd
-// [Cosmetic] Remove unused include statements
+// Revision 1.239  2018/06/21 01:48:42  perev
+// iTPCheckIn
 //
-// Revision 1.237  2018/04/12 18:43:59  smirnovd
-// Add new option to deactivate iTpc hits
+// Revision 1.235.4.2  2018/05/28 23:16:58  perev
+// Cleanup
 //
-// Revision 1.236  2018/04/10 11:32:10  smirnovd
-// Minor corrections across multiple files
-//
-// - Remove ClassImp macro
-// - Change white space
-// - Correct windows newlines to unix
-// - Remove unused debugging
-// - Correct StTpcRTSHitMaker header guard
-// - Remove unused preprocessor directives in StiCA
-// - Minor changes in status and debug print out
-// - Remove using std namespace from StiKalmanTrackFinder
-// - Remove includes for unused headers
+// Revision 1.235.4.1  2018/02/28 01:49:15  perev
+// Debug--
 //
 // Revision 1.235  2018/01/03 21:24:21  smirnovd
 // Remove unused std::string

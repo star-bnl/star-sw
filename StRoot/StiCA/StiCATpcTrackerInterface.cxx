@@ -404,9 +404,8 @@ void StiCATpcTrackerInterface::MakeHits()
 
         // get local coordinates. take into account distortion
       StiHit *hit = *cit;
-      if ( !(hit->detector()->isActive()) ) continue;
       if (! hit->stHit()) 	continue;
-      if (  hit->timesUsed()) 	continue;//VP
+      //yf      if (  hit->timesUsed()) 	continue;//VP
       
       const StTpcHit *tpcHit = dynamic_cast<const StTpcHit*>(hit->stHit());
       if ( ! tpcHit) continue;
@@ -770,7 +769,6 @@ void StiCATpcTrackerInterface::FillStiPerformance()
             
     StiKalmanTrackNode *NodePar = track->getInnerMostDetHitNode(kTpcId);
     if (!NodePar) continue;
-//    std::cout <<"node x  "<< track->getInnerMostTPCHitNode(0)->getX() << std::endl << std::endl;
 
     double JI[5]; 
     JI[0] = -1.;                    // y

@@ -18,8 +18,7 @@
  */
 #ifndef StiKalmanTrack_H
 #define StiKalmanTrack_H 1
-
-#include <cassert>
+#include <assert.h>
 //STD
 #include <vector>
 //Sti
@@ -274,7 +273,7 @@ class StiKalmanTrack : public StiTrack
   StiTrackNode *extendToVertex(StiHit* vertex);
   void setFlag(long v);
   long getFlag() const;
-
+  int  legal(const StiHit* stiHit) const;
   StiKalmanTrackNode * extrapolateToBeam();
   StiKalmanTrackNode * extrapolateToRadius(double radius);
   int approx(int mode=0,int nNodes=999);
@@ -288,7 +287,7 @@ class StiKalmanTrack : public StiTrack
   int rejectByHitSet()  const;
   int idTruth(int *qu=0) const;
 
- void test(const char *txt="")  const;
+ void test(const char *txt="Qwerty")  const;
   
   typedef enum{ // type of return value for the refit() procedure
     kNoErrors = 0,
@@ -330,7 +329,7 @@ protected:
   char      mCombUsed; 	  // save which combinatoric style was used
   int     mVertex;
   long    mFlag;         //A flag to pack w/ topo info
-  double  mMass;         // mass hypothesis
+  double  mMass;             // mass hypothesis
   double  _dca;
 
  public:
@@ -429,8 +428,8 @@ inline double  StiKalmanTrack::getRapidity()       const
   double mass = getMass();
   assert(mass >= 0);
   double e = ::sqrt(mass*mass+p[0]*p[0]+p[1]*p[1]+p[2]*p[2]);
-  assert(e > p[2]);
-  return 0.5*::log(e+p[2]/e-p[2]);
+  assert(e >= p[2]);
+  return 0.5*::log((e+p[2])/(e-p[2]));
 }
 
 /*!

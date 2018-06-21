@@ -1,15 +1,12 @@
 //StiDetectorTreeBuilder.cxx
 //M.L. Miller (Yale Software)
 //07/01
-
-#include <cassert>
+#include <assert.h>
 #include "Stiostream.h"
 #include <stdio.h>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <stdexcept>
-
-#include "St_base/StMessMgr.h"
 #include "StiDetector.h"
 #include "StiPlacement.h"
 #include "StiCompositeTreeNode.h"
@@ -25,7 +22,7 @@ StiDetectorTreeBuilder::StiDetectorTreeBuilder()
       mnodefactory(StiToolkit::instance()->getDetectorNodeFactory()), 
     mregion(0)
 {
-    LOG_INFO <<"StiDetectorTreeBuilder::StiDetectorTreeBuilder() : Started/Done"<<endm;
+    cout <<"StiDetectorTreeBuilder::StiDetectorTreeBuilder() -I- Started/Done"<<endl;
 }
 
 StiDetectorTreeBuilder::~StiDetectorTreeBuilder()
@@ -33,30 +30,30 @@ StiDetectorTreeBuilder::~StiDetectorTreeBuilder()
 
 StiDetectorNode* StiDetectorTreeBuilder::build(StiDetectorBuilder * builder)
 {
-    LOG_INFO <<"StiDetectorTreeBuilder::build() : Started"<<endm;
+    cout <<"StiDetectorTreeBuilder::build() - Started"<<endl;
     if (mroot) 	
       {
-	LOG_INFO << "StiDetectorTreeBuilder::build()\tError!\troot tree already built"<<endm;
+	cout << "StiDetectorTreeBuilder::build()\tError!\troot tree already built"<<endl;
 	assert(mroot);
       }
     assert(builder);
     assert(mnodefactory);
     mDetectorBuilder = builder;
-    LOG_INFO <<"StiDetectorTreeBuilder::build() : Build root"<<endm;
+    cout <<"StiDetectorTreeBuilder::build() -I- Build root"<<endl;
 		
     buildRoot();
     loopOnDetectors();
-    LOG_INFO <<"StiDetectorTreeBuilder::build() : Sort Tree"<<endm;
+    cout <<"StiDetectorTreeBuilder::build() -I- Sort Tree"<<endl;
     //Now sort the tree:
     SortDaughters<StiDetector> mysorter;
     //mysorter(mregion); (old)
     mysorter(mroot); //new (MLM)
     //Now index the tree to give efficient sibling traversal
-    LOG_INFO <<"StiDetectorTreeBuilder::build() : Index Tree"<<endm;
+    cout <<"StiDetectorTreeBuilder::build() -I- Index Tree"<<endl;
     IndexDaughters<StiDetector> myindexer;
     myindexer(mroot);
     //myindexer(mregion);
-    LOG_INFO <<"StiDetectorTreeBuilder::build() : Done"<<endm;
+    cout <<"StiDetectorTreeBuilder::build() -I- Done"<<endl;
     return mroot;
 }
 
@@ -94,7 +91,7 @@ void StiDetectorTreeBuilder::buildRoot()
 
 void StiDetectorTreeBuilder::addToTree(StiDetector* layer)
 {
-  //LOG_INFO << "StiDetectorTreeBuilder::addToTree(StiDetector*) : Started"<<endm;
+  //cout << "StiDetectorTreeBuilder::addToTree(StiDetector*) -I- Started"<<endl;
   //Which region do we hang it on?
   StiPlacement* placement = layer->getPlacement();
   SameOrderKey<StiDetector> mySameOrderKey;
@@ -105,7 +102,7 @@ void StiDetectorTreeBuilder::addToTree(StiDetector* layer)
   
   if (where==mroot->end()) {
     //must abort!!! If this happens do not go on!!!
-    LOG_ERROR <<"StiDetectorContainer::build() : mid-rapidity region not found - where==0"<<endm;
+    cout <<"StiDetectorContainer::build() - ERROR - mid-rapidity region not found - where==0"<<endl;
     abort();
   }
 
@@ -124,8 +121,8 @@ void StiDetectorTreeBuilder::addToTree(StiDetector* layer)
 	radstring = "_radius";
     }
     else {
-	LOG_ERROR <<"StiDetectorBuiler::addToTree() : unkown region:\t"<<theRegion
-	     <<"\tfrom detector:\t"<<layer->getName()<<"\tabort"<<endm;
+	cout <<"StiDetectorBuiler::addToTree().  unkown region:\t"<<theRegion
+	     <<"\tfrom detector:\t"<<layer->getName()<<"\tabort"<<endl;
 	abort();
     }
 
@@ -161,7 +158,7 @@ StiDetectorNode* StiDetectorTreeBuilder::hangWhere(StiDetectorNode* parent, cons
     StiDetectorNodeVector::iterator where = find_if(parent->begin(), parent->end(), mySameOrderKey);
 
     if (newOne || where == parent->end()) {
-	//LOG_INFO <<"hangWhere().  Start new node"<<endm;
+	//cout <<"hangWhere().  Start new node"<<endl;
 	StiDetectorNode* temp = mnodefactory->getInstance();
 	char tempname[100];
 	sprintf(tempname,"_%f", order.key);
@@ -181,7 +178,7 @@ StiDetectorNode* StiDetectorTreeBuilder::hangWhere(StiDetectorNode* parent, cons
 
 void StiDetectorTreeBuilder::loopOnDetectors()
 {
-  //LOG_INFO << "StiDetectorTreeBuilder::loopOnDetectors() : Started"<<endm;
+  //cout << "StiDetectorTreeBuilder::loopOnDetectors() -I- Started"<<endl;
   while(mDetectorBuilder->hasMore())
     {
       //StiDetector* layer = mdetfactory->getInstance();
@@ -192,6 +189,6 @@ void StiDetectorTreeBuilder::loopOnDetectors()
       addToTree(detector);
       // add to by-name map
     }
-  // LOG_INFO << "StiDetectorTreeBuilder::loopOnDetectors() : Done"<<endm;
+  // cout << "StiDetectorTreeBuilder::loopOnDetectors() -I- Done"<<endl;
   return;
 }

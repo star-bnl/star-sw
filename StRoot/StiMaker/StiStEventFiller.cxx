@@ -1,30 +1,22 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.121 2018/04/30 23:18:11 smirnovd Exp $
+ * $Id: StiStEventFiller.cxx,v 2.122 2018/06/21 01:48:46 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
- * Revision 2.121  2018/04/30 23:18:11  smirnovd
- * [Cosmetic] Minor changes in various files
+ * Revision 2.122  2018/06/21 01:48:46  perev
+ * iTPCheckIn
  *
- * - Renamed data member s/m/mMass/ in StikalmanTrack
- * - Changes in white space
- * - Return STAR code
+ * Revision 2.119.6.3  2018/05/28 23:17:47  perev
+ * Cleanup
  *
- * Revision 2.120  2018/04/10 11:32:10  smirnovd
- * Minor corrections across multiple files
+ * Revision 2.119.6.2  2018/03/26 23:52:19  perev
+ * Remove wrong asserts
  *
- * - Remove ClassImp macro
- * - Change white space
- * - Correct windows newlines to unix
- * - Remove unused debugging
- * - Correct StTpcRTSHitMaker header guard
- * - Remove unused preprocessor directives in StiCA
- * - Minor changes in status and debug print out
- * - Remove using std namespace from StiKalmanTrackFinder
- * - Remove includes for unused headers
+ * Revision 2.119.6.1  2018/02/28 01:50:12  perev
+ * Debug--
  *
  * Revision 2.119  2016/06/30 18:33:48  perev
  * simplifacation
@@ -754,7 +746,7 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
           }
 	  fillTrackCount2++;
 if (kTrack->getPointCount(kTpcId)>10)
-StiHftHits::hftHist("HFTAfterAll",kTrack);//???????????????????????
+StiHftHits::hftHist("HFTAfterAll",kTrack);
           fillPulls(kTrack,gTrack,0);
           if (kTrack->getPointCount()<15) continue;
 	  fillTrackCountG++;
@@ -937,7 +929,7 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
       if (!node->isFitted()) 	continue;
 
       const StiDetector *detector = node->getDetector();
-      assert(detector == stiHit->detector());
+//VP      assert(detector == stiHit->detector());
       assert(!detector || stiHit->timesUsed());
       if (!fistNode) fistNode = node;
       lastNode = node;
@@ -951,8 +943,7 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
 	if (nTotHits>=15) {
           if (mUsedGits[0]<gid) mUsedGits[0]=gid;
           mUsedGits[gid]++;
-        }
-      }
+      } }
       StHit *hh = (StHit*)stiHit->stHit();
       if (!hh) 			continue;
       assert(detector->getGroupId()==hh->detector());
@@ -1516,7 +1507,7 @@ enum dcaEmx {kImpImp,
       if (!node->isFitted()) 	continue;
 
       const StiDetector *detector = node->getDetector();
-      assert(detector == stiHit->detector());
+//VP      assert(detector == stiHit->detector());
       assert(!detector || stiHit->timesUsed());
       StHit *hh = (StHit*)stiHit->stHit();
       fillPulls(hh,stiHit,node,track,dets,gloPri);

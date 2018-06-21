@@ -1,6 +1,10 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.70 2018/06/08 18:18:37 genevb Exp $
+<<<<<<< StTpcDbMaker.cxx
+ * $Id: StTpcDbMaker.cxx,v 1.71 2018/06/21 01:47:18 perev Exp $
+=======
+ * $Id: StTpcDbMaker.cxx,v 1.71 2018/06/21 01:47:18 perev Exp $
+>>>>>>> 1.70
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,24 +15,22 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.71  2018/06/21 01:47:18  perev
+ * iTPCheckIn
+ *
+<<<<<<< StTpcDbMaker.cxx
+ * Revision 1.67.2.1  2018/02/16 22:14:59  perev
+ * iTPC
+=======
  * Revision 1.70  2018/06/08 18:18:37  genevb
  * Introduce padrow 40 correction for iTPC GridLeak Wall, reduce includes dependencies
  *
  * Revision 1.69  2018/04/30 23:18:11  smirnovd
  * [Cosmetic] Minor changes in various files
+>>>>>>> 1.70
  *
- * - Renamed data member s/m/mMass/ in StikalmanTrack
- * - Changes in white space
- * - Return STAR code
- *
- * Revision 1.68  2018/04/11 02:39:49  genevb
- * Distortion smearing by calibration resolutions
- *
- * Revision 1.67  2017/11/13 21:14:27  fisyak
- * Enable Mag.Field depending flavor
- *
- * Revision 1.66  2017/01/30 17:59:13  fisyak
- * Undo commit
+ * Revision 1.65  2017/01/30 17:54:18  fisyak
+ * Remove dependce on StEvent
  *
  * Revision 1.64  2017/01/06 22:30:45  genevb
  * Introduce FullGridLeak distortion correction
@@ -213,7 +215,6 @@
  *
  **************************************************************************/
 
-//#define StTpc_STATIC_ARRAYS
 #include <assert.h>
 #include "StTpcDbMaker.h"
 #include "StDbUtilities/StCoordinates.hh"
@@ -224,7 +225,6 @@
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/StDetectorDbMagnet.h"
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
-#include "StEventTypes.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
 #else
@@ -233,32 +233,12 @@
 ClassImp(StTpcDbMaker)
 //_____________________________________________________________________________
 Int_t StTpcDbMaker::InitRun(int runnumber){
+  static Bool_t Done = kFALSE;
+  if (Done) return kStOK;
+  Done = kTRUE;
   // Create Needed Tables:    
   //Float_t gFactor = StarMagField::Instance()->GetFactor();
   // Set Table Flavors
-  if (! IAttr("Simu")) {
-    Float_t gFactor = StarMagField::Instance()->GetFactor();
-    if (gFactor<-0.8) {
-      gMessMgr->Info() << "StTpcDbMaker::Full Reverse Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-      SetFlavor("ofl+FullMagFNegative","tpcGlobalPosition");
-    }
-    else if (gFactor<-0.2) {
-      gMessMgr->Info() << "StTpcDbMaker::Half Reverse Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-      SetFlavor("ofl+HalfMagFNegative","tpcGlobalPosition");
-    }
-    else if (gFactor<0.2) {
-      gMessMgr->Info() << "StTpcDbMaker::Zero Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-      SetFlavor("ofl+ZeroMagF","tpcGlobalPosition");
-    }
-    else if (gFactor<0.8) {
-      gMessMgr->Info() << "StTpcDbMaker::Half Forward Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-      SetFlavor("ofl+HalfMagFPositive","tpcGlobalPosition");
-    }
-    else if (gFactor<1.2) {
-      gMessMgr->Info() << "StTpcDbMaker::Full Forward Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-      SetFlavor("ofl+FullMagFPositive","tpcGlobalPosition");
-    }
-  }
   if         (IAttr("useLDV")) {
     SetFlavor("laserDV","tpcDriftVelocity");
     gMessMgr->Info() << "StTpcDbMaker::Using drift velocity from laser analysis" << endm;
@@ -305,54 +285,16 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     if( IAttr("OGridLeakFull")) mask |= ( kFullGridLeak   << 1);
     if( IAttr("OGGVoltErr") ) mask |= ( kGGVoltError  << 1);
     if( IAttr("OSectorAlign"))mask |= ( kSectorAlign  << 1);
-    if( IAttr("ODistoSmear")) mask |= ( kDistoSmearing<< 1);
     LOG_QA << "Instantiate ExB The option passed will be " << Form("%d 0x%X\n",mask,mask) << endm;
     // option handling needs some clean up, but right now we stay compatible
     Int_t option = (mask & 0x7FFFFFFE) >> 1;
 #ifndef __NEW_MagUtilities__
-    StMagUtilities *magU = new StMagUtilities(gStTpcDb, GetDataBase("RunLog"), option);
+    new StMagUtilities(gStTpcDb, GetDataBase("RunLog"), option);
 #else
-    StMagUtilities *magU = new StMagUtilities(gStTpcDb, option);
+    new StMagUtilities(gStTpcDb, option);
 #endif
-    StTpcDb::instance()->SetExB(magU);
   }
   StTpcDb::instance()->SetTpcRotations();
-#ifdef StTpc_STATIC_ARRAYS
-  //Here I fill in the arrays for the row parameterization ax+by=1
-  if (StTpcDb::instance()->GlobalPosition()) {
-    for (int i=0;i<24;i++){
-      for (int j=0;j<45;j++){
-	int time[1] = {10}; 
-	int ipad[2] = {20,40};
-	StTpcPadCoordinate pad1(i+1, j+1, ipad[0], *time);
-	StTpcPadCoordinate pad2(i+1, j+1, ipad[1], *time);
-	StGlobalCoordinate gc1,gc2;
-	StTpcCoordinateTransform transform(gStTpcDb);
-	transform(pad1,gc1);
-	transform(pad2,gc2);
-	double x1,y1,x2,y2;
-	double m,bb; // y = mx + bb
-	x1 = gc1.position().x();
-	y1 = gc1.position().y();
-	x2 = gc2.position().x();
-	y2 = gc2.position().y();
-	if (fabs(x2-x1)<0.000001) {
-	  aline[i][j] = 1/x1;
-	  bline[i][j] = 0.;
-	  continue;
-	}
-	m = (y2 - y1)/(x2 - x1);
-	bb = y1 - m*x1;
-	if (bb == 0) {
-	  gMessMgr->Warning() << "StTpcDbMaker::Init() Row intersects 0,0" << endm;
-	  continue;
-	}
-	aline[i][j] = (float) -m/bb;
-	bline[i][j] = (float) 1.0/bb;
-      }
-    }
-  }
-#endif /* StTpc_STATIC_ARRAYS */
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -363,10 +305,9 @@ Int_t StTpcDbMaker::Make(){
     return kStEOF;
   }
   StTpcDb::instance()->SetDriftVelocity();
-  St_trgTimeOffsetC::instance()->SetLaser(kFALSE);
+#if 0
   if (IAttr("laserIT")) {
-    St_trgTimeOffsetC::instance()->SetLaser(kTRUE);
-  } else {
+    St_trgTimeOffsetC::instance()->SetLaser(kFALSE);
     StEvent* pEvent = dynamic_cast<StEvent*> (GetInputDS("StEvent"));
     if (pEvent) {
       const StTriggerIdCollection* trig = pEvent->triggerIdCollection();
@@ -386,7 +327,9 @@ Int_t StTpcDbMaker::Make(){
 	}
       }
     }
+    if (! St_trgTimeOffsetC::instance()->IsLaser()) return kStSkip;
   }
+#endif
   //  SetTpcRotations();
   return kStOK;
 }
