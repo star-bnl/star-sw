@@ -187,6 +187,9 @@ void tpxPed::accum(tpx_altro_struct *a)
 	row = a->row ;
 	pad = a->pad ;
 
+	if(tpx_is_stgc) {
+		LOG(TERR,"RDO0 %d, RP %d:%d, AID %d:%d",r0_logical,row,pad,a->id,a->ch) ;
+	}
 
 	p = get(r0_logical,row, pad) ;
 
