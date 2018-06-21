@@ -532,7 +532,7 @@ TF1 *FitRL5(TH1 *hist, Bool_t outer = kFALSE)
   l5xg_mult->SetParent(hist);
   l5xg_mult->SetParName(0,"norm");  //l5xg_mult->SetParLimits(0,-80,80);
   l5xg_mult->SetParName(1,"mu");    //l5xg_mult->SetParLimits(1,-1.5,1.5);
-  l5xg_mult->SetParName(2,"Sigma"); //l5xg_mult->SetParLimits(2,0.05,0.8);
+  l5xg_mult->SetParName(2,"Sigma"); //l5xg_mult->SetParLimits(2,0.2,0.8);
   l5xg_mult->SetParName(3,"P"); 
   l5xg_mult->SetParName(4,"K");     //l5xg_mult->SetParLimits(4,0.0,0.5);
   l5xg_mult->SetParName(5,"e");     //l5xg_mult->SetParLimits(5,0.0,0.5);
@@ -723,7 +723,7 @@ TF1 *FitR5(TH1 *proj, Option_t *opt="", Int_t nhyps = 5) { // fit by 5 landau co
     g2 = new TF1("R5",gfR5Func, -5, 5, 10);
     g2->SetParName(0,"norm"); g2->SetParLimits(0,-80,80);
     g2->SetParName(1,"mu");     //g2->SetParLimits(1,-1.5,1.5);
-    g2->SetParName(2,"Sigma");  g2->SetParLimits(2,0.05,0.8);
+    g2->SetParName(2,"Sigma");  g2->SetParLimits(2,0.2,0.8);
     g2->SetParName(3,"P"); 
     g2->SetParName(4,"K");      g2->SetParLimits(4,0.0,0.5);
     g2->SetParName(5,"e");      g2->SetParLimits(5,0.0,0.5);
@@ -1175,7 +1175,89 @@ TH2F *ProjectX(TH3F *hist, const Char_t *Name="_yz",const Int_t binx1=0,const In
   return h;
 } 
 //________________________________________________________________________________
-TF1 *FitGP(TH1 *proj, Option_t *opt="Q", Double_t nSigma=3, Int_t pow=3) {
+TF1 *FitGP(TH1 *proj, Option_t *opt="RQ", Double_t nSigma=3, Int_t pow=3) {
+  if (! proj) return 0;
+  TString Opt(opt);
+  //  Bool_t quet = Opt.Contains("Q",TString::kIgnoreCase);
+  TF1 *g = 0, *g0 = 0;
+  TF1 *gaus = (TF1*) gROOT->GetFunction("gaus");
+  if (pow >= 0) g0 = new TF1("g0",Form("gaus(0)+pol%i(3)",pow),-0.2,0.2);
+  else          g0 = new TF1("g0","gaus",-0.2,0.2); 
+  g0->SetParName(0,"Constant");
+  g0->SetParName(1,"Mean");
+  g0->SetParName(2,"Sigma");
+  for (int i=0; i<=pow;i++) g0->SetParName(3+i,Form("a%i",i));
+  TF1 *g1 = new TF1("g1",Form("gaus(0)+pol%i(3)",pow+1),-0.2,0.2);
+  g1->SetParName(0,"Constant");
+  g1->SetParName(1,"Mean");
+  g1->SetParName(2,"Sigma");
+  for (int i=0; i<=pow+1;i++) g1->SetParName(3+i,Form("a%i",i));
+  TF1 *g2 = new TF1("g2",Form("gaus(0)+pol%i(3)",pow+2),-0.2,0.2);
+  g2->SetParName(0,"Constant");
+  g2->SetParName(1,"Mean");
+  g2->SetParName(2,"Sigma");
+  for (int i=0; i<=pow+2;i++) g2->SetParName(3+i,Form("a%i",i));
+  Double_t params[9];
+  Int_t peak = proj->GetMaximumBin();
+  Double_t peakX = proj->GetBinCenter(peak);
+  params[0] = proj->GetBinContent(peak);
+  if (peakX > 0.5) {
+    params[1] = 0;
+    params[2] = 0.2;
+  }
+  else {
+    params[1] = peakX;
+    params[2] = proj->GetRMS();
+    if (params[2] > 0.25) params[2] = 0.25;
+  }
+  params[3] = 0;
+  params[4] = 0;
+  params[5] = 0;
+  params[6] = 0;
+  params[7] = 0;
+  params[8] = 0;
+  if (gaus) {
+    g = gaus;
+    g->SetParameters(params);
+    g->SetRange(params[1]-nSigma*params[2],params[1]+nSigma*params[2]);
+    proj->Fit(g,opt);
+    g->GetParameters(params);
+    if (g->GetProb() > 0.01) return g;
+    params[2] = TMath::Abs(params[2]);
+  }
+  g = g0;
+  g->SetParameters(params);
+  g->SetRange(params[1]-nSigma*params[2],params[1]+nSigma*params[2]);
+  proj->Fit(g,opt);
+  if (g->GetProb() > 0.01) return g;
+  g->GetParameters(params);
+  g = g1;
+  params[2] = TMath::Abs(params[2]);
+  g->SetParameters(params);
+  g->SetRange(params[1]-nSigma*params[2],params[1]+nSigma*params[2]);
+  proj->Fit(g,opt);
+  if (g->GetProb() > 0.01) return g;
+  g->GetParameters(params);
+  g = g2;
+  params[2] = TMath::Abs(params[2]);
+  g->SetParameters(params);
+  g->SetRange(params[1]-nSigma*params[2],params[1]+nSigma*params[2]);
+  proj->Fit(g,opt);
+  if (! Opt.Contains("q",TString::kIgnoreCase)) {
+    g->GetParameters(params);
+    Double_t X = params[1];
+    Double_t Y = params[0]/TMath::Sqrt(2*TMath::Pi()*params[2]);
+    TPolyMarker *pm = new TPolyMarker(1, &X, &Y);
+    proj->GetListOfFunctions()->Add(pm);
+    pm->SetMarkerStyle(23);
+    pm->SetMarkerColor(kRed);
+    pm->SetMarkerSize(1.3);
+    proj->Draw();
+  }
+  return g;
+}
+//________________________________________________________________________________
+TF1 *FitADC(TH1 *proj, Option_t *opt="Q", Double_t nSigma=3, Int_t pow=3) {
   if (! proj) return 0;
   TString Opt(opt);
   //  Bool_t quet = Opt.Contains("Q",TString::kIgnoreCase);
@@ -3087,7 +3169,7 @@ TF1 *FitXF(TH1 *proj, Option_t *opt, Double_t dX = 1.25, Double_t ddX = 0.01) {/
 void dEdxFit() {}
 //________________________________________________________________________________
 void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP", 
-	     Option_t *opt="", 
+	     Option_t *opt="R", 
 	     Int_t ix = -1, Int_t jy = -1, 
 	     Int_t mergeX=1, Int_t mergeY=1, 
 	     Double_t nSigma=3, Int_t pow=1) {
@@ -3276,6 +3358,7 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
       Fit.entries = proj->Integral();
       if (Fit.entries < 100) {delete proj; continue;}
       if (TString(FitName) == "GP") g = FitGP(proj,opt,nSigma,pow);
+      else if (TString(FitName) == "ADC") g = FitADC(proj,opt,nSigma,pow);
       else if (TString(FitName) == "G2") g = FitG2(proj,opt);
       else if (TString(FitName) == "NF" && dim == 3) {
 	TH3 *hists[5] = {0};
