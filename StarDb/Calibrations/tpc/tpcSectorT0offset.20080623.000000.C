@@ -9,7 +9,8 @@ TDataSet *CreateTable() {
   St_tpcSectorT0offset *tableSet = new St_tpcSectorT0offset("tpcSectorT0offset",1);
   //
   memset(&row,0,tableSet->GetRowSize());
-  for (Int_t i = 0; i < 24; i++)  row.t0[i] = -22.2572 ;
+  int n = tableSet->GetRowSize()/sizeof(row.t0[0]);
+  for (Int_t i = 0; i < n; i++)  row.t0[i] = -22.2572 ;
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
