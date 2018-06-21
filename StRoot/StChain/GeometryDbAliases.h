@@ -134,7 +134,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2016a",      20151215,     1, "y2016a",   "y2016 production geometry, AgML,xgeometry"},   // dev2016 is deprecated for reco
 
 
-  {"y2017",       20161215,     0, "y2017",    "y2017 development geometry, AgML,xgeometry"},   
+  {"y2017",       20161215,     1, "y2017a",   "y2017 production  geometry, AgML,xgeometry"},  // IRAKLI 
   {"y2017a",      20161215,     1, "y2017a",   "y2017 production  geometry, AgML,xgeometry"},   
 
  
@@ -143,6 +143,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2018a",      20171215,     3, "y2018a",   "y2018a physics production geometry version A, AgML,xgeometry"},   
 
   {"y2019",       20181215,     0, "y2019",    "y2019 development geometry, AgML,xgeometry"},   
+  {"r2019",       20181215,     0, "y2019",    "y2019, iTPC, Jim Thomas 05/31/16, no HFT,xgeometry"}, // 
   
   //
   // Move DEVT and upgrade series +100 years along timeline else they interfere with y2018+ runs

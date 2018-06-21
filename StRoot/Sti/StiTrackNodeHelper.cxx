@@ -358,7 +358,7 @@ int StiTrackNodeHelper::makeFit(int smooth)
     }
     mChi2 = chi2; if (mChi2>999) mChi2=999;
     ians = updateNode();
-    if (debug() & 8) { LOG_DEBUG << Form("%5d ",ians); StiKalmanTrackNode::PrintStep();}
+    if (debug() & 8) {cout << Form("%5d ",ians); StiKalmanTrackNode::PrintStep();}
     if (!ians) 	break;
     if (mTargetNode == mVertexNode)	return 15;
     mState = StiTrackNode::kTNReady;
@@ -466,15 +466,7 @@ int StiTrackNodeHelper::join()
      }//end Switch
   } while(kase>=0);
 
-   if (std::fabs(mJoinPars.hz() - mTargetHz) > 1e-10)
-   {
-     LOG_WARN << "Expected |mJoinPars.hz() - mTargetHz| <= 1e-10 "
-              << "instead |" << mJoinPars.hz() << " - " << mTargetHz << "| = "
-              << std::fabs(mJoinPars.hz() - mTargetHz) << ". "
-              << "Will set mJoinPars.hz to " << mTargetHz << endm;
-     mJoinPars.hz() = mTargetHz;
-   }
-
+   assert(fabs(mJoinPars.hz()-mTargetHz)<=1e-10);
    assert(fabs(mTargetNode->getHz()-mTargetHz)<=1e-10);
 
 

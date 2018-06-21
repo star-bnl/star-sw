@@ -1,8 +1,7 @@
 //StiDetectorContainer.cxx
 //M.L. Miller (Yale Software)
 //02/02/01
-
-#include <cassert>
+#include <assert.h>
 #include <Stiostream.h>
 #include <math.h>
 #include <stdio.h>
@@ -23,6 +22,7 @@ using std::binary_search;
 ostream& operator<<(ostream&, const NameMapKey&);
 ostream& operator<<(ostream*, const StiDetector&);
 
+//______________________________________________________________________________
 StiDetectorContainer::StiDetectorContainer(const string & name,
                                            const string & description,
                                            StiMasterDetectorBuilder* masterBuilder)
@@ -36,6 +36,7 @@ StiDetectorContainer::StiDetectorContainer(const string & name,
   cout <<"StiDetectorContainer::StiDetectorContainer() -I- Started/Done"<<endl;
 }
 
+//______________________________________________________________________________
 StiDetectorContainer::~StiDetectorContainer()
 {
   cout <<"StiDetectorContainer::~StiDetectorContainer() -I- Started"<<endl;
@@ -46,6 +47,7 @@ StiDetectorContainer::~StiDetectorContainer()
   cout <<"StiDetectorContainer::~StiDetectorContainer() -I- Done"<<endl;
 }
 
+//______________________________________________________________________________
 void StiDetectorContainer::initialize()
 {
   cout << "StiDetectorContainer::initialize() -I- Started" << endl;
@@ -59,6 +61,7 @@ void StiDetectorContainer::initialize()
   for (bIter=_masterDetectorBuilder->begin(); bIter!=_masterDetectorBuilder->end(); ++bIter)
     {
     string name = (*bIter)->getName();
+    //cout << "Detector:"<< name<<endl;
     ULong_t where = name.find("Tpc");
     if (where==name.npos)
       {
@@ -72,7 +75,7 @@ void StiDetectorContainer::initialize()
       for (int sector=0; sector<nSectors; sector++)
         {
         StiDetector* detector = (*bIter)->getDetector(row,sector);
-        if (!detector) continue;
+	if(!detector) continue;
         if (detector->isActive()) 
 	  add(detector);
         else 
@@ -84,6 +87,7 @@ void StiDetectorContainer::initialize()
 }
 
 
+//______________________________________________________________________________
 /*! This is used, e.g., to set the iterators to a certain point in
 preparation  for propogation of a new track.  If no StiDetector pointer is
 found that is equal to <b>layer</b>, then an error message is streamed to
@@ -94,6 +98,7 @@ void StiDetectorContainer::setToDetector(const StiDetector* layer)
   assert(layer->getTreeNode() && "StiDetectorContainer::setToDetector(StiDetector*) layer->getTreeNode()==0");
   setToLeaf( layer->getTreeNode() );
 }
+//______________________________________________________________________________
 
 /// A call to reset simply sets the pointer to the default StiDetector object.
 /// It does not alter the state of the detector model.
@@ -111,6 +116,7 @@ void StiDetectorContainer::reset()
   mphi_it = (*mradial_it)->begin();
 }
 
+//______________________________________________________________________________
 StiDetector* StiDetectorContainer::operator*() const
 {
   assert(*mphi_it && "StiDetectorContainer::operator*() *mphi_it==0");
@@ -119,14 +125,16 @@ StiDetector* StiDetectorContainer::operator*() const
   return det;
 }
 
+//______________________________________________________________________________
 StiDetector* StiDetectorContainer::getCurrentDetector() const
 {
   assert(*mphi_it && "StiDetectorContainer::getCurrentDetector() *mphi_it==0");
   StiDetector * det = (*mphi_it)->getData();
-  assert(det && "StiDetectorContainer::getCurrentDetector()  det==0");
+  assert(det && "StiDetectorContainer::getCurrentDetector()  *mphi_it==0");
   return det;
 }
 
+//______________________________________________________________________________
 /*! A call to moveIn() may not always alter the StiDetector to which the
 container points.  Notably, if there is nowhere else to 'move in to', then
 moveIn() will have no action.  So, to see if the action succeeded, one must
@@ -142,18 +150,12 @@ extreme assymetry, such as navigation through the Silicon Vertex Tracker.
 */
 bool StiDetectorContainer::moveIn()
 {
-  //if (mradial_it == mregion->begin() ) { //change (MLM)
-  if (mradial_it == (*mregion)->begin() ) { //change (MLM)
-                                            // cout <<"StiDetectorContainer::moveIn():\t";
-                                            // cout <<"Nowhere to go. return false"<<endl;
-    return false;
-  }
 
   //remember where we started:
   const StiDetectorNode* oldPhiNode = *mphi_it;
 
   --mradial_it;
-  mphi_it = (*mradial_it)->begin();
+//  mphi_it = (*mradial_it)->begin();
 
   if ( (*mradial_it)->getChildCount() == oldPhiNode->getParent()->getChildCount()) {
     // cout <<"Index into array"<<endl;
@@ -162,10 +164,12 @@ bool StiDetectorContainer::moveIn()
   }
   else {
     // cout <<"Do linear search"<<endl;
+    mphi_it = (*mradial_it)->begin();
     return setPhi( oldPhiNode->getOrderKey() );
   }
-  }
+}
 
+//______________________________________________________________________________
 bool StiDetectorContainer::setPhi(const StiOrderKey& oldOrder)
 {
   mphi_it = gFindClosestOrderKey((*mradial_it)->begin(),
@@ -178,12 +182,12 @@ bool StiDetectorContainer::setPhi(const StiOrderKey& oldOrder)
     }
   return true;
 }
+//______________________________________________________________________________
 /*! Recursively load all detector definition files from the given directory.
 There is internal protection to avoid building the detector representation
 more than once.
 */
-void
-StiDetectorContainer::build(StiDetectorBuilder * builder)
+void StiDetectorContainer::build(StiDetectorBuilder * builder)
 {
   cout <<"StiDetectorContainer::build() -I- Starting"<<endl;
   cout <<"StiDetectorContainer::build() -I- Building using builder:"<<builder->getName()<<endl;
@@ -214,7 +218,7 @@ StiDetectorContainer::build(StiDetectorBuilder * builder)
   cout <<"StiDetectorContainer::build() -I- Done"<<endl;
   return;
 }
-
+//______________________________________________________________________________
 /*
  void StiDetectorContainer::print() const
  {
@@ -246,14 +250,14 @@ void StiDetectorContainer::setToLeaf(StiDetectorNode* leaf)
   //cout <<"*mphi_it: "<<(*mphi_it)->getName()<<" "<<(*mphi_it)->getOrderKey()<<endl;
 
 }
-
+//______________________________________________________________________________
 void StiDetectorContainer::add(StiDetector* det)
 {
   _sortedDetectors.push_back(det);
   sort(_sortedDetectors.begin(), _sortedDetectors.end(), RPhiLessThan());
 }
 
-
+//______________________________________________________________________________
 //Non members
 
 //sort in descending order in radius, and ascending order in phi
@@ -279,6 +283,7 @@ bool RPhiLessThan::operator()(const StiDetector* lhs, const StiDetector* rhs)
 }
 
 
+//______________________________________________________________________________
 vector<StiDetector*> & StiDetectorContainer::getDetectors()
 {
   return _sortedDetectors;
@@ -299,23 +304,27 @@ vector<StiDetector*> & StiDetectorContainer::getDetectors(Filter<StiDetector> & 
   return _selectedDetectors;
 }
 
+//______________________________________________________________________________
 vector<StiDetector*>::iterator  StiDetectorContainer::begin()
 {
   cout << "StiDetectorContainer::begin() -I- size:"<<_sortedDetectors.size()<<endl;
   return _sortedDetectors.begin();
 }
 
+//______________________________________________________________________________
 vector<StiDetector*>::iterator  StiDetectorContainer::end()
 {  
   return _sortedDetectors.end();
 }
 
+//______________________________________________________________________________
 vector<StiDetector*>::const_iterator  StiDetectorContainer::begin() const
 {
   cout << "StiDetectorContainer::begin() const -I- size:"<<_sortedDetectors.size()<<endl;
   return _sortedDetectors.begin();
 }
 
+//______________________________________________________________________________
 vector<StiDetector*>::const_iterator  StiDetectorContainer::end() const
 {  
   return _sortedDetectors.end();

@@ -180,7 +180,8 @@ Int_t StIOMaker::OpenWrite()
   return fCurrMk->Open();
 }
 //_____________________________________________________________________________
-Int_t StIOMaker::Make(){
+Int_t StIOMaker::Make()
+{
   int iret;   
   fNIO++;
   if (fIOMode[0]=='r')  { //Read mode
@@ -204,7 +205,8 @@ AGAIN:
   }
 }
 //_____________________________________________________________________________
-Int_t StIOMaker::MakeRead(){
+Int_t StIOMaker::MakeRead()
+{
 
   if (!fCurrMk) Open();
   if (!fCurrMk) return kStEOF;

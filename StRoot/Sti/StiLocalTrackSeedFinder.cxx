@@ -81,19 +81,26 @@ StiTrack* StiLocalTrackSeedFinder::findTrack(double rMin)
 bool StiLocalTrackSeedFinder::extendHit(StiHit& hit)
 {
   //cout <<"StiLocalTrackSeedFinder::extendHit(StiHit& hit) -I- Started"<<endl;
-  _detectorContainer->setToDetector( hit.detector() );
+  auto *d0 = hit.detector();
+  _detectorContainer->setToDetector(d0);
+  double r0 = d0->getPlacement()->getLayerRadius();
+
+
   //Done if the inner most detector is reached.
   if ( _detectorContainer->moveIn()==false ) return false;
   const StiDetector* d = _detectorContainer->getCurrentDetector(); //**_detectorContainer;
   StiPlacement *     p = d->getPlacement();
-  if (p->getLayerRadius() < fRxyMin) return false;
+  double r1 =p->getLayerRadius();
+  if (r1 < fRxyMin) return false;
+//????  assert(fabs(r1-r0)>0.1);
+  if (fabs(r1-r0)<1e-3) return false;
   StiHit* closestHit = _hitContainer->getNearestHit(p->getLayerRadius(),
 						    p->getLayerAngle(),
 						    hit.y(), hit.z(),
 						    StiLocalTrackSeedFinderParameters::instance()->deltaY(), 
 						    StiLocalTrackSeedFinderParameters::instance()->deltaZ());
-  
   if (!closestHit ) return false;
+  assert(closestHit->detector()!=d0);
   _seedHits.push_back(closestHit);
    return true;
 }
@@ -194,8 +201,8 @@ bool StiLocalTrackSeedFinder::extrapolate()
   double dr = r2-r1;
   double dy = y2-y1;
   double dz = z2-z1;
-  if (fabs(dr) <=1.e-3) return false;
-  assert (fabs(dr) >1.e-3); //// || dy==0. || dz==0.);
+//????assert(fabs(dr)>0.01);
+  if (fabs(dr) <=1.e-3) { ++_skipped; return true;}
   //Now look for a hit in the next layer in:
   _detectorContainer->setToDetector( hit2->detector());
   //Test to see if move in worked
@@ -207,13 +214,15 @@ bool StiLocalTrackSeedFinder::extrapolate()
 	  return false;
 	}
     }
-
   const StiDetector* newLayer = **_detectorContainer;
   double r3 = newLayer->getPlacement()->getNormalRadius();
-  
+      if(fabs(r3-r2)<1e-3) {  
+      //cout<<"StiLocalTrackSeedFinder::extrapolate() -W- Too close next layer."<<endl;
+      ++_skipped;
+      return true;
+  }
   //Temp hack by Mike
-//VP  if (r3<=60.) { return false; }
-  if (r3<=25.) { return false; } //VP avoid SVT from seed
+  if (r3<=60.) { return false; }
     
   //First, r-y plane
   //double m_ry = dr/dy;

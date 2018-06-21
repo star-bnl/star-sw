@@ -21,6 +21,7 @@ class StiDetector;
 typedef std::vector<StiDetector*> StiDetVect;
 
 
+
 /*!
    StiDetector represents a detector for the purposes of ITTF tracking.
    It contains all information about the geometry of the detector and
@@ -70,6 +71,8 @@ public:
     void setPlacement(StiPlacement *val);
     void setProperties(std::string name, StiIsActiveFunctor* activeFunctor, StiShape* shape, StiPlacement* placement,
             StiMaterial* gas, StiMaterial* material);
+    void setSplit(StiDetector *gemini);
+    const StiDetector *getSplit() const {return mGemini;}
 
     //action
     virtual void build(){}  //for now, build from SCL parsable ascii file
@@ -84,7 +87,7 @@ public:
     void setHitErrorCalculator(const StiHitErrorCalculator * calculator) {_hitErrorCalculator = calculator;}
     const StiHitErrorCalculator * getHitErrorCalculator() const {return _hitErrorCalculator;}
 
-    void setGroupId(int id) { _groupId = _groupId < 0 ? id : _groupId; }
+    void setGroupId(int id) {  _groupId = id;}
     int  getGroupId() const {return _groupId;}
 
     void setTrackingParameters(const StiTrackingParameters * pars) {_pars = pars;}
@@ -100,7 +103,7 @@ public:
     void   getDetPlane(double plane[4]) const;
 
  static int    mgIndex;
- static double mgValue[2];
+ static double mgValue[3];
 
  protected:
     
@@ -131,12 +134,14 @@ public:
     /// Convenience storage of sin(refAngle)
     double _sin;
     /// Detector group identifier.
-    int _groupId = -1;
+    int _groupId;
     const StiTrackingParameters * _pars;
-    int _key1, _key2;
-
+    int _key[2];
+    StiDetector *mGemini;
     char mEnd[1];
 };
+
+
 
 
 inline void StiDetector::setPlacement(StiPlacement *val)
@@ -145,26 +150,44 @@ inline void StiDetector::setPlacement(StiPlacement *val)
   _cos = cos(val->getNormalRefAngle());
   _sin = sin(val->getNormalRefAngle());
 }
-
-
 inline void StiDetector::setKey(int index,int value)
 {
-switch (index)
-  {
-  case 1: _key1 = value; break;
-  case 2: _key2 = value; break;
-  }
+  assert(index<=22);
+  _key[index-1]=value;
 }
-
 
 inline int StiDetector::getKey(int index) const 
 {
-switch (index)
-  {
-  case 1: return _key1;
-  case 2: return _key2;
-  }
-return -1;
+  assert(index<=2);
+return  _key[index-1];
 }
+
+inline void StiDetector::setSplit(StiDetector *gemini)
+{
+  mGemini = gemini; gemini->mGemini= this;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #endif
