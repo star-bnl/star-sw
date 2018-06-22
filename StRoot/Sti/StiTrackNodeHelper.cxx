@@ -466,8 +466,8 @@ int StiTrackNodeHelper::join()
      }//end Switch
   } while(kase>=0);
 
-   assert(fabs(mJoinPars.hz()-mTargetHz)<=1e-10);
-   assert(fabs(mTargetNode->getHz()-mTargetHz)<=1e-10);
+//    assert(fabs(mJoinPars.hz()-mTargetHz)<=1e-10);
+//    assert(fabs(mTargetNode->getHz()-mTargetHz)<=1e-10);
 
 
   mTargetNode->mFE   = mJoinErrs;
