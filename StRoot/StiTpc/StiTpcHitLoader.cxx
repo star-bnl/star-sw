@@ -74,7 +74,10 @@ void StiTpcHitLoader::loadHits(StEvent* source,
 //      double z = hit->position().y();
         double ang = atan2(y,x);
         int sec = StiTpcDetectorBuilder::sector(ang,hit->sector()>12);
-        assert((int)hit->sector()==sec);
+        sec -= (int)hit->sector();
+	if (sec> 6) sec-=12;
+	if (sec<-6) sec+=12;
+        assert(abs(sec)<=1);
 
 }
 	assert(_hitFactory);
