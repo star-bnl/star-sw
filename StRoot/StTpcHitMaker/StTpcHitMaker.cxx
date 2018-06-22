@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.71 2018/06/21 01:47:32 perev Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.72 2018/06/22 18:35:19 perev Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,11 +13,8 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
- * Revision 1.71  2018/06/21 01:47:32  perev
- * iTPCheckIn
- *
- * Revision 1.53.6.3  2018/05/02 20:47:53  perev
- * some fixes to properly read the real data. Irakli
+ * Revision 1.72  2018/06/22 18:35:19  perev
+ * Merging with TPC group code
  *
  * Revision 1.55  2018/02/18 23:35:33  perev
  * Remove iTPC update
