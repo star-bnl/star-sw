@@ -48,10 +48,12 @@
 
 #include <DAQ_ITPC/daq_itpc.h>
 #include <DAQ_ITPC/itpcCore.h>
+#include <TPC/rowlen.h>
 
 #include <DAQ_FCS/daq_fcs.h>
+#include <DAQ_STGC/daq_stgc.h>
 
-#include <TPC/rowlen.h>
+
 
 /* various test routines... typically used by Tonko only */
 #include <DAQ_FGT/fgtPed.h>
@@ -89,6 +91,7 @@ static int rhicf_doer(daqReader *rdr, const char *do_print) ;
 static int etof_doer(daqReader *rdr, const char *do_print) ;
 static int itpc_doer(daqReader *rdr, const char *do_print) ;
 static int fcs_doer(daqReader *rdr, const char *do_print) ;
+static int stgc_doer(daqReader *rdr, const char *do_print) ;
 
 static int good ;
 static int bad ;
@@ -404,6 +407,9 @@ int main(int argc, char *argv[])
 
 		/*************************** FCS **************************/
 		fcs_doer(evp,print_det) ;
+		
+		/*************************** STGC **************************/
+		stgc_doer(evp,print_det) ;
 		
 
 
@@ -2579,6 +2585,65 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 
 	if(raw_found) {
 		LOG(INFO,"FCS found") ;
+	}
+
+	return raw_found ;
+
+}
+
+static int stgc_doer(daqReader *rdr, const char *do_print)
+{
+	int raw_found = 0 ;
+	daq_dta *dd ;
+
+	if(strcasestr(do_print,"stgc")) ;	// leave as is...
+	else do_print = 0 ;
+
+
+	
+#if 0
+	dd = rdr->det("stgc")->get("raw") ;
+	
+
+	if(dd) {
+		while(dd->iterate()) {	//per xing and per RDO
+			raw_found = 1 ;
+
+			if(do_print) {
+				printf("STGC ALTRO: sec %02d, RDO %d: bytes %d\n",dd->sec,dd->rdo,dd->ncontent) ;
+				
+				u_int *d = (u_int *)dd->Void ;
+				for(u_int i=0;i<dd->ncontent/4;i++) {
+					printf("  %d/%d = 0x%04X\n",i,dd->ncontent/4,d[i]) ;
+				}
+			}
+
+		}
+
+	}
+#endif
+
+	for(int r=1;r<=6;r++) {
+		dd = rdr->det("stgc")->get("altro",r) ;	
+
+		while(dd && dd->iterate()) {	//per xing and per RDO
+			raw_found = 1 ;
+
+			if(do_print) {
+				printf("STGC ALTRO: sec %02d, RDO %d: ALTRO %3d:%d\n",dd->sec,r,dd->row,dd->pad) ;
+
+				for(u_int i=0;i<dd->ncontent;i++) {
+					printf("    %3d %3d\n",dd->adc[i].tb,dd->adc[i].adc) ;
+				}
+			}
+
+		}
+
+	}
+
+
+	if(raw_found) {
+		LOG(INFO,"STGC found") ;
 	}
 
 	return raw_found ;
