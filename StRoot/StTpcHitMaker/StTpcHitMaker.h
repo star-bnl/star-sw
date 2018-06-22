@@ -3,14 +3,11 @@
 
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.h,v 1.25 2018/06/21 01:47:34 perev Exp $
+ * $Id: StTpcHitMaker.h,v 1.26 2018/06/22 18:35:19 perev Exp $
  * StTpcHitMaker - class to fill the StEvent with TPC clusters from DAQ reader
  * $Log: StTpcHitMaker.h,v $
- * Revision 1.25  2018/06/21 01:47:34  perev
- * iTPCheckIn
- *
- * Revision 1.19.10.3  2018/05/02 20:47:06  perev
- * some fixes to properly read the real data. Irakli
+ * Revision 1.26  2018/06/22 18:35:19  perev
+ * Merging with TPC group code
  *
  * Revision 1.19  2014/08/06 11:43:50  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
