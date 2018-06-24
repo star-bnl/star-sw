@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.179 2018/06/21 01:48:12 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.180 2018/06/23 23:59:29 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.180  2018/06/23 23:59:29  perev
+ * Fill mag field more carefully
+ *
  * Revision 2.179  2018/06/21 01:48:12  perev
  * iTPCheckIn
  *
@@ -733,7 +736,7 @@ void StiKalmanTrackNode::setState(const StiKalmanTrackNode * n)
   _alpha    = n->_alpha;
   mFP = n->mFP;
   mFE = n->mFE;
-  mFP.hz()=0;
+//????VP  mFP.hz()=0;
   nullCount = n->nullCount;
   contiguousHitCount = n->contiguousHitCount;
   contiguousNullCount = n->contiguousNullCount;
@@ -781,6 +784,7 @@ void StiKalmanTrackNode::propagateCurv(const StiKalmanTrackNode *parent)
 {
    mFP.ptin()=parent->mFP.ptin();
    mFP.curv()=getHz()*mFP.ptin();
+   mFP.hz()=getHz();
 } 
 //______________________________________________________________________________
 /*! Calculate/return the z component of mag field 
@@ -793,7 +797,7 @@ double StiKalmanTrackNode::getHz() const
 {
   
 static const double EC = 2.99792458e-4,ZEROHZ = 2e-6;
-   if (fabs(mHz)<999) return mHz;
+   if (mHz && fabs(mHz)<999) return mHz;
    if (! _laser) {
      double h[3];
      StarMagField::Instance()->BField(&(getGlobalPoint().x()),h);
@@ -1115,6 +1119,7 @@ StiDebug::Break(nCall);
   if (position>=kOutX && position<=kOutX && !tDet->isActive()) position=0;
   if (position) return position;
   assert(mFP.x() > 0.);
+  assert(mFP.hz());
   if (mFP[0]*mFP._cosCA+mFP[1]*mFP._sinCA<0) return kEnded;
 
   propagateError();
@@ -1274,11 +1279,12 @@ StiDebug::Break(nCall);
     if (!ians ) 	break;
   }
 
+  mFP.hz()      = getHz();
   if (ians) 						return ians;
   if (mFP.x()> kFarFromBeam) {
     if (mFP.x()*mgP.cosCA2+mFP.y()*mgP.sinCA2<=0)	return kEnded; 
   }
-  mFP.hz()      = getHz();
+  assert(mFP.hz());
   mFP.curv() = mFP.hz()*mFP.ptin();
 
   mPP() = mFP;
