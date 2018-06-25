@@ -1,6 +1,7 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.70 2018/06/08 18:18:37 genevb Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.72 2018/06/21 15:46:21 perev Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.72 2018/06/21 15:46:21 perev Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,24 +12,22 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.72  2018/06/21 15:46:21  perev
+ * Restore removed by mistake line
+ *
+ * Revision 1.71  2018/06/21 01:47:18  perev
+ * iTPCheckIn
+ *
+ * Revision 1.67.2.1  2018/02/16 22:14:59  perev
+ * iTPC
  * Revision 1.70  2018/06/08 18:18:37  genevb
  * Introduce padrow 40 correction for iTPC GridLeak Wall, reduce includes dependencies
  *
  * Revision 1.69  2018/04/30 23:18:11  smirnovd
  * [Cosmetic] Minor changes in various files
  *
- * - Renamed data member s/m/mMass/ in StikalmanTrack
- * - Changes in white space
- * - Return STAR code
- *
- * Revision 1.68  2018/04/11 02:39:49  genevb
- * Distortion smearing by calibration resolutions
- *
- * Revision 1.67  2017/11/13 21:14:27  fisyak
- * Enable Mag.Field depending flavor
- *
- * Revision 1.66  2017/01/30 17:59:13  fisyak
- * Undo commit
+ * Revision 1.65  2017/01/30 17:54:18  fisyak
+ * Remove dependce on StEvent
  *
  * Revision 1.64  2017/01/06 22:30:45  genevb
  * Introduce FullGridLeak distortion correction

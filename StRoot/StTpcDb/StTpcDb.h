@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.42 2018/04/11 02:43:22 smirnovd Exp $
+ * $Id: StTpcDb.h,v 1.44 2018/06/21 01:47:16 perev Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,14 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.44  2018/06/21 01:47:16  perev
+ * iTPCheckIn
+ *
+ * Revision 1.41.10.1  2018/02/16 22:14:59  perev
+ * iTPC
+ * Revision 1.43  2018/06/07 04:30:35  genevb
+ * Remove unnecessary dependence on StMagUtilities.h
+ *
  * Revision 1.42  2018/04/11 02:43:22  smirnovd
  * Enable TPC/iTPC switch via St_tpcPadConfig
  *

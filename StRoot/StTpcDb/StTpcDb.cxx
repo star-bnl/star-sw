@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.64 2018/04/11 02:43:22 smirnovd Exp $
+ * $Id: StTpcDb.cxx,v 1.65 2018/06/21 01:47:14 perev Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,12 +14,11 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
- * Revision 1.64  2018/04/11 02:43:22  smirnovd
- * Enable TPC/iTPC switch via St_tpcPadConfig
+ * Revision 1.65  2018/06/21 01:47:14  perev
+ * iTPCheckIn
  *
- * This is accomplished by substituting St_tpcPadPlanes with St_tpcPadConfig.
- * A sector ID is passed to St_tpcPadConfig in order to extract parameters for
- * either TPC or iTPC
+ * Revision 1.63.6.1  2018/02/16 22:14:59  perev
+ * iTPC
  *
  * Revision 1.63  2015/05/17 22:53:52  fisyak
  * Remove duplicted line
