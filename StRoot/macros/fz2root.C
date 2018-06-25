@@ -5,6 +5,7 @@ void fz2root(UInt_t nEvent=99999, const Char_t *file=
    gROOT->LoadMacro("bfc.C");
    bfc(0,"fzin, GeantOut, nodefault,-magf,-db,noHistos,noRunco",file);
    chain->SetDEBUG(0);
+   StMaker::lsMakers(chain);
    chain->EventLoop(nEvent);
    chain->Finish();
 }
