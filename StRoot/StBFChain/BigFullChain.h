@@ -1141,10 +1141,10 @@ Bfc_st BFC[] = { // standard chains
    "B2018,StiCA,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
    ,                 "","","Production chain for year 2018 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 #if 0 /* y2018a is not ready yet */
-  {"B2018a"  ,"","","ry2018a,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,CorrX","",""
+  {"B2018a"  ,"","","ry2018a,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite","",""
    ,                                                           "Base chain for run 2018 data (tpc)",kFALSE},
 #else
-  {"B2018a"  ,"","","ry2018,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,CorrX","",""
+  {"B2018a"  ,"","","ry2018,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite","",""
    ,                                                           "Base chain for run 2018 data (tpc)",kFALSE},
 #endif
   
@@ -1610,12 +1610,7 @@ Bfc_st BFC[] = { // standard chains
   {"ssdpre"      ,"","","ssdEmbed,spa"                    ,"","","SSD full chain for pre-embedding",kFALSE},
   {"ssdAdd"     ,"","","ssd_daq","StSsdAddMaker","StSsdAddMaker",             "... SSD merge maker",kFALSE},
   {"ssdE"        ,"","","ssdpre,ssdAdd"                       ,"","","SSD full chain for embedding",kFALSE},
-
-
   {"epdHit",    "", "", "epdDb,event",            "StEpdHitMaker", "StEpdHitMaker","EPD hit maker", kFALSE},
-
-
-
   {"ZDCVtx"      ,"","","db"                              ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"emcRaw"   ,"emcRaw","","daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent"
    ,"StEmcRawMaker","StEmcRawMaker",                                    "B/E EMC data common maker",kFALSE},
@@ -1816,9 +1811,9 @@ Bfc_st BFC[] = { // standard chains
   {"mtdEvtFilt"  ,"","","db",       "StMtdEvtFilterMaker","StMtdEvtFilterMaker","MTD event filter" ,kFALSE},
   {"gmtMatch"                                 ,"","","", "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"gmtPlotter"                               ,"","","", "","","WARNING *** Option is OBSOLETE ***",kFALSE},
-  {"FindVtxSeed"   ,"FindVtxSeed"   ,"","globT,MuDSTDeps,picoDst","StVertexSeedMaker"
+  {"FindVtxSeed"   ,"FindVtxSeed"   ,"","globT,MuDSTDeps,PicoDeps","StVertexSeedMaker"
    ,                                   "StPass0CalibMaker",          "Performs vertex seed finding",kFALSE},
-  {"FindEvtVtxSeed","FindEvtVtxSeed","","MuDSTDeps,picoDst","StEvtVtxSeedMaker"
+  {"FindEvtVtxSeed","FindEvtVtxSeed","","MuDSTDeps,picoDeps","StEvtVtxSeedMaker"
    ,                               "StPass0CalibMaker","Performs vertex seed finding using StEvent",kFALSE},
   {"Ftpc"      ,"ftpcChain"  ,"","ftpcT,fcl,fpt"                            ,"StMaker","StChain","",kFALSE},
   {"fss"       ,"ftpc_raw","ftpcChain","SCL,Simu","StFtpcSlowSimMaker"
@@ -1856,10 +1851,10 @@ Bfc_st BFC[] = { // standard chains
 #endif /* __NoStrangeMuDst__ */
   {"V0svt"       ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"Xisvt"       ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
-  {"SCEbyE"      ,"scebye","","MuDSTDeps,picoDst","StSpaceChargeEbyEMaker"
-   ,                    "StMuDSTMaker,StPass0CalibMaker","Determine EbyE SpaceCharge using StEvent",kFALSE},
-  {"SCScalerCal" ,"scscalercal","","MuDSTDeps,picoDst","StSpaceChargeEbyEMaker"
-   ,                               "StMuDSTMaker,StPass0CalibMaker","Calibrate SpaceCharge scalers",kFALSE},
+  {"SCEbyE"      ,"scebye","","MuDSTDeps","StSpaceChargeEbyEMaker"
+   ,        "StMuDSTMaker,StPicoEvent,StPass0CalibMaker","Determine EbyE SpaceCharge using StEvent",kFALSE},
+  {"SCScalerCal" ,"scscalercal","","MuDSTDeps,picoDeos","StSpaceChargeEbyEMaker"
+   ,                              "StMuDSTMaker,StPass0CalibMaker","Calibrate SpaceCharge scalers",kFALSE},
   {"compend"     ,"","","event,detDb","StEventCompendiumMaker","StEventCompendiumMaker"
    ,                                                             "Fill event summary in ITTF Chain",kFALSE},
   {"TpcAligner"    ,"","","Alignment"         ,"StTpcAlignerMaker","StTpcAlignerMaker","TpcAligner",kFALSE},
@@ -1870,7 +1865,7 @@ Bfc_st BFC[] = { // standard chains
   {"Flow"        ,"","TagsChain","StEvent,Stu"                      ,"StFlowMaker","StFlowMaker","",kFALSE},
   {"FlowTag"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"FlowAnalysis","","TagsChain","StEvent,Flow"     ,"StFlowAnalysisMaker","StFlowAnalysisMaker","",kFALSE},
-  {"StrangeTags"  ,"","",""                            ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"StrangeTags"  ,"","",""                             ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"SpectraTag"  ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"HeavyTags"   ,"","TagsChain","StEVent"                  ,"StHeavyTagMaker","StHeavyTagMaker","",kFALSE},
   {"EbyeScaTags" ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
@@ -1933,8 +1928,8 @@ Bfc_st BFC[] = { // standard chains
   {"LAna"        ,"","","in,detDb,StEvent,tpcDb,TpcHitMover","StLaserAnalysisMaker"
    ,                                                   "StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"MuD0Anal"    ,"","","","StMuD0AnalysisMaker",         "StMuD0AnalysisMaker","MuDst D0 Analysis",kFALSE},
-  {"KFPInter"    ,"","","","KFParticle,picoEvt", "KFParticlePerformance,StPicoEvent,StPicoDstMaker,"
-   "StKFParticleAnalysisMaker"                                         ,"STAR KFParticle interface",kFALSE},
+  {"KFPInter"    ,"","","","KFParticle,picoDeps", "KFParticlePerformance,StKFParticleAnalysisMaker" 
+   ,                                                                    "STAR KFParticle interface",kFALSE},
   {"KFPAna"      ,"","","KFPInter","StKFParticleAnalysisMaker",      "", "STAR KFParticle analysis",kFALSE},
   {"MuMc"        ,"","","KFPAna","StMuMcAnalysisMaker",       "StMuMcAnalysisMaker","MuMc Analysis",kFALSE},
   {"PicoAnalysis","","","KFPInter","StPicoAnalysisMaker"
