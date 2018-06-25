@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.63 2018/04/19 22:38:25 smirnovd Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.72 2018/06/22 18:35:19 perev Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,44 +13,8 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
- * Revision 1.63  2018/04/19 22:38:25  smirnovd
- * Revert iTPC related changes committed on 2018-04-19
- *
- * ...except cosmetic ones
- *
- * Revision 1.62  2018/04/19 15:47:42  smirnovd
- * Change hardware Id for hits originated in iTpc padrow rather than iTpc sector
- *
- * Revision 1.61  2018/04/10 11:39:11  smirnovd
- * StTpcHitMaker: Match logic in pre-iTPC code
- *
- * Select DAQ reader type first and then loop over padrows instead of looping over
- * different DAQ reader types
- *
- * Revision 1.60  2018/04/10 11:39:03  smirnovd
- * StTpcHitMaker: Update hardware Id for iTPC sectors (Gene)
- *
- * Revision 1.59  2018/04/10 11:38:54  smirnovd
- * StTpcHitMaker: Fixes to properly read the real data (Yuri and Irakli)
- *
- * Revision 1.58  2018/04/10 11:38:44  smirnovd
- * StTpcHitMaker: Modified for iTPC era (Yuri and Irakli)
- *
- * Revision 1.57  2018/04/10 11:38:33  smirnovd
- * Replace thrown exceptions with runtime asserts
- *
- * Revision 1.56  2018/04/10 11:32:08  smirnovd
- * Minor corrections across multiple files
- *
- * - Remove ClassImp macro
- * - Change white space
- * - Correct windows newlines to unix
- * - Remove unused debugging
- * - Correct StTpcRTSHitMaker header guard
- * - Remove unused preprocessor directives in StiCA
- * - Minor changes in status and debug print out
- * - Remove using std namespace from StiKalmanTrackFinder
- * - Remove includes for unused headers
+ * Revision 1.72  2018/06/22 18:35:19  perev
+ * Merging with TPC group code
  *
  * Revision 1.55  2018/02/18 23:35:33  perev
  * Remove iTPC update
@@ -248,7 +212,7 @@
  * StTpcHitMaker - class to fille the StEvewnt from DAQ reader
  *
  **************************************************************************/
-#include <cassert>
+#include <assert.h>
 #include "StEvent/StTpcHit.h"
 #include <algorithm>
 #include "StTpcHitMaker.h"
@@ -256,8 +220,10 @@
 #include "TDataSetIter.h"
 #include "StDAQMaker/StDAQReader.h"
 #include "TError.h"
+#include "string.h"
 #include "StEvent.h"
 #include "StEvent/StTpcHitCollection.h"
+#include "StEvent/StTpcHit.h"
 #include "RTS/src/DAQ_TPX/tpxFCF_flags.h" // for FCF flag definition
 #include "StTpcRawData.h"
 #include "StThreeVectorF.hh"
@@ -288,6 +254,7 @@ TableClassImpl(St_daq_sim_cld,tcl_cl);
 TableClassImpl(St_daq_adc_tb,daq_adc_tb);
 #include "St_daq_sim_adc_tb.h"
 TableClassImpl(St_daq_sim_adc_tb,daq_sim_adc_tb);
+ClassImp(StTpcHitMaker);
 static TNtuple *pulserP = 0;
 Float_t StTpcHitMaker::fgDp    = .1;             // hardcoded errors
 Float_t StTpcHitMaker::fgDt    = .2;
@@ -625,7 +592,6 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t
   transform(local,global);
     
   UInt_t hw = 1;   // detid_tpc
-  //yf  if (St_tpcPadConfigC::instance()->numberOfRows(sector) != 45) hw += 1U << 1; // iTPC
   hw += sector << 4;     // (row/100 << 4);   // sector
   hw += row    << 9;     // (row%100 << 9);   // row
 #if 0  
@@ -684,7 +650,6 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
   transform(local,global);
     
   UInt_t hw = 1;   // detid_tpc
-  //yf  if (St_tpcPadConfigC::instance()->numberOfRows(sector) != 45) hw += 1U << 1; // iTPC
   hw += sector << 4;     // (row/100 << 4);   // sector
   hw += row    << 9;     // (row%100 << 9);   // row
 #if 0  
