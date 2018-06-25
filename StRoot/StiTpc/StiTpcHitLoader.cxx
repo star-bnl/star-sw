@@ -72,7 +72,21 @@ void StiTpcHitLoader::loadHits(StEvent* source,
 	if (StiKalmanTrackNode::IsLaser() && hit->flag()) continue;
 	if (hit->flag() & FCF_CHOPPED || hit->flag() & FCF_SANITY)     continue; // ignore hits marked by AfterBurner as chopped or bad sanity
 	if (hit->pad() > 182 || hit->timeBucket() > 511) continue; // some garbadge  for y2001 daq
-        assert(_hitFactory);
+#if 0 /*VP*/
+{        
+        double x = hit->position().x();
+        double y = hit->position().y();
+//      double z = hit->position().y();
+        double ang = atan2(y,x);
+        int sec = StiTpcDetectorBuilder::sector(ang,hit->sector()>12);
+        sec -= (int)hit->sector();
+	if (sec> 6) sec-=12;
+	if (sec<-6) sec+=12;
+        assert(abs(sec)<=1);
+
+}
+#endif
+	assert(_hitFactory);
         stiHit = _hitFactory->getInstance();
         assert(stiHit);
         stiHit->reset();
