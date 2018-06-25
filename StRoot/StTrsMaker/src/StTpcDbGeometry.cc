@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcDbGeometry.cc,v 1.11 2018/02/20 22:45:53 smirnovd Exp $
+ * $Id: StTpcDbGeometry.cc,v 1.12 2018/06/21 22:23:08 perev Exp $
  *
  * Authors: Brain Lasiuk & Manuel Calderon de la Barca Sanchez September 8, 1999
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcDbGeometry.cc,v $
+ * Revision 1.12  2018/06/21 22:23:08  perev
+ * TpcGroup fixes
+ *
  * Revision 1.11  2018/02/20 22:45:53  smirnovd
  * Revert "Changes from Irakli's directory to make the code compile"
  *

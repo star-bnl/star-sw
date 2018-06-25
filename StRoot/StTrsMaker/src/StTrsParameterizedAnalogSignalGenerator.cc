@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.42 2018/02/20 22:45:53 smirnovd Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.43 2018/06/21 22:23:08 perev Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -11,6 +11,9 @@
  *
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.43  2018/06/21 22:23:08  perev
+ * TpcGroup fixes
+ *
  * Revision 1.42  2018/02/20 22:45:53  smirnovd
  * Revert "Changes from Irakli's directory to make the code compile"
  *
