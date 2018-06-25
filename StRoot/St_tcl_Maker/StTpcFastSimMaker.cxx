@@ -1,11 +1,10 @@
-/* $Id: StTpcFastSimMaker.cxx,v 1.9 2018/04/11 02:43:22 smirnovd Exp $
+/* $Id: StTpcFastSimMaker.cxx,v 1.10 2018/06/21 01:47:26 perev Exp $
     $Log: StTpcFastSimMaker.cxx,v $
-    Revision 1.9  2018/04/11 02:43:22  smirnovd
-    Enable TPC/iTPC switch via St_tpcPadConfig
+    Revision 1.10  2018/06/21 01:47:26  perev
+    iTPCheckIn
 
-    This is accomplished by substituting St_tpcPadPlanes with St_tpcPadConfig.
-    A sector ID is passed to St_tpcPadConfig in order to extract parameters for
-    either TPC or iTPC
+    Revision 1.8.10.1  2018/02/16 22:09:42  perev
+    iTPC
 
     Revision 1.8  2014/07/27 13:28:06  fisyak
     Add cast for c++11 option
