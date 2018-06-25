@@ -91,9 +91,9 @@ MakeChairOptionalInstance2(TpcSecRowCor,St_TpcSecRowCC,Calibrations/tpc/TpcSecRo
 #include "St_TpcSecRowXC.h"
 MakeChairInstance2(TpcSecRowCor,St_TpcSecRowXC,Calibrations/tpc/TpcSecRowX);
 #include "St_tpcCorrectionC.h"
-ClassImp(St_tpcCorrectionC);
 #include "St_tpcCalibResolutionsC.h"
 MakeChairInstance(tpcCalibResolutions,Calibrations/tpc/tpcCalibResolutions);
+ClassImp(St_tpcCorrectionC);
 //________________________________________________________________________________
 Double_t St_tpcCorrectionC::CalcCorrection(Int_t i, Double_t x, Double_t z, Int_t NparMax) {
   tpcCorrection_st *cor =  ((St_tpcCorrection *) Table())->GetTable() + i;
