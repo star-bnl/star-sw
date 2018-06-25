@@ -100,7 +100,7 @@ class daqReader {
   int trgIdsSet;
   int trgIdsNotPresent;
 
-  static const int DAQ_READER_MAX_DETS = 32 ;
+  static const int DAQ_READER_MAX_DETS = 48 ;
   daq_det *dets[DAQ_READER_MAX_DETS] ;
   daq_det *pseudo_dets[DAQ_READER_MAX_DETS] ;
 

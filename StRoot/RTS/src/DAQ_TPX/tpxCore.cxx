@@ -92,6 +92,7 @@ void tpx_to_altro(int row, int pad, int &rdo, int &a, int &ch)
 
 int *tpx_altro_to_row_override = 0 ;
 int tpx_fy16_map = 0 ;	// moved some FEEs from RDO1 to RDO2
+int tpx_is_stgc = 0 ;
 
 /*
 	RDO counts from 0!
@@ -526,6 +527,7 @@ u_int *tpx_scan_to_next(u_int *now, u_int *first, struct tpx_altro_struct *a_str
 	u_int *store = now ;
 	int log_yes ;
 	int was_log_yes ;
+	int iter = 0 ;
 
 	// I will log only if I'm told to
 	log_yes = was_log_yes = a_struct->log_err ;
@@ -535,10 +537,13 @@ u_int *tpx_scan_to_next(u_int *now, u_int *first, struct tpx_altro_struct *a_str
 
 
 	do {
+		iter++ ;
 		next_altro = data_test(now,a_struct,log_yes,first) ;	// returns pointer to next altro!
 
 		// logic to print out on first error only....
 		if(next_altro==0) {	// error in the bank!
+			LOG(DBG,"Error in the bank at iter %d",iter) ;
+
 			a_struct->err =  1 ;
 
 			log_yes = 0 ;	// switch off further logging
@@ -567,11 +572,11 @@ u_int *tpx_scan_to_next(u_int *now, u_int *first, struct tpx_altro_struct *a_str
 
 		}
 
-
+	
 	} while((now-first)>=1) ;	// there must be at least 2 words!
 
 	// can't be -- I wan't to see this
-	LOG(ERR,"At end: now 0x%08X, next_altro 0x%08X, now-first 0x%08X, next-first 0x%08X",
+	LOG(ERR,"At end %d: now 0x%08X, next_altro 0x%08X, now-first 0x%08X, next-first 0x%08X",iter,
 	    now,next_altro,now-first,next_altro-first) ;
 
 	return 0 ;	// nothing found!
@@ -644,7 +649,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
 
   delta = h - first ;
   if(delta < 1) {
-	if(log) LOG(ERR,"Startup offset bad %d",delta) ;
+	//if(log) LOG(ERR,"Startup offset bad %d",delta) ;
 	return 0 ;
   }
 
@@ -695,6 +700,15 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
 	return 0 ;	// already error...
   }
 
+  int rrow, ppad ;
+
+  // FY19: special treatment for 
+  if(tpx_is_stgc) {
+	a->pad = a->ch ;
+	a->row = a->id  ;
+
+	goto real_tpx_skipped ;
+  }
 
 
   for(int i=0;i<tpx_fee_override_cou;i++) {
@@ -725,7 +739,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
 
 
 
-  int rrow, ppad ;
+
   // get the row and pad; this is why we needed the rdo...
   tpx_from_altro(a->rdo, a->id, a->ch, rrow, ppad) ;
 
@@ -738,6 +752,9 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
 //LOG(WARN,"Change for sTGC: altro %d",a->id) ;
 	return 0 ;
   }
+
+  real_tpx_skipped:;
+
 
   if(wc == 0) return h ;	// empty channel...
 
@@ -1345,9 +1362,8 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 // this is the real sector and real RDO (from 0)!
 int tpx_analyze_msc(int sector,int rb, char *buff, int *altro_list)
 {
-	struct tpx_rdo *rdo ;
-
-	rdo = (struct tpx_rdo *) buff ;
+//	struct tpx_rdo *rdo ;
+//	rdo = (struct tpx_rdo *) buff ;
 
 	memcpy(&(tpx_rdo[sector-1][rb]),buff,sizeof(struct tpx_rdo)) ;
 

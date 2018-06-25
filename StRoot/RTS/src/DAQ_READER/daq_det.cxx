@@ -18,8 +18,8 @@
 
 
 //static
-daq_det_factory *daq_det_factory::pseudo_factories[32] ;
-daq_det_factory *daq_det_factory::det_factories[32] ;
+daq_det_factory *daq_det_factory::pseudo_factories[48] ;
+daq_det_factory *daq_det_factory::det_factories[48] ;
 
 
 //static
