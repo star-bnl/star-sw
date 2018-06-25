@@ -256,9 +256,9 @@ Int_t StTpcAlignerMaker::Make(){
       } 
     } else {TriggerId = goodIds[0];}
   }
-  Bool_t LaserT  = TriggerId == goodIds[0] || TriggerId == goodIds[1];
-  Bool_t CosmicT = TriggerId != 0 && ! LaserT;
-  Bool_t EventT  = ! LaserT && ! CosmicT;
+  //  Bool_t LaserT  = TriggerId == goodIds[0] || TriggerId == goodIds[1];
+  //  Bool_t CosmicT = TriggerId != 0 && ! LaserT;
+  //  Bool_t EventT  = ! LaserT && ! CosmicT;
   StSPtrVecTrackNode& trackNode = pEvent->trackNodes();
   UInt_t nTracks = trackNode.size();
   if (! nTracks) return kStOK;
@@ -280,7 +280,27 @@ Int_t StTpcAlignerMaker::Make(){
       if (time < tofMin) {tofMin = time;}
     }
   }
+  // Best PV
+  StPrimaryVertex *pVbest  = pEvent->primaryVertex();
+  if (btofcol) {
+    Double_t VpdZ = -300;
+    if (btofcol->tofHeader()) VpdZ = btofcol->tofHeader()->vpdVz();
+    if (TMath::Abs(VpdZ) < 200) {
+      Double_t dZbest = 999;
+      StPrimaryVertex *pVertex = 0;
+      for (Int_t ipr=0;(pVertex=pEvent->primaryVertex(ipr));ipr++) {
+	Double_t dZ = TMath::Abs(pVertex->position().z()-VpdZ);
+	if (dZ < dZbest) {
+	  dZbest = dZ;
+	  pVbest = pVertex;
+	}
+      }
+      if (dZbest > 3.0) pVbest = 0;
+    }
+  }
+
   StTrackNode *node=0;
+#if 0
   for (UInt_t i=0; i < nTracks; i++) {
     node = trackNode[i]; 
     if (!node) continue;
@@ -296,7 +316,7 @@ Int_t StTpcAlignerMaker::Make(){
     StPtrVecHit hvec   = gTrack->detectorInfo()->hits();
     UInt_t nTpcHits = hvec.size();
     if (nTpcHits <  10) {gTrack->SetBit(kRejected); continue;}
-    if (EventT) {      continue;     }                          // event
+    //    if (EventT) {      continue;     }                          // event
     if (LaserT) {                                               // laser
       // mark all tracks as coming from outside
       if (pMomentum < 50) {gTrack->SetBit(kRejected); continue;}
@@ -321,6 +341,7 @@ Int_t StTpcAlignerMaker::Make(){
       }
     }
   }
+#endif
   static StThreeVectorD XyzI, XyzO;
   static StThreeVectorD DirI, DirO;
   static Double_t stepMX = 1.e3;
@@ -400,6 +421,20 @@ Int_t StTpcAlignerMaker::Make(){
 	}
       }
       if (sectorWithMaxNoHits < 0 || N < 10) continue;
+      static Int_t sectorOld = -1;
+      static StThreeVectorD xyzLPV; // Primary vertex position in Tpc Sector Coordinate System
+      Int_t sector = sectorWithMaxNoHits;
+      if (pVbest && sector != sectorOld) {
+	sectorOld = sector;
+	StThreeVectorD xyzG(pVbest->position());
+	StThreeVectorD xyzL;
+   	StTpcDb::instance()->SupS2Glob(sector).MasterToLocal(xyzG.xyz(), xyzL.xyz());
+	StTpcDb::instance()->Flip().MasterToLocal(xyzL.xyz(), xyzLPV.xyz());
+	fTpcInOutMatch->iPV = 1;
+	fTpcInOutMatch->xPV =  xyzLPV.x();
+	fTpcInOutMatch->yPV =  xyzLPV.y();
+	fTpcInOutMatch->zPV =  xyzLPV.z();
+      }
       N = 0;
       UInt_t Nhits = hvec.size();
       for (UInt_t j = 0; j < Nhits; j++) {// hit loop
@@ -447,21 +482,28 @@ Int_t StTpcAlignerMaker::Make(){
 	tpcHits[N].row    = row;
 	if (_debug) {
 	  if (Debug()%10 > 5)    
-	    cout << Form("row = %2i N =%2i %8.3f %8.3f %8.3f",row,N,
+	    cout << Form("sector = %2i row = %2i N =%2i %8.3f %8.3f %8.3f",sector,row,N,
 			 tpcHits[N].x,tpcHits[N].y,tpcHits[N].z) << endl;
 	}
 	N++;
       }
       //      TArrayI idxT(N); Int_t *idx = idxT.GetArray();
       TMath::Sort(N,RIO,idx,0);
-      Int_t I123 = -1;
+      Int_t I123 = 0;
       Int_t i,k;
-      for (i = 0; i < N; i++) if (RIO[idx[i]] > 123) {I123 = i; break;}
+      for (i = 0; i < N; i++) {
+	if (RIO[idx[i]] <= 123.0) {
+	  I123++;
+	} else {
+	  break;
+	}
+      }
       Int_t NoIOHits[2] = {I123, N - I123};
-      if (NoIOHits[0] < 5 || NoIOHits[1] < 5) continue;
+      //      if (NoIOHits[0] < 5 || NoIOHits[1] < 5) continue;
       THelixFitter vHelices[2];
-      HelixPar_t *HlxPars[2] = {&fTpcInOutMatch->In, &fTpcInOutMatch->Out};
+      HelixPar_t *HlxPars[4] = {&fTpcInOutMatch->In, &fTpcInOutMatch->Out, &fTpcInOutMatch->InAtVx, &fTpcInOutMatch->OutAtVx};
       for (Int_t io = 0; io < 2; io++) {// Inner / Outer Loop
+	if (NoIOHits[io] < 5) continue;
 	HlxPars[io]->sector = sectorWithMaxNoHits;
 	Int_t i1 = NoIOHits[0]-1;
 	Int_t ii = -1;
@@ -482,8 +524,8 @@ Int_t StTpcAlignerMaker::Make(){
 	*HlxPars[io] = vHelices[io];
 	vHelices[io].MakeErrs();
 	vHelices[io].Backward();
-	step = vHelices[io].Step(stepMX, RefSurfice, 4, HlxPars[io]->xyz(), HlxPars[io]->pxyz());
-	if (step >= stepMX) goto FAILED;;
+	step = vHelices[io].Step(stepMX, RefSurfice, 4, HlxPars[io]->xyz(), HlxPars[io]->pxyz(), 1);
+	if (TMath::Abs(step) >= stepMX) goto FAILED;;
 	if (Debug()%10 > 5) {
 	  if (! io) cout << "In:\t";
 	  else      cout << "Out:\t";
@@ -496,10 +538,34 @@ Int_t StTpcAlignerMaker::Make(){
 	HlxPars[io]->Rho = vHelices[io].GetRho();
 	HlxPars[io]->dRho = vHelices[io].GetDRho();
 	vHelices[io].StiEmx(StiErr);
-	TRSymMatrix StiMtx(6,StiErr);// PrPP(Make,StiMtx);
+	TRSymMatrix StiMtx(6,StiErr); PrPP(Make,StiMtx);
 	TRMatrix &S2R = GetSti2R(HlxPars[io]->nx, HlxPars[io]->ny, HlxPars[io]->nz);
-	TRSymMatrix Cov2(S2R,TRArray::kATxSxA,StiMtx);//  PrPP(Make,Cov2);
+	TRSymMatrix Cov2(S2R,TRArray::kATxSxA,StiMtx);  PrPP(Make,Cov2);
 	memcpy(HlxPars[io]->fCov, Cov2.GetArray(), 15*sizeof(Double_t));
+	// To Primary Vertex
+	if (fTpcInOutMatch->iPV) {
+	  //	  step = vHelices[io].Step(stepMX, xyzLPV.xyz());
+	  step = vHelices[io].Path(fTpcInOutMatch->xPV, fTpcInOutMatch->yPV);
+	  if (TMath::Abs(step) >= stepMX) goto FAILED;;
+	  vHelices[io].Move(step);
+	  if (Debug()%10 > 5) {
+	    if (! io) cout << "InAtVx:\t";
+	    else      cout << "OutAtVx:\t";
+	    const THelixFitter &p = *&vHelices[io];
+	    p.Print("");
+	    *HlxPars[io+2] = vHelices[io];
+	    HlxPars[io+2]->sector = sector;
+	    if (step < 0) {HlxPars[io+2]->nx *= -1; HlxPars[io+2]->ny *= -1; HlxPars[io+2]->nz *= -1;}
+	    HlxPars[io+2]->Rho = vHelices[io].GetRho();
+	    HlxPars[io+2]->dRho = vHelices[io].GetDRho();
+	    vHelices[io].StiEmx(StiErr);
+	    TRSymMatrix StiMtx(6,StiErr);// PrPP(Make,StiMtx);
+	    TRMatrix &S2R = GetSti2R(HlxPars[io]->nx, HlxPars[io+2]->ny, HlxPars[io+2]->nz);
+	    TRSymMatrix Cov2(S2R,TRArray::kATxSxA,StiMtx);//  PrPP(Make,Cov2);
+	    memcpy(HlxPars[io+2]->fCov, Cov2.GetArray(), 15*sizeof(Double_t));
+	    PrPP(Make, *HlxPars[io+2]);
+	  }
+	}
       } // end loop over helices
       if (TpcInOutTree)	TpcInOutTree->Fill();
     FAILED:

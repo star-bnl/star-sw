@@ -76,10 +76,16 @@ public:
   Double_t charge;
   Int_t    NoFitPoints;
   Double_t pX, pY, pZ;
+  Int_t          iPV;  //  iPV == 0 vertex has not been defined
+  Double_t       xPV;
+  Double_t       yPV;
+  Double_t       zPV;
   //  StThreeVectorF pxyzG;
   Char_t         end[1]; // !
   HelixPar_t In;
   HelixPar_t Out;
+  HelixPar_t InAtVx;
+  HelixPar_t OutAtVx;
   void        Clear(Option_t *opt = 0) {if (opt); memset(beg, 0, end-beg); In.Clear(); Out.Clear();}
   ClassDef(StTpcInOutMatch,1)
 };
