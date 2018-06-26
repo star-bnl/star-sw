@@ -161,7 +161,7 @@ Int_t StVMCMaker::Init() {
   fgStarVMCApplication = new StarVMCApplication("StarVMC", "The STAR VMC application");
   fgGeant3 = (TGeant3TGeo *) TVirtualMC::GetMC();
   if (! fgGeant3) {
-    fgGeant3 = new TGeant3TGeo("TGeant3TGeo",4000000);
+    fgGeant3 = new TGeant3TGeo("TGeant3TGeo");
   }
   LOG_INFO << "Init Geant3 has been created." << endm;
   fgGeant3->SetExternalDecayer(TPythia6Decayer::Instance());
@@ -218,7 +218,8 @@ Int_t StVMCMaker::Init() {
     fgStarVMCApplication->SetStepping(hits);
   }
   SafeDelete(gRandom);
-  gRandom = new TRandom3(IAttr("RunG"));
+  fRunNo = IAttr("RunG");
+  gRandom = new TRandom3(fRunNo);
   fgGeant3->SetRandom(gRandom);
   LOG_INFO << "Init, Generator type: TRandom3 Seed: " << gRandom->GetSeed() << endm;
   TString GoodTriggers(SAttr("GoodTriggers"));
@@ -232,6 +233,7 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
   if (! gGeoManager) {
     TObjectSet *geom = (TObjectSet *) GetDataBase("VmcGeometry/Geometry");
     if (! geom) {
+
       LOG_WARN << "StVMCMaker::InitRun: Can't get VMC geometry, try AgiGeometry" <<endm;
       geom = (TObjectSet *) GetDataBase("AgiGeometry/Geometry");
     }
@@ -279,6 +281,8 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
       if (!fEvtHddr) {                            // Standalone run
 	fEvtHddr = new StEvtHddr(m_ConstSet);
 	SetOutput(fEvtHddr);	                //Declare this "EvtHddr" for output
+      }
+      if (fEvtHddr->GetRunNumber() < 0) {
 	fEvtHddr->SetRunNumber(fRunNo);
 	fEvtHddr->SetEventNumber(0);
 	fEvtHddr->SetEventType("VMC");
@@ -323,7 +327,23 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
     TVirtualMC::GetMC()->SetCut("PPCUTM", 	.001  );
     TVirtualMC::GetMC()->SetCut("TOFMAX", 	50.e-6);
   }
-  fgStarVMCApplication->InitMC();
+  fgStarVMCApplication->InitMC(SAttr("VMCConfig"));
+  Double_t scaleX0 = DAttr("ScaleX04TpcGas");
+  if (scaleX0 > 0.0) {
+    TList *materials = gGeoManager->GetListOfMaterials();
+    TIter next(materials);
+    TGeoMaterial *mat = 0;
+    while ((mat = (TGeoMaterial *) next())) {
+      TString MatName(mat->GetName());
+      if (MatName == "TPCE_P10" || MatName == "TPCE_SENSITIVE_GAS") {
+	Double_t x0 = mat->GetRadLen();
+	cout << "Change radl. length for " << MatName.Data() << " from " << x0 << "\to " << x0/scaleX0 << endl;
+	cout << "Old\t"; mat->Print();
+	mat->SetRadLen(-x0/scaleX0);
+	cout << "New\t"; mat->Print();
+      }
+    }
+  }
   if (! gGeoManager->IsClosed()) {
     gGeoManager->CloseGeometry();
   }
