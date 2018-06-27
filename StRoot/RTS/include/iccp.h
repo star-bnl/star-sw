@@ -549,8 +549,8 @@ struct ic_spool_free_disk
 
 struct TokenManagerIccpPayload {
     int sz;
-    int rtsMask;     // only used for TRG node.
     int detLocalId;  // ID passed to and from dets...
+    UINT64 rtsMask;
 };
 
 struct TokenManagerResults {

@@ -3,7 +3,7 @@
 
 #include <sys/types.h>
 #include <daqFormats.h>
-
+#include <rts.h>
 // Event Flag Definition
 
 typedef unsigned int u_int;
@@ -79,10 +79,32 @@ struct iccp2k {
 // else 
 //    version = gbPayloadVersion...
 
-#define GB_PAYLOAD_VERSION 0xDA000002
-
-// 2008 run, pre-new TCU:   gbPayloadVersion=0xDA000002, TrgDataFmtVer=0x40
+#define GB_PAYLOAD_VERSION 0xDA000003
+// 2019 run,  expand the rtsDetMask
 struct gbPayload {
+  u_int gbPayloadVersion;
+
+  union {
+    EvtDescData EventDescriptor ;   // take from data!  // big endian
+    u_int eventDesc[sizeof(EvtDescData)/4];
+  };
+
+  // The rest is all little endian...
+  u_int L3summary[4] ;
+  u_int L2summary[2];
+  u_int L1summary[2];
+  UINT64 rtsDetMask;
+  u_int eventNumber;
+  u_int sec;
+  u_int usec;
+  u_int flags;            // bit 0 set, tpc raw data inside
+  u_int evp;
+  u_int token;
+};
+
+// #define GB_PAYLOAD_VERSION 0xDA000002
+// 2008 run, pre-new TCU:   gbPayloadVersion=0xDA000002, TrgDataFmtVer=0x40
+struct gbPayload_0x02 {
   u_int gbPayloadVersion;
 
   union {
