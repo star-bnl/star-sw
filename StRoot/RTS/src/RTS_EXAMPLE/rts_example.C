@@ -477,7 +477,7 @@ static int trg_doer(daqReader *rdr, const char  *do_print)
 	
 			if(do_print) {	// I have no clue but let me print first few words...
 
-				printf("EvtDescData %u %u --> %u\n",evtDesc->tcuCtrBunch_hi,evtDesc->DSMAddress,rcc_timestamp) ;
+			    //printf("EvtDescData %u %u --> %u  mark: 0x%x\n",evtDesc->tcuCtrBunch_hi,evtDesc->DSMAddress,rcc_timestamp,evtDesc->TCUMark) ;
 
 				// simple start of trig desc; the way it should be...
 				struct simple_desc {
@@ -1788,9 +1788,12 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
       
 	    UINT32 bunches_h = swap16(evtDesc->tcuCtrBunch_hi);
 	    UINT32 bunches = swap16(evtDesc->DSMAddress) & 0xffff;
-
-	    bunches |= bunches_h << 16;
-
+	    
+	    UINT32 bx_high = swap32(evtDesc->bunchXing_hi);
+	    UINT32 bx_low = swap32(evtDesc->bunchXing_lo);
+	    UINT64 bx64 = bx_high;
+	    bx64 = (bx64 << 32) + bx_low;
+	    
 	    double bx_sec = bunches/9.3e6;
 	   
 	    TrgSumData *trgSum = (TrgSumData *)(((char *)trg) + swap32(trg->Summary_ofl.offset));
@@ -1870,6 +1873,9 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 		   trgCrateMask,
 		   bx_sec);
 
+	    // seq, size, bx, bx % 120
+	    printf("L4BUG: %d %d %lld %lld\n", rdr->seq, rdr->event_size, bx64, bx64 % 120);
+	    
 	    printf("EvtDescData %d %d %d\n",evtDesc->tcuCtrBunch_hi,evtDesc->DSMAddress,0) ;
 
 	    //TrgSumData *trgSum = (TrgSumData *)(((char *)trg) + swap32(trg->Summary_ofl.offset));
