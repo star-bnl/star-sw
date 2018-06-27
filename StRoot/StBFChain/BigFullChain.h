@@ -1319,7 +1319,7 @@ Bfc_st BFC[] = { // standard chains
   {"StarMiniCern","" ,"","geant3",""                       ,"","STAR addition to minicern OBSOLETE",kFALSE},
   {"mysql"       ,"" ,"","",""                                            ,"libmysqlclient","MySQL",kFALSE},
   {"libPhysics"  ,"" ,"","",""                                              ,"libPhysics","TVector",kFALSE},
-  {"geant3vmc"   ,"" ,"","-usexgeom,-xgeometry","",        "libGeom,libVMC,libgeant3", "VMC geant3",kFALSE},
+  {"geant3vmc"  ,"" ,"","-usexgeom,-xgeometry","","libGeom,libVMC,minicern,libgeant3", "VMC geant3",kFALSE},
   {"geant3"      ,"" ,"","geant3vmc",""   ,"EG,Pythia6,EGPythia6","VMC geant3 plus ROOT EG,pythia6",kFALSE},
   {"geometry"    ,"" ,"","",""                                    ,"geometry","geometry+Mag.Field",kFALSE},
   {"StarMagField","", "","magF"                          ,"","VMC,StarMagField","Load StarMagField",kFALSE},

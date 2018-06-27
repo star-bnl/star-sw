@@ -25,7 +25,14 @@
 #include "TObjArray.h"
 #include "TArrayI.h"
 
+#include <map>
+#include <set>
+
 class TGeoHMatrix;
+class TGeoRCExtension;
+#if ROOT_VERSION_CODE >= 396548 /* ROOT_VERSION(6,13,4) */
+class TVirtualMCSensitiveDetector;
+#endif /* ROOT_VERSION(6,13,4) */
 class TArrayD;
 class TString;
 
@@ -692,9 +699,12 @@ public:
   Double_t Xsec(char* reac, Double_t energy, Int_t part, Int_t mate);
   void  TrackPosition(TLorentzVector &xyz) const;
   void  TrackPosition(Double_t &x, Double_t &y, Double_t &z) const;
+  void  TrackPosition(Float_t &x, Float_t &y, Float_t &z) const;
   void  TrackMomentum(TLorentzVector &xyz) const;
   void  TrackMomentum(Double_t &px, Double_t &py, Double_t &pz,
                       Double_t &etot) const;
+  void  TrackMomentum(Float_t &px, Float_t &py, Float_t &pz,
+                      Float_t &etot) const;
   Int_t NofVolumes() const;
   Int_t NofVolDaughters(const char* volName) const;
   const char*  VolDaughterName(const char* volName, Int_t i) const;
@@ -760,6 +770,7 @@ public:
   virtual Int_t CurrentMedium() const;
   virtual Int_t GetMedium() const;
   virtual Double_t Edep() const;
+  virtual Double_t NIELEdep() const;
   virtual Double_t Etot() const;
 
   virtual void  Material(Int_t& kmat, const char* name, Double_t a, Double_t z,
@@ -1131,7 +1142,17 @@ public:
    virtual void Trscsp(Float_t *ps,Float_t *rs,Float_t *pc,Float_t *rc,Float_t *h,
 			Float_t &ch,Int_t &ierr,Float_t &spx);
    virtual void Trspsc(Float_t *ps,Float_t *rs,Float_t *pc,Float_t *rc,Float_t *h,
-			Float_t &ch,Int_t &ierr,Float_t &spx);
+                       Float_t &ch,Int_t &ierr,Float_t &spx);
+
+#if ROOT_VERSION_CODE >= 396548 /* ROOT_VERSION(6,13,4) */
+  // Methods for sensitive detectors
+
+   virtual void SetSensitiveDetector(const TString& volumeName, TVirtualMCSensitiveDetector* sd);
+   virtual TVirtualMCSensitiveDetector* GetSensitiveDetector(const TString& volumeName) const;
+   virtual TVirtualMCSensitiveDetector* GetCurrentSensitiveDetector() const;
+   virtual void SetExclusiveSDScoring(Bool_t exclusiveSDScoring);
+   Bool_t IsExclusiveSDScoring() const;
+#endif /* ROOT_VERSION(6,13,4) */
   // Control Methods
 
   virtual void FinishGeometry();
@@ -1140,6 +1161,8 @@ public:
   virtual void ProcessEvent();
   virtual Bool_t ProcessRun(Int_t nevent);
   virtual void AddParticlesToPdgDataBase() const;
+  virtual void SetCollectTracks(Bool_t) {}
+  Bool_t IsCollectTracks() const {return kFALSE;}
 
   //
   virtual void SetColors();
@@ -1220,15 +1243,18 @@ protected:
                                         // in FinishGeometry()
   Bool_t           fStopRun;            // The flag for stopping run by a user
   Bool_t           fSkipNeutrinos;      // The flag for skipping neutrinos from decays
-
+#if ROOT_VERSION_CODE >= 396548 /* ROOT_VERSION(6,13,4) */
+  Bool_t           fExclusiveSDScoring; //!
+  std::set<TVirtualMCSensitiveDetector*>  fUserSDs; //!
+  std::map<TString, TVirtualMCSensitiveDetector*>  fUserSDMap; //!
+#endif /* ROOT_VERSION(6,13,4) */
   TMCProcess G3toVMC(Int_t iproc) const;
 
   void   DefineParticles();
   Int_t  TransportMethod(TMCParticleType particleType) const;
   TString  ParticleClass(TMCParticleType particleType) const;
   TMCParticleType ParticleType(Int_t itrtyp) const;
-  virtual void SetCollectTracks(Bool_t) {}
-  Bool_t IsCollectTracks() const {return kFALSE;}
+
   enum {kTRIG = BIT(14),
         kSWIT = BIT(15),
         kDEBU = BIT(16),
@@ -1265,7 +1291,11 @@ protected:
   // particles definition
   Int_t GetIonPdg(Int_t z, Int_t a, Int_t i = 0) const;                
   Int_t GetSpecialPdg(Int_t number) const;                
-
+#if ROOT_VERSION_CODE >= 396548 /* ROOT_VERSION(6,13,4) */
+  // sensitive detectors
+  void InitSDs();
+  void EndOfEventForSDs();
+#endif /* ROOT_VERSION(6,13,4) */
   ClassDef(TGeant3,1)  //C++ interface to Geant basic routines
 };
 

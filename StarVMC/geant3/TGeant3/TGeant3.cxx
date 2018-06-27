@@ -569,6 +569,9 @@ Cleanup of code
 
 #include "TCallf77.h"
 #include "TVirtualMCDecayer.h"
+#if ROOT_VERSION_CODE >= 396548 /* ROOT_VERSION(6,13,4) */
+#include "TVirtualMCSensitiveDetector.h"
+#endif
 #include "TPDGCode.h"
 using namespace std;
 #ifndef WIN32
@@ -1134,8 +1137,11 @@ Gconsx_t *gconsx=0;          //! GCONSX common structure
 Gcjump_t *gcjump=0;          //! GCJUMP common structure
 Sckine_t *sckine=0;
 
-
-
+//
+// TVirtualMCApplication global pointer
+//
+TVirtualMCApplication* vmcApplication =0;
+ 
 extern "C"  type_of_call void gtonlyg3(Int_t&);
 void (*fginvol)(Float_t*, Int_t&) = 0;
 void (*fgtmedi)(Float_t*, Int_t&) = 0;
@@ -1168,12 +1174,20 @@ TGeant3::TGeant3()
     fMCGeo(0),
     fImportRootGeometry(kFALSE),
     fStopRun(kFALSE),
+#if ROOT_VERSION_CODE >= 396548 /* ROOT_VERSION(6,13,4) */
+    fSkipNeutrinos(kTRUE),
+    fExclusiveSDScoring(kFALSE),
+    fUserSDs(),
+    fUserSDMap()
+#else
     fSkipNeutrinos(kTRUE)
+#endif /* ROOT_VERSION(6,13,4) */
 {
   //
   // Default constructor
   //
    geant3 = this;
+   vmcApplication = TVirtualMCApplication::Instance();
 }
 
 //______________________________________________________________________
@@ -1185,7 +1199,14 @@ TGeant3::TGeant3(const char *title, Int_t nwgeant)
     fMCGeo(0),
     fImportRootGeometry(kFALSE),
     fStopRun(kFALSE),
+#if ROOT_VERSION_CODE >= 396548 /* ROOT_VERSION(6,13,4) */
+    fSkipNeutrinos(kTRUE),
+    fExclusiveSDScoring(kFALSE),
+    fUserSDs(),
+    fUserSDMap()
+#else
     fSkipNeutrinos(kTRUE)
+#endif /* ROOT_VERSION(6,13,4) */
 {
   //
   // Standard constructor for TGeant3 with ZEBRA initialization
@@ -1205,7 +1226,7 @@ TGeant3::TGeant3(const char *title, Int_t nwgeant)
 #endif
 
   geant3 = this;
-
+  vmcApplication = TVirtualMCApplication::Instance();
   if(nwgeant) {
     g3zebra(nwgeant);
     g3init();
@@ -1246,7 +1267,6 @@ TGeant3::TGeant3(const char *title, Int_t nwgeant)
     if (!TestBit(kOPTI)) SetOPTI(2);       // Select optimisation level for 
                                            // GEANT geometry searches (0,1,2)
     if (!TestBit(kERAN)) SetERAN(5.e-7);   //
-
     DefineParticles();
     fApplication->AddParticles();
 #if ROOT_VERSION_CODE >= ROOT_VERSION(5,22,0)
@@ -1311,6 +1331,7 @@ void TGeant3::InitGEANE()
   geant3 = this;
   geant3->SetECut(1.);
   geant3->SetClose(0,pf,999.,w1,w2,p1,p2,p3,cl);
+  vmcApplication = TVirtualMCApplication::Instance();
 }
 
 //______________________________________________________________________
@@ -2412,6 +2433,18 @@ void TGeant3::TrackPosition(Double_t &x, Double_t &y, Double_t &z) const
 }
 
 //______________________________________________________________________
+void TGeant3::TrackPosition(Float_t &x, Float_t &y, Float_t &z) const
+{
+  //
+  // Return the current position in the master reference frame of the
+  // track being transported
+  //
+  x=fGctrak->vect[0];
+  y=fGctrak->vect[1];
+  z=fGctrak->vect[2];
+}
+
+//______________________________________________________________________
 Double_t TGeant3::TrackTime() const
 {
   //
@@ -2443,6 +2476,21 @@ void TGeant3::TrackMomentum(Double_t &px, Double_t &py, Double_t &pz,
   // currently being transported
   //
   Double_t ptot=fGctrak->vect[6];
+  px  =fGctrak->vect[3]*ptot;
+  py  =fGctrak->vect[4]*ptot;
+  pz  =fGctrak->vect[5]*ptot;
+  etot=fGctrak->getot;
+ }
+
+//______________________________________________________________________
+void TGeant3::TrackMomentum(Float_t &px, Float_t &py, Float_t &pz,
+                            Float_t &etot) const
+{
+  //
+  // Return the direction and the momentum (GeV/c) of the track
+  // currently being transported
+  //
+  Float_t ptot=fGctrak->vect[6];
   px  =fGctrak->vect[3]*ptot;
   py  =fGctrak->vect[4]*ptot;
   pz  =fGctrak->vect[5]*ptot;
@@ -3236,6 +3284,16 @@ Double_t TGeant3::Edep() const
   // Return the energy lost in the current step
   //
   return fGctrak->destep;
+}
+
+//______________________________________________________________________
+Double_t TGeant3::NIELEdep() const
+{
+  //
+  // Return the non-ionizing energy deposit in the current step.
+  // Dummy implementaion - as this info is not available in Geant3.
+  //
+  return 0.;
 }
 
 //______________________________________________________________________
@@ -4382,11 +4440,12 @@ void  TGeant3::Gspos(const char *name, Int_t nr, const char *mother,
   //
   //  It positions a previously defined volume in the mother.
   //
-
+#if 0
   TString only = konly;
   only.ToLower();
-//   Bool_t isOnly = kFALSE;
-//   if (only.Contains("only")) isOnly = kTRUE;
+  Bool_t isOnly = kFALSE;
+  if (only.Contains("only")) isOnly = kTRUE;
+#endif
   char vname[5];
   Vname(name,vname);
   char vmother[5];
@@ -4409,11 +4468,13 @@ void  TGeant3::G3Gsposp(const char *name, Int_t nr, const char *mother,
   //      Place a copy of generic volume NAME with user number
   //      NR inside MOTHER, with its parameters UPAR(1..NP)
   //
+#if 0
   TString only = konly;
   only.ToLower();
-//   Bool_t isOnly = kFALSE;
-//   if (only.Contains("only")) isOnly = kTRUE;
-  char vname[5];
+  Bool_t isOnly = kFALSE;
+  if (only.Contains("only")) isOnly = kTRUE;
+#endif
+   char vname[5];
   Vname(name,vname);
   char vmother[5];
   Vname(mother,vmother);
@@ -6429,7 +6490,55 @@ TString  TGeant3::ParticleClass(TMCParticleType particleType) const
     default:          return TString("Unknown");
   }
 }
+#if ROOT_VERSION_CODE >= 396548 /* ROOT_VERSION(6,13,4) */
+//_____________________________________________________________________________
+void TGeant3::SetSensitiveDetector(const TString& volumeName,
+                                   TVirtualMCSensitiveDetector* userSD)
+{
+  // Add the userSD in the vector only once
+  if ( fUserSDs.find(userSD) == fUserSDs.end() ) {
+    fUserSDs.insert(userSD);
+  }
 
+  if ( fUserSDMap.find(volumeName) == fUserSDMap.end() ) {
+    fUserSDMap[volumeName] = userSD;
+  } else {
+    Warning("SetSensitiveDetector",
+      "A sensitive detector for volume %s has been already defined. Setting was ingored.\n",
+      volumeName.Data());
+  }
+}
+
+//_____________________________________________________________________________
+TVirtualMCSensitiveDetector* TGeant3::GetSensitiveDetector(const TString& volumeName) const
+{
+  std::map<TString, TVirtualMCSensitiveDetector*>::const_iterator it
+    = fUserSDMap.find(volumeName);
+
+  if ( it == fUserSDMap.end() ) {
+    return 0;
+  }
+
+  return it->second;
+}
+
+//_____________________________________________________________________________
+TVirtualMCSensitiveDetector* TGeant3::GetCurrentSensitiveDetector() const
+{
+  return GetSensitiveDetector(CurrentVolName());
+}
+//_____________________________________________________________________________
+void TGeant3::SetExclusiveSDScoring(Bool_t exclusiveSDScoring)
+{
+  fExclusiveSDScoring = exclusiveSDScoring;
+}
+
+//_____________________________________________________________________________
+Bool_t TGeant3::IsExclusiveSDScoring() const
+{
+  return fExclusiveSDScoring;
+}
+#endif /* ROOT_VERSION(6,13,4) */
 //______________________________________________________________________
 void TGeant3::FinishGeometry()
 {
@@ -6457,12 +6566,29 @@ void TGeant3::Init()
     //=================Create Materials and geometry
     //
 
+    //  Some default settings, if not changed by user
+    if (!TestBit(kTRIG)) SetTRIG(1);       // Number of events to be processed
+    if (!TestBit(kSWIT)) SetSWIT(4, 10);   //
+    if (!TestBit(kDEBU)) SetDEBU(0, 0, 1); //
+    if (!TestBit(kAUTO)) SetAUTO(1);       // Select automatic STMIN etc... 
+                                           // calc. (AUTO 1) or manual (AUTO 0)
+    if (!TestBit(kABAN)) SetABAN(0);       // Restore 3.16 behaviour for 
+                                           // abandoned tracks
+    if (!TestBit(kOPTI)) SetOPTI(2);       // Select optimisation level for 
+                                           // GEANT geometry searches (0,1,2)
+    if (!TestBit(kERAN)) SetERAN(5.e-7);   //
     fApplication->ConstructGeometry();
     FinishGeometry();
 #if ROOT_VERSION_CODE >= ROOT_VERSION(5,01,1)
     fApplication->ConstructOpGeometry();
 #endif
+#if ROOT_VERSION_CODE >= 396548 /* ROOT_VERSION(6,13,4) */
+    fApplication->ConstructSensitiveDetectors();
+#endif /* ROOT_VERSION(6,13,4) */
     fApplication->InitGeometry();
+#if ROOT_VERSION_CODE >= 396548 /* ROOT_VERSION(6,13,4) */
+    InitSDs();
+#endif /* ROOT_VERSION(6,13,4) */
 }
 
 
@@ -6483,6 +6609,9 @@ Bool_t TGeant3::ProcessRun(Int_t nevent)
      if (fStopRun) break;
      ProcessEvent();
      if (fStopRun) break;
+#if ROOT_VERSION_CODE >= 396548 /* ROOT_VERSION(6,13,4) */
+     EndOfEventForSDs();
+#endif /* ROOT_VERSION(6,13,4) */
      fApplication->FinishEvent();
      if (fStopRun) break;
   }
@@ -7255,3 +7384,23 @@ Int_t TGeant3::GetSpecialPdg(Int_t number) const
 
   return 50000000 + number;
 }                
+#if ROOT_VERSION_CODE >= 396548 /* ROOT_VERSION(6,13,4) */
+//__________________________________________________________________
+void TGeant3::InitSDs()
+{
+  std::set<TVirtualMCSensitiveDetector*>::iterator it;
+  for (it = fUserSDs.begin(); it != fUserSDs.end(); it++ ) {
+     (*it)->Initialize();
+  }
+}
+
+//__________________________________________________________________
+void TGeant3::EndOfEventForSDs()
+{
+  std::set<TVirtualMCSensitiveDetector*>::iterator it;
+  for (it = fUserSDs.begin(); it != fUserSDs.end(); it++ ) {
+     (*it)->EndOfEvent();
+     if ( fStopRun ) break;
+  }
+}
+#endif /* ROOT_VERSION(6,13,4) */

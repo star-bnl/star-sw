@@ -12,8 +12,13 @@
 
 #include "TGeant3.h"
 
-class TGeoMaterial;
+#include <map>
+#include <set>
 
+class TGeoMaterial;
+#if ROOT_VERSION_CODE >= 396548 /* ROOT_VERSION(6,13,4) */
+class TVirtualMCSensitiveDetector;
+#endif /* ROOT_VERSION(6,13,4) */
 //______________________________________________________________
 //
 //       Geant3 prototypes for commons
@@ -111,7 +116,7 @@ public:
 
       // functions from GBASE
    virtual  void  Ggclos();
-
+   virtual  void  Gprint(const char *name);
       // functions from GCONS
    virtual  void  Gsmate(Int_t imat, const char *name, Float_t a, Float_t z,
                          Float_t dens, Float_t radl, Float_t absl);
@@ -209,7 +214,11 @@ public:
   // Control Methods
 
   virtual void FinishGeometry();
-
+#if ROOT_VERSION_CODE >= 396548 /* ROOT_VERSION(6,13,4) */
+  // methods for sensitive detectors
+  virtual void SetSensitiveDetector(const TString& volumeName, TVirtualMCSensitiveDetector* sd);
+  virtual TVirtualMCSensitiveDetector* GetCurrentSensitiveDetector() const;
+#endif /* ROOT_VERSION(6,13,4) */
   //
   virtual void SetColors();
   virtual void SetCollectTracks(Bool_t flag=kTRUE) {fCollectTracks = flag;}
@@ -222,7 +231,9 @@ protected:
   Bool_t           fCollectTracks;      //! Tracks get collected via TGeoTrack 
   Bool_t           fIsComputeNextMatrix; //! Compute systematically the matrix to the next crossed node.
   Gcvol1_t *fGcvol1;          //! GCVOLU common structure
-
+#if ROOT_VERSION_CODE >= 396548 /* ROOT_VERSION(6,13,4) */
+  std::map<TVirtualMCSensitiveDetector*, TGeoRCExtension*>  fUserSDTGeoMap; //!
+#endif /* ROOT_VERSION(6,13,4) */
 private:
 
   TGeant3TGeo(const TGeant3TGeo &) : TGeant3() {}
