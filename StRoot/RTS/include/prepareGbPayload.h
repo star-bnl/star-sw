@@ -25,9 +25,9 @@ class Lxgbx {
     int run_type;
     int cl_run;     // clusters for tpx
     int raw_write;  // raw write for tpx
-    UINT32 dets_in_run_mask;
+    UINT64 dets_in_run_mask;
 
-    UINT32 tokenZeroTriggers;
+    UINT64 tokenZeroTriggers;
  
 
     struct evpCfg {
@@ -73,6 +73,7 @@ class Lxgbx {
 	return 0;  
     }
 
+    /*
     // divisor is for use in EVB where rate gets divided by number of evbs...
     int configEvp(STAR_CFG *cfg, int divisor=1)
     {
@@ -102,6 +103,7 @@ class Lxgbx {
 
 	return 0;
     }
+    */
 
     int config(SimpleXmlDoc *xml) {
 	int ret;
@@ -128,7 +130,7 @@ class Lxgbx {
 	    if(sys == DAQ_SYSTEM) continue;
 	    if(sys == TRG_SYSTEM) continue;
 	    
-	    dets_in_run_mask |= (1<<sys);
+	    dets_in_run_mask |= (1ll<<sys);
 	}
 	
 	tokenZeroTriggers = 0;
@@ -138,14 +140,15 @@ class Lxgbx {
 	    if(!inrun) continue;
 
 	    if(xml->getParamI("trg_setup.triggers[%d].userdata.tokenZero", i)) {
-		tokenZeroTriggers |= (1<<i);
+		tokenZeroTriggers |= (1ll<<i);
 	    }
 	}
 	
-	LOG(NOTE, "dets_in_run_mask = 0x%x",dets_in_run_mask,0,0,0,0);
+	LOG(NOTE, "dets_in_run_mask = 0x%llx",dets_in_run_mask,0,0,0,0);
 	return ret;
     }
 
+    /*
     // Returns -1 if invalid configuration
     int config(STAR_CFG *cfg)
     {
@@ -182,6 +185,7 @@ class Lxgbx {
 
 	return ret;
     }
+    */
 
     double mygettime() {
 #ifdef __vxworks
@@ -332,20 +336,20 @@ class Lxgbx {
 
 	pay->flags = l2h32(pay->flags);
     
-	UINT32 detmask = b2h16(evt->actionWdDetectorBitMask);
+	UINT32 awdetmask = b2h16(evt->actionWdDetectorBitMask);
 
-	LOG(NOTE, "grp_mask = 0x%x",detmask,0,0,0,0);
+	LOG(NOTE, "grp_mask = 0x%x",awdetmask,0,0,0,0);
+	
+	UINT64 detmask = grp2rts_mask(awdetmask);
 
-	detmask = grp2rts_mask(detmask);
-
-	LOG(NOTE, "potential det_mask = 0x%x dets_in_run_mask 0x%x",detmask,dets_in_run_mask,0,0,0);
+	LOG(NOTE, "potential det_mask = 0x%llx dets_in_run_mask 0x%llx",detmask,dets_in_run_mask,0,0,0);
 
 	detmask &= dets_in_run_mask;
-	detmask |= (1<<TRG_SYSTEM);
+	detmask |= (1ll<<TRG_SYSTEM);
+	
+	LOG(NOTE, "final det_mask = 0x%llx",detmask,0,0,0,0);
 
-	LOG(NOTE, "final det_mask = 0x%x",detmask,0,0,0,0);
-
-	pay->rtsDetMask = l2h32(detmask);
+	pay->rtsDetMask = l2h64(detmask);
 
 	if(pay->flags & EVBFLAG_L25ABORT) {
 	    LOG(DBG, "Sending L25Abort: token=%d event=%d 1l=0x%x l2=0x%x l2abort=%d",
@@ -362,18 +366,29 @@ class Lxgbx {
 	// Set event descriptor...  (in big endian)
 	EvtDescData *des = (EvtDescData *)pay->eventDesc;
 	des->TrgToken = b2h16(0);
-	des->actionWdDetectorBitMask = b2h16(dets_in_run_mask);
+
+
+	// WRONG!
+	des->actionWdDetectorBitMask = b2h16(0);
+
 	des->TrgDataFmtVer = FORMAT_VERSION & 0x000000ff;
 	// 
 
-	pay->gbPayloadVersion = GB_PAYLOAD_VERSION;
+	pay->gbPayloadVersion = l2h32(GB_PAYLOAD_VERSION);
 	pay->eventNumber = l2h32(eventNumber);
 	pay->token = 0;
 
 	// The rest should be little endian 
-	pay->L1summary[0] = l2h32(tokenZeroTriggers);
-	pay->L2summary[0] = l2h32(tokenZeroTriggers);
-	pay->L3summary[0] = l2h32(tokenZeroTriggers);
+	UINT32 tzt_lo = tokenZeroTriggers & 0xffffffff;
+	UINT32 tzt_hi = (tokenZeroTriggers >> 32) & 0xffffffff;
+	
+	pay->L1summary[0] = l2h32(tzt_lo);
+	pay->L1summary[1] = l2h32(tzt_hi);
+	pay->L2summary[0] = l2h32(tzt_lo);
+	pay->L2summary[1] = l2h32(tzt_hi);
+	pay->L3summary[0] = l2h32(tzt_lo);
+	pay->L3summary[1] = l2h32(tzt_hi);
+
 	pay->evp = l2h32(1);
 	pay->L3summary[3] = pay->evp;
     
@@ -390,8 +405,8 @@ class Lxgbx {
 #endif
 
 	//	int detmask = grp2rts_mask(dets_in_run_mask);
-	int detmask = dets_in_run_mask | (1<<TRG_ID);
-	pay->rtsDetMask = l2h32(detmask);    
+	UINT64 detmask = dets_in_run_mask | (1ll <<TRG_ID);
+	pay->rtsDetMask = l2h64(detmask);    
 
 	return 0;
     }
