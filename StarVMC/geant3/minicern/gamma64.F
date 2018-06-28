@@ -1,10 +1,7 @@
 *
-* $Id: gamma64.F,v 1.1.1.1 2009/02/18 20:32:28 fisyak Exp $
+* $Id$
 *
 * $Log: gamma64.F,v $
-* Revision 1.1.1.1  2009/02/18 20:32:28  fisyak
-*
-*
 * Revision 1.1.1.1  2002/06/16 15:18:44  hristov
 * Separate distribution  of Geant3
 *

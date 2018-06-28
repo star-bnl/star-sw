@@ -1,16 +1,7 @@
 *
-* $Id: sortzv.F,v 1.2 2009/02/25 00:08:29 fisyak Exp $
+* $Id$
 *
 * $Log: sortzv.F,v $
-* Revision 1.2  2009/02/25 00:08:29  fisyak
-* Clean up mess created after merging
-*
-* Revision 1.1.1.1  2004/07/17 20:01:57  perev
-* STAR version of Geant321 TGeant3 etc
-*
-* Revision 1.1.1.1  2002/07/24 15:56:27  rdm
-* initial import into CVS
-*
 * Revision 1.1.1.1  2002/06/16 15:18:47  hristov
 * Separate distribution  of Geant3
 *

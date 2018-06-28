@@ -1,10 +1,7 @@
 *
-* $Id: q_jbytet.inc,v 1.1.1.1 2009/02/18 20:32:36 fisyak Exp $
+* $Id$
 *
 * $Log: q_jbytet.inc,v $
-* Revision 1.1.1.1  2009/02/18 20:32:36  fisyak
-*
-*
 * Revision 1.1.1.1  2002/07/24 15:56:28  rdm
 * initial import into CVS
 *

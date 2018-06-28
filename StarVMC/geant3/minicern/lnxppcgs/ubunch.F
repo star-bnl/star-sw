@@ -1,10 +1,7 @@
 *
-* $Id: ubunch.F,v 1.1.1.1 2009/02/18 20:32:35 fisyak Exp $
+* $Id$
 *
 * $Log: ubunch.F,v $
-* Revision 1.1.1.1  2009/02/18 20:32:35  fisyak
-*
-*
 * Revision 1.1  2003/06/30 07:42:34  brun
 * From Federico:
 * Add new makefile for MacOS

@@ -1,10 +1,7 @@
 *
-* $Id: mtlprt.F,v 1.1.1.1 2009/02/18 20:32:28 fisyak Exp $
+* $Id$
 *
 * $Log: mtlprt.F,v $
-* Revision 1.1.1.1  2009/02/18 20:32:28  fisyak
-*
-*
 * Revision 1.1.1.1  2002/06/16 15:18:46  hristov
 * Separate distribution  of Geant3
 *
@@ -34,7 +31,7 @@
         IF(MLG .LT. 1) WRITE(  *,100) ERC(1:4),NAME,ERC,TEXT(1:LT)
         IF(MLG .GE. 1) WRITE(MLG,100) ERC(1:4),NAME,ERC,TEXT(1:LT)
       ENDIF
-      IF(.NOT.LRF) CALL ABEND! 'in MTLPRT'
+      IF(.NOT.LRF) STOP 'in MTLPRT'
       RETURN
 100   FORMAT(7X,'***** CERN ',A,1X,A,' ERROR ',A,': ',A)
       END

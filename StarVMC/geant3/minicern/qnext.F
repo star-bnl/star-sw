@@ -1,10 +1,7 @@
 *
-* $Id: qnext.F,v 1.1.1.1 2009/02/18 20:32:28 fisyak Exp $
+* $Id$
 *
 * $Log: qnext.F,v $
-* Revision 1.1.1.1  2009/02/18 20:32:28  fisyak
-*
-*
 * Revision 1.1.1.1  2002/06/16 15:18:49  hristov
 * Separate distribution  of Geant3
 *
@@ -30,7 +27,7 @@ C--------------    END CDE                             --------------
    11 LUN = IQLOG
    12 WRITE (LUN,9001)
       IF (LUN.NE.IQLOG)            GO TO 11
-      CALL ABEND
+      STOP
 
  9001 FORMAT ('0!!!!!    DUMMY ROUTINE QNEXT REACHED.')
       END

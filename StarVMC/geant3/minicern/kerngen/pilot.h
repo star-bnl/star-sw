@@ -15,46 +15,46 @@
 #endif
 #endif
 #if defined(CERNLIB_MSDOS)
-#include "kdos.h"
+#include "kerngen/kdos.h"
 #endif
 #if defined(CERNLIB_WINNT)
-#include "kwnt.h"
+#include "kerngen/kwnt.h"
 #endif
 #if (defined(CERNLIB_DECS))&&(!defined(CERNLIB_QMVAOS))
-#include "kvmi.h"
+#include "kerngen/kvmi.h"
 #endif
 #if (defined(CERNLIB_DECS))&&(defined(CERNLIB_QMVAOS))
-#include "kvaos.h"
+#include "kerngen/kvaos.h"
 #endif
 #if defined(CERNLIB_HPUX)
-#include "khpx.h"
+#include "kerngen/khpx.h"
 #endif
 #if defined(CERNLIB_IBMRT)
-#include "kirt.h"
+#include "kerngen/kirt.h"
 #endif
 #if defined(CERNLIB_LINUX)
-#include "klnx.h"
+#include "kerngen/klnx.h"
 #endif
 #if defined(CERNLIB_MACMPW)
-#include "kmpw.h"
+#include "kerngen/kmpw.h"
 #endif
 #if defined(CERNLIB_OS9)
 #if 0
 * Added at release 94B
 #endif
-#include "kos9.h"
+#include "kerngen/kos9.h"
 #endif
 #if defined(CERNLIB_SGI)
-#include "ksgi.h"
+#include "kerngen/ksgi.h"
 #endif
 #if defined(CERNLIB_SUN)
-#include "ksun.h"
+#include "kerngen/ksun.h"
 #endif
 #if (defined(CERNLIB_VAXVMS))&&(!defined(CERNLIB_QMALPH))
-#include "kvax.h"
+#include "kerngen/kvax.h"
 #endif
 #if (defined(CERNLIB_VAXVMS))&&(defined(CERNLIB_QMALPH))
-#include "kalph.h"
+#include "kerngen/kalph.h"
 #endif
 #ifndef CERNLIB_A4
 #define CERNLIB_A4

@@ -1,10 +1,7 @@
 *
-* $Id: ranlux.F,v 1.1.1.1 2009/02/18 20:32:29 fisyak Exp $
+* $Id$
 *
 * $Log: ranlux.F,v $
-* Revision 1.1.1.1  2009/02/18 20:32:29  fisyak
-*
-*
 * Revision 1.1.1.1  2002/06/16 15:18:46  hristov
 * Separate distribution  of Geant3
 *

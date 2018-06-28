@@ -1,10 +1,7 @@
 *
-* $Id: iumode.F,v 1.1.1.1 2009/02/18 20:32:39 fisyak Exp $
+* $Id$
 *
 * $Log: iumode.F,v $
-* Revision 1.1.1.1  2009/02/18 20:32:39  fisyak
-*
-*
 * Revision 1.1.1.1  1999/05/18 15:55:30  fca
 * AliRoot sources
 *

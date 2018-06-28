@@ -1,10 +1,7 @@
 /*
- * $Id: lnblnk.c,v 1.1.1.1 2009/02/18 20:32:39 fisyak Exp $
+ * $Id$
  *
  * $Log: lnblnk.c,v $
- * Revision 1.1.1.1  2009/02/18 20:32:39  fisyak
- *
- *
  * Revision 1.1.1.1  2002/06/16 15:18:46  hristov
  * Separate distribution  of Geant3
  *

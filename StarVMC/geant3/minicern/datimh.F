@@ -1,10 +1,7 @@
 *
-* $Id: datimh.F,v 1.1.1.1 2009/02/18 20:32:28 fisyak Exp $
+* $Id$
 *
 * $Log: datimh.F,v $
-* Revision 1.1.1.1  2009/02/18 20:32:28  fisyak
-*
-*
 * Revision 1.1.1.1  2002/07/24 15:56:27  rdm
 * initial import into CVS
 *

@@ -1,10 +1,7 @@
 *
-* $Id: getenvf.F,v 1.1.1.1 2009/02/18 20:32:28 fisyak Exp $
+* $Id$
 *
 * $Log: getenvf.F,v $
-* Revision 1.1.1.1  2009/02/18 20:32:28  fisyak
-*
-*
 * Revision 1.1.1.1  2002/06/16 15:18:46  hristov
 * Separate distribution  of Geant3
 *

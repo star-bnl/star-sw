@@ -1,10 +1,7 @@
 *
-* $Id: q_jbyt.inc,v 1.1.1.1 2009/02/18 20:32:36 fisyak Exp $
+* $Id$
 *
 * $Log: q_jbyt.inc,v $
-* Revision 1.1.1.1  2009/02/18 20:32:36  fisyak
-*
-*
 * Revision 1.2  2002/12/02 16:37:45  brun
 * Changes from Federico Carminati and Peter Hristov who ported the system
 * on the Ithanium processors.It is tested on HP, Sun, and Alpha, everything

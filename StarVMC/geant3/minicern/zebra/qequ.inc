@@ -1,10 +1,7 @@
 *
-* $Id: qequ.inc,v 1.1.1.1 2009/02/18 20:32:35 fisyak Exp $
+* $Id$
 *
 * $Log: qequ.inc,v $
-* Revision 1.1.1.1  2009/02/18 20:32:35  fisyak
-*
-*
 * Revision 1.1.1.1  2002/06/16 15:18:50  hristov
 * Separate distribution  of Geant3
 *

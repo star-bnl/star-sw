@@ -1,10 +1,7 @@
 /*
- * $Id: traceqc.c,v 1.1.1.1 2009/02/18 20:32:34 fisyak Exp $
+ * $Id$
  *
  * $Log: traceqc.c,v $
- * Revision 1.1.1.1  2009/02/18 20:32:34  fisyak
- *
- *
  * Revision 1.1.1.1  1999/05/18 15:55:33  fca
  * AliRoot sources
  *

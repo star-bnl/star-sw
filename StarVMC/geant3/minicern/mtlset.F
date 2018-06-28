@@ -1,10 +1,7 @@
 *
-* $Id: mtlset.F,v 1.1.1.1 2009/02/18 20:32:28 fisyak Exp $
+* $Id$
 *
 * $Log: mtlset.F,v $
-* Revision 1.1.1.1  2009/02/18 20:32:28  fisyak
-*
-*
 * Revision 1.1.1.1  2002/06/16 15:18:46  hristov
 * Separate distribution  of Geant3
 *
@@ -208,7 +205,7 @@ C---  AFB301I: Argument for DLGAMA is out of range
       IF(ERC .EQ. CODE(I))  GOTO 21
    20 CONTINUE
       WRITE(*,100) ERC
-      CALL ABEND! 'in MTLSET'
+      STOP 'in MTLSET'
       RETURN
 
    21 LMF=KNTM(I) .GE. 1
