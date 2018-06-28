@@ -1,6 +1,7 @@
 #ifndef _DAQ_READERCLASS_HH_
 #define _DAQ_READERCLASS_HH_
 
+#include <rts.h>
 #include <ctype.h>
 #include <sys/types.h>
 #include "daqConfig.h"
