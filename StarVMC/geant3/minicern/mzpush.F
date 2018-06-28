@@ -1,7 +1,10 @@
 *
-* $Id$
+* $Id: mzpush.F,v 1.2 2018/06/28 19:27:00 fisyak Exp $
 *
 * $Log: mzpush.F,v $
+* Revision 1.2  2018/06/28 19:27:00  fisyak
+* Merge with geant3
+*
 * Revision 1.1.1.1  2002/06/16 15:18:49  hristov
 * Separate distribution  of Geant3
 *

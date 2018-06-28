@@ -1,7 +1,10 @@
 *
-* $Id: rstsel.F,v 1.1.1.3 2009/02/18 20:32:18 fisyak Exp $
+* $Id: rstsel.F,v 1.2 2018/06/28 19:29:24 fisyak Exp $
 *
 * $Log: rstsel.F,v $
+* Revision 1.2  2018/06/28 19:29:24  fisyak
+* Merge with geant3
+*
 * Revision 1.1.1.3  2009/02/18 20:32:18  fisyak
 * *** empty log message ***
 *

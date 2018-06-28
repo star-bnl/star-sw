@@ -1,7 +1,10 @@
 *
-* $Id$
+* $Id: ubunch.F,v 1.2 2018/06/28 16:15:17 fisyak Exp $
 *
 * $Log: ubunch.F,v $
+* Revision 1.2  2018/06/28 16:15:17  fisyak
+* Merge with geant3
+*
 * Revision 1.1  2003/06/30 07:42:34  brun
 * From Federico:
 * Add new makefile for MacOS

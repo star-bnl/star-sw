@@ -1,7 +1,10 @@
 *
-* $Id$
+* $Id: locatf.F,v 1.2 2018/06/28 19:26:59 fisyak Exp $
 *
 * $Log: locatf.F,v $
+* Revision 1.2  2018/06/28 19:26:59  fisyak
+* Merge with geant3
+*
 * Revision 1.1.1.1  2002/06/16 15:18:48  hristov
 * Separate distribution  of Geant3
 *

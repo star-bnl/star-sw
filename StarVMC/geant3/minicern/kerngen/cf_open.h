@@ -1,7 +1,10 @@
 /*
-* $Id$
+* $Id: cf_open.h,v 1.2 2018/06/28 16:15:58 fisyak Exp $
 *
 * $Log: cf_open.h,v $
+* Revision 1.2  2018/06/28 16:15:58  fisyak
+* Merge with geant3
+*
 * Revision 1.1.1.1  2002/06/16 15:18:46  hristov
 * Separate distribution  of Geant3
 *

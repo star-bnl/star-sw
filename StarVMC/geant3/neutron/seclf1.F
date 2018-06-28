@@ -1,7 +1,10 @@
 *
-* $Id: seclf1.F,v 1.1.1.3 2009/02/18 20:32:06 fisyak Exp $
+* $Id: seclf1.F,v 1.2 2018/06/28 19:29:23 fisyak Exp $
 *
 * $Log: seclf1.F,v $
+* Revision 1.2  2018/06/28 19:29:23  fisyak
+* Merge with geant3
+*
 * Revision 1.1.1.3  2009/02/18 20:32:06  fisyak
 * *** empty log message ***
 *

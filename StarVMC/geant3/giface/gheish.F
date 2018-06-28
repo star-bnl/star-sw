@@ -1,7 +1,10 @@
 *
-* $Id: gheish.F,v 1.2 2013/02/22 20:14:17 fisyak Exp $
+* $Id: gheish.F,v 1.3 2018/06/28 19:29:22 fisyak Exp $
 *
 * $Log: gheish.F,v $
+* Revision 1.3  2018/06/28 19:29:22  fisyak
+* Merge with geant3
+*
 * Revision 1.2  2013/02/22 20:14:17  fisyak
 * Freeze
 *

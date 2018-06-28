@@ -1,7 +1,10 @@
 *
-* $Id$
+* $Id: jbyt.F,v 1.2 2018/06/28 16:14:31 fisyak Exp $
 *
 * $Log: jbyt.F,v $
+* Revision 1.2  2018/06/28 16:14:31  fisyak
+* Merge with geant3
+*
 * Revision 1.1.1.1  1999/05/18 15:55:32  fca
 * AliRoot sources
 *

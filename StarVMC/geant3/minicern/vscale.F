@@ -1,7 +1,10 @@
 *
-* $Id$
+* $Id: vscale.F,v 1.3 2018/06/28 19:27:04 fisyak Exp $
 *
 * $Log: vscale.F,v $
+* Revision 1.3  2018/06/28 19:27:04  fisyak
+* Merge with geant3
+*
 * Revision 1.1.1.1  2002/06/16 15:18:47  hristov
 * Separate distribution  of Geant3
 *

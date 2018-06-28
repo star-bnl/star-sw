@@ -1,7 +1,10 @@
 *
-* $Id$
+* $Id: mzlink.F,v 1.2 2018/06/28 19:27:00 fisyak Exp $
 *
 * $Log: mzlink.F,v $
+* Revision 1.2  2018/06/28 19:27:00  fisyak
+* Merge with geant3
+*
 * Revision 1.1.1.1  2002/07/24 15:56:27  rdm
 * initial import into CVS
 *

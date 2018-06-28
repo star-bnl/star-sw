@@ -1,7 +1,10 @@
 *
-* $Id: stpair.F,v 1.1.1.3 2009/02/18 20:33:31 fisyak Exp $
+* $Id: stpair.F,v 1.2 2018/06/28 19:29:22 fisyak Exp $
 *
 * $Log: stpair.F,v $
+* Revision 1.2  2018/06/28 19:29:22  fisyak
+* Merge with geant3
+*
 * Revision 1.1.1.3  2009/02/18 20:33:31  fisyak
 * *** empty log message ***
 *

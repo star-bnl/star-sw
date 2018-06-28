@@ -1,7 +1,10 @@
 *
-* $Id$
+* $Id: q_shiftl.inc,v 1.2 2018/06/28 16:02:51 fisyak Exp $
 *
 * $Log: q_shiftl.inc,v $
+* Revision 1.2  2018/06/28 16:02:51  fisyak
+* Merge with geant3
+*
 * Revision 1.1.1.1  2002/07/24 15:56:28  rdm
 * initial import into CVS
 *

@@ -1,7 +1,10 @@
 *
-* $Id: gmate.F,v 1.1.1.3 2009/02/18 20:33:34 fisyak Exp $
+* $Id: gmate.F,v 1.2 2018/06/28 19:29:21 fisyak Exp $
 *
 * $Log: gmate.F,v $
+* Revision 1.2  2018/06/28 19:29:21  fisyak
+* Merge with geant3
+*
 * Revision 1.1.1.3  2009/02/18 20:33:34  fisyak
 * *** empty log message ***
 *

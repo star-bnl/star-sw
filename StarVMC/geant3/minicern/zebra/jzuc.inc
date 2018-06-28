@@ -1,7 +1,10 @@
 *
-* $Id$
+* $Id: jzuc.inc,v 1.2 2018/06/28 16:02:50 fisyak Exp $
 *
 * $Log: jzuc.inc,v $
+* Revision 1.2  2018/06/28 16:02:50  fisyak
+* Merge with geant3
+*
 * Revision 1.1.1.1  2002/06/16 15:18:49  hristov
 * Separate distribution  of Geant3
 *

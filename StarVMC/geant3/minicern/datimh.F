@@ -1,7 +1,10 @@
 *
-* $Id$
+* $Id: datimh.F,v 1.2 2018/06/28 19:26:57 fisyak Exp $
 *
 * $Log: datimh.F,v $
+* Revision 1.2  2018/06/28 19:26:57  fisyak
+* Merge with geant3
+*
 * Revision 1.1.1.1  2002/07/24 15:56:27  rdm
 * initial import into CVS
 *

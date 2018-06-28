@@ -1,7 +1,10 @@
 *
-* $Id$
+* $Id: q_jbit.inc,v 1.2 2018/06/28 16:02:50 fisyak Exp $
 *
 * $Log: q_jbit.inc,v $
+* Revision 1.2  2018/06/28 16:02:50  fisyak
+* Merge with geant3
+*
 * Revision 1.2  2002/12/02 16:37:45  brun
 * Changes from Federico Carminati and Peter Hristov who ported the system
 * on the Ithanium processors.It is tested on HP, Sun, and Alpha, everything

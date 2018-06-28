@@ -1,7 +1,10 @@
 *
-* $Id: gstset.F,v 1.1.1.3 2009/02/18 20:31:43 fisyak Exp $
+* $Id: gstset.F,v 1.2 2018/06/28 19:29:22 fisyak Exp $
 *
 * $Log: gstset.F,v $
+* Revision 1.2  2018/06/28 19:29:22  fisyak
+* Merge with geant3
+*
 * Revision 1.1.1.3  2009/02/18 20:31:43  fisyak
 * *** empty log message ***
 *

@@ -1,4 +1,4 @@
-// $Id: TG3Application.h,v 1.1.1.3 2009/02/18 20:33:30 fisyak Exp $
+// $Id: TG3Application.h,v 1.2 2018/06/28 19:29:18 fisyak Exp $
 //
 // Class TG3Application
 // ----------------------- 

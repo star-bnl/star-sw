@@ -1,7 +1,10 @@
 *
-* $Id$
+* $Id: dzare1.F,v 1.2 2018/06/28 19:26:58 fisyak Exp $
 *
 * $Log: dzare1.F,v $
+* Revision 1.2  2018/06/28 19:26:58  fisyak
+* Merge with geant3
+*
 * Revision 1.1.1.1  2002/07/24 15:56:28  rdm
 * initial import into CVS
 *

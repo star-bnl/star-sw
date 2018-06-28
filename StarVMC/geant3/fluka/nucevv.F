@@ -1,7 +1,10 @@
 *
-* $Id: nucevv.F,v 1.1.1.3 2009/02/18 20:33:23 fisyak Exp $
+* $Id: nucevv.F,v 1.2 2018/06/28 19:29:21 fisyak Exp $
 *
 * $Log: nucevv.F,v $
+* Revision 1.2  2018/06/28 19:29:21  fisyak
+* Merge with geant3
+*
 * Revision 1.1.1.3  2009/02/18 20:33:23  fisyak
 * *** empty log message ***
 *

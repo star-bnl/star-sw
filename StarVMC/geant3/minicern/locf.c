@@ -1,7 +1,10 @@
 /*
- * $Id$
+ * $Id: locf.c,v 1.2 2018/06/28 19:26:59 fisyak Exp $
  *
  * $Log: locf.c,v $
+ * Revision 1.2  2018/06/28 19:26:59  fisyak
+ * Merge with geant3
+ *
  * Revision 1.1.1.1  2002/07/24 15:56:28  rdm
  * initial import into CVS
  *

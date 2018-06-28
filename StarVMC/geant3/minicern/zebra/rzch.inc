@@ -1,7 +1,10 @@
 *
-* $Id$
+* $Id: rzch.inc,v 1.2 2018/06/28 16:02:52 fisyak Exp $
 *
 * $Log: rzch.inc,v $
+* Revision 1.2  2018/06/28 16:02:52  fisyak
+* Merge with geant3
+*
 * Revision 1.1.1.1  2002/06/16 15:18:50  hristov
 * Separate distribution  of Geant3
 *

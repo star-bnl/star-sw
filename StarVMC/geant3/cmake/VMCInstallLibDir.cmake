@@ -70,7 +70,7 @@
 # 
 #-----------------------------------------------------------------------
 
-# $Id$
+# $Id: VMCInstallLibDir.cmake,v 1.1 2018/06/28 19:29:20 fisyak Exp $
 #
 # Define installation lib directory for Geant4VMC.
 # According to Geant4InstallDirs.cmake.

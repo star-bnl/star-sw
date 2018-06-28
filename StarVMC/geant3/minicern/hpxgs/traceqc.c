@@ -1,7 +1,10 @@
 /*
- * $Id$
+ * $Id: traceqc.c,v 1.2 2018/06/28 16:16:12 fisyak Exp $
  *
  * $Log: traceqc.c,v $
+ * Revision 1.2  2018/06/28 16:16:12  fisyak
+ * Merge with geant3
+ *
  * Revision 1.1.1.1  1999/05/18 15:55:33  fca
  * AliRoot sources
  *

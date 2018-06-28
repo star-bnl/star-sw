@@ -1,7 +1,10 @@
 *
-* $Id: ertrak.F,v 1.8 2013/02/22 20:14:17 fisyak Exp $
+* $Id: ertrak.F,v 1.9 2018/06/28 19:29:20 fisyak Exp $
 *
 * $Log: ertrak.F,v $
+* Revision 1.9  2018/06/28 19:29:20  fisyak
+* Merge with geant3
+*
 * Revision 1.8  2013/02/22 20:14:17  fisyak
 * Freeze
 *

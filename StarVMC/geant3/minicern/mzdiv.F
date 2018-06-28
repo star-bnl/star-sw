@@ -1,7 +1,10 @@
 *
-* $Id$
+* $Id: mzdiv.F,v 1.2 2018/06/28 19:27:00 fisyak Exp $
 *
 * $Log: mzdiv.F,v $
+* Revision 1.2  2018/06/28 19:27:00  fisyak
+* Merge with geant3
+*
 * Revision 1.1.1.1  2002/07/24 15:56:28  rdm
 * initial import into CVS
 *

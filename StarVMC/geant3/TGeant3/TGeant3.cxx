@@ -14,10 +14,13 @@
  * provided "as is" without express or implied warranty.                  *
  **************************************************************************/
 
-/* $Id: TGeant3.cxx,v 1.14 2014/05/29 12:45:18 fisyak Exp $ */
+/* $Id: TGeant3.cxx,v 1.15 2018/06/28 19:29:18 fisyak Exp $ */
 
 /*
 $Log: TGeant3.cxx,v $
+Revision 1.15  2018/06/28 19:29:18  fisyak
+Merge with geant3
+
 Revision 1.14  2014/05/29 12:45:18  fisyak
 Merge with version 1.15
 

@@ -1,7 +1,10 @@
 *
-* $Id: thrsel.F,v 1.1.1.3 2009/02/18 20:32:01 fisyak Exp $
+* $Id: thrsel.F,v 1.2 2018/06/28 19:29:23 fisyak Exp $
 *
 * $Log: thrsel.F,v $
+* Revision 1.2  2018/06/28 19:29:23  fisyak
+* Merge with geant3
+*
 * Revision 1.1.1.3  2009/02/18 20:32:01  fisyak
 * *** empty log message ***
 *

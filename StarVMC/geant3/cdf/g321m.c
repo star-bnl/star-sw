@@ -1,7 +1,10 @@
 /*
- * $Id$
+ * $Id: g321m.c,v 1.3 2018/06/28 19:29:19 fisyak Exp $
  *
  * $Log: g321m.c,v $
+ * Revision 1.3  2018/06/28 19:29:19  fisyak
+ * Merge with geant3
+ *
  * Revision 1.1.1.1  2002/06/16 15:17:53  hristov
  * Separate distribution  of Geant3
  *

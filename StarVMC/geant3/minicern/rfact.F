@@ -1,7 +1,10 @@
 *
-* $Id$
+* $Id: rfact.F,v 1.2 2018/06/28 19:27:01 fisyak Exp $
 *
 * $Log: rfact.F,v $
+* Revision 1.2  2018/06/28 19:27:01  fisyak
+* Merge with geant3
+*
 * Revision 1.1.1.1  2002/06/16 15:18:48  hristov
 * Separate distribution  of Geant3
 *
