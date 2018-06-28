@@ -17,6 +17,7 @@ int isActive(int sector,int row) const;
 static int   sector(double ang,int east=0);
 static double angle(int sec);
  protected:
+    int _noDead;
     StiMaterial * _fcMaterial;    
 };
 
