@@ -214,7 +214,13 @@ struct evtDoneMsg {
   u_short status;
 };
 
-#define EVB_SUMMARY_VERSION 1
+#define EVB_SUMMARY_VERSION 2
+
+struct EvbSummary_v2 {
+    u_int version;
+    u_int sz;
+    UINT64 detectorsInRun;
+};
 
 struct EvbSummary_v1 {
   u_int version;  // version
@@ -222,6 +228,6 @@ struct EvbSummary_v1 {
   u_int detectorsInRun;
 };
 
-typedef EvbSummary_v1 EvbSummary;
+typedef EvbSummary_v2 EvbSummary;
 
 #endif
