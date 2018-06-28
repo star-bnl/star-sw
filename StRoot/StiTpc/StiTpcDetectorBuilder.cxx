@@ -47,6 +47,7 @@ TPC, the field cage are artificially segmented into 12 sectors each.
 */
 void StiTpcDetectorBuilder::buildDetectors(StMaker &source)
 {
+  _noDead = 0;
   cout << "StiTpcDetectorBuilder::buildDetectors() -I- Started" << endl;
   assert(gStTpcDb);
   useVMCGeometry();
@@ -55,8 +56,8 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker &source)
 //________________________________________________________________________________
 void StiTpcDetectorBuilder::useVMCGeometry() 
 {
+  _noDead = (getOpt("noDead")!=0);  
   int debug = 0;
-
   int buildFlagDef = 0; // 0 - long, West+East together
   			// 1 - split,West&East separately
   if (getOpt("split")) buildFlagDef|=1;
@@ -246,6 +247,7 @@ int StiTpcDetectorBuilder::isActive(int sector,int row) const
 {
 static St_tpcPadConfigC        *tpcPadConfigC = St_tpcPadConfigC::instance();
 static StDetectorDbTpcRDOMasks *s_pRdoMasks   = StDetectorDbTpcRDOMasks::instance();
+  if (_noDead) return 1;	//Supress dead volumes
   int myInnNRows  = tpcPadConfigC->innerPadRows(sector);
   if (row<=myInnNRows) {
     TString ts("deadInner="); ts+=sector;
@@ -256,7 +258,6 @@ static StDetectorDbTpcRDOMasks *s_pRdoMasks   = StDetectorDbTpcRDOMasks::instanc
   }
   int nRows = tpcPadConfigC->numberOfRows(sector);
   if (nRows != 45) return 1;
-/// return 1; //?????????????????????????????????
   int we = s_pRdoMasks->isRowOn(sector,row);
   if (!we) return 0;
   we = St_tpcAnodeHVavgC::instance()->livePadrow(sector,row) &&
