@@ -1,10 +1,19 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.175.2.5 2018/05/28 22:59:50 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.175.2.6 2018/06/29 16:42:02 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.175.2.6  2018/06/29 16:42:02  perev
+ * Hz fix
+ *
+ * Revision 2.180  2018/06/23 23:59:29  perev
+ * Fill mag field more carefully
+ *
+ * Revision 2.179  2018/06/21 01:48:12  perev
+ * iTPCheckIn
+ *
  * Revision 2.175.2.5  2018/05/28 22:59:50  perev
  * Implement gemini
  *
@@ -639,8 +648,8 @@ using namespace std;
 // x[3] = C  (local) curvature of the track
 // x[4] = tan(l) 
 
-//static const double kMaxEta = 1.5; // 72 degrees for laser tracks
-static const double kMaxEta = 1.25; // 72 degrees for laser tracks
+static const double kMaxEta = 1.5; // 72 degrees for laser tracks
+//static const double kMaxEta = 1.25; // 72 degrees for laser tracks
 static const double kMaxSinEta = sin(kMaxEta);
 static const double kMaxCur = 0.2;
 static const double kFarFromBeam = 10.;
@@ -730,7 +739,7 @@ void StiKalmanTrackNode::setState(const StiKalmanTrackNode * n)
   _alpha    = n->_alpha;
   mFP = n->mFP;
   mFE = n->mFE;
-  mFP.hz()=0;
+//????VP  mFP.hz()=0;
   nullCount = n->nullCount;
   contiguousHitCount = n->contiguousHitCount;
   contiguousNullCount = n->contiguousNullCount;
@@ -778,6 +787,7 @@ void StiKalmanTrackNode::propagateCurv(const StiKalmanTrackNode *parent)
 {
    mFP.ptin()=parent->mFP.ptin();
    mFP.curv()=getHz()*mFP.ptin();
+   mFP.hz()=getHz();
 } 
 //______________________________________________________________________________
 /*! Calculate/return the z component of mag field 
@@ -790,7 +800,7 @@ double StiKalmanTrackNode::getHz() const
 {
   
 static const double EC = 2.99792458e-4,ZEROHZ = 2e-6;
-   if (fabs(mHz)<999) return mHz;
+   if (mHz && fabs(mHz)<999) return mHz;
    if (! _laser) {
      double h[3];
      StarMagField::Instance()->BField(&(getGlobalPoint().x()),h);
@@ -1108,9 +1118,11 @@ StiDebug::Break(nCall);
   }
    
   position = propagate(endVal,shapeCode,dir); 
-
+//		if out of the volume but is not active, ignore it(VP)
+  if (position>=kOutX && position<=kOutX && !tDet->isActive()) position=0;
   if (position) return position;
   assert(mFP.x() > 0.);
+  assert(mFP.hz());
   if (mFP[0]*mFP._cosCA+mFP[1]*mFP._sinCA<0) return kEnded;
 
   propagateError();
@@ -1270,11 +1282,12 @@ StiDebug::Break(nCall);
     if (!ians ) 	break;
   }
 
+  mFP.hz()      = getHz();
   if (ians) 						return ians;
   if (mFP.x()> kFarFromBeam) {
     if (mFP.x()*mgP.cosCA2+mFP.y()*mgP.sinCA2<=0)	return kEnded; 
   }
-  mFP.hz()      = getHz();
+  assert(mFP.hz());
   mFP.curv() = mFP.hz()*mFP.ptin();
 
   mPP() = mFP;
@@ -1942,8 +1955,8 @@ StThreeVector<double> StiKalmanTrackNode::getHelixCenter() const
 //______________________________________________________________________________
 int StiKalmanTrackNode::locate()
 {
-//static const double kYFactor = 1.2, kZFactor=1.2;
-static const double kYFactor = 1.0, kZFactor=1.0;
+  static const double kYFactor = 1.2, kZFactor=1.2;
+//  static const double kYFactor = 1.0, kZFactor=1.0;
   double yOff, zOff,ang;
   //fast way out for projections going out of fiducial volume
   const StiDetector *tDet = getDetector();
