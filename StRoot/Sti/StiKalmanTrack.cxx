@@ -1,24 +1,30 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.151 2018/04/11 02:41:08 smirnovd Exp $
- * $Id: StiKalmanTrack.cxx,v 2.151 2018/04/11 02:41:08 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.153 2018/06/21 01:48:04 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.153 2018/06/21 01:48:04 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
- * Revision 2.151  2018/04/11 02:41:08  smirnovd
- * Remove deprecated methods in StikalmanTrack
+ * Revision 2.153  2018/06/21 01:48:04  perev
+ * iTPCheckIn
  *
- * Revision 2.150  2018/04/11 02:40:55  smirnovd
- * Add new method StikalmanTrack::getInnerMostDetHitNode()
+ * Revision 2.148.2.6  2018/05/28 22:23:40  perev
+ * Debug++
  *
- * Use it in StiCA to replace getInnerMostTPCHitNode()
+ * Revision 2.148.2.5  2018/04/16 00:49:03  perev
+ * Add legal(...) method
  *
- * Revision 2.149  2018/04/10 11:38:34  smirnovd
- * Replace thrown exceptions with runtime asserts
+ * Revision 2.148.2.4  2018/03/08 22:33:48  smirnovd
+ * Revert addition of StiKalmanTrack::legal()
  *
- * Revision 2.148  2018/01/12 23:17:09  smirnovd
- * Removed declared but undefined functions
+ * This method does not belong to iTPC branch
+ *
+ * Revision 2.148.2.2  2018/02/28 01:47:37  perev
+ * Debug--
+ *
+ * Revision 2.148.2.1  2018/02/17 02:20:02  perev
+ * Cleanup
  *
  * Revision 2.147  2017/01/26 21:32:41  perev
  * 1. Method removeNode added. It removes node from the track.
@@ -560,9 +566,7 @@
  * Added getTrackRadLength function to return radiation thickness along track (%).
  *
  */
-
-
-#include <cassert>
+#include <assert.h>
 //Std
 #include <stdexcept>
 #include <cmath>
@@ -607,7 +611,8 @@
 ostream& operator<<(ostream&, const StiHit&);
 
 Factory<StiKalmanTrackNode>* StiKalmanTrack::trackNodeFactory = 0;
-int StiKalmanTrack::mgMaxRefiter = 100;
+enum {kMaxRefiter = 100};
+int StiKalmanTrack::mgMaxRefiter = kMaxRefiter;
 int StiKalmanTrack::_debug = 0;
 int debugCount=0;
 
@@ -711,7 +716,6 @@ int StiKalmanTrack::initialize(const std::vector<StiHit*> &hits)
 
 int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *firstPars, StiNodePars *lastPars, StiNodeErrs *firstErrs, StiNodeErrs *lastErrs)
 {
-  //cout << "StiKalmanTrack::initialize() -I- Started"<<endl;
   reset();
   //StiKalmanTrackNode * node  = 0;
   const StiDetector* detector=0;
@@ -897,7 +901,7 @@ int StiKalmanTrack::getMaxPointCount(int detectorId) const
     if (!detector)						continue;
     StiHit* h = node->getHit();
     if (!h && !detector->isActive(node->getY(),node->getZ()))	continue;
-    if (detectorId && detector->getGroupId() != detectorId) 	continue;
+///VP    if (detectorId && detector->getGroupId() != detectorId) 	continue;
     nPts++;
   }
   return nPts;
@@ -969,7 +973,7 @@ int StiKalmanTrack::getFitPointCount(int detectorId)    const
     if (!node->isFitted())		continue;
     const StiDetector *det = hit->detector();
     if (!det)				continue;  
-    if (detectorId && detectorId!=det->getGroupId())continue;
+///VP    if (detectorId && detectorId!=det->getGroupId())continue;
     fitPointCount++;
   }
   return fitPointCount;
@@ -1162,7 +1166,7 @@ double StiKalmanTrack::getNearBeam(StThreeVectorD *pnt,StThreeVectorD *dir) cons
 //_____________________________________________________________________________
 StiKalmanTrackNode * StiKalmanTrack::getInnOutMostNode(int inot,int qua)  const
 {
-  assert(firstNode && lastNode);
+  assert(firstNode &&lastNode);
   
   StiKalmanTrackNode *node;
   StiKTNIterator it =(inot) ? begin():rbegin();
@@ -1173,8 +1177,6 @@ StiKalmanTrackNode * StiKalmanTrack::getInnOutMostNode(int inot,int qua)  const
     if (qua&kGoodHit) {if (!hit || node->getChi2()>10000.)continue;}
     return node;
   }
-  cout << "StiKalmanTrack::getInnOutMostNode() -E- No requested nodes " << endl;
-  //throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- No requested nodes");
   return 0;
 }
 //_____________________________________________________________________________
@@ -1578,7 +1580,6 @@ void StiKalmanTrack::removeLastNode()
 int StiKalmanTrack::refit()
 {
   int errType = kNoErrors;
-  
   enum {kMaxIter=30,kPctLoss=10,kHitLoss=3};
   static double defConfidence = StiDebug::dFlag("StiConfidence",0.01);
   int nNBeg = getNNodes(3), nNEnd = nNBeg;
@@ -1668,8 +1669,7 @@ int StiKalmanTrack::refit()
       node->setHit(0);
     }
   }
-
-  if (fail) setFlag(-1);
+  if ( fail) setFlag(-1);
   return errType;
 }
 //_____________________________________________________________________________
@@ -1934,7 +1934,7 @@ StiKalmanTrack &StiKalmanTrack::operator=(const StiKalmanTrack &tk)
 //_____________________________________________________________________________
 void StiKalmanTrack::setMaxRefiter(int maxRefiter) 
 {
-  mgMaxRefiter = maxRefiter;
+  mgMaxRefiter = (maxRefiter<0)? kMaxRefiter:maxRefiter;
 }
 //_____________________________________________________________________________
 int StiKalmanTrack::rejectByHitSet()  const
@@ -1978,12 +1978,11 @@ void StiKalmanTrack::test(const char *txt) const
     if (!node->isValid()) continue;
     const StiDetector *det = node->getDetector();
     if  (!det) continue;
-    const auto &P = node->fitPars();
-    double tst = P[0]*P._cosCA+P[1]*P._sinCA;
-    if (tst>=0) continue;
-    tst /= sqrt(P[0]*P[0]+P[1]*P[1]);
-//    assert (tst>=-1e-5);
-StiDebug::Count("OverKill",tst);
+    const auto* hit = node->getHit();
+    if (!hit) continue;
+    TString ts(txt);ts+="_Fellow";
+  
+    if (hit->detector()!=det) {ts=txt;ts+="_Alien";}
   }
 }
 //_____________________________________________________________________________
@@ -2004,4 +2003,79 @@ int StiKalmanTrack::idTruth(int *qa) const
   }
   if (qa) *qa = 100*ut.GetQua();  
   return ut.GetIdTru();
+}
+//_____________________________________________________________________________
+int StiKalmanTrack::legal(const StiHit *hit)  const
+{
+  enum {kNear= 50};
+  int ans[]={
+/* 0 00000 G G+ G+*/ 1
+/* 1 00001 G G+ G-*/,1
+/* 2 00010 G G+ B+*/,0
+/* 3 00011 G G+ B-*/,1
+/* 4 00100 G G- G+*/,0
+/* 5 00101 G G- G-*/,1
+/* 6 00110 G G- B+*/,0
+/* 7 00111 G G- B-*/,1
+/* 8 01000 G B+ G+*/,0
+/* 9 01001 G B+ G-*/,0
+/*10 01010 G B+ B+*/,0
+/*11 01011 G B- B-*/,1
+/*12 01100 G B- G+*/,0
+/*13 01101 G B- G-*/,0
+/*14 01110 G B- B+*/,0
+/*15 01111 G B- B-*/,1
+/*16 10000 B G+ G+*/,0
+/*17 10001 B G+ G-*/,0
+/*18 10010 B G+ B+*/,0
+/*19 10011 B G+ B-*/,0
+/*20 10100 B G+ B+*/,0
+/*21 10101 B G- G-*/,1
+/*22 10110 B G- B+*/,0
+/*23 10111 B G- B-*/,0
+/*24 11000 B B+ G+*/,0
+/*25 11001 B B+ G-*/,1
+/*26 11010 B B+ B+*/,1
+/*27 11011 B B+ B-*/,0
+/*28 11100 B B- G+*/,0
+/*29 11101 B B- G-*/,0
+/*30 11110 B B- B+*/,0
+/*31 11111 B B- B-*/,0
+};  
+  for (auto it=begin();it!=end();it++)  {
+    StiKalmanTrackNode *node = &(*it);
+    if (!node->isValid()) 	continue;
+    const StiHit *myhit = node->getHit();
+    if (!myhit) 		continue;
+    if ( node->getChi2()>100)	continue;
+    if ( myhit==hit) 		return 0;
+  }
+  double zH = hit->z(); if (fabs(zH)>kNear)	return 1; //Too far from memb
+  double vH = hit->vz();if (fabs(vH)<=   0) 	return 1; //Non TPC hit
+//		Hit info
+  int qH = (zH*vH<0); //hit quality
+
+  const auto *fstHit = getInnerMostHitNode(1)->getHit();
+  const auto *lstHit = getOuterMostHitNode(1)->getHit();
+  double zF = fstHit->z();
+  double zL = lstHit->z();
+
+  if (fabs(zF-zH) < fabs(zL-zH)) {
+    const auto *swap = fstHit; fstHit = lstHit; lstHit = swap;
+          auto  zwap = zF;     zF     = zL;     zL = zwap;
+  }
+  
+  double vF = fstHit->vz(); int qF = (zF*vF<0); //first hit quality
+  double vL = lstHit->vz(); int qL = (zL*vL<0); // last hit quality
+  if (fabs(vF*vL)<=0) return 1;
+  int kase = 0;
+  if (zH*zF<0) kase|= 1; 	//new hit in opposite side
+  if (qH     ) kase|= 2;	//new hit is bad
+  if (zL*zF<0) kase|= 4; 	//lst hit in opposite side
+  if (qL     ) kase|= 8;	//lst hit is bad
+  if (qF     ) kase|=16;	//fst hit is bad
+
+return 1; ///????????????????????????????????
+
+  return ans[kase];
 }
