@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuRefMult.hh,v 1.7 2005/08/19 03:50:58 perev Exp $
+ * $Id: StuRefMult.hh,v 1.8 2018/06/29 17:21:24 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez Aug 2000
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: StuRefMult.hh,v $
+ * Revision 1.8  2018/06/29 17:21:24  perev
+ * Irakli_Jun29
+ *
  * Revision 1.7  2005/08/19 03:50:58  perev
  * Marco request
  *
@@ -61,7 +64,7 @@ uncorrectedNumberOfNegativePrimaries(const StPrimaryVertex*& primVtx) {
     const StSPtrVecPrimaryTrack& tracks = primVtx->daughters();
     size_t countedTracks = 0;
     for (StSPtrVecPrimaryTrackConstIterator iter = tracks.begin(); iter != tracks.end(); iter++) {
-	StTrack* track = (*iter);
+      StTrack* track = (StTrack*) (*iter);
 	// these first 3 checks are easy, save time
 	if (track->flag()<0 || track->geometry()->charge()>0 || track->fitTraits().numberOfFitPoints()<10 ) continue; 
 	// check eta, a bit more elaborate
@@ -87,7 +90,7 @@ uncorrectedNumberOfPositivePrimaries(const StPrimaryVertex*& primVtx) {
     const StSPtrVecPrimaryTrack& tracks = primVtx->daughters();
     size_t countedTracks = 0;
     for (StSPtrVecPrimaryTrackConstIterator iter = tracks.begin(); iter != tracks.end(); iter++) {
-	StTrack* track = (*iter);
+      StTrack* track = (StTrack* )(*iter);
 	// these first 3 checks are easy, save time
 	if (track->flag()<0 || track->geometry()->charge()<0 || track->fitTraits().numberOfFitPoints()<10 ) continue; 
 	// check eta, a bit more elaborate

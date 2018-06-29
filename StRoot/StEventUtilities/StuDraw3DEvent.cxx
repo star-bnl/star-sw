@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.34 2012/04/27 00:20:23 perev Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.35 2018/06/29 17:21:24 perev Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TSystem.h"
@@ -7,6 +7,7 @@
 #include "StEventHelper.h"
 #include "StEvent.h"
 #include "StTrack.h"
+#include "StGlobalTrack.h"
 #include "StHit.h"
 #include "StTpcHit.h"
 #include "StFtpcHit.h"
@@ -157,6 +158,7 @@ void StuDraw3DEvent::EmcHits(const StEvent* event,const char *detId)
    StEmcCollection* emcC =(StEmcCollection*)event->emcCollection();
    if (emcC) {
       StEmcDetector* det = emcC->detector( strcmp(detId,"bemc") ? kEndcapEmcTowerId : kBarrelEmcTowerId); 
+      if (det) {
       for(unsigned int md=1; md <=det->numberOfModules(); md++) {
          StEmcModule*  module=det->module(md);
          StSPtrVecEmcRawHit&   hit=  module->hits();
@@ -191,6 +193,7 @@ void StuDraw3DEvent::EmcHits(const StEvent* event,const char *detId)
          }
       }
    }
+   }
 }
 
 //____________________________________________________________________________________
@@ -219,6 +222,26 @@ TObject *StuDraw3DEvent::Track(const StTrack &track, Color_t col,Style_t sty,Siz
  */
 //___________________________________________________
 TObject *StuDraw3DEvent::Track(const StTrack &track, EDraw3DStyle sty)
+{
+   const StDraw3DStyle &style =  Style(sty);
+   return Track(track, style.Col(),style.Sty(),style.Siz() );
+}
+//____________________________________________________________________________________
+TObject *StuDraw3DEvent::Track(const StGlobalTrack &track, Color_t col,Style_t sty,Size_t siz)
+{
+   StTrackHelper trPnt(&track);
+   Int_t size;
+   Float_t *xyz = trPnt.GetPoints(size);
+   TObject *l = Line(size,xyz,col,sty,siz);
+   SetModel((TObject*)&track);
+   return l;
+}
+
+//! This is an overloaded member function, provided for convenience.
+/*! Add \a track to the display list with the \a sty pre-defined style
+ */
+//___________________________________________________
+TObject *StuDraw3DEvent::Track(const StGlobalTrack &track, EDraw3DStyle sty)
 {
    const StDraw3DStyle &style =  Style(sty);
    return Track(track, style.Col(),style.Sty(),style.Siz() );
@@ -456,7 +479,7 @@ void StuDraw3DEvent::Tracks(const StSPtrVecTrackNode &theNodes
    // double pt;
    //    int  minFitPoints = mAllGlobalTracks ? 1 : mMinFitPoints;
    for (i=0; i<theNodes.size(); i++) {
-      track = theNodes[i]->track(type);
+     track = (StTrack *) theNodes[i]->track(type);
       if (track && track->flag() > 0
          //  &&   track->fitTraits().numberOfFitPoints(kTpcId) >= minFitPoints) 
          )
@@ -481,7 +504,7 @@ void StuDraw3DEvent::Hits(const StEvent *event,EStuDraw3DEvent trackHitsOnly, St
 
       const StSPtrVecTrackNode& theNodes = event->trackNodes();
       for (unsigned int i=0; i<theNodes.size(); i++) {
-         StTrack *track = theNodes[i]->track(type);
+	StTrack *track = (StTrack *)theNodes[i]->track(type);
          if (track &&  track->flag() > 0
                    &&  track->detectorInfo() 
                    && !track->bad() 
@@ -533,7 +556,7 @@ void StuDraw3DEvent::FtpcHits(const StEvent *event,EStuDraw3DEvent trackHitsOnly
       int trackCounter = 0;
       const StSPtrVecTrackNode& theNodes = event->trackNodes();
       for (unsigned int i=0; i<theNodes.size(); i++) {
-         StTrack *track = theNodes[i]->track(type);
+	StTrack *track = (StTrack *) theNodes[i]->track(type);
          if (track &&  track->flag() > 0
                    &&  track->detectorInfo()                
                    &&  ( track->detectorInfo()->numberOfPoints(kFtpcWestId) || track->detectorInfo()->numberOfPoints(kFtpcEastId)  )

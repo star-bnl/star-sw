@@ -79,7 +79,7 @@ Int_t StRedoTracks::Make(){
     Bool_t iterate = kTRUE;
     while (iterate) {
       for (j=0; j<theNodes[i]->entries(typ); j++) {
-        StTrack* tri = theNodes[i]->track(typ,j);
+        StTrack* tri = (StTrack *) theNodes[i]->track(typ,j);
         const StTrackTopologyMap& map = tri->topologyMap();
         for (k=0; k<2; k++) {
           if (k) triGeom = tri->outerGeometry();
@@ -127,8 +127,11 @@ Int_t StRedoTracks::Make(){
   return kStOK;
 }
 //_____________________________________________________________________________
-// $Id: StRedoTracks.cxx,v 1.6 2012/11/07 23:27:55 fisyak Exp $
+// $Id: StRedoTracks.cxx,v 1.7 2018/06/29 17:21:24 perev Exp $
 // $Log: StRedoTracks.cxx,v $
+// Revision 1.7  2018/06/29 17:21:24  perev
+// Irakli_Jun29
+//
 // Revision 1.6  2012/11/07 23:27:55  fisyak
 // Add place holder for new StMagUtilities
 //

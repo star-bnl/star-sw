@@ -1,7 +1,7 @@
-// $Id: EveDis.C,v 1.5 2010/02/22 06:11:49 fine Exp $
+// $Id: EveDis.C,v 1.6 2018/06/29 17:21:24 perev Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #  include "TVirtualPad.h"
 #  include "TColor.h"
 #  include "StEventHelper.h"
@@ -27,7 +27,7 @@ class EveDis : public StuDraw3DEvent {
   //  You have to apply ACliC to use the custom class this macro defines as follows:
   //
   //   root.exe
-  //      root.exe [0].x Load.C
+  //      root.exe [0].x lMuDst.C
   //      root.exe [1].L EveDis.C++
   //      root.exe [2] EveDis display;
   //      root.exe [3] display.Draw3DTest()

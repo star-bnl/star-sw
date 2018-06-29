@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuPostScript.cc,v 1.3 2002/10/11 17:34:14 ullrich Exp $
+ * $Id: StuPostScript.cc,v 1.4 2018/06/29 17:21:24 perev Exp $
  *
  * Author: Thomas Ullrich, April 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StuPostScript.cc,v $
+ * Revision 1.4  2018/06/29 17:21:24  perev
+ * Irakli_Jun29
+ *
  * Revision 1.3  2002/10/11 17:34:14  ullrich
  * Hits on tracks drawn as circles not diamonds
  *
@@ -291,7 +294,7 @@ void StuPostScript::writeTracks(ostream &os, const StEvent* event)
     }
     else {
 	for (i=0; i<theNodes.size(); i++) {
-	    track = theNodes[i]->track(global);
+	  track = (StTrack *) theNodes[i]->track(global);
 	    if (track) theTracks.push_back(track);
 	}
     }
