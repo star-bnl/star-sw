@@ -1,6 +1,6 @@
 #ifndef StPicoDst_h
 #define StPicoDst_h
-
+#define __TFG__VERSION__
 #include "TClonesArray.h"
 #include "StPicoArrays.h"
 
