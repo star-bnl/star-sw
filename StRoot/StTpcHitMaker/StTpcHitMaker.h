@@ -3,11 +3,32 @@
 
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.h,v 1.26 2018/06/22 18:35:19 perev Exp $
+ * $Id: StTpcHitMaker.h,v 1.27 2018/06/29 21:46:23 smirnovd Exp $
  * StTpcHitMaker - class to fill the StEvent with TPC clusters from DAQ reader
  * $Log: StTpcHitMaker.h,v $
- * Revision 1.26  2018/06/22 18:35:19  perev
- * Merging with TPC group code
+ * Revision 1.27  2018/06/29 21:46:23  smirnovd
+ * Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
+ *
+ * Revert "NoDead option added"
+ * Revert "Fill mag field more carefully"
+ * Revert "Assert commented out"
+ * Revert "Merging with TPC group code"
+ * Revert "Remove too strong assert"
+ * Revert "Restore removed by mistake line"
+ * Revert "Remove not used anymore file"
+ * Revert "iTPCheckIn"
+ *
+ * Revision 1.24  2018/04/26 17:09:41  smirnovd
+ * Revert "Revert iTPC related changes committed on 2018-04-24"
+ *
+ * Revision 1.22  2018/04/24 16:45:39  smirnovd
+ * Correct outter row numbers for sectors with iTPC
+ *
+ * Revision 1.21  2018/04/10 11:38:54  smirnovd
+ * StTpcHitMaker: Fixes to properly read the real data (Yuri and Irakli)
+ *
+ * Revision 1.20  2018/04/10 11:38:44  smirnovd
+ * StTpcHitMaker: Modified for iTPC era (Yuri and Irakli)
  *
  * Revision 1.19  2014/08/06 11:43:50  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
@@ -92,6 +113,7 @@ class tpc_cl;
 class daq_cld;
 class tpc_t;
 class StTpcHitCollection;
+
 class StTpcHitMaker : public StRTSBaseMaker {
  public:
   enum EReaderType {kUnknown, kLegacyTpc, kLegacyTpx, kStandardTpx, kStandardiTPC};
@@ -141,7 +163,9 @@ class StTpcHitMaker : public StRTSBaseMaker {
   TH3F       **fAvLaser;
 #endif /* __USE__THnSparse__ */
   TH1F        *fSectCounts;
-  Int_t        RowNumber();
+  Int_t    NoRows;
+  Int_t    NoInnerPadRows;
+  Int_t    RowNumber();
  protected:
   StTpcHit *CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t row);
   StTpcHit *CreateTpcHit(const daq_cld  &cluster, Int_t sector, Int_t row);
@@ -153,8 +177,8 @@ class StTpcHitMaker : public StRTSBaseMaker {
              UInt_t hw, float q, UChar_t c,
              UShort_t idTruth, UShort_t quality,
              UShort_t id,
-             UShort_t mnpad, UShort_t mxpad, UShort_t mntmbk,
-             UShort_t mxtmbk, Float_t cl_x, Float_t cl_t, UShort_t adc,
+             Short_t mnpad, Short_t mxpad, Short_t mntmbk,
+             Short_t mxtmbk, Float_t cl_x, Float_t cl_t, UShort_t adc,
              UShort_t flag);
   static Float_t fgDp;             // hardcoded errors
   static Float_t fgDt;

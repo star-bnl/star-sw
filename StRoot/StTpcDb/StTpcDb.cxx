@@ -1,6 +1,7 @@
+
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.65 2018/06/21 01:47:14 perev Exp $
+ * $Id: StTpcDb.cxx,v 1.66 2018/06/29 21:46:21 smirnovd Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,11 +15,24 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
- * Revision 1.65  2018/06/21 01:47:14  perev
- * iTPCheckIn
+ * Revision 1.66  2018/06/29 21:46:21  smirnovd
+ * Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
  *
- * Revision 1.63.6.1  2018/02/16 22:14:59  perev
- * iTPC
+ * Revert "NoDead option added"
+ * Revert "Fill mag field more carefully"
+ * Revert "Assert commented out"
+ * Revert "Merging with TPC group code"
+ * Revert "Remove too strong assert"
+ * Revert "Restore removed by mistake line"
+ * Revert "Remove not used anymore file"
+ * Revert "iTPCheckIn"
+ *
+ * Revision 1.64  2018/04/11 02:43:22  smirnovd
+ * Enable TPC/iTPC switch via St_tpcPadConfig
+ *
+ * This is accomplished by substituting St_tpcPadPlanes with St_tpcPadConfig.
+ * A sector ID is passed to St_tpcPadConfig in order to extract parameters for
+ * either TPC or iTPC
  *
  * Revision 1.63  2015/05/17 22:53:52  fisyak
  * Remove duplicted line
@@ -231,6 +245,7 @@ StTpcDb::~StTpcDb() {
   SafeDelete(mHalf[1]);
   SafeDelete(mSwap[0]);  
   SafeDelete(mSwap[1]);
+  SafeDelete(mExB);
   SafeDelete(mTpc2GlobMatrix);
   SafeDelete(mFlip);
   gStTpcDb = 0;
@@ -406,6 +421,8 @@ void StTpcDb::SetTpcRotations() {
 	}
       } else {
 	Id = 10*sector + k;
+	TGeoTranslation TIO; 
+	TGeoRotation    RIO;
 	StBeamDirection part = east;
 	if (sector <= 12) part = west;
 	switch (k) {

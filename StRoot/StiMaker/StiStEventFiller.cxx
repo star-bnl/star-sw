@@ -1,22 +1,42 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.122 2018/06/21 01:48:46 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.123 2018/06/29 21:46:33 smirnovd Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
- * Revision 2.122  2018/06/21 01:48:46  perev
- * iTPCheckIn
+ * Revision 2.123  2018/06/29 21:46:33  smirnovd
+ * Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
  *
- * Revision 2.119.6.3  2018/05/28 23:17:47  perev
- * Cleanup
+ * Revert "NoDead option added"
+ * Revert "Fill mag field more carefully"
+ * Revert "Assert commented out"
+ * Revert "Merging with TPC group code"
+ * Revert "Remove too strong assert"
+ * Revert "Restore removed by mistake line"
+ * Revert "Remove not used anymore file"
+ * Revert "iTPCheckIn"
  *
- * Revision 2.119.6.2  2018/03/26 23:52:19  perev
- * Remove wrong asserts
+ * Revision 2.121  2018/04/30 23:18:11  smirnovd
+ * [Cosmetic] Minor changes in various files
  *
- * Revision 2.119.6.1  2018/02/28 01:50:12  perev
- * Debug--
+ * - Renamed data member s/m/mMass/ in StikalmanTrack
+ * - Changes in white space
+ * - Return STAR code
+ *
+ * Revision 2.120  2018/04/10 11:32:10  smirnovd
+ * Minor corrections across multiple files
+ *
+ * - Remove ClassImp macro
+ * - Change white space
+ * - Correct windows newlines to unix
+ * - Remove unused debugging
+ * - Correct StTpcRTSHitMaker header guard
+ * - Remove unused preprocessor directives in StiCA
+ * - Minor changes in status and debug print out
+ * - Remove using std namespace from StiKalmanTrackFinder
+ * - Remove includes for unused headers
  *
  * Revision 2.119  2016/06/30 18:33:48  perev
  * simplifacation
@@ -746,7 +766,7 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
           }
 	  fillTrackCount2++;
 if (kTrack->getPointCount(kTpcId)>10)
-StiHftHits::hftHist("HFTAfterAll",kTrack);
+StiHftHits::hftHist("HFTAfterAll",kTrack);//???????????????????????
           fillPulls(kTrack,gTrack,0);
           if (kTrack->getPointCount()<15) continue;
 	  fillTrackCountG++;
@@ -929,7 +949,7 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
       if (!node->isFitted()) 	continue;
 
       const StiDetector *detector = node->getDetector();
-//VP      assert(detector == stiHit->detector());
+      assert(detector == stiHit->detector());
       assert(!detector || stiHit->timesUsed());
       if (!fistNode) fistNode = node;
       lastNode = node;
@@ -943,7 +963,8 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
 	if (nTotHits>=15) {
           if (mUsedGits[0]<gid) mUsedGits[0]=gid;
           mUsedGits[gid]++;
-      } }
+        }
+      }
       StHit *hh = (StHit*)stiHit->stHit();
       if (!hh) 			continue;
       assert(detector->getGroupId()==hh->detector());
@@ -1507,7 +1528,7 @@ enum dcaEmx {kImpImp,
       if (!node->isFitted()) 	continue;
 
       const StiDetector *detector = node->getDetector();
-//VP      assert(detector == stiHit->detector());
+      assert(detector == stiHit->detector());
       assert(!detector || stiHit->timesUsed());
       StHit *hh = (StHit*)stiHit->stHit();
       fillPulls(hh,stiHit,node,track,dets,gloPri);

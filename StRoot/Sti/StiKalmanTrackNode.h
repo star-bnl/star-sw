@@ -21,17 +21,11 @@ class StiMaterial;
 //class StiElossCalculator;
   
 typedef enum {
-  kOutX   =  1,
-  kOutY   =  2,
-  kOutZ   =  3,
-  kOutRxy =  4,
-  kOutAng =  5,
-  kBigRxy =  6,
-  kBigZ   =  7,
-  kTouch  =  8,
-  kEnded  =  9,
-  kMissed = 10,
-  kFailed = -1
+  kFailed = -1,         // could not find intersection
+  kHit,                                
+  kEdgePhiPlus, kEdgeZminus, kEdgePhiMinus, kEdgeZplus, 
+  kMissPhiPlus, kMissZminus, kMissPhiMinus, kMissZplus,
+  kEnded
 } StiIntersection;
   
 class StiNodeStat {

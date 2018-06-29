@@ -1,6 +1,7 @@
-// $Id: StiGenericDetectorGroup.cxx,v 2.6 2018/06/21 01:47:54 perev Exp $
+// $Id: StiGenericDetectorGroup.cxx,v 2.7 2018/06/29 21:46:26 smirnovd Exp $
 // Author: Valeri Fine, Dec 2006
-#include <assert.h>
+
+#include <cassert>
 #include <stdexcept>
 #include "StiGenericDetectorGroup.h"
 #include "Sti/StiDetectorBuilder.h"

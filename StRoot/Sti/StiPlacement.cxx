@@ -23,7 +23,7 @@ StiPlacement::StiPlacement(float  normRefAngle,float  normRadius,float normYOffs
   setNormalRep(normRefAngle,normRadius,normYOffset);
   zCenter = centralZ;
   setLayerRadius(centerRadius);
-  setLayerAngle(centerRefAngle);
+  layerAngle = centerRefAngle;
   mRegion = kMidRapidity;
 
 }
@@ -67,7 +67,7 @@ StiPlacement::StiPlacement(const TGeoMatrix& transMatrix, const TVector3& localC
    setNormalRep(normalVec.Phi(), normalVecMag, centralVec.Perp()*sin(deltaPhi));
    zCenter = centralVec.Z();
    setLayerRadius(centerRadius);
-   setLayerAngle(centerRefAngle);
+   layerAngle = centerRefAngle;
    mRegion = kMidRapidity;
 }
 
@@ -103,10 +103,6 @@ void StiPlacement::setLayerAngle(float layerAng)
   layerAngle = layerAng;
   while (layerAngle< -M_PI) {layerAngle+=2*M_PI;}	
   while (layerAngle>  M_PI) {layerAngle-=2*M_PI;}	
-  layerAngle*=1800./M_PI;
-  if (layerAngle<0) layerAngle-=0.5;
-  else              layerAngle+=0.5;
-  layerAngle = int(layerAngle)*M_PI/1800;
 }
 	
 	

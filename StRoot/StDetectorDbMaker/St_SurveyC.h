@@ -6,7 +6,6 @@
 #include "TGeoMatrix.h"
 class St_SurveyC : public TChair {
  public:
-  virtual  ~St_SurveyC();
   static St_SurveyC   *instance(const Char_t *name);
   Survey_st    *Struct(Int_t i = 0) 	const {return ((St_Survey*) Table())->GetTable()+i;}
   UInt_t     	getNumRows()            const {return GetNRows();}
@@ -39,11 +38,9 @@ class St_SurveyC : public TChair {
   const Double_t *r(Int_t i = 0)        const {return &Struct(i)->r00;}
   const Double_t *t(Int_t i = 0)        const {return &Struct(i)->t0;}
   static void Normalize(TGeoHMatrix &rot);
-  static Double_t IsOrtogonal(const Double_t *r);
  protected:
-  St_SurveyC(St_Survey *table=0);
+  St_SurveyC(St_Survey *table=0) : TChair(table) {}
  private:
-  TGeoHMatrix  **fRotations;
   ClassDefChair(St_Survey, Survey_st )
   ClassDef(St_SurveyC,1) //C++ TChair for Survey table class
 };

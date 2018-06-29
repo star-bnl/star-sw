@@ -95,61 +95,6 @@ void StiHitContainer::add(StiHit* hit)
   _map[_key].push_back(hit);
   return;
 }
-//________________________________________________________________________________
-void StiHitContainer::print()
-{
-
-  int num = 0;
-  for (auto itm = _map.begin();itm != _map.end();++itm) 
-  {
-    double refangle = (*itm).first.refangle;
-    double position = (*itm).first.position;
-    auto &hits = (*itm).second.hits();
-    const StiDetector *dets[3]={0};
-    double zmin[3]={ 999, 999,-999};
-    double zmax[3]={-999,-999,-999};
-    num++;
-    int nHits[4]={0};
-    for (int ih=0;ih<(int)hits.size();ih++) 
-    {
-      auto *hit = hits[ih];
-      if (!hit) continue;
-      double z = hit->z();
-      auto *det = hit->detector();
-      for (int j=0;j<4;j++) {
-        if (!dets[j]) dets[j] = det;   
-        if (dets[j]!=det) continue;
-        nHits[j]++;
-        if (zmin[j]>z) zmin[j]=z;
-        if (zmax[j]<z) zmax[j]=z;
-        break;
-      }
-    }
-
-    if (position>50 && position<200 && dets[1]) {
-      const char *cek = 0;
-      int pad[2],sek[2]={0};
-      for (int j=0;j<2;j++) {
-        const char *nam = dets[j]->getName().c_str();
-        cek = strstr(nam,"Sector_");
-        if (!cek) break;
-        sek[j] = atoi(cek+7);
-        cek = strstr(nam,"Padrow_");
-        if (!cek) break;
-        pad[j]=atoi(cek+7);
-      }
-      assert(!pad[1] || sek[1]==(24-sek[0]%12));
-      assert(!pad[1] || pad[1]==pad[0]);
-    }
-static const double k57 = 180./M_PI;
-    printf("%d - (refangle=%g position=%g)\t",num,refangle*k57,position);
-    for ( int j=0;dets[j];j++) {
-      printf(" %s(%d) Z(%d:%d)\t"
-            ,dets[j]->getName().c_str(),nHits[j],int(zmin[j]),int(zmax[j]));
-    } 
-    printf("\n");
-  }
-}
 
 //________________________________________________________________________________
 void StiHitContainer::reset()
@@ -271,7 +216,6 @@ vector<StiHit*> & StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bo
 
   vector<StiHit*>::iterator tempend = _map[_key].TheEffectiveEnd();
 
-#if 1
    //sanity check block
    vector<StiHit*>::iterator  tmptest = tempvec.begin();
    vector<StiHit*>::iterator  tmpend  = tempvec.end();
@@ -281,7 +225,6 @@ vector<StiHit*> & StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bo
             << " " << tempvec.size() << " --> " << endl;
        assert(0);
    }
-#endif   
 
    //Search first by distance along z
   _start = lower_bound(tempvec.begin(), tempend, &_minPoint, StizHitLessThan());
@@ -308,13 +251,6 @@ vector<StiHit*> & StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bo
        // cout << "Warning: Fix me, please !" << endl; 
     }
   }    //  NO _key was provided
-#if 0
- else {
-     cout << "-- Go ahead to test thing ------------------ last id =" << id << endl;
-     id = _map[_key].fId;
-     cout << "-- Go ahead to test thing ------------------ next id =" << id << endl;
-  }
-#endif  
   return _selectedHits;
 }
 

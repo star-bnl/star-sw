@@ -1,9 +1,9 @@
 #ifndef StiMasterHitLoader_H
 #define StiMasterHitLoader_H
-#include <assert.h>
+
+#include <cassert>
 #include <stdexcept>
 #include <vector>
-#include "Riostream.h"
 #include "StiHitLoader.h"
 #include "Sti/StiTrackContainer.h"
 #include "StEvent.h"

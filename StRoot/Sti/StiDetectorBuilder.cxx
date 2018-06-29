@@ -103,7 +103,7 @@ StiDetector * StiDetectorBuilder::add(UInt_t row, UInt_t sector, StiDetector *de
     assert( !_detectors[row][sector]);
   }  
   _detectors[row][sector] = detector;
-  if (_debug || (sector == 0 && detector->isActive())) {
+  if (_debug || sector == 0) {
     cout << "StiDetectorBuilder::add(" << row << "," << sector << ") detector ";
     if (detector) cout << detector->getName();
     else          cout << " NULL ??";
@@ -308,16 +308,12 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     for (int i=0;i<(int)dv.size();i++) {
       int layer = getNRows();
       add(layer,0,dv[i]); 
-      if (debug()) {
-	cout << "StiDetectorBuilder::AverageVolume build detector " << dv[i]->getName() << " at layer " << layer << endl;
-      }
+      cout << "StiDetectorBuilder::AverageVolume build detector " << dv[i]->getName() << " at layer " << layer << endl;
     } }
   else {  
    int layer = getNRows();
    add(layer,0,pDetector); 
-   if (debug()) {
-     cout << "StiDetectorBuilder::AverageVolume build detector " << pDetector->getName() << " at layer " << layer << endl;
-   }
+   cout << "StiDetectorBuilder::AverageVolume build detector " << pDetector->getName() << " at layer " << layer << endl;
   }
 
 }
@@ -336,8 +332,8 @@ UInt_t  StiDetectorBuilder::getNSectors(UInt_t row) const
 //________________________________________________________________________________
 StiDetector * StiDetectorBuilder::getDetector(UInt_t row, UInt_t sector) const
 {
-  if(row   >=_detectors.size()) 	return 0;
-  if(sector>=_detectors[row].size()) 	return 0;;
+  assert(row<_detectors.size());
+  assert(sector<_detectors[row].size());
   return _detectors[row][sector];
 }
 
@@ -350,7 +346,6 @@ assert(!_detectors[row][sector]);
 }
 
 
-//________________________________________________________________________________
 void StiDetectorBuilder::Print() const
 {
    std::cout << "StiDetectorBuilder::Print(): " << getName() << std::endl;
@@ -358,16 +353,7 @@ void StiDetectorBuilder::Print() const
 }
 
 
-//________________________________________________________________________________
 ostream& operator<<(ostream& os, const DetectorMapPair& detMapEntry)
 {
    return os << *detMapEntry.second;
-}
-//________________________________________________________________________________
-const char* StiDetectorBuilder::getOpt(const char* opt) const
-{
-
-  TString ts(" "); ts+=opt; ts+=" ";
-  const char *c = strstr(_opt.Data(),ts.Data());
-  return (c)? c+1:0;
 }

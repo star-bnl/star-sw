@@ -3,19 +3,18 @@
 
 #include "TChair.h"
 #include "tables/St_tpcSlewing_Table.h"
-#include "St_tpcPadConfigC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 
 class St_tpcSlewingC : public TChair {
  public:
   static St_tpcSlewingC* 	instance();
-  tpcSlewing_st 	*Struct(long i = 0) 	const {return ((St_tpcSlewing*) Table())->GetTable()+i;}
-  int     	getNumRows()                	const {return GetNRows();}
-  long         type(long i = 0)               	const {return Struct(i)->type;}
-  long         npar(long i = 0)               	const {return Struct(i)->npar;}
-  double      minT(Int_t i = 0)               	const {return Struct(i)->min;}
-  double      a(int i = 0, int n = 0)     	const {return Struct(i)->a[n];}
-  double      slewing(int sector, int i = 0, double q = 0) {
-    if (St_tpcPadConfigC::instance()->iTpc(sector)) return 0;
+  tpcSlewing_st 	*Struct(Int_t i = 0) 	const {return ((St_tpcSlewing*) Table())->GetTable()+i;}
+  UInt_t     	getNumRows()                	const {return GetNRows();}
+  long          type(Int_t i = 0)               const {return Struct(i)->type;}
+  long          npar(Int_t i = 0)               const {return Struct(i)->npar;}
+  double        minT(Int_t i = 0)               const {return Struct(i)->min;}
+  double        a(Int_t i = 0, Int_t n = 0)     const {return Struct(i)->a[n];}
+  double        slewing(Int_t i = 0, double q = 0) {
     switch (type(i)) {
       case 1001 : { return func1001(q,a(i,0),a(i,1),a(i,2),a(i,3)); }
       // define other functions as needed
@@ -23,11 +22,23 @@ class St_tpcSlewingC : public TChair {
     }
     return 0;
   }
+
+  double        slewing(int sector, int i, double q) {
+    if (St_tpcPadConfigC::instance()->iTpc(sector)) return 0;
+    return slewing(i, q);
+  }
+
+  double        correctedT(int padrow = 1, double q = 0, double T = 0) { // T [microsec]
+    int inout = (padrow <= 13 ? 0 : 1); // padrow = 1..45
+    return T - (T > minT(inout) ? slewing(inout,q) : 0);
+  }
+
   double        correctedT(int sector, int padrow, double q, double T) { // T [microsec]
     if (St_tpcPadConfigC::instance()->iTpc(sector)) return T;
     int inout = (St_tpcPadConfigC::instance()->isInnerPadRow(sector,padrow) ? 0 : 1); // padrow = 1..45
     return T - (T > minT(inout) ? slewing(sector,inout,q) : 0);
   }
+
  protected:
   St_tpcSlewingC(St_tpcSlewing *table=0) : TChair(table) {}
   virtual ~St_tpcSlewingC() {fgInstance = 0;}

@@ -65,9 +65,6 @@ void StiTrackNodeHelper::set(StiKalmanTrackNode *pNode,StiKalmanTrackNode *sNode
   mParentNode = pNode;
   mTargetNode = sNode;
   mTargetHz = mTargetNode->getHz();
-assert(mTargetHz);
-assert(sNode->fitPars().hz());
-assert(!pNode || pNode->fitPars().hz());
   mParentHz = mTargetHz;
   if (mParentNode) {
     mParentHz = mParentNode->getHz();
@@ -361,7 +358,7 @@ int StiTrackNodeHelper::makeFit(int smooth)
     }
     mChi2 = chi2; if (mChi2>999) mChi2=999;
     ians = updateNode();
-    if (debug() & 8) {cout << Form("%5d ",ians); StiKalmanTrackNode::PrintStep();}
+    if (debug() & 8) { LOG_DEBUG << Form("%5d ",ians); StiKalmanTrackNode::PrintStep();}
     if (!ians) 	break;
     if (mTargetNode == mVertexNode)	return 15;
     mState = StiTrackNode::kTNReady;
@@ -468,8 +465,16 @@ int StiTrackNodeHelper::join()
        default: assert(0);
      }//end Switch
   } while(kase>=0);
-   mJoinPars.hz()=mTargetHz;//////////////////////???????????????????????????????????????????????????
-   assert(fabs(mJoinPars.hz()-mTargetHz)<=1e-10);
+
+   if (std::fabs(mJoinPars.hz() - mTargetHz) > 1e-10)
+   {
+     LOG_WARN << "Expected |mJoinPars.hz() - mTargetHz| <= 1e-10 "
+              << "instead |" << mJoinPars.hz() << " - " << mTargetHz << "| = "
+              << std::fabs(mJoinPars.hz() - mTargetHz) << ". "
+              << "Will set mJoinPars.hz to " << mTargetHz << endm;
+     mJoinPars.hz() = mTargetHz;
+   }
+
    assert(fabs(mTargetNode->getHz()-mTargetHz)<=1e-10);
 
 
@@ -662,9 +667,7 @@ double StiTrackNodeHelper::joinVtx(const double      *Y,const StiHitErrs  &B
 //______________________________________________________________________________
 int StiTrackNodeHelper::save()
 {
-mPredPars.hz()=mTargetHz;///????????????????????????????
    assert(fabs(mPredPars.hz()-mTargetHz)<=1e-10);
-mFitdPars.hz()=mTargetHz;///???????????????????????????
    assert(fabs(mFitdPars.hz()-mTargetHz)<=1e-10);
    assert(fabs(mTargetNode->getHz()-mTargetHz)<=1e-10);
    

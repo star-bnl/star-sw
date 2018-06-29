@@ -21,9 +21,9 @@ public:
   Named(name),_halfDepth(halfDepth),_thickness(thickness),_edgeWidth(edge) {}
   
     // accessors
-        float getHalfDepth() const { return _halfDepth; } 	//Z direction
-virtual float getHalfWidth() const=0;				//Y direction
-        float getThickness() const { return _thickness; }	//X direction
+    float getHalfDepth() const { return _halfDepth; } //Z direction
+virtual float getHalfWidth() const=0;
+        float getThickness() const { return _thickness; }
 virtual StiShapeCode getShapeCode() const = 0;
         float getEdgeWidth() const { return _edgeWidth; }
 virtual float getOpeningAngle() const =0; 
@@ -32,16 +32,16 @@ virtual float getOuterRadius() const {return -999;}
     virtual double getVolume() const = 0;
 
     // mutators
-    void setHalfDepth(float val) {if(val >= 0.) _halfDepth = val; }//Z direction
-    void setThickness(float val) {if(val >= 0.) _thickness = val; }//X direction
+    void setHalfDepth(float val) {if(val >= 0.) _halfDepth = val; }
+    void setThickness(float val) {if(val >= 0.) _thickness = val; }
 
  protected:
     
     double nice(double val);
 
-    /// half extent along Z, always >= 0
+    /// half extent along z, always >= 0
     float _halfDepth;  
-    /// "thickness" along X, always >= 0
+    /// "thickness", always >= 0
     float _thickness;
     /// size of the edge used in tracking, deltaX local
     float _edgeWidth;  

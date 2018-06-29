@@ -58,17 +58,26 @@ class StChain : public StMaker {
    void               SetChainOpt(StChainOpt *opt) 			{mChainOpt=opt;}
    virtual const StChainOpt *GetChainOpt()    const;
    virtual const char *GetCVS() const 
- {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.47 2018/06/21 01:46:52 perev Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+ {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.48 2018/06/29 21:46:18 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
    ClassDef(StChain, 0)   //StChain control class
 };
 
 #endif
 
 
-// $Id: StChain.h,v 1.47 2018/06/21 01:46:52 perev Exp $
+// $Id: StChain.h,v 1.48 2018/06/29 21:46:18 smirnovd Exp $
 // $Log: StChain.h,v $
-// Revision 1.47  2018/06/21 01:46:52  perev
-// iTPCheckIn
+// Revision 1.48  2018/06/29 21:46:18  smirnovd
+// Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
+//
+// Revert "NoDead option added"
+// Revert "Fill mag field more carefully"
+// Revert "Assert commented out"
+// Revert "Merging with TPC group code"
+// Revert "Remove too strong assert"
+// Revert "Restore removed by mistake line"
+// Revert "Remove not used anymore file"
+// Revert "iTPCheckIn"
 //
 // Revision 1.46  2014/08/06 11:42:55  jeromel
 // Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes

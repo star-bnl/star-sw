@@ -1,10 +1,23 @@
-/* $Id: StTpcFastSimMaker.cxx,v 1.10 2018/06/21 01:47:26 perev Exp $
+/* $Id: StTpcFastSimMaker.cxx,v 1.11 2018/06/29 21:46:24 smirnovd Exp $
     $Log: StTpcFastSimMaker.cxx,v $
-    Revision 1.10  2018/06/21 01:47:26  perev
-    iTPCheckIn
+    Revision 1.11  2018/06/29 21:46:24  smirnovd
+    Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
 
-    Revision 1.8.10.1  2018/02/16 22:09:42  perev
-    iTPC
+    Revert "NoDead option added"
+    Revert "Fill mag field more carefully"
+    Revert "Assert commented out"
+    Revert "Merging with TPC group code"
+    Revert "Remove too strong assert"
+    Revert "Restore removed by mistake line"
+    Revert "Remove not used anymore file"
+    Revert "iTPCheckIn"
+
+    Revision 1.9  2018/04/11 02:43:22  smirnovd
+    Enable TPC/iTPC switch via St_tpcPadConfig
+
+    This is accomplished by substituting St_tpcPadPlanes with St_tpcPadConfig.
+    A sector ID is passed to St_tpcPadConfig in order to extract parameters for
+    either TPC or iTPC
 
     Revision 1.8  2014/07/27 13:28:06  fisyak
     Add cast for c++11 option
@@ -56,7 +69,7 @@ ClassImp(StTpcFastSimMaker);
 //____________________________________________________________
 Int_t StTpcFastSimMaker::Make() {
   static Int_t iBreak = 0;
-  mExB = StMagUtilities::Instance();
+  mExB = gStTpcDb->ExB();
   if (! gRandom) gRandom = new TRandom();
   // Get the input data structures from StEvent
   StEvent *rEvent =  (StEvent*) GetInputDS("StEvent");
@@ -106,11 +119,11 @@ Int_t StTpcFastSimMaker::Make() {
     static StTpcLocalSectorCoordinate  coorLS;
     transform(coorLTD,coorLS); // alignment
     Double_t xyzL[3] = {coorLS.position().x(),coorLS.position().y(),coorLS.position().z()};
-    if (TMath::Abs(xyzL[1]-transform.yFromRow(sector,row)) > 0.1000) {
+    if (TMath::Abs(xyzL[1]-transform.yFromRow(row)) > 0.1000) {
       if (Debug()) {
 	LOG_DEBUG << "Id: " << tpc_hit[i].volume_id  
 		  << "\txyzL :" << xyzL[0] << "\t" << xyzL[1] << "\t" << xyzL[2] 
-		  << "\tdR :" << xyzL[1]-transform.yFromRow(sector,row) << endm;
+		  << "\tdR :" << xyzL[1]-transform.yFromRow(row) << endm;
       }
       iBreak++;
     }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.52 2018/06/22 18:35:19 perev Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.53 2018/06/29 21:46:23 smirnovd Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -11,8 +11,6 @@
 #include <stdio.h>
 #include "StTpcHitMaker.h"
 #include "StTpcRTSHitMaker.h"
-
-#include "TString.h"
 
 #include "StTpcRawData.h"
 #include "StEvent/StTpcRawData.h"
@@ -29,13 +27,12 @@
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StMessMgr.h" 
-#  include "StDAQMaker/StDAQReader.h"
-#  include "StRtsTable.h"
-#  include "DAQ_TPX/daq_tpx.h"
-#  include "DAQ_READER/daq_dta.h"
-#  include "DAQ_READER/daqReader.h"
+#include "StDAQMaker/StDAQReader.h"
+#include "StRtsTable.h"
+#include "DAQ_TPX/daq_tpx.h"
+#include "DAQ_READER/daq_dta.h"
+#include "DAQ_READER/daqReader.h"
 #include "RTS/src/DAQ_TPX/tpxFCF_flags.h" // for FCF flag definition
-#include "TBenchmark.h"
 ClassImp(StTpcRTSHitMaker); 
 #define __DEBUG__
 #ifdef __DEBUG__
@@ -155,8 +152,6 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 }
 //________________________________________________________________________________
 Int_t StTpcRTSHitMaker::Make() {
-  gBenchmark->Reset();
-  gBenchmark->Start("StTpcRTSHitMaker::Make");
   static  Short_t ADCs[__MaxNumberOfTimeBins__];
   static UShort_t IDTs[__MaxNumberOfTimeBins__];
   StEvent*   rEvent      = (StEvent*)    GetInputDS("StEvent");
@@ -189,7 +184,8 @@ Int_t StTpcRTSHitMaker::Make() {
     StTpcDigitalSector *digitalSector = tpcRawData->GetSector(sec);
     if (! digitalSector) continue;
     UShort_t Id = 0;
-    if (St_tpcPadConfigC::instance()->numberOfRows(sec) != 45) 
+    bool isiTpcSector = (St_tpcPadConfigC::instance()->numberOfRows(sec) != 45);
+    if (isiTpcSector)
       dta = fTpx->put("adc_sim",0,St_tpcPadConfigC::instance()->numberOfRows(sec)+1,0,mTpx_RowLen[sec-1]); // used for any kind of data; transparent pointer
     else              dta = fTpx->put("adc_sim");
     Int_t hitsAdded = 0;
@@ -216,12 +212,10 @@ Int_t StTpcRTSHitMaker::Make() {
 	  }
 	}
 	if (l > 0) {
-	  gBenchmark->Start("StTpcRTSHitMaker::Make::finalize");
 	  dta->finalize(l,sec,row,pad);
-	  gBenchmark->Stop("StTpcRTSHitMaker::Make::finalize");
 	  NoAdcs += l;
 	}
-      } // pad loop
+      }
     }      
     if (! NoAdcs) continue;
     if (Debug() > 1) {
@@ -306,7 +300,8 @@ Int_t StTpcRTSHitMaker::Make() {
 	  ADC2GeV = ((Double_t) St_tss_tssparC::instance()->ave_ion_pot() * 
 		     (Double_t) St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
 	}
-	UInt_t hw = 1;   // detid_tpc
+	UInt_t hw = 1U;   // detid_tpc
+        if (St_tpcPadConfigC::instance()->isiTpcPadRow(dta->sec, dta->row)) hw += 1U << 1;
 	hw += dta->sec << 4;     // (row/100 << 4);   // sector
 	hw += dta->row << 9;     // (row%100 << 9);   // row
 #if 0	
@@ -395,9 +390,6 @@ Int_t StTpcRTSHitMaker::Make() {
               << ") starting at time bin 0. Skipping event." << endm;
     return kStSkip;
   }
-  if (! IAttr("NoTpxAfterBurner")) StTpcHitMaker::AfterBurner(hitCollection);
-  gBenchmark->Stop("StTpcRTSHitMaker::Make");
-  gBenchmark->Show("StTpcRTSHitMaker::Make");
-  gBenchmark->Show("StTpcRTSHitMaker::Make::finalize");
+  StTpcHitMaker::AfterBurner(hitCollection);
   return kStOK;
 }

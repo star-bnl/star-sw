@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.655 2018/06/21 01:46:48 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.656 2018/06/29 21:46:18 smirnovd Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -412,6 +412,7 @@ Int_t StBFChain::Instantiate()
 	  !GetOption("pythia"))                      NwGeant =  5;
       if (GetOption("big"))                          NwGeant = 20;
       if (GetOption("bigbig"))                       NwGeant = 40;
+      if (GetOption("huge"))                         NwGeant = 80;
       ProcessLine(Form("((St_geant_Maker *) %p)->SetNwGEANT(%i);",mk,NwGeant));
       if (GetOption("Higz")) ProcessLine(Form("((St_geant_Maker *) %p)->SetIwtype(1);",mk));
       if (GetOption("paw"))  ProcessLine(Form("((St_geant_Maker *) %p)->SetNwPAW(2);",mk));
@@ -1437,16 +1438,6 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("-VMCPassive","Default,TGiant3");
       SetOption("-VMCAppl","Default,TGiant3");
       SetOption("-RootVMC","Default,TGiant3");
-#if 1 /* Not Active geant is not needed any more, except BTofUtil */
-      if (!( GetOption("fzin")   || 
-	     GetOption("ntin")   || 
-	     GetOption("gstar" ) || 
-	     GetOption("pythia") || 
-	     GetOption("PrepEmbed"))) {// Not Active geant
-	SetOption("geant","Default,TGiant3");
-	SetOption("MagF","Default,TGiant3");
-      }
-#endif
       if (GetOption("xgeometry")) {
 	SetOption("-geometry","Default,-xgeometry");
 	SetOption("-geomNoField","Default,-xgeometry");

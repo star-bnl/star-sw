@@ -576,9 +576,7 @@ void StTree::SetIOMode(Option_t *iomode)
 {
  StBranch::SetIOMode(iomode);
  TDataSetIter next(this);StBranch *br;
- while ((br=(StBranch*)next())) {
-   br->SetIOMode(iomode);
- }
+ while ((br=(StBranch*)next())) { br->SetIOMode(iomode);}
 }
 //_______________________________________________________________________________
 Int_t StTree::SetFile(const char *file,const char *mode,int /* insist */)
@@ -601,9 +599,7 @@ Int_t StTree::SetFile(const char *file,const char *mode,int /* insist */)
 void StTree::Clear(Option_t*)
 {
  TDataSetIter next(this);StBranch *br;
- while ((br=(StBranch*)next())) {
-   /*if(!br->IsOption("const"))*/ br->Clear();
- }
+ while ((br=(StBranch*)next())) {/*if(!br->IsOption("const"))*/ br->Clear();}
 }
 
 //_______________________________________________________________________________
@@ -621,9 +617,7 @@ Int_t StTree::Open()
 Int_t StTree::UpdateFile(const char *file)
 {
   TDataSetIter next(this);StBranch *br;
-  while ((br=(StBranch*)next())) {
-    br->UpdateFile(file);
-  }
+  while ((br=(StBranch*)next())) br->UpdateFile(file);
   return 0;
 }
 
@@ -632,9 +626,7 @@ Int_t StTree::WriteEvent(const StUKey &ukey)
 {
   fUKey.Update(ukey,GetName()); Open();
   TDataSetIter next(this);StBranch *br;
-  while ((br=(StBranch*)next())) {
-    br->WriteEvent(fUKey);
-  }
+  while ((br=(StBranch*)next())) br->WriteEvent(fUKey);
   fNEvents++;
   return 0;
 }

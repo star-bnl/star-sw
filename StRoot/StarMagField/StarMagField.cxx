@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.32 2018/06/21 01:47:28 perev Exp $
+ * $Id: StarMagField.cxx,v 1.33 2018/06/29 21:46:25 smirnovd Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,8 +11,17 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
- * Revision 1.32  2018/06/21 01:47:28  perev
- * iTPCheckIn
+ * Revision 1.33  2018/06/29 21:46:25  smirnovd
+ * Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
+ *
+ * Revert "NoDead option added"
+ * Revert "Fill mag field more carefully"
+ * Revert "Assert commented out"
+ * Revert "Merging with TPC group code"
+ * Revert "Remove too strong assert"
+ * Revert "Restore removed by mistake line"
+ * Revert "Remove not used anymore file"
+ * Revert "iTPCheckIn"
  *
  * Revision 1.31  2017/04/28 19:44:35  perev
  * Fix wrong default. Non const field is default
@@ -176,11 +185,7 @@ StarMagField *StarMagField::fgInstance = 0;
 ClassImp(StarMagField);
 #endif
 //________________________________________________________________________________
-StarMagField* StarMagField::Instance() 
-{
- if (!fgInstance) fgInstance=new StarMagField ( StarMagField::kMapped, 1.);
- return fgInstance;
-}
+StarMagField* StarMagField::Instance() {return fgInstance;}
 //________________________________________________________________________________
 R__EXTERN  "C" {
 
