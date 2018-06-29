@@ -1,6 +1,7 @@
 #ifndef _DAQ_READERCLASS_HH_
 #define _DAQ_READERCLASS_HH_
 
+#include <rts.h>
 #include <ctype.h>
 #include <sys/types.h>
 #include "daqConfig.h"
@@ -63,6 +64,7 @@ struct SummaryInfo {
   u_int token ;		// current token
   u_int evt_time ;	// time in UNIX seconds
   u_int detectors ;	// detectors present bit mask according to DAQ!
+  UINT64 detectors64;
   u_int daqbits;
   u_int daqbits_l1;
   u_int daqbits_l2;
@@ -220,10 +222,13 @@ class daqReader {
   u_int evt_time ;	// time in UNIX seconds
   u_int seq ;		// event sequence from EVB
   u_int detectors ;	// detectors present bit mask according to DAQ!
+  UINT64 detectors64;
 
   u_int detector_bugs ;	// for per-detector bug tracing i.e. FY12 UU future protection TPX bug
+  UINT64 detector_bugs64;
 
   u_int detsinrun ;
+  UINT64 detsinrun64;
   u_int evpgroupsinrun;
 
   // copies from the trigger data format...

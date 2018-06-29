@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.67 2017/06/06 16:01:10 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.68 2018/06/27 14:12:04 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -648,6 +648,7 @@ char *daqReader::get(int num, int type)
 	char *buff = (char *)memmap->mem + esum->offset;
 	EvbSummary *evbsum = (EvbSummary *)buff;
 	detsinrun = evbsum->detectorsInRun;
+	detsinrun64 = evbsum->detectorsInRun;
 	evpgroupsinrun = 0xffffffff;
     }
     else {
@@ -676,10 +677,12 @@ char *daqReader::get(int num, int type)
       
 	    if(runconfig->run == 0) {
 		detsinrun = 0xffffffff;
+		detsinrun64 = 0xffffffffffffffff;
 		evpgroupsinrun = 0xffffffff;
 	    }
 	    else {
 		detsinrun = runconfig->detMask;
+		detsinrun64 = runconfig->detMask;
 		evpgroupsinrun = runconfig->grpMask;
 	    }
 	}
@@ -689,6 +692,7 @@ char *daqReader::get(int num, int type)
        Catch the TPC FY12 UU future-protection bug
     */
     detector_bugs = 0;	// clear them all first
+    detector_bugs64 = 0;
 
     if(detectors & (1 << TPX_ID)) {
 	if((run >= 13114025) && (run < 13130030)) {
@@ -713,6 +717,7 @@ char *daqReader::get(int num, int type)
 			    LOG(WARN,"run %d, seq %d -- removing TPX due to FY12 UU future-protection bug",run,seq) ;
 
 			    detector_bugs |= (1<<TPX_ID) ;	// set tje bug status
+			    detector_bugs64 |= (1<<TPX_ID);
 			    goto bug_check_done ;
 			}
 		    }
@@ -1164,6 +1169,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
     token = info->token;
     evt_time = info->evt_time;
     detectors = info->detectors;
+    detectors64 = info->detectors;
     daqbits_l1 = info->daqbits_l1;
     daqbits_l2 = info->daqbits_l2;
     evpgroups = info->evpgroups;
@@ -1199,6 +1205,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
     token = 0;
     evt_time = 0;
     detectors = 0;
+    detectors64 = 0;
     daqbits_l1 = 0;
     daqbits_l2 = 0;
     evpgroups = 0;
@@ -1264,6 +1271,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
     info->token = l2h32(pay->token);
     info->evt_time = l2h32(pay->sec);
     info->detectors = l2h32(pay->rtsDetMask);
+    info->detectors64 = l2h32(pay->rtsDetMask);
     info->daqbits_l1 = l2h32(pay->L1summary[0]);
     info->daqbits_l2 = l2h32(pay->L2summary[0]);
     info->evpgroups = l2h32(pay->L3summary[3]);
@@ -1291,6 +1299,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
     info->token = l2h32(pay->token);
     info->evt_time = l2h32(pay->sec);
     info->detectors = l2h32(pay->rtsDetMask);
+    info->detectors64 = l2h32(pay->rtsDetMask);
     info->daqbits_l1 = l2h32(pay->L1summary[0]);
     info->daqbits_l2 = l2h32(pay->L2summary[0]);
     info->evpgroups = l2h32(pay->L3summary[2]);
@@ -1318,6 +1327,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
     info->token = l2h32(pay->token);
     info->evt_time = l2h32(pay->sec);
     info->detectors = l2h32(pay->rtsDetMask);
+    info->detectors64 = l2h32(pay->rtsDetMask);
     info->daqbits_l1 = l2h32(pay->L1summary[0]);
     info->daqbits_l2 = l2h32(pay->L2summary[0]);
     info->evpgroups = l2h32(pay->L3summary[2]);
@@ -1344,6 +1354,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
     info->token = qswap32(swap, datap->bh.token);
     info->evt_time = qswap32(swap, datap->time);
     info->detectors = qswap32(swap, datap->detector);
+    info->detectors64 = qswap32(swap, datap->detector);
     info->seq = qswap32(swap, datap->seq);
     info->daqbits_l1 = qswap32(swap, datap->TRG_L1_summary[0]);
     info->daqbits_l2 = qswap32(swap, datap->TRG_L2_summary[0]);

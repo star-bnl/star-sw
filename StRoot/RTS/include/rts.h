@@ -191,9 +191,11 @@ extern inline void swapBuff32(unsigned int *buff, int n)
 #define RTS_ENDIAN	0
 
 #define l2hfloat(x)     (x)
+#define l2h64(x)        (x)
 #define l2h32(x)	(x)
 #define l2h16(x)	(x)
 #define b2hfloat(x)     swapf(x)
+#define b2h64(x)        swap64(x)
 #define b2h32(x)	swap32(x)
 #define b2h16(x)	swap16(x)
 
@@ -202,9 +204,11 @@ extern inline void swapBuff32(unsigned int *buff, int n)
 #define RTS_ENDIAN	1
 
 #define l2hfloat(x)     swapf(x)
+#define l2h64(x)        swap64(x)
 #define l2h32(x)	swap32(x)
 #define l2h16(x)	swap16(x)
 #define b2hfloat(x)     (x)
+#define b2h64(x)        (x)
 #define b2h32(x)	(x)
 #define b2h16(x)	(x)
 
@@ -216,7 +220,7 @@ extern inline void swapBuff32(unsigned int *buff, int n)
 
 #define qswap16(test,x) ((test)?swap16(x):(x))
 #define qswap32(test,x) ((test)?swap32(x):(x))
-
+#define qswap64(test,x) ((test)?swap64(x):(x))
 
 
 /* *** COMPILER TRICKS ***********************************************************/

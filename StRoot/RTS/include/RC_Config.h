@@ -43,20 +43,12 @@
 #define CFG_MAX_LABELS 200
 #define MAX_TRG_DICT_ENTRIES 1500
 
-#ifdef RTS_PROJECT_PP
-#define MAX_ID 32
-#else
-#define MAX_ID 32
-#endif
+#define MAX_ID 64
 #define MAX_SUB 4
 #define MAX_INST 100
 #define MAX_TCD 20
 
-#ifdef RTS_PROJECT_PP 
-#define MAX_NODES 20
-#else
-#define MAX_NODES 200
-#endif
+#define MAX_NODES 400
 
 #define MAX_THREADS 400
 #define MAX_STR_LEN 40
@@ -523,7 +515,7 @@ struct DAQ_RUN
  * STAR_CFG fully defines the STAR run
  ************************************************************************************/
 
-#ifndef RTS_PROJECT_PP
+#ifdef OBSOLETE
 
 struct STAR_CFG
 {
@@ -546,51 +538,17 @@ struct STAR_CFG
   //Expansion expansion;
 };
 
-#endif // !PP
-
-#ifdef RTS_PROJECT_PP
-struct PP_SETUP {
-  //char name[MAX_STR_LEN];
-  char daq_setup[MAX_STR_LEN];
-  char filename[MAX_STR_LEN];
-  u_int enable_mask;
-  u_int resync;
-  u_int p3;
-  u_int p4;
-  u_int p5;
-  u_int p6;
-};
-
-struct PP_RUN {
-  char SETUP_name[MAX_STR_LEN];
-  int run_number;
-  u_int p1;    // skip n events
-  u_int p2;
-  u_int p3;
-  u_int p4;
-  u_int p5;
-  u_int p6;
-};
-
-struct PP_CFG
-{
-  SUBSYS_TASKS subsys_tasks;
-
-  PP_SETUP setup;  
-  PP_RUN   run;
-  DAQ_SETUP daq_setup;
-  DAQ_RUN   daq_run;
-};
-
-typedef PP_CFG STAR_CFG;
 #endif
 
+
+
+#ifdef OBSOLETE
 typedef STAR_CFG DAQ_CFG;
 typedef STAR_CFG TRG_CFG;
 typedef STAR_CFG SC_CFG;
 typedef STAR_CFG L3_CFG;
-
 typedef STAR_CFG RC_Config;
+#endif
 
 // SWAPS...
 #ifdef RTS_LITTLE_ENDIAN
@@ -619,7 +577,7 @@ void swapDAQ_DET(DAQ_DET *);
 void swapDAQ_SETUP(DAQ_SETUP *);
 void swapDAQ_DAQ(DAQ_DAQ *);
 void swapDAQ_RUN(DAQ_RUN *);
-void swapSTAR_CFG(STAR_CFG *);
+//void swapSTAR_CFG(STAR_CFG *);
 
 #ifdef RTS_PROJECT_PP
 void swapPP_SETUP(PP_SETUP *);
@@ -678,11 +636,11 @@ char *getConfigBase(char *filename, int port, int trg);
 char *getConfigBase(char *filename, ic_msg *m);
 
 // fills cfg, returns sizeof(cfg)
-int getConfigFile(STAR_CFG *cfg, ic_msg *m);
-int getConfigFile(STAR_CFG *cfg, char *filename);
+//int getConfigFile(STAR_CFG *cfg, ic_msg *m);
+//int getConfigFile(STAR_CFG *cfg, char *filename);
 
 // puts cfg into filename, returns sizeof(cfg)
-int putConfigFile(STAR_CFG *cfg, char *filename);
+//int putConfigFile(STAR_CFG *cfg, char *filename);
 
 ///////////////////////////////////////////////////////////////
 // Trigger Definition stuff
@@ -698,16 +656,16 @@ UINT32 getCrateMask4TrgDet(int det);
 int getConfNumForNode(int node);
 UINT16 getTrgDetRequiredMask(char *node, int board=-1);
 
-void writeRCCNF(char *fn, STAR_CFG *cfg);   // write rc def file...
+//void writeRCCNF(char *fn, STAR_CFG *cfg);   // write rc def file...
 
-bool node_inrun(int node, STAR_CFG *cfg);
-bool system_inrun(int sys, STAR_CFG *cfg);
-void maskDetectorsInRun(STAR_CFG *cfg);
+//bool node_inrun(int node, STAR_CFG *cfg);
+//bool system_inrun(int sys, STAR_CFG *cfg);
+//void maskDetectorsInRun(STAR_CFG *cfg);
 bool system_inrun(int sys, SimpleXmlDoc *xml);
 void maskDetectorsInRun(SimpleXmlDoc *xml);
 
 
-bool cfgBuildPS(TrgPS *ps, RC_Config *rccfg);
+//bool cfgBuildPS(TrgPS *ps, RC_Config *rccfg);
 bool cfgBuildPS(TrgPS *ps, SimpleXmlDoc *xml);
 
 
@@ -755,7 +713,7 @@ class EvbChooser
     EvbChooser() {weights_set = 0; };
   void configure(SimpleXmlDoc *xml);
 
-  void configure(STAR_CFG *cfg, int legacy);
+  //void configure(STAR_CFG *cfg, int legacy);
 
   // These return error if no evbs in run, but otherwise
   // return a valid EVB even if the token is invalid

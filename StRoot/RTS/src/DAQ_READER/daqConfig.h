@@ -1,7 +1,7 @@
 #ifndef _EVP_DAQCONFIG_HH_
 #define _EVP_DAQCONFIG_HH_
 // Borrow from $ROOTSYS/include/RConfig.h
-
+#include "RC_Config.h"
 #ifndef ANSICPP
 #  define ANSICPP
 #endif
