@@ -14,7 +14,9 @@
 #include "TMethod.h"
 #include "TMethodArg.h"
 #include "TDataType.h"
+#if ROOT_VERSION_CODE < ROOT_VERSION(5,34,29)
 #include "Api.h"
+#endif
 #include "TMemberInspector.h"
 #include "TExMap.h"
 #include "TCollection.h"
@@ -30,12 +32,17 @@
 #include "StObject.h"
 #include "StHit.h"
 #include "StTrack.h"
+#include "StGlobalTrack.h"
 #include "StTrackNode.h"
 #include "StVertex.h"
 #include "StTrackGeometry.h"
 #include "StTrackDetectorInfo.h"
 // For L3 filter
+#if 0
 #include "StarClassLibrary/BetheBloch.h"
+#else
+#include "StBichsel/Bichsel.h"
+#endif 
 #include "StEvent/StDedxPidTraits.h"
 // For coloring filter
 #include "StEventTypes.h"
@@ -58,8 +65,9 @@ std::map<long,long>  myMap;
 typedef std::pair <long,long> MyPair;
 std::map <long,long> :: const_iterator myFinder;
 
-
-
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,34,29)
+typedef TMemberInspector StEventInspector;
+#else
 
 class StEventInspector : public TMemberInspector {
 public:
@@ -74,7 +82,6 @@ TRegexp *fSkip;
 TString fOpt;
 
 };      
-
 //______________________________________________________________________________
 StEventInspector::StEventInspector(TExMap *map,Int_t &count,const char *opt):fCount(count)
 {  
@@ -213,6 +220,7 @@ void StEventInspector::CheckIn(TObject *obj,const char *bwname)
   obj->ShowMembers(insp);
 #endif
 }
+#endif /* ROOT_VERSION_CODE >= ROOT_VERSION(5,34,29) */
 //______________________________________________________________________________
 ClassImp(StEventHelper)
 //______________________________________________________________________________
@@ -241,6 +249,7 @@ void StEventHelper::Reset(const TObject *evt,const char *opt)
    Clear();
    myMap.clear();
    fMap->Delete();
+#if ROOT_VERSION_CODE < ROOT_VERSION(5,34,29)
    if (!fObject) return;
    int kount=0;
    StEventInspector insp(fMap,kount,opt);
@@ -249,6 +258,7 @@ void StEventHelper::Reset(const TObject *evt,const char *opt)
    fObject->ShowMembers(insp,cbuf);
 #else
    fObject->ShowMembers(insp);
+#endif
 #endif
 }
 //______________________________________________________________________________
@@ -352,7 +362,7 @@ int trackTypes[]= {global, primary, tpt, secondary, estGlobal, estPrimary,-1};
       StTrack *trk = 0;int ity; int bty=kTGB;
       for (int jty=0;(ity=trackTypes[jty])>=0;jty++,bty<<=1){
         if (!(flag&bty))	continue;
-        trk=tn->track(ity);
+        trk=(StTrack *)tn->track(ity);
 	if (!trk)		continue;
 	if (trk->IsZombie())  	continue;
    // See:  StRoot/St_base/StObject.h also
@@ -836,13 +846,19 @@ SKIP: return 0;
 ClassImp(StMuDstFilterHelper)
 StMuDstFilterHelper::StMuDstFilterHelper(const char *name,bool active):StFilterABC(name,active)
 {
+#if 0
   mBB = new BetheBloch();
+#endif
   SetDefs();
   
 }
 //______________________________________________________________________________
 StMuDstFilterHelper::~StMuDstFilterHelper()
+#if 0
 { delete mBB;}
+#else
+{}
+#endif
 //______________________________________________________________________________
 const char  **StMuDstFilterHelper::GetNams() const
 {
@@ -908,11 +924,15 @@ Int_t StMuDstFilterHelper::Accept(const StTrack* track) {
            chargeOK = 1;
         else if (track->geometry()->charge() == chargeForLowP) 
            chargeOK = 1;
-
+#if 0
         // check dEdx
         //	      if (mBB==0) mBB = new BetheBloch();
         float dedxHigh = dEdxFractionCutHigh * mBB->Sirrf(magnitude/dEdxMassCutHigh);
         float dedxLow  = dEdxFractionCutLow  * mBB->Sirrf(magnitude/dEdxMassCutLow);
+#else
+        float dedxHigh = dEdxFractionCutHigh * Bichsel::Instance()->GetI70M(TMath::Log10(magnitude/dEdxMassCutHigh));
+        float dedxLow  = dEdxFractionCutLow  * Bichsel::Instance()->GetI70M(TMath::Log10(magnitude/dEdxMassCutLow));
+#endif
         float dedx     = 0;
 
         // get track dEdx
@@ -1075,9 +1095,9 @@ const StThreeVectorF &StVertexHelper::GetPoint()
 //______________________________________________________________________________   
 const StTrack *StVertexHelper::GetTrack(int idx)  	// -1=parent track  
 {
-  if (idx==-1) return fVtx->parent();
+  if (idx==-1) return (const StTrack *) fVtx->parent();
   if (idx>= GetNTracks()) return 0;
-  return fVtx->daughter((UInt_t)idx);
+  return (const StTrack *) fVtx->daughter((UInt_t)idx);
 }
 //______________________________________________________________________________   
 const float *StVertexHelper::GetErrMtx()  	
@@ -1097,6 +1117,11 @@ const float *StVertexHelper::GetErrMtx()
 ClassImp(StTrackHelper)
 StTrackHelper::StTrackHelper(const StTrack *trk) : 
       StHelixHelper(trk->geometry()->helix(),
+                    trk->outerGeometry()->helix(),trk->length())
+      , fTrk(trk), fHits(0)
+{    GetNHits();  }
+StTrackHelper::StTrackHelper(const StGlobalTrack *trk) : 
+      StHelixHelper(trk->dcaGeometry()->helix(),
                     trk->outerGeometry()->helix(),trk->length())
       , fTrk(trk), fHits(0)
 {    GetNHits();  }

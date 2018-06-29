@@ -1,7 +1,7 @@
 #ifndef STAR_StuDraw3DEvent
 #define STAR_StuDraw3DEvent
 
-// $Id: StuDraw3DEvent.h,v 1.21 2012/01/24 03:11:25 perev Exp $
+// $Id: StuDraw3DEvent.h,v 1.22 2018/06/29 17:21:24 perev Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/05/2008
 
 #include "StDraw3D.h"
@@ -10,6 +10,7 @@
 
 
 class StTrack;
+class StGlobalTrack;
 class StMeasuredPoint;
 class StEvent;
 class StEventHitIter;
@@ -70,6 +71,11 @@ class StuDraw3DEvent : public virtual StDraw3D
                   ,  Style_t sty= Style_t(-1)
                   ,  Size_t siz = Size_t (-1));
      virtual TObject *Track(const StTrack &track, EDraw3DStyle sty=kPrimaryTrack);
+     virtual TObject *Track(const StGlobalTrack &track
+                  ,  Color_t col
+                  ,  Style_t sty= Style_t(-1)
+                  ,  Size_t siz = Size_t (-1));
+     virtual TObject *Track(const StGlobalTrack &track, EDraw3DStyle sty=kPrimaryTrack);
      virtual TObject *Hit(const StMeasuredPoint &hit
                   ,  Color_t col
                   ,  Style_t sty= Style_t(-1)

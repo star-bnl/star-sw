@@ -25,6 +25,7 @@
 
 class StEvent;
 class StTrack;
+class StGlobalTrack;
 class StHit;
 class StVertex;
 class StarClassLibrary;
@@ -64,6 +65,7 @@ class StTrackHelper: public StHelixHelper
 {
 public:
       StTrackHelper(const StTrack *trk=0);
+      StTrackHelper(const StGlobalTrack *trk);
      ~StTrackHelper();
         int     GetType() 	const;
         int     GetFlag() 	const;

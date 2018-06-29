@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StuFtpcRefMult.hh,v 1.7 2005/08/19 03:44:28 perev Exp $
+ * $Id: StuFtpcRefMult.hh,v 1.8 2018/06/29 17:21:24 perev Exp $
  ***************************************************************************
  *
  * Description:
@@ -32,6 +32,9 @@
  *
  **************************************************************************
  * $Log: StuFtpcRefMult.hh,v $
+ * Revision 1.8  2018/06/29 17:21:24  perev
+ * Irakli_Jun29
+ *
  * Revision 1.7  2005/08/19 03:44:28  perev
  * Marco updates
  *
@@ -90,7 +93,7 @@ uncorrectedNumberOfFtpcEastPrimaries(const StPrimaryVertex*& primVtx)
    // check pt
    if (track->geometry()->momentum().perp()>=3) continue; 
    // finally, check dca, if a track satisfies gets inside the if, count it.
-   StTrack *glt = track->node()->track(global);
+   StTrack *glt = (StTrack *) track->node()->track(global);
    if (glt->geometry()->helix().distance(primVtx->position())<3) ++countedTracks;
     }
     return countedTracks;
@@ -120,7 +123,7 @@ uncorrectedNumberOfFtpcWestPrimaries(const StPrimaryVertex*& primVtx)
    // check pt
    if (track->geometry()->momentum().perp()>=3) continue; 
    // finally, check dca, if a track satisfies gets inside the if, count it.
-   if (track->node()->track(global)->geometry()->helix().distance(primVtx->position())<3) ++countedTracks;
+   if (((StTrack *)track->node()->track(global))->geometry()->helix().distance(primVtx->position())<3) ++countedTracks;
     }
     return countedTracks;
 }
