@@ -14,7 +14,8 @@ TDataSet *CreateTable() {
   //  row.t0[23+20] -= 6.74451; // TpcHit19116021.root // 7.4645;
   //  row.t0[23+20] -= 6.713; 
   //           +/- 0.0312 averaged
-  row.t0[23+20] -= 7.221; // from run 19116021, 05/17/18
+  //  row.t0[23+20] -= 7.221; // from run 19116021, 05/17/18
+  row.t0[23+20] -= 7.2106; // from run 19116021, 06/27/18
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
