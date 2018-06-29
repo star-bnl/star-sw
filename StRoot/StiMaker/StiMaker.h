@@ -6,6 +6,8 @@
 
 #include "StMaker.h"
 #include "StEvent/StEnumerations.h"
+#include "Sti/StiKalmanTrackFinder.h"
+#include "Sti/StiKalmanTrackFitter.h"
 #include "Sti/StiHitLoader.h"
 
 class TFile;
@@ -47,10 +49,11 @@ class StiMaker : public StMaker
              void FinishTracks(int gloPri);
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.41 2018/04/19 15:48:28 smirnovd Exp $ built " __DATE__ " " __TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.42 2018/06/21 01:48:44 perev Exp $ built " __DATE__ " " __TIME__; return cvs;}	
 
 
     StiToolkit * getToolkit();
+    void load(TDataSet *);
 
  protected:
     virtual TDataSet  *FindDataSet (const char* logInput,
