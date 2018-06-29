@@ -66,6 +66,8 @@ float LaserReader::Make(daqReader *rdr)
   //const double TPC_DELTAT = 0.106574;
   //const double TPC_DELTAT = 0.108508;
   const double TPC_DELTAT = 0.106576; //200GeV d+Au
+  //const double TPC_DELTAT = .10982996;   // 3.875 GeV fixed:   f=9.104984
+
   static double LaserPosition[12][7] =
     { {-179.353, -151.665, -120.698, -90.8549, -59.3999, -32.1487, 0.0},
       {-179.207, -151.674, -120.563, -90.6271, -59.6521, -32.0164, 0.0},

@@ -134,6 +134,8 @@ class tpxBuilder : public JevpBuilder {
 
       TH1 *cl66_tpc_phi_charge;
       TH1 *cl67_tpc_sector_charge;
+
+      TH1 *clusters_per_bx;
     };
   } extras;
 

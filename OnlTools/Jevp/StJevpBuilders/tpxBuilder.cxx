@@ -153,6 +153,8 @@ void tpxBuilder::initialize(int argc, char *argv[]) {
   extras.cl66_tpc_phi_charge = new TH1D("cl66_tpc_phi_charge","Azimuthal Distribution of TPC Charge",360,-180,180);
   extras.cl67_tpc_sector_charge = new TH1D("cl67_tpc_sector_charge","TPC Charge per Sector",24,0.5,24.5);
  
+  extras.clusters_per_bx = new TH1D("clusters_per_bx", "TPC clusters per bunch01 crossing", 120, -.5, 119.5);
+  
   // Add root histograms to Plots
   int np = sizeof(contents) / sizeof(TH1 *);
   JevpPlot *plots[np];
@@ -293,6 +295,9 @@ void tpxBuilder::initialize(int argc, char *argv[]) {
   plots[n]->getHisto(0)->setLegArgs("l");
   plots[n]->getHisto(1)->setLegArgs("l");
 
+  plots[++n] = new JevpPlot(extras.clusters_per_bx);
+  plots[n]->optstat = 0;
+
   long q_idx = ((long)&contents.h15_tpc_sec1 - (long)contents.array) / (sizeof(TH1 *));
   long qs_idx = ((long)&contents.h120_chargeStep_s1 - (long)contents.array) / (sizeof(TH1 *));
   long cl_qs_idx = ((long)&extras.cl120_chargeStep_s1 - (long)extras.array) / (sizeof(TH1 *));
@@ -336,6 +341,21 @@ void tpxBuilder::event(daqReader *rdr)
 {
   int has_adc=0;
   int has_cld=0;
+  int bunch7bit;
+
+  //printf("trgd\n");
+  // Get bunch crossing from trigger data..
+  StTriggerData *trgd = getStTriggerData(rdr);
+  if(trgd) {
+    //printf("a\n");
+    bunch7bit = trgd->bunchId7Bit();
+    delete trgd;
+  }
+  else {
+    bunch7bit = 0;
+  }
+  
+  //printf(".\n");
 
   // printf("aa\n");
   long q_idx = ((long)&contents.h15_tpc_sec1 - (long)contents.array) / (sizeof(TH1 *));
@@ -347,7 +367,7 @@ void tpxBuilder::event(daqReader *rdr)
 
   double pixel_count = 0;
   double channel_count = 0;
-  double cluster_count = 0;
+  //double cluster_count = 0;
   double charge_count = 0;
   double charge_count_sector;
   double tpc_max_channels = 0.0;
@@ -515,6 +535,11 @@ void tpxBuilder::event(daqReader *rdr)
     contents.tpc_pix_occ_physics->Fill(100.0 * (double)pixel_count / (tpc_max_channels * 400.0));
 
     extras.tpc_clpix_occ_physics->Fill(100.0 * (double)pix_count_cl / (cl_max_channels * 400.0));
+
+    //printf("pix: %d cl: %lf\n", bunch7bit, pix_count_cl);
+
+    extras.clusters_per_bx->Fill(bunch7bit, pix_count_cl);
+    //printf(".\n");
 
     //printf("chan=%lf pix=%lf max=%lf:  %lf %lf\n",channel_count,pixel_count,tpc_max_channels,channel_count/tpc_max_channels,pixel_count/(tpc_max_channels*400));
     break;
