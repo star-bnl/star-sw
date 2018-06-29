@@ -25,6 +25,7 @@ extern int   _NAME2_(xxx,Reader)(char *mem)
 struct DATAP;
 struct rccnf ;
 struct gbPayload;
+struct gbPayload_0x02;
 struct gbPayload_0x01a;
 struct gbPayload_0x01;
 
@@ -252,7 +253,8 @@ class daqReader {
   int fillSummaryInfo(SummaryInfo *info, gbPayload *gbPayload);
 
   // history...
-  int fillSummaryInfo_v02(SummaryInfo *info, gbPayload *gbPayload);
+  int fillSummaryInfo_v03(SummaryInfo *info, gbPayload *gbPayload);
+  int fillSummaryInfo_v02(SummaryInfo *info, gbPayload_0x02 *gbPayload);
   int fillSummaryInfo_v01a(SummaryInfo *info, gbPayload_0x01a *gbPayload);
   int fillSummaryInfo_v01(SummaryInfo *info, gbPayload_0x01 *gbPayload);
 
