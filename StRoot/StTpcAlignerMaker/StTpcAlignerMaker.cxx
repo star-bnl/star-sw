@@ -265,6 +265,7 @@ Int_t StTpcAlignerMaker::Make(){
   //  if (TriggerId > 310810 && nTracks > 5) return kStOK;
   // Check ToF to understand direction where muons a comint from
   StBTofCollection *btofcol = pEvent->btofCollection();
+#if 0
   Double_t tofMin = 1e9; 
   Double_t tofMax =   0;
   if (btofcol) {
@@ -280,6 +281,7 @@ Int_t StTpcAlignerMaker::Make(){
       if (time < tofMin) {tofMin = time;}
     }
   }
+#endif
   // Best PV
   StPrimaryVertex *pVbest  = pEvent->primaryVertex();
   if (btofcol) {

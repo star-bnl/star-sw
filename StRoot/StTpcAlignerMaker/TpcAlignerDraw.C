@@ -213,6 +213,8 @@ void TpcAlignerDrawIO(const Char_t *files = "*.root", Bool_t laser = kFALSE) {
     if (laser && pxyz.Mag() < 100.0) continue;
     //    if (In_Ndf < 15 || Out_Ndf < 15) continue;
     Int_t sector = In_sector;
+    if (! sector) continue;
+    if (! Out_sector) continue;
     TVector3 pxyzIn(In_pxyz_mX1,In_pxyz_mX2,In_pxyz_mX3);  PrPP(pxyzIn);
     TVector3 rI(In_xyz_mX1,In_xyz_mX2,In_xyz_mX3);         PrPP(rI);
     TVector3 pxyzOut(Out_pxyz_mX1,Out_pxyz_mX2,Out_pxyz_mX3);   PrPP(pxyzOut);
