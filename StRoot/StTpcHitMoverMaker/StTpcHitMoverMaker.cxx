@@ -167,10 +167,10 @@ void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StGlobalCoordinate &
   moveTpcHit(coorL,coorLTD);
   transform(coorLTD,coorG); PrPP(moveTpcHit,coorLTD); PrPP(moveTpcHit,coorG); 
 }
-// $Id: StTpcHitMoverMaker.cxx,v 1.27.10.1 2018/02/16 22:15:01 perev Exp $
+// $Id: StTpcHitMoverMaker.cxx,v 1.27.10.2 2018/06/29 17:21:33 perev Exp $
 // $Log: StTpcHitMoverMaker.cxx,v $
-// Revision 1.27.10.1  2018/02/16 22:15:01  perev
-// iTPC
+// Revision 1.27.10.2  2018/06/29 17:21:33  perev
+// Irakli_Jun29
 //
 // Revision 1.27  2014/07/27 13:23:09  fisyak
 // Add cast for c++11 option

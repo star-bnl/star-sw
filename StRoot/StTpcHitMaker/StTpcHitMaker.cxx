@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.53.6.3 2018/05/02 20:47:53 perev Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.53.6.4 2018/06/29 17:21:32 perev Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
- * Revision 1.53.6.3  2018/05/02 20:47:53  perev
- * some fixes to properly read the real data. Irakli
+ * Revision 1.53.6.4  2018/06/29 17:21:32  perev
+ * Irakli_Jun29
  *
  * Revision 1.55  2018/02/18 23:35:33  perev
  * Remove iTPC update

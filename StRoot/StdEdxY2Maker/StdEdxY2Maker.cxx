@@ -1,7 +1,8 @@
-// $Id: StdEdxY2Maker.cxx,v 1.90.2.2 2018/02/20 23:27:34 smirnovd Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.90.2.3 2018/06/29 17:21:21 perev Exp $
 //#define CompareWithToF 
 //#define __USEZ3A__
 //#define __CHECK_LargedEdx__
+//#define __Use_dNdx__
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
 #include "StTpcdEdxCorrection.h" 

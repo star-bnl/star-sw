@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.110.2.3 2018/05/02 19:43:24 perev Exp $
+ * $Id: StMagUtilities.cxx,v 1.110.2.4 2018/06/29 17:21:16 perev Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,8 +11,8 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
- * Revision 1.110.2.3  2018/05/02 19:43:24  perev
- * Gene corrections
+ * Revision 1.110.2.4  2018/06/29 17:21:16  perev
+ * Irakli_Jun29
  *
  * Revision 1.109  2017/04/12 19:47:02  genevb
  * Generic SpaceCharge and GridLeak functions independent of specific modes

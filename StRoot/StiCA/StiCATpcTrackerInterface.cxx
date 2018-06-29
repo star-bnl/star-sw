@@ -767,8 +767,9 @@ void StiCATpcTrackerInterface::FillStiPerformance()
       fStiCaHits.push_back(caHit);
     }
             
-    StiKalmanTrackNode *NodePar = track->getInnerMostDetHitNode(kTpcId);
-    if (!NodePar) continue;
+    if(!(track->getInnerMostTPCHitNode(0))) continue;
+    StiKalmanTrackNode *NodePar = track->getInnerMostTPCHitNode(0);
+//    std::cout <<"node x  "<< track->getInnerMostTPCHitNode(0)->getX() << std::endl << std::endl;
 
     double JI[5]; 
     JI[0] = -1.;                    // y

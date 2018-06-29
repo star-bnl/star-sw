@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.hh,v 1.22.10.1 2018/02/16 22:14:56 perev Exp $
+ * $Id: StTpcCoordinateTransform.hh,v 1.22.10.2 2018/06/29 17:21:20 perev Exp $
  *
  * Author: brian made this on  Feb 6, 1998
  *
@@ -16,8 +16,8 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.hh,v $
- * Revision 1.22.10.1  2018/02/16 22:14:56  perev
- * iTPC
+ * Revision 1.22.10.2  2018/06/29 17:21:20  perev
+ * Irakli_Jun29
  *
  * Revision 1.22  2014/06/26 21:29:27  fisyak
  * New Tpc Alignment, v632

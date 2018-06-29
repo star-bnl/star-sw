@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// $Id: TpcHitUtilities.cxx,v 1.9.14.1 2018/02/16 22:09:41 perev Exp $
+// $Id: TpcHitUtilities.cxx,v 1.9.14.2 2018/06/29 17:21:29 perev Exp $
 //
 // Author: M.L. Miller, Yale
 //
@@ -10,8 +10,8 @@
 ///////////////////////////////////////////////////////////////////////////
 //
 // $Log: TpcHitUtilities.cxx,v $
-// Revision 1.9.14.1  2018/02/16 22:09:41  perev
-// iTPC
+// Revision 1.9.14.2  2018/06/29 17:21:29  perev
+// Irakli_Jun29
 //
 // Revision 1.9  2011/01/18 14:40:32  fisyak
 // Clean up TpcDb interfaces and Tpc coordinate transformation

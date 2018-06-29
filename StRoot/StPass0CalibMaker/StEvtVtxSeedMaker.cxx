@@ -141,16 +141,16 @@ int StEvtVtxSeedMaker::GetEventData() {
 //_____________________________________________________________________________
 void StEvtVtxSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.14.4.1 2018/02/16 22:09:40 perev Exp $"
+           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.14.4.2 2018/06/29 17:21:28 perev Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StEvtVtxSeedMaker.cxx,v 1.14.4.1 2018/02/16 22:09:40 perev Exp $
+// $Id: StEvtVtxSeedMaker.cxx,v 1.14.4.2 2018/06/29 17:21:28 perev Exp $
 // $Log: StEvtVtxSeedMaker.cxx,v $
-// Revision 1.14.4.1  2018/02/16 22:09:40  perev
-// iTPC
+// Revision 1.14.4.2  2018/06/29 17:21:28  perev
+// Irakli_Jun29
 //
 // Revision 1.14  2016/08/02 21:17:16  genevb
 // Added tDay,tFill to resNtuple, and improved C++11 compliance

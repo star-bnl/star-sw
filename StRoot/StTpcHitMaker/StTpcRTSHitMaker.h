@@ -3,11 +3,11 @@
 
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.h,v 1.12.10.2 2018/02/28 01:42:13 perev Exp $
+ * $Id: StTpcRTSHitMaker.h,v 1.12.10.3 2018/06/29 17:21:32 perev Exp $
  * StTpcRTSHitMaker - class to runonline (RTS) cluster maker over StTpcRawData
  * $Log: StTpcRTSHitMaker.h,v $
- * Revision 1.12.10.2  2018/02/28 01:42:13  perev
- * There are some fixes to properly read the real data. Irakli
+ * Revision 1.12.10.3  2018/06/29 17:21:32  perev
+ * Irakli_Jun29
  *
  * Revision 1.12  2014/08/06 11:43:50  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
@@ -78,7 +78,7 @@ class StTpcRTSHitMaker : public StMaker {
   UChar_t *mTpx_RowLen[24];
   // cvs
   virtual const char *GetCVS() const    {
-    static const char cvs[]="Tag $Name:  $ $Id: StTpcRTSHitMaker.h,v 1.12.10.2 2018/02/28 01:42:13 perev Exp $  built " __DATE__ " " __TIME__ ; return cvs;
+    static const char cvs[]="Tag $Name:  $ $Id: StTpcRTSHitMaker.h,v 1.12.10.3 2018/06/29 17:21:32 perev Exp $  built " __DATE__ " " __TIME__ ; return cvs;
   }
   ClassDef(StTpcRTSHitMaker, 1)    //StTpcRTSHitMaker - class to fille the StEvewnt from DAQ reader
 };

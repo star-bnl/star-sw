@@ -27,7 +27,6 @@ using namespace ROOT::Math;
     if (! strcmp(makeSTRING(C_STRUCT),"Survey")) {shift = 4; NrowSize = 12*8;}\
     if (! strcmp(makeSTRING(C_STRUCT),"tpcSectorT0offset")) {for (Int_t i = 0; i < 24; i++) def->t0[i] = -22.257;} \
     if (! strcmp(makeSTRING(C_STRUCT),"tofTrayConfig")) {def->entries = 120; for (Int_t i = 0; i < 120; i++) {def->iTray[i] = i+1; def->nModules[i] = 32;} \
-
     for (Int_t i = 0; i < table->GetNRows(); i++, s++) {	      \
       if (memcmp(&def+shift, s+shift,  NrowSize)) {iprt = kTRUE; break;}   \
     }								      \
@@ -93,6 +92,8 @@ MakeChairOptionalInstance2(TpcSecRowCor,St_TpcSecRowCC,Calibrations/tpc/TpcSecRo
 MakeChairInstance2(TpcSecRowCor,St_TpcSecRowXC,Calibrations/tpc/TpcSecRowX);
 #include "St_tpcCorrectionC.h"
 ClassImp(St_tpcCorrectionC);
+#include "St_tpcCalibResolutionsC.h"
+MakeChairInstance(tpcCalibResolutions,Calibrations/tpc/tpcCalibResolutions);
 //________________________________________________________________________________
 Double_t St_tpcCorrectionC::CalcCorrection(Int_t i, Double_t x, Double_t z, Int_t NparMax) {
   tpcCorrection_st *cor =  ((St_tpcCorrection *) Table())->GetTable() + i;
@@ -536,49 +537,134 @@ void  St_tpcAnodeHVC::sockets(Int_t sector, Int_t padrow, Int_t &e1, Int_t &e2, 
   e1 = (sector-1)*19;
   e2 = e1;
   f2 = 0;
-  // sector=1..24 , padrow=1..X
+  // sector=1..24 , padrow=1..45
   // f2 represents signal couplings from neighboring HV sections
   // see: http://www.star.bnl.gov/public/tpc/hard/signals/signal_division.html
-  int total_rows = St_tpcPadConfigC::instance()->padRows(sector);
-  int inner_rows = St_tpcPadConfigC::instance()->innerPadRows(sector);
-  if (padrow <= inner_rows) {
-    if (total_rows == 45) { // Original TPC
-      switch (padrow) {
-        case  1: e1+= 1; e2+= 2; f2 = 0.00197; break;
-        case  2: e1+= 2; break;
-        case  3: e1+= 3; e2+= 2; f2 = 0.04547; break;
-        case  4: e1+= 3; break;
-        case  5: e1+= 4; break;
-        case  6: e1+= 4; e2+= 5; f2 = 0.00007; break;
-        case  7: e1+= 5; break;
-        case  8: e1+= 6; e2+= 5; f2 = 0.04547; break;
-        case  9: e1+= 6; break;
-        case 10: e1+= 7; break;
-        case 11: e1+= 8; e2+= 7; f2 = 0.33523; break;
-        case 12: e1+= 8; break;
-        case 13: e1+=17; break;
-        default: e1 = 0; e2 = 0; f2 = 0;
-      }
-    } else { // iTPC
-      e1+= (padrow + 5) / 5; // first 4 rows => socket 9, next 4 => 10, etc.
-      if (padrow == inner_rows) {
-        e1+= 8; // actually 17, but already added 9
-      } else if (padrow == inner_rows - 1) {
-        e2+=17; f2 = 0.25148;
-      } else if (padrow % 5 == 4) {
-        e2=e1+1; f2 = 0.25148;
-      } // else f2 = 0
+  if (!  St_tpcPadConfigC::instance()->iTPC(sector)) {
+    switch (padrow) {
+    case  1: e1+= 1; e2+= 2; f2 = 0.00197; break;
+    case  2: e1+= 2; break;
+    case  3: e1+= 3; e2+= 2; f2 = 0.04547; break;
+    case  4: e1+= 3; break;
+    case  5: e1+= 4; break;
+    case  6: e1+= 4; e2+= 5; f2 = 0.00007; break;
+    case  7: e1+= 5; break;
+    case  8: e1+= 6; e2+= 5; f2 = 0.04547; break;
+    case  9: e1+= 6; break;
+    case 10: e1+= 7; break;
+    case 11: e1+= 8; e2+= 7; f2 = 0.33523; break;
+    case 12: e1+= 8; break;
+    case 13: e1+=17; break;
+    case 14: e1+= 9; e2+=18; f2 = 0.00312; break;
+    case 15:
+    case 16: e1+= 9; break;
+    case 17: e1+= 9; e2+=10; f2 = 0.40250; break;
+    case 18:
+    case 19:
+    case 20: e1+=10; break;
+    case 21: e1+=10; e2+=11; f2 = 0.40250; break;
+    case 22:
+    case 23:
+    case 24: e1+=11; break;
+    case 25: e1+=11; e2+=12; f2 = 0.40250; break;
+    case 26:
+    case 27:
+    case 28: e1+=12; break;
+    case 29: e1+=12; e2+=13; f2 = 0.40250; break;
+    case 30:
+    case 31:
+    case 32: e1+=13; break;
+    case 33: e1+=13; e2+=14; f2 = 0.40250; break;
+    case 34:
+    case 35:
+    case 36: e1+=14; break;
+    case 37: e1+=14; e2+=15; f2 = 0.40250; break;
+    case 38:
+    case 39:
+    case 40: e1+=15; break;
+    case 41: e1+=15; e2+=16; f2 = 0.40250; break;
+    case 42:
+    case 43:
+    case 44: e1+=16; break;
+    case 45: e1+=16; e2+=19; f2 = 0.40250; break;
+    default: e1 = 0; e2 = 0; f2 = 0;
     }
-  } else { // Outer sector
-    int outer_row = padrow - inner_rows;
-    e1+= (outer_row + 35) / 4; // first 4 rows => socket 9, next 4 => 10, etc.
-    if (outer_row == 1) {
-      e2+=18; f2 = 0.00312;
-    } else if (outer_row == total_rows) {
-      e2+=19; f2 = 0.40250;
-    } else if (outer_row % 4 == 3) {
-      e2=e1+1; f2 = 0.40250;
-    } // else f2 = 0
+  } else { // iTPC
+    switch (padrow) {
+    case  1:
+    case  2:
+    case  3: e1+= 1; e2+= 1; break;
+    case  4: e1+= 1; e2+= 2; break;
+    case  5:
+    case  6:
+    case  7:
+    case  8: e1+= 2; e2+= 2; break;
+    case  9: e1+= 2; e2+= 3; break;
+    case 10: 
+    case 11:
+    case 12:
+    case 13: e1+= 3; e2+= 3; break;
+    case 14: e1+= 3; e2+= 4; break;
+    case 15:
+    case 16:
+    case 17:
+    case 18: e1+= 4; e2+= 4; break;
+    case 19: e1+= 4; e2+= 5; break;
+    case 20:
+    case 21:
+    case 22:
+    case 23: e1+= 5; e2+= 5; break;
+    case 24: e1+= 5; e2+= 6; break;
+    case 25:
+    case 26:
+    case 27:
+    case 28: e1+= 6; e2+= 6; break;
+    case 29: e1+= 6; e2+= 7; break;
+    case 30:
+    case 31:
+    case 32:
+    case 33: e1+= 7; e2+= 7; break;
+    case 34: e1+= 7; e2+= 8; break;
+    case 35:
+    case 36:
+    case 37:
+    case 38: e1+= 8; e2+= 8; break;
+    case 39:
+    case 40: e1+=17; e2+=17; break;
+    case 41: e1+= 9; e2+=18;  break;
+    case 42:
+    case 43: e1+= 9; break;
+    case 44: e1+= 9; e2+=10;  break;
+    case 45:
+    case 46:
+    case 47: e1+=10; break;
+    case 48: e1+=10; e2+=11;  break;
+    case 49:
+    case 50:
+    case 51: e1+=11; break;
+    case 52: e1+=11; e2+=12; f2 = 0.40250; break;
+    case 53:
+    case 54:
+    case 55: e1+=12; break;
+    case 56: e1+=12; e2+=13; f2 = 0.40250; break;
+    case 57:
+    case 58:
+    case 59: e1+=13; break;
+    case 60: e1+=13; e2+=14; f2 = 0.40250; break;
+    case 61:
+    case 62:
+    case 63: e1+=14; break;
+    case 64: e1+=14; e2+=15; f2 = 0.40250; break;
+    case 65:
+    case 66:
+    case 67: e1+=15; break;
+    case 68: e1+=15; e2+=16; f2 = 0.40250; break;
+    case 69:
+    case 70:
+    case 71: e1+=16; break;
+    case 72: e1+=16; e2+=19; f2 = 0.40250; break;
+    default: e1 = 0; e2 = 0; f2 = 0;
+    }
   }
 }
 //________________________________________________________________________________
@@ -684,8 +770,49 @@ Float_t St_tpcAnodeHVavgC::voltagePadrow(Int_t sector, Int_t padrow) const {
 //________________________________________________________________________________
 #include "St_tpcPadGainT0C.h"
 MakeChairInstance(tpcPadGainT0,Calibrations/tpc/tpcPadGainT0);
+#include "St_itpcPadGainT0C.h"
+MakeChairInstance(itpcPadGainT0,Calibrations/tpc/itpcPadGainT0);
 #include "St_tpcPadGainT0BC.h"
-MakeChairInstance(tpcPadGainT0B,Calibrations/tpc/tpcPadGainT0B);
+St_tpcPadGainT0BC *St_tpcPadGainT0BC::fgInstance = 0;
+St_tpcPadGainT0BC *St_tpcPadGainT0BC::instance() {if (! fgInstance) fgInstance = new St_tpcPadGainT0BC(); return fgInstance;}
+//________________________________________________________________________________
+Float_t 	St_tpcPadGainT0BC::Gain(Int_t sector, Int_t row, Int_t pad) const {
+  Float_t gain = 0;
+  if (St_tpcPadConfigC::instance()->iTPC(sector)) {
+    if (row <= 40) {
+      gain = St_itpcPadGainT0C::instance()->Gain(sector,row,pad);
+    } else {
+      gain = St_tpcPadGainT0C::instance()->Gain(sector,row-40+13,pad);
+    }
+  } else { // Tpx
+    gain = St_tpcPadGainT0C::instance()->Gain(sector,row,pad);
+  }
+  return gain;
+}
+//________________________________________________________________________________
+Float_t 	  St_tpcPadGainT0BC::T0(Int_t sector, Int_t row, Int_t pad) const {
+  Float_t T0 = 0;
+  if (St_tpcPadConfigC::instance()->iTPC(sector)) {
+    if (row <= 40) 
+      T0 = St_itpcPadGainT0C::instance()->T0(sector,row,pad);
+    else 
+      T0 = St_tpcPadGainT0C::instance()->T0(sector,row-40+13,pad);
+  } else { // Tpx
+    T0 = St_tpcPadGainT0C::instance()->T0(sector,row,pad);
+  }
+  return T0;
+}
+//________________________________________________________________________________
+Bool_t    St_tpcPadGainT0BC::livePadrow(Int_t sector, Int_t row) const {
+  if (St_tpcPadConfigC::instance()->iTPC(sector)) {
+    if (row <= 40)
+      return St_itpcPadGainT0C::instance()->livePadrow(sector,row);
+    else 
+      return St_tpcPadGainT0C::instance()->livePadrow(sector,row-40+13);
+  }
+  return St_tpcPadGainT0C::instance()->livePadrow(sector,row);
+}
+//________________________________________________________________________________
 #include "St_tpcSlewingC.h"
 MakeChairInstance(tpcSlewing,Calibrations/tpc/tpcSlewing);
 #include "St_tpcAcChargeC.h"
@@ -780,7 +907,7 @@ MakeChairInstance(TpcAvgCurrent,Calibrations/tpc/TpcAvgCurrent);
 //________________________________________________________________________________
 Int_t St_TpcAvgCurrentC::ChannelFromRow(Int_t sector, Int_t row) {
   if (row <  1 || row > St_tpcPadConfigC::instance()->padRows(sector)) return -1;
-  if (St_tpcPadConfigC::instance()->padRows(sector) == 45) {
+  if (!  St_tpcPadConfigC::instance()->iTPC(sector)) {
     if (row <  3) return 1;
     if (row <  7) return 2;
     if (row < 10) return 3;
@@ -789,7 +916,7 @@ Int_t St_TpcAvgCurrentC::ChannelFromRow(Int_t sector, Int_t row) {
     if (row < 30) return 6;
     if (row < 38) return 7;
     return 8;
-  } else if (St_tpcPadConfigC::instance()->padRows(sector) == 72) {
+  } else { // iTPC
     // Jim Thomas, mail from 09/27/17
     if (row < 10) return 1; //  9 shared 1&2
     if (row < 20) return 2; // 19 shared 2&3
@@ -798,9 +925,7 @@ Int_t St_TpcAvgCurrentC::ChannelFromRow(Int_t sector, Int_t row) {
     if (row < 22 - 13 + 40) return 5;
     if (row < 30 - 13 + 40) return 6;
     if (row < 38 - 13 + 40) return 7;
-    return 9;
-  } else {
-    LOG_ERROR << "St_TpcAvgCurrentC::ChannelFromRow: unknown configuration with no. pad row at sector = " << sector << " = " << St_tpcPadConfigC::instance()->padRows(sector) << endm;
+    return 8;
   }
   return -1;
 }
@@ -866,6 +991,32 @@ Float_t St_TpcAvgCurrentC::AcCharge(Int_t sector, Int_t channel) {
   return (sector > 0 && sector <= 24 && channel > 0 && channel <= 8) ?
     Struct()->AcCharge[8*(sector-1)+channel-1] :     0;
 }
+#include "St_tpcRDOMapC.h"
+MakeChairInstance(tpcRDOMap,Calibrations/tpc/tpcRDOMap);
+//________________________________________________________________________________
+Int_t St_tpcRDOMapC::rdo(Int_t padrow, Int_t pad) const {
+  Int_t rdo = 0;
+  Int_t N = nrows(0);
+  for (Int_t i = 0; i < N; i++) {
+    if (padrow != row(i)) continue;
+    if (pad < padMin(i) || pad > padMax(i)) continue;
+    rdo = rdoI(i);
+    
+    break;
+  }
+  return rdo;
+}
+#include "St_tpcRDOT0offsetC.h"
+MakeChairInstance(tpcRDOT0offset,Calibrations/tpc/tpcRDOT0offset);
+Float_t St_tpcRDOT0offsetC::T0(Int_t sector, Int_t padrow, Int_t pad) const {
+  Float_t t0 = 0;
+  if (! IsShfited(sector)) return t0;
+  if (St_tpcPadConfigC::instance()->iTPC(sector) && padrow <= 40)  return t0; // no shift in iTPC
+  Int_t rdo = St_tpcRDOMapC::instance()->rdo(padrow,pad);
+  if (!rdo) return t0;
+  t0 = Struct()->t0[sector-1][rdo-1];
+  return t0;
+}
 //__________________Calibrations/trg______________________________________________________________
 #include "St_defaultTrgLvlC.h"
 MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
@@ -873,9 +1024,7 @@ MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
 St_trigDetSumsC *St_trigDetSumsC::fgInstance = 0;
 St_trigDetSumsC *St_trigDetSumsC::instance() {
   if (fgInstance) return fgInstance;
-  St_trigDetSums *table = 0;
-  TDataSet *event = StMaker::GetChain()->GetDataSet("StEvent");
-  if (event) table = (St_trigDetSums *) event->Find("trigDetSums");
+  St_trigDetSums *table = (St_trigDetSums *) StMaker::GetChain()->GetDataSet("trigDetSums");
   if (! table) table = (St_trigDetSums *) StMaker::GetChain()->GetDataBase("Calibrations/rich/trigDetSums");
   assert(table);
   fgInstance = new St_trigDetSumsC(table);
@@ -1130,6 +1279,8 @@ MakeChairAltInstance2(Survey,StTpcOuterSectorPosition,Geometry/tpc/TpcOuterSecto
 MakeChairAltInstance2(Survey,StTpcSuperSectorPosition,Geometry/tpc/TpcSuperSectorPosition,Geometry/tpc/TpcSuperSectorPositionB,gEnv->GetValue("NewTpcAlignment",0));
 MakeChairInstance2(Survey,StTpcHalfPosition,Geometry/tpc/TpcHalfPosition);
 MakeChairInstance2(Survey,StTpcPosition,Geometry/tpc/TpcPosition);
+#include "St_iTPCSurveyC.h"
+MakeChairInstance(iTPCSurvey,Geometry/tpc/iTPCSurvey);
 //____________________________Geometry/gmt____________________________________________________
 #include "StGmtSurveyC.h"
 MakeChairInstance2(Survey,StGmtOnTpc,Geometry/gmt/GmtOnTpc);
@@ -1165,6 +1316,7 @@ St_SurveyC::St_SurveyC(St_Survey *table) : TChair(table), fRotations(0)  {
     rot.SetRotation(Rotation(i));
     rot.SetTranslation(Translation(i));
     Normalize(rot);
+    assert(TMath::Abs(rot.Determinant())-1 < 1.e-3);
   }
 }
 //________________________________________________________________________________
@@ -1242,16 +1394,19 @@ void St_SurveyC::Normalize(TGeoHMatrix &R) {
     if (_debug) {LOG_INFO << "Qn:" << endl << Qn << endm;}
   }
   R.SetRotation(Qn.Array()); cout << "New\t"; R.Print();
+#endif
   if (_debug) {
+    LOG_INFO << "Matrix:" << endm; R.Print("");
     LOG_INFO << "Determinant-1 = " << R.Determinant()-1 << endm;
     const Double_t *rr = R.GetRotationMatrix();
     LOG_INFO << "Ortogonality " << IsOrtogonal(rr) << endm;
   }
-#endif
+  return;
 }
 //________________________________________________________________________________
 const TGeoHMatrix &St_SurveyC::GetMatrix(Int_t i) {
   assert(fRotations || fRotations[i]);
+  assert(TMath::Abs(fRotations[i]->Determinant())-1 < 1.e-3);
   return *fRotations[i];
 }
 //________________________________________________________________________________
