@@ -20,7 +20,7 @@ class TpcHit {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
-
+   TFile          *fOut;
    // Declaration of leaf types
    Int_t           sector;
    Int_t           row;
@@ -96,6 +96,7 @@ TpcHit::~TpcHit()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
+   if (fOut) fOut->Write();
 }
 
 Int_t TpcHit::GetEntry(Long64_t entry)

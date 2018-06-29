@@ -3,17 +3,20 @@
 
 /// ROOT headers
 #include "TObject.h"
-
+#if !defined (_VANILLA_ROOT_)
+#include "StEvent/StDcaGeometry.h"
+#endif
+#include "StPicoDst.h"
 //_________________
 class StPicoTrackCovMatrix : public TObject {
   
  public:
   
-  /// Defaults empty constructor
+  /// Default constructor
   StPicoTrackCovMatrix();
   /// Copy constructor
   StPicoTrackCovMatrix(const StPicoTrackCovMatrix &matrix);
-  /// Destruct
+  /// Destructor
   virtual ~StPicoTrackCovMatrix();
   /// Print option
   virtual void Print(Char_t const* option = "") const;
@@ -38,6 +41,9 @@ class StPicoTrackCovMatrix : public TObject {
   Float_t pti() const;
   Float_t tan() const;
   Float_t curv() const;
+#if !defined (_VANILLA_ROOT_)
+  StDcaGeometry dcaGeometry() const;
+#endif
 
   /**
    * Setters
@@ -81,6 +87,9 @@ class StPicoTrackCovMatrix : public TObject {
   ClassDef(StPicoTrackCovMatrix, 1)
 };
 
+/**
+ * Getters
+ */
 inline Float_t* StPicoTrackCovMatrix::params() { return &mImp; }
 inline const Float_t* StPicoTrackCovMatrix::params() const { return &mImp; }
 inline const Float_t* StPicoTrackCovMatrix::sigmas() const { return mSigma; }
@@ -92,6 +101,9 @@ inline Float_t StPicoTrackCovMatrix::pti() const { return mPti; }
 inline Float_t StPicoTrackCovMatrix::tan() const { return mTan; }
 inline Float_t StPicoTrackCovMatrix::curv() const { return mCurv; }
 
+/**
+ * Setters
+ */
 inline void StPicoTrackCovMatrix::setImp(Float_t imp) { mImp = (Float16_t)imp; }
 inline void StPicoTrackCovMatrix::setZ(Float_t z) { mZ = (Float16_t)z; }
 inline void StPicoTrackCovMatrix::setPsi(Float_t psi) { mPsi = (Float16_t)psi; }

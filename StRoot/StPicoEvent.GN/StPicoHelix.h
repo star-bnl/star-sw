@@ -4,7 +4,7 @@
  * 
  * Parametrization of a helix (modification of StHelix). Can also cope 
  * with straight tracks, i.e. with zero curvature. This represents only 
- * the mathematical model of a helix. See the SCL user guide for more.
+ * the mathematical model of a helix. See the SCL user guide for more info.
  *
  */
 
@@ -38,7 +38,7 @@ using std::max;
 class StPicoHelix {
  public:
 
-  /// Empty constructor
+  /// Default constructor
   StPicoHelix();
   
   /// Constructor that takes next arguments:

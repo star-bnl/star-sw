@@ -69,6 +69,9 @@ void StiTrackNodeHelper::set(StiKalmanTrackNode *pNode,StiKalmanTrackNode *sNode
   mParentNode = pNode;
   mTargetNode = sNode;
   mTargetHz = mTargetNode->getHz();
+assert(mTargetHz);
+assert(sNode->fitPars().hz());
+assert(!pNode || pNode->fitPars().hz());
   mParentHz = mTargetHz;
   if (mParentNode) {
     mParentHz = mParentNode->getHz();
@@ -470,16 +473,8 @@ int StiTrackNodeHelper::join()
        default: assert(0);
      }//end Switch
   } while(kase>=0);
-
-   if (std::fabs(mJoinPars.hz() - mTargetHz) > 1e-10)
-   {
-     LOG_WARN << "Expected |mJoinPars.hz() - mTargetHz| <= 1e-10 "
-              << "instead |" << mJoinPars.hz() << " - " << mTargetHz << "| = "
-              << std::fabs(mJoinPars.hz() - mTargetHz) << ". "
-              << "Will set mJoinPars.hz to " << mTargetHz << endm;
-     mJoinPars.hz() = mTargetHz;
-   }
-
+   mJoinPars.hz()=mTargetHz;//////////////////////???????????????????????????????????????????????????
+   assert(fabs(mJoinPars.hz()-mTargetHz)<=1e-10);
    assert(fabs(mTargetNode->getHz()-mTargetHz)<=1e-10);
 
 
@@ -672,7 +667,9 @@ double StiTrackNodeHelper::joinVtx(const double      *Y,const StiHitErrs  &B
 //______________________________________________________________________________
 int StiTrackNodeHelper::save()
 {
+mPredPars.hz()=mTargetHz;///????????????????????????????
    assert(fabs(mPredPars.hz()-mTargetHz)<=1e-10);
+mFitdPars.hz()=mTargetHz;///???????????????????????????
    assert(fabs(mFitdPars.hz()-mTargetHz)<=1e-10);
    assert(fabs(mTargetNode->getHz()-mTargetHz)<=1e-10);
    

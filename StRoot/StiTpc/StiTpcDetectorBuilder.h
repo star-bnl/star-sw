@@ -20,6 +20,7 @@ public:
     static Int_t StiRow(Int_t sector, Int_t padrow);
     static void  testStiRow();
  protected:
+    int _noDead;
     StiMaterial * _fcMaterial;    
 };
 #if 0

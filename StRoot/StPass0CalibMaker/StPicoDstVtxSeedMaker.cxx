@@ -63,8 +63,13 @@ int StPicoDstVtxSeedMaker::GetEventData() {
   run = event->runId();
   // timeEvent not saved in PicoDst
 
+#ifdef __TFG__VERSION__
   StThreeVectorF const& pvert = event->primaryVertex();
   StThreeVectorF const& epvert = event->primaryVertexError();
+#else /* ! __TFG__VERSION__ */
+  TVector3 const& pvert = event->primaryVertex();
+  TVector3 const& epvert = event->primaryVertexError();
+#endif /* __TFG__VERSION__ */
   zvertex = pvert.z();
   yvertex = pvert.y();
   xvertex = pvert.x();

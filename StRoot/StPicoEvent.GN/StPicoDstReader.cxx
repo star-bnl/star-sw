@@ -82,7 +82,8 @@ void StPicoDstReader::clearArrays() {
 //_________________
 void StPicoDstReader::SetStatus(const Char_t *branchNameRegex, Int_t enable) {
   if(strncmp(branchNameRegex, "St", 2) == 0) {
-    branchNameRegex += 2; //Ignore first "St"
+    /// Ignore first "St"
+    branchNameRegex += 2; 
   }
 
   TRegexp re(branchNameRegex, 1);
@@ -102,7 +103,7 @@ void StPicoDstReader::setBranchAddresses(TChain *chain) {
   if (!chain) return;
   chain->SetBranchStatus("*", 0);
   TString ts;
-  for (int i = 0; i < StPicoArrays::NAllPicoArrays; ++i) {
+  for (Int_t i = 0; i < StPicoArrays::NAllPicoArrays; ++i) {
     if (mStatusArrays[i] == 0) continue;
     char const* bname = StPicoArrays::picoArrayNames[i];
     TBranch* tb = chain->GetBranch(bname);
@@ -174,7 +175,7 @@ void StPicoDstReader::Init() {
       LOG_ERROR << "ERROR: Cannot open list file " << dirFile << endm;
     }
 
-    int nFile = 0;
+    Int_t nFile = 0;
     std::string file;
     while(getline(inputStream, file)) {
       if(file.find(".picoDst.root") != std::string::npos) {

@@ -4,14 +4,6 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
-#if ROOT_VERSION_CODE >= 393216
-#pragma link C++ class StPicoThreeVector<float>+;
-#pragma link C++ class StPicoThreeVector<double>+;
-#else
-#pragma link C++ class StPicoThreeVector<float>-;
-#pragma link C++ class StPicoThreeVector<double>-;
-#endif
-
 #pragma link C++ class StPicoArrays+;   //Maybe + is not needed
 #pragma link C++ class StPicoTrack+;
 #pragma link C++ class StPicoMtdTrigger+;
@@ -31,8 +23,5 @@
 #pragma link C++ class StPicoPhysicalHelix+;
 #pragma link C++ class StPicoTrackCovMatrix+;
 #pragma link C++ class StPicoDstReader;
-
-//#pragma link C++ typedef StPicoThreeVectorF;
-//#pragma link C++ typedef StPicoThreeVectorD;
 
 #endif

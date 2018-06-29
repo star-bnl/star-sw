@@ -9,7 +9,7 @@
 /// appear in the supporting documentation. The authors make no claims
 /// about the suitability of this software for any purpose. It is
 /// provided "as is" without express or implied warranty.
-#include <cassert>
+#include <assert.h>
 #include "Stiostream.h"
 #include <stdexcept>
 #include <math.h>
@@ -55,6 +55,10 @@ enum {kMaxTrackPerm = 10000,kMaxEventPerm=10000000};
 
 static const double kRMinTpc =55;
 int StiKalmanTrackFinder::_debug = 0;
+
+//static void printIt(const StiKalmanTrack* trak,const StiKalmanTrackNode *node);
+//static void printSeed(const StiKalmanTrack* trak);
+
 ostream& operator<<(ostream&, const StiTrack&);
 Bool_t StiKalmanTrackFinder::_DoAlignment = kFALSE;
 std::ostream& operator<<(std::ostream&, const StiTrack&);
@@ -99,7 +103,7 @@ _trackContainer(0)
   cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Started"<<endl;
 memset(mTimg,0,sizeof(mTimg));
   assert(_toolkit);
-  cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Done"<<endl;
+//  cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Done"<<endl;
 }
 //______________________________________________________________________________
 /*!
@@ -433,7 +437,6 @@ static int nCall=0; nCall++;
   qa.setNits(track->getGapCount()   );
   if (direction && qa.hits()<5)        return 0;
   find(track,direction,leadNode,qa);
-assert(qa.hits()==track->getPointCount());
 
   track->setCombUsed(mUseComb);
   track->setFirstLastNode(leadNode);
@@ -477,6 +480,8 @@ assert(direction || leadNode==track->getLastNode());
   double xg = leadNode->x_g();
   double yg = leadNode->y_g();
   double projAngle = atan2(yg,xg);
+  StiHit *leadHit = leadNode->getHit();
+  
   if(debug() > 2)cout << "Projection Angle:"<<projAngle*180/3.1415<<endl;
     
   vector<StiDetectorNode*>::const_iterator layer;
@@ -529,7 +534,8 @@ assert(direction || leadNode==track->getLastNode());
        if (fabs(diff) > OpenAngle)	continue;
        detectors.push_back(detector);
     }
-//             list of detectors candidates created
+
+//		list of detectors candidates created
     int nDets = detectors.size(); 
     if (!nDets) continue;
 //             and sorted by Phi angle
@@ -572,7 +578,10 @@ assert(direction || leadNode==track->getLastNode());
 	for (hitIter=candidateHits.begin();hitIter!=candidateHits.end();++hitIter)
 	{
 	  stiHit = *hitIter;
-          if (stiHit->detector() && stiHit->detector()!=tDet) continue;
+          if (leadHit == stiHit) 				continue;
+          if (leadHit && leadHit->stHit()==stiHit->stHit())	continue;
+          if (!track->legal(stiHit))				continue;
+
           status = testNode.nudge(stiHit);
           testNode.setReady();
           if (status)		continue;
@@ -615,8 +624,8 @@ assert(direction || leadNode==track->getLastNode());
           node->setIHitCand(jHit);
           node->setHit(stiHit);
           status = node->updateNode();
-          if (status)  break;
-          node->setChi2(hitCont.getChi2(jHit));
+          if (status)  break; 
+	  node->setChi2(hitCont.getChi2(jHit));
           if (!direction && node->getX()< kRMinTpc) node->saveInfo(); //Save info for pulls 
 	  if (debug() > 0) {
 	  if (node->getDetector()) 
@@ -862,6 +871,3 @@ void StiKalmanTrackFinder::PrintFitStatus(const int status, const StiKalmanTrack
        break;
    } 
 }
-
-
-

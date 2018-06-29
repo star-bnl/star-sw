@@ -1,7 +1,6 @@
 #ifndef StiMasterHitLoader_H
 #define StiMasterHitLoader_H
-
-#include <cassert>
+#include <assert.h>
 #include <stdexcept>
 #include <vector>
 #include "Riostream.h"

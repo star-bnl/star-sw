@@ -390,7 +390,8 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
 #ifdef __TPC_LOCAL_COORDINATES__
 		    StTpcCoordinateTransform tran;
 		    StGlobalCoordinate glob(xyz);
-		    StTpcLocalCoordinate lTpc;
+		    //		    StTpcLocalCoordinate lTpc;
+		    StTpcLocalSectorCoordinate lTpc;
 		    tran(glob,lTpc,i+1,j+1);
 		    BPoint.xL = lTpc.position().x();
 		    BPoint.yL = lTpc.position().y();

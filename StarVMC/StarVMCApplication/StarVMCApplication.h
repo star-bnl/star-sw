@@ -36,9 +36,10 @@ class StarVMCApplication : public TVirtualMCApplication {
   
   // static access method
   static StarVMCApplication* Instance() { return (StarVMCApplication*)(TVirtualMCApplication::Instance()); } 
+  static StarVMCApplication* instance() { return Instance(); } 
 
   // methods
-  void InitMC(const char *setup=0);
+  void InitMC(const Char_t *setup="");
   Bool_t RunMC(Int_t nofEvents); // kFALSE if run has been stopped
   void FinishRun();
   
@@ -60,9 +61,9 @@ class StarVMCApplication : public TVirtualMCApplication {
   }
   virtual void SetMagField(StarMagField *m = 0) {fMagField = m;}
   virtual void SetStepping(StarMCHits *m = 0) {fMcHits = m;}
-  virtual StarMCPrimaryGenerator *GetPrimaryGenerator() const {return fPrimaryGenerator;}
-  virtual StarMagField           *GetMagField() const {return fMagField;}
-  virtual StarStack            *GetStack() const {return fStarStack;}
+  virtual StarMCPrimaryGenerator  *GetPrimaryGenerator() const {return fPrimaryGenerator;}
+  virtual StarMagField            *GetMagField() const {return fMagField;}
+  virtual StarStack               *GetStack() const {return fStarStack;}
     
   virtual Double_t                 TrackingRmax() const { return 1.e4; }		  
   virtual Double_t 		   TrackingZmax() const { return 1.e5; } 		  
@@ -81,11 +82,11 @@ class StarVMCApplication : public TVirtualMCApplication {
   // methods
   
   // data members
-  StarStack*             fStarStack;
-  StarMCPrimaryGenerator*  fPrimaryGenerator;
-  StarMagField*            fMagField;
-  StarMCHits*              fMcHits;
-  Double_t*                fFieldB;
+  StarStack               *fStarStack;
+  StarMCPrimaryGenerator  *fPrimaryGenerator;
+  StarMagField            *fMagField;
+  StarMCHits              *fMcHits;
+  Double_t                *fFieldB;
   Int_t                    fDebug;
   Bool_t                   fAlignment;
   Bool_t                   fAlignmentDone;

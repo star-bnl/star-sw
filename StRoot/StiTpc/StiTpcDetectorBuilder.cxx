@@ -47,6 +47,7 @@ TPC, the field cage are artificially segmented into 12 sectors each.
 */
 void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
 {
+  _noDead = 0;
   cout << "StiTpcDetectorBuilder::buildDetectors() -I- Started" << endl;
   assert(gStTpcDb);
   useVMCGeometry();

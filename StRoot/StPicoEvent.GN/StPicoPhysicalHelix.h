@@ -20,7 +20,7 @@ class StPicoPhysicalHelix : public StPicoHelix {
   
  public:
 
-  /// Empty constructor
+  /// Default constructor
   StPicoPhysicalHelix();
   /// Constructor with momentum, origin, signed Magnetic Field
   /// and Charge of particle (+/- 1)

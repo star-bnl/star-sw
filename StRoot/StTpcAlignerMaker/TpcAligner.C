@@ -1,6 +1,3 @@
-/*
-  root.exe -q -b 'TpcAligner.C(1e8,"*event.root")' 
- */
 #if !defined(__CINT__) && !defined(__CLING__)
 #include "iostream.h"
 #include "Rtypes.h"
@@ -39,12 +36,11 @@ class StTpcAlignerMaker;
 //#define OLDdEdx
 //________________________________________________________________________________
 void TpcAligner(Int_t nevents=1000,
-		const char *MainFile="st_physics_19168025_raw_1500001.event.root", 
-		//"st_laser_adc_19169021_raw_3500001.event.root",
+		const char *MainFile="/star/rcf/test/dev/daq_sl302.ittf/Sun/year_2008/ppProduction2008/st_physics_9043046_raw_2030002.event.root",
 		// "/star/data45/reco/productionMinBias/FullField/P04ij/2004/030/st_physics_5030012_raw_4010010.event.root",
 		//	  "/star/data08/reco/dAuMinBias/FullField/P03ih/2003/040/st_physics_4040004_raw_0010010.event.root",
 		//		const char* rootFile="TpcAlignerFullFieldOldHelix.root")
-		const char *Tag = "y2018,CorrX",
+		const char *Tag = "y2014a,CorrX",
 // 		const char *Tag = "y2014a,Corr4"
 		const Char_t *output = 0) 
 {
@@ -60,25 +56,30 @@ void TpcAligner(Int_t nevents=1000,
   //  TString Chain("in,StarMagField,mysql,tpcDb,StEvent,Event,Stu,analysis,StiCA,KFVertex,TpcAligner,TpcHitMover,OSpaceZ2,OGridLeak3D,BAna,Tree,CMuDst,"); // No corrections
   //  TString Chain("in,StarMagField,mysql,tpcDb,StEvent,Event,Stu,analysis,StiCA,KFVertex,TpcAligner,TpcHitMover,BAna,Tree,CMuDst,"); // No corrections
   //  TString Chain("in,StarMagField,mysql,tpcDb,StEvent,Event,Stu,analysis,StiCA,KFVertex,TpcAligner,TpcHitMover,BAna,Tree,"); // No corrections
-  TString Chain("in,StarMagField,mysql,tpcDb,StEvent,Event,Stu,analysis,TpcAligner,CorrX,TpcHitMover,");// ,BAna,Tree,"); //StiCA,CMuDst,"); // No corrections
+  TString Chain("in,StarMagField,mysql,tpcDb,StEvent,Event,Stu,analysis,StiCA,TpcAligner,TpcHitMover,BAna,Tree,CMuDst,"); // No corrections
   Chain += Tag;
   //  Chain += ",AgML,NoHistos,noTags,noRunco,NoDefault";
   Chain += ",NoHistos,noTags,noRunco,NoDefault,-evout,-hitfilt";
-  TString rFile(output);
-  if (rFile == "") {
-    rFile = gSystem->BaseName(MainFile);
-    rFile.ReplaceAll("*","");
-    rFile.ReplaceAll(".event","");
-    rFile.ReplaceAll(".root","");
-    rFile.ReplaceAll("..",".");
-    //    rFile += Tag;
-    rFile.ReplaceAll(",","_");
+  TString rFile("");
+  if (output) rFile = output;
+  else {
+    if (nevents >= 0) {
+      rFile = gSystem->BaseName(MainFile);
+      rFile.ReplaceAll("*","");
+      rFile.ReplaceAll(".event","");
+      rFile.ReplaceAll(".root","");
+      rFile.ReplaceAll("..",".");
+      //    rFile += Tag;
+      rFile.ReplaceAll(",","_");
 #if 0
-    rFile += "_";
-    rFile += nevents;
+      rFile += "_";
+      rFile += nevents;
 #endif
-    rFile.Strip();
-    rFile += "Aligner.root";
+      rFile.Strip();
+      rFile += ".root";
+    } else {
+      MainFile = "";
+    }
   }
   bfc(-1,Chain.Data(),MainFile,0,rFile.Data());
   if (nevents < 0) return;

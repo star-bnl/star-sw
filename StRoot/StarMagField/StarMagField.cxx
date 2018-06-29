@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.31 2017/04/28 19:44:35 perev Exp $
+ * $Id: StarMagField.cxx,v 1.32 2018/06/21 01:47:28 perev Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.32  2018/06/21 01:47:28  perev
+ * iTPCheckIn
+ *
  * Revision 1.31  2017/04/28 19:44:35  perev
  * Fix wrong default. Non const field is default
  *
@@ -173,7 +176,11 @@ StarMagField *StarMagField::fgInstance = 0;
 ClassImp(StarMagField);
 #endif
 //________________________________________________________________________________
-StarMagField* StarMagField::Instance() {return fgInstance;}
+StarMagField* StarMagField::Instance() 
+{
+ if (!fgInstance) fgInstance=new StarMagField ( StarMagField::kMapped, 1.);
+ return fgInstance;
+}
 //________________________________________________________________________________
 R__EXTERN  "C" {
 

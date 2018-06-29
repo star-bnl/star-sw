@@ -23,7 +23,7 @@ double getVolume() 	const;
 
 
   // mutators
-  void setHalfWidth(float val);
+  void setHalfWidth(float val);	//Y direction
   
  protected:
   /// Half extent in local y, always >= 0

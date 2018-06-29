@@ -61,3 +61,20 @@ void StPicoTrackCovMatrix::Print(Char_t const* option) const {
 	   << lCorr[8] << "/" << lCorr[9]    
 	   << endm;
 }
+//________________________________________________________________________________
+StDcaGeometry StPicoTrackCovMatrix::dcaGeometry() const {
+  StDcaGeometry a;
+  Float_t errMatrix[15];
+  Int_t ii = 0;
+  for (Int_t i = 0; i < 5; i++) {
+    errMatrix[ii] = mSigma[i]*mSigma[i];
+    for (Int_t j = 0; j < i; j++) {
+      Int_t ij = ii - i - 1 + j + 1;
+      Int_t ij1 = ij - i;
+      errMatrix[ij] = mCorr[ij1]*mSigma[i]*mSigma[j];
+    }
+    ii += i+2;
+  }
+  a.set(params(), errMatrix);
+  return a;
+}      

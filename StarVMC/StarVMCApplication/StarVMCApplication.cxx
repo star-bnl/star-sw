@@ -90,8 +90,8 @@ StarVMCApplication::~StarVMCApplication() {  // Destructor
   SafeDelete(fgDetSets);
 }
 //_____________________________________________________________________________
-void StarVMCApplication::InitMC(const char* setup) {  // Initialize MC.
-  if (setup) {
+void StarVMCApplication::InitMC(const Char_t *setup) {  // Initialize MC.
+  if (setup && TString(setup) != "" && gSystem->AccessPathName(setup,kReadPermission)) {
     gROOT->LoadMacro(setup);
     gInterpreter->ProcessLine("Config()");
   }

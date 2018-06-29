@@ -1175,24 +1175,24 @@ TH2F *ProjectX(TH3F *hist, const Char_t *Name="_yz",const Int_t binx1=0,const In
   return h;
 } 
 //________________________________________________________________________________
-TF1 *FitGP(TH1 *proj, Option_t *opt="RQ", Double_t nSigma=3, Int_t pow=3) {
+TF1 *FitGP(TH1 *proj, Option_t *opt="RQ", Double_t nSigma=3, Int_t pow=3, Double_t zmin = -0.2, Double_t zmax = 0.2) {
   if (! proj) return 0;
   TString Opt(opt);
   //  Bool_t quet = Opt.Contains("Q",TString::kIgnoreCase);
   TF1 *g = 0, *g0 = 0;
   TF1 *gaus = (TF1*) gROOT->GetFunction("gaus");
-  if (pow >= 0) g0 = new TF1("g0",Form("gaus(0)+pol%i(3)",pow),-0.2,0.2);
-  else          g0 = new TF1("g0","gaus",-0.2,0.2); 
+  if (pow >= 0) g0 = new TF1("g0",Form("gaus(0)+pol%i(3)",pow),zmin,zmax);
+  else          g0 = new TF1("g0","gaus",zmin,zmax); 
   g0->SetParName(0,"Constant");
   g0->SetParName(1,"Mean");
   g0->SetParName(2,"Sigma");
   for (int i=0; i<=pow;i++) g0->SetParName(3+i,Form("a%i",i));
-  TF1 *g1 = new TF1("g1",Form("gaus(0)+pol%i(3)",pow+1),-0.2,0.2);
+  TF1 *g1 = new TF1("g1",Form("gaus(0)+pol%i(3)",pow+1),zmin,zmax);
   g1->SetParName(0,"Constant");
   g1->SetParName(1,"Mean");
   g1->SetParName(2,"Sigma");
   for (int i=0; i<=pow+1;i++) g1->SetParName(3+i,Form("a%i",i));
-  TF1 *g2 = new TF1("g2",Form("gaus(0)+pol%i(3)",pow+2),-0.2,0.2);
+  TF1 *g2 = new TF1("g2",Form("gaus(0)+pol%i(3)",pow+2),zmin,zmax);
   g2->SetParName(0,"Constant");
   g2->SetParName(1,"Mean");
   g2->SetParName(2,"Sigma");
@@ -1201,15 +1201,19 @@ TF1 *FitGP(TH1 *proj, Option_t *opt="RQ", Double_t nSigma=3, Int_t pow=3) {
   Int_t peak = proj->GetMaximumBin();
   Double_t peakX = proj->GetBinCenter(peak);
   params[0] = proj->GetBinContent(peak);
-  if (peakX > 0.5) {
+#if 0
+  if (peakX > zmax) {
     params[1] = 0;
-    params[2] = 0.2;
+    params[2] = zmax;
   }
   else {
+#endif
     params[1] = peakX;
     params[2] = proj->GetRMS();
+#if 0
     if (params[2] > 0.25) params[2] = 0.25;
   }
+#endif
   params[3] = 0;
   params[4] = 0;
   params[5] = 0;
@@ -3172,7 +3176,8 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
 	     Option_t *opt="R", 
 	     Int_t ix = -1, Int_t jy = -1, 
 	     Int_t mergeX=1, Int_t mergeY=1, 
-	     Double_t nSigma=3, Int_t pow=1) {
+	     Double_t nSigma=3, Int_t pow=1,
+	     Double_t zmin = -0.2, Double_t zmax = 0.2) {
   TCanvas *canvas = 0;
   TString Opt(opt);
   if (! Opt.Contains("Q",TString::kIgnoreCase)) {
@@ -3357,7 +3362,7 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
       Fit.prob  = 0;
       Fit.entries = proj->Integral();
       if (Fit.entries < 100) {delete proj; continue;}
-      if (TString(FitName) == "GP") g = FitGP(proj,opt,nSigma,pow);
+      if (TString(FitName) == "GP") g = FitGP(proj,opt,nSigma,pow,zmin,zmax);
       else if (TString(FitName) == "ADC") g = FitADC(proj,opt,nSigma,pow);
       else if (TString(FitName) == "G2") g = FitG2(proj,opt);
       else if (TString(FitName) == "NF" && dim == 3) {

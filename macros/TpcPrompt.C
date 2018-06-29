@@ -1,6 +1,10 @@
 /* 
    root.exe -q -b TpcPrompt.C >& TpcPrompt.log &
- */
+   Fit
+   root.exe -q -b TpcHit.root TpcPrompt.C+
+Draw();
+ root.exe -q -b lBichsel.C TpcHitZT.root  'dEdxFit.C+("Z","GP","R",-1,-1,1,1,10,1,206,212)'
+*/
 #if !defined(__CINT__)
 // code that should be seen ONLY by the compiler
 #else
@@ -71,17 +75,19 @@ using namespace RooFit ;
 #define TpcHit_cxx
 #include "TpcHit.h"
 void  TpcHit::Fill(Long64_t entry) {
-  static TH3F *hist3DZ = 0, *hist3DT = 0;
+  static TH3F *hist3DZ = 0, *hist3DT = 0, *hist3DZL = 0;
   if (! hist3DZ) {
     TDirectory *old = gDirectory;
     TString fName(gDirectory->GetName());
-    fName.ReplaceAll(".root","ZT.root");
-    TFile *f = new TFile(fName,"recreate");
-    hist3DZ = new TH3F("Z","|z| versus sector and row",24,0.5,24.5,72,0.5,72.5,130,200,213);
-    hist3DT = new TH3F("T","time bucket versus sector and row",24,0.5,24.5,72,0.5,72.5,200,0,20);
+    fName.ReplaceAll(".root","ZLT.root");
+    fOut = new TFile(fName,"recreate");
+    hist3DZ  = new TH3F("Z","|z| versus sector and row",24,0.5,24.5,72,0.5,72.5,130,200,213);
+    hist3DZL = new TH3F("ZL","Drift distance sector local versus sector and row",24,0.5,24.5,72,0.5,72.5,100,-2,3);
+    hist3DT  = new TH3F("T","time bucket versus sector and row",24,0.5,24.5,72,0.5,72.5,200,0,20);
     gDirectory = old;
   }
   hist3DZ->Fill(sector,row,TMath::Abs(z));
+  hist3DZL->Fill(sector,row,TMath::Abs(zL));
   hist3DT->Fill(sector,row,timebucket);
 }
 //________________________________________________________________________________
@@ -144,12 +150,18 @@ class TpcHit;
 #endif
 #if !defined(__CINT__) || defined(__MAKECINT__)
 //________________________________________________________________________________
-void Draw(const Char_t *tag = "New") {
-  TNtuple *tree = (TNtuple *) gDirectory->Get("TpcHit");
-  if (! tree) return;
+void Draw(TChain *tree) {
   TpcHit hit(tree);
   hit.Loop();
-  gDirectory->Write();
+}
+//________________________________________________________________________________
+void Draw(const Char_t *tag = "New") {
+  TChain *tree = (TChain *) gDirectory->Get("TpcHit");
+  if (! tree) {
+    cout << "No TpcHit tree has been found" << endl;
+    return;
+  }
+  Draw(tree);
 }
 //________________________________________________________________________________
 void ClusterSize(const Char_t *f0 = "AuAu200AltroDef/st_physics_adc_15152001_raw_1000013.TpcHit.root",
@@ -219,7 +231,7 @@ void ClusterSize(const Char_t *f0 = "AuAu200AltroDef/st_physics_adc_15152001_raw
 /*
   TpcHit->Draw("timebucket:(sector <= 12) ? row : -row >> D(100,-45.5,54.5,100,0.5,5.5)","trigId==0","colz");
 */
-#include "Gamma.h"
+#include "Gamma.C"
 //________________________________________________________________________________
 void T0Fit(TChain *tree) {
   TH2D *D = (TH2D *) gDirectory->Get("D");
@@ -430,7 +442,7 @@ void T0Fit(TH3F *D = 0, Int_t iX = 0, Int_t iY = 0) {
 }
 //________________________________________________________________________________
 void TpcPrompt(Int_t Nevents= 0, const Char_t *daqfile = "", const Char_t *treefile = "") {
-  T0Fit();
+  Draw();
 }
 #else /* __CINT__ */
 //________________________________________________________________________________
