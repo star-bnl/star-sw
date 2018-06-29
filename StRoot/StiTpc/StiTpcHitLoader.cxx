@@ -45,21 +45,21 @@ void StiTpcHitLoader::loadHits(StEvent* source,
   UInt_t noHitsLoaded = 0;
   for (UInt_t sector=_minSector-1; sector<_maxSector; sector++)    {
     const StTpcSectorHitCollection* secHits = tpcHits->sector(sector);
-    if (! secHits->numberOfHits()) continue;
+    if (! secHits->numberOfHits())	continue;
     stiSector = toStiSect(sector);
     _maxRow = St_tpcPadConfigC::instance()->padRows(sector+1);
     Float_t driftvel = 1e-6*gStTpcDb->DriftVelocity(sector+1); // cm/mkmsec
     for (UInt_t row=_minRow-1; row<_maxRow; row++) {
       //cout << "StiTpcHitLoader:loadHits() -I- Loading row:"<<row<<" sector:"<<sector<<endl;
       const StTpcPadrowHitCollection* padrowHits = secHits->padrow(row);
-      if (!padrowHits) break;
+      if (!padrowHits) 			continue;
       const StSPtrVecTpcHit& hitvec = padrowHits->hits();
-      if (! hitvec.size()) continue;
+      if (! hitvec.size()) 		continue;
       const_StTpcHitIterator iter;
       StiHitTest hitTest;
       detector = _detector->getDetector(row,sector);
       assert(detector);
-      if (!detector->isActive()) continue;
+      if (!detector->isActive())	continue;
 
 // printf("HitLoad %s sect=%d row=%d\n",detector->getName().c_str(),sector+1,row+1);
       
@@ -72,16 +72,12 @@ void StiTpcHitLoader::loadHits(StEvent* source,
         double x = hit->position().x();
         double y = hit->position().y();
 //      double z = hit->position().y();
-#if 0
-        double ang = atan2(y,x)/M_PI*180;
-	double d = -(ang)/30+3;
-        if (d<0.5) d+=12; if (d>12.5) d-=12;
-	int sec = d+0.5;
-        if (hit->sector()>12) sec = 24-(sec)%12;
-#endif
         double ang = atan2(y,x);
         int sec = StiTpcDetectorBuilder::sector(ang,hit->sector()>12);
-        assert((int)hit->sector()==sec);
+        sec -= (int)hit->sector();
+	if (sec> 6) sec-=12;
+	if (sec<-6) sec+=12;
+        assert(abs(sec)<=1);
 
 }
 	assert(_hitFactory);
