@@ -7,7 +7,6 @@
 #ifdef __CORRECT_CHARGE__
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #endif /* __CORRECT_CHARGE__ */
-#include "StDetectorDbMaker/St_tpcSlewingC.h"
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StDetectorDbMaker/St_tpcEffectiveGeomC.h"
 #include "StDetectorDbMaker/St_tpcTimeBucketCorC.h"
