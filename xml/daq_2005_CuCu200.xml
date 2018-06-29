@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<job name="recoJob" maxFilesPerProcess="1" filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<command>
+  cd ${SUBMITTINGDIRECTORY}  
+#  starver .DEV2 
+#  setup gcc45
+  set evtsFile = $INPUTFILE0;
+  if (! -r ${evtsFile}) exit 1;
+  echo "${evtsFile}"
+  set file     = `basename $evtsFile .daq`
+  set logFile  = ${file}B.log
+#  root.exe -q -b TpcRS.C\(9999,\"P2005b\",\"${evtsFile}\",\"\"\) &gt;&amp; ${logFile}
+#  root.exe -q -b 'TpcRS.C(9999,"P2005,tofDat","'${evtsFile}'","")' &gt;&amp; ${logFile}
+#   root.exe -q -b 'bfc.C(9999,"P2005,tofDat,logger,MakeEvent,ITTF,ssddat,spt,SsdIt,SvtIt,pmdRaw,OShortR,OSpaceZ2,StiCA,TpxRaw,TpxClu,NoHistos,NoRunco,noTags,EvOut,-hitfilt,McTpcAna","'${evtsFile}'")' &gt;&amp; ${logFile}
+   root.exe -q -b 'bfc.C(9999,"P2005,tofDat,logger,MakeEvent,NoSsdIt,NoSvtIt,pmdRaw,OShortR,OSpaceZ2,OSpaceZ2,StiCA,TpxRaw,TpxClu,NoHistos,NoRunco,noTags,EvOut,-hitfilt,McTpcAna","'${evtsFile}'")' &gt;&amp; ${logFile}
+</command>
+<stdout URL="file:./sched$JOBID.log" />
+<input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2005/059/st_physics_adc_*.daq" />
+
+</job>

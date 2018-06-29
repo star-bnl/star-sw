@@ -3,7 +3,7 @@
         <command>
          cd ${SUBMITTINGDIRECTORY}
    setenv STARFPE NO
-#   setenv NODEBUG yes
+   setenv NODEBUG yes
 #.DEV2
 #   setup 64b
    starver .DEV2
@@ -40,8 +40,11 @@
 #  root.exe -q -b 'bfc.C(1000,"P2018,useCDV,Tpx,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX,dEdxCalib","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
 #  root.exe -q -b 'bfc.C(10000,"P2018,useCDV,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  root.exe -q -b 'bfc.C(1000,"P2018,useCDV,Tpx,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
-#  root.exe -q -b 'bfc.C(10000,"P2018,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'")' &gt;&amp; ${logFile}
-  root.exe -q -b 'bfc.C(10000,"P2018,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(10000,"P2018,WestOff,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(10000,"P2018,EastOff,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(10000,"P2018,EastOff,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(10000,"P2018,WestOff,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+  root.exe -q -b 'bfc.C(10000,"P2018,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
@@ -54,8 +57,8 @@
 <!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/1911602*/*adc*.daq" />  -->
 <!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/1911602*/*.daq" />  -->
 <!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/19116021/*.daq" />  -->
-<!-- <input URL="file:/net/l401/data/scratch1/daq/2018/151/19151066/*.daq" /> -->
-<!-- <input URL="file:/net/l401/data/scratch1/daq/2018/169/19169021/st_laser_*.daq" /> -->
-<!--- production_26p5GeV_fixedTarget_2018 19168004 - 19168020, 27GeV_production_2018 19168025 - 19168040 -->
-<input URL="file:/net/l401/data/scratch1/daq/2018/168/*/st_physics_19*.daq" /> 
+<!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/19116020/*.daq" />  -->
+<!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/1911602?/*.daq" />-->
+<!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/1911602?/*.daq" />-->
+<input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/19116021/st_physics_1*.daq" />
 </job>

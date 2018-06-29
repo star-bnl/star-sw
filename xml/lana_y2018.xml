@@ -37,13 +37,10 @@
 # 2018
 #      root.exe -q -b -x 'bfc.C(99999,"lana,B2018,LaserIT,StiCA,KFVertex,CorrX,OGridLeak3D,OSpaceZ2,analysis,NoHistos,NoRunco,-HitFilt,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
 #      root.exe -q -b -x 'bfc.C(99999,"lana,B2018,TpxRaw,TpxClu,LaserIT,StiCA,KFVertex,CorrX,OGridLeak3D,OSpaceZ2,analysis,NoHistos,NoRunco,-HitFilt,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
-#      root.exe -q -b -x 'bfc.C(99999,"lana,B2018,trgd,Tpx,LaserIT,StiCA,KFVertex,CorrX,OGridLeak3D,OSpaceZ2,analysis,NoHistos,NoRunco,-HitFilt,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
-#      root.exe -q -b -x 'bfc.C(99999,"lana,B2018,trgd,Tpx,LaserIT,StiCA,KFVertex,CorrY,OGridLeak3D,OSpaceZ2,analysis,NoHistos,NoRunco,-HitFilt,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
-#      root.exe -q -b -x 'bfc.C(99999,"lana,B2018,trgd,Tpx,LaserIT,StiCA,KFVertex,CorrX,OGridLeak3D,OSpaceZ2,analysis,NoHistos,NoRunco,-HitFilt,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
-      root.exe -q -b -x 'bfc.C(99999,"lana,B2018,trgd,Tpx,LaserIT,StiCA,KFVertex,CorrX,OPr40,OGridLeak3D,OSpaceZ2,analysis,NoHistos,NoRunco,-HitFilt,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+      root.exe -q -b -x 'bfc.C(99999,"lana,B2018,trgd,Tpx,LaserIT,StiCA,KFVertex,CorrX,OGridLeak3D,OSpaceZ2,analysis,NoHistos,NoRunco,-HitFilt,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
   endif
 </command>
 <!-- <input URL="file:/star/data03/daq/2018/*/*/st_laser_adc*.daq"/>  -->
-<!-- <input URL="command:Lana2018.pl"/> -->
-<input URL="file:/net/l401/data/scratch1/daq/2018/169/19169021/st_laser_*.daq" />
+<input URL="command:Lana2018.pl"/>
+<!-- <input URL="file:/net/l401/data/scratch1/daq/2018/088/19088006/st_laser_19088006_raw_0000007.daq" /> -->
 </job>
