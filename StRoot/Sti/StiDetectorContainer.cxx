@@ -155,7 +155,7 @@ bool StiDetectorContainer::moveIn()
   const StiDetectorNode* oldPhiNode = *mphi_it;
 
   --mradial_it;
-  mphi_it = (*mradial_it)->begin();
+//  mphi_it = (*mradial_it)->begin();
 
   if ( (*mradial_it)->getChildCount() == oldPhiNode->getParent()->getChildCount()) {
     // cout <<"Index into array"<<endl;
@@ -164,6 +164,7 @@ bool StiDetectorContainer::moveIn()
   }
   else {
     // cout <<"Do linear search"<<endl;
+    mphi_it = (*mradial_it)->begin();
     return setPhi( oldPhiNode->getOrderKey() );
   }
 }
