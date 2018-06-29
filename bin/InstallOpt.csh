@@ -56,12 +56,9 @@ switch (${STAR_HOST_SYS})
         setenv FC gfortran
 endsw
 # 
-#set list = "apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.6 pythia6 pythia8226 eigen3";
-#set list = "cmake-3.10.0-rc1 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.6 pythia6 pythia8230 eigen3";
-#set list = "cmake-3.8.1 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.6 pythia6 pythia8230 eigen3";
-#set list = "cmake-3.8.1 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8230 eigen3";
-#set list = "cmake-3.10.0-rc1 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8230 eigen3 mercurial-4.4-rc coin soqt Coin3D-simage-cf953eacd849 Coin3D-soqt-483ecb26b30c boost_1_66_0";
-set list = "boost_1_66_0";
+#set list = "libtool cmake-3.10.0-rc1 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8230 eigen3 mercurial-4.4-rc coin soqt Coin3D-simage-cf953eacd849 Coin3D-soqt-483ecb26b30c boost_1_66_0";
+set list = "gsl-2.1";
+#set list = "boost_1_66_0";
 #set list = "Coin3D-simage-cf953eacd849";
 #set list = "coin"
 #eigen-eigen-10219c95fe65";
@@ -102,7 +99,13 @@ foreach pkg ($list)
     endif
     cd ${pkg}
     switch ($pkg)
-    case 
+      case "libtools*":
+       ./bootstrap
+       ./configure --prefix=$XOPTSTAR
+       make install
+       if ( $?) break;
+        touch ../${pkg}.Done
+	breaksw
       case "eigen*":
 	cmake -DCMAKE_INSTALL_PREFIX=${XOPTSTAR} ../../${pkg}
 	if ( $?) break;
@@ -124,6 +127,7 @@ foreach pkg ($list)
           touch ../${pkg}.Done
 	  breaksw
       case "cmake*":
+	./bootstrep
           ./configure --prefix=$XOPTSTAR
           make install
           if ( $?) break;
