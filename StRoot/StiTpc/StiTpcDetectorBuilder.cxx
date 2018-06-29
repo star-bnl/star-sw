@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "Stiostream.h"
 #include <stdexcept>
+#include "TSystem.h"
 #include "StDbUtilities/StTpcLocalCoordinate.hh"
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StTpcDb/StTpcDb.h"
@@ -14,13 +15,11 @@
 #include "Sti/StiToolkit.h"
 #include "Sti/StiIsActiveFunctor.h"
 #include "Rtypes.h"
-#include "Stiostream.h"
 #include "Sti/StiNeverActiveFunctor.h"
 #include "StDetectorDbMaker/StiTpcInnerHitErrorCalculator.h"
 #include "StDetectorDbMaker/StiTpcOuterHitErrorCalculator.h"
 #include "StiTpcDetectorBuilder.h"
 #include "StiTpcIsActiveFunctor.h"
-//#include "Sti/StiElossCalculator.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StDbUtilities/StCoordinates.hh"
@@ -48,6 +47,7 @@ TPC, the field cage are artificially segmented into 12 sectors each.
 */
 void StiTpcDetectorBuilder::buildDetectors(StMaker &source)
 {
+  _noDead = 0;
   cout << "StiTpcDetectorBuilder::buildDetectors() -I- Started" << endl;
   assert(gStTpcDb);
   useVMCGeometry();
@@ -56,8 +56,8 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker &source)
 //________________________________________________________________________________
 void StiTpcDetectorBuilder::useVMCGeometry() 
 {
+  _noDead = (getOpt("noDead")!=0);  
   int debug = 0;
-
   int buildFlagDef = 0; // 0 - long, West+East together
   			// 1 - split,West&East separately
   if (getOpt("split")) buildFlagDef|=1;
@@ -116,10 +116,13 @@ static St_tpcPadConfigC *tpcPadConfigC = St_tpcPadConfigC::instance();
         if (iWE && getDetector(iRow-1,mySector-1)) continue;
 	float fRadius = tpcPadConfigC->radialDistanceAtRow(mySector,iRow);
 	TString name(Form("Tpc/Sector_%d,Padrow_%d",mySector,iRow));
-        if (iRow<=myInnNRows && myInnNRows!=13) 
+        int active = 1;
+        if (iRow<=myInnNRows && myInnNRows!=13) { 
            name = Form("iTpc/Sector_%d,Padrow_%d",mySector,iRow);
+           if (!getOpt("activeiTpc")) active = 0;
+        }
 	int inner = (iRow<=myInnNRows);
-        int active = isActive(mySector,iRow);
+        active = active && isActive(mySector,iRow);
         int myBuildFlag = buildFlag|iWE;
         myBuildFlag |= !active;
         if (!(myBuildFlag&1)) {
@@ -182,6 +185,7 @@ static St_tpcPadConfigC *tpcPadConfigC = St_tpcPadConfigC::instance();
         do {		//define gemini
           if (!iWE) 							break;
 	  auto *qDetector = getDetector(iRow-1,sectorWE[0]-1);
+          if (!qDetector)						break;
           auto *qShape = qDetector->getShape();
           if (fabs(qShape->getThickness()-thick)>0.1*thick) 		break;
           auto *qPlacement = qDetector->getPlacement();
@@ -222,20 +226,22 @@ static St_tpcPadConfigC *tpcPadConfigC = St_tpcPadConfigC::instance();
   cout << "StiTpcDetectorBuilder::buildDetectors() -I- Done" << endl;
 }
 //________________________________________________________________________________
-int StiTpcDetectorBuilder::sector(double ang,int east)
+int StiTpcDetectorBuildersector(double ang,int east)
 {
   double gang = ang/M_PI*180;
-  double d = -(gang)/30+3;
-  if (d<0.5) d+=12; if (d>12.5) d-=12;
-  int sec = d+0.5;
+  int sec = int(-(gang+15)/30)+3;
+  if (sec<1) sec+=12; if (sec>12) sec-=12;
   if (east) sec = 24-(sec)%12;
   return sec;
 }
+
 //________________________________________________________________________________
 double StiTpcDetectorBuilder::angle(int sec)
 {
   if (sec>12) sec = 12-sec%12;
   double ang = (3-sec)*(M_PI/6);
+  if (ang<-M_PI) ang += 2*M_PI;
+  if (ang> M_PI) ang -= 2*M_PI;
   return ang;
 }
 //________________________________________________________________________________
@@ -243,6 +249,7 @@ int StiTpcDetectorBuilder::isActive(int sector,int row) const
 {
 static St_tpcPadConfigC        *tpcPadConfigC = St_tpcPadConfigC::instance();
 static StDetectorDbTpcRDOMasks *s_pRdoMasks   = StDetectorDbTpcRDOMasks::instance();
+  if (_noDead) return 1;	//Supress dead volumes
   int myInnNRows  = tpcPadConfigC->innerPadRows(sector);
   if (row<=myInnNRows) {
     TString ts("deadInner="); ts+=sector;
