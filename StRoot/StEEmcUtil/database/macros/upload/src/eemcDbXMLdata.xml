@@ -1,6 +1,0 @@
-<StarDataBase> TkEEmcDb
-<StDbTable> eemcDbXMLdata  <comment>       online-DB, xml data  </comment>
-  <dbString> xmldata <length> 524288 </length> <comment>  xmldata </comment> </dbString> 
-  <dbString> comment <length> 160 </length> <comment>  comment </comment> </dbString> 
-</StDbTable> 
-</StarDataBase>
