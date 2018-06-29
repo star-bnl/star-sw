@@ -608,9 +608,14 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
     
   StPicoEvent* picoEvent = picoDst->event();
   if(!picoEvent) return 0;
-  
+
+#ifdef __TFG__VERSION__
   const StThreeVectorF picoPV = picoEvent->primaryVertex();
   const StThreeVectorF picoPVError = picoEvent->primaryVertexError();
+#else /* ! __TFG__VERSION__ */
+  const TVector3 picoPV = picoEvent->primaryVertex();
+  const TVector3 picoPVError = picoEvent->primaryVertexError();
+#endif /* __TFG__VERSION__ */
   
   KFPVertex primVtx_tmp;
   primVtx_tmp.SetXYZ(picoPV.x(), picoPV.y(), picoPV.z());
@@ -806,12 +811,19 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
     double lengthTof = btofPid.pathLength();
     if(lengthTof < 0.)
     {
+      StPhysicalHelixD innerHelix = gTrack->helix();
+      StPhysicalHelixD outerHelix = gTrack->outerHelix();
+#ifdef __TFG__VERSION__
       const StThreeVectorF & tofPoint  = btofPid.position();
       const StThreeVectorF & dcaPoint  = gTrack->dca(bestPV);
-      StPhysicalHelixD innerHelix = gTrack->helix();
       double dlDCA = fabs( innerHelix.pathLength( StThreeVector<double>(dcaPoint.x(), dcaPoint.y(), dcaPoint.z()) ) );
-      StPhysicalHelixD outerHelix = gTrack->outerHelix();
       double dlTOF = fabs( outerHelix.pathLength( StThreeVector<double>(tofPoint.x(), tofPoint.y(), tofPoint.z()) ) );
+#else /* ! __TFG__VERSION__ */
+      const Float_t *xyzP = btofPid.position().xyz();
+      const Float_t *xyzD = gTrack->dca(bestPV).xyz();
+      double dlDCA = fabs( innerHelix.pathLength( StThreeVector<double>(xyzD)));
+      double dlTOF = fabs( outerHelix.pathLength( StThreeVector<double>(xyzP)));
+#endif /* __TFG__VERSION__ */
       
       double l = gTrack->length();
       lengthTof = l + dlDCA + dlTOF;

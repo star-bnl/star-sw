@@ -45,10 +45,14 @@ Int_t StFemtoDstMaker::Make(){
   if(isGoodEvent) openCharmTrigger = fStKFParticleInterface->OpenCharmTrigger();
   if (! openCharmTrigger) {
     for (UInt_t i = StPicoArrays::Track; i < StPicoArrays::NAllPicoArrays; i++) {
+#ifdef __TFG__VERSION__
       StPicoDstMaker::instance()->picoArrays()[i]->Clear();
+#else /* ! __TFG__VERSION__ */
+      StPicoDst::instance()->picoArray(i)->Clear();
+#endif /* __TFG__VERSION__ */
     }
   } else {
-    TClonesArray *tracks = StPicoDstMaker::instance()->picoArrays()[StPicoArrays::Track];
+    TClonesArray *tracks = StPicoDst::instance()->picoArray(StPicoArrays::Track);
     Int_t N = tracks->GetEntriesFast();
     TArrayC flags(N);
     for (UInt_t i = 0; i < triggeredTracks.size(); i++) flags[triggeredTracks[i]] = kTRUE;
