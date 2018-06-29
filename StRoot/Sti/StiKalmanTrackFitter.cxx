@@ -105,3 +105,25 @@ Int_t StiKalmanTrackFitter::fit(StiTrack * stiTrack, Int_t fitDirection)
   return (nerr>kMaxNErr)? kManyErrors:0;
 }
 
+/*
+	useful diagnostic tool - do not delete.
+
+	if (!targetNode) continue;
+	    {
+	      cout << " StiKalmanTrackFitter::fit(StiTrack * stiTrack, Int_t fitDirection) -E- [1] targetNode==0" << endl;
+	      cout << " FIT != TRACKING --- Original Track" << endl;
+	      StiKTNForwardIterator it2(track->getLastNode());
+	      StiKTNForwardIterator end2 = it2.end();
+	      while (it2!=end2) 
+		{
+		  const StiKalmanTrackNode& node2 = *it2;
+		  Double_t x_g = node2.x_g();
+		  Double_t y_g = node2.y_g();
+		  Double_t rt_g2 = sqrt(x_g*x_g+y_g*y_g);
+		  cout << "rt=" << rt_g2 << " " << node2 << endl;
+		  ++it2;
+		}
+	      cout << " report done"<<endl;
+	      throw runtime_error("StiKalmanTrack::fit() -E- [1] targetNode==0"); 
+	    }
+*/

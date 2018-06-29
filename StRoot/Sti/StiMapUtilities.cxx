@@ -18,7 +18,6 @@
 #include "StiPlacement.h"
 #include "StiDetector.h"
 #include "StiTrackNode.h"
-#include "StiUtilities/StiDebug.h"
 
 //------------------------------ Hit Map Utilities ----------------------------
 
@@ -36,39 +35,27 @@ bool MapKeyLessThan::operator() (const HitMapKey& key1, const HitMapKey& key2) c
 {
     //cout <<"HitMapKey::operator()"<<endl;
     bool val = false;
-    double difPos = -999;
-    double difAng = key1.refangle-key2.refangle;
-    if (difAng > M_PI) difAng -= 2*M_PI;
-    if (difAng <-M_PI) difAng += 2*M_PI;
-    if ( fabs(difAng)< reftolerance) {
+    if ( fabs(key1.refangle-key2.refangle) < reftolerance) {
 	//Call these equal, check position
-	difPos = (key1.position-key2.position);
-	if ( fabs(difPos)  < postolerance) {
+	
+	if ( fabs(key1.position-key2.position) < postolerance) {
 	    //Call these equal
 	    val = false;
 	}	
-	else if (difPos<0) 	{val = true ;}
-	else               	{val = false;}
+	else if (key1.position < key2.position) {val = true;}
+	else {val = false;}
     }
-    else if (difAng<0) 		{val = true ;}
-    else 			{val = false;}
-
-
-if (key1.position<50) return val;
-if (key2.position<50) return val;
-static double k57 = 180./M_PI;
-double myAng = fabs(difAng*k57);
-myAng = myAng - (int(myAng+0.5)/30)*30;
-assert(fabs(myAng)<10);
+    
+    else if (key1.refangle < key2.refangle) {val = true;}
+    else {val = false;}
 
     return val;
 }
 
 
 //______________________________________________________________________________
-bool StiDetectorNodePositionLessThan::operator() (const StiCompositeTreeNode<StiDetector> * lhs
-						 ,const StiCompositeTreeNode<StiDetector> * rhs) const 
-{
+bool StiDetectorNodePositionLessThan::operator() (const StiCompositeTreeNode<StiDetector> * lhs,
+						  const StiCompositeTreeNode<StiDetector> * rhs) const {
   if (lhs->getData()==0 || rhs->getData()==0) 
     cout <<"StiDetectorNodeLessThan::operator(). ERROR:\t" <<"null data.  Return false"<<endl;
   

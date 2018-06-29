@@ -1,7 +1,16 @@
-// $Id: StMagFMaker.cxx,v 1.17 2018/06/21 01:47:12 perev Exp $
+// $Id: StMagFMaker.cxx,v 1.18 2018/06/29 21:46:21 smirnovd Exp $
 // $Log: StMagFMaker.cxx,v $
-// Revision 1.17  2018/06/21 01:47:12  perev
-// iTPCheckIn
+// Revision 1.18  2018/06/29 21:46:21  smirnovd
+// Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
+//
+// Revert "NoDead option added"
+// Revert "Fill mag field more carefully"
+// Revert "Assert commented out"
+// Revert "Merging with TPC group code"
+// Revert "Remove too strong assert"
+// Revert "Restore removed by mistake line"
+// Revert "Remove not used anymore file"
+// Revert "iTPCheckIn"
 //
 // Revision 1.16  2010/09/01 20:21:21  fisyak
 // remove dependence on St_geant_Maker
@@ -63,7 +72,6 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #include <assert.h>
-#include "TError.h"
 #include <Stiostream.h>
 #include "StMagFMaker.h"
 #include "StDetectorDbMaker/St_MagFactorC.h"
@@ -87,23 +95,23 @@ ClassImp(StMagF)
 //_____________________________________________________________________________
 StMagFMaker::~StMagFMaker(){}
 //_____________________________________________________________________________
-Int_t StMagFMaker::InitRun(Int_t RunNo)
-{
-  if (StarMagField::Instance()->IsLocked()) {
+Int_t StMagFMaker::InitRun(Int_t RunNo){
+  if (StarMagField::Instance() && StarMagField::Instance()->IsLocked()) {
     // Passive mode, do not change scale factor
     gMessMgr->Info() << "StMagFMaker::InitRun passive mode. Don't update Mag.Field from DB" << endm;
-  } else {
-    double fScale = 1;
-    if (*SAttr("magFactor")) {fScale = DAttr("magFactor");}
-    else                     {fScale = St_MagFactorC::instance()->ScaleFactor();}
-    if (fabs(fScale) < 1e-3) fScale = 1e-3;
-    StarMagField::Instance()->SetFactor(fScale);
+    return kStOK;
   }
-
-  double x[3]={0},b[3];
-  StarMagField::Instance()->BField(x,b);
-  Info("InitRun","Mag Field(0,0,0) = %g",b[2]);
-
+  Float_t  fScale = St_MagFactorC::instance()->ScaleFactor();
+  if (TMath::Abs(fScale) < 1e-3) fScale = 1e-3;
+  gMessMgr->Info() << "StMagFMaker::InitRun active mode ";
+  if (! StarMagField::Instance()) {
+    new StarMagField ( StarMagField::kMapped, fScale);
+    gMessMgr->Info() << "Initialize STAR magnetic field with scale factor " << fScale << endm;
+  }
+  else if (StarMagField::Instance()) {
+    StarMagField::Instance()->SetFactor(fScale);
+    gMessMgr->Info() << "Reset STAR magnetic field with scale factor " << fScale << endm;
+  }
   return kStOK;
 }
 //_____________________________________________________________________________

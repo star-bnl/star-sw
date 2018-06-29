@@ -1,4 +1,4 @@
-#include <assert.h>
+#include <cassert>
 #include "StiDefaultTrackFilter.h"
 
 #include <stdexcept>
@@ -61,6 +61,36 @@ void StiDefaultTrackFilter::initialize()
 
 bool StiDefaultTrackFilter::accept(const StiTrack * t) const
 {
+  //cout << "StiDefaultTrackFilter::accept(t) - INFO - Starting" << endl;
+  double v,low,high;
+  ParameterConstIterator iter = begin();
+  Parameter * parUse;
+  Parameter * parLow;
+  Parameter * parHi;
+  while (iter!=end())
+    {
+      parUse = *iter; iter++;
+      parLow = *iter; iter++;
+      parHi  = *iter; iter++;
+      if (parUse&&parLow&&parHi)
+	    {
+	    if (parUse->getBoolValue())
+		    {
+		    //cout << "/"<<count++;
+		    v = t->getValue(parUse->getKey());
+		    low = parLow->getDoubleValue();
+		    high = parHi->getDoubleValue();
+		    if (v<low || v>high)
+			    {
+			    //cout<<"/false-done"<<endl;
+			    return false;
+			    }
+		    }
+	    }
+      else
+        assert(0 && "StiDefaultTrackFilter::accept Internal error");
+    }
+  //cout<<"/true-done"<<endl;
   return true;
 }
 
