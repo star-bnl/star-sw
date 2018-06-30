@@ -1931,7 +1931,7 @@ Bfc_st BFC[] = { // standard chains
   {"KFPInter"    ,"","","","KFParticle,picoDeps", "KFParticlePerformance,StKFParticleAnalysisMaker" 
    ,                                                                    "STAR KFParticle interface",kFALSE},
   {"KFPAna"      ,"","","KFPInter","StKFParticleAnalysisMaker",      "", "STAR KFParticle analysis",kFALSE},
-  {"MuMc"        ,"","","KFPAna","StMuMcAnalysisMaker",       "StMuMcAnalysisMaker","MuMc Analysis",kFALSE},
+  {"MuMc"        ,"","","","StMuMcAnalysisMaker",             "StMuMcAnalysisMaker","MuMc Analysis",kFALSE},
   {"PicoAnalysis","","","KFPInter","StPicoAnalysisMaker"
    ,                                    "KFParticlePerformance,StPicoAnalysisMaker","Pico Analysis",kFALSE},
   {"EandBDir","","","in,StEvent,TpcHitMover,nodefault"
