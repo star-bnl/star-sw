@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.69 2018/06/29 13:18:34 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.70 2018/06/29 13:56:53 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -1255,19 +1255,48 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
   
     if(version == 0xda000002) {
 	LOG(DBG, "gbPayload 0x02: v#=0x%x",version);
-	return fillSummaryInfo_v02(info, pay);
+	return fillSummaryInfo_v02(info, (gbPayload_0x02 *)pay);
     }
 
+    if(version == 0xda000003) {
+	LOG(DBG, "gbPayload 0x03: v=0x%x", version);
+	return fillSummaryInfo_v03(info, pay);
+    }
 
     LOG(ERR, "gbPayload Version Unknown: 0x%x vs 0x%x.  Using 02", version, GB_PAYLOAD_VERSION);
+    return fillSummaryInfo_v03(info, pay);
+  }
 
-    return fillSummaryInfo_v02(info, pay);
-   
-    return -1;
+int daqReader::fillSummaryInfo_v03(SummaryInfo *info, gbPayload *pay) {
+    // gbPayload is mostly little endian...
+
+    LOG(DBG, "gbPayloadVersion=0x%x, trgVersion=0x%x", pay->gbPayloadVersion, pay->EventDescriptor.TrgDataFmtVer);
+
+    info->token = l2h32(pay->token);
+    info->evt_time = l2h32(pay->sec);
+    info->detectors = l2h32(pay->rtsDetMask);
+    info->detectors64 = l2h32(pay->rtsDetMask);
+    info->daqbits_l1 = l2h32(pay->L1summary[0]);
+    info->daqbits_l2 = l2h32(pay->L2summary[0]);
+    info->evpgroups = l2h32(pay->L3summary[3]);
+    info->daqbits = l2h32(pay->L3summary[0]);
+    info->evp_daqbits = daqbits;
+    info->flags = l2h32(pay->flags);
+
+    // event descriptor is big endian...
+    //info->trgword = b2h16(pay->EventDescriptor.TriggerWord);
+    info->trgcmd = pay->EventDescriptor.actionWdTrgCommand;
+    info->daqcmd = pay->EventDescriptor.actionWdDaqCommand;
+
+    for(int i=0;i<2;i++) info->L1summary[i] = l2h32(pay->L1summary[i]);
+    for(int i=0;i<2;i++) info->L2summary[i] = l2h32(pay->L2summary[i]);
+    for(int i=0;i<4;i++) info->L3summary[i] = l2h32(pay->L3summary[i]);
+
+    return 0;
   }
 
 
-  int daqReader::fillSummaryInfo_v02(SummaryInfo *info, gbPayload *pay) {
+int daqReader::fillSummaryInfo_v02(SummaryInfo *info, gbPayload_0x02 *pay) {
     // gbPayload is mostly little endian...
 
     LOG(DBG, "gbPayloadVersion=0x%x, trgVersion=0x%x", pay->gbPayloadVersion, pay->EventDescriptor.TrgDataFmtVer);

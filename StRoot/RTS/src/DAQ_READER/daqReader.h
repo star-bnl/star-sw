@@ -1,7 +1,6 @@
 #ifndef _DAQ_READERCLASS_HH_
 #define _DAQ_READERCLASS_HH_
 
-#include <rts.h>
 #include <ctype.h>
 #include <sys/types.h>
 #include "daqConfig.h"
@@ -25,6 +24,7 @@ extern int   _NAME2_(xxx,Reader)(char *mem)
 struct DATAP;
 struct rccnf ;
 struct gbPayload;
+struct gbPayload_0x02;
 struct gbPayload_0x01a;
 struct gbPayload_0x01;
 
@@ -59,6 +59,7 @@ enum Input_Type { none, live, file, pointer, dir };
 
 typedef unsigned int u_int;
 typedef unsigned long long int u_longlong;
+typedef unsigned long long int UINT64;
 
 struct SummaryInfo {
   u_int token ;		// current token
@@ -252,7 +253,8 @@ class daqReader {
   int fillSummaryInfo(SummaryInfo *info, gbPayload *gbPayload);
 
   // history...
-  int fillSummaryInfo_v02(SummaryInfo *info, gbPayload *gbPayload);
+  int fillSummaryInfo_v03(SummaryInfo *info, gbPayload *gbPayload);
+  int fillSummaryInfo_v02(SummaryInfo *info, gbPayload_0x02 *gbPayload);
   int fillSummaryInfo_v01a(SummaryInfo *info, gbPayload_0x01a *gbPayload);
   int fillSummaryInfo_v01(SummaryInfo *info, gbPayload_0x01 *gbPayload);
 
