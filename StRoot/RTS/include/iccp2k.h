@@ -3,12 +3,12 @@
 
 #include <sys/types.h>
 #include <daqFormats.h>
-#include <rts.h>
 // Event Flag Definition
 
 typedef unsigned int u_int;
 typedef unsigned short u_short;
 typedef unsigned char u_char;
+typedef unsigned long long int UINT64;
 
 #define CMD2_PING     0x01
 #define CMD2_DATA     0x02
@@ -79,27 +79,28 @@ struct iccp2k {
 // else 
 //    version = gbPayloadVersion...
 
+
 #define GB_PAYLOAD_VERSION 0xDA000003
 // 2019 run,  expand the rtsDetMask
 struct gbPayload {
-  u_int gbPayloadVersion;
-
-  union {
-    EvtDescData EventDescriptor ;   // take from data!  // big endian
-    u_int eventDesc[sizeof(EvtDescData)/4];
-  };
-
-  // The rest is all little endian...
-  u_int L3summary[4] ;
-  u_int L2summary[2];
-  u_int L1summary[2];
-  UINT64 rtsDetMask;
-  u_int eventNumber;
-  u_int sec;
-  u_int usec;
-  u_int flags;            // bit 0 set, tpc raw data inside
-  u_int evp;
-  u_int token;
+    u_int gbPayloadVersion;
+    
+    union {
+	EvtDescData EventDescriptor ;   // take from data!  // big endian
+	u_int eventDesc[sizeof(EvtDescData)/4];
+    };
+    
+    // The rest is all little endian...
+    u_int L3summary[4] ;
+    u_int L2summary[2];
+    u_int L1summary[2];
+    UINT64 rtsDetMask;
+    u_int eventNumber;
+    u_int sec;
+    u_int usec;
+    u_int flags;            // bit 0 set, tpc raw data inside
+    u_int evp;
+    u_int token;
 };
 
 // #define GB_PAYLOAD_VERSION 0xDA000002
@@ -191,6 +192,9 @@ struct gbPayload_0x01 {         // for 2007 run
   u_int evp;
   u_int token;
 };
+
+
+
 
 /////////////////////////////////////////////////////////
 
