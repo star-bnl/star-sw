@@ -998,6 +998,7 @@ if ( $?GRPE_pself ) then
     set self=$GRPE_pself
     unset GRPE_pself
 endif
+if (-r /opt/rh/rh-git29/root/usr/bin) setenv PATH /opt/rh/rh-git29/root/usr/bin:${PATH}
 if (-r ${HOME}/bin)                   setenv PATH ${HOME}/bin:${PATH}
 if (-r ${HOME}/bin/.${STAR_HOST_SYS}) setenv PATH ${HOME}/bin/.${STAR_HOST_SYS}:${PATH}
 if (-r ${STAR}/scripts/RCF)           setenv PATH ${PATH}:${STAR}/scripts/RCF
