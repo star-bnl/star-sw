@@ -41,6 +41,10 @@
 #include "StBTofHit.h"
 #include "StBTofPidTraits.h"
 
+//epd
+#include "StEpdCollection.h"
+
+
 static StEmcGeom* emcGeom[4];
 
 // These are the mean z positions of the FTPC padrows (1-20).
@@ -325,7 +329,9 @@ Int_t StEventQAMaker::Make() {
   }  // allTrigs
 
   // some identified StQAHistSetType values
-  if (run_year >=18) {
+  if (run_year >=19) {
+    if (realData) histsSet = StQA_run18; // for now, everything from run17 on uses this set
+  } else if (run_year >=18) {
     if (realData) histsSet = StQA_run17; // for now, everything from run17 on uses this set
   } else if (run_year >=16) {
     if (realData) histsSet = StQA_run15; // for now, everything from run15 on uses this set
@@ -373,6 +379,7 @@ Int_t StEventQAMaker::Make() {
       case (StQA_run14):
       case (StQA_run15):
       case (StQA_run17):
+      case (StQA_run18):
       case (StQA_AuAu) :
       case (StQA_dAu)  : break;
       default: nEvClasses=1; evClasses[0] = 1;
@@ -2820,10 +2827,42 @@ void StEventQAMaker::MakeHistRP() {
   } // if( RpsColl ) {
 
 }
+//_____________________________________________________________________________
+void StEventQAMaker::MakeHistEPD() {
+
+  StEpdCollection *epdcol = (StEpdCollection *)(event->epdCollection());
+  if (!epdcol) return;
+
+  // EPD hits
+  StSPtrVecEpdHit &epdHits = epdcol->epdHits();
+  Int_t nEpdHits = epdHits.size();
+    
+  for(Int_t i=0;i<nEpdHits;i++) {
+    StEpdHit *aHit = dynamic_cast<StEpdHit*>(epdHits[i]);
+    if(!aHit) continue;
+    if(!(aHit->isGood())) continue;
+    short side  = aHit->side();                   //+1/-1 for West/East
+    int position = aHit->position();              //1....12
+    int tile = aHit->tile();                      //1....31
+    int adc = aHit->adc();
+    int histId = (position - 1);
+    if (side == 1) histId += 12;                  //0-11 for East, 12-23 for West
+    
+    hists->m_epd_adc[histId]->Fill(tile, adc);
+    if (tile < 10) {
+      int tac = aHit->tac();
+      hists->m_epd_tac[histId]->Fill(tile,tac);
+     }
+  }
+
+}
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.131 2018/06/13 00:14:24 smirnovd Exp $
+// $Id: StEventQAMaker.cxx,v 2.132 2018/07/03 21:33:34 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.132  2018/07/03 21:33:34  genevb
+// Introduce EPD (code provided by J. Ewigleben)
+//
 // Revision 2.131  2018/06/13 00:14:24  smirnovd
 // StEventQAMaker: Use the number of hits associated with the track
 //
