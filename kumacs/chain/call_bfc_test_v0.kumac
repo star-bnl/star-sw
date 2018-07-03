@@ -1,0 +1,46 @@
+* 12/10/98 K. Turner (for 98k)
+* Run BFC in following manner:
+* - read in g2t file with 1000 test events with Lambda's (from Al Saulys)
+* - run tpc fast chain
+* - run svt fast chain
+* - run global packages
+* PLUS ==> (see email from Al Saulys on 9/14/98 to Kathy)
+*  - writes out v0 table to ntuple
+*  - makes plot from ntuple
+*
+
+ exec $STAR/kumacs/chain/bfc _
+   TOP=$STAR _
+   calib_dir=$STAR_CALIB/ebye _  
+   tpc_sector_first=1 _
+   tpc_sector_last=1 _
+   gstar_settings=' field_only' _
+   domain=' geometry g2t tpc svt global strange' _
+   chain=' g2tin tpg svg tfs srs tpt tid tte_e sgr svm egr evr ev02 ev0d sdst2 ntup ' _
+   skip=0 _
+   no_events=1000 _
+   input_data_file=$AFS_RHIC/star/data/samples/hijet-g2t.xdf _
+   output_file=hijet-g2t_v0_test _
+   log=bfc_test_v0.log _
+   nunit=21 _
+   nfile=hijet_test_v0.ntup _
+   nid=121 _
+   ntable=event/data/strange/smdst/smdst_v0
+*
+*
+* ---------------------------------------------------------------
+* Now read in ntuple and make plot
+ hi/file 31 hijet_test_v0.ntup 0
+ opt stat
+ set stat 111111
+ nt/list
+ for/file 40 hijet_test_v0.ps
+ meta 40 -111
+ title_global ' Lambda Mass'
+ nt/plot 121.mala (mala>1.1).and.(mala<1.14)
+ title_global ' Proton pi- invariant mass'
+ close 40
+* 
+
+
+
