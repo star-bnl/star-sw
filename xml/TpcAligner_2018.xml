@@ -21,5 +21,6 @@ end
 	</command>
 	<stdout URL="file:./sched$JOBID.log" />
 	<stderr URL="file:./sched$JOBID.err" />
-<input URL="file:/star/subsys/tpc/fisyak/reco/2018/Cosmics/*event.root" />
+<input URL="command:dEdxSample.pl" />
+<!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2018/Cosmics/*event.root" /> -->
 </job>
