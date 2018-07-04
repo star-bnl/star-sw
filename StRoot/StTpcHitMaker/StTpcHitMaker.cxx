@@ -444,7 +444,7 @@ Int_t StTpcHitMaker::Make() {
 	if (Sector() == sector) {
 	  fTpc = 0;
 	  if (kReaderType == kLegacyTpx || kReaderType == kLegacyTpc) fTpc = (tpc_t*)*DaqDta()->begin();
-	  Int_t row = RowNumber();
+	  Int_t row = St_tpcPadConfigC::instance()->numberOfRows(sector);
 	  if (row >= minRow && row <= maxRow) {
 	    switch (kMode) {
 	    case kTpc: 
@@ -1043,11 +1043,11 @@ Int_t StTpcHitMaker::RawTpcData(Int_t sector) {
   if (! fTpc) return 0;
   memset(ADCs, 0, sizeof(ADCs));
   memset(IDTs, 0, sizeof(IDTs));
-  StTpcDigitalSector *digitalSector = 0;
+  StTpcDigitalSector *digitalSector = GetDigitalSector(sector);
+  assert( digitalSector );
   Int_t Total_data = 0;
-  for (Int_t row = 1;  row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
+  for (Int_t row = 1;  row <= digitalSector->numberOfRows(); row++) {
       Int_t r = row - 1;
-      if (! digitalSector) digitalSector = GetDigitalSector(sector);
       for (Int_t pad = 1; pad <= digitalSector->numberOfPadsAtRow(row); pad++) {
          Int_t p = pad - 1;
          memset(ADCs, 0, sizeof(ADCs));
