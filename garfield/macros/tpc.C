@@ -341,7 +341,7 @@ void tpc(TString IO = "Inner1170", Int_t nEvents = 10) {
       }
       if (x0 > xmin && x0 < xmax) hRadial->Fill(r, phi);
       driftline_i->DriftIon(x0, y0, z0, t0);
-      const std::vector<DriftLineRKF::step> &path_i = driftline_i->path();
+      //yf      const std::vector<DriftLineRKF::step> &path_i = driftline_i->path();
     }    
     v_i->Plot(true,false);
     c_i->Update();
