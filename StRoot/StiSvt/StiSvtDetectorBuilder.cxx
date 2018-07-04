@@ -183,12 +183,16 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
     StSvtWaferGeometry* waferGeom;
     Int_t index1, index2;
     StSvtWaferGeometry* waferGeom2;
-    for(unsigned int ladder = 0; ladder<getNSectors(layer); ladder++)	{
+    for(unsigned int ladder = 0; ladder<nSectors; ladder++)	{
       Int_t svtLadder = 2*(ladder+1) - (svtLayer-1)%2;
       Int_t wafer = nWafers/2+1;
       index1 = _geometry->getWaferIndex(svtBarrel,svtLadder,wafer);
       assert (index1 >= 0);
       waferGeom = (StSvtWaferGeometry*) _geometry->at(index1);
+      if (! waferGeom) {
+	cout << "waferGeom(" << index1 << ") is missing" << endl;
+	continue;
+      }
       if (_debug) waferGeom->print();
       StThreeVectorD centerVector(waferGeom->x(0), waferGeom->x(1), waferGeom->x(2) );
       if ( nWafers%2 == 0) {
