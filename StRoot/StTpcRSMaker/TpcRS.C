@@ -40,8 +40,9 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   //  RunOpt.ToLower();
   //ChainOpt = "MakeEvent,ITTF,ForceGeometry,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,";
   if (RunOpt.Contains("y2005",TString::kIgnoreCase)) {
-    ChainOpt = "ry2005b,in,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout,ssdDb,IAna,fcf,VFMinuit,emcDY2,";
-    ChainOpt+= "ftpc,trgd,ZDCvtx,svtIT,Corr3,DbV20060421,useCDV,ITTF,tofDat,-svtIT,SCEbyE,OGridLeak,OShortR,OSpaceZ2,TpxClu,TpxRaw";//-VFMinuit,";
+    //    ChainOpt = "ry2005b,in,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout,ssdDb,IAna,fcf,VFMinuit,emcDY2,";
+    ChainOpt = "ry2005b,in,tpcI,Physics,Idst,l0,tags,Tree,evout,IAna,fcf,VFMinuit,emcDY2,";
+    ChainOpt+= "ftpc,trgd,ZDCvtx,Corr3,DbV20060421,useCDV,ITTF,tofDat,NosstIT,NosvtIT,SCEbyE,OGridLeak,OShortR,OSpaceZ2,TpxClu,TpxRaw";//-VFMinuit,";
     ChainOpt+= ",useInTracker";
   } else if (! RunOpt.Contains("RC.y",TString::kIgnoreCase) &&  
 	     ! RunOpt.Contains("MC.y",TString::kIgnoreCase)) {
