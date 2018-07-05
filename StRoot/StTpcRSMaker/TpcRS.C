@@ -41,12 +41,12 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   //ChainOpt = "MakeEvent,ITTF,ForceGeometry,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,";
   if (RunOpt.Contains("y2005",TString::kIgnoreCase)) {
     ChainOpt = "ry2005b,in,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout,ssdDb,IAna,fcf,VFMinuit,emcDY2,";
-    ChainOpt+= "ftpc,trgd,ZDCvtx,svtIT,Corr3,DbV20060421,useCDV,ITTF,tofDat,-svtIT,SCEbyE,OGridLeak,OShortR,OSpaceZ2,VFMCE,TpxClu,-VFMinuit,";
-    ChainOpt+= "useInTracker";
+    ChainOpt+= "ftpc,trgd,ZDCvtx,svtIT,Corr3,DbV20060421,useCDV,ITTF,tofDat,-svtIT,SCEbyE,OGridLeak,OShortR,OSpaceZ2,TpxClu,TpxRaw";//-VFMinuit,";
+    ChainOpt+= ",useInTracker";
   } else if (! RunOpt.Contains("RC.y",TString::kIgnoreCase) &&  
 	     ! RunOpt.Contains("MC.y",TString::kIgnoreCase)) {
     ChainOpt = RunOpt;
-    ChainOpt += ",MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,TpcHitMover,bigbig";
+    ChainOpt += ",MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2";
     //  ChainOpt += "Corr4";// no dynamical distortion ! ,OSpaceZ2,OGridLeak3D,"; // check that StTpcRSMaker::kDistortion bit is set
     //  ChainOpt += "EvOut,MuDST,MiniMcMk,McTpcAna,IdTruth,useInTracker,-hitfilt,";
     //  ChainOpt += ",CMuDst,MiniMcMk,IdTruth,useInTracker,tree,";
@@ -68,7 +68,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     RunOpt.ReplaceAll("TpcRS,","");
     RunOpt.ReplaceAll("trs,","");
   } else {
-    ChainOpt += "tpcDB,TpcHitMover,TpxClu,";
+    ChainOpt += ",tpcDB,TpcHitMover,TpxClu,";
   }
   //  Bool_t needAlias = kFALSE;
   TString FileIn(fileIn);
