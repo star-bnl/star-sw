@@ -581,7 +581,10 @@ Int_t StMuTrack::vertexIndex() const {
 
 	//For old MuDsts where there was one vertex per event
 	if (StMuDst::numberOfPrimaryVertices()==0){
-		if(!(fabs(StMuDst::event()->primaryVertexPosition().x()) < 1.e-5 && fabs(StMuDst::event()->primaryVertexPosition().y()) < 1.e-5 && fabs(StMuDst::event()->primaryVertexPosition().z()) < 1.e-5)){
+		if (StMuDst::event() && 
+		   !(fabs(StMuDst::event()->primaryVertexPosition().x()) < 1.e-5 && 
+		     fabs(StMuDst::event()->primaryVertexPosition().y()) < 1.e-5 && 
+		     fabs(StMuDst::event()->primaryVertexPosition().z()) < 1.e-5)){
 			if(primaryTrack()!=0) return 0;
 		}
 		else return -1;
