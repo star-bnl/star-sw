@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.78 2018/05/02 21:07:40 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.79 2018/07/03 21:33:34 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.79  2018/07/03 21:33:34  genevb
+// Introduce EPD (code provided by J. Ewigleben)
+//
 // Revision 2.78  2018/05/02 21:07:40  genevb
 // Initial accomodation for iTPC
 //
@@ -892,6 +895,13 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_MtdNMatchHits = 0;
   m_MtdMatchHitMap = 0;
 
+// for EPD
+  for (int i=0; i<24; i++) {
+    m_epd_adc[i] = 0;
+    m_epd_tac[i] = 0;
+  }
+
+
 }
 //_____________________________________________________________________________
 void StQABookHist::BookHist(Int_t hSet){
@@ -927,6 +937,7 @@ void StQABookHist::BookHist(Int_t hSet){
     BookHistIST();
     BookHistHFT();
   }
+  if (histsSet>=StQA_run18) BookHistEPD();
 
   
 }
@@ -2298,6 +2309,30 @@ void StQABookHist::BookHistMTD(){
   m_MtdNMatchHits  = QAH::H1F("QaMtdNMatchHits","Number of matched MTD hits per event;N",20,0,20);
   m_MtdMatchHitMap = QAH::H2F("QaMtdMatchHitMap","MTD: channel vs backleg of matched hits;backleg;channel",30,0.5,30.5,60,-0.5,59.5);
 
+}
+//_____________________________________________________________________________
+void StQABookHist::BookHistEPD(){
+
+  TString name, title;
+  const TString side[2] = {"East", "West"};
+  
+  const int nPP = 12;
+  for (int i=0; i<2; i++){
+    for (int j=0; j<nPP; j++){
+      (((name = "QaEpdAdc") += side[i]) += "PP") += (j+1);
+      ((((title = "EPD ") += side[i]) += " PP") += (j+1)) += " ADC";
+      m_epd_adc[(i*nPP)+j] = QAH::H2F(name,title,31,1,31,4096,0,4095);
+      m_epd_adc[(i*nPP)+j]->SetXTitle("Tile");
+      m_epd_adc[(i*nPP)+j]->SetYTitle("ADC");
+      
+      (((name = "QaEpdTac") += side[i]) += "PP") += (j+1);
+      ((((title = "EPD ") += side[i]) += " PP") += (j+1)) += " TAC";
+      m_epd_tac[(i*nPP)+j] = QAH::H2F(name,title,9,1,9,4096,0,4095);
+      m_epd_tac[(i*nPP)+j]->SetXTitle("Tile");
+      m_epd_tac[(i*nPP)+j]->SetYTitle("TAC");
+    }
+  }
+    
 }
 //_____________________________________________________________________________
 

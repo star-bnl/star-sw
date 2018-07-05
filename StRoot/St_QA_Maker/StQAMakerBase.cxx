@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.49 2018/05/02 21:07:40 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.50 2018/07/03 21:33:34 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.50  2018/07/03 21:33:34  genevb
+// Introduce EPD (code provided by J. Ewigleben)
+//
 // Revision 2.49  2018/05/02 21:07:40  genevb
 // Initial accomodation for iTPC
 //
@@ -294,6 +297,8 @@ Int_t StQAMakerBase::Make() {
   }
   // histograms from Roman-Pot in StEvent
   if (histsSet>=StQA_run15) MakeHistRP();
+  // histograms from EPD in StEvent
+  if (histsSet>=StQA_run18) MakeHistEPD();
 
   eventCount++;
   return kStOk;
@@ -345,6 +350,7 @@ void StQAMakerBase::BookHist() {
   // Real data with event classes for different triggers
 
     // any new StQAHistSetType values
+    case (StQA_run18) :
     case (StQA_run17) :
     case (StQA_run15) :
     case (StQA_run14) :
