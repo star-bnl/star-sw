@@ -471,7 +471,8 @@ void StEventQAMaker::MakeHistGlob() {
     const StTrackTopologyMap& map=globtrk->topologyMap();
     if (map.trackTpcOnly()) cnttrkT++;
     if (map.trackTpcSvt()) cnttrkTS++;
-    if (globtrk->flag()>0) {
+    if (globtrk->flag() <= 0) continue;
+
       StTrackDetectorInfo* detInfo = globtrk->detectorInfo();
       if (map.hasHitInDetector(kTpcId) && PCThits(detInfo)) continue;
 
@@ -968,8 +969,6 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_global_hft_hit->Fill(3,map.numberOfHits(kIstId));
         hists->m_global_hft_hit->Fill(4,map.numberOfHits(kSstId));
       }
-
-    }
   }
   hists->m_globtrk_tot->Fill(cnttrk); 
   hists->m_globtrk_good->Fill(cnttrkg);
@@ -2858,8 +2857,11 @@ void StEventQAMaker::MakeHistEPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.132 2018/07/03 21:33:34 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.133 2018/07/06 22:10:26 smirnovd Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.133  2018/07/06 22:10:26  smirnovd
+// [Cosmetic] Inverse test conditions to skip loop iterations
+//
 // Revision 2.132  2018/07/03 21:33:34  genevb
 // Introduce EPD (code provided by J. Ewigleben)
 //
