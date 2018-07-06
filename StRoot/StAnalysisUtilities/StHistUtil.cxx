@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.101 2018/05/05 04:00:54 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.102 2018/07/06 22:10:26 smirnovd Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.102  2018/07/06 22:10:26  smirnovd
+// [Cosmetic] Inverse test conditions to skip loop iterations
+//
 // Revision 2.101  2018/05/05 04:00:54  genevb
 // iTPC RDO outlines
 //
@@ -776,7 +779,8 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
 
   while ((obj = nextHist())) {
 
-    if (obj->InheritsFrom("TH1")) { 
+    if (!obj->InheritsFrom("TH1")) continue;
+
       TH1* hobj = (TH1*) obj;
       const char* oname = hobj->GetName();
       const char* otitle = hobj->GetTitle();
@@ -1485,8 +1489,6 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
 //        to actually see the stupid thing
 
 // just ended  actual loop over histograms !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-    }
   }
 
   if (C_ostr) delete C_ostr;
