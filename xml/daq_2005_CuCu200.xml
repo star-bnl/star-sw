@@ -2,8 +2,9 @@
 <job name="recoJob" maxFilesPerProcess="1" filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
 <command>
   cd ${SUBMITTINGDIRECTORY}  
-#  starver .DEV2 
-#  setup gcc45
+  setenv NODEBUG yes
+  FPE_OFF
+  starver .DEV2 
   set evtsFile = $INPUTFILE0;
   if (! -r ${evtsFile}) exit 1;
   echo "${evtsFile}"
@@ -15,7 +16,8 @@
 #   root.exe -q -b 'bfc.C(9999,"P2005,tofDat,logger,MakeEvent,NoSsdIt,NoSvtIt,pmdRaw,OShortR,OSpaceZ2,OSpaceZ2,StiCA,TpxRaw,TpxClu,NoHistos,NoRunco,noTags,EvOut,-hitfilt,McTpcAna","'${evtsFile}'")' &gt;&amp; ${logFile}
 #   root.exe -q -b 'bfc.C(9999,"ry2005b,in,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout,ssdDb,IAna,fcf,VFMinuit,emcDY2,ftpc,trgd,ZDCvtx,svtIT,Corr3,DbV20060421,useCDV,ITTF,tofDat,-svtIT,SCEbyE,OGridLeak,OShortR,OSpaceZ2,VFMCE,TpxClu,-VFMinuit,useInTracker,TpcHitMover,TpxClu,McTpcAna","'${evtsFile}'")' &gt;&amp; ${logFile}
 #   root.exe -q -b 'bfc.C(9999,"P2005,tofDat,logger,MakeEvent,ITTF,ssddat,spt,SsdIt,SvtIt,pmdRaw,OShortR,OSpaceZ2","'${evtsFile}'")' &gt;&amp; ${logFile}
-   root.exe -q -b 'bfc.C(9999,"ry2005b,in,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout,ssdDb,IAna,fcf,VFMinuit,emcDY2,ftpc,trgd,ZDCvtx,svtIT,Corr3,DbV20060421,useCDV,ITTF,tofDat,-svtIT,SCEbyE,OGridLeak,OShortR,OSpaceZ2,TpxClu,-VFMinuit,useInTracker,TpxRaw,TpxClu,McTpcAna","'${evtsFile}'")' &gt;&amp; ${logFile}
+#   root.exe -q -b 'bfc.C(9999,"ry2005b,in,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout,ssdDb,IAna,fcf,VFMinuit,emcDY2,ftpc,trgd,ZDCvtx,svtIT,Corr3,DbV20060421,useCDV,ITTF,tofDat,-svtIT,SCEbyE,OGridLeak,OShortR,OSpaceZ2,TpxClu,-VFMinuit,useInTracker,TpxRaw,TpxClu,McTpcAna","'${evtsFile}'")' &gt;&amp; ${logFile}
+    root.exe -q -b 'TpcRS.C(9999,"y2005","'${evtsFile}'","")' &gt;&amp; ${logFile}
 </command>
 <stdout URL="file:./sched$JOBID.log" />
 <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2005/059/st_physics_adc_*.daq" />

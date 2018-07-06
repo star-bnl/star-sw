@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.38 2016/05/13 22:04:49 genevb Exp $ 
+// $Id: StQABookHist.h,v 2.39 2018/07/03 21:33:34 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.39  2018/07/03 21:33:34  genevb
+// Introduce EPD (code provided by J. Ewigleben)
+//
 // Revision 2.38  2016/05/13 22:04:49  genevb
 // Address coverity findings: uninit vars, dead code, one PMD error, and one TOF error
 //
@@ -147,7 +150,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.38 2016/05/13 22:04:49 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.39 2018/07/03 21:33:34 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -768,6 +771,10 @@ class StQABookHist : public TObject {
   TH1F *m_MtdNMatchHits;       //!
   TH2F *m_MtdMatchHitMap;      //!
 
+  // Hists for EPD
+  TH2F* m_epd_adc[24];         //!
+  TH2F* m_epd_tac[24];         //!
+
 
   // ********************** Members For Internal Use *************************
  protected:
@@ -793,6 +800,7 @@ class StQABookHist : public TObject {
   virtual void   BookHistPXL();
   virtual void   BookHistHFT();
   virtual void   BookHistIST();
+  virtual void   BookHistEPD();
 
   ClassDef(StQABookHist,0)
 };

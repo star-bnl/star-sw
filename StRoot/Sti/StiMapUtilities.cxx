@@ -56,11 +56,12 @@ bool MapKeyLessThan::operator() (const HitMapKey& key1, const HitMapKey& key2) c
 
 if (key1.position<50) return val;
 if (key2.position<50) return val;
+#if 0
 static double k57 = 180./M_PI;
 double myAng = fabs(difAng*k57);
 myAng = myAng - (int(myAng+0.5)/30)*30;
 assert(fabs(myAng)<10);
-
+#endif
     return val;
 }
 

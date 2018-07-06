@@ -1336,6 +1336,7 @@ Bfc_st BFC[] = { // standard chains
   {"TbUtil"      ,""  ,"","sim_T,tpc_t,globT,SCL",""    ,"StTableUtilities","Load StTableUtilities",kFALSE},
   {"TofUtil"     ,""  ,"","",""                                       ,"StTofUtil","Load StTofUtil",kFALSE},
   {"BTofUtil"    ,""  ,"","",""                                     ,"StBTofUtil","Load StBTofUtil",kFALSE},
+  {"ETofUtil"    ,""  ,"","",""                                     ,"StETofUtil","Load StETofUtil",kFALSE},
   {"MtdUtil"    ,""  ,"","",""                                        ,"StMtdUtil","Load StMtdUtil",kFALSE},
   {"StBichsel"   ,""  ,"","",""                         ,"StBichsel","Load Bichsel model for dE/dx",kFALSE},
   {"StEvent"   ,"","","globT,SCL,TRGDef,StBichsel,Stu,TbUtil,dbUtil,KFParticle","","StTpcDb,StEvent"
@@ -1651,6 +1652,17 @@ Bfc_st BFC[] = { // standard chains
 #else
   {"btofMixer"    ,"","","","",""                                               "ignore BTof Mixer",kFALSE},
 #endif
+
+  // ETOF chains - do they have to be before the VPD / vpdsim?
+  {"ETofDat",   "etof_raw","ETofChain", "db, ETofUtil", "StETofDigiMaker",  "StEvent,StETofDigiMaker"
+   ,                                                                              "ETOF digi maker",kFALSE},
+  //{"ETofCalib", "",        "ETofChain", "db, ETofUtil", "StETofCalibMaker", "StETofCalibMaker",
+  //                                                                               "ETOF calibration",kFALSE},
+  //{"ETofHit",   "",        "ETofChain", "db",          "StETofHitMaker",   "StETofHitMaker",
+  //                                                                                 "ETOF hit maker",kFALSE},
+  {"ETofQa",    "",        "ETofChain", "db",      "StETofQAMaker","StETofQAMaker",   "ETOF QA maker",kFALSE},
+  
+
   // left MTD chain for sumulation alone here
   {"mtdSim"    ,"","","","StMtdSimMaker,StEvent",                   "StMtdSimMaker","MTD Simulator",kFALSE},
   // Time Of Flight related options
