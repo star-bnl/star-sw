@@ -6,6 +6,8 @@
 #include "Sti/StiDetectorBuilder.h"
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
 
+
+
 class StiTpcDetectorBuilder : public StiDetectorBuilder
 {
 
@@ -19,7 +21,7 @@ public:
     double phiForSector(UInt_t iSector,     UInt_t nSectors) const;
     double phiForWestSector(UInt_t iSector, UInt_t nSectors) const;
     double phiForEastSector(UInt_t iSector, UInt_t nSectors) const;
-    void         useVMCGeometry();		
+    void   useVMCGeometry();		
     //    virtual void AverageVolume(TGeoPhysicalNode *nodeP);
 
     static std::pair<int, int>  toStiLayer(const int tpc_sector, const int tpc_padrow);

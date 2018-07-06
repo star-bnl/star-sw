@@ -50,7 +50,8 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
   cout << "StiTpcDetectorBuilder::buildDetectors() -I- Done" << endl;
 }
 //________________________________________________________________________________
-void StiTpcDetectorBuilder::useVMCGeometry() {
+void StiTpcDetectorBuilder::useVMCGeometry()
+{
   Int_t debug = 0;
 
   if (debug>1) StiVMCToolKit::SetDebug(1);
@@ -72,6 +73,7 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
     {"TPA1","outer pad row","HALL_1/CAVE_1/TPCE_1/TPGV_%d/TPSS_%d/TPA1_%d","tpc",""},
     {"tpad","all pad rows","/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TpcSectorWhole_%d/TpcGas_1/TpcPadPlane_%d/tpad_%d","tpc"} // VMC
   };
+
   Bool_t newRefSystem = kTRUE;
   TString path("HALL_1/CAVE_1/TpcRefSys_1/TPCE_1");
   if (! gGeoManager->cd(path)) newRefSystem = kFALSE;
@@ -79,15 +81,18 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
   // Get Materials
   TGeoVolume *volT = gGeoManager->GetVolume("TPAD"); 
   if (! volT) volT = gGeoManager->GetVolume("tpad"); 
-  assert (volT);
-  TGeoMaterial *mat = volT->GetMaterial(); assert(mat); if (debug>1) mat->Print();
-  Double_t PotI = StiVMCToolKit::GetPotI(mat); if (debug>1) cout << "PotI " << PotI << endl;
+  assert(volT);
+  TGeoMaterial *mat = volT->GetMaterial();
+  assert(mat);
+  if (debug>1) mat->Print();
+  Double_t PotI = StiVMCToolKit::GetPotI(mat);
+  if (debug>1) cout << "PotI " << PotI << endl;
   _gasMat = add(new StiMaterial(mat->GetName(),
-				mat->GetZ(),
-				mat->GetA(),
-				mat->GetDensity(),
-				mat->GetDensity()*mat->GetRadLen(),
-				PotI));
+                                mat->GetZ(),
+                                mat->GetA(),
+                                mat->GetDensity(),
+                                mat->GetDensity()*mat->GetRadLen(),
+                                PotI));
   StThreeVectorD RowPosition;
 
   fillStiLayersMap();
@@ -97,7 +102,8 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
     StiPlanarShape* pShape = constructTpcPadrowShape(stiLayer);
     StiDetector* pDetector = constructTpcPadrowDetector(stiLayer, pShape);
 
-    add(stiLayer.sti_padrow_id, stiLayer.sti_sector_id, pDetector); if (debug>1) cout << *pDetector << endl;
+    add(stiLayer.sti_padrow_id, stiLayer.sti_sector_id, pDetector);
+    if (debug>1) cout << *pDetector << endl;
   }
 
   for (Int_t i = 0; i < 4; i++) {
@@ -258,8 +264,10 @@ StiPlanarShape* StiTpcDetectorBuilder::constructTpcPadrowShape(StiLayer stiLayer
 
   TString name = Form("Tpc/Padrow_%d/Sector_%d", stiLayer.sti_padrow_id, stiLayer.sti_sector_id);
   StiPlanarShape* pShape = new StiPlanarShape;
+
   if (!pShape)
     throw runtime_error("StiTpcDetectorBuilder::buildDetectors() - FATAL - pShape==0||ofcShape==0");
+
   Double_t dZ = 0;
   if(tpc_padrow_id <= nInnerPadrows) {
     pShape->setThickness(St_tpcPadConfigC::instance()->innerSectorPadLength(tpc_sector_id));
@@ -278,8 +286,11 @@ StiPlanarShape* StiTpcDetectorBuilder::constructTpcPadrowShape(StiLayer stiLayer
   }
 
   pShape->setHalfDepth(dZ*24/NoStiSectors);
-  pShape->setHalfWidth(St_tpcPadConfigC::instance()->PadPitchAtRow(tpc_sector_id, tpc_padrow_id) * St_tpcPadConfigC::instance()->numberOfPadsAtRow(tpc_sector_id, tpc_padrow_id) / 2.);
-  pShape->setName(name.Data()); if (StiVMCToolKit::Debug()>1) cout << *pShape << endl;
+  pShape->setHalfWidth(St_tpcPadConfigC::instance()->PadPitchAtRow(tpc_sector_id, tpc_padrow_id) *
+                       St_tpcPadConfigC::instance()->numberOfPadsAtRow(tpc_sector_id, tpc_padrow_id) / 2.);
+  pShape->setName(name.Data());
+
+  if (StiVMCToolKit::Debug()>1) cout << *pShape << endl;
 
   return pShape;
 }

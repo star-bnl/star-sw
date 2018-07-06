@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.102 2018/07/06 22:10:26 smirnovd Exp $
+// $Id: StHistUtil.cxx,v 2.103 2018/07/06 22:13:04 smirnovd Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.103  2018/07/06 22:13:04  smirnovd
+// [Cosmetic] Changes in white space
+//
 // Revision 2.102  2018/07/06 22:10:26  smirnovd
 // [Cosmetic] Inverse test conditions to skip loop iterations
 //
@@ -1527,10 +1530,11 @@ TList* StHistUtil::FindHists(const Char_t *dirName, const Char_t *withPrefix)
 //
   PathCopy(m_dirName,dirName);
   StMaker *temp = m_PntrToMaker->GetMaker(m_dirName);
-    if (temp) {
-      LOG_INFO << "FindHists - found pointer to maker" << endm;
-      dList = temp->Histograms();
-    }
+
+  if (temp) {
+    LOG_INFO << "FindHists - found pointer to maker" << endm;
+    dList = temp->Histograms();
+  }
 
 // Now check to see if any histograms exist here (look for something in
 //  the list (test)

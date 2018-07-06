@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.240 2018/06/29 21:46:33 smirnovd Exp $
+// $Id: StiMaker.cxx,v 1.241 2018/07/06 22:13:05 smirnovd Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -314,101 +314,94 @@ Int_t StiMaker::InitDetectors()
 //_____________________________________________________________________________
 Int_t StiMaker::InitRun(int run)
 {
-  if (!_initialized)    {
-      cout <<"StiMaker::InitRun() -I- Initialization Segment Started"<<endl;
-      InitDetectors();
-      // Load Detector related parameters
-      StiMasterDetectorBuilder * masterBuilder = _toolkit->getDetectorBuilder();
-      masterBuilder->build(*this);
-      StiDetectorContainer * detectorContainer = _toolkit->getDetectorContainer();
-      detectorContainer->initialize();//build(masterBuilder);
-      detectorContainer->reset();
-       _seedFinder = _toolkit->getTrackSeedFinder();
-      _seedFinder->initialize();
-      _hitLoader  = _toolkit->getHitLoader();
-      _tracker=0;
-      mMaxTimes = IAttr("setMaxTimes");
+  if (!_initialized) {
+    cout <<"StiMaker::InitRun() -I- Initialization Segment Started"<<endl;
+    InitDetectors();
+    // Load Detector related parameters
+    StiMasterDetectorBuilder * masterBuilder = _toolkit->getDetectorBuilder();
+    masterBuilder->build(*this);
+    StiDetectorContainer * detectorContainer = _toolkit->getDetectorContainer();
+    detectorContainer->initialize();//build(masterBuilder);
+    detectorContainer->reset();
+    _seedFinder = _toolkit->getTrackSeedFinder();
+    _seedFinder->initialize();
+    _hitLoader  = _toolkit->getHitLoader();
+    _tracker=0;
+    mMaxTimes = IAttr("setMaxTimes");
 
+    if (IAttr("useTracker")) {
 
-      if (IAttr("useTracker")) {
+      _tracker = (StiKalmanTrackFinder *)(_toolkit->getTrackFinder());
 
-        _tracker = (StiKalmanTrackFinder *)(_toolkit->getTrackFinder());
+      do  {
 
-        do  {
+        TString seedFinders = SAttr("seedFinders");
 
-          TString seedFinders = SAttr("seedFinders");
+        // Return without changing anything if attribute's value is empty
+        if (seedFinders.Length()) {	//found list of ssedfinders
 
-// 		Return without changing anything if attribute's value is empty
-  	  if (seedFinders.Length()) {	//found list of ssedfinders
+          TObjArray *sub_strings = seedFinders.Tokenize(" .,");
 
-            TObjArray *sub_strings = seedFinders.Tokenize(" .,");
+          for (int i=0; i <= sub_strings->GetLast(); i++) {
+            int n = 0;
+            TString &sub_string = static_cast<TObjString*>( sub_strings->At(i))->String();
+            if (sub_string[0]=='!') continue; 	//commented out
+            if ( !sub_string.CompareTo("CA", TString::kIgnoreCase) ) 
+              {n++;_tracker->addSeedFinder(_toolkit->getTrackSeedFinderCA());}
+            if ( !sub_string.CompareTo("Def", TString::kIgnoreCase) ) 
+              {n++;_tracker->addSeedFinder(_toolkit->getTrackSeedFinder());}
+            if ( !sub_string.CompareTo("KNN", TString::kIgnoreCase) ) 
+              {n++;_tracker->addSeedFinder(_toolkit->getTrackSeedFinderKNN());}
+            assert(n);
+          }
+          delete sub_strings; break;
+         }// end seedfinder list
 
-  	    for (int i=0; i <= sub_strings->GetLast(); i++) {
-              int n = 0;
-              TString &sub_string = static_cast<TObjString*>( sub_strings->At(i))->String();
-              if (sub_string[0]=='!') continue; 	//commented out
-              if ( !sub_string.CompareTo("CA", TString::kIgnoreCase) ) 
-                {n++;_tracker->addSeedFinder(_toolkit->getTrackSeedFinderCA());}
-              if ( !sub_string.CompareTo("Def", TString::kIgnoreCase) ) 
-                {n++;_tracker->addSeedFinder(_toolkit->getTrackSeedFinder());}
-              if ( !sub_string.CompareTo("KNN", TString::kIgnoreCase) ) 
-                {n++;_tracker->addSeedFinder(_toolkit->getTrackSeedFinderKNN());}
-              assert(n);
-            }
-            delete sub_strings; break;
-           }// end seedfinder list
+       if (IAttr("StiCA")) {
+          _tracker->addSeedFinder(_toolkit->getTrackSeedFinderCA());
+          _tracker->addSeedFinder(_toolkit->getTrackSeedFinder());
+          break;
+       }
+      // Default case, Sti seed finder only
+      _tracker->addSeedFinder(_toolkit->getTrackSeedFinder());
 
-         if (IAttr("StiCA")) {
-            _tracker->addSeedFinder(_toolkit->getTrackSeedFinderCA());
-            _tracker->addSeedFinder(_toolkit->getTrackSeedFinder());
-            break;
-         }
-//		Default case, Sti seed finder only               
-	_tracker->addSeedFinder(_toolkit->getTrackSeedFinder());
+      }while(0);
 
-        }while(0);
- 
+    }//end tracker
 
-     }//end tracker
+    // useTreeSearch flag means
+    // useTreeSearch == tpcFlag *4 + hftFlag
+    // flag == treeSearchOn + 2*treeSearchFull
+    // treeSearchOn==1 means tree search is ON
+    // treeSearchFull==1 means tree search includes case that existing hit
+    //                                on this level could be omitted
+    // Typical case chain->SetAttr("useTreeSearch",(1+2) +4*(1),"Sti");
+    // means HFT full tree searh, TPC tree search only with existing hits, no hits is not considered
 
+    if (*SAttr("useTreeSearch")) _tracker->setComb(IAttr("useTreeSearch"));
+    if ( IAttr("useTiming"    )) _tracker->setTiming();
+    _fitter  = dynamic_cast<StiKalmanTrackFitter *>(_toolkit->getTrackFitter());
 
+    //if (*SAttr("useMCS")) StiKalmanTrackNode::setMCS(IAttr("useMCS"));
+  }
 
-
-
-
-
-//		useTreeSearch flag means
-//		useTreeSearch == tpcFlag *4 + hftFlag
-//		flag == treeSearchOn + 2*treeSearchFull
-// 		treeSearchOn==1 means tree search is ON
-// 		treeSearchFull==1 means tree search includes case that existing hit
-//                                on this level could be omitted
-//  		Typical case chain->SetAttr("useTreeSearch",(1+2) +4*(1),"Sti");
-//		means HFT full tree searh, TPC tree search only with existing hits, no hits is not considered
-
-        if (*SAttr("useTreeSearch")) _tracker->setComb(IAttr("useTreeSearch"));
-        if ( IAttr("useTiming"    )) _tracker->setTiming();
-        _fitter  = dynamic_cast<StiKalmanTrackFitter *>(_toolkit->getTrackFitter());
-
-//        if (*SAttr("useMCS")) StiKalmanTrackNode::setMCS(IAttr("useMCS"));
-      }
-      _eventFiller=0;
-      if (IAttr("useEventFiller")) {
-        _eventFiller =  new StiStEventFiller();
-        _eventFiller->setUseAux(IAttr("useAux"));
-        InitPulls();
-      }
-      _trackContainer = _toolkit->getTrackContainer();
-      _vertexFinder   = 0;
-      if (GetTopChain()->GetMakerInheritsFrom("StGenericVertexMaker")) {
-	_vertexFinder   = _toolkit->getVertexFinder();
-      }
-      if (_tracker) {
-        _tracker->initialize();
-        _tracker->clear();
-      }
-      _initialized=true;
-      cout <<"StiMaker::InitRun() -I- Initialization Segment Completed"<<endl;
+  _eventFiller=0;
+  if (IAttr("useEventFiller")) {
+    _eventFiller =  new StiStEventFiller();
+    _eventFiller->setUseAux(IAttr("useAux"));
+    InitPulls();
+  }
+  _trackContainer = _toolkit->getTrackContainer();
+  _vertexFinder   = 0;
+  if (GetTopChain()->GetMakerInheritsFrom("StGenericVertexMaker")) {
+    _vertexFinder   = _toolkit->getVertexFinder();
+  }
+  if (_tracker) {
+    _tracker->initialize();
+    _tracker->clear();
+  }
+  _initialized=true;
+  cout <<"StiMaker::InitRun() -I- Initialization Segment Completed"<<endl;
 
   return StMaker::InitRun(run);
 }
@@ -734,8 +727,11 @@ void StiMaker::FinishTracks (int gloPri)
 }
 
 
-// $Id: StiMaker.cxx,v 1.240 2018/06/29 21:46:33 smirnovd Exp $
+// $Id: StiMaker.cxx,v 1.241 2018/07/06 22:13:05 smirnovd Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.241  2018/07/06 22:13:05  smirnovd
+// [Cosmetic] Changes in white space
+//
 // Revision 1.240  2018/06/29 21:46:33  smirnovd
 // Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
 //
