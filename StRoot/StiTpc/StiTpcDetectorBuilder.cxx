@@ -117,7 +117,6 @@ StiDetector* StiTpcDetectorBuilder::constructTpcPadrowDetector(StiLayer stiLayer
   int tpc_sector_id = stiLayer.tpc_sector();
   int tpc_padrow_id = stiLayer.tpc_padrow();
 
-  Int_t NoStiSectors = 12;
   StDetectorDbTpcRDOMasks *s_pRdoMasks = StDetectorDbTpcRDOMasks::instance();
   UInt_t nRows = St_tpcPadConfigC::instance()->numberOfRows(tpc_sector_id);// Only sensitive detectors
   UInt_t nInnerPadrows = St_tpcPadConfigC::instance()->numberOfInnerRows(tpc_sector_id);
@@ -127,7 +126,10 @@ StiDetector* StiTpcDetectorBuilder::constructTpcPadrowDetector(StiLayer stiLayer
   StTpcCoordinateTransform transform(gStTpcDb);
   StMatrixD  local2GlobalRotation;
   StMatrixD  unit(3,3,1);
-  Double_t dZ = pShape->getHalfDepth()*NoStiSectors/24.;
+  // The length of the Sti layer shape is used to place it in the rigth position
+  // along z. We have to multiply by 0.5 to revert the effect of the old
+  // implementation bug when the length was doubled
+  Double_t dZ = pShape->getHalfDepth()*0.5;
 
   //Retrieve position and orientation of the TPC pad rows from the database.
   StTpcLocalSectorDirection  dirLS[3];
@@ -176,7 +178,6 @@ StiDetector* StiTpcDetectorBuilder::constructTpcPadrowDetector(StiLayer stiLayer
   Double_t r = centerVector.perp();
   StiPlacement *pPlacement = new StiPlacement;
   Double_t zc = 0;
-  if (NoStiSectors != 12) zc = centerVector.z();
 
   if ( stiLayer.tpc_sector_id[StiLayer::East] < 0 ) zc =  2*dZ;
   if ( stiLayer.tpc_sector_id[StiLayer::West] < 0 ) zc = -2*dZ;
@@ -249,7 +250,6 @@ StiPlanarShape* StiTpcDetectorBuilder::constructTpcPadrowShape(StiLayer stiLayer
   int tpc_sector_id = stiLayer.tpc_sector();
   int tpc_padrow_id = stiLayer.tpc_padrow();
 
-  Int_t NoStiSectors = 12;
   UInt_t nInnerPadrows = St_tpcPadConfigC::instance()->numberOfInnerRows(tpc_sector_id);
 
   TString name = Form("Tpc/Padrow_%d/Sector_%d", stiLayer.sti_padrow_id, stiLayer.sti_sector_id);
@@ -275,7 +275,10 @@ StiPlanarShape* StiTpcDetectorBuilder::constructTpcPadrowShape(StiLayer stiLayer
     dZ *= 0.5;
   }
 
-  pShape->setHalfDepth(dZ*24/NoStiSectors);
+  // The length is doubled to match the old implementation where the value
+  // depended on the number of TPC sectors. Without the factor 2 we loose prompt
+  // hits which can be outside of the physical volume
+  pShape->setHalfDepth(dZ*2);
   pShape->setHalfWidth(St_tpcPadConfigC::instance()->PadPitchAtRow(tpc_sector_id, tpc_padrow_id) *
                        St_tpcPadConfigC::instance()->numberOfPadsAtRow(tpc_sector_id, tpc_padrow_id) / 2.);
   pShape->setName(name.Data());
