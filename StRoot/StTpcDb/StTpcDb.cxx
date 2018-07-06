@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.66 2018/06/29 21:46:21 smirnovd Exp $
+ * $Id: StTpcDb.cxx,v 1.67 2018/07/06 22:13:16 smirnovd Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.67  2018/07/06 22:13:16  smirnovd
+ * [Cosmetic] Remove unused variables and commented code
+ *
  * Revision 1.66  2018/06/29 21:46:21  smirnovd
  * Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
  *
@@ -421,8 +424,6 @@ void StTpcDb::SetTpcRotations() {
 	}
       } else {
 	Id = 10*sector + k;
-	TGeoTranslation TIO; 
-	TGeoRotation    RIO;
 	StBeamDirection part = east;
 	if (sector <= 12) part = west;
 	switch (k) {
