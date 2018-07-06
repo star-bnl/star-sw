@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.73 2018/06/29 21:46:22 smirnovd Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.74 2018/07/06 22:13:16 smirnovd Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.74  2018/07/06 22:13:16  smirnovd
+ * [Cosmetic] Remove unused variables and commented code
+ *
  * Revision 1.73  2018/06/29 21:46:22  smirnovd
  * Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
  *
@@ -225,7 +228,6 @@
  *
  **************************************************************************/
 
-//#define StTpc_STATIC_ARRAYS
 #include <assert.h>
 #include "StTpcDbMaker.h"
 #include "StDbUtilities/StCoordinates.hh"
@@ -329,42 +331,6 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     StTpcDb::instance()->SetExB(magU);
   }
   StTpcDb::instance()->SetTpcRotations();
-#ifdef StTpc_STATIC_ARRAYS
-  //Here I fill in the arrays for the row parameterization ax+by=1
-  if (StTpcDb::instance()->GlobalPosition()) {
-    for (int i=0;i<24;i++){
-      for (int j=0;j<45;j++){
-	int time[1] = {10}; 
-	int ipad[2] = {20,40};
-	StTpcPadCoordinate pad1(i+1, j+1, ipad[0], *time);
-	StTpcPadCoordinate pad2(i+1, j+1, ipad[1], *time);
-	StGlobalCoordinate gc1,gc2;
-	StTpcCoordinateTransform transform(gStTpcDb);
-	transform(pad1,gc1);
-	transform(pad2,gc2);
-	double x1,y1,x2,y2;
-	double m,bb; // y = mx + bb
-	x1 = gc1.position().x();
-	y1 = gc1.position().y();
-	x2 = gc2.position().x();
-	y2 = gc2.position().y();
-	if (fabs(x2-x1)<0.000001) {
-	  aline[i][j] = 1/x1;
-	  bline[i][j] = 0.;
-	  continue;
-	}
-	m = (y2 - y1)/(x2 - x1);
-	bb = y1 - m*x1;
-	if (bb == 0) {
-	  gMessMgr->Warning() << "StTpcDbMaker::Init() Row intersects 0,0" << endm;
-	  continue;
-	}
-	aline[i][j] = (float) -m/bb;
-	bline[i][j] = (float) 1.0/bb;
-      }
-    }
-  }
-#endif /* StTpc_STATIC_ARRAYS */
   return kStOK;
 }
 //_____________________________________________________________________________

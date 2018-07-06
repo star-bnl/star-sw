@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.154 2018/06/29 21:46:27 smirnovd Exp $
- * $Id: StiKalmanTrack.cxx,v 2.154 2018/06/29 21:46:27 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.155 2018/07/06 22:13:16 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.155 2018/07/06 22:13:16 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.155  2018/07/06 22:13:16  smirnovd
+ * [Cosmetic] Remove unused variables and commented code
+ *
  * Revision 2.154  2018/06/29 21:46:27  smirnovd
  * Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
  *
@@ -725,7 +728,6 @@ int StiKalmanTrack::initialize(const std::vector<StiHit*> &hits)
 //_____________________________________________________________________________
 int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *firstPars, StiNodePars *lastPars, StiNodeErrs *firstErrs, StiNodeErrs *lastErrs)
 {
-  //cout << "StiCAKalmanTrack::initialize() -I- Started"<<endl;
   reset();
   //StiKalmanTrackNode * node  = 0;
   const StiDetector* detector=0;
@@ -1176,7 +1178,6 @@ StiKalmanTrackNode * StiKalmanTrack::getInnOutMostNode(int inot,int qua)  const
     return node;
   }
   cout << "StiKalmanTrack::getInnOutMostNode() -E- No requested nodes " << endl;
-  //throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- No requested nodes");
   return 0;
 }
 //_____________________________________________________________________________
