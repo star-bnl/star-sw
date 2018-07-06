@@ -57,19 +57,6 @@ void StiTpcDetectorBuilder::useVMCGeometry()
   if (debug>1) StiVMCToolKit::SetDebug(1);
   cout << "StiTpcDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endl;
   SetCurrentDetectorBuilder(this);
-  const VolumeMap_t TpcVolumes[] = {
-    {"TIFC","Inner Field Cage","HALL_1/CAVE_1/TPCE_1/TIFC_1","",""},
-    {"TIFC","Inner Field Cage","HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TIFC_1","",""},
-    {"TOFC","Inner Field Cage","HALL_1/CAVE_1/TPCE_1/TOFC_1","",""},
-    {"TOFC","Inner Field Cage","HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TOFC_1","",""},
-    {"TPAD","inner pad row","HALL_1/CAVE_1/TPCE_1/TPGV_%d/TPSS_%d/TPAD_%d","tpc",""},// <+++
-    {"TPA1","outer pad row","HALL_1/CAVE_1/TPCE_1/TPGV_%d/TPSS_%d/TPA1_%d","tpc",""},
-    {"tpad","all pad rows","/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TpcSectorWhole_%d/TpcGas_1/TpcPadPlane_%d/tpad_%d","tpc"} // VMC
-  };
-
-  Bool_t newRefSystem = kTRUE;
-  TString path("HALL_1/CAVE_1/TpcRefSys_1/TPCE_1");
-  if (! gGeoManager->cd(path)) newRefSystem = kFALSE;
 
   // Get Materials
   TGeoVolume *volT = gGeoManager->GetVolume("TPAD"); 
@@ -98,17 +85,28 @@ void StiTpcDetectorBuilder::useVMCGeometry()
     if (debug>1) cout << *pDetector << endl;
   }
 
+  // Create inactive Sti volumes by averaging material in TPC inner and outer field cages
+  const VolumeMap_t TpcVolumes[] = {
+    {"TIFC","Inner Field Cage","HALL_1/CAVE_1/TPCE_1/TIFC_1","",""},
+    {"TOFC","Inner Field Cage","HALL_1/CAVE_1/TPCE_1/TOFC_1","",""},
+    {"TIFC","Inner Field Cage","HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TIFC_1","",""},
+    {"TOFC","Inner Field Cage","HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TOFC_1","",""},
+  };
+
+  TString check_path("HALL_1/CAVE_1/TpcRefSys_1/TPCE_1");
+  bool newRefSystem = gGeoManager->cd(check_path) ? true : false;
+
   for (Int_t i = 0; i < 4; i++) {
-    gGeoManager->RestoreMasterVolume();
-    gGeoManager->CdTop();
+    TString path = TpcVolumes[i].path;
+
+    if ( newRefSystem && !path.Contains("TpcRefSys")) continue;
+    if (!newRefSystem &&  path.Contains("TpcRefSys")) continue;
+    if (!gGeoManager->cd(path)) {
+      LOG_WARN << "Skipping non-existing geometry path " << path << endm;
+      continue;
+    }
+
     TGeoNode *nodeT = gGeoManager->GetCurrentNode();
-    path = TpcVolumes[i].path;
-    if (  newRefSystem && ! path.Contains("TpcRefSys")) continue;
-    if (! newRefSystem &&   path.Contains("TpcRefSys")) continue;
-    if (! gGeoManager->cd(path)) continue;
-    nodeT = gGeoManager->GetCurrentNode();
-    if (! nodeT) continue;
-    path = gGeoManager->GetPath();
     StiVMCToolKit::LoopOverNodes(nodeT, path, TpcVolumes[i].name, MakeAverageVolume);
   }
 }
