@@ -473,502 +473,502 @@ void StEventQAMaker::MakeHistGlob() {
     if (map.trackTpcSvt()) cnttrkTS++;
     if (globtrk->flag() <= 0) continue;
 
-      StTrackDetectorInfo* detInfo = globtrk->detectorInfo();
-      if (map.hasHitInDetector(kTpcId) && PCThits(detInfo)) continue;
+    StTrackDetectorInfo* detInfo = globtrk->detectorInfo();
+    if (map.hasHitInDetector(kTpcId) && PCThits(detInfo)) continue;
 
-      StTrackGeometry* geom = globtrk->geometry();
-      StDcaGeometry* dcageom = ((StGlobalTrack*) globtrk)->dcaGeometry();
-      StTrackFitTraits& fTraits = globtrk->fitTraits();
+    StTrackGeometry* geom = globtrk->geometry();
+    StDcaGeometry* dcageom = ((StGlobalTrack*) globtrk)->dcaGeometry();
+    StTrackFitTraits& fTraits = globtrk->fitTraits();
 
-      n_glob_good++;
-      cnttrkg++;
-      Float_t pT = -999.;
-      pT = geom->momentum().perp();
-      if (pT <= 1.e-10) continue;
-      Float_t lmevpt = TMath::Log10(1e-30+pT*1000.0);
-      Float_t theta = TMath::ASin(1.) - geom->dipAngle();
-      Float_t thetad = theta/degree;
-      Float_t eta = geom->momentum().pseudoRapidity();
-      Float_t gmom = abs(geom->momentum());
-      Float_t lmevmom = TMath::Log10(1e-30+gmom*1000.0);
-      Float_t chisq0 = fTraits.chi2(0);
-      Float_t chisq1 = fTraits.chi2(1);
-      Float_t nfitnmax = (Float_t(fTraits.numberOfFitPoints())) /
-	(Float_t(globtrk->numberOfPossiblePoints())+1.e-10);
-      const StThreeVectorF& firstPoint = detInfo->firstPoint();
-      const StThreeVectorF& lastPoint = detInfo->lastPoint();
-      const StThreeVectorF& origin = geom->origin();
-      Float_t psi = geom->psi()/degree;
-      if (psi<0) psi+=360;
-      Float_t orphi = origin.phi()/degree;
-      if (orphi<0) orphi+=360;
-      Float_t fphi = firstPoint.phi()/degree;
-      if (fphi<0) fphi+=360;
-      StPhysicalHelixD hx = geom->helix();
-      StPhysicalHelixD dcahx = (dcageom ? dcageom->helix() : hx);
-      // get the helix position closest to the first point on track
-      double sFirst = hx.pathLength(firstPoint);
-      // get the helix position closest to the last point on track
-      double sLast = hx.pathLength(lastPoint);
-      
-      StThreeVectorF dif = firstPoint - hx.at(sFirst);
-      StThreeVectorF difl = lastPoint - hx.at(sLast);
-      Float_t xcenter = hx.xcenter();
-      Float_t ycenter = hx.ycenter();
-      Float_t rcircle = 1./hx.curvature();
-      Float_t centerOfCircleToFP = ::sqrt(::pow(xcenter-firstPoint.x(),2) +
-					  ::pow(ycenter-firstPoint.y(),2));
-      Float_t centerOfCircleToLP = ::sqrt(::pow(xcenter-lastPoint.x(),2) +
-					  ::pow(ycenter-lastPoint.y(),2));
-      Float_t azimdif = dif.perp();
-      if (rcircle<centerOfCircleToFP) azimdif *= -1.;
-      Float_t azimdifl = difl.perp();
-      if (rcircle<centerOfCircleToLP) azimdifl *= -1.;
-      Float_t radf = firstPoint.perp();
-      
-      Float_t logImpact = TMath::Log10(1e-30+globtrk->impactParameter());
+    n_glob_good++;
+    cnttrkg++;
+    Float_t pT = -999.;
+    pT = geom->momentum().perp();
+    if (pT <= 1.e-10) continue;
+    Float_t lmevpt = TMath::Log10(1e-30+pT*1000.0);
+    Float_t theta = TMath::ASin(1.) - geom->dipAngle();
+    Float_t thetad = theta/degree;
+    Float_t eta = geom->momentum().pseudoRapidity();
+    Float_t gmom = abs(geom->momentum());
+    Float_t lmevmom = TMath::Log10(1e-30+gmom*1000.0);
+    Float_t chisq0 = fTraits.chi2(0);
+    Float_t chisq1 = fTraits.chi2(1);
+    Float_t nfitnmax = (Float_t(fTraits.numberOfFitPoints())) /
+      (Float_t(globtrk->numberOfPossiblePoints())+1.e-10);
+    const StThreeVectorF& firstPoint = detInfo->firstPoint();
+    const StThreeVectorF& lastPoint = detInfo->lastPoint();
+    const StThreeVectorF& origin = geom->origin();
+    Float_t psi = geom->psi()/degree;
+    if (psi<0) psi+=360;
+    Float_t orphi = origin.phi()/degree;
+    if (orphi<0) orphi+=360;
+    Float_t fphi = firstPoint.phi()/degree;
+    if (fphi<0) fphi+=360;
+    StPhysicalHelixD hx = geom->helix();
+    StPhysicalHelixD dcahx = (dcageom ? dcageom->helix() : hx);
+    // get the helix position closest to the first point on track
+    double sFirst = hx.pathLength(firstPoint);
+    // get the helix position closest to the last point on track
+    double sLast = hx.pathLength(lastPoint);
+    
+    StThreeVectorF dif = firstPoint - hx.at(sFirst);
+    StThreeVectorF difl = lastPoint - hx.at(sLast);
+    Float_t xcenter = hx.xcenter();
+    Float_t ycenter = hx.ycenter();
+    Float_t rcircle = 1./hx.curvature();
+    Float_t centerOfCircleToFP = ::sqrt(::pow(xcenter-firstPoint.x(),2) +
+      				  ::pow(ycenter-firstPoint.y(),2));
+    Float_t centerOfCircleToLP = ::sqrt(::pow(xcenter-lastPoint.x(),2) +
+      				  ::pow(ycenter-lastPoint.y(),2));
+    Float_t azimdif = dif.perp();
+    if (rcircle<centerOfCircleToFP) azimdif *= -1.;
+    Float_t azimdifl = difl.perp();
+    if (rcircle<centerOfCircleToLP) azimdifl *= -1.;
+    Float_t radf = firstPoint.perp();
+    
+    Float_t logImpact = TMath::Log10(1e-30+globtrk->impactParameter());
 
-      Float_t sImpact = (primVtx ? dcahx.geometricSignedDistance(pvert.x(),pvert.y()) : -999);
-      Float_t logCurvature = TMath::Log10(1e-30+geom->curvature());
+    Float_t sImpact = (primVtx ? dcahx.geometricSignedDistance(pvert.x(),pvert.y()) : -999);
+    Float_t logCurvature = TMath::Log10(1e-30+geom->curvature());
+    
+    // pathLength(double x,double y) should return path length at
+    // DCA in the xy-plane to a given point
+    double S = dcahx.pathLength(0,0);
+    StThreeVectorD dcaToBeam = dcahx.at(S);
+    
+    // from Lanny on 2 Jul 1999 9:56:03
+    //1. x0,y0,z0 are coordinates on the helix at the starting point, which
+    //   should be close to the first TPC hit position assigned to the track.
+    //   The latter, different quantity is in x_first[3].
+    
+    // from Helen on 14 Jul 1999 - she now fills chisq0,1 with chisq/dof
+    // so it doesn't need to be calculated here 
+    
+    // check if the track has hits in a detector -CPL
+    for (int detId=0; detId<kMaxDetectorId; detId++)
+      if (map.hasHitInDetector(static_cast<StDetectorId>(detId)))
+        hists->m_det_id->Fill(detId);
+    
+    // these histogram additions are for Lanny's evr QA histograms
+    hists->m_dcaToBeamXY->Fill(dcaToBeam.x(),dcaToBeam.y());
+    hists->m_dcaToBeamZ1->Fill(dcaToBeam.z());
+    hists->m_dcaToBeamZ2->Fill(dcaToBeam.z());
+    hists->m_dcaToBeamZ3->Fill(dcaToBeam.z());
+    if (map.trackTpcOnly()) {
+      hists->m_zDcaTanl->Fill(dcaToBeam.z(),TMath::Tan(geom->dipAngle()));
+      hists->m_zDcaZf->Fill(dcaToBeam.z(),firstPoint.z());
+    }
+    if (map.trackTpcSvt())
+      hists->m_zDcaTanl->Fill(dcaToBeam.z(),TMath::Tan(geom->dipAngle()));
+    if (map.trackTpcSvt() && radf>40)
+      hists->m_zDcaZf->Fill(dcaToBeam.z(),firstPoint.z());
+    hists->m_zDcaPsi->Fill(dcaToBeam.z(),psi);
+    hists->m_zDcaPhi0->Fill(dcaToBeam.z(),orphi);
+    
+    // calculate the probability of a fit being correct
+    // number of degrees of freedom = fitpoints-5 (5 params constrain track)
+    Double_t ndf = 2*fTraits.numberOfFitPoints()-5;
+    Double_t probability = TMath::Prob(chisq0*ndf,(int) ndf);
+    hists->m_globtrk_fit_prob->Fill(probability);
+    
+    // now fill all TPC histograms ------------------------------------------------
+    if (map.trackTpcOnly()) {
       
-      // pathLength(double x,double y) should return path length at
-      // DCA in the xy-plane to a given point
-      double S = dcahx.pathLength(0,0);
-      StThreeVectorD dcaToBeam = dcahx.at(S);
+      cnttrkgT++;
+      cnttrkgTTS++;
+      // these are TPC only
+      // m_glb_f0 uses hist class StMultiH1F
+      hists->m_glb_f0->Fill(dif.x(),0.);
+      hists->m_glb_f0->Fill(dif.y(),1.);
+      hists->m_glb_f0->Fill(dif.z(),2.);
       
-      // from Lanny on 2 Jul 1999 9:56:03
-      //1. x0,y0,z0 are coordinates on the helix at the starting point, which
-      //   should be close to the first TPC hit position assigned to the track.
-      //   The latter, different quantity is in x_first[3].
-      
-      // from Helen on 14 Jul 1999 - she now fills chisq0,1 with chisq/dof
-      // so it doesn't need to be calculated here 
-      
-      // check if the track has hits in a detector -CPL
-      for (int detId=0; detId<kMaxDetectorId; detId++)
-        if (map.hasHitInDetector(static_cast<StDetectorId>(detId)))
-          hists->m_det_id->Fill(detId);
-      
-      // these histogram additions are for Lanny's evr QA histograms
-      hists->m_dcaToBeamXY->Fill(dcaToBeam.x(),dcaToBeam.y());
-      hists->m_dcaToBeamZ1->Fill(dcaToBeam.z());
-      hists->m_dcaToBeamZ2->Fill(dcaToBeam.z());
-      hists->m_dcaToBeamZ3->Fill(dcaToBeam.z());
-      if (map.trackTpcOnly()) {
-	hists->m_zDcaTanl->Fill(dcaToBeam.z(),TMath::Tan(geom->dipAngle()));
-	hists->m_zDcaZf->Fill(dcaToBeam.z(),firstPoint.z());
+      hists->m_glb_xf0->Fill(dif.x());
+      hists->m_glb_yf0->Fill(dif.y());
+      hists->m_glb_zf0->Fill(dif.z());
+      hists->m_glb_rzf0->Fill(azimdif,0.);
+      hists->m_glb_rzf0->Fill(dif.z(),1.);
+      hists->m_glb_rzl0->Fill(azimdifl,0.);
+      hists->m_glb_rzl0->Fill(difl.z(),1.);
+
+      if (TMath::Abs(dcaToBeam.z()-pvert.z())<6) {
+      // Fill impact parameters only for tracks near vtx in z
+      //   to reduce pile-up contributions
+
+      hists->m_glb_impactT->Fill(logImpact,2.);
+      hists->m_glb_simpactT->Fill(sImpact,2.);
+      if ((firstPoint.z() < 0) && (lastPoint.z() < 0)) { // east-only
+        hists->m_glb_impactT->Fill(logImpact,0.);
+        hists->m_glb_simpactT->Fill(sImpact,0.);
       }
-      if (map.trackTpcSvt())
-	hists->m_zDcaTanl->Fill(dcaToBeam.z(),TMath::Tan(geom->dipAngle()));
-      if (map.trackTpcSvt() && radf>40)
-	hists->m_zDcaZf->Fill(dcaToBeam.z(),firstPoint.z());
-      hists->m_zDcaPsi->Fill(dcaToBeam.z(),psi);
-      hists->m_zDcaPhi0->Fill(dcaToBeam.z(),orphi);
+      if ((firstPoint.z() > 0) && (lastPoint.z() > 0)) { // west-only
+        hists->m_glb_impactT->Fill(logImpact,1.);
+        hists->m_glb_simpactT->Fill(sImpact,1.);
+      }
+      hists->m_glb_impactrT->Fill(globtrk->impactParameter());
+      if (silHists) {
+      hists->m_glb_impactTTS->Fill(logImpact,1.);
+      hists->m_glb_impactrTTS->Fill(globtrk->impactParameter(),1.);
+      }
+
+      } // vtx z cut for impact parameter
       
-      // calculate the probability of a fit being correct
-      // number of degrees of freedom = fitpoints-5 (5 params constrain track)
-      Double_t ndf = 2*fTraits.numberOfFitPoints()-5;
-      Double_t probability = TMath::Prob(chisq0*ndf,(int) ndf);
-      hists->m_globtrk_fit_prob->Fill(probability);
+      // TPC padrow histogram
+      Int_t minpadrow = 0;
+      while (minpadrow < 72) {
+        minpadrow++;
+        if ((minpadrow <= 45 && map.hasHitInRow(kTpcId,minpadrow)) ||
+            map.hasHitInRow(kiTpcId,minpadrow))
+          break;
+      }
+      hists->m_glb_padfT->Fill(minpadrow);
       
-      // now fill all TPC histograms ------------------------------------------------
-      if (map.trackTpcOnly()) {
-	
-	cnttrkgT++;
-	cnttrkgTTS++;
-	// these are TPC only
-	// m_glb_f0 uses hist class StMultiH1F
-        hists->m_glb_f0->Fill(dif.x(),0.);
-        hists->m_glb_f0->Fill(dif.y(),1.);
-        hists->m_glb_f0->Fill(dif.z(),2.);
-	
-        hists->m_glb_xf0->Fill(dif.x());
-        hists->m_glb_yf0->Fill(dif.y());
-        hists->m_glb_zf0->Fill(dif.z());
-	hists->m_glb_rzf0->Fill(azimdif,0.);
-        hists->m_glb_rzf0->Fill(dif.z(),1.);
-	hists->m_glb_rzl0->Fill(azimdifl,0.);
-        hists->m_glb_rzl0->Fill(difl.z(),1.);
-
-        if (TMath::Abs(dcaToBeam.z()-pvert.z())<6) {
-        // Fill impact parameters only for tracks near vtx in z
-        //   to reduce pile-up contributions
-
-        hists->m_glb_impactT->Fill(logImpact,2.);
-        hists->m_glb_simpactT->Fill(sImpact,2.);
-        if ((firstPoint.z() < 0) && (lastPoint.z() < 0)) { // east-only
-          hists->m_glb_impactT->Fill(logImpact,0.);
-          hists->m_glb_simpactT->Fill(sImpact,0.);
-        }
-        if ((firstPoint.z() > 0) && (lastPoint.z() > 0)) { // west-only
-          hists->m_glb_impactT->Fill(logImpact,1.);
-          hists->m_glb_simpactT->Fill(sImpact,1.);
-        }
-        hists->m_glb_impactrT->Fill(globtrk->impactParameter());
-        if (silHists) {
-        hists->m_glb_impactTTS->Fill(logImpact,1.);
-        hists->m_glb_impactrTTS->Fill(globtrk->impactParameter(),1.);
-        }
-
-        } // vtx z cut for impact parameter
-	
-	// TPC padrow histogram
-	Int_t minpadrow = 0;
-	while (minpadrow < 72) {
-          minpadrow++;
-          if ((minpadrow <= 45 && map.hasHitInRow(kTpcId,minpadrow)) ||
-              map.hasHitInRow(kiTpcId,minpadrow))
-            break;
-        }
-        hists->m_glb_padfT->Fill(minpadrow);
-	
-        hists->m_pointT->Fill(detInfo->numberOfReferencedPoints());
-        hists->m_max_pointT->Fill(globtrk->numberOfPossiblePoints());
-        hists->m_fit_pointT->Fill(fTraits.numberOfFitPoints());
-        if (silHists)
-        hists->m_fit_pointTTS->Fill(fTraits.numberOfFitPoints(),1.);
-        hists->m_glb_chargeT->Fill(geom->charge());
-	
-        hists->m_glb_r0T->Fill(origin.perp());
-        hists->m_glb_phi0T->Fill(orphi);
-	
-	if (firstPoint.z() < 0) {
-	  hists->m_glb_padfTEW->Fill(minpadrow,0.);
-	  hists->m_glb_phifT->Fill(fphi,0.);
-	}
-	else if (firstPoint.z() > 0) {
-	  hists->m_glb_padfTEW->Fill(minpadrow,1.);
-	  hists->m_glb_phifT->Fill(fphi,1.);
-	}
-	
-        hists->m_glb_z0T->Fill(origin.z());
-        hists->m_glb_curvT->Fill(logCurvature);
-	
-        hists->m_glb_xfT->Fill(firstPoint.x());
-        hists->m_glb_yfT->Fill(firstPoint.y());
-        hists->m_glb_zfT->Fill(firstPoint.z());
-        hists->m_glb_radfT->Fill(radf);
-        hists->m_glb_ratiomT->Fill(nfitnmax);
-        if (silHists)
-        hists->m_glb_ratiomTTS->Fill(nfitnmax,1.);
-        hists->m_psiT->Fill(psi);
-        if (silHists)
-        hists->m_psiTTS->Fill(psi,1.);
-        hists->m_tanlT->Fill(TMath::Tan(geom->dipAngle()));
-        hists->m_glb_thetaT->Fill(thetad);
-        hists->m_etaT->Fill(eta);
-        if (silHists)
-        hists->m_etaTTS->Fill(eta,1.);
-        hists->m_pTT->Fill(pT);
-        if (silHists)
-        hists->m_pTTTS->Fill(lmevpt,1.);
-        hists->m_momT->Fill(gmom);
-        hists->m_lengthT->Fill(globtrk->length());
-        hists->m_chisq0T->Fill(chisq0);
-        if (silHists)
-        hists->m_chisq0TTS->Fill(chisq0,1.);
-	
-	if (firstPoint.z()<0)
-	  hists->m_globtrk_xf_yfTE->Fill(firstPoint.x(),
-					 firstPoint.y());
-	else
-	  hists->m_globtrk_xf_yfTW->Fill(firstPoint.x(),
-					 firstPoint.y());
-        hists->m_eta_trklengthT->Fill(eta,globtrk->length());
-        hists->m_npoint_lengthT->Fill(globtrk->length(),
-				      Float_t(detInfo->numberOfPoints()));
-        hists->m_fpoint_lengthT->Fill(globtrk->length(),
-				      Float_t(fTraits.numberOfFitPoints()));
-        if (silHists)
-        hists->m_fpoint_lengthTTS->Fill(globtrk->length(),
-					Float_t(fTraits.numberOfFitPoints()));
-	
-        hists->m_pT_eta_recT->Fill(eta,lmevpt);
-	if (primVtx && fabs(rcircle)>0.) {
-          double qwe = ::pow(firstPoint.x()-pvert.x(),2)
-	  + ::pow(firstPoint.y()-pvert.y(),2);
-          qwe = ::sqrt(qwe)/(2*rcircle);
-	  if (qwe>0.9999) qwe = 0.999;
-	  Float_t denom = 2*rcircle*(::asin(qwe));
-	  if (denom>0)hists->m_tanl_zfT->Fill((firstPoint.z()-pvert.z())/denom,
-				  Float_t(TMath::Tan(geom->dipAngle())));
-	}
-        hists->m_mom_trklengthT->Fill(globtrk->length(),lmevmom);
-        hists->m_chisq0_momT->Fill(lmevmom,chisq0);
-        hists->m_chisq0_etaT->Fill(eta,chisq0);
-        hists->m_chisq0_dipT->Fill(TMath::Tan(geom->dipAngle()),chisq0);
-        hists->m_chisq0_zfT->Fill(firstPoint.z(),chisq0);
-	hists->m_chisq0_phiT->Fill(orphi,chisq0);
-        hists->m_psi_phiT->Fill(orphi,psi);
+      hists->m_pointT->Fill(detInfo->numberOfPoints());
+      hists->m_max_pointT->Fill(globtrk->numberOfPossiblePoints());
+      hists->m_fit_pointT->Fill(fTraits.numberOfFitPoints());
+      if (silHists)
+      hists->m_fit_pointTTS->Fill(fTraits.numberOfFitPoints(),1.);
+      hists->m_glb_chargeT->Fill(geom->charge());
+      
+      hists->m_glb_r0T->Fill(origin.perp());
+      hists->m_glb_phi0T->Fill(orphi);
+      
+      if (firstPoint.z() < 0) {
+        hists->m_glb_padfTEW->Fill(minpadrow,0.);
+        hists->m_glb_phifT->Fill(fphi,0.);
+      }
+      else if (firstPoint.z() > 0) {
+        hists->m_glb_padfTEW->Fill(minpadrow,1.);
+        hists->m_glb_phifT->Fill(fphi,1.);
       }
       
-      // now fill all TPC+(SVT or SSD) histograms ------------------------------
+      hists->m_glb_z0T->Fill(origin.z());
+      hists->m_glb_curvT->Fill(logCurvature);
       
-      else if (silHists && (map.hasHitInDetector(kSvtId) || map.hasHitInDetector(kSsdId))) {
+      hists->m_glb_xfT->Fill(firstPoint.x());
+      hists->m_glb_yfT->Fill(firstPoint.y());
+      hists->m_glb_zfT->Fill(firstPoint.z());
+      hists->m_glb_radfT->Fill(radf);
+      hists->m_glb_ratiomT->Fill(nfitnmax);
+      if (silHists)
+      hists->m_glb_ratiomTTS->Fill(nfitnmax,1.);
+      hists->m_psiT->Fill(psi);
+      if (silHists)
+      hists->m_psiTTS->Fill(psi,1.);
+      hists->m_tanlT->Fill(TMath::Tan(geom->dipAngle()));
+      hists->m_glb_thetaT->Fill(thetad);
+      hists->m_etaT->Fill(eta);
+      if (silHists)
+      hists->m_etaTTS->Fill(eta,1.);
+      hists->m_pTT->Fill(pT);
+      if (silHists)
+      hists->m_pTTTS->Fill(lmevpt,1.);
+      hists->m_momT->Fill(gmom);
+      hists->m_lengthT->Fill(globtrk->length());
+      hists->m_chisq0T->Fill(chisq0);
+      if (silHists)
+      hists->m_chisq0TTS->Fill(chisq0,1.);
+      
+      if (firstPoint.z()<0)
+        hists->m_globtrk_xf_yfTE->Fill(firstPoint.x(),
+      				 firstPoint.y());
+      else
+        hists->m_globtrk_xf_yfTW->Fill(firstPoint.x(),
+      				 firstPoint.y());
+      hists->m_eta_trklengthT->Fill(eta,globtrk->length());
+      hists->m_npoint_lengthT->Fill(globtrk->length(),
+      			      Float_t(detInfo->numberOfPoints()));
+      hists->m_fpoint_lengthT->Fill(globtrk->length(),
+      			      Float_t(fTraits.numberOfFitPoints()));
+      if (silHists)
+      hists->m_fpoint_lengthTTS->Fill(globtrk->length(),
+      				Float_t(fTraits.numberOfFitPoints()));
+      
+      hists->m_pT_eta_recT->Fill(eta,lmevpt);
+      if (primVtx && fabs(rcircle)>0.) {
+        double qwe = ::pow(firstPoint.x()-pvert.x(),2)
+        + ::pow(firstPoint.y()-pvert.y(),2);
+        qwe = ::sqrt(qwe)/(2*rcircle);
+        if (qwe>0.9999) qwe = 0.999;
+        Float_t denom = 2*rcircle*(::asin(qwe));
+        if (denom>0)hists->m_tanl_zfT->Fill((firstPoint.z()-pvert.z())/denom,
+      			  Float_t(TMath::Tan(geom->dipAngle())));
+      }
+      hists->m_mom_trklengthT->Fill(globtrk->length(),lmevmom);
+      hists->m_chisq0_momT->Fill(lmevmom,chisq0);
+      hists->m_chisq0_etaT->Fill(eta,chisq0);
+      hists->m_chisq0_dipT->Fill(TMath::Tan(geom->dipAngle()),chisq0);
+      hists->m_chisq0_zfT->Fill(firstPoint.z(),chisq0);
+      hists->m_chisq0_phiT->Fill(orphi,chisq0);
+      hists->m_psi_phiT->Fill(orphi,psi);
+    }
+    
+    // now fill all TPC+(SVT or SSD) histograms ------------------------------
+    
+    else if (silHists && (map.hasHitInDetector(kSvtId) || map.hasHitInDetector(kSsdId))) {
 
-        if (map.hasHitInDetector(kSsdId)) {
-          if (primVtx && TMath::Abs(pvert.z())<10 && TMath::Abs(eta)<1 && 
-              map.numberOfHits(kTpcId)>15) {
-            StPtrVecHit ssd_hits = detInfo->hits(kSsdId);
-	    if (ssd_hits.size()) {
-	      Float_t sphi = ssd_hits[0]->position().phi()/degree;
-	      if (sphi<0) sphi+=360.;
-	      hists->m_glb_ssd_phi->Fill(sphi);
-	    }
+      if (map.hasHitInDetector(kSsdId)) {
+        if (primVtx && TMath::Abs(pvert.z())<10 && TMath::Abs(eta)<1 && 
+            map.numberOfHits(kTpcId)>15) {
+          StPtrVecHit ssd_hits = detInfo->hits(kSsdId);
+          if (ssd_hits.size()) {
+            Float_t sphi = ssd_hits[0]->position().phi()/degree;
+            if (sphi<0) sphi+=360.;
+            hists->m_glb_ssd_phi->Fill(sphi);
           }
-        } // SSD Requirement
+        }
+      } // SSD Requirement
 
-        if (map.trackTpcSvt()) {
-        // now fill all TPC+SVT histograms -------------------------------------
-	
-	cnttrkgTS++;
-	cnttrkgTTS++;
-	
-        hists->m_glb_sptsTS->Fill(map.numberOfHits(kSvtId));
-	
-        hists->m_glb_f0TS->Fill(dif.x(),0.);
-        hists->m_glb_f0TS->Fill(dif.y(),1.);
-        hists->m_glb_f0TS->Fill(dif.z(),2.);
-	
-        hists->m_glb_xf0TS->Fill(dif.x());
-        hists->m_glb_yf0TS->Fill(dif.y());
-        hists->m_glb_zf0TS->Fill(dif.z());
-	hists->m_glb_rzf0TS->Fill(azimdif,0.);
-        hists->m_glb_rzf0TS->Fill(dif.z(),1.);
-	hists->m_glb_rzl0TS->Fill(azimdifl,0.);
-        hists->m_glb_rzl0TS->Fill(difl.z(),1.);
-        hists->m_glb_impactTS->Fill(logImpact,2.);
-        hists->m_glb_simpactTS->Fill(sImpact,2.);
-        if ((firstPoint.z() < 0) && (lastPoint.z() < 0)) { // east-only
-          hists->m_glb_impactTS->Fill(logImpact,0.);
-          hists->m_glb_simpactTS->Fill(sImpact,0.);
-        }
-        if ((firstPoint.z() > 0) && (lastPoint.z() > 0)) { // west-only
-          hists->m_glb_impactTS->Fill(logImpact,1.);
-          hists->m_glb_simpactTS->Fill(sImpact,1.);
-        }
-        hists->m_glb_impactrTS->Fill(globtrk->impactParameter());
-        hists->m_glb_impactTTS->Fill(logImpact,0.);
-        hists->m_glb_impactrTTS->Fill(globtrk->impactParameter(),0.);
-	
-        hists->m_pointTS->Fill(detInfo->numberOfPoints());
-        hists->m_max_pointTS->Fill(globtrk->numberOfPossiblePoints());
-        hists->m_fit_pointTS->Fill(fTraits.numberOfFitPoints());
-        hists->m_fit_pointTTS->Fill(fTraits.numberOfFitPoints(),0.);
-        hists->m_glb_chargeTS->Fill(geom->charge());
-	
-        hists->m_glb_r0TS->Fill(origin.perp());
-	hists->m_glb_phi0TS->Fill(orphi);
-        hists->m_glb_z0TS->Fill(origin.z());
-        hists->m_glb_curvTS->Fill(logCurvature);
-	
-        hists->m_glb_xfTS->Fill(firstPoint.x());
-        hists->m_glb_yfTS->Fill(firstPoint.y());
-        if (radf<40) {
-	  hists->m_glb_zfTS->Fill(firstPoint.z());
-	  hists->m_glb_phifTS->Fill(fphi);
-	}
-	
-        hists->m_glb_radfTS->Fill(radf);
-        hists->m_glb_ratiomTS->Fill(nfitnmax);
-        hists->m_glb_ratiomTTS->Fill(nfitnmax,0.);
-        hists->m_psiTS->Fill(psi);
-        hists->m_psiTTS->Fill(psi,0.);
-        hists->m_tanlTS->Fill(TMath::Tan(geom->dipAngle()));
-        hists->m_glb_thetaTS->Fill(thetad);
-        hists->m_etaTS->Fill(eta);
-        hists->m_etaTTS->Fill(eta,0.);
-        hists->m_pTTS->Fill(pT);
-        hists->m_pTTTS->Fill(lmevpt,0.);
-        hists->m_momTS->Fill(gmom);
-        hists->m_lengthTS->Fill(globtrk->length());
-        hists->m_chisq0TS->Fill(chisq0);
-        hists->m_chisq0TTS->Fill(chisq0,0.);
-        hists->m_globtrk_xf_yfTS->Fill(firstPoint.x(),
-				       firstPoint.y());
-        hists->m_eta_trklengthTS->Fill(eta,globtrk->length());
-        hists->m_npoint_lengthTS->Fill(globtrk->length(),
-				       Float_t(detInfo->numberOfPoints()));
-        hists->m_fpoint_lengthTS->Fill(globtrk->length(),
-				       Float_t(fTraits.numberOfFitPoints()));
-        hists->m_fpoint_lengthTTS->Fill(globtrk->length(),
-					Float_t(fTraits.numberOfFitPoints()));
-	
-        hists->m_pT_eta_recTS->Fill(eta,lmevpt);
-	if (primVtx) {
-          double qwe = ::pow(firstPoint.x()-pvert.x(),2)
-	  + ::pow(firstPoint.y()-pvert.y(),2);
-          qwe = ::sqrt(qwe)/(2*rcircle);
-	  if (qwe>0.9999) qwe = 0.999;
-	  Float_t denom = 2*rcircle*(::asin(qwe));
-	  if (radf>40 && denom>0) {
-	    hists->m_tanl_zfT->Fill((firstPoint.z()-pvert.z())/denom,
-				    Float_t(TMath::Tan(geom->dipAngle())));
-	  }
-	  if (radf<40 && denom>0) {
-	    hists->m_tanl_zfTS->Fill((firstPoint.z()-pvert.z())/denom,
-				     Float_t(TMath::Tan(geom->dipAngle())));
-	  }
-	}
-        hists->m_mom_trklengthTS->Fill(globtrk->length(),lmevmom);
-        hists->m_chisq0_momTS->Fill(lmevmom,chisq0);
-        hists->m_chisq0_etaTS->Fill(eta,chisq0);
-        hists->m_chisq0_dipTS->Fill(TMath::Tan(geom->dipAngle()),chisq0);
-        hists->m_chisq0_zfTS->Fill(firstPoint.z(),chisq0);
-	hists->m_chisq0_phiTS->Fill(orphi,chisq0);
-	
-        hists->m_psi_phiTS->Fill(orphi,psi);
-      } // SVT requirement
-      } // SVT || SSD requirement
+      if (map.trackTpcSvt()) {
+      // now fill all TPC+SVT histograms -------------------------------------
       
-      // now fill all FTPC East histograms ------------------------------------------
-      else if (ftpHists && map.trackFtpcEast()) {
-	
-	cnttrkgFE++;
-	
-	// east and west in same histogram
-        hists->m_pointF->Fill(detInfo->numberOfPoints(),0.);
-        hists->m_max_pointF->Fill(globtrk->numberOfPossiblePoints(),0.);
-        hists->m_glb_chargeF->Fill(geom->charge(),0.);
-        hists->m_glb_xfF->Fill(firstPoint.x(),0.);
-        hists->m_glb_yfF->Fill(firstPoint.y(),0.);
-        hists->m_glb_zfF->Fill(firstPoint.z(),0.);
-        hists->m_glb_radfF->Fill(radf,0.);
-        hists->m_glb_ratiomF->Fill(nfitnmax,0.);
-        hists->m_psiF->Fill(psi,0.);
-        hists->m_etaF->Fill(fabs(eta),0.);
-        hists->m_pTF->Fill(pT,0.);
-        hists->m_momF->Fill(gmom,0.);
-        hists->m_lengthF->Fill(globtrk->length(),0.);
-        hists->m_chisq0F->Fill(chisq0,0.);
-        hists->m_chisq1F->Fill(chisq1,0.);
-        hists->m_glb_impactF->Fill(logImpact,0.);
-        hists->m_glb_impactrF->Fill(globtrk->impactParameter(),0.);
-	
-	if (fabs(firstPoint.z()-ftpcPadrowZPos[10])<=1)
-	  hists->m_glb_planefF->Fill(11,0.);
-	if (fabs(firstPoint.z()-ftpcPadrowZPos[11])<=1)
-	  hists->m_glb_planefF->Fill(12,0.);
-	if (fabs(firstPoint.z()-ftpcPadrowZPos[12])<=1)
-	  hists->m_glb_planefF->Fill(13,0.);
-	if (fabs(firstPoint.z()-ftpcPadrowZPos[13])<=1)
-	  hists->m_glb_planefF->Fill(14,0.);
-	if (fabs(firstPoint.z()-ftpcPadrowZPos[14])<=1)
-	  hists->m_glb_planefF->Fill(15,0.);
-	if (fabs(firstPoint.z()-ftpcPadrowZPos[15])<=1)
-	  hists->m_glb_planefF->Fill(16,0.);
-	if (fabs(firstPoint.z()-ftpcPadrowZPos[16])<=1)
-	  hists->m_glb_planefF->Fill(17,0.);
-	if (fabs(firstPoint.z()-ftpcPadrowZPos[17])<=1)
-	  hists->m_glb_planefF->Fill(18,0.);
-	if (fabs(firstPoint.z()-ftpcPadrowZPos[18])<=1)
-	  hists->m_glb_planefF->Fill(19,0.);
-	if (fabs(firstPoint.z()-ftpcPadrowZPos[19])<=1)
-	  hists->m_glb_planefF->Fill(20,0.);
-	
-	// east and west in separate histograms
-        hists->m_pointFE->Fill(detInfo->numberOfPoints());
-        hists->m_max_pointFE->Fill(globtrk->numberOfPossiblePoints());
-        hists->m_glb_chargeFE->Fill(geom->charge());
-        hists->m_glb_xfFE->Fill(firstPoint.x());
-        hists->m_glb_yfFE->Fill(firstPoint.y());
-        hists->m_glb_zfFE->Fill(firstPoint.z());
-        hists->m_glb_radfFE->Fill(radf);
-        hists->m_glb_ratiomFE->Fill(nfitnmax);
-        hists->m_psiFE->Fill(psi);
-        hists->m_etaFE->Fill(eta);
-        hists->m_pTFE->Fill(pT);
-        hists->m_momFE->Fill(gmom);
-        hists->m_lengthFE->Fill(globtrk->length());
-        hists->m_chisq0FE->Fill(chisq0);
-        hists->m_chisq1FE->Fill(chisq1);
-	
-        hists->m_pT_eta_recFE->Fill(eta,lmevpt);
-        hists->m_globtrk_xf_yfFE->Fill(firstPoint.x(),
-				       firstPoint.y());
-        hists->m_eta_trklengthFE->Fill(eta,globtrk->length());
-        hists->m_npoint_lengthFE->Fill(globtrk->length(),
-				       Float_t(detInfo->numberOfPoints()));
+      cnttrkgTS++;
+      cnttrkgTTS++;
+      
+      hists->m_glb_sptsTS->Fill(map.numberOfHits(kSvtId));
+      
+      hists->m_glb_f0TS->Fill(dif.x(),0.);
+      hists->m_glb_f0TS->Fill(dif.y(),1.);
+      hists->m_glb_f0TS->Fill(dif.z(),2.);
+      
+      hists->m_glb_xf0TS->Fill(dif.x());
+      hists->m_glb_yf0TS->Fill(dif.y());
+      hists->m_glb_zf0TS->Fill(dif.z());
+      hists->m_glb_rzf0TS->Fill(azimdif,0.);
+      hists->m_glb_rzf0TS->Fill(dif.z(),1.);
+      hists->m_glb_rzl0TS->Fill(azimdifl,0.);
+      hists->m_glb_rzl0TS->Fill(difl.z(),1.);
+      hists->m_glb_impactTS->Fill(logImpact,2.);
+      hists->m_glb_simpactTS->Fill(sImpact,2.);
+      if ((firstPoint.z() < 0) && (lastPoint.z() < 0)) { // east-only
+        hists->m_glb_impactTS->Fill(logImpact,0.);
+        hists->m_glb_simpactTS->Fill(sImpact,0.);
       }
-      // now fill all FTPC West histograms ------------------------------------------
-      else if (ftpHists && map.trackFtpcWest()) {
-	
-	cnttrkgFW++;
-	
-	// east and west in same histogram
-        hists->m_pointF->Fill(detInfo->numberOfPoints(),1.);
-        hists->m_max_pointF->Fill(globtrk->numberOfPossiblePoints(),1.);
-        hists->m_glb_chargeF->Fill(geom->charge(),1.);
-        hists->m_glb_xfF->Fill(firstPoint.x(),1.);
-        hists->m_glb_yfF->Fill(firstPoint.y(),1.);
-        hists->m_glb_zfF->Fill(firstPoint.z(),1.);
-        hists->m_glb_radfF->Fill(radf,1.);
-        hists->m_glb_ratiomF->Fill(nfitnmax,1.);
-        hists->m_psiF->Fill(psi,1.);
-        hists->m_etaF->Fill(fabs(eta),1.);
-        hists->m_pTF->Fill(pT,1.);
-        hists->m_momF->Fill(gmom,1.);
-        hists->m_lengthF->Fill(globtrk->length(),1.);
-        hists->m_chisq0F->Fill(chisq0,1.);
-        hists->m_chisq1F->Fill(chisq1,1.);
-        hists->m_glb_impactF->Fill(logImpact,1.);
-        hists->m_glb_impactrF->Fill(globtrk->impactParameter(),1.);
-	
-	if (fabs(firstPoint.z()-ftpcPadrowZPos[0])<=1)
-	  hists->m_glb_planefF->Fill(1,1.);
-	if (fabs(firstPoint.z()-ftpcPadrowZPos[1])<=1)
-	  hists->m_glb_planefF->Fill(2,1.);
-	if (fabs(firstPoint.z()-ftpcPadrowZPos[2])<=1)
-	  hists->m_glb_planefF->Fill(3,1.);
-	if (fabs(firstPoint.z()-ftpcPadrowZPos[3])<=1)
-	  hists->m_glb_planefF->Fill(4,1.);
-	if (fabs(firstPoint.z()-ftpcPadrowZPos[4])<=1)
-	  hists->m_glb_planefF->Fill(5,1.);
-	if (fabs(firstPoint.z()-ftpcPadrowZPos[5])<=1)
-	  hists->m_glb_planefF->Fill(6,1.);
-	if (fabs(firstPoint.z()-ftpcPadrowZPos[6])<=1)
-	  hists->m_glb_planefF->Fill(7,1.);
-	if (fabs(firstPoint.z()-ftpcPadrowZPos[7])<=1)
-	  hists->m_glb_planefF->Fill(8,1.);
-	if (fabs(firstPoint.z()-ftpcPadrowZPos[8])<=1)
-	  hists->m_glb_planefF->Fill(9,1.);
-	if (fabs(firstPoint.z()-ftpcPadrowZPos[9])<=1)
-	  hists->m_glb_planefF->Fill(10,1.);
-	
-	// east and west in separate histograms
-        hists->m_pointFW->Fill(detInfo->numberOfPoints());
-        hists->m_max_pointFW->Fill(globtrk->numberOfPossiblePoints());
-        hists->m_glb_chargeFW->Fill(geom->charge());
-        hists->m_glb_xfFW->Fill(firstPoint.x());
-        hists->m_glb_yfFW->Fill(firstPoint.y());
-        hists->m_glb_zfFW->Fill(firstPoint.z());
-        hists->m_glb_radfFW->Fill(radf);
-        hists->m_glb_ratiomFW->Fill(nfitnmax);
-        hists->m_psiFW->Fill(psi);
-        hists->m_etaFW->Fill(eta);
-        hists->m_pTFW->Fill(pT);
-        hists->m_momFW->Fill(gmom);
-        hists->m_lengthFW->Fill(globtrk->length());
-        hists->m_chisq0FW->Fill(chisq0);
-        hists->m_chisq1FW->Fill(chisq1);
-	
-        hists->m_pT_eta_recFW->Fill(eta,lmevpt);
-        hists->m_globtrk_xf_yfFW->Fill(firstPoint.x(),
-				       firstPoint.y());
-        hists->m_eta_trklengthFW->Fill(eta,globtrk->length());
-        hists->m_npoint_lengthFW->Fill(globtrk->length(),
-				       Float_t(detInfo->numberOfPoints()));
+      if ((firstPoint.z() > 0) && (lastPoint.z() > 0)) { // west-only
+        hists->m_glb_impactTS->Fill(logImpact,1.);
+        hists->m_glb_simpactTS->Fill(sImpact,1.);
       }
+      hists->m_glb_impactrTS->Fill(globtrk->impactParameter());
+      hists->m_glb_impactTTS->Fill(logImpact,0.);
+      hists->m_glb_impactrTTS->Fill(globtrk->impactParameter(),0.);
+      
+      hists->m_pointTS->Fill(detInfo->numberOfPoints());
+      hists->m_max_pointTS->Fill(globtrk->numberOfPossiblePoints());
+      hists->m_fit_pointTS->Fill(fTraits.numberOfFitPoints());
+      hists->m_fit_pointTTS->Fill(fTraits.numberOfFitPoints(),0.);
+      hists->m_glb_chargeTS->Fill(geom->charge());
+      
+      hists->m_glb_r0TS->Fill(origin.perp());
+      hists->m_glb_phi0TS->Fill(orphi);
+      hists->m_glb_z0TS->Fill(origin.z());
+      hists->m_glb_curvTS->Fill(logCurvature);
+      
+      hists->m_glb_xfTS->Fill(firstPoint.x());
+      hists->m_glb_yfTS->Fill(firstPoint.y());
+      if (radf<40) {
+        hists->m_glb_zfTS->Fill(firstPoint.z());
+        hists->m_glb_phifTS->Fill(fphi);
+      }
+      
+      hists->m_glb_radfTS->Fill(radf);
+      hists->m_glb_ratiomTS->Fill(nfitnmax);
+      hists->m_glb_ratiomTTS->Fill(nfitnmax,0.);
+      hists->m_psiTS->Fill(psi);
+      hists->m_psiTTS->Fill(psi,0.);
+      hists->m_tanlTS->Fill(TMath::Tan(geom->dipAngle()));
+      hists->m_glb_thetaTS->Fill(thetad);
+      hists->m_etaTS->Fill(eta);
+      hists->m_etaTTS->Fill(eta,0.);
+      hists->m_pTTS->Fill(pT);
+      hists->m_pTTTS->Fill(lmevpt,0.);
+      hists->m_momTS->Fill(gmom);
+      hists->m_lengthTS->Fill(globtrk->length());
+      hists->m_chisq0TS->Fill(chisq0);
+      hists->m_chisq0TTS->Fill(chisq0,0.);
+      hists->m_globtrk_xf_yfTS->Fill(firstPoint.x(),
+      			       firstPoint.y());
+      hists->m_eta_trklengthTS->Fill(eta,globtrk->length());
+      hists->m_npoint_lengthTS->Fill(globtrk->length(),
+      			       Float_t(detInfo->numberOfPoints()));
+      hists->m_fpoint_lengthTS->Fill(globtrk->length(),
+      			       Float_t(fTraits.numberOfFitPoints()));
+      hists->m_fpoint_lengthTTS->Fill(globtrk->length(),
+      				Float_t(fTraits.numberOfFitPoints()));
+      
+      hists->m_pT_eta_recTS->Fill(eta,lmevpt);
+      if (primVtx) {
+        double qwe = ::pow(firstPoint.x()-pvert.x(),2)
+        + ::pow(firstPoint.y()-pvert.y(),2);
+        qwe = ::sqrt(qwe)/(2*rcircle);
+        if (qwe>0.9999) qwe = 0.999;
+        Float_t denom = 2*rcircle*(::asin(qwe));
+        if (radf>40 && denom>0) {
+          hists->m_tanl_zfT->Fill((firstPoint.z()-pvert.z())/denom,
+      			    Float_t(TMath::Tan(geom->dipAngle())));
+        }
+        if (radf<40 && denom>0) {
+          hists->m_tanl_zfTS->Fill((firstPoint.z()-pvert.z())/denom,
+      			     Float_t(TMath::Tan(geom->dipAngle())));
+        }
+      }
+      hists->m_mom_trklengthTS->Fill(globtrk->length(),lmevmom);
+      hists->m_chisq0_momTS->Fill(lmevmom,chisq0);
+      hists->m_chisq0_etaTS->Fill(eta,chisq0);
+      hists->m_chisq0_dipTS->Fill(TMath::Tan(geom->dipAngle()),chisq0);
+      hists->m_chisq0_zfTS->Fill(firstPoint.z(),chisq0);
+      hists->m_chisq0_phiTS->Fill(orphi,chisq0);
+      
+      hists->m_psi_phiTS->Fill(orphi,psi);
+    } // SVT requirement
+    } // SVT || SSD requirement
+    
+    // now fill all FTPC East histograms ------------------------------------------
+    else if (ftpHists && map.trackFtpcEast()) {
+      
+      cnttrkgFE++;
+      
+      // east and west in same histogram
+      hists->m_pointF->Fill(detInfo->numberOfPoints(),0.);
+      hists->m_max_pointF->Fill(globtrk->numberOfPossiblePoints(),0.);
+      hists->m_glb_chargeF->Fill(geom->charge(),0.);
+      hists->m_glb_xfF->Fill(firstPoint.x(),0.);
+      hists->m_glb_yfF->Fill(firstPoint.y(),0.);
+      hists->m_glb_zfF->Fill(firstPoint.z(),0.);
+      hists->m_glb_radfF->Fill(radf,0.);
+      hists->m_glb_ratiomF->Fill(nfitnmax,0.);
+      hists->m_psiF->Fill(psi,0.);
+      hists->m_etaF->Fill(fabs(eta),0.);
+      hists->m_pTF->Fill(pT,0.);
+      hists->m_momF->Fill(gmom,0.);
+      hists->m_lengthF->Fill(globtrk->length(),0.);
+      hists->m_chisq0F->Fill(chisq0,0.);
+      hists->m_chisq1F->Fill(chisq1,0.);
+      hists->m_glb_impactF->Fill(logImpact,0.);
+      hists->m_glb_impactrF->Fill(globtrk->impactParameter(),0.);
+      
+      if (fabs(firstPoint.z()-ftpcPadrowZPos[10])<=1)
+        hists->m_glb_planefF->Fill(11,0.);
+      if (fabs(firstPoint.z()-ftpcPadrowZPos[11])<=1)
+        hists->m_glb_planefF->Fill(12,0.);
+      if (fabs(firstPoint.z()-ftpcPadrowZPos[12])<=1)
+        hists->m_glb_planefF->Fill(13,0.);
+      if (fabs(firstPoint.z()-ftpcPadrowZPos[13])<=1)
+        hists->m_glb_planefF->Fill(14,0.);
+      if (fabs(firstPoint.z()-ftpcPadrowZPos[14])<=1)
+        hists->m_glb_planefF->Fill(15,0.);
+      if (fabs(firstPoint.z()-ftpcPadrowZPos[15])<=1)
+        hists->m_glb_planefF->Fill(16,0.);
+      if (fabs(firstPoint.z()-ftpcPadrowZPos[16])<=1)
+        hists->m_glb_planefF->Fill(17,0.);
+      if (fabs(firstPoint.z()-ftpcPadrowZPos[17])<=1)
+        hists->m_glb_planefF->Fill(18,0.);
+      if (fabs(firstPoint.z()-ftpcPadrowZPos[18])<=1)
+        hists->m_glb_planefF->Fill(19,0.);
+      if (fabs(firstPoint.z()-ftpcPadrowZPos[19])<=1)
+        hists->m_glb_planefF->Fill(20,0.);
+      
+      // east and west in separate histograms
+      hists->m_pointFE->Fill(detInfo->numberOfPoints());
+      hists->m_max_pointFE->Fill(globtrk->numberOfPossiblePoints());
+      hists->m_glb_chargeFE->Fill(geom->charge());
+      hists->m_glb_xfFE->Fill(firstPoint.x());
+      hists->m_glb_yfFE->Fill(firstPoint.y());
+      hists->m_glb_zfFE->Fill(firstPoint.z());
+      hists->m_glb_radfFE->Fill(radf);
+      hists->m_glb_ratiomFE->Fill(nfitnmax);
+      hists->m_psiFE->Fill(psi);
+      hists->m_etaFE->Fill(eta);
+      hists->m_pTFE->Fill(pT);
+      hists->m_momFE->Fill(gmom);
+      hists->m_lengthFE->Fill(globtrk->length());
+      hists->m_chisq0FE->Fill(chisq0);
+      hists->m_chisq1FE->Fill(chisq1);
+      
+      hists->m_pT_eta_recFE->Fill(eta,lmevpt);
+      hists->m_globtrk_xf_yfFE->Fill(firstPoint.x(),
+      			       firstPoint.y());
+      hists->m_eta_trklengthFE->Fill(eta,globtrk->length());
+      hists->m_npoint_lengthFE->Fill(globtrk->length(),
+      			       Float_t(detInfo->numberOfPoints()));
+    }
+    // now fill all FTPC West histograms ------------------------------------------
+    else if (ftpHists && map.trackFtpcWest()) {
+      
+      cnttrkgFW++;
+      
+      // east and west in same histogram
+      hists->m_pointF->Fill(detInfo->numberOfPoints(),1.);
+      hists->m_max_pointF->Fill(globtrk->numberOfPossiblePoints(),1.);
+      hists->m_glb_chargeF->Fill(geom->charge(),1.);
+      hists->m_glb_xfF->Fill(firstPoint.x(),1.);
+      hists->m_glb_yfF->Fill(firstPoint.y(),1.);
+      hists->m_glb_zfF->Fill(firstPoint.z(),1.);
+      hists->m_glb_radfF->Fill(radf,1.);
+      hists->m_glb_ratiomF->Fill(nfitnmax,1.);
+      hists->m_psiF->Fill(psi,1.);
+      hists->m_etaF->Fill(fabs(eta),1.);
+      hists->m_pTF->Fill(pT,1.);
+      hists->m_momF->Fill(gmom,1.);
+      hists->m_lengthF->Fill(globtrk->length(),1.);
+      hists->m_chisq0F->Fill(chisq0,1.);
+      hists->m_chisq1F->Fill(chisq1,1.);
+      hists->m_glb_impactF->Fill(logImpact,1.);
+      hists->m_glb_impactrF->Fill(globtrk->impactParameter(),1.);
+      
+      if (fabs(firstPoint.z()-ftpcPadrowZPos[0])<=1)
+        hists->m_glb_planefF->Fill(1,1.);
+      if (fabs(firstPoint.z()-ftpcPadrowZPos[1])<=1)
+        hists->m_glb_planefF->Fill(2,1.);
+      if (fabs(firstPoint.z()-ftpcPadrowZPos[2])<=1)
+        hists->m_glb_planefF->Fill(3,1.);
+      if (fabs(firstPoint.z()-ftpcPadrowZPos[3])<=1)
+        hists->m_glb_planefF->Fill(4,1.);
+      if (fabs(firstPoint.z()-ftpcPadrowZPos[4])<=1)
+        hists->m_glb_planefF->Fill(5,1.);
+      if (fabs(firstPoint.z()-ftpcPadrowZPos[5])<=1)
+        hists->m_glb_planefF->Fill(6,1.);
+      if (fabs(firstPoint.z()-ftpcPadrowZPos[6])<=1)
+        hists->m_glb_planefF->Fill(7,1.);
+      if (fabs(firstPoint.z()-ftpcPadrowZPos[7])<=1)
+        hists->m_glb_planefF->Fill(8,1.);
+      if (fabs(firstPoint.z()-ftpcPadrowZPos[8])<=1)
+        hists->m_glb_planefF->Fill(9,1.);
+      if (fabs(firstPoint.z()-ftpcPadrowZPos[9])<=1)
+        hists->m_glb_planefF->Fill(10,1.);
+      
+      // east and west in separate histograms
+      hists->m_pointFW->Fill(detInfo->numberOfPoints());
+      hists->m_max_pointFW->Fill(globtrk->numberOfPossiblePoints());
+      hists->m_glb_chargeFW->Fill(geom->charge());
+      hists->m_glb_xfFW->Fill(firstPoint.x());
+      hists->m_glb_yfFW->Fill(firstPoint.y());
+      hists->m_glb_zfFW->Fill(firstPoint.z());
+      hists->m_glb_radfFW->Fill(radf);
+      hists->m_glb_ratiomFW->Fill(nfitnmax);
+      hists->m_psiFW->Fill(psi);
+      hists->m_etaFW->Fill(eta);
+      hists->m_pTFW->Fill(pT);
+      hists->m_momFW->Fill(gmom);
+      hists->m_lengthFW->Fill(globtrk->length());
+      hists->m_chisq0FW->Fill(chisq0);
+      hists->m_chisq1FW->Fill(chisq1);
+      
+      hists->m_pT_eta_recFW->Fill(eta,lmevpt);
+      hists->m_globtrk_xf_yfFW->Fill(firstPoint.x(),
+      			       firstPoint.y());
+      hists->m_eta_trklengthFW->Fill(eta,globtrk->length());
+      hists->m_npoint_lengthFW->Fill(globtrk->length(),
+      			       Float_t(detInfo->numberOfPoints()));
+    }
 
-      if (histsSet>=StQA_run14 && histsSet<StQA_run17) {
-        // HFT Histograms
-        hists->m_global_pxl_hit->Fill(map.numberOfHits(kPxlId));      // number of PIXEL hits per global track
-        hists->m_global_ist_hit->Fill(map.numberOfHits(kIstId));      // number of IST hits per global track
-        if(map.hasHitInPxlLayer(1))hists->m_global_hft_hit->Fill(1);  // PXL layer=1
-        if(map.hasHitInPxlLayer(2))hists->m_global_hft_hit->Fill(2);  // PXL layer=2
-        hists->m_global_hft_hit->Fill(3,map.numberOfHits(kIstId));
-        hists->m_global_hft_hit->Fill(4,map.numberOfHits(kSstId));
-      }
+    if (histsSet>=StQA_run14 && histsSet<StQA_run17) {
+      // HFT Histograms
+      hists->m_global_pxl_hit->Fill(map.numberOfHits(kPxlId));      // number of PIXEL hits per global track
+      hists->m_global_ist_hit->Fill(map.numberOfHits(kIstId));      // number of IST hits per global track
+      if(map.hasHitInPxlLayer(1))hists->m_global_hft_hit->Fill(1);  // PXL layer=1
+      if(map.hasHitInPxlLayer(2))hists->m_global_hft_hit->Fill(2);  // PXL layer=2
+      hists->m_global_hft_hit->Fill(3,map.numberOfHits(kIstId));
+      hists->m_global_hft_hit->Fill(4,map.numberOfHits(kSstId));
+    }
   }
   hists->m_globtrk_tot->Fill(cnttrk); 
   hists->m_globtrk_good->Fill(cnttrkg);
@@ -2857,8 +2857,11 @@ void StEventQAMaker::MakeHistEPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.133 2018/07/06 22:10:26 smirnovd Exp $
+// $Id: StEventQAMaker.cxx,v 2.134 2018/07/06 22:13:04 smirnovd Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.134  2018/07/06 22:13:04  smirnovd
+// [Cosmetic] Changes in white space
+//
 // Revision 2.133  2018/07/06 22:10:26  smirnovd
 // [Cosmetic] Inverse test conditions to skip loop iterations
 //
