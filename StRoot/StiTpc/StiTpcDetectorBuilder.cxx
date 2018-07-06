@@ -226,7 +226,7 @@ static St_tpcPadConfigC *tpcPadConfigC = St_tpcPadConfigC::instance();
   cout << "StiTpcDetectorBuilder::buildDetectors() -I- Done" << endl;
 }
 //________________________________________________________________________________
-int StiTpcDetectorBuildersector(double ang,int east)
+int StiTpcDetectorBuilder::sector(double ang,int east)
 {
   double gang = ang/M_PI*180;
   int sec = int(-(gang+15)/30)+3;
