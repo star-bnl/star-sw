@@ -13,10 +13,11 @@
   if ( -r $logFile) exit 0;
   root.exe -q -b 'TpcAligner.C(9999999,"'${evtsFile}'")' &gt;&amp;  ${logFile}
 	</command>
-	<stdout URL="file:./$JOBID.log" />
-	<stderr URL="file:./$JOBID.err" />
+	<stdout URL="file:./shed$JOBID.log" />
+	<stderr URL="file:./shed$JOBID.err" />
 <!-- <input URL="command:CosmicsAnalysis.pl" /> -->
-<input URL="command:EandBSample.pl" />
+<!-- <input URL="command:EandBSample.pl" /> -->
+<input URL="file:/gpfs01/star/pwg/iraklic/iTPC/Cosmics/Cosmics2018/*event.root" />
 <!-- <input URL="file:/star/subsys/tpc/fisyak/Tpc/Alignment/Y201?RC.E/*event.root" /> -->
 <!-- <input URL="file:/star/subsys/tpc/fisyak/Tpc/Alignment/Y2011RC.E/st_tofcosmic_12*event.root" /> -->
 <!-- <input URL="file:/star/subsys/tpc/fisyak/Tpc/Alignment/Y2011RC.F/st_tofcosmic_12*event.root" /> -->
