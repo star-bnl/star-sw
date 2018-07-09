@@ -74,7 +74,8 @@ void StiTpcDetectorBuilder::useVMCGeometry()
                                 mat->GetDensity()*mat->GetRadLen(),
                                 PotI));
 
-  fillStiLayersMap();
+  // Create active Sti volumes for TPC sensitive layers
+  StiTpcDetectorBuilder::buildStiLayerMap();
 
   for(const StiLayer& stiLayer : sStiLayers)
   {
@@ -180,8 +181,8 @@ StiDetector* StiTpcDetectorBuilder::constructTpcPadrowDetector(StiLayer stiLayer
   StiPlacement *pPlacement = new StiPlacement;
   Double_t zc = 0;
 
-  if ( stiLayer.tpc_sector_id[StiLayer::East] < 0 ) zc =  2*dZ;
-  if ( stiLayer.tpc_sector_id[StiLayer::West] < 0 ) zc = -2*dZ;
+  if ( stiLayer.represents_only(StiLayer::West) ) zc =  2*dZ;
+  if ( stiLayer.represents_only(StiLayer::East) ) zc = -2*dZ;
 
   pPlacement->setZcenter(zc);
   pPlacement->setLayerRadius(fRadius);
@@ -271,8 +272,8 @@ StiPlanarShape* StiTpcDetectorBuilder::constructTpcPadrowShape(StiLayer stiLayer
   }
 
   // Check if stiLayer represents only one half of TPC layer
-  if ( stiLayer.tpc_sector_id[StiLayer::West] < 0 ||
-       stiLayer.tpc_sector_id[StiLayer::East] < 0 )
+  if ( stiLayer.represents_only(StiLayer::West) ||
+       stiLayer.represents_only(StiLayer::East) )
   {
     dZ *= 0.5;
   }
@@ -325,7 +326,7 @@ std::pair<int, int> StiTpcDetectorBuilder::toStiLayer(const int tpc_sector, cons
 
 
 
-void StiTpcDetectorBuilder::fillStiLayersMap()
+void StiTpcDetectorBuilder::buildStiLayerMap()
 {
   St_tpcPadConfigC& tpcPadCfg = *St_tpcPadConfigC::instance();
 
@@ -339,7 +340,7 @@ void StiTpcDetectorBuilder::fillStiLayersMap()
       bool inserted;
       std::tie(stiLayerIter, inserted) = sStiLayers.insert( StiLayer(sector, row) );
 
-      if (!inserted) stiLayerIter->update(sector, row);
+      if (!inserted) stiLayerIter->update_tpc_id(sector, row);
     }
   }
 
