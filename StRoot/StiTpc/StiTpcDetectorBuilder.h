@@ -49,7 +49,8 @@ struct StiTpcDetectorBuilder::StiLayer
 {
   enum TpcHalf { West = 0, East = 1 };
 
-  StiLayer(int tpc_sector, int tpc_padrow) :
+  StiLayer(int tpc_sector, int tpc_padrow, bool split = false) :
+    sti_split_in_half(split),
     sti_sector_id(tpc_sector <= 12 ? tpc_sector-1 : 12 - (tpc_sector-12)%12 - 1),
     sti_padrow_id(0)
     {
@@ -58,6 +59,7 @@ struct StiTpcDetectorBuilder::StiLayer
       tpc_padrow_id[tpc_half_id] = tpc_padrow;
     }
 
+         bool sti_split_in_half = false;   ///< Split Sti layer in East and West halves
           int sti_sector_id = -1;
   mutable int sti_padrow_id = -1;
   mutable int tpc_sector_id[2] = {-1, -1}; ///< East and/or West if available
