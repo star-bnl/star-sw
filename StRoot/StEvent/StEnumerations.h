@@ -240,6 +240,7 @@ enum StChargeSign {negative, positive};
  */
 enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kTpcId       = kTpcIdentifier,
+                   kiTpcId      = kTpcIdentifier,
                    kSvtId       = kSvtIdentifier,
                    kRichId      = kRichIdentifier,
                    kFtpcWestId  = kFtpcWestIdentifier,
