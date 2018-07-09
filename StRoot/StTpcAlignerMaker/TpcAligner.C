@@ -60,7 +60,7 @@ void TpcAligner(Int_t nevents=1000,
   //  TString Chain("in,StarMagField,mysql,tpcDb,StEvent,Event,Stu,analysis,StiCA,KFVertex,TpcAligner,TpcHitMover,OSpaceZ2,OGridLeak3D,BAna,Tree,CMuDst,"); // No corrections
   //  TString Chain("in,StarMagField,mysql,tpcDb,StEvent,Event,Stu,analysis,StiCA,KFVertex,TpcAligner,TpcHitMover,BAna,Tree,CMuDst,"); // No corrections
   //  TString Chain("in,StarMagField,mysql,tpcDb,StEvent,Event,Stu,analysis,StiCA,KFVertex,TpcAligner,TpcHitMover,BAna,Tree,"); // No corrections
-  TString Chain("in,StarMagField,mysql,tpcDb,StEvent,Event,Stu,analysis,TpcAligner,CorrX,TpcHitMover,");// ,BAna,Tree,"); //StiCA,CMuDst,"); // No corrections
+  TString Chain("in,StarMagField,mysql,tpcDb,StEvent,Event,Stu,analysis,TpcAligner,OPr40,CorrX,TpcHitMover,quiet,");// ,BAna,Tree,"); //StiCA,CMuDst,"); // No corrections
   Chain += Tag;
   //  Chain += ",AgML,NoHistos,noTags,noRunco,NoDefault";
   Chain += ",NoHistos,noTags,noRunco,NoDefault,-evout,-hitfilt";

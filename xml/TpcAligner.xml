@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<job maxFilesPerProcess="1" fileListSyntax="paths">
+<job maxFilesPerProcess="20" fileListSyntax="paths">
 <!-- <job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="xrootd"> -->
 	<command>
          cd ${SUBMITTINGDIRECTORY}
   setenv STARFPE NO
-  set evtsFile = $INPUTFILE0;
+  setenv NODEBUG yes
+  setup 64b
+  foreach  evtsFile(`cat $FILELIST`) 
+#  set evtsFile = $INPUTFILE0;
   echo "${evtsFile}"
-  if (! -r ${evtsFile}) exit 1;
+  if (! -r ${evtsFile}) continue;
   set file     = `basename $evtsFile .root`
   set dir      = `dirname  $evtsFile`;          
   set logFile  = ${file}B.log
-  if ( -r $logFile) exit 0;
+  if ( -r $logFile) continue;
   root.exe -q -b 'TpcAligner.C(9999999,"'${evtsFile}'")' &gt;&amp;  ${logFile}
+  end
 	</command>
-	<stdout URL="file:./shed$JOBID.log" />
-	<stderr URL="file:./shed$JOBID.err" />
+	<stdout URL="file:./sched$JOBID.log" />
+	<stderr URL="file:./sched$JOBID.err" />
 <!-- <input URL="command:CosmicsAnalysis.pl" /> -->
 <!-- <input URL="command:EandBSample.pl" /> -->
 <input URL="file:/gpfs01/star/pwg/iraklic/iTPC/Cosmics/Cosmics2018/*event.root" />

@@ -1,3 +1,4 @@
+#define __TpcInnerSector__ 
 class St_db_Maker;
 class TTable;
 St_db_Maker *dbMk = 0;
@@ -47,7 +48,7 @@ void MakeInnerOuterSector(const Char_t *opt = 0){
 	    X1[2*i+1] >= 0 && X1[2*i+1] < 99) {
 	  val = 0.50*(X0[2*i] + X1[2*i]);
 	  dal = 0.50*(X0[2*i] - X1[2*i]);
-#if 1
+#if 0
 	  val /= 2;
 	  dal /= 2;
 	  //	  dal = 0.25*(X0[2*i] - X1[2*i]);
@@ -85,30 +86,38 @@ void MakeInnerOuterSector(const Char_t *opt = 0){
   dbMk->SetDebug(2);
   dbMk->SetDateTime(Pass[0].date,Pass[0].time); 
   // Outer sector in Inner sector coordinate system
-  St_SurveyC                 *TpcOuterSectorPositionBOld = StTpcOuterSectorPosition::instance();
-  Int_t NoldRows = TpcOuterSectorPositionBOld->GetNRows();
-  if (! (TpcOuterSectorPositionBOld)) return;
+#ifndef  __TpcInnerSector__ 
+  St_SurveyC                 *TpcSectorPositionBOld = StTpcOuterSectorPosition::instance();
+#else /* __TpcInnerSector__ */
+  St_SurveyC                 *TpcSectorPositionBOld = StTpcInnerSectorPosition::instance();
+#endif /* !  __TpcInnerSector__ */
+  if (! (TpcSectorPositionBOld)) return;
+  Int_t NoldRows = TpcSectorPositionBOld->GetNRows();
   Int_t NoSectors = 24;
-  St_Survey      *TpcOuterSectorPositionB = new St_Survey("TpcOuterSectorPositionB",NR*NoSectors);
+#ifndef  __TpcInnerSector__ 
+  St_Survey      *TpcSectorPositionB = new St_Survey("TpcOuterSectorPositionB",NR*NoSectors);
+#else /* __TpcInnerSector__ */
+  St_Survey      *TpcSectorPositionB = new St_Survey("TpcInnerSectorPositionB",NR*NoSectors);
+#endif /* !  __TpcInnerSector__ */
   TGeoHMatrix Flip  = StTpcDb::instance()->Flip(); cout << "Flip\t"; Flip.Print();
   TGeoHMatrix FlipI = Flip.Inverse();              cout << "FlipI\t"; FlipI.Print();
   for (Int_t r = 0; r < NR; r++) { // half sum & half diff
     for (Int_t s = 0; s < NoSectors; s++) {
       TGeoHMatrix LSold, LS, dR;
       if (r == 0 ) {
-	LSold = TpcOuterSectorPositionBOld->GetMatrix(s);   
+	LSold = TpcSectorPositionBOld->GetMatrix(s);   
       } else {
-	if (NoldRows > 24) LSold = TpcOuterSectorPositionBOld->GetMatrix(s+24); 
+	if (NoldRows > 24) LSold = TpcSectorPositionBOld->GetMatrix(s+24); 
       }
       cout << "===================== Sector \t" << s+1 << endl; cout << "\tLSold\t"; LSold.Print();
       Int_t i = -1; 
       for (Int_t k = 0; k < N; k++) {
-	if (TpcOuterSectorPositionBOld->Id(s) ==Pass[r].Data[k].sector) {i = k; break;}
+	if (TpcSectorPositionBOld->Id(s) ==Pass[r].Data[k].sector) {i = k; break;}
       }
       if (i < 0) {
-	cout << "Correction for " << TpcOuterSectorPositionBOld->Id(s) << " is not found" << endl;
+	cout << "Correction for " << TpcSectorPositionBOld->Id(s) << " is not found" << endl;
       } else {
-	cout << "Sector " << TpcOuterSectorPositionBOld->Id(s) << "\ti " << i 
+	cout << "Sector " << TpcSectorPositionBOld->Id(s) << "\ti " << i 
 	     << "\talpha " << Pass[r].Data[i].alpha << "+/-" <<Pass[r].Data[i].Dalpha
 	     << "\tbeta "  << Pass[r].Data[i].beta  << "+/-" <<Pass[r].Data[i].Dbeta
 	     << "\tgamma " << Pass[r].Data[i].gamma << "+/-" <<Pass[r].Data[i].Dgamma
@@ -116,7 +125,7 @@ void MakeInnerOuterSector(const Char_t *opt = 0){
 	     << "\ty " << Pass[r].Data[i].y << "+/-" <<Pass[r].Data[i].Dy
 	     << "\tz " << Pass[r].Data[i].z << "+/-" <<Pass[r].Data[i].Dz << endl;
 	Double_t xyz[3] = {0, 0, 0};
-#if 0 /* no alpha, beta rotation */
+#if 1 /* no alpha, beta rotation */
 	if (Pass[r].Data[i].Dalpha >= 0) dR.RotateX(TMath::RadToDeg()*Pass[r].Data[i].alpha*1e-3);
 	if (Pass[r].Data[i].Dbeta  >= 0) dR.RotateY(TMath::RadToDeg()*Pass[r].Data[i].beta *1e-3);
 	if (Pass[r].Data[i].Dgamma >= 0) dR.RotateZ(TMath::RadToDeg()*Pass[r].Data[i].gamma*1e-3);
@@ -130,7 +139,12 @@ void MakeInnerOuterSector(const Char_t *opt = 0){
       //      TGeoHMatrix dRI = dR.Inverse(); cout << "dR^-1\t"; dRI.Print();
       //      TGeoHMatrix dRT = FlipI * dRI * Flip; cout << "F^-1 dR^-1 F\t"; dRT.Print();
       //      TGeoHMatrix dRT = FlipI * dR * Flip; cout << "F^-1 dR F\t"; dRT.Print();
+#ifndef __TpcInnerSector__
       LS = dR * LSold; cout << "LS_new\t"; LS.Print();
+#else /* __TpcInnerSector__ */
+      //      LS = LSold.Inverse() * dR.Inverse(); cout << "LS_new\t"; LS.Print();
+      LS = dR.Inverse() * LSold; cout << "LS_new\t"; LS.Print();
+#endif /* !  __TpcInnerSector__ */
       //      LS = dRT * LSold; cout << "LS_new\t"; LS.Print();
       Survey_st row; memset (&row, 0, sizeof(Survey_st));
       Double_t *rx = LS.GetRotationMatrix();
@@ -141,13 +155,13 @@ void MakeInnerOuterSector(const Char_t *opt = 0){
       row.sigmaTrX  =Pass[r].Data[i].Dx;
       row.sigmaTrY  =Pass[r].Data[i].Dy;
       row.sigmaTrZ  =Pass[r].Data[i].Dz;
-      row.Id = TpcOuterSectorPositionBOld->Id(s);
+      row.Id = TpcSectorPositionBOld->Id(s);
       Double_t *t = LS.GetTranslation();
       memcpy(&row.t0, t, 3*sizeof(Double_t));
-      TpcOuterSectorPositionB->AddAt(&row);
+      TpcSectorPositionB->AddAt(&row);
     }
   }
-  TString fOut =  Form("%s.%8i.%06i.C",TpcOuterSectorPositionB->GetName(),Pass[0].date,Pass[0].time);
+  TString fOut =  Form("%s.%8i.%06i.C",TpcSectorPositionB->GetName(),Pass[0].date,Pass[0].time);
   ofstream out;
   cout << "Create " << fOut << endl;
   out.open(fOut.Data());
@@ -155,11 +169,11 @@ void MakeInnerOuterSector(const Char_t *opt = 0){
   out << "  if (!gROOT->GetClass(\"St_Survey\")) return 0;" << endl;
   out << "  Survey_st row[" << NR*NoSectors << "] = {" << endl; 
   out << "    //               -gamma      beta     gamma              -alpha     -beta     alpha                 x0       y0       z0" << endl;
-  Survey_st *OuterSectorPositionBs = TpcOuterSectorPositionB->GetTable(); 
+  Survey_st *SectorPositionBs = TpcSectorPositionB->GetTable(); 
   for (Int_t r = 0; r < NR; r++) {
-    for (Int_t i = 0; i < NoSectors; i++, OuterSectorPositionBs++) { 
-      out << "    {" << Form("%2i",TpcOuterSectorPositionBOld->Id(i)); 
-      Double_t *rx = &(OuterSectorPositionBs->r00);
+    for (Int_t i = 0; i < NoSectors; i++, SectorPositionBs++) { 
+      out << "    {" << Form("%2i",TpcSectorPositionBOld->Id(i)); 
+      Double_t *rx = &(SectorPositionBs->r00);
       for (Int_t j =  0; j <  9; j++) out << Form(",%9.6f",rx[j]);
       for (Int_t j =  9; j < 12; j++) out << Form(",%8.4f",rx[j]);
       for (Int_t j = 12; j < 18; j++) out << Form(",%5.2f",TMath::Min(99.99,rx[j]));
@@ -169,7 +183,7 @@ void MakeInnerOuterSector(const Char_t *opt = 0){
     } 
   }
   out << "  };" << endl;
-  out << "  St_Survey *tableSet = new St_Survey(\"" << TpcOuterSectorPositionB->GetName() << "\"," << NR*NoSectors << ");" << endl; 
+  out << "  St_Survey *tableSet = new St_Survey(\"" << TpcSectorPositionB->GetName() << "\"," << NR*NoSectors << ");" << endl; 
   out << "  for (Int_t i = 0; i < " << NR*NoSectors << "; i++) tableSet->AddAt(&row[i].Id, i);" << endl; 
   out << "  return (TDataSet *)tableSet;" << endl;
   out << "}" << endl;

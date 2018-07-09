@@ -1,5 +1,5 @@
 /*
-  root.exe -q -b 'TpcAlignerDraw.C+(0,"*Corr*.root")' >& TpcAlignerDraw.log &
+  root.exe -q -b TpcAlignerDraw.C+
 foreach f (`ls -1d 2014*.root`)
 set b = `basename ${f} .root`; root.exe -q -b 'TpcAlignerDraw.C+(0,"'${f}'")' >& ${b}.log &
 end
