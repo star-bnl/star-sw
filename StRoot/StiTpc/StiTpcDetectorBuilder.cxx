@@ -309,6 +309,22 @@ bool StiTpcDetectorBuilder::StiLayer::operator< (const StiLayer& other) const
 
 
 
+std::ostream& operator<<(std::ostream& os, const StiTpcDetectorBuilder::StiLayer& stiLayer)
+{
+  St_tpcPadConfigC& tpcPadCfg = *St_tpcPadConfigC::instance();
+
+  double radius = tpcPadCfg.radialDistanceAtRow(stiLayer.tpc_sector(), stiLayer.tpc_padrow());
+
+  os << radius << ",\t" << stiLayer.radial_distance() << ";\t"
+     << stiLayer.tpc_sector_id[0] << ",\t" << stiLayer.tpc_padrow_id[0] << ";\t"
+     << stiLayer.tpc_sector_id[1] << ",\t" << stiLayer.tpc_padrow_id[1] << "\t-->\t"
+     << stiLayer.sti_sector_id    << ",\t" << stiLayer.sti_padrow_id;
+
+  return os;
+}
+
+
+
 std::pair<int, int> StiTpcDetectorBuilder::toStiLayer(const int tpc_sector, const int tpc_padrow)
 {
   auto find_tpc_sector = [tpc_sector, tpc_padrow](const StiLayer& sl)

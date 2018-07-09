@@ -32,6 +32,8 @@ private:
     StiPlanarShape* constructTpcPadrowShape(StiLayer stiLayer) const;
     StiDetector*    constructTpcPadrowDetector(StiLayer stiLayer, StiPlanarShape* pShape) const;
 
+    friend std::ostream& operator<< (std::ostream& os, const StiLayer& stiLayer);
+
     /// Fills internal container with Sti layers based on information in St_tpcPadConfigC
     static void buildStiLayerMap();
 
