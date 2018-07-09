@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.49 2018/02/08 17:36:26 ullrich Exp $
+ * $Id: StEvent.h,v 2.50 2018/07/09 16:50:31 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.50  2018/07/09 16:50:31  ullrich
+ * Added EToF hooks.
+ *
  * Revision 2.49  2018/02/08 17:36:26  ullrich
  * Changed for new EPD classes.
  *
@@ -194,6 +197,7 @@ class StRichCollection;
 class StRpsCollection;
 class StTofCollection;
 class StBTofCollection;
+class StETofCollection;
 class StMtdCollection;
 class StTriggerDetectorCollection;
 class StTriggerIdCollection;
@@ -259,6 +263,8 @@ public:
     const StTofCollection*              tofCollection() const;
     StBTofCollection*                   btofCollection();
     const StBTofCollection*             btofCollection() const;
+    StETofCollection*                   etofCollection();
+    const StETofCollection*             etofCollection() const;
     StMtdCollection*                    mtdCollection();
     const StMtdCollection*              mtdCollection() const;
     StFpdCollection*                    fpdCollection();
@@ -357,6 +363,7 @@ public:
     void setRpsCollection(StRpsCollection*);
     void setTofCollection(StTofCollection*);
     void setBTofCollection(StBTofCollection*);
+    void setETofCollection(StETofCollection*);
     void setMtdCollection(StMtdCollection*);
     void setFpdCollection(StFpdCollection*);
     void setPhmdCollection(StPhmdCollection*);

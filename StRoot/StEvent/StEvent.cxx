@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.57 2018/02/08 17:36:26 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.58 2018/07/09 16:50:31 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.58  2018/07/09 16:50:31  ullrich
+ * Added EToF hooks.
+ *
  * Revision 2.57  2018/02/08 17:36:26  ullrich
  * Changed for new EPD classes.
  *
@@ -217,6 +220,7 @@
 #include "StRunInfo.h"
 #include "StTofCollection.h"
 #include "StBTofCollection.h"
+#include "StETofCollection.h"
 #include "StMtdCollection.h"
 #include "StFpdCollection.h"
 #include "StPhmdCollection.h"
@@ -243,8 +247,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.57 2018/02/08 17:36:26 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.57 2018/02/08 17:36:26 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.58 2018/07/09 16:50:31 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.58 2018/07/09 16:50:31 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -632,6 +636,22 @@ StEvent::btofCollection() const
     StBTofCollection *btof = 0;
     _lookup(btof, mContent);
     return btof;
+}
+
+StETofCollection*
+StEvent::etofCollection()
+{
+    StETofCollection *etof = 0;
+    _lookup(etof, mContent);
+    return etof;
+}
+
+const StETofCollection*
+StEvent::etofCollection() const
+{
+    StETofCollection *etof = 0;
+    _lookup(etof, mContent);
+    return etof;
 }
 
 StEpdCollection*
@@ -1224,6 +1244,13 @@ StEvent::setBTofCollection(StBTofCollection* val)
 }
 
 void
+StEvent::setETofCollection(StETofCollection* val)
+{
+    _lookupAndSet(val, mContent);
+}
+
+
+void
 StEvent::setEpdCollection(StEpdCollection* val)
 {
     _lookupAndSet(val, mContent);
@@ -1430,7 +1457,8 @@ void StEvent::statistics()
     cout << "\tStRpsCollection:             " << static_cast<void*>(rpsCollection());
     cout << "\tStTofCollection:             " << static_cast<void*>(tofCollection());
     cout << "\tStBTofCollection:            " << static_cast<void*>(btofCollection());
-    cout << "\tStEpdCollection:          " << static_cast<void*>(epdCollection());
+    cout << "\tStETofCollection:            " << static_cast<void*>(etofCollection());
+    cout << "\tStEpdCollection:             " << static_cast<void*>(epdCollection());
     cout << "\tStMtdCollection:             " << static_cast<void*>(mtdCollection());
     cout << "\tStFpdCollection:             " << static_cast<void*>(fpdCollection());
     cout << "\tStPhmdCollection:            " << static_cast<void*>(phmdCollection());
