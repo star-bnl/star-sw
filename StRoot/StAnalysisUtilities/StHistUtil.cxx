@@ -1,5 +1,11 @@
-// $Id: StHistUtil.cxx,v 2.101 2018/05/05 04:00:54 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.103 2018/07/06 22:13:04 smirnovd Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.103  2018/07/06 22:13:04  smirnovd
+// [Cosmetic] Changes in white space
+//
+// Revision 2.102  2018/07/06 22:10:26  smirnovd
+// [Cosmetic] Inverse test conditions to skip loop iterations
+//
 // Revision 2.101  2018/05/05 04:00:54  genevb
 // iTPC RDO outlines
 //
@@ -776,7 +782,8 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
 
   while ((obj = nextHist())) {
 
-    if (obj->InheritsFrom("TH1")) { 
+    if (!obj->InheritsFrom("TH1")) continue;
+
       TH1* hobj = (TH1*) obj;
       const char* oname = hobj->GetName();
       const char* otitle = hobj->GetTitle();
@@ -1485,8 +1492,6 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
 //        to actually see the stupid thing
 
 // just ended  actual loop over histograms !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-    }
   }
 
   if (C_ostr) delete C_ostr;
@@ -1525,10 +1530,11 @@ TList* StHistUtil::FindHists(const Char_t *dirName, const Char_t *withPrefix)
 //
   PathCopy(m_dirName,dirName);
   StMaker *temp = m_PntrToMaker->GetMaker(m_dirName);
-    if (temp) {
-      LOG_INFO << "FindHists - found pointer to maker" << endm;
-      dList = temp->Histograms();
-    }
+
+  if (temp) {
+    LOG_INFO << "FindHists - found pointer to maker" << endm;
+    dList = temp->Histograms();
+  }
 
 // Now check to see if any histograms exist here (look for something in
 //  the list (test)
