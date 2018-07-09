@@ -372,19 +372,19 @@ void StiTpcDetectorBuilder::buildStiLayerMap()
     }
   }
 
-  int curr_padrow_id = -1;
-  double curr_radius = 0;
-  auto fill_sti_padrow_id = [&curr_padrow_id, &curr_radius, &tpcPadCfg](const StiLayer& stiLayer)
+  // Now we loop over the sorted (by radius) set of StiLayers and assign a
+  // corresponding padrow ID to each layer
+  auto prevStiLayer = sStiLayers.begin();
+  auto currStiLayer = sStiLayers.begin();
+
+  for ( ; currStiLayer != sStiLayers.end(); ++currStiLayer)
   {
-    double radius = tpcPadCfg.radialDistanceAtRow(stiLayer.tpc_sector(), stiLayer.tpc_padrow());
+    currStiLayer->sti_padrow_id = prevStiLayer->sti_padrow_id;
 
-    if (curr_radius != radius ) {
-      curr_padrow_id++;
-      curr_radius = radius;
-    }
+    if (currStiLayer->radial_distance() != prevStiLayer->radial_distance())
+      currStiLayer->sti_padrow_id++;
 
-    stiLayer.sti_padrow_id = curr_padrow_id;
-  };
+    prevStiLayer = currStiLayer;
+  }
 
-  std::for_each(sStiLayers.begin(), sStiLayers.end(), fill_sti_padrow_id);
 }
