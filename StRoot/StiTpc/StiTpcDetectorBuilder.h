@@ -75,6 +75,8 @@ struct StiTpcDetectorBuilder::StiLayer
   int  tpc_sector(TpcHalf half) const { return tpc_sector_id[half]; }
   bool represents_only(TpcHalf half) const { return (half == East && tpc_sector_id[West] < 0) ||
                                                     (half == West && tpc_sector_id[East] < 0); }
+  double radial_distance() const;
+
   bool operator< (const StiLayer& other) const;
 };
 
