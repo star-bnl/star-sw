@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.49 2018/02/08 17:36:26 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.50 2018/07/09 14:54:37 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.50  2018/07/09 14:54:37  ullrich
+ * Changed to add ETof.
+ *
  * Revision 2.49  2018/02/08 17:36:26  ullrich
  * Changed for new EPD classes.
  *
@@ -271,8 +274,11 @@
 #include "StTofData.h"
 #include "StTofRawData.h"
 #include "StBTofHit.h"
+#include "StETofHit.h"
+#include "StETofDigi.h"
 #include "StEpdHit.h"
 #include "StBTofCollection.h"
+#include "StETofCollection.h"
 #include "StEpdCollection.h"
 #include "StTpcDedxPidAlgorithm.h"
 #include "StTpcHit.h"

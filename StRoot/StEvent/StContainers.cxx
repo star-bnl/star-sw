@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.38 2018/02/08 17:36:26 ullrich Exp $
+ * $Id: StContainers.cxx,v 2.39 2018/07/09 14:54:37 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
+ * Revision 2.39  2018/07/09 14:54:37  ullrich
+ * Changed to add ETof.
+ *
  * Revision 2.38  2018/02/08 17:36:26  ullrich
  * Changed for new EPD classes.
  *
@@ -170,6 +173,8 @@
 #include "StTofCell.h"
 #include "StTofData.h"
 #include "StTofHit.h"
+#include "StETofHit.h"
+#include "StETofDigi.h"
 #include "StTofRawData.h"
 #include "StTofSlat.h"
 #include "StTpcHit.h"
@@ -234,6 +239,8 @@ StCollectionImp(SvtHit)
 StCollectionImp(TofCell)
 StCollectionImp(TofData)
 StCollectionImp(TofHit)
+StCollectionImp(ETofHit)
+StCollectionImp(ETofDigi)
 StCollectionImp(TofRawData)
 StCollectionImp(TofSlat)
 StCollectionImp(TpcHit)
