@@ -293,16 +293,28 @@ StiPlanarShape* StiTpcDetectorBuilder::constructTpcPadrowShape(StiLayer stiLayer
 
 
 
-bool StiTpcDetectorBuilder::StiLayer::operator< (const StiLayer& other) const
+double StiTpcDetectorBuilder::StiLayer::radial_distance() const
 {
   St_tpcPadConfigC& tpcPadCfg = *St_tpcPadConfigC::instance();
 
+  double delta = 0;
+
+  if (sti_split_in_half)
+    delta = represents_only(StiLayer::East) ? +0.1 : (represents_only(StiLayer::West) ? -0.1 : 0);
+
+  return tpcPadCfg.radialDistanceAtRow(tpc_sector(), tpc_padrow()) + delta;
+}
+
+
+
+bool StiTpcDetectorBuilder::StiLayer::operator< (const StiLayer& other) const
+{
+  double radius       = radial_distance();
+  double radius_other = other.radial_distance();
+
   bool result =
-         ( tpcPadCfg.radialDistanceAtRow(tpc_sector(), tpc_padrow()) <
-           tpcPadCfg.radialDistanceAtRow(other.tpc_sector(), other.tpc_padrow()) ) ||
-         ( tpcPadCfg.radialDistanceAtRow(tpc_sector(), tpc_padrow()) ==
-           tpcPadCfg.radialDistanceAtRow(other.tpc_sector(), other.tpc_padrow()) &&
-           sti_sector_id < other.sti_sector_id );
+         ( radius <  radius_other ) ||
+         ( radius == radius_other && sti_sector_id <  other.sti_sector_id );
 
   return result;
 }
