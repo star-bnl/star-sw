@@ -27,12 +27,13 @@ public:
 
 private:
 
-
     class StiLayer;
-    void fillStiLayersMap();
 
     StiPlanarShape* constructTpcPadrowShape(StiLayer stiLayer) const;
     StiDetector*    constructTpcPadrowDetector(StiLayer stiLayer, StiPlanarShape* pShape) const;
+
+    /// Fills internal container with Sti layers based on information in St_tpcPadConfigC
+    static void buildStiLayerMap();
 
     static std::set<StiLayer> sStiLayers;
 };
@@ -48,27 +49,29 @@ struct StiTpcDetectorBuilder::StiLayer
 
   StiLayer(int tpc_sector, int tpc_padrow) :
     sti_sector_id(tpc_sector <= 12 ? tpc_sector-1 : 12 - (tpc_sector-12)%12 - 1),
-    sti_padrow_id(-1)
+    sti_padrow_id(0)
     {
       TpcHalf tpc_half_id = (tpc_sector <= 12 ? West : East);
       tpc_sector_id[tpc_half_id] = tpc_sector;
       tpc_padrow_id[tpc_half_id] = tpc_padrow;
     }
 
-           int sti_sector_id;
-  mutable  int sti_padrow_id;
-  mutable  int tpc_sector_id[2] = {-1, -1}; /// East and/or West if available
-  mutable  int tpc_padrow_id[2] = {-1, -1}; /// East and/or West if available
+          int sti_sector_id = -1;
+  mutable int sti_padrow_id = -1;
+  mutable int tpc_sector_id[2] = {-1, -1}; ///< East and/or West if available
+  mutable int tpc_padrow_id[2] = {-1, -1}; ///< East and/or West if available
 
-          void update(int tpc_sector, int tpc_padrow) const {
-                 TpcHalf tpc_half_id = (tpc_sector <= 12 ? West : East);
-                 tpc_sector_id[tpc_half_id] = tpc_sector;
-                 tpc_padrow_id[tpc_half_id] = tpc_padrow;
-               }
-           int tpc_sector() const { return tpc_sector_id[West] > 0 ? tpc_sector_id[West] : tpc_sector_id[East]; }
-           int tpc_padrow() const { return tpc_padrow_id[West] > 0 ? tpc_padrow_id[West] : tpc_padrow_id[East]; }
-           int tpc_sector(TpcHalf half) const { return tpc_sector_id[half]; }
-          bool operator< (const StiLayer& other) const;
+  void update_tpc_id(int tpc_sector, int tpc_padrow) const {
+         TpcHalf tpc_half_id = (tpc_sector <= 12 ? West : East);
+         tpc_sector_id[tpc_half_id] = tpc_sector;
+         tpc_padrow_id[tpc_half_id] = tpc_padrow;
+       }
+  int  tpc_sector() const { return tpc_sector_id[West] > 0 ? tpc_sector_id[West] : tpc_sector_id[East]; }
+  int  tpc_padrow() const { return tpc_padrow_id[West] > 0 ? tpc_padrow_id[West] : tpc_padrow_id[East]; }
+  int  tpc_sector(TpcHalf half) const { return tpc_sector_id[half]; }
+  bool represents_only(TpcHalf half) const { return (half == East && tpc_sector_id[West] < 0) ||
+                                                    (half == West && tpc_sector_id[East] < 0); }
+  bool operator< (const StiLayer& other) const;
 };
 
 
