@@ -12,6 +12,9 @@
 #ifndef _ICCP_H_
 #define _ICCP_H_
 
+#pragma pack(1)
+
+
 /* changes :
 // 11/18/97  changed name of SB_ANNOUNCE_DATA -> SB_ANNOUNCE_FORMATTED_DATA
 //           The SB_CONFIRM_FORMATTED_DATA  is renamed to 
@@ -547,9 +550,11 @@ struct ic_spool_free_disk
   int seq;
 };
 
+
 struct TokenManagerIccpPayload {
     int sz;
     int detLocalId;  // ID passed to and from dets...
+    int dummy;
     UINT64 rtsMask;
 };
 
@@ -669,8 +674,8 @@ union ic_load
     //ic_l4_event l4_event;
     ic_l4_evt_descriptor l4_evt_descriptor;
 
-    TokenManagerResults tokenManagerResults;
-    TokenManagerIccpPayload tokenManagerIccpPayload;
+    //TokenManagerResults tokenManagerResults;
+    //TokenManagerIccpPayload tokenManagerIccpPayload;
   
 #endif /* NOT_DAQ */
   //  ic_qdsend_announce_chunk         qdsend_announce_chunk;
@@ -683,6 +688,8 @@ struct ic_msg
   ic_msg_head head ;
   ic_load ld ;                 // for practical reasons  I'll  keep it short
 } ;
+
+#pragma pack()
 
 
 #include "rtsSystems.h"
