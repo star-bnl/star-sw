@@ -38,8 +38,9 @@ class StTpcAlignerMaker;
 #endif
 //#define OLDdEdx
 //________________________________________________________________________________
-void TpcAligner(Int_t nevents=1000,
-		const char *MainFile="st_physics_19168025_raw_1500001.event.root", 
+void TpcAligner(Int_t nevents=1e8,
+		const char *MainFile="*.event.root", 
+		//		const char *MainFile="st_physics_19168025_raw_1500001.event.root", 
 		//"st_laser_adc_19169021_raw_3500001.event.root",
 		// "/star/data45/reco/productionMinBias/FullField/P04ij/2004/030/st_physics_5030012_raw_4010010.event.root",
 		//	  "/star/data08/reco/dAuMinBias/FullField/P03ih/2003/040/st_physics_4040004_raw_0010010.event.root",

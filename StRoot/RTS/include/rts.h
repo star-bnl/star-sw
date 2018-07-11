@@ -165,6 +165,15 @@ extern inline unsigned int swap32(unsigned int x)
       (((x) & 0x0000ff00) <<  8) | (((x) & 0x000000ff) << 24)) ;
 }
 
+extern inline unsigned long long swap64(unsigned long long x) {
+    unsigned long long ret = x;
+    unsigned int *low = (unsigned int *)&ret;
+    unsigned int *high = low + 1;
+    *low = swap32(*low);
+    *high = swap32(*high);
+    return ret;
+}
+
 
 #endif /* BYTESWAP */
 
