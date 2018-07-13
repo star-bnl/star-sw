@@ -21,7 +21,7 @@ enum {kHh,kAh,kCh,kZh,kLh};
   static const int idx66[6][6] =
   {{ 0, 1, 3, 6,10,15},{ 1, 2, 4, 7,11,16},{ 3, 4, 5, 8,12,17}
   ,{ 6, 7, 8, 9,13,18},{10,11,12,13,14,19},{15,16,17,18,19,20}};
-static const double recvCORRMAX  = 0.99;
+static const double recvCORRMAX  = 0.9999;
 static const double chekCORRMAX  = 0.9999;
 
 //                               X   Y   Z Dx Dy Dz Pinv
@@ -496,12 +496,11 @@ int StvFitErrs::Recov()
   for (int i=0,li=0;i< 5;li+=++i) {
     dia[i]=e[li+i];
     for (int j=0;j<i;j++) {
-       if (e[li+j]*e[li+j]>=dia[i]*dia[j]) jerr++;
+       if (e[li+j]*e[li+j]<=dia[i]*dia[j]*chekCORRMAX) continue ;
+       double qwe = sqrt(dia[i]*dia[j]*recvCORRMAX);
+       if (e[li+j]<0) qwe = -qwe;
+       e[li+j] = qwe;
   } }
-  if (jerr) {  		//Recovery
-    for (int i=0,li=0;i< 5;li+=++i) {
-      for (int j=0;j<i;j++) {e[li+j]=0;}
-  } } 
   
   return nerr+jerr;
 }     
