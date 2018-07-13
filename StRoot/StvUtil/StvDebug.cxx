@@ -281,9 +281,14 @@ void StvDebug::SetActGra(int akt)
 //______________________________________________________________________________
 void StvDebug::Show(const StvTrack* tk)
 {
-  delete mgGrappaTmp; 
-  mgGrappaTmp = new StvGrappa("BOT OH");
-  mgGrappaTmp->Show(tk);
+  if(!mgGrappa) mgGrappa = new StvGrappa("StvDebug");
+  mgGrappa->Show(tk);
+}
+//______________________________________________________________________________
+void StvDebug::Zhow(const StvTrack* tk)
+{
+  if(!mgGrappa) mgGrappa = new StvGrappa("StvDebug");
+  mgGrappa->Zhow(tk);
 }
 //______________________________________________________________________________
 void StvDebug::SaveAll()

@@ -35,6 +35,7 @@ static void AddGra(double x,double y,double z,int iObj);
 static void ClearGra();
 static void ShowGra();
 static void Show(const StvTrack*);
+static void Zhow(const StvTrack*);
 static void SetActGra(int akt = 1);
 
 private:
