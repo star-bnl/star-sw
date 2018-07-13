@@ -36,7 +36,7 @@ typedef std::vector<StvNode*> 		StvNodeVec;
 typedef std::map<double,StvNode*> 	StvNodeMap;
 typedef StvNodeMap::iterator 		StvNodeMapIter ;
 static const double k57 = TMath::RadToDeg();
-static const char *BOTOHO = gSystem->Getenv("BOTOHO");
+static int BOTOHO = (gSystem->Getenv("BOTOHO"))? atoi(gSystem->Getenv("BOTOHO")):0;
 //_____________________________________________________________________________
 StvKalmanTrackFinder::StvKalmanTrackFinder(const char *name):StvTrackFinder(name)
 {
@@ -73,8 +73,10 @@ static int nTally = 0;
 static StvToolkit *kit = StvToolkit::Inst();
 enum {kRepeatSeedFinder = 2};
 
-double ptBefRefit=0,ptAftRefit=0;
-int    nHitsBefRefit=0,nHitsAftRefit=0;
+double pt0BefRefit=0,pt0AftRefit=0;
+double pt1BefRefit=0,pt1AftRefit=0;
+int    nHits0BefRefit=0,nHits0AftRefit=0;
+int    nHits1BefRefit=0,nHits1AftRefit=0;
 
 
 
@@ -90,14 +92,6 @@ int    nHitsBefRefit=0,nHitsAftRefit=0;
       while ((mSeedHelx = mSeedFinder->NextSeed())) 
       {
 	nSeed++; nTally++; 
-if(BOTOHO) {        
-nSits = mSeedFinder->GetHits()->size();
-myMask = nSits;
-TVector3 myDir(mSeedHelx->Dir()),myPos(mSeedHelx->Pos());
-printf("\n\nBOTOHO: Tally=%d Rxy=%g Phi=%g Z=%g Lamda=%g dPsi=%g\n",nTally
-      ,myPos.Pt(),myPos.Phi()*k57,myPos[2]
-      ,(90-myDir.Theta()*k57),myDir.Angle(myPos)*k57);
-}//BOTOHOend        
 
 	if (!mCurrTrak) mCurrTrak = kit->GetTrack();
 	mCurrTrak->CutTail();	//Clean track from previous failure
@@ -105,71 +99,55 @@ printf("\n\nBOTOHO: Tally=%d Rxy=%g Phi=%g Z=%g Lamda=%g dPsi=%g\n",nTally
 //=============================
 	nAdded = FindTrack(0);
 //=============================
+    if (BOTOHO&1) StvDebug::Zhow(mCurrTrak);
 
-        mCurrTrak->CutEnds();  	//remove ends without hits
+//???        mCurrTrak->CutEnds();  	//remove ends without hits
 	int ans = 0,fail=13;
 //		Refit track   
-        int nFitHits = mCurrTrak->GetNHits();
+        nHits0BefRefit = mCurrTrak->GetNHits();
 	do {
            if (nAdded<3) {fail = 7; mSeedFinder->FeedBack(0); break;}
-          fail = 1; if(nFitHits<3)		break;
-{//////////??????????????????????????????
-StvNode *myNode = mCurrTrak->GetNode(StvTrack::kFirstPoint);
-ptBefRefit = myNode->GetFP().getPt();
-StvDebug::Count("PtBefRefit",ptBefRefit);      
-nHitsBefRefit = mCurrTrak->GetNHits();
-StvDebug::Count("HitsBefRefit",nHitsBefRefit);      
-}
+          fail = 1; if(nHits0BefRefit<3)	break;
 //=============================
-	  if(mRefit && nFitHits>=mKons->mMinHits) {
+	  if(mRefit && nHits0BefRefit>=mKons->mMinHits) {
 	    ans = Refit(1);
-if (ans) {
-StvDebug::Count("PtFailRefit",ptBefRefit);      
-StvDebug::Count("HitsFailRefit",nHitsBefRefit);      
-if (nFitHits>15) StvDebug::Break(-1946);
-}
+
+ if (!ans && mCurrTrak->GetNHits()<=3) { ans=100;}
+
+ if (BOTOHO&2) StvDebug::Zhow(mCurrTrak);
 
 
-	    fail = 2; if (ans) 			break;
-            nHits = mCurrTrak->GetNHits();
-            myMask += 100*nHits;
-            fail = 3; if (nHits<3) 		break;
+StvNode *myNode = mCurrTrak->GetNode(StvTrack::kFirstPoint);
+pt0AftRefit = myNode->GetFP().getPt();
+            nHits0AftRefit = mCurrTrak->GetNHits();
+            myMask += 100*nHits0AftRefit;
+          if (nHits0AftRefit<=3)
+
+
+
+            fail = 3; if (nHits0AftRefit<3) 	break;
           }
 //=============================
 	  nAdded = FindTrack(1);
 //=============================
           if (nAdded<=0)			continue;;
-          nHits = mCurrTrak->GetNHits();
-          fail = 4; if (nHits<mKons->mMinHits) 	break;
+if (BOTOHO&4) StvDebug::Zhow(mCurrTrak);
+          nHits1BefRefit = mCurrTrak->GetNHits();
+          fail = 4; if (nHits1BefRefit<mKons->mMinHits) 	break;
 // 			few hits added. Refit track to beam again 
 //=============================
 	  ans = Refit(0);
-if (ans) {
-StvDebug::Count("PtFailREFIT"  ,ptBefRefit);      
-StvDebug::Count("HitsFailREFIT",nHitsBefRefit);      
-if (nFitHits>15) StvDebug::Break(-1952);
-}
+if (BOTOHO&8) StvDebug::Zhow(mCurrTrak);
 
           fail = 5; if (ans) 			break;
           nHits = mCurrTrak->GetNHits();
           myMask += 10000*nHits;
 
           fail = 6; if (nHits<mKons->mMinHits) 	break;
-{//////////??????????????????????????????
-StvNode *myNode = mCurrTrak->GetNode(StvTrack::kFirstPoint);
-StvDebug::Count("PtAftRefit",myNode->GetFP().getPt());      
-StvDebug::Count("HitsAftRefit",mCurrTrak->GetNHits());      
-StvDebug::Count("BefHitsAftRefit",nHitsBefRefit);      
-}
 
 //=============================
 
 	} while((fail=0));		
-if(BOTOHO) {
-if (!fail) myMask += 1000000*int(10*mCurrTrak->GetXi2());
-printf("BOTOHO: myMask=%d\n",myMask);
-return 0;
-}//BOTOHOend
       
 	nHits = mCurrTrak->GetNHits();
 	if (nHits < mKons->mMinHits)	fail+=100;		;
@@ -188,25 +166,6 @@ return 0;
 	kit->GetTracks().push_back(mCurrTrak);
 	nTrk++;nTrkTot++;
 
-///HISTOS
-StvNode *myNode = mCurrTrak->GetNode(StvTrack::kFirstPoint);
-if (myNode) {
-double Xi2 = mCurrTrak->GetXi2();
-double Pt  = myNode->GetFP().getPt();
-double Psi = myNode->GetFP().getPsi()		/M_PI*180;
-double Lam = atan(myNode->GetFP().getTanL())	/M_PI*180;
-
-StvDebug::Count("Xi2_Pt" ,Pt ,Xi2);
-StvDebug::Count("Xi2_Psi",Psi,Xi2);
-StvDebug::Count("Xi2_Lam",Lam,Xi2);
-
-StvDebug::Count("nHits_Pt" ,Pt ,nHits);
-StvDebug::Count("nHits_Psi",Psi,nHits);
-StvDebug::Count("nHits_Lam",Lam,nHits);
-StvDebug::Count("Xi2",Xi2);
-
-}
-///HISTOSend
 
         aveHits+= nHits;
 	aveRes += mCurrTrak->GetRes();
@@ -251,7 +210,6 @@ const StHitPlane *prevHitPlane=0;
     par[0].set(mSeedHelx); 		//Set seed pars into par[0] and err[0]
     err[0].Set(mSeedHelx); err[0]*= kKalmanErrFact; 
 ///=
-StvDebug::Count("PtSeed",par[0].getPt());/////????????????????????
 
 
     par[0].reverse();			//Seed direction OutIn but track direction is allways InOut	
@@ -283,26 +241,7 @@ StvDebug::Count("PtSeed",par[0].getPt());/////????????????????????
 
 //+++++++++++++++++++++++++++++++++++++
     nTally++;
-if(BOTOHO) {
-{
-  TVector3 myDir(par[0]._d),myPos(par[0]._x);
-  printf("BOTOHO.DiveIn: Rxy=%g Phi=%g Z=%g Lam=%g dPsi=%g\n"
-        ,myPos.Pt(),myPos.Phi()*k57,myPos[2] 
-	, (90-myDir.Theta()*k57),myDir.Angle(myPos)*k57);
-}
-}//BOTOHOend
     idive = mDive->Dive();
-if(BOTOHO) {
-{
-  TString path(gGeoManager->GetPath());
-  printf("BOTOHO Tally %d\tidive=%d \tPath=%s\n",nTally,idive,path.Data());
-  TVector3 myDir(par[0]._d),myPos(par[0]._x);
-  printf("BOTOHO.DiveOut: Rxy=%g Phi=%g Z=%g Lam=%g dPsi=%g\n"
-        ,myPos.Pt(),myPos.Phi()*k57,myPos[2] 
-	, (90-myDir.Theta()*k57),myDir.Angle(myPos)*k57);
-}
-}//BOTOHOend
-
 //+++++++++++++++++++++++++++++++++++++
 
     double deltaL = mDive->GetLength();
@@ -374,16 +313,10 @@ if(BOTOHO) {
     int minIdx = -1;
     for (int ihit=0;ihit<(int)localHits->size();ihit++) {
       StvHit *hit = (*localHits)[ihit];
-StvDebug::AddGra(hit->x()[0]
-                ,hit->x()[1]
-		,hit->x()[2],1);///???????
 
       if (hit == prevHit) continue;
       myXi2 = fitt->Xi2(hit);
 
-if(BOTOHO) {  
-printf("BOTOHO: %d Xi2=%g Pos=%g %g %g\n",ihit,myXi2,hit->x()[0],hit->x()[1],hit->x()[2]);
-}//BOTOHOend
 
       if (nTotHits > mKons->mMinHits && fitt->IsFailed() == -99) { // Too big track errs
          mySkip = 4; break;	//Track Errors too big, stop tracking
@@ -408,17 +341,8 @@ printf("BOTOHO: %d Xi2=%g Pos=%g %g %g\n",ihit,myXi2,hit->x()[0],hit->x()[1],hit
       myXi2 = fitt->Xi2(minHit[0]);
       int iuerr = fitt->Update(); 
       if (iuerr<=0 || (nHits<3)) {		//Hit accepted
-StvDebug::AddGra(minHit[0]->x()[0]
-                ,minHit[0]->x()[1]
-		,minHit[0]->x()[2],2);
 
         mHitCounter->AddHit();
-if(BOTOHO) {  
-printf("BOTOHO: Added hit Xi2=%g Pos=%g %g %g\n"
-      ,myXi2,minHit[0]->x()[0],minHit[0]->x()[1],minHit[0]->x()[2]);
-}//BOTOHOend
-
-
 	nHits++;nTotHits++;assert(nHits<256);
         curNode->SetHE(fitt->GetHitErrs());
         curNode->SetFit(par[1],err[1],0);
@@ -441,17 +365,12 @@ assert(vsuma(curNode->GetFE(0).TkDir()[0],3*3)>0.1);
   mCurrTrak->SetTypeEnd(mySkip);
   if (!idir) {
     double eff = mHitCounter->Eff(); if (eff){}
-StvDebug::Count("Eff_vs_nHits",nHits,eff);
     int myReject = mHitCounter->Reject();
     if (myReject) {
 
      mCurrTrak->CutTail(); return 0; }
   }
 
-if (StvDebug::Debug()>=3) {
-    StvDebug::SetActGra(1);
-    StvDebug::ShowGra();
-}
 
   if (nHits>3) {
     double tlen = mCurrTrak->GetLength();

@@ -28,7 +28,7 @@ ClassImp(StvKalmanTrackFitter)
 static const int    kXtendFactor  = 10;//Xi2 factor that fit sure failed
 static const double kPiMass=0.13956995;
 static const double kMinP = 0.01,kMinE = sqrt(kMinP*kMinP+kPiMass*kPiMass);
-static const double kMaxCorr = 0.1;
+//static const double kMaxCorr = 0.1;
 
 //_____________________________________________________________________________
 StvKalmanTrackFitter::StvKalmanTrackFitter():StvTrackFitter("StvKalmanTrackFitter")
