@@ -22,13 +22,16 @@ void Clear(const char* opt=0);
  int NObj() const;
 void SetActive(int akt=1) {mActive = akt;}
 void Show(const StvTrack *tk);
+void Zhow(const StvTrack *tk);
 private:
 void MakeCanvas();
 void MyShow(int iPad,int iObj,int iX,int iY );
 void MySize(int iPad,int iX,int iY);
 void MyClear();
 void MySort();
-
+protected:
+double Dist2(const StvTrack *tk,const float *hit) const;
+void MakeLims(const StvTrack *tk,double xMiMax[2][3]) const;
 
 protected:
 char mBeg[1];
