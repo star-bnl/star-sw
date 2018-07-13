@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofDigi.h,v 2.1 2018/07/09 14:53:48 ullrich Exp $
+ * $Id: StETofDigi.h,v 2.2 2018/07/13 14:55:09 ullrich Exp $
  *
  * Author: Philipp Weidenkaff, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofDigi.h,v $
+ * Revision 2.2  2018/07/13 14:55:09  ullrich
+ * Added getter function for the associated hit (Florian)
+ *
  * Revision 2.1  2018/07/09 14:53:48  ullrich
  * Initial Revision.
  *
@@ -139,6 +142,12 @@ public:
     unsigned int rocId()      const;
 
 
+    /**
+    ** @brief pointer to the hit which has been reconstructed from this digi
+    **/
+    StETofHit* associatedHit();
+
+
 
     /**
     ** @brief Sorting using the time, assumes Digis are in same reference frame (e.g. same epoch).
@@ -204,12 +213,13 @@ inline unsigned int StETofDigi::elChan()   const { return mElChan;  };
 inline unsigned int StETofDigi::get4Id()   const { return mGet4Id;  };
 inline unsigned int StETofDigi::rocId()    const { return mRocId;   };
 
+inline StETofHit*   StETofDigi::associatedHit()  { return mAssociatedHit; };
 
 inline void StETofDigi::setRawTime(   const double& time )  { mRawTime   = time; };
 inline void StETofDigi::setRawTot(    const double& tot  )  { mRawTot    = tot;  };
 inline void StETofDigi::setCalibTime( const double& time )  { mCalibTime = time; };
 inline void StETofDigi::setCalibTot(  const double& tot  )  { mCalibTot  = tot;  };
-    
+
 inline void StETofDigi::setAssociatedHit( StETofHit* hit ) { mAssociatedHit = hit; };
 
 
