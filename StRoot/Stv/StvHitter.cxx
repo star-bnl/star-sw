@@ -64,6 +64,7 @@ assert(myHitPlane);
 
   double totRr = (*errs)[0]+(*errs)[2];
   totRr = sqrt(totRr);
+  if (totRr<0.1) totRr = 0.1;
   for (int j=0;j<2;j++) {
     myGate[j] = gate[j]*totRr;
     if (myGate[j]>gate[j+2]) myGate[j]=gate[j+2];}
