@@ -1244,7 +1244,7 @@ void TDrawW2S() {
   outC.close();
 }
 //________________________________________________________________________________
-void TpcAlignerDraw(Int_t jcase = 0, const Char_t *files = "*.root") {
+void TpcAlignerDraw(Int_t jcase = 0, const Char_t *files = "st*.root") {
   switch (jcase) {
   case 0: TpcAlignerDrawIO(files);  break;
   case 1: TpcAlignerDrawW2S(files); break;
