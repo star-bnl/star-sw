@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHit.h,v 2.1 2018/07/09 14:53:48 ullrich Exp $
+ * $Id: StETofHit.h,v 2.2 2018/07/13 14:55:09 ullrich Exp $
  *
  * Author: Philipp Weidenkaff, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofHit.h,v $
+ * Revision 2.2  2018/07/13 14:55:09  ullrich
+ * Added getter function for the associated hit (Florian)
+ *
  * Revision 2.1  2018/07/09 14:53:48  ullrich
  * Initial Revision.
  *
@@ -103,6 +106,11 @@ public:
     double localY()            const;
 
 
+    /**
+    ** @brief pointer to the track which has been matched to this hit
+    **/
+    StTrack* associatedTrack();
+
 
     /**
     ** @brief Sorting using the time, assumes Digis are in same reference frame (e.g. same epoch).
@@ -167,6 +175,8 @@ inline unsigned int StETofHit::clusterSize() const { return mClusterSize; };
 
 inline double StETofHit::localX()   const { return mLocalX; };
 inline double StETofHit::localY()   const { return mLocalY; };
+
+inline StTrack* StETofHit:: associatedTrack()  { return mAssociatedTrack; };
 
 
 inline void StETofHit::setSector(  const unsigned int sector  )  { mSector   = sector;  }
