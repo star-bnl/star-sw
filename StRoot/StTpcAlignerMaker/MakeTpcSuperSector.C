@@ -22,7 +22,7 @@ void MakeTpcSuperSector(const Char_t *opt = 0){
   cout << "Pass for " << kPass << " has been found" << endl;
   Passes[kPass].Print();
   gROOT->LoadMacro("bfc.C");
-  bfc(0,"mysql,tpcDb,nodefault");
+  bfc(0,"mysql,tpcDb,corrX,nodefault");
   StMaker *dbMk = chain->Maker("db");
   if (! dbMk) return;
   dbMk->SetDebug(1);
@@ -37,7 +37,7 @@ void MakeTpcSuperSector(const Char_t *opt = 0){
   St_SurveyC                 *TpcSuperSectorPositionOld = StTpcSuperSectorPosition::instance();
   if (! (TpcSuperSectorPositionOld)) return;
   Int_t NoSectors = TpcSuperSectorPositionOld->GetNRows();
-  St_Survey      *TpcSuperSectorPosition = new St_Survey("TpcSuperSectorPosition",NoSectors);
+  St_Survey      *TpcSuperSectorPosition = new St_Survey(TpcSuperSectorPositionOld->Table()->GetName(),NoSectors);
   for (Int_t s = 0; s < NoSectors; s++) {
     TGeoHMatrix LSold, LS, dR, dRI;
     LSold = TpcSuperSectorPositionOld->GetMatrix(s);   cout << "===================== Sector \t" << s+1 << endl; cout << "\tLSold\t"; LSold.Print();
@@ -67,7 +67,7 @@ void MakeTpcSuperSector(const Char_t *opt = 0){
       dR.SetTranslation(xyz);
       cout << "dR\t"; dR.Print();
     }
-#if 0
+#if 1
 #if 1 /* 10/03/11 */    
     LS = dR * LSold; cout << "LS_new\t"; LS.Print();
 #else
@@ -99,6 +99,7 @@ void MakeTpcSuperSector(const Char_t *opt = 0){
   out << "TDataSet *CreateTable() {" << endl;
   out << "  if (!gROOT->GetClass(\"St_Survey\")) return 0;" << endl;
   out << "  Survey_st row[" << NoSectors << "] = {" << endl; 
+  out << "    //               -gamma      beta     gamma              -alpha     -beta     alpha                 x0       y0       z0" << endl;
   Survey_st *OuterSectorPositions = TpcSuperSectorPosition->GetTable(); 
   for (Int_t i = 0; i < NoSectors; i++, OuterSectorPositions++) { 
     out << "    {" << Form("%2i",TpcSuperSectorPositionOld->Id(i)); 
