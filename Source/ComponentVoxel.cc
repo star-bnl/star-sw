@@ -71,10 +71,24 @@ void ComponentVoxel::WeightingField(const double x, const double y,
   int status = 0;
   Medium* med = nullptr;
   double v = 0.;
-  double x1 = x - m_wField_xOffset;
-  double y1 = y - m_wField_yOffset;
-  double z1 = z - m_wField_zOffset;
+  const double x1 = x - m_wField_xOffset;
+  const double y1 = y - m_wField_yOffset;
+  const double z1 = z - m_wField_zOffset;
   ElectricField(x1, y1, z1, wx, wy, wz, v, med, status);
+}
+
+double ComponentVoxel::WeightingPotential(const double x, const double y,
+                                          const double z, 
+                                          const std::string& /*label*/) {
+  int status = 0;
+  Medium* med = nullptr;
+  double v = 0.;
+  const double x1 = x - m_wField_xOffset;
+  const double y1 = y - m_wField_yOffset;
+  const double z1 = z - m_wField_zOffset;
+  double wx = 0., wy = 0., wz = 0.;
+  ElectricField(x1, y1, z1, wx, wy, wz, v, med, status);
+  return v;
 }
 
 void ComponentVoxel::SetWeightingFieldOffset(const double x, const double y,
