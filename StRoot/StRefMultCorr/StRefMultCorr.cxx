@@ -444,6 +444,7 @@ Double_t StRefMultCorr::getScaleForWeight() const
       }
       if(mName.CompareTo("grefmult_P16id", TString::kIgnoreCase) == 0) {
         if(VPD5weight==0) VPD5weight=1;
+        if(mRefMult_corr>650) VPD5weight=1;  // Run14 and Run16 prod 1/2 stop value
       }
     }
   }
@@ -658,7 +659,7 @@ void StRefMultCorr::readBadRuns()
     cout << "StRefMultCorr::readBadRuns  For " << mName << ": open " << flush ;
     const Int_t year = 2010 + i ;
     Char_t* inputFileName(Form("StRoot/StRefMultCorr/bad_runs_refmult_year%d.txt", year));
-    if(mName.CompareTo("grefmult_P16id", TString::kIgnoreCase) == 0) //read bad runs for VPDMB5, add bad runs for Run16 (now no bad runs for Run16 available)
+    if(mName.CompareTo("grefmult_P16id", TString::kIgnoreCase) == 0) //read bad runs for VPDMB5
         sprintf(inputFileName,"StRoot/StRefMultCorr/bad_runs_refmult_year%d_P16id.txt",year);
     else if(mName.CompareTo("grefmult_VpdMB30", TString::kIgnoreCase) == 0) //read bad runs for VPDMB30
         sprintf(inputFileName,"StRoot/StRefMultCorr/bad_runs_refmult_year%d_VpdMB30.txt",year);
