@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.30 2018/01/30 21:26:38 jwebb Exp $
+* $Id: xgeometry.age,v 1.31 2018/07/23 19:09:21 jwebb Exp $
 
 
 
@@ -2510,6 +2510,7 @@ If LL>0
   Case y2017a  { y2017a : y2017 production;   Geom = 'y2017a    '; call geom_y2017a;  } 
 
   case y2018 { y2018: y2018 first cut geometry; Geom =        'y2018     '; call geom_y2018;} 
+  case y2018a { y2018a: y2018 first cut geometry; Geom =        'y2018a    '; call geom_y2018a;} 
   case y2018x { y2018x: y2018 experimentap TPC geometry; Geom =        'y2018x    '; call geom_y2018x;} 
 
   case y2019 { y2019: y2019 first cut geometry; Geom =        'y2019     '; call geom_y2019;} 
@@ -4641,8 +4642,11 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.30 2018/01/30 21:26:38 jwebb Exp $
+* $Id: xgeometry.age,v 1.31 2018/07/23 19:09:21 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.31  2018/07/23 19:09:21  jwebb
+* Make y2018a available to starsim
+*
 * Revision 1.30  2018/01/30 21:26:38  jwebb
 * Integrate y2019 geometry (full eTOF).
 *
