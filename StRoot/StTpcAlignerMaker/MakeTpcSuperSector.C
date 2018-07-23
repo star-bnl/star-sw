@@ -56,14 +56,14 @@ void MakeTpcSuperSector(const Char_t *opt = 0){
 	   << "\ty " <<  Passes[kPass].Data[i].y << "+/-" << Passes[kPass].Data[i].Dy
 	   << "\tz " <<  Passes[kPass].Data[i].z << "+/-" << Passes[kPass].Data[i].Dz << endl;
       Double_t xyz[3] = {0, 0, 0};
-      if (Passes[kPass].Data[i].Dalpha >= 0) dR.RotateX(TMath::RadToDeg()*Passes[kPass].Data[i].alpha*1e-3);
+      if (Passes[kPass].Data[i].Dalpha >= 0) dR.RotateX(TMath::RadToDeg()*Passes[kPass].Data[i].alpha*0.5e-3);
 #if 1
-      if (Passes[kPass].Data[i].Dbeta  >= 0) dR.RotateY(TMath::RadToDeg()*Passes[kPass].Data[i].beta *1e-3);
+      if (Passes[kPass].Data[i].Dbeta  >= 0) dR.RotateY(TMath::RadToDeg()*Passes[kPass].Data[i].beta *0.5e-3);
 #endif
-      if (Passes[kPass].Data[i].Dgamma >= 0) dR.RotateZ(TMath::RadToDeg()*Passes[kPass].Data[i].gamma*1e-3);
-      if (Passes[kPass].Data[i].Dx >= 0) xyz[0] =  1e-4*Passes[kPass].Data[i].x;
-      if (Passes[kPass].Data[i].Dy >= 0) xyz[1] =  1e-4*Passes[kPass].Data[i].y;
-      if (Passes[kPass].Data[i].Dz >= 0) xyz[2] =  1e-4*Passes[kPass].Data[i].z;
+      if (Passes[kPass].Data[i].Dgamma >= 0) dR.RotateZ(TMath::RadToDeg()*Passes[kPass].Data[i].gamma*0.5e-3);
+      if (Passes[kPass].Data[i].Dx >= 0) xyz[0] =  0.5e-4*Passes[kPass].Data[i].x;
+      if (Passes[kPass].Data[i].Dy >= 0) xyz[1] =  0.5e-4*Passes[kPass].Data[i].y;
+      if (Passes[kPass].Data[i].Dz >= 0) xyz[2] =  0.5e-4*Passes[kPass].Data[i].z;
       dR.SetTranslation(xyz);
       cout << "dR\t"; dR.Print();
     }
