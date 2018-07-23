@@ -140,7 +140,16 @@ SurveyPass_t Passes[] = {
   //#include  "y2018A_Pass8.h"
   //#include  "y2018A_Pass9.h"
   //#include  "y2018A_Pass10.h"
-#include  "y2018A_Pass18.h"
+  //#include  "y2018A_Pass18.h"
+  //#include  "y2018A_Pass19.h"
+  //#include  "y2018A_Pass20.h"
+  //#include  "y2018A_Pass21.h"
+  //#include  "y2018A_Pass22.h"
+  //#include  "y2018A_Pass23.h"
+  //#include  "y2018A_Pass24.h"
+  //#include  "y2018A_Pass25.h"
+  //#include  "y2018A_Pass26.h"
+#include  "y2018A_Pass27.h"
 #endif /* new */  
  };
 const  Int_t NP = sizeof(Passes)/sizeof(SurveyPass_t);

@@ -1033,6 +1033,7 @@ void TDrawW2S() {
       Int_t    iFlag;
     };
     Val_t ValA[7]; memset (ValA, 0, sizeof(ValA));
+#if 0
     if (LSF) {
       line = "";
       for (Int_t m = 0; m < 6; m++) {
@@ -1054,6 +1055,7 @@ void TDrawW2S() {
     }
     cout << line << endl;
     out << line << endl;
+#endif
     for (Int_t j = 0; j < NwsPlots; j++) {
       TH3 *h3 = (TH3 *) gDirectory->Get(plotNameWS[j].Name);
       if (! h3) continue;
