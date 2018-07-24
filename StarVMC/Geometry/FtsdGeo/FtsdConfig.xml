@@ -20,6 +20,21 @@
 	    module = "FtsdGeo1"
 	    onoff  = "on"  > 
 
+      <Init struct="MAIN" var="version" value="3.0" />
+      <Init struct="MAIN" var="useids"  value="0.0" />
+      <Init struct="MAIN" var="active"  value="{0,0,0,0,0,0, 0,0,1,1,1,1}" />
+
+    </Setup> 
+    <Setup  name   = "FTSIv1" simu="2" 
+	    comment= "3 CBM-like Si detectors plus sTGC wheels"
+	    module = "FtsdGeo1"
+	    onoff  = "on"  > 
+
+      <Init struct="MAIN" var="version" value="3.0" />
+      <Init struct="MAIN" var="useids"  value="0.0" />
+      <Init struct="MAIN" var="active"  value="{0,0,0,0,0,0, 0,0,1,1,1,1}" />
+      <Init struct="MAIN" var="rotatez" value="120" /> <!-- 120 degree rotation between each Si plane -->
+
     </Setup> 
 
     <Setup  name   = "FTSDv0" simu="2" 

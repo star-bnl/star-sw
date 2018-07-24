@@ -12,10 +12,12 @@
   
   <Content>
     FTSM,  <!-- FTS Mother volume -->    
-    FTSA,
-    FTSB,
-    FTSC,
-
+    FTSD, <!-- Volume for each FTS disk           -->
+    FTSA, <!-- Active volume for each FTS disk    -->
+    FTSS, <!-- Support material for each FTS disk -->
+    FSTA,
+    FSTB,
+    FSTC,
     FSIA,  <!-- FTS Si sensor -->
     FSIB,
     FSIC
@@ -31,403 +33,761 @@
     <var name="rmnDSK" type="float" /> <!-- min disk radius -->
     <var name="rmxDSK" type="float" /> <!-- max disk radius -->
     <var name="cutele" type="float" />
+    <var name="rotatez" type="float" />
+    <var name="zsi(3)"  type="float" />
   </Structure>
+
+  <Structure name="FDSK" comment="Description of each disk">
+    <var name="version" type="float" />
+    <var  name="diskid"   type="int"   />
+    <var  name="x"    type="float" />
+    <var  name="y"    type="float" />
+    <var  name="z"    type="float" />
+    <var  name="rmax" type="float" />
+    <var  name="rmin" type="float" />
+    <var  name="rmaxsens" type="float" />
+    <var  name="rminsens" type="float" />
+    <var  name="thksens" type="float" />
+    <var  name="thksupp" type="float" />
+  </Structure>
+
+  <varlist type="int">
+    ndisk/0/, idisk/0/
+  </varlist>
+
+  <varlist type="float">
+    zmin,    <!-- minimum z for mother volume -->
+    zmax,    <!-- maximum z for mother volume -->
+    rmin,    <!-- minimum r for mother volume -->
+    rmax,    <!-- maximum r for mother volume -->
+    xcenter, <!-- used for positioning volumes -->
+    ycenter, <!-- used for positioning volumes -->
+    zcenter, <!-- used for positioning volumes -->
+    zdisk,
+    dzdisk,
+    Rin/0/,
+    Rout/0/
+  </varlist>
 
   <varlist type="int"> station </varlist>
 
-  <Fill name="MAIN" comment="MAIN FTS control structure">
-    <var name="version" value="1.0" />
-    <var name="type"    value="1" comment="1: Si, 2: sTGC, else: Si+sTGC" />
-  </Fill>
+  <Inline name="eta2tan" type="real">
+    <Arguement type="real" name="etax" />
+    <Return value="tan(2*atan(exp(-etax)))" />
+  </Inline>
 
+  <Fill name="MAIN" comment="Select configuration" >
+    <var name="version" value="3.0" comment="selector" />
+    <var name="useids"  value="1.0" comment="defines placement 0=in cave, 1=in idsm" />
+    <var name="active"  value="{1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1}" comment="switch on/off up to 20 disks" />
+    <var name="rmnDSK"  value="2.25" comment="default disk inner radius" />
+    <var name="rmxDSK"  value="32.5" comment="default disk outer radius" />
+    <var name="cutele"  value="1 MeV" comment="electron propagation threshold" />
+    <var name="type"    value="1" comment="This is combined Si+sTGC" />
+    <var name="rotatez" value="0" comment="rotation angles for disk 2 and 3"/>
+    <var name="zsi"     value="{93.3, 140.0, 186.6}" comment="Positions of the Si disks" />
+  </Fill>
   <Use struct="MAIN" />
 
-  <Create    block="FTSM"/>  <Placement block="FTSM" in="CAVE" konly="MANY" />
+  <If expr="MAIN_version==3.0">
+    
+    zdisk  = 70.0;
+    dzdisk = 23.3333333;
+    Rin    = MAIN_rmndsk !2.25
+    Rout   = MAIN_rmxdsk !32.25
+    
+    <!--                                                                                     Geometric paramters for disk 1 -->
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="First disk">
+        <var name="version"   value="1.0"    comment="disk version" />
+        <var name="diskid"    value="ndisk"  comment="disk number" />
+        <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+        <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+        <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+        <var name="rmin"      value="Rin-0.5"   comment="minimum radius of disk [cm]" />
+        <var name="rmax"      value="Rout+0.5"  comment="maximum radius of disk [cm]" />
+        <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+        <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+        <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+        <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+    zdisk = zdisk + dzdisk
+    
+    <!--                                                                                     Geometric paramters for disk 2 -->
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="Second disk">
+        <var name="version"   value="1.1"    comment="disk version" />
+        <var name="diskid"        value="ndisk"  comment="disk number" />
+        <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+        <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+        <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
+    </Fill>
+    zdisk = zdisk + dzdisk
+    
+    <!--                                                                                     Geometric paramters for disk 3 -->
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="Third disk">
+        <var name="version"   value="1.2"    comment="disk version" />
+        <var name="diskid"    value="ndisk"  comment="disk number" />
+        <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+        <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+        <var name="z"         value="zdisk" comment="z center of disk [cm]" />
+    </Fill>
+    zdisk = zdisk + dzdisk
+    
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="Fourth disk">
+        <var name="version"   value="1.3"    comment="disk version" />
+        <var name="diskid"    value="ndisk"  comment="disk number" />
+        <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+        <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+        <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
+    </Fill>
+    zdisk = zdisk + dzdisk
+    
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="Fifth disk">
+        <var name="version"   value="1.4"    comment="disk version" />
+        <var name="diskid"    value="ndisk"  comment="disk number" />
+        <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+        <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+        <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
+    </Fill>
+    zdisk = zdisk + dzdisk
+    
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="Sixth disk">
+        <var name="version"   value="1.5"    comment="disk version" />
+        <var name="diskid"    value="ndisk"  comment="disk number" />
+        <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+        <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+        <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
+    </Fill>
+    
+    
+    
+    <!--                                                                                     Geometric paramters for disk s -->
+    zdisk = 238.0; <!-- place outside magnet -->
+    ndisk = ndisk + 1
+    Rin  = 6.0
+    Rout = (Rin + 30.0) / cos(pi/8.0)
+    <Fill name="FDSK" comment="First disk">
+        <var name="version"   value="1.0"    comment="disk version" />
+        <var name="diskid"    value="ndisk"  comment="disk number" />
+        <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+        <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+        <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+        <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+        <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+        <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+        <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+        <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+        <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+    
+    zdisk = 243.0; <!-- second 4 cm separation -->
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="wheel 2">
+        <var name="version"   value="1.0"    comment="disk version" />
+        <var name="diskid"    value="ndisk"  comment="disk number" />
+        <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+        <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+        <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+        <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+        <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+        <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+        <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+        <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+        <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+    <!--                                                                                     Geometric paramters for disk s -->
+    Rout = (Rin+60)/cos(pi/8)
+    zdisk = 273.0; <!-- place outside magnet -->
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="wheel 3">
+        <var name="version"   value="1.0"    comment="disk version" />
+        <var name="diskid"    value="ndisk"  comment="disk number" />
+        <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+        <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+        <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+        <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+        <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+        <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+        <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+        <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+        <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+    
+    zdisk = 303.0; <!-- second 4 cm separation -->
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="wheel 4">
+        <var name="version"   value="1.0"    comment="disk version" />
+        <var name="diskid"    value="ndisk"  comment="disk number" />
+        <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+        <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+        <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+        <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+        <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+        <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+        <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+        <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+        <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+    <!--                                                                                     Geometric paramters for disk s -->
+    zdisk = 333.0; <!-- place outside magnet -->
+    ndisk = ndisk + 1
+    
+    <Fill name="FDSK" comment="wheel 5">
+        <var name="version"   value="1.0"    comment="disk version" />
+        <var name="diskid"    value="ndisk"  comment="disk number" />
+        <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+        <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+        <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+        <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+        <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+        <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+        <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+        <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+        <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+    
+    zdisk = 362.0; <!-- second 4 cm separation -->
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="wheel 6">
+        <var name="version"   value="1.0"    comment="disk version" />
+        <var name="diskid"    value="ndisk"  comment="disk number" />
+        <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+        <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+        <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+        <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+        <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+        <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+        <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+        <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+        <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+    
+  </If>
 
+  <Use struct="FDSK" />
+
+  <!-- set zmin, zmax, rmin, rmax -->
+  <Use struct="FDSK" select="diskid" value="1" />
+
+  zmin = FDSK_z    - FDSK_thksupp
+  rmin = FDSK_rmin                 <!-- set mother volume zmin (Assumes all are the same) -->
+
+  <Use struct="FDSK" select="diskid" value="ndisk" />
+
+  zmax = FDSK_z    + FDSK_thksupp
+  rmax = FDSK_rmax                  <!-- set mother volume rmax (Assumes last disk is largest) -->
+
+
+  <!--                                                                Create and place the FSTM mother volume in the CAVE -->
+
+  xcenter = 0
+  ycenter = 0
+  zcenter = zmin + (zmax-zmin) / 2.0
+
+  <Info format="SELECT MAIN_version = {6.2f}">MAIN_version</Info>
+  <Info format="ndisk = {2i}">ndisk</Info>
+  <Info format="zmin = {6.2f}">zmin</Info>
+  <Info format="zmax = {6.2f}">zmax</Info>
+  <Info format="rmin = {6.2f}">rmin</Info>
+  <Info format="rmax = {6.2f}">rmax</Info>
+
+  <Create    block="FTSM" />
+  <Placement block="FTSM" in="IDSM" konly="MANY"      if="MAIN_useids.eq.1.0"
+    x="xcenter"
+    y="ycenter"
+    z="zcenter" />
+
+  <Placement block="FTSM" in="CAVE" konly="MANY"      if="MAIN_useids!=1.0"
+    x="xcenter"
+    y="ycenter"
+    z="zcenter" />
 
   <Volume name="FTSM" comment="FTS mother volume"  >
-  <Material name="Air" />
-  <Shape type="tube" 
-	 rmin="2.25"
-	 rmax="30.0"
-	 dz="190.0" />
+    <Material name="Air" />
+    <Shape type="tube"
+    rmin="rmin"
+    rmax="rmax"
+    dz="(zmax-zmin)/2.0" />
+
+  <!-- loop over and place all disks -->
+  <For var="idisk" from="1" to="ndisk">
+    
+    <!-- Load disk "idisk" into data structure -->
+    <Use struct="FDSK" select="diskid" value="idisk" />
+    
+    <!-- Create and place the disk -->
+    <If expr="MAIN_active(idisk).eq.1">
+        <Create    block="FTSD" />
+        <Placement block="FTSD" in="FTSM" x="FDSK_x" y="FDSK_y" z="FDSK_z-zcenter" ncopy="idisk"   />
+        <Info format="Positioning FTSD {2I}">idisk</Info>
+    </If>
+    
+  </For>
 
 
-  station = 1; <Create    block="FTSA"/>  <Placement block="FTSA" in="FTSM"  z="93.3" />
-  station = 2; <Create    block="FTSB"/>  <Placement block="FTSB" in="FTSM"  z="140.0" />
-  station = 3; <Create    block="FTSC"/>  <Placement block="FTSC" in="FTSM"  z="186.6" />
+  station = 1; <Create    block="FSTA"/>  <Placement block="FSTA" in="FTSM"  z="MAIN_zsi(1)-zcenter" />
+  station = 2; <Create    block="FSTB"/>  <Placement block="FSTB" in="FTSM"  z="MAIN_zsi(2)-zcenter" ><Rotation alphaz="MAIN_rotatez" /></Placement>
+  station = 3; <Create    block="FSTC"/>  <Placement block="FSTC" in="FTSM"  z="MAIN_zsi(3)-zcenter" ><Rotation alphaz="-MAIN_rotatez" /></Placement>
 
 
   </Volume>
 
-  <Volume name="FTSA" comment="Station A">
+  <!--                                                             FTSD represents the disks in the FTS.  One new object 
+                                                                                                                                      will be created for each disk based on the dimensions 
+                                                                   provided in the DISK structure -->
+  <Volume name="FTSD" comment="FTS disk">
+
+    <Attribute for="FTSD" seen="0" colo="3" />
+    <Shape type="TUBE"
+           rmin="FDSK_rmin"
+           rmax="FDSK_rmax"
+           dz="FDSK_thksupp" />
+
+    <Create    block="FTSA" />
+    <Placement block="FTSA" rmin="FDSK_rminsens" rmax="FDSK_rmaxsens" dz="FDSK_thksens" />
+
+    <Create    block="FTSS" />
+    <Placement block="FTSS" rmin="FDSK_rmin"     rmax="FDSK_rminsens" dz="FDSK_thksupp" />
+    <Placement block="FTSS" rmin="FDSK_rmaxsens" rmax="FDSK_rmax"     dz="FDSK_thksupp" />
+
+  </Volume>
+
+  <!--                                                                                                     Active volume -->
+  <Volume name="FTSA" comment="Active volume of the FTS">
+    <Attribute for="FTSA" seen="1" colo="4" />
+    <Material name="silicon" />
+    <Material name="silicon" isvol="1" />
+    <Shape type="TUBE"
+           rmin="0"
+           rmax="0"
+           dz="0" />
+
+    <Par name="CUTGAM" value="1 MeV" />
+    <Par name="CUTELE" value="MAIN_cutele" />
+    <Par name="CUTNEU" value="10 keV" />
+    <Par name="CUTHAD" value="10 keV" />
+    <Par name="CUTMUO" value="10 keV" />
+    <Par name="BCUTE"  value="1 MeV" />
+    <Par name="DCUTE"  value="10000 GeV" />
+    <Par name="DCUTM"  value="10000 GeV" />
+    <Par name="PPCUTM" value="10 keV" />
+
+        <Instrument block="FTSA"  >
+             <Hit meas="zz" opts="S" bins="0.00001"  />
+             <Hit meas="yy" opts="S" bins="0.00001"  />
+             <Hit meas="xx" opts="S" bins="0.00001"  />
+             <Hit meas="z"  opts="S" bins="0.00001"  />
+             <Hit meas="y"  opts="S" bins="0.00001"  />
+             <Hit meas="x"  opts="S" bins="0.00001"  />
+             <Hit meas="ptot" nbits="16" min="0" max="100"  />
+             <Hit meas="cx" nbits="10"  />
+             <Hit meas="cy" nbits="10"  />
+             <Hit meas="cz" nbits="10"  />
+             <Hit meas="sleng" nbits="16" min="0" max="500"  />
+             <Hit meas="tof" nbits="16"  />
+             <Hit meas="step" bins=".0001"  />
+             <Hit meas="eloss" nbits="16"  />
+       </Instrument>
+  </Volume>
+
+  <!--                                                                                                 Support strucutres -->
+  <Volume name="FTSS" comment="Support structure for each disk"  >
+
+    <Attribute for="FTSS" seen="1" colo="3" />
+    <Material name="aluminium" />
+    <Material name="aluminium" isvol="0" />
+<!--
+         <Par name="CUTGAM" value="1 MeV" />
+    <Par name="CUTELE" value="MAIN_cutele" />
+    <Par name="CUTNEU" value="10 MeV" />
+    <Par name="CUTHAD" value="10 MeV" />
+    <Par name="CUTMUO" value="10 MeV" />
+    <Par name="BCUTE"  value="1 MeV" />
+    <Par name="DCUTE"  value="10000 GeV" />
+    <Par name="DCUTM"  value="10000 GeV" />
+    <Par name="PPCUTM" value="10 MeV" />
+-->
+    <Shape type="TUBE"
+           rmin="0"
+           rmax="0" 
+           dz="0" />
+
+  </Volume>
+
+  <Volume name="FSTA" comment="Station A">
     <Material  name="Air" />
-    <Attribute for="FTSA" seen="1" colo="2" />
+    <Attribute for="FSTA" seen="1" colo="2" />
     <Shape     type="tube" rmin="3.0" rmax="20.0" dz="1.0" />
 
     <Create block="FSIA" />
 
-    <Placement block="FSIA" x="15.5"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="9.3"   y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="3.1"   y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="-3.1"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="-9.3"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="-15.5" y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="-15.5" y="17.1" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="-9.3"  y="17.1" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="-3.1"  y="17.1" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="3.1"   y="17.1" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="9.3"   y="17.1" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="15.5"  y="17.1" dx="3.1" dy="2.1" dz="0.03" />
+
+    <Placement block="FSIA" x="-15.5" y="12.9" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="-9.3"  y="12.9" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="-3.1"  y="12.9" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="3.1"   y="12.9" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="9.3"   y="12.9" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="15.5"  y="12.9" dx="3.1" dy="2.1" dz="0.03" />
+
+    <Placement block="FSIA" x="-15.5" y="8.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="-9.3"  y="8.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="-3.1"  y="8.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="3.1"   y="8.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="9.3"   y="8.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="15.5"  y="8.7" dx="3.1" dy="2.1" dz="0.03" />
+
+    <Placement block="FSIA" x="-15.5" y="5.5" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="-9.3"  y="5.5" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="-3.1"  y="5.5" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="3.1"   y="5.5" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="9.3"   y="5.5" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="15.5"  y="5.5" dx="3.1" dy="1.1" dz="0.03" />
+
+    <Placement block="FSIA" x="-15.5" y="3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="-9.3"  y="3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="-3.1"  y="3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="3.1"   y="3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="9.3"   y="3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="15.5"  y="3.3" dx="3.1" dy="1.1" dz="0.03" />
+
+    <Placement block="FSIA" x="-15.5" y="1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="-9.3"  y="1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="-3.1"  y="1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="3.1"   y="1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="9.3"   y="1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="15.5"  y="1.1" dx="3.1" dy="1.1" dz="0.03" />
    
-    <Placement block="FSIA" x="15.5"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="9.3"   y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="3.1"   y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="-3.1"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="-9.3"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="-15.5" y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-
-    <Placement block="FSIA" x="15.5"  y="5.5" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="9.3"   y="5.5" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="3.1"   y="5.5" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="-3.1"  y="5.5" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="-9.3"  y="5.5" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="-15.5" y="5.5" dx="3.1" dy="1.1" dz="0.1" />
-
-    <Placement block="FSIA" x="15.5"  y="8.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="9.3"   y="8.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="3.1"   y="8.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="-3.1"  y="8.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="-9.3"  y="8.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="-15.5" y="8.7" dx="3.1" dy="2.1" dz="0.1" />
-
-    <Placement block="FSIA" x="15.5"  y="12.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="9.3"   y="12.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="3.1"   y="12.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="-3.1"  y="12.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="-9.3"  y="12.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="-15.5" y="12.9" dx="3.1" dy="2.1" dz="0.1" />
-
-    <Placement block="FSIA" x="15.5"  y="17.1" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="9.3"   y="17.1" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="3.1"   y="17.1" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="-3.1"  y="17.1" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="-9.3"  y="17.1" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="-15.5" y="17.1" dx="3.1" dy="2.1" dz="0.1" />
-
-
-    <Placement block="FSIA" x="15.5"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="9.3"   y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="3.1"   y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="-3.1"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="-9.3"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="-15.5" y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="-15.5" y="-1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="-9.3"  y="-1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="-3.1"  y="-1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="3.1"   y="-1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="9.3"   y="-1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="15.5"  y="-1.1" dx="3.1" dy="1.1" dz="0.03" />
    
-    <Placement block="FSIA" x="15.5"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="9.3"   y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="3.1"   y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="-3.1"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="-9.3"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="-15.5" y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="-15.5" y="-3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="-9.3"  y="-3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="-3.1"  y="-3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="3.1"   y="-3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="9.3"   y="-3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="15.5"  y="-3.3" dx="3.1" dy="1.1" dz="0.03" />
 
-    <Placement block="FSIA" x="15.5"  y="-5.5" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="9.3"   y="-5.5" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="3.1"   y="-5.5" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="-3.1"  y="-5.5" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="-9.3"  y="-5.5" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIA" x="-15.5" y="-5.5" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="-15.5" y="-5.5" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="-9.3"  y="-5.5" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="-3.1"  y="-5.5" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="3.1"   y="-5.5" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="9.3"   y="-5.5" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIA" x="15.5"  y="-5.5" dx="3.1" dy="1.1" dz="0.03" />
 
-    <Placement block="FSIA" x="15.5"  y="-8.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="9.3"   y="-8.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="3.1"   y="-8.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="-3.1"  y="-8.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="-9.3"  y="-8.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="-15.5" y="-8.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="-15.5" y="-8.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="-9.3"  y="-8.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="-3.1"  y="-8.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="3.1"   y="-8.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="9.3"   y="-8.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="15.5"  y="-8.7" dx="3.1" dy="2.1" dz="0.03" />
 
-    <Placement block="FSIA" x="15.5"  y="-12.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="9.3"   y="-12.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="3.1"   y="-12.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="-3.1"  y="-12.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="-9.3"  y="-12.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="-15.5" y="-12.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="-15.5" y="-12.9" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="-9.3"  y="-12.9" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="-3.1"  y="-12.9" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="3.1"   y="-12.9" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="9.3"   y="-12.9" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="15.5"  y="-12.9" dx="3.1" dy="2.1" dz="0.03" />
 
-    <Placement block="FSIA" x="15.5"  y="-17.1" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="9.3"   y="-17.1" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="3.1"   y="-17.1" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="-3.1"  y="-17.1" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="-9.3"  y="-17.1" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIA" x="-15.5" y="-17.1" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="-15.5" y="-17.1" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="-9.3"  y="-17.1" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="-3.1"  y="-17.1" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="3.1"   y="-17.1" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="9.3"   y="-17.1" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIA" x="15.5"  y="-17.1" dx="3.1" dy="2.1" dz="0.03" />
+
   </Volume>
-  <Volume name="FTSB" comment="Station B">
+  <Volume name="FSTB" comment="Station B">
     <Material  name="Air" />
-    <Attribute for="FTSB" seen="1" colo="3" />
+    <Attribute for="FSTB" seen="1" colo="3" />
     <Shape     type="tube" rmin="3.0" rmax="25.0" dz="1.0" />
 
     <Create block="FSIB" />
-    <Placement block="FSIB" x="21.7"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="15.5"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="9.3"   y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="3.1"   y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="-3.1"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="-9.3"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="-15.5" y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="-21.7" y="1.1" dx="3.1" dy="1.1" dz="0.1" />
 
-    <Placement block="FSIB" x="21.7"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="15.5"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="9.3"   y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="3.1"   y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="-3.1"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="-9.3"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="-15.5" y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="-21.7" y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="-21.7" y="20.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIB" x="-15.5" y="20.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIB" x="-9.3"  y="20.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIB" x="-3.1"  y="20.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIB" x="3.1"   y="20.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIB" x="9.3"   y="20.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIB" x="15.5"  y="20.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIB" x="21.7"  y="20.1" dx="3.1" dy="3.1" dz="0.03" />
 
-    <Placement block="FSIB" x="21.7"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="15.5"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="9.3"   y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="3.1"   y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="-3.1"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="-9.3"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="-15.5" y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="-21.7" y="6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-21.7" y="14.9" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="-15.5" y="14.9" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="-9.3"  y="14.9" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="-3.1"  y="14.9" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="3.1"   y="14.9" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="9.3"   y="14.9" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="15.5"  y="14.9" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="21.7"  y="14.9" dx="3.1" dy="2.1" dz="0.03" />
 
-    <Placement block="FSIB" x="21.7"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="15.5"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="9.3"   y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="3.1"   y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="-3.1"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="-9.3"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="-15.5" y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="-21.7" y="10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-21.7" y="10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="-15.5" y="10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="-9.3"  y="10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="-3.1"  y="10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="3.1"   y="10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="9.3"   y="10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="15.5"  y="10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="21.7"  y="10.7" dx="3.1" dy="2.1" dz="0.03" />
 
-    <Placement block="FSIB" x="21.7"  y="14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="15.5"  y="14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="9.3"   y="14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="3.1"   y="14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="-3.1"  y="14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="-9.3"  y="14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="-15.5" y="14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="-21.7" y="14.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-21.7" y="6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="-15.5" y="6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="-9.3"  y="6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="-3.1"  y="6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="3.1"   y="6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="9.3"   y="6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="15.5"  y="6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="21.7"  y="6.5" dx="3.1" dy="2.1" dz="0.03" />
 
-    <Placement block="FSIB" x="21.7"  y="20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIB" x="15.5"  y="20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIB" x="9.3"   y="20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIB" x="3.1"   y="20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIB" x="-3.1"  y="20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIB" x="-9.3"  y="20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIB" x="-15.5" y="20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIB" x="-21.7" y="20.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIB" x="-21.7" y="3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="-15.5" y="3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="-9.3"  y="3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="-3.1"  y="3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="3.1"   y="3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="9.3"   y="3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="15.5"  y="3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="21.7"  y="3.3" dx="3.1" dy="1.1" dz="0.03" />
+
+    <Placement block="FSIB" x="-21.7" y="1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="-15.5" y="1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="-9.3"  y="1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="-3.1"  y="1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="3.1"   y="1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="9.3"   y="1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="15.5"  y="1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="21.7"  y="1.1" dx="3.1" dy="1.1" dz="0.03" />
 
 
-    <Placement block="FSIB" x="21.7"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="15.5"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="9.3"   y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="3.1"   y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="-3.1"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="-9.3"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="-15.5" y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="-21.7" y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="-21.7" y="-1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="-15.5" y="-1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="-9.3"  y="-1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="-3.1"  y="-1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="3.1"   y="-1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="9.3"   y="-1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="15.5"  y="-1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="21.7"  y="-1.1" dx="3.1" dy="1.1" dz="0.03" />
 
-    <Placement block="FSIB" x="21.7"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="15.5"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="9.3"   y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="3.1"   y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="-3.1"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="-9.3"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="-15.5" y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIB" x="-21.7" y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="-21.7" y="-3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="-15.5" y="-3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="-9.3"  y="-3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="-3.1"  y="-3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="3.1"   y="-3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="9.3"   y="-3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="15.5"  y="-3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIB" x="21.7"  y="-3.3" dx="3.1" dy="1.1" dz="0.03" />
 
-    <Placement block="FSIB" x="21.7"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="15.5"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="9.3"   y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="3.1"   y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="-3.1"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="-9.3"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="-15.5" y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="-21.7" y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-21.7" y="-6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="-15.5" y="-6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="-9.3"  y="-6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="-3.1"  y="-6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="3.1"   y="-6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="9.3"   y="-6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="15.5"  y="-6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="21.7"  y="-6.5" dx="3.1" dy="2.1" dz="0.03" />
 
-    <Placement block="FSIB" x="21.7"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="15.5"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="9.3"   y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="3.1"   y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="-3.1"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="-9.3"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="-15.5" y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="-21.7" y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-21.7" y="-10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="-15.5" y="-10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="-9.3"  y="-10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="-3.1"  y="-10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="3.1"   y="-10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="9.3"   y="-10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="15.5"  y="-10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="21.7"  y="-10.7" dx="3.1" dy="2.1" dz="0.03" />
 
-    <Placement block="FSIB" x="21.7"  y="-14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="15.5"  y="-14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="9.3"   y="-14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="3.1"   y="-14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="-3.1"  y="-14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="-9.3"  y="-14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="-15.5" y="-14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIB" x="-21.7" y="-14.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-21.7" y="-14.9" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="-15.5" y="-14.9" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="-9.3"  y="-14.9" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="-3.1"  y="-14.9" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="3.1"   y="-14.9" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="9.3"   y="-14.9" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="15.5"  y="-14.9" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIB" x="21.7"  y="-14.9" dx="3.1" dy="2.1" dz="0.03" />
 
-    <Placement block="FSIB" x="21.7"  y="-20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIB" x="15.5"  y="-20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIB" x="9.3"   y="-20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIB" x="3.1"   y="-20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIB" x="-3.1"  y="-20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIB" x="-9.3"  y="-20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIB" x="-15.5" y="-20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIB" x="-21.7" y="-20.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIB" x="-21.7" y="-20.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIB" x="-15.5" y="-20.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIB" x="-9.3"  y="-20.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIB" x="-3.1"  y="-20.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIB" x="3.1"   y="-20.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIB" x="9.3"   y="-20.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIB" x="15.5"  y="-20.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIB" x="21.7"  y="-20.1" dx="3.1" dy="3.1" dz="0.03" />
 
   </Volume>
-  <Volume name="FTSC" comment="Station C">
+  <Volume name="FSTC" comment="Station C">
     <Material  name="Air" />
-    <Attribute for="FTSC" seen="1" colo="4" />
+    <Attribute for="FSTC" seen="1" colo="4" />
     <Shape     type="tube" rmin="3.0" rmax="30.0" dz="1.0" /> 
 
     <Create block="FSIC" />
-    <Placement block="FSIC" x="27.9"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="21.7"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="15.5"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="9.3"   y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="3.1"   y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="-3.1"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="-9.3"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="-15.5" y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="-21.7" y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="-27.9" y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="28.3" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="-21.7" y="28.3" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="-15.5" y="28.3" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="-9.3"  y="28.3" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="-3.1"  y="28.3" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="3.1"   y="28.3" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="9.3"   y="28.3" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="15.5"  y="28.3" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="21.7"  y="28.3" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="27.9"  y="28.3" dx="3.1" dy="3.1" dz="0.03" />
 
-    <Placement block="FSIC" x="27.9"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="21.7"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="15.5"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="9.3"   y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="3.1"   y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="-3.1"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="-9.3"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="-15.5" y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="-21.7" y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="-27.9" y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="22.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="-21.7" y="22.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="-15.5" y="22.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="-9.3"  y="22.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="-3.1"  y="22.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="3.1"   y="22.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="9.3"   y="22.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="15.5"  y="22.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="21.7"  y="22.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="27.9"  y="22.1" dx="3.1" dy="3.1" dz="0.03" />
 
-    <Placement block="FSIC" x="27.9"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="21.7"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="15.5"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="9.3"   y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="3.1"   y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="-3.1"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="-9.3"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="-15.5" y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="-21.7" y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="-27.9" y="6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="15.9" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="-21.7" y="15.9" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="-15.5" y="15.9" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="-9.3"  y="15.9" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="-3.1"  y="15.9" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="3.1"   y="15.9" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="9.3"   y="15.9" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="15.5"  y="15.9" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="21.7"  y="15.9" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="27.9"  y="15.9" dx="3.1" dy="3.1" dz="0.03" />
 
-    <Placement block="FSIC" x="27.9"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="21.7"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="15.5"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="9.3"   y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="3.1"   y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="-3.1"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="-9.3"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="-15.5" y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="-21.7" y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="-27.9" y="10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="-21.7" y="10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="-15.5" y="10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="-9.3"  y="10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="-3.1"  y="10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="3.1"   y="10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="9.3"   y="10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="15.5"  y="10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="21.7"  y="10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="27.9"  y="10.7" dx="3.1" dy="2.1" dz="0.03" />
 
-    <Placement block="FSIC" x="27.9"  y="15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="21.7"  y="15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="15.5"  y="15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="9.3"   y="15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="3.1"   y="15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-3.1"  y="15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-9.3"  y="15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-15.5" y="15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-21.7" y="15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-27.9" y="15.9" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="-21.7" y="6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="-15.5" y="6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="-9.3"  y="6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="-3.1"  y="6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="3.1"   y="6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="9.3"   y="6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="15.5"  y="6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="21.7"  y="6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="27.9"  y="6.5" dx="3.1" dy="2.1" dz="0.03" />
 
-    <Placement block="FSIC" x="27.9"  y="22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="21.7"  y="22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="15.5"  y="22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="9.3"   y="22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="3.1"   y="22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-3.1"  y="22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-9.3"  y="22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-15.5" y="22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-21.7" y="22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-27.9" y="22.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="-21.7" y="3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="-15.5" y="3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="-9.3"  y="3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="-3.1"  y="3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="3.1"   y="3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="9.3"   y="3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="15.5"  y="3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="21.7"  y="3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="27.9"  y="3.3" dx="3.1" dy="1.1" dz="0.03" />
 
-    <Placement block="FSIC" x="27.9"  y="28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="21.7"  y="28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="15.5"  y="28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="9.3"   y="28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="3.1"   y="28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-3.1"  y="28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-9.3"  y="28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-15.5" y="28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-21.7" y="28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-27.9" y="28.3" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="-21.7" y="1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="-15.5" y="1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="-9.3"  y="1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="-3.1"  y="1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="3.1"   y="1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="9.3"   y="1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="15.5"  y="1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="21.7"  y="1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="27.9"  y="1.1" dx="3.1" dy="1.1" dz="0.03" />
 
 
-    <Placement block="FSIC" x="27.9"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="21.7"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="15.5"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="9.3"   y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="3.1"   y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="-3.1"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="-9.3"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="-15.5" y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="-21.7" y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="-27.9" y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="-1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="-21.7" y="-1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="-15.5" y="-1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="-9.3"  y="-1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="-3.1"  y="-1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="3.1"   y="-1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="9.3"   y="-1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="15.5"  y="-1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="21.7"  y="-1.1" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="27.9"  y="-1.1" dx="3.1" dy="1.1" dz="0.03" />
 
-    <Placement block="FSIC" x="27.9"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="21.7"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="15.5"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="9.3"   y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="3.1"   y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="-3.1"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="-9.3"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="-15.5" y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="-21.7" y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIC" x="-27.9" y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="-3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="-21.7" y="-3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="-15.5" y="-3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="-9.3"  y="-3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="-3.1"  y="-3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="3.1"   y="-3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="9.3"   y="-3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="15.5"  y="-3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="21.7"  y="-3.3" dx="3.1" dy="1.1" dz="0.03" />
+    <Placement block="FSIC" x="27.9"  y="-3.3" dx="3.1" dy="1.1" dz="0.03" />
 
-    <Placement block="FSIC" x="27.9"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="21.7"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="15.5"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="9.3"   y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="3.1"   y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="-3.1"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="-9.3"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="-15.5" y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="-21.7" y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="-27.9" y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="-6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="-21.7" y="-6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="-15.5" y="-6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="-9.3"  y="-6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="-3.1"  y="-6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="3.1"   y="-6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="9.3"   y="-6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="15.5"  y="-6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="21.7"  y="-6.5" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="27.9"  y="-6.5" dx="3.1" dy="2.1" dz="0.03" />
 
-    <Placement block="FSIC" x="27.9"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="21.7"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="15.5"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="9.3"   y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="3.1"   y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="-3.1"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="-9.3"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="-15.5" y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="-21.7" y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIC" x="-27.9" y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="-10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="-21.7" y="-10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="-15.5" y="-10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="-9.3"  y="-10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="-3.1"  y="-10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="3.1"   y="-10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="9.3"   y="-10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="15.5"  y="-10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="21.7"  y="-10.7" dx="3.1" dy="2.1" dz="0.03" />
+    <Placement block="FSIC" x="27.9"  y="-10.7" dx="3.1" dy="2.1" dz="0.03" />
 
-    <Placement block="FSIC" x="27.9"  y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="21.7"  y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="15.5"  y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="9.3"   y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="3.1"   y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-3.1"  y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-9.3"  y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-15.5" y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-21.7" y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-27.9" y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="-15.9" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="-21.7" y="-15.9" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="-15.5" y="-15.9" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="-9.3"  y="-15.9" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="-3.1"  y="-15.9" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="3.1"   y="-15.9" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="9.3"   y="-15.9" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="15.5"  y="-15.9" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="21.7"  y="-15.9" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="27.9"  y="-15.9" dx="3.1" dy="3.1" dz="0.03" />
 
-    <Placement block="FSIC" x="27.9"  y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="21.7"  y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="15.5"  y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="9.3"   y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="3.1"   y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-3.1"  y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-9.3"  y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-15.5" y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-21.7" y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-27.9" y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="-22.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="-21.7" y="-22.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="-15.5" y="-22.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="-9.3"  y="-22.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="-3.1"  y="-22.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="3.1"   y="-22.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="9.3"   y="-22.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="15.5"  y="-22.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="21.7"  y="-22.1" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="27.9"  y="-22.1" dx="3.1" dy="3.1" dz="0.03" />
 
-    <Placement block="FSIC" x="27.9"  y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="21.7"  y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="15.5"  y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="9.3"   y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="3.1"   y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-3.1"  y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-9.3"  y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-15.5" y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-21.7" y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIC" x="-27.9" y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="-28.3" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="-21.7" y="-28.3" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="-15.5" y="-28.3" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="-9.3"  y="-28.3" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="-3.1"  y="-28.3" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="3.1"   y="-28.3" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="9.3"   y="-28.3" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="15.5"  y="-28.3" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="21.7"  y="-28.3" dx="3.1" dy="3.1" dz="0.03" />
+    <Placement block="FSIC" x="27.9"  y="-28.3" dx="3.1" dy="3.1" dz="0.03" />
 
   </Volume>
 
