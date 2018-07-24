@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.88 2018/02/01 22:52:38 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.89 2018/07/24 18:46:14 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.89  2018/07/24 18:46:14  jwebb
+* Updates to EPD geometry and numbering from Prashanth.
+*
 * Revision 1.88  2018/02/01 22:52:38  jwebb
 * Updated g2t volume ID for epd.
 *
@@ -1151,16 +1154,21 @@ c$$$    write (*,*) numbv
            epd_epss = numbv(2) "1 for PP1, 2 for PP2, PP-postion 1'o,2'o clock etc"
            epd_epdt = numbv(3) "1:T1 trap, 2:T1 Triangular, 3:T2 Thin, 4:T3 Thick"
 
-	   volume_id = 10000 * epd_epdm                          +
-	                 100 * epd_epss                          +
-		           1 * (mod(epd_epdt,2) + (epd_epdt/2) ) 
+	   volume_id = 100000 * epd_epdm                          +
+	                 1000 * epd_epss                          +
+		           10 * (mod(epd_epdt,2) + (epd_epdt/2) ) +
+			    1 * (mod(epd_epdt,2)) 
 
      " EPD volume_id " 
-     " 10,000 : east or west "
-     "    100 : Position clock wise, 1 to 12 "
-     "      1 : Tile number 1 to 31, refer EPD Drupal page"
+     " 100,000 : east or west "
+     "   1,000 : Position clock wise, 1 to 12 "
+     "      10 : Tile number 1 to 31, refer EPD Drupal page"
+     "       1 : 1 T1 trap or T2 thin; 0 T1 triangular or T2 thick
 	               
 
+*write (*,*) 'g2t volume id: epd=', epd_epdm,'  ',epd_epss,'  ',epd_epdt,'  ',
+*    (mod(epd_epdt,2) + (epd_epdt/2) ),' ',mod(epd_epdt,2) ,'  ',volume_id
+   
 
 
 *******************************************************************************************
