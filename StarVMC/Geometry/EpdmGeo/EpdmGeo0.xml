@@ -224,7 +224,7 @@
 
       <Shape type="TUBE" rmin="mcdt_srad" rmax="mcdt_lrad" dz="mcdt_thick" />
 
-      <For var="ss" from="0" to="12">
+      <For var="ss" from="0" to="11">
 	rotz=-105-(30*ss); <!-- rotation angle of each SS,EPSS -->
 	<Create block="EPSS" />
 	<Placement block="EPSS" x="0" y="0" z="0">
@@ -267,7 +267,7 @@
       </Placement>
 
       <!--Creating 31 tiles -->
-      <For var="tt" from="1" to="31">
+      <For var="tt" from="2" to="31">
 
 	<!-- Creating thiner part of a tile -->
         icolor=4;
