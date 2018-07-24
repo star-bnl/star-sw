@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.30.2.2 2018/03/19 17:55:56 jwebb Exp $
+* $Id: xgeometry.age,v 1.30.2.3 2018/07/24 14:31:04 jwebb Exp $
 
 
 
@@ -2538,7 +2538,10 @@ If LL>0
   Case ftsref10 { y2017 : y2017 baseline w/ ids and fts r10;    Geom = 'ftsref10  '; call geom_ftsref10;}
 
 
-  Case sitrver0  { y2017 : y2017 baseline w/ ids and fts v1;     Geom = 'sitrver0  '; call geom_sitrver0;}
+  Case sitrver0  { sitrver0 : Si + sTGC;     Geom = 'sitrver0  '; call geom_sitrver0;}
+  Case sitrver1  { sitrver1 : Si + sTGC pipev2;     Geom = 'sitrver1  '; call geom_sitrver1;}
+  Case sitrver2  { sitrver2 : Si + sTGC pipev2;     Geom = 'sitrver2  '; call geom_sitrver2;}
+  Case sitrver3  { sitrver2 : Si + sTGC pipev1;     Geom = 'sitrver3  '; call geom_sitrver3;}
 
 
 * Case epdtest { epdtest: epd test geometry; Geom = 'epdtest   '; call geom_epdtest;}
@@ -4659,9 +4662,13 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.30.2.2 2018/03/19 17:55:56 jwebb Exp $
+* $Id: xgeometry.age,v 1.30.2.3 2018/07/24 14:31:04 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.30.2.3  2018/07/24 14:31:04  jwebb
+* Updated Si tracker models
+*
 * Revision 1.30.2.2  2018/03/19 17:55:56  jwebb
+*
 * Integrates si tracker tag into xgeometry.
 *
 * Revision 1.30.2.1  2018/03/14 22:11:33  jwebb
