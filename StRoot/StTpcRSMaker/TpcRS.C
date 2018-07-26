@@ -44,6 +44,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     ChainOpt = "ry2005b,in,tpcI,Physics,Idst,l0,tags,Tree,evout,IAna,fcf,VFMinuit,emcDY2,";
     ChainOpt+= "ftpc,trgd,ZDCvtx,Corr3,DbV20060421,useCDV,ITTF,tofDat,NosstIT,NosvtIT,SCEbyE,OGridLeak,OShortR,OSpaceZ2,TpxClu,TpxRaw";//-VFMinuit,";
     ChainOpt+= ",useInTracker";
+    ChainOpt += ",McTpcAna,";
   } else if (! RunOpt.Contains("RC.y",TString::kIgnoreCase) &&  
 	     ! RunOpt.Contains("MC.y",TString::kIgnoreCase)) {
     ChainOpt = RunOpt;
