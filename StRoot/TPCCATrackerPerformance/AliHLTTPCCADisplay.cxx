@@ -51,7 +51,7 @@
 #ifdef DRAW_3D
   #include "TVector3.h"
 #endif // DRAW_3D
-
+using namespace std;
 class AliHLTTPCCADisplay::AliHLTTPCCADisplayTmpHit
 {
 
