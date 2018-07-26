@@ -216,3 +216,4 @@
 #root.exe -q -b  SecRow3CGFdEdx58RC4.root 'MakeTpcSecRowB.C(20180426,134546)' >& MakeTpcSecRowB.20180426,134546.log
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20180426.124701.root SecRow3CGFdEdx101RC4.root 'MakeTpcSecRowB.C(20180426,124702)' >& MakeTpcSecRowB.20180426,124702.log
 root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20180426.124702.root SecRow3CGFdEdx103RC4.root 'MakeTpcSecRowB.C(20180426,124703)' >& MakeTpcSecRowB.20180426,124703.log
+root.exe -q -b  ~/work/reco/2018/27GeV_production_2018/dEdx/Fit/SecRow3CGFdEdx27GeV2.root  'MakeTpcSecRowB.C(20180510,0)' >& MakeTpcSecRowB.20180510,0.log
