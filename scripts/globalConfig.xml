@@ -2132,7 +2132,7 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
                         <void property="universe"><string>grid</string></void>
                         <void property="grid_resource"><string>condor stargw3.starp.bnl.gov stargw3.starp.bnl.gov:9619</string></void>
                         <void property="useRSL"><boolean>false</boolean></void>
-                        <void property="condorGOptions"><string>use_x509userproxy = true</string></void> 
+                        <void property="condorGOptions"><string>use_x509userproxy = false</string></void> 
                         <void property="defaultStorageSpace"><int>-1</int></void>
                         <void property="maxAttempts"><int>1</int></void>
                         <void property="msBtwnFailure"><int>10000</int></void>
@@ -4274,7 +4274,8 @@ end
             <void method="add">
             <object class="gov.bnl.star.offline.scheduler.Site">
                <!--<void property="siteName"><string>star.bnl.gov</string></void> Moved to starp network-->
-               <void property="siteName"><string>starp.bnl.gov</string></void>
+              <!-- <void property="siteName"><string>starp.bnl.gov</string></void> -->
+              <void property="siteName"><string>l4.bnl.local</string></void>
                
                <void method="addAccessPoint">   
                    <object class="gov.bnl.star.offline.scheduler.LocalAccessPoint">                   
