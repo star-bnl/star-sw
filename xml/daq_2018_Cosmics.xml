@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false">
+<job maxFilesPerProcess="20" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false">
         <command>
          cd ${SUBMITTINGDIRECTORY}
    setenv STARFPE NO
@@ -16,21 +16,26 @@
      set f        = 1
      set l        = 5000000
 #  endif
+  foreach  evtsFile(`cat $FILELIST`) 
   echo "${evtsFile}"
-  set filel    = `basename $evtsFile .daq`
+  set filel1    = `basename $evtsFile .daq`
+  set filel     = `basename $evtsFile .root`
   set output  = ${filel}.event.root
-  if (! -r ${evtsFile}) exit 1;
+  if (! -r ${evtsFile}) continue;
   set logFile  = ${filel}B.log
-#  if ( -r $logFile) exit 0;
+#  if ( -r $logFile) continue;
   set muFile = ${filel}.MuDst.root
-  if (-r $muFile) exit 0;
+  if (-r $muFile) continue;
 #root.exe -q -b 'bfc.C(1000,"P2014,TpxRaw,TpxClu2D,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,CorrX,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
 #root.exe -q -b 'bfc.C(1000,"P2018,TpxRaw,TpxClu,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,CorrX,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
-root.exe -q -b 'bfc.C(100000,"P2018a,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,OGridLeak3D,useCDV,CorrX,-evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'")' &gt;&amp; ${logFile}
+#root.exe -q -b 'bfc.C(100000,"P2018a,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,OGridLeak3D,useCDV,CorrX,-evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'")' &gt;&amp; ${logFile}
+root.exe -q -b 'bfc.C(100000,"P2018a,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,OGridLeak3D,useCDV,CorrX,OPr40,-evout,NoHistos,noTags,noRunco,StiCA,KFVertex,-picoWrite","'${evtsFile}'")' &gt;&amp; ${logFile}
+  end
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
 <!-- <input URL="file:/star/data03/daq/2018/*/*/st_cosmic_adc_*.daq" /> -->
-<input URL="file:/star/data03/daq/2018/108/*/st_cosmic*.daq" /> 
+<!-- <input URL="file:/star/data03/daq/2018/108/*/st_cosmic*.daq" /> -->
+<input URL="file:/gpfs01/star/pwg/iraklic/iTPC/Cosmics/Cosmics2018/*event.root" />
 <!-- <input URL="file:/star/data03/daq/2018/108/19108054/st_cosmic_adc_19108054_raw_5500008.daq" /> -->
 </job>
