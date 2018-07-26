@@ -343,7 +343,7 @@ Double_t StTpcCoordinateTransform::padFromX(Double_t x, Int_t sector, Int_t row)
   if (NiRows != 13 && row <= NiRows) {
     // iTPC Survey
     Double_t yRef = St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,NiRows) - 0.565;
-    Double_t xHit = -xL;
+    Double_t xHit = xL;
     Double_t yHit = St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,row) - yRef;
     St_iTPCSurveyC *sur = St_iTPCSurveyC::instance();
     Double_t dx = sur->dx(sector-1);
@@ -351,7 +351,7 @@ Double_t StTpcCoordinateTransform::padFromX(Double_t x, Int_t sector, Int_t row)
     Double_t Xscale = sur->ScaleX(sector-1);
 //  Double_t Yscale = sur->ScaleY(sector-1);
     Double_t theta  = sur->Angle(sector-1);
-             xL = -(xHit*(1. - Xscale) - dx + theta*yHit);
+             xL = xHit*(1. - Xscale) - dx + theta*yHit;
 //  Double_t yL = yHit*(1. - Yscale) - dy - theta*xHit + yRef;
   }
   Double_t probablePad = (npads+1.)/2. - xL/pitch;
@@ -383,7 +383,7 @@ Double_t StTpcCoordinateTransform::xFromPad(Int_t sector, Int_t row, Double_t pa
   }
   // iTPC Survey
   Double_t yRef = St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,NiRows) - 0.565;
-  Double_t xL = - xPad;
+  Double_t xL = xPad;
   Double_t yL = St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,row) - yRef;
   St_iTPCSurveyC *sur = St_iTPCSurveyC::instance();
   Double_t dx = sur->dx(sector-1);
@@ -391,7 +391,7 @@ Double_t StTpcCoordinateTransform::xFromPad(Int_t sector, Int_t row, Double_t pa
   Double_t Xscale = sur->ScaleX(sector-1);
 //Double_t Yscale = sur->ScaleY(sector-1);
   Double_t theta  = sur->Angle(sector-1);
-  Double_t xHit = -( xL*(1. + Xscale) + dx - theta*yL);
+  Double_t xHit = xL*(1. + Xscale) + dx - theta*yL;
 //Double_t yHit = yL*(1. + Yscale) + dy + theta*xL + yRef;
   return xHit;
 }

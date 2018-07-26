@@ -1,13 +1,9 @@
 /* 
    root.exe -q -b TpcPrompt.C >& TpcPrompt.log &
-   root.exe -q -b 'Chain.C+("*.root","TpcHit")' 'TpcPrompt.C+(tChain)' 
-
    Fit
    root.exe -q -b TpcHit.root TpcPrompt.C+
 Draw();
- root.exe -q -b lBichsel.C TpcHitZT.root  'dEdxFit.C+("Z","GP","R",-1,-1,1,1,10,1,206,212)' >& Z.log &
- root.exe -q -b lBichsel.C TpcHitZT.root  'dEdxFit.C+("ZL","GP","R",-1,-1,1,1,10,1,0,3.0)' >& ZL.log &
- root.exe -q -b lBichsel.C TpcHitZT.root  'dEdxFit.C+("T","GP","R",-1,-1,1,1,10,1,0,12.0)' >& T.log &
+ root.exe -q -b lBichsel.C TpcHitZT.root  'dEdxFit.C+("Z","GP","R",-1,-1,1,1,10,1,206,212)'
 */
 #if !defined(__CINT__)
 // code that should be seen ONLY by the compiler
@@ -445,8 +441,8 @@ void T0Fit(TH3F *D = 0, Int_t iX = 0, Int_t iY = 0) {
   fOut->Write();
 }
 //________________________________________________________________________________
-void TpcPrompt(TChain *chain) {
-  Draw(chain);
+void TpcPrompt(Int_t Nevents= 0, const Char_t *daqfile = "", const Char_t *treefile = "") {
+  Draw();
 }
 #else /* __CINT__ */
 //________________________________________________________________________________

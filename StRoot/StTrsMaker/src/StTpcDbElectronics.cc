@@ -50,7 +50,7 @@
         using std::invalid_argument;
 #   endif
 #endif
-using std::cerr;
+
 StTpcElectronics* StTpcDbElectronics::mInstance = 0; // static data member
 
 StTpcDbElectronics::StTpcDbElectronics() { /* nopt */ }

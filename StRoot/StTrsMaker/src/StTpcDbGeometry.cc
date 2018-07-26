@@ -56,7 +56,7 @@
 #ifndef ST_NO_EXCEPTIONS
 #include <stdexcept>
 #endif
-#include "Riostream.h"
+
 #include "SystemOfUnits.h"
 #ifndef ST_NO_NAMESPACES
 using namespace units;
@@ -69,8 +69,7 @@ using namespace units;
         using std::range_error;
 #   endif
 #endif
-using std::cerr;
-using std::ios;
+
 #include "StTpcDbGeometry.hh"
 //#include "StUtilities/StMessMgr.h"
 #include "StTpcDb/StTpcDb.h"

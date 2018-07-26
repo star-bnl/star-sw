@@ -414,13 +414,9 @@ bool DriftLineRKF::DriftLine(const double x0, const double y0,
     }
     // Stop in case dt tends to become too small.
     if (dt * (fabs(phi1[0]) + fabs(phi1[1]) + fabs(phi1[2])) < m_accuracy) {
-	static int Ibreak = 0;
-	Ibreak++;
-	if (Ibreak < 13) {
       std::cerr << m_className << "::DriftLine:\n"
                 << "    Step size has become smaller than int. accuracy.\n"
                 << "    The calculation is abandoned.\n";
-  	}
       m_status = StatusCalculationAbandoned; 
       break;
     }

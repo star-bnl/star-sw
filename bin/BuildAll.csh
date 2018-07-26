@@ -4,7 +4,7 @@ set host = `hostname | awk -F\. '{print $1}'`
 switch ($HOSTNAME) 
   case "*local":
   case "*starp.bnl.gov":
-    set list = "gcc gcc521 gcc631" # gcc7";
+    set list = "gcc521 gcc621";
     breaksw
   case "*bnl.gov":
 #    set list = "gcc482 gcc492";
@@ -13,8 +13,8 @@ switch ($HOSTNAME)
 endsw
 foreach gcc (${list})
   foreach opt (debug opt)
-    set bits = "64b";
-    if ($gcc == "gcc") set bits = "32b 64b";
+    set bits = "32b 64b";
+    if ($gcc == "gcc621") set bits = "64b";
     foreach bit (${bits})
       if ($opt == "debug") then 
         unsetenv NODEBUG

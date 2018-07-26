@@ -134,8 +134,11 @@ int StiHit::IsDca() const {
   if (_V_g(2,2)<1000)	return 0;
   return 1;
 }
-//________________________________________________________________________________
-void StiHit::setVyz(Float_t vy, Float_t vz) {_DriftVelocity = TRVector(2,vy,vz);}
-void StiHit::setVz(Float_t vz) {_DriftVelocity = TRVector(2,0.,vz);}
-void StiHit::setVy(Float_t vy) {_DriftVelocity = TRVector(2,vy,0.);}
+
+
+
+
+
+
+
 

@@ -1,11 +1,10 @@
 /* Heinrich Schindler 04/22/13
   root.exe lGarfield.C tpc.C+
  */
-#define __DONT_AVALANCHE__
-//#define __USE_AvalancheMicroscopic
+#define __USE_AvalancheMicroscopic
 #include <iostream>
 #include <fstream>
-#include "TSystem.h"
+
 #include "TCanvas.h"
 #include "TROOT.h"
 #include "TApplication.h"
@@ -14,7 +13,6 @@
 #include "TH2F.h"
 #include "TSystem.h"
 #include "TMath.h"
-#include "GarfieldConstants.hh"
 #include "ViewField.hh"
 #include "ViewDrift.hh"
 #include "ViewCell.hh"
@@ -24,24 +22,21 @@
 #include "ComponentAnalyticField.hh"
 #include "Sensor.hh"
 #include "DriftLineRKF.hh"
-#ifndef __DONT_AVALANCHE__
 #include "AvalancheMicroscopic.hh"
 #include "AvalancheMC.hh"
-#endif /* __DONT_AVALANCHE__ */
+
 #include "FundamentalConstants.hh"
 #include "Random.hh"
 #include "Plotting.hh"
 //#define __DriftVelocity__
 using namespace Garfield;
 
-void tpc(Int_t nEvents = 10000, const Char_t *file = "") {
-  TString PWD(gSystem->WorkingDirectory());
-  TString IO(gSystem->BaseName(PWD)); cout << "Directory : " << IO.Data() << endl;
+void tpc(TString IO = "Inner1170", Int_t nEvents = 10) {
   // STAR coordinate system (xS,yS,zS) => Garfield (yS,zG,xG,yG); Garfield(xG,yG,zG) = > Star(y,z,x)
 
   //  plottingEngine.SetDefaultStyle();
-  const Bool_t Inner  = IO.Contains("Inner",TString::kIgnoreCase);  // Setup the gas.
-  const Bool_t Prompt = IO.Contains("Prompt",TString::kIgnoreCase);  // Setup the gas.
+  const Bool_t Inner = IO.Contains("Inner");
+  // Setup the gas.
   const Double_t BarPressure         = 1010.8; // [mbar], TPC-PTB, barometricPressure
   const Double_t inputTPCGasPressure = 1.93;   // [mbar], TPC-PT8, difference between barometer pressure and pressure in TPC
   //  const Double_t pressure = (1011. / 1000.) * 750.; // 1 bar = 750 torr 
@@ -49,33 +44,28 @@ void tpc(Int_t nEvents = 10000, const Char_t *file = "") {
   const Double_t temperature = 297.839; //273.15 + 24.7; // inputGasTemperature (degree K)
   Double_t BField = 0.5; // Tesla
   Double_t Angle  = 0.0; // rad
+  TString gasFile("P10.");
   Int_t b = 10*BField;
   Int_t t = temperature;
   Int_t p = pressure;
-  TString gasFile("../P10.");
   gasFile += Form("B%ikGT%iP%i",b,t,p);
-  TString fOutName(file);
-#ifndef __DONT_AVALANCHE__
+  TString fOutName(IO);
 #ifdef __USE_AvalancheMicroscopic
   fOutName += "Microscopic";
 #endif
-#endif /* __DONT_AVALANCHE__ */
   //Switch between Inner and Outer sector
   // Voltage settings
-  Double_t vAnode = 1390;
-  if        (IO.Contains("1100",TString::kIgnoreCase)) {
-    vAnode = 1100;
-  } else if (IO.Contains("1135",TString::kIgnoreCase)) {
-    vAnode = 1135;
-  } else if (IO.Contains("1170",TString::kIgnoreCase)) {
-    vAnode = 1170;
-  } else if (IO.Contains("1345",TString::kIgnoreCase)) {
-    vAnode = 1345;
-  } else if (IO.Contains("1390",TString::kIgnoreCase)) {
-    vAnode = 1390;
-  }
-  fOutName += "V_"; fOutName += (Int_t) vAnode; 
-  fOutName += ".root";
+  const Double_t vAnodeI  =   1170.;
+  const Double_t vAnodeO  =   1390.;
+  Double_t vAnode = 1190;
+  if (IO == "Inner1170") vAnode == 1170;
+  if (IO == "Inner1135") vAnode == 1135;
+  if (IO == "Inner1100") vAnode == 1100;
+  if (IO == "Outer1345") vAnode == 1345;
+  if (IO == "Outer1390") vAnode == 1390;
+    //  const Double_t vAnode   = (Inner) ? vAnodeI : vAnodeO;
+  fOutName += "_"; fOutName += (Int_t) vAnode; fOutName += "V_";
+  fOutName += gasFile; fOutName += ".root";
 #ifdef  __DriftVelocity__
   TFile *fOut = new TFile("DriftVelocity1V.root","recreate");
 #else
@@ -192,7 +182,7 @@ void tpc(Int_t nEvents = 10000, const Char_t *file = "") {
                               nBinsGain, 0, 5.);
   TH1F* hIons = new TH1F("hIons", "Log_{10}(Number of ions)",
                          nBinsGain, 0, 5.);
-  TH1F* tElectrons = new TH1F("tElectrons","time distribution of electors (ns)",1000,0,1000);
+  TH1F* tElectrons = new TH1F("tElectrons","time distribution of electors (ns)",100,0,1000);
 
   // Build the geometry, in this case just a box.
   GeometrySimple* geo = new GeometrySimple(); // geo->EnableDebugging();
@@ -226,7 +216,6 @@ void tpc(Int_t nEvents = 10000, const Char_t *file = "") {
   comp->AddReadout("p");
  
   comp->SetGeometry(geo);
-#ifdef __DRAW__
   TCanvas *c_e = new TCanvas("Cell","Cell");
   ViewCell* cellView = new ViewCell();
   cellView->SetComponent(comp);
@@ -241,7 +230,6 @@ void tpc(Int_t nEvents = 10000, const Char_t *file = "") {
   cellView_i->SetArea(-nRep * perSens / 2., -yPad, -2.,           
 		    nRep * perSens / 2.,  yPad,   2.); 
   cellView_i->Plot2d();
-#endif
   // Make a sensor
   Sensor* sensor = new Sensor();
   //sensor->EnableDebugging();
@@ -249,7 +237,7 @@ void tpc(Int_t nEvents = 10000, const Char_t *file = "") {
   sensor->AddElectrode(comp, "p");
   sensor->SetTimeWindow(0., 50., 1000);
   sensor->ClearSignal();
-#ifdef __DRAW__
+
   ViewDrift* v_e = new ViewDrift();
   v_e->SetCanvas(c_e);
   v_e->SetArea(-nRep * perSens / 2., -yPad, -10.0,
@@ -272,8 +260,6 @@ void tpc(Int_t nEvents = 10000, const Char_t *file = "") {
     fView->PlotContour();
   }
   //  return;
-#endif
-#ifndef __DONT_AVALANCHE__
 #ifdef __USE_AvalancheMicroscopic
   AvalancheMicroscopic* aval = new AvalancheMicroscopic(); 
 #else
@@ -284,22 +270,13 @@ void tpc(Int_t nEvents = 10000, const Char_t *file = "") {
   //  aval->EnableDebugging();
   aval->EnableMagneticField();
   aval->SetSensor(sensor);
-#ifdef __DRAW__
   aval->EnablePlotting(v_e);
-#endif
  //aval->EnableNullCollisionSteps();
   DriftLineRKF* driftline_i = new DriftLineRKF();
   driftline_i->SetSensor(sensor);
-#ifdef __DRAW__
   driftline_i->EnablePlotting(v_i);
-#endif
-#else /* ! __DONT_AVALANCHE__ */ 
-  DriftLineRKF* driftline_e = new DriftLineRKF();
-  driftline_e->SetSensor(sensor);
-#ifdef __DRAW__
-  driftline_e->EnablePlotting(vd);
-#endif /* __DRAW__ */  
-#endif /* __DONT_AVALANCHE__ */  
+
+  
   const Double_t xmin = -aWpitch/2;
   const Double_t xmax =  aWpitch/2;
   
@@ -312,28 +289,18 @@ void tpc(Int_t nEvents = 10000, const Char_t *file = "") {
   for (Int_t i = nEvents; i--;) {
     gas->ResetCollisionCounters();
     sensor->NewSignal();
-    if (! Prompt) {
-      x0 = xmin + RndmUniform() * (xmax - xmin);
-      y0 = yGate - 0.1;
-    } else {
-      x0 = xmin + RndmUniform() * (xmax - xmin);
-      y0 = ySens + 2*gap*RndmUniform();
-    }
+    x0 = xmin + RndmUniform() * (xmax - xmin);
+    y0 = yGate - 0.1;
     z0 = t0 = 0.;
     e0 = 0.1; // eV
     t0 = 0;
-#ifndef __DONT_AVALANCHE__
 #ifdef __USE_AvalancheMicroscopic
     aval->AvalancheElectron(x0, y0, z0, t0, e0, 0., 0., 0.);
 #else
     aval->AvalancheElectron(x0, y0, z0, t0);
 #endif
-#endif /* __DONT_AVALANCHE__ */
-#ifdef __DRAW__
     v_e->Plot(true,false);
     c_e->Update();
-#endif
-#ifndef __DONT_AVALANCHE__
     aval->GetAvalancheSize(ne, ni);
     if (ne > 0) hElectrons->Fill(ne);    
     if (ni > 0) hIons->Fill(ni);
@@ -354,7 +321,7 @@ void tpc(Int_t nEvents = 10000, const Char_t *file = "") {
       aval->GetElectronEndpoint(j, x0, y0, z0, t0,
 				 x1, y1, z1, t1, status);
 #endif
-      if (TMath::Abs(y1-ySens) > 0.0050) continue;
+      
       tElectrons->Fill(t1);
       phi = atan((y1 - ySens) / x1) * 180. / Pi;
       if (x1 > 0.) {
@@ -376,18 +343,9 @@ void tpc(Int_t nEvents = 10000, const Char_t *file = "") {
       driftline_i->DriftIon(x0, y0, z0, t0);
       //yf      const std::vector<DriftLineRKF::step> &path_i = driftline_i->path();
     }    
-#ifdef __DRAW__
     v_i->Plot(true,false);
     c_i->Update();
     // std::cout << "Next avalanche..." << std::endl;
-#endif
-#else /* ! __DONT_AVALANCHE__  */
-    driftline_e->DriftElectron(x0,y0,z0,t0);
-    driftline_e->GetEndPoint(x1, y1, z1, t1, status);
-    //    if (status != StatusLeftDriftMedium) continue;
-    if (t <= 0) continue;
-    tElectrons->Fill(t1);
-#endif /* _DONT_AVALANCHE__  */
   }
   fOut->Write();
 }
