@@ -126,6 +126,7 @@ void TpcAlignerDrawIO(const Char_t *files = "*.root", Bool_t laser = kFALSE) {
   while ((file = (Char_t *) Dir.NextFile())) {
     if (TString(file).Contains("MuDst")) continue;
     if (TString(file).Contains("event")) continue;
+    if (TString(file).Contains("laser")) continue;
     iter.AddFile(file); NFiles++;
   }
   const Double_t&    field                                    = iter("field");
