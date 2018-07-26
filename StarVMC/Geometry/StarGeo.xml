@@ -43,6 +43,33 @@
     <Construct sys="ftsd" config="FTSIv1" simu="2" />
   
   </Geometry>
+  <Geometry tag="sitrver4a"  comment="Forward Tracking test setup for Si tracker | version1 of the beampipe ">
+
+    <Construct sys="cave" config="CAVE05" simu="1" />
+    <Construct sys="pipe" config="PIPE12" simu="2" />
+    <Construct sys="tpce" config="TPCE31" simu="2"/>
+    <Construct sys="magp" config="MAGPon" simu="1"/>
+    <Construct sys="ftsd" config="FTSIv2a" simu="2" />
+  
+  </Geometry>
+  <Geometry tag="sitrver4b"  comment="Forward Tracking test setup for Si tracker | version1 of the beampipe ">
+
+    <Construct sys="cave" config="CAVE05" simu="1" />
+    <Construct sys="pipe" config="PIPE12" simu="2" />
+    <Construct sys="tpce" config="TPCE31" simu="2"/>
+    <Construct sys="magp" config="MAGPon" simu="1"/>
+    <Construct sys="ftsd" config="FTSIv2b" simu="2" />
+  
+  </Geometry>
+  <Geometry tag="sitrver4c"  comment="Forward Tracking test setup for Si tracker | version1 of the beampipe ">
+
+    <Construct sys="cave" config="CAVE05" simu="1" />
+    <Construct sys="pipe" config="PIPE12" simu="2" />
+    <Construct sys="tpce" config="TPCE31" simu="2"/>
+    <Construct sys="magp" config="MAGPon" simu="1"/>
+    <Construct sys="ftsd" config="FTSIv2c" simu="2" />
+  
+  </Geometry>
 
 
   <!-- Quick test geometry for FTS deveolpment -->

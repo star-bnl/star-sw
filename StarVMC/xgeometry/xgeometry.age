@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.30.2.3 2018/07/24 14:31:04 jwebb Exp $
+* $Id: xgeometry.age,v 1.30.2.4 2018/07/26 14:58:32 jwebb Exp $
 
 
 
@@ -2543,6 +2543,10 @@ If LL>0
   Case sitrver2  { sitrver2 : Si + sTGC pipev2;     Geom = 'sitrver2  '; call geom_sitrver2;}
   Case sitrver3  { sitrver2 : Si + sTGC pipev1;     Geom = 'sitrver3  '; call geom_sitrver3;}
 
+  Case sitrver4a { sitrver4a : Si + sTGC pipev1;     Geom = 'sitrver4a '; call geom_sitrver4a;}
+  Case sitrver4b { sitrver4b : Si + sTGC pipev1;     Geom = 'sitrver4b '; call geom_sitrver4b;}
+  Case sitrver4c { sitrver4c : Si + sTGC pipev1;     Geom = 'sitrver4c '; call geom_sitrver4c;}
+
 
 * Case epdtest { epdtest: epd test geometry; Geom = 'epdtest   '; call geom_epdtest;}
 * Case epdwest { epdwest: epd test geometry; Geom = 'epdwest   '; call geom_epdwest;}
@@ -4662,8 +4666,16 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.30.2.3 2018/07/24 14:31:04 jwebb Exp $
+* $Id: xgeometry.age,v 1.30.2.4 2018/07/26 14:58:32 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.30.2.4  2018/07/26 14:58:32  jwebb
+* Adding new conceptual design for the FTS Si, based on the CBM 12.4 x 6.2cm
+* sensors.  Three new geometry models sitrver4a, sitrver4b and sitrver4c
+*
+* sitrver4a -- 3 stations w/ single plane @ 0deg, 15deg, 30deg
+* sitrver4b -- 3 stations, 2 planes @45deg per station
+* sitrver4c -- 4 planes, 2 planes @45 deg per station
+*
 * Revision 1.30.2.3  2018/07/24 14:31:04  jwebb
 * Updated Si tracker models
 *

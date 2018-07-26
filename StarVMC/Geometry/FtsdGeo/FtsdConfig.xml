@@ -4,7 +4,7 @@
 
 
     <Modules>
-      FtsdGeo, FtsdGeo1
+      FtsdGeo, FtsdGeo1, FtsdGeo2
     </Modules> 
 
     <Setup  name   = "FTSDof" comment="OFF" module="FtsdGeo" onoff="off" simu="2" />
@@ -34,6 +34,36 @@
       <Init struct="MAIN" var="useids"  value="0.0" />
       <Init struct="MAIN" var="active"  value="{0,0,0,0,0,0, 0,0,1,1,1,1}" />
       <Init struct="MAIN" var="rotatez" value="120" /> <!-- 120 degree rotation between each Si plane -->
+
+    </Setup> 
+
+    <Setup  name   = "FTSIv2a" simu="2" 
+	    comment= "3 CBM-like Si detectors plus sTGC wheels"
+	    module = "FtsdGeo2"
+	    onoff  = "on"  > 
+
+      <Init struct="MAIN" var="version" value="3.0" />
+      <Init struct="MAIN" var="active"  value="{1,0,1,0,1,0, 0,0,1,1,1,1}" />
+
+    </Setup> 
+    <Setup  name   = "FTSIv2b" simu="2" 
+	    comment= "4 CBM-like Si detectors plus sTGC wheels"
+	    module = "FtsdGeo2"
+	    onoff  = "on"  > 
+
+      <Init struct="MAIN" var="version" value="3.0" />
+      <Init struct="MAIN" var="active"  value="{1,1,1,1,1,1, 0,0,1,1,1,1}" />
+
+    </Setup> 
+    <Setup  name   = "FTSIv2c" simu="2" 
+	    comment= "6 CBM-like Si detectors plus sTGC wheels"
+	    module = "FtsdGeo2"
+	    onoff  = "on"  > 
+
+      <Init struct="MAIN" var="version" value="3.0" />
+      <Init struct="MAIN" var="active"  value="{1,1,1,1,0,0, 0,0,1,1,1,1}" />
+      <Init struct="MAIN" var="delta"   value="23.35" />
+
 
     </Setup> 
 
