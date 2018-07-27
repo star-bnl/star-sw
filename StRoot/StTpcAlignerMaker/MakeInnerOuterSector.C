@@ -26,29 +26,41 @@ void MakeInnerOuterSector(const Char_t *opt = 0){
       return;
     }
   } else { //default average for two last passes
-    if (kPass < 1) return;
-    Passes[kPass-1].Print();
-    Passes[kPass].Print();
-    Pass[0] = Passes[kPass-1]; 
-    Pass[1] = Passes[kPass];
+    if (kPass < 0) return;
+    Int_t kP0 = kPass - 1;
+    Int_t kP1 = kPass;
+    if (kP0 < 0) kP0 = 0;
+    Passes[kP0].Print();
+    Passes[kP1].Print();
+    Pass[0] = Passes[kP0]; 
+    Pass[1] = Passes[kP1];
     NR = 2;
-    CS = "("; CS += Passes[kPass-1].PassName; CS += "+"; CS += Passes[kPass].PassName; CS += ")/2";
+    CS = "("; CS += Passes[kP0].PassName; CS += "+"; CS += Passes[kP1].PassName; CS += ")/2";
     Pass[0].PassName = CS.Data();
-    CD = "("; CD += Passes[kPass-1].PassName; CD += "-"; CD += Passes[kPass].PassName; CD += ")/2";
+    CD = "("; CD += Passes[kP0].PassName; CD += "-"; CD += Passes[kP1].PassName; CD += ")/2";
     Pass[1].PassName = CD.Data();
     for (Int_t l = 0; l < 24; l++) {
       Int_t secs;
       Double_t val, dal, err;
       Double_t *XS = &Pass[0].Data[l].x;       // 0.5*(+)
       Double_t *XD = &Pass[1].Data[l].x;       // 0.5*(-)
-      Double_t *X0 = &Pass[kPass-1].Data[l].x; // FF
-      Double_t *X1 = &Passes[kPass].Data[l].x; // RF
+      Double_t *X0 = &Passes[kP0].Data[l].x; // FF
+      Double_t *X1 = &Passes[kP1].Data[l].x; // RF
       for (Int_t i = 0; i < 6; i++) {
-	if (X0[2*i+1] >= 0 && X0[2*i+1] < 99 &&
-	    X1[2*i+1] >= 0 && X1[2*i+1] < 99) {
+	XS[2*i]   = 0;
+	XS[2*i+1] = 0;
+	XD[2*i]   = 0;
+	XD[2*i+1] = 0;
+	if ((i < 3 && 
+	     X0[2*i+1] >= 0 && X0[2*i+1] < 99 &&
+	     X1[2*i+1] >= 0 && X1[2*i+1] < 99) ||
+	    (i > 3 && 
+	     X0[2*i+1] >= 0 && X0[2*i+1] < 0.1 &&
+	     X1[2*i+1] >= 0 && X1[2*i+1] < 0.1)
+	    )  {
 	  val = 0.50*(X0[2*i] + X1[2*i]);
 	  dal = 0.50*(X0[2*i] - X1[2*i]);
-#if 1
+#if 0
 	  val /= 2;
 	  dal /= 2;
 	  //	  dal = 0.25*(X0[2*i] - X1[2*i]);
@@ -61,10 +73,6 @@ void MakeInnerOuterSector(const Char_t *opt = 0){
 	  XD[2*i]   = dal;
 	  XD[2*i+1] = err;
 	} else {
-	  XS[2*i]   = 0;
-	  XS[2*i+1] = 0;
-	  XD[2*i]   = 0;
-	  XD[2*i+1] = 0;
 	}
       }
     }
