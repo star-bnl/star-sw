@@ -332,14 +332,14 @@ void StTpcDb::SetTpcRotations() {
   // Pad [== sector12 == localsector (SecL, ideal)] => subsector (SubS,local sector aligned) => flip => sector (SupS) => tpc => global
   //                                    ------        
   //old:  global = Tpc2GlobalMatrix() * SupS2Tpc(sector) *                                    Flip() * {SubSInner2SupS(sector) | SubSOuter2SupS(sector)}
-  //new:  global = Tpc2GlobalMatrix() * SupS2Tpc(sector) * StTpcSuperSectorPosition(sector) * Flip() * {                     I | StTpcOuterSectorPosition(sector)}
+  //new:  global = Tpc2GlobalMatrix() * SupS2Tpc(sector) * StTpcSuperSectorPosition(sector) * Flip() * {StTpcInnerSectorPosition(sector)} | StTpcOuterSectorPosition(sector)}
   //      StTpcSuperSectorPosition(sector) * Flip() = Flip() * SubSInner2SupS(sector) 
   // =>  StTpcSuperSectorPosition(sector) = Flip() * SubSInner2SupS(sector) * Flip()^-1
   //      StTpcSuperSectorPosition(sector) * Flip() * StTpcOuterSectorPosition(sector) = Flip() *  SubSOuter2SupS(sector)
   // =>  StTpcOuterSectorPosition(sector) = Flip()^-1 * StTpcSuperSectorPosition(sector)^-1 *  Flip() *  SubSOuter2SupS(sector)
   /*
     .                                                                                             <-- the system of coordinate where Outer to Inner Alignment done -->
-    global = Tpc2GlobalMatrix() * SupS2Tpc(sector) * StTpcSuperSectorPosition(sector) * Flip() * {                     I | StTpcOuterSectorPosition(sector)} * local
+    global = Tpc2GlobalMatrix() * SupS2Tpc(sector) * StTpcSuperSectorPosition(sector) * Flip() * {    StTpcInnerSectorPosition(sector) | StTpcOuterSectorPosition(sector)} * local
     .                                                result of super sector alignment                                      result of Outer to Inner sub sector alignment
   */
   /* 03/07/14
@@ -432,7 +432,20 @@ void StTpcDb::SetTpcRotations() {
 	  break; 
 	case kSubSInner2SupS: 
 	  if (mOldScheme) 	  rotA = Flip(); 
+#if 0
 	  else                    rotA = Flip() * StTpcInnerSectorPosition::instance()->GetMatrix(sector-1); 
+#else
+	  else           {
+	    rotA = Flip() * StTpcInnerSectorPosition::instance()->GetMatrix(sector-1); 
+	    if (StTpcInnerSectorPosition::instance()->GetNRows() > 24) {
+	      if (gFactor > 0.2) {
+		rotA *= StTpcInnerSectorPosition::instance()->GetMatrix(sector-1+24);
+	      } else if (gFactor < -0.2) {
+		rotA *= StTpcInnerSectorPosition::instance()->GetMatrix(sector-1+24).Inverse();
+	      }
+	    }
+	  }
+#endif
 	  break;
 	case kSubSOuter2SupS: 
 	  if (mOldScheme) rotA = Flip() * StTpcOuterSectorPosition::instance()->GetMatrix(sector-1); 
