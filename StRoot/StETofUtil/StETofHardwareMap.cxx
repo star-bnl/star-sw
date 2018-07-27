@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHardwareMap.cxx,v 1.1 2018/07/25 14:34:40 jeromel Exp $
+ * $Id: StETofHardwareMap.cxx,v 1.2 2018/07/27 14:01:57 fseck Exp $
  *
  * Author: Pengfei Lyu, April 2018
  ***************************************************************************
@@ -12,13 +12,16 @@
  ***************************************************************************
  *
  * $Log: StETofHardwareMap.cxx,v $
+ * Revision 1.2  2018/07/27 14:01:57  fseck
+ * small change to fix compiler warning
+ *
  * Revision 1.1  2018/07/25 14:34:40  jeromel
  * First version, reviewed Raghav+Jerome
  *
  *
  **************************************************************************/
 #include "StETofHardwareMap.h"
-
+#include "StMaker.h"
 
 StETofHardwareMap::StETofHardwareMap()
 {
