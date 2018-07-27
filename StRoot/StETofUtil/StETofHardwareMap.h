@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHardwareMap.h,v 1.1 2018/07/25 14:34:40 jeromel Exp $
+ * $Id: StETofHardwareMap.h,v 1.2 2018/07/27 14:01:53 fseck Exp $
  *
  * Author: Pengfei Lyu, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofHardwareMap.h,v $
+ * Revision 1.2  2018/07/27 14:01:53  fseck
+ * small change to fix compiler warning
+ *
  * Revision 1.1  2018/07/25 14:34:40  jeromel
  * First version, reviewed Raghav+Jerome
  *
@@ -20,13 +23,12 @@
 #ifndef STETOFHARDWAREMAP_H
 #define STETOFHARDWAREMAP_H
 
-#include "StMaker.h"
-
 #include <vector>
 #include <map>
 
+#include "TObject.h"
 
-class StETofHardwareMap {
+class StETofHardwareMap : public TObject {
 
 public:
     StETofHardwareMap();
@@ -34,7 +36,7 @@ public:
     ~StETofHardwareMap();
 
     void          init(); 
-    void          mapToGeom( unsigned int rocId, unsigned int chipId, unsigned int channelId, std::vector<unsigned int>& geomVec );
+    void          mapToGeom( unsigned int rocId, unsigned int chipId, unsigned int channelId, std::vector< unsigned int >& geomVec );
     unsigned int  module( unsigned int sector, unsigned int plane );
 
 protected:
