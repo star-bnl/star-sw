@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofINLCorr.h,v 1.6 2013/12/06 23:27:04 geurts Exp $
+ * $Id: StBTofINLCorr.h,v 1.7 2016/07/13 19:13:19 jdb Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StBTofINLCorr.h,v $
+ * Revision 1.7  2016/07/13 19:13:19  jdb
+ * Increasing the max # of TDIG for INL corrections for the recent upload of a new board to the tof INL Corr DB Table
+ *
  * Revision 1.6  2013/12/06 23:27:04  geurts
  * increasee max number of TDIGs that are stored in database from 1200 to 1202
  *
@@ -54,7 +57,10 @@ class StBTofINLCorr{
   static const Int_t mNTDIGOnTray = 8;
   static const Int_t mNGLOBALCHANMAX = 192;
 
-  static const Int_t mNTDIGMAX = 1202;
+  // nMTDIGMAX = 1202 Originally
+  // July, 2016 uploaded INL corrs for new board but also keeping all of the old ones
+  // so total is now 1203
+  static const Int_t mNTDIGMAX = 1203;
   static const Int_t mNChanOnTDIG = 24;
   static const Int_t mNChanMAX = 1024;
   static const Int_t mNBoardIdMAX = 4800;

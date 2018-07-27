@@ -16,8 +16,10 @@ int DSMAlgo_EM201_2009::ajpBarrel(const DSM& dsm, int offset) const
   for (int ch = 0; ch < 6; ++ch)
     {
       jpBits[ch] = dsm.channels[ch] >> offset & 0x3;
+//      printf("The channel %d jp bit is %d\n", ch, jpBits[ch]); //Test by Z. Chang
     }
   const int R3 = dsm.registers[3];
+//  printf("R3 is %d out of %d\n", R3,dsm.registers[3]);
 
   return (((jpBits[0] > R3) && (jpBits[1] > R3)) ||
 	  ((jpBits[1] > R3) && (jpBits[2] > R3)) ||

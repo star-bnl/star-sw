@@ -92,6 +92,10 @@ public:
 
   void get2009_DSMLayer0();	// Reads output from feeTPTreeADC & process
   void get2009_DSMLayer1();     // Reads output from mE101 & process
+ 
+  // mod by Danny
+  void get2013_DSMLayer0(Int_t runnumber);	// Reads output from feeTPTreeADC & process
+  void get2013_DSMLayer1(Int_t runnumber);	// Reads output from feeTPTreeADC & process
 
   // Access to 2009 EEMC Layer 0 + 1
  public:
@@ -163,6 +167,9 @@ public:
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.28  2017/01/02 15:31:56  rfatemi
+// Updated by Danny OLVITT for 2013 dijet analysiss
+//
 // Revision 1.27  2012/08/27 17:16:41  pibero
 // Add logging of EEMC gains from DB
 //

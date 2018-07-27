@@ -21,6 +21,7 @@ struct DSMLayer_E001_2009 : public DSMLayer<TriggerDataBlk> {
   bool read(const TriggerDataBlk& event);
   void write(DSMLayer<TriggerDataBlk>& layer);
   void run();
+  void run(int runnumber);
 };
 
 #endif	// DSM_LAYER_E001_2009_HH

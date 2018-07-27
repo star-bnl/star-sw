@@ -11,10 +11,10 @@ class St_tpcAnodeHVC : public TChair {
   UInt_t     	 getNumRows()           const {return GetNRows();}
   UShort_t 	 sector(Int_t i = 0) 	const {return Struct(i)->sector;}
   UShort_t 	 socket(Int_t i = 0) 	const {return Struct(i)->socket;}
-  Float_t 	 voltage(Int_t i = 0) 	const {return Struct(i)->voltage;}
-  Bool_t	 livePadrow(int sector = 1, int padrow = 1) const { return voltagePadrow(sector,padrow) > 500; }
-  Float_t	 voltagePadrow(int sector = 1, int padrow = 1) const ; // sector=1..24 , padrow=1..100
-  Bool_t         tripped() const { return (voltage() < -100); }
+  Float_t 	 voltage(Int_t i = 0) 	const;
+  Bool_t	 livePadrow(Int_t sector = 1, Int_t padrow = 1) const { return voltagePadrow(sector,padrow) > 500; }
+  Float_t	 voltagePadrow(Int_t sector = 1, Int_t padrow = 1) const ; // sector=1..24 , padrow=1..100
+  Bool_t         tripped(Int_t sector = 1, Int_t padrow = 1) const { return (voltagePadrow(sector,padrow) < -100); }
   static  void   sockets(Int_t sector, Int_t padrow, Int_t &e1, Int_t &e2, Float_t &f2);
  protected:
   St_tpcAnodeHVC(St_tpcAnodeHV *table=0) : TChair(table) {}

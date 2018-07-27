@@ -550,6 +550,15 @@ void StBemcTriggerSimu::Make(){
     get2009_DSMLayer1();
   }
 
+  // mod by Danny to grab 2013 DSM layers
+  Int_t runnumber = StMaker::GetChain()->GetRunNumber();
+  //pp
+  if ((year>=2013)&&(yyyymmdd>20130101)) {
+    get2013_DSMLayer0(runnumber);
+    get2013_DSMLayer1(runnumber);
+  }
+
+
   if (mMCflag) fillStEmcTriggerDetector();
 }
 //==================================================
@@ -855,6 +864,8 @@ void StBemcTriggerSimu::FEEini2009(int runNumber)
     } // switch mConfig
 
     TowerStatus[towerId-1] = status == 1 || status == 18;
+    // Mod by Danny    
+    if(runNumber > 14000000 && runNumber < 15000000) TowerStatus[towerId-1] = status == 1;
 
     if (!TowerStatus[towerId-1]) ++numMaskTow[triggerPatch];
     FEEped[towerId-1] = getFEEpedestal(ped12[towerId-1],pedTargetValue,debug);
@@ -910,7 +921,9 @@ void StBemcTriggerSimu::FEEini2009(int runNumber)
       LUTsig  [crate-1][seq] = parameters[2];
       LUTpow  [crate-1][seq] = parameters[3];
       //run12 modify trigger patch pedestal due to masked out towers --zchang
-      if(runNumber > 13000000 && runNumber < 14000000){
+      //if(runNumber > 13000000 && runNumber < 14000000){
+      //Mod by Danny
+      if(runNumber > 13000000 && runNumber < 15000000){
 	//test zchang set all trigger patch formula and bit conversion to 2 --zchang
 	bitConvValue[triggerPatch] = 2;
 	formula[crate-1][seq] = 2;
@@ -3008,6 +3021,28 @@ void StBemcTriggerSimu::get2009_DSMLayer0()
 
 //==================================================
 
+void StBemcTriggerSimu::get2013_DSMLayer0(Int_t runnumber)
+{
+  // Loop over 30 modules
+  for (int dsm = 0; dsm < kL0DsmModule; ++dsm) {
+    TString line = (*mB001)[dsm].name + ": ";
+    // Loop over 10 input channels to each module 
+    for (int ch = 0 ; ch < kL0DsmInputs; ++ch) {
+      int tpid = dsm*kL0DsmInputs+ch;
+      (*mB001)[dsm].channels[ch] = L0_HT_ADC[tpid] | L0_TP_ADC[tpid] << 6;
+      line += Form("%04x ",(*mB001)[dsm].channels[ch]);
+    } // End loop over channels
+    LOG_DEBUG << line << endm;
+  } // End loop over modules
+
+  // Emulate BEMC layer 0
+  mB001->run(runnumber);
+}
+
+//==================================================
+
+//==================================================
+
 void StBemcTriggerSimu::get2009_DSMLayer1()
 {
   // Get input from BEMC layer 0
@@ -3025,6 +3060,27 @@ void StBemcTriggerSimu::get2009_DSMLayer1()
 }
 
 //==================================================
+
+//==================================================
+
+void StBemcTriggerSimu::get2013_DSMLayer1(Int_t runnumber)
+{
+  // Get input from BEMC layer 0
+  mB001->write(*mB101);
+
+  // LOG_DEBUG messages
+  for (size_t dsm = 0; dsm < mB101->size(); ++dsm) {
+    TString line = (*mB101)[dsm].name + ": ";
+    for (int ch = 0; ch < 8; ++ch) line += Form("%04x ",(*mB101)[dsm].channels[ch]);
+    LOG_DEBUG << line << endm;
+  }
+
+  // Emulate BEMC layer 1
+  mB101->run(runnumber);
+}
+
+//==================================================
+
 
 const vector< pair<int,int> > StBemcTriggerSimu::getTowersAboveThreshold(int trigId) const {  
   vector< pair<int,int> > towers;

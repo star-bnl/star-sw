@@ -1,0 +1,5 @@
+//:Description: Effective height of pad row
+struct TpcEffectivedX {
+  float scaleInner; /* scale factor for inner dX */
+  float scaleOuter; /*       -"-        outer dX  */
+};

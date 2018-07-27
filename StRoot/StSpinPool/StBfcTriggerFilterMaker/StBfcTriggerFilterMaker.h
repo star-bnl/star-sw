@@ -56,7 +56,8 @@ public:
 
   int Init();
   int Make();
-
+  //Below are the Layer 2 EMC DSM for 2009
+  /*
   void SetBHT0(int value = 1) { mMask.set(0,value);  }
   void SetBHT1(int value = 1) { mMask.set(1,value);  }
   void SetBHT2(int value = 1) { mMask.set(2,value);  }
@@ -73,6 +74,25 @@ public:
   void SetBAJP(int value = 1) { mMask.set(13,value); }
   void SetEAJP(int value = 1) { mMask.set(14,value); }
   void SetJP0 (int value = 1) { mMask.set(15,value); }
+  */
+
+  // Layer 2 EMC DSM for 2013
+  void SetBHT0(int value = 1) { mMask.set(0,value); }
+  void SetBHT1(int value = 1) { mMask.set(1,value); }
+  void SetBHT2(int value = 1) { mMask.set(2,value); }
+  void SetBHT3(int value = 1) { mMask.set(3,value); }
+  void SetEHT0(int value = 1) { mMask.set(4,value); }
+  void SetEHT1(int value = 1) { mMask.set(5,value); }
+  void SetJP1(int value = 1) { mMask.set(6,value); } // Unified over BEMC & EEMC
+  void SetJP2(int value = 1) { mMask.set(7,value); } // Unified over BEMC & EEMC
+  void SetBJP1(int value = 1) { mMask.set(8,value); } // For 18 BEMC only patches
+  void SetEEMCdijet(int value = 1) { mMask.set(9,value); } // EEMC-only JP0-baseddijet trigger bit
+  void SetEJP1(int value = 1) { mMask.set(10,value); } // For 6 EEMC only patches
+  void SetJP1dijet(int value = 1) { mMask.set(11,value); } 
+  void SetJP0dijet(int value = 1) { mMask.set(12,value); } 
+  void SetBAJP(int value = 1) { mMask.set(13,value); } 
+  void SetDAQ10k(int value = 1) { mMask.set(14,value); } 
+  void SetJP0(int value = 1) { mMask.set(15,value); } 
 
   void changeJPThresh(int dsm);	/// Changes the JP Thresholds by dsm
   void SetOkAllEvents  (int ok   = 1) { mOkAllEvents   = ok  ; }
@@ -84,6 +104,9 @@ private:
   vector<int> mTriggers;
   int mOkAllEvents;
   int mSkipAllEvents;
+
+  // virtual const char *GetCVS() const                                                      //Amilkar: commented
+  //{static const char cvs[]="Tag $Name:  $ $Id: StBfcTriggerFilterMaker.h,v 1.5.12.1 2018/07/27 14:35:22 didenko Exp $ built "__DATE__" "__TIME__ ; return cvs;}    //Amilkar: commented
 
   ClassDef(StBfcTriggerFilterMaker,0);
 };

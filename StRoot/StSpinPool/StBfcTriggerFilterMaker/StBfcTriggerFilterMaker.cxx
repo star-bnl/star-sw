@@ -25,7 +25,8 @@ int StBfcTriggerFilterMaker::Init()
   SetAttr(".Privilege",1);
 
   // Print mask
-  LOG_INFO << Form("MASK: BHT0=%d BHT1=%d BHT2=%d BHT3=%d EHT0=%d EHT1=%d JP1=%d JP2=%d BJP1=%d BJP2=%d EJP1=%d EJP2=%d AJP=%d BAJP=%d EAJP=%d JP0=%d",
+  // Mask now changed to run 13 bits
+  LOG_INFO << Form("MASK: BHT0=%d BHT1=%d BHT2=%d BHT3=%d EHT0=%d EHT1=%d JP1=%d JP2=%d BJP1=%d EEMCdiJet=%d EJP1=%d JP1diJet=%d JP0diJet=%d BAJP=%d DAQ10k=%d JP0=%d",
 		   mMask.test(0),
 		   mMask.test(1),
 		   mMask.test(2),

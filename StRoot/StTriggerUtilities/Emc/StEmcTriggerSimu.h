@@ -57,6 +57,12 @@ public:
   int EHT0() const;
   int EHT1() const;
 
+  // 2013 change
+  int EEMCdijet() const;  // Bit 9
+  int JP1dijet() const;  // Bit 11
+  int JP0dijet() const;  //Bit 12
+  int DAQ10k() const;  // Bit 14
+
   void setHeadMaker(StMaker*) { /* dummy */ }
 
   void InitRun(int runNumber);
@@ -119,5 +125,11 @@ inline int StEmcTriggerSimu::BHT3() const { return btest(EM201output(),3); }
 
 inline int StEmcTriggerSimu::EHT0() const { return btest(EM201output(),4); }
 inline int StEmcTriggerSimu::EHT1() const { return btest(EM201output(),5); }
+
+// 2013 change
+inline int StEmcTriggerSimu::EEMCdijet() const { return btest(EM201output(),9); }
+inline int StEmcTriggerSimu::JP1dijet() const { return btest(EM201output(),11); }
+inline int  StEmcTriggerSimu::JP0dijet() const { return btest(EM201output(),12); }
+inline int StEmcTriggerSimu::DAQ10k() const { return btest(EM201output(),14); }
 
 #endif // ST_EMC_TRIGGER_SIMU_H
