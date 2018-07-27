@@ -44,6 +44,9 @@
         using std::invalid_argument;
 #   endif
 #endif
+#include "Riostream.h"
+using std::cerr;
+using std::ios;
 
 //#include "StUtilities/StMessMgr.h"
 

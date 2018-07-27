@@ -1,3 +1,6 @@
+/* 
+   root.exe Cosmics*.root CosmicsPlot.C
+ */
 void CosmicsPlot() {
   TSeqCollection *files = gROOT->GetListOfFiles();
   Int_t nn = files->GetSize();

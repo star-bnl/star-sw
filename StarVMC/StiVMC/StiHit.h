@@ -138,9 +138,9 @@ class StiHit {
   void setStHit(const StMeasuredPoint*hit){_sthit=hit;}
   //!Set the number of times used
   void setTimesUsed(UInt_t val) { mTimesUsed=(UChar_t)val; }
-  void setVyz(Float_t vy = 0, Float_t vz = 0) {_DriftVelocity = TRVector(2,vy,vz);}
-  void setVz(Float_t vz) {_DriftVelocity = TRVector(2,0.,vz);}
-  void setVy(Float_t vy) {_DriftVelocity = TRVector(2,vy,0.);}
+  void setVyz(Float_t vy = 0, Float_t vz = 0);
+  void setVz(Float_t vz);
+  void setVy(Float_t vy);
   void Reset();
   void Unset(){;}
   Double_t Value(Int_t key) const;

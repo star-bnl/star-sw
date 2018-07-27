@@ -397,70 +397,7 @@ switch ($pkg)
 	    setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc471/lib64:/usr/lib64/mysql:$LD_LIBRARY_PATH
 	endif
 	breaksw
-	case "gcc482":
-	setenv devtools /opt/rh/devtoolset-2
-	if (-r ${devtools}) then
-	  setenv PATH  ${devtools}/root/usr/bin:${PATH}
-	  setenv LD_LIBRARY_PATH  ${devtools}/root/usr/lib64:${devtools}/root/usr/lib:${LD_LIBRARY_PATH}
-	  setenv INFOPATH  ${devtools}/root/usr/share/info
-	  setenv PCP_DIR   ${devtools}/root
-          setenv PERL5LIB  ${devtools}/root/usr/lib64/perl5/vendor_perl:${devtools}/root/usr/lib/perl5:${devtools}/root/usr/share/perl5/vendor_perl:${PERL5LIB}
-	  setenv PYTHONPATH  ${devtools}/root/usr/lib64/python2.7/site-packages:${devtools}/root/usr/lib/python2.7/site-packages:/opt/rh/devtoolset-3/root/usr/lib64/python2.6/site-packages:/opt/rh/devtoolset-3/root/usr/lib/python2.6/site-packages
-	  setenv PKG_CONFIG_PATH  	
-	  setenv XDG_CONFIG_DIRS  ${devtools}/root/etc/xdg:/etc/xdg
-	  setenv XDG_DATA_DIRS  ${devtools}/root/usr/share:/usr/local/share:/usr/share
-          setenv X_SCLS  `basename $devtools`
-	endif
-	breaksw
-	case "gcc492":
-	setenv devtools /opt/rh/devtoolset-3
-	if (-r ${devtools}) then
-#	  if ( -r /tmp/${USER}/setenv.csh) /bin/rm /tmp/${USER}/setenv.csh
-#	  scl enable devtoolset-3 $GROUP_DIR/scl_source_STAR > /tmp/${USER}/setenv.csh
-#          source /tmp/${USER}/setenv.csh
-#          rm /tmp/${USER}/setenv.csh
-	  setenv PATH  ${devtools}/root/usr/bin:${PATH}
-	  setenv LD_LIBRARY_PATH  ${devtools}/root/usr/lib64:${devtools}/root/usr/lib:${LD_LIBRARY_PATH}
-	  setenv INFOPATH  ${devtools}/root/usr/share/info
-	  setenv PCP_DIR   ${devtools}/root
-          setenv PERL5LIB  ${devtools}/root/usr/lib64/perl5/vendor_perl:${devtools}/root/usr/lib/perl5:${devtools}/root/usr/share/perl5/vendor_perl:${PERL5LIB}
-	  setenv PYTHONPATH  ${devtools}/root/usr/lib64/python2.7/site-packages:${devtools}/root/usr/lib/python2.7/site-packages:/opt/rh/devtoolset-3/root/usr/lib64/python2.6/site-packages:/opt/rh/devtoolset-3/root/usr/lib/python2.6/site-packages
-	  setenv PKG_CONFIG_PATH  	
-	  setenv XDG_CONFIG_DIRS  ${devtools}/root/etc/xdg:/etc/xdg
-	  setenv XDG_DATA_DIRS  ${devtools}/root/usr/share:/usr/local/share:/usr/share
-          setenv X_SCLS  `basename $devtools`
-	else
-	  if (-r /afs/rhic.bnl.gov/rcassoft/x8664_sl6/gcc492/bin) then
-	    setenv PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl6/gcc492/bin:$PATH
-	    if (! $USE_64BITS) then
-		setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl6/gcc492/lib:/usr/lib/mysql:$LD_LIBRARY_PATH
-#		setenv PREFIX /afs/rhic.bnl.gov/star/packages/.DEV2/.misc/opt/$STAR_HOST_SYS
-	    else
-		setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl6/gcc492/lib64:/usr/lib64/mysql:$LD_LIBRARY_PATH
-	    endif
-          endif
-	endif
-#        exit 0;
-	breaksw
-	case "gcc520": # Hongwei private version
-	if (-r /opt/gcc/5.2.0)then
-	    setenv PATH /opt/gcc/5.2.0/bin:$PATH
-	    if (! $USE_64BITS) then
-		setenv LD_LIBRARY_PATH /opt/gcc/5.2.0/lib:/usr/lib/mysql:$LD_LIBRARY_PATH
-	    else
-		setenv LD_LIBRARY_PATH /opt/gcc/5.2.0/lib64:/usr/lib64/mysql:$LD_LIBRARY_PATH
-	    endif
-        else 
-          if (-r /star/u/kehw/software/gcc/5.2.0 ) then
-	    setenv PATH /star/u/kehw/software/binutils/bin:/star/u/kehw/software/gcc/5.2.0/bin:$PATH
-	    if (! $USE_64BITS) then
-		setenv LD_LIBRARY_PATH /star/u/kehw/software/binutils/lib:/star/u/kehw/software/gcc/5.2.0/lib:/usr/lib/mysql:$LD_LIBRARY_PATH
-	    else
-		setenv LD_LIBRARY_PATH /star/u/kehw/software/binutils/lib:/star/u/kehw/software/gcc/5.2.0/lib64:/usr/lib64/mysql:$LD_LIBRARY_PATH
-	    endif
-        endif
-	breaksw
-	case "gcc521":
+	case "gcc5*":
 	setenv devtools /opt/rh/devtoolset-4
 	if (-r ${devtools}) then
 	  setenv PATH  ${devtools}/root/usr/bin:${PATH}
@@ -475,18 +412,7 @@ switch ($pkg)
           setenv X_SCLS  `basename $devtools`
 	endif
 	breaksw
-	case "gcc620": # Hongwei private version
-	if (-r /opt/gcc/6.2.0)then
-	    setenv PATH /opt/gcc/6.2.0/bin:$PATH
-	    if (! $USE_64BITS) then
-		setenv LD_LIBRARY_PATH /opt/gcc/6.2.0/lib:/usr/lib/mysql:$LD_LIBRARY_PATH
-	    else
-		setenv LD_LIBRARY_PATH /opt/gcc/6.2.0/lib64:/usr/lib64/mysql:$LD_LIBRARY_PATH
-	    endif
-        endif
-	breaksw
-	case "gcc621":
-	case "gcc631":
+	case "gcc6*":
 	setenv devtools /opt/rh/devtoolset-6
 	if (-r ${devtools}) then
 	  setenv PATH  ${devtools}/root/usr/bin:${PATH}
@@ -501,8 +427,7 @@ switch ($pkg)
           setenv X_SCLS  `basename $devtools`
 	endif
 	breaksw
-	case "gcc72*":
-	case "gcc73*":
+	case "gcc7*":
 	setenv devtools /opt/rh/devtoolset-7
 	if (-r ${devtools}) then
 	  setenv PATH  ${devtools}/root/usr/bin:${PATH}
@@ -557,7 +482,8 @@ switch ($pkg)
 	breaksw
 	default:
 	breaksw
-      endsw # for specfic gc version
+      endsw # for specfic gcc version
+      $STARCMPL --version | head -1
        source ${GROUP_DIR}/.starver $STAR_LEVEL
       if ( $?DECHO ) echo "setup:set PATH = $PATH"
       if ( $?DECHO ) echo "setup:set LD_LIBRARY_PATH = $LD_LIBRARY_PATH"

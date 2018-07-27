@@ -268,17 +268,17 @@ public:
     StMatrix(size_t p, size_t q, size_t init=0);
 
     // Copy constructor.
-#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__)
+#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__) && !defined(__CLING__)
     template<class X>
     StMatrix(const StMatrix<X>&);
     StMatrix(const StMatrix<DataType>&);
-#else
+#else 
     StMatrix(const StMatrix<float>&);
     StMatrix(const StMatrix<double>&);
 #endif
     
     // Assignment operators.
-#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__)
+#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__) && !defined(__CLING__)
     template<class X>
     StMatrix<DataType>& operator=(const StMatrix<X>&);
     StMatrix<DataType>& operator=(const StMatrix<DataType>&);
@@ -342,7 +342,7 @@ public:
     StMatrix<DataType>& operator/=(double t);
 
     // Matrix Operations
-#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__)
+#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__) && !defined(__CLING__)
     template<class X> StMatrix<DataType>& operator+=(const StMatrix<X>&);
     template<class X> StMatrix<DataType>& operator-=(const StMatrix<X>&);
     template<class X> StMatrix<DataType>  dot(const StMatrix<X>&);
@@ -455,7 +455,7 @@ StMatrix<DataType>::StMatrix(size_t p,size_t q, size_t init)
     }
 }
 
-#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__)
+#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__) && !defined(__CLING__)
 template<class DataType>
 template<class X>
 StMatrix<DataType>::StMatrix(const StMatrix<X>& m1)
@@ -503,7 +503,7 @@ StMatrix<DataType>::StMatrix(const StMatrix<double>& m1)
 
 #endif
 
-#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__)
+#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__) && !defined(__CLING__)
 template<class DataType>
 template<class X>
 StMatrix<DataType>& StMatrix<DataType>::operator=(const StMatrix<X>& m1)
@@ -686,7 +686,7 @@ StMatrix<DataType> & StMatrix<DataType>::operator/=(double fact)
     return (*this);
 }
 
-#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__)
+#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__) && !defined(__CLING__)
 template<class DataType>
 template<class X>
 StMatrix<DataType>& StMatrix<DataType>::operator+=(const StMatrix<X>& m2)
@@ -1498,6 +1498,7 @@ StMatrix<DataType> dsum(const StMatrix<DataType> &m1, const StMatrix<DataType> &
 
 #endif /* ! __CINT__ */
 #if defined(__CINT__) || defined(__CLING__)
+#if 0
 template<> StMatrix<double> operator*(const StMatrix<double>& m1,const StMatrix<double>& m2);
 template<> StMatrix<double> operator*(const StMatrix<double>& m1,const StMatrix<float>&  m2);
 template<> StMatrix<double> operator*(const StMatrix<float>&  m1,const StMatrix<double>& m2);
@@ -1548,6 +1549,7 @@ template<> double norm1(const StMatrix<double>& m1);
 template<> float norm_infinity(const StMatrix<float>& m1);
 template<> float normInfinity(const StMatrix<float>& m1);
 template<> float norm1(const StMatrix<float>& m1);
+#endif
 #else /* ! __CINT__ */
 // Non-Member
 template<class DataType, class X>

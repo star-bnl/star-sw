@@ -1,7 +1,7 @@
 /* to Run: root.exe -q -b lMuDst.C Cosmics.C+
 
    to get momentum Resolution:
-//   CosmicT->Draw("(K.mPti+L.mPti)*TMath::Sqrt(2.)/TMath::Abs(K.mPti-L.mPti):-TMath::Log10(TMath::Abs(K.mPti-L.mPti)/2.)>>DpT(15,-1,2,100,-0.2,0.2)","chi2<200","colz");
+//   CosmicT->Draw("(K.mPti+L.mPti)*TMath::Sqrt(2.)/TMath::Abs(K.mPti-L.mPti):-TMath::Log10(TMath::Abs(K.mPti-L.mPti)/2.)>>DpT(60,-1,2,400,-0.2,0.2)","chi2<200","colz");
    TLegend *leg = new TLegend(0.4,0.4,0.7,0.7);
    TF1 *f = new TF1("f","TMath::Sqrt([0]*[0]/TMath::Power(10.,2*x)+[1]*[1]*TMath::Power(10.,2*x))",-1,2);
    Int_t color = 2; 
@@ -46,7 +46,6 @@
 //#define DEBUG
 //#define __PrimaryVertices__
 //#define __PrimaryTracks__
-#define __Y2015__
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <assert.h>
 #include "Riostream.h"
@@ -559,3 +558,10 @@ void Plot(Int_t nevents = 1e9) {
   //  leg->Draw();
 }
 //________________________________________________________________________________
+/*
+  Int_t NF = 0;
+  TSeqCollection *files = gROOT->GetListOfFiles();
+  TIter next(files);
+  TFile *f = 0;
+ 
+ */
