@@ -9,7 +9,7 @@
         </CDE>
         
         <Content  >
-            SHLD,SHBS,SHLS,SHBI,SHFI,SHOL,SFLR
+            SHLX,SHBS,SHLS,SHBI,SHFI,SHOL,SFLR
         </Content>
         
         <Structure name="SHLG"  >
@@ -78,11 +78,11 @@
 
         ShieldHalfHeight=(shlg_baseDy+shlg_slabDy+shlg_fiDy) 
 
-        <Create block="SHLD"  />
-        <Placement y="shlg_baseLevel+ShieldHalfHeight" x="0.0" z="+shlg_Z" block="SHLD" in="CAVE"  >
+        <Create block="SHLX"  />
+        <Placement y="shlg_baseLevel+ShieldHalfHeight" x="0.0" z="+shlg_Z" block="SHLX" in="CAVE"  >
         </Placement>
         
-        <Placement y="shlg_baseLevel+ShieldHalfHeight" x="0.0" z="-shlg_Z" block="SHLD" in="CAVE"  >
+        <Placement y="shlg_baseLevel+ShieldHalfHeight" x="0.0" z="-shlg_Z" block="SHLX" in="CAVE"  >
             <Rotation thetaz="180"  />
         </Placement>
         
@@ -96,10 +96,10 @@
         </Placement>
         
 
-        <Block name="SHLD" comment="is the shield mother volume in the STAR cave"  >
+        <Block name="SHLX" comment="is the shield mother volume in the STAR cave"  >
             <Material name="Air"  />
             <Medium name="Standard"  />
-            <Attribute for="SHLD" seen="1" colo="2"  />
+            <Attribute for="SHLX" seen="1" colo="2"  />
 
             <Shape type="BOX" dz="shlg_dz" dx="shlg_dx" dy="ShieldHalfHeight"  />
 
