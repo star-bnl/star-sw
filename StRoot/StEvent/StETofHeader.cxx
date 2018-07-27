@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHeader.cxx,v 2.1 2018/07/09 14:53:48 ullrich Exp $
+ * $Id: StETofHeader.cxx,v 2.2 2018/07/27 13:44:55 jeromel Exp $
  *
  * Author: Pengfei Lyu, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofHeader.cxx,v $
+ * Revision 2.2  2018/07/27 13:44:55  jeromel
+ * Changes by Florian
+ *
  * Revision 2.1  2018/07/09 14:53:48  ullrich
  * Initial Revision.
  *
@@ -37,17 +40,16 @@ StETofHeader::StETofHeader( const double& trgGdpbTime, const double& trgStarTime
                             const map< unsigned int, uint64_t >& gdpbTs, const map< unsigned int, uint64_t >& starTs,
                             const unsigned int& starToken, const unsigned int& starDaqCmdIn, const unsigned int& starTrgCmdIn,
                             const uint64_t& eventStatusFlag )
+: mTrgGdpbFullTime( trgGdpbTime ),
+  mTrgStarFullTime( trgStarTime ),
+  mStarToken( starToken ),
+  mStarDaqCmdIn( starDaqCmdIn ),
+  mStarTrgCmdIn( starTrgCmdIn ),
+  mEventStatusFlag( eventStatusFlag )
+
 {
-    mTrgGdpbFullTime = trgGdpbTime;
-    mTrgStarFullTime = trgStarTime;
-
-    mRocGdpbTs       = gdpbTs;
-    mRocStarTs       = starTs;
-
-    mStarToken       = starToken;
-    mStarDaqCmdIn    = starDaqCmdIn;
-    mStarTrgCmdIn    = starTrgCmdIn;
-    mEventStatusFlag = eventStatusFlag;
+    setRocGdpbTs( gdpbTs );
+    setRocStarTs( starTs );
 }
 
 
@@ -70,14 +72,18 @@ StETofHeader::trgStarFullTime() const
 map< unsigned int, uint64_t >
 StETofHeader::rocGdpbTs() const
 {
-    return mRocGdpbTs;
+    map< unsigned int, uint64_t > map_root_type( mRocGdpbTs.begin(), mRocGdpbTs.end() );
+
+    return map_root_type;
 }
 
 
 map< unsigned int, uint64_t >
 StETofHeader::rocStarTs() const
 {
-    return mRocStarTs;
+    map< unsigned int, uint64_t > map_root_type( mRocStarTs.begin(), mRocStarTs.end() );
+
+    return map_root_type;
 }
 
 
@@ -126,14 +132,14 @@ StETofHeader::setTrgStarFullTime( const double& starFullTime )
 void
 StETofHeader::setRocGdpbTs( const map< unsigned int, uint64_t >& gdpbTs )
 {
-    mRocGdpbTs = gdpbTs;
+    mRocGdpbTs.insert( gdpbTs.begin(), gdpbTs.end() );
 }
 
 
 void
 StETofHeader::setRocStarTs( const map< unsigned int, uint64_t >& starTs )
 {
-    mRocStarTs = starTs;
+    mRocStarTs.insert( starTs.begin(), starTs.end() );
 }
 
 
