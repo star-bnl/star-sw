@@ -14,6 +14,7 @@ using namespace std;
 class TFile;
 class StMuDstMaker;
 class StMCAsymMaker;
+class StNNPDFAsymMaker;  //Amilkar Nov 2017
 class TTree;
 class StJetSkimEvent;
 class StJetSkimTrig;
@@ -38,11 +39,12 @@ public:
     void addSimuTrigger(int trigId) {mSimuTrigIds.push_back(trigId);}
 
     const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StJetSkimEventMaker.h,v 1.8 2014/08/06 11:43:22 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StJetSkimEventMaker.h,v 1.8.10.1 2018/07/27 14:49:25 didenko Exp $ built " __DATE__ " " __TIME__; return cvs;}
     	
 protected:
-    StMuDstMaker*   muDstMaker;         //!
-    StMCAsymMaker*  mcAsymMaker;        //!
+    StMuDstMaker*      muDstMaker;         //!
+    StMCAsymMaker*     mcAsymMaker;        //!
+    StNNPDFAsymMaker*  nnpdfAsymMaker;     //!
     	
 private:
     const char*     outName;            //!
