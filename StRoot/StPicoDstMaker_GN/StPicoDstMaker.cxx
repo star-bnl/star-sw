@@ -1445,7 +1445,7 @@ void StPicoDstMaker::fillBTowHits() {
     /// Set up default values for towers                                                            
     /// that do not exist ( see StPicoBTowHit::isBad() )                                            
     Int_t adc = 0;
-    Float_t energy = -9.;
+    Float_t energy = -2.;
     if (aHit) {
       //int softId = aHit->softId(1);                                                               
       adc = aHit->adc();
@@ -1453,7 +1453,6 @@ void StPicoDstMaker::fillBTowHits() {
     }
 
     Int_t counter = mPicoArrays[StPicoArrays::BTowHit]->GetEntries();
-    //new((*(mPicoArrays[StPicoArrays::BTowHit]))[counter]) StPicoBTowHit(softId, adc, energy);     
     new((*(mPicoArrays[StPicoArrays::BTowHit]))[counter]) StPicoBTowHit(adc, energy);
   } //for (int i = 0; i < 4800; ++i)                                                                
 }

@@ -77,10 +77,6 @@ class StPicoTrack : public TObject {
   Float_t dEdxError() const;
   //Float_t dNdx() const;
   //Float_t dNdxError() const;
-  //Float_t nSigmaPionOld() const {return (Float_t)mOldNSigmaPion / 100.f;}
-  //void setNSigmaPionOld(Float_t val);
-  //Float_t nSigmaPionMuDst() const { return mMuNSigmaPion; }
-  //void setNSigmaPionMuDst(Float_t ns) { mMuNSigmaPion= ns; }
   Float_t nSigmaPion() const;
   Float_t nSigmaKaon() const;
   Float_t nSigmaProton() const;
@@ -169,18 +165,14 @@ class StPicoTrack : public TObject {
   UChar_t  mNHitsMax;
   /// nHitsDedx (in TPC)
   UChar_t  mNHitsDedx;
-  /// nSigmaPion * 100 (old style)
-  //Short_t   mOldNSigmaPion;
-  /// As in MuDst
-  //Float_t  mMuNSigmaPion;
   /// nsigmaPi (comment after the variable declaration is on purpose)
-  Float16_t mNSigmaPion;      //[-327,327,16]
+  Float16_t mNSigmaPion;      //[-60,60,16]
   /// nsigmaK  (comment after the variable declaration is on purpose)
-  Float16_t mNSigmaKaon;      //[-327,327,16]
+  Float16_t mNSigmaKaon;      //[-60,60,16]
   /// nsigmaP  (comment after the variable declaration is on purpose)
-  Float16_t mNSigmaProton;    //[-327,327,16]
+  Float16_t mNSigmaProton;    //[-60,60,16]
   /// nsigmaE  (comment after the variable declaration is on purpose)
-  Float16_t  mNSigmaElectron; //[-327,327,16]
+  Float16_t  mNSigmaElectron; //[-60,60,16]
   /// Toplogy Map data0 and data1. See StEvent/StTrackTopologyMap.cxx
   UInt_t   mTopologyMap[2];
 
@@ -235,10 +227,10 @@ inline Float_t StPicoTrack::dEdx() const { return mDedx; }
 inline Float_t StPicoTrack::dEdxError() const { return mDedxError; }
 //inline Float_t StPicoTrack::dNdx() const { return mDnDx;}
 //inline Float_t StPicoTrack::dNdxError() const { return mDnDxError;}
-inline Float_t StPicoTrack::nSigmaPion() const { return mNSigmaPion; /* return (Float_t)mNSigmaPion / 100.f; */ }
-inline Float_t StPicoTrack::nSigmaKaon() const { return mNSigmaKaon; /* return (Float_t)mNSigmaKaon / 100.f; */ }
-inline Float_t StPicoTrack::nSigmaProton() const { return mNSigmaProton; /* return (Float_t)mNSigmaProton / 100.f; */ }
-inline Float_t StPicoTrack::nSigmaElectron() const { return mNSigmaElectron; /* return (Float_t)mNSigmaElectron / 100.f; */ }
+inline Float_t StPicoTrack::nSigmaPion() const { return mNSigmaPion; }
+inline Float_t StPicoTrack::nSigmaKaon() const { return mNSigmaKaon; }
+inline Float_t StPicoTrack::nSigmaProton() const { return mNSigmaProton; }
+inline Float_t StPicoTrack::nSigmaElectron() const { return mNSigmaElectron; }
 inline UInt_t  StPicoTrack::topologyMap(UInt_t idx) const { return mTopologyMap[idx]; }
 inline Int_t   StPicoTrack::bemcPidTraitsIndex() const { return mBEmcPidTraitsIndex; }
 inline Int_t   StPicoTrack::bTofPidTraitsIndex() const { return mBTofPidTraitsIndex; }
@@ -288,5 +280,9 @@ inline void StPicoTrack::setOrigin(Float_t x, Float_t y, Float_t z) {
 inline void StPicoTrack::setOrigin(TVector3 orig) {
   mOriginX = (Float_t)orig.X(); mOriginY = (Float_t)orig.Y(); mOriginZ = (Float_t)orig.Z();
 }
+inline void StPicoTrack::setNSigmaPion(Float_t ns) { mNSigmaPion = ns; }
+inline void StPicoTrack::setNSigmaKaon(Float_t ns) { mNSigmaKaon = ns; }
+inline void StPicoTrack::setNSigmaProton(Float_t ns) { mNSigmaProton = ns; }
+inline void StPicoTrack::setNSigmaElectron(Float_t ns) { mNSigmaElectron = ns; }
 
 #endif

@@ -13,13 +13,13 @@ StPicoBTowHit::StPicoBTowHit(): TObject(), mAdc(0), mE(-9000) {
 StPicoBTowHit::StPicoBTowHit(Int_t adc, Float_t e) : TObject() {
 
   if (adc < 0) return;
-  mAdc  = (adc > std::numeric_limits<unsigned short>::max()) ? std::numeric_limits<unsigned short>::max() : (UShort_t)adc;
-  mE    = (e * 1000. > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)(TMath::Nint(e * 1000.));
+  mAdc  = (adc > std::numeric_limits<unsigned short>::max()) ? 
+    std::numeric_limits<unsigned short>::max() : (UShort_t)adc;
+  mE = e;
 }
 
 //_________________
 StPicoBTowHit::StPicoBTowHit(const StPicoBTowHit &hit) {
-  //mId = hit.mId;
   mAdc = hit.mAdc;
   mE = hit.mE;
 }
@@ -31,13 +31,12 @@ StPicoBTowHit::~StPicoBTowHit() {
 
 //_________________
 void StPicoBTowHit::Print(const Char_t* option) const {
-  //LOG_INFO << " Id = " << id() << " Adc = " << adc() << " Energy = " << energy() << endm;
   LOG_INFO << " Adc = " << adc() << " Energy = " << energy() << endm;
 }
 
 //_________________
 Bool_t StPicoBTowHit::isBad() const {
-  if( energy()==-9. && mAdc==0) {
+  if( energy()==-2. && mAdc==0) {
     return kTRUE;
   }
   else {
@@ -54,10 +53,4 @@ void StPicoBTowHit::setAdc(Int_t adc) {
     mAdc  = (adc > std::numeric_limits<unsigned short>::max()) ?
       std::numeric_limits<unsigned short>::max() : (UShort_t)adc;
   }
-}
-
-//_________________
-void StPicoBTowHit::setEnergy(Float_t e) {
-  mE = (e * 1000. > std::numeric_limits<short>::max()) ?
-    std::numeric_limits<short>::max() : (Short_t)(TMath::Nint(e * 1000.));
 }

@@ -14,16 +14,13 @@ ClassImp(StPicoTrack)
 StPicoTrack::StPicoTrack() : TObject(),
   mId(0),
   mChi2(std::numeric_limits<unsigned short>::max()),
-  mPMomentumX(0.), mPMomentumY(0.), mPMomentumZ(0.),
-  mGMomentumX(0.), mGMomentumY(0.), mGMomentumZ(0.),
-  mOriginX(0.),mOriginY(0.), mOriginZ(0.),
+  mPMomentumX(0), mPMomentumY(0), mPMomentumZ(0),
+  mGMomentumX(0), mGMomentumY(0), mGMomentumZ(0),
+  mOriginX(0),mOriginY(0), mOriginZ(0),
   mDedx(0), mDedxError(0), /* mDnDx(0.), mDnDxError(0.), */
   mNHitsFit(0), mNHitsMax(0), mNHitsDedx(0),
-/*mOldNSigmaPion(std::numeric_limits<short>::max()),*/
-  mNSigmaPion(std::numeric_limits<short>::max() * 0.01),
-  mNSigmaKaon(std::numeric_limits<short>::max() * 0.01),
-  mNSigmaProton(std::numeric_limits<short>::max() * 0.01),
-  mNSigmaElectron(std::numeric_limits<short>::max() * 0.01),
+  mNSigmaPion(-60), mNSigmaKaon(-60), mNSigmaProton(-60),
+  mNSigmaElectron(-60),
   mTopologyMap{}, mBEmcPidTraitsIndex(-1), mBTofPidTraitsIndex(-1),
   mMtdPidTraitsIndex(-1) {
   /* empty */
@@ -49,7 +46,6 @@ StPicoTrack::StPicoTrack(const StPicoTrack &track) : TObject() {
   mNHitsFit = track.mNHitsFit;
   mNHitsMax = track.mNHitsMax;
   mNHitsDedx = track.mNHitsDedx;
-  //mOldNSigmaPion = track.mOldNSigmaPion;
   mNSigmaPion = track.mNSigmaPion;
   mNSigmaKaon = track.mNSigmaKaon;
   mNSigmaProton = track.mNSigmaProton;
@@ -152,44 +148,4 @@ TVector3 StPicoTrack::gMom(TVector3 pVtx, Float_t const B) const {
 StPicoPhysicalHelix StPicoTrack::helix(Float_t const B) const {
   return StPicoPhysicalHelix( gMom(), origin(), B * kilogauss,
 			      static_cast<float>( charge() ) );
-}
-
-//_________________
-/*
-void StPicoTrack::setNSigmaPionOld(Float_t ns) {
-  mOldNSigmaPion = (fabs(ns * 100) > std::numeric_limits<short>::max()) ?
-    ((ns>0) ? std::numeric_limits<short>::max() :
-     std::numeric_limits<short>::min() ):
-    (Short_t)( TMath::Nint(ns * 100) );
-}
-*/
-
-//_________________
-void StPicoTrack::setNSigmaPion(Float_t ns) {
-  
-  mNSigmaPion = (fabs(ns) > (Float_t)std::numeric_limits<short>::max() * 0.01) ?
-    ( (ns>0) ? (Float_t)std::numeric_limits<short>::max() * 0.01 :
-      (Float_t)std::numeric_limits<short>::min() * 0.01 ) : ns;
-  //mNSigmaPion = (fabs(ns * 100) > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)ns;
-}
-
-//_________________
-void StPicoTrack::setNSigmaKaon(Float_t ns) {
-  mNSigmaKaon = (fabs(ns) > (Float_t)std::numeric_limits<short>::max() * 0.01) ?
-    ( (ns>0) ? (Float_t)std::numeric_limits<short>::max() * 0.01 :
-      (Float_t)std::numeric_limits<short>::min() * 0.01 ) : ns;
-}
-
-//_________________
-void StPicoTrack::setNSigmaProton(Float_t ns) {
-  mNSigmaProton = (fabs(ns) > (Float_t)std::numeric_limits<short>::max() * 0.01) ?
-    ( (ns>0) ? (Float_t)std::numeric_limits<short>::max() * 0.01 :
-      (Float_t)std::numeric_limits<short>::min() * 0.01 ) : ns;
-}
-
-//_________________
-void StPicoTrack::setNSigmaElectron(Float_t ns) {
-  mNSigmaElectron = (fabs(ns) > (Float_t)std::numeric_limits<short>::max() * 0.01) ?
-    ( (ns>0) ? (Float_t)std::numeric_limits<short>::max() * 0.01 :
-      (Float_t)std::numeric_limits<short>::min() * 0.01 ) : ns;
 }
