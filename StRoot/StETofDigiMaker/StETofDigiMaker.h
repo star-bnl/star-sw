@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofDigiMaker.h,v 1.1 2018/07/25 14:39:40 jeromel Exp $
+ * $Id: StETofDigiMaker.h,v 1.2 2018/07/27 13:58:08 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StETofDigiMaker.h,v $
+ * Revision 1.2  2018/07/27 13:58:08  fseck
+ * small change to compile also in 64bit mode
+ *
  * Revision 1.1  2018/07/25 14:39:40  jeromel
  * Peer reviewed Raghav+Jerome - code from Florian Seck
  *
@@ -46,15 +49,15 @@ public:
     StETofCollection* GetETofCollection();
 
     void   convertTriggerMessages( vector< gdpb::FullMessage >& triggerMessages,
-                                   map< UInt_t, ULong64_t >& gdpbTs,
-                                   map< UInt_t, ULong64_t >& starTs );
+                                   map< unsigned int, uint64_t >& gdpbTs,
+                                   map< unsigned int, uint64_t >& starTs );
 
-    void   fillETofHeader( ULong64_t* longBuff, vector< gdpb::FullMessage >& triggerMessages );
+    void   fillETofHeader( uint64_t* longBuff, vector< gdpb::FullMessage >& triggerMessages );
     void   fillETofDigi( gdpb::FullMessage& mess );
     void   fillEvent();
 
     //virtual const char *GetCVS() const
-    //{static const char cvs[]="Tag $Name:  $ $Id: StETofDigiMaker.h,v 1.1 2018/07/25 14:39:40 jeromel Exp $ built "__DATE__" " __TIME__ ; return cvs;}
+    //{ static const char cvs[]="Tag $Name:  $ $Id: StETofDigiMaker.h,v 1.2 2018/07/27 13:58:08 fseck Exp $ built "__DATE__" " __TIME__ ; return cvs; }
 
 private:
     StEvent*             mEvent;
