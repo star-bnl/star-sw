@@ -2,13 +2,13 @@
 <!DOCTYPE SCATALOG [
    <!ELEMENT SCATALOG (SITE*)>
        <!ATTLIST SCATALOG VERSION CDATA #REQUIRED>
-   <!ELEMENT SITE (SERVER)+>
+   <!ELEMENT SITE (SERVER+)>
        <!ATTLIST SITE name (BNL | LBL) #REQUIRED>
        <!ATTLIST SITE description CDATA #IMPLIED>
        <!ATTLIST SITE URI CDATA #IMPLIED>
-   <!ELEMENT SERVER (HOST)+>
+   <!ELEMENT SERVER (HOST+)>
        <!ATTLIST SERVER SCOPE (Master | Admin | User) #REQUIRED>
-   <!ELEMENT HOST (ACCESS)+>
+   <!ELEMENT HOST (ACCESS+)>
        <!ATTLIST HOST NAME CDATA #REQUIRED>
        <!ATTLIST HOST DBTYPE CDATA #IMPLIED>
        <!ATTLIST HOST DBNAME CDATA #REQUIRED>
@@ -30,7 +30,7 @@
 		<SERVER SCOPE="User">
 			<HOST NAME="fc2.star.bnl.gov" DBNAME="FileCatalog_BNL" PORT="3336">
 				<ACCESS USER="FC_user" PASS="FCatalog"/>
-                        </HOST>
+			</HOST>
 			<HOST NAME="fc4.star.bnl.gov" DBNAME="FileCatalog_BNL" PORT="3336">
 				<ACCESS USER="FC_user" PASS="FCatalog"/>
 			</HOST>

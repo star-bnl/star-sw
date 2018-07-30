@@ -29,35 +29,30 @@
                 </Server>  
 
                 <Server scope="Analysis" accessMode="read">
-            	   		<Host name="db14.star.bnl.gov"  port="3316" machinePower="2.0" />
-               		    <Host name="db13.star.bnl.gov"  port="3316" machinePower="2.0" />
+            		<Host name="db14.star.bnl.gov"  port="3316" machinePower="2.0" />
+               		<Host name="db13.star.bnl.gov"  port="3316" machinePower="2.0" />
                         <Host name="db12.star.bnl.gov"  port="3316" machinePower="2.0" />
-                    	<Host name="db11.star.bnl.gov"  port="3316" />						
+                	<Host name="db11.star.bnl.gov"  port="3316" />
                         <Host name="db01.star.bnl.gov"  port="3316" />
-                        <Host name="db04.star.bnl.gov"  port="3316" />
+            		<Host name="db02.star.bnl.gov"  port="3316" />
                         <Host name="db06.star.bnl.gov"  port="3316" />
                         <Host name="db07.star.bnl.gov"  port="3316" />
                         <Host name="db08.star.bnl.gov"  port="3316" />
-                        <Host name="db05.star.bnl.gov"  port="3316" />
-                        <!-- <Host name="db02.star.bnl.gov"  port="3316" /> -->
+        	    <!-- <Host name="db05.star.bnl.gov"  port="3316" /> -->
+                    <!-- <Host name="db02.star.bnl.gov"  port="3316" /> -->
                 </Server>	
                <!-- <Server scope="Analysis" user="mriganka,qiuh,xueliang,kxin,wuyf,luoxf,starembd,jiezhao,glma,hzhang,girard" accessMode="read"> //-->
 
 
 <!--
-               <Server scope="Analysis" whenActive="night" accessMode="read">
-               		    <Host name="db12.star.bnl.gov" port="3316" machinePower="1.0" />
-                </Server> 
--->	
-               <Server scope="Analysis" user="fisyak,perev,balewski,jwebb,pibero,dunlop" accessMode="read">
+               <Server scope="Analysis" user="perev,jwebb,dunlop,genevb,dmitry" accessMode="read">
           		<Host name="db10.star.bnl.gov" port="3316" machinePower="10.0" />
                 </Server>
-
+-->	
 
                <Server scope="Analysis" user="genevb,dunlop" accessMode="read">
                		<Host name="db10.star.bnl.gov" port="3316" machinePower="5.0" />
                 </Server>	
-
 
                 <Server scope="Analysis" accessMode="write">
                         <Host name="robinson.star.bnl.gov" port="3306"/>
