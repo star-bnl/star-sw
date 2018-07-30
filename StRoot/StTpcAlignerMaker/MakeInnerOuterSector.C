@@ -1,4 +1,4 @@
-#define __TpcInnerSector__ 
+//#define __TpcInnerSector__ 
 class St_db_Maker;
 class TTable;
 St_db_Maker *dbMk = 0;
@@ -54,7 +54,7 @@ void MakeInnerOuterSector(const Char_t *opt = 0){
 	if ((i < 3 && 
 	     X0[2*i+1] >= 0 && X0[2*i+1] < 99 &&
 	     X1[2*i+1] >= 0 && X1[2*i+1] < 99) ||
-	    (i > 3 && 
+	    (i >= 3 && 
 	     X0[2*i+1] >= 0 && X0[2*i+1] < 0.1 &&
 	     X1[2*i+1] >= 0 && X1[2*i+1] < 0.1)
 	    )  {

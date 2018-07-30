@@ -1033,7 +1033,7 @@ void TDrawW2S() {
       Int_t    iFlag;
     };
     Val_t ValA[7]; memset (ValA, 0, sizeof(ValA));
-#if 0
+#if 1
     if (LSF) {
       line = "";
       for (Int_t m = 0; m < 6; m++) {
@@ -1051,6 +1051,7 @@ void TDrawW2S() {
 	  line  += Form("|%8.2f+-%6.2f ", TMath::Max(-9999.99,TMath::Min( 9999.99,ValA[m].val)),TMath::Min(999.99,ValA[m].valError)); 
 	else
 	  line  += Form("|%7.2f+-%5.2f ", ValA[m].val,TMath::Min(99.99,ValA[m].valError)); 
+	ValA[m].val = ValA[m].valError = 0; ValA[m].iFlag = 0;
       }
     }
     cout << line << endl;

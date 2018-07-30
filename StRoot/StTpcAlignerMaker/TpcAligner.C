@@ -45,7 +45,7 @@ void TpcAligner(Int_t nevents=1e8,
 		// "/star/data45/reco/productionMinBias/FullField/P04ij/2004/030/st_physics_5030012_raw_4010010.event.root",
 		//	  "/star/data08/reco/dAuMinBias/FullField/P03ih/2003/040/st_physics_4040004_raw_0010010.event.root",
 		//		const char* rootFile="TpcAlignerFullFieldOldHelix.root")
-		const char *Tag = "y2018,CorrX",
+		const char *Tag = "", // "y2018,CorrX",
 // 		const char *Tag = "y2014a,Corr4"
 		const Char_t *output = 0) 
 {

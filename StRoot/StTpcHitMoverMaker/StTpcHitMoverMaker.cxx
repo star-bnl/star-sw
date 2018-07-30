@@ -56,7 +56,7 @@ Int_t StTpcHitMover::Make() {
     LOG_WARN << "StTpcHitMover::Make there is no StEvent " << endm;
     return kStWarn;
   }
-  gMessMgr->Info() << "StTpcHitMover::Make use StEvent " << endm;
+  //  gMessMgr->Info() << "StTpcHitMover::Make use StEvent " << endm;
   if (! gStTpcDb) {
     gMessMgr->Error() << "StTpcHitMover::Make TpcDb has not been instantiated " << endm;
     return kStErr;

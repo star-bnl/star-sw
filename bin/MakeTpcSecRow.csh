@@ -216,8 +216,10 @@
 #root.exe -q -b  SecRow3CGFdEdx58RC4.root 'MakeTpcSecRowB.C(20180426,134546)' >& MakeTpcSecRowB.20180426,134546.log
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20180426.124701.root SecRow3CGFdEdx101RC4.root 'MakeTpcSecRowB.C(20180426,124702)' >& MakeTpcSecRowB.20180426,124702.log
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20180426.124702.root SecRow3CGFdEdx103RC4.root 'MakeTpcSecRowB.C(20180426,124703)' >& MakeTpcSecRowB.20180426,124703.log
-root.exe -q -b  ~/work/reco/2018/27GeV_production_2018/dEdx/Fit/SecRow3CGFdEdx27GeV2.root  'MakeTpcSecRowB.C(20180510,0)' >& MakeTpcSecRowB.20180510,0.log
+#root.exe -q -b  ~/work/reco/2018/27GeV_production_2018/dEdx/Fit/SecRow3CGFdEdx27GeV2.root  'MakeTpcSecRowB.C(20180510,0)' >& MakeTpcSecRowB.20180510,0.log
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20180426.124702.root SecRow3CGFdEdx103RC4.root 'MakeTpcSecRowB.C(20180426,124703)' >& MakeTpcSecRowB.20180426,124703.log
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20180426.124702.root SecRow3CGFdEdx103RC4.root 'MakeTpcSecRowB.C(20180426,124703)' >& MakeTpcSecRowB.20180426,124703.log
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20180225.000058.root SecRow3CGFRunXVIII01.root 'MakeTpcSecRowB.C(20180312,1)' >& MakeTpcSecRowB.20180312,1.log
-root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20180312.000001.root SecRow3CGFRunXVIII02.root 'MakeTpcSecRowB.C(20180312,2)' >& MakeTpcSecRowB.20180312,2.log
+#root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20180312.000001.root SecRow3CGFRunXVIII02.root 'MakeTpcSecRowB.C(20180312,2)' >& MakeTpcSecRowB.20180312,2.log
+#root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20180312.000002.root SecRow3CGFRunXVIII04.root 'MakeTpcSecRowB.C(20180312,4)' >& MakeTpcSecRowB.20180312,4.log
+root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20180312.000004.root SecRow3CGFRunXVIII06.root 'MakeTpcSecRowB.C(20180312,6)' >& MakeTpcSecRowB.20180312,6.log
