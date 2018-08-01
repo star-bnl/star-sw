@@ -67,6 +67,7 @@ const static Int_t tMin = 20090301;
 const static Int_t tMax = 20200101;
 const static TDatime t0(tZero,0);
 const static Int_t timeOffSet = t0.Convert();
+static Int_t tpcTime = -1;
 Int_t     StdEdxY2Maker::NdEdx = 0;
 dEdxY2_t *StdEdxY2Maker::CdEdx = 0;
 dEdxY2_t *StdEdxY2Maker::FdEdx = 0;
@@ -230,6 +231,7 @@ void StdEdxY2Maker::AddEdxTraits(StTrack *tracks[2], dst_dedx_st &dedx){
 }
 //_____________________________________________________________________________
 Int_t StdEdxY2Maker::Make(){ 
+  Double_t tpcTime = GetDateTime().Convert() - timeOffSet;
   static  StTpcLocalSectorCoordinate        localSect[4];
   static  StTpcPadCoordinate                PadOfTrack, Pad;
   static  StTpcLocalSectorDirection         localDirectionOfTrack;
@@ -551,6 +553,7 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].ZdriftDistance = localSect[3].position().z();
 	CdEdx[NdEdx].zG      = tpcHit->position().z();
 	CdEdx[NdEdx].TanL = -CdEdx[NdEdx].xyzD[2]/TMath::Sqrt(CdEdx[NdEdx].xyzD[0]*CdEdx[NdEdx].xyzD[0]+CdEdx[NdEdx].xyzD[1]*CdEdx[NdEdx].xyzD[1]);
+	CdEdx[NdEdx].tpcTime = tpcTime;
 	if (St_trigDetSumsC::instance())	CdEdx[NdEdx].Zdc     = St_trigDetSumsC::instance()->zdcX();
 	CdEdx[NdEdx].adc     = tpcHit->adc();
 	Bool_t doIT = kTRUE;
@@ -911,7 +914,6 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
     TH1::SetDefaultSumw2(fSetDefaultSumw2);
     return;
   }
-  Double_t date = GetDateTime().Convert() - timeOffSet;
   // fill histograms 
   tpcGas_st           *tpcGas = 0;
   if ( m_TpcdEdxCorrection && m_TpcdEdxCorrection->tpcGas()) tpcGas = m_TpcdEdxCorrection->tpcGas()->GetTable();
@@ -1160,7 +1162,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 // 	    PressureT.Fill(FdEdx[k].row,temp,Vars);
 // 	  }
 	}
-	Double_t vars[2] = {date,FdEdx[k].C[ StTpcdEdxCorrection::ktpcTime-1].dEdxN};
+	Double_t vars[2] = {tpcTime,FdEdx[k].C[ StTpcdEdxCorrection::ktpcTime-1].dEdxN};
 	if (Time)    Time->Fill(vars);
 	//	if (TimeP)  {vars[1] = FdEdx[k].C[StTpcdEdxCorrection::ktpcTime].dEdxN; TimeP->Fill(vars);}
 	if (TimeC)  {vars[1] = FdEdx[k].F.dEdxN; TimeC->Fill(vars);}
@@ -1375,23 +1377,22 @@ void StdEdxY2Maker::TrigHistos(Int_t iok) {
   }
   else {
     tpcGas_st  *tpcgas = m_TpcdEdxCorrection && m_TpcdEdxCorrection->tpcGas() ? m_TpcdEdxCorrection->tpcGas()->GetTable():0;
-    Double_t date = GetDateTime().Convert() - timeOffSet;
     if (tpcgas) {
-      if (BarPressure)           BarPressure->Fill(date,tpcgas->barometricPressure);             
-      if (inputTPCGasPressure)   inputTPCGasPressure->Fill(date,tpcgas->inputTPCGasPressure);    
-      if (nitrogenPressure)      nitrogenPressure->Fill(date,tpcgas->nitrogenPressure);          
-      if (gasPressureDiff)       gasPressureDiff->Fill(date,tpcgas->gasPressureDiff);            
-      if (inputGasTemperature)   inputGasTemperature->Fill(date,tpcgas->inputGasTemperature);    
-      if (flowRateArgon1)        flowRateArgon1->Fill(date,tpcgas->flowRateArgon1);              
-      if (flowRateArgon2)        flowRateArgon2->Fill(date,tpcgas->flowRateArgon2);              
-      if (flowRateMethane)       flowRateMethane->Fill(date,tpcgas->flowRateMethane);            
+      if (BarPressure)           BarPressure->Fill(tpcTime,tpcgas->barometricPressure);             
+      if (inputTPCGasPressure)   inputTPCGasPressure->Fill(tpcTime,tpcgas->inputTPCGasPressure);    
+      if (nitrogenPressure)      nitrogenPressure->Fill(tpcTime,tpcgas->nitrogenPressure);          
+      if (gasPressureDiff)       gasPressureDiff->Fill(tpcTime,tpcgas->gasPressureDiff);            
+      if (inputGasTemperature)   inputGasTemperature->Fill(tpcTime,tpcgas->inputGasTemperature);    
+      if (flowRateArgon1)        flowRateArgon1->Fill(tpcTime,tpcgas->flowRateArgon1);              
+      if (flowRateArgon2)        flowRateArgon2->Fill(tpcTime,tpcgas->flowRateArgon2);              
+      if (flowRateMethane)       flowRateMethane->Fill(tpcTime,tpcgas->flowRateMethane);            
       if (percentMethaneIn)      
-	percentMethaneIn->Fill(date,tpcgas->percentMethaneIn*1000./tpcgas->barometricPressure);          
-      if (ppmOxygenIn)           ppmOxygenIn->Fill(date,tpcgas->ppmOxygenIn);                    
-      if (flowRateExhaust)       flowRateExhaust->Fill(date,tpcgas->flowRateExhaust);            
-      if (ppmWaterOut)           ppmWaterOut->Fill(date,tpcgas->ppmWaterOut);                    
-      if (ppmOxygenOut)          ppmOxygenOut->Fill(date,tpcgas->ppmOxygenOut);                
-      if (flowRateRecirculation) flowRateRecirculation->Fill(date,tpcgas->flowRateRecirculation);
+	percentMethaneIn->Fill(tpcTime,tpcgas->percentMethaneIn*1000./tpcgas->barometricPressure);          
+      if (ppmOxygenIn)           ppmOxygenIn->Fill(tpcTime,tpcgas->ppmOxygenIn);                    
+      if (flowRateExhaust)       flowRateExhaust->Fill(tpcTime,tpcgas->flowRateExhaust);            
+      if (ppmWaterOut)           ppmWaterOut->Fill(tpcTime,tpcgas->ppmWaterOut);                    
+      if (ppmOxygenOut)          ppmOxygenOut->Fill(tpcTime,tpcgas->ppmOxygenOut);                
+      if (flowRateRecirculation) flowRateRecirculation->Fill(tpcTime,tpcgas->flowRateRecirculation);
     }
     if (St_trigDetSumsC::instance()) {
       if (St_trigDetSumsC::instance()->zdcX() > 0 && ZdcC) ZdcC->Fill(TMath::Log10(St_trigDetSumsC::instance()->zdcX()));

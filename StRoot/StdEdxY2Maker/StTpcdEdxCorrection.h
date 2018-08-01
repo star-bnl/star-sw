@@ -156,6 +156,7 @@ class dEdxY2_t {
   Float_t  Voltage; // Anode Voltage
   Float_t  xpad;    // relative position in pad [-1.0,1.0]
   Float_t  yrow;    // relative position in row [-0.5,0.0] inner, and [0.0,0.5] outer
+  Float_t  tpcTime;
   dE_t     C[StTpcdEdxCorrection::kTpcAllCorrections+1];
   dE_t     F;     //! 
   Char_t   last[1];
