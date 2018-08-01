@@ -3,7 +3,7 @@
 
 #include "StChain/StMaker.h"
 #include "StPicoEvent_GN/StPicoArrays.h"
-#include "StPicoDstMaker/StPicoFmsFiller.h"
+#include "StPicoFmsFiller.h"
 
 class TClonesArray;
 class TChain;

@@ -32,7 +32,6 @@ class StPicoDst {
   StPicoDst() { /* emtpy */}
   /// Destructor
   ~StPicoDst() { /* empty*/ }
-
   /// Set the pointers to the TClonesArrays
   static void set(TClonesArray**);
   /// Reset the pointers to the TClonesArrays to 0
