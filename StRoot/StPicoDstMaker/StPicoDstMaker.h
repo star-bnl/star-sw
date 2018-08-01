@@ -24,17 +24,25 @@ class StPicoDstMaker : public StMaker {
  public:
   enum PicoIoMode {IoWrite=1, IoRead=2};
   enum PicoVtxMode {NotSet=0, Default=1, Vpd=2, VpdOrDefault=3};
+  enum PicoCovMtxMode {NotDefined=0, Skip=1, Write=2};
 
+  /// Constructor
   StPicoDstMaker(char const* name = "PicoDst");
-  StPicoDstMaker(PicoIoMode ioMode, char const* fileName = "", char const* name = "PicoDst");
+  /// Constructor that takes most of pararmeters
+  StPicoDstMaker(PicoIoMode ioMode, char const* fileName = "",
+		 char const* name = "PicoDst");
+  /// Destructor
   virtual ~StPicoDstMaker();
 
-  virtual Int_t Init();
+  /// Init run
   virtual Int_t InitRun(Int_t const runnumber);
+  /// Standard STAR functions
+  virtual Int_t Init();
   virtual Int_t Make();
   virtual void  Clear(Option_t* option = "");
   virtual Int_t Finish();
 
+  /// Print pico arrays
   void printArrays();
 
   /// Enables or disables branches matching a simple regex pattern in reading mode
@@ -54,7 +62,10 @@ class StPicoDstMaker : public StMaker {
   /// Sets the compression level for the file and all branches. 0 means no compression, 9 is the higher compression level.
   void setCompression(int comp = 9);
 
+  /// Set vertex selection mode
   void setVtxMode(const PicoVtxMode vtxMode);
+  /// Set to write or not to write covariant matrix
+  void setCovMtxMode(const PicoCovMtxMode covMtxMode);
 
  private:
 
@@ -80,10 +91,10 @@ class StPicoDstMaker : public StMaker {
   Int_t MakeRead();
   Int_t MakeWrite();
 
-  //for reading
+  /// For READ mode
   void fillEventHeader() const; //changes "global" variable, not this maker
 
-  //for writing
+  /// For WRITE mode
   void fillTracks();
   void fillEvent();
   void fillEmcTrigger();
@@ -115,12 +126,13 @@ class StPicoDstMaker : public StMaker {
   * param[out]  nep[1]   The number of phi strips in the BSMD cluster corresponding to the BEMC cluster matching track t
   * param[out]  towid[]  Unique ids of the three BEMC towers identified for ene[2], ene[3], and ene[4]
   */
-  bool getBEMC(const StMuTrack* t, int* id, int* adc, float* ene, float* d, int* nep, int* towid);
-  int  setVtxModeAttr();
+  Bool_t getBEMC(const StMuTrack* t, int* id, int* adc, float* ene, float* d, int* nep, int* towid);
+  Int_t  setVtxModeAttr();
+  Int_t  setCovMtxModeAttr();
 
   /// Selects a primary vertex from `muDst` vertex collection according to the
   /// vertex selection mode `mVtxMode` specified by the user.
-  bool selectVertex();
+  Bool_t selectVertex();
   Float_t   mTpcVpdVzDiffCut;
 
   /// A pointer to the main input source containing all muDst `TObjArray`s
@@ -135,7 +147,12 @@ class StPicoDstMaker : public StMaker {
   StEmcGeom*       mEmcGeom[4];
   StEmcRawHit*     mEmcIndex[4800];
 
+  Float_t    mBField;
+
+  /// Vertex selection mode
   PicoVtxMode mVtxMode;
+  /// Covariant matrix not write/write mode
+  PicoCovMtxMode mCovMtxMode;
 
   TString   mInputFileName;        //! *.list - MuDst or picoDst
   TString   mOutputFileName;       //! FileName
@@ -154,7 +171,7 @@ class StPicoDstMaker : public StMaker {
   int mBufferSize;
   ///@}
 
-  // MTD map from backleg to QT
+  /// MTD map from backleg to QT
   Int_t  mModuleToQT[30][5];        // Map from module to QT board index
   Int_t  mModuleToQTPos[30][5];     // Map from module to the position on QA board
   Int_t  mQTtoModule[8][8];         // Map from QT board to module
@@ -169,7 +186,6 @@ class StPicoDstMaker : public StMaker {
   ClassDef(StPicoDstMaker, 0)
 };
 
-
 inline StPicoDst* StPicoDstMaker::picoDst() { return mPicoDst; }
 inline TChain* StPicoDstMaker::chain() { return mChain; }
 inline TTree* StPicoDstMaker::tree() { return mTTree; }
@@ -177,5 +193,6 @@ inline void StPicoDstMaker::setSplit(int split) { mSplit = split; }
 inline void StPicoDstMaker::setCompression(int comp) { mCompression = comp; }
 inline void StPicoDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 inline void StPicoDstMaker::setVtxMode(const PicoVtxMode vtxMode) { mVtxMode = vtxMode; }
+inline void StPicoDstMaker::setCovMtxMode(const PicoCovMtxMode covMtxMode) { mCovMtxMode = covMtxMode; }
 
 #endif
