@@ -296,7 +296,7 @@ namespace gdpb {
 
       protected:
 
-         uint64_t data;   // main and only storage field for the message
+         ULong64_t data;   // main and only storage field for the message
 
       public:
 
@@ -304,7 +304,7 @@ namespace gdpb {
 
          Message(const Message& src) : data(src.data) {}
 
-         Message( uint64_t dataIn ) : data(dataIn) {}
+         Message( ULong64_t dataIn ) : data(dataIn) {}
 
          virtual ~Message() {};
 
@@ -314,13 +314,13 @@ namespace gdpb {
 
          inline void reset() { data = 0; }
 
-         inline uint64_t getData() const { return data; }
+         inline ULong64_t getData() const { return data; }
 
-         inline void setData( uint64_t value) { data = value; }
+         inline void setData( ULong64_t value) { data = value; }
 
-         inline uint64_t getFieldLong(uint32_t shift, uint32_t len) const
+         inline ULong64_t getFieldLong(uint32_t shift, uint32_t len) const
 
-            { return (data >> shift) & (((static_cast<uint64_t>(1)) << len) - 1); }
+            { return (data >> shift) & (((static_cast<ULong64_t>(1)) << len) - 1); }
 
          inline uint32_t getField(uint32_t shift, uint32_t len) const
 
@@ -328,7 +328,7 @@ namespace gdpb {
 
          inline void setField(uint32_t shift, uint32_t len, uint32_t value)
 
-            { data = (data & ~((((static_cast<uint64_t>(1)) << len) - 1) << shift)) | ((static_cast<uint64_t>(value)) << shift); }
+            { data = (data & ~((((static_cast<ULong64_t>(1)) << len) - 1) << shift)) | ((static_cast<ULong64_t>(value)) << shift); }
 
          inline uint8_t getBit(uint32_t shift) const
 
@@ -336,7 +336,7 @@ namespace gdpb {
 
          inline void setBit(uint32_t shift, uint8_t value)
 
-            { data = value ? (data | ((static_cast<uint64_t>(1)) << shift)) : (data & ~((static_cast<uint64_t>(1)) << shift)) ; }
+            { data = value ? (data | ((static_cast<ULong64_t>(1)) << shift)) : (data & ~((static_cast<ULong64_t>(1)) << shift)) ; }
 
          inline uint32_t getFieldBE(uint32_t shift, uint32_t len) const
 
@@ -346,7 +346,7 @@ namespace gdpb {
 
             { return (dataBE() >> shift) & 1; }
 
-         inline uint64_t dataBE() const
+         inline ULong64_t dataBE() const
 
             { return ((data&0x00000000000000FF)<<56)+
 
@@ -638,21 +638,21 @@ namespace gdpb {
 
          //++++//
 
-         inline uint64_t getGdpbTsMsbStarA()   const { return getFieldLong(  8, 40 ); }
+         inline ULong64_t getGdpbTsMsbStarA()   const { return getFieldLong(  8, 40 ); }
 
          //++++//
 
-         inline uint64_t getGdpbTsLsbStarB()   const { return getFieldLong( 24, 24 ); }
+         inline ULong64_t getGdpbTsLsbStarB()   const { return getFieldLong( 24, 24 ); }
 
-         inline uint64_t getStarTsMsbStarB()   const { return getFieldLong(  8, 16 ); }
-
-         //++++//
-
-         inline uint64_t getStarTsMidStarC()   const { return getFieldLong(  8, 40 ); }
+         inline ULong64_t getStarTsMsbStarB()   const { return getFieldLong(  8, 16 ); }
 
          //++++//
 
-         inline uint64_t getStarTsLsbStarD()   const { return getFieldLong( 40,  8 ); }
+         inline ULong64_t getStarTsMidStarC()   const { return getFieldLong(  8, 40 ); }
+
+         //++++//
+
+         inline ULong64_t getStarTsLsbStarD()   const { return getFieldLong( 40,  8 ); }
 
          /// 12 bits in between are set to 0
 
@@ -726,17 +726,17 @@ namespace gdpb {
 
                       uint32_t epoch = 0, std::ostream& os = std::cout ) const;
 
-         uint64_t getMsgFullTime(uint64_t epoch) const;
+         ULong64_t getMsgFullTime(ULong64_t epoch) const;
 
-         double getMsgFullTimeD(uint64_t epoch) const;
+         double getMsgFullTimeD(ULong64_t epoch) const;
 
          //! Expanded timestamp for 160 MHz * 19 bit (12 + 7) epochs
 
-         inline static uint64_t FullTimeStamp2(uint64_t epoch, uint32_t stamp)
+         inline static ULong64_t FullTimeStamp2(ULong64_t epoch, uint32_t stamp)
 
             { return ( epoch << 19) | (stamp & 0x7ffff); }
 
-         static uint64_t CalcDistance(uint64_t start, uint64_t stop);
+         static ULong64_t CalcDistance(ULong64_t start, ULong64_t stop);
 
          static double CalcDistanceD(double start, double stop);
 
@@ -756,13 +756,13 @@ namespace gdpb {
 
       protected:
 
-         uint64_t fulExtendedEpoch;   // Epoch of the message, extended with 32b epoch cycle counter
+         ULong64_t fulExtendedEpoch;   // Epoch of the message, extended with 32b epoch cycle counter
 
       public:
 
          FullMessage() : Message(), fulExtendedEpoch(0) {}
 
-         FullMessage(const Message& src, uint64_t uEpIn = 0) : Message(src), fulExtendedEpoch(uEpIn) {}
+         FullMessage(const Message& src, ULong64_t uEpIn = 0) : Message(src), fulExtendedEpoch(uEpIn) {}
 
          FullMessage(const FullMessage& src) : Message(src), fulExtendedEpoch(src.fulExtendedEpoch) {}
 
@@ -774,7 +774,7 @@ namespace gdpb {
 
          inline void reset() {  Message::reset(); fulExtendedEpoch = 0; }
 
-         inline uint64_t getExtendedEpoch() const {return fulExtendedEpoch; }
+         inline ULong64_t getExtendedEpoch() const {return fulExtendedEpoch; }
 
          // Works only for GET4 v2.XXX !!!!!!
 

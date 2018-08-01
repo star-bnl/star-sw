@@ -42,9 +42,9 @@ bool gdpb::Message::operator<(const gdpb::Message& other) const
 
 {
 
-   uint64_t uThisTs  = 0;
+   ULong64_t uThisTs  = 0;
 
-   uint64_t uOtherTs = 0;
+   ULong64_t uOtherTs = 0;
 
    uint32_t uThisType  = this->getMessageType();
 
@@ -126,7 +126,7 @@ bool gdpb::Message::operator<(const gdpb::Message& other) const
 
 //! =====> see '///' lines
 
-uint64_t gdpb::Message::getMsgFullTime(uint64_t epoch) const
+ULong64_t gdpb::Message::getMsgFullTime(ULong64_t epoch) const
 
 {
 
@@ -142,7 +142,7 @@ uint64_t gdpb::Message::getMsgFullTime(uint64_t epoch) const
 
 //! Harcoded constants should be implemented better as soon as their value is fixed
 
-double gdpb::Message::getMsgFullTimeD(uint64_t epoch) const
+double gdpb::Message::getMsgFullTimeD(ULong64_t epoch) const
 
 {
 
@@ -194,7 +194,7 @@ double gdpb::Message::getMsgFullTimeD(uint64_t epoch) const
 
 //! Returns the time difference between two expanded time stamps
 
-uint64_t gdpb::Message::CalcDistance(uint64_t start, uint64_t stop)
+ULong64_t gdpb::Message::CalcDistance(ULong64_t start, ULong64_t stop)
 
 {
 
