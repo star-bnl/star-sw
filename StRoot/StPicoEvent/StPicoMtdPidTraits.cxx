@@ -1,40 +1,22 @@
+/// C++ headers
 #include <limits>
 
-#include "StMuDSTMaker/COMMON/StMuMtdPidTraits.h"
-#include "StMuDSTMaker/COMMON/StMuMtdHit.h"
-#include "StarClassLibrary/PhysicalConstants.h"
-#include "St_base/StMessMgr.h"
-
-#include "StPicoEvent/StPicoMtdPidTraits.h"
+/// PicoDst headers
+#include "StPicoMessMgr.h"
+#include "StPicoMtdPidTraits.h"
 
 ClassImp(StPicoMtdPidTraits)
 
 //_________________
 StPicoMtdPidTraits::StPicoMtdPidTraits() : TObject(),
-					   mTrackIndex(-1), mMtdHitIndex(-1), mMatchFlag(-1),
-					   mDeltaY(-999.), mDeltaZ(-999.), mDeltaTimeOfFlight(-999.), 
-					   mBeta(-999.), mMtdHitChan(-1) {
+  mTrackIndex(-1), mMtdHitIndex(-1), mMatchFlag(-1),
+  mDeltaY(-999.), mDeltaZ(-999.), mDeltaTimeOfFlight(-999.), 
+  mBeta(-999.), mMtdHitChan(-1) {
   /* emtpy */
 }
 
 //_________________
-StPicoMtdPidTraits::StPicoMtdPidTraits(const StMuMtdHit*  hit,
-                                       const StMuMtdPidTraits* trait,
-                                       const Int_t index) {
-  mTrackIndex = (Short_t)index;
-  mMtdHitIndex = -1;
-  mMatchFlag = (Char_t)trait->matchFlag();
-  mDeltaY = trait->deltaY();
-  mDeltaZ = trait->deltaZ();
-  mDeltaTimeOfFlight = trait->timeOfFlight() - trait->expTimeOfFlight();
-  mBeta = (trait->pathLength() / trait->expTimeOfFlight()) * 1e9 / c_light;
-  mMtdHitChan = -1;
-  Int_t gchan = (hit->backleg() - 1) * 60 + (hit->module() - 1) * 12 + hit->cell();
-  mMtdHitChan = (gchan > std::numeric_limits<short>::max()) ? -1 : (Short_t) gchan;
-}
-
-//_________________
-StPicoMtdPidTraits::StPicoMtdPidTraits(const StPicoMtdPidTraits &traits) {
+StPicoMtdPidTraits::StPicoMtdPidTraits(const StPicoMtdPidTraits &traits) : TObject() {
   mTrackIndex = traits.mTrackIndex;
   mMtdHitIndex = traits.mMtdHitIndex;
   mMatchFlag = traits.mMatchFlag;
@@ -63,4 +45,10 @@ void StPicoMtdPidTraits::Print(const Char_t* option) const {
            << mDeltaZ << ", "
            << mDeltaTimeOfFlight << ", "
            << mBeta << ")" << endm;
+}
+
+//_________________
+void StPicoMtdPidTraits::setHitChannel(Int_t backleg, Int_t module, Int_t cell) {
+  Int_t gchan = (backleg - 1) * 60 + (module - 1) * 12 + cell;
+  mMtdHitChan = (gchan > std::numeric_limits<short>::max()) ? -1 : (Short_t) gchan;  
 }

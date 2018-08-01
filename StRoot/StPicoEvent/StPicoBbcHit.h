@@ -1,8 +1,8 @@
 #ifndef StPicoBbcHit_h
 #define StPicoBbcHit_h
 
-#include "TObject.h"
-//#include <cstdlib>
+/// ROOT headers
+#include <TObject.h>
 
 //
 // \class StPicoBbcHit
@@ -49,33 +49,34 @@ class StPicoBbcHit : public TObject {
   /// \param TDC          TDC reported by QT board [0,32]
   /// \param hasTAC       true/fals if this channel has a TAC
   /// \param statusIsGood good status, according to database
-  StPicoBbcHit(int PMTnumber, int EW, int ADC, int TAC, int TDC, bool hasTAC, bool statusIsGood);
+  StPicoBbcHit(Int_t PMTnumber, Int_t EW, Int_t ADC, Int_t TAC,
+	       Int_t TDC, Bool_t hasTAC, Bool_t statusIsGood);
   /// copy constructor
   StPicoBbcHit(const StPicoBbcHit &hit);
   /// destructor
   virtual ~StPicoBbcHit();
 
   /// true if this channel has a valid TAC value
-  bool hasTac() const;
+  Bool_t hasTac() const;
   /// ADC value [0,4095]
-  int  adc() const;
+  Int_t  adc() const;
   /// TAC value [0,4095]
-  int  tac() const;
+  Int_t  tac() const;
   /// TDC value [0,31]
-  int  tdc() const;
+  Int_t  tdc() const;
   /// +1 if tile is on West side; -1 if on East side
-  short side() const;
+  Short_t side() const;
 
   /// unique PMT identifier
   ///   absolute value is phototube number, between 1 and 16, inclusive
   ///   sign is +1/-1 for West/East
-  short id() const;
+  Short_t id() const;
   /// the packed data from the QT board: ADC=bits 0-11; TAC=bits 12-23; TDC=bits 24-28;
   ///                    bit 29=0/1 for has/does not have TAC;
   ///                    bit 30=0/1 if tile is marked bad/good in database
-  int qtData() const;
+  Int_t qtData() const;
   /// false if tile is bad or missing, according to (time-dependent) database
-  bool isGood() const;
+  Bool_t isGood() const;
 
 
   /// If you use the setQTdata method, you need to pack the data yourself.
@@ -100,23 +101,17 @@ class StPicoBbcHit : public TObject {
   ///                      bit 30 is the good/bad (1/0) status flag
   Int_t mQTdata;
 
-
   ClassDef(StPicoBbcHit, 1)
 };
 
-inline void    StPicoBbcHit::setId(short id){mId = id;}
-inline void    StPicoBbcHit::setQTdata(int packedData){mQTdata=packedData;}
-
-
-inline int     StPicoBbcHit::qtData()   const {return mQTdata;}
-
-
-inline short   StPicoBbcHit::side()     const { return mId < 0 ? -1 : +1;}
-inline short   StPicoBbcHit::id()       const { return mId; }
-
-inline int     StPicoBbcHit::adc() const { return mQTdata & 0x0FFF; }
-inline int     StPicoBbcHit::tac() const { return (mQTdata >> 12) & 0x0FFF; }
-inline int     StPicoBbcHit::tdc() const { return (mQTdata >> 24) & 0x001F; }
-inline bool    StPicoBbcHit::hasTac() const { return (mQTdata >> 29) & 0x1; }
-inline bool    StPicoBbcHit::isGood() const { return (mQTdata >> 30) & 0x1; }
+inline void    StPicoBbcHit::setId(Short_t id) { mId = id; }
+inline void    StPicoBbcHit::setQTdata(Int_t packedData) { mQTdata=packedData; }
+inline Int_t   StPicoBbcHit::qtData()   const { return mQTdata; }
+inline Short_t StPicoBbcHit::side()     const { return mId < 0 ? -1 : +1;}
+inline Short_t StPicoBbcHit::id()       const { return mId; }
+inline Int_t   StPicoBbcHit::adc() const { return mQTdata & 0x0FFF; }
+inline Int_t   StPicoBbcHit::tac() const { return (mQTdata >> 12) & 0x0FFF; }
+inline Int_t   StPicoBbcHit::tdc() const { return (mQTdata >> 24) & 0x001F; }
+inline Bool_t  StPicoBbcHit::hasTac() const { return (mQTdata >> 29) & 0x1; }
+inline Bool_t  StPicoBbcHit::isGood() const { return (mQTdata >> 30) & 0x1; }
 #endif

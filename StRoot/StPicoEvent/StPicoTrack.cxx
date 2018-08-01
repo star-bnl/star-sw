@@ -1,9 +1,12 @@
+/// C+++ headers
 #include <limits>
-#include "TMath.h"
-#include "StEvent/StDcaGeometry.h"
-#include "St_base/StMessMgr.h"
-#include "StMuDSTMaker/COMMON/StMuTrack.h"
-#include "StPicoEvent/StPicoTrack.h"
+
+/// ROOT headers
+#include <TMath.h>
+
+/// PicoDst headers
+#include "StPicoMessMgr.h"
+#include "StPicoTrack.h"
 
 ClassImp(StPicoTrack)
 
@@ -11,80 +14,33 @@ ClassImp(StPicoTrack)
 StPicoTrack::StPicoTrack() : TObject(),
   mId(0),
   mChi2(std::numeric_limits<unsigned short>::max()),
-  mPMomentum(0., 0., 0.), mGMomentum(0., 0., 0.), mOrigin(0., 0., 0.), 
-  mDedx(0.), /* mDnDx(0.), mDnDxError(0.), */
+  mPMomentumX(0), mPMomentumY(0), mPMomentumZ(0),
+  mGMomentumX(0), mGMomentumY(0), mGMomentumZ(0),
+  mOriginX(0),mOriginY(0), mOriginZ(0),
+  mDedx(0), mDedxError(0), /*mDnDx(0),mDnDxError(0)*/
   mNHitsFit(0), mNHitsMax(0), mNHitsDedx(0),
-  mNSigmaPion(std::numeric_limits<short>::max()),
-  mNSigmaKaon(std::numeric_limits<short>::max()),
-  mNSigmaProton(std::numeric_limits<short>::max()),
-  mNSigmaElectron(std::numeric_limits<short>::max()),
-  mTopologyMap{}, mBEmcPidTraitsIndex(-1), mBTofPidTraitsIndex(-1), mMtdPidTraitsIndex(-1) {
-    /* empty */
+  mNSigmaPion(-30), mNSigmaKaon(-30), mNSigmaProton(-30),
+  mNSigmaElectron(-30),
+  mTopologyMap{}, mBEmcPidTraitsIndex(-1), mBTofPidTraitsIndex(-1),
+  mMtdPidTraitsIndex(-1) {
+  /* empty */
 }
 
 //_________________
-StPicoTrack::StPicoTrack(StMuTrack const* const gTrk, StMuTrack const* const pTrk, double const B, 
-			 StThreeVectorD const& pVtx, StDcaGeometry const& dcaG) : StPicoTrack() {
-
-  if ( !gTrk || 
-       (gTrk->type() != global) || 
-       ( pTrk && (pTrk->type() != primary || pTrk->id() != gTrk->id()) ) ) {
-
-    LOG_WARN << "Invalid arguments passed to StPicoTrack constructor. Object is default initialized" << endm;
-    return;
-  }
-
-  mId   = (UShort_t)gTrk->id();
-  mChi2 = (gTrk->chi2() * 1000. > std::numeric_limits<unsigned short>::max()) ? std::numeric_limits<unsigned short>::max() : (UShort_t)(TMath::Nint(gTrk->chi2() * 1000.));
-
-  if (pTrk) {
-    mPMomentum = pTrk->p();
-  }
-
-  /// Calculate global momentum and position at point of DCA to the pVtx
-  StPhysicalHelixD gHelix = dcaG.helix();
-  gHelix.moveOrigin(gHelix.pathLength(pVtx));
-  mGMomentum = gHelix.momentum(B * kilogauss);
-  mOrigin = gHelix.origin();
-
-  mDedx = gTrk->dEdx() * 1.e6;
-  //mDnDx      = gTrk->probPidTraits().dNdxFit();
-  //mDnDxError = gTrk->probPidTraits().dNdxErrorFit();
-
-  int flag = gTrk->flag();
-  if (flag / 100 < 7) { /// TPC tracks
-    mNHitsFit  = (Char_t)(gTrk->nHitsFit(kTpcId) * gTrk->charge());
-    mNHitsMax  = (UChar_t)(gTrk->nHitsPoss(kTpcId));
-  }
-  else {    /// FTPC tracks
-    if (gTrk->helix().momentum(B * kilogauss).pseudoRapidity() > 0.) {
-      mNHitsFit  = (Char_t)(gTrk->nHitsFit(kFtpcWestId) * gTrk->charge());
-      mNHitsMax  = (UChar_t)(gTrk->nHitsPoss(kFtpcWestId));
-    }
-    else {
-      mNHitsFit  = (Char_t)(gTrk->nHitsFit(kFtpcEastId) * gTrk->charge());
-      mNHitsMax  = (UChar_t)(gTrk->nHitsPoss(kFtpcEastId));
-    }
-  }
-
-  mNHitsDedx = (UChar_t)(gTrk->nHitsDedx());
-  mNSigmaPion     = (fabs(gTrk->nSigmaPion() * 100.)     > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)(TMath::Nint(gTrk->nSigmaPion() * 100.));
-  mNSigmaKaon     = (fabs(gTrk->nSigmaKaon() * 100.)     > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)(TMath::Nint(gTrk->nSigmaKaon() * 100.));
-  mNSigmaProton   = (fabs(gTrk->nSigmaProton() * 100.)   > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)(TMath::Nint(gTrk->nSigmaProton() * 100.));
-  mNSigmaElectron = (fabs(gTrk->nSigmaElectron() * 100.) > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)(TMath::Nint(gTrk->nSigmaElectron() * 100.));
-
-  mTopologyMap[0] = (UInt_t)(gTrk->topologyMap().data(0));
-  mTopologyMap[1] = (UInt_t)(gTrk->topologyMap().data(1));
-}
-
-//_________________
-StPicoTrack::StPicoTrack(const StPicoTrack &track) {
+StPicoTrack::StPicoTrack(const StPicoTrack &track) : TObject() {
   mId = track.mId;
   mChi2 = track.mChi2;
-  mPMomentum = track.mPMomentum;
-  mGMomentum = track.mGMomentum;
-  mOrigin = track.mOrigin;
+  mPMomentumX = track.mPMomentumX;
+  mPMomentumY = track.mPMomentumY;
+  mPMomentumZ = track.mPMomentumZ;
+  mGMomentumX = track.mGMomentumX;
+  mGMomentumY = track.mGMomentumY;
+  mGMomentumZ = track.mGMomentumZ;
+  mOriginX = track.mOriginX;
+  mOriginY = track.mOriginY;
+  mOriginZ = track.mOriginZ;
   mDedx = track.mDedx;
+  mDedxError = track.mDedxError;
   //mDnDx = track.mDnDx;
   //mDnDxError = track.mDnDxError;
   mNHitsFit = track.mNHitsFit;
@@ -97,7 +53,6 @@ StPicoTrack::StPicoTrack(const StPicoTrack &track) {
   for(int iIter=0; iIter<2; iIter++) {
     mTopologyMap[iIter] = track.mTopologyMap[iIter];
   }
-
   mBEmcPidTraitsIndex = track.mBEmcPidTraitsIndex;
   mBTofPidTraitsIndex = track.mBTofPidTraitsIndex;
   mMtdPidTraitsIndex = track.mMtdPidTraitsIndex;
@@ -112,22 +67,85 @@ StPicoTrack::~StPicoTrack() {
 void StPicoTrack::Print(Char_t const* option) const {
   LOG_INFO << "id: " << id()
            << " chi2: " << chi2() << "\n"
-           << "pMom: " << pMom()
+           << "pMom: " << pMom().X() << " " << pMom().Y() << " " << pMom().Z()
+	   << "gMom: " << gMom().X() << " " << gMom().Y() << " " << gMom().Z()
+	   << "origin: " << origin().X() << " " << origin().Y() << " " << origin().Z()
            << " nHitsFit: " << nHitsFit()
            << " nHitsdEdx: " << nHitsDedx() << "\n"
            << "nSigma pi/K/p/e: " << nSigmaPion()   << "/" << nSigmaKaon() << "/"
-           << nSigmaProton() << "/" << nSigmaElectron()
+           << nSigmaProton() << "/" << nSigmaElectron() << "\n"
            << endm;
 }
 
 //_________________
-Float_t StPicoTrack::gDCAxy(Float_t x, Float_t y) {
-  return ::sqrt( (mOrigin.x()-x)*(mOrigin.x()-x) + (mOrigin.y()-y)*(mOrigin.y()-y) );
+Float_t StPicoTrack::gDCAxy(Float_t x, Float_t y) const {
+  return TMath::Sqrt( (mOriginX-x)*(mOriginX-x) + (mOriginY-y)*(mOriginY-y) );
 }
 
 //_________________
-Float_t StPicoTrack::gDCA(Float_t x, Float_t y, Float_t z) {
-  return ::sqrt( (mOrigin.x()-x)*(mOrigin.x()-x) + 
-		 (mOrigin.y()-y)*(mOrigin.y()-y) +
-		 (mOrigin.z()-z)*(mOrigin.z()-z) );
+Float_t StPicoTrack::gDCA(Float_t x, Float_t y, Float_t z) const {
+  return TMath::Sqrt( (mOriginX-x)*(mOriginX-x) +
+		      (mOriginY-y)*(mOriginY-y) +
+		      (mOriginZ-z)*(mOriginZ-z) );
+}
+
+//_________________
+TVector3 StPicoTrack::gDCA(TVector3 pVtx) const {
+  return (origin() - pVtx);
+}
+
+//_________________
+void StPicoTrack::setChi2(Float_t chi2) {
+  mChi2 = (chi2 * 1000. > std::numeric_limits<unsigned short>::max()) ?
+    std::numeric_limits<unsigned short>::max() : (UShort_t)(TMath::Nint(chi2 * 1000.));
+}
+
+//_________________
+void StPicoTrack::setDedx(Float_t dEdx) {
+  /// In KeV/cm
+  mDedx = dEdx * 1.e6;
+}
+
+//_________________
+void StPicoTrack::setDedxError(Float_t dEdxError) {
+  /// In KeV/cm
+  mDedxError = dEdxError * 1.e6;
+}
+
+//_________________
+void StPicoTrack::setNHitsMax(Int_t nhits) {
+  mNHitsMax = (UChar_t)nhits;
+}
+
+//_________________
+void StPicoTrack::setNHitsPossible(Int_t nhits) {
+  /// For those who wants to have standard terminology
+  setNHitsMax(nhits);
+}
+
+//_________________
+void StPicoTrack::setNHitsDedx(Int_t nhits) {
+  mNHitsDedx = (UChar_t)nhits;
+}
+
+//_________________
+void StPicoTrack::setTopologyMap(Int_t id, UInt_t word) {
+  if(id==0 || id==1) {
+    mTopologyMap[id] = word;
+  }
+  else {
+    /// Shouldn't here be a protection?
+  }
+}
+
+//_________________
+TVector3 StPicoTrack::gMom(TVector3 pVtx, Float_t const B) const {
+  StPicoPhysicalHelix gHelix = helix(B);
+  return gHelix.momentumAt( gHelix.pathLength( pVtx ), B * kilogauss );
+}
+
+//_________________
+StPicoPhysicalHelix StPicoTrack::helix(Float_t const B) const {
+  return StPicoPhysicalHelix( gMom(), origin(), B * kilogauss,
+			      static_cast<float>( charge() ) );
 }

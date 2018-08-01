@@ -1,8 +1,11 @@
 #ifndef StPicoEpdHit_h
 #define StPicoEpdHit_h
 
-#include "TObject.h"
-//#include <cstdlib>
+/// C++ headers
+#include <cstdlib>
+
+/// ROOT headers
+#include <TObject.h>
 
 //
 // \class StPicoEpdHit
@@ -56,46 +59,47 @@ class StPicoEpdHit : public TObject {
   /// \param hasTAC       true/fals if this channel has a TAC
   /// \param nMIP         gain-calibrated signal; energy loss in terms of MPV of Landau for a MIP
   /// \param statusIsGood good status, according to database
-  StPicoEpdHit(int position, int tile, int EW, int ADC, int TAC, int TDC, bool hasTAC, float nMIP, bool statusIsGood);
+  StPicoEpdHit(Int_t position, Int_t tile, Int_t EW, Int_t ADC, Int_t TAC, Int_t TDC,
+	       Bool_t hasTAC, Float_t nMIP, Bool_t statusIsGood);
   /// constructor just taking id, QT, nMIP
   /// \param id           tile id, encoding size, position and tile
   /// \param QTdata       bit-compressed QT data
   /// \nMIP               calibrated ADC
-  StPicoEpdHit(short id, int QTdata, float nMIP);
+  StPicoEpdHit(Short_t id, Int_t QTdata, Float_t nMIP);
   /// Copy constructor
   StPicoEpdHit(const StPicoEpdHit &hit);
   /// Destructor
   virtual ~StPicoEpdHit();
 
   /// true if this channel has a valid TAC value
-  bool hasTac() const;
+  Bool_t hasTac() const;
   /// ADC value [0,4095]
-  int  adc() const;
+  Int_t  adc() const;
   /// TAC value [0,4095]
-  int  tac() const;
+  Int_t  tac() const;
   /// TDC value [0,31]
-  int  tdc() const;
+  Int_t  tdc() const;
   /// +1 if tile is on West side; -1 if on East side
-  short side() const;
+  Short_t side() const;
 
   /// unique tile identifier
   ///   absolulte value is 100*position + tile
   ///   sign is +1/-1 for West/East
-  short id() const;
+  Short_t id() const;
   /// position of supersector on a wheel [1,12]
-  int position() const;     // 1...12
+  Int_t position() const;     // 1...12
   /// tile on the supersector [1,31]
-  int tile() const;         // 1...31
+  Int_t tile() const;         // 1...31
   /// row number [1,16]
-  int row() const;
+  Int_t row() const;
   /// the packed data from the QT board: ADC=bits 0-11; TAC=bits 12-23; TDC=bits 24-28;
   ///                    bit 29=0/1 for has/does not have TAC;
   ///                    bit 30=0/1 if tile is marked bad/good in database
-  int qtData() const;
+  Int_t qtData() const;
   /// gain calibrated energy loss in tile, in units of Landau MPV for one MIP
-  float nMIP() const;
+  Float_t nMIP() const;
   /// false if tile is bad or missing, according to (time-dependent) database
-  bool isGood() const;
+  Bool_t isGood() const;
 
 
   /// If you use the setQTdata method, you need to pack the data yourself.
@@ -108,7 +112,7 @@ class StPicoEpdHit : public TObject {
   /// \param id = sign*(100*position+tile) where sign=+/- for West/East wheel
   void setId(Short_t id);
   /// \param gain calibrated energy loss in tile, in units of Landau MPV for one MIP
-  void setnMIP(float nMIP);
+  void setnMIP(Float_t nMIP);
 
  protected:
 
@@ -128,24 +132,23 @@ class StPicoEpdHit : public TObject {
   ClassDef(StPicoEpdHit, 1)
 };
 
-inline void    StPicoEpdHit::setnMIP(float nMIP){mnMIP = nMIP;}
-inline void    StPicoEpdHit::setId(short id){mId = id;}
-inline void    StPicoEpdHit::setQTdata(int packedData){mQTdata=packedData;}
+inline void    StPicoEpdHit::setnMIP(Float_t nMIP) { mnMIP = nMIP; }
+inline void    StPicoEpdHit::setId(Short_t id) { mId = id; }
+inline void    StPicoEpdHit::setQTdata(Int_t packedData) { mQTdata=packedData; }
+
+inline Float_t StPicoEpdHit::nMIP()     const { return mnMIP; }
+inline Int_t   StPicoEpdHit::qtData()   const { return mQTdata; }
 
 
-inline float   StPicoEpdHit::nMIP()     const {return mnMIP;}
-inline int     StPicoEpdHit::qtData()   const {return mQTdata;}
+inline Short_t StPicoEpdHit::side()     const { return mId < 0 ? -1 : +1;}
+inline Short_t StPicoEpdHit::id()       const { return mId; }
+inline Int_t   StPicoEpdHit::position() const { return std::abs(mId / 100); }
+inline Int_t   StPicoEpdHit::tile()     const { return std::abs(mId % 100); }
+inline Int_t   StPicoEpdHit::row()      const { return (std::abs(mId % 100))/2 + 1; }
 
-
-inline short   StPicoEpdHit::side()     const { return mId < 0 ? -1 : +1;}
-inline short   StPicoEpdHit::id()       const { return mId; }
-inline int     StPicoEpdHit::position() const { return std::abs(mId / 100); }
-inline int     StPicoEpdHit::tile()     const { return std::abs(mId % 100); }
-inline int     StPicoEpdHit::row()      const { return (std::abs(mId % 100))/2 + 1; }
-
-inline int     StPicoEpdHit::adc() const { return mQTdata & 0x0FFF; }
-inline int     StPicoEpdHit::tac() const { return (mQTdata >> 12) & 0x0FFF; }
-inline int     StPicoEpdHit::tdc() const { return (mQTdata >> 24) & 0x001F; }
-inline bool    StPicoEpdHit::hasTac() const { return (mQTdata >> 29) & 0x1; }
-inline bool    StPicoEpdHit::isGood() const { return (mQTdata >> 30) & 0x1; }
+inline Int_t   StPicoEpdHit::adc() const { return mQTdata & 0x0FFF; }
+inline Int_t   StPicoEpdHit::tac() const { return (mQTdata >> 12) & 0x0FFF; }
+inline Int_t   StPicoEpdHit::tdc() const { return (mQTdata >> 24) & 0x001F; }
+inline Bool_t  StPicoEpdHit::hasTac() const { return (mQTdata >> 29) & 0x1; }
+inline Bool_t  StPicoEpdHit::isGood() const { return (mQTdata >> 30) & 0x1; }
 #endif

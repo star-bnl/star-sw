@@ -1,37 +1,62 @@
 #ifndef StPicoBTowHit_h
 #define StPicoBTowHit_h
 
-#include "TObject.h"
+/// C++ headers
+#include <limits>
+
+/// ROOT headers
+#include <TObject.h>
+#include <TMath.h>
 
 //_________________
 class StPicoBTowHit : public TObject {
 
  public:
-  //Default constructor
+  /// Default constructor
   StPicoBTowHit();
-  //Constructor that takes id, ADC and energy
-  StPicoBTowHit(int id, int adc, float e);
-  //Copy constructor
+  /// Constructor that takes ADC and energy
+  StPicoBTowHit(Int_t adc, Float_t e);
+  /// Copy constructor
   StPicoBTowHit(const StPicoBTowHit &hit);
-  //Destructor
+  /// Destructor
   virtual ~StPicoBTowHit();
-  //Print tower information
+  /// Print tower information
   virtual void Print(const Char_t* option = "") const;
 
-  Int_t   id() const;
+  /**
+   * Getters
+   */
   Int_t   adc() const;
   Float_t energy() const;
+  Bool_t  isBad() const;
+  Int_t   numericIndex2SoftId(Int_t idx) const;
+
+  /**
+   * Setters
+   */
+  void setAdc(Int_t adc);
+  void setEnergy(Float_t energy);
 
  protected:
 
-  UShort_t mId;    // towerId 1-4800
-  UShort_t mAdc;   // adc
-  Short_t  mE;     // Energy * 1000;
+  /// ADC
+  UShort_t mAdc;
+  /// Energy
+  Float16_t mE; //[-5,35,16]
 
-  ClassDef(StPicoBTowHit, 1)
+  ClassDef(StPicoBTowHit, 3)
 };
 
-inline Int_t   StPicoBTowHit::id() const { return (Int_t)mId; }
+/**
+ * Setters
+ */
+inline void StPicoBTowHit::setEnergy(Float_t energy) { mE = energy; }
+
+/**
+ * Getters
+ */
 inline Int_t   StPicoBTowHit::adc() const { return (Int_t)mAdc; }
-inline Float_t StPicoBTowHit::energy() const { return (Float_t)mE / 1000.; }
+inline Float_t StPicoBTowHit::energy() const { return mE; }
+inline Int_t StPicoBTowHit::numericIndex2SoftId(Int_t idx) const { return (idx+1); }
+
 #endif

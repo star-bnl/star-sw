@@ -1,16 +1,17 @@
-#include "St_base/StMessMgr.h"
-
-#include "StPicoEvent/StPicoEvent.h"
-#include "StPicoEvent/StPicoTrack.h"
-#include "StPicoEvent/StPicoEmcTrigger.h"
-#include "StPicoEvent/StPicoBTowHit.h"
-#include "StPicoEvent/StPicoBTofHit.h"
-#include "StPicoEvent/StPicoMtdHit.h"
-#include "StPicoEvent/StPicoFmsHit.h"
-#include "StPicoEvent/StPicoBEmcPidTraits.h"
-#include "StPicoEvent/StPicoBTofPidTraits.h"
-#include "StPicoEvent/StPicoMtdPidTraits.h"
-#include "StPicoEvent/StPicoDst.h"
+/// PicoDst headers
+#include "StPicoMessMgr.h"
+#include "StPicoEvent.h"
+#include "StPicoTrack.h"
+#include "StPicoEmcTrigger.h"
+#include "StPicoBTowHit.h"
+#include "StPicoBTofHit.h"
+#include "StPicoMtdHit.h"
+#include "StPicoFmsHit.h"
+#include "StPicoBEmcPidTraits.h"
+#include "StPicoBTofPidTraits.h"
+#include "StPicoMtdPidTraits.h"
+#include "StPicoTrackCovMatrix.h"
+#include "StPicoDst.h"          //MUST be the last one
 
 TClonesArray** StPicoDst::picoArrays = 0;
 
@@ -26,25 +27,22 @@ void StPicoDst::set(TClonesArray** thePicoArrays) {
 
 //_________________
 void StPicoDst::print() const {
-  LOG_INFO << "\n=========== event header =============\n\n";
-  LOG_INFO << " fill/run/event Id = " << event()->fillId() << "/" << event()->runId() << "/" << event()->eventId() << "\n";
-  LOG_INFO << " vertex = " << event()->primaryVertex() << "\n";
-  LOG_INFO << " refMult = " << event()->refMult() << " refMultFtpc = " << event()->refMultFtpc() << "\n";
-  LOG_INFO << " nVpdHits e/w = " << event()->nVpdHitsEast() << "/" << event()->nVpdHitsWest() << " nTofT0 = " << event()->nTofT0() << " vzVpd = " << event()->vzVpd() << "\n";
+  LOG_INFO << "\n=========== Event header =============\n\n";
+  event()->Print();
   LOG_INFO << "=====================================\n\n";
 }
 
 //_________________
 void StPicoDst::printTracks() {
-  if (numberOfTracks() == 0) {
+  if(numberOfTracks() == 0) {
     LOG_INFO << "No tracks found!" << endm;
     return;
   }
 
   LOG_INFO << "\n+++++++++ track list ( " << numberOfTracks() << " entries )\n\n";
-  for (UInt_t i_trk = 0; i_trk < numberOfTracks(); i_trk++) {
-    LOG_INFO << "+++ track " << i_trk << "\n";
-    track(i_trk)->Print();
+  for(UInt_t iTrk=0; iTrk<numberOfTracks(); iTrk++) {
+    LOG_INFO << "+++ track " << iTrk << "\n";
+    track(iTrk)->Print();
     LOG_INFO << "\n";
   }
 
@@ -56,15 +54,15 @@ void StPicoDst::printTriggers() {
 
   LOG_INFO << "=== EMC triggers ===" << "\n";
 
-  if (numberOfEmcTriggers() == 0) {
+  if(numberOfEmcTriggers() == 0) {
     LOG_INFO << "No triggers found!" << endm;
     return;
   }
 
   LOG_INFO << "\n\n+++++++++ trigger list ( " << numberOfEmcTriggers() << " entries )\n\n";
-  for (UInt_t i_t = 0; i_t < numberOfEmcTriggers(); i_t++) {
-    LOG_INFO << "+++ trigger " << i_t << "\n";
-    emcTrigger(i_t)->Print();
+  for(UInt_t iEntry=0; iEntry<numberOfEmcTriggers(); iEntry++) {
+    LOG_INFO << "+++ trigger " << iEntry << "\n";
+    emcTrigger(iEntry)->Print();
     LOG_INFO << "\n";
   }
 
@@ -72,17 +70,17 @@ void StPicoDst::printTriggers() {
 }
 
 //_________________
-void StPicoDst::printBTOWHits() {
+void StPicoDst::printBTowHits() {
 
-  if (numberOfBTOWHits() == 0) {
-    LOG_INFO << "No BTOWHit found!" << endm;
+  if(numberOfBTowHits() == 0) {
+    LOG_INFO << "No BTowHit found!" << endm;
     return;
   }
 
-  LOG_INFO << "\n+++++++++ BTOWHit list ( " << numberOfBTOWHits() << " entries )\n\n";
-  for (UInt_t i_t = 0; i_t < numberOfBTOWHits(); i_t++) {
-    LOG_INFO << "+++ btowHit " << i_t << "\n";
-    btowHit(i_t)->Print();
+  LOG_INFO << "\n+++++++++ BTowHit list ( " << numberOfBTowHits() << " entries )\n\n";
+  for(UInt_t iEntry=0; iEntry<numberOfBTowHits(); iEntry++) {
+    LOG_INFO << "+++ btowHit " << iEntry << "\n";
+    btowHit(iEntry)->Print();
     LOG_INFO << "\n";
   }
 
@@ -92,15 +90,15 @@ void StPicoDst::printBTOWHits() {
 //_________________
 void StPicoDst::printBTofHits() {
 
-  if (numberOfBTofHits() == 0) {
+  if(numberOfBTofHits() == 0) {
     LOG_INFO << "No BTofHit found!" << endm;
     return;
   }
 
   LOG_INFO << "\n+++++++++ BTof list ( " << numberOfBTofHits() << " entries )\n\n";
-  for (UInt_t i_t = 0; i_t < numberOfBTofHits(); i_t++) {
-    LOG_INFO << "+++ btofHit " << i_t << "\n";
-    btofHit(i_t)->Print();
+  for(UInt_t iEntry=0; iEntry<numberOfBTofHits(); iEntry++) {
+    LOG_INFO << "+++ btofHit " << iEntry << "\n";
+    btofHit(iEntry)->Print();
     LOG_INFO << "\n";
   }
 
@@ -110,15 +108,15 @@ void StPicoDst::printBTofHits() {
 //_________________
 void StPicoDst::printMtdHits() {
 
-  if (numberOfMtdHits() == 0) {
+  if(numberOfMtdHits() == 0) {
     LOG_INFO << "No MtdHit found!" << endm;
     return;
   }
 
   LOG_INFO << "\n+++++++++ Mtd list ( " << numberOfMtdHits() << " entries )\n\n";
-  for (UInt_t i_t = 0; i_t < numberOfMtdHits(); i_t++) {
-    LOG_INFO << "+++ mtdHit " << i_t << "\n";
-    mtdHit(i_t)->Print();
+  for(UInt_t iEntry=0; iEntry<numberOfMtdHits(); iEntry++) {
+    LOG_INFO << "+++ mtdHit " << iEntry << "\n";
+    mtdHit(iEntry)->Print();
     LOG_INFO << "\n";
   }
 
@@ -128,15 +126,15 @@ void StPicoDst::printMtdHits() {
 //_________________
 void StPicoDst::printFmsHits() {
 
-  if (numberOfFmsHits() == 0) {
+  if(numberOfFmsHits() == 0) {
     LOG_INFO << "No FmsHit found!" << endm;
     return;
   }
 
   LOG_INFO << "\n+++++++++ Fms list ( " << numberOfFmsHits() << " entries )\n\n";
-  for (UInt_t i_t = 0; i_t < numberOfFmsHits(); i_t++) {
-    LOG_INFO << "+++ fmsHit " << i_t << "\n";
-    fmsHit(i_t)->Print();
+  for(UInt_t iEntry=0; iEntry<numberOfFmsHits(); iEntry++) {
+    LOG_INFO << "+++ fmsHit " << iEntry << "\n";
+    fmsHit(iEntry)->Print();
     LOG_INFO << "\n";
   }
 
@@ -146,15 +144,15 @@ void StPicoDst::printFmsHits() {
 //_________________
 void StPicoDst::printBEmcPidTraits() {
 
-  if (numberOfBEmcPidTraits() == 0) {
-    LOG_INFO << "No BEmc pidTraits found!" << endm;
+  if(numberOfBEmcPidTraits() == 0) {
+    LOG_INFO << "No BEMC pidTraits found!" << endm;
     return;
   }
 
   LOG_INFO << "\n+++++++++ BEmc pidTraits list ( " << numberOfBEmcPidTraits() << " entries )\n\n";
-  for (UInt_t i_t = 0; i_t < numberOfBEmcPidTraits(); i_t++) {
-    LOG_INFO << "+++ BEmcPidTraits " << i_t << "\n";
-    bemcPidTraits(i_t)->Print();
+  for(UInt_t iEntry=0; iEntry<numberOfBEmcPidTraits(); iEntry++) {
+    LOG_INFO << "+++ BEmcPidTraits " << iEntry << "\n";
+    bemcPidTraits(iEntry)->Print();
     LOG_INFO << "\n";
   }
 
@@ -164,15 +162,15 @@ void StPicoDst::printBEmcPidTraits() {
 //_________________
 void StPicoDst::printBTofPidTraits() {
 
-  if (numberOfBTofPidTraits() == 0) {
+  if(numberOfBTofPidTraits() == 0) {
     LOG_INFO << "No BTof pidTraits found!" << endm;
     return;
   }
 
   LOG_INFO << "\n+++++++++ BTof pidTraits list ( " << numberOfBTofPidTraits() << " entries )\n\n";
-  for (UInt_t i_t = 0; i_t < numberOfBTofPidTraits(); i_t++) {
-    LOG_INFO << "+++ EmcPidTraits " << i_t << "\n";
-    btofPidTraits(i_t)->Print();
+  for(UInt_t iEntry=0; iEntry<numberOfBTofPidTraits(); iEntry++) {
+    LOG_INFO << "+++ EmcPidTraits " << iEntry << "\n";
+    btofPidTraits(iEntry)->Print();
     LOG_INFO << "\n";
   }
 
@@ -182,18 +180,35 @@ void StPicoDst::printBTofPidTraits() {
 //_________________
 void StPicoDst::printMtdPidTraits() {
 
-  if (numberOfMtdPidTraits() == 0) {
-    LOG_INFO << "No Mtd pidTraits found!" << endm;
+  if(numberOfMtdPidTraits() == 0) {
+    LOG_INFO << "No MTD pidTraits found!" << endm;
     return;
   }
 
-  LOG_INFO << "\n+++++++++ Mtd pidTraits list ( " << numberOfMtdPidTraits() << " entries )\n\n";
-  for (UInt_t i_t = 0; i_t < numberOfMtdPidTraits(); i_t++) {
-    LOG_INFO << "+++ mtdPidTraits " << i_t << "\n";
-    mtdPidTraits(i_t)->Print();
+  LOG_INFO << "\n+++++++++ MTD pidTraits list ( " << numberOfMtdPidTraits() << " entries )\n\n";
+  for(UInt_t iEntry=0; iEntry<numberOfMtdPidTraits(); iEntry++) {
+    LOG_INFO << "+++ mtdPidTraits " << iEntry << "\n";
+    mtdPidTraits(iEntry)->Print();
     LOG_INFO << "\n";
   }
 
   LOG_INFO << endm;
 }
 
+//_________________
+void StPicoDst::printTrackCovMatrices() {
+
+  if(numberOfTrackCovMatrices() == 0) {
+    LOG_INFO << "No TrackCovMatrix found!" << endm;
+    return;
+  }
+
+  LOG_INFO << "\n+++++++++ trackCovMatrix list ( " << numberOfTrackCovMatrices() << " entries )\n\n";
+  for(UInt_t iEntry=0; iEntry<numberOfTrackCovMatrices(); iEntry++) {
+    LOG_INFO << "+++ trackCovMatrix " << iEntry << "\n";
+    trackCovMatrix(iEntry)->Print();
+    LOG_INFO << "\n";
+  }
+
+  LOG_INFO << endm;
+}
