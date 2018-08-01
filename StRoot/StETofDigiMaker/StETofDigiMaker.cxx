@@ -135,9 +135,9 @@ StETofDigiMaker::Make()
     int iInputSizeBytes = daqdta->GetSize();
     LOG_DEBUG << "StETofDigiMaker::Make() - InputSize (bytes): " << iInputSizeBytes << endm;
 
-    int iInputSzLg = iInputSizeBytes / sizeof( uint64_t );
+    int iInputSzLg = iInputSizeBytes / sizeof( ULong64_t );
 
-    uint64_t* pulLongBuff = ( uint64_t* ) ( *daqdta->begin() );
+    ULong64_t* pulLongBuff = ( ULong64_t* ) ( *daqdta->begin() );
 
 
     // determine number of full messages to read
@@ -188,8 +188,8 @@ StETofDigiMaker::Make()
  */
 void
 StETofDigiMaker::convertTriggerMessages( vector< gdpb::FullMessage >& triggerMessages,
-                                         map< unsigned int, uint64_t >&    gdpbTs,
-                                         map< unsigned int, uint64_t >&    starTs )
+                                         map< unsigned int, ULong64_t >&    gdpbTs,
+                                         map< unsigned int, ULong64_t >&    starTs )
 {
     LOG_INFO << "StETofDigiMaker::convertTriggerMessages() - Do the conversion... " << endm; 
 
@@ -216,15 +216,15 @@ StETofDigiMaker::convertTriggerMessages( vector< gdpb::FullMessage >& triggerMes
             return;
         }
 
-        uint64_t ulGdpbTsMsb = triggerMessages.at( i   ).getGdpbTsMsbStarA();
-        uint64_t ulGdpbTsLsb = triggerMessages.at( i+1 ).getGdpbTsLsbStarB();
-        uint64_t ulStarTsMsb = triggerMessages.at( i+1 ).getStarTsMsbStarB();
-        uint64_t ulStarTsMid = triggerMessages.at( i+2 ).getStarTsMidStarC();
+        ULong64_t ulGdpbTsMsb = triggerMessages.at( i   ).getGdpbTsMsbStarA();
+        ULong64_t ulGdpbTsLsb = triggerMessages.at( i+1 ).getGdpbTsLsbStarB();
+        ULong64_t ulStarTsMsb = triggerMessages.at( i+1 ).getStarTsMsbStarB();
+        ULong64_t ulStarTsMid = triggerMessages.at( i+2 ).getStarTsMidStarC();
 
-        uint64_t rocGdpbTs = ( ulGdpbTsMsb << 24 )
+        ULong64_t rocGdpbTs = ( ulGdpbTsMsb << 24 )
                            + ( ulGdpbTsLsb       );
 
-        uint64_t rocStarTs = ( ulStarTsMsb << 48 )
+        ULong64_t rocStarTs = ( ulStarTsMsb << 48 )
                            + ( ulStarTsMid <<  8 )
                            + triggerMessages.at( i+3 ).getStarTsLsbStarD();
 
@@ -241,14 +241,14 @@ StETofDigiMaker::convertTriggerMessages( vector< gdpb::FullMessage >& triggerMes
 
 //_____________________________________________________________
 void
-StETofDigiMaker::fillETofHeader( uint64_t* pulLongBuff, vector< gdpb::FullMessage >& triggerMessages )
+StETofDigiMaker::fillETofHeader( ULong64_t* pulLongBuff, vector< gdpb::FullMessage >& triggerMessages )
 {
-    uint64_t trgGdpbFullTs          = pulLongBuff[0]; //time since last ETof clock reset in ns
-    uint64_t trgStarFullTs          = pulLongBuff[1]; //time since last BTof clock reset in ns
+    ULong64_t trgGdpbFullTs          = pulLongBuff[0]; //time since last ETof clock reset in ns
+    ULong64_t trgStarFullTs          = pulLongBuff[1]; //time since last BTof clock reset in ns
     unsigned int    starToken       = (pulLongBuff[2] >> 32) & 0xFFF;
     unsigned int    starDaqCmdIn    = (pulLongBuff[2] >> 16) & 0x00F;
     unsigned int    starTrigCmdIn   = (pulLongBuff[2]      ) & 0x00F;
-    uint64_t eventStatusFlag        = pulLongBuff[3]; // filled from Apr 24th 2018 on
+    ULong64_t eventStatusFlag        = pulLongBuff[3]; // filled from Apr 24th 2018 on
 
     LOG_DEBUG << "StETofDigiMaker::fillETofHeader()"   << endm;
     LOG_DEBUG << "trgGdpbFullTs="   << trgGdpbFullTs   << endm;
@@ -258,8 +258,8 @@ StETofDigiMaker::fillETofHeader( uint64_t* pulLongBuff, vector< gdpb::FullMessag
     LOG_DEBUG << "starTrigCmdIn="   << starTrigCmdIn   << endm;
     LOG_DEBUG << "eventStatusFlag=" << eventStatusFlag << endm;
 
-    map< unsigned int, uint64_t > gdpbTs;
-    map< unsigned int, uint64_t > starTs;
+    map< unsigned int, ULong64_t > gdpbTs;
+    map< unsigned int, ULong64_t > starTs;
 
     convertTriggerMessages( triggerMessages, gdpbTs, starTs );
 

@@ -72,7 +72,7 @@ StETofHeader::trgStarFullTime() const
 map< unsigned int, ULong64_t >
 StETofHeader::rocGdpbTs() const
 {
-    map< unsigned int, uint64_t > map_root_type( mRocGdpbTs.begin(), mRocGdpbTs.end() );
+    map< unsigned int, ULong64_t > map_root_type( mRocGdpbTs.begin(), mRocGdpbTs.end() );
 
     return map_root_type;
 }
@@ -81,7 +81,7 @@ StETofHeader::rocGdpbTs() const
 map< unsigned int, ULong64_t >
 StETofHeader::rocStarTs() const
 {
-    map< unsigned int, uint64_t > map_root_type( mRocStarTs.begin(), mRocStarTs.end() );
+    map< unsigned int, ULong64_t > map_root_type( mRocStarTs.begin(), mRocStarTs.end() );
 
     return map_root_type;
 }

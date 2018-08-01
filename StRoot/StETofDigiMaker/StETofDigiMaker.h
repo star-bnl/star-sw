@@ -49,10 +49,10 @@ public:
     StETofCollection* GetETofCollection();
 
     void   convertTriggerMessages( vector< gdpb::FullMessage >& triggerMessages,
-                                   map< unsigned int, uint64_t >& gdpbTs,
-                                   map< unsigned int, uint64_t >& starTs );
+                                   map< unsigned int, ULong64_t >& gdpbTs,
+                                   map< unsigned int, ULong64_t >& starTs );
 
-    void   fillETofHeader( uint64_t* longBuff, vector< gdpb::FullMessage >& triggerMessages );
+    void   fillETofHeader( ULong64_t* longBuff, vector< gdpb::FullMessage >& triggerMessages );
     void   fillETofDigi( gdpb::FullMessage& mess );
     void   fillEvent();
 
