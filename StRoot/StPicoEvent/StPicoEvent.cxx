@@ -1,23 +1,20 @@
+/// C++ headers
 #include <algorithm>
 #include <limits>
 
-#include "StEvent/StBTofHeader.h"
-#include "StEvent/StEventTypes.h"
-#include "StMuDSTMaker/COMMON/StMuDst.h"
-#include "StMuDSTMaker/COMMON/StMuEvent.h"
-#include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
-
-#include "StPicoEvent/StPicoUtilities.h"
-#include "StPicoEvent/StPicoEvent.h"
+/// PicoDst headers
+#include "StPicoMessMgr.h"
+#include "StPicoEvent.h"
 
 ClassImp(StPicoEvent)
 
 //_________________
-StPicoEvent::StPicoEvent():
+StPicoEvent::StPicoEvent(): TObject(),
   mRunId(0), mEventId(0), mFillId(0), mBField(0), mTime(0),
-  mPrimaryVertex{ -999., -999., -999.}, mPrimaryVertexError{ -999., -999., -999},
+  mPrimaryVertexX(0), mPrimaryVertexY(0), mPrimaryVertexZ(0),
+  mPrimaryVertexErrorX(0), mPrimaryVertexErrorY(0), mPrimaryVertexErrorZ(0),
   mRanking(-999), mNBEMCMatch(0), mNBTOFMatch(0),
-  mTriggerIds{},
+  mTriggerIds(),
   mRefMultFtpcEast(0), mRefMultFtpcWest(0),
   mRefMultNeg(0), mRefMultPos(0),
   mRefMult2NegEast(0), mRefMult2PosEast(0), mRefMult2NegWest(0), mRefMult2PosWest(0),
@@ -31,117 +28,27 @@ StPicoEvent::StPicoEvent():
   mZdcSumAdcEast(0), mZdcSumAdcWest(0),
   mZdcSmdEastHorizontal{}, mZdcSmdEastVertical{}, mZdcSmdWestHorizontal{}, mZdcSmdWestVertical{},
   mBbcAdcEast{}, mBbcAdcWest{},
-  mHighTowerThreshold{}, mJetPatchThreshold{} {
-    /* empty */
+  mHighTowerThreshold{},
+  mJetPatchThreshold{} {
+
+    if( !mTriggerIds.empty() ) {
+      mTriggerIds.clear();
+    }
 }
 
 //_________________
-StPicoEvent::StPicoEvent(StMuDst const& muDst) : StPicoEvent() {
-
-  StMuEvent* ev = muDst.event() ;
-
-  mRunId = ev->runNumber();
-  mEventId = ev->eventNumber();
-  mFillId = ev->runInfo().beamFillNumber(blue);
-  mBField = ev->magneticField();
-
-  mTime=ev->eventInfo().time();
-
-  mPrimaryVertex = ev->primaryVertexPosition();
-  mPrimaryVertexError = ev->primaryVertexErrors();
-
-  if (StMuPrimaryVertex* pv = muDst.primaryVertex()) {
-    mRanking = pv->ranking();
-    mNBEMCMatch = pv->nBEMCMatch();
-    mNBTOFMatch = pv->nBTOFMatch();
-  }
-
-  mTriggerIds = ev->triggerIdCollection().nominal().triggerIds();
-
-  mRefMultFtpcEast = (UShort_t)(ev->refMultFtpcEast());
-  mRefMultFtpcWest = (UShort_t)(ev->refMultFtpcWest());
-  mRefMultNeg = (UShort_t)(ev->refMultNeg());
-  mRefMultPos = (UShort_t)(ev->refMultPos());
-
-  {
-    using namespace StPicoUtilities;
-    auto custom_refMult = StPicoUtilities::calculateRefMult(muDst);
-    mRefMult2NegEast = custom_refMult[RefMult2NegEast];
-    mRefMult2PosEast = custom_refMult[RefMult2PosEast];
-    mRefMult2NegWest = custom_refMult[RefMult2NegWest];
-    mRefMult2PosWest = custom_refMult[RefMult2PosWest];
-    mRefMult3NegEast = custom_refMult[RefMult3NegEast];
-    mRefMult3PosEast = custom_refMult[RefMult3PosEast];
-    mRefMult3NegWest = custom_refMult[RefMult3NegWest];
-    mRefMult3PosWest = custom_refMult[RefMult3PosWest];
-    mRefMult4NegEast = custom_refMult[RefMult4NegEast];
-    mRefMult4PosEast = custom_refMult[RefMult4PosEast];
-    mRefMult4NegWest = custom_refMult[RefMult4NegWest];
-    mRefMult4PosWest = custom_refMult[RefMult4PosWest];
-    mRefMultHalfNegEast = custom_refMult[RefMultHalfNegEast];
-    mRefMultHalfPosEast = custom_refMult[RefMultHalfPosEast];
-    mRefMultHalfNegWest = custom_refMult[RefMultHalfNegWest];
-    mRefMultHalfPosWest = custom_refMult[RefMultHalfPosWest];
-  }
-
-  mGRefMult = (UShort_t)ev->grefmult();
-  mNumberOfGlobalTracks = muDst.numberOfGlobalTracks();
-  mbTofTrayMultiplicity = ev->btofTrayMultiplicity() ;
-  mNHitsHFT[0] = (UShort_t)ev->numberOfPxlInnerHits();
-  mNHitsHFT[1] = (UShort_t)ev->numberOfPxlOuterHits();
-  mNHitsHFT[2] = (UShort_t)ev->numberOfIstHits();
-  mNHitsHFT[3] = (UShort_t)ev->numberOfSsdHits();
-
-  if (StBTofHeader* header = muDst.btofHeader()) {
-    mNVpdHitsEast = (UChar_t)(header->numberOfVpdHits(east));
-    mNVpdHitsWest = (UChar_t)(header->numberOfVpdHits(west));
-    mNTofT0 = (UShort_t)(header->nTzero());
-    mVzVpd = header->vpdVz();
-  }
-
-  mZDCx = (UInt_t)ev->runInfo().zdcCoincidenceRate();
-  mBBCx = (UInt_t)ev->runInfo().bbcCoincidenceRate();
-  mBackgroundRate = ev->runInfo().backgroundRate();
-  mBbcBlueBackgroundRate = ev->runInfo().bbcBlueBackgroundRate();
-  mBbcYellowBackgroundRate = ev->runInfo().bbcYellowBackgroundRate();
-  mBbcEastRate = ev->runInfo().bbcEastRate();
-  mBbcWestRate = ev->runInfo().bbcWestRate();
-  mZdcEastRate = ev->runInfo().zdcEastRate();
-  mZdcWestRate = ev->runInfo().zdcWestRate();
-
-  StZdcTriggerDetector& ZDC = ev->zdcTriggerDetector();
-  mZdcSumAdcEast = (UShort_t)ZDC.adcSum(east);
-  mZdcSumAdcWest = (UShort_t)ZDC.adcSum(west);
-  for (int strip = 1; strip < 9; ++strip) {
-    if (ZDC.zdcSmd(east, 1, strip))
-      mZdcSmdEastHorizontal[strip - 1] = (UShort_t)ZDC.zdcSmd(east, 1, strip);
-    if (ZDC.zdcSmd(east, 0, strip))
-      mZdcSmdEastVertical[strip - 1] = (UShort_t)ZDC.zdcSmd(east, 0, strip);
-    if (ZDC.zdcSmd(west, 1, strip))
-      mZdcSmdWestHorizontal[strip - 1] = (UShort_t)ZDC.zdcSmd(west, 1, strip);
-    if (ZDC.zdcSmd(west, 0, strip))
-      mZdcSmdWestVertical[strip - 1] = (UShort_t)ZDC.zdcSmd(west, 0, strip);
-  }
-
-  StBbcTriggerDetector bbc = ev->bbcTriggerDetector() ;
-  for (UInt_t i = 0; i < bbc.numberOfPMTs(); ++i) {
-    UInt_t const eastWest = (i < 24) ? 0 : 1 ; // East:0-23, West:24-47
-    UInt_t const pmtId    = i % 24 ;         // pmtId:0-23
-
-    if (eastWest == 0) mBbcAdcEast[pmtId] = bbc.adc(i) ;
-    else               mBbcAdcWest[pmtId] = bbc.adc(i) ;
-  }
-}
-
-//_________________
-StPicoEvent::StPicoEvent(const StPicoEvent &event) {
+StPicoEvent::StPicoEvent(const StPicoEvent &event) : TObject() {
   mRunId = event.mRunId;
   mEventId = event.mEventId;
   mFillId = event.mFillId;
   mBField = event.mBField;
   mTime = event.mTime;
-  mPrimaryVertex = event.mPrimaryVertex;
-  mPrimaryVertexError = event.mPrimaryVertexError;
+  mPrimaryVertexX = event.mPrimaryVertexX;
+  mPrimaryVertexY = event.mPrimaryVertexY;
+  mPrimaryVertexZ = event.mPrimaryVertexZ;
+  mPrimaryVertexErrorX = event.mPrimaryVertexErrorX;
+  mPrimaryVertexErrorY = event.mPrimaryVertexErrorY;
+  mPrimaryVertexErrorZ = event.mPrimaryVertexErrorZ;
   mRanking = event.mRanking;
   mNBEMCMatch = event.mNBEMCMatch;
   mNBTOFMatch = event.mNBTOFMatch;
@@ -217,16 +124,169 @@ StPicoEvent::~StPicoEvent() {
 }
 
 //_________________
-int StPicoEvent::year() const {
+void StPicoEvent::Print(const Char_t *option) const {
+  LOG_INFO << " year = " << year()
+	   << " day = " << day() << "\n"
+	   << " fill/run/event Id = " << fillId() << "/" << runId() << "/" << eventId() << "\n"
+	   
+	   << " vertex x = " << primaryVertex().X()
+	   << " vertex y = " << primaryVertex().Y()
+	   << " vertex z = " << primaryVertex().Z() << "\n"
+	   << " refMult = " << refMult()
+	   << " grefMult = " << grefMult() << "\n"
+	   << " nTofT0 = " << nTofT0()
+	   << " vpdVz = " << vzVpd()
+	   << endm;
+}
+
+//_________________
+Int_t StPicoEvent::year() const {
   return mRunId / 1000000 - 1 + 2000;
 }
 
 //_________________
-int StPicoEvent::day() const {
+Int_t StPicoEvent::day() const {
   return (mRunId % 1000000) / 1000;
 }
 
 //_________________
-bool StPicoEvent::isTrigger(unsigned int id) const {
+Bool_t StPicoEvent::isTrigger(unsigned int id) const {
   return std::find(mTriggerIds.begin(), mTriggerIds.end(), id) != mTriggerIds.end();
+}
+
+//_________________
+void StPicoEvent::setTriggerId(UInt_t id) {
+
+  /// If trigger list is not empty then loop over it
+  /// and check if the new trigger already in.
+  if( !mTriggerIds.empty() ) {
+
+    /// Assume that the new trigger is not in the list
+    Bool_t isUsed = false;
+
+    /// Loop over the trigger list
+    for(UInt_t iIter=0; iIter<mTriggerIds.size(); iIter++) {
+
+      /// Compare triggers
+      if( mTriggerIds.at(iIter) == id ) {
+	isUsed = true;
+      }
+    } //(unsigned int iIter=0; iIter<mTriggerIds.size(); iIter++)
+
+    /// If the trigger not in the list then add it
+    if( !isUsed ) {
+      mTriggerIds.push_back(id);
+    }
+  } //if( !mTriggerIds.empty() )
+  else {
+    mTriggerIds.push_back(id);
+  }
+}
+
+//_________________
+void StPicoEvent::setTriggerIds(std::vector<unsigned int> newIds) {
+
+  /// Protection: work only if input vector has entries
+  if (!newIds.empty()) {
+
+    /// If trigger list is not empty then loop over it
+    /// and check if the new trigger already in.
+    if (!mTriggerIds.empty()) {
+
+      /// For each entry in the input vector
+      for (UInt_t iIter1= 0; iIter1<newIds.size(); iIter1++) {
+	
+        /// Assume that the new trigger is not in the list
+        Bool_t isUsed = false;
+
+        /// Loop over existing trigger list
+        for (UInt_t iIter2=0; iIter2<mTriggerIds.size(); iIter2++) {
+
+          /// Compare triggers
+          if (mTriggerIds.at(iIter2) == newIds.at(iIter1)) {
+            isUsed = true;
+          }
+        } //for (unsigned int iIter2=0; iIter2<mTriggerIds.size(); iIter2++)
+
+        /// The entry is unique then add it to the list
+        if (!isUsed) {
+          mTriggerIds.push_back(newIds.at(iIter1));
+        }
+
+      } //for(unsigned int iIter1= 0; iIter1<newIds.size(); iIter1++)
+    }   //if( !mTriggerIds.empty() )
+    else {
+      mTriggerIds = newIds;
+    }
+  } //if( !newIds.empty() )
+}
+
+//________________
+void StPicoEvent::setNHitsHFT(Int_t layer, UShort_t word) {
+  if(layer>=0 && layer<=3) {
+    mNHitsHFT[layer] = (UShort_t)word;
+  }
+  else {
+    /// Probably some information about this incident may be printed
+  }
+}
+
+//________________
+void StPicoEvent::setZdcSmdEastHorizontal(Int_t strip, Float_t zdcSmdEastHorizontal) {
+  if(strip>=0 && strip<=7) {
+    mZdcSmdEastHorizontal[strip] = (UShort_t)zdcSmdEastHorizontal;
+  }
+  else {
+    /// Probably some information about this incident may be printed
+  }
+}
+
+//________________
+void StPicoEvent::setZdcSmdEastVertical(Int_t strip, Float_t zdcSmdEastVertical) {
+  if(strip>=0 && strip<=7) {
+    mZdcSmdEastVertical[strip] = (UShort_t)zdcSmdEastVertical;
+  }
+  else {
+    /// Probably some information about this incident may be printed
+  }
+}
+
+//________________
+void StPicoEvent::setZdcSmdWestHorizontal(Int_t strip, Float_t zdcSmdWestHorizontal) {
+  if(strip>=0 && strip<=7) {
+    mZdcSmdWestHorizontal[strip] = (UShort_t)zdcSmdWestHorizontal;
+  }
+  else {
+    /// Probably some information about this incident may be printed
+  }
+}
+
+//________________
+void StPicoEvent::setZdcSmdWestVertical(Int_t strip, Float_t zdcSmdWestVertical) {
+  if(strip>=0 && strip<=7) {
+    mZdcSmdWestVertical[strip] = (UShort_t)zdcSmdWestVertical;
+  }
+  else {
+    /// Probably some information about this incident may be printed
+  }
+}
+
+//________________
+void StPicoEvent::setBbcAdcEast(Int_t iPMT, Float_t bbcAdcEast) {
+  if(iPMT>=0 && iPMT<=23) {
+    mBbcAdcEast[iPMT] = (UShort_t)bbcAdcEast;
+  }
+  else {
+    /// Probably some information about this incident may be printed
+  }
+}
+
+//________________
+void StPicoEvent::setBbcAdcWest(Int_t iPMT, Float_t bbcAdcWest) {
+  if(iPMT>=0 && iPMT<=23) {
+    mBbcAdcWest[iPMT] = (UShort_t)bbcAdcWest;
+  }
+  else {
+    /// Probably some information about this incident may be printed
+  }
 }

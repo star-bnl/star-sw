@@ -1,5 +1,8 @@
+/// PicoDst headers
 #include "StPicoBbcHit.h"
 
+/// C++ headers
+#include <cstdlib>
 
 // \class StPicoBbcHit
 // \author Mike Lisa
@@ -30,8 +33,6 @@
  * - Mike Lisa March 2018
  ************************************************/
 
-#include "StPicoBbcHit.h"
-
 ClassImp(StPicoBbcHit)
 
 //_________________
@@ -40,13 +41,12 @@ StPicoBbcHit::StPicoBbcHit() : StPicoBbcHit(0, 0, 0, 0, 0, false, false) {
 }
 
 //_________________
-StPicoBbcHit::StPicoBbcHit(int PMTnumber,
-			   int EW, int ADC, int TAC,
-			   int TDC, bool hasTAC,
-			   bool statusIsGood) :
-  mId( std::abs(PMTnumber)*EW ),
+StPicoBbcHit::StPicoBbcHit(Int_t PMTnumber,
+			   Int_t EW, Int_t ADC, Int_t TAC,
+			   Int_t TDC, Bool_t hasTAC,
+			   Bool_t statusIsGood) :
   mQTdata( (ADC & 0x0FFF) | (TAC & 0x0FFF) << 12 | (TDC & 0x001F) << 24 | hasTAC << 29 | statusIsGood << 30 ) {
-  /* no-op */
+  mId = std::abs(PMTnumber) * EW;
 }
 
 //_________________
