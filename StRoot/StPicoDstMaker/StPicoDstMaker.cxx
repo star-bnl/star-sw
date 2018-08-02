@@ -17,6 +17,13 @@
 #include "StChain/StChainOpt.h"
 #include "St_base/StMessMgr.h"
 #include "StarRoot/TAttr.h"
+#include "StarRoot/THelixTrack.h"
+#include "StarClassLibrary/StThreeVector.hh"
+#include "StarClassLibrary/StThreeVectorF.hh"
+#include "StarClassLibrary/StThreeVectorD.hh"
+#include "StarClassLibrary/StHelix.hh"
+#include "StarClassLibrary/StPhysicalHelix.hh"
+#include "StarClassLibrary/PhysicalConstants.h"
 
 #include "StEvent/StBTofHeader.h"
 #include "StEvent/StDcaGeometry.h"
@@ -75,15 +82,15 @@
 #include "StPicoDstMaker/StPicoDstMaker.h"
 #include "StPicoDstMaker/StPicoUtilities.h"
 
-#include "StarClassLibrary/PhysicalConstants.h"
+
 
 //_________________
 StPicoDstMaker::StPicoDstMaker(char const* name) :
   StMaker(name),
+  mTpcVpdVzDiffCut(6.),
   mMuDst(nullptr), mPicoDst(new StPicoDst()),
   mEmcCollection(nullptr), mEmcPosition(nullptr),
   mEmcGeom{}, mEmcIndex{},
-  mTpcVpdVzDiffCut(6.),
   mBField(0),
   mVtxMode(PicoVtxMode::NotSet), // This should always be ::NotSet, do not change it, see ::Init()
   mCovMtxMode(PicoCovMtxMode::NotDefined),
@@ -285,6 +292,7 @@ Int_t StPicoDstMaker::setVtxModeAttr(){
 //_________________
 Int_t StPicoDstMaker::setCovMtxModeAttr() {
 
+  /// Choose the writing method: skip - do not write; write - write
   if (strcasecmp(SAttr("PicoCovMtxMode"), "PicoCovMtxSkip") == 0) {
     setCovMtxMode(PicoCovMtxMode::Skip);
     LOG_INFO << " PicoCovMtxSkip is being used " << endm;
@@ -301,6 +309,7 @@ Int_t StPicoDstMaker::setCovMtxModeAttr() {
 
 //_________________
 Int_t StPicoDstMaker::InitRun(Int_t const runnumber) {
+  
   if (StMaker::m_Mode == PicoIoMode::IoWrite) {
     if (!initMtd(runnumber)) {
       LOG_ERROR << " MTD initialization error!!! " << endm;
@@ -422,6 +431,7 @@ Bool_t StPicoDstMaker::initMtd(Int_t const runnumber) {
 
 //_________________
 Int_t StPicoDstMaker::Finish() {
+  
   if (StMaker::m_Mode == PicoIoMode::IoRead) {
     closeRead();
   }
@@ -459,7 +469,7 @@ Int_t StPicoDstMaker::openRead() {
 
         if (ftmp) ftmp->Close();
       }
-    }
+    } // while (getline(inputStream, file))
 
     LOG_INFO << " Total " << nFile << " files have been read in. " << endm;
   }
@@ -470,6 +480,7 @@ Int_t StPicoDstMaker::openRead() {
     LOG_WARN << " No good input file to read ... " << endm;
   }
 
+  /// Set branch addresses and pointers
   if (mChain) {
     setBranchAddresses(mChain);
     mChain->SetCacheSize(50e6);
@@ -502,42 +513,49 @@ void StPicoDstMaker::openWrite() {
 
 //_________________
 void StPicoDstMaker::initEmc() {
-  mEmcPosition = new StEmcPosition();
 
+  /// Create an instance of the StEmcPosition
+  mEmcPosition = new StEmcPosition();
+  /// Fill the instance
   for (int i = 0; i < 4; ++i) {
     mEmcGeom[i] = StEmcGeom::getEmcGeom(detname[i].Data());
   }
 }
 
-//_________________                                                                                 
+//_________________
 void StPicoDstMaker::buildEmcIndex() {
 
+  /// Retrieve a pointer to BEMC
   StEmcDetector* mEmcDet = mMuDst->emcCollection()->detector(kBarrelEmcTowerId);
+  /// Clean EmcIndex
   std::fill_n(mEmcIndex, sizeof(mEmcIndex) / sizeof(mEmcIndex[0]), nullptr);
 
   if (!mEmcDet) return;
-  /// Loop over 120 modules                                                                         
+  
+  /// Loop over 120 modules
   for (size_t iMod = 1; iMod <= mEmcDet->numberOfModules(); ++iMod) {
 
     StSPtrVecEmcRawHit& modHits = mEmcDet->module(iMod)->hits();
-    /// Each module has 40 towers (that should work)                                                
+    
+    /// Each module has 40 towers (that should work)
     for (size_t iHit = 0; iHit < modHits.size(); ++iHit) {
 
       StEmcRawHit* rawHit = modHits[iHit];
 
-      /// If no tower information is available                                                      
-      /// then we skip the current tower                                                            
+      /// If no tower information is available
+      /// then we skip the current tower
       if(!rawHit) continue;
 
       UInt_t softId = rawHit->softId(1);
-      if (mEmcGeom[0]->checkId(softId) == 0) { // OK                                                
-        /// Here we store one to one correspondence                                                 
-        /// between tower id (detector, module, eta, sub)                                           
-        /// and its softId (numerical order of the tower)                                           
+      if (mEmcGeom[0]->checkId(softId) == 0) { // OK
+	
+        /// Here we store one to one correspondence
+        /// between tower id (detector, module, eta, sub)
+        /// and its softId (numerical order of the tower)
         mEmcIndex[softId - 1] = rawHit;
       }
-    } //for (size_t iHit = 0; iHit < modHits.size(); ++iHit)                                        
-  } //for (size_t iMod = 1; iMod <= mEmcDet->numberOfModules(); ++iMod)                             
+    } //for (size_t iHit = 0; iHit < modHits.size(); ++iHit)
+  } //for (size_t iMod = 1; iMod <= mEmcDet->numberOfModules(); ++iMod)
 }
 
 //_________________
@@ -620,6 +638,7 @@ Int_t StPicoDstMaker::MakeWrite() {
     return kStErr;
   }
 
+  /// Retrieve pointer to StMuEvent
   StMuEvent* muEvent = mMuDst->event();
 
   if (!muEvent) {
@@ -636,16 +655,17 @@ Int_t StPicoDstMaker::MakeWrite() {
 
   mBField = muEvent->magneticField();
 
-  //Get Emc collection
+  /// Get Emc collection
   mEmcCollection = mMuDst->emcCollection();
 
   if (mEmcCollection) {
-    // build EmcIndex before ::fillTracks()
+    /// Build EmcIndex before ::fillTracks()
     buildEmcIndex();
-    // fill BTOW hits only if ::buildEmcIndex() has been called for this event
+    /// Fill BTOW hits only if ::buildEmcIndex() has been called for this event
     fillBTowHits();
   }
 
+  /// Fill StPicoEvent members
   fillTracks();
   fillEvent();
   fillEmcTrigger();
@@ -655,7 +675,7 @@ Int_t StPicoDstMaker::MakeWrite() {
   fillEpdHits();
   fillBbcHits();
 
-  // Could be a good idea to move this call to Init() or InitRun()
+  /// Could be a good idea to move this call to Init() or InitRun()
   StFmsDbMaker* fmsDbMaker = static_cast<StFmsDbMaker*>(GetMaker("fmsDb"));
 
   if (fmsDbMaker) {
@@ -680,7 +700,8 @@ void StPicoDstMaker::fillEventHeader() const {
     return;
   }
 
-  StEvtHddr* header=GetEvtHddr();//get or create
+  /// Get or create
+  StEvtHddr* header=GetEvtHddr();
   header->SetRunNumber(event->runId());
   header->SetEventNumber(event->eventId());
   header->SetGMTime( (UInt_t) (event->time()) );
@@ -752,7 +773,7 @@ void StPicoDstMaker::fillTracks() {
     picoTrk->setChi2( gTrk->chi2() );
     /// Store dE/dx in KeV/cm
     picoTrk->setDedx( gTrk->dEdx() );
-    /// Store dEdx error in KeV/cm
+    /// Store dEdx error (fit) in KeV/cm
     picoTrk->setDedxError( gTrk->probPidTraits().dEdxErrorFit() );
 
     /// Fill track's hit information
@@ -842,7 +863,7 @@ void StPicoDstMaker::fillTracks() {
 
       /// Retrieve index in the PicoTrackCovMatrix pico array
       Int_t cov_index = mPicoArrays[StPicoArrays::TrackCovMatrix]->GetEntries();
-      /// Create new empty instance
+      /// Create new empty instance. It must be initialized with 0 (default constructor)
       new((*(mPicoArrays[StPicoArrays::TrackCovMatrix]))[cov_index]) StPicoTrackCovMatrix();
       /// Make a pointer to the new element
       StPicoTrackCovMatrix *covMatrix = (StPicoTrackCovMatrix*)mPicoArrays[StPicoArrays::TrackCovMatrix]->At(cov_index);
@@ -1302,6 +1323,7 @@ void StPicoDstMaker::fillEmcTrigger() {
     mPicoDst->event()->setHighTowerThreshold(i, trigSimu->bemc->barrelHighTowerTh(i));
   }
 
+  /// Loop over all towers
   for(Int_t towerId=1; towerId<=4800; towerId++) {
     Int_t status;
     trigSimu->bemc->getTables()->getStatus(BTOW, towerId, status);
@@ -1327,9 +1349,9 @@ void StPicoDstMaker::fillEmcTrigger() {
       Int_t counter = mPicoArrays[StPicoArrays::EmcTrigger]->GetEntries();
       new((*(mPicoArrays[StPicoArrays::EmcTrigger]))[counter]) StPicoEmcTrigger(flag, towerId, adc);
     }
-  }
+  } //for(Int_t towerId=1; towerId<=4800; towerId++)
 
-  // BEMC Jet Patch trigger threshold
+  /// BEMC Jet Patch trigger threshold
   int const bjpth0 = trigSimu->bemc->barrelJetPatchTh(0);
   int const bjpth1 = trigSimu->bemc->barrelJetPatchTh(1);
   int const bjpth2 = trigSimu->bemc->barrelJetPatchTh(2);
@@ -1338,8 +1360,10 @@ void StPicoDstMaker::fillEmcTrigger() {
     mPicoDst->event()->setJetPatchThreshold(i, trigSimu->bemc->barrelJetPatchTh(i));
   }
 
+  /// Loop voer triggers
   for (int jp = 0; jp < 18; ++jp) {
-    // BEMC: 12 Jet Patch + 6 overlap Jet Patches. As no EEMC information is recorded in Pico tree, not EEMC trigger information also.
+    /// BEMC: 12 Jet Patch + 6 overlap Jet Patches. As no EEMC information
+    /// is recorded in Pico tree, not EEMC trigger information also.
     int const jpAdc = trigSimu->bemc->barrelJetPatchAdc(jp);
 
     unsigned char flag = 0;
@@ -1359,7 +1383,7 @@ void StPicoDstMaker::fillEmcTrigger() {
       int counter = mPicoArrays[StPicoArrays::EmcTrigger]->GetEntries();
       new((*(mPicoArrays[StPicoArrays::EmcTrigger]))[counter]) StPicoEmcTrigger(flag, jp, jpAdc);
     }
-  }
+  } //for (int jp = 0; jp < 18; ++jp)
 }
 
 //_________________
@@ -1367,9 +1391,6 @@ void StPicoDstMaker::fillMtdTrigger() {
 
   /// Retrieve index of the last element of the MTD trigger array
   int counter = mPicoArrays[StPicoArrays::MtdTrigger]->GetEntries();
-  
-  /// Old version that used MuDst
-  //new((*(mPicoArrays[StPicoArrays::MtdTrigger]))[counter]) StPicoMtdTrigger(*mMuDst, mQTtoModule, mQTSlewBinEdge, mQTSlewCorr);
   
   /// Create empty MTDTrigger object and add it to pico array
   new((*(mPicoArrays[StPicoArrays::MtdTrigger]))[counter]) StPicoMtdTrigger();
@@ -1399,7 +1420,7 @@ void StPicoDstMaker::fillMtdTrigger() {
   /// run year
   const int runnumber = mMuDst->event()->runNumber();
   int year = runnumber / 1e6 + 1999;
-  // Oct. 1st (approx. 273rd day) is the start of a new running year
+  /// Oct. 1st (approx. 273rd day) is the start of a new running year
   if ((runnumber % 1000000) / 1000 >= 273) year += 1;
 
   /// Get QT information
@@ -1433,7 +1454,8 @@ void StPicoDstMaker::fillMtdTrigger() {
     }//else
   }//for (Int_t i = 0; i < 32; i++)
 
-  mtdTrigger->setQTtacSum(runnumber, mtdQTadc, mtdQTtac, mQTtoModule, mQTSlewBinEdge, mQTSlewCorr);
+  mtdTrigger->setQTtacSum(runnumber, mtdQTadc, mtdQTtac, mQTtoModule,
+			  mQTSlewBinEdge, mQTSlewCorr);
   
   /// MT101 information
   UShort_t mt101Tac[kNQTboard][2],  mt101Id[kNQTboard][2];
@@ -1461,27 +1483,27 @@ void StPicoDstMaker::fillMtdTrigger() {
   mtdTrigger->setTF201TriggerBit(year, dsmBit1, dsmBit2);
 }
 
-//_________________                                                                                 
+//_________________
 void StPicoDstMaker::fillBTowHits() {
 
-  //Loop over 120 modules and each of them consist from 40 towers                                   
+  //Loop over 120 modules and each of them consist from 40 towers
   for (Int_t iTower = 0; iTower < 4800; iTower++) {
 
     StEmcRawHit* aHit = mEmcIndex[iTower];
 
-    /// Set up default values for towers                                                            
-    /// that do not exist ( see StPicoBTowHit::isBad() )                                            
+    /// Set up default values for towers
+    /// that do not exist ( see StPicoBTowHit::isBad() )
     Int_t adc = 0;
     Float_t energy = -2.;
     if (aHit) {
-      //int softId = aHit->softId(1);                                                               
+      //int softId = aHit->softId(1);
       adc = aHit->adc();
       energy = aHit->energy();
     }
 
     Int_t counter = mPicoArrays[StPicoArrays::BTowHit]->GetEntries();
     new((*(mPicoArrays[StPicoArrays::BTowHit]))[counter]) StPicoBTowHit(adc, energy);
-  } //for (int i = 0; i < 4800; ++i)                                                                
+  } //for (int i = 0; i < 4800; ++i)
 }
 
 //_________________
@@ -1498,29 +1520,34 @@ void StPicoDstMaker::fillBTofHits() {
 }
 //_________________
 void StPicoDstMaker::fillBbcHits() {
+  /// Retrieve pointer to StMuEvent
   StMuEvent* muEvent = mMuDst->event();
+  /// Retrieve trigger data
   const StTriggerData* trg = muEvent->triggerData();
-  for (int ew=-1; ew<2; ew+=2){            // note loop -1,+1
-    StBeamDirection dir = (ew<0)?east:west;
-    for (int pmt=1; pmt<17; pmt++){
+  /// Loop over two directions (east, west)
+  for (int ew=-1; ew<2; ew+=2) { // note loop -1,+1
+    StBeamDirection dir = (ew<0) ? east : west;
+    /// Loop over PMT boxes
+    for (int pmt=1; pmt<17; pmt++) {
       int adc = trg->bbcADC(dir,pmt);
-      if (adc>0){
+      if (adc>0) {
 	int tdc = trg->bbcTDC5bit(dir,pmt);
 	int tac = trg->bbcTDC(dir,pmt);
 	bool trueval = kTRUE;
 	int counter = mPicoArrays[StPicoArrays::BbcHit]->GetEntries();
 	new((*(mPicoArrays[StPicoArrays::BbcHit]))[counter]) StPicoBbcHit(pmt,ew,adc,tac,tdc,trueval,trueval);
-      }
-    }
-  }
+      } //if (adc>0)
+    } //for (int pmt=1; pmt<17; pmt++)
+  } //for (int ew=-1; ew<2; ew+=2)
 }
 //_________________
 void StPicoDstMaker::fillEpdHits() {
-  for (unsigned int i=0; i < mMuDst->numberOfEpdHit(); i++){
+  /// Loop over EPD hits
+  for (unsigned int i=0; i < mMuDst->numberOfEpdHit(); i++) {
     StMuEpdHit* aHit = mMuDst->epdHit(i);
     int counter = mPicoArrays[StPicoArrays::EpdHit]->GetEntries();
     new((*(mPicoArrays[StPicoArrays::EpdHit]))[counter]) StPicoEpdHit(aHit->id(), aHit->qtData(), aHit->nMIP());
-  }
+  } //for (unsigned int i=0; i < mMuDst->numberOfEpdHit(); i++)
 }
 //_________________
 void StPicoDstMaker::fillMtdHits() {
@@ -1536,9 +1563,8 @@ void StPicoDstMaker::fillMtdHits() {
 
     /// Retrieve the index int the MtdHit pico array
     Int_t counter = mPicoArrays[StPicoArrays::MtdHit]->GetEntries();
-    /// Add empty MTD hit
+    /// Create new MTD hit
     new((*(mPicoArrays[StPicoArrays::MtdHit]))[counter]) StPicoMtdHit();
-    //new((*(mPicoArrays[StPicoArrays::MtdHit]))[counter]) StPicoMtdHit(hit);
 
     /// Return pointer to a new MTD hit
     StPicoMtdHit *mtdHit = (StPicoMtdHit*)mPicoArrays[StPicoArrays::MtdHit]->At(counter);
