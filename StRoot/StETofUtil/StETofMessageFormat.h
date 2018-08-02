@@ -21,7 +21,7 @@
 
 #include <stdint.h>
 #include <iostream>
-
+#include "Rtypes.h"
 //#ifndef __CINT__
 
 namespace get4v2x {
