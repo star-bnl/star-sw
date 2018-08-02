@@ -10,10 +10,11 @@
 #include "StEvent/StTrackNode.h"
 	       //#include "StxMaker/StxStEventFiller.h"
 #include "TMath.h"
+#if 0
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiDefaultToolkit.h"
 #include "StiMaker/StiStEventFiller.h"
-
+#endif
 ClassImp(StxMaker);
 //_____________________________________________________________________________
 Int_t StxMaker::Init(){
@@ -23,7 +24,9 @@ Int_t StxMaker::Init(){
 }
 //_____________________________________________________________________________
 Int_t StxMaker::Make(){
+#if 0
   StiStEventFiller *filler = StiStEventFiller::instance();
+#endif
   StEvent   *mEvent = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
   // zero all banks before filling !!! 
   if (! mEvent) {return kStWarn;};
