@@ -48,11 +48,20 @@ int StEpdHitMaker::Make(){
   mEventCounter++ ;
   mTriggerEventCounter++;
   mTriggerData   = this->GetTriggerData();
-  if (!mTriggerData) LOG_ERROR << "StEpdHitMaker::Make - no TriggerData object" << endm;
+  if (!mTriggerData){
+    LOG_ERROR << "StEpdHitMaker::Make - no TriggerData object" << endm;
+    return kStErr;
+  }
   mEpdDbMaker    = this->GetEpdDbMaker();
-  if (!mEpdDbMaker) LOG_ERROR << "StEpdHitMaker::Make - no EpdDbMaker object" << endm;
+  if (!mEpdDbMaker){
+    LOG_ERROR << "StEpdHitMaker::Make - no EpdDbMaker object" << endm;
+    return kStErr;
+  }
   mEpdCollection = this->GetEpdCollection();
-  if (!mEpdCollection) LOG_ERROR << "StEpdHitMaker::Make - no EpdCollection object" << endm;
+  if (!mEpdCollection){
+    LOG_ERROR << "StEpdHitMaker::Make - no EpdCollection object" << endm;
+    return kStErr;
+  }
   FillStEpdData();
   return kStOK;
 }
