@@ -63,8 +63,8 @@ int StPicoDstVtxSeedMaker::GetEventData() {
   run = event->runId();
   // timeEvent not saved in PicoDst
 
-  StThreeVectorF const& pvert = event->primaryVertex();
-  StThreeVectorF const& epvert = event->primaryVertexError();
+  TVector3 pvert = event->primaryVertex();
+  TVector3 epvert = event->primaryVertexError();
   zvertex = pvert.z();
   yvertex = pvert.y();
   xvertex = pvert.x();
@@ -120,14 +120,17 @@ int StPicoDstVtxSeedMaker::GetEventData() {
 //_____________________________________________________________________________
 void StPicoDstVtxSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StPicoDstVtxSeedMaker.cxx,v 1.2 2018/04/04 11:01:39 jeromel Exp $"
+           << "\n* $Id: StPicoDstVtxSeedMaker.cxx,v 1.3 2018/08/02 04:08:09 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StPicoDstVtxSeedMaker.cxx,v 1.2 2018/04/04 11:01:39 jeromel Exp $
+// $Id: StPicoDstVtxSeedMaker.cxx,v 1.3 2018/08/02 04:08:09 genevb Exp $
 // $Log: StPicoDstVtxSeedMaker.cxx,v $
+// Revision 1.3  2018/08/02 04:08:09  genevb
+// Changed return type in StPicoEvent
+//
 // Revision 1.2  2018/04/04 11:01:39  jeromel
 // Changed location pf include
 //
