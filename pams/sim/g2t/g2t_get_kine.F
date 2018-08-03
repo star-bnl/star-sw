@@ -1,6 +1,11 @@
-* $Id: g2t_get_kine.F,v 1.13 2000/01/23 19:04:43 nevski Exp $
+* $Id: g2t_get_kine.F,v 1.14 2018/08/03 21:15:15 jwebb Exp $
 *
 * $Log: g2t_get_kine.F,v $
+* Revision 1.14  2018/08/03 21:15:15  jwebb
+* Allow local array, used to group close vertices, to grow in size during the
+* job.  Eliminates an array out-of-bounds issue which can be encountered
+* in events with abnormally large number of vertices.
+*
 * Revision 1.13  2000/01/23 19:04:43  nevski
 * unused variables deleted
 *
@@ -35,8 +40,13 @@ CC:>-----+---------+---------+---------+---------+---------+---------+---------+
      >          Amass, Tlife, Charge, Tofg, Pt, tet, Eta, rap, 
      >          P(4),V(3),am,time,Vcut/0.0010/
       CHARACTER NAPART*24,Cvol*4,Cshap*4
-      Integer   NUM(100000),ISTAT,IDPDG,MOTH(2),IDAU(2)
+      Integer   ISTAT,IDPDG,MOTH(2),IDAU(2)
       INTEGER             NUMPRIM,NUMFINS
+
+      Integer, save, allocatable :: num(:)
+      Integer, save              :: nvertx0 = -1
+
+
       common /g2tevtcnt/  NUMPRIM,NUMFINS
 
 #include       "g2t_get_kine.inc"
@@ -62,6 +72,16 @@ C: Sanity check of header for table 'p_vert' & 'p_track'
       p_vert_h.nok  = 0
       LabelV        = 0
       Iv            = 0
+
+      ! Let space for vertex grow with time
+      if ( .not. allocated(num) ) allocate( num(1:50000) ) 
+
+      if ( nvertx .gt. size(num) ) then
+         deallocate(num)
+         allocate( num(1:NVERTX) )
+      endif
+
+
       Do Kv = 1,NVERTX
 
         Call VZERO  (p_vert(Kv),LenV)
@@ -74,7 +94,8 @@ C: Sanity check of header for table 'p_vert' & 'p_track'
           Do Jv = 1,Iv
             IF ( p_vert(jv).eg_label.ne.0       .and. 
      >           VDIST(p_vert(jv).ge_x,Vert,3).le.Vcut) then
-               num(min(kv,100000)) = Jv
+c              num(min(kv,100000)) = Jv
+               num(kv) = jv
                goto 77
             endif
           enddo  
@@ -228,6 +249,7 @@ c       p_vert(iv).daughter_p - filled by tracks ! first daughter in linked list
       end do
 *
       G2T_GET_KINE  = STAFCV_OK
+
       return
 
  901  print *,' FATAL error in G2T_GET_KINE '
