@@ -67,7 +67,7 @@ const static Int_t tMin = 20090301;
 const static Int_t tMax = 20200101;
 const static TDatime t0(tZero,0);
 const static Int_t timeOffSet = t0.Convert();
-static Int_t tpcTime = -1;
+static Double_t tpcTime = -1;
 Int_t     StdEdxY2Maker::NdEdx = 0;
 dEdxY2_t *StdEdxY2Maker::CdEdx = 0;
 dEdxY2_t *StdEdxY2Maker::FdEdx = 0;
@@ -254,6 +254,7 @@ Int_t StdEdxY2Maker::Make(){
   }
   if (pEvent->runInfo()) bField = pEvent->runInfo()->magneticField()*kilogauss;
   if (TMath::Abs(bField) < 1.e-5*kilogauss) return kStOK;
+#if 0
   const StBTofCollection* tof = pEvent->btofCollection();
   StPrimaryVertex *pVbest  = 0;
   if (tof) {
@@ -272,6 +273,7 @@ Int_t StdEdxY2Maker::Make(){
       if (dZbest > 3.0) pVbest = 0;
     }
   }
+#endif
   // no of tpc hits
   Int_t TotalNoOfTpcHits = 0;
   Int_t NoOfTpcHitsUsed  = 0;

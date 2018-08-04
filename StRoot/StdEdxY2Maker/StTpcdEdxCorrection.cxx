@@ -38,6 +38,7 @@
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_TpcAvgCurrentC.h"
 #include "StDetectorDbMaker/St_TpcAvgPowerSupplyC.h"
+#include "StDetectorDbMaker/St_tpcTimeDependenceC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
 #include "TUnixTime.h"
 //________________________________________________________________________________
@@ -68,7 +69,7 @@ void StTpcdEdxCorrection::ReSetCorrections() {
   m_Corrections[kTpcSecRowB            ] = dEdxCorrection_t("TpcSecRowB"          ,"Gas gain correction for sector/row"					,St_TpcSecRowBC::instance());		     
   m_Corrections[kTpcSecRowC            ] = dEdxCorrection_t("TpcSecRowC"          ,"Additional Gas gain correction for sector/row"			,St_TpcSecRowCC::instance());		     
   m_Corrections[ktpcPressure           ] = dEdxCorrection_t("tpcPressureB"        ,"Gain on Gas Density due to Pressure"			        ,St_tpcPressureBC::instance());	     
-  m_Corrections[ktpcTime               ] = dEdxCorrection_t("tpcTime"       	  ,"Unregognized time dependce"						,0); 
+  m_Corrections[ktpcTime               ] = dEdxCorrection_t("tpcTime"       	  ,"Unregognized time dependce"						,St_tpcTimeDependenceC::instance()); 
   m_Corrections[kDrift                 ] = dEdxCorrection_t("TpcDriftDistOxygen"  ,"Correction for Electron Attachment due to O2"			,St_TpcDriftDistOxygenC::instance());	     
   m_Corrections[kMultiplicity          ] = dEdxCorrection_t("TpcMultiplicity"     ,"Global track multiplicity dependence"				,St_TpcMultiplicityC::instance());	     
   m_Corrections[kzCorrection           ] = dEdxCorrection_t("TpcZCorrectionB"     ,"Variation on drift distance"					,St_TpcZCorrectionBC::instance());	     
@@ -308,8 +309,8 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	if (corl->type == 200) VarXs[kEdge] = TMath::Abs(CdEdx.edge);
 	if (corl->min > 0 && corl->min > VarXs[kEdge]    ) return 2;
       } else if (k == ktpcTime) { // use the correction if you have xmin < xmax && xmin <= x <= xmax
-	if (corl->min >= corl->max || corl->min < VarXs[ktpcTime] ||  VarXs[ktpcTime] > corl->max) goto ENDL;
-	Double_t xx = VarXs[ktpcTime] - corl->min;
+	if (corl->min >= corl->max || corl->min > VarXs[ktpcTime] ||  VarXs[ktpcTime] > corl->max) goto ENDL;
+	Double_t xx = VarXs[ktpcTime];
 	dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,xx));
 	goto ENDL;
       } 
