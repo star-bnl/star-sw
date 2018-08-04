@@ -10,7 +10,7 @@
 //                                                                                           //
 //                                                                                           //
 ///////////////////////////////////////////////////////////////////////////////////////////////
-#include "digcluster.h"
+#include <digcluster.h>
 
 
 #include <TROOT.h> // for gROOT object

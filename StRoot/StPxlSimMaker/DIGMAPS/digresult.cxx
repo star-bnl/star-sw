@@ -10,7 +10,7 @@
 //                                                                                           //
 //                                                                                           //
 ///////////////////////////////////////////////////////////////////////////////////////////////
-#include "digresult.h"
+#include <digresult.h>
 
 
 #include <TROOT.h> // for gROOT object

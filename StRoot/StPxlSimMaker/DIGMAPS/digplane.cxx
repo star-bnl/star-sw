@@ -10,7 +10,7 @@
 //                                                                                           //
 //                                                                                           //
 ///////////////////////////////////////////////////////////////////////////////////////////////
-#include "digplane.h"
+#include <digplane.h>
 
 #include <TROOT.h> // for gROOT object
 #include <TMath.h>
