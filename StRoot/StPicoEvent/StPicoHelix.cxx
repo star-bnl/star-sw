@@ -34,10 +34,10 @@ ClassImpT(StPicoHelix,double);
 const Double_t StPicoHelix::NoSolution = 3.e+33;
 
 //_________________
-StPicoHelix::StPicoHelix() : mSingularity(false), mOrigin(0., 0., 0.),
-			     mDipAngle(0.), mCurvature(0.), mPhase(0.),
-			     mH(0), mCosDipAngle(0.), mSinDipAngle(0.),
-			     mCosPhase(0.), mSinPhase(0.) {
+StPicoHelix::StPicoHelix() : mSingularity(false), mOrigin(0, 0, 0),
+			     mDipAngle(0), mCurvature(0), mPhase(0),
+			     mH(0), mCosDipAngle(0), mSinDipAngle(0),
+			     mCosPhase(0), mSinPhase(0) {
   /*no-op*/
 }
 
@@ -45,6 +45,20 @@ StPicoHelix::StPicoHelix() : mSingularity(false), mOrigin(0., 0., 0.),
 StPicoHelix::StPicoHelix(Double_t c, Double_t d, Double_t phase,
 			 const TVector3& o, Int_t h) {
   setParameters(c, d, phase, o, h);
+}
+
+//_________________
+StPicoHelix::StPicoHelix(const StPicoHelix &h) {
+  mSingularity = h.mSingularity;
+  mOrigin = h.mOrigin;
+  mDipAngle = h.mDipAngle;
+  mCurvature = h.mCurvature;
+  mPhase = h.mPhase;
+  mH = h.mH;
+  mCosDipAngle = h.mCosDipAngle;
+  mSinDipAngle = h.mSinDipAngle;
+  mCosPhase = h.mCosPhase;
+  mSinPhase = h.mSinPhase;
 }
 
 //_________________

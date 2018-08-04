@@ -1,86 +1,120 @@
 #ifndef StPicoBEmcPidTraits_h
 #define StPicoBEmcPidTraits_h
 
-#include "TObject.h"
+/// ROOT headers
+#include <TObject.h>
 
 //_________________
 class StPicoBEmcPidTraits: public TObject {
 
  public:
-  //Defaults constructor
+  /// Default constructor
   StPicoBEmcPidTraits();
-  //Constructor that fills the parameters accordingly to the input
-  StPicoBEmcPidTraits(Int_t index, Int_t id, Int_t adc0, Float_t const* e, Float_t const* dist, 
-		      Int_t const* nhit, Int_t const* ntow);
-  //Copy constructor
+  /// Constructor that fills the parameters accordingly to the input
+  StPicoBEmcPidTraits(Int_t index, Int_t id, Int_t adc0, const Float_t* e,
+		      const Float_t* dist, const Int_t* nhit, const Int_t* ntow);
+  /// Copy constructor
   StPicoBEmcPidTraits(const StPicoBEmcPidTraits &traits);
-  //Destructor
+  /// Destructor
   virtual ~StPicoBEmcPidTraits();
-  //Print BEMC PID traits information
+  /// Print BEMC PID traits information
   virtual void Print(const Char_t* option = "") const;
 
-  //Return track index
+  /**
+   * Getters
+   */
+  /// Return track index
   Int_t   trackIndex() const;
-  //Associated BEMC cluster id (STAR standard clustering algorithm)
+  /// Associated BEMC cluster id (STAR standard clustering algorithm)
   Int_t   bemcId() const;
-  //Associated bemc cluster highest tower adc (STAR standard clustering algorithm)
+  /// Associated bemc cluster highest tower adc (STAR standard clustering algorithm)
   Int_t   bemcAdc0() const;
-  //Associated bemc cluster highest tower energy (STAR standard clustering algorithm)
+  /// Associated bemc cluster highest tower energy (STAR standard clustering algorithm)
   Float_t bemcE0() const;
-  //Associated bemc cluster energy (STAR standard clustering algorithm)
+  /// Associated bemc cluster energy (STAR standard clustering algorithm)
   Float_t bemcE() const;
-  //Associated bemc cluster Z-distance (cm) (STAR standard clustering algorithm)
+  /// Associated bemc cluster Z-distance (cm) (STAR standard clustering algorithm)
   Float_t bemcZDist() const;
-  //Associated bemc cluster phi-distance (cm) (STAR standard clustering algorithm)
+  /// Associated bemc cluster phi-distance (cm) (STAR standard clustering algorithm)
   Float_t bemcPhiDist() const;
-  //Associated bemc cluster number of fired SMD-eta wires (STAR standard clustering algorithm)
+  /// Associated bemc cluster number of fired SMD-eta wires (STAR standard clustering algorithm)
   Int_t   bemcSmdNEta() const;
-  //Associated bemc cluster number of fired SMD-phi wires (STAR standard clustering algorithm)
+  /// Associated bemc cluster number of fired SMD-phi wires (STAR standard clustering algorithm)
   Int_t   bemcSmdNPhi() const;
 
-  //Track matched tower id (using StEmcPosition::projTrack())
+  /// Track matched tower id (using StEmcPosition::projTrack())
   Int_t   btowId() const;
-  //Track second closest tower local id
+  /// Track second closest tower local id
   Int_t   btowId2() const;
-  //Track third closest tower local id
+  /// Track third closest tower local id
   Int_t   btowId3() const;
-  //Matched tower energy
+  /// Matched tower energy
   Float_t btowE() const;
-  //Energy of second closest tower
+  /// Energy of second closest tower
   Float_t btowE2() const;
-  //Energy of third closest tower
+  /// Energy of third closest tower
   Float_t btowE3() const;
-  //Eta distance to matched tower (cm)
+  /// Eta distance to matched tower (cm)
   Float_t btowEtaDist() const;
-  //Phi distance to matched tower (cm)
+  /// Phi distance to matched tower (cm)
   Float_t btowPhiDist() const;
 
+  /**
+   * Setters
+   */
+  void setTrackIndex(Int_t idx);
+  void setBEmcId(Int_t id);
+  void setAdc0(Int_t adc);
+  void setEnergy(Float_t energy[5]);
+  void setDistances(Float_t dist[4]);
+  void setNHits(Int_t nhit[2]);
+  void setNTOW(Int_t ntow[3]);
+
  private:
+
+  /// Index to the associated track in the event
+  Short_t  mTrackIndex;       
   
-  Short_t  mTrackIndex;       // Index to the associated track in the event
+  /// Next variables are extracted from the standard BEMC cluster algorithm
+  /// Index in bemcPoint array
+  Short_t  mBemcId;
+  /// adc0 is the higest adc in the cluster
+  Short_t  mBemcAdc0;
+  /// E0*1000 highest tower in the cluster
+  Short_t  mBemcE0;
+  /// EMC point E*1000
+  Short_t  mBemcE;
+  /// z*100
+  Short_t  mBemcZDist;
+  /// phi*10000
+  Short_t  mBemcPhiDist;
+  /// # of hits in eta
+  UChar_t  mBemcSmdNEta;
+  /// # of hits in phi
+  UChar_t  mBemcSmdNPhi;
 
-  // these variables are extracted from the standard BEMC cluster algorithm
-  Short_t  mBemcId;           // index in bemcPoint array
-  Short_t  mBemcAdc0;         // adc0 higest adc in the cluster
-  Short_t  mBemcE0;           // E0*1000 highest tower in the cluster
-  Short_t  mBemcE;            // EMC point E*1000
-  Short_t  mBemcZDist;        // z*100
-  Short_t  mBemcPhiDist;      // phi*10000
-  UChar_t  mBemcSmdNEta;         // # of hits in eta
-  UChar_t  mBemcSmdNPhi;         // # of hits in phi
-
-  // these variables are purely from single tower or nearby towers
-  Short_t  mBtowId;           // projected tower Id 1-4800
-  Char_t   mBtowId23;         // emc 2nd and 3rd closest tower local id  ( 2nd X 10 + 3rd), each id 0-8
-  Short_t  mBtowE;           // E1*1000 matched (closest) tower E
-  Short_t  mBtowE2;           // E2*1000 2nd closest tower E
-  Short_t  mBtowE3;           // E3*1000 3rd closest tower E
-  Short_t  mBtowEtaDist;      // eta*10000 distance between track and matched tower center
-  Short_t  mBtowPhiDist;      // phi*10000 distance between track and matched tower center
+  /// Next variables are purely from single tower or nearby towers
+  /// Projected tower Id 1-4800
+  Short_t  mBtowId;
+  /// The 2nd and 3rd closest tower local id  ( 2nd X 10 + 3rd), each id 0-8
+  Char_t   mBtowId23;
+  /// E1*1000 of matched (closest) tower E
+  Short_t  mBtowE;
+  /// E2*1000 of the 2nd closest tower E
+  Short_t  mBtowE2;
+  /// E3*1000 of the 3rd closest tower E
+  Short_t  mBtowE3;
+  /// eta*10000 distance between track and matched tower center
+  Short_t  mBtowEtaDist;
+  /// phi*10000 distance between track and matched tower center
+  Short_t  mBtowPhiDist;
 
   ClassDef(StPicoBEmcPidTraits, 1);
 };
 
+/**
+ * Getters
+ */
 inline Int_t   StPicoBEmcPidTraits::trackIndex() const { return (Int_t)mTrackIndex; }
 inline Int_t   StPicoBEmcPidTraits::bemcId() const { return (Int_t)mBemcId; }
 inline Int_t   StPicoBEmcPidTraits::bemcAdc0() const { return (Int_t)mBemcAdc0; }
@@ -99,4 +133,18 @@ inline Float_t StPicoBEmcPidTraits::btowE2() const { return (Float_t)mBtowE2 / 1
 inline Float_t StPicoBEmcPidTraits::btowE3() const { return (Float_t)mBtowE3 / 1000.; }
 inline Float_t StPicoBEmcPidTraits::btowEtaDist() const { return (Float_t)mBtowEtaDist / 10000.; }
 inline Float_t StPicoBEmcPidTraits::btowPhiDist() const { return (Float_t)mBtowPhiDist / 10000.; }
+
+/**
+ * Setters
+ */
+inline void StPicoBEmcPidTraits::setTrackIndex(Int_t idx) {
+  mTrackIndex = (idx > std::numeric_limits<short>::max()) ? -1 : (Short_t)idx;
+}
+inline void StPicoBEmcPidTraits::setBEmcId(Int_t id) {
+  mBemcId = (id > std::numeric_limits<short>::max()) ? -1 : (Short_t)id;
+}
+inline void StPicoBEmcPidTraits::setAdc0(Int_t adc0) {
+  mBemcAdc0 = (adc0 > std::numeric_limits<unsigned short>::max()) ?
+    std::numeric_limits<unsigned short>::max() : (UShort_t)adc0;
+}
 #endif

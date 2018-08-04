@@ -4,6 +4,10 @@
 /// ROOT headers
 #include <TObject.h>
 #include <TBufferFile.h>
+#include "StPicoDst.h"
+#ifdef  __TFG__VERSION__
+#include "StEvent/StDcaGeometry.h"
+#endif /* __TFG__VERSION__ */
 
 //_________________
 class StPicoTrackCovMatrix : public TObject {
@@ -44,6 +48,9 @@ class StPicoTrackCovMatrix : public TObject {
   /// the case when track did not have a covariance
   /// matrix in MuDst
   Bool_t isBadCovMatrix();
+#ifdef  __TFG__VERSION__
+  StDcaGeometry &dcaGeometry() const;
+#endif /* __TFG__VERSION__ */
 
   /**
    * Setters

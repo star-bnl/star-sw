@@ -31,6 +31,7 @@
 #include "../StPicoTrack.h"
 #include "../StPicoBTofHit.h"
 #include "../StPicoBTowHit.h"
+#include "../StPicoEmcTrigger.h"
 #include "../StPicoTrackCovMatrix.h"
 
 /// Load libraries (for ROOT_VERSTION_CODE >= 393215)
@@ -57,8 +58,9 @@ void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_30
   picoReader->SetStatus("*",0);
   picoReader->SetStatus("Event",1);
   picoReader->SetStatus("Track",1);
-  picoReader->SetStatus("BTofHit",1);
-  //picoReader->SetStatus("BTowHit",1);
+  //picoReader->SetStatus("BTofHit",1);
+  picoReader->SetStatus("BTowHit",1);
+  picoReader->SetStatus("EmcTrigger",1);
   //picoReader->SetStatus("TrackCovMatrix",1);
   std::cout << "Status has been set" << std::endl;
 
@@ -75,14 +77,45 @@ void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_30
 	    << std::endl;
 
   /// Histogramming
-  TH1F *hRefMult = new TH1F("hRefMult","Reference multiplicity;refMult",
+  // Event
+  TH1F *hRefMult = new TH1F("hRefMult",
+			    "Reference multiplicity;refMult",
 			    500, -0.5, 499.5);
+  TH2F *hVtxXvsY = new TH2F("hVtxXvsY",
+			    "hVtxXvsY",
+			    200,-10.,10.,200,-10.,10.);
+  TH1F *hVtxZ = new TH1F("hVtxZ","hVtxZ",
+			 140, -70., 70.);
+
+  // Track
+  TH1F *hGlobalPtot = new TH1F("hGlobalPtot",
+			       "Global track momentum;p (GeV/c)",
+			       100, 0., 1. );
+  TH1F *hGlobalPtotCut = new TH1F("hGlobalPtotCut",
+				  "Global track momentum after cut;p (GeV/c)",
+				  100, 0., 1. );
+  TH1F *hPrimaryPtot = new TH1F("hPrimaryPtot",
+				"Primary track momentum;p (GeV/c)",
+			       100, 0., 1. );
+  TH1F *hPrimaryPtotCut = new TH1F("hPrimaryPtotCut",
+				   "Primary track momentum after cut;p (GeV/c)",
+				  100, 0., 1. );
   TH1F *hTransvMomentum = new TH1F("hTransvMomentum",
 				   "Track transverse momentum;p_{T} (GeV/c)",
 				   200, 0., 2.);
+  TH1F *hNSigmaPion = new TH1F("hNSigmaPion",
+			       "n#sigma(#pi);n#sigma(#pi)",
+			       400, -10., 10.);
+  // TofPidTrait
+  TH1F *hTofBeta = new TH1F("hTofBeta",
+			    "BTofPidTraits #beta;#beta",
+			    2000, 0., 2.);
+
+  // TofHit
   TH1F *hBTofTrayHit = new TH1F("hBTofTrayHit","BTof tray number with the hit",
 				120, -0.5, 119.5);
-  
+
+
   /// Loop over events
   for(Long64_t iEvent=0; iEvent<events2read; iEvent++) {
 
@@ -108,11 +141,15 @@ void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_30
     }
     hRefMult->Fill( event->refMult() );
 
+    TVector3 pVtx = event->primaryVertex();
+    hVtxXvsY->Fill( event->primaryVertex().X(), event->primaryVertex().Y() );
+    hVtxZ->Fill( event->primaryVertex().Z() );
+
     /// Track analysis
     Int_t nTracks = dst->numberOfTracks();
     Int_t nMatrices = dst->numberOfTrackCovMatrices();
     if(nTracks != nMatrices) {
-      std::cout << "Number of tracks and matrices do not match!" << std::endl;
+      //std::cout << "Number of tracks and matrices do not match!" << std::endl;
     }
     //std::cout << "Number of tracks in event: " << nTracks << std::endl;
     
@@ -125,19 +162,41 @@ void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_30
       if(!picoTrack) continue;
       //std::cout << "Track #[" << (iTrk+1) << "/" << nTracks << "]"  << std::endl;
 
-      /// Single-track cut example
-      if( !picoTrack->isPrimary() ||
-	  picoTrack->nHits() < 15 ||
-	  TMath::Abs( picoTrack->gMom().PseudoRapidity() ) > 0.5 ) {
+      hGlobalPtot->Fill( picoTrack->gMom().Mag() );
+      if( picoTrack->isPrimary() ) {
+	hPrimaryPtot->Fill( picoTrack->pMom().Mag() );
+      }
+      
+      /// Simple single-track cut
+      if( picoTrack->gMom().Mag() < 0.1 ||
+	  picoTrack->gDCA(pVtx).Mag()>50. ) {
 	continue;
       } 
-      
+
+      hGlobalPtotCut->Fill( picoTrack->gMom().Mag() );
+      if( picoTrack->isPrimary() ) {
+	hPrimaryPtotCut->Fill( picoTrack->pMom().Mag() );
+      }
+      hNSigmaPion->Fill( picoTrack->nSigmaPion() );
       hTransvMomentum->Fill( picoTrack->gMom().Pt() );
+
+      /// Check if track has TOF signal
+      if( isTofTrack() ) {
+	/// Retrieve corresponding trait
+	StPicoBTofPidTraits *trait = dst->btofPidTraits( picoTrack->bTofPidTraitsIndex() );
+	if( !trait ) {
+	  std::cout << "O-oh... No BTofPidTrait # " << picoTrack->bTofPidTraitsIndex()
+		    << " for track # " << iTrk << std::endl;
+	  break;
+	}
+	/// Fill beta
+	hTofBeta->Fill( trait->btofBeta() );
+      } //if( isTofTrack() )
+      
     } //for(Int_t iTrk=0; iTrk<nTracks; iTrk++)
 
     /// Hit analysis
     Int_t nBTofHits = dst->numberOfBTofHits();
-    
     //std::cout << "Number of btofHits in event: " << nBTofHits << std::endl;
 
     /// Hit loop
@@ -147,6 +206,8 @@ void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_30
       if( !btofHit ) continue;
       hBTofTrayHit->Fill( btofHit->tray() );
     } //for(Int_t iHit=0; iHit<nBTofHits; iHit++)
+
+
 
   } //for(Long64_t iEvent=0; iEvent<events2read; iEvent++)
 

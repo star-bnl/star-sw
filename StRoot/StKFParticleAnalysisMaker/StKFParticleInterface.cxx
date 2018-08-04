@@ -13,6 +13,7 @@
 #include "StPicoEvent/StPicoArrays.h"
 #include "StPicoEvent/StPicoEvent.h"
 #include "StPicoEvent/StPicoTrack.h"
+#include "StPicoEvent/StPicoTrackCovMatrix.h"
 #include "StPicoEvent/StPicoBTofPidTraits.h"
 
 #include "StBichsel/Bichsel.h"
@@ -518,7 +519,6 @@ void StKFParticleInterface::FillPIDHistograms(StPicoTrack *gTrack, const std::ve
       {
         fHistodEdXwithToFTracks[iTrackHisto] -> Fill(momentum, gTrack->dEdx());
         fHistoTofPIDTracks[iTrackHisto] -> Fill(momentum, m2tof);
-        
         if(abs(pdg)==211)
         {
           fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(0.139570, fdEdXMode, 1));
@@ -609,13 +609,8 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
   StPicoEvent* picoEvent = picoDst->event();
   if(!picoEvent) return 0;
 
-#ifdef __TFG__VERSION__
-  const StThreeVectorF picoPV = picoEvent->primaryVertex();
-  const StThreeVectorF picoPVError = picoEvent->primaryVertexError();
-#else /* ! __TFG__VERSION__ */
   const TVector3 picoPV = picoEvent->primaryVertex();
   const TVector3 picoPVError = picoEvent->primaryVertexError();
-#endif /* __TFG__VERSION__ */
   
   KFPVertex primVtx_tmp;
   primVtx_tmp.SetXYZ(picoPV.x(), picoPV.y(), picoPV.z());
@@ -641,8 +636,8 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
     if (  gTrack->nHitsFit() < 15) continue;
     if (  gTrack->dEdxError() < 0.04 || gTrack->dEdxError() > 0.12 ) continue;
     const int index = gTrack->id();
-    
-    const StDcaGeometry dcaG = gTrack->dcaGeometry();
+    StPicoTrackCovMatrix *cov = picoDst->trackCovMatrix(iTrack);
+    const StDcaGeometry dcaG = cov->dcaGeometry();
     Int_t q = 1; if (gTrack->charge() < 0) q = -1;
     KFPTrack track;
     if( !GetTrack(dcaG, track, q, index) ) continue;

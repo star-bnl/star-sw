@@ -26,6 +26,7 @@
 
 //_________________
 void RunAnalyzer(const Char_t *inFileName = "../files/st_physics_12126101_raw_3040006.picoDst.root") {
+  // Next line is not needed if you are not running in a standalone mode
   gROOT->ProcessLine("#define _VANILLA_ROOT_");
   gSystem->Load("../libStPicoDst.so");
   TString str;

@@ -46,12 +46,15 @@ class StPicoHelix {
 	      const TVector3& o, Int_t h=-1);
 
   /// Copy constructor
-  StPicoHelix(const StPicoHelix&);			// use default
+  StPicoHelix(const StPicoHelix&);
+
+  /// Assignment operator (will use the one, provided by compiler)
+  //StPicoHelix& operator=(const StPicoHelix&);
   
   /// Destructor
   virtual ~StPicoHelix();
 
-  // StPicoHelix& operator=(const StPicoHelix&);	// use default
+  
 
   Double_t dipAngle()   const;           
   Double_t curvature()  const;	/// 1/R in xy-plane
@@ -113,10 +116,8 @@ class StPicoHelix {
   
   static const Double_t NoSolution;
     
-protected:
+ protected:
   
-  //StPicoHelix();   // Was here in the original version
-
   /// Set curvature of the helix
   void setCurvature(Double_t);	/// performs also various checks
   /// Set phase of the helix
@@ -125,9 +126,8 @@ protected:
   void setDipAngle(Double_t);
   /// Value of S where distance in x-y plane is minimal
   Double_t fudgePathLength(const TVector3&) const;
-  
+
  protected:
-  
   Bool_t    mSingularity;  /// true for straight line case (B=0)
   TVector3  mOrigin;       /// starting point of a helix
   Double_t  mDipAngle;
