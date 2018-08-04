@@ -10,7 +10,7 @@
 //                                                                                           //
 //                                                                                           //
 ///////////////////////////////////////////////////////////////////////////////////////////////
-#include "digreadoutmap.h"
+#include <digreadoutmap.h>
 
 
 #include <TROOT.h> // for gROOT object

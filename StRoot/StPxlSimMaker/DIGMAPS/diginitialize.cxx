@@ -10,7 +10,7 @@
 //                                                                                           //
 //                                                                                           //
 ///////////////////////////////////////////////////////////////////////////////////////////////
-#include "diginitialize.h"
+#include <diginitialize.h>
 
 #include <TROOT.h> // for gROOT object
 #include <TMath.h>

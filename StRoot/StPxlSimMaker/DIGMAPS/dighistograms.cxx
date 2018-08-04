@@ -10,7 +10,7 @@
 //                                                                                           //
 //                                                                                           //
 ///////////////////////////////////////////////////////////////////////////////////////////////
-#include "dighistograms.h"
+#include <dighistograms.h>
 
 
 #include <TROOT.h> // for gROOT object

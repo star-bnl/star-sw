@@ -10,7 +10,7 @@
 //                                                                                           //
 //                                                                                           //
 ///////////////////////////////////////////////////////////////////////////////////////////////
-#include "digtransport.h"
+#include <digtransport.h>
 
 
 #include <TROOT.h> // for gROOT object

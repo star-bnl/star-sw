@@ -10,7 +10,7 @@
 //                                                                                           //
 //                                                                                           //
 ///////////////////////////////////////////////////////////////////////////////////////////////
-#include "digevent.h"
+#include <digevent.h>
 
 #include <TROOT.h> // for gROOT object
 #include <TMath.h>

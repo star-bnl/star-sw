@@ -10,7 +10,7 @@
 //                                                                                           //
 //                                                                                           //
 ///////////////////////////////////////////////////////////////////////////////////////////////
-#include "digproto.h"
+#include <digproto.h>
 
 
 #include <TROOT.h> // for gROOT object

@@ -12,7 +12,7 @@
 //    - RunConfiguration() loop on all events for a given configuration                      //
 //                                                                                           //
 ///////////////////////////////////////////////////////////////////////////////////////////////
-#include "digmaps.h"
+#include <digmaps.h>
 #include <TStopwatch.h>
 #include <TROOT.h> // for gROOT object
 #include <TMath.h>
