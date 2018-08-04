@@ -1,5 +1,6 @@
 // @(#)root/main:$Name:  $:$Id: h2mdf.C,v 1.3 2014/12/22 23:50:53 fisyak Exp $
 /*
+  root.exe -q -b xyPad3CGF_y3RunXVIII11.root 'xyPadMDF.C("mu",7.20,20180312,11)' >& xyPadMDF.log
  */
 #ifndef __CINT__
 #include <stdlib.h>
@@ -54,17 +55,18 @@ void xyPadMDF1(const TH2D *total2D, Int_t max=7, Int_t maxTerm = 20){
 #endif
   // variables to hold the temporary input data 
   Double_t *x = new Double_t[nVars];
-  
-  // Print out the start parameters
-  fit->Print("p");
-  
   TAxis *xa = total2D->GetXaxis();
   TAxis *ya = total2D->GetYaxis();
   Int_t nx = xa->GetNbins();
   Int_t ny = ya->GetNbins();
   Int_t iy, ix;
-  for (iy = ya->GetFirst(); iy <= ya->GetLast(); iy++) {
-    for (ix = xa->GetFirst(); ix <= xa->GetLast(); ix++) {
+  Int_t netries = 0;
+  Int_t ix1 = xa->GetFirst(), ix2 = xa->GetLast(), nX = (ix2 - ix1 + 1);
+  Int_t iy1 = ya->GetFirst(), iy2 = ya->GetLast(), nY = (iy2 - iy1 + 1);
+  cout << "Range: x[" << xa->GetBinLowEdge(ix1) << "," << xa->GetBinUpEdge(ix2) << "] and y[" << ya->GetBinLowEdge(iy1) << "," << ya->GetBinUpEdge(iy2) << "]" 
+       << " nX = " << nX << ", nY = " << nY  <<  endl;
+  for (iy = iy1; iy <= iy2; iy++) {
+    for (ix = ix1; ix <= ix2; ix++) {
       Double_t error = total2D->GetBinError(ix,iy);
       if (error <= 0) continue;
       //      if (error >  0.008) continue;
@@ -77,11 +79,18 @@ void xyPadMDF1(const TH2D *total2D, Int_t max=7, Int_t maxTerm = 20){
       Double_t yy = value;
       Double_t ee = error*error; // 1e-4; //
       fit->AddRow(x,yy,ee);
+      netries++;
     }
   }
+  if (netries < nX*nY/2) {
+    return;
+  }
+  // Print out the start parameters
+  fit->Print("p");
   // Print out the statistics
   fit->Print("s");
-  
+  cout << "SampleSize = " << fit->GetSampleSize() << "\tSumSqQuantity = " << fit->GetSumSqQuantity() << "\tSumSqAvgQuantity = " << fit->GetSumSqQuantity()/fit->GetSampleSize() << endl;
+  //  if (fit->GetSumSqQuantity()/fit->GetSampleSize() < 5e-5) return;
   // Book histograms 
   //  fit->SetBinVarX(1000);
   //  fit->SetBinVarY(1000);
@@ -169,7 +178,7 @@ void xyPadMDF1(const TH2D *total2D, Int_t max=7, Int_t maxTerm = 20){
 #endif
 }
 //____________________________________________________________________________
-void xyPadMDF(const Char_t  *total = "mu", Int_t max=7, Int_t maxTerm = 20, Int_t date = 20170101, Int_t time = 13){
+void xyPadMDF(const Char_t  *total = "mu", Int_t max=7, Int_t maxTerm = 20, Int_t date = 20180312, Int_t time = 11){
   TH2D *mu = (TH2D *) gDirectory->Get(total);
   if (! mu) {
     cout << "Histogram " << total << " has not been found " << endl;
