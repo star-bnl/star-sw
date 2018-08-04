@@ -1,24 +1,28 @@
 #ifndef StPicoEmcTrigger_h
 #define StPicoEmcTrigger_h
 
-#include "TObject.h"
+/// ROOT headers
+#include <TObject.h>
 
 //_________________
 class StPicoEmcTrigger : public TObject {
 
  public:
-  //Default constructor
+  /// Default constructor
   StPicoEmcTrigger();
-  //Constructor that takes values
-  StPicoEmcTrigger(int flag, int id, int adc);
-  //Copy constructor
+  /// Constructor that takes values
+  StPicoEmcTrigger(Int_t flag, Int_t id, Int_t adc);
+  /// Copy constructor
   StPicoEmcTrigger(const StPicoEmcTrigger &trigger);
-  //Destructor
+  /// Destructor
   virtual ~StPicoEmcTrigger();
-  //Print EMC trigger information
+  /// Print EMC trigger information
   virtual void Print(const Char_t* option = "") const;  ///< Print trigger info
 
-  UInt_t   flag() const;
+  /**
+   * Getters
+   */
+  UInt_t  flag() const;
   Int_t   id() const;
   Int_t   adc() const;
 
@@ -31,15 +35,28 @@ class StPicoEmcTrigger : public TObject {
   bool isJP1() const;
   bool isJP2() const;
 
+  /**
+   * Setters
+   */
+  void setFlag(Int_t flag);
+  void setId(Int_t id);
+  void setAdc(Int_t adc);
+
  protected:
-  UChar_t mFlag;   // 0x1: ht0, 0x2: ht1, 0x4: ht2; 0x8: ht3
-                   // 0x10: jp0, 0x20: jp1, 0x40: jp2
-  UShort_t mId;    // soft id.  bjp: 1-18, ht: 1-4800
-  UShort_t mAdc;   // adc
+  /// Flag encdoes next triggers: 0x1: ht0, 0x2: ht1, 0x4: ht2; 0x8: ht3
+  ///                             0x10: jp0, 0x20: jp1, 0x40: jp2
+  UChar_t mFlag;
+  /// SoftId.  bjp: 1-18, ht: 1-4800
+  UShort_t mId;
+  /// ADC
+  UShort_t mAdc;
 
   ClassDef(StPicoEmcTrigger, 1)
 };
 
+/**
+ * Getters
+ */
 inline UInt_t StPicoEmcTrigger::flag() const { return (UInt_t)mFlag; }
 inline Int_t StPicoEmcTrigger::id() const { return (Int_t)mId; }
 inline Int_t StPicoEmcTrigger::adc() const { return (Int_t)mAdc; }

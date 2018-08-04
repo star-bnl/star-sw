@@ -1,4 +1,6 @@
+/// PicoDst headers
 #include "StPicoEpdHit.h"
+
 //
 // \class StPicoEpdHit
 // \author Mike Lisa
@@ -28,20 +30,18 @@
  * - Mike Lisa March 2018
  ************************************************/
 
-#include "StPicoEpdHit.h"
-
 ClassImp(StPicoEpdHit)
 
 //_________________
-StPicoEpdHit::StPicoEpdHit() : StPicoEpdHit(0, 0, 0, 0, 0, 0, false, 0.0, false) {
+StPicoEpdHit::StPicoEpdHit() : mId(0), mQTdata(0), mnMIP(0) {
   /* no-op */
 }
 
 //_________________
-StPicoEpdHit::StPicoEpdHit(int position, int tile,
-		       int EW, int ADC, int TAC,
-		       int TDC, bool hasTAC, float nMIP,
-		       bool statusIsGood) :
+StPicoEpdHit::StPicoEpdHit(Int_t position, Int_t tile,
+			   Int_t EW, Int_t ADC, Int_t TAC,
+			   Int_t TDC, Bool_t hasTAC, Float_t nMIP,
+			   Bool_t statusIsGood) :
   mId( (100*position + tile)*EW ),
   mQTdata( (ADC & 0x0FFF) | (TAC & 0x0FFF) << 12 | (TDC & 0x001F) << 24 | hasTAC << 29 | statusIsGood << 30 ),
   mnMIP(nMIP) {
@@ -49,7 +49,7 @@ StPicoEpdHit::StPicoEpdHit(int position, int tile,
 }
 
 //_________________
-StPicoEpdHit::StPicoEpdHit(short id, int QTdata, float nMIP) :
+StPicoEpdHit::StPicoEpdHit(Short_t id, Int_t QTdata, Float_t nMIP) :
   mId(id), mQTdata(QTdata), mnMIP(nMIP) {
   /* no-op */
 }

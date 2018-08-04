@@ -1,19 +1,18 @@
-#include <limits>
-
-#include "St_base/StMessMgr.h"
-#include "StPicoEvent/StPicoBTofHit.h"
+/// PicoDst headers
+#include "StPicoMessMgr.h"
+#include "StPicoBTofHit.h"
 
 ClassImp(StPicoBTofHit)
 
 //_________________
-StPicoBTofHit::StPicoBTofHit() : mId(0) {
+StPicoBTofHit::StPicoBTofHit() : TObject(), mId(-1) {
   /* empty */
 }
 
 //_________________
-StPicoBTofHit::StPicoBTofHit(int id): StPicoBTofHit() {
+StPicoBTofHit::StPicoBTofHit(int id) : TObject() {
   if (id  < 0) return;
-  mId = (id > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)id;
+  mId = (id > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)id; 
 }
 
 //_________________

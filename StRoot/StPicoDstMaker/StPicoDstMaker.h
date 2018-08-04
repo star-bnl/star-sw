@@ -1,10 +1,10 @@
-#ifndef StPicoDstMaker_h
+ #ifndef StPicoDstMaker_h
 #define StPicoDstMaker_h
 #include <vector>
 #include "StChain/StMaker.h"
 #include "StPicoEvent/StPicoArrays.h"
 #include "StPicoDstMaker/StPicoFmsFiller.h"
-
+#include "StPicoEvent/StPicoDst.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 class TClonesArray;
 class TChain;
@@ -23,18 +23,29 @@ class StPicoDstMaker : public StMaker {
 
  public:
   enum PicoIoMode {IoWrite=1, IoRead=2};
+#ifndef __TFG__VERSION__
 
-  StPicoDstMaker(char const* name);
-  //  StPicoDstMaker(PicoIoMode ioMode, char const* fileName = "", char const* name = "PicoDst");
-  StPicoDstMaker(Int_t ioMode, char const* fileName = "", char const* name = "PicoDst");
+  enum PicoVtxMode {NotSet=0, Default=1, Vpd=2, VpdOrDefault=3};
+#endif /* ! __TFG__VERSION__ */
+  enum PicoCovMtxMode {NotDefined=0, Skip=1, Write=2};
+
+  /// Constructor
+  StPicoDstMaker(char const* name = "PicoDst");
+  /// Constructor that takes most of pararmeters
+  StPicoDstMaker(Int_t ioMode, char const* fileName = "",
+		 char const* name = "PicoDst");
+  /// Destructor
   virtual ~StPicoDstMaker();
 
-  virtual Int_t Init();
+  /// Init run
   virtual Int_t InitRun(Int_t const runnumber);
+  /// Standard STAR functions
+  virtual Int_t Init();
   virtual Int_t Make();
   virtual void  Clear(Option_t* option = "");
   virtual Int_t Finish();
 
+  /// Print pico arrays
   void printArrays();
 
   /// Enables or disables branches matching a simple regex pattern in reading mode
@@ -53,6 +64,7 @@ class StPicoDstMaker : public StMaker {
   void setBufferSize(int = 65536 * 4);
   /// Sets the compression level for the file and all branches. 0 means no compression, 9 is the higher compression level.
   void setCompression(int comp = 9);
+#ifdef __TFG__VERSION__
   PicoVtxMode vtxMode() {return StMuDst::instance()->vtxMode();}
   void setVtxMode(const PicoVtxMode vtxMode)         {StMuDst::instance()->setVtxMode(vtxMode);}
   void SetMaxTrackDca(Double_t cut = 50)             {StMuDst::instance()->SetMaxTrackDca(cut);}
@@ -62,6 +74,14 @@ class StPicoDstMaker : public StMaker {
   void SetVxRmax(Double_t rmax = 2)                  {StMuDst::instance()->SetVxRmax(rmax);}
   static StPicoDstMaker *instance() {return fgPicoDstMaker;}
   TClonesArray** picoArrays() {return mPicoArrays;}
+#else /* ! __TFG__VERSION__ */
+
+  /// Set vertex selection mode
+  void setVtxMode(const PicoVtxMode vtxMode);
+#endif /* __TFG__VERSION__ */
+  /// Set to write or not to write covariant matrix
+  void setCovMtxMode(const PicoCovMtxMode covMtxMode);
+ private:
 
   void streamerOff();
 
@@ -85,11 +105,11 @@ class StPicoDstMaker : public StMaker {
   Int_t MakeRead();
   Int_t MakeWrite();
 
-  //for reading
+  /// For READ mode
   void fillEventHeader() const; //changes "global" variable, not this maker
 
-  //for writing
-  Int_t fillTracks(); // iok != 0 skip event
+  /// For WRITE mode
+  void fillTracks();
   void fillEvent();
   void fillEmcTrigger();
   void fillMtdTrigger();
@@ -121,11 +141,18 @@ class StPicoDstMaker : public StMaker {
   * param[out]  towid[]  Unique ids of the three BEMC towers identified for ene[2], ene[3], and ene[4]
   */
   Bool_t getBEMC(const StMuTrack* t, int* id, int* adc, float* ene, float* d, int* nep, int* towid);
-  int  setVtxModeAttr();
+  Int_t  setVtxModeAttr();
+  Int_t  setCovMtxModeAttr();
 
   /// Selects a primary vertex from `muDst` vertex collection according to the
   /// vertex selection mode `mVtxMode` specified by the user.
+#ifdef __TFG__VERSION__
     Bool_t selectVertex() {return StMuDst::instance()->selectVertex();}
+#else /* ! __TFG__VERSION__ */
+  Bool_t selectVertex();
+#endif /* __TFG__VERSION__ */
+  Float_t   mTpcVpdVzDiffCut;
+
   /// A pointer to the main input source containing all muDst `TObjArray`s
   /// filled from corresponding muDst branches
   StMuDst*  mMuDst;
@@ -138,11 +165,12 @@ class StPicoDstMaker : public StMaker {
   StEmcGeom*       mEmcGeom[4];
   StEmcRawHit*     mEmcIndex[4800];
 
-  Float_t   mTpcVpdVzDiffCut;
-
   Float_t    mBField;
 
+  /// Vertex selection mode
   PicoVtxMode mVtxMode;
+  /// Covariant matrix not write/write mode
+  PicoCovMtxMode mCovMtxMode;
 
   TString   mInputFileName;        //! *.list - MuDst or picoDst
   TString   mOutputFileName;       //! FileName
@@ -161,7 +189,7 @@ class StPicoDstMaker : public StMaker {
   int mBufferSize;
   ///@}
 
-  // MTD map from backleg to QT
+  /// MTD map from backleg to QT
   Int_t  mModuleToQT[30][5];        // Map from module to QT board index
   Int_t  mModuleToQTPos[30][5];     // Map from module to the position on QA board
   Int_t  mQTtoModule[8][8];         // Map from QT board to module
@@ -178,12 +206,15 @@ class StPicoDstMaker : public StMaker {
   ClassDef(StPicoDstMaker, 0)
 };
 
-
 inline StPicoDst* StPicoDstMaker::picoDst() { return mPicoDst; }
 inline TChain* StPicoDstMaker::chain() { return mChain; }
 inline TTree* StPicoDstMaker::tree() { return mTTree; }
 inline void StPicoDstMaker::setSplit(int split) { mSplit = split; }
 inline void StPicoDstMaker::setCompression(int comp) { mCompression = comp; }
 inline void StPicoDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
+#ifndef __TFG__VERSION__
+inline void StPicoDstMaker::setVtxMode(const PicoVtxMode vtxMode) { mVtxMode = vtxMode; }
+#endif /* __TFG__VERSION__ */
+inline void StPicoDstMaker::setCovMtxMode(const PicoCovMtxMode covMtxMode) { mCovMtxMode = covMtxMode; }
 
 #endif
