@@ -119,7 +119,7 @@ void StPicoTrack::setDedx(Float_t dEdx) {
 //_________________
 void StPicoTrack::setDedxError(Float_t dEdxError) {
   /// In KeV/cm
-  mDedxError = dEdxError * 1.e6;
+  mDedxError = dEdxError;
 }
 
 //_________________
