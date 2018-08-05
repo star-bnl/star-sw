@@ -84,6 +84,7 @@
 #include "StarRoot/TDirIter.h"
 #include "StMuDSTMaker/COMMON/StMuMcTrack.h"
 #include "StMuDSTMaker/COMMON/StMuMcVertex.h"
+#include "StMuDSTMaker/COMMON/StMuProbPidTraits.h"
 #include "TSystem.h"
 #include "TH1.h"
 #include "TH2.h"
@@ -241,7 +242,7 @@ Int_t StPicoDstMaker::Init() {
 #ifdef __TFG__VERSION__
     if (StMuDst::vtxMode() == PicoVtxMode::NotSet) {
 #else /* ! __TFG__VERSION__ */
-    if (mVtxMode == PicoVtxMode::NotSet) {
+    if (mVtxMode == PicoVtxMode::NotSet) { 
 #endif /* __TFG__VERSION__ */
       if (setVtxModeAttr() != kStOK) {
 	LOG_ERROR << "Pico Vertex Mode is not set ... " << endm;
@@ -257,6 +258,7 @@ Int_t StPicoDstMaker::Init() {
       }
     } //if (mCovMtxMode == PicoCovMtxMode::NotSet)
 
+#ifndef __TFG__VERSION__
     if (mInputFileName.Length() == 0) {
       // No input file
       mOutputFileName = GetChainOpt()->GetFileOut();
@@ -273,7 +275,7 @@ Int_t StPicoDstMaker::Init() {
       }
     }
 
-#ifdef __TFG__VERSION__
+#else /* __TFG__VERSION__ */
     if (mInputFileName.Length() == 0) mInputFileName = GetChainOpt()->GetFileOut();
     file = gSystem->BaseName(mInputFileName);
     l = file.Index(".");
@@ -925,10 +927,12 @@ void StPicoDstMaker::fillTracks() {
     /// Fill basic track information here
     picoTrk->setId( gTrk->id() );
     picoTrk->setChi2( gTrk->chi2() );
-    /// Store dE/dx in KeV/cm
+    /// Store dE/dx in keV/cm
     picoTrk->setDedx( gTrk->dEdx() );
-    /// Store dEdx error (fit) in KeV/cm
-    picoTrk->setDedxError( gTrk->probPidTraits().dEdxErrorFit() );
+    /// Store dEdx error (fit) 
+    const StMuProbPidTraits &pidTrait = gTrk->probPidTraits();
+    Float_t dEdxError = pidTrait.dEdxErrorFit();
+    picoTrk->setDedxError( dEdxError );
 
     /// Fill track's hit information
     picoTrk->setNHitsDedx( gTrk->nHitsDedx() );
