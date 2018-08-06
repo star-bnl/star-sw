@@ -17,7 +17,6 @@ class St_TpcAvgPowerSupplyC : public TChair {
   Float_t* 	Voltage(Int_t i = 0) 	const {return Struct(i)->Voltage;}
   Float_t	voltagePadrow(Int_t sec = 1, Int_t padrow = 1) const; // sector=1..24 , padrow=1..100
   Bool_t        tripped(Int_t sec = 1, Int_t row = 1) const {return voltagePadrow(sec,row) < -100;}
-  static Int_t  ChannelFromRow(Int_t row) {return St_TpcAvgCurrentC::ChannelFromRow(row);}
   static Int_t  ChannelFromRow(Int_t sector, Int_t row) {return St_TpcAvgCurrentC::ChannelFromRow(sector,row);}
   static Int_t  ChannelFromSocket(Int_t socket) {return St_TpcAvgCurrentC::ChannelFromSocket(socket);}
   Float_t       AvCurrent(Int_t sector = 1, Int_t channel = 1) {

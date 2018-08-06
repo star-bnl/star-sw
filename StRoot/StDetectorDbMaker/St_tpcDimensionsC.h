@@ -81,7 +81,7 @@ class St_tpcDimensionsC : public TChair {
   Double_t* 	outerDXExtraAl(Int_t i = 0) 	{return Struct(i)->outerDXExtraAl;}
   Double_t* 	outerDZExtraAl(Int_t i = 0) 	{return Struct(i)->outerDZExtraAl;}
   Double_t      gatingGridZ(Int_t sector=20) {
-    return St_tpcPadConfigC::instance()->outerSectorPadPlaneZ(sector)
+    return St_tpcPadConfigC::instance()->outerSectorPadPlaneZ(sector) 
       - St_tpcWirePlanesC::instance()->outerSectorGatingGridPadPlaneSeparation();}
   Double_t      zInnerOffset()                  {return St_tpcEffectiveGeomC::instance()->z_inner_offset();}
   Double_t      zOuterOffset()                  {return St_tpcEffectiveGeomC::instance()->z_outer_offset();}
