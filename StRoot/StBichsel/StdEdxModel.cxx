@@ -735,8 +735,11 @@ void StdEdxModel::MakedEdxModel() {
   }
   fOut->Write();
 }
-// $Id: StdEdxModel.cxx,v 1.2 2016/06/10 19:55:45 fisyak Exp $
+// $Id: StdEdxModel.cxx,v 1.3 2018/08/06 15:30:11 fisyak Exp $
 // $Log: StdEdxModel.cxx,v $
+// Revision 1.3  2018/08/06 15:30:11  fisyak
+// Add HEED model
+//
 // Revision 1.2  2016/06/10 19:55:45  fisyak
 // Fix mem. leak (covertry)
 //

@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.y2017.C,v 1.1 2017/02/07 16:58:37 fisyak Exp $
-// $Log: TpcResponseSimulator.y2017.C,v $
+// $Id: TpcResponseSimulator.y2018.C,v 1.1 2018/08/06 15:41:44 fisyak Exp $
+// $Log: TpcResponseSimulator.y2018.C,v $
+// Revision 1.1  2018/08/06 15:41:44  fisyak
+// RunXVIII isobar dE/dx calibration
+//
 // Revision 1.1  2017/02/07 16:58:37  fisyak
 // Clean up
 //

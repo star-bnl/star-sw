@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.91 2018/04/11 02:41:54 smirnovd Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.92 2018/08/06 15:30:57 fisyak Exp $
 //#define CompareWithToF 
 //#define __USEZ3A__
 //#define __CHECK_LargedEdx__

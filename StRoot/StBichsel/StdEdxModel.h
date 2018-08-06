@@ -90,8 +90,11 @@ class StdEdxModel {
   static Int_t        _debug;
   ClassDef(StdEdxModel,0)
 };
-// $Id: StdEdxModel.h,v 1.1 2015/12/24 00:16:25 fisyak Exp $
+// $Id: StdEdxModel.h,v 1.3 2018/08/06 15:30:11 fisyak Exp $
 // $Log: StdEdxModel.h,v $
+// Revision 1.3  2018/08/06 15:30:11  fisyak
+// Add HEED model
+//
 // Revision 1.1  2015/12/24 00:16:25  fisyak
 // Add TpcRS model and macros
 //

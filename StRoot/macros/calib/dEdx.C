@@ -59,6 +59,7 @@ void dEdx(Int_t nevents=1000,
   //  TString Chain("in,dEdxY2,magF,StEvent,St_geom,tofrMatch,tofpMatch,tofCalib,Corr4,OSpaceZ2");
   //  TString Chain("in,TpcHitMover,CorrX,OSpaceZ2,OGridLeak3D,dEdxY2,magF,StEvent,mysql,CMuDst,noHistos,noRunco,NoDefault"); // ,analysis
   TString Chain("in,TpcHitMover,simu,CorrX,OSpaceZ2,OGridLeak3D,dEdxY2,magF,StEvent,mysql,quiet,NoDefault"); // ,analysis
+  //  Chain += ",CMuDst,picoWrite,noHistos,noRunco,-evout"; // For PicoDst
   TString RootFile(rootFile);
   if (RootFile == "") {
     RootFile = gSystem->BaseName(MainFile);

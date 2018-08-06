@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.30 2016/05/16 02:44:00 perev Exp $
+ * $Id: StTpcHit.h,v 2.32 2018/08/06 15:54:30 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
+ * Revision 2.32  2018/08/06 15:54:30  fisyak
+ * Add dX
+ *
  * Revision 2.30  2016/05/16 02:44:00  perev
  * Added init of mAdd. (Coverity)
  *
@@ -182,6 +185,6 @@ protected:
 };
 ostream&              operator<<(ostream& os, StTpcHit const & v);
 
-inline StDetectorId StTpcHit::detector() const {return kTpcId;}
+inline StDetectorId StTpcHit::detector() const {return (bits(1,1) ? kiTpcId : kTpcId);}
 
 #endif

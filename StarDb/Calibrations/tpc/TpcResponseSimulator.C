@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.C,v 1.12 2012/04/03 14:06:55 fisyak Exp $
+// $Id: TpcResponseSimulator.C,v 1.13 2018/08/06 15:41:44 fisyak Exp $
 // $Log: TpcResponseSimulator.C,v $
+// Revision 1.13  2018/08/06 15:41:44  fisyak
+// RunXVIII isobar dE/dx calibration
+//
 // Revision 1.12  2012/04/03 14:06:55  fisyak
 // Speed up using  GetSaveL (__PAD_BLOCK__), sluggish shape histograms, Heed electron generation
 //
