@@ -20,9 +20,9 @@
  *  directory where the RunAnalyzer.C is stored.
  **/
 
-#include <TROOT.h>
-#include <TSystem.h>
-#include <TString.h>
+#include "TROOT.h"
+#include "TSystem.h"
+#include "TString.h"
 
 //_________________
 void RunAnalyzer(const Char_t *inFileName = "../files/st_physics_12126101_raw_3040006.picoDst.root") {
@@ -34,5 +34,6 @@ void RunAnalyzer(const Char_t *inFileName = "../files/st_physics_12126101_raw_30
   str += inFileName;
   str += "\")";
   gROOT->ProcessLine( str.Data() );
+  // Next line should be commented if you run in a batch mode
   gROOT->ProcessLine(".!rm -f PicoDstAnalyzer_C* ");
 }

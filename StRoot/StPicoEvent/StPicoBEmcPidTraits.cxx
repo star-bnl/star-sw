@@ -2,7 +2,7 @@
 #include <limits>
 
 /// ROOT headers
-#include <TMath.h>
+#include "TMath.h"
 
 /// PicoDst headers
 #include "StPicoMessMgr.h"
