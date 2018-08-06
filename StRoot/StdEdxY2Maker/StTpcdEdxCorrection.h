@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.10 2018/04/11 02:41:54 smirnovd Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.11 2018/08/06 15:30:57 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -34,7 +34,7 @@ struct dEdxCorrection_t {
 class dEdxY2_t;
 class StTpcdEdxCorrection : public TObject {
  public:
-  enum ESector : int {kTpcOuter = 0, kTpcInner = 1};
+  enum ESector : int {kTpcOuter = 0, kTpcInner = 1, kiTpc = 2};
   enum EOptions : int {
     kUncorrected           =  0,//U   				           
     kEdge                  =  1,//E   correction near edge of chamber	     
@@ -156,6 +156,7 @@ class dEdxY2_t {
   Float_t  Voltage; // Anode Voltage
   Float_t  xpad;    // relative position in pad [-1.0,1.0]
   Float_t  yrow;    // relative position in row [-0.5,0.0] inner, and [0.0,0.5] outer
+  Float_t  tpcTime;
   dE_t     C[StTpcdEdxCorrection::kTpcAllCorrections+1];
   dE_t     F;     //! 
   Char_t   last[1];
