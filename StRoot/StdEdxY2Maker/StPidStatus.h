@@ -50,6 +50,7 @@ class StPidStatus {
   virtual ~StPidStatus() {}
   void Clear() {memset(mBeg,0,mEnd-mBeg+1);}
   Int_t Status() {return PiDStatus;}
+  StdEdxStatus *Status(StDedxMethod k) {return fStatus[k];}
   void Set();
   StdEdxStatus fI70; //!
   StdEdxStatus fFit; //!
@@ -59,6 +60,7 @@ class StPidStatus {
   StdEdxStatus fdNdxU;//!
   StToFStatus  fToF; //!
   Int_t        PiDStatus; //!
+  StdEdxStatus* fStatus[kOtherMethodId2+1];
   //  StGlobalTrack *gTrack; //!
   StThreeVectorD g3; //!
   Char_t                mBeg[1];                   //!
