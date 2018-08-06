@@ -103,9 +103,11 @@ protected:
 private:
     UInt_t  mMap0;
     UInt_t  mMap1;
-    UInt_t  mMap2;
-    
-    ClassDef(StTrackTopologyMap,2)
+    union {
+      UInt_t   mMap2;
+      Long64_t mMap_iTpc;
+    };
+    ClassDef(StTrackTopologyMap,3)
 };
 
 ostream& operator<< (ostream&, const StTrackTopologyMap&);
