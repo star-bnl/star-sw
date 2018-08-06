@@ -12,7 +12,6 @@ class St_TpcAvgCurrentC : public TChair {
   Int_t 	run(Int_t i = 0) 	const {return Struct(i)->run;}
   Int_t 	start_time(Int_t i = 0) 	const {return Struct(i)->start_time;}
   Int_t 	stop_time(Int_t i = 0) 	const {return Struct(i)->stop_time;}
-  static Int_t  ChannelFromRow(Int_t row);
   static Int_t  ChannelFromRow(Int_t sector, Int_t row);
   static Int_t  ChannelFromSocket(Int_t socket);
   Float_t       AvCurrent(Int_t sector = 1, Int_t channel = 1);
