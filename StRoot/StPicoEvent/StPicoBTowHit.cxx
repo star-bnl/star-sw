@@ -1,3 +1,9 @@
+/// C++ headers
+#include <limits>
+
+/// ROOT headers
+#include "TMath.h"
+
 /// PicoDst headers
 #include "StPicoMessMgr.h"
 #include "StPicoBTowHit.h"
@@ -36,7 +42,7 @@ void StPicoBTowHit::Print(const Char_t* option) const {
 
 //_________________
 Bool_t StPicoBTowHit::isBad() const {
-  if( energy()==-2. && mAdc==0) {
+  if( energy()<=-2. && mAdc==0) {
     return kTRUE;
   }
   else {
@@ -45,8 +51,16 @@ Bool_t StPicoBTowHit::isBad() const {
 }
 
 //_________________
+void StPicoBTowHit::setEnergy(Float_t energy) {
+  mE = ( fabs(energy * 1000) > std::numeric_limits<short>::max() ?
+	 ( (energy > 0) ? std::numeric_limits<short>::max() :
+	   std::numeric_limits<short>::min() ) :
+	 (Short_t)( TMath::Nint(energy * 1000) ) );
+}
+
+//_________________
 void StPicoBTowHit::setAdc(Int_t adc) {
-  if(adc<0) {
+  if( adc<0 ) {
     mAdc = 0;
   }
   else {

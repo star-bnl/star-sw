@@ -2,8 +2,7 @@
 #define StPicoTrackCovMatrix_h
 
 /// ROOT headers
-#include <TObject.h>
-#include <TBufferFile.h>
+#include "TObject.h"
 
 //_________________
 class StPicoTrackCovMatrix : public TObject {

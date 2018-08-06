@@ -5,8 +5,8 @@
 #include <vector>
 
 /// ROOT headers
-#include <TObject.h>
-#include <TVector3.h>
+#include "TObject.h"
+#include "TVector3.h"
 
 //_________________
 class StPicoEvent : public TObject {
