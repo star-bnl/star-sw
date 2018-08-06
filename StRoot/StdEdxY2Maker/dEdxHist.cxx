@@ -5,7 +5,7 @@ Hists3D::Hists3D(const Char_t *Name, const Char_t *Title,
 		 Int_t nXBins, 
 		 Int_t nYBins,  Double_t ymin, Double_t ymax,
 		 Int_t nZBins, Double_t ZdEdxMin, Double_t ZdEdxMax,
-		 Double_t xmin, Double_t xmax, Int_t nh = NtotHist) : fNHist(nh) {
+		 Double_t xmin, Double_t xmax, Int_t nh) : fNHist(nh) {
   const Char_t *Names[9] = {"","C","N","Ne","Npi","NK","NP","Nd","dX"};
   const Char_t *Titles[9] = {"uncorrected", "correctred","nP measured","nP for e","nP for pi","nP for K","nP for P","nP for d","dX"};
   memset(hists, 0, 9*sizeof(TH1*));
