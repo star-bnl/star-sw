@@ -33,7 +33,10 @@ struct TpcResponseSimulator {
   float  SigmaJitterXO;        /* = 0.0  for Tpx outer */
   float  longitudinalDiffusion;/*   cm/sqrt(cm)  */
   float  transverseDiffusion;  /*   cm/sqrt(cm)  */
-  float  NoElPerAdc;           /* = 335, No. of electrons per 1 ADC count */
+  float  NoElPerAdc;           /* = 335, No. of electrons per 1 ADC count, keep for back compartibility */
+  float  NoElPerAdcI;          /* = 335, No. of electrons per 1 ADC count for inner TPX */
+  float  NoElPerAdcO;          /* = 335, No. of electrons per 1 ADC count for outer TPX */
+  float  NoElPerAdcX;          /* = 335, No. of electrons per 1 ADC count for iTPC      */
   float  OmegaTauScaleI;       /* = 2.145, effective reduction of OmegaTau near 
 				  Inner sector anode wire */
   float  OmegaTauScaleO;       /* = 1.8, effective reduction of OmegaTau near 
