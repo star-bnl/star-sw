@@ -81,13 +81,13 @@ void StPidStatus::Set() {
   Int_t l;
   PredBMN[0] = Pred70BMN[0] =  1;
   PredBMN[1] = Pred70BMN[1] = -1;
-  memset (fStatus, 0, sizeof(fStatus));
-  fStatus[kTruncatedMeanId]         = fI70.fPiD   ? &fI70   : 0;
-  fStatus[kLikelihoodFitId]         = fFit.fPiD   ? &fFit   : 0;
-  fStatus[kEnsembleTruncatedMeanId] = fI70U.fPiD  ? &fI70U  : 0;
-  fStatus[kWeightedTruncatedMeanId] = fFitU.fPiD  ? &fFitU  : 0;
-  fStatus[kOtherMethodId]           = fdNdx.fPiD  ? &fdNdx  : 0;
-  fStatus[kOtherMethodId2]          = fdNdxU.fPiD ? &fdNdxU : 0;
+  StdEdxStatus *status[kOtherMethodId2+1] = {0};
+  status[kTruncatedMeanId]         = fI70.fPiD   ? &fI70   : 0;
+  status[kLikelihoodFitId]         = fFit.fPiD   ? &fFit   : 0;
+  status[kEnsembleTruncatedMeanId] = fI70U.fPiD  ? &fI70U  : 0;
+  status[kWeightedTruncatedMeanId] = fFitU.fPiD  ? &fFitU  : 0;
+  status[kOtherMethodId]           = fdNdx.fPiD  ? &fdNdx  : 0;
+  status[kOtherMethodId2]          = fdNdxU.fPiD ? &fdNdxU : 0;
 
   for (l = kPidElectron; l < KPidParticles; l++) {
     Double_t charge = StProbPidTraits::mPidParticleDefinitions[l]->charge();
@@ -95,31 +95,28 @@ void StPidStatus::Set() {
     bgs[l]   = pMomentum*TMath::Abs(charge)/mass;
     bghyp[l] = TMath::Log10(bgs[l]);
     for (Int_t m = 1; m <= kOtherMethodId2; m++) {
-      if (! fStatus[m]) continue;
+      if (! status[m]) continue;
       switch (m) {
       case kTruncatedMeanId: 
       case kEnsembleTruncatedMeanId: 
-	fStatus[m]->Pred[l] = 1.e-6*charge*charge*
-	  Bichsel::Instance()->GetI70M(bghyp[l],fStatus[m]->fPiD->log2dX());
+	status[m]->Pred[l] = 1.e-6*charge*charge*
+	  Bichsel::Instance()->GetI70M(bghyp[l],status[m]->fPiD->log2dX());
 	  break;
       case kLikelihoodFitId: 
       case kWeightedTruncatedMeanId:
-	fStatus[m]->Pred[l] = 1.e-6*charge*charge*
-	  TMath::Exp(Bichsel::Instance()->GetMostProbableZ(bghyp[l],fStatus[m]->fPiD->log2dX())); 
+	status[m]->Pred[l] = 1.e-6*charge*charge*
+	  TMath::Exp(Bichsel::Instance()->GetMostProbableZ(bghyp[l],status[m]->fPiD->log2dX())); 
 	break;
       case kOtherMethodId: 
       case kOtherMethodId2: 
-	fStatus[m]->Pred[l]  = StdEdxModel::instance()->dNdx(bgs[l], charge);
+	status[m]->Pred[l]  = StdEdxModel::instance()->dNdx(bgs[l], charge);
 	break;
       default: continue;
       }
-      fStatus[m]->dev[l] = TMath::Log(fStatus[m]->I()/fStatus[m]->Pred[l]);
-      fStatus[m]->devS[l] = -999;
-      if (fStatus[m]->D() > 0) {
-	fStatus[m]->devS[l] = fStatus[m]->dev[l]/fStatus[m]->D();
-      }
-      if (fStatus[m]->Pred[l] < PredBMN[0]) PredBMN[0] = fStatus[m]->Pred[l];
-      if (fStatus[m]->Pred[l] > PredBMN[1]) PredBMN[1] = fStatus[m]->Pred[l];
+      status[m]->dev[l] = TMath::Log(status[m]->I()/status[m]->Pred[l]);
+      status[m]->devS[l] = status[m]->dev[l]/status[m]->D();
+      if (status[m]->Pred[l] < PredBMN[0]) PredBMN[0] = status[m]->Pred[l];
+      if (status[m]->Pred[l] > PredBMN[1]) PredBMN[1] = status[m]->Pred[l];
     }
   }
   PiDkey    = -1; // best
