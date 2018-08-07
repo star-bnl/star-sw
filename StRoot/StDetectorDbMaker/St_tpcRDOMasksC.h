@@ -4,7 +4,7 @@
 #include "TChair.h"
 #include "tables/St_tpcRDOMasks_Table.h"
 #include "St_tpcPadPlanesC.h"
-#include "St_tpcPadConfigC.h"
+
 class St_tpcRDOMasksC : public TChair {
  public:
   static St_tpcRDOMasksC* 	instance();
@@ -14,8 +14,7 @@ class St_tpcRDOMasksC : public TChair {
   UInt_t 	sector(Int_t i = 0) 	        {return Struct(i)->sector;}
   UInt_t 	mask(Int_t i = 0) 	        {return Struct(i)->mask;}
   UInt_t        getSectorMask(UInt_t sector);
-  static UInt_t rdoForPadrow(Int_t sector, Int_t row) { //Function returns the rdo board number for a given padrow index. Range of map used is 1-45.
-    if (St_tpcPadConfigC::instance()->iTpc(sector)) return 8;
+  static UInt_t rdoForPadrow(Int_t row) { //Function returns the rdo board number for a given padrow index. Range of map used is 1-45.
     UInt_t rdo = 0;
     if      (row > 0 && row <=  8) rdo = 1;
     else if (row > 8 && row <= 13) rdo = 2;
@@ -25,15 +24,14 @@ class St_tpcRDOMasksC : public TChair {
     else if (row >37 && row <= St_tpcPadPlanesC::instance()->padRows()) rdo = 6;
     return rdo;
   }
-  Bool_t        isOn(Int_t sector,Int_t rdo)  {    
-    if (St_tpcPadConfigC::instance()->iTpc(sector)) return 1;
+  Bool_t        isOn(UInt_t sector,UInt_t rdo)  {    
     if(sector < 1 || sector > 24 || rdo < 1 || rdo > 6)	return 0;
     UInt_t MASK = getSectorMask(sector);
     MASK = MASK >> (rdo - 1);
     MASK &= 0x00000001;
     return MASK;
   }
-  Bool_t       isRowOn(Int_t sector, Int_t row) {return isOn(sector, rdoForPadrow(sector, row));}
+  Bool_t       isRowOn(UInt_t sector, UInt_t row) {return isOn(sector, rdoForPadrow(row));}
  protected:
   St_tpcRDOMasksC(St_tpcRDOMasks *table=0) : TChair(table) {}
   virtual ~St_tpcRDOMasksC() {fgInstance = 0;}
