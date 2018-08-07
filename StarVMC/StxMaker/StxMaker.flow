@@ -1,0 +1,73 @@
+#include "TPCCATracker/AliHLTTPCCAGBHit.h"
+    float fX; //* X position
+    float fY; //* Y position
+    float fZ; //* Z position
+
+    float fErrX; //* X position error
+    float fErrY; //* Y position error
+    float fErrZ; //* Z position error
+
+    float fAmp;   //* Maximal amplitude
+    int fISlice; //* slice number
+    int fIRow;   //* row number
+    int fID;     //* external ID (id of AliTPCcluster)
+    bool fIsUsed; //* is used by GBTracks
+#include "TPCCATracker/AliHLTTPCCAGBTrack.h"
+    int fFirstHitRef;        // index of the first hit reference in track->hit reference array
+    int fNHits;              // number of track hits
+    AliHLTTPCCATrackParam fInnerParam; // fitted track parameters
+    AliHLTTPCCATrackParam fOuterParam;
+    float fAlpha;             //* Alpha angle of the parametrerisation
+    int   fNDeDx;
+    float fDeDx;              //* DE/DX
+
+    // ---
+    bool tIsMerged;
+#include "TPCCATracker/AliHLTTPCCAParam.h"
+    int fISlice; // slice number
+    int fNRows; // number of rows
+    int fNInnerRows; // number of inner rows
+
+    float fAlpha, fDAlpha; // slice angle and angular size
+    float fCosAlpha, fSinAlpha;// sign and cosine of the slice angle
+    float fAngleMin, fAngleMax; // minimal and maximal angle
+    float fRMin, fRMax;// slice R range
+    float fZMin, fZMax;// slice Z range
+    float fErrX, fErrY, fErrZ;// default cluster errors
+    float fPadPitch; // pad pitch
+    float fBz;       // magnetic field value (only constant field can be used)
+
+    float fHitPickUpFactor;// multiplier for the chi2 window for hit pick up procedure
+
+    int   fMaxTrackMatchDRow;// maximal jump in TPC row for connecting track segments
+    float fTrackConnectionFactor; // allowed distance in Chi^2/3.5 for neighbouring tracks
+    float fTrackChiCut; // cut for track Sqrt(Chi2/NDF);
+    float fTrackChi2Cut;// cut for track Chi^2/NDF
+
+    vector<float> fRowX;// X-coordinate of rows 
+    int   fRecoType;		   // 0=Sti error parametrization; 1=Stv
+    float fParamS0Par[2][3][7];    // cluster error parameterization coeficients
+    float fPolinomialFieldBz[6];   // field coefficients
+#include "TPCCATracker/AliHLTTPCCATrackParam.h"
+    float fX;      // x position
+    float fSignCosPhi; // sign of cosPhi   // phi = arctg (Dy/Dx)
+    float fP[5];   // 'active' track parameters: Y, Z, SinPhi, Dz/Ds (ds = sqrt( dx^2 + dy^2 )), q/Pt
+    float fC[15];  // the covariance matrix for Y,Z,SinPhi,..
+    float fChi2;   // the chi^2 value
+    int   fNDF;    // the Number of Degrees of Freedom
+
+================================================================================
+
+
+       
+    StxMaker::Make
+      StxInterface::Run
+        AliHLTTPCCAGBTracker::FindTracks
+          AliHLTTPCCATracker::ReadEvent
+            AliHLTTPCCATracker::StartEvent
+              AliHLTTPCCATracker::SetupCommonMemory
+            AliHLTTPCCASliceData::InitFromClusterData
+            AliHLTTPCCASliceData::NumberOfHits 
+          AliHLTTPCCATracker::Reconstruct
+            AliHLTTPCCATracker::Reconstructor::Reconstructor
+
