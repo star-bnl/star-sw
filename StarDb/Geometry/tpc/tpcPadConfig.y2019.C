@@ -7,8 +7,7 @@ TDataSet *CreateTable() {
   if (!TClass::GetClass("St_tpcPadConfig")) return 0;
   tpcPadConfig_st row;
   St_tpcPadConfig *tableSet = new St_tpcPadConfig("tpcPadConfig",1);
-  Int_t i = 0;
-  for (i = 1; i <=24; i++) row.itpc[i-1] = 1;
+  for (Int_t i = 1; i <=24; i++) row.itpc[i-1] = 1;
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;

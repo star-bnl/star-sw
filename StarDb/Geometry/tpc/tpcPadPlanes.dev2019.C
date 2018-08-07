@@ -1,12 +1,12 @@
 TDataSet *CreateTable() { 
   // -----------------------------------------------------------------
-  // db/.const/StarDb/Geometry/tpc/.itpcPadPlanes/itpcPadPlanes Allocated rows: 1  Used rows: 1  Row size: 1392 bytes
-  //  Table: itpcPadPlanes_st[0]--> itpcPadPlanes_st[0]
+  // db/.const/StarDb/Geometry/tpc/.tpcPadPlanes/tpcPadPlanes Allocated rows: 1  Used rows: 1  Row size: 1392 bytes
+  //  Table: tpcPadPlanes_st[0]--> tpcPadPlanes_st[0]
   // ====================================================================
   // ------  Test whether this table share library was loaded ------
-  if (!TClass::GetClass("St_itpcPadPlanes")) return 0;
-  itpcPadPlanes_st row;
-  St_itpcPadPlanes *tableSet = new St_itpcPadPlanes("itpcPadPlanes",1);
+  if (!TClass::GetClass("St_tpcPadPlanes")) return 0;
+  tpcPadPlanes_st row;
+  St_tpcPadPlanes *tableSet = new St_tpcPadPlanes("tpcPadPlanes",1);
   /* 
      Jim Thomas 04/02/15 
      pads = 2*(row + 24 - Int_t ((row - 1)/7)); // row = 1 - 40;
