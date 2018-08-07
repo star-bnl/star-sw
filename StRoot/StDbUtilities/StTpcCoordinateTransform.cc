@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.46 2018/06/21 01:46:54 perev Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.48 2018/08/07 03:43:37 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.48  2018/08/07 03:43:37  fisyak
+ * iTPC corrections
+ *
  * Revision 1.46  2018/06/21 01:46:54  perev
  * iTPCheckIn
  *
