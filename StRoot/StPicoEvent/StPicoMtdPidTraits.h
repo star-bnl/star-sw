@@ -54,9 +54,9 @@ class StPicoMtdPidTraits : public TObject {
   Short_t   mMtdHitIndex;
   /// Matching flag indicating multiple matches
   Char_t    mMatchFlag;
-  /// DeltaY between matched track-hit pair * 200 = provides ~0.7 cm precision
+  /// DeltaY between matched track-hit pair * 200 = provides 0.005 cm precision
   Short_t   mDeltaY;
-  /// DeltaZ between matched track-hit pair * 200 = provides 1.5 cm precision
+  /// DeltaZ between matched track-hit pair * 200 = provides 0.005 cm precision
   Short_t   mDeltaZ;
   /// Difference between measured and expected time-of-flight
   Float_t   mDeltaTimeOfFlight;
