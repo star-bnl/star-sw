@@ -9,7 +9,7 @@ TDataSet *CreateTable() {
   St_TpcSecRowCor *tableSet = new St_TpcSecRowCor("TpcSecRowB",24);
   //
   memset(&row,0,tableSet->GetRowSize());
-  for (int i=0;i<72;i++) { 
+  for (int i=0;i<45;i++) { 
     row.GainScale[i]     =   1.;
     row.GainRms[i]       =   0.;
   }
