@@ -41,7 +41,6 @@ class StTpcHalfPosition : public St_SurveyC {// Extra rotation for half of Tpc  
   const TGeoHMatrix  &GetWestMatrix() {return  GetMatrix(west);}
   const TGeoHMatrix  &GetEastMatrixR() {return  GetMatrixR(east);}
   const TGeoHMatrix  &GetWestMatrixR() {return  GetMatrixR(west);}
-  static void Normalize(TGeoHMatrix &R) {}
  private:
   static StTpcHalfPosition* fgInstance;
   ClassDef(StTpcHalfPosition,1) //C++ TChair for TpcHalfPosition
