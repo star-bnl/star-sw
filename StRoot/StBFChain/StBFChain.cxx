@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.647 2017/12/08 20:15:55 jwebb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.657 2018/08/08 15:01:05 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -412,6 +412,7 @@ Int_t StBFChain::Instantiate()
 	  !GetOption("pythia"))                      NwGeant =  5;
       if (GetOption("big"))                          NwGeant = 20;
       if (GetOption("bigbig"))                       NwGeant = 40;
+      if (GetOption("huge"))                         NwGeant = 80;
       ProcessLine(Form("((St_geant_Maker *) %p)->SetNwGEANT(%i);",mk,NwGeant));
       if (GetOption("Higz")) ProcessLine(Form("((St_geant_Maker *) %p)->SetIwtype(1);",mk));
       if (GetOption("paw"))  ProcessLine(Form("((St_geant_Maker *) %p)->SetNwPAW(2);",mk));
@@ -478,6 +479,9 @@ Int_t StBFChain::Instantiate()
       if ( GetOption("hitreuseon") ){
 	mk->SetAttr("SetMaxTimes", 100); 
       }
+
+      // By default iTpc hits are used in tracking
+      mk->SetAttr("activeiTpc", GetOption("iTpcIT") ? kTRUE : kFALSE);
 
       // old logic for svt and ssd
       if (GetOption("NoSvtIT")){
@@ -665,8 +669,10 @@ Int_t StBFChain::Instantiate()
     if ( maker == "StPicoDstMaker"){
       if ( GetOption("picoWrite") )  mk->SetMode(1);
       if ( GetOption("picoRead")  )  mk->SetMode(2);   // possibly more magic
-      if ( GetOption("PicoVtxVpd"))           mk->SetAttr("picoVtxMode", "PicoVtxVpd");
-      else if ( GetOption("PicoVtxDefault"))  mk->SetAttr("picoVtxMode", "PicoVtxDefault");
+      if ( GetOption("PicoVtxVpd"))           mk->SetAttr("PicoVtxMode", "PicoVtxVpd");
+      else if ( GetOption("PicoVtxDefault"))  mk->SetAttr("PicoVtxMode", "PicoVtxDefault");
+      if ( GetOption("PicoCovMtxWrite"))      mk->SetAttr("PicoCovMtxMode", "PicoCovMtxWrite");
+      else if ( GetOption("PicoCovMtxSkip"))  mk->SetAttr("PicoCovMtxMode", "PicoCovMtxSkip"); // Default mode
       
     }
 
@@ -752,6 +758,7 @@ Int_t StBFChain::Instantiate()
 	//            kIFCShift,kSpaceCharge,kSpaceChargeR2);
 	if( GetOption("OBmap")      ) mk->SetAttr("OBmap"      , kTRUE);
 	if( GetOption("OPr13")      ) mk->SetAttr("OPr13"      , kTRUE);
+	if( GetOption("OPr40")      ) mk->SetAttr("OPr40"      , kTRUE);
 	if( GetOption("OTwist")     ) mk->SetAttr("OTwist"     , kTRUE);
 	if( GetOption("OClock")     ) mk->SetAttr("OClock"     , kTRUE);
 	if( GetOption("OCentm")     ) mk->SetAttr("OCentm"     , kTRUE);
@@ -1433,16 +1440,6 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("-VMCPassive","Default,TGiant3");
       SetOption("-VMCAppl","Default,TGiant3");
       SetOption("-RootVMC","Default,TGiant3");
-#if 1 /* Not Active geant is not needed any more, except BTofUtil */
-      if (!( GetOption("fzin")   || 
-	     GetOption("ntin")   || 
-	     GetOption("gstar" ) || 
-	     GetOption("pythia") || 
-	     GetOption("PrepEmbed"))) {// Not Active geant
-	SetOption("geant","Default,TGiant3");
-	SetOption("MagF","Default,TGiant3");
-      }
-#endif
       if (GetOption("xgeometry")) {
 	SetOption("-geometry","Default,-xgeometry");
 	SetOption("-geomNoField","Default,-xgeometry");

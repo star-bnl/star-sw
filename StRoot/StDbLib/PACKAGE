@@ -1,4 +1,0 @@
-# $Id $
-# package StDbLib
-# author: 
-#Library:libStDbLib.so:LIBS +=   -lmysqlclient

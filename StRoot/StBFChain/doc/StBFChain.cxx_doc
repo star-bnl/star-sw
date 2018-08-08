@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.165 2017/10/23 11:25:49 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.169 2018/08/08 15:01:06 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -774,9 +774,13 @@ Bfc_st BFC[] = {
    , "Base chain for 2005 ITTF (tpc only)",kFALSE},
   {"B2005b" ,"" ,"","ry2005f,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout,ssdDb","",""
    , "Base chain for 2005 ITTF Geo f (tpc+svt only)",kFALSE},
+  {"B2005c" ,"" ,"","ry2005g,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout,ssdDb","",""
+   , "Base chain for 2005 ITTF Geo g (tpc+svt only + dead material)",kFALSE},
   {"P2005" ,"" ,"", "B2005,IAna,fcf,VFMinuit,emcDY2,ftpc,trgd,ZDCvtx,svtIT,Corr3"
    , "","","Production chain for 2004/2005 data (+ l3, tof, ftpc, e/b-emc, trgd)",kFALSE},
   {"P2005b" ,"" ,"", "B2005b,IAna,fcf,VFMinuit,emcDY2,ftpc,trgd,ZDCvtx,svtIT,Corr3"
+   , "","","Production chain for 2004/2005 data (+ l3, tof, ftpc, e/b-emc, trgd)",kFALSE},
+  {"P2005c" ,"" ,"", "B2005c,IAna,fcf,VFMinuit,emcDY2,ftpc,trgd,ZDCvtx,svtIT,Corr3"
    , "","","Production chain for 2004/2005 data (+ l3, tof, ftpc, e/b-emc, trgd)",kFALSE},
   {"pp2005","" ,"","B2005,IAna,fcf,ppOpt,VFppLMV5,CtbMatchVtx,emcDY2,ftpc,trgd,ZDCvtx,svtIT,Corr3"
    , "","","Production chain for 2005 pp data (+ l3, tof, ftpc, e/b-emc, trgd)",kFALSE},
@@ -988,6 +992,11 @@ Bfc_st BFC[] = {
   {"P2017a","" ,"",
    "B2017a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,beamline3D,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
    , "","","Production chain for year 2017 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+  {"B2018a" ,"","","ry2018a,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite","",""
+   , "Base chain for run 2018 data (tpc)",kFALSE},
+  {"P2018a","" ,"",
+   "B2018a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,beamline3D,l3onl,emcDY2,epdHit,fpd,trgd,ZDCvtx,analysis"
+   , "","","Base chain for year 2018 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    , "Laser Calibration Chain (tcl)",kFALSE},
   {"LaserCal","" ,"","db,detDb,tpc_daq,tpcDb,fcf,globT,laser,LaserTest","",""
@@ -1038,6 +1047,7 @@ Bfc_st BFC[] = {
   {"Higz" ,"" ,"","" ,"","","Pop Higz window",kFALSE},
   {"big" ,"" ,"","" ,"","","Set NwGEANT =20Mwords",kFALSE},
   {"bigbig" ,"" ,"","" ,"","","Set NwGEANT =40Mwords",kFALSE},
+  {"huge" ,"" ,"","" ,"","","Set NwGEANT =80Mwords",kFALSE},
   {"clearmem" ,"" ,"","" ,"","","Obsolete",kFALSE},
   {"adcOnly" ,"" ,"","" ,"","","DAQMaker selects only TPC ADC events",kFALSE},
   {"InTree" ,"" ,"","in","" ,"","bfcTree Input Tree name",kFALSE},
@@ -1069,6 +1079,7 @@ Bfc_st BFC[] = {
   {"OTwist" ,"" ,"","","" ,"","ExB twist correction",kFALSE},
   {"OClock" ,"" ,"","","" ,"","Clock/tpc rot. correction",kFALSE},
   {"OPr13" ,"" ,"","","" ,"","PadRow 13 distortion",kFALSE},
+  {"OPr40" ,"" ,"","","" ,"","PadRow 40 distortion",kFALSE},
   {"OCentm" ,"" ,"","","" ,"","Central membrane correction",kFALSE},
   {"OECap" ,"" ,"","","" ,"","EndCap (curved) correction",kFALSE},
   {"OIFC" ,"" ,"","","" ,"","Field Cage correction",kFALSE},
@@ -1080,6 +1091,7 @@ Bfc_st BFC[] = {
   {"OGridLeakFull","" ,"","","" ,"","Full Grid Leak correction",kFALSE},
   {"OGGVoltErr" ,"" ,"","","" ,"","GG voltage error correction",kFALSE},
   {"OSectorAlign","" ,"","","" ,"","Sector alignment distortion correction",kFALSE},
+  {"ODistoSmear" ,"" ,"","","" ,"","Distortion smearing accounting for calibration resolutions",kFALSE},
   {"AlignSectors","" ,"","","" ,"","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"DbRichSca" ,"" ,"","detdb","","", "Force reading of Rich scalers from DB",kFALSE},
   {"EastOff" ,"" ,"","","" ,"","Disactivate East part of tpc",kFALSE},
@@ -1112,7 +1124,7 @@ Bfc_st BFC[] = {
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Tables      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"tables","","","StDbT,ctf_T,ebyeT,emc_T,ftpcT,gen_T,geomT,globT,l3_T,sim_T,svt_T,tpc_T","","","",kFALSE},
+  {"tables" ,"","","StDbT,ebyeT,emc_T,ftpcT,gen_T,geomT,globT,l3_T,sim_T,svt_T,tpc_T","","","",kFALSE},
   {"StDbT" ,"" ,"","","" ,"StDb_Tables","Load StDb_Tables",kFALSE},
   {"ctf_T" ,"" ,"","","" ,"ctf_Tables","Load ctf_Tables",kFALSE},
   {"ebyeT" ,"" ,"","","" ,"ebye_Tables","Load ebye_Tables",kFALSE},
@@ -1155,6 +1167,7 @@ Bfc_st BFC[] = {
   {"TbUtil" ,"" ,"","sim_T,tpc_t,globT,SCL","" ,"StTableUtilities","Load StTableUtilities",kFALSE},
   {"TofUtil" ,"" ,"","","" ,"StTofUtil","Load StTofUtil",kFALSE},
   {"BTofUtil" ,"" ,"","","" ,"StBTofUtil","Load StBTofUtil",kFALSE},
+  {"ETofUtil" ,"" ,"","","" ,"StETofUtil","Load StETofUtil",kFALSE},
   {"MtdUtil" ,"" ,"","","" ,"StMtdUtil","Load StMtdUtil",kFALSE},
   {"StBichsel" ,"" ,"","","" ,"StBichsel","Load Bichsel model for dE/dx",kFALSE},
   {"StEvent" ,"","","globT,SCL,TRGDef,StBichsel,EmcUtil,TbUtil,detDb","","StEvent","Load StEvent",kFALSE},
@@ -1221,7 +1234,7 @@ Bfc_st BFC[] = {
   {"fgtDb" ,"fgtDb","","db,fgtutil", "StFgtDbMaker","StFgtDbMaker","Load FgtDbMaker",kFALSE},
   {"pxlDb" ,"pxlDb","","tpcDb PxlUtil", "StPxlDbMaker","StPxlDbMaker","Load PxlDbMaker",kFALSE},
   {"istDb" ,"istDb","","tpcDb", "StIstDbMaker","StIstDbMaker","Load IstDbMaker",kFALSE},
-  {"epdDb" ,"epdDb","","epdDb", "StEpdDbMaker","StEpdDbMaker","Load EpdDbMaker",kFALSE},
+  {"epdDb" ,"epdDb","","tpcDb", "StEpdDbMaker","StEpdDbMaker","Load EpdDbMaker",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1369,6 +1382,7 @@ Bfc_st BFC[] = {
   {"ssdpre" ,"","","ssdEmbed,spa" ,"","","SSD full chain for pre-embedding",kFALSE},
   {"ssdAdd" ,"","","ssd_daq","StSsdAddMaker","StSsdAddMaker", "... SSD merge maker",kFALSE},
   {"ssdE" ,"","","ssdpre,ssdAdd" ,"","","SSD full chain for embedding",kFALSE},
+  {"epdHit", "", "", "epdDb,event", "StEpdHitMaker", "StEpdHitMaker","EPD hit maker", kFALSE},
   {"ZDCVtx" ,"","","db" ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"emcDY2" ,"emcRaw","","daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc"
    ,"StEmcRawMaker","StEmcRawMaker", "B/E EMC data common maker",kFALSE},
@@ -1389,7 +1403,7 @@ Bfc_st BFC[] = {
   {"EEmcMixer", "","","", "StEEmcMixerMaker","StEEmcSimulatorMaker","EEMC mixer",kFALSE},
   {"eemcA2E","eemcA2E","" ,"db","StEEmcA2EMaker", "StEEmcA2EMaker","E-EMC ADC to E converter",kFALSE},
   {"eemCl" ,"eemCl","","db","StEEmcClusterMaker" ,"StEEmcClusterMaker","E-EMC clustering",kFALSE},
-  {"btof" ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib,geant","StMaker"
+  {"btof" ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib","StMaker"
    , "StChain","BTOF Chain",kFALSE},
   {"BtofDat" ,"tof_raw","BTofChain","db,BTofutil","StBTofHitMaker","StEvent,StBTofHitMaker"
    , "BTOF hit maker",kFALSE},
@@ -1400,9 +1414,13 @@ Bfc_st BFC[] = {
                        "StEvent,StMcEvent,StTofUtil,StBTofHitMaker,StBTofSimMaker","BTOF Simulator",kFALSE},
   {"btofMixer" ,"","BTofChain","BTofUtil","StBTofMixerMaker","StEvent,StBTofHitMaker,StBTofMixerMaker"
    , "BTof Mixer",kFALSE},
+  {"ETofDat", "etof_raw","ETofChain", "db, ETofUtil", "StETofDigiMaker", "StEvent,StETofDigiMaker",
+                                                                                  "ETOF digi maker",kFALSE},
+  {"ETofQa", "", "ETofChain", "db", "StETofQAMaker", "StETofQAMaker",
+                                                                                    "ETOF QA maker",kFALSE},
   {"mtdSim" ,"","MtdChain","","StMtdSimMaker", "StEvent,StMtdSimMaker","MTD Simulator",kFALSE},
-  {"ToF" ,"TofChain","","tofDat,tofrMatch,tofpMatch,tofCalib","StMaker","StChain","ToF Chain",kFALSE},
-  {"ToFx" ,"TofChain","","tofXDat,tofrMatch,tofCalib" ,"StMaker","StChain","ToFx Chain",kFALSE},
+  {"ToF" ,"TofChain","","tofDat,tofrMatch,tofpMatch,tofCalib,geant","StMaker","StChain","ToF Chain",kFALSE},
+  {"ToFx" ,"TofChain","","tofXDat,tofrMatch,tofCalib,geant" ,"StMaker","StChain","ToFx Chain",kFALSE},
   {"tofDat" ,"tof_raw","TofChain","db,Tofutil","StTofMaker","StEvent,StTofMaker",
    "TOF Data base chain", kFALSE},
   {"tofXDat" ,"tof_raw","TofChain","db,Tofutil","StTofHitMaker","StEvent,StTofMaker,StTofHitMaker",
@@ -1445,8 +1463,8 @@ Bfc_st BFC[] = {
   {"fgtClu" ,"","", "fgtutil", "StFgtClusterMaker","StFgtClusterMaker", "FGT cluster maker",kFALSE},
   {"fgtAtoC" ,"","", "fgtdb", "StFgtA2CMaker","StFgtA2CMaker", "FGT ADC to Charge maker",kFALSE},
   {"fgtPoint" ,"","", "event", "StFgtPointMaker", "StFgtPointMaker", "Creates FGT points",kFALSE},
-  {"genvtx","","","ctf_T,EEmcUtil","StGenericVertexMaker"
-   ,"ctf,St_ctf,St_ctf_Maker,Minuit,StGenericVertexMakerNoSti"
+  {"genvtx" ,"" ,"","EEmcUtil","StGenericVertexMaker"
+   , "Minuit,StGenericVertexMakerNoSti"
    , "Generic Vertex Finder library (default is MinuitVertexFinder)",kFALSE},
   {"VFMinuit" ,"" ,"" ,"genvtx" ,"","","... Generic VF will use Minuit method",kFALSE},
   {"CtbMatchVtx" ,"" ,"","VFMinuit","" ,"","... CTB Matching ON in Vertex Finding",kFALSE},
@@ -1473,11 +1491,11 @@ Bfc_st BFC[] = {
   {"StiHftP", "","","StiLibsHft,-SvtIT,-SsdIT,PxlIT,pxlDb","" ,"","Enables partial  Hft (PXL)",kFALSE},
   {"StiHftC", "","","StiLibsHft,-SvtIT,-SsdIT,PxlIT,pxlDb,IstIT,istDb,SstIT,sstDb",""
    , "","Enables complete Hft (PXL+IST+SST)",kFALSE},
-  {"VFPPV" ,"" ,"","ctf_T,eemcDb,StiLib,-VFMinuit,-VFMinuit2,-VFMinuit3,","StGenericVertexMaker"
-   , "ctf,St_ctf,St_ctf_Maker,Minuit,StGenericVertexMaker","... Pile-up proof vertex finder",kFALSE},
+  {"VFPPV" ,"" ,"","      eemcDb,StiLib,-VFMinuit,-VFMinuit2,-VFMinuit3,","StGenericVertexMaker"
+   , "Minuit,StGenericVertexMaker","... Pile-up proof vertex finder",kFALSE},
   {"VFPPVnoCTB" ,"" ,"","VFPPV","" ,"","... Pile-up proof vertex finder, noCTB",kFALSE},
-  {"VFPPVEv" ,"" ,"" ,"ctf_T,eemcDb" ,"StGenericVertexMaker"
-   ,"ctf,St_ctf,St_ctf_Maker,Minui,StGenericVertexMaker" , "... StEvent based VFPPV, noCTB",kFALSE},
+  {"VFPPVEv" ,"" ,"" ,"eemcDb" ,"StGenericVertexMaker"
+   , "Minui,StGenericVertexMaker" ,"... StEvent based VFPPV, noCTB",kFALSE},
   {"VFPPVEvNoBtof" ,"" ,"" ,"VFPPVEv" ,"" ,"","...VFPPVEv with no Btof ",kFALSE},
   {"Sti" ,"Sti","","StiLib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,sim_T,tbutil","StiMaker"
    , "StEventUtilities,StiUtilities,StiMaker","Sti tracker",kFALSE},
@@ -1489,7 +1507,7 @@ Bfc_st BFC[] = {
   {"KFVertex" ,"" ,"Sti","-genvtx,-VFMinuit,-VFFV,-VFMCE,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2"
    ,"StKFVertexMaker", "MathMore,Spectrum", "...KFParticle based multi vertex reconstruction",kFALSE},
   {"Stv" ,"Stv","","-xgeometry,-Sti,-StiTpc,-StiSsd,-StiSvt,-StiPxl,-StiSsd,-StiSst,-StiIst,","StvMaker"
-  ,"libHist,libHistPainter,libVMC,StarMiniCern,geant3,GeoTestMaker,StvUtil,Stv,StvMaker,StEventUtilities,-StiLibs,-StiLibsHft","Stv",kFALSE},
+  ,"libHist,libHistPainter,libVMC,StarMiniCern,geant3,GeoTestMaker,StvUtil,Stv,StvSeed,StvMaker,StEventUtilities,-StiLibs,-StiLibsHft","Stv",kFALSE},
   {"StvCA" ,"StvCA","","Stv","","" ,"StvCA",kFALSE},
   {"StiVMC" ,"StiVMC","","-Sti,SCL,StEvent,StDbT,TpcDb,compend","StiVMCMaker"
    , "StEventUtilities,StiVMC,StiVMCMaker" ,"ITTF VMC tracker",kFALSE},
@@ -1503,6 +1521,7 @@ Bfc_st BFC[] = {
   {"PxlIT" ,"" ,"","ITTF","" ,"","Sti tracking: Pixel geom",kFALSE},
   {"IstIT" ,"" ,"","ITTF","" ,"","Sti tracking: Ist geom",kFALSE},
   {"SstIT" ,"" ,"","ITTF","" ,"","Sti tracking: Sst geom",kFALSE},
+  {"iTpcIT" ,"" ,"","ITTF","" ,"","Sti tracking: iTpc geom + hits",kFALSE},
   {"BTofIT" ,"" ,"","ITTF","" ,"","Sti tracking: BTof geom",kFALSE},
   {"NoSvtIT" ,"" ,"","-SvtIT","" ,"","ITTF: track with switch off SVT geom",kFALSE},
   {"NoSsdIT" ,"" ,"","-SsdIT","" ,"","ITTF: track with switch off SSD geom",kFALSE},
@@ -1586,7 +1605,9 @@ Bfc_st BFC[] = {
   {"picoWrite" ,"","PicoChain","picoDst","StPicoDstMaker","" ,"Writes picoDST format",kFALSE},
   {"picoRead" ,"","PicoChain","picoDst","StPicoDstMaker","" ,"WritesRead picoDST format",kFALSE},
   {"PicoVtxDefault" ,"","","" ,"" ,"","pico Vtx default mode",kFALSE},
-  {"PicoVtxVpd" ,"","","" ,"" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
+  {"PicoVtxVpd" ,"","","-PicoVtxDefault" ,"" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
+  {"PicoCovMtxSkip" ,"","","" ,"" ,"","Do not write covariance matrices to picoDst (default)",kFALSE},
+  {"PicoCovMtxWrite","","","-PicoCovMtxSkip" ,"" ,"","Write track covariance matrices to picoDst",kFALSE},
   {"St_geom" ,"" ,"","" , "St_geom_Maker","St_geom_Maker","",kFALSE},
   {"Display" ,"","","", "","","WARNING *** Option is OBSOLETE *** use Ed.C macro instead",kFALSE},
   {"Mc" ,"McChain","McEvent","sim_T,globT,McAss,McAna" ,"StMaker","StChain","",kFALSE},
@@ -2391,9 +2412,13 @@ Bfc_st BFC[] = {
    , "Base chain for 2005 ITTF (tpc only)",kFALSE},
   {"B2005b" ,"" ,"","ry2005f,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout,ssdDb","",""
    , "Base chain for 2005 ITTF Geo f (tpc+svt only)",kFALSE},
+  {"B2005c" ,"" ,"","ry2005g,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout,ssdDb","",""
+   , "Base chain for 2005 ITTF Geo g (tpc+svt only + dead material)",kFALSE},
   {"P2005" ,"" ,"", "B2005,IAna,fcf,VFMinuit,emcDY2,ftpc,trgd,ZDCvtx,svtIT,Corr3"
    , "","","Production chain for 2004/2005 data (+ l3, tof, ftpc, e/b-emc, trgd)",kFALSE},
   {"P2005b" ,"" ,"", "B2005b,IAna,fcf,VFMinuit,emcDY2,ftpc,trgd,ZDCvtx,svtIT,Corr3"
+   , "","","Production chain for 2004/2005 data (+ l3, tof, ftpc, e/b-emc, trgd)",kFALSE},
+  {"P2005c" ,"" ,"", "B2005c,IAna,fcf,VFMinuit,emcDY2,ftpc,trgd,ZDCvtx,svtIT,Corr3"
    , "","","Production chain for 2004/2005 data (+ l3, tof, ftpc, e/b-emc, trgd)",kFALSE},
   {"pp2005","" ,"","B2005,IAna,fcf,ppOpt,VFppLMV5,CtbMatchVtx,emcDY2,ftpc,trgd,ZDCvtx,svtIT,Corr3"
    , "","","Production chain for 2005 pp data (+ l3, tof, ftpc, e/b-emc, trgd)",kFALSE},
@@ -2605,6 +2630,11 @@ Bfc_st BFC[] = {
   {"P2017a","" ,"",
    "B2017a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,beamline3D,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
    , "","","Production chain for year 2017 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+  {"B2018a" ,"","","ry2018a,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite","",""
+   , "Base chain for run 2018 data (tpc)",kFALSE},
+  {"P2018a","" ,"",
+   "B2018a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,beamline3D,l3onl,emcDY2,epdHit,fpd,trgd,ZDCvtx,analysis"
+   , "","","Base chain for year 2018 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    , "Laser Calibration Chain (tcl)",kFALSE},
   {"LaserCal","" ,"","db,detDb,tpc_daq,tpcDb,fcf,globT,laser,LaserTest","",""
@@ -2655,6 +2685,7 @@ Bfc_st BFC[] = {
   {"Higz" ,"" ,"","" ,"","","Pop Higz window",kFALSE},
   {"big" ,"" ,"","" ,"","","Set NwGEANT =20Mwords",kFALSE},
   {"bigbig" ,"" ,"","" ,"","","Set NwGEANT =40Mwords",kFALSE},
+  {"huge" ,"" ,"","" ,"","","Set NwGEANT =80Mwords",kFALSE},
   {"clearmem" ,"" ,"","" ,"","","Obsolete",kFALSE},
   {"adcOnly" ,"" ,"","" ,"","","DAQMaker selects only TPC ADC events",kFALSE},
   {"InTree" ,"" ,"","in","" ,"","bfcTree Input Tree name",kFALSE},
@@ -2686,6 +2717,7 @@ Bfc_st BFC[] = {
   {"OTwist" ,"" ,"","","" ,"","ExB twist correction",kFALSE},
   {"OClock" ,"" ,"","","" ,"","Clock/tpc rot. correction",kFALSE},
   {"OPr13" ,"" ,"","","" ,"","PadRow 13 distortion",kFALSE},
+  {"OPr40" ,"" ,"","","" ,"","PadRow 40 distortion",kFALSE},
   {"OCentm" ,"" ,"","","" ,"","Central membrane correction",kFALSE},
   {"OECap" ,"" ,"","","" ,"","EndCap (curved) correction",kFALSE},
   {"OIFC" ,"" ,"","","" ,"","Field Cage correction",kFALSE},
@@ -2697,6 +2729,7 @@ Bfc_st BFC[] = {
   {"OGridLeakFull","" ,"","","" ,"","Full Grid Leak correction",kFALSE},
   {"OGGVoltErr" ,"" ,"","","" ,"","GG voltage error correction",kFALSE},
   {"OSectorAlign","" ,"","","" ,"","Sector alignment distortion correction",kFALSE},
+  {"ODistoSmear" ,"" ,"","","" ,"","Distortion smearing accounting for calibration resolutions",kFALSE},
   {"AlignSectors","" ,"","","" ,"","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"DbRichSca" ,"" ,"","detdb","","", "Force reading of Rich scalers from DB",kFALSE},
   {"EastOff" ,"" ,"","","" ,"","Disactivate East part of tpc",kFALSE},
@@ -2729,7 +2762,7 @@ Bfc_st BFC[] = {
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Tables      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"tables","","","StDbT,ctf_T,ebyeT,emc_T,ftpcT,gen_T,geomT,globT,l3_T,sim_T,svt_T,tpc_T","","","",kFALSE},
+  {"tables" ,"","","StDbT,ebyeT,emc_T,ftpcT,gen_T,geomT,globT,l3_T,sim_T,svt_T,tpc_T","","","",kFALSE},
   {"StDbT" ,"" ,"","","" ,"StDb_Tables","Load StDb_Tables",kFALSE},
   {"ctf_T" ,"" ,"","","" ,"ctf_Tables","Load ctf_Tables",kFALSE},
   {"ebyeT" ,"" ,"","","" ,"ebye_Tables","Load ebye_Tables",kFALSE},
@@ -2772,6 +2805,7 @@ Bfc_st BFC[] = {
   {"TbUtil" ,"" ,"","sim_T,tpc_t,globT,SCL","" ,"StTableUtilities","Load StTableUtilities",kFALSE},
   {"TofUtil" ,"" ,"","","" ,"StTofUtil","Load StTofUtil",kFALSE},
   {"BTofUtil" ,"" ,"","","" ,"StBTofUtil","Load StBTofUtil",kFALSE},
+  {"ETofUtil" ,"" ,"","","" ,"StETofUtil","Load StETofUtil",kFALSE},
   {"MtdUtil" ,"" ,"","","" ,"StMtdUtil","Load StMtdUtil",kFALSE},
   {"StBichsel" ,"" ,"","","" ,"StBichsel","Load Bichsel model for dE/dx",kFALSE},
   {"StEvent" ,"","","globT,SCL,TRGDef,StBichsel,EmcUtil,TbUtil,detDb","","StEvent","Load StEvent",kFALSE},
@@ -2838,7 +2872,7 @@ Bfc_st BFC[] = {
   {"fgtDb" ,"fgtDb","","db,fgtutil", "StFgtDbMaker","StFgtDbMaker","Load FgtDbMaker",kFALSE},
   {"pxlDb" ,"pxlDb","","tpcDb PxlUtil", "StPxlDbMaker","StPxlDbMaker","Load PxlDbMaker",kFALSE},
   {"istDb" ,"istDb","","tpcDb", "StIstDbMaker","StIstDbMaker","Load IstDbMaker",kFALSE},
-  {"epdDb" ,"epdDb","","epdDb", "StEpdDbMaker","StEpdDbMaker","Load EpdDbMaker",kFALSE},
+  {"epdDb" ,"epdDb","","tpcDb", "StEpdDbMaker","StEpdDbMaker","Load EpdDbMaker",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -2986,6 +3020,7 @@ Bfc_st BFC[] = {
   {"ssdpre" ,"","","ssdEmbed,spa" ,"","","SSD full chain for pre-embedding",kFALSE},
   {"ssdAdd" ,"","","ssd_daq","StSsdAddMaker","StSsdAddMaker", "... SSD merge maker",kFALSE},
   {"ssdE" ,"","","ssdpre,ssdAdd" ,"","","SSD full chain for embedding",kFALSE},
+  {"epdHit", "", "", "epdDb,event", "StEpdHitMaker", "StEpdHitMaker","EPD hit maker", kFALSE},
   {"ZDCVtx" ,"","","db" ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"emcDY2" ,"emcRaw","","daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc"
    ,"StEmcRawMaker","StEmcRawMaker", "B/E EMC data common maker",kFALSE},
@@ -3006,7 +3041,7 @@ Bfc_st BFC[] = {
   {"EEmcMixer", "","","", "StEEmcMixerMaker","StEEmcSimulatorMaker","EEMC mixer",kFALSE},
   {"eemcA2E","eemcA2E","" ,"db","StEEmcA2EMaker", "StEEmcA2EMaker","E-EMC ADC to E converter",kFALSE},
   {"eemCl" ,"eemCl","","db","StEEmcClusterMaker" ,"StEEmcClusterMaker","E-EMC clustering",kFALSE},
-  {"btof" ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib,geant","StMaker"
+  {"btof" ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib","StMaker"
    , "StChain","BTOF Chain",kFALSE},
   {"BtofDat" ,"tof_raw","BTofChain","db,BTofutil","StBTofHitMaker","StEvent,StBTofHitMaker"
    , "BTOF hit maker",kFALSE},
@@ -3017,9 +3052,13 @@ Bfc_st BFC[] = {
                        "StEvent,StMcEvent,StTofUtil,StBTofHitMaker,StBTofSimMaker","BTOF Simulator",kFALSE},
   {"btofMixer" ,"","BTofChain","BTofUtil","StBTofMixerMaker","StEvent,StBTofHitMaker,StBTofMixerMaker"
    , "BTof Mixer",kFALSE},
+  {"ETofDat", "etof_raw","ETofChain", "db, ETofUtil", "StETofDigiMaker", "StEvent,StETofDigiMaker",
+                                                                                  "ETOF digi maker",kFALSE},
+  {"ETofQa", "", "ETofChain", "db", "StETofQAMaker", "StETofQAMaker",
+                                                                                    "ETOF QA maker",kFALSE},
   {"mtdSim" ,"","MtdChain","","StMtdSimMaker", "StEvent,StMtdSimMaker","MTD Simulator",kFALSE},
-  {"ToF" ,"TofChain","","tofDat,tofrMatch,tofpMatch,tofCalib","StMaker","StChain","ToF Chain",kFALSE},
-  {"ToFx" ,"TofChain","","tofXDat,tofrMatch,tofCalib" ,"StMaker","StChain","ToFx Chain",kFALSE},
+  {"ToF" ,"TofChain","","tofDat,tofrMatch,tofpMatch,tofCalib,geant","StMaker","StChain","ToF Chain",kFALSE},
+  {"ToFx" ,"TofChain","","tofXDat,tofrMatch,tofCalib,geant" ,"StMaker","StChain","ToFx Chain",kFALSE},
   {"tofDat" ,"tof_raw","TofChain","db,Tofutil","StTofMaker","StEvent,StTofMaker",
    "TOF Data base chain", kFALSE},
   {"tofXDat" ,"tof_raw","TofChain","db,Tofutil","StTofHitMaker","StEvent,StTofMaker,StTofHitMaker",
@@ -3062,8 +3101,8 @@ Bfc_st BFC[] = {
   {"fgtClu" ,"","", "fgtutil", "StFgtClusterMaker","StFgtClusterMaker", "FGT cluster maker",kFALSE},
   {"fgtAtoC" ,"","", "fgtdb", "StFgtA2CMaker","StFgtA2CMaker", "FGT ADC to Charge maker",kFALSE},
   {"fgtPoint" ,"","", "event", "StFgtPointMaker", "StFgtPointMaker", "Creates FGT points",kFALSE},
-  {"genvtx","","","ctf_T,EEmcUtil","StGenericVertexMaker"
-   ,"ctf,St_ctf,St_ctf_Maker,Minuit,StGenericVertexMakerNoSti"
+  {"genvtx" ,"" ,"","EEmcUtil","StGenericVertexMaker"
+   , "Minuit,StGenericVertexMakerNoSti"
    , "Generic Vertex Finder library (default is MinuitVertexFinder)",kFALSE},
   {"VFMinuit" ,"" ,"" ,"genvtx" ,"","","... Generic VF will use Minuit method",kFALSE},
   {"CtbMatchVtx" ,"" ,"","VFMinuit","" ,"","... CTB Matching ON in Vertex Finding",kFALSE},
@@ -3090,11 +3129,11 @@ Bfc_st BFC[] = {
   {"StiHftP", "","","StiLibsHft,-SvtIT,-SsdIT,PxlIT,pxlDb","" ,"","Enables partial  Hft (PXL)",kFALSE},
   {"StiHftC", "","","StiLibsHft,-SvtIT,-SsdIT,PxlIT,pxlDb,IstIT,istDb,SstIT,sstDb",""
    , "","Enables complete Hft (PXL+IST+SST)",kFALSE},
-  {"VFPPV" ,"" ,"","ctf_T,eemcDb,StiLib,-VFMinuit,-VFMinuit2,-VFMinuit3,","StGenericVertexMaker"
-   , "ctf,St_ctf,St_ctf_Maker,Minuit,StGenericVertexMaker","... Pile-up proof vertex finder",kFALSE},
+  {"VFPPV" ,"" ,"","      eemcDb,StiLib,-VFMinuit,-VFMinuit2,-VFMinuit3,","StGenericVertexMaker"
+   , "Minuit,StGenericVertexMaker","... Pile-up proof vertex finder",kFALSE},
   {"VFPPVnoCTB" ,"" ,"","VFPPV","" ,"","... Pile-up proof vertex finder, noCTB",kFALSE},
-  {"VFPPVEv" ,"" ,"" ,"ctf_T,eemcDb" ,"StGenericVertexMaker"
-   ,"ctf,St_ctf,St_ctf_Maker,Minui,StGenericVertexMaker" , "... StEvent based VFPPV, noCTB",kFALSE},
+  {"VFPPVEv" ,"" ,"" ,"eemcDb" ,"StGenericVertexMaker"
+   , "Minui,StGenericVertexMaker" ,"... StEvent based VFPPV, noCTB",kFALSE},
   {"VFPPVEvNoBtof" ,"" ,"" ,"VFPPVEv" ,"" ,"","...VFPPVEv with no Btof ",kFALSE},
   {"Sti" ,"Sti","","StiLib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,sim_T,tbutil","StiMaker"
    , "StEventUtilities,StiUtilities,StiMaker","Sti tracker",kFALSE},
@@ -3106,7 +3145,7 @@ Bfc_st BFC[] = {
   {"KFVertex" ,"" ,"Sti","-genvtx,-VFMinuit,-VFFV,-VFMCE,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2"
    ,"StKFVertexMaker", "MathMore,Spectrum", "...KFParticle based multi vertex reconstruction",kFALSE},
   {"Stv" ,"Stv","","-xgeometry,-Sti,-StiTpc,-StiSsd,-StiSvt,-StiPxl,-StiSsd,-StiSst,-StiIst,","StvMaker"
-  ,"libHist,libHistPainter,libVMC,StarMiniCern,geant3,GeoTestMaker,StvUtil,Stv,StvMaker,StEventUtilities,-StiLibs,-StiLibsHft","Stv",kFALSE},
+  ,"libHist,libHistPainter,libVMC,StarMiniCern,geant3,GeoTestMaker,StvUtil,Stv,StvSeed,StvMaker,StEventUtilities,-StiLibs,-StiLibsHft","Stv",kFALSE},
   {"StvCA" ,"StvCA","","Stv","","" ,"StvCA",kFALSE},
   {"StiVMC" ,"StiVMC","","-Sti,SCL,StEvent,StDbT,TpcDb,compend","StiVMCMaker"
    , "StEventUtilities,StiVMC,StiVMCMaker" ,"ITTF VMC tracker",kFALSE},
@@ -3120,6 +3159,7 @@ Bfc_st BFC[] = {
   {"PxlIT" ,"" ,"","ITTF","" ,"","Sti tracking: Pixel geom",kFALSE},
   {"IstIT" ,"" ,"","ITTF","" ,"","Sti tracking: Ist geom",kFALSE},
   {"SstIT" ,"" ,"","ITTF","" ,"","Sti tracking: Sst geom",kFALSE},
+  {"iTpcIT" ,"" ,"","ITTF","" ,"","Sti tracking: iTpc geom + hits",kFALSE},
   {"BTofIT" ,"" ,"","ITTF","" ,"","Sti tracking: BTof geom",kFALSE},
   {"NoSvtIT" ,"" ,"","-SvtIT","" ,"","ITTF: track with switch off SVT geom",kFALSE},
   {"NoSsdIT" ,"" ,"","-SsdIT","" ,"","ITTF: track with switch off SSD geom",kFALSE},
@@ -3203,7 +3243,9 @@ Bfc_st BFC[] = {
   {"picoWrite" ,"","PicoChain","picoDst","StPicoDstMaker","" ,"Writes picoDST format",kFALSE},
   {"picoRead" ,"","PicoChain","picoDst","StPicoDstMaker","" ,"WritesRead picoDST format",kFALSE},
   {"PicoVtxDefault" ,"","","" ,"" ,"","pico Vtx default mode",kFALSE},
-  {"PicoVtxVpd" ,"","","" ,"" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
+  {"PicoVtxVpd" ,"","","-PicoVtxDefault" ,"" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
+  {"PicoCovMtxSkip" ,"","","" ,"" ,"","Do not write covariance matrices to picoDst (default)",kFALSE},
+  {"PicoCovMtxWrite","","","-PicoCovMtxSkip" ,"" ,"","Write track covariance matrices to picoDst",kFALSE},
   {"St_geom" ,"" ,"","" , "St_geom_Maker","St_geom_Maker","",kFALSE},
   {"Display" ,"","","", "","","WARNING *** Option is OBSOLETE *** use Ed.C macro instead",kFALSE},
   {"Mc" ,"McChain","McEvent","sim_T,globT,McAss,McAna" ,"StMaker","StChain","",kFALSE},
@@ -3634,6 +3676,7 @@ Int_t StBFChain::Instantiate()
 	  !GetOption("pythia"))                      NwGeant =  5;
       if (GetOption("big"))                          NwGeant = 20;
       if (GetOption("bigbig"))                       NwGeant = 40;
+      if (GetOption("huge"))                         NwGeant = 80;
       ProcessLine(Form("((St_geant_Maker *) %p)->SetNwGEANT(%i);",mk,NwGeant));
       if (GetOption("Higz")) ProcessLine(Form("((St_geant_Maker *) %p)->SetIwtype(1);",mk));
       if (GetOption("paw"))  ProcessLine(Form("((St_geant_Maker *) %p)->SetNwPAW(2);",mk));
@@ -3700,6 +3743,9 @@ Int_t StBFChain::Instantiate()
       if ( GetOption("hitreuseon") ){
 	mk->SetAttr("SetMaxTimes", 100); 
       }
+
+      // By default iTpc hits are used in tracking
+      mk->SetAttr("activeiTpc", GetOption("iTpcIT") ? kTRUE : kFALSE);
 
       // old logic for svt and ssd
       if (GetOption("NoSvtIT")){
@@ -3889,6 +3935,8 @@ Int_t StBFChain::Instantiate()
       if ( GetOption("picoRead")  )  mk->SetMode(2);   // possibly more magic
       if ( GetOption("PicoVtxVpd"))           mk->SetAttr("picoVtxMode", "PicoVtxVpd");
       else if ( GetOption("PicoVtxDefault"))  mk->SetAttr("picoVtxMode", "PicoVtxDefault");
+      if ( GetOption("PicoCovMtxWrite"))      mk->SetAttr("picoCovMtxMode", "PicoCovMtxWrite");
+      else if ( GetOption("PicoCovMtxSkip"))  mk->SetAttr("picoCovMtxMode", "PicoCovMtxSkip"); // Default mode
       
     }
 
@@ -3974,6 +4022,7 @@ Int_t StBFChain::Instantiate()
 	//            kIFCShift,kSpaceCharge,kSpaceChargeR2);
 	if( GetOption("OBmap")      ) mk->SetAttr("OBmap"      , kTRUE);
 	if( GetOption("OPr13")      ) mk->SetAttr("OPr13"      , kTRUE);
+	if( GetOption("OPr40")      ) mk->SetAttr("OPr40"      , kTRUE);
 	if( GetOption("OTwist")     ) mk->SetAttr("OTwist"     , kTRUE);
 	if( GetOption("OClock")     ) mk->SetAttr("OClock"     , kTRUE);
 	if( GetOption("OCentm")     ) mk->SetAttr("OCentm"     , kTRUE);
@@ -4160,9 +4209,9 @@ Int_t StBFChain::Init() {
 
 
     if (fNoChainOptions) {
-      if (GetOption("misalign") ) 
+      if (GetOption("misalign") && TClass::GetClass("AgPosition") ) 
 	gROOT->ProcessLine("AgPosition::SetReal();");
-      else                        
+      else if ( TClass::GetClass("AgPosition") )                        
 	gROOT->ProcessLine("AgPosition::SetIdeal();");
     }
 
@@ -4655,16 +4704,6 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("-VMCPassive","Default,TGiant3");
       SetOption("-VMCAppl","Default,TGiant3");
       SetOption("-RootVMC","Default,TGiant3");
-#if 1 /* Not Active geant is not needed any more, except BTofUtil */
-      if (!( GetOption("fzin")   || 
-	     GetOption("ntin")   || 
-	     GetOption("gstar" ) || 
-	     GetOption("pythia") || 
-	     GetOption("PrepEmbed"))) {// Not Active geant
-	SetOption("geant","Default,TGiant3");
-	SetOption("MagF","Default,TGiant3");
-      }
-#endif
       if (GetOption("xgeometry")) {
 	SetOption("-geometry","Default,-xgeometry");
 	SetOption("-geomNoField","Default,-xgeometry");
