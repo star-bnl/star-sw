@@ -3,7 +3,6 @@
 
 /// ROOT headers
 #include <TObject.h>
-#include <TBufferFile.h>
 #include "StPicoDst.h"
 #ifdef  __TFG__VERSION__
 #include "StEvent/StDcaGeometry.h"

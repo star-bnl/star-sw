@@ -17,7 +17,7 @@
 #include <algorithm>
 
 /// ROOT headers
-#include <TVector3.h>
+#include "TVector3.h"
 
 /// PicoDst headers
 #ifdef _VANILLA_ROOT_
@@ -53,8 +53,6 @@ class StPicoHelix {
   
   /// Destructor
   virtual ~StPicoHelix();
-
-  
 
   Double_t dipAngle()   const;           
   Double_t curvature()  const;	/// 1/R in xy-plane

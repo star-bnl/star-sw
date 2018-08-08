@@ -2,7 +2,7 @@
 #define StPicoFmsHit_h
 
 /// ROOT headers
-#include <TObject.h>
+#include "TObject.h"
 
 /**
  * \author: Peifeng Liu, Stony Brook University, pliuphys@gmail.com

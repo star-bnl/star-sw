@@ -2,7 +2,7 @@
 #define StPicoMtdPidTraits_h
 
 /// ROOT headers
-#include <TObject.h>
+#include "TObject.h"
 
 //_________________
 class StPicoMtdPidTraits : public TObject {
@@ -54,18 +54,18 @@ class StPicoMtdPidTraits : public TObject {
   Short_t   mMtdHitIndex;
   /// Matching flag indicating multiple matches
   Char_t    mMatchFlag;
-  /// DeltaY between matched track-hit pair
-  Float16_t   mDeltaY;    //[-70,70,16]
-  /// DeltaZ between matched track-hit pair
-  Float16_t   mDeltaZ;    //[-150,150,16]
+  /// DeltaY between matched track-hit pair * 200 = provides 0.005 cm precision
+  Short_t   mDeltaY;
+  /// DeltaZ between matched track-hit pair * 200 = provides 0.005 cm precision
+  Short_t   mDeltaZ;
   /// Difference between measured and expected time-of-flight
   Float_t   mDeltaTimeOfFlight;
-  /// Beta of matched tracks
-  Float16_t   mBeta;      //[0,2,16]
+  /// Beta of matched tracks * 20000
+  UShort_t  mBeta;
   /// HitChan encoding: (backleg-1) * 60 + (module-1) * 12 + cell
   Short_t   mMtdHitChan;
 
-  ClassDef(StPicoMtdPidTraits, 2)
+  ClassDef(StPicoMtdPidTraits, 3)
 };
 
 /**
@@ -78,10 +78,10 @@ inline Int_t    StPicoMtdPidTraits::backleg()           const { return mMtdHitCh
 inline Int_t    StPicoMtdPidTraits::module()            const { return (mMtdHitChan % 60) / 12 + 1; }
 inline Int_t    StPicoMtdPidTraits::cell()              const { return mMtdHitChan % 12; }
 inline Int_t    StPicoMtdPidTraits::matchFlag()         const { return mMatchFlag; }
-inline Float_t  StPicoMtdPidTraits::deltaY()            const { return mDeltaY; }
-inline Float_t  StPicoMtdPidTraits::deltaZ()            const { return mDeltaZ; }
+inline Float_t  StPicoMtdPidTraits::deltaY()            const { return (Float_t)mDeltaY / 200.; }
+inline Float_t  StPicoMtdPidTraits::deltaZ()            const { return (Float_t)mDeltaZ / 200.; }
 inline Float_t  StPicoMtdPidTraits::deltaTimeOfFlight() const { return mDeltaTimeOfFlight; }
-inline Float_t  StPicoMtdPidTraits::beta()              const { return mBeta; }
+inline Float_t  StPicoMtdPidTraits::beta()              const { return (Float_t)mBeta / 20000.; }
 
 /**
  * Setters
@@ -89,9 +89,6 @@ inline Float_t  StPicoMtdPidTraits::beta()              const { return mBeta; }
 inline void    StPicoMtdPidTraits::setTrackIndex(Int_t index) { mTrackIndex = (Short_t) index; }
 inline void    StPicoMtdPidTraits::setMtdHitIndex(Int_t index) { mMtdHitIndex = (Short_t) index; }
 inline void    StPicoMtdPidTraits::setMatchFlag(Char_t flag) { mMatchFlag = (Char_t)flag; }
-inline void    StPicoMtdPidTraits::setDeltaY(Float_t dy) { mDeltaY = dy; }
-inline void    StPicoMtdPidTraits::setDeltaZ(Float_t dz) { mDeltaZ = dz; }
 inline void    StPicoMtdPidTraits::setDeltaTimeOfFlight(Float_t t) { mDeltaTimeOfFlight = t; }
-inline void    StPicoMtdPidTraits::setBeta(Float_t beta) { mBeta = beta; }
 
 #endif

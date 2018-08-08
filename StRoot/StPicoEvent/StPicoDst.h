@@ -4,7 +4,7 @@
 #define __TFG__VERSION__
 #endif /* ! _VANILLA_ROOT_ */
 /// ROOT headers
-#include <TClonesArray.h>
+#include "TClonesArray.h"
 
 /// PicoDst headers
 #include "StPicoArrays.h"

@@ -39,7 +39,7 @@
 #include "StPicoDst.h"
 
 /// ROOT headers
-#include <TRegexp.h>
+#include "TRegexp.h"
 
 ClassImp(StPicoDstReader)
 

@@ -93,8 +93,6 @@ StPicoDstMaker *StPicoDstMaker::fgPicoDstMaker = 0;
 #endif /* __TFG__VERSION__ */
 #include "StPicoDstMaker/StPicoUtilities.h"
 
-
-
 //_________________
 StPicoDstMaker::StPicoDstMaker(char const* name) :
   StMaker(name),
@@ -104,7 +102,7 @@ StPicoDstMaker::StPicoDstMaker(char const* name) :
   mEmcGeom{}, mEmcIndex{},
   mBField(0),
   mVtxMode(PicoVtxMode::NotSet), // This should always be ::NotSet, do not change it, see ::Init()
-  mCovMtxMode(PicoCovMtxMode::NotDefined),
+  mCovMtxMode(PicoCovMtxMode::Skip),
   mInputFileName(), mOutputFileName(), mOutputFile(nullptr),
   mChain(nullptr), mTTree(nullptr), mEventCounter(0), mSplit(99), mCompression(9), mBufferSize(65536 * 4),
   mModuleToQT{}, mModuleToQTPos{}, mQTtoModule{}, mQTSlewBinEdge{}, mQTSlewCorr{},
@@ -251,14 +249,11 @@ Int_t StPicoDstMaker::Init() {
     } //if (mVtxMode == PicoVtxMode::NotSet)
 
     /// To write or not to write covariance matrices into the branch
-    if (mCovMtxMode == PicoCovMtxMode::NotDefined) {
-      if (setCovMtxModeAttr() != kStOK) {
-	LOG_ERROR << "Pico covariance matrix I/O mode is not set ..." << endm;
-	return kStErr;
-      }
-    } //if (mCovMtxMode == PicoCovMtxMode::NotSet)
-
-#ifndef __TFG__VERSION__
+    if (setCovMtxModeAttr() != kStOK) {
+      LOG_ERROR << "Pico covariance matrix I/O mode is not set ..." << endm;
+      return kStErr;
+    }
+#ifndef __TFG__VERSION__    
     if (mInputFileName.Length() == 0) {
       // No input file
       mOutputFileName = GetChainOpt()->GetFileOut();
@@ -339,6 +334,19 @@ Int_t StPicoDstMaker::setVtxModeAttr(){
 Int_t StPicoDstMaker::setCovMtxModeAttr() {
 
   /// Choose the writing method: skip - do not write; write - write
+
+  if (strcasecmp(SAttr("PicoCovMtxMode"), "PicoCovMtxWrite") == 0) {
+    setCovMtxMode(PicoCovMtxMode::Write);
+    LOG_INFO << " PicoCovMtxWrite is being used " << endm;
+    return kStOK;
+  }
+  else if ( (strcasecmp(SAttr("PicoCovMtxMode"), "") == 0) ||
+	    (strcasecmp(SAttr("PicoCovMtxMode"), "PicoCovMtxSkip") == 0) ){
+    setCovMtxMode(PicoCovMtxMode::Skip);
+    LOG_INFO << " PicoCovMtxSkip is being used " << endm;
+    return kStOK;
+  }
+  /*
   if (strcasecmp(SAttr("PicoCovMtxMode"), "PicoCovMtxSkip") == 0) {
     setCovMtxMode(PicoCovMtxMode::Skip);
     LOG_INFO << " PicoCovMtxSkip is being used " << endm;
@@ -349,7 +357,9 @@ Int_t StPicoDstMaker::setCovMtxModeAttr() {
     LOG_INFO << " PicoCovMtxWrite is being used " << endm;
     return kStOK;
   }
+  */
 
+  /// Only if something went wrong
   return kStErr;
 }
 
@@ -929,10 +939,8 @@ void StPicoDstMaker::fillTracks() {
     picoTrk->setChi2( gTrk->chi2() );
     /// Store dE/dx in keV/cm
     picoTrk->setDedx( gTrk->dEdx() );
-    /// Store dEdx error (fit) 
-    const StMuProbPidTraits &pidTrait = gTrk->probPidTraits();
-    Float_t dEdxError = pidTrait.dEdxErrorFit();
-    picoTrk->setDedxError( dEdxError );
+    /// Store dEdx error (fit)
+    picoTrk->setDedxError( gTrk->probPidTraits().dEdxErrorFit() );
 
     /// Fill track's hit information
     picoTrk->setNHitsDedx( gTrk->nHitsDedx() );
