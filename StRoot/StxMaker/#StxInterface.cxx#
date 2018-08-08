@@ -17,11 +17,11 @@
 #include "StDetectorDbMaker/StiTpcOuterHitErrorCalculator.h"
   //to get Magnetic Field
 #include "StarMagField/StarMagField.h"
-
-  // for sti perfo
+#define DO_TPCCATRACKER_EFF_PERFORMANCE
+// for sti perfo
 #ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
-#include "TPCCATrackerPerformance/AliHLTTPCCAStxPerformance.h"
-#include "TPCCATrackerPerformance/AliHLTTPCCAMergerPerformance.h"
+#include "AliHLTTPCCAPerformance.h"
+#include "AliHLTTPCCAMergerPerformance.h"
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #endif /* DO_TPCCATRACKER_EFF_PERFORMANCE */
 
@@ -60,9 +60,6 @@ StxInterface::StxInterface() {
 void StxInterface::SetNewEvent() {
   fSeeds.clear();
   fSeedFinder = 0;
-#if 0
-  fStxTracks = 0;
-#endif
   fIdTruth.clear(); // id of the Track, which has created CaHit
 #ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
   assert(fPerformance != 0);
@@ -144,9 +141,6 @@ void StxInterface::RunPerformance() {
 #ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
   TStopwatch timer;
   timer.Start();
-#if 0    
-  assert(fStxTracks  != 0);
-#endif
   // ----- Efficiency ---------
   // init all performances
   fPerformance->InitSubPerformances();
@@ -241,9 +235,6 @@ void StxInterface::RunPerformance() {
               << std::endl;
   }
 #endif // 0 timing
-#if 0//def DO_TPCCATRACKER_EFF_PERFORMANCE   outdated
-  ((AliHLTTPCCAMergerPerformance*)(AliHLTTPCCAPerformance::Instance().GetSubPerformance("Merger")))->FillTree();
-#endif //DO_TPCCATRACKER_EFF_PERFORMANCE
 } // void StxInterface::Run()
 //________________________________________________________________________________
 void StxInterface::MakeSettings() {
@@ -274,16 +265,6 @@ void StxInterface::MakeSettings() {
     SlicePar.SetErrZ     (   0.16 ); // 0.12  for Inner                NodePar->fitPars()        //TODO initialize from StRoot
 #endif
     //   SlicePar.SetPadPitch (   0.675 );// 0.335 -"-
-#if 0
-    if (! StxKalmanTrackNode::IsLaser()) {
-      float x[3]={0,0,0},b[3];
-      StarMagField::Instance()->BField(x,b);
-      SlicePar.SetBz       ( - b[2] );   // change sign because change z
-    } else {
-      static const double HZERO=2e-6;
-      SlicePar.SetBz (HZERO);
-    }
-#endif
     if (sector <= 12) {
       SlicePar.SetZMin     (   0. );                                        //TODO initialize from StRoot
       SlicePar.SetZMax     ( 210. );                                        //TODO initialize from StRoot
