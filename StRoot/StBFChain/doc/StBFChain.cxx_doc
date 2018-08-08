@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.168 2018/07/03 17:02:50 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.169 2018/08/08 15:01:06 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -1605,7 +1605,9 @@ Bfc_st BFC[] = {
   {"picoWrite" ,"","PicoChain","picoDst","StPicoDstMaker","" ,"Writes picoDST format",kFALSE},
   {"picoRead" ,"","PicoChain","picoDst","StPicoDstMaker","" ,"WritesRead picoDST format",kFALSE},
   {"PicoVtxDefault" ,"","","" ,"" ,"","pico Vtx default mode",kFALSE},
-  {"PicoVtxVpd" ,"","","" ,"" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
+  {"PicoVtxVpd" ,"","","-PicoVtxDefault" ,"" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
+  {"PicoCovMtxSkip" ,"","","" ,"" ,"","Do not write covariance matrices to picoDst (default)",kFALSE},
+  {"PicoCovMtxWrite","","","-PicoCovMtxSkip" ,"" ,"","Write track covariance matrices to picoDst",kFALSE},
   {"St_geom" ,"" ,"","" , "St_geom_Maker","St_geom_Maker","",kFALSE},
   {"Display" ,"","","", "","","WARNING *** Option is OBSOLETE *** use Ed.C macro instead",kFALSE},
   {"Mc" ,"McChain","McEvent","sim_T,globT,McAss,McAna" ,"StMaker","StChain","",kFALSE},
@@ -3241,7 +3243,9 @@ Bfc_st BFC[] = {
   {"picoWrite" ,"","PicoChain","picoDst","StPicoDstMaker","" ,"Writes picoDST format",kFALSE},
   {"picoRead" ,"","PicoChain","picoDst","StPicoDstMaker","" ,"WritesRead picoDST format",kFALSE},
   {"PicoVtxDefault" ,"","","" ,"" ,"","pico Vtx default mode",kFALSE},
-  {"PicoVtxVpd" ,"","","" ,"" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
+  {"PicoVtxVpd" ,"","","-PicoVtxDefault" ,"" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
+  {"PicoCovMtxSkip" ,"","","" ,"" ,"","Do not write covariance matrices to picoDst (default)",kFALSE},
+  {"PicoCovMtxWrite","","","-PicoCovMtxSkip" ,"" ,"","Write track covariance matrices to picoDst",kFALSE},
   {"St_geom" ,"" ,"","" , "St_geom_Maker","St_geom_Maker","",kFALSE},
   {"Display" ,"","","", "","","WARNING *** Option is OBSOLETE *** use Ed.C macro instead",kFALSE},
   {"Mc" ,"McChain","McEvent","sim_T,globT,McAss,McAna" ,"StMaker","StChain","",kFALSE},
@@ -3931,6 +3935,8 @@ Int_t StBFChain::Instantiate()
       if ( GetOption("picoRead")  )  mk->SetMode(2);   // possibly more magic
       if ( GetOption("PicoVtxVpd"))           mk->SetAttr("picoVtxMode", "PicoVtxVpd");
       else if ( GetOption("PicoVtxDefault"))  mk->SetAttr("picoVtxMode", "PicoVtxDefault");
+      if ( GetOption("PicoCovMtxWrite"))      mk->SetAttr("picoCovMtxMode", "PicoCovMtxWrite");
+      else if ( GetOption("PicoCovMtxSkip"))  mk->SetAttr("picoCovMtxMode", "PicoCovMtxSkip"); // Default mode
       
     }
 
