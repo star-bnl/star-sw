@@ -1716,7 +1716,7 @@ my @badruns = (19116020); # Altro3
 #$hist = "RunXVIII13"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/02/18 redo TpcPadCorrectionMDF.20180312.000011.C without selection
 #$hist = "RunXVIII14"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/02/18 add tpcTimeDependenceT, TpcLengthCorrectionMDF.20180312.000013.C, TpcSecRowB.20180312.000013.root
 #$hist = "RunXVIII15"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/03/18 fix tpcTimeDependence
-$hist = "RunXVIII16"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/06/18 check with PicoDst
+$hist = "RunXVIII16"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/09/18 TpcPadCorrectionMDF.20180312.000015.C 
 
 my $prod = $hist; #$Production;
 $prod =~ s/\*//g;
@@ -1939,8 +1939,8 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
     chmod 0755, $SCRIPT;
   }
 print XML '
-<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/dEdx_sched$JOBID.log" />
-<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/dEdx_sched$JOBID.err" />
+<stdout URL="file:./sched$JOBID.log" />
+<stderr URL="file:./sched$JOBID.err" />
 </job>
 ';
 close (XML);
