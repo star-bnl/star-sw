@@ -78,7 +78,9 @@ Int_t StHLTCAMaker::Make(){
   caTrackerInt.SetHits(map);
   caTrackerInt.Run();
   vector<Seed_t> &seeds = caTrackerInt.GetSeeds();
+#if 0
   caTrackerInt.SetStiTracks(StiToolkit::instance()->getTrackContainer());
+#endif
   caTrackerInt.RunPerformance();
   Int_t key = 1;
   sort(seeds.begin(), seeds.end(),StiCATpcSeedFinder::SeedsCompareStatus );
