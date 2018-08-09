@@ -165,13 +165,13 @@ class StPicoTrack : public TObject {
   UChar_t  mNHitsMax;
   /// nHitsDedx (in TPC)
   UChar_t  mNHitsDedx;
-  /// nsigmaPi * 100
+  /// nsigmaPi * 1000
   Short_t  mNSigmaPion;
-  /// nsigmaK * 100
+  /// nsigmaK * 1000
   Short_t  mNSigmaKaon;
-  /// nsigmaP * 100
+  /// nsigmaP * 1000
   Short_t  mNSigmaProton;
-  /// nsigmaE * 100
+  /// nsigmaE * 1000
   Short_t  mNSigmaElectron;
   /// Toplogy Map data0 and data1. See StEvent/StTrackTopologyMap.cxx
   UInt_t   mTopologyMap[2];
@@ -227,10 +227,10 @@ inline Float_t StPicoTrack::dEdx() const { return mDedx; }
 inline Float_t StPicoTrack::dEdxError() const { return mDedxError; }
 //inline Float_t StPicoTrack::dNdx() const { return mDnDx;}
 //inline Float_t StPicoTrack::dNdxError() const { return mDnDxError;}
-inline Float_t StPicoTrack::nSigmaPion() const { return (Float_t)mNSigmaPion / 100.f; }
-inline Float_t StPicoTrack::nSigmaKaon() const { return (Float_t)mNSigmaKaon / 100.f; }
-inline Float_t StPicoTrack::nSigmaProton() const { return (Float_t)mNSigmaProton / 100.f; }
-inline Float_t StPicoTrack::nSigmaElectron() const { return (Float_t)mNSigmaElectron / 100.f; }
+inline Float_t StPicoTrack::nSigmaPion() const { return (Float_t)mNSigmaPion / 1000.f; }
+inline Float_t StPicoTrack::nSigmaKaon() const { return (Float_t)mNSigmaKaon / 1000.f; }
+inline Float_t StPicoTrack::nSigmaProton() const { return (Float_t)mNSigmaProton / 1000.f; }
+inline Float_t StPicoTrack::nSigmaElectron() const { return (Float_t)mNSigmaElectron / 1000.f; }
 inline UInt_t  StPicoTrack::topologyMap(UInt_t idx) const { return mTopologyMap[idx]; }
 inline Int_t   StPicoTrack::bemcPidTraitsIndex() const { return mBEmcPidTraitsIndex; }
 inline Int_t   StPicoTrack::bTofPidTraitsIndex() const { return mBTofPidTraitsIndex; }
