@@ -11,65 +11,33 @@
 #include "tables/St_g2t_track_Table.h" 
 #include "tables/St_g2t_tpc_hit_Table.h"
 #include "TDatabasePDG.h"
-#include "StBFChain.h"
-#include "Sti/StiDetectorBuilder.h"
-#include "Sti/StiDetectorGroups.h"
-#include "Sti/StiGenericDetectorGroup.h"
-#include "Sti/StiToolkit.h"
   //to obtain error coefficients
 #include "StDetectorDbMaker/StiTpcInnerHitErrorCalculator.h"
 #include "StDetectorDbMaker/StiTpcOuterHitErrorCalculator.h"
+#include "StDetectorDbMaker/StiTPCHitErrorCalculator.h"
   //to get Magnetic Field
 #include "StarMagField/StarMagField.h"
-
+#include "TStopwatch.h"
 #include <vector>
 #include <algorithm>
 using std::vector;
-
-#include <string>
-using std::string;
-
-
-StiCATpcTrackerInterface &StiCATpcTrackerInterface::Instance()
-{
-    // reference to static object
-  static StiCATpcTrackerInterface g;
-  return g;
-}
-
-StiCATpcTrackerInterface::StiCATpcTrackerInterface()
-{
-  //yf   SetNewEvent();
-} // StiCATpcTrackerInterface::StiCATpcTrackerInterface()
-
-StiCATpcTrackerInterface::~StiCATpcTrackerInterface(  )
-{ // never called for static object
-} // StiCATpcTrackerInterface::StiCATpcTrackerInterface()
-
+//________________________________________________________________________________
 void StiCATpcTrackerInterface::SetNewEvent()
 {
   fHitsMap = 0;
   fSeeds.clear();
 
   fSeedFinder = 0;
-  fStiTracks = 0;
 
   fIdTruth.clear(); // id of the Track, which has created CaHit
   fCaParam.clear();// settings for all sectors to give CATracker
   fCaHits.clear(); // hits to give CATracker
   fSeedHits.clear();          // hits to make seeds
-
-//VP  if (!fSeedFinder) fSeedFinder = new StiCATpcSeedFinder;
-  
   if (fTracker)    delete fTracker;
   fTracker    = new AliHLTTPCCAGBTracker;
-  if (fStiTracker) delete fStiTracker;
-  fStiTracker = new AliHLTTPCCAGBTracker; 
-  
 }
-
-
-  /// Copy data to CATracker. Run CATracker. Copy tracks in fSeeds.
+//________________________________________________________________________________
+/// Copy data to CATracker. Run CATracker. Copy tracks in fSeeds.
 void StiCATpcTrackerInterface::Run()
 {
   assert(fHitsMap != 0);
@@ -79,40 +47,9 @@ void StiCATpcTrackerInterface::Run()
 
   MakeSettings();
   MakeHits();
-
-
-  
-    // run tracker
+  // run tracker
   fTracker->SetSettings(fCaParam);
   fTracker->SetHits(fCaHits);
-  
-#ifdef STORE_STANDALONE_DATA // write data in files for Standalone
-  static int iEvent = -1;
-  iEvent++;
-  TString name = "./data/";
-  if (iEvent == 0) fTracker->SaveSettingsInFile(string(name));
-  name += "event";
-  name += iEvent;
-  name += "_";
-  fTracker->SaveHitsInFile(string(name));
-// check
-  if(1){
-  if (fTracker)    delete fTracker;
-  fTracker    = new AliHLTTPCCAGBTracker;
-  TString name = "./data/";
-  fTracker->ReadSettingsFromFile(string(name));
-  name += "event";
-  name += iEvent;
-  name += "_";
-  fTracker->ReadHitsFromFile(string(name));
-  fTracker->SetSettings(fCaParam);
-  fTracker->SetHits(fCaHits);
-
-  }
-#endif // STORE_STANDALONE_DATA
-
-
-
   timer.Stop();
   fPreparationTime_real = timer.RealTime();
   fPreparationTime_cpu = timer.CpuTime();  
@@ -121,7 +58,7 @@ void StiCATpcTrackerInterface::Run()
   fTracker->FindTracks();
   std::cout<<" - fTracker->NTracks(): "<<fTracker->NTracks()<<"\n";
 
-    // copy hits
+  // copy hits
   timer.Start();
   // --- Tracking time ---
   const int NTimers = fTracker->NTimers();
@@ -130,15 +67,11 @@ void StiCATpcTrackerInterface::Run()
   static double statTime_SliceTrackerTime = 0;
   static double statTime_SliceTrackerCpuTime = 0;
   
-// #ifndef __Kozlov__
-//   MakeSeeds();
-// #else /* __Kozlov__ */
   if (!statIEvent){
     for (int i = 0; i < NTimers; i++){
       statTime[i] = 0;
     }
   }
-// #endif /* __Kozlov__ */
   
   statIEvent++;
   for (int i = 0; i < NTimers; i++){
@@ -148,50 +81,44 @@ void StiCATpcTrackerInterface::Run()
   statTime_SliceTrackerCpuTime += fTracker->SliceTrackerCpuTime();
 
   if (statTime_SliceTrackerTime > 0) {
-  std::cout << "Reconstruction Time"
-      << " Real = " << std::setw( 10 ) << 1./statIEvent*(statTime_SliceTrackerTime+statTime[ 9 ]) * 1.e3 << " ms,"
-      << " CPU = " << std::setw( 10 ) << 1./statIEvent*(statTime_SliceTrackerCpuTime+statTime[ 10 ]) * 1.e3 << " ms,"
-      << " parallelization speedup (only SectorTracker): " << statTime_SliceTrackerCpuTime / statTime_SliceTrackerTime
-      << std::endl;
-  if ( 1 ) {
-    std::cout
-        << " |  ------ Sector trackers (w\\o init): " << std::setw( 10 ) << 1./statIEvent*statTime[ 0 ] * 1000. << " ms\n"
-        << " |      Initialization: " << std::setw( 10 )  << 1./statIEvent*statTime[ 12 ] * 1000. << " ms\n"
-        << " |    NeighboursFinder: " << std::setw( 10 ) << 1./statIEvent*statTime[ 1 ] * 1000. << " ms, " << std::setw( 12 ) << 1./statIEvent*statTime[ 5 ] << " cycles\n"
-        << " |   NeighboursCleaner: " << std::setw( 10 ) << 1./statIEvent*statTime[ 11 ] * 1000. << " ms\n"
-        << " |     StartHitsFinder: " << std::setw( 10 ) << 1./statIEvent*statTime[ 4 ] * 1000. << " ms\n"
-        << " | TrackletConstructor: " << std::setw( 10 ) << 1./statIEvent*statTime[ 2 ] * 1000. << " ms, " << std::setw( 12 ) << 1./statIEvent*statTime[ 7 ] << " cycles\n"
-        << " |    TrackletSelector: " << std::setw( 10 ) << 1./statIEvent*statTime[ 3 ] * 1000. << " ms, " << std::setw( 12 ) << 1./statIEvent*statTime[ 8 ] << " cycles\n"
-        << " |         WriteOutput: " << std::setw( 10 ) << 1./statIEvent*statTime[ 6 ] * 1000. << " ms\n"
-        << " |  --------------------------  Merge: " << std::setw( 10 ) << 1./statIEvent*statTime[ 9 ] * 1000. << " ms\n"
-        << " |      Initialization: " << std::setw( 10 )  << 1./statIEvent*statTime[ 13 ] * 1000. << " ms\n"
-        << " | -- NoOverlapTrackMerge: " << std::setw( 10 )  << 1./statIEvent*statTime[ 14 ] * 1000. << " ms\n"
-        << " |               Merge: " << std::setw( 10 )  << 1./statIEvent*statTime[ 16 ] * 1000. << " ms\n"
-        << " |           DataStore: " << std::setw( 10 )  << 1./statIEvent*statTime[ 18 ] * 1000. << " ms\n"
-        << " | ---- OverlapTrackMerge: " << std::setw( 10 )  << 1./statIEvent*statTime[ 15 ] * 1000. << " ms\n"
-        << " |               Merge: " << std::setw( 10 )  << 1./statIEvent*statTime[ 17 ] * 1000. << " ms\n"
-        << " |           DataStore: " << std::setw( 10 )  << 1./statIEvent*statTime[ 19 ] * 1000. << " ms\n"
-      ;
+    std::cout << "Reconstruction Time"
+	      << " Real = " << std::setw( 10 ) << 1./statIEvent*(statTime_SliceTrackerTime+statTime[ 9 ]) * 1.e3 << " ms,"
+	      << " CPU = " << std::setw( 10 ) << 1./statIEvent*(statTime_SliceTrackerCpuTime+statTime[ 10 ]) * 1.e3 << " ms,"
+	      << " parallelization speedup (only SectorTracker): " << statTime_SliceTrackerCpuTime / statTime_SliceTrackerTime
+	      << std::endl;
+    if ( 1 ) {
+      std::cout
+	<< " |  ------ Sector trackers (w\\o init): " << std::setw( 10 ) << 1./statIEvent*statTime[ 0 ] * 1000. << " ms\n"
+	<< " |      Initialization: " << std::setw( 10 )  << 1./statIEvent*statTime[ 12 ] * 1000. << " ms\n"
+	<< " |    NeighboursFinder: " << std::setw( 10 ) << 1./statIEvent*statTime[ 1 ] * 1000. << " ms, " << std::setw( 12 ) << 1./statIEvent*statTime[ 5 ] << " cycles\n"
+	<< " |   NeighboursCleaner: " << std::setw( 10 ) << 1./statIEvent*statTime[ 11 ] * 1000. << " ms\n"
+	<< " |     StartHitsFinder: " << std::setw( 10 ) << 1./statIEvent*statTime[ 4 ] * 1000. << " ms\n"
+	<< " | TrackletConstructor: " << std::setw( 10 ) << 1./statIEvent*statTime[ 2 ] * 1000. << " ms, " << std::setw( 12 ) << 1./statIEvent*statTime[ 7 ] << " cycles\n"
+	<< " |    TrackletSelector: " << std::setw( 10 ) << 1./statIEvent*statTime[ 3 ] * 1000. << " ms, " << std::setw( 12 ) << 1./statIEvent*statTime[ 8 ] << " cycles\n"
+	<< " |         WriteOutput: " << std::setw( 10 ) << 1./statIEvent*statTime[ 6 ] * 1000. << " ms\n"
+	<< " |  --------------------------  Merge: " << std::setw( 10 ) << 1./statIEvent*statTime[ 9 ] * 1000. << " ms\n"
+	<< " |      Initialization: " << std::setw( 10 )  << 1./statIEvent*statTime[ 13 ] * 1000. << " ms\n"
+	<< " | -- NoOverlapTrackMerge: " << std::setw( 10 )  << 1./statIEvent*statTime[ 14 ] * 1000. << " ms\n"
+	<< " |               Merge: " << std::setw( 10 )  << 1./statIEvent*statTime[ 16 ] * 1000. << " ms\n"
+	<< " |           DataStore: " << std::setw( 10 )  << 1./statIEvent*statTime[ 18 ] * 1000. << " ms\n"
+	<< " | ---- OverlapTrackMerge: " << std::setw( 10 )  << 1./statIEvent*statTime[ 15 ] * 1000. << " ms\n"
+	<< " |               Merge: " << std::setw( 10 )  << 1./statIEvent*statTime[ 17 ] * 1000. << " ms\n"
+	<< " |           DataStore: " << std::setw( 10 )  << 1./statIEvent*statTime[ 19 ] * 1000. << " ms\n"
+	;
+    }
   }
-  }
-  // ---
-
-//  RunPerformance();
-
-    // copy hits
-//  timer.Start();
-//
+  //
   MakeSeeds();
 
   timer.Stop();
   fPreparationTime_real += timer.RealTime();
   fPreparationTime_cpu += timer.CpuTime();
 } // void StiCATpcTrackerInterface::Run()
-
+//________________________________________________________________________________
 void StiCATpcTrackerInterface::RunPerformance()
 {
   cout << " ---- CA TPC Tracker ---- " << endl;
-
+  
   // ----- Timing ---------
   //  TODO saparete in procedure in TPCCATracker/ ...
 #if 1
@@ -276,11 +203,10 @@ void StiCATpcTrackerInterface::RunPerformance()
 #endif // 0 timing
   
 } // void StiCATpcTrackerInterface::Run()
-
-
+//________________________________________________________________________________
 void StiCATpcTrackerInterface::MakeSettings()
 {
-
+  
   const int NSlices = 24; //TODO initialize from StRoot
   for ( int iSlice = 0; iSlice < NSlices; iSlice++ ) {
     AliHLTTPCCAParam SlicePar;
@@ -327,7 +253,12 @@ void StiCATpcTrackerInterface::MakeSettings()
       SlicePar.SetRowX(iR, St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,iR+1));
     }
 
-    Double_t *coeffInner = StiTpcInnerHitErrorCalculator::instance()->coeff();
+    Double_t *coeffInner = 0;
+    if (St_tpcPadConfigC::instance()->iTPC(sector)) {
+      coeffInner = StiTPCHitErrorCalculator::instance()->coeff();
+    } else {
+      coeffInner = StiTpcInnerHitErrorCalculator::instance()->coeff();
+    }
     for(int iCoef=0; iCoef<6; iCoef++)
     {
       SlicePar.SetParamS0Par(0, 0, iCoef, (float)coeffInner[iCoef] );
@@ -374,8 +305,7 @@ void StiCATpcTrackerInterface::MakeSettings()
     fCaParam.push_back(SlicePar);
   } // for iSlice
 } // void StiCATpcTrackerInterface::MakeSettings()
-
-
+//________________________________________________________________________________
 void StiCATpcTrackerInterface::MakeHits()
 {
   StTpcCoordinateTransform tran(gStTpcDb);
@@ -414,7 +344,7 @@ void StiCATpcTrackerInterface::MakeHits()
       hitc.hit  = hit;
       fSeedHits.push_back(hitc);
 
-        // convert to CA Hit
+      // convert to CA Hit
       AliHLTTPCCAGBHit caHit;
       caHit.SetIRow( hitc.padrow );
 //      caHit.SetX( hit->x() );
@@ -434,7 +364,7 @@ void StiCATpcTrackerInterface::MakeHits()
   }
 
 } // void StiCATpcTrackerInterface::MakeHits()
-
+//________________________________________________________________________________
 void StiCATpcTrackerInterface::ConvertPars(const AliHLTTPCCATrackParam& caPar, double _alpha, StiNodePars& nodePars, StiNodeErrs& nodeErrs)
 {
     // set jacobian integral coef
@@ -540,18 +470,12 @@ void StiCATpcTrackerInterface::MakeSeeds()
     Seed_t seed;
 
     const int NHits = tr.NHits();
-//VP    float last_x = 1e10; // for check
     for ( int iHit = NHits-1; iHit >= 0; iHit-- ){ 
       const int index = fTracker->TrackHit( tr.FirstHitRef() + iHit );
       const int hId   = fTracker->Hit( index ).ID();
-//      if ( last_x == fSeedHits[hId].hit->position() ) continue; // track can have 2 hits on 1 row because of track segments merger.
       seed.vhit.push_back(&(fSeedHits[hId]));
-//      assert( last_x >= fSeedHits[hId].hit->position() ); // should be back order - from outer to inner.
-//VP      last_x = fSeedHits[hId].hit->position();
     }
-
     seed.total_hits = seed.vhit.size();
-
     ConvertPars( tr.OuterParam(), tr.Alpha(), seed.firstNodePars, seed.firstNodeErrs );
     ConvertPars( tr.InnerParam(), tr.Alpha(), seed.lastNodePars,  seed.lastNodeErrs );
 
