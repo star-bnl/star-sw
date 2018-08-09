@@ -22,14 +22,6 @@
   //to get Magnetic Field
 #include "StarMagField/StarMagField.h"
 
-  // for sti perfo
-#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
-#include "TPCCATrackerPerformance/AliHLTTPCCAStiPerformance.h"
-#include "TPCCATrackerPerformance/AliHLTTPCCAMergerPerformance.h"
-#include "StDetectorDbMaker/St_tpcPadConfigC.h"
-#include "Sti/StiKalmanTrack.h"
-#include "Sti/StiKalmanTrackNode.h"
-#endif /* DO_TPCCATRACKER_EFF_PERFORMANCE */
 #include <vector>
 #include <algorithm>
 using std::vector;
@@ -37,9 +29,6 @@ using std::vector;
 #include <string>
 using std::string;
 
-#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
-//#define STORE_STANDALONE_DATA // write data in files for Standalone
-#endif
 
 StiCATpcTrackerInterface &StiCATpcTrackerInterface::Instance()
 {
@@ -50,13 +39,6 @@ StiCATpcTrackerInterface &StiCATpcTrackerInterface::Instance()
 
 StiCATpcTrackerInterface::StiCATpcTrackerInterface()
 {
-#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
-  fOutFile = StMaker::GetChain()->GetTFile();
-  if(!fOutFile) cout << "W StiCATpcTrackerInterface: Warning - There isn't any tag file, so histograms won't be saved!" << endl;
-
-  fPerformance = &(AliHLTTPCCAPerformance::Instance());
-  fPerformance->SetOutputFile(fOutFile);
-#endif
   //yf   SetNewEvent();
 } // StiCATpcTrackerInterface::StiCATpcTrackerInterface()
 
@@ -73,12 +55,6 @@ void StiCATpcTrackerInterface::SetNewEvent()
   fStiTracks = 0;
 
   fIdTruth.clear(); // id of the Track, which has created CaHit
-#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
-  assert(fPerformance != 0);
-  fMCTracks.clear();
-  fMCPoints.clear();
-  fHitLabels.clear();
-#endif
   fCaParam.clear();// settings for all sectors to give CATracker
   fCaHits.clear(); // hits to give CATracker
   fSeedHits.clear();          // hits to make seeds
@@ -90,9 +66,6 @@ void StiCATpcTrackerInterface::SetNewEvent()
   if (fStiTracker) delete fStiTracker;
   fStiTracker = new AliHLTTPCCAGBTracker; 
   
-#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
-  fPerformance->SetTracker(fTracker);
-#endif
 }
 
 
@@ -107,14 +80,6 @@ void StiCATpcTrackerInterface::Run()
   MakeSettings();
   MakeHits();
 
-#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
-    // put data in performance
-  std::cout<q<" ------- put data in performance\n";
-  FillPerformance(fCaHits,fIdTruth, fMCTracks,fMCPoints,fHitLabels);
-  fPerformance->SetMCTracks(fMCTracks);
-  fPerformance->SetMCPoints(fMCPoints);
-  fPerformance->SetHitLabels(fHitLabels);
-#endif //  DO_TPCCATRACKER_EFF_PERFORMANCE
 
   
     // run tracker
@@ -130,27 +95,16 @@ void StiCATpcTrackerInterface::Run()
   name += iEvent;
   name += "_";
   fTracker->SaveHitsInFile(string(name));
-#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
-  std::cout<<" ------- fPerformance->SaveDataInFiles(string(name));\n";
-  fPerformance->SaveDataInFiles(string(name));
-#endif
 // check
   if(1){
   if (fTracker)    delete fTracker;
   fTracker    = new AliHLTTPCCAGBTracker;
-#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
-  std::cout<<" ------- fPerformance->SetTracker(fTracker);\n";
-  fPerformance->SetTracker(fTracker);
-#endif
   TString name = "./data/";
   fTracker->ReadSettingsFromFile(string(name));
   name += "event";
   name += iEvent;
   name += "_";
   fTracker->ReadHitsFromFile(string(name));
-#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
-  fPerformance->ReadDataFromFiles(string(name));
-#endif
   fTracker->SetSettings(fCaParam);
   fTracker->SetHits(fCaHits);
 
@@ -166,17 +120,6 @@ void StiCATpcTrackerInterface::Run()
   std::cout<<" - CA FindTracks() start -\n";
   fTracker->FindTracks();
   std::cout<<" - fTracker->NTracks(): "<<fTracker->NTracks()<<"\n";
-#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
-  if (fTracker->NHits() > 0) {
-      std::cout<<" - Run CA Performans\n";
-      fPerformance->SetTracker(fTracker);
-      fPerformance->InitSubPerformances();
-      fPerformance->ExecPerformance();
-  }
-  else {
-    cout << "Event contains 0 hits." << std::endl;
-  }
-#endif
 
     // copy hits
   timer.Start();
@@ -248,35 +191,6 @@ void StiCATpcTrackerInterface::Run()
 void StiCATpcTrackerInterface::RunPerformance()
 {
   cout << " ---- CA TPC Tracker ---- " << endl;
-#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
-  TStopwatch timer;
-  timer.Start();
-    
-  assert(fStiTracks  != 0);
-  assert(fStiTracker != 0);
-
-  // ----- Efficiency ---------
-  
-    // init all performances
-  fPerformance->InitSubPerformances();
-
-    // -- correct init of stiPerformance --
-
-  FillStiPerformance(); // get fStiCaHits fStiIdTruth fStiCaTracks
-  
-    // prepare tracker
-  fStiTracker->SetHits(fStiCaHits);
-  fStiTracker->SetSettings(fCaParam);
-
-  AliHLTTPCCAStiPerformance* stiPerf = (AliHLTTPCCAStiPerformance*)fPerformance->GetSubPerformance("Sti Performance");
-  stiPerf->SetNewEvent(fStiTracker,&fStiHitLabels,&fStiMCTracks,&fStiMCPoints);
-  stiPerf->SetRecoTracks(fStiCaTracks);  
-  fPerformance->ExecPerformance();
-
-  timer.Stop();
-  fPreparationTime_real += timer.RealTime();
-  fPreparationTime_cpu += timer.CpuTime();   
-#endif //  DO_TPCCATRACKER_EFF_PERFORMANCE
 
   // ----- Timing ---------
   //  TODO saparete in procedure in TPCCATracker/ ...
@@ -361,9 +275,6 @@ void StiCATpcTrackerInterface::RunPerformance()
   }
 #endif // 0 timing
   
-#if 0//def DO_TPCCATRACKER_EFF_PERFORMANCE   outdated
-  ((AliHLTTPCCAMergerPerformance*)(AliHLTTPCCAPerformance::Instance().GetSubPerformance("Merger")))->FillTree();
-#endif //DO_TPCCATRACKER_EFF_PERFORMANCE
 } // void StiCATpcTrackerInterface::Run()
 
 
@@ -648,273 +559,3 @@ void StiCATpcTrackerInterface::MakeSeeds()
   }
 } // void StiCATpcTrackerInterface::MakeSeeds()
 
-#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
-bool myfunction (AliHLTTPCCALocalMCPoint i,AliHLTTPCCALocalMCPoint j) { 
-  return (i.TrackI() < j.TrackI()) || ( i.TrackI()==j.TrackI() && i.IRow() < j.IRow() ); 
-}
-  /// fill fPerformance by MCTracks, MCPoints and Hit-MCPointsMatch
-void StiCATpcTrackerInterface::FillPerformance(const vector<AliHLTTPCCAGBHit>& caHits, const vector<int>& idsTruth, vector<AliHLTTPCCAMCTrack>& mcTracks, vector<AliHLTTPCCALocalMCPoint>& mcPoints, vector<AliHLTTPCCAHitLabel>& hitLabels)
-{
-  mcTracks.clear();
-  mcPoints.clear();
-  hitLabels.clear();
-  hitLabels.resize(caHits.size());
-
-  StBFChain *chain = (StBFChain *) StMaker::GetChain();
-  St_g2t_track *Track = (St_g2t_track *) chain->FindObject("g2t_track");
-  St_g2t_tpc_hit *mcTpcHits = (St_g2t_tpc_hit *) chain->FindObject("g2t_tpc_hit");
-  if (Track && mcTpcHits) {
-    static  StTpcLocalSectorCoordinate        localSect;
-    static  StTpcLocalSectorDirection         dirSect;
-    StTpcCoordinateTransform transform(gStTpcDb);
-    int nMCTracks = Track->GetNRows();
-    const g2t_track_st *track = Track->GetTable();
-    
-    vector<int> truthToIndex; // need for finding MCPoints to MCTracks correspondence
-    truthToIndex.resize(nMCTracks+1,-1);
-    
-    const g2t_tpc_hit_st *mcTpcHit = mcTpcHits->GetTable();
-    const Int_t nMcTpcHits = mcTpcHits->GetNRows();
-     
-    AliHLTTPCCAMCTrack mcTrack;
-    for (Int_t l = 0; l < nMCTracks; l++, track++) {
-      if (! track->n_tpc_hit) continue;
-      if (track->ptot < 1e-3) continue;
-      memset(&mcTrack, 0, sizeof(AliHLTTPCCAMCTrack));
-      mcTrack.SetPDG( TDatabasePDG::Instance()->ConvertGeant3ToPdg(track->ge_pid) );
-      TParticlePDG *part = TDatabasePDG::Instance()->GetParticle( mcTrack.PDG() );
-      Float_t      q     = part->Charge();
-      mcTrack.SetP ( track->ptot );
-      mcTrack.SetPt( track->pt );
-        //      mcTrack.SetNHits( track->n_tpc_hit ); // it is not really what we need. See below
-      for (Int_t i = 0; i < 3; i++) { // TODO
-        mcTrack.SetPar( i, ((i>=1)?-1:1) * 0 );
-      }
-      for (Int_t i = 0; i < 3; i++) {
-        mcTrack.SetPar( 3+i, ((i>=1)?-1:1) * track->p[i]/mcTrack.P() );
-      }
-      mcTrack.SetPar(6, q/mcTrack.P()/3 ); // q=3q      
-      mcTrack.SetNTurns( 1 ); // TODO: read from somewhere
-      const int idTruth = l+1;
-
-      truthToIndex[idTruth] = mcTracks.size();
-      mcTracks.push_back(mcTrack);
-    } // for iMCTrack
-    
-      // get hits
-    const int nHits = caHits.size();
-    for (int iHit = 0; iHit < nHits; iHit++){
-      const int iTrack = truthToIndex[idsTruth[iHit]];
-      if (iTrack == -1) continue;
-      AliHLTTPCCAHitLabel &l = hitLabels[iHit];
-      l.fLab[0] = iTrack;
-      l.fLab[1] = -1;
-      l.fLab[2] = -1;
-      mcTracks[iTrack].SetNHits( 1 + mcTracks[iTrack].NHits() );
-    } // j
-      
-      // get MCPoints
-    for (Int_t iP = 0; iP < nMcTpcHits; iP++, mcTpcHit++) {
-      AliHLTTPCCALocalMCPoint mcPoint;
-      Int_t is     =  mcTpcHit->volume_id/100000;
-      if (is) continue;
-      const int iTrack = truthToIndex[mcTpcHit->track_p];
-      if (iTrack == -1) continue;
-      AliHLTTPCCAMCTrack& mcTrack = mcTracks[iTrack];
-      
-      mcPoint.SetIRow( mcTpcHit->volume_id%100 - 1 );
-      mcPoint.SetISlice( (mcTpcHit->volume_id/100)%100 - 1 );
-
-      Int_t sector = (mcTpcHit->volume_id%100000)/100;
-      Int_t row    =  mcTpcHit->volume_id%100;
-
-        // get detector
-      StiDetectorBuilder* detectorBuilder = 0;
-      StiDetectorGroups *groups=StiToolkit::instance()->getDetectorGroups();
-      vector<StiGenericDetectorGroup *>::iterator it = groups->begin();
-      for (; it != groups->end(); ++it) {
-        StiGenericDetectorGroup *group = *it;
-        detectorBuilder = group->getDetectorBuilder();
-        TString builderName = (const char*)(detectorBuilder->getName().c_str());
-        if (builderName == "TpcBuilder")
-          break;
-      }
-      int sectorTpm = sector - 1;
-      if (sectorTpm >= 12)    sectorTpm = 11 - (sectorTpm - 11)%12;
-      StiDetector* detector = detectorBuilder->getDetector(row-1,sectorTpm);
-
-      static StiHit tmpStiHit; // used for convert only
-
-        // Get XYZ
-      StTpcHit* mpTmp = new StTpcHit;
-      double energyTmp = 0.;
-      tmpStiHit.setGlobal(detector, mpTmp, mcTpcHit->x[0], mcTpcHit->x[1], mcTpcHit->x[2], energyTmp);
-      mcPoint.SetX( tmpStiHit.x() );
-      mcPoint.SetY( - tmpStiHit.y() );
-      mcPoint.SetZ( - tmpStiHit.z() );
-
-        // Get P
-      StGlobalDirection  gDir(mcTpcHit->p[0],mcTpcHit->p[1],mcTpcHit->p[2]);
-      transform(gDir,dirSect,sector,row);
-      double px = mcTpcHit->p[0], py = mcTpcHit->p[1], pz_new = mcTpcHit->p[2], px_new, py_new;
-      double angle = detector->getPlacement()->getNormalRefAngle();
-      px_new =  cos(angle)*px + sin(angle)*py;
-      py_new = -sin(angle)*px + cos(angle)*py;
-
-      mcPoint.SetPx( px_new );
-      mcPoint.SetPy( - py_new );
-      mcPoint.SetPz( - pz_new );
-      const int qpSign = fabs(mcTrack.Par(6))/mcTrack.Par(6);
-      mcPoint.SetQP( double( qpSign ) / sqrt(px_new*px_new + py_new*py_new + pz_new*pz_new) );
-      mcPoint.SetTrackI( iTrack );
-      mcPoint.SetTrackID( mcTpcHit->track_p );
-
-      mcPoints.push_back(mcPoint);
-    } // for mcPoints
-    
-    std::sort( mcPoints.begin(), mcPoints.end(), myfunction );
-    mcTracks[0].SetFirstMCPointID(0);
-    int iPLast = 0;
-    int iTr = 0;
-    for( UInt_t iP = 0; iP < mcPoints.size(); ++iP ) {
-      if ( mcPoints[iP].TrackI() != iTr ) {
-        mcTracks[iTr].SetNMCPoints(iP - iPLast);
-        iPLast = iP;
-        iTr = mcPoints[iP].TrackI();
-        mcTracks[iTr].SetFirstMCPointID(iP);
-      }
-    }
-    mcTracks[iTr].SetNMCPoints(mcPoints.size() - iPLast);
-  }
-} // void StiCATpcTrackerInterface::FillPerformance()
-
-void StiCATpcTrackerInterface::FillStiPerformance()
-{
-  fStiCaHits.clear();
-  fStiIdTruth.clear();
-  fStiCaTracks.clear();
-  
-  AliHLTTPCCAStiPerformance* stiPerf = (AliHLTTPCCAStiPerformance*)fPerformance->GetSubPerformance("Sti Performance");
-  int NGBHits = 0;
-
-  
-  StTpcCoordinateTransform tran(gStTpcDb);
-  StTpcLocalSectorCoordinate loc;
-
-  for(int iTr=0; iTr<fStiTracks->getTrackCount(0); iTr++)
-  {
-    auto * track = (StiKalmanTrack*) fStiTracks->at(iTr);
-    vector<StiHit*> hits_v = track-> getHits();
-
-    AliHLTTPCCAGBTrack GBTrack;
-    int nTrackHits = 0;
-
-        // get local coordinates. take into account distortion
-
-    for(unsigned iH=0; iH<hits_v.size(); iH++)
-    {
-      StiHit *hit = hits_v[iH];
-      if (! hit->stHit()) 	continue;
-      if (  hit->timesUsed()) 	continue;
-      const StTpcHit *tpcHit = dynamic_cast<const StTpcHit*>(hit->stHit());
-      if ( ! tpcHit) continue;
-      StGlobalCoordinate glob(tpcHit->position());
-      tran(glob,loc,tpcHit->sector(),tpcHit->padrow());
-
-        // convert to CA Hit
-      AliHLTTPCCAGBHit caHit;
-      caHit.SetIRow( tpcHit->padrow()-1 );
-      caHit.SetX( hit->position() ); // take position of the row
-      caHit.SetY( - hit->y() );
-      caHit.SetZ( - hit->z() );
-      caHit.SetErrY( 0.12 );// TODO: read parameters from somewhere 
-      caHit.SetErrZ( 0.16 );
-      caHit.SetISlice( tpcHit->sector() - 1 );
-      caHit.SetID( fStiCaHits.size() );
-      fStiIdTruth.push_back( tpcHit->idTruth() );
-
-      int iHit = NGBHits+iH;
-      stiPerf->AddHit(iHit);
-      nTrackHits++;
-      
-      fStiCaHits.push_back(caHit);
-    }
-            
-    StiKalmanTrackNode *NodePar = track->getInnerMostDetHitNode(kTpcId);
-    if (!NodePar) continue;
-
-    double JI[5]; 
-    JI[0] = -1.;                    // y
-    JI[1] = -1.;                    // z
-    JI[2] = -1.;                    // eta
-    JI[3] =  1.;                    // ptin
-    JI[4] = -1.;                    // tanl
-
-    double J[5]; 
-    J[0] = JI[0];                              // y
-    J[1] = JI[1];                              // z
-    J[2] = JI[2]*cos(NodePar->fitPars().eta()); // eta
-    J[3] = JI[3];                              // ptin
-    J[4] = JI[4];                              // tanl
-    
-    double Cos = cos(NodePar->fitPars().eta());
-    float sgnCos = fabs(Cos)/Cos;
-
-    AliHLTTPCCATrackParam    GBTrackParam;
-    GBTrackParam.SetX     ( NodePar->fitPars().x() );
-    GBTrackParam.SetY     ( JI[0] * NodePar->fitPars().y() );
-    GBTrackParam.SetZ     ( JI[1] * NodePar->fitPars().z() );
-    GBTrackParam.SetSinPhi( JI[2] * sin(NodePar->fitPars().eta()));
-    GBTrackParam.SetQPt   ( JI[3] * NodePar->fitPars().ptin() );
-    GBTrackParam.SetDzDs  ( JI[4] * NodePar->fitPars().tanl() );
-
-    GBTrackParam.SetCov( 0, NodePar->fitErrs()._cYY);
-    GBTrackParam.SetCov( 1, NodePar->fitErrs()._cZY*J[0]*J[1]);
-    GBTrackParam.SetCov( 2, NodePar->fitErrs()._cZZ*J[0]*J[1]);
-    GBTrackParam.SetCov( 3, NodePar->fitErrs()._cEY*J[0]*J[2]);
-    GBTrackParam.SetCov( 4, NodePar->fitErrs()._cEZ*J[1]*J[2]);
-    GBTrackParam.SetCov( 5, NodePar->fitErrs()._cEE*J[2]*J[2]);
-    GBTrackParam.SetCov( 6, NodePar->fitErrs()._cTY*J[0]*J[4]);
-    GBTrackParam.SetCov( 7, NodePar->fitErrs()._cTZ*J[1]*J[4]);
-    GBTrackParam.SetCov( 8, NodePar->fitErrs()._cTE*J[2]*J[4]);    
-    GBTrackParam.SetCov( 9, NodePar->fitErrs()._cTT*J[4]*J[4]);
-    GBTrackParam.SetCov(10, NodePar->fitErrs()._cPY*J[0]*J[3]);
-    GBTrackParam.SetCov(11, NodePar->fitErrs()._cPZ*J[1]*J[3]);
-    GBTrackParam.SetCov(12, NodePar->fitErrs()._cPE*J[2]*J[3]);
-    GBTrackParam.SetCov(13, NodePar->fitErrs()._cTP*J[4]*J[3]);
-    GBTrackParam.SetCov(14, NodePar->fitErrs()._cPP*J[3]*J[3]);
-    
-    GBTrackParam.SetSignCosPhi(sgnCos);
-    
-    GBTrack.SetInnerParam(GBTrackParam);
-    
-    GBTrack.SetNHits( nTrackHits );
-    GBTrack.SetFirstHitRef( NGBHits );
-    
-    NGBHits += nTrackHits;
-    
-    fStiCaTracks.push_back(GBTrack);
- }
-
-    // prepare mc
-  vector<AliHLTTPCCAMCTrack> stiMCTracks;
-  vector<AliHLTTPCCALocalMCPoint> stiMCPoints;
-  vector<AliHLTTPCCAHitLabel> stiHitLabels;
-  FillPerformance(fStiCaHits,fStiIdTruth, stiMCTracks,stiMCPoints,stiHitLabels);
-
-  fStiMCTracks.Resize(stiMCTracks.size());
-  for (unsigned i = 0; i < stiMCTracks.size(); i++) {
-    fStiMCTracks[i] = stiMCTracks[i];
-  }
-  fStiMCPoints.Resize(stiMCPoints.size());
-  for (unsigned i = 0; i < stiMCPoints.size(); i++) {
-    fStiMCPoints[i] = stiMCPoints[i];
-  }
-  fStiHitLabels.Resize(stiHitLabels.size());
-  for (unsigned i = 0; i < stiHitLabels.size(); i++) {
-    fStiHitLabels[i] = stiHitLabels[i];
-  }
-  
-
-} // void StiCATpcTrackerInterface::FillStiPerformance()
-#endif // DO_TPCCATRACKER_EFF_PERFORMANCE
