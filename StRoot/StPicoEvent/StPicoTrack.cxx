@@ -137,34 +137,34 @@ void StPicoTrack::setTopologyMap(Int_t id, UInt_t word) {
 
 //_________________
 void StPicoTrack::setNSigmaPion(Float_t ns) {
-  mNSigmaPion = ( fabs(ns * 100.) > std::numeric_limits<short>::max() ?
+  mNSigmaPion = ( fabs(ns * 1000.) > std::numeric_limits<short>::max() ?
 		  ( (ns > 0) ? std::numeric_limits<short>::max() :
 		    std::numeric_limits<short>::min() ) :
-		  (Short_t)( TMath::Nint( ns * 100. ) ) );
+		  (Short_t)( TMath::Nint( ns * 1000. ) ) );
 }
 
 //_________________
 void StPicoTrack::setNSigmaKaon(Float_t ns) {
-  mNSigmaKaon = ( fabs(ns * 100) > std::numeric_limits<short>::max() ?
+  mNSigmaKaon = ( fabs(ns * 1000.) > std::numeric_limits<short>::max() ?
 		  ( (ns > 0) ? std::numeric_limits<short>::max() :
 		    std::numeric_limits<short>::min() ) :
-		  (Short_t)( TMath::Nint( ns * 100. ) ) );
+		  (Short_t)( TMath::Nint( ns * 1000. ) ) );
 }
 
 //_________________
 void StPicoTrack::setNSigmaProton(Float_t ns) {
-  mNSigmaProton = ( fabs(ns * 100) > std::numeric_limits<short>::max() ?
+  mNSigmaProton = ( fabs(ns * 1000.) > std::numeric_limits<short>::max() ?
 		    ( (ns > 0) ? std::numeric_limits<short>::max() :
 		      std::numeric_limits<short>::min() ) :
-		    (Short_t)( TMath::Nint( ns * 100. ) ) );
+		    (Short_t)( TMath::Nint( ns * 1000. ) ) );
 }
 
 //_________________
 void StPicoTrack::setNSigmaElectron(Float_t ns) {
-  mNSigmaElectron = ( fabs(ns * 100) > std::numeric_limits<short>::max() ?
+  mNSigmaElectron = ( fabs(ns * 1000.) > std::numeric_limits<short>::max() ?
 		      ( (ns > 0) ? std::numeric_limits<short>::max() :
 			std::numeric_limits<short>::min() ) :
-		      (Short_t)( TMath::Nint( ns * 100. ) ) );
+		      (Short_t)( TMath::Nint( ns * 1000. ) ) );
 }
 
 //_________________
