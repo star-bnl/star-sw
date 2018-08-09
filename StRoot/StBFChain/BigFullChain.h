@@ -261,6 +261,12 @@ Bfc_st BFC[] = { // standard chains
   {"XC2018",      "","","y2018,TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,OSpaceZ2,tpcDB,TpcHitMover"
    ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,sdt20180426.122000,Stx,Idst,BAna"       
    ,                                                                                       "","","",kFALSE},
+  {"HLT2017",      "","","y2017,TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,OSpaceZ2,tpcDB,TpcHitMover"
+   ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,sdt20170426,StiCALib,HLTCA,Idst,BAna"       
+   ,                                                                                       "","","",kFALSE},
+  {"HLT2018",      "","","y2018,TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,OSpaceZ2,tpcDB,TpcHitMover"
+   ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,sdt20180426.122000,StiCALib,HLTCA,Idst,BAna"       
+   ,                                                                                       "","","",kFALSE},
   {"MC2019.Ideal","","","MC.2019,MC.StiCA"                                                ,"","","",kFALSE},
   {"MC2019",      "","","MC2019.Ideal"                                                    ,"","","",kFALSE},
   {"RC----------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1743,7 +1749,7 @@ Bfc_st BFC[] = { // standard chains
   {"StvPulls" ,"","",""                                         ,"","", "Request to make Stv Pulls",kFALSE},
   {"StiLib"   ,"","",""                                           ,"","Sti,StiUtilities","Load Sti",kFALSE},
   {"StiCALib" ,"","","StiLib"                                ,"","TPCCATracker,StiCA","Load Sti+CA",kFALSE},
-  {"StiTpc"   ,"","","TpcDb,ITTF,tpc_T,dbutil,detDb,StarMagField,magF"   ,"","StiTpc","Load StiTpc",kFALSE},
+  {"StiTpc"   ,"","","TpcDb,tpc_T,dbutil,detDb,StarMagField,magF"        ,"","StiTpc","Load StiTpc",kFALSE},
   {"StiSvt"   ,"",""," "                  ,"","StSvtClassLibrary,StSvtDbMaker,StiSvt","Load StiSvt",kFALSE},
   {"StiSsd"   ,"","",""                           ,"","StSsdUtil,StSsdDbMaker,StiSsd","Load StiSsd",kFALSE},
   {"StiSst"   ,"","",""                           ,"","StSstUtil,StSstDbMaker,StiSst","Load StiSst",kFALSE},
@@ -1769,7 +1775,8 @@ Bfc_st BFC[] = { // standard chains
   {"StiCA"    ,"","","Sti,StiCALib",                                    "","libEG","Sti+CA tracker",kFALSE},
   {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,Stu,StEvent,StDbT,TpcIT,compend,sim_T,tbutil,TMVARank","StiMaker"
    ,                                                          "StiUtilities,StiMaker","Sti tracker",kFALSE},
-  {"HLTCA","","-Sti,-StiCA,-Stv","","StHLTCAMaker","TPCCATracker,StHLTCAMaker","HLT reconstruction",kFALSE},
+  {"HLTCA","","","-Sti,-Stv,StiLib,StiLibs,TMVARank","StHLTCAMaker","TPCCATracker,StiMaker,StHLTCAMaker"
+   ,                                                                           "HLT reconstruction",kFALSE},
   {"Stx", "","","-Sti,-StiCA,-Stv","StxMaker"     ,"TPCCATracker,StxMaker","eXpress reconstruction",kFALSE},
   {"KFVertex",""  ,"Sti","StiLibs,-VFMinuit,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2"
    ,"StKFVertexMaker","MathMore,Spectrum,StiMaker",  "KFParticle based multi vertex reconstruction",kFALSE},
@@ -1904,9 +1911,12 @@ Bfc_st BFC[] = { // standard chains
   {"picoDst"    ,"","","picoEvt,EmcUtil,TofUtil,BTofUtil,PmdUtil","StPicoDstMaker"
    ,                                                        "StPicoDstMaker","Load PicoDST library",kFALSE},
   {"PicoVtxDefault" ,"","",""                                       ,"" ,"","pico Vtx default mode",kFALSE},
-  {"PicoVtxVpd"     ,"","",""                            ,"" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
+  {"PicoVtxVpd"     ,"","","-PicoVtxDefault"             ,"" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
+  {"PicoCovMtxSkip" ,"","",""       ,"" ,"","Do not write covariance matrices to picoDst (default)",kFALSE},
+  {"PicoCovMtxWrite","","","-PicoCovMtxSkip"   ,"" ,"","Write track covariance matrices to picoDst",kFALSE},
   {"femtoDst"    ,"","","KFPInter","StFemtoDstMaker"
    ,                                            "StKFParticleAnalysisMaker","Load FemtoDST library",kFALSE},
+
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
 #ifndef __NoDisplay__
   {"Display"     ,"","","TbUtil,St_geom,Stu"

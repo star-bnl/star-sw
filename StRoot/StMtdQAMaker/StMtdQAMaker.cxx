@@ -442,6 +442,38 @@ Int_t StMtdQAMaker::processStEvent()
 {
   // Event statistics
   mhEventTrig->Fill(0.5);
+
+  StMtdCollection *mtdCollection = mStEvent->mtdCollection();
+  if(!mtdCollection)
+    {
+      LOG_WARN << "No MTD collection is available ..." << endm;
+      return kStErr;
+    }
+
+  // MTD trigger time
+  StMtdHeader *mtdHeader = mtdCollection->mtdHeader();
+  if(mtdHeader)
+    {
+      mMtdData.mtdTriggerTime[0] = 25.*(mtdHeader->triggerTime(0)&0xfff);
+      mMtdData.mtdTriggerTime[1] = 25.*(mtdHeader->triggerTime(1)&0xfff);
+    }
+  else
+    {
+      mMtdData.mtdTriggerTime[0] = -99999;
+      mMtdData.mtdTriggerTime[1] = -99999;
+    }
+  for(Int_t i=0; i<2; i++)
+    mTrigTime[i] = mMtdData.mtdTriggerTime[i];
+
+  // MTD raw hits
+  StSPtrVecMtdRawHit& mtdRawHits = mtdCollection->mtdRawHits();
+  Int_t nMtdRawHits = mtdRawHits.size();
+  printf("[i] # of MTD raw hits = %d\n",nMtdRawHits);
+
+  // MTD hits
+  StSPtrVecMtdHit& mtdHits = mtdCollection->mtdHits();
+  Int_t nMtdHits = mtdHits.size();
+  printf("[i] # of MTD hits = %d\n",nMtdHits);
   return kStOK;
 }
 
@@ -622,7 +654,9 @@ Int_t StMtdQAMaker::processMuDst()
       mMtdData.mtdTriggerTime[1] = -99999;
     }
   for(Int_t i=0; i<2; i++)
-    mTrigTime[i] = mMtdData.mtdTriggerTime[i];
+    {
+      mTrigTime[i] = mMtdData.mtdTriggerTime[i];
+    }
 
   // MTD raw hits
   Int_t nMtdRawHits = mMuDst->numberOfBMTDRawHit();
@@ -648,13 +682,18 @@ Int_t StMtdQAMaker::processMuDst()
   Int_t goodTrack = 0;
   Double_t projPhi = -999, projZ = -999;
   Int_t backleg = -1, module = -1, cell = -1;
-  map<Short_t, UShort_t> primaryIndex;
-  Int_t nPrimTrks = mMuDst->numberOfPrimaryTracks();
-  for(Int_t i=0; i<nPrimTrks; i++)
+  map<Short_t, UShort_t> trackIndex;
+  trackIndex.clear();
+  Int_t nTrks = 0;
+  if(mIsCosmic) nTrks = mMuDst->numberOfGlobalTracks();
+  else nTrks = mMuDst->numberOfPrimaryTracks();
+  StMuTrack *pTrack = 0x0;
+  for(Int_t i=0; i<nTrks; i++)
     {
-      StMuTrack* pTrack = mMuDst->primaryTracks(i);
+      if(mIsCosmic) pTrack = mMuDst->globalTracks(i);
+      else          pTrack = mMuDst->primaryTracks(i);
       if(!pTrack) continue;
-      primaryIndex[pTrack->id()] = i;
+      trackIndex[pTrack->id()] = i;
       if(!isValidTrack(pTrack)) continue;
       mMtdData.trkPt[goodTrack]           = pTrack->pt();
       mMtdData.trkEta[goodTrack]          = pTrack->eta();
@@ -750,10 +789,13 @@ Int_t StMtdQAMaker::processMuDst()
       mMtdData.isMatched[i] = kFALSE;
       Short_t trackId = hit->associatedTrackKey();
       if(trackId<1) continue;
-      Int_t index = (primaryIndex.find(trackId)!=primaryIndex.end()) ? primaryIndex.find(trackId)->second : -1;
+      Int_t index = (trackIndex.find(trackId)!=trackIndex.end()) ? trackIndex.find(trackId)->second : -1;
       if(index<0) continue;
-      StMuTrack *pTrack = mMuDst->primaryTracks(index);
-      if(!pTrack || !isValidTrack(pTrack) || pTrack->vertexIndex()!=mVertexIndex) continue;
+      StMuTrack *pTrack = 0x0;
+      if(mIsCosmic) pTrack = mMuDst->globalTracks(index);
+      else pTrack = mMuDst->primaryTracks(index);
+      if(!pTrack || !isValidTrack(pTrack)) continue;
+      if(!mIsCosmic && pTrack->vertexIndex()!=mVertexIndex) continue;
       mMtdData.isMatched[i] = kTRUE;
 
       StThreeVectorF trkMom = pTrack->momentum();
@@ -1585,7 +1627,7 @@ void StMtdQAMaker::bookHistos()
   AddHist(mhMtdRawHitTrNWest);
 
   // ===== hits
-  mhMtdNHits = new TH1F("hMtdNHits","Number of MTD hits per event;N",10,0,10);
+  mhMtdNHits = new TH1F("hMtdNHits","Number of MTD hits per event;N",50,0,50);
   AddHist(mhMtdNHits);
 
   mhMtdHitMap = new TH2F("hMtdHitMap","MTD: channel vs backleg of hits;backleg;channel",30,0.5,30.5,60,-0.5,59.5);
@@ -1851,7 +1893,8 @@ void StMtdQAMaker::printConfig()
 //_____________________________________________________________________________
 Bool_t StMtdQAMaker::propagateHelixToMtd(StPhysicalHelixD helix, Double_t &projPhi, Double_t &projZ) const
 {
-  // helix extrapolation
+  // a rough estimate
+  // pure helix extrapolation
   // no energy loss
 
   projPhi = -999; projZ = -999;
@@ -2018,18 +2061,18 @@ Bool_t StMtdQAMaker::isValidTrack(StTrack *track, StVertex *vtx) const
 
   Int_t nHitsPoss = track->numberOfPossiblePoints(kTpcId);
   if(nHitsFit/(1.0*nHitsPoss)<mMinFitHitsFraction) return kFALSE;
-  
-  StTpcDedxPidAlgorithm pidAlgorithm;
-  const StParticleDefinition *pd = track->pidTraits(pidAlgorithm);
-  if(!pd || !pidAlgorithm.traits()) return kFALSE;
-  if(pidAlgorithm.traits()->numberOfPoints()<mMinNHitsDedx) return kFALSE;
-
-  static StPionPlus* Pion = StPionPlus::instance();
-  Double_t nSigmaPi = pidAlgorithm.numberOfSigma(Pion);
-  if(nSigmaPi<mMinNsigmaPi || nSigmaPi>mMaxNsigmaPi) return kFALSE;
 
   if(!mIsCosmic)
     {
+      StTpcDedxPidAlgorithm pidAlgorithm;
+      const StParticleDefinition *pd = track->pidTraits(pidAlgorithm);
+      if(!pd || !pidAlgorithm.traits()) return kFALSE;
+      if(pidAlgorithm.traits()->numberOfPoints()<mMinNHitsDedx) return kFALSE;
+
+      static StPionPlus* Pion = StPionPlus::instance();
+      Double_t nSigmaPi = pidAlgorithm.numberOfSigma(Pion);
+      if(nSigmaPi<mMinNsigmaPi || nSigmaPi>mMaxNsigmaPi) return kFALSE;
+
       StGlobalTrack *globalTrack = dynamic_cast<StGlobalTrack*>(track);
       if(!globalTrack) return kFALSE;
       THelixTrack    thelix      = globalTrack->dcaGeometry()->thelix();
@@ -2056,10 +2099,15 @@ Bool_t StMtdQAMaker::isValidTrack(const StMuTrack *track) const
   if(eta < mMinTrkEta || eta > mMaxTrkEta)           return kFALSE;
   if(phi < mMinTrkPhi || phi > mMaxTrkPhi)           return kFALSE;
   if(track->nHitsFit(kTpcId)<mMinNHitsFit)           return kFALSE;
-  if(track->nHitsDedx()<mMinNHitsDedx)               return kFALSE;
-  if(!mIsCosmic && track->dcaGlobal().mag()>mMaxDca) return kFALSE;
-  if(nSigmaPi<mMinNsigmaPi || nSigmaPi>mMaxNsigmaPi) return kFALSE;
   if(track->nHitsFit(kTpcId)/(1.0*track->nHitsPoss(kTpcId))<mMinFitHitsFraction) return kFALSE;
+
+  if(!mIsCosmic)
+    {
+      if(track->nHitsDedx()<mMinNHitsDedx)               return kFALSE;
+      if(track->dcaGlobal().mag()>mMaxDca)               return kFALSE;
+      if(nSigmaPi<mMinNsigmaPi || nSigmaPi>mMaxNsigmaPi) return kFALSE;
+    }
+
   return kTRUE;
 }
 
@@ -2073,8 +2121,11 @@ Double_t StMtdQAMaker::rotatePhi(Double_t phi) const
 }
 
 //
-//// $Id: StMtdQAMaker.cxx,v 1.17 2018/02/20 19:46:48 marr Exp $
+//// $Id: StMtdQAMaker.cxx,v 1.18 2018/08/08 19:29:22 marr Exp $
 //// $Log: StMtdQAMaker.cxx,v $
+//// Revision 1.18  2018/08/08 19:29:22  marr
+//// MOdify to accomondate the cosmic ray data
+////
 //// Revision 1.17  2018/02/20 19:46:48  marr
 //// Major update with more histograms
 ////
