@@ -3,6 +3,7 @@
 //#define __USEZ3A__
 //#define __CHECK_LargedEdx__
 //#define __Use_dNdx__
+#define __BEST_VERTEX__
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
 #include "StTpcdEdxCorrection.h" 
@@ -254,7 +255,7 @@ Int_t StdEdxY2Maker::Make(){
   }
   if (pEvent->runInfo()) bField = pEvent->runInfo()->magneticField()*kilogauss;
   if (TMath::Abs(bField) < 1.e-5*kilogauss) return kStOK;
-#if 0
+#ifdef __BEST_VERTEX__
   const StBTofCollection* tof = pEvent->btofCollection();
   StPrimaryVertex *pVbest  = 0;
   if (tof) {
@@ -273,7 +274,7 @@ Int_t StdEdxY2Maker::Make(){
       if (dZbest > 3.0) pVbest = 0;
     }
   }
-#endif
+#endif /* __BEST_VERTEX__ */
   // no of tpc hits
   Int_t TotalNoOfTpcHits = 0;
   Int_t NoOfTpcHitsUsed  = 0;
@@ -686,7 +687,7 @@ Int_t StdEdxY2Maker::Make(){
     if (pTrack) QAPlots(gTrack);
     if ((TESTBIT(m_Mode, kCalibration))) {
       if (! pTrack) continue; // reject non primary tracks
-#if 0
+#ifdef __BEST_VERTEX__
       if (! pEvent->primaryVertex()) continue; 
       // AuAu could have wrong ranking
       if (pEvent->primaryVertex()->ranking() > 0) {
@@ -695,7 +696,7 @@ Int_t StdEdxY2Maker::Make(){
       } else {// try to use VpdZ to select best vertex
 	if (pTrack->vertex() != pVbest) continue;
       }
-#endif
+#endif /* __BEST_VERTEX__ */
       Histogramming(gTrack);
     }
   }
