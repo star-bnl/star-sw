@@ -1,6 +1,6 @@
 // @(#)root/main:$Name:  $:$Id: h2mdf.C,v 1.3 2014/12/22 23:50:53 fisyak Exp $
 /*
-  root.exe -q -b xyPad3CGF_y3RunXVIII11.root 'xyPadMDF.C("mu",7.20,20180312,11)' >& xyPadMDF.log
+  root.exe -q -b xyPad3CGF_y3RunXVIII11.root 'xyPadMDF.C("mu",7,20,20180312,11)' >& xyPadMDF.log
  */
 #ifndef __CINT__
 #include <stdlib.h>
