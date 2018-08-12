@@ -463,12 +463,13 @@ Int_t StiMaker::Make()
   _hitLoader->loadEvent(event,_loaderTrackFilter,_loaderHitFilter);
   if (mMaxTimes) _hitLoader->setMaxTimes(mMaxTimes);
   if (mTimg[kHitTimg]) mTimg[kHitTimg]->Stop();
-  
+  _seedFinder->reset();
   StMaker *HLT = GetMaker("HLTCA");
   if (HLT) {
-    _seedFinder->reset();
+    //
     HLT->Make();
   }
+  
   iAnz = MakeGlobalTracks(event);
   if (iAnz) {MyClear(); return iAnz;}
   CountHits();

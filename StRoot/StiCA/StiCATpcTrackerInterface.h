@@ -9,11 +9,7 @@ class StiCATpcTrackerInterface : public StTPCCAInterface {
  public:
   StiCATpcTrackerInterface();
   virtual ~StiCATpcTrackerInterface() {fgStiCATpcTrackerInterface = 0;}
-#ifdef __CINT__
-  static StiCATpcTrackerInterface *Instance();
-#else
   static StiCATpcTrackerInterface &Instance();
-#endif
   virtual void SetNewEvent() {fSeedFinder = 0; fSeeds.clear(); fSeedHits.clear(); fHitsMap = 0; StTPCCAInterface::SetNewEvent();}
   virtual void SetHits(HitMapToVectorAndEndType &map_){ fHitsMap = &map_; };// set hits data array.
   virtual vector<Seed_t> &GetSeeds(){ return fSeeds; };                   // get seeds. Should be called after Run(...).

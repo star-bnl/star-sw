@@ -262,7 +262,7 @@ Bfc_st BFC[] = { // standard chains
    ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,sdt20180426.122000,Stx,Idst,BAna"       
    ,                                                                                       "","","",kFALSE},
   {"HLT2017",      "","","y2017,TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,OSpaceZ2,tpcDB,TpcHitMover"
-   ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,sdt20170426,StiCALib,HLTCA,Idst,BAna"       
+   ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,sdt20170426,StiCA,HLTCA,Idst,BAna"       
    ,                                                                                       "","","",kFALSE},
   {"HLT2018",      "","","y2018,TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,OSpaceZ2,tpcDB,TpcHitMover"
    ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,sdt20180426.122000,StiCALib,HLTCA,Idst,BAna"       
@@ -1775,7 +1775,7 @@ Bfc_st BFC[] = { // standard chains
   {"StiCA"    ,"","","Sti,StiCALib",                                    "","libEG","Sti+CA tracker",kFALSE},
   {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,Stu,StEvent,StDbT,TpcIT,compend,sim_T,tbutil,TMVARank","StiMaker"
    ,                                                          "StiUtilities,StiMaker","Sti tracker",kFALSE},
-  {"HLTCA","","","-Sti,-Stv,StiLib,StiLibs,TMVARank","StHLTCAMaker","TPCCATracker,StiMaker,StHLTCAMaker"
+  {"HLTCA","","Sti","-Stv,StiLib,StiLibs,TMVARank","StHLTCAMaker","TPCCATracker,StiMaker,StHLTCAMaker"
    ,                                                                           "HLT reconstruction",kFALSE},
   {"Stx", "","","-Sti,-StiCA,-Stv","StxMaker"     ,"TPCCATracker,StxMaker","eXpress reconstruction",kFALSE},
   {"KFVertex",""  ,"Sti","StiLibs,-VFMinuit,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2"

@@ -1,69 +1,36 @@
 #include "StHLTTPCCATrackerInterface.h"
-// need for hits data
+#include "TPCCATracker/AliHLTTPCCAGBHit.h"
+#include "TPCCATracker/AliHLTTPCCAGBTrack.h"
+#include "TPCCATracker/AliHLTTPCCAParam.h"
+  // need for hits data
 #include "StTpcHit.h"                
 #include "StTpcDb/StTpcDb.h"
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StDbUtilities/StTpcLocalSectorCoordinate.hh"
-#include "StDbUtilities/StMagUtilities.h"
-
-#include "tables/St_MagFactor_Table.h"
+  // for MCdata
+#include "tables/St_g2t_track_Table.h" 
+#include "tables/St_g2t_tpc_hit_Table.h"
+#include "TDatabasePDG.h"
+  //to obtain error coefficients
+#include "StDetectorDbMaker/StiTpcInnerHitErrorCalculator.h"
+#include "StDetectorDbMaker/StiTpcOuterHitErrorCalculator.h"
+#include "StDetectorDbMaker/StiTPCHitErrorCalculator.h"
+  //to get Magnetic Field
 #include "StarMagField/StarMagField.h"
-#include "StDetectorDbMaker/St_MagFactorC.h"
-#include "StDetectorDbMaker/StDetectorDbSpaceCharge.h"
-
-//#include "online/RTS/src/L4_HLT/online_tracking_TpcHitMap.h"
-#include "online_tracking_TpcHitMap.h"
-
+#include "TStopwatch.h"
+#include <vector>
+#include <algorithm>
+//#include "online_tracking_TpcHitMap.h"
+using std::vector;
+StHLTTPCCATrackerInterface *StHLTTPCCATrackerInterface::fgStHLTTPCCATrackerInterface = 0;
 //________________________________________________________________________________
-StHLTTPCCATrackerInterface::StHLTTPCCATrackerInterface() : StiCATpcTrackerInterface() {
-#if 0
-  char mapName[256];
-  const char* hltPara = "HLTConf/HLTparameters"; // file name of the HLTParamaters
-#endif
-  double driftVelocity = 1.0E-6 * StTpcDb::instance()->DriftVelocity();
-  LOG_INFO << ">>> driftvelocity = " << driftVelocity << endm;
-  
-  // St_MagFactor *fMagFactor    = (St_MagFactor *)GetDataBase("RunLog")->Find("MagFactor");
-  // double        gFactor       = (*fMagFactor)[0].ScaleFactor;
-  double gFactor = StarMagField::Instance()->GetFactor();
-  LOG_INFO << "gFactor = " << gFactor << endm;
-  if (!(StDetectorDbSpaceChargeR2::instance())) {
-    LOG_INFO << "StDetectorDbSpaceChargeR2::instance() == 0" << endm;
-    exit(1);
-  }
-  double spaceCharge = StDetectorDbSpaceChargeR2::instance()->getSpaceChargeCoulombs((double)gFactor);
-  LOG_INFO << "spaceCharge = " << spaceCharge << endm;
-#if 0
-  for (int i = 0; i < nTpcSectors; ++i) {
-    sprintf(mapName, "HLTConf/tpcHitMap_sector%i.bin", i+1); // hard code the path here, tmp
-    hitMap[i] = new online_tracking_TpcHitMap(hltPara, i);
-    hitMap[i]->loadMap(mapName);
-    hitMap[i]->setDriftVelocity(driftVelocity);
-    hitMap[i]->setSpaceCharge(spaceCharge);
-    LOG_INFO << "loading Map: " << mapName
-             << "  driftVelocity = " << hitMap[i]->getDriftVelocity()
-             << "  mapDriftVelocity = " << hitMap[i]->getMapDriftVelocity() << endm;
-  }
-#endif
+StHLTTPCCATrackerInterface &StHLTTPCCATrackerInterface::Instance() {
+  if (! fgStHLTTPCCATrackerInterface) fgStHLTTPCCATrackerInterface = new StHLTTPCCATrackerInterface(); 
+  return *fgStHLTTPCCATrackerInterface;
 }
-  
 //________________________________________________________________________________
-StHLTTPCCATrackerInterface::~StHLTTPCCATrackerInterface() {
-#if 0
-  for (int i = 0; i < nTpcSectors; ++i) {
-    delete hitMap[i];
-  }
-#endif
+StHLTTPCCATrackerInterface::StHLTTPCCATrackerInterface() : StTPCCAInterface() {
 }
-
-//________________________________________________________________________________
-StHLTTPCCATrackerInterface &StHLTTPCCATrackerInterface::Instance()
-{
-  // reference to static object
-  static StHLTTPCCATrackerInterface g;
-  return g;
-}
-
 //________________________________________________________________________________
 void StHLTTPCCATrackerInterface::MakeHits()
 {
@@ -93,7 +60,7 @@ void StHLTTPCCATrackerInterface::MakeHits()
 #else
       StGlobalCoordinate loc(tpcHit->position());
 #endif
-
+#ifdef __HLT_COOR__
       double  globalXyz[3];
       double  HLTLocalXyz[3];
       Int_t   sector     = tpcHit->sector(); // 1 - 24
@@ -116,7 +83,7 @@ void StHLTTPCCATrackerInterface::MakeHits()
 #endif // KEHW_DEBUG
 
       HLTHitG2L(sector, padrow, globalXyz, HLTLocalXyz);
-
+#endif /*  __HLT_COOR__ */
       // obtain seed Hit
       SeedHit_t hitc;
 #if 0
@@ -143,11 +110,14 @@ void StHLTTPCCATrackerInterface::MakeHits()
       caHit.SetX( hit->position() ); // take position of the row
       // caHit.SetY( - hit->y() );
       // caHit.SetZ( - hit->z() );
-
+#ifdef __HLT_COOR__
       // caHit.SetX( HLTLocalXyz[0] );
       caHit.SetY( HLTLocalXyz[1] );
       caHit.SetZ( HLTLocalXyz[2] );
-
+#else /* ! __HLT_COOR__ */
+      caHit.SetY( - hit->y() );
+      caHit.SetZ( - hit->z() );
+#endif /*  __HLT_COOR__ */
       // caHit.SetErrX(   );
       caHit.SetErrY( 0.12 );// TODO: read parameters from somewhere 
       caHit.SetErrZ( 0.16 );
@@ -166,6 +136,125 @@ void StHLTTPCCATrackerInterface::MakeHits()
 } // void StHLTTPCCATrackerInterface::MakeHits()
 
 //________________________________________________________________________________
+void StHLTTPCCATrackerInterface::ConvertPars(const AliHLTTPCCATrackParam& caPar, double _alpha, StiNodePars& nodePars, StiNodeErrs& nodeErrs)
+{
+    // set jacobian integral coef
+  double JI[5]; 
+  JI[0] = -1.;                    // y
+  JI[1] = -1.;                    // z
+  JI[2] = -1.;         // eta
+  JI[3] =  1.;         // ptin
+  JI[4] = -1.;         // tanl
+    // get parameters
+  nodePars.x()    = caPar.GetX();
+  nodePars.y()    = JI[0] * caPar.GetY();
+  nodePars.z()    = JI[1] * caPar.GetZ();
+  nodePars.eta()  = JI[2] * asin(caPar.GetSinPhi()); // (signed curvature)*(local Xc of helix axis - X current point on track)
+  nodePars.ptin() = JI[3] * caPar.GetQPt();        // signed invert pt [sign = sign(-qB)]
+  nodePars.tanl() = JI[4] * caPar.GetDzDs();         // tangent of the track momentum dip angle
+  
+    // get h & signB
+  static const double EC = 2.99792458e-4, ZEROHZ = 2e-6;
+// #define USE_CA_FIELD
+#ifndef USE_CA_FIELD // use field in the point. Need this because of check in StiTrackNodeHelper::set()
+  const double ca = cos(_alpha), sa = sin(_alpha); // code has been taken from StiKalmanTrackNode::getHz()
+  double globalXYZ[3] = {
+    ca * nodePars.x() - sa * nodePars.y(),
+    sa * nodePars.x() + ca * nodePars.y(),
+    nodePars.z()
+  };
+
+  double h2=ZEROHZ;
+  if (! StiKalmanTrackNode::IsLaser()) {
+    double b[3];
+    StarMagField::Instance()->BField(globalXYZ,b);
+    h2 = b[2];
+  } 
+
+#else  // these parameters have been obtained with that MF, so let's use it.
+  double h2 = - fTracker->Slice(0).Param().Bz(); // change sign because change z
+#endif // 1
+  h2 *= EC;
+    // get parameters. continue
+  nodePars.hz() = h2;  // Z component magnetic field in units Pt(Gev) = Hz * RCurv(cm)
+  nodePars.ready(); // set cosCA, sinCA & curv
+//std::cout << nodePars._ptin << std::endl;
+    // set jacobian integral coef
+  double J[5]; 
+  J[0] = JI[0];                    // y
+  J[1] = JI[1];                    // z
+  J[2] = JI[2]/cos(nodePars.eta()); // eta
+  J[3] = JI[3];                    // ptin
+  J[4] = JI[4];                    // tanl
+  
+    // get cov matrises
+  const float *caCov = caPar.GetCov();
+//   double nodeCov[15];
+//   for (int i1 = 0, i = 0; i1 < 5; i1++){
+//     for (int i2 = 0; i2 <= i1; i2++, i++){
+//       nodeCov[i] = J[i1]*J[i2]*caCov[i];
+//     }
+//   }
+  // if ( (caCov[0] <= 0) || (caCov[2] <= 0) || (caCov[5] <= 0) || (caCov[9] <= 0) || (caCov[14] <= 0))
+  //   cout << "Warrning: Bad CA Cov Matrix." << endl;
+  // if ( (nodeCov[0] <= 0) || (nodeCov[2] <= 0) || (nodeCov[5] <= 0) || (nodeCov[9] <= 0) || (nodeCov[14] <= 0))
+  //   cout << "Warrning: Bad Node Cov Matrix." << endl;
+
+  double *A = nodeErrs.G();
+/*  for (int i1 = 0, i = 0; i1 < 5; i1++){
+    for (int i2 = 0; i2 <= i1; i2++, i++){
+      A[i+i1+2] = caCov[i];
+    }
+  }*/
+  
+  nodeErrs._cYY = caCov[ 0];
+  nodeErrs._cZY = caCov[ 1]*J[0]*J[1];
+  nodeErrs._cZZ = caCov[ 2]*J[0]*J[1];
+  nodeErrs._cEY = caCov[ 3]*J[0]*J[2];
+  nodeErrs._cEZ = caCov[ 4]*J[1]*J[2];
+  nodeErrs._cEE = caCov[ 5]*J[2]*J[2];
+  nodeErrs._cTY = caCov[ 6]*J[0]*J[4];
+  nodeErrs._cTZ = caCov[ 7]*J[1]*J[4];
+  nodeErrs._cTE = caCov[ 8]*J[2]*J[4];    
+  nodeErrs._cTT = caCov[ 9]*J[4]*J[4];
+  nodeErrs._cPY = caCov[10]*J[0]*J[3];
+  nodeErrs._cPZ = caCov[11]*J[1]*J[3];
+  nodeErrs._cPE = caCov[12]*J[2]*J[3];
+  nodeErrs._cTP = caCov[13]*J[4]*J[3];
+  nodeErrs._cPP = caCov[14]*J[3]*J[3];
+#if 1  
+  A[0] = 1; // don't use parameter X
+  A[1] = 0;
+  A[3] = 0;
+  A[6] = 0;
+  A[10] = 0;
+  A[15] = 0;
+#endif
+}
+//________________________________________________________________________________
+void StHLTTPCCATrackerInterface::MakeSeeds()
+{
+  const int NRecoTracks = fTracker->NTracks();
+  for ( int iTr = 0; iTr < NRecoTracks; iTr++ ) {
+      // get seed
+    const AliHLTTPCCAGBTrack tr = fTracker->Track( iTr );
+    Seed_t seed;
+
+    const int NHits = tr.NHits();
+    for ( int iHit = NHits-1; iHit >= 0; iHit-- ){ 
+      const int index = fTracker->TrackHit( tr.FirstHitRef() + iHit );
+      const int hId   = fTracker->Hit( index ).ID();
+      seed.vhit.push_back(&(fSeedHits[hId]));
+    }
+    seed.total_hits = seed.vhit.size();
+    ConvertPars( tr.OuterParam(), tr.Alpha(), seed.firstNodePars, seed.firstNodeErrs );
+    ConvertPars( tr.InnerParam(), tr.Alpha(), seed.lastNodePars,  seed.lastNodeErrs );
+
+    fSeeds.push_back(seed);
+  }
+} // void StHLTTPCCATrackerInterface::MakeSeeds()
+
+//________________________________________________________________________________
 void StHLTTPCCATrackerInterface::HLTHitG2L(const int iSector, const int iPadrow,
                                            const double globalXyz[3], double HLTLocalXyz[3])
 {
@@ -173,18 +262,6 @@ void StHLTTPCCATrackerInterface::HLTHitG2L(const int iSector, const int iPadrow,
   
   const double pi      = 3.14159265358979323846;
   const double piOver6 = pi / 6.0;
-  const int    NRows   = 45;
-  
-  float R[NRows] = { 60.000,  64.800,  69.600,   74.400,  79.200, //  5  //TODO initialize from StRoot
-                     84.000,  88.800,  93.600,   98.800, 104.000, // 10
-                     109.200, 114.400, 119.600, 127.195, 129.195, // 15
-                     131.195, 133.195, 135.195, 137.195, 139.195, // 20
-                     141.195, 143.195, 145.195, 147.195, 149.195, // 25
-                     151.195, 153.195, 155.195, 157.195, 159.195, // 30
-                     161.195, 163.195, 165.195, 167.195, 169.195, // 35
-                     171.195, 173.195, 175.195, 177.195, 179.195, // 40
-                     181.195, 183.195, 185.195, 187.195, 189.195};// 45
-
   // STAR global coordinates to CA local
   // setcori ( 1 <= i <= 12), rotateZ i * pi/6
   // (13 <= i <= 24), rotateZ (24 - i) * pi/6
@@ -221,7 +298,7 @@ void StHLTTPCCATrackerInterface::HLTHitG2L(const int iSector, const int iPadrow,
     LOG_ERROR << "Error: TPC hit pasrow run out of range, padrow = " << iPadrow << endm;
     exit(1);
   }
-  xn = R[iPadrow-1];              // use padrow x for CA
+  xn = St_tpcPadConfigC::instance()->radialDistanceAtRow(iSector,iPadrow);//
   
   HLTLocalXyz[0] = xn;
   HLTLocalXyz[1] = yn;
