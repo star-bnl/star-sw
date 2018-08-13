@@ -3,26 +3,193 @@
   <StarGeometry default="y2016" >
 
   <!-- Quick test geometry for FTS deveolpment -->
-  <Geometry tag="ftsver1" comment="Forward Tracking test setup">
+  <Geometry tag="test"  comment="Forward Tracking reference development">
 
-    <Construct sys="cave" config="CAVE05" />
-    <Construct sys="idsm" config="IDSM14" />
-    <Construct sys="pipe" config="PIPE12"  />
-    <Construct sys="upst" config="UPSTon" />
-    <Construct sys="tpce" config="TPCE31" />
-    <Construct sys="btof" config="BTOFv8" />
-    <Construct sys="vpdd" config="VPDD08" />
-    <Construct sys="calb" config="CALB02" />
-    <Construct sys="ecal" config="ECALv6" />
-    <Construct sys="bbcm" config="BBCMon" />
-    <Construct sys="zcal" config="ZCALon" />
-    <Construct sys="magp" config="MAGPon" />
-    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="cave" config="CAVE05" simu="1" />
+      <Construct sys="upst" config="UPSTon"  />
+      <Construct sys="shld" config="SHLDon"  />
+      <Construct sys="quad" config="QUADon"  />
+      <Construct sys="magp" config="MAGPon" simu="1"/>
+      <Construct sys="pipe" config="PIPEv3a" simu="2" />
+      <Construct sys="scon" config="SCON14" simu="2" />
+      <Construct sys="tpce" config="TPCE31" simu="2"/>
+      <Construct sys="ftsd" config="FTSIv3a" simu="2" />
 
-    <Construct sys="ftsd" config="FTSDv1" />
+      <Construct sys="wcal" config="WCALv0" simu="1" />
+      <Construct sys="hcal" config="HCALv0" simu="1" />
+      <Construct sys="plat" config="PLATon" simu="2" />
+   
+  </Geometry>
+
+  <!-- Quick test geometry for FTS deveolpment -->
+  <Geometry tag="fwddev0a"  comment="Forward Tracking development">
+
+    <Construct sys="cave" config="CAVE05" simu="1" />
+      <Construct sys="upst" config="UPSTon"  />
+      <Construct sys="shld" config="SHLDon"  />
+      <Construct sys="quad" config="QUADon"  />
+      <Construct sys="magp" config="MAGPon" simu="1"/>
+      <Construct sys="pipe" config="PIPEv3a" simu="2" />
+      <Construct sys="scon" config="SCON14" simu="2" />
+      <Construct sys="tpce" config="TPCE31" simu="2"/>
+      <Construct sys="ftsd" config="FTSIv3a" simu="2" />
   
   </Geometry>
-  <Geometry tag="ftsver2" comment="Forward Tracking test setup">
+  <Geometry tag="fwddev0b"  comment="Forward Tracking development">
+
+    <Construct sys="cave" config="CAVE05" simu="1" />
+      <Construct sys="upst" config="UPSTon"  />
+      <Construct sys="shld" config="SHLDon"  />
+      <Construct sys="quad" config="QUADon"  />
+      <Construct sys="magp" config="MAGPon" simu="1"/>
+      <Construct sys="pipe" config="PIPE12" simu="2" />
+      <Construct sys="scon" config="SCON14" simu="2" />
+      <Construct sys="tpce" config="TPCE31" simu="2"/>
+      <Construct sys="ftsd" config="FTSIv3b" simu="2" />
+  
+  </Geometry>
+  <Geometry tag="fwddev1a"  comment="Forward Tracking development">
+
+    <Construct sys="cave" config="CAVE05" simu="1" />
+      <Construct sys="upst" config="UPSTon"  />
+      <Construct sys="shld" config="SHLDon"  />
+      <Construct sys="quad" config="QUADon"  />
+      <Construct sys="magp" config="MAGPon" simu="1"/>
+      <Construct sys="pipe" config="PIPEv3a" simu="2" />
+      <Construct sys="scon" config="SCON14" simu="2" />
+      <Construct sys="tpce" config="TPCE31" simu="2"/>
+      <Construct sys="ftsd" config="FTSIv3c" simu="2" />
+  
+  </Geometry>
+  <Geometry tag="fwddev1b"  comment="Forward Tracking development">
+
+    <Construct sys="cave" config="CAVE05" simu="1" />
+      <Construct sys="upst" config="UPSTon"  />
+      <Construct sys="shld" config="SHLDon"  />
+      <Construct sys="quad" config="QUADon"  />
+      <Construct sys="magp" config="MAGPon" simu="1"/>
+      <Construct sys="pipe" config="PIPE12" simu="2" />
+      <Construct sys="scon" config="SCON14" simu="2" />
+      <Construct sys="tpce" config="TPCE31" simu="2"/>
+      <Construct sys="ftsd" config="FTSIv3d" simu="2" />
+  
+  </Geometry>
+
+
+
+
+
+  <!-- Quick test geometry for FTS deveolpment -->
+  <Geometry tag="sitrver0"  comment="Forward Tracking test setup for Si tracker">
+
+    <Construct sys="cave" config="CAVE05" simu="1" />
+    <Construct sys="pipe" config="PIPE12" simu="2" />
+    <Construct sys="tpce" config="TPCE31" simu="2"/>
+    <Construct sys="magp" config="MAGPon" simu="1"/>
+    <Construct sys="ftsd" config="FTSIv0" simu="2" />
+  
+  </Geometry>
+  <!-- Quick test geometry for FTS deveolpment -->
+  <Geometry tag="sitrver1"  comment="Forward Tracking test setup for Si tracker | version2 of the beampipe ">
+
+    <Construct sys="cave" config="CAVE05" simu="1" />
+    <Construct sys="pipe" config="PIPEv2" simu="2" />
+    <Construct sys="tpce" config="TPCE31" simu="2"/>
+    <Construct sys="magp" config="MAGPon" simu="1"/>
+    <Construct sys="ftsd" config="FTSIv0" simu="2" />
+  
+  </Geometry>
+
+  <Geometry tag="sitrver2"  comment="Forward Tracking test setup for Si tracker | version2 of the beampipe ">
+
+    <Construct sys="cave" config="CAVE05" simu="1" />
+    <Construct sys="pipe" config="PIPEv2" simu="2" />
+    <Construct sys="tpce" config="TPCE31" simu="2"/>
+    <Construct sys="magp" config="MAGPon" simu="1"/>
+    <Construct sys="ftsd" config="FTSIv1" simu="2" />
+  
+  </Geometry>
+
+  <Geometry tag="sitrver3"  comment="Forward Tracking test setup for Si tracker | version1 of the beampipe ">
+
+    <Construct sys="cave" config="CAVE05" simu="1" />
+    <Construct sys="pipe" config="PIPE12" simu="2" />
+    <Construct sys="tpce" config="TPCE31" simu="2"/>
+    <Construct sys="magp" config="MAGPon" simu="1"/>
+    <Construct sys="ftsd" config="FTSIv1" simu="2" />
+  
+  </Geometry>
+  <Geometry tag="sitrver4a"  comment="Forward Tracking test setup for Si tracker | version1 of the beampipe ">
+
+    <Construct sys="cave" config="CAVE05" simu="1" />
+    <Construct sys="pipe" config="PIPE12" simu="2" />
+    <Construct sys="tpce" config="TPCE31" simu="2"/>
+    <Construct sys="magp" config="MAGPon" simu="1"/>
+    <Construct sys="ftsd" config="FTSIv2a" simu="2" />
+  
+  </Geometry>
+  <Geometry tag="sitrver4b"  comment="Forward Tracking test setup for Si tracker | version1 of the beampipe ">
+
+    <Construct sys="cave" config="CAVE05" simu="1" />
+    <Construct sys="pipe" config="PIPE12" simu="2" />
+    <Construct sys="tpce" config="TPCE31" simu="2"/>
+    <Construct sys="magp" config="MAGPon" simu="1"/>
+    <Construct sys="ftsd" config="FTSIv2b" simu="2" />
+  
+  </Geometry>
+  <Geometry tag="sitrver4c"  comment="Forward Tracking test setup for Si tracker | version1 of the beampipe ">
+
+    <Construct sys="cave" config="CAVE05" simu="1" />
+    <Construct sys="pipe" config="PIPE12" simu="2" />
+    <Construct sys="tpce" config="TPCE31" simu="2"/>
+    <Construct sys="magp" config="MAGPon" simu="1"/>
+    <Construct sys="ftsd" config="FTSIv2c" simu="2" />
+  
+  </Geometry>
+
+
+  <!-- Quick test geometry for FTS deveolpment -->
+  <Geometry tag="ftsver0"  comment="Forward Tracking test setup">
+
+    <Construct sys="cave" config="CAVE05" simu="1" />
+    <Construct sys="idsm" config="IDSM14" simu="2" />
+    <Construct sys="pipe" config="PIPE12" simu="2" />
+    <Construct sys="upst" config="UPSTon" simu="1"/>
+    <Construct sys="tpce" config="TPCE31" simu="2"/>
+    <Construct sys="btof" config="BTOFv8" simu="1"/>
+    <Construct sys="vpdd" config="VPDD08" simu="1"/>
+    <Construct sys="calb" config="CALB02" simu="1"/>
+    <Construct sys="ecal" config="ECALv6" simu="1"/>
+    <Construct sys="bbcm" config="BBCMon" simu="1"/>
+    <Construct sys="zcal" config="ZCALon" simu="1"/>
+    <Construct sys="magp" config="MAGPon" simu="1"/>
+    <Construct sys="mutd" config="MUTD15" simu="1"/>
+
+    <Construct sys="ftsd" config="FTSDv0" simu="2" />
+  
+  </Geometry>
+
+  <!-- Quick test geometry for FTS deveolpment -->
+  <Geometry tag="ftsver1"  comment="Forward Tracking test setup">
+
+    <Construct sys="cave" config="CAVE05" simu="1" />
+    <Construct sys="idsm" config="IDSM14" simu="2" />
+    <Construct sys="pipe" config="PIPE12" simu="2" />
+    <Construct sys="upst" config="UPSTon" simu="1"/>
+    <Construct sys="tpce" config="TPCE31" simu="2"/>
+    <Construct sys="btof" config="BTOFv8" simu="1"/>
+    <Construct sys="vpdd" config="VPDD08" simu="1"/>
+    <Construct sys="calb" config="CALB02" simu="1"/>
+    <Construct sys="ecal" config="ECALv6" simu="1"/>
+    <Construct sys="bbcm" config="BBCMon" simu="1"/>
+    <Construct sys="zcal" config="ZCALon" simu="1"/>
+    <Construct sys="magp" config="MAGPon" simu="1"/>
+    <Construct sys="mutd" config="MUTD15" simu="1"/>
+
+    <Construct sys="ftsd" config="FTSDv1" simu="2" />
+  
+  </Geometry>
+  <Geometry tag="ftsver2"  comment="Forward Tracking test setup">
 
     <Construct sys="cave" config="CAVE05" />
     <Construct sys="idsm" config="IDSM14" />
@@ -41,7 +208,7 @@
     <Construct sys="ftsd" config="FTSDv2" />
   
   </Geometry>
-  <Geometry tag="ftsver3" comment="Forward Tracking test setup">
+  <Geometry tag="ftsver3"  comment="Forward Tracking test setup">
 
     <Construct sys="cave" config="CAVE05" />
     <Construct sys="idsm" config="IDSM14" />
@@ -60,7 +227,7 @@
     <Construct sys="ftsd" config="FTSDv3" />
   
   </Geometry>
-  <Geometry tag="ftsver4" comment="Forward Tracking test setup">
+  <Geometry tag="ftsver4"  comment="Forward Tracking test setup">
 
     <Construct sys="cave" config="CAVE05" />
     <Construct sys="pipe" config="PIPE12"  />
@@ -76,7 +243,21 @@
 
   </Geometry>
 
-  <Geometry tag="ftsref1" comment="Forward Tracking reference 1">
+  <Geometry tag="ftsref0"  comment="Forward Tracking reference 0">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPE12" simu="1" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="ftsd" config="FTSDr0" />
+    <Construct sys="epdm" config="EPDMon" simu="1" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+  </Geometry>
+  <Geometry tag="ftsref1"  comment="Forward Tracking reference 1">
 
     <Construct sys="cave" config="CAVE05" />
     <Construct sys="pipe" config="PIPE12"  />
@@ -90,8 +271,7 @@
     <Construct sys="calb" config="CALB02" />
 
   </Geometry>
-
-  <Geometry tag="ftsref2" comment="Forward Tracking reference 1">
+  <Geometry tag="ftsref2"  comment="Forward Tracking reference 1">
 
     <Construct sys="cave" config="CAVE05" />
     <Construct sys="pipe" config="PIPE12"  />
@@ -99,6 +279,202 @@
     <Construct sys="magp" config="MAGPon" />
     <Construct sys="ftsd" config="FTSDr2" />
     <Construct sys="epdm" config="EPDMon"  />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+  </Geometry>
+  <Geometry tag="ftsref3"  comment="Forward Tracking reference 3">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPE12" simu="1" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="ftsd" config="FTSDr3" />
+    <Construct sys="epdm" config="EPDMon" simu="1" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+  </Geometry>
+  <Geometry tag="ftsref4"  comment="Forward Tracking reference 4">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPE12" simu="1" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="ftsd" config="FTSDr4" />
+    <Construct sys="epdm" config="EPDMon" simu="1" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+  </Geometry>
+  <Geometry tag="ftsref5"  comment="Forward Tracking reference 5">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPE12" simu="1" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="ftsd" config="FTSDr5" />
+    <Construct sys="epdm" config="EPDMon" simu="1" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+  </Geometry>
+  <Geometry tag="ftsref6"  comment="Forward Tracking reference 6">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPEv2" simu="1" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="ftsd" config="FTSDr6" />
+    <Construct sys="epdm" config="EPDMon" simu="1" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+  </Geometry>
+  <Geometry tag="ftsref6a" comment="Forward Tracking reference 6a">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPEv2" simu="1" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="ftsd" config="FTSDr6a" />
+    <Construct sys="epdm" config="EPDMon" simu="1" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+  </Geometry>
+  <Geometry tag="ftsref6b" comment="Forward Tracking reference 6b">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPEv2" simu="1" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="ftsd" config="FTSDr6b" />
+    <Construct sys="epdm" config="EPDMon" simu="1" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+  </Geometry>
+  <Geometry tag="ftsref6c" comment="Forward Tracking reference 6c">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPEv2" simu="1" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="ftsd" config="FTSDr6c" />
+    <Construct sys="epdm" config="EPDMon" simu="1" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+  </Geometry>
+  <Geometry tag="ftsref6d" comment="Forward Tracking reference 6d">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPEv2" simu="1" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="ftsd" config="FTSDr6d" />
+    <Construct sys="epdm" config="EPDMon" simu="1" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+  </Geometry>
+  <Geometry tag="ftsref6x" comment="Forward Tracking reference 6x (no pipe)">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPEof" simu="1" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="ftsd" config="FTSDr6" />
+    <Construct sys="epdm" config="EPDMon" simu="1" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+  </Geometry>
+  <Geometry tag="ftsref6y" comment="Forward Tracking reference 6y (no pipe)">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPEof" simu="1" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="ftsd" config="FTSDr6b" />
+    <Construct sys="epdm" config="EPDMon" simu="1" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+  </Geometry>
+  <Geometry tag="ftsref7"  comment="Forward Tracking reference 7">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPE12" simu="1" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="ftsd" config="FTSDr7" />
+    <Construct sys="epdm" config="EPDMon" simu="1" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+  </Geometry>
+  <Geometry tag="ftsref8"  comment="Forward Tracking reference 8">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPE12" simu="1" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="ftsd" config="FTSDr8" />
+    <Construct sys="epdm" config="EPDMon" simu="1" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+  </Geometry>
+  <Geometry tag="ftsref9"  comment="Forward Tracking reference 9">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPE12" simu="1" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="ftsd" config="FTSDr9" />
+    <Construct sys="epdm" config="EPDMon" simu="1" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+  </Geometry>
+  <Geometry tag="ftsref10" comment="Forward Tracking reference 10">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPE12" simu="1" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="ftsd" config="FTSDr10" />
+    <Construct sys="epdm" config="EPDMon" simu="1" />
     <Construct sys="tpce" config="TPCE31" />
     <Construct sys="btof" config="BTOFv8" />
     <Construct sys="mutd" config="MUTD15" />
@@ -157,7 +533,7 @@
     <Construct sys="fpdm" config="FPDMv4"  />
     <Construct sys="zcal" config="ZCALon"  />
     <Construct sys="magp" config="MAGPon"  />
-    <Construct sys="mutd" config="MUTD16"  />
+    <Construct sys="mutd" config="MUTD15"  />
     <Construct sys="etof" config="ETOFv14s"  />
   </Geometry>
 
@@ -177,7 +553,7 @@
     <Construct sys="fpdm" config="FPDMv4"  />
     <Construct sys="zcal" config="ZCALon"  />
     <Construct sys="magp" config="MAGPon"  />
-    <Construct sys="mutd" config="MUTD16"  />
+    <Construct sys="mutd" config="MUTD15"  />
     <Construct sys="etof" config="ETOFv14s"  />
   </Geometry>
 
@@ -501,7 +877,9 @@
     <Construct sys="calb" config="CALB02" />
     <Construct sys="ecal" config="ECALv6" />
     <Construct sys="bbcm" config="BBCMon" />
-    <Construct sys="hcal" config="HCALv0" />
+<!--
+    <Construct sys="hcal" config="HCALvA" />
+-->
     <Construct sys="zcal" config="ZCALon" />
     <Construct sys="magp" config="MAGPon" />
     <Construct sys="sisd" config="SISD85" />
