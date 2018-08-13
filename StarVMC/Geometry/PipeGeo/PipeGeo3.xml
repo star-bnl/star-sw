@@ -90,7 +90,7 @@
    <Structure name="PIPV">
      <var type="float" name="version" />
      <var type="int"   name="pipeconfig"  />
-     <var type="int"   name="pipeflag"  />
+     <var type="int"   name="inidsm"  />
    </Structure>
 
    <Structure name="PIPG">
@@ -154,7 +154,7 @@
    <Fill name="PIPV" comment="Pipe version" >
      <var name="version" value="3.0" comment="3.0 version of the beam pipe"/>
      <var name="pipeconfig"  value="3"   comment="Configuration is three" />
-     <var name="pipeflag"    value="1"   comment="Configuration is three" />
+     <var name="inidsm"    value="1"   comment="Configuration is three" />
    </Fill>
 
   <Fill name="PIPG" comment="Pipe geometry">
@@ -247,23 +247,19 @@
   <!--                                                                        Create the Pipe -->
  
   <Create    block="PIPE" />
-  <Placement block="PIPE" in="IDSM" 
-	     x="PIPG_xoffset" 
-	     y="PIPG_yoffset" 
-	     z="PIPG_zoffset" />
+  <Placement block="PIPE" in="IDSM" if="PIPV_inIDSM.eq.1" />
+  <Placement block="PIPE" in="CAVE" if="PIPV_inIDSM.eq.0" />
+
   
   
   <Create    block="PIPI" />  <!-- WHY IS MANY NEEDED HERE? -->
-  <Placement block="PIPI" in="IDSM" konly="MANY"
-	     x="PIPG_xoffset" 
-	     y="PIPG_yoffset" 
-	     z="PIPG_zoffset" />
+  <Placement block="PIPI" in="IDSM" konly="MANY" if="PIPV_inIDSM.eq.1" />
+  <Placement block="PIPI" in="CAVE" konly="MANY" if="PIPV_inIDSM.eq.0" />
+
   
   <Create    block="PIPW" />
-  <Placement block="PIPW" in="IDSM" 
-	     x="PIPG_xoffset" 
-	     y="PIPG_yoffset" 
-	     z="PIPG_zoffset" />
+  <Placement block="PIPW" in="IDSM" if="PIPV_inIDSM.eq.1" />
+  <Placement block="PIPW" in="CAVE" if="PIPV_inIDSM.eq.0" />
   
  
   <Create    block="PIPA" />
