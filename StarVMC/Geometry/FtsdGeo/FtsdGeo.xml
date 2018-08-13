@@ -1,6 +1,10 @@
 <Document  file="StarVMC/Geometry/FtsdGeo/FtsdGeo.xml">
-<!--  ================================================================================================================ -->
-<Module name="FtsdGeo" comment=" is the Beam Beam Counter Modules GEOmetry "  >
+
+<Replace match="GeV">*1.0E+0;</Replace>    
+<Replace match="MeV">*1.0E-3;</Replace>    
+<Replace match="keV">*1.0E-6;</Replace>
+
+<Module name="FtsdGeo" comment="Forward Tracking System Geometry">
 
   <Created date="10/7/2015" />
   <Author  name="Jason Webb" />
@@ -15,8 +19,12 @@
 
   <Structure name="MAIN" comment="Main configuration control structure, selects version at run time">
     <var name="version" type="float" />
+    <var name="type"    type="int" />
     <var name="useids"  type="float" />
     <var name="active(20)" type="float" />
+    <var name="rmnDSK" type="float" /> <!-- min disk radius -->
+    <var name="rmxDSK" type="float" /> <!-- max disk radius -->
+    <var name="cutele" type="float" />
   </Structure>
 
   <Structure name="FDSK" comment="Description of each disk">
@@ -61,6 +69,10 @@
     <var name="version" value="3.0" comment="selector" />
     <var name="useids"  value="1.0" comment="defines placement 0=in cave, 1=in idsm" />
     <var name="active"  value="{1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1}" comment="switch on/off up to 20 disks" />
+    <var name="rmnDSK"  value="2.25" comment="default disk inner radius" />
+    <var name="rmxDSK"  value="32.5" comment="default disk outer radius" />
+    <var name="cutele"  value="1 MeV" comment="electron propagation threshold" />
+    <var name="type"    value="0" comment="This is combined Si+sTGC" />
   </Fill>
   <Use struct="MAIN" />
 
@@ -130,10 +142,6 @@
   </Fill>
 
   </If>
-
-
-
-
   <If expr="MAIN_version==2.0">
 
     zdisk = 70.0;
@@ -228,16 +236,12 @@
   </Fill>
 
   </If>
-
-
-
-
   <If expr="MAIN_version==3.0">
 
   zdisk  = 70.0;
   dzdisk = 23.3333333;
-  Rin    = 2.25
-  Rout   = 32.25
+  Rin    = MAIN_rmndsk !2.25
+  Rout   = MAIN_rmxdsk !32.25
 
   <!--                                                                                     Geometric paramters for disk 1 -->
   ndisk = ndisk + 1
@@ -308,9 +312,6 @@
   </Fill>
 
   </If>
-
-  
-
   <If expr="MAIN_version==4.0">
   
     <!--                                                                                     Geometric paramters for disk s -->
@@ -416,8 +417,8 @@
 
   zdisk  = 70.0;
   dzdisk = 23.3333333;
-  Rin    = 2.25
-  Rout   = 32.25
+  Rin    = MAIN_rmndsk !2.25
+  Rout   = MAIN_rmxdsk !32.25
 
   <!--                                                                                     Geometric paramters for disk 1 -->
   ndisk = ndisk + 1
@@ -587,6 +588,931 @@
     </Fill>
     
   </If>
+  <If expr="MAIN_version==6.0">
+  
+
+  zdisk  = 70.0;
+  dzdisk = 23.3333333;
+  Rin    = MAIN_rmndsk !2.25
+  Rout   = MAIN_rmxdsk !32.25
+
+  <!--                                                                                     Geometric paramters for disk 1 -->
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="First disk">
+    <var name="version"   value="1.0"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+    <var name="rmin"      value="Rin-0.5"   comment="minimum radius of disk [cm]" />
+    <var name="rmax"      value="Rout+0.5"  comment="maximum radius of disk [cm]" />
+    <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+    <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+    <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+  </Fill>
+  zdisk = zdisk + dzdisk
+
+  <!--                                                                                     Geometric paramters for disk 2 -->
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="Second disk">
+    <var name="version"   value="1.1"    comment="disk version" />
+    <var name="diskid"        value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
+  </Fill>
+  zdisk = zdisk + dzdisk
+
+  <!--                                                                                     Geometric paramters for disk 3 -->
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="Third disk">
+    <var name="version"   value="1.2"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk" comment="z center of disk [cm]" />
+  </Fill>
+  zdisk = zdisk + dzdisk
+
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="Fourth disk">
+    <var name="version"   value="1.3"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
+  </Fill>
+  zdisk = zdisk + dzdisk
+
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="Fifth disk">
+    <var name="version"   value="1.4"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
+  </Fill>
+  zdisk = zdisk + dzdisk
+
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="Sixth disk">
+    <var name="version"   value="1.5"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
+  </Fill>
+
+
+
+    <!--                                                                                     Geometric paramters for disk s -->
+    zdisk = 238.0; <!-- place outside magnet -->
+    ndisk = ndisk + 1
+    Rin  = 6.0
+    Rout = (Rin + 30.0) / cos(pi/8.0) 
+    <Fill name="FDSK" comment="First disk">
+      <var name="version"   value="1.0"    comment="disk version" />
+      <var name="diskid"    value="ndisk"  comment="disk number" />
+      <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+      <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+      <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+      <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+      <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+      <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+      <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+      <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+      <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+
+    zdisk = 242.0; <!-- second 4 cm separation -->
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="First disk">
+      <var name="version"   value="1.0"    comment="disk version" />
+      <var name="diskid"    value="ndisk"  comment="disk number" />
+      <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+      <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+      <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+      <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+      <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+      <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+      <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+      <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+      <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+    <!--                                                                                     Geometric paramters for disk s -->
+    Rout = (Rin+60)/cos(pi/8) 
+    zdisk = 273.0; <!-- place outside magnet -->
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="First disk">
+      <var name="version"   value="1.0"    comment="disk version" />
+      <var name="diskid"    value="ndisk"  comment="disk number" />
+      <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+      <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+      <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+      <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+      <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+      <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+      <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+      <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+      <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+
+    zdisk = 275.0; <!-- second 4 cm separation -->
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="First disk">
+      <var name="version"   value="1.0"    comment="disk version" />
+      <var name="diskid"    value="ndisk"  comment="disk number" />
+      <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+      <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+      <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+      <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+      <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+      <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+      <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+      <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+      <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+    <!--                                                                                     Geometric paramters for disk s -->
+    zdisk = 358.0; <!-- place outside magnet -->
+    ndisk = ndisk + 1
+    
+    <Fill name="FDSK" comment="First disk">
+      <var name="version"   value="1.0"    comment="disk version" />
+      <var name="diskid"    value="ndisk"  comment="disk number" />
+      <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+      <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+      <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+      <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+      <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+      <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+      <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+      <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+      <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+
+    zdisk = 362.0; <!-- second 4 cm separation -->
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="First disk">
+      <var name="version"   value="1.0"    comment="disk version" />
+      <var name="diskid"    value="ndisk"  comment="disk number" />
+      <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+      <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+      <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+      <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+      <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+      <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+      <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+      <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+      <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+    
+  </If>
+  <If expr="MAIN_version==7.0">
+  
+  zdisk  = 70.0;
+  dzdisk = 23.3333333;
+  Rin    = MAIN_rmndsk !2.25
+  Rout   = MAIN_rmxdsk !32.25
+
+  <!--                                                                                     Geometric paramters for disk 1 -->
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="First disk">
+    <var name="version"   value="1.0"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+    <var name="rmin"      value="Rin-0.5"   comment="minimum radius of disk [cm]" />
+    <var name="rmax"      value="Rout+0.5"  comment="maximum radius of disk [cm]" />
+    <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+    <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+    <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+  </Fill>
+  zdisk = zdisk + dzdisk
+
+  <!--                                                                                     Geometric paramters for disk 2 -->
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="Second disk">
+    <var name="version"   value="1.1"    comment="disk version" />
+    <var name="diskid"        value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
+  </Fill>
+  zdisk = zdisk + dzdisk
+
+  <!--                                                                                     Geometric paramters for disk 3 -->
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="Third disk">
+    <var name="version"   value="1.2"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk" comment="z center of disk [cm]" />
+  </Fill>
+  zdisk = zdisk + dzdisk
+
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="Fourth disk">
+    <var name="version"   value="1.3"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
+  </Fill>
+  zdisk = zdisk + dzdisk
+
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="Fifth disk">
+    <var name="version"   value="1.4"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
+  </Fill>
+  zdisk = zdisk + dzdisk
+
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="Sixth disk">
+    <var name="version"   value="1.5"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
+  </Fill>
+
+
+
+    <!--                                                                                     Geometric paramters for disk s -->
+    zdisk = 238.0; <!-- place outside magnet -->
+    ndisk = ndisk + 1
+    Rin  = 6.0
+    Rout = (Rin + 30.0) / cos(pi/8.0) 
+    <Fill name="FDSK" comment="First disk">
+      <var name="version"   value="1.0"    comment="disk version" />
+      <var name="diskid"    value="ndisk"  comment="disk number" />
+      <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+      <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+      <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+      <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+      <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+      <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+      <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+      <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+      <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+
+    zdisk = 243.0; <!-- second 4 cm separation -->
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="wheel 2">
+      <var name="version"   value="1.0"    comment="disk version" />
+      <var name="diskid"    value="ndisk"  comment="disk number" />
+      <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+      <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+      <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+      <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+      <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+      <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+      <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+      <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+      <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+    <!--                                                                                     Geometric paramters for disk s -->
+    Rout = (Rin+60)/cos(pi/8) 
+    zdisk = 273.0; <!-- place outside magnet -->
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="wheel 3">
+      <var name="version"   value="1.0"    comment="disk version" />
+      <var name="diskid"    value="ndisk"  comment="disk number" />
+      <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+      <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+      <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+      <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+      <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+      <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+      <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+      <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+      <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+
+    zdisk = 303.0; <!-- second 4 cm separation -->
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="wheel 4">
+      <var name="version"   value="1.0"    comment="disk version" />
+      <var name="diskid"    value="ndisk"  comment="disk number" />
+      <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+      <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+      <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+      <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+      <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+      <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+      <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+      <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+      <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+    <!--                                                                                     Geometric paramters for disk s -->
+    zdisk = 333.0; <!-- place outside magnet -->
+    ndisk = ndisk + 1
+    
+    <Fill name="FDSK" comment="wheel 5">
+      <var name="version"   value="1.0"    comment="disk version" />
+      <var name="diskid"    value="ndisk"  comment="disk number" />
+      <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+      <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+      <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+      <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+      <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+      <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+      <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+      <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+      <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+
+    zdisk = 362.0; <!-- second 4 cm separation -->
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="wheel 6">
+      <var name="version"   value="1.0"    comment="disk version" />
+      <var name="diskid"    value="ndisk"  comment="disk number" />
+      <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+      <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+      <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+      <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+      <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+      <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+      <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+      <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+      <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+    
+  </If>
+  <If expr="MAIN_version==71.0">
+
+  zdisk  = 90.0;
+  dzdisk = 30.0000000;
+  Rin    = MAIN_rmndsk !2.25
+  Rout   = MAIN_rmxdsk !32.25
+  <!--                                                                                     Geometric paramters for disk 1 -->
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="First disk">
+    <var name="version"   value="1.0"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+    <var name="rmin"      value="Rin-0.5"   comment="minimum radius of disk [cm]" />
+    <var name="rmax"      value="Rout+0.5"  comment="maximum radius of disk [cm]" />
+    <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+    <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+    <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+  </Fill>
+  zdisk = zdisk + dzdisk
+
+  <!--                                                                                     Geometric paramters for disk 2 -->
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="Second disk">
+    <var name="version"   value="1.1"    comment="disk version" />
+    <var name="diskid"        value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
+  </Fill>
+  zdisk = zdisk + dzdisk
+
+  <!--                                                                                     Geometric paramters for disk 3 -->
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="Third disk">
+    <var name="version"   value="1.2"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk" comment="z center of disk [cm]" />
+  </Fill>
+  zdisk = zdisk + dzdisk
+
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="Fourth disk">
+    <var name="version"   value="1.3"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
+  </Fill>
+  zdisk = zdisk + dzdisk
+
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="Fifth disk">
+    <var name="version"   value="1.4"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
+  </Fill>
+  zdisk = zdisk + dzdisk
+
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="Sixth disk">
+    <var name="version"   value="1.5"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
+  </Fill>
+
+
+
+    <!--                                                                                     Geometric paramters for disk s -->
+    zdisk = 238.0; <!-- place outside magnet -->
+    ndisk = ndisk + 1
+    Rin  = 6.0
+    Rout = (Rin + 30.0) / cos(pi/8.0) 
+    <Fill name="FDSK" comment="First disk">
+      <var name="version"   value="1.0"    comment="disk version" />
+      <var name="diskid"    value="ndisk"  comment="disk number" />
+      <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+      <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+      <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+      <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+      <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+      <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+      <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+      <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+      <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+
+    zdisk = 243.0; <!-- second 4 cm separation -->
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="wheel 2">
+      <var name="version"   value="1.0"    comment="disk version" />
+      <var name="diskid"    value="ndisk"  comment="disk number" />
+      <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+      <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+      <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+      <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+      <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+      <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+      <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+      <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+      <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+    <!--                                                                                     Geometric paramters for disk s -->
+    Rout = (Rin+60)/cos(pi/8) 
+    zdisk = 273.0; <!-- place outside magnet -->
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="wheel 3">
+      <var name="version"   value="1.0"    comment="disk version" />
+      <var name="diskid"    value="ndisk"  comment="disk number" />
+      <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+      <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+      <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+      <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+      <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+      <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+      <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+      <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+      <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+
+    zdisk = 303.0; <!-- second 4 cm separation -->
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="wheel 4">
+      <var name="version"   value="1.0"    comment="disk version" />
+      <var name="diskid"    value="ndisk"  comment="disk number" />
+      <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+      <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+      <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+      <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+      <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+      <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+      <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+      <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+      <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+    <!--                                                                                     Geometric paramters for disk s -->
+    zdisk = 333.0; <!-- place outside magnet -->
+    ndisk = ndisk + 1
+    
+    <Fill name="FDSK" comment="wheel 5">
+      <var name="version"   value="1.0"    comment="disk version" />
+      <var name="diskid"    value="ndisk"  comment="disk number" />
+      <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+      <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+      <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+      <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+      <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+      <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+      <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+      <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+      <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+
+    zdisk = 362.0; <!-- second 4 cm separation -->
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="wheel 6">
+      <var name="version"   value="1.0"    comment="disk version" />
+      <var name="diskid"    value="ndisk"  comment="disk number" />
+      <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+      <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+      <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+      <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+      <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+      <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+      <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+      <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+      <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+    
+  </If>
+  <If expr="MAIN_version==8.0">
+  
+
+  zdisk  = 70.0;
+  dzdisk = 23.3333333;
+  Rin    = MAIN_rmndsk !2.25
+  Rout   = MAIN_rmxdsk !32.25
+
+  <!--                                                                                     Geometric paramters for disk 1 -->
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="First disk">
+    <var name="version"   value="1.0"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+    <var name="rmin"      value="Rin-0.5"   comment="minimum radius of disk [cm]" />
+    <var name="rmax"      value="Rout+0.5"  comment="maximum radius of disk [cm]" />
+    <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+    <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+    <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+  </Fill>
+  zdisk = zdisk + dzdisk
+
+  <!--                                                                                     Geometric paramters for disk 2 -->
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="Second disk">
+    <var name="version"   value="1.1"    comment="disk version" />
+    <var name="diskid"        value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
+  </Fill>
+  zdisk = zdisk + dzdisk
+
+  <!--                                                                                     Geometric paramters for disk 3 -->
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="Third disk">
+    <var name="version"   value="1.2"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk" comment="z center of disk [cm]" />
+  </Fill>
+  zdisk = zdisk + dzdisk
+
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="Fourth disk">
+    <var name="version"   value="1.3"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
+  </Fill>
+  zdisk = zdisk + dzdisk
+
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="Fifth disk">
+    <var name="version"   value="1.4"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
+  </Fill>
+  zdisk = zdisk + dzdisk
+
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="Sixth disk">
+    <var name="version"   value="1.5"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
+  </Fill>
+
+
+
+    <!--                                                                                     Geometric paramters for disk s -->
+    zdisk = 238.0; <!-- place outside magnet -->
+    ndisk = ndisk + 1
+    Rin  = 6.0
+    Rout = (Rin + 30.0) / cos(pi/8.0) 
+    <Fill name="FDSK" comment="First disk">
+      <var name="version"   value="1.0"    comment="disk version" />
+      <var name="diskid"    value="ndisk"  comment="disk number" />
+      <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+      <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+      <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+      <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+      <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+      <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+      <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+      <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+      <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+
+    zdisk = 243.0; <!-- second 4 cm separation -->
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="wheel 2">
+      <var name="version"   value="1.0"    comment="disk version" />
+      <var name="diskid"    value="ndisk"  comment="disk number" />
+      <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+      <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+      <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+      <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+      <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+      <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+      <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+      <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+      <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+    <!--                                                                                     Geometric paramters for disk s -->
+    Rout = (Rin+60)/cos(pi/8) 
+    zdisk = 283.0; <!-- place outside magnet -->
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="wheel 3">
+      <var name="version"   value="1.0"    comment="disk version" />
+      <var name="diskid"    value="ndisk"  comment="disk number" />
+      <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+      <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+      <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+      <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+      <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+      <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+      <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+      <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+      <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+
+    zdisk = 323.0; <!-- second 4 cm separation -->
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="wheel 4">
+      <var name="version"   value="1.0"    comment="disk version" />
+      <var name="diskid"    value="ndisk"  comment="disk number" />
+      <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+      <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+      <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+      <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+      <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+      <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+      <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+      <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+      <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+    <!--                                                                                     Geometric paramters for disk s -->
+    zdisk = 362.0; <!-- place outside magnet -->
+    ndisk = ndisk + 1
+    
+    <Fill name="FDSK" comment="wheel 5">
+      <var name="version"   value="1.0"    comment="disk version" />
+      <var name="diskid"    value="ndisk"  comment="disk number" />
+      <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+      <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+      <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+      <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+      <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+      <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+      <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+      <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+      <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+
+    zdisk = 700.0; <!-- place outside magnet -->
+    ndisk = ndisk + 1
+    <Fill name="FDSK" comment="First disk">
+      <var name="version"   value="1.0"    comment="disk version" />
+      <var name="diskid"    value="ndisk"  comment="disk number" />
+      <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+      <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+      <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+      <var name="rmin"      value="zdisk*eta2tan(4.0)-1.0"    comment="minimum radius of disk [cm]" />
+      <var name="rmax"      value="zdisk*eta2tan(2.5)+1.0"   comment="maximum radius of disk [cm]" />
+      <var name="rminsens"  value="zdisk*eta2tan(4.0)"   comment="minimum radius of sensitive layer [cm]" />
+      <var name="rmaxsens"  value="zdisk*eta2tan(2.5)"   comment="maximum radius of sensitive layer [cm]" />
+      <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+      <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+    </Fill>
+
+    
+  </If>
+  <If expr="MAIN_version==10.0">
+  
+
+  zdisk  = 70.0;
+  dzdisk = 23.3333333;
+  Rin    = MAIN_rmndsk !2.25
+  Rout   = MAIN_rmxdsk !32.25
+
+  <!--                                                                                     Geometric paramters for disk 1 -->
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="First disk">
+    <var name="version"   value="1.0"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+    <var name="rmin"      value="Rin-0.5"   comment="minimum radius of disk [cm]" />
+    <var name="rmax"      value="Rout+0.5"  comment="maximum radius of disk [cm]" />
+    <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+    <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+    <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+  </Fill>
+  <!--                                                                                     Geometric paramters for disk 2 -->
+  ndisk = ndisk + 1
+  zdisk = 93.3333 !zdisk + dzdisk
+  <Fill name="FDSK" comment="Second disk">
+    <var name="version"   value="1.1"    comment="disk version" />
+    <var name="diskid"        value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
+  </Fill>
+  <!--                                                                                     Geometric paramters for disk 3 -->
+  ndisk = ndisk + 1
+  zdisk = 116.666 !zdisk + dzdisk
+  <Fill name="FDSK" comment="Third disk">
+    <var name="version"   value="1.2"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk" comment="z center of disk [cm]" />
+  </Fill>
+  <!--                                                                                     Geometric paramters for disk 4 -->
+  ndisk = ndisk + 1
+  zdisk = 140.0 !zdisk + dzdisk
+  <Fill name="FDSK" comment="Fourth disk">
+    <var name="version"   value="1.3"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
+  </Fill>  <!--                                                                                     Geometric paramters for disk 5 -->
+  ndisk = ndisk + 1
+  zdisk = 180.0
+  <Fill name="FDSK" comment="Fifth disk">
+    <var name="version"   value="1.4"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
+  </Fill>
+  <!--                                                                                     Geometric paramters for disk 6 -->
+  ndisk = ndisk + 1
+  zdisk = 220.0
+  <Fill name="FDSK" comment="Sixth disk">
+    <var name="version"   value="1.5"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
+  </Fill>
+
+  <!--                                                                                     Geometric paramters for wheel 1 -->
+  zdisk = 395.0; <!-- place outside magnet -->
+  ndisk = ndisk + 1
+  Rin  = 6.0
+  Rout = (Rin + 30.0) / cos(pi/8.0) 
+  <Fill name="FDSK" comment="First disk">
+    <var name="version"   value="1.0"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+    <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+    <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+    <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+    <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+    <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+  </Fill>
+  <!--                                                                                     Geometric paramters for wheel 2 -->
+  zdisk = 405.0; <!-- second 4 cm separation -->
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="wheel 2">
+    <var name="version"   value="1.0"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+    <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+    <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+    <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+    <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+    <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+  </Fill>
+  <!--                                                                                     Geometric paramters for wheel 3 -->
+  Rout = (Rin+60)/cos(pi/8) 
+  zdisk = 495.0; <!-- place outside magnet -->
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="wheel 3">
+    <var name="version"   value="1.0"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+    <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+    <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+    <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+    <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+    <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+  </Fill>
+  <!--                                                                                     Geometric paramters for wheel 4 -->
+  zdisk = 505.0; <!-- second 4 cm separation -->
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="wheel 4">
+    <var name="version"   value="1.0"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+    <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+    <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+    <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+    <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+    <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+  </Fill>
+  <!--                                                                                     Geometric paramters for wheel 5 -->
+  zdisk = 595.0; <!-- place outside magnet -->
+  ndisk = ndisk + 1 
+  <Fill name="FDSK" comment="wheel 5">
+    <var name="version"   value="1.0"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+    <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+    <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+    <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+    <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+    <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+  </Fill>
+  <!--                                                                                     Geometric paramters for disk 6 -->
+  zdisk = 605.0; <!-- place outside magnet -->
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="Wheel 6">
+    <var name="version"   value="1.0"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+    <var name="rmin"      value="zdisk*eta2tan(4.0)-1.0"    comment="minimum radius of disk [cm]" />
+    <var name="rmax"      value="zdisk*eta2tan(2.5)+1.0"   comment="maximum radius of disk [cm]" />
+    <var name="rminsens"  value="zdisk*eta2tan(4.0)"   comment="minimum radius of sensitive layer [cm]" />
+    <var name="rmaxsens"  value="zdisk*eta2tan(2.5)"   comment="maximum radius of sensitive layer [cm]" />
+    <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+  </Fill>
+  zdisk = 695.0; <!-- place outside magnet -->
+  ndisk = ndisk + 1 
+  <Fill name="FDSK" comment="wheel 5">
+    <var name="version"   value="1.0"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+    <var name="rmin"      value="Rin-0.5"    comment="minimum radius of disk [cm]" />
+    <var name="rmax"      value="Rout+0.5"   comment="maximum radius of disk [cm]" />
+    <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
+    <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
+    <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+  </Fill>
+  <!--                                                                                     Geometric paramters for disk 6 -->
+  zdisk = 705.0; <!-- place outside magnet -->
+  ndisk = ndisk + 1
+  <Fill name="FDSK" comment="Wheel 6">
+    <var name="version"   value="1.0"    comment="disk version" />
+    <var name="diskid"    value="ndisk"  comment="disk number" />
+    <var name="x"         value="0.0"    comment="x center of disk [cm]" />
+    <var name="y"         value="0.0"    comment="y center of disk [cm]" />
+    <var name="z"         value="zdisk"   comment="z center of disk [cm]" />
+    <var name="rmin"      value="zdisk*eta2tan(4.0)-1.0"    comment="minimum radius of disk [cm]" />
+    <var name="rmax"      value="zdisk*eta2tan(2.5)+1.0"   comment="maximum radius of disk [cm]" />
+    <var name="rminsens"  value="zdisk*eta2tan(4.0)"   comment="minimum radius of sensitive layer [cm]" />
+    <var name="rmaxsens"  value="zdisk*eta2tan(2.5)"   comment="maximum radius of sensitive layer [cm]" />
+    <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
+    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
+  </Fill>
+
+    
+  </If>
+ 
 
   <!--                                                                                                     Select version -->
   <!--                                                                                                     Select version -->
@@ -612,13 +1538,20 @@
   ycenter = 0
   zcenter = zmin + (zmax-zmin) / 2.0
 
+  <Info format="SELECT MAIN_version = {6.2f}">MAIN_version</Info>  
+  <Info format="ndisk = {2i}">ndisk</Info>
+  <Info format="zmin = {6.2f}">zmin</Info>
+  <Info format="zmax = {6.2f}">zmax</Info>
+  <Info format="rmin = {6.2f}">rmin</Info>
+  <Info format="rmax = {6.2f}">rmax</Info>
+
   <Create    block="FTSM" />
   <Placement block="FTSM" in="IDSM" konly="MANY"      if="MAIN_useids.eq.1.0"
 	     x="xcenter"
 	     y="ycenter"
 	     z="zcenter" />
 
-  <Placement block="FTSM" in="CAVE" konly="MANY"      
+  <Placement block="FTSM" in="CAVE" konly="MANY"      if="MAIN_useids!=1.0"
 	     x="xcenter"
 	     y="ycenter"
 	     z="zcenter" />
@@ -631,6 +1564,17 @@
     <Material  name="air" isvol="0" />     <!-- hack to create local copy -->
     <Medium    name="standard"      />     <!-- can change medium paramters here -->
     <Attribute for="FSTM" seen="0" colo="1" />
+<!--
+    <Par name="CUTGAM" value="1 MeV" />
+    <Par name="CUTELE" value="MAIN_cutele" />
+    <Par name="CUTNEU" value="10 MeV" />
+    <Par name="CUTHAD" value="10 MeV" />
+    <Par name="CUTMUO" value="10 MeV" />
+    <Par name="BCUTE"  value="1 MeV" />
+    <Par name="DCUTE"  value="10000 GeV" />
+    <Par name="DCUTM"  value="10000 GeV" />
+    <Par name="PPCUTM" value="10 MeV" />
+-->
     
     <!-- Shape will be dynamically sized to include all disks placed, assuming last disk is the largest -->
     <Shape     type="TUBE" 
@@ -685,10 +1629,24 @@
 	   rmin="0"
 	   rmax="0"
 	   dz="0" />
+
+    <Par name="CUTGAM" value="1 MeV" />
+    <Par name="CUTELE" value="MAIN_cutele" />
+    <Par name="CUTNEU" value="10 keV" />
+    <Par name="CUTHAD" value="10 keV" />
+    <Par name="CUTMUO" value="10 keV" />
+    <Par name="BCUTE"  value="1 MeV" />
+    <Par name="DCUTE"  value="10000 GeV" />
+    <Par name="DCUTM"  value="10000 GeV" />
+    <Par name="PPCUTM" value="10 keV" />
+
         <Instrument block="FTSA"  >
-             <Hit meas="z" opts="S" bins=".00001"  />
-             <Hit meas="y" opts="S" bins=".00001"  />
-             <Hit meas="x" opts="S" bins=".00001"  />
+             <Hit meas="zz" opts="S" bins="0.00001"  />
+             <Hit meas="yy" opts="S" bins="0.00001"  />
+             <Hit meas="xx" opts="S" bins="0.00001"  />
+             <Hit meas="z"  opts="S" bins="0.00001"  />
+             <Hit meas="y"  opts="S" bins="0.00001"  />
+             <Hit meas="x"  opts="S" bins="0.00001"  />
              <Hit meas="ptot" nbits="16" min="0" max="100"  />
              <Hit meas="cx" nbits="10"  />
              <Hit meas="cy" nbits="10"  />
@@ -706,6 +1664,17 @@
     <Attribute for="FTSS" seen="1" colo="3" />
     <Material name="aluminium" />
     <Material name="aluminium" isvol="0" />
+<!--
+    <Par name="CUTGAM" value="1 MeV" />
+    <Par name="CUTELE" value="MAIN_cutele" />
+    <Par name="CUTNEU" value="10 MeV" />
+    <Par name="CUTHAD" value="10 MeV" />
+    <Par name="CUTMUO" value="10 MeV" />
+    <Par name="BCUTE"  value="1 MeV" />
+    <Par name="DCUTE"  value="10000 GeV" />
+    <Par name="DCUTM"  value="10000 GeV" />
+    <Par name="PPCUTM" value="10 MeV" />
+-->
     <Shape type="TUBE"
 	   rmin="0"
 	   rmax="0" 
