@@ -1,5 +1,20 @@
-* $Id: g2t_volume_id.g,v 1.87 2018/01/26 18:09:07 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.87.2.1 2018/08/13 20:43:04 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.87.2.1  2018/08/13 20:43:04  jwebb
+* Adding support for readout of different versions of the forward Si tracker...
+*
+* Revision 1.88.2.2  2018/03/22 20:40:22  jwebb
+*
+* Third plane has >100 sensors... planeID needs to be *1000.
+*
+* Revision 1.88.2.1  2018/03/19 17:56:25  jwebb
+*
+* Defines g2t volume id and reads out fts hits for the new version of the SI
+* tracker.
+*
+* Revision 1.88  2018/02/01 22:52:38  jwebb
+* Updated g2t volume ID for epd.
+*
 * Revision 1.87  2018/01/26 18:09:07  jwebb
 * Reduce unneeded output
 *
@@ -280,6 +295,11 @@
       Structure  ISTC { version, int misalign }
       Structure  SSDP { version, int contig, int placement, int misalign }
 
+      " FTS MAIN control structure /DETM/FTSD/MAIN "
+      Structure  FTSM  { version, int type, useids, active(20), rmndsk, rmxdsk, cutele }
+      Integer   iFTSM /0/ 
+      Integer    g2t_fts_volume_id
+      
 
       logical    first/.true./
       logical    printOnce/.true./
@@ -1137,9 +1157,10 @@ c$$$    write (*,*) numbv
 *******************************************************************************************
 ** 27                                                                            Jason Webb
       ELSE IF (CSYS=='fts') THEN
-         
-           "Disk number is 1st entry in numbv"
-           volume_id = numbv(1)
+
+            volume_id = g2t_fts_volume_id( numbv )
+
+
 *******************************************************************************************
 ** 28                                                                           Prashanth S 
       ELSE IF (CSYS=='epd') THEN
@@ -1149,7 +1170,7 @@ c$$$    write (*,*) numbv
            epd_epdt = numbv(3) "1:T1 trap, 2:T1 Triangular, 3:T2 Thin, 4:T3 Thick"
 
 	   volume_id = 10000 * epd_epdm                          +
-	                 100 * epd_epss * 1000                   +
+	                 100 * epd_epss                          +
 		           1 * (mod(epd_epdt,2) + (epd_epdt/2) ) 
 
      " EPD volume_id " 
@@ -1192,3 +1213,80 @@ c$$$    write (*,*) numbv
 
     end
       
+
+
+*******************************************************************************************
+      Function g2t_fts_volume_id ( numbv )
+      Integer, intent(in) :: numbv(15)
+
+      Logical :: first = .true.
+      Structure  MAIN  { version, int type, useids, active(20), rmndsk, rmxdsk, cutele }
+      Integer ::  iFTSM = 0, g2t_fts_volume_id
+
+      Integer ::       Iprin,Nvb
+      Character(len=4) ::           cs,cd
+      COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
+
+      Integer :: subsys  
+      Integer :: station, plane
+      Integer :: sensor
+
+      if ( first ) then
+         call rbpushd  "save current zebra directory"
+         first = .false.
+         USE /DETM/FTSD/MAIN stat=iftsm 
+         call rbpopd   "restore original zebra directory"
+      endif
+
+      subsys = MAIN_type
+
+      if (subsys=0) then "FtsdGeo configuration (prototype Si+sTGC)"
+          g2t_fts_volume_id = numbv(1)
+          return
+      endif
+
+      if (subsys=1) then "FtsdGeo1 configuration (Si development)
+
+         if (cd=='FSIA') station = 1;
+         if (cd=='FSIB') station = 2;
+         if (cd=='FSIC') station = 3;
+
+         g2t_fts_volume_id = 10000 * subsys  + 
+                              1000 * station + 
+                                     numbv(1)
+
+         write (*,*) cd, ' ', g2t_fts_volume_id, ' | ', numbv(1:4)
+
+         return
+      endif
+
+      if (subsys=2 ) then "FtsdGeo2 configuration (Si development)
+
+
+         if (cd=='FTSA') then 
+           g2t_fts_volume_id = numbv(1)           
+           write (*,*) cd, ' ', g2t_fts_volume_id, ' | ', numbv(1:4)
+           return
+         endif
+
+
+         if (cd=='FSIA') station = 1;
+         if (cd=='FSIB') station = 2;
+         if (cd=='FSIC') station = 3;
+
+         plane  = numbv(1)
+         sensor = numbv(2)
+
+         g2t_fts_volume_id = 10000 * subsys  + 
+                              1000 * (2 * (station-1) + plane ) +
+                                     sensor
+
+         write (*,*) cd, ' ', g2t_fts_volume_id, ' | ', numbv(1:4)
+
+
+         return
+      endif
+ 
+
+      Return
+      End Function
