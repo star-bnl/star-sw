@@ -1,11 +1,11 @@
-void loadAgML( const char* name=0, char* opts="sdt20160216 misalign newtpcalignment" )
+void loadAgML( const char* name="test", char* opts="" )
 {
   gROOT->LoadMacro("bfc.C");
 //  bfc(0,"agml nodefault mysql db detdb misalign sdt20150216");
-  bfc(0,Form("agml nodefault mysql db detdb %s",opts));
+  bfc(0,Form("agml nodefault mysql ideal %s",opts));
 
   AgModule::SetStacker( new StarTGeoStacker() );
-AgPosition::SetDebug(2); 
+  //AgPosition::SetDebug(2); 
 
   if ( 0==name ) {
      cout << "Usage: "<< endl;
@@ -30,9 +30,14 @@ void construct(const char * name ) {
   //  geometry -> ConstructGeometry( name );
 
   StarGeometry::Construct(name);
+gGeoManager->SetVisLevel(10); 
 
 }
 
 void list( const char* tag ) {
    StarGeometry::List(tag); 
+}
+
+void draw( const char* name ) {
+	gGeoManager->FindVolumeFast(name)->Draw("ogl"); 
 }
