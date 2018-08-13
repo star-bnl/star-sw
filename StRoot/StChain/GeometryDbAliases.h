@@ -170,6 +170,34 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"upgr16",      21190101,    19, "upgr16",   ""},
   {"upgr17",      21190101,    20, "upgr17",   ""},
   {"upgr16a",     21190101,    21, "upgr16a",  ""},
+
+
+  {"ftsver0",     20201210,     1, "ftsver0",  ""},
+  {"ftsref1",     20201210,     2, "ftsref1",  ""},
+  {"ftsref2",     20201210,     3, "ftsref2",  ""},
+  {"ftsref3",     20201210,     4, "ftsref3",  ""},
+  {"ftsref4",     20201210,     5, "ftsref4",  ""},
+  {"ftsref5",     20201210,     6, "ftsref5",  ""},
+  {"ftsref6",     20201210,     7, "ftsref6",  ""},
+  {"ftsref6a",    20201210,     8, "ftsref6a", ""},
+
+  {"ftsref10",    20201210,    99, "ftsref10", ""},
+
+  {"sitrver0",    20201210,   100, "sitrver0", ""}, // plain Si tracker
+  {"sitrver1",    20201210,   101, "sitrver1", ""}, // plain Si tracker
+  {"sitrver2",    20201210,   102, "sitrver2", ""}, // plain Si tracker
+  {"sitrver3",    20201210,   103, "sitrver3", ""}, // plain Si tracker
+  {"sitrver4a",   20201210,   104, "sitrver4a", ""}, // plain Si tracker
+  {"sitrver4b",   20201210,   105, "sitrver4b", ""}, // plain Si tracker
+  {"sitrver4c",   20201210,   106, "sitrver4c", ""}, // plain Si tracker
+
+  {"fwddev0a",    20201210,   107, "fwddev0a",""},   // new forward tracker reference
+  {"fwddev0b",    20201210,   108, "fwddev0b",""},   // new forward tracker reference
+  {"fwddev1a",    20201210,   109, "fwddev1a",""},   // new forward tracker reference
+  {"fwddev1b",    20201210,   110, "fwddev1b",""},   // new forward tracker reference
+
+
+
   // Future development:
   //  {"simpletpc",   20200102,    16, "simpletpc",""},
   //  {"upgr20",      20200102,    17, "upgr20",   "y2007 +  one TOF"}, // advertized simu 20061101
