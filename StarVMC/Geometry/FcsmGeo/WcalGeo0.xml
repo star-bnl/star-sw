@@ -1,0 +1,116 @@
+<Document file="StarVMC/Geometry/FcsmGeo/WcalGeo0.xml">
+<Module name="WCALGEO0" comment=" is the Forward Calorimeter System WALL EM Calorimeter "  >
+
+  <Created date="   10 Aug 2018 "  />
+  <Author name="Akio Ogawa"  />
+  <CDE  >
+    AGECOM
+    GCONST
+    GCUNIT
+  </CDE>
+        
+  <Content  >
+    WMOD
+  </Content>
+  
+  <Structure name="FEVR"   > 
+    <var name="Version"   />
+  </Structure>
+        
+  <Structure name="FEGE"  >
+    <var name="Height"  type="float"  />
+    <var name="Depth"   type="float"  />
+    <var name="Width"   type="float"  />
+    <var name="NX"      type="float"  />
+    <var name="NY"      type="float"  />
+  </Structure>
+
+  <Structure name="FEOF"  >
+    <var name="NS"      type="float"  />
+    <var name="XOffset" type="float"  />
+    <var name="YOffset" type="float"  />
+    <var name="ZOffset" type="float"  />
+    <var name="Angle"   type="float"  />
+  </Structure>
+
+  <varlist type="float">dtr,a,x,y,z</varlist>
+  <varlist type="int">ns</varlist>
+
+  <Fill name="FEVR" comment="FCSE basic data"  >
+    <var name="Version" value="1.0" comment=" Geometry version  "  />
+  </Fill>
+  <Use struct="FEVR" select="version" value="1.0" />
+
+  <Fill name="FEGE" comment="FCSE EM geometry" >
+    <var name="Height" value="200" comment=" Box height "  />
+    <var name="Depth" value="90" comment=" Box Depth "  />
+    <var name="Width" value="712.1" comment=" Box Width "  />
+    <var name="NX" value="22" comment=" Number of tower in x "  />
+    <var name="NY" value="34" comment=" number of tower in y "  />
+  </Fill>
+  <Use struct="FEGE" />
+ 
+  <Fill name="FEOF" comment="FCSE position Offsets " >
+    <var name="NS" value="1" comment=" North or South " />    
+    <var name="XOffset" value="-19.39" comment=" tower x offset from beam to nearlest tower @ front face"  />
+    <var name="YOffset" value="0.0" comment=" tower y offset from beam to the center of whole stack"  />
+    <var name="ZOffset" value="779.27" comment=" tower z offset from IR to tower front face @ near beam "  />
+    <var name="Angle"   value="1.4" comment=" Angle aroud y axis [degree] "  />
+  </Fill>
+
+  <Fill name="FEOF" comment="FCSE position Offsets " >
+    <var name="NS" value="2" comment=" North or South " />    
+    <var name="XOffset" value="19.39" comment=" tower x offset from beam to nearlest tower @ front face"  />
+    <var name="YOffset" value="0.0" comment=" tower y offset from beam to the center of whole stack"  />
+    <var name="ZOffset" value="779.27" comment=" tower z offset from IR to tower front face @ near beam "  />
+    <var name="Angle"   value="-1.4" comment=" Angle aroud y axis [degree] "  />
+  </Fill>
+
+<!-- Loud enough already...
+  <Print level="1" fmt="'****************** FCSEGEO version ', F4.2"  >
+    fevr_version
+  </Print>
+-->
+<!--
+  pi=acos(0.0)*2.0
+-->
+  dtr=pi/180.0
+  <Do var="ns" from="1" to="2"  >
+    <Use struct="FEOF" select="NS" value="ns "  />
+    <Create block="WMOD"  />
+    a= FEOF_Angle*dtr
+    x= FEOF_XOffset + FEGE_Width/2.0*cos(a) + FEGE_Depth/2.0*sin(a)
+    y= FEOF_YOffset
+    z= FEOF_ZOffset + FEGE_Width/2.0*sin(a) - FEGE_depth/2.0*cos(a)
+
+    <Info format="xpos={10.5f}">x</Info>
+    <Info format="ypos={10.5f}">y</Info>
+    <Info format="zpos={10.5f}">z</Info>
+
+    <Placement block="WMOD" in="CAVE" group="WestRefSys" 
+	       x="x" 
+	       y="y" 
+	       z="z" 
+	       konly="ONLY" >
+      <Rotation alphay="a"  />
+    </Placement>
+  </Do>
+  
+  <Block name="WMOD" comment="is a stack of FCS WALL EM nodule"  >
+    <Material name="Air"  />
+    <Medium name="standard"  />
+    <Attribute for="WMOD" seen="1" colo="631"  />
+    <Shape type="BOX" 
+	   dz="FEGE_Depth/2.0" 
+	   dx="FEGE_Width/2.0" 
+	   dy="FEGE_Height/2.0"  />
+
+    <Info format="dx = {10.5f}">FEGE_Width</Info>
+    <Info format="dy = {10.5f}">FEGE_Height</Info>
+    <Info format="dz = {10.5f}">FEGE_Depth</Info>
+
+  </Block>
+  
+</Module>
+</Document>
+

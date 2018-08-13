@@ -1,0 +1,104 @@
+<Document file="StarVMC/Geometry/FcsmGeo/HcalGeo0.xml">
+<Module name="HCALGEO0" comment=" is the Forward Calorimeter System Hadron GEOmetry "  >
+
+  <Created date="   10 Aug 2018 "  />
+  <Author name="Akio Ogawa"  />
+  <CDE  >
+    AGECOM
+    GCONST
+    GCUNIT
+  </CDE>
+        
+  <Content  >
+    HMOD
+  </Content>
+  
+  <Structure name="FHVR"   > 
+    <var name="Version"   />
+  </Structure>
+        
+  <Structure name="FHGE"  >
+    <var name="Height"  type="float"  />
+    <var name="Depth"   type="float"  />
+    <var name="Width"   type="float"  />
+    <var name="NX"      type="float"  />
+    <var name="NY"      type="float"  />
+  </Structure>
+
+  <Structure name="FHOF"  >
+    <var name="NS"      type="float"  />
+    <var name="XOffset" type="float"  />
+    <var name="YOffset" type="float"  />
+    <var name="ZOffset" type="float"  />
+    <var name="Angle"   type="float"  />
+  </Structure>
+
+  <varlist type="float">dtr,a,x,y,z</varlist>
+  <varlist type="int">ns</varlist>
+
+<!-- Probably don't need a custom step routine...
+  <External routine="FCSHSTEP"  />
+-->
+
+  <Fill name="FHVR" comment="FCSH basic data"  >
+    <var name="Version" value="1.0" comment=" Geometry version  "  />
+  </Fill>
+  <Use struct="FHVR" select="version" value="1.0" />
+
+  <Fill name="FHGE" comment="FCSH geometry" >
+    <var name="Height" value="200" comment=" Box height "  />
+    <var name="Depth" value="90" comment=" Box Depth "  />
+    <var name="Width" value="130.0" comment=" Box Width "  />
+    <var name="NX" value="13" comment=" Number of tower in x "  />
+    <var name="NY" value="20" comment=" number of tower in y "  />
+  </Fill>
+  <Use struct="FHGE" />
+ 
+  <Fill name="FHOF" comment="FCSH position Offsets " >
+    <var name="NS" value="1" comment=" North or South " />    
+    <var name="XOffset" value="-19.00" comment=" tower x offset from beam to nearlest tower @ front face"  />
+    <var name="YOffset" value="0.0" comment=" tower y offset from beam to the center of whole stack"  />
+    <var name="ZOffset" value="779.00" comment=" tower z offset from IR to tower front face @ near beam "  />
+    <var name="Angle"   value="1.4" comment=" Angle aroud y axis [degree] "  />
+  </Fill>
+
+  <Fill name="FHOF" comment="FCSH position Offsets " >
+    <var name="NS" value="2" comment=" North or South " />    
+    <var name="XOffset" value="10.00" comment=" tower x offset from beam to nearlest tower @ front face"  />
+    <var name="YOffset" value="0.0" comment=" tower y offset from beam to the center of whole stack"  />
+    <var name="ZOffset" value="779.00" comment=" tower z offset from IR to tower front face @ near beam "  />
+    <var name="Angle"   value="-1.4" comment=" Angle aroud y axis [degree] "  />
+  </Fill>
+
+<!-- Loud enough already 
+  <Print level="1" fmt="'****************** FCSHGEO version ', F4.2"  >
+    fhvr_version
+  </Print>
+-->
+
+<!-- PI is predefined
+  pi=acos(0.0)*2.0
+-->
+  dtr=pi/180.0
+  <Do var="ns" from="1" to="2"  >
+    <Use struct="FHOF" select="NS" value="ns "  />
+    <Create block="HMOD"  />
+    a=FHOF_Angle*dtr
+    x= FHOF_XOffset + FHGE_Width/2.0*cos(a) + FHGE_Depth/2.0*sin(a)
+    y= FHOF_YOffset
+    z= FHOF_ZOffset + FHGE_Width/2.0*sin(a) - FHGE_depth/2.0*cos(a)
+    <Placement block="HMOD" in="CAVE" group="WestRefSys" x="x" y="y" z="z" konly="ONLY" >
+      <Rotation alphay="a"  />
+    </Placement>
+  </Do>
+  
+  <Block name="HMOD" comment="is a stack of FCS hadron module"  >
+    <Material name="Air"  />
+    <Medium name="standard"  />
+    <Attribute for="HMOD" seen="1" colo="1"  />
+    <Shape type="BOX" dz="FHGE_Depth/2.0" dx="FHGE_Width/2.0" dy="FHGE_Height/2.0"  />
+  </Block>
+  
+</Module>
+</Document>
+

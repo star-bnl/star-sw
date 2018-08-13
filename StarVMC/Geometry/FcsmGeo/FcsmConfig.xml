@@ -1,0 +1,33 @@
+<Document  file="StarVMC/Geometry/FcsmGeo/FcsmConfig.xml">
+ 
+  <Detector name="WCAL" comment="Forward EM Calorimeter">
+    <Modules>
+      WcalGeo0     
+    </Modules>
+
+    <Setup name="WCALof" comment="off" module="WcalGeo0" onoff="off" />
+    <Setup name="WCALv0" comment="v0"  module="WcalGeo0" onoff="on"  />
+
+  </Detector>
+
+  <Detector name="HCAL" comment="Forward Hadron Calorimeter">
+    <Modules>
+      HcalGeo0
+    </Modules>
+
+    <Setup name="HCALof" comment="off" module="HcalGeo0" onoff="off" />
+    <Setup name="HCALv0" comment="v0"  module="HcalGeo0" onoff="on"  />
+
+  </Detector>
+
+  <Detector name="PLAT" comment="Forward Calorimeter Platform">
+    <Modules>
+      PlatGeo0
+    </Modules>
+
+    <Setup name="PLATof" comment="off" module="PlatGeo0" onoff="off" />
+    <Setup name="PLATon" comment="on"  module="PlatGeo0" onoff="on"  />
+
+  </Detector>
+
+</Document>
