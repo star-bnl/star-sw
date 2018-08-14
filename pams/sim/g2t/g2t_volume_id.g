@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.87.2.2 2018/08/14 19:30:50 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.87.2.3 2018/08/14 22:20:58 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.87.2.3  2018/08/14 22:20:58  jwebb
+* Restore numbering for sTGC wheels
+*
 * Revision 1.87.2.2  2018/08/14 19:30:50  jwebb
 * StarVMC/xgeometry/xgeometry.age
 *
@@ -1253,6 +1256,7 @@ c$$$    write (*,*) numbv
 
       if (subsys=1) then "Single plane station"
 
+
          if (cd=='FSIA') station = 1;
          if (cd=='FSIB') station = 2;
          if (cd=='FSIC') station = 3;
@@ -1261,7 +1265,11 @@ c$$$    write (*,*) numbv
                               1000 * station + 
                                      numbv(1)
 
-         write (*,*) cd, ' 111 ', g2t_fts_volume_id, ' | ', numbv(1:4)
+         if (cd=='FTSA') then 
+           g2t_fts_volume_id = numbv(1)           
+         endif
+
+!$$$     write (*,*) cd, ' 111 ', g2t_fts_volume_id, ' | ', numbv(1:4)
 
          return
       endif
@@ -1269,11 +1277,7 @@ c$$$    write (*,*) numbv
       if (subsys=2 ) then "Single or dual plane stations"
 
 
-         if (cd=='FTSA') then 
-           g2t_fts_volume_id = numbv(1)           
-           write (*,*) cd, ' ', g2t_fts_volume_id, ' | ', numbv(1:4)
-           return
-         endif
+
 
 
          if (cd=='FSIA') station = 1;
@@ -1292,7 +1296,13 @@ c$$$    write (*,*) numbv
                               1000 * plane +
                                      sensor
 
-         write (*,*) cd, ' 222  ', g2t_fts_volume_id, ' | ', numbv(1:4)
+
+         if (cd=='FTSA') then 
+           g2t_fts_volume_id = numbv(1)           
+         endif
+
+
+!$$$     write (*,*) cd, ' 222  ', g2t_fts_volume_id, ' | ', numbv(1:4)
 
          return
       endif
