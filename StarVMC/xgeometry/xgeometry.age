@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.29.2.1 2018/08/13 20:49:51 jwebb Exp $
+* $Id: xgeometry.age,v 1.29.2.2 2018/08/14 18:54:44 jwebb Exp $
 
 
 
@@ -138,8 +138,6 @@ replace [exe FPDM04;] with [; "forward pion detector "; FPDM=on; FpdmConfig  = 4
 
 replace [exe HCALof;] with [; "HCAL off"; HCAL=off; HcalConfig=0; ]
 replace [exe HCALv0;] with [; "HCAL on "; HCAL=on;  HcalConfig=0; hcal_addr = SETUP_HCALv0();]
-replace [exe HCALv1;] with [; "HCAL on "; HCAL=on;  HcalConfig=1; hcal_addr = SETUP_HCALv1();]
-replace [exe HCALvF;] with [; "HCAL on "; HCAL=on;  HcalConfig=15; hcal_addr = SETUP_HCALvF();]
 
 replace [exe FTSDof;] with [; "FTSD off"; FTSD=off; FtsdConfig=0; ]
 replace [exe FTSDv0;] with [; "FTSD on" ; FTSD=on ; FtsdConfig=0; ftsd_addr = SETUP_FTSDv0();]
@@ -1431,7 +1429,7 @@ REPLACE [exe dev2016;] with ["Y2016 development tag";
     exe DTUB01;      "DTUB";
     exe PSUP01;      "1st version of pixl supports";
     exe FGTDv56;     "12 disk FGT";
-    exe HCALv1;      "HCAL prototype";
+***    exe HCALv1;      "HCAL prototype";
 
 ];
 
@@ -1444,7 +1442,7 @@ REPLACE [exe dev15a;] with ["Y2014 first cut geometry";
 REPLACE [exe dev15b;] with ["Y2014 first cut geometry";
    exe MAPGon;
     exe y2014a;      "Baseline is y2014a";
-    exe HCALv1;      "Naked HCAL";
+***    exe HCALv1;      "Naked HCAL";
 ]
 
 REPLACE [exe dev2020;] with ["DEV 2020 first cut";
@@ -1709,7 +1707,7 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
   Integer :: fpdm_addr=0,   SETUP_FPDM00, SETUP_FPDM01, SETUP_FPDM02,
                             SETUP_FPDM03, SETUP_FPDM04
 
-  Integer :: hcal_addr=0,   SETUP_HCALv0, SETUP_HCALv1, SETUP_HCALv2, SETUP_HCALvF
+  Integer :: hcal_addr=0,   SETUP_HCALv0 
 
   Integer :: ftsd_addr=0,   SETUP_FTSDv0 "TODO"
 
@@ -2594,8 +2592,6 @@ If LL>0
 
    MFLD = on;
    exe CAVE04
-   exe HCALvF
-
 
 
   }
@@ -4670,8 +4666,12 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.29.2.1 2018/08/13 20:49:51 jwebb Exp $
+* $Id: xgeometry.age,v 1.29.2.2 2018/08/14 18:54:44 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.29.2.2  2018/08/14 18:54:44  jwebb
+* Removed references to deprecated versions of HCAL... (although be careful when
+* mergeing back with MAIN...)
+*
 * Revision 1.29.2.1  2018/08/13 20:49:51  jwebb
 * Adding few new development versions for forward Si tracker.
 *
