@@ -71,7 +71,7 @@
 
       <Init struct="MAIN" var="version" value="3.0" />
       <Init struct="MAIN" var="layout"    value="1"   />      
-      <Init struct="MAIN" var="active"  value="{1,0,1,0,1,0, 0,0,0,0,0,0}" />
+      <Init struct="MAIN" var="active"  value="{1,0,1,0,1,0, 0,0,1,1,1,1}" />
       <Init struct="MAIN" var="zsi" value="{80.0, 100.0, 120.0}" />
       <Init struct="MAIN" var="bmc" value="{2.25, 2.25, 2.25}" />
       <Init struct="MAIN" var="bmo" value="{2.00, 2.00, 2.00}" />
@@ -81,7 +81,7 @@
 
       <Init struct="MAIN" var="version" value="3.0" />
       <Init struct="MAIN" var="layout"    value="1"   />      
-      <Init struct="MAIN" var="active"  value="{1,0,1,0,1,0, 0,0,0,0,0,0}" />
+      <Init struct="MAIN" var="active"  value="{1,0,1,0,1,0, 0,0,1,1,1,1}" />
       <Init struct="MAIN" var="zsi" value="{115.0, 125.0, 135.0}" />
       <Init struct="MAIN" var="bmo" value="{4.00, 4.00, 4.00}" />
       <Init struct="MAIN" var="bmc" value="{4.25, 4.25, 4.25}" />
@@ -91,7 +91,7 @@
 
       <Init struct="MAIN" var="version" value="3.0" />
       <Init struct="MAIN" var="layout"    value="2"   />      
-      <Init struct="MAIN" var="active"  value="{1,0,1,0,1,0, 0,0,0,0,0,0}" />
+      <Init struct="MAIN" var="active"  value="{1,0,1,0,1,0, 0,0,1,1,1,1}" />
       <Init struct="MAIN" var="zsi" value="{55.0, 70.0, 85.0}" />
       <Init struct="MAIN" var="bmc" value="{2.25, 2.25, 2.25}" />
       <Init struct="MAIN" var="bmo" value="{2.00, 2.00, 2.00}" />
@@ -102,7 +102,7 @@
       <Init struct="MAIN" var="version" value="3.0" />
       <Init struct="MAIN" var="type"    value="2" />
       <Init struct="MAIN" var="layout"    value="2"   />      
-      <Init struct="MAIN" var="active"  value="{1,1,1,1,1,0, 0,0,0,0,0,0}" />
+      <Init struct="MAIN" var="active"  value="{1,1,1,1,1,0, 0,0,1,1,1,1}" />
       <Init struct="MAIN" var="delta" value="15" />
       <Init struct="MAIN" var="zsi" value="{85.0, 115.0, 145.0}" />
       <Init struct="MAIN" var="bmo" value="{4.00, 4.00, 4.00}" />
@@ -116,7 +116,7 @@
 	    onoff  = "on"  > 
 
       <Init struct="MAIN" var="version" value="3.0" />
-      <Init struct="MAIN" var="active"  value="{1,0,0,0,0,0, 0,0,0,0,0,0}" />
+      <Init struct="MAIN" var="active"  value="{1,0,0,0,0,0, 0,0,1,1,1,1}" />
       <Init struct="MAIN" var="zsi" value="{110.0, 150.0, 190.0}" />
       <Init struct="MAIN" var="bmc" value="{4.0, 4.0, 4.0}" />
 
