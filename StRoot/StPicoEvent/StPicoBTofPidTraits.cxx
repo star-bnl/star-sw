@@ -44,9 +44,14 @@ StPicoBTofPidTraits::~StPicoBTofPidTraits() {
 
 //_________________
 void StPicoBTofPidTraits::setBeta(Float_t beta) {
-  mBTofBeta = ( (beta * 20000.) > std::numeric_limits<unsigned short>::max() ?
-		std::numeric_limits<unsigned short>::max() :
-		(UShort_t)( TMath::Nint( beta * 20000. ) ) );
+  if( beta <= 0) {
+    mBTofBeta = 0;
+  }
+  else {
+    mBTofBeta = ( (beta * 20000.) > std::numeric_limits<unsigned short>::max() ?
+		  std::numeric_limits<unsigned short>::max() :
+		  (UShort_t)( TMath::Nint( beta * 20000. ) ) );
+  }
 }
 
 //_________________

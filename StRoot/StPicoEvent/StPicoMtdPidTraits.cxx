@@ -14,8 +14,7 @@ ClassImp(StPicoMtdPidTraits)
 StPicoMtdPidTraits::StPicoMtdPidTraits() : TObject(),
   mTrackIndex(-1), mMtdHitIndex(-1), mMatchFlag(-1),
   mDeltaY(-999.), mDeltaZ(-999.), mDeltaTimeOfFlight(-999.), 
-  mBeta( std::numeric_limits<unsigned short>::max() ),
-  mMtdHitChan(-1) {
+  mBeta( 0 ), mMtdHitChan(-1) {
   /* emtpy */
 }
 
@@ -59,14 +58,19 @@ void StPicoMtdPidTraits::setHitChannel(Int_t backleg, Int_t module, Int_t cell) 
 
 //_________________
 void StPicoMtdPidTraits::setBeta(Float_t beta) {
-  mBeta = ( (beta * 20000.) > std::numeric_limits<unsigned short>::max() ?
-	    std::numeric_limits<unsigned short>::max() :
-	    (UShort_t)( TMath::Nint( beta * 20000. ) ) );
+  if( beta <= 0 ) {
+    mBeta = 0;
+  }
+  else {
+    mBeta = ( (beta * 20000.) > std::numeric_limits<unsigned short>::max() ?
+	      std::numeric_limits<unsigned short>::max() :
+	      (UShort_t)( TMath::Nint( beta * 20000. ) ) );
+  }
 }
 
 //_________________
 void StPicoMtdPidTraits::setDeltaY(Float_t dy) {
-  mDeltaY = ( fabs(dy * 200) > std::numeric_limits<short>::max() ?
+  mDeltaY = ( fabs(dy * 200.) > std::numeric_limits<short>::max() ?
 	      ( (dy > 0) ? std::numeric_limits<short>::max() :
 		std::numeric_limits<short>::min() ) :
 	      (Short_t)( TMath::Nint( dy * 200.) ) );
