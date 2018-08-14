@@ -851,6 +851,7 @@ inline uint_v AliHLTTPCCASliceData::HitWeight( const AliHLTTPCCARow &row, const 
     if( !mask[i] ) continue;
     r[i] = row.fHitWeights[(unsigned int)hitIndex[i]];
   }
+  return 0;
 }
 
 

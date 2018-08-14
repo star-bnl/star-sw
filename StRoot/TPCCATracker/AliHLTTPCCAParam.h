@@ -378,7 +378,7 @@ inline void AliHLTTPCCAParam::GetClusterErrors2( uint_v rowIndexes, const TrackP
   const float_v errmin=1e-6f;
 //  float_v v( c, type );
   float_v v, v1, v2, v4, v5;
-  for( int i = 0; i < float_v::Size; i++ ) {
+  for( unsigned int i = 0; i < float_v::Size; i++ ) {
     const float *c_temp = &c[(unsigned int)type[i]];
     v[i]  = c_temp[0];
     v1[i] = c_temp[1];
@@ -394,7 +394,7 @@ inline void AliHLTTPCCAParam::GetClusterErrors2( uint_v rowIndexes, const TrackP
   *Err2Y = CAMath::Abs( v );
 
 //  v.gather( c+3, type );
-  for( int i = 0; i < float_v::Size; i++ ) {
+  for( unsigned int i = 0; i < float_v::Size; i++ ) {
       v[i] = c[(unsigned int)type[i] + 3];
   }
 //  v += z * float_v( c + 4, type )*(one + tg2Lambda) + float_v( c + 5, type )*tg2Lambda;
