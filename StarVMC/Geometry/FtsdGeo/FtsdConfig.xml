@@ -100,6 +100,7 @@
     <Setup  name   = "FTSIv3d" simu="2" comment= "3 CBM-like Si detectors plus sTGC wheels" module = "FtsdGeo3" onoff  = "on"  > 
 
       <Init struct="MAIN" var="version" value="3.0" />
+      <Init struct="MAIN" var="type"    value="2" />
       <Init struct="MAIN" var="layout"    value="2"   />      
       <Init struct="MAIN" var="active"  value="{1,1,1,1,1,0, 0,0,0,0,0,0}" />
       <Init struct="MAIN" var="delta" value="15" />

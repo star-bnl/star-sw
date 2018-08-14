@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.29.2.2 2018/08/14 18:54:44 jwebb Exp $
+* $Id: xgeometry.age,v 1.29.2.3 2018/08/14 19:30:50 jwebb Exp $
 
 
 
@@ -2550,6 +2550,8 @@ If LL>0
   Case fwddev1a  { fwddev1a: Si + sTGC pipev1;     Geom = 'fwddev1a  '; call geom_fwddev1a; }
   Case fwddev1b  { fwddev1b: Si + sTGC pipev1;     Geom = 'fwddev1b  '; call geom_fwddev1b; }
 
+  Case test      { test    : Si + sTGC pipev1;     Geom = 'test      '; call geom_test;     }
+
 * Case epdtest { epdtest: epd test geometry; Geom = 'epdtest   '; call geom_epdtest;}
 * Case epdwest { epdwest: epd test geometry; Geom = 'epdwest   '; call geom_epdwest;}
 
@@ -4666,8 +4668,11 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.29.2.2 2018/08/14 18:54:44 jwebb Exp $
+* $Id: xgeometry.age,v 1.29.2.3 2018/08/14 19:30:50 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.29.2.3  2018/08/14 19:30:50  jwebb
+* StarVMC/xgeometry/xgeometry.age
+*
 * Revision 1.29.2.2  2018/08/14 18:54:44  jwebb
 * Removed references to deprecated versions of HCAL... (although be careful when
 * mergeing back with MAIN...)

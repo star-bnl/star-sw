@@ -1,6 +1,10 @@
-* $Id: g2t_volume_id.g,v 1.87.2.1 2018/08/13 20:43:04 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.87.2.2 2018/08/14 19:30:50 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.87.2.2  2018/08/14 19:30:50  jwebb
+* StarVMC/xgeometry/xgeometry.age
+*
 * Revision 1.87.2.1  2018/08/13 20:43:04  jwebb
+*
 * Adding support for readout of different versions of the forward Si tracker...
 *
 * Revision 1.88.2.2  2018/03/22 20:40:22  jwebb
@@ -1220,7 +1224,9 @@ c$$$    write (*,*) numbv
       Integer, intent(in) :: numbv(15)
 
       Logical :: first = .true.
-      Structure  MAIN  { version, int type, useids, active(20), rmndsk, rmxdsk, cutele }
+      Structure  MAIN  { version, 
+                         int type, int layout,
+                         useids, active(20), rmndsk, rmxdsk, cutele }
       Integer ::  iFTSM = 0, g2t_fts_volume_id
 
       Integer ::       Iprin,Nvb
@@ -1245,7 +1251,7 @@ c$$$    write (*,*) numbv
           return
       endif
 
-      if (subsys=1) then "FtsdGeo1 configuration (Si development)
+      if (subsys=1) then "Single plane station"
 
          if (cd=='FSIA') station = 1;
          if (cd=='FSIB') station = 2;
@@ -1255,12 +1261,12 @@ c$$$    write (*,*) numbv
                               1000 * station + 
                                      numbv(1)
 
-         write (*,*) cd, ' ', g2t_fts_volume_id, ' | ', numbv(1:4)
+         write (*,*) cd, ' 111 ', g2t_fts_volume_id, ' | ', numbv(1:4)
 
          return
       endif
 
-      if (subsys=2 ) then "FtsdGeo2 configuration (Si development)
+      if (subsys=2 ) then "Single or dual plane stations"
 
 
          if (cd=='FTSA') then 
@@ -1274,15 +1280,19 @@ c$$$    write (*,*) numbv
          if (cd=='FSIB') station = 2;
          if (cd=='FSIC') station = 3;
 
-         plane  = numbv(1)
-         sensor = numbv(2)
+         IF ( numbv(2) .eq. 0 ) THEN
+             plane =  2 * station - 1
+             sensor = numbv(1)
+         ELSE
+             plane = 2 * (station - 1) + numbv(1)
+             sensor = numbv(2)
+         ENDIF
 
-         g2t_fts_volume_id = 10000 * subsys  + 
-                              1000 * (2 * (station-1) + plane ) +
+         g2t_fts_volume_id = 10000 * subsys  +
+                              1000 * plane +
                                      sensor
 
-         write (*,*) cd, ' ', g2t_fts_volume_id, ' | ', numbv(1:4)
-
+         write (*,*) cd, ' 222  ', g2t_fts_volume_id, ' | ', numbv(1:4)
 
          return
       endif
