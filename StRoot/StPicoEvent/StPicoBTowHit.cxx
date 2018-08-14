@@ -23,7 +23,7 @@ StPicoBTowHit::StPicoBTowHit(Int_t adc, Float_t e) : TObject() {
     std::numeric_limits<unsigned short>::max() : (UShort_t)adc;
 
   mE = ( fabs(e * 1000.) > std::numeric_limits<short>::max() ?
-	 ( (e. > 0) ? std::numeric_limits<short>::max() :
+	 ( (e > 0.) ? std::numeric_limits<short>::max() :
 	   std::numeric_limits<short>::min() ) :
 	 (Short_t)( TMath::Nint(e * 1000.) ) );
 }
