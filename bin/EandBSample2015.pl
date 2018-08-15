@@ -4,13 +4,13 @@ use Cwd;
 my $pwd = cwd();
 #my $sample = "FFB";
 #if ($pwd =~ /RF/) {$sample = "RFB";}
-#my @list = glob "/star/subsys/tpc/fisyak/Cosmics/2014/" . $sample . "/*event.root";
+#my @list = glob "/gpfs01/star/subsys-tpc/fisyak/Cosmics/2014/" . $sample . "/*event.root";
 #my %Runs = ();
 # /star/data8*/reco/CosmicLocalClock/FullField/P15ii_MTD/2015/*/*
 # /star/data8*/reco/CosmicLocalClock/ReversedFullField/P15ii_MTD/2015/*/*
 my $sample = "FullField";
 if ($pwd =~ /RF/) {$sample = "ReversedFullField";}
-#my @list = glob "/star/subsys/tpc/fisyak/reco/2014/Cosmics/901/" . $sample . "/*event.root";
+#my @list = glob "/gpfs01/star/subsys-tpc/fisyak/reco/2014/Cosmics/901/" . $sample . "/*event.root";
 my @list = glob "/star/data8*/reco/CosmicLocalClock/" . $sample . "/P15ii_MTD/2015/*/*/*.event.root";
 foreach my $line (@list) {
   my $file = File::Basename::basename($line,".event.root");

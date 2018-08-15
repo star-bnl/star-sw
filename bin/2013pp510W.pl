@@ -13,7 +13,7 @@ my $debug = 0;
 #my @list = `get_file_list.pl -delim '/' -keys 'path,filename' -cond 'filetype=online_daq,filename~st_W,runnumber>14076004,tpx=1,sanity=1,trgsetupname=pp500_production_2013' -limit 0`;
 #my @list = `get_file_list.pl -delim '/' -keys 'path,filename' -cond 'filetype=online_daq,filename~st_physics_15,tpx=1,sanity=1,trgsetupname=AuAu_200_LowLuminosity_2014' -limit 100`;
 #my @list = `get_file_list.pl -delim ':' -keys 'path,filename,events' -cond 'filetype=online_daq,filename~st_W,runnumber>14076004,tpx=1,sanity=1,trgsetupname=pp500_production_2013,events>1' -limit 0`;
-my @list = `cat /star/subsys/tpc/fisyak/daq/2013W/2013W.events1`;
+my @list = `cat /gpfs01/star/subsys-tpc/fisyak/daq/2013W/2013W.events1`;
 my ($run,$dummy);
 foreach my $l (@list) {
   chomp($l);

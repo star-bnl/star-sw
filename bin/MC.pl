@@ -6,7 +6,7 @@ if ($#ARGV < 0) {
   exit 0;
 } 
 
-#		/star/subsys/tpc/fisyak/reco/2013/MC.SL15.ExB/*.event.root
+#		/gpfs01/star/subsys-tpc/fisyak/reco/2013/MC.SL15.ExB/*.event.root
 
 my @globs = @ARGV;
 foreach my $glob (@globs) {

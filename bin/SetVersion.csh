@@ -44,10 +44,10 @@ endsw
 
 switch ($case) 
   case "*SL15j*" :   
-    source /star/subsys/tpc/fisyak/STAR/packages/.DEV2/unsetupDEV2.csh
+    source /gpfs01/star/subsys-tpc/fisyak/STAR/packages/.DEV2/unsetupDEV2.csh
     setenv STAR_LEVEL SL15j;       
   case "*SL16d*" :   
-    source /star/subsys/tpc/fisyak/STAR/packages/.DEV2/unsetupDEV2.csh
+    source /gpfs01/star/subsys-tpc/fisyak/STAR/packages/.DEV2/unsetupDEV2.csh
     setenv STAR_LEVEL SL16d;       
   breaksw
   case "*TFG17o*": 

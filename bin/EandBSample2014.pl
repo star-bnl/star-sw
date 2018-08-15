@@ -4,11 +4,11 @@ use Cwd;
 my $pwd = cwd();
 #my $sample = "FFB";
 #if ($pwd =~ /RF/) {$sample = "RFB";}
-#my @list = glob "/star/subsys/tpc/fisyak/Cosmics/2014/" . $sample . "/*event.root";
+#my @list = glob "/gpfs01/star/subsys-tpc/fisyak/Cosmics/2014/" . $sample . "/*event.root";
 #my %Runs = ();
 my $sample = "FF";
 if ($pwd =~ /RF/) {$sample = "RF";}
-my @list = glob "/star/subsys/tpc/fisyak/reco/2014/Cosmics/901/" . $sample . "/*event.root";
+my @list = glob "/gpfs01/star/subsys-tpc/fisyak/reco/2014/Cosmics/901/" . $sample . "/*event.root";
 foreach my $line (@list) {
   my $file = File::Basename::basename($line,".event.root");
 #  $file =~ s/_raw_.*//;

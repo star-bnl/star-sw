@@ -5,7 +5,7 @@ use File::stat;
 my $pwd = cwd();
 my $day = File::Basename::basename(File::Basename::dirname($pwd));
 my $run =  File::Basename::basename($pwd);
-#my $dir = "/star/subsys/tpc/fisyak/reco/2014/50M/SL15StiCAKFV/" . $day . "/" . $run;
+#my $dir = "/gpfs01/star/subsys-tpc/fisyak/reco/2014/50M/SL15StiCAKFV/" . $day . "/" . $run;
 #my $dir = "/net/l401/data/scratch2/fisyak/MuDst/2016/" . $day . "/" . $run;
 my $debug = 0;
 #my $dir = "/gpfs01/star/pwg/fisyak/MuDst/2016/" . $day . "/" . $run; print "dir = $dir\n" if ($debug);
