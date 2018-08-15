@@ -1332,7 +1332,7 @@ my $NEvents = 100000;
 # fixedTarget |     2015-06-18 17:19:01 GMT  | 2015-06-18 18:31:31 GMT
 # pAl200      |     2015-06-18 22:00:34 GMT  | 2015-06-21 03:17:21 GMT
 #$hist = "RunXV01pp200"; $NEvents = 5000; $disk = "data*"; $RECO = "/reco/production_pp200trans_2015*/*"; $Production = "/dev"; $year = "/2015/*/*/"; $FILE = "st_physics_16*"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "/afs/rhic.bnl.gov/star/users/fisyak/macros/dEdx";# 04/01/15 check
-#/star/subsys/tpc/fisyak/reco/2015/FixedTarget/*.event.root
+#/gpfs01/star/subsys-tpc/fisyak/reco/2015/FixedTarget/*.event.root
 #$hist = "RunXV02FixedTarget"; $NEvents = 5000; $disk = "subsys/tpc/fisyak"; $RECO = ""; $Production = "/reco"; $year = "/2015/FixedTarget/"; $FILE = "st_physics_16*"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "/afs/rhic.bnl.gov/star/users/fisyak/macros/dEdx";# 06/15/15 The first check
 #$hist = "RunXV03FixedTarget"; $NEvents = 50000; $disk = "subsys/tpc/fisyak"; $RECO = ""; $Production = "/reco"; $year = "/2015/FixedTargetNoGL/"; $FILE = "st_physics_16*"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "/afs/rhic.bnl.gov/star/users/fisyak/macros/dEdx";# 07/09/15 ReRun with no SC&GL corrections, check
 #$hist = "RunXV04FixedTarget"; $NEvents = 50000; $disk = "subsys/tpc/fisyak"; $RECO = ""; $Production = "/reco"; $year = "/2015/FixedTargetNoGL/"; $FILE = "st_physics_16*"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "/afs/rhic.bnl.gov/star/users/fisyak/macros/dEdx";# 07/10/15 ReRun with no SC&GL corrections, reset TpcSecRowB & TpcRowQ
@@ -1758,7 +1758,7 @@ my @files = ();
 $script = $prod;# . "O";
 #my $SCR = "/star/institutions/bnl/fisyak/dEdx/";
 #my $SCR = "/star/data05/scratch/fisyak/dEdx/";
-my $SCR = "/star/subsys/tpc/fisyak/dEdx/";
+my $SCR = "/gpfs01/star/subsys-tpc/fisyak/dEdx/";
 my $hostname = `hostname`; chomp($hostname);
 #my $homedir  = "/afs/rhic/star/users/fisyak/public/.dev/dEdx";
 #my $homedir  = "/star/institutions/bnl/fisyak/dEdx/jobs/SL04i";
@@ -1874,12 +1874,12 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
 #Universe       = vanilla
 #Notification   = never
 #Executable     = /afs/rhic.bnl.gov/star/users/fisyak/bin/trapguard.csh
-#Arguments      = /star/subsys/tpc/fisyak/dEdx/jobs/New/$SCRIPT
+#Arguments      = /gpfs01/star/subsys-tpc/fisyak/dEdx/jobs/New/$SCRIPT
 #Output         = $LOG
 #Error          = $ERR
 #Requirements   = (CPU_Experiment == \"star\")
 #Log            = $LOG
-#Initialdir     = /star/subsys/tpc/fisyak/dEdx/jobs/New
+#Initialdir     = /gpfs01/star/subsys-tpc/fisyak/dEdx/jobs/New
 #+Experiment     = \"star\"
 #+Job_Type       = \"cas\"
 #kill_sig        = SIGINT
@@ -1909,8 +1909,8 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
 #      print OUT " unsetenv Calibrations_tpc\n";
 #      print OUT "cd $homedir; \n"; 
 #      print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
-#      print OUT "cd /star/subsys/tpc/fisyak/dEdx/jobs/New\n";
-#      print OUT "cd /star/subsys/tpc/fisyak/dEdx/jobs\n";
+#      print OUT "cd /gpfs01/star/subsys-tpc/fisyak/dEdx/jobs/New\n";
+#      print OUT "cd /gpfs01/star/subsys-tpc/fisyak/dEdx/jobs\n";
       print OUT "test -d $scrr || mkdir -p $scrr;\n";
 #      print OUT "cd $scrr; \n";
     }

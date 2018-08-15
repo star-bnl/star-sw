@@ -16,5 +16,5 @@
     root4star -q -b 'TpcRS.C(4000,"y2005,TpcRS","'${evtsFile}'","Bichsel,PhysicsOff")' &gt;&amp; ${logFile}
   endif
 </command>
-<input URL="file:/star/subsys/tpc/fisyak/Tpc/TpcRS/daq_2005_CuCu22/*MuDst.root" /> 
+<input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/daq_2005_CuCu22/*MuDst.root" /> 
 </job>

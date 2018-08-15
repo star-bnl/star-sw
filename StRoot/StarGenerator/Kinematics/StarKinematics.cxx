@@ -93,31 +93,66 @@ void StarKinematics::Kine(Int_t ntrack, const Char_t *_type, Double_t ptlow, Dou
       StarGenParticle *p = AddParticle(type.c_str());
 
       // Sample pt, eta, phi
-      double pt = random(ptlow,  pthigh);
-      double y  = random(ylow,   yhigh );
-      double phi= random(philow, phihigh );
-      double m  = p->GetMass();
+      if ( 0 == IAttr("energy") ) { // uniform in pT
+	double pt = random(ptlow,  pthigh);
+	double y  = random(ylow,   yhigh );
+	double phi= random(philow, phihigh );
+	double m  = p->GetMass();
 
-      double mt = pt;
-      if ( IAttr("rapidity" ) ) { 
-	// switch from pseudorapidity to plain vanilla rapidity
-	mt = TMath::Sqrt( pt*pt + m*m );
-      }
+	double mt = pt;
+	if ( IAttr("rapidity" ) ) { 
+	  // switch from pseudorapidity to plain vanilla rapidity
+	  mt = TMath::Sqrt( pt*pt + m*m );
+	}
       
-      double px = pt * TMath::Cos( phi );
-      double py = pt * TMath::Sin( phi );
-      double pz = mt * TMath::SinH( y ); 
-      double E  = mt * TMath::CosH( y );
+	double px = pt * TMath::Cos( phi );
+	double py = pt * TMath::Sin( phi );
+	double pz = mt * TMath::SinH( y ); 
+	double E  = mt * TMath::CosH( y );
 
-      p->SetPx( px );
-      p->SetPy( py );
-      p->SetPz( pz );
-      p->SetEnergy( E );
+	p->SetPx( px );
+	p->SetPy( py );
+	p->SetPz( pz );
+	p->SetEnergy( E );
 
-      p->SetVx( 0. ); // put vertex at 0,0,0,0
-      p->SetVy( 0. );
-      p->SetVz( 0. );
-      p->SetTof( 0. );
+	p->SetVx( 0. ); // put vertex at 0,0,0,0
+	p->SetVy( 0. );
+	p->SetVz( 0. );
+	p->SetTof( 0. );
+      }
+      if ( IAttr("energy") ) { // uniform in energy.
+
+	assert( 0==IAttr("rapidity") ); // only flat in eta, not rapidity
+
+	double E  = random(ptlow, pthigh);
+	double y  = random(ylow,   yhigh );   // y is eta here, not rapidity
+	double phi= random(philow, phihigh );
+	double m  = p->GetMass();
+	double pmom  = TMath::Sqrt(E*E - m*m);
+	double pt = 2.0 * pmom * TMath::Exp( -y ) / ( 1 + TMath::Exp( -2.0*y ) );
+
+	double mt = pt;
+	if ( IAttr("rapidity" ) ) { 
+	  // switch from pseudorapidity to plain vanilla rapidity
+	  mt = TMath::Sqrt( pt*pt + m*m );
+	}
+ 
+	double px = pt * TMath::Cos( phi );
+	double py = pt * TMath::Sin( phi );
+	double pz = mt * TMath::SinH( y ); 
+	//double E  = mt * TMath::CosH( y );
+
+	p->SetPx( px );
+	p->SetPy( py );
+	p->SetPz( pz );
+	p->SetEnergy( E );
+
+	p->SetVx( 0. ); // put vertex at 0,0,0,0
+	p->SetVy( 0. );
+	p->SetVz( 0. );
+	p->SetTof( 0. );
+      }
+	
 
     }
 

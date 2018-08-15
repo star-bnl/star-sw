@@ -20,6 +20,6 @@
     root.exe -q -b 'bfc.C(99999,"in,MakeEvent,mysql,tpxRaw,tpxClu,TpcAvCluster,analysis,nodefault","'${evtsFile}'","","'$rootF'")' &gt;&amp; ${logFile}
   endif
 </command>
-<!-- <input URL="file:/star/subsys/tpc/fisyak/Tpc/Laser/y2010/st_laser*.daq"/> -->
-<input URL="file:/star/subsys/tpc/fisyak/daq/2003/*/st_laser*.daq"/> 
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/Laser/y2010/st_laser*.daq"/> -->
+<input URL="file:/gpfs01/star/subsys-tpc/fisyak/daq/2003/*/st_laser*.daq"/> 
 </job>

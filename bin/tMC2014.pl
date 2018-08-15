@@ -4,7 +4,7 @@ use Cwd;
 my $pwd = cwd();
 #my @list = glob "/star/data03/daq/2013/15[4-9]/*/st_physics*.daq";
 #my @list = glob "/gpfs01/star/scratch_delete/fisyak/daq/2014/100/*/st_physics*.daq";
-my @list = glob "/star/subsys/tpc/fisyak/simu/2014/AuAu200Z6cmBL3/*.fz";# /gpfs01/star/scratch_delete/fisyak/daq/2014/100/*/st_physics*.daq ";
+my @list = glob "/gpfs01/star/subsys-tpc/fisyak/simu/2014/AuAu200Z6cmBL3/*.fz";# /gpfs01/star/scratch_delete/fisyak/daq/2014/100/*/st_physics*.daq ";
 #my $MaxEvents = 500; #
 my $MaxEvents = 5000;
 my $step      = 5000;

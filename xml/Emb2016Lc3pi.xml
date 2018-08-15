@@ -22,6 +22,6 @@
     root.exe -q -b -x 'bfcMixerVMC.C(10000,"Vmc,Lc3pimT,VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
   endif
 </command>
-<!-- <input URL="file:/star/subsys/tpc/fisyak/Tpc/TpcRS/daq_2016_AuAu200.DEV2/*.MuDst.root" /> -->
-<input URL="file:/star/subsys/tpc/fisyak/reco/2016/TFG17eAuAu200/*.MuDst.root" />
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/daq_2016_AuAu200.DEV2/*.MuDst.root" /> -->
+<input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2016/TFG17eAuAu200/*.MuDst.root" />
 </job>

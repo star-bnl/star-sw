@@ -75,17 +75,17 @@
         </command>
         <stdout URL="file:./$JOBID.log" />
         <stderr URL="file:./$JOBID.err" />
-<!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2013/MC.DEV2/*.event.root" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2013/MC.DEV2/pythiapp510wenu_0055_pileup_1_10.event.root" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2013/MC.SL15.ExB/*.event.root" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2013/MC.SL15.ExB/pythiapp510wenu_0055_pileup_1_10.event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2013/MC.DEV2/*.event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2013/MC.DEV2/pythiapp510wenu_0055_pileup_1_10.event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2013/MC.SL15.ExB/*.event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2013/MC.SL15.ExB/pythiapp510wenu_0055_pileup_1_10.event.root" /> -->
 <!-- <input URL="command:MC2013.pl" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/2013/pp510WB/*.fz" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/2013/pp510WB/pythiapp510wenu_2999.fz" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/2014/AuAu200Z6cmBL/hijingauau200_0999.fz" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/2014/AuAu200Z6cmBL2/*.fz" /> -->
-<!--  <input URL="file:/star/subsys/tpc/fisyak/simu/2014/AuAu200Z6cmBL2/hijingauau200z6cm_0898.fz" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/2014/AuAu200Z6cmBL3/*.fz" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/2013/pp510WB/*.fz" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/2013/pp510WB/pythiapp510wenu_2999.fz" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/2014/AuAu200Z6cmBL/hijingauau200_0999.fz" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/2014/AuAu200Z6cmBL2/*.fz" /> -->
+<!--  <input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/2014/AuAu200Z6cmBL2/hijingauau200z6cm_0898.fz" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/2014/AuAu200Z6cmBL3/*.fz" /> -->
 <!-- <input URL="command:tMC2014.pl" /> -->
 <input URL="command:RunId.pl 1 100" />
 </job>

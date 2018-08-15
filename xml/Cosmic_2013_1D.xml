@@ -24,6 +24,6 @@
         </command>
         <stdout URL="file:./$JOBID.log" />
         <stderr URL="file:./$JOBID.err" />
-<!-- <input URL="file:/star/subsys/tpc/FF_adc/*.daq" /> -->
-<input URL="file:/star/subsys/tpc/RFF_adc/*.daq" />
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/FF_adc/*.daq" /> -->
+<input URL="file:/gpfs01/star/subsys-tpc/RFF_adc/*.daq" />
 </job>

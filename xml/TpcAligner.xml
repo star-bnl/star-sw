@@ -23,10 +23,10 @@
 <!-- <input URL="command:CosmicsAnalysis.pl" /> -->
 <!-- <input URL="command:EandBSample.pl" /> -->
 <!-- <input URL="file:/gpfs01/star/pwg/iraklic/iTPC/Cosmics/Cosmics2018/*event.root" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/Tpc/Alignment/Y201?RC.E/*event.root" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/Tpc/Alignment/Y2011RC.E/st_tofcosmic_12*event.root" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/Tpc/Alignment/Y2011RC.F/st_tofcosmic_12*event.root" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/Tpc/Alignment/Y2010RC.E/st_tofcosmic_11159008_raw_2020001_25001.event.root" />  -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/Alignment/Y201?RC.E/*event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/Alignment/Y2011RC.E/st_tofcosmic_12*event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/Alignment/Y2011RC.F/st_tofcosmic_12*event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/Alignment/Y2010RC.E/st_tofcosmic_11159008_raw_2020001_25001.event.root" />  -->
 <!-- <input URL="file:/star/data06/TPCCalib/Y2011RC.G/FF/*1_50000.event.root" /> -->
 <!--  <input URL="file:/star/data06/TPCCalib/Y2011RC.G/ZeroF/*.event.root" />  -->
 <!-- <input URL="file:/star/data06/TPCCalib/Y2011RC.G/RFF/*.event.root" />  -->

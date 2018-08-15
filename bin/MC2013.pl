@@ -2,9 +2,9 @@
 use File::Basename;
 use Cwd;
 my $pwd = cwd();
-#		/star/subsys/tpc/fisyak/reco/2013/MC.SL15.ExB/*.event.root
+#		/gpfs01/star/subsys-tpc/fisyak/reco/2013/MC.SL15.ExB/*.event.root
 my @globs = qw(
-		/star/subsys/tpc/fisyak/reco/2013/MC.DEV2.ExB/*.event.root
+		/gpfs01/star/subsys-tpc/fisyak/reco/2013/MC.DEV2.ExB/*.event.root
 	     );
 foreach my $glob (@globs) {
   my @list = glob $glob;

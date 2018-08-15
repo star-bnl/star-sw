@@ -47,9 +47,9 @@
         </command>
         <stdout URL="file:./$JOBID.log" />
         <stderr URL="file:./$JOBID.err" />
-<!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2013/MC.DEV2/*.event.root" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2013/MC.DEV2/pythiapp510wenu_0055_pileup_1_10.event.root" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2013/MC.SL15.ExB/*.event.root" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2013/MC.DEV2.ExB/pythiapp510wenu_0055_pileup_1_10.event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2013/MC.DEV2/*.event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2013/MC.DEV2/pythiapp510wenu_0055_pileup_1_10.event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2013/MC.SL15.ExB/*.event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2013/MC.DEV2.ExB/pythiapp510wenu_0055_pileup_1_10.event.root" /> -->
 <input URL="command:MC2013.pl" />
 </job>

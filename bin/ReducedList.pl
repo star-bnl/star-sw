@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-my @files = glob "/star/subsys/tpc/2013/pp500/Filter/*.event.root";
+my @files = glob "/gpfs01/star/subsys-tpc/2013/pp500/Filter/*.event.root";
 my @runs = ();
 foreach my $file (@files) {
   my @words = split("_",$file);
@@ -8,7 +8,7 @@ foreach my $file (@files) {
 }
 my $runs = join("|",@runs);# print "runs = $runs\n";
 my $l  = 0;
-my $ListOfFiles = "/star/subsys/tpc/2013/Run13pp500P1.list";
+my $ListOfFiles = "/gpfs01/star/subsys-tpc/2013/Run13pp500P1.list";
 open (In, $ListOfFiles) or die "Can't open $ListOfFiles";
 while (my $line = <In>) {
   my @words = split("_",$line);

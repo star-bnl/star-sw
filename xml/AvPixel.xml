@@ -20,8 +20,8 @@
     root.exe -q -b 'bfc.C(99999,"in,mysql,tpcDb,detDb,StEvent,TpxAvLaser,nodefault","'${evtsFile}'","","'$rootF'")' > ${logFile}
   endif
 </command>
-<!-- <input URL="file:/star/subsys/tpc/fisyak/Tpc/Laser/y2010/st_laser*.daq"/> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/daq/2003/*/st_laser*.daq"/> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/Laser/y2010/st_laser*.daq"/> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/daq/2003/*/st_laser*.daq"/> -->
 <!-- <input URL="file:/star/data03/daq/2013/046/14046081/st_laser_adc_*.daq"/>  laser Full Field -->
 <!-- <input URL="file:/star/data03/daq/2013/*/*/st_laser_adc_*.daq"/>  laser Reverse Full Field -->
 <!-- <input URL="file:/star/data03/daq/2013/046/14046066/st_pedestal_adc_14046066_raw_0540001.daq"/> peds -->

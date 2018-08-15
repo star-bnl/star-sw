@@ -46,8 +46,8 @@ if (-d /net/l402/data/fisyak/STAR) then
   setenv AFS_RHIC  /net/l402/data/fisyak/STAR
     setenv SITE "HLT"
 else 
-  if (-d /star/subsys/tpc/fisyak/STAR) then 
-    setenv AFS_RHIC  /star/subsys/tpc/fisyak/STAR
+  if (-d /gpfs01/star/subsys-tpc/fisyak/STAR) then 
+    setenv AFS_RHIC  /gpfs01/star/subsys-tpc/fisyak/STAR
   else
     setenv AFS_RHIC  /afs/rhic.bnl.gov/star
   endif

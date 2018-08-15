@@ -36,10 +36,10 @@ set year  = "y2015";    breaksw
   if ( -r ${logFile}) exit 0;
   root4star -q -b 'bfc.C('${f}','${l}',"fzin,'${year}',tpcRS,TpxClu,useXgeom,MakeEvent,McEvent,bbcSim,btofsim,mtdSim,emcY2,EEfs,evout,geantout,verybig,analysis,noRunco,noHistos","'${INPUTFILE0}'","'${file}'")' &gt;&amp; ${logFile}
 </command>
-<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/2013/pp510W+pileupB/*.fz" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/2013/pp510W+pileupB/*.fz" /> -->
 <!-- <input URL="file:/star/data99/reco/AuAu200/hijing_382/b0_20/minbias/y2014a/gheisha_on/gstar_pileup_Oct05/*.pileup.fzd" /> -->
 <!-- <input URL="file:/star/data99/reco/AuAu200/hijing_382/b0_20/minbias/y2014a/gheisha_on/gstar_pileup_Oct05/rcf15005_999_10evts.pileup.fzd" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/2013/pp510W+pileupB/pythiapp510wenu_0099_pileup.fz" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/2014/AuAu200mixedBL2/*.fz" /> -->
-<input URL="file:/star/subsys/tpc/fisyak/simu/2014/AuAu200mixedBL3/*.fz" />
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/2013/pp510W+pileupB/pythiapp510wenu_0099_pileup.fz" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/2014/AuAu200mixedBL2/*.fz" /> -->
+<input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/2014/AuAu200mixedBL3/*.fz" />
 </job>

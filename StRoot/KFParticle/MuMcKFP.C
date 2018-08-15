@@ -32,7 +32,7 @@
 int nK0=0;
 
 void MuMcKFP(Long64_t Nevent = 999999,
-             const char* file="/star/subsys/tpc/fisyak/reco/2014/V0B/*MuDst.root",
+             const char* file="/gpfs01/star/subsys-tpc/fisyak/reco/2014/V0B/*MuDst.root",
              const  char* outFile="MuMcPrV23ST.root")
 { 
   
