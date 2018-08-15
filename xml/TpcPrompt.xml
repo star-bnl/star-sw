@@ -18,8 +18,8 @@
     root.exe -x -q -b 'TpcPrompt.C(1000000,"'${INPUTFILE0}'","'${file}'.root")' &gt;&amp; ${logFile}
 #  endif
 </command>
-<!-- <input URL="file:/star/subsys/tpc/fisyak/Tpc/TpcRS/TpcRS_2016sdt/*event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/TpcRS_2016sdt/*event.root" /> -->
 <input URL="command:dEdxSample.pl" />
-<!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2014/TFG17vnoV5/*event.root" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2014/TFG17vnoV5.Altro4/*event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2014/TFG17vnoV5/*event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2014/TFG17vnoV5.Altro4/*event.root" /> -->
 </job>

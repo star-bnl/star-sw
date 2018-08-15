@@ -75,11 +75,11 @@ root.exe -q -b 'bfc.C(500000,"P2014a,gmt,gmtCosmics,gmtClusTree,mtd,btof,-hitfil
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
-<!-- <input URL="file:/star/subsys/tpc/FF_adc/*.daq" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/FF_adc/*.daq" /> -->
 <!-- <input URL="file:/star/data03/daq/2014/*/*/st_cosmic_adc_15*.daq" /> -->
 <!-- <input URL="command:Cosmics2014.pl" /> -->
-<!-- <input URL="file:/star/subsys/tpc/daq/2014/061/*/*.daq" /> -->
-<!-- <input URL="file:/star/subsys/tpc/daq/2014/*/*/st_physics_15*.daq" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/daq/2014/061/*/*.daq" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/daq/2014/*/*/st_physics_15*.daq" /> -->
 <input URL="file:/star/data03/daq/2014/069/*/*.daq" />
 <!-- <input URL="command:Cosmics2014.pl" /> -->
 <!-- <input URL="command:daq_2014AuAu200LowLum.pl" /> -->

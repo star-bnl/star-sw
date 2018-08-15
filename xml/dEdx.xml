@@ -24,9 +24,9 @@
 #  endif
 </command>
 <input URL="file:/net/l401/data/scratch1/fisyak/reco/2018/27GeV_production_2018NewAlignment/*.event.root" /> 
-<!-- <input URL="file:/star/subsys/tpc/fisyak/Tpc/TpcRS/TpcRS_2016sdt/*event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/TpcRS_2016sdt/*event.root" /> -->
 <!-- <input URL="command:dEdxSample.pl" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2014/TFG17vnoV5/*event.root" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2014/TFG17vnoV5.Altro4/*event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2014/TFG17vnoV5/*event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2014/TFG17vnoV5.Altro4/*event.root" /> -->
 <!-- <output fromScratch="*.root" toURL="/net/l404/data/fisyak/Histograms/RunXVIII/RunXVIII102/" /> -->
 </job>

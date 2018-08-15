@@ -11,6 +11,6 @@
 	</command>
 	<stdout URL="file:./$JOBID.log" />
 	<stderr URL="file:./$JOBID.err" />
-<!-- <input URL="file:/star/subsys/tpc/fisyak/MuDst/2014/AuAu200/P15ic/*MuDst.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/MuDst/2014/AuAu200/P15ic/*MuDst.root" /> -->
 <input URL="file:/star/data9*/reco/AuAu_200_production_low_2014/ReversedFullField/P15ic/2014/*/*/st_physics_151*MuDst.root" />
 </job>

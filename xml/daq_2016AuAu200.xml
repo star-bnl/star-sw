@@ -32,11 +32,11 @@ root.exe -q -b -x 'bfc.C(1000,"P2016a btof mtd mtdCalib BEmcChkStat CorrX OSpace
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
-<!-- <input URL="file:/star/subsys/tpc/FF_adc/*.daq" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/FF_adc/*.daq" /> -->
 <!-- <input URL="file:/star/data03/daq/2015/*/*/st_cosmic_adc_15*.daq" /> -->
 <!-- <input URL="command:Cosmics2015.pl" /> -->
-<!-- <input URL="file:/star/subsys/tpc/daq/2015/061/*/*.daq" /> -->
-<!-- <input URL="file:/star/subsys/tpc/daq/2015/*/*/st_physics_15*.daq" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/daq/2015/061/*/*.daq" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/daq/2015/*/*/st_physics_15*.daq" /> -->
 <!-- <input URL="command:Cosmics2015.pl" /> -->
 <!-- <input URL="command:daq_2014.pl" /> -->
 <!-- <input URL="file:/star/data03/daq/2016/035/17035170/st_physics_adc_17035170_raw_*.daq" /> -->

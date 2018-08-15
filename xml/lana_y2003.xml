@@ -17,5 +17,5 @@
     root.exe -q -b 'bfc.C(99999,"lana,B2003,Corr2,analysis,NoHistos,NoRunco,-HitFilt,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
   endif
 </command>
-<input URL="file:/star/subsys/tpc/fisyak/daq/2003/*/*.daq"/> 
+<input URL="file:/gpfs01/star/subsys-tpc/fisyak/daq/2003/*/*.daq"/> 
 </job>

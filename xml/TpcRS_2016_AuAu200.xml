@@ -18,7 +18,7 @@
     root4star -q -b 'TpcRS.C(4000,"y2016a,TpcRS,StiCA,KFVertex,xgeometry,CorrX,McTpcAna,-evout","'${evtsFile}'","heed,PhysicsOff")' &gt;&amp; ${logFile}
   endif
 </command>
-<!--- <input URL="file:/star/subsys/tpc/fisyak/Tpc/TpcRS/daq_2014_AuAu200Z3/*MuDst.root" />  -->
+<!--- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/daq_2014_AuAu200Z3/*MuDst.root" />  -->
 <!-- <input URL="file:/net/l404/data/fisyak/Tpc/TpcRS/daq_2016_AuAu200/*MuDst.root" />  -->
 <input URL="command:TpcRS_Part.pl" />
 </job>

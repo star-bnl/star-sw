@@ -19,9 +19,9 @@
   if ( -r ${logFile}) exit 0;
   starsim -w 0 -G 500 -b $STAR/kumacs/merge input=${INPUTFILE0} pileup=pileup.list set=${s} &gt; ${logFile}
 </command>
-<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/2013/pp510WB/pythia_*.fz" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/2013/pp510WB/pythiapp510wenu_*.fz" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/2013/pp510W/pythiapp510wenu_999_10.fz" />  -->
-<input URL="file:/star/subsys/tpc/fisyak/simu/2014/AuAu200Z6cmBL3/*.fz" />
-<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/2014/AuAu200Z3cm/hijingauau200z3cm_1999.fz" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/2013/pp510WB/pythia_*.fz" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/2013/pp510WB/pythiapp510wenu_*.fz" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/2013/pp510W/pythiapp510wenu_999_10.fz" />  -->
+<input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/2014/AuAu200Z6cmBL3/*.fz" />
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/2014/AuAu200Z3cm/hijingauau200z3cm_1999.fz" /> -->
 </job>

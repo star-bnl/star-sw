@@ -32,8 +32,8 @@
 </command>
 <stdout URL="file:./$JOBID.log" />
 <!-- <input URL="command:Nightlies.pl" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/Nightlies/Test.MC.year_*.csh" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/Nightlies/Test.MC.year_2005_cucu62_minbias.csh" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/Nightlies/Test.MC.year_2009*.csh" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Nightlies/Test.MC.year_*.csh" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Nightlies/Test.MC.year_2005_cucu62_minbias.csh" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Nightlies/Test.MC.year_2009*.csh" /> -->
 <input URL="command:timing.pl" />
 </job>

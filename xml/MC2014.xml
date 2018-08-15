@@ -58,9 +58,9 @@
         <stderr URL="file:./$JOBID.err" />
 <!-- <input URL="file:/star/data99/reco/AuAu200/hijing_382/b0_20/minbias/y2014a/gheisha_on/pileup_eval_Oct05/*.event.root" /> -->
 <!-- <input URL="file:/star/data99/reco/AuAu200/hijing_382/b0_20/minbias/y2014a/gheisha_on/pileup_eval_Oct05/rcf15005_999_10evts.event.root" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2014/MC.DEV2/*event.root" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2014/MC.DEV2/rcf15005_999_10evts.event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2014/MC.DEV2/*event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2014/MC.DEV2/rcf15005_999_10evts.event.root" /> -->
 <!-- <input URL="command:MC.pl /star/data99/reco/AuAu200/hijing_382/b0_20/minbias/y2014a/gheisha_on/pileup_eval_Oct05 " /> -->
-<!-- <input URL="command:MC.pl /star/subsys/tpc/fisyak/reco/2014/MC.SL15.BL.CorrX2" /> -->
-<input URL="command:MC.pl /star/subsys/tpc/fisyak/reco/2014/SL15BL3TrsCL" />
+<!-- <input URL="command:MC.pl /gpfs01/star/subsys-tpc/fisyak/reco/2014/MC.SL15.BL.CorrX2" /> -->
+<input URL="command:MC.pl /gpfs01/star/subsys-tpc/fisyak/reco/2014/SL15BL3TrsCL" />
 </job>

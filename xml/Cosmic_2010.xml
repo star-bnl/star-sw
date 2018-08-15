@@ -24,6 +24,6 @@
 <!-- <input URL="file:/star/data03/daq/2010/159/*/*.daq" /> -->
 <!-- <input URL="file:/star/data03/daq/2010/*/*/st_tofcosmic_1*.daq" /> -->
 <!--<input URL="file:/star/data03/daq/2010/159/11159008/st_tofcosmic_11159008_raw_1030002.daq" />  -->
-<input URL="filelist:/star/subsys/tpc/fisyak/Tpc/Alignment/Y2010RC.E/daqRevised.list" />
+<input URL="filelist:/gpfs01/star/subsys-tpc/fisyak/Tpc/Alignment/Y2010RC.E/daqRevised.list" />
 
 </job>

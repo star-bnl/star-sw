@@ -31,7 +31,7 @@ foreach input (`cat $FILELIST`)
 end
 
 </command>
-<!--- <input URL="file:/star/subsys/tpc/2013/Cosmics/2DFF/*event.root" />  -->
+<!--- <input URL="file:/gpfs01/star/subsys-tpc/2013/Cosmics/2DFF/*event.root" />  -->
 <!-- <input URL="command:EandBSample.pl" /> -->
 <input URL="command:EandBSample2014.pl" />
 <!-- <input URL="file:/gpfs/scratch/users/fisyak/Cosmics/2014/*event.root" /> -->
