@@ -1775,7 +1775,7 @@ Bfc_st BFC[] = { // standard chains
   {"StiCA"    ,"","","Sti,StiCALib",                                    "","libEG","Sti+CA tracker",kFALSE},
   {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,Stu,StEvent,StDbT,TpcIT,compend,sim_T,tbutil,TMVARank","StiMaker"
    ,                                                          "StiUtilities,StiMaker","Sti tracker",kFALSE},
-  {"HLTCA","","Sti","-Stv,StiLib,StiLibs,TMVARank","StHLTCAMaker","TPCCATracker,StiMaker,StHLTCAMaker"
+  {"HLTCA","","Sti","Sti,-Stv,StiLib,StiLibs,TMVARank","StHLTCAMaker","TPCCATracker,StiMaker,StHLTCAMaker"
    ,                                                                           "HLT reconstruction",kFALSE},
   {"Stx", "","","-Sti,-StiCA,-Stv","StxMaker"     ,"TPCCATracker,StxMaker","eXpress reconstruction",kFALSE},
   {"KFVertex",""  ,"Sti","StiLibs,-VFMinuit,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2"
