@@ -61,13 +61,49 @@
 
        
     StxMaker::Make
-      StxInterface::Run
-        AliHLTTPCCAGBTracker::FindTracks
-          AliHLTTPCCATracker::ReadEvent
-            AliHLTTPCCATracker::StartEvent
-              AliHLTTPCCATracker::SetupCommonMemory
-            AliHLTTPCCASliceData::InitFromClusterData
-            AliHLTTPCCASliceData::NumberOfHits 
-          AliHLTTPCCATracker::Reconstruct
-            AliHLTTPCCATracker::Reconstructor::Reconstructor
+      StxCAInterface::SetNewEvent()   - clean fSeedFinder, fSeeds, 
+        StTPCCAInterface::SetNewEvent - clean fIdTruth, fCaParam, fCaHits, fTracker
+      StxCAInterface::Run
+	StTPCCAInterface::Run
+           StTPCCAInterface::MakeSettings
+           MakeHits
+             StxCAInterface::MakeHits()
+		Id = fCaHits.size();
+          	hitc.track_key=tpcHit->idTruth();
+	        hitc.hit  = tpcHit;
+	        hitc.Id = Id;
+                fSeedHits.push_back(hitc);
+	        fCaHits.push_back(caHit);
 
+           AliHLTTPCCAGBTracker::SetSettings(fCaParam);
+           AliHLTTPCCAGBTracker::SetHits(fCaHits);
+           AliHLTTPCCAGBTracker::FindTracks		    
+             AliHLTTPCCATracker::ReadEvent			    
+               AliHLTTPCCATracker::StartEvent		    
+                 AliHLTTPCCATracker::SetupCommonMemory	    
+               AliHLTTPCCASliceData::InitFromClusterData	    
+               AliHLTTPCCASliceData::NumberOfHits 		    
+             AliHLTTPCCATracker::Reconstruct		    
+               AliHLTTPCCATracker::Reconstructor::Reconstructor
+           MakeSeeds();
+             StxCAInterface::MakeSeeds
+	       seed.vhit.push_back(fSeedHits[hId].hit);
+               fSeeds.push_back(seed);
+
+================================================================================
+StixSeedFinder:
+  StxNodePars copy of StiNodePars
+  StxNodeErrs -"-     StiNodeErrs
+  SeedHit_t
+      const StTpcHit  *hit;
+      Int_t      Id; // from CA
+     	
+  Seedx_t             Keeps CA seeds
+     vector<const StTpcHit *> vhit;
+     StxNodePars firstNodePars;
+     StxNodePars lastNodePars;
+     StxNodeErrs firstNodeErrs;
+     StxNodeErrs lastNodeErrs;
+    
+   StxSeedFinder
+      std::vector<Seedx_t> *mSeeds; 

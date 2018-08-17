@@ -1,7 +1,7 @@
 //*-- Author : Yuri Fisyak
 // $Id: StxMaker.cxx,v 1.6 2013/09/16 19:54:04 fisyak Exp $
 #include "StxMaker.h"
-#include "StxInterface.h"
+#include "StxCAInterface.h"
 #include "StxSeedFinder.h"
 #include "StEvent/StEvent.h"
 #include "StEvent/StGlobalTrack.h"
@@ -27,13 +27,12 @@ Int_t StxMaker::Make(){
   StEvent   *mEvent = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
   // zero all banks before filling !!! 
   if (! mEvent) {return kStWarn;};
-  StxInterface& caTrackerInt = StxInterface::Instance();
+  StxCAInterface& caTrackerInt = StxCAInterface::Instance();
   caTrackerInt.SetNewEvent();
   // Run reconstruction by the CA Tracker
-  caTrackerInt.Run(mEvent);
+  caTrackerInt.Run();
   vector<Seedx_t> &seeds = caTrackerInt.GetSeeds();
   caTrackerInt.RunPerformance();
-  Int_t key = 1;
   sort(seeds.begin(), seeds.end(),StxSeedFinder::SeedsCompareStatus );
 #define PRINT_SEED_STATISTIC
 #ifdef PRINT_SEED_STATISTIC

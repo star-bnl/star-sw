@@ -6,7 +6,7 @@
 #include "StEvent/StTpcHit.h"
 #include "StEvent/StTpcHit.h"
 
-#include "StxInterface.h"
+#include "StxCAInterface.h"
 //#define PRINT_SEED_STATISTIC
 //#define PRINT_FIT_ERR_STATISTIC
 #ifdef PRINT_FIT_ERR_STATISTIC
@@ -22,7 +22,7 @@ Bool_t StxSeedFinder::SeedsCompareStatus(const Seedx_t a, const Seedx_t b) {
 #if 0
 //________________________________________________________________________________
 StxTrack *StxSeedFinder::findTrack(double rMin) { 
-  static StxInterface& caTrackerInt = StxInterface::Instance();
+  static StxCAInterface& caTrackerInt = StxCAInterface::Instance();
   if (!mSeeds || mSeeds->size()==0) {
     if (mEnded) return 0;
     caTrackerInt.SetNewEvent();
