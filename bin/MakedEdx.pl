@@ -1693,12 +1693,12 @@ $hist = "RunXVII26"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/AuAu54_pr
 # dEdx46 reset TcpSecRowB to 1, 06/03/18
 # Run XVIII
 # A.Lebedev, 07/24/18: May 3, 2010, about 19:45 TPC gas system failed and in ~ hour I restored. 
-# production_isobar_2018               2018-03-12 16:24:39 GMT - 2018-05-09 11:41:42 GMT
-# sobar_2018_oldaltro run = 19116020   2018-04-26 12:19:19 GMT - 2018-04-26 12:46:49 GMT
-# production_27GeV_fixedTarget_2018    2018-05-18 23:16:02 GMT - 2018-05-29 01:43:36 GMT
-# production_3p85GeV_fixedTarget_2018  2018-05-31 07:14:46 GMT - 2018-06-04 12:11:00 GMT 
-# 27GeV_production_2018                2018-06-04 12:11:00 GMT - 2018-06-17 22:40:27 GMT 
-# production_26p5GeV_fixedTarget_2018  2018-06-07 22:58:53 GMT - 2018-06-18 11:46:48 GMT
+# production_isobar_2018               2018-03-12 16:24:39 GMT - 2018-05-09 11:41:42 GMT days  71 - 129
+# sobar_2018_oldaltro run = 19116020   2018-04-26 12:19:19 GMT - 2018-04-26 12:46:49 GMT day  116
+# production_27GeV_fixedTarget_2018    2018-05-18 23:16:02 GMT - 2018-05-29 01:43:36 GMT days 138 - 149
+# production_3p85GeV_fixedTarget_2018  2018-05-31 07:14:46 GMT - 2018-06-04 12:11:00 GMT days 151 - 155
+# 27GeV_production_2018                2018-06-04 12:11:00 GMT - 2018-06-17 22:40:27 GMT days 155 - 168
+# production_26p5GeV_fixedTarget_2018  2018-06-07 22:58:53 GMT - 2018-06-18 11:46:48 GMT days 158 - 169
 # /star/data*/reco/production_isobar_2018/ReversedFullField/P18ie_calib/2018/*/*
 my @badruns = (19116020); # Altro3
 #$hist = "RunXVIII01"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/21/18 check 
@@ -1723,7 +1723,8 @@ my @badruns = (19116020); # Altro3
 #$hist = "RunXVIII20"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/12/18 TpcdXCorrectionB.20180225.000019.C
 #$hist = "RunXVIII21"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/12/18 TpcSecRowB.20180312.000020.root$hist = "RunXVIII21"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/12/18 TpcSecRowB.20180312.000020.root
 #$hist = "RunXVIII22"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/12/18 TpcZCorrectionB.20180225.000021.C
-$hist = "RunXVIII23"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/13/18 TpcSecRowB.20180312.000022.root
+#$hist = "RunXVIII23"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/13/18 TpcSecRowB.20180312.000022.root
+$hist = "RunXVIII118"; $NEvents = 2000; $disk = "data100/"; $RECO = "reco/27GeV_production_2018/*FullField";  $Production = "/P18if_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/16/18 check dE/dx calibration produced on HLT (with aligned geometry) wrt RCF
 my $prod = $hist; #$Production;
 $prod =~ s/\*//g;
 $prod =~ s/\//_/g;
