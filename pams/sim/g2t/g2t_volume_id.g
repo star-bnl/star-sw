@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.87.2.3 2018/08/14 22:20:58 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.87.2.4 2018/08/20 20:11:11 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.87.2.4  2018/08/20 20:11:11  jwebb
+* g2t_volume_id assigned for FCS.
+*
 * Revision 1.87.2.3  2018/08/14 22:20:58  jwebb
 * Restore numbering for sTGC wheels
 *
@@ -305,7 +308,8 @@
       " FTS MAIN control structure /DETM/FTSD/MAIN "
       Structure  FTSM  { version, int type, useids, active(20), rmndsk, rmxdsk, cutele }
       Integer   iFTSM /0/ 
-      Integer    g2t_fts_volume_id
+
+      Integer    g2t_fts_volume_id, g2t_wca_volume_id, g2t_hca_volume_id
       
 
       logical    first/.true./
@@ -1105,8 +1109,19 @@ c$$$    write (*,*) numbv
 
 
 *******************************************************************************************
+      elseif (Csys=='wca') then
+
+           volume_id = g2t_wca_volume_id( numbv )
+
 *26* 				Prashanth Shanmuganathan(HCAL)
       elseif (Csys=='hca') then
+
+         if ( cd=='HSCI' ) then
+
+            volume_id = g2t_hca_volume_id( numbv )
+
+         else
+        
       """  Volume_Id """
       """ HCAL             1 000  """
       """ FPSC           100 000  """
@@ -1160,6 +1175,7 @@ c$$$    write (*,*) numbv
 	     if(numbv(1) == 2) volume_id = 41 - numbv(2)
 	  endif
 
+         endif
 
 *******************************************************************************************
 ** 27                                                                            Jason Webb
@@ -1221,7 +1237,50 @@ c$$$    write (*,*) numbv
     end
       
 
+*******************************************************************************************
+      Integer Function g2t_wca_volume_id ( numbv )
+      Integer, intent(in) :: numbv(15)     
+      Logical :: first = .true.
 
+      Integer ::       Iprin,Nvb
+      Character(len=4) ::           cs,cd
+      COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
+
+      Integer imod, itow, isci
+
+      wmod = numbv(1)
+      wtow = numbv(2)
+      wsci = numbv(3)
+            
+      g2t_wca_volume_id = 1000000 * wmod +
+                             1000 * wtow +
+                                    wsci 
+
+      return
+
+
+      END Function g2t_wca_volume_id
+*******************************************************************************************
+      Integer Function g2t_hca_volume_id ( numbv )
+      Integer, intent(in) :: numbv(15)     
+      Logical :: first = .true.
+
+      Integer ::       Iprin,Nvb
+      Character(len=4) ::           cs,cd
+      COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
+
+      hmod = numbv(1)
+      htow = numbv(2)
+      hsci = numbv(3)
+
+ 
+
+      g2t_hca_volume_id = 1000000 * hmod +
+                             1000 * htow +
+                                    hsci 
+
+
+      END Function g2t_hca_volume_id
 *******************************************************************************************
       Function g2t_fts_volume_id ( numbv )
       Integer, intent(in) :: numbv(15)
@@ -1275,10 +1334,6 @@ c$$$    write (*,*) numbv
       endif
 
       if (subsys=2 ) then "Single or dual plane stations"
-
-
-
-
 
          if (cd=='FSIA') station = 1;
          if (cd=='FSIB') station = 2;
