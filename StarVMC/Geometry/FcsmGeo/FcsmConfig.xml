@@ -5,8 +5,8 @@
       WcalGeo0     
     </Modules>
 
-    <Setup name="WCALof" comment="off" module="WcalGeo0" onoff="off" />
-    <Setup name="WCALv0" comment="v0"  module="WcalGeo0" onoff="on"  />
+    <Setup name="WCALof" comment="off" module="WcalGeo0" onoff="off" simu="1" />
+    <Setup name="WCALv0" comment="v0"  module="WcalGeo0" onoff="on"  simu="1" />
 
   </Detector>
 
@@ -15,8 +15,8 @@
       HcalGeo0
     </Modules>
 
-    <Setup name="HCALof" comment="off" module="HcalGeo0" onoff="off" />
-    <Setup name="HCALv0" comment="v0"  module="HcalGeo0" onoff="on"  />
+    <Setup name="HCALof" comment="off" module="HcalGeo0" onoff="off" simu="1" />
+    <Setup name="HCALv0" comment="v0"  module="HcalGeo0" onoff="on"  simu="1" />
 
   </Detector>
 
@@ -25,8 +25,8 @@
       PlatGeo0
     </Modules>
 
-    <Setup name="PLATof" comment="off" module="PlatGeo0" onoff="off" />
-    <Setup name="PLATon" comment="on"  module="PlatGeo0" onoff="on"  />
+    <Setup name="PLATof" comment="off" module="PlatGeo0" onoff="off" simu="2" />
+    <Setup name="PLATon" comment="on"  module="PlatGeo0" onoff="on"  simu="2" />
 
   </Detector>
 
