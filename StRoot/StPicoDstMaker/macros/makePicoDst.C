@@ -7,6 +7,7 @@
    root.exe 'lMuDst.C(-1,"/net/l404/data/fisyak/reco/2016/AuAu200_adc/st_physics_adc_17134047_raw_3500050.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet,TTreeFile")' makePicoDst.C+
    root.exe 'lMuDst.C(-1,"/net/l401/data/scratch2/fisyak/MuDst/2016/125/17125034/st_physics_17125034_raw_1000002.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet,TTreeFile")' makePicoDst.C+
    root.exe 'lMuDst.C(-1,"/net/l404/data/fisyak/reco/2016/Hijing/VMC.Real.TFG17j/hijingAuAu200_65_1000.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet,TTreeFile")' makePicoDst.C+
+   root.exe 'lMuDst.C(-1,"root://xrdstar.rcf.bnl.gov:port//home/starlib/home/starreco/reco/AuAu62_production/ReversedFullField/P10ik/2010/078/11078018/st_physics_11078018_raw_5020001.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet,TTreeFile")' 'makePicoDst.C+("y2011")'
 */
 #include "TSystem.h"
 #include "Riostream.h"
@@ -25,7 +26,7 @@
 #else
 class StGoodTrigger;
 #endif 
-void makePicoDst(const Char_t *triggerSet = "y2016", const bool creatingPhiWgt = kFALSE, const int prodMod = 0, const int emcMode=1) {
+void makePicoDst(TString triggerSet = "y2016") {
   Int_t nEvents = 10000000;
   StBFChain *chain = (StBFChain *) StMaker::GetTopChain();
   StMuDstMaker *MuDstMaker = (StMuDstMaker *) chain->Maker("MuDst");
@@ -47,33 +48,15 @@ void makePicoDst(const Char_t *triggerSet = "y2016", const bool creatingPhiWgt =
   StMaker *tpcDB = chain->Maker("tpcDB");
   tpcDB->SetActive(kFALSE);
   StPicoDstMaker *PicoDstMaker = (StPicoDstMaker *) chain->Maker("PicoDst");
-#ifdef __Y2010__
-  PicoDstMaker->SetVxZrange(-70,70);
-  PicoDstMaker->SetVxRmax(2);
-#else /* __Y2014__ || __Y2016__ introduced 02/08/2018 for the 2-nd par of y2016 pico production*/
-  PicoDstMaker->SetVxZrange(-6,6);
-  PicoDstMaker->SetVxRmax(2);
+  if (triggerSet.Contains("y2010",TString::kIgnoreCase) || triggerSet.Contains("y2011",TString::kIgnoreCase)) {
+    PicoDstMaker->SetVxZrange(-70,70);
+    PicoDstMaker->SetVxRmax(2);
+  } else if (triggerSet.Contains("y2014",TString::kIgnoreCase) || triggerSet.Contains("y2016",TString::kIgnoreCase)) {
+    PicoDstMaker->SetVxZrange(-6,6);
+    PicoDstMaker->SetVxRmax(2);
+  }
   chain->SetAttr(".Privilege",1,"StMuDstMaker::*");
   StGoodTrigger tiggers(triggerSet);
-#endif
-#if 0  
-  if(!creatingPhiWgt&&emcMode) {
-    StEmcADCtoEMaker *adc2e = (StEmcADCtoEMaker *) chain->Maker("bemcA2E");
-    //		adc2e->setPrint(false);
-    adc2e->saveAllStEvent(true);
-    StPreEclMaker *pre_ecl = (StPreEclMaker *) chain->Maker("preecl");
-    pre_ecl->setPrint(kFALSE);
-    StEpcMaker *epc= (StEpcMaker *)  chain->Maker("epc");
-    epc->setPrint(kFALSE);
-    // Trigger simulator
-    StTriggerSimuMaker* trigSimu = (StTriggerSimuMaker *) chain->Maker("StarTrigSimu");
-    trigSimu->setMC(false);
-    trigSimu->useBemc();
-    trigSimu->useEemc();
-    trigSimu->useOnlineDB();
-    trigSimu->bemc->setConfig(StBemcTriggerSimu::kOffline);
-  }
-#endif
   chain->Init();
   chain->EventLoop(nEvents);
 }
