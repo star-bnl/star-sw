@@ -425,6 +425,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   for (v=0; v<numVtxCandidates; v++) {
     if (TrackInfomode<2) {
       pvtx = event->primaryVertex(vtxCandidates[v]);
+      if (! pvtx) continue;
       vtxPos = pvtx->position();
       vtxPosErr = pvtx->positionError();
     }
