@@ -28,6 +28,6 @@
  TFG18i Fix infinit loop in StSstUtil, add smearing of origin vx     2018-04-18 12:32:48 -0400  (HEAD, tag: TFG18i, origin/master, origin/HEAD, master)
  TFG18j iTPC Cluster Finder offline                                  2018-05-14 18:33:18 -0400  (HEAD -> master, tag: TFG18j)
  TFG18k iTPC ADC correction, revision StTpcRSMaker                   2018-06-13 18:33:18 -0400  (HEAD -> master, tag: TFG18k)
- TFG18l Freeze iTPCalignment, and 2018 isobar dE/dx calibration      2018-07-31 20:22:29 -0400  (tag: TFG18l, origin/master, origin/HEAD)
+ TFG18l Freeze iTPCalignment, and 2018 isobar dE/dx calibration      2018-08-17 16:55:15 -0400  (HEAD -> master, tag: TFG18m)
  TFG18m 2018 isobar and 27 AuAu dE/dx calibration, GN PicoDst        2018-08-17 20:22:29 -0400  (tag: TFG18m, origin/master, origin/HEAD)
  .DEV2  head of TFG git repository, no V5          

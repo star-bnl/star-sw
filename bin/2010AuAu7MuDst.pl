@@ -4,7 +4,7 @@ if ($#ARGV < 0) {
   print "Usage : $0 day\n";
   exit 0;
 }
-my $debug = 0;
+my $debug = 1;
 my $day = $ARGV[0];
 my $trigger = "AuAu7_production";
 #my @list = `get_file_list.pl -delim '/' -keys 'path,filename,events' -cond 'filetype=online_daq,filename~st_laser,tpx=1,sanity=1,runnumber>15000000,events>10' -limit 0`;

@@ -16,17 +16,18 @@ my $FCPATH = $env->{FCPATH};
 my $FFLAGS = $env->{FFLAGS};
 my $FPPFLAGS = $env->{FPPFLAGS};
 my $CPPFLAGS = $env->{CPPFLAGS};
-my $FLIBS = $env->{FLIBS};
+my $FLIBS = $env->{FLIBS};#  print "FLIBS = $FLIBS ===========================\n";
 my $PGI = $env->{ENV}->{PGI};
 my $PGILIBS = "";
-my $CLIBS = $env->{CLIBS};
+my $CLIBS = $env->{CLIBS}; # print "CLIBS = $CLIBS\n";
 print "build $pkg with cons\n";
 my $FC         = $env->{FC};
 my $FEXTEND    = $env->{FEXTEND};
 my $LD         = $env->{LD}; #!
 my $LDFLAGS    = $env->{LDFLAGS};
 #my $CERNLIBS   = $env->{CERNLIBS};
-my $CERNLIBS   = "-L$ROOTSYS/lib -lminicern";
+my $ROOTSYS    = $env->{ENV}->{ROOTSYS}; # print "ROOTSYS = $ROOTSYS\n";
+my $CERNLIBS   = "-L$ROOTSYS/lib -lminicern"; #print "CERNLIBS = $CERNLIBs =====================\n";
 my $CXX_VERSION= $env->{CXX_VERSION};
 
 
@@ -56,6 +57,7 @@ if ($FC =~ m/g77/ || $FC =~ m/gfortran/) {
 #  my $LIBIFCPATH    = `which ifort | sed -e 's|bin/ifort|lib|'`; chomp($LIBIFCPATH);
 #  $Libraries .= " " . $LIBIFCPATH . "/for_main.o"; 
 # }
+#print "Libraries = $Libraries ==================\n";
 $env2 = $env->clone('FC'           => $FC,
 		    'LD'           => $LD,
 		    'LDFLAGS'      => $LDFLAGS,
