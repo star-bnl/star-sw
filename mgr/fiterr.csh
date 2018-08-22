@@ -20,7 +20,7 @@
 # All questions to Victor Perev
 # Victor Perev Feb 17, 2007
 ############################################################################
-source ${GROUP_DIR}/.starver  DEV
+#source ${GROUP_DIR}/.starver  DEV
 #source ${GROUP_DIR}/.starver  .DEV
 echo STAR = $STAR $ROOTSYS
 
@@ -66,7 +66,7 @@ if (${daqFile:e} == "fz") touch fiterrPrepass.DONE
 if (${noPrepass}        ) touch fiterrPrepass.DONE
 
 if (!(-e fiterrPrepass.DONE)) then
-rm fit.log sti.log
+rm -f fit.log sti.log
 touch sti.log
 touch fit.log
 setenv STARNODELETE YES
@@ -79,7 +79,7 @@ root4star -b  <<EOF  >>& sti.log
 #include <stdlib.h>
 int ans =13;
 ans =prepass("$daqFile","$Opt");
-printf("ptrepass ans=%d\n",ans);\n");
+printf("ptrepass ans=%d\n",ans);
 if (ans != 99) exit(13);
 printf("exit(0)\n");
 exit(0);
@@ -107,7 +107,8 @@ echo '*** STI Started *** Iter=' $iter
 echo '*** STI Started *** Iter=' $iter >> sti.log
 
 STI:
-root4star -b  <<EOF  >>& sti.log
+#root4star -b  <<EOF  >>& sti.log
+root.exe -b  <<EOF  >>& sti.log
 .L calib/fiterrSti.C
 #include <stdlib.h>
 int ans =13;
