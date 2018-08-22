@@ -1,0 +1,1 @@
+../StRoot/GenFit/macros/streamerTest.C
