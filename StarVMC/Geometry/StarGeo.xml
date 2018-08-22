@@ -2,6 +2,103 @@
 
   <StarGeometry default="y2016" >
 
+    <!-- NOTE: the SIMU flag specified in StarGeo is not used.
+    SIMU flag must be defined withing the XXXXConfig.xml files.
+    -->
+
+
+  <!-- Quick test geometry for FTS deveolpment -->
+  <Geometry tag="test"  comment="Forward Tracking reference development">
+
+    <Construct sys="cave" config="CAVE05" simu="1" />
+      <Construct sys="upst" config="UPSTon"  />
+      <Construct sys="shld" config="SHLDon"  />
+      <Construct sys="quad" config="QUADon"  />
+      <Construct sys="magp" config="MAGPon" simu="1"/>
+      <Construct sys="pipe" config="PIPEv3a" simu="2" />
+      <Construct sys="scon" config="SCON14" simu="2" />
+      <Construct sys="tpce" config="TPCE31" simu="2"/>
+      <Construct sys="ftsd" config="FTSIv3a" simu="2" />
+
+      <Construct sys="wcal" config="WCALv0" simu="1" />
+      <Construct sys="hcal" config="HCALv0" simu="1" />
+      <Construct sys="plat" config="PLATon" simu="2" />
+   
+  </Geometry>
+
+  <!-- Quick test geometry for FTS deveolpment -->
+  <Geometry tag="fwddev0a"  comment="Forward Tracking development">
+
+    <Construct sys="cave" config="CAVE05" simu="1" />
+      <Construct sys="upst" config="UPSTon"  />
+      <Construct sys="shld" config="SHLDon"  />
+      <Construct sys="quad" config="QUADon"  />
+      <Construct sys="magp" config="MAGPon" simu="1"/>
+      <Construct sys="pipe" config="PIPEv3a" simu="2" />
+      <Construct sys="scon" config="SCON14" simu="2" />
+      <Construct sys="tpce" config="TPCE31" simu="2"/>
+      <Construct sys="ftsd" config="FTSIv3a" simu="2" />
+
+      <Construct sys="wcal" config="WCALv0" simu="1" />
+      <Construct sys="hcal" config="HCALv0" simu="1" />
+      <Construct sys="plat" config="PLATon" simu="2" />
+ 
+  </Geometry>
+  <Geometry tag="fwddev0b"  comment="Forward Tracking development">
+
+    <Construct sys="cave" config="CAVE05" simu="1" />
+      <Construct sys="upst" config="UPSTon"  />
+      <Construct sys="shld" config="SHLDon"  />
+      <Construct sys="quad" config="QUADon"  />
+      <Construct sys="magp" config="MAGPon" simu="1"/>
+      <Construct sys="pipe" config="PIPE12" simu="2" />
+      <Construct sys="scon" config="SCON14" simu="2" />
+      <Construct sys="tpce" config="TPCE31" simu="2"/>
+      <Construct sys="ftsd" config="FTSIv3b" simu="2" />
+ 
+      <Construct sys="wcal" config="WCALv0" simu="1" />
+      <Construct sys="hcal" config="HCALv0" simu="1" />
+      <Construct sys="plat" config="PLATon" simu="2" />
+ 
+  </Geometry>
+  <Geometry tag="fwddev1a"  comment="Forward Tracking development">
+
+    <Construct sys="cave" config="CAVE05" simu="1" />
+      <Construct sys="upst" config="UPSTon"  />
+      <Construct sys="shld" config="SHLDon"  />
+      <Construct sys="quad" config="QUADon"  />
+      <Construct sys="magp" config="MAGPon" simu="1"/>
+      <Construct sys="pipe" config="PIPEv3a" simu="2" />
+      <Construct sys="scon" config="SCON14" simu="2" />
+      <Construct sys="tpce" config="TPCE31" simu="2"/>
+      <Construct sys="ftsd" config="FTSIv3c" simu="2" />
+ 
+      <Construct sys="wcal" config="WCALv0" simu="1" />
+      <Construct sys="hcal" config="HCALv0" simu="1" />
+      <Construct sys="plat" config="PLATon" simu="2" />
+ 
+  </Geometry>
+  <Geometry tag="fwddev1b"  comment="Forward Tracking development">
+
+    <Construct sys="cave" config="CAVE05" simu="1" />
+      <Construct sys="upst" config="UPSTon"  />
+      <Construct sys="shld" config="SHLDon"  />
+      <Construct sys="quad" config="QUADon"  />
+      <Construct sys="magp" config="MAGPon" simu="1"/>
+      <Construct sys="pipe" config="PIPE12" simu="2" />
+      <Construct sys="scon" config="SCON14" simu="2" />
+      <Construct sys="tpce" config="TPCE31" simu="2"/>
+      <Construct sys="ftsd" config="FTSIv3d" simu="2" />
+
+      <Construct sys="wcal" config="WCALv0" simu="1" />
+      <Construct sys="hcal" config="HCALv0" simu="1" />
+      <Construct sys="plat" config="PLATon" simu="2" />
+ 
+  </Geometry>
+
+
+
+
 
   <!-- Quick test geometry for FTS deveolpment -->
   <Geometry tag="sitrver0"  comment="Forward Tracking test setup for Si tracker">
@@ -801,7 +898,9 @@
     <Construct sys="calb" config="CALB02" />
     <Construct sys="ecal" config="ECALv6" />
     <Construct sys="bbcm" config="BBCMon" />
-    <Construct sys="hcal" config="HCALv0" />
+<!--
+    <Construct sys="hcal" config="HCALvA" />
+-->
     <Construct sys="zcal" config="ZCALon" />
     <Construct sys="magp" config="MAGPon" />
     <Construct sys="sisd" config="SISD85" />
