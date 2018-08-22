@@ -1,0 +1,300 @@
+<Document file="StarVMC/Geometry/FcsmGeo/HcalGeo0.xml">
+  
+<Replace match="GeV">*1.0E+0;</Replace>
+<Replace match="MeV">*1.0E-3;</Replace>
+<Replace match="keV">*1.0E-6;</Replace>
+<Replace match="SET EmCuts(#)"  >                 
+  Call GsTPar( ag_imed, 'CUTGAM', #1_CUTGAM );
+  Call GsTPar( ag_imed, 'CUTELE', #1_CUTELE );
+  Call GsTPar( ag_imed, 'CUTHAD', #1_CUTHAD );
+  Call GsTPar( ag_imed, 'CUTNEU', #1_CUTNEU );
+  Call GsTPar( ag_imed, 'CUTMUO', #1_CUTMUO );
+  Call GsTPar( ag_imed, 'DCUTE', #1_DCUTE );  
+  Call GsTPar( ag_imed, 'DCUTM', #1_DCUTM );  
+  Call GsTPar( ag_imed, 'BCUTE', #1_BCUTE );  
+  Call GsTPar( ag_imed, 'BCUTM', #1_BCUTM );  
+</Replace>
+
+<Module name="HCALGEO0" comment=" is the Forward Calorimeter System HCal GEOmetry "  >
+
+  <Created date="   10 Aug 2018 "  />
+  <Author name="Akio Ogawa"  />
+  <CDE  >
+    AGECOM
+    GCONST
+    GCUNIT
+  </CDE>
+        
+  <Content  >
+    HMOD,HTOW,HABS,HRSP,HSCI,HWSP,HSPC
+  </Content>
+  
+  <Structure name="HVER"   > 
+    <var name="Version"   />
+  </Structure>
+        
+  <Structure name="HGEO"  >
+    <var name="Depth"   type="float"  />
+    <var name="NX"      type="float"  />
+    <var name="NY"      type="float"  />
+    <var name="DX"      type="float"  />
+    <var name="DY"      type="float"  />
+    <var name="Clearance"  type="float"  />
+    <var name="NLayer"     type="float"  />
+    <var name="DZLAY"      type="float"  />
+    <var name="DXABS"      type="float"  />
+    <var name="DYABS"      type="float"  />
+    <var name="DZABS"      type="float"  />
+    <var name="DXSCI"      type="float"  />
+    <var name="DYSCI"      type="float"  />
+    <var name="DZSCI"      type="float"  />
+    <var name="DZRSP"      type="float"  />    
+    <var name="DYSPC"      type="float"  />
+    <var name="DXWLS"      type="float"  />
+    <var name="DYWLS"      type="float"  />
+  </Structure>
+
+  <Structure name="HOFF"  >
+    <var name="NS"      type="float"  />
+    <var name="XOffset" type="float"  />
+    <var name="YOffset" type="float"  />
+    <var name="ZOffset" type="float"  />
+    <var name="Angle"   type="float"  />
+  </Structure>
+
+  <Structure name="HCUT"  >
+    <var name="CUTGAM" type="float"  />
+    <var name="CUTELE" type="float"  />
+    <var name="CUTNEU" type="float"  />
+    <var name="CUTHAD" type="float"  />
+    <var name="CUTMUO" type="float"  />
+    <var name="DCUTE" type="float"  />
+    <var name="DCUTM" type="float"  />
+    <var name="BCUTE" type="float"  />
+    <var name="BCUTM" type="float"  />
+  </Structure>
+
+  <varlist type="float">dtr,xtow,ytow,xtot,ytot,ztot</varlist>
+  <varlist type="float">a,x,y,z,aa,xx,yy,zz</varlist>
+  <varlist type="float">zsp,xsc,ysc,xab,yab,xwls,ywls,xspc,yspc</varlist>
+  <varlist type="int">ns,ix,iy,iz,i</varlist>
+
+  <Fill name="HVER" comment="FCS HCal basic data"  >
+    <var name="Version" value="1.0" comment=" Geometry version  "  />
+  </Fill>
+  <Use struct="HVER" select="version" value="1.0" />
+
+  <Fill name="HGEO" comment="FCSH HCal geometry" >
+    <var name="Depth" value="90" comment=" Box Depth "  />
+    <var name="NX" value="13" comment=" Number of tower in x "  />
+    <var name="NY" value="20" comment=" number of tower in y "  />
+    <var name="DX" value="10.0" comment=" tower size in x "  />
+    <var name="DY" value="10.0" comment=" tower size in y "  />
+    <var name="Clearance" value="0.02"  comment=" space between towers "  /> 
+    <var name="NLayer" value="36" comment=" number of steel + scinti layers "  />
+    <var name="DZLAY"  value="2.34" comment=" thickness of steel + scinti layers "  />
+    <var name="DXABS"  value="9.6" comment=" width of steel absorber"  />
+    <var name="DYABS"  value="9.8" comment=" height of steel absorber "  />
+    <var name="DZABS"  value="2.0" comment=" depth of steel abosrber "  />
+    <var name="DXSCI"  value="9.5" comment=" width of scinti "  />
+    <var name="DYSCI"  value="9.7" comment=" height of scinti "  />
+    <var name="DZSCI"  value="0.3" comment=" depth of scinti "  />
+    <var name="DZRSP"  value="1.0" comment=" depth of back steel plate "  />
+    <var name="DYSPC"  value="0.2" comment=" height of steel spacer "  />
+    <var name="DXWLS"  value="0.3" comment=" width of WLS plate "  />
+    <var name="DYWLS"  value="9.7" comment=" height of WLS plate "  />
+  </Fill>
+  <Use struct="HGEO" />
+ 
+  <Fill name="HOFF" comment="FCS HCal position Offsets " >
+    <var name="NS" value="1" comment=" North or South " />    
+    <var name="XOffset" value="18.87" comment=" tower x offset from beam to nearlest tower @ front face"  />
+    <var name="YOffset" value="0.0" comment=" tower y offset from beam to the center of whole stack"  />
+    <var name="ZOffset" value="782.63" comment=" tower z offset from IR to tower front face @ near beam "  />
+    <var name="Angle"   value="1.73" comment=" Angle aroud y axis [degree] "  />
+  </Fill>
+
+  <Fill name="HOFF" comment="FCS HCal position Offsets " >
+    <var name="NS" value="2" comment=" North or South " />    
+    <var name="XOffset" value="18.87" comment=" tower x offset from beam to nearlest tower @ front face"  />
+    <var name="YOffset" value="0.0" comment=" tower y offset from beam to the center of whole stack"  />
+    <var name="ZOffset" value="782.63" comment=" tower z offset from IR to tower front face @ near beam "  />
+    <var name="Angle"   value="1.73" comment=" Angle aroud y axis [degree] "  />
+  </Fill>
+
+  <!-- Energy cuts are based on Endcap geometry (EcalGeo6.xml, EABS/ESEN version=1) -->
+  <Fill name="HCUT" comment="E cuts in FCS HCal"  >
+    <var name="CutGAM" value="10 keV" comment=" gamma transport cut "  />
+    <var name="CutELE" value="10 keV" comment=" electron transport cut "  />
+    <var name="CutHAD" value="1 MeV" comment=" hadron transport cut "  />
+    <var name="CutNEU" value="1 MeV" comment=" neutron transport cut "  />
+    <var name="CutMUO" value="1 MeV" comment=" muon transport cut "  />
+    <var name="DCutE" value="10 keV" comment=" electron delta ray cut "  />
+    <var name="DCutM" value="10 keV" comment=" muon delta ray cut "  />
+    <var name="BCutE" value="10 keV" comment=" electron brem cut "  />
+    <var name="BCutM" value="10 keV" comment=" muon brem cut "  />    
+  </Fill>
+  <Use struct="HCUT" />
+
+  dtr=pi/180.0
+  ztot = HGEO_NLayer*HGEO_DZLAY + HGEO_DZRSP
+  xtow = HGEO_DX + HGEO_Clearance
+  ytow = HGEO_DY + HGEO_Clearance
+  xtot = xtow * HGEO_NX
+  ytot = ytow * HGEO_NY
+
+  <Info format="FCS Hcal Module xtot={10.5f}">xtot</Info>
+  <Info format="FCS Hcal Module ytot={10.5f}">ytot</Info>
+  <Info format="FCS Hcal Module ztot={10.5f}">ztot</Info>
+
+  <Create block="HMOD"  />
+  <Do var="ns" from="1" to="2"  >
+    <Use struct="HOFF" select="NS" value="ns "  />
+    a= HOFF_Angle*dtr
+    x= HOFF_XOffset + xtot/2.0*cos(a) + HGEO_Depth/2.0*sin(a)
+    y= HOFF_YOffset
+    z= HOFF_ZOffset + HGEO_Depth/2.0*cos(a) - xtot/2.0*sin(a)
+    <If expr="HOFF_NS.eq.1" >
+      x=-x 
+      aa=-HOFF_Angle
+    <Else >
+      aa=HOFF_Angle
+    </Else></If>
+
+    <Info format="FCS HCal Module xpos={10.5f}">x</Info>
+    <Info format="FCS HCal Module ypos={10.5f}">y</Info>
+    <Info format="FCS HCal Module zpos={10.5f}">z</Info>
+
+    <Placement block="HMOD" in="CAVE" group="WestRefSys" 
+	       x="x" 
+	       y="y" 
+	       z="z" 
+	       konly="ONLY" >
+      <Rotation alphay="aa"  />
+    </Placement>
+  </Do>
+  
+  <Block name="HMOD" comment="is a stack of FCS hadron module"  >
+    <Material name="Air"  />
+    <Medium name="standard"  />
+    <Attribute for="HMOD" seen="1" colo="1" fill="0" />
+    <Shape type="BOX" 
+	   dz="HGEO_Depth/2.0" 
+	   dx="xtot/2.0" 
+	   dy="ytot/2.0"  />
+    <Create block="HTOW"  />  
+    <Do var="iy" from="1" to="HGEO_NY" > 
+      yy = (HGEO_NY/2.0 - iy + 0.5) * ytow
+      <Do var="ix" from="1" to="HGEO_NX" >  
+	xx = (-HGEO_NX/2.0 + ix - 0.5) * xtow
+	<If expr="HOFF_NS.eq.1" >
+	  <Placement block="HTOW" in="HMOD" x="xx" y="yy" z="0.0" konly="ONLY" >
+	    <Rotation matrix="{-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+	  </Placement>
+	<Else >
+	  <Placement block="HTOW" in="HMOD" x="-xx" y="yy" z="0.0" konly="ONLY" >
+	    <Rotation matrix="{+1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+	  </Placement>
+	</Else ></If >
+      </Do>
+    </Do>        
+  </Block>
+  
+  <Block name="HTOW" comment="is a FCS HCal tower"  >
+    <Material name="Air" />
+    <Medium name="standard" />
+    <Attribute for="HTOW" seen="1" colo="6" fill="0" />  
+    <Shape type="BOX"
+           dz="HGEO_Depth/2.0"
+           dx="xtow/2.0"
+           dy="ytow/2.0"  />
+    
+    <Create block="HABS"  />
+    <Create block="HSPC"  />
+    <Create block="HWSP"  />
+    <Create block="HRSP"  />
+    <Create block="HSCI"  />
+    zsp = (HGEO_DZLAY - HGEO_DZABS - HGEO_DZSCI)/2.0
+    zz  = - HGEO_Depth/2.0
+    xab = - (HGEO_DX - HGEO_DXABS)/2.0
+    yab = - (HGEO_DY - HGEO_DYABS)/2.0
+    xsc = - (HGEO_DX - HGEO_DXSCI)/2.0
+    ysc = - (HGEO_DY - HGEO_DYSCI)/2.0
+    <Do var="i" from="1" to="HGEO_NLayer" >  
+      zz = zz + HGEO_DZABS/2.0  
+      <Placement block="HABS" in="HTOW" x="xab" y="yab" z="zz" konly="ONLY"  />
+      zz = zz + HGEO_DZABS/2.0 + zsp + HGEO_DZSCI/2.0  
+      <Placement block="HSCI" in="HTOW" x="xsc" y="ysc" z="zz" konly="ONLY"  />
+      zz = zz + HGEO_DZSCI/2.0 + zsp 
+    </Do>
+    zz = zz + HGEO_DZRSP/2.0
+    <Placement block="HRSP" in="HTOW" x="xab" y="yab" z="zz" konly="ONLY"  />    
+    
+    zz = - (HGEO_Depth - ztot)/2.0
+    xwls= HGEO_DX/2.0 - (HGEO_DX - HGEO_DXABS)/2.0
+    ywls= -(HGEO_DY - HGEO_DYWLS)/2.0
+    <Placement block="HWSP" in="HTOW" x="xwls" y="ywls" z="zz" konly="ONLY" />
+    xspc=0.0
+    yspc=HGEO_DY/2.0 - HGEO_DYSPC/2.0
+    <Placement block="HSPC" in="HTOW" x="xspc" y="yspc" z="zz" konly="ONLY" />
+    
+  </Block>
+  
+  <Block name="HABS" comment="is a FCS HCal tower iron absorber plate"  >
+    <Material name="iron"  />
+    <Medium name="hcal_iron" />
+    <Attribute for="HABS" lwid="1" seen="1" colo="401"  />
+    <Shape type="BOX" dz="1.0" dx="4.8" dy="4.9"  />
+    <Export language="Mortran">
+      Set EmCuts (HCUT)
+    </Export>
+  </Block>
+  
+  <Block name="HRSP" comment="is a FCS HCal tower Rear Steel Plate"  >
+    <Material name="iron"  />
+    <Medium name="hcal_iron" />
+    <Attribute for="HRSP" lwid="1" seen="0" colo="1"  />
+    <Shape type="BOX" dz="HGEO_DZRSP/2.0" dx="HGEO_DXABS/2.0" dy="HGEO_DYABS/2.0"  />
+    <Export language="Mortran">
+      Set EmCuts (HCUT)
+    </Export>
+  </Block>
+  
+  <Block name="HSCI" comment="is a FCS HCal tower Scintillator Plate"  >
+    <Material name="Polystyren"  />
+    <Medium name="hcal_scinti" isvol="1"/>
+    <Attribute for="HSCI" lwid="1" seen="1" colo="601"  />
+    <Shape type="BOX" dz="HGEO_DZSCI/2.0" dx="HGEO_DXSCI/2.0" dy="HGEO_DYSCI/2.0"  />
+    <Export language="Mortran">
+      Set EmCuts (HCUT)
+    </Export>
+    <Par name="BIRK1" value="1."  />
+    <Par name="BIRK2" value="0.013"  />
+    <Par name="BIRK3" value="9.6E-6"  />
+    <Instrument block="HSCI" > 
+      <Hit meas="birk" nbits="0" min="0" max="100"  />
+    </Instrument >
+  </Block>
+  
+  <Block name="HWSP" comment="is a FCS HCal tower WLS Plate"  >
+    <Material name="Polystyren"  />
+    <Medium name="hcal_wls" />
+    <Attribute for="HWSP" lwid="1" seen="1" colo="417"  />
+    <Shape type="BOX" dz="ztot/2.0" dx="HGEO_DXWLS/2.0" dy="HGEO_DYWLS/2.0"  />
+    <Export language="Mortran">
+      Set EmCuts (HCUT)
+    </Export>
+  </Block>
+  
+  <Block name="HSPC" comment="is a FCS HCal tower Steel Spacer"  >
+    <Material name="iron"  />
+    <Medium name="hcal_iron" />
+    <Attribute for="HSPC" lwid="1" seen="1" colo="401"  />
+    <Shape type="BOX" dz="ztot/2.0" dx="HGEO_DX/2.0" dy="HGEO_DYSPC/2.0"  />
+    <Export language="Mortran">
+      Set EmCuts (HCUT)
+    </Export>
+  </Block>
+  
+</Module>
+</Document>
