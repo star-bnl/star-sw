@@ -76,7 +76,7 @@ StMuDst::StMuDst() {
   unset();
   mCurrVertexId                 = -2;
   mCurrPrimaryTracks       = 0;
-  SetMaxTrackDca(50);
+  SetMaxTrackDca(0);
   SetMaxVertexTransError(0);
   SetVxXYrange(0,0,0,0);
   SetVxZrange(0,0);
