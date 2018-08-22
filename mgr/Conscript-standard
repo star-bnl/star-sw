@@ -650,6 +650,14 @@ if ( $pkg =~ m/^StEventDisplay/ || $#uiQT >= 0 || $OnlinePackage ) {
       }
     }
   }
+} elsif ( $pkg =~ m/^GenFit$/ ) {
+  $CPPPATH = "#" . $Dir;
+  foreach my $subdir (qw(core eventDisplay fields finitePlanes fitters GBL GFRave measurements trackReps utilities)) {
+    $CPPPATH .= $main::PATH_SEPARATOR . "#" . $Dir . "/" . $subdir . "/include";
+  }
+  $CPPPATH .= $main::PATH_SEPARATOR .  $env->{ENV}->{OPTSTAR} . "/include/eigen3";
+  if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
+  print "CPPPATH = $CPPPATH\n" if $param::debug;
 } elsif ( $pkg =~ m/^StAssociationMaker$/ ||
 	  $pkg =~ m/EmcUtil$/             ||
 	  $pkg =~ m/St_geant_Maker$/      ||
@@ -1253,7 +1261,7 @@ if ( $#idlM > -1 ) {
 if ($#srcX >= 0) {
   push @src, @srcX;
 }
-if ( $#Defs > -1 ) {
+if ( $#Defs > -1) {# &&  $pkg !~ m/^GenFit$/ ) {
   my @CintFiles = ( $PKG . "_Cint.cxx", $PKG . "_Cint.h", "LinkDef.h" );
   @Defs = script::sortu(@Defs);
   my @defs = ();
