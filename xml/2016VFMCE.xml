@@ -35,12 +35,12 @@
 #  set chain = "MC.2016a,istSlowSim"${Sti}",StiPulls,-hitfilt,KFVertex,StiHftC,beamLine,geantOut,evout,picoWrite,PicoVtxVpd,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
   set chain = "MC.2016a,istSlowSim"${Sti}",StiPulls,-hitfilt,KFVertex,StiHftC,beamLine,-geantOut,-evout,picoWrite,PicoVtxVpd,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
   set sdt = "";
-  set VMCE = "";
+  set VFMCE = "";
   echo $Name | grep -i Ideal
   if ($?) set sdt = ",sdt20160301";
   echo $Name | grep -i 20Muons
-  if ( $? ) set VMCE = ",VFMCE";
-  set Chain = ${chain}${VMCE}${sdt}",Rung."${rung}
+  if ( $? ) set VFMCE = ",VFMCE";
+  set Chain = ${chain}${VFMCE}${sdt}",Rung."${rung}
   set base = ${name}_${rung}_${f}_${N};
   set file = ${base}.MuDst.root
   set tag  = ${base}.tags.root

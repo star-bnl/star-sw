@@ -10,7 +10,7 @@ if ($#ARGV != 0) {
   $mount = $ARGV[0];
 }
 if    ($mount eq 'u'  ) { $DISK = "/direct/star+u"; $disk = "/direct/star/u";}
-elsif ($mount eq 'tpc') { $DISK = "/direct/star+subsys+tpc"; $disk = "/direct/gpfs01/star/subsys-tpc";}
+elsif ($mount eq 'tpc') { $DISK = "/direct/gpfs01/star/subsys-tpc"; $disk = "/direct/star/subsys/tpc";}
 elsif ($mount eq 'bnl') { $DISK = "/gpfs01/star/i_bnl"; $disk = "/direct/star/institutions/bnl";}
 elsif ($mount eq 'gpfs01') { $DISK = "/direct/gpfs01"; $disk = "/direct/gpfs01";}
 elsif ($mount eq 'gpfs02') { $DISK = "/direct/gpfs02"; $disk = "/direct/gpfs02";}
