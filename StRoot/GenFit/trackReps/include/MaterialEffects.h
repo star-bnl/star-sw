@@ -101,7 +101,7 @@ public:
                const double& mom, // momentum
                double& relMomLoss, // relative momloss for the step will be added
                const int& pdg,
-               Material& currentMaterial,
+               MaterialProperties& currentMaterial,
                StepLimits& limits,
                bool varField = true);
 

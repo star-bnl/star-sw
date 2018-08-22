@@ -1,12 +1,12 @@
 #pragma once
-
-#include <Eigen/Dense>
-
+#ifndef __CINT__
+#include <eigen3/Eigen/Dense>
+#endif
 namespace genfit {
     typedef double Precision;
 
     typedef Precision Scalar;
-
+#ifndef __CINT__
     typedef Eigen::Matrix<Precision, 3, 1> Vector3;
     typedef Eigen::Matrix<Precision, 5, 1> Vector5;
     typedef Eigen::Matrix<Precision, 6, 1> Vector6;
@@ -26,4 +26,5 @@ namespace genfit {
     typedef Matrix5x5 Matrix5x5Sym;
     typedef Matrix6x6 Matrix6x6Sym;
     typedef Matrix7x7 Matrix7x7Sym;
+#endif
 }

@@ -37,22 +37,11 @@ namespace genfit {
  * Ownership can be shared, e.g between multiple StateOnPlane objects.
  * The DetPlane will automatically be deleted, if no owner remains.
  */
-    typedef std::shared_ptr< genfit::DetPlane > SharedPlanePtr;
-
-    /**
-     * Class allowing to create a SharedPlanePtr from a DetPlane from Python.
-     */
-    class SharedPlanePtrCreator {
-    public:
-      /**
-       * Function which allows to create a shared plane pointer from a DetPlane.
-       * @param plane : A DetPlane.
-       * @return SharedPlanePtr : A shared plane pointer to the provided plane.
-       */
-      static SharedPlanePtr getPlanePtr(DetPlane *plane) {
-          return SharedPlanePtr(plane);
-      }
-    };
+#ifndef __CINT__
+typedef std::shared_ptr< genfit::DetPlane > SharedPlanePtr;
+#else
+class SharedPlanePtr;
+#endif
 
 } /* End of namespace genfit */
 /** @} */

@@ -158,7 +158,7 @@ double MaterialEffects::effects(const std::vector<RKStep>& steps,
         debugOut << "and noise";
       debugOut << " for ";
       debugOut << "stepSize = " << it->matStep_.stepSize_ << "\t";
-      it->matStep_.material_.Print();
+      it->matStep_.materialProperties_.Print();
     }
 
     double stepSign(1.);
@@ -167,14 +167,7 @@ double MaterialEffects::effects(const std::vector<RKStep>& steps,
     realPath = fabs(realPath);
     stepSize_ = realPath;
 
-
-    const Material& currentMaterial = it->matStep_.material_;
-    matDensity_ = currentMaterial.density;
-    matZ_ = currentMaterial.Z;
-    matA_ = currentMaterial.A;
-    radiationLength_ = currentMaterial.radiationLength;
-    mEE_ = currentMaterial.mEE;
-
+    it->matStep_.materialProperties_.getMaterialProperties(matDensity_, matZ_, matA_, radiationLength_, mEE_);
 
     if (matZ_ > 1.E-3) { // don't calculate energy loss for vacuum
 
@@ -215,7 +208,7 @@ void MaterialEffects::stepper(const RKTrackRep* rep,
                               const double& mom, // momentum
                               double& relMomLoss, // relative momloss for the step will be added
                               const int& pdg,
-                              Material& currentMaterial,
+                              MaterialProperties& currentMaterial,
                               StepLimits& limits,
                               bool varField)
 {
@@ -268,13 +261,9 @@ void MaterialEffects::stepper(const RKTrackRep* rep,
   materialInterface_->initTrack(state7[0], state7[1], state7[2],
                                 limits.getStepSign() * state7[3], limits.getStepSign() * state7[4], limits.getStepSign() * state7[5]);
 
+  materialInterface_->getMaterialParameters(matDensity_, matZ_, matA_, radiationLength_, mEE_);
+  currentMaterial.setMaterialProperties(matDensity_, matZ_, matA_, radiationLength_, mEE_);
 
-  currentMaterial = materialInterface_->getMaterialParameters();
-  matDensity_ = currentMaterial.density;
-  matZ_ = currentMaterial.Z;
-  matA_ = currentMaterial.A;
-  radiationLength_ = currentMaterial.radiationLength;
-  mEE_ = currentMaterial.mEE;
 
   if (debugLvl_ > 0) {
     debugOut << "     currentMaterial "; currentMaterial.Print();
@@ -301,6 +290,7 @@ void MaterialEffects::stepper(const RKTrackRep* rep,
   sMax = limits.getLowestLimitSignedVal();
 
   stepSize_ = limits.getStepSign() * minStep;
+  MaterialProperties materialAfter;
   M1x3 SA;
   double boundaryStep(sMax);
 
@@ -340,7 +330,7 @@ void MaterialEffects::stepper(const RKTrackRep* rep,
     materialInterface_->initTrack(state7[0], state7[1], state7[2],
                                   limits.getStepSign() * state7[3], limits.getStepSign() * state7[4], limits.getStepSign() * state7[5]);
 
-    Material materialAfter = materialInterface_->getMaterialParameters();
+    materialInterface_->getMaterialParameters(materialAfter);
 
     if (debugLvl_ > 0) {
       debugOut << "     material after step: "; materialAfter.Print();
@@ -825,12 +815,8 @@ void MaterialEffects::drawdEdx(int pdg) {
   stepSize_ = 1;
 
   materialInterface_->initTrack(0, 0, 0, 1, 1, 1);
-  auto currentMaterial = materialInterface_->getMaterialParameters();
-  matDensity_ = currentMaterial.density;
-  matZ_ = currentMaterial.Z;
-  matA_ = currentMaterial.A;
-  radiationLength_ = currentMaterial.radiationLength;
-  mEE_ = currentMaterial.mEE;
+  materialInterface_->getMaterialParameters(matDensity_, matZ_, matA_, radiationLength_, mEE_);
+
 
   double minMom = 0.00001;
   double maxMom = 10000;

@@ -1,23 +1,26 @@
+#ifdef __CINT__
+
 #pragma link off all globals;
 #pragma link off all classes;
 #pragma link off all functions;
 
+#ifdef __CLING__
 #pragma link C++ nestedclass;
 #pragma link C++ nestedtypedef;
 
 #pragma link C++ namespace genfit;
+#endif
 
 // These need no special treatment.
 #pragma link C++ class genfit::AbsFinitePlane+;
 #pragma link C++ class genfit::AbsHMatrix+;
 #pragma link C++ class genfit::RectangularFinitePlane+;
 #pragma link C++ class genfit::FitStatus+;
-#pragma link C++ class genfit::Material+;
+#pragma link C++ class genfit::MaterialProperties+;
 #pragma link C++ class genfit::PruneFlags+;
 #pragma link C++ class genfit::TrackCand+;
 #pragma link C++ class genfit::TrackCandHit+;
-#pragma link C++ class genfit::SharedPlanePtrCreator-;
-
+#pragma link C++ class genfit::Material-;
 // These inherit from classes with custom streamers, or reference shared_ptrs in their interfaces.
 #pragma link C++ class genfit::AbsTrackRep+;
 #pragma link C++ class genfit::MeasuredStateOnPlane+;
@@ -57,3 +60,6 @@
   targetClass="genfit::TrackCand"                          \
   source="" target="time_"                                 \
   code="{ time_ = 0; }"
+
+
+#endif

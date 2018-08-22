@@ -25,7 +25,7 @@
 
 #include "SharedPlanePtr.h"
 //#include "MaterialInfo.h"
-#include "Material.h"
+#include "MaterialProperties.h"
 
 #include <TVector3.h>
 #include <TObject.h>
@@ -40,7 +40,7 @@ namespace genfit {
  * @brief Simple struct containing MaterialProperties and stepsize in the material.
  */
 struct MatStep {
-  Material material_;
+  MaterialProperties materialProperties_;
   double stepSize_;
 
   MatStep() {

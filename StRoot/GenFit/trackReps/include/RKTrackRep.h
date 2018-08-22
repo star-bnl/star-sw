@@ -28,7 +28,6 @@
 #include "StateOnPlane.h"
 #include "RKTools.h"
 #include "StepLimits.h"
-#include "Material.h"
 
 #include <algorithm>
 
