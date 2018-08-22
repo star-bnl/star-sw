@@ -56,6 +56,7 @@ void makePicoDst(TString triggerSet = "y2016") {
     PicoDstMaker->SetVxZrange(-6,6);
     PicoDstMaker->SetVxRmax(2);
   }
+  PicoDstMaker->SetMaxTrackDca(0);
   chain->SetAttr(".Privilege",1,"StMuDstMaker::*");
   StGoodTrigger tiggers(triggerSet);
   chain->Init();
