@@ -748,8 +748,10 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 		      NoRowss,0,-1, 
 		      100,0.,10.,
 		      0,-1,1);
+#if 0
   static Hists3D TanL3D("TanL3D","log(dEdx/Pion)","row","Tan(#lambda)",NoRowss,200,-2.,2.); // ? mix of inner and outer
   static Hists3D TanL3DiTPC("TanL3DiTPC","log(dEdx/Pion)","row","Tan(#lambda)",NoRowss,200,-2.,2.); // ? mix of inner and outer
+#endif
   //  static Hists3D Zdc3("Zdc3","<log(dEdx/Pion)>","row","log10(ZdcCoincidenceRate)",St_tpcPadConfigC::instance()->numberOfRows(sector),100,0.,10.);
   static Hists3D Z3("Z3","<log(dEdx/Pion)>","row","Drift Distance",NoRowss,105,0,210);
   static Hists3D Z3iTPC("Z3iTPC","<log(dEdx/Pion)>","row","Drift Distance",NoRowss,105,0,210);
@@ -1142,10 +1144,12 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	//Double_t xyzD[3] = {FdEdx[k].xyzD[0],FdEdx[k].xyzD[1],FdEdx[k].xyzD[2]};
 	//Double_t Phi  = 180./TMath::Pi()*TMath::ATan2(xyz[0],xyz[1]);
 	//	Double_t PhiD = 180./TMath::Pi()*TMath::ATan2(xyzD[0],xyzD[1]); 
+#if 0
 	if (! St_tpcPadConfigC::instance()->iTPC(FdEdx[k].sector)) 
 	  TanL3D.Fill(FdEdx[k].row,FdEdx[k].TanL,Vars);
 	else 
 	  TanL3DiTPC.Fill(FdEdx[k].row,FdEdx[k].TanL,Vars);
+#endif
 	if (tpcGas) {
 	  Double_t p     = tpcGas->barometricPressure;
 	  //	  Double_t t     = tpcGas->inputGasTemperature/298.2;
