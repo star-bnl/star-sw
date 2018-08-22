@@ -71,7 +71,6 @@ void StiCATpcTrackerInterface::MakeHits()
 
       // convert to CA Hit
       AliHLTTPCCAGBHit caHit;
-      caHit.SetIRow( hitc.padrow );
 //      caHit.SetX( hit->x() );
       caHit.SetX( hit->position() ); // take position of the row
       caHit.SetY( - hit->y() );
