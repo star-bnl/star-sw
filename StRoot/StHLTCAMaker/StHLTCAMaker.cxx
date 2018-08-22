@@ -71,17 +71,17 @@ Int_t StHLTCAMaker::Make(){
   StiStEventFiller *filler = StiStEventFiller::instance();
   StEvent   *mEvent = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
   // zero all banks before filling !!! 
-  HitMapToVectorAndEndType& map =  StiToolkit::instance()->getHitContainer()->hits();
   StHLTTPCCATrackerInterface& caTrackerInt = StHLTTPCCATrackerInterface::Instance();
   caTrackerInt.SetNewEvent();
+  auto *map =  &StiToolkit::instance()->getHitContainer()->hits();
+  caTrackerInt.SetHits(*map);
   // Run reconstruction by the CA Tracker
-  caTrackerInt.SetHits(map);
   caTrackerInt.Run();
   vector<Seed_t> &seeds = caTrackerInt.GetSeeds();
 #if 0
   caTrackerInt.SetStiTracks(StiToolkit::instance()->getTrackContainer());
-#endif
   caTrackerInt.RunPerformance();
+#endif
   Int_t key = 1;
   sort(seeds.begin(), seeds.end(),StiCATpcSeedFinder::SeedsCompareStatus );
   //#define PRINT_SEED_STATISTIC
