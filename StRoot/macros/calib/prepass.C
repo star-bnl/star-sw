@@ -2,7 +2,8 @@ int prepass(const char *daqFile,const char *flg="")
 {
 gROOT->ProcessLine(".L bfc.C");
 TString opt(flg);
-opt += ",SpcChgCalG,MakeEvent,ITTF,OShortR,OSpaceZ2,MuDst,-dstout";
+//opt += ",SpcChgCalG,MakeEvent,ITTF,OShortR,OSpaceZ2,MuDst,-dstout";
+opt += ",MakeEvent,ITTF,OShortR,OSpaceZ2,MuDst,-dstout";
 bfc(0,opt,daqFile);
 chain->SetAttr(".call","SetActive(0)","MuDst");		//NO MuDst
 chain->SetAttr(".call","SetActive(0)","outputStream");	//NO Out

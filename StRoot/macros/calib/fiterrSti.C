@@ -8,8 +8,8 @@ TString opt(flg);
 printf("\n============= runsti: file=%s\n",daqFile);
 printf("============= runsti: Opt =%s\n",opt.Data());
 
-ians = bfc(-1,opt, daqFile,0,"pulls.root");
-if (ians) {printf("ERROR: bfc(-1,...) == %d\n",ians); return iAns;}
+bfc(-1,opt, daqFile,0,"pulls.root");
+//if (ians) {printf("ERROR: bfc(-1,...) == %d\n",ians); return iAns;}
 
 chain->SetAttr("dbSnapshot","dbSnapshot.root","db");		
 chain->SetAttr(".call","SetActive(0)","MuDst");		//NO MuDst
