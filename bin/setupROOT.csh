@@ -24,7 +24,8 @@ setenv SHIFTINCDIR ""#$CERN_ROOT/../../usr.local/include/shift
 setenv x11libdir /usr/X11R6/lib
 setenv xpmlibdir /usr/X11R6/lib
 setenv xftlibdir /usr/X11R6/lib
-setenv DISABLE "--disable-python --disable-qt --disable-qtgsi --disable-vc"
+#setenv DISABLE "--disable-python --disable-qt --disable-qtgsi --disable-vc"
+setenv DISABLE "--disable-qt --disable-qtgsi --disable-vc"
 #setenv MYSQL /opt/star
 #setenv MYSQLINCDIR $MYSQL/include/mysql	
 #setenv MYSQLCLILIB $MYSQL/lib/mysql
@@ -140,8 +141,20 @@ endsw
     setenv ENABLE_CXX11 ""
     setenv EXTRA_FLAGS ""
 switch ( $STAR_HOST_SYS )  
-    case *gcc7*:
+    case *_x8664_gcc7*:
      setenv ENABLE_CXX11 "--enable-cxx17"
+     setenv EXTRA_FLAGS " --cflags=-fdiagnostics-color=always --cxxflags=-fdiagnostics-color=always"
+     setenv EXTRA_FLAGS " $EXTRA_FLAGS --cxxflags=-msse --cxxflags=-msse2 --cxxflags=-msse3 --cxxflags=-msse4.1 --cxxflags=-mssse3"
+     setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=-msse --cflags=-msse2 --cflags=-msse3 --cflags=-msse4.1 --cflags=-mssse3"
+     breaksw
+    case *gcc7*:
+#     setenv ENABLE_CXX11 "--enable-cxx17"
+     setenv EXTRA_FLAGS " --cflags=-fdiagnostics-color=always --cxxflags=-fdiagnostics-color=always"
+     setenv EXTRA_FLAGS " $EXTRA_FLAGS --cxxflags=-msse --cxxflags=-msse2 --cxxflags=-msse3 --cxxflags=-msse4.1 --cxxflags=-mssse3"
+     setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=-msse --cflags=-msse2 --cflags=-msse3 --cflags=-msse4.1 --cflags=-mssse3"
+     breaksw
+    case *_x8664_ggcc6*:
+#    setenv ENABLE_CXX11 "--enable-cxx14"
      setenv EXTRA_FLAGS " --cflags=-fdiagnostics-color=always --cxxflags=-fdiagnostics-color=always"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cxxflags=-msse --cxxflags=-msse2 --cxxflags=-msse3 --cxxflags=-msse4.1 --cxxflags=-mssse3"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=-msse --cflags=-msse2 --cflags=-msse3 --cflags=-msse4.1 --cflags=-mssse3"
@@ -152,15 +165,28 @@ switch ( $STAR_HOST_SYS )
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cxxflags=-msse --cxxflags=-msse2 --cxxflags=-msse3 --cxxflags=-msse4.1 --cxxflags=-mssse3"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=-msse --cflags=-msse2 --cflags=-msse3 --cflags=-msse4.1 --cflags=-mssse3"
      breaksw
-    case *gcc5*:
-    case *gcc492*:
+    case *_x8664_gcc5*:
+    case *_x8664_gcc492*:
      setenv ENABLE_CXX11 "--enable-cxx14"
      setenv EXTRA_FLAGS " --cflags=-fdiagnostics-color=always --cxxflags=-fdiagnostics-color=always"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cxxflags=-msse --cxxflags=-msse2 --cxxflags=-msse3 --cxxflags=-msse4.1 --cxxflags=-mssse3"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=-msse --cflags=-msse2 --cflags=-msse3 --cflags=-msse4.1 --cflags=-mssse3"
      breaksw
-    case *gcc48*:
+    case *gcc5*:
+    case *gcc492*:
+#     setenv ENABLE_CXX11 "--enable-cxx14"
+     setenv EXTRA_FLAGS " --cflags=-fdiagnostics-color=always --cxxflags=-fdiagnostics-color=always"
+     setenv EXTRA_FLAGS " $EXTRA_FLAGS --cxxflags=-msse --cxxflags=-msse2 --cxxflags=-msse3 --cxxflags=-msse4.1 --cxxflags=-mssse3"
+     setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=-msse --cflags=-msse2 --cflags=-msse3 --cflags=-msse4.1 --cflags=-mssse3"
+     breaksw
+    case *_x8664_gcc48*:
      setenv ENABLE_CXX11 "--enable-cxx11"
+     setenv EXTRA_FLAGS " --cflags=-fdiagnostics-color=always --cxxflags=-fdiagnostics-color=always"
+     setenv EXTRA_FLAGS " $EXTRA_FLAGS --cxxflags=-msse --cxxflags=-msse2 --cxxflags=-msse3 --cxxflags=-msse4.1 --cxxflags=-mssse3"
+     setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=-msse --cflags=-msse2 --cflags=-msse3 --cflags=-msse4.1 --cflags=-mssse3"
+     breaksw
+    case *gcc48*:
+#     setenv ENABLE_CXX11 "--enable-cxx11"
      setenv EXTRA_FLAGS " --cflags=-fdiagnostics-color=always --cxxflags=-fdiagnostics-color=always"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cxxflags=-msse --cxxflags=-msse2 --cxxflags=-msse3 --cxxflags=-msse4.1 --cxxflags=-mssse3"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=-msse --cflags=-msse2 --cflags=-msse3 --cflags=-msse4.1 --cflags=-mssse3"
@@ -186,34 +212,52 @@ echo "EXTRA_FLAGS = $EXTRA_FLAGS"
 #setenv libdir \$\(LD_LIBRARY_PATH\)
 #setenv macrodir \$HOME/macros:./StRoot/macros:./StRoot/macros/graphics:./StRoot/macros/analysis:./StRoot/macros/test:./StRoot/macros/examples:./StRoot/macros/html:./StRoot/macros/qa:./StRoot/macros/embedding:\$\(STAR\)/StRoot/macros:\$\(STAR\)/StRoot/macros/graphics:\$\(STAR\)/StRoot/macros/analysis:\$\(STAR\)/StRoot/macros/test:\$\(STAR\)/StRoot/macros/examples:\$\(STAR\)/StRoot/macros/html:\$\(STAR\)/StRoot/macros/qa:\$\(STAR\)/StRoot/macros/embedding:\$\(ROOTSYS\)/macros:\$\(ROOTSYS\)/tutorials
 #setenv plugindir \$STAR/plugins
-./configure $ARCH --build=debug\
+#./configure $ARCH --build=debug\
+#    --build=$ROOTBUILD \
+#    --with-thread-libdir=/usr/lib \
+#    --with-afs=/usr/awsfs/lib \
+#    --with-x11-libdir=$x11libdir \
+#    --with-xpm-libdir=$xpmlibdir \
+#    --with-gsl-incdir=$GSL_DIR/include \
+#    --with-gsl-libdir=$GSL_DIR/lib \
+#    --with-pythia6-libdir=$XOPTSTAR/lib \
+#    --with-llvm-config=$ROOTSYS/../../../.sl64_gcc447/tools \
+#    --with-f77=$F77 \
+#    --with-mysql-incdir=$MYSQLINCDIR --with-mysql-libdir=$MYSQLCLILIB \
+#    --with-fftw3-incdir=$XOPTSTAR/include --with-fftw3-libdir=$XOPTSTAR/lib \
+#    --enable-builtin_ftgl       \
+#    --enable-builtin_freetype   \
+#    --enable-builtin_glew       \
+#    --enable-builtin_pcre       \
+#    --enable-builtin_zlib       \
+#    --enable-builtin_lzma       \
+#    --all \
+#    --disable-python \
+#    $DISABLE \
+#    $ENABLE_CXX11 $EXTRA_FLAGS
+#    --with-xrootd=$XOPTSTAR \
+#setenv plugindir \$STAR/plugins
+./configure $ARCH \
     --build=$ROOTBUILD \
-    --with-thread-libdir=/usr/lib \
-    --with-afs=/usr/awsfs/lib \
-    --with-x11-libdir=$x11libdir \
-    --with-xpm-libdir=$xpmlibdir \
-    --with-gsl-incdir=$GSL_DIR/include \
-    --with-gsl-libdir=$GSL_DIR/lib \
-    --with-pythia6-libdir=$XOPTSTAR/lib \
-    --with-llvm-config=$ROOTSYS/../../../.sl64_gcc447/tools \
-    --with-f77=$F77 \
-    --with-mysql-incdir=$MYSQLINCDIR --with-mysql-libdir=$MYSQLCLILIB \
-    --with-fftw3-incdir=$XOPTSTAR/include --with-fftw3-libdir=$XOPTSTAR/lib \
     --enable-builtin_ftgl       \
     --enable-builtin_freetype   \
     --enable-builtin_glew       \
     --enable-builtin_pcre       \
     --enable-builtin_zlib       \
     --enable-builtin_lzma       \
+    --with-gsl-incdir=$GSL_DIR/include \
+    --with-gsl-libdir=$GSL_DIR/lib \
+    --with-pythia6-libdir=$XOPTSTAR/lib \
+    --with-pythia8-libdir=$XOPTSTAR/lib \
+    --with-pythia8-incdir=$XOPTSTAR/include \
+    --with-mysql-incdir=$MYSQLINCDIR --with-mysql-libdir=$MYSQLCLILIB \
+    --with-fftw3-incdir=$XOPTSTAR/include --with-fftw3-libdir=$XOPTSTAR/lib \
+    --with-xrootd=$XOPTSTAR \
     --all \
-    --disable-python \
     $DISABLE \
     $ENABLE_CXX11 $EXTRA_FLAGS
-#    --with-xrootd=$XOPTSTAR \
 #unsetenv libdir 
 #unsetenv macrodir
 #unsetenv plugindir
 #    --enable-builtin_afterimage \
 #    --enable-builtin_lz4        \
-#    --with-pythia8-libdir=$XOPTSTAR/lib \
-#    --with-pythia8-incdir=$XOPTSTAR/include \
