@@ -413,7 +413,7 @@ void DrawEfficiency(Int_t k = 0, Double_t pmax = 5.0) {
     if (pTEf[i]) pTEfP[i] = pTEf[i]->ProjectionX(Form("%s_all",pTEf[i]->GetName()),-1,-1,"e");
     else         pTEfP[i] = 0;
   }
-  Double_t emin = 0.5;
+  Double_t emin = 0.0;
   //  if (k == 1) emin = 0.9;
   cTitle  = gTitle;
   TString hTitle("");
