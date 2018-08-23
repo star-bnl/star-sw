@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.171 2018/03/22 19:46:19 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.171.2.1 2018/08/23 19:45:56 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.171.2.1  2018/08/23 19:45:56  jwebb
+// Add readout for FCS
+//
 // Revision 1.171  2018/03/22 19:46:19  jwebb
 // Get the hit count right for FTS
 //
@@ -636,6 +639,7 @@
 #include "g2t/St_g2t_mtd_Module.h"
 #include "g2t/St_g2t_etr_Module.h"
 #include "g2t/St_g2t_hca_Module.h"
+#include "g2t/St_g2t_wca_Module.h"
 #include "g2t/St_g2t_fts_Module.h"
 #include "g2t/St_g2t_epd_Module.h"
 
@@ -1545,11 +1549,21 @@ Int_t St_geant_Maker::Make() {
   geant3 -> Gfnhit("HCAH","BBCB", nhit1); nhits+=nhit1;
   geant3 -> Gfnhit("HCAH","LEDG", nhit1); nhits+=nhit1; 
   geant3 -> Gfnhit("HCAH","HSTP", nhit1); nhits+=nhit1;
+
+  geant3 -> Gfnhit("HCAH","HSCI", nhit1); nhits+=nhit1;
   if ( nhits > 0 ) 
   {
     St_g2t_emc_hit *g2t_hca_hit = new St_g2t_emc_hit("g2t_hca_hit",nhits);
     AddData(g2t_hca_hit);
     iRes = g2t_hca( g2t_track, g2t_hca_hit);
+  } 
+
+  geant3 -> Gfnhit("WCAH","WSCI", nhit1); nhits+=nhit1;
+  if ( nhits > 0 ) 
+  {
+    St_g2t_emc_hit *g2t_wca_hit = new St_g2t_emc_hit("g2t_wca_hit",nhits);
+    AddData(g2t_wca_hit);
+    iRes = g2t_wca( g2t_track, g2t_wca_hit);
   } 
 
   nhits=nhit1=0;
