@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.41 2018/02/08 17:36:26 ullrich Exp $
+ * $Id: StContainers.h,v 2.41.4.1 2018/08/24 15:46:49 jwebb Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
+ * Revision 2.41.4.1  2018/08/24 15:46:49  jwebb
+ * ... and need to declare types...
+ *
  * Revision 2.41  2018/02/08 17:36:26  ullrich
  * Changed for new EPD classes.
  *
@@ -140,6 +143,7 @@ class StEtrHit;
 class StFgtHit;
 class StFgtPoint;
 class StFgtStrip;
+class StFcsHit;
 class StFmsCluster;
 class StFmsHit;
 class StFmsPoint;
@@ -207,6 +211,7 @@ StCollectionDef(EtrHit)
 StCollectionDef(FgtHit)
 StCollectionDef(FgtPoint)
 StCollectionDef(FgtStrip)
+StCollectionDef(FcsHit)
 StCollectionDef(FmsCluster)
 StCollectionDef(FmsHit)
 StCollectionDef(FmsPoint)

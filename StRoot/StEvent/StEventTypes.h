@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.49 2018/02/08 17:36:26 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.49.4.1 2018/08/24 15:46:50 jwebb Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.49.4.1  2018/08/24 15:46:50  jwebb
+ * ... and need to declare types...
+ *
  * Revision 2.49  2018/02/08 17:36:26  ullrich
  * Changed for new EPD classes.
  *
@@ -176,6 +179,7 @@
 #include "StEventClusteringHints.h"
 #include "StEventInfo.h"
 #include "StEventSummary.h"
+#include "StFcsCollection.h"
 #include "StFmsCollection.h"
 #include "StFmsCluster.h"
 #include "StFmsHit.h"
