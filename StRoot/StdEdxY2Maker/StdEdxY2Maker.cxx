@@ -79,6 +79,8 @@ static Int_t NumberOfChannels = 8;
 
 const static Double_t pMomin = 0.35; // range for dE/dx calibration
 const static Double_t pMomax = 0.75;
+Double_t StdEdxY2Maker::bField = 0;
+
 //______________________________________________________________________________
 // QA histograms
 const static Int_t  fNZOfBadHits = 11;
@@ -247,7 +249,6 @@ Int_t StdEdxY2Maker::Make(){
   St_tpcGas  *tpcGas = m_TpcdEdxCorrection->tpcGas();
   if (TESTBIT(m_Mode, kCalibration) && tpcGas) TrigHistos(1);
   StTpcCoordinateTransform transform(gStTpcDb);
-  Double_t bField = 0;
   StEvent* pEvent = dynamic_cast<StEvent*> (GetInputDS("StEvent"));
   if (!pEvent) {
     LOG_INFO << "StdEdxY2Maker: no StEvent " << endm;
@@ -366,7 +367,7 @@ Int_t StdEdxY2Maker::Make(){
 	      (row >  St_tpcPadConfigC::instance()->innerPadRows(sector) && 1390 - V > 100)) {BadHit(9,tpcHit->position()); continue;}
 	}
 	// check that helix prediction is consistent with measurement
-	if (Propagate(middle,normal,helixI,helixO,bField,xyz[0],dirG,s,w)) {BadHit(2,tpcHit->position()); continue;}
+	if (Propagate(middle,normal,helixI,helixO,xyz[0],dirG,s,w)) {BadHit(2,tpcHit->position()); continue;}
 	if (Debug() > 1) {
 	  cout << " Prediction:\t" << xyz[0] 
 	       << "\tat s=\t" << s[0] << "/" << s[1] 
@@ -376,8 +377,8 @@ Int_t StdEdxY2Maker::Make(){
 	if (dif.perp() > 2.0) {if (Debug() > 1) {cout << "Prediction is to far from hit:\t" << xyz[3] << endl;}
 	  continue;
 	}
-	if (Propagate(upper,normal,helixI,helixO,bField,xyz[1],dirG,s_out,w_out)) {BadHit(2,tpcHit->position()); continue;}
-	if (Propagate(lower,normal,helixI,helixO,bField,xyz[2],dirG,s_in ,w_in )) {BadHit(2,tpcHit->position()); continue;}
+	if (Propagate(upper,normal,helixI,helixO,xyz[1],dirG,s_out,w_out)) {BadHit(2,tpcHit->position()); continue;}
+	if (Propagate(lower,normal,helixI,helixO,xyz[2],dirG,s_in ,w_in )) {BadHit(2,tpcHit->position()); continue;}
 	dx = ((s_out[0] - s_in[0])*w[1] + (s_out[1] - s_in[1])*w[0]);
 	if (dx <= 0.0) {if (Debug() > 1) {cout << "negative dx " << dx << endl;}
 	  continue;
@@ -417,7 +418,7 @@ Int_t StdEdxY2Maker::Make(){
 				<< *PromptPlanes[l]  << endl;
 	  }
 	  // check that helix prediction is consistent with measurement
-	  if (Propagate(*((const StThreeVectorD *) &anode),PromptNormal,helixI,helixO,bField,xyz[0],dirG,s,w)) {BadHit(2,tpcHit->position()); continue;}
+	  if (Propagate(*((const StThreeVectorD *) &anode),PromptNormal,helixI,helixO,xyz[0],dirG,s,w)) {BadHit(2,tpcHit->position()); continue;}
 	  if (Debug() > 1) {
 	    cout << " Prediction:\t" << xyz[0] 
 		 << "\tat s=\t" << s[0] << "/" << s[1] 
@@ -428,8 +429,8 @@ Int_t StdEdxY2Maker::Make(){
 	    continue;
 	  }
 	  static Double_t s_inP[2], s_outP[2];
-	  if (Propagate(*((const StThreeVectorD *) &pads),PromptNormal,helixI,helixO,bField,xyz[1],dirG,s_outP,w_out)) {BadHit(2,tpcHit->position()); continue;}
-	  if (Propagate(*((const StThreeVectorD *) &gg  ),PromptNormal,helixI,helixO,bField,xyz[2],dirG,s_inP ,w_in )) {BadHit(2,tpcHit->position()); continue;}
+	  if (Propagate(*((const StThreeVectorD *) &pads),PromptNormal,helixI,helixO,xyz[1],dirG,s_outP,w_out)) {BadHit(2,tpcHit->position()); continue;}
+	  if (Propagate(*((const StThreeVectorD *) &gg  ),PromptNormal,helixI,helixO,xyz[2],dirG,s_inP ,w_in )) {BadHit(2,tpcHit->position()); continue;}
 	  s_out[0] = TMath::Min(s_outP[0], s_out[0]);
 	  s_out[1] = TMath::Min(s_outP[1], s_out[1]);
 	  s_in[0]  = TMath::Max(s_inP[0] , s_in[0] );
@@ -810,6 +811,8 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   static TH1F *BaddEdxMult70[2], *BaddEdxMultZ[2];
 #endif
   static Int_t hMade = 0;
+  static TH2F *Eta[2] = {0};     // 0 -> F, 1 -> 70
+  static TH2F *EtaiTPC[2] = {0};
   
   if (! gTrack && !hMade) {
     TFile  *f = GetTFile();
@@ -853,7 +856,16 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
       PullsiTPC[t] = new TH2F(Form("Pull%siTPC",N[t]),
 			  Form("Pull %s versus Length in iTPC",T[t]),
 			  190,10.,200,nZBins,ZdEdxMin,ZdEdxMax);
+      if (t < 2) {
+	Eta[t] = new TH2F(Form("Eta%s",N[t]),
+			  Form("%s for primary tracks versus Eta for |zPV| < 10cm and TpcLength > 40cm",T[t]),
+			  100,-2.5,2.5,500,-1.,4.);
+	EtaiTPC[t] = new TH2F(Form("EtaiTPC%s",N[t]),
+			  Form("%s for primary tracks versus Eta for |zPV| < 10cm and TpcLength > 40cm, iTPC only",T[t]),
+			      100,-2.5,2.5,500,-1.,4.);
+      }
     }
+    
     TDatime t1(tMin,0); // min Time and
     TDatime t2(tMax,0); // max 
     
@@ -997,8 +1009,9 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   };
   Bool_t iTPCOnly = kTRUE;
   for (Int_t k = 0; k < NdEdx; k++) {
-    if (St_tpcPadConfigC::instance()->iTPC(FdEdx[k].sector)) {iTPCOnly = kFALSE; break;}
+    if (! St_tpcPadConfigC::instance()->iTPC(FdEdx[k].sector)) {iTPCOnly = kFALSE; break;}
   }
+  
   for (Int_t j = 0; j < kTotalMethods; j++) {
     if (PiD.Status(kTPoints[j])) {
       TPoints[j]->Fill(PiD.fFit.TrackLength(),PiD.fFit.log2dX(),PiD.Status(kTPoints[j])->dev[kPidPion]);
@@ -1006,6 +1019,23 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
       if (iTPCOnly) {
 	TPointsiTPC[j]->Fill(PiD.fFit.TrackLength(),PiD.fFit.log2dX(),PiD.Status(kTPoints[j])->dev[kPidPion]);
 	PullsiTPC[j]->Fill(PiD.fFit.TrackLength(),PiD.Status(kTPoints[j])->devS[kPidPion]);
+      }
+      if (j < 2 && PiD.fFit.TrackLength() > 40) {
+	StTrackNode *node = gTrack->node();
+	StPrimaryTrack *pTrack = static_cast<StPrimaryTrack*>(node->track(primary));
+	if (pTrack) {
+	  StPrimaryVertex *primVx = (StPrimaryVertex *) pTrack->vertex();
+	  if (primVx) {
+	    if (TMath::Abs(primVx->position().z()) < 10) {
+	      StThreeVectorD P = pTrack->geometry()->helix().momentum(bField);
+	      Double_t eta = P.pseudoRapidity();
+	      Eta[j]->Fill(eta,PiD.Status(kTPoints[j])->dev[kPidPion]);
+	      if (iTPCOnly) {
+		EtaiTPC[j]->Fill(eta,PiD.Status(kTPoints[j])->dev[kPidPion]);
+	      }
+	    }
+	  }
+	}
       }
     }
   }
@@ -1597,7 +1627,6 @@ void StdEdxY2Maker::BadHit(Int_t iFlag, const StThreeVectorF &xyz) {
 //________________________________________________________________________________
 Int_t StdEdxY2Maker::Propagate(const StThreeVectorD &middle,const StThreeVectorD &normal,
 			       const StPhysicalHelixD &helixI, const StPhysicalHelixD &helixO,
-			       Double_t bField, 
 			       StThreeVectorD &xyz, StThreeVectorD &dirG, Double_t s[2], Double_t w[2]) {
   xyz  = StThreeVectorD();
   dirG = StThreeVectorD();

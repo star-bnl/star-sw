@@ -74,7 +74,6 @@ class StdEdxY2Maker : public StMaker {
   void   AddEdxTraits(StTrack *tracks[2], dst_dedx_st &dedx);
   static Int_t Propagate(const StThreeVectorD &middle,const StThreeVectorD &normal,
 			 const StPhysicalHelixD &helixI, const StPhysicalHelixD &helixO,
-			 Double_t bField, 
 			 StThreeVectorD &xyz, StThreeVectorD &dirG, Double_t s[2], Double_t w[2]);
   static Int_t     NdEdx;
   static dEdxY2_t *CdEdx; // corrected
@@ -91,6 +90,7 @@ class StdEdxY2Maker : public StMaker {
   StThreeVectorD      *mPromptPosition[2][2][3]; 
 #endif /* __OLD_dX_Calculation__ */
   TH2F                *mHitsUsage;//!
+  static Double_t      bField;
   Char_t              end[1];
  public:
   virtual const char *GetCVS() const {
