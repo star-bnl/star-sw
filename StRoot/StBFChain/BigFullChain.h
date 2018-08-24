@@ -1643,6 +1643,10 @@ Bfc_st BFC[] = { // standard chains
    "StFmsPointMaker","StFmsPointMaker","Fill FMS clusters and points",                              kFALSE},
   {"fmsfps"   ,"","", "event,fmsDb",
    "StFmsFpsMaker","StFmsFpsMaker","Fill FPS association in FMS points",                            kFALSE},
+  // FCS
+  {"fcsSim",""    ,"","StEvent",
+   "StFcsFastSimulatorMaker","StFcsFastSimulatorMaker","FCS Fast Simulator",                        kFALSE},
+
 
 #if 0
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
