@@ -191,6 +191,11 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"sitrver4b",   20201210,   105, "sitrver4b", ""}, // plain Si tracker
   {"sitrver4c",   20201210,   106, "sitrver4c", ""}, // plain Si tracker
 
+  {"fwddev0a",    20201210,   107, "fwddev0a",""},   // new forward tracker reference
+  {"fwddev0b",    20201210,   108, "fwddev0b",""},   // new forward tracker reference
+  {"fwddev1a",    20201210,   109, "fwddev1a",""},   // new forward tracker reference
+  {"fwddev1b",    20201210,   110, "fwddev1b",""},   // new forward tracker reference
+
 
 
   // Future development:
