@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.49 2018/02/08 17:36:26 ullrich Exp $
+ * $Id: StEvent.h,v 2.49.4.1 2018/08/24 16:06:19 jwebb Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.49.4.1  2018/08/24 16:06:19  jwebb
+ * ... updated StEvent to add FCS as well...
+ *
  * Revision 2.49  2018/02/08 17:36:26  ullrich
  * Changed for new EPD classes.
  *
@@ -190,6 +193,7 @@ class StEtrHitCollection;
 class StEmcCollection;
 class StEpdCollection;
 class StFmsCollection;
+class StFcsCollection;
 class StRichCollection;
 class StRpsCollection;
 class StTofCollection;
@@ -251,6 +255,8 @@ public:
     const StEmcCollection*              emcCollection() const;
     StFmsCollection*                    fmsCollection();
     const StFmsCollection*              fmsCollection() const;
+    StFcsCollection*                    fcsCollection();
+    const StFcsCollection*              fcsCollection() const;
     StRichCollection*                   richCollection();
     const StRichCollection*             richCollection() const;
     StRpsCollection*                    rpsCollection();
@@ -353,6 +359,7 @@ public:
     void setEmcCollection(StEmcCollection*);
     void setEpdCollection(StEpdCollection*);
     void setFmsCollection(StFmsCollection*);
+    void setFcsCollection(StFcsCollection*);
     void setRichCollection(StRichCollection*);
     void setRpsCollection(StRpsCollection*);
     void setTofCollection(StTofCollection*);
