@@ -26,7 +26,7 @@
   </CDE>
         
   <Content  >
-    HMOD,HTOW,HABS,HRSP,HSCI,HWSP,HSPC
+    HMOD,HTOW,HABS,HRSP,HSCI,HGAP,HWSP,HSPC
   </Content>
   
   <Structure name="HVER"   > 
@@ -74,9 +74,9 @@
     <var name="BCUTM" type="float"  />
   </Structure>
 
-  <varlist type="float">dtr,xtow,ytow,xtot,ytot,ztot</varlist>
-  <varlist type="float">a,x,y,z,aa,xx,yy,zz</varlist>
-  <varlist type="float">zsp,xsc,ysc,xab,yab,xwls,ywls,xspc,yspc</varlist>
+  <varlist type="float">dtr,xtow,ytow,xtot,ytot,ztot,zsci,zgap</varlist>
+  <varlist type="float">a,x,y,z,aa,xx,yy,zz,zzz</varlist>
+  <varlist type="float">xsc,ysc,xab,yab,xwls,ywls,xspc,yspc</varlist>
   <varlist type="int">ns,ix,iy,iz,i</varlist>
 
   <Fill name="HVER" comment="FCS HCal basic data"  >
@@ -96,13 +96,13 @@
     <var name="DXABS"  value="9.6" comment=" width of steel absorber"  />
     <var name="DYABS"  value="9.8" comment=" height of steel absorber "  />
     <var name="DZABS"  value="2.0" comment=" depth of steel abosrber "  />
-    <var name="DXSCI"  value="9.5" comment=" width of scinti "  />
-    <var name="DYSCI"  value="9.7" comment=" height of scinti "  />
+    <var name="DXSCI"  value="9.6" comment=" width of scinti "  />
+    <var name="DYSCI"  value="9.8" comment=" height of scinti "  />
     <var name="DZSCI"  value="0.3" comment=" depth of scinti "  />
     <var name="DZRSP"  value="1.0" comment=" depth of back steel plate "  />
     <var name="DYSPC"  value="0.2" comment=" height of steel spacer "  />
     <var name="DXWLS"  value="0.3" comment=" width of WLS plate "  />
-    <var name="DYWLS"  value="9.7" comment=" height of WLS plate "  />
+    <var name="DYWLS"  value="9.8" comment=" height of WLS plate "  />
   </Fill>
   <Use struct="HGEO" />
  
@@ -137,7 +137,9 @@
   <Use struct="HCUT" />
 
   dtr=pi/180.0
-  ztot = HGEO_NLayer*HGEO_DZLAY + HGEO_DZRSP
+  zsci = HGEO_NLayer*HGEO_DZLAY
+  zgap = (HGEO_DZLAY - HGEO_DZABS - HGEO_DZSCI)/2.0
+  ztot = zsci + HGEO_DZRSP
   xtow = HGEO_DX + HGEO_Clearance
   ytow = HGEO_DY + HGEO_Clearance
   xtot = xtow * HGEO_NX
@@ -209,47 +211,34 @@
            dx="xtow/2.0"
            dy="ytow/2.0"  />
     
-    <Create block="HABS"  />
     <Create block="HSPC"  />
     <Create block="HWSP"  />
     <Create block="HRSP"  />
     <Create block="HSCI"  />
-    zsp = (HGEO_DZLAY - HGEO_DZABS - HGEO_DZSCI)/2.0
+
+    zgap = (HGEO_DZLAY - HGEO_DZABS - HGEO_DZSCI)/2.0
     zz  = - HGEO_Depth/2.0
-    xab = - (HGEO_DX - HGEO_DXABS)/2.0
-    yab = - (HGEO_DY - HGEO_DYABS)/2.0
-    xsc = - (HGEO_DX - HGEO_DXSCI)/2.0
+    xsc = - HGEO_DXWLS/2.0 
     ysc = - (HGEO_DY - HGEO_DYSCI)/2.0
-    <Do var="i" from="1" to="HGEO_NLayer" >  
-      zz = zz + HGEO_DZABS/2.0  
-      <Placement block="HABS" in="HTOW" x="xab" y="yab" z="zz" konly="ONLY"  />
-      zz = zz + HGEO_DZABS/2.0 + zsp + HGEO_DZSCI/2.0  
-      <Placement block="HSCI" in="HTOW" x="xsc" y="ysc" z="zz" konly="ONLY"  />
-      zz = zz + HGEO_DZSCI/2.0 + zsp 
-    </Do>
-    zz = zz + HGEO_DZRSP/2.0
-    <Placement block="HRSP" in="HTOW" x="xab" y="yab" z="zz" konly="ONLY"  />    
-    
-    zz = - (HGEO_Depth - ztot)/2.0
-    xwls= HGEO_DX/2.0 - (HGEO_DX - HGEO_DXABS)/2.0
-    ywls= -(HGEO_DY - HGEO_DYWLS)/2.0
+    <Info format="FCS HCal Scinti xpos={10.5f}">xsc</Info>
+    <Info format="FCS HCal Scinti ypos={10.5f}">ysc</Info>
+    zz = zz + zsci/2.0
+    <Placement block="HSCI" in="HTOW" x="xsc" y="ysc" z="zz" konly="ONLY"  />
+    zz = zz + zsci/2.0 + HGEO_DZRSP/2.0
+    <Placement block="HRSP" in="HTOW" x="xsc" y="ysc" z="zz" konly="ONLY"  />        
+
+    zz = -HGEO_Depth/2.0 + ztot/2.0
+    xwls= +HGEO_DX/2.0 - HGEO_DXWLS/2.0
+    ywls= - (HGEO_DY - HGEO_DYWLS)/2.0
     <Placement block="HWSP" in="HTOW" x="xwls" y="ywls" z="zz" konly="ONLY" />
+
+    zz = -HGEO_Depth/2.0 + ztot/2.0
     xspc=0.0
     yspc=HGEO_DY/2.0 - HGEO_DYSPC/2.0
     <Placement block="HSPC" in="HTOW" x="xspc" y="yspc" z="zz" konly="ONLY" />
     
   </Block>
-  
-  <Block name="HABS" comment="is a FCS HCal tower iron absorber plate"  >
-    <Material name="iron"  />
-    <Medium name="hcal_iron" />
-    <Attribute for="HABS" lwid="1" seen="1" colo="401"  />
-    <Shape type="BOX" dz="1.0" dx="4.8" dy="4.9"  />
-    <Export language="Mortran">
-      Set EmCuts (HCUT)
-    </Export>
-  </Block>
-  
+    
   <Block name="HRSP" comment="is a FCS HCal tower Rear Steel Plate"  >
     <Material name="iron"  />
     <Medium name="hcal_iron" />
@@ -264,18 +253,51 @@
     <Material name="Polystyren"  />
     <Medium name="hcal_scinti" isvol="1"/>
     <Attribute for="HSCI" lwid="1" seen="1" colo="601"  />
-    <Shape type="BOX" dz="HGEO_DZSCI/2.0" dx="HGEO_DXSCI/2.0" dy="HGEO_DYSCI/2.0"  />
+    <Shape type="BOX" dz="zsci/2.0" dx="HGEO_DXSCI/2.0" dy="HGEO_DYSCI/2.0"  />
     <Export language="Mortran">
       Set EmCuts (HCUT)
     </Export>
     <Par name="BIRK1" value="1."  />
     <Par name="BIRK2" value="0.013"  />
     <Par name="BIRK3" value="9.6E-6"  />
-    <Instrument block="HSCI" > 
-      <Hit meas="birk" nbits="0" min="0" max="100"  />
+    <Instrument block="HSCI" >
+      <Hit meas="birk" nbits="0" min="0" max="100" opts="c" />
     </Instrument >
+
+    <Create block="HABS"  />
+    <Create block="HGAP"  />
+    zzz=-zsci/2.0
+    <Do var="i" from="1" to="HGEO_NLayer" >  
+      zzz = zzz + HGEO_DZABS/2.0  
+      <Placement block="HABS" in="HSCI" x="0" y="0" z="zzz" konly="ONLY"  /> 
+      zzz = zzz + HGEO_DZABS/2.0 + zgap/2.0
+      <Placement block="HGAP" in="HSCI" x="0" y="0" z="zzz" konly="ONLY"  />
+      zzz = zzz + zgap/2.0 +  HGEO_DZSCI + zgap/2.0
+      <Placement block="HGAP" in="HSCI" x="0" y="0" z="zzz" konly="ONLY"  />
+      zzz = zzz + zgap/2.0
+    </Do>
   </Block>
-  
+
+  <Block name="HABS" comment="is a FCS HCal tower iron absorber plate"  >
+    <Material name="iron"  />
+    <Medium name="hcal_iron" isvol="0" />
+    <Attribute for="HABS" lwid="1" seen="1" colo="401"  />
+    <Shape type="BOX" dz="HGEO_DZABS/2.0" dx="HGEO_DXABS/2.0" dy="HGEO_DYABS/2.0"  />
+    <Export language="Mortran">
+      Set EmCuts (HCUT)
+    </Export>
+  </Block>
+
+  <Block name="HGAP" comment="is a FCS HCal tower gap between scinti and absorber"  >
+    <Material name="Air"  />
+    <Medium name="Standard" isvol="0" />
+    <Attribute for="HABS" lwid="1" seen="1" colo="401"  />
+    <Shape type="BOX" dz="zgap/2.0" dx="HGEO_DXSCI/2.0" dy="HGEO_DYSCI/2.0"  />
+    <Export language="Mortran">
+      Set EmCuts (HCUT)
+    </Export>
+  </Block>
+
   <Block name="HWSP" comment="is a FCS HCal tower WLS Plate"  >
     <Material name="Polystyren"  />
     <Medium name="hcal_wls" />
