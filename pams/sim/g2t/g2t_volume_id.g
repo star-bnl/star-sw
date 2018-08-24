@@ -1,5 +1,9 @@
-* $Id: g2t_volume_id.g,v 1.87.2.4 2018/08/20 20:11:11 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.87.2.5 2018/08/24 14:22:37 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.87.2.5  2018/08/24 14:22:37  jwebb
+* Akio's reorganization of the tower structure, in order that single track
+* produces a single hit per tower per event.
+*
 * Revision 1.87.2.4  2018/08/20 20:11:11  jwebb
 * g2t_volume_id assigned for FCS.
 *
@@ -1094,8 +1098,8 @@ c$$$    write (*,*) numbv
 *******************************************************************************************
        elseif (Csys=='etr') then
 
-          sector = MOD( (numbv(1)-1), 12 );   "Sectors count from 0 - 11"
-          layer  =      (numbv(1)-1)/ 12;     "Layers  count from 0 - 2"
+          sector = MOD( (numbv(1)-1), 12 ); "Sectors count from 0 - 11"
+          layer  =      (numbv(1)-1)/ 12;   "Layers  count from 0 - 2"
           section= numbv(2) - 1
 
           """ sector  from 0 - 11  (phi division)      """
@@ -1105,10 +1109,11 @@ c$$$    write (*,*) numbv
           volume_id = section + 100*layer + 10000*sector
 
           <W> numbv(1), numbv(2), sector, layer, section, volume_id; 
-    ('numbv =',I4,2X,I4,' sector=',I4,' layer=',I4,' section=',I4,' vid=', I7);
+          ('numbv =',I4,2X,I4,' sector=',I4,' layer=',I4,' section=',I4,' vid=', I7);
 
 
 *******************************************************************************************
+
       elseif (Csys=='wca') then
 
            volume_id = g2t_wca_volume_id( numbv )
@@ -1231,7 +1236,6 @@ c$$$    write (*,*) numbv
           print *,' G2T warning: volume  ',Csys,'  not found '  
       endif
 
-
     g2t_volume_id = volume_id
 
     end
@@ -1246,18 +1250,11 @@ c$$$    write (*,*) numbv
       Character(len=4) ::           cs,cd
       COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
 
-      Integer imod, itow, isci
-
+      Integer imod, itow
       wmod = numbv(1)
-      wtow = numbv(2)
-      wsci = numbv(3)
-            
-      g2t_wca_volume_id = 1000000 * wmod +
-                             1000 * wtow +
-                                    wsci 
-
+      wtow = numbv(2)            
+      g2t_wca_volume_id = 1000 * wmod + wtow 
       return
-
 
       END Function g2t_wca_volume_id
 *******************************************************************************************
@@ -1269,16 +1266,12 @@ c$$$    write (*,*) numbv
       Character(len=4) ::           cs,cd
       COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
 
+      integer hmod,htow
       hmod = numbv(1)
       htow = numbv(2)
       hsci = numbv(3)
-
- 
-
-      g2t_hca_volume_id = 1000000 * hmod +
-                             1000 * htow +
-                                    hsci 
-
+      g2t_hca_volume_id = 1000 * hmod + htow
+      return
 
       END Function g2t_hca_volume_id
 *******************************************************************************************
