@@ -1007,11 +1007,13 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 			<< " is wrong = " << PiD.fFit.Pred[kPidPion] << " <<<<<<<<<<<<<" << endl;
     return;
   };
-  Bool_t iTPCOnly = kTRUE;
+  Int_t noiTPC = 0;
   for (Int_t k = 0; k < NdEdx; k++) {
-    if (! St_tpcPadConfigC::instance()->iTPC(FdEdx[k].sector)) {iTPCOnly = kFALSE; break;}
+    if (St_tpcPadConfigC::instance()->iTPC(FdEdx[k].sector) &&
+	St_tpcPadConfigC::instance()->IsRowInner(FdEdx[k].sector, FdEdx[k].row))
+      noiTPC++;
   }
-  
+  Bool_t iTPCOnly = (noiTPC >= 20);
   for (Int_t j = 0; j < kTotalMethods; j++) {
     if (PiD.Status(kTPoints[j])) {
       TPoints[j]->Fill(PiD.fFit.TrackLength(),PiD.fFit.log2dX(),PiD.Status(kTPoints[j])->dev[kPidPion]);
