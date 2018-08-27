@@ -85,7 +85,7 @@ class StiMaker : public StMaker
     TTree 	        *mPullTTree;
     int 	        mPullHits[3];//number of hits filled. See FillPulls
     int                 mTotPrimTks[2];
-    TStopwatch          *mTimg[5];   //HitLoad,GloTrks,Vtx,PriTrks,StFill
+    TStopwatch          *mTimg[6];   //HitLoad,GloTrks,Vtx,PriTrks,StFill,HLTCA
     ClassDef(StiMaker,0)
 };
 

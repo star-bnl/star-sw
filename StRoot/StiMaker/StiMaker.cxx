@@ -135,7 +135,7 @@ More detailed: 				<br>
 /// But zero errors could to unpredicted problems
 /// Now minimal possible error is 1 micron
 static const float MIN_VTX_ERR2 = 1e-4*1e-4;
-enum { kHitTimg,kGloTimg,kVtxTimg,kPriTimg,kFilTimg};
+enum { kHitTimg,kGloTimg,kVtxTimg,kPriTimg,kFilTimg,kHLTCATimg};
 
 void CountHits();
 ClassImp(StiMaker)
@@ -213,7 +213,7 @@ Int_t StiMaker::Finish()
   StiTimer::Clear();
 
   if (mTimg[0]) {
-    static const char *timg[] = {"HitLoa","GlobFnd","VtxFnd","PriFnd","FilFnd",0};
+    static const char *timg[] = {"HitLoa","GlobFnd","VtxFnd","PriFnd","FilFnd","HLTCA",0};
     for (int i=0;timg[i];i++) {
       Info("Timing","%s(%d) \tCpuTime = %6.2f seconds,\tPerEvent = %g seconds"
       ,timg[i],mTimg[i]->Counter(),mTimg[i]->CpuTime()
