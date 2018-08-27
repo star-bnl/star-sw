@@ -256,6 +256,8 @@ StBFChain *bfc(Int_t First, Int_t Last,
   if (Last < 0) return chain;
   StMaker *dbMk = chain->GetMaker("db");
   if (dbMk) dbMk->SetDebug(1);
+  StMaker *sti  = chain->GetMaker("Sti");
+  if (sti) sti->SetAttr("useTiming",1);
 #if 0
   // Insert your maker before "tpc_hits"
   Char_t *myMaker = "St_TLA_Maker";
