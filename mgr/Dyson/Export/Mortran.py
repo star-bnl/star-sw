@@ -453,6 +453,7 @@ class Setup( Handler ):
         self.comment = attr.get('comment', None)
         self.module  = attr.get('module',  None)
         self.onoff   = attr.get('onoff',   None)
+        self.runtime = attr.get('runtime', None)
         self.detector = self.parent.name
 
         # Flags set by agsflag
@@ -495,8 +496,10 @@ class Setup( Handler ):
 
             #
             # Configuration of detector parameters
-            # 
-            formatter( "Call AgDetp NEW('%s')"%name )
+            #
+            if ( self.runtime == None or self.runtime == 'False' ):
+                formatter( "Call AgDetp NEW('%s')"%name )
+                
             for i in self.inits:
                 value = i.value
                 value = value.strip('{}')
