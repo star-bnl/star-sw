@@ -10,6 +10,7 @@
     <Setup  name   = "KLUDon"
 	    comment= "Default configuration for the Beam Beam counter"
 	    module = "KludGeo"
+	    runtime= "True"
 	    onoff  = "on"
 	    simu   = "2">
 
