@@ -59,6 +59,17 @@
 	       rmax  ="KTUB_rmx(i)"
 	       dz    ="KTUB_dz(i)"
 	       />
+
+
+    <Info format="KludGeo: Place effective tube {2i}">i</Info>
+    <Info format="KludGeo: z =           {7.2f}">KTUB_z(i)</Info>
+    <Info format="KludGeo: dz =          {7.3f}">KTUB_dz(i)</Info>
+    <Info format="KludGeo: rmin =        {7.3f}">KTUB_rmn(i)</Info>
+    <Info format="KludGeo: rmax =        {7.3f}">KTUB_rmx(i)</Info>
+    <Info format="KludGeo: A =           {7.2f}">KTUB_aa(i)</Info>
+    <Info format="KludGeo: Z =           {7.2f}">KTUB_zz(i)</Info>
+    <Info format="KludGeo: dens =        {7.2f}">KTUB_dd(i)</Info>
+
   </Do>
 
 
@@ -71,6 +82,7 @@
 	      rmin="0" 
 	      rmax="0" 
 	      dz="0" />
+
   </Volume>
 
 
