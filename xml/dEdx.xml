@@ -13,13 +13,13 @@
   set fileB = `basename ${INPUTFILE0}`;
   set file = `basename ${fileB} .event.root`;
   echo "${file}"
-  cp ${INPUTFILE0} ${fileB}
+#  cp ${INPUTFILE0} ${fileB}
   set logFile  = ${SUBMITTINGDIRECTORY}/${file}B.log
 #  set f=`find . -maxdepth 1 -type f -name "*${file}*.root"`
 #  if ("${f}" == "") then
-#    root.exe -x -q -b 'dEdx.C(1000000,"'${INPUTFILE0}'","'${file}'.root",2)' &gt;&amp; ${logFile}
-    root.exe -x -q -b 'dEdx.C(1000000,"'${fileB}'","'${file}'.root",2)' &gt;&amp; ${logFile}
-   rm ${fileB}
+    root.exe -x -q -b 'dEdx.C(1000000,"'${INPUTFILE0}'","'${file}'.root",2)' &gt;&amp; ${logFile}
+#    root.exe -x -q -b 'dEdx.C(1000000,"'${fileB}'","'${file}'.root",2)' &gt;&amp; ${logFile}
+#   rm ${fileB}
    cp *.root ${SUBMITTINGDIRECTORY} 
 #  endif
 </command>
