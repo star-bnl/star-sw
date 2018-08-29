@@ -535,9 +535,9 @@ Int_t StarPrimaryMaker::Finalize()
 	  Double_t pz   = particle->GetPz();
 	  Double_t E    = particle->GetEnergy();
 	  Double_t M    = particle->GetMass();
-	  Double_t vx   = particle->GetVx();
-	  Double_t vy   = particle->GetVy();
-	  Double_t vz   = particle->GetVz();
+	  Double_t vx   = particle->GetVx() / 10; // mm --> cm as per the HEPEVT standard  
+	  Double_t vy   = particle->GetVy() / 10; // mm --> cm
+	  Double_t vz   = particle->GetVz() / 10; // mm --> cm 
 	  Double_t vt   = particle->GetTof();
 
 	  Double_t polx=0, poly=0, polz=0;
@@ -548,6 +548,7 @@ Int_t StarPrimaryMaker::Finalize()
 	  Int_t    kid2    = particle->GetLastDaughter();
 	  Int_t    id      = particle->GetId();
 	  Int_t    status  = particle->GetStatus();
+
 	  Double_t weight  = 1.0;
 
 	  //
@@ -660,10 +661,10 @@ void StarPrimaryMaker::BuildTables()
 
   // Create g2t_event and g2t_particle tables for geant maker.  
   St_g2t_event    *g2t_event    = new St_g2t_event( "event", 1 );
-  m_DataSet -> Add( g2t_event );
+  AddData( g2t_event );
   if ( mNumParticles ) {
     St_particle *g2t_particle = new St_particle( "particle", mNumParticles );
-    m_DataSet -> Add( g2t_particle );
+    AddData( g2t_particle );
   }
   // note: m_DataSet owns the new object(s) and is responsible for cleanup
    

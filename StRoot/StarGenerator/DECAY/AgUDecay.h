@@ -7,6 +7,7 @@
 class TClonesArray;
 
 class TVirtualMCDecayer;
+class TParticle;
 
 /**!
    \class AgUDecay
@@ -27,7 +28,7 @@ public:
     return d;
   };
 
-  Int_t operator()();
+  int operator()();
 
   enum DiscoveryPolicy_t 
     {
@@ -36,12 +37,15 @@ public:
     };
 
   void SetDiscovery( DiscoveryPolicy_t p ){ mDiscovery = p; }
-    
+
+  /// Debug method.  Will throw an exception when pdgid is decayed.
+  static void setParticleStop( const int pdgid ){ mParticleStop[pdgid]=1; }    
  
 private:
 protected:
 
   AgUDecay();
+  virtual ~AgUDecay(); 
 
   static AgUDecay sInstance;
 
@@ -51,6 +55,13 @@ protected:
 
   DiscoveryPolicy_t mDiscovery;
   int mNextG3id;
+
+  static std::map<int, int> mParticleStop;
+
+  double StackParticleForTransport( const TParticle* particle );
+  bool MayTransport( const TParticle* particle );
+
+  int mNonConservation;
 
   ClassDef(AgUDecay,1);
 };

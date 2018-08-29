@@ -10,7 +10,7 @@ class StarGenEvent;
 StarGenEvent   *event       = 0;
 
 class StarPrimaryMaker;
-StarPrimaryMaker *primary   = 0;
+StarPrimaryMaker *_primary   = 0;
 
 //class StarHerwig6;
 //StarHerwig6 *gHerwig        = 0;
@@ -35,7 +35,7 @@ void trig( Int_t n=1 )
   for ( Int_t i=0; i<n; i++ ) {
     chain->Clear();
     chain->Make();
-    primary->event()->Print();     // Print the primary event
+    _primary->event()->Print();     // Print the primary event
   }
 }
 // ----------------------------------------------------------------------------
@@ -58,7 +58,7 @@ void Herwig6( TString mode="pp" )
     herwig6->SetProcess(1000);
   }
     
-  primary->AddGenerator(herwig6);
+  _primary->AddGenerator(herwig6);
 }
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -90,10 +90,10 @@ void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
   // before the geant maker
   //
   //  StarPrimaryMaker *
-  primary = new StarPrimaryMaker();
+  _primary = new StarPrimaryMaker();
   {
-    primary -> SetFileName( "Herwig6.starsim.root");
-    chain -> AddBefore( "geant", primary );
+    _primary -> SetFileName( "Herwig6.starsim.root");
+    chain -> AddBefore( "geant", _primary );
   }
 
   //
@@ -104,7 +104,7 @@ void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
   //
   // Initialize primary event generator and all sub makers
   //
-  primary -> Init();
+  _primary -> Init();
 
   //
   // Setup geometry and set starsim to use agusread for input

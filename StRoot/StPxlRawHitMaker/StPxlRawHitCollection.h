@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlRawHitCollection.h,v 1.4 2014/08/06 11:43:35 jeromel Exp $
+ * $Id: StPxlRawHitCollection.h,v 1.5 2017/08/28 17:05:16 dongx Exp $
  *
  * Author: Qiu Hao, March 2013
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlRawHitCollection.h,v $
+ * Revision 1.5  2017/08/28 17:05:16  dongx
+ * Append rawHits to StPxlRawHitCollection only if exists - for simu/embedding
+ *
  * Revision 1.4  2014/08/06 11:43:35  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
  *
@@ -39,9 +42,10 @@ public:
    StPxlRawHitCollection();
    void addRawHit(const StPxlRawHit &rawHit); ///< add a raw hit to the collection
    Int_t numberOfRawHits(Int_t sector, Int_t ladder, Int_t sensor); ///< number of raw hits in a sensor
+   Int_t numberOfRawHits();
    const StPxlRawHit *rawHit(Int_t sector, Int_t ladder, Int_t sensor, Int_t rawHitIndex) const; ///< pionter to a rawHit in the collection
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlRawHitCollection.h,v 1.4 2014/08/06 11:43:35 jeromel Exp $ built " __DATE__ " " __TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlRawHitCollection.h,v 1.5 2017/08/28 17:05:16 dongx Exp $ built " __DATE__ " " __TIME__ ;
       return cvs;
    }
 

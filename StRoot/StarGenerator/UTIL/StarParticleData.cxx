@@ -42,7 +42,11 @@ class G3TrackingCode : public StarTrackingCode {
 public:
   virtual Int_t operator()( Int_t ipdg )
   { 
-    return TDatabasePDG::Instance()->ConvertPdgToGeant3(ipdg); 
+    int g3id = TDatabasePDG::Instance()->ConvertPdgToGeant3(ipdg); 
+    if ( ipdg == 12 || ipdg == -12 ) g3id = 4; // nu_e
+    if ( ipdg == 14 || ipdg == -14 ) g3id = 4; // nu_mu
+    if ( ipdg == 16 || ipdg == -16 ) g3id = 4; // nu_tau
+    return g3id;
   }
 };
 

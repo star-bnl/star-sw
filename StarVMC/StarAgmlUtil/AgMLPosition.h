@@ -17,16 +17,16 @@ public:
   /// be multiplied by the matrix accessed from the DB.
   /// @param tablename Name of the table in the DB
   /// @param options Delimited list of options.  "invert" will perform the inverse transformation.
-  bool Misalign( const char* tablename=0, const int rownumber=0, const char* options="" ) { return false; }
+  bool Misalign( const char* tablename=0, const int rownumber=0, const char* options="" );
 
   /// Reset state of transofmation matrix and apply alternate positioning based on DB table.
   bool Alternate( const char* tablename=0, const int rownumber=0, const char* options="" ){ return false; }
 
-  /// Apply specified matrix as a misalignment.  
-  bool Misalign( const double trn[4][4], const char *options="" );
+  // /// Apply specified matrix as a misalignment.  
+  // bool Misalign( const double trn[4][4], const char *options="" );
 
-  /// Reset state of transofrmation matrix and apply the specified matrix instead.
-  bool Alternate( const double trn[4][4], const char* options="" );
+  // /// Reset state of transofrmation matrix and apply the specified matrix instead.
+  // bool Alternate( const double trn[4][4], const char* options="" );
    
   /// Perform translation
   void Translate( const double x, const double y, const double z );
@@ -54,14 +54,17 @@ public:
   };
   
   /// Order of operations
-  void SetOrder( OrderOps_t order ){ mOrderOps = order; }
+  void SetOrder( OrderOps_t order );//{ mOrderOps = order; }
+  int  GetOrder(){ return mOrderOps; }
+
+  // big question w/ code below... getting X for general transform?
 
   /// Get X position
-  double GetX(){ return mX; }
+  double GetX();
   /// Get Y position
-  double GetY(){ return mY; }
+  double GetY();
   /// Get Z position
-  double GetZ(){ return mZ; }
+  double GetZ();
 
   /// Return the six G3 angles which correspond to the current state of the rotation matrix.
   void GetAngles( float& thetax, float& phix, 

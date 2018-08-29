@@ -11,28 +11,28 @@
 
   <Setup name="MUTDof" comment="OFF" module="MutdGeo" onoff="off" />
 
-  <Setup name="MUTD01" comment="Muon Telescope" module="MutdGeo"  onoff="on" />
-  <Setup name="MUTD02" comment="Muon Telescope" module="MutdGeo2" onoff="on" />
-  <Setup name="MUTD03" comment="Muon Telescope" module="MutdGeo3" onoff="on" />
-  <Setup name="MUTD04" comment="Muon Telescope" module="MutdGeo4" onoff="on"  >
+  <Setup name="MUTD01" comment="Muon Telescope" module="MutdGeo"  onoff="on" simu="1" />
+  <Setup name="MUTD02" comment="Muon Telescope" module="MutdGeo2" onoff="on" simu="1" />
+  <Setup name="MUTD03" comment="Muon Telescope" module="MutdGeo3" onoff="on" simu="1" />
+  <Setup name="MUTD04" comment="Muon Telescope" module="MutdGeo4" onoff="on" simu="1"  >
     <Init struct="mtdg" var="config" value="4.0" />
   </Setup>
-  <Setup name="MUTD05" comment="Muon Telescope" module="MutdGeo4" onoff="on"  >
+  <Setup name="MUTD05" comment="Muon Telescope" module="MutdGeo4" onoff="on" simu="1"  >
     <Init struct="mtdg" var="config" value="5.0" />
   </Setup>
-  <Setup name="MUTD12" comment="Muon Telescope" module="MutdGeo4" onoff="on"  >
+  <Setup name="MUTD12" comment="Muon Telescope" module="MutdGeo4" onoff="on" simu="1"  >
     <Init struct="mtdg" var="config" value="12.0" />
   </Setup>
-  <Setup name="MUTD13" comment="Muon Telescope" module="MutdGeo4" onoff="on"  >
+  <Setup name="MUTD13" comment="Muon Telescope" module="MutdGeo4" onoff="on" simu="1"  >
     <Init struct="mtdg" var="config" value="13.0" />
   </Setup>
-  <Setup name="MUTD14" comment="Muon Telescope" module="MutdGeo5" onoff="on"  >
+  <Setup name="MUTD14" comment="Muon Telescope" module="MutdGeo5" onoff="on" simu="1"  >
     <Init struct="mtdg" var="config" value="14.0" />
   </Setup>
-  <Setup name="MUTD15" comment="Muon Telescope" module="MutdGeo7" onoff="on"  >
+  <Setup name="MUTD15" comment="Muon Telescope" module="MutdGeo7" onoff="on" simu="2"  >
     <Init struct="mtdg" var="config" value="15.0" />
   </Setup>
-  <Setup name="MUTD16" comment="Muon Telescope" module="MutdGeo7" onoff="on"  >
+  <Setup name="MUTD16" comment="Muon Telescope" module="MutdGeo7" onoff="on" simu="2"  >
     <Init struct="mtdg" var="config"  value="16.0" />
     <Init struct="mtdg" var="version" value="1.1" />
   </Setup>

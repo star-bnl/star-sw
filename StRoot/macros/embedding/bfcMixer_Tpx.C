@@ -4,9 +4,33 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.40 2016/04/05 13:32:45 zhux Exp $
+// $Id: bfcMixer_Tpx.C,v 1.48 2018/01/11 19:06:26 genevb Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.48  2018/01/11 19:06:26  genevb
+// Update B/EEMC simulation chain options and maker ordering
+//
+// Revision 1.47  2017/11/04 03:12:53  zhux
+// added P16ig Run14 AuAu200 st_WB chain
+//
+// Revision 1.46  2017/10/13 05:36:18  zhux
+// added lines for pvranking/primemode cut switches. the default is off.
+//
+// Revision 1.45  2017/10/12 13:31:06  zhux
+// add "Run9 pp500 P16ib" chain setting.
+//
+// Revision 1.44  2017/10/12 13:02:27  zhux
+// added run15 pp200 pAu200 chains
+//
+// Revision 1.43  2017/10/02 09:28:09  zhux
+// added chain for Run15 FXT AuAu4.5/AuAl4.9
+//
+// Revision 1.42  2017/10/02 04:22:05  zhux
+// updated run14 auau200 HFT chain. removed 'NoPXLIT,NoSstIT,NoIstIT' from the chain, removed pxlhit,isthit from the chain.
+//
+// Revision 1.41  2017/08/09 09:13:24  zhux
+// added run14 auau200 (p16id) chain
+//
 // Revision 1.40  2016/04/05 13:32:45  zhux
 // added chain for : Run13 pp500; Run14 AuAu200 HFT & MTD; Run12 CuAu200.
 //
@@ -133,14 +157,33 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   // Run14 AuAu15 chain
   TString prodP14iiAuAu15("DbV20150110,P2014a,btof,mtd,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt");
 
-  // Run14 AuAu200 chain
-  TString prodP15icAuAu200("DbV20150316,P2014a,pxlHit,istHit,btof,mtd,mtdCalib,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt");
+  // Run14 AuAu200 chain (P15ic) (NO PXL/IST hits)
+  TString prodP15icAuAu200("DbV20150316,P2014a,btof,mtd,mtdCalib,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt");
 
   // Run14 AuAu200 MTD chain
   TString prodP15ieAuAu200("DbV20150504,P2014a,btof,mtd,mtdCalib,pxlHit,istHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt");
 
   // Run12 CuAu200 chain
   TString prodP15ieCuAu200("DbV20150529,P2012b,AgML,mtd,btof,fmsDat,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt");
+
+  // Run14 AuAu200 chain (P16id) (NO PXL/IST hits)
+  TString prodP16idAuAu200("DbV20160418,P2014a,btof,mtd,mtdCalib,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt");
+
+  // Run15 AuAu4.5 fxt chain
+  TString prodP16iaAuAu5("DbV20160126,DbV20150920_tpc_Calibrations,P2015b,mtd,btof,BEmcChkStat,CorrX,VFMCE,TpxClu,-VFMinuit,-hitfilt");
+
+  // Run15 pp200 chains
+  TString prodP16idpp200("DbV20160418,DbV20161117_TPC_Calibrations,pp2015c,btof,mtd,mtdCalib,pp2pp,fmsDat,fmsPoint,fpsDat,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFPPVnoCTB,-VFPPV,-beamline,-hitfilt");
+
+  // Run15 pAu200 chains
+  TString prodP16idpAu200("DbV20160710,DbV20161117_TPC_Calibrations,pp2015c,btof,mtd,mtdCalib,pp2pp,fmsDat,fmsPoint,fpsDat,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFPPVnoCTB,-VFPPV,-beamline,-hitfilt");
+
+  // Run9 pp500 P16ib chain
+  TString prodP16ibpp500("DbV20110311,OGGVoltErr,pp2009c,ITTF,BEmcChkStat,btof,Corr4,OSpaceZ2,OGridLeak3D,DbV20151021_TOF_Calibrations,DbV20161021_tpc_Calibrations,VFMCE,TpxClu,-hitfilt");
+
+  // Run14 AuAu200 st_WB chain (P16ig)
+  TString prodP16igAuAu200("DbV20160406,P2014a,StiCA,btof,mtd,mtdCalib,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt");
+
 
   TString geomP08ic("ry2008e");
   TString geomP10ic("ry2009d");
@@ -152,6 +195,10 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   TString geomP14ii("ry2014a");
   TString geomP15ic("ry2014a");
   TString geomP15ie("ry2014a");
+  TString geomP16id("ry2014a");
+  TString geomP16ia("ry2015b");
+  TString geomP16id_run15("ry2015c");
+  TString geomP16ig("ry2014a");
 
   TString xgeom(" useXgeom");
   TString chain1Opt("in,magF,tpcDb,NoDefault,TpxRaw,-ittf,NoOutput");
@@ -193,12 +240,22 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   else if (prodName == "P15icAuAu200") { chain1Opt += xgeom; chain3Opt = prodP15icAuAu200;  chain3Opt += ",mtdsim";  chain2Opt += geomP15ic;}
   else if (prodName == "P15ieAuAu200") { chain1Opt += xgeom; chain3Opt = prodP15ieAuAu200;  chain3Opt += ",mtdsim";  chain2Opt += geomP15ie;}
   else if (prodName == "P15ieCuAu200") { chain3Opt = prodP15ieCuAu200;  chain2Opt += geomP12id;}
+  else if (prodName == "P16idAuAu200") { chain1Opt += xgeom; chain3Opt = prodP16idAuAu200;  chain3Opt += ",mtdsim";  chain2Opt += geomP16id;}
+  else if (prodName == "P16iaAuAu5")   { chain1Opt += xgeom; chain3Opt = prodP16iaAuAu5;    chain3Opt += ",mtdsim";  chain2Opt += geomP16ia;}
+  else if (prodName == "P16idpp200")   { chain1Opt += xgeom; chain3Opt = prodP16idpp200;    chain3Opt += ",mtdsim";  chain2Opt += geomP16id_run15;}
+  else if (prodName == "P16idpAu200")  { chain1Opt += xgeom; chain3Opt = prodP16idpAu200;   chain3Opt += ",mtdsim";  chain2Opt += geomP16id_run15;}
+  else if (prodName == "P16ibpp500")   { chain3Opt = prodP16ibpp500;    chain2Opt += geomP10ic;}
+  else if (prodName == "P16igAuAu200") { chain1Opt += xgeom; chain3Opt = prodP16igAuAu200;  chain3Opt += ",mtdsim";  chain2Opt += geomP16ig;}
 
   else {
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
     return;
   }
-  chain3Opt += ",TpcMixer,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker"; 
+  chain3Opt += ",TpcMixer,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker,emcSim,BEmcMixer,EEfs,EEmcMixer"; 
+
+  bool useEndcapSlowSim = true; // turn Endcap slow simu On/Off 
+  if (useEndcapSlowSim) chain3Opt += ",EEss";
+
 
   // Dynamically link some shared libs
   gROOT->LoadMacro("bfc.C");
@@ -273,42 +330,30 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   }
   Chain->cd();
 
- //............. begin of EMC embedding makers................
+  //.............. Ensure EEmc maker order here ....................
 
-  //.............. Add BEmc stuff here ....................
-  gSystem->Load("StEmcSimulatorMaker");
-  gSystem->Load("StEmcMixerMaker");
-  gSystem->Load("StEEmcSimulatorMaker");
-
-  StMcEventMaker* mcEventMaker = new StMcEventMaker();
-  StEmcSimulatorMaker *bemcSim   = new StEmcSimulatorMaker();
-  StEmcMixerMaker     *bemcMixer = new StEmcMixerMaker();
-  chain3->AddAfter("emcRaw",bemcMixer); 
-  chain3->AddAfter("emcRaw",bemcSim); 
-  chain3->AddAfter("emcRaw",mcEventMaker);
-  bemcMixer->SetDebug(0); // set it to 1 for more printouts
- // note, Barrel slow sim is always ON, said Adam 
-
-  //........... Add EEmc Stuff ( Simu, and Mixer) here ..............
-  StEEmcFastMaker  *eemcFastSim = new StEEmcFastMaker();
-  StEEmcMixerMaker *eemcMixer   = new StEEmcMixerMaker();
-
-  /* position B+E EMC makers in the chain 
-     (order is reverse because 'After' is used - looks funny but is right)
-  */
-  chain3->AddAfter("emcRaw",eemcMixer); 
-  chain3->AddAfter("emcRaw",eemcFastSim); 
-
+  // EEMC fast simulator should be run, even if slow simulator is run (Ting Lin)
+  StEEmcFastMaker  *eemcFastSim = (StEEmcFastMaker*) chain3->Maker("eefs");
+  if (!eemcFastSim) eemcFastSim = (StEEmcFastMaker*) chain3->Maker("EEmcFastSim");
+  if (!eemcFastSim) eemcFastSim = new StEEmcFastMaker();
   eemcFastSim->SetEmbeddingMode();
   //  eemcFastSim->SetDebug();
-  // eemcMixer->SetDebug();
   
-  bool useEndcapSlowSim = true;
-  if(useEndcapSlowSim) { // turn Endcap slow simu On/Off 
-    StEEmcSlowMaker *slowSim=new StEEmcSlowMaker();
-    chain3->AddAfter("EEmcFastSim",slowSim); 
-    slowSim->setEmbeddingMode();
+  StEEmcMixerMaker* eemcMixer = (StEEmcMixerMaker *) chain3->Maker("EEmcMixer");
+  if (!eemcMixer) cout << "ERROR in finding EEMC Mixer!" << endl;
+  // eemcMixer->SetDebug();
+  chain3->AddBefore(eemcMixer->GetName(),eemcFastSim);
+
+  if (useEndcapSlowSim) {
+    StEEmcSlowMaker  *eemcSlowSim = (StEEmcSlowMaker*) chain3->Maker("eess");
+    if (!eemcSlowSim) cout << "ERROR in finding EEMC Slow Simulator!" << endl;
+    eemcSlowSim->setEmbeddingMode();
+    chain3->AddBefore(eemcMixer->GetName(),eemcSlowSim);
   }
+
+  StMcEventMaker* mcEventMaker = (StMcEventMaker *) chain3->Maker("StMcEventMaker");
+  if (!mcEventMaker)  mcEventMaker = new StMcEventMaker();
+  chain3->AddAfter(eemcMixer->GetName(),mcEventMaker);
 
 
   
@@ -335,7 +380,10 @@ void bfcMixer_Tpx(Int_t Nevents=100,
 
   	embMk->SetTemp(0.35);
 
-	//embMk->SetRapidityMode(kFALSE);
+	//embMk->SetRapidityMode(kFALSE);  //default is 'kTRUE'
+	
+	//Switch to prime mode for nucleus (with geantID > 10000) embedding, default is 'kFALSE'
+	//embMk->SetPrimeMode(kTRUE);
 
   	// Make trigger and z-vertex cuts (only if SkipMode is true)
   	// Trigger cut
@@ -350,8 +398,13 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   	// vr = sqrt{vx^2 + vy^2} cut
   	embMk->SetVrCut(vr);
 
+	//cut on VpdVz, need moretags.root
 	//embMk->SetVpdVzCutMode(kTRUE);
 	//embMk->SetVpdVzCut(3);
+	
+	//cut on PVranking, need moretags.root
+	//embMk->SetPVRankCutMode(kTRUE);
+	//embMk->SetPVRankCut(0);  // pvrank > 0
 
 	}
 

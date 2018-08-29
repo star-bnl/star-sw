@@ -1,4 +1,4 @@
-// $Id: StIstRawHitMaker.h,v 1.24 2016/02/18 17:24:40 smirnovd Exp $
+// $Id: StIstRawHitMaker.h,v 1.26 2018/02/25 03:51:57 dongx Exp $
 
 #ifndef StIstRawHitMaker_hh
 #define StIstRawHitMaker_hh
@@ -10,8 +10,8 @@
 
 #include <vector>
 
-#include "StRoot/St_base/Stypes.h"
-#include "StRoot/StChain/StRTSBaseMaker.h"
+#include "St_base/Stypes.h"
+#include "StChain/StRTSBaseMaker.h"
 #include "StIstUtil/StIstConsts.h"
 
 
@@ -50,7 +50,7 @@ public:
 
    // Get CVS
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.24 2016/02/18 17:24:40 smirnovd Exp $ built " __DATE__ " " __TIME__  ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.26 2018/02/25 03:51:57 dongx Exp $ built " __DATE__ " " __TIME__  ;
       return cvs;
    }
 
@@ -81,15 +81,15 @@ protected:
 
 private:
 
-   void FillRawHitCollectionFromAPVData(unsigned char dataFlag, int ntimebin, int counterAdcPerEvent[], double sumAdcPerEvent[], int apvElecId,
+   int FillRawHitCollectionFromAPVData(unsigned char dataFlag, int ntimebin, int counterAdcPerEvent[], double sumAdcPerEvent[], int apvElecId,
       std::array< std::array<double, kIstNumTimeBins>, kIstNumApvChannels > &signalUnCorrected,
       std::array< std::array<double, kIstNumTimeBins>, kIstNumApvChannels > &signalCorrected,
       std::array<int, kIstNumApvChannels> &idTruth);
 
-   void FillRawHitCollectionFromSimData();
+   int FillRawHitCollectionFromSimData();
 
    Int_t mDataType; ///<  0=all, 1=adc only, 2=zs only
-
+   
    ClassDef(StIstRawHitMaker, 0);
 };
 

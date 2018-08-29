@@ -36,6 +36,8 @@ MakeChairOptionalInstance2(TpcSecRowCor,St_TpcSecRowCC,Calibrations/tpc/TpcSecRo
 MakeChairInstance2(TpcSecRowCor,St_TpcSecRowXC,Calibrations/tpc/TpcSecRowX);
 #include "St_tpcCorrectionC.h"
 ClassImp(St_tpcCorrectionC);
+#include "St_tpcCalibResolutionsC.h"
+MakeChairInstance(tpcCalibResolutions,Calibrations/tpc/tpcCalibResolutions);
 //________________________________________________________________________________
 Double_t St_tpcCorrectionC::CalcCorrection(Int_t i, Double_t x, Double_t z, Int_t NparMax) {
   tpcCorrection_st *cor =  ((St_tpcCorrection *) Table())->GetTable() + i;
@@ -392,7 +394,7 @@ Float_t St_tpcAnodeHVC::voltagePadrow(Int_t sector, Int_t padrow) const {
   Float_t v_eff = TMath::Log((1.0-f2)*TMath::Exp(B*v1) + f2*TMath::Exp(B*v2)) / B;
   return v_eff;
 }
-MakeChairInstance(TpcAvgPowerSupply,Calibrations/tpc/TpcAvgPowerSupply);
+MakeChairOptionalInstance(TpcAvgPowerSupply,Calibrations/tpc/TpcAvgPowerSupply);
 //________________________________________________________________________________
 Float_t St_TpcAvgPowerSupplyC::voltagePadrow(Int_t sector, Int_t padrow) const {
   Int_t e1 = 0, e2 = 0;
@@ -753,9 +755,9 @@ MakeChairOptionalInstance(trigPrescales,RunLog/onl/trigPrescales);
 #include "St_L0TriggerInfoC.h"
 MakeChairInstance(L0TriggerInfo,RunLog/onl/L0TriggerInfo);
 #include "St_trigL3ExpandedC.h"
-MakeChairInstance(trigL3Expanded,RunLog/onl/trigL3Expanded);
+MakeChairOptionalInstance(trigL3Expanded,RunLog/onl/trigL3Expanded);
 #include "St_dsmPrescalesC.h"
-MakeChairInstance(dsmPrescales,RunLog/onl/dsmPrescales);
+MakeChairOptionalInstance(dsmPrescales,RunLog/onl/dsmPrescales);
 #include "St_additionalTriggerIDC.h"
 MakeChairOptionalInstance(additionalTriggerID,RunLog/onl/additionalTriggerID);
 #include "StDetectorDbTriggerID.h"
@@ -891,10 +893,9 @@ MakeChairInstance2(Survey,StSsdSectorsOnGlobal,Geometry/ssd/SsdSectorsOnGlobal);
 MakeChairInstance2(Survey,StSsdLaddersOnSectors,Geometry/ssd/SsdLaddersOnSectors);
 MakeChairInstance2(Survey,StSsdWafersOnLadders,Geometry/ssd/SsdWafersOnLadders);
 #include "StSstSurveyC.h"
-MakeChairInstance2(Survey,StSstOnGlobal,Geometry/sst/SstOnGlobal);
-MakeChairInstance2(Survey,StSstSectorsOnGlobal,Geometry/sst/SstSectorsOnGlobal);
-MakeChairInstance2(Survey,StSstLaddersOnSectors,Geometry/sst/SstLaddersOnSectors);
-MakeChairInstance2(Survey,StSstWafersOnLadders,Geometry/sst/SstWafersOnLadders);
+MakeChairInstance2(Survey,StsstOnOsc,Geometry/sst/sstOnOsc);
+MakeChairInstance2(Survey,StsstLadderOnSst,Geometry/sst/sstLadderOnSst);
+MakeChairInstance2(Survey,StsstSensorOnLadder,Geometry/sst/sstSensorOnLadder);
 #include "StTpcSurveyC.h"
 MakeChairAltInstance2(Survey,StTpcInnerSectorPosition,Geometry/tpc/TpcInnerSectorPosition,Geometry/tpc/TpcInnerSectorPositionB,gEnv->GetValue("NewTpcAlignment",0));
 MakeChairAltInstance2(Survey,StTpcOuterSectorPosition,Geometry/tpc/TpcOuterSectorPosition,Geometry/tpc/TpcOuterSectorPositionB,gEnv->GetValue("NewTpcAlignment",0));
@@ -908,7 +909,7 @@ MakeChairInstance2(Survey,StGmtOnModule,Geometry/gmt/GmtOnModule);
 //____________________________Geometry/ist____________________________________________________
 #include "StIstSurveyC.h"
 MakeChairInstance2(Survey,StidsOnTpc,Geometry/ist/idsOnTpc);                      
-MakeChairInstance2(Survey,StIstpstOnIds,Geometry/ist/pstOnIds);
+MakeChairInstance2(Survey,StpstOnIds,Geometry/ist/pstOnIds);
 MakeChairInstance2(Survey,StistOnPst,Geometry/ist/istOnPst);
 MakeChairInstance2(Survey,StLadderOnIst,Geometry/ist/istLadderOnIst);
 MakeChairInstance2(Survey,StistSensorOnLadder,Geometry/ist/istSensorOnLadder);
@@ -930,6 +931,20 @@ const TGeoHMatrix &St_SurveyC::GetMatrix(Int_t i) {
   rot.SetName(Table()->GetName());
   rot.SetRotation(Rotation(i));
   rot.SetTranslation(Translation(i));
+  return *&rot;
+}
+//________________________________________________________________________________
+const TGeoHMatrix &St_SurveyC::GetMatrix4Id(Int_t id) {
+  static TGeoHMatrix rot("UnKnown");
+  for (UInt_t i = 0; i < getNumRows(); i++) {
+    if (Id(i) == id) {
+      rot.SetName(Form("%s_%i",Table()->GetName(),id));
+      rot.SetRotation(Rotation(i));
+      rot.SetTranslation(Translation(i));
+      //      Table()->Print(i,1);
+      break;
+    }
+  }
   return *&rot;
 }
 //________________________________________________________________________________
@@ -984,7 +999,7 @@ St_SurveyC   *St_SurveyC::instance(const Char_t *name) {
   if (Name == "TpcSuperSectorPosition") return (St_SurveyC   *) StTpcSuperSectorPosition::instance();
   if (Name == "TpcHalfPosition")        return (St_SurveyC   *) StTpcHalfPosition::instance();
   if (Name == "idsOnTpc")               return (St_SurveyC   *) StidsOnTpc::instance();	    
-  if (Name == "istpstOnIds")        	return (St_SurveyC   *) StIstpstOnIds::instance();  	
+  if (Name == "pstOnIds")               return (St_SurveyC   *) StpstOnIds::instance();
   if (Name == "istOnPst")        	return (St_SurveyC   *) StistOnPst::instance();  	
   if (Name == "LadderOnIst")       	return (St_SurveyC   *) StLadderOnIst::instance(); 	
   if (Name == "LadderOnShell")        	return (St_SurveyC   *) StSvtLadderOnShell::instance();  	
@@ -1197,6 +1212,8 @@ Float_t  St_vpdTotCorrC::Corr(Int_t i, Float_t x) {
   }
   return dcorr;
 }
+#include "St_vpdSimParamsC.h"
+MakeChairInstance(vpdSimParams,Calibrations/tof/vpdSimParams);
 //____________________________Calibrations/emc____________________________________________________
 #include "St_emcPedC.h"
 MakeChairInstance2(emcPed,St_bemcPedC,Calibrations/emc/y3bemc/bemcPed);

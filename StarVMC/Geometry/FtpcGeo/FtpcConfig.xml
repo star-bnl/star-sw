@@ -4,16 +4,16 @@
  
     <Modules>FtpcGeo,FtpcGeo1</Modules>
 
-    <Setup  name   = "FTPCof" comment="FTPC off" module="FtpcGeo" onoff="off" />
+    <Setup  name   = "FTPCof" comment="FTPC off" module="FtpcGeo" onoff="off"  simu="2" />
 
-    <Setup  name   = "FTPCon"
+    <Setup  name   = "FTPCon" simu="2" 
 	    comment= "Default configuration for the Forward TPC tracker"
 	    module = "FtpcGeo"
 	    onoff  = "on" >      
 
     </Setup>
 
-    <Setup  name   = "FTPC00"
+    <Setup  name   = "FTPC00" simu="2" 
 	    comment= "Default configuration for the Forward TPC tracker"
 	    module = "FtpcGeo"
 	    onoff  = "on" >
@@ -22,7 +22,7 @@
       <Exec name   = "SUPO00" /> -->
 
     </Setup>
-    <Setup  name   = "FTPC01"
+    <Setup  name   = "FTPC01" simu="2" 
 	    comment= "Default configuration for the Forward TPC tracker"
 	    module = "FtpcGeo1"
 	    onoff  = "on" >
