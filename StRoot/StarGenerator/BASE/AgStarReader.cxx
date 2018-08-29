@@ -28,8 +28,8 @@ AgStarReader *AgStarReader::mInstance = 0;
 
 extern "C" {
   void type_of_call agusread() {    AgStarReader::Instance().ReadEvent();  }
-  void type_of_call agsvert( Float_t *vertex, Int_t *nb, Int_t *nt, Float_t *ubuf, Int_t *nu, Int_t *nv );
-  void type_of_call agskine( Float_t *plab,   Int_t *ip, Int_t *nv, Float_t *ubuf, Int_t *nb, Int_t *nt );
+  void type_of_call agsvert( float *vertex, int *nb, int *nt, float *ubuf, int *nu, int *nv );
+  void type_of_call agskine( float *plab,   int *ip, int *nv, float *ubuf, int *nb, int *nt );
 };
 
 // ----------------------------------------------------------------------------------------------------
@@ -56,16 +56,16 @@ void AgStarReader::ReadEvent()
   TGiant3 *geant3 = St_geant_Maker::instance()->Geant3();
 
   TParticle *part = 0;    // particle 
-  Int_t      itrk = -1;   // track number
+  int      itrk = -1;   // track number
 
 
   struct Vertex_t {
     Double_t x, y, z, t;
-    Int_t idx;
+    int idx;
   };
 
-  Int_t idvtx = 0;
-  map<Int_t, Int_t> start_vtx;
+  int idvtx = 0;
+  map<int, int> start_vtx;
 
   while(  (part=mStack->PopNextTrack(itrk)) )
     {
@@ -77,17 +77,17 @@ void AgStarReader::ReadEvent()
       //      part->Print();
 
       // Get the parent particle and lookup the vertex id
-      Int_t parent = part->GetFirstMother();
-      Int_t myvtx  = start_vtx[parent];
+      int parent = part->GetFirstMother();
+      int myvtx  = start_vtx[parent];
       if ( !myvtx )
 	{
 	  start_vtx[parent]=++idvtx;
 
 	  // Build the vertex
-	  Float_t v[] = {
-	    Float_t(part->Vx())  ,
-	    Float_t(part->Vy())  ,
-	    Float_t(part->Vz())
+	  float v[] = {
+	    float(part->Vx())  ,
+	    float(part->Vy())  ,
+	    float(part->Vz())
 	  };
 
 	  myvtx = geant3->Gsvert( v, 0, 0 );
@@ -96,14 +96,14 @@ void AgStarReader::ReadEvent()
 	}
 
       // Now connect the particle to the vertex
-      Float_t plab[] = { 
-	Float_t(part->Px())  ,
-	Float_t(part->Py())  ,
-	Float_t(part->Pz())
+      float plab[] = { 
+	float(part->Px())  ,
+	float(part->Py())  ,
+	float(part->Pz())
       };
 
-      Int_t   ipdg    = part->GetPdgCode();
-      Int_t   g3id    = 0;
+      int   ipdg    = part->GetPdgCode();
+      int   g3id    = 0;
       {
 	TParticlePDG *pdg = mParticleData -> GetParticle( ipdg );     assert(pdg);
 	g3id = pdg->TrackingCode();
@@ -122,14 +122,14 @@ void AgStarReader::ReadEvent()
 // ----------------------------------------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------------------------------------
-void AgStarReader::SetVert( Float_t *vertex, Int_t ntbeam, Int_t nttarg, Float_t *ubuf, Int_t nu, Int_t &nv )
+void AgStarReader::SetVert( float *vertex, int ntbeam, int nttarg, float *ubuf, int nu, int &nv )
 {
   /* call */ agsvert( vertex, &ntbeam, &nttarg, ubuf, &nu, &nv );
 }
 // ----------------------------------------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------------------------------------
-void AgStarReader::SetKine( Float_t *plab,   Int_t idpart, Int_t nv,     Float_t *ubuf, Int_t nb, Int_t &nt )
+void AgStarReader::SetKine( float *plab,   int idpart, int nv,     float *ubuf, int nb, int &nt )
 {
   /* call */ agskine( plab, &idpart, &nv, ubuf, &nb, &nt );
 }
