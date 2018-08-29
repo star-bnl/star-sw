@@ -118,6 +118,7 @@
 ** Add the FTS tracker
 */
 #define kFtsIdentifier                38 
+#define kFcsIdentifier                38 
 
 
 
@@ -137,9 +138,14 @@
 
 #endif /*STDETECTORDEFINITIONS*/
 
-/* $Id: StDetectorDefinitions.h,v 2.13 2017/05/04 00:52:53 perev Exp $
+/* $Id: StDetectorDefinitions.h,v 2.13.6.1 2018/08/29 14:52:37 jwebb Exp $
 **
 ** $Log: StDetectorDefinitions.h,v $
+** Revision 2.13.6.1  2018/08/29 14:52:37  jwebb
+** o Victor corrected issues with FCS hit dependency, enumerations, definitions...
+**
+** o Added missing implementations for fcsCollection() and setFcsCollection(...).
+**
 ** Revision 2.13  2017/05/04 00:52:53  perev
 ** Fts added
 **

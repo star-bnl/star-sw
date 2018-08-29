@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.57 2018/02/08 17:36:26 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.57.4.1 2018/08/29 14:52:37 jwebb Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.57.4.1  2018/08/29 14:52:37  jwebb
+ * o Victor corrected issues with FCS hit dependency, enumerations, definitions...
+ *
+ * o Added missing implementations for fcsCollection() and setFcsCollection(...).
+ *
  * Revision 2.57  2018/02/08 17:36:26  ullrich
  * Changed for new EPD classes.
  *
@@ -212,6 +217,7 @@
 #include "StEmcCollection.h"
 #include "StEpdCollection.h"
 #include "StFmsCollection.h"
+#include "StFcsCollection.h"
 #include "StRichCollection.h"
 #include "StRpsCollection.h"
 #include "StRunInfo.h"
@@ -243,8 +249,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.57 2018/02/08 17:36:26 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.57 2018/02/08 17:36:26 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.57.4.1 2018/08/29 14:52:37 jwebb Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.57.4.1 2018/08/29 14:52:37 jwebb Exp $";
 
 ClassImp(StEvent)
 
@@ -568,6 +574,22 @@ StEvent::fmsCollection() const
     StFmsCollection *fms = 0;
     _lookup(fms, mContent);
     return fms;
+}
+
+StFcsCollection*
+StEvent::fcsCollection()
+{
+    StFcsCollection *fcs = 0;
+    _lookup(fcs, mContent);
+    return fcs;
+}
+
+const StFcsCollection*
+StEvent::fcsCollection() const
+{
+    StFcsCollection *fcs = 0;
+    _lookup(fcs, mContent);
+    return fcs;
 }
 
 StRichCollection*
@@ -1200,6 +1222,12 @@ StEvent::setFmsCollection(StFmsCollection* val)
 }
 
 void
+StEvent::setFcsCollection(StFcsCollection* val)
+{
+    _lookupAndSet(val, mContent);
+}
+
+void
 StEvent::setRichCollection(StRichCollection* val)
 {
     _lookupAndSet(val, mContent);
@@ -1426,6 +1454,7 @@ void StEvent::statistics()
     cout << "\tStPxlHitCollection:          " << static_cast<void*>(pxlHitCollection());
     cout << "\tStEmcCollection:             " << static_cast<void*>(emcCollection());
     cout << "\tStFmsCollection:             " << static_cast<void*>(fmsCollection());
+    cout << "\tStFcsCollection:             " << static_cast<void*>(fcsCollection());
     cout << "\tStRichCollection:            " << static_cast<void*>(richCollection());
     cout << "\tStRpsCollection:             " << static_cast<void*>(rpsCollection());
     cout << "\tStTofCollection:             " << static_cast<void*>(tofCollection());

@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.64 2017/05/04 00:54:13 perev Exp $
+ * $Id: StEnumerations.h,v 2.64.6.1 2018/08/29 14:52:37 jwebb Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,11 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.64.6.1  2018/08/29 14:52:37  jwebb
+ * o Victor corrected issues with FCS hit dependency, enumerations, definitions...
+ *
+ * o Added missing implementations for fcsCollection() and setFcsCollection(...).
+ *
  * Revision 2.64  2017/05/04 00:54:13  perev
  * Fts added
  *
@@ -278,7 +283,8 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kSstId       = kSstIdentifier,
 		   kGmtId       = kGmtIdentifier,
 		   kFtsId       = kFtsIdentifier,
-                   kMaxDetectorId = 40};
+		   kFcsId       = kFcsIdentifier,
+                   kMaxDetectorId = kFcsId+1};
 
 /*!
  * \enum StTrackType

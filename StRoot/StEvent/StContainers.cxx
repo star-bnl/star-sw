@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.38 2018/02/08 17:36:26 ullrich Exp $
+ * $Id: StContainers.cxx,v 2.38.4.1 2018/08/29 14:52:37 jwebb Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
+ * Revision 2.38.4.1  2018/08/29 14:52:37  jwebb
+ * o Victor corrected issues with FCS hit dependency, enumerations, definitions...
+ *
+ * o Added missing implementations for fcsCollection() and setFcsCollection(...).
+ *
  * Revision 2.38  2018/02/08 17:36:26  ullrich
  * Changed for new EPD classes.
  *
@@ -166,6 +171,7 @@
 #include "StRpsTrackPoint.h"
 #include "StSsdHit.h"
 #include "StSstHit.h"
+#include "StFcsHit.h"
 #include "StSvtHit.h"
 #include "StTofCell.h"
 #include "StTofData.h"
@@ -230,6 +236,7 @@ StCollectionImp(RpsTrack)
 StCollectionImp(RpsTrackPoint)
 StCollectionImp(SsdHit)
 StCollectionImp(SstHit)
+StCollectionImp(FcsHit)
 StCollectionImp(SvtHit)
 StCollectionImp(TofCell)
 StCollectionImp(TofData)
