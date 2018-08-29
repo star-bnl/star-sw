@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlClusterMaker.cxx,v 1.10 2014/02/27 03:50:17 qiuh Exp $
+ * $Id: StPxlClusterMaker.cxx,v 1.12 2017/09/08 17:37:18 dongx Exp $
  *
  * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,12 @@
  ***************************************************************************
  *
  * $Log: StPxlClusterMaker.cxx,v $
+ * Revision 1.12  2017/09/08 17:37:18  dongx
+ * change std::random_shuffle to std::rand to be consistent with STAR coding
+ *
+ * Revision 1.11  2017/09/01 02:58:33  dongx
+ * Update to ensure idTruth is preserved for MC hits for overlapping scenarios between MC/data and two or more MC hits
+ *
  * Revision 1.10  2014/02/27 03:50:17  qiuh
  * *** empty log message ***
  *
@@ -39,7 +45,8 @@
  *
  **************************************************************************/
 
-#include <algorithm>
+#include <cstdlib>
+#include <map>
 
 #include "StPxlClusterMaker.h"
 #include "StMessMgr.h"
@@ -81,6 +88,8 @@ Int_t StPxlClusterMaker::Make()
       LOG_WARN << "Make() - no pxlRawHitCollection." << endm;
       return kStWarn;
    }
+   
+   LOG_INFO << " Before clustering. Number of PxlRawHits = " << pxlRawHitCollection->numberOfRawHits() << endm;
 
    // output cluster data structures
    mPxlClusterCollection = new StPxlClusterCollection();
@@ -91,28 +100,71 @@ Int_t StPxlClusterMaker::Make()
 
    // real work
    int embeddingShortCut = IAttr("EmbeddingShortCut");
+   int nIdTruth = 0;
    for (int i = 0; i < kNumberOfPxlSectors; i++)
       for (int j = 0; j < kNumberOfPxlLaddersPerSector; j++)
          for (int k = 0; k < kNumberOfPxlSensorsPerLadder; k++) {
 
-            // load rawHitMap
-            int vectorSize = pxlRawHitCollection->numberOfRawHits(i + 1, j + 1, k + 1);
-            for (int l = 0; l < vectorSize; l++) {
-               const StPxlRawHit *rawHit = pxlRawHitCollection->rawHit(i + 1, j + 1, k + 1, l);
-               mRawHitMap[rawHit->row()][rawHit->column()] = rawHit;
+            std::map<int, std::vector<int>> firedPixelsMap;
+            for (int iHit=0; iHit < pxlRawHitCollection->numberOfRawHits(i+1, j+1, k+1); ++iHit)
+            {
+              StPxlRawHit const* rawHit = pxlRawHitCollection->rawHit(i + 1, j + 1, k + 1, iHit);
+              int const id = rawHit->row() * 1000 + rawHit->column();
+              firedPixelsMap[id].push_back(iHit);
+            }
+
+            for(auto& pixel: firedPixelsMap)
+            {
+              std::vector<int> mcHits;
+              for(auto const& rawHitIdx: pixel.second)
+              {
+                StPxlRawHit const* rawHit = pxlRawHitCollection->rawHit(i + 1, j + 1, k + 1, rawHitIdx);
+                if(rawHit->idTruth() > 0) mcHits.push_back(rawHitIdx);
+              }
+
+              if(!mcHits.empty()) // if any of the hits is MC then pick a random mc hit
+              {
+                int const rnd_idx = std::rand() % static_cast<int>(mcHits.size());
+                StPxlRawHit const* rawHit = pxlRawHitCollection->rawHit(i + 1, j + 1, k + 1, mcHits[rnd_idx]);
+                mRawHitMap[rawHit->row()][rawHit->column()] = rawHit;
+              }
+              else // pick a random hit
+              {
+                int const rnd_idx = std::rand() % static_cast<int>(pixel.second.size());
+                StPxlRawHit const* rawHit = pxlRawHitCollection->rawHit(i + 1, j + 1, k + 1, pixel.second[rnd_idx]);
+                mRawHitMap[rawHit->row()][rawHit->column()] = rawHit;
+              }
+                          
+              if(Debug() && pixel.second.size()>1) // in case of overlapping raw pixels
+              {
+                LOG_INFO << " ++ Two or more rawHits found in this pixel row/column = " << pixel.first/1000 << "/" << pixel.first%1000 << endm;
+                for(size_t ih = 0; ih<pixel.second.size(); ++ih)
+                {
+                  StPxlRawHit const* rawHit = pxlRawHitCollection->rawHit(i + 1, j + 1, k + 1, pixel.second[ih]);                                  
+                  LOG_INFO << "      rawHit #" << ih << "\t idTruth=" << rawHit->idTruth() << endm;
+                }
+                LOG_INFO << "        => Selected rawHit idTruth = " << mRawHitMap[pixel.first/1000][pixel.first%1000]->idTruth() << endm;
+              }
             }
 
             // find clusters
-            for (int l = 0; l < vectorSize; l++) {
+            for (int l = 0; l < pxlRawHitCollection->numberOfRawHits(i+1, j+1, k+1); l++) {
                const StPxlRawHit *rawHit = pxlRawHitCollection->rawHit(i + 1, j + 1, k + 1, l);
                StPxlCluster cluster;
                findCluster(&cluster, rawHit->column(), rawHit->row());
                if (cluster.nRawHits() > 0) {
                   cluster.summarize(embeddingShortCut);
                   mPxlClusterCollection->addCluster(i + 1, j + 1, k + 1, cluster);
+                  if(cluster.idTruth()>0) {
+                    LOG_DEBUG << " ==> A new cluster added sector/ladder/sensor/row/column = " << i+1 <<"/" << j+1 << "/" << k+1 << "/" << cluster.rowCenter() << "/" << cluster.columnCenter() << "\t nRawHits=" << cluster.nRawHits() << "\t idTruth=" << cluster.idTruth() << endm;
+                    nIdTruth++;
+                  }
                }
             }
          }
+         
+   LOG_INFO << " After clustering. Number of PxlClusters = " << mPxlClusterCollection->numberOfClusters() << " w/ idTruth = " << nIdTruth << endm;
+            
    return kStOK;
 }
 

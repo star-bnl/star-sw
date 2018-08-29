@@ -145,7 +145,6 @@ StiDebug::Break(nCall);
  double XX,XN,L;
  N[0] = -Dp[1];
  N[1] =  Dp[0];  
- N[2] =  0.0;
  XX = MAG2(Xp); //X*X;  
  XN = DOT(Xp,N);//X*N;
 
@@ -378,7 +377,6 @@ StiDebug::Break(nCall);
   if (_cXX>0) {i0=0;li0=0;}
 
    double dia[kNPars],fak[kNPars]={1,1,1,1,1,1},corrMax=1;;
-   int isTouched[kNPars]={0};
    for (int i=i0,li=li0;i<kNPars ;li+=++i) {
      double &aii = A[li+i];
      if (aii < MIN2ERR[i]) aii = MIN2ERR[i];
@@ -390,7 +388,7 @@ StiDebug::Break(nCall);
        if (aij*aij <=    dia[i]*dia[j]*chekCORRMAX) continue;
        double qwe = aij*aij/(dia[i]*dia[j]);
        if (corrMax>=qwe) continue;
-       corrMax=qwe; isTouched[i]=1; isTouched[j]=1;
+       corrMax=qwe;
    } } 
    if (corrMax>=chekCORRMAX) { 
      corrMax = sqrt(corrMax/recvCORRMAX);
@@ -566,7 +564,9 @@ int StiNodePars::check(const char *pri) const
   if (fabs(hz())>=1e-5 && fabs(tmp)> 1e-3*fabs(curv()))    {ierr=1313; goto FAILED;}
   for (int i=0;i<kNPars;i++) {if (fabs(P[i]) > MAXPARS[i]) {ierr = i+1 ; break;}} 
   if(ierr) goto FAILED;
-  for (int i=-2;i<0;i++)     {if (fabs(P[i]) > 1.)         {ierr = i+12; break;}} 
+//  for (int i=-2;i<0;i++)     {if (fabs(P[i]) > 1.)         {ierr = i+12; break;}} 
+  if (fabs(_cosCA) > 1) {ierr = 12;}
+  if (fabs(_sinCA) > 1) {ierr = 13;}
 FAILED: 
   if (!ierr) return ierr;
   if (!pri ) return ierr;
@@ -615,8 +615,9 @@ void StiNodePars::rotate(double alpha)
 //______________________________________________________________________________
 int StiNodePars::nan() const
 {
+  const double *d = &(_cosCA);
   for (int i=-2; i<=kHz;i++) {
-    if (!finite(P[i])) return 100+i;
+    if (!finite(*(d++))) return 100+i;
   }
   return 0;
 }
@@ -624,7 +625,8 @@ int StiNodePars::nan() const
 void StiNodePars::print() const
 {
 static const char* tit[]={"cosCA","sinCA","X","Y","Z","Eta","Ptin","TanL","Curv",0};
-  for (int i=-2;i<kNPars+1;i++) {LOG_DEBUG << Form("%s = %g, ",tit[i+2],P[i]);}
+  const double *d = P-2;
+  for (int i=-2;i<kNPars+1;i++) {LOG_DEBUG << Form("%s = %g, ",tit[i+2],*(d++));}
   LOG_DEBUG << endm;
 }   
 //______________________________________________________________________________

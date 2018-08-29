@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.106 2015/06/30 21:43:40 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.106.4.1.2.1 2018/04/20 13:53:13 didenko Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,12 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.106.4.1.2.1  2018/04/20 13:53:13  didenko
+ * patch for SL16d_embed library
+ *
+ * Revision 1.106.4.1  2018/04/13 16:23:29  didenko
+ * updates for SL16d_embed library
+ *
  * Revision 1.106  2015/06/30 21:43:40  genevb
  * Allow for a (dummy) initialization call of UndoDistortion()
  *
@@ -376,7 +382,8 @@ enum   DistortSelect                                                  <br>
   kGridLeak          = 0x4000,   // Bit 15                            <br>
   k3DGridLeak        = 0x8000,   // Bit 16                            <br>
   kGGVoltError       = 0x10000,  // Bit 17                            <br>
-  kSectorAlign       = 0x20000   // Bit 18                            <br>
+  kSectorAlign       = 0x20000,  // Bit 18                            <br>
+  kDistoSmearing     = 0x100000  // Bit 21                            <br>
 } ;                                                                   <br>
 
 Note that the option flag used in the chain is 2x larger 
@@ -406,6 +413,7 @@ To do:  <br>
 #include "TGraphErrors.h"
 #include "TF1.h"
 #include "TH2.h"
+#include "TRandom.h"
 #include "StTpcDb/StTpcDb.h"
 #include "tables/St_MagFactor_Table.h"
 #include "StDetectorDbMaker/St_tpcHVPlanesC.h"
@@ -413,6 +421,7 @@ To do:  <br>
 #include "StDetectorDbMaker/St_tpcFieldCageShortC.h"
 #include "StDetectorDbMaker/StTpcSurveyC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
+#include "StDetectorDbMaker/St_tpcCalibResolutionsC.h"
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
   //#include "StDetectorDbMaker/StDetectorDbMagnet.h"
 static Float_t  gFactor  = 1.0 ;        // Multiplicative factor (allows scaling and sign reversal)
@@ -454,6 +463,7 @@ StMagUtilities::StMagUtilities (StTpcDb* /* dbin */, Int_t mode )
     SafeDelete(fgInstance);
   }
   fgInstance = this;
+  GetDistoSmearing(mode);    // Get distortion smearing from the DB
   GetMagFactor()        ;    // Get the magnetic field scale factor from the DB
   GetTPCParams()        ;    // Get the TPC parameters from the DB
   GetTPCVoltages()      ;    // Get the TPC Voltages from the DB
@@ -476,6 +486,7 @@ StMagUtilities::StMagUtilities ( const StarMagField::EBField map, const Float_t 
     SafeDelete(fgInstance);
   }
   fgInstance = this;
+  GetDistoSmearing(0)   ;        // Do not get distortion smearing out of the DB
   GetMagFactor()        ;        // Get the magnetic field scale factor from the StarMagField
   fTpcVolts      =  0   ;        // Do not get TpcVoltages out of the DB   - use defaults in CommonStart
   fOmegaTau      =  0   ;        // Do not get OmegaTau out of the DB      - use defaults in CommonStart
@@ -490,6 +501,15 @@ StMagUtilities::StMagUtilities ( const StarMagField::EBField map, const Float_t 
 }
 
 
+//________________________________________
+
+void StMagUtilities::GetDistoSmearing (Int_t mode)
+{
+  fCalibResolutions = ((mode & kDistoSmearing) > 0 ?St_tpcCalibResolutionsC::instance() : 0);
+  mRandom = (fCalibResolutions ? new TRandom(time(NULL)) : 0);
+}
+ 	 
+ 	 
 //________________________________________
 
 void StMagUtilities::GetMagFactor () 
@@ -624,7 +644,8 @@ void StMagUtilities::GetSpaceChargeR2 ()
   spaceTable = new_spaceTable;
   scalers = new_scalers;
 
-  SpaceChargeR2  =  fSpaceChargeR2->getSpaceChargeCoulombs((double)gFactor) ;
+  SpaceChargeR2      = fSpaceChargeR2->getSpaceChargeCoulombs((double)gFactor) ;
+  SmearCoefSC        = (fCalibResolutions ? mRandom->Gaus(1,fCalibResolutions->SpaceCharge()) : 1.0);
   SpaceChargeEWRatio = fSpaceChargeR2->getEWRatio() ;
 }
 
@@ -727,6 +748,8 @@ void StMagUtilities::GetGridLeak ()
    OuterGridLeakStrength  =  fGridLeak -> getGridLeakStrength ( kGLouter )  ;  // Relative strength of the Outer grid leak
    OuterGridLeakRadius    =  fGridLeak -> getGridLeakRadius   ( kGLouter )  ;  // Location (in local Y coordinates) of Outer grid leak 
    OuterGridLeakWidth     =  fGridLeak -> getGridLeakWidth    ( kGLouter )  ;  // Half-width of the Outer grid leak.  
+   SmearCoefGL = (fCalibResolutions && fCalibResolutions->GridLeak() > 0 ?
+     mRandom->Gaus(1,fCalibResolutions->GridLeak()) : 1.0);
 }
 
 void StMagUtilities::ManualGridLeakStrength (Double_t inner, Double_t middle, Double_t outer)
@@ -945,6 +968,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
   if ( mDistortionMode & kGridLeak )      printf (" + GridLeak") ;
   if ( mDistortionMode & k3DGridLeak )    printf (" + 3DGridLeak") ;
   if ( mDistortionMode & kSectorAlign )   printf (" + SectorAlign") ;
+  if ( mDistortionMode & kDistoSmearing ) printf (" + DistoSmearing") ;
   if ( ! StTpcDb::IsOldScheme())          printf (" + New TPC Alignment schema") ;
   usingCartesian = kTRUE; // default
 
@@ -984,6 +1008,10 @@ void StMagUtilities::CommonStart ( Int_t mode )
   cout << "StMagUtilities::SpaceCharge   =  " << SpaceCharge << " Coulombs/epsilon-nought" << endl ;
   cout << "StMagUtilities::SpaceChargeR2 =  " << SpaceChargeR2 << " Coulombs/epsilon-nought" << "  EWRatio = " 
                                               << SpaceChargeEWRatio << endl ;
+  if (mDistortionMode & kDistoSmearing) {
+  cout << "StMagUtilities::SmearCoefSC   =  " << SmearCoefSC << endl;
+  cout << "StMagUtilities::SmearCoefGL   =  " << SmearCoefGL << endl;
+  }
   cout << "StMagUtilities::IFCShift      =  " << IFCShift << " cm" << endl ;
   cout << "StMagUtilities::CathodeV      =  " << CathodeV << " volts" << endl ;
   cout << "StMagUtilities::GG            =  " << GG << " volts" << endl ;
@@ -1006,6 +1034,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
   cout << "StMagUtilities::GLWeights     =  " ;
   for ( Int_t i = 1 ; i < 25 ; i++ ) cout << GLWeights[i] << " " ; cout << endl;
 
+  doingDistortion = kFALSE;
   DoOnce = kTRUE;
 
 }
@@ -1215,7 +1244,9 @@ void StMagUtilities::DoDistortion( const Float_t x[], Float_t Xprime[] , Int_t S
   // NOTE: x[],Xprime[] must be Cartesian for this function!
 
   Bool_t tempIterDist = iterateDistortion;
+  Bool_t tempDoingDist = doingDistortion;
   iterateDistortion = kFALSE; // Do not iterate for DoDistortion()
+  doingDistortion = kTRUE;
 
   UndoDistortion ( x, Xprime, Sector ) ;
 
@@ -1235,6 +1266,7 @@ void StMagUtilities::DoDistortion( const Float_t x[], Float_t Xprime[] , Int_t S
     D.zLC = Xprime[2];
     fgDoDistortion->Fill(&D.sector);
   }
+  doingDistortion = tempDoingDist;
 }
 
 
@@ -1904,8 +1936,9 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
   // Subtract to Undo the distortions
   if ( r > 0.0 ) 
     {
-      phi =  phi - SpaceCharge * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
-      r   =  r   - SpaceCharge * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
+      Float_t Weight = SpaceCharge * (doingDistortion ? SmearCoefSC : 1.0);
+      phi =  phi - Weight * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
+      r   =  r   - Weight * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
     }
 
   if (usingCartesian) Polar2Cart(r,phi,Xprime);
@@ -2042,16 +2075,10 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
   // Subtract to Undo the distortions and apply the EWRatio on the East end of the TPC 
   if ( r > 0.0 ) 
     {
-      if ( z < 0.0 ) 
-	{
-	  phi =  phi - SpaceChargeR2 * SpaceChargeEWRatio * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
-	  r   =  r   - SpaceChargeR2 * SpaceChargeEWRatio * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
-	}
-      else
-	{
-	  phi =  phi - SpaceChargeR2 * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
-	  r   =  r   - SpaceChargeR2 * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
-	}
+      double Weight = SpaceChargeR2 * (doingDistortion ? SmearCoefSC : 1.0);
+      if ( z < 0) Weight *= SpaceChargeEWRatio ;
+      phi =  phi - Weight * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;
+      r   =  r   - Weight * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;
     }
 
   if (usingCartesian) Polar2Cart(r,phi,Xprime);
@@ -3983,16 +4010,10 @@ void StMagUtilities::UndoGridLeakDistortion( const Float_t x[], Float_t Xprime[]
   // Subtract to Undo the distortions and apply the EWRatio factor to the data on the East end of the TPC
   if ( r > 0.0 ) 
     {
-      if ( z < 0.0 )
-	{
-	  phi =  phi - SpaceChargeR2 * SpaceChargeEWRatio * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
-	  r   =  r   - SpaceChargeR2 * SpaceChargeEWRatio * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
-	}
-      else
-	{
-	  phi =  phi - SpaceChargeR2 * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
-	  r   =  r   - SpaceChargeR2 * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
-	}
+      Float_t Weight = SpaceChargeR2 * (doingDistortion ? SmearCoefSC*SmearCoefGL : 1.0);
+      if (z <  0) Weight *= SpaceChargeEWRatio ;
+      phi =  phi - Weight * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;
+      r   =  r   - Weight * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;
     }
 
   if (usingCartesian) Polar2Cart(r,phi,Xprime);
@@ -4202,7 +4223,7 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
 
   if ( r > 0.0 ) 
     {
-      Float_t Weight = SpaceChargeR2 ;
+      Float_t Weight = SpaceChargeR2 * (doingDistortion ? SmearCoefSC*SmearCoefGL : 1.0);;
       if (GLWeights[Sector] >= 0) Weight *= GLWeights[Sector] ;
       if (                z <  0) Weight *= SpaceChargeEWRatio ;
       phi =  phi - Weight * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      

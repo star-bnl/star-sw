@@ -19,7 +19,8 @@ StarGenParticle::StarGenParticle() :
   mTof(0),
   mIndex(0),
   mStack(0), 
-  mPrimaryKey(0)
+  mPrimaryKey(0),
+  mGeneratorId(-1)
 {
   for ( Int_t i=0;i<2;i++ ) { mMother[i]=0.0; mDaughter[i]=0.0; }
 }

@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.61 2015/03/13 18:44:44 perev Exp $
+ * $Id: StAssociationMaker.cxx,v 1.62 2018/01/04 18:07:06 genevb Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.62  2018/01/04 18:07:06  genevb
+ * Better counting of MC track pings (common hits)
+ *
  * Revision 1.61  2015/03/13 18:44:44  perev
  * Roll back
  *
@@ -940,6 +943,9 @@ Int_t StAssociationMaker::Make()
 		   fabs(zDiff)>= parDB->zCutTpc(mcTpcHit->position().z())) continue;
 	    } else 
 	      if (mcTpcHit->parentTrack()->key() != rcTpcHit->idTruth()) continue;
+	    // Note: Association is within sector and pad row, so a Monte Carlo
+	    // looper may have multiple Monte Carlo hits from one track associated
+	    // to one and the same reconstructed hit!
 	    // Make Associations  Use maps,
 	    mRcTpcHitMap->insert(rcTpcHitMapValType (rcTpcHit, mcTpcHit) );
 	    mMcTpcHitMap->insert(mcTpcHitMapValType (mcTpcHit, rcTpcHit) );
@@ -1353,6 +1359,9 @@ Int_t StAssociationMaker::Make()
 #else
     vector<trackPing, allocator<trackPing> > candidates(20, initializedTrackPing);
 #endif
+    vector<const StMcTrack*> pingedMcTracks(16, 0);
+    unsigned int nPingedMcTracks = 0;
+
     trkNode = rcTrackNodes[trkNodeI]; // For a by-pointer collection we need to dereference once
     if (!mEstTracksOn)
       rcTrack = dynamic_cast<const StGlobalTrack*>(trkNode->track(global));
@@ -1385,6 +1394,7 @@ static int mykount=0; mykount++;
 	rcKeyTpcHit = dynamic_cast<StTpcHit*>(rcHit);
 	
 	if (!rcKeyTpcHit) continue;
+        nPingedMcTracks = 0;
 	boundsTpc = mRcTpcHitMap->equal_range(rcKeyTpcHit);
 	
 	for (tpcHMIter=boundsTpc.first; tpcHMIter!=boundsTpc.second; ++tpcHMIter) {
@@ -1392,6 +1402,20 @@ static int mykount=0; mykount++;
 	  mcValueTpcHit = (*tpcHMIter).second;
 	  if (! mcValueTpcHit) continue; // I added 0 for unmatched RcTpcHit
 	  trackCand = mcValueTpcHit->parentTrack();
+
+          // Skip any candidate Monte Carlo Tracks we already counted for this reconstructed hit
+          // This can happen for Monte Carlo loopers that have multiple hits on the same pad row
+          bool countedMcTrack = false;
+          for (unsigned int iMcTrack = 0; iMcTrack<nPingedMcTracks; iMcTrack++) {
+            if (trackCand == pingedMcTracks[iMcTrack]) {
+              countedMcTrack = true;
+              break;
+            }
+          }
+          if (countedMcTrack) continue;
+          if (nPingedMcTracks>=pingedMcTracks.size()) pingedMcTracks.resize(nPingedMcTracks+16,0);
+          pingedMcTracks[nPingedMcTracks] = trackCand;
+          nPingedMcTracks++;
 	  
 	  // At this point we have a candidate Monte Carlo Track
 	  // If there are no candidates, create the first candidate.
@@ -1418,7 +1442,7 @@ static int mykount=0; mykount++;
 				// check that we don't overstep the bounds,
 				// if so increase the size of the vector in steps of 20 candidates
 		if (nCandidates>=candidates.size()) {
-		  candidates.resize(nCandidates+20);
+		  candidates.resize(nCandidates+20, initializedTrackPing);
 		  if (Debug()) cout << "Resizing in the TPC hits of the track " << endl;
 		}
 		break;
@@ -1443,12 +1467,27 @@ static int mykount=0; mykount++;
 	rcKeySvtHit = dynamic_cast<StSvtHit*>(rcHit);
 	
 	if (!rcKeySvtHit) continue;
+        nPingedMcTracks = 0;
 	boundsSvt = mRcSvtHitMap->equal_range(rcKeySvtHit);
 	
 	for (svtHMIter=boundsSvt.first; svtHMIter!=boundsSvt.second; ++svtHMIter) {
 	  
 	  mcValueSvtHit = (*svtHMIter).second;
 	  trackCand = mcValueSvtHit->parentTrack();
+
+          // Skip any candidate Monte Carlo Tracks we already counted for this reconstructed hit
+          // This can happen for Monte Carlo loopers that have multiple hits on the same pad row
+          bool countedMcTrack = false;
+          for (unsigned int iMcTrack = 0; iMcTrack<nPingedMcTracks; iMcTrack++) {
+            if (trackCand == pingedMcTracks[iMcTrack]) {
+              countedMcTrack = true;
+              break;
+            }
+          }
+          if (countedMcTrack) continue;
+          if (nPingedMcTracks>=pingedMcTracks.size()) pingedMcTracks.resize(nPingedMcTracks+16,0);
+          pingedMcTracks[nPingedMcTracks] = trackCand;
+          nPingedMcTracks++;
 	  
 	  // At this point we have a candidate Monte Carlo Track
 	  // If there are no candidates, create the first candidate.
@@ -1475,7 +1514,7 @@ static int mykount=0; mykount++;
 				// check that we don't overstep the bounds,
 				// if so increase the size of the vector in steps of 20 candidates
 		if (nCandidates>=candidates.size()) {
-		  candidates.resize(nCandidates+20);
+		  candidates.resize(nCandidates+20, initializedTrackPing);
 		  if (Debug()) cout << "Resizing in the SVT hits of the track " << endl;
 		}
 		break;
@@ -1500,12 +1539,27 @@ static int mykount=0; mykount++;
 	rcKeySsdHit = dynamic_cast<StSsdHit*>(rcHit);
 	
 	if (!rcKeySsdHit) continue;
+        nPingedMcTracks = 0;
 	boundsSsd = mRcSsdHitMap->equal_range(rcKeySsdHit);
 	
 	for (ssdHMIter=boundsSsd.first; ssdHMIter!=boundsSsd.second; ++ssdHMIter) {
 	  
 	  mcValueSsdHit = (*ssdHMIter).second;
 	  trackCand = mcValueSsdHit->parentTrack();
+
+          // Skip any candidate Monte Carlo Tracks we already counted for this reconstructed hit
+          // This can happen for Monte Carlo loopers that have multiple hits on the same pad row
+          bool countedMcTrack = false;
+          for (unsigned int iMcTrack = 0; iMcTrack<nPingedMcTracks; iMcTrack++) {
+            if (trackCand == pingedMcTracks[iMcTrack]) {
+              countedMcTrack = true;
+              break;
+            }
+          }
+          if (countedMcTrack) continue;
+          if (nPingedMcTracks>=pingedMcTracks.size()) pingedMcTracks.resize(nPingedMcTracks+16,0);
+          pingedMcTracks[nPingedMcTracks] = trackCand;
+          nPingedMcTracks++;
 	  
 	  // At this point we have a candidate Monte Carlo Track
 	  // If there are no candidates, create the first candidate.
@@ -1532,7 +1586,7 @@ static int mykount=0; mykount++;
 				// check that we don't overstep the bounds,
 				// if so increase the size of the vector in steps of 20 candidates
 		if (nCandidates>=candidates.size()) {
-		  candidates.resize(nCandidates+20);
+		  candidates.resize(nCandidates+20, initializedTrackPing);
 		  if (Debug()) cout << "Resizing in the SSD hits of the track " << endl;
 		}
 		break;
@@ -1562,12 +1616,27 @@ static int mykount=0; mykount++;
 	rcKeyFtpcHit = dynamic_cast<StFtpcHit*>(rcHit);
 	
 	if (!rcKeyFtpcHit) continue;
+        nPingedMcTracks = 0;
 	boundsFtpc = mRcFtpcHitMap->equal_range(rcKeyFtpcHit);
 	
 	for (ftpcHMIter=boundsFtpc.first; ftpcHMIter!=boundsFtpc.second; ++ftpcHMIter) {
 	  
 	  mcValueFtpcHit = (*ftpcHMIter).second;
 	  trackCand = mcValueFtpcHit->parentTrack();
+
+          // Skip any candidate Monte Carlo Tracks we already counted for this reconstructed hit
+          // This can happen for Monte Carlo loopers that have multiple hits on the same pad row
+          bool countedMcTrack = false;
+          for (unsigned int iMcTrack = 0; iMcTrack<nPingedMcTracks; iMcTrack++) {
+            if (trackCand == pingedMcTracks[iMcTrack]) {
+              countedMcTrack = true;
+              break;
+            }
+          }
+          if (countedMcTrack) continue;
+          if (nPingedMcTracks>=pingedMcTracks.size()) pingedMcTracks.resize(nPingedMcTracks+16,0);
+          pingedMcTracks[nPingedMcTracks] = trackCand;
+          nPingedMcTracks++;
 	  
 	  // At this point we have a candidate Monte Carlo Track
 	  // If there are no candidates, create the first candidate.
@@ -1594,7 +1663,7 @@ static int mykount=0; mykount++;
 				// check that we don't overstep the bounds,
 				// if so increase the size of the vector in steps of 20 candidates
 		if (nCandidates>=candidates.size()) {
-		  candidates.resize(nCandidates+20);
+		  candidates.resize(nCandidates+20, initializedTrackPing);
 		  if (Debug()) cout << "Resizing in the East FTPC hits of the track " << endl;
 		}
 		break;
@@ -1614,12 +1683,27 @@ static int mykount=0; mykount++;
 	rcKeyFtpcHit = dynamic_cast<StFtpcHit*>(rcHit);
 	
 	if (!rcKeyFtpcHit) continue;
+        nPingedMcTracks = 0;
 	boundsFtpc = mRcFtpcHitMap->equal_range(rcKeyFtpcHit);
 	
 	for (ftpcHMIter=boundsFtpc.first; ftpcHMIter!=boundsFtpc.second; ++ftpcHMIter) {
 	  
 	  mcValueFtpcHit = (*ftpcHMIter).second;
 	  trackCand = mcValueFtpcHit->parentTrack();
+
+          // Skip any candidate Monte Carlo Tracks we already counted for this reconstructed hit
+          // This can happen for Monte Carlo loopers that have multiple hits on the same pad row
+          bool countedMcTrack = false;
+          for (unsigned int iMcTrack = 0; iMcTrack<nPingedMcTracks; iMcTrack++) {
+            if (trackCand == pingedMcTracks[iMcTrack]) {
+              countedMcTrack = true;
+              break;
+            }
+          }
+          if (countedMcTrack) continue;
+          if (nPingedMcTracks>=pingedMcTracks.size()) pingedMcTracks.resize(nPingedMcTracks+16,0);
+          pingedMcTracks[nPingedMcTracks] = trackCand;
+          nPingedMcTracks++;
 	  
 	  // At this point we have a candidate Monte Carlo Track
 	  // If there are no candidates, create the first candidate.
@@ -1646,7 +1730,7 @@ static int mykount=0; mykount++;
 				// check that we don't overstep the bounds,
 				// if so increase the size of the vector in steps of 20 candidates
 		if (nCandidates>=candidates.size()) {
-		  candidates.resize(nCandidates+20);
+		  candidates.resize(nCandidates+20, initializedTrackPing);
 		  if (Debug()) cout << "Resizing in the West FTPC hits of the track " << endl;
 		}
 		break;

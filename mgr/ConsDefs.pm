@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.141 2015/09/21 21:40:47 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.144 2016/04/26 17:58:26 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -234,6 +234,11 @@
     # now treat NODEBUG and GPROF - kind of assume generic gcc
     # and flag will need to be reset otherwise
     #-
+
+    # historical had DEBUG_OPTIONS used to set optimizer options (confusing)
+    # Kept it as support but added {OPTIM_OPTIONS, a more natural naming
+    my($OPTIM_OPTS) = $ENV{OPTIM_OPTIONS}||$ENV{DEBUG_OPTIONS};
+
     if ( defined( $ARG{GPROF} ) or defined($ENV{GPROF}) ){
 	print "Using GPROF\n" unless ($param::quiet);
 	$EXTRA_CXXFLAGS= " -pg ";
@@ -248,10 +253,17 @@
 	# gcc specific). The rest is treated later
 	$GPROF= undef;
 	if ( defined( $ARG{NODEBUG} ) || $NODEBUG ) {
-	    $DEBUG = $ENV{DEBUG_OPTIONS}||"-O2 -g";
+	    $DEBUG = $OPTIM_OPTS||"-O2 -g";
 	    $FDEBUG= $DEBUG;
-	    print "Base DEBUG options = $DEBUG\n" unless ($param::quiet);
 	}
+    }
+    unless ($param::quiet){
+	print 
+	    "Base ".(defined($NODEBUG)?"OPTIM":"DEBUG")." options = $DEBUG\n",
+	    defined($NODEBUG)?"\tOPTIM is enabled (the ENV NODEBUG is enabled)\n":
+	                      "\tDEBUG is enabled (enable optimize by setting the ENV NODEBUG)\n",
+	    defined($OPTIM_OPTS)?"":
+	                         "\tThe ENV variable OPTIM_OPTIONS may override the default optimize options\n";
     }
 
 
@@ -573,12 +585,13 @@
 	# Additional GCC optimization flags if NODEBUG
 	#
 	if ( (defined( $ARG{NODEBUG} ) or $NODEBUG) && !defined($ENV{DEBUG_OPTIONS}) ) {
+	    # Optimization is requested
 	    my $optflags = "";
 
 	    if ($CXX_VERSION < 3){
 		$optflags = "-malign-loops=2 -malign-jumps=2 -malign-functions=2";
 	    } elsif ( $CXX_VERSION < 4.5 ){
-		# this naiming convention starts at gcc 3.2 which happens to
+		# this naming convention starts at gcc 3.2 which happens to
 		# have a change in the options.
 		# Valid and used up to 4.4.7
 		$optflags = "-falign-loops=2 -falign-jumps=2 -falign-functions=2";
@@ -591,37 +604,50 @@
 
 	    # JL patch for gcc 4.1 -> 4.3.x (report that it is broken in 4.4 as well)
 	    if ( $STAR_HOST_SYS =~ m/(_gcc4)(\d+)/ ){
-		print "Notice: Enabling gcc patch for V4.x series\n";
+		print "\tChecking if OPTIM options tweak are needed for gcc V4.x series\n";
 		if ( $2 <= 49 ){
 		    # Note: all inlining failed with gcc 4.4.7 with no indication
 		    # of a resolve up to 4.4.9 . Symbols would be removed and
 		    # linking would fail.
 		    $DEBUG .= " -fno-inline";
+		    $FDEBUG = $DEBUG;
 		} elsif ( $2 <= 82){
-		    # Note: 4.8.2 is picky, we may ned to adjust options here
+		    # Note: 4.8.2 is picky, we may need to adjust options here
 		    #$DEBUG  =  "-O1 -g -fno-merge-constants";
-		    $DEBUG   =  "-g -fif-conversion -fif-conversion2 -fforward-propagate -fmerge-constants -finline-small-functions -findirect-inlining -fpartial-inlining -fdevirtualize -floop-interchange -ftree-ccp";
-		    # Other possible options part of O1
-		    #   -fmerge-all-constants (implies merge-contstants)
-		    #   -finline-functions-called-once
-		    #   -fcombine-stack-adjustments
-		    #   -fcompare-elim
-		    #   -fcprop-registers
-		    #   -fdce -fdse
-		    #   -ftree-dce -ftree-dse 
-		    #   -frerun-cse-after-loop
-		    #   -ftree-dominator-opts
-		    # With O2
-		    #   -fpartial-inlining
-		    #   -foptimize-sibling-calls
-		    #  With O3
-		    #   -finline-functions
+		    if ( defined($ENV{OPTIM_WITH_O}) ) {
+			# -O2 initially did ot work due to code issues (i.e. bugs
+			# or tricks used with array overbound, the compiler resshuffled)
+			# In case this happens again, the minal set of optimizing options
+			# below worked fine and could be re-used
+			#
+			# Other possible options part of O1
+			#   -fmerge-all-constants (implies merge-contstants)
+			#   -finline-functions-called-once
+			#   -fcombine-stack-adjustments
+			#   -fcompare-elim
+			#   -fcprop-registers
+			#   -fdce -fdse
+			#   -ftree-dce -ftree-dse 
+			#   -frerun-cse-after-loop
+			#   -ftree-dominator-opts
+			# With O2
+			#   -fpartial-inlining
+			#   -foptimize-sibling-calls
+			#  With O3
+			#   -finline-functions
+			$FDEBUG = $DEBUG   =  "-g -fif-conversion -fif-conversion2 -fforward-propagate -fmerge-constants -finline-small-functions -findirect-inlining -fpartial-inlining -fdevirtualize -floop-interchange -ftree-ccp";
+		    } else {
+			# STAR default optimization options
+			$DEBUG   = "-O2 -g";
+                        # downgraded pon request 2016/04/26
+			$FDEBUG  = "-g -fif-conversion -fif-conversion2 -fforward-propagate -fmerge-constants -finline-small-functions -findirect-inlining -fpartial-inlining -fdevirtualize -floop-interchange -ftree-ccp";
+		    }
 		}
 	    }
 
-	    $DEBUG .= " ".$optflags;
-	    $FDEBUG = $DEBUG;
-	    print "set DEBUG = $DEBUG\n" unless ($param::quiet);
+	    $DEBUG  .= " ".$optflags;
+	    $FDEBUG .= " ".$optflags; # $DEBUG;
+	    print "Set final OPTIM/DEBUG options as [$DEBUG]\n" unless ($param::quiet);
 	}
 
         $CFLAGS   .= " -pipe -fPIC -Wall -Wshadow";

@@ -219,7 +219,9 @@ Int_t StTruthTestMaker::MakeGeant()
 
 
   hNumMismatched -> Fill( missed );
-  hPerMismatched -> Fill( float(missed) / float(count) );
+  if ( count > 0 ) { 
+    hPerMismatched -> Fill( float(missed / count) );
+  };
 
   return kStOK;
 }
@@ -355,9 +357,12 @@ Int_t StTruthTestMaker::MakeRecord()
       continue;     
   
     }
-
+  
   hNumMismatched -> Fill( missed );
-  hPerMismatched -> Fill( float(missed) / float(count) );
+  if ( count > 0 ) { 
+    hPerMismatched -> Fill( float(missed / count) );
+  }
+
 
   return kStOK;
 }

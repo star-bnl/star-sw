@@ -69,53 +69,15 @@ void StarAgmlStacker::SetMediumParameters( TGeoMedium *medium )
 // ---------------------------------------------------------------------------------------------------
 TString StarAgmlStacker::nickname( TString agname, Bool_t add )
 {
+  // alphabet
+  const char*   alpha[]={ ".",
+			  "1","2","3","4","5","6","7","8","9","0",
+			  "a","b","c","d","e","f","g","h","i","j",
+			  "k","l","m","n","o","p","q","r","s","t",
+			  "u","v","w","x","y","z" }; 
 
-  /**********************************************************************
-   *                                                                    *
-          Subroutine   A g S N A M E   (Volume,Ign,CNick)
-   *                                                                    *
-   *  Description:  generate a NickName for (Volume,Ign) instance       *
-   **********************************************************************
-
-#include "commons/typing.inc"
-#include "geant321/gcunit.inc"
-   Character*1 Symb
-   Character*4 Volume,Cnick
-   Integer     Ign,ii,i,j,k
-
-   Cnick=Volume;  
-   Unless 0<=Ign & Ign <=1368 {
-        <W> Ign,Volume;(' AgSNAME: Bad volume number ',I5,' for Volume ',A); Return;
-   }
-
-   ii=Ign;                                  ! Start with the number of generic names
-
-   do k=4,3,-1                              ! Loop over last two characters
-   {  i=mod(ii,37);   ii=ii/37;   
-
-      check i>0                             ! Return if i==0
-
-      j=i+48;   If(i==10) j=48;             ! 1 2 3 ... 8 9 0 ...
-      If(i>10) j=96+(i-10)                  ! a b c ... x y z
-      Call ITOCH(j,Symb,*:err:);   Cnick(k:k)=Symb
-   }  :err:
-   END
-
-
-   */
-
-
-
-  const Char_t *nn[]={ "0","1","2","3","4","5","6","7","8","9",
-		       "a","b","c","d","e","f","g","h","i","j",
-		       "k","l","m","n","o","p","q","r","s","t",
-		       "u","v","w","x","y","z" }; // 36
-
-  const Char_t *aa[]={ "1","2","3","4","5","6","7","8","9","0" };
-
-#ifdef __NO_NICKNAMES__
-  return agname;
-#endif
+  // size of the alphabet
+  constexpr unsigned int salpha = sizeof(alpha) / sizeof(char*);
 
   //
   // If there is no list of nicknames for this block, create an 
@@ -130,31 +92,34 @@ TString StarAgmlStacker::nickname( TString agname, Bool_t add )
       return agname;
     }
 
-   // Get a reference to the list of nicknames. 
+  //
+  // Otherwise, we will begin nickname convention.  Start by getting
+  // the vector of nicknames for thie block.
+  //
   std::vector<TString> &nicks = mNicknames[agname];
+  unsigned int snicks = nicks.size() + 1;
 
-  UInt_t i = nicks.size(); 
+  assert(snicks < salpha*salpha*salpha*salpha);// If you see this assert, you are creating too many volumes.  Consider setting shape at position time.
 
-  TString mynickname=agname;
-  assert(i<36*36*36*36); // TOO MANY NICKNAMES
+  TString mynickname = agname;
 
-  Int_t i3 = i%36;       // last character will be modulo 36
-  Int_t i2 = (i/36)%36;
-  Int_t i1 = (i/36/36)%36; 
+  unsigned int i3 = snicks % salpha;
+  unsigned int i2 = (snicks / salpha) % salpha;
+  unsigned int i1 = (snicks / salpha / salpha ) % salpha;
 
-  if ( i>=0   && i3!=0 ) mynickname.Replace(3,1,nn[i3]);
-  if ( i < 10   ) mynickname.Replace(3,1,aa[i3]);
-  if ( i>=36  && i2!=0 ) mynickname.Replace(2,1,nn[i2]);
-  if ( i>=36*36 && i1!=0 ) mynickname.Replace(1,1,nn[i1]);
+  TString c3 = alpha[i3]; if ( c3 != "." ) mynickname.Replace(3,1,c3);
+  TString c2 = alpha[i2]; if ( c2 != "." ) mynickname.Replace(2,1,c2);
+  TString c1 = alpha[i1]; if ( c1 != "." ) mynickname.Replace(1,1,c1);
 
-  //  std::cout << mynickname << std::endl;
+  //std::cout << i3 << " " << c3 << std::endl;
 
+  // Add nickname to list of nicknames, and associate realname with nickname
   nicks.push_back(mynickname);
   mRealnames[mynickname]=agname;
 
   return mynickname;
-  
-}
+
+};
 
 TString StarAgmlStacker::realname( TString nname )
 {

@@ -8,4 +8,6 @@
 struct fpsGain { 
   unsigned short slatid; /* 0-251: slat Id = (quad-1)*nLayer*maxSlat + (layer-1)*maxSlat + (slat-1)*/
   float MIP;             /* Single MIP ADC ch */
+  float Sigma;           /* MIP peak width [ch]*/
+  float Valley;          /* Valley location between noise and MIP peak [ch]*/
 };  

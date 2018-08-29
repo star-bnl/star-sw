@@ -1,0 +1,13 @@
+/*    fpostGain.idl
+*
+*  Table: fpostGain
+*
+*       description: //  FPOST MIP position in ch
+*/ 
+
+struct fpostGain { 
+  unsigned short slatid; /* 0-240: slat Id */
+  float MIP; /* Single MIP ADC ch */ 
+  float Sigma;           /* MIP peak width [ch]*/
+  float Valley;          /* Valley location between noise and MIP peak [ch]*/
+};  

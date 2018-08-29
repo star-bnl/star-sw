@@ -70,7 +70,7 @@ class StTinyRcTrack {
   void setFirstFitPadrow(Short_t val){ mFirstFitPadrow=val; }
   void setLastFitPadrow(Short_t val) { mLastFitPadrow=val; }
 
-  void setRecoKey(Short_t val) { mRecoKey=val; }
+  void setRecoKey(Int_t val) { mRecoKey=val; }
   void setFirstSector(Short_t val) { mFirstSector=val; }
   void setLastSector(Short_t val) { mLastSector=val; }
   void setFitPts(Short_t val) { mFitPts=val; }
@@ -131,7 +131,7 @@ class StTinyRcTrack {
   short firstFitPadrow()const { return mFirstFitPadrow; }
   short fastFitPadrow() const { return mLastFitPadrow; }
 
-  short recoKey() const { return mRecoKey; }
+    int recoKey() const { return mRecoKey; }
   short firstSector() const { return mFirstSector; }
   short lastSector() const { return mLastSector; }
   short fitPts()     const { return mFitPts; }
@@ -216,7 +216,7 @@ private:
   Short_t    mLastFitPadrow;
   Short_t    mFirstSector;
   Short_t    mLastSector;
-  Short_t    mRecoKey;
+  Int_t      mRecoKey;
     
   Short_t      mFitPts;
   Short_t      mFitSvt;
@@ -239,6 +239,9 @@ private:
 #endif
 //
 // $Log: StTinyRcTrack.h,v $
+// Revision 1.11  2018/01/03 18:18:09  genevb
+// idTruths and keys moved from short to int
+//
 // Revision 1.10  2011/07/19 19:16:33  perev
 // mDca00 added
 //
@@ -275,6 +278,9 @@ private:
 //
 // Revision 1.2  2002/06/06 18:58:30  calderon
 // Added $Log: StTinyRcTrack.h,v $
+// Added Revision 1.11  2018/01/03 18:18:09  genevb
+// Added idTruths and keys moved from short to int
+// Added
 // Added Revision 1.10  2011/07/19 19:16:33  perev
 // Added mDca00 added
 // Added

@@ -8,6 +8,7 @@
 
 Float_t AgUStep::rmin = 0.0;
 Float_t AgUStep::rmax = 200.0;
+Float_t AgUStep::zmin =-200.0;
 Float_t AgUStep::zmax = 200.0;
 Int_t   AgUStep::verbose = 0;
 Int_t   AgUStep::mnTruth =  0;
@@ -120,6 +121,7 @@ void  Track::Clear( const Option_t *opts ) {
 // .................................................................. Step ................
 Step::Step() : TObject(), 
 	       idStep(-1), 
+	       idTruth(0),
 	       x(0), y(0), z(0), r(0), 
 	       state(0), 
 	       dEstep(-1), 
@@ -128,14 +130,15 @@ Step::Step() : TObject(),
 	       step(-1) ,
 	       dens(0)  ,
 	       A(0), 
-	       Z(0)
+	       Z(0),
+	       isvol(0)
 { 
   Clear(); 
 }
 
 void Step::Clear(Option_t *opts)
 {
-  idStep=-1;
+  idStep=-1; idTruth=0; isvol=0;
   x=0; y=0; z=0; dEstep=-1; adEstep=-1; step=-1; state=0; nStep=-1;
   for( Int_t i=0;i<15;i++ ) { vnums[i]=0; cnums[i]=0; }
 }
@@ -183,6 +186,8 @@ Gctrak_t *AgUStep::ctrak;
 Gcmate_t *AgUStep::cmate;
 Gccuts_t *AgUStep::ccuts;
 Gcphys_t *AgUStep::cphys;
+Gctmed_t *AgUStep::ctmed;
+
 Int_t     AgUStep::nlev;
 
 AgUStep *AgUStep::sInstance = 0;
@@ -196,7 +201,13 @@ AgUStep::AgUStep() : TNamed("AgUStep","AgSTAR user stepping routine"),
 		     mFile(0),
 		     mEvent( new Event() ),
 		     mTrack(0),
-		     idEvent(-1)
+		     idEvent(-1),
+		     idTruth(0),
+		     aDeStep(0.),
+		     nStep(0),
+		     aStep(0.),
+		     vect0{0.,0.,0., 0.,0.,0., 0.}, oldEvent(-1)
+  
 { 
   geant3 = St_geant_Maker::instance()->Geant3();
   cquest = (Quest_t  *) geant3->Quest();
@@ -211,6 +222,7 @@ AgUStep::AgUStep() : TNamed("AgUStep","AgSTAR user stepping routine"),
   cmate  = (Gcmate_t *) geant3->Gcmate();
   ccuts  = (Gccuts_t *) geant3->Gccuts();
   cphys  = (Gcphys_t *) geant3->Gcphys();
+  ctmed  = (Gctmed_t *) geant3->Gctmed();
 
   oldEvent = -999;
 
@@ -229,7 +241,7 @@ void AgUStep::operator()()
   Double_t _dens = cmate->dens;
 
   Double_t r = TMath::Sqrt(x*x+y*y);      
-  if (r > rmax || TMath::Abs(z)>zmax ) 
+  if (r > rmax || TMath::Abs(z) > 200 ) // limited to inner tracking region
     {
       ctrak->istop = 2; // stop the track
       return; // track is exiting region of interest
@@ -269,6 +281,8 @@ void AgUStep::operator()()
       
     }
   
+
+
   aDeStep += ctrak->destep;
   aStep   += ctrak->step;
   nStep   ++;
@@ -277,8 +291,22 @@ void AgUStep::operator()()
   assert(mTrack);
 
   if ( r < rmin ) return; // track has not entered region of interest
+  if ( z < zmin || z > zmax ) return; // outside of region of interest
 
   Step *mStep = mTrack -> AddStep();
+
+  mStep -> isvol   =  ctmed->isvol;
+  if ( ctmed->isvol ) {
+    // I cannot rely on this, but we will set isvol to the value
+    // of csets->numbv[0]... only correct for sensitive volumes
+    // placed w/in the mother volume ...
+    mStep->isvol = csets->numbv[0] + 1;
+    
+    //  LOG_INFO << "Sensitive volume: " << endm;
+    //    for ( int i=0;i<20;i++ ) 
+    //      LOG_INFO << csets->numbv[i] << endm;
+  }
+
   mStep -> adEstep = aDeStep;
   mStep -> nStep  = nStep;
   mStep -> dEstep  = ctrak -> destep;

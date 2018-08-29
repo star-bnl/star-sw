@@ -1,0 +1,8 @@
+<Document file="StarVMC/Geometry/PsupGeo/PsupConfig.xml">
+<Detector name="PSUP" comment="STAR Pixel detector">
+<Modules>PsupGeo</Modules>
+<!-- D Tube, pixel support tube and pixel support services -->
+<Setup name="PSUPof" module="PsupGeo" onoff="off" comment="OFF" />
+<Setup name="PSUP01" onoff="on" module="PsupGeo" comment="Pixel D-tube" simu="2" />
+</Detector>
+</Document>

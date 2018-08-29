@@ -1,9 +1,12 @@
 #!/opt/star/bin/perl
 #use Env;
 ############################################################
-# $Id: Conscript,v 1.20 2013/11/18 20:30:09 jeromel Exp $
+# $Id: Conscript,v 1.21 2016/04/27 11:29:09 jeromel Exp $
 #
 # $Log: Conscript,v $
+# Revision 1.21  2016/04/27 11:29:09  jeromel
+# Fix regexp issue
+#
 # Revision 1.20  2013/11/18 20:30:09  jeromel
 # hardwired -m32 for sl53 should not be needed since LDFLAGS gets that from a central place
 #
@@ -158,7 +161,7 @@ my @starsim = qw(acmain.cxx deccc/traceqc.c atmain/traceq.age atmain/sterror.age
 my $pgm = "starsim";
 script::Keep $pgm;
 my $LD = $env->{LD};
-if ($LD eq 'g++' and $FC ne 'gfortran') {$LD = $env->{CC};}
+if ($LD =~ /g++/ && $FC !~ m/gfortran/) {$LD = $env->{CC};}
 
 my $LDFLAGS = $env->{LDFLAGS};
 $LDFLAGS .= $env->{LDEXPORT};

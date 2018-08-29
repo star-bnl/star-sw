@@ -10,7 +10,7 @@ class StarGenEvent;
 StarGenEvent   *event       = 0;
 
 class StarPrimaryMaker;
-StarPrimaryMaker *primary = 0;
+StarPrimaryMaker *_primary = 0;
 
 // ----------------------------------------------------------------------------
 void geometry( TString tag, Bool_t agml=true )
@@ -60,8 +60,8 @@ void Hijing()
   // For more configuration options, see the HIJING manual
   // http://ntc0.lbl.gov/~xnwang/hijing/doc.html
 
-  primary -> AddGenerator(hijing);
-  primary -> SetCuts( 1.0E-6 , -1., -2.5, +2.5 );
+  _primary -> AddGenerator(hijing);
+  _primary -> SetCuts( 1.0E-6 , -1., -2.5, +2.5 );
   
 }
 // ----------------------------------------------------------------------------
@@ -95,10 +95,10 @@ void starsim( Int_t nevents=50, Int_t rngSeed=1234 )
   // Create the primary event generator and insert it
   // before the geant maker
   //
-  primary = new StarPrimaryMaker();
+  _primary = new StarPrimaryMaker();
   {
-    primary -> SetFileName( "hijing.starsim.root");
-    chain -> AddBefore( "geant", primary );
+    _primary -> SetFileName( "hijing.starsim.root");
+    chain -> AddBefore( "geant", _primary );
   }
 
 
@@ -110,7 +110,7 @@ void starsim( Int_t nevents=50, Int_t rngSeed=1234 )
   //
   // Initialize primary event generator and all sub makers
   //
-  primary -> Init();
+  _primary -> Init();
 
   //
   // Setup geometry and set starsim to use agusread for input

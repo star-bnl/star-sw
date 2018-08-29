@@ -1,0 +1,11 @@
+/*    fpostStatus.idl
+*
+*  Table: fpostStatus
+*
+*       description: //  FPOST Status table 
+*/
+
+struct fpostStatus { 
+  unsigned short slatid; /* 0-240: slat Id */
+  unsigned short status; /* 0=Good, 1=bad, 9=Unused */ 
+};  

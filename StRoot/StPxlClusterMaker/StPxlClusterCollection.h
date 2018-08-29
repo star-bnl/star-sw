@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlClusterCollection.h,v 1.4 2014/08/06 11:43:34 jeromel Exp $
+ * $Id: StPxlClusterCollection.h,v 1.5 2017/09/01 02:58:33 dongx Exp $
  *
  * Author: Qiu Hao, March 2013
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlClusterCollection.h,v $
+ * Revision 1.5  2017/09/01 02:58:33  dongx
+ * Update to ensure idTruth is preserved for MC hits for overlapping scenarios between MC/data and two or more MC hits
+ *
  * Revision 1.4  2014/08/06 11:43:34  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
  *
@@ -39,9 +42,10 @@ public:
    StPxlClusterCollection();
    void addCluster(Int_t sector, Int_t ladder, Int_t sensor, const StPxlCluster &cluster); ///< add a cluster to the collection
    Int_t numberOfClusters(Int_t sector, Int_t ladder, Int_t sensor) const; ///< number of clusters in a sensor
+   Int_t numberOfClusters() const;
    const StPxlCluster *cluster(Int_t sector, Int_t ladder, Int_t sensor, Int_t clusterIndex) const; ///< pointer to a cluster in the collection
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlClusterCollection.h,v 1.4 2014/08/06 11:43:34 jeromel Exp $ built " __DATE__ " " __TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlClusterCollection.h,v 1.5 2017/09/01 02:58:33 dongx Exp $ built " __DATE__ " " __TIME__ ;
       return cvs;
    }
 

@@ -108,11 +108,14 @@ Int_t StDijetFilter::Filter( StarGenEvent *mEvent )
 	jf.push_back(finalparticles[l]);
 	nChange++;
       }
+      if (j) delete j; // prevent resource leak when combineTracks overwrites
       j = combineTracks(jf);
       nIter++;
     }
     if(jf.size() == 0)continue;
     jetFour.push_back(jf);
+    // j goes out of scope here, so time to clean up
+    if (j) delete j;
   }
 
   jetFour = EtOrderedList(jetFour);
@@ -434,20 +437,24 @@ vector< vector<JetFourVec*> > StDijetFilter::doSplitMerge(vector< vector<JetFour
 	vector< vector<JetFourVec*> >::iterator njit2;
 	njit1 = find(jetFour.begin(),jetFour.end(),*iter1);
 	njit2 = find(jetFour.begin(),jetFour.end(),*iter2);
-	if(oe > mSplitfraction){
-	  vector<JetFourVec*> mj = merge(*iter1,*iter2);
-	  (*njit1).clear();
-	  (*njit2).clear();
-	  jetFour.erase(njit2);
-	  jetFour.erase(njit1);
-	  jetFour.insert(jetFour.begin(),mj);
-	  delete nj;
-	  continue;
-	}else{
-	  split(*njit1,*njit2);
-	  delete nj;
-	  continue;
-	}
+	if ( njit1!=jetFour.end() && njit2!=jetFour.end() ) // add protection against end of list
+	  {
+	    if(oe > mSplitfraction){
+	      vector<JetFourVec*> mj = merge(*iter1,*iter2);
+	      (*njit1).clear();
+	      (*njit2).clear();
+	      jetFour.erase(njit2);
+	      jetFour.erase(njit1);
+	      jetFour.insert(jetFour.begin(),mj);
+	      if(nj) delete nj;
+	      continue;
+	    }else{
+	      split(*njit1,*njit2);
+	      if(nj) delete nj;
+	      continue;
+	    }
+	  }
+	if(nj)delete nj; // was deleted on both branches if (oe>mSplitFraction) ... else ...
       }
       delete j;
     }

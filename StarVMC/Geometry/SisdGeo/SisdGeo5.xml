@@ -340,7 +340,7 @@
             <var name="SFRA_Dz" value="1.0" comment="     Length of the hybrid stiffner "  />
             <var name="SFRA_Pz" value="1.1" comment=" Z-Position of the hybrid stiffner "  />
             <var name="SFSW_Dy" value="1.0" comment=" Width of a single wafer container "  />
-            <var name="SFSW_Dz" value="2.25" comment=" Lengthof of a single wafer container "  />
+            <var name="SFSW_Dz" value="2.175" comment=" Lengthof of a single wafer container "  />
             <var name="SFRS_Dx" value="0.04" comment=" Dx of the two supports of the hybrid stiffner "  />
             <var name="SFRS_Dy" value="0.0915" comment=" Dy of the two supports of the hybrid stiffner "  />
             <var name="SFRS_Px" value="3.8" comment=" x-Position of the two supports of the hybrid stiffner "  />

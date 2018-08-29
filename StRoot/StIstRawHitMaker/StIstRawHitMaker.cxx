@@ -1,17 +1,17 @@
-// $Id: StIstRawHitMaker.cxx,v 1.48 2016/02/18 17:24:49 smirnovd Exp $
+// $Id: StIstRawHitMaker.cxx,v 1.50 2018/02/25 03:51:57 dongx Exp $
 #include "StIstRawHitMaker.h"
 
 #include "StEvent.h"
-#include "StRoot/St_base/StMessMgr.h"
+#include "St_base/StMessMgr.h"
 #include "RTS/src/DAQ_FGT/daq_fgt.h"
 #include "RTS/src/DAQ_READER/daq_dta.h"
 #include "StChain/StRtsTable.h"
 
-#include "StRoot/StIstUtil/StIstCollection.h"
-#include "StRoot/StIstUtil/StIstRawHitCollection.h"
-#include "StRoot/StIstUtil/StIstRawHit.h"
-#include "StRoot/StIstDbMaker/StIstDb.h"
-#include "StRoot/StIstUtil/StIstConsts.h"
+#include "StIstUtil/StIstCollection.h"
+#include "StIstUtil/StIstRawHitCollection.h"
+#include "StIstUtil/StIstRawHit.h"
+#include "StIstDbMaker/StIstDb.h"
+#include "StIstUtil/StIstConsts.h"
 
 #include "tables/St_istPedNoise_Table.h"
 #include "tables/St_istGain_Table.h"
@@ -195,9 +195,12 @@ Int_t StIstRawHitMaker::Make()
    Int_t ntimebin = mCurrentTimeBinNum;
 
    Int_t nRawAdcFromData = 0;
+   int nIdTruth_Ist = 0;
+   Bool_t printed = kFALSE;
    while (1) { //loops over input raw data
       if (dataFlag == mALLdata) {
          if (mDataType == mALLdata) {
+            if(!printed) { LOG_INFO << " Trying to read ALLdata" << endm; printed = kTRUE; }
             rts_tbl = GetNextDaqElement("ist/zs");      dataFlag = mZSdata;
 
             if (!rts_tbl) {
@@ -206,14 +209,22 @@ Int_t StIstRawHitMaker::Make()
             }
          }
          else if (mDataType == mADCdata) {
+            if(!printed) { LOG_INFO << " Trying to read ADCdata" << endm; printed = kTRUE; }
             rts_tbl = GetNextDaqElement("ist/adc");     dataFlag = mADCdata;
          }
          else if (mDataType == mZSdata) {
+            if(!printed) { LOG_INFO << " Trying to read ZSdata" << endm; printed = kTRUE; }         
             rts_tbl = GetNextDaqElement("ist/zs");      dataFlag = mZSdata;
          }
       }
-      else if (dataFlag == mADCdata) { rts_tbl = GetNextDaqElement("ist/adc"); }
-      else if (dataFlag == mZSdata) { rts_tbl = GetNextDaqElement("ist/zs"); }
+      else if (dataFlag == mADCdata) { 
+            if(!printed) { LOG_INFO << " Trying to read ADCdata" << endm; printed = kTRUE; }
+            rts_tbl = GetNextDaqElement("ist/adc"); 
+      }
+      else if (dataFlag == mZSdata) { 
+            if(!printed) { LOG_INFO << " Trying to read ZSdata" << endm; printed = kTRUE; }
+            rts_tbl = GetNextDaqElement("ist/zs");
+      }
 
       if (!rts_tbl) break;
 
@@ -306,7 +317,7 @@ Int_t StIstRawHitMaker::Make()
                LOG_INFO << "Wrong elecId: " << elecId  << endm;
                continue;
             }
-
+            
             // This is where we get the simulated hits from the simu container if it is available
             // and merge with real data ADC values
             if (mIstCollectionSimuPtr)
@@ -318,8 +329,11 @@ Int_t StIstRawHitMaker::Make()
                if(rawHitCollectionSimuPtr)
                {
                   StIstRawHit * rawHitSimu = rawHitCollectionSimuPtr->getRawHit(elecId);
-                  signalUnCorrected[channel][timebin] += rawHitSimu->getCharge(timebin);
-                  idTruth[channel] = (rawHitSimu->getCharge(timebin) > 0 ? rawHitSimu->getIdTruth() : 0);
+                  idTruth[channel] = 0;
+                  if(rawHitSimu->getCharge(timebin) > 0) {  // a valid MC hit
+                    signalUnCorrected[channel][timebin] += rawHitSimu->getCharge(timebin);
+                    idTruth[channel] = rawHitSimu->getIdTruth();
+                  }
                }
             }
 
@@ -333,6 +347,8 @@ Int_t StIstRawHitMaker::Make()
                   sumAdcPerEvent[timebin] += signalCorrected[channel][timebin];
                   counterAdcPerEvent[timebin]++;
                }
+               
+               LOG_DEBUG << " Corrected = " << signalCorrected[channel][timebin] << "\t sumAdcPerEvent = " << sumAdcPerEvent[timebin] << endm;
             }
             else {      // ZS data
                signalCorrected[channel][timebin]    = signalUnCorrected[channel][timebin];
@@ -340,15 +356,18 @@ Int_t StIstRawHitMaker::Make()
          }
       } // end current APV loops
 
-      FillRawHitCollectionFromAPVData(dataFlag, ntimebin, counterAdcPerEvent, sumAdcPerEvent, apvElecId, signalUnCorrected, signalCorrected, idTruth);
+      nIdTruth_Ist += FillRawHitCollectionFromAPVData(dataFlag, ntimebin, counterAdcPerEvent, sumAdcPerEvent, apvElecId, signalUnCorrected, signalCorrected, idTruth);
 
    }//end while
-
+   LOG_INFO << " Total number of IST Raw Hits - Step I = " << mIstCollectionPtr->getNumRawHits() << " w/ idTruth = " << nIdTruth_Ist << endm;
+   
    // In case of pure simulation mode when neither real data hits from DAQ
    // records is available nor embedding is requested fill the output container
    // with simulated hits
-   if(!mDoEmbedding && !nRawAdcFromData) FillRawHitCollectionFromSimData();
+   if(!mDoEmbedding && !nRawAdcFromData) nIdTruth_Ist += FillRawHitCollectionFromSimData();
 
+   LOG_INFO << " Total number of IST Raw Hits - Step II = " << mIstCollectionPtr->getNumRawHits() << " w/ idTruth = " << nIdTruth_Ist << endm;
+   
    return ierr;
 }
 
@@ -357,12 +376,13 @@ Int_t StIstRawHitMaker::Make()
  * A private helper function to actually insert StIstRawHits unpacked from DAQ
  * records into the final output container mIstCollectionPtr.
  */
-void StIstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, int ntimebin,
+int StIstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, int ntimebin,
    int counterAdcPerEvent[], double sumAdcPerEvent[], int apvElecId,
    std::array< std::array<double, kIstNumTimeBins>, kIstNumApvChannels > &signalUnCorrected,
    std::array< std::array<double, kIstNumTimeBins>, kIstNumApvChannels > &signalCorrected,
    std::array<int, kIstNumApvChannels> &idTruth)
 {
+   int nIdTruth = 0;
    // calculate the dynamical common mode noise for the current chip in this event
    double commonModeNoise[kIstNumTimeBins];
 
@@ -404,7 +424,7 @@ void StIstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, i
    // skip the chip filling if the signal-channel number too large (20% chip occupancy was set) to exclude hot chip
    if ( !mIsCaliMode && (nChanPassedCut > mMaxNumOfRawHits || nChanPassedCut < mMinNumOfRawHits) ) {
       LOG_DEBUG << "Skip: The APV chip could be hot with " << nChanPassedCut << " channels fired!!" << endm;
-      return;
+      return 0;
    }
 
    // fill IST raw hits for current APV chip
@@ -428,7 +448,7 @@ void StIstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, i
          if (dataFlag == mADCdata) {
             rawHitCollectionPtr->addRawHit( new StIstRawHit(elecId, geoId, signalUnCorrected[iChan]) );
          }
-         else return;
+         else return 0;
       }
       else { //physics mode: pedestal subtracted + dynamical common mode correction
          //skip dead chips and bad mis-configured chips
@@ -479,8 +499,11 @@ void StIstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, i
          rawHitPtr->setMaxTimeBin( tempMaxTB );
          rawHitPtr->setDefaultTimeBin( mDefaultTimeBin );
          rawHitPtr->setIdTruth( idTruth[iChan] );
+         if(idTruth[iChan]>0) nIdTruth++;
+         
       }//end filling hit info
    } //end single APV chip hits filling
+   return nIdTruth;
 }
 
 
@@ -492,9 +515,10 @@ void StIstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, i
  * in the pure simulation mode when neither real data hits from DAQ records is
  * available nor embedding is requested.
  */
-void StIstRawHitMaker::FillRawHitCollectionFromSimData()
+int StIstRawHitMaker::FillRawHitCollectionFromSimData()
 {
-   if(!mIstCollectionSimuPtr) return;
+   int nIdTruth = 0;
+   if(!mIstCollectionSimuPtr) return 0;
 
    for( UChar_t ladderIdx=0; ladderIdx < kIstNumLadders; ++ladderIdx )
    {
@@ -506,8 +530,10 @@ void StIstRawHitMaker::FillRawHitCollectionFromSimData()
          if (!rawAdcSimuPtr) continue;
 
          rawHitCollectionDataPtr->addRawHit(new StIstRawHit(*rawAdcSimuPtr));
+         if(rawAdcSimuPtr->getIdTruth()>0) nIdTruth++;
       }
    }
+   return nIdTruth;
 }
 
 void StIstRawHitMaker::Clear( Option_t *opts )

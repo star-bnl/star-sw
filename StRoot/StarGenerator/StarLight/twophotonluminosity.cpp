@@ -22,7 +22,7 @@
 // File and Version Information:
 // $Rev::                             $: revision of last commit
 // $Author: jwebb $: author of last commit
-// $Date: 2012/11/27 22:27:33 $: date of last commit
+// $Date: 2016/05/06 14:03:43 $: date of last commit
 //
 // Description:
 //    Added incoherent factor to luminosity table output--Joey
@@ -34,6 +34,7 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <assert.h>
 
 #include "inputParameters.h"
 #include "beambeamsystem.h"
@@ -489,7 +490,7 @@ double twoPhotonLuminosity::radmul(int N,double *A,double *B,int MINPTS,int MAXP
     }
     if (LDV) {
       LDV = false;
-      ctr[IDVAX0-1]=ctr[IDVAX0-1]+2*wth[IDVAX0-1];
+      assert(IDVAX0>0);      ctr[IDVAX0-1]=ctr[IDVAX0-1]+2*wth[IDVAX0-1];
       ISBRGS = ISBRGS + IRGNST;
       ISBRGN = ISBRGS;
       goto L20;

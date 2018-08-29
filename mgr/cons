@@ -31,7 +31,7 @@ use Cwd;
 
 use vars qw( $CVS_id $CVS_ver $ver_num $ver_rev $version );
 
-$CVS_id = '$Id: cons,v 1.111 2014/07/23 15:36:55 jeromel Exp $ ';
+$CVS_id = '$Id: cons,v 1.113 2018/02/20 17:34:26 jeromel Exp $ ';
 $CVS_ver = (split(/\s+/, $CVS_id))[2];
 
 $ver_num = "2.3";
@@ -108,7 +108,8 @@ BEGIN {
 $| = 1;
 
 # Seed random number generator.
-srand(time . $$); # this works better than time ^ $$ in perlfunc manpage.
+#srand(time . $$); # this works better than time ^ $$ in perlfunc manpage.
+srand(time | $$); # this works better than time ^ $$ in perlfunc manpage.
 
 $usage = q(
 Usage: cons [arguments] -- [construct-args]
@@ -863,7 +864,11 @@ sub main::doscripts {
 		$file = $path;
 	    }
 	    # Actually process the Conscript file.
-	    do $file;
+	    if ( -e "./$file"){
+		do "./$file";
+	    } else {
+		do $file;
+	    }
 	    # Save any variables defined by the Conscript file
 	    # so we can restore them later, if needed;
 	    # then delete them from the script:: namespace.
