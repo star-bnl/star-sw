@@ -18,7 +18,7 @@ int read_trigger_definitions(int runNumber = 13078009)
   gSystem->Load("St_db_Maker");
 
   gSystem->Load("StEmcRawMaker");
-  gSystem->Load("StEmcAdctoEMaker");
+  gSystem->Load("StEmcADCtoEMaker");
   gSystem->Load("StEEmcUtil");
   gSystem->Load("StEEmcDbMaker");
 
