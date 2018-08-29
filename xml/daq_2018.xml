@@ -7,8 +7,8 @@
 #.DEV2
 #   setup gcc
    setup 64b
-#   starver .DEV2
-   starver TFG18m
+   starver .DEV2
+#   starver TFG18m
 #dev
 #   setup gcc
 #   starver dev

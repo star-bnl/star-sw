@@ -580,6 +580,13 @@ Int_t StdEdxY2Maker::Make(){
       if (fTracklengthInTpc)      fTracklengthInTpc->Fill(TrackLength);
       SortdEdx();
       if (Debug() > 1) PrintdEdx(2);
+      Int_t noiTPC = 0;
+      for (Int_t k = 0; k < NdEdx; k++) {
+	if (St_tpcPadConfigC::instance()->iTPC(FdEdx[k].sector) &&
+	    St_tpcPadConfigC::instance()->IsRowInner(FdEdx[k].sector, FdEdx[k].row))
+	  noiTPC++;
+      }
+      Int_t iTPCOnly = (noiTPC >= 20) ? 1 : 0;
       Double_t I70 = 0, D70 = 0;
       Double_t dXavLog2 = 1;
       Double_t SumdEdX = 0;
@@ -641,7 +648,7 @@ Int_t StdEdxY2Maker::Make(){
 	  }
 	  if (SumdEdX > 0) dXavLog2 = SumdX/SumdEdX;
 	  dedx.id_track  =  Id;
-	  dedx.det_id    =  kTpcId;    // TPC track 
+	  dedx.det_id    =  100*iTPCOnly + kTpcId;    // TPC track 
 	  dedx.method    =  kWeightedTruncatedMeanId;// == kLikelihoodFitId+1;
 	  dedx.ndedx     =  NdEdx + 100*((int) TrackLength);
 	  dedx.dedx[0]   =  TMath::Exp(fitZ);
@@ -661,7 +668,7 @@ Int_t StdEdxY2Maker::Make(){
 	DoFitN(chisqN, fitN, fitdN);
 	if (chisqN > -900.0 &&chisqN < 10000.0) {
 	  dedx.id_track  =  Id;
-	  dedx.det_id    =  kTpcId;    // TPC track 
+	  dedx.det_id    =  100*iTPCOnly + kTpcId;    // TPC track 
 	  dedx.method    =  kOtherMethodId2;
 	  dedx.ndedx     =  NdEdx + 100*((int) TrackLength);
 	  dedx.dedx[0]   =  fitN;
@@ -845,10 +852,10 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 			    "dNdx/Pion",
 			    "dNdx(uncorrected)/Pion"};
       TPoints[t]   = new TH3F(Form("TPoints%s",N[t]),
-			      Form("%s versus Length in Tpc and <log_{2}(dX)>",T[t]),
+			      Form("%s versus Length in Tpc and <log_{2}(dX)> in TPC - iTPC",T[t]),
 			      190,10,200., Nlog2dx, log2dxLow, log2dxHigh, 500,-1.,4.);
       Pulls[t] = new TH2F(Form("Pull%s",N[t]),
-			  Form("Pull %s versus Length in Tpc",T[t]),
+			  Form("Pull %s versus Length in TPC - iTPC",T[t]),
 			  190,10.,200,nZBins,ZdEdxMin,ZdEdxMax);
       TPointsiTPC[t]   = new TH3F(Form("TPoints%siTPC",N[t]),
 			      Form("%s versus Length in Tpc and <log_{2}(dX)> in iTPC",T[t]),
@@ -858,7 +865,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 			  190,10.,200,nZBins,ZdEdxMin,ZdEdxMax);
       if (t < 2) {
 	Eta[t] = new TH2F(Form("Eta%s",N[t]),
-			  Form("%s for primary tracks versus Eta for |zPV| < 10cm and TpcLength > 40cm",T[t]),
+			  Form("%s for primary tracks versus Eta for |zPV| < 10cm and TpcLength > 40cm, TPC - iTPC",T[t]),
 			  100,-2.5,2.5,500,-1.,4.);
 	EtaiTPC[t] = new TH2F(Form("EtaiTPC%s",N[t]),
 			  Form("%s for primary tracks versus Eta for |zPV| < 10cm and TpcLength > 40cm, iTPC only",T[t]),
@@ -1016,11 +1023,12 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   Bool_t iTPCOnly = (noiTPC >= 20);
   for (Int_t j = 0; j < kTotalMethods; j++) {
     if (PiD.Status(kTPoints[j])) {
-      TPoints[j]->Fill(PiD.fFit.TrackLength(),PiD.fFit.log2dX(),PiD.Status(kTPoints[j])->dev[kPidPion]);
-      Pulls[j]->Fill(PiD.fFit.TrackLength(),PiD.Status(kTPoints[j])->devS[kPidPion]);
       if (iTPCOnly) {
 	TPointsiTPC[j]->Fill(PiD.fFit.TrackLength(),PiD.fFit.log2dX(),PiD.Status(kTPoints[j])->dev[kPidPion]);
 	PullsiTPC[j]->Fill(PiD.fFit.TrackLength(),PiD.Status(kTPoints[j])->devS[kPidPion]);
+      } else {
+	TPoints[j]->Fill(PiD.fFit.TrackLength(),PiD.fFit.log2dX(),PiD.Status(kTPoints[j])->dev[kPidPion]);
+	Pulls[j]->Fill(PiD.fFit.TrackLength(),PiD.Status(kTPoints[j])->devS[kPidPion]);
       }
       if (j < 2 && PiD.fFit.TrackLength() > 40) {
 	StTrackNode *node = gTrack->node();
@@ -1031,9 +1039,10 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	    if (TMath::Abs(primVx->position().z()) < 10) {
 	      StThreeVectorD P = pTrack->geometry()->helix().momentum(bField);
 	      Double_t eta = P.pseudoRapidity();
-	      Eta[j]->Fill(eta,PiD.Status(kTPoints[j])->dev[kPidPion]);
 	      if (iTPCOnly) {
 		EtaiTPC[j]->Fill(eta,PiD.Status(kTPoints[j])->dev[kPidPion]);
+	      } else {
+		Eta[j]->Fill(eta,PiD.Status(kTPoints[j])->dev[kPidPion]);
 	      }
 	    }
 	  }

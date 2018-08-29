@@ -29,6 +29,11 @@ public:
     size_t buildRecHitTrackMap(const StSPtrVecTrackNode& nodes,map<const StTpcHit*,StGlobalTrack*>& htMap);
     void   buildHit2HitMaps(const StTpcHitCollection *tpchitcoll1, const StTpcHitCollection *tpchitcoll2,
 			    map<const StTpcHit*,const StTpcHit*>        &Hit1ToHit2,map<const StTpcHit*,const StTpcHit*>        &Hit2ToHit1);
+    void   buildTrack2TrackMap(const StSPtrVecTrackNode &trackNodes1, 
+			       const StSPtrVecTrackNode &trackNodes2, 
+			       map<const StTpcHit*,const StTpcHit*> &Hit1ToHit2, 
+			       map<const StTpcHit*,StGlobalTrack*> &hitTrackMap2,
+			       map<StGlobalTrack*,StGlobalTrack*> &Track1ToTrack2);
     Float_t getTpcDedx(StTrack* trk);
     Bool_t  GoodTrack(StTrack* trk);
     Bool_t  GoodMatch(StTrack* trk1, StTrack* trk2, UInt_t NPings);

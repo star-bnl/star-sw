@@ -23,7 +23,8 @@
     endif
     set log = ${tag}C.log
     if (! -r "${tag}.picoDst.root") then
-      root.exe -q -b -x 'lMuDst.C(-1,"root://xrdstar.rcf.bnl.gov:1095/'${dir}'/'${tag}'.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,PicoVtxDefault,quiet")'  'makePicoDst.C("y2010")'  &gt;&amp; ${log}
+#      root.exe -q -b -x 'lMuDst.C(-1,"root://xrdstar.rcf.bnl.gov:1095/'${dir}'/'${tag}'.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,PicoVtxDefault,quiet")'  'makePicoDst.C("y2010")'  &gt;&amp; ${log}
+      root.exe -q -b -x 'lMuDst.C(-1,"root://xrdstar.rcf.bnl.gov:1095/'${dir}'/'${tag}'.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,PicoVtxDefault,quiet")'  'makePicoDst.C("y2011")'  &gt;&amp; ${log}
     endif
   end
         </command>

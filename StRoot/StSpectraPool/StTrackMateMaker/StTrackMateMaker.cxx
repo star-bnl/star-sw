@@ -140,8 +140,8 @@ Bool_t StTrackMateMaker::GoodMatch(StTrack* trk1, StTrack* trk2, UInt_t NPings) 
   if (NPings < 5) return kFALSE;
   if (! trk1)    return kFALSE;
   if (! trk2)    return kFALSE;
-  Int_t minFit = TMath::Min(trk1->fitTraits().numberOfFitPoints(),trk2->fitTraits().numberOfFitPoints());
-  if (minFit - NPings > 5) return kFALSE;
+  UInt_t minFit = 0.5*TMath::Min(trk1->fitTraits().numberOfFitPoints(),trk2->fitTraits().numberOfFitPoints());
+  if (NPings < minFit) return kFALSE;
   return kTRUE;
 }
 //________________________________________________________________________________
@@ -179,17 +179,6 @@ Int_t StTrackMateMaker::Make(){
   else {
     LOG_INFO << "Event2: Vertex Not Found" << endm;
   }
-#if 0
-  if (rEvent1->runInfo()->spaceChargeCorrectionMode() != 21 ||
-      rEvent2->runInfo()->spaceChargeCorrectionMode() != 21) {
-    LOG_INFO << "Event1:  spaceChargeCorrectionMode "
-	     << rEvent1->runInfo()->spaceChargeCorrectionMode() << endm;
-    LOG_INFO << "Event2:  spaceChargeCorrectionMode "
-	     << rEvent2->runInfo()->spaceChargeCorrectionMode() << endm;
-    LOG_INFO << " Skip it " << endm;
-    return kStWarn;
-  }
-#endif
   LOG_INFO << "Size of track containers" << endm;
   const StSPtrVecTrackNode& trackNodes1 = rEvent1->trackNodes();
   LOG_INFO << "Event1: Track Nodes " << trackNodes1.size() << endm;
@@ -260,11 +249,6 @@ Int_t StTrackMateMaker::Make(){
   buildHit2HitMaps(tpchitcoll1,tpchitcoll2,Hit1ToHit2,Hit2ToHit1);
   // Do Track association.
   LOG_INFO << "Begin Track Association..." << endm;
-  Int_t matcTrkCounter = 0;
-  Int_t origTrkCounter = 0;
-  Int_t oldOnlyCounter = 0;
-  Int_t oldDoubCounter = 0;
-  Int_t newDoubCounter = 0;
   // Algorithm is a simplified version of the one in StAssociationMaker
   // since we don't need to worry about merged tracks, or splitting, or
   // multiple matches.  Just worry about the simple case of one-to-one matching.
@@ -276,10 +260,6 @@ Int_t StTrackMateMaker::Make(){
   //   Call a match if there is a candidate.  For the cases where there
   //   are more than 1 candidates, only match the track with most hits in common.
   //
-  StTrackPing initTrackPing;
-  initTrackPing.mTrack=0;
-  initTrackPing.mNPings=0;
-  
   // Keep a set of the StTracks from event 2 that are associated,
   // so that at the end we can loop over the track container in event
   // 2 and find out the tracks that were not associated from event 2
@@ -287,150 +267,34 @@ Int_t StTrackMateMaker::Make(){
   //  set<StGlobalTrack*> assocTracks2;
   map<StGlobalTrack*,StGlobalTrack*> Track1ToTrack2;
   map<StGlobalTrack*,StGlobalTrack*> Track2ToTrack1;
-  for (size_t iTrk=0; iTrk<trackNodes1.size();++iTrk) {
-    StGlobalTrack *trk1 = (StGlobalTrack *) trackNodes1[iTrk]->track(global);
-    if (! GoodTrack(trk1)) continue;
-    StPrimaryTrack* ptrk1 = (StPrimaryTrack*) trackNodes1[iTrk]->track(primary);
-    if (Debug()>2) LOG_INFO << "Processing Track " << iTrk << endm;
-    ++origTrkCounter;
-    vector<StTrackPing> candidates(20,initTrackPing); //make sure it's filled with null pointers and zeros
-    size_t nCandidates = 0;
-    StPtrVecHit trkhits1 = trk1->detectorInfo()->hits(kTpcId);
-    
-    for (StPtrVecHitIterator hIterTrk = trkhits1.begin(); hIterTrk != trkhits1.end(); ++hIterTrk) {
-      // get the hit from the track
-      const StTpcHit* hit1 = static_cast<const StTpcHit*>(*hIterTrk);
-#if 0
-      // go to the hit collection and get the hit container for its sector,padrow
-      if (! tpchitcoll1->sector(hit1->sector()-1)->padrow(hit1->padrow()-1)) continue;
-      const StSPtrVecTpcHit& hits1 = tpchitcoll1->sector(hit1->sector()-1)->padrow(hit1->padrow()-1)->hits();
-      if (! hits1.size()) continue;
-      // find the hit in this container and get the index
-      StPtrVecTpcHitConstIterator hIterColl =  find(hits1.begin(),hits1.end(),hit1);
-      Int_t index = hIterColl - hits1.begin();
-      // get the hit container for the sector,padrow in event 2
-      // using the SAME sector, padrow as for hit 1
-      if (! tpchitcoll2->sector(hit1->sector()-1)->padrow(hit1->padrow()-1)) continue;
-      const StSPtrVecTpcHit& hits2 = tpchitcoll2->sector(hit1->sector()-1)->padrow(hit1->padrow()-1)->hits();
-      if (! hits2.size()) continue;
-      // use the index found above to find the hit in event 2
-      const StTpcHit* hit2 = hits2[index];
-#else
-      const StTpcHit* hit2 = Hit1ToHit2[hit1];
-      if (! hit2) continue;
-#endif
-      // use the map to find its track!
-      StTrack* trackCand = hitTrackMap2[hit2];
-      if (!trackCand) {
-	// the hit is not on a track in the 2nd event
-	continue;
-      }
-      // At this point we have a candidate StTrack
-      // If there are no candidates, create the first candidate.
-      // If already there, increment its nPings.
-      // If doesn't match any of the previous candidates, create new candidate.
-      
-      if (nCandidates == 0) {
-	candidates[0].mTrack   = trackCand;
-	candidates[0].mNPings  = 1;
-	nCandidates++;
-	
-      }//if, case of no tracks in candidate vector
-      else {
-	for (UInt_t iCandidate=0; iCandidate<nCandidates; iCandidate++){ 
-	  if (trackCand==candidates[iCandidate].mTrack){
-	    candidates[iCandidate].mNPings++;
-	    break;
-	  }
-	  if (iCandidate == (nCandidates-1)){
-	    candidates[nCandidates].mTrack  = trackCand;
-	    candidates[nCandidates].mNPings = 1;
-	    nCandidates++;
-	    // check that we don't overstep the bounds,
-	    // if so increase the size of the vector in steps of 20 candidates
-	    if (nCandidates>=candidates.size()) {
-	      candidates.resize(nCandidates+20);
-	      if (Debug()) LOG_INFO << "Resizing in the TPC hits of the track " << endm;
-	    }
-	    break;
-	  }
-	} // candidate loop
-      }//else, case of tracks in candidate vector
-      
-    }// trk1 hit loop
-    
-    // at this point, we have all possible track candidates
-    // based on the tpc hits of trk1.
-    // find candidate with most common tpc hits,
-    // could rewrite using
-    // max_element...
-    if (!nCandidates) {
-      ++oldOnlyCounter;
-      Fill(trk1,ptrk1,0,0,0);
-      continue;
-    }
-    vector<StTrackPing>::iterator max = max_element(candidates.begin(),candidates.end(),compStTrackPing);
-    UInt_t NPings = (*max).mNPings;
-    if (Debug()>2) {
-      LOG_INFO << "Matching track " << (*max).mTrack << " has " << NPings << ", index " << max-candidates.begin() << endm;
-    }
-    // Association is considered as good if no. of matched (good) point > 5 and no. of bad points for each track less than 5
-    StGlobalTrack* trk2 = (StGlobalTrack*) (*max).mTrack;
-    StPrimaryTrack* ptrk2 = (StPrimaryTrack*) trk2->node()->track(primary);
-    Bool_t Matched = GoodMatch(trk1, trk2, NPings);
-    if (! Matched) {
-      ++oldOnlyCounter;
+  buildTrack2TrackMap(trackNodes1, trackNodes2, Hit1ToHit2, hitTrackMap2, Track1ToTrack2);
+  buildTrack2TrackMap(trackNodes2, trackNodes1, Hit2ToHit1, hitTrackMap1, Track2ToTrack1);
+  // at this point, we have all possible track candidates
+  // based on the tpc hits of trk1.
+  // find candidate with most common tpc hits,
+  // could rewrite using
+  // max_element...
+  for (auto x1 : Track1ToTrack2) {
+    StGlobalTrack *trk1 = x1.first;
+    if (! trk1 ) continue;
+    StPrimaryTrack* ptrk1 = (StPrimaryTrack*) trk1->node()->track(primary);
+    StGlobalTrack *trk2 = x1.second;
+    if (! trk2 ) {
       Fill(trk1,ptrk1,0,0,-1);
     } else {
-    //    if (assocTracks2.find(trk2)!=assocTracks2.end()) {
-      if (Track1ToTrack2[trk1]) {
-	//This is a match to an New track that has already been matched.
-	// We can enter the old track and flag this double match by
-	// setting the fit points to be negative.
-	LOG_INFO << "Double track match\ntrk1:" << *trk1 << "\nold2:" << *Track1ToTrack2[trk1] << "\ntrk2:" << *trk2 << endm;
-	++oldDoubCounter;
-	//      Fill(trk1,ptrk1,trk2,ptrk2,(*max).mNPings);
-      } else if (Track2ToTrack1[trk2]) {
-	LOG_INFO << "Double track match\ntrk2:" << *trk2 << "\nold1:" << *Track2ToTrack1[trk2] << "\ntrk1:" << *trk1 << endm;
-	++newDoubCounter;
-      } else {
-	// Ok! Now we found a pair if we're here!	
-	++matcTrkCounter;
-	//    assocTracks2.insert(trk2);
-	Track1ToTrack2[trk1] = trk2;
-	Track2ToTrack1[trk2] = trk1;
-	Fill(trk1,ptrk1,trk2,ptrk2,(*max).mNPings);
-      }
+      //      assert(trk1 == Track2ToTrack1[trk2]);
+      StPrimaryTrack* ptrk2 = (StPrimaryTrack*) trk2->node()->track(primary);
+      Fill(trk1,ptrk1,trk2,ptrk2,1);
     }
-  }//track loop
-  
-  // simple track loop to count new global tracks with flag>0
-  Int_t newgTrkCounter = 0;
-  Int_t newOnlyCounter = 0;    
-  for (size_t iTrk=0; iTrk<trackNodes2.size();++iTrk) {
-    StGlobalTrack* trk2 = (StGlobalTrack*) trackNodes2[iTrk]->track(global);
-    if (! GoodTrack(trk2)) continue;
-    ++newgTrkCounter;
-    if (! Track2ToTrack1[trk2]) {
-      // Now try to see if this track was associated
-      ++newOnlyCounter;    	    
-      StPrimaryTrack* ptrk2 = 0;
-      if (trk2->node()) ptrk2 = (StPrimaryTrack*) trk2->node()->track(primary);
-      Fill(0,0,trk2,ptrk2,-2);
-    }
-  }    
-  if (Debug()) {
-    LOG_INFO << "Old      Global Tracks (flag>0) " << origTrkCounter << endm;
-    LOG_INFO << "New      Global Tracks (flag>0) " << newgTrkCounter << endm;
-    LOG_INFO << "Matched  Global Tracks (flag>0) " << matcTrkCounter << endm;
-    LOG_INFO << "Old      Only   Tracks (flag>0) " << oldOnlyCounter << endm;
-    LOG_INFO << "Old      Double Matches to New  " << oldDoubCounter << endm;
-    LOG_INFO << "New      Double Matches to Old  " << newDoubCounter << endm;
-    LOG_INFO << "size of  Track1->Track2         " << Track1ToTrack2.size() << endm; 
-    LOG_INFO << "size of  Track2->Track1         " << Track2ToTrack1.size() << endm; 
-    LOG_INFO << "New      Only   Tracks (flag>0) " << newOnlyCounter << endm;
   }
-  
+  for (auto x2 : Track2ToTrack1) {
+    StGlobalTrack *trk2 = x2.first;
+    if (! trk2 ) continue;
+    StPrimaryTrack* ptrk2 = (StPrimaryTrack*) trk2->node()->track(primary);
+    StGlobalTrack *trk1 = x2.second;
+    if (trk1) continue;
+    Fill(0,0,trk2,ptrk2,-2);
+  }
   return kStOK;
 }
 //________________________________________________________________________________
@@ -567,18 +431,18 @@ void StTrackMateMaker::buildHit2HitMaps(const StTpcHitCollection *tpchitcoll1, c
       UInt_t N2  = hits2.size();
       for (UInt_t it1 = 0; it1 < N1; it1++) {
 	const StTpcHit *hit1 = hits1[it1];
+	if (! hit1) continue;
+	if (hit1->flag()) continue;
 	for (UInt_t it2 = 0; it2 < N2; it2++) {
 	  const StTpcHit *hit2 = hits2[it2];
+	  if (! hit2) continue;
+	  if (hit2->flag()) continue;
 	  assert(hit1->sector() == hit2->sector() &&
 		 hit1->padrow() == hit2->padrow());
 	  Double_t R = 
 	    (hit1->pad()        - hit2->pad()       )*(hit1->pad()        - hit2->pad()      ) +
 	    (hit1->timeBucket() - hit2->timeBucket())*(hit1->timeBucket() - hit2->timeBucket());
 	  if (R < 4) {
-#if 0
-	    Hit1ToHit2.insert(map<const StTpcHit*,const StTpcHit*>::value_type(hit1,hit2));
-	    Hit2ToHit1.insert(map<const StTpcHit*,const StTpcHit*>::value_type(hit2,hit1));
-#else
 	    if (! Hit1ToHit2[hit1] && ! Hit2ToHit1[hit2]) {
 	      Hit1ToHit2[hit1] = hit2;
 	      Hit2ToHit1[hit2] = hit1;
@@ -602,13 +466,85 @@ void StTrackMateMaker::buildHit2HitMaps(const StTpcHitCollection *tpchitcoll1, c
 		Hit1ToHit2[hit1] = hit2;
 	      }
 	    }
-#endif
 	  }
 	}
       }
     }
   }
 }
+//________________________________________________________________________________
+void    StTrackMateMaker::buildTrack2TrackMap(const StSPtrVecTrackNode &trackNodes1, 
+					      const StSPtrVecTrackNode &trackNodes2, 
+					      map<const StTpcHit*,const StTpcHit*> &Hit1ToHit2, 
+					      map<const StTpcHit*,StGlobalTrack*> &hitTrackMap2,
+					      map<StGlobalTrack*,StGlobalTrack*> &Track1ToTrack2) {
+  StTrackPing initTrackPing;
+  initTrackPing.mTrack=0;
+  initTrackPing.mNPings=0;
+  for (size_t iTrk=0; iTrk<trackNodes1.size();++iTrk) {
+    StGlobalTrack *trk1 = (StGlobalTrack *) trackNodes1[iTrk]->track(global);
+    if (! GoodTrack(trk1)) continue;
+    if (Debug()>2) LOG_INFO << "Processing Track " << iTrk << endm;
+    vector<StTrackPing> candidates(20,initTrackPing); //make sure it's filled with null pointers and zeros
+    size_t nCandidates = 0;
+    StPtrVecHit trkhits1 = trk1->detectorInfo()->hits(kTpcId);
+    
+    for (StPtrVecHitIterator hIterTrk = trkhits1.begin(); hIterTrk != trkhits1.end(); ++hIterTrk) {
+      // get the hit from the track
+      const StTpcHit* hit1 = static_cast<const StTpcHit*>(*hIterTrk);
+      const StTpcHit* hit2 = Hit1ToHit2[hit1];
+      if (! hit2) continue;
+      // use the map to find its track!
+      StTrack* trackCand = hitTrackMap2[hit2];
+      if (!trackCand) {
+	// the hit is not on a track in the 2nd event
+	continue;
+      }
+      // At this point we have a candidate StTrack
+      // If there are no candidates, create the first candidate.
+      // If already there, increment its nPings.
+      // If doesn't match any of the previous candidates, create new candidate.
+      
+      if (nCandidates == 0) {
+	candidates[0].mTrack   = trackCand;
+	candidates[0].mNPings  = 1;
+	nCandidates++;
+	
+      }//if, case of no tracks in candidate vector
+      else {
+	for (UInt_t iCandidate=0; iCandidate<nCandidates; iCandidate++){ 
+	  if (trackCand==candidates[iCandidate].mTrack){
+	    candidates[iCandidate].mNPings++;
+	    break;
+	  }
+	  if (iCandidate == (nCandidates-1)){
+	    candidates[nCandidates].mTrack  = trackCand;
+	    candidates[nCandidates].mNPings = 1;
+	    nCandidates++;
+	    // check that we don't overstep the bounds,
+	    // if so increase the size of the vector in steps of 20 candidates
+	    if (nCandidates>=candidates.size()) {
+	      candidates.resize(nCandidates+20);
+	      if (Debug()) LOG_INFO << "Resizing in the TPC hits of the track " << endm;
+	    }
+	    break;
+	  }
+	} // candidate loop
+      }//else, case of tracks in candidate vector
+      
+    }// trk1 hit loop
+    vector<StTrackPing>::iterator max = max_element(candidates.begin(),candidates.end(),compStTrackPing);
+    UInt_t NPings = (*max).mNPings;
+    if (Debug()>2) {
+      LOG_INFO << "Matching track " << (*max).mTrack << " has " << NPings << ", index " << max-candidates.begin() << endm;
+    }
+    // Association is considered as good if no. of matched (good) point > 5 and no. of bad points for each track less than 5
+    StGlobalTrack* trk2 = (StGlobalTrack*) (*max).mTrack;
+    Bool_t Matched = GoodMatch(trk1, trk2, NPings);
+    if (Matched) Track1ToTrack2[trk1] = trk2;
+    else         Track1ToTrack2[trk1] =    0;
+  }//track loop
+ }
 //________________________________________________________________________________
 Float_t StTrackMateMaker::getTpcDedx(StTrack* trk) {
   const StSPtrVecTrackPidTraits& vec = trk->pidTraits();
