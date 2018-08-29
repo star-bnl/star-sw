@@ -267,6 +267,10 @@ void StarKinematics::Cosmic( int ntrack, const char* _type, double plow, double 
       double xvertex = radius * TMath::Cos(phi);
       double yvertex = radius * TMath::Sin(phi);
 
+      xvertex *= 10; // cm --> mm per HEPEVT standard 
+      yvertex *= 10; // cm --> mm 
+      zvertex *= 10; // cm --> mm 
+
       // Initialize vertex X,Y ... to get unit vector pointing to beam line
       TVector3 vertex(xvertex,yvertex,0);
 
