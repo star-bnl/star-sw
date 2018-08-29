@@ -2,6 +2,7 @@
   root.exe TbyTPlots.C+
   .L TbyTPlots.C+
   Init();
+  Draw();
  */
 //#define __SAVE_ROOT_PICTURES_
 #if !defined(__CINT__) || defined(__MAKECINT__)
@@ -1155,9 +1156,12 @@ void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
       if (data.newFitPtsPr >= effNFP) {pTEf[1][0]->Fill(data.newPtPr,refMult); PhiEf[1][0]->Fill(phiNew,refMult);}
       if (data.oldFitPtsPr >= effNFP) {pTEf[1][1]->Fill(data.oldPtPr,refMult); PhiEf[1][1]->Fill(phiOld,refMult);}
       // Matched 
+      if (data.maxPing < 0) continue;
+#if 0
       if (data.newFitPtsGl > 2*data.maxPing ||
 	  data.oldFitPtsGl > 2*data.maxPing ) continue;
       if (data.newFitPtsGl < minNFP || data.oldFitPtsGl < minNFP) continue;
+#endif
       //      if (data.firstHitsDist < 0 || data.firstHitsDist> 1) continue;
       fitPtsHistPing->Fill(data.newFitPtsGl,data.oldFitPtsGl);
       pTdiffGl  = data.oldPtGl - data.newPtGl;
