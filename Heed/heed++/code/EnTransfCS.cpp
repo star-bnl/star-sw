@@ -142,14 +142,14 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
     }
   }
   const long qe = hmd->energy_mesh->get_q();
-  log1C.resize(qe, 0.0);
-  log2C.resize(qe, 0.0);
-  chereC.resize(qe, 0.0);
-  chereCangle.resize(qe, 0.0);
-  Rruth.resize(qe, 0.0);
-  addaC.resize(qe, 0.0);
+  log1C.assign(qe, 0.0);
+  log2C.assign(qe, 0.0);
+  chereC.assign(qe, 0.0);
+  chereCangle.assign(qe, 0.0);
+  Rruth.assign(qe, 0.0);
+  addaC.assign(qe, 0.0);
 #ifndef EXCLUDE_A_VALUES
-  addaC_a.resize(qe, 0.0);
+  addaC_a.assign(qe, 0.0);
 #endif
 
   const long qa = hmd->matter->qatom();
@@ -169,52 +169,48 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
 
   for (long na = 0; na < qa; na++) {
     const long qs = hmd->apacs[na]->get_qshell();
-    cher[na].resize(qs, std::vector<double>(qe, 0.));
-    fruth[na].resize(qs, std::vector<double>(qe, 0.));
-    adda[na].resize(qs, std::vector<double>(qe, 0.));
-    fadda[na].resize(qs, std::vector<double>(qe, 0.));
-    quan[na].resize(qs, 0.);
-    mean[na].resize(qs, 0.);
+    cher[na].assign(qs, std::vector<double>(qe, 0.));
+    fruth[na].assign(qs, std::vector<double>(qe, 0.));
+    adda[na].assign(qs, std::vector<double>(qe, 0.));
+    fadda[na].assign(qs, std::vector<double>(qe, 0.));
+    quan[na].assign(qs, 0.);
+    mean[na].assign(qs, 0.);
 #ifndef EXCLUDE_A_VALUES
-    cher_a[na].resize(qs, std::vector<double>(qe, 0.));
-    adda_a[na].resize(qs, std::vector<double>(qe, 0.));
-    fadda_a[na].resize(qs, std::vector<double>(qe, 0.));
-    quan_a[na].resize(qs, 0.);
-    mean_a[na].resize(qs, 0.);
+    cher_a[na].assign(qs, std::vector<double>(qe, 0.));
+    adda_a[na].assign(qs, std::vector<double>(qe, 0.));
+    fadda_a[na].assign(qs, std::vector<double>(qe, 0.));
+    quan_a[na].assign(qs, 0.);
+    mean_a[na].assign(qs, 0.);
 #endif
   }
 
-  for (long ne = 0; ne < qe; ne++) {
-    double r = -hmd->epsi1[ne] + (1.0 + hmd->epsi1[ne]) * beta12;
-    r = r * r + beta2 * beta2 * hmd->epsi2[ne] * hmd->epsi2[ne];
-    log1C[ne] = log(1. / sqrt(r));
-  }
-  for (long ne = 0; ne < qe; ne++) {
-    double r = 2. * electron_mass_c2 * beta2 / hmd->energy_mesh->get_ec(ne);
-    log2C[ne] = r > 0. ? log(r) : 0.;
-  }
   const long q2 = particle_charge * particle_charge;
   double coefpa = fine_structure_const * q2 / (beta2 * CLHEP::pi);
+  const double coefCh = coefpa / hmd->eldens;
   for (long ne = 0; ne < qe; ne++) {
-    const double r0 = 1.0 + hmd->epsi1[ne];
-    double r = -hmd->epsi1[ne] + r0 * beta12;
-    const double rr12 = r0 * r0;
-    const double rr22 = hmd->epsi2[ne] * hmd->epsi2[ne];
-    const double r1 = (-r0 * r + beta2 * rr22) / (rr12 + rr22);
-    const double r2 = hmd->epsi2[ne] * beta2 / r;
-    double r3 = atan(r2);
-    if (r < 0) r3 += CLHEP::pi;
-    chereCangle[ne] = r3;
-    chereC[ne] = (coefpa / hmd->eldens) * r1 * r3;
-  }
+    const double eps1 = hmd->epsi1[ne];
+    const double eps2 = hmd->epsi2[ne];
+    const double a0 = 1. + eps1;
+    const double a1 = -eps1 + a0 * beta12;
+    const double a2 = beta2 * eps2;
+    log1C[ne] = log(1. / sqrt(a1 * a1 + a2 * a2));
 
-  for (long ne = 0; ne < qe; ne++) {
     const double ec = hmd->energy_mesh->get_ec(ne);
+    const double a3 = 2. * electron_mass_c2 * beta2 / ec;
+    log2C[ne] = a3 > 0. ? log(a3) : 0.;
+
+    double a4 = atan(a2 / a1);
+    if (a1 < 0) a4 += CLHEP::pi;
+    chereCangle[ne] = a4;
+
+    const double a5 = eps2 * eps2;
+    const double a6 = (-a0 * a1 + beta2 * a5) / (a0 * a0 + a5);
+    chereC[ne] = coefCh * a6 * a4;
+
     if (s_simple_form) {
+      Rruth[ne] = 1. / (ec * ec);
       if (!s_primary_electron) {
-        Rruth[ne] = 1. / (ec * ec) * (1. - beta2 * ec / max_etransf);
-      } else {
-        Rruth[ne] = 1. / (ec * ec);
+        Rruth[ne] *= (1. - beta2 * ec / max_etransf);
       }
     } else {
       if (!s_primary_electron) {
@@ -232,63 +228,48 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
   }
 
   double Z_mean = hmd->matter->Z_mean();
+  const double ethr = hmd->min_ioniz_pot;
   for (long na = 0; na < qa; na++) {
     auto pacs = hmd->apacs[na];
     const double awq = hmd->matter->weight_quan(na);
     const long qs = pacs->get_qshell();
     for (long ns = 0; ns < qs; ns++) {
-      std::vector<double>& acher = cher[na][ns];
-#ifndef EXCLUDE_A_VALUES
-      std::vector<double>& acher_a = cher_a[na][ns];
-#endif
-      std::vector<double>& afruth = fruth[na][ns];
-
       for (long ne = 0; ne < qe; ne++) {
         double e1 = hmd->energy_mesh->get_e(ne);
         double e2 = hmd->energy_mesh->get_e(ne + 1);
         double ics = 0.;
         if (hmd->s_use_mixture_thresholds == 1) {
-          ics = pacs->get_integral_TICS(ns, e1, e2, hmd->min_ioniz_pot) /
-                (e2 - e1) * C1_MEV2_MBN;
+          ics = pacs->get_integral_TICS(ns, e1, e2, ethr) / (e2 - e1);
         } else {
-          ics = pacs->get_integral_ICS(ns, e1, e2) / (e2 - e1) * C1_MEV2_MBN;
+          ics = pacs->get_integral_ICS(ns, e1, e2) / (e2 - e1);
         }
-#ifndef EXCLUDE_A_VALUES
-        double acs =
-            pacs->get_integral_ACS(ns, e1, e2) / (e2 - e1) * C1_MEV2_MBN;
-#endif
         check_econd11a(ics, < 0,
                        "na=" << na << " ns=" << ns << " ne=" << ne << '\n',
                        mcerr);
-        if (hmd->ACS[ne] > 0.0) {
-          acher[ne] = chereC[ne] * awq * ics / (hmd->ACS[ne] * C1_MEV2_MBN);
+        const double tacs = hmd->ACS[ne];
+        if (tacs <= 0.0) continue;
+        cher[na][ns][ne] = chereC[ne] * awq * ics / tacs;
 #ifndef EXCLUDE_A_VALUES
-          acher_a[ne] = chereC[ne] * awq * acs / (hmd->ACS[ne] * C1_MEV2_MBN);
+        double acs = pacs->get_integral_ACS(ns, e1, e2) / (e2 - e1);
+        cher_a[na][ns][ne] = chereC[ne] * awq * acs / tacs;
 #endif
-        } else {
-          acher[ne] = 0.0;
-#ifndef EXCLUDE_A_VALUES
-          acher_a[ne] = 0.0;
-#endif
-        }
       }
       // Calculate the integral.
+      const double cR = C1_MEV2_MBN * awq * coefpa / Z_mean;
       double s = 0.;
       for (long ne = 0; ne < qe; ne++) {
         const double e1 = hmd->energy_mesh->get_e(ne);
         const double ec = hmd->energy_mesh->get_ec(ne);
         const double e2 = hmd->energy_mesh->get_e(ne + 1);
-        double r = pacs->get_integral_ACS(ns, e1, e2) * C1_MEV2_MBN * awq;
+        const double r = pacs->get_integral_ACS(ns, e1, e2) * cR;
         // Here it must be ACS to satisfy sum rule for Rutherford
-        check_econd11a(r, < 0.0, "na=" << na << " ns=" << ns << " na=" << na,
+        check_econd11a(r, < 0.0, "na=" << na << " ns=" << ns << " ne=" << ne,
                        mcerr);
-        if (ec > hmd->min_ioniz_pot && ec < max_etransf) {
-          afruth[ne] = (s + 0.5 * r) * coefpa * Rruth[ne] / Z_mean;
-          check_econd11a(afruth[ne], < 0,
+        if (ec > ethr && ec < max_etransf) {
+          fruth[na][ns][ne] = (s + 0.5 * r) * Rruth[ne];
+          check_econd11a(fruth[na][ns][ne], < 0,
                          "na=" << na << " ns=" << ns << " na=" << na, mcerr);
-        } else {
-          afruth[ne] = 0.0;
-        }
+        } 
         s += r;
       }
     }
@@ -301,48 +282,48 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
     double e1 = hmd->energy_mesh->get_e(ne);
     double ec = hmd->energy_mesh->get_ec(ne);
     double e2 = hmd->energy_mesh->get_e(ne + 1);
-    double sqepsi = pow((1 + hmd->epsi1[ne]), 2) + pow(hmd->epsi2[ne], 2);
+    const double eps1 = hmd->epsi1[ne];
+    const double eps2 = hmd->epsi2[ne];
+    const double eps11 = 1. + eps1;
+    const double sqepsi = eps11 * eps11 + eps2 * eps2;
+    const double cL = C1_MEV2_MBN * coefpa * (log1C[ne] + log2C[ne]) / 
+                      (ec * Z_mean * sqepsi); 
     for (long na = 0; na < qa; na++) {
       double awq = hmd->matter->weight_quan(na);
       auto pacs = hmd->apacs[na];
       const long qs = pacs->get_qshell();
       for (long ns = 0; ns < qs; ns++) {
-        double ics;
+        double ics = 0.;
         if (hmd->s_use_mixture_thresholds == 1) {
-          ics = pacs->get_integral_TICS(ns, e1, e2, hmd->min_ioniz_pot) /
-                (e2 - e1) * C1_MEV2_MBN;
+          ics = pacs->get_integral_TICS(ns, e1, e2, ethr) / (e2 - e1);
         } else {
-          ics = pacs->get_integral_ICS(ns, e1, e2) / (e2 - e1) * C1_MEV2_MBN;
+          ics = pacs->get_integral_ICS(ns, e1, e2) / (e2 - e1);
         }
-        const double r0 = awq * coefpa * ics / (ec * Z_mean * sqepsi); 
-        double& r_adda = adda[na][ns][ne];
-        double& r_fruth = fruth[na][ns][ne];
-        r_adda = std::max(r0 * (log1C[ne] + log2C[ne]) + r_fruth, 0.);
+        double r = std::max(cL * awq * ics + fruth[na][ns][ne], 0.);
 #ifndef EXCLUDE_A_VALUES
-        double acs =
-            pacs->get_integral_ACS(ns, e1, e2) / (e2 - e1) * C1_MEV2_MBN;
-        const double r0_a = awq * coefpa * acs / (ec * Z_mean * sqepsi);
-        double& r_adda_a = adda_a[na][ns][ne];
-        r_adda_a = std::max(r0 * (log1C[ne] + log2C[ne]) + fruth, 0.);
+        double acs = pacs->get_integral_ACS(ns, e1, e2) / (e2 - e1);
+        double r_a = std::max(cL * awq * acs + fruth[na][ns][ne], 0.);
 #endif
-        if (ec > hmd->min_ioniz_pot) {
-          r_adda += cher[na][ns][ne];
-          if (r_adda < 0.0) {
+        if (ec > ethr) {
+          r += cher[na][ns][ne];
+          if (r < 0.0) {
             funnw.whdr(mcout);
             mcout << "negative adda\n";
             mcout << "na=" << na << " ns=" << ns << " ne=" << ne
-                  << " adda[na][ns][ne] = " << adda[na][ns][ne] << '\n';
-            adda[na][ns][ne] = 0.0;
+                  << ": " << r << '\n';
+            r = 0.;
           }
         }
 #ifndef EXCLUDE_A_VALUES
-        adda_a[na][ns][ne] += cher[na][ns][ne];
-        check_econd11a(adda_a[na][ns][ne], < 0,
+        r_a += cher[na][ns][ne];
+        check_econd11a(r_a, < 0,
                        "na=" << na << " ns=" << ns << " na=" << na, mcerr);
 #endif
-        s += r_adda;
+        adda[na][ns][ne] = r;
+        s += r;
 #ifndef EXCLUDE_A_VALUES
-        s_a += r_adda_a;
+        adda_a[na][ns][ne] = r_a;
+        s_a += r_a;
 #endif
       }
     }
@@ -443,21 +424,42 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
     length_y0[ne] = det_value > 0. ? beta / k0 * 1.0 / sqrt(det_value) : 0.;
   }
 
-  log1C.clear();
-  log2C.clear();
-  chereC.clear();
-  chereCangle.clear();
-  Rruth.clear();
   /*
   std::ofstream dcsfile;
   dcsfile.open("dcs.txt", std::ios::out);
   dcsfile << "# energy [MeV] vs. diff. cs per electron [Mbarn / MeV]\n";
   for (int i = 0; i < qe; ++i) {
+    double sumR = 0.;
+    double sumC = 0.;
+    double sumL = 0.; 
+    for (long na = 0; na < qa; ++na) {
+      const long qs = hmd->apacs[na]->get_qshell();
+      for (long ns = 0; ns < qs; ++ns) {
+        sumR += fruth[na][ns][i];
+        sumC += cher[na][ns][i];
+        sumL += adda[na][ns][i] - cher[na][ns][i] - fruth[na][ns][i];
+      }
+    }
+    const double f1 = log1C[i] / (log1C[i] + log2C[i]);
+    const double f2 = 1. - f1;
+    sumR /= C1_MEV2_MBN;
+    sumC /= C1_MEV2_MBN;
+    sumL /= C1_MEV2_MBN;
+    const double sumL1 = f1 * sumL;
+    const double sumL2 = f2 * sumL;
     dcsfile << hmd->energy_mesh->get_ec(i) << "  " << addaC[i] / C1_MEV2_MBN
+            << "  " << sumL1 << "  " << "  " << sumC << "  " << sumL2 << "  " << sumR 
             << "\n";
   }
   dcsfile.close();
-  */
+  //*/
+
+  log1C.clear();
+  log2C.clear();
+  chereC.clear();
+  chereCangle.clear();
+  Rruth.clear();
+
   addaC.clear();
   cher.clear();
   fruth.clear();
