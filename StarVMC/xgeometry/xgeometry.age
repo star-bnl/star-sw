@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.30.2.5 2018/08/24 21:32:09 jwebb Exp $
+* $Id: xgeometry.age,v 1.30.2.6 2018/08/30 15:08:12 jwebb Exp $
 
 
 
@@ -2549,6 +2549,7 @@ If LL>0
   Case fwddev0b  { fwddev0b: Si + sTGC pipev1;     Geom = 'fwddev0b  '; call geom_fwddev0b; }
   Case fwddev1a  { fwddev1a: Si + sTGC pipev1;     Geom = 'fwddev1a  '; call geom_fwddev1a; }
   Case fwddev1b  { fwddev1b: Si + sTGC pipev1;     Geom = 'fwddev1b  '; call geom_fwddev1b; }
+  Case fwddev1c  { fwddev1c: Si + sTGC pipev1;     Geom = 'fwddev1b  '; call geom_fwddev1c; }
 
   Case test      { test    : Si + sTGC pipev1;     Geom = 'test      '; call geom_test;     }
 
@@ -4668,8 +4669,11 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.30.2.5 2018/08/24 21:32:09 jwebb Exp $
+* $Id: xgeometry.age,v 1.30.2.6 2018/08/30 15:08:12 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.30.2.6  2018/08/30 15:08:12  jwebb
+* Add one last conceptual design...
+*
 * Revision 1.30.2.5  2018/08/24 21:32:09  jwebb
 * Enabling new fcs models..
 *
