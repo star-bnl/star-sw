@@ -243,6 +243,7 @@ Int_t StdEdxY2Maker::Make(){
   static  Double_t s[2], s_in[2], s_out[2], w[2], w_in[2], w_out[2], dx;
   enum {kNdEdxMax  = 100};
   static dEdxY2_t CdEdxT[3*kNdEdxMax];//,FdEdxT[kNdEdxMax],dEdxST[kNdEdxMax];
+  static Int_t sectorMin = 1, sectorMax = 24;
   CdEdx = CdEdxT; 
   FdEdx = CdEdxT + kNdEdxMax; 
   dEdxS = CdEdxT + 2*kNdEdxMax; 
@@ -350,9 +351,17 @@ Int_t StdEdxY2Maker::Make(){
 	StTpcHit *tpcHit = static_cast<StTpcHit *> (hvec[j]);
 	if (! tpcHit) continue;
 	if (Debug() > 1) {tpcHit->Print();}
+	if (! tpcHit->usedInFit()) {
+	  BadHit(0,tpcHit->position());
+	  continue;
+	} if (  tpcHit->flag()) {
+	  BadHit(1,tpcHit->position());
+	  continue;
+	}
 	Int_t sector = tpcHit->sector();
+	if (sector < sectorMin || sector > sectorMax) continue;
 	Int_t row    = tpcHit->padrow();
-	if (St_tpcPadConfigC::instance()->numberOfRows(sector) == 45 && ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue; // iTpx
+	if (! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue; // iTpx
 	xyz[3] = StThreeVectorD(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z());
 	//________________________________________________________________________________      
 	StThreeVectorD middle = xyz[3];
@@ -360,12 +369,14 @@ Int_t StdEdxY2Maker::Make(){
 	StThreeVectorD lower(tpcHit->positionL().x(),tpcHit->positionL().y(),tpcHit->positionL().z());
 	StThreeVectorD dif = upper - lower;
 	StThreeVectorD normal = dif.unit();
+#if 0
 	if (St_tpcPadConfigC::instance()->numberOfRows(sector) == 45) {// ! iTpx
 	  // Check that Voltage above "-100V" from nominal, mark as unrecoverable
 	  Double_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sector,row);
 	  if ((row <= St_tpcPadConfigC::instance()->innerPadRows(sector) && 1170 - V > 100) || 
 	      (row >  St_tpcPadConfigC::instance()->innerPadRows(sector) && 1390 - V > 100)) {BadHit(9,tpcHit->position()); continue;}
 	}
+#endif
 	// check that helix prediction is consistent with measurement
 	if (Propagate(middle,normal,helixI,helixO,xyz[0],dirG,s,w)) {BadHit(2,tpcHit->position()); continue;}
 	if (Debug() > 1) {
@@ -446,21 +457,10 @@ Int_t StdEdxY2Maker::Make(){
 	  }
 	}
 #endif /* __PROMPT_HITS__ */
+	TrackLengthTotal += dx;
 	transform(localSect[0],PadOfTrack);
 	transform(globalDirectionOfTrack,localDirectionOfTrack,sector,row);
 	transform(localSect[3],Pad);
-	CdEdx[NdEdx].Reset();
-	CdEdx[NdEdx].resXYZ[0] = localSect[3].position().x() - localSect[0].position().x();
-	CdEdx[NdEdx].resXYZ[1] = localSect[3].position().y() - localSect[0].position().y();
-	CdEdx[NdEdx].resXYZ[2] = localSect[3].position().z() - localSect[0].position().z();
-	TrackLengthTotal += dx;
-	tpcHit->setdX(dx);
-	if (! tpcHit->usedInFit()) {
-	  BadHit(0,tpcHit->position());
-	  continue;}
-	if (  tpcHit->flag()) {
-	  BadHit(1,tpcHit->position());
-	  continue;}
 	//________________________________________________________________________________      
 	Int_t iokCheck = 0;
 	if (sector != Pad.sector() || // ? && TMath::Abs(xyz[0].x()) > 20.0 ||
@@ -508,6 +508,7 @@ Int_t StdEdxY2Maker::Make(){
 	if ((TESTBIT(m_Mode, kPadSelection)) && iokCheck) {BadHit(3, tpcHit->position()); continue;}
 	if ((TESTBIT(m_Mode, kPadSelection)) && (dx < 0.5 || dx > 25.)) {BadHit(4, tpcHit->position()); continue;}
 	// Corrections
+	tpcHit->setdX(dx);
 	CdEdx[NdEdx].Reset();
 	CdEdx[NdEdx].resXYZ[0] = localSect[3].position().x() - localSect[0].position().x();
 	CdEdx[NdEdx].resXYZ[1] = localSect[3].position().y() - localSect[0].position().y();
@@ -631,8 +632,10 @@ Int_t StdEdxY2Maker::Make(){
 	if ((TESTBIT(m_Mode, kCalibration)))  // uncorrected dEdx
 	  AddEdxTraits(tracks, dedx);
 	if (! TESTBIT(m_Mode, kDoNotCorrectdEdx)) { 
+	  dedx.det_id    =  100*iTPCOnly + kTpcId;    // TPC track & iTPC
 	  m_TpcdEdxCorrection->dEdxTrackCorrection(0,dedx); 
-	  dedx.method    =  kTruncatedMeanId;
+	  dedx.det_id    = kTpcId;    // TPC track 
+	  dedx.method    = kTruncatedMeanId;
 	  AddEdxTraits(tracks, dedx);
 	}
 	// likelihood fit
@@ -648,7 +651,7 @@ Int_t StdEdxY2Maker::Make(){
 	  }
 	  if (SumdEdX > 0) dXavLog2 = SumdX/SumdEdX;
 	  dedx.id_track  =  Id;
-	  dedx.det_id    =  100*iTPCOnly + kTpcId;    // TPC track 
+	  dedx.det_id    =  kTpcId;    // TPC track 
 	  dedx.method    =  kWeightedTruncatedMeanId;// == kLikelihoodFitId+1;
 	  dedx.ndedx     =  NdEdx + 100*((int) TrackLength);
 	  dedx.dedx[0]   =  TMath::Exp(fitZ);
@@ -657,8 +660,10 @@ Int_t StdEdxY2Maker::Make(){
 	  if ((TESTBIT(m_Mode, kCalibration)))  // uncorrected dEdx
 	    AddEdxTraits(tracks, dedx);
 	  if (! TESTBIT(m_Mode, kDoNotCorrectdEdx)) { 
+	    dedx.det_id    =  100*iTPCOnly + kTpcId;    // TPC track & iTPC
  	    m_TpcdEdxCorrection->dEdxTrackCorrection(2,dedx); 
-	    dedx.method    =  kLikelihoodFitId;
+	    dedx.det_id    = kTpcId;    // TPC track 
+	    dedx.method    = kLikelihoodFitId;
 	    AddEdxTraits(tracks, dedx);
 	  }
 	}
@@ -668,14 +673,16 @@ Int_t StdEdxY2Maker::Make(){
 	DoFitN(chisqN, fitN, fitdN);
 	if (chisqN > -900.0 &&chisqN < 10000.0) {
 	  dedx.id_track  =  Id;
-	  dedx.det_id    =  100*iTPCOnly + kTpcId;    // TPC track 
+	  dedx.det_id    =  kTpcId;    // TPC track 
 	  dedx.method    =  kOtherMethodId2;
 	  dedx.ndedx     =  NdEdx + 100*((int) TrackLength);
 	  dedx.dedx[0]   =  fitN;
 	  dedx.dedx[1]   =  fitdN/fitN; 
 	  dedx.dedx[2]   =  dXavLog2;
 	  AddEdxTraits(tracks, dedx);
+	  dedx.det_id    =  100*iTPCOnly + kTpcId;    // TPC track & iTPC
 	  m_TpcdEdxCorrection->dEdxTrackCorrection(1,dedx); 
+	  dedx.det_id    =  kTpcId;    // TPC track 
 	  dedx.method    =  kOtherMethodId;
 	  AddEdxTraits(tracks, dedx);
 	}
@@ -1020,7 +1027,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	St_tpcPadConfigC::instance()->IsRowInner(FdEdx[k].sector, FdEdx[k].row))
       noiTPC++;
   }
-  Bool_t iTPCOnly = (noiTPC >= 20);
+  Int_t iTPCOnly = (noiTPC >= 20) ? 1 : 0;
   for (Int_t j = 0; j < kTotalMethods; j++) {
     if (PiD.Status(kTPoints[j])) {
       if (iTPCOnly) {
