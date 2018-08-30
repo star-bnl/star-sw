@@ -34,6 +34,7 @@ public:
 			       map<const StTpcHit*,const StTpcHit*> &Hit1ToHit2, 
 			       map<const StTpcHit*,StGlobalTrack*> &hitTrackMap2,
 			       map<StGlobalTrack*,StGlobalTrack*> &Track1ToTrack2);
+    void  checkConsistency(map<StGlobalTrack*,StGlobalTrack*> &Track1ToTrack2, map<StGlobalTrack*,StGlobalTrack*> &Track2ToTrack1);
     Float_t getTpcDedx(StTrack* trk);
     Bool_t  GoodTrack(StTrack* trk);
     Bool_t  GoodMatch(StTrack* trk1, StTrack* trk2, UInt_t NPings);

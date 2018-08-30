@@ -25,6 +25,12 @@
 #include "StEventUtilities/StuRefMult.hh"
 #include "StDedxPidTraits.h"
 #include "StMessMgr.h"
+#define __DEBUG__
+#if defined(__DEBUG__)
+#define PrPP(A,B) if (Debug()%10 > 2) {LOG_INFO << "StTrackMaterMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
+#else
+#define PrPP(A,B)
+#endif
 
 // //#include "StMemoryInfo.hh"
 // #include "StParticleDefinition.hh"
@@ -132,7 +138,7 @@ void StTrackMateMaker::Clear(const char* c)
 Bool_t StTrackMateMaker::GoodTrack(StTrack* trk) {
   if (! trk || trk->flag()<=0 || trk->topologyMap().trackFtpc()) return kFALSE;
   if (! trk->detectorInfo())  return kFALSE;
-  if ( trk->fitTraits().numberOfFitPoints() < 10) return kFALSE;
+  if ( trk->fitTraits().numberOfFitPoints(kTpcId) < 10) return kFALSE;
   return kTRUE;
 }
 //________________________________________________________________________________
@@ -140,7 +146,7 @@ Bool_t StTrackMateMaker::GoodMatch(StTrack* trk1, StTrack* trk2, UInt_t NPings) 
   if (NPings < 5) return kFALSE;
   if (! trk1)    return kFALSE;
   if (! trk2)    return kFALSE;
-  UInt_t minFit = 0.5*TMath::Min(trk1->fitTraits().numberOfFitPoints(),trk2->fitTraits().numberOfFitPoints());
+  UInt_t minFit = 0.9*TMath::Min(trk1->fitTraits().numberOfFitPoints(kTpcId),trk2->fitTraits().numberOfFitPoints(kTpcId));
   if (NPings < minFit) return kFALSE;
   return kTRUE;
 }
@@ -269,6 +275,8 @@ Int_t StTrackMateMaker::Make(){
   map<StGlobalTrack*,StGlobalTrack*> Track2ToTrack1;
   buildTrack2TrackMap(trackNodes1, trackNodes2, Hit1ToHit2, hitTrackMap2, Track1ToTrack2);
   buildTrack2TrackMap(trackNodes2, trackNodes1, Hit2ToHit1, hitTrackMap1, Track2ToTrack1);
+  checkConsistency(Track1ToTrack2,Track2ToTrack1);
+  checkConsistency(Track2ToTrack1,Track1ToTrack2);
   // at this point, we have all possible track candidates
   // based on the tpc hits of trk1.
   // find candidate with most common tpc hits,
@@ -310,7 +318,7 @@ void StTrackMateMaker::Fill(StGlobalTrack* trk1, StPrimaryTrack* ptrk1,StGlobalT
     myData.oldEtaGl = mom1.pseudoRapidity();
     myData.oldPhiGl = mom1.phi();
     myData.oldPGl = mom1.mag();
-    myData.oldFitPtsGl = trk1->fitTraits().numberOfFitPoints();
+    myData.oldFitPtsGl = trk1->fitTraits().numberOfFitPoints(kTpcId);
     myData.oldDedx = getTpcDedx(trk1);
     myData.oldCharge = trk1->geometry()->charge();
     myData.oldChi2Gl0 = trk1->fitTraits().chi2(0);
@@ -322,7 +330,7 @@ void StTrackMateMaker::Fill(StGlobalTrack* trk1, StPrimaryTrack* ptrk1,StGlobalT
       myData.oldEtaPr = pmom1.pseudoRapidity();
       myData.oldPhiPr = pmom1.phi();
       myData.oldPPr   = pmom1.mag();
-      myData.oldFitPtsPr = trk1->fitTraits().numberOfFitPoints();
+      myData.oldFitPtsPr = trk1->fitTraits().numberOfFitPoints(kTpcId);
       myData.Prim    += 1;
       myData.oldChi2Pr0 = ptrk1->fitTraits().chi2(0);
       myData.oldChi2Pr1 = ptrk1->fitTraits().chi2(1);
@@ -555,4 +563,42 @@ Float_t StTrackMateMaker::getTpcDedx(StTrack* trk) {
   }
   if (!mTraits) return 0;    // no info available
   return mTraits->mean();
+}
+//________________________________________________________________________________
+void StTrackMateMaker::checkConsistency(map<StGlobalTrack*,StGlobalTrack*> &Track1ToTrack2, map<StGlobalTrack*,StGlobalTrack*> &Track2ToTrack1) {
+  // Check consistency of the maps Track1 => Track2 
+  for (auto x : Track1ToTrack2) {
+    StGlobalTrack *track1 = x.first;
+    if (! track1) continue;
+    StGlobalTrack *track2 = x.second;
+    if (! track2 ) continue;
+    StGlobalTrack *track = Track2ToTrack1[track2];
+    if (track1 != track) {
+      cout << "Inconsistent tracks" << endl;
+      PrPP(Make,*track1);
+      PrPP(Make,*track2);
+      if (! track) {
+	cout << "track2 => track1 is missing" << endl;
+      } else {
+	PrPP(Make,*track);
+      }
+      StGlobalTrack *tracks[3] = {track1, track2, track};
+      for (Int_t i = 0; i < 3; i++) {
+	StGlobalTrack *t = tracks[i];
+	PrPP(Form("Track %i",i+1),*t);
+	if (! t) continue;
+	StTrackDetectorInfo *det = t->detectorInfo();
+	StPtrVecHit hits = det->hits(kTpcId);
+	UInt_t Nhits = hits.size(); 
+	PrPP(Form("Track %i",i+1),Nhits);
+	for (UInt_t j = 0; j < Nhits; j++) {
+	  StTpcHit *tpcHit = static_cast<StTpcHit *> (hits[j]);
+	  if (! tpcHit) continue;
+	  PrPP("hit", *tpcHit);
+	}
+      }
+      static Int_t iBreak = 0;
+      iBreak++;
+    }
+  }
 }

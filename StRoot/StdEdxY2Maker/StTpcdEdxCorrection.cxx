@@ -292,7 +292,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       } else if (k == kdXCorrection) {
 	xL2 = TMath::Log2(dx);
 	dXCorr = ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,xL2); 
-	if (TMath::Abs(dXCorr) > 1) return 3;
+	if (TMath::Abs(dXCorr) > 10) return 3;
 	if (nrows == 7) {// old schema without iTPC
 	  dXCorr += ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2,xL2);
 	  dXCorr += ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(5+kTpcOutIn,xL2);

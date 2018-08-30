@@ -4,7 +4,7 @@
 <stdout URL="file:./sched$JOBID.log" />
 <stderr URL="file:./sched$JOBID.err" />
 <command> 
-#   cd ${SUBMITTINGDIRECTORY}  
+   cd ${SUBMITTINGDIRECTORY}  
    setenv STARFPE NO
 #   setenv NODEBUG yes
 #   setup 64b
@@ -14,14 +14,15 @@
   set file = `basename ${fileB} .event.root`;
   echo "${file}"
 #  cp ${INPUTFILE0} ${fileB}
-  set logFile  = ${SUBMITTINGDIRECTORY}/${file}B.log
-#  set f=`find . -maxdepth 1 -type f -name "*${file}*.root"`
-#  if ("${f}" == "") then
+#  set logFile  = ${SUBMITTINGDIRECTORY}/${file}B.log
+  set logFile  = ${file}B.log
+  set f=`find . -maxdepth 1 -type f -name "*${file}*.root"`
+  if ("${f}" == "") then
     root.exe -x -q -b 'dEdx.C(1000000,"'${INPUTFILE0}'","'${file}'.root",2)' &gt;&amp; ${logFile}
 #    root.exe -x -q -b 'dEdx.C(1000000,"'${fileB}'","'${file}'.root",2)' &gt;&amp; ${logFile}
 #   rm ${fileB}
-   cp *.root ${SUBMITTINGDIRECTORY} 
-#  endif
+#   cp *.root ${SUBMITTINGDIRECTORY} 
+   endif
 </command>
 <input URL="file:/net/l401/data/scratch1/fisyak/reco/2018/27GeV_production_2018NewAlignment/27GeV_production_2018/*.event.root" /> 
 <!-- <input URL="file:/gpfs01/star/scratch/fisyak/reco/2018/isobar.TFG18m/*.event.root" /> -->
