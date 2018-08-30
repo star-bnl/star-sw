@@ -552,16 +552,11 @@ Int_t StarPrimaryMaker::Finalize()
 	  Double_t pz   = particle->GetPz();
 	  Double_t E    = particle->GetEnergy();
 	  Double_t M    = particle->GetMass();
-	  Double_t vx   = 0;
-	  Double_t vy   = 0;
-	  Double_t vz   = 0;
-	  Double_t vt   = 0;
-	  if (UseGeneratorPV) {
-	    vx   = particle->GetVx();
-	    vy   = particle->GetVy();
-	    vz   = particle->GetVz();
-	    vt   = particle->GetTof();
-	  }
+	  Double_t vx   = particle->GetVx() / 10; // mm --> cm as per the HEPEVT standard  
+	  Double_t vy   = particle->GetVy() / 10; // mm --> cm
+	  Double_t vz   = particle->GetVz() / 10; // mm --> cm 
+	  Double_t vt   = particle->GetTof();
+
 	  Double_t polx=0, poly=0, polz=0;
 	  
 	  Int_t    parent  = particle->GetFirstMother();
@@ -570,6 +565,7 @@ Int_t StarPrimaryMaker::Finalize()
 	  Int_t    kid2    = particle->GetLastDaughter();
 	  Int_t    id      = particle->GetId();
 	  Int_t    status  = particle->GetStatus();
+
 	  Double_t weight  = 1.0;
 
 	  //

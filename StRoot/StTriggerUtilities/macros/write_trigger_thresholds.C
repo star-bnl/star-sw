@@ -9,7 +9,7 @@ int write_trigger_thresholds(int runNumber = 13078009)
   gSystem->Load("StDbLib.so");
 
   gSystem->Load("StEmcRawMaker");
-  gSystem->Load("StEmcAdctoEMaker");
+  gSystem->Load("StEmcADCtoEMaker");
   gSystem->Load("StEEmcUtil");
   gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StTriggerUtilities");
