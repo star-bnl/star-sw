@@ -938,7 +938,11 @@ void StPicoDstMaker::fillTracks() {
     picoTrk->setId( gTrk->id() );
     picoTrk->setChi2( gTrk->chi2() );
     /// Store dE/dx in keV/cm
+#ifdef __TFG__VERSION__
+    picoTrk->setDedx( gTrk->dEdxFit() );
+#else
     picoTrk->setDedx( gTrk->dEdx() );
+#endif /* __TFG__VERSION__ *
     /// Store dEdx error (fit)
     picoTrk->setDedxError( gTrk->probPidTraits().dEdxErrorFit() );
 
