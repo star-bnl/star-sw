@@ -54,7 +54,12 @@
 
   <Setup name="PIPEv3" onoff="on"  module="PipeGeo3" comment="HFT beampipe" simu="2">
     <Init struct="pipv" var="pipeconfig" value="30" />
-    <Init struct="pipv" var="pipeflag"   value="1" />
+    <Init struct="pipv" var="inidsm"   value="1" />
+  </Setup>
+
+  <Setup name="PIPEv3a" onoff="on"  module="PipeGeo3" comment="HFT beampipe" simu="2">
+    <Init struct="pipv" var="pipeconfig" value="30" />
+    <Init struct="pipv" var="inidsm"   value="0" />
   </Setup>
 
 
