@@ -182,6 +182,9 @@ char *getConfigBaseXml(char *filename, ic_msg *m);
 char *getConfigBase(char *filename, int port, int trg);
 char *getConfigBase(char *filename, ic_msg *m);
 
+SimpleXmlDoc *getConfigFileXml(SimpleXmlDoc *xml, ic_msg *m, int sz=0);
+SimpleXmlDoc *getConfigFileXml(SimpleXmlDoc *xml, char *filename, int sz=0);
+
 // fills cfg, returns sizeof(cfg)
 //int getConfigFile(STAR_CFG *cfg, ic_msg *m);
 //int getConfigFile(STAR_CFG *cfg, char *filename);
