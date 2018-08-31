@@ -93,6 +93,9 @@ void AgStarReader::ReadEvent()
 	  myvtx = geant3->Gsvert( v, 0, 0 );
 	  assert(myvtx==idvtx);
 
+	  // Set time of flight
+	  geant3->Gctrak()->tofg = part->T();
+
 	}
 
       // Now connect the particle to the vertex
