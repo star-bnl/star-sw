@@ -25,6 +25,7 @@
 #include "StarClassLibrary/StPhysicalHelix.hh"
 #include "StarClassLibrary/PhysicalConstants.h"
 
+#include "StEvent/StEventInfo.h" 
 #include "StEvent/StBTofHeader.h"
 #include "StEvent/StDcaGeometry.h"
 #include "StEvent/StEmcCollection.h"
@@ -937,14 +938,22 @@ void StPicoDstMaker::fillTracks() {
     /// Fill basic track information here
     picoTrk->setId( gTrk->id() );
     picoTrk->setChi2( gTrk->chi2() );
-    /// Store dE/dx in keV/cm
-#ifdef __TFG__VERSION__
-    picoTrk->setDedx( gTrk->probPidTraits().dEdxFit() );
+    /// Store dE/dx in keV/cm & Store dEdx error
+#ifndef __TFG__VERSION__
+    static TString Production(mMuDst->event()->runInfo().productionVersion());
+    static TString prodYear(Production.Data()+2,2);
+    static Int_t defY = prodYear.Atoi();
+    static StDedxMethod defaultdEdxMethod = (defY > 0 && defY < 14) ? kTruncatedMeanId : kLikelihoodFitId;
 #else
-    picoTrk->setDedx( gTrk->dEdx() );
-#endif /* __TFG__VERSION__ *
-    /// Store dEdx error (fit)
-    picoTrk->setDedxError( gTrk->probPidTraits().dEdxErrorFit() );
+    static StDedxMethod defaultdEdxMethod = kLikelihoodFitId;
+#endif
+    if (defaultdEdxMethod == kTruncatedMeanId) {
+      picoTrk->setDedx( gTrk->probPidTraits().dEdxTruncated() );
+      picoTrk->setDedxError( gTrk->probPidTraits().dEdxErrorTruncated() );
+    } else {
+      picoTrk->setDedx( gTrk->probPidTraits().dEdxFit() );
+      picoTrk->setDedxError( gTrk->probPidTraits().dEdxErrorFit() );
+    }
 
     /// Fill track's hit information
     picoTrk->setNHitsDedx( gTrk->nHitsDedx() );
