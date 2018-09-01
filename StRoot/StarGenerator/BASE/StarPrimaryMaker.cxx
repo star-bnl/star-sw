@@ -38,6 +38,9 @@ ClassImp(StarPrimaryMaker);
 
 using namespace std;
 
+// 1 mm / speed of light
+const double mmOverC = 1.0E-3 / TMath::C();
+
 StarPrimaryMaker *fgPrimary      = 0;
 // --------------------------------------------------------------------------------------------------------------
 StarPrimaryMaker::StarPrimaryMaker()  : 
@@ -552,10 +555,10 @@ Int_t StarPrimaryMaker::Finalize()
 	  Double_t pz   = particle->GetPz();
 	  Double_t E    = particle->GetEnergy();
 	  Double_t M    = particle->GetMass();
-	  Double_t vx   = particle->GetVx() / 10; // mm --> cm as per the HEPEVT standard  
-	  Double_t vy   = particle->GetVy() / 10; // mm --> cm
-	  Double_t vz   = particle->GetVz() / 10; // mm --> cm 
-	  Double_t vt   = particle->GetTof();
+	  Double_t vx   = particle->GetVx() / 10;       // mm --> cm as per the HEPEVT standard  
+	  Double_t vy   = particle->GetVy() / 10;       // mm --> cm
+	  Double_t vz   = particle->GetVz() / 10;       // mm --> cm 
+	  Double_t vt   = particle->GetTof() * mmOverC; // mm/c to s
 
 	  Double_t polx=0, poly=0, polz=0;
 	  
