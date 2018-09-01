@@ -4,9 +4,10 @@
         <command>
          cd ${SUBMITTINGDIRECTORY}
   setenv STARFPE NO
-  setenv NODEBUG yes
-  starver TFG18m
-  setup 64b
+#  setenv NODEBUG yes
+#  starver TFG18m
+  starver TFG18n
+#  setup 64b
   set filelist = `cat $FILELIST | awk '{print $1}'`
   echo "file list = ${filelist}"
   set NL = `echo ${filelist} | wc -l`
@@ -23,8 +24,8 @@
     endif
     set log = ${tag}C.log
     if (! -r "${tag}.picoDst.root") then
-#      root.exe -q -b -x 'lMuDst.C(-1,"root://xrdstar.rcf.bnl.gov:1095/'${dir}'/'${tag}'.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,PicoVtxDefault,quiet")'  'makePicoDst.C("y2010")'  &gt;&amp; ${log}
-      root.exe -q -b -x 'lMuDst.C(-1,"root://xrdstar.rcf.bnl.gov:1095/'${dir}'/'${tag}'.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,PicoVtxDefault,quiet")'  'makePicoDst.C("y2011")'  &gt;&amp; ${log}
+      root.exe -q -b -x 'lMuDst.C(-1,"root://xrdstar.rcf.bnl.gov:1095/'${dir}'/'${tag}'.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,PicoVtxDefault,quiet")'  'makePicoDst.C("y2010")'  &gt;&amp; ${log}
+#      root.exe -q -b -x 'lMuDst.C(-1,"root://xrdstar.rcf.bnl.gov:1095/'${dir}'/'${tag}'.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,PicoVtxDefault,quiet")'  'makePicoDst.C("y2011")'  &gt;&amp; ${log}
     endif
   end
         </command>
