@@ -1725,6 +1725,12 @@ my @badruns = (19116020); # Altro3
 #$hist = "RunXVIII22"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = "TFG18m"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/12/18 TpcSecRowB.20180312.000020.root$hist = "RunXVIII21"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/18/18 check TFG18m
 #$hist = "RunXVIII23"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/12/18 TpcZCorrectionB.20180225.000021.C
 #$hist = "RunXVIII25"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/13/18 TpcSecRowB.20180312.000022.root
+#$hist = "RunXVIII39"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/30/18 test calibration obtained with alignment production
+$hist = "RunXVIII40"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/31/18 cut dX for Outer
+
+
+
+
 #$hist = "RunXVIII118"; $NEvents = 2000; $disk = "data100/"; $RECO = "reco/27GeV_production_2018/*FullField";  $Production = "/P18if_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/16/18 check dE/dx calibration produced on HLT (with aligned geometry) wrt RCF
 #$hist = "RunXVIII119"; $NEvents = 2000; $disk = "data100/"; $RECO = "reco/27GeV_production_2018/*FullField";  $Production = "/P18if_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = "TFG18m"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/18/18 check TFG18m
 #$hist = "RunXVIII120"; $NEvents = 2000; $disk = "data100/"; $RECO = "reco/27GeV_production_2018/*FullField";  $Production = "/P18if_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/20/18 back to  TpcAdcCorrectionB.y2018.C.Altro4 as TpcAdcCorrectionB.20180518.000119.C to undestadn difference in sigma for Inner Rows
@@ -1908,9 +1914,9 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
 	print OUT "source $GROUP_DIR/setup gcc;\n";
 	print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
       }  else {
-	print OUT "setenv NODEBUG yes\n";
-        print OUT "source $GROUP_DIR/setup 64b;\n";
-        print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
+#	print OUT "setenv NODEBUG yes\n";
+#        print OUT "source $GROUP_DIR/setup 64b;\n";
+#        print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
       }
 #     print OUT "setenv Calibrations_tpc reconYuri\n";
 #      print OUT " unsetenv Calibrations_tpc\n";
