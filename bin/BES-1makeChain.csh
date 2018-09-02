@@ -1,9 +1,9 @@
 #! /bin/tcsh -f
 set TRIG = AuAu7_production
 set PicoDIR  = /gpfs02/eic/ayk/STAR/reco/Pico/BES-I/${TRIG}/2010
-setenv NODEBUG yes
-setup 64b
-xtitl
+#setenv NODEBUG yes
+#setup 64b
+#xtitl
 cd ${PicoDIR}
 @ count = 0
 foreach f (`ls -1d ???/*/MuDst.list.Done`)
