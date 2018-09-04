@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.39 2017/07/31 14:19:14 marr Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.40 2018/09/04 19:29:14 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.40  2018/09/04 19:29:14  marr
+ * Use the pairD definition in StHelixD.hh
+ *
  * Revision 1.39  2017/07/31 14:19:14  marr
  * Add protection for BL9, installed in 2017 for test, since the geometry file
  * does not include this backleg.
@@ -192,6 +195,7 @@
 #include "StTpcDedxPidAlgorithm.h"
 #include "StParticleDefinition.hh"
 #include "StPhysicalHelix.hh"
+#include "StHelixD.hh"
 
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"   // has "tesla" in it

@@ -6,11 +6,14 @@
  *
  * The MTD MatchMaker matches STAR tracks to the MTD MRPCs.
  * 
- * $Id: StMtdMatchMaker.h,v 1.18 2017/03/08 20:48:54 marr Exp $
+ * $Id: StMtdMatchMaker.h,v 1.19 2018/09/04 19:29:14 marr Exp $
  */
 /*****************************************************************
  *
  * $Log: StMtdMatchMaker.h,v $
+ * Revision 1.19  2018/09/04 19:29:14  marr
+ * Use the pairD definition in StHelixD.hh
+ *
  * Revision 1.18  2017/03/08 20:48:54  marr
  * 1) Add a new data member mYear to indicate run year
  * 2) Invoke appropriate functions in StMtdGeometry class to calculate local y
@@ -308,7 +311,6 @@ class StMtdMatchMaker: public StMaker
 		typedef vector<StructCellHit,allocator<StructCellHit>> mtdCellHitVector;
 #endif
 		typedef vector<StructCellHit>::iterator mtdCellHitVectorIter;
-		typedef pair<Double_t,Double_t> pairD;
 
 
 		/// set QA histograms
@@ -334,7 +336,7 @@ class StMtdMatchMaker: public StMaker
 		bool matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,const StPhysicalHelixD &helix, Int_t gq, mtdCellHitVector& allCellsHitVec,unsigned int iNode, StThreeVectorD globalPos);
 
 		virtual const char *GetCVS() const
-	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.18 2017/03/08 20:48:54 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.19 2018/09/04 19:29:14 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 		ClassDef(StMtdMatchMaker,2)
 };
 
