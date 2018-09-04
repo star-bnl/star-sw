@@ -265,6 +265,7 @@ Int_t StPicoDstMaker::Init() {
 Int_t StPicoDstMaker::setVtxModeAttr(){
 
   mTpcVpdVzDiffCut = DAttr("TpcVpdVzDiffCut"); //Read the Tpc-Vpd cut from the input
+  LOG_INFO << " mTpcVpdVzDiffCut = " << mTpcVpdVzDiffCut << endm;
 
   if (strcasecmp(SAttr("PicoVtxMode"), "PicoVtxDefault") == 0) {
     setVtxMode(PicoVtxMode::Default);
