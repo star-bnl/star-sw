@@ -308,8 +308,6 @@ class Lxgbx {
 	    evt->actionWdDetectorBitMask);
 
 
-	LOG("JEFF", "1 btoh16(1) = 0x%x  l2h16(1) = %d", b2h16(1), l2h16(1));
-
 	pay->evp = l2h32(evpAssign(l2trg_lo, l2trg_hi));
 	pay->L3summary[3] = pay->evp;
 
