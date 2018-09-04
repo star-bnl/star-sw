@@ -288,11 +288,7 @@ class Lxgbx {
     //              2 = l2 timeout
     int doEvent(gbPayload *pay, EvtDescData *evt, UINT32 l1trg_lo, UINT32 l2trg_lo, UINT32 l25abort, UINT32 token, UINT32 eventNumber, UINT32 l1trg_hi=0, UINT32 l2trg_hi=0)
     {
-	// Stays big endian
-	EvtDescData *paydesc = (EvtDescData *)pay->eventDesc;
-	memcpy(paydesc, evt, sizeof(EvtDescData));
-
-	pay->gbPayloadVersion = l2h32(GB_PAYLOAD_VERSION);
+       	pay->gbPayloadVersion = l2h32(GB_PAYLOAD_VERSION);
 	pay->eventNumber = l2h32(eventNumber);
 	pay->token = l2h32(token);
 
@@ -303,6 +299,16 @@ class Lxgbx {
 	pay->L3summary[0] = l2h32(l2trg_lo);
 	pay->L2summary[1] = l2h32(l2trg_hi);
 	pay->L3summary[1] = l2h32(l2trg_hi);
+
+	LOG("JEFF", "l1: 0x%x/0x%x,   l2: 0x%x/0x%x   dets: 0x%x",
+	    pay->L1summary[0],
+	    pay->L1summary[1],
+	    pay->L2summary[0],
+	    pay->L2summary[1],
+	    evt->actionWdDetectorBitMask);
+
+
+	LOG("JEFF", "1 btoh16(1) = 0x%x  l2h16(1) = %d", b2h16(1), l2h16(1));
 
 	pay->evp = l2h32(evpAssign(l2trg_lo, l2trg_hi));
 	pay->L3summary[3] = pay->evp;
@@ -319,7 +325,7 @@ class Lxgbx {
 	pay->usec = tm.tv_usec;
 #endif
 
-	LOG(DBG, "Payload: ver=0x%x token=%d trgcmd=%d daqcmd=0x%x",
+	LOG("JEFF", "Payload: ver=0x%x token=%d trgcmd=%d daqcmd=0x%x",
 	    pay->gbPayloadVersion,
 	    pay->EventDescriptor.TrgToken,
 	    pay->EventDescriptor.actionWdTrgCommand,
@@ -338,23 +344,31 @@ class Lxgbx {
     
 	UINT32 awdetmask = b2h16(evt->actionWdDetectorBitMask);
 
-	LOG(NOTE, "grp_mask = 0x%x",awdetmask,0,0,0,0);
+	LOG("JEFF", "grp_mask = 0x%x",awdetmask,0,0,0,0);
 	
 	UINT64 detmask = grp2rts_mask(awdetmask);
 
-	LOG(NOTE, "potential det_mask = 0x%llx dets_in_run_mask 0x%llx",detmask,dets_in_run_mask,0,0,0);
+	
+	LOG("JEFF", "potential det_mask = 0x%llx dets_in_run_mask 0x%llx",detmask,dets_in_run_mask,0,0,0);
 
 	detmask &= dets_in_run_mask;
 	detmask |= (1ll<<TRG_SYSTEM);
 	
-	LOG(NOTE, "final det_mask = 0x%llx",detmask,0,0,0,0);
+	LOG("JEFF", "final det_mask = 0x%llx",detmask,0,0,0,0);
 
 	pay->rtsDetMask = l2h64(detmask);
 
 	if(pay->flags & EVBFLAG_L25ABORT) {
 	    LOG(DBG, "Sending L25Abort: token=%d event=%d 1l=0x%x l2=0x%x l2abort=%d",
-		token, eventNumber, l1trg_lo, l2trg_hi, l25abort);
+		token, eventNumber, l1trg_lo, l2trg_lo, l25abort);
 	}
+
+
+	LOG("JEFF", "l1: 0x%x/0x%x,   l2: 0x%x/0x%x",
+	    pay->L1summary[0],
+	    pay->L1summary[1],
+	    pay->L2summary[0],
+	    pay->L2summary[1],0);
 
 	return 0;
     }

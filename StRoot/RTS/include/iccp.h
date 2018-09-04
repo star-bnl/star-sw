@@ -12,9 +12,6 @@
 #ifndef _ICCP_H_
 #define _ICCP_H_
 
-#pragma pack(1)
-
-
 /* changes :
 // 11/18/97  changed name of SB_ANNOUNCE_DATA -> SB_ANNOUNCE_FORMATTED_DATA
 //           The SB_CONFIRM_FORMATTED_DATA  is renamed to 
@@ -143,6 +140,8 @@ typedef unsigned int UINTPTR;
 // and the union that contains all the different message 
 // bodies is ld (for load) I am happy to get input on 
 // name changes!!!!! (announce is a good candidate to be replaced)
+
+#pragma pack(1)
 
 // the CMD struct
 struct ic_cmd_ping {  uint dummy;};
