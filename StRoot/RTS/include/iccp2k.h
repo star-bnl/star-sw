@@ -39,7 +39,7 @@ typedef unsigned long long int UINT64;
 #define EVBFLAG_L25TIMEOUT (1<<13)
 #define EVBFLAG_L3ABORT (1<<14)
 
-
+#pragma pack(1)
 
 //#ifdef RTS_LITTLE_ENDIAN
 struct iccp2k {   
@@ -233,5 +233,7 @@ struct EvbSummary_v1 {
 };
 
 typedef EvbSummary_v2 EvbSummary;
+
+#pragma pack()
 
 #endif

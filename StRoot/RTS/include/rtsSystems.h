@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <string.h>
-
+#include <rtsLog.h>
 
 /*
 	HISTORY:
@@ -977,6 +977,7 @@ extern inline unsigned long long grp2rts_mask(int grp)
 	}
 	if(grp & (1 << STGC_GRP)) {
 	  ret |= (1LL << STGC_SYSTEM);	// NOTE 1LL!
+	  LOG("JEFF", "Adding STGC 0x%llx 0x%llx", ret, (1LL << STGC_SYSTEM));
 	}
 	if(grp & (1 << FCS_GRP)) {
 	  ret |= (1 << FCS_SYSTEM);
