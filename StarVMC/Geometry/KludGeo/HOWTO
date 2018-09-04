@@ -47,11 +47,8 @@ You may crete up to 10 tubes which are centered on and parallel to the z-axis.
 
 After executing the DETP command, you should build the geometry as usual...
 
-
 NOTE:  During geometry construction, you should see printouts indicating
 that the tubes have been placed in the geometry.
-
-
 
 
 Example:
@@ -59,8 +56,24 @@ Example:
 cp $STAR/StarVMC/Geometry/macros/loadAgML.kumac
 starsim
 
-> DETP KLUD kcfg.ntube=1 ktub.z=-150.0 ktub.dz=250.0 ktub.rmn=9.95 ktub.rmx=10.05 aa=12.0 zz=6.0 dd=1.70
-> loadAgML y2015a
+starsim> DETP KLUD kcfg.ntube=1 ktub.z=-150.0 ktub.dz=250.0 ktub.rmn=9.95 ktub.rmx=10.05 aa=12.0 zz=6.0 dd=1.70
+starsim> loadAgML y2015a
+
+To visualize the detector configuration, you can do the following.  First, export the geometry to an rz file.
+
+starsim> grfile y2015a_kludge.rz
+starsim> exit
+
+Next, convert to ROOT CINT macro and execute it 
+
+$ g2root y2015a_kludge.rz
+$ root y2015a_kludge.C
+
+Finally, draw the geometry.  
+
+root [0] gGeoManager->FindVolumeFast("CAVE")->Draw("ogl")
+
+
 
 
 If you run within the root4star framework, the DETP command should be issued before
