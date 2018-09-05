@@ -9,6 +9,7 @@
    root.exe 'lMuDst.C(-1,"/net/l404/data/fisyak/reco/2016/Hijing/VMC.Real.TFG17j/hijingAuAu200_65_1000.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet,TTreeFile")' makePicoDst.C+
    root.exe 'lMuDst.C(-1,"root://xrdstar.rcf.bnl.gov:port//home/starlib/home/starreco/reco/AuAu62_production/ReversedFullField/P10ik/2010/078/11078018/st_physics_11078018_raw_5020001.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet,TTreeFile")' 'makePicoDst.C+("y2011")'
    root.exe 'lMuDst.C(-1,"root://xrdstar.rcf.bnl.gov:1095//home/starlib/home/starreco/reco/AuAu11_production/ReversedFullField/P10ih/2010/149/11149011/st_physics_11149011_raw_1010001.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,PicoVtxDefault,quiet")' 'makePicoDst.C("y2010")'
+   root.exe  'lMuDst.C(-1,"root://xrdstar.rcf.bnl.gov:1095//home/starlib/home/starreco/reco/AuAu7_production/ReversedFullField/P10ih/2010/114/11114040/st_physics_11114040_raw_1010001.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,PicoVtxDefault,quiet")' 'makePicoDst.C("y2010")'
 */
 #include "TSystem.h"
 #include "Riostream.h"

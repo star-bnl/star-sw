@@ -34,6 +34,7 @@
 #include "StEvent/StEmcModule.h"
 #include "StEvent/StEmcRawHit.h"
 #include "StEvent/StTriggerData.h"
+#include "StEvent/StEnumerations.h"
 
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
@@ -311,6 +312,7 @@ Int_t StPicoDstMaker::Init() {
 Int_t StPicoDstMaker::setVtxModeAttr(){
 
   mTpcVpdVzDiffCut = DAttr("TpcVpdVzDiffCut"); //Read the Tpc-Vpd cut from the input
+  LOG_INFO << " mTpcVpdVzDiffCut = " << mTpcVpdVzDiffCut << endm;
 
   if (strcasecmp(SAttr("PicoVtxMode"), "PicoVtxDefault") == 0) {
     setVtxMode(PicoVtxMode::Default);
@@ -938,7 +940,10 @@ void StPicoDstMaker::fillTracks() {
     /// Fill basic track information here
     picoTrk->setId( gTrk->id() );
     picoTrk->setChi2( gTrk->chi2() );
-    /// Store dE/dx in keV/cm & Store dEdx error
+    /// Store dE/dx in KeV/cm and its error. Next lines are needed
+    /// in order to store the values obrained with the same method:
+    /// either truncated mean of fit. Starting SL14 the default was
+    /// changed from thuncated mean to fit.
 #ifndef __TFG__VERSION__
     static TString Production(mMuDst->event()->runInfo().productionVersion());
     static TString prodYear(Production.Data()+2,2);
@@ -950,7 +955,8 @@ void StPicoDstMaker::fillTracks() {
     if (defaultdEdxMethod == kTruncatedMeanId) {
       picoTrk->setDedx( gTrk->probPidTraits().dEdxTruncated() );
       picoTrk->setDedxError( gTrk->probPidTraits().dEdxErrorTruncated() );
-    } else {
+    }
+    else {
       picoTrk->setDedx( gTrk->probPidTraits().dEdxFit() );
       picoTrk->setDedxError( gTrk->probPidTraits().dEdxErrorFit() );
     }
