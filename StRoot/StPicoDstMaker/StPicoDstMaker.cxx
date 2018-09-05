@@ -801,9 +801,6 @@ void StPicoDstMaker::fillTracks() {
       picoTrk->setDedxError( gTrk->probPidTraits().dEdxErrorFit() );
     }
 
-    /// Store dEdx error (fit)
-    picoTrk->setDedxError( gTrk->probPidTraits().dEdxErrorFit() );
-
     /// Fill track's hit information
     picoTrk->setNHitsDedx( gTrk->nHitsDedx() );
     
