@@ -183,6 +183,11 @@ class StPicoDstMaker : public StMaker {
 
   StPicoFmsFiller  mFmsFiller;
 
+  virtual const char *GetCVS() const {
+    static const char cvs[]="Tag $Name:  $ $Id: StPicoDstMaker.h,v 1.20 2018/09/05 18:53:06 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
+    return cvs;
+  }
+
   ClassDef(StPicoDstMaker, 0)
 };
 
