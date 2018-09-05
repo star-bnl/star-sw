@@ -33,6 +33,7 @@
 #include "StEvent/StEmcModule.h"
 #include "StEvent/StEmcRawHit.h"
 #include "StEvent/StTriggerData.h"
+#include "StEvent/StEnumerations.h"
 
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
@@ -783,8 +784,23 @@ void StPicoDstMaker::fillTracks() {
     /// Fill basic track information here
     picoTrk->setId( gTrk->id() );
     picoTrk->setChi2( gTrk->chi2() );
-    /// Store dE/dx in KeV/cm
-    picoTrk->setDedx( gTrk->dEdx() );
+    /// Store dE/dx in KeV/cm and its error. Next lines are needed
+    /// in order to store the values obrained with the same method:
+    /// either truncated mean of fit. Starting SL14 the default was
+    /// changed from thuncated mean to fit.
+    static TString Production(mMuDst->event()->runInfo().productionVersion());
+    static TString prodYear(Production.Data()+2,2);
+    static Int_t defY = prodYear.Atoi();
+    static StDedxMethod defaultdEdxMethod = (defY > 0 && defY < 14) ? kTruncatedMeanId : kLikelihoodFitId;
+    if (defaultdEdxMethod == kTruncatedMeanId) {
+      picoTrk->setDedx( gTrk->probPidTraits().dEdxTruncated() );
+      picoTrk->setDedxError( gTrk->probPidTraits().dEdxErrorTruncated() );
+    }
+    else {
+      picoTrk->setDedx( gTrk->probPidTraits().dEdxFit() );
+      picoTrk->setDedxError( gTrk->probPidTraits().dEdxErrorFit() );
+    }
+
     /// Store dEdx error (fit)
     picoTrk->setDedxError( gTrk->probPidTraits().dEdxErrorFit() );
 
