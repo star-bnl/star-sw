@@ -1,0 +1,2 @@
+#! /bin/tcsh -f
+ls -1d $PWD/*/*/MuDst.list.Done

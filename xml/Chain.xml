@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<!-- <job name="jobs" maxFilesPerProcess="10" simulateSubmission="false" fileListSyntax="paths"> -->
+<job name="jobs" maxFilesPerProcess="10" simulateSubmission="false" fileListSyntax="paths">
+         <command>
+         cd ${SUBMITTINGDIRECTORY}
+  set filelist = `cat $FILELIST | awk '{print $1}'`
+  echo "file list = ${filelist}"
+  set NL = `echo ${filelist} | wc -l`
+  echo "NL = ${NL}"
+  if (${NL} == 0) exit 0;
+  foreach input ( ${filelist} )
+    cd ${SUBMITTINGDIRECTORY}
+    set d = `dirname ${input}`;
+    cd ${d}; pwd;
+    if (! -r Chain.log) then
+      rm -rf .sl*
+      ln -s ~fisyak/macros/.sl73_* .
+      root.exe -q -b 'Chain.C+("*.root","PicoDst")' &gt;&amp;  Chain.log 
+    endif
+  end    
+</command>
+<!-- <stdout URL="file:./sched$JOBID.log" /> -->
+<stdout URL="file:./sched$JOBID.log" />
+<input URL="command:lsMuDstDone" />
+</job>

@@ -30,7 +30,7 @@ foreach f (`ls -1d ???/*/MuDst.list.Done`)
   cd ${d}; pwd;
   if (! -r Chain.log) then	
     rm -rf .sl*
-    ln -s ../../.sl73_* .	
+    ln -s ~/macros/.sl73_* .	
     root.exe -q -b 'Chain.C+("*.root","PicoDst")' >&  Chain.log  &
     @ count++;  echo "count $count";
     if ($count > 40) break;
@@ -75,3 +75,8 @@ foreach d (`ls -1d */*/Chain.log | awk -F\/ '{print $1"/"$2}'`)
   endif
   cd -;		
 end 
+================================================================================
+redo
+foreach f (`ls -1d */*/MuDst.list.Done`)
+  set d = `dirname ${f}`; set b = `basename ${f} .Done`; mv  ${f} ${d}/${b}
+end
