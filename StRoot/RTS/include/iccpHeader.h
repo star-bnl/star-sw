@@ -6,6 +6,8 @@
 //           reordered 
 // Tonko, 4/24/2002 Changed "transaction" to "dest_id"
 
+#pragma pack(1)
+
 #ifndef RTS_LITTLE_ENDIAN   
 // Big endian header definition
 struct ic_msg_head 
@@ -41,5 +43,7 @@ struct ic_msg_head
   unsigned short dest_id ;
 };
 #endif // RTS_LITTLE_ENDIAN
+
+#pragma pack()
 
 #endif

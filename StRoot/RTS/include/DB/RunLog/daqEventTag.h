@@ -39,4 +39,6 @@ struct daqEventTag {
   unsigned long long int l2_trg_bits;       /* new in version 10.0  triggers satisfied after L2 */
   unsigned long long int l3_trg_bits;       /* new in version 10.0  triggers satisfied after L3 */
 };  
+
+
 #endif 
