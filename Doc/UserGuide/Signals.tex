@@ -1,0 +1,149 @@
+Signals are calculated using the Shockley-Ramo theorem. 
+The current \(i\left(t\right)\) induced by a particle with charge 
+\(q\) at a position \(\mathbf{r}\) moving at a velocity \(\mathbf{v}\)
+is given by
+\begin{equation*}
+  i\left(t\right) = -q \mathbf{v} \cdot \mathbf{E}_{w}\left(\mathbf{r}\right),
+\end{equation*}
+where \(\mathbf{E}_{w}\) is the so-called weighting field for the 
+electrode to be read out. 
+
+The basic steps for calculating the current induced 
+by the drift of electrons and ions/holes are:
+\begin{enumerate}
+  \item
+  Prepare the weighting field for the electrode to be read out. 
+  This step depends on the field calculation technique 
+  (\textit{i.\,e.} the type of \texttt{Component}) which is used 
+  (see Chapter~\ref{Chap:Components}). 
+  \item
+  Tell the \texttt{Sensor} that you want to use this 
+  weighting field for the signal calculation. 
+  \begin{lstlisting}
+void Sensor::AddElectrode(ComponentBase* cmp, std::string label);
+  \end{lstlisting}
+  where \texttt{cmp} is a pointer to the \texttt{Component} 
+  which calculates the weighting field, and \texttt{label} 
+  (in our example \texttt{"readout"}) is 
+  the name you have assigned to the weighting field in the previous step.
+  \item
+  Setup the binning for the signal calculation.
+  \begin{lstlisting}
+void Sensor::SetTimeWindow(const double tmin, const double tstep, 
+                           const int nbins);
+  \end{lstlisting}
+  The first parameter in this function is the lower time limit (in ns), 
+  the second one is the bin width (in ns), and the last one 
+  is the number of time bins.
+  \item
+  Switch on signal calculation in the transport classes using 
+  \begin{lstlisting}
+void AvalancheMicroscopic::EnableSignalCalculation();
+void AvalancheMC::EnableSignalCalculation();
+  \end{lstlisting}
+  The \texttt{Sensor} then records and accumulates the signals of all 
+  avalanches and drift lines which are simulated.
+  \item
+  The calculated signal can be retrieved using 
+  \begin{lstlisting}
+double Sensor::GetSignal(const std::string label, const int bin);
+double Sensor::GetElectronSignal(const std::string label, const int bin);
+double Sensor::GetIonSignal(const std::string label, const int bin); 
+  \end{lstlisting}
+  The functions \texttt{GetElectronSignal} and 
+  \texttt{GetIonSignal} return the signal induced by negative 
+  and positive charges, respectively. \texttt{GetSignal} returns 
+  the sum of both electron and hole signals.   
+  \item
+  After the signal of a given track is finished, call
+  \begin{lstlisting}
+void Sensor::ClearSignal();
+  \end{lstlisting}
+  to reset the signal to zero.
+\end{enumerate}
+
+For plotting the signal, the class \texttt{ViewSignal} can be used.
+As an illustration of the above recipe consider the following example. 
+\begin{lstlisting}
+// Electrode label
+const std::string label = "readout";
+// Setup the weighting field.
+// In this example we use a FEM field map.
+ComponentAnsys123* fm = new ComponentAnsys123();
+...
+fm->SetWeightingField("WPOT.lis", label);
+
+Sensor* sensor = new Sensor();
+sensor->AddComponent(fm);
+sensor->AddElectrode(fm, label);
+// Setup the binning (0 to 100 ns in 100 steps).
+const double tStart =   0.;
+const double tStop  = 100.;
+const int nSteps = 100;
+const double tStep = (tStop - tStart) / nSteps;
+
+AvalancheMicroscopic* aval = new AvalancheMicroscopic();
+aval->SetSensor(sensor);
+aval->EnableSignalCalculation();
+// Calculate some drift lines.
+...
+// Plot the induced current.
+ViewSignal* signalView = new ViewSignal(tStart, tStep, nSteps);
+signalView->SetSensor(sensor);
+signalView->Plot(label);
+\end{lstlisting}
+
+\section{Readout Electronics}
+
+In order to model the signal-processing by the front-end electronics, the 
+``raw signal'' -- \textit{i.\,e.} the induced current -- 
+can be convoluted with a so-called ``transfer function''. 
+The transfer function to be applied can be set using
+\begin{lstlisting}
+void Sensor::SetTransferFunction(double (*f)(double t));
+\end{lstlisting}
+where \texttt{double f(double t)} is a function provided by the user, 
+or using
+\begin{lstlisting}
+void Sensor::SetTransferFunction(std::vector<double> times,
+                                 std::vector<double> values);
+\end{lstlisting}
+in which case the transfer function will be calculated by 
+interpolation of the values provided in the table.
+
+In order to convolute the presently stored signal with the 
+transfer function (specified using the above function), 
+the function
+\begin{lstlisting}
+bool Sensor::ConvoluteSignal();
+\end{lstlisting}
+can be called. 
+
+As an example, consider the following transfer function
+\begin{equation*}
+  f\left(t\right) = e\frac{t}{\tau}\text{e}^{1 - t/\tau}, \qquad
+  \tau = 25~\text{ns}
+\end{equation*}
+
+\begin{lstlisting}
+double transfer(double t) {
+
+  const double tau = 25.;
+  return (t / tau) * exp(1 - t / tau);
+
+}
+
+int main(int argc, char* argv[]) {
+
+  // Setup component, media, etc.
+  ...
+  Sensor* sensor = new Sensor();
+  sensor->SetTransferFunction(transfer);
+  // Calculate the induced current.
+  ...
+  // Apply the transfer function.
+  sensor->ConvoluteSignal();
+  ...
+}
+ 
+\end{lstlisting}

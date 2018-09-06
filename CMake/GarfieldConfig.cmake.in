@@ -1,0 +1,16 @@
+# - Config file for the Garfield package
+# It defines the following variables
+#  GARFIELD_INCLUDE_DIRS - include directories for Garfield
+#  GARFIELD_LIBRARIES - at the moment only Garfield
+ 
+SET(GARFIELD_INCLUDE_DIRS
+  "@PROJECT_SOURCE_DIR@/Include"
+  "@PROJECT_SOURCE_DIR@/Heed/heed++/code"
+  "@PROJECT_SOURCE_DIR@/Heed/")
+SET(GARFIELD_LIBRARIES Garfield)
+  
+SET( GARFIELD_SOURCE_DIR "@PROJECT_SOURCE_DIR@")
+SET( GARFIELD_BINARY_DIR "@PROJECT_BINARY_DIR@")
+SET( GARFIELD_LIBRARIES Garfield )
+ 
+include("@CMAKE_INSTALL_PREFIX@/cmake/GarfieldLibraryDepends.cmake")

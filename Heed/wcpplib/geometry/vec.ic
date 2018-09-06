@@ -1,0 +1,83 @@
+/*
+Copyright (c) 2000 Igor B. Smirnov
+
+The file can be used, copied, modified, and distributed
+according to the terms of GNU Lesser General Public License version 2.1
+as published by the Free Software Foundation,
+and provided that the above copyright notice, this permission notice,
+and notices about any modifications of the original text
+appear in all copies and in supporting documentation.
+The file is provided "as is" without express or implied warranty.
+*/
+
+int operator==(const vec &r1, const vec &r2) {
+  if (r1.x == r2.x && r1.y == r2.y && r1.z == r2.z)
+    return 1;
+  else
+    return 0;
+}
+
+int operator!=(const vec &r1, const vec &r2) {
+  if (r1 == r2)
+    return 0;
+  else
+    return 1;
+}
+
+/// Return true if two vectors are approximately the same.
+// Thus r2 may be is cube with side 2*prec with center marked by r1.
+bool apeq(const vec &r1, const vec &r2, vfloat prec) {
+  return (apeq(r1.x, r2.x, prec) && apeq(r1.y, r2.y, prec) &&
+          apeq(r1.z, r2.z, prec));
+}
+
+vec unit_vec(const vec &v) {
+  // pvecerror("inline vec unit_vec(const vec &v)");
+  const vfloat len = v.length();
+  if (len == 0) {
+    mcerr << "error in unit_vec: length(vec)=0\n";
+    spexit(mcerr);
+  }
+  return vec(v.x / len, v.y / len, v.z / len);
+}
+
+int check_par(const vec &r1, const vec &r2, vfloat prec) {
+  // 1 par, -1 antipar, 0 not parallel
+  vfloat a = ang2vec(r1, r2);
+  // mcout<<"check_par: a="<<a<<" a-(M_PI - prec)="<<a-(M_PI - prec)<<'\n';
+  if (vecerror != 0) {
+    vecerror = 0;
+    return 0;
+  }
+  if (a <= prec) return 1;
+  if (a >= M_PI - std::max(prec, vprecision)) {
+    // If without max(prec, vprecision) but with just -prec
+    // Even for exactly parallel vectors this function
+    // would never confirm this.
+    if (prec < vprecision) {
+      vec anti_r2 = -r2;         // reverse the vector
+      a = ang2vec(r1, anti_r2);  // M_PI - old_a
+      if (a <= prec) return -1;
+    } else {
+      return -1;
+    }
+  }
+  return 0;
+}
+
+int check_perp(const vec &r1, const vec &r2, vfloat prec) {  
+  // returns 1 if perpendicular
+  vfloat a = ang2vec(r1, r2);
+  if (vecerror != 0) {
+    vecerror = 0;
+    return 0;
+  }
+  if (apeq(a, 0.5 * M_PI, std::max(prec, vprecision))) return 1;
+  // If without max(prec, vprecision) but with just prec
+  // Event for exactly perpendicular vectors this function
+  // would never confirm this.
+  // if(a >= 0.5*M_PI - prec && a =< 0.5*M_PI + prec ) return 1;
+  return 0;
+}
+
+vec switch_xyz(const vec &v) { return vec(v.z, v.x, v.y); }
