@@ -18,9 +18,9 @@ namespace genfit {
 
         Material(Scalar density_, Scalar Z_, Scalar A_, Scalar radiationLength_, Scalar mEE_) :
                 density(density_), Z(Z_), A(A_), radiationLength(radiationLength_), mEE(mEE_) {}
-#ifndef __CINT__
+
         Material(const Material &material) = default;
-#endif
+
         virtual ~Material() {};
 
         void Print(const Option_t* = "") const;

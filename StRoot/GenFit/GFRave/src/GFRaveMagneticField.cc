@@ -16,16 +16,32 @@
    You should have received a copy of the GNU Lesser General Public License
    along with GENFIT.  If not, see <http://www.gnu.org/licenses/>.
 */
-#pragma link off all globals;
-#pragma link off all classes;
-#pragma link off all functions;
 
-#pragma link C++ nestedclass;
-#pragma link C++ nestedtypedef;
 
-#pragma link C++ namespace genfit;
+#include "GFRaveMagneticField.h"
+#include <FieldManager.h>
 
-#pragma link C++ class genfit::HelixTrackModel+;
-#pragma link C++ class genfit::MeasurementCreator+;
-#pragma link C++ class genfit::mySpacepointDetectorHit+;
-#pragma link C++ class genfit::mySpacepointMeasurement+;
+#include <iostream>
+
+
+namespace genfit {
+
+GFRaveMagneticField *
+GFRaveMagneticField::copy() const{
+  return new GFRaveMagneticField(*this);
+}
+
+
+rave::Vector3D
+GFRaveMagneticField::inTesla ( const rave::Point3D & position) const
+{
+  TVector3 pos(position.x(), position.y(), position.z());
+
+  TVector3 B = FieldManager::getInstance()->getFieldVal(pos); // magnetic field in kGauss
+  B *= 1.E-1;
+
+  return rave::Vector3D (B.X(), B.Y(), B.Z());
+}
+
+
+} /* End of namespace genfit */

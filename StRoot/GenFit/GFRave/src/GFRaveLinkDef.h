@@ -17,28 +17,20 @@
    along with GENFIT.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/** @addtogroup genfit
- * @{
- */
+#ifdef __CINT__
+#pragma link off all globals;
+#pragma link off all classes;
+#pragma link off all functions;
 
-#ifndef genfit_SharedMaterialPropertiesPtr_h
-#define genfit_SharedMaterialPropertiesPtr_h
+#ifdef __CLING__
+#pragma link C++ nestedclass;
+#pragma link C++ nestedtypedef;
 
-#include "MaterialProperties.h"
-
-#include <memory>
-
-
-
-namespace genfit {
-
-#ifndef __CINT__
-typedef std::shared_ptr< const genfit::MaterialProperties > SharedMaterialPropertiesPtr;
-#else
-class SharedMaterialPropertiesPrt;
+#pragma link C++ namespace genfit;
 #endif
 
-} /* End of namespace genfit */
-/** @} */
+#pragma link C++ class genfit::GFRaveVertex+;
+#pragma link C++ class genfit::GFRaveTrackParameters+;
 
-#endif // genfit_SharedMaterialPropertiesPtr_h
+#endif
+
