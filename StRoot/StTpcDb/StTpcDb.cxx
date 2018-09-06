@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.67 2018/07/06 22:13:16 smirnovd Exp $
+ * $Id: StTpcDb.cxx,v 1.68 2018/09/06 14:21:13 genevb Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.68  2018/09/06 14:21:13  genevb
+ * SafeDelete requires class definition, not just declaration
+ *
  * Revision 1.67  2018/07/06 22:13:16  smirnovd
  * [Cosmetic] Remove unused variables and commented code
  *
@@ -208,6 +211,7 @@
 #include "StDetectorDbMaker/StTpcSurveyC.h"
 #include "StDetectorDbMaker/St_tpcDriftVelocityC.h"
 #include "StarMagField.h"
+#include "StDbUtilities/StMagUtilities.h"
 #include "TEnv.h"
 StTpcDb* gStTpcDb = 0;
 Bool_t StTpcDb::mOldScheme = kTRUE;
