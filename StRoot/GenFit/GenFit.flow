@@ -1,0 +1,53 @@
+measurementFactoryExample
+________________________________________________________________________________
+  // init geometry and mag. field
+  new TGeoManager("Geometry", "Geane geometry");
+  TGeoManager::Import("genfitGeom.root");
+  genfit::FieldManager::getInstance()->init(new genfit::ConstField(0.,0., 15.)); // 15 kGauss
+  genfit::MaterialEffects::getInstance()->init(new genfit::TGeoMaterialInterface());
+
+
+  // init event display
+  genfit::EventDisplay* display = genfit::EventDisplay::getInstance();
+
+
+  // init fitter
+  genfit::AbsKalmanFitter* fitter = new genfit::KalmanFitterRefTrack();
+
+
+  TClonesArray myDetectorHitArray("genfit::mySpacepointDetectorHit");
+
+  // init the factory
+  int myDetId(1);
+  genfit::MeasurementFactory<genfit::AbsMeasurement> factory;
+  genfit::MeasurementProducer<genfit::mySpacepointDetectorHit, genfit::mySpacepointMeasurement> myProducer(&myDetectorHitArray);
+  factory.addProducer(myDetId, &myProducer);
+================================================================================
+enum eMeasurementType { Pixel = 0,
+        Spacepoint,
+        ProlateSpacepoint,
+        StripU,
+        StripV,
+        StripUV,
+	Wire,
+	WirePoint,
+	nMeasurementTypes
+        };
+
+
+FullMeasurement(int nDim = 5); the fitted track parameters measured in one subdetector should be put into one "measurement".
+PlanarMeasurement(int nDim = 1); setStripV(bool v = true) {stripV_ = v;} a planar hit geometry (1 or 2D).
+
+ProlateSpacepointMeasurementint nDim = 3); detectors measuring 3D space points with errors in one direction much larger than the errors perpendicular should use this class.
+SpacepointMeasurement(int nDim = 3);  detectorplane is chosen perpendicular to the track.
+WireMeasurement(int nDim = 7); double maxDistance_;  signed char leftRight_;
+WireMeasurementNew
+WirePointMeasurement(int nDim = 8); w_x1, w_y1, w_z1, w_x2, w_y2, w_z2, rdrift, zreco
+WireTrackCandHit
+
+HMatrixPhi  H = (0, 0, 0, cos(phi), sin(phi)); For one dimensional measurements which are rotated by phi against U of the DetPlane 
+HMatrixU    H = (0, 0, 0, 1, 0)
+HMatrixUnit H(5,5) = I
+HMatrixUV   H(2,5) = H = (0, 0, 0, 1, 0)
+                         (0, 0, 0, 0, 1)
+HMatrixV    H = (0, 0, 0, 0, 1)
