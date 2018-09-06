@@ -1743,7 +1743,9 @@ Bfc_st BFC[] = { // standard chains
   {"VFMCE"          ,""  ,"","genvtx"                        ,"","","... Fixed vertex from MCEvent",kFALSE},
   {"VFppLMV"        ,""  ,"","genvtx"                ,"","","... VertexMaker will use ppLMV method",kFALSE},
   {"VFppLMV5"       ,""  ,"","VFppLMV"       ,"","","... VertexMaker will use ppLMV method (tuned)",kFALSE},
-  {"VFStoreX"       ,""  ,"","genvtx"  ,"","","... VertexMaker will use save at least 100 vertices",kFALSE},
+  // VFStore.value would work as well
+  {"VFStoreX"       ,""  ,"",""        ,"","","... VertexMaker will use save at least 100 vertices",kFALSE},
+
   // Sti options
   {"StiPulls" ,"","",""                                         ,"","", "Request to make Sti Pulls",kFALSE},
   {"StvPulls" ,"","",""                                         ,"","", "Request to make Stv Pulls",kFALSE},
