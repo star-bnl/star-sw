@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <string.h>
-#include <rtsLog.h>
 
 /*
 	HISTORY:
@@ -950,43 +949,42 @@ extern inline unsigned long long grp2rts_mask(int grp)
 
 	ret = 0 ;
 
-	if(grp & (1<<ETOF_GRP)) {
-	  ret  |= (1<<ETOF_SYSTEM) ;
+	if(grp & (1ll<<ETOF_GRP)) {
+	  ret  |= (1ll<<ETOF_SYSTEM) ;
 	}
-	if(grp & (1 << PP_GRP)) {
-	  ret |= (1 << PP_SYSTEM);
+	if(grp & (1ll << PP_GRP)) {
+	  ret |= (1ll << PP_SYSTEM);
 	}
-	if(grp & (1 << ETOW_GRP)) {
-	  ret |= (1 << ETOW_SYSTEM) ;
+	if(grp & (1ll << ETOW_GRP)) {
+	  ret |= (1ll << ETOW_SYSTEM) ;
 	}
-	if(grp & (1 << BTOW_GRP)) {
-	  ret |= (1 << BTOW_SYSTEM) ;
+	if(grp & (1ll << BTOW_GRP)) {
+	  ret |= (1ll << BTOW_SYSTEM) ;
 	}
-	if(grp & (1 << BSMD_GRP)) {
-	  ret |= (1 << BSMD_SYSTEM) ;
+	if(grp & (1ll << BSMD_GRP)) {
+	  ret |= (1ll << BSMD_SYSTEM) ;
 	}
-	if(grp & (1 << TOF_GRP)) {
-	  ret |= (1 << TOF_SYSTEM)  ;	
+	if(grp & (1ll << TOF_GRP)) {
+	  ret |= (1ll << TOF_SYSTEM)  ;	
 	}
-	if(grp & (1 << ESMD_GRP)) {
-	  ret |= (1 << ESMD_SYSTEM) ;
+	if(grp & (1ll << ESMD_GRP)) {
+	  ret |= (1ll << ESMD_SYSTEM) ;
 	}
-	if(grp & (1 << TPX_GRP)) {
-	  ret |= (1 << TPX_SYSTEM);
-	  ret |= (1 << ITPC_SYSTEM);
+	if(grp & (1ll << TPX_GRP)) {
+	  ret |= (1ll << TPX_SYSTEM);
+	  ret |= (1ll << ITPC_SYSTEM);
 	}
-	if(grp & (1 << STGC_GRP)) {
+	if(grp & (1ll << STGC_GRP)) {
 	  ret |= (1LL << STGC_SYSTEM);	// NOTE 1LL!
-	  LOG("JEFF", "Adding STGC 0x%llx 0x%llx", ret, (1LL << STGC_SYSTEM));
 	}
-	if(grp & (1 << FCS_GRP)) {
-	  ret |= (1 << FCS_SYSTEM);
+	if(grp & (1ll << FCS_GRP)) {
+	  ret |= (1ll << FCS_SYSTEM);
 	}
-	if(grp & (1 << MTD_GRP)) {
-	  ret |= (1 << MTD_SYSTEM);
+	if(grp & (1ll << MTD_GRP)) {
+	  ret |= (1ll << MTD_SYSTEM);
 	}
-	if(grp & (1 << GMT_GRP)) {
-	  ret |= (1 << GMT_SYSTEM);
+	if(grp & (1ll << GMT_GRP)) {
+	  ret |= (1ll << GMT_SYSTEM);
 	}
 
 	return ret ;
