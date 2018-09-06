@@ -136,8 +136,9 @@ void mparticle::curvature(int& fs_cf, vec& frelcen, vfloat& fmrange,
 }
 
 int mparticle::force(const point& /*pt*/, vec& f, vec& f_perp, vfloat& mrange) {
-  f = vec(0, 0, 0);
-  f_perp = vec(0, 0, 0);
+  f.x = f_perp.x = 0.;
+  f.y = f_perp.y = 0.;
+  f.z = f_perp.z = 0.;
   mrange = max_vfloat;
   return 0;
 }
@@ -149,7 +150,6 @@ void mparticle::new_speed() {
     return;
   }
   vec f1, f2, f_perp1, f_perp2, f_perp_fl1, f_perp_fl2;
-  vec f_mean;
   vfloat r1, r2;  // ranges, do not need here
   int i = force(prevpos.pt, f1, f_perp_fl1, r1);
   int j = force(currpos.pt, f2, f_perp_fl2, r2);
@@ -157,7 +157,7 @@ void mparticle::new_speed() {
   f_perp1 = prevpos.speed * (prevpos.dir || f_perp_fl1);
   f_perp2 = currpos.speed * (currpos.dir || f_perp_fl2);
   // Later f_perp are ignored since they can not do the work;
-  f_mean = 0.5 * (f1 + f2);
+  vec f_mean = 0.5 * (f1 + f2);
   check_econd11a(vecerror, != 0, "position 2, after computing f_perp\n", mcerr);
 
   if ((i == 0 && j == 0) || f_mean == dv0) {
@@ -240,8 +240,8 @@ void mparticle::new_speed() {
   check_consistency();
 }
 void mparticle::print(std::ostream& file, int l) const {
-  if (l < 0)
-    Ifile << "mparticle: mass=" << mass << " (" << mass / CLHEP::kg << " kg, "
+  if (l < 0) return;
+  Ifile << "mparticle: mass=" << mass << " (" << mass / CLHEP::kg << " kg, "
           << mass* c_squared / CLHEP::GeV << " GeV)\n";
   Ifile << "orig_kin_energy=" << orig_kin_energy << " ("
         << orig_kin_energy / CLHEP::GeV << " GeV)"

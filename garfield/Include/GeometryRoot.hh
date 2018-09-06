@@ -56,7 +56,7 @@ class GeometryRoot : public GeometryBase {
 
  protected:
   // ROOT geometry manager
-  TGeoManager* m_geoManager;
+  TGeoManager* m_geoManager = nullptr;
 
   // List of ROOT materials associated to Garfield media
   struct material {
@@ -66,7 +66,7 @@ class GeometryRoot : public GeometryBase {
   std::vector<material> m_materials;
 
   // Switch on/off debugging messages
-  bool m_debug;
+  bool m_debug = false;
 };
 }
 

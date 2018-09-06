@@ -24,7 +24,6 @@ The file is provided "as is" without express or implied warranty.
 */
 #include <string>
 #include "wcpplib/util/FunNameStack.h"
-#include "wcpplib/safetl/AbsPtr.h"
 
 #define pvecerror(string)                                      \
   mfunname(string);                                            \
@@ -94,29 +93,28 @@ class absref {
   virtual void shift(const vec& dir);
 
  private:
-  virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
+  virtual absref_transmit get_components();
 };
 
-// Contains three methods of transmission, the fastest, slower and the slowest
+/// Container for transmitting geometry transformations.
+/// Three methods of transmission (fast, slower and slowest) are available.
 class absref_transmit {
  public:
-  absref_transmit() : qaref(0), qaref_pointer(0), qaref_other(0) {}
+  absref_transmit() {}
   // For transmitting the members of the class, when
   // their relative addresses are available.
   absref_transmit(int fqaref, absref absref::** faref)
-      : qaref(fqaref), aref(faref), qaref_pointer(0), qaref_other(0) {}
+      : qaref(fqaref), aref(faref) {}
   absref_transmit(int fqaref_pointer, absref** faref_pointer)
-      : qaref(0),
-        qaref_pointer(fqaref_pointer),
-        aref_pointer(faref_pointer),
-        qaref_other(0) {}
+      : qaref_pointer(fqaref_pointer),
+        aref_pointer(faref_pointer) {}
+
   absref_transmit(int fqaref, absref absref::** faref, int fqaref_pointer,
                   absref** faref_pointer)
       : qaref(fqaref),
         aref(faref),
         qaref_pointer(fqaref_pointer),
-        aref_pointer(faref_pointer),
-        qaref_other(0) {}
+        aref_pointer(faref_pointer) {}
 
   absref_transmit(const absref_transmit& f) { *this = f; }
   /// Destructor
@@ -126,7 +124,7 @@ class absref_transmit {
   virtual absref_transmit* copy() const { return new absref_transmit(*this); }
 
   /// Number of vector objects which are the members of the class
-  int qaref;  
+  int qaref = 0;
   /// Reference to address of array containing their relative addresses
   /// as class members.
   absref(absref::** aref);  
@@ -134,7 +132,7 @@ class absref_transmit {
   // When the relative addresses are not available, in particular
   // when the component object is located in heap memory:
   // Number of vector objects
-  int qaref_pointer;      
+  int qaref_pointer = 0;
 
   // Reference to address of array containing addresses of objects.
   absref** aref_pointer;  
@@ -146,7 +144,7 @@ class absref_transmit {
   // from absref_transmit. This is the slowest method of transmission.
 
   /// Number of objects available though virtual function GetOther.
-  int qaref_other;  
+  int qaref_other = 0;
   /// This function is meant to be redefined in derived classes to
   /// obtain additional address except those contained in aref and aref_pointer.
   /// This default version always returns NULL.
@@ -154,26 +152,19 @@ class absref_transmit {
 
 };
 
-#define ApplyAnyFunctionToVecElements(func)                       \
-  {                                                               \
-    ActivePtr<absref_transmit> aref_tran_cont;                    \
-    get_components(aref_tran_cont);                               \
-    absref_transmit* aref_tran = aref_tran_cont.get();            \
-    if (aref_tran != NULL) {                                      \
-      int n;                                                      \
-      int q = aref_tran->qaref;                                   \
-      for (n = 0; n < q; n++) (this->*(aref_tran->aref[n])).func; \
-      q = aref_tran->qaref_pointer;                               \
-      for (n = 0; n < q; n++) aref_tran->aref_pointer[n]->func;   \
-      q = aref_tran->qaref_other;                                 \
-      for (n = 0; n < q; n++) {                                   \
-        absref* ar = aref_tran->get_other(n);                     \
-        if (ar == NULL)                                           \
-          break;                                                  \
-        else                                                      \
-          ar->func;                                               \
-      }                                                           \
-    }                                                             \
+#define ApplyAnyFunctionToVecElements(func)                        \
+  {                                                                \
+    auto aref_tran = get_components();                             \
+    int q = aref_tran.qaref;                                       \
+    for (int n = 0; n < q; n++) (this->*(aref_tran.aref[n])).func; \
+    q = aref_tran.qaref_pointer;                                   \
+    for (int n = 0; n < q; n++) aref_tran.aref_pointer[n]->func;   \
+    q = aref_tran.qaref_other;                                     \
+    for (int n = 0; n < q; n++) {                                  \
+      absref* ar = aref_tran.get_other(n);                         \
+      if (!ar) break;                                              \
+      ar->func;                                                    \
+    }                                                              \
   }
 
 /// Vector.
@@ -192,33 +183,34 @@ class vec : public absref {
     z = zz;
   }
   /// Default constructor.
-  vec() {
-    x = 0;
-    y = 0;
-    z = 0;
-  }
+  vec() = default;
   /// Destructor
   virtual ~vec() {}
  
-  vfloat x, y, z;
+  vfloat x = 0.;
+  vfloat y = 0.;
+  vfloat z = 0.;
 
   vfloat length() const { return sqrt(x * x + y * y + z * z); }
   vfloat length2() const { return x * x + y * y + z * z; }
 
   vec down_new(const basis* fabas);
-  void down(const basis* fabas);
   vec up_new(const basis* fabas_new);
-  void up(const basis* fabas_new);
-  vec down_new(const abssyscoor* fasc);
-  void down(const abssyscoor* fasc);
-  vec up_new(const abssyscoor* fasc);
-  void up(const abssyscoor* fasc);
 
-  // make new turned vector and leave this unchanged
+  void down(const basis* fabas);
+  void up(const basis* fabas_new);
+
+  vec down_new(const abssyscoor* fasc);
+  vec up_new(const abssyscoor* fasc);
+
+  void down(const abssyscoor* fasc) override;
+  void up(const abssyscoor* fasc) override;
+
+  /// Make new turned vector and leave this one unchanged.
   vec turn_new(const vec& dir, vfloat angle);
   /// Turn this vector
-  void turn(const vec& dir, vfloat angle);
-  void shift(const vec& dir);
+  void turn(const vec& dir, vfloat angle) override;
+  void shift(const vec& dir) override;
 
   /// Generate random unit vector in plane perpendicular to z-axis.
   void random_round_vec();
@@ -322,7 +314,7 @@ class basis : public absref {
   /// Supposed to be perpendicular, therefore not public.
   vec ex, ey, ez;  
 
-  virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
+  virtual absref_transmit get_components() override;
 
   static absref absref::*aref[3];
 
@@ -376,14 +368,13 @@ class point : public absref {
   vec v;
 
  private:
-  virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
+  absref_transmit get_components() override;
   static absref(absref::*aref);
 
  public:
-  virtual void down(const abssyscoor* fasc);
-  virtual void up(const abssyscoor* fasc);
-  virtual void shift(const vec& dir) {
-    // not defined for vectors, but defined for points
+  void down(const abssyscoor* fasc) override;
+  void up(const abssyscoor* fasc) override;
+  void shift(const vec& dir) override {
     v += dir;
   }
   /// Default constructor (coordinates are not initialised).
@@ -425,10 +416,10 @@ std::ostream& operator<<(std::ostream& file, const point& p);
 #define vec_syscoor_index 0
 class abssyscoor {
  public:
-  std::string name;
+  std::string name = "none";
   virtual const point* Gapiv() const = 0;
   virtual const basis* Gabas() const = 0;
-  abssyscoor() : name("none") {}
+  abssyscoor() = default;
   abssyscoor(char* fname) : name(fname) {}
   abssyscoor(const std::string& fname) : name(fname) {}
   virtual void print(std::ostream& file, int l) const;
@@ -437,14 +428,14 @@ class abssyscoor {
 };
 extern std::ostream& operator<<(std::ostream& file, const abssyscoor& s);
 
-class fixsyscoor : public absref, public abssyscoor, public RegPassivePtr {
+class fixsyscoor : public absref, public abssyscoor {
  public:
-  virtual const point* Gapiv() const { return &piv; }
-  virtual const basis* Gabas() const { return &bas; }
+  const point* Gapiv() const override { return &piv; }
+  const basis* Gabas() const override { return &bas; }
   void Ppiv(const point& fpiv);
   void Pbas(const basis& fbas);
   // nominal system
-  fixsyscoor() {}                                     
+  fixsyscoor() = default;
   fixsyscoor(char* fname) : abssyscoor(fname) {}          
   fixsyscoor(const std::string& fname) : abssyscoor(fname) {}
   fixsyscoor(const point& fpiv, const basis& fbas, const std::string& fname)
@@ -458,12 +449,12 @@ class fixsyscoor : public absref, public abssyscoor, public RegPassivePtr {
       : abssyscoor(f),
         piv((f.Gapiv() != NULL) ? (*(f.Gapiv())) : point()),
         bas((f.Gabas() != NULL) ? (*(f.Gabas())) : basis()) {}
-  virtual void print(std::ostream& file, int l) const;
-  virtual fixsyscoor* copy() const { return new fixsyscoor(*this); }
+  void print(std::ostream& file, int l) const override;
+  fixsyscoor* copy() const { return new fixsyscoor(*this); }
   virtual ~fixsyscoor() {}
 
  protected:
-  virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
+  absref_transmit get_components() override;
   static absref(absref::*aref[2]);
 
  private:

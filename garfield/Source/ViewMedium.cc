@@ -1,7 +1,5 @@
-
 #include <iostream>
 #include <string>
-#include <sstream>
 #include <cmath>
 
 #include <TAxis.h>
@@ -12,32 +10,8 @@
 
 namespace Garfield {
 
-ViewMedium::ViewMedium()
-    : m_debug(false),
-      m_canvas(NULL),
-      m_hasExternalCanvas(false),
-      m_medium(NULL),
-      m_eMin(0.),
-      m_eMax(1000.),
-      m_bMin(0.),
-      m_bMax(5.),
-      m_aMin(0.),
-      m_aMax(3.14),
-      m_vMin(0.),
-      m_vMax(0.),
-      m_efield(500.),
-      m_bfield(1.e2),
-      m_angle(0.),
-      m_etolerance(1.),
-      m_btolerance(0.01),
-      m_atolerance(0.05),
-      m_labele("electric field [V/cm]"),
-      m_labelb("magnetic field [T]"),
-      m_labela("magnetic field angle [rad]"),
-      m_labelv("drift velocity [cm/ns]"),
-      m_labeld("diffusion coefficient [#sqrt{cm}]") {
+ViewMedium::ViewMedium() {
 
-  m_className = "ViewMedium";
   plottingEngine.SetDefaultStyle();
 }
 
@@ -54,7 +28,7 @@ void ViewMedium::SetCanvas(TCanvas* c) {
   }
   if (!m_hasExternalCanvas && m_canvas) {
     delete m_canvas;
-    m_canvas = NULL;
+    m_canvas = nullptr;
   }
   m_canvas = c;
   m_hasExternalCanvas = true;
@@ -316,10 +290,7 @@ void ViewMedium::AddFunction(const double xmin, const double xmax,
   std::string fname = "fMediumView_0";
   while (gROOT->GetListOfFunctions()->FindObject(fname.c_str())) {
     ++idx;
-    std::stringstream ss;
-    ss << "fMediumView_";
-    ss << idx;
-    fname = ss.str();
+    fname = "fMediumView_" + std::to_string(idx);
   }
   if (m_debug) {
     std::cout << m_className << "::AddFunction:\n";
@@ -608,11 +579,8 @@ void ViewMedium::AddFunction(const double xmin, const double xmax,
     m_functions.back().GetYaxis()->SetTitleOffset(1.5);
     m_functions.back().Draw("");
   }
-  if (!m_graphs.empty()) {
-    const unsigned int nGraphs = m_graphs.size();
-    for (unsigned int i = 0; i < nGraphs; ++i) {
-      m_graphs[i].Draw("p");
-    }
+  for (auto& graph : m_graphs) {
+    graph.Draw("p");
   }
 }
 
@@ -791,7 +759,7 @@ double ViewMedium::EvaluateFunction(double* pos, double* par) {
   return y;
 }
 
-int ViewMedium::GetColor(const unsigned int prop) const {
+int ViewMedium::GetColor(const Property prop) const {
 
   if (prop == ElectronLongitudinalDiffusion || prop == ElectronAttachment ||
       prop == ElectronLorentzAngle) {

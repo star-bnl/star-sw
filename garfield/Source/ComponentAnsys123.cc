@@ -809,7 +809,7 @@ void ComponentAnsys123::ElectricField(const double xin, const double yin,
   // Initial values
   ex = ey = ez = volt = 0.;
   status = 0;
-  m = NULL;
+  m = nullptr;
 
   // Do not proceed if not properly initialised.
   if (!m_ready) {
@@ -825,19 +825,17 @@ void ComponentAnsys123::ElectricField(const double xin, const double yin,
   const int imap = FindElement13(x, y, z, t1, t2, t3, t4, jac, det);
   if (imap < 0) {
     if (m_debug) {
-      std::cerr << m_className << "::ElectricField:\n";
-      std::cerr << "    Point (" << x << ", " << y << ", " << z
-                << ") not in the mesh.\n";
+      std::cerr << m_className << "::ElectricField: Point ("
+                << x << ", " << y << ", " << z << ") not in the mesh.\n";
     }
     status = -6;
     return;
   }
 
-  if (m_debug) {
-    PrintElement("ElectricField", x, y, z, t1, t2, t3, t4, imap, 10);
-  }
-
   const Element& element = elements[imap];
+  if (m_debug) {
+    PrintElement("ElectricField", x, y, z, t1, t2, t3, t4, element, 10);
+  }
   const Node& n0 = nodes[element.emap[0]];
   const Node& n1 = nodes[element.emap[1]];
   const Node& n2 = nodes[element.emap[2]];
@@ -848,39 +846,43 @@ void ComponentAnsys123::ElectricField(const double xin, const double yin,
   const Node& n7 = nodes[element.emap[7]];
   const Node& n8 = nodes[element.emap[8]];
   const Node& n9 = nodes[element.emap[9]];
-  // Tetrahedral field
+  // Shorthands.
+  const double fourt1 = 4 * t1;
+  const double fourt2 = 4 * t2;
+  const double fourt3 = 4 * t3;
+  const double fourt4 = 4 * t4;
   const double invdet = 1. / det;
+  // Tetrahedral field
   volt = n0.v * t1 * (2 * t1 - 1) + n1.v * t2 * (2 * t2 - 1) +
          n2.v * t3 * (2 * t3 - 1) + n3.v * t4 * (2 * t4 - 1) +
-         4 * n4.v * t1 * t2 + 4 * n5.v * t1 * t3 + 4 * n6.v * t1 * t4 +
-         4 * n7.v * t2 * t3 + 4 * n8.v * t2 * t4 + 4 * n9.v * t3 * t4;
+         n4.v * fourt1 * t2 + n5.v * fourt1 * t3 + n6.v * fourt1 * t4 +
+         n7.v * fourt2 * t3 + n8.v * fourt2 * t4 + n9.v * fourt3 * t4;
+  ex = -(n0.v * (fourt1 - 1) * jac[0][1] + n1.v * (fourt2 - 1) * jac[1][1] +
+         n2.v * (fourt3 - 1) * jac[2][1] + n3.v * (fourt4 - 1) * jac[3][1] +
+         n4.v * (fourt2 * jac[0][1] + fourt1 * jac[1][1]) +
+         n5.v * (fourt3 * jac[0][1] + fourt1 * jac[2][1]) +
+         n6.v * (fourt4 * jac[0][1] + fourt1 * jac[3][1]) +
+         n7.v * (fourt3 * jac[1][1] + fourt2 * jac[2][1]) +
+         n8.v * (fourt4 * jac[1][1] + fourt2 * jac[3][1]) +
+         n9.v * (fourt4 * jac[2][1] + fourt3 * jac[3][1])) * invdet;
 
-  ex = -(n0.v * (4 * t1 - 1) * jac[0][1] + n1.v * (4 * t2 - 1) * jac[1][1] +
-         n2.v * (4 * t3 - 1) * jac[2][1] + n3.v * (4 * t4 - 1) * jac[3][1] +
-         n4.v * (4 * t2 * jac[0][1] + 4 * t1 * jac[1][1]) +
-         n5.v * (4 * t3 * jac[0][1] + 4 * t1 * jac[2][1]) +
-         n6.v * (4 * t4 * jac[0][1] + 4 * t1 * jac[3][1]) +
-         n7.v * (4 * t3 * jac[1][1] + 4 * t2 * jac[2][1]) +
-         n8.v * (4 * t4 * jac[1][1] + 4 * t2 * jac[3][1]) +
-         n9.v * (4 * t4 * jac[2][1] + 4 * t3 * jac[3][1])) * invdet;
+  ey = -(n0.v * (fourt1 - 1) * jac[0][2] + n1.v * (fourt2 - 1) * jac[1][2] +
+         n2.v * (fourt3 - 1) * jac[2][2] + n3.v * (fourt4 - 1) * jac[3][2] +
+         n4.v * (fourt2 * jac[0][2] + fourt1 * jac[1][2]) +
+         n5.v * (fourt3 * jac[0][2] + fourt1 * jac[2][2]) +
+         n6.v * (fourt4 * jac[0][2] + fourt1 * jac[3][2]) +
+         n7.v * (fourt3 * jac[1][2] + fourt2 * jac[2][2]) +
+         n8.v * (fourt4 * jac[1][2] + fourt2 * jac[3][2]) +
+         n9.v * (fourt4 * jac[2][2] + fourt3 * jac[3][2])) * invdet;
 
-  ey = -(n0.v * (4 * t1 - 1) * jac[0][2] + n1.v * (4 * t2 - 1) * jac[1][2] +
-         n2.v * (4 * t3 - 1) * jac[2][2] + n3.v * (4 * t4 - 1) * jac[3][2] +
-         n4.v * (4 * t2 * jac[0][2] + 4 * t1 * jac[1][2]) +
-         n5.v * (4 * t3 * jac[0][2] + 4 * t1 * jac[2][2]) +
-         n6.v * (4 * t4 * jac[0][2] + 4 * t1 * jac[3][2]) +
-         n7.v * (4 * t3 * jac[1][2] + 4 * t2 * jac[2][2]) +
-         n8.v * (4 * t4 * jac[1][2] + 4 * t2 * jac[3][2]) +
-         n9.v * (4 * t4 * jac[2][2] + 4 * t3 * jac[3][2])) * invdet;
-
-  ez = -(n0.v * (4 * t1 - 1) * jac[0][3] + n1.v * (4 * t2 - 1) * jac[1][3] +
-         n2.v * (4 * t3 - 1) * jac[2][3] + n3.v * (4 * t4 - 1) * jac[3][3] +
-         n4.v * (4 * t2 * jac[0][3] + 4 * t1 * jac[1][3]) +
-         n5.v * (4 * t3 * jac[0][3] + 4 * t1 * jac[2][3]) +
-         n6.v * (4 * t4 * jac[0][3] + 4 * t1 * jac[3][3]) +
-         n7.v * (4 * t3 * jac[1][3] + 4 * t2 * jac[2][3]) +
-         n8.v * (4 * t4 * jac[1][3] + 4 * t2 * jac[3][3]) +
-         n9.v * (4 * t4 * jac[2][3] + 4 * t3 * jac[3][3])) * invdet;
+  ez = -(n0.v * (fourt1 - 1) * jac[0][3] + n1.v * (fourt2 - 1) * jac[1][3] +
+         n2.v * (fourt3 - 1) * jac[2][3] + n3.v * (fourt4 - 1) * jac[3][3] +
+         n4.v * (fourt2 * jac[0][3] + fourt1 * jac[1][3]) +
+         n5.v * (fourt3 * jac[0][3] + fourt1 * jac[2][3]) +
+         n6.v * (fourt4 * jac[0][3] + fourt1 * jac[3][3]) +
+         n7.v * (fourt3 * jac[1][3] + fourt2 * jac[2][3]) +
+         n8.v * (fourt4 * jac[1][3] + fourt2 * jac[3][3]) +
+         n9.v * (fourt4 * jac[2][3] + fourt3 * jac[3][3])) * invdet;
 
   // Transform field to global coordinates
   UnmapFields(ex, ey, ez, x, y, z, xmirr, ymirr, zmirr, rcoordinate, rotation);
@@ -940,11 +942,10 @@ void ComponentAnsys123::WeightingField(const double xin, const double yin,
   // Check if the point is in the mesh.
   if (imap < 0) return;
 
-  if (m_debug) {
-    PrintElement("WeightingField", x, y, z, t1, t2, t3, t4, imap, 10, iw);
-  }
-
   const Element& element = elements[imap];
+  if (m_debug) {
+    PrintElement("WeightingField", x, y, z, t1, t2, t3, t4, element, 10, iw);
+  }
   const Node& n0 = nodes[element.emap[0]];
   const Node& n1 = nodes[element.emap[1]];
   const Node& n2 = nodes[element.emap[2]];
@@ -957,38 +958,42 @@ void ComponentAnsys123::WeightingField(const double xin, const double yin,
   const Node& n9 = nodes[element.emap[9]];
   // Tetrahedral field
   const double invdet = 1. / det;
-  wx = -(n0.w[iw] * (4 * t1 - 1) * jac[0][1] +
-         n1.w[iw] * (4 * t2 - 1) * jac[1][1] +
-         n2.w[iw] * (4 * t3 - 1) * jac[2][1] +
-         n3.w[iw] * (4 * t4 - 1) * jac[3][1] +
-         n4.w[iw] * (4 * t2 * jac[0][1] + 4 * t1 * jac[1][1]) +
-         n5.w[iw] * (4 * t3 * jac[0][1] + 4 * t1 * jac[2][1]) +
-         n6.w[iw] * (4 * t4 * jac[0][1] + 4 * t1 * jac[3][1]) +
-         n7.w[iw] * (4 * t3 * jac[1][1] + 4 * t2 * jac[2][1]) +
-         n8.w[iw] * (4 * t4 * jac[1][1] + 4 * t2 * jac[3][1]) +
-         n9.w[iw] * (4 * t4 * jac[2][1] + 4 * t3 * jac[3][1])) * invdet;
+  const double fourt1 = 4 * t1;
+  const double fourt2 = 4 * t2;
+  const double fourt3 = 4 * t3;
+  const double fourt4 = 4 * t4;
+  wx = -(n0.w[iw] * (fourt1 - 1) * jac[0][1] +
+         n1.w[iw] * (fourt2 - 1) * jac[1][1] +
+         n2.w[iw] * (fourt3 - 1) * jac[2][1] +
+         n3.w[iw] * (fourt4 - 1) * jac[3][1] +
+         n4.w[iw] * (fourt2 * jac[0][1] + fourt1 * jac[1][1]) +
+         n5.w[iw] * (fourt3 * jac[0][1] + fourt1 * jac[2][1]) +
+         n6.w[iw] * (fourt4 * jac[0][1] + fourt1 * jac[3][1]) +
+         n7.w[iw] * (fourt3 * jac[1][1] + fourt2 * jac[2][1]) +
+         n8.w[iw] * (fourt4 * jac[1][1] + fourt2 * jac[3][1]) +
+         n9.w[iw] * (fourt4 * jac[2][1] + fourt3 * jac[3][1])) * invdet;
 
-  wy = -(n0.w[iw] * (4 * t1 - 1) * jac[0][2] +
-         n1.w[iw] * (4 * t2 - 1) * jac[1][2] +
-         n2.w[iw] * (4 * t3 - 1) * jac[2][2] +
-         n3.w[iw] * (4 * t4 - 1) * jac[3][2] +
-         n4.w[iw] * (4 * t2 * jac[0][2] + 4 * t1 * jac[1][2]) +
-         n5.w[iw] * (4 * t3 * jac[0][2] + 4 * t1 * jac[2][2]) +
-         n6.w[iw] * (4 * t4 * jac[0][2] + 4 * t1 * jac[3][2]) +
-         n7.w[iw] * (4 * t3 * jac[1][2] + 4 * t2 * jac[2][2]) +
-         n8.w[iw] * (4 * t4 * jac[1][2] + 4 * t2 * jac[3][2]) +
-         n9.w[iw] * (4 * t4 * jac[2][2] + 4 * t3 * jac[3][2])) * invdet;
+  wy = -(n0.w[iw] * (fourt1 - 1) * jac[0][2] +
+         n1.w[iw] * (fourt2 - 1) * jac[1][2] +
+         n2.w[iw] * (fourt3 - 1) * jac[2][2] +
+         n3.w[iw] * (fourt4 - 1) * jac[3][2] +
+         n4.w[iw] * (fourt2 * jac[0][2] + fourt1 * jac[1][2]) +
+         n5.w[iw] * (fourt3 * jac[0][2] + fourt1 * jac[2][2]) +
+         n6.w[iw] * (fourt4 * jac[0][2] + fourt1 * jac[3][2]) +
+         n7.w[iw] * (fourt3 * jac[1][2] + fourt2 * jac[2][2]) +
+         n8.w[iw] * (fourt4 * jac[1][2] + fourt2 * jac[3][2]) +
+         n9.w[iw] * (fourt4 * jac[2][2] + fourt3 * jac[3][2])) * invdet;
 
-  wz = -(n0.w[iw] * (4 * t1 - 1) * jac[0][3] +
-         n1.w[iw] * (4 * t2 - 1) * jac[1][3] +
-         n2.w[iw] * (4 * t3 - 1) * jac[2][3] +
-         n3.w[iw] * (4 * t4 - 1) * jac[3][3] +
-         n4.w[iw] * (4 * t2 * jac[0][3] + 4 * t1 * jac[1][3]) +
-         n5.w[iw] * (4 * t3 * jac[0][3] + 4 * t1 * jac[2][3]) +
-         n6.w[iw] * (4 * t4 * jac[0][3] + 4 * t1 * jac[3][3]) +
-         n7.w[iw] * (4 * t3 * jac[1][3] + 4 * t2 * jac[2][3]) +
-         n8.w[iw] * (4 * t4 * jac[1][3] + 4 * t2 * jac[3][3]) +
-         n9.w[iw] * (4 * t4 * jac[2][3] + 4 * t3 * jac[3][3])) * invdet;
+  wz = -(n0.w[iw] * (fourt1 - 1) * jac[0][3] +
+         n1.w[iw] * (fourt2 - 1) * jac[1][3] +
+         n2.w[iw] * (fourt3 - 1) * jac[2][3] +
+         n3.w[iw] * (fourt4 - 1) * jac[3][3] +
+         n4.w[iw] * (fourt2 * jac[0][3] + fourt1 * jac[1][3]) +
+         n5.w[iw] * (fourt3 * jac[0][3] + fourt1 * jac[2][3]) +
+         n6.w[iw] * (fourt4 * jac[0][3] + fourt1 * jac[3][3]) +
+         n7.w[iw] * (fourt3 * jac[1][3] + fourt2 * jac[2][3]) +
+         n8.w[iw] * (fourt4 * jac[1][3] + fourt2 * jac[3][3]) +
+         n9.w[iw] * (fourt4 * jac[2][3] + fourt3 * jac[3][3])) * invdet;
 
   // Transform field to global coordinates
   UnmapFields(wx, wy, wz, x, y, z, xmirr, ymirr, zmirr, rcoordinate, rotation);
@@ -1032,11 +1037,10 @@ double ComponentAnsys123::WeightingPotential(const double xin, const double yin,
   const int imap = FindElement13(x, y, z, t1, t2, t3, t4, jac, det);
   if (imap < 0) return 0.;
 
-  if (m_debug) {
-    PrintElement("WeightingPotential", x, y, z, t1, t2, t3, t4, imap, 10, iw);
-  }
-
   const Element& element = elements[imap];
+  if (m_debug) {
+    PrintElement("WeightingPotential", x, y, z, t1, t2, t3, t4, element, 10, iw);
+  }
   const Node& n0 = nodes[element.emap[0]];
   const Node& n1 = nodes[element.emap[1]];
   const Node& n2 = nodes[element.emap[2]];
@@ -1095,7 +1099,7 @@ Medium* ComponentAnsys123::GetMedium(const double xin, const double yin,
   }
 
   if (m_debug) {
-    PrintElement("GetMedium", x, y, z, t1, t2, t3, t4, imap, 10);
+    PrintElement("GetMedium", x, y, z, t1, t2, t3, t4, element, 10);
   }
 
   // Assign a medium.

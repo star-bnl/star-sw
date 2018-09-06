@@ -8,20 +8,8 @@
 
 namespace Garfield {
 
-Track::Track()
-    : m_className("Track"),
-      m_q(-1.),
-      m_spin(1),
-      m_mass(MuonMass),
-      m_energy(0.),
-      m_isElectron(false),
-      m_particleName("mu-"),
-      m_sensor(NULL),
-      m_isChanged(true),
-      m_usePlotting(false),
-      m_viewer(NULL),
-      m_debug(false),
-      m_plotId(-1) {
+Track::Track() 
+    : m_mass(MuonMass) {
 
   SetBetaGamma(3.);
 }

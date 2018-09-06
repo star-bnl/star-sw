@@ -47,12 +47,12 @@ void HeedParticle::physics(std::vector<gparticle*>& secondaries) {
   if (currpos.prange <= 0.0) return;
   // Get local volume.
   const absvol* av = currpos.tid.G_lavol();
-  const EnTransfCS* etcs = dynamic_cast<const EnTransfCS*>(av);
+  auto etcs = dynamic_cast<const EnTransfCS*>(av);
   if (!etcs) return;
-  HeedMatterDef* hmd = etcs->hmd.getver();
-  MatterDef* matter = hmd->matter.getver();
-  EnergyMesh* emesh = hmd->energy_mesh.getver();
-  const double* aetemp = hmd->energy_mesh->get_ae();
+  HeedMatterDef* hmd = etcs->hmd;
+  MatterDef* matter = hmd->matter;
+  EnergyMesh* emesh = hmd->energy_mesh;
+  const double* aetemp = emesh->get_ae();
   PointCoorMesh<double, const double*> pcm(emesh->get_q() + 1, &(aetemp));
   const long qa = matter->qatom();
   if (s_print_listing) Iprintn(mcout, qa);
@@ -99,7 +99,7 @@ void HeedParticle::physics(std::vector<gparticle*>& secondaries) {
         if (s_loss_only) continue;
         if (s_print_listing) mcout << "generating new cluster\n";
         if (s_store_clusters) {
-          m_clusterBank.push_back(
+          m_clusterBank.emplace_back(
               HeedCluster(et, 0, pt, ptloc, prevpos.tid, na, ns));
         }
         // Generate a virtual photon.
@@ -117,7 +117,7 @@ void HeedParticle::physics(std::vector<gparticle*>& secondaries) {
         double speed = vel.length();
         double time = arange / speed;
         if (s_print_listing) mcout << "generating new virtual photon\n";
-        HeedPhoton* hp = new HeedPhoton(currpos.tid.eid[0].getver(), pt, vel,
+        HeedPhoton* hp = new HeedPhoton(currpos.tid.eid[0], pt, vel,
                                         time, particle_number, et, m_fieldMap);
         hp->s_photon_absorbed = true;
         hp->s_delta_generated = false;

@@ -48,9 +48,9 @@ class AvalancheMicroscopic {
 
   /// Switch on filling histograms for electron energy distribution
   void EnableElectronEnergyHistogramming(TH1* histo);
-  void DisableElectronEnergyHistogramming() { m_histElectronEnergy = NULL; }
+  void DisableElectronEnergyHistogramming() { m_histElectronEnergy = nullptr; }
   void EnableHoleEnergyHistogramming(TH1* histo);
-  void DisableHoleEnergyHistogramming() { m_histHoleEnergy = NULL; }
+  void DisableHoleEnergyHistogramming() { m_histHoleEnergy = nullptr; }
 
   /** Fill histograms of the distance between successive collisions.
     * \param histo
@@ -65,7 +65,7 @@ class AvalancheMicroscopic {
   void DisableDistanceHistogramming();
   /// Fill histograms of the energy of electrons emitted in ionising collisions.
   void EnableSecondaryEnergyHistogramming(TH1* histo);
-  void DisableSecondaryEnergyHistogramming() { m_histSecondary = NULL; }
+  void DisableSecondaryEnergyHistogramming() { m_histSecondary = nullptr; }
 
   /// Switch on storage of drift lines.
   void EnableDriftLines() { m_useDriftLines = true; }
@@ -202,9 +202,9 @@ class AvalancheMicroscopic {
   void DisableDebugging() { m_debug = false; }
 
  private:
-  std::string m_className;
+  std::string m_className = "AvalancheMicroscopic";
 
-  Sensor* m_sensor;
+  Sensor* m_sensor = nullptr;
 
   struct point {
     double x, y, z, t;
@@ -234,68 +234,69 @@ class AvalancheMicroscopic {
   std::vector<photon> m_photons;
 
   /// Number of electrons produced
-  int m_nElectrons;
+  int m_nElectrons = 0;
   /// Number of holes produced
-  int m_nHoles;
+  int m_nHoles = 0;
   /// Number of ions produced
-  int m_nIons;
+  int m_nIons = 0;
 
-  bool m_usePlotting;
-  ViewDrift* m_viewer;
-  bool m_plotExcitations;
-  bool m_plotIonisations;
-  bool m_plotAttachments;
+  bool m_usePlotting = false;
+  ViewDrift* m_viewer = nullptr;
+  bool m_plotExcitations = true;
+  bool m_plotIonisations = true;
+  bool m_plotAttachments = true;
 
-  TH1* m_histElectronEnergy;
-  TH1* m_histHoleEnergy;
-  TH1* m_histDistance;
-  char m_distanceOption;
+  TH1* m_histElectronEnergy = nullptr;
+  TH1* m_histHoleEnergy = nullptr;
+  TH1* m_histDistance = nullptr;
+  char m_distanceOption = 'r';
   std::vector<int> m_distanceHistogramType;
 
-  TH1* m_histSecondary;
+  TH1* m_histSecondary = nullptr;
 
-  bool m_useSignal;
-  bool m_useInducedCharge;
-  bool m_useDriftLines;
-  bool m_usePhotons;
-  bool m_useBandStructureDefault;
-  bool m_useNullCollisionSteps;
-  bool m_useBfield;
+  bool m_useSignal = false;
+  bool m_useInducedCharge = false;
+  bool m_useDriftLines = false;
+  bool m_usePhotons = false;
+  bool m_useBandStructureDefault = true;
+  bool m_useNullCollisionSteps = false;
+  bool m_useBfield = false;
 
   // Rotation matrices
-  double m_rb11, m_rb12, m_rb13;
-  double m_rb21, m_rb22, m_rb23;
-  double m_rb31, m_rb32, m_rb33;
-  double m_rx22, m_rx23, m_rx32, m_rx33;
+  double m_rb11 = 1., m_rb12 = 0., m_rb13 = 0.;
+  double m_rb21 = 0., m_rb22 = 1., m_rb23 = 0.;
+  double m_rb31 = 0., m_rb32 = 0., m_rb33 = 1.;
+  double m_rx22 = 1., m_rx23 = 0., m_rx32 = 0., m_rx33 = 1.;
 
   // Transport cuts
-  double m_deltaCut;
-  double m_gammaCut;
+  double m_deltaCut = 0.;
+  double m_gammaCut = 0.;
 
   // Max. avalanche size
-  unsigned int m_sizeCut;
+  unsigned int m_sizeCut = 0;
 
-  unsigned int m_nCollSkip;
+  unsigned int m_nCollSkip = 100;
 
-  bool m_hasTimeWindow;
-  double m_tMin, m_tMax;
+  bool m_hasTimeWindow = false;
+  double m_tMin = 0.;
+  double m_tMax = 0.;
 
   // User procedures
-  bool m_hasUserHandleStep;
-  bool m_hasUserHandleAttachment;
-  bool m_hasUserHandleInelastic;
-  bool m_hasUserHandleIonisation;
+  bool m_hasUserHandleStep = false;
+  bool m_hasUserHandleAttachment = false;
+  bool m_hasUserHandleInelastic = false;
+  bool m_hasUserHandleIonisation = false;
   void (*m_userHandleStep)(double x, double y, double z, double t, double e,
-                         double dx, double dy, double dz, bool hole);
+                         double dx, double dy, double dz, bool hole) = nullptr;
   void (*m_userHandleAttachment)(double x, double y, double z, double t, int type,
-                               int level, Medium* m);
+                               int level, Medium* m) = nullptr;
   void (*m_userHandleInelastic)(double x, double y, double z, double t, int type,
-                              int level, Medium* m);
+                              int level, Medium* m) = nullptr;
   void (*m_userHandleIonisation)(double x, double y, double z, double t, int type,
-                               int level, Medium* m);
+                               int level, Medium* m) = nullptr;
 
   // Switch on/off debugging messages
-  bool m_debug;
+  bool m_debug = false;
 
   // Electron transport
   bool TransportElectron(const double x0, const double y0, const double z0,

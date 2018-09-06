@@ -68,18 +68,6 @@ namespace Heed {
 
 typedef std::string String;
 
-inline String long_to_String(const long n) {
-  std::ostringstream s;
-  s << n;
-  return String(s.str());
-}
-
-inline String double_to_String(const double d) {
-  std::ostringstream s;
-  s << d;
-  return String(s.str());
-}
-
 // puts one \n at the end of string stream:
 
 inline void put_one_n(std::ostringstream& ost) {

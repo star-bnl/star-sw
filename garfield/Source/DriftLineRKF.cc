@@ -8,34 +8,16 @@
 
 namespace Garfield {
 
-DriftLineRKF::DriftLineRKF()
-    : m_sensor(NULL),
-      m_medium(NULL),
-      m_maxStepSize(1.e8),
-      m_accuracy(1.e-8),
-      m_maxSteps(1000),
-      m_maxStepsToWire(1000),
-      m_rejectKinks(true),
-      m_useStepSizeLimit(false),
-      m_usePlotting(false),
-      m_view(NULL),
-      m_status(0),
-      m_nPoints(0),
-      m_scaleElectronSignal(1.),
-      m_scaleHoleSignal(1.),
-      m_scaleIonSignal(1.),
-      m_debug(false),
-      m_verbose(false) {
+DriftLineRKF::DriftLineRKF() {
 
   const unsigned int nMaxPoints = m_maxSteps + m_maxStepsToWire + 10;
   m_path.resize(nMaxPoints);
-  m_className = "DriftLineRKF";
 }
 
 void DriftLineRKF::SetSensor(Sensor* s) {
 
   if (!s) {
-    std::cerr << m_className << "::SetSensor:\n    Null pointer.\n";
+    std::cerr << m_className << "::SetSensor: Null pointer.\n";
     return;
   }
   m_sensor = s;
@@ -68,17 +50,15 @@ void DriftLineRKF::SetMaximumStepSize(const double ms) {
 void DriftLineRKF::EnablePlotting(ViewDrift* view) {
 
   if (!view) {
-    std::cerr << m_className << "::EnablePlotting:\n    Null pointer.\n";
+    std::cerr << m_className << "::EnablePlotting: Null pointer.\n";
     return;
   }
-  m_usePlotting = true;
   m_view = view;
 }
 
 void DriftLineRKF::DisablePlotting() {
 
-  m_view = NULL;
-  m_usePlotting = false;
+  m_view = nullptr;
 }
 
 bool DriftLineRKF::DriftElectron(const double x0, const double y0,
@@ -150,7 +130,7 @@ bool DriftLineRKF::DriftLine(const double x0, const double y0,
 
   // Start plotting a new line if requested.
   int iLine = 0;
-  if (m_usePlotting) {
+  if (m_view) {
     if (m_particleType == ParticleTypeIon) {
       m_view->NewIonDriftLine(1, iLine, x0, y0, z0);
     } else if (m_particleType == ParticleTypeElectron) {
@@ -161,19 +141,19 @@ bool DriftLineRKF::DriftLine(const double x0, const double y0,
   }
 
   // Set the numerical constants for the RKF integration.
-  const double c10 = 214. /  891.;
-  const double c11 =   1. /   33.;
-  const double c12 = 650. /  891.;
-  const double c20 = 533. / 2106.;
-  const double c22 = 800. / 1053.;
-  const double c23 =  -1. /   78.;
+  constexpr double c10 = 214. /  891.;
+  constexpr double c11 =   1. /   33.;
+  constexpr double c12 = 650. /  891.;
+  constexpr double c20 = 533. / 2106.;
+  constexpr double c22 = 800. / 1053.;
+  constexpr double c23 =  -1. /   78.;
 
-  const double b10 =    1. /   4.;
-  const double b20 = -189. / 800.;
-  const double b21 =  729. / 800.;
-  const double b30 =  214. / 891.;
-  const double b31 =    1. /  33.;
-  const double b32 =  650. / 891.;
+  constexpr double b10 =    1. /   4.;
+  constexpr double b20 = -189. / 800.;
+  constexpr double b21 =  729. / 800.;
+  constexpr double b30 =  214. / 891.;
+  constexpr double b31 =    1. /  33.;
+  constexpr double b32 =  650. / 891.;
 
   // Set the charge of the drifting particle.
   const double charge = m_particleType == ParticleTypeElectron ? -1 : 1;
@@ -414,13 +394,9 @@ bool DriftLineRKF::DriftLine(const double x0, const double y0,
     }
     // Stop in case dt tends to become too small.
     if (dt * (fabs(phi1[0]) + fabs(phi1[1]) + fabs(phi1[2])) < m_accuracy) {
-	static int Ibreak = 0;
-	Ibreak++;
-	if (Ibreak < 13) {
       std::cerr << m_className << "::DriftLine:\n"
                 << "    Step size has become smaller than int. accuracy.\n"
                 << "    The calculation is abandoned.\n";
-  	}
       m_status = StatusCalculationAbandoned; 
       break;
     }
@@ -454,7 +430,7 @@ bool DriftLineRKF::DriftLine(const double x0, const double y0,
                 << std::setw(15) << m_path[i].z << "\n";
     }
   }
-  if (m_usePlotting) {
+  if (m_view) {
     for (unsigned int i = 0; i < m_nPoints; ++i) {
       m_view->AddDriftLinePoint(iLine, m_path[i].x, m_path[i].y, m_path[i].z);
     }

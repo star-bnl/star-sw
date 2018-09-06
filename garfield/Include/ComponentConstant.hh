@@ -16,16 +16,16 @@ class ComponentConstant : public ComponentBase {
   ~ComponentConstant() {}
 
   void ElectricField(const double x, const double y, const double z, double& ex,
-                     double& ey, double& ez, Medium*& m, int& status);
+                     double& ey, double& ez, Medium*& m, int& status) override;
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, double& v, Medium*& m,
-                     int& status);
-  bool GetVoltageRange(double& vmin, double& vmax);
+                     int& status) override;
+  bool GetVoltageRange(double& vmin, double& vmax) override;
   void WeightingField(const double x, const double y, const double z,
                       double& wx, double& wy, double& wz,
-                      const std::string& label);
+                      const std::string& label) override;
   double WeightingPotential(const double x, const double y, const double z,
-                            const std::string& label);
+                            const std::string& label) override;
 
   void SetElectricField(const double ex, const double ey, const double ez);
   void SetPotential(const double x, const double y, const double z,
@@ -38,29 +38,29 @@ class ComponentConstant : public ComponentBase {
 
  private:
   // Electric field
-  double m_fx, m_fy, m_fz;
+  double m_fx = 0.;
+  double m_fy = 0.;
+  double m_fz = 0.;
 
   // Potential
-  bool m_hasPotential;
+  bool m_hasPotential = false;
   // Point where potential was specified
-  double m_x0, m_y0, m_z0;
+  double m_x0 = 0., m_y0 = 0., m_z0 = 0.;
   // Potential at this point
-  double m_v0;
+  double m_v0 = 0.;
 
   // Weighting field
-  bool m_hasWeightingField;
-  std::string m_wfield;
-  double m_fwx, m_fwy, m_fwz;
-  bool m_hasWeightingPotential;
+  bool m_hasWeightingField = false;
+  std::string m_wfield = "";
+  double m_fwx = 0., m_fwy = 0., m_fwz = 0.;
+  bool m_hasWeightingPotential = false;
   // Point where the weighting potential was specified
-  double m_wx0, m_wy0, m_wz0;
+  double m_wx0 = 0., m_wy0 = 0., m_wz0 = 0.;
   // Weighting potential at this point
-  double m_w0;
+  double m_w0 = 0.;
 
-  // Reset the component
-  void Reset();
-  // Verify periodicities
-  void UpdatePeriodicity();
+  void Reset() override;
+  void UpdatePeriodicity() override;
 };
 }
 #endif

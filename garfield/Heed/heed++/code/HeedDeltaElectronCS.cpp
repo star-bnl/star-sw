@@ -4,6 +4,7 @@
 #include "wcpplib/ioniz/e_cont_enloss.h"
 #include "wcpplib/clhep_units/WPhysicalConstants.h"
 #include "wcpplib/math/lorgamma.h"
+#include "wcpplib/util/FunNameStack.h"
 
 // 2003, I. Smirnov
 
@@ -19,8 +20,6 @@ using CLHEP::cm3;
 using CLHEP::gram;
 using CLHEP::mole;
 using CLHEP::Avogadro;
-
-const double HeedDeltaElectronCS::low_cut_angle_deg = 20.0;
 
 HeedDeltaElectronCS::HeedDeltaElectronCS(HeedMatterDef* fhmd,
                                          ElElasticScat* fees,

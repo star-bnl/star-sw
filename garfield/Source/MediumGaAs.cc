@@ -11,23 +11,7 @@
 
 namespace Garfield {
 
-MediumGaAs::MediumGaAs()
-    : Medium(),
-      // bandGap(1.42),
-      eMobility(8.8e-6),
-      hMobility(3.2e-6),
-      eHallFactor(1.05),
-      hHallFactor(1.25),
-      eTrapCs(1.e-15),
-      hTrapCs(1.e-15),
-      eTrapDensity(1.e13),
-      hTrapDensity(1.e13),
-      eTrapTime(0.),
-      hTrapTime(0.),
-      trappingModel(0),
-      m_hasUserMobility(false),
-      m_hasOpticalData(false),
-      opticalDataFile("OpticalData_GaAs.txt") {
+MediumGaAs::MediumGaAs() : Medium() {
 
   m_className = "MediumGaAs";
   m_name = "GaAs";
@@ -117,7 +101,7 @@ bool MediumGaAs::ElectronVelocity(const double ex, const double ey,
                                   double& vy, double& vz) {
 
   vx = vy = vz = 0.;
-  if (m_hasElectronVelocityE) {
+  if (!m_eVelocityE.empty()) {
     // Interpolation in user table.
     return Medium::ElectronVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
   }
@@ -148,7 +132,7 @@ bool MediumGaAs::ElectronTownsend(const double ex, const double ey,
                                   double& alpha) {
 
   alpha = 0.;
-  if (!tabElectronTownsend.empty()) {
+  if (!m_eTownsend.empty()) {
     // Interpolation in user table.
     return Medium::ElectronTownsend(ex, ey, ez, bx, by, bz, alpha);
   }
@@ -161,7 +145,7 @@ bool MediumGaAs::ElectronAttachment(const double ex, const double ey,
                                     double& eta) {
 
   eta = 0.;
-  if (m_hasElectronAttachment) {
+  if (!m_eAttachment.empty()) {
     // Interpolation in user table.
     return Medium::ElectronAttachment(ex, ey, ez, bx, by, bz, eta);
   }
@@ -191,7 +175,7 @@ bool MediumGaAs::HoleVelocity(const double ex, const double ey, const double ez,
                               double& vx, double& vy, double& vz) {
 
   vx = vy = vz = 0.;
-  if (m_hasHoleVelocityE) {
+  if (!m_hVelocityE.empty()) {
     // Interpolation in user table.
     return Medium::HoleVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
   }
@@ -220,7 +204,7 @@ bool MediumGaAs::HoleTownsend(const double ex, const double ey, const double ez,
                               double& alpha) {
 
   alpha = 0.;
-  if (m_hasHoleTownsend) {
+  if (!m_hTownsend.empty()) {
     // Interpolation in user table.
     return Medium::HoleTownsend(ex, ey, ez, bx, by, bz, alpha);
   }
@@ -232,7 +216,7 @@ bool MediumGaAs::HoleAttachment(const double ex, const double ey,
                                 const double by, const double bz, double& eta) {
 
   eta = 0.;
-  if (m_hasHoleAttachment) {
+  if (!m_hAttachment.empty()) {
     // Interpolation in user table.
     return Medium::HoleAttachment(ex, ey, ez, bx, by, bz, eta);
   }
@@ -269,202 +253,4 @@ void MediumGaAs::SetLowFieldMobility(const double mue, const double muh) {
   m_isChanged = true;
 }
 
-bool MediumGaAs::GetOpticalDataRange(double& emin, double& emax, 
-                                     const unsigned int i) {
-
-  if (i != 0) {
-    std::cerr << m_className << "::GetOpticalDataRange:\n";
-    std::cerr << "    Medium has only one component.\n";
-  }
-
-  // Make sure the optical data table has been loaded.
-  if (!m_hasOpticalData) {
-    if (!LoadOpticalData(opticalDataFile)) {
-      std::cerr << m_className << "::GetOpticalDataRange:\n";
-      std::cerr << "    Optical data table could not be loaded.\n";
-      return false;
-    }
-    m_hasOpticalData = true;
-  }
-
-  emin = opticalDataTable[0].energy;
-  emax = opticalDataTable.back().energy;
-  if (m_debug) {
-    std::cout << m_className << "::GetOpticalDataRange:\n";
-    std::cout << "    " << emin << " < E [eV] < " << emax << "\n";
-  }
-  return true;
-}
-
-bool MediumGaAs::GetDielectricFunction(const double e, double& eps1,
-                                       double& eps2, const unsigned int i) {
-
-  if (i != 0) {
-    std::cerr << m_className << "::GetDielectricFunction:\n";
-    std::cerr << "    Medium has only one component.\n";
-    return false;
-  }
-
-  // Make sure the optical data table has been loaded.
-  if (!m_hasOpticalData) {
-    if (!LoadOpticalData(opticalDataFile)) {
-      std::cerr << m_className << "::GetDielectricFunction:\n";
-      std::cerr << "    Optical data table could not be loaded.\n";
-      return false;
-    }
-    m_hasOpticalData = true;
-  }
-
-  // Make sure the requested energy is within the range of the table.
-  const double emin = opticalDataTable[0].energy;
-  const double emax = opticalDataTable.back().energy;
-  if (e < emin || e > emax) {
-    std::cerr << m_className << "::GetDielectricFunction:\n";
-    std::cerr << "    Requested energy (" << e << " eV) "
-              << " is outside the range of the optical data table.\n";
-    std::cerr << "    " << emin << " < E [eV] < " << emax << "\n";
-    eps1 = eps2 = 0.;
-    return false;
-  }
-
-  // Locate the requested energy in the table.
-  int iLow = 0;
-  int iUp = opticalDataTable.size() - 1;
-  int iM;
-  while (iUp - iLow > 1) {
-    iM = (iUp + iLow) >> 1;
-    if (e >= opticalDataTable[iM].energy) {
-      iLow = iM;
-    } else {
-      iUp = iM;
-    }
-  }
-
-  // Interpolate the real part of dielectric function.
-  // Use linear interpolation if one of the values is negative,
-  // Otherwise use log-log interpolation.
-  const double logX0 = log(opticalDataTable[iLow].energy);
-  const double logX1 = log(opticalDataTable[iUp].energy);
-  const double logX = log(e);
-  if (opticalDataTable[iLow].eps1 <= 0. || opticalDataTable[iUp].eps1 <= 0.) {
-    eps1 = opticalDataTable[iLow].eps1 +
-           (e - opticalDataTable[iLow].energy) *
-               (opticalDataTable[iUp].eps1 - opticalDataTable[iLow].eps1) /
-               (opticalDataTable[iUp].energy - opticalDataTable[iLow].energy);
-  } else {
-    const double logY0 = log(opticalDataTable[iLow].eps1);
-    const double logY1 = log(opticalDataTable[iUp].eps1);
-    eps1 = logY0 + (logX - logX0) * (logY1 - logY0) / (logX1 - logX0);
-    eps1 = exp(eps1);
-  }
-
-  // Interpolate the imaginary part of dielectric function,
-  // using log-log interpolation.
-  const double logY0 = log(opticalDataTable[iLow].eps2);
-  const double logY1 = log(opticalDataTable[iUp].eps2);
-  eps2 = logY0 + (log(e) - logX0) * (logY1 - logY0) / (logX1 - logX0);
-  eps2 = exp(eps2);
-  return true;
-}
-
-bool MediumGaAs::LoadOpticalData(const std::string filename) {
-
-  // Get the path to the data directory.
-  char* pPath = getenv("GARFIELD_HOME");
-  if (pPath == 0) {
-    std::cerr << m_className << "::LoadOpticalData:\n";
-    std::cerr << "    Environment variable GARFIELD_HOME is not set.\n";
-    return false;
-  }
-  std::string filepath = pPath;
-  filepath = filepath + "/Data/" + filename;
-
-  // Open the file.
-  std::ifstream infile;
-  infile.open(filepath.c_str(), std::ios::in);
-  // Make sure the file could actually be opened.
-  if (!infile) {
-    std::cerr << m_className << "::LoadOpticalData:\n";
-    std::cerr << "    Error opening file " << filename << ".\n";
-    return false;
-  }
-
-  // Clear the optical data table.
-  opticalDataTable.clear();
-
-  double lastEnergy = -1.;
-  double energy, eps1, eps2, loss;
-  opticalData data;
-  // Read the file line by line.
-  std::string line;
-  std::istringstream dataStream;
-  int i = 0;
-  while (!infile.eof()) {
-    ++i;
-    // Read the next line.
-    std::getline(infile, line);
-    // Strip white space from the beginning of the line.
-    line.erase(line.begin(),
-               std::find_if(line.begin(), line.end(),
-                            not1(std::ptr_fun<int, int>(isspace))));
-    // Skip comments.
-    if (line[0] == '#' || line[0] == '*' || (line[0] == '/' && line[1] == '/'))
-      continue;
-    // Extract the values.
-    dataStream.str(line);
-    dataStream >> energy >> eps1 >> eps2 >> loss;
-    if (dataStream.eof()) break;
-    // Check if the data has been read correctly.
-    if (infile.fail()) {
-      std::cerr << m_className << "::LoadOpticalData:\n";
-      std::cerr << "    Error reading file " << filename << " (line " << i
-                << ").\n";
-      return false;
-    }
-    // Reset the stringstream.
-    dataStream.str("");
-    dataStream.clear();
-    // Make sure the values make sense.
-    // The table has to be in ascending order
-    //  with respect to the photon energy.
-    if (energy <= lastEnergy) {
-      std::cerr << m_className << "::LoadOpticalData:\n";
-      std::cerr << "    Table is not in monotonically "
-                << "increasing order (line " << i << ").\n";
-      std::cerr << "    " << lastEnergy << "  " << energy << "  " << eps1
-                << "  " << eps2 << "\n";
-      return false;
-    }
-    // The imaginary part of the dielectric function has to be positive.
-    if (eps2 < 0.) {
-      std::cerr << m_className << "::LoadOpticalData:\n";
-      std::cerr << "    Negative value of the loss function "
-                << "(line " << i << ").\n";
-      return false;
-    }
-    // Ignore negative photon energies.
-    if (energy <= 0.) continue;
-    // Add the values to the list.
-    data.energy = energy;
-    data.eps1 = eps1;
-    data.eps2 = eps2;
-    opticalDataTable.push_back(data);
-    lastEnergy = energy;
-  }
-
-  const int nEntries = opticalDataTable.size();
-  if (nEntries <= 0) {
-    std::cerr << m_className << "::LoadOpticalData:\n";
-    std::cerr << "    Import of data from file " << filepath << "failed.\n";
-    std::cerr << "    No valid data found.\n";
-    return false;
-  }
-
-  if (m_debug) {
-    std::cout << m_className << "::LoadOpticalData:\n";
-    std::cout << "    Read " << nEntries << " values from file " << filepath
-              << "\n";
-  }
-  return true;
-}
 }

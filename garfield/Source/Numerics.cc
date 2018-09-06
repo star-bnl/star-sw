@@ -10,8 +10,8 @@ namespace Numerics {
 void Dfact(const int n, std::vector<std::vector<double> >& a,
            std::vector<int>& ir, int& ifail, double& det, int& jfail) {
 
-  const double g1 = 1.e-19;
-  const double g2 = 1.e-19;
+  constexpr double g1 = 1.e-19;
+  constexpr double g2 = 1.e-19;
 
   double tf, p, q, t, s11, s12;
   int k;
@@ -220,10 +220,7 @@ void Deqinv(const int n, std::vector<std::vector<double> >& a, int& ifail,
   double det, temp, s;
   double b1, b2, c11, c12, c13, c21, c22, c23, c31, c32, c33;
 
-  std::vector<int> ir;
-  ir.clear();
-  ir.resize(n);
-  for (int i = 0; i < n; ++i) ir[i] = 0;
+  std::vector<int> ir(n, 0);
 
   // TEST FOR PARAMETER ERRORS.
   if (n < 1) {
@@ -334,8 +331,8 @@ void Cfact(const int n, std::vector<std::vector<std::complex<double> > >& a,
            std::vector<int>& ir, int& ifail, std::complex<double>& det,
            int& jfail) {
 
-  const double g1 = 1.e-19;
-  const double g2 = 1.e-19;
+  constexpr double g1 = 1.e-19;
+  constexpr double g2 = 1.e-19;
 
   std::complex<double> tf;
   double p, q, t;
@@ -498,10 +495,7 @@ void Cinv(const int n, std::vector<std::vector<std::complex<double> > >& a,
   std::complex<double> det, temp, s;
   std::complex<double> c11, c12, c13, c21, c22, c23, c31, c32, c33;
 
-  std::vector<int> ir;
-  ir.clear();
-  ir.resize(n);
-  for (int i = 0; i < n; ++i) ir[i] = 0;
+  std::vector<int> ir(n, 0);
 
   // TEST FOR PARAMETER ERRORS.
   if (n < 1) {
@@ -603,17 +597,17 @@ double GaussKronrod15(double (*f)(const double), const double a,
   // xGK[1], xGK[3], ... abscissae of the 7-point Gauss rule
   // xGK[0], xGK[2], ... abscissae which are optimally added
   //                     to the 7-point Gauss rule
-  const double xGK[8] = {9.914553711208126e-01, 9.491079123427585e-01,
+  constexpr double xGK[8] = {9.914553711208126e-01, 9.491079123427585e-01,
                          8.648644233597691e-01, 7.415311855993944e-01,
                          5.860872354676911e-01, 4.058451513773972e-01,
                          2.077849550078985e-01, 0.0e+00};
   // Weights of the 15-point Kronrod rule
-  const double wGK[8] = {2.293532201052922e-02, 6.309209262997855e-02,
+  constexpr double wGK[8] = {2.293532201052922e-02, 6.309209262997855e-02,
                          1.047900103222502e-01, 1.406532597155259e-01,
                          1.690047266392679e-01, 1.903505780647854e-01,
                          2.044329400752989e-01, 2.094821410847278e-01};
   // Weights of the 7-point Gauss rule
-  const double wG[4] = {1.294849661688697e-01, 2.797053914892767e-01,
+  constexpr double wG[4] = {1.294849661688697e-01, 2.797053914892767e-01,
                         3.818300505051189e-01, 4.179591836734694e-01};
 
   // Mid-point of the interval

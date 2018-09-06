@@ -10,82 +10,70 @@ namespace Garfield {
 class ComponentNeBem2d : public ComponentBase {
 
  public:
-  // Constructor
+  /// Constructor
   ComponentNeBem2d();
+  /// Destructor
   ~ComponentNeBem2d() {}
 
-  // Calculate the drift field [V/cm] at (x, y, z)
   void ElectricField(const double x, const double y, const double z, double& ex,
-                     double& ey, double& ez, Medium*& m, int& status);
-  // Calculate the drift field [V/cm] and potential [V] at (x, y, z)
+                     double& ey, double& ez, Medium*& m, int& status) override;
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, double& v, Medium*& m,
-                     int& status);
-  // Calculate the voltage range [V]
-  bool GetVoltageRange(double& vmin, double& vmax);
+                     int& status) override;
+  bool GetVoltageRange(double& vmin, double& vmax) override;
 
   void SetProjectionX() { projAxis = 0; }
   void SetProjectionY() { projAxis = 1; }
   void SetProjectionZ() { projAxis = 2; }
 
   void AddPanel(const double x0, const double y0, const double x1,
-                const double y1, const int bctype, const double bcval,
+                const double y1, const unsigned int bctype, const double bcval,
                 const double lambda);
   void AddWire(const double x0, const double y0, const double d,
                const double bcval);
 
-  void SetNumberOfDivisions(const int ndiv);
-  void SetNumberOfCollocationPoints(const int ncoll);
+  void SetNumberOfDivisions(const unsigned int ndiv);
+  void SetNumberOfCollocationPoints(const unsigned int ncoll);
   void SetMinimumElementSize(const double min);
-  void EnableAutoResizing() { autoSize = true; }
-  void DisableAutoResizing() { autoSize = false; }
-  void EnableRandomCollocation() { randomCollocation = true; }
-  void DisableRandomCollocation() { randomCollocation = false; }
-  void SetMaxNumberOfIterations(const int niter);
+  void EnableAutoResizing(const bool on = true) { m_autoSize = on; }
+  void EnableRandomCollocation(const bool on = true) { 
+    m_randomCollocation = on; 
+  }
+  void SetMaxNumberOfIterations(const unsigned int niter);
 
-  int GetNumberOfPanels() { return nPanels; }
-  int GetNumberOfWires() { return nWires; }
-  int GetNumberOfElements() { return nElements; }
+  unsigned int GetNumberOfPanels() const { return m_panels.size(); }
+  unsigned int GetNumberOfWires() const { return m_wires.size(); }
+  unsigned int GetNumberOfElements() const { return m_elements.size(); }
 
  private:
   static const int Local2Global = -1;
   static const int Global2Local = 1;
+  static const double InvEpsilon0;
+  static const double InvTwoPiEpsilon0;
 
-  // Influence matrix
-  std::vector<std::vector<double> > influenceMatrix;
-  // Inverse of the influence matrix
-  std::vector<std::vector<double> > inverseMatrix;
-  // Right hand side vector (boundary conditions)
-  std::vector<double> boundaryConditions;
-  // Temporary arrays used during LU decomposition
-  std::vector<double> col;
-  std::vector<int> index;
+  int projAxis = 2;
+  unsigned int m_nDivisions = 5;
+  unsigned int m_nCollocationPoints = 3;
+  double m_minSize = 1.e-3;
+  bool m_autoSize = false;
+  bool m_randomCollocation = false;
+  unsigned int m_nMaxIterations = 3;
 
-  int projAxis;
-  int nDivisions;
-  int nCollocationPoints;
-  double minSize;
-  bool autoSize;
-  bool randomCollocation;
-  int nMaxIterations;
-
-  int nPanels;
-  struct panel {
+  struct Panel {
     // Coordinates of boundary points
     double x0, y0;
     double x1, y1;
     // Boundary condition type and value
     // 0: conductor (fixed potential), 1: conductor (floating),
     // 2: DD interface, 3: known charge density
-    int bcType;
+    unsigned int bcType;
     double bcValue;
     // Ratio of relative dielectric permittivities
     double lambda;
   };
-  std::vector<panel> panels;
+  std::vector<Panel> m_panels;
 
-  int nWires;
-  struct wire {
+  struct Wire {
     // Center point
     double cX, cY;
     // Diameter
@@ -93,11 +81,10 @@ class ComponentNeBem2d : public ComponentBase {
     // Boundary condition
     double bcValue;
   };
-  std::vector<wire> wires;
+  std::vector<Wire> m_wires;
 
-  int nElements;
   // Array of boundary elements
-  struct element {
+  struct Element {
     // Geometric type
     // 0: line, 1: (thin) wire
     int geoType;
@@ -110,32 +97,38 @@ class ComponentNeBem2d : public ComponentBase {
     // Charge density
     double solution;
     // Boundary condition type and value
-    int bcType;
+    unsigned int bcType;
     double bcValue;
     // Ratio of relative dielectric permittivities
     double lambda;
   };
-  std::vector<element> elements;
+  std::vector<Element> m_elements;
 
-  bool matrixInversionFlag;
+  bool m_matrixInversionFlag = false;
 
   bool Initialise();
   bool Discretise();
-  bool ComputeInfluenceMatrix();
-  void SplitElement(const int iel);
-  bool InvertMatrix();
-  bool LUDecomposition();
-  void LUSubstitution();
-  bool GetBoundaryConditions();
-  bool Solve();
-  bool CheckConvergence();
+  bool ComputeInfluenceMatrix(std::vector<std::vector<double> >& infmat) const;
+  void SplitElement(const unsigned int iel);
+  bool InvertMatrix(std::vector<std::vector<double> >& influenceMatrix,
+                    std::vector<std::vector<double> >& inverseMatrix) const;
+  bool LUDecomposition(std::vector<std::vector<double> >& mat,
+                       std::vector<int>& index) const;
+  void LUSubstitution(const std::vector<std::vector<double> >& mat,
+                      const std::vector<int>& index,
+                      std::vector<double>& col) const;
+
+  bool GetBoundaryConditions(std::vector<double>& bc) const;
+  bool Solve(const std::vector<std::vector<double> >& inverseMatrix,
+             const std::vector<double>& bc);
+  bool CheckConvergence() const;
 
   void Rotate(const double xIn, const double yIn, const double phi,
-              const int opt, double& xOut, double& yOut);
+              const int opt, double& xOut, double& yOut) const;
 
   // Compute the potential
   bool ComputePotential(const int gt, const double len, const double x,
-                        const double y, double& p) {
+                        const double y, double& p) const {
 
     switch (gt) {
       case 0:
@@ -152,9 +145,10 @@ class ComponentNeBem2d : public ComponentBase {
 
   // Compute the field
   bool ComputeFlux(const int gt, const double len, const double rot,
-                   const double x, const double y, double& ex, double& ey) {
+                   const double x, const double y, 
+                   double& ex, double& ey) const {
 
-    double fx, fy;
+    double fx = 0., fy = 0.;
     switch (gt) {
       case 0:
         LineFlux(len, x, y, fx, fy);
@@ -170,15 +164,15 @@ class ComponentNeBem2d : public ComponentBase {
     return true;
   }
 
-  double LinePotential(const double a, const double x, const double y);
-  double WirePotential(const double r0, const double x, const double y);
+  double LinePotential(const double a, const double x, const double y) const;
+  double WirePotential(const double r0, const double x, const double y) const;
   void LineFlux(const double a, const double x, const double y, double& ex,
-                double& ey);
+                double& ey) const;
   void WireFlux(const double r0, const double x, const double y, double& ex,
-                double& ey);
+                double& ey) const;
 
-  void Reset();
-  void UpdatePeriodicity();
+  void Reset() override;
+  void UpdatePeriodicity() override;
 };
 }
 

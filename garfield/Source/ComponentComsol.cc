@@ -381,11 +381,10 @@ void ComponentComsol::ElectricField(const double xin, const double yin,
     return;
   }
 
-  if (m_debug) {
-    PrintElement("ElectricField", x, y, z, t1, t2, t3, t4, imap, 10);
-  }
-
   const Element& element = elements[imap];
+  if (m_debug) {
+    PrintElement("ElectricField", x, y, z, t1, t2, t3, t4, element, 10);
+  }
   const Node& n0 = nodes[element.emap[0]];
   const Node& n1 = nodes[element.emap[1]];
   const Node& n2 = nodes[element.emap[2]];
@@ -489,11 +488,10 @@ void ComponentComsol::WeightingField(const double xin, const double yin,
   // Check if the point is in the mesh.
   if (imap < 0) return;
 
-  if (m_debug) {
-    PrintElement("WeightingField", x, y, z, t1, t2, t3, t4, imap, 10, iw);
-  }
-
   const Element& element = elements[imap];
+  if (m_debug) {
+    PrintElement("WeightingField", x, y, z, t1, t2, t3, t4, element, 10, iw);
+  }
   const Node& n0 = nodes[element.emap[0]];
   const Node& n1 = nodes[element.emap[1]];
   const Node& n2 = nodes[element.emap[2]];
@@ -583,11 +581,10 @@ double ComponentComsol::WeightingPotential(const double xin, const double yin,
   const int imap = FindElement13(x, y, z, t1, t2, t3, t4, jac, det);
   if (imap < 0) return 0.;
 
-  if (m_debug) {
-    PrintElement("WeightingPotential", x, y, z, t1, t2, t3, t4, imap, 10, iw);
-  }
-
   const Element& element = elements[imap];
+  if (m_debug) {
+    PrintElement("WeightingPotential", x, y, z, t1, t2, t3, t4, element, 10, iw);
+  }
   const Node& n0 = nodes[element.emap[0]];
   const Node& n1 = nodes[element.emap[1]];
   const Node& n2 = nodes[element.emap[2]];
@@ -646,7 +643,7 @@ Medium* ComponentComsol::GetMedium(const double xin, const double yin,
   }
 
   if (m_debug) {
-    PrintElement("GetMedium", x, y, z, t1, t2, t3, t4, imap, 10);
+    PrintElement("GetMedium", x, y, z, t1, t2, t3, t4, element, 10);
   }
 
   return materials[element.matmap].medium;

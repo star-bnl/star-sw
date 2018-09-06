@@ -31,14 +31,14 @@ absref absref::*(trajestep::aref[4]) = {(absref absref::*)&trajestep::currpos,
                                         (absref absref::*)&trajestep::relcen,
                                         (absref absref::*)&trajestep::mpoint};
 
-void trajestep::get_components(ActivePtr<absref_transmit>& aref_tran) {
-  aref_tran.pass(new absref_transmit(4, aref));
+absref_transmit trajestep::get_components() {
+  return absref_transmit(4, aref);
 }
 
 trajestep::trajestep(trajestep_limit* ftl, const point& fcurrpos,
                      const vec& fdir, int fs_cf, const vec& frelcen,
                      vfloat fmrange, vfloat prec)
-    : tl(ftl),
+    : m_tl(ftl),
       currpos(fcurrpos),
       dir(),
       s_cf(fs_cf),
@@ -57,7 +57,7 @@ trajestep::trajestep(trajestep_limit* ftl, const point& fcurrpos,
                             << "fcurrpos=" << fcurrpos << "fdir=" << fdir,
                      mcerr);
     }
-    tl->range(s_cf, relcen.length(), s_range_cf, mrange);
+    m_tl->range(s_cf, relcen.length(), s_range_cf, mrange);
   }
 }
 
@@ -70,7 +70,7 @@ trajestep::trajestep(const trajestep& fts, vfloat fmrange) {
   fts.Gnextpoint1(fts.mrange, fpos, fdir, frelcen);
   vfloat prec = 0.1;  // not important here
   *this =
-      trajestep(fts.tl.getver(), fpos, fdir, fts.s_cf, frelcen, fmrange, prec);
+      trajestep(fts.m_tl, fpos, fdir, fts.s_cf, frelcen, fmrange, prec);
 }
 
 void trajestep::Gnextpoint(vfloat frange, point& fpos, vec& fdir) const {

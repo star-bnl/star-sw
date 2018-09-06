@@ -1,50 +1,64 @@
 #include <iostream>
 #include <iomanip>
 #include <cmath>
+#include <array>
+#include <algorithm>
 
 #include "OpticalData.hh"
 #include "FundamentalConstants.hh"
 
-namespace Garfield {
+namespace {
 
-bool OpticalData::IsAvailable(const std::string material) const {
+  double Evaluate(const double y, const double a, const double b, 
+                  const double c, const double d) {
+ 
+    const double y2 = y * y;
+    const double y3 = y2 * y;
+    return a * y2 + b * y3 + c * y2 * y2 + d * y2 * y3;
+  }
+  
+  template<std::size_t SIZE>
+  float Interpolate(const std::array<float, SIZE>& xs,
+                    const std::array<float, SIZE>& ys, const float x) {
 
-  if (material == "Ne") return true;
-  if (material == "Ar") return true;
-
-  if (material == "CO2") return true;
-
-  if (material == "CH4") return true;
-  if (material == "C2H6") return true;
-  if (material == "nC4H10") return true;
-
-  if (material == "C2H2") return true;
-
-  if (material == "CF4") return true;
-
-  if (material == "N2") return true;
-
-  return false;
+    const auto begin = std::begin(xs);
+    const auto end = std::end(xs);
+    const auto it1 = std::upper_bound(begin, end, x);
+    if (it1 == begin) return ys.front();
+    if (it1 == end) return ys.back();
+    const auto it0 = std::prev(it1);
+    const auto y0 = ys[it0 - begin]; 
+    const auto y1 = ys[it1 - begin]; 
+    // Linear interpolation.
+    return y0 + (x - *it0) * (y1 - y0) / (*it1 - *it0);
+  }
 }
 
-bool OpticalData::GetPhotoabsorptionCrossSection(const std::string material,
+namespace Garfield {
+
+OpticalData::OpticalData() {}
+
+bool OpticalData::IsAvailable(const std::string& material) const {
+
+  std::array<std::string, 9> materials = {{
+    "Ne", "Ar", "CO2", "CH4", "C2H6", "nC4H10", "C2H2", "CF4", "N2"}};
+  auto result = std::find(materials.begin(), materials.end(), material);
+  return result != materials.end();
+}
+
+bool OpticalData::GetPhotoabsorptionCrossSection(const std::string& material,
                                                  const double e, double& cs,
                                                  double& eta) {
 
   if (material == "Ne") return PhotoAbsorptionCsNeon(e, cs, eta);
   if (material == "Ar") return PhotoAbsorptionCsArgon(e, cs, eta);
-
   if (material == "CO2") return PhotoAbsorptionCsCO2(e, cs, eta);
-
   if (material == "CH4") return PhotoAbsorptionCsMethane(e, cs, eta);
   if (material == "C2H6") return PhotoAbsorptionCsEthane(e, cs, eta);
   if (material == "nC4H10") return PhotoAbsorptionCsButane(e, cs, eta);
   if (material == "C2H2") return PhotoAbsorptionCsAcetylene(e, cs, eta);
-
   if (material == "CF4") return PhotoAbsorptionCsCF4(e, cs, eta);
-
   if (material == "N2") return PhotoAbsorptionCsNitrogen(e, cs, eta);
-
   return false;
 }
 
@@ -55,7 +69,7 @@ bool OpticalData::PhotoAbsorptionCsNeon(const double e, double& cs,
   // J. Berkowitz, Atomic and Molecular Photoabsorption (2002)
   // N. Sakamoto et al., NIFS-DATA 109
 
-  const double ip12 = 21.6613;
+  constexpr double ip12 = 21.6613;
 
   if (e < ip12) {
     cs = eta = 0.;
@@ -95,11 +109,9 @@ bool OpticalData::PhotoAbsorptionCsNeon(const double e, double& cs,
     d = 2306776.;
   }
 
-  const double y = ip12 / e;
-  const double f =
-      a * pow(y, 2) + b * pow(y, 3) + c * pow(y, 4) + d * pow(y, 5);
+  const double f = Evaluate(ip12 / e, a, b, c, d);
   // Convert from oscillator strength (per Rydberg) to photoabsorption cs
-  cs = 8.067283e-18 * f;
+  cs = OscToPacs * f;
   eta = 1.;
   return true;
 }
@@ -111,8 +123,8 @@ bool OpticalData::PhotoAbsorptionCsArgon(const double e, double& cs,
   // J. Berkowitz, Atomic and Molecular Photoabsorption (2002)
   // N. Sakamoto et al., NIFS-DATA 109
 
-  const double ip32 = 15.7596103;
-  const double ip12 = 15.9371039;
+  constexpr double ip32 = 15.7596103;
+  constexpr double ip12 = 15.9371039;
 
   if (e < ip32) {
     cs = eta = 0.;
@@ -126,8 +138,8 @@ bool OpticalData::PhotoAbsorptionCsArgon(const double e, double& cs,
 
   if (e >= 243. && e <= 336.) {
     // L23 edge
-    const int nEntries = 130;
-    const double xAr[nEntries] = {
+    constexpr size_t nEntries = 130;
+    constexpr std::array<float, nEntries> xAr = {{
         2.4300e02, 2.4400e02, 2.4450e02, 2.4500e02, 2.4550e02, 2.4600e02,
         2.4650e02, 2.4700e02, 2.4750e02, 2.4800e02, 2.4850e02, 2.4900e02,
         2.4950e02, 2.5000e02, 2.5050e02, 2.5100e02, 2.5150e02, 2.5200e02,
@@ -149,9 +161,8 @@ bool OpticalData::PhotoAbsorptionCsArgon(const double e, double& cs,
         3.1500e02, 3.1600e02, 3.1700e02, 3.1800e02, 3.1900e02, 3.2000e02,
         3.2100e02, 3.2200e02, 3.2300e02, 3.2400e02, 3.2500e02, 3.2600e02,
         3.2700e02, 3.2800e02, 3.2900e02, 3.3000e02, 3.3100e02, 3.3200e02,
-        3.3300e02, 3.3400e02, 3.3500e02, 3.3600e02};
-
-    const double yAr[nEntries] = {
+        3.3300e02, 3.3400e02, 3.3500e02, 3.3600e02}};
+    constexpr std::array<float, nEntries> yAr = {{
         4.1053e-01, 5.7040e-01, 8.3784e-01, 7.6382e-01, 5.8520e-01, 6.0099e-01,
         1.0352,     1.5938,     1.8138,     1.9737,     2.2698,     2.6546,
         3.0888,     3.3750,     3.5428,     3.7204,     3.8092,     3.8882,
@@ -173,25 +184,10 @@ bool OpticalData::PhotoAbsorptionCsArgon(const double e, double& cs,
         2.8428,     2.8209,     2.8428,     2.8428,     2.8209,     2.8428,
         2.8428,     2.8538,     2.9196,     2.9635,     3.0075,     3.0075,
         2.9635,     3.0075,     2.9526,     2.9526,     2.9087,     2.8648,
-        2.8977,     2.8757,     2.8648,     2.8318};
+        2.8977,     2.8757,     2.8648,     2.8318}};
 
-    int iLow = 0;
-    int iUp = nEntries - 1;
-    int iM;
-    while (iUp - iLow > 1) {
-      iM = (iUp + iLow) >> 1;
-      if (e >= xAr[iM]) {
-        iLow = iM;
-      } else {
-        iUp = iM;
-      }
-    }
-
-    // Linear interpolation.
-    cs = yAr[iLow] +
-         (e - xAr[iLow]) * (yAr[iUp] - yAr[iLow]) / (xAr[iUp] - xAr[iLow]);
-    // Convert from Mbarn to cm2.
-    cs *= 1.e-18;
+    // Interpolate and convert from Mbarn to cm2.
+    cs = Mbarn * Interpolate(xAr, yAr, e);
     eta = 1.;
     return true;
   }
@@ -244,11 +240,9 @@ bool OpticalData::PhotoAbsorptionCsArgon(const double e, double& cs,
     d = -624237063.;
   }
 
-  const double y = ip12 / e;
-  const double f =
-      a * pow(y, 2) + b * pow(y, 3) + c * pow(y, 4) + d * pow(y, 5);
+  const double f = Evaluate(ip12 / e, a, b, c, d);
   // Convert from oscillator strength (per Rydberg) to photoabsorption cs
-  cs = 8.067283e-18 * f;
+  cs = OscToPacs * f;
   eta = 1.;
   return true;
 }
@@ -275,9 +269,9 @@ bool OpticalData::PhotoAbsorptionCsCO2(const double e, double& cs,
   if (e < 107.) {
 
     // Photoabsorption cross-section
-    const int nPacsEntries = 1072;
+    constexpr size_t nPacsEntries = 1072;
 
-    const double xCO2[nPacsEntries] = {
+    constexpr std::array<float, nPacsEntries> xCO2 = {{
         7.0000,   7.3120,   7.5360,   7.7130,   7.8620,   8.0170,   8.1810,
         8.3290,   8.5750,   8.7380,   8.8800,   9.0360,   9.2060,   9.3480,
         9.4850,   9.5720,   9.6760,   9.8120,   9.9500,   1.0080e1, 1.0170e1,
@@ -431,9 +425,8 @@ bool OpticalData::PhotoAbsorptionCsCO2(const double e, double& cs,
         7.3100e1, 7.4130e1, 7.5170e1, 7.6200e1, 7.7230e1, 7.8270e1, 7.9300e1,
         8.0050e1, 8.2100e1, 8.4150e1, 8.6200e1, 8.8250e1, 9.0300e1, 9.2340e1,
         9.4390e1, 9.6440e1, 9.8490e1, 1.0054e2, 1.0259e2, 1.0464e2, 1.0669e2,
-        1.0708e2};
-
-    const double yCO2[nPacsEntries] = {
+        1.0708e2}};
+    constexpr std::array<float, nPacsEntries> yCO2 = {{
         6.7469e-3, 3.4926e-2, 8.8547e-2, 1.7432e-1, 2.7115e-1, 3.6920e-1,
         4.5146e-1, 4.9826e-1, 5.0214e-1, 5.1128e-1, 5.5255e-1, 6.2484e-1,
         7.1291e-1, 7.4200e-1, 7.0101e-1, 6.4783e-1, 5.5338e-1, 4.1268e-1,
@@ -612,24 +605,24 @@ bool OpticalData::PhotoAbsorptionCsCO2(const double e, double& cs,
         8.1328,    7.8260,    7.6232,    7.3619,    7.3330,    6.9313,
         6.8787,    6.6611,    6.3447,    6.0507,    5.8142,    5.5418,
         5.3038,    5.0295,    4.8488,    4.6202,    4.4264,    4.2438,
-        4.0606,    3.8530,    3.7162,    3.6875};
+        4.0606,    3.8530,    3.7162,    3.6875}};
 
     // Photoionization yield
     /*
-    const int nYieldEntries = 11;
-    const double xIon[nYieldEntries] = {
+    constexpr size_t nYieldEntries = 11;
+    constexpr std::array<float, nYieldEntries> xIon = {{
       12.65, 12.87, 13.02, 13.24, 13.88,
       14.66, 15.01, 15.44, 15.67, 15.87,
-      16.22};
+      16.22}};
 
-    const double yIon[nYieldEntries] = {
+    constexpr std::array<float, nYieldEntries> yIon = {{
       0.,     0.01226, 0.02900, 0.08853, 0.3693,
       0.7024, 0.8190,  0.9262,  0.9715,  0.9883,
-      1.};
+      1.}};
     //*/
 
-    const int nYieldEntries = 405;
-    const double xIon[nYieldEntries] = {
+    constexpr size_t nYieldEntries = 405;
+    constexpr std::array<float, nYieldEntries> xIon = {{
         13.6926361811117,   13.715317754199855, 13.744304479209204,
         13.763071315347828, 13.769719353658544, 13.7850365564675,
         13.798269318989469, 13.804269586746194, 13.808694970264064,
@@ -764,9 +757,8 @@ bool OpticalData::PhotoAbsorptionCsCO2(const double e, double& cs,
         19.763520917003543, 19.783991501058271, 19.8001706011875,
         19.861503694771521, 19.898480975465262, 19.919154152807984,
         19.939735002832577, 19.9853971171303,   20.018636744916986,
-        20.043637577493911, 20.068786367947979, 20.089685885252269};
-
-    const double yIon[nYieldEntries] = {
+        20.043637577493911, 20.068786367947979, 20.089685885252269}};
+    constexpr std::array<float, nYieldEntries> yIon = {{
         0.02808, 0.03070, 0.03609, 0.05291, 0.13500, 0.28217, 0.42368, 0.36980,
         0.41792, 0.39518, 0.42347, 0.43754, 0.41483, 0.50541, 0.45149, 0.5081,
         0.47687, 0.50228, 0.47951, 0.55589, 0.47082, 0.51038, 0.55269, 0.61491,
@@ -817,47 +809,18 @@ bool OpticalData::PhotoAbsorptionCsCO2(const double e, double& cs,
         0.98130, 0.97701, 0.96519, 0.98026, 0.97059, 0.98242, 0.97706, 0.96632,
         0.98675, 0.97602, 0.98356, 0.97176, 0.99435, 0.98361, 0.97934, 0.98902,
         0.98796, 0.99550, 0.97508, 0.99121, 0.99124, 0.99234, 0.98267, 0.99236,
-        0.98055, 0.98594, 0.99026, 0.98274, 0.99135};
+        0.98055, 0.98594, 0.99026, 0.98274, 0.99135}};
 
-    // Locate the requested energy in the tables.
-    // First the photoabsorption cross-section.
-    int iLow = 0;
-    int iUp = nPacsEntries - 1;
-    int iM;
-    while (iUp - iLow > 1) {
-      iM = (iUp + iLow) >> 1;
-      if (e >= xCO2[iM]) {
-        iLow = iM;
-      } else {
-        iUp = iM;
-      }
-    }
-
-    // Linear interpolation.
-    cs = yCO2[iLow] +
-         (e - xCO2[iLow]) * (yCO2[iUp] - yCO2[iLow]) / (xCO2[iUp] - xCO2[iLow]);
-    // Convert from Mbarn to cm2.
-    cs *= 1.e-18;
+    // Interpolate and convert from Mbarn to cm2.
+    cs = Mbarn * Interpolate(xCO2, yCO2, e);
 
     if (e < xIon[0]) {
       eta = 0.;
     } else if (e >= xIon[nYieldEntries - 1]) {
       eta = 1.;
     } else {
-      // Linear interpolation.
       // Same procedure as for photoabsorption cross-section.
-      iLow = 0;
-      iUp = nYieldEntries - 1;
-      while (iUp - iLow > 1) {
-        iM = (iUp + iLow) >> 1;
-        if (e >= xIon[iM]) {
-          iLow = iM;
-        } else {
-          iUp = iM;
-        }
-      }
-      eta = yIon[iLow] + (e - xIon[iLow]) * (yIon[iUp] - yIon[iLow]) /
-                             (xIon[iUp] - xIon[iLow]);
+      eta = Interpolate(xIon, yIon, e);
     }
 
     return true;
@@ -866,18 +829,16 @@ bool OpticalData::PhotoAbsorptionCsCO2(const double e, double& cs,
   if (e >= 290.06 && e <= 341.3) {
     // Carbon K edge
 
-    const int nEntries = 46;
-
-    const double xCO2[nEntries] = {
+    constexpr size_t nEntries = 46;
+    constexpr std::array<float, nEntries> xCO2 = {{
         2.8967e2, 2.9006e2, 2.9036e2, 2.9071e2, 2.9105e2, 2.9132e2, 2.9175e2,
         2.9194e2, 2.9213e2, 2.9217e2, 2.9247e2, 2.9286e2, 2.9336e2, 2.9366e2,
         2.9397e2, 2.9466e2, 2.9547e2, 2.9601e2, 2.9631e2, 2.9697e2, 2.9793e2,
         2.9904e2, 3.0031e2, 3.0153e2, 3.0284e2, 3.0384e2, 3.0453e2, 3.0560e2,
         3.0698e2, 3.0852e2, 3.1002e2, 3.1128e2, 3.1224e2, 3.1328e2, 3.1424e2,
         3.1539e2, 3.1650e2, 3.1785e2, 3.1996e2, 3.2245e2, 3.2545e2, 3.2875e2,
-        3.3193e2, 3.3593e2, 3.3904e2, 3.4134e2};
-
-    const double yCO2[nEntries] = {
+        3.3193e2, 3.3593e2, 3.3904e2, 3.4134e2}};
+    constexpr std::array<float, nEntries> yCO2 = {{
         1.4893,    2.8017,    4.1009,    1.0011e1,  1.1982e1,  1.0011e1,
         4.1395,    2.7813,    1.4556,    1.1096,    9.7879e-1, 1.0178,
         1.2919,    1.0045,    8.9979e-1, 8.3420e-1, 1.0755,    8.2710e-1,
@@ -885,25 +846,9 @@ bool OpticalData::PhotoAbsorptionCsCO2(const double e, double& cs,
         1.2225,    1.4115,    1.4308,    1.3454,    1.3840,    1.5465,
         1.7548,    1.9437,    2.0021,    1.9298,    1.9294,    1.8048,
         1.6476,    1.5034,    1.3458,    1.2077,    1.0823,    9.7640e-1,
-        9.0974e-1, 8.6233e-1, 8.5447e-1, 8.4696e-1};
-
-    // Linear interpolation.
-    int iLow = 0;
-    int iUp = nEntries - 1;
-    int iM;
-    while (iUp - iLow > 1) {
-      iM = (iUp + iLow) >> 1;
-      if (e >= xCO2[iM]) {
-        iLow = iM;
-      } else {
-        iUp = iM;
-      }
-    }
-
-    cs = yCO2[iLow] +
-         (e - xCO2[iLow]) * (yCO2[iUp] - yCO2[iLow]) / (xCO2[iUp] - xCO2[iLow]);
-    // Convert from Mbarn to cm2.
-    cs *= 1.e-18;
+        9.0974e-1, 8.6233e-1, 8.5447e-1, 8.4696e-1}};
+    // Interpolate and convert from Mbarn to cm2.
+    cs = Mbarn * Interpolate(xCO2, yCO2, e);
     eta = 1.;
     return true;
   }
@@ -911,18 +856,16 @@ bool OpticalData::PhotoAbsorptionCsCO2(const double e, double& cs,
   if (e >= 524.9 && e <= 572.8) {
     // Oxygen K edge
 
-    const int nEntries = 44;
-
-    const double xCO2[nEntries] = {
+    constexpr size_t nEntries = 44;
+    constexpr std::array<float, nEntries> xCO2 = {{
         5.2490e2, 5.2490e2, 5.2954e2, 5.3096e2, 5.3214e2, 5.3282e2, 5.3319e2,
         5.3373e2, 5.3448e2, 5.3503e2, 5.3526e2, 5.3561e2, 5.3604e2, 5.3642e2,
         5.3691e2, 5.3717e2, 5.3743e2, 5.3774e2, 5.3812e2, 5.3851e2, 5.3904e2,
         5.3996e2, 5.4084e2, 5.4226e2, 5.4403e2, 5.4568e2, 5.4725e2, 5.4855e2,
         5.4920e2, 5.5054e2, 5.5245e2, 5.5360e2, 5.5567e2, 5.5693e2, 5.5781e2,
         5.5835e2, 5.5938e2, 5.6007e2, 5.6080e2, 5.6292e2, 5.6495e2, 5.6760e2,
-        5.7009e2, 5.7280e2};
-
-    const double yCO2[nEntries] = {
+        5.7009e2, 5.7280e2}};
+    constexpr std::array<float, nEntries> yCO2 = {{
         3.0446e-1, 3.4889e-1, 3.7017e-1, 4.1350e-1, 5.2302e-1, 7.3175e-1,
         2.5744,    4.7866,    2.9776,    1.2349,    1.0929,    1.0079,
         9.5595e-1, 9.8459e-1, 1.2643,    1.4918,    1.5629,    1.5630,
@@ -930,25 +873,10 @@ bool OpticalData::PhotoAbsorptionCsCO2(const double e, double& cs,
         1.3815,    1.3633,    1.4162,    1.3931,    1.4124,    1.5268,
         1.7456,    1.7982,    1.7992,    1.8709,    1.9045,    1.8858,
         1.8059,    1.7493,    1.6787,    1.5471,    1.4581,    1.3978,
-        1.3659,    1.3389};
+        1.3659,    1.3389}};
 
-    // Linear interpolation.
-    int iLow = 0;
-    int iUp = nEntries - 1;
-    int iM;
-    while (iUp - iLow > 1) {
-      iM = (iUp + iLow) >> 1;
-      if (e >= xCO2[iM]) {
-        iLow = iM;
-      } else {
-        iUp = iM;
-      }
-    }
-
-    cs = yCO2[iLow] +
-         (e - xCO2[iLow]) * (yCO2[iUp] - yCO2[iLow]) / (xCO2[iUp] - xCO2[iLow]);
-    // Convert from Mbarn to cm2.
-    cs *= 1.e-18;
+    // Interpolate and convert from Mbarn to cm2. 
+    cs = Mbarn * Interpolate(xCO2, yCO2, e);
     eta = 1.;
     return true;
   }
@@ -976,11 +904,9 @@ bool OpticalData::PhotoAbsorptionCsCO2(const double e, double& cs,
     d = -71331572.;
   }
 
-  const double y = ip / e;
-  const double f =
-      a * pow(y, 2) + b * pow(y, 3) + c * pow(y, 4) + d * pow(y, 5);
+  const double f = Evaluate(ip / e, a, b, c, d);
   // Convert from oscillator strength (per Rydberg) to photoabsorption cs
-  cs = 8.067283e-18 * f;
+  cs = OscToPacs * f;
   eta = 1.;
   return true;
 }
@@ -1003,9 +929,8 @@ bool OpticalData::PhotoAbsorptionCsMethane(const double e, double& cs,
   if (e < 150.) {
 
     // Photoabsorption cross-section
-    const int nPacsEntries = 134;
-
-    const double xCH4[nPacsEntries] = {
+    constexpr size_t nPacsEntries = 134;
+    constexpr std::array<float, nPacsEntries> xCH4 = {{
         8.6100,    9.0000,    9.2130,    9.5000,    9.6900,    1.0050e01,
         1.0425e01, 1.0700e01, 1.0913e01, 1.1270e01, 1.1500e01, 1.1713e01,
         1.1900e01, 1.2125e01, 1.2375e01, 1.2610e01, 1.3000e01, 1.3325e01,
@@ -1028,9 +953,8 @@ bool OpticalData::PhotoAbsorptionCsMethane(const double e, double& cs,
         8.6000e01, 8.8000e01, 9.0000e01, 9.2000e01, 9.4000e01, 9.6000e01,
         9.8000e01, 1.0000e02, 1.0200e02, 1.0400e02, 1.0600e02, 1.0800e02,
         1.1000e02, 1.1200e02, 1.1270e02, 1.1900e02, 1.2500e02, 1.3291e02,
-        1.4286e02, 1.5000e02};
-
-    const double yCH4[nPacsEntries] = {
+        1.4286e02, 1.5000e02}};
+    constexpr std::array<float, nPacsEntries> yCH4 = {{
         0.,        3.9896,    9.2248,    1.6727e01, 1.8644e01, 1.7399e01,
         1.9316e01, 1.8119e01, 1.6679e01, 2.0792e01, 2.8706e01, 3.0086e01,
         2.9689e01, 3.1516e01, 3.3929e01, 3.9598e01, 4.5208e01, 4.8369e01,
@@ -1053,21 +977,19 @@ bool OpticalData::PhotoAbsorptionCsMethane(const double e, double& cs,
         7.8041e-1, 7.3630e-1, 6.9212e-1, 6.4789e-1, 6.2595e-1, 5.8161e-1,
         5.5961e-1, 5.2637e-1, 5.1550e-1, 4.8219e-1, 4.7128e-1, 4.4913e-1,
         4.2695e-1, 4.0474e-1, 3.8734e-1, 3.4841e-1, 3.0851e-1, 2.7834e-1,
-        2.3357e-1, 2.0263e-1};
+        2.3357e-1, 2.0263e-1}};
 
     // Photoionization yield
-    const int nYieldEntries = 51;
-
-    const double xIon[nYieldEntries] = {
+    constexpr size_t nYieldEntries = 51;
+    constexpr std::array<float, nYieldEntries> xIon = {{
         12.05,   12.5833, 12.7333, 12.8167, 12.9167, 13.0167, 13.0833, 13.1833,
         13.2833, 13.3833, 13.4667, 13.6,    13.6833, 13.75,   13.8167, 13.9333,
         14.0167, 14.1,    14.2167, 14.2667, 14.3667, 14.5,    14.65,   14.7833,
         14.8667, 14.9833, 15.1667, 15.3167, 15.4333, 15.6833, 16.05,   16.0833,
         16.2167, 16.4167, 16.7333, 16.95,   18.35,   19.7833, 20.1833, 20.35,
         20.4667, 20.6,    21.1833, 21.4,    21.5167, 21.65,   22.1167, 22.8667,
-        23.35,   23.75,   24.1333};
-
-    const double yIon[nYieldEntries] = {
+        23.35,   23.75,   24.1333}};
+    constexpr  std::array<float, nYieldEntries> yIon = {{
         0.,       0.,      0.0017271, 0.0069085, 0.01209, 0.022453, 0.039724,
         0.063903, 0.10708, 0.15717,   0.18653,   0.23661, 0.27288,  0.30225,
         0.33333,  0.37478, 0.39896,   0.43005,   0.4715,  0.49223,  0.55095,
@@ -1075,47 +997,18 @@ bool OpticalData::PhotoAbsorptionCsMethane(const double e, double& cs,
         0.90846,  0.95164, 0.99309,   1.,        1.,      1.,       1.,
         1.,       1.,      0.99482,   0.97927,   0.98446, 0.97755,  0.98446,
         0.97927,  0.98964, 0.97927,   0.98618,   0.97927, 0.981,    0.98791,
-        1.,       1.};
+        1.,       1.}};
 
-    // Locate the requested energy in the tables.
-    // First the photoabsorption cross-section.
-    int iLow = 0;
-    int iUp = nPacsEntries - 1;
-    int iM;
-    while (iUp - iLow > 1) {
-      iM = (iUp + iLow) >> 1;
-      if (e >= xCH4[iM]) {
-        iLow = iM;
-      } else {
-        iUp = iM;
-      }
-    }
-
-    // Linear interpolation.
-    cs = yCH4[iLow] +
-         (e - xCH4[iLow]) * (yCH4[iUp] - yCH4[iLow]) / (xCH4[iUp] - xCH4[iLow]);
-    // Convert from Mbarn to cm2.
-    cs *= 1.e-18;
+    // Interpolate and convert from Mbarn to cm2.
+    cs = Mbarn * Interpolate(xCH4, yCH4, e);
 
     if (e < xIon[0]) {
       eta = 0.;
     } else if (e >= xIon[nYieldEntries - 1]) {
       eta = 1.;
     } else {
-      // Linear interpolation.
       // Same procedure as for photoabsorption cross-section.
-      iLow = 0;
-      iUp = nYieldEntries - 1;
-      while (iUp - iLow > 1) {
-        iM = (iUp + iLow) >> 1;
-        if (e >= xIon[iM]) {
-          iLow = iM;
-        } else {
-          iUp = iM;
-        }
-      }
-      eta = yIon[iLow] + (e - xIon[iLow]) * (yIon[iUp] - yIon[iLow]) /
-                             (xIon[iUp] - xIon[iLow]);
+      eta = Interpolate(xIon, yIon, e);
     }
 
     return true;
@@ -1124,9 +1017,8 @@ bool OpticalData::PhotoAbsorptionCsMethane(const double e, double& cs,
   if (e >= 285. && e <= 340.) {
     // Carbon K edge
 
-    const int nEntries = 106;
-
-    const double xCH4[nEntries] = {
+    constexpr size_t nEntries = 106;
+    constexpr std::array<float, nEntries> xCH4 = {{
         2.8500e02, 2.8591e02, 2.8640e02, 2.8671e02, 2.8695e02, 2.8701e02,
         2.8704e02, 2.8708e02, 2.8712e02, 2.8716e02, 2.8725e02, 2.8734e02,
         2.8739e02, 2.8759e02, 2.8768e02, 2.8776e02, 2.8781e02, 2.8786e02,
@@ -1144,9 +1036,8 @@ bool OpticalData::PhotoAbsorptionCsMethane(const double e, double& cs,
         2.9103e02, 2.9126e02, 2.9150e02, 2.9223e02, 2.9366e02, 2.9590e02,
         2.9776e02, 3.0025e02, 3.0224e02, 3.0342e02, 3.0479e02, 3.0628e02,
         3.0821e02, 3.0908e02, 3.1120e02, 3.1275e02, 3.1580e02, 3.1934e02,
-        3.2451e02, 3.2961e02, 3.3495e02, 3.4000e02};
-
-    const double yCH4[nEntries] = {
+        3.2451e02, 3.2961e02, 3.3495e02, 3.4000e02}};
+    constexpr std::array<float, nEntries> yCH4 = {{
         4.1692e-02, 8.4191e-02, 1.5756e-01, 3.8643e-01, 5.0083e-01, 1.0526,
         1.2561,     1.0539,     7.0664e-01, 4.1755e-01, 3.3202e-01, 3.6272e-01,
         4.7949e-01, 4.5392e-01, 5.7151e-01, 7.7579e-01, 1.1537,     1.8502,
@@ -1164,25 +1055,10 @@ bool OpticalData::PhotoAbsorptionCsMethane(const double e, double& cs,
         1.7025,     1.6774,     1.6526,     1.5320,     1.4318,     1.3409,
         1.2958,     1.2874,     1.2789,     1.2609,     1.1881,     1.1245,
         1.1068,     1.0796,     1.0711,     1.0258,     9.9013e-01, 9.4546e-01,
-        8.6468e-01, 8.0217e-01, 7.3974e-01, 6.9461e-01};
+        8.6468e-01, 8.0217e-01, 7.3974e-01, 6.9461e-01}};
 
-    // Linear interpolation.
-    int iLow = 0;
-    int iUp = nEntries - 1;
-    int iM;
-    while (iUp - iLow > 1) {
-      iM = (iUp + iLow) >> 1;
-      if (e >= xCH4[iM]) {
-        iLow = iM;
-      } else {
-        iUp = iM;
-      }
-    }
-
-    cs = yCH4[iLow] +
-         (e - xCH4[iLow]) * (yCH4[iUp] - yCH4[iLow]) / (xCH4[iUp] - xCH4[iLow]);
-    // Convert from Mbarn to cm2.
-    cs *= 1.e-18;
+    // Interpolate and convert from Mbarn to cm2.
+    cs = Interpolate(xCH4, yCH4, e);
     eta = 1.;
     return true;
   }
@@ -1205,11 +1081,9 @@ bool OpticalData::PhotoAbsorptionCsMethane(const double e, double& cs,
     d = -364234.;
   }
 
-  const double y = 12.61 / e;
-  const double f =
-      a * pow(y, 2) + b * pow(y, 3) + c * pow(y, 4) + d * pow(y, 5);
+  const double f = Evaluate(12.61 / e, a, b, c, d);
   // Convert from oscillator strength (per Rydberg) to photoabsorption cs
-  cs = 8.067283e-18 * f;
+  cs = OscToPacs * f;
   eta = 1.;
   return true;
 }
@@ -1232,9 +1106,8 @@ bool OpticalData::PhotoAbsorptionCsEthane(const double e, double& cs,
   if (e < 150.) {
 
     // Photoabsorption cross-section
-    const int nPacsEntries = 147;
-
-    const double xC2H6[nPacsEntries] = {
+    constexpr size_t nPacsEntries = 147;
+    constexpr std::array<float, nPacsEntries> xC2H6 = {{
         8.1300,    8.2800,    8.5200,    8.6400,    8.7500,    8.8500,
         8.9100,    9.0000,    9.0500,    9.1300,    9.2000,    9.2700,
         9.3400,    9.4200,    9.4900,    9.5600,    9.6500,    9.7200,
@@ -1259,9 +1132,8 @@ bool OpticalData::PhotoAbsorptionCsEthane(const double e, double& cs,
         1.1000e02, 1.1200e02, 1.1400e02, 1.1600e02, 1.1800e02, 1.2000e02,
         1.2200e02, 1.2400e02, 1.2600e02, 1.2800e02, 1.3000e02, 1.3200e02,
         1.3400e02, 1.3600e02, 1.3800e02, 1.4000e02, 1.4200e02, 1.4400e02,
-        1.4600e02, 1.4800e02, 1.5000e02};
-
-    const double yC2H6[nPacsEntries] = {
+        1.4600e02, 1.4800e02, 1.5000e02}};
+    constexpr std::array<float, nPacsEntries> yC2H6 = {{
         4.1354e-01, 1.3158,     2.8697,     3.5213,     5.0001,     9.9124,
         9.0853,     1.7030e01,  1.6379e01,  2.6128e01,  2.4161e01,  3.3334e01,
         2.9524e01,  3.5213e01,  3.0589e01,  3.4073e01,  2.8998e01,  3.1291e01,
@@ -1286,11 +1158,10 @@ bool OpticalData::PhotoAbsorptionCsEthane(const double e, double& cs,
         8.3693e-01, 7.8187e-01, 7.5985e-01, 7.3782e-01, 7.2681e-01, 6.9377e-01,
         6.6074e-01, 6.4973e-01, 6.1669e-01, 5.9466e-01, 5.7264e-01, 5.8365e-01,
         5.6163e-01, 5.1758e-01, 5.1758e-01, 4.9555e-01, 4.8454e-01, 4.6252e-01,
-        4.6252e-01, 4.5150e-01, 4.4049e-01};
+        4.6252e-01, 4.5150e-01, 4.4049e-01}};
 
-    const int nYieldEntries = 67;
-
-    const double xIon[nYieldEntries] = {
+    constexpr size_t nYieldEntries = 67;
+    constexpr std::array<float, nYieldEntries> xIon = {{
         11.52,   11.6667, 11.8167, 12.,     12.1833, 12.2667, 12.4333, 12.65,
         12.8,    13.05,   13.25,   13.45,   13.5833, 13.6833, 13.7667, 13.95,
         14.2333, 14.4,    14.55,   14.7333, 14.8667, 15.,     15.15,   15.2833,
@@ -1299,9 +1170,8 @@ bool OpticalData::PhotoAbsorptionCsEthane(const double e, double& cs,
         18.9333, 19.,     19.1667, 19.2667, 19.3333, 19.4,    19.4667, 19.5667,
         19.6,    19.7,    19.7833, 19.9333, 20.,     20.0833, 20.2,    20.6,
         20.9333, 21.1333, 21.3167, 21.6167, 21.9833, 22.2333, 22.6,    22.9667,
-        23.1667, 23.3833, 23.5667};
-
-    const double yIon[nYieldEntries] = {
+        23.1667, 23.3833, 23.5667}};
+    constexpr std::array<float, nYieldEntries> yIon = {{
         0.,      0.0034433, 0.055093, 0.12396, 0.21349, 0.25825, 0.33745,
         0.42697, 0.50789,   0.62324,  0.71966, 0.79197, 0.82984, 0.84706,
         0.8505,  0.84362,   0.83156,  0.82296, 0.81263, 0.80918, 0.81607,
@@ -1311,64 +1181,33 @@ bool OpticalData::PhotoAbsorptionCsEthane(const double e, double& cs,
         0.98135, 0.97791,   0.97791,  0.98135, 0.97618, 0.97618, 0.97446,
         0.98135, 0.97446,   0.97102,  0.97274, 0.96758, 0.96758, 0.97446,
         0.97791, 0.97791,   0.97618,  0.97618, 0.97791, 0.97791, 0.97618,
-        0.97791, 0.97446,   0.97446,  0.97446};
+        0.97791, 0.97446,   0.97446,  0.97446}};
 
     // Branching ratio (%) for dissociation to C2H5+ + H-
-    const int nBranchEntries = 50;
-
-    const double xBranch[nBranchEntries] = {
+    constexpr size_t nBranchEntries = 50;
+    constexpr std::array<float, nBranchEntries> xBranch = {{
         11., 11.5, 12., 12.5, 13., 13.5, 14., 14.5, 15., 15.5,
         16., 16.5, 17., 17.5, 18., 18.5, 19., 19.5, 20., 20.5,
         21., 21.5, 22., 22.5, 23., 23.5, 24., 24.5, 25., 25.5,
         26., 26.5, 27., 27.5, 28., 28.5, 29., 29.5, 30., 31.,
-        32., 33.,  34., 35.,  36., 37.,  38., 39.,  40., 41.};
-
-    const double yBranch[nBranchEntries] = {
+        32., 33.,  34., 35.,  36., 37.,  38., 39.,  40., 41.}};
+    constexpr std::array<float, nBranchEntries> yBranch = {{
         0.,    0.,    2.8,   4.56,  8.98,  11.87, 13.21, 14.71, 14.6,  14.18,
         13.27, 13.28, 13.12, 12.78, 13.04, 13.16, 13.04, 13.11, 12.76, 12.62,
         12.27, 12.17, 12.28, 12.04, 11.94, 11.76, 11.73, 11.56, 11.24, 11.49,
         11.17, 11.,   11.04, 10.83, 10.8,  10.59, 10.65, 10.53, 10.27, 10.45,
-        10.3,  10.24, 9.89,  9.28,  9.24,  9.4,   9.13,  9.41,  8.78,  9.54};
+        10.3,  10.24, 9.89,  9.28,  9.24,  9.4,   9.13,  9.41,  8.78,  9.54}};
 
-    // Locate the requested energy in the tables.
-    // First the photoabsorption cross-section.
-    int iLow = 0;
-    int iUp = nPacsEntries - 1;
-    int iM;
-    while (iUp - iLow > 1) {
-      iM = (iUp + iLow) >> 1;
-      if (e >= xC2H6[iM]) {
-        iLow = iM;
-      } else {
-        iUp = iM;
-      }
-    }
-
-    // Linear interpolation.
-    cs = yC2H6[iLow] + (e - xC2H6[iLow]) * (yC2H6[iUp] - yC2H6[iLow]) /
-                           (xC2H6[iUp] - xC2H6[iLow]);
-    // Convert from Mbarn to cm2.
-    cs *= 1.e-18;
+    // Interpolate and convert from Mbarn to cm2.
+    cs = Mbarn * Interpolate(xC2H6, yC2H6, e);
 
     if (e < xIon[0]) {
       eta = 0.;
     } else if (e >= xIon[nYieldEntries - 1]) {
       eta = 1.;
     } else {
-      // Linear interpolation.
       // Same procedure as for photoabsorption cross-section.
-      iLow = 0;
-      iUp = nYieldEntries - 1;
-      while (iUp - iLow > 1) {
-        iM = (iUp + iLow) >> 1;
-        if (e >= xIon[iM]) {
-          iLow = iM;
-        } else {
-          iUp = iM;
-        }
-      }
-      eta = yIon[iLow] + (e - xIon[iLow]) * (yIon[iUp] - yIon[iLow]) /
-                             (xIon[iUp] - xIon[iLow]);
+      eta = Interpolate(xIon, yIon, e);
     }
 
     const bool useBranching = true;
@@ -1380,19 +1219,7 @@ bool OpticalData::PhotoAbsorptionCsEthane(const double e, double& cs,
         br = yBranch[nBranchEntries - 1];
       } else {
         // Linear interpolation.
-        iLow = 0;
-        iUp = nYieldEntries - 1;
-        while (iUp - iLow > 1) {
-          iM = (iUp + iLow) >> 1;
-          if (e >= xBranch[iM]) {
-            iLow = iM;
-          } else {
-            iUp = iM;
-          }
-        }
-        br = yBranch[iLow] + (e - xBranch[iLow]) *
-                                 (yBranch[iUp] - yBranch[iLow]) /
-                                 (xBranch[iUp] - xBranch[iLow]);
+        br = Interpolate(xBranch, yBranch, e);
       }
       eta *= (1. - 0.01 * br);
     }
@@ -1402,9 +1229,8 @@ bool OpticalData::PhotoAbsorptionCsEthane(const double e, double& cs,
   if (e >= 280. && e <= 320.) {
     // Carbon K edge
 
-    const int nEntries = 63;
-
-    const double xC2H6[nEntries] = {
+    constexpr size_t nEntries = 63;
+    constexpr std::array<float, nEntries> xC2H6 = {{
         2.8000e02, 2.8618e02, 2.8638e02, 2.8670e02, 2.8698e02, 2.8723e02,
         2.8739e02, 2.8763e02, 2.8771e02, 2.8775e02, 2.8799e02, 2.8811e02,
         2.8819e02, 2.8827e02, 2.8847e02, 2.8860e02, 2.8872e02, 2.8892e02,
@@ -1415,9 +1241,8 @@ bool OpticalData::PhotoAbsorptionCsEthane(const double e, double& cs,
         3.0257e02, 3.0330e02, 3.0390e02, 3.0451e02, 3.0547e02, 3.0608e02,
         3.0692e02, 3.0757e02, 3.0829e02, 3.0914e02, 3.1015e02, 3.1127e02,
         3.1196e02, 3.1280e02, 3.1421e02, 3.1538e02, 3.1607e02, 3.1728e02,
-        3.1820e02, 3.1909e02, 3.2000e02};
-
-    const double yC2H6[nEntries] = {
+        3.1820e02, 3.1909e02, 3.2000e02}};
+    constexpr std::array<float, nEntries> yC2H6 = {{
         7.1950e-04, 1.0941e-03, 2.2763e-03, 9.7735e-03, 1.6678e-02, 1.7366e-02,
         1.8253e-02, 3.3250e-02, 4.8744e-02, 5.6341e-02, 5.9398e-02, 5.3673e-02,
         5.2686e-02, 4.9922e-02, 3.7782e-02, 3.2748e-02, 2.8108e-02, 2.7515e-02,
@@ -1428,25 +1253,10 @@ bool OpticalData::PhotoAbsorptionCsEthane(const double e, double& cs,
         2.4203,     2.3437,     2.3105,     2.3099,     2.1897,     2.1023,
         2.0581,     2.0358,     1.9809,     1.9691,     1.8814,     1.7935,
         1.7819,     1.7269,     1.6712,     1.6374,     1.5609,     1.5703,
-        1.4935,     1.5034,     1.4807};
+        1.4935,     1.5034,     1.4807}};
 
-    // Linear interpolation.
-    int iLow = 0;
-    int iUp = nEntries - 1;
-    int iM;
-    while (iUp - iLow > 1) {
-      iM = (iUp + iLow) >> 1;
-      if (e >= xC2H6[iM]) {
-        iLow = iM;
-      } else {
-        iUp = iM;
-      }
-    }
-
-    cs = yC2H6[iLow] + (e - xC2H6[iLow]) * (yC2H6[iUp] - yC2H6[iLow]) /
-                           (xC2H6[iUp] - xC2H6[iLow]);
-    // Convert from Mbarn to cm2.
-    cs *= 1.e-18;
+    // Interpolate and convert from Mbarn to cm2.
+    cs = Interpolate(xC2H6, yC2H6, e);
     eta = 1.;
     return true;
   }
@@ -1469,11 +1279,9 @@ bool OpticalData::PhotoAbsorptionCsEthane(const double e, double& cs,
     d = -2946480.;
   }
 
-  const double y = 11.52 / e;
-  const double f =
-      a * pow(y, 2) + b * pow(y, 3) + c * pow(y, 4) + d * pow(y, 5);
+  const double f = Evaluate(11.52 / e, a, b, c, d);
   // Convert from oscillator strength (per Rydberg) to photoabsorption cs
-  cs = 8.067283e-18 * f;
+  cs = OscToPacs * f;
   eta = 1.;
   return true;
 }
@@ -1499,9 +1307,8 @@ bool OpticalData::PhotoAbsorptionCsAcetylene(const double e, double& cs,
   if (e < 62.) {
 
     // Photoabsorption cross-section
-    const int nPacsEntries = 196;
-
-    const double xC2H2[nPacsEntries] = {
+    constexpr size_t nPacsEntries = 196;
+    constexpr std::array<float, nPacsEntries> xC2H2 = {{
         6.,        6.5,       7.,        7.5,       8.,        8.5,
         9.,        9.5,       10.,       10.5,      11.,       1.1401e01,
         1.1407e01, 1.1409e01, 1.1413e01, 1.1416e01, 1.1418e01, 1.1423e01,
@@ -1534,9 +1341,8 @@ bool OpticalData::PhotoAbsorptionCsAcetylene(const double e, double& cs,
         4.1000e01, 4.2000e01, 4.3000e01, 4.4000e01, 4.5000e01, 4.6000e01,
         4.7000e01, 4.8000e01, 4.9000e01, 5.0000e01, 5.1000e01, 5.2000e01,
         5.3000e01, 5.4000e01, 5.5000e01, 5.6000e01, 5.7000e01, 5.8000e01,
-        5.9000e01, 6.0000e01, 6.1000e01, 6.2000e01};
-
-    const double yC2H2[nPacsEntries] = {
+        5.9000e01, 6.0000e01, 6.1000e01, 6.2000e01}};
+    constexpr std::array<float, nPacsEntries> yC2H2 = {{
         0.1537,    0.5049,    1.0976,    3.4794,    18.3081,   18.0776,
         33.4881,   48.9534,   39.3164,   37.8895,   33.7295,   2.6374e01,
         2.7607e01, 2.9974e01, 3.4365e01, 3.6190e01, 3.7176e01, 3.3769e01,
@@ -1569,62 +1375,33 @@ bool OpticalData::PhotoAbsorptionCsAcetylene(const double e, double& cs,
         9.2962,    8.8682,    8.3743,    8.0669,    7.7157,    7.3206,
         6.9036,    6.6621,    6.3767,    6.0145,    5.7182,    5.4987,
         5.2243,    4.9170,    4.7414,    4.3792,    4.2475,    3.9841,
-        3.8414,    3.6658,    3.5341,    3.3146};
+        3.8414,    3.6658,    3.5341,    3.3146}};
 
     // Photoionization yield
-    const int nYieldEntries = 44;
-    double xIon[nYieldEntries] = {
+    constexpr size_t nYieldEntries = 44;
+    constexpr std::array<float, nYieldEntries> xIon = {{
         11.,   11.08, 11.55, 11.99, 12.53, 12.87, 13.21, 13.58, 13.65,
         13.92, 14.16, 14.29, 14.49, 14.56, 14.63, 15.03, 15.24, 15.41,
         15.47, 15.71, 15.74, 15.95, 16.08, 16.25, 16.49, 16.66, 16.76,
         17.03, 17.13, 17.47, 17.84, 18.38, 18.75, 18.95, 19.39, 19.76,
-        20.00, 20.30, 20.54, 20.81, 21.69, 21.89, 22.33, 23.41};
+        20.00, 20.30, 20.54, 20.81, 21.69, 21.89, 22.33, 23.41}};
 
-    double yIon[nYieldEntries] = {
+    constexpr std::array<float, nYieldEntries> yIon = {{
         0.16, 0.49, 0.70, 0.79, 0.7,  0.79, 0.78, 0.72, 0.69, 0.66, 0.63,
         0.66, 0.70, 0.73, 0.76, 0.82, 0.81, 0.81, 0.79, 0.80, 0.78, 0.77,
         0.77, 0.75, 0.76, 0.78, 0.81, 0.85, 0.89, 0.91, 0.94, 0.94, 0.95,
-        0.97, 0.98, 0.98, 0.99, 0.98, 0.97, 0.98, 0.98, 0.97, 0.97, 0.97};
+        0.97, 0.98, 0.98, 0.99, 0.98, 0.97, 0.98, 0.98, 0.97, 0.97, 0.97}};
 
-    // Locate the requested energy in the tables.
-    // First the photoabsorption cross-section.
-    int iLow = 0;
-    int iUp = nPacsEntries - 1;
-    int iM;
-    while (iUp - iLow > 1) {
-      iM = (iUp + iLow) >> 1;
-      if (e >= xC2H2[iM]) {
-        iLow = iM;
-      } else {
-        iUp = iM;
-      }
-    }
-
-    // Linear interpolation.
-    cs = yC2H2[iLow] + (e - xC2H2[iLow]) * (yC2H2[iUp] - yC2H2[iLow]) /
-                           (xC2H2[iUp] - xC2H2[iLow]);
-    // Convert from Mbarn to cm2.
-    cs *= 1.e-18;
+    // Interpolate and convert from Mbarn to cm2.
+    cs = Mbarn * Interpolate(xC2H2, yC2H2, e);
 
     if (e < xIon[0]) {
       eta = 0.;
     } else if (e >= xIon[nYieldEntries - 1]) {
       eta = 1.;
     } else {
-      // Linear interpolation.
       // Same procedure as for photoabsorption cross-section.
-      iLow = 0;
-      iUp = nYieldEntries - 1;
-      while (iUp - iLow > 1) {
-        iM = (iUp + iLow) >> 1;
-        if (e >= xIon[iM]) {
-          iLow = iM;
-        } else {
-          iUp = iM;
-        }
-      }
-      eta = yIon[iLow] + (e - xIon[iLow]) * (yIon[iUp] - yIon[iLow]) /
-                             (xIon[iUp] - xIon[iLow]);
+      eta = Interpolate(xIon, yIon, e);
     }
 
     return true;
@@ -1633,9 +1410,8 @@ bool OpticalData::PhotoAbsorptionCsAcetylene(const double e, double& cs,
   if (e > 285. && e <= 360.) {
     // Carbon K edge
 
-    const int nEntries = 175;
-
-    const double xC2H2[nEntries] = {
+    constexpr size_t nEntries = 175;
+    constexpr std::array<float, nEntries> xC2H2 = {{
         2.8481e02, 2.8506e02, 2.8535e02, 2.8553e02, 2.8561e02, 2.8579e02,
         2.8597e02, 2.8611e02, 2.8629e02, 2.8651e02, 2.8673e02, 2.8684e02,
         2.8702e02, 2.8730e02, 2.8733e02, 2.8735e02, 2.8736e02, 2.8739e02,
@@ -1665,9 +1441,8 @@ bool OpticalData::PhotoAbsorptionCsAcetylene(const double e, double& cs,
         3.0777e02, 3.0910e02, 3.1030e02, 3.1197e02, 3.1425e02, 3.1675e02,
         3.2018e02, 3.2341e02, 3.2702e02, 3.3003e02, 3.3342e02, 3.3656e02,
         3.4000e02, 3.4335e02, 3.4683e02, 3.5013e02, 3.5344e02, 3.5731e02,
-        3.6000e02};
-
-    const double yC2H2[nEntries] = {
+        3.6000e02}};
+    constexpr std::array<float, nEntries> yC2H2 = {{
         1.1447,    4.0960,    8.2636,    1.2449e01, 1.4649e01, 1.5865e01,
         1.4505e01, 1.1662e01, 7.4408,    4.1139,    1.6456,    1.0374,
         6.0814e-1, 2.9716e-1, 3.5206e-1, 3.4023e-1, 4.3127e-1, 3.7713e-1,
@@ -1697,25 +1472,10 @@ bool OpticalData::PhotoAbsorptionCsAcetylene(const double e, double& cs,
         2.2475,    2.2718,    2.2692,    2.2640,    2.1756,    2.0712,
         1.9159,    1.7846,    1.6669,    1.5921,    1.5226,    1.4665,
         1.4132,    1.3679,    1.3306,    1.2879,    1.2507,    1.2188,
-        1.2169};
+        1.2169}};
 
-    // Linear interpolation.
-    int iLow = 0;
-    int iUp = nEntries - 1;
-    int iM;
-    while (iUp - iLow > 1) {
-      iM = (iUp + iLow) >> 1;
-      if (e >= xC2H2[iM]) {
-        iLow = iM;
-      } else {
-        iUp = iM;
-      }
-    }
-
-    cs = yC2H2[iLow] + (e - xC2H2[iLow]) * (yC2H2[iUp] - yC2H2[iLow]) /
-                           (xC2H2[iUp] - xC2H2[iLow]);
-    // Convert from Mbarn to cm2.
-    cs *= 1.e-18;
+    // Interpolate and convert from Mbarn to cm2.
+    cs = Mbarn * Interpolate(xC2H2, yC2H2, e);
     eta = 1.;
     return true;
   }
@@ -1738,11 +1498,9 @@ bool OpticalData::PhotoAbsorptionCsAcetylene(const double e, double& cs,
     d = -1205737.;
   }
 
-  const double y = 11.4011 / e;
-  const double f =
-      a * pow(y, 2) + b * pow(y, 3) + c * pow(y, 4) + d * pow(y, 5);
+  const double f = Evaluate(11.4011 / e, a, b, c, d);
   // Convert from oscillator strength (per Rydberg) to photoabsorption cs
-  cs = 8.067283e-18 * f;
+  cs = OscToPacs * f;
   eta = 1.;
   return true;
 }
@@ -1764,9 +1522,8 @@ bool OpticalData::PhotoAbsorptionCsCF4(const double e, double& cs,
   if (e < 200.) {
 
     // Differential oscillator strength
-    const int nPacsEntries = 255;
-
-    const double xCF4[nPacsEntries] = {
+    constexpr size_t nPacsEntries = 255;
+    constexpr std::array<float, nPacsEntries> xCF4 = {{
         10.0,  10.5,  11.0,  11.5,
         // High resolution data (from plot)
         11.66, 11.88, 12.06, 12.14, 12.26, 12.42, 12.58, 12.81, 12.95, 13.11,
@@ -1796,9 +1553,9 @@ bool OpticalData::PhotoAbsorptionCsCF4(const double e, double& cs,
         132.0, 134.0, 136.0, 138.0, 140.0, 142.0, 144.0, 146.0, 148.0, 150.0,
         152.0, 154.0, 156.0, 158.0, 160.0, 162.0, 164.0, 166.0, 168.0, 170.0,
         172.0, 174.0, 176.0, 178.0, 180.0, 182.0, 184.0, 186.0, 188.0, 190.0,
-        192.0, 194.0, 196.0, 198.0, 200.0};
+        192.0, 194.0, 196.0, 198.0, 200.0}};
 
-    const double yCF4[nPacsEntries] = {
+    constexpr std::array<float, nPacsEntries> yCF4 = {{
         0.05,  0.06,  0.10,  0.27,
         // High resolution data (from plot)
         0.29,  0.29,  0.44,  1.47,  1.91,  3.08,  3.67,  3.67,  3.23,  3.37,
@@ -1828,33 +1585,20 @@ bool OpticalData::PhotoAbsorptionCsCF4(const double e, double& cs,
         6.09,  5.91,  5.69,  5.56,  5.30,  5.18,  5.03,  4.87,  4.74,  4.52,
         4.42,  4.27,  4.15,  4.13,  3.94,  3.89,  3.80,  3.75,  3.58,  3.46,
         3.35,  3.26,  3.17,  3.10,  3.13,  2.99,  2.91,  2.79,  2.67,  2.68,
-        2.72,  2.55,  2.52,  2.45,  2.42};
+        2.72,  2.55,  2.52,  2.45,  2.42}};
 
     // Photoionization yield
-    const int nYieldEntries = 10;
-    double xIon[nYieldEntries] = {15.5, 16.0, 16.5, 17.0, 17.5,
-                                  18.0, 18.5, 19.0, 19.5, 20.0};
+    constexpr size_t nYieldEntries = 10;
+    constexpr std::array<float, nYieldEntries> xIon = {{
+      15.5, 16.0, 16.5, 17.0, 17.5,
+      18.0, 18.5, 19.0, 19.5, 20.0}};
+    constexpr std::array<float, nYieldEntries> yIon = {{
+      0.03, 0.14, 0.28, 0.50, 0.68,
+      0.84, 0.93, 0.95, 0.97, 1.0}};
 
-    double yIon[nYieldEntries] = {0.03, 0.14, 0.28, 0.50, 0.68,
-                                  0.84, 0.93, 0.95, 0.97, 1.0};
-
-    // Locate the requested energy in the tables.
     // First the photoabsorption cross-section.
-    int iLow = 0;
-    int iUp = nPacsEntries - 1;
-    int iM;
-    while (iUp - iLow > 1) {
-      iM = (iUp + iLow) >> 1;
-      if (e >= xCF4[iM]) {
-        iLow = iM;
-      } else {
-        iUp = iM;
-      }
-    }
-
     // Linear interpolation.
-    cs = yCF4[iLow] +
-         (e - xCF4[iLow]) * (yCF4[iUp] - yCF4[iLow]) / (xCF4[iUp] - xCF4[iLow]);
+    cs = Interpolate(xCF4, yCF4, e);
     // Data in the table are given in 0.01 eV-1.
     cs *= 0.01;
     // Convert from oscillator strength to photoabsorption cs.
@@ -1867,18 +1611,7 @@ bool OpticalData::PhotoAbsorptionCsCF4(const double e, double& cs,
     } else {
       // Linear interpolation.
       // Same procedure as for photoabsorption cross-section.
-      iLow = 0;
-      iUp = nYieldEntries - 1;
-      while (iUp - iLow > 1) {
-        iM = (iUp + iLow) >> 1;
-        if (e >= xIon[iM]) {
-          iLow = iM;
-        } else {
-          iUp = iM;
-        }
-      }
-      eta = yIon[iLow] + (e - xIon[iLow]) * (yIon[iUp] - yIon[iLow]) /
-                             (xIon[iUp] - xIon[iLow]);
+      eta = Interpolate(xIon, yIon, e);
     }
 
     return true;
@@ -1905,69 +1638,37 @@ bool OpticalData::PhotoAbsorptionCsButane(const double e, double& cs,
   if (e < 25.04) {
 
     // Differential oscillator strength
-    const int nPacsEntries = 40;
-
-    const double xC4H10[nPacsEntries] = {
-        7.61194, 8.0597,  8.29851, 8.38806, 8.50746, 8.65672, 9.01493, 9.19403,
-        9.49254, 9.85075, 10.0299, 10.2985, 10.5672, 10.6567, 11.0324, 11.5044,
-        12.0059, 12.5369, 12.8319, 13.1268, 13.2153, 13.5693, 13.9233, 14.2478,
-        14.7198, 15.2802, 16.1062, 16.7552, 17.2861, 17.7581, 18.2301, 18.8791,
-        19.6755, 20.354,  21.1504, 21.9469, 22.6254, 23.5693, 24.2773, 25.0442};
-
-    const double yC4H10[nPacsEntries] = {
-        0.,      1.80412, 9.02062, 15.8763, 24.5361, 31.3918, 32.1134, 37.5258,
-        42.2165, 39.6907, 41.134,  47.9897, 53.4021, 55.2062, 61.8598, 70.7547,
-        80.4582, 90.566,  101.482, 110.377, 118.868, 123.315, 131.402, 139.892,
-        144.34,  148.787, 150.809, 146.766, 143.531, 137.062, 131.402, 126.55,
-        119.272, 112.803, 103.1,   95.0135, 88.5445, 81.2668, 74.3935, 68.3288};
+    constexpr size_t nPacsEntries = 40;
+    constexpr std::array<float, nPacsEntries> xC4H10 = {{
+       7.61194, 8.0597,  8.29851, 8.38806, 8.50746, 8.65672, 9.01493, 9.19403,
+       9.49254, 9.85075, 10.0299, 10.2985, 10.5672, 10.6567, 11.0324, 11.5044,
+       12.0059, 12.5369, 12.8319, 13.1268, 13.2153, 13.5693, 13.9233, 14.2478,
+       14.7198, 15.2802, 16.1062, 16.7552, 17.2861, 17.7581, 18.2301, 18.8791,
+       19.6755, 20.354,  21.1504, 21.9469, 22.6254, 23.5693, 24.2773, 25.0442}};
+    constexpr std::array<float, nPacsEntries> yC4H10 = {{
+       0.,      1.80412, 9.02062, 15.8763, 24.5361, 31.3918, 32.1134, 37.5258,
+       42.2165, 39.6907, 41.134,  47.9897, 53.4021, 55.2062, 61.8598, 70.7547,
+       80.4582, 90.566,  101.482, 110.377, 118.868, 123.315, 131.402, 139.892,
+       144.34,  148.787, 150.809, 146.766, 143.531, 137.062, 131.402, 126.55,
+       119.272, 112.803, 103.1,   95.0135, 88.5445, 81.2668, 74.3935, 68.3288}};
 
     // Photoionization yield
-    const int nYieldEntries = 9;
-    double xIon[nYieldEntries] = {10.,  10.5, 11.0, 11.5, 12.0,
-                                  12.5, 13.0, 13.5, 14.0};
+    constexpr size_t nYieldEntries = 9;
+    constexpr std::array<float, nYieldEntries> xIon = {{
+      10.,  10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0}};
+    constexpr std::array<float, nYieldEntries> yIon = {{
+      0.04,  0.148, 0.319, 0.501, 0.717, 0.832, 0.880, 0.943, 1.}};
 
-    double yIon[nYieldEntries] = {0.04,  0.148, 0.319, 0.501, 0.717,
-                                  0.832, 0.880, 0.943, 1.};
-
-    // Locate the requested energy in the tables.
-    // First the photoabsorption cross-section.
-    int iLow = 0;
-    int iUp = nPacsEntries - 1;
-    int iM;
-    while (iUp - iLow > 1) {
-      iM = (iUp + iLow) >> 1;
-      if (e >= xC4H10[iM]) {
-        iLow = iM;
-      } else {
-        iUp = iM;
-      }
-    }
-
-    // Linear interpolation.
-    cs = yC4H10[iLow] + (e - xC4H10[iLow]) * (yC4H10[iUp] - yC4H10[iLow]) /
-                            (xC4H10[iUp] - xC4H10[iLow]);
-    // Convert from Mbarn to cm2.
-    cs *= 1.e-18;
+    // Interpolate and convert from Mbarn to cm2.
+    cs = Mbarn * Interpolate(xC4H10, yC4H10, e);
 
     if (e < xIon[0]) {
       eta = 0.;
     } else if (e >= xIon[nYieldEntries - 1]) {
       eta = 1.;
     } else {
-      // Linear interpolation.
       // Same procedure as for photoabsorption cross-section.
-      iLow = 0;
-      iUp = nYieldEntries - 1;
-      while (iUp - iLow > 1) {
-        iM = (iUp + iLow) >> 1;
-        if (e >= xIon[iM]) {
-          iLow = iM;
-        } else {
-          iUp = iM;
-        }
-      }
-      eta = yIon[iLow] + (e - xIon[iLow]) * (yIon[iUp] - yIon[iLow]) /
-                             (xIon[iUp] - xIon[iLow]);
+      eta = Interpolate(xIon, yIon, e);
     }
 
     return true;
@@ -1994,9 +1695,8 @@ bool OpticalData::PhotoAbsorptionCsNitrogen(const double e, double& cs,
   if (e < 150.) {
 
     // Photoabsorption cross-section
-    const int nPacsEntries = 198;
-
-    const double xN2[nPacsEntries] = {
+    constexpr size_t nPacsEntries = 198;
+    constexpr std::array<float, nPacsEntries> xN2 = {{
         1.4920e01, 1.4949e01, 1.4974e01, 1.4996e01, 1.5005e01, 1.5014e01,
         1.5057e01, 1.5104e01, 1.5115e01, 1.5188e01, 1.5197e01, 1.5230e01,
         1.5242e01, 1.5271e01, 1.5295e01, 1.5321e01, 1.5368e01, 1.5373e01,
@@ -2029,9 +1729,8 @@ bool OpticalData::PhotoAbsorptionCsNitrogen(const double e, double& cs,
         4.1442e02, 4.1485e02, 4.1532e02, 4.1583e02, 4.1625e02, 4.1677e02,
         4.1715e02, 4.1766e02, 4.1809e02, 4.1862e02, 4.1902e02, 4.1947e02,
         4.2000e02, 4.2060e02, 4.2132e02, 4.2217e02, 4.2306e02, 4.2411e02,
-        4.2520e02, 4.2619e02, 4.2722e02, 4.2809e02, 4.2896e02, 4.3000e02};
-
-    const double yN2[nPacsEntries] = {
+        4.2520e02, 4.2619e02, 4.2722e02, 4.2809e02, 4.2896e02, 4.3000e02}};
+    constexpr std::array<float, nPacsEntries> yN2 = {{
         2.6696,     3.5876,     7.0085,     1.4017e01,  1.8550e01,  2.2525e01,
         8.8070,     2.3226e01,  3.4138e01,  9.8988,     1.2080e01,  3.3358e01,
         3.6631e01,  1.5900e01,  8.5734,     1.3016e01,  3.8269e01,  4.0996e01,
@@ -2064,27 +1763,10 @@ bool OpticalData::PhotoAbsorptionCsNitrogen(const double e, double& cs,
         1.9286,     1.9594,     1.9236,     1.8509,     1.8150,     1.9067,
         1.9923,     2.1228,     2.2224,     2.2414,     2.2105,     2.1139,
         2.0202,     1.9316,     1.8489,     1.7821,     1.7214,     1.6606,
-        1.5968,     1.5550,     1.5052,     1.4753,     1.4444,     1.4116};
+        1.5968,     1.5550,     1.5052,     1.4753,     1.4444,     1.4116}};
 
-    // Locate the requested energy in the tables.
-    // First the photoabsorption cross-section.
-    int iLow = 0;
-    int iUp = nPacsEntries - 1;
-    int iM;
-    while (iUp - iLow > 1) {
-      iM = (iUp + iLow) >> 1;
-      if (e >= xN2[iM]) {
-        iLow = iM;
-      } else {
-        iUp = iM;
-      }
-    }
-
-    // Linear interpolation.
-    cs = yN2[iLow] +
-         (e - xN2[iLow]) * (yN2[iUp] - yN2[iLow]) / (xN2[iUp] - xN2[iLow]);
-    // Convert from Mbarn to cm2.
-    cs *= 1.e-18;
+    // Interpolate and convert from Mbarn to cm2.
+    cs = Interpolate(xN2, yN2, e);
     eta = 0.;
 
     return true;
@@ -2108,11 +1790,9 @@ bool OpticalData::PhotoAbsorptionCsNitrogen(const double e, double& cs,
     d = -364234.;
   }
 
-  const double y = 12.61 / e;
-  const double f =
-      a * pow(y, 2) + b * pow(y, 3) + c * pow(y, 4) + d * pow(y, 5);
+  const double f = Evaluate(12.61 / e, a, b, c, d);
   // Convert from oscillator strength (per Rydberg) to photoabsorption cs
-  cs = 8.067283e-18 * f;
+  cs = OscToPacs * f;
   eta = 1.;
   return true;
 }

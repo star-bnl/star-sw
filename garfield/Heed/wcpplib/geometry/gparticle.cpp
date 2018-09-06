@@ -38,18 +38,11 @@ void stvpoint::print(std::ostream& file, int l) const {
   file.flush();
 }
 
-long gparticle::max_q_zero_step = 100;
-
 gparticle::gparticle(manip_absvol* primvol, const point& pt, const vec& vel,
                      vfloat time)
-    : s_life(false),
-      nstep(0),
-      total_range_from_origin(0.0),
-      n_zero_step(0),
-      prevpos(),
+    : prevpos(),
       nextpos() {
-  // As far as I can now understand, PassivePtr<primvol> will be at
-  // origin.tid.eid[0]
+  // As far as I can now understand, primvol will be at origin.tid.eid[0]
   mfunname("gparticle::gparticle(...)");
   primvol->m_find_embed_vol(pt, vel, &origin.tid);
   origin.pt = pt;
@@ -99,7 +92,9 @@ void gparticle::step(std::vector<gparticle*>& secondaries) {
 void gparticle::curvature(int& fs_cf, vec& frelcen, vfloat& fmrange,
                           vfloat /*prec*/) {
   fs_cf = 0;
-  frelcen = vec(0, 0, 0);
+  frelcen.x = 0.;
+  frelcen.y = 0.;
+  frelcen.z = 0.;
   fmrange = max_vfloat;
   /* The following is for debug
   vec field(0,1,0);
@@ -145,8 +140,7 @@ stvpoint gparticle::calc_step_to_bord() {
   }
   // Here the range is calculated:
   int sb;
-  // manip_absvol_eid faeid;
-  PassivePtr<manip_absvol> faeid;
+  manip_absvol* faeid = nullptr;
   currpos.tid.G_lavol()->range(ts, 1, sb, faeid);
   // 1 means inside the volume and makes
   // the program checking embraced volumes
@@ -161,7 +155,7 @@ stvpoint gparticle::switch_new_vol(void) {
   // generates next position in new volume
   mfunname("stvpoint gparticle::switch_new_vol(void)");
   manip_absvol_treeid tidl;
-  PassivePtr<manip_absvol> eidl;
+  manip_absvol* eidl = nullptr;
   stvpoint nextp = currpos;
   point pth = nextp.pt;
   // search from primary

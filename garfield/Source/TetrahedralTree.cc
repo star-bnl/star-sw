@@ -22,7 +22,7 @@ TetrahedralTree::TetrahedralTree(const Vec3& origin, const Vec3& halfDimension)
   max.z = origin.z + halfDimension.z;
 
   // Initially, there are no children
-  for (int i = 0; i < 8; ++i) children[i] = NULL;
+  for (int i = 0; i < 8; ++i) children[i] = nullptr;
 }
 
 TetrahedralTree::~TetrahedralTree() {
@@ -60,9 +60,9 @@ bool TetrahedralTree::IsFull() const {
 bool TetrahedralTree::IsEmpty() const { return iBlockElems.size() == 0; }
 
 bool TetrahedralTree::IsLeafNode() const {
-  // We are a leaf iff we have no children. Since we either have none, or
+  // We are a leaf if we have no children. Since we either have none, or
   // all eight, it is sufficient to just check the first.
-  return children[0] == NULL;  // || (!block && block->isFull());
+  return children[0] == nullptr;  // || (!block && block->isFull());
 }
 
 void TetrahedralTree::InsertMeshNode(Vec3 point, int nodeIndex) {
@@ -149,7 +149,7 @@ const TetrahedralTree* TetrahedralTree::GetBlockFromPoint(const Vec3& point) {
         point.y <= m_origin.y + m_halfDimension.y &&
         m_origin.z - m_halfDimension.z <= point.z &&
         point.z <= m_origin.z + m_halfDimension.z))
-    return NULL;
+    return nullptr;
 
   return GetBlockFromPointHelper(point);
 }

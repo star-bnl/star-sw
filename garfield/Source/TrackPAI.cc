@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <algorithm>
 
 #include "Sensor.hh"
 #include "TrackPAI.hh"
@@ -10,27 +11,9 @@
 
 namespace Garfield {
 
-TrackPAI::TrackPAI()
-    : m_ready(false),
-      m_x(0.),
-      m_y(0.),
-      m_z(0.),
-      m_t(0.),
-      m_dx(0.),
-      m_dy(0),
-      m_dz(1.),
-      m_e(0.),
-      m_speed(0.),
-      m_emax(0.),
-      m_imfp(0.),
-      m_dedx(0.),
-      m_nSteps(1000),
-      m_mediumName(""),
-      m_mediumDensity(0.),
-      m_electronDensity(0.) {
+TrackPAI::TrackPAI() : Track() {
 
   m_className = "TrackPAI";
-
 }
 
 bool TrackPAI::NewTrack(const double x0, const double y0, const double z0,
@@ -41,20 +24,19 @@ bool TrackPAI::NewTrack(const double x0, const double y0, const double z0,
 
   // Make sure the sensor has been set.
   if (!m_sensor) {
-    std::cerr << m_className << "::NewTrack:\n    Sensor is not defined.\n";
+    std::cerr << m_className << "::NewTrack: Sensor is not defined.\n";
     return false;
   }
 
   // Get the medium at this location and check if it is "ionisable".
-  Medium* medium = NULL;
+  Medium* medium = nullptr;
   if (!m_sensor->GetMedium(x0, y0, z0, medium)) {
-    std::cerr << m_className << "::NewTrack:\n"
-              << "    No medium at initial position.\n";
+    std::cerr << m_className << "::NewTrack: No medium at initial position.\n";
     return false;
   }
   if (!medium->IsIonisable()) {
-    std::cerr << m_className << "::NewTrack:\n";
-    std::cerr << "    Medium at initial position is not ionisable.\n";
+    std::cerr << m_className << "::NewTrack:\n"
+              << "    Medium at initial position is not ionisable.\n";
     return false;
   }
 
@@ -62,9 +44,8 @@ bool TrackPAI::NewTrack(const double x0, const double y0, const double z0,
       medium->GetNumberDensity() != m_mediumDensity) {
     m_isChanged = true;
     if (!SetupMedium(medium)) {
-      std::cerr << m_className << "::NewTrack:\n";
-      std::cerr << "    Properties of medium " << medium->GetName()
-                << " are not available.\n";
+      std::cerr << m_className << "::NewTrack:\n    Properties of medium "
+                << medium->GetName() << " are not available.\n";
       return false;
     }
     m_mediumName = medium->GetName();
@@ -94,12 +75,7 @@ bool TrackPAI::NewTrack(const double x0, const double y0, const double z0,
                 << "    Direction vector has zero norm.\n"
                 << "    Initial direction is randomized.\n";
     }
-    const double ctheta = 1. - 2. * RndmUniform();
-    const double stheta = sqrt(1. - ctheta * ctheta);
-    const double phi = TwoPi * RndmUniform();
-    m_dx = cos(phi) * stheta;
-    m_dy = sin(phi) * stheta;
-    m_dz = ctheta;
+    RndmDirection(m_dx, m_dy, m_dz);
   } else {
     // Normalize the direction vector.
     m_dx = dx0 / d;
@@ -144,7 +120,7 @@ bool TrackPAI::GetCluster(double& xcls, double& ycls, double& zcls,
   m_t += d / m_speed;
 
   // Check the medium at this location.
-  Medium* medium = NULL;
+  Medium* medium = nullptr;
   if (!m_sensor->GetMedium(m_x, m_y, m_z, medium)) {
     m_ready = false;
     return false;
@@ -194,33 +170,29 @@ double TrackPAI::SampleEnergyDeposit(const double u, double& f) const {
   if (u >= 1.) return m_energies.back();
 
   // Find the energy loss by interpolation
-  // from the cumulative distribution table
-  int iLow = 0, iUp = m_cdf.size(), iMid;
-  while (iUp - iLow > 1) {
-    iMid = (iUp + iLow) >> 1;
-    if (u >= m_cdf[iMid]) {
-      iLow = iMid;
-    } else {
-      iUp = iMid;
-    }
-  }
-  if (m_energies[iLow] < 100.) {
-    const double edep = m_energies[iLow] + 
-           (u - m_cdf[iLow]) * (m_energies[iUp] - m_energies[iLow]) /
-           (m_cdf[iUp] - m_cdf[iLow]);
-    f = m_rutherford[iLow] + (edep - m_energies[iLow]) *
-                               (m_rutherford[iUp] - m_rutherford[iLow]) /
-                               (m_energies[iUp] - m_energies[iLow]);
+  // from the cumulative distribution table.
+  const auto begin = m_cdf.cbegin();
+  const auto it1 = std::upper_bound(begin, m_cdf.cend(), u);
+  if (it1 == m_cdf.cbegin()) return m_energies[0]; 
+  const auto it0 = std::prev(it1);
+  const double c0 = *it0;
+  const double c1 = *it1;
+  const double e0 = m_energies[it0 - begin];
+  const double e1 = m_energies[it1 - begin];
+  const double r0 = m_rutherford[it0 - begin];
+  const double r1 = m_rutherford[it1 - begin]; 
+  if (e0 < 100.) {
+    const double edep = e0 + (u - c0) * (e1 - e0) / (c1 - c0);
+    f = r0 + (edep - e0) * (r1 - r0) / (e1 - e0);
     return edep;
   }
-  double edep = log(m_energies[iLow]) +
-         (log(u) - log(m_cdf[iLow])) *
-             (log(m_energies[iUp]) - log(m_energies[iLow])) /
-             (log(m_cdf[iUp]) - log(m_cdf[iLow]));
+  const double loge0 = log(e0);
+  const double loge1 = log(e1);
+  const double logc0 = log(c0);
+  const double logc1 = log(c1);
+  double edep = loge0 + (log(u) - logc0) * (loge1 - loge0) / (logc1 - logc0);
+  f = r0 + (log(edep) - loge0) * (r1 - r0) / (loge1 - loge0);
   edep = exp(edep);
-  f = m_rutherford[iLow] + (log(edep) - log(m_energies[iLow])) *
-                         (m_rutherford[iUp] - m_rutherford[iLow]) /
-                         (log(m_energies[iUp]) - log(m_energies[iLow]));
   return edep;
 }
 
@@ -228,7 +200,7 @@ bool TrackPAI::SetupMedium(Medium* medium) {
 
   // Make sure that the medium is defined.
   if (!medium) {
-    std::cerr << m_className << "::SetupMedium:\n    Null pointer.\n";
+    std::cerr << m_className << "::SetupMedium: Null pointer.\n";
     return false;
   }
 
@@ -278,13 +250,12 @@ bool TrackPAI::SetupMedium(Medium* medium) {
   double f1 = m_energies[0] * LossFunction(m_opticalDataTable[0].eps1, 
                                            m_opticalDataTable[0].eps2);
   double f2 = f1;
-  double eM, fM;
   for (int i = 1; i < m_nSteps; ++i) {
     f2 = m_energies[i] *
          LossFunction(m_opticalDataTable[i].eps1, m_opticalDataTable[i].eps2);
-    eM = 0.5 * (m_energies[i - 1] + m_energies[i]);
+    const double eM = 0.5 * (m_energies[i - 1] + m_energies[i]);
     medium->GetDielectricFunction(eM, eps1, eps2);
-    fM = eM * LossFunction(eps1, eps2);
+    const double fM = eM * LossFunction(eps1, eps2);
     // Simpson's rule
     integral += (f1 + 4 * fM + f2) * (m_energies[i] - m_energies[i - 1]) / 6.;
     m_opticalDataTable[i].integral = integral;
@@ -365,7 +336,6 @@ bool TrackPAI::SetupCrossSectionTable() {
 
   // Compute the differential cross-section.
   std::vector<double> dcs;
-  dcs.clear();
   m_rutherford.clear();
 
   for (int i = 0; i < m_nSteps; ++i) {
@@ -376,22 +346,22 @@ bool TrackPAI::SetupCrossSectionTable() {
     const double integral = m_opticalDataTable[i].integral;
 
     // First, calculate the distant-collision terms.
-    double dcsLog = 0., dcsDensity = 0., dcsCerenkov = 0.;
+    double dcsLog = 0., dcsDensity = 0., dcsCher = 0.;
     if (eps2 > 0.) {
       // Normal case (loss function > 0).
+      const double lf = LossFunction(eps1, eps2); 
       // Non-relativistic logarithmic term.
-      dcsLog =
-          LossFunction(eps1, eps2) * log(2 * ElectronMass * m_beta2 / egamma);
+      dcsLog = lf * log(2 * ElectronMass * m_beta2 / egamma);
       // Relativistic logarithmic term (density effect)
       const double u = 1. - m_beta2 * eps1;
       const double v = m_beta2 * eps2;
-      dcsDensity = -0.5 * LossFunction(eps1, eps2) * log(u * u + v * v);
+      dcsDensity = -0.5 * lf * log(u * u + v * v);
       // "Cerenkov" term
-      dcsCerenkov =
+      dcsCher =
           (m_beta2 - eps1 / (eps1 * eps1 + eps2 * eps2)) * (HalfPi - atan(u / v));
     } else if (eps1 > 1. / m_beta2) {
       // Imaginary part is zero, only the Cerenkov term contributes.
-      dcsCerenkov = Pi * (m_beta2 - 1. / eps1);
+      dcsCher = Pi * (m_beta2 - 1. / eps1);
     }
 
     // Calculate the close-collision term (quasi-free scattering)
@@ -399,14 +369,14 @@ bool TrackPAI::SetupCrossSectionTable() {
     double f = 0.;
     if (egamma > 0. && integral > 0.) {
       dcsRuth = integral / (egamma * egamma);
-      f = dcsRuth / (dcsLog + dcsDensity + dcsCerenkov);
+      f = dcsRuth / (dcsLog + dcsDensity + dcsCher);
     }
     m_rutherford.push_back(f);
-    dcs.push_back(dcsLog + dcsDensity + dcsCerenkov + dcsRuth);
+    dcs.push_back(dcsLog + dcsDensity + dcsCher + dcsRuth);
     // If requested, write the cross-section terms to file.
     if (m_debug) {
       outfile << egamma << "  " << eps1 << "  " << eps2 << "  " << dcsLog* c2
-              << "  " << dcsDensity* c2 << "  " << dcsCerenkov* c2 << "  "
+              << "  " << dcsDensity* c2 << "  " << dcsCher* c2 << "  "
               << dcsRuth* c2 << "\n";
     }
   }
@@ -419,10 +389,14 @@ bool TrackPAI::SetupCrossSectionTable() {
   m_dedx = 0.;
   double cs = 0.;
   for (int i = 1; i < m_nSteps; ++i) {
-    cs += 0.5 * (dcs[i - 1] + dcs[i]) * (m_energies[i] - m_energies[i - 1]);
+    const double e0 = m_energies[i - 1];
+    const double e1 = m_energies[i];
+    const double de = e1 - e0;
+    const double dcs0 = dcs[i - 1];
+    const double dcs1 = dcs[i];
+    cs += 0.5 * (dcs0 + dcs1) * de;
     m_cdf.push_back(cs);
-    m_dedx += 0.5 * (dcs[i - 1] * m_energies[i - 1] + dcs[i] * m_energies[i]) *
-            (m_energies[i] - m_energies[i - 1]);
+    m_dedx += 0.5 * (dcs0 * e0 + dcs1 * e1) * de;
   }
 
   // Add the contribution of high energy transfers to the stopping power
@@ -595,9 +569,8 @@ double TrackPAI::SampleAsymptoticCsSpinZero(const double emin, double u) const {
   const double b = m_beta2 * a;
   u *= (1. - a + b * log(a));
   double eLow = emin, eUp = m_emax;
-  double eM;
   while (eUp - eLow > 1.) {
-    eM = 0.5 * (eUp + eLow);
+    const double eM = 0.5 * (eUp + eLow);
     if (u >= 1. - emin / eM - b * log(eM / emin)) {
       eLow = eM;
     } else {
@@ -615,9 +588,8 @@ double TrackPAI::SampleAsymptoticCsSpinHalf(const double emin, double u) const {
   const double c = emin / (2. * m_energy * m_energy);
   u *= 1. - a + b * log(a) + (m_emax - emin) * c;
   double eLow = emin, eUp = m_emax;
-  double eM;
   while (eUp - eLow > 1.) {
-    eM = 0.5 * (eUp + eLow);
+    const double eM = 0.5 * (eUp + eLow);
     if (u >= 1. - emin / eM - b * log(eM / emin) + (eM - emin) * c) {
       eLow = eM;
     } else {
@@ -638,9 +610,8 @@ double TrackPAI::SampleAsymptoticCsSpinOne(const double emin, double u) const {
   u *= (m_emax - emin) * (0.5 * (emin + m_emax) / e2 + a + b / m_emax) +
        c * log(m_emax / emin);
   double eLow = emin, eUp = m_emax;
-  double eM;
   while (eUp - eLow > 1.) {
-    eM = 0.5 * (eUp + eLow);
+    const double eM = 0.5 * (eUp + eLow);
     if (u >=
         (eM - emin) * ((emin + eM) / e2 + a + b / eM) + c * log(eM / emin)) {
       eLow = eM;
@@ -660,9 +631,9 @@ double TrackPAI::SampleAsymptoticCsElectron(const double emin, double u) const {
   const double norm = 1. / emin - 0.5 / ek - emin * emin / ((ek - emin) * ek2) -
                       2. * emin / ek2;
   u *= norm;
-  double eLow = emin, eUp = m_emax, eM;
+  double eLow = emin, eUp = m_emax;
   while (eUp - eLow > 1.) {
-    eM = 0.5 * (eUp + eLow);
+    const double eM = 0.5 * (eUp + eLow);
     if (u >= a - 1. / eM + (eM - emin) / ek2 + 1. / (ek - eM)) {
       eLow = eM;
     } else {
@@ -687,10 +658,9 @@ double TrackPAI::SampleAsymptoticCsPositron(const double emin, double u) const {
        (m_emax - emin) * (emin * emin + emin * m_emax + m_emax * m_emax) / ek4 -
        (2. / ek) * log(m_emax / emin);
   double eLow = emin, eUp = m_emax;
-  double eM, eM2;
   while (eUp - eLow > 1.) {
-    eM = 0.5 * (eUp + eLow);
-    eM2 = eM * eM;
+    const double eM = 0.5 * (eUp + eLow);
+    const double eM2 = eM * eM;
     if (u >= a - 1. / eM + b * (eM - emin) - (eM2 - emin2) / ek3 +
                  (eM - emin) * (emin2 + emin * eM + eM2) / ek4 -
                  c * log(eM / emin)) {

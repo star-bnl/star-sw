@@ -13,7 +13,6 @@ namespace Heed {
 /// and molecules.
 /// 2004, I. Smirnov
 
-extern HydrogenPhotoAbsCS Hydrogen_shell_PACS;
 extern SimpleAtomPhotoAbsCS Hydrogen_PACS;
 extern SimpleAtomPhotoAbsCS Hydrogen_for_H2_PACS;
 extern SimpleAtomPhotoAbsCS Hydrogen_for_CH4_PACS;

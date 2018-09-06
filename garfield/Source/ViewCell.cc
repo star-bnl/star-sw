@@ -14,22 +14,7 @@
 
 namespace Garfield {
 
-ViewCell::ViewCell()
-    : m_className("ViewCell"),
-      m_debug(false),
-      m_useWireMarker(true),
-      m_label("Cell Layout"),
-      m_canvas(NULL),
-      m_hasExternalCanvas(false),
-      m_hasUserArea(false),
-      m_xMin(-1.),
-      m_yMin(-1.),
-      m_zMin(-1.),
-      m_xMax(1.),
-      m_yMax(1.),
-      m_zMax(1.),
-      m_component(NULL),
-      m_geo(NULL) {
+ViewCell::ViewCell() {
 
   plottingEngine.SetDefaultStyle();
 }
@@ -37,8 +22,6 @@ ViewCell::ViewCell()
 ViewCell::~ViewCell() {
 
   if (!m_hasExternalCanvas && m_canvas) delete m_canvas;
-  if (m_geo) delete m_geo;
-
 }
 
 void ViewCell::SetComponent(ComponentAnalyticField* comp) {
@@ -56,7 +39,7 @@ void ViewCell::SetCanvas(TCanvas* c) {
   if (!c) return;
   if (!m_hasExternalCanvas && m_canvas) {
     delete m_canvas;
-    m_canvas = NULL;
+    m_canvas = nullptr;
   }
   m_canvas = c;
   m_hasExternalCanvas = true;
@@ -170,7 +153,7 @@ bool ViewCell::Plot(const bool use3d) {
 
   if (use3d) {
     if (!m_geo) {
-      m_geo = new TGeoManager("ViewCellGeoManager", m_label.c_str());
+      m_geo.reset(new TGeoManager("ViewCellGeoManager", m_label.c_str()));
       TGeoMaterial* matVacuum = new TGeoMaterial("Vacuum", 0., 0., 0.); 
       TGeoMaterial* matMetal = new TGeoMaterial("Metal", 63.546, 29., 8.92);
       TGeoMedium* medVacuum = new TGeoMedium("Vacuum", 0, matVacuum);

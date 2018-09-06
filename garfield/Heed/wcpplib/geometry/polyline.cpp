@@ -15,8 +15,8 @@ The file is provided "as is" without express or implied warranty.
 namespace Heed {
 
 // **** polyline  ****
-void polyline::get_components(ActivePtr<absref_transmit>& aref_tran) {
-  aref_tran.pass(new absref_transmit(qpt + qsl, aref));
+absref_transmit polyline::get_components() {
+  return absref_transmit(qpt + qsl, aref);
 }
 
 polyline::polyline(polyline& pl) : absref(pl) {
@@ -233,8 +233,8 @@ std::ostream& operator<<(std::ostream& file, const polyline& p) {
 
 absref absref::*(polyline_pl::aref_pl) = (absref absref::*)&polyline_pl::pn;
 
-void polyline_pl::get_components(ActivePtr<absref_transmit>& aref_tran) {
-  aref_tran.pass(new absref_transmit(1, &aref_pl, qpt + qsl, aref));
+absref_transmit polyline_pl::get_components() {
+  return absref_transmit(1, &aref_pl, qpt + qsl, aref);
 }
 
 polyline_pl::polyline_pl(polyline& pl) {
@@ -425,8 +425,8 @@ absref absref::*(rectangle::aref_rct[4]) = {
     (absref absref::*)&rectangle::pn,   (absref absref::*)&rectangle::piv,
     (absref absref::*)&rectangle::dir1, (absref absref::*)&rectangle::dir2};
 
-void rectangle::get_components(ActivePtr<absref_transmit>& aref_tran) {
-  aref_tran.pass(new absref_transmit(4, aref_rct, qpt + qsl, aref));
+absref_transmit rectangle::get_components() {
+  return absref_transmit(4, aref_rct, qpt + qsl, aref);
 }
 
 rectangle::rectangle(const point& fpiv, vec fdir[2], vfloat fdim[2],
@@ -484,8 +484,8 @@ absref absref::*(spquadr::aref_sp[4]) = {
     (absref absref::*)&spquadr::pn,   (absref absref::*)&spquadr::piv,
     (absref absref::*)&spquadr::dir1, (absref absref::*)&spquadr::dir2};
 
-void spquadr::get_components(ActivePtr<absref_transmit>& aref_tran) {
-  aref_tran.pass(new absref_transmit(4, aref_sp, qpt + qsl, aref));
+absref_transmit spquadr::get_components() {
+  return absref_transmit(4, aref_sp, qpt + qsl, aref);
 }
 
 point spquadr::pt_angle_rad(vfloat rad, vfloat angle) {

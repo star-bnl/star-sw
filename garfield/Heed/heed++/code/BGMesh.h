@@ -3,23 +3,21 @@
 
 #include <vector>
 
-#include "wcpplib/safetl/AbsPtr.h"
-
 namespace Heed {
 
 /// Mesh of \f$\beta\gamma\f$ values.
 
-class BGMesh : public RegPassivePtr {
+class BGMesh {
  public:
-  BGMesh() : xmin(0.0), xmax(0.0), q(0), x(0) {}
+  BGMesh() = default;
   BGMesh(double fxmin, double fxmax, long fq);
-  double xmin;
-  double xmax;
+  double xmin = 0.;
+  double xmax = 0.;
   /// Total number of points (not number of intervals).
-  long q;
+  long q = 0;
   std::vector<double> x;
-  virtual void print(std::ostream& file, int l) const;
-  virtual BGMesh* copy() const { return new BGMesh(*this); }
+  void print(std::ostream& file, int l) const;
+  BGMesh* copy() const { return new BGMesh(*this); }
 };
 std::ostream& operator<<(std::ostream& file, const BGMesh& bgm);
 }

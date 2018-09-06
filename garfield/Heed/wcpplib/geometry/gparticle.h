@@ -28,40 +28,29 @@ class stvpoint {
   /// Unit vector, in the local system (last system in the tree).
   vec dirloc;
   /// Longitudinal velocity
-  vfloat speed;
+  vfloat speed = 0.;
   manip_absvol_treeid tid;
 
   /// Position flag
   /// 0 - inside volume, or unknown
   /// 1 - on the border of the volume
   /// 2 - on the border of an embraced volume
-  int sb;     
+  int sb = 0; 
   /// "Entering flag".
   /// 1 - entering new volume, 0 otherwise. i
   /// Embraced volume is also considered new.
-  int s_ent;  
+  int s_ent = 0;  
 
-  PassivePtr<manip_absvol> next_eid;  // if nextpos.sb==2
+  manip_absvol* next_eid = nullptr;  // if nextpos.sb==2
   /// Range from previous point.
-  vfloat prange;
-  vfloat time;
+  vfloat prange = 0.;
+  vfloat time = 0.;
 
   // constructors
-  stvpoint()
-      : pt(),
-        dir(),
-        ptloc(),
-        dirloc(),
-        speed(0.0),
-        tid(),
-        sb(0),
-        s_ent(0),
-        next_eid(),
-        prange(0.0),
-        time(0) {}
+  stvpoint() = default;
   stvpoint(const point& fpt, const vec& fdir, vfloat fspeed,
            manip_absvol_treeid& ftid, vfloat fprange, vfloat ftime, int fsb,
-           int fs_ent, PassivePtr<manip_absvol>& faeid)
+           int fs_ent, manip_absvol* faeid)
       : pt(fpt),
         dir(unit_vec(fdir)),
         speed(fspeed),
@@ -78,7 +67,7 @@ class stvpoint {
   }
   stvpoint(const stvpoint& pstv, const trajestep& ts,  // in the local system
            vfloat mrange,  // may be less than one in ts
-           int fsb, int fs_ent, PassivePtr<manip_absvol>& faeid)
+           int fsb, int fs_ent, manip_absvol* faeid)
       : pt(),
         dir(),
         ptloc(),
@@ -104,7 +93,7 @@ class stvpoint {
   }
 
   stvpoint(const stvpoint& pstv, const trajestep& ts,  // in the local system
-           int fsb, int fs_ent, PassivePtr<manip_absvol>& faeid)
+           int fsb, int fs_ent, manip_absvol* faeid)
       : pt(),
         dir(),
         ptloc(),
@@ -153,25 +142,25 @@ extern trajestep_limit gtrajlim;
 /// particle position.
 /// Interacted particle should be derived class from this one.
 
-class gparticle : public RegPassivePtr {
+class gparticle {
  public:
   /// Default constructor.
-  gparticle() : s_life(false), nstep(0) {}
+  gparticle() = default;
   /// Constructor.
   gparticle(manip_absvol* primvol, const point& pt, const vec& vel,
             vfloat time);
   /// Destructor.
   virtual ~gparticle() {}
 
-  bool s_life;
+  bool s_life = false;
   /// Step number.
-  long nstep;                      
+  long nstep = 0;
   /// Range from origin to currpos.
-  double total_range_from_origin;  
+  double total_range_from_origin = 0.; 
   /// Number of previous steps with zero range (including this step).
-  long n_zero_step;                
+  long n_zero_step = 0; 
 
-  static long max_q_zero_step;
+  static constexpr long max_q_zero_step = 100;
   stvpoint origin;
   stvpoint prevpos;
   stvpoint currpos;

@@ -29,24 +29,24 @@ class TrackPAI : public Track {
   virtual double GetStoppingPower();
 
  private:
-  bool m_ready;
+  bool m_ready = false;
 
   // Particle coordinates and direction
-  double m_x, m_y, m_z, m_t;
-  double m_dx, m_dy, m_dz;
+  double m_x = 0., m_y = 0., m_z = 0., m_t = 0.;
+  double m_dx = 0., m_dy = 0., m_dz = 0.;
   // Particle energy and speed
-  double m_e;
-  double m_speed;
+  double m_e = 0.;
+  double m_speed = 0.;
   // Max. energy transfer in a collision
-  double m_emax;
+  double m_emax = 0.;
 
   // Total inelastic mean free path
-  double m_imfp;
+  double m_imfp = 0.;
   // Stopping power
-  double m_dedx;
+  double m_dedx = 0.;
 
   // Dielectric function
-  int m_nSteps;
+  int m_nSteps = 1000;
   struct opticalData {
     double eps1, eps2;
     double integral;
@@ -70,9 +70,9 @@ class TrackPAI : public Track {
   std::vector<electron> m_holes;
 
   // Medium properties
-  std::string m_mediumName;
-  double m_mediumDensity;
-  double m_electronDensity;
+  std::string m_mediumName = "";
+  double m_mediumDensity = 0.;
+  double m_electronDensity = 0.;
 
   bool SetupMedium(Medium* medium);
   bool SetupCrossSectionTable();

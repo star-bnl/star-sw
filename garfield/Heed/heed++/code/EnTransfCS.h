@@ -5,11 +5,7 @@
 
 namespace Heed {
 
-//#define DEBUG_EnTransfCS  // allows to print additional information
-// and keeps it in class, which makes it bigger
-
 #define EXCLUDE_A_VALUES   // exclude absorption values
-#define EXCLUDE_VAL_FADDA  // exclude values not necessary for MC
 
 /// The PAI cross section of energy transfers from charged particle to media.
 /// The particle has fixed parameters (energy, speed, etc.), which
@@ -18,38 +14,37 @@ namespace Heed {
 ///
 /// 2003, I. Smirnov
 
-class EnTransfCS : public RegPassivePtr {
+class EnTransfCS {
  public:
   /// Default constructor
-  EnTransfCS() {}
+  EnTransfCS() = default;
   /// Constructor
-  EnTransfCS(double fparticle_mass, double fgamma_1, int fs_primary_electron,
+  EnTransfCS(double fparticle_mass, double fgamma_1, bool fs_primary_electron,
              HeedMatterDef* fhmd, long fparticle_charge = 1);
-  virtual void print(std::ostream& file, int l) const;
-  virtual EnTransfCS* copy() const { return new EnTransfCS(*this); }
+
+  void print(std::ostream& file, int l) const;
+  EnTransfCS* copy() const { return new EnTransfCS(*this); }
 
   /// Particle mass [MeV]
-  double particle_mass;
-  /// Total energy [MeV]
-  double particle_ener;
+  double particle_mass = 0.;
   /// Charge in units of electron charge (used square, sign does not matter).
-  long particle_charge;
+  long particle_charge = 0;
 
   /// Lorentz factor - 1 (the best dimensionless measurement of speed).
-  double gamma_1;
+  double gamma_1 = 0.;
 
   /// Max. energy transfer [MeV]
-  double max_etransf;
+  double max_etransf = 0.;
   /// Flag controlling the form of Rutherford scattering.
   /// For our purposes it is good to have simple form,
   /// so this variable is initialized to 1.
   /// Simple form means that there are two terms.
   /// The third term is assumed zero.
-  bool s_simple_form;
-  /// Flag that the primary particle is the electron
-  int s_primary_electron;
+  bool s_simple_form = true;
+  /// Flag indicating whether the primary particle is an electron.
+  bool s_primary_electron = false;
 
-  PassivePtr<HeedMatterDef> hmd;
+  HeedMatterDef* hmd = nullptr;
 
   /// In the following arrays there is the only index: the energy.
   /// The meaning: the average value on the energy interval.
@@ -58,36 +53,28 @@ class EnTransfCS : public RegPassivePtr {
   std::vector<double> chereC;       ///< Cherenkov's radiation
   std::vector<double> chereCangle;  ///< angle of Cherenkov's radiation
   std::vector<double> Rruth;        ///< term called R in my paper
-#ifdef DEBUG_EnTransfCS
-  // Total Rutherford, sum of fruth by atoms and shells, per one electron
-  // (in the paper it is per atom).
-  std::vector<double> truth;
-#endif
 
   /// Sum of (ionization) differential cross-section terms
   std::vector<double> addaC;
   /// Integrated (ionization) cross-section
-  double quanC;
+  double quanC = 0.;
 
 #ifndef EXCLUDE_A_VALUES
   /// Sum of (absorption) differential cross-section terms
   std::vector<double> addaC_a;
   /// Integrated (absorption) cross-section
-  double quanC_a;
+  double quanC_a = 0.;
 #endif
 
   // First moment (mean restricted energy loss) [MeV]
-  double meanC;
+  double meanC = 0.;
   // First moment with additional tail to max. kinematically allowed transfer,
   // calculated only for heavy particles (integral for electrons non-trivial).
-  double meanC1;
+  double meanC1 = 0.;
 #ifndef EXCLUDE_A_VALUES
-  double meanC1_a;
-  double meanC_a;
+  double meanC1_a = 0.;
+  double meanC_a = 0.;
 #endif
-  // Secondary ionization
-  double meaneleC;
-  double meaneleC1;
 
   /// In the following arrays there are three indices:
   /// atom number in the matter, shell number in atom, energy
@@ -100,25 +87,22 @@ class EnTransfCS : public RegPassivePtr {
   /// Integral, normalised to unity
   std::vector<std::vector<std::vector<double> > > fadda;
 #ifndef EXCLUDE_A_VALUES
+  /// Cherenkov term (total absorption)
   std::vector<std::vector<std::vector<double> > > cher_a;
+  /// Sum (total absorption)
   std::vector<std::vector<std::vector<double> > > adda_a;
+  /// Integral (total absorption), normalised to unity
   std::vector<std::vector<std::vector<double> > > fadda_a;
 #endif
 
-#ifndef EXCLUDE_VAL_FADDA
-  /// The true values of the integral (should be equal to quan)
-  std::vector<std::vector<double> > val_fadda;  // integral * hmd->xeldens;
-#ifndef EXCLUDE_A_VALUES
-  std::vector<std::vector<double> > val_fadda_a;  // integral * hmd->xeldens;
-#endif
-#endif
-
-  /// In the following arrays there are two indices:
-  /// atom number in the matter, shell number in atom.
-  std::vector<std::vector<double> > quan;  // per 1 cm, used for path length
+  /// Number of collisions / cm, for each atom and shell.
+  std::vector<std::vector<double> > quan;
+  /// First moment, for each atom and shell.
   std::vector<std::vector<double> > mean;
 #ifndef EXCLUDE_A_VALUES
+  /// Number of collisions / cm (total absorption), for each atom and shell.
   std::vector<std::vector<double> > quan_a;
+  /// First moment (total absorption), for each atom and shell.
   std::vector<std::vector<double> > mean_a;
 #endif
 

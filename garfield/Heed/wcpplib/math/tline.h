@@ -445,7 +445,6 @@ class PointCoorMesh {
            // The number of intervals is q-1.
            // Therefore q has to be 2 or more
 #ifndef TLINE_REDUCE_TO_RAW_ARR
-  // PassivePtr< D > amesh;
   D* amesh;
 #else
   T* amesh;

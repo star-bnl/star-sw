@@ -25,8 +25,8 @@ class GeometrySimple : public GeometryBase {
   // Get the medium at a given location (x, y, z)
   Medium* GetMedium(const double x, const double y, const double z) const;
   // Number of solids/media in the geometry
-  unsigned int GetNumberOfSolids() const { return m_nSolids; }
-  unsigned int GetNumberOfMedia() const { return m_nMedia; }
+  unsigned int GetNumberOfSolids() const { return m_solids.size(); }
+  unsigned int GetNumberOfMedia() const { return m_media.size(); }
   // Get a solid/medium from the list
   Solid* GetSolid(const unsigned int i) const;
   virtual Medium* GetMedium(const unsigned int i) const;
@@ -49,32 +49,22 @@ class GeometrySimple : public GeometryBase {
   }
 
   // Switch on/off debugging and warning messages
-  void EnableDebugging() { m_debug = true; }
-  void DisableDebugging() { m_debug = false; }
+  void EnableDebugging(const bool on = true) { m_debug = on; }
 
  protected:
-  // List of media
-  unsigned int m_nMedia;
-  struct medium {
-    Medium* medium;
-  };
-  std::vector<medium> m_media;
+  // List of media.
+  std::vector<Medium*> m_media;
 
   // List of solids
-  unsigned int m_nSolids;
-  struct solid {
-    Solid* solid;
-    int medium;
-  };
-  std::vector<solid> m_solids;
+  std::vector<std::pair<Solid*, int> > m_solids;
 
   // Bounding box ranges
-  bool m_hasBoundingBox;
+  bool m_hasBoundingBox = false;
   double m_xMinBoundingBox, m_yMinBoundingBox, m_zMinBoundingBox;
   double m_xMaxBoundingBox, m_yMaxBoundingBox, m_zMaxBoundingBox;
 
   // Switch on/off debugging messages
-  bool m_debug;
+  bool m_debug = false;
 };
 }
 

@@ -1,7 +1,7 @@
-
 #ifndef G_HEED_FIELDMAP_H
 #define G_HEED_FIELDMAP_H
 
+#include "wcpplib/clhep_units/WPhysicalConstants.h"
 #include "wcpplib/geometry/vec.h"
 
 namespace Garfield {
@@ -14,7 +14,7 @@ namespace Heed {
 
 class HeedFieldMap {
  public:
-  HeedFieldMap();
+  HeedFieldMap() = default;
 
   void SetSensor(Garfield::Sensor* sensor) { m_sensor = sensor; }
   void SetCentre(const double x, const double y, const double z) {
@@ -31,16 +31,16 @@ class HeedFieldMap {
 
  private:
   /// Conversion factor from mm to cm.
-  static const double conv;
+  static constexpr double conv = 1. / CLHEP::cm;
 
   // Centre of the geometry.
-  double m_x;
-  double m_y;
-  double m_z;
+  double m_x = 0.;
+  double m_y = 0.;
+  double m_z = 0.;
 
-  Garfield::Sensor* m_sensor;
-  bool m_useEfield;
-  bool m_useBfield;
+  Garfield::Sensor* m_sensor = nullptr;
+  bool m_useEfield = false;
+  bool m_useBfield = false;
 };
 }
 

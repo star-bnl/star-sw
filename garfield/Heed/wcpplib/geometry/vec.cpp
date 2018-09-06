@@ -58,8 +58,8 @@ void absref::shift(const vec& dir) {
   ApplyAnyFunctionToVecElements(shift(dir));
 }
 
-void absref::get_components(ActivePtr<absref_transmit>& aref_tran) {
-  aref_tran.put(NULL);
+absref_transmit absref::get_components() {
+  return absref_transmit();
 }
 
 // **** vector ****
@@ -269,8 +269,8 @@ absref absref::*basis::aref[3] = {
     reinterpret_cast<absref absref::*>(static_cast<vec absref::*>(&basis::ey)),
     reinterpret_cast<absref absref::*>(static_cast<vec absref::*>(&basis::ez))};
 
-void basis::get_components(ActivePtr<absref_transmit>& aref_tran) {
-  aref_tran.pass(new absref_transmit(3, aref));
+absref_transmit basis::get_components() {
+  return absref_transmit(3, aref);
 }
 
 basis basis::switch_xyz() const {
@@ -411,8 +411,8 @@ std::ostream& operator<<(std::ostream& file, const basis& b) {
 absref absref::*(point::aref) =
     reinterpret_cast<absref absref::*>(static_cast<vec absref::*>(&point::v));
 
-void point::get_components(ActivePtr<absref_transmit>& aref_tran) {
-  aref_tran.pass(new absref_transmit(1, &aref));
+absref_transmit point::get_components() {
+  return absref_transmit(1, &aref);
 }
 
 void point::down(const abssyscoor* fasc) {
@@ -470,8 +470,8 @@ absref absref::*(fixsyscoor::aref[2]) = {
     reinterpret_cast<absref absref::*>(
         static_cast<basis absref::*>(&fixsyscoor::bas))};
 
-void fixsyscoor::get_components(ActivePtr<absref_transmit>& aref_tran) {
-  aref_tran.pass(new absref_transmit(2, aref));
+absref_transmit fixsyscoor::get_components() {
+  return absref_transmit(2, aref);
 }
 
 void fixsyscoor::Ppiv(const point& fpiv) { piv = fpiv; }
@@ -482,7 +482,6 @@ void fixsyscoor::print(std::ostream& file, int l) const {
     Ifile << "fixsyscoor::print(l=" << l << ")\n";
     if (l > 1) {
       indn.n += 2;
-      RegPassivePtr::print(file, l);
       abssyscoor::print(file, l);
     }
   }
@@ -490,7 +489,6 @@ void fixsyscoor::print(std::ostream& file, int l) const {
 
 std::ostream& operator<<(std::ostream& file, const fixsyscoor& f) {
   Ifile << "fixsyscoor:\n";
-  f.RegPassivePtr::print(file, 2);
   f.abssyscoor::print(file, 2);
   return file;
 }

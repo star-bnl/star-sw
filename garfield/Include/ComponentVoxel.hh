@@ -17,29 +17,31 @@ class ComponentVoxel : public ComponentBase {
 
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, double& v, Medium*& m,
-                     int& status);
+                     int& status) override;
   void ElectricField(const double x, const double y, const double z, double& ex,
-                     double& ey, double& ez, Medium*& m, int& status);
+                     double& ey, double& ez, Medium*& m, int& status) override;
 
   void WeightingField(const double x, const double y, const double z,
                       double& wx, double& wy, double& wz,
-                      const std::string& label);
+                      const std::string& label) override;
+  double WeightingPotential(const double x, const double y,
+                            const double z, const std::string& label) override;
 
   void MagneticField(const double x, const double y, const double z,
-                     double& bx, double& by, double& bz, int& status);
+                     double& bx, double& by, double& bz, int& status) override;
 
   /// Offset coordinates in the weighting field, such that the
   /// same numerical weighting field map can be used for electrodes at
   /// different positions.
   void SetWeightingFieldOffset(const double x, const double y, const double z);
 
-  Medium* GetMedium(const double x, const double y, const double z);
+  Medium* GetMedium(const double x, const double y, const double z) override;
 
-  bool GetVoltageRange(double& vmin, double& vmax);
+  bool GetVoltageRange(double& vmin, double& vmax) override;
   bool GetElectricFieldRange(double& exmin, double& exmax, double& eymin,
                              double& eymax, double& ezmin, double& ezmax);
   bool GetBoundingBox(double& xmin, double& ymin, double& zmin, double& xmax,
-                      double& ymax, double& zmax);
+                      double& ymax, double& zmax) override;
 
   /** Define the grid.
     * \param nx,ny,nz number of bins along x, y, z.
@@ -104,32 +106,32 @@ class ComponentVoxel : public ComponentBase {
   /// Region indices.
   std::vector<std::vector<std::vector<int> > > m_regions;
   // Dimensions of the mesh
-  unsigned int m_nX, m_nY, m_nZ;
-  double m_xMin, m_yMin, m_zMin;
-  double m_xMax, m_yMax, m_zMax;
+  unsigned int m_nX = 0, m_nY = 0, m_nZ = 0;
+  double m_xMin = 0., m_yMin = 0., m_zMin = 0.;
+  double m_xMax = 0., m_yMax = 0., m_zMax = 0.;
 
-  bool m_hasMesh;
-  bool m_hasPotential;
-  bool m_hasEfield;
-  bool m_hasBfield;
+  bool m_hasMesh = false;
+  bool m_hasPotential = false;
+  bool m_hasEfield = false;
+  bool m_hasBfield = false;
 
   // Offset for weighting field
-  double m_wField_xOffset;
-  double m_wField_yOffset;
-  double m_wField_zOffset;
+  double m_wField_xOffset = 0.;
+  double m_wField_yOffset = 0.;
+  double m_wField_zOffset = 0.;
 
   // Voltage range
-  double m_pMin, m_pMax;
+  double m_pMin = 0., m_pMax = 0.;
 
   /// Read data from file.
   bool LoadData(const std::string& filename, std::string format, 
                 const bool withPotential, const bool withRegion,
                 const double scaleX, const double scaleF, const double scaleP,
                 const char field);
-  /// Reset the component.
-  void Reset();
-  /// Periodicities.
-  void UpdatePeriodicity();
+
+  void Reset() override;
+  void UpdatePeriodicity() override;
+
   /// Reduce a coordinate to the basic cell (in case of periodicity).
   double Reduce(const double xin, const double xmin, const double xmax,
                 const bool simplePeriodic, const bool mirrorPeriodic,

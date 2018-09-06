@@ -17,13 +17,10 @@ void AtomDef::print(std::ostream& file, int l) const {
 
 void AtomDef::printall(std::ostream& file) {
   Ifile << "AtomDef::printall:\n";
-  const std::list<AtomDef*>& logbook = AtomDef::get_logbook();
-  std::list<AtomDef*>::const_iterator it;
-  std::list<AtomDef*>::const_iterator end = logbook.end();
-  for (it = logbook.begin(); it != end; ++it) file << (*it);
+  for (auto atom : AtomDef::get_logbook()) file << atom;
 }
 
-AtomDef::AtomDef() : nameh("none"), notationh("none") {
+AtomDef::AtomDef() {
   AtomDef::get_logbook().push_back(this);
 }
 
@@ -38,11 +35,8 @@ AtomDef::AtomDef(const std::string& fnameh, const std::string& fnotationh,
 
 double AtomDef::get_A(int fZ) {
   mfunnamep("double AtomDef::get_A(int fZ)");
-  const std::list<AtomDef*>& logbook = AtomDef::get_logbook();
-  std::list<AtomDef*>::const_iterator it;
-  std::list<AtomDef*>::const_iterator end = logbook.end();
-  for (it = logbook.begin(); it != end; ++it) {
-    if ((*it)->Z() == fZ) return (*it)->A();
+  for (auto atom : AtomDef::get_logbook()) {
+    if (atom->Z() == fZ) return atom->A();
   }
   funnw.ehdr(mcerr);
   mcerr << "Atom is not found, Z=" << fZ << '\n';
@@ -52,31 +46,24 @@ double AtomDef::get_A(int fZ) {
 
 AtomDef* AtomDef::get_AtomDef(int fZ) {
   mfunnamep("AtomDef* AtomDef::get_AtomDef(int fZ)");
-  const std::list<AtomDef*>& logbook = AtomDef::get_logbook();
-  std::list<AtomDef*>::const_iterator it;
-  std::list<AtomDef*>::const_iterator end = logbook.end();
-  for (it = logbook.begin(); it != end; ++it) {
-    if ((*it)->Z() == fZ) return *it;
+  for (auto atom : AtomDef::get_logbook()) {
+    if (atom->Z() == fZ) return atom;
   }
   funnw.ehdr(mcerr);
   mcerr << "Atom is not found, Z=" << fZ << '\n';
   spexit(mcerr);
-  return NULL;
+  return nullptr;
 }
 
 void AtomDef::verify() {
   mfunnamep("void AtomDef::verify()");
   if (nameh == "none" && notationh == "none") return;
-  const std::list<AtomDef*>& logbook = AtomDef::get_logbook();
-  std::list<AtomDef*>::const_iterator it;
-  std::list<AtomDef*>::const_iterator end = logbook.end();
-  for (it = logbook.begin(); it != end; ++it) {
-    if ((*it)->nameh == nameh || (*it)->notationh == notationh) {
-      funnw.ehdr(mcerr);
-      mcerr << "cannot initialize two atoms with the same name or notation\n";
-      mcerr << "name=" << nameh << " notation=" << notationh << '\n';
-      spexit(mcerr);
-    }
+  for (auto atom : AtomDef::get_logbook()) {
+    if (atom->nameh != nameh && atom->notationh != notationh) continue;
+    funnw.ehdr(mcerr);
+    mcerr << "cannot initialize two atoms with the same name or notation\n";
+    mcerr << "name=" << nameh << " notation=" << notationh << '\n';
+    spexit(mcerr);
   }
 }
 
@@ -98,13 +85,10 @@ const std::list<AtomDef*>& AtomDef::get_const_logbook() {
 }
 
 AtomDef* AtomDef::get_AtomDef(const std::string& fnotation) {
-  const std::list<AtomDef*>& logbook = AtomDef::get_logbook();
-  std::list<AtomDef*>::const_iterator it;
-  std::list<AtomDef*>::const_iterator end = logbook.end();
-  for (it = logbook.begin(); it != end; ++it) {
-    if ((*it)->notation() == fnotation) return *it;
+  for (auto atom : AtomDef::get_logbook()) {
+    if (atom->notation() == fnotation) return atom;
   }
-  return NULL;
+  return nullptr;
 }
 
 AtomDef::~AtomDef() { AtomDef::get_logbook().remove(this); }
@@ -113,13 +97,9 @@ AtomMixDef::AtomMixDef(unsigned long fqatom,
                        const std::vector<std::string>& fatom_not,
                        const std::vector<double>& fweight_quan)
     : qatomh(fqatom),
-      atomh(fqatom),
+      atomh(fqatom, nullptr),
       weight_quanh(fqatom, 0.0),
-      weight_massh(fqatom, 0.0),
-      Z_meanh(0.0),
-      A_meanh(0.0),
-      inv_A_meanh(0.0),
-      mean_ratio_Z_to_Ah(0.0) {
+      weight_massh(fqatom, 0.0) {
   mfunnamep("AtomMixDef::AtomMixDef(...)");
   check_econd11(fqatom, <= 0, mcerr);
   check_econd12(fqatom, >, fatom_not.size(), mcerr);
@@ -133,7 +113,7 @@ AtomMixDef::AtomMixDef(unsigned long fqatom,
             << "\nIn particular, check the sequence of initialization\n";
       spexit(mcerr);
     }
-    atomh[n].put(ad);
+    atomh[n] = ad;
   }
   double s = 0.0;
   for (long n = 0; n < qatomh; n++) {
@@ -173,13 +153,9 @@ AtomMixDef::AtomMixDef(unsigned long fqatom,
                        const std::vector<std::string>& fatom_not,
                        const std::vector<long>& fweight_quan)
     : qatomh(fqatom),
-      atomh(fqatom),
+      atomh(fqatom, nullptr),
       weight_quanh(fqatom, 0.0),
-      weight_massh(fqatom, 0.0),
-      Z_meanh(0.0),
-      A_meanh(0.0),
-      inv_A_meanh(0.0),
-      mean_ratio_Z_to_Ah(0.0) {
+      weight_massh(fqatom, 0.0) {
   mfunnamep("AtomMixDef::AtomMixDef(...)");
   check_econd11(fqatom, <= 0, mcerr);
   check_econd12(fqatom, >, fatom_not.size(), mcerr);
@@ -193,7 +169,7 @@ AtomMixDef::AtomMixDef(unsigned long fqatom,
             << "\nIn particular, check the sequence of initialization\n";
       spexit(mcerr);
     }
-    atomh[n].put(ad);
+    atomh[n] = ad;
   }
   double s = 0.0;
   for (long n = 0; n < qatomh; n++) {
@@ -232,13 +208,9 @@ AtomMixDef::AtomMixDef(unsigned long fqatom,
 // one atom in mixture
 AtomMixDef::AtomMixDef(const std::string& fatom_not)
     : qatomh(1),
-      atomh(1),
-      weight_quanh(1),
-      weight_massh(1),
-      Z_meanh(0.0),
-      A_meanh(0.0),
-      inv_A_meanh(0.0),
-      mean_ratio_Z_to_Ah(0.0) {
+      atomh(1, nullptr),
+      weight_quanh(1, 1.),
+      weight_massh(1, 1.) {
   mfunnamep("AtomMixDef::AtomMixDef(...)");
   AtomDef* ad = AtomDef::get_AtomDef(fatom_not);
   if (!ad) {
@@ -247,7 +219,7 @@ AtomMixDef::AtomMixDef(const std::string& fatom_not)
           << "\nIn particular, check the sequence of initialization\n";
     spexit(mcerr);
   }
-  atomh[0].put(ad);
+  atomh[0] = ad;
 
   weight_quanh[0] = 1.0;
   weight_massh[0] = 1.0;
@@ -263,13 +235,9 @@ AtomMixDef::AtomMixDef(const std::string& fatom_not)
 AtomMixDef::AtomMixDef(const std::string& fatom_not1, double fweight_quan1,
                        const std::string& fatom_not2, double fweight_quan2)
     : qatomh(2),
-      atomh(2),
+      atomh(2, nullptr),
       weight_quanh(2),
-      weight_massh(2),
-      Z_meanh(0.0),
-      A_meanh(0.0),
-      inv_A_meanh(0.0),
-      mean_ratio_Z_to_Ah(0.0) {
+      weight_massh(2) {
   mfunnamep("AtomMixDef::AtomMixDef(...)");
   std::vector<std::string> fatom_not(2);
   fatom_not[0] = fatom_not1;
@@ -283,7 +251,7 @@ AtomMixDef::AtomMixDef(const std::string& fatom_not1, double fweight_quan1,
             << "\nIn particular, check the sequence of initialization\n";
       spexit(mcerr);
     }
-    atomh[n].put(ad);
+    atomh[n] = ad;
   }
   weight_quanh[0] = fweight_quan1;
   weight_quanh[1] = fweight_quan2;
@@ -325,13 +293,9 @@ AtomMixDef::AtomMixDef(const std::string& fatom_not1, double fweight_quan1,
                        const std::string& fatom_not2, double fweight_quan2,
                        const std::string& fatom_not3, double fweight_quan3)
     : qatomh(3),
-      atomh(3),
+      atomh(3, nullptr),
       weight_quanh(3),
-      weight_massh(3),
-      Z_meanh(0.0),
-      A_meanh(0.0),
-      inv_A_meanh(0.0),
-      mean_ratio_Z_to_Ah(0.0) {
+      weight_massh(3) {
 
   mfunnamep("AtomMixDef::AtomMixDef(...)");
   std::vector<std::string> fatom_not(3);
@@ -347,7 +311,7 @@ AtomMixDef::AtomMixDef(const std::string& fatom_not1, double fweight_quan1,
             << "\nIn particular, check the sequence of initialization\n";
       spexit(mcerr);
     }
-    atomh[n].put(ad);
+    atomh[n] = ad;
   }
   weight_quanh[0] = fweight_quan1;
   weight_quanh[1] = fweight_quan2;
@@ -391,13 +355,9 @@ AtomMixDef::AtomMixDef(const std::string& fatom_not1, double fweight_quan1,
                        const std::string& fatom_not3, double fweight_quan3,
                        const std::string& fatom_not4, double fweight_quan4)
     : qatomh(4),
-      atomh(4),
-      weight_quanh(4),
-      weight_massh(4),
-      Z_meanh(0.0),
-      A_meanh(0.0),
-      inv_A_meanh(0.0),
-      mean_ratio_Z_to_Ah(0.0) {
+      atomh(4, nullptr),
+      weight_quanh(4, 0.),
+      weight_massh(4, 0.) {
   mfunnamep("AtomMixDef::AtomMixDef(...)");
   std::vector<std::string> fatom_not(4);
   fatom_not[0] = fatom_not1;
@@ -413,7 +373,7 @@ AtomMixDef::AtomMixDef(const std::string& fatom_not1, double fweight_quan1,
             << "\nIn particular, check the sequence of initialization\n";
       spexit(mcerr);
     }
-    atomh[k].put(ad);
+    atomh[k] = ad;
   }
   weight_quanh[0] = fweight_quan1;
   weight_quanh[1] = fweight_quan2;
@@ -457,16 +417,15 @@ void AtomMixDef::print(std::ostream& file, int l) const {
 }
 
 std::ostream& operator<<(std::ostream& file, const AtomMixDef& f) {
-  mfunname(
-      "std::ostream& operator << (std::ostream& file, const AtomMixDef& f)");
+  mfunname("std::ostream& operator << (std::ostream&, const AtomMixDef&)");
   Ifile << "AtomMixDef\n";
   indn.n += 2;
+  constexpr double gpm = gram / mole;
   Ifile << "Z_mean()=" << std::setw(3) << f.Z_mean()
-        << " A_mean()/(gram/mole)=" << f.A_mean() / (gram / mole) << '\n';
-  Ifile << "inv_A_mean()*(gram/mole)=" << f.inv_A_mean() * (gram / mole)
-        << '\n';
-  Ifile << "mean_ratio_Z_to_A()*(gram/mole)=" << f.mean_ratio_Z_to_A() *
-                                                     (gram / mole) << '\n';
+        << " A_mean()/(gram/mole)=" << f.A_mean() / gpm << '\n';
+  Ifile << "inv_A_mean()*(gram/mole)=" << f.inv_A_mean() * gpm << '\n';
+  Ifile << "mean_ratio_Z_to_A()*(gram/mole)=" 
+        << f.mean_ratio_Z_to_A() * gpm << '\n';
   Ifile << "NumberOfElectronsInGram()=" << f.NumberOfElectronsInGram() << '\n';
   // Here above the mass unit is defined,
   // therefore there is no need to divide by gram.

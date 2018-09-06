@@ -49,14 +49,13 @@ void HeedPhoton::physics(std::vector<gparticle*>& /*secondaries*/) {
   if (nextpos.prange <= 0.0) return;
   // Get least address of volume
   const absvol* av = currpos.tid.G_lavol();
-  HeedMatterDef* hmd = NULL;
-  const EnTransfCS* etcs = dynamic_cast<const EnTransfCS*>(av);
+  HeedMatterDef* hmd = nullptr;
+  auto etcs = dynamic_cast<const EnTransfCS*>(av);
   if (etcs) {
-    hmd = etcs->hmd.getver();
+    hmd = etcs->hmd;
   } else {
-    const HeedDeltaElectronCS* hdecs =
-        dynamic_cast<const HeedDeltaElectronCS*>(av);
-    if (hdecs) hmd = hdecs->hmd.get();
+    auto hdecs = dynamic_cast<const HeedDeltaElectronCS*>(av);
+    if (hdecs) hmd = hdecs->hmd;
   }
   // Stop here if we couldn't retrieve the material definition.
   if (!hmd) return;
@@ -118,14 +117,13 @@ void HeedPhoton::physics_after_new_speed(std::vector<gparticle*>& secondaries) {
   if (s_delta_generated) return;
   // Get least address of volume
   const absvol* av = currpos.tid.G_lavol();
-  HeedMatterDef* hmd = NULL;
-  const EnTransfCS* etcs = dynamic_cast<const EnTransfCS*>(av);
+  HeedMatterDef* hmd = nullptr;
+  auto etcs = dynamic_cast<const EnTransfCS*>(av);
   if (etcs) {
-    hmd = etcs->hmd.getver();
+    hmd = etcs->hmd;
   } else {
-    const HeedDeltaElectronCS* hdecs =
-        dynamic_cast<const HeedDeltaElectronCS*>(av);
-    if (hdecs) hmd = hdecs->hmd.get();
+    auto hdecs = dynamic_cast<const HeedDeltaElectronCS*>(av);
+    if (hdecs) hmd = hdecs->hmd;
   }
   // Stop here if we couldn't retrieve the material definition.
   if (!hmd) return;
@@ -170,7 +168,7 @@ void HeedPhoton::physics_after_new_speed(std::vector<gparticle*>& secondaries) {
       Iprint4n(mcout, el_energy[nel], gam_1, beta, mod_v);
     }
     HeedDeltaElectron* hd =
-        new HeedDeltaElectron(currpos.tid.eid[0].getver(), currpos.pt, vel,
+        new HeedDeltaElectron(currpos.tid.eid[0], currpos.pt, vel,
                               currpos.time, particle_number, m_fieldMap);
     secondaries.push_back(hd);
   }
@@ -183,7 +181,7 @@ void HeedPhoton::physics_after_new_speed(std::vector<gparticle*>& secondaries) {
       mcout << "Initializing photon\n";
       Iprint2n(mcout, el_energy[nph], vel);
     }
-    HeedPhoton* hp = new HeedPhoton(currpos.tid.eid[0].getver(), currpos.pt,
+    HeedPhoton* hp = new HeedPhoton(currpos.tid.eid[0], currpos.pt,
                                     vel, currpos.time, particle_number,
                                     ph_energy[nph], m_fieldMap);
     secondaries.push_back(hp);

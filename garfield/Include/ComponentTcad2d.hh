@@ -10,17 +10,17 @@ namespace Garfield {
 class ComponentTcad2d : public ComponentBase {
 
  public:
-  // Constructor
+  /// Constructor
   ComponentTcad2d();
-  // Destructor
+  /// Destructor
   ~ComponentTcad2d() {}
 
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, double& v, Medium*& m,
-                     int& status);
+                     int& status) override;
 
   void ElectricField(const double x, const double y, const double z, double& ex,
-                     double& ey, double& ez, Medium*& m, int& status) {
+                     double& ey, double& ez, Medium*& m, int& status) override {
 
     double v = 0.;
     ElectricField(x, y, z, ex, ey, ez, v, m, status);
@@ -28,28 +28,29 @@ class ComponentTcad2d : public ComponentBase {
 
   void WeightingField(const double x, const double y, const double z,
                             double& wx, double& wy, double& wz,
-                            const std::string& label); 
+                            const std::string& label) override; 
 
-  Medium* GetMedium(const double x, const double y, const double z);
+  Medium* GetMedium(const double x, const double y, const double z) override;
 
-  bool GetVoltageRange(double& vmin, double& vmax);
+  bool GetVoltageRange(double& vmin, double& vmax) override;
   bool GetBoundingBox(double& xmin, double& ymin, double& zmin, double& xmax,
-                      double& ymax, double& zmax);
+                      double& ymax, double& zmax) override;
   void SetRangeZ(const double zmin, const double zmax);
 
-  // Import mesh and field map from files.
+  /// Import mesh and field map from files.
   bool Initialise(const std::string& gridfilename,
                   const std::string& datafilename);
 
-  // List all currently defined regions.
+  /// List all currently defined regions.
   void PrintRegions() const;
-  // Get the number of regions in the device.
+  /// Get the number of regions in the device.
   unsigned int GetNumberOfRegions() const { return m_regions.size(); }
   void GetRegion(const unsigned int i, std::string& name, bool& active) const;
   void SetDriftRegion(const unsigned int ireg);
   void UnsetDriftRegion(const unsigned int ireg);
-  // Set/get the medium for a given region.
+  /// Set the medium for a given region.
   void SetMedium(const unsigned int ireg, Medium* m);
+  /// Get the medium for a given region.
   Medium* GetMedium(const unsigned int ireg) const;
 
   // Retrieve information about the mesh.
@@ -71,15 +72,15 @@ class ComponentTcad2d : public ComponentBase {
   // Velocity field maps
   void ElectronVelocity(const double x, const double y, const double z,
                         double& vx, double& vy, double& vz,
-                        Medium*& m, int& status);
+                        Medium*& m, int& status) override;
   void HoleVelocity(const double x, const double y, const double z,
                     double& vx, double& vy, double& vz,
-                    Medium*& m, int& status);
+                    Medium*& m, int& status) override;
   // Lifetime field maps
   bool GetElectronLifetime(const double x, const double y, const double z, 
-                           double& etau);
+                           double& etau) override;
   bool GetHoleLifetime(const double x, const double y, const double z, 
-                       double& htau);
+                       double& htau) override;
 
   // Trapping 
   int GetNumberOfDonors() { return m_donors.size(); }
@@ -99,13 +100,13 @@ class ComponentTcad2d : public ComponentBase {
                    const double concentration);
 
   bool ElectronAttachment(const double x, const double y, const double z,
-                          double& eta);
+                          double& eta) override;
   bool HoleAttachment(const double x, const double y, const double z,
-                      double& eta);
+                      double& eta) override;
 
  private:
   // Max. number of vertices per element
-  static const int nMaxVertices = 4;
+  static constexpr unsigned int nMaxVertices = 4;
 
   // Regions
   struct Region {
@@ -169,33 +170,32 @@ class ComponentTcad2d : public ComponentBase {
   std::vector<Defect> m_acceptors;
   
   // Available data.
-  bool m_hasPotential;
-  bool m_hasField;
-  bool m_hasElectronMobility;
-  bool m_hasHoleMobility;
-  bool m_hasElectronVelocity;
-  bool m_hasHoleVelocity; 
-  bool m_hasElectronLifetime;
-  bool m_hasHoleLifetime;
+  bool m_hasPotential = false;
+  bool m_hasField = false;
+  bool m_hasElectronMobility = false;
+  bool m_hasHoleMobility = false;
+  bool m_hasElectronVelocity = false;
+  bool m_hasHoleVelocity = false;
+  bool m_hasElectronLifetime = false;
+  bool m_hasHoleLifetime = false;
 
   // Are all the cross-sections and concentrations valid and set.
-  bool m_validTraps;
+  bool m_validTraps = false;
 
   // Voltage range
-  double m_pMin, m_pMax;
+  double m_pMin = 0.;
+  double m_pMax = 0.;
 
   // Bounding box
-  bool m_hasRangeZ;
+  bool m_hasRangeZ = false;
   double m_xMinBB, m_yMinBB, m_zMinBB;
   double m_xMaxBB, m_yMaxBB, m_zMaxBB;
 
   // Element from the previous call
-  int m_lastElement;
+  int m_lastElement = 0;
 
-  // Reset the component
-  void Reset();
-  // Periodicities
-  void UpdatePeriodicity();
+  void Reset() override;
+  void UpdatePeriodicity() override;
 
   // Check whether a point is inside a given element and calculate the  
   // shape functions if it is.

@@ -67,21 +67,20 @@ class DriftLineRKF {
   static const unsigned int ParticleTypeIon = 1;
   static const unsigned int ParticleTypeHole = 2;
 
-  std::string m_className;
+  std::string m_className = "DriftLineRKF";
 
-  Sensor* m_sensor;
-  Medium* m_medium;
+  Sensor* m_sensor = nullptr;
+  Medium* m_medium = nullptr;
 
   unsigned int m_particleType;
-  double m_maxStepSize;
-  double m_accuracy;
-  unsigned int m_maxSteps;
-  unsigned int m_maxStepsToWire;
-  bool m_rejectKinks;
-  bool m_useStepSizeLimit;
+  double m_maxStepSize = 1.e8;
+  double m_accuracy = 1.e-8;
+  unsigned int m_maxSteps = 1000;
+  unsigned int m_maxStepsToWire = 1000;
+  bool m_rejectKinks = true;
+  bool m_useStepSizeLimit = false;
 
-  bool m_usePlotting;
-  ViewDrift* m_view;
+  ViewDrift* m_view = nullptr;
 
   struct step {
     // Position
@@ -94,15 +93,15 @@ class DriftLineRKF {
     double alphaint;
   };
   std::vector<step> m_path;
-  int m_status;
-  unsigned int m_nPoints;
+  int m_status = 0;
+  unsigned int m_nPoints = 0;
 
-  double m_scaleElectronSignal;
-  double m_scaleHoleSignal;
-  double m_scaleIonSignal;
+  double m_scaleElectronSignal = 1.;
+  double m_scaleHoleSignal = 1.;
+  double m_scaleIonSignal = 1.;
 
-  bool m_debug;
-  bool m_verbose;
+  bool m_debug = false;
+  bool m_verbose = false;
 
   // Calculate a drift line starting at a given position.
   bool DriftLine(const double x0, const double y0, const double z0, 

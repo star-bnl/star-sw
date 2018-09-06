@@ -5,8 +5,6 @@
 #include <vector>
 #include <list>
 
-#include "wcpplib/safetl/AbsPtr.h"
-
 namespace Heed {
 
 /// Definition of atoms.
@@ -22,8 +20,6 @@ namespace Heed {
 /// When the user program wants to refer to atom,
 /// it has to use either char* (string) notation, or pointer (or reference)
 /// to one of these objects.
-/// As usually, in the case of pointers I recommend to use protected pointers
-/// to external objects PassivePtr.
 /// The user pogram can initialize the new atoms.
 /// The standard atoms are initiated in files GasLib.h and GasLib.c.
 ///
@@ -48,14 +44,14 @@ namespace Heed {
 ///
 /// 1998-2004, I. Smirnov.
 
-class AtomDef : public RegPassivePtr {
-  std::string nameh;
-  std::string notationh;
+class AtomDef {
+  std::string nameh = "none";
+  std::string notationh = "none";
   /// Atomic number.
-  int Zh;
+  int Zh = 0;
   /// Atomic mass in internal units. Transfer to gram/mole if need.
-  double Ah;
-  static const int max_poss_atom_z = 100;
+  double Ah = 0.;
+  static constexpr int max_poss_atom_z = 100;
 
  public:
   /// Default constructor
@@ -91,40 +87,34 @@ class AtomDef : public RegPassivePtr {
   static AtomDef* get_AtomDef(int fZ);
 
   void print(std::ostream& file, int l = 0) const;
-  virtual AtomDef* copy() const { return new AtomDef(*this); } 
+  AtomDef* copy() const { return new AtomDef(*this); } 
 };
 std::ostream& operator<<(std::ostream& file, const AtomDef& f);
 
 /// Definition of atomic mixtures. Pointers to atoms, weights and
 /// various mean parameters.
 
-class AtomMixDef : public RegPassivePtr {
+class AtomMixDef {
   /// Number of different atoms.
-  long qatomh;
+  long qatomh = 0;
   /// Constituent atoms.
-  std::vector<PassivePtr<AtomDef> > atomh;
+  std::vector<AtomDef*> atomh;
   std::vector<double> weight_quanh;  // sum is 1
   std::vector<double> weight_massh;  // sum is 1
 
   /// Weighted mean Z
-  double Z_meanh;
+  double Z_meanh = 0.;
   /// Weighted mean A (in internal units). Transfer to gram/mole if needed.
-  double A_meanh;
+  double A_meanh = 0.;
   /// Weighted mean 1 / A (in internal units).
-  double inv_A_meanh;
+  double inv_A_meanh = 0.;
   /// Weighted mean ratio Z / A.
-  double mean_ratio_Z_to_Ah;
-  double NumberOfElectronsInGramh;
+  double mean_ratio_Z_to_Ah = 0.;
+  double NumberOfElectronsInGramh = 0.;
 
  public:
   /// Default constructor
-  AtomMixDef()
-      : qatomh(0),
-        Z_meanh(0.0),
-        A_meanh(0.0),
-        inv_A_meanh(0.0),
-        mean_ratio_Z_to_Ah(0.0),
-        NumberOfElectronsInGramh(0.0) {}
+  AtomMixDef() = default;
   AtomMixDef(unsigned long fqatom, const std::vector<std::string>& fatom_not,
              const std::vector<double>& fweight_quan);
   AtomMixDef(unsigned long fqatom, const std::vector<std::string>& fatom_not,
@@ -141,8 +131,8 @@ class AtomMixDef : public RegPassivePtr {
              const std::string& fatom_not4, double fweight_quan4);
   void print(std::ostream& file, int l) const;
   long qatom() const { return qatomh; }
-  const std::vector<PassivePtr<AtomDef> >& atom() const { return atomh; }
-  PassivePtr<AtomDef> atom(long n) const { return atomh[n]; }
+  const std::vector<AtomDef*>& atom() const { return atomh; }
+  AtomDef* atom(long n) const { return atomh[n]; }
   const std::vector<double>& weight_quan() const { return weight_quanh; }
   const std::vector<double>& weight_mass() const { return weight_massh; }
   double weight_quan(long n) const { return weight_quanh[n]; }

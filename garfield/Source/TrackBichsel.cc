@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
+#include <array>
 #include <algorithm>
 
 #include "Sensor.hh"
@@ -9,25 +10,12 @@
 #include "FundamentalConstants.hh"
 #include "GarfieldConstants.hh"
 #include "Random.hh"
+#include "Utilities.hh"
 
 namespace Garfield {
 
-TrackBichsel::TrackBichsel()
-    : m_bg(3.16228),
-      m_speed(SpeedOfLight * m_bg / sqrt(1. + m_bg * m_bg)),
-      m_x(0.),
-      m_y(0.),
-      m_z(0.),
-      m_t(0.),
-      m_dx(0.),
-      m_dy(0.),
-      m_dz(1.),
-      m_imfp(4.05090e4),
-      m_datafile("SiM0invw.inv"),
-      m_iCdf(2),
-      m_nCdfEntries(-1),
-      m_isInitialised(false),
-      m_isInMedium(false) {
+TrackBichsel::TrackBichsel() : Track(),
+      m_speed(SpeedOfLight * m_bg / sqrt(1. + m_bg * m_bg)) {
 
   m_className = "TrackBichsel";
 }
@@ -38,8 +26,7 @@ bool TrackBichsel::NewTrack(const double x0, const double y0, const double z0,
 
   // Make sure a sensor has been defined.
   if (!m_sensor) {
-    std::cerr << m_className << "::NewTrack:\n"
-              << "    Sensor is not defined.\n";
+    std::cerr << m_className << "::NewTrack: Sensor is not defined.\n";
     m_isInMedium = false;
     return false;
   }
@@ -89,12 +76,7 @@ bool TrackBichsel::NewTrack(const double x0, const double y0, const double z0,
   const double d = sqrt(dx0 * dx0 + dy0 * dy0 + dz0 * dz0);
   if (d < Small) {
     // In case of a null vector, choose a random direction.
-    const double phi = TwoPi * RndmUniform();
-    const double ctheta = 1. - 2. * RndmUniform();
-    const double stheta = sqrt(1. - ctheta * ctheta);
-    m_dx = cos(phi) * stheta;
-    m_dy = sin(phi) * stheta;
-    m_dz = ctheta;
+    RndmDirection(m_dx, m_dy, m_dz);
   } else {
     m_dx = dx0 / d;
     m_dy = dy0 / d;
@@ -165,68 +147,58 @@ bool TrackBichsel::GetCluster(double& xcls, double& ycls, double& zcls,
 
 double TrackBichsel::GetClusterDensity() {
 
-  const int nEntries = 38;
-
-  const double tabBg[nEntries] = {
+  constexpr unsigned int nEntries = 38;
+  constexpr std::array<double, nEntries> tabBg = {{
       0.316,   0.398,   0.501,   0.631,    0.794,    1.000,   1.259,   1.585,
       1.995,   2.512,   3.162,   3.981,    5.012,    6.310,   7.943,   10.000,
       12.589,  15.849,  19.953,  25.119,   31.623,   39.811,  50.119,  63.096,
       79.433,  100.000, 125.893, 158.489,  199.526,  251.189, 316.228, 398.107,
-      501.187, 630.958, 794.329, 1000.000, 1258.926, 1584.894};
-
-  const double tabImfp[nEntries] = {
+      501.187, 630.958, 794.329, 1000.000, 1258.926, 1584.894}};
+  constexpr std::array<double, nEntries> tabImfp = {{
       30.32496, 21.14965, 15.06555, 11.05635, 8.43259, 6.72876, 5.63184,
       4.93252,  4.49174,  4.21786,  4.05090,  3.95186, 3.89531, 3.86471,
       3.84930,  3.84226,  3.83952,  3.83887,  3.83912, 3.83970, 3.84035,
       3.84095,  3.84147,  3.84189,  3.84223,  3.84249, 3.84269, 3.84283,
       3.84293,  3.84300,  3.84304,  3.84308,  3.84310, 3.84311, 3.84312,
-      3.84313,  3.84313,  3.84314};
+      3.84313,  3.84313,  3.84314}};
 
   if (m_isChanged) m_bg = GetBetaGamma();
 
-  if (m_bg < tabBg[0]) {
+  if (m_bg < tabBg.front()) {
     if (m_debug) {
       std::cerr << m_className << "::GetClusterDensity:\n"
                 << "    Bg is below the tabulated range.\n";
     }
-    return tabImfp[0] * 1.e4;
-  } else if (m_bg > tabBg[nEntries - 1]) {
-    return tabImfp[nEntries - 1] * 1.e4;
+    return tabImfp.front() * 1.e4;
+  } else if (m_bg > tabBg.back()) {
+    return tabImfp.back() * 1.e4;
   }
 
-  // Locate the requested energy in the table
-  int iLow = 0;
-  int iUp = nEntries - 1;
-  while (iUp - iLow > 1) {
-    const int iM = (iUp + iLow) >> 1;
-    if (m_bg >= tabBg[iM]) {
-      iLow = iM;
-    } else {
-      iUp = iM;
-    }
-  }
-
-  if (fabs(m_bg - tabBg[iLow]) < 1.e-6 * (tabBg[iUp] - tabBg[iLow])) {
-    return tabImfp[iLow] * 1.e4;
-  }
-  if (fabs(m_bg - tabBg[iUp]) < 1.e-6 * (tabBg[iUp] - tabBg[iLow])) {
-    return tabImfp[iUp] * 1.e4;
-  }
+  // Locate the requested energy in the table.
+  const auto it1 = std::upper_bound(tabBg.cbegin(), tabBg.cend(), m_bg);
+  if (it1 == tabBg.cbegin()) return 1.e4 * tabImfp.front();
+  const auto it0 = std::prev(it1);
+  const double x0 = *it0;
+  const double x1 = *it1;
+  const double y0 = tabImfp[it0 - tabBg.cbegin()];
+  const double y1 = tabImfp[it1 - tabBg.cbegin()];
+  const double tol = 1.e-6 * (x1 - x0);
+  if (fabs(m_bg - x0) < tol) return y0 * 1.e4;
+  if (fabs(m_bg - x1) < tol) return y1 * 1.e4;
 
   // Log-log interpolation
-  const double logX0 = log(tabBg[iLow]);
-  const double logX1 = log(tabBg[iUp]);
-  const double logY0 = log(tabImfp[iLow]);
-  const double logY1 = log(tabImfp[iUp]);
-  double d = logY0 + (log(m_bg) - logX0) * (logY1 - logY0) / (logX1 - logX0);
+  const double lnx0 = log(x0);
+  const double lnx1 = log(x1);
+  const double lny0 = log(y0);
+  const double lny1 = log(y1);
+  const double d = lny0 + (log(m_bg) - lnx0) * (lny1 - lny0) / (lnx1 - lnx0);
   return 1.e4 * exp(d);
 }
 
 double TrackBichsel::GetStoppingPower() {
 
-  const unsigned int nEntries = 51;
-
-  const double tabBg[nEntries] = {
+  constexpr unsigned int nEntries = 51;
+  constexpr std::array<double, nEntries> tabBg = {{
       0.316,     0.398,    0.501,    0.631,     0.794,     1.000,     1.259,
       1.585,     1.995,    2.512,    3.162,     3.981,     5.012,     6.310,
       7.943,     10.000,   12.589,   15.849,    19.953,    25.119,    31.623,
@@ -234,9 +206,8 @@ double TrackBichsel::GetStoppingPower() {
       199.526,   251.189,  316.228,  398.107,   501.187,   630.958,   794.329,
       1000.000,  1258.926, 1584.894, 1995.263,  2511.888,  3162.280,  3981.074,
       5011.875,  6309.578, 7943.287, 10000.010, 12589.260, 15848.940, 19952.640,
-      25118.880, 31622.800};
-
-  const double tabdEdx[nEntries] = {
+      25118.880, 31622.800}};
+  constexpr std::array<double, nEntries> tabdEdx = {{
       2443.71800, 1731.65600, 1250.93400, 928.69920, 716.37140, 578.28850,
       490.83670,  437.33820,  406.58490,  390.95170, 385.29000, 386.12000,
       391.07730,  398.53930,  407.39420,  416.90860, 426.63010, 436.30240,
@@ -245,54 +216,43 @@ double TrackBichsel::GetStoppingPower() {
       534.90670,  540.27590,  545.42880,  550.39890, 555.20800, 559.88820,
       564.45780,  568.93850,  573.34700,  577.69140, 581.99010, 586.25090,
       590.47720,  594.68660,  598.86880,  603.03510, 607.18890, 611.33250,
-      615.46810,  619.59740,  623.72150};
+      615.46810,  619.59740,  623.72150}};
 
   if (m_isChanged) m_bg = GetBetaGamma();
 
-  if (m_bg < tabBg[0]) {
+  if (m_bg < tabBg.front()) {
     if (m_debug) {
-      std::cerr << m_className << "::GetStoppingPower:\n";
-      std::cerr << "    Bg is below the tabulated range.\n";
+      std::cerr << m_className << "::GetStoppingPower:\n"
+                << "    Bg is below the tabulated range.\n";
     }
-    return tabdEdx[0] * 1.e4;
-  } else if (m_bg > tabBg[nEntries - 1]) {
-    return tabdEdx[nEntries - 1] * 1.e4;
+    return tabdEdx.front() * 1.e4;
+  } else if (m_bg > tabBg.back()) {
+    return tabdEdx.back() * 1.e4;
   }
 
-  // Locate the requested energy in the table
-  int iLow = 0;
-  int iUp = nEntries - 1;
-  int iM;
-  while (iUp - iLow > 1) {
-    iM = (iUp + iLow) >> 1;
-    if (m_bg >= tabBg[iM]) {
-      iLow = iM;
-    } else {
-      iUp = iM;
-    }
-  }
-
+  // Locate the requested energy in the table.
+  const auto it1 = std::upper_bound(tabBg.cbegin(), tabBg.cend(), m_bg);
+  if (it1 == tabBg.cbegin()) return 1.e4 * tabdEdx.front(); 
+  const auto it0 = std::prev(it1); 
+  const double x0 = *it0;
+  const double x1 = *it1;
   if (m_debug) {
-    std::cout << m_className << "::GetStoppingPower:\n";
-    std::cout << "    Bg = " << m_bg << "\n";
-    std::cout << "    Interpolating between " << tabBg[iLow] << " and "
-              << tabBg[iUp] << "\n";
+    std::cout << m_className << "::GetStoppingPower:\n"
+              << "    Bg = " << m_bg << "\n"
+              << "    Interpolating between " << x0 << " and " << x1 << "\n";
   }
-
-  if (fabs(m_bg - tabBg[iLow]) < 1.e-6 * (tabBg[iUp] - tabBg[iLow])) {
-    return tabdEdx[iLow] * 1.e4;
-  }
-  if (fabs(m_bg - tabBg[iUp]) < 1.e-6 * (tabBg[iUp] - tabBg[iLow])) {
-    return tabdEdx[iUp] * 1.e4;
-  }
+  const double y0 = tabdEdx[it0 - tabBg.cbegin()];
+  const double y1 = tabdEdx[it1 - tabBg.cbegin()];
+  const double tol = 1.e-6 * (x1 - x0);
+  if (fabs(m_bg - x0) < tol) return y0 * 1.e4;
+  if (fabs(m_bg - x1) < tol) return y1 * 1.e4;
 
   // Log-log interpolation
-  const double logX0 = log(tabBg[iLow]);
-  const double logX1 = log(tabBg[iUp]);
-  const double logY0 = log(tabdEdx[iLow]);
-  const double logY1 = log(tabdEdx[iUp]);
-  const double dedx =
-      logY0 + (log(m_bg) - logX0) * (logY1 - logY0) / (logX1 - logX0);
+  const double lnx0 = log(x0);
+  const double lnx1 = log(x1);
+  const double lny0 = log(y0);
+  const double lny1 = log(y1);
+  const double dedx = lny0 + (log(m_bg) - lnx0) * (lny1 - lny0) / (lnx1 - lnx0);
   return 1.e4 * exp(dedx);
 }
 
@@ -340,9 +300,8 @@ bool TrackBichsel::LoadCrossSectionTable(const std::string& filename) {
     // Read the line.
     std::getline(infile, line);
     // Strip white space from the beginning of the line.
-    line.erase(line.begin(),
-               std::find_if(line.begin(), line.end(),
-                            not1(std::ptr_fun<int, int>(isspace))));
+    ltrim(line);
+    if (line.empty()) continue;
     // Skip comments.
     if (line[0] == '#' || line[0] == '*' || (line[0] == '/' && line[1] == '/'))
       continue;
@@ -397,7 +356,7 @@ bool TrackBichsel::LoadCrossSectionTable(const std::string& filename) {
 
 void TrackBichsel::SelectCrossSectionTable() {
 
-  const unsigned int nTables = 10;
+  constexpr unsigned int nTables = 10;
   const double tabBg[nTables] = {0.31623,    1.00000,    3.16228,   10.00000,
                                  31.62278,   100.00000,  316.22780, 1000.00000,
                                  3162.27800, 10000.00000};

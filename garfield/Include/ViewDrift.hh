@@ -2,6 +2,9 @@
 #define G_VIEW_DRIFT
 
 #include <string>
+#include <vector>
+#include <memory>
+
 #include <TGraph.h>
 #include <TCanvas.h>
 #include <TPolyLine3D.h>
@@ -67,10 +70,10 @@ class ViewDrift {
   friend class ViewFEMesh;
 
  private:
-  std::string m_className;
+  std::string m_className = "ViewDrift";
 
   // Options
-  bool m_debug;
+  bool m_debug = false;
 
   struct Marker {
     double x;
@@ -78,35 +81,36 @@ class ViewDrift {
     double z;
   };
   // Canvas
-  TCanvas* m_canvas;
-  bool m_hasExternalCanvas;
+  TCanvas* m_canvas = nullptr;
+  bool m_hasExternalCanvas = false;
 
   // Box dimensions
-  double m_xMin, m_yMin, m_zMin;
-  double m_xMax, m_yMax, m_zMax;
-  // View
-  TView* m_view;
+  double m_xMin = -1., m_yMin = -1., m_zMin = -1.;
+  double m_xMax =  1., m_yMax =  1., m_zMax =  1.;
 
-  struct driftLine {
-    std::vector<Marker> vect;
+  // View
+  std::unique_ptr<TView> m_view;
+
+  struct DriftLine {
+    std::vector<Marker> points;
     int n;  // what kind of particle?
   };
-  std::vector<driftLine> m_driftLines;
-  std::vector<TPolyLine3D*> m_driftLinePlots;
+  std::vector<DriftLine> m_driftLines;
+  std::vector<TPolyLine3D> m_driftLinePlots;
 
   std::vector<std::vector<Marker> > m_tracks;
-  std::vector<TPolyMarker3D*> m_trackPlots;
-  std::vector<TPolyLine3D*> m_trackLinePlots;
+  std::vector<TPolyMarker3D> m_trackPlots;
+  std::vector<TPolyLine3D> m_trackLinePlots;
 
   std::vector<Marker> m_excMarkers;
-  TPolyMarker3D* m_excPlot;
+  std::unique_ptr<TPolyMarker3D> m_excPlot;
   std::vector<Marker> m_ionMarkers;
-  TPolyMarker3D* m_ionPlot;
+  std::unique_ptr<TPolyMarker3D> m_ionPlot;
   std::vector<Marker> m_attMarkers;
-  TPolyMarker3D* m_attPlot;
+  std::unique_ptr<TPolyMarker3D> m_attPlot;
 
-  double m_markerSizeCluster;
-  double m_markerSizeCollision;
+  double m_markerSizeCluster = 1.;
+  double m_markerSizeCollision = 1.;
 
   void Plot2d(const bool axis);
   void Plot3d(const bool axis);

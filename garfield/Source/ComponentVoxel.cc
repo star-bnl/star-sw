@@ -6,26 +6,11 @@
 #include <cmath>
 
 #include "ComponentVoxel.hh"
+#include "Utilities.hh"
 
 namespace Garfield {
 
-ComponentVoxel::ComponentVoxel()
-    : ComponentBase(),
-      m_nX(0), 
-      m_nY(0), 
-      m_nZ(0),
-      m_xMin(0.), 
-      m_yMin(0.), 
-      m_zMin(0.),
-      m_xMax(0.), 
-      m_yMax(0.), 
-      m_zMax(0.),
-      m_hasMesh(false),
-      m_hasPotential(false),
-      m_hasEfield(false),
-      m_hasBfield(false),
-      m_pMin(0.), 
-      m_pMax(0.) {
+ComponentVoxel::ComponentVoxel() : ComponentBase() {
 
   m_className = "ComponentVoxel";
 }
@@ -35,7 +20,7 @@ void ComponentVoxel::ElectricField(const double x, const double y,
                                    double& ez, double& p, Medium*& m,
                                    int& status) {
 
-  m = NULL;
+  m = nullptr;
   // Make sure the field map has been loaded.
   if (!m_ready) {
     std::cerr << m_className << "::ElectricField:\n"
@@ -64,7 +49,7 @@ void ComponentVoxel::ElectricField(const double x, const double y,
   // Get the medium.
   const int region = m_regions[i][j][k];
   if (region < 0 || region > (int)m_media.size()) {
-    m = NULL;
+    m = nullptr;
     status = -5;
     return;
   }
@@ -84,12 +69,26 @@ void ComponentVoxel::WeightingField(const double x, const double y,
                                     const double z, double& wx, double& wy,
                                     double& wz, const std::string& /*label*/) {
   int status = 0;
-  Medium* med = NULL;
+  Medium* med = nullptr;
   double v = 0.;
-  double x1 = x - m_wField_xOffset;
-  double y1 = y - m_wField_yOffset;
-  double z1 = z - m_wField_zOffset;
+  const double x1 = x - m_wField_xOffset;
+  const double y1 = y - m_wField_yOffset;
+  const double z1 = z - m_wField_zOffset;
   ElectricField(x1, y1, z1, wx, wy, wz, v, med, status);
+}
+
+double ComponentVoxel::WeightingPotential(const double x, const double y,
+                                          const double z, 
+                                          const std::string& /*label*/) {
+  int status = 0;
+  Medium* med = nullptr;
+  double v = 0.;
+  const double x1 = x - m_wField_xOffset;
+  const double y1 = y - m_wField_yOffset;
+  const double z1 = z - m_wField_zOffset;
+  double wx = 0., wy = 0., wz = 0.;
+  ElectricField(x1, y1, z1, wx, wy, wz, v, med, status);
+  return v;
 }
 
 void ComponentVoxel::SetWeightingFieldOffset(const double x, const double y,
@@ -133,16 +132,16 @@ Medium* ComponentVoxel::GetMedium(const double x, const double y,
   if (!m_ready) {
     std::cerr << m_className << "::GetMedium:\n"
               << "    Field map is not available for interpolation.\n";
-    return NULL;
+    return nullptr;
   }
 
   unsigned int i, j, k;
   bool xMirrored, yMirrored, zMirrored;
   if (!GetElement(x, y, z, i, j, k, xMirrored, yMirrored, zMirrored)) {
-    return NULL;
+    return nullptr;
   }
   const int region = m_regions[i][j][k];
-  if (region < 0 || region > (int)m_media.size()) return NULL;
+  if (region < 0 || region > (int)m_media.size()) return nullptr;
   return m_media[region];
 }
 
@@ -159,13 +158,13 @@ void ComponentVoxel::SetMesh(const unsigned int nx, const unsigned int ny,
     return;
   }
   if (xmin >= xmax) {
-    std::cerr << m_className << "::SetMesh:\n    Invalid x range.\n";
+    std::cerr << m_className << "::SetMesh: Invalid x range.\n";
     return;
   } else if (ymin >= ymax) {
-    std::cerr << m_className << "::SetMesh:\n    Invalid y range.\n";
+    std::cerr << m_className << "::SetMesh: Invalid y range.\n";
     return;
   } else if (zmin >= zmax) {
-    std::cerr << m_className << "::SetMesh:\n    Invalid z range.\n";
+    std::cerr << m_className << "::SetMesh: Invalid z range.\n";
     return;
   }
   m_nX = nx;
@@ -260,7 +259,7 @@ bool ComponentVoxel::LoadData(const std::string& filename, std::string format,
                               const double scaleP, const char field) {
 
   if (!m_hasMesh) {
-    std::cerr << m_className << "::LoadData:\n    Mesh has not been set.\n";
+    std::cerr << m_className << "::LoadData: Mesh has not been set.\n";
     return false;
   }
 
@@ -302,9 +301,7 @@ bool ComponentVoxel::LoadData(const std::string& filename, std::string format,
     std::getline(infile, line);
     ++nLines;
     // Strip white space from beginning of line.
-    line.erase(line.begin(),
-               std::find_if(line.begin(), line.end(),
-                            not1(std::ptr_fun<int, int>(isspace))));
+    ltrim(line);
     // Skip empty lines.
     if (line.empty()) continue;
     // Skip comments.
@@ -530,7 +527,7 @@ bool ComponentVoxel::GetBoundingBox(double& xmin, double& ymin, double& zmin,
                                     double& xmax, double& ymax, double& zmax) {
 
   if (!m_ready) return false;
-  if (m_xPeriodic || m_xMirrorPeriodic) {
+  if (m_periodic[0] || m_mirrorPeriodic[0]) {
     xmin = -INFINITY;
     xmax = +INFINITY;
   } else {
@@ -538,7 +535,7 @@ bool ComponentVoxel::GetBoundingBox(double& xmin, double& ymin, double& zmin,
     xmax = m_xMax;
   }
 
-  if (m_yPeriodic || m_yMirrorPeriodic) {
+  if (m_periodic[1] || m_mirrorPeriodic[1]) {
     ymin = -INFINITY;
     ymax = +INFINITY;
   } else {
@@ -546,7 +543,7 @@ bool ComponentVoxel::GetBoundingBox(double& xmin, double& ymin, double& zmin,
     ymax = m_yMax;
   }
 
-  if (m_zPeriodic || m_zMirrorPeriodic) {
+  if (m_periodic[2] || m_mirrorPeriodic[2]) {
     zmin = -INFINITY;
     zmax = +INFINITY;
   } else {
@@ -597,13 +594,13 @@ void ComponentVoxel::PrintRegions() const {
 
   // Do not proceed if not properly initialised.
   if (!m_ready) {
-    std::cerr << m_className << "::PrintRegions:\n";
-    std::cerr << "    Field map not yet initialised.\n";
+    std::cerr << m_className << "::PrintRegions:\n"
+              << "    Field map not yet initialised.\n";
     return;
   }
 
   if (m_media.empty()) {
-    std::cerr << m_className << "::PrintRegions:\n    No regions defined.\n";
+    std::cerr << m_className << "::PrintRegions: No regions defined.\n";
     return;
   }
 
@@ -619,18 +616,18 @@ void ComponentVoxel::PrintRegions() const {
 void ComponentVoxel::SetMedium(const unsigned int i, Medium* m) {
 
   if (!m) {
-    std::cerr << m_className << "::SetMedium:\n    Null pointer.\n";
+    std::cerr << m_className << "::SetMedium: Null pointer.\n";
     if (m_media.empty()) return;
   }
-  if (i >= m_media.size()) m_media.resize(i + 1, NULL); 
+  if (i >= m_media.size()) m_media.resize(i + 1, nullptr); 
   m_media[i] = m;
 }
 
 Medium* ComponentVoxel::GetMedium(const unsigned int i) const {
 
   if (i > m_media.size()) {
-    std::cerr << m_className << "::GetMedium:\n    Index out of range.\n";
-    return NULL;
+    std::cerr << m_className << "::GetMedium: Index out of range.\n";
+    return nullptr;
   }
   return m_media[i];
 }
@@ -642,20 +639,20 @@ bool ComponentVoxel::GetElement(const double xi, const double yi,
                                 bool& zMirrored) const {
 
   if (!m_hasMesh) {
-    std::cerr << m_className << "::GetElement:\n    Mesh is not set.\n";
+    std::cerr << m_className << "::GetElement: Mesh is not set.\n";
     return false;
   }
 
   // Reduce the point to the basic cell (in case of periodicity) and 
   // check if it is inside the mesh.
-  const double x = Reduce(xi, m_xMin, m_xMax, m_xPeriodic, 
-                          m_xMirrorPeriodic, xMirrored);
+  const double x = Reduce(xi, m_xMin, m_xMax, m_periodic[0], 
+                          m_mirrorPeriodic[0], xMirrored);
   if (x < m_xMin || x > m_xMax) return false;
-  const double y = Reduce(yi, m_yMin, m_yMax, m_yPeriodic, 
-                          m_yMirrorPeriodic, yMirrored);
+  const double y = Reduce(yi, m_yMin, m_yMax, m_periodic[1], 
+                          m_mirrorPeriodic[1], yMirrored);
   if (y < m_yMin || y > m_yMax) return false;
-  const double z = Reduce(zi, m_zMin, m_zMax, m_zPeriodic, 
-                          m_zMirrorPeriodic, zMirrored);
+  const double z = Reduce(zi, m_zMin, m_zMax, m_periodic[2], 
+                          m_mirrorPeriodic[2], zMirrored);
   if (z < m_zMin || z > m_zMax) return false;
 
   // Get the indices.
@@ -678,14 +675,14 @@ bool ComponentVoxel::GetElement(const unsigned int i, const unsigned int j,
   v = ex = ey = ez = 0.;
   if (!m_ready) {
     if (!m_hasMesh) {
-      std::cerr << m_className << "::GetElement:\n    Mesh not set.\n";
+      std::cerr << m_className << "::GetElement: Mesh not set.\n";
       return false;
     }
-    std::cerr << m_className << "::GetElement:\n    Field map not set.\n";
+    std::cerr << m_className << "::GetElement: Field map not set.\n";
     return false;
   }
   if (i >= m_nX || j >= m_nY || k >= m_nZ) {
-    std::cerr << m_className << "::GetElement:\n    Index out of range.\n";
+    std::cerr << m_className << "::GetElement: Index out of range.\n";
     return false;
   }
   const Element& element = m_efields[i][j][k]; 
@@ -717,43 +714,31 @@ void ComponentVoxel::Reset() {
 void ComponentVoxel::UpdatePeriodicity() {
 
   if (!m_ready) {
-    std::cerr << m_className << "::UpdatePeriodicity:\n";
-    std::cerr << "    Field map not available.\n";
+    std::cerr << m_className << "::UpdatePeriodicity:\n"
+              << "    Field map not available.\n";
     return;
   }
 
   // Check for conflicts.
-  if (m_xPeriodic && m_xMirrorPeriodic) {
-    std::cerr << m_className << "::UpdatePeriodicity:\n";
-    std::cerr << "    Both simple and mirror periodicity\n";
-    std::cerr << "    along x requested; reset.\n";
-    m_xPeriodic = m_xMirrorPeriodic = false;
+  for (unsigned int i = 0; i < 3; ++i) {
+    if (m_periodic[i] && m_mirrorPeriodic[i]) {
+      std::cerr << m_className << "::UpdatePeriodicity:\n"
+                << "    Both simple and mirror periodicity requested. Reset.\n";
+      m_periodic[i] = m_mirrorPeriodic[i] = false;
+    }
   }
 
-  if (m_yPeriodic && m_yMirrorPeriodic) {
-    std::cerr << m_className << "::UpdatePeriodicity:\n";
-    std::cerr << "    Both simple and mirror periodicity\n";
-    std::cerr << "    along y requested; reset.\n";
-    m_yPeriodic = m_yMirrorPeriodic = false;
+  if (m_axiallyPeriodic[0] || m_axiallyPeriodic[1] || m_axiallyPeriodic[2]) {
+    std::cerr << m_className << "::UpdatePeriodicity:\n"
+              << "    Axial symmetry is not supported. Reset.\n";
+    m_axiallyPeriodic.fill(false);
   }
 
-  if (m_zPeriodic && m_zMirrorPeriodic) {
-    std::cerr << m_className << "::UpdatePeriodicity:\n";
-    std::cerr << "    Both simple and mirror periodicity\n";
-    std::cerr << "    along z requested; reset.\n";
-    m_zPeriodic = m_zMirrorPeriodic = false;
-  }
-
-  if (m_xAxiallyPeriodic || m_yAxiallyPeriodic || m_zAxiallyPeriodic) {
-    std::cerr << m_className << "::UpdatePeriodicity:\n";
-    std::cerr << "    Axial symmetry is not supported; reset.\n";
-    m_xAxiallyPeriodic = m_yAxiallyPeriodic = m_zAxiallyPeriodic = false;
-  }
-
-  if (m_xRotationSymmetry || m_yRotationSymmetry || m_zRotationSymmetry) {
-    std::cerr << m_className << "::UpdatePeriodicity:\n";
-    std::cerr << "    Rotation symmetry is not supported; reset.\n";
-    m_xRotationSymmetry = m_yRotationSymmetry = m_zRotationSymmetry = false;
+  if (m_rotationSymmetric[0] || m_rotationSymmetric[1] || 
+      m_rotationSymmetric[2]) {
+    std::cerr << m_className << "::UpdatePeriodicity:\n"
+              << "    Rotation symmetry is not supported. Reset.\n";
+    m_rotationSymmetric.fill(false);
   }
 }
 

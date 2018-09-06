@@ -31,11 +31,11 @@ class TrackElectron : public Track {
   virtual double GetStoppingPower();
 
  private:
-  bool m_ready;
+  bool m_ready = false;
 
   // Particle coordinates and direction
-  double m_x, m_y, m_z, m_t;
-  double m_dx, m_dy, m_dz;
+  double m_x = 0., m_y = 0., m_z = 0., m_t = 0.;
+  double m_dx = 0., m_dy = 0., m_dz = 1.;
 
   // Parameters in ionization cross-section
   struct component {
@@ -65,11 +65,11 @@ class TrackElectron : public Track {
   std::vector<electron> m_electrons;
 
   // Medium name
-  std::string m_mediumName;
+  std::string m_mediumName = "";
   // Atomic density
-  double m_mediumDensity;
+  double m_mediumDensity = 0.;
   // Mean free path
-  double m_mfp;
+  double m_mfp = 0.;
 
   bool SetupGas(Medium* gas);
   bool UpdateCrossSection();

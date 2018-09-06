@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cmath>
+#include <utility>
 
 #include "Medium.hh"
 #include "FundamentalConstants.hh"
@@ -8,83 +9,65 @@
 #include "Random.hh"
 #include "Numerics.hh"
 
+namespace {
+
+void PrintNotImplemented(const std::string& cls, const std::string& fcn) {
+
+  std::cerr << cls << "::" << fcn << ": Function is not implemented.\n";
+}
+
+void PrintOutOfRange(const std::string& cls, const std::string& fcn,
+                     const unsigned int i, const unsigned int j,
+                     const unsigned int k) {
+
+  std::cerr << cls << "::" << fcn << ": Index (" << i << ", " << j << ", " << k
+            << ") out of range.\n";
+}
+
+void PrintDataNotAvailable(const std::string& cls, const std::string& fcn) {
+
+  std::cerr << cls << "::" << fcn << ": Data not available.\n";
+}
+
+bool CheckFields(const std::vector<double>& fields, const std::string& hdr,
+                 const std::string& lbl) {
+
+  if (fields.empty()) {
+    std::cerr << hdr << ": Number of " << lbl << " must be > 0.\n";
+    return false;
+  }
+
+  // Make sure the values are not negative.
+  if (fields.front() < 0.) {
+    std::cerr << hdr << ": " << lbl << " must be >= 0.\n";
+    return false;
+  }
+
+  const size_t nEntries = fields.size();
+  // Make sure the values are in strictly monotonic, ascending order.
+  if (nEntries > 1) {
+    for (size_t i = 1; i < nEntries; ++i) {
+      if (fields[i] <= fields[i - 1]) {
+        std::cerr << hdr << ": " << lbl << " are not in ascending order.\n";
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+}
+
 namespace Garfield {
 
 int Medium::m_idCounter = -1;
 
 Medium::Medium()
-    : m_className("Medium"),
-      m_id(++m_idCounter),
-      m_name(""),
-      m_temperature(293.15),
-      m_pressure(760.),
-      m_epsilon(1.),
-      m_nComponents(1),
-      m_z(1.),
-      m_a(0.),
-      m_density(0.),
-      m_driftable(false),
-      m_microscopic(false),
-      m_ionisable(false),
-      m_w(0.),
-      m_fano(0.),
-      m_isChanged(true),
-      m_debug(false),
-      m_map2d(false) {
+    : m_id(++m_idCounter) {
 
   // Initialise the transport tables.
   m_bFields.assign(1, 0.);
   m_bAngles.assign(1, 0.);
-
-  m_hasElectronVelocityE = false;
-  m_hasElectronVelocityB = false;
-  m_hasElectronVelocityExB = false;
-  m_hasElectronDiffLong = false;
-  m_hasElectronDiffTrans = false;
-  m_hasElectronAttachment = false;
-  m_hasElectronLorentzAngle = false;
-  m_hasElectronDiffTens = false;
-
-  m_hasHoleVelocityE = false;
-  m_hasHoleVelocityB = false;
-  m_hasHoleVelocityExB = false;
-  m_hasHoleDiffLong = false;
-  m_hasHoleDiffTrans = false;
-  m_hasHoleTownsend = false;
-  m_hasHoleAttachment = false;
-  m_hasHoleDiffTens = false;
-
-  m_hasIonMobility = false;
-  m_hasIonDiffLong = false;
-  m_hasIonDiffTrans = false;
-  m_hasIonDissociation = false;
-
-  m_extrLowVelocity = 0;
-  m_extrHighVelocity = 1;
-  m_extrLowDiffusion = 0;
-  m_extrHighDiffusion = 1;
-  m_extrLowTownsend = 0;
-  m_extrHighTownsend = 1;
-  m_extrLowAttachment = 0;
-  m_extrHighAttachment = 1;
-  m_extrLowLorentzAngle = 0;
-  m_extrHighLorentzAngle = 1;
-  m_extrLowMobility = 0;
-  m_extrHighMobility = 1;
-  m_extrLowDissociation = 0;
-  m_extrHighDissociation = 1;
-
-  m_intpVelocity = 2;
-  m_intpDiffusion = 2;
-  m_intpTownsend = 2;
-  m_intpAttachment = 2;
-  m_intpLorentzAngle = 2;
-  m_intpMobility = 2;
-  m_intpDissociation = 2;
-
-  thrElectronTownsend = thrElectronAttachment = 0;
-  thrHoleTownsend = thrHoleAttachment = 0;
-  thrIonDissociation = 0;
 
   // Set the default grid.
   SetFieldGrid(100., 100000., 20, true, 0., 0., 1, 0., 0., 1);
@@ -95,8 +78,8 @@ Medium::~Medium() {}
 void Medium::SetTemperature(const double t) {
 
   if (t <= 0.) {
-    std::cerr << m_className << "::SetTemperature:\n";
-    std::cerr << "    Temperature [K] must be greater than zero.\n";
+    std::cerr << m_className << "::SetTemperature:\n"
+              << "    Temperature [K] must be greater than zero.\n";
     return;
   }
   m_temperature = t;
@@ -106,8 +89,8 @@ void Medium::SetTemperature(const double t) {
 void Medium::SetPressure(const double p) {
 
   if (p <= 0.) {
-    std::cerr << m_className << "::SetPressure:\n";
-    std::cerr << "    Pressure [Torr] must be greater than zero.\n";
+    std::cerr << m_className << "::SetPressure:\n"
+              << "    Pressure [Torr] must be greater than zero.\n";
     return;
   }
   m_pressure = p;
@@ -117,8 +100,8 @@ void Medium::SetPressure(const double p) {
 void Medium::SetDielectricConstant(const double eps) {
 
   if (eps < 1.) {
-    std::cerr << m_className << "::SetDielectricConstant:\n";
-    std::cerr << "    Dielectric constant must be >= 1.\n";
+    std::cerr << m_className << "::SetDielectricConstant:\n"
+              << "    Dielectric constant must be >= 1.\n";
     return;
   }
   m_epsilon = eps;
@@ -134,8 +117,7 @@ void Medium::GetComponent(const unsigned int i,
                           std::string& label, double& f) {
 
   if (i >= m_nComponents) {
-    std::cerr << m_className << "::GetComponent:\n";
-    std::cerr << "    Index out of range.\n";
+    std::cerr << m_className << "::GetComponent: Index out of range.\n";
   }
 
   label = m_name;
@@ -145,8 +127,8 @@ void Medium::GetComponent(const unsigned int i,
 void Medium::SetAtomicNumber(const double z) {
 
   if (z < 1.) {
-    std::cerr << m_className << "::SetAtomicNumber:\n";
-    std::cerr << "    Atomic number must be >= 1.\n";
+    std::cerr << m_className << "::SetAtomicNumber:\n"
+              << "    Atomic number must be >= 1.\n";
     return;
   }
   m_z = z;
@@ -156,8 +138,8 @@ void Medium::SetAtomicNumber(const double z) {
 void Medium::SetAtomicWeight(const double a) {
 
   if (a <= 0.) {
-    std::cerr << m_className << "::SetAtomicWeight:\n";
-    std::cerr << "    Atomic weight must be greater than zero.\n";
+    std::cerr << m_className << "::SetAtomicWeight:\n"
+              << "    Atomic weight must be greater than zero.\n";
     return;
   }
   m_a = a;
@@ -167,8 +149,8 @@ void Medium::SetAtomicWeight(const double a) {
 void Medium::SetNumberDensity(const double n) {
 
   if (n <= 0.) {
-    std::cerr << m_className << "::SetNumberDensity:\n";
-    std::cerr << "    Density [cm-3] must be greater than zero.\n";
+    std::cerr << m_className << "::SetNumberDensity:\n"
+              << "    Density [cm-3] must be greater than zero.\n";
     return;
   }
   m_density = n;
@@ -178,14 +160,14 @@ void Medium::SetNumberDensity(const double n) {
 void Medium::SetMassDensity(const double rho) {
 
   if (rho <= 0.) {
-    std::cerr << m_className << "::SetMassDensity:\n";
-    std::cerr << "    Density [g/cm3] must be greater than zero.\n";
+    std::cerr << m_className << "::SetMassDensity:\n"
+              << "    Density [g/cm3] must be greater than zero.\n";
     return;
   }
 
   if (m_a <= 0.) {
-    std::cerr << m_className << "::SetMassDensity:\n";
-    std::cerr << "    Atomic weight is not defined.\n";
+    std::cerr << m_className << "::SetMassDensity:\n"
+              << "    Atomic weight is not defined.\n";
     return;
   }
   m_density = rho / (AtomicMassUnit * m_a);
@@ -198,7 +180,7 @@ bool Medium::ElectronVelocity(const double ex, const double ey, const double ez,
 
   vx = vy = vz = 0.;
   // Make sure there is at least a table of velocities along E.
-  if (!m_hasElectronVelocityE) return false;
+  if (m_eVelocityE.empty()) return false;
 
   // Compute the magnitude of the electric field.
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
@@ -207,34 +189,23 @@ bool Medium::ElectronVelocity(const double ex, const double ey, const double ez,
 
   // Compute the magnitude of the magnetic field.
   const double b = sqrt(bx * bx + by * by + bz * bz);
-
   // Compute the angle between B field and E field.
   const double ebang = GetAngle(ex, ey, ez, bx, by, bz, e, b);
 
   if (b < Small) {
-    // No magnetic field.
-
-    // Calculate the velocity along E.
+    // No magnetic field. Calculate the velocity along E.
     double ve = 0.;
-    if (m_map2d) {
-      if (!Numerics::Boxin3(tabElectronVelocityE, m_bAngles, m_bFields, m_eFields,
-                            m_bAngles.size(), m_bFields.size(), m_eFields.size(), ebang, b, e0, ve,
-                            m_intpVelocity)) {
-        std::cerr << m_className << "::ElectronVelocity:\n";
-        std::cerr << "    Interpolation of velocity along E failed.\n";
-        return false;
-      }
-    } else {
-      ve = Interpolate1D(e0, tabElectronVelocityE[0][0], m_eFields, m_intpVelocity,
-                         m_extrLowVelocity, m_extrHighVelocity);
+    if (!Interpolate(e0, b, ebang, m_eVelocityE, ve, m_intpVel, m_extrVel)) {
+      std::cerr << m_className << "::ElectronVelocity:\n"
+                << "    Interpolation of velocity along E failed.\n";
+      return false;
     }
-    const double q = -1.;
-    const double mu = q * ve / e;
+    const double mu = -ve / e;
     vx = mu * ex;
     vy = mu * ey;
     vz = mu * ez;
 
-  } else if (m_hasElectronVelocityB && m_hasElectronVelocityExB) {
+  } else if (!m_eVelocityB.empty() && !m_eVelocityExB.empty()) {
     // Magnetic field, velocities along ExB and Bt available
 
     // Compute unit vectors along E, E x B and Bt.
@@ -268,8 +239,8 @@ bool Medium::ElectronVelocity(const double ex, const double ey, const double ez,
 
     if (m_debug) {
       std::cout << std::setprecision(5);
-      std::cout << m_className << "::ElectronVelocity:\n";
-      std::cout << "    unit vector along E:     (" << ue[0] << ", " << ue[1]
+      std::cout << m_className << "::ElectronVelocity:\n"
+                << "    unit vector along E:     (" << ue[0] << ", " << ue[1]
                 << ", " << ue[2] << ")\n";
       std::cout << "    unit vector along E x B: (" << uexb[0] << ", "
                 << uexb[1] << ", " << uexb[2] << ")\n";
@@ -279,72 +250,47 @@ bool Medium::ElectronVelocity(const double ex, const double ey, const double ez,
 
     // Calculate the velocities in all directions.
     double ve = 0., vbt = 0., vexb = 0.;
-    if (m_map2d) {
-      if (!Numerics::Boxin3(tabElectronVelocityE, m_bAngles, m_bFields, m_eFields,
-                            m_bAngles.size(), m_bFields.size(), m_eFields.size(), ebang, b, e0, ve,
-                            m_intpVelocity)) {
-        std::cerr << m_className << "::ElectronVelocity:\n";
-        std::cerr << "    Interpolation of velocity along E failed.\n";
-        return false;
-      }
-      if (!Numerics::Boxin3(tabElectronVelocityExB, m_bAngles, m_bFields, m_eFields,
-                            m_bAngles.size(), m_bFields.size(), m_eFields.size(), ebang, b, e0, vexb,
-                            m_intpVelocity)) {
-        std::cerr << m_className << "::ElectronVelocity:\n";
-        std::cerr << "    Interpolation of velocity along ExB failed.\n";
-        return false;
-      }
-      if (!Numerics::Boxin3(tabElectronVelocityB, m_bAngles, m_bFields, m_eFields,
-                            m_bAngles.size(), m_bFields.size(), m_eFields.size(), ebang, b, e0, vbt,
-                            m_intpVelocity)) {
-        std::cerr << m_className << "::ElectronVelocity:\n";
-        std::cerr << "    Interpolation of velocity along Bt failed.\n";
-        return false;
-      }
-    } else {
-      ve = Interpolate1D(e0, tabElectronVelocityE[0][0], m_eFields, 
-                         m_intpVelocity,
-                         m_extrLowVelocity, m_extrHighVelocity);
-      vbt = Interpolate1D(e0, tabElectronVelocityB[0][0], m_eFields, 
-                          m_intpVelocity,
-                          m_extrLowVelocity, m_extrHighVelocity);
-      vexb = Interpolate1D(e0, tabElectronVelocityExB[0][0], m_eFields,
-                           m_intpVelocity, 
-                           m_extrLowVelocity, m_extrHighVelocity);
+    if (!Interpolate(e0, b, ebang, m_eVelocityE, ve, m_intpVel, m_extrVel)) {
+      std::cerr << m_className << "::ElectronVelocity:\n"
+                << "    Interpolation of velocity along E failed.\n";
+      return false;
     }
-    const double q = -1.;
-    if (ex * bx + ey * by + ez * bz > 0.) vbt = fabs(vbt);
-     else vbt = -fabs(vbt);
-    vx = q * (ve * ue[0] + q * q * vbt * ubt[0] + q * vexb * uexb[0]);
-    vy = q * (ve * ue[1] + q * q * vbt * ubt[1] + q * vexb * uexb[1]);
-    vz = q * (ve * ue[2] + q * q * vbt * ubt[2] + q * vexb * uexb[2]);
+    if (!Interpolate(e0, b, ebang, m_eVelocityExB, vexb, m_intpVel, m_extrVel)) {
+      std::cerr << m_className << "::ElectronVelocity:\n"
+                << "    Interpolation of velocity along ExB failed.\n";
+      return false;
+    }
+    if (!Interpolate(e0, b, ebang, m_eVelocityB, vbt, m_intpVel, m_extrVel)) {
+      std::cerr << m_className << "::ElectronVelocity:\n"
+                << "    Interpolation of velocity along Bt failed.\n";
+      return false;
+    }
+    if (ex * bx + ey * by + ez * bz > 0.) {
+      vbt = fabs(vbt);
+    } else {
+      vbt = -fabs(vbt);
+    }
+    vx = -(ve * ue[0] + vbt * ubt[0] - vexb * uexb[0]);
+    vy = -(ve * ue[1] + vbt * ubt[1] - vexb * uexb[1]);
+    vz = -(ve * ue[2] + vbt * ubt[2] - vexb * uexb[2]);
 
   } else {
-    // Magnetic field, velocities along ExB, Bt not available
+    // Magnetic field, velocities along ExB, Bt not available.
 
     // Calculate the velocity along E.
     double ve = 0.;
-    if (m_map2d) {
-      if (!Numerics::Boxin3(tabElectronVelocityE, m_bAngles, m_bFields, m_eFields,
-                            m_bAngles.size(), m_bFields.size(), m_eFields.size(), ebang, b, e0, ve,
-                            m_intpVelocity)) {
-        std::cerr << m_className << "::ElectronVelocity:\n";
-        std::cerr << "    Interpolation of velocity along E failed.\n";
-        return false;
-      }
-    } else {
-      ve = Interpolate1D(e0, tabElectronVelocityE[0][0], m_eFields, 
-                         m_intpVelocity,
-                         m_extrLowVelocity, m_extrHighVelocity);
+    if (!Interpolate(e0, b, ebang, m_eVelocityE, ve, m_intpVel, m_extrVel)) {
+      std::cerr << m_className << "::ElectronVelocity:\n"
+                << "    Interpolation of velocity along E failed.\n";
+      return false;
     }
-
-    const double q = -1.;
-    const double mu = q * ve / e;
+    const double mu = -ve / e;
+    const double mu2 = mu * mu;
     const double eb = bx * ex + by * ey + bz * ez;
-    const double nom = 1. + pow(mu * b, 2);
-    vx = mu * (ex + mu * (ey * bz - ez * by) + mu * mu * bx * eb) / nom;
-    vy = mu * (ey + mu * (ez * bx - ex * bz) + mu * mu * by * eb) / nom;
-    vz = mu * (ez + mu * (ex * by - ey * bx) + mu * mu * bz * eb) / nom;
+    const double f = 1. / (1. + mu2 * b * b);
+    vx = f * (ex + mu * (ey * bz - ez * by) + mu2 * bx * eb);
+    vy = f * (ey + mu * (ez * bx - ex * bz) + mu2 * by * eb);
+    vz = f * (ez + mu * (ex * by - ey * bx) + mu2 * bz * eb);
   }
 
   return true;
@@ -361,46 +307,29 @@ bool Medium::ElectronDiffusion(const double ex, const double ey,
   const double e0 = ScaleElectricField(e);
   if (e < Small || e0 < Small) return true;
 
-  if (m_map2d) {
-    // Compute the magnitude of the magnetic field.
-    const double b = sqrt(bx * bx + by * by + bz * bz);
-    // Compute the angle between B field and E field.
-    const double ebang = GetAngle(ex, ey, ez, bx, by, bz, e, b);
+  // Compute the magnitude of the magnetic field.
+  const double b = m_map2d ? sqrt(bx * bx + by * by + bz * bz) : 0.;
+  // Compute the angle between B field and E field.
+  const double ebang = m_map2d ? GetAngle(ex, ey, ez, bx, by, bz, e, b) : 0.;
 
-    // Interpolate.
-    if (m_hasElectronDiffLong) {
-      if (!Numerics::Boxin3(tabElectronDiffLong, m_bAngles, m_bFields, m_eFields,
-                            m_bAngles.size(), m_bFields.size(), m_eFields.size(), ebang, b, e0, dl,
-                            m_intpDiffusion)) {
-        dl = 0.;
-      }
+  // Interpolate.
+  if (!m_eDiffLong.empty()) {
+    if (!Interpolate(e0, b, ebang, m_eDiffLong, dl, m_intpDiff, m_extrDiff)) {
+      dl = 0.;
     }
-    if (m_hasElectronDiffTrans) {
-      if (!Numerics::Boxin3(tabElectronDiffTrans, m_bAngles, m_bFields, m_eFields,
-                            m_bAngles.size(), m_bFields.size(), m_eFields.size(), ebang, b, e0, dt,
-                            m_intpDiffusion)) {
-        dt = 0.;
-      }
-    }
-  } else {
-    if (m_hasElectronDiffLong) {
-      dl = Interpolate1D(e0, tabElectronDiffLong[0][0], m_eFields, 
-                         m_intpDiffusion,
-                         m_extrLowDiffusion, m_extrHighDiffusion);
-    }
-    if (m_hasElectronDiffTrans) {
-      dt = Interpolate1D(e0, tabElectronDiffTrans[0][0], m_eFields, 
-                         m_intpDiffusion,
-                         m_extrLowDiffusion, m_extrHighDiffusion);
+  }
+  if (!m_eDiffTrans.empty()) {
+    if (!Interpolate(e0, b, ebang, m_eDiffTrans, dt, m_intpDiff, m_extrDiff)) {
+      dt = 0.;
     }
   }
 
   // If no data available, calculate
   // the diffusion coefficients using the Einstein relation
-  if (!m_hasElectronDiffLong || !m_hasElectronDiffTrans) {
+  if (m_eDiffLong.empty() || m_eDiffTrans.empty()) {
     const double d = sqrt(2. * BoltzmannConstant * m_temperature / e);
-    if (!m_hasElectronDiffLong) dl = d;
-    if (!m_hasElectronDiffTrans) dt = d;
+    if (m_eDiffLong.empty()) dl = d;
+    if (m_eDiffTrans.empty()) dt = d;
   }
   // Verify values and apply scaling.
   if (dl < 0.) dl = 0.;
@@ -421,57 +350,34 @@ bool Medium::ElectronDiffusion(const double ex, const double ey,
   cov[1][0] = cov[1][1] = cov[1][2] = 0.;
   cov[2][0] = cov[2][1] = cov[2][2] = 0.;
 
-  if (!m_hasElectronDiffTens) return false;
+  if (m_eDiffTens.empty()) return false;
 
   // Compute the magnitude of the electric field.
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
   const double e0 = ScaleElectricField(e);
   if (e < Small || e0 < Small) return true;
 
-  if (m_map2d) {
-    // Compute the magnitude of the magnetic field.
-    const double b = sqrt(bx * bx + by * by + bz * bz);
-    // Compute the angle between B field and E field.
-    const double ebang = GetAngle(ex, ey, ez, bx, by, bz, e, b);
+  // Compute the magnitude of the magnetic field.
+  const double b = m_map2d ? sqrt(bx * bx + by * by + bz * bz) : 0.;
+  // Compute the angle between B field and E field.
+  const double ebang = m_map2d ? GetAngle(ex, ey, ez, bx, by, bz, e, b) : 0.;
 
+  for (int j = 0; j < 6; ++j) {
     // Interpolate.
-    double diff = 0.;
-    for (int l = 0; l < 6; ++l) {
-      if (!Numerics::Boxin3(tabElectronDiffTens[l], m_bAngles, m_bFields, m_eFields,
-                            m_bAngles.size(), m_bFields.size(), m_eFields.size(), ebang, b, e0, diff,
-                            m_intpDiffusion)) {
-        diff = 0.;
-      }
-      // Apply scaling.
-      diff = ScaleDiffusionTensor(diff);
-      if (l < 3) {
-        cov[l][l] = diff;
-      } else if (l == 3) {
-        cov[0][1] = cov[1][0] = diff;
-      } else if (l == 4) {
-        cov[0][2] = cov[2][0] = diff;
-      } else if (l == 5) {
-        cov[1][2] = cov[2][1] = diff;
-      }
+    double y = 0.;
+    if (!Interpolate(e0, b, ebang, m_eDiffTens[j], y, m_intpDiff, m_extrDiff)) {
+      y = 0.;
     }
-  } else {
-    // Interpolate.
-    for (int l = 0; l < 6; ++l) {
-      double diff =
-          Interpolate1D(e0, tabElectronDiffTens[l][0][0], m_eFields,
-                        m_intpDiffusion, 
-                        m_extrLowDiffusion, m_extrHighDiffusion);
-      // Apply scaling.
-      diff = ScaleDiffusionTensor(diff);
-      if (l < 3) {
-        cov[l][l] = diff;
-      } else if (l == 3) {
-        cov[0][1] = cov[1][0] = diff;
-      } else if (l == 4) {
-        cov[0][2] = cov[2][0] = diff;
-      } else if (l == 5) {
-        cov[1][2] = cov[2][1] = diff;
-      }
+    // Apply scaling.
+    y = ScaleDiffusionTensor(y);
+    if (j < 3) {
+      cov[j][j] = y;
+    } else if (j == 3) {
+      cov[0][1] = cov[1][0] = y;
+    } else if (j == 4) {
+      cov[0][2] = cov[2][0] = y;
+    } else if (j == 5) {
+      cov[1][2] = cov[2][1] = y; 
     }
   }
 
@@ -483,44 +389,23 @@ bool Medium::ElectronTownsend(const double ex, const double ey, const double ez,
                               double& alpha) {
 
   alpha = 0.;
-  if (tabElectronTownsend.empty()) return false;
+  if (m_eTownsend.empty()) return false;
+
   // Compute the magnitude of the electric field.
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
   const double e0 = ScaleElectricField(e);
   if (e < Small || e0 < Small) return true;
 
-  if (m_map2d) {
-    // Compute the magnitude of the magnetic field.
-    const double b = sqrt(bx * bx + by * by + bz * bz);
-    // Compute the angle between B field and E field.
-    const double ebang = GetAngle(ex, ey, ez, bx, by, bz, e, b);
+  // Compute the magnitude of the magnetic field.
+  const double b = m_map2d ? sqrt(bx * bx + by * by + bz * bz) : 0.;
+  // Compute the angle between B field and E field.
+  const double ebang = m_map2d ? GetAngle(ex, ey, ez, bx, by, bz, e, b) : 0.;
 
-    // Interpolate.
-    if (e0 < m_eFields[thrElectronTownsend]) {
-      if (!Numerics::Boxin3(tabElectronTownsend, m_bAngles, m_bFields, m_eFields,
-                            m_bAngles.size(), m_bFields.size(), m_eFields.size(), ebang, b, e0, alpha,
-                            1)) {
-        alpha = -30.;
-      }
-    } else {
-      if (!Numerics::Boxin3(tabElectronTownsend, m_bAngles, m_bFields, m_eFields,
-                            m_bAngles.size(), m_bFields.size(), m_eFields.size(), ebang, b, e0, alpha,
-                            m_intpTownsend)) {
-        alpha = -30.;
-      }
-    }
-  } else {
-    // Interpolate.
-    if (e0 < m_eFields[thrElectronTownsend]) {
-      alpha = Interpolate1D(e0, tabElectronTownsend[0][0], m_eFields, 1,
-                            m_extrLowTownsend, m_extrHighTownsend);
-    } else {
-      alpha = Interpolate1D(e0, tabElectronTownsend[0][0], m_eFields,
-                            m_intpTownsend, 
-                            m_extrLowTownsend, m_extrHighTownsend);
-    }
+  // Interpolate.
+  const auto intp = e0 < m_eFields[thrElectronTownsend] ? 1 : m_intpTownsend;
+  if (!Interpolate(e0, b, ebang, m_eTownsend, alpha, intp, m_extrTownsend)) {
+    alpha = -30.;
   }
-
   if (alpha < -20.) {
     alpha = 0.;
   } else {
@@ -537,45 +422,23 @@ bool Medium::ElectronAttachment(const double ex, const double ey,
                                 const double by, const double bz, double& eta) {
 
   eta = 0.;
-  if (!m_hasElectronAttachment) return false;
+  if (m_eAttachment.empty()) return false;
+
   // Compute the magnitude of the electric field.
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
   const double e0 = ScaleElectricField(e);
   if (e < Small || e0 < Small) return true;
 
-  if (m_map2d) {
-    // Compute the magnitude of the magnetic field.
-    const double b = sqrt(bx * bx + by * by + bz * bz);
-    // Compute the angle between B field and E field.
-    const double ebang = GetAngle(ex, ey, ez, bx, by, bz, e, b);
+  // Compute the magnitude of the magnetic field.
+  const double b = m_map2d ? sqrt(bx * bx + by * by + bz * bz) : 0.;
+  // Compute the angle between B field and E field.
+  const double ebang = m_map2d ? GetAngle(ex, ey, ez, bx, by, bz, e, b) : 0.;
 
-    // Interpolate.
-    if (e0 < m_eFields[thrElectronAttachment]) {
-      if (!Numerics::Boxin3(tabElectronAttachment, m_bAngles, m_bFields, m_eFields,
-                            m_bAngles.size(), m_bFields.size(), m_eFields.size(), ebang, b, e0, eta,
-                            1)) {
-        eta = -30.;
-      }
-    } else {
-      if (!Numerics::Boxin3(tabElectronAttachment, m_bAngles, m_bFields, m_eFields,
-                            m_bAngles.size(), m_bFields.size(), m_eFields.size(), ebang, b, e0, eta,
-                            m_intpAttachment)) {
-        eta = -30.;
-      }
-    }
-  } else {
-    // Interpolate.
-    if (e0 < m_eFields[thrElectronAttachment]) {
-      eta = Interpolate1D(e0, tabElectronAttachment[0][0], m_eFields, 1,
-                          m_extrLowAttachment, m_extrHighAttachment);
-    } else {
-      eta =
-          Interpolate1D(e0, tabElectronAttachment[0][0], m_eFields,
-                        m_intpAttachment, 
-                        m_extrLowAttachment, m_extrHighAttachment);
-    }
+  // Interpolate.
+  const auto intp = e0 < m_eFields[thrElectronAttachment] ? 1 : m_intpAttachment;
+  if (!Interpolate(e0, b, ebang, m_eAttachment, eta, intp, m_extrAttachment)) {
+    eta = -30.;
   }
-
   if (eta < -20.) {
     eta = 0.;
   } else {
@@ -593,30 +456,21 @@ bool Medium::ElectronLorentzAngle(const double ex, const double ey,
                                   double& lor) {
 
   lor = 0.;
-  if (!m_hasElectronLorentzAngle) return false;
+  if (m_eLorentzAngle.empty()) return false;
+
   // Compute the magnitude of the electric field.
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
   const double e0 = ScaleElectricField(e);
   if (e < Small || e0 < Small) return true;
 
-  if (m_map2d) {
-    // Compute the magnitude of the magnetic field.
-    const double b = sqrt(bx * bx + by * by + bz * bz);
-    // Compute the angle between B field and E field.
-    const double ebang = GetAngle(ex, ey, ez, bx, by, bz, e, b);
+  // Compute the magnitude of the magnetic field.
+  const double b = m_map2d ? sqrt(bx * bx + by * by + bz * bz) : 0.;
+  // Compute the angle between B field and E field.
+  const double ebang = m_map2d ? GetAngle(ex, ey, ez, bx, by, bz, e, b) : 0.;
 
-    // Interpolate.
-    if (!Numerics::Boxin3(tabElectronLorentzAngle, m_bAngles, m_bFields, m_eFields,
-                          m_bAngles.size(), m_bFields.size(), m_eFields.size(), ebang, b, e0, lor,
-                          m_intpLorentzAngle)) {
-      lor = 0.;
-    }
-  } else {
-    // Interpolate.
-    lor =
-        Interpolate1D(e0, tabElectronLorentzAngle[0][0], m_eFields,
-                      m_intpLorentzAngle, 
-                      m_extrLowLorentzAngle, m_extrHighLorentzAngle);
+  // Interpolate.
+  if (!Interpolate(e0, b, ebang, m_eLorentzAngle, lor, m_intpLorentzAngle, m_extrLorentzAngle)) {
+    lor = 0.;
   }
   // Apply scaling.
   lor = ScaleLorentzAngle(lor);
@@ -643,77 +497,43 @@ void Medium::GetElectronMomentum(const double e, double& px, double& py,
                                  double& pz, int& band) {
 
   const double p = sqrt(2. * ElectronMass * e) / SpeedOfLight;
-  const double ctheta = 1. - 2. * RndmUniform();
-  const double stheta = sqrt(1. - ctheta * ctheta);
-  const double phi = TwoPi * RndmUniform();
-
-  px = p * stheta * cos(phi);
-  py = p * stheta * sin(phi);
-  pz = p * ctheta;
-
+  RndmDirection(px, py, pz, p);
   band = -1;
 }
 
 double Medium::GetElectronNullCollisionRate(const int /*band*/) {
 
-  if (m_debug) {
-    std::cerr << m_className << "::GetElectronNullCollisionRate:\n";
-    std::cerr << "    Function is not implemented.\n";
-  }
+  if (m_debug) PrintNotImplemented(m_className, "GetElectronNullCollisionRate");
   return 0.;
 }
 
 double Medium::GetElectronCollisionRate(const double /*e*/, 
                                         const int /*band*/) {
 
-  if (m_debug) {
-    std::cerr << m_className << "::GetElectronCollisionRate:\n";
-    std::cerr << "    Function is not implemented.\n";
-  }
+  if (m_debug) PrintNotImplemented(m_className, "GetElectronCollisionRate");
   return 0.;
 }
 
 bool Medium::GetElectronCollision(const double e, int& type, int& level,
                                   double& e1, double& dx, double& dy,
-                                  double& dz, int& nion, int& ndxc, int& band) {
+                                  double& dz, 
+                                  std::vector<std::pair<int, double> >& /*secondaries*/, 
+                                  int& ndxc, int& band) {
 
   type = level = -1;
   e1 = e;
-  nion = ndxc = band = 0;
-  const double ctheta = 1. - 2 * RndmUniform();
-  const double stheta = sqrt(1. - ctheta * ctheta);
-  const double phi = TwoPi * RndmUniform();
-  dx = cos(phi) * stheta;
-  dy = sin(phi) * stheta;
-  dz = ctheta;
+  ndxc = band = 0;
+  RndmDirection(dx, dy, dz);
 
-  if (m_debug) {
-    std::cerr << m_className << "::GetElectronCollision:\n";
-    std::cerr << "    Function is not implemented.\n";
-  }
+  if (m_debug) PrintNotImplemented(m_className, "GetElectronCollision");
   return false;
 }
 
-bool Medium::GetIonisationProduct(const unsigned int /*i*/, 
-                                  int& type, double& energy) const {
-
-  if (m_debug) {
-    std::cerr << m_className << "::GetIonisationProduct:\n"
-              << "    Function is not implemented for this class.\n";
-  }
-  type = 0;
-  energy = 0.;
-  return false;
-}
-
-bool Medium::GetDeexcitationProduct(const unsigned int i, double& t, double& s,
+bool Medium::GetDeexcitationProduct(const unsigned int /*i*/, 
+                                    double& t, double& s,
                                     int& type, double& energy) const {
 
-  if (m_debug) {
-    std::cerr << m_className << "::GetDeexcitationProduct:\n"
-              << "    Deexcitation product " << i << " requested.\n"
-              << "    Not supported. Program bug!\n";
-  }
+  if (m_debug) PrintNotImplemented(m_className, "GetDeexcitationProduct");
   t = s = energy = 0.;
   type = 0;
   return false;
@@ -725,7 +545,7 @@ bool Medium::HoleVelocity(const double ex, const double ey, const double ez,
 
   vx = vy = vz = 0.;
   // Make sure there is at least a table of velocities along E.
-  if (!m_hasHoleVelocityE) return false;
+  if (m_hVelocityE.empty()) return false;
 
   // Compute the magnitude of the electric field.
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
@@ -739,28 +559,20 @@ bool Medium::HoleVelocity(const double ex, const double ey, const double ez,
   const double ebang = GetAngle(ex, ey, ez, bx, by, bz, e, b);
 
   if (b < Small) {
-    // No magnetic field.
-    // Calculate the velocity along E.
+    // No magnetic field. Calculate the velocity along E.
     double ve = 0.;
-    if (m_map2d) {
-      if (!Numerics::Boxin3(tabHoleVelocityE, m_bAngles, m_bFields, m_eFields,
-                            m_bAngles.size(), m_bFields.size(), m_eFields.size(), ebang, b, e0, ve,
-                            m_intpVelocity)) {
-        std::cerr << m_className << "::HoleVelocity:\n";
-        std::cerr << "    Interpolation of velocity along E failed.\n";
-        return false;
-      }
-    } else {
-      ve = Interpolate1D(e0, tabHoleVelocityE[0][0], m_eFields, m_intpVelocity,
-                         m_extrLowVelocity, m_extrHighVelocity);
+    if (!Interpolate(e0, b, ebang, m_hVelocityE, ve, m_intpVel, m_extrVel)) {
+      std::cerr << m_className << "::HoleVelocity:\n"
+                << "    Interpolation of velocity along E failed.\n";
+      return false;
     }
-    const double q = 1.;
+    constexpr double q = 1.;
     const double mu = q * ve / e;
     vx = mu * ex;
     vy = mu * ey;
     vz = mu * ez;
 
-  } else if (m_hasHoleVelocityB && m_hasHoleVelocityExB) {
+  } else if (!m_hVelocityB.empty() && !m_hVelocityExB.empty()) {
     // Magnetic field, velocities along ExB and Bt available
 
     // Compute unit vectors along E, E x B and Bt.
@@ -794,37 +606,22 @@ bool Medium::HoleVelocity(const double ex, const double ey, const double ez,
 
     // Calculate the velocities in all directions.
     double ve = 0., vbt = 0., vexb = 0.;
-    if (m_map2d) {
-      if (!Numerics::Boxin3(tabHoleVelocityE, m_bAngles, m_bFields, m_eFields,
-                            m_bAngles.size(), m_bFields.size(), m_eFields.size(), ebang, b, e0, ve,
-                            m_intpVelocity)) {
-        std::cerr << m_className << "::HoleVelocity:\n";
-        std::cerr << "    Interpolation of velocity along E failed.\n";
-        return false;
-      }
-      if (!Numerics::Boxin3(tabHoleVelocityExB, m_bAngles, m_bFields, m_eFields,
-                            m_bAngles.size(), m_bFields.size(), m_eFields.size(), ebang, b, e0, vexb,
-                            m_intpVelocity)) {
-        std::cerr << m_className << "::HoleVelocity:\n";
-        std::cerr << "    Interpolation of velocity along ExB failed.\n";
-        return false;
-      }
-      if (!Numerics::Boxin3(tabHoleVelocityB, m_bAngles, m_bFields, m_eFields,
-                            m_bAngles.size(), m_bFields.size(), m_eFields.size(), ebang, b, e0, vbt,
-                            m_intpVelocity)) {
-        std::cerr << m_className << "::HoleVelocity:\n";
-        std::cerr << "    Interpolation of velocity along Bt failed.\n";
-        return false;
-      }
-    } else {
-      ve = Interpolate1D(e0, tabHoleVelocityE[0][0], m_eFields, m_intpVelocity,
-                         m_extrLowVelocity, m_extrHighVelocity);
-      vbt = Interpolate1D(e0, tabHoleVelocityB[0][0], m_eFields, m_intpVelocity,
-                          m_extrLowVelocity, m_extrHighVelocity);
-      vexb = Interpolate1D(e0, tabHoleVelocityExB[0][0], m_eFields, m_intpVelocity,
-                           m_extrLowVelocity, m_extrHighVelocity);
+    if (!Interpolate(e0, b, ebang, m_hVelocityE, ve, m_intpVel, m_extrVel)) {
+      std::cerr << m_className << "::HoleVelocity:\n"
+                << "    Interpolation of velocity along E failed.\n";
+      return false;
     }
-    const double q = 1.;
+    if (!Interpolate(e0, b, ebang, m_hVelocityExB, vexb, m_intpVel, m_extrVel)) {
+      std::cerr << m_className << "::HoleVelocity:\n"
+                << "    Interpolation of velocity along ExB failed.\n";
+      return false;
+    }
+    if (!Interpolate(e0, b, ebang, m_hVelocityB, vbt, m_intpVel, m_extrVel)) {
+      std::cerr << m_className << "::HoleVelocity:\n"
+                << "    Interpolation of velocity along Bt failed.\n";
+      return false;
+    }
+    constexpr double q = 1.;
     if (ex * bx + ey * by + ez * bz > 0.) vbt = fabs(vbt);
      else vbt = -fabs(vbt);
     vx = q * (ve * ue[0] + q * q * vbt * ubt[0] + q * vexb * uexb[0]);
@@ -833,29 +630,21 @@ bool Medium::HoleVelocity(const double ex, const double ey, const double ez,
 
   } else {
     // Magnetic field, velocities along ExB, Bt not available
-
     // Calculate the velocity along E.
     double ve = 0.;
-    if (m_map2d) {
-      if (!Numerics::Boxin3(tabHoleVelocityE, m_bAngles, m_bFields, m_eFields,
-                            m_bAngles.size(), m_bFields.size(), m_eFields.size(), ebang, b, e0, ve,
-                            m_intpVelocity)) {
-        std::cerr << m_className << "::HoleVelocity:\n";
-        std::cerr << "    Interpolation of velocity along E failed.\n";
-        return false;
-      }
-    } else {
-      ve = Interpolate1D(e0, tabHoleVelocityE[0][0], m_eFields, m_intpVelocity,
-                         m_extrLowVelocity, m_extrHighVelocity);
+    if (!Interpolate(e0, b, ebang, m_hVelocityE, ve, m_intpVel, m_extrVel)) {
+      std::cerr << m_className << "::HoleVelocity:\n"
+                << "    Interpolation of velocity along E failed.\n";
+      return false;
     }
-
-    const double q = 1.;
+    constexpr double q = 1.;
     const double mu = q * ve / e;
+    const double mu2 = mu * mu;
     const double eb = bx * ex + by * ey + bz * ez;
-    const double nom = 1. + pow(mu * b, 2);
-    vx = mu * (ex + mu * (ey * bz - ez * by) + mu * mu * bx * eb) / nom;
-    vy = mu * (ey + mu * (ez * bx - ex * bz) + mu * mu * by * eb) / nom;
-    vz = mu * (ez + mu * (ex * by - ey * bx) + mu * mu * bz * eb) / nom;
+    const double nom = 1. + mu2 * b * b;
+    vx = mu * (ex + mu * (ey * bz - ez * by) + mu2 * bx * eb) / nom;
+    vy = mu * (ey + mu * (ez * bx - ex * bz) + mu2 * by * eb) / nom;
+    vz = mu * (ez + mu * (ex * by - ey * bx) + mu2 * bz * eb) / nom;
   }
 
   return true;
@@ -871,47 +660,30 @@ bool Medium::HoleDiffusion(const double ex, const double ey, const double ez,
   const double e0 = ScaleElectricField(e);
   if (e < Small || e0 < Small) return true;
 
-  if (m_map2d) {
-    // Compute the magnitude of the magnetic field.
-    const double b = sqrt(bx * bx + by * by + bz * bz);
-    // Compute the angle between B field and E field.
-    const double ebang = GetAngle(ex, ey, ez, bx, by, bz, e, b);
+  // Compute the magnitude of the magnetic field.
+  const double b = m_map2d ? sqrt(bx * bx + by * by + bz * bz) : 0.;
+  // Compute the angle between B field and E field.
+  const double ebang = m_map2d ? GetAngle(ex, ey, ez, bx, by, bz, e, b) : 0.;
 
-    // Interpolate.
-    if (m_hasHoleDiffLong) {
-      if (!Numerics::Boxin3(tabHoleDiffLong, m_bAngles, m_bFields, m_eFields, m_bAngles.size(),
-                            m_bFields.size(), m_eFields.size(), ebang, b, e0, dl,
-                            m_intpDiffusion)) {
-        dl = 0.;
-      }
+  // Interpolate.
+  if (!m_hDiffLong.empty()) {
+    if (!Interpolate(e0, b, ebang, m_hDiffLong, dl, m_intpDiff, m_extrDiff)) {
+      dl = 0.;
     }
-    if (m_hasHoleDiffTrans) {
-      if (!Numerics::Boxin3(tabHoleDiffTrans, m_bAngles, m_bFields, m_eFields,
-                            m_bAngles.size(), m_bFields.size(), m_eFields.size(), ebang, b, e0, dt,
-                            m_intpDiffusion)) {
-        dt = 0.;
-      }
-    }
-  } else {
-    if (m_hasHoleDiffLong) {
-      dl = Interpolate1D(e0, tabHoleDiffLong[0][0], m_eFields, m_intpDiffusion,
-                         m_extrLowDiffusion, m_extrHighDiffusion);
-    }
-    if (m_hasHoleDiffTrans) {
-      dt = Interpolate1D(e0, tabHoleDiffTrans[0][0], m_eFields, m_intpDiffusion,
-                         m_extrLowDiffusion, m_extrHighDiffusion);
+  }
+  if (!m_hDiffTrans.empty()) {
+    if (!Interpolate(e0, b, ebang, m_hDiffTrans, dt, m_intpDiff, m_extrDiff)) {
+      dt = 0.;
     }
   }
 
   // If no data available, calculate
   // the diffusion coefficients using the Einstein relation
-  if (!m_hasHoleDiffLong) {
-    dl = sqrt(2. * BoltzmannConstant * m_temperature / e);
+  if (m_hDiffLong.empty() || m_hDiffTrans.empty()) {
+    const double d = sqrt(2. * BoltzmannConstant * m_temperature / e);
+    if (m_hDiffLong.empty()) dl = d;
+    if (m_hDiffTrans.empty()) dt = d;
   }
-  if (!m_hasHoleDiffTrans) {
-    dt = sqrt(2. * BoltzmannConstant * m_temperature / e);
-  }
-
   // Verify values and apply scaling.
   if (dl < 0.) dl = 0.;
   if (dt < 0.) dt = 0.;
@@ -930,59 +702,35 @@ bool Medium::HoleDiffusion(const double ex, const double ey, const double ez,
   cov[1][0] = cov[1][1] = cov[1][2] = 0.;
   cov[2][0] = cov[2][1] = cov[2][2] = 0.;
 
-  if (!m_hasHoleDiffTens) return false;
+  if (m_hDiffTens.empty()) return false;
 
   // Compute the magnitude of the electric field.
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
   const double e0 = ScaleElectricField(e);
   if (e < Small || e0 < Small) return true;
 
-  if (m_map2d) {
-    // Compute the magnitude of the magnetic field.
-    const double b = sqrt(bx * bx + by * by + bz * bz);
-    // Compute the angle between B field and E field.
-    const double ebang = GetAngle(ex, ey, ez, bx, by, bz, e, b);
+  // Compute the magnitude of the magnetic field.
+  const double b = m_map2d ? sqrt(bx * bx + by * by + bz * bz) : 0.;
+  // Compute the angle between B field and E field.
+  const double ebang = m_map2d ? GetAngle(ex, ey, ez, bx, by, bz, e, b) : 0.;
 
-    // Interpolate.
-    double diff = 0.;
-    for (int l = 0; l < 6; ++l) {
-      if (!Numerics::Boxin3(tabHoleDiffTens[l], m_bAngles, m_bFields, m_eFields,
-                            m_bAngles.size(), m_bFields.size(), m_eFields.size(), ebang, b, e0, diff,
-                            m_intpDiffusion)) {
-        diff = 0.;
-      }
-      // Apply scaling.
-      diff = ScaleDiffusionTensor(diff);
-      if (l < 3) {
-        cov[l][l] = diff;
-      } else if (l == 3) {
-        cov[0][1] = cov[1][0] = diff;
-      } else if (l == 4) {
-        cov[0][2] = cov[2][0] = diff;
-      } else if (l == 5) {
-        cov[1][2] = cov[2][1] = diff;
-      }
+  for (int j = 0; j < 6; ++j) {
+    double y = 0.;
+    if (!Interpolate(e0, b, ebang, m_hDiffTens[j], y, m_intpDiff, m_extrDiff)) {
+      y = 0.;
     }
-  } else {
-    // Interpolate.
-    for (int l = 0; l < 6; ++l) {
-      double diff =
-          Interpolate1D(e0, tabHoleDiffTens[l][0][0], m_eFields, m_intpDiffusion,
-                        m_extrLowDiffusion, m_extrHighDiffusion);
-      // Apply scaling.
-      diff = ScaleDiffusionTensor(diff);
-      if (l < 3) {
-        cov[l][l] = diff;
-      } else if (l == 3) {
-        cov[0][1] = cov[1][0] = diff;
-      } else if (l == 4) {
-        cov[0][2] = cov[2][0] = diff;
-      } else if (l == 5) {
-        cov[1][2] = cov[2][1] = diff;
-      }
+    // Apply scaling.
+    y = ScaleDiffusionTensor(y);
+    if (j < 3) {
+      cov[j][j] = y;
+    } else if (j == 3) {
+      cov[0][1] = cov[1][0] = y;
+    } else if (j == 4) {
+      cov[0][2] = cov[2][0] = y;
+    } else if (j == 5) {
+      cov[1][2] = cov[2][1] = y;
     }
   }
-
   return true;
 }
 
@@ -991,42 +739,22 @@ bool Medium::HoleTownsend(const double ex, const double ey, const double ez,
                           double& alpha) {
 
   alpha = 0.;
-  if (!m_hasHoleTownsend) return false;
+  if (m_hTownsend.empty()) return false;
   // Compute the magnitude of the electric field.
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
   const double e0 = ScaleElectricField(e);
   if (e < Small || e0 < Small) return true;
 
-  if (m_map2d) {
-    // Compute the magnitude of the magnetic field.
-    const double b = sqrt(bx * bx + by * by + bz * bz);
-    // Compute the angle between B field and E field.
-    const double ebang = GetAngle(ex, ey, ez, bx, by, bz, e, b);
+  // Compute the magnitude of the magnetic field.
+  const double b = m_map2d ? sqrt(bx * bx + by * by + bz * bz) : 0.;
+  // Compute the angle between B field and E field.
+  const double ebang = m_map2d ? GetAngle(ex, ey, ez, bx, by, bz, e, b) : 0.;
 
-    // Interpolate.
-    if (e0 < m_eFields[thrHoleTownsend]) {
-      if (!Numerics::Boxin3(tabHoleTownsend, m_bAngles, m_bFields, m_eFields, m_bAngles.size(),
-                            m_bFields.size(), m_eFields.size(), ebang, b, e0, alpha, 1)) {
-        alpha = -30.;
-      }
-    } else {
-      if (!Numerics::Boxin3(tabHoleTownsend, m_bAngles, m_bFields, m_eFields, m_bAngles.size(),
-                            m_bFields.size(), m_eFields.size(), ebang, b, e0, alpha,
-                            m_intpTownsend)) {
-        alpha = -30.;
-      }
-    }
-  } else {
-    // Interpolate.
-    if (e0 < m_eFields[thrHoleTownsend]) {
-      alpha = Interpolate1D(e0, tabHoleTownsend[0][0], m_eFields, 1,
-                            m_extrLowTownsend, m_extrHighTownsend);
-    } else {
-      alpha = Interpolate1D(e0, tabHoleTownsend[0][0], m_eFields, m_intpTownsend,
-                            m_extrLowTownsend, m_extrHighTownsend);
-    }
+  // Interpolate.
+  const auto intp = e0 < m_eFields[thrHoleTownsend] ? 1 : m_intpTownsend; 
+  if (!Interpolate(e0, b, ebang, m_hTownsend, alpha, intp, m_extrTownsend)) {
+    alpha = -30.;
   }
-
   if (alpha < -20.) {
     alpha = 0.;
   } else {
@@ -1043,44 +771,22 @@ bool Medium::HoleAttachment(const double ex, const double ey, const double ez,
                             double& eta) {
 
   eta = 0.;
-  if (!m_hasHoleAttachment) return false;
+  if (m_hAttachment.empty()) return false;
   // Compute the magnitude of the electric field.
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
   const double e0 = ScaleElectricField(e);
   if (e < Small || e0 < Small) return true;
 
-  if (m_map2d) {
-    // Compute the magnitude of the magnetic field.
-    const double b = sqrt(bx * bx + by * by + bz * bz);
-    // Compute the angle between B field and E field.
-    const double ebang = GetAngle(ex, ey, ez, bx, by, bz, e, b);
+  // Compute the magnitude of the magnetic field.
+  const double b = m_map2d ? sqrt(bx * bx + by * by + bz * bz) : 0.;
+  // Compute the angle between B field and E field.
+  const double ebang = m_map2d ? GetAngle(ex, ey, ez, bx, by, bz, e, b) : 0.;
 
-    // Interpolate.
-    if (e0 < m_eFields[thrHoleAttachment]) {
-      if (!Numerics::Boxin3(tabHoleAttachment, m_bAngles, m_bFields, m_eFields,
-                            m_bAngles.size(), m_bFields.size(), m_eFields.size(), ebang, b, e0, eta,
-                            1)) {
-        eta = -30.;
-      }
-    } else {
-      if (!Numerics::Boxin3(tabHoleAttachment, m_bAngles, m_bFields, m_eFields,
-                            m_bAngles.size(), m_bFields.size(), m_eFields.size(), ebang, b, e0, eta,
-                            m_intpAttachment)) {
-        eta = -30.;
-      }
-    }
-  } else {
-    // Interpolate.
-    if (e0 < m_eFields[thrHoleAttachment]) {
-      eta = Interpolate1D(e0, tabHoleAttachment[0][0], m_eFields, 1,
-                          m_extrLowAttachment, m_extrHighAttachment);
-    } else {
-      eta = Interpolate1D(e0, tabHoleAttachment[0][0], m_eFields, 
-                          m_intpAttachment,
-                          m_extrLowAttachment, m_extrHighAttachment);
-    }
+  // Interpolate.
+  const int intp = e0 < m_eFields[thrHoleAttachment] ? 1 : m_intpAttachment;
+  if (!Interpolate(e0, b, ebang, m_hAttachment, eta, intp, m_extrAttachment)) {
+    eta = -30.;
   }
-
   if (eta < -20.) {
     eta = 0.;
   } else {
@@ -1097,7 +803,7 @@ bool Medium::IonVelocity(const double ex, const double ey, const double ez,
                          double& vx, double& vy, double& vz) {
 
   vx = vy = vz = 0.;
-  if (!m_hasIonMobility) return false;
+  if (m_ionMobility.empty()) return false;
   // Compute the magnitude of the electric field.
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
   const double e0 = ScaleElectricField(e);
@@ -1105,22 +811,14 @@ bool Medium::IonVelocity(const double ex, const double ey, const double ez,
   // Compute the magnitude of the electric field.
   const double b = sqrt(bx * bx + by * by + bz * bz);
 
+  // Compute the angle between B field and E field.
+  const double ebang = m_map2d ? GetAngle(ex, ey, ez, bx, by, bz, e, b) : 0.;
   double mu = 0.;
-  if (m_map2d) {
-    // Compute the angle between B field and E field.
-    const double ebang = GetAngle(ex, ey, ez, bx, by, bz, e, b);
-
-    if (!Numerics::Boxin3(tabIonMobility, m_bAngles, m_bFields, m_eFields, m_bAngles.size(),
-                          m_bFields.size(), m_eFields.size(), ebang, b, e0, mu, 
-                          m_intpMobility)) {
-      mu = 0.;
-    }
-  } else {
-    mu = Interpolate1D(e0, tabIonMobility[0][0], m_eFields, m_intpMobility,
-                       m_extrLowMobility, m_extrHighMobility);
+  if (!Interpolate(e0, b, ebang, m_ionMobility, mu, m_intpMobility, m_extrMobility)) {
+    mu = 0.;
   }
 
-  const double q = 1.;
+  constexpr double q = 1.;
   mu *= q;
   if (b < Small) {
     vx = mu * ex;
@@ -1128,10 +826,11 @@ bool Medium::IonVelocity(const double ex, const double ey, const double ez,
     vz = mu * ez;
   } else {
     const double eb = bx * ex + by * ey + bz * ez;
-    const double nom = 1. + pow(mu * b, 2);
-    vx = mu * (ex + mu * (ey * bz - ez * by) + mu * mu * bx * eb) / nom;
-    vy = mu * (ey + mu * (ez * bx - ex * bz) + mu * mu * by * eb) / nom;
-    vz = mu * (ez + mu * (ex * by - ey * bx) + mu * mu * bz * eb) / nom;
+    const double mu2 = mu * mu;
+    const double nom = 1. + mu2 * b * b;
+    vx = mu * (ex + mu * (ey * bz - ez * by) + mu2 * bx * eb) / nom;
+    vy = mu * (ey + mu * (ez * bx - ex * bz) + mu2 * by * eb) / nom;
+    vz = mu * (ez + mu * (ex * by - ey * bx) + mu2 * bz * eb) / nom;
   }
 
   return true;
@@ -1147,47 +846,30 @@ bool Medium::IonDiffusion(const double ex, const double ey, const double ez,
   const double e0 = ScaleElectricField(e);
   if (e < Small || e0 < Small) return true;
 
-  if (m_map2d) {
-    // Compute the magnitude of the magnetic field.
-    const double b = sqrt(bx * bx + by * by + bz * bz);
-    // Compute the angle between B field and E field.
-    const double ebang = GetAngle(ex, ey, ez, bx, by, bz, e, b);
+  // Compute the magnitude of the magnetic field.
+  const double b = m_map2d ? sqrt(bx * bx + by * by + bz * bz) : 0.;
+  // Compute the angle between B field and E field.
+  const double ebang = m_map2d ? GetAngle(ex, ey, ez, bx, by, bz, e, b) : 0.;
 
-    // Interpolate.
-    if (m_hasIonDiffLong) {
-      if (!Numerics::Boxin3(tabIonDiffLong, m_bAngles, m_bFields, m_eFields, m_bAngles.size(),
-                            m_bFields.size(), m_eFields.size(), ebang, b, e0, dl,
-                            m_intpDiffusion)) {
-        dl = 0.;
-      }
+  // Interpolate.
+  if (!m_ionDiffLong.empty()) {
+    if (!Interpolate(e0, b, ebang, m_ionDiffLong, dl, m_intpDiff, m_extrDiff)) {
+      dl = 0.;
     }
-    if (m_hasIonDiffTrans) {
-      if (!Numerics::Boxin3(tabIonDiffTrans, m_bAngles, m_bFields, m_eFields, m_bAngles.size(),
-                            m_bFields.size(), m_eFields.size(), ebang, b, e0, dt,
-                            m_intpDiffusion)) {
-        dt = 0.;
-      }
-    }
-  } else {
-    if (m_hasIonDiffLong) {
-      dl = Interpolate1D(e0, tabIonDiffLong[0][0], m_eFields, m_intpDiffusion,
-                         m_extrLowDiffusion, m_extrHighDiffusion);
-    }
-    if (m_hasIonDiffTrans) {
-      dt = Interpolate1D(e0, tabIonDiffTrans[0][0], m_eFields, m_intpDiffusion,
-                         m_extrLowDiffusion, m_extrHighDiffusion);
+  }
+  if (!m_ionDiffTrans.empty()) {
+    if (!Interpolate(e0, b, ebang, m_ionDiffTrans, dt, m_intpDiff, m_extrDiff)) {
+      dt = 0.;
     }
   }
 
   // If no data available, calculate
   // the diffusion coefficients using the Einstein relation
-  if (!m_hasIonDiffLong) {
-    dl = sqrt(2. * BoltzmannConstant * m_temperature / e);
+  if (m_ionDiffLong.empty() || m_ionDiffTrans.empty()) {
+    const double d = sqrt(2. * BoltzmannConstant * m_temperature / e);
+    if (m_ionDiffLong.empty()) dl = d;
+    if (m_ionDiffTrans.empty()) dt = d;
   }
-  if (!m_hasIonDiffTrans) {
-    dt = sqrt(2. * BoltzmannConstant * m_temperature / e);
-  }
-
   return true;
 }
 
@@ -1196,43 +878,22 @@ bool Medium::IonDissociation(const double ex, const double ey, const double ez,
                              double& diss) {
 
   diss = 0.;
-  if (!m_hasIonDissociation) return false;
+  if (m_ionDissociation.empty()) return false;
   // Compute the magnitude of the electric field.
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
   const double e0 = ScaleElectricField(e);
   if (e < Small || e0 < Small) return true;
 
-  if (m_map2d) {
-    // Compute the magnitude of the magnetic field.
-    const double b = sqrt(bx * bx + by * by + bz * bz);
-    // Compute the angle between B field and E field.
-    const double ebang = GetAngle(ex, ey, ez, bx, by, bz, e, b);
-    // Interpolate.
-    if (e0 < m_eFields[thrIonDissociation]) {
-      if (!Numerics::Boxin3(tabIonDissociation, m_bAngles, m_bFields, m_eFields,
-                            m_bAngles.size(), m_bFields.size(), m_eFields.size(), ebang, b, e0, diss,
-                            1)) {
-        diss = -30.;
-      }
-    } else {
-      if (!Numerics::Boxin3(tabIonDissociation, m_bAngles, m_bFields, m_eFields,
-                            m_bAngles.size(), m_bFields.size(), m_eFields.size(), ebang, b, e0, diss,
-                            m_intpDissociation)) {
-        diss = -30.;
-      }
-    }
-  } else {
-    // Interpolate.
-    if (e0 < m_eFields[thrIonDissociation]) {
-      diss = Interpolate1D(e0, tabIonDissociation[0][0], m_eFields, 1,
-                           m_extrLowDissociation, m_extrHighDissociation);
-    } else {
-      diss = Interpolate1D(e0, tabHoleTownsend[0][0], m_eFields, 
-                           m_intpDissociation,
-                           m_extrLowDissociation, m_extrHighDissociation);
-    }
-  }
+  // Compute the magnitude of the magnetic field.
+  const double b = m_map2d ? sqrt(bx * bx + by * by + bz * bz) : 0.;
+  // Compute the angle between B field and E field.
+  const double ebang = m_map2d ? GetAngle(ex, ey, ez, bx, by, bz, e, b) : 0.;
 
+  // Interpolate.
+  const int intp = e0 < m_eFields[thrIonDissociation] ? 1 : m_intpDissociation;
+  if (!Interpolate(e0, b, ebang, m_ionDissociation, diss, intp, m_extrDissociation)) {
+    diss = -30.;
+  } 
   if (diss < -20.) {
     diss = 0.;
   } else {
@@ -1253,10 +914,7 @@ bool Medium::GetOpticalDataRange(double& emin, double& emax,
     return false;
   }
 
-  if (m_debug) {
-    std::cerr << m_className << "::GetOpticalDataRange:\n";
-    std::cerr << "    Function is not implemented.\n";
-  }
+  if (m_debug) PrintNotImplemented(m_className, "GetOpticalDataRange");
   emin = emax = 0.;
   return false;
 }
@@ -1276,10 +934,7 @@ bool Medium::GetDielectricFunction(const double e, double& eps1, double& eps2,
     return false;
   }
 
-  if (m_debug) {
-    std::cerr << m_className << "::GetDielectricFunction:\n";
-    std::cerr << "    Function is not implemented.\n";
-  }
+  if (m_debug) PrintNotImplemented(m_className, "GetDielectricFunction");
   eps1 = 1.;
   eps2 = 0.;
   return false;
@@ -1301,8 +956,7 @@ bool Medium::GetPhotoAbsorptionCrossSection(const double e, double& sigma,
   }
 
   if (m_debug) {
-    std::cerr << m_className << "::GetPhotoAbsorptionCrossSection:\n";
-    std::cerr << "    Function is not implemented.\n";
+    PrintNotImplemented(m_className, "GetPhotoAbsorptionCrossSection");
   }
   sigma = 0.;
   return false;
@@ -1328,131 +982,39 @@ bool Medium::GetPhotonCollision(const double e, int& type, int& level,
   return false;
 }
 
-void Medium::ResetElectronVelocity() {
-
-  tabElectronVelocityE.clear();
-  tabElectronVelocityB.clear();
-  tabElectronVelocityExB.clear();
-  m_hasElectronVelocityE = false;
-  m_hasElectronVelocityB = false;
-  m_hasElectronVelocityExB = false;
-}
-
-void Medium::ResetElectronDiffusion() {
-
-  tabElectronDiffLong.clear();
-  tabElectronDiffTrans.clear();
-  tabElectronDiffTens.clear();
-  m_hasElectronDiffLong = false;
-  m_hasElectronDiffTrans = false;
-  m_hasElectronDiffTens = false;
-}
-
-void Medium::ResetElectronTownsend() {
-
-  tabElectronTownsend.clear();
-}
-
-void Medium::ResetElectronAttachment() {
-
-  tabElectronAttachment.clear();
-  m_hasElectronAttachment = false;
-}
-
-void Medium::ResetElectronLorentzAngle() {
-
-  tabElectronLorentzAngle.clear();
-  m_hasElectronLorentzAngle = false;
-}
-
-void Medium::ResetHoleVelocity() {
-
-  tabHoleVelocityE.clear();
-  tabHoleVelocityB.clear();
-  tabHoleVelocityExB.clear();
-  m_hasHoleVelocityE = false;
-  m_hasHoleVelocityB = false;
-  m_hasHoleVelocityExB = false;
-}
-
-void Medium::ResetHoleDiffusion() {
-
-  tabHoleDiffLong.clear();
-  tabHoleDiffTrans.clear();
-  tabHoleDiffTens.clear();
-  m_hasHoleDiffLong = false;
-  m_hasHoleDiffTrans = false;
-  m_hasHoleDiffTens = false;
-}
-
-void Medium::ResetHoleTownsend() {
-
-  tabHoleTownsend.clear();
-  m_hasHoleTownsend = false;
-}
-
-void Medium::ResetHoleAttachment() {
-
-  tabHoleAttachment.clear();
-  m_hasHoleAttachment = false;
-}
-
-void Medium::ResetIonMobility() {
-
-  tabIonMobility.clear();
-  m_hasIonMobility = false;
-}
-
-void Medium::ResetIonDiffusion() {
-
-  tabIonDiffLong.clear();
-  tabIonDiffTrans.clear();
-  m_hasIonDiffLong = false;
-  m_hasIonDiffTrans = false;
-}
-
-void Medium::ResetIonDissociation() {
-
-  tabIonDissociation.clear();
-  m_hasIonDissociation = false;
-}
-
-void Medium::SetFieldGrid(double emin, double emax, int ne, bool logE,
-                          double bmin, double bmax, int nb, double amin,
-                          double amax, int na) {
+void Medium::SetFieldGrid(double emin, double emax, const size_t ne, bool logE,
+                          double bmin, double bmax, const size_t nb, 
+                          double amin, double amax, const size_t na) {
 
   // Check if the requested E-field range makes sense.
   if (ne <= 0) {
-    std::cerr << m_className << "::SetFieldGrid:\n";
-    std::cerr << "    Number of E-fields must be > 0.\n";
+    std::cerr << m_className << "::SetFieldGrid:\n"
+              << "    Number of E-fields must be > 0.\n";
     return;
   }
 
   if (emin < 0. || emax < 0.) {
-    std::cerr << m_className << "::SetFieldGrid:\n";
-    std::cerr << "    Electric fields must be positive.\n";
+    std::cerr << m_className << "::SetFieldGrid:\n"
+              << "    Electric fields must be positive.\n";
     return;
   }
 
   if (emax < emin) {
-    std::cerr << m_className << "::SetFieldGrid:\n";
-    std::cerr << "    Swapping min./max. E-field.\n";
-    const double etemp = emin;
-    emin = emax;
-    emax = etemp;
+    std::cerr << m_className << "::SetFieldGrid: Swapping min./max. E-field.\n";
+    std::swap(emin, emax);
   }
 
   double estep = 0.;
   if (logE) {
     // Logarithmic scale
     if (emin < Small) {
-      std::cerr << m_className << "::SetFieldGrid:\n";
-      std::cerr << "    Min. E-field must be non-zero for log. scale.\n";
+      std::cerr << m_className << "::SetFieldGrid:\n"
+                << "    Min. E-field must be non-zero for log. scale.\n";
       return;
     }
     if (ne == 1) {
-      std::cerr << m_className << "::SetFieldGrid:\n";
-      std::cerr << "    Number of E-fields must be > 1 for log. scale.\n";
+      std::cerr << m_className << "::SetFieldGrid:\n"
+                << "    Number of E-fields must be > 1 for log. scale.\n";
       return;
     }
     estep = pow(emax / emin, 1. / (ne - 1.));
@@ -1463,65 +1025,53 @@ void Medium::SetFieldGrid(double emin, double emax, int ne, bool logE,
 
   // Check if the requested B-field range makes sense.
   if (nb <= 0) {
-    std::cerr << m_className << "::SetFieldGrid:\n";
-    std::cerr << "    Number of B-fields must be > 0.\n";
+    std::cerr << m_className << "::SetFieldGrid:\n"
+              << "    Number of B-fields must be > 0.\n";
     return;
   }
   if (bmax < 0. || bmin < 0.) {
-    std::cerr << m_className << "::SetFieldGrid:\n";
-    std::cerr << "    Magnetic fields must be positive.\n";
+    std::cerr << m_className << "::SetFieldGrid:\n"
+              << "    Magnetic fields must be positive.\n";
     return;
   }
   if (bmax < bmin) {
-    std::cerr << m_className << "::SetFieldGrid:\n";
-    std::cerr << "    Swapping min./max. B-field.\n";
-    const double btemp = bmin;
-    bmin = bmax;
-    bmax = btemp;
+    std::cerr << m_className << "::SetFieldGrid: Swapping min./max. B-field.\n";
+    std::swap(bmin, bmax);
   }
 
-  double bstep = 0.;
-  if (nb > 1) bstep = (bmax - bmin) / (nb - 1.);
+  const double bstep = nb > 1 ? (bmax - bmin) / (nb - 1.) : 0.;
 
   // Check if the requested angular range makes sense.
   if (na <= 0) {
-    std::cerr << m_className << "::SetFieldGrid:\n";
-    std::cerr << "    Number of angles must be > 0.\n";
+    std::cerr << m_className << "::SetFieldGrid:\n"
+              << "    Number of angles must be > 0.\n";
     return;
   }
   if (amax < 0. || amin < 0.) {
-    std::cerr << m_className << "::SetFieldGrid:\n";
-    std::cerr << "    Angles must be positive.\n";
+    std::cerr << m_className << "::SetFieldGrid:"
+              << "    Angles must be positive.\n";
     return;
   }
   if (amax < amin) {
-    std::cerr << m_className << "::SetFieldGrid:\n";
-    std::cerr << "    Swapping min./max. angle.\n";
-    const double atemp = amin;
-    amin = amax;
-    amax = atemp;
+    std::cerr << m_className << "::SetFieldGrid: Swapping min./max. angle.\n";
+    std::swap(amin, amax);
   }
-  double astep = 0.;
-  if (na > 1) astep = (amax - amin) / (na - 1.);
+  const double astep = na > 1 ? (amax - amin) / (na - 1.) : 0;
 
   // Setup the field grids.
   std::vector<double> eFieldsNew(ne);
   std::vector<double> bFieldsNew(nb);
   std::vector<double> bAnglesNew(na);
-  for (int i = 0; i < ne; ++i) {
-    if (logE) {
-      eFieldsNew[i] = emin * pow(estep, i);
-    } else {
-      eFieldsNew[i] = emin + i * estep;
-    }
+  for (size_t i = 0; i < ne; ++i) {
+    eFieldsNew[i] = logE ? emin * pow(estep, i) : emin + i * estep;
   }
-  for (int i = 0; i < nb; ++i) {
+  for (size_t i = 0; i < nb; ++i) {
     bFieldsNew[i] = bmin + i * bstep;
   }
   if (na == 1 && nb == 1 && fabs(bmin) < 1.e-4) {
     bAnglesNew[0] = HalfPi;
   } else {
-    for (int i = 0; i < na; ++i) {
+    for (size_t i = 0; i < na; ++i) {
       bAnglesNew[i] = amin + i * astep;
     }
   }
@@ -1532,162 +1082,75 @@ void Medium::SetFieldGrid(const std::vector<double>& efields,
                           const std::vector<double>& bfields,
                           const std::vector<double>& angles) {
 
-  if (efields.empty()) {
-    std::cerr << m_className << "::SetFieldGrid:\n";
-    std::cerr << "    Number of E-fields must be > 0.\n";
-    return;
-  }
-  if (bfields.empty()) {
-    std::cerr << m_className << "::SetFieldGrid:\n";
-    std::cerr << "    Number of B-fields must be > 0.\n";
-    return;
-  }
-  if (angles.empty()) {
-    std::cerr << m_className << "::SetFieldGrid:\n";
-    std::cerr << "    Number of angles must be > 0.\n";
-    return;
-  }
-
-  // Make sure the values are not negative.
-  if (efields[0] < 0.) {
-    std::cerr << m_className << "::SetFieldGrid:\n";
-    std::cerr << "    E-fields must be >= 0.\n";
-  }
-  if (bfields[0] < 0.) {
-    std::cerr << m_className << "::SetFieldGrid:\n";
-    std::cerr << "    B-fields must be >= 0.\n";
-  }
-  if (angles[0] < 0.) {
-    std::cerr << m_className << "::SetFieldGrid:\n";
-    std::cerr << "    Angles must be >= 0.\n";
-  }
-
-  const unsigned int nEfieldsNew = efields.size();
-  const unsigned int nBfieldsNew = bfields.size();
-  const unsigned int nAnglesNew = angles.size();
-  // Make sure the values are in strictly monotonic, ascending order.
-  if (nEfieldsNew > 1) {
-    for (unsigned int i = 1; i < nEfieldsNew; ++i) {
-      if (efields[i] <= efields[i - 1]) {
-        std::cerr << m_className << "::SetFieldGrid:\n";
-        std::cerr << "    E-fields are not in ascending order.\n";
-        return;
-      }
-    }
-  }
-  if (nBfieldsNew > 1) {
-    for (unsigned int i = 1; i < nBfieldsNew; ++i) {
-      if (bfields[i] <= bfields[i - 1]) {
-        std::cerr << m_className << "::SetFieldGrid:\n";
-        std::cerr << "    B-fields are not in ascending order.\n";
-        return;
-      }
-    }
-  }
-  if (nAnglesNew > 1) {
-    for (unsigned int i = 1; i < nAnglesNew; ++i) {
-      if (angles[i] <= angles[i - 1]) {
-        std::cerr << m_className << "::SetFieldGrid:\n";
-        std::cerr << "    Angles are not in ascending order.\n";
-        return;
-      }
-    }
-  }
+  const std::string hdr = m_className + "::SetFieldGrid";
+  if (!CheckFields(efields, hdr, "E-fields")) return;
+  if (!CheckFields(bfields, hdr, "B-fields")) return;
+  if (!CheckFields(angles, hdr, "angles")) return;
 
   if (m_debug) {
     std::cout << m_className << "::SetFieldGrid:\n";
     std::cout << "    E-fields:\n";
-    for (unsigned int i = 0; i < nEfieldsNew; ++i) {
-      std::cout << "      " << efields[i] << "\n";
-    }
+    for (const auto efield : efields) std::cout << "      " << efield << "\n";
     std::cout << "    B-fields:\n";
-    for (unsigned int i = 0; i < nBfieldsNew; ++i) {
-      std::cout << "      " << bfields[i] << "\n";
-    }
+    for (const auto bfield : bfields) std::cout << "      " << bfield << "\n";
     std::cout << "    Angles:\n";
-    for (unsigned int i = 0; i < nAnglesNew; ++i) {
-      std::cout << "      " << angles[i] << "\n";
-    }
+    for (const auto angle : angles) std::cout << "      " << angle << "\n";
   }
 
   // Clone the existing tables.
   // Electrons
-  CloneTable(tabElectronVelocityE, efields, bfields, angles, m_intpVelocity,
-             m_extrLowVelocity, m_extrHighVelocity, 0.,
+  CloneTable(m_eVelocityE, efields, bfields, angles, m_intpVel, m_extrVel, 0.,
              "electron velocity along E");
-  CloneTable(tabElectronVelocityB, efields, bfields, angles, m_intpVelocity,
-             m_extrLowVelocity, m_extrHighVelocity, 0.,
+  CloneTable(m_eVelocityB, efields, bfields, angles, m_intpVel, m_extrVel, 0.,
              "electron velocity along Bt");
-  CloneTable(tabElectronVelocityExB, efields, bfields, angles, m_intpVelocity,
-             m_extrLowVelocity, m_extrHighVelocity, 0.,
-             "electron velocity along ExB");
-  CloneTable(tabElectronDiffLong, efields, bfields, angles, m_intpDiffusion,
-             m_extrLowDiffusion, m_extrHighDiffusion, 0.,
+  CloneTable(m_eVelocityExB, efields, bfields, angles, m_intpVel, m_extrVel, 0.,
+              "electron velocity along ExB");
+  CloneTable(m_eDiffLong, efields, bfields, angles, m_intpDiff, m_extrDiff, 0.,
              "electron longitudinal diffusion");
-  CloneTable(tabElectronDiffTrans, efields, bfields, angles, m_intpDiffusion,
-             m_extrLowDiffusion, m_extrHighDiffusion, 0.,
+  CloneTable(m_eDiffTrans, efields, bfields, angles, m_intpDiff, m_extrDiff, 0.,
              "electron transverse diffusion");
-  CloneTable(tabElectronTownsend, efields, bfields, angles, m_intpTownsend,
-             m_extrLowTownsend, m_extrHighTownsend, -30.,
-             "electron Townsend coefficient");
-  CloneTable(tabElectronAttachment, efields, bfields, angles, m_intpAttachment,
-             m_extrLowAttachment, m_extrHighAttachment, -30.,
-             "electron attachment coefficient");
-  CloneTable(tabElectronLorentzAngle, efields, bfields, angles, m_intpLorentzAngle,
-             m_extrLowLorentzAngle, m_extrHighLorentzAngle, 0.,
-             "electron attachment coefficient");
-  if (m_hasElectronDiffTens) {
-    CloneTensor(tabElectronDiffTens, 6, efields, bfields, angles, m_intpDiffusion,
-                m_extrLowDiffusion, m_extrHighDiffusion, 0.,
-                "electron diffusion tensor");
+  CloneTable(m_eTownsend, efields, bfields, angles, m_intpTownsend,
+             m_extrTownsend, -30., "electron Townsend coefficient");
+  CloneTable(m_eAttachment, efields, bfields, angles, m_intpAttachment,
+             m_extrAttachment, -30., "electron attachment coefficient");
+  CloneTable(m_eLorentzAngle, efields, bfields, angles, m_intpLorentzAngle,
+             m_extrLorentzAngle, 0., "electron Lorentz angle");
+  if (!m_eDiffTens.empty()) {
+    CloneTensor(m_eDiffTens, 6, efields, bfields, angles, m_intpDiff,
+                m_extrDiff, 0., "electron diffusion tensor");
   }
 
   // Holes
-  CloneTable(tabHoleVelocityE, efields, bfields, angles, m_intpVelocity,
-             m_extrLowVelocity, m_extrHighVelocity, 0., 
+  CloneTable(m_hVelocityE, efields, bfields, angles, m_intpVel, m_extrVel, 0.,
              "hole velocity along E");
-  CloneTable(tabHoleVelocityB, efields, bfields, angles, m_intpVelocity,
-             m_extrLowVelocity, m_extrHighVelocity, 0., 
+  CloneTable(m_hVelocityB, efields, bfields, angles, m_intpVel, m_extrVel, 0.,
              "hole velocity along Bt");
-  CloneTable(tabHoleVelocityExB, efields, bfields, angles, m_intpVelocity,
-             m_extrLowVelocity, m_extrHighVelocity, 0.,
+  CloneTable(m_hVelocityExB, efields, bfields, angles, m_intpVel, m_extrVel, 0.,
              "hole velocity along ExB");
-  CloneTable(tabHoleDiffLong, efields, bfields, angles, m_intpDiffusion,
-             m_extrLowDiffusion, m_extrHighDiffusion, 0.,
+  CloneTable(m_hDiffLong, efields, bfields, angles, m_intpDiff, m_extrDiff, 0.,
              "hole longitudinal diffusion");
-  CloneTable(tabHoleDiffTrans, efields, bfields, angles, m_intpDiffusion,
-             m_extrLowDiffusion, m_extrHighDiffusion, 0.,
+  CloneTable(m_hDiffTrans, efields, bfields, angles, m_intpDiff, m_extrDiff, 0.,
              "hole transverse diffusion");
-  CloneTable(tabHoleTownsend, efields, bfields, angles, m_intpTownsend,
-             m_extrLowTownsend, m_extrHighTownsend, -30.,
-             "hole Townsend coefficient");
-  CloneTable(tabHoleAttachment, efields, bfields, angles, m_intpAttachment,
-             m_extrLowAttachment, m_extrHighAttachment, -30.,
-             "hole attachment coefficient");
-  if (m_hasHoleDiffTens) {
-    CloneTensor(tabHoleDiffTens, 6, efields, bfields, angles, m_intpDiffusion,
-                m_extrLowDiffusion, m_extrHighDiffusion, 0.,
-                "hole diffusion tensor");
+  CloneTable(m_hTownsend, efields, bfields, angles, m_intpTownsend,
+             m_extrTownsend, -30., "hole Townsend coefficient");
+  CloneTable(m_hAttachment, efields, bfields, angles, m_intpAttachment,
+             m_extrAttachment, -30., "hole attachment coefficient");
+  if (!m_hDiffTens.empty()) {
+    CloneTensor(m_hDiffTens, 6, efields, bfields, angles, m_intpDiff,
+                m_extrDiff, 0., "hole diffusion tensor");
   }
 
   // Ions
-  CloneTable(tabIonMobility, efields, bfields, angles, m_intpMobility,
-             m_extrLowMobility, m_extrHighMobility, 0., 
-             "ion mobility");
-  CloneTable(tabIonDiffLong, efields, bfields, angles, m_intpDiffusion,
-             m_extrLowDiffusion, m_extrHighDiffusion, 0.,
-             "ion longitudinal diffusion");
-  CloneTable(tabIonDiffTrans, efields, bfields, angles, m_intpDiffusion,
-             m_extrLowDiffusion, m_extrHighDiffusion, 0.,
-             "ion transverse diffusion");
-  CloneTable(tabIonDissociation, efields, bfields, angles, m_intpDissociation,
-             m_extrLowDissociation, m_extrHighDissociation, -30.,
-             "ion dissociation");
+  CloneTable(m_ionMobility, efields, bfields, angles, m_intpMobility,
+             m_extrMobility, 0., "ion mobility");
+  CloneTable(m_ionDiffLong, efields, bfields, angles, m_intpDiff,
+             m_extrDiff, 0., "ion longitudinal diffusion");
+  CloneTable(m_ionDiffTrans, efields, bfields, angles, m_intpDiff,
+             m_extrDiff, 0., "ion transverse diffusion");
+  CloneTable(m_ionDissociation, efields, bfields, angles, m_intpDissociation,
+             m_extrDissociation, -30., "ion dissociation");
 
-  if (nBfieldsNew > 1 || nAnglesNew > 1) m_map2d = true;
-  m_eFields.resize(nEfieldsNew);
-  m_bFields.resize(nBfieldsNew);
-  m_bAngles.resize(nAnglesNew);
+  if (bfields.size() > 1 || angles.size() > 1) m_map2d = true;
   m_eFields = efields;
   m_bFields = bfields;
   m_bAngles = angles;
@@ -1705,72 +1168,51 @@ void Medium::GetFieldGrid(std::vector<double>& efields,
 bool Medium::GetElectronVelocityE(const unsigned int ie, 
                                   const unsigned int ib, 
                                   const unsigned int ia, double& v) {
-
-  if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetElectronVelocityE:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    v = 0.;
+  v = 0.;
+  if (ie >= m_eFields.size() || ib >= m_bFields.size() || 
+      ia >= m_bAngles.size()) {
+    PrintOutOfRange(m_className, "GetElectronVelocityE", ie, ib, ia);
     return false;
   }
-  if (!m_hasElectronVelocityE) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetElectronVelocityE:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    v = 0.;
+  if (m_eVelocityE.empty()) {
+    if (m_debug) PrintDataNotAvailable(m_className, "GetElectronVelocityE");
     return false;
   }
-
-  v = tabElectronVelocityE[ia][ib][ie];
+  v = m_eVelocityE[ia][ib][ie];
   return true;
 }
 
 bool Medium::GetElectronVelocityExB(const unsigned int ie, 
                                     const unsigned int ib, 
                                     const unsigned int ia, double& v) {
-
-  if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetElectronVelocityExB:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    v = 0.;
+  v = 0.;
+  if (ie >= m_eFields.size() || ib >= m_bFields.size() || 
+      ia >= m_bAngles.size()) {
+    PrintOutOfRange(m_className, "GetElectronVelocityExB", ie, ib, ia);
     return false;
   }
-  if (!m_hasElectronVelocityExB) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetElectronVelocityExB:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    v = 0.;
+  if (m_eVelocityExB.empty()) {
+    if (m_debug) PrintDataNotAvailable(m_className, "GetElectronVelocityExB");
     return false;
   }
-
-  v = tabElectronVelocityExB[ia][ib][ie];
+  v = m_eVelocityExB[ia][ib][ie];
   return true;
 }
 
 bool Medium::GetElectronVelocityB(const unsigned int ie, 
                                   const unsigned int ib, 
                                   const unsigned int ia, double& v) {
-
-  if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetElectronVelocityB:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    v = 0.;
+  v = 0.;
+  if (ie >= m_eFields.size() || ib >= m_bFields.size() || 
+      ia >= m_bAngles.size()) {
+    PrintOutOfRange(m_className, "GetElectronVelocityB", ie, ib, ia);
     return false;
   }
-  if (!m_hasElectronVelocityB) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetElectronVelocityB:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    v = 0.;
+  if (m_eVelocityB.empty()) {
+    if (m_debug) PrintDataNotAvailable(m_className, "GetElectronVelocityB");
     return false;
   }
-
-  v = tabElectronVelocityB[ia][ib][ie];
+  v = m_eVelocityB[ia][ib][ie];
   return true;
 }
 
@@ -1778,24 +1220,19 @@ bool Medium::GetElectronLongitudinalDiffusion(const unsigned int ie,
                                               const unsigned int ib,
                                               const unsigned int ia, 
                                               double& dl) {
-
-  if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetElectronLongitudinalDiffusion:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    dl = 0.;
+  dl = 0.;
+  if (ie >= m_eFields.size() || ib >= m_bFields.size() || 
+      ia >= m_bAngles.size()) {
+    PrintOutOfRange(m_className, "GetElectronLongitudinalDiffusion", ie, ib, ia);
     return false;
   }
-  if (!m_hasElectronDiffLong) {
+  if (m_eDiffLong.empty()) {
     if (m_debug) {
-      std::cerr << m_className << "::GetElectronLongitudinalDiffusion:\n";
-      std::cerr << "    Data not available.\n";
+      PrintDataNotAvailable(m_className, "GetElectronLongitudinalDiffusion");
     }
-    dl = 0.;
     return false;
   }
-
-  dl = tabElectronDiffLong[ia][ib][ie];
+  dl = m_eDiffLong[ia][ib][ie];
   return true;
 }
 
@@ -1803,359 +1240,264 @@ bool Medium::GetElectronTransverseDiffusion(const unsigned int ie,
                                             const unsigned int ib,
                                             const unsigned int ia, 
                                             double& dt) {
-
-  if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetElectronTransverseDiffusion:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    dt = 0.;
+  dt = 0.;
+  if (ie >= m_eFields.size() || ib >= m_bFields.size() || 
+      ia >= m_bAngles.size()) {
+    PrintOutOfRange(m_className, "GetElectronTransverseDiffusion", ie, ib, ia);
     return false;
   }
-  if (!m_hasElectronDiffTrans) {
+  if (m_eDiffTrans.empty()) {
     if (m_debug) {
-      std::cerr << m_className << "::GetElectronTransverseDiffusion:\n";
-      std::cerr << "    Data not available.\n";
+      PrintDataNotAvailable(m_className, "GetElectronTransverseDiffusion");
     }
-    dt = 0.;
     return false;
   }
-
-  dt = tabElectronDiffTrans[ia][ib][ie];
+  dt = m_eDiffTrans[ia][ib][ie];
   return true;
 }
 
 bool Medium::GetElectronTownsend(const unsigned int ie, 
                                  const unsigned int ib, 
                                  const unsigned int ia, double& alpha) {
-
-  if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetElectronTownsend:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    alpha = 0.;
+  alpha = 0.;
+  if (ie >= m_eFields.size() || ib >= m_bFields.size() || 
+      ia >= m_bAngles.size()) {
+    PrintOutOfRange(m_className, "GetElectronTownsend", ie, ib, ia);
     return false;
   }
-  if (tabElectronTownsend.empty()) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetElectronTownsend:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    alpha = 0.;
+  if (m_eTownsend.empty()) {
+    if (m_debug) PrintDataNotAvailable(m_className, "GetElectronTownsend");
     return false;
   }
-
-  alpha = tabElectronTownsend[ia][ib][ie];
+  alpha = m_eTownsend[ia][ib][ie];
   return true;
 }
 
 bool Medium::GetElectronAttachment(const unsigned int ie, 
                                    const unsigned int ib, 
                                    const unsigned int ia, double& eta) {
-
-  if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetElectronAttachment:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    eta = 0.;
+ eta = 0.;
+  if (ie >= m_eFields.size() || ib >= m_bFields.size() || 
+      ia >= m_bAngles.size()) {
+    PrintOutOfRange(m_className, "GetElectronAttachment", ie, ib, ia);
     return false;
   }
-  if (!m_hasElectronAttachment) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetElectronAttachment:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    eta = 0.;
+  if (m_eAttachment.empty()) {
+    if (m_debug) PrintDataNotAvailable(m_className, "GetElectronAttachment");
     return false;
   }
-
-  eta = tabElectronAttachment[ia][ib][ie];
+  eta = m_eAttachment[ia][ib][ie];
   return true;
 }
 
 bool Medium::GetElectronLorentzAngle(const unsigned int ie, 
                                      const unsigned int ib, 
                                      const unsigned int ia, double& lor) {
-
-  if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetElectronLorentzAngle:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    lor = 0.;
+  lor = 0.;
+  if (ie >= m_eFields.size() || ib >= m_bFields.size() || 
+      ia >= m_bAngles.size()) {
+    PrintOutOfRange(m_className, "GetElectronLorentzAngle", ie, ib, ia);
     return false;
   }
-  if (!m_hasElectronLorentzAngle) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetElectronLorentzAngle:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    lor = 0.;
+  if (m_eLorentzAngle.empty()) {
+    if (m_debug) PrintDataNotAvailable(m_className, "GetElectronLorentzAngle");
     return false;
   }
-
-  lor = tabElectronLorentzAngle[ia][ib][ie];
+  lor = m_eLorentzAngle[ia][ib][ie];
   return true;
 }
 
 bool Medium::GetHoleVelocityE(const unsigned int ie, 
                               const unsigned int ib, 
                               const unsigned int ia, double& v) {
-
-  if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetHoleVelocityE:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    v = 0.;
+  v = 0.;
+  if (ie >= m_eFields.size() || ib >= m_bFields.size() || 
+      ia >= m_bAngles.size()) {
+    PrintOutOfRange(m_className, "GetHoleVelocityE", ie, ib, ia);
     return false;
   }
-  if (!m_hasHoleVelocityE) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetHoleVelocityE:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    v = 0.;
+  if (m_hVelocityE.empty()) {
+    if (m_debug) PrintDataNotAvailable(m_className, "GetHoleVelocityE");
     return false;
   }
-
-  v = tabHoleVelocityE[ia][ib][ie];
+  v = m_hVelocityE[ia][ib][ie];
   return true;
 }
 
 bool Medium::GetHoleVelocityExB(const unsigned int ie, 
                                 const unsigned int ib, 
                                 const unsigned int ia, double& v) {
-
-  if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetHoleVelocityExB:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    v = 0.;
+  v = 0.;
+  if (ie >= m_eFields.size() || ib >= m_bFields.size() || 
+      ia >= m_bAngles.size()) {
+    PrintOutOfRange(m_className, "GetHoleVelocityExB", ie, ib, ia);
     return false;
   }
-  if (!m_hasHoleVelocityExB) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetHoleVelocityExB:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    v = 0.;
+  if (m_hVelocityExB.empty()) {
+    if (m_debug) PrintDataNotAvailable(m_className, "GetHoleVelocityExB");
     return false;
   }
-
-  v = tabHoleVelocityExB[ia][ib][ie];
+  v = m_hVelocityExB[ia][ib][ie];
   return true;
 }
 
 bool Medium::GetHoleVelocityB(const unsigned int ie, 
                               const unsigned int ib, 
                               const unsigned int ia, double& v) {
-
-  if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetHoleVelocityB:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    v = 0.;
+  v = 0.;
+  if (ie >= m_eFields.size() || ib >= m_bFields.size() || 
+      ia >= m_bAngles.size()) {
+    PrintOutOfRange(m_className, "GetHoleVelocityB", ie, ib, ia);
     return false;
   }
-  if (!m_hasHoleVelocityB) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetHoleVelocityB:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    v = 0.;
+  if (m_hVelocityB.empty()) {
+    if (m_debug) PrintDataNotAvailable(m_className, "GetHoleVelocityB");
     return false;
   }
-
-  v = tabHoleVelocityB[ia][ib][ie];
+  v = m_hVelocityB[ia][ib][ie];
   return true;
 }
 
 bool Medium::GetHoleLongitudinalDiffusion(const unsigned int ie, 
                                           const unsigned int ib,
                                           const unsigned int ia, double& dl) {
-
-  if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetHoleLongitudinalDiffusion:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    dl = 0.;
+  dl = 0.;
+  if (ie >= m_eFields.size() || ib >= m_bFields.size() || 
+      ia >= m_bAngles.size()) {
+    PrintOutOfRange(m_className, "GetHoleLongitudinalDiffusion", ie, ib, ia);
     return false;
   }
-  if (!m_hasHoleDiffLong) {
+  if (m_hDiffLong.empty()) {
     if (m_debug) {
-      std::cerr << m_className << "::GetHoleLongitudinalDiffusion:\n";
-      std::cerr << "    Data not available.\n";
+      PrintDataNotAvailable(m_className, "GetHoleLongitudinalDiffusion");
     }
-    dl = 0.;
     return false;
   }
-
-  dl = tabHoleDiffLong[ia][ib][ie];
+  dl = m_hDiffLong[ia][ib][ie];
   return true;
 }
 
 bool Medium::GetHoleTransverseDiffusion(const unsigned int ie, 
                                         const unsigned int ib,
                                         const unsigned int ia, double& dt) {
-
-  if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetHoleTransverseDiffusion:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    dt = 0.;
+  dt = 0.;
+  if (ie >= m_eFields.size() || ib >= m_bFields.size() || 
+      ia >= m_bAngles.size()) {
+    PrintOutOfRange(m_className, "GetHoleTransverseDiffusion", ie, ib, ia);
     return false;
   }
-  if (!m_hasHoleDiffTrans) {
+  if (m_hDiffTrans.empty()) {
     if (m_debug) {
-      std::cerr << m_className << "::GetHoleTransverseDiffusion:\n";
-      std::cerr << "    Data not available.\n";
+      PrintDataNotAvailable(m_className, "GetHoleTransverseDiffusion");
     }
-    dt = 0.;
     return false;
   }
-
-  dt = tabHoleDiffTrans[ia][ib][ie];
+  dt = m_hDiffTrans[ia][ib][ie];
   return true;
 }
 
 bool Medium::GetHoleTownsend(const unsigned int ie, 
                              const unsigned int ib, 
                              const unsigned int ia, double& alpha) {
-
-  if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetHoleTownsend:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    alpha = 0.;
+  alpha = 0.;
+  if (ie >= m_eFields.size() || ib >= m_bFields.size() || 
+      ia >= m_bAngles.size()) {
+    PrintOutOfRange(m_className, "GetHoleTownsend", ie, ib, ia);
     return false;
   }
-  if (!m_hasHoleTownsend) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetHoleTownsend:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    alpha = 0.;
+  if (m_hTownsend.empty()) {
+    if (m_debug) PrintDataNotAvailable(m_className, "GetHoleTownsend");
     return false;
   }
-
-  alpha = tabHoleTownsend[ia][ib][ie];
+  alpha = m_hTownsend[ia][ib][ie];
   return true;
 }
 
 bool Medium::GetHoleAttachment(const unsigned int ie, 
                                const unsigned int ib, 
                                const unsigned int ia, double& eta) {
-
-  if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetHoleAttachment:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    eta = 0.;
+  eta = 0.;
+  if (ie >= m_eFields.size() || ib >= m_bFields.size() || 
+      ia >= m_bAngles.size()) {
+    PrintOutOfRange(m_className, "GetHoleAttachment", ie, ib, ia);
     return false;
   }
-  if (!m_hasHoleAttachment) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetHoleAttachment:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    eta = 0.;
+  if (m_hAttachment.empty()) {
+    if (m_debug) PrintDataNotAvailable(m_className, "GetHoleAttachment");
     return false;
   }
-
-  eta = tabHoleAttachment[ia][ib][ie];
+  eta = m_hAttachment[ia][ib][ie];
   return true;
 }
 
 bool Medium::GetIonMobility(const unsigned int ie, const unsigned int ib, 
                             const unsigned int ia, double& mu) {
-
-  if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetIonMobility:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    mu = 0.;
+  mu = 0.;
+  if (ie >= m_eFields.size() || ib >= m_bFields.size() || 
+      ia >= m_bAngles.size()) {
+    PrintOutOfRange(m_className, "GetIonMobility", ie, ib, ia);
     return false;
   }
-  if (!m_hasIonMobility) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetIonMobility:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    mu = 0.;
+  if (m_ionMobility.empty()) {
+    if (m_debug) PrintDataNotAvailable(m_className, "GetIonMobility");
     return false;
   }
-
-  mu = tabIonMobility[ia][ib][ie];
+  mu = m_ionMobility[ia][ib][ie];
   return true;
 }
 
 bool Medium::GetIonLongitudinalDiffusion(const unsigned int ie, 
                                          const unsigned int ib,
                                          const unsigned int ia, double& dl) {
-
-  if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetIonLongitudinalDiffusion:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    dl = 0.;
+  dl = 0.;
+  if (ie >= m_eFields.size() || ib >= m_bFields.size() || 
+      ia >= m_bAngles.size()) {
+    PrintOutOfRange(m_className, "GetIonLongitudinalDiffusion", ie, ib, ia);
     return false;
   }
-  if (!m_hasIonDiffLong) {
+  if (m_ionDiffLong.empty()) {
     if (m_debug) {
-      std::cerr << m_className << "::GetIonLongitudinalDiffusion:\n";
-      std::cerr << "    Data not available.\n";
+      PrintDataNotAvailable(m_className, "GetIonLongitudinalDiffusion");
     }
-    dl = 0.;
     return false;
   }
-
-  dl = tabIonDiffLong[ia][ib][ie];
+  dl = m_ionDiffLong[ia][ib][ie];
   return true;
 }
 
 bool Medium::GetIonTransverseDiffusion(const unsigned int ie, 
                                        const unsigned int ib, 
                                        const unsigned int ia, double& dt) {
-
-  if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetIonTransverseDiffusion:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    dt = 0.;
+  dt = 0.;
+  if (ie >= m_eFields.size() || ib >= m_bFields.size() || 
+      ia >= m_bAngles.size()) {
+    PrintOutOfRange(m_className, "GetIonTransverseDiffusion", ie, ib, ia);
     return false;
   }
-  if (!m_hasIonDiffTrans) {
+  if (m_ionDiffTrans.empty()) {
     if (m_debug) {
-      std::cerr << m_className << "::GetIonTransverseDiffusion:\n";
-      std::cerr << "    Data not available.\n";
+      PrintDataNotAvailable(m_className, "GetIonTransverseDiffusion");
     }
-    dt = 0.;
     return false;
   }
-
-  dt = tabIonDiffTrans[ia][ib][ie];
+  dt = m_ionDiffTrans[ia][ib][ie];
   return true;
 }
 
 bool Medium::GetIonDissociation(const unsigned int ie, 
                                 const unsigned int ib, 
                                 const unsigned int ia, double& diss) {
-
-  if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::GetIonDissociation:\n";
-    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
-    diss = 0.;
+  diss = 0.;
+  if (ie >= m_eFields.size() || ib >= m_bFields.size() || 
+      ia >= m_bAngles.size()) {
+    PrintOutOfRange(m_className, "GetIonDissociation", ie, ib, ia);
     return false;
   }
-  if (!m_hasIonDissociation) {
-    if (m_debug) {
-      std::cerr << m_className << "::GetIonDissociation:\n";
-      std::cerr << "    Data not available.\n";
-    }
-    diss = 0.;
+  if (m_ionDissociation.empty()) {
+    if (m_debug) PrintDataNotAvailable(m_className, "GetIonDissociation");
     return false;
   }
-
-  diss = tabIonDissociation[ia][ib][ie];
+  diss = m_ionDissociation[ia][ib][ie];
   return true;
 }
 
@@ -2164,64 +1506,48 @@ void Medium::CloneTable(std::vector<std::vector<std::vector<double> > >& tab,
                         const std::vector<double>& bfields,
                         const std::vector<double>& angles, 
                         const unsigned int intp,
-                        const unsigned int extrLow, 
-                        const unsigned int extrHigh,
+                        const std::pair<unsigned int, unsigned int>& extr,
                         const double init, const std::string& label) {
 
   if (m_debug) {
-    std::cout << m_className << "::CloneTable:\n";
-    std::cout << "    Copying values of " << label << " to new grid.\n";
+    std::cout << m_className << "::CloneTable: Copying " << label
+              << " to new grid.\n";
   }
 
   if (tab.empty()) {
-    if (m_debug) std::cout << "    Table is empty.\n";
+    if (m_debug) std::cout << m_className << "::CloneTable: Table is empty.\n";
     return;
   }
   // Get the dimensions of the new grid.
-  const int nEfieldsNew = efields.size();
-  const int nBfieldsNew = bfields.size();
-  const int nAnglesNew = angles.size();
+  const auto nE = efields.size();
+  const auto nB = bfields.size();
+  const auto nA = angles.size();
 
   // Create a temporary table to store the values at the new grid points.
   std::vector<std::vector<std::vector<double> > > tabClone;
-  InitParamArrays(nEfieldsNew, nBfieldsNew, nAnglesNew, tabClone, init);
+  InitTable(nE, nB, nA, tabClone, init);
 
   // Fill the temporary table.
-  for (int i = 0; i < nEfieldsNew; ++i) {
-    for (int j = 0; j < nBfieldsNew; ++j) {
-      for (int k = 0; k < nAnglesNew; ++k) {
+  for (size_t i = 0; i < nE; ++i) {
+    const double e = efields[i];
+    for (size_t j = 0; j < nB; ++j) {
+      const double b = bfields[j];
+      for (size_t k = 0; k < nA; ++k) {
+        const double a = angles[k];
         double val = 0.;
-        if (m_map2d) {
-          if (!Numerics::Boxin3(tab, m_bAngles, m_bFields, m_eFields, m_bAngles.size(),
-                                m_bFields.size(), m_eFields.size(), angles[k], bfields[j],
-                                efields[i], val, intp)) {
-            std::cerr << m_className << "::SetFieldGrid:\n";
-            std::cerr << "    Interpolation of " << label << " failed.\n";
-            std::cerr << "    Cannot copy value to new grid at: \n";
-            std::cerr << "      E = " << efields[i] << "\n";
-            std::cerr << "      B = " << bfields[j] << "\n";
-            std::cerr << "      angle: " << angles[k] << "\n";
-          } else {
-            tabClone[k][j][i] = val;
-          }
-        } else {
-          val = Interpolate1D(efields[i], tab[0][0], m_eFields, intp, extrLow,
-                              extrHigh);
-          tabClone[k][j][i] = val;
+        if (!Interpolate(e, b, a, tab, val, intp, extr)) {
+          std::cerr << m_className << "::CloneTable:\n"
+                    << "    Interpolation of " << label << " failed.\n"
+                    << "    Cannot copy value to new grid at E = " << e 
+                    << ", B = " << b << ", angle: " << a << "\n";
+          continue;
         }
+        tabClone[k][j][i] = val;
       }
     }
   }
-  // Re-dimension the original table.
-  InitParamArrays(nEfieldsNew, nBfieldsNew, nAnglesNew, tab, init);
   // Copy the values to the original table.
-  for (int i = 0; i < nEfieldsNew; ++i) {
-    for (int j = 0; j < nBfieldsNew; ++j) {
-      for (int k = 0; k < nAnglesNew; ++k) {
-        tab[k][j][i] = tabClone[k][j][i];
-      }
-    }
-  }
+  tab.swap(tabClone);
   tabClone.clear();
 }
 
@@ -2231,7 +1557,7 @@ void Medium::CloneTensor(
     const std::vector<double>& efields, const std::vector<double>& bfields, 
     const std::vector<double>& angles,
     const unsigned int intp, 
-    const unsigned int extrLow, const unsigned int extrHigh, 
+    const std::pair<unsigned int, unsigned int>& extr,
     const double init,
     const std::string& label) {
 
@@ -2239,56 +1565,38 @@ void Medium::CloneTensor(
   if (tab.empty()) return;
 
   // Get the dimensions of the new grid.
-  const unsigned int nEfieldsNew = efields.size();
-  const unsigned int nBfieldsNew = bfields.size();
-  const unsigned int nAnglesNew = angles.size();
+  const unsigned int nE = efields.size();
+  const unsigned int nB = bfields.size();
+  const unsigned int nA = angles.size();
 
   // Create a temporary table to store the values at the new grid points.
   std::vector<std::vector<std::vector<std::vector<double> > > > tabClone;
-  tabClone.clear();
-  InitParamTensor(nEfieldsNew, nBfieldsNew, nAnglesNew, n, tabClone, init);
+  InitTensor(nE, nB, nA, n, tabClone, init);
 
   // Fill the temporary table.
   for (unsigned int l = 0; l < n; ++l) {
-    for (unsigned int i = 0; i < nEfieldsNew; ++i) {
-      for (unsigned int j = 0; j < nBfieldsNew; ++j) {
-        for (unsigned int k = 0; k < nAnglesNew; ++k) {
+    for (unsigned int i = 0; i < nE; ++i) {
+      const double e = efields[i];
+      for (unsigned int j = 0; j < nB; ++j) {
+        const double b = bfields[j];
+        for (unsigned int k = 0; k < nA; ++k) {
+          const double a = angles[k];
           double val = 0.;
-          if (m_map2d) {
-            if (!Numerics::Boxin3(tab[l], m_bAngles, m_bFields, m_eFields, m_bAngles.size(),
-                                  m_bFields.size(), m_eFields.size(), angles[k], bfields[j],
-                                  efields[i], val, intp)) {
-              std::cerr << m_className << "::SetFieldGrid:\n";
-              std::cerr << "    Interpolation of " << label << " failed.\n";
-              std::cerr << "    Cannot copy value to new grid at: \n";
-              std::cerr << "      Index: " << l << "\n";
-              std::cerr << "      E = " << efields[i] << "\n";
-              std::cerr << "      B = " << bfields[j] << "\n";
-              std::cerr << "      angle: " << angles[k] << "\n";
-            } else {
-              tabClone[l][k][j][i] = val;
-            }
-          } else {
-            val = Interpolate1D(efields[i], tab[l][0][0], m_eFields, intp,
-                                extrLow, extrHigh);
-            tabClone[l][k][j][i] = val;
+          if (!Interpolate(e, b, a, tab[l], val, intp, extr)) {
+            std::cerr << m_className << "::CloneTensor:\n"
+                      << "    Interpolation of " << label << " failed.\n"
+                      << "    Cannot copy value to new grid at index " << l 
+                      << ", E = " << e << ", B = "  << b << ", angle: " 
+                      << a << "\n";
+            continue;
           }
+          tabClone[l][k][j][i] = val;
         }
       }
     }
   }
-  // Re-dimension the original table.
-  InitParamTensor(nEfieldsNew, nBfieldsNew, nAnglesNew, n, tab, 0.);
   // Copy the values to the original table.
-  for (unsigned int l = 0; l < n; ++l) {
-    for (unsigned int i = 0; i < nEfieldsNew; ++i) {
-      for (unsigned int j = 0; j < nBfieldsNew; ++j) {
-        for (unsigned int k = 0; k < nAnglesNew; ++k) {
-          tab[l][k][j][i] = tabClone[l][k][j][i];
-        }
-      }
-    }
-  }
+  tab.swap(tabClone);
 }
 
 bool Medium::SetIonMobility(const unsigned int ie, const unsigned int ib, 
@@ -2297,13 +1605,11 @@ bool Medium::SetIonMobility(const unsigned int ie, const unsigned int ib,
   // Check the index.
   if (ie >= m_eFields.size() || ib >= m_bFields.size() || 
       ia >= m_bAngles.size()) {
-    std::cerr << m_className << "::SetIonMobility:\n";
-    std::cerr << "    Index (" << ie << ", " << ib << ", " << ia
-              << ") out of range.\n";
+    PrintOutOfRange(m_className, "SetIonMobility", ie, ib, ia);
     return false;
   }
 
-  if (!m_hasIonMobility) {
+  if (m_ionMobility.empty()) {
     std::cerr << m_className << "::SetIonMobility:\n";
     std::cerr << "    Ion mobility table not initialised.\n";
     return false;
@@ -2315,7 +1621,7 @@ bool Medium::SetIonMobility(const unsigned int ie, const unsigned int ib,
     return false;
   }
 
-  tabIonMobility[ia][ib][ie] = mu;
+  m_ionMobility[ia][ib][ie] = mu;
   if (m_debug) {
     std::cout << m_className << "::SetIonMobility:\n";
     std::cout << "   Ion mobility at E = " << m_eFields[ie]
@@ -2340,154 +1646,98 @@ bool Medium::SetIonMobility(const std::vector<double>& efields,
   const unsigned int nEfields = m_eFields.size();
   const unsigned int nBfields = m_bFields.size();
   const unsigned int nAngles = m_bAngles.size();
-  InitParamArrays(nEfields, nBfields, nAngles, tabIonMobility, 0.);
+  InitTable(nEfields, nBfields, nAngles, m_ionMobility, 0.);
   for (unsigned int i = 0; i < nEfields; ++i) {
     const double e = m_eFields[i];
     const double mu = Interpolate1D(e, mobilities, efields, m_intpMobility,
-                                    m_extrLowMobility, m_extrHighMobility);
-    tabIonMobility[0][0][i] = mu;
+                                    m_extrMobility);
+    m_ionMobility[0][0][i] = mu;
   }
 
   if (m_map2d) {
     for (unsigned int i = 0; i < nAngles; ++i) {
       for (unsigned int j = 0; j< nBfields; ++j) {
         for (unsigned int k = 0; k < nEfields; ++k) {
-          tabIonMobility[i][j][k] = tabIonMobility[0][0][k];
+          m_ionMobility[i][j][k] = m_ionMobility[0][0][k];
         }
       }
     }
   }
-  m_hasIonMobility = true;
-
   return true;
 }
 
-void Medium::SetExtrapolationMethodVelocity(const std::string& extrLow,
-                                            const std::string& extrHigh) {
 
-  unsigned int iExtr = 0;
-  if (GetExtrapolationIndex(extrLow, iExtr)) {
-    m_extrLowVelocity = iExtr;
-  } else {
-    std::cerr << m_className << "::SetExtrapolationMethodVelocity:\n";
-    std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
-  }
+void Medium::SetExtrapolationMethodVelocity(const std::string& low,
+                                            const std::string& high) {
 
-  if (GetExtrapolationIndex(extrHigh, iExtr)) {
-    m_extrHighVelocity = iExtr;
+  SetExtrapolationMethod(low, high, m_extrVel, "Velocity");
+}
+
+void Medium::SetExtrapolationMethodDiffusion(const std::string& low,
+                                             const std::string& high) {
+
+  SetExtrapolationMethod(low, high, m_extrDiff, "Diffusion");
+}
+
+void Medium::SetExtrapolationMethodTownsend(const std::string& low,
+                                            const std::string& high) {
+
+  SetExtrapolationMethod(low, high, m_extrTownsend, "Townsend");
+}
+
+void Medium::SetExtrapolationMethodAttachment(const std::string& low,
+                                              const std::string& high) {
+
+  SetExtrapolationMethod(low, high, m_extrAttachment, "Attachment");
+}
+
+void Medium::SetExtrapolationMethodIonMobility(const std::string& low,
+                                               const std::string& high) {
+
+  SetExtrapolationMethod(low, high, m_extrMobility, "IonMobility");
+}
+
+void Medium::SetExtrapolationMethodIonDissociation(const std::string& low,
+                                                   const std::string& high) {
+
+  SetExtrapolationMethod(low, high, m_extrDissociation, "IonDissociation");
+}
+
+void Medium::SetExtrapolationMethod(const std::string& low,
+                                    const std::string& high,
+                                    std::pair<unsigned int, unsigned int>& extr,
+                                    const std::string& fcn) {
+
+
+  unsigned int i = 0;
+  if (GetExtrapolationIndex(low, i)) {
+    extr.first = i;
   } else {
-    std::cerr << m_className << "::SetExtrapolationMethodVelocity:\n";
-    std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
+    std::cerr << m_className << "::SetExtrapolationMethod" << fcn << ":\n"
+              << "    Unknown extrapolation method (" << low << ")\n";
+  } 
+  unsigned int j = 0;
+  if (GetExtrapolationIndex(high, j)) {
+    extr.second = j;
+  } else {
+    std::cerr << m_className << "::SetExtrapolationMethod" << fcn << ":\n"
+              << "    Unknown extrapolation method (" << high << ")\n";
   }
 }
 
-void Medium::SetExtrapolationMethodDiffusion(const std::string& extrLow,
-                                             const std::string& extrHigh) {
-
-  unsigned int iExtr = 0;
-  if (GetExtrapolationIndex(extrLow, iExtr)) {
-    m_extrLowDiffusion = iExtr;
-  } else {
-    std::cerr << m_className << "::SetExtrapolationMethodDiffusion:\n";
-    std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
-  }
-
-  if (GetExtrapolationIndex(extrHigh, iExtr)) {
-    m_extrHighDiffusion = iExtr;
-  } else {
-    std::cerr << m_className << "::SetExtrapolationMethodDiffusion:\n";
-    std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
-  }
-}
-
-void Medium::SetExtrapolationMethodTownsend(const std::string& extrLow,
-                                            const std::string& extrHigh) {
-
-  unsigned int iExtr = 0;
-  if (GetExtrapolationIndex(extrLow, iExtr)) {
-    m_extrLowTownsend = iExtr;
-  } else {
-    std::cerr << m_className << "::SetExtrapolationMethodTownsend:\n";
-    std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
-  }
-
-  if (GetExtrapolationIndex(extrHigh, iExtr)) {
-    m_extrHighTownsend = iExtr;
-  } else {
-    std::cerr << m_className << "::SetExtrapolationMethodTownsend:\n";
-    std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
-  }
-}
-
-void Medium::SetExtrapolationMethodAttachment(const std::string& extrLow,
-                                              const std::string& extrHigh) {
-
-  unsigned int iExtr = 0;
-  if (GetExtrapolationIndex(extrLow, iExtr)) {
-    m_extrLowAttachment = iExtr;
-  } else {
-    std::cerr << m_className << "::SetExtrapolationMethodAttachment:\n";
-    std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
-  }
-
-  if (GetExtrapolationIndex(extrHigh, iExtr)) {
-    m_extrHighAttachment = iExtr;
-  } else {
-    std::cerr << m_className << "::SetExtrapolationMethodAttachment:\n";
-    std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
-  }
-}
-
-void Medium::SetExtrapolationMethodIonMobility(const std::string& extrLow,
-                                               const std::string& extrHigh) {
-
-  unsigned int iExtr = 0;
-  if (GetExtrapolationIndex(extrLow, iExtr)) {
-    m_extrLowMobility = iExtr;
-  } else {
-    std::cerr << m_className << "::SetExtrapolationMethodIonMobility:\n";
-    std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
-  }
-  if (GetExtrapolationIndex(extrHigh, iExtr)) {
-    m_extrHighMobility = iExtr;
-  } else {
-    std::cerr << m_className << "::SetExtrapolationMethodIonMobility:\n";
-    std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
-  }
-}
-
-void Medium::SetExtrapolationMethodIonDissociation(const std::string& extrLow,
-                                                   const std::string& extrHigh) {
-
-  unsigned int iExtr = 0;
-  if (GetExtrapolationIndex(extrLow, iExtr)) {
-    m_extrLowDissociation = iExtr;
-  } else {
-    std::cerr << m_className << "::SetExtrapolationMethodIonDissociation:\n";
-    std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
-  }
-
-  if (GetExtrapolationIndex(extrHigh, iExtr)) {
-    m_extrHighDissociation = iExtr;
-  } else {
-    std::cerr << m_className << "::SetExtrapolationMethodIonDissociation:\n";
-    std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
-  }
-}
-
-bool Medium::GetExtrapolationIndex(std::string extrStr, unsigned int& extrNb) {
+bool Medium::GetExtrapolationIndex(std::string str, unsigned int& nb) const {
 
   // Convert to upper-case
-  for (unsigned int i = 0; i < extrStr.length(); ++i) {
-    extrStr[i] = toupper(extrStr[i]);
+  for (unsigned int i = 0; i < str.length(); ++i) {
+    str[i] = toupper(str[i]);
   }
 
-  if (extrStr == "CONST" || extrStr == "CONSTANT") {
-    extrNb = 0;
-  } else if (extrStr == "LIN" || extrStr == "LINEAR") {
-    extrNb = 1;
-  } else if (extrStr == "EXP" || extrStr == "EXPONENTIAL") {
-    extrNb = 2;
+  if (str == "CONST" || str == "CONSTANT") {
+    nb = 0;
+  } else if (str == "LIN" || str == "LINEAR") {
+    nb = 1;
+  } else if (str == "EXP" || str == "EXPONENTIAL") {
+    nb = 2;
   } else {
     return false;
   }
@@ -2497,12 +1747,12 @@ bool Medium::GetExtrapolationIndex(std::string extrStr, unsigned int& extrNb) {
 
 void Medium::SetInterpolationMethodVelocity(const unsigned int intrp) {
 
-  if (intrp > 0) m_intpVelocity = intrp;
+  if (intrp > 0) m_intpVel = intrp;
 }
 
 void Medium::SetInterpolationMethodDiffusion(const unsigned int intrp) {
 
-  if (intrp > 0) m_intpDiffusion = intrp;
+  if (intrp > 0) m_intpDiff = intrp;
 }
 
 void Medium::SetInterpolationMethodTownsend(const unsigned int intrp) {
@@ -2587,10 +1837,31 @@ double Medium::GetAngle(const double ex, const double ey, const double ez,
   return acos(std::min(1., eb / (e * b)));
 } 
 
+bool Medium::Interpolate(const double e, const double b, const double a,
+    const std::vector<std::vector<std::vector<double> > >& table, double& y,
+    const unsigned int intp, const std::pair<unsigned int, unsigned int>& extr) const {
+
+  if (table.empty()) {
+    y = 0.;
+    return false; // TODO: true!
+  }
+
+  if (m_map2d) {
+    if (!Numerics::Boxin3(table, m_bAngles, m_bFields, m_eFields,
+                          m_bAngles.size(), m_bFields.size(), m_eFields.size(), a, b, e, y,
+                          intp)) {
+      return false;
+    }
+  } else {
+    y = Interpolate1D(e, table[0][0], m_eFields, intp, extr);
+  }
+  return true;
+}
+
 double Medium::Interpolate1D(const double e, const std::vector<double>& table,
                              const std::vector<double>& fields,
-                             const unsigned int intpMeth, const int extrLow,
-                             const int extrHigh) {
+                             const unsigned int intpMeth, 
+                             const std::pair<unsigned int, unsigned int>& extr) const {
 
   // This function is a generalized version of the Fortran functions
   // GASVEL, GASVT1, GASVT2, GASLOR, GASMOB, GASDFT, and GASDFL
@@ -2614,12 +1885,12 @@ double Medium::Interpolate1D(const double e, const std::vector<double>& table,
         std::cerr << "    No extrapolation to lower fields.\n";
       }
       result = table[0];
-    } else if (extrLow == 1) {
+    } else if (extr.first == 1) {
       // Linear extrapolation
       const double extr4 = (table[1] - table[0]) / (fields[1] - fields[0]);
       const double extr3 = table[0] - extr4 * fields[0];
       result = extr3 + extr4 * e;
-    } else if (extrLow == 2) {
+    } else if (extr.first == 2) {
       // Logarithmic extrapolation
       const double extr4 = log(table[1] / table[0]) / (fields[1] - fields[0]);
       const double extr3 = log(table[0] - extr4 * fields[0]);
@@ -2636,14 +1907,14 @@ double Medium::Interpolate1D(const double e, const std::vector<double>& table,
         std::cerr << "    No extrapolation to higher fields.\n";
       }
       result = table[nSizeTable - 1];
-    } else if (extrHigh == 1) {
+    } else if (extr.second == 1) {
       // Linear extrapolation
       const double extr2 = (table[nSizeTable - 1] - table[nSizeTable - 2]) /
                            (fields[nSizeTable - 1] - fields[nSizeTable - 2]);
       const double extr1 =
           table[nSizeTable - 1] - extr2 * fields[nSizeTable - 1];
       result = extr1 + extr2 * e;
-    } else if (extrHigh == 2) {
+    } else if (extr.second == 2) {
       // Logarithmic extrapolation
       const double extr2 = log(table[nSizeTable - 1] / table[nSizeTable - 2]) /
                            (fields[nSizeTable - 1] - fields[nSizeTable - 2]);
@@ -2662,50 +1933,27 @@ double Medium::Interpolate1D(const double e, const std::vector<double>& table,
   return result;
 }
 
-void Medium::InitParamArrays(
-    const unsigned int eRes, const unsigned int bRes, 
-    const unsigned int aRes,
+void Medium::InitTable(const size_t nE, const size_t nB, const size_t nA,
     std::vector<std::vector<std::vector<double> > >& tab, const double val) {
 
-  if (eRes == 0 || bRes == 0 || aRes == 0) {
-    std::cerr << m_className << "::InitParamArrays:\n";
-    std::cerr << "    Invalid grid.\n";
+  if (nE == 0 || nB == 0 || nA == 0) {
+    std::cerr << m_className << "::InitTable: Invalid grid.\n";
     return;
   }
-
-  tab.assign(aRes, std::vector<std::vector<double> >(bRes, std::vector<double>(eRes, val))); 
-  /*
-  tab.resize(aRes);
-  for (unsigned int i = 0; i < aRes; ++i) {
-    tab[i].resize(bRes);
-    for (unsigned int j = 0; j < bRes; ++j) {
-      tab[i][j].assign(eRes, val);
-    }
-  }
-  */
+  tab.assign(nA, std::vector<std::vector<double> >(nB, std::vector<double>(nE, val)));
 }
 
-void Medium::InitParamTensor(
-    const unsigned int eRes, const unsigned int bRes, 
-    const unsigned int aRes, const unsigned int tRes,
+void Medium::InitTensor(
+    const size_t nE, const size_t nB, const size_t nA, const size_t nT,
     std::vector<std::vector<std::vector<std::vector<double> > > >& tab,
     const double val) {
 
-  if (eRes == 0 || bRes == 0 || aRes == 0 || tRes == 0) {
-    std::cerr << m_className << "::InitParamArrays:\n";
-    std::cerr << "    Invalid grid.\n";
+  if (nE == 0 || nB == 0 || nA == 0 || nT == 0) {
+    std::cerr << m_className << "::InitTensor: Invalid grid.\n";
     return;
   }
 
-  tab.resize(tRes);
-  for (unsigned int l = 0; l < tRes; ++l) {
-    tab[l].resize(aRes);
-    for (unsigned int i = 0; i < aRes; ++i) {
-      tab[l][i].resize(bRes);
-      for (unsigned int j = 0; j < bRes; ++j) {
-        tab[l][i][j].assign(eRes, val);
-      }
-    }
-  }
+  tab.assign(nT, std::vector<std::vector<std::vector<double> > >(nA, 
+        std::vector<std::vector<double> >(nB, std::vector<double>(nE, val))));
 }
 }

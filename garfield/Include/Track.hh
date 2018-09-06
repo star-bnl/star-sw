@@ -77,26 +77,26 @@ class Track {
   void DisableDebugging() { m_debug = false; }
 
  protected:
-  std::string m_className;
+  std::string m_className = "Track";
 
-  double m_q;
-  int m_spin;
+  double m_q = -1.;
+  int m_spin = 1;
   double m_mass;
-  double m_energy;
+  double m_energy = 0.;
   double m_beta2;
-  bool m_isElectron;
-  std::string m_particleName;
+  bool m_isElectron = false;
+  std::string m_particleName = "mu-";
 
-  Sensor* m_sensor;
+  Sensor* m_sensor = nullptr;
 
-  bool m_isChanged;
+  bool m_isChanged = true;
 
-  bool m_usePlotting;
-  ViewDrift* m_viewer;
+  bool m_usePlotting = false;
+  ViewDrift* m_viewer = nullptr;
 
-  bool m_debug;
+  bool m_debug = false;
 
-  int m_plotId;
+  int m_plotId = -1;
   void PlotNewTrack(const double x0, const double y0, const double z0);
   void PlotCluster(const double x0, const double y0, const double z0);
 };

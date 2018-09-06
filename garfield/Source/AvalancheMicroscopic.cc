@@ -10,16 +10,6 @@
 
 namespace {
 
-void RndmDirection(double& dx, double& dy, double& dz) {
-
-  const double phi = Garfield::TwoPi * Garfield::RndmUniform();
-  const double ctheta = 2 * Garfield::RndmUniform() - 1.;
-  const double stheta = sqrt(1. - ctheta * ctheta);
-  dx = cos(phi) * stheta;
-  dy = sin(phi) * stheta;
-  dz = ctheta;
-}
-
 void PrintStatus(const std::string& hdr, const std::string& status,
                  const double x, const double y, const double z,
                  const bool hole) {
@@ -32,70 +22,17 @@ void PrintStatus(const std::string& hdr, const std::string& status,
 
 namespace Garfield {
 
-AvalancheMicroscopic::AvalancheMicroscopic()
-    : m_sensor(NULL),
-      m_nElectrons(0),
-      m_nHoles(0),
-      m_nIons(0),
-      m_usePlotting(false),
-      m_viewer(NULL),
-      m_plotExcitations(true),
-      m_plotIonisations(true),
-      m_plotAttachments(true),
-      m_histElectronEnergy(NULL),
-      m_histHoleEnergy(NULL),
-      m_histDistance(NULL),
-      m_distanceOption('r'),
-      m_histSecondary(NULL),
-      m_useSignal(false),
-      m_useInducedCharge(false),
-      m_useDriftLines(false),
-      m_usePhotons(false),
-      m_useBandStructureDefault(true),
-      m_useNullCollisionSteps(false),
-      m_useBfield(false),
-      m_rb11(1.),
-      m_rb12(0.),
-      m_rb13(0.),
-      m_rb21(0.),
-      m_rb22(1.),
-      m_rb23(0.),
-      m_rb31(0.),
-      m_rb32(0.),
-      m_rb33(1.),
-      m_rx22(1.),
-      m_rx23(0.),
-      m_rx32(0.),
-      m_rx33(1.),
-      m_deltaCut(0.),
-      m_gammaCut(0.),
-      m_sizeCut(0),
-      m_nCollSkip(100),
-      m_hasTimeWindow(false),
-      m_tMin(0.),
-      m_tMax(0.),
-      m_hasUserHandleStep(false),
-      m_hasUserHandleAttachment(false),
-      m_hasUserHandleInelastic(false),
-      m_hasUserHandleIonisation(false),
-      m_userHandleStep(0),
-      m_userHandleAttachment(0),
-      m_userHandleInelastic(0),
-      m_userHandleIonisation(0),
-      m_debug(false) {
-
-  m_className = "AvalancheMicroscopic";
+AvalancheMicroscopic::AvalancheMicroscopic() {
 
   m_endpointsElectrons.reserve(10000);
   m_endpointsHoles.reserve(10000);
   m_photons.reserve(1000);
-
 }
 
 void AvalancheMicroscopic::SetSensor(Sensor* s) {
 
   if (!s) {
-    std::cerr << m_className << "::SetSensor:\n    Null pointer.\n";
+    std::cerr << m_className << "::SetSensor: Null pointer.\n";
     return;
   }
   m_sensor = s;
@@ -104,7 +41,7 @@ void AvalancheMicroscopic::SetSensor(Sensor* s) {
 void AvalancheMicroscopic::EnablePlotting(ViewDrift* view) {
 
   if (!view) {
-    std::cerr << m_className << "::EnablePlotting:\n    Null pointer.\n";
+    std::cerr << m_className << "::EnablePlotting: Null pointer.\n";
     return;
   }
 
@@ -119,7 +56,7 @@ void AvalancheMicroscopic::EnablePlotting(ViewDrift* view) {
 
 void AvalancheMicroscopic::DisablePlotting() {
 
-  m_viewer = NULL;
+  m_viewer = nullptr;
   m_usePlotting = false;
 }
 
@@ -148,7 +85,7 @@ void AvalancheMicroscopic::EnableHoleEnergyHistogramming(TH1* histo) {
 void AvalancheMicroscopic::SetDistanceHistogram(TH1* histo, const char opt) {
 
   if (!histo) {
-    std::cerr << m_className << "::SetDistanceHistogram:\n    Null pointer.\n";
+    std::cerr << m_className << "::SetDistanceHistogram: Null pointer.\n";
     return;
   }
 
@@ -215,7 +152,7 @@ void AvalancheMicroscopic::DisableDistanceHistogramming(const int type) {
 
 void AvalancheMicroscopic::DisableDistanceHistogramming() {
 
-  m_histDistance = NULL;
+  m_histDistance = nullptr;
   m_distanceHistogramType.clear();
 }
 
@@ -434,7 +371,7 @@ void AvalancheMicroscopic::GetPhoton(const unsigned int i, double& e, double& x0
                                      double& t1, int& status) const {
 
   if (i >= m_photons.size()) {
-    std::cerr << m_className << "::GetPhoton:\n    Index out of range.\n";
+    std::cerr << m_className << "::GetPhoton: Index out of range.\n";
     return;
   }
 
@@ -455,8 +392,7 @@ void AvalancheMicroscopic::SetUserHandleStep(
               double dy, double dz, bool hole)) {
 
   if (!f) {
-    std::cerr << m_className << "::SetUserHandleStep:\n";
-    std::cerr << "    Function pointer is a null pointer.\n";
+    std::cerr << m_className << "::SetUserHandleStep: Null pointer.\n";
     return;
   }
   m_userHandleStep = f;
@@ -465,7 +401,7 @@ void AvalancheMicroscopic::SetUserHandleStep(
 
 void AvalancheMicroscopic::UnsetUserHandleStep() {
 
-  m_userHandleStep = 0;
+  m_userHandleStep = nullptr;
   m_hasUserHandleStep = false;
 }
 
@@ -478,7 +414,7 @@ void AvalancheMicroscopic::SetUserHandleAttachment(void (*f)(
 
 void AvalancheMicroscopic::UnsetUserHandleAttachment() {
 
-  m_userHandleAttachment = 0;
+  m_userHandleAttachment = nullptr;
   m_hasUserHandleAttachment = false;
 }
 
@@ -491,7 +427,7 @@ void AvalancheMicroscopic::SetUserHandleInelastic(void (*f)(
 
 void AvalancheMicroscopic::UnsetUserHandleInelastic() {
 
-  m_userHandleInelastic = 0;
+  m_userHandleInelastic = nullptr;
   m_hasUserHandleInelastic = false;
 }
 
@@ -504,7 +440,7 @@ void AvalancheMicroscopic::SetUserHandleIonisation(void (*f)(
 
 void AvalancheMicroscopic::UnsetUserHandleIonisation() {
 
-  m_userHandleIonisation = 0;
+  m_userHandleIonisation = nullptr;
   m_hasUserHandleIonisation = false;
 }
 
@@ -555,7 +491,7 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
   }
 
   // Make sure that the starting point is inside a medium.
-  Medium* medium = NULL;
+  Medium* medium = nullptr;
   if (!m_sensor->GetMedium(x0, y0, z0, medium) || !medium) {
     std::cerr << hdr << "No medium at initial position.\n";
     return false;
@@ -607,6 +543,7 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
   stackOld.reserve(10000);
   stackNew.reserve(1000);
   std::vector<std::pair<double, double> > stackPhotons;
+  std::vector<std::pair<int, double> > secondaries;
 
   // Put the initial electron on the stack.
   if (useBandStructure) {
@@ -660,14 +597,14 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
         stackNew.resize(m_sizeCut - stackOld.size()); 
       }
     }
-    stackOld.insert(stackOld.end(), stackNew.begin(), stackNew.end()); 
+    stackOld.insert(stackOld.end(), 
+                    std::make_move_iterator(stackNew.begin()), 
+                    std::make_move_iterator(stackNew.end())); 
     stackNew.clear();
     // If the list of electrons/holes is exhausted, we're done.
     if (stackOld.empty()) break;
     // Loop over all electrons/holes in the avalanche.
-    const std::vector<Electron>::const_iterator end = stackOld.end();
-    std::vector<Electron>::iterator it;
-    for (it = stackOld.begin(); it != end; ++it) {
+    for (auto it = stackOld.begin(), end = stackOld.end(); it != end; ++it) {
       // Get an electron/hole from the stack.
       double x = (*it).x;
       double y = (*it).y;
@@ -1014,11 +951,9 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
         // Get the collision type and parameters.
         int cstype = 0;
         int level = 0;
-        int nion = 0;
         int ndxc = 0;
         medium->GetElectronCollision(newEnergy, cstype, level, energy, newKx,
-                                     newKy, newKz, nion, ndxc, band);
-
+                                     newKy, newKz, secondaries, ndxc, band);
         // If activated, histogram the distance with respect to the
         // last collision.
         if (m_histDistance && !m_distanceHistogramType.empty()) {
@@ -1067,12 +1002,9 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
             if (m_hasUserHandleIonisation) {
               m_userHandleIonisation(x, y, z, t, cstype, level, medium);
             }
-            for (int j = nion; j--;) {
-              int itype;
-              double esec;
-              medium->GetIonisationProduct(j, itype, esec);
-              if (itype == IonProdTypeElectron) {
-                esec = std::max(esec, Small);
+            for (const auto& secondary : secondaries) {
+              if (secondary.first == IonProdTypeElectron) {
+                const double esec = std::max(secondary.second, Small);
                 if (m_histSecondary) m_histSecondary->Fill(esec);
                 // Increment the electron counter.
                 ++m_nElectrons;
@@ -1086,8 +1018,8 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
                 } else {
                   AddToStack(x, y, z, t, esec, false, stackNew);
                 }
-              } else if (itype == IonProdTypeHole) {
-                esec = std::max(esec, Small);
+              } else if (secondary.first == IonProdTypeHole) {
+                const double esec = std::max(secondary.second, Small);
                 // Increment the hole counter.
                 ++m_nHoles;
                 if (!aval) continue;
@@ -1100,10 +1032,11 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
                 } else {
                   AddToStack(x, y, z, t, esec, true, stackNew);
                 }
-              } else if (itype == IonProdTypeIon) {
+              } else if (secondary.first == IonProdTypeIon) {
                 ++m_nIons;
               }
             }
+            secondaries.clear();
             if (m_debug) PrintStatus(hdr, "ionised", x, y, z, hole);
             break;
           // Attachment
@@ -1164,7 +1097,7 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
                   zp += sdx * dzp;
                 }
                 // Get the electric field and medium at this location.
-                Medium* med = NULL;
+                Medium* med = nullptr;
                 double fx = 0., fy = 0., fz = 0.;
                 m_sensor->ElectricField(xp, yp, zp, fx, fy, fz, med, status);
                 // Check if this location is inside a drift medium/area.
@@ -1182,7 +1115,7 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
               } else if (typedx == DxcProdTypePhoton && m_usePhotons &&
                          edx > m_gammaCut) {
                 // Radiative de-excitation
-                stackPhotons.push_back(std::make_pair(t + tdx, edx));
+                stackPhotons.emplace_back(std::make_pair(t + tdx, edx));
               }
             }
 
@@ -1249,7 +1182,7 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
         newPoint.y = y;
         newPoint.z = z;
         newPoint.t = t;
-        (*it).driftLine.push_back(newPoint);
+        (*it).driftLine.push_back(std::move(newPoint));
       }
     }
   }
@@ -1400,7 +1333,7 @@ void AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
     newPhoton.z1 = z;
     newPhoton.energy = e0;
     newPhoton.status = StatusLeftDriftMedium;
-    m_photons.push_back(newPhoton);
+    m_photons.push_back(std::move(newPhoton));
     return;
   }
 
@@ -1458,7 +1391,7 @@ void AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
   newPhoton.z1 = z;
   newPhoton.energy = e0;
   newPhoton.status = -2;
-  m_photons.push_back(newPhoton);
+  m_photons.push_back(std::move(newPhoton));
 }
 
 void AvalancheMicroscopic::ComputeRotationMatrix(
@@ -1585,7 +1518,7 @@ void AvalancheMicroscopic::AddToStack(const double x, const double y,
   electron.yLast = y;
   electron.zLast = z;
   electron.driftLine.reserve(1000);
-  container.push_back(electron);
+  container.push_back(std::move(electron));
 }
 
 void AvalancheMicroscopic::Terminate(double x0, double y0, double z0, double t0,
@@ -1604,7 +1537,7 @@ void AvalancheMicroscopic::Terminate(double x0, double y0, double z0, double t0,
     const double tm = 0.5 * (t0 + t1);
     // Check if the mid-point is inside the drift medium.
     double ex = 0., ey = 0., ez = 0.;
-    Medium* medium = NULL;
+    Medium* medium = nullptr;
     int status = 0;
     m_sensor->ElectricField(xm, ym, zm, ex, ey, ez, medium, status);
     if (status == 0 && m_sensor->IsInArea(xm, ym, zm)) {

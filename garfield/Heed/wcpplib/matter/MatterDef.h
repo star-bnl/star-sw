@@ -43,7 +43,7 @@ class MatterDef : public AtomMixDef {
             const std::string& fatom_not2, double fweight_quan2,
             const std::string& fatom_not3, double fweight_quan3,
             double fdensity, double ftemperature);
-  ~MatterDef();
+  virtual ~MatterDef();
 
   static void printall(std::ostream& file);
   const std::string& name() const { return nameh; }
@@ -62,8 +62,8 @@ class MatterDef : public AtomMixDef {
   /// Otherwise return NULL.
   static MatterDef* get_MatterDef(const std::string& fnotation);
 
-  virtual void print(std::ostream& file, int l) const;
-  virtual MatterDef* copy() const { return new MatterDef(*this); }
+  void print(std::ostream& file, int l) const;
+  MatterDef* copy() const { return new MatterDef(*this); }
 };
 std::ostream& operator<<(std::ostream& file, const MatterDef& f);
 

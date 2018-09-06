@@ -14,14 +14,14 @@ The old names are preserved.
 namespace Heed {
 
 /// Electron radius (1/MeV)
-const double ELRAD = CLHEP::fine_structure_const / CLHEP::electron_mass_c2;
-const double ELRADCM = 2.81794092e-13;     // Electron radius (cm)
-const double C1_MEV_CM = ELRAD / ELRADCM;  // Ratio r(1/MeV)/r(cm)
+constexpr double ELRAD = CLHEP::fine_structure_const / CLHEP::electron_mass_c2;
+constexpr double ELRADCM = 2.81794092e-13;     // Electron radius (cm)
+constexpr double C1_MEV_CM = ELRAD / ELRADCM;  // Ratio r(1/MeV)/r(cm)
 // or coefficient for passing from x(cm) to x(1/MeV) = 5.07E10
-const double C1_MEV2_BN = C1_MEV_CM * C1_MEV_CM / 1.0e24;
+constexpr double C1_MEV2_BN = C1_MEV_CM * C1_MEV_CM / 1.0e24;
 // coefficient for passing from x(bn) to x(1/MeV^2) =
 // (5.07E10)^2/(1.0e24)
-const double C1_MEV2_MBN = C1_MEV_CM * C1_MEV_CM / 1.0e18;
+constexpr double C1_MEV2_MBN = C1_MEV_CM * C1_MEV_CM / 1.0e18;
 // coefficient for passing from x(mbn) to x(1/MeV^2) =
 // (5.07E10)^2/(1.0e18)
 }

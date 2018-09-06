@@ -49,37 +49,28 @@ class MediumGaAs : public Medium {
 
   void SetLowFieldMobility(const double mue, const double muh);
 
-  bool GetOpticalDataRange(double& emin, double& emax, 
-                           const unsigned int i = 0);
-  bool GetDielectricFunction(const double e, double& eps1, double& eps2,
-                             const unsigned int i = 0);
-
  private:
+  // Band-gap energy [eV]
+  // double m_bandGap = 1.42;
   // Low-field mobility
-  double eMobility, hMobility;
+  double eMobility = 8.8e-6;
+  double hMobility = 3.2e-6;
   // Hall factor
-  double eHallFactor, hHallFactor;
+  double eHallFactor = 1.05;
+  double hHallFactor = 1.25;
 
   // Trapping parameters
-  double eTrapCs, hTrapCs;
-  double eTrapDensity, hTrapDensity;
-  double eTrapTime, hTrapTime;
-  int trappingModel;
+  double eTrapCs = 1.e-15;
+  double hTrapCs = 1.e-15;
+  double eTrapDensity = 1.e13;
+  double hTrapDensity = 1.e13;
+  double eTrapTime = 0.;
+  double hTrapTime = 0.;
+  int trappingModel = 0;
 
   // Models
-  bool m_hasUserMobility;
+  bool m_hasUserMobility = false;
 
-  // Optical data
-  bool m_hasOpticalData;
-  std::string opticalDataFile;
-  struct opticalData {
-    // Energy [eV]
-    double energy;
-    // Dielectric function
-    double eps1, eps2;
-  };
-  std::vector<opticalData> opticalDataTable;
-  bool LoadOpticalData(const std::string filename);
 };
 }
 

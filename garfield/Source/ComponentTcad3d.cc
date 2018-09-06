@@ -7,22 +7,11 @@
 
 #include "ComponentTcad3d.hh"
 #include "GarfieldConstants.hh"
-
-namespace {
-
-void ltrim(std::string& line) {
-  line.erase(line.begin(), find_if(line.begin(), line.end(),
-                                   not1(std::ptr_fun<int, int>(isspace))));
-}
-
-}
+#include "Utilities.hh"
 
 namespace Garfield {
 
-ComponentTcad3d::ComponentTcad3d() : ComponentBase(),
-      m_pMin(0.), 
-      m_pMax(0.),
-      m_lastElement(0) {
+ComponentTcad3d::ComponentTcad3d() : ComponentBase() {
 
   m_className = "ComponentTcad3d";
 
@@ -472,15 +461,15 @@ bool ComponentTcad3d::GetBoundingBox(double& xmin, double& ymin, double& zmin,
   xmax = m_xMaxBB;
   ymax = m_yMaxBB;
   zmax = m_zMaxBB;
-  if (m_xPeriodic || m_xMirrorPeriodic) {
+  if (m_periodic[0] || m_mirrorPeriodic[0]) {
     xmin = -INFINITY;
     xmax = +INFINITY;
   }
-  if (m_yPeriodic || m_yMirrorPeriodic) {
+  if (m_periodic[1] || m_mirrorPeriodic[1]) {
     ymin = -INFINITY;
     ymax = +INFINITY;
   }
-  if (m_zPeriodic || m_zMirrorPeriodic) {
+  if (m_periodic[2] || m_mirrorPeriodic[2]) {
     zmin = -INFINITY;
     zmax = +INFINITY;
   }
@@ -1582,38 +1571,25 @@ void ComponentTcad3d::UpdatePeriodicity() {
     return;
   }
 
-  // Check for conflicts.
-  if (m_xPeriodic && m_xMirrorPeriodic) {
-    std::cerr << m_className << "::UpdatePeriodicity:\n"
-              << "    Both simple and mirror periodicity\n"
-              << "    along x requested; reset.\n";
-    m_xPeriodic = m_xMirrorPeriodic = false;
+  for (unsigned int i = 0; i < 3; ++i) {
+    // Check for conflicts.
+    if (m_periodic[i] && m_mirrorPeriodic[i]) {
+      std::cerr << m_className << "::UpdatePeriodicity:\n"
+                << "    Both simple and mirror periodicity requested. Reset.\n";
+      m_periodic[i] = m_mirrorPeriodic[i] = false;
+    }
   }
 
-  if (m_yPeriodic && m_yMirrorPeriodic) {
+  if (m_axiallyPeriodic[0] || m_axiallyPeriodic[1] || m_axiallyPeriodic[2]) {
     std::cerr << m_className << "::UpdatePeriodicity:\n"
-              << "    Both simple and mirror periodicity\n"
-              << "    along y requested; reset.\n";
-    m_yPeriodic = m_yMirrorPeriodic = false;
+              << "    Axial symmetry is not supported. Reset.\n";
+    m_axiallyPeriodic.fill(false);
   }
 
-  if (m_zPeriodic && m_zMirrorPeriodic) {
+  if (m_rotationSymmetric[0] || m_rotationSymmetric[1] || m_rotationSymmetric[2]) {
     std::cerr << m_className << "::UpdatePeriodicity:\n"
-              << "    Both simple and mirror periodicity\n"
-              << "    along z requested; reset.\n";
-    m_zPeriodic = m_zMirrorPeriodic = false;
-  }
-
-  if (m_xAxiallyPeriodic || m_yAxiallyPeriodic || m_zAxiallyPeriodic) {
-    std::cerr << m_className << "::UpdatePeriodicity:\n"
-              << "    Axial symmetry is not supported; reset.\n";
-    m_xAxiallyPeriodic = m_yAxiallyPeriodic = m_zAxiallyPeriodic = false;
-  }
-
-  if (m_xRotationSymmetry || m_yRotationSymmetry || m_zRotationSymmetry) {
-    std::cerr << m_className << "::UpdatePeriodicity:\n"
-              << "    Rotation symmetry is not supported; reset.\n";
-    m_xRotationSymmetry = m_yRotationSymmetry = m_zRotationSymmetry = false;
+              << "    Rotation symmetry is not supported. Reset.\n";
+    m_rotationSymmetric.fill(false);
   }
 }
 
@@ -1622,10 +1598,10 @@ void ComponentTcad3d::MapCoordinates(double& x, double& y, double& z,
 
   xmirr = false;
   const double cellsx = m_xMaxBB - m_xMinBB;
-  if (m_xPeriodic) {
+  if (m_periodic[0]) {
     x = m_xMinBB + fmod(x - m_xMinBB, cellsx);
     if (x < m_xMinBB) x += cellsx;
-  } else if (m_xMirrorPeriodic) {
+  } else if (m_mirrorPeriodic[0]) {
     double xNew = m_xMinBB + fmod(x - m_xMinBB, cellsx);
     if (xNew < m_xMinBB) xNew += cellsx;
     const int nx = int(floor(0.5 + (xNew - x) / cellsx));
@@ -1637,10 +1613,10 @@ void ComponentTcad3d::MapCoordinates(double& x, double& y, double& z,
   }
   ymirr = false;
   const double cellsy = m_yMaxBB - m_yMinBB;
-  if (m_yPeriodic) {
+  if (m_periodic[1]) {
     y = m_yMinBB + fmod(y - m_yMinBB, cellsy);
     if (y < m_yMinBB) y += cellsy;
-  } else if (m_yMirrorPeriodic) {
+  } else if (m_mirrorPeriodic[1]) {
     double yNew = m_yMinBB + fmod(y - m_yMinBB, cellsy);
     if (yNew < m_yMinBB) yNew += cellsy;
     const int ny = int(floor(0.5 + (yNew - y) / cellsy));
@@ -1652,10 +1628,10 @@ void ComponentTcad3d::MapCoordinates(double& x, double& y, double& z,
   }
   zmirr = false;
   const double cellsz = m_zMaxBB - m_zMinBB;
-  if (m_zPeriodic) {
+  if (m_periodic[2]) {
     z = m_zMinBB + fmod(z - m_zMinBB, cellsz);
     if (z < m_zMinBB) z += cellsz;
-  } else if (m_zMirrorPeriodic) {
+  } else if (m_mirrorPeriodic[2]) {
     double zNew = m_zMinBB + fmod(z - m_zMinBB, cellsz);
     if (zNew < m_zMinBB) zNew += cellsz;
     const int nz = int(floor(0.5 + (zNew - z) / cellsz));

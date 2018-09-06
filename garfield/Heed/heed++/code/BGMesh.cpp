@@ -1,5 +1,6 @@
 #include <cmath>
 
+#include "wcpplib/util/FunNameStack.h"
 #include "heed++/code/BGMesh.h"
 
 namespace Heed {

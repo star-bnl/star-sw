@@ -17,7 +17,7 @@ namespace Heed {
 /// Note that the class AtomMixDef undirectly appear twice.
 /// It is the base class of matter and molecula. Therefore it is
 /// indirectly the base class of GasDef, and the base class
-/// of its external elements - DynLinArr< PassivePtr<MoleculeDef> >molech.
+/// of its external elements molech.
 ///
 /// As the base class of GasDef, the class AtomMixDef determines only the
 /// relative weights of atoms of different sorts. Also note that
@@ -36,29 +36,29 @@ namespace Heed {
 /// 1998-2004 I. Smirnov
 
 class GasDef : public MatterDef {
-  double pressureh;
+  double pressureh = 0.;
   /// Number of different molecules
-  long qmolech;
-  std::vector<PassivePtr<MoleculeDef> > molech;
+  long qmolech = 0;
+  std::vector<MoleculeDef*> molech;
   std::vector<double> weight_quan_molech;  // sum is 1
   std::vector<double> weight_mass_molech;  // sum is 1
  public:
-  inline double pressure() const { return pressureh; }
-  inline long qmolec() const { return qmolech; }
-  inline const std::vector<PassivePtr<MoleculeDef> >& molec() const {
+  double pressure() const { return pressureh; }
+  long qmolec() const { return qmolech; }
+  const std::vector<MoleculeDef*>& molec() const {
     return molech;
   }
-  inline PassivePtr<MoleculeDef> molec(long n) const { return molech[n]; }
-  inline const std::vector<double>& weight_quan_molec() const {
+  MoleculeDef* molec(long n) const { return molech[n]; }
+  const std::vector<double>& weight_quan_molec() const {
     return weight_quan_molech;
   }
-  inline const std::vector<double>& weight_mass_molec() const {
+  const std::vector<double>& weight_mass_molec() const {
     return weight_mass_molech;
   }
-  inline double weight_quan_molec(const long n) const {
+  double weight_quan_molec(const long n) const {
     return weight_quan_molech[n];
   }
-  inline double weight_mass_molec(const long n) const {
+  double weight_mass_molec(const long n) const {
     return weight_mass_molech[n];
   }
   /// Mean charge of molecules in this gas
@@ -112,8 +112,8 @@ class GasDef : public MatterDef {
          const GasDef& gd, double fpressure, double ftemperature,
          double fdensity = -1.0);
 
-  virtual void print(std::ostream& file, int l = 0) const;
-  virtual GasDef* copy() const { return new GasDef(*this); }
+  void print(std::ostream& file, int l = 0) const;
+  GasDef* copy() const { return new GasDef(*this); }
 };
 std::ostream& operator<<(std::ostream& file, const GasDef& f);
 

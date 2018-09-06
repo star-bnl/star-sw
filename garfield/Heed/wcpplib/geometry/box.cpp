@@ -1,3 +1,4 @@
+#include <array>
 #include "wcpplib/geometry/box.h"
 /*
 Copyright (c) 2000 Igor B. Smirnov
@@ -13,12 +14,13 @@ The file is provided "as is" without express or implied warranty.
 
 namespace Heed {
 
-void box::get_components(ActivePtr<absref_transmit>& /*aref_tran*/) {
+absref_transmit box::get_components() {
   mfunnamep("box::get_components(...)");
   funnw.ehdr(mcerr);
   mcerr << "one should not call this function, since this object cannot be "
            "modified\n";
   spexit(mcerr);
+  return absref_transmit();
 }
 
 box::box()
@@ -88,16 +90,20 @@ void box::init_prec() {
 
 void box::init_planes() {
   mfunname("void box::init_planes()");
-  splane spl[6];
-  spl[0] = splane(plane(point(m_dxh, 0, 0), vec(-1, 0, 0)), vec(-1, 0, 0));
-  spl[1] = splane(plane(point(-m_dxh, 0, 0), vec(+1, 0, 0)), vec(+1, 0, 0));
-  spl[2] = splane(plane(point(0, m_dyh, 0), vec(0, -1, 0)), vec(0, -1, 0));
-  spl[3] = splane(plane(point(0, -m_dyh, 0), vec(0, +1, 0)), vec(0, +1, 0));
-  spl[4] = splane(plane(point(0, 0, m_dzh), vec(0, 0, -1)), vec(0, 0, -1));
-  spl[5] = splane(plane(point(0, 0, -m_dzh), vec(0, 0, +1)), vec(0, 0, +1));
-  surface* fsurf[6];
-  for (int n = 0; n < 6; ++n) fsurf[n] = &spl[n];
-  m_ulsv.ulsvolume_init(fsurf, 6, "ulsv of box", prec);
+  std::vector<std::shared_ptr<surface> > fsurf(6);
+  fsurf[0] = std::make_shared<splane>(
+      plane(point(m_dxh, 0, 0), vec(-1, 0, 0)), vec(-1, 0, 0));
+  fsurf[1] = std::make_shared<splane>(
+      plane(point(-m_dxh, 0, 0), vec(+1, 0, 0)), vec(+1, 0, 0));
+  fsurf[2] = std::make_shared<splane>(
+      plane(point(0, m_dyh, 0), vec(0, -1, 0)), vec(0, -1, 0));
+  fsurf[3] = std::make_shared<splane>(
+    plane(point(0, -m_dyh, 0), vec(0, +1, 0)), vec(0, +1, 0));
+  fsurf[4] = std::make_shared<splane>(
+    plane(point(0, 0, m_dzh), vec(0, 0, -1)), vec(0, 0, -1));
+  fsurf[5] = std::make_shared<splane>(
+    plane(point(0, 0, -m_dzh), vec(0, 0, +1)), vec(0, 0, +1));
+  m_ulsv.ulsvolume_init(fsurf, "ulsv of box", prec);
 }
 
 int box::check_point_inside(const point& fpt, const vec& dir) const {
@@ -291,8 +297,8 @@ absvol* sh_manip_box::Gavol() const {
   return dynamic_cast<box*>(const_cast<sh_manip_box*>(this)); 
 }
 
-void sh_manip_box::get_components(ActivePtr<absref_transmit>& aref_tran) {
-  sh_manip_absvol::get_components(aref_tran);
+absref_transmit sh_manip_box::get_components() {
+  return sh_manip_absvol::get_components();
 }
 
 sh_manip_box* sh_manip_box::copy() const { return new sh_manip_box(*this); }

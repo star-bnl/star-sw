@@ -119,15 +119,11 @@ const std::list<particle_def*>& particle_def::get_const_logbook() {
 }
 
 particle_def* particle_def::get_particle_def(const std::string& fnotation) {
-  std::list<particle_def*>& logbook = particle_def::get_logbook();
-  std::list<particle_def*>::iterator it;
-  std::list<particle_def*>::const_iterator end = logbook.end();
-  for (it = logbook.begin(); it != end; ++it) {
-    particle_def* node = *it;
-    if (!node) continue;
-    if (node->notation == fnotation) return node;
+  for (auto particle : particle_def::get_logbook()) {
+    if (!particle) continue;
+    if (particle->notation == fnotation) return particle;
   }
-  return NULL;
+  return nullptr;
 }
 
 void particle_def::set_mass(const double m) { mass = m * MeV / c_squared; }
@@ -139,11 +135,8 @@ void particle_def::print(std::ostream& file, int l) const {
 }
 void particle_def::printall(std::ostream& file) {
   Ifile << "particle_def::printall:\n";
-  std::list<particle_def*>& logbook = particle_def::get_logbook();
-  std::list<particle_def*>::const_iterator it;
-  std::list<particle_def*>::const_iterator end;
-  for (it = logbook.begin(); it != end; ++it) {
-    if (*it) file << *it;
+  for (auto particle : particle_def::get_logbook()) {
+    if (particle) file << particle;
   }
 }
 
@@ -161,18 +154,15 @@ std::ostream& operator<<(std::ostream& file, const particle_def& f) {
 
 particle_type::particle_type(const char* name, int s) {
   mfunname("particle_type::particle_type(const char* name, int s)");
-  std::list<particle_def*>& logbook = particle_def::get_logbook();
-  std::list<particle_def*>::iterator it;
-  std::list<particle_def*>::const_iterator end = logbook.end();
-  for (it = logbook.begin(); it != end; ++it) {
-    if (name == (*it)->notation) {
-      pardef = *it;
+  for (auto particle : particle_def::get_logbook()) {
+    if (name == particle->notation) {
+      pardef = particle;
       return;
     }
   }
-  for (it = logbook.begin(); it != end; ++it) {
-    if (name == (*it)->name) {
-      pardef = *it;
+  for (auto particle : particle_def::get_logbook()) {
+    if (name == particle->name) {
+      pardef = particle;
       return;
     }
   }
@@ -180,11 +170,11 @@ particle_type::particle_type(const char* name, int s) {
     mcerr << "this type of particle is absent, name=" << name << '\n';
     spexit(mcerr);
   }
-  pardef = NULL;
+  pardef = nullptr;
 }
 
 void particle_type::print_notation(std::ostream& file) const {
-  if (pardef.get() == NULL) {
+  if (!pardef) {
     file << "none";
   } else {
     file << pardef->notation;
@@ -192,7 +182,7 @@ void particle_type::print_notation(std::ostream& file) const {
 }
 
 std::ostream& operator<<(std::ostream& file, const particle_type& f) {
-  if (f.pardef.get() == NULL) {
+  if (!f.pardef) {
     file << "type is not initialized";
   } else {
     file << (f.pardef->name);

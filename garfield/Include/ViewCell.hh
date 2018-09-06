@@ -2,6 +2,7 @@
 #define G_VIEW_CELL
 
 #include <string>
+#include <memory>
 
 #include <TCanvas.h>
 #include <TGeoManager.h>
@@ -45,27 +46,27 @@ class ViewCell {
   void DisableWireMarkers() { EnableWireMarkers(false); }
 
  private:
-  std::string m_className;
+  std::string m_className = "ViewCell";
 
   // Options
-  bool m_debug;
-  bool m_useWireMarker;
+  bool m_debug = false;
+  bool m_useWireMarker = true;
 
-  std::string m_label;
+  std::string m_label = "Cell Layout";
 
   // Canvas
-  TCanvas* m_canvas;
-  bool m_hasExternalCanvas;
+  TCanvas* m_canvas = nullptr;
+  bool m_hasExternalCanvas = false;
 
   // Box dimensions
-  bool m_hasUserArea;
-  double m_xMin, m_yMin, m_zMin;
-  double m_xMax, m_yMax, m_zMax;
+  bool m_hasUserArea = false;
+  double m_xMin = -1., m_yMin = -1., m_zMin = -1.;
+  double m_xMax =  1., m_yMax =  1., m_zMax =  1.;
 
-  ComponentAnalyticField* m_component;
+  ComponentAnalyticField* m_component = nullptr;
 
   // 3D geometry.
-  TGeoManager* m_geo;
+  std::unique_ptr<TGeoManager> m_geo;
 
   bool Plot(const bool use3d);
   void PlotWire(const double x, const double y, const double d, 

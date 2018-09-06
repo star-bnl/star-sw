@@ -110,19 +110,14 @@ extern MoleculeDef Helium_molec;
 extern MoleculeDef Nitrogen_molec;
 extern MoleculeDef Oxygen_molec;
 extern MoleculeDef Neon_molec;
-extern VanDerWaals Argon_VanDerWaals;
 extern MoleculeDef Argon_molec;
 // extern MoleculeDef Argon_without_K_molec;
-extern VanDerWaals Krypton_VanDerWaals;
 extern MoleculeDef Krypton_molec;
-extern VanDerWaals Xenon_VanDerWaals;
 extern MoleculeDef Xenon_molec;
 extern MoleculeDef NH3;
 extern MoleculeDef N2O;
 extern MoleculeDef CO2;
-extern VanDerWaals CH4_VanDerWaals;
 extern MoleculeDef CH4;
-extern VanDerWaals CF4_VanDerWaals;
 extern MoleculeDef CF4;
 
 // The following is defined without Van der Waals corrections

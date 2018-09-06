@@ -87,39 +87,39 @@ class ViewMedium {
   };
 
  private:
-  std::string m_className;
+  std::string m_className = "ViewMedium";
 
   // Options
-  bool m_debug;
+  bool m_debug = false;
 
   // Canvas
-  TCanvas* m_canvas;
-  bool m_hasExternalCanvas;
+  TCanvas* m_canvas = nullptr;
+  bool m_hasExternalCanvas = false;
 
-  Medium* m_medium;
+  Medium* m_medium = nullptr;
 
   // Ranges for variable parameters
-  double m_eMin, m_eMax;
-  double m_bMin, m_bMax;
-  double m_aMin, m_aMax;
-  double m_vMin, m_vMax;
+  double m_eMin = 0., m_eMax = 1000.;
+  double m_bMin = 0., m_bMax = 5.;
+  double m_aMin = 0., m_aMax = 3.14;
+  double m_vMin = 0., m_vMax = 0.;
 
   // Fixed parameters
-  double m_efield;
-  double m_bfield;
-  double m_angle;
+  double m_efield = 500.;
+  double m_bfield = 100.;
+  double m_angle = 0.;
 
   // Tolerances for marker plotting
-  double m_etolerance;
-  double m_btolerance;
-  double m_atolerance;
+  double m_etolerance = 1.;
+  double m_btolerance = 0.01;
+  double m_atolerance = 0.05;
 
   // Labels
-  std::string m_labele;
-  std::string m_labelb;
-  std::string m_labela;
-  std::string m_labelv;
-  std::string m_labeld;
+  std::string m_labele = "electric field [V/cm]";
+  std::string m_labelb = "magnetic field [T]";
+  std::string m_labela = "magnetic field angle [rad]";
+  std::string m_labelv = "drift velocity [cm/ns]";
+  std::string m_labeld = "diffusion coefficient [#sqrt{cm}]";
 
   // Functions
   std::vector<TF1> m_functions;
@@ -132,7 +132,7 @@ class ViewMedium {
                    const std::string& xlabel, const std::string& ylabel, 
                    const int type, const char xaxis,
                    const double e, const double b, const double a);
-  int GetColor(const unsigned int property) const;
+  int GetColor(const Property property) const;
 };
 }
 #endif

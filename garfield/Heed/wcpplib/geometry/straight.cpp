@@ -20,8 +20,8 @@ namespace Heed {
 absref absref::*(straight::aref[2]) = {(absref absref::*)&straight::piv,
                                        (absref absref::*)&straight::dir};
 
-void straight::get_components(ActivePtr<absref_transmit>& aref_tran) {
-  aref_tran.pass(new absref_transmit(2, aref));
+absref_transmit straight::get_components() {
+  return absref_transmit(2, aref);
 }
 
 straight::straight(const plane pl1, const plane pl2) {

@@ -10,38 +10,7 @@
 
 namespace Garfield {
 
-double AvalancheMC::c1 = ElectronMass / (SpeedOfLight * SpeedOfLight);
-
-AvalancheMC::AvalancheMC()
-    : m_sensor(NULL),
-      m_stepModel(2),
-      m_tMc(0.02),
-      m_dMc(0.001),
-      m_nMc(100),
-      m_hasTimeWindow(false),
-      m_tMin(0.),
-      m_tMax(0.),
-      m_nElectrons(0),
-      m_nHoles(0),
-      m_nIons(0),
-      m_viewer(NULL),
-      m_useSignal(false),
-      m_useInducedCharge(false),
-      m_useEquilibration(true),
-      m_useDiffusion(true),
-      m_useAttachment(true),
-      m_useBfield(false),
-      m_useIons(true),
-      m_withElectrons(true),
-      m_withHoles(true),
-      m_scaleElectronSignal(1.),
-      m_scaleHoleSignal(1.),
-      m_scaleIonSignal(1.),
-      m_useTcadTrapping(false),
-      m_useTcadVelocity(false),
-      m_debug(false) {
-
-  m_className = "AvalancheMC";
+AvalancheMC::AvalancheMC() {
 
   m_drift.reserve(10000);
 }
@@ -49,7 +18,7 @@ AvalancheMC::AvalancheMC()
 void AvalancheMC::SetSensor(Sensor* sensor) {
 
   if (!sensor) {
-    std::cerr << m_className << "::SetSensor:\n    Null pointer.\n";
+    std::cerr << m_className << "::SetSensor: Null pointer.\n";
     return;
   }
 
@@ -59,7 +28,7 @@ void AvalancheMC::SetSensor(Sensor* sensor) {
 void AvalancheMC::EnablePlotting(ViewDrift* view) {
 
   if (!view) {
-    std::cerr << m_className << "::EnablePlotting:\n    Null pointer.\n";
+    std::cerr << m_className << "::EnablePlotting: Null pointer.\n";
     return;
   }
 
@@ -68,7 +37,7 @@ void AvalancheMC::EnablePlotting(ViewDrift* view) {
 
 void AvalancheMC::SetTimeSteps(const double d) {
 
-  m_stepModel = 0;
+  m_stepModel = FixedTime;
   if (d < Small) {
     std::cerr << m_className << "::SetTimeSteps:\n    "
               << "Step size is too small. Using default (20 ps) instead.\n";
@@ -84,7 +53,7 @@ void AvalancheMC::SetTimeSteps(const double d) {
 
 void AvalancheMC::SetDistanceSteps(const double d) {
 
-  m_stepModel = 1;
+  m_stepModel = FixedDistance;
   if (d < Small) {
     std::cerr << m_className << "::SetDistanceSteps:\n    "
               << "Step size is too small. Using default (10 um) instead.\n";
@@ -98,9 +67,9 @@ void AvalancheMC::SetDistanceSteps(const double d) {
   m_dMc = d;
 }
 
-void AvalancheMC::SetCollisionSteps(const int n) {
+void AvalancheMC::SetCollisionSteps(const unsigned int n) {
 
-  m_stepModel = 2;
+  m_stepModel = CollisionTime;
   if (n < 1) {
     std::cerr << m_className << "::SetCollisionSteps:\n    "
               << "Number of collisions set to default value (100).\n";
@@ -131,8 +100,7 @@ void AvalancheMC::GetDriftLinePoint(const unsigned int i, double& x, double& y,
                                     double& z, double& t) const {
 
   if (i >= m_drift.size()) {
-    std::cerr << m_className << "::GetDriftLinePoint:\n"
-              << "    Drift line point " << i << " does not exist.\n";
+    std::cerr << m_className << "::GetDriftLinePoint: Index out of range.\n";
     return;
   }
 
@@ -148,8 +116,7 @@ void AvalancheMC::GetHoleEndpoint(const unsigned int i, double& x0, double& y0,
                                   int& status) const {
 
   if (i >= m_endpointsHoles.size()) {
-    std::cerr << m_className << "::GetHoleEndpoint:\n"
-              << "    Endpoint " << i << " does not exist.\n";
+    std::cerr << m_className << "::GetHoleEndpoint: Index out of range.\n";
     return;
   }
 
@@ -169,8 +136,7 @@ void AvalancheMC::GetIonEndpoint(const unsigned int i, double& x0, double& y0,
                                  double& z1, double& t1, int& status) const {
 
   if (i >= m_endpointsIons.size()) {
-    std::cerr << m_className << "::GetIonEndpoint:\n"
-              << "    Endpoint " << i << " does not exist.\n";
+    std::cerr << m_className << "::GetIonEndpoint: Index out of range.\n";
     return;
   }
 
@@ -191,8 +157,7 @@ void AvalancheMC::GetElectronEndpoint(const unsigned int i, double& x0,
                                       double& t1, int& status) const {
 
   if (i >= m_endpointsElectrons.size()) {
-    std::cerr << m_className << "::GetElectronEndpoint:\n"
-              << "    Endpoint " << i << " does not exist.\n";
+    std::cerr << m_className << "::GetElectronEndpoint: Index out of range.\n";
     return;
   }
 
@@ -211,8 +176,7 @@ bool AvalancheMC::DriftElectron(const double x0, const double y0,
                                 const double z0, const double t0) {
 
   if (!m_sensor) {
-    std::cerr << m_className << "::DriftElectron:\n"
-              << "    Sensor is not defined.\n";
+    std::cerr << m_className << "::DriftElectron: Sensor is not defined.\n";
     return false;
   }
 
@@ -231,7 +195,7 @@ bool AvalancheMC::DriftHole(const double x0, const double y0, const double z0,
                             const double t0) {
 
   if (!m_sensor) {
-    std::cerr << m_className << "::DriftHole:\n    Sensor is not defined.\n";
+    std::cerr << m_className << "::DriftHole: Sensor is not defined.\n";
     return false;
   }
 
@@ -250,7 +214,7 @@ bool AvalancheMC::DriftIon(const double x0, const double y0, const double z0,
                            const double t0) {
 
   if (!m_sensor) {
-    std::cerr << m_className << "::DriftIon:\n    Sensor is not defined.\n";
+    std::cerr << m_className << "::DriftIon: Sensor is not defined.\n";
     return false;
   }
 
@@ -290,12 +254,12 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     // Get the electric and magnetic field at the current position.
     double ex = 0., ey = 0., ez = 0.;
     double bx = 0., by = 0., bz = 0.;
-    Medium* medium = NULL;
+    Medium* medium = nullptr;
     status = GetField(x, y, z, ex, ey, ez, bx, by, bz, medium);
     if (status == StatusCalculationAbandoned) {
       // Something went wrong.
       std::cerr << hdr << "Abandoning the calculation.\n";
-    } else if (status == StatusLeftDriftMedium || medium == NULL) {
+    } else if (status == StatusLeftDriftMedium || !medium) {
       // Point is not inside a "driftable" medium.
       if (m_drift.empty()) {
         std::cerr << hdr << "Initial position (" << x << ", " << y << ", " 
@@ -364,7 +328,7 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     point.y = y;
     point.z = z;
     point.t = t;
-    m_drift.push_back(point);
+    AddPoint(x, y, z, t, 0, 0, 0, m_drift);
 
     // Stop if the drift line has ended.
     if (status != 0) break;
@@ -397,16 +361,13 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     // Determine the time step.
     double dt = 0.;
     switch (m_stepModel) {
-      case 0:
-        // Fixed time steps
+      case FixedTime:
         dt = m_tMc;
         break;
-      case 1:
-        // Fixed distance steps
+      case FixedDistance:
         dt = m_dMc / vmag;
         break;
-      case 2:
-        // Steps based on collision time
+      case CollisionTime:
         dt = -m_nMc * (c1 * vmag / emag) * log(RndmUniformPos());
         break;
       default:
@@ -414,7 +375,6 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
         status = StatusCalculationAbandoned;
         return false;
     }
-
     // Compute the proposed end-point of this step.
     x += dt * vx;
     y += dt * vy;
@@ -458,11 +418,11 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   endPoint.t1 = m_drift.back().t;
   endPoint.status = status;
   if (type == -1) {
-    m_endpointsElectrons.push_back(endPoint);
+    m_endpointsElectrons.push_back(std::move(endPoint));
   } else if (type == 1) {
-    m_endpointsHoles.push_back(endPoint);
+    m_endpointsHoles.push_back(std::move(endPoint));
   } else if (type == 2) {
-    m_endpointsIons.push_back(endPoint);
+    m_endpointsIons.push_back(std::move(endPoint));
   }
   if (m_debug) {
     const int nNewElectrons = m_nElectrons - nElectronsOld;
@@ -473,17 +433,16 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
               << "      " << nNewHoles << " holes, and\n"
               << "      " << nNewIons << " ions\n"
               << "    along the drift line from \n"
-              << "      (" << endPoint.x0 << ", " << endPoint.y0 << ", "
-              << endPoint.z0 << ") to \n"
-              << "      (" << endPoint.x1 << ", " << endPoint.y1 << ", "
-              << endPoint.z1 << ").\n";
+              << "      (" << x0 << ", " << y0 << ", " << z0 << ") to \n"
+              << "      (" << m_drift.back().x << ", " << m_drift.back().y 
+              << ", " << m_drift.back().z << ").\n";
   }
 
   // Compute the induced signal and induced charge if requested.
   const double scale = type == -1 ? -m_scaleElectronSignal : 
                        type ==  1 ?  m_scaleHoleSignal : m_scaleIonSignal; 
-  if (m_useSignal) ComputeSignal(scale);
-  if (m_useInducedCharge) ComputeInducedCharge(scale);
+  if (m_doSignal) ComputeSignal(scale, m_drift);
+  if (m_doInducedCharge) ComputeInducedCharge(scale, m_drift);
 
   // Plot the drift line if requested.
   if (m_viewer && !m_drift.empty()) {
@@ -512,31 +471,27 @@ bool AvalancheMC::AvalancheElectron(const double x0, const double y0,
                                     const double z0, const double t0,
                                     const bool holes) {
 
-  m_withHoles = holes;
-  return Avalanche(x0, y0, z0, t0, 1, 0, 0);
+  return Avalanche(x0, y0, z0, t0, 1, 0, 0, true, holes);
 }
 
 bool AvalancheMC::AvalancheHole(const double x0, const double y0,
                                 const double z0, const double t0,
                                 const bool electrons) {
 
-  m_withElectrons = electrons;
-  return Avalanche(x0, y0, z0, t0, 0, 1, 0);
+  return Avalanche(x0, y0, z0, t0, 0, 1, 0, electrons, true);
 }
 
 bool AvalancheMC::AvalancheElectronHole(const double x0, const double y0,
                                         const double z0, const double t0) {
 
-  m_withElectrons = m_withHoles = true;
-  return Avalanche(x0, y0, z0, t0, 1, 1, 0);
+  return Avalanche(x0, y0, z0, t0, 1, 1, 0, true, true);
 }
 
 bool AvalancheMC::Avalanche(const double x0, const double y0, const double z0,
                             const double t0,
                             const unsigned int ne0, const unsigned int nh0,
-                            const unsigned int ni0) {
-
-  const std::string hdr = m_className + "::Avalanche:\n    ";
+                            const unsigned int ni0, const bool withElectrons,
+                            const bool withHoles) {
 
   m_endpointsElectrons.clear();
   m_endpointsHoles.clear();
@@ -544,90 +499,71 @@ bool AvalancheMC::Avalanche(const double x0, const double y0, const double z0,
 
   // Make sure the sensor is defined.
   if (!m_sensor) {
-    std::cerr << hdr << "Sensor is not defined.\n";
+    std::cerr << m_className << "::Avalanche: Sensor is not defined.\n";
     return false;
   }
 
   // Add the first point to the list.
-  std::vector<AvalPoint> aval;
-  AvalPoint point;
-  point.x = x0;
-  point.y = y0;
-  point.z = z0;
-  point.t = t0;
-  point.ne = ne0;
-  point.nh = nh0;
-  point.ni = ni0;
-  aval.push_back(point);
+  std::vector<DriftPoint> aval;
+  AddPoint(x0, y0, z0, t0, ne0, nh0, ni0, aval);
 
   m_nElectrons = ne0;
   m_nHoles = nh0;
   m_nIons = ni0;
 
-  if (!m_withHoles && !m_withElectrons) {
+  if (!withHoles && !withElectrons) {
+    const std::string hdr = m_className + "::Avalanche:\n    ";
     std::cerr << hdr << "Neither electron nor hole/ion component requested.\n";
   }
 
-  std::vector<AvalPoint> newAval;
+  std::vector<DriftPoint> newAval;
   while (!aval.empty()) {
-    std::vector<AvalPoint>::iterator it;
-    std::vector<AvalPoint>::iterator end = aval.end(); 
-    for (it = aval.begin(); it != end; ++it) {
-      if (m_withElectrons) {
+    for (const auto& point : aval) {
+      if (withElectrons) {
         // Loop over the electrons at this location.
-        const unsigned int ne = (*it).ne;
+        const unsigned int ne = point.ne;
         for (unsigned int i = 0; i < ne; ++i) {
           // Compute an electron drift line.
-          if (!DriftLine((*it).x, (*it).y, (*it).z, (*it).t, -1, true)) {
+          if (!DriftLine(point.x, point.y, point.z, point.t, -1, true)) {
             continue;
           }
           // Loop over the drift line.
-          const int nPoints = m_drift.size();
+          const unsigned int nPoints = m_drift.size();
           // TODO: why - 2?
-          for (int j = 0; j < nPoints - 2; ++j) {
-            if (m_drift[j].ne > 0 || m_drift[j].nh > 0 || m_drift[j].ni > 0) {
+          for (unsigned int j = 0; j < nPoints - 2; ++j) {
+            const auto& p = m_drift[j];
+            if (p.ne > 0 || p.nh > 0 || p.ni > 0) {
               // Add the point to the table.
-              point.x = m_drift[j + 1].x;
-              point.y = m_drift[j + 1].y;
-              point.z = m_drift[j + 1].z;
-              point.t = m_drift[j + 1].t;
-              point.ne = m_drift[j].ne;
-              point.nh = m_drift[j].nh;
-              point.ni = m_drift[j].ni;
-              newAval.push_back(point);
+              AddPoint(m_drift[j + 1].x, m_drift[j + 1].y, m_drift[j + 1].z,
+                       m_drift[j + 1].t, p.ne, p.nh, p.ni, newAval);
             }
           }
         }
       }
 
-      if (m_withHoles) {
+      if (withHoles) {
         // Loop over the ions at this location.
-        const unsigned int ni = (*it).ni;
+        const unsigned int ni = point.ni;
         for (unsigned int i = 0; i < ni; ++i) {
           // Compute an ion drift line.
-          DriftLine((*it).x, (*it).y, (*it).z, (*it).t, 2, false);
+          DriftLine(point.x, point.y, point.z, point.t, 2, false);
         }
 
         // Loop over the holes at this location.
-        const unsigned int nh = (*it).nh;
+        const unsigned int nh = point.nh;
         for (unsigned int i = 0; i < nh; ++i) {
           // Compute a hole drift line.
-          if (!DriftLine((*it).x, (*it).y, (*it).z, (*it).t, +1, true)) {
+          if (!DriftLine(point.x, point.y, point.z, point.t, +1, true)) {
             continue;
           }
           // Loop over the drift line.
           const unsigned int nPoints = m_drift.size();
           for (unsigned int j = 0; j < nPoints - 1; ++j) {
-            if (m_drift[j].ne > 0 || m_drift[j].nh > 0 || m_drift[j].ni > 0) {
+            const auto& p = m_drift[j];
+            if (p.ne > 0 || p.nh > 0 || p.ni > 0) {
               // Add the point to the table.
-              point.x = m_drift[j + 1].x;
-              point.y = m_drift[j + 1].y;
-              point.z = m_drift[j + 1].z;
-              point.t = m_drift[j + 1].t;
-              point.ne = m_drift[j].ne;
-              point.nh = m_drift[j].nh;
-              point.ni = m_drift[j].ni;
-              newAval.push_back(point);
+              AddPoint(m_drift[j + 1].x, m_drift[j + 1].y, m_drift[j + 1].z,
+                       m_drift[j + 1].t, p.ne, p.nh, p.ni, newAval);
             }
           }
         }
@@ -677,7 +613,7 @@ bool AvalancheMC::GetVelocity(const int type, Medium* medium,
     for (unsigned int i = 0; i < nComponents; ++i) {
       ComponentBase* cmp = m_sensor->GetComponent(i);
       if (!cmp->IsVelocityActive()) continue;
-      Medium* m = NULL;
+      Medium* m = nullptr;
       int status = 0;
       if (type < 0) {
         cmp->ElectronVelocity(x, y, z, vx, vy, vz, m, status);
@@ -749,7 +685,7 @@ bool AvalancheMC::AddDiffusion(const int type, Medium* medium,
   const double dy = step * RndmGaussian(0., dt);
   const double dz = step * RndmGaussian(0., dt);
   if (m_debug) {
-    std::cout << m_className << "::AddDiffusion:\n    Adding diffusion step "
+    std::cout << m_className << "::AddDiffusion: Adding diffusion step "
               << dx << ", " << dy << ", " << dz << "\n";
   }
   // Compute the rotation angles to align diffusion and drift velocity vectors.
@@ -795,7 +731,7 @@ void AvalancheMC::TerminateLine(double x0, double y0, double z0, double t0,
     // Check if the mid-point is inside the drift medium and the drift area.
     double ex = 0., ey = 0., ez = 0.;
     int status = 0;
-    Medium* medium = NULL;
+    Medium* medium = nullptr;
     m_sensor->ElectricField(xm, ym, zm, ex, ey, ez, medium, status);
     if (status == 0 && m_sensor->IsInArea(xm, ym, zm)) {
       x = xm;
@@ -823,7 +759,8 @@ bool AvalancheMC::ComputeGainLoss(const int type, int& status) {
   const double probth = 0.01;
 
   // Set initial number of electrons/ions.
-  int ne = 1, ni = 0;
+  int ne = 1;
+  int ni = 0;
   // Loop over the drift line.
   for (unsigned int i = 0; i < nPoints - 1; ++i) {
     m_drift[i].ne = 0;
@@ -910,46 +847,48 @@ bool AvalancheMC::ComputeGainLoss(const int type, int& status) {
 bool AvalancheMC::ComputeAlphaEta(const int type, std::vector<double>& alphas,
                                   std::vector<double>& etas) const {
   // Locations and weights for 6-point Gaussian integration
-  const double tg[6] = {-0.932469514203152028, -0.661209386466264514,
-                        -0.238619186083196909,  0.238619186083196909,
-                         0.661209386466264514,  0.932469514203152028};
-  const double wg[6] = {0.171324492379170345, 0.360761573048138608,
-                        0.467913934572691047, 0.467913934572691047,
-                        0.360761573048138608, 0.171324492379170345};
+  constexpr double tg[6] = {-0.932469514203152028, -0.661209386466264514,
+                            -0.238619186083196909,  0.238619186083196909,
+                             0.661209386466264514,  0.932469514203152028};
+  constexpr double wg[6] = {0.171324492379170345, 0.360761573048138608,
+                            0.467913934572691047, 0.467913934572691047,
+                            0.360761573048138608, 0.171324492379170345};
 
   const unsigned int nPoints = m_drift.size();
-  alphas.resize(nPoints, 0.);
-  etas.resize(nPoints, 0.);
+  alphas.assign(nPoints, 0.);
+  etas.assign(nPoints, 0.);
   if (nPoints < 2) return true;
   // Loop over the drift line.
   for (unsigned int i = 0; i < nPoints - 1; ++i) {
-    const DriftPoint& p0 = m_drift[i];
-    const DriftPoint& p1 = m_drift[i + 1];
+    const auto& p0 = m_drift[i];
+    const auto& p1 = m_drift[i + 1];
     // Compute the step length.
     const double delx = p1.x - p0.x;
     const double dely = p1.y - p0.y;
     const double delz = p1.z - p0.z;
     const double del = sqrt(delx * delx + dely * dely + delz * delz);
+    if (del < Small) continue;
     // Integrate drift velocity and Townsend and attachment coefficients.
     double vdx = 0.;
     double vdy = 0.;
     double vdz = 0.;
     for (unsigned int j = 0; j < 6; ++j) {
-      const double x = p0.x + 0.5 * (1. + tg[j]) * delx;
-      const double y = p0.y + 0.5 * (1. + tg[j]) * dely;
-      const double z = p0.z + 0.5 * (1. + tg[j]) * delz;
+      const double f = 0.5 * (1. + tg[j]);
+      const double x = p0.x + f * delx;
+      const double y = p0.y + f * dely;
+      const double z = p0.z + f * delz;
       // Get the electric field.
       double ex = 0., ey = 0., ez = 0.;
-      Medium* medium = NULL;
+      Medium* medium = nullptr;
       int status = 0;
       m_sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
       // Make sure we are in a drift medium.
       if (status != 0) {
         // Check if this point is the last but one.
         if (i < nPoints - 2) {
-          std::cerr << m_className << "::ComputeAlphaEta:    Got status \n"
-                    << status << " at segment " << j + 1 
-                    << "/6, drift point " << i + 1 << "/" << nPoints << ".\n";
+          std::cerr << m_className << "::ComputeAlphaEta: Got status " << status
+                    << " at segment " << j + 1 << "/6, drift point " 
+                    << i + 1 << "/" << nPoints << ".\n";
           return false;
         }
         continue;
@@ -1010,17 +949,13 @@ bool AvalancheMC::ComputeAlphaEta(const int type, std::vector<double>& alphas,
     }
     // Compute the scaling factor for the projected length.
     double scale = 1.;
-    if (m_useEquilibration) {
+    if (m_doEquilibration) {
       const double vd = sqrt(vdx * vdx + vdy * vdy + vdz * vdz);
       if (vd * del <= 0.) {
         scale = 0.;
       } else {
         const double dinv = delx * vdx + dely * vdy + delz * vdz;
-        if (dinv < 0.) {
-          scale = 0.;
-        } else {
-          scale = (delx * vdx + dely * vdy + delz * vdz) / (vd * del);
-        }
+        scale = dinv < 0. ? 0. : dinv / (vd * del);
       }
     }
     alphas[i] *= 0.5 * del * scale;
@@ -1028,7 +963,7 @@ bool AvalancheMC::ComputeAlphaEta(const int type, std::vector<double>& alphas,
   }
 
   // Skip equilibration if projection has not been requested.
-  if (!m_useEquilibration) return true;
+  if (!m_doEquilibration) return true;
   if (!Equilibrate(alphas)) {
     if (m_debug) {
       std::cerr << m_className << "::ComputeAlphaEta:\n    Unable to even out "
@@ -1132,14 +1067,16 @@ bool AvalancheMC::Equilibrate(std::vector<double>& alphas) const {
 
 }
 
-void AvalancheMC::ComputeSignal(const double q) const {
+void AvalancheMC::ComputeSignal(const double q,
+    const std::vector<DriftPoint>& driftLine) const {
 
-  const unsigned int nPoints = m_drift.size();
+  const unsigned int nPoints = driftLine.size();
   if (nPoints < 2) return;
   for (unsigned int i = 0; i < nPoints - 1; ++i) {
-    const DriftPoint& p0 = m_drift[i];
-    const DriftPoint& p1 = m_drift[i + 1];
+    const auto& p0 = driftLine[i];
+    const auto& p1 = driftLine[i + 1];
     const double dt = p1.t - p0.t;
+    if (dt < Small) continue;
     const double dx = p1.x - p0.x;
     const double dy = p1.y - p0.y;
     const double dz = p1.z - p0.z;
@@ -1147,16 +1084,17 @@ void AvalancheMC::ComputeSignal(const double q) const {
     const double y =  p0.y + 0.5 * dy;
     const double z =  p0.z + 0.5 * dz;
     const double s = 1. / dt;
-    m_sensor->AddSignal(q, p0.t, dt, x, y, z,
-                        dx * s, dy * s, dz * s);
+    m_sensor->AddSignal(q, p0.t, dt, x, y, z, dx * s, dy * s, dz * s);
   }
 }
 
-void AvalancheMC::ComputeInducedCharge(const double q) const {
+void AvalancheMC::ComputeInducedCharge(const double q,
+    const std::vector<DriftPoint>& driftLine) const {
 
-  if (m_drift.size() < 2) return;
-  const DriftPoint& p0 = m_drift.front();
-  const DriftPoint& p1 = m_drift.back();
+  if (driftLine.size() < 2) return;
+  const auto& p0 = driftLine.front();
+  const auto& p1 = driftLine.back();
   m_sensor->AddInducedCharge(q, p0.x, p0.y, p0.z, p1.x, p1.y, p1.z);
 }
+
 }

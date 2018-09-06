@@ -1,7 +1,7 @@
 #ifndef G_COMPONENT_BASE_H
 #define G_COMPONENT_BASE_H
 
-#include <vector>
+#include <array>
 #include <string>
 
 #include "GeometryBase.hh"
@@ -102,76 +102,76 @@ class ComponentBase {
 
   /// Enable simple periodicity in the \f$x\f$ direction.
   void EnablePeriodicityX(const bool on = true) {
-    m_xPeriodic = on;
+    m_periodic[0] = on;
     UpdatePeriodicity();
   }
   void DisablePeriodicityX() { EnablePeriodicityX(false); }
   /// Enable simple periodicity in the \f$y\f$ direction.
   void EnablePeriodicityY(const bool on = true) {
-    m_yPeriodic = on;
+    m_periodic[1] = on;
     UpdatePeriodicity();
   }
   void DisablePeriodicityY() { EnablePeriodicityY(false); }
   /// Enable simple periodicity in the \f$z\f$ direction.
   void EnablePeriodicityZ(const bool on = true) {
-    m_zPeriodic = on;
+    m_periodic[2] = on;
     UpdatePeriodicity();
   }
   void DisablePeriodicityZ() { EnablePeriodicityZ(false); }
 
   /// Enable mirror periodicity in the \f$x\f$ direction.
   void EnableMirrorPeriodicityX(const bool on = true) {
-    m_xMirrorPeriodic = on;
+    m_mirrorPeriodic[0] = on;
     UpdatePeriodicity();
   }
   void DisableMirrorPeriodicityX() { EnableMirrorPeriodicityX(false); }
   /// Enable mirror periodicity in the \f$y\f$ direction.
   void EnableMirrorPeriodicityY(const bool on = true) {
-    m_yMirrorPeriodic = on;
+    m_mirrorPeriodic[1] = on;
     UpdatePeriodicity();
   }
   void DisableMirrorPeriodicityY() { EnableMirrorPeriodicityY(false); }
   /// Enable mirror periodicity in the \f$y\f$ direction.
   void EnableMirrorPeriodicityZ(const bool on = true) {
-    m_zMirrorPeriodic = on;
+    m_mirrorPeriodic[2] = on;
     UpdatePeriodicity();
   }
   void DisableMirrorPeriodicityZ() { EnableMirrorPeriodicityZ(false); }
 
   /// Enable axial periodicity in the \f$x\f$ direction.
   void EnableAxialPeriodicityX(const bool on = true) {
-    m_xAxiallyPeriodic = on;
+    m_axiallyPeriodic[0] = on;
     UpdatePeriodicity();
   }
   void DisableAxialPeriodicityX() { EnableAxialPeriodicityX(false); }
   /// Enable axial periodicity in the \f$y\f$ direction.
   void EnableAxialPeriodicityY(const bool on = true) {
-    m_yAxiallyPeriodic = on;
+    m_axiallyPeriodic[1] = on;
     UpdatePeriodicity();
   }
   void DisableAxialPeriodicityY() { EnableAxialPeriodicityY(false); }
   /// Enable axial periodicity in the \f$z\f$ direction.
   void EnableAxialPeriodicityZ(const bool on = true) {
-    m_zAxiallyPeriodic = on;
+    m_axiallyPeriodic[2] = on;
     UpdatePeriodicity();
   }
   void DisableAxialPeriodicityZ() { EnableAxialPeriodicityZ(false); }
 
   /// Enable rotation symmetry around the \f$x\f$ axis.
   void EnableRotationSymmetryX(const bool on = true) {
-    m_xRotationSymmetry = on;
+    m_rotationSymmetric[0] = on;
     UpdatePeriodicity();
   }
   void DisableRotationSymmetryX() { EnableRotationSymmetryX(false); }
   /// Enable rotation symmetry around the \f$y\f$ axis.
   void EnableRotationSymmetryY(const bool on = true) {
-    m_yRotationSymmetry = on;
+    m_rotationSymmetric[1] = on;
     UpdatePeriodicity();
   }
   void DisableRotationSymmetryY() { EnableRotationSymmetryY(false); }
   /// Enable rotation symmetry around the \f$z\f$ axis.
   void EnableRotationSymmetryZ(const bool on = true) {
-    m_zRotationSymmetry = on;
+    m_rotationSymmetric[2] = on;
     UpdatePeriodicity();
   }
   void DisableRotationSymmetryZ() { EnableRotationSymmetryZ(false); }
@@ -230,52 +230,36 @@ class ComponentBase {
 
  protected:
   /// Class name.
-  std::string m_className;
+  std::string m_className = "ComponentBase";
 
   /// Pointer to the geometry.
-  GeometryBase* m_geometry;
+  GeometryBase* m_geometry = nullptr;
 
   /// Ready for use?
-  bool m_ready;
+  bool m_ready = false;
 
   /// Does the component have traps?
-  bool m_activeTraps;
+  bool m_activeTraps = false;
   /// Does the component have velocity maps?
-  bool m_hasVelocityMap;
+  bool m_hasVelocityMap = false;
 
-  /// Simple periodicity in x.
-  bool m_xPeriodic;
-  /// Simple periodicity in y.
-  bool m_yPeriodic;
-  /// Simple periodicity in z.
-  bool  m_zPeriodic;
-  /// Mirror periodicity in x.
-  bool m_xMirrorPeriodic;
-  /// Mirror periodicity in y.
-  bool m_yMirrorPeriodic;
-  /// Mirror periodicity in z.
-  bool m_zMirrorPeriodic;
-  /// Axial periodicity in x.
-  bool m_xAxiallyPeriodic;
-  /// Axial periodicity in y.
-  bool m_yAxiallyPeriodic;
-  /// Axial periodicity in z.
-  bool m_zAxiallyPeriodic;
-  /// Rotation symmetry around x-axis.
-  bool m_xRotationSymmetry;
-  /// Rotation symmetry around y-axis.
-  bool m_yRotationSymmetry;
-  /// Rotation symmetry around z-axis.
-  bool m_zRotationSymmetry;
+  /// Simple periodicity in x, y, z.
+  std::array<bool, 3> m_periodic = {{false, false, false}};
+  /// Mirror periodicity in x, y, z.
+  std::array<bool, 3> m_mirrorPeriodic = {{false, false, false}};
+  /// Axial periodicity in x, y, z.
+  std::array<bool, 3> m_axiallyPeriodic = {{false, false, false}};
+  /// Rotation symmetry around x-axis, y-axis, z-axis.
+  std::array<bool, 3> m_rotationSymmetric = {{false, false, false}};
 
-  double m_bx0, m_by0, m_bz0; //< Constant magnetic field.
+  double m_bx0 = 0., m_by0 = 0., m_bz0 = 0.; //< Constant magnetic field.
 
   /// Switch on/off debugging messages
-  bool m_debug;
+  bool m_debug = false;
 
-  /// Geometry checks
+  /// Reset the component.
   virtual void Reset() = 0;
-  /// Verify periodicities
+  /// Verify periodicities.
   virtual void UpdatePeriodicity() = 0;
 };
 }

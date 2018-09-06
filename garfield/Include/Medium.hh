@@ -113,13 +113,10 @@ class Medium {
   virtual double GetElectronCollisionRate(const double e, const int band = 0);
   virtual bool GetElectronCollision(const double e, int& type, int& level,
                                     double& e1, double& dx, double& dy,
-                                    double& dz, int& nion, int& ndxc,
+                                    double& dz, 
+                                    std::vector<std::pair<int, double> >& secondaries, 
+                                    int& ndxc,
                                     int& band);
-
-  virtual unsigned int GetNumberOfIonisationProducts() const { return 0; }
-  virtual bool GetIonisationProduct(const unsigned int i, 
-                                    int& type, double& energy) const;
-
   virtual unsigned int GetNumberOfDeexcitationProducts() const { return 0; }
   virtual bool GetDeexcitationProduct(const unsigned int i, double& t, 
                                       double& s,
@@ -155,9 +152,9 @@ class Medium {
                                const double by, const double bz, double& diss);
 
   // Set the range of fields to be covered by the transport tables.
-  void SetFieldGrid(double emin, double emax, int ne, bool logE,
-                    double bmin = 0., double bmax = 0., int nb = 1,
-                    double amin = 0., double amax = 0., int na = 1);
+  void SetFieldGrid(double emin, double emax, const size_t ne, bool logE,
+                    double bmin = 0., double bmax = 0., const size_t nb = 1,
+                    double amin = 0., double amax = 0., const size_t na = 1);
   void SetFieldGrid(const std::vector<double>& efields,
                     const std::vector<double>& bfields,
                     const std::vector<double>& angles);
@@ -219,18 +216,39 @@ class Medium {
                           const unsigned int ib, 
                           const unsigned int ia, double& diss);
 
-  void ResetElectronVelocity();
-  void ResetElectronDiffusion();
-  void ResetElectronTownsend();
-  void ResetElectronAttachment();
-  void ResetElectronLorentzAngle();
-  void ResetHoleVelocity();
-  void ResetHoleDiffusion();
-  void ResetHoleTownsend();
-  void ResetHoleAttachment();
-  void ResetIonMobility();
-  void ResetIonDiffusion();
-  void ResetIonDissociation();
+  void ResetElectronVelocity() {
+    m_eVelocityE.clear();
+    m_eVelocityB.clear();
+    m_eVelocityExB.clear();
+  }
+  void ResetElectronDiffusion() {
+    m_eDiffLong.clear();
+    m_eDiffTrans.clear();
+    m_eDiffTens.clear();
+  }
+  void ResetElectronTownsend() { m_eTownsend.clear(); }
+  void ResetElectronAttachment() { m_eAttachment.clear(); }
+  void ResetElectronLorentzAngle() { m_eLorentzAngle.clear(); }
+
+  void ResetHoleVelocity() {
+    m_hVelocityE.clear();
+    m_hVelocityB.clear();
+    m_hVelocityExB.clear();
+  }
+  void ResetHoleDiffusion() {
+    m_hDiffLong.clear();
+    m_hDiffTrans.clear();
+    m_hDiffTens.clear();
+  }
+  void ResetHoleTownsend() { m_hTownsend.clear(); }
+  void ResetHoleAttachment() { m_hAttachment.clear(); }
+
+  void ResetIonMobility() { m_ionMobility.clear(); } 
+  void ResetIonDiffusion() {
+    m_ionDiffLong.clear();
+    m_ionDiffTrans.clear();
+  }
+  void ResetIonDissociation() { m_ionDissociation.clear(); }
 
   bool SetIonMobility(const unsigned int ie, const unsigned int ib, 
                       const unsigned int ia, const double mu);
@@ -291,42 +309,44 @@ class Medium {
   void DisableDebugging() { m_debug = false; }
 
  protected:
-  std::string m_className;
+  std::string m_className = "Medium";
 
   static int m_idCounter;
 
   // Id number
   int m_id;
   // Name
-  std::string m_name;
+  std::string m_name = "";
   // Temperature [K]
-  double m_temperature;
+  double m_temperature = 293.15;
   // Pressure [Torr]
-  double m_pressure;
+  double m_pressure = 760.;
   // Static dielectric constant
-  double m_epsilon;
+  double m_epsilon = 1.;
   // Number of components
-  unsigned int m_nComponents;
+  unsigned int m_nComponents = 1;
   // (Effective) atomic number Z
-  double m_z;
+  double m_z = 1.;
   // Atomic weight A
-  double m_a;
+  double m_a = 0.;
   // Number density [cm-3]
-  double m_density;
+  double m_density = 0.;
 
   // Transport flags
-  bool m_driftable;
-  bool m_microscopic;
-  bool m_ionisable;
+  bool m_driftable = false;
+  bool m_microscopic = false;
+  bool m_ionisable = false;
 
-  // W value and Fano factor
-  double m_w, m_fano;
+  // W value
+  double m_w = 0.;
+  // Fano factor
+  double m_fano = 0.;
 
   // Update flag
-  bool m_isChanged;
+  bool m_isChanged = true;
 
   // Switch on/off debugging messages
-  bool m_debug;
+  bool m_debug = false;
 
   // Field grids
   std::vector<double> m_eFields;
@@ -334,87 +354,85 @@ class Medium {
   std::vector<double> m_bAngles;
 
   // Tables of transport parameters
-  bool m_map2d;
+  bool m_map2d = false;
   // Electrons
-  bool m_hasElectronVelocityE, m_hasElectronVelocityB, m_hasElectronVelocityExB;
-  bool m_hasElectronDiffLong, m_hasElectronDiffTrans, m_hasElectronDiffTens;
-  bool m_hasElectronAttachment;
-  bool m_hasElectronLorentzAngle;
-  std::vector<std::vector<std::vector<double> > > tabElectronVelocityE;
-  std::vector<std::vector<std::vector<double> > > tabElectronVelocityExB;
-  std::vector<std::vector<std::vector<double> > > tabElectronVelocityB;
-  std::vector<std::vector<std::vector<double> > > tabElectronDiffLong;
-  std::vector<std::vector<std::vector<double> > > tabElectronDiffTrans;
-  std::vector<std::vector<std::vector<double> > > tabElectronTownsend;
-  std::vector<std::vector<std::vector<double> > > tabElectronAttachment;
-  std::vector<std::vector<std::vector<double> > > tabElectronLorentzAngle;
+  std::vector<std::vector<std::vector<double> > > m_eVelocityE;
+  std::vector<std::vector<std::vector<double> > > m_eVelocityExB;
+  std::vector<std::vector<std::vector<double> > > m_eVelocityB;
+  std::vector<std::vector<std::vector<double> > > m_eDiffLong;
+  std::vector<std::vector<std::vector<double> > > m_eDiffTrans;
+  std::vector<std::vector<std::vector<double> > > m_eTownsend;
+  std::vector<std::vector<std::vector<double> > > m_eAttachment;
+  std::vector<std::vector<std::vector<double> > > m_eLorentzAngle;
 
   std::vector<std::vector<std::vector<std::vector<double> > > >
-      tabElectronDiffTens;
+      m_eDiffTens;
 
   // Holes
-  bool m_hasHoleVelocityE, m_hasHoleVelocityB, m_hasHoleVelocityExB;
-  bool m_hasHoleDiffLong, m_hasHoleDiffTrans, m_hasHoleDiffTens;
-  bool m_hasHoleTownsend, m_hasHoleAttachment;
-  std::vector<std::vector<std::vector<double> > > tabHoleVelocityE;
-  std::vector<std::vector<std::vector<double> > > tabHoleVelocityExB;
-  std::vector<std::vector<std::vector<double> > > tabHoleVelocityB;
-  std::vector<std::vector<std::vector<double> > > tabHoleDiffLong;
-  std::vector<std::vector<std::vector<double> > > tabHoleDiffTrans;
-  std::vector<std::vector<std::vector<double> > > tabHoleTownsend;
-  std::vector<std::vector<std::vector<double> > > tabHoleAttachment;
+  std::vector<std::vector<std::vector<double> > > m_hVelocityE;
+  std::vector<std::vector<std::vector<double> > > m_hVelocityExB;
+  std::vector<std::vector<std::vector<double> > > m_hVelocityB;
+  std::vector<std::vector<std::vector<double> > > m_hDiffLong;
+  std::vector<std::vector<std::vector<double> > > m_hDiffTrans;
+  std::vector<std::vector<std::vector<double> > > m_hTownsend;
+  std::vector<std::vector<std::vector<double> > > m_hAttachment;
 
-  std::vector<std::vector<std::vector<std::vector<double> > > > tabHoleDiffTens;
+  std::vector<std::vector<std::vector<std::vector<double> > > > m_hDiffTens;
 
   // Ions
-  bool m_hasIonMobility;
-  bool m_hasIonDiffLong, m_hasIonDiffTrans;
-  bool m_hasIonDissociation;
-  std::vector<std::vector<std::vector<double> > > tabIonMobility;
-  std::vector<std::vector<std::vector<double> > > tabIonDiffLong;
-  std::vector<std::vector<std::vector<double> > > tabIonDiffTrans;
-  std::vector<std::vector<std::vector<double> > > tabIonDissociation;
+  std::vector<std::vector<std::vector<double> > > m_ionMobility;
+  std::vector<std::vector<std::vector<double> > > m_ionDiffLong;
+  std::vector<std::vector<std::vector<double> > > m_ionDiffTrans;
+  std::vector<std::vector<std::vector<double> > > m_ionDissociation;
 
   // Thresholds for Townsend, attachment and dissociation coefficients.
-  int thrElectronTownsend;
-  int thrElectronAttachment;
+  int thrElectronTownsend = 0;
+  int thrElectronAttachment = 0;
 
-  int thrHoleTownsend;
-  int thrHoleAttachment;
-  int thrIonDissociation;
+  int thrHoleTownsend = 0;
+  int thrHoleAttachment = 0;
+  int thrIonDissociation = 0;
 
-  // Extrapolation methods
-  unsigned int m_extrLowVelocity, m_extrHighVelocity;
-  unsigned int m_extrLowDiffusion, m_extrHighDiffusion;
-  unsigned int m_extrLowTownsend, m_extrHighTownsend;
-  unsigned int m_extrLowAttachment, m_extrHighAttachment;
-  unsigned int m_extrLowLorentzAngle, m_extrHighLorentzAngle;
-  unsigned int m_extrLowMobility, m_extrHighMobility;
-  unsigned int m_extrLowDissociation, m_extrHighDissociation;
+  // Extrapolation methods (TODO: enum).
+  std::pair<unsigned int, unsigned int> m_extrVel = {0, 1};
+  std::pair<unsigned int, unsigned int> m_extrDiff = {0, 1};
+  std::pair<unsigned int, unsigned int> m_extrTownsend = {0, 1};
+  std::pair<unsigned int, unsigned int> m_extrAttachment = {0, 1};
+  std::pair<unsigned int, unsigned int> m_extrLorentzAngle = {0, 1};
+  std::pair<unsigned int, unsigned int> m_extrMobility = {0, 1};
+  std::pair<unsigned int, unsigned int> m_extrDissociation = {0, 1};
 
   // Interpolation methods
-  unsigned int m_intpVelocity;
-  unsigned int m_intpDiffusion;
-  unsigned int m_intpTownsend;
-  unsigned int m_intpAttachment;
-  unsigned int m_intpLorentzAngle;
-  unsigned int m_intpMobility;
-  unsigned int m_intpDissociation;
+  unsigned int m_intpVel = 2;
+  unsigned int m_intpDiff = 2;
+  unsigned int m_intpTownsend = 2;
+  unsigned int m_intpAttachment = 2;
+  unsigned int m_intpLorentzAngle = 2;
+  unsigned int m_intpMobility = 2;
+  unsigned int m_intpDissociation = 2;
 
   double GetAngle(const double ex, const double ey, const double ez,
                   const double bx, const double by, const double bz,
                   const double e, const double b) const;
+  bool Interpolate(const double e, const double b, const double a,
+    const std::vector<std::vector<std::vector<double> > >& table, double& y,
+    const unsigned int intp, const std::pair<unsigned int, unsigned int>& extr) const;
+
   double Interpolate1D(const double e, const std::vector<double>& table,
                        const std::vector<double>& fields, 
                        const unsigned int intpMeth,
-                       const int jExtr, const int iExtr);
-  bool GetExtrapolationIndex(std::string extrStr, unsigned int& extrNb);
+                       const std::pair<unsigned int, unsigned int>& extr) const;
+  void SetExtrapolationMethod(const std::string& low, const std::string& high,
+                              std::pair<unsigned int, unsigned int>& extr,
+                              const std::string& fcn);
+  bool GetExtrapolationIndex(std::string str, unsigned int& nb) const;
+
   void CloneTable(std::vector<std::vector<std::vector<double> > >& tab,
                   const std::vector<double>& efields,
                   const std::vector<double>& bfields,
                   const std::vector<double>& angles, 
                   const unsigned int intp,
-                  const unsigned int extrLow, const unsigned int extrHigh, 
+                  const std::pair<unsigned int, unsigned int>& extr,
                   const double init,
                   const std::string& label);
   void CloneTensor(
@@ -424,17 +442,15 @@ class Medium {
       const std::vector<double>& bfields, 
       const std::vector<double>& angles,
       const unsigned int intp, 
-      const unsigned int extrLow, const unsigned int extrHigh, 
+      const std::pair<unsigned int, unsigned int>& extr,
       const double init,
       const std::string& label);
 
-  void InitParamArrays(const unsigned int eRes, const unsigned int bRes, 
-                       const unsigned int aRes,
-                       std::vector<std::vector<std::vector<double> > >& tab,
-                       const double val);
-  void InitParamTensor(
-      const unsigned int eRes, const unsigned int bRes, 
-      const unsigned int aRes, const unsigned int tRes,
+  void InitTable(const size_t nE, const size_t nB, const size_t nA,
+                 std::vector<std::vector<std::vector<double> > >& tab,
+                 const double val);
+  void InitTensor(
+      const size_t nE, const size_t nB, const size_t nA, const size_t nT, 
       std::vector<std::vector<std::vector<std::vector<double> > > >& tab,
       const double val);
 };

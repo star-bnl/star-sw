@@ -8,23 +8,7 @@
 
 namespace Garfield {
 
-ViewDrift::ViewDrift()
-    : m_className("ViewDrift"),
-      m_debug(false),
-      m_canvas(NULL),
-      m_hasExternalCanvas(false),
-      m_xMin(-1.),
-      m_yMin(-1.),
-      m_zMin(-1.),
-      m_xMax(1.),
-      m_yMax(1.),
-      m_zMax(1.),
-      m_view(NULL),
-      m_excPlot(NULL),
-      m_ionPlot(NULL),
-      m_attPlot(NULL),
-      m_markerSizeCluster(1.),
-      m_markerSizeCollision(1.) {
+ViewDrift::ViewDrift() {
 
   m_driftLines.reserve(1000);
   m_driftLinePlots.reserve(1000);
@@ -38,7 +22,6 @@ ViewDrift::ViewDrift()
 ViewDrift::~ViewDrift() {
 
   if (!m_hasExternalCanvas && m_canvas) delete m_canvas;
-  if (m_view) delete m_view;
   Clear();
 }
 
@@ -47,7 +30,7 @@ void ViewDrift::SetCanvas(TCanvas* c) {
   if (!c) return;
   if (!m_hasExternalCanvas && m_canvas) {
     delete m_canvas;
-    m_canvas = NULL;
+    m_canvas = nullptr;
   }
   m_canvas = c;
   m_hasExternalCanvas = true;
@@ -80,30 +63,12 @@ void ViewDrift::Clear() {
   m_ionMarkers.clear();
   m_attMarkers.clear();
 
-  if (m_excPlot) {
-    delete m_excPlot;
-    m_excPlot = NULL;
-  }
-  if (m_ionPlot) {
-    delete m_ionPlot;
-    m_ionPlot = NULL;
-  }
-  if (m_attPlot) {
-    delete m_attPlot;
-    m_attPlot = NULL;
-  }
-  const unsigned int nTrackPlots = m_trackPlots.size();
-  for (unsigned int i = 0; i < nTrackPlots; ++i) {
-    if (m_trackPlots[i]) delete m_trackPlots[i];
-  }
-  const unsigned int nTrackLinePlots = m_trackLinePlots.size();
-  for (unsigned int i = 0; i < nTrackLinePlots; ++i) {
-    if (m_trackLinePlots[i]) delete m_trackLinePlots[i];
-  }
-  const unsigned int nDriftLinePlots = m_driftLinePlots.size();
-  for (unsigned int i = 0; i < nDriftLinePlots; ++i) {
-    if (m_driftLinePlots[i]) delete m_driftLinePlots[i];
-  }
+  m_excPlot.reset();
+  m_ionPlot.reset();
+  m_attPlot.reset();
+
+  m_trackPlots.clear();
+  m_trackLinePlots.clear();
 }
 
 void ViewDrift::SetClusterMarkerSize(const double size) {
@@ -128,27 +93,24 @@ void ViewDrift::NewElectronDriftLine(const unsigned int np, int& id,
                                      const double x0, const double y0,
                                      const double z0) {
 
-  const int col = plottingEngine.GetRootColorElectron();
   // Create a new electron drift line and add it to the list.
-  driftLine d;
+  DriftLine d;
   if (np <= 0) {
     // Number of points is not yet known.
-    std::vector<Marker> p(1);
-    p[0].x = x0;
-    p[0].y = y0;
-    p[0].z = z0;
-    d.vect = p;
+    d.points.resize(1);
+    d.points.front().x = x0;
+    d.points.front().y = y0;
+    d.points.front().z = z0;
   } else {
-    std::vector<Marker> p(np);
+    d.points.resize(np);
     for (unsigned int i = 0; i < np; ++i) {
-      p[i].x = x0;
-      p[i].y = y0;
-      p[i].z = z0;
+      d.points[i].x = x0;
+      d.points[i].y = y0;
+      d.points[i].z = z0;
     }
-    d.vect = p;
   }
-  d.n = col;
-  m_driftLines.push_back(d);
+  d.n = plottingEngine.GetRootColorElectron();
+  m_driftLines.push_back(std::move(d));
   // Return the index of this drift line.
   id = m_driftLines.size() - 1;
 }
@@ -157,22 +119,19 @@ void ViewDrift::NewHoleDriftLine(const unsigned int np, int& id,
                                  const double x0, const double y0,
                                  const double z0) {
 
-  const int col = plottingEngine.GetRootColorHole();
-  driftLine d;
+  DriftLine d;
   Marker m0;
   m0.x = x0;
   m0.y = y0;
   m0.z = z0;
   if (np <= 0) {
     // Number of points is not yet known.
-    std::vector<Marker> p(1, m0);
-    d.vect = p;
+    d.points.push_back(m0);
   } else {
-    std::vector<Marker> p(np, m0);
-    d.vect = p;
+    d.points.assign(np, m0);
   }
-  d.n = col;
-  m_driftLines.push_back(d);
+  d.n = plottingEngine.GetRootColorHole();
+  m_driftLines.push_back(std::move(d));
   // Return the index of this drift line.
   id = m_driftLines.size() - 1;
 }
@@ -180,22 +139,19 @@ void ViewDrift::NewHoleDriftLine(const unsigned int np, int& id,
 void ViewDrift::NewIonDriftLine(const unsigned int np, int& id, const double x0,
                                 const double y0, const double z0) {
 
-  const int col = 47;
-  driftLine d;
+  DriftLine d;
   Marker m0;
   m0.x = x0;
   m0.y = y0;
   m0.z = z0;
   if (np <= 0) {
     // Number of points is not yet known.
-    std::vector<Marker> p(1, m0);
-    d.vect = p;
+    d.points.push_back(m0);
   } else {
-    std::vector<Marker> p(np, m0);
-    d.vect = p;
+    d.points.assign(np, m0);
   }
-  d.n = col;
-  m_driftLines.push_back(d);
+  d.n = 47;
+  m_driftLines.push_back(std::move(d));
   // Return the index of this drift line.
   id = m_driftLines.size() - 1;
 }
@@ -204,10 +160,9 @@ void ViewDrift::NewPhotonTrack(const double x0, const double y0,
                                const double z0, const double x1,
                                const double y1, const double z1) {
 
-  const int col = plottingEngine.GetRootColorPhoton();
   // Create a new photon track (line between start and end point).
   TPolyLine3D p(2);
-  p.SetLineColor(col);
+  p.SetLineColor(plottingEngine.GetRootColorPhoton());
   p.SetLineStyle(7);
   p.SetNextPoint(x0, y0, z0);
   p.SetNextPoint(x1, y1, z1);
@@ -222,7 +177,7 @@ void ViewDrift::NewChargedParticleTrack(const unsigned int np, int& id,
   track[0].x = x0;
   track[0].y = y0;
   track[0].z = z0;
-  m_tracks.push_back(track);
+  m_tracks.push_back(std::move(track));
   // Return the index of this track.
   id = m_tracks.size() - 1;
 }
@@ -235,9 +190,9 @@ void ViewDrift::SetDriftLinePoint(const unsigned int iL, const unsigned int iP,
     std::cerr << m_className << "::SetDriftLinePoint: Index out of range.\n";
     return;
   }
-  m_driftLines[iL].vect[iP].x = x;
-  m_driftLines[iL].vect[iP].y = y;
-  m_driftLines[iL].vect[iP].z = z;
+  m_driftLines[iL].points[iP].x = x;
+  m_driftLines[iL].points[iP].y = y;
+  m_driftLines[iL].points[iP].z = z;
 }
 
 void ViewDrift::AddDriftLinePoint(const unsigned int iL, const double x,
@@ -251,7 +206,7 @@ void ViewDrift::AddDriftLinePoint(const unsigned int iL, const double x,
   m.x = x;
   m.y = y;
   m.z = z;
-  m_driftLines[iL].vect.push_back(m);
+  m_driftLines[iL].points.push_back(std::move(m));
 }
 
 void ViewDrift::SetTrackPoint(const unsigned int iL, const unsigned int iP,
@@ -277,7 +232,7 @@ void ViewDrift::AddTrackPoint(const unsigned int iL, const double x,
   newPoint.x = x;
   newPoint.y = y;
   newPoint.z = z; 
-  m_tracks[iL].push_back(newPoint);
+  m_tracks[iL].push_back(std::move(newPoint));
 }
 
 void ViewDrift::AddExcitationMarker(const double x, const double y,
@@ -287,7 +242,7 @@ void ViewDrift::AddExcitationMarker(const double x, const double y,
   newMarker.x = x;
   newMarker.y = y;
   newMarker.z = z;
-  m_excMarkers.push_back(newMarker);
+  m_excMarkers.push_back(std::move(newMarker));
 }
 
 void ViewDrift::AddIonisationMarker(const double x, const double y,
@@ -297,7 +252,7 @@ void ViewDrift::AddIonisationMarker(const double x, const double y,
   newMarker.x = x;
   newMarker.y = y;
   newMarker.z = z;
-  m_ionMarkers.push_back(newMarker);
+  m_ionMarkers.push_back(std::move(newMarker));
 }
 
 void ViewDrift::AddAttachmentMarker(const double x, const double y,
@@ -307,7 +262,7 @@ void ViewDrift::AddAttachmentMarker(const double x, const double y,
   newMarker.x = x;
   newMarker.y = y;
   newMarker.z = z;
-  m_attMarkers.push_back(newMarker);
+  m_attMarkers.push_back(std::move(newMarker));
 }
 
 void ViewDrift::Plot(const bool twod, const bool axis) {
@@ -329,16 +284,15 @@ void ViewDrift::Plot2d(const bool axis) {
   m_canvas->cd();
   m_canvas->Update();
 
-  const unsigned int nDriftLines = m_driftLines.size();
-  for (unsigned int i = 0; i < nDriftLines; ++i) {
-    const unsigned int nPoints = m_driftLines[i].vect.size();
+  for (const auto& driftLine : m_driftLines) {
+    const auto nPoints = driftLine.points.size();
     TGraph t(nPoints);
     for (unsigned int j = 0; j < nPoints; ++j) {
-      t.SetPoint(j, m_driftLines[i].vect[j].x, m_driftLines[i].vect[j].y);
+      t.SetPoint(j, driftLine.points[j].x, driftLine.points[j].y);
     }
-    t.SetLineColor(m_driftLines[i].n);
+    t.SetLineColor(driftLine.n);
     t.SetLineWidth(1);
-    if (i == 0) {
+    if (&driftLine == &m_driftLines.front()) {
       t.GetXaxis()->SetLimits(m_xMin, m_xMax);
       t.GetHistogram()->SetMaximum(m_yMax);
       t.GetHistogram()->SetMinimum(m_yMin);
@@ -353,18 +307,16 @@ void ViewDrift::Plot2d(const bool axis) {
     m_canvas->Update();
   }
 
-  const int trackCol = plottingEngine.GetRootColorChargedParticle();
-  const unsigned int nTracks = m_tracks.size();
-  for (unsigned int i = 0; i < nTracks; ++i) {
-    const std::vector<Marker>& track = m_tracks[i];
-    const unsigned int nPoints = track.size();
+  const auto trackCol = plottingEngine.GetRootColorChargedParticle();
+  for (const auto& track : m_tracks) {
+    const auto nPoints = track.size();
     TGraph t(nPoints);
     for (unsigned int j = 0; j < nPoints; ++j) {
       t.SetPoint(j, track[j].x, track[j].y);
     }
     t.SetLineColor(trackCol);
     t.SetLineWidth(2);
-    if (i == 0) {
+    if (&track == &m_tracks.front()) {
       t.GetXaxis()->SetLimits(m_xMin, m_xMax);
       t.GetHistogram()->SetMaximum(m_yMax);
       t.GetHistogram()->SetMinimum(m_yMin);
@@ -391,94 +343,81 @@ void ViewDrift::Plot3d(const bool axis) {
   m_canvas->cd();
   if (axis) {
     if (!m_canvas->GetView()) {
-      if (!m_view) m_view = TView::CreateView(1, 0, 0);
+      m_view.reset(TView::CreateView(1, 0, 0));
       m_view->SetRange(m_xMin, m_yMin, m_zMin, m_xMax, m_yMax, m_zMax);
       m_view->ShowAxis();
       m_view->Top();
-      m_canvas->SetView(m_view);
+      m_canvas->SetView(m_view.get());
     }
   }
 
-  const unsigned int nDriftLines = m_driftLines.size();
-  for (unsigned int i = 0; i < nDriftLines; ++i) {
-    const unsigned int nPoints = m_driftLines[i].vect.size();
-    TPolyLine3D* t = new TPolyLine3D(nPoints);
-    for (unsigned int j = 0; j < nPoints; ++j) {
-      t->SetNextPoint(m_driftLines[i].vect[j].x, m_driftLines[i].vect[j].y,
-                      m_driftLines[i].vect[j].z);
+  for (const auto& driftLine : m_driftLines) {
+    TPolyLine3D t(driftLine.points.size());
+    for (const auto& point : driftLine.points) {
+      t.SetNextPoint(point.x, point.y, point.z);
     }
-    t->SetLineColor(m_driftLines[i].n);
-    m_driftLinePlots.push_back(t);
-    t->Draw("same");
+    t.SetLineColor(driftLine.n);
+    m_driftLinePlots.push_back(std::move(t));
+    m_driftLinePlots.back().Draw("same");
   }
+
   const int trackCol = plottingEngine.GetRootColorChargedParticle();
-  const unsigned int nTracks = m_tracks.size();
-  for (unsigned int i = 0; i < nTracks; ++i) {
-    const std::vector<Marker>& track = m_tracks[i];
+  for (const auto& track : m_tracks) {
     const unsigned int nPoints = track.size();
-    TPolyMarker3D* t = new TPolyMarker3D(nPoints);
-    TPolyLine3D* l = new TPolyLine3D(nPoints);
-    for (unsigned int j = 0; j < nPoints; ++j) {
-      t->SetNextPoint(track[j].x, track[j].y, track[j].z);
-      l->SetNextPoint(track[j].x, track[j].y, track[j].z);
+    TPolyMarker3D t(nPoints);
+    TPolyLine3D l(nPoints);
+    for (const auto& point : track) {
+      t.SetNextPoint(point.x, point.y, point.z);
+      l.SetNextPoint(point.x, point.y, point.z);
     }
-    t->SetMarkerStyle(20);
-    t->SetMarkerColor(trackCol);
-    t->SetMarkerSize(m_markerSizeCluster);
-    t->Draw("same");
-    m_trackPlots.push_back(t);
-    l->SetLineColor(trackCol);
-    l->SetLineWidth(1);
-    l->Draw("same");
-    m_trackLinePlots.push_back(l);
+    t.SetMarkerStyle(20);
+    t.SetMarkerColor(trackCol);
+    t.SetMarkerSize(m_markerSizeCluster);
+    t.Draw("same");
+    m_trackPlots.push_back(std::move(t));
+    l.SetLineColor(trackCol);
+    l.SetLineWidth(1);
+    l.Draw("same");
+    m_trackLinePlots.push_back(std::move(l));
   }
-  if (m_excPlot) {
-    delete m_excPlot;
-    m_excPlot = NULL;
-  }
+
   if (!m_excMarkers.empty()) {
-    const unsigned int nExcMarkers = m_excMarkers.size();
-    m_excPlot = new TPolyMarker3D(nExcMarkers);
+    m_excPlot.reset(new TPolyMarker3D(m_excMarkers.size()));
     m_excPlot->SetMarkerColor(plottingEngine.GetRootColorLine2());
     m_excPlot->SetMarkerStyle(20);
     m_excPlot->SetMarkerSize(m_markerSizeCollision);
-    for (unsigned int i = 0; i < nExcMarkers; ++i) {
-      m_excPlot->SetNextPoint(m_excMarkers[i].x, m_excMarkers[i].y,
-                              m_excMarkers[i].z);
+    for (const auto& point : m_excMarkers) {
+      m_excPlot->SetNextPoint(point.x, point.y, point.z);
     }
     m_excPlot->Draw("same");
+  } else {
+    m_excPlot.reset(nullptr);
   }
-  if (m_ionPlot) {
-    delete m_ionPlot;
-    m_ionPlot = NULL;
-  }
+
   if (!m_ionMarkers.empty()) {
-    const unsigned int nIonMarkers = m_ionMarkers.size();
-    m_ionPlot = new TPolyMarker3D(nIonMarkers);
+    m_ionPlot.reset(new TPolyMarker3D(m_ionMarkers.size()));
     m_ionPlot->SetMarkerColor(plottingEngine.GetRootColorIon());
     m_ionPlot->SetMarkerStyle(20);
     m_ionPlot->SetMarkerSize(m_markerSizeCollision);
-    for (unsigned int i = 0; i < nIonMarkers; ++i) {
-      m_ionPlot->SetNextPoint(m_ionMarkers[i].x, m_ionMarkers[i].y,
-                              m_ionMarkers[i].z);
+    for (const auto& point : m_ionMarkers) {
+      m_ionPlot->SetNextPoint(point.x, point.y, point.z);
     }
     m_ionPlot->Draw("same");
+  } else {
+    m_ionPlot.reset(nullptr);
   }
-  if (m_attPlot) {
-    delete m_attPlot;
-    m_attPlot = NULL;
-  }
+
   if (!m_attMarkers.empty()) {
-    const unsigned int nAttMarkers = m_attMarkers.size();
-    m_attPlot = new TPolyMarker3D(nAttMarkers);
+    m_attPlot.reset(new TPolyMarker3D(m_attMarkers.size()));
     m_attPlot->SetMarkerColor(plottingEngine.GetRootColorLine1());
     m_attPlot->SetMarkerStyle(20);
     m_attPlot->SetMarkerSize(m_markerSizeCollision);
-    for (unsigned int i = 0; i < nAttMarkers; ++i) {
-      m_attPlot->SetNextPoint(m_attMarkers[i].x, m_attMarkers[i].y,
-                              m_attMarkers[i].z);
+    for (const auto& point : m_attMarkers) {
+      m_attPlot->SetNextPoint(point.x, point.y, point.z);
     }
     m_attPlot->Draw("same");
+  } else {
+    m_attPlot.reset(nullptr);
   }
   m_canvas->Update();
 }

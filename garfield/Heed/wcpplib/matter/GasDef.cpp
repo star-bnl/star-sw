@@ -8,7 +8,7 @@ namespace Heed {
 using CLHEP::Avogadro;
 using CLHEP::k_Boltzmann;
 
-GasDef::GasDef() : MatterDef(), pressureh(0.0), qmolech(0) {}
+GasDef::GasDef() : MatterDef() {}
 
 GasDef::GasDef(const std::string& fname, const std::string& fnotation,
                long fqmolec, const std::vector<std::string>& fmolec_not,
@@ -16,7 +16,7 @@ GasDef::GasDef(const std::string& fname, const std::string& fnotation,
                double ftemperature, double fdensity)
     : pressureh(fpressure),
       qmolech(fqmolec),
-      molech(fqmolec),
+      molech(fqmolec, nullptr),
       weight_quan_molech(fqmolec),
       weight_mass_molech(fqmolec) {
   mfunname("GasDef::GasDef(...many molecules...)");
@@ -27,12 +27,12 @@ GasDef::GasDef(const std::string& fname, const std::string& fnotation,
     check_econd11a(amd, == NULL,
                    "No molecule with such notation: " << fmolec_not[k] << '\n',
                    mcerr)
-    molech[k].put(amd);
-    if (amd == NULL) {
+    if (!amd) {
       mcerr << "cannot find molecule with notation " << fmolec_not[k]
             << "\nIn particular, check the sequence of initialization\n";
       spexit(mcerr);
     }
+    molech[k] = amd;
   }
   double s = 0.0;
   for (long n = 0; n < fqmolec; ++n) {
@@ -120,7 +120,7 @@ GasDef::GasDef(const std::string& fname, const std::string& fnotation,
                    "No molecule with such notation: " << fmolec_not[n] << '\n',
                    mcerr)
     // Van der Waals correction currently not used.
-    // VanDerWaals* aw = amolec[n]->awls().get();
+    // VanDerWaals* aw = amolec[n]->vdw().get();
   }
   // first normalize volumes to total unity
   std::vector<double> fw(fqmolec);
@@ -137,12 +137,12 @@ GasDef::GasDef(const std::string& fname, const std::string& fnotation,
   // calculate number of molecules or moles and mass of each component
   std::vector<double> fweight_quan_molec(fqmolec);
   double mass_t = 0.0;
-  double ridberg = k_Boltzmann * Avogadro;  // more precise
+  constexpr double rydberg = k_Boltzmann * Avogadro;
   for (long n = 0; n < fqmolec; ++n) {
-    VanDerWaals* aw = amolec[n]->awls().get();
-    if (aw == NULL) {
+    VanDerWaals* aw = amolec[n]->vdw().get();
+    if (!aw) {
       // ideal gas case
-      fweight_quan_molec[n] = fw[n] * fpressure / (ridberg * ftemperature);
+      fweight_quan_molec[n] = fw[n] * fpressure / (rydberg * ftemperature);
       double ms = fweight_quan_molec[n] * amolec[n]->A_total();
       // Iprint2n(mcout, fweight_quan_molec[n], ms/gram);
       mass_t += ms;
@@ -298,12 +298,13 @@ std::ostream& operator<<(std::ostream& file, const GasDef& f) {
   indn.n += 2;
   file << ((MatterDef&)f);
   indn.n -= 2;
-  const double mm_rt_st_in_atmosphere = 760;
+  constexpr double mm_rt_st_in_atmosphere = 760.;
   // This corresponds to 133.322 pascal in one mm
   //( 101325 pascal in one atmosphere )
-  Ifile << "pressure/atmosphere=" << f.pressure() / CLHEP::atmosphere
+  const double patm = f.pressure() / CLHEP::atmosphere;
+  Ifile << "pressure/atmosphere=" << patm
         << " pressure/atmosphere * mm_rt_st_in_atmosphere = "
-        << f.pressure() / CLHEP::atmosphere * mm_rt_st_in_atmosphere << '\n';
+        << patm * mm_rt_st_in_atmosphere << '\n';
   Ifile << "Z_mean_molec=" << f.Z_mean_molec() << '\n';
 
   file << "qmolec()=" << f.qmolec() << '\n';

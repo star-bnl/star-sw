@@ -15,7 +15,7 @@ The file is provided "as is" without express or implied warranty.
 namespace Heed {
 
 absvol* manip_absvol_treeid::G_lavol() const {
-  return eid.empty() ? NULL : eid.back()->Gavol();
+  return eid.empty() ? nullptr : eid.back()->Gavol();
 }
 
 void manip_absvol_treeid::down_absref(absref* f) {
@@ -29,14 +29,12 @@ void manip_absvol_treeid::up_absref(absref* f) {
 }
 
 int manip_absvol_treeid::check_manip_absvol_registered(manip_absvol* amvol) {
-  const int qeid = eid.size();
-  for (int n = 0; n < qeid; ++n) if (eid[n].get() == amvol) return 1;
+  for (auto vol : eid) if (vol == amvol) return 1;
   return 0;
 }
 
 int manip_absvol_treeid::check_absvol_registered(absvol* avol) {
-  const int qeid = eid.size();
-  for (int n = 0; n < qeid; ++n) if (eid[n]->Gavol() == avol) return 1;
+  for (auto vol : eid) if (vol->Gavol() == avol) return 1;
   return 0;
 }
 
@@ -48,7 +46,7 @@ int operator==(manip_absvol_treeid& tid1, manip_absvol_treeid& tid2) {
   // Check all volumes.
   const int qeid = tid1.eid.size();
   for (int n = 0; n < qeid - 1; ++n) {
-    if (tid1.eid[n].get() != tid2.eid[n].get()) return 0;
+    if (tid1.eid[n] != tid2.eid[n]) return 0;
   }
   return 1;
 }
@@ -58,15 +56,18 @@ void manip_absvol_treeid::print(std::ostream& file, int l) const {
   if (eid.empty()) {
     Ifile << "no volume defined\n";
   } else {
+    // TODO!
+    /*
     const int qeid = eid.size();
     if (l > 0) {
       for (int n = 0; n < qeid - 1; ++n) {
         Ifile << "n=" << n;
-        eid[n].print(file, 0);
+        eid[n]->print(file, 0);
       }
     }
     Ifile << "n=" << qeid - 1;
-    eid.back().print(file, 0);
+    eid.back()->print(file, 0);
+    */
   }
   file.flush();
 }
@@ -96,8 +97,8 @@ int absvol::find_embed_vol(const point& fpt, const vec& dir,
 }
 
 int absvol::range(trajestep& fts, int s_ext, int& sb,
-                  PassivePtr<manip_absvol>& faeid) const {
-  faeid.put(NULL);
+                  manip_absvol*& faeid) const {
+  faeid = nullptr;
   if (s_ext == 0) {
     sb = 1;
     return range_ext(fts, 0);
@@ -108,7 +109,7 @@ int absvol::range(trajestep& fts, int s_ext, int& sb,
   for (int n = 0; n < qaman; ++n) {
     if (aman[n]->m_range_ext(fts, 0) == 1) {
       sb = 2;
-      faeid.put(aman[n]);
+      faeid = aman[n];
     }
   }
   if (sb == 1 || sb == 2) return 1;
@@ -154,7 +155,7 @@ int manip_absvol::m_check_point_inside(const point& fpt,
                                        const vec& fdir) const {
   const abssyscoor* asc = Gasc();
   const absvol* avol = Gavol();
-  if (asc != NULL) {
+  if (asc) {
     point pt = fpt;
     vec dir = fdir;
     pt.up(asc);
@@ -174,7 +175,7 @@ int manip_absvol::m_find_embed_vol(const point& fpt, const vec& fdir,
   up_absref(&dir);
   // TODO!
   atid->eid.resize(atid->eid.size() + 1);
-  atid->eid.back().put((manip_absvol*)this);
+  atid->eid.back() = (manip_absvol*)this;
   unsigned int s = atid->eid.size();
   int iret = avol->find_embed_vol(pt, dir, atid);
   if (iret == 0) {
@@ -194,7 +195,7 @@ int manip_absvol::m_find_embed_vol(const point& fpt, const vec& fdir,
 }
 
 int manip_absvol::m_range(trajestep& fts, int s_ext, int& sb,
-                          PassivePtr<manip_absvol>& faeid) const {
+                          manip_absvol*& faeid) const {
   trajestep ts(fts);
   up_absref(&ts);
   absvol* avol = Gavol();
@@ -254,9 +255,9 @@ manip_absvol* manip_absvol::copy() const {
 }                   
 
 // *********  sh_manip_absvol  *********
-void sh_manip_absvol::get_components(ActivePtr<absref_transmit>& aref_tran) {
+absref_transmit sh_manip_absvol::get_components() {
   aref_ptr[0] = &csys;
-  aref_tran.pass(new absref_transmit(1, aref_ptr));
+  return absref_transmit(1, aref_ptr);
 }
 
 const abssyscoor* sh_manip_absvol::Gasc() const { return &csys; }

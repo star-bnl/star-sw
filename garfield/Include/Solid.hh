@@ -9,7 +9,7 @@ class Solid {
 
  public:
   /// Constructor
-  Solid() : m_debug(false) {}
+  Solid() {}
   /// Destructor
   virtual ~Solid() {}
 
@@ -36,7 +36,7 @@ class Solid {
   void DisableDebugging() { m_debug = false; }
 
  protected:
-  bool m_debug;
+  bool m_debug = false;
 };
 }
 

@@ -2,380 +2,443 @@
 OBJDIR = $(STAR_OBJ)/garfield
 SRCDIR = $(GARFIELD_HOME)/Source
 INCDIR = $(GARFIELD_HOME)/Include
-#LIBDIR = $(GARFIELD_HOME)/.$(STAR_HOST_SYS)/Library
 LIBDIR = .
 HEEDDIR = $(GARFIELD_HOME)/Heed
 
-HEADERS = $(filter-out $(INCDIR)/TrackHeed.hh,$(wildcard $(INCDIR)/*.hh))
-SOURCES = $(wildcard $(SRCDIR)/*.cc)
+HEEDOBJS = \
+	$(OBJDIR)/Heed/FunNameStack.o \
+	$(OBJDIR)/Heed/definp.o \
+	$(OBJDIR)/Heed/findmark.o \
+	$(OBJDIR)/Heed/prstream.o \
+	$(OBJDIR)/Heed/AbsArr.o \
+	$(OBJDIR)/Heed/AbsPtr.o \
+	$(OBJDIR)/Heed/chisran.o \
+	$(OBJDIR)/Heed/PointsRan.o \
+	$(OBJDIR)/Heed/pois.o \
+	$(OBJDIR)/Heed/rnorm.o \
+	$(OBJDIR)/Heed/eparticle.o \
+	$(OBJDIR)/Heed/particle_def.o \
+	$(OBJDIR)/Heed/AtomDef.o \
+	$(OBJDIR)/Heed/GasDef.o \
+	$(OBJDIR)/Heed/MatterDef.o \
+	$(OBJDIR)/Heed/MoleculeDef.o \
+	$(OBJDIR)/Heed/inverse.o \
+	$(OBJDIR)/Heed/multiply.o \
+	$(OBJDIR)/Heed/cubic.o \
+	$(OBJDIR)/Heed/DoubleAc.o \
+	$(OBJDIR)/Heed/kinem.o \
+	$(OBJDIR)/Heed/linexi2.o \
+	$(OBJDIR)/Heed/lorgamma.o \
+	$(OBJDIR)/Heed/parabol.o \
+	$(OBJDIR)/Heed/PolLeg.o \
+	$(OBJDIR)/Heed/bethe_bloch.o \
+	$(OBJDIR)/Heed/e_cont_enloss.o \
+	$(OBJDIR)/Heed/box.o \
+	$(OBJDIR)/Heed/circumf.o \
+	$(OBJDIR)/Heed/gparticle.o \
+	$(OBJDIR)/Heed/mparticle.o \
+	$(OBJDIR)/Heed/plane.o \
+	$(OBJDIR)/Heed/polyline.o \
+	$(OBJDIR)/Heed/straight.o \
+	$(OBJDIR)/Heed/surface.o \
+	$(OBJDIR)/Heed/trajestep.o \
+	$(OBJDIR)/Heed/vec.o \
+	$(OBJDIR)/Heed/volume.o
 
-OBJECTS = $(subst $(SRCDIR),$(OBJDIR),$(SOURCES:.cc=.o))
-OBJECTS += $(OBJDIR)/magboltz.o 
-OBJECTS += $(OBJDIR)/GarfieldDict.o
+HEEDOBJS += \
+	$(OBJDIR)/Heed/BGMesh.o \
+	$(OBJDIR)/Heed/ElElasticScat.o \
+	$(OBJDIR)/Heed/EnergyMesh.o \
+	$(OBJDIR)/Heed/EnTransfCS_BGM.o \
+	$(OBJDIR)/Heed/EnTransfCS.o \
+	$(OBJDIR)/Heed/HeedCluster.o \
+	$(OBJDIR)/Heed/HeedCondElectron.o \
+	$(OBJDIR)/Heed/HeedDeltaElectron.o \
+	$(OBJDIR)/Heed/HeedDeltaElectronCS.o \
+	$(OBJDIR)/Heed/HeedMatterDef.o \
+	$(OBJDIR)/Heed/HeedParticle.o \
+	$(OBJDIR)/Heed/HeedParticle_BGM.o \
+	$(OBJDIR)/Heed/HeedPhoton.o \
+	$(OBJDIR)/Heed/PairProd.o \
+	$(OBJDIR)/Heed/PhotoAbsCS.o \
+	$(OBJDIR)/Heed/PhotoAbsCSLib.o
 
-TARGETS = $(OBJECTS)
-TARGETS += heed
-
-# Fortran compiler
-FC = `root-config --f77`
+HEEDOBJS += \
+	$(OBJDIR)/Heed/HeedFieldMap.o \
 
 # Compilation flags
-CPPFLAGS = -I$(INCDIR) -I$(HEEDDIR)
-CFLAGS = -Wall -Wextra -pedantic -ansi -Wabi -Wno-long-long -Woverloaded-virtual \
-	 `root-config --cflags` \
-        -fpic -fno-common -c \
-	$(CPPFLAGS) -DINS_CRETURN 
-
-FFLAGS = -fpic -c
-
-# Optimization flags
-# CFLAGS += -Os
-# FFLAGS += -Os
-#CFLAGS += -O2
-#FFLAGS += -O2
-CFLAGS += -fPIC
-FFLAGS += `root-config --ldflags` -fPIC
-# Debug flags
-
+CFLAGS = -Wall -Wextra -pedantic -ansi -Wabi -Wno-long-long -Wshadow \
+        `root-config --cflags` \
+        -fpic -Os -c \
+	-I$(INCDIR) -I$(HEEDDIR) \
+	-DGARFIELD_HEED_INTERFACE -DUSE_SRANLUX \
+	-DEXCLUDE_FUNCTIONS_WITH_HISTDEF -DINS_CRETURN 
+# Debugging flags
 CFLAGS += -g
-FFLAGS += -g
 ifneq ($(NODEBUG),) 
 CFLAGS += -O
-FFLAGS += -O
 endif 
-# Profiling flag
-# CFLAGS += -pg
 
 # Linking flags
-LDFLAGS = `root-config --glibs` `root-config --ldflags` -lGeom
-ifeq (,$(findstring darwin,$(STAR_HOST_SYS)))
-LDFLAGS += -shared -Wl,-Bdynamic -lgfortran -lm
-#lgfortran = $(shell gfortran `root-config --ldflags` -print-file-name=libgfortran.a)
-#LDFLAGS += -shared -Wl,-Bdynamic $(lgfortran) -lm
-#LDFLAGS += -shared  -Wl,--whole-archive -Wl,-Bstatic -Wl,-z -Wl,muldefs $(lgfortran)  -Wl,--no-whole-archive -Wl,-Bdynamic -lm
-else
-lgfortran = $(shell gfortran -print-file-name=libgfortran.dylib)
-LDFLAGS += $(lgfortran) -lm
-endif
+LDFLAGS = `root-config --glibs` -lGeom -lgfortran -lm
+
 .PHONY:	all  showbuild 
-all: heed lib
-lib:	$(LIBDIR)/libGarfield.so 
-$(LIBDIR)/libGarfield.so:	$(OBJECTS) $(wildcard $(OBJDIR)/Heed/*.o)
-	@echo Creating library libGarfield...
-#	ar rcs $(LIBDIR)/libGarfield.a $(OBJECTS) \
-#	$(wildcard $(OBJDIR)/Heed/*.o)
-#	ranlib $(LIBDIR)/libGarfield.a
-	`root-config --ld` -o $(LIBDIR)/libGarfield.so $(LDFLAGS)  $(OBJECTS) \
-	$(wildcard $(OBJDIR)/Heed/*.o)
-#	`root-config --ld` -o $(LIBDIR)/libGarfield.so `root-config --ldflags` -shared -Wl,-Bdynamic -lgfortran $<
-	touch $(OBJDIR)/last_updated_on
-	@echo Finished.
-
-
-installdirs : 
-	@if [ ! -d $(LIBDIR) ] ; then mkdir -p $(LIBDIR); \
-	    echo "   >>>> Create $(LIBDIR)"; fi
-	@if [ ! -d $(OBJDIR) ]; then mkdir -p $(OBJDIR); \
-	    echo "   >>>> Create $(OBJDIR)"; \
-        else echo " $(OBJDIR) already exists"; fi
-	@if [ ! -d $(OBJDIR)/Heed/ ]; then mkdir -p $(OBJDIR)/Heed; \
-	    echo "   >>>> Create $(OBJDIR)/Heed"; \
-        else echo " $(OBJDIR)/Heed already exists"; fi
-        
-heed:	
-	@echo Compiling Heed...
-	cd Heed; make; cd -
-	@touch $(OBJDIR)/last_updated_on
+all:	$(HEEDOBJS) 
 
 clean:
-	@echo Removing object files...
-	$(RM) $(OBJDIR)/*.o
-	@echo Removing libraries...
-	$(RM) $(LIBDIR)/*.a
-	cd $(HEEDDIR); make clean
-	@echo Removing dictionary...
-	$(RM) $(OBJDIR)/GarfieldDict.C 
+	@echo Removing Heed object files...
+	@$(RM) $(HEEDOBJS) 
 
-$(OBJDIR)/AvalancheMicroscopic.o: \
-	$(SRCDIR)/AvalancheMicroscopic.cc \
-	$(INCDIR)/AvalancheMicroscopic.hh \
-	$(INCDIR)/FundamentalConstants.hh $(INCDIR)/GarfieldConstants.hh \
-	$(INCDIR)/Random.hh \
-	$(INCDIR)/Sensor.hh $(INCDIR)/Medium.hh $(INCDIR)/ViewDrift.hh
+$(OBJDIR)/Heed/FunNameStack.o: \
+	$(HEEDDIR)/wcpplib/util/FunNameStack.cpp\
+	$(HEEDDIR)/wcpplib/util/FunNameStack.h
 	@echo $@
 	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/AvalancheMC.o: \
-	$(SRCDIR)/AvalancheMC.cc $(INCDIR)/AvalancheMC.hh \
-	$(INCDIR)/FundamentalConstants.hh $(INCDIR)/GarfieldConstants.hh \
-	$(INCDIR)/Random.hh \
-	$(INCDIR)/Sensor.hh $(INCDIR)/Medium.hh $(INCDIR)/ViewDrift.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@      
-$(OBJDIR)/DriftLineRKF.o: \
-	$(SRCDIR)/DriftLineRKF.cc $(INCDIR)/DriftLineRKF.hh \
-	$(INCDIR)/FundamentalConstants.hh \
-	$(INCDIR)/Sensor.hh $(INCDIR)/Medium.hh $(INCDIR)/ViewDrift.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
- 
-$(OBJDIR)/Track.o: \
-	$(SRCDIR)/Track.cc $(INCDIR)/Track.hh \
-	$(INCDIR)/ViewDrift.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@        
-$(OBJDIR)/TrackBichsel.o: \
-	$(SRCDIR)/TrackBichsel.cc $(INCDIR)/TrackBichsel.hh \
-	$(INCDIR)/Track.hh $(SRCDIR)/Track.cc
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@       
-$(OBJDIR)/TrackPAI.o: \
-	$(SRCDIR)/TrackPAI.cc $(INCDIR)/TrackPAI.hh \
-	$(INCDIR)/Track.hh $(SRCDIR)/Track.cc
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/TrackSimple.o: \
-	$(SRCDIR)/TrackSimple.cc $(INCDIR)/TrackSimple.hh \
-	$(INCDIR)/Track.hh $(SRCDIR)/Track.cc
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@        
-$(OBJDIR)/TrackHeed.o: \
-	$(SRCDIR)/TrackHeed.cc $(INCDIR)/TrackHeed.hh \
-	$(INCDIR)/Track.hh $(SRCDIR)/Track.cc \
-	$(HEEDDIR)/HeedChamber.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/TrackElectron.o: \
-	$(SRCDIR)/TrackElectron.cc $(INCDIR)/TrackElectron.hh \
-	$(INCDIR)/Track.hh $(SRCDIR)/Track.cc
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/TrackSrim.o: \
-	$(SRCDIR)/TrackSrim.cc $(INCDIR)/TrackSrim.hh \
-	$(INCDIR)/Track.hh $(SRCDIR)/Track.cc 
-	@echo $@
-	@$(CXX) $(CFLAGS) $< -o $@
 
-$(OBJDIR)/ComponentBase.o: \
-	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh \
-	$(INCDIR)/Medium.hh
+$(OBJDIR)/Heed/definp.o: \
+	$(HEEDDIR)/wcpplib/stream/definp.cpp\
+	$(HEEDDIR)/wcpplib/stream/definp.h
 	@echo $@
 	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/ComponentConstant.o: \
-	$(SRCDIR)/ComponentConstant.cc $(INCDIR)/ComponentConstant.hh \
-	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/ComponentUser.o: \
-	$(SRCDIR)/ComponentUser.cc $(INCDIR)/ComponentUser.hh \
-	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@       
-$(OBJDIR)/ComponentAnalyticField.o: \
-	$(SRCDIR)/ComponentAnalyticField.cc \
-	$(INCDIR)/ComponentAnalyticField.hh \
-	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/ComponentNeBem2d.o: \
-	$(SRCDIR)/ComponentNeBem2d.cc $(INCDIR)/ComponentNeBem2d.hh \
-	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@        
-$(OBJDIR)/ComponentFieldMap.o: \
-	$(SRCDIR)/ComponentFieldMap.cc $(INCDIR)/ComponentFieldMap.hh \
-	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/ComponentAnsys121.o: \
-	$(SRCDIR)/ComponentAnsys121.cc $(INCDIR)/ComponentAnsys121.hh \
-	$(SRCDIR)/ComponentFieldMap.cc $(INCDIR)/ComponentFieldMap.hh 
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/ComponentAnsys123.o: \
-	$(SRCDIR)/ComponentAnsys123.cc $(INCDIR)/ComponentAnsys123.hh \
-	$(SRCDIR)/ComponentFieldMap.cc $(INCDIR)/ComponentFieldMap.hh 
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/ComponentCST.o: \
-	$(SRCDIR)/ComponentCST.cc $(INCDIR)/ComponentCST.hh \
-	$(SRCDIR)/ComponentFieldMap.cc $(INCDIR)/ComponentFieldMap.hh 
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/ComponentElmer.o: \
-	$(SRCDIR)/ComponentElmer.cc $(INCDIR)/ComponentElmer.hh \
-	$(SRCDIR)/ComponentFieldMap.cc $(INCDIR)/ComponentFieldMap.hh 
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/ComponentComsol.o: \
-	$(SRCDIR)/ComponentComsol.cc $(INCDIR)/ComponentComsol.hh \
-	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh
-	@echo $@
-	@$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/ComponentTcad2d.o: \
-	$(SRCDIR)/ComponentTcad2d.cc $(INCDIR)/ComponentTcad2d.hh \
-	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@   
-$(OBJDIR)/ComponentTcad3d.o: \
-	$(SRCDIR)/ComponentTcad3d.cc $(INCDIR)/ComponentTcad3d.hh \
-	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@   
-$(OBJDIR)/ComponentVoxel.o: \
-	$(SRCDIR)/ComponentVoxel.cc $(INCDIR)/ComponentVoxel.hh \
-	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh
-	@echo $@
-	@$(CXX) $(CFLAGS) $< -o $@   
-$(OBJDIR)/ComponentUserMapBase.o: \
-	$(SRCDIR)/ComponentUserMapBase.cc $(INCDIR)/ComponentUserMapBase.hh \
-	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh
-	@echo $@
-	@$(CXX) $(CFLAGS) $< -o $@    
 
-$(OBJDIR)/GeometrySimple.o: \
-	$(SRCDIR)/GeometrySimple.cc $(INCDIR)/GeometrySimple.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@   
-$(OBJDIR)/GeometryRoot.o: \
-	$(SRCDIR)/GeometryRoot.cc $(INCDIR)/GeometryRoot.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@    
-
-$(OBJDIR)/ViewFEMesh.o: \
-	$(SRCDIR)/ViewFEMesh.cc $(INCDIR)/ViewFEMesh.hh \
-	$(SRCDIR)/ViewDrift.cc $(INCDIR)/ViewDrift.hh \
-	$(INCDIR)/ComponentFieldMap.hh
+$(OBJDIR)/Heed/findmark.o: \
+	$(HEEDDIR)/wcpplib/stream/findmark.cpp\
+	$(HEEDDIR)/wcpplib/stream/findmark.h
 	@echo $@
 	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/ViewField.o: \
-	$(SRCDIR)/ViewField.cc $(INCDIR)/ViewField.hh \
+
+$(OBJDIR)/Heed/prstream.o: \
+	$(HEEDDIR)/wcpplib/stream/prstream.cpp\
+	$(HEEDDIR)/wcpplib/stream/prstream.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/AbsArr.o: \
+	$(HEEDDIR)/wcpplib/safetl/AbsArr.cpp\
+	$(HEEDDIR)/wcpplib/safetl/AbsArr.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/AbsPtr.o: \
+	$(HEEDDIR)/wcpplib/safetl/AbsPtr.cpp\
+	$(HEEDDIR)/wcpplib/safetl/AbsPtr.h 
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/chisran.o: \
+	$(HEEDDIR)/wcpplib/random/chisran.cpp\
+	$(HEEDDIR)/wcpplib/random/chisran.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/PointsRan.o: \
+	$(HEEDDIR)/wcpplib/random/PointsRan.cpp\
+	$(HEEDDIR)/wcpplib/random/PointsRan.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/pois.o: \
+	$(HEEDDIR)/wcpplib/random/pois.cpp\
+	$(HEEDDIR)/wcpplib/random/pois.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/rnorm.o: \
+	$(HEEDDIR)/wcpplib/random/rnorm.cpp\
+	$(HEEDDIR)/wcpplib/random/rnorm.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/eiparticle.o: \
+	$(HEEDDIR)/wcpplib/particle/eiparticle.cpp\
+	$(HEEDDIR)/wcpplib/particle/eiparticle.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/eparticle.o: \
+	$(HEEDDIR)/wcpplib/particle/eparticle.cpp\
+	$(HEEDDIR)/wcpplib/particle/eparticle.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/particle_def.o: \
+	$(HEEDDIR)/wcpplib/particle/particle_def.cpp\
+	$(HEEDDIR)/wcpplib/particle/particle_def.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/AtomDef.o: \
+	$(HEEDDIR)/wcpplib/matter/AtomDef.cpp\
+	$(HEEDDIR)/wcpplib/matter/AtomDef.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/GasDef.o: \
+	$(HEEDDIR)/wcpplib/matter/GasDef.cpp\
+	$(HEEDDIR)/wcpplib/matter/GasDef.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/GasLib.o: \
+	$(HEEDDIR)/wcpplib/matter/GasLib.cpp\
+	$(HEEDDIR)/wcpplib/matter/GasLib.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/MatterDef.o: \
+	$(HEEDDIR)/wcpplib/matter/MatterDef.cpp\
+	$(HEEDDIR)/wcpplib/matter/MatterDef.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/MoleculeDef.o: \
+	$(HEEDDIR)/wcpplib/matter/MoleculeDef.cpp\
+	$(HEEDDIR)/wcpplib/matter/MoleculeDef.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/inverse.o: \
+	$(HEEDDIR)/wcpplib/matrix/inverse.cpp\
+	$(HEEDDIR)/wcpplib/matrix/inverse.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/multiply.o: \
+	$(HEEDDIR)/wcpplib/matrix/multiply.cpp\
+	$(HEEDDIR)/wcpplib/matrix/multiply.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/cubic.o: \
+	$(HEEDDIR)/wcpplib/math/cubic.cpp\
+	$(HEEDDIR)/wcpplib/math/cubic.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/DoubleAc.o: \
+	$(HEEDDIR)/wcpplib/math/DoubleAc.cpp\
+	$(HEEDDIR)/wcpplib/math/DoubleAc.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/kinem.o: \
+	$(HEEDDIR)/wcpplib/math/kinem.cpp\
+	$(HEEDDIR)/wcpplib/math/kinem.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/line.o: \
+	$(HEEDDIR)/wcpplib/math/line.cpp\
+	$(HEEDDIR)/wcpplib/math/line.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/linexi2.o: \
+	$(HEEDDIR)/wcpplib/math/linexi2.cpp\
+	$(HEEDDIR)/wcpplib/math/linexi2.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/lorgamma.o: \
+	$(HEEDDIR)/wcpplib/math/lorgamma.cpp\
+	$(HEEDDIR)/wcpplib/math/lorgamma.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/parabol.o: \
+	$(HEEDDIR)/wcpplib/math/parabol.cpp\
+	$(HEEDDIR)/wcpplib/math/parabol.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/PolLeg.o: \
+	$(HEEDDIR)/wcpplib/math/PolLeg.cpp\
+	$(HEEDDIR)/wcpplib/math/PolLeg.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/bethe_bloch.o: \
+	$(HEEDDIR)/wcpplib/ioniz/bethe_bloch.cpp\
+	$(HEEDDIR)/wcpplib/ioniz/bethe_bloch.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/e_cont_enloss.o: \
+	$(HEEDDIR)/wcpplib/ioniz/e_cont_enloss.cpp\
+	$(HEEDDIR)/wcpplib/ioniz/e_cont_enloss.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/box.o: \
+	$(HEEDDIR)/wcpplib/geometry/box.cpp\
+	$(HEEDDIR)/wcpplib/geometry/box.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/circumf.o: \
+	$(HEEDDIR)/wcpplib/geometry/circumf.cpp\
+	$(HEEDDIR)/wcpplib/geometry/circumf.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/gparticle.o: \
+	$(HEEDDIR)/wcpplib/geometry/gparticle.cpp\
+	$(HEEDDIR)/wcpplib/geometry/gparticle.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/mparticle.o: \
+	$(HEEDDIR)/wcpplib/geometry/mparticle.cpp\
+	$(HEEDDIR)/wcpplib/geometry/mparticle.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/plane.o: \
+	$(HEEDDIR)/wcpplib/geometry/plane.cpp\
+	$(HEEDDIR)/wcpplib/geometry/plane.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/polyline.o: \
+	$(HEEDDIR)/wcpplib/geometry/polyline.cpp\
+	$(HEEDDIR)/wcpplib/geometry/polyline.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/straight.o: \
+	$(HEEDDIR)/wcpplib/geometry/straight.cpp\
+	$(HEEDDIR)/wcpplib/geometry/straight.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/surface.o: \
+	$(HEEDDIR)/wcpplib/geometry/surface.cpp\
+	$(HEEDDIR)/wcpplib/geometry/surface.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/trajestep.o: \
+	$(HEEDDIR)/wcpplib/geometry/trajestep.cpp\
+	$(HEEDDIR)/wcpplib/geometry/trajestep.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/vec.o: \
+	$(HEEDDIR)/wcpplib/geometry/vec.cpp\
+	$(HEEDDIR)/wcpplib/geometry/vec.h \
+	$(HEEDDIR)/wcpplib/geometry/vec.ic
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/volume.o: \
+	$(HEEDDIR)/wcpplib/geometry/volume.cpp\
+	$(HEEDDIR)/wcpplib/geometry/volume.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/BGMesh.o: \
+	$(HEEDDIR)/heed++/code/BGMesh.cpp \
+	$(HEEDDIR)/heed++/code/BGMesh.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/ElElasticScat.o: \
+	$(HEEDDIR)/heed++/code/ElElasticScat.cpp \
+	$(HEEDDIR)/heed++/code/ElElasticScat.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/EnergyMesh.o: \
+	$(HEEDDIR)/heed++/code/EnergyMesh.cpp \
+	$(HEEDDIR)/heed++/code/EnergyMesh.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/EnTransfCS_BGM.o: \
+	$(HEEDDIR)/heed++/code/EnTransfCS_BGM.cpp \
+	$(HEEDDIR)/heed++/code/EnTransfCS_BGM.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/EnTransfCS.o: \
+	$(HEEDDIR)/heed++/code/EnTransfCS.cpp \
+	$(HEEDDIR)/heed++/code/EnTransfCS.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/HeedCluster.o: \
+	$(HEEDDIR)/heed++/code/HeedCluster.cpp \
+	$(HEEDDIR)/heed++/code/HeedCluster.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/HeedCondElectron.o: \
+	$(HEEDDIR)/heed++/code/HeedCondElectron.cpp \
+	$(HEEDDIR)/heed++/code/HeedCondElectron.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/HeedDeltaElectron.o: \
+	$(HEEDDIR)/heed++/code/HeedDeltaElectron.cpp \
+	$(HEEDDIR)/heed++/code/HeedDeltaElectron.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/HeedDeltaElectronCS.o: \
+	$(HEEDDIR)/heed++/code/HeedDeltaElectronCS.cpp \
+	$(HEEDDIR)/heed++/code/HeedDeltaElectronCS.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/HeedMatterDef.o: \
+	$(HEEDDIR)/heed++/code/HeedMatterDef.cpp \
+	$(HEEDDIR)/heed++/code/HeedMatterDef.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/HeedParticle_BGM.o: \
+	$(HEEDDIR)/heed++/code/HeedParticle_BGM.cpp \
+	$(HEEDDIR)/heed++/code/HeedParticle_BGM.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/HeedParticle.o: \
+	$(HEEDDIR)/heed++/code/HeedParticle.cpp \
+	$(HEEDDIR)/heed++/code/HeedParticle.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/HeedPhoton.o: \
+	$(HEEDDIR)/heed++/code/HeedPhoton.cpp \
+	$(HEEDDIR)/heed++/code/HeedPhoton.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/PairProd.o: \
+	$(HEEDDIR)/heed++/code/PairProd.cpp \
+	$(HEEDDIR)/heed++/code/PairProd.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/PhotoAbsCS.o: \
+	$(HEEDDIR)/heed++/code/PhotoAbsCS.cpp \
+	$(HEEDDIR)/heed++/code/PhotoAbsCS.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/PhotoAbsCSLib.o: \
+	$(HEEDDIR)/heed++/code/PhotoAbsCSLib.cpp \
+	$(HEEDDIR)/heed++/code/PhotoAbsCSLib.h \
+	$(HEEDDIR)/wcpplib/matter/GasLib.cpp\
+	$(HEEDDIR)/wcpplib/matter/GasLib.h
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
+$(OBJDIR)/Heed/HeedFieldMap.o: \
+	$(HEEDDIR)/HeedFieldMap.cpp \
+	$(HEEDDIR)/HeedFieldMap.h \
 	$(INCDIR)/Sensor.hh
 	@echo $@
 	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/ViewDrift.o: \
-	$(SRCDIR)/ViewDrift.cc $(INCDIR)/ViewDrift.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/ViewMedium.o: \
-	$(SRCDIR)/ViewMedium.cc $(INCDIR)/ViewMedium.hh \
-	$(INCDIR)/Medium.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/ViewSignal.o: \
-	$(SRCDIR)/ViewSignal.cc $(INCDIR)/ViewSignal.hh \
-	$(INCDIR)/Sensor.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/ViewCell.o: \
-	$(SRCDIR)/ViewCell.cc $(INCDIR)/ViewCell.hh \
-	$(INCDIR)/ComponentAnalyticField.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/ViewGeometry.o: \
-	$(SRCDIR)/ViewGeometry.cc $(INCDIR)/ViewGeometry.hh \
-	$(INCDIR)/GeometrySimple.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-
-$(OBJDIR)/Medium.o: \
-	$(SRCDIR)/Medium.cc $(INCDIR)/Medium.hh \
-	$(INCDIR)/FundamentalConstants.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/MediumGas.o: \
-	$(SRCDIR)/MediumGas.cc $(INCDIR)/MediumGas.hh \
-	$(SRCDIR)/Medium.cc $(INCDIR)/Medium.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/MediumMagboltz.o: \
-	$(SRCDIR)/MediumMagboltz.cc $(INCDIR)/MediumMagboltz.hh \
-	$(SRCDIR)/Medium.cc $(INCDIR)/Medium.hh $(SRCDIR)/OpticalData.cc \
-	$(SRCDIR)/MediumGas.cc $(INCDIR)/MediumGas.hh \
-	$(INCDIR)/FundamentalConstants.hh $(INCDIR)/Random.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/magboltz.o: \
-	$(SRCDIR)/magboltz-9.01.f
-	@echo $@
-	$(FC) $(FFLAGS) $< -o $@
-$(OBJDIR)/MediumSilicon.o: \
-	$(SRCDIR)/MediumSilicon.cc $(INCDIR)/MediumSilicon.hh \
-	$(SRCDIR)/Medium.cc $(INCDIR)/Medium.hh \
-	$(INCDIR)/FundamentalConstants.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/MediumCdTe.o: \
-	$(SRCDIR)/MediumCdTe.cc $(INCDIR)/MediumCdTe.hh \
-	$(SRCDIR)/Medium.cc $(INCDIR)/Medium.hh \
-	$(INCDIR)/FundamentalConstants.hh
-	@echo $@
-	@$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/MediumGaAs.o: \
-	$(SRCDIR)/MediumGaAs.cc $(INCDIR)/MediumGaAs.hh \
-	$(SRCDIR)/Medium.cc $(INCDIR)/Medium.hh \
-	$(INCDIR)/FundamentalConstants.hh
-	@echo $@
-	@$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/OpticalData.o: \
-	$(SRCDIR)/OpticalData.cc $(INCDIR)/OpticalData.hh \
-	$(INCDIR)/FundamentalConstants.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-
-$(OBJDIR)/SolidBox.o: \
-	$(SRCDIR)/SolidBox.cc $(INCDIR)/SolidBox.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/SolidTube.o: \
-	$(SRCDIR)/SolidTube.cc $(INCDIR)/SolidTube.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/SolidSphere.o: \
-	$(SRCDIR)/SolidSphere.cc $(INCDIR)/SolidSphere.hh
-	@echo $@
-	@$(CXX) $(CFLAGS) $< -o $@
-
-$(OBJDIR)/Random.o: \
-	$(SRCDIR)/Random.cc $(INCDIR)/Random.hh
-	@echo $@
-	@$(CXX) $(CFLAGS) $< -o $@  
-$(OBJDIR)/RandomEngineGSL.o: \
-	$(SRCDIR)/RandomEngineGSL.cc $(INCDIR)/RandomEngineGSL.hh
-	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/RandomEngineRoot.o: \
-	$(SRCDIR)/RandomEngineRoot.cc $(INCDIR)/RandomEngineRoot.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-
-$(OBJDIR)/PlottingEngineRoot.o: \
-	$(SRCDIR)/PlottingEngineRoot.cc $(INCDIR)/PlottingEngineRoot.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@        
-
-$(OBJDIR)/Numerics.o: \
-	$(SRCDIR)/Numerics.cc $(INCDIR)/Numerics.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@  
-
-$(OBJDIR)/Sensor.o: \
-	$(SRCDIR)/Sensor.cc $(INCDIR)/Sensor.hh \
-	$(INCDIR)/ComponentBase.hh $(INCDIR)/FundamentalConstants.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-
-$(OBJDIR)/TetrahedralTree.o: \
-	$(SRCDIR)/TetrahedralTree.cc $(INCDIR)/TetrahedralTree.hh
-	@echo $@
-	@$(CXX) $(CFLAGS) $< -o $@
-
-$(OBJDIR)/GarfieldDict.o: \
-	$(OBJDIR)/GarfieldDict.C
-	@echo $@
-	$(CXX) $(CFLAGS) -DDICT_SKIP_HEED $< -o $@
-
-$(OBJDIR)/GarfieldDict.C: $(HEADERS) $(INCDIR)/LinkDef.h
-	@echo Creating dictionary...
-	rootcint -f $@ -c $(CPPFLAGS) -p $^ 
 showbuild:
 	@echo "ROOTSYS            = $(ROOTSYS)"
 	@echo "STAR_HOST_SYS      = $(STAR_HOST_SYS)"
@@ -383,5 +446,4 @@ showbuild:
 	@echo "CFLAGS             = $(CFLAGS)"
 	@echo "FFLAGS             = $(FFLAGS)"
 	@echo "NODEBUG            = $(NODEBUG)"
-	@echo "DYNAMIC            = $(DYNAMIC)"
-	@echo "HEADERS            = $(HEADERS)"
+

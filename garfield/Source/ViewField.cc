@@ -1,5 +1,4 @@
 #include <iostream>
-#include <sstream>
 #include <stdio.h>
 #include <string.h>
 #include <limits>
@@ -49,36 +48,7 @@ void SampleRange(TF1* f, double& ymin, double& ymax) {
 
 namespace Garfield {
 
-ViewField::ViewField()
-    : m_className("ViewField"),
-      m_debug(false),
-      m_useAutoRange(true),
-      m_useStatus(false),
-      m_vBkg(0.),
-      m_sensor(NULL),
-      m_component(NULL),
-      m_hasUserArea(false),
-      m_xmin(-1.),
-      m_ymin(-1.),
-      m_xmax(1.),
-      m_ymax(1.),
-      m_vmin(0.),
-      m_vmax(100.),
-      m_emin(0.),
-      m_emax(10000.),
-      m_wmin(0.),
-      m_wmax(100.),
-      m_nContours(m_nMaxContours),
-      m_nSamples1d(1000),
-      m_nSamples2dX(200),
-      m_nSamples2dY(200),
-      m_electrode(""),
-      m_canvas(NULL),
-      m_hasExternalCanvas(false),
-      m_f2d(NULL),
-      m_f2dW(NULL),
-      m_fProfile(NULL),
-      m_fProfileW(NULL) {
+ViewField::ViewField() {
 
   SetDefaultProjection();
   plottingEngine.SetDefaultStyle();
@@ -101,7 +71,7 @@ void ViewField::SetSensor(Sensor* s) {
   }
 
   m_sensor = s;
-  m_component = NULL;
+  m_component = nullptr;
 }
 
 void ViewField::SetComponent(ComponentBase* c) {
@@ -112,7 +82,7 @@ void ViewField::SetComponent(ComponentBase* c) {
   }
 
   m_component = c;
-  m_sensor = NULL;
+  m_sensor = nullptr;
 }
 
 void ViewField::SetCanvas(TCanvas* c) {
@@ -120,7 +90,7 @@ void ViewField::SetCanvas(TCanvas* c) {
   if (!c) return;
   if (!m_hasExternalCanvas && m_canvas) {
     delete m_canvas;
-    m_canvas = NULL;
+    m_canvas = nullptr;
   }
   m_canvas = c;
   m_hasExternalCanvas = true;
@@ -280,10 +250,7 @@ std::string ViewField::FindUnusedFunctionName(const std::string& s) {
   std::string fname = s + "_0";
   while (gROOT->GetListOfFunctions()->FindObject(fname.c_str())) {
     ++idx;
-    std::stringstream ss;
-    ss << s;
-    ss << idx;
-    fname = ss.str();
+    fname = s + "_" + std::to_string(idx);
   }
   return fname;
 }
@@ -330,7 +297,7 @@ double ViewField::Evaluate2D(double* pos, double* par) {
   int status = 0;
   if (par[0] > 0.) {
     // "Drift" electric field.
-    Medium* medium = NULL;
+    Medium* medium = nullptr;
     if (!m_sensor) {
       m_component->ElectricField(x, y, z, ex, ey, ez, volt, medium, status);
     } else {
@@ -411,7 +378,7 @@ double ViewField::EvaluateProfile(double* pos, double* par) {
   double ex = 0., ey = 0., ez = 0., volt = 0.;
   int status = 0;
   if (par[6] > 0.) {
-    Medium* medium = NULL;
+    Medium* medium = nullptr;
     // "Drift" electric field.
     if (!m_sensor) {
       m_component->ElectricField(x, y, z, ex, ey, ez, volt, medium, status);
