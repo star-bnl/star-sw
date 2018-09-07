@@ -755,7 +755,7 @@ void StMuMcAnalysisMaker::FillTrackPlots()
     if (! mcTrack) continue;
     // Select only Triggered Mc Vertex
     UInt_t IdVx = mcTrack->IdVx();
-    if(IdVx >= muDst->numberOfMcVertices()) continue;
+    if(IdVx > muDst->numberOfMcVertices()) continue;
     if(IdVx < 1) continue;
     while (IdVx != 1) { // Find parent vertex 
       StMuMcVertex *mcVertex = muDst->MCvertex(IdVx-1);
