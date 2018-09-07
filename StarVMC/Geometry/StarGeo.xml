@@ -223,7 +223,7 @@
   <!-- y2015 series geometry tags -->
   <Geometry tag="y2015"  check="false" comment="Y2015 rough cut geometry">
 
-    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="cave" config="CAVE05" /> <Construct sys="klud" config="KLUDon" />
     <Construct sys="idsm" config="IDSM14" />
     <Construct sys="pipe" config="PIPEv3" />
     <Construct sys="upst" config="UPSTon" />
@@ -247,7 +247,7 @@
   </Geometry>
   <Geometry tag="y2015a" check="false" comment="Y2015 production latest pixl">
 
-    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="cave" config="CAVE05" /> <Construct sys="klud" config="KLUDon" />
     <Construct sys="idsm" config="IDSM14" />
     <Construct sys="pipe" config="PIPEv3" />
     <Construct sys="upst" config="UPSTon" />
@@ -271,7 +271,7 @@
   </Geometry>
   <Geometry tag="y2015b" check="false" comment="Y2015 production improved mtd">
 
-    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="cave" config="CAVE05" /> <Construct sys="klud" config="KLUDon" />
     <Construct sys="idsm" config="IDSM14" />
     <Construct sys="pipe" config="PIPEv3" />
     <Construct sys="upst" config="UPSTon" />
@@ -295,7 +295,7 @@
   </Geometry>
   <Geometry tag="y2015c" check="false" comment="Y2015 production correct mtd radii">
 
-    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="cave" config="CAVE05" /> <Construct sys="klud" config="KLUDon" />
     <Construct sys="idsm" config="IDSM14" />
     <Construct sys="pipe" config="PIPEv3" />
     <Construct sys="upst" config="UPSTon" />
@@ -319,7 +319,7 @@
   </Geometry>
   <Geometry tag="y2015d" check="false" comment="Y2015 production correct mtd radii">
 
-    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="cave" config="CAVE05" /> <Construct sys="klud" config="KLUDon" />
     <Construct sys="idsm" config="IDSM14" />
     <Construct sys="pipe" config="PIPEv3" />
     <Construct sys="upst" config="UPSTon" />
