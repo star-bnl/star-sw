@@ -1,8 +1,14 @@
 *
-* $Id: agsbegm.age,v 1.1.1.1 2004/01/12 23:49:37 potekhin Exp $
+* $Id: agsbegm.age,v 1.2 2018/09/07 19:32:34 jwebb Exp $
 * $Name:  $
 * $Log: agsbegm.age,v $
+* Revision 1.2  2018/09/07 19:32:34  jwebb
+* Add exception rule for a specific geometry (KludGeo), disabling any attempt
+* to use it unless it is being run in a "dev" library (dev, .dev*, adev, etc...).
+* Users should watch out when using KludGeo.
+*
 * Revision 1.1.1.1  2004/01/12 23:49:37  potekhin
+*
 *
 * Revision 1.4  2003/06/11 08:05:46  nevski
 * call within the same module return the first IPR flag
@@ -39,6 +45,7 @@
 #include "slug/sclink.inc"
    Integer           AgPFLAG,LENOCC,MEMGETF,LOCF,n,m;  parameter (n=100)
    Character         Module*(*),Stage*4,Cmother*4,Cs*1,Chdir0*6/' '/,CWD*80
+   Character*42      STAR_LEVEL, STAR_USER
    Integer           IPR,i,Idet,Lrecl/0/,Istat/-1/,Itry,Lun/61/
    Character*8       CHTAG(2)/'Bank-ID','Bank-ID'/,CHDIR(n),omod
    Real              Xtime,XXtime
@@ -48,7 +55,7 @@
    Logical           EXST,Opnd,First/.true./
    Integer           LRZDOC
    Common /AgCZDOC/  LRZDOC
-#include "slug/stafunc.inc"
+#include "slug/stafunc.inc" 
                                * * *
    IPR=%Iprin;    Check %Module != Module;
    omod=%Module;  %Module=Module;  Cs=Module(5:5);
@@ -63,6 +70,19 @@
    %IMFLd=LVMFLD(Idet);  %Ihist=LVHIST(Idet);  %IGrap=LVGRAP(idet);
    %Igeom=LVGEOM(Idet);  IF (Stage=='RECO')    %Igeom=LVRECO(Idet);
    IPR=%Iprin; Iprin=%Iprin;
+
+*  Special logic for KLUDGEO.  Should note that
+   IF (module='KLUDGEO') THEN  "Verify we can proceed in this level and log attempt"
+      CALL GET_ENVIRONMENT_VARIABLE('STAR_LEVEL',STAR_LEVEL)
+      CALL GET_ENVIRONMENT_VARIABLE('USER'      ,STAR_USER )
+      STAR_LEVEL = trim(STAR_LEVEL)
+      STAR_USER  = trim(STAR_USER)
+      IF( INDEX(STAR_LEVEL,'dev') == 0 ) THEN
+          WRITE (*,*) STAR_LEVEL, '|', 'dev', '|', INDEX(STAR_LEVEL,'dev')
+         "Require some form of DEV (straight dev, adev, .dev, etc...)"
+         Ipr = -1; 
+      ENDIF
+   ENDIF
 *
    "Make a standalone clean up"
    If Cs='G' & Cmother=%Module(1:4) & %Standalone>0

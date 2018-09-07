@@ -1,8 +1,14 @@
 *
-* $Id: axposition.age,v 1.1.1.1 2004/01/12 23:49:38 potekhin Exp $
+* $Id: axposition.age,v 1.2 2018/09/07 19:32:34 jwebb Exp $
 * $Name:  $
 * $Log: axposition.age,v $
+* Revision 1.2  2018/09/07 19:32:34  jwebb
+* Add exception rule for a specific geometry (KludGeo), disabling any attempt
+* to use it unless it is being run in a "dev" library (dev, .dev*, adev, etc...).
+* Users should watch out when using KludGeo.
+*
 * Revision 1.1.1.1  2004/01/12 23:49:38  potekhin
+*
 *
 * Revision 1.1  2001/02/27 10:14:42  nevski
 *  first working release
@@ -30,6 +36,11 @@
   Character*4 Daughter,Daught;
   Integer  LENOCC,Idaught,Ivd,Jvd,Ivo,Jvo,Ign,Jvm,Ivm,
            Npo,Npa,Jmo,in,nin,Ncopy,Id,Jd,Jg,IDH,IDM,igsame
+
+  Character(len=42) :: STAR_LEVEL, STAR_USER
+  Character(len=5)  :: authlist='jwebb' "List users where no warning is required" 
+  Character(len=8)  :: date
+  Character(len=10) :: time
 
 * search for the mother, if it is explicitely defined, and check it.
   If %Ivolume<=0 | %Mother!=%Volume
@@ -99,6 +110,26 @@
 :done: %Ncopy=Ncopy;
   " keep GCVOLUM updated  - still does not work"
   Nlevel=%Level+1;  Names(Nlevel)=Idaught;  Number(Nlevel)=%Ncopy;
+
+* Special action for module KludGeo... log the attempt 
+
+   IF (%module='KLUDGEO') THEN "log attempt"
+      CALL GET_ENVIRONMENT_VARIABLE('STAR_LEVEL',STAR_LEVEL)
+      CALL GET_ENVIRONMENT_VARIABLE('USER'      ,STAR_USER )
+      CALL DATE_AND_TIME( DATE=date, TIME=time )
+      STAR_LEVEL = trim(STAR_LEVEL)
+      STAR_USER  = trim(STAR_USER)
+      IF( INDEX(STAR_USER,AUTHLIST) == 0 ) THEN  "Log bad actors in unit 66"
+        OPEN (unit=66, file='/tmp/naughty.'//trim(date)//'.'//STAR_USER, action='write', position='append')
+        Write (66,*) trim(STAR_LEVEL), ' ', 
+                     trim(time), ' ',
+                     trim(daught),' ',
+                     trim(%CNick),' ',
+                     %x,' ',%y,' ',%z, ' ',
+                     %par(1:3)
+        CLOSE (66)
+      ENDIF
+   ENDIF   
    END
 
    function Igsame(x,y,n)
