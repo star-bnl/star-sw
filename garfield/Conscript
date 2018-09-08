@@ -18,6 +18,6 @@ if ($#src > -1) {
 #  Program      $env2 $pkg, @src;
 #  LinkedModule $env, $SO_PKG, @src;
 #
-  Command $env ($SO_PKG), (@src, @hfiles, "makefile", "Heed/makefile"),  qq(cd $obj_dir; make heed; make);
+  Command $env ($SO_PKG), (@src, @hfiles, "makefile"),  qq(cd $obj_dir; make);
   Install $env $LIB, $SO_PKG;
 }
