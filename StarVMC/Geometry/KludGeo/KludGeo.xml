@@ -30,7 +30,7 @@
   <!-- Default configuration -->
   <Fill name="KCFG" comment="Main configuration">
     <var name="version" value="1.0" comment="default versioning" />
-    <var name="ntube"   value="10"   comment="default none" />
+    <var name="ntube"   value="0"   comment="default none" />
   </Fill> 
   <!-- Default disks -->
   <Fill name="KTUB" comment="Default tubes">
