@@ -300,7 +300,7 @@ class Lxgbx {
 	pay->L2summary[1] = l2h32(l2trg_hi);
 	pay->L3summary[1] = l2h32(l2trg_hi);
 
-	LOG("JEFF", "l1: 0x%x/0x%x,   l2: 0x%x/0x%x   dets: 0x%x",
+	LOG(DBG, "l1: 0x%x/0x%x,   l2: 0x%x/0x%x   dets: 0x%x",
 	    pay->L1summary[0],
 	    pay->L1summary[1],
 	    pay->L2summary[0],
@@ -323,7 +323,7 @@ class Lxgbx {
 	pay->usec = tm.tv_usec;
 #endif
 
-	LOG("JEFF", "Payload: ver=0x%x token=%d trgcmd=%d daqcmd=0x%x",
+	LOG(DBG, "Payload: ver=0x%x token=%d trgcmd=%d daqcmd=0x%x",
 	    pay->gbPayloadVersion,
 	    pay->EventDescriptor.TrgToken,
 	    pay->EventDescriptor.actionWdTrgCommand,
@@ -342,17 +342,17 @@ class Lxgbx {
     
 	UINT32 awdetmask = b2h16(evt->actionWdDetectorBitMask);
 
-	LOG("JEFF", "grp_mask = 0x%x",awdetmask,0,0,0,0);
+	LOG(DBG, "grp_mask = 0x%x",awdetmask,0,0,0,0);
 	
 	UINT64 detmask = grp2rts_mask(awdetmask);
 
 	
-	LOG("JEFF", "potential det_mask = 0x%llx dets_in_run_mask 0x%llx",detmask,dets_in_run_mask,0,0,0);
+	LOG(DBG, "potential det_mask = 0x%llx dets_in_run_mask 0x%llx",detmask,dets_in_run_mask,0,0,0);
 
 	detmask &= dets_in_run_mask;
 	detmask |= (1ll<<TRG_SYSTEM);
 	
-	LOG("JEFF", "final det_mask = 0x%llx",detmask,0,0,0,0);
+	LOG(NOTE, "final det_mask = 0x%llx",detmask,0,0,0,0);
 
 	pay->rtsDetMask = l2h64(detmask);
 
@@ -362,7 +362,7 @@ class Lxgbx {
 	}
 
 
-	LOG("JEFF", "l1: 0x%x/0x%x,   l2: 0x%x/0x%x",
+	LOG(DBG, "l1: 0x%x/0x%x,   l2: 0x%x/0x%x",
 	    pay->L1summary[0],
 	    pay->L1summary[1],
 	    pay->L2summary[0],

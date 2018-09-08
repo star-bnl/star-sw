@@ -373,7 +373,6 @@ void StarMCHits::PreTrack() {
     vertex.next_prim_v_p= 0              ;// next primary vertex
     fg2t_vertex->AddAt(&vertex);
     fvertexCurrent      = fg2t_vertex->GetTable() + nv;
-    fvertexCurrent->n_daughter++;
   }
   Int_t nt = fg2t_track->GetNRows();
   g2t_track_st track;
@@ -397,6 +396,7 @@ void StarMCHits::PreTrack() {
   static const Double_t pEMax = 1 - 1.e-10;
   ratio                = TMath::Min(pEMax,TMath::Max(-pEMax, ratio));
   track.eta            = TMath::ATanH(ratio);
+  fvertexCurrent->n_daughter++;
   fg2t_track->AddAt(&track);
   ftrackCurrent = fg2t_track->GetTable() + nt;
 }
