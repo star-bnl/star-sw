@@ -11,12 +11,12 @@ class StxCAInterface : public StTPCCAInterface {
   static StxCAInterface &Instance();
   virtual void SetNewEvent() {fSeedFinder = 0; fSeeds.clear(); fSeedHits.clear(); StTPCCAInterface::SetNewEvent();}
   virtual vector<Seedx_t> &GetSeeds(){ return fSeeds; };                   // get seeds. Should be called after Run(...).
-  virtual vector<SeedHit_t>        GetSeedHits()    { return fSeedHits;}
+  virtual vector<SeedHit_t>        &GetSeedHits()    { return fSeedHits;}
+  static  void ConvertPars(const AliHLTTPCCATrackParam& caPar, double _alpha, StxNodePars& nodePars, StxNodeErrs& nodeErrs); // convert caPars into NodePars
 
  protected:
   virtual void MakeHits();     // fill fCaHits & fSeedHits
   virtual void MakeSeeds();    // fill fSeeds & fTrackParameters
-  virtual void ConvertPars(const AliHLTTPCCATrackParam& caPar, double _alpha, StxNodePars& nodePars, StxNodeErrs& nodeErrs); // convert caPars into NodePars
 
   vector<Seedx_t>         fSeeds;
   StxSeedFinder          *fSeedFinder;

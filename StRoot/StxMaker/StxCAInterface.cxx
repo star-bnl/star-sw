@@ -186,8 +186,8 @@ void StxCAInterface::ConvertPars(const AliHLTTPCCATrackParam& caPar, double _alp
 #endif
 }
 //________________________________________________________________________________
-void StxCAInterface::MakeSeeds()
-{
+void StxCAInterface::MakeSeeds() {
+#if 0
   const int NRecoTracks = fTracker->NTracks();
   for ( int iTr = 0; iTr < NRecoTracks; iTr++ ) {
       // get seed
@@ -201,10 +201,11 @@ void StxCAInterface::MakeSeeds()
       seed.vhit.push_back(fSeedHits[hId].hit);
     }
     seed.total_hits = seed.vhit.size();
-    ConvertPars( tr.OuterParam(), tr.Alpha(), seed.firstNodePars, seed.firstNodeErrs );
-    ConvertPars( tr.InnerParam(), tr.Alpha(), seed.lastNodePars,  seed.lastNodeErrs );
+    ConvertPars( tr.InnerParam(), tr.Alpha(), seed.firstNodePars, seed.firstNodeErrs );
+    ConvertPars( tr.OuterParam(), tr.Alpha(), seed.lastNodePars,  seed.lastNodeErrs );
 
     fSeeds.push_back(seed);
   }
+#endif
 } // void StxCAInterface::MakeSeeds()
 

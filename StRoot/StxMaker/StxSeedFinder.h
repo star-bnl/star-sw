@@ -2,6 +2,7 @@
 #define __StxSeedFinder_h__
 #include <vector>
 #include "StEvent/StTpcHit.h"
+#include "TPCCATracker/AliHLTTPCCATrackParam.h"
 class StxCAInterface;
 class StTpcHit;
 struct SeedHit_t {
@@ -97,6 +98,8 @@ class Seedx_t {
   StxNodePars lastNodePars;
   StxNodeErrs firstNodeErrs;
   StxNodeErrs lastNodeErrs;
+  AliHLTTPCCATrackParam innerParams;
+  AliHLTTPCCATrackParam outerParams;
 #if 0
   virtual void Print(Option_t *option="") const {
     firstNodePars.print();
