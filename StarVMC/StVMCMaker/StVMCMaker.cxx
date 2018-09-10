@@ -55,35 +55,72 @@
 StVMCMaker::Init()
 ------------------
 
-   StarVMCApplication *appl = new StarVMCApplication("StarVMC", "The STAR VMC application");
-   Geant3TGeo* geant3 = new TGeant3TGeo("C++ Interface to Geant3"); // gMC
+   StarVMCApplication *fgStarVMCApplication = new StarVMCApplication("StarVMC", "The STAR VMC application");
+   Geant3TGeo* fgGeant3 = new TGeant3TGeo("C++ Interface to Geant3"); // gMC
+   fgGeant3->SetExternalDecayer(TPythia6Decayer::Instance());
    StarMCPrimaryGenerator *generator = new StarMCHBPrimaryGenerator(fInputFile,m_DataSet); // a generator
    appl->SetPrimaryGenerator(generator);
    StarMCHits *hits = StarMCHits::instance(); 
    appl->SetStepping(hits);
    hits->SetHitHolder(m_DataSet); // set hit storage
-   appl->InitMC();
-   ->    gMC->SetStack(fStack);
-   ->    gMC->Init();
-   ->                  DefineParticles();
-   ->                  appl->AddParticles();
-   ->                  appl->ConstructGeometry();
-   ->                  FinishGeometry();
-   ->                  appl->InitGeometry();
-   ->                        fMcHits->Init(); // hit description
-   ->    gMC->BuildPhysics(); 
+   SetRandom
+   SetGoodTriggers
 ----------------
-StVMCMaker::InitRun()
+StVMCMaker::StVMCMaker
 ----------------
-   ->    StarVMCApplication::InitMC
+   ->  StVMCMaker::instance()
+----------------
+StVMCMaker::Init()
+----------------
+   ->    fgStarVMCApplication = new StarVMCApplication("StarVMC", "The STAR VMC application"); ==> fApplication = TVirtualMCApplication::Instance()
+   ->    fgGeant3 = new TGeant3TGeo("TGeant3TGeo");
+   ->      TGeant3::TGeant3
+   ->        STATISTICS tree
+   ->        ZEBRA
+   ->        LoadAddress()
+   ->        Set biis: switch debug, run
+   ->        DefineParticles();			    
+   ->        TVirtualMCApplication::AddParticles();			    
+   ->        TVirtualMCApplication::AddIons()
+   ->        InitGEANE()
+   ->    fgGeant3 = (TGeant3TGeo *) TVirtualMC::GetMC();
+   ->    StarMCPrimaryGenerator *generator = StarMCPrimaryGenerator::Instance();
+   ->    StarMCHits *hits = StarMCHits::instance();
+   ->    hits->SetHitHolder(m_DataSet);
+   ->    fgStarVMCApplication->SetStepping(hits);
+   ->    fgGeant3->SetRandom(gRandom);
+   ->    SetGoodTriggers(GoodTriggers);
+----------------
+StVMCMaker::InitRun(const Char_t *setup)
+----------------
+   ->    Get "VmcGeometry/Geometry" and set it up accordingly to Env
+   ->    Get fVolume a TDataSet HALL geometry
+   ->    Config() => StarVMCDetector::SetConfigEnv(env);
+   ->    TGeant3::SetMagField
+   ->    Setup HEADER
+   ->    Setup requested physics
+   ->    StarVMCApplication::InitMC(SAttr("VMCConfig"));
+   ->      Config() from "VMCConfig" if any
+   ->      TVirtualMC::SetStackfStarStack);
    ->      TGeant3::Init
-   ->        StarVMCApplication::InitGeometry
-   ->          StarMCHits::Init
-   ->            StarVMCDetectorSet::instance
-   ->              StarVMCDetectorSet::StarVMCDetectorSet
-   ->                StarVMCDetectorSet::Init
-   ->                  StarVMCDetectorSet::MakeDetectorDescriptors
-   ->                    StarVMCDetectorSet::LoopOverTgeo
+   ->        Set biis: switch debug, run
+   ->        StarVMCApplication::ConstructGeometry()
+   ->          StarVMCApplication::InitGeometry
+   ->            StarVMCDetectorSet::StarVMCDetectorSet
+   ->              StarVMCDetectorSet::Init()
+   ->                StarVMCDetectorSet::MakeDetectorDescriptors()
+   ->          	       StarVMCDetectorSet::LoopOverTgeo	    
+   ->                  Fill fDetectorDescriptors = new TDataSet("Index");
+   ->      TGeant3TGeo::FinishGeometry();			    
+   ->            Gclos()
+   ->            Update UniqueID for materails and media (?)
+   ->            StarVMCApplication::MisalignGeometry()
+   ->            TGeant3TGeo::SetColors()
+   ->              TGeant3TGeo::SetSensitiveDetector
+   ->                TGeant3::SetSensitiveDetector
+   ->      TVirtualMC::BuildPhysics
+   ->    Scale X0 for TPC gas ("ScaleX04TpcGas")
+   ->    TGeoManger::CloseGeometry()
 ----------------
 StVMCMaker::Make
 ----------------
@@ -168,7 +205,7 @@ Int_t StVMCMaker::Init() {
   if (IAttr("VMCAlignment")) fgStarVMCApplication->DoMisAlignment(kTRUE);
   if (IAttr("NoVMCAlignment")) fgStarVMCApplication->DoMisAlignment(kFALSE);
   if (! IAttr("VMCPassive")) {
-    LOG_INFO << "InitRun Active mode" << endm; 
+    LOG_INFO << "StVMCMaker::Ini => Active mode" << endm; 
     TString CintF(SAttr("GeneratorFile"));
     if (CintF != "") {
       static const Char_t *path  = ".:./StarDb/Generators:$STAR/StarDb/Generators";
@@ -224,7 +261,7 @@ Int_t StVMCMaker::Init() {
   LOG_INFO << "Init, Generator type: TRandom3 Seed: " << gRandom->GetSeed() << endm;
   TString GoodTriggers(SAttr("GoodTriggers"));
   if (GoodTriggers != "") SetGoodTriggers(GoodTriggers);
-  return kStOK; // StMaker::Init();
+  return kStOK; 
 }
 //_____________________________________________________________________________
 Int_t StVMCMaker::InitRun  (Int_t runumber){
@@ -243,23 +280,9 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
     StarVMCDetector::SetConfigEnv(env);
   }
   if (!fVolume) {
-#if 0
-    TGeoDrawHelper Helper;
-    fVolume = (TDataSet *) Helper.GetVolume();
-#else
     fVolume = (TDataSet *) GetDataBase("StarDb/AgiGeometry/HALL");
-#endif
   }
   if (fVolume) { 
-#if 0 /* Don't remember why I need to remove it */
-     if (gGeometry) {
-        TList *listOfVolume = gGeometry->GetListOfNodes();
-
-        // Remove hall from the list of ROOT nodes to make it free of ROOT control
-        listOfVolume->Remove(fVolume);
-        listOfVolume->Remove(fVolume);
-     }
-#endif 
      // Add "hall" into ".const" area of this maker
      ((StVMCMaker *)this)->AddConst(fVolume);
      if (Debug() > 1) fVolume->ls(3);
@@ -268,10 +291,7 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
 		   << " with Map: " << StarMagField::Instance()->GetMap()
 		   << ",Factor: " << StarMagField::Instance()->GetFactor() 
 		   << ",Rescale: " << StarMagField::Instance()->GetRescale() <<endm;
-  fgStarVMCApplication->SetMagField(StarMagField::Instance());
-#if ROOT_VERSION_CODE >= ROOT_VERSION(5,34,1)
   fgGeant3->SetMagField(StarMagField::Instance());
-#endif
   if (IAttr("VMCPassive"))  {LOG_INFO << "StVMCMaker::InitRun Passive   mode" << endm;} 
   else                      {LOG_INFO << "StVMCMaker::InitRun Active    mode" << endm;
     if (IAttr("Embedding")) {LOG_INFO << "StVMCMaker::InitRun Embedding mode" << endm;}

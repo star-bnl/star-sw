@@ -11,8 +11,8 @@
 #include "TVirtualMCApplication.h"
 #include "StarMCPrimaryGenerator.h"
 #include "StarStack.h"
-#include "StarMagField.h"
 #include "StarMCHits.h"
+#include "StarVMCDetectorSet.h"
 #include "TTable.h"
 #include "Ttypes.h"
 class TGeoPhysicalNode;
@@ -53,16 +53,13 @@ class StarVMCApplication : public TVirtualMCApplication {
   virtual void PostTrack();
   virtual void FinishPrimary();
   virtual void FinishEvent();
-  virtual void Field(const Double_t* x, Double_t* b) const;
   virtual void AddParticles() {}
   virtual void SetPrimaryGenerator(StarMCPrimaryGenerator *m = 0) {
     fPrimaryGenerator = m; 
     if (fPrimaryGenerator) fPrimaryGenerator->SetStack(fStarStack);
   }
-  virtual void SetMagField(StarMagField *m = 0) {fMagField = m;}
   virtual void SetStepping(StarMCHits *m = 0) {fMcHits = m;}
   virtual StarMCPrimaryGenerator  *GetPrimaryGenerator() const {return fPrimaryGenerator;}
-  virtual StarMagField            *GetMagField() const {return fMagField;}
   virtual StarStack               *GetStack() const {return fStarStack;}
     
   virtual Double_t                 TrackingRmax() const { return 1.e4; }		  
@@ -70,10 +67,8 @@ class StarVMCApplication : public TVirtualMCApplication {
   virtual void     		   SetDebug(Int_t m);
   virtual Int_t    		   Debug() {return fDebug;}				  
   virtual void     		   DoMisAlignment(Bool_t m = kTRUE) {fAlignment = m;}	  
-  static  Int_t     		   LoopOverTgeo(TGeoNode *nodeT = 0, TString pathT = "");
-  static  void     		   GeometryDb(TDataSet *Detectors=0);			  
   virtual Bool_t   		   MisalignGeometry();					  
-  static  TDataSet 		  *DetectroDescriptors() {return fgDetSets;}             
+  virtual THashList               *GetDetectorHash() {return (StarVMCDetectorSet::instance()) ? StarVMCDetectorSet::instance()->GetDetectorHash() : 0;}
   void  ForceDecay(const Char_t *nameP, 
 		   const Char_t *mode1A = 0, const Char_t *mode1B = 0, const Char_t *mode1C = 0, Float_t branch1 = 0,
 		   const Char_t *mode2A = 0, const Char_t *mode2B = 0, const Char_t *mode2C = 0, Float_t branch2 = 0,
@@ -84,13 +79,10 @@ class StarVMCApplication : public TVirtualMCApplication {
   // data members
   StarStack               *fStarStack;
   StarMCPrimaryGenerator  *fPrimaryGenerator;
-  StarMagField            *fMagField;
   StarMCHits              *fMcHits;
-  Double_t                *fFieldB;
   Int_t                    fDebug;
   Bool_t                   fAlignment;
   Bool_t                   fAlignmentDone;
-  static  TDataSet        *fgDetSets;
   ClassDef(StarVMCApplication,1)  //Interface to MonteCarlo application
 };
 
@@ -101,4 +93,4 @@ class StarVMCApplication : public TVirtualMCApplication {
 // Revision 1.2  2009/02/25 20:22:26  fisyak
 // Add the first version for misalignment
 //
-#endif //Star_MC_APPLICATION_H
+#endif //Star_MC_APPLICATION_

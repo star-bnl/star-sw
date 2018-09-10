@@ -17,6 +17,7 @@ class StarVMCDetectorSet : public TDataSet {
   void                         MakeDetectorDescriptors();
   Int_t                        LoopOverTgeo(TGeoNode *nodeT = 0, TString pathT = "");
   const StarVMCDetector*       GetVMCDetector(StDetectorId Id);
+  const TDataSet*              GetDetectorDescriptors() {return fDetectorDescriptors;}
  private:
   StarVMCDetectorSet(const Char_t *name="StarVMCDetectorSet",const Char_t *title="");
   static StarVMCDetectorSet *fgInstance;

@@ -56,38 +56,25 @@ TableClassImpl(St_VMCPath2Detector,VMCPath2Detector_st);
 ClassImp(StarVMCApplication);
 #define PrPV(B)      if (Debug())                {std::cout << (#B) << " = \t"; (B).Print();} 
 static const TString separator("/_"); 
-TDataSet        *StarVMCApplication::fgDetSets = 0;
 //_____________________________________________________________________________
 StarVMCApplication::StarVMCApplication(const char *name, const char *title) : 
   TVirtualMCApplication(name,title),
   fStarStack(0),
   fPrimaryGenerator(0),
-  fMagField(0),
   fMcHits(0),
-  fFieldB(0),
   fDebug(0),
   fAlignment(kTRUE),
-  fAlignmentDone(kFALSE)
-{
+  fAlignmentDone(kFALSE) {
   // Standard constructor
   TString program(gSystem->BaseName(gROOT->GetApplication()->Argv(0)));
   assert (! program.BeginsWith("root4star"));
-  if (name) {
-    // Create a user stack
-    fStarStack = new StarStack(100); 
-    // Constant magnetic field (in kiloGauss)
-    fFieldB = new Double_t[3];
-    fFieldB[0] = 0.;
-    fFieldB[1] = 0.;
-    fFieldB[2] = 5.;
-  }
+  // Create a user stack
+  fStarStack = new StarStack(100); 
 }
 //_____________________________________________________________________________
 StarVMCApplication::~StarVMCApplication() {  // Destructor  
   delete fStarStack;
-  delete fFieldB;
   //  SafeDelete(TVirtualMC::GetMC());
-  SafeDelete(fgDetSets);
 }
 //_____________________________________________________________________________
 void StarVMCApplication::InitMC(const Char_t *setup) {  // Initialize MC.
@@ -98,7 +85,7 @@ void StarVMCApplication::InitMC(const Char_t *setup) {  // Initialize MC.
   TVirtualMC::GetMC()->SetStack(fStarStack);
   TVirtualMC::GetMC()->Init();
   TVirtualMC::GetMC()->BuildPhysics(); 
-  //  MisalignGeometry(); // Called from Geant3TGeo::FinishGeometry
+  //  MisalignGeometry(); // Called from TGeant3TGeo::FinishGeometry
 }
 //_____________________________________________________________________________
 Bool_t StarVMCApplication::RunMC(Int_t nofEvents) {    // MC run.
@@ -111,15 +98,13 @@ void StarVMCApplication::FinishRun() {    // Finish MC run.
 }
 //_____________________________________________________________________________
 void StarVMCApplication::ConstructGeometry() {    // Initialize geometry
-  if (TVirtualMC::GetMC()->IsA()->InheritsFrom("TGeant3TGeo")) {
-    assert(gGeoManager); 
-    TVirtualMC::GetMC()->SetRootGeometry();
-  }
+  InitGeometry();
 }
 //_____________________________________________________________________________
 void StarVMCApplication::InitGeometry() {    
   if (TVirtualMC::GetMC()->IsA()->InheritsFrom("TGeant3")) {
-    // Set drawing options
+    assert(gGeoManager); 
+    TVirtualMC::GetMC()->SetRootGeometry();
   }  
   if (TVirtualMC::GetMC()->IsA()->InheritsFrom("TGeant3TGeo")) {
     TGeant3TGeo *geant3 = (TGeant3TGeo *)TVirtualMC::GetMC();
@@ -187,194 +172,6 @@ void StarVMCApplication::FinishEvent() {    // User actions after finishing of a
   }
   if (fMcHits) fMcHits->FinishEvent(); // add kine info
 } 
-//_____________________________________________________________________________
-void StarVMCApplication::Field(const Double_t* x, Double_t* b) const {
-  if (fMagField) {
-    fMagField->BField(x,b);
-  } else {
-    // Uniform magnetic field
-    // ---
-    for (Int_t i=0; i<3; i++) b[i] = fFieldB[i];
-  }
-}
-//_____________________________________________________________________________
-Int_t StarVMCApplication::LoopOverTgeo(TGeoNode *nodeT, TString pathT) {
-  Int_t NoSensVolumes = 0;
-  if (! nodeT) { 
-    if (! gGeoManager) return NoSensVolumes;
-    gGeoManager->RestoreMasterVolume();
-    //    gGeoManager->cd("HALL_1/CAVE_1/SVTT_1/SFMO_1");
-    gGeoManager->CdTop();
-    nodeT = gGeoManager->GetCurrentNode();
-    if (! nodeT) return NoSensVolumes;
-    TString path = nodeT->GetName();
-    cout << "top " << nodeT->GetName() << "\t" << nodeT->GetVolume()->GetName() 
-	 << "\t" << path << endl;
-    NoSensVolumes += LoopOverTgeo(nodeT,path);
-    return NoSensVolumes;
-  } 
-  TGeoVolume *vol = nodeT->GetVolume();
-  if (! vol->TestBit(StarVMCDetector::kChecked)) vol->SetBit(StarVMCDetector::kChecked);
-  TObjArray *nodes = vol->GetNodes();
-  Int_t nd = nodeT->GetNdaughters();
-  //     cout << nd << "\t" << nodeT->GetName() 
-  // 	 << "\t" << vol->GetName() 
-  // 	 << "\t" << gGeoManager->GetCurrentNode()->GetName() << "\t" << pathT 
-  // 	 << endl;
-  Int_t NoSensDauthers = 0;
-  TGeoMedium     *med = vol->GetMedium();
-  Int_t           isvol = 0;
-  if (med) isvol  = (Int_t) med->GetParam(0);
-  for (Int_t id = 0; id < nd; id++) {
-    TGeoNode *node = (TGeoNode*)nodes->UncheckedAt(id);
-    if (! node) continue;
-    vol = node->GetVolume();
-    if (! vol) continue; 
-    TString path = pathT;
-    if (path != "") path += "/";
-    path += node->GetName();
-    //      gGeoManager->cdDown(node->GetIndex());
-    //    Int_t nodeid = gGeoManager->GetCurrentNode()->GetVolume()->GetIndex(node);
-    //    gGeoManager->CdDown(nodeid);
-    gGeoManager->CdDown(id);
-    //      cout << "path " << path << endl;
-    //      gGeoManager->cd(node->GetName());
-    //      gGeoManager->cdNode(node->GetIndex());
-    NoSensDauthers += LoopOverTgeo(node,path);
-    gGeoManager->CdUp();
-  }
-  NoSensVolumes += NoSensDauthers;
-  if (NoSensDauthers == 0 && isvol) {
-    NoSensVolumes++;
-    //      cout << "sens. vol. " << pathT << endl;
-    TGeoVolume *vol = nodeT->GetVolume();
-    vol->SetBit(StarVMCDetector::kActive);
-    TObjString *objs;
-    TObjArray *array = pathT.Tokenize(separator); 
-    Int_t N = array->GetEntriesFast();
-    St_VMCPath2Detector *dpath = (St_VMCPath2Detector *) fgDetSets->Find(vol->GetName());
-    VMCPath2Detector_st dpathT;
-    if (! dpath) {
-      dpath = new St_VMCPath2Detector(vol->GetName(),N/2);
-      fgDetSets->Add(dpath);
-      for (Int_t i = 0; i < N; i +=2) {
-	objs = (TObjString *) array->At(i); // cout << objs->GetString().Data() << endl;
-	TString Name(objs->GetString());
-	if (Name == "") continue;
-	objs = (TObjString *) array->At(i+1); // cout << objs->GetString().Data() << endl;
-	Int_t j = atoi(objs->GetString().Data());
-	memset(&dpathT.VName[0], 0, sizeof(VMCPath2Detector_st));
-	strcpy(&dpathT.VName[0],Name.Data());
-	dpathT.Ncopy = j;
-	dpath->AddAt(&dpathT);
-      }
-      //	dpath->Print(0,N);
-    } else {
-      for (Int_t i = 0; i < N; i +=2) {
-	objs = (TObjString *) array->At(i); // cout << objs->GetString().Data() << endl;
-	TString Name(objs->GetString());
-	objs = (TObjString *) array->At(i+1); // cout << objs->GetString().Data() << endl;
-	Int_t j = atoi(objs->GetString().Data());
-	
-	VMCPath2Detector_st *row = dpath->GetTable();
-	Int_t Nr = dpath->GetNRows();
-	Int_t l = -1;
-	for (Int_t k = 0; k < Nr; k++, row++) {
-	  if (TString(row->VName) == Name) {
-	    l = k;
-	    if (j > row->Ncopy) {
-	      row->Ncopy = j;
-	      //		dpath->Print(k,1);
-	    }
-	    break;
-	  }
-	}
-	if (l < 0) {
-	  memset(&dpathT.VName[0], 0, sizeof(VMCPath2Detector_st));
-	  strcpy(&dpathT.VName[0],Name.Data());
-	  dpathT.Ncopy = j;
-	  dpath->AddAt(&dpathT);
-	  //	    dpath->Print(0,Nr+1);
-	}
-      }
-    }
-    delete array;
-  }
-  return NoSensVolumes;
-}
-//________________________________________________________________________________
-void StarVMCApplication::GeometryDb(TDataSet *Detectors) {
-  // Check consistency the current geometry with respect to DB
-  // Mark sensitive volumes
-  // Correct volume position accordingly DB
-  gBenchmark->Reset();
-  gBenchmark->Start("StarVMCApplication::GeometryDb");
-  
-  fgDetSets = new TDataSet("DetSets");
-  fgDetSets->SetTitle("Star Detector sets: contains description of path to sensitive volumes");
-  
-  LoopOverTgeo();
-
-  TDataSet *set = fgDetSets;
-  if (! set) {cout << "Can't find Detectors " << endl; return;}
-  TDataSetIter next(set,99);
-  TDataSet *d = 0;
-  Int_t k = 0;
-  while ((d = next())) {
-    if (! d->HasData()) continue;
-    St_VMCPath2Detector *table = (St_VMCPath2Detector *) d;
-    Int_t N = table->GetNRows();
-    VMCPath2Detector_st *path = table->GetTable();
-    k++;
-    cout << k << "\t";
-    TString title("");
-    for (Int_t i = 0; i < N; i++, path++) {
-      title += Form("/%s_%i", path->VName,path->Ncopy);
-    }
-    table->SetTitle(title);
-    cout << title << endl;
-    if (Detectors) {
-      // Check consistency 
-      StarVMCDetector *det = (StarVMCDetector *) Detectors->Find(table->GetName());
-      if (! det) {
-	cout << "Detector description for " << table->GetName() << "\t" << table->GetTitle() << " is missing" << endl;
-      } else {
-	Int_t N = det->GetNVmax().GetSize();
-	Int_t Numbv[15];
-	det->GetNumbv(title,Numbv);
-	cout << "Read Detector path :" << title << endl;
-	cout << "with format        :" << det->GetFMT();
-	if (N <= 0) {
-	  cout << "\tCan't read it" << endl;
-	} else {
-	  Int_t fails = 0;
-	  for (Int_t i = 0; i < N; i++) {
-	    if (det->GetNVmax()[i] != Numbv[i]) {
-	      fails++;
-	      if (fails == 1) cout << "\tFails" << endl;
-	      cout << "field " << i << "\tis mismatched from Detector descriptor " << det->GetNVmax()[i] 
-		   << "\tfrom detector path " << Numbv[i] << endl;
-	    }
-	  }
-	  if (! fails) {
-	    cout << "\tRead o.k." << endl;
-	  }
-	}
-      }
-    }
-  }
-  //  SafeDelete(fgDetSets);
-  gBenchmark->Show("StarVMCApplication::GeometryDb");
-  TObjArray *vols = gGeoManager->GetListOfVolumes();
-  UInt_t nvol = vols->GetEntriesFast();
-  TGeoVolume *vol = 0;
-  for (UInt_t i = 0; i < nvol; i++) {
-    vol = (TGeoVolume *) vols->UncheckedAt(i);
-    if (! vol->IsVolumeMulti() && ! vol->TestBit(StarVMCDetector::kChecked)) {
-      cout << "hanging volume:\t " << vol->GetName() << "\t" << vol->GetTitle() << endl;
-    }
-  }
-}
 //________________________________________________________________________________
 Bool_t StarVMCApplication::MisalignGeometry() {
 #if 0
@@ -459,7 +256,6 @@ Bool_t StarVMCApplication::MisalignGeometry() {
   I.SetRotation(kIdentityMatrix);
   I.SetTranslation(kNullVector);
   TGeoNode *nodeT = 0;
-  Bool_t ok = kFALSE;
   TGeoHMatrix PLAC, PXSI;
   TString path2PLAC("/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/LADR_1/LADX_1/PXSI_1/PLAC_1");
   if (gGeoManager->CheckPath(path2PLAC)) {
