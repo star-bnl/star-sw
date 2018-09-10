@@ -134,14 +134,7 @@ echo $timstamp
 touch fit.log
 echo STAR = $STAR $ROOTSYS
 echo LIBP = $LD_LIBRARY_PATH
-root.exe -b <<EOF  >>& fit.log
-#include <stdlib.h>
-.L fiterr.C+
-int ans = 13;
-ans = fiterr("U ${timstamp[2]}");
-exit(ans);
-.q
-EOF
+root.exe -q -b 'fiterr.C+("U '${timstamp[2]}'")' >>& fit.log
 set myerr = $status
 echo '*** FitErr Ended *** Status=' $myerr
 if ($myerr) goto FITERR

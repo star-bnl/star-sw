@@ -1,6 +1,7 @@
 //#if !defined(__CINT__) && !defined(__CLING__)
 #include <stdio.h>
 #include <iostream>
+#include <stdlib.h>
 #include <fstream>
 #include "TSystem.h"
 #include "TMath.h"
@@ -28,7 +29,7 @@
 #define PW2(X) ((X)*(X))
 #define PW3(X) ((X)*(X)*(X))
 
-enum {kNOBAGR=0,kNDETS=4,kMINHITS=50};
+enum {kNOBAGR=0,kNDETS=5,kMINHITS=50};
 static const double WINDOW_NSTD=3;
 
 static const double kAGREE=1e-7,kSMALL=1e-9,kBIG=1.,kDAMPR=0.1;
@@ -40,7 +41,7 @@ int fiterr(const char *opt);
 double     Fit(HitPars_t &pout); 
 void AveRes(); 
 double AveErr(); 
-int  kind(double xl);
+int  kind(double xl, Int_t detector, Int_t HardwarePosition);
 void DbInit();
 void DbDflt();
 void DbEnd();
@@ -120,6 +121,8 @@ float grf;	//  Rxy of Fit  in global Sti frame
 float gpf;	//  Phi of Fit  in global Sti frame
 float gzf;	//  Z   of Fit  in global Sti frame
 float ang;	//  rotation angle
+  Int_t Detector;
+  Int_t HardwarePosition;
 };
 
 class HitPars_t {
@@ -235,8 +238,8 @@ TMatrixD fAi;
 
 
 std::vector<MyPull> MyVect;
-  double aveRes[4][6],aveTrk[4][2][3];
-  int    numRes[4];
+  double aveRes[kNDETS][6],aveTrk[kNDETS][2][3];
+  int    numRes[kNDETS];
   double pSTI[8][3] =      {{0.000421985  ,0.00124327 ,0.0257111  }
                       	   ,{0.000402954   ,0.00346896 ,0.0377259 }
                            ,{0.            ,0.0009366  ,0.0004967 }
@@ -250,14 +253,16 @@ HitPars_t HitErr;
 static const char *DETS[]={"OutY","OutZ","InnY","InnZ"
                           ,"SsdY","SsdZ","SvtY","SvtZ"};
 static const char *DETZ[]={"Out" ,"Inn","Ssd","Svt"};
-  int FitOk[4]={0,0,0,0};
-static char dbFile[4][100] = {
+  int FitOk[kNDETS]={0};
+static char dbFile[kNDETS][100] = {
 "StarDb/Calibrations/tracker/tpcOuterHitError.20050101.235959.C",  
 "StarDb/Calibrations/tracker/tpcInnerHitError.20050101.235959.C",  
 "StarDb/Calibrations/tracker/ssdHitError.20050101.235959.C"     , 
-"StarDb/Calibrations/tracker/svtHitError.20050101.235959.C"    };
+"StarDb/Calibrations/tracker/svtHitError.20050101.235959.C"     ,
+"StarDb/Calibrations/tracker/iTPCHitError.20050101.235959.C"
+};
 
-static TTable *dbTab[4];
+static TTable *dbTab[kNDETS];
 void myBreak(int kase) { 
   static int myKase=-1946; 
   if (kase != myKase) return;
@@ -308,7 +313,8 @@ int fiterr(const char *opt)
   const float *&gRFit    = th("mHitsG.gRFit");
   const float *&gPFit    = th("mHitsG.gPFit");
   const float *&gZFit    = th("mHitsG.gZFit");
-
+  const UChar_t *&mDetector = th("mHitsG.mDetector");
+  const UInt_t *&mHardwarePosition = th("mHitsG.mHardwarePosition");
   printf("*lYPul = %p\n",lYPul);
   printf("&run=%p &evt=%p\n",&run,&evt);
   MyPull mp;   
@@ -369,7 +375,8 @@ int fiterr(const char *opt)
     mp.gzf  =   gZFit[ih];
     mp.curv =   mCurv[ih];
     mp.ang  =   mNormalRefAngle[ih];
-
+    mp.Detector = mDetector[ih];
+    mp.HardwarePosition = mHardwarePosition[ih];
     MyVect.push_back(mp);
 
   }
@@ -903,7 +910,7 @@ void AveRes()
   memset(numRes   ,0,sizeof(numRes));
   for (int jhit=0; jhit<(int)MyVect.size(); jhit++) {
      MyPull &myRes = MyVect[jhit];
-     int jdx = kind(myRes.xyz[0]);
+     int jdx = kind(myRes.xyz[0],myRes.Detector,myRes.HardwarePosition);
      aveRes[jdx][0]+= myRes.ypul*myRes.ypul;
      aveRes[jdx][1]+= myRes.zpul*myRes.zpul;
      aveRes[jdx][2]+= myRes.uyy;
@@ -923,7 +930,7 @@ void AveRes()
   int ihit=0;
   for (int jhit=0; jhit<(int)MyVect.size(); jhit++) {
      MyPull &myRes = MyVect[jhit];
-     int jdx = kind(myRes.xyz[0]);
+     int jdx = kind(myRes.xyz[0],myRes.Detector,myRes.HardwarePosition);
      if (numRes[jdx]<kMINHITS) continue;
      aveRes[jdx][0]+= myRes.ypul*myRes.ypul;
      if (ihit!=jhit) MyVect[ihit]=MyVect[jhit];
@@ -931,7 +938,7 @@ void AveRes()
   }
   MyVect.resize(ihit);
 
-  for(int jdx=0;jdx<4;jdx++) {
+  for(int jdx=0;jdx<kNDETS;jdx++) {
     if (numRes[jdx]<kMINHITS) continue;
     double f = 1./numRes[jdx];
     TCL::vscale(aveRes[jdx],f,aveRes[jdx],6);
@@ -952,11 +959,23 @@ void AveRes()
 
   }
 }
+
+//________________________________________________________________________________
+UInt_t bits(UInt_t mHardwarePosition, UInt_t bit, UInt_t nbits) {return (mHardwarePosition>>bit) & ~(~0UL<<nbits);};
+//________________________________________________________________________________
+UInt_t sector(UInt_t mHardwarePosition) {return bits(mHardwarePosition, 4, 5);}      // TPC
+//________________________________________________________________________________
+UInt_t padrow(UInt_t mHardwarePosition) {return bits(mHardwarePosition, 9, 7);}      // TPC
 //______________________________________________________________________________
-int kind(double x) 
+int kind(double x, Int_t Detector, Int_t HardwarePosition) 
 {
 static const double radds[5]={120,25,16,0,0};
-  for(int jdx=0;1;jdx++) {if (x>radds[jdx]) return jdx;}
+  for(int jdx=0;1;jdx++) {
+    if (x>radds[jdx]) {
+      if (jdx == 1 && Detector == 1 && sector(HardwarePosition) == 20) jdx = 4; // iTPC
+      return jdx;
+    }
+  }
 }
 //___________________________________myRes___________________________________________
 void HInit()
@@ -1005,7 +1024,7 @@ void FillPulls(int befAft)
   MyPull myRes;
   for (int jhit=0; jhit<(int)MyVect.size(); jhit++) {
      myRes = MyVect[jhit];
-     int jdx = kind(myRes.xyz[0]);
+     int jdx = kind(myRes.xyz[0],myRes.Detector,myRes.HardwarePosition);
      if (befAft==0) {
       hh[jdx*4+0]->Fill(myRes.ypul/(myRes.pye));
       hh[jdx*4+2]->Fill(myRes.zpul/(myRes.pze));
@@ -1031,7 +1050,7 @@ void DbInit()
  gSystem->Load("libStDb_Tables.so");
  TString command;
  TTable *newdat = 0;
- for (int idb=0;idb<4;idb++) {
+ for (int idb=0;idb<kNDETS;idb++) {
    memcpy(strstr(dbFile[idb],"20"),gTimeStamp,15);
    int ready=0;
    if (!gSystem->AccessPathName(dbFile[idb])) {//file exists
@@ -1054,7 +1073,7 @@ void DbDflt()
 {
 //	Set initial values if db file was non existing
 
-  for (int idb=0;idb<4;idb++) 
+  for (int idb=0;idb<kNDETS;idb++) 
   {
     if (numRes[idb]<kMINHITS) continue;
     double *d = (double *)dbTab[idb]->GetArray();
@@ -1102,7 +1121,7 @@ void CheckErr()
 {
   for (int jhit=0; jhit<(int)MyVect.size(); jhit++) {
      MyPull &myRes = MyVect[jhit];
-     int jdx = kind(myRes.xyz[0]); if(jdx){};
+     int jdx = kind(myRes.xyz[0],myRes.Detector,myRes.HardwarePosition); if(jdx){};
      if (jdx != 2) continue;
      float pye = myRes.pye;
      float hye = myRes.hye;
@@ -1126,6 +1145,8 @@ double AveErr()
 // idx=5 Ssd   resZ
 // idx=4 Svt   resY
 // idx=5 Svt   resZ
+// idx=6 iTPC  resY
+// idx=7 iTPC  resZ
   double pctMax=0;
   for (int iDet=0;iDet<kNDETS;iDet++) { 
     for (int iYZ=0;iYZ<2;iYZ++) {
@@ -1135,7 +1156,7 @@ double AveErr()
       int nTot=0;
       for (int jhit=0; jhit<(int)MyVect.size(); jhit++) {
 	 MyPull &myRes = MyVect[jhit];
-	 int jdx = kind(myRes.xyz[0]);
+	 int jdx = kind(myRes.xyz[0],myRes.Detector,myRes.HardwarePosition);
 	 if (jdx != iDet) continue;
 	 nTot++;
 	 HitAccr accr;
@@ -1295,7 +1316,7 @@ double HitPars_t::Dens(double rxy,int ntk)
 void HitPars_t::HitCond(const MyPull& myRes,HitAccr &acc)
 {
   memset(acc.A[0],0,sizeof(acc.A));
-  acc.iDet = kind(myRes.xyz[0]);
+  acc.iDet = kind(myRes.xyz[0],myRes.Detector,myRes.HardwarePosition);
   for (int iyz=0;iyz<2;iyz++) {
     acc.A[iyz][0]=1;
     acc.A[iyz][1]= 0.01*(200-fabs(myRes.xyz[2]));
