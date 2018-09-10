@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false">
+        <command>
+         cd ${SUBMITTINGDIRECTORY}
+   setenv STARFPE NO
+#   setenv NODEBUG yes
+#.DEV2
+#   setup gcc
+#   setup 64b
+#   starver .DEV2
+#   starver TFG18m
+#dev
+#   setup gcc
+#   starver dev
+# SL16j
+#   starver SL16j
+# SL17d
+#   setup gcc
+#   starver SL17d
+#TFG17e
+#   setup 64b
+#   starver TFG17e
+#  echo $INPUTFILE0 | grep ':'
+#  if (! $?) then
+#    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+#    set f        = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+#    set l        = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+#  else
+     set evtsFile = $INPUTFILE0;
+     set f        = 1
+     set l        = 5000000
+#  endif
+  echo "${evtsFile}"
+  set filel    = `basename $evtsFile .daq`
+  set output  = ${filel}.event.root
+  if (! -r ${evtsFile}) exit 1;
+  set logFile  = ${filel}B.log
+  if ( -r $logFile) exit 0;
+  set muFile = ${filel}.MuDst.root
+  if (-r $muFile) exit 0;
+#  root.exe -q -b 'bfc.C(1000,"P2018,useCDV,Tpx,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX,dEdxCalib","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(10000,"P2018,useCDV,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(1000,"P2018,useCDV,Tpx,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(10000,"P2018,WestOff,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(10000,"P2018,EastOff,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(10000,"P2018,EastOff,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(10000,"P2018,WestOff,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(10000,"P2018,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+  root.exe -q -b 'bfc.C(100,"P2018,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,HLTCA,KFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+        </command>
+        <stdout URL="file:./sched$JOBID.log" />
+        <stderr URL="file:./sched$JOBID.err" />
+<!-- <input URL="file:/star/data03/daq/2018/073/19073049/st_physics_adc_19073049_raw_*.daq" /> -->
+<!-- <input URL="file:/star/data03/daq/2018/078/19078015/st_physics_adc_19078015_raw_*.daq" /> -->
+<!-- <input URL="file:/star/data03/daq/2018/086/19086040/*.daq" /> -->
+<!-- <input URL="file:/star/data03/daq/2018/106/1910602*/*adc*.daq" /> -->
+<!-- <input URL="file:/star/data03/daq/2018/113/19113018/st_itpc*.daq" /> -->
+<!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/1911602*/*.daq" />  -->
+<!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/1911602*/*adc*.daq" />  -->
+<!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/1911602*/*.daq" />  -->
+<!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/19116021/*.daq" />  -->
+<!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/19116020/*.daq" />  -->
+<!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/1911602?/*.daq" />-->
+<!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/1911602?/*.daq" />-->
+<!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/19116021/st_physics_1*.daq" /> -->
+<!-- <input URL="file:/net/l401/data/scratch1/daq/2018/168/*/st_physics_1*.daq" /> -->
+<!-- <input URL="file:/net/l404/data/fisyak/daq/2018/27GeV_production_2018/*/*/*.daq" /> -->
+<!-- <input URL="file:/net/l401/data/scratch1/daq/2018/27GeV_production_2018/168/*/*.daq" /> -->
+<!-- <input URL="file:/star/data03/daq/2018/12*/*/st_physics_191*.daq" /> -->
+<input URL="file:/net/l401/data/scratch1/daq/2018/27GeV_production_2018/168/19168040/ *.daq" />
+</job>
