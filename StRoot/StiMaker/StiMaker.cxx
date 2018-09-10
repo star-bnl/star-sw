@@ -467,7 +467,9 @@ Int_t StiMaker::Make()
   StMaker *HLT = GetMaker("HLTCA");
   if (HLT) {
     //
+    if (mTimg[kHLTCATimg]) mTimg[kHLTCATimg]->Start(0);
     HLT->Make();
+    if (mTimg[kHLTCATimg]) mTimg[kHLTCATimg]->Stop();
   }
   
   iAnz = MakeGlobalTracks(event);

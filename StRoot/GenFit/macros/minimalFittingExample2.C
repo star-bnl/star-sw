@@ -35,7 +35,7 @@ int minimalFittingExample2() {
 
 
   // init event display
-#define __DISPLAY__
+  //#define __DISPLAY__
 #ifdef __DISPLAY__
   genfit::EventDisplay* display = genfit::EventDisplay::getInstance();
 #else

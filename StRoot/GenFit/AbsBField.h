@@ -53,7 +53,7 @@ public:
    *
    * Override this in your concrete implementation.
    */
-  virtual void get(const double& posX, const double& posY, const double& posZ, double& Bx, double& By, double& Bz) const { const TVector3& B(this->get(TVector3(posX, posY, posZ))); Bx = B.X(); By = B.Y(); Bz = B.Z(); }
+  virtual void get(const double& posX, const double& posY, const double& posZ, double& Bx, double& By, double& Bz) const {TVector3 B(this->get(TVector3(posX, posY, posZ))); Bx = B.X(); By = B.Y(); Bz = B.Z(); }
  
 };
 
