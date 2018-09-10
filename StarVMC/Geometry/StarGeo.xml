@@ -32,7 +32,8 @@
     <Construct sys="shld" config="SHLDon"  />
     <Construct sys="zcal" config="ZCALon"  />
     <Construct sys="scon" config="SCON14"  />
-    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="pipe" config="PIPE12ft" />
+    <Construct sys="targ" config="TARGv1"  /> <!-- fixed target geometry -->
     <Construct sys="tpce" config="TPCE31"  />
     <Construct sys="btof" config="BTOFv8"  />
     <Construct sys="vpdd" config="VPDD08"  />
@@ -83,6 +84,7 @@
     <Construct sys="etof" config="ETOFv14s"  />
   </Geometry>
 
+
   <Geometry tag="y2018x"  check="false" comment="Y2018 with experimental TPC">
 
     <Construct sys="cave" config="CAVE05"  />
@@ -90,7 +92,8 @@
     <Construct sys="shld" config="SHLDon"  />
     <Construct sys="zcal" config="ZCALon"  />
     <Construct sys="scon" config="SCON14"  />
-    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="pipe" config="PIPE12ft"  />
+    <Construct sys="targ" config="TARGv1"  /> <!-- fixed target geometry -->
     <Construct sys="tpce" config="TPCEv5"  />
     <Construct sys="btof" config="BTOFv8"  />
     <Construct sys="vpdd" config="VPDD08"  />
