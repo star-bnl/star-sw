@@ -13,7 +13,7 @@ class StTPCCAInterface {
   virtual void SetNewEvent(); // clean and initialize before new event
   virtual void Run(); 
   virtual void RunPerformance();
-
+  virtual AliHLTTPCCAGBTracker* GetTracker() {return fTracker;}
  protected:
   virtual void MakeSettings(); // fill fCaParam
   virtual void MakeHits() {cout << "Dummy StTPCCAInterface::;MakeHits is called" << endl;}
