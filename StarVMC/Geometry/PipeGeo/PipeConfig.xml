@@ -28,6 +28,12 @@
     <Init struct="pipv" var="pipeflag"   value="1" />
   </Setup>
 
+  <Setup name="PIPE12ft" onoff="on"  module="PipeGeo" comment="Default pipe"  simu="2">
+    <Init struct="pipv" var="pipeconfig" value="2" />
+    <Init struct="pipv" var="pipeflag"   value="1" />
+    <Init struct="pipv" var="targflag"   value="1" />
+  </Setup>
+
 
   <Setup name="PIPE04" onoff="on"  module="PipeGeo" comment="" simu="2">
     <Init struct="pipv" var="pipeconfig" value="4" />
