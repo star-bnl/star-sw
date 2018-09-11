@@ -19,7 +19,6 @@
     FSIA  <!-- FTS Si sensor -->
 
 
-
   </Content>
 
 
@@ -35,8 +34,10 @@
     <var name="rmxDSK" type="float" /> <!-- max disk radius -->
     <var name="cutele" type="float" />
     <var name="rotatez" type="float" />
-    <var name="zsi(3)"  type="float" />
-    <var name="bmc(3)" type="float" />
+    <var name="zsi(6)"  type="float" />
+    <var name="bmc(6)" type="float" />
+    <var name="bmo(6)" type="float" />
+    <var name="dyb(6)" type="float" />
     <var name="delta" type="float" />
   </Structure>
 
@@ -94,7 +95,7 @@
     dyblade
   </varlist>
 
-  <varlist type="int"> station </varlist>
+  <varlist type="int"> station, type </varlist>
 
   <Inline name="eta2tan" type="real">
     <Arguement type="real" name="etax" />
@@ -104,14 +105,16 @@
   <Fill name="MAIN" comment="Select configuration" >
     <var name="version" value="3.0" comment="selector" />
     <var name="useids"  value="0.0" comment="defines placement 0=in cave, 1=in idsm, 2=in scon" />
-    <var name="active"  value="{1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1}" comment="switch on/off up to 20 disks" />
+    <var name="active"  value="{1,2,1,2,1,2,   0,0,0,0, 0,0,0,0,0, 0,0,0,0,0}" comment="switch on/off up to 20 disks" />
     <var name="rmnDSK"  value="2.25" comment="default disk inner radius" />
     <var name="rmxDSK"  value="32.5" comment="default disk outer radius" />
     <var name="cutele"  value="1 MeV" comment="electron propagation threshold" />
     <var name="type"    value="1" comment="This is combined Si+sTGC with 3 Si planes" />
     <var name="rotatez" value="0" comment="rotation angles for disk 2 and 3"/>
-    <var name="zsi"     value="{93.3, 140.0, 186.6}" comment="Positions of the Si disks" />
-    <var name="bmc"     value="{1.6, 2.0, 3.0}" comment="beam clearance" />
+    <var name="zsi"     value="{40,45,60,65,80,85 }" comment="Positions of the Si disks" />
+    <var name="dyb"     value="{8.4,4.2,8.4,4.2,8.4,4.2}" comment="Blade size"  />
+    <var name="bmc"     value="{2.30, 3.30, 2.30, 3.30, 2.30, 3.30}" comment="beam clearance" />
+    <var name="bmo"     value="{2.05, 3.05, 2.05, 3.05, 2.05, 3.05}" comment="beam outer rad" />
     <var name="delta"  value="1.0" comment="distance between planes in station" />
   </Fill>
   <Use struct="MAIN" />
@@ -372,14 +375,11 @@
   <Use struct="SITC" />
 
 
-
-
-
   <!-- set zmin, zmax, rmin, rmax -->
   <Use struct="FDSK" select="diskid" value="1" />
 
-  zmin = FDSK_z    - FDSK_thksupp
-  rmin = FDSK_rmin                 <!-- set mother volume zmin (Assumes all are the same) -->
+  zmin = MAIN_zsi(1)-2.0
+  rmin = 2.025
 
   <Use struct="FDSK" select="diskid" value="ndisk" />
 
@@ -443,70 +443,36 @@
   </For>
 
 
-  station = 1;   <Use       struct = "SITC" select="plane" value="1" />
-
-nnn = 22
-dyblade = 6.0
-bmclear = 2.25
-
-  <Create    block  = "FSTA"/>  
-  <Placement block  = "FSTA" in="FTSM"  z="115-zcenter">
-    <Rotation alphaz="0" />
-  </Placement>
-
 <!--
-station = 2
-nnn=22
-dyblade = 12.4
-bmclear = 4.25 + 6.2 - 0.5
+  station = 1;   
+
+  nnn     = 22
+  dyblade = 6.0
+  bmclear = 2.25
 
   <Create    block  = "FSTA"/>  
   <Placement block  = "FSTA" in="FTSM"  z="115-zcenter">
     <Rotation alphaz="0" />
-  </Placement>
-
-station = 3
-nnn = 12
-dyblade = 6.2
-bmclear = 4.25
-
-  <Use       struct = "SITC" select="plane" value="2" />
-  <Placement block  = "FSTA" in="FTSM"  z="128-zcenter" >
-    <Rotation alphaz="3.75" />
-  </Placement>
-
-station = 4
-nnn=22
-dyblade = 12.4
-bmclear = 4.25 + 6.2 - 0.5
-
-  <Use       struct = "SITC" select="plane" value="2" />
-  <Placement block  = "FSTA" in="FTSM"  z="128-zcenter+6" >
-    <Rotation alphaz="3.75" />
-  </Placement>
-
-  <Use       struct = "SITC" select="plane" value="3" />
-
-station =5
-nnn = 12
-dyblade = 6.2
-bmclear = 4.25
-
-  <Create    block  = "FSTA"/> 
-  <Placement block  = "FSTA" in="FTSM"  z="141-zcenter" >
-    <Rotation alphaz="7.5" />
-  </Placement>
-
-station = 6
-nnn=22
-dyblade = 12.4
-bmclear = 4.25 + 6.2 - 0.5
-
-  <Create    block  = "FSTA"/> 
-  <Placement block  = "FSTA" in="FTSM"  z="141-zcenter+6" >
-    <Rotation alphaz="7.5" />
   </Placement>
 -->
+
+  <Do var="station" from="1" to="6"> 
+
+    type = MAIN_active(station)
+    <If expr="type.gt.0">
+
+      nnn = 12 <!-- TODO parameterize -->
+      dyblade = MAIN_dyb(station)
+      bmclear = MAIN_bmc(station)
+
+      <Create    block="FSTA" />
+      <Placement block="FSTA" in="FTSM" z="MAIN_zsi(station) - zcenter" />
+
+    </If>
+
+  </Do>
+  
+  
 
 
   </Volume>
@@ -573,8 +539,10 @@ bmclear = 4.25 + 6.2 - 0.5
   <Volume name="FTSS" comment="Support structure for each disk"  >
 
     <Attribute for="FTSS" seen="1" colo="3" />
-    <Material name="aluminium" />
-    <Material name="aluminium" isvol="0" />
+    <Attribute for="FTSS" seen="1" colo="920" />
+    <Material name="CFRPmix"  a="12" z="6"
+	      dens="1.3"
+	      radl="23.9" />
 <!--
          <Par name="CUTGAM" value="1 MeV" />
     <Par name="CUTELE" value="MAIN_cutele" />
@@ -596,7 +564,7 @@ bmclear = 4.25 + 6.2 - 0.5
   <Volume name="FSTA" comment="Station A">
     <Material  name="Air" />
 
-    <Attribute for="FSTA" seen="1" colo="2" serial="station" />
+    <Attribute for="FSTA" seen="1" colo="2" serial="type" />
     <Shape     type="tube" rmin="3.0" rmax="20.0" dz="2.0" />
  
     <Create block="FSIA" />
@@ -604,6 +572,12 @@ bmclear = 4.25 + 6.2 - 0.5
     <!-- beam clearance 
     bmclear = MAIN_bmc(1) -->
 
+    <Create    block="FTSS"/>
+    <Placement block="FTSS" rmin="MAIN_bmo(station)" rmax="MAIN_bmc(station)" dz="2.0" />
+<!--
+    <Placement block="FTSS" rmin="MAIN_bmc(1)+21.0" rmax="MAIN_bmc(1)+21.25" dz="2.0" if="MAIN_layout.eq.1" />
+-->
+    <Placement block="FTSS" rmin="MAIN_bmc(station)+dyblade+0.6" rmax="MAIN_bmc(station)+dyblade+0.85" dz="1.0" />
 
     <Do var="iblade" from="1" to="nnn">
 
@@ -619,14 +593,9 @@ bmclear = 4.25 + 6.2 - 0.5
 	<Rotation alphaz="(360.0/(nnn))*(iblade-1)" />
       </Placement>
 
-
     </Do>
 
-
   </Volume>
-
-
-
   <Volume name="FSIA" comment="Silicon sensor">
 
     <Material name="silicon"/>
@@ -636,7 +605,7 @@ bmclear = 4.25 + 6.2 - 0.5
     specify the dimensions when we place the box -->
     <Shape type="box" dx="0" dy="0" dz="0" />
 
-    <Instrument block="FSIA"  >
+    <Instrument block="FSIA">
       <!-- Local coordinates 0.1 micron resolution -->
       <Hit meas="z"  opts="S" bins="0.00001"  />
       <Hit meas="y"  opts="S" bins="0.00001"  />
@@ -646,15 +615,17 @@ bmclear = 4.25 + 6.2 - 0.5
       <Hit meas="yy" opts="S" bins="0.00001"  />
       <Hit meas="xx" opts="S" bins="0.00001"  />
       <!-- Time of flight, energy lost, direction cosines, total momentum -->    
-      <Hit meas="ptot"  nbits="16" min="0" max="100"  />
-      <Hit meas="cx"    nbits="16"  />
-      <Hit meas="cy"    nbits="16"  />
-      <Hit meas="cz"    nbits="16"  />
-      <Hit meas="tof"   nbits="16"  />
-      <Hit meas="eloss" nbits="16"  />
+      <Hit meas="ptot"  nbits="32" min="0" max="100"  />
+      <Hit meas="cx"    nbits="32"  />
+      <Hit meas="cy"    nbits="32"  />
+      <Hit meas="cz"    nbits="32"  />
+      <Hit meas="tof"   nbits="32"  />
+      <Hit meas="eloss" nbits="32"  />
     </Instrument>
     
   </Volume>
+
+
 
 
 
