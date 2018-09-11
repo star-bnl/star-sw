@@ -75,7 +75,7 @@
   </Structure>
 
   <varlist type="float">dtr,xtow,ytow,xtot,ytot,ztot,zsci,zgap</varlist>
-  <varlist type="float">a,x,y,z,aa,xx,yy,zz,zzz</varlist>
+  <varlist type="float">a,x,y,z,aa,ortx,xx,yy,zz,zzz</varlist>
   <varlist type="float">xsc,ysc,xab,yab,xwls,ywls,xspc,yspc</varlist>
   <varlist type="int">ns,ix,iy,iz,i</varlist>
 
@@ -158,8 +158,10 @@
     z= HOFF_ZOffset + HGEO_Depth/2.0*cos(a) - xtot/2.0*sin(a)
     <If expr="HOFF_NS.eq.1" >
       x=-x 
+      ortx=1.0
       aa=-HOFF_Angle
     <Else >
+      ortx=-1.0
       aa=HOFF_Angle
     </Else></If>
 
@@ -172,6 +174,8 @@
 	       y="y" 
 	       z="z" 
 	       konly="ONLY" >
+
+      <Rotation matrix="{ortx, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
       <Rotation alphay="aa"  />
     </Placement>
   </Do>
@@ -188,16 +192,8 @@
     <Do var="iy" from="1" to="HGEO_NY" > 
       yy = (HGEO_NY/2.0 - iy + 0.5) * ytow
       <Do var="ix" from="1" to="HGEO_NX" >  
-	xx = (-HGEO_NX/2.0 + ix - 0.5) * xtow
-	<If expr="HOFF_NS.eq.1" >
-	  <Placement block="HTOW" in="HMOD" x="xx" y="yy" z="0.0" konly="ONLY" >
-	    <Rotation matrix="{-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
-	  </Placement>
-	<Else >
-	  <Placement block="HTOW" in="HMOD" x="-xx" y="yy" z="0.0" konly="ONLY" >
-	    <Rotation matrix="{+1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
-	  </Placement>
-	</Else ></If >
+	xx = (HGEO_NX/2.0 - ix + 0.5) * xtow
+	<Placement block="HTOW" in="HMOD" x="xx" y="yy" z="0.0" konly="ONLY" />
       </Do>
     </Do>        
   </Block>
@@ -291,7 +287,7 @@
   <Block name="HGAP" comment="is a FCS HCal tower gap between scinti and absorber"  >
     <Material name="Air"  />
     <Medium name="Standard" isvol="0" />
-    <Attribute for="HABS" lwid="1" seen="1" colo="401"  />
+    <Attribute for="HABS" lwid="1" seen="1" colo="1"  />
     <Shape type="BOX" dz="zgap/2.0" dx="HGEO_DXSCI/2.0" dy="HGEO_DYSCI/2.0"  />
     <Export language="Mortran">
       Set EmCuts (HCUT)
@@ -301,7 +297,7 @@
   <Block name="HWSP" comment="is a FCS HCal tower WLS Plate"  >
     <Material name="Polystyren"  />
     <Medium name="hcal_wls" />
-    <Attribute for="HWSP" lwid="1" seen="1" colo="417"  />
+    <Attribute for="HWSP" lwid="1" seen="1" colo="3"  />
     <Shape type="BOX" dz="ztot/2.0" dx="HGEO_DXWLS/2.0" dy="HGEO_DYWLS/2.0"  />
     <Export language="Mortran">
       Set EmCuts (HCUT)

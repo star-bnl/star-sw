@@ -76,7 +76,7 @@
   </Structure>
     
   <varlist type="float">dtr,xtow,ytow,xtot,ytot,ztot,zsci</varlist>
-  <varlist type="float">a,x,y,z,aa,xx,yy,zz,zzz</varlist>
+  <varlist type="float">a,x,y,z,aa,ortx,xx,yy,zz,zzz</varlist>
   <varlist type="int">ns,ix,iy,iz,i</varlist>
 
   <Fill name="WVER" comment="FCS ECal basic data"  >
@@ -147,39 +147,39 @@
   ytot = ytow * WGEO_NY
 
   <If expr="WVER_active.eq.1">
-<!--
-    <Info format="FCS Ecal Module xtot={10.5f}">xtot</Info>
-    <Info format="FCS Ecal Module ytot={10.5f}">ytot</Info>
-    <Info format="FCS Ecal Module ztot={10.5f}">ztot</Info>    
--->
+
     <Create block="WMOD"  />
     <Do var="ns" from="1" to="2"  >
-    <Use struct="WOFF" select="NS" value="ns "  />
-    a= WOFF_Angle*dtr
-    x= WOFF_XOffset + xtot/2.0*cos(a)       + WGEO_Depth/2.0*sin(a)
-    y= WOFF_YOffset
-    z= WOFF_ZOffset + WGEO_Depth/2.0*cos(a) - xtot/2.0*sin(a)
-    <If expr="WOFF_NS.eq.1" >
-      x=-x
-      aa=-WOFF_Angle
-    <Else>
-      aa=WOFF_Angle
-    </Else> </If>
+      <Use struct="WOFF" select="NS" value="ns"  />
+      a= WOFF_Angle*dtr
+      x= WOFF_XOffset + xtot/2.0*cos(a)       + WGEO_Depth/2.0*sin(a)
+      y= WOFF_YOffset
+      z= WOFF_ZOffset + WGEO_Depth/2.0*cos(a) - xtot/2.0*sin(a)
+      <If expr="ns.eq.1" >
+	x=-x
+	ortx=1.0
+	aa=-WOFF_Angle
+	<Else>
+	  ortx=-1.0
+	  aa=WOFF_Angle
+      </Else> </If>
+      
+      <Info format="FCS Ecal Module xpos={10.5f}">x</Info>
+      <Info format="FCS Ecal Module ypos={10.5f}">y</Info>
+      <Info format="FCS Ecal Module zpos={10.5f}">z</Info>
 
-    <Info format="FCS Ecal Module xpos={10.5f}">x</Info>
-    <Info format="FCS Ecal Module ypos={10.5f}">y</Info>
-    <Info format="FCS Ecal Module zpos={10.5f}">z</Info>
-
-    <Placement block="WMOD" in="CAVE" group="WestRefSys" 
-	       x="x" 
-	       y="y" 
-	       z="z" 
-	       konly="ONLY" >
-      <Rotation alphay="aa"  />
-    </Placement>
-  </Do>
-    <Info format="WcalGeo switched off on WMOD.active={1i}">WVER_active</Info>
+      <Placement block="WMOD" in="CAVE" group="WestRefSys" 
+		 x="x" 
+		 y="y" 
+		 z="z" 
+		 konly="ONLY" >
+	<Rotation matrix="{ortx, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+	<Rotation alphay="aa"  />
+      </Placement>
+    </Do>
   <Else>
+
+    <Info format="WcalGeo switched off on WMOD.active={1i}">WVER_active</Info>
 
   </Else></If>
   
@@ -196,10 +196,7 @@
     <Do var="iy" from="1" to="WGEO_NY" > 
       yy = (WGEO_NY/2.0 - iy + 0.5) * ytow
       <Do var="ix" from="1" to="WGEO_NX" >  
-	xx = (-WGEO_NX/2.0 + ix - 0.5) * xtow
-        <If expr="WOFF_NS.eq.2" >
-          xx=-xx          
-	</If>
+	xx = (WGEO_NX/2.0 - ix + 0.5) * xtow
 	<Placement block="WTOW" in="WMOD" x="xx" y="yy" z="0.0" konly="ONLY" />
       </Do>
     </Do>    
