@@ -32,7 +32,7 @@ particle=`echo $part`
 trg=`grep -a "\-trg" $PWD/preparexmlslr.sh | awk -F"-trg |-production" '{print $2}'`
 trgset=`echo $trg`
 reqid=`grep -a "\-r" $PWD/preparexmlslr.sh | awk '{print $2}'`
-daqdir=`grep -a "\-daq" $PWD/preparexmlslr.sh | awk '{print $2}'`
+daqdir=`grep -a "\-daq\ " $PWD/preparexmlslr.sh | awk '{print $2}'`
 ndaq=`find $daqdir/*.daq | wc -l`
 
 for (( ifset=$begin ; $ifset - $end ; ifset++ ))
