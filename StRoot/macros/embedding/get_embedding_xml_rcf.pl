@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml_rcf.pl,v 1.23 2015/04/15 06:36:40 zhux Exp $
+# $Id: get_embedding_xml_rcf.pl,v 1.24 2018/09/16 09:29:19 zhux Exp $
 # $Log: get_embedding_xml_rcf.pl,v $
+# Revision 1.24  2018/09/16 09:29:19  zhux
+# *** empty log message ***
+#
 # Revision 1.23  2015/04/15 06:36:40  zhux
 # Added filesPerHour=0.1 in <job> descriptions, force to choose queue for long jobs
 #
@@ -68,7 +71,7 @@ my $requestNumber = 9999999999 ;                                    # Default re
 my $daqsDirectory = "$staroflDir/embedding/$production";            # Default daq files directory
 my $tagsDirectory = "$staroflDir/embedding/$production";            # Default tag files directory
 my $trgsetupName  = "production";                                   # Default trigger setup name
-my $trgForce      = 0;                                              # Default trigger setup name obtained from get_pathFC.pl for a single daq file
+my $trgForce      = 1;                                              # Default trigger setup name obtained from the above $trgsetupName, instead of get_pathFC.pl for a single daq file
 my $bfcMixer      = "StRoot/macros/embedding/bfcMixer_TpcSvtSsd.C"; # Default bfcMixer
 my $zvertexCut    = 200 ;                                           # Default z-vertex cut
 my $vrCut         = 100 ;                                           # Default vr cut
@@ -86,12 +89,12 @@ my $seed          = "StRoot/macros/embedding/get_random_seed";      # Random see
 my $daqEvents     = "$staroflDir/embedding/$production";            # File list for starsim with daq files and number of events for each file		
 my $toscratch     = 1;                                              # Default copy daq and tags to $SCRATCH
 my $ptbin         = 0 ;                                             # Default mode (OFF) for multiple pt hard bins for a single request 			
-my $localStRoot   = 0;					  	    # default use local StRoot dir off
+my $localStRoot   = 1;					  	    # default use local StRoot dir on
 
 # Output path will be the following structure
 # $starDisk/embedding/${TRGSETUPNAME}/${PARTICLENAME}_${FSET}_${REQUESTNUMBER}/${PRODUCTION}.${LIBRARY}/${YEAR}/${DAY}/${RUNNUMBER}
-my $starDisk     = "/star/data60" ;                                 # Default star disk (is /star/data60)
-my $logdisk      = "/star/data18" ;                                 # Default log disk  (is /star/data18)
+my $starDisk     = "/star/embed" ;                                 # Default star disk (is /star/embed)
+my $logdisk      = "/star/embed" ;                                 # Default log disk  (is /star/embed)
 $verbose          = 0 ;                                             # verbose flag (defalt is false)
 
 my $maxFilesPerProcess = 1 ;       # 1 file per job
@@ -248,7 +251,7 @@ if( ! $localStRoot ) {
 # Common log/generator area under /project directory at RCF
 #   The directories only used for the temporary storage for log files
 #$EMLOGS = "$logdisk/embed/projects";
-$EMLOGS = "${logdisk}/embedlog";
+$EMLOGS = "${logdisk}/log";
 
 #----------------------------------------------------------------------------------------------------
 # Set generator/directory from production name, particle name and request number
@@ -968,7 +971,7 @@ sub getCatalogDirectory {
   my $particleName  = shift @_ ;
   my $logdisk       = shift @_ ;
   my $requestNumber = shift @_ ;
-  my $target        = "$logdisk/embedlog/$particleName\_&FSET;_$requestNumber/log"; 
+  my $target        = "$logdisk/log/$particleName\_&FSET;_$requestNumber/log"; 
   return $target;
 
 }
@@ -1060,7 +1063,7 @@ sub getLocalLibraryPath {
   #  print "Unknown OS : $chos. Set the sl44 path\n";
   #  return ".sl44_gcc346";
   #}
-  return ".sl64_gcc447";
+  return ".sl73_gcc485";
 }
 
 #----------------------------------------------------------------------------------------------------
