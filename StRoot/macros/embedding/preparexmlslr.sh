@@ -31,6 +31,7 @@ else
  ln -s StRoot/macros/embedding/findfailedxml.sh
  ln -s -f StRoot/macros/embedding/fsetstat.sh
  script="perl StRoot/macros/embedding/get_embedding_xml.pl"
+ #script="perl StRoot/macros/embedding/get_embedding_xml_rcf.pl"
  fset=""
  cpuh=""
  outp=""
