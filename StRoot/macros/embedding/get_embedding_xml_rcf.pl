@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml_rcf.pl,v 1.24 2018/09/16 09:29:19 zhux Exp $
+# $Id: get_embedding_xml_rcf.pl,v 1.25 2018/09/16 09:51:58 zhux Exp $
 # $Log: get_embedding_xml_rcf.pl,v $
+# Revision 1.25  2018/09/16 09:51:58  zhux
+# updated to the latest setup at RCF.
+#
 # Revision 1.24  2018/09/16 09:29:19  zhux
 # *** empty log message ***
 #
@@ -72,7 +75,7 @@ my $daqsDirectory = "$staroflDir/embedding/$production";            # Default da
 my $tagsDirectory = "$staroflDir/embedding/$production";            # Default tag files directory
 my $trgsetupName  = "production";                                   # Default trigger setup name
 my $trgForce      = 1;                                              # Default trigger setup name obtained from the above $trgsetupName, instead of get_pathFC.pl for a single daq file
-my $bfcMixer      = "StRoot/macros/embedding/bfcMixer_TpcSvtSsd.C"; # Default bfcMixer
+my $bfcMixer      = "StRoot/macros/embedding/bfcMixer_Tpx.C"; # Default bfcMixer
 my $zvertexCut    = 200 ;                                           # Default z-vertex cut
 my $vrCut         = 100 ;                                           # Default vr cut
 my $ptmin         = 0.0 ;                                           # Default pt lower cut off
@@ -164,7 +167,7 @@ my $usage = q(
   -daq [daq file directory]    Set daq file directory (default is /home/starofl/embedding/$production)
 
   -disk [star disk]            Set target star disk (e.g. /star/data60) for the outputs
-  -log  [log disk]             Set target log disk on project (e.g. /star/data12) for the outputs
+  -logdisk  [log disk]             Set target log disk on project (e.g. /star/data12) for the outputs
   -f                           Overwrite the existing xml file (default is false)
   -g (or --geantid) [GEANT id] GEANT3 id for input MC particle
   -h or --help                 Show this messages and exit
