@@ -58,7 +58,8 @@ void StxCAInterface::MakeHits() {
 	  for (Long64_t k = 0; k < NoHits; k++) {
 	    const StTpcHit *tpcHit = static_cast<const StTpcHit *> (hits[k]);
 	    if ( ! tpcHit) continue;
-	    Int_t Id = fCaHits.size();
+	    //	    Int_t Id = fCaHits.size();
+	    Int_t Id = fSeedHits.size();
 	    // obtain seed Hit
 	    SeedHit_t hitc;
 	    hitc.padrow = tpcHit->padrow();
@@ -82,7 +83,7 @@ void StxCAInterface::MakeHits() {
 	    caHit.SetISlice( tpcHit->sector() - 1 );
 	    caHit.SetIRow( tpcHit->padrow()-1 );
 	    caHit.SetID( Id );
-	    caHit.SetID( tpcHit->id() );
+	    //	    caHit.SetID( tpcHit->id() );
 	    fIdTruth.push_back( tpcHit->idTruth() );
 	    fCaHits.push_back(caHit);
 	  }
@@ -94,52 +95,23 @@ void StxCAInterface::MakeHits() {
 //________________________________________________________________________________
 void StxCAInterface::ConvertPars(const AliHLTTPCCATrackParam& caPar, double _alpha, StxNodePars& nodePars, StxNodeErrs& nodeErrs)
 {
-    // set jacobian integral coef
-  double JI[5]; 
-  JI[0] = -1.;                    // y
-  JI[1] = -1.;                    // z
-  JI[2] = -1.;         // eta
-  JI[3] =  1.;         // ptin
-  JI[4] = -1.;         // tanl
-    // get parameters
-  nodePars.x()    = caPar.GetX();
+  // set jacobian integral coef 
+  //                      y   z eta ptin tanl  
+  static Double_t JI[5] {-1, -1, -1,   1, -1};
+  // get parameters
+  nodePars.x()    =         caPar.GetX();
   nodePars.y()    = JI[0] * caPar.GetY();
   nodePars.z()    = JI[1] * caPar.GetZ();
   nodePars.eta()  = JI[2] * asin(caPar.GetSinPhi()); // (signed curvature)*(local Xc of helix axis - X current point on track)
-  nodePars.ptin() = JI[3] * caPar.GetQPt();        // signed invert pt [sign = sign(-qB)]
+  nodePars.ptin() = JI[3] * caPar.GetQPt();          // signed invert pt [sign = sign(-qB)]
   nodePars.tanl() = JI[4] * caPar.GetDzDs();         // tangent of the track momentum dip angle
-  
-    // get h & signB
-  static const double EC = 2.99792458e-4, ZEROHZ = 2e-6;
-// #define USE_CA_FIELD
-#ifndef USE_CA_FIELD // use field in the point. Need this because of check in StxTrackNodeHelper::set()
-  const double ca = cos(_alpha), sa = sin(_alpha); // code has been taken from StxKalmanTrackNode::getHz()
-  double globalXYZ[3] = {
-    ca * nodePars.x() - sa * nodePars.y(),
-    sa * nodePars.x() + ca * nodePars.y(),
-    nodePars.z()
-  };
-
-  double h2=ZEROHZ;
-  double b[3];
-  StarMagField::Instance()->BField(globalXYZ,b);
-  h2 = b[2];
-
-#else  // these parameters have been obtained with that MF, so let's use it.
-  double h2 = - fTracker->Slice(0).Param().Bz(); // change sign because change z
-#endif // 1
-  h2 *= EC;
-    // get parameters. continue
-  nodePars.hz() = h2;  // Z component magnetic field in units Pt(Gev) = Hz * RCurv(cm)
-  nodePars.ready(); // set cosCA, sinCA & curv
-//std::cout << nodePars._ptin << std::endl;
-    // set jacobian integral coef
-  double J[5]; 
-  J[0] = JI[0];                    // y
-  J[1] = JI[1];                    // z
+  // set jacobian integral coef
+  Double_t J[5]; 
+  J[0] = JI[0];                     // y
+  J[1] = JI[1];                     // z
   J[2] = JI[2]/cos(nodePars.eta()); // eta
-  J[3] = JI[3];                    // ptin
-  J[4] = JI[4];                    // tanl
+  J[3] = JI[3];                     // ptin
+  J[4] = JI[4];                     // tanl
   
     // get cov matrises
   const float *caCov = caPar.GetCov();

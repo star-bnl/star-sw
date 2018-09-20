@@ -107,3 +107,129 @@ StixSeedFinder:
     
    StxSeedFinder
       std::vector<Seedx_t> *mSeeds; 
+================================================================================
+StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr)
+  // init fitter
+  genfit::AbsKalmanFitter* fitter = 0;
+...
+       case genfit::RefKalman:
+      fitter = new genfit::KalmanFitterRefTrack(nIter, dPVal);
+      fitter->setMultipleMeasurementHandling(mmHandling);
+      break;
+...
+  genfit::FieldManager::getInstance()->useCache(true, 8);
+  genfit::MaterialEffects::getInstance()->init(new genfit::TGeoMaterialInterface());
+  const int pdg = -13;               // particle pdg code mu+
+...
+  //========== Reference  track ======================================================================
+  Double_t sign = ConvertCA2XYZ(tr, pos, mom, covM);
+  genfit::AbsTrackRep* rep = new genfit::RKTrackRep(sign*pdg);
+...
+  genfit::MeasuredStateOnPlane stateRef(rep);
+  genfit::Track  fitTrack(rep, pos, mom);
+  rep->setPosMomCov(stateRef, pos, mom, covM);
+     genfit::RKTrackRep::setPosMomCov
+  rep->setPropDir(1);
+  const genfit::StateOnPlane stateRefOrig(stateRef);
+  //========== Mesurements ======================================================================
+  const int NHits = tr.NHits();
+  for ( int iHit = 0; iHit < NHits; iHit++ ){ 
+...
+   TVectorD HitCoords(2);
+    HitCoords[0] = xyzL[1];
+    HitCoords[1] = xyzL[2];
+    TMatrixDSym hitCov(2);
+    Double_t zL = xyzL[2] + ((TGeoBBox *)nodeP->GetVolume(-1)->GetShape())->GetDZ();
+    Double_t ecross, edip;
+    errCalc->calculateError(zL, pars.eta(), pars.tanl(), ecross, edip);
+    hitCov(0,0) = ecross;
+    hitCov(1,1) = edip;
+    genfit::PlanarMeasurement* measurement = new genfit::PlanarMeasurement(HitCoords, hitCov, detId, ++hitId, nullptr);
+    measurement->setPlane(genfit::SharedPlanePtr(new genfit::DetPlane(TVector3(D.GetTranslation()), TVector3(D.GetRotationMatrix()+3), TVector3(D.GetRotationMatrix()+6))), ++planeId);
+    fitTrack.insertPoint(new genfit::TrackPoint(measurement, nullptr));
+...
+
+  fitTrack.checkConsistency();
+  fitter->processTrack(&fitTrack);
+    genfit::AbsFitter::processTrack
+      genfit::KalmanFitterRefTrack::processTrackWithRep
+        genfit::KalmanFitterRefTrack::prepareTrack
+          genfit::KalmanFitterRefTrack::removeOutdated 
+...
+          // loop over TrackPoints
+          genfit::RKTrackRep::extrapolateToPlane
+            genfit::RKTrackRep::Extrap
+              genfit::RKTrackRep::RKutta
+                genfit::RKTrackRep::estimateStep
+                  genfit::MaterialEffects::stepper
+                    genfit::TGeoMaterialInterface::initTrack
+                      TGeoManger::IsSameLocation
+                      TGeoManger::SetCurrentDirection
+                    genfit::TGeoMaterialInterface::findNextBoundary
+                      TGeoManager::FindNextBoundary
+                        TGeoNavigator::FindNextBoundary
+  fitTrack.getFittedState().Print();
+    genfit::Track::getFittedState(int id = 0, const AbsTrackRep* rep = nullptr, bool biased = true) 
+    genfit::MeasuredStateOnPlane::Print
+  fitTrack.checkConsistency();
+
+
+
+================================================================================
+    M1x7 state7;
+
+    state7[0] = pos.X();
+    state7[1] = pos.Y();
+    state7[2] = pos.Z();
+
+    state7[3] = mom.X();
+    state7[4] = mom.Y();
+    state7[5] = mom.Z();
+    norm = 1. / sqrt(state7[3]*state7[3] + state7[4]*state7[4] + state7[5]*state7[5]);
+    state7[6] = getCharge(state) * norm;
+
+void RKTrackRep::getState5(StateOnPlane& state, const M1x7& state7) const 
+
+  const TVector3& O(state.getPlane()->getO());
+  const TVector3& U(state.getPlane()->getU());
+  const TVector3& V(state.getPlane()->getV());
+  const TVector3& W(state.getPlane()->getNormal());
+  // force A to be in normal direction and set spu accordingly
+  double AtW( state7[3]*W.X() + state7[4]*W.Y() + state7[5]*W.Z() );
+  if (AtW < 0.) {
+    //fDir *= -1.;
+    //AtW *= -1.;
+    spu = -1.;
+  }
+
+  state5[0] = state7[6]; // q/p
+  state5[1] = (state7[3]*U.X() + state7[4]*U.Y() + state7[5]*U.Z()) / AtW; // u' = (A * U) / (A * W)
+  state5[2] = (state7[3]*V.X() + state7[4]*V.Y() + state7[5]*V.Z()) / AtW; // v' = (A * V) / (A * W)
+  state5[3] = ((state7[0]-O.X())*U.X() +
+               (state7[1]-O.Y())*U.Y() +
+               (state7[2]-O.Z())*U.Z()); // u = (pos - O) * U
+  state5[4] = ((state7[0]-O.X())*V.X() +
+               (state7[1]-O.Y())*V.Y() +
+               (state7[2]-O.Z())*V.Z()); // v = (pos - O) * V
+
+  setSpu(state, spu);
+
+
+  const double qop = state7[6];
+  const double p = getCharge(state)/qop; // momentum
+  // J_Mp matrix is d(q/p,u',v',u,v) / d(x,y,z,px,py,pz)       (in is 6x6)
+//
+//    state7 - initial parameters (coordinates(cm), direction,
+//             charge/momentum (Gev-1)
+//    cov      and derivatives this parameters  (7x7)
+//
+//    X         Y         Z         Ax        Ay        Az        q/P
+//    state7[0] state7[1] state7[2] state7[3] state7[4] state7[5] state7[6]
+//
+//    dX/dp     dY/dp     dZ/dp     dAx/dp    dAy/dp    dAz/dp    d(q/P)/dp
+//    cov[ 0]   cov[ 1]   cov[ 2]   cov[ 3]   cov[ 4]   cov[ 5]   cov[ 6]               d()/dp1
+//
+//    cov[ 7]   cov[ 8]   cov[ 9]   cov[10]   cov[11]   cov[12]   cov[13]               d()/dp2
+//    ............................................................................    d()/dpND
+//
+// Authors: R.Brun, M.Hansroul, V.Perevoztchikov (Geant3)
