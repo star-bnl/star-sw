@@ -44,7 +44,7 @@ int minimalFittingExample2() {
 
   // init fitter
   genfit::AbsKalmanFitter* fitter = new genfit::KalmanFitterRefTrack();
-
+  fitter->setDebugLvl(10);
 
   // particle pdg code; pion hypothesis
   const int pdg = 211;

@@ -16,5 +16,5 @@ void lGenFit() {
     i++;
   }
 #endif
-  gSystem->AddIncludePath("-IGenFit -I$STAR/StRoot/GenFit -I$XOPTSTAR/include/eigen3");
+  gSystem->AddIncludePath("-IStRoot/GenFit -I$STAR/StRoot/GenFit -I$XOPTSTAR/include/eigen3");
 }
