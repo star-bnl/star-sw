@@ -258,13 +258,20 @@ Bfc_st BFC[] = { // standard chains
   {"MC2017",      "","","MC2017.Ideal"                                                    ,"","","",kFALSE},
   {"MC2018.Ideal","","","MC.2018,MC.StiCA,NewTpcAlignment"                                ,"","","",kFALSE},
   {"MC2018",      "","","MC2018.Ideal,VMCAlignment,sdt20180426.122000"                    ,"","","",kFALSE},
-  {"XC2018",      "","","y2018,TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,OSpaceZ2,tpcDB,TpcHitMover"
+  {"XC2018",      "","","y2018,TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,"
+   "OSpaceZ2,OGridLeak3D,CorrX,tpcDB,TpcHitMover"
    ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,sdt20180426.122000,Stx,Idst,BAna"       
    ,                                                                                       "","","",kFALSE},
-  {"HLT2017",      "","","y2017,TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,OSpaceZ2,tpcDB,TpcHitMover"
-   ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,sdt20170426,StiCA,HLTCA,Idst,BAna"       
+  {"XC2018I",     "","","y2018,TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,"
+   "NewTpcAlignment,tpcDB,TpcHitMover"
+   ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,Stx,Idst,BAna"       
    ,                                                                                       "","","",kFALSE},
-  {"HLT2018",      "","","y2018,TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,OSpaceZ2,tpcDB,TpcHitMover"
+  {"HLT2017",      "","","y2017,TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,"
+   "OSpaceZ2,OGridLeak3D,CorrX,tpcDB,TpcHitMover"
+   ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,sdt20170426,StiCA,HLTCA,Idst,BAna"
+   ,                                                                                       "","","",kFALSE},
+  {"HLT2018",      "","","y2018,TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,"
+   "OSpaceZ2,OGridLeak3D,CorrX,tpcDB,TpcHitMover"
    ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,sdt20180426.122000,StiCALib,HLTCA,Idst,BAna"       
    ,                                                                                       "","","",kFALSE},
   {"MC2019.Ideal","","","MC.2019,MC.StiCA"                                                ,"","","",kFALSE},
@@ -1779,7 +1786,7 @@ Bfc_st BFC[] = { // standard chains
    ,                                                          "StiUtilities,StiMaker","Sti tracker",kFALSE},
   {"HLTCA","","Sti","Sti,-Stv,StiLib,StiLibs,TMVARank","StHLTCAMaker","TPCCATracker,StiMaker,StHLTCAMaker"
    ,                                                                           "HLT reconstruction",kFALSE},
-  {"Stx", "","","-Sti,-StiCA,-Stv","StxMaker"     ,"TPCCATracker,StxMaker","eXpress reconstruction",kFALSE},
+  {"Stx","","","VMCAppl" ,"StxMaker","libEve,GenFit,TPCCATracker,StxMaker","eXpress Reconstruction",kFALSE},
   {"KFVertex",""  ,"Sti","StiLibs,-VFMinuit,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2"
    ,"StKFVertexMaker","MathMore,Spectrum,StiMaker",  "KFParticle based multi vertex reconstruction",kFALSE},
   {"Stv","Stv","","-xgeometry,-Sti,-StiTpc,-StiSsd,-StiSvt,-StiPxl,-StiSsd,-StiSst,-StiIst,-StiLibs,-StiLibsHft"

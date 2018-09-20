@@ -1647,6 +1647,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
 	SetOption("mysql","Default,-TGiant3");
 	//yf	SetOption("minicern","Default,-TGiant3");
       }
+      if (GetOption("Stx") && ! GetOption("vmc")) SetOption("VmcPassive","Stx,-Vmc");
     }
     if (GetOption("ITTF") && ! (GetOption("Sti") || GetOption("StiCA")  || GetOption("Stv") || 
 				GetOption("Stx") || GetOption("StiVMC"))) {
