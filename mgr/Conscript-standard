@@ -814,10 +814,10 @@ if ( $pkg =~ m/^St.*Db/             ||
   $CPPPATH = "#StarVMC" . $main::PATH_SEPARATOR . $CPPPATH;
 } elsif ( $pkg =~ m/StPxlSimMaker/) {
   $CPPPATH .= $main::PATH_SEPARATOR . "#StRoot/StPxlSimMaker/DIGMAPS"; 
-} elsif ($pkg =~ m/^StHLTCAMaker$/ || $pkg =~ m/^StvMaker$/ || $pkg =~ m/^StvSeed$/ ){ #  
+} elsif ($pkg =~ m/^StHLTCAMaker$/ || $pkg =~ m/^StvMaker$/ || $pkg =~ m/^StvSeed$/){ #  
   $CXXFLAGS .= " -DNVALGRIND -DDO_TPCCATRACKER -DNODEBUG -DENABLE_VECTORIZATION";# . $SSE_FLAGS; #" -msse -msse2";
   if ($CC ne 'icc') {
-    $CXXFLAGS .= " -Wno-pragmas";
+    $CXXFLAGS .= " -Wno-pragmas -Wunused-function";
   }
   $CXXFLAGS .= " -Wno-parentheses"; # new flags needed for Vc
 }  elsif ( $pkg eq 'TPCCATracker' or $pkg eq 'TPCCATrackerPerformance' or $pkg eq 'StiCA' or $pkg eq 'StxMaker') {
@@ -827,7 +827,7 @@ if ( $pkg =~ m/^St.*Db/             ||
   $extraCXXFLAGS = "-DNODEBUG -DNVALGRIND ";
   if ($STAR_SYS eq 'sl64_gcc447' or $STAR_SYS eq 'sl64_x8664_gcc447') {$extraCXXFLAGS .= " --param large-function-growth=500";}
   $extraCXXFLAGS .= " -DNODEBUG";
-  $extraCXXFLAGS .= "  -Wno-parentheses"; # new flags
+  $extraCXXFLAGS .= "  -Wno-parentheses -Wno-unused-function"; # new flags
   $CXXFLAGS .= $extraCXXFLAGS;
   $CXXFLAGS .= $env->{Packages}->{Vc}->{CPP};
   $LIBS = "-lVc";
