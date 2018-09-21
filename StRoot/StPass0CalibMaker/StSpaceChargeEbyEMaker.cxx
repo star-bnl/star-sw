@@ -315,7 +315,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
       if (QAmode) cutshist->Fill(6);
       if (pvtx->numMatchesWithBTOF() < vtxTofMatch) continue;
       if (QAmode) cutshist->Fill(7);
-      if (pvtx->numTracksCrossingCentralMembrane() > vtxPCTs) continue;
+      if (pvtx->numPostXTracks() > vtxPCTs) continue;
       if (QAmode) cutshist->Fill(8);
       if (vtxVpdAgree > 0 && // set vtxVpdAgree negative to skip this cut
           TMath::Abs(pvtx->position().z() - vpd_zvertex) > vtxVpdAgree) continue;
@@ -1555,8 +1555,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.69 2018/06/08 16:39:59 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.70 2018/09/21 18:22:47 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.70  2018/09/21 18:22:47  genevb
+// Bug fix for wrong vertex daughter PCTs function
+//
 // Revision 1.69  2018/06/08 16:39:59  genevb
 // Needs explicity include of TROOT.h
 //
