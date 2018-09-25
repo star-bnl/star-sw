@@ -598,7 +598,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	#print "***** DEBUG ****\n";
 	$CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/include"; 
 	$CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/include/Pythia8";
-	$CXXFLAGS .= " -DPythia8_version=\\\"$pkg\\\" ";
+	$CXXFLAGS .= " -DPythia8_version=\\\"$pkg\\\" -DXMLDIR=\\\".\\\" "; # note XMLDIR is fake here... code/interface needs to take care to set
+	
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
 
 	# Do not compile hepmc support, rootexamples
