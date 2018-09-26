@@ -22,7 +22,7 @@ import datetime
 #----------------------------------------------------------
 def setup_parser():
    # parser.add_argument("-x", dest="x",help="x")
-   parser.add_argument('-trigger','-t', action='append', dest="trigIdL", help="trigId, accepts many")
+   parser.add_argument('-trigger','-t', action='append', dest="trigIdL", help="trigId, accepts many",default='0')
    parser.add_argument("-trg", dest="triggerSetName",help="data trigger set name")
 
    parser.add_argument("-lib", dest="starLib",help="STAR library version")
@@ -35,9 +35,15 @@ def setup_parser():
    parser.add_argument("-particle", dest="particleName",help="geant particle name")
    parser.add_argument("-mode", dest="ptMode",help="pt mode")
 
+   parser.add_argument("-simulator", dest="simulatorMode",help="simulator mode",default='0')
+   parser.add_argument("-zerobias", dest="zerobiasMode",help="zerobias mode",default='0')
+   parser.add_argument("-moretags", dest="moretagsMode",help="moretags mode",default='0')
+   parser.add_argument("-kumacfile", dest="kumacFile",help="simulator macro")
+   parser.add_argument("-seed", dest="seed",help="random number generator for simulator",default='StRoot/macros/embedding/get_random_seed')
+   parser.add_argument("-daqevents", dest="daqEvents",help="simulator daq file and event number list")
 
-   parser.add_argument("-z", dest="zVertMax",help="z vertex max")
-   parser.add_argument("-vrcut", dest="vrcut",help="r-vertex cut")
+   parser.add_argument("-z", dest="zVertMax",help="z vertex max",default='200')
+   parser.add_argument("-vrcut", dest="vrcut",help="r-vertex cut",default='100')
 
 
    parser.add_argument("-ymin", dest="ymin",help="ymin")
@@ -50,13 +56,18 @@ def setup_parser():
 
    parser.add_argument("-daq", dest="daqPath",help=" daq path")
    parser.add_argument("-tag", dest="tagPath",help=" tag path")
-   parser.add_argument("-outPath", dest="outPath",help="output path",default='/global/projecta/projectdirs/starprod/embedding')
+   parser.add_argument("-outPath", dest="outPath",help="output path",default='${SCRATCH}/embedding')
 
    parser.add_argument("-fSetRange", dest="fSetRange",help="range of fSET, '-' separated")
    parser.add_argument("-fSetCPUHours", dest="fSetCPUHours",help="estimated CPU hours for one fSET",default='1000')
 
    parser.add_argument("-wallHour", dest="wallHour",help="max running time for one task (in hours)",default='35')
    parser.add_argument("-nThreads", dest="nThreads",help="max number of threads on one node",default='50')
+
+   parser.add_argument("-shifter", dest="shifter",help="shifter image",default='pdsf-sl64-star:v9')
+   parser.add_argument("-partition", dest="partition",help="partition selection",default='1')
+
+   parser.add_argument("-localDB", dest="localDB",help="local STAR DB on master node",default='1')
 
    parser.add_argument("-nevents", dest="nevents",help="num. eve per r4s task",default='1000')
 
@@ -75,12 +86,20 @@ def  supplementArgs(argD):
    now = datetime.datetime.now()
    argD['scriptProdDate']=now.strftime("%B %d %Y %I:%M%p")
 
+   argD['debg_part']='-'
+   argD['regu_part']='-'
+   argD['prem_part']='-'
+   if argD['partition']=='0': argD['debg_part']=''
+   if argD['partition']=='1': argD['regu_part']=''
+   if argD['partition']=='2': argD['prem_part']=''
+
 #----------------------------------------------------------
 def makeTaskScript(argD,inpF):
    outF=inpF.replace('templ','csh')
    outF=os.path.basename(outF)
    print('replacing content of template=',inpF, outF)
-   
+   argD['r4s_csh']= outF
+
    t = open(inpF, 'r')
    tempstr = t.read()
    t.close()
@@ -161,6 +180,8 @@ def   makeTaskList(argD,taskLF):
    print('base daq list len',len(coreL))
    print('example daq',coreL[0])
 
+   if argD['partition']=='0': argD['nevents']='1'
+
    print('output:',outF)
    nFtot=0
    fout = open(outF, 'w')
@@ -168,8 +189,9 @@ def   makeTaskList(argD,taskLF):
    for x in coreL:
       nevents=int(argD['nevents'])
       for fset in range(fs1,fs2+1):
-         print('---make daq=',x,' fset=',fset,' nevents=',nevents)
-         text='shifter  /bin/tcsh  ${WRK_DIR}/r4sTask_embed.csh '+x+' '+str(fset)+' '+str(nevents)+'  >&   ${WRK_DIR}/logs/'+x+'_fset'+str(fset)+'.taskLog\n'
+         if nr<5:
+            print('---make daq=',x,' fset=',fset,' nevents=',nevents)
+         text='shifter  /bin/tcsh  ${WRK_DIR}/'+argD['r4s_csh']+' '+x+' '+str(fset)+' '+str(nevents)+'  >&   ${WRK_DIR}/logs/'+x+'_fset'+str(fset)+'.taskLog\n'
          fout.write(text)
          nFtot=nFtot+1
       nr=nr+1
@@ -184,8 +206,10 @@ def   makeTaskList(argD,taskLF):
    
    nnode=int(nFtot*1.0/nthreads/npass+0.9)+1  #1 node is used to monitor tasks at Cori
    argD['nodeNumber']=str(nnode)
-   nskew=int((nnode-1)*150) #allow a DB connection time of 150 seconds for one node
+   nskew=int((nnode-1)*500) #allow a DB connection time of 500 seconds for one node
    argD['skewNumber']=str(nskew)
+   if argD['partition']=='0': argD['nodeNumber']='2'
+   if argD['partition']=='0': argD['skewNumber']='50'
 
 #----------------------------------------------------------
 if __name__ == "__main__":
