@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml_rcf.pl,v 1.25 2018/09/16 09:51:58 zhux Exp $
+# $Id: get_embedding_xml_rcf.pl,v 1.26 2018/09/26 03:55:56 zhux Exp $
 # $Log: get_embedding_xml_rcf.pl,v $
+# Revision 1.26  2018/09/26 03:55:56  zhux
+# adapted to HFT embedding
+#
 # Revision 1.25  2018/09/16 09:51:58  zhux
 # updated to the latest setup at RCF.
 #
@@ -64,18 +67,18 @@ chomp($date);
 # Available options
 #----------------------------------------------------------------------------------------------------
 # Default parameters
-my $staroflDir    = "/home/starreco"; # starreco home
+my $staroflDir    = "/star/data18"; # starreco home
 
 my $force         = 0;                                              # Default is false (do not overwrite existing xml file)
-my $production    = "P08ic";                                        # Default production
+my $production    = "P16id";                                        # Default production
 my $library       = getLibrary($production);                        # Default library
 my $outputXml     = getXmlFileName($production);                    # Default xml file name
 my $requestNumber = 9999999999 ;                                    # Default request number
 my $daqsDirectory = "$staroflDir/embedding/$production";            # Default daq files directory
 my $tagsDirectory = "$staroflDir/embedding/$production";            # Default tag files directory
-my $trgsetupName  = "production";                                   # Default trigger setup name
+my $trgsetupName  = "AuAu_200_production_2014";                     # Default trigger setup name
 my $trgForce      = 1;                                              # Default trigger setup name obtained from the above $trgsetupName, instead of get_pathFC.pl for a single daq file
-my $bfcMixer      = "StRoot/macros/embedding/bfcMixer_Tpx.C"; # Default bfcMixer
+my $bfcMixer      = "StRoot/macros/embedding/bfcMixer_Tpx.C";       # Default bfcMixer
 my $zvertexCut    = 200 ;                                           # Default z-vertex cut
 my $vrCut         = 100 ;                                           # Default vr cut
 my $ptmin         = 0.0 ;                                           # Default pt lower cut off
@@ -87,6 +90,8 @@ my $multiplicity  = 1 ;                                             # Default mu
 my $particleName  = "PiPlus" ;                                      # Default particle name (is pi+)
 my $prodName      = $production ;                                   # Default prodName (4th last argument in the bfcMixer)
 my $simulatorMode = 0 ;                                             # Default mode (OFF) for using starsim (no StPrepEmbedding) 			
+my $zerobiasMode  = 0 ;                                             # Default mode (OFF) for using as many zerobias daq events as possible, set $EVENTS_START randomly in the xml file.
+my $moretagsMode  = 0 ;                                             # Default mode (OFF) for using moretags file as input tags
 my $kumacFile     = "StRoot/macros/embedding/pythiaTuneA_template.kumac"; # Kumac file for starsim 			
 my $seed          = "StRoot/macros/embedding/get_random_seed";      # Random seed generator for starsim		
 my $daqEvents     = "$staroflDir/embedding/$production";            # File list for starsim with daq files and number of events for each file		
@@ -132,6 +137,7 @@ GetOptions (
     'mixer=s' => \$bfcMixer,               # bfcMixer
     'mode=s' => \$ptOption,                # pt option
     'mult=s' => \$multiplicity,            # Number of MC tracks per event
+    'nevents=i' => \$nevents,              # Number of maximum events to be processed for ONE daq file
     'particlename=s' => \$particleName,    # Particle name
     'prodname=s' => \$prodName,            # prodName
     'production=s' => \$production,        # Production
@@ -147,7 +153,9 @@ GetOptions (
     'ymax=f' => \$ymax,                    # Maximum rapidity cut
     'zvertex=f' => \$zvertexCut,           # Set z-vertex cut
     'simulator=i' => \$simulatorMode,      # Set Simulator mode	
-    'kumacfile=s' => \$kumacFile,          # Set Simulator input	
+    'zerobias=i' => \$zerobiasMode,        # Set Simulator/zerobias mode	
+    'kumacfile=s' => \$kumacFile,          # Set Simulator input
+    'moretags=i' => \$moretagsMode,        # Set moretags mode
     'seed=s' => \$seed,                    # Set Simulator random seed generator
     'daqevents=s' => \$daqEvents,          # Set Simulator daq file and event number list
     'toscratch=i' => \$toscratch,          # Set whether copy daq&tags files to $SCRATCH
@@ -241,7 +249,7 @@ if( $help )
 printDebug("Verbose mode. Print debugging messages ...");
 
 #----------------------------------------------------------------------------------------------------
-# prepend $STAR directory if localStRoot=0 (default)
+# prepend $STAR directory if localStRoot=0 
 #----------------------------------------------------------------------------------------------------
 if( ! $localStRoot ) {
   my $StDir = `echo -n \$STAR`;
@@ -345,6 +353,12 @@ print OUT "<command>\n";
 printDebug("Add: starver $library ...");
 print OUT "<!-- Load library -->\n";
 print OUT "starver $library\n";
+print OUT "rm -rf .sl*\n";
+print OUT "echo 'Build local makers for $library ...'\n";
+print OUT "cons\n";
+print OUT "ls -la . \n";
+print OUT "ls -la StRoot/ \n";
+print OUT "ls -la .sl*/lib/ \n";
 print OUT "\n";
 
 #----------------------------------------------------------------------------------------------------
@@ -415,10 +429,17 @@ print OUT "\n";
 my $daqFile = "\$INPUTFILE0"; #Define daq file
 my $tagFile = "\$EMBEDTAGDIR/$fileBaseNameXml.tags.root"; #Define tag file
 my $moretagFile = "\$EMBEDTAGDIR/$fileBaseNameXml.moretags.root"; #Define tag file  #X.ZHU
+my $tagname = "tags" ;
+if ( $moretagsMode == 1) {
+   $tagname = "moretags";
+}
 my $tagDirScratch = "\$SCRATCH/tags"; 
-my $tagFileScratch = "$tagDirScratch/$fileBaseNameXml.tags.root"; 
-my $daqFileScratch = "\$SCRATCH/$fileBaseNameXml.daq"; 
-printDebug("Set tags file: $tagFile");
+my $tagFileMixer = "\$EMBEDTAGDIR/$fileBaseNameXml.$tagname.root"; 
+if ( $toscratch ){
+   $tagFileMixer = "$tagDirScratch/$fileBaseNameXml.$tagname.root"; 
+   $daqFile      = "\$SCRATCH/$fileBaseNameXml.daq"; 
+}
+printDebug("Set tags file: $tagFileMixer");
 
 #----------------------------------------------------------------------------------------------------
 # Set fzd file
@@ -427,9 +448,27 @@ my $fzdFile = "$fileBaseNameXml.fzd"; #Define fzd file - it will be created, and
 printDebug("Set fzd file: $fzdFile");
 
 #----------------------------------------------------------------------------------------------------
+# Copy daq & tags to SCRATCH
+#----------------------------------------------------------------------------------------------------
+if( $toscratch ){
+print OUT "<!-- Copy daq and tags file to SCRATCH -->\n";
+print OUT "mkdir -v $tagDirScratch\n";
+print OUT "cp -v \$INPUTFILE0 \$SCRATCH/\n";
+print OUT "cp -v $tagFile $tagDirScratch/\n";
+print OUT "if ( -e $moretagFile ) then\n"; #X.ZHU
+print OUT "  cp -v $moretagFile $tagDirScratch/\n";  #X.ZHU
+print OUT "endif\n";  #X.ZHU
+print OUT "ls -lah \$SCRATCH/\n";
+print OUT "ls -lah $tagDirScratch/ \n\n";
+}
+
+#----------------------------------------------------------------------------------------------------
 # Set bfcMixer
 #----------------------------------------------------------------------------------------------------
 printDebug("Set bfcMixer: $bfcMixer ...");
+
+print OUT "touch \$SCRATCH/\${FILEBASENAME}\_\${JOBID}.log\n";
+print OUT "\n";
 
 #---------------------------------------------------------------------------------------------------
 # Run starsim with kumac file and random number generator
@@ -442,11 +481,36 @@ if ( $simulatorMode == 1 ) {
 	print OUT "set kumac=$kumacFile\n";
 	print OUT "set fzdFile=$fzdFile\n";
 	print OUT "set random=`$seed`\n";
+	print OUT "set seed=`echo \$random | awk '{print \$1}'`\n";
 	print OUT "set ptmin=$ptmin\n";
 	print OUT "set ptmax=$ptmax\n";
 	print OUT "set nevents=`grep \$FILEBASENAME \$daqevents | awk '{print \$2}'`\n";
-	print OUT "echo nevents = \$nevents, random = \$random, kumac = \$kumac, fzdFile=\$fzdFile, ptmin = \$ptmin, ptmax = \$ptmax\n";
-	print OUT "starsim -w 0 -b \$kumac \$fzdFile \$random \$nevents \$ptmin	\$ptmax\n\n";
+	print OUT "echo nevents = \$nevents, seed = \$seed, random = \$random, kumac = \$kumac, fzdFile=\$fzdFile, ptmin = \$ptmin, ptmax = \$ptmax\n";
+#	print OUT "starsim -w 0 -b \$kumac \$fzdFile \$random \$nevents \$ptmin	\$ptmax\n\n";
+
+#for HFT+HIJING+ZB embedding only!
+	if ( $zerobiasMode == 1 ) {
+	print OUT "\n";
+	print OUT "echo DAQ FILE has \$nevents events\n";
+	print OUT "echo We need $nevents\n";
+	print OUT "if ( \$nevents > $nevents ) then \n";
+	print OUT "  set nmax = `echo \"\$nevents-$nevents-1\" | bc`\n";
+	print OUT "  set first = `shuf -i 1-\$nmax -n 1`\n";
+	print OUT "  set last  = `echo \"\${first}+$nevents\" | bc`\n";
+	print OUT "  echo We begin at \${first} and end at \${last}\n";
+	print OUT "else\n";
+	print OUT "  set first = 1\n";
+	print OUT "endif\n";
+	print OUT "setenv EVENTS_START \$first\n";
+	print OUT "\n";
+        }
+
+	print OUT "if ( \$nevents > $nevents ) then \n";
+	print OUT "  root4star -b -q \$kumac\\\($nevents,\$seed,\\\"\$fzdFile\\\",\\\"$tagFileMixer\\\",$multiplicity,$pid,$ptmin,$ptmax,$ymin,$ymax\\\) &gt;&gt;&amp; \$SCRATCH/\${FILEBASENAME}\_\${JOBID}.log\n";
+	print OUT "else\n";
+	print OUT "  root4star -b -q \$kumac\\\(\$nevents,\$seed,\\\"\$fzdFile\\\",\\\"$tagFileMixer\\\",$multiplicity,$pid,$ptmin,$ptmax,$ymin,$ymax\\\) &gt;&gt;&amp; \$SCRATCH/\${FILEBASENAME}\_\${JOBID}.log\n";
+	print OUT "endif\n";
+	print OUT "\n";
 }
 
 # Determine trigger string
@@ -455,32 +519,14 @@ if ( @triggerId ){
   $triggerString = "triggers";
 }
 
-if( $toscratch ){
-# Copy daq and tags file to $SCRATCH
-print OUT "<!-- Copy daq and tags file to SCRATCH -->\n";
-print OUT "mkdir -v $tagDirScratch\n";
-print OUT "cp -v \$INPUTFILE0 \$SCRATCH/\n";
-print OUT "cp -v $tagFile $tagDirScratch/\n";
-print OUT "if ( -e $moretagFile ) then\n"; #X.ZHU
-print OUT "  cp -v $moretagFile $tagDirScratch/\n";  #X.ZHU
-print OUT "endif\n";  #X.ZHU
-print OUT "ls -lah \$SCRATCH/\n";
-print OUT "ls -lah $tagDirScratch/ \n\n";
-}
 
 print OUT "<!-- Start job -->\n";
 # Get bfcMixer
-if( $toscratch ){
-$execute_bfcMixer = get_bfcMixer($bfcMixer, $nevents, $daqFileScratch, $tagFileScratch, $ptmin, $ptmax, $ymin, $ymax, $zvertexCut, $vrCut,
+$execute_bfcMixer = get_bfcMixer($bfcMixer, $nevents, $daqFile, $tagFileMixer, $ptmin, $ptmax, $ymin, $ymax, $zvertexCut, $vrCut,
     $pid, $multiplicity, $triggerString, $prodName, $ptOption, $simulatorMode, $fzdFile) ;
-}
-else {
-$execute_bfcMixer = get_bfcMixer($bfcMixer, $nevents, $daqFile, $tagFile, $ptmin, $ptmax, $ymin, $ymax, $zvertexCut, $vrCut,
-    $pid, $multiplicity, $triggerString, $prodName, $ptOption, $simulatorMode, $fzdFile) ;
-}
 print OUT "echo 'Executing $execute_bfcMixer ...'\n";
 print OUT "\n";
-print OUT "root4star -b &gt;&amp; \$SCRATCH/\${FILEBASENAME}\_\${JOBID}.log &lt;&lt;EOF\n";
+print OUT "root4star -b &gt;&gt;&amp; \$SCRATCH/\${FILEBASENAME}\_\${JOBID}.log &lt;&lt;EOF\n";
 
 # Put Trigger id's 
 print OUT getTriggerVector(0, $triggerString, @triggerId) ;
@@ -584,8 +630,8 @@ printDebug("Locations of log/elog, daq files, csh/list and local sand-box ...");
 # Now, the directory for LOG files here is the temporary path to store the files.
 # Files will be moved a new path determined by production, particle name, request number and FSET
 print OUT "<!-- Define locations of ROOT files -->\n";
-print OUT "<output fromScratch=\"st*.root\" toURL=\"\$EMOUTPUT/\"/>\n";  #X.ZHU
-if ( $simulatorMode == 1 ) { print OUT "<output fromScratch=\"*.fzd\" toURL=\"\$EMOUTPUT/\"/>\n"; }
+print OUT "<output fromScratch=\"st_*.root\" toURL=\"\$EMOUTPUT/\"/>\n";  #X.ZHU
+if ( $simulatorMode == 1 ) { print OUT "<output fromScratch=\"st_*.fzd\" toURL=\"\$EMOUTPUT/\"/>\n"; }
 print OUT "\n";
 print OUT "<!-- Define locations of log/elog files -->\n";
 #print OUT "<stdout URL=\"file:$tempLogDirectory/$jobIdXml.log\"/>\n";
@@ -605,10 +651,12 @@ print OUT "\n";
 if( $localStRoot ) {
   print OUT "<!-- Put any locally-compiled stuffs into a sand-box -->\n";
   print OUT "<SandBox installer=\"ZIP\">\n";
-  print OUT "  <Package name=\"Localmakerlibs\">\n";
-  print OUT "    <File>file:./$libraryPath/</File>\n";
+  print OUT "  <Package name=\"Localmakerlibs&FSET;\">\n";
+#  print OUT "    <File>file:./$libraryPath/</File>\n";
   print OUT "    <File>file:./StRoot/</File>\n";
   print OUT "    <File>file:./pams/</File>\n";
+  print OUT "    <File>file:./StarDb/</File>\n";
+  print OUT "    <File>file:./Input/</File>\n";
   print OUT "  </Package>\n";
   print OUT "</SandBox>\n";
 }
@@ -649,7 +697,7 @@ if($local){
   }
   printDebug("Found one daq file: $daqOneFile");
 
-  my $tagsBaseName = `basename $daqOneFile | sed 's/\\.daq/\\.tags\\.root/g'`;
+  my $tagsBaseName = `basename $daqOneFile | sed 's/\\.daq/\\.$tagname\\.root/g'`;
   chomp($tagsBaseName);
   my $tagsOneFile  = "$tagsDirectory/$tagsBaseName";
 
@@ -671,6 +719,12 @@ if($local){
   print LOCAL "#!/bin/csh\n";
   print LOCAL "\n";
   print LOCAL "starver $library\n";
+  print LOCAL "rm -rf .sl*\n";
+  print LOCAL "echo 'Build local makers for $library ...'\n";
+  print LOCAL "cons\n";
+  print LOCAL "ls -la . \n";
+  print LOCAL "ls -la StRoot/ \n";
+  print LOCAL "ls -la .sl*/lib/ \n";
   print LOCAL "set daq  = \"$daqOneFile\"\n";
   print LOCAL "set tags = \"$tagsOneFile\"\n";
   print LOCAL "\n";
@@ -686,13 +740,16 @@ if($local){
 		print LOCAL "set fzd=$fzdOneFile\n";
 		print LOCAL "set daqevents=$daqEvents\n";
 		print LOCAL "set random=`$seed`\n";
+		print LOCAL "set seed=`echo \$random | awk '{print \$1}'`\n";
 		print LOCAL "set ptmin=$ptmin\n";
 		print LOCAL "set ptmax=$ptmax\n";
 		print LOCAL "set nevents=`grep \'$daqOneFileBaseName\' \$daqevents | awk '{print \$2}'`\n";
-		print LOCAL "echo nevents = \$nevents, random = \$random, kumac = \$kumac, fzd=\$fzd, ptmin = \$ptmin, ptmax = \$ptmax\n";
+		print LOCAL "echo nevents = \$nevents, seed = \$seed, kumac = \$kumac, fzd=\$fzd, ptmin = \$ptmin, ptmax = \$ptmax\n";
 		print LOCAL "\n";
-		print LOCAL "echo Running \"starsim -w 0 -b \$kumac \$fzd \$random \$nevents \$ptmin \$ptmax\"\n";
-		print LOCAL "starsim -w 0 -b \$kumac \$fzd \$random \$nevents \$ptmin	\$ptmax\n\n";
+#		print LOCAL "echo Running \"starsim -w 0 -b \$kumac \$fzd \$random \$nevents \$ptmin \$ptmax\"\n";
+#		print LOCAL "starsim -w 0 -b \$kumac \$fzd \$random \$nevents \$ptmin	\$ptmax\n\n";
+		print LOCAL "root4star -b -q \$kumac\\\(10,\$seed,\\\"\$fzd\\\",\\\"\$tags\\\",$multiplicity,$pid,$ptmin,$ptmax,$ymin,$ymax\\\)\n";
+		print LOCAL "\n";
 	}
  	print LOCAL "echo 'Executing $execute_bfcMixer ...'\n";
  	print LOCAL "\n";
@@ -756,6 +813,12 @@ sub get_bfcMixer {
   elsif ( $bfcMixer =~ /.*Tpx.C/  ){
     # bfcMixers with PYTHIA flag option (Tpx only) (CBPowell)
     printDebug("Starndard (without SVT/SSD) bfcMixer (Tpx only)");
+
+    $execute_bfcMixer = "$bfcMixerFunction($nevents, \"$daqfile\", \"$tagsfile\", $ptmin, $ptmax, $ymin, $ymax, -$zvertexcut, $zvertexcut, $vrcut, $pid, $multiplicity, $trigger, \"$prodname\", \"$ptOption\", $simulator, \"$fzdfile\");";
+  }
+  elsif ( $bfcMixer =~ /.*Hft.C/  ){
+    # bfcMixers with PYTHIA flag option (Hft)
+    printDebug("Starndard (with PXL/IST/SST) bfcMixer (Hft)");
 
     $execute_bfcMixer = "$bfcMixerFunction($nevents, \"$daqfile\", \"$tagsfile\", $ptmin, $ptmax, $ymin, $ymax, -$zvertexcut, $zvertexcut, $vrcut, $pid, $multiplicity, $trigger, \"$prodname\", \"$ptOption\", $simulator, \"$fzdfile\");";
   }
