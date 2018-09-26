@@ -7,6 +7,16 @@
 # *) run embedding in the sandbox
 # *) gzip r4s-log file 
 
+echo r4s-start `date` "  host-is " `hostname`
+
+# set the time spread per task on each node
+if ( ! -f ${WRK_DIR}/skewdone ) then
+   set WNODES=`expr $SLURM_JOB_NUM_NODES - 1`
+   set SKEWPERNODE=`expr $SKEW / $WNODES`
+   set  nsleep=`perl -e "srand; print int(rand($SKEWPERNODE))"`
+   echo nsleep=$nsleep seconds sleep for this task \(SKEW=$SKEW, SKEWPERNODE=$SKEWPERNODE\)
+   sleep $nsleep
+endif
 
 # Note, all code in this scrpt is executed under tcsh
 
@@ -29,7 +39,12 @@
     echo 'pwd='`pwd` ' WRK_DIR='${WRK_DIR}  
 
     set daqN = $PATH_DAQ/$coreN.daq
-    set tagsN = $PATH_TAG/$coreN.tags.root
+    set mtags = <moretagsMode>
+    if ( "$mtags" == "0" ) then
+       set tagsN = $PATH_TAG/$coreN.tags.root
+    else
+       set tagsN = $PATH_TAG/$coreN.moretags.root
+    endif
     set fzdN =  $coreN.fzd
     set r4sLogFile = ${coreN}.r4s_${fSet}.log
 
@@ -77,7 +92,6 @@
     set NCHOS = sl64
     set SCHOS = 64
     set DECHO = 1
-    #set SCRATCH = $SCRATCH/out-star1
     setenv GROUP_DIR /common/star/star${SCHOS}/group/
     source $GROUP_DIR/star_cshrc.csh    
      
@@ -114,6 +128,20 @@
       ln -s ${WRK_DIR}/Input  $sandBox
     endif
     echo step into sandbox 
+
+    set localDB=<localDB>
+    if ( "$localDB" == "1" ) then
+    echo "  DB  DB  DB  DB    DB  DB  DB  DB    DB  DB  DB  DB  --- check start"
+    echo get IP of local DB to verify it is accessible
+    cat $DB_SERVER_LOCAL_CONFIG
+    set dbIP = `grep "Host name=" $DB_SERVER_LOCAL_CONFIG | cut -f2 -d\"`
+    echo star-db-IP=$dbIP  tables seen by st_db_maker
+    mysql  --socket=/mysqlVault/mysql.sock -h$dbIP -e 'show databases'
+    echo check if loadbalancer sees  processlist
+    mysql -u loadbalancer -P3306 -plbdb -h $dbIP -e 'show processlist';
+    echo "  DB  DB  DB  DB    DB  DB  DB  DB    DB  DB  DB  DB  --- check end"
+    endif
+  
     cd $sandBox
     pwd
     cons
@@ -124,13 +152,38 @@
     # make sure local .cxx was copied to wrk-dir and compiled correctly in advance 
     echo start embedding for $NUM_EVE events  on $coreN r4sLogFile=$r4sLogFile
     echo full r4s log  $sandBox/$r4sLogFile
+    if ( -f $r4sLogFile ) then
+	 rm -f $r4sLogFile
+    endif
+    touch $r4sLogFile
+
+    # setup and executing simulator
+    set simumode = <simulatorMode>
+    if ( "$simumode" != "0" ) then
+	 set daqevents=<daqEvents>
+	 set kumac=<kumacFile>
+	 set fzdFile=$fzdN
+	 set random=`<seed>`
+	 set seed=`echo $random | awk '{print $1}'`
+	 set ptmin=<ptmin>
+	 set ptmax=<ptmax>
+	 set nevents=`grep $coreN $daqevents | awk '{print $2}'`
+	 echo nevents = $nevents, seed = $seed, kumac = $kumac, fzdFile=$fzdFile, ptmin = $ptmin, ptmax = $ptmax >>& $r4sLogFile
+	 if ( $nevents > $NUM_EVE ) then
+	    $EXEC_NAME -b -q $kumac\($NUM_EVE,$seed,\"$fzdFile\",\"$tagsN\",<mult>,<geantPID>,<ptmin>,<ptmax>,<ymin>,<ymax>\) >>& $r4sLogFile
+	 else
+	    $EXEC_NAME -b -q $kumac\($nevents,$seed,\"$fzdFile\",\"$tagsN\",<mult>,<geantPID>,<ptmin>,<ptmax>,<ymin>,<ymax>\) >>& $r4sLogFile
+	 endif
+    endif
+    # parsing the mixer name
+    set MIXER_NAME=`basename <mixerScript> .C`
 
     date
-    time $EXEC_NAME -b <<EOF >& $r4sLogFile
+    time $EXEC_NAME -b <<EOF >>& $r4sLogFile
     std::vector<Int_t> triggers;
 <triggers_push_back>
     .L <mixerScript>
-     bfcMixer_Tpx($NUM_EVE, "$daqN", "$tagsN",<ptmin>, <ptmax>, <ymin>, <ymax>,  -<zVertMax>, <zVertMax>, <vrcut>, <geantPID>, <mult> , triggers, "<prodName>", "<ptMode>", 0, "$fzdN");
+     $MIXER_NAME($NUM_EVE, "$daqN", "$tagsN",<ptmin>, <ptmax>, <ymin>, <ymax>,  -<zVertMax>, <zVertMax>, <vrcut>, <geantPID>, <mult> , triggers, "<prodName>", "<ptMode>", $simumode, "$fzdN");
     .q
 EOF
 
