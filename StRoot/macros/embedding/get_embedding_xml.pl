@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.35 2017/12/06 06:54:39 zhux Exp $
+# $Id: get_embedding_xml.pl,v 1.36 2018/09/26 03:55:51 zhux Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.36  2018/09/26 03:55:51  zhux
+# adapted to HFT embedding
+#
 # Revision 1.35  2017/12/06 06:54:39  zhux
 # open read permission for log file.
 #
@@ -118,6 +121,8 @@ my $multiplicity  = 1 ;                                             # Default mu
 my $particleName  = "PiPlus" ;                                      # Default particle name (is pi+)
 my $prodName      = $production ;                                   # Default prodName (4th last argument in the bfcMixer)
 my $simulatorMode = 0 ;                                             # Default mode (OFF) for using starsim (no StPrepEmbedding) 			
+my $zerobiasMode  = 0 ;                                             # Default mode (OFF) for using as many zerobias daq events as possible, set $EVENTS_START randomly in the xml file.
+my $moretagsMode  = 0 ;                                             # Default mode (OFF) for using moretags file as input tags
 my $kumacFile     = "StRoot/macros/embedding/pythiaTuneA_template.kumac"; # Kumac file for starsim 			
 my $seed          = "StRoot/macros/embedding/get_random_seed";      # Random seed generator for starsim		
 my $daqEvents     = "$staroflDir/embedding/$production";            # File list for starsim with daq files and number of events for each file		
@@ -172,7 +177,9 @@ GetOptions (
     'ymax=f' => \$ymax,                    # Maximum rapidity cut
     'zvertex=f' => \$zvertexCut,           # Set z-vertex cut
     'simulator=i' => \$simulatorMode,      # Set Simulator mode	
-    'kumacfile=s' => \$kumacFile,          # Set Simulator input	
+    'zerobias=i' => \$zerobiasMode,        # Set Simulator/zerobias mode	
+    'kumacfile=s' => \$kumacFile,          # Set Simulator input
+    'moretags=i' => \$moretagsMode,        # Set moretags mode
     'seed=s' => \$seed,                    # Set Simulator random seed generator
     'daqevents=s' => \$daqEvents,          # Set Simulator daq file and event number list
     'ptbin=i' => \$ptbin,                  # Set pt bin description in output directory	
@@ -416,7 +423,11 @@ print OUT "<!-- Start job -->\n";
 #----------------------------------------------------------------------------------------------------
 # Set tags file
 #----------------------------------------------------------------------------------------------------
-my $tagFile = "\$EMBEDTAGDIR/$fileBaseNameXml.tags.root"; #Define tag file
+my $tagname = "tags" ;
+if ( $moretagsMode == 1) {
+   $tagname = "moretags";
+}
+my $tagFile = "\$EMBEDTAGDIR/$fileBaseNameXml.$tagname.root"; #Define tag file
 printDebug("Set tags file: $tagFile");
 
 #----------------------------------------------------------------------------------------------------
@@ -441,17 +452,43 @@ if ( $simulatorMode == 1 ) {
 #	my($seedBaseFileName, $seedBaseDirectory) = fileparse($seed);
 #	my($daqEventsBaseFileName, $daqEventsSeedBaseDirectory) = fileparse($daqEvents);
 #	print OUT "set daqEventsBaseFileName=$daqEventsBaseFileName\n";
-	print OUT "set daqevents=$daqEvents\n";
+	print OUT "set daqevents=$daqEvents &gt;&gt;&amp; \${LOGFILE}\n";
 #	print OUT "set kumac=$kumacBaseFileName\n";
-	print OUT "set kumac=$kumacFile\n";
-	print OUT "set fzdFile=$fzdFile\n";
+	print OUT "set kumac=$kumacFile &gt;&gt;&amp; \${LOGFILE}\n";
+	print OUT "set fzdFile=$fzdFile &gt;&gt;&amp; \${LOGFILE}\n";
 # print OUT "set random=`$seedBaseFileName`\n";
-	print OUT "set random=`$seed`\n";
-	print OUT "set ptmin=$ptmin\n";
-	print OUT "set ptmax=$ptmax\n";
-	print OUT "set nevents=`grep \$FILEBASENAME \$daqevents | awk '{print \$2}'`\n";
-	print OUT "echo nevents = \$nevents, random = \$random, kumac = \$kumac, fzdFile=\$fzdFile, ptmin = \$ptmin, ptmax = \$ptmax\n";
-	print OUT "starsim -w 0 -b \$kumac \$fzdFile \$random \$nevents \$ptmin	\$ptmax\n\n";
+	print OUT "set random=`$seed` &gt;&gt;&amp; \${LOGFILE}\n";
+	print OUT "set seed=`echo \$random | awk '{print \$1}'` &gt;&gt;&amp; \${LOGFILE}\n";
+	print OUT "set ptmin=$ptmin &gt;&gt;&amp; \${LOGFILE}\n";
+	print OUT "set ptmax=$ptmax &gt;&gt;&amp; \${LOGFILE}\n";
+	print OUT "set nevents=`grep \$FILEBASENAME \$daqevents | awk '{print \$2}'` &gt;&gt;&amp; \${LOGFILE}\n";
+	print OUT "echo nevents = \$nevents, seed = \$seed, kumac = \$kumac, fzdFile=\$fzdFile, ptmin = \$ptmin, ptmax = \$ptmax &gt;&gt;&amp; \${LOGFILE}\n";
+
+#	print OUT "starsim -w 0 -b \$kumac \$fzdFile \$random \$nevents \$ptmin	\$ptmax\n\n";
+
+#for HFT+HIJING+ZB embedding only!
+	if ( $zerobiasMode == 1 ) {
+	print OUT "\n";
+	print OUT "echo DAQ FILE has \$nevents events &gt;&gt;&amp; \${LOGFILE}\n";
+	print OUT "echo We need $nevents &gt;&gt;&amp; \${LOGFILE}\n";
+	print OUT "if ( \$nevents > $nevents ) then \n";
+	print OUT "  set nmax = `echo \"\$nevents-$nevents-1\" | bc` &gt;&gt;&amp; \${LOGFILE}\n";
+	print OUT "  set first = `shuf -i 1-\$nmax -n 1` &gt;&gt;&amp; \${LOGFILE}\n";
+	print OUT "  set last  = `echo \"\${first}+$nevents\" | bc` &gt;&gt;&amp; \${LOGFILE}\n";
+	print OUT "  echo We begin at \${first} and end at \${last} &gt;&gt;&amp; \${LOGFILE}\n";
+	print OUT "else\n";
+	print OUT "  set first = 1 &gt;&gt;&amp; \${LOGFILE}\n";
+	print OUT "endif\n";
+	print OUT "setenv EVENTS_START \$first &gt;&gt;&amp; \${LOGFILE}\n";
+	print OUT "\n";
+      }
+
+	print OUT "if ( \$nevents > $nevents ) then \n";
+	print OUT "  root4star -b -q \$kumac\\\($nevents,\$seed,\\\"\$fzdFile\\\",\\\"$tagFile\\\",$multiplicity,$pid,$ptmin,$ptmax,$ymin,$ymax\\\) &gt;&gt;&amp; \${LOGFILE}\n";
+	print OUT "else\n";
+	print OUT "  root4star -b -q \$kumac\\\(\$nevents,\$seed,\\\"\$fzdFile\\\",\\\"$tagFile\\\",$multiplicity,$pid,$ptmin,$ptmax,$ymin,$ymax\\\) &gt;&gt;&amp; \${LOGFILE}\n";
+	print OUT "endif\n";
+	print OUT "\n";
 }
 
 # Determine trigger string
@@ -577,9 +614,9 @@ print OUT "<ResourceUsage>\n";
 print OUT "<Times>\n";
 print OUT "<MaxWallTime>35</MaxWallTime>\n";
 print OUT "</Times>\n";
-print OUT "<Memory>\n";
-print OUT "<MinMemory>3700</MinMemory>\n";
-print OUT "</Memory>\n";
+#print OUT "<Memory>\n";
+#print OUT "<MinMemory>3700</MinMemory>\n";
+#print OUT "</Memory>\n";
 print OUT "</ResourceUsage>\n";
 print OUT "\n";
 print OUT "<!-- Put any locally-compiled stuffs into a sand-box -->\n";
@@ -634,7 +671,7 @@ if($local){
   }
   printDebug("Found one daq file: $daqOneFile");
 
-  my $tagsBaseName = `basename $daqOneFile | sed 's/\\.daq/\\.tags\\.root/g'`;
+  my $tagsBaseName = `basename $daqOneFile | sed 's/\\.daq/\\.$tagname\\.root/g'`;
   chomp($tagsBaseName);
   my $tagsOneFile  = "$tagsDirectory/$tagsBaseName";
 
@@ -682,13 +719,17 @@ if($local){
 		print LOCAL "set daqevents=$daqEvents\n";
 #		print LOCAL "set random=`$seedBaseFileName`\n";
 		print LOCAL "set random=`$seed`\n";
+		print LOCAL "set seed=`echo \$random | awk '{print \$1}'`\n";
 		print LOCAL "set ptmin=$ptmin\n";
 		print LOCAL "set ptmax=$ptmax\n";
 		print LOCAL "set nevents=`grep \'$daqOneFileBaseName\' \$daqevents | awk '{print \$2}'`\n";
-		print LOCAL "echo nevents = \$nevents, random = \$random, kumac = \$kumac, fzd=\$fzd, ptmin = \$ptmin, ptmax = \$ptmax\n";
+		print LOCAL "echo nevents = \$nevents, seed = \$seed, kumac = \$kumac, fzd=\$fzd, ptmin = \$ptmin, ptmax = \$ptmax\n";
 		print LOCAL "\n";
-		print LOCAL "echo Running \"starsim -w 0 -b \$kumac \$fzd \$random \$nevents \$ptmin \$ptmax\"\n";
-		print LOCAL "starsim -w 0 -b \$kumac \$fzd \$random \$nevents \$ptmin	\$ptmax\n\n";
+
+#		print LOCAL "echo Running \"starsim -w 0 -b \$kumac \$fzd \$random \$nevents \$ptmin \$ptmax\"\n";
+#		print LOCAL "starsim -w 0 -b \$kumac \$fzd \$random \$nevents \$ptmin	\$ptmax\n\n";
+		print LOCAL "root4star -b -q \$kumac\\\(10,\$seed,\\\"\$fzd\\\",\\\"\$tags\\\",$multiplicity,$pid,$ptmin,$ptmax,$ymin,$ymax\\\)\n";
+		print LOCAL "\n";
 	}
  	print LOCAL "echo 'Executing $execute_bfcMixer ...'\n";
  	print LOCAL "\n";
@@ -752,6 +793,12 @@ sub get_bfcMixer {
   elsif ( $bfcMixer =~ /.*Tpx.C/  ){
     # bfcMixers with PYTHIA flag option (Tpx only) (CBPowell)
     printDebug("Starndard (without SVT/SSD) bfcMixer (Tpx only)");
+
+    $execute_bfcMixer = "$bfcMixerFunction($nevents, \"$daqfile\", \"$tagsfile\", $ptmin, $ptmax, $ymin, $ymax, -$zvertexcut, $zvertexcut, $vrcut, $pid, $multiplicity, $trigger, \"$prodname\", \"$ptOption\", $simulator, \"$fzdfile\");";
+  }
+  elsif ( $bfcMixer =~ /.*Hft.C/  ){
+    # bfcMixers with PYTHIA flag option (Hft)
+    printDebug("Starndard (with PXL/IST/SST) bfcMixer (Hft)");
 
     $execute_bfcMixer = "$bfcMixerFunction($nevents, \"$daqfile\", \"$tagsfile\", $ptmin, $ptmax, $ymin, $ymax, -$zvertexcut, $zvertexcut, $vrcut, $pid, $multiplicity, $trigger, \"$prodname\", \"$ptOption\", $simulator, \"$fzdfile\");";
   }

@@ -5,12 +5,12 @@
 #SBATCH -c64 -C haswell # 123 GB RAM
 #-SBATCH -c48  # Edison, 59 GB RAM
 
-#-SBATCH --partition debug -t 00:29:00   -J starFarm-dbg
-#SBATCH  --partition regular -t <wallHour>:30:00   -J starFarm-reg
-#-SBATCH  --partition regular -t <wallHour>:30:00 --qos=premium   -J starFarm-prem
+#<debg_part>SBATCH --partition debug -t 00:29:00   -J starFarm-dbg
+#<regu_part>SBATCH  --partition regular -t <wallHour>:30:00   -J starFarm-reg
+#<prem_part>SBATCH  --partition regular -t <wallHour>:30:00 --qos=premium   -J starFarm-prem
 
 # pick the image you need
-#SBATCH --image=custom:pdsf-sl64-star:v8
+#SBATCH --image=custom:<shifter>
 
 #SBATCH -L SCRATCH   #note: specify license need for the file systems your job needs, such as SCRATCH,project
 
@@ -34,6 +34,11 @@ monQA=`pwd`/mon.farmer-$SLURM_JOB_ID
 
 echo this is my task list
 ls -l $myTaskList
+if [ ! -e  $myTaskList ] ;then
+     echo "starFarmer error : file $myTaskList does not exist!" 
+     exit 1
+fi
+nl  $myTaskList | tail -n3
 
 env | grep SLURM
 
@@ -46,7 +51,6 @@ if  [ $THREADS -gt $SLURM_CPUS_PER_TASK ];     then
     echo "taskFarmer must NOT run more tasks than threads, aborting "
     exit 21
 fi
-
 
 # prepare sandbox 
 wrkDir=$SCRATCH/starFarm-$SLURM_JOBID
@@ -64,6 +68,57 @@ export PATH=$PATH:$wrkDir
 
 # goto sandbox
 cd $wrkDir
+
+export localDB=<localDB>
+if [ "$localDB" == "1" ]; then
+echo "M - - - - -   local STAR DB deployment - - - - "`date`
+usrDbConfXml=dbLoadBalLocConf.xml
+myDbVault=$wrkDir/mysql51Vault
+srcDbVault=/global/projecta/projectdirs/starprod/db/starDB-master/latest
+echo DB-source $srcDbVault
+ls -l $srcDbVault/../
+
+export DBCONF_PATH=$wrkDir/$usrDbConfXml
+
+echo redirect to local DB  for STAR jobs
+# disable this 1 line to swithc back to public external STAR DB
+export DB_SERVER_LOCAL_CONFIG=$DBCONF_PATH
+
+echo "M conf=$DBCONF_PATH ,  copy DB clone ..."
+time cp -rp $srcDbVault/  $wrkDir/mysql51Vault
+cp  ./StRoot/macros/embedding/cori/$usrDbConfXml $wrkDir
+
+#0 echo tmp-hack for one-only local DB 
+#0 myDbVault=/global/project/projectdirs/mpccc/balewski/myStarDB/mysql51Vault-2018-02-22d3d
+
+NN=`hostname -f`
+echo   M-$NN before starting DB-server using  $myDbVault '  '`date`
+srun -N 1 -n 1 shifter --image=balewski/mysql51-balewski:c --volume=$myDbVault:/mysqlVault  ./StRoot/macros/embedding/cori/starLocalDb.sh  &
+
+
+# wait for DBserver start
+nSleep=5
+dbOK=0
+for i in `seq 1 20`; do
+    sleep $nSleep
+    echo  -n M-$NN  after-srun-db i=$i  sleep $nSleep "sec "
+    date
+    # check if the string was replaced --> DB runs
+    grep db_server_ip $DBCONF_PATH
+    if [ $? -ne 0  ]; then
+        echo "M-$NN  found DB-IP , proceed "
+        dbOK=1
+        break
+    fi
+done
+
+if [ $dbOK -eq 0  ]; then
+    echo "M-$NN  NOT found DB-IP , time out, i=$i, abort SLURM job"
+    exit
+fi
+
+echo "M - - - - -   local STAR DB deployment completed - - - -"
+fi
 
 echo   farmer  qa-utility start in background "  "`date`
 pwd

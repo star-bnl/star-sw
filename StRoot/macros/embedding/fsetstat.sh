@@ -23,11 +23,16 @@ fi
 
 if [[ $HOST =~ "cori" ]] ; then
    outp="$CSCRATCH/embedding"
-else
+elif [[ $HOST =~ "pdsf" ]] ; then
    outp="/global/projecta/projectdirs/starprod/embedding"
+elif [[ $HOST =~ "rcas" ]] ; then
+   outp="/star/embed/embedding"
+else
+   echo "the marco is only applicable for Cori, PDSF, RACF!"
+   exit
 fi
 
-part=`grep -a "\-particle" $PWD/preparexmlslr.sh | awk -F"-particle |-mode" '{print $2}'`
+part=`grep -a "\-particle" $PWD/preparexmlslr.sh | awk '{print $2}'`
 particle=`echo $part`
 trg=`grep -a "\-trg" $PWD/preparexmlslr.sh | awk -F"-trg |-production" '{print $2}'`
 trgset=`echo $trg`
@@ -50,21 +55,39 @@ if [ ! -d "$fsetp" ] ; then
 fi
 echo "Fset# $ifset is found at $fsetp"
 echo "The directory size is "`du -sh $fsetp | awk '{print $1}'`
-echo "Now start to scan the log files..."
 
+if [[ $HOST =~ "rcas" ]] ; then
+   logp=/star/embed/log/${particle}_${ifset}_${reqid}/log
+   if [ ! -d "$logp" ] ; then
+	echo "CAUTION: Fset# $ifset directory can not be found in /star/embed/log!"
+	if [ $ifset -eq $(($end-1)) ] ; then
+	   echo ""
+	fi
+	continue
+   fi
+else
+   logp=$fsetp
+fi
+echo "Now start to scan the log files..."
 
 total=0
 count=0
 allevts=0
 storedevts=0
 
-for i in `find $fsetp/ -name "*.log.gz"`
+for i in `find $logp/ -name "*.log*"`
 do
 #echo $i
 if [ -f tmplog.txt ] ; then
    rm -f tmplog.txt
 fi
-gzip -cd $i | tail -n 1000 > tmplog.txt
+
+if [ "${i##*.}" = "gz" ] ; then
+   gzip -cd $i | tail -n 1000 > tmplog.txt
+else
+   cat $i | tail -n 1000 > tmplog.txt
+fi
+
 jtime=`grep -a "StChain::Embedding" tmplog.txt | awk -F '=' '{print $2}' | awk '{print $1}'`
 if [ -z $jtime ] ; then
    echo CAUTION: corrupted task found!

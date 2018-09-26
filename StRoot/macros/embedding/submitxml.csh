@@ -1,7 +1,7 @@
 #!/bin/csh
 
-if ( "$HOST" !~ "*pdsf*" ) then
-   echo "this code can only be used for PDSF!"
+if ( "$HOST" !~ "*pdsf*" && "$HOST" !~ "*rcas*" ) then
+   echo "this code can only be used for PDSF and RCF!"
    exit
 endif
 
