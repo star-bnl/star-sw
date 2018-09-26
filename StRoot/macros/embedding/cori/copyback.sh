@@ -38,7 +38,7 @@ fi
 cori="$CSCRATCH/embedding"
 pdsf="/global/projecta/projectdirs/starprod/embedding"
 
-part=`grep "\-particle" $PWD/preparexmlslr.sh | awk -F"-particle |-mode" '{print $2}'`
+part=`grep "\-particle" $PWD/preparexmlslr.sh | awk '{print $2}'`
 particle=`echo $part`
 trg=`grep "\-trg" $PWD/preparexmlslr.sh | awk -F"-trg |-production" '{print $2}'`
 trgset=`echo $trg`
