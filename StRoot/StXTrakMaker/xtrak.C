@@ -15,8 +15,7 @@ int KNN = 0;
 opt = "in,y2016,AgML,usexgeom,FieldOn,MakeEvent,Sti,NoSsdIt,NoSvtIt,";
 opt+= "Idst,BAna,l0,Tree,logger,genvtx,tpcDB,bbcSim,btofsim,mtdSim,tags,emcY2,EEfs,evout,";
 opt+= "-dstout,IdTruth,big,MiniMcMk";
-fil = "/star/simu/simu/perev/bug/data/rcf15001_0_100evts.event.root";
-
+fil = "/star/simu/simu/perev/StvKutta/OutDirSti/hijing_18_fieldon_ideal_sdt20160517_10evts.event.root";
 #endif
 //////////////////////////////////////////////////////////////////////////////
 bfc(-1,opt,fil);
