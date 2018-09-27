@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.36 2018/09/26 03:55:51 zhux Exp $
+# $Id: get_embedding_xml.pl,v 1.37 2018/09/27 12:36:34 zhux Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.37  2018/09/27 12:36:34  zhux
+# updated 'fromScratch' tag
+#
 # Revision 1.36  2018/09/26 03:55:51  zhux
 # adapted to HFT embedding
 #
@@ -595,8 +598,8 @@ printDebug("Locations of log/elog, daq files, csh/list and local sand-box ...");
 # Now, the directory for LOG files here is the temporary path to store the files.
 # Files will be moved a new path determined by production, particle name, request number and FSET
 print OUT "<!-- Define locations of ROOT files -->\n";
-print OUT "<output fromScratch=\"st*.root\" toURL=\"\$EMOUTPUT/\"/>\n";
-if ( $simulatorMode == 1 ) { print OUT "<output fromScratch=\"*.fzd\" toURL=\"\$EMOUTPUT/\"/>\n"; }
+print OUT "<output fromScratch=\"st_*.root\" toURL=\"\$EMOUTPUT/\"/>\n";
+if ( $simulatorMode == 1 ) { print OUT "<output fromScratch=\"st_*.fzd\" toURL=\"\$EMOUTPUT/\"/>\n"; }
 print OUT "\n";
 print OUT "<!-- Define locations of log/elog files -->\n";
 print OUT "<stdout URL=\"file:$tempLogDirectory/$jobIdXml.oldlog\"/>\n";
