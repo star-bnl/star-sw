@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.h,v 2.13 2018/09/27 20:03:33 ullrich Exp $
+ * $Id: StTpcRawData.h,v 2.14 2018/09/27 22:01:24 ullrich Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.h,v $
+ * Revision 2.14  2018/09/27 22:01:24  ullrich
+ * Added missing inheritance, SObject, for StDigitalPair
+ *
  * Revision 2.13  2018/09/27 20:03:33  ullrich
  * Added ClassDef for StDigitalPair
  *
@@ -61,7 +64,7 @@
 typedef std::vector<Short_t>  StVectorADC;
 typedef std::vector<UShort_t> StVectorIDT;
 
-class StDigitalPair {
+class StDigitalPair : public StObject {
 public:
     StDigitalPair(UShort_t time=0)      {mTime=time;}
     virtual ~StDigitalPair() {}
