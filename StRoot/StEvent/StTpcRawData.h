@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.h,v 2.12 2018/04/05 03:16:20 smirnovd Exp $
+ * $Id: StTpcRawData.h,v 2.13 2018/09/27 20:03:33 ullrich Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.h,v $
+ * Revision 2.13  2018/09/27 20:03:33  ullrich
+ * Added ClassDef for StDigitalPair
+ *
  * Revision 2.12  2018/04/05 03:16:20  smirnovd
  * Make StTpcDigitalSector compatible with iTPC
  *
@@ -75,6 +78,7 @@ private:
     UShort_t    mTime;
     StVectorADC mAdc;
     StVectorIDT mIdt; 
+    ClassDef(StDigitalPair,1)
 };
 
 typedef std::vector<StDigitalPair>           StDigitalTimeBins;
