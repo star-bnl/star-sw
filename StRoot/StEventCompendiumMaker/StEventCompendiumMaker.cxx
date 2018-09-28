@@ -1,5 +1,5 @@
 //
-// $Id: StEventCompendiumMaker.cxx,v 1.4 2013/04/03 21:58:39 fisyak Exp $
+// $Id: StEventCompendiumMaker.cxx,v 1.5 2018/09/28 20:17:35 fisyak Exp $
 //
 //#include <iostream>
 #include "Stiostream.h"
@@ -16,7 +16,7 @@
 #include "StTrackGeometry.h"
 #include "StPrimaryVertex.h" 
 
-static const char rcsid[] = "$Id: StEventCompendiumMaker.cxx,v 1.4 2013/04/03 21:58:39 fisyak Exp $";
+static const char rcsid[] = "$Id: StEventCompendiumMaker.cxx,v 1.5 2018/09/28 20:17:35 fisyak Exp $";
 ClassImp(StEventCompendiumMaker)
 //________________________________________________________________________________
 Int_t StEventCompendiumMaker::Make(){
