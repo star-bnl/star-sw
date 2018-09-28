@@ -27,12 +27,6 @@ Int_t StEventCompendiumMaker::Make(){
 	return kStWarn;
     }
     fillEventSummary(rEvent);
-    // the magnetic field needs to be obtained from the database.
-    // this are the magic words...
-    St_MagFactorC* mMagTable = St_MagFactorC::instance();
-    double scalef = mMagTable->ScaleFactor();
-    double bfieldz = scalef * 4.97952;  // (value returned from gufld at 0,0,0 for FullField)
-    rEvent->summary()->setMagneticField(bfieldz);
     if (Debug() > 1) {
 	rEvent->summary()->Dump();
     }
