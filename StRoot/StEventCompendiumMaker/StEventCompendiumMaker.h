@@ -1,5 +1,5 @@
 /*!
-// $Id: StEventCompendiumMaker.h,v 1.3 2012/05/07 14:43:47 fisyak Exp $
+// $Id: StEventCompendiumMaker.h,v 1.4 2018/09/28 20:17:35 fisyak Exp $
 //
 // \class StEventCompendiumMaker
 // \brief Class for Making a Compendium of the information in StEvent.
@@ -35,7 +35,7 @@ class StEventCompendiumMaker : public StMaker {
   virtual  ~StEventCompendiumMaker() {}
   Int_t  Make();
   virtual const char *GetCVS() const {
-    static const char cvs[]= "Tag $Name:  $ $Id: StEventCompendiumMaker.h,v 1.3 2012/05/07 14:43:47 fisyak Exp $ built __DATE__ __TIME__" ; 
+    static const char cvs[]= "Tag $Name:  $ $Id: StEventCompendiumMaker.h,v 1.4 2018/09/28 20:17:35 fisyak Exp $ built " __DATE__ " " __TIME__ ;
     return cvs;
   }
  private:
