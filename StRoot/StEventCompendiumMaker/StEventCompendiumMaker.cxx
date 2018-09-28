@@ -1,5 +1,5 @@
 //
-// $Id: StEventCompendiumMaker.cxx,v 1.4 2013/04/03 21:58:39 fisyak Exp $
+// $Id: StEventCompendiumMaker.cxx,v 1.5 2018/09/28 20:17:35 fisyak Exp $
 //
 //#include <iostream>
 #include "Stiostream.h"
@@ -16,7 +16,7 @@
 #include "StTrackGeometry.h"
 #include "StPrimaryVertex.h" 
 
-static const char rcsid[] = "$Id: StEventCompendiumMaker.cxx,v 1.4 2013/04/03 21:58:39 fisyak Exp $";
+static const char rcsid[] = "$Id: StEventCompendiumMaker.cxx,v 1.5 2018/09/28 20:17:35 fisyak Exp $";
 ClassImp(StEventCompendiumMaker)
 //________________________________________________________________________________
 Int_t StEventCompendiumMaker::Make(){
@@ -27,12 +27,6 @@ Int_t StEventCompendiumMaker::Make(){
 	return kStWarn;
     }
     fillEventSummary(rEvent);
-    // the magnetic field needs to be obtained from the database.
-    // this are the magic words...
-    St_MagFactorC* mMagTable = St_MagFactorC::instance();
-    double scalef = mMagTable->ScaleFactor();
-    double bfieldz = scalef * 4.97952;  // (value returned from gufld at 0,0,0 for FullField)
-    rEvent->summary()->setMagneticField(bfieldz);
     if (Debug() > 1) {
 	rEvent->summary()->Dump();
     }
@@ -51,7 +45,7 @@ void StEventCompendiumMaker::fillEventSummary(StEvent* e) {
     // Fill pt, eta & phi histograms  */
     const StSPtrVecTrackNode& nodes = e->trackNodes();
     for (size_t itrk=0; itrk < nodes.size(); itrk++) {/* begin global track loop */
-	StTrack* gtrk = nodes[itrk]->track(global);
+      StTrack* gtrk = (StTrack *)nodes[itrk]->track(global);
 	if (! gtrk) continue;
 	// Calculate track multiplicities 
 	
@@ -60,7 +54,7 @@ void StEventCompendiumMaker::fillEventSummary(StEvent* e) {
 	glb_trk_good++;
 	
 	// good primary tracks
-	StTrack* ptrk = nodes[itrk]->track(primary);
+	StTrack* ptrk = (StTrack *) nodes[itrk]->track(primary);
 	if(ptrk && ptrk->flag()>0) prim_trk_good++;
 	
 	// count plus & minus
