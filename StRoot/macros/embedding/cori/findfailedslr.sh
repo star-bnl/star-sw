@@ -22,10 +22,10 @@ echo parsing the request information from the configuration file \"preparexmlslr
 
 trg=`grep "\-trg" $PWD/preparexmlslr.sh | awk -F"-trg |-production" '{print $2}'`
 trgset=`echo $trg`
-part=`grep "\-particle" $PWD/preparexmlslr.sh | awk -F"-particle |-mode" '{print $2}'`
+part=`grep "\-particle" $PWD/preparexmlslr.sh | awk '{print $2}'`
 particle=`echo $part`
 reqid=`grep "\-r" $PWD/preparexmlslr.sh | awk '{print $2}'`
-daqdir=`grep "\-daq" $PWD/preparexmlslr.sh | awk '{print $2}'`
+daqdir=`grep "\-daq\ " $PWD/preparexmlslr.sh | awk '{print $2}'`
 ndaq=`find $daqdir/*.daq | wc -l`
 
 echo trgset: $trgset

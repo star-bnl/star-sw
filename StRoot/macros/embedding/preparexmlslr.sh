@@ -16,25 +16,20 @@ if [[ $HOST =~ "cori" ]] ; then
  ln -s -f StRoot/macros/embedding/fsetstat.sh
  ln -s StRoot/macros/embedding/cori/findfailedslr.sh
  ln -s StRoot/macros/embedding/cori/copyback.sh
-#uncomment the following line to use STAR DB server at NERSC
  script="python StRoot/macros/embedding/cori/prepEmbedTaskList.py"
-#uncomment the following line to setup and use local STAR DB server on the master node
- #script="python StRoot/macros/embedding/cori/prepEmbedTaskList2.py"
-
-#EDIT the following three options before use this script at Cori farm
+ #EDIT the following three options before use this script at Cori farm
  fset="-fSetRange 101-109"
  cpuh="-fSetCPUHours 1321"
- outp="-outPath /global/cscratch1/sd/$USER/embedding"
-
+ #choose the partition for this job: 0 - debug; 1 - production; 2 - premium production
+ part="-partition 1"
 else
- ln -s StRoot/macros/embedding/submitxml.csh
- ln -s StRoot/macros/embedding/findfailedxml.sh
+ if [[ $HOST =~ "rcas" ]] ; then
+    facisuff="_rcf"
+ fi
+ ln -s -f StRoot/macros/embedding/submitxml.csh
+ ln -s -f StRoot/macros/embedding/findfailedxml.sh
  ln -s -f StRoot/macros/embedding/fsetstat.sh
- script="perl StRoot/macros/embedding/get_embedding_xml.pl"
- #script="perl StRoot/macros/embedding/get_embedding_xml_rcf.pl"
- fset=""
- cpuh=""
- outp=""
+ script="perl StRoot/macros/embedding/get_embedding_xml${facisuff}.pl"
 fi
 
 #EDIT the following options according to the embedding request page
@@ -42,7 +37,8 @@ $script \
  -trg AuAu200_production_2011 -production P11id -lib SL11d_embed \
  -mixer StRoot/macros/embedding/bfcMixer_Tpx.C -prodname P11idAuAu200 \
  -r 20172901 \
- -geantid 10018 -particle Lambda -mode FlatPt \
+ -particle Lambda \
+ -geantid 10018 -mode FlatPt \
  -trigger 350003 -trigger 350013 -trigger 350023 -trigger 350033 -trigger 350043 \
  -z 30.0 -vrcut 2.0 \
  -ymin -0.5 -ymax 0.5 -ptmin 0 -ptmax 5.0 \
@@ -52,5 +48,4 @@ $script \
  -tag /global/projecta/projectdirs/starprod/tags/2011_auau200 \
  $fset \
  $cpuh \
- $outp
-
+ $part

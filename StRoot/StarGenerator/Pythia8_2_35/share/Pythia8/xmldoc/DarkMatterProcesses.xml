@@ -1,0 +1,128 @@
+<chapter name="Dark Matter Processes"> 
+ 
+<h2>Dark Matter Processes</h2> 
+ 
+This page contains the production of Dirac fermion Dark Matter via new 
+<ei>s</ei>-channel mediators. An example how these processes can be run 
+is found in <code>main75.cc</code>. 
+ 
+<h3>Scalar Mediator </h3> 
+ 
+<flag name="DM:gg2S2XX" default="off"> 
+Scattering <ei>g g &rarr; S &rarr; X Xbar</ei>. 
+Code 6001. S is assumed to be on-shell. 
+</flag> 
+ 
+<flag name="DM:gg2S2XXj" default="off"> 
+Scattering <ei>g g &rarr;S &rarr; X Xbar j</ei>. 
+Code 6002. S is assumed to be on-shell. (Not validated) 
+</flag> 
+ 
+<p> 
+Fermion couplings to scalar S are assumed to be proportional to mass 
+of the fermion and couplings are the factor multiplying SM Higgs 
+coupling (i.e. sin(mixing) in case of portal models). 
+</p> 
+ 
+<parm name="Sdm:vf" default="0.1"> 
+Scalar coupling of SM fermions. 
+</parm> 
+ <parm name="Sdm:af" default="0"> 
+Pseudo-scalar coupling of SM fermions. 
+</parm> 
+<parm name="Sdm:vX" default="1.0"> 
+Scalar coupling of DM fermion. 
+</parm> 
+<parm name="Sdm:aX" default="0"> 
+Pseudo-scalar coupling of DM fermion. 
+</parm> 
+ 
+<h3>Vector Mediator <ei>Z'</ei></h3> 
+ 
+The Vector mediator model assumes a simplified U(1) model with couplings 
+to fermionic Dark Matter.  Both vector and axial couplings are possible. 
+ 
+<flag name="DM:ffbar2Zp2XX" default="off"> 
+Scattering <ei>f fbar &rarr;Z'^0 &rarr; X Xbar</ei>. 
+Code 6001. <ei>Z'</ei> is assumed to be on-shell. 
+</flag> 
+ 
+<flag name="DM:ffbar2ZpH" default="off"> 
+Scattering <ei>f fbar &rarr;Z'^0 H </ei>. 
+Code 6004. <ei>Z'</ei> is assumed to be on-shell. The coupling of the 
+<ei>Z'</ei> to the SM Higgs is given by the parameter <code>Zp:coupH</code>. 
+Interference with <ei>gamma/Z</ei> currently not implemented, therefore 
+this is only suitable when <ei>Z' &rarr; X Xbar</ei>.  This can be 
+ensured using <br/> 
+55:onMode = off <br/> 
+55:onIfAny = 52 
+</flag> 
+ 
+<flag name="DM:ffbar2Zp2XXj" default="off"> 
+Scattering <ei>f fbar &rarr;Z'^0 &rarr; X Xbar</ei>. 
+Code 6002. <ei>Z'</ei> is assumed to be on-shell. (Not validated) 
+</flag> 
+ 
+<flag name="DM:qg2Zp2XXj" default="off"> 
+Scattering <ei>f fbar &rarr;Z'^0 &rarr; X Xbar</ei>. 
+Code 6003. <ei>Z'</ei> is assumed to be on-shell. (Not validated) 
+</flag> 
+ 
+<p> 
+The couplings of the <ei>Z'^0</ei> to quarks and leptons are be 
+assumed universal, i.e. generation-independent.  The choice of fixed 
+axial and vector couplings implies a resonance width that increases 
+linearly with the <ei>Z'</ei> mass. 
+</p> 
+ 
+<p> 
+Here are the couplings: 
+</p> 
+ 
+<parm name="Zp:gZp" default="0.1"> 
+Gauge coupling of new U(1). 
+</parm> 
+ 
+<parm name="Zp:coupH" default="0.1"> 
+Coupling to SM higgs. 
+</parm> 
+ 
+ 
+<parm name="Zp:vu" default="1"> 
+Vector coupling of up-type quarks. 
+</parm> 
+ <parm name="Zp:au" default="0"> 
+Axial coupling of up-type quarks. 
+</parm> 
+ 
+<parm name="Zp:vd" default="1"> 
+Vector coupling of down-type quarks. 
+</parm> 
+ <parm name="Zp:ad" default="0"> 
+Axial coupling of down-type quarks. 
+</parm> 
+ 
+<parm name="Zp:vl" default="1"> 
+Vector coupling of charged leptons. 
+</parm> 
+<parm name="Zp:al" default="0"> 
+Axial coupling of charged leptons. 
+</parm> 
+ 
+<parm name="Zp:vv" default="1"> 
+Vector coupling of neutrinos. 
+</parm> 
+<parm name="Zp:av" default="0"> 
+Axial coupling of neutrinos. 
+</parm> 
+ 
+<parm name="Zp:vX" default="1"> 
+Vector coupling of DM fermion. 
+</parm> 
+<parm name="Zp:aX" default="0"> 
+Axial coupling of DM fermion. 
+</parm> 
+ 
+</chapter> 
+ 
+<!-- Copyright (C) 2018 Torbjorn Sjostrand --> 
