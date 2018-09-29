@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.h,v 2.11 2018/02/18 23:18:45 perev Exp $
+ * $Id: StTpcRawData.h,v 2.14 2018/09/27 22:01:24 ullrich Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,15 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.h,v $
+ * Revision 2.14  2018/09/27 22:01:24  ullrich
+ * Added missing inheritance, SObject, for StDigitalPair
+ *
+ * Revision 2.13  2018/09/27 20:03:33  ullrich
+ * Added ClassDef for StDigitalPair
+ *
+ * Revision 2.12  2018/04/05 03:16:20  smirnovd
+ * Make StTpcDigitalSector compatible with iTPC
+ *
  * Revision 2.11  2018/02/18 23:18:45  perev
  * Remove iTPC related update
  *
