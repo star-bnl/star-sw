@@ -40,7 +40,7 @@ $script \
  -particle Lambda \
  -geantid 10018 -mode FlatPt \
  -trigger 350003 -trigger 350013 -trigger 350023 -trigger 350033 -trigger 350043 \
- -z 30.0 -vrcut 2.0 \
+ -zvertex 30.0 -vrcut 2.0 \
  -ymin -0.5 -ymax 0.5 -ptmin 0 -ptmax 5.0 \
  -mult 0.05 \
  -local \
