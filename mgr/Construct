@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.183 2018/10/01 17:50:40 jeromel Exp $
+# $Id: Construct,v 1.184 2018/10/01 22:56:44 jeromel Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -373,9 +373,9 @@ if ($STAR_SYS !~ /x86_darwin/) {
 #       A comment character before !($USE_64BITS and $USE_64BITS != "0") would reenable
 #       compilation but other parts of this code excludes more directories.
 #
-if ( 1==0 ){  # disable the exclusion 
-    if ( !($USE_64BITS and $USE_64BITS != "0") && 
-	 $STAR_SYS !~ /x86_darwin/){
+#if ( 1==0 ){  # disable the exclusion 
+#    if ( !($USE_64BITS and $USE_64BITS != "0") &&
+     if (  $STAR_SYS !~ /x86_darwin/){
 	push @sysdirlist, "asps/Simulation/geant321";
 	push @sysdirlist, "asps/Simulation/gcalor";
 	push @sysdirlist, "asps/rexe";
@@ -387,7 +387,7 @@ if ( 1==0 ){  # disable the exclusion
 	    push @sysdirlist, "OnlTools/Jevp";
 	}
     }
-}
+#}
 
 #print "sysdirlist = @sysdirlist \n subdirs = @subdirs\n";
 
