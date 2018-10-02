@@ -49,7 +49,7 @@ class Lxgbx {
 	memset(evpCtrs.cnt, 0, sizeof(evpCtrs.cnt));
       
 	// do configuration
-	evpCfg.policy = xml->getParamI("trg_run.EvpPolicy");
+	evpCfg.policy = xml->getParamI("trg_setup.extra.evp_policy");
 
 	for(int i=0;i<EVP_GROUP_MAX;i++) {
  
