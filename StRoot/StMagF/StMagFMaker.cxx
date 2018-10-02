@@ -100,12 +100,13 @@ Int_t StMagFMaker::InitRun(Int_t RunNo)
     if (fabs(fScale) < 1e-3) fScale = 1e-3;
     StarMagField::Instance()->SetFactor(fScale);
   }
+#ifdef __RotaateMagField__
   St_Survey *tableSet = (St_Survey *) GetDataBase("StMagF/MagFieldRotation");
   if (tableSet) {
     Survey_st *row = tableSet->GetTable();
     StarMagField::Instance()->SetStarMagFieldRotation(&row->r00);
   }
-
+#endif
   double x[3]={0},b[3];
   StarMagField::Instance()->BField(x,b);
   Info("InitRun","Mag Field(0,0,0) = %g",b[2]);

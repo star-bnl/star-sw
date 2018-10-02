@@ -115,7 +115,9 @@ class StarMagField
   virtual void    ReadField ( ) ;
   static StarMagField *fgInstance;
 #if defined (__ROOT__)
+#ifdef __RotaateMagField__
   TGeoRotation fStarMagFieldRotation;
+#endif
   TH2F *fBzdZCorrection; // correction due to endcap calomiter
   TH2F *fBrdZCorrection; // correction due to endcap calomiter
 #endif 
@@ -188,10 +190,12 @@ class StarMagField
   virtual Float_t GetRescale() {return fRescale;}
   virtual Bool_t  IsLocked()   {return fLock;}
   virtual void    Print(Option_t* opt="") const;
-#ifdef __ROOT__
+#if defined(__ROOT__)
+#ifdef __RotaateMagField__
   void  SetStarMagFieldRotation(TGeoRotation &rot);
   void  SetStarMagFieldRotation(Double_t *rot);
   const TGeoRotation &StarMagFieldRotation() {return *&fStarMagFieldRotation;}
+#endif
   ClassDef(StarMagField,1)    // Base class for all STAR MagField
 #endif
 };

@@ -386,7 +386,7 @@ static const BDAT_t BDAT[nZext] = { // calculated STAR field
     { 24.8,  23.8,  21.0,  16.8,  11.6,   6.1,   0.9,  -3.5,  -6.7 } , // Axial
     {  0.0,   5.2,   9.8,  13.3,  15.2,  15.4,  14.1,  11.4,   7.9 } },// Radial
 };
-#ifdef __ROOT__
+#if defined(__ROOT__) && defined(__RotaateMagField__)
 //________________________________________________________________________________
 void StarMagField::SetStarMagFieldRotation(TGeoRotation &rot) {
   fStarMagFieldRotation = rot;
@@ -432,9 +432,9 @@ StarMagField::StarMagField ( EBField map, Float_t factor,
     if (fLock) printf("StarMagField is locked, no modification from DB will be accepted\n");
   }
   ReadField() ;                       // Read the Magnetic
-#ifdef __ROOT__
+#if defined(__ROOT__) && defined(__RotateMagField__)
   fStarMagFieldRotation = TGeoRotation("StarMagFieldRotation");
-#endif /* __ROOT__ */
+#endif /* __ROOT__ &&  __RotateMagField__*/
 }
 //________________________________________
 /// B field in Cartesian coordinates - 2D field (ie. Phi symmetric)
@@ -484,13 +484,13 @@ void StarMagField::BField( const Float_t x[], Float_t B[] )
       BL[0] = Br_value * (x[0]/r) ;
       BL[1] = Br_value * (x[1]/r) ;
     }
-#ifdef __ROOT__
+#if defined(__ROOT__) && defined(__RotateMagField__)
     Double_t BG[3];
     fStarMagFieldRotation.LocalToMaster(BL,BG);
     for (Int_t i = 0; i < 3; i++) B[i] = BG[i];
-#else  /* ! __ROOT__ */
+#else  /* ! __ROOT__ || !__RotateMagField__ */
     for (Int_t i = 0; i < 3; i++) B[i] = BL[i];
-#endif /* __ROOT__ */
+#endif /* __ROOT__ && __RotateMagField__ */
     return;
   }
 
@@ -585,7 +585,7 @@ void StarMagField::B3DField( const Float_t x[], Float_t B[] )
       B[2] = Bz_value ;
     }
   Double_t BL[3] = {B[0], B[1], B[2]};
-#ifdef __ROOT__
+#if defined(__ROOT__) && defined(__RotateMagField__)
   Double_t BG[3];
   fStarMagFieldRotation.LocalToMaster(BL,BG);
   for (Int_t i = 0; i < 3; i++) B[i] = BG[i];
