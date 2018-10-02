@@ -31,7 +31,7 @@ void SetVtx(const float vtx[3]) { memcpy(mVtx,vtx,sizeof(mVtx));mIsVtx=1;}
 
 int  Reject(const float x[3],const void* hp);	// 0  :x accepted
 					// >0 :x rejected
-					//-1 =x     accepted and lims updated
+					// -1 =x     accepted and lims updated
 private:
 void UpdateLims();		//Update  limits
 
@@ -46,6 +46,7 @@ float mErr;
 float mRxy2;		//Rxy**2 of previous hit
 float mRxy;		//Rxy    of previous hit
 float mDelta;
+
 float mDir[3]; 		// track direction
 float mLayer;
 const float *mHitDir; 	// hit plane direction
@@ -61,7 +62,7 @@ float mMinPrj;
 float mMinImp;
 
 const float *mX[100];	//array of hit coordinates pointers
-const float *mHit;	//current hit coordinates
+const float *mHit;	//current (last accepted) hit coordinates
 float mS[100];
 int   mNPnt;
 char  mEnd[1];
@@ -71,10 +72,8 @@ TVector3 mPnt[100];
 
 class StvDefaultSeedFinder : public StvSeedFinder
 {
-  
-public:
   enum { kNDejavu = 99 };
-
+public:
   StvDefaultSeedFinder(const char *name="Default");
    ~StvDefaultSeedFinder(){;}
   const THelixTrack* NextSeed();
