@@ -1,17 +1,31 @@
-#if 1
 void Run1Ev(Int_t NEvents=1, Int_t iD = 5, 
+#if 0 /* 1 muon in sector 3 */
+	    Double_t pTlow=1,Double_t pThigh=1,
+	    Double_t Ylow=.1, Double_t Yhigh=.1,
+	    Double_t Philow=0, Double_t Phihigh=0,
+	    Double_t Zlow=0, Double_t Zhigh=0, Int_t Npart = 1, const Char_t *opt = "G"
+#else 
+#if 1 /* 1 muon in sector 20 */
+#if 0
 	    Double_t pTlow=1,Double_t pThigh=1,
 	    Double_t Ylow=-.1, Double_t Yhigh=-.1,
 	    Double_t Philow=-TMath::DegToRad()*30, Double_t Phihigh=-TMath::DegToRad()*30,
-	    Double_t Zlow=0, Double_t Zhigh=0, Int_t Npart = 1, const Char_t *opt = "G") 
+	    Double_t Zlow=0, Double_t Zhigh=0, Int_t Npart = 1, const Char_t *opt = "G"
 #else
-void Run1Ev(Int_t NEvents=1, Int_t iD = 5, 
+	    Double_t pTlow=1,Double_t pThigh=1,
+	    Double_t Ylow=0, Double_t Yhigh=0,
+	    //	    Double_t Philow=0, Double_t Phihigh=0,
+	    Double_t Philow=TMath::DegToRad()*90, Double_t Phihigh=TMath::DegToRad()*90,
+	    Double_t Zlow=100, Double_t Zhigh=100, Int_t Npart = 1, const Char_t *opt = "G"
+#endif
+#else
 	    Double_t pTlow=0.602,Double_t pThigh=0.602,
 	    Double_t Ylow=-.1, Double_t Yhigh=-.1,
 	    Double_t Philow=-TMath::DegToRad()*25, Double_t Phihigh=-TMath::DegToRad()*35,
-	    Double_t Zlow=0, Double_t Zhigh=0, Int_t Npart = 20, const Char_t *opt = "BLG") 
+	    Double_t Zlow=0, Double_t Zhigh=0, Int_t Npart = 20, const Char_t *opt = "BLG"
 #endif
-  {
+#endif
+	    ) {
   if ( gClassTable->GetID("TGiant3") >= 0) { // root4star
     if (gClassTable->GetID("St_geant_Maker") < 0) {
       cout << "You have to use root4star with St_geant_Maker already loaded" << endl; 
