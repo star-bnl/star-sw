@@ -48,6 +48,7 @@ void StiCATpcTrackerInterface::MakeHits()
       
       const StTpcHit *tpcHit = dynamic_cast<const StTpcHit*>(hit->stHit());
       if ( ! tpcHit) continue;
+      Int_t Id = fSeedHits.size();
       StGlobalCoordinate glob(tpcHit->position());
       tran(glob,loc,tpcHit->sector(),tpcHit->padrow());
 
@@ -81,7 +82,8 @@ void StiCATpcTrackerInterface::MakeHits()
       caHit.SetErrZ( 0.16 );
       caHit.SetISlice( tpcHit->sector() - 1 );
       caHit.SetIRow( hitc.padrow );
-      caHit.SetID( fCaHits.size() );
+      //      caHit.SetID( fCaHits.size() );
+      caHit.SetID( Id );
       fIdTruth.push_back( hitc.track_key );
 
       fCaHits.push_back(caHit);
