@@ -257,7 +257,7 @@ void AliHLTTPCCAMerger::UnpackSlices()
 
     const AliHLTTPCCASliceOutput &slice = *( fkSlices[iSlice] );
 
-    for ( int itr = 0; itr < slice.NTracks(); itr += uint_v::Size ) {
+    for ( UInt_t itr = 0; itr < slice.NTracks(); itr += uint_v::Size ) {
 
       int nTracksVector = uint_v::Size;
       if(slice.NTracks() - itr < uint_v::Size )

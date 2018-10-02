@@ -18,7 +18,7 @@ class StTPCCAInterface {
   virtual void MakeSettings(); // fill fCaParam
   virtual void MakeHits() {cout << "Dummy StTPCCAInterface::;MakeHits is called" << endl;}
   virtual void MakeSeeds() {cout << "Dummy StTPCCAInterface::;MakeSeeds is called" << endl;}
-
+  
   AliHLTTPCCAGBTracker     *fTracker;
   vector<int>               fIdTruth; // id of the Track, which has created CaHit
   vector<AliHLTTPCCAParam>  fCaParam;// settings for all sectors to give CATracker
