@@ -258,15 +258,15 @@ Bfc_st BFC[] = { // standard chains
   {"MC2017",      "","","MC2017.Ideal"                                                    ,"","","",kFALSE},
   {"MC2018.Ideal","","","MC.2018,MC.StiCA,NewTpcAlignment"                                ,"","","",kFALSE},
   {"MC2018",      "","","MC2018.Ideal,VMCAlignment,sdt20180426.122000"                    ,"","","",kFALSE},
-  {"XC2018",      "","","y2018,TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,"
+  {"XC",          "","","TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,"
    "OSpaceZ2,OGridLeak3D,CorrX,tpcDB,TpcHitMover"
-   ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,sdt20180426.122000,Stx,Idst,BAna"       
+   ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,Stx,Idst,BAna"       
    ,                                                                                       "","","",kFALSE},
-  {"XC2018I",     "","","y2018,TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,"
-   "NewTpcAlignment,tpcDB,TpcHitMover"
-   ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,Stx,Idst,BAna"       
-   ,                                                                                       "","","",kFALSE},
-  {"HLT2017",      "","","y2017,TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,"
+  {"XC2017I",     "","","y2017,XC",                                                        "","","",kFALSE},
+  {"XC2018I",     "","","y2018,XC",                                                        "","","",kFALSE},
+  {"XC2018",      "","","y2018,XC,h,sdt20180426.122000",                                   "","","",kFALSE},
+  {"XC2019I",     "","","y2019,XC",                                                        "","","",kFALSE},
+  {"HLT2017",     "","","y2017,TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,"
    "OSpaceZ2,OGridLeak3D,CorrX,tpcDB,TpcHitMover"
    ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,sdt20170426,StiCA,HLTCA,Idst,BAna"
    ,                                                                                       "","","",kFALSE},
