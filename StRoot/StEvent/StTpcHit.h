@@ -106,8 +106,8 @@
  * Completely Revised for New Version
  *
  **************************************************************************/
-#ifndef StTpcHit_hh
-#define StTpcHit_hh
+#ifndef StTpcHit_hh_TFG
+#define StTpcHit_hh_TFG
 
 #include "StHit.h"
 #include "StMemoryPool.hh"
