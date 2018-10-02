@@ -114,8 +114,8 @@ void KalmanFitterRefTrack::processTrackWithRep(Track* tr, const AbsTrackRep* rep
   double oldPvalFW = 0.;
   double oldChi2BW = 1e6;
   double oldPvalBW = 0.;
-  double chi2FW(0), ndfFW(0);
-  double chi2BW(0), ndfBW(0);
+  double chi2FW(1e7), ndfFW(0);
+  double chi2BW(1e7), ndfBW(0);
   int nFailedHits(0);
 
   KalmanFitStatus* status = new KalmanFitStatus();
@@ -232,7 +232,7 @@ void KalmanFitterRefTrack::processTrackWithRep(Track* tr, const AbsTrackRep* rep
       bool finished(false);
       if (nIt >= minIterations_ && fabs(oldPvalBW - PvalBW) < deltaPval_)  {
         // if pVal ~ 0, check if chi2 has changed significantly
-        if (fabs(1 - fabs(oldChi2BW / chi2BW)) > relChi2Change_) {
+        if (chi2BW > 0 && fabs(1 - fabs(oldChi2BW / chi2BW)) > relChi2Change_) {
           finished = false;
         }
         else {

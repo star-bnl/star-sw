@@ -129,6 +129,85 @@ StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr)
   genfit::Track  fitTrack(rep, pos, mom);
   rep->setPosMomCov(stateRef, pos, mom, covM);
      genfit::RKTrackRep::setPosMomCov
+                         setPosMomCov (this=0x9ed85a0, state=..., pos=..., mom=..., cov6x6=...)
+                           (gdb) p pos.Print("")													       
+			   TVector3 A 3D physics vector (x,y,z)=(49.478474,-25.887495,-99.967354) (rho,theta,phi)=(114.506566,150.812356,-27.618890)      
+			   (gdb) p mom.Print("")													       
+			   TVector3 A 3D physics vector (x,y,z)=(0.923118,-0.433284,0.000149) (rho,theta,phi)=(1.019746,89.991622,-25.143977)	       
+			   (gdb) p cov6x6.Print("")												       
+			   6x6 matrix is as follows												       
+			        |      0    |      1    |      2    |      3    |      4    | |      5    | 							       
+			   -------------------------------------------------------------------------------------							       
+			      0 |          0           0           0           0           0  |          0  							       
+			      1 |          0      0.0019  -9.282e-11  -0.0006105    0.001301  | -2.246e-07  							       
+			      2 |          0  -9.282e-11   0.0005771   2.602e-10  -5.545e-10  | -1.549e-05  							       
+			      3 |          0  -0.0006105   2.602e-10   0.0004232  -0.0009016  |  1.531e-07  							       
+			      4 |          0    0.001301  -5.545e-10  -0.0009016    0.001921  | -3.263e-07  							       
+			      5 |          0  -2.246e-07  -1.549e-05   1.531e-07  -3.263e-07  |  7.239e-07  							       
+			   															       
+                         setPosMom(state, pos, mom)
+                           (gdb) p state.Print("")																    
+			   genfit::MeasuredStateOnPlane my address 0x7ffffffd9cf0 my plane's address 0x9e35b10; use count: 1							    
+			    state vector: 																		    
+			   Vector (5)  is as follows																    
+			   																			    
+			        |        1  |																	    
+			   ------------------																	    
+			      0 |0.980636 																		    
+			      1 |0 																		    
+			      2 |0 																		    
+			      3 |0 																		    
+			      4 |0 																		    
+			   																			    
+			    covariance matrix: 																	    
+			   5x5 matrix is as follows																    
+			   																			    
+			        |      0    |      1    |      2    |      3    |      4    |											    
+			   ----------------------------------------------------------------------											    
+			      0 |          0           0           0           0           0 											    
+			      1 |          0           0           0           0           0 											    
+			      2 |          0           0           0           0           0 											    
+			      3 |          0           0           0           0           0 											    
+			      4 |          0           0           0           0           0 											    
+			   																			    
+			    defined in plane DetPlane: O(49.4785, -25.8875, -99.9674) u(-0.424894, -0.905243, 0) v(0.000132363, -6.21272e-05, -1) n(0.905243, -0.424894, 0.000146218)  
+			    3D position: TVector3 A 3D physics vector (x,y,z)=(49.478474,-25.887495,-99.967354) (rho,theta,phi)=(114.506566,150.812356,-27.618890)			    
+  			    3D momentum: TVector3 A 3D physics vector (x,y,z)=(0.923118,-0.433284,0.000149) (rho,theta,phi)=(1.019746,89.991622,-25.143977)                            
+                         getState7(state, state7)
+                           (gdb) p state7
+                             $22 = (genfit::M1x7 &) @0x7ffffffd9540: {vals = {49.478473663330078, -25.887495040893555, -99.967353820800781, 0.9052429303982451,-0.42489435814601006, 0.00014621794824180284, 0.9806359901503936}}
+
+                         transformM6P(cov6x6_, state7, state);
+                           (gdb) p state.Print("")																	  
+			   genfit::MeasuredStateOnPlane my address 0x7ffffffd9cf0 my plane's address 0x9ebc410; use count: 1							  
+			    state vector: 																		  
+			   Vector (5)  is as follows																  
+			   																			  
+			        |        1  |																	  
+			   ------------------		   <<<<<<<<< Creates pseudo plane ???															  
+			      0 |0.980636 																		  
+			      1 |0 																		  
+			      2 |0 																		  
+			      3 |0 																		  
+			      4 |0 																		  
+			   																			  
+			    covariance matrix: 																	  
+			   5x5 matrix is as follows																  
+			   																			  
+			        |      0    |      1    |      2    |      3    |      4    |											  
+			   ----------------------------------------------------------------------											  
+			      0 |   0.001283   -0.001086    7.03e-08  -0.0009623  -6.776e-08 											  
+			      1 |  -0.001086   0.0009202  -5.945e-08    0.000815   5.555e-08 											  
+			      2 |   7.03e-08  -5.945e-08   6.961e-07  -5.591e-08  -1.519e-05 											  
+			      3 | -0.0009623    0.000815  -5.591e-08    0.001557   1.068e-07 											  
+			      4 | -6.776e-08   5.555e-08  -1.519e-05   1.068e-07   0.0005771 											  
+			   																			  
+ 			    defined in plane DetPlane: O(49.4785, -25.8875, -99.9674) u(-0.424894, -0.905243, 0) v(0.000132363, -6.21272e-05, -1) n(0.905243, -0.424894, 0.000146218)
+			    3D position: TVector3 A 3D physics vector (x,y,z)=(49.478474,-25.887495,-99.967354) (rho,theta,phi)=(114.506566,150.812356,-27.618890)			  
+			    3D momentum: TVector3 A 3D physics vector (x,y,z)=(0.923118,-0.433284,0.000149) (rho,theta,phi)=(1.019746,89.991622,-25.143977)                          
+		   															        
+       genfit::RKTrackRep::transformM6P 
+	 genfit::MeasuredStateOnPlane::getCov 
   rep->setPropDir(1);
   const genfit::StateOnPlane stateRefOrig(stateRef);
   //========== Mesurements ======================================================================
@@ -156,7 +235,12 @@ StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr)
         genfit::KalmanFitterRefTrack::prepareTrack
           genfit::KalmanFitterRefTrack::removeOutdated 
 ...
-          // loop over TrackPoints
+          // loop over TrackPoints {
+	    genfit::PlanarMeasurement::constructMeasurementsOnPlane 
+              genfit::MeasurementOnPlane::MeasurementOnPlane
+                genfit::MeasuredStateOnPlane::MeasuredStateOnPlane
+                  genfit::AbsMeasurement::getRawHitCov 
+          }  
           genfit::RKTrackRep::extrapolateToPlane
             genfit::RKTrackRep::Extrap
               genfit::RKTrackRep::RKutta
@@ -168,6 +252,88 @@ StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr)
                     genfit::TGeoMaterialInterface::findNextBoundary
                       TGeoManager::FindNextBoundary
                         TGeoNavigator::FindNextBoundary
+        genfit::KalmanFitterRefTrack::fitTrack
+          genfit::KalmanFitterRefTrack::processTrackPoint
+	    >> get predicted state p_ and cov. matrix C_
+	    >> update : p_{k,r} (reference state), p_{k|k-1} (state prediction)
+            >> for all measurements for given TrackPoint  
+            genfit::RKTrackRep::setPosMomCov 
+ m (measurement) 
+Vector (2)  is as follows
+
+     |        1  |
+------------------
+   0 |2.30851 
+   1 |-4.84902 
+
+V ((weighted) measurement covariance) 
+2x2 matrix is as follows
+
+     |      0    |      1    |
+-------------------------------
+   0 |   0.005447           0 
+   1 |          0     0.00705 
+
+residual        
+Vector (2)  is as follows
+
+     |        1  |
+------------------
+   0 |-1.7532                             ??  <<<<<<<<<
+   1 |0.0385169 
+
+ update
+Vector (5)  is as follows
+
+     |        1  |
+------------------
+   0 |0 
+   1 |0 
+   2 |0 
+   3 |-1.75319 
+   4 |0.0385167 
+
+ p_{k|k} (updated state)
+Vector (5)  is as follows
+
+     |        1  |
+------------------
+   0 |0.980627 
+   1 |1.45173 
+   2 |0.000257714 
+   3 |2.30852 
+   4 |-4.84902 
+
+ C_{k|k} (updated covariance)
+5x5 matrix is as follows
+
+     |      0    |      1    |      2    |      3    |      4    |
+----------------------------------------------------------------------
+   0 |      924.7           0           0           0           0 
+   1 |          0        9286           0           0           0 
+   2 |          0           0        2988           0           0 
+   3 |          0           0           0    0.005447           0 
+   4 |          0           0           0           0     0.00705 
+
+ resNew 
+Vector (2)  is as follows
+
+     |        1  |
+------------------
+   0 |-9.54915e-06 
+   1 |2.7156e-07 
+
+ Rinv 
+2x2 matrix is as follows
+
+     |      0    |      1    |
+-------------------------------
+   0 |  3.371e+07           0 
+   1 |          0   2.012e+07 
+             genfit::RKTrackRep::transformM6P 
+                genfit::MeasuredStateOnPlane::getCov 
+            
+
   fitTrack.getFittedState().Print();
     genfit::Track::getFittedState(int id = 0, const AbsTrackRep* rep = nullptr, bool biased = true) 
     genfit::MeasuredStateOnPlane::Print
@@ -233,3 +399,135 @@ void RKTrackRep::getState5(StateOnPlane& state, const M1x7& state7) const
 //    ............................................................................    d()/dpND
 //
 // Authors: R.Brun, M.Hansroul, V.Perevoztchikov (Geant3)
+================================================================================
+state => genfit::StateOnPlane 
+...
+  protected:
+    TVectorD state_;
+    TVectorD auxInfo_;
+    genfit::SharedPlanePtr sharedPlane_;
+  private:
+    const genfit::AbsTrackRep *rep_;
+...
+---------------------------------------
+state7 -> genfit::RKMatrix<1ul, 7ul> 
+...
+double vals[7];
+...
+---------------------------------------
+tr -> genfit::Track 
+...
+
+    std::vector<genfit::AbsTrackRep*, std::allocator<genfit::AbsTrackRep*> > trackReps_;
+    unsigned int cardinalRep_;
+    std::vector<genfit::TrackPoint*, std::allocator<genfit::TrackPoint*> > trackPoints_;
+    std::vector<genfit::TrackPoint*, std::allocator<genfit::TrackPoint*> > trackPointsWithMeasurement_;
+    std::map<genfit::AbsTrackRep const*, genfit::FitStatus*, std::less<genfit::AbsTrackRep const*>, std::allocator<std::pair<genfit::AbsTrackRep const* const, genfit::FitStatus*> > > fitStatuses_;
+    int mcTrackId_;
+    double timeSeed_;
+    TVectorD stateSeed_;
+    TMatrixDSym covSeed_;
+    static atomic_TClass_ptr fgIsA;
+...
+---------------------------------------
+
+.sl73_x8664_gcc485/obj/StRoot/GenFit/KalmanFitterRefTrack.cc:1117
+
+x (1,0,0)
+p_{k|k} (updated state)
+Vector (5)  is as follows
+
+     |        1  |
+------------------
+   0 |0.930214 
+   1 |-0.252877 
+   2 |0.000754044 
+   3 |20.2235 
+   4 |-5.11637 
+
+Inner Parameters
+====================
+genfit::MeasuredStateOnPlane my address 0xa523a50 my plane's address 0xa4e4b20; use count: 9
+ state vector: 
+Vector (5)  is as follows
+
+     |        1  |
+------------------
+   0 |0.993915 
+   1 |-0.0909113 
+   2 |4.1921e-05 
+   3 |2.65967 
+   4 |-4.89868 
+
+ covariance matrix: 
+5x5 matrix is as follows
+
+     |      0    |      1    |      2    |      3    |      4    |
+----------------------------------------------------------------------
+   0 |  0.0001281   8.237e-06   3.701e-09   0.0001653  -2.186e-08 
+   1 |  8.237e-06   1.185e-06  -1.226e-09   2.447e-05  -1.973e-08 
+   2 |  3.701e-09  -1.226e-09   8.098e-07  -1.034e-08   2.234e-05 
+   3 |  0.0001653   2.447e-05  -1.034e-08    0.000883  -2.034e-07 
+   4 | -2.186e-08  -1.973e-08   2.234e-05  -2.034e-07    0.001321 
+
+ defined in plane DetPlane: O(60, 1.66533e-15, 104.855) u(2.77556e-17, -1, 0) v(0, 0, 1) n(-1, -2.77556e-17, 0) 
+ 3D position: TVector3 A 3D physics vector (x,y,z)=(60.000000,-2.659669,99.956728) (rho,theta,phi)=(116.612270,30.999519,-2.538135)
+ 3D momentum: TVector3 A 3D physics vector (x,y,z)=(1.001990,-0.091092,-0.000042) (rho,theta,phi)=(1.006122,90.002392,-5.194557)
+Outer Parameters
+====================
+genfit::MeasuredStateOnPlane my address 0xa523e20 my plane's address 0xa5019f0; use count: 10
+ state vector: 
+Vector (5)  is as follows
+
+     |        1  |
+------------------
+   0 |0.994247 
+   1 |-0.294784 
+   2 |0.000506403 
+   3 |27.3254 
+   4 |-5.12834 
+
+ covariance matrix: 
+5x5 matrix is as follows
+
+     |      0    |      1    |      2    |      3    |      4    |
+----------------------------------------------------------------------
+   0 |   0.000128  -6.973e-06   6.714e-10   0.0001022  -3.577e-08 
+   1 | -6.973e-06   9.742e-07   1.288e-09  -1.442e-05   8.296e-09 
+   2 |  6.714e-10   1.288e-09   7.146e-07   7.576e-09  -1.353e-05 
+   3 |  0.0001022  -1.442e-05   7.576e-09   0.0003541  -1.104e-07 
+   4 | -3.577e-08   8.296e-09  -1.353e-05  -1.104e-07   0.0005203 
+
+ defined in plane DetPlane: O(189.195, 5.25122e-15, 105.055) u(2.77556e-17, -1, 0) v(0, 0, 1) n(-1, -2.77556e-17, 0) 
+ 3D position: TVector3 A 3D physics vector (x,y,z)=(189.195000,-27.325444,99.927071) (rho,theta,phi)=(215.700828,62.401879,-8.218401)
+ 3D momentum: TVector3 A 3D physics vector (x,y,z)=(0.964742,-0.284391,-0.000489) (rho,theta,phi)=(1.005786,90.027831,-16.424676)
+DCA
+RKTrackRep::extrapolateToLine(): Reached POCA after 15 iterations. Distance: 0.102997 cm. Angle deviation: 8.79469e-07 rad 
+genfit::MeasuredStateOnPlane my address 0x7ffffffd9ed0 my plane's address 0xa50c2a0; use count: 2
+ state vector: 
+Vector (5)  is as follows
+
+     |        1  |
+------------------
+   0 |0.99271 
+   1 |8.80398e-07 
+   2 |4.11895e-05 
+   3 |-0.103013 
+   4 |99.9592 
+
+ covariance matrix: 
+5x5 matrix is as follows
+
+     |      0    |      1    |      2    |      3    |      4    |
+----------------------------------------------------------------------
+   0 |  0.0001283   1.964e-05   3.858e-09    0.001001   2.049e-07 
+   1 |  1.964e-05   8.227e-06  -1.198e-09   0.0002722  -7.967e-08 
+   2 |  3.858e-09  -1.198e-09   5.388e-06  -7.045e-08   0.0001372 
+   3 |   0.001001   0.0002722  -7.045e-08      0.0152  -5.637e-06 
+   4 |  2.049e-07  -7.967e-08   0.0001372  -5.637e-06    0.009635 
+
+ defined in plane DetPlane: O(0, 0, 0) u(-0.0013759, -0.999999, 0) v(0, 0, 1) n(-0.999999, 0.0013759, 0) 
+ 3D position: TVector3 A 3D physics vector (x,y,z)=(0.000142,0.103013,99.959209) (rho,theta,phi)=(99.959262,0.059046,89.921167)
+ 3D momentum: TVector3 A 3D physics vector (x,y,z)=(1.007343,-0.001385,-0.000041) (rho,theta,phi)=(1.007344,90.002360,-0.078783)
+
+y (0,1,0)

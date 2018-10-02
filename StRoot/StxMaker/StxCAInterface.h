@@ -15,6 +15,9 @@ class StxCAInterface : public StTPCCAInterface {
   static  void ConvertPars(const AliHLTTPCCATrackParam& caPar, double _alpha, StxNodePars& nodePars, StxNodeErrs& nodeErrs); // convert caPars into NodePars
 
  protected:
+#if 0
+  virtual void MakeSettings(); // fill fCaParam
+#endif
   virtual void MakeHits();     // fill fCaHits & fSeedHits
   virtual void MakeSeeds();    // fill fSeeds & fTrackParameters
 

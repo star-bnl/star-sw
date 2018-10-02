@@ -31,9 +31,9 @@
 
 namespace genfit {
 
-class AbsTrackRep;
-class TrackPoint;
-
+  class AbsTrackRep;
+  class TrackPoint;
+  class StateOnPlane;
 /**
  *  @brief Contains the measurement and covariance in raw detector coordinates.
  *
@@ -55,10 +55,10 @@ class AbsMeasurement : public TObject {
   TrackPoint* getTrackPoint() const {return trackPoint_;}
   void setTrackPoint(TrackPoint* tp) {trackPoint_ = tp;}
 
-  const TVectorD& getRawHitCoords() const {return rawHitCoords_;}
-  const TMatrixDSym& getRawHitCov() const {return rawHitCov_;}
-  TVectorD& getRawHitCoords() {return rawHitCoords_;}
-  TMatrixDSym& getRawHitCov() {return rawHitCov_;}
+  virtual const TVectorD& getRawHitCoords(StateOnPlane *state=0) const {return rawHitCoords_;}
+  virtual const TMatrixDSym& getRawHitCov(StateOnPlane *state=0) const {return rawHitCov_;}
+  virtual TVectorD& getRawHitCoords(StateOnPlane *state=0) {return rawHitCoords_;}
+  virtual TMatrixDSym& getRawHitCov(StateOnPlane *state=0) {return rawHitCov_;}
   int getDetId() const {return detId_;}
   int getHitId() const {return hitId_;}
 
