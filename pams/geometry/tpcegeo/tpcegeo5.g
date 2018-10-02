@@ -734,18 +734,18 @@ Block TPCE is the TPC envelope
       zTIFCend = TPCG_LengthW/2 + 0.97;                 !// write(*,*) 'zTIFCend', zTIFCend; !// end of TIFC + flange
       zTIFCFlangeBegin = zTIFCend - 1*INCH;             !// write(*,*) 'zTIFCFlangeBegin' , zTIFCFlangeBegin;
       half = 1
-      Create and position  TPGV kONLY = 'MANY',
+      Create and position  TPGV kONLY = 'ONLY',
                                 z=+tpgvz,
                                 thetax=90 thetay=90 thetaz=0,
                                 phix = 75 phiy =-15 phiz=0
       half = 2
       if (TPCG_TpadConfig != 9) {	
-                 position  TPGV kONLY = 'MANY',
+                 position  TPGV kONLY = 'ONLY',
                                 z=-tpgvz,
                                 thetax=90 thetay=90 thetaz=180,
                                 phix =105 phiy =195 phiz=0
       } else {
-      Create and position  TPGV kONLY = 'MANY',
+      Create and position  TPGV kONLY = 'ONLY',
                                 z=-tpgvz,
                                 thetax=90 thetay=90 thetaz=180,
                                 phix =105 phiy =195 phiz=0
@@ -1092,7 +1092,7 @@ yhOF = {-15.025, -11.606, -8.177, -4.220,  0,  4.220,  8.177,  11.606, 15.025,
 
 !//    tpcWheel[inOut] = new TGeoVolumeAssembly(Form("TpcWheel%sAssembly",InnerOuter[inOut]));
 !//    tpcWheel[inOut]->SetTitle(Form("the %s wheel assembly",InnerOuter[inOut]));
-    Create And Position TWAS kOnly='MANY'
+    Create And Position TWAS kOnly='ONLY'
 
 !//  TGeoVolume *WheelRibBox = gGeoManager->MakeBox("WheelRibBox",GetMed("TPCE_ALUMINIUM"), TPCG_WheelBoxDy/2, TPCG_WheelBoxDx/2, TPCG_WheelTHK/2);
 !//  TpcSectorAndWheel->AddNodeOverlap(WheelRibBox, 1, new TGeoTranslation(TPCG_WheelR1, 0., zWheel1+TPCG_WheelTHK/2));
@@ -1743,7 +1743,7 @@ Block TPGV is the Gas Volume placed in TPC
      }	
      do iSecAng = 15,360-15,30
        sector = sector + 1
-       Create and Position TPSS            alphaz=iSecAng kOnly='MANY'
+       Create and Position TPSS            alphaz=iSecAng kOnly='ONLY'
      endDo
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
