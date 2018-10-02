@@ -24,7 +24,7 @@
 #include "genhit.h"
       INTEGER         G2T_TPC,G2R_GET_HIT,Iprin,Idigi,Ip0,N,ish,npar,n0,i,jtra
       REAL            G2T_FIELD,par(50),U(100),Pt,Vr,dphi,dtr,FieldZ
-      logical         Local
+      logical         Local /.false./
       Character       Cp*20
       Equivalence     (NAPART,cp)
 *
@@ -34,7 +34,7 @@
       call G2R_GET_SYS ('TPCE','TPAD',Iprin,Idigi)
       if (Iprin.lt.0) return
       FieldZ = G2T_FIELD (0.)
-      Local  = Idigi.ge.2
+*!yf      Local  = Idigi.ge.2
 *
       i    = 0
       itra = 0
