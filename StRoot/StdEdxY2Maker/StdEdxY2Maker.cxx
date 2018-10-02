@@ -508,7 +508,9 @@ Int_t StdEdxY2Maker::Make(){
 	if ((TESTBIT(m_Mode, kPadSelection)) && iokCheck) {BadHit(3, tpcHit->position()); continue;}
 	if ((TESTBIT(m_Mode, kPadSelection)) && (dx < 0.5 || dx > 25.)) {BadHit(4, tpcHit->position()); continue;}
 	// Corrections
+#ifdef StTpcHit_hh_TFG
 	tpcHit->setdX(dx);
+#endif
 	CdEdx[NdEdx].Reset();
 	CdEdx[NdEdx].resXYZ[0] = localSect[3].position().x() - localSect[0].position().x();
 	CdEdx[NdEdx].resXYZ[1] = localSect[3].position().y() - localSect[0].position().y();
