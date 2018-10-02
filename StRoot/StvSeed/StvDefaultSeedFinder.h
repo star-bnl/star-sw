@@ -27,7 +27,9 @@ void Update();
 void AddHit(const float *x,const float *dir,float layer);
 void SetErr(float err) 			{mErr=err;}
 void SetSgn(int dir=1) { mSgn = dir; }
-void SetVtx(const float vtx[3]) { memcpy(mVtx,vtx,sizeof(mVtx));mIsVtx=1;}
+void SetVtx(const float vtx[3]) { 
+  mIsVtx=0; memset(mVtx,0,sizeof(mVtx));
+  if (vtx) {memcpy(mVtx,vtx,sizeof(mVtx));mIsVtx=1;};}
 
 int  Reject(const float x[3],const void* hp);	// 0  :x accepted
 					// >0 :x rejected
@@ -84,7 +86,7 @@ public:
   void      ShowIn();
    int      Reject(const float x[3])		{return mSel.Reject(x,0)>0;}	
 void SetSgn(int dir=1) { fSgn = dir; mSel.SetSgn(dir);}
-void SetVtx(const float vtx[3]) { StvSeedFinder::SetVtx(vtx); mSel.SetVtx(fVtx);}
+void SetVtx(const float vtx[3]) { StvSeedFinder::SetVtx(vtx); mSel.SetVtx(vtx);}
 
 protected:
 
