@@ -25,8 +25,16 @@ void StG2TrackVertexMap::Reset(St_g2t_track *track, St_g2t_vertex *vertex) {
   g2t_track_st *t = track->GetTable();
   g2t_vertex_st *v = vertex->GetTable();
   for (Int_t i = 0; i < Nt; i++) {
-    Int_t IdT = t[i].id - 1;                 assert(IdT >= 0 && IdT < Nt);
-    Int_t IdV = t[i].start_vertex_p - 1;     assert(IdV >= 0 && IdV < NV);
+    Int_t IdT = t[i].id - 1;                 
+    if (! (IdT >= 0 && IdT < Nt)) {
+      cout << " StG2TrackVertexMap::Reset Illegal IdT = " << IdT + 1 << " and Nt = " << Nt << endl;
+      assert(IdT >= 0 && IdT < Nt);
+    }
+    Int_t IdV = t[i].start_vertex_p - 1;     
+    if (! (IdV >= 0 && IdV < NV)) {
+      cout << " StG2TrackVertexMap::Reset Illegal IdV = " << IdV + 1 << " and NV = " << NV << endl;
+      assert(IdV >= 0 && IdV < NV);
+    }
     TVector3 Vx1(v[IdV].ge_x);
     Float_t tof1 = v[IdV].ge_tof;
     Int_t IdP = v[IdV].parent_p - 1;         
