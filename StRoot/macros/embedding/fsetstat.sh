@@ -98,7 +98,7 @@ count=$(($count+1))
 total=`echo "$total+$jtime" |bc -l`
 nevents=`grep -a "Total events processed" tmplog.txt | awk -F ':' '{print $4}' | awk '{print $1}'`
 #echo $nevents events in this daq file
-nanaevents=`grep -a "StAnalysisMaker::Finish" tmplog.txt | awk '{print $5}'`
+nanaevents=`grep -a "StAnalysisMaker::Finish" tmplog.txt | awk -F"Processed|events" '{print $2}'`
 #echo $nanaevents events accepted for embedding in this daq file
 allevts=`echo "$allevts+$nevents" |bc -l`
 storedevts=`echo "$storedevts+$nanaevents" |bc -l`
