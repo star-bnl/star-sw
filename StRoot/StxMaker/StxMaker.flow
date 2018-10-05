@@ -126,7 +126,14 @@ StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr)
   genfit::AbsTrackRep* rep = new genfit::RKTrackRep(sign*pdg);
 ...
   genfit::MeasuredStateOnPlane stateRef(rep);
+    StateOnPlane(rep)
+      state_(0), auxInfo_(0), sharedPlane_(), rep_(rep)
   genfit::Track  fitTrack(rep, pos, mom);
+    genfit::Track::addTrackRep 
+      trackReps_.push_back(trackRep);
+      fitStatuses_[trackRep] = new FitStatus();
+    genfit::Track::setStateSeed(posSeed, momSeed)
+
   rep->setPosMomCov(stateRef, pos, mom, covM);
      genfit::RKTrackRep::setPosMomCov
                          setPosMomCov (this=0x9ed85a0, state=..., pos=..., mom=..., cov6x6=...)
@@ -244,7 +251,7 @@ StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr)
           genfit::RKTrackRep::extrapolateToPlane
             genfit::RKTrackRep::Extrap
               genfit::RKTrackRep::RKutta
-                genfit::RKTrackRep::estimateStep
+                genfit::RKTrackRep::estimateStep <<<<<<<<<<<<<<<
                   genfit::MaterialEffects::stepper
                     genfit::TGeoMaterialInterface::initTrack
                       TGeoManger::IsSameLocation

@@ -317,7 +317,7 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
   }*/
 
   genfit::FieldManager::getInstance()->init(new genfit::StarField());
-  genfit::FieldManager::getInstance()->useCache(true, 8);
+  //  genfit::FieldManager::getInstance()->useCache(true, 8);
   //  genfit::FieldManager::getInstance()->useCache(false, 0);
   genfit::MaterialEffects::getInstance()->init(new genfit::TGeoMaterialInterface());
   const int pdg = 211; // -13;               // particle pdg code mu+
@@ -337,8 +337,8 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
   CALLGRIND_START_INSTRUMENTATION;
 #endif
   //========== Reference  track ======================================================================
-  TVector3 pos, mom;
-  TMatrixDSym covM(6);
+  TVector3 posSeed, momSeed;
+  TMatrixDSym covSeed(6);
 #if 1
   const AliHLTTPCCATrackParam& caPar = tr.InnerParam();
   Double_t alpha = tr.Alpha();
@@ -346,24 +346,31 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
   StxNodeErrs errs;
   StxCAInterface::Instance().ConvertPars(caPar, alpha, pars, errs);
 #endif  
-  Double_t sign = ConvertCA2XYZ(tr, pos, mom, covM);
+  Double_t sign = ConvertCA2XYZ(tr, posSeed, momSeed, covSeed);
   genfit::AbsTrackRep* rep = new genfit::RKTrackRep(sign*pdg);
   if (Debug()) rep->setDebugLvl();
+  rep->setPropDir(1);
   //  genfit::AbsTrackRep* secondRep = 0;
   //  if (twoReps) secondRep = new genfit::RKTrackRep(sign*-211);
-  genfit::MeasuredStateOnPlane stateRef(rep);
+  genfit::MeasuredStateOnPlane stateSeed(rep);
+  stateSeed.setPosMomCov(posSeed, momSeed, covSeed);
   // create track
   //  genfit::Track* secondTrack(nullptr);
-  genfit::Track  fitTrack(rep, pos, mom);
+  //  genfit::Track  fitTrack(rep, posSeed, momSeed);
+  TVectorD  state7(6);
+  TMatrixDSym origCov(6);
+  stateSeed.get6DStateCov(state7, origCov);
+  genfit::Track fitTrack(rep, state7, origCov);
+
+  //  genfit::Track  fitTrack(rep, stateSeed, covSeed);
   
   // smeared start state
   //  genfit::MeasuredStateOnPlane stateSmeared(rep);
-  rep->setPosMomCov(stateRef, pos, mom, covM);
+  //  rep->setPosMomCov(stateSeed, posSeed, momSeed, covSeed);
   // propagation direction. (-1, 0, 1) -> (backward, auto, forward).
-  rep->setPropDir(1);
   if (!matFX) genfit::MaterialEffects::getInstance()->setNoEffects();
   // remember original initial state
-  const genfit::StateOnPlane stateRefOrig(stateRef);
+  const genfit::StateOnPlane stateRefOrig(stateSeed);
   //========== Mesurements ======================================================================
   const int NHits = tr.NHits();
   vector<SeedHit_t>        &fSeedHits = StxCAInterface::Instance().GetSeedHits();
@@ -375,8 +382,8 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
   int planeId(0); // detector plane ID
   int hitId(0); // hit ID
   if (Debug()) {
-    cout << "mom\t"; mom.Print("");
-    cout << "ps\t"; pos.Print("");
+    cout << "momSeed\t"; momSeed.Print("");
+    cout << "posSeed\t"; posSeed.Print("");
     cout << "NHits = " << NHits << endl;
   }
   for ( int iHit = 0; iHit < NHits; iHit++ ){ 
@@ -425,22 +432,63 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
     Double_t xyzG[3] = {tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z()};
     Double_t xyzL[3];
     D.MasterToLocal(xyzG, xyzL);
+    // Shift center of pad row
+    Double_t shiftG[3];
+    TGeoHMatrix DT(D);
+    if (DT.Determinant() < 0) {
+      Double_t *r = DT.GetRotationMatrix();
+#if 0
+      r[2] = - r[2];
+      r[5] = - r[5];
+      r[8] = - r[8];
+#else
+      //      for (Int_t i = 0; i < 9; i++) r[i] = - r[i];
+      r[1] = - r[1];
+      r[4] = - r[4];
+      r[7] = - r[7];
+#endif
+      Double_t shiftL[3] = {xyzL[0], 0, -((TGeoBBox *)nodeP->GetVolume(-1)->GetShape())->GetDZ()};
+      D.LocalToMaster(shiftL,shiftG);
+    } else {
+      Double_t shiftL[3] = {xyzL[0], 0, ((TGeoBBox *)nodeP->GetVolume(-1)->GetShape())->GetDZ()};
+      D.LocalToMaster(shiftL,shiftG);
+    }
+    DT.SetTranslation(shiftG);
+    Double_t xyzLT[3];
+    DT.MasterToLocal(xyzG, xyzLT);
+    Double_t PosG[3] = {posSeed.x(), posSeed.y(), posSeed.z()}; 
+    Double_t PosL[3];
+    DT.MasterToLocal(PosG,PosL);
+    TVector3 o(shiftG);
+    TVector3 u(DT.GetRotationMatrix()+3);
+    TVector3 v(DT.GetRotationMatrix()+6);
+    DT.MasterToLocal(xyzG, xyzL);
+    genfit::DetPlane *plane = new genfit::DetPlane(o,u,v);
     TVectorD HitCoords(2);
     HitCoords[0] = xyzL[1];
     HitCoords[1] = xyzL[2];
-    TMatrixDSym hitCov(2);
-    Double_t zL = xyzL[2] + ((TGeoBBox *)nodeP->GetVolume(-1)->GetShape())->GetDZ();
     Double_t ecross, edip;
-    errCalc->calculateError(zL, pars.eta(), pars.tanl(), ecross, edip);
+    errCalc->calculateError(xyzL[2], pars.eta(), pars.tanl(), ecross, edip);
+    TMatrixDSym hitCov(2);
     hitCov(0,0) = ecross;
     hitCov(1,1) = edip;
     if (Debug()) {
       cout << path.Data() << " local xyz " << xyzL[0] << "/" << xyzL[1] << "/" << xyzL[2] <<  endl;
+      cout << path.Data() << " local xyzT " << xyzLT[0] << "/" << xyzLT[1] << "/" << xyzLT[2] <<  endl;
+      cout << path.Data() << " local PosL " << PosL[0] << "/" << PosL[1] << "/" << PosL[2] <<  endl;
       tpcHit->Print();
     }
     genfit::PlanarMeasurement* measurement = new genfit::PlanarMeasurement(HitCoords, hitCov, detId, ++hitId, nullptr);
+#if 0
+    const Double_t *r = D.GetRotationMatrix();
+    TVector3 u(r[0],r[3],r[6]);
+    TVector3 v(r[1],r[4],r[7]);
     measurement->setPlane(genfit::SharedPlanePtr(new genfit::DetPlane(TVector3(D.GetTranslation()), TVector3(D.GetRotationMatrix()+3), TVector3(D.GetRotationMatrix()+6))), ++planeId);
-    fitTrack.insertPoint(new genfit::TrackPoint(measurement, nullptr));
+    //    measurement->setPlane(genfit::SharedPlanePtr(new genfit::DetPlane(TVector3(D.GetTranslation()),u,v)),++planeId);
+#else
+    measurement->setPlane(genfit::SharedPlanePtr(plane), ++planeId);
+#endif
+    fitTrack.insertPoint(new genfit::TrackPoint(measurement, &fitTrack));
     
   }
   try{
@@ -503,6 +551,7 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
   }
   if (! ok) {
     //  TVector3 pos, mom;
+    TVector3 mom, pos;
     TMatrixDSym cov(6,6);
     state.getPosMomCov(pos, mom, cov);
     state.Print();
