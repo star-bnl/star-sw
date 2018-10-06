@@ -88,7 +88,7 @@ class KFParticleTopoReconstructor{
   vector<int>& GetPVTrackIndexArray(int iPV=0) const { return fKFParticlePVReconstructor->GetPVTrackIndexArray(iPV); }
   
   vector<KFParticle> const &GetParticles() const { return fParticles; }
-  void RemoveParticle(const int iParticle) { if(iParticle>=0 && iParticle<fParticles.size()) fParticles[iParticle].SetPDG(-1); } 
+  void RemoveParticle(const unsigned int iParticle) { if(iParticle>=0 && iParticle<fParticles.size()) fParticles[iParticle].SetPDG(-1); } 
   const KFPTrackVector* GetTracks() const { return fTracks; }
   const kfvector_float* GetChiPrim() const { return fChiToPrimVtx; }
   

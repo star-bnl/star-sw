@@ -639,23 +639,6 @@ void KFParticleTopoReconstructor::SelectParticleCandidates()
       deleteCandidate[iParticle] = true;
   }
 
-  for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
-  {
-    if(abs(fParticles[iParticle].GetPDG()) == 4122)
-    {
-      float chiPrimCut = 44.4 - 8.6*fParticles[iParticle].GetPt();
-      for(int iDaughter=0; iDaughter<fParticles[iParticle].NDaughters(); iDaughter++)
-      {
-        float chiPrim = fParticles[fParticles[iParticle].DaughterIds()[iDaughter]].GetDeviationFromVertex(GetPrimVertex());
-        if(chiPrim < chiPrimCut)
-        {
-          deleteCandidate[iParticle] = true;
-          break;
-        }
-      } 
-    }
-  }
-
 //   for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
 //   {
 //     if(abs(fParticles[iParticle].GetPDG()) == 431 || abs(fParticles[iParticle].GetPDG()) == 4122)

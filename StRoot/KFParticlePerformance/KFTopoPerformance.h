@@ -102,6 +102,9 @@ class KFTopoPerformance: public KFParticlePerformanceBase
     return vMCTracks[iMCTrack]; 
   }
   
+  void SetCentralityBin(const int iBin) { fCentralityBin = iBin; }
+  void SetCentralityWeight(const float weight) { fCentralityWeight = weight; }
+  
  private:
 
   const KFTopoPerformance& operator = (const KFTopoPerformance&);
@@ -149,6 +152,9 @@ class KFTopoPerformance: public KFParticlePerformanceBase
   int fPrintEffFrequency;
   
   KFPartEfficiencies fPartInfo;
+  
+  int fCentralityBin;
+  float fCentralityWeight;
 };
 
 #endif

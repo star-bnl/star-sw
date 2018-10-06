@@ -572,7 +572,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
   TString parTitle[nHistoPartParam];
   TString parName2D[nHistoPartParam2D] = {"y-p_{t}", "Z-R", "Armenteros", "y-m_{t}"};
   TString parTitle2D[nHistoPartParam2D];
-  TString parName3D[nHistoPartParam3D] = {"y-p_{t}-M", "y-m_{t}-M"};
+  TString parName3D[nHistoPartParam3D] = {"y-p_{t}-M", "y-m_{t}-M", "centrality-pt-M", "centrality-y-M", "centrality-mt-M"};
   TString parTitle3D[nHistoPartParam3D];
   for(int iParam=0; iParam<nHistoPartParam; iParam++)
   {
@@ -730,8 +730,8 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
   if(IsCollectArmenteros(iPart))
   {
     histoParameters2D[iPart][2] = new TH2F(parName2D[2].Data(),parTitle2D[2].Data(),
-                                          100, -1.f, 1.f,
-                                          300,  0.f, 1.2f);
+                                          100, -2.f, 2.f, //100, -1.f, 1.f,
+                                          300,  0.f, 2.f); //300,  0.f, 1.2f);
     histoParameters2D[iPart][2]->GetXaxis()->SetTitle("#alpha (p_{L}^{+}-p_{L}^{-})/(p_{L}^{+}+p_{L}^{-})");
     histoParameters2D[iPart][2]->GetYaxis()->SetTitle("q_{t} [GeV/c]");
   }
@@ -754,12 +754,24 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
     histoParameters3D[iPart][0]->GetZaxis()->SetTitle("M");
     
     histoParameters3D[iPart][1] = new TH3F(parName3D[1].Data(),parTitle3D[1].Data(),
-                                      nBins[3],xMin[3],xMax[3],
-                                      nBins[16],xMin[16],xMax[16],
-                                      nBins[0],xMin[0],xMax[0]);
+                                           nBins[3],xMin[3],xMax[3],
+                                           nBins[16],xMin[16],xMax[16],
+                                           nBins[0],xMin[0],xMax[0]);
     histoParameters3D[iPart][1]->GetXaxis()->SetTitle("y");
     histoParameters3D[iPart][1]->GetYaxis()->SetTitle("m_{t} [GeV/c]");
     histoParameters3D[iPart][1]->GetZaxis()->SetTitle("M");
+    
+    int centralityHisto[3] = {2,3,16};
+    for(int iCH = 0; iCH<3; iCH++)
+    {
+      histoParameters3D[iPart][2+iCH] = new TH3F(parName3D[2+iCH].Data(),parTitle3D[2+iCH].Data(),
+                                                 10,0.,10.,
+                                                 nBins[centralityHisto[iCH]],xMin[centralityHisto[iCH]],xMax[centralityHisto[iCH]],
+                                                 nBins[0],xMin[0],xMax[0]);
+      histoParameters3D[iPart][2+iCH]->GetXaxis()->SetTitle("centrality bin");
+      histoParameters3D[iPart][2+iCH]->GetYaxis()->SetTitle(parAxisName[centralityHisto[iCH]]);
+      histoParameters3D[iPart][2+iCH]->GetZaxis()->SetTitle("M");
+    }
   }
 }
 
@@ -774,30 +786,26 @@ bool KFParticlePerformanceBase::IsCollectZRHistogram(int iParticle) const
 
 bool KFParticlePerformanceBase::IsCollect3DHistogram(int iParticle) const
 {
-  return abs(fParteff.partPDG[iParticle]) == 310 ||
-         abs(fParteff.partPDG[iParticle]) == 3122 ||
-         abs(fParteff.partPDG[iParticle]) == 3312 ||
-         abs(fParteff.partPDG[iParticle]) == 3334 ||
-#ifdef CBM
-         abs(fParteff.partPDG[iParticle]) == 7003112 ||
-         abs(fParteff.partPDG[iParticle]) == 7003222 ||
-         abs(fParteff.partPDG[iParticle]) == 7003312 ||
-         abs(fParteff.partPDG[iParticle]) == 8003222 ||
-         abs(fParteff.partPDG[iParticle]) == 9000321;
-#else
-         abs(fParteff.partPDG[iParticle]) == 421 ||
+//   return abs(fParteff.partPDG[iParticle]) == 310 ||
+//          abs(fParteff.partPDG[iParticle]) == 3122 ||
+//          abs(fParteff.partPDG[iParticle]) == 3312 ||
+//          abs(fParteff.partPDG[iParticle]) == 3334 ||
+// #ifdef CBM
+//          abs(fParteff.partPDG[iParticle]) == 7003112 ||
+//          abs(fParteff.partPDG[iParticle]) == 7003222 ||
+//          abs(fParteff.partPDG[iParticle]) == 7003312 ||
+//          abs(fParteff.partPDG[iParticle]) == 8003222 ||
+//          abs(fParteff.partPDG[iParticle]) == 9000321;
+// #else
+  return abs(fParteff.partPDG[iParticle]) == 421 ||
          abs(fParteff.partPDG[iParticle]) == 429 ||
          abs(fParteff.partPDG[iParticle]) == 426 ||
          abs(fParteff.partPDG[iParticle]) == 411 ||
          abs(fParteff.partPDG[iParticle]) == 431 ||
          abs(fParteff.partPDG[iParticle]) == 4122 ||
-         abs(fParteff.partPDG[iParticle]) == 500 ||
-         abs(fParteff.partPDG[iParticle]) == 501 ||
          abs(fParteff.partPDG[iParticle]) == 521 ||
-         abs(fParteff.partPDG[iParticle]) == 529 ||
-         abs(fParteff.partPDG[iParticle]) == 511 ||
-         abs(fParteff.partPDG[iParticle]) == 519;
-#endif
+         abs(fParteff.partPDG[iParticle]) == 511;
+// #endif
 }
 
 bool KFParticlePerformanceBase::IsCollectArmenteros(int iParticle) const
@@ -826,15 +834,8 @@ bool KFParticlePerformanceBase::IsCollectArmenteros(int iParticle) const
          abs(fParteff.partPDG[iParticle]) == 421 ||
          abs(fParteff.partPDG[iParticle]) == 420 ||
          abs(fParteff.partPDG[iParticle]) == 426 ||
-         abs(fParteff.partPDG[iParticle]) == 500 ||
-         abs(fParteff.partPDG[iParticle]) == 501 ||
          abs(fParteff.partPDG[iParticle]) == 521 ||
-         abs(fParteff.partPDG[iParticle]) == 529 ||
-         abs(fParteff.partPDG[iParticle]) == 511 ||
-         abs(fParteff.partPDG[iParticle]) == 519 ||
-         abs(fParteff.partPDG[iParticle]) == 300443 ||
-         abs(fParteff.partPDG[iParticle]) == 400443 ||
-         abs(fParteff.partPDG[iParticle]) == 500443;        
+         abs(fParteff.partPDG[iParticle]) == 511;        
 #endif
 }
 

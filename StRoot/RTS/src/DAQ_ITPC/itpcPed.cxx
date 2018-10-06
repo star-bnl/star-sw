@@ -38,7 +38,7 @@ itpcPed::~itpcPed()
 // rdo: 1 to 4
 void itpcPed::init(int sector, int rdo, u_int mask)
 {
-//	LOG(TERR,"%s: sector %d, RDO %d, mask 0x%04X",__PRETTY_FUNCTION__,sector,rdo,mask) ;
+	LOG(TERR,"%s: sector %d, RDO %d, mask 0x%04X",__PRETTY_FUNCTION__,sector,rdo,mask) ;
 
 	sector-- ;	// to start from 0
 	rdo-- ;		// to start from 0
@@ -82,6 +82,8 @@ void itpcPed::clear()
 	}
 	}
 	}
+
+	memset(fee_err,0,sizeof(fee_err)) ;
 
 }
 
@@ -223,6 +225,86 @@ int itpcPed::from_cache(const char *fname)
 	return 0 ;
 }
 
+int itpcPed::sanity(int mode)
+{
+	u_int bad_cou =0 ;
+	u_int good_cou =0 ;
+
+	for(int s=0;s<24;s++) {
+	for(int r=0;r<4;r++) {
+		if(ped_p[s][r][0][0]==0) continue ;
+
+		for(int p=0;p<16;p++) {
+			if(fee_mask[s][r] & (1<<p)) ;
+			else continue ;
+
+			for(int c=0;c<64;c++) {
+				ped_t *pt = ped_p[s][r][p][c] ;
+
+
+				int row, pad, fee_id ;
+
+				fee_id = padplane_id[s][r][p] ;
+
+				//if(p==4) fee_id = 54 ;
+				//else if(p==11) fee_id = 55 ;
+				//else fee_id = 46 ;
+
+				itpc_ifee_to_rowpad(fee_id,c,row,pad) ;
+
+				int pin ;
+				itpc_rowpad_to_id(row,pad,fee_id,pin) ;
+
+				//LOG(TERR,"%2d %d %2d %2d -1 %.3f %.3f :: FEE_ID %d,RP %d:%d, pin %d",s+1,r+1,p+1,c,pt->c_ped,pt->c_rms,fee_id,row,pad,pin) ;
+
+	
+				double m_ped = 0.0 ;
+				double m_rms = 0.0 ;
+				u_int m_cou = 0 ;
+
+				for(int t=0;t<=20;t++) {
+					m_ped += pt->ped[t] ;
+					m_rms += pt->rms[t] ;
+					m_cou++ ;
+				}
+
+
+
+				m_ped /= m_cou ;
+				m_rms /= m_cou ;
+
+				double pulser = pt->ped[90] - m_ped ; 	// this is where the pulser on the FEE QA stand resides
+
+				int bad = 0 ;
+
+				if(row) {	// only for connected pads!
+					if((m_rms<0.5) || (m_rms>1.8)) bad |= 1 ;
+					if((m_ped<40)||(m_ped>150)) bad |= 2 ;
+
+					if(pulser < 200 && mode == 1) bad |= 4 ;
+				}
+
+				if(bad) {
+					bad_cou++ ;
+					fee_err[s][r][p][c] |= bad ;
+					//LOG(TERR,"sector %d, rdo %d, port %d",s,r,p) ;
+					LOG(WARN,"Bad FEE Ch: Port %d, Channel %d (Padplane Id %d, rp %d:%d): flag 0x%0X: %.1f +- %.1f, %.1f",p+1,c,fee_id,row,pad,bad,m_ped,m_rms,pulser) ;
+				}
+				else {
+					good_cou++ ;
+				}
+
+			}
+		}
+	}
+	}
+
+
+	LOG(INFO,"Bad channels: %d/%d",bad_cou,bad_cou+good_cou) ;
+
+
+	return 0 ;
+}
 
 int itpcPed::to_cache(const char *fname)
 {

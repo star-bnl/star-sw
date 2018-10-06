@@ -429,8 +429,8 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
                 71.8,  73.4,    75,  76.6,  78.2,  79.8,  81.4,    83,  84.6,  86.2,
                 87.8,  89.4,    91,  92.6,  94.2,  95.8,  97.4,    99, 100.6, 102.2,
                103.8, 105.4,   107, 108.6, 110.2, 111.8, 113.4,   115, 116.6, 118.2} ! tpc padrow radii
-      Y1stAnode  =  54.0        ! the first anode wire positon, two first wires removed
-      YlastAnode = 120.0        ! the last  anode, two last wires removed
+      Y1stAnode  =  53.2        ! the first anode wire positon
+      YlastAnode = 120.8        ! the last  anode 
    EndFill
         }
 *
@@ -1776,18 +1776,12 @@ Block  TPSS is a division of gas volume corresponding to a supersectors
            do i_row = 1,nint(tprs_nRow)
               dy=tprs_npads(i_row)*tprs_pitch/2;
 	      if (i_row==1) then
-	        r1  = tprs_Y1stAnode
-	        r2  = tprs_Rpads(i_row)-tprs_width/2
-                dx1 = (r2 - r1)/2
-		x   = (r2 + r1)/2
-	        dy2  = r1*tan15;
-	        if (dy > dy2) dy = dy2
+                dx1 = ((tprs_Rpads(i_row)-tprs_width/2)-tprs_Y1stAnode)/2
+		x   = ((tprs_Rpads(i_row)-tprs_width/2)+tprs_Y1stAnode)/2
                 Create and Position TPAD  x=x z=z dx=dx1 dy=dy dz=dz
               else if (nint(tprs_super) .eq. 3) then
-	        r1  = tprs_Rpads(i_row-1)+tprs_width/2
-                r2  = tprs_Rpads(i_row  )-tprs_width/2
-	        dx1 = (r2 - r1)/4;
-	        x   = (r2 + r1)/2 + dx1;
+	        dx1 = ((tprs_Rpads(i_row)-tprs_width/2)-(tprs_Rpads(i_row-1)+tprs_width/2))/2
+                x   = ((tprs_Rpads(i_row)-tprs_width/2)+(tprs_Rpads(i_row-1)+tprs_width/2))/2
                 Create and Position TPAD  x=x z=z dx=dx1 dy=dy dz=dz
 !//              write(*,*) 'TPAD.A Sec=',i_sec,AG_NCOPY,'row=',i_row,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
               endif
@@ -1795,16 +1789,12 @@ Block  TPSS is a division of gas volume corresponding to a supersectors
               Create and Position TPAD  x=x z=z dx=dx dy=dy dz=dz
 !//           write(*,*) 'TPAD.B Sec=',i_sec,AG_NCOPY,'row=',i_row,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
 	      if (i_row==nint(tprs_nRow)) then
-	        r1 = tprs_Rpads(i_row)+tprs_width/2
-                r2 = tprs_YlastAnode
-	        dx1 = (r2 - r1)/2;
-	        x   = (r2 + r1)/2;
+   		dx1 = (tprs_YlastAnode - (tprs_Rpads(i_row)+tprs_width/2))/2;
+   	        x   = (tprs_YlastAnode + (tprs_Rpads(i_row)+tprs_width/2))/2;
                 Create and Position TPAD  x=x z=z dx=dx1 dy=dy dz=dz
               else if (nint(tprs_super)==3 ) then
-	        r1 = tprs_Rpads(i_row  )+tprs_width/2
-                r2 = tprs_Rpads(i_row+1)-tprs_width/2
-	        dx1 = (r2 - r1)/4;
-                x   = (r2 + r1)/2 - dx1
+	        dx1 = ((tprs_Rpads(i_row+1)-tprs_width/2)-(tprs_Rpads(i_row)+tprs_width/2))/2
+                x   = ((tprs_Rpads(i_row+1)-tprs_width/2)+(tprs_Rpads(i_row)+tprs_width/2))/2
                 Create and Position TPAD  x=x z=z dx=dx1 dy=dy dz=dz
 	      endif
            enddo

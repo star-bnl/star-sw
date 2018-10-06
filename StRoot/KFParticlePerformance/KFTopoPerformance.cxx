@@ -41,11 +41,10 @@
 #include <map>
 #include <algorithm>
 using std::sort;
-using std::cout;
-using std::endl;
+
 KFTopoPerformance::KFTopoPerformance():KFParticlePerformanceBase(),fTopoReconstructor(0),fPrimVertices(0), fMCTrackToMCPVMatch(0), 
   fPVPurity(0), fNCorrectPVTracks(0), fTrackMatch(0), vMCTracks(0), vMCParticles(0), fNeutralIndex(0), MCtoRParticleId(0), RtoMCParticleId(0), 
-  MCtoRPVId(0), RtoMCPVId(0), fPrintEffFrequency(1), fPartInfo()
+  MCtoRPVId(0), RtoMCPVId(0), fPrintEffFrequency(1), fPartInfo(), fCentralityBin(-1), fCentralityWeight(0.f)
 {
 }
 
@@ -1360,6 +1359,12 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
   {
     histoParameters3D[0][iParticle][0]->Fill(Rapidity,Pt,M,1);
     histoParameters3D[0][iParticle][1]->Fill(Rapidity,M_t,M,1);
+    if(fCentralityBin>=0)
+    {
+      histoParameters3D[0][iParticle][2]->Fill(fCentralityBin, Pt, M, fCentralityWeight);
+      histoParameters3D[0][iParticle][3]->Fill(fCentralityBin, Rapidity, M, fCentralityWeight);
+      histoParameters3D[0][iParticle][4]->Fill(fCentralityBin, M_t, M, fCentralityWeight);
+    }
   }
   
   //Fill histograms for the side bands analysis

@@ -47,6 +47,8 @@ public:
 	int from_cache(const char *fname) ;
 	int to_cache(const char *fname=0) ;
 
+	int sanity(int mode) ;
+
 	struct ped_t {
 		double ped[512] ;
 		double rms[512] ;
@@ -59,6 +61,8 @@ public:
 
 
 	u_char padplane_id[24][4][16] ;
+
+	u_char fee_err[24][4][16][64] ;
 
 private:
 
