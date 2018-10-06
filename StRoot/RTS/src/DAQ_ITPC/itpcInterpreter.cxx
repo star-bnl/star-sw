@@ -1079,12 +1079,41 @@ void itpcInterpreter::fee_dbase(const char *fname)
 	char *ct = ctime(&tm) ;
 	ct[strlen(ct)-1] = 0 ;
 
+//	LOG(TERR,"ped_c %p: %d %d",ped_c,sector_id,rdo_id) ;
+
 	for(int i=1;i<=16;i++) {
+		char err_str[16] ;
 		if(fee[i].wire1_id == 0) continue ;	//skip non-FEEs
+
+		itpcPed *p_c = (itpcPed *) ped_c ;
+		int err = 0 ;
+		int flag = 0 ;
+
+		for(int c=0;c<64;c++) {
+			if(p_c && p_c->fee_err[sector_id-1][rdo_id-1][i-1][c]) {
+				err++ ;
+				flag |= p_c->fee_err[sector_id-1][rdo_id-1][i-1][c] ;
+				LOG(ERR,"FEE 0x%08X, port %2d, channel %d - bad [0x%X]",fee[i].wire1_id,i,c,p_c->fee_err[sector_id-1][rdo_id-1][i-1][c]) ;
+
+			}
+			else {
+
+			}
+		}
+
+		if(err) {
+			sprintf(err_str,"errs%d=0x%X",err,flag) ;
+		}
+		else {
+			sprintf(err_str,"NC") ;		
+		}
 
 		//1wire1, padplane, port, RDO 1wire, RDO #, host, uname,date, comment
 		fprintf(db,"0x%08X,%2d,%2d,0x%08X,%d,%s,%s,%s,%s\n",fee[i].wire1_id,fee[i].padplane_id,i,
-			rdo_wire1_id,rdo_id,uname,hname,ct,"NC") ;
+			rdo_wire1_id,rdo_id,uname,hname,ct,err_str) ;
+
+
+
 	}
 	fprintf(db,"\n") ;	//one more NL
 
@@ -1306,9 +1335,11 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 	fee_id = 0 ;	// claim unknown
 	fee_cou++ ;	// so it starts from 1
 
-
-
-
+//	if(fee_cou==16) {
+//		for(int i=0;i<16;i++) {
+//			LOG(TERR,"... %d: 0x%08X",i,data[i]) ;
+//		}
+//	}
 
 	if((data[0] & 0xFFC0FFFF)==0x80000001) {
 		fee_version = 0 ;
@@ -1396,6 +1427,7 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 	
 	// I need fee_port here!!!
 
+//	LOG(TERR,"... %d: port %d, id %d",fee_cou,fee_port,fee_id) ;
 
 
 	//data[7] is the start of lane data!!!
@@ -1527,7 +1559,10 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		goto done ;	// occassionally a "delayed FEE" is the last one
 	}
 	if(data[0]==0x980000FC) goto done ;	// RDO-mon start
-
+	if(itpc_config[sector_id-1].rdo[rdo_id-1].fee_count && (fee_cou>itpc_config[sector_id-1].rdo[rdo_id-1].fee_count)) {
+		LOG(WARN,"RDO %d: fee_count %d",rdo_id,fee_cou) ;
+		goto done ;
+	}
 	goto fee_start ;
 
 
@@ -1737,6 +1772,9 @@ int itpcInterpreter::rdo_scan_top(u_int *data, int words)
 		break ;
 	case 0x9800FD60 :	// pedestal response from FEE
 		ret = ana_pedestal(data,data_end) ;
+		break ;
+	case 0x5800FD81 :	// end of run???
+		LOG(WARN,"End of run 0x%08X",d) ;
 		break ;
 	default :
 		if((d & 0xFF00000F)==0x98000004) {	// triggered event
