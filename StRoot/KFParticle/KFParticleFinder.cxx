@@ -139,8 +139,8 @@ void KFParticleFinder::FindParticles(KFPTrackVector* vRTracks, kfvector_float* C
 
   int nPartEstimation = nPart+vRTracks[0].Size()+vRTracks[1].Size()+vRTracks[2].Size()+vRTracks[3].Size() + nEmcClusters;
 
-  if(nPartEstimation < 100000)
-    Particles.reserve(nPartEstimation);
+//   if(nPartEstimation < 100000)
+//     Particles.reserve(nPartEstimation);
   //* Finds particles (K0s and Lambda) from a given set of tracks
 // std::cout << "kfp size  " <<  sizeof(KFParticle) << std::endl;
   {
@@ -1875,6 +1875,10 @@ void KFParticleFinder::ConstructTrackV0Cand(KFPTrackVector& vTracks,
       daughter_temp.GetMass(mass,dm);
       if( (fabs(mass - massPDG)/massSigmaPDG) > 3 ) continue;
       
+//       KFParticleSIMD daughter_tempSIMD(daughter_temp);
+//       daughter_tempSIMD.SetProductionVertex(PrimVtx[0]);
+//       if(daughter_tempSIMD.GetChi2()[0]/daughter_tempSIMD.GetNDF()[0] < 3. ) continue;
+      
       daughter_temp.SetId(Particles.size());
       daughter_temp.SetPDG(-1);
       mother_temp.SetId(Particles.size()+1);
@@ -2037,7 +2041,7 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
       
       trackPdgPos[0] = trackPDG;
       
-      if( (trackPDG == -1).isEmpty() || abs(V0PDG ==  421) )
+      if( (trackPDG == -1).isEmpty() || (abs(V0PDG) ==  421) || (abs(V0PDG) ==  411) )
       {
         nPDGPos = 1;
       }

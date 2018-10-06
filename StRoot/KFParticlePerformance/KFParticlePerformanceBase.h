@@ -125,8 +125,8 @@ class KFParticlePerformanceBase
   TH2F *hPartParam2DSecondary[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D];
   TH2F *hPartParam2DSecondaryMass[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D];
 
-  static const int nHistoPartParam3D = 2;
-  TH3F *hPartParam3D[1][KFPartEfficiencies::nParticles][nHistoPartParam3D]; // y-pt-M, y-mt-M
+  static const int nHistoPartParam3D = 5;
+  TH3F *hPartParam3D[1][KFPartEfficiencies::nParticles][nHistoPartParam3D]; // y-pt-M, y-mt-M, b-pt-M, b-y-M, b-mt-M
 
   static const int nPartEfficiency = 9;
   //1 index - particle index, 2 - index of efficiency, 3 - histogram dependency (vs p, pt ..)
