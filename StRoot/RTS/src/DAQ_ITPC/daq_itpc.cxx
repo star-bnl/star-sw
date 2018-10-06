@@ -967,7 +967,7 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		trg[t_cou].daq = (v>>4) & 0xF ;
 		trg[t_cou].t = t ; 
 
-		if((v&0xFFF00000) != 0x04300000) {
+		if(((v&0xFFF00000) != 0x04300000)&&((v&0xFFF00000)!=0x08300000)) {	// 0x043 external trigger, 0x083 local trigger
 			LOG(ERR,"RDO %d: 0x%08X: %d %d %d",rdo,trg[0].reserved[0],trg[0].t,trg[0].trg,trg[0].daq) ;
 		}
 			
@@ -988,6 +988,8 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		trg[t_cou].trg = v & 0xF ;
 		trg[t_cou].daq = (v>>4) & 0xF ;
 		trg[t_cou].t = t ; 
+
+		//LOG(TERR,"trg %d: 0x%08X: trg %d",i,v,v&0xF) ;
 
 		if(trg[t_cou].trg>=4 && trg[t_cou].trg<13) {	// FIFO trg
 			//LOG(WARN,"RDO %d: %d/%d: 0x%08X: %d %d %d",rdo,i,(trg_cou+1),
