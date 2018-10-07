@@ -1,4 +1,4 @@
-// $Id: StXTrakMaker.cxx,v 1.9 2017/05/04 01:20:46 perev Exp $
+// $Id: StXTrakMaker.cxx,v 1.10 2018/10/06 23:42:55 perev Exp $
 /// \File StXTrakMaker.cxx
 /// \author V.Perev 2016
 //
@@ -119,7 +119,7 @@ Int_t StXTrakMaker::Make()
     int            priCHARGE = geo1st->charge();
     auto h = geo1st->helicity();
     double priCURV = geo1st->curvature(); if (h<0) priCURV = -priCURV;
-    if (fabs(priCURV  )>1./200) continue;    
+    if (fabs(priCURV  )>1./90) continue;    
     THelixTrack priHLX(priPOS.xyz(),priMOM.xyz(),priCURV);
 
     mSwim->Set1stPoint(priCHARGE,priPOS.xyz(),priMOM.xyz());
@@ -129,7 +129,7 @@ Int_t StXTrakMaker::Make()
     int CHARGE = geo2nd->charge();
     h = geo2nd->helicity();
     double CURV = geo2nd->curvature(); if (h<0) CURV = -CURV;
-    if (fabs(CURV )>1./200) continue;    
+    if (fabs(CURV )>1./90) continue;    
     StThreeVectorD STPOS = geo2nd->origin();
     StThreeVectorD STMOM = geo2nd->momentum();
     mSwim->Set2ndPoint(CHARGE,STPOS.xyz(),STMOM.xyz());
