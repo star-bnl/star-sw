@@ -6421,7 +6421,7 @@ TGeoVolume *MTT1 = gGeoManager->MakeBox("MTTG",GetMed("MUTD_STANDARD"),4.9911,33
   MTT1->SetVisibility(0);
   MTT1->SetLineColor(3);
 TGeoVolumeMulti *TPAD = gGeoManager->MakeVolumeMulti("TPAD", GetMed("TPCE_SENSITIVE_GAS")); TPAD->SetTitle("TPAD");
- TPAD->AddVolume(gGeoManager->MakeBox("TPAD",GetMed("TPCE_SENSITIVE_GAS"),0.8999996,13,104.8516));
+ TPAD->AddVolume(gGeoManager->MakeBox("TPAD",GetMed("TPCE_SENSITIVE_GAS"),0.8999993,13,104.8516));
   TPAD->SetLineColor(2);
  TPAD->AddVolume(gGeoManager->MakeBox("TPAD",GetMed("TPCE_SENSITIVE_GAS"),0.8,13,104.8516));
  TPAD->AddVolume(gGeoManager->MakeBox("TPAD",GetMed("TPCE_SENSITIVE_GAS"),0.8,13.5,104.8516));
@@ -6463,7 +6463,7 @@ TGeoVolumeMulti *TPAD = gGeoManager->MakeVolumeMulti("TPAD", GetMed("TPCE_SENSIT
  TPAD->AddVolume(gGeoManager->MakeBox("TPAD",GetMed("TPCE_SENSITIVE_GAS"),0.8,29,104.8516));
  TPAD->AddVolume(gGeoManager->MakeBox("TPAD",GetMed("TPCE_SENSITIVE_GAS"),0.8,29.5,104.8516));
  TPAD->AddVolume(gGeoManager->MakeBox("TPAD",GetMed("TPCE_SENSITIVE_GAS"),0.8,30,104.8516));
- TPAD->AddVolume(gGeoManager->MakeBox("TPAD",GetMed("TPCE_SENSITIVE_GAS"),0.9000015,30,104.8516));
+ TPAD->AddVolume(gGeoManager->MakeBox("TPAD",GetMed("TPCE_SENSITIVE_GAS"),0.9000031,30,104.8516));
 TGeoVolumeMulti *TPA1 = gGeoManager->MakeVolumeMulti("TPAD", GetMed("TPCE_SENSITIVE_GAS")); TPA1->SetTitle("TPA1");
  TPA1->AddVolume(gGeoManager->MakeBox("TPAD",GetMed("TPCE_SENSITIVE_GAS"),1.700001,32.83,105.0516));
   TPA1->SetLineColor(2);
