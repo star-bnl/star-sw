@@ -22,7 +22,7 @@ import datetime
 #----------------------------------------------------------
 def setup_parser():
    # parser.add_argument("-x", dest="x",help="x")
-   parser.add_argument('-trigger','-t', action='append', dest="trigIdL", help="trigId, accepts many",default=['0'])
+   parser.add_argument('-trigger','-t', action='append', dest="trigIdL", help="trigId, accepts many",default=[])
    parser.add_argument("-trg", dest="triggerSetName",help="data trigger set name")
 
    parser.add_argument("-lib", dest="starLib",help="STAR library version")
