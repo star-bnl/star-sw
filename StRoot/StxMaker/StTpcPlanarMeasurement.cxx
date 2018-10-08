@@ -37,22 +37,22 @@ StTpcPlanarMeasurement::StTpcPlanarMeasurement(const StTpcHit *hit,TrackPoint* t
   Int_t rowVMC = 0;
   Int_t NoOfInnerRows = St_tpcPadConfigC::instance()->innerPadRows(sector);
   Int_t NoOfRows = St_tpcPadConfigC::instance()->padRows(sector);
-  StiHitErrorCalculator *errCalc = 0;
+  fErrCalc = 0;
   if (NoOfInnerRows == 13) {
-    if (rowRC <= NoOfInnerRows) {rowVMC = 3*(rowRC -  1) +  2;  errCalc = StiTpcInnerHitErrorCalculator::instance(); }
-    else                        {rowVMC =   (rowRC - 14  + 41); errCalc = StiTpcOuterHitErrorCalculator::instance(); }
+    if (rowRC <= NoOfInnerRows) {rowVMC = 3*(rowRC -  1) +  2;  fErrCalc = StiTpcInnerHitErrorCalculator::instance(); }
+    else                        {rowVMC =   (rowRC - 14  + 41); fErrCalc = StiTpcOuterHitErrorCalculator::instance(); }
     if (rowVMC > 72)   rowVMC = 72;
   } else {// iTPC
     if (rowRC <= NoOfInnerRows) {
       rowVMC = rowRC + 1; 
       if (rowVMC <  2) rowVMC =  2; 
       if (rowVMC > 41) rowVMC = 41;
-      errCalc = StiTPCHitErrorCalculator::instance(); 
+      fErrCalc = StiTPCHitErrorCalculator::instance(); 
     } else {
       rowVMC = rowRC + 3;
       if (rowVMC < 44) rowVMC = 44;
       if (rowRC > NoOfRows) rowRC = NoOfRows;
-      errCalc = StiTpcOuterHitErrorCalculator::instance(); 
+      fErrCalc = StiTpcOuterHitErrorCalculator::instance(); 
     }
   }
   Int_t planeId = 100*sector + rowRC;
@@ -106,7 +106,7 @@ StTpcPlanarMeasurement::StTpcPlanarMeasurement(const StTpcHit *hit,TrackPoint* t
   rawHitCoords_[1] = xyzL[2];
   Double_t ecross = 0.12*0.12, edip = 0.16*0.16;
 #if 0
-  errCalc->calculateError(xyzL[2], pars.eta(), pars.tanl(), ecross, edip);
+  fErrCalc->calculateError(xyzL[2], pars.eta(), pars.tanl(), ecross, edip);
 #endif
   rawHitCov_(0,0) = ecross;
   rawHitCov_(1,1) = edip;

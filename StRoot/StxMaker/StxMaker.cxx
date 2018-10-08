@@ -188,43 +188,6 @@ Double_t StxMaker::ConvertCA2XYZ(const AliHLTTPCCAGBTrack &tr, TVector3 &pos, TV
   TRSymMatrix C(6,errs.G());
   TRSymMatrix Cov(F,TRArray::kAxSxAT,C);
   // --------------------------------------------------------------------------------
-#if 0
-  Double_t X = caPar.GetX();
-  Double_t Y = caPar.GetY();        // 0
-  Double_t Z = caPar.GetZ();        // 1
-  Double_t S = caPar.GetSinPhi();   // 2
-  Double_t T = caPar.GetDzDs();     // 3
-  Double_t V = caPar.GetQPt();      // 4
-
-  Double_t x =  X;
-  Double_t y =  Y;
-  Double_t z = -Z;
-  Double_t charge = 1;
-  if (V > 0) charge = -1;
-  Double_t pT = - charge/V;
-  Double_t t  = -T;
-  Double_t Phi = TMath::Pi()/2 - TMath::ASin(S);
-  Double_t s   = TMath::Sin(Phi); // sqrt(1 - S**2)
-  Double_t c   = TMath::Cos(Phi); // S
-  
-  Double_t px = pT*c; //  pT*S
-  Double_t py = pT*s; //  pT*sqrt(1 - S**2)
-  Double_t pz = pT*t; // -pT*T
-  Double_t xyzp[6] = { x, y, z, px, py, pz};
-  Double_t dpTdV = -charge*pT*pT;
-  Double_t f[36] = {
-    //         Y    Z       S          T         V
-    /*  x */   0,   0,      0,         0,        0,
-    /*  y */   1,   0,      0,         0,        0,
-    /*  z */   0,  -1,      0,         0,        0,
-    /* px */   0,   0,     pT,         0,  dpTdV*s,
-    /* py */   0,   0, pT*s/c,         0 , dpTdV*c,
-    /* pz */   0,   0,      0,       -pT, -dpTdV*t}; 
-  TRMatrix F(6,5,f);      PrPP(ConvertCA2XYZ,F);
-  const Float_t *caCov = caPar.GetCov();
-  TRSymMatrix C(5,caCov); PrPP(ConvertCA2XYZ,C);
-  TRSymMatrix Cov(F,TRArray::kAxSxAT,C); PrPP(ConvertCA2XYZ,Cov);
-#endif
   pos = TVector3(xyzp);
   mom = TVector3(xyzp+3);
   for (Int_t i = 0; i < 6; i++) 
@@ -239,15 +202,6 @@ Double_t StxMaker::ConvertCA2XYZ(const AliHLTTPCCAGBTrack &tr, TVector3 &pos, TV
 Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
   static TStopwatch *watch = new  TStopwatch;
   watch->Start(kTRUE);
-#if 0
-  const double outlierProb = -0.1;
-  const double outlierRange = 2;
-
-  const double hitSwitchProb = -0.1; // probability to give hits to fit in wrong order (flip two hits)
-
-  const int splitTrack = -5; //nMeasurements/2; // for track merging testing.
-  const bool fullMeasurement = false; // put fit result of first tracklet as FullMeasurement into second tracklet, don't merge
-#endif
   //const genfit::eFitterType fitterId = genfit::SimpleKalman;
   const genfit::eFitterType fitterId = genfit::RefKalman;
   //const genfit::eFitterType fitterId = genfit::DafRef;
@@ -322,30 +276,14 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
   genfit::MaterialEffects::getInstance()->init(new genfit::TGeoMaterialInterface());
   const int pdg = 211; // -13;               // particle pdg code mu+
   //  const double charge = TDatabasePDG::Instance()->GetParticle(pdg)->Charge()/(3.);
-#if 0
-  double maxWeight(0);
-  unsigned int nTotalIterConverged(0);
-  unsigned int nTotalIterNotConverged(0);
-  unsigned int nTotalIterSecondConverged(0);
-  unsigned int nTotalIterSecondNotConverged(0);
-  unsigned int nConvergedFits(0);
-  unsigned int nUNConvergedFits(0);
-  unsigned int nConvergedFitsSecond(0);
-  unsigned int nUNConvergedFitsSecond(0);
-
-
-  CALLGRIND_START_INSTRUMENTATION;
-#endif
   //========== Reference  track ======================================================================
   TVector3 posSeed, momSeed;
   TMatrixDSym covSeed(6);
-#if 1
   const AliHLTTPCCATrackParam& caPar = tr.InnerParam();
   Double_t alpha = tr.Alpha();
   StxNodePars pars;
   StxNodeErrs errs;
   StxCAInterface::Instance().ConvertPars(caPar, alpha, pars, errs);
-#endif  
   Double_t sign = ConvertCA2XYZ(tr, posSeed, momSeed, covSeed);
   genfit::AbsTrackRep* rep = new genfit::RKTrackRep(sign*pdg);
   if (Debug()) rep->setDebugLvl();
@@ -502,6 +440,4 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
 	  watch->Print("");
   return kStOK;
 }
-#if 0
-#endif
 // $Log: StxMaker.cxx,v $
