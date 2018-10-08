@@ -22,7 +22,7 @@ import datetime
 #----------------------------------------------------------
 def setup_parser():
    # parser.add_argument("-x", dest="x",help="x")
-   parser.add_argument('-trigger','-t', action='append', dest="trigIdL", help="trigId, accepts many",default='0')
+   parser.add_argument('-trigger','-t', action='append', dest="trigIdL", help="trigId, accepts many",default=['0'])
    parser.add_argument("-trg", dest="triggerSetName",help="data trigger set name")
 
    parser.add_argument("-lib", dest="starLib",help="STAR library version")
@@ -38,11 +38,11 @@ def setup_parser():
    parser.add_argument("-simulator", dest="simulatorMode",help="simulator mode",default='0')
    parser.add_argument("-zerobias", dest="zerobiasMode",help="zerobias mode",default='0')
    parser.add_argument("-moretags", dest="moretagsMode",help="moretags mode",default='0')
-   parser.add_argument("-kumacfile", dest="kumacFile",help="simulator macro")
+   parser.add_argument("-kumacfile", dest="kumacFile",help="simulator macro",default='StRoot/macros/embedding/a.kumac')
    parser.add_argument("-seed", dest="seed",help="random number generator for simulator",default='StRoot/macros/embedding/get_random_seed')
-   parser.add_argument("-daqevents", dest="daqEvents",help="simulator daq file and event number list")
+   parser.add_argument("-daqevents", dest="daqEvents",help="simulator daq file and event number list",default='StRoot/macros/embedding/a.txt')
 
-   parser.add_argument("-z", dest="zVertMax",help="z vertex max",default='200')
+   parser.add_argument("-zvertex", dest="zVertMax",help="z vertex max",default='200')
    parser.add_argument("-vrcut", dest="vrcut",help="r-vertex cut",default='100')
 
 
