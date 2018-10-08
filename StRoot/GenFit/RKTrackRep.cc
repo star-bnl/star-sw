@@ -2337,8 +2337,14 @@ double RKTrackRep::Extrap(const DetPlane& startPlane,
 
   M1x7 startState7 = state7;
 
-  while(true){
-
+  static const unsigned int maxIt(100);
+   unsigned int iterations(0);
+ while(true){
+   if(++iterations == maxIt) {
+      Exception exc("RKTrackRep::Extrap ==> maximum number of iterations reached",__LINE__,__FILE__);
+      exc.setFatal();
+      throw exc;
+    }
     if (debugLvl_ > 0) {
       debugOut << "\n============ RKTrackRep::Extrap loop nr. " << numIt << " ============\n";
       debugOut << "Start plane: "; startPlane.Print();
