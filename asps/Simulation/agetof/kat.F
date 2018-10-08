@@ -110,7 +110,7 @@ C------------------------------------------------------------------
          O(L-1)=O(L)
          O(L)=Z
       END IF
-150   IF(O(B).NE.1.AND.O(B).NE.0) STOP 18
+150   IF(O(B).NE.1.AND.O(B).NE.0) STOP !18
       GOTO 99999
 100   IUNI=O(B)
       REWIND IUNI

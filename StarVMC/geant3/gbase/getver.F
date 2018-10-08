@@ -76,6 +76,7 @@ C.
       CHVER = ' '
       HVERS = 0.
       CHDAT = ' '
+#if __GNUC__ < 7
 *
       WRITE(CHTIT,'(
      + 40H GEANT   3.21/11  100298                         
@@ -119,5 +120,6 @@ C.
       ENDIF
 *
       CHDAT=CHTIT(JEND+3:JEND+11)
+#endif
 *
   999 END

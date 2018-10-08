@@ -66,7 +66,7 @@ C+SELF. <ENDVAX>;
       ELSE
          CALLFIND(16,7,O(17))
 C    <VAX> +SELF,IF=VAX.; cLIB$STOP(PARSER$ERROR); +SELF. <ENDVAX>
-         STOP 'parser error(s) occured'
+         STOP !'parser error(s) occured'
       END IF
 C  IF(MODE==0) cINITAL(0,0,-1,0,0,0,0);   - PLN - 20-03-93 - binary not
 Cused
