@@ -29,14 +29,12 @@ StPlanarMeasurement::StPlanarMeasurement(const StHit *hit,TrackPoint* trackPoint
   rawHitCov_(1,1) = hit->positionError().y()*hit->positionError().y();
   rawHitCov_(2,2) = hit->positionError().z()*hit->positionError().z();
 }
-#if 0
 //________________________________________________________________________________
-const TVectorD& StPlanarMeasurement::getRawHitCoords() const {return genfit::AbsMeasurement::getRawHitCoords();}
+const TVectorD& StPlanarMeasurement::getRawHitCoords(genfit::StateOnPlane *state) const {return genfit::AbsMeasurement::getRawHitCoords(state);}
 //________________________________________________________________________________
-const TMatrixDSym& StPlanarMeasurement::getRawHitCov() const {return genfit::AbsMeasurement::getRawHitCov();}
+const TMatrixDSym& StPlanarMeasurement::getRawHitCov(genfit::StateOnPlane *state) const {return genfit::AbsMeasurement::getRawHitCov(state);}
 //________________________________________________________________________________
-TVectorD& StPlanarMeasurement::getRawHitCoords() {return genfit::AbsMeasurement::getRawHitCoords();}
+TVectorD& StPlanarMeasurement::getRawHitCoords(genfit::StateOnPlane *state) {return genfit::AbsMeasurement::getRawHitCoords(state);}
 //________________________________________________________________________________
-TMatrixDSym& StPlanarMeasurement::getRawHitCov(genfit::StateOnPlane *state) {return genfit::AbsMeasurement::getRawHitCov();}
+TMatrixDSym& StPlanarMeasurement::getRawHitCov(genfit::StateOnPlane *state) {return genfit::AbsMeasurement::getRawHitCov(state);}
 //________________________________________________________________________________
-#endif

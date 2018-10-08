@@ -14,10 +14,6 @@
 #include "StEventUtilities/StEventHelper.h"
 #include "TRMatrix.h"
 #include "TRVector.h"
-#include "StDetectorDbMaker/St_tpcPadConfigC.h"
-#include "StDetectorDbMaker/StiTPCHitErrorCalculator.h"
-#include "StDetectorDbMaker/StiTpcInnerHitErrorCalculator.h"
-#include "StDetectorDbMaker/StiTpcOuterHitErrorCalculator.h"
 // GenFit
 #include <iostream>
 #include <execinfo.h>
@@ -68,20 +64,19 @@
 
 #include "GenFit/HelixTrackModel.h"
 #include "GenFit/MeasurementCreator.h"
-
+#include "StTpcPlanarMeasurement.h"
 #include "TApplication.h"
 #include "TCanvas.h"
 #include "TDatabasePDG.h"
 #include "TEveManager.h"
 #include "TGeoManager.h"
 #include "TGeoMatrix.h"
-#include "TGeoPhysicalNode.h"
-#include "TGeoBBox.h"
-#include "StarVMC/StarVMCApplication/StarVMCDetector.h"
 #include "TH1D.h"
 #include "TRandom.h"
 #include "TStyle.h"
 #include "TVector3.h"
+#include "TStopwatch.h"
+#include "TString.h"
 #include <vector>
 
 #include "TROOT.h"
@@ -242,6 +237,8 @@ Double_t StxMaker::ConvertCA2XYZ(const AliHLTTPCCAGBTrack &tr, TVector3 &pos, TV
 }
 //________________________________________________________________________________
 Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
+  static TStopwatch *watch = new  TStopwatch;
+  watch->Start(kTRUE);
 #if 0
   const double outlierProb = -0.1;
   const double outlierRange = 2;
@@ -307,6 +304,9 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
   if (Debug()) {
     fitter->setDebugLvl(10);
     gGeoManager->SetVerboseLevel(5);
+  } else {
+    fitter->setDebugLvl(0);
+    gGeoManager->SetVerboseLevel(0);
   }
   /*if (dynamic_cast<genfit::DAF*>(fitter) != nullptr) {
     //static_cast<genfit::DAF*>(fitter)->setBetas(100, 50, 25, 12, 6, 3, 1, 0.5, 0.1);
@@ -377,10 +377,6 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
   std::vector<genfit::eMeasurementType> measurementTypes;
   //  std::vector< std::vector<genfit::AbsMeasurement*> > measurements;
   //  genfit::AbsMeasurement* measurement = 0;
-  static TString path2TPC("/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_%d/TPSS_%d/TPAD_%d");
-  const int detId(0); // detector ID
-  int planeId(0); // detector plane ID
-  int hitId(0); // hit ID
   if (Debug()) {
     cout << "momSeed\t"; momSeed.Print("");
     cout << "posSeed\t"; posSeed.Print("");
@@ -390,106 +386,8 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
     const Int_t index = StxCAInterface::Instance().GetTracker()->TrackHit( tr.FirstHitRef() + iHit );
     const Int_t hId   = StxCAInterface::Instance().GetTracker()->Hit( index ).ID();
     const StTpcHit *tpcHit = fSeedHits[hId].hit;
-    Int_t sector = tpcHit->sector();
-    Int_t half   = (sector  - 1)/12 + 1;
-    Int_t sectorVMC = (sector - 1)%12 + 1;
-    Int_t rowRC = tpcHit->padrow();
-    Int_t rowVMC = 0;
-    Int_t NoOfInnerRows = St_tpcPadConfigC::instance()->innerPadRows(sector);
-    Int_t NoOfRows = St_tpcPadConfigC::instance()->padRows(sector);
-    StiHitErrorCalculator *errCalc = 0;
-    if (NoOfInnerRows == 13) {
-      if (rowRC <= NoOfInnerRows) {rowVMC = 3*(rowRC -  1) +  2;  errCalc = StiTpcInnerHitErrorCalculator::instance(); }
-      else                        {rowVMC =   (rowRC - 14  + 41); errCalc = StiTpcOuterHitErrorCalculator::instance(); }
-      if (rowVMC > 72)   rowVMC = 72;
-    } else {// iTPC
-      if (rowRC <= NoOfInnerRows) {
-	rowVMC = rowRC + 1; 
-	if (rowVMC <  2) rowVMC =  2; 
-	if (rowVMC > 41) rowVMC = 41;
-	errCalc = StiTPCHitErrorCalculator::instance(); 
-      } else {
-	rowVMC = rowRC + 3;
-	if (rowVMC < 44) rowVMC = 44;
-	if (rowRC > NoOfRows) rowRC = NoOfRows;
-	errCalc = StiTpcOuterHitErrorCalculator::instance(); 
-      }
-    }
-    Int_t indx[3] = {half, sectorVMC, rowVMC};
-    TString path(StarVMCDetector::FormPath(path2TPC,3,indx));
-    if (! gGeoManager->CheckPath(path)) {
-      cout << "Illegal path " << path.Data() << endl;
-      continue;
-    }
-    TGeoPhysicalNode *nodeP = gGeoManager->MakePhysicalNode(path);
-    if (! nodeP) {
-      cout << "TGeoPhysicalNode with path " << path.Data() << " does not exists" << endl;
-      continue;
-    }
-    const TGeoHMatrix &D = *nodeP->GetMatrix();
-    genfit::eMeasurementType type = genfit::Spacepoint;
-    measurementTypes.push_back(type);
-    Double_t xyzG[3] = {tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z()};
-    Double_t xyzL[3];
-    D.MasterToLocal(xyzG, xyzL);
-    // Shift center of pad row
-    Double_t shiftG[3];
-    TGeoHMatrix DT(D);
-    if (DT.Determinant() < 0) {
-      Double_t *r = DT.GetRotationMatrix();
-#if 0
-      r[2] = - r[2];
-      r[5] = - r[5];
-      r[8] = - r[8];
-#else
-      //      for (Int_t i = 0; i < 9; i++) r[i] = - r[i];
-      r[1] = - r[1];
-      r[4] = - r[4];
-      r[7] = - r[7];
-#endif
-      Double_t shiftL[3] = {xyzL[0], 0, -((TGeoBBox *)nodeP->GetVolume(-1)->GetShape())->GetDZ()};
-      D.LocalToMaster(shiftL,shiftG);
-    } else {
-      Double_t shiftL[3] = {xyzL[0], 0, ((TGeoBBox *)nodeP->GetVolume(-1)->GetShape())->GetDZ()};
-      D.LocalToMaster(shiftL,shiftG);
-    }
-    DT.SetTranslation(shiftG);
-    Double_t xyzLT[3];
-    DT.MasterToLocal(xyzG, xyzLT);
-    Double_t PosG[3] = {posSeed.x(), posSeed.y(), posSeed.z()}; 
-    Double_t PosL[3];
-    DT.MasterToLocal(PosG,PosL);
-    TVector3 o(shiftG);
-    TVector3 u(DT.GetRotationMatrix()+3);
-    TVector3 v(DT.GetRotationMatrix()+6);
-    DT.MasterToLocal(xyzG, xyzL);
-    genfit::DetPlane *plane = new genfit::DetPlane(o,u,v);
-    TVectorD HitCoords(2);
-    HitCoords[0] = xyzL[1];
-    HitCoords[1] = xyzL[2];
-    Double_t ecross, edip;
-    errCalc->calculateError(xyzL[2], pars.eta(), pars.tanl(), ecross, edip);
-    TMatrixDSym hitCov(2);
-    hitCov(0,0) = ecross;
-    hitCov(1,1) = edip;
-    if (Debug()) {
-      cout << path.Data() << " local xyz " << xyzL[0] << "/" << xyzL[1] << "/" << xyzL[2] <<  endl;
-      cout << path.Data() << " local xyzT " << xyzLT[0] << "/" << xyzLT[1] << "/" << xyzLT[2] <<  endl;
-      cout << path.Data() << " local PosL " << PosL[0] << "/" << PosL[1] << "/" << PosL[2] <<  endl;
-      tpcHit->Print();
-    }
-    genfit::PlanarMeasurement* measurement = new genfit::PlanarMeasurement(HitCoords, hitCov, detId, ++hitId, nullptr);
-#if 0
-    const Double_t *r = D.GetRotationMatrix();
-    TVector3 u(r[0],r[3],r[6]);
-    TVector3 v(r[1],r[4],r[7]);
-    measurement->setPlane(genfit::SharedPlanePtr(new genfit::DetPlane(TVector3(D.GetTranslation()), TVector3(D.GetRotationMatrix()+3), TVector3(D.GetRotationMatrix()+6))), ++planeId);
-    //    measurement->setPlane(genfit::SharedPlanePtr(new genfit::DetPlane(TVector3(D.GetTranslation()),u,v)),++planeId);
-#else
-    measurement->setPlane(genfit::SharedPlanePtr(plane), ++planeId);
-#endif
+    genfit::PlanarMeasurement* measurement = new StTpcPlanarMeasurement(tpcHit, nullptr);
     fitTrack.insertPoint(new genfit::TrackPoint(measurement, &fitTrack));
-    
   }
   try{
     //check
@@ -601,6 +499,7 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
   
 
 #endif
+	  watch->Print("");
   return kStOK;
 }
 #if 0

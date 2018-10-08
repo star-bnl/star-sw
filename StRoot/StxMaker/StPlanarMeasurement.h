@@ -14,12 +14,10 @@ class StPlanarMeasurement : public genfit::PlanarMeasurement {
   StPlanarMeasurement(const StHit *hit, genfit::TrackPoint* trackPoint);
   virtual ~StPlanarMeasurement() {}
   virtual genfit::AbsMeasurement* clone() const {return new StPlanarMeasurement(*this);}
-#if 0
   virtual const TVectorD& getRawHitCoords(genfit::StateOnPlane *state=0) const;
   virtual const TMatrixDSym& getRawHitCov(genfit::StateOnPlane *state=0) const;
   virtual       TVectorD& getRawHitCoords(genfit::StateOnPlane *state=0);
   virtual       TMatrixDSym& getRawHitCov(genfit::StateOnPlane *state=0);
-#endif
  protected:
   const StHit  *fHit; 
   StiHitErrorCalculator *fErrCalc;
