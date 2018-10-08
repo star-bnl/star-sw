@@ -66,7 +66,7 @@ StarGenParticle *StarKinematics::AddParticle()
 // ----------------------------------------------------------------------------
 StarGenParticle *StarKinematics::AddParticle( const Char_t *type )
 {
-  TParticlePDG *pdg = data(type); assert(pdg);
+  TParticlePDG *pdg = StarParticleData::instance().GetParticle(type);  /* data(type); */ assert(pdg);
   Int_t id = pdg->PdgCode();
   StarGenParticle *p = AddParticle();
   p->SetStatus( StarGenParticle::kFinal );
