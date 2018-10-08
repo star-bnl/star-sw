@@ -264,7 +264,7 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                                       "","","",kFALSE},
   {"XC2017I",     "","","y2017,XC",                                                        "","","",kFALSE},
   {"XC2018I",     "","","y2018,XC",                                                        "","","",kFALSE},
-  {"XC2018",      "","","y2018,XC,h,sdt20180426.122000",                                   "","","",kFALSE},
+  {"XC2018",      "","","y2018,XC,sdt20180426.122000",                                     "","","",kFALSE},
   {"XC2019I",     "","","y2019,XC",                                                        "","","",kFALSE},
   {"HLT2017",     "","","y2017,TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,"
    "OSpaceZ2,OGridLeak3D,CorrX,tpcDB,TpcHitMover"
