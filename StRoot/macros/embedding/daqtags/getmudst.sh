@@ -1,5 +1,20 @@
 #!/bin/bash
 
+if [[ ! $HOST =~ "rcas" ]] ; then
+   echo this code can only be used for RCF!
+   exit
+fi
+
+if [[ ! $# -eq 2 ]] ; then
+   echo ""
+   echo " Usage : $0 [good_daqfilelist.500.daq.list] [ProdId]"
+   echo " output MuDst filelist : good_daqfilelist.500.[ProdId].mudst.list,"
+   echo " output tags filelist : good_daqfilelist.500.[ProdId].tags.list. "
+   echo ""
+   exit
+fi
+
+
 daqlist=$1
 prod=$2
 
