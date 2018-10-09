@@ -17,7 +17,7 @@ if [[ $HOST =~ "cori" ]] ; then
    exit
 fi
 
-daqdir=`grep "\-daq" preparexmlslr.sh | awk '{print $2}'`
+daqdir=`grep "\-daq\ " preparexmlslr.sh | awk '{print $2}'`
 nfsetjob=`ls $daqdir/*daq |wc -l`
 echo $nfsetjob jobs per FSET!
 
