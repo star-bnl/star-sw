@@ -17,6 +17,13 @@ using namespace std;
 StEpdEpFinder::StEpdEpFinder(int nCentBins, char const* CorrectionFile) : mFormatUsed(2), mThresh(0.3), mMax(2.0), mWeightingScheme(0)
 {
 
+  cout << "\n**********\n*  Welcome to the EPD Event Plane finder.\n"
+       << "*  Please note that when you specify 'order' as an argument to a method,\n"
+       << "*  then 1=first-order plane, 2=second-order plane, etc.\n"
+       << "*  This code is currently configured to go up to order=" << _EpOrderMax << "\n"
+       << "*  To include higher orders, edit StEpdUtil/StEpdEpInfo.h\n**********\n";
+
+
   mEpdGeom = new StEpdGeom();
 
   for (int iOrder=0; iOrder<_EpOrderMax; iOrder++){
@@ -86,16 +93,20 @@ StEpdEpFinder::StEpdEpFinder(int nCentBins, char const* CorrectionFile) : mForma
 }
 
 void StEpdEpFinder::SetEtaWeights(int order, TH2D EtaWeights){
-  mWeightingScheme = 1;
-  if (order>_EpOrderMax){
-    std::cout << "You are setting weights for EP of order " << order << " which is too high!  Increase _EpOrderMax in StEpdEpFinder.h\n";
-    assert(0);
+  if (OrderOutsideRange(order)){
+    cout << "Ignoring your eta weights\n";
+    return;
   }
+  mWeightingScheme = 1;
   mEtaWeights[order-1] = new TH2D;
   EtaWeights.Copy(*mEtaWeights[order-1]);
 }
 
 void StEpdEpFinder::SetRingWeights(int order, double* RingWeights){
+  if (OrderOutsideRange(order)){
+    cout << "Ignoring your ring weights\n";
+    return;
+  }
   mWeightingScheme = 2;
   if (order>_EpOrderMax){
     std::cout << "You are setting weights for EP of order " << order << " which is too high!  Increase _EpOrderMax in StEpdEpFinder.h\n";
@@ -293,5 +304,61 @@ double StEpdEpFinder::GetPsiInRange(double Qx, double Qy, int order){
     else if (temp>AngleWrapAround) temp -= AngleWrapAround;
   }
   return temp;
+}
+
+bool StEpdEpFinder::OrderOutsideRange(int order){
+  if (order < 1) {
+    cout << "\n*** Invalid order specified ***\n";
+    cout << "order must be 1 (for first-order plane) or higher\n";
+    return true;
+  }
+  if (order > _EpOrderMax) {
+    cout << "\n*** Invalid order specified ***\n";
+    cout << "Maximum order=" << _EpOrderMax << ". To change, edit StEpdUtil/StEpdEpInfo.h\n";
+    return true;
+  }
+  return false;
+}
+
+
+TString StEpdEpFinder::Report(){
+
+  TString rep = Form("This is the StEpdEpFinder Report:\n");
+  rep += Form("Number of centrality bins = %d\n",mNumberOfCentralityBins);
+  rep += Form("Format of input data = %d  [note: 0=StEvent, 1=StMuDst, 2=StPicoDst]\n",mFormatUsed);
+  rep += Form("Threshold (in MipMPV units) = %f  and MAX weight = %f\n",mThresh,mMax);
+  rep += Form("Weighting scheme used=%d  [note: 0=none, 1=eta-based weighting, 2=ring-based weighting]\n",mWeightingScheme);
+  if (mWeightingScheme==1){
+    for (int order=1; order<_EpOrderMax+1; order++){
+      if (mEtaWeights[order-1]==0){
+        rep += Form("No eta weighing for order n=%d\n",order);
+      }
+      else{
+        rep += Form("Weights for order %d  W[j] means weight for centrality bin j\n",order);
+        rep += Form("eta");
+        for (int centId=0; centId<mEtaWeights[order-1]->GetYaxis()->GetNbins(); centId++){rep += Form("\t\tW[%d]",centId);}
+        rep += Form("\n");
+        for (int iEtaBin=1; iEtaBin<=mEtaWeights[order-1]->GetXaxis()->GetNbins(); iEtaBin++){
+          rep += Form("%f",mEtaWeights[order-1]->GetXaxis()->GetBinCenter(iEtaBin));
+          for (int iCentBin=1; iCentBin<=mEtaWeights[order-1]->GetYaxis()->GetNbins(); iCentBin++){rep += Form("\t%f",mEtaWeights[order-1]->GetBinContent(iEtaBin,iCentBin));}
+          rep += Form("\n");
+        }
+      }
+    }
+  }
+  else{
+    if (mWeightingScheme==2){
+      rep += Form("Here is the weighting: W[n] is weight for EP of order n\n");
+      rep += Form("ring");
+      for (int order=1; order<=_EpOrderMax; order++){rep += Form("\tW[%d]",order);}
+      rep += Form("\n");
+      for (int iRing=1; iRing<=16; iRing++){
+        rep += Form("%d",iRing);
+        for (int order=1; order<=_EpOrderMax; order++){rep += Form("\t%f",mRingWeights[iRing-1][order-1]);}
+        rep += Form("\n");
+      }
+    }
+  }
+  return rep;
 }
 
