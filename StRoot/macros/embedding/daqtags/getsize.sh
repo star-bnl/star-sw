@@ -1,5 +1,18 @@
 #!/bin/bash
 
+if [[ ! $HOST =~ "rcas" ]] ; then
+   echo this code can only be used for RCF!
+   exit
+fi
+
+if [[ ! $# -eq 1 ]] ; then
+   echo ""
+   echo " Usage : $0 [good_daqfilelist.500.daq.list] "
+   echo " output filelist : nevent_good_daqfilelist.500.daq.list. "
+   echo ""
+   exit
+fi
+
 totalsize=0
 nfile=0
 nevents=0
