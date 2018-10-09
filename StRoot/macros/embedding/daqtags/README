@@ -39,4 +39,13 @@ MODIFY and run
 ./restage.sh
 to restage the daq/reco/tags files to daq/reco/tags directory.
 please do change the filelist names in restage.sh first!
+Step 8:
+sometimes, some daq/reco/tags files can not be restaged for some reasons, need to remove all of those files that have either type of file missing.
+run 
+./trimdata.sh
+to delete those files.
+Step 9:
+in case that moretags files are needed, use the following command to checkout the latest scripts for making moretags files. 
+(ignore this step if moretags is not needed.)
+cvs co -d moretags StRoot/macros/embedding/moretags 
 
