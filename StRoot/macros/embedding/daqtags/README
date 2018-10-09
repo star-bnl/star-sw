@@ -1,33 +1,39 @@
+The following instructions are for daq&tags files preparation for embedding productions, only applicable at RCF.
+Make sure you have sufficient permissions to write in /star/embed/ sub-directories (better run as the user "starembd").
+
 Step 1:
-modify daq.sh, change the file type (e.g. st_physics_adc), "trgsetupname", and the run range or other conditions if necessary.
-run ./daq.sh to obtain the full list of available daq file for a specific data configuration.
+modify daq.sh, change the file type (e.g. st_physics_adc), "trgsetupname", and the run range or add other conditions if necessary.
+run ./daq.sh to obtain the full list of available daq files on HPSS for a specific data configuration. 
+the list filename MUST end with .daq.list, "all.daq.list" will be used below as an example.
 Step 2:
 obtain the list of good runs from PA. (ignore this step if it can not be provided)
+name it as goodruns.txt, then run 
 ./keepgood.sh all.daq.list 
-to produce the daq list from good runs, output to good_all.daq.list
+to produce the daq list from good runs only, output to good_all.daq.list
 Step 3:
-randomly sample some daq files from the good_all.daq.list, and monitor the # of runs sampled.
+randomly sample some daq files from the good_all.daq.list, and monitor the number of runs sampled.
 ./getruns.sh good_all.daq.list 500 | sort | uniq | wc -l
-usually 500 daq files are sufficient for minimum bias events, for rare triggers, increase this number.
-the file list for these 500 files are inside good_all.500.daq.list
+usually 500 daq files are sufficient for minimum bias events, for the rare triggers (like HT), increase this 
+number accordingly to increase the statistics in one sample.
+the file list for these 500 files is named as good_all.500.daq.list automatically.
 Step 4:
 to estimate the disk space needed for restaging those daq files to disks,
 ./getsize.sh good_all.500.daq.list
-usually, the size should be reasonable, below 5TB, ideally 1-2TB is fine.
-the script also provide the estimation on total # of events for these sample. note that these are all events (all triggers).
-please ignore the nevents_* file produced by this script, it is only for zerobias embedding.
+usually, the total volume should be reasonable, i.e. below 5TB, < 2TB is ideal.
+the script also provide the total # of events for these sample. note that these are all events (all triggers are included).
+please ignore the nevents_* file produced by this script, it is only used for zerobias embedding.
 Step 5:
 run 
 ./getmudst.sh good_all.500.daq.list P16ij
-to get the list of MuDst and tags files corresponding to those 500 daq files.
-MuDst is used for base QA and/or moretags production.
-tags is used in embedding production for the input of PV position and refmult, etc.
+to get the list of MuDst and tags files corresponding to those 500 daq files, P16ij is the example production ID for the real data.
+MuDst files are used for base QA and/or moretags production.
+tags files are used in embedding production for providing the PV position and refmult, etc.
 Step 6:
 MODIFY and run
 ./mkdir.sh
 to create the daq/reco/tags directory at /star/embed
 please do change the year and directory names in mkdir.sh first!
-this script also links back the directories.
+this script also links back those directories.
 Step 7:
 MODIFY and run
 ./restage.sh
