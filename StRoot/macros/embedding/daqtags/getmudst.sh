@@ -6,6 +6,7 @@ prod=$2
 lbn=`basename $daqlist .daq.list`
 
 rm -f ${lbn}.${prod}.mudst.list
+rm -f ${lbn}.${prod}.tags.list
 
 for i in `cat $daqlist`
 do
@@ -21,4 +22,6 @@ do
 	echo $mdstfile >> ${lbn}.${prod}.mudst.list
    fi
 done
+
+sed "s/MuDst/tags/g" ${lbn}.${prod}.mudst.list > ${lbn}.${prod}.tags.list
 
