@@ -17,7 +17,7 @@ my $outf=$opt_o;
 my $complist=$opt_c;
 my $simulate=$opt_k;
 
-my $getCmd=qq{ get_file_list.pl -keys \"filename,size\" -delim \" \" -cond \"};
+my $getCmd=qq{ get_file_list.pl -keys \"filename,size,events\" -delim \" \" -cond \"};
 
 
 if($prod) { $getCmd=$getCmd."production=".$prod.","; };
