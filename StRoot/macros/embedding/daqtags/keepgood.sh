@@ -1,5 +1,7 @@
 #!/bin/bash
 
+rm -f good_$1
+
 for i in `cat $1`
 do
    bname=`basename $i`
