@@ -1,0 +1,36 @@
+Step 1:
+modify daq.sh, change the file type (e.g. st_physics_adc), "trgsetupname", and the run range or other conditions if necessary.
+run ./daq.sh to obtain the full list of available daq file for a specific data configuration.
+Step 2:
+obtain the list of good runs from PA. (ignore this step if it can not be provided)
+./keepgood.sh all.daq.list 
+to produce the daq list from good runs, output to good_all.daq.list
+Step 3:
+randomly sample some daq files from the good_all.daq.list, and monitor the # of runs sampled.
+./getruns.sh good_all.daq.list 500 | sort | uniq | wc -l
+usually 500 daq files are sufficient for minimum bias events, for rare triggers, increase this number.
+the file list for these 500 files are inside good_all.500.daq.list
+Step 4:
+to estimate the disk space needed for restaging those daq files to disks,
+./getsize.sh good_all.500.daq.list
+usually, the size should be reasonable, below 5TB, ideally 1-2TB is fine.
+the script also provide the estimation on total # of events for these sample. note that these are all events (all triggers).
+please ignore the nevents_* file produced by this script, it is only for zerobias embedding.
+Step 5:
+run 
+./getmudst.sh good_all.500.daq.list P16ij
+to get the list of MuDst and tags files corresponding to those 500 daq files.
+MuDst is used for base QA and/or moretags production.
+tags is used in embedding production for the input of PV position and refmult, etc.
+Step 6:
+MODIFY and run
+./mkdir.sh
+to create the daq/reco/tags directory at /star/embed
+please do change the year and directory names in mkdir.sh first!
+this script also links back the directories.
+Step 7:
+MODIFY and run
+./restage.sh
+to restage the daq/reco/tags files to daq/reco/tags directory.
+please do change the filelist names in restage.sh first!
+
