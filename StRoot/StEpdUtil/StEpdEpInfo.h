@@ -127,6 +127,9 @@ class StEpdEpInfo{
 
  private:
 
+  bool ArgumentOutOfBounds(int order);              /// protection against user selecting "order=0" or order that has not been defined
+  bool ArgumentOutOfBounds(int order, int ring);    /// additional protection that 1<=ring<=16
+
   TVector2 RawQ(int ew, int order);                        /// called internally
   TVector2 PhiWeightedQ(int ew, int order);                /// called internally
   TVector2 RingRawQ(int ew, int order, int ring);          /// called internally
