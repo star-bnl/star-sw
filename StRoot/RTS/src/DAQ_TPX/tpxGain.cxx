@@ -977,7 +977,7 @@ int tpxGain::from_file(char *fname, int sec)
 					tpx_from_altro(r-1,fee+i,ch, row, pad) ;
 
 					if(row>45) {
-						LOG(ERR,"What????") ;
+						LOG(ERR,"What %d: %d %d %d????",row,r,fee+i,ch) ;
 						continue ;
 					}
 
@@ -1040,7 +1040,7 @@ int tpxGain::to_file(char *fname)
 	    s_start,s_stop,
 	    c_run, c_date, c_time) ;
 
-	fprintf(f,"# $Id: tpxGain.cxx,v 1.34 2018/06/21 19:02:55 tonko Exp $\n") ;	// CVS id!
+	fprintf(f,"# $Id: tpxGain.cxx,v 1.35 2018/10/10 11:25:01 tonko Exp $\n") ;	// CVS id!
 	fprintf(f,"# Run %u\n",c_run) ;
 
 	for(s=s_start;s<=s_stop;s++) {

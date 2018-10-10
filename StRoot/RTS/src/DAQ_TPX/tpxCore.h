@@ -191,5 +191,6 @@ extern int tpx_odd_fee_count ;
 extern int *tpx_altro_to_row_override ;
 extern int tpx_fy16_map ;
 extern int tpx_is_stgc ;
+extern int tpx_rdo_override ;
 
 #endif
