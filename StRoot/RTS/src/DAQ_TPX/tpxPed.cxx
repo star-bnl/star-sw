@@ -750,7 +750,10 @@ int tpxPed::to_cache(char *fname, u_int run)
 			int t_rdo, t_a, t_ch ;
 
 			tpx_to_altro(r,p,t_rdo,t_a,t_ch) ;
-			if(t_rdo != r_real) continue ;
+			if(t_rdo != r_real) {
+				//LOG(WARN,"RDO %d, real %d: RP %d:%d, AID %d:%d",t_rdo,r_real,r,p,t_a,t_ch) ;
+				continue ;
+			}
 
 			struct peds *peds = get(rdo-1,r, p) ;
 			if(peds == 0) {

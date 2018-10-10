@@ -91,6 +91,7 @@ void tpx_to_altro(int row, int pad, int &rdo, int &a, int &ch)
 }
 
 int *tpx_altro_to_row_override = 0 ;
+int tpx_rdo_override = 0 ;
 int tpx_fy16_map = 0 ;	// moved some FEEs from RDO1 to RDO2
 int tpx_is_stgc = 0 ;
 
@@ -153,10 +154,18 @@ void tpx_from_altro(int rdo, int a, int ch, int &row, int &pad)
 	pad = tpx_altro_to_pad[rdo][a][ch].pad ;
 
 	if(tpx_altro_to_row_override) {
+		if(tpx_rdo_override != (rdo+1)) {
+			row = 255 ;
+			pad = 255 ;
+			return ;
+		}
+
 		row = tpx_altro_to_row_override[a&0xFE] ;
 
 		if(a&1) pad = 1 + 16 + ch ;
 		else pad = 1 + ch ;
+
+
 
 //		LOG(TERR,"A %d: row %d, pad %d",a,row,pad) ;
 
@@ -750,7 +759,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
   if((a->row > 45) || (a->pad > 182)) {
 	if(log) LOG(ERR,"row:pad %d:%d illegal for altro %d:%d",a->row,a->pad,a->id,a->ch) ;
 //LOG(WARN,"Change for sTGC: altro %d",a->id) ;
-	return 0 ;
+	if(tpx_rdo_override==0) return 0 ;
   }
 
   real_tpx_skipped:;
