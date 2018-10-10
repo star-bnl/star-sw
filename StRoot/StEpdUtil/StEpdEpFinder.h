@@ -100,12 +100,12 @@ class StEpdEpFinder{
 
   /// sets eta-based weights and sets the flag indicating that eta-based weights will be used
   /// The x-axis of the TH2D is abs(eta).  The y-axis is centralityID (according to whatever convention/definition the user is using)
-  /// \param order        order of the EP (first-order plane, 2nd-order plane, ...)
+  /// \param order        order of the EP Begins at UNITY! i.e. order=1 means first-order plane, order=2 means 2nd-order plane, ...
   /// \param EtaWeight    histogram with the weights as a function of |eta| and centrality
   void SetEtaWeights(int order, TH2D EtaWeight);
 
   /// sets ring-based weights and sets the flag indicating that the ring-based weights will be used
-  /// \param order        order of the EP (first-order plane, 2nd-order plane, ...)
+  /// \param order        order of the EP Begins at UNITY! i.e. order=1 means first-order plane, order=2 means 2nd-order plane, ...
   /// \param RingWeights  1D array of length 16, containing the RingWeights
   void SetRingWeights(int order, double* RingWeights);
 
@@ -134,7 +134,16 @@ class StEpdEpFinder{
   /// \param CentralityID user-defined integer specifying centrality of the event.  User must use same convention in correction histograms and weights
   StEpdEpInfo Results(TClonesArray* EpdHits, TVector3 primVertex, int CentralityID);
 
+  /// Returns a big string that tells in text what the settings were.
+  /// This is for your convenience and is of course optional.  I like
+  /// to put a concatenation of such Reports into a text file, so I
+  /// "autodocument" what were the settings for a given run
+  TString Report();
+
+
  private:
+
+  bool OrderOutsideRange(int order);         // just makes sure order is between 1 and _EpOrderMax
 
   double GetPsiInRange(double Qx, double Qy, int order);
   double RingOrEtaWeight(int ring, double eta, int order, int CentId);

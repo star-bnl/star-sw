@@ -35,6 +35,8 @@
 #include <DAQ_TOF/daq_tof.h>
 #include <DAQ_TPC/daq_tpc.h>
 #include <DAQ_TPX/daq_tpx.h>
+#include <DAQ_TPX/tpxCore.h>
+
 #include <DAQ_TRG/daq_trg.h>
 #include <DAQ_HLT/daq_hlt.h>
 #include <DAQ_L4/daq_l4.h>
@@ -610,6 +612,8 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 	u_int tot_pixels = 0 ;
 	daq_dta *dd ;
 
+	//tpx_rdo_override = 3 ;
+
 	if(strcasestr(do_print,"tpx")) ;	// leave as is...
 	else do_print = 0 ;
 
@@ -652,7 +656,7 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 				//if(dd->row > 8) continue ;
 				
 				if(do_print) {
-					//printf("TPX: sec %02d, row %2d, pad %3d: %3d pixels\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
+					printf("TPX: sec %02d, row %2d, pad %3d: %3d pixels\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
 				}
 
 				pixel_count[dd->row] += dd->ncontent ;
@@ -711,8 +715,8 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 			if(sec_found) {
 
 				s_mask[dd->sec-1]=1 ;
-				if(0) {
-				//if(do_print) {
+				//if(0) {
+				if(do_print) {
 
 					for(int row=0;row<=45;row++) {
 						int max_cou = tpc_rowlen[row] * 400 ;
@@ -736,7 +740,7 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 
 
 			if(do_print) {
-				//printf("TPX: sec %02d, row %2d: %3d clusters (evt %d)\n",dd->sec,dd->row,dd->ncontent,good) ;
+				printf("TPX: sec %02d, row %2d: %3d clusters (evt %d)\n",dd->sec,dd->row,dd->ncontent,good) ;
 			}
 			
 			tot_pixels += dd->ncontent ;
@@ -761,12 +765,12 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 					if((t2-t1)>30) bad = 1 ;
 
 					//if(bad) printf("BAD: ") ;
-					//printf("\tpad %7.3f[%d,%d], time %7.3f[%d,%d], charge %5d, flags 0x%02X\n",
-					//     dd->cld[i].pad,dd->cld[i].p1,dd->cld[i].p2,
-					//       dd->cld[i].tb,dd->cld[i].t1,dd->cld[i].t2,
-					//       dd->cld[i].charge,dd->cld[i].flags) ;
+					printf("\tpad %7.3f[%d,%d], time %7.3f[%d,%d], charge %5d, flags 0x%02X\n",
+					     dd->cld[i].pad,dd->cld[i].p1,dd->cld[i].p2,
+					       dd->cld[i].tb,dd->cld[i].t1,dd->cld[i].t2,
+					       dd->cld[i].charge,dd->cld[i].flags) ;
 
-					printf("-%d %d %f %f %d\n",dd->sec,dd->row,dd->cld[i].pad,dd->cld[i].tb,dd->cld[i].charge) ;
+					//printf("-%d %d %f %f %d\n",dd->sec,dd->row,dd->cld[i].pad,dd->cld[i].tb,dd->cld[i].charge) ;
 					
 				}
 			}
@@ -790,7 +794,7 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 			}
 		}
 
-#if 0
+#if 1
 		//new ALTRO bank, for a test
 		for(int r=1;r<=6;r++) {
 			dd = rdr->det("tpx")->get("altro",s,r) ;

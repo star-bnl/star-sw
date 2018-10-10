@@ -57,7 +57,7 @@
 #define RTS_MON_VERSION_X	(RTS_MON_VERSION_X_FLAG | RTS_MON_VERSION)	/* FY04 (Oct03) extended version */
 
 /* total number of entities (i.e. node-task pairs we support) */
-#define RTS_MON_MAX_NODES	256
+#define RTS_MON_MAX_NODES	512
 
 #define RTS_MON_USER_WORDS	100	/* NX4bytes of storage for user defined entries */ 
 #define RTS_MON_SYS_WORDS	17	/* DO NOT MODIFY UNLESS ONE CHANGES THE rtsMonStruct ! */

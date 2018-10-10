@@ -5,6 +5,7 @@ Step 1:
 modify daq.sh, change the file type (e.g. st_physics_adc), "trgsetupname", and the run range or add other conditions if necessary.
 run ./daq.sh to obtain the full list of available daq files on HPSS for a specific data configuration. 
 the list filename MUST end with .daq.list, "all.daq.list" will be used below as an example.
+NOTE that trgword is not reliable for get_file_list.pl, do not use it in conditions.
 Step 2:
 obtain the list of good runs from PA. (ignore this step if it can not be provided)
 name it as goodruns.txt, then run 
@@ -39,4 +40,13 @@ MODIFY and run
 ./restage.sh
 to restage the daq/reco/tags files to daq/reco/tags directory.
 please do change the filelist names in restage.sh first!
+Step 8:
+sometimes, some daq/reco/tags files can not be restaged for some reasons, need to remove all of those files that have either type of file missing.
+run 
+./trimdata.sh
+to delete those files.
+Step 9:
+in case that moretags files are needed, use the following command to checkout the latest scripts for making moretags files. 
+(ignore this step if moretags is not needed.)
+cvs co -d moretags StRoot/macros/embedding/moretags 
 
