@@ -108,12 +108,13 @@ $MAIN  = "/star/data";                                    # default base path
 # matters (the first encountered will stop parsing). All sizes will be reduced by the
 # replication factor
 %REPLICATION = (
-          "/gpfs01/star/XROOTD" =>  1,
-          "/gpfs01/star/scratch"=>  1,
-          "/gpfs01/star/pwg"    =>  1,
-          "/gpfs01/star/daq"    =>  1,
-          "/gpfs01/star/data"   =>  1,   # this will match any pattern from gpfs01
-          "/gpfs01/"            =>  2,
+          #"/gpfs01/star/XROOTD"     =>  1,
+          #"/gpfs01/star/scratch"    =>  1,
+          #"/gpfs01/star/pwg"        =>  1,
+          #"/gpfs01/star/daq"        =>  1,
+          #"/gpfs01/star/data"       =>  1,   # this will match any pattern from gpfs01
+          #"/gpfs01/star/susbsysg"   =>  1,   # this will match any pattern from gpfs01
+          "/gpfs01/"                =>  1,
           );
 
 

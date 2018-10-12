@@ -124,6 +124,13 @@ if ( ! -e "$BINCRON/$DOXYGEN"){    chomp($DOXYGEN=`which $DOXYGEN`);
 if ( ! -e "$BINCRON/$DOXYTAG"){    chomp($DOXYTAG=`which $DOXYTAG`);
 } else {                                 $DOXYTAG= "$BINCRON/$DOXYTAG";}
 
+
+if ( $DOXYTAG eq "" && $DOTAG){
+    # disable it, program doe snot exist
+    print "We will not be able to generate tags - doxytag could not be found (disabling)\n";
+    $DOTAG = 0;
+}
+
 if ( ! -d $TMPDIR ){
     if( ! mkdir($TMPDIR,0777) ){
 	print "\tDooo  !! Directory $TMPDIR cannot be created.\n";
@@ -377,12 +384,15 @@ for ($kk=0 ; $kk <= $#PROJECTS ; $kk++){
 	    "\t\t(cd $TMPDIR ; $DOXYGEN $tmpf.cfg >&$tmpf.log)\n";
 
 	system("cd $TMPDIR ; $DOXYGEN $tmpf.cfg >&$tmpf.log");
+	if ( -e "$TMODIR/index.tag"){
+	    # copy what was generated
+	    system("/bin/cp $TMODIR/index.tag $TARGETD/dox$SUBDIR/tmp$$/html");
+	}
 	$status = $?;
 	if ($status != 0){
 	    print "Error: $DOXYGEN stopped with status $status\n";
 	    exit;
 	}
-
 
 	if( -d "$TARGETD/dox$SUBDIR/tmp$$/html" && $DOTAG){
 	    print "\tRunning $DOXYTAG now ".localtime()."\n";
