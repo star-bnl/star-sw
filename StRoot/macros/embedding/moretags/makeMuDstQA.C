@@ -13,6 +13,8 @@
 #include "TTree.h"
 #include "TChain.h"
 #include "TTreeHelper.h"
+#include "TDatime.h"
+#include "StarRoot/TUnixTime.h"
 #include "StChain.h"
 #include "StMessMgr.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
@@ -79,19 +81,29 @@ void makeMuDstQA(TString InputFileList, Int_t nFiles, Int_t nEvents, TString Out
 
   //Prepare the output tree
   Int_t mRunId, mEvtId;
-  Int_t mnRefMult, mngRefMult, mnTofMatch;
-  Float_t mVX, mVY, mVZ;
+  Int_t mnRefMult, mnRefMult2, mnRefMult3, mnRefMult4, mngRefMult, mnTofMatch;
+  Double_t mVX, mVY, mVZ;
+  Double_t mVXsigma, mVYsigma, mVZsigma;
   Float_t mVpdVz;
   Float_t mPVRank;
+  Double_t mEvtTime, mProdTime;
   TTree *mMoreTagsTree = new TTree("MoreTags","MoreTags");
   mMoreTagsTree->Branch("RunId",&mRunId,"RunId/I");
   mMoreTagsTree->Branch("EvtId",&mEvtId,"EvtId/I");
+  mMoreTagsTree->Branch("EvtTime",&mEvtTime,"EvtTime/D");
+  mMoreTagsTree->Branch("ProdTime",&mProdTime,"ProdTime/D");
   mMoreTagsTree->Branch("nRefMult",&mnRefMult,"nRefMult/I");
+  mMoreTagsTree->Branch("nRefMult2",&mnRefMult2,"nRefMult2/I");
+  mMoreTagsTree->Branch("nRefMult3",&mnRefMult3,"nRefMult3/I");
+  mMoreTagsTree->Branch("nRefMult4",&mnRefMult4,"nRefMult4/I");
   mMoreTagsTree->Branch("ngRefMult",&mngRefMult,"ngRefMult/I");
   mMoreTagsTree->Branch("nTofMatch",&mnTofMatch,"nTofMatch/I");
-  mMoreTagsTree->Branch("VX",&mVX,"VX/F");
-  mMoreTagsTree->Branch("VY",&mVY,"VY/F");
-  mMoreTagsTree->Branch("VZ",&mVZ,"VZ/F");
+  mMoreTagsTree->Branch("VX",&mVX,"VX/D");
+  mMoreTagsTree->Branch("VY",&mVY,"VY/D");
+  mMoreTagsTree->Branch("VZ",&mVZ,"VZ/D");
+  mMoreTagsTree->Branch("VXsigma",&mVXsigma,"VXsigma/D");
+  mMoreTagsTree->Branch("VYsigma",&mVYsigma,"VYsigma/D");
+  mMoreTagsTree->Branch("VZsigma",&mVZsigma,"VZsigma/D");
   mMoreTagsTree->Branch("VpdVz",&mVpdVz,"VpdVz/F");
   mMoreTagsTree->Branch("PVRank",&mPVRank,"PVRank/F");
   mMoreTagsTree->SetAutoSave(10000000);
@@ -138,47 +150,11 @@ void makeMuDstQA(TString InputFileList, Int_t nFiles, Int_t nEvents, TString Out
      Float_t vzVpd=-999;
      if (mBTofHeader) vzVpd = mBTofHeader->vpdVz();
 
-/*
-     //Run14 vertex selection
-     //////////////////////////////////////
-     // select the right vertex using VPD
-     /////////////////////////////////////
-     for(unsigned int i=0;i<mMuDst->numberOfPrimaryVertices();i++) {
-	  StMuPrimaryVertex *vtx = mMuDst->primaryVertex(i);
-	  if(!vtx) continue;
-	  Float_t vz = vtx->position().z();
-	  if(fabs(vzVpd)<100 && fabs(vzVpd-vz)<3.) {
-	     mMuDst->setVertexIndex(i);
-	     break;
-	  }
-     }
-     /////////////////////////////////////
-*/
-
-/*
-     //Run16 vertex selection
-     ////////////////////////////////////////////////////////////////
-     if (fabs(vzVpd) < 200)
-     {
-	  for (unsigned int iVtx = 0; iVtx < mMuDst->numberOfPrimaryVertices(); ++iVtx)
-	  {
-	     StMuPrimaryVertex* vtx = mMuDst->primaryVertex(iVtx);
-	     if (!vtx) continue;
-
-	     if (fabs(vzVpd - vtx->position().z()) < 3.)
-	     {
-		  mMuDst->setVertexIndex(iVtx);
-		  break;
-	     }
-	  }
-     }
-     ////////////////////////////////////////////////////////////////
-*/
-
-/*
-     //Run15 pAu & Run16 dAu vertex selection
+     //StPicoDstMaker vertex selection (cvs, PicoVtxMode:VtxDefault)
      int index = 0;
-     const double mTpcVpdVzDiffCut = 6;
+     //StPicoDstMaker vertex selection (cvs, PicoVtxMode:PicoVtxVpdOrDefault)
+     /*
+     const double mTpcVpdVzDiffCut = 3;
      if (mBTofHeader && fabs(vzVpd) < 200) {
 	  for (unsigned int iVtx = 0; iVtx < mMuDst->numberOfPrimaryVertices(); ++iVtx) {
 	     StMuPrimaryVertex* vtx = mMuDst->primaryVertex(iVtx);
@@ -189,26 +165,68 @@ void makeMuDstQA(TString InputFileList, Int_t nFiles, Int_t nEvents, TString Out
 	     }
 	  }
      }
+     */
      if(index>=0) mMuDst->setVertexIndex(index);
-*/
 
      mRunId = mMuEvent->runNumber();
      mEvtId = mMuEvent->eventNumber();
+
+     //add eventtime and prodtime to moretags.root, for HFT embedding
+     //cout<<mRunId<<" "<<mEvtId<<" "<<mMuEvent->eventInfo().time()<<" "<<mMuEvent->runInfo().productionTime()<<endl;
+     TDatime EventTime, ProdTime;
+     TUnixTime unixTime(mMuEvent->eventInfo().time());
+     Int_t dat=0,tim=0;
+     unixTime.GetGTime(dat,tim);
+     EventTime.Set(dat,tim);
+     unixTime.SetUTime(mMuEvent->runInfo().productionTime());
+     unixTime.GetGTime(dat,tim);
+     ProdTime.Set(dat,tim);
+     mEvtTime = EventTime.GetDate() + EventTime.GetTime()/1000000.;
+     mProdTime= ProdTime.GetDate() +  ProdTime.GetTime()/1000000. ;
+     //cout<<EventTime.GetDate() + EventTime.GetTime()/1000000.<<" "<<ProdTime.GetDate() +  ProdTime.GetTime()/1000000. <<endl;
+
      mnRefMult = mMuEvent->refMult();
 
      Int_t nTofMatPrTrack = 0;
+     Int_t nprTrack2 = 0;
+     Int_t nprTrack3 = 0;
+     Int_t nprTrack4 = 0;
      TObjArray* prtracks = muDstMaker->muDst()->primaryTracks() ;    // Create a TObject array containing the global tracks  
      TObjArrayIter GetPrTracks(prtracks) ;                              // Create an iterator to step through the tracks  
      StMuTrack* prtrack ;                                             // Pointer to a track
      while ( ( prtrack = (StMuTrack*)GetPrTracks.Next() ) )             // Main loop for Iterating over tracks
      {
 	  if(prtrack->btofPidTraits().matchFlag()) nTofMatPrTrack ++;
+
+	  if (prtrack->flag() < 0 || fabs(prtrack->momentum().mag()) < 1.e-10
+		  || prtrack->dca().mag() > 3 || fabs(prtrack->momentum().pseudoRapidity()) > 1) continue;
+	  double const eta = prtrack->momentum().pseudoRapidity() ;
+	  double const beta = prtrack->btofPidTraits().beta();
+	  double const mass2 = beta <= 1.e-5 ? -999. : prtrack->momentum().mag2() * (std::pow(1. / beta, 2) - 1);
+	  if (prtrack->nHitsFit(kTpcId) >= 10) {
+	     // refMult2 definition in PicoEvent: pt> 0.1 && abs(dca) < 3 && nHitsTpc >= 10 && abs(eta) > 0.5 && abs(eta) < 1
+	     if (fabs(eta) > 0.5) nprTrack2 += 1;
+	     // refMult3 definition in PicoEvent: pt> 0.1 && abs(dca) < 3 && nHitsTpc >= 10 && abs(eta) < 1 && Exclude protons
+	     if (prtrack->nSigmaProton() < -3. && mass2 < 0.4)  nprTrack3 += 1;
+	  }
+	  if (prtrack->nHitsFit(kTpcId) >= 15) {
+	     // refMult4 definition in PicoEvent: pt> 0.1 && abs(dca) < 3 && nHitsTpc >= 15 && abs(eta) < 1 && Exclude kaons
+	     if ((mass2 <= -990. && fabs(prtrack->nSigmaKaon()) > 3) || // tof is not available
+		     (mass2 >  -990. && (mass2 > 0.6 || mass2 < 0.1)))    // tof is available
+		  nprTrack4 += 1;
+	  }
      }
      mnTofMatch = nTofMatPrTrack;
+     mnRefMult2 = nprTrack2;
+     mnRefMult3 = nprTrack3;
+     mnRefMult4 = nprTrack4;
 
      mVX = mMuEvent->primaryVertexPosition().x();
      mVY = mMuEvent->primaryVertexPosition().y();
      mVZ = mMuEvent->primaryVertexPosition().z();
+     mVXsigma = mMuEvent->primaryVertexErrors().x();
+     mVYsigma = mMuEvent->primaryVertexErrors().y();
+     mVZsigma = mMuEvent->primaryVertexErrors().z();
 
      mVpdVz = vzVpd;
      if(mMuDst->primaryVertex())mPVRank = mMuDst->primaryVertex()->ranking();
@@ -227,6 +245,7 @@ void makeMuDstQA(TString InputFileList, Int_t nFiles, Int_t nEvents, TString Out
      }
      mngRefMult = nGlTrack;
 
+     //Comment out this line for HFT embedding!
      mMoreTagsTree->Fill();
 
      //Event info (for debug)
@@ -237,15 +256,20 @@ void makeMuDstQA(TString InputFileList, Int_t nFiles, Int_t nEvents, TString Out
 
      //Event cuts (NO EVENT CUTS TILL HERE!)
      //trigger
-     if ( ! mMuEvent->triggerIdCollection().nominal().isTrigger(410008) && ! mMuEvent->triggerIdCollection().nominal().isTrigger(410005) ) continue;
+     if ( ! mMuEvent->triggerIdCollection().nominal().isTrigger(580001) && ! mMuEvent->triggerIdCollection().nominal().isTrigger(580011) && ! mMuEvent->triggerIdCollection().nominal().isTrigger(580021) ) continue ;
      //Vz
-     if ( fabs(mMuEvent->primaryVertexPosition().z()) > 30.0 ) continue ;
+     if ( fabs(mMuEvent->primaryVertexPosition().z()) > 60.0 ) continue ;
+     //if ( fabs(mMuEvent->primaryVertexPosition().z() - vzVpd) > 3.0 ) continue ;
      //Vr
-     //if ( mMuEvent->primaryVertexPosition().perp() > 100.0 ) continue ;
+     //if ( mMuEvent->primaryVertexPosition().perp() > 2.0 ) continue ;
+     //pileup cut
+     //if ( mnTofMatch <= 0.46*mnRefMult - 10 ) continue ;
      //VF failed (for some old dataset)
      //if ( fabs(mMuEvent->primaryVertexPosition().x()) < 1e-5 && fabs(mMuEvent->primaryVertexPosition().y()) < 1e-5 && fabs(mMuEvent->primaryVertexPosition().z()) < 1e-5 ) continue;
 
      chop_output<<mRunId<<'\t'<<mEvtId<<endl;
+     //for HFT ONLY! PrepEmbd will not be used, event cuts are done here!
+     //mMoreTagsTree->Fill();
      
      /*
      //fill Event QA histograms
