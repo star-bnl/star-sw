@@ -284,7 +284,7 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
 /*!
  * \enum StTrackType
  */
-enum StTrackType {global, primary, tpt, secondary, estGlobal, estPrimary, massFit, massFitAtVx};
+enum StTrackType {global, primary, tpt, secondary, estGlobal, estPrimary, massFit, massFitAtVx, massFitAtDca};
 
 /*!
  * \enum StTrackModel
