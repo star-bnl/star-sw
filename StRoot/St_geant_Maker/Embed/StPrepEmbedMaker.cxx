@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.17 2018/09/29 13:22:35 zhux Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.18 2018/10/12 13:44:49 zhux Exp $
  *
  */
 
@@ -495,7 +495,7 @@ Int_t StPrepEmbedMaker::Make()
 					EvtHddr->GetEventNumber()),"goff");
 
       //get primary vertex errors from moretags.root
-      if(nFound == -1 && mMoreTree) {
+      if( mMoreTree ) {
         nFound = (Int_t) mMoreTree->Draw("VXsigma:VYsigma:VZsigma",
              Form("RunId==%i&&EvtId==%i",
                   EvtHddr->GetRunNumber(),
@@ -505,14 +505,17 @@ Int_t StPrepEmbedMaker::Make()
         LOG_INFO << "StPrepEmbedMaker::Make Use moretags file to extract vertex errors, nFound =" << nFound << endm ;
       }
 
-      if (nFound != 1) {
-        LOG_ERROR << "StPrepEmbedMaker::Make Run/Event = " << EvtHddr->GetRunNumber() << "/" << EvtHddr->GetEventNumber()
-             << " has been found in moretags file " << nFound << " times" <<  endm;
-        return kStErr;
-     }
-     xyzerr[0] = mMoreTree->GetV1()[0];
-     xyzerr[1] = mMoreTree->GetV2()[0];
-     xyzerr[2] = mMoreTree->GetV3()[0];
+      if ( mMoreTree ) {
+	   xyzerr[0] = mMoreTree->GetV1()[0];
+	   xyzerr[1] = mMoreTree->GetV2()[0];
+	   xyzerr[2] = mMoreTree->GetV3()[0];
+	}
+	else {
+	   xyzerr[0] = mTree->GetV1()[0];
+	   xyzerr[1] = mTree->GetV2()[0];
+	   xyzerr[2] = mTree->GetV3()[0];
+	}
+
      LOG_INFO << xyzerr[0] << " " << xyzerr[1] << " " << xyzerr[2] << endm;
 //     vzlow = -100.0;
 //     vzhigh = 100.0;
@@ -890,6 +893,9 @@ void StPrepEmbedMaker::gkine(const Int_t mult, const Double_t vzmin, const Doubl
 
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.18  2018/10/12 13:44:49  zhux
+ * updated vertex errors from moretags
+ *
  * Revision 1.17  2018/09/29 13:22:35  zhux
  * updated primary vertex sigma names in moretree
  *
