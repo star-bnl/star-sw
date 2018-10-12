@@ -57,4 +57,5 @@ Step 9:
 in case that moretags files are needed, use the following command to checkout the latest scripts for making moretags files. 
 (ignore this step if moretags is not needed.)
 cvs co -d moretags StRoot/macros/embedding/moretags 
+follow the moretags/README to produce moretags.root files, and/or chop the daq files if necessary.
 
