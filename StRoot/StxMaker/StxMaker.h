@@ -16,7 +16,12 @@
 #endif
 #include "TVector3.h"
 #include "TMatrixDSym.h"
+#include "GenFit/Track.h"
+#include "StThreeVectorD.hh"
 class AliHLTTPCCAGBTrack;
+class StEvent;
+class StTrack;
+class StTrackDetectorInfo;
 class StxMaker : public StMaker {
  public: 
  StxMaker(const char *name="Stx") : StMaker(name) {}
@@ -27,6 +32,18 @@ class StxMaker : public StMaker {
   static Double_t ConvertCA2XYZ(const AliHLTTPCCAGBTrack &tr, TVector3 &pos, TVector3 &mom, TMatrixDSym &covM);
   // virtual Int_t InitRun  (int runumber){return 0;}; // Overload empty StMaker::InitRun 
   // virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty StMaker::FinishRun 
+  Bool_t Accept(genfit::Track *kTrack);
+  void FillGlobalTrack(genfit::Track *kTrack);
+  void FillEventPrimaries();
+  void FillDetectorInfo(StTrack *gTrack,StTrackDetectorInfo* detInfo, genfit::Track * track, bool refCountIncr) ;
+  void FillGeometry(StTrack* gTrack, genfit::Track * track, bool outer);
+  void FillFitTraits(StTrack* gTrack, genfit::Track * track);
+  void FillFlags(StTrack* gTrack);
+  void FillTrack(StTrack* gTrack, genfit::Track * track,StTrackDetectorInfo* detInfo );
+  Double_t impactParameter(genfit::Track * track, StThreeVectorD &vertexPosition);
+  Double_t impactParameter(StTrack* track, StThreeVectorD &vertex);
+  void FillDca(StTrack* stTrack, genfit::Track * track);
+  //  void FillStHitErr(StHit *hh,const StxKalmanTrackNode *node);
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
@@ -34,7 +51,7 @@ class StxMaker : public StMaker {
     return cvs;
   }
  private:
-  
+  StEvent *mEvent;
   ClassDef(StxMaker,0)   //StAF chain virtual base class for Makers
 };
 
