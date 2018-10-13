@@ -1102,15 +1102,15 @@ void KFTopoPerformance::CalculateEfficiency()
     //   cout.precision(3);
   if(fNEvents%fPrintEffFrequency == 0)
   {
-    cout << " ---- KF Particle finder --- " << endl;
-    // cout << "L1 STAT    : " << fNEvents << " EVENT "               << endl << endl;
+    std::cout << " ---- KF Particle finder --- " << std::endl;
+    // std::cout << "L1 STAT    : " << fNEvents << " EVENT "               << std::endl << std::endl;
     //partEff.PrintEff();
-    // cout << endl;
-    cout << "ACCUMULATED STAT    : " << fNEvents << " EVENTS "               << endl << endl;
+    // std::cout << std::endl;
+    std::cout << "ACCUMULATED STAT    : " << fNEvents << " EVENTS "               << std::endl << std::endl;
     fParteff.PrintEff();
 
-    cout<<endl;
-      // cout<<"CA Track Finder: " << L1_CATIME/L1_fNEvents << " s/ev" << endl << endl;
+    std::cout<<std::endl;
+      // std::cout<<"CA Track Finder: " << L1_CATIME/L1_fNEvents << " s/ev" << std::endl << std::endl;
   }
 }
 
@@ -1212,19 +1212,19 @@ void KFTopoPerformance::CalculatePVEfficiency()
     //   cout.precision(3);
   if(fNEvents%fPrintEffFrequency == 0)
   {
-    cout << " ---- KF PV finder --- " << endl;
-    // cout << "L1 STAT    : " << fNEvents << " EVENT "               << endl << endl;
+    std::cout << " ---- KF PV finder --- " << std::endl;
+    // std::cout << "L1 STAT    : " << fNEvents << " EVENT "               << std::endl << std::endl;
     //partEff.PrintEff();
-    // cout << endl;
-    cout << "ACCUMULATED STAT    : " << fNEvents << " EVENTS "               << endl << endl;
-    cout << "PV with at least 2 reconstructed tracks is reconstructable:" << endl;
+    // std::cout << std::endl;
+    std::cout << "ACCUMULATED STAT    : " << fNEvents << " EVENTS "               << std::endl << std::endl;
+    std::cout << "PV with at least 2 reconstructed tracks is reconstructable:" << std::endl;
     fPVeff.PrintEff();
-    cout << endl;
-    cout << "PV with at least 2 MC tracks with 15 MC points is reconstructable:" << endl;
+    std::cout << std::endl;
+    std::cout << "PV with at least 2 MC tracks with 15 MC points is reconstructable:" << std::endl;
     fPVeffMCReconstructable.PrintEff();
 
-    cout<<endl;
-      // cout<<"CA Track Finder: " << L1_CATIME/L1_fNEvents << " s/ev" << endl << endl;
+    std::cout<<std::endl;
+      // std::cout<<"CA Track Finder: " << L1_CATIME/L1_fNEvents << " s/ev" << std::endl << std::endl;
   }
 }
 
