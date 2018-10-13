@@ -16,6 +16,7 @@
 #include "StTrackGeometry.h"
 #include "StEvent/StTpcHit.h"
 #include "StEventUtilities/StEventHelper.h"
+#include "StEventUtilities/StuFixTopoMap.cxx"
 #include "TRMatrix.h"
 #include "TRVector.h"
 #include "KFParticle/KFVertex.h"
@@ -400,7 +401,6 @@ Bool_t StxMaker::Accept(genfit::Track *kTrack) {
 //_____________________________________________________________________________
 void StxMaker::FillGlobalTrack(genfit::Track *kTrack) {
   if (!Accept(kTrack)) return; // get rid of riff-raff
-  StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
   // track node where the new StTrack will reside
   StTrackNode* trackNode = new StTrackNode;
   // actual filling of StTrack from genfit::Track 
@@ -415,22 +415,17 @@ void StxMaker::FillGlobalTrack(genfit::Track *kTrack) {
   // and a valid StDetectorInfo object.
   //cout<<"Tester: Event Track Node Entries: "<<trackNode->entries()<<endl;
   //  mTrkNodeMap.insert(map<StxKalmanTrack*,StTrackNode*>::value_type (kTrack,trNodeVec.back()) );
-  FillTrack(gTrack,kTrack,detInfo);
-  Int_t ibad = gTrack->bad();
-  if (ibad) {
-    delete detInfo;
+  if (FillTrack(gTrack,kTrack)) {
     delete gTrack;
     delete trackNode;
     throw genfit::Exception("Consistency check failed ", __LINE__, __FILE__);
   }
-  StSPtrVecTrackDetectorInfo& detInfoVec = mEvent->trackDetectorInfo(); 
-  detInfoVec.push_back(detInfo);
   trackNode->addTrack(gTrack);
   trNodeVec.push_back(trackNode);
   return;
 }
 //_____________________________________________________________________________
-void StxMaker::FillTrack(StTrack* gTrack, genfit::Track * kTrack,StTrackDetectorInfo* detInfo )
+Int_t StxMaker::FillTrack(StTrack* gTrack, genfit::Track * kTrack)
 {
   //cout << "StxMaker::FillTrack()" << endl;
   // encoded method = 16 bits = 12 fitting and 4 finding, for the moment use:
@@ -450,126 +445,26 @@ void StxMaker::FillTrack(StTrack* gTrack, genfit::Track * kTrack,StTrackDetector
   Double_t tlen = kTrack->getTrackLen();
   assert(tlen >0.0 && tlen<1000.);
   gTrack->setLength(tlen);// someone removed this, grrrr!!!!
-  FillDetectorInfo(gTrack,detInfo,kTrack,true); //3d argument used to increase/not increase the refCount. MCBS oct 04.
+  FillDetectorInfo(gTrack,kTrack,true); //3d argument used to increase/not increase the refCount. MCBS oct 04.
   FillGeometry(gTrack, kTrack, false); // inner geometry
   FillGeometry(gTrack, kTrack, true ); // outer geometry
-  FillFitTraits(gTrack, kTrack);
-  gTrack->setDetectorInfo(detInfo);
-#if 0
   StuFixTopoMap(gTrack);
-#endif
   FillFlags(gTrack);
 #if 0
   if (!gTrack->IsPrimary()) 
 #endif
     FillDca(gTrack,kTrack);
-  return;
+  Int_t iok = gTrack->bad();
+  return iok;
 }
 //_____________________________________________________________________________
-void StxMaker::FillEventPrimaries()  {
-#if 0
-  //cout <<"StxMaker::FillEventPrimaries() -I- Started"<<endl;
-  mGloPri=1;
-  if (!mTrkNodeMap.size()) 
-    {
-      cout <<"StxMaker::FillEventPrimaries(). ERROR:\t"
-	   << "Mapping between the StTrackNodes and the genfit::Track s is empty.  Exit." << endl;
-      return;
-    }
-  //Added residual maker...aar
-  StPrimaryVertex* vertex = 0;
-  StSPtrVecTrackDetectorInfo& detInfoVec = mEvent->trackDetectorInfo();
-  cout << "StxMaker::FillEventPrimaries() -I- Tracks in container:" << mTrackStore->size() << endl;
-  Int_t mTrackN=0,mVertN=0;
-  Int_t noPipe=0;
-  Int_t ifcOK=0;
-  Int_t fillTrackCount1=0;
-  Int_t fillTrackCount2=0;
-  Int_t fillTrackCountG=0;
-  StErrorHelper errh;
-  Int_t nTracks = mTrackStore->size();
-  genfit::Track  *kTrack = 0;
-  StPrimaryTrack *pTrack = 0;
-  StGlobalTrack  *gTrack = 0;
-  StTrackNode    *nTRack = 0;
-  mTrackNumber=0;
-  for (mTrackN=0; mTrackN<nTracks;++mTrackN) {
-    kTrack = (genfit::Track *)(*mTrackStore)[mTrackN];
-    if (!Accept(kTrack)) 			continue;
-    map<StxKalmanTrack*, StTrackNode*>::iterator itKtrack = mTrkNodeMap.find(kTrack);
-    if (itKtrack == mTrkNodeMap.end())  	continue;//Stx global was rejected
-    mTrackNumber++;
-
-    nTRack = (*itKtrack).second;
-    assert(nTRack->entries()<=10);
-    assert(nTRack->entries(global)); 
-
-    //Double_t globalDca = nTRack->track(global)->impactParameter();
-    //Even though this is filling of primary tracks, there are certain
-    // quantities that need to be filled for global tracks that are only known
-    // after the vertex is found, such as dca.  Here we can fill them.
-    // 
-    gTrack = static_cast<StGlobalTrack*>(nTRack->track(global));
-    assert(gTrack->key()==kTrack->Id());
-    Float_t minDca = 1e10; //We do not know which primary. Use the smallest one
-    
-    pTrack = 0;
-    for (mVertN=0; (vertex = mEvent->primaryVertex(mVertN));mVertN++) {
-      StThreeVectorD vertexPosition = vertex->position();
-      Double_t zPrim = vertexPosition.z();
-      // loop over genfit::Track s
-      Float_t globalDca = impactParameter(gTrack,vertexPosition);
-      if (fabs(minDca) > fabs(globalDca)) minDca = globalDca;
- 
-      if (!kTrack->IsPrimary())			continue;
-      StxKalmanTrackNode *lastNode = kTrack->LastNode();
-      StxHit *pHit = lastNode->Hit();
-      if (fabs(pHit->z_g()-zPrim)>0.1)		continue;//not this primary
-
-      fillTrackCount1++;
-      // detector info
-      StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
-      FillDetectorInfo(detInfo,kTrack,false); //3d argument used to increase/not increase the refCount. MCBS oct 04.
-      StPrimaryTrack* pTrack = new StPrimaryTrack;
-      pTrack->setKey( gTrack->key());
-
-      FillTrack(pTrack,kTrack, detInfo);
-      // set up relationships between objects
-      detInfoVec.push_back(detInfo);
-
-      nTRack->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
-      vertex->addDaughter(pTrack);
-      fillTrackCount2++;
-      Int_t ibad = pTrack->bad();
-      errh.Add(ibad);
-      if (ibad) {
-//VP	        printf("PTrack error: %s\n",errh.Say(ibad).Data());
-//VP	        throw runtime_error("StxMaker::fillEventPrimaries() StTrack::bad() non zero");
-      }
-      if (pTrack->numberOfPossiblePoints()<10) 		break;
-      if (pTrack->geometry()->momentum().mag()<0.1) 	break;
-      fillTrackCountG++;
-      break;
-    } //end of verteces
-      kTrack->setDca(minDca);
-      gTrack->setImpactParameter(minDca);
-      if (pTrack) pTrack->setImpactParameter(minDca);
-
-  } // kalman track loop
-  mTrkNodeMap.clear();  // need to Reset for the next event
-  cout <<"StxMaker::FillEventPrimaries() -I- Primaries (1):"<< fillTrackCount1<< " (2):"<< fillTrackCount2<< " no pipe node:"<<noPipe<<" with IFC:"<< ifcOK<<endl;
-  cout <<"StxMaker::FillEventPrimaries() -I- GOOD:"<< fillTrackCountG <<endl;
-  errh.Print();
-#endif
-  return;
-}
 //_____________________________________________________________________________
 /// use the vector of StHits to fill the detector info
 /// change: currently point and fit points are the same for genfit::Track s,
 /// if this gets modified later in ITTF, this must be changed here
 /// but maybe use track->PointCount() later?
 //_____________________________________________________________________________
-void StxMaker::FillDetectorInfo(StTrack *gTrack, StTrackDetectorInfo* detInfo, genfit::Track * track, bool refCountIncr) {
+Int_t StxMaker::FillDetectorInfo(StTrack *gTrack, genfit::Track * track, bool refCountIncr) {
   //  output array actually is count[maxDetId+1][3] 
   //  count[0] all detectors
   //  count[detId] for particular detector
@@ -582,6 +477,7 @@ void StxMaker::FillDetectorInfo(StTrack *gTrack, StTrackDetectorInfo* detInfo, g
   memset(dets,0,sizeof(dets));
   genfit::TrackPoint *firstTP = 0, *lastTP = 0;
   const AbsTrackRep* rep = track->getCardinalRep();
+  StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
   for (std::vector< genfit::TrackPoint* >::const_iterator it = track->getPointsWithMeasurement().begin(); 
        it != track->getPointsWithMeasurement().end(); ++it) {
     genfit::TrackPoint *tp = *it;
@@ -594,7 +490,7 @@ void StxMaker::FillDetectorInfo(StTrack *gTrack, StTrackDetectorInfo* detInfo, g
       lastTP = tp;
       Int_t detId = measurement->getPlaneId()/10000 + 1;
       dets[0][kPP]++; dets[detId][kPP]++;
-      const StHit *hit = measurement->Hit();
+      StHit *hit = (StHit*) measurement->Hit();
       if (! hit) continue;
       detId = hit->detector();
       dets[0][kMP]++; dets[detId][kMP]++;
@@ -605,6 +501,9 @@ void StxMaker::FillDetectorInfo(StTrack *gTrack, StTrackDetectorInfo* detInfo, g
       if (!refCountIncr) 	continue;
       hit->setFitFlag(stiHit->timesUsed());
 #endif
+      Int_t used = hit->usedInFit();
+      used++;
+      hit->setFitFlag(used);
     }
   }
   genfit::TrackPoint *flTP[2] = {firstTP, lastTP};
@@ -617,12 +516,57 @@ void StxMaker::FillDetectorInfo(StTrack *gTrack, StTrackDetectorInfo* detInfo, g
     if (! i) detInfo->setFirstPoint(posF);
     else     detInfo->setLastPoint (posF);
   }
+  // fitTraits
+  // mass
+  // this makes no sense right now... Double_t massHyp = track->getMass();  // change: perhaps this mass is not set right?
+  UShort_t geantIdPidHyp = 9999;
+  //if (.13< massHyp<.14) 
+  geantIdPidHyp = 9;
+#if 0
+  // chi square and covariance matrix, plus other stuff from the
+  // innermost track node
+  genfit::Track Node* node = track->InnerMostHitNode(3);
+  Float_t x[6],covMFloat[15];
+  node->GlobalTpt(x,covMFloat);
+#else
+  Float_t covMFloat[15];
+#endif
+  KalmanFitStatus *fitStatus = track->getKalmanFitStatus();
+  Float_t chi2[2];
+  //get chi2/dof
+  chi2[0] = fitStatus->getChi2()/fitStatus->getNdf();
+  chi2[1] = -999; // change: here goes an actual probability, need to calculate?
+#if 0
+  // December 04: The second element of the array will now hold the incremental chi2 of adding
+  // the vertex for primary tracks
+  if (gTrack->type()==primary) {
+    assert(node->Detector()==0);
+    chi2[1]=node->Chi2();
+  }
+#endif    
+  // setFitTraits uses assignment operator of StTrackFitTraits, which is the default one,
+  // which does a memberwise copy.  Therefore, constructing a local instance of 
+  // StTrackFitTraits is fine, as it will get properly copied.
+  StTrackFitTraits fitTraits(geantIdPidHyp,0,chi2,covMFloat);
+#if 0
+  if (gTrack->type()==primary) {
+     fitTraits.setPrimaryVertexUsedInFit(true);
+  }
+#endif
   for (Int_t i=1;i<kMaxDetectorId;i++) {
     if(!dets[i][0]) continue;
-    gTrack->setNumberOfPossiblePoints((unsigned char)dets[i][0],(StDetectorId)i);
+    gTrack->setNumberOfPossiblePoints((UChar_t)dets[i][0],(StDetectorId)i);
     if (!dets[i][1]) continue;
     detInfo->setNumberOfPoints(dets[i][1],static_cast<StDetectorId>(i));
+    if (!dets[i][2]) continue;
+    fitTraits.setNumberOfFitPoints((UChar_t)dets[i][2],(StDetectorId)i);
   }
+  StSPtrVecTrackDetectorInfo& detInfoVec = mEvent->trackDetectorInfo(); 
+  detInfoVec.push_back(detInfo);
+  gTrack->setDetectorInfo(detInfo);
+  gTrack->setFitTraits(fitTraits);
+  
+  return kStOk;
 }
 //_____________________________________________________________________________
 void StxMaker::FillGeometry(StTrack* gTrack, genfit::Track * track, bool outer) {
@@ -673,48 +617,6 @@ void StxMaker::FillGeometry(StTrack* gTrack, genfit::Track * track, bool outer) 
 #endif
   return;
 }
-//_____________________________________________________________________________
-void StxMaker::FillFitTraits(StTrack* gTrack, genfit::Track * track){
-  // mass
-  // this makes no sense right now... Double_t massHyp = track->getMass();  // change: perhaps this mass is not set right?
-  UShort_t geantIdPidHyp = 9999;
-  //if (.13< massHyp<.14) 
-  geantIdPidHyp = 9;
-#if 0
-  // chi square and covariance matrix, plus other stuff from the
-  // innermost track node
-  genfit::Track Node* node = track->InnerMostHitNode(3);
-  Float_t x[6],covMFloat[15];
-  node->GlobalTpt(x,covMFloat);
-#else
-  Float_t covMFloat[15];
-#endif
-  KalmanFitStatus *fitStatus = track->getKalmanFitStatus();
-  Float_t chi2[2];
-  //get chi2/dof
-  chi2[0] = fitStatus->getChi2()/fitStatus->getNdf();
-  chi2[1] = -999; // change: here goes an actual probability, need to calculate?
-#if 0
-  // December 04: The second element of the array will now hold the incremental chi2 of adding
-  // the vertex for primary tracks
-  if (gTrack->type()==primary) {
-    assert(node->Detector()==0);
-    chi2[1]=node->Chi2();
-  }
-#endif    
-  // setFitTraits uses assignment operator of StTrackFitTraits, which is the default one,
-  // which does a memberwise copy.  Therefore, constructing a local instance of 
-  // StTrackFitTraits is fine, as it will get properly copied.
-  StTrackFitTraits fitTraits(geantIdPidHyp,0,chi2,covMFloat);
-#if 0
-  if (gTrack->type()==primary) {
-     fitTraits.setPrimaryVertexUsedInFit(true);
-  }
-#endif
-  gTrack->setFitTraits(fitTraits);
-  return;
-}
-
 ///_____________________________________________________________________________
 /// data members from StEvent/StTrack.h
 ///  The track flag (mFlag accessed via flag() method) definitions with ITTF 
@@ -787,7 +689,6 @@ void StxMaker::FillFlags(StTrack* gTrack) {
     // there are more than 2 hits with wrong Z -position
     Int_t flag = TMath::Abs(gTrack->flag());
     if (NoTpcFitPoints >= 11) {
-      const StTrackDetectorInfo *dinfo = gTrack->detectorInfo();
       const StPtrVecHit& hits = dinfo->hits(kTpcId);
       Int_t Nhits = hits.size();
       Int_t NoWrongSignZ = 0;
@@ -907,8 +808,8 @@ void StxMaker::FillDca(StTrack* stTrack, genfit::Track * track)
   Double_t qoverpT = charge/mom.Pt();
   Double_t qoverpT2 = qoverpT * qoverpT;
   Double_t curvature = - hz*qoverpT;
-  Double_t sinPsi = mom.X()/pT;
-  Double_t cosPsi = mom.Y()/pT;
+  Double_t cosPsi = mom.X()/pT;
+  Double_t sinPsi = mom.Y()/pT;
   Double_t Psi = TMath::ATan2(sinPsi, cosPsi);
   Double_t tanL   = mom.Z()/pT;
   Double_t Imp    = -pos.X()*sinPsi + pos.Y()*cosPsi;

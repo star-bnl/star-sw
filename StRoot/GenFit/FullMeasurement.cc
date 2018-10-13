@@ -53,9 +53,11 @@ SharedPlanePtr FullMeasurement::constructPlane(const StateOnPlane&) const {
 
 std::vector<MeasurementOnPlane*> FullMeasurement::constructMeasurementsOnPlane(const StateOnPlane& state) const {
 
-  MeasurementOnPlane* mop = new MeasurementOnPlane(rawHitCoords_,
-       rawHitCov_,
-       state.getPlane(), state.getRep(), constructHMatrix(state.getRep()));
+  MeasurementOnPlane* mop = new MeasurementOnPlane(//rawHitCoords_,
+						   //       rawHitCov_,
+						   getRawHitCoords((StateOnPlane*) &state),
+						   getRawHitCov((StateOnPlane*) &state),
+						   state.getPlane(), state.getRep(), constructHMatrix(state.getRep()));
 
   std::vector<MeasurementOnPlane*> retVal;
   retVal.push_back(mop);

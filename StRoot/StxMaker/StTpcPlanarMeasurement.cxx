@@ -18,6 +18,7 @@
 #include "TGeoPhysicalNode.h"
 #include "TGeoBBox.h"
 #include "StarVMC/StarVMCApplication/StarVMCDetector.h"
+#include "TMath.h"
 using namespace genfit;
 Int_t StTpcPlanarMeasurement::fDebug = 0;
 //________________________________________________________________________________
@@ -116,12 +117,21 @@ StTpcPlanarMeasurement::StTpcPlanarMeasurement(const StTpcHit *hit,TrackPoint* t
     fHit->Print();
   }
 }
+#if 0
 //________________________________________________________________________________
 const TVectorD& StTpcPlanarMeasurement::getRawHitCoords(genfit::StateOnPlane *state) const {return genfit::AbsMeasurement::getRawHitCoords(state);}
 //________________________________________________________________________________
 const TMatrixDSym& StTpcPlanarMeasurement::getRawHitCov(genfit::StateOnPlane *state) const {return genfit::AbsMeasurement::getRawHitCov(state);}
+#endif
 //________________________________________________________________________________
-TVectorD& StTpcPlanarMeasurement::getRawHitCoords(genfit::StateOnPlane *state) {return genfit::AbsMeasurement::getRawHitCoords(state);}
+TVectorD& StTpcPlanarMeasurement::getRawHitCoords(const genfit::StateOnPlane *state) {return genfit::AbsMeasurement::getRawHitCoords(state);}
 //________________________________________________________________________________
-TMatrixDSym& StTpcPlanarMeasurement::getRawHitCov(genfit::StateOnPlane *state) {return genfit::AbsMeasurement::getRawHitCov(state);}
+TMatrixDSym& StTpcPlanarMeasurement::getRawHitCov(const genfit::StateOnPlane *state) {
+  Double_t eta  = TMath::ATan(state->getState()(1));
+  Double_t tanL = state->getState()(2);
+  Double_t Z    = state->getState()(4);
+  TMatrixDSym &rawHitCov = genfit::AbsMeasurement::getRawHitCov(state);
+  fErrCalc->calculateError(Z,eta,tanL, rawHitCov(0,0), rawHitCov(1,1));
+  return rawHitCov;
+}
 //________________________________________________________________________________

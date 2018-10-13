@@ -54,11 +54,12 @@ class AbsMeasurement : public TObject {
 
   TrackPoint* getTrackPoint() const {return trackPoint_;}
   void setTrackPoint(TrackPoint* tp) {trackPoint_ = tp;}
-
+#if 0
   virtual const TVectorD& getRawHitCoords(StateOnPlane *state=0) const {return rawHitCoords_;}
   virtual const TMatrixDSym& getRawHitCov(StateOnPlane *state=0) const {return rawHitCov_;}
-  virtual TVectorD& getRawHitCoords(StateOnPlane *state=0) {return rawHitCoords_;}
-  virtual TMatrixDSym& getRawHitCov(StateOnPlane *state=0) {return rawHitCov_;}
+#endif
+  virtual TVectorD& getRawHitCoords(const StateOnPlane *state=0) {return rawHitCoords_;}
+  virtual TMatrixDSym& getRawHitCov(const StateOnPlane *state=0) {return rawHitCov_;}
   int getDetId() const {return detId_;}
   int getHitId() const {return hitId_;}
 

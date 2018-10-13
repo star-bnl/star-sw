@@ -34,12 +34,10 @@ class StxMaker : public StMaker {
   // virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty StMaker::FinishRun 
   Bool_t Accept(genfit::Track *kTrack);
   void FillGlobalTrack(genfit::Track *kTrack);
-  void FillEventPrimaries();
-  void FillDetectorInfo(StTrack *gTrack,StTrackDetectorInfo* detInfo, genfit::Track * track, bool refCountIncr) ;
+  Int_t FillDetectorInfo(StTrack *gTrack, genfit::Track * track, bool refCountIncr) ;
   void FillGeometry(StTrack* gTrack, genfit::Track * track, bool outer);
-  void FillFitTraits(StTrack* gTrack, genfit::Track * track);
   void FillFlags(StTrack* gTrack);
-  void FillTrack(StTrack* gTrack, genfit::Track * track,StTrackDetectorInfo* detInfo );
+  Int_t FillTrack(StTrack* gTrack, genfit::Track * track);
   Double_t impactParameter(genfit::Track * track, StThreeVectorD &vertexPosition);
   Double_t impactParameter(StTrack* track, StThreeVectorD &vertex);
   void FillDca(StTrack* stTrack, genfit::Track * track);

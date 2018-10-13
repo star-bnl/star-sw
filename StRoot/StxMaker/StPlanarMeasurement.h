@@ -16,8 +16,8 @@ class StPlanarMeasurement : public genfit::PlanarMeasurement {
   virtual genfit::AbsMeasurement* clone() const {return new StPlanarMeasurement(*this);}
   virtual const TVectorD& getRawHitCoords(genfit::StateOnPlane *state=0) const;
   virtual const TMatrixDSym& getRawHitCov(genfit::StateOnPlane *state=0) const;
-  virtual       TVectorD& getRawHitCoords(genfit::StateOnPlane *state=0);
-  virtual       TMatrixDSym& getRawHitCov(genfit::StateOnPlane *state=0);
+  virtual       TVectorD& getRawHitCoords(genfit::StateOnPlane *state);
+  virtual       TMatrixDSym& getRawHitCov(genfit::StateOnPlane *state);
  protected:
   const StHit  *fHit; 
   StiHitErrorCalculator *fErrCalc;
