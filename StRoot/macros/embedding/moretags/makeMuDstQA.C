@@ -150,23 +150,61 @@ void makeMuDstQA(TString InputFileList, Int_t nFiles, Int_t nEvents, TString Out
      Float_t vzVpd=-999;
      if (mBTofHeader) vzVpd = mBTofHeader->vpdVz();
 
-     //StPicoDstMaker vertex selection (cvs, PicoVtxMode:VtxDefault)
-     int index = 0;
-     //StPicoDstMaker vertex selection (cvs, PicoVtxMode:PicoVtxVpdOrDefault)
-     /*
+     //-----------------------------------------------------------------------------
+     //vertex selection in StPicoDstMaker
+     enum PicoVtxMode {NotSet=0, Default=1, Vpd=2, VpdOrDefault=3};
+     PicoVtxMode mVtxMode;
+
+     //MUST assign this line!!!
+     mVtxMode = VpdOrDefault;
      const double mTpcVpdVzDiffCut = 3;
-     if (mBTofHeader && fabs(vzVpd) < 200) {
-	  for (unsigned int iVtx = 0; iVtx < mMuDst->numberOfPrimaryVertices(); ++iVtx) {
-	     StMuPrimaryVertex* vtx = mMuDst->primaryVertex(iVtx);
-	     if (!vtx) continue;
-	     if (fabs(vzVpd - vtx->position().z()) < mTpcVpdVzDiffCut) {
-		  index = iVtx;
-		  break;
-	     }
-	  }
+
+     int const originalVertexId = mMuDst->currentVertexIndex();
+
+     StMuPrimaryVertex* selectedVertex = nullptr;
+
+     if (mVtxMode == Default) {
+	  // choose the default vertex, i.e. the first vertex
+	  mMuDst->setVertexIndex(0);
+	  selectedVertex = mMuDst->primaryVertex();
      }
-     */
-     if(index>=0) mMuDst->setVertexIndex(index);
+     else if (mVtxMode == Vpd || mVtxMode == VpdOrDefault) {
+
+	  if(mVtxMode == VpdOrDefault) {
+	     mMuDst->setVertexIndex(0);
+	     selectedVertex = mMuDst->primaryVertex();
+	  }
+
+	  //StBTofHeader const* mBTofHeader = mMuDst->btofHeader();
+
+	  if (mBTofHeader && fabs(mBTofHeader->vpdVz()) < 200) {
+	     float vzVPD = mBTofHeader->vpdVz();
+
+	     for (unsigned int iVtx = 0; iVtx < mMuDst->numberOfPrimaryVertices(); ++iVtx) {
+		  StMuPrimaryVertex* vtx = mMuDst->primaryVertex(iVtx);
+		  if (!vtx) continue;
+
+		  if (fabs(vzVPD - vtx->position().z()) < mTpcVpdVzDiffCut) {
+		     mMuDst->setVertexIndex(iVtx);
+		     selectedVertex = mMuDst->primaryVertex();
+		     break;
+		  } //if (fabs(vzVPD - vtx->position().z()) < mTpcVpdVzDiffCut)
+	     } //for (unsigned int iVtx = 0; iVtx < mMuDst->numberOfPrimaryVertices(); ++iVtx)
+	  } //if (mBTofHeader && fabs(mBTofHeader->vpdVz()) < 200)
+     } //else if (mVtxMode == Vpd || mVtxMode == VpdOrDefault)
+     else { // default case
+	  LOG_ERROR << "Pico Vtx Mode not set!" << endm;
+     }
+
+     // fall back to default vertex if no vertex is selected in the algorithm above.
+     // should skip this event in the event cuts below.
+     if ( ! selectedVertex ){
+	  LOG_INFO << "Vertex is not valid" << endm;
+	  //cout<<originalVertexId<<endl;
+	  mMuDst->setVertexIndex(originalVertexId);
+     }
+     //end of vertex selection
+     //------------------------------------------------------------------------------
 
      mRunId = mMuEvent->runNumber();
      mEvtId = mMuEvent->eventNumber();
@@ -255,11 +293,13 @@ void makeMuDstQA(TString InputFileList, Int_t nFiles, Int_t nEvents, TString Out
      //cout<<"refmult: "<<mMuEvent->refMult()<<endl;
 
      //Event cuts (NO EVENT CUTS TILL HERE!)
+     //vertex is not selected (only for PicoVtxMode::Vpd)
+     if ( ! selectedVertex ) continue;
      //trigger
-     if ( ! mMuEvent->triggerIdCollection().nominal().isTrigger(580001) && ! mMuEvent->triggerIdCollection().nominal().isTrigger(580011) && ! mMuEvent->triggerIdCollection().nominal().isTrigger(580021) ) continue ;
+     if ( ! mMuEvent->triggerIdCollection().nominal().isTrigger(520001) && ! mMuEvent->triggerIdCollection().nominal().isTrigger(520011) && ! mMuEvent->triggerIdCollection().nominal().isTrigger(520021) && ! mMuEvent->triggerIdCollection().nominal().isTrigger(520031) && ! mMuEvent->triggerIdCollection().nominal().isTrigger(520041) && ! mMuEvent->triggerIdCollection().nominal().isTrigger(520051) ) continue ;
      //Vz
-     if ( fabs(mMuEvent->primaryVertexPosition().z()) > 60.0 ) continue ;
-     //if ( fabs(mMuEvent->primaryVertexPosition().z() - vzVpd) > 3.0 ) continue ;
+     if ( fabs(mMuEvent->primaryVertexPosition().z()) > 6.0 ) continue ;
+     if ( fabs(mMuEvent->primaryVertexPosition().z() - vzVpd) > 3.0 ) continue ;
      //Vr
      //if ( mMuEvent->primaryVertexPosition().perp() > 2.0 ) continue ;
      //pileup cut
