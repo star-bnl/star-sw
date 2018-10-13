@@ -10,7 +10,7 @@ if [[ ! -d daq || ! -d reco || ! -d tags ]] ; then
 fi
 
 echo scanning daq/ ...
-for i in `find daq/*daq`
+for i in `find daq/*.daq`
 do
    bname=`basename $i .daq`
    #echo $bname
@@ -23,7 +23,7 @@ do
    fi
 done
 echo scanning reco/ ...
-for i in `find reco/*root`
+for i in `find reco/*.MuDst.root`
 do
    bname=`basename $i .MuDst.root`
    #echo $bname
@@ -36,7 +36,7 @@ do
    fi
 done
 echo scanning tags/ ...
-for i in `find tags/*root`
+for i in `find tags/*.tags.root`
 do
    bname=`basename $i .tags.root`
    #echo $bname
