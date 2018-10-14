@@ -354,6 +354,10 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
     std::cout << e.what();
     return kStErr;
   }
+  KalmanFitStatus *fitStatus = fitTrack.getKalmanFitStatus();
+  if (! fitStatus || !(fitStatus->isFitConvergedFully() || fitStatus->isFitConvergedPartially())) {
+    return kStErr;
+  }
   //_________ Fill StTrack _______________
   //  UInt_t npoints = fitTrack.getNumPoints();
   

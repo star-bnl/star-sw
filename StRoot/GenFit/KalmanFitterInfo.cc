@@ -266,7 +266,14 @@ const MeasuredStateOnPlane& KalmanFitterInfo::getFittedState(bool biased) const 
     #ifdef DEBUG
     debugOut << "KalmanFitterInfo::getFittedState - biased = mean(forwardUpdate_, backwardPrediction_) \n";
     #endif
-    fittedStateBiased_.reset(new MeasuredStateOnPlane(calcAverageState(*forwardUpdate_, *backwardPrediction_)));
+    try {
+      fittedStateBiased_.reset(new MeasuredStateOnPlane(calcAverageState(*forwardUpdate_, *backwardPrediction_)));
+    }
+    catch(Exception& e){
+      Exception e2("KKalmanFitterInfo::getFittedState - illegal matrix", __LINE__,__FILE__);
+      throw e2;
+    }
+    
     return *fittedStateBiased_;
   }
 
@@ -306,7 +313,13 @@ const MeasuredStateOnPlane& KalmanFitterInfo::getFittedState(bool biased) const 
   #ifdef DEBUG
   debugOut << "KalmanFitterInfo::getFittedState - unbiased = mean(forwardPrediction_, backwardPrediction_) \n";
   #endif
-  fittedStateUnbiased_.reset(new MeasuredStateOnPlane(calcAverageState(*forwardPrediction_, *backwardPrediction_)));
+  try {
+    fittedStateUnbiased_.reset(new MeasuredStateOnPlane(calcAverageState(*forwardPrediction_, *backwardPrediction_)));
+  }
+  catch(Exception& e){
+    Exception e2("KKalmanFitterInfo::getFittedState - illegal matrix", __LINE__,__FILE__);
+    throw e2;
+  }
   return *fittedStateUnbiased_;
 }
 
