@@ -1,19 +1,49 @@
 This directory contains the code to generate the .moretags.root files for an embedding request.
-The .tags.root file from real data production doesn't have enough information to do fine event 
-cuts, like the VpdVz. The code here will scan the MuDst.root files (corresponding to the daq 
-files) and write all the relavant event info to .moretags.root
+The .tags.root file from real data production may not have enough information to do fine event 
+cuts, for example, the cuts on VpdVz, or select the VpdVz constrained vertex instead of using 
+the default highest ranking one. The code here will scan the MuDst.root files (corresponding to
+the sampled daq files) and write all the relavant event info to .moretags.root. The code also
+outputs the runID and eventID of those events that pass the event cuts to .chopper.txt file, 
+which can be used to estimate the embedding statistics per sample, or to chop the sampled daq 
+files if necessary.
 
-1) generate the list of MuDst.root files
-find mudst_dir/ -name "*.MuDst.root" > a.list
-2) modify 'makeMuDstQA.C' according to the requested event information
-3) run the first file for a test (and compile makeMuDstQA.C).
-./tryfirst.sh a.list SL15e_embed
-4) submit the full job
-./submit.sh a.list SL15e_embed
-5) If the job has to wait due to low slurm priority, cancel the job, run it on the terminal
+Step 1:
+generate the list of restaged MuDst.root files,
+find mudst_dir/ -name "*.MuDst.root" > a.mudst.list
+
+Step 2:
+modify 'makeMuDstQA.C' according to the requested vertex selection and event cut information,
+or add new branches to moretags.root as needed.
+
+Step 3:
+run the first file for testing and compiling makeMuDstQA.C.
+./tryfirst.sh a.mudst.list SL15e_embed
+inspect the resulting two files in test/, see whether everything works as expected.
+
+Step 4:
+if the test works, submit the full job
+./submit.sh a.mudst.list SL15e_embed
+usually the job starts to run immediately and finishes quickly. but sometimes the job has to 
+wait a long time due to low slurm priority. if so, one can cancel the job, run it on the terminal
+with the following commands,
 scancel -u ausername
 find sums/sched9EC71*csh > tasks.csh
 ./runterm.sh tasks.csh
 
-The output directory will contain all the st*.moretags.root files, which should be copied to
-the tags directory for embedding production.
+Step 5:
+Once the job finishes, the output/ directory will contain all the st*.moretags.root and 
+st*.chopper.txt files. MAKE SURE that all jobs completed properly by counting the # of
+those files.
+ls -l output/st*moretags.root |wc -l
+ls -l output/st*chopper.txt |wc -l
+compare the output with 
+wc -l a.mudst.list
+the numbers should be exactly the same. Once can also estimate the total # of events can be used
+in embedding with
+wc -l output/st*chopper.txt
+
+the moretags files should be copied to the tags directory for embedding production.
+cp output/st*moretags.root ../tags/
+
+
+
