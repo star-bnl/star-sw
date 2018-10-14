@@ -59,3 +59,10 @@ in case that moretags files are needed, use the following command to checkout th
 cvs co -d moretags StRoot/macros/embedding/moretags 
 follow the moretags/README to produce moretags.root files, and/or chop the daq files if necessary.
 
+Other tools:
+daqAdder.sh, tagAdder.sh
+the tools to combine the daq/tags/moretags files from the same runnumber. used in some rare case that each chopped daq files contains 
+only tens of events (for example, AuAu7 data). combining the daq files from the same runs can help reduce the job numbers, 
+hence increase the running efficiency significantly.
+please look into these scripts to know how to use them.
+
