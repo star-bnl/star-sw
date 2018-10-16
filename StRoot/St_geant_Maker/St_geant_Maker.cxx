@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.171 2018/03/22 19:46:19 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.172 2018/10/16 01:07:12 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.172  2018/10/16 01:07:12  perev
+// Two years old mistype fix
+//
 // Revision 1.171  2018/03/22 19:46:19  jwebb
 // Get the hit count right for FTS
 //
@@ -1419,7 +1422,8 @@ Int_t St_geant_Maker::Make() {
   if (nhits>0) {
     St_g2t_emc_hit *g2t_emc_hit = new St_g2t_emc_hit("g2t_emc_hit",nhits);
     AddData(g2t_emc_hit);
-    //           ==============================
+    iRes = g2t_emc(g2t_track,g2t_emc_hit); if (Debug() > 1) g2t_emc_hit->Print(0,10); 	 
+     //           ==============================
   }
   
   nhits = 0;
