@@ -144,7 +144,7 @@ class Lxgbx {
 	    }
 	}
 	
-	LOG(NOTE, "dets_in_run_mask = 0x%llx",dets_in_run_mask,0,0,0,0);
+	LOG("JEFF", "dets_in_run_mask = 0x%llx",dets_in_run_mask,0,0,0,0);
 	return ret;
     }
 
@@ -292,6 +292,15 @@ class Lxgbx {
 	pay->eventNumber = l2h32(eventNumber);
 	pay->token = l2h32(token);
 
+
+	if(&pay->EventDescriptor == evt) {
+	    LOG("JEFF", "Event descriptor is already in payload!   Fine.",0,0,0,0,0);
+	}
+	else {
+	    LOG("JEFF", "Event descriptor not in payload, copy it! %p %p", &pay->EventDescriptor, evt,0,0,0);
+	    memcpy(&pay->EventDescriptor, evt, sizeof(EvtDescData));
+	}
+	
 	// The rest should be little endian 
 	pay->L1summary[0] = l2h32(l1trg_lo);
 	pay->L1summary[1] = l2h32(l1trg_hi);
@@ -300,7 +309,7 @@ class Lxgbx {
 	pay->L2summary[1] = l2h32(l2trg_hi);
 	pay->L3summary[1] = l2h32(l2trg_hi);
 
-	LOG(DBG, "l1: 0x%x/0x%x,   l2: 0x%x/0x%x   dets: 0x%x",
+	LOG("JEFF", "l1: 0x%x/0x%x,   l2: 0x%x/0x%x   evtdesc->dets: 0x%x",
 	    pay->L1summary[0],
 	    pay->L1summary[1],
 	    pay->L2summary[0],
@@ -341,20 +350,21 @@ class Lxgbx {
 	pay->flags = l2h32(pay->flags);
     
 	UINT32 awdetmask = b2h16(evt->actionWdDetectorBitMask);
-
-	LOG(DBG, "grp_mask = 0x%x",awdetmask,0,0,0,0);
+      	LOG("JEFF", "grp_mask = 0x%x",awdetmask,0,0,0,0);
 	
 	UINT64 detmask = grp2rts_mask(awdetmask);
 
 	
-	LOG(DBG, "potential det_mask = 0x%llx dets_in_run_mask 0x%llx",detmask,dets_in_run_mask,0,0,0);
+	LOG("JEFF", "potential det_mask  = 0x%llx dets_in_run_mask 0x%llx",detmask,dets_in_run_mask,0,0,0);
 
 	detmask &= dets_in_run_mask;
 	detmask |= (1ll<<TRG_SYSTEM);
 	
-	LOG(NOTE, "final det_mask = 0x%llx",detmask,0,0,0,0);
+	LOG("JEFF", "final det_mask = 0x%llx",detmask,0,0,0,0);
 
 	pay->rtsDetMask = l2h64(detmask);
+
+	LOG("JEFF", "super final det_mask = 0x%llx",pay->rtsDetMask,0,0,0,0);
 
 	if(pay->flags & EVBFLAG_L25ABORT) {
 	    LOG(DBG, "Sending L25Abort: token=%d event=%d 1l=0x%x l2=0x%x l2abort=%d",
