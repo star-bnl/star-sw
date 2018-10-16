@@ -79,15 +79,15 @@ do
    fi
 done
 
-find $srcdirs -name "*.log.gz" > tmplog.list
-find $srcdirs -name "*.minimc.root" > tmpminimc.list
+find $srcdirs -name "*.log.gz" > tmplog$$.list
+find $srcdirs -name "*.minimc.root" > tmpminimc$$.list
 
 nfailed=0
 while read line
 do
    fn=`echo $line | awk '{print $4}'`
    fset=`echo $line | awk '{print $5}'`
-   logfile=`grep "${fn}.r4s_${fset}.log.gz" tmplog.list`
+   logfile=`grep "${fn}.r4s_${fset}.log.gz" tmplog$$.list`
    if [ -z "$logfile" ] ; then
 	echo "found one possible failed task with no log file"
 	echo $line >> $newtlist
@@ -95,7 +95,7 @@ do
 	continue
    fi
 
-   minicheck=`grep "${fn}.minimc.root" tmpminimc.list | grep "${particle}_${fset}_${reqid}"`
+   minicheck=`grep "${fn}.minimc.root" tmpminimc$$.list | grep "${particle}_${fset}_${reqid}"`
    aborted=`zgrep "StChain::Embedding" $logfile`
    buserr=`zgrep "Bus error" $logfile`
    if [[ -z "$minicheck" || -z "$aborted" || ! -z "$buserr" ]] ; then
@@ -143,5 +143,5 @@ if [ $nfailed -gt 0 ] ; then
 
 fi
 
-rm -f tmplog.list tmpminimc.list
+rm -f tmplog$$.list tmpminimc$$.list
 
