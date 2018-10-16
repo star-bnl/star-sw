@@ -218,7 +218,8 @@ StiDetector* StiTpcDetectorBuilder::constructTpcPadrowDetector(StiLayer stiLayer
   StiIsActiveFunctor* activator = nullptr;
 
   if ( tpcPadCfg.isiTpcPadRow(tpc_sector_id, tpc_padrow_id) ) {
-    pDetector->setGroupId(kiTpcId);
+    //pDetector->setGroupId(kiTpcId);
+    pDetector->setGroupId(kTpcId); // Y. Fisyak and I. Chakaberia approach is not to use kiTpcId
     activator = _active_iTpc ? new StiTpcIsActiveFunctor(true,west,east) :
                                new StiTpcIsActiveFunctor(false,west,east);
   }
