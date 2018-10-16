@@ -78,17 +78,17 @@ storedevts=0
 for i in `find $logp/ -name "*.log*"`
 do
 #echo $i
-if [ -f tmplog.txt ] ; then
-   rm -f tmplog.txt
+if [ -f tmplog$$.txt ] ; then
+   rm -f tmplog$$.txt
 fi
 
 if [ "${i##*.}" = "gz" ] ; then
-   gzip -cd $i | tail -n 1000 > tmplog.txt
+   gzip -cd $i | tail -n 1000 > tmplog$$.txt
 else
-   cat $i | tail -n 1000 > tmplog.txt
+   cat $i | tail -n 1000 > tmplog$$.txt
 fi
 
-jtime=`grep -a "StChain::Embedding" tmplog.txt | awk -F '=' '{print $2}' | awk '{print $1}'`
+jtime=`grep -a "StChain::Embedding" tmplog$$.txt | awk -F '=' '{print $2}' | awk '{print $1}'`
 if [ -z $jtime ] ; then
    echo CAUTION: corrupted task found!
    echo $i
@@ -96,15 +96,15 @@ if [ -z $jtime ] ; then
 fi
 count=$(($count+1))
 total=`echo "$total+$jtime" |bc -l`
-nevents=`grep -a "Total events processed" tmplog.txt | awk -F ':' '{print $4}' | awk '{print $1}'`
+nevents=`grep -a "Total events processed" tmplog$$.txt | awk -F ':' '{print $4}' | awk '{print $1}'`
 #echo $nevents events in this daq file
-nanaevents=`grep -a "StAnalysisMaker::Finish" tmplog.txt | awk -F"Processed|events" '{print $2}'`
+nanaevents=`grep -a "StAnalysisMaker::Finish" tmplog$$.txt | awk -F"Processed|events" '{print $2}'`
 #echo $nanaevents events accepted for embedding in this daq file
 allevts=`echo "$allevts+$nevents" |bc -l`
 storedevts=`echo "$storedevts+$nanaevents" |bc -l`
 done
-if [ -f tmplog.txt ] ; then
-   rm -f tmplog.txt
+if [ -f tmplog$$.txt ] ; then
+   rm -f tmplog$$.txt
 fi
 
 echo "Scanned Fset# $ifset data:" 
