@@ -425,6 +425,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   for (v=0; v<numVtxCandidates; v++) {
     if (TrackInfomode<2) {
       pvtx = event->primaryVertex(vtxCandidates[v]);
+      if (! pvtx) continue;
       vtxPos = pvtx->position();
       vtxPosErr = pvtx->positionError();
     }
@@ -616,7 +617,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
           }
 
           Float_t space = 10000.;
-          Int_t predictFailed = m_ExB->PredictSpaceChargeDistortion(ch,oldPt,vtxPos.z(),
+          Int_t predictFailed = m_ExB->PredictSpaceChargeDistortion(sec,ch,oldPt,vtxPos.z(),
             eta,phi,DCA2,map.data(0),map.data(1),rerrors,rphierrors,space);
           if (predictFailed) {
             if (QAmode) cutshist->Fill(40+predictFailed);
@@ -1555,8 +1556,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.70 2018/09/21 18:22:47 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.71 2018/10/17 20:45:27 fisyak Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.71  2018/10/17 20:45:27  fisyak
+// Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
+//
 // Revision 1.70  2018/09/21 18:22:47  genevb
 // Bug fix for wrong vertex daughter PCTs function
 //

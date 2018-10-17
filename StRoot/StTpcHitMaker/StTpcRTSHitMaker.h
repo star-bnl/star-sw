@@ -3,36 +3,14 @@
 
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.h,v 1.16 2018/06/29 21:46:23 smirnovd Exp $
+ * $Id: StTpcRTSHitMaker.h,v 1.17 2018/10/17 20:45:27 fisyak Exp $
  * StTpcRTSHitMaker - class to runonline (RTS) cluster maker over StTpcRawData
  * $Log: StTpcRTSHitMaker.h,v $
- * Revision 1.16  2018/06/29 21:46:23  smirnovd
- * Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
+ * Revision 1.17  2018/10/17 20:45:27  fisyak
+ * Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
  *
- * Revert "NoDead option added"
- * Revert "Fill mag field more carefully"
- * Revert "Assert commented out"
- * Revert "Merging with TPC group code"
- * Revert "Remove too strong assert"
- * Revert "Restore removed by mistake line"
- * Revert "Remove not used anymore file"
- * Revert "iTPCheckIn"
- *
- * Revision 1.14  2018/04/10 11:38:44  smirnovd
- * StTpcHitMaker: Modified for iTPC era (Yuri and Irakli)
- *
- * Revision 1.13  2018/04/10 11:32:09  smirnovd
- * Minor corrections across multiple files
- *
- * - Remove ClassImp macro
- * - Change white space
- * - Correct windows newlines to unix
- * - Remove unused debugging
- * - Correct StTpcRTSHitMaker header guard
- * - Remove unused preprocessor directives in StiCA
- * - Minor changes in status and debug print out
- * - Remove using std namespace from StiKalmanTrackFinder
- * - Remove includes for unused headers
+ * Revision 1.15  2018/06/22 18:35:19  perev
+ * Merging with TPC group code
  *
  * Revision 1.12  2014/08/06 11:43:50  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
@@ -79,31 +57,34 @@
  *--------------------------------------------------------------------------
  *
  ***************************************************************************/
-
+#include <string.h>
 #include "StMaker.h"
 
 class StTpcDigitalSector;
 
 #include "StDAQMaker/StRtsReaderMaker.h"
 class daq_tpx;
+class daq_itpc;
 class StTpcRTSHitMaker : public StMaker {
  public:
-  StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0), fminCharge(0) {memset(mTpx_RowLen, 0, sizeof(mTpx_RowLen));}
+ StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0), fiTpc(0), fminCharge(0) {memset(mTpx_RowLen, 0, sizeof(mTpx_RowLen));}
   virtual ~StTpcRTSHitMaker();
   
   Int_t               Init();
   Int_t               InitRun(Int_t runnumber);
   Int_t               Make();
  private:
-  daq_tpx *fTpx; //!
-  Double_t fminCharge; // ! minimum cluster charge in ADC
-  Int_t    maxHits[24];
-  Int_t    maxBin0Hits;
-  Int_t    bin0Hits;
-  UChar_t *mTpx_RowLen[24];
+  daq_tpx  *fTpx; //!
+  daq_itpc *fiTpc; //!
+  Bool_t    fNoiTPCLu; //!
+  Double_t  fminCharge; // ! minimum cluster charge in ADC
+  Int_t     maxHits[24];
+  Int_t     maxBin0Hits;
+  Int_t     bin0Hits;
+  UChar_t  *mTpx_RowLen[24];
   // cvs
   virtual const char *GetCVS() const    {
-    static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
+    static const char cvs[]="Tag $Name:  $ $Id: StTpcRTSHitMaker.h,v 1.17 2018/10/17 20:45:27 fisyak Exp $  built " __DATE__ " " __TIME__ ; return cvs;
   }
   ClassDef(StTpcRTSHitMaker, 1)    //StTpcRTSHitMaker - class to fille the StEvewnt from DAQ reader
 };

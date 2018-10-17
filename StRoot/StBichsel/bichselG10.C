@@ -1,3 +1,67 @@
+/*
+  root.exe lBichsel.C bichselG10.C+
+  bichselG10("N");  // dN/dx
+  bichselG10("I70"; // I70
+  bichselG10("Bz"); // Ifit
+  TH1D *pB70  = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("B70p1"))->GetHistogram();
+  TH1D *piB70 = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("B70#pi1"))->GetHistogram();
+  TH1D *diffB70 = new TH1D(*pB70);
+  diffB70->SetName("diffB70");
+  diffB70->Add(pB70,piB70,1,-1);
+  diffB70->SetLineColor(1);
+  TH1D *pBz  = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("Bzp1"))->GetHistogram();
+  TH1D *piBz = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("Bz#pi1"))->GetHistogram();
+  TH1D *diffBz = new TH1D(*pBz);
+  diffBz->SetName("diffBz");
+  diffBz->Add(pBz,piBz,1,-1);
+  diffBz->SetLineColor(2);
+  TH1D *pdNdx  = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("dNdxp1"))->GetHistogram();
+  TH1D *pidNdx = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("dNdx#pi1"))->GetHistogram();
+  TH1D *diffdNdx = new TH1D(*pdNdx);
+  diffdNdx->SetName("diffdNdx");
+  diffdNdx->Add(pdNdx,pidNdx,1,-1);
+  diffdNdx->SetLineColor(3);
+  cppi = new TCanvas("cppi","cppi");
+  diffB70->SetXTitle("log_{10}p")
+  diffB70->SetTitle("z_{p} - z_{#pi}");
+  diffB70->Draw("l");
+  diffBz->Draw("samel");
+  diffdNdx->Draw("samel");
+  TLegend *l = new TLegend(0.6,0.6,0.8,0.8);
+  l->AddEntry(diff70,"I70");
+  l->AddEntry(diffBz,"Ifit");
+  l->AddEntry(diffdNdx,"dNdx");
+
+  TH1D *eB70  = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("B70e1"))->GetHistogram();
+  TH1D *piB70 = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("B70#pi1"))->GetHistogram();
+  TH1D *diffB70 = new TH1D(*eB70);
+  diffB70->SetName("diffB70");
+  diffB70->Add(eB70,piB70,1,-1);
+  diffB70->SetLineColor(1);
+  TH1D *eBz  = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("Bze1"))->GetHistogram();
+  TH1D *piBz = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("Bz#pi1"))->GetHistogram();
+  TH1D *diffBz = new TH1D(*eBz);
+  diffBz->SetName("diffBz");
+  diffBz->Add(eBz,piBz,1,-1);
+  diffBz->SetLineColor(2);
+  TH1D *edNdx  = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("dNdxe1"))->GetHistogram();
+  TH1D *pidNdx = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("dNdx#pi1"))->GetHistogram();
+  TH1D *diffdNdx = new TH1D(*edNdx);
+  diffdNdx->SetName("diffdNdx");
+  diffdNdx->Add(edNdx,pidNdx,1,-1);
+  diffdNdx->SetLineColor(3);
+  cepi = new TCanvas("cepi","cepi");
+  diffB70->SetXTitle("log_{10}p")
+  diffB70->SetTitle("z_{e} - z_{#pi}");
+  diffB70->Draw("l");
+  diffBz->Draw("samel");
+  diffdNdx->Draw("samel");
+  TLegend *l = new TLegend(0.6,0.6,0.8,0.8);
+  l->AddEntry(diff70,"I70");
+  l->AddEntry(diffBz,"Ifit");
+  l->AddEntry(diffdNdx,"dNdx");
+
+*/
 #if !defined(__CINT__)
 // code that should be seen ONLY by the compiler
 #else
@@ -24,7 +88,7 @@
 class Bichsel;
 #endif
 Bichsel *m_Bichsel = 0;
-const Int_t NMasses = 10;
+const Int_t NMasses = 12;
 const Double_t Masses[NMasses] = {0.93827231,
 				  0.493677,
 				  0.13956995,
@@ -35,10 +99,12 @@ const Double_t Masses[NMasses] = {0.93827231,
 				  2.80923, //GEANT3
 				  3.727417, //GEANT3
 				  0.13956995,
+				  0.93827231*6.94/1.008,
+				  0.93827231
 };
-const Int_t   Index[NMasses] = { 4,    3,   2,   0,   5,    1,  6,    7,       8,    -2};
-const Char_t *Names[NMasses] = {"p", "K","#pi","e", "d","#mu","t","He3","#alpha","2#pi"};
-const Int_t NF = 4;  //         0       1    2     3     4      5   6     7
+const Int_t   Index[NMasses] = { 4,    3,   2,   0,   5,    1,  6,    7,       8,    -2, 9, 0};
+const Char_t *Names[NMasses] = {"p", "K","#pi","e", "d","#mu","t","He3","#alpha","2#pi", "Li", "2p"};
+const Int_t NF = 4;  //          0    1     2   3    4     5   6     7        8      -2        9
 const Char_t *FNames[8] = {"Girrf","Sirrf","Bz","B70","B60","B70M","dNdx","BzM"};
 const Int_t Nlog2dx = 3;
 const Double_t log2dx[Nlog2dx] = {0,1,2};
@@ -52,7 +118,7 @@ Double_t bichselZ(Double_t *x,Double_t *par) {
   Double_t charge = 1.;
   Double_t dx2 = 1;
   if (par[1] > 1.0) {
-    charge = 2;
+    charge = par[1];
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
@@ -69,7 +135,7 @@ Double_t bichselZM(Double_t *x,Double_t *par) {
   Double_t charge = 1.;
   Double_t dx2 = 1;
   if (par[1] > 1.0) {
-    charge = 2;
+    charge = par[1];
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
@@ -86,7 +152,7 @@ Double_t bichsel70(Double_t *x,Double_t *par) {
   Double_t charge = 1.;
   Double_t dx2 = 1;
   if (par[1] > 1.0) {
-    charge = 2;
+    charge = par[1];
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
@@ -103,7 +169,7 @@ Double_t bichsel70M(Double_t *x,Double_t *par) {
   Double_t charge = 1.;
   Double_t dx2 = 1;
   if (par[1] > 1.0) {
-    charge = 2;
+    charge = par[1];
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
@@ -118,14 +184,11 @@ Double_t dNdx(Double_t *x,Double_t *par) {
   Double_t poverm = pove/mass; 
   Double_t charge = 1.;
   Double_t dx2 = 1;
-  if (par[1] > 1.0) {
-    charge = 2;
-    poverm *= charge;
-    dx2 = TMath::Log2(5.);
-  }
+  if (par[1] > 1.0) charge = par[1];
+  poverm *= charge;
   return  TMath::Log10(scale*StdEdxModel::instance()->dNdx(poverm,charge));//TMath::Exp(7.81779499999999961e-01));
 }
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 //________________________________________________________________________________
 Double_t aleph70P(Double_t *x,Double_t *par) {
   /* 
@@ -176,10 +239,9 @@ Double_t aleph70(Double_t *x,Double_t *par) {
   Double_t mass = Masses[hyp];
   Double_t poverm = pove/mass; 
   Double_t charge = 1.;
-  if (h > 6) {
-    charge = 2;
-    poverm *= charge;
-  }
+  if (h > 6 && h > 9) charge = 2;
+  else if (h == 10)   charge = 3;
+  poverm *= charge;
   Double_t bg = poverm;
   /* 
      W.Blum, L. Rolandi "Particle Detection with Drift Chambers", page 246, eq. (9.5)
@@ -214,7 +276,7 @@ void bichselG10(const Char_t *type="Bz") {
   TString Type(type);
   TLegend *leg = new TLegend(0.65,0.45,0.75,0.9,"");
   Double_t xmax = 4;
-  for (int h = 0; h < NMasses; h++) { // Masses
+  for (int h = 0; h < NMasses-1; h++) { // Masses
   //  for (int h = 0; h < 7; h++) { // Masses
     Int_t f = 3;
     if      (Type.Contains("BzM",TString::kIgnoreCase))  f = 7;
@@ -225,7 +287,7 @@ void bichselG10(const Char_t *type="Bz") {
     else if (Type.Contains("N",TString::kIgnoreCase))    f = 6;
     Int_t dx = 1;
     Char_t *FunName = Form("%s%s%i",FNames[f],Names[h],(int)log2dx[dx]);
-    cout << "Make " << FunName << endl;
+    cout << "Make " << h << "\t" << FunName << endl;
     Double_t xmin = -1;
     //    if (h == 0 || h >= 5) xmin = -0.75;
     if (h == 4) xmin = -0.70;
@@ -239,10 +301,11 @@ void bichselG10(const Char_t *type="Bz") {
     else {
       return;
     }
-    if (h == 9) func->SetParameter(0,-Masses[h]);
-    else       func->SetParameter(0,Masses[h]);
+    if (h == 9 || h == 11) func->SetParameter(0,-Masses[h]);
+    else                   func->SetParameter(0,Masses[h]);
     func->SetParameter(1,1.);
     if (h >= 7 && h < 9) func->SetParameter(1,2.);
+    if (h == 10) func->SetParameter(1,3.);
     Int_t color = h+1;
     if (color > 8) color -= 8;
     //    if (color > 7) color++;

@@ -453,7 +453,7 @@ void StSpaceChargeDistMaker::GeomInit() {
       }
       m = j + NP*i;
       LiveRow[m] = (StDetectorDbTpcRDOMasks::instance()->isOn(isec,
-            StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(irow)) &&
+       StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(isec,irow)) &&
             (St_tss_tssparC::instance()->gain(isec,irow) > 0) &&
             gainScales[j]>0); // gainScales necessary for dE/dx
 
@@ -605,8 +605,11 @@ void StSpaceChargeDistMaker::GeomFill(Float_t z) {
 
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeDistMaker.cxx,v 1.10 2018/04/11 02:43:21 smirnovd Exp $
+// $Id: StSpaceChargeDistMaker.cxx,v 1.11 2018/10/17 20:45:27 fisyak Exp $
 // $Log: StSpaceChargeDistMaker.cxx,v $
+// Revision 1.11  2018/10/17 20:45:27  fisyak
+// Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
+//
 // Revision 1.10  2018/04/11 02:43:21  smirnovd
 // Enable TPC/iTPC switch via St_tpcPadConfig
 //

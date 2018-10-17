@@ -24,6 +24,7 @@ using namespace units;
 #include "TArrayF.h"
 class Altro;
 class StTpcdEdxCorrection;
+class StTpcDigitalSector;
 struct SignalSum_t {
   Float_t      Sum;
   Short_t      Adc;
@@ -45,15 +46,15 @@ class StTpcRSMaker : public StMaker {
   virtual Int_t         Make();
   virtual Int_t  	Finish();
   TF1F *GetShaperResponse(Int_t io = 0, Int_t sector = 1) {return (TF1F *) mShaperResponses[io][sector-1];}          
-  TF1F *GetChargeFraction(Int_t io = 0)     {return (TF1F *) mChargeFraction[io];}     
-  TF1F *GetPadResponseFunction(Int_t io = 0){return (TF1F *) mPadResponseFunction[io];}
+  TF1F *GetChargeFraction(Int_t io = 0, Int_t sector = 20)     {return (TF1F *) mChargeFraction[io][sector-1];}     
+  TF1F *GetPadResponseFunction(Int_t io = 0, Int_t sector = 20){return (TF1F *) mPadResponseFunction[io][sector-1];}
   TF1F *GetPolya(Int_t io = 0)       {return (TF1F *) mPolya[io];}
   TF1F *GetTimeShape0(Int_t io = 0)  {return fgTimeShape0[io];}
   TF1F *GetTimeShape3(Int_t io = 0)  {return fgTimeShape3[io];}
   TF1  *GetHeed()                    {return mHeed;}
   Double_t GetNoPrimaryClusters(Double_t betaGamma, Int_t charge);
   virtual void Print(Option_t *option="") const;
-  void DigitizeSector(Int_t sector);
+  StTpcDigitalSector *DigitizeSector(Int_t sector);
   void SetLaserScale(Double_t m=1) {mLaserScale = m;}
   static Int_t    AsicThresholds(Short_t ADCs[__MaxNumberOfTimeBins__]);
   static Int_t    SearchT(const void *elem1, const void **elem2);
@@ -64,8 +65,8 @@ class StTpcRSMaker : public StMaker {
   static Double_t shapeEI3_I(Double_t *x, Double_t *par=0);
   static Double_t fei(Double_t t, Double_t t0, Double_t T);
   static Double_t polya(Double_t *x, Double_t *par);
-  SignalSum_t  *GetSignalSum();
-  SignalSum_t  *ResetSignalSum();
+  SignalSum_t  *GetSignalSum(Int_t sector);
+  SignalSum_t  *ResetSignalSum(Int_t sector);
   void SettauIntegrationX(Double_t p =      74.6e-9, Int_t io=0) {mtauIntegrationX[io] = p;}
   void SettauCX(Double_t           p =    1000.0e-9, Int_t io=0) {mtauCX[io] = p;}
   void SetCutEle(Double_t p = 1e-4)                  {mCutEle = p;}
@@ -76,7 +77,7 @@ class StTpcRSMaker : public StMaker {
   static Double_t PadResponseFunc(Double_t *x, Double_t *p);
   static Double_t Gatti(Double_t *x, Double_t *p);
   static Double_t InducedCharge(Double_t s, Double_t h, Double_t ra, Double_t Va, Double_t &t0);
-  static TF1F     *fgTimeShape3[2];   //!
+  static TF1F     *fgTimeShape3[2];  //!
   static TF1F     *fgTimeShape0[2];   //!
   Char_t   beg[1];                    //!
   TTree   *fTree;                     //!
@@ -85,8 +86,8 @@ class StTpcRSMaker : public StMaker {
   TH1D*    mdNdxL10;                  //!
   TH1D*    mdNdEL10;                  //!
   TF1F  *mShaperResponses[2][24];     //!
-  TF1F  *mChargeFraction[2];          //!
-  TF1F  *mPadResponseFunction[2];     //!
+  TF1F  *mChargeFraction[2][24];      //!
+  TF1F  *mPadResponseFunction[2][24]; //!
   TF1F  *mPolya[2];                   //!
   TF1F  *mGG;                         //! Gating Grid Transperency
   TF1   *mHeed;                       //!
@@ -97,9 +98,7 @@ class StTpcRSMaker : public StMaker {
   Char_t end[1];                      //!
   Double_t             mLaserScale;   //!
   // local variables
-  Int_t NumberOfInnerRows;            //!
   Int_t numberOfSectors;              //!
-  Int_t NumberOfRows;                 //!
   Int_t NoPads;                       //!
   Int_t numberOfTimeBins;             //!
   Int_t    numberOfInnerSectorAnodeWires; //! 
@@ -119,35 +118,24 @@ class StTpcRSMaker : public StMaker {
   const Double_t ElectronRangePower;  //!
   Double_t      mtauIntegrationX[2];  //! for TPX inner=0/outer=1
   Double_t      mtauCX[2];            //! -"- 
-  Double_t    mLocalYDirectionCoupling[2][7]; //!
+  Double_t    mLocalYDirectionCoupling[2][24][7]; //!
   const Int_t NoOfSectors;            //!
-  Int_t       NoOfRows;               //!
-  Int_t       NoOfInnerRows;          //!
   const Int_t NoOfPads;               //!
   const Int_t NoOfTimeBins;           //!
   Double_t   mCutEle;                 //! cut for delta electrons
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.30 2018/06/29 21:46:24 smirnovd Exp $ built " __DATE__ " " __TIME__ ; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.31 2018/10/17 20:45:28 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.30 2018/06/29 21:46:24 smirnovd Exp $
+// $Id: StTpcRSMaker.h,v 1.31 2018/10/17 20:45:28 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
-// Revision 1.30  2018/06/29 21:46:24  smirnovd
-// Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
-//
-// Revert "NoDead option added"
-// Revert "Fill mag field more carefully"
-// Revert "Assert commented out"
-// Revert "Merging with TPC group code"
-// Revert "Remove too strong assert"
-// Revert "Restore removed by mistake line"
-// Revert "Remove not used anymore file"
-// Revert "iTPCheckIn"
+// Revision 1.31  2018/10/17 20:45:28  fisyak
+// Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
 //
 // Revision 1.28  2016/09/18 22:45:25  fisyak
 // Clean up, add Heed model, adjust for new StTpcdEdxCorrections

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.43 2011/01/18 14:34:28 fisyak Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.44 2018/10/17 20:45:24 fisyak Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -48,7 +48,7 @@ StSvtCoordinateTransform::StSvtCoordinateTransform() {
 
 //_____________________________________________________________________________
 
-StSvtCoordinateTransform::StSvtCoordinateTransform(StTpcDb* gStTpcDb) {
+StSvtCoordinateTransform::StSvtCoordinateTransform(StTpcDb* /* gStTpcDb */) {
   mFlag=0;
   mPoly9=0;
 }
