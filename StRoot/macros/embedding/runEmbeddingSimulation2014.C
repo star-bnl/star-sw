@@ -30,8 +30,8 @@ double _prodtime  = 0;
 
 int     _npart = 10;  // floor number of tracks per event
 float   _fpart = 0.05;  // fraction of track multiplicity to embed
-int     _pid[50]={1,2,3,8,9,11,12,14,15,10017,10007}; //geant3 particle ID
-TString _pnm[50]={"gamma","positron","electron","pi+","pi-","K+","K-","proton","antiproton","eta","pi0"}; // particle names
+int     _pid[50]={1,2,3,8,9,11,12,14,15,10017,10007,45}; //geant3 particle ID
+TString _pnm[50]={"gamma","positron","electron","pi+","pi-","K+","K-","proton","antiproton","eta","pi0","deuteron"}; // particle names
 TString _part  = "pi+"; // particle to simulate, default pi+
 float   _ptmn  = 0.100; // min pT to simulate [GeV]
 float   _ptmx  = 7.000; // max pT to simulate [GeV]
@@ -297,6 +297,7 @@ void runEmbeddingSimulation2014(
   data.AddParticleToG3( "D0", 0.186483E+01, 0.41010E-12, 0., 3, 421, 37, 0, 0 );
   //data.AddParticleToG3( "eta",5.47853e-01, 0.50244E-18, 0., 3, 221, 17, 0, 0 );
   //data.AddParticleToG3( "pi0",1.34977e-01, 0.85200E-16, 0., 3, 111, 7, 0, 0 );
+  data.AddParticleToG3( "deuteron", 0.1876E+01, 0.10000E+16, 1., 8, 1000010020, 45, 0, 0 );
 
   TParticlePDG* D0     = data.GetParticle("D0");    
   D0->Print();
@@ -304,6 +305,9 @@ void runEmbeddingSimulation2014(
   //eta->Print();
   //TParticlePDG* pi0    = data.GetParticle("pi0");    
   //pi0->Print();
+
+  TParticlePDG* deuteron     = data.GetParticle("deuteron");    
+  deuteron->Print();
 
   //
   // Set D0 decay to K+ pi- mode (or cc).
