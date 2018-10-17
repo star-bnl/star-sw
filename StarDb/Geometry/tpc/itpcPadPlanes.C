@@ -8,7 +8,7 @@ TDataSet *CreateTable() {
   itpcPadPlanes_st row;
   St_itpcPadPlanes *tableSet = new St_itpcPadPlanes("itpcPadPlanes",1);
   /* 
-     Jim Thomas 04/02/15 http://rnc.lbl.gov/~jhthomas/public/iTPC/PadPlane/PadRow2HVandWire.pdf
+     Jim Thomas 04/02/15 
      pads = 2*(row + 24 - Int_t ((row - 1)/7)); // row = 1 - 40;
 
 Pads are spaced 0.5 x 1.6 cm with a 0.5 mm gap.
@@ -17,8 +17,8 @@ Which means the actual copper size of the pad is 0.45 x 1.55 cm.
      Jim Thomas 05/31/16
      pads = 2*(row + 25 - Int_t ((row - 1)/7)); // row = 1 - 40;
   */
-  Int_t NinnerRows = 40;
-  Int_t nPadsInner[40] = { //J.Thomas, 05/31/2016
+  enum {NinnerRows = 40};
+  Int_t nPadsInner[NinnerRows] = { //J.Thomas, 05/31/2016
     52, 54, 56, 58, 60, 62, 62, 64, 66, 68,
     70, 72, 74, 74, 76, 78, 80, 82, 84, 86,
     86, 88, 90, 92, 94, 96, 98, 98,100,102,
