@@ -1,7 +1,10 @@
-// $Id: TpcResponseSimulator.C,v 1.14 2018/08/07 13:17:10 didenko Exp $
+// $Id: TpcResponseSimulator.C,v 1.15 2018/10/17 20:45:17 fisyak Exp $
 // $Log: TpcResponseSimulator.C,v $
-// Revision 1.14  2018/08/07 13:17:10  didenko
-// put back previous revision
+// Revision 1.15  2018/10/17 20:45:17  fisyak
+// Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
+//
+// Revision 1.13  2018/08/06 15:41:44  fisyak
+// RunXVIII isobar dE/dx calibration
 //
 // Revision 1.12  2012/04/03 14:06:55  fisyak
 // Speed up using  GetSaveL (__PAD_BLOCK__), sluggish shape histograms, Heed electron generation
@@ -101,7 +104,10 @@ TDataSet *CreateTable() {
   // TpcT->Draw("fMcHit.mPosition.mX3-fRcHit.mPosition.mX3:fMcHit.mPosition.mX3>>Z(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz")
   // The corection has to be added                                                                    M             P
   //row.T0offset   = 0.50 + 1.65431e-01 -  3.45247e-01 -1.54583e+00 -2.90686e-03+ 1.54353e+00 + 0.0191135  -1.20938e-03 ; //E
-  row.T0offset   = 0.50-6.83675e-01; // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
+  //  row.T0offset   = 0.50-6.83675e-01; // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
+  // -(-dZE+dzW)/2/(DV[cm/sec]/frequancy[Hz]) : DV = 5533042; f = 9.386470*1e 6
+  // row.T0offset   = 0.50-6.83675e-01; // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding
+  row.T0offset   = 0.50-6.83675e-01-5.74e-02; // 07/26/18 2005 CuCu200, run 6059070
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;

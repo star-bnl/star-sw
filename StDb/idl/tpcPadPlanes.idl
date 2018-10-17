@@ -35,9 +35,9 @@ struct tpcPadPlanes {
    double  outerSectorEdge;   /*   */
    double  innerSectorPadPlaneZ;   /*   */
    double  outerSectorPadPlaneZ;   /*   */
-   long  innerPadsPerRow[50];   /*   */
-   long  outerPadsPerRow[50];   /*   */
-   double  innerRowRadii[50];   /*   */
-   double  outerRowRadii[50];   /*   */
+   long  innerPadsPerRow[13];   /*   */
+   long  outerPadsPerRow[32];   /*   */
+   double  innerRowRadii[13];   /*   */
+   double  outerRowRadii[32];   /*   */
 
  };  

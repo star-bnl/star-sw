@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.49 2018/08/07 12:29:09 didenko Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.50 2018/10/17 20:45:24 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,37 +16,20 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
- * Revision 1.49  2018/08/07 12:29:09  didenko
- * put back
+ * Revision 1.50  2018/10/17 20:45:24  fisyak
+ * Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
  *
- * Revision 1.47  2018/06/29 21:46:19  smirnovd
- * Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
+ * Revision 1.48  2018/08/07 03:43:37  fisyak
+ * iTPC corrections
  *
- * Revert "NoDead option added"
- * Revert "Fill mag field more carefully"
- * Revert "Assert commented out"
- * Revert "Merging with TPC group code"
- * Revert "Remove too strong assert"
- * Revert "Restore removed by mistake line"
- * Revert "Remove not used anymore file"
- * Revert "iTPCheckIn"
+ * Revision 1.46  2018/06/21 01:46:54  perev
+ * iTPCheckIn
  *
- * Revision 1.45  2018/06/14 21:22:54  smirnovd
- * Slight refactoring of "Apply T0 offset to inner TPC sectors"
+ * Revision 1.42.6.3  2018/05/28 23:56:26  perev
+ * Add backward compatibility
  *
- * Avoid modifying the input TPC sector ID [1, 24] inside of
- * StTpcCoordinateTransform::zFromTB() as was mistakenly done in the previous
- * commit. The input sector ID should be passed to StTpcDb::DriftVelocity(sector)
- * unmodified.
- *
- * Revision 1.44  2018/06/13 00:14:35  smirnovd
- * Apply T0 offset to inner TPC sectors
- *
- * The number of T0 constants increased from 24 to 48 to accommodate inner iTPC
- * sectors. The sector index is updated according to the requested sector/row
- *
- * Revision 1.43  2018/04/11 02:43:43  smirnovd
- * StTpcCoordinateTransform: Extend interface to accept TPC sector + use padConfig
+ * Revision 1.42.6.2  2018/05/02 19:41:33  perev
+ * Supress some Irakli correction
  *
  * Revision 1.42  2015/07/19 22:20:42  fisyak
  * Add recalculation of pad row during transformation
@@ -266,10 +249,12 @@
 #include "StMessMgr.h"
 #include "StDetectorDbMaker/St_tpcPadrowT0C.h"
 #include "StDetectorDbMaker/St_tpcSectorT0offsetC.h"
+#include "StDetectorDbMaker/St_tpcRDOT0offsetC.h"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "StDetectorDbMaker/St_tpcPadGainT0BC.h"
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_iTPCSurveyC.h"
 #include "TMath.h"
 #include "StThreeVectorD.hh"
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
@@ -324,7 +309,7 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
   if (! useT0 && useTau) // for cluster
     t0offset -= 3.0 * St_tss_tssparC::instance()->tau();   // correct for convolution lagtime
   Double_t t0zoffset = t0offset*StTpcDb::instance()->DriftVelocity(sector)*1e-6;
-  Double_t tb = tBFromZ(a.position().z()+zoffset-t0zoffset,sector,row);
+  Double_t tb = tBFromZ(a.position().z()+zoffset-t0zoffset,sector,row,probablePad);
   b = StTpcPadCoordinate(sector, row, probablePad, tb);
 }
 //________________________________________________________________________________
@@ -347,25 +332,10 @@ void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLoc
     t0offset -= 3.0 * St_tss_tssparC::instance()->tau();   // correct for convolution lagtime
   Double_t t0zoffset = t0offset*StTpcDb::instance()->DriftVelocity(a.sector())*1e-6;
   //t0 offset -- DH  27-Mar-00
-  Double_t z = zFromTB(a.timeBucket(),a.sector(),a.row())-zoffset+t0zoffset;
+  Double_t z = zFromTB(a.timeBucket(),a.sector(),a.row(),a.pad())-zoffset+t0zoffset;
   tmp.setZ(z);
   b = StTpcLocalSectorCoordinate(tmp,a.sector(),a.row());
 }
-//________________________________________________________________________________
-Double_t StTpcCoordinateTransform::padFromX(Double_t x, Int_t row) const {
-  if (row > mNoOfRows) row = mNoOfRows;
-  Double_t pitch = (row <= mNoOfInnerRows) ?
-    StTpcDb::instance()->PadPlaneGeometry()->innerSectorPadPitch() :
-    StTpcDb::instance()->PadPlaneGeometry()->outerSectorPadPitch();
-  // x coordinate in sector 12
-  Double_t probablePad = (StTpcDb::instance()->PadPlaneGeometry()->numberOfPadsAtRow(row)+1.)/2. - x/pitch;
-  // CAUTION: pad cannot be <1
-  if(probablePad<0.500001) {
-    probablePad=0.500001;
-  }
-  return (probablePad);
-}
-
 //________________________________________________________________________________
 Double_t StTpcCoordinateTransform::padFromX(Double_t x, Int_t sector, Int_t row) const {
   if (row > St_tpcPadConfigC::instance()->numberOfRows(sector)) row = St_tpcPadConfigC::instance()->numberOfRows(sector);
@@ -373,36 +343,69 @@ Double_t StTpcCoordinateTransform::padFromX(Double_t x, Int_t sector, Int_t row)
     St_tpcPadConfigC::instance()->innerSectorPadPitch(sector) :
     St_tpcPadConfigC::instance()->outerSectorPadPitch(sector);
   // x coordinate in sector 12
-  Double_t probablePad = (St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row)+1.)/2. - x/pitch;
+  Int_t npads = St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row);
+  Double_t xL = x;
+  Int_t NiRows = St_tpcPadConfigC::instance()->numberOfInnerRows(sector);
+  if (NiRows != 13 && row <= NiRows) {
+    // iTPC Survey
+    Double_t yRef = St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,NiRows) - 0.565;
+    Double_t xHit = -xL;
+    Double_t yHit = St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,row) - yRef;
+    St_iTPCSurveyC *sur = St_iTPCSurveyC::instance();
+    Double_t dx = sur->dx(sector-1);
+//  Double_t dy = sur->dy(sector-1);
+    Double_t Xscale = sur->ScaleX(sector-1);
+//  Double_t Yscale = sur->ScaleY(sector-1);
+    Double_t theta  = sur->Angle(sector-1);
+             xL = -(xHit*(1. - Xscale) - dx + theta*yHit);
+//  Double_t yL = yHit*(1. - Yscale) - dy - theta*xHit + yRef;
+  }
+  Double_t probablePad = (npads+1.)/2. - xL/pitch;
   // CAUTION: pad cannot be <1
   if(probablePad<0.500001) {
     probablePad=0.500001;
   }
+  if (_debug) {
+    cout << "StTpcCoordinateTransform::padFromX(" << x << "," << sector << "," << row << "); npads = " << npads << ", pitch = " << pitch 
+	 << "\tprobablePad " << probablePad << endl;
+  }
   return (probablePad);
 }
-
 //________________________________________________________________________________
-Double_t StTpcCoordinateTransform::xFromPad(Int_t row, Double_t pad)          const {    // x coordinate in sector 12
-  if (row > mNoOfRows) row = mNoOfRows;
-  Double_t pitch = (row <= mNoOfInnerRows) ?	
-    StTpcDb::instance()->PadPlaneGeometry()->innerSectorPadPitch() : 
-    StTpcDb::instance()->PadPlaneGeometry()->outerSectorPadPitch();
-  return -pitch*(pad - (StTpcDb::instance()->PadPlaneGeometry()->numberOfPadsAtRow(row)+1.)/2.);
-}
-
-//________________________________________________________________________________
-Double_t StTpcCoordinateTransform::xFromPad(Int_t sector, Int_t row, Double_t pad)          const {    // x coordinate in sector 12
+Double_t StTpcCoordinateTransform::xFromPad(Int_t sector, Int_t row, Double_t pad) const {    // x coordinate in sector 12
   if (row > St_tpcPadConfigC::instance()->numberOfRows(sector)) row = St_tpcPadConfigC::instance()->numberOfRows(sector);
   Double_t pitch = (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) ?	
     St_tpcPadConfigC::instance()->innerSectorPadPitch(sector) : 
     St_tpcPadConfigC::instance()->outerSectorPadPitch(sector);
-  return -pitch*(pad - (St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row)+1.)/2.);
+  Int_t npads = St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row);
+  Double_t xPad = -pitch*(pad - (npads+1.)/2.);
+  if (_debug) {
+    cout << "StTpcCoordinateTransform::xFromPad(" << sector << "," << row << "," << pad << "); npads = " << npads << ", pitch = " << pitch 
+	 << "\txPad = " << xPad << endl;
+  }
+  Int_t NiRows = St_tpcPadConfigC::instance()->numberOfInnerRows(sector);
+  if (NiRows == 13 || row > NiRows) {
+    return xPad;
+  }
+  // iTPC Survey
+  Double_t yRef = St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,NiRows) - 0.565;
+  Double_t xL = - xPad;
+  Double_t yL = St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,row) - yRef;
+  St_iTPCSurveyC *sur = St_iTPCSurveyC::instance();
+  Double_t dx = sur->dx(sector-1);
+//Double_t dy = sur->dy(sector-1);
+  Double_t Xscale = sur->ScaleX(sector-1);
+//Double_t Yscale = sur->ScaleY(sector-1);
+  Double_t theta  = sur->Angle(sector-1);
+  Double_t xHit = -( xL*(1. + Xscale) + dx - theta*yL);
+//Double_t yHit = yL*(1. + Yscale) + dy + theta*xL + yRef;
+  return xHit;
 }
 // Coordinate from Row
 //
 //Local Transformation...
 //________________________________________________________________________________
-Double_t StTpcCoordinateTransform::zFromTB(Double_t tb, Int_t sector, Int_t row) const {
+Double_t StTpcCoordinateTransform::zFromTB(Double_t tb, Int_t sector, Int_t row, Int_t pad) const {
   if (row > St_tpcPadConfigC::instance()->numberOfRows(sector)) row = St_tpcPadConfigC::instance()->numberOfRows(sector);
   Double_t trigT0 = StTpcDb::instance()->triggerTimeOffset()*1e6;         // units are s
 #if 0
@@ -412,15 +415,18 @@ Double_t StTpcCoordinateTransform::zFromTB(Double_t tb, Int_t sector, Int_t row)
   Double_t elecT0 = StTpcDb::instance()->Electronics()->tZero();          // units are us 
   Double_t sectT0 = St_tpcPadrowT0C::instance()->T0(sector,row);// units are us 
   Double_t t0 = trigT0 + elecT0 + sectT0;
-  bool isiTpcInnerSector = St_tpcPadConfigC::instance()->isiTpcSector(sector) &&
-                           St_tpcPadConfigC::instance()->isInnerPadRow(sector,row);
-  double t0offset = St_tpcSectorT0offsetC::instance()->t0offset(isiTpcInnerSector ? sector + 24 : sector);
-  Double_t time = t0 + (tb + t0offset)*mTimeBinWidth;
+  Int_t l = sector;
+  if ( St_tpcPadConfigC::instance()->IsRowInner(sector,row)) l += 24;
+  Double_t tbx = tb + St_tpcSectorT0offsetC::instance()->t0offset(l);
+  if (St_tpcRDOT0offsetC::instance()->IsShfited(sector)) {
+    tbx += St_tpcRDOT0offsetC::instance()->T0(sector,row,pad);
+  }
+  Double_t time = t0 + tbx*mTimeBinWidth; 
   Double_t z = StTpcDb::instance()->DriftVelocity(sector)*1e-6*time;
   return z;
 }
 //________________________________________________________________________________
-Double_t StTpcCoordinateTransform::tBFromZ(Double_t z, Int_t sector, Int_t row) const {
+Double_t StTpcCoordinateTransform::tBFromZ(Double_t z, Int_t sector, Int_t row, Int_t pad) const {
   if (row > St_tpcPadConfigC::instance()->numberOfRows(sector)) row = St_tpcPadConfigC::instance()->numberOfRows(sector);
   Double_t trigT0 = StTpcDb::instance()->triggerTimeOffset()*1e6;         // units are s
 #if 0
@@ -431,17 +437,40 @@ Double_t StTpcCoordinateTransform::tBFromZ(Double_t z, Int_t sector, Int_t row) 
   Double_t sectT0 = St_tpcPadrowT0C::instance()->T0(sector,row);// units are us 
   Double_t t0 = trigT0 + elecT0 + sectT0;
   Double_t time = z / (StTpcDb::instance()->DriftVelocity(sector)*1e-6);
-  bool isiTpcInnerSector = St_tpcPadConfigC::instance()->isiTpcSector(sector) &&
-                           St_tpcPadConfigC::instance()->isInnerPadRow(sector,row);
-  double t0offset = St_tpcSectorT0offsetC::instance()->t0offset(isiTpcInnerSector ? sector + 24 : sector);
-  Double_t tb = (time - t0)/mTimeBinWidth - t0offset;
+  Int_t l = sector;
+  if ( St_tpcPadConfigC::instance()->IsRowInner(sector,row)) l += 24;
+  Double_t tb = (time - t0)/mTimeBinWidth - St_tpcSectorT0offsetC::instance()->t0offset(l);
+  if (St_tpcRDOT0offsetC::instance()->IsShfited(sector)) tb -= St_tpcRDOT0offsetC::instance()->T0(sector,row,pad);
   return tb;
 }
 //________________________________________________________________________________
 // FOR SECTOR 12 ONLY!!!! (Local coordinate);
-Int_t StTpcCoordinateTransform::rowFromLocalY(Double_t y) {
+Int_t StTpcCoordinateTransform::rowFromLocalY(Double_t y, Int_t sector) {
   static Int_t Nrows = 0;
   static Double_t *Radii = 0;
+#ifndef __OLD__
+  if (Nrows != St_tpcPadConfigC::instance()->padRows(sector)) {
+    Nrows = St_tpcPadConfigC::instance()->padRows(sector);
+    if (Radii) delete [] Radii;
+    Radii = new Double_t[Nrows+1];
+    for (Int_t i = 1; i <= Nrows+1; i++) {
+      if (i == 1) {
+	Radii[i-1] =  (3*St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i) 
+		       - St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i+1))/2;
+      } else if (i == Nrows + 1) {
+	Radii[i-1] =  (3*St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i-1) 
+		       - St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i-2))/2;
+      } else {
+	Radii[i-1] = (St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i-1) +
+		      St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i-1))/2;
+      }
+    }
+  }
+  if (y < Radii[1]) return 1;
+  if (y > Radii[Nrows]) return Nrows;
+  Long64_t row = TMath::BinarySearch(Nrows+1, Radii, y);
+  return row;
+#else
   if (! Nrows) {
     Nrows = St_tpcPadPlanesC::instance()->padRows();
     Radii = new Double_t[Nrows];
@@ -457,32 +486,7 @@ Int_t StTpcCoordinateTransform::rowFromLocalY(Double_t y) {
   }
   row++;
   return row;
-}
-
-Int_t StTpcCoordinateTransform::rowFromLocalY(Double_t y, Int_t sector) {
-  static Int_t Nrows = 0;
-  static Double_t *Radii = 0;
-  if (Nrows != St_tpcPadConfigC::instance()->padRows(sector)) {
-    Nrows = St_tpcPadConfigC::instance()->padRows(sector);
-    if (Radii) delete [] Radii;
-    Radii = new Double_t[Nrows+1];
-    for (Int_t i = 1; i <= Nrows+1; i++) {
-      if (i == 1) {
-	Radii[i-1] =  (3*St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i)
-		       - St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i+1))/2;
-      } else if (i == Nrows + 1) {
-	Radii[i-1] =  (3*St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i-1)
-		       - St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i-2))/2;
-      } else {
-	Radii[i-1] = (St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i-1) +
-		      St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i-1))/2;
-      }
-    }
-  }
-  if (y < Radii[1]) return 1;
-  if (y > Radii[Nrows]) return Nrows;
-  Long64_t row = TMath::BinarySearch(Nrows+1, Radii, y);
-  return row;
+#endif
 }
 //________________________________________________________________________________
 void  StTpcCoordinateTransform::operator()(const        StTpcLocalSectorCoordinate& a, StTpcLocalCoordinate& b           )

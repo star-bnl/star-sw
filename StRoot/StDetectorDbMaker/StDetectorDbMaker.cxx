@@ -3,7 +3,11 @@
 #include "St_trigDetSumsC.h"
 #include "StDetectorDbMaker.h"
 #include "StDetectorDbRichScalers.h"
-
+#if 0
+#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
+#include "StMuDSTMaker/COMMON/StMuDst.h"
+#include "StMuDSTMaker/COMMON/StMuEvent.h"
+#endif
 St_trigDetSums* St_trigDetSumsC::fgTableCopy = 0;
 Int_t StDetectorDbMaker::_debug = 0;
 ClassImp(StDetectorDbMaker)
@@ -24,8 +28,23 @@ Int_t StDetectorDbMaker::Make(){
 	LOG_QA << "get trigDetSums from inputStream_DAQ" << endm;
 	StMaker::GetChain()->AddData(new St_trigDetSumsC(table));
       }
+#if 0
+    } else {
+      StMuDstMaker *MuDstMk = (StMuDstMaker *) StMaker::GetChain()->Maker("MuDst");
+      if (MuDstMk) {
+	StMuDst *MuDst = MuDstMk->muDst();
+	StMuEvent *MuEve = 0;
+	if (MuDst) MuEve = MuDst->event();
+	if (MuEve) {
+	   St_trigDetSums *table = new St_trigDetSums("trigDetSums",1);
+	  table->AddAt(&MuEve->trigDetSums());
+	  StMaker::GetChain()->AddData(table);
+	}
+      }
+#endif
     }
   }
+#if 0
   if (! St_trigDetSumsC::instance()) {
     St_trigDetSums *table = (St_trigDetSums *) GetDataBase("Calibrations/rich/trigDetSums");
     if (table) {
@@ -42,5 +61,6 @@ Int_t StDetectorDbMaker::Make(){
   LOG_QA << "Space Charge CorrectionR2 = " << StDetectorDbSpaceChargeR2::instance()->getSpaceChargeCoulombs()
 	       << " Coulombs" << endm;
 #endif  
+#endif
   return kStOK;
 }

@@ -1,4 +1,4 @@
-#ifdef __CINT__
+#if defined(__CINT__) || defined(__CLING__)
 #pragma link off all globals;
 #pragma link off all classes;
 #pragma link off all functions;
@@ -30,6 +30,7 @@
 #pragma link C++ function operator<<(ostream&, const StTpcPadCoordinate&);
 
 #pragma link C++ class StTpcCoordinateTransform!-;
+#ifndef __CLING__
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate&, StTpcPadCoordinate&);
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StTpcPadCoordinate&, StTpcLocalSectorCoordinate&);
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate&, StTpcPadCoordinate&);
@@ -51,6 +52,7 @@
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StGlobalDirection&, StTpcLocalDirection&,Int_t, Int_t);
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StTpcPadCoordinate&, StGlobalCoordinate&);
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StGlobalCoordinate&, StTpcPadCoordinate&);
+#endif
 #pragma link C++ enum  Prime;
 #pragma link C++ enum  DistortSelect;
 #endif

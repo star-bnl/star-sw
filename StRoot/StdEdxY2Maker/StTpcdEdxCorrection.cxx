@@ -38,6 +38,7 @@
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_TpcAvgCurrentC.h"
 #include "StDetectorDbMaker/St_TpcAvgPowerSupplyC.h"
+#include "StDetectorDbMaker/St_tpcTimeDependenceC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
 #include "TUnixTime.h"
 //________________________________________________________________________________
@@ -68,7 +69,7 @@ void StTpcdEdxCorrection::ReSetCorrections() {
   m_Corrections[kTpcSecRowB            ] = dEdxCorrection_t("TpcSecRowB"          ,"Gas gain correction for sector/row"					,St_TpcSecRowBC::instance());		     
   m_Corrections[kTpcSecRowC            ] = dEdxCorrection_t("TpcSecRowC"          ,"Additional Gas gain correction for sector/row"			,St_TpcSecRowCC::instance());		     
   m_Corrections[ktpcPressure           ] = dEdxCorrection_t("tpcPressureB"        ,"Gain on Gas Density due to Pressure"			        ,St_tpcPressureBC::instance());	     
-  m_Corrections[ktpcTime               ] = dEdxCorrection_t("tpcTime"       	  ,""									,0);					         
+  m_Corrections[ktpcTime               ] = dEdxCorrection_t("tpcTime"       	  ,"Unregognized time dependce"						,St_tpcTimeDependenceC::instance()); 
   m_Corrections[kDrift                 ] = dEdxCorrection_t("TpcDriftDistOxygen"  ,"Correction for Electron Attachment due to O2"			,St_TpcDriftDistOxygenC::instance());	     
   m_Corrections[kMultiplicity          ] = dEdxCorrection_t("TpcMultiplicity"     ,"Global track multiplicity dependence"				,St_TpcMultiplicityC::instance());	     
   m_Corrections[kzCorrection           ] = dEdxCorrection_t("TpcZCorrectionB"     ,"Variation on drift distance"					,St_TpcZCorrectionBC::instance());	     
@@ -142,7 +143,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   Int_t row       	  = CdEdx.row;   
   Double_t dx     	  = CdEdx.F.dx;    
   if (dE <= 0 || dx <= 0) return 3;
-  Int_t channel = St_TpcAvgPowerSupplyC::instance()->ChannelFromRow(sector,row);
+  Int_t channel = St_TpcAvgPowerSupplyC::instance()->ChannelFromRow(sector,row); 
   CdEdx.channel = channel;
   
   CdEdx.Voltage = St_tpcAnodeHVavgC::instance()->voltagePadrow(sector,row);
@@ -181,7 +182,11 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 #endif  
   Double_t ZdriftDistance = CdEdx.ZdriftDistance;
   ESector kTpcOutIn = kTpcOuter;
-  if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) kTpcOutIn = kTpcInner;
+  if (! St_tpcPadConfigC::instance()->iTpc(sector)) {
+    if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) kTpcOutIn = kTpcInner;
+  } else {
+    if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) kTpcOutIn = kiTpc;
+  }
   St_tss_tssparC *tsspar = St_tss_tssparC::instance();
   Float_t gasGain = 1;
   Float_t gainNominal = 0;
@@ -221,7 +226,8 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   VarXs[ktpcWaterOut]          = gas->ppmWaterOut;     
   VarXs[kEdge]                 = CdEdx.PhiR;
   VarXs[kPhiDirection]         = (TMath::Abs(CdEdx.xyzD[0]) > 1.e-7) ? TMath::Abs(CdEdx.xyzD[1]/CdEdx.xyzD[0]) : 999.;
-  VarXs[kTanL]                  = CdEdx.TanL;     
+  VarXs[kTanL]                 = CdEdx.TanL;     
+  VarXs[ktpcTime]              = CdEdx.tpcTime; 
   for (Int_t k = kUncorrected; k <= kTpcLast; k++) {
     Int_t l = 0;
     tpcCorrection_st *cor = 0;
@@ -240,22 +246,21 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       if (gain->GainRms[row-1] > 0.1) CdEdx.Weight = 1./(gain->GainRms[row-1]*gain->GainRms[row-1]);
       goto ENDL;
     } else if (k == kTpcEffectivedX) {
-      dx *= (kTpcOutIn == kTpcInner) ? 
-	((const St_TpcEffectivedXC* ) m_Corrections[k].Chair)->scaleInner() :
-	((const St_TpcEffectivedXC* ) m_Corrections[k].Chair)->scaleOuter();
+      if      (kTpcOutIn == kTpcOuter) dx *= ((const St_TpcEffectivedXC* ) m_Corrections[k].Chair)->scaleOuter();
+      else if (kTpcOutIn == kTpcInner) dx *= ((const St_TpcEffectivedXC* ) m_Corrections[k].Chair)->scaleInner();
       goto ENDL;
     }
     if (k == kTpcPadMDF) {
       l = 2*(sector-1);
-      if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) l += kTpcOutIn;
+      if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) l += kTpcInner; // for both tpc and iTPC inner sectors
       dE *= TMath::Exp(-((St_TpcPadCorrectionMDF *)m_Corrections[k].Chair)->Eval(l,CdEdx.yrow,CdEdx.xpad));
       goto ENDL;
     }
     cor = ((St_tpcCorrection *) m_Corrections[k].Chair->Table())->GetTable();
     if (! cor) goto ENDL;
     nrows = cor->nrows;
-    l = kTpcOuter;
-    if (nrows == 2) {if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) l = kTpcOutIn;}
+    if (nrows <= 3)
+      l = TMath::Min(nrows-1, kTpcOutIn);
     else {
       if (nrows == St_tpcPadConfigC::instance()->numberOfRows(sector)) l = row - 1;
       else if (nrows == 192) {l = 8*(sector-1) + channel - 1; assert(l == (cor+l)->idx-1);}
@@ -270,36 +275,44 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	ADC = adcCF;
         if (ADC <=0) return 3; //HACK to avoid FPE (VP)
 	if (corl->type == 12) 
-	  dE = Adc2GeVReal*((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(kTpcOutIn,ADC,VarXs[kTanL]);
+	  dE = Adc2GeVReal*((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,ADC,VarXs[kTanL]);
 	else 
-	  dE = Adc2GeVReal*((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(kTpcOutIn,ADC,TMath::Abs(CdEdx.zG));
+	  dE = Adc2GeVReal*((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,ADC,TMath::Abs(CdEdx.zG));
 	if (dE <= 0) return 3;
       }
       goto ENDL;
     } else {
       if (k == kTpcdCharge) {
-	slope = ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(kTpcOutIn,row+0.5);
+	if (l > 2) l = 1;
+	slope = ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,row+0.5);
 	dE *=  TMath::Exp(-slope*CdEdx.dCharge);
-	dE *=  TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2+kTpcOutIn,CdEdx.dCharge));
+	dE *=  TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2+l,CdEdx.dCharge));
 	goto ENDL;
       } else if (k == kzCorrection) {iCut = 1; // Always cut
       } else if (k == kdXCorrection) {
 	xL2 = TMath::Log2(dx);
-	dXCorr = ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(kTpcOutIn,xL2); 
-	if (nrows > 2) dXCorr += ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2,xL2);
-	if (nrows > 6) dXCorr += ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(5+kTpcOutIn,xL2);
+	dXCorr = ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,xL2); 
+	if (nrows == 7) {// old schema without iTPC
+	  dXCorr += ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2,xL2);
+	  dXCorr += ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(5+kTpcOutIn,xL2);
+	}
 	CdEdx.dxC = TMath::Exp(dXCorr)*CdEdx.F.dx;
+	dE *= TMath::Exp(-dXCorr);
 	goto ENDL;
       } else if (k == kSpaceCharge) {
-	if (cor[2*kTpcOutIn  ].min <= CdEdx.QRatio && CdEdx.QRatio <= cor[2*kTpcOutIn  ].max &&
-	    cor[2*kTpcOutIn+1].min <= CdEdx.DeltaZ && CdEdx.DeltaZ <= cor[2*kTpcOutIn+1].max) 
-	  dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2*kTpcOutIn  ,CdEdx.QRatio)
-			   -((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2*kTpcOutIn+1,CdEdx.DeltaZ));
+	if (cor[2*l  ].min <= CdEdx.QRatio && CdEdx.QRatio <= cor[2*l  ].max &&
+	    cor[2*l+1].min <= CdEdx.DeltaZ && CdEdx.DeltaZ <= cor[2*l+1].max) 
+	  dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2*l  ,CdEdx.QRatio)
+			   -((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2*l+1,CdEdx.DeltaZ));
 	goto ENDL;
       } else if (k == kEdge) {
 	if (corl->type == 200) VarXs[kEdge] = TMath::Abs(CdEdx.edge);
 	if (corl->min > 0 && corl->min > VarXs[kEdge]    ) return 2;
-	if (corl->max > 0 && VarXs[kEdge]     > corl->max) return 2;
+      } else if (k == ktpcTime) { // use the correction if you have xmin < xmax && xmin <= x <= xmax
+	if (corl->min >= corl->max || corl->min > VarXs[ktpcTime] ||  VarXs[ktpcTime] > corl->max) goto ENDL;
+	Double_t xx = VarXs[ktpcTime];
+	dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,xx));
+	goto ENDL;
       } 
     }
     if (corl->type == 300) {

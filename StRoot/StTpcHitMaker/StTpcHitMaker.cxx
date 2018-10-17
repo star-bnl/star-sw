@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.73 2018/06/29 21:46:22 smirnovd Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.74 2018/10/17 20:45:27 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,80 +13,11 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
- * Revision 1.73  2018/06/29 21:46:22  smirnovd
- * Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
+ * Revision 1.74  2018/10/17 20:45:27  fisyak
+ * Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
  *
- * Revert "NoDead option added"
- * Revert "Fill mag field more carefully"
- * Revert "Assert commented out"
- * Revert "Merging with TPC group code"
- * Revert "Remove too strong assert"
- * Revert "Restore removed by mistake line"
- * Revert "Remove not used anymore file"
- * Revert "iTPCheckIn"
- *
- * Revision 1.70  2018/05/17 22:41:26  smirnovd
- * Set TPC row number for legacy TPC DAQ records
- *
- * This fix restores part of the logic replaced by the following commit:
- * "Correct outer row numbers for sectors with iTPC"
- *
- * Revision 1.69  2018/04/30 23:18:54  smirnovd
- * Try different DAQ readers when reading TPC data
- *
- * Selecting one reader type is not enough in the iTPC era cause the outter and
- * inner sectors may have different formats
- *
- * Revision 1.68  2018/04/26 17:09:41  smirnovd
- * Revert "Revert iTPC related changes committed on 2018-04-24"
- *
- * Revision 1.66  2018/04/24 16:45:39  smirnovd
- * Correct outter row numbers for sectors with iTPC
- *
- * Revision 1.65  2018/04/24 16:45:05  smirnovd
- * Expand interface for iTPC slewing correction
- *
- * Revision 1.64  2018/04/24 16:44:41  smirnovd
- * Change hardware Id for hits originated in iTpc padrow rather than iTpc sector
- *
- * Revision 1.63  2018/04/19 22:38:25  smirnovd
- * Revert iTPC related changes committed on 2018-04-19
- *
- * ...except cosmetic ones
- *
- * Revision 1.62  2018/04/19 15:47:42  smirnovd
- * Change hardware Id for hits originated in iTpc padrow rather than iTpc sector
- *
- * Revision 1.61  2018/04/10 11:39:11  smirnovd
- * StTpcHitMaker: Match logic in pre-iTPC code
- *
- * Select DAQ reader type first and then loop over padrows instead of looping over
- * different DAQ reader types
- *
- * Revision 1.60  2018/04/10 11:39:03  smirnovd
- * StTpcHitMaker: Update hardware Id for iTPC sectors (Gene)
- *
- * Revision 1.59  2018/04/10 11:38:54  smirnovd
- * StTpcHitMaker: Fixes to properly read the real data (Yuri and Irakli)
- *
- * Revision 1.58  2018/04/10 11:38:44  smirnovd
- * StTpcHitMaker: Modified for iTPC era (Yuri and Irakli)
- *
- * Revision 1.57  2018/04/10 11:38:33  smirnovd
- * Replace thrown exceptions with runtime asserts
- *
- * Revision 1.56  2018/04/10 11:32:08  smirnovd
- * Minor corrections across multiple files
- *
- * - Remove ClassImp macro
- * - Change white space
- * - Correct windows newlines to unix
- * - Remove unused debugging
- * - Correct StTpcRTSHitMaker header guard
- * - Remove unused preprocessor directives in StiCA
- * - Minor changes in status and debug print out
- * - Remove using std namespace from StiKalmanTrackFinder
- * - Remove includes for unused headers
+ * Revision 1.72  2018/06/22 18:35:19  perev
+ * Merging with TPC group code
  *
  * Revision 1.55  2018/02/18 23:35:33  perev
  * Remove iTPC update
@@ -284,7 +215,7 @@
  * StTpcHitMaker - class to fille the StEvewnt from DAQ reader
  *
  **************************************************************************/
-#include <cassert>
+#include <assert.h>
 #include "StEvent/StTpcHit.h"
 #include <algorithm>
 #include "StTpcHitMaker.h"
@@ -292,8 +223,10 @@
 #include "TDataSetIter.h"
 #include "StDAQMaker/StDAQReader.h"
 #include "TError.h"
+#include "string.h"
 #include "StEvent.h"
 #include "StEvent/StTpcHitCollection.h"
+#include "StEvent/StTpcHit.h"
 #include "RTS/src/DAQ_TPX/tpxFCF_flags.h" // for FCF flag definition
 #include "StTpcRawData.h"
 #include "StThreeVectorF.hh"
@@ -324,12 +257,12 @@ TableClassImpl(St_daq_sim_cld,tcl_cl);
 TableClassImpl(St_daq_adc_tb,daq_adc_tb);
 #include "St_daq_sim_adc_tb.h"
 TableClassImpl(St_daq_sim_adc_tb,daq_sim_adc_tb);
+ClassImp(StTpcHitMaker);
 static TNtuple *pulserP = 0;
 Float_t StTpcHitMaker::fgDp    = .1;             // hardcoded errors
 Float_t StTpcHitMaker::fgDt    = .2;
 Float_t StTpcHitMaker::fgDperp = .1;
 static Int_t _debug = 0;
-#define __USE_TONKO_CLUSTER_ANNOTATION__
 //#define __MAKE_NTUPLE__
 //#define __CORRECT_S_SHAPE__
 //#define __TOKENIZED__
@@ -347,6 +280,7 @@ StTpcHitMaker::StTpcHitMaker(const char *name) : StRTSBaseMaker("tpc",name), kMo
   SetAttr("minSector",1);
   SetAttr("maxSector",24);
   SetAttr("minRow",1);
+  SetAttr("UseTonkoClusterAnnotation",1);
 }
 //_____________________________________________________________
 Int_t StTpcHitMaker::Init() {
@@ -436,8 +370,7 @@ Int_t StTpcHitMaker::InitRun(Int_t runnumber) {
       for(Int_t row=1;row<=St_tpcPadConfigC::instance()->numberOfRows(sector);row++) {
         Int_t numPadsAtRow = St_tpcPadConfigC::instance()->padsPerRow(sector,row);
         totalSecPads += numPadsAtRow;
-        if (StDetectorDbTpcRDOMasks::instance()->isOn(sector,
-            StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(row)) &&
+        if (StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row) &&
             St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
           liveSecPads += numPadsAtRow;
       }
@@ -502,21 +435,19 @@ Int_t StTpcHitMaker::Make() {
     fId = 0;
     // invoke tpcReader to fill the TPC DAQ sector structure
     Int_t hitsAdded = 0;
-    StRtsTable *daqTpcTable = nullptr;
     for (Int_t k = kStandardiTPC;  k > 0; k--) {
       if (k > kLegacyTpx) 
 	mQuery = Form("%s/%s[%i]",tpcDataNames[k],cldadc.Data(),sector);
       else
 	mQuery = Form("%s[%i]",tpcDataNames[k],sector);
-      daqTpcTable = GetNextDaqElement(mQuery);
+      StRtsTable *daqTpcTable = GetNextDaqElement(mQuery);
       if (! daqTpcTable) continue;
       kReaderType = (EReaderType) k;
-
       while (daqTpcTable) {
 	if (Sector() == sector) {
 	  fTpc = 0;
 	  if (kReaderType == kLegacyTpx || kReaderType == kLegacyTpc) fTpc = (tpc_t*)*DaqDta()->begin();
-	  Int_t row = RowNumber();
+	  Int_t row = St_tpcPadConfigC::instance()->numberOfRows(sector);
 	  if (row >= minRow && row <= maxRow) {
 	    switch (kMode) {
 	    case kTpc: 
@@ -545,8 +476,7 @@ Int_t StTpcHitMaker::Make() {
 	}
 	daqTpcTable = GetNextDaqElement(mQuery);
       }
-    }
-
+    } // Loop over ReaderType
     if (maxHits[sector-1] && hitsAdded > maxHits[sector-1]) {
       LOG_ERROR << "Too many hits (" << hitsAdded << ") in one sector ("
 		<< sector << "). Skipping event." << endm;
@@ -558,12 +488,12 @@ Int_t StTpcHitMaker::Make() {
                 << ") starting at time bin 0. Skipping event." << endm;
       return kStSkip;
   }
-  if (kMode == kTpc || kMode == kTpx || kMode == kiTPC) {
+  if (kMode == kTpc || kMode == kTpx) { // || kMode == kiTPC) { --> no after burner for iTpc
     StEvent *pEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));
     if (Debug()) {LOG_INFO << "StTpcHitMaker::Make : StEvent has been retrieved " <<pEvent<< endm;}
     if (! pEvent) {LOG_INFO << "StTpcHitMaker::Make : StEvent has not been found " << endm; return kStWarn;}
     StTpcHitCollection *hitCollection = pEvent->tpcHitCollection();
-    if (hitCollection) AfterBurner(hitCollection);
+    if (hitCollection && ! IAttr("NoTpxAfterBurner")) AfterBurner(hitCollection);
   }
   return kStOK;
 }
@@ -664,8 +594,7 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t
   transform(padcoord,local,kFALSE);
   transform(local,global);
     
-  UInt_t hw = 1U;   // detid_tpc
-  if (St_tpcPadConfigC::instance()->isiTpcPadRow(sector, row)) hw += 1U << 1; // iTPC
+  UInt_t hw = 1;   // detid_tpc
   hw += sector << 4;     // (row/100 << 4);   // sector
   hw += row    << 9;     // (row%100 << 9);   // row
 #if 0  
@@ -723,8 +652,7 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
   transform(padcoord,local,kFALSE);
   transform(local,global);
     
-  UInt_t hw = 1U;   // detid_tpc
-  if (St_tpcPadConfigC::instance()->isiTpcPadRow(sector, row)) hw += 1U << 1; // iTPC
+  UInt_t hw = 1;   // detid_tpc
   hw += sector << 4;     // (row/100 << 4);   // sector
   hw += row    << 9;     // (row%100 << 9);   // row
 #if 0  
@@ -895,8 +823,10 @@ void StTpcHitMaker::TpxAvLaser(Int_t sector) {
 #ifdef __NOT_ZERO_SUPPRESSED_DATA__
 #ifdef  __TOKENIZED__
     if (tb >= 368 && tb <= 383) 
+      //    adc -= St_tpcPedestalC::instance()->Pedestal(sector,r+1,p+1,tb);
     adc -= St_tpcPedestalC::instance()->Pedestal(sector,r+1,p+1);
 #else /* ! __TOKENIZED__ */
+    //    adc -= St_tpcPedestalC::instance()->Pedestal(sector,r+1,p+1,tb);
     adc -= St_tpcPedestalC::instance()->Pedestal(sector,r+1,p+1);
 #endif /*  __TOKENIZED__ */
 #else
@@ -1046,6 +976,7 @@ StTpcDigitalSector *StTpcHitMaker::GetDigitalSector(Int_t sector) {
 }
 //________________________________________________________________________________
 Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
+  static Int_t TonkoAnn  = IAttr("UseTonkoClusterAnnotation");
   Short_t  ADCs2[512];
   UShort_t IDTs2[512];
   memset(ADCs, 0, sizeof(ADCs));
@@ -1073,10 +1004,13 @@ Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
 		 << " already has " << ntbold << " time bins at row/pad " << r_old+1 <<  "/" << p_old+1 << endm;
 #endif
 	digitalSector->getTimeAdc(r_old+1,p_old+1,ADCs2,IDTs2);
-	for (Int_t i = 0; i < __MaxNumberOfTimeBins__; i++) {
-	  if (! ADCs2[i]) continue;
-	  if ((IDTs[i] || IDTs2[i]) && ADCs[i] < ADCs2[i]) IDTs[i] = IDTs2[i];
-	  ADCs[i] += ADCs2[i];
+	//	if (IAttr("UseTonkoClusterAnnotation")) {
+	if (TonkoAnn) {
+	  for (Int_t i = 0; i < __MaxNumberOfTimeBins__; i++) {
+	    if (! ADCs2[i]) continue;
+	    if ((IDTs[i] || IDTs2[i]) && ADCs[i] < ADCs2[i]) IDTs[i] = IDTs2[i];
+	    ADCs[i] += ADCs2[i];
+	  }
 	}
       }
       digitalSector->putTimeAdc(r_old+1,p_old+1,ADCs,IDTs);
@@ -1092,13 +1026,15 @@ Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
       Int_t tb   = daqadc.tb;
       Int_t adc  = daqadc.adc;
 #ifdef __NOT_ZERO_SUPPRESSED_DATA__
+      //      adc -= St_tpcPedestalC::instance()->Pedestal(sector,r+1,p+1,tb);
       adc -= St_tpcPedestalC::instance()->Pedestal(sector,r+1,p+1);
       if (adc <= 0) continue;
 #endif
       ADCs[tb] = adc;
-#ifdef __USE_TONKO_CLUSTER_ANNOTATION__
-      IDTs[tb] = 65535;
-#endif
+      //      if (IAttr("UseTonkoClusterAnnotation")) {
+      if (TonkoAnn) {
+	IDTs[tb] = 65535;
+      }
       some_data++ ;	// I don't know the bytecount but I'll return something...
     }
   } while (some_data);
@@ -1106,14 +1042,15 @@ Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
 }
 //________________________________________________________________________________
 Int_t StTpcHitMaker::RawTpcData(Int_t sector) {
+  static Int_t TonkoAnn  = IAttr("UseTonkoClusterAnnotation");
   if (! fTpc) return 0;
   memset(ADCs, 0, sizeof(ADCs));
   memset(IDTs, 0, sizeof(IDTs));
-  StTpcDigitalSector *digitalSector = 0;
+  StTpcDigitalSector *digitalSector = GetDigitalSector(sector);
+  assert( digitalSector );
   Int_t Total_data = 0;
-  for (Int_t row = 1;  row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
+  for (Int_t row = 1;  row <= digitalSector->numberOfRows(); row++) {
       Int_t r = row - 1;
-      if (! digitalSector) digitalSector = GetDigitalSector(sector);
       for (Int_t pad = 1; pad <= digitalSector->numberOfPadsAtRow(row); pad++) {
          Int_t p = pad - 1;
          memset(ADCs, 0, sizeof(ADCs));
@@ -1123,9 +1060,10 @@ Int_t StTpcHitMaker::RawTpcData(Int_t sector) {
          for (Int_t i = 0; i < ncounts; i++) {
             Int_t tb = fTpc->timebin[r][p][i];
             ADCs[tb] = log8to10_table[fTpc->adc[r][p][i]]; 
-#ifdef __USE_TONKO_CLUSTER_ANNOTATION__
-            IDTs[tb] = 65535;
-#endif
+	    //	    if (IAttr("UseTonkoClusterAnnotation")) {
+	    if (TonkoAnn) {
+	      IDTs[tb] = 65535;
+	    }
             Total_data++;
          }
          Int_t ntbold = digitalSector->numberOfTimeBins(row,pad);
@@ -1168,7 +1106,7 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
   static StTpcLocalSectorCoordinate local;
   static StTpcLocalCoordinate global;
   if (! TpcHitCollection) return;
-
+  
 #ifdef __MAKE_NTUPLE__
   if (! tup) {
     if (StChain::GetChain()->GetTFile()) {
@@ -1309,6 +1247,7 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
       }
     }
   }
+  LOG_INFO << "StTpcHitMaker::AfterBurner from " << TotNoHits << " Total no. of hits "  << RejNoHits << " were rejected" << endm;
   return;
 };
 //________________________________________________________________________________
@@ -1317,8 +1256,8 @@ StTpcHit* StTpcHitMaker::StTpcHitFlag(const StThreeVectorF& p,
              UInt_t hw, float q, UChar_t c,
              UShort_t idTruth, UShort_t quality,
              UShort_t id,
-             Short_t mnpad, Short_t mxpad, Short_t mntmbk,
-             Short_t mxtmbk, Float_t cl_x, Float_t cl_t, UShort_t adc,
+             UShort_t mnpad, UShort_t mxpad, UShort_t mntmbk,
+             UShort_t mxtmbk, Float_t cl_x, Float_t cl_t, UShort_t adc,
              UShort_t flag) {
   // New hit
   StTpcHit* hit = new StTpcHit(p,e,hw,q,c,idTruth,quality,id,mnpad,mxpad,mntmbk,mxtmbk,cl_x,cl_t,adc);
@@ -1379,19 +1318,14 @@ THnSparseF *StTpcHitMaker::CompressTHn(THnSparseF *hist, Double_t compress) {
   return hnew;
 }
 #endif /* __USE__THnSparse__ */
-
-
-Int_t StTpcHitMaker::RowNumber()
-{
-  int sector = DaqDta()->Sector();
-  int row = DaqDta()->Row();
-
-  // It appears that for old data (pre 2009) the row information should reflect
-  // the total number of rows in TPC sector
-  row = (kReaderType == kLegacyTpc && row == 0 ?
-        St_tpcPadConfigC::instance()->numberOfRows(sector) : row);
-
-  return kReaderType != kStandardiTPC &&
-         St_tpcPadConfigC::instance()->isiTpcSector(sector) &&
-         row > 13 ? row - 13 + 40 : row;
+//________________________________________________________________________________
+Int_t StTpcHitMaker::RowNumber(){
+  Int_t sector = DaqDta()->Sector();
+  Int_t row = DaqDta()->Row();
+  if (kReaderType != kStandardiTPC) {
+    if (St_tpcPadConfigC::instance()->iTpc(sector) && row > 13) {
+      row += 41-14;
+    }
+  }
+  return row;
 }

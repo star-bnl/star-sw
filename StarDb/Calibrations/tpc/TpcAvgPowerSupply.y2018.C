@@ -14,8 +14,9 @@ TDataSet *CreateTable() {
 	Int_t index = 8*(sec-1)+socket-1;
 	//	cout << "sec " << sec << " socket " << socket << " index " << index << endl;
 	if (! io) {
-	  if (sec == 20) row.Voltage[index] = 1120;
-	  else           row.Voltage[index] = 1100;
+// 	  if (sec == 20) row.Voltage[index] = 1120;
+// 	  else           row.Voltage[index] = 1100;
+	  row.Voltage[index] = 1100;
 	}
 	else      row.Voltage[index] = 1390;
       }

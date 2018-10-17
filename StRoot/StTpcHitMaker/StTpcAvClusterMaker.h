@@ -2,7 +2,7 @@
 #define StTpcAvClusterMaker_H
 /***************************************************************************
  *
- * $Id: StTpcAvClusterMaker.h,v 1.2 2014/08/06 11:43:50 jeromel Exp $
+ * $Id: StTpcAvClusterMaker.h,v 1.3 2018/10/17 20:45:27 fisyak Exp $
  ***************************************************************************/
 #include "TString.h"
 #include "StMaker.h"
@@ -10,7 +10,7 @@
 #include "THnSparse.h"
 class StTpcAvClusterMaker : public StMaker {
  public:
-  StTpcAvClusterMaker(const char *name="TpcAvCluster") : StMaker(name),  fAvLaser(0), NoRows(-1), NoInnerPadRows(-1) {}
+  StTpcAvClusterMaker(const char *name="TpcAvCluster") : StMaker(name),  fAvLaser(0) {}
   virtual ~StTpcAvClusterMaker() {}
   Int_t   InitRun(Int_t runnumber);
   Int_t   Make();
@@ -18,8 +18,6 @@ class StTpcAvClusterMaker : public StMaker {
   virtual Int_t        Finish();
  private:
   THnSparseF **fAvLaser;
-  Int_t    NoRows;
-  Int_t    NoInnerPadRows;
  public:
   virtual const char *GetCVS() const    {
     static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
