@@ -30,9 +30,10 @@ double _prodtime  = 0;
 
 int     _npart = 10;  // floor number of tracks per event
 float   _fpart = 0.05;  // fraction of track multiplicity to embed
-int     _pid[50]={1,2,3,8,9,11,12,14,15,10017,10007,45}; //geant3 particle ID
-TString _pnm[50]={"gamma","positron","electron","pi+","pi-","K+","K-","proton","antiproton","eta","pi0","deuteron"}; // particle names
+int     _pid[50]={1,2,3,8,9,11,12,14,15,10017,10007,45,50045}; //geant3 particle ID
+TString _pnm[50]={"gamma","positron","electron","pi+","pi-","K+","K-","proton","antiproton","eta","pi0","deuteron","antideuteron"}; // particle names
 TString _part  = "pi+"; // particle to simulate, default pi+
+TString _part_save;
 float   _ptmn  = 0.100; // min pT to simulate [GeV]
 float   _ptmx  = 7.000; // max pT to simulate [GeV]
 float   _etamn = -2.0;  // min eta to simulate
@@ -114,7 +115,14 @@ void trig( int n=1 )
 	 if ( npart < _npart ) npart = _npart;
     }
     else npart = int(_fpart);
-	 
+
+    if(i==0) _part_save=_part;
+    if(_part_save == "antideuteron"){
+	 if(i==0)
+	    _part = "deuteron"; //prime the first event with deuteron for nucleus embedding
+	 else 
+	    _part = _part_save;
+    }
 
     // Print the run and vertex info
     cout << Form("run=%i event=%i seed=%i part=%s npart=%i %i vxyz=%f %f %f",
@@ -298,6 +306,7 @@ void runEmbeddingSimulation2014(
   //data.AddParticleToG3( "eta",5.47853e-01, 0.50244E-18, 0., 3, 221, 17, 0, 0 );
   //data.AddParticleToG3( "pi0",1.34977e-01, 0.85200E-16, 0., 3, 111, 7, 0, 0 );
   data.AddParticleToG3( "deuteron", 0.1876E+01, 0.10000E+16, 1., 8, 1000010020, 45, 0, 0 );
+  data.AddParticleToG3( "antideuteron", 0.1876E+01, 0.10000E+16, -1., 8, -1000010020, 50045, 0, 0 );
 
   TParticlePDG* D0     = data.GetParticle("D0");    
   D0->Print();
@@ -308,6 +317,9 @@ void runEmbeddingSimulation2014(
 
   TParticlePDG* deuteron     = data.GetParticle("deuteron");    
   deuteron->Print();
+
+  TParticlePDG* antideuteron     = data.GetParticle("antideuteron");    
+  antideuteron->Print();
 
   //
   // Set D0 decay to K+ pi- mode (or cc).
