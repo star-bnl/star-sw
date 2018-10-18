@@ -2,7 +2,7 @@
 #define StTpcAvClusterMaker_H
 /***************************************************************************
  *
- * $Id: StTpcAvClusterMaker.h,v 1.2 2014/08/06 11:43:50 jeromel Exp $
+ * $Id: StTpcAvClusterMaker.h,v 1.3 2018/10/17 20:45:27 fisyak Exp $
  ***************************************************************************/
 #include "TString.h"
 #include "StMaker.h"

@@ -73,19 +73,19 @@ do
 
    #if [ $nlogs -lt 890 ] ; then
    echo "checking FSET "$fset"..."
-   find ${xmllog}/ -name "*.log*" > tmplog.list
-   find ${datadir}${particle}_${fset}_${reqid}/ -name "*.minimc.root" > tmpminimc.list
+   find ${xmllog}/ -name "*.log*" > tmplog$$.list
+   find ${datadir}${particle}_${fset}_${reqid}/ -name "*.minimc.root" > tmpminimc$$.list
    #fi
 
    nfailed=0
    for (( ijob=0 ; $ijob - $ndaq ; ijob++ ))
    do
 	if [[ $HOST =~ "rcas" ]] ; then
-	   xmllogfile=`grep "${bn}_${ijob}\." tmplog.list`
+	   xmllogfile=`grep "${bn}_${ijob}\." tmplog$$.list`
 	   stfile=`basename $xmllogfile .log | awk -F"_${bn}_" '{print $1}'`
 	   logfile=`find ${emlog}/ -name "${stfile}*.log"`
 	else
-	   logfile=`grep "${bn}_${ijob}\." tmplog.list`
+	   logfile=`grep "${bn}_${ijob}\." tmplog$$.list`
 	fi
 	#echo $logfile
 	if [ -z "$logfile" ] ; then
@@ -112,7 +112,7 @@ do
 		cgrep="zgrep"
 	   fi
 	   #echo $minifile
-	   minicheck=`grep $minifile tmpminimc.list`
+	   minicheck=`grep $minifile tmpminimc$$.list`
 	   aborted=`$cgrep "StChain::Embedding" $logfile`
 	   buserr=`$cgrep "Bus error" $logfile`
 	   if [[ -z "$minicheck" || -z "$aborted" || ! -z "$buserr" ]] ; then
@@ -166,5 +166,5 @@ if [ ! -z $allgood ] ; then
 else
    rm -f $subfile
 fi
-rm -f tmplog.list tmpminimc.list
+rm -f tmplog$$.list tmpminimc$$.list
 

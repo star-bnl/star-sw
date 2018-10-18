@@ -39,7 +39,6 @@ i686*
 i386*  
 hold 
 *.d 
-*PACKAGE 
 *.log 
 .svn* 
 .svn/* 

@@ -735,8 +735,11 @@ void StdEdxModel::MakedEdxModel() {
   }
   fOut->Write();
 }
-// $Id: StdEdxModel.cxx,v 1.3 2018/08/06 15:30:11 fisyak Exp $
+// $Id: StdEdxModel.cxx,v 1.5 2018/10/17 20:45:23 fisyak Exp $
 // $Log: StdEdxModel.cxx,v $
+// Revision 1.5  2018/10/17 20:45:23  fisyak
+// Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
+//
 // Revision 1.3  2018/08/06 15:30:11  fisyak
 // Add HEED model
 //

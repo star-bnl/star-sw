@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.32 2018/08/06 15:54:30 fisyak Exp $
+ * $Id: StTpcHit.h,v 2.34 2018/10/17 20:45:26 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
+ * Revision 2.34  2018/10/17 20:45:26  fisyak
+ * Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
+ *
  * Revision 2.32  2018/08/06 15:54:30  fisyak
  * Add dX
  *
@@ -106,8 +109,8 @@
  * Completely Revised for New Version
  *
  **************************************************************************/
-#ifndef StTpcHit_hh_TFG
-#define StTpcHit_hh_TFG
+#ifndef StTpcHit_hh
+#define StTpcHit_hh
 
 #include "StHit.h"
 #include "StMemoryPool.hh"

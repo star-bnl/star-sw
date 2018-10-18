@@ -19,7 +19,6 @@ unsetenv optstar
 unsetenv OPTSTAR
 unsetenv PATH
 unsetenv PROD_LOG
-unsetenv PWD
 unsetenv PYTHONPATH
 unsetenv QTDIR
 unsetenv ROOTROOT

@@ -1,5 +1,8 @@
-/* $Id: StTpcFastSimMaker.cxx,v 1.10 2018/06/21 01:47:26 perev Exp $
+/* $Id: StTpcFastSimMaker.cxx,v 1.12 2018/10/17 20:45:29 fisyak Exp $
     $Log: StTpcFastSimMaker.cxx,v $
+    Revision 1.12  2018/10/17 20:45:29  fisyak
+    Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
+
     Revision 1.10  2018/06/21 01:47:26  perev
     iTPCheckIn
 
