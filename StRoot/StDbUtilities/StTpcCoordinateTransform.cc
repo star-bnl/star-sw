@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.48 2018/08/07 03:43:37 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.50 2018/10/17 20:45:24 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.50  2018/10/17 20:45:24  fisyak
+ * Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
+ *
  * Revision 1.48  2018/08/07 03:43:37  fisyak
  * iTPC corrections
  *

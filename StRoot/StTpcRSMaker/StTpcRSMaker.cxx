@@ -67,7 +67,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.77 2018/02/18 21:08:54 perev Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.80 2018/10/17 20:45:28 fisyak Exp $";
 #define __ClusterProfile__
 static Bool_t ClusterProfile = kFALSE;
 #define Laserino 170
@@ -1946,8 +1946,11 @@ TF1 *StTpcRSMaker::StTpcRSMaker::fEc(Double_t w) {
 
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.77 2018/02/18 21:08:54 perev Exp $
+// $Id: StTpcRSMaker.cxx,v 1.80 2018/10/17 20:45:28 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.80  2018/10/17 20:45:28  fisyak
+// Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
+//
 // Revision 1.77  2018/02/18 21:08:54  perev
 // Move back DSmirnov correction
 //

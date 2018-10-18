@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StTpcMixerMaker.cxx,v 1.4 2014/06/26 21:31:42 fisyak Exp $
+ * $Id: StTpcMixerMaker.cxx,v 1.5 2018/10/17 20:45:27 fisyak Exp $
  * $Log: StTpcMixerMaker.cxx,v $
+ * Revision 1.5  2018/10/17 20:45:27  fisyak
+ * Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
+ *
  * Revision 1.4  2014/06/26 21:31:42  fisyak
  * New Tpc Alignment, v632
  *

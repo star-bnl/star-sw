@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.63 2018/06/08 18:18:37 genevb Exp $
+ * $Id: StMagUtilities.h,v 1.64 2018/10/17 20:45:24 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.64  2018/10/17 20:45:24  fisyak
+ * Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
+ *
  * Revision 1.63  2018/06/08 18:18:37  genevb
  * Introduce padrow 40 correction for iTPC GridLeak Wall, reduce includes dependencies
  *

@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.92 2018/08/06 15:30:57 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.94 2018/10/17 20:45:26 fisyak Exp $
 //#define CompareWithToF 
 //#define __USEZ3A__
 //#define __CHECK_LargedEdx__
@@ -508,9 +508,7 @@ Int_t StdEdxY2Maker::Make(){
 	if ((TESTBIT(m_Mode, kPadSelection)) && iokCheck) {BadHit(3, tpcHit->position()); continue;}
 	if ((TESTBIT(m_Mode, kPadSelection)) && (dx < 0.5 || dx > 25.)) {BadHit(4, tpcHit->position()); continue;}
 	// Corrections
-#ifdef StTpcHit_hh_TFG
 	tpcHit->setdX(dx);
-#endif
 	CdEdx[NdEdx].Reset();
 	CdEdx[NdEdx].resXYZ[0] = localSect[3].position().x() - localSect[0].position().x();
 	CdEdx[NdEdx].resXYZ[1] = localSect[3].position().y() - localSect[0].position().y();
@@ -881,7 +879,6 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 			      100,-2.5,2.5,500,-1.,4.);
       }
     }
-    
     TDatime t1(tMin,0); // min Time and
     TDatime t2(tMax,0); // max 
     

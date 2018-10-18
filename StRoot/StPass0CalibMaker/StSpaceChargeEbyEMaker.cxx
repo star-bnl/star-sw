@@ -1556,8 +1556,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.70 2018/09/21 18:22:47 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.71 2018/10/17 20:45:27 fisyak Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.71  2018/10/17 20:45:27  fisyak
+// Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
+//
 // Revision 1.70  2018/09/21 18:22:47  genevb
 // Bug fix for wrong vertex daughter PCTs function
 //

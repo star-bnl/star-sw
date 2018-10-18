@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.y2018.C,v 1.1 2018/08/06 15:41:44 fisyak Exp $
+// $Id: TpcResponseSimulator.y2018.C,v 1.3 2018/10/17 20:45:17 fisyak Exp $
 // $Log: TpcResponseSimulator.y2018.C,v $
+// Revision 1.3  2018/10/17 20:45:17  fisyak
+// Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
+//
 // Revision 1.1  2018/08/06 15:41:44  fisyak
 // RunXVIII isobar dE/dx calibration
 //

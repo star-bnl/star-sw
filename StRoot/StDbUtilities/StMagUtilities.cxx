@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.114 2018/06/21 04:23:45 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.115 2018/10/17 20:45:24 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.115  2018/10/17 20:45:24  fisyak
+ * Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
+ *
  * Revision 1.114  2018/06/21 04:23:45  genevb
  * Simpler way to address calculation of data arrays for wrong sign of the voltages
  *

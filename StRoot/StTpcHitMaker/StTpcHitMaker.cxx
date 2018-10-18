@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.72 2018/06/22 18:35:19 perev Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.74 2018/10/17 20:45:27 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.74  2018/10/17 20:45:27  fisyak
+ * Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
+ *
  * Revision 1.72  2018/06/22 18:35:19  perev
  * Merging with TPC group code
  *
