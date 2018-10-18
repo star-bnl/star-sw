@@ -292,6 +292,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       } else if (k == kdXCorrection) {
 	xL2 = TMath::Log2(dx);
 	dXCorr = ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,xL2); 
+	if (TMath::Abs(dXCorr) > 10) return 3;
 	if (nrows == 7) {// old schema without iTPC
 	  dXCorr += ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2,xL2);
 	  dXCorr += ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(5+kTpcOutIn,xL2);
@@ -375,23 +376,24 @@ Int_t StTpcdEdxCorrection::dEdxTrackCorrection(EOptions opt, Int_t type, dst_ded
   Double_t LogTrackLength = TMath::Log((Double_t) (dedx.ndedx/100));
   Double_t dxLog2   = dedx.dedx[2];
   Double_t xx[2] = {LogTrackLength, dxLog2};
-  Int_t nrows = 0;
   Double_t I70L;
   Int_t k = opt;
   if (! m_Corrections[k].Chair) return 0;
+  Int_t l = 2*type;
+  Int_t nrows = 0;
   switch (k) {
   case kTpcLengthCorrection:
-    nrows = ((St_tpcCorrectionC *) m_Corrections[k].Chair)->nrows();
+    nrows = ((St_tpcCorrectionC *) m_Corrections[k].Chair)->nrows(l);
     switch (type) {
     case 0: // I70
     case 1: // dNdx
     case 2: // fit
-      if (nrows > 1+2*type) {
-	dedx.dedx[0]   *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(  2*type,LogTrackLength));
-	dedx.dedx[1]    =             ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(1+2*type,LogTrackLength);
+      if (nrows > l+1) {
+	dedx.dedx[0]   *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(  l,LogTrackLength));
+	dedx.dedx[1]    =             ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l+1,LogTrackLength);
       }
-      if (nrows > 6+2*type) {
-	dedx.dedx[0]   *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(6+2*type,LogTrackLength));
+      if (nrows > l+6) {
+	dedx.dedx[0]   *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l+6,LogTrackLength));
       }
       break;
     default:
@@ -399,14 +401,15 @@ Int_t StTpcdEdxCorrection::dEdxTrackCorrection(EOptions opt, Int_t type, dst_ded
     }
     break;
   case kTpcLengthCorrectionMDF:
-    nrows = ((St_MDFCorrectionC *) m_Corrections[k].Chair)->nrows();
+    nrows = ((St_MDFCorrectionC *) m_Corrections[k].Chair)->nrows(l);
+    if (dedx.det_id > 100 && nrows > l+6) l += 6;
     switch (type) {
     case 0: // I70
     case 1: // dNdx
     case 2: // fit
-      if (nrows > 1+2*type) {
-	dedx.dedx[0]   *= TMath::Exp(-((St_MDFCorrectionC *)m_Corrections[k].Chair)->Eval(  2*type,xx));
-	dedx.dedx[1]    =             ((St_MDFCorrectionC *)m_Corrections[k].Chair)->Eval(1+2*type,xx);
+      if (nrows > l+1) {
+	dedx.dedx[0]   *= TMath::Exp(-((St_MDFCorrectionC *)m_Corrections[k].Chair)->Eval(  l,xx));
+	dedx.dedx[1]    =             ((St_MDFCorrectionC *)m_Corrections[k].Chair)->Eval(l+1,xx);
       }
       break;
     default:

@@ -15,7 +15,7 @@ StPidStatus::StPidStatus(StGlobalTrack *gTrack) : PiDStatus(-1) {// , gTrack(Tra
     StTrackPidTraits *trait = traits[i];
     if (! trait) continue;
     if ( trait->IsZombie()) continue;
-    Short_t id = trait->detector();
+    Short_t id = trait->detector()%100;
     if (id == kTofId) {
       StBTofPidTraits* pid = dynamic_cast<StBTofPidTraits*>(trait);
       if (! pid) continue;

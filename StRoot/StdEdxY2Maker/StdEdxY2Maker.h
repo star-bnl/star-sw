@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.h,v 1.31 2016/09/18 22:40:31 fisyak Exp $
+// $Id: StdEdxY2Maker.h,v 1.32 2018/10/18 20:17:32 fisyak Exp $
 #ifndef STAR_StdEdxY2Maker
 #define STAR_StdEdxY2Maker
 
@@ -74,7 +74,6 @@ class StdEdxY2Maker : public StMaker {
   void   AddEdxTraits(StTrack *tracks[2], dst_dedx_st &dedx);
   static Int_t Propagate(const StThreeVectorD &middle,const StThreeVectorD &normal,
 			 const StPhysicalHelixD &helixI, const StPhysicalHelixD &helixO,
-			 Double_t bField, 
 			 StThreeVectorD &xyz, StThreeVectorD &dirG, Double_t s[2], Double_t w[2]);
   static Int_t     NdEdx;
   static dEdxY2_t *CdEdx; // corrected
@@ -91,11 +90,12 @@ class StdEdxY2Maker : public StMaker {
   StThreeVectorD      *mPromptPosition[2][2][3]; 
 #endif /* __OLD_dX_Calculation__ */
   TH2F                *mHitsUsage;//!
+  static Double_t      bField;
   Char_t              end[1];
  public:
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.31 2016/09/18 22:40:31 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
+      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.32 2018/10/18 20:17:32 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
   ClassDef(StdEdxY2Maker,0)   //StAF chain virtual base class for Makers
