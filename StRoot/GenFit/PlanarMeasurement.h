@@ -52,7 +52,7 @@ class PlanarMeasurement : public AbsMeasurement {
   virtual AbsMeasurement* clone() const {return new PlanarMeasurement(*this);}
 
   int getPlaneId() const {return planeId_;}
-
+  const SharedPlanePtr getPlane() const {return physicalPlane_;}
   virtual SharedPlanePtr constructPlane(const StateOnPlane& state) const;
 
   virtual std::vector<MeasurementOnPlane*> constructMeasurementsOnPlane(const StateOnPlane& state) const;
