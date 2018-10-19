@@ -307,50 +307,60 @@ void runEmbeddingSimulation2014(
 #if 1
   // Particle data
   StarParticleData& data = StarParticleData::instance();
-  //  One can add a particle to G3 using...
-  data.AddParticleToG3( "D0", 0.186483E+01, 0.41010E-12, 0., 3, 421, 37, 0, 0 );
-  //data.AddParticleToG3( "eta",5.47853e-01, 0.50244E-18, 0., 3, 221, 17, 0, 0 );
-  //data.AddParticleToG3( "pi0",1.34977e-01, 0.85200E-16, 0., 3, 111, 7, 0, 0 );
-  data.AddParticleToG3( "deuteron", 0.1876E+01, 0.10000E+16, 1., 8, 1000010020, 45, 0, 0 );
-  data.AddParticleToG3( "antideuteron", 0.1876E+01, 0.10000E+16, -1., 8, -1000010020, 50045, 0, 0 );
-  data.AddParticleToG3( "he3", 0.2809E+01, 0.10000E+16, 2., 8, 1000020030, 49, 0, 0 );
-  data.AddParticleToG3( "antihe3", 0.2809E+01, 0.10000E+16, -2., 8, -1000020030, 50049, 0, 0 );
 
-  TParticlePDG* D0     = data.GetParticle("D0");    
-  D0->Print();
-  //TParticlePDG* eta    = data.GetParticle("eta");    
-  //eta->Print();
-  //TParticlePDG* pi0    = data.GetParticle("pi0");    
-  //pi0->Print();
+  if(_part == "D0"){
+     //  One can add a particle to G3 using...
+     data.AddParticleToG3( "D0", 0.186483E+01, 0.41010E-12, 0., 3, 421, 37, 0, 0 );
+     TParticlePDG* D0     = data.GetParticle("D0");    
+     D0->Print();
+     //
+     // Set D0 decay to K+ pi- mode (or cc).
+     //
+     decayPy8->Set("421:onMode = off");
+     decayPy8->Set("421:onIfMatch = 211 321");
+  }
+  if(_part == "eta"){
+     data.AddParticleToG3( "eta",5.47853e-01, 0.50244E-18, 0., 3, 221, 17, 0, 0 );
+     TParticlePDG* eta    = data.GetParticle("eta");    
+     eta->Print();
+     //
+     // Set eta Dalitz decay to gamma e- e+ mode.
+     //
+     decayPy8->Set("221:onMode = off");
+     decayPy8->Set("221:onIfMatch = 22 11 -11");
+  }
+  if(_part == "pi0"){
+     data.AddParticleToG3( "pi0",1.34977e-01, 0.85200E-16, 0., 3, 111, 7, 0, 0 );
+     TParticlePDG* pi0    = data.GetParticle("pi0");    
+     pi0->Print();
+     //
+     // Set pi0 Dalitz decay to gamma e- e+ mode.
+     //
+     decayPy8->Set("111:onMode = off");
+     decayPy8->Set("111:onIfMatch = 22 11 -11");
+  }
+  if(_part == "deuteron" || _part == "antideuteron" || _part == "he3" || _part == "antihe3"){
+     data.AddParticleToG3( "deuteron", 0.1876E+01, 0.10000E+16, 1., 8, 1000010020, 45, 0, 0 );
+     TParticlePDG* deuteron     = data.GetParticle("deuteron");    
+     deuteron->Print();
+  }
+  if(_part == "antideuteron"){
+     data.AddParticleToG3( "antideuteron", 0.1876E+01, 0.10000E+16, -1., 8, -1000010020, 50045, 0, 0 );
+     TParticlePDG* antideuteron     = data.GetParticle("antideuteron");    
+     antideuteron->Print();
+  }
+  if(_part == "he3"){
+     data.AddParticleToG3( "he3", 0.2809E+01, 0.10000E+16, 2., 8, 1000020030, 49, 0, 0 );
+     TParticlePDG* he3     = data.GetParticle("he3");    
+     he3->Print();
+  }
+  if(_part == "antihe3"){
+     data.AddParticleToG3( "antihe3", 0.2809E+01, 0.10000E+16, -2., 8, -1000020030, 50049, 0, 0 );
+     TParticlePDG* antihe3     = data.GetParticle("antihe3");    
+     antihe3->Print();
+  }
 
-  TParticlePDG* deuteron     = data.GetParticle("deuteron");    
-  deuteron->Print();
-  TParticlePDG* antideuteron     = data.GetParticle("antideuteron");    
-  antideuteron->Print();
-  TParticlePDG* he3     = data.GetParticle("he3");    
-  he3->Print();
-  TParticlePDG* antihe3     = data.GetParticle("antihe3");    
-  antihe3->Print();
-
-  //
-  // Set D0 decay to K+ pi- mode (or cc).
-  //
-  decayPy8->Set("421:onMode = off");
-  decayPy8->Set("421:onIfMatch = 211 321");
-
-  //
-  // Set eta Dalitz decay to gamma e- e+ mode.
-  //
-  //decayPy8->Set("221:onMode = off");
-  //decayPy8->Set("221:onIfMatch = 22 11 -11");
-
-  //
-  // Set pi0 Dalitz decay to gamma e- e+ mode.
-  //
-  //decayPy8->Set("111:onMode = off");
-  //decayPy8->Set("111:onIfMatch = 22 11 -11");
 #endif
-
 
   //
   // Initialize primary event generator and all sub makers
