@@ -30,14 +30,15 @@ double _prodtime  = 0;
 
 int     _npart = 10;  // floor number of tracks per event
 float   _fpart = 0.05;  // fraction of track multiplicity to embed
-int     _pid[50]={1,2,3,8,9,11,12,14,15,10017,10007,45,50045,49,50049}; //geant3 particle ID
-TString _pnm[50]={"gamma","positron","electron","pi+","pi-","K+","K-","proton","antiproton","eta","pi0","deuteron","antideuteron","he3","antihe3"}; // particle names
+int     _pid[50]={1,2,3,8,9,11,12,14,15,10017,10007,45,50045,49,50049,37}; //geant3 particle ID
+TString _pnm[50]={"gamma","positron","electron","pi+","pi-","K+","K-","proton","antiproton","eta","pi0","deuteron","antideuteron","he3","antihe3","D0"}; // particle names
 TString _part  = "pi+"; // particle to simulate, default pi+
 TString _part_save;
 float   _ptmn  = 0.100; // min pT to simulate [GeV]
 float   _ptmx  = 7.000; // max pT to simulate [GeV]
 float   _etamn = -2.0;  // min eta to simulate
 float   _etamx = +2.0;  // max eta to simulate
+bool    _rapiditymode = false; //default is flat in pseudorapidity (eta)
 //float   _mnvtx = -5.0;  // min z vertex
 //float   _mxvtx = +5.0;  // max z vertex
 
@@ -174,7 +175,12 @@ void Kinematics()
   //  gSystem->Load( "libStarGeneratorPoolPythia6_4_23.so" );
   gSystem->Load( "libKinematics.so");
   kinematics = new StarKinematics();
-    
+
+  //default is flat in eta, switch on flat in 'y'
+  if (_rapiditymode){
+     kinematics->SetAttr( "rapidity", 1 );
+  }
+
   _primary->AddGenerator(kinematics);
 }
 //______________________________________________________________________________________
@@ -433,20 +439,24 @@ void runEmbeddingSimulation2014(
      }
   }
   if ( indx == 50 ) cout<<"WRONG GeantID: "<<pid<<" !!!"<<endl;
-  
-  // // Particle is a D0 use distributions
+
+  //TFile* mHistFile = new TFile("Input/D0_weight_pt.root");
+  //If Particle name has D0, use distributions
   if ( _part.Contains("D0") )
-    {
-      ptDist = new TF1("ptDist","(1/[0])/(1+(x/[0])^2)^[1]",_ptmn,_ptmx);
-      ptDist->SetParameter(0, 3.0);
-      ptDist->SetParameter(1, 5.0);
-      etaDist = new TF1("etaDist","1.0",_etamn,_etamx);
+  {
+     ptDist = new TF1("ptDist","(1/[0])/(1+(x/[0])^2)^[1]",_ptmn,_ptmx);
+     ptDist->SetParameter(0, 3.0);
+     ptDist->SetParameter(1, 5.0);
+     //ptDist  = (TF1 *) mHistFile->Get("D0_weight_pt");
+     etaDist = new TF1("etaDist","1.0",_etamn,_etamx);
 
-      ptDist->Print();
-      etaDist->Print();
+     ptDist->Print();
+     etaDist->Print();
 
-    }
+  }
   runEmbeddingSimulation2014( tagfile, fzdfile, seed, ne );
+
+  //mHistFile->Close();
 }
 //______________________________________________________________________________________
 
