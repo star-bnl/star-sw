@@ -99,8 +99,9 @@ StTpcPlanarMeasurement::StTpcPlanarMeasurement(const StTpcHit *hit,TrackPoint* t
   DT.MasterToLocal(PosG,PosL);
 #endif
   TVector3 o(shiftG);
-  TVector3 u(DT.GetRotationMatrix()+3);
-  TVector3 v(DT.GetRotationMatrix()+6);
+  const Double_t *r = DT.GetRotationMatrix();
+  TVector3 u(r[1],r[4],r[7]);
+  TVector3 v(r[2],r[5],r[8]);
   DT.MasterToLocal(xyzG, xyzL);
   setPlane(genfit::SharedPlanePtr(new genfit::DetPlane(o,u,v)),planeId);
   rawHitCoords_[0] = xyzL[1];
@@ -114,6 +115,7 @@ StTpcPlanarMeasurement::StTpcPlanarMeasurement(const StTpcHit *hit,TrackPoint* t
   if (Debug()) {
     cout << path.Data() << " local xyz " << xyzL[0] << "/" << xyzL[1] << "/" << xyzL[2] <<  endl;
     cout << path.Data() << " local xyzT " << xyzLT[0] << "/" << xyzLT[1] << "/" << xyzLT[2] <<  endl;
+    getPlane()->Print();
     fHit->Print();
   }
 }

@@ -20,7 +20,7 @@ class StTpcPlanarMeasurement : public genfit::PlanarMeasurement {
 #endif
   virtual       TVectorD& getRawHitCoords(const genfit::StateOnPlane *state=0);
   virtual       TMatrixDSym& getRawHitCov(const genfit::StateOnPlane *state=0);
-  virtual       void SetDebug(Int_t k) {fDebug = k;}
+  static        void SetDebug(Int_t k) {fDebug = k;}
   virtual       Int_t Debug() {return fDebug;}
   virtual const StTpcHit *Hit() const {return fHit;}
  protected:
