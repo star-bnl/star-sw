@@ -538,3 +538,36 @@ Vector (5)  is as follows
  3D momentum: TVector3 A 3D physics vector (x,y,z)=(1.007343,-0.001385,-0.000041) (rho,theta,phi)=(1.007344,90.002360,-0.078783)
 
 y (0,1,0)
+
+
+momSeed TVector3 A 3D physics vector (x,y,z)=(-0.286149,-0.778798,0.972906) (rho,theta,phi)=(1.278653,40.457852,-110.174529)
+posSeed TVector3 A 3D physics vector (x,y,z)=(-32.290499,-113.675114,136.096222) (rho,theta,phi)=(180.241198,40.967786,-105.857702)
+NHits = 24
+/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_1/TPSS_7/TPAD_35 local xyz -2.09138e-05/28.774/135.739
+/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_1/TPSS_7/TPAD_35 local xyzT -2.09138e-05/28.774/135.739
+DetPlane: O(-57.3536, -99.1396, -0.254367) u(-0.86601, -0.500026, -0.00025996) v(-0.000410309, 0.000190302, 1) n(-0.500026, 0.86601, -0.000369969) 
+Tpc s/r   7/ 12 id     1 xyz:   -32.485  -113.563   135.490 q(keV)   0.22 idT     1 qa 100 fl  1 us 0 pmin/max   2/  2 np  1 tmin/max 126/129 nt  4 tm 127.14 pad   2.00 adc   29
+/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_1/TPSS_7/TPAD_38 local xyz -2.09074e-05/29.9371/142.744
+/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_1/TPSS_7/TPAD_38 local xyzT -2.09074e-05/29.9371/142.744
+DetPlane: O(-59.9456, -103.629, -0.256494) u(-0.86601, -0.500026, -0.00025996) v(-0.000410309, 0.000190302, 1) n(-0.500026, 0.86601, -0.000369969) 
+Tpc s/r   7/ 13 id     2 xyz:   -34.073  -118.635   142.493 q(keV)   1.00 idT     1 qa 100 fl  0 us 0 pmin/max   2/  4 np  3 tmin/max 113/118 nt  6 tm 115.34 pad   2.56 adc  133
+/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_1/TPSS_7/TPAD_41 local xyz -3.17219e-05/31.0807/151.591
+/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_1/TPSS_7/TPAD_41 local xyzT -3.17219e-05/31.0807/151.591
+DetPlane: O(-63.6642, -110.257, -0.234975) u(-0.86628, -0.499559, -0.000199596) v(-0.000450207, 0.000380523, 1) n(-0.499559, 0.86628, -0.000554544) 
+
+
+gdb) p state.Print("")
+genfit::StateOnPlane  state vector: 
+Vector (5)  is as follows
+
+     |        1  |
+------------------
+   0 |-0.782073 
+   1 |0 
+   2 |0 
+   3 |0 
+   4 |0 
+
+ defined in plane DetPlane: O(-32.2905, -113.675, 136.096) u(0, 0.780684, 0.624927) v(-0.974638, 0.139852, -0.174709) n(-0.223789, -0.609077, 0.760884) 
+ 3D position: TVector3 A 3D physics vector (x,y,z)=(-32.290499,-113.675114,136.096222) (rho,theta,phi)=(180.241198,40.967786,-105.857702)
+ 3D momentum: TVector3 A 3D physics vector (x,y,z)=(-0.286149,-0.778798,0.972906) (rho,theta,phi)=(1.278653,40.457852,-110.174529)
