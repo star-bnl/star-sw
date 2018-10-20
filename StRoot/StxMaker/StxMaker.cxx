@@ -1,7 +1,7 @@
 // Author : Yuri Fisyak
 // $Id: StxMaker.cxx,v 1.6 2013/09/16 19:54:04 fisyak Exp $
+//#define __TPC3D__
 #include "StxMaker.h"
-#include "StxSeedFinder.h"
 #include "StxCAInterface.h"
 #include "StEvent/StEvent.h"
 #include "StEvent/StGlobalTrack.h"
@@ -72,6 +72,7 @@
 #include "GenFit/HelixTrackModel.h"
 #include "GenFit/MeasurementCreator.h"
 #include "StTpcPlanarMeasurement.h"
+#include "StTpc3DMeasurement.h"
 #include "TApplication.h"
 #include "TCanvas.h"
 #include "TDatabasePDG.h"
@@ -135,9 +136,42 @@ Int_t StxMaker::Make(){
   StxCAInterface::Instance().SetNewEvent();
   // Run reconstruction by the CA Tracker
   StxCAInterface::Instance().Run();
-  const int NRecoTracks = StxCAInterface::Instance().GetTracker()->NTracks();
-  for ( int iTr = 0; iTr < NRecoTracks; iTr++ ) {
+  // Sort CA track candidate on no. of hits
+  const Int_t NRecoTracks = StxCAInterface::Instance().GetTracker()->NTracks();
+  TArrayI NoHits(NRecoTracks); Int_t *noHits = NoHits.GetArray();
+  for ( Int_t iTr = 0; iTr < NRecoTracks; iTr++ ) {
+    noHits[iTr] = StxCAInterface::Instance().GetTracker()->Track( iTr ).NHits();
+  }  
+  TArrayI Index(NRecoTracks); Int_t *index = Index.GetArray();
+  TMath::Sort(NRecoTracks,noHits,index,kTRUE);
+  vector<SeedHit_t>        &fSeedHits = StxCAInterface::Instance().GetSeedHits();
+  for ( Int_t ITr = 0; ITr < NRecoTracks; ITr++ ) {
+    Int_t iTr = index[ITr];
     const AliHLTTPCCAGBTrack &tr = StxCAInterface::Instance().GetTracker()->Track( iTr );
+    Int_t NoHitsTotal = 0;
+    Int_t NoHitsUsed = 0;
+    Int_t NHits = tr.NHits();
+    for ( Int_t iHit = 0; iHit < NHits; iHit++ ){ 
+      const Int_t index = StxCAInterface::Instance().GetTracker()->TrackHit( tr.FirstHitRef() + iHit );
+      const Int_t hId   = StxCAInterface::Instance().GetTracker()->Hit( index ).ID();
+      const StTpcHit *tpcHit = fSeedHits[hId].hit;
+      if (! tpcHit) {
+	if (Debug()) {LOG_WARN << "StxMaker::Make pointer to StTpcHit is zero" << endm;}
+	continue;
+      }
+      NoHitsTotal++;
+      if (! tpcHit->usedInFit()) continue;
+      NoHitsUsed++;
+    }
+    if (NoHitsTotal < 5) {
+      if (Debug()) {LOG_WARN << "StxMaker::Make no. of hits for the track candidate " << NoHitsTotal << " is too low. Reject it." << endm;}
+      continue;
+    }
+    if (NoHitsUsed > 0.1*NoHitsTotal) {
+      if (Debug()) {LOG_WARN << "StxMaker::Make no. of reused hits for the track candidate " 
+			     << NoHitsTotal << " from total " << NoHitsTotal << " is too high. Reject it." << endm;}
+      continue;
+    }
     if (! FitTrack(tr)) continue;
     // Create StTrack
   }
@@ -145,7 +179,7 @@ Int_t StxMaker::Make(){
 }
 //________________________________________________________________________________
 #ifdef __HANDLER__
-void handler(int sig) {
+void handler(Int_t sig) {
   void *array[10];
   size_t size;
 
@@ -224,8 +258,8 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
   const genfit::eMultipleMeasurementHandling mmHandling = genfit::unweightedClosestToPredictionWire;
   //const genfit::eMultipleMeasurementHandling mmHandling = genfit::weightedClosestToReferenceWire;
   //const genfit::eMultipleMeasurementHandling mmHandling = genfit::weightedClosestToPredictionWire;
-  const int nIter = 20; // max number of iterations
-  const double dPVal = 1.E-3; // convergence criterion
+  const Int_t nIter = 20; // max number of iterations
+  const Double_t dPVal = 1.E-3; // convergence criterion
 
   //  const bool resort = false;
   //  const bool prefit = false; // make a simple Kalman iteration before the actual fit
@@ -267,9 +301,15 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
   if (Debug()) {
     fitter->setDebugLvl(10);
     gGeoManager->SetVerboseLevel(5);
+#ifndef __TPC3D__ /* ! __TPC3D__ */
+    StTpcPlanarMeasurement::SetDebug(1);
+#endif /* ! __TPC3D__ */    
   } else {
     fitter->setDebugLvl(0);
     gGeoManager->SetVerboseLevel(0);
+#ifndef __TPC3D__ /* ! __TPC3D__ */
+    StTpcPlanarMeasurement::SetDebug(0);
+#endif /* ! __TPC3D__ */ 
   }
   /*if (dynamic_cast<genfit::DAF*>(fitter) != nullptr) {
     //static_cast<genfit::DAF*>(fitter)->setBetas(100, 50, 25, 12, 6, 3, 1, 0.5, 0.1);
@@ -283,8 +323,8 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
   //  genfit::FieldManager::getInstance()->useCache(true, 8);
   //  genfit::FieldManager::getInstance()->useCache(false, 0);
   genfit::MaterialEffects::getInstance()->init(new genfit::TGeoMaterialInterface());
-  const int pdg = 211; // -13;               // particle pdg code mu+
-  //  const double charge = TDatabasePDG::Instance()->GetParticle(pdg)->Charge()/(3.);
+  const Int_t pdg = 211; // -13;               // particle pdg code mu+
+  //  const Double_t charge = TDatabasePDG::Instance()->GetParticle(pdg)->Charge()/(3.);
   //========== Reference  track ======================================================================
   TVector3 posSeed, momSeed;
   TMatrixDSym covSeed(6);
@@ -319,7 +359,7 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
   // remember original initial state
   const genfit::StateOnPlane stateRefOrig(stateSeed);
   //========== Mesurements ======================================================================
-  const int NHits = tr.NHits();
+  const Int_t NHits = tr.NHits();
   vector<SeedHit_t>        &fSeedHits = StxCAInterface::Instance().GetSeedHits();
   std::vector<genfit::eMeasurementType> measurementTypes;
   //  std::vector< std::vector<genfit::AbsMeasurement*> > measurements;
@@ -329,11 +369,15 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
     cout << "posSeed\t"; posSeed.Print("");
     cout << "NHits = " << NHits << endl;
   }
-  for ( int iHit = 0; iHit < NHits; iHit++ ){ 
+  for ( Int_t iHit = 0; iHit < NHits; iHit++ ){ 
     const Int_t index = StxCAInterface::Instance().GetTracker()->TrackHit( tr.FirstHitRef() + iHit );
     const Int_t hId   = StxCAInterface::Instance().GetTracker()->Hit( index ).ID();
     const StTpcHit *tpcHit = fSeedHits[hId].hit;
+#ifndef __TPC3D__ /* ! __TPC3D__ */
     genfit::PlanarMeasurement* measurement = new StTpcPlanarMeasurement(tpcHit, nullptr);
+#else /* __TPC3D__ */
+    genfit::AbsMeasurement* measurement = new StTpc3DMeasurement(tpcHit, nullptr);
+#endif /* ! __TPC3D__ */
     fitTrack.insertPoint(new genfit::TrackPoint(measurement, &fitTrack));
   }
   try{
@@ -488,11 +532,16 @@ Int_t StxMaker::FillDetectorInfo(StTrack *gTrack, genfit::Track * track, bool re
     for (std::vector< genfit::AbsMeasurement* >::const_iterator im = tp->getRawMeasurements().begin(); 
 	 im !=  tp->getRawMeasurements().end(); ++im) {
       dets[0][kPP]++;
+#ifndef __TPC3D__ /* ! __TPC3D__ */
       const StTpcPlanarMeasurement *measurement =  dynamic_cast<StTpcPlanarMeasurement *>(*im);
+#else /* __TPC3D__ */
+      const StTpc3DMeasurement *measurement =  dynamic_cast<StTpc3DMeasurement *>(*im);
+#endif /* ! __TPC3D__ */
       if (! measurement) continue;
       if (! firstTP) firstTP = tp;
       lastTP = tp;
-      Int_t detId = measurement->getPlaneId()/10000 + 1;
+      //      Int_t detId = measurement->getPlaneId()/10000 + 1;
+      Int_t detId = measurement->getDetId();
       dets[0][kPP]++; dets[detId][kPP]++;
       StHit *hit = (StHit*) measurement->Hit();
       if (! hit) continue;
@@ -587,7 +636,7 @@ void StxMaker::FillGeometry(StTrack* gTrack, genfit::Track * track, bool outer) 
   measuredPointState.getPosMomCov(pos, mom, cov);
   TVector3 field = FieldManager::getInstance()->getField()->get(pos);
   StThreeVectorF origin(pos.X(),pos.Y(),pos.Z());
-  static const double EC = 2.99792458e-4;
+  static const Double_t EC = 2.99792458e-4;
   StThreeVectorF p(mom.X(), mom.Y(), mom.Z());
   Double_t hz = EC*field.Z();
   Double_t qovepT = measuredPointState.getCharge()/mom.Pt();
@@ -661,7 +710,7 @@ void StxMaker::FillFlags(StTrack* gTrack) {
     gTrack->setFlag(301);
   }
   StTrackFitTraits& fitTrait = gTrack->fitTraits();
-  //int tpcFitPoints = fitTrait.numberOfFitPoints(kTpcId);
+  //Int_t tpcFitPoints = fitTrait.numberOfFitPoints(kTpcId);
   Int_t svtFitPoints = fitTrait.numberOfFitPoints(kSvtId);
   Int_t ssdFitPoints = fitTrait.numberOfFitPoints(kSsdId);
   Int_t pxlFitPoints = fitTrait.numberOfFitPoints(kPxlId);
@@ -753,7 +802,6 @@ void StxMaker::FillDca(StTrack* stTrack, genfit::Track * track)
   try{
     //  Double_t s = 
     rep->extrapolateToLine(state, linePoint, lineDirection);
-    state.Print("");
   }
   catch(genfit::Exception& e) {
     std::cout << "Exception, fail to make DCA" << std::endl;
@@ -807,7 +855,7 @@ void StxMaker::FillDca(StTrack* stTrack, genfit::Track * track)
   // 
   Double_t pT = mom.Pt();
   TVector3 field = FieldManager::getInstance()->getField()->get(pos);
-  static const double EC = 2.99792458e-4;
+  static const Double_t EC = 2.99792458e-4;
   Double_t hz = EC*field.Z();
   Double_t qoverpT = charge/mom.Pt();
   Double_t qoverpT2 = qoverpT * qoverpT;
