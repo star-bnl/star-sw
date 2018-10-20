@@ -1,0 +1,5 @@
+# $Id $
+# package StEmcUtil
+# author: 
+Library:libStEmcUtil.so:LIBS += -lKFParticle
+

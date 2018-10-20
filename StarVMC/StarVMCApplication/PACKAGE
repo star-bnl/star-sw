@@ -1,0 +1,6 @@
+# $Id $
+# package StarVMCApplication
+# author: 
+Library:libStarVMCApplication.so:LIBS += -lgen_Tables -lsim_Tables -lStIstDbMaker -lStPxlDbMaker -lStSsdDbMaker -lStSvtDbMaker -lStTpcDb -lEG -lVMC -lStarRoot 
+#Library:libStarVMCApplication.so:LIBS +=   -lEG -lVMC -lminicern -lgeant3
+

@@ -1,0 +1,5 @@
+# $Id $
+# package StGenericVertexMaker
+# author: 
+#Library:libStGenericVertexMaker.so:LIBS +=   -lStChain -lStDb_Tables
+

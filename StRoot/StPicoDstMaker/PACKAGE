@@ -1,0 +1,6 @@
+# $Id $
+# package StPicoDstMaker
+# author: 
+Library:libStPicoDstMaker.so:LIBS +=   -lStChain -lStMuDSTMaker -lStPicoEvent
+
+

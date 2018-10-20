@@ -1,0 +1,6 @@
+# $Id $
+# package StPicoEvent
+# author: 
+Library:libStPicoEvent.so:LIBS += -lStMuDSTMaker
+
+

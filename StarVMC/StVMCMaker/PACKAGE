@@ -1,0 +1,5 @@
+# $Id $
+# package StVMCMaker
+# author: 
+Library:libStVMCMaker.so:LIBS +=   -lRotations  -lgeant3 -lStarVMCApplication
+
