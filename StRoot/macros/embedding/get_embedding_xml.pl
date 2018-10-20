@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.37 2018/09/27 12:36:34 zhux Exp $
+# $Id: get_embedding_xml.pl,v 1.38 2018/10/20 08:53:02 starembd Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.38  2018/10/20 08:53:02  starembd
+# updated default daq tags dirs and daqEvents file
+#
 # Revision 1.37  2018/09/27 12:36:34  zhux
 # updated 'fromScratch' tag
 #
@@ -98,7 +101,7 @@ chomp($date);
 # Available options
 #----------------------------------------------------------------------------------------------------
 # Default parameters
-my $staroflDir    = "/home/starofl"; # starofl home
+my $staroflDir    = "/global/projecta/projectdirs/starprod"; # starofl home
 
 # Common log/generator area under /project directory at PDSF
 #   The directories only used for the temporary storage for log files
@@ -109,8 +112,8 @@ my $production    = "P08ic";                                        # Default pr
 my $library       = getLibrary($production);                        # Default library
 my $outputXml     = getXmlFileName($production);                    # Default xml file name
 my $requestNumber = 9999999999 ;                                    # Default request number
-my $daqsDirectory = "$staroflDir/embedding/$production";            # Default daq files directory
-my $tagsDirectory = "$staroflDir/embedding/$production";            # Default tag files directory
+my $daqsDirectory = "$staroflDir/daq";            # Default daq files directory
+my $tagsDirectory = "$staroflDir/tags";            # Default tag files directory
 my $trgsetupName  = "2007ProductionMinBias";                        # Default trigger setup name
 my $bfcMixer      = "StRoot/macros/embedding/bfcMixer_TpcSvtSsd.C"; # Default bfcMixer
 my $zvertexCut    = 200 ;                                           # Default z-vertex cut
@@ -128,7 +131,7 @@ my $zerobiasMode  = 0 ;                                             # Default mo
 my $moretagsMode  = 0 ;                                             # Default mode (OFF) for using moretags file as input tags
 my $kumacFile     = "StRoot/macros/embedding/pythiaTuneA_template.kumac"; # Kumac file for starsim 			
 my $seed          = "StRoot/macros/embedding/get_random_seed";      # Random seed generator for starsim		
-my $daqEvents     = "$staroflDir/embedding/$production";            # File list for starsim with daq files and number of events for each file		
+my $daqEvents     = "$staroflDir/daq";            # File list for starsim with daq files and number of events for each file		
 my $ptbin         = 0 ;                                             # Default mode (OFF) for multiple pt hard bins for a single request 			
 
 # Output path will be the following structure
