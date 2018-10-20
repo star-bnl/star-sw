@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.115 2018/10/17 20:45:24 fisyak Exp $
+ * $Id: StMagUtilities.cxx,v 1.116 2018/10/19 20:41:28 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.116  2018/10/19 20:41:28  genevb
+ * Clean up after Y. Fisyak modifications (which were for iTPC, not dE/dx), and add new PredictSpaceCharge() using real hit radii
+ *
  * Revision 1.115  2018/10/17 20:45:24  fisyak
  * Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
  *
@@ -521,11 +524,10 @@ StMagUtilities::StMagUtilities (StTpcDb* /* dbin */, Int_t mode )
     SafeDelete(fgInstance);
   }
   fgInstance = this;
-  DoOnce     = kTRUE;
   GetDistoSmearing(mode);    // Get distortion smearing from the DB
   GetMagFactor()        ;    // Get the magnetic field scale factor from the DB
   GetTPCParams()        ;    // Get the TPC parameters from the DB
-  GetTPCVoltages( mode );    // Get the TPC Voltages from the DB
+  GetTPCVoltages( mode );    // Get the TPC Voltages from the DB! (after GetTPCParams!)
   GetHVPlanes()         ;    // Get the parameters that describe the HV plane errors (after GetTPCVoltages!)
   GetOmegaTau ()        ;    // Get Omega Tau parameters
   GetSpaceCharge()      ;    // Get the spacecharge variable from the DB
@@ -545,7 +547,6 @@ StMagUtilities::StMagUtilities ( const StarMagField::EBField map, const Float_t 
     SafeDelete(fgInstance);
     }
   fgInstance = this;
-  DoOnce         = kTRUE;
   GetDistoSmearing(0)   ;        // Do not get distortion smearing out of the DB
   GetMagFactor()        ;        // Get the magnetic field scale factor from the StarMagField
   fTpcVolts      =  0   ;        // Do not get TpcVoltages out of the DB   - use defaults in CommonStart
@@ -599,10 +600,10 @@ void StMagUtilities::GetTPCParams ()
   TPC_Z0         =  dims->gatingGridZ() ;
   IFCShift       =  cages->InnerFieldCageShift();
   for (Int_t sec = 1; sec <= 24; sec++) {
-    INNER[sec-1]          =  pads->innerPadRows(sec); // Use Sector 1 for default values
+    INNER[sec-1]          =  pads->innerPadRows(sec);
     TPCROWS[sec-1]        =  pads->padRows(sec);
-    for ( Int_t i = 0 ; i < TPCROWS[sec-1] ; i++ )
-    TPCROWR[sec-1][i] = pads->radialDistanceAtRow(sec,i+1); // Use Sector 1 for default values
+    for ( Int_t row = 1 ; row <= TPCROWS[sec-1] ; row++ )
+      TPCROWR[sec-1][row-1] = pads->radialDistanceAtRow(sec,row);
   }
   IFCRadius      =    47.90 ;  // Radius of the Inner Field Cage (GVB: not sure where in DB?)
   OFCRadius      =  dims->senseGasOuterRadius();
@@ -642,7 +643,8 @@ void StMagUtilities::GetE()
 }
 
 void StMagUtilities::GetTPCVoltages (Int_t mode)  
-{ 
+{
+  // GetTPCParams() must be called first!
   fTpcVolts      =  St_tpcHighVoltagesC::instance() ;  // Initialize the DB for TpcVoltages
   CathodeV       =  fTpcVolts->getCathodeVoltage() * 1000 ; 
   GG             =  fTpcVolts->getGGVoltage() ; 
@@ -678,11 +680,8 @@ void StMagUtilities::GetTPCVoltages (Int_t mode)
     double cmnOuter = outerVs.GetBinCenter(outerVs.GetMaximumBin());
     cout << "StMagUtilities assigning common anode voltages as " << cmnInner << " , " << cmnOuter << endl;
     for (Int_t i = 1 ; i < 25; i++ ) {
-      int inner = St_tpcPadConfigC::instance()->innerPadRows(i);
-      //      GLWeights[i] = ( ( TMath::Abs(anodeVolts->voltagePadrow(i,inner  ) - cmnInner) < stepsInner/2. ) &&
-      GLWeights[i] = inner > 13 ? 0 :
-	( ( TMath::Abs(anodeVolts->voltagePadrow(i,inner)   - cmnInner) < stepsInner/2. ) &&
-                      ( TMath::Abs(anodeVolts->voltagePadrow(i,inner+1) - cmnOuter) < stepsOuter/2. ) ? 1 : -1 );
+      GLWeights[i] = ( ( TMath::Abs(anodeVolts->voltagePadrow(i,INNER[i-1]  ) - cmnInner) < stepsInner/2. ) &&
+                       ( TMath::Abs(anodeVolts->voltagePadrow(i,INNER[i-1]+1) - cmnOuter) < stepsOuter/2. ) ? 1 : -1 );
     }
   } else if (mode & kFullGridLeak) {
 
@@ -695,18 +694,10 @@ void StMagUtilities::GetTPCVoltages (Int_t mode)
                      (GL_charge_y_hi[2]*GL_charge_y_hi[2] - GL_charge_y_lo[2]*GL_charge_y_lo[2]) ) ;
 
     for (Int_t i = 0 ; i < 24; i++ ) {
-      int inner = St_tpcPadConfigC::instance()->innerPadRows(i+1);
-      int lastrow = St_tpcPadConfigC::instance()->padRows(i+1);
-//       GLWeights[i   ] = GL_rho_inner_of_innerSec(anodeVolts->voltagePadrow(i+1,      1)) * norm ;
-//       GLWeights[i+24] = GL_rho_outer_of_innerSec(anodeVolts->voltagePadrow(i+1,inner  )) * norm ;
-//       GLWeights[i+48] = GL_rho_inner_of_outerSec(anodeVolts->voltagePadrow(i+1,inner+1)) * norm ;
-      GLWeights[i   ] = inner > 13 ? 0 :
-                        GL_rho_inner_of_innerSec(anodeVolts->voltagePadrow(i+1,      1)) * norm ;
-      GLWeights[i+24] = inner > 13 ? 0 :
-                        GL_rho_outer_of_innerSec(anodeVolts->voltagePadrow(i+1,inner  )) * norm ;
-      GLWeights[i+48] = inner > 13 ? 0 :
-                        GL_rho_inner_of_outerSec(anodeVolts->voltagePadrow(i+1,inner+1)) * norm ;
-      GLWeights[i+72] = GL_rho_outer_of_outerSec(anodeVolts->voltagePadrow(i+1,lastrow)) * norm ;
+      GLWeights[i   ] = GL_rho_inner_of_innerSec(anodeVolts->voltagePadrow(i+1,         1)) * norm ;
+      GLWeights[i+24] = GL_rho_outer_of_innerSec(anodeVolts->voltagePadrow(i+1,INNER[i]  )) * norm ;
+      GLWeights[i+48] = GL_rho_inner_of_outerSec(anodeVolts->voltagePadrow(i+1,INNER[i]+1)) * norm ;
+      GLWeights[i+72] = GL_rho_outer_of_outerSec(anodeVolts->voltagePadrow(i+1,TPCROWS[i])) * norm ;
     }
   }
   
@@ -974,10 +965,6 @@ void StMagUtilities::CommonStart ( Int_t mode )
       EASTCLOCKERROR =   0.0 ;      // Phi rotation of East end of TPC in milli-radians
       WESTCLOCKERROR = -0.43 ;      // Phi rotation of West end of TPC in milli-radians
 #endif /* ! __NO_CLOCK__ */
-#if 0
-      INNER          =  13   ;      // Number of TPC rows in the inner sectors
-      TPCROWS        =  45   ;      // Total number of TPC rows per sector (Inner + Outer)
-#endif
       IFCRadius   =    47.90 ;      // Radius of the Inner Field Cage
       OFCRadius   =    200.0 ;      // Radius of the Outer Field Cage
       INNERGGFirst =  53.0   ;      // Radius of the first Inner Gating Grid Wire
@@ -986,17 +973,20 @@ void StMagUtilities::CommonStart ( Int_t mode )
       OUTERGGLast  = 191.395 ;      // Radius of the last Outer Gating Grid Wire
       GAPRADIUS   =    121.8 ;      // Radius of the gap between the inner and outer grids (cm) at sector centerline
       WIREGAP     =    1.595 ;      // Width of the gap between the inner and outer grids (cm)
-#if 0
-      for ( Int_t i = 0 ; i < TPCROWS ; i++ )
+      for ( Int_t sec = 0; sec < 24; sec++)
         {
-          if ( i < 8 ) 
-	    TPCROWR[i] = 60.0 + i*4.8 ;
-          else if ( i < INNER ) 
-	    TPCROWR[i] = 93.6 + (i-8+1)*5.2 ;
-          else               
-	    TPCROWR[i] = 127.195 + (i-INNER)*2.0 ;
+          INNER[sec]          =  13   ;      // Number of TPC rows in the inner sectors
+          TPCROWS[sec]        =  45   ;      // Total number of TPC rows per sector (Inner + Outer)
+          for ( Int_t row = 0 ; row < TPCROWS[sec] ; row++ )
+            {
+              if ( row < 8 )
+	        TPCROWR[sec][row] = 60.0 + row*4.8 ;
+              else if ( row < INNER[sec] )
+	        TPCROWR[sec][row] = 93.6 + (row-8+1)*5.2 ;
+              else
+	        TPCROWR[sec][row] = 127.195 + (row-INNER[sec])*2.0 ;
+            }
         }
-#endif
       mCorrectionsMode = 0;
 
       cout << "StMagUtilities::CommonSta  WARNING -- Using hard-wired TPC parameters. " << endl ; 
@@ -1590,7 +1580,8 @@ void StMagUtilities::FastUndo2DBDistortion( const Float_t x[], Float_t Xprime[] 
 
   Float_t r,phi;
   if (usingCartesian) Cart2Polar(x,r,phi);
-  else { r = x[0]; phi = x[1]; }  if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
+  else { r = x[0]; phi = x[1]; }
+  if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
   Float_t z = LimitZ( Sector, x ) ;                 // Protect against discontinuity at CM
 
   if ( DoOnce )
@@ -3556,11 +3547,12 @@ void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **Arr
     OverRelaxers[k-1] = 1.0 + TMath::Sqrt( TMath::Cos( (k*TMath::PiOver2())/ITERATIONS ) ) ;    // Over-relaxation index, >= 1 but < 2
   }
 
-  Float_t coef1[ROWS],coef2[ROWS],coef3[ROWS],coef4[ROWS];
+  Float_t coef1[ROWS],coef2[ROWS],coef3[ROWS],coef4[ROWS],OverRelaxcoef4[ROWS];
   memset(coef1,0,ROWS*sizeof(Float_t));
   memset(coef2,0,ROWS*sizeof(Float_t));
   memset(coef3,0,ROWS*sizeof(Float_t));
   memset(coef4,0,ROWS*sizeof(Float_t));
+  memset(OverRelaxcoef4,0,ROWS*sizeof(Float_t));
 
   for ( Int_t count = 0 ; count < loops ; count++ ) {  // START the master loop and do the binary expansion
    
@@ -3617,7 +3609,6 @@ void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **Arr
     for ( Int_t k = 1 ; k <= ITERATIONS; k++ ) {
       Float_t OverRelax   = OverRelaxers[k-1];
       Float_t OverRelaxM1 = OverRelax - 1.0 ;
-      Float_t OverRelaxcoef4[ROWS] ;
       for ( Int_t i = i_one ; i < ROWS-1 ; i+=i_one ) { 
         OverRelaxcoef4[i] = OverRelax * coef4[i] ;
       }
@@ -3689,8 +3680,8 @@ void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **Arr
           }
         }
 
-      }
-    }      
+      } // m phi slices for-loop
+    } // k iterations for-loop
 
     // For asymmetric grid sizes, keep them coarse as long as possible to avoid excessive calculations
     if (iWillDivide) { i_one = i_one / 2 ; if ( i_one < 1 ) i_one = 1 ; }
@@ -4412,8 +4403,10 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t sec, Int_t Charge, Flo
   There are also cuts on Pt and rapdity, etc, that can cause the funtion to return non-zero.
 
 */
-Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t sec, Int_t Charge, Float_t Pt, Float_t VertexZ, Float_t PseudoRapidity, Float_t Phi,
-						    Float_t DCA,  const unsigned int RowMask1, const unsigned int RowMask2, 
+Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t sec, Int_t Charge, Float_t Pt, Float_t VertexZ,
+                                                    Float_t PseudoRapidity, Float_t Phi, Float_t DCA,
+						    const unsigned long long RowMask1,
+                                                    const unsigned long long RowMask2,
 						    Float_t RowMaskErrorR[64], Float_t RowMaskErrorRPhi[64], Float_t &pSpace )
 {
 
@@ -4466,8 +4459,8 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t sec, Int_t Charge, Flo
    if (!useManualSCForPredict) ManualSpaceChargeR2(0.01,SpaceChargeEWRatio); // Set "medium to large" value of the spacecharge parameter for tests, not critical.
                                                    // but keep EWRatio that was previously defined 
    if (DoOnce) {
-     xx[0] = TPCROWR[sec-1][0]; xx[1] = 0; xx[2] = 50;
-     DoDistortion ( xx, xxprime ) ;
+     xx[0] = TPCROWR[2][0]; xx[1] = 0; xx[2] = 50; // a dummy point in sector 3
+     DoDistortion ( xx, xxprime, 3 ) ;
    }
    Int_t tempDistortionMode = mDistortionMode;
    mDistortionMode = (tempDistortionMode & kSpaceChargeR2);
@@ -4614,6 +4607,181 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t sec, Int_t Charge, Flo
        gre.Draw("A*") ;
        c1  -> Update() ;
        TGraph* gra  = new TGraph( Index+1, Xprime, Yprime ) ;
+       c2  -> cd() ;
+       gra -> SetMaximum(200)  ;
+       gra -> SetMinimum(-200) ;
+       //gra -> Draw("A*") ;  // Have to draw twice in order to get the Axis (?)
+       gra -> GetXaxis() -> SetLimits(-200.,200.) ;
+       gra -> Draw("A*") ;
+       c2  -> Update() ;
+     } // End debugging plots 
+   
+   pSpace  =  (DCA * ChargeB) * SpaceChargeR2 / DCA_new ;    // Work with Physical-Signed DCA from Chain or MuDST 
+
+   // Restore settings for spacechargeR2
+   fSpaceChargeR2  =  tempfSpaceChargeR2 ;
+   SpaceChargeR2   =  tempSpaceChargeR2  ;
+   mDistortionMode =  tempDistortionMode ;
+   
+   return(0) ; // Success 
+
+}
+
+
+/// PredictSpaceCharge - Input Physical-Signed DCA and get back spacecharge estimate.
+/*!
+  Input the parameters for a global track fit and get back an estimate of the spacecharge that distorted the track.
+
+  Input for the track includes the Charge, Pt, VertexZ, PseudoRapidity, and measured DCA. 
+
+  The code attempts to be as realistic as possible when it does the refit and takes as its primary input
+  the radii of hits on the track. Hits that are not within the dimensions of the TPC are not moved.
+  You must provide the hit errors by instantiating with two vectors that include the track errors in both r and phi
+  R[]         is the array of hit radii (ie in the direction of a high pt track)
+  ErrorR[]    is the array of hit errors in the radial direction (ie in the direction of a high pt track)
+  ErrorRPhi[] is the array of hit errors in the r-phi direction  (ie tranvsverse to the direction of a high pt track)
+  
+  pSpace contains the estimate of the space charge in the TPC that caused the distortion on the original track.
+
+  The function returns zero if it succeeds and pSpace will be finite.
+  The function returns non-zero if it fails and pSpace will be zero.  
+  The function returns non-zero if there are too few hits in the TPC inner and outer sectors.  
+  There are also cuts on Pt and rapdity, etc, that can cause the funtion to return non-zero.
+
+*/
+Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t NHits, Int_t Charge, Float_t Pt, Float_t VertexZ,
+                                                    Float_t PseudoRapidity, Float_t Phi, Float_t DCA,
+						    Double_t R[128],
+						    Double_t ErrorR[128],
+                                                    Double_t ErrorRPhi[128], Float_t &pSpace )
+{
+
+   const Int_t   MinInnerTPCHits  =   5  ;       // Minimum number of hits on a track.  If less than this, then no action taken.
+   const Int_t   MinOuterTPCHits  =  10  ;       // Minimum number of hits on a track.  If less than this, then no action taken.
+   const Int_t   DEBUG            =   0  ;       // Turn on debugging statements and plots
+
+   pSpace  = 0 ;
+
+   if ( (Pt < 0.3) || (Pt > 2.0) )                           return(1) ; // Fail
+   if ( (VertexZ < -50) || (VertexZ > 50) )                  return(2) ; // Fail
+   if ( (PseudoRapidity < -1.0) || (PseudoRapidity > 1.0) )  return(3) ; // Fail
+   if ( (Charge != 1) && (Charge != -1) )                    return(4) ; // Fail
+   if ( (DCA < -4.0) || (DCA > 4.0) )                        return(5) ; // Fail
+
+   Int_t InnerTPCHits = 0, OuterTPCHits = 0 ;
+   for ( Int_t i = 0 ; i < NHits ; i++ ) 
+     {
+       // non-strict counting to return quickly if it's clear, but will count strictly later
+       if ( R[i] > IFCRadius && R[i] < 1.035*GAPRADIUS ) InnerTPCHits++ ;
+       if ( R[i] < OFCRadius && R[i] > 0.990*GAPRADIUS ) OuterTPCHits++ ;
+     }
+
+   if ( InnerTPCHits < MinInnerTPCHits )                     return(6) ; // No action if too few hits in the TPC   
+   if ( OuterTPCHits < MinOuterTPCHits )                     return(7) ; // No action if too few hits in the TPC   
+   InnerTPCHits = 0 ; OuterTPCHits = 0 ;
+
+   Int_t    ChargeB, HitSector ;
+   Float_t  B[3], xx[3], xxprime[3] ;
+   Double_t Xtrack[NHits], Ytrack[NHits], Ztrack[NHits] ;
+   Double_t X0, Y0, R0, Pz_over_Pt, Z_coef, DeltaTheta ;
+   Float_t HitPhi ;
+   Double_t cosPhi, sinPhi ;
+
+   // Temporarily overide settings for space charge data (only)
+   St_spaceChargeCorC* tempfSpaceChargeR2 = fSpaceChargeR2 ;
+   Double_t tempSpaceChargeR2 = SpaceChargeR2 ;
+   if (!useManualSCForPredict) ManualSpaceChargeR2(0.01,SpaceChargeEWRatio); // Set "medium to large" value of the spacecharge parameter for tests, not critical.
+                                                   // but keep EWRatio that was previously defined 
+   if (DoOnce) UndoDistortion(0,0,0); // make sure everything is initialized for mDistortionMode
+   Int_t tempDistortionMode = mDistortionMode;
+   mDistortionMode = (tempDistortionMode & (kSpaceCharge | kSpaceChargeR2 | kGridLeak | k3DGridLeak | kFullGridLeak));
+ 
+   memset(xx,0,3*sizeof(Float_t));  // Get the B field at the vertex 
+   BFieldTpc(xx,B) ;
+   ChargeB = Charge * TMath::Sign((int)1,(int)(B[2]*1000)) ;
+   R0 = TMath::Abs( 1000.0 * Pt / ( 0.299792 * B[2] ) ) ;     // P in GeV, R in cm, B in kGauss
+   X0 = ChargeB *  0.0 * R0  ;   // Assume a test particle that shoots out at 0 degrees
+   Y0 = ChargeB * -1.0 * R0  ;
+   Pz_over_Pt = TMath::SinH(PseudoRapidity) ;
+   Z_coef = ChargeB*R0*Pz_over_Pt ;
+
+   cosPhi = TMath::Cos(Phi);
+   sinPhi = TMath::Sin(Phi);
+
+   for ( Int_t i = 0 ; i < NHits ; i++ )
+     {
+
+       Ytrack[i] = -1 * ChargeB * ( R[i]*R[i]/(2*R0) ) ;
+       Xtrack[i] = TMath::Sqrt( R[i]*R[i] - Ytrack[i]*Ytrack[i] ) ;
+       DeltaTheta  =  TMath::ATan2(-1*Y0,-1*X0) - TMath::ATan2(Ytrack[i]-Y0,Xtrack[i]-X0) ;
+       while ( DeltaTheta < -1*TMath::Pi() ) DeltaTheta += TMath::TwoPi() ;
+       while ( DeltaTheta >=   TMath::Pi() ) DeltaTheta -= TMath::TwoPi() ;
+       Ztrack[i]  =   VertexZ + DeltaTheta*Z_coef;
+       // Do nothing if point is outside the TPC drift volume
+       if ( R[i] < IFCRadius || R[i] > OFCRadius ||
+            TMath::Abs(Ztrack[i]) > TPC_Z0-0.5) continue ;
+            // GVB: excluding a 5 mm around the GG plane in case alignment moves a
+            // prompt hit there. Other PredictSpaceCharge() functions did not exclude
+            // prompt hits, but DoDistortion should do nothing to those anyhow.
+
+       // Distortion must be applied at (approximately) true positions in space
+       // to account for the TPC distortions not being azimuthally symmetric,
+       // then rotated back to fitting frame
+
+       // Rotate by Phi to the true angle
+       xx[0] = cosPhi*Xtrack[i] - sinPhi*Ytrack[i];
+       xx[1] = sinPhi*Xtrack[i] + cosPhi*Ytrack[i];
+       xx[2] = Ztrack[i];
+
+       HitPhi = TMath::ATan2(xx[1],xx[0]) ;
+       while ( HitPhi < 0 ) HitPhi += TMath::TwoPi() ;
+       while ( HitPhi >= TMath::TwoPi() ) HitPhi -= TMath::TwoPi() ;
+       HitSector = 0;
+       SectorNumber ( HitSector, HitPhi, xx[2] );
+
+       if (mDistortionMode & (kGridLeak | k3DGridLeak | kFullGridLeak)) {
+         if ( GLWeights[HitSector] < 0) {
+           // Restore settings for spacechargeR2
+           fSpaceChargeR2  =  tempfSpaceChargeR2 ;
+           SpaceChargeR2   =  tempSpaceChargeR2  ;
+           mDistortionMode =  tempDistortionMode ;
+           return(8); // Fail on unknown GridLeak weights
+         }
+       }
+       HitPhi = fmod(HitPhi + PiOver12, PiOver6) - PiOver12;
+       if ( R[i]*TMath::Cos(HitPhi) < GAPRADIUS ) InnerTPCHits++ ;
+       else OuterTPCHits++ ;
+
+       DoDistortion ( xx, xxprime, HitSector) ; // Distort the tracks
+       Xtrack[i] =  cosPhi*xxprime[0] + sinPhi*xxprime[1] ; // Rotate by -Phi
+       Ytrack[i] = -sinPhi*xxprime[0] + cosPhi*xxprime[1] ;
+       Ztrack[i] = xxprime[2] ;
+       
+     }
+   
+   if ( InnerTPCHits < MinInnerTPCHits )                     return(6) ; // No action if too few hits in the TPC   
+   if ( OuterTPCHits < MinOuterTPCHits )                     return(7) ; // No action if too few hits in the TPC   
+
+   TGraphErrors gre(NHits,Xtrack,Ytrack,ErrorR,ErrorRPhi) ;  
+
+   // Note that circle fitting has ambiguities which can be settled via ChargeB.
+   //   The "+" solution is for Y points greater than Y0.  "-" for Y < Y0.
+   static TF1* newDCA = 0;
+   if (!newDCA) newDCA = new TF1("newDCA" , "( [1] + [3] * sqrt( [1]**2 - x**2 + 2*x*[0] + [2]*[2] - [2]*(2*sqrt([0]**2+[1]**2))) )" );
+   newDCA->SetParameters( X0, Y0, 0.0, ChargeB );
+   newDCA->FixParameter(3, ChargeB);
+   gre.Fit(newDCA,"Q") ;
+   Double_t DCA_new = newDCA->GetParameter( 2 ) ;  // Negative means that (0,0) is inside the circle
+   // End of circle fitting
+
+   if ( DEBUG ) 
+     { // Begin debugging plots
+       TCanvas* c1  = new TCanvas("A Simple Fit","The Fit", 250, 10, 700, 500) ;
+       TCanvas* c2  = new TCanvas("The circles are OK","The circles ", 250, 800, 700, 500) ;
+       c1  -> cd() ;
+       gre.Draw("A*") ;
+       c1  -> Update() ;
+       TGraph* gra  = new TGraph( NHits, Xtrack, Ytrack ) ;
        c2  -> cd() ;
        gra -> SetMaximum(200)  ;
        gra -> SetMinimum(-200) ;
