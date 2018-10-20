@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml_rcf.pl,v 1.26 2018/09/26 03:55:56 zhux Exp $
+# $Id: get_embedding_xml_rcf.pl,v 1.27 2018/10/20 07:05:53 starembd Exp $
 # $Log: get_embedding_xml_rcf.pl,v $
+# Revision 1.27  2018/10/20 07:05:53  starembd
+# updated default daq tags dirs and daqEvents file
+#
 # Revision 1.26  2018/09/26 03:55:56  zhux
 # adapted to HFT embedding
 #
@@ -74,8 +77,8 @@ my $production    = "P16id";                                        # Default pr
 my $library       = getLibrary($production);                        # Default library
 my $outputXml     = getXmlFileName($production);                    # Default xml file name
 my $requestNumber = 9999999999 ;                                    # Default request number
-my $daqsDirectory = "$staroflDir/embedding/$production";            # Default daq files directory
-my $tagsDirectory = "$staroflDir/embedding/$production";            # Default tag files directory
+my $daqsDirectory = "$staroflDir/embedding/daq";                    # Default daq files directory
+my $tagsDirectory = "$staroflDir/embedding/tags";                   # Default tag files directory
 my $trgsetupName  = "AuAu_200_production_2014";                     # Default trigger setup name
 my $trgForce      = 1;                                              # Default trigger setup name obtained from the above $trgsetupName, instead of get_pathFC.pl for a single daq file
 my $bfcMixer      = "StRoot/macros/embedding/bfcMixer_Tpx.C";       # Default bfcMixer
@@ -94,7 +97,7 @@ my $zerobiasMode  = 0 ;                                             # Default mo
 my $moretagsMode  = 0 ;                                             # Default mode (OFF) for using moretags file as input tags
 my $kumacFile     = "StRoot/macros/embedding/pythiaTuneA_template.kumac"; # Kumac file for starsim 			
 my $seed          = "StRoot/macros/embedding/get_random_seed";      # Random seed generator for starsim		
-my $daqEvents     = "$staroflDir/embedding/$production";            # File list for starsim with daq files and number of events for each file		
+my $daqEvents     = "$staroflDir/embedding/daq";                    # File list for starsim with daq files and number of events for each file		
 my $toscratch     = 1;                                              # Default copy daq and tags to $SCRATCH
 my $ptbin         = 0 ;                                             # Default mode (OFF) for multiple pt hard bins for a single request 			
 my $localStRoot   = 1;					  	    # default use local StRoot dir on
