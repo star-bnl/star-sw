@@ -4,8 +4,14 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml_rcf.pl,v 1.26 2018/09/26 03:55:56 zhux Exp $
+# $Id: get_embedding_xml_rcf.pl,v 1.28 2018/10/20 08:46:02 starembd Exp $
 # $Log: get_embedding_xml_rcf.pl,v $
+# Revision 1.28  2018/10/20 08:46:02  starembd
+# code cleanup for HFT embedding
+#
+# Revision 1.27  2018/10/20 07:05:53  starembd
+# updated default daq tags dirs and daqEvents file
+#
 # Revision 1.26  2018/09/26 03:55:56  zhux
 # adapted to HFT embedding
 #
@@ -74,8 +80,8 @@ my $production    = "P16id";                                        # Default pr
 my $library       = getLibrary($production);                        # Default library
 my $outputXml     = getXmlFileName($production);                    # Default xml file name
 my $requestNumber = 9999999999 ;                                    # Default request number
-my $daqsDirectory = "$staroflDir/embedding/$production";            # Default daq files directory
-my $tagsDirectory = "$staroflDir/embedding/$production";            # Default tag files directory
+my $daqsDirectory = "$staroflDir/embedding/daq";                    # Default daq files directory
+my $tagsDirectory = "$staroflDir/embedding/tags";                   # Default tag files directory
 my $trgsetupName  = "AuAu_200_production_2014";                     # Default trigger setup name
 my $trgForce      = 1;                                              # Default trigger setup name obtained from the above $trgsetupName, instead of get_pathFC.pl for a single daq file
 my $bfcMixer      = "StRoot/macros/embedding/bfcMixer_Tpx.C";       # Default bfcMixer
@@ -94,7 +100,7 @@ my $zerobiasMode  = 0 ;                                             # Default mo
 my $moretagsMode  = 0 ;                                             # Default mode (OFF) for using moretags file as input tags
 my $kumacFile     = "StRoot/macros/embedding/pythiaTuneA_template.kumac"; # Kumac file for starsim 			
 my $seed          = "StRoot/macros/embedding/get_random_seed";      # Random seed generator for starsim		
-my $daqEvents     = "$staroflDir/embedding/$production";            # File list for starsim with daq files and number of events for each file		
+my $daqEvents     = "$staroflDir/embedding/daq";                    # File list for starsim with daq files and number of events for each file		
 my $toscratch     = 1;                                              # Default copy daq and tags to $SCRATCH
 my $ptbin         = 0 ;                                             # Default mode (OFF) for multiple pt hard bins for a single request 			
 my $localStRoot   = 1;					  	    # default use local StRoot dir on
@@ -485,32 +491,32 @@ if ( $simulatorMode == 1 ) {
 	print OUT "set ptmin=$ptmin\n";
 	print OUT "set ptmax=$ptmax\n";
 	print OUT "set nevents=`grep \$FILEBASENAME \$daqevents | awk '{print \$2}'`\n";
-	print OUT "echo nevents = \$nevents, seed = \$seed, random = \$random, kumac = \$kumac, fzdFile=\$fzdFile, ptmin = \$ptmin, ptmax = \$ptmax\n";
+	print OUT "set nsimevents=\$nevents\n";
+	print OUT "if ( \$nevents > $nevents ) then \n";
+	print OUT "  set nsimevents = $nevents\n";
+	print OUT "endif\n";
+	print OUT "echo nevents = \$nevents, nsimevents = \$nsimevents, seed = \$seed, random = \$random, kumac = \$kumac, fzdFile=\$fzdFile, ptmin = \$ptmin, ptmax = \$ptmax\n";
 #	print OUT "starsim -w 0 -b \$kumac \$fzdFile \$random \$nevents \$ptmin	\$ptmax\n\n";
+
+	print OUT "root4star -b -q \$kumac\\\(\$nsimevents,\$seed,\\\"\$fzdFile\\\",\\\"$tagFileMixer\\\",$multiplicity,$pid,$ptmin,$ptmax,$ymin,$ymax\\\) &gt;&gt;&amp; \$SCRATCH/\${FILEBASENAME}\_\${JOBID}.log\n";
+	print OUT "\n";
 
 #for HFT+HIJING+ZB embedding only!
 	if ( $zerobiasMode == 1 ) {
-	print OUT "\n";
-	print OUT "echo DAQ FILE has \$nevents events\n";
-	print OUT "echo We need $nevents\n";
-	print OUT "if ( \$nevents > $nevents ) then \n";
-	print OUT "  set nmax = `echo \"\$nevents-$nevents-1\" | bc`\n";
-	print OUT "  set first = `shuf -i 1-\$nmax -n 1`\n";
-	print OUT "  set last  = `echo \"\${first}+$nevents\" | bc`\n";
-	print OUT "  echo We begin at \${first} and end at \${last}\n";
-	print OUT "else\n";
-	print OUT "  set first = 1\n";
-	print OUT "endif\n";
-	print OUT "setenv EVENTS_START \$first\n";
-	print OUT "\n";
-        }
+	   print OUT "echo DAQ FILE has \$nevents events\n";
+	   print OUT "echo We need $nevents\n";
+	   print OUT "if ( \$nevents > $nevents ) then \n";
+	   print OUT "  set nmax = `echo \"\$nevents-$nevents-1\" | bc`\n";
+	   print OUT "  set first = `shuf -i 1-\$nmax -n 1`\n";
+	   print OUT "  set last  = `echo \"\${first}+$nevents\" | bc`\n";
+	   print OUT "  echo We begin at \${first} and end at \${last}\n";
+	   print OUT "else\n";
+	   print OUT "  set first = 1\n";
+	   print OUT "endif\n";
+	   print OUT "setenv EVENTS_START \$first\n";
+	   print OUT "\n";
+	}
 
-	print OUT "if ( \$nevents > $nevents ) then \n";
-	print OUT "  root4star -b -q \$kumac\\\($nevents,\$seed,\\\"\$fzdFile\\\",\\\"$tagFileMixer\\\",$multiplicity,$pid,$ptmin,$ptmax,$ymin,$ymax\\\) &gt;&gt;&amp; \$SCRATCH/\${FILEBASENAME}\_\${JOBID}.log\n";
-	print OUT "else\n";
-	print OUT "  root4star -b -q \$kumac\\\(\$nevents,\$seed,\\\"\$fzdFile\\\",\\\"$tagFileMixer\\\",$multiplicity,$pid,$ptmin,$ptmax,$ymin,$ymax\\\) &gt;&gt;&amp; \$SCRATCH/\${FILEBASENAME}\_\${JOBID}.log\n";
-	print OUT "endif\n";
-	print OUT "\n";
 }
 
 # Determine trigger string
