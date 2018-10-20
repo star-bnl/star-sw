@@ -1728,7 +1728,8 @@ my @badruns = (19116020); # Altro3
 #$hist = "RunXVIII39"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/30/18 test calibration obtained with alignment production
 #$hist = "RunXVIII40"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/31/18 cut dX for Outer
 #$hist = "RunXVIII41"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/02/18 rechec after merging with RCF
-$hist = "RunXVIII43"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = "DEV"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/18/18 check 2018 isobar calibration wtih dev (no iTPC)
+#$hist = "RunXVIII43"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = "DEV"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/18/18 check 2018 isobar calibration  dev (no iTPC, Aug version of code))
+$hist = "RunXVIII44"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = "DEV"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/19/18 check 2018 isobar calibration  dev (with iTPC, October)
 
 
 
@@ -1739,6 +1740,7 @@ $hist = "RunXVIII43"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/productio
 #$hist = "RunXVIII122"; HLT; # 08/23/18 add Eta hitogram
 #$hist = "RunXVIII123"; HLT; # 08/24/18 redo ZCorrection
 #$hist = "RunXVIII134"; $NEvents = 2000; $disk = "data100/"; $RECO = "reco/27GeV_production_2018/*FullField";  $Production = "/P18if_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/02/18 recheck after merging with HLT
+#$hist = "RunXVIII135"; $NEvents = 2000; $disk = "data100/"; $RECO = "reco/27GeV_production_2018/*FullField";  $Production = "/P18if_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = "DEV"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/19/18 recheck in dev
 my $prod = $hist; #$Production;
 $prod =~ s/\*//g;
 $prod =~ s/\//_/g;
@@ -1913,7 +1915,7 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
 #      print OUT "source $GROUP_DIR/setup 64b;\n";
 #      print OUT "source $GROUP_DIR/setup gcc451;\n";
       if ($STAR_LEVEL ne "\.DEV2") {
-	print OUT "source /afs/rhic.bnl.gov/star/packages/.DEV2/unsetupDEV2.csh;\n";
+#	print OUT "source /afs/rhic.bnl.gov/star/packages/.DEV2/unsetupDEV2.csh;\n";
 	print OUT "source $GROUP_DIR/setup gcc;\n";
 	print OUT "source $GROUP_DIR/setup 32b;\n";
 	print OUT "source $GROUP_DIR/setup nodebug;\n";

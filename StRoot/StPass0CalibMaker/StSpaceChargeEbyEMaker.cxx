@@ -67,7 +67,6 @@ const float ZGGRID = 208.707;
 
 static TF1 ga1("ga1","[0]*exp(-0.5*(x-[1])*(x-[1])/([2]*[2]))");
 static TF1 ln1("ln1","[0]+((208.707-abs(x))*[1]/100.0)",-150.,150.);
-//static TF1 ln1("ln1","[0]+((350.0-abs(x))*[1]/100.0)",-150.,150.);
 
 const unsigned int MAXVTXCANDIDATES = 256;
 
@@ -421,6 +420,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
     emcRadius = emcGeom->Radius() + 30; // use exit radius, 30cm beyond face
   }
 
+  St_tpcPadConfigC* pads = St_tpcPadConfigC::instance();
   StThreeVectorD vtxPos(0,0,0),vtxPosErr(0,0,0);
   for (v=0; v<numVtxCandidates; v++) {
     if (TrackInfomode<2) {
@@ -574,39 +574,40 @@ Int_t StSpaceChargeEbyEMaker::Make() {
 
           Int_t PCT = 0;
           Int_t sec,sector = -1;
-          UInt_t prow = 0;
-          Float_t rerrors[64];
-          Float_t rphierrors[64];
+          Int_t prow = 0;
+          Int_t prowmask = 0x0;
+          Double_t rs[128];
+          Double_t rerrors[128];
+          Double_t rphierrors[128];
           memset(rerrors,0,64*sizeof(Float_t));
           memset(rphierrors,0,64*sizeof(Float_t));
           StPtrVecHit& hits = tri->detectorInfo()->hits();
           for (k=0;k<hits.size();k++) {
             StHit* hit = hits[k];
-            unsigned int maskpos = 0;
-            switch (hit->detector()) {
-              case (kTpcId) :
-                sec  = ((StTpcHit*) hit)->sector();
-                prow = ((StTpcHit*) hit)->padrow();
-                if ((hit->position().z() > 1 && sec > 12) ||
-                    (hit->position().z() <-1 && sec < 13)) PCT++;
-                if (prow >= 12 && prow <=15)
-                  sector = ( sec == sector || sector < 0 ? sec : 0 ); // 0 if crossing sectors
-                maskpos = 7 + prow; break;
-              case (kSvtId) :
-                maskpos = ((StSvtHit*) hit)->layer(); break;
-              case (kSsdId) :
-                maskpos = 7; break;
-              default :
-                maskpos = 0;
+            if (hit->detector() == kTpcId) {
+              sec  = ((StTpcHit*) hit)->sector();
+              prow = ((StTpcHit*) hit)->padrow();
+              if ((hit->position().z() > 1 && sec > 12) ||
+                  (hit->position().z() <-1 && sec < 13)) PCT++;
+              int lastInner = pads->innerPadRows(sec);
+              if (prow >= lastInner-2 && prow <= lastInner+3) {
+                sector = ( sec == sector || sector < 0 ? sec : 0 ); // 0 if crossing sectors
+                // Require 4 hits: one on prow closest to gap for both inner and outer,
+                // and another on either of next two prows away from gap for both inner and outer
+                // (exception for inGapRow==12 to require prow 11 & 12 for inner)
+                int shifter = prow-(lastInner-1);
+                if (shifter<0) shifter += (inGapRow==12 ? 2 : 1);
+                else if (shifter>3) shifter--;
+                prowmask |= (0x1 << shifter);
+              }
             }
-            if (maskpos) {
-              StThreeVectorF herrVec = hit->positionError();
-              Float_t herr = herrVec.perp();
-              rerrors[maskpos] = herr;
-              rphierrors[maskpos] = herr;
-            }
+            rs[k] = hit->position().perp();
+            Float_t herr = hit->positionError().perp();
+            rerrors[k] = herr;
+            rphierrors[k] = herr;
           }
           if (PCT && TrackInfomode<2) continue; // Track has post-crossing hits
+          bool good4gap = (sector > 0) && (prowmask == 0xF);
           if (QAmode) cutshist->Fill(32);
 
           if (TrackInfomode) {
@@ -617,8 +618,8 @@ Int_t StSpaceChargeEbyEMaker::Make() {
           }
 
           Float_t space = 10000.;
-          Int_t predictFailed = m_ExB->PredictSpaceChargeDistortion(sec,ch,oldPt,vtxPos.z(),
-            eta,phi,DCA2,map.data(0),map.data(1),rerrors,rphierrors,space);
+          Int_t predictFailed = m_ExB->PredictSpaceChargeDistortion(hits.size(),ch,oldPt,vtxPos.z(),
+            eta,phi,DCA2,rs,rerrors,rphierrors,space);
           if (predictFailed) {
             if (QAmode) cutshist->Fill(40+predictFailed);
             continue;
@@ -663,9 +664,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
           FillQAHists(DCA2,space,spaceEW,ch,hh,e_or_w);
 
 
-          if ((doGaps) &&
-              (map.hasHitInRow(kTpcId,inGapRow))&&(map.hasHitInRow(kTpcId,14)) &&
-              (map.hasHitInRow(kTpcId,11))&&(map.hasHitInRow(kTpcId,15)) &&
+          if (doGaps && good4gap &&
               (e_or_w!=0) && (TMath::Abs(ch)==1) && (oldPt>0.3))
             FillGapHists(tri,hh,e_or_w,ch);
 
@@ -1288,15 +1287,19 @@ float StSpaceChargeEbyEMaker::FakeAutoSpaceCharge() {
 //_____________________________________________________________________________
 void StSpaceChargeEbyEMaker::FillGapHists(StTrack* tri, StPhysicalHelixD& hh,
                                           int e_or_w, int ch) {
+  St_tpcPadConfigC* pads = St_tpcPadConfigC::instance();
   float fsign = ( event->runInfo()->magneticField() < 0 ? -1 : 1 );
   StPtrVecHit hts = tri->detectorInfo()->hits(kTpcId);
   float gap = 0.; float zgap = 0.; int ct=0;
+  float GAPRADIUS = 121.8; // messy to get from the database (see StMagUtilities)
   Int_t sector = -1;
   for (UInt_t ht=0; ht<hts.size(); ht++) {
     StTpcHit* hit = (StTpcHit*) hts[ht];
-    UInt_t prow = hit->padrow();
-    if ((prow != inGapRow) && (prow != 14)) continue;
-    float gsign = ( prow == 14 ? -1 : 1 );
+    Int_t prow = hit->padrow();
+    Int_t sec = hit->sector();
+    int lastInner = pads->innerPadRows(sec);
+    if ((prow != lastInner) && (prow != lastInner+1)) continue;
+    float gsign = ( prow > lastInner ? -1 : 1 );
     const StThreeVectorF& hp = hit->position();
 
     // Avoid sector edges
@@ -1304,15 +1307,15 @@ void StSpaceChargeEbyEMaker::FillGapHists(StTrack* tri, StPhysicalHelixD& hh,
     while (hphi > TMath::Pi()/12.) hphi -= TMath::Pi()/6.;
     if (TMath::Abs(hphi) > 0.75*TMath::Pi()/12.) break;
 
-    if (inGapRow==13) zgap += (hp.z() / 7.595) * ( prow == 14 ? 2.2 : 5.395 ); // ~z at gap
-    else if (inGapRow==12) zgap += (hp.z() / 12.795) * ( prow == 14 ? 7.4 : 5.395 ); // ~z at gap
-    else return;
+    float distToOuterRow = pads->radialDistanceAtRow(sec,lastInner+1) - GAPRADIUS;
+    float distToInnerRow = GAPRADIUS - pads->radialDistanceAtRow(sec,lastInner + inGapRow - 13);
+    zgap += (hp.z() / (distToInnerRow+distToOuterRow)) *
+            ( prow == lastInner ? distToOuterRow : distToInnerRow ); // ~z at gap
 
     // Measurement method described at:
     // http://drupal.star.bnl.gov/STAR/blog/genevb/2010/feb/21/gridleak-update-using-residuals-along-padrows
     Double_t residual = hh.geometricSignedDistance(hp.x(),hp.y());
 
-    Int_t sec = hit->sector();
     sector = ( sec == sector || sector < 0 ? sec : 0 ); // 0 if crossing sectors
     if (sector == 0) return; // don't use sector-crossing tracks!
     Double_t sector_angle = (TMath::Pi()/6.) * (sec < 13 ? 3 - sec : sec - 21);
@@ -1556,8 +1559,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.71 2018/10/17 20:45:27 fisyak Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.72 2018/10/19 21:06:17 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.72  2018/10/19 21:06:17  genevb
+// Clean up after Y. Fisyak modifications (which were for iTPC, not dE/dx), and use new PredictSpaceCharge() using real hit radii
+//
 // Revision 1.71  2018/10/17 20:45:27  fisyak
 // Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
 //

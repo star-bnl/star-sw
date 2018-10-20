@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.64 2018/10/17 20:45:24 fisyak Exp $
+ * $Id: StMagUtilities.h,v 1.65 2018/10/19 20:41:29 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.65  2018/10/19 20:41:29  genevb
+ * Clean up after Y. Fisyak modifications (which were for iTPC, not dE/dx), and add new PredictSpaceCharge() using real hit radii
+ *
  * Revision 1.64  2018/10/17 20:45:24  fisyak
  * Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
  *
@@ -455,8 +458,8 @@ class StMagUtilities {
 					       const unsigned int RowMask2 = 0x1FFFFF,
 					       const Float_t VertexError = 0.0200 ) ;
 
-  virtual Int_t   PredictSpaceChargeDistortion (Int_t  sec,
-						Int_t   Charge, 
+  virtual Int_t   PredictSpaceChargeDistortion ( Int_t   sec,
+						 Int_t   Charge, 
 						 Float_t Pt, 
 						 Float_t VertexZ, 
 						 Float_t PseudoRapidity, 
@@ -465,17 +468,29 @@ class StMagUtilities {
 						 const unsigned int RowMask2, 
 						 Float_t &pSpace ) ;
 
-  virtual Int_t   PredictSpaceChargeDistortion (Int_t  sec,
-						Int_t   Charge, 
+  virtual Int_t   PredictSpaceChargeDistortion ( Int_t   sec,
+						 Int_t   Charge, 
 						 Float_t Pt, 
 						 Float_t VertexZ, 
 						 Float_t PseudoRapidity, 
 						 Float_t Phi,
 						 Float_t DCA,  
-						 const unsigned int RowMask1, 
-						 const unsigned int RowMask2, 
+						 const unsigned long long RowMask1, 
+						 const unsigned long long RowMask2, 
 						 Float_t RowMaskErrorR[64], 
 						 Float_t RowMaskErrorRPhi[64], 
+						 Float_t &pSpace ) ;
+
+  virtual Int_t   PredictSpaceChargeDistortion ( Int_t   NHits,
+						 Int_t   Charge, 
+						 Float_t Pt, 
+						 Float_t VertexZ, 
+						 Float_t PseudoRapidity, 
+						 Float_t Phi,
+						 Float_t DCA,  
+						 Double_t R[128],
+						 Double_t ErrorR[128], 
+						 Double_t ErrorRPhi[128], 
 						 Float_t &pSpace ) ;
 
   virtual void     ManualShortedRing ( Int_t EastWest, Int_t InnerOuter, 
