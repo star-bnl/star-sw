@@ -137,27 +137,29 @@ void Res(const Char_t *select="x", const Char_t *name="sigma") {
     if (c == 10) c = 11;
     if (FitFiles[i]) { 
       FitFiles[i]->cd();
-      TH1 *Sigma = 0;
-      TH1 *sigma = (TH1 *) FitFiles[i]->Get(plot);
-      if (! sigma) continue;
-      if (sigma->GetDimension() == 2) {
-	Sigma = ((TH2 *) sigma)->ProjectionX(Form("%s_%i",Plot.Data(),i),0,0);
+      TH1 *Hist = 0;
+      TH1 *hist = (TH1 *) FitFiles[i]->Get(plot);
+      if (! hist) continue;
+      if (hist->GetDimension() == 2) {
+	Hist = ((TH2 *) hist)->ProjectionX(Form("%s_%i",Plot.Data(),i),0,0);
       } else {
-	Sigma = sigma; 
+	Hist = hist; 
       }
-      Sigma->SetMarkerColor(c); Sigma->SetMarkerStyle(20); Sigma->SetLineColor(c);
+      Hist->SetMarkerColor(c); Hist->SetMarkerStyle(20); Hist->SetLineColor(c);
       TString Title(gSystem->BaseName(FitFiles[i]->GetName()));
       Title.ReplaceAll(".root","");
-      if (! Title.Contains("TPoints70") && ! Title.Contains("TPoints")) continue;
-      if (!Sigma || Sigma->GetEntries() < 1.) {
+      if (! Title.Contains("TPoints")) continue;
+      if (!Hist|| Hist->GetEntries() < 1.e-4) {
 	TTree *FitP = (TTree *) gDirectory->Get("FitP");
-	if (FitP) FitP->Draw("sigma:x>>Sigma","sigma<0.2&&j==0","profgoff");
-	Sigma = (TProfile *) FitFiles[i]->Get("Sigma");
+	if (FitP) {
+	  FitP->Draw(Form("%s:x>>%s",plot.Data(),Plot.Data()),"sigma<0.2&&j==0","profgoff");
+	  Hist = (TProfile *) FitFiles[i]->Get(Plot);
+	}
       }
-      if (! Sigma) continue;
-      if (Sigma->GetEntries() < 1.) continue;
-      Sigma->Rebin();
-      Sigma->Scale(0.5);
+      if (! Hist) continue;
+      if (Hist->GetEntries() < 1.e-4) continue;
+      Hist->Rebin();
+      Hist->Scale(0.5);
       TF1 *powfit = 0;
       if (plot == "sigma") {
 	powfit = new TF1("powfit","[0]*TMath::Power(x,[1])",40,160);
@@ -167,10 +169,10 @@ void Res(const Char_t *select="x", const Char_t *name="sigma") {
 	//	powfit->SetParameter(0,0.);
       }
       powfit->SetLineColor(c);
-      Sigma->Fit("powfit","rn");
+      Hist->Fit("powfit","rn");
       powfit->Draw("same");
-      //      Sigma->Fit("powfit","r");
-      Sigma->Draw("same");
+      //      Hist->Fit("powfit","r");
+      Hist->Draw("same");
       //      leg->AddEntry(sigma,Form("%s:  #sigma(@76cm) = %5.2f%%",FitNames[i],100*powfit->Eval(76)));
       Title.ReplaceAll("GPHist","");
       Title.ReplaceAll("TPoints70BE","I70  East");
@@ -231,7 +233,7 @@ void Res(const Char_t *select="x", const Char_t *name="sigma") {
       //      Title += Form(" : #sigma(@128cm) = %5.2f%\%",100*powfit->Eval(128));
       Title.Strip();
       cout << Title << endl;
-      leg->AddEntry(Sigma,Title.Data());
+      leg->AddEntry(Hist,Title.Data());
     }
   }
   if (plot == "sigma") {
