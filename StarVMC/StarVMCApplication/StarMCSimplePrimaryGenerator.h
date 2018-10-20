@@ -33,15 +33,21 @@ class StarMCSimplePrimaryGenerator : public StarMCPrimaryGenerator  {
   void static SetTemperature(Double_t T) {fTemperature = T;}
   virtual void GeneratePrimaries();
   virtual void GeneratePrimaries(const TVector3& v);
-  virtual void SetGenerator(Int_t nprim=1, Int_t Id=13, 
+  virtual void SetGenerator(Int_t nprim=1, Int_t Id=6, 
 			    Double_t pT_min = 0,Double_t pT_max = 1000,
 			    Double_t Eta_min=-10, Double_t Eta_max=10, 
 			    Double_t Phi_min = 0, Double_t Phi_max= 2*TMath::Pi(), 
 			    Double_t Z_min=0, Double_t Z_max=0, const Char_t *option = "G");
+  virtual void SetGun(Int_t Id=6, 
+		      Double_t px = -0.185378, Double_t py = -0.982667, Double_t pz = 1.166532,
+		      Double_t x = 0, Double_t y = 0, Double_t z = -1.65956, const Char_t *option = "G");
  private:
   void GeneratePrimary();
   void PreSet();
   Double_t fpT_min, fpT_max, fEta_min, fEta_max, fPhi_min, fPhi_max, fZ_min, fZ_max;
+  Bool_t fGun;
+  Double_t fGunpX, fGunpY, fGunpZ, fGunX, fGunY, fGunZ;
+  Int_t    fGunId;
   static Double_t fTemperature;
   ClassDef(StarMCSimplePrimaryGenerator,1)  //StarMCSimplePrimaryGenerator
 };

@@ -350,6 +350,7 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 	Id = indx[0];
 	A = StTpcHalfPosition::instance()->GetMatrix4Id(half);
 	rotA = A * rotL;
+	//?	rotA = rotL * A;
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
 	break;
       case kTpcPad:
