@@ -186,7 +186,7 @@ class StTpcDb {
  private:
   Char_t                mBeg[1];        //!
   Int_t                 m_Debug;        //!
-  TGeoTranslation      *mSwap[2];       //! 
+  TGeoTranslation      *mShift[2];       //! 
   TGeoHMatrix          *mFlip;          //!
   TGeoHMatrix          *mTpc2GlobMatrix;//!
   TGeoHMatrix          *mHalf[2];       //!
@@ -239,7 +239,7 @@ class StTpcDb {
   Int_t TriggerId() {return mTriggerId;}
   const TGeoHMatrix &Flip()                           const {return *mFlip;}
   const TGeoHMatrix &TpcHalf(StBeamDirection part)    const {return *mHalf[part];}
-  const TGeoTranslation &Swap(StBeamDirection part)   const {return *mSwap[part];}
+  const TGeoTranslation &Shift(StBeamDirection part)   const {return *mShift[part];}
   const TGeoHMatrix &Tpc2GlobalMatrix()               const {return *mTpc2GlobMatrix;}
   const TGeoHMatrix &TpcRot(Int_t sector, Int_t k)    const {return *mTpcSectorRotations[sector-1][k];}
   const TGeoHMatrix &SupS2Tpc(Int_t sector = 1)       const {return TpcRot(sector,kSupS2Tpc);}

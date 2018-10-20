@@ -214,8 +214,8 @@ StTpcDb::StTpcDb() {
 			  0, 0,-1};
   //  Double_t Translation[3] = {0, 0, mzGG};
   mFlip->SetName("Flip"); mFlip->SetRotation(Rotation);// mFlip->SetTranslation(Translation);
-  mSwap[0] = new TGeoTranslation("Signed Drift distance to z for East", 0, 0, -mzGG);
-  mSwap[1] = new TGeoTranslation("Signed Drift distance to z for West", 0, 0,  mzGG);
+  mShift[0] = new TGeoTranslation("Signed Drift distance to z for East", 0, 0, -mzGG);
+  mShift[1] = new TGeoTranslation("Signed Drift distance to z for West", 0, 0,  mzGG);
   mHalf[0] = new TGeoHMatrix("Default for east part of TPC");
   mHalf[1] = new TGeoHMatrix("Default for west part of TPC");
   gStTpcDb = this;
@@ -229,8 +229,8 @@ StTpcDb::~StTpcDb() {
   }
   SafeDelete(mHalf[0]);  
   SafeDelete(mHalf[1]);
-  SafeDelete(mSwap[0]);  
-  SafeDelete(mSwap[1]);
+  SafeDelete(mShift[0]);  
+  SafeDelete(mShift[1]);
   SafeDelete(mTpc2GlobMatrix);
   SafeDelete(mFlip);
   gStTpcDb = 0;
@@ -359,10 +359,12 @@ void StTpcDb::SetTpcRotations() {
              (0 0 -1 zGG) ( z )    ( zGG - z)
              (0 0  0 1  ) ( 1 )    ( 1 )
      Z_tpc is not changed during any sector transformation  !!!
-
-
-   */
-  //  TGeoTranslation T123(0,123,0); T123.SetName("T123"); if (Debug() > 1) T123.Print();
+     ================================================================================
+     10/17/18 Just checking new schema
+          TPCE        (           TPGV                      ) * (              TPSS                                   )
+     StTpcPosition * ((Shift(half) * StTpcHalfPosition(half)) * (rotmS(sector,iPhi) * StTpcSuperSectorPosition) * Flip) * (StTpcInnerSectorPosition || StTpcOuterSectorPosition)
+        kTpcRefSys *          kTpcHalf                        *               kTpcPad       
+  */
   assert(Dimensions()->numberOfSectors() == 24);
   Float_t gFactor = StarMagField::Instance()->GetFactor();
   Double_t phi, theta, psi;
@@ -422,7 +424,7 @@ void StTpcDb::SetTpcRotations() {
 	    else              rotm = new TGeoRotation(Rot,   90.0,    0.0,  90.0,  -90.0,  180.0,    0.00); // Flip (x,y,z) => ( x,-y,-z)
 	    rotm->RotateZ(iphi);
 	  }
-	  rotA = (*mSwap[part]) * (*mHalf[part]) * (*rotm);
+	  rotA = (*mShift[part]) * (*mHalf[part]) * (*rotm);
 	  rotA *= StTpcSuperSectorPosition::instance()->GetMatrix(sector-1);
 	  if (gGeoManager) rotm->RegisterYourself();
 	  else             SafeDelete(rotm);
