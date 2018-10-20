@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.38 2018/10/20 08:53:02 starembd Exp $
+# $Id: get_embedding_xml.pl,v 1.39 2018/10/20 09:12:40 starembd Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.39  2018/10/20 09:12:40  starembd
+# code cleanup for HFT embedding
+#
 # Revision 1.38  2018/10/20 08:53:02  starembd
 # updated default daq tags dirs and daqEvents file
 #
@@ -468,33 +471,31 @@ if ( $simulatorMode == 1 ) {
 	print OUT "set ptmin=$ptmin &gt;&gt;&amp; \${LOGFILE}\n";
 	print OUT "set ptmax=$ptmax &gt;&gt;&amp; \${LOGFILE}\n";
 	print OUT "set nevents=`grep \$FILEBASENAME \$daqevents | awk '{print \$2}'` &gt;&gt;&amp; \${LOGFILE}\n";
-	print OUT "echo nevents = \$nevents, seed = \$seed, kumac = \$kumac, fzdFile=\$fzdFile, ptmin = \$ptmin, ptmax = \$ptmax &gt;&gt;&amp; \${LOGFILE}\n";
-
+	print OUT "set nsimevents=\$nevents &gt;&gt;&amp; \${LOGFILE}\n";
+	print OUT "if ( \$nevents > $nevents ) then \n";
+	print OUT "  set nsimevents = $nevents &gt;&gt;&amp; \${LOGFILE}\n";
+	print OUT "endif\n";
+	print OUT "echo nevents = \$nevents, nsimevents = \$nsimevents, seed = \$seed, kumac = \$kumac, fzdFile=\$fzdFile, ptmin = \$ptmin, ptmax = \$ptmax &gt;&gt;&amp; \${LOGFILE}\n";
 #	print OUT "starsim -w 0 -b \$kumac \$fzdFile \$random \$nevents \$ptmin	\$ptmax\n\n";
+	print OUT "root4star -b -q \$kumac\\\(\$nsimevents,\$seed,\\\"\$fzdFile\\\",\\\"$tagFile\\\",$multiplicity,$pid,$ptmin,$ptmax,$ymin,$ymax\\\) &gt;&gt;&amp; \${LOGFILE}\n";
+	print OUT "\n";
 
 #for HFT+HIJING+ZB embedding only!
 	if ( $zerobiasMode == 1 ) {
-	print OUT "\n";
-	print OUT "echo DAQ FILE has \$nevents events &gt;&gt;&amp; \${LOGFILE}\n";
-	print OUT "echo We need $nevents &gt;&gt;&amp; \${LOGFILE}\n";
-	print OUT "if ( \$nevents > $nevents ) then \n";
-	print OUT "  set nmax = `echo \"\$nevents-$nevents-1\" | bc` &gt;&gt;&amp; \${LOGFILE}\n";
-	print OUT "  set first = `shuf -i 1-\$nmax -n 1` &gt;&gt;&amp; \${LOGFILE}\n";
-	print OUT "  set last  = `echo \"\${first}+$nevents\" | bc` &gt;&gt;&amp; \${LOGFILE}\n";
-	print OUT "  echo We begin at \${first} and end at \${last} &gt;&gt;&amp; \${LOGFILE}\n";
-	print OUT "else\n";
-	print OUT "  set first = 1 &gt;&gt;&amp; \${LOGFILE}\n";
-	print OUT "endif\n";
-	print OUT "setenv EVENTS_START \$first &gt;&gt;&amp; \${LOGFILE}\n";
-	print OUT "\n";
+	   print OUT "echo DAQ FILE has \$nevents events &gt;&gt;&amp; \${LOGFILE}\n";
+	   print OUT "echo We need $nevents &gt;&gt;&amp; \${LOGFILE}\n";
+	   print OUT "if ( \$nevents > $nevents ) then \n";
+	   print OUT "  set nmax = `echo \"\$nevents-$nevents-1\" | bc` &gt;&gt;&amp; \${LOGFILE}\n";
+	   print OUT "  set first = `shuf -i 1-\$nmax -n 1` &gt;&gt;&amp; \${LOGFILE}\n";
+	   print OUT "  set last  = `echo \"\${first}+$nevents\" | bc` &gt;&gt;&amp; \${LOGFILE}\n";
+	   print OUT "  echo We begin at \${first} and end at \${last} &gt;&gt;&amp; \${LOGFILE}\n";
+	   print OUT "else\n";
+	   print OUT "  set first = 1 &gt;&gt;&amp; \${LOGFILE}\n";
+	   print OUT "endif\n";
+	   print OUT "setenv EVENTS_START \$first &gt;&gt;&amp; \${LOGFILE}\n";
+	   print OUT "\n";
       }
 
-	print OUT "if ( \$nevents > $nevents ) then \n";
-	print OUT "  root4star -b -q \$kumac\\\($nevents,\$seed,\\\"\$fzdFile\\\",\\\"$tagFile\\\",$multiplicity,$pid,$ptmin,$ptmax,$ymin,$ymax\\\) &gt;&gt;&amp; \${LOGFILE}\n";
-	print OUT "else\n";
-	print OUT "  root4star -b -q \$kumac\\\(\$nevents,\$seed,\\\"\$fzdFile\\\",\\\"$tagFile\\\",$multiplicity,$pid,$ptmin,$ptmax,$ymin,$ymax\\\) &gt;&gt;&amp; \${LOGFILE}\n";
-	print OUT "endif\n";
-	print OUT "\n";
 }
 
 # Determine trigger string
