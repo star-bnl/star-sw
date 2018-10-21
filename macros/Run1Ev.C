@@ -93,6 +93,7 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
       StarVMCApplication::Instance()->SetPrimaryGenerator(gener);
       cout << "Set StarMCSimplePrimaryGenerator" << endl;
       }
+      //      gener->SetGun();
       //      StarVMCApplication::Instance()->DoMisAlignment(kFALSE);
       //      geant->SetSetAttr("phys_off",kTRUE); // physics off
       gMC->SetProcess("DCAY", 0);
