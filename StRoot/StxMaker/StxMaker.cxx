@@ -453,6 +453,7 @@ void StxMaker::FillGlobalTrack(genfit::Track *kTrack) {
   StTrackNode* trackNode = new StTrackNode;
   // actual filling of StTrack from genfit::Track 
   StGlobalTrack* gTrack = new StGlobalTrack;
+  trackNode->addTrack(gTrack);
   // filling successful, set up relationships between objects
   StSPtrVecTrackNode& trNodeVec = mEvent->trackNodes(); 
   UShort_t Id = trNodeVec.size() + 1;
@@ -464,11 +465,10 @@ void StxMaker::FillGlobalTrack(genfit::Track *kTrack) {
   //cout<<"Tester: Event Track Node Entries: "<<trackNode->entries()<<endl;
   //  mTrkNodeMap.insert(map<StxKalmanTrack*,StTrackNode*>::value_type (kTrack,trNodeVec.back()) );
   if (FillTrack(gTrack,kTrack)) {
-    delete gTrack;
+    //    delete gTrack;
     delete trackNode;
     throw genfit::Exception("Consistency check failed ", __LINE__, __FILE__);
   }
-  trackNode->addTrack(gTrack);
   trNodeVec.push_back(trackNode);
   return;
 }
@@ -848,10 +848,8 @@ void StxMaker::FillDca(StTrack* stTrack, genfit::Track * track)
   fParticle.SetPDG(pdg);
   fParticle.SetId(kg);
   fParticle.AddDaughterId(kg);
-#if 0
-  StTrackMassFitAtDca *dcaTrack = new StTrackMassFitAtDca(kg, &fParticle);
+  StTrackMassFit *dcaTrack = new StTrackMassFit(kg, &fParticle);
   gTrack->node()->addTrack(dcaTrack);
-#endif
   // 
   Double_t pT = mom.Pt();
   TVector3 field = FieldManager::getInstance()->getField()->get(pos);
