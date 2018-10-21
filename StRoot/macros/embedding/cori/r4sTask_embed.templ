@@ -159,6 +159,7 @@ endif
 
     # setup and executing simulator
     set simumode = <simulatorMode>
+    set zbmode   = <zerobiasMode>
     if ( "$simumode" != "0" ) then
 	 set daqevents=<daqEvents>
 	 set kumac=<kumacFile>
@@ -168,11 +169,24 @@ endif
 	 set ptmin=<ptmin>
 	 set ptmax=<ptmax>
 	 set nevents=`grep $coreN $daqevents | awk '{print $2}'`
-	 echo nevents = $nevents, seed = $seed, kumac = $kumac, fzdFile=$fzdFile, ptmin = $ptmin, ptmax = $ptmax >>& $r4sLogFile
+	 set nsimevents=$nevents
 	 if ( $nevents > $NUM_EVE ) then
-	    $EXEC_NAME -b -q $kumac\($NUM_EVE,$seed,\"$fzdFile\",\"$tagsN\",<mult>,<geantPID>,<ptmin>,<ptmax>,<ymin>,<ymax>\) >>& $r4sLogFile
-	 else
-	    $EXEC_NAME -b -q $kumac\($nevents,$seed,\"$fzdFile\",\"$tagsN\",<mult>,<geantPID>,<ptmin>,<ptmax>,<ymin>,<ymax>\) >>& $r4sLogFile
+	    set nsimevents = $NUM_EVE
+	 endif
+	 echo nevents = $nevents, nsimevents = $nsimevents, seed = $seed, kumac = $kumac, fzdFile=$fzdFile, ptmin = $ptmin, ptmax = $ptmax >>& $r4sLogFile
+	 $EXEC_NAME -b -q $kumac\($nsimevents,$seed,\"$fzdFile\",\"$tagsN\",<mult>,<geantPID>,<ptmin>,<ptmax>,<ymin>,<ymax>\) >>& $r4sLogFile
+	 if ( "$zbmode" != "0" ) then
+	    echo DAQ FILE has $nevents events
+	    echo We need $NUM_EVE
+	    if ( $nevents > $NUM_EVE ) then
+		 set nmax = `echo "$nevents-${NUM_EVE}-1" | bc`
+		 set first = `shuf -i 1-$nmax -n 1`
+		 set last  = `echo "${first}+${NUM_EVE}" | bc`
+		 echo We begin at ${first} and end at ${last}
+	    else
+		 set first = 1
+	    endif
+	    setenv EVENTS_START $first
 	 endif
     endif
     # parsing the mixer name
