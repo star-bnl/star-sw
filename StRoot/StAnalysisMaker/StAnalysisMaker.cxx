@@ -188,7 +188,9 @@ void StAnalysisMaker::PrintStEvent(TString opt) {
   } else {
     cout << "Event: Vertex Not Found" << endl;
   }
-  if (opt.Contains("g",TString::kIgnoreCase)) {
+  if (opt.Contains("g",TString::kIgnoreCase) ||
+      opt.Contains("p",TString::kIgnoreCase) ||
+      opt.Contains("m",TString::kIgnoreCase)) {
     StSPtrVecTrackNode& trackNode = pEvent->trackNodes();
     UInt_t nTracks = trackNode.size();
     cout << nTracks << " Track nodes" << endl;
@@ -196,32 +198,27 @@ void StAnalysisMaker::PrintStEvent(TString opt) {
     StTrack     *track = 0;
     for (UInt_t  i=0; i < nTracks; i++) {
       node = trackNode[i]; if (!node) continue;
-#if 0
-      cout << *node << endl;
-#else
       UInt_t nR = node->referencedTracks().size();
       UInt_t nO = node->ownedTracks().size();
       for (UInt_t k = 0; k < nR + nO; k++) {
 	if (k < nR) track = node->referencedTracks()[k];
 	else        track = node->ownedTracks()[k-nR];
 	if (mOnlyIdT && track->idTruth() <= 0) continue;
-#if 0
-	if (k) cout << endl;
-	if (k == nR) cout << "Owned  tracks:" << endl;
-#endif
 	if (track->type() == primary) {
-	  cout << *((const StPrimaryTrack*) track) << endl;
+	  if (opt.Contains("p",TString::kIgnoreCase)) 
+	    cout << *((const StPrimaryTrack*) track) << endl;
 	} else if (track->type() == global) {
-	  cout << *((const StGlobalTrack*) track) << endl;
+	  if (opt.Contains("g",TString::kIgnoreCase)) 
+	    cout << *((const StGlobalTrack*) track) << endl;
 #ifdef StTrackMassFit_hh
-	} else if (track->type() == massFitAtVx || track->type() == massFit) {
-	  cout << *((const StTrackMassFit*) track) << endl;
+	} else if (track->type() == massFitAtVx || track->type() == massFit ) {
+	  if (opt.Contains("m",TString::kIgnoreCase))
+	    cout << *((const StTrackMassFit*) track) << endl;
 #endif
 	} else {
 	  cout << *track << endl;
 	}
       }
-#endif
     }
   }
   if (opt.Contains("l3",TString::kIgnoreCase)) {

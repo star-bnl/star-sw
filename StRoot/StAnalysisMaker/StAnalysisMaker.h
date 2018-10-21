@@ -120,7 +120,7 @@ public:
   static void summarizeEvent(StEvent *event=0, Int_t mEventCounter=0);
   static void HitCounts(StHit *hit, UInt_t &TotalNoOfHits, UInt_t &noBadHits, UInt_t &noHitsUsedInFit,  UInt_t &TotalNoOfMcHits, UInt_t &noMcHitsUsedInFit, UInt_t Flag = 0);
   static void PrintHitCounts(const Char_t *name, UInt_t &TotalNoOfHits, UInt_t &noBadHits, UInt_t &noHitsUsedInFit,  UInt_t &TotalNoOfMcHits, UInt_t &noMcHitsUsedInFit, const Char_t *title = "Used in Fit");
-  static void PrintStEvent(TString opt="vpgl3");
+  static void PrintStEvent(TString opt="vpgml3");
   static void PrintVertex(Int_t ivx = -1);
   static void PrintGlobalTrack(Int_t itk = 0);
   static void PrintTpcHits(Int_t sector = 0, Int_t row = 0, Int_t plot = 0, Int_t IdTruth=-1);
