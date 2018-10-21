@@ -35,11 +35,13 @@ using std::map;
 #include "Sti/StiKalmanTrackNode.h"
 #include "Sti/StiVertexFinder.h"
 #include "Sti/StiDefaultToolkit.h"
+#if 0
 #include "StiStEventFiller.h"
+#include "Sti/StiToolkit.h"
+#endif
 #include "TRMatrix.h"
 #include "TRSymMatrix.h"
 #include "TRVector.h"
-#include "Sti/StiToolkit.h"
 #include "TDatabasePDG.h"
 #include "TParticlePDG.h"
 #include "TArrayF.h"
@@ -175,6 +177,7 @@ KFParticle *StKFVertexMaker::AddTrackAt(const StGlobalTrack *gTrack) {
   }
   return particle;
 }
+#if 0
 //________________________________________________________________________________
 KFParticle *StKFVertexMaker::AddTrackAt(const StiKalmanTrackNode *tNode, Int_t kg) {
   if (! tNode) return 0;
@@ -201,6 +204,7 @@ KFParticle *StKFVertexMaker::AddTrackAt(const StiKalmanTrackNode *tNode, Int_t k
   fParticles->AddAtAndExpand(particle, kg);
   return particle;
 }
+#endif
 //________________________________________________________________________________
 Double_t StKFVertexMaker::AnnelingFcn(Double_t TInv) {
   if (! fgcVertices) return 0;
@@ -288,6 +292,7 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tra
       cout << endl;
     }
   }
+#if 0
   StTrackNode *node = TrackNodeMap[kg];
   if (! node) {
     UpdateParticleAtVertex(0, &track->Particle());
@@ -427,6 +432,7 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tra
   detInfoVec.push_back(detInfo);
   UpdateParticleAtVertex(kTrack, &track->Particle());
   BFactory::Free(kTrack);
+#endif
   return pTrack;
 }
 //________________________________________________________________________________
@@ -1451,6 +1457,7 @@ void StKFVertexMaker::TMVARank(StPrimaryVertex *primV) {
   primV->setRanking(rank); 
   if (Debug()) primV->Print(Form("Rank:#V[%3i]",primV->key()));
 }
+#if 0
 //________________________________________________________________________________
 void StKFVertexMaker::UpdateParticleAtVertex(StiKalmanTrack *kTrack,KFParticle *particle) {
   StiKalmanTrackNode *extended = 0;
@@ -1477,6 +1484,7 @@ void StKFVertexMaker::UpdateParticleAtVertex(StiKalmanTrack *kTrack,KFParticle *
   particle->Chi2() = extended->getChi2();
   PrPP(UpdateParticleAtVertex  after,*particle);
 }
+#endif
 //________________________________________________________________________________
 void StKFVertexMaker::PrintPrimVertices() {
   StPrimaryVertex *pVertex = 0;

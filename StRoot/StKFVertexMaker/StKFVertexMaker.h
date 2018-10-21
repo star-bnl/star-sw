@@ -32,9 +32,11 @@ class StPrimaryTrack;
 class StDcaGeometry;
 class StTrack;
 class StKFVerticesCollection;
+#if 0
 class StiHit;
 class StiKalmanTrackNode;
 class StiKalmanTrack;
+#endif
 class StKFParticleInterface;
 class StKFVertexMaker : public StMaker {
  public: 
@@ -44,7 +46,9 @@ class StKFVertexMaker : public StMaker {
   KFParticle 	 	 	*AddBeamTrack();                                      		  		   
   KFParticle 	 	 	*AddTrackAt(const StDcaGeometry *dca,Int_t kg);	   	  		   
   KFParticle     	 	*AddTrackAt(const StGlobalTrack *gTrack);		   	  		   
+#if 0
   KFParticle 	 	 	*AddTrackAt(const StiKalmanTrackNode *tNode,Int_t kg);		  		   
+#endif
   static Double_t	 	 AnnelingFcn(Double_t TInv=1);					  		   
   TCanvas        	 	*Canvas() {return fc1;}					  		   
   void           	 	 CalculateRank(StPrimaryVertex *primV);			  		   
@@ -69,7 +73,9 @@ class StKFVertexMaker : public StMaker {
   void                   	 SetDefaultTempLog(Double_t tLog = 2) {fTempLog = tLog;}			   
   static void                    SetProbCut(Double_t prob) {fgProbCut = prob;}
   void                   	 SetZwindow(Double_t z = 2) {fzWindow = z;}					   
+#if 0
   void                   	 UpdateParticleAtVertex(StiKalmanTrack */* kTrack */, KFParticle */* particle */);
+#endif
   TH1                       	*VertexZPlot() {return fVertexZPlot;}                                             
   void                           PrintParticles();
   void                           PrintPrimVertices();
