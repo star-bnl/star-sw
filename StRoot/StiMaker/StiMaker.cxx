@@ -475,7 +475,7 @@ Int_t StiMaker::Make()
   iAnz = MakeGlobalTracks(event);
   if (iAnz) {MyClear(); return iAnz;}
   CountHits();
-  StMaker *KFV = GetMaker("KFVertex");
+  StMaker *KFV = GetMaker("StiKFVertex");
   if (KFV) {
     iAnz = KFV->Make();
     FinishTracks(1);

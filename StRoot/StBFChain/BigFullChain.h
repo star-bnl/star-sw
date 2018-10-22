@@ -250,7 +250,7 @@ Bfc_st BFC[] = { // standard chains
   {"MC.2019","","","y2019,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
-  {"MC.StiCA",   "","","StiCA,-hitfilt,KFVertex,geantOut,noRunco,noHistos,20Muons,OSpaceZ2,"
+  {"MC.StiCA",   "","","StiCA,-hitfilt,StiKFVertex,geantOut,noRunco,noHistos,20Muons,OSpaceZ2,"
    "OGridLeak3D,CorrX,StiPulls,picoWrite,PicoVtxVpd,RunG.1,McTpcAna,tags"                 ,"","","",kFALSE},
   {"MC2016.Ideal","","","MC.2016a,istSlowSim,pxlSlowSim,StiHftC,MC.StiCA"                 ,"","","",kFALSE},
   {"MC2016",      "","","MC2016.Ideal,VMCAlignment,sdt20160301"                           ,"","","",kFALSE},
@@ -1782,13 +1782,17 @@ Bfc_st BFC[] = { // standard chains
   // Sti/Stv chains
   {"StiCAPerf","","","","",                             "TPCCATrackerPerformance", "CA Performance",kFALSE},
   {"StiCA"    ,"","","Sti,StiCALib",                                    "","libEG","Sti+CA tracker",kFALSE},
-  {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,Stu,StEvent,StDbT,TpcIT,compend,sim_T,tbutil,TMVARank","StiMaker"
-   ,                                                          "StiUtilities,StiMaker","Sti tracker",kFALSE},
+  {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,Stu,StEvent,StDbT,TpcIT,compend,sim_T,tbutil,TMVARank"
+   ,"StiMaker",                               "StiUtilities,StKFVertexMaker,StiMaker","Sti tracker",kFALSE},
   {"HLTCA","","Sti","Sti,-Stv,StiLib,StiLibs,TMVARank","StHLTCAMaker","TPCCATracker,StiMaker,StHLTCAMaker"
    ,                                                                           "HLT reconstruction",kFALSE},
   {"Stx","","","VMCAppl" ,"StxMaker","libEve,GenFit,TPCCATracker,StxMaker","eXpress Reconstruction",kFALSE},
-  {"KFVertex",""  ,"Sti","StiLibs,-VFMinuit,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2"
-   ,"StKFVertexMaker","MathMore,Spectrum,StiMaker",  "KFParticle based multi vertex reconstruction",kFALSE},
+  {"KFVertex",""  ,"Stx","-VFMinuit,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2,TMVARank"
+   ,"StKFVertexMaker","MathMore,Spectrum,StKFVertexMaker"
+   ,                                                 "KFParticle based multi vertex reconstruction",kFALSE},
+  {"StiKFVertex",""  ,"Sti","StiLibs,-VFMinuit,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2"
+   ,"StiKFVertexMaker","MathMore,Spectrum,StKFVertexMaker,StiMaker"
+   ,                                                 "KFParticle based multi vertex reconstruction",kFALSE},
   {"Stv","Stv","","-xgeometry,-Sti,-StiTpc,-StiSsd,-StiSvt,-StiPxl,-StiSsd,-StiSst,-StiIst,-StiLibs,-StiLibsHft"
    ,"StvMaker","libHist,libHistPainter,libVMC,geant3,GeoTestMaker,StvUtil,Stv,StvSeed,StvMaker,StEventUtilities,"
    ,"Stv"                                                                                          ,kFALSE},

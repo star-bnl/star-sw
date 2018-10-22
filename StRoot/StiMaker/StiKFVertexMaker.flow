@@ -1,6 +1,6 @@
  Flow diagram:
  ==============
-StKFVertexMaker::Make 
+StiKFVertexMaker::Make 
 	KFParticle::SetField(bField); set mag.field 
 	MakeParticles:  convert dca tracks into KFParticle, 
 	     Create TObjSet's for tracks ("KFTracks") and vertices ("KFVertices") with TObjArray (fParticles and vertices)

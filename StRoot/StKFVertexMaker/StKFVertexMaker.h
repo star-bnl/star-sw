@@ -1,11 +1,11 @@
-// $Id: StxKFVertexMaker.h,v 2.5 2018/01/03 21:23:36 smirnovd Exp $
+// $Id: StKFVertexMaker.h,v 2.5 2018/01/03 21:23:36 smirnovd Exp $
 
-#ifndef STAR_StxKFVertexMaker
-#define STAR_StxKFVertexMaker
+#ifndef STAR_StKFVertexMaker
+#define STAR_StKFVertexMaker
 
 /*!
  *                                                                     
- * \class  StxKFVertexMaker
+ * \class  StKFVertexMaker
  * \author fisyak
  * \date   2012/04/18
  * \brief  virtual base class for Maker
@@ -33,11 +33,14 @@ class StDcaGeometry;
 class StTrack;
 class StKFVerticesCollection;
 class StKFParticleInterface;
-class StxKFVertexMaker : public StMaker {
+class StKFVertex; 
+class StKFTrack;
+
+class StKFVertexMaker : public StMaker {
  public: 
-  StxKFVertexMaker(const Char_t *name="KFVertex");
+  StKFVertexMaker(const Char_t *name="KFVertex");
                                 
-  virtual                       ~StxKFVertexMaker();						   		   
+  virtual                       ~StKFVertexMaker();						   		   
   KFParticle 	 	 	*AddBeamTrack();                                      		  		   
   KFParticle 	 	 	*AddTrackAt(const StDcaGeometry *dca,Int_t kg);	   	  		   
   KFParticle     	 	*AddTrackAt(const StGlobalTrack *gTrack);		   	  		   
@@ -49,7 +52,7 @@ class StxKFVertexMaker : public StMaker {
   void           	 	 Clear(Option_t *option="");					  		   
   virtual Int_t  	 	 Init();							  		   
   void           	 	 Fit();							  		   
-  StPrimaryTrack 	 	*FitTrack2Vertex(StKFVertex *V, StKFTrack* track);	  		   
+  virtual StPrimaryTrack 	*FitTrack2Vertex(StKFVertex *V, StKFTrack* track) {}	  		   
   TH1F           	 	*GetVertexZPlots(Int_t pass = 0) {return fVertexZPlots[pass];}	  		   
   virtual Int_t  	 	 Make();							  		   
   Int_t          	 	 MakeParticles();						  		   
@@ -72,7 +75,7 @@ class StxKFVertexMaker : public StMaker {
   void                           ResetDaughterIds(KFParticle *particle, vector<KFParticle> &particles);
 #endif
   static Int_t                   Key2(Int_t Id1, Int_t Id2) {return (Id1 > Id2) ? 1000000*Id1 + Id2 : 1000000*Id2 + Id1;}
- private:
+ protected:
   TObjArray                     *fParticles; // KF particles = global tracks + decay particles
   TObjArray                     *fVertices;  // KF vertices and decay particles
   Int_t     			 fPass;    
@@ -97,15 +100,15 @@ class StxKFVertexMaker : public StMaker {
   static Double_t                fgProbCut; // Cut for fits
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StxKFVertexMaker.h,v 2.5 2018/01/03 21:23:36 smirnovd Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StKFVertexMaker.h,v 2.5 2018/01/03 21:23:36 smirnovd Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
-  ClassDef(StxKFVertexMaker,0)   //StAF chain virtual base class for Makers
+  ClassDef(StKFVertexMaker,0)   //StAF chain virtual base class for Makers
 };
-// $Log: StxKFVertexMaker.h,v $
+// $Log: StKFVertexMaker.h,v $
 // Revision 2.5  2018/01/03 21:23:36  smirnovd
-// StxKFVertexMaker: Added missing include
+// StKFVertexMaker: Added missing include
 //
 // Revision 2.4  2014/08/06 11:43:59  jeromel
 // Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
@@ -114,6 +117,6 @@ class StxKFVertexMaker : public StMaker {
 // Roll back to version 04/04/2013
 //
 // Revision 2.1  2012/05/07 14:56:14  fisyak
-// Add StxKFVertexMaker
+// Add StKFVertexMaker
 //
-#endif /* STAR_StxKFVertexMaker */
+#endif /* STAR_StKFVertexMaker */
