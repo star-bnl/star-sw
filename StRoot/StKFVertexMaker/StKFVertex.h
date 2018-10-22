@@ -4,7 +4,7 @@
 #include "Riostream.h"
 #include "TObject.h"
 #include "TList.h"
-#include "StKFTrack.h"
+#include "StKFVertexMaker/StKFTrack.h"
 #include "KFParticle/KFVertex.h"
 #include "KFParticle/KFParticle.h"
 #include "TVector3.h"
