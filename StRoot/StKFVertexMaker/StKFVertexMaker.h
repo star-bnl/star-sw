@@ -42,6 +42,7 @@ class StKFVertexMaker : public StMaker {
                                 
   virtual                       ~StKFVertexMaker();						   		   
   KFParticle 	 	 	*AddBeamTrack();                                      		  		   
+  KFParticle 	 	 	*AddTrackAt(const KFParticle *particleO,Int_t kg);	   	  		   
   KFParticle 	 	 	*AddTrackAt(const StDcaGeometry *dca,Int_t kg);	   	  		   
   KFParticle     	 	*AddTrackAt(const StGlobalTrack *gTrack);		   	  		   
   static Double_t	 	 AnnelingFcn(Double_t TInv=1);					  		   
@@ -52,7 +53,7 @@ class StKFVertexMaker : public StMaker {
   void           	 	 Clear(Option_t *option="");					  		   
   virtual Int_t  	 	 Init();							  		   
   void           	 	 Fit();							  		   
-  virtual StPrimaryTrack 	*FitTrack2Vertex(StKFVertex *V, StKFTrack* track) {}	  		   
+  virtual StPrimaryTrack 	*FitTrack2Vertex(StKFVertex *V, StKFTrack* track) {return 0;}	  		   
   TH1F           	 	*GetVertexZPlots(Int_t pass = 0) {return fVertexZPlots[pass];}	  		   
   virtual Int_t  	 	 Make();							  		   
   Int_t          	 	 MakeParticles();						  		   

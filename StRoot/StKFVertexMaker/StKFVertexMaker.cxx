@@ -152,19 +152,36 @@ KFParticle *StKFVertexMaker::AddTrackAt(const StDcaGeometry *dca, Int_t kg) {
   return particle;
 }
 //________________________________________________________________________________
+KFParticle *StKFVertexMaker::AddTrackAt(const KFParticle *particleO, Int_t kg) {
+  if (! particleO) return 0;
+  KFParticle *particle =  new KFParticle(*particleO);
+  fParticles->AddAtAndExpand(particle, kg);
+  if (fLastGlobalId < kg) fLastGlobalId = kg;
+  return particle;
+}
+//________________________________________________________________________________
 KFParticle *StKFVertexMaker::AddTrackAt(const StGlobalTrack *gTrack) {
   if (! gTrack) return 0;
-  const StDcaGeometry* dca = gTrack->dcaGeometry();
-  if (! dca) return 0;
   Int_t kg = gTrack->key();
-  KFParticle *particle = AddTrackAt(dca,kg);
-  if (particle) {
-    particle->SetIdTruth(gTrack->idTruth(),gTrack->qaTruth());
-    particle->SetIdParentMcVx(gTrack->idParentVx());
-    UShort_t nfitp = gTrack->fitTraits().numberOfFitPoints();
-    Double_t chi2OverNdf = gTrack->fitTraits().chi2(0);
-    particle->NDF()  = 2*nfitp - 5;
-    particle->Chi2() = chi2OverNdf*particle->NDF();
+  KFParticle *particle = 0;
+  const StTrackNode *node = gTrack->node();
+  if (! node) return 0;
+  const StTrackMassFit *mf = ( const StTrackMassFit *) node->track(massFit,0);
+  if (mf) {
+    particle = (KFParticle *) mf->kfParticle();
+  } 
+  if (! particle) {
+    const StDcaGeometry* dca = gTrack->dcaGeometry();
+    if (! dca) return 0;
+    particle = AddTrackAt(dca,kg);
+    if (particle) {
+      particle->SetIdTruth(gTrack->idTruth(),gTrack->qaTruth());
+      particle->SetIdParentMcVx(gTrack->idParentVx());
+      UShort_t nfitp = gTrack->fitTraits().numberOfFitPoints();
+      Double_t chi2OverNdf = gTrack->fitTraits().chi2(0);
+      particle->NDF()  = 2*nfitp - 5;
+      particle->Chi2() = chi2OverNdf*particle->NDF();
+    }
   }
   return particle;
 }
@@ -218,6 +235,21 @@ void StKFVertexMaker::Clear(Option_t *option) {
 Int_t StKFVertexMaker::Init(){
   mBeamLine = IAttr("beamLine");
   return StMaker::Init();
+}
+//________________________________________________________________________________
+void StKFVertexMaker::Fit() {
+  if (Debug())  StKFVertex::SetDebug(Debug());
+  SafeDelete(fgcVertices);
+  PrimaryVertices();
+  SecondaryVertices();
+  if (! fgcVertices) return;
+  if ( fgcVertices->IsEmpty()) {SafeDelete(fgcVertices); return;}
+  //  fgcVertices->UniqueTracks2VertexAssociation(); // Make track associated with only vertex
+  if (! fgcVertices) return;
+  if ( fgcVertices->IsEmpty()) {SafeDelete(fgcVertices); return;}
+  fVertexZPlot = fVertexZPlots[0];
+  fgcVertices->Fit(29,Canvas(),fVertexZPlot);
+  PrPP2(After final fit, *fgcVertices);
 }
 //________________________________________________________________________________
 Int_t StKFVertexMaker::Make() {
