@@ -654,7 +654,7 @@ Int_t StBFChain::Instantiate()
     if (maker== "StGmtClusterMaker") {
       if (GetOption("gmtCosmics"))  mk->SetAttr("gmtCosmics",  1);
     }
-    if (maker=="StKFVertexMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT"    ,1);
+    if (maker=="StiKFVertexMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT"    ,1);
     //		Sti(ITTF) end
     if (maker=="StGenericVertexMaker") {
       // VertexFinder methods
@@ -692,7 +692,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("VFStoreX")    ) mk->SetAttr("VFStore"      , 100); 
       mk->PrintAttr();
     }
-    if (maker=="StKFVertexMaker") {
+    if (maker=="StKFVertexMaker" || maker=="StiKFVertexMaker") {
       if (GetOption("beamLine"   ) ) mk->SetAttr("BeamLine"   	, 1);
       if (GetOption("VFFV"       ) ) mk->SetAttr("VFFV"       	, 1);
       if (GetOption("VFMCE"      ) ) mk->SetAttr("VFMCE"      	, 1);
