@@ -16,20 +16,19 @@
 #include "Sti/StiKalmanTrack.h"
 class StiKFVertexMaker : public StKFVertexMaker {
  public: 
-  StiKFVertexMaker(const Char_t *name="SiKFVertex") {}
-  virtual                       ~StiKFVertexMaker() {}					   		   
-  virtual StPrimaryTrack 	*FitTrack2Vertex(StKFVertex *V, StKFTrack* track);	  		   
-  TH1F           	 	*GetVertexZPlots(Int_t pass = 0) {return fVertexZPlots[pass];}	  		   
-  virtual Int_t  	 	 Make();							  		   
-  void                           ReFitToVertex();  // refit Sti Track to primary vertices			   
-  void                   	 UpdateParticleAtVertex(StiKalmanTrack */* kTrack */, KFParticle */* particle */);
+ StiKFVertexMaker(const Char_t *name="StiKFVertex") : StKFVertexMaker(name) {}
+ virtual                       ~StiKFVertexMaker() {}					   		   
+ virtual StPrimaryTrack 	*FitTrack2Vertex(StKFVertex *V, StKFTrack* track);	  		   
+ TH1F           	 	*GetVertexZPlots(Int_t pass = 0) {return fVertexZPlots[pass];}	  		   
+ virtual Int_t  	 	 Make();							  		   
+ void                           ReFitToVertex();  // refit Sti Track to primary vertices			   
+ void                   	 UpdateParticleAtVertex(StiKalmanTrack */* kTrack */, KFParticle */* particle */);
  private:
-  /// Displayed on session exit, leave it as-is please ...
-  virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StiKFVertexMaker.h,v 2.5 2018/01/03 21:23:36 smirnovd Exp $ built " __DATE__ " " __TIME__ ; 
-    return cvs;
-  }
-
+ /// Displayed on session exit, leave it as-is please ...
+ virtual const char *GetCVS() const {
+   static const char cvs[]="Tag $Name:  $ $Id: StiKFVertexMaker.h,v 2.5 2018/01/03 21:23:36 smirnovd Exp $ built " __DATE__ " " __TIME__ ; 
+   return cvs;
+ }
   ClassDef(StiKFVertexMaker,0)   //StAF chain virtual base class for Makers
 };
 // $Log: StiKFVertexMaker.h,v $

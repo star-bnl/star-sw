@@ -767,6 +767,25 @@ void StiMaker::FinishTracks (int gloPri)
      int qa,idt = track->idTruth(&qa);if(idt){};
   }
 }
+//_____________________________________________________________________________
+void CountHits()
+{
+ int nTimesUsed=0;
+ StiTrackContainer* tkV  = StiToolkit::instance()->getTrackContainer();
+ if (!tkV) return;
+   for (int itk=0; itk<(int)tkV->size(); itk++)
+   {
+     StiKalmanTrack *track = (StiKalmanTrack*)(*tkV)[itk];
+     StiKalmanTrackNode *node;
+     StiKTNIterator it = track->begin();
+     for (;(node=it());it++){
+       const StiHit *hit = node->getHit();
+       if (!hit) 		continue;
+       if (!hit->detector()) 	continue;
+       assert(node->getChi2()<1000.);
+       nTimesUsed++;
+   } }
+}
 
 
 // $Id: StiMaker.cxx,v 1.239 2018/06/21 01:48:42 perev Exp $
@@ -1205,22 +1224,3 @@ void StiMaker::FinishTracks (int gloPri)
 // including changes for inside out tracking
 //
 
-//_____________________________________________________________________________
-void CountHits()
-{
- int nTimesUsed=0;
- StiTrackContainer* tkV  = StiToolkit::instance()->getTrackContainer();
- if (!tkV) return;
-   for (int itk=0; itk<(int)tkV->size(); itk++)
-   {
-     StiKalmanTrack *track = (StiKalmanTrack*)(*tkV)[itk];
-     StiKalmanTrackNode *node;
-     StiKTNIterator it = track->begin();
-     for (;(node=it());it++){
-       const StiHit *hit = node->getHit();
-       if (!hit) 		continue;
-       if (!hit->detector()) 	continue;
-       assert(node->getChi2()<1000.);
-       nTimesUsed++;
-   } }
-}
