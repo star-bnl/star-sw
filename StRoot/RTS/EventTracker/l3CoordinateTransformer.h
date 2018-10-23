@@ -104,6 +104,8 @@ class l3CoordinateTransformer{
   // Set paramaters needed for the transformation in different ways
   // This is only for the transformation z <-> timebucket the others are fixed
 
+
+  //void Set_parameters_by_hand(const double lengthPerTb = .6176,    // 3.85 GeV
   void Set_parameters_by_hand(const double lengthPerTb = 0.584, 
 			      const double drift_length_inner = 201., 
 			      const double drift_length_outer = 201.) ;
