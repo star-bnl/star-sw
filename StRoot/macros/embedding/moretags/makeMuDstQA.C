@@ -86,12 +86,13 @@ void makeMuDstQA(TString InputFileList, Int_t nFiles, Int_t nEvents, TString Out
   Double_t mVXsigma, mVYsigma, mVZsigma;
   Float_t mVpdVz;
   Float_t mPVRank;
-  Double_t mEvtTime, mProdTime;
+  Double_t mEvtTime, mProdTime, mmagField;
   TTree *mMoreTagsTree = new TTree("MoreTags","MoreTags");
   mMoreTagsTree->Branch("RunId",&mRunId,"RunId/I");
   mMoreTagsTree->Branch("EvtId",&mEvtId,"EvtId/I");
   mMoreTagsTree->Branch("EvtTime",&mEvtTime,"EvtTime/D");
   mMoreTagsTree->Branch("ProdTime",&mProdTime,"ProdTime/D");
+  mMoreTagsTree->Branch("magField",&mmagField,"magField/D");
   mMoreTagsTree->Branch("nRefMult",&mnRefMult,"nRefMult/I");
   mMoreTagsTree->Branch("nRefMult2",&mnRefMult2,"nRefMult2/I");
   mMoreTagsTree->Branch("nRefMult3",&mnRefMult3,"nRefMult3/I");
@@ -222,6 +223,8 @@ void makeMuDstQA(TString InputFileList, Int_t nFiles, Int_t nEvents, TString Out
      mEvtTime = EventTime.GetDate() + EventTime.GetTime()/1000000.;
      mProdTime= ProdTime.GetDate() +  ProdTime.GetTime()/1000000. ;
      //cout<<EventTime.GetDate() + EventTime.GetTime()/1000000.<<" "<<ProdTime.GetDate() +  ProdTime.GetTime()/1000000. <<endl;
+
+     mmagField = mMuEvent->runInfo().magneticField();
 
      mnRefMult = mMuEvent->refMult();
 
