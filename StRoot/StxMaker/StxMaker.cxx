@@ -73,6 +73,8 @@
 #include "GenFit/MeasurementCreator.h"
 #include "StTpcPlanarMeasurement.h"
 #include "StTpc3DMeasurement.h"
+#include "StG2TrackVertexMap.h"
+
 #include "TApplication.h"
 #include "TCanvas.h"
 #include "TDatabasePDG.h"
@@ -123,6 +125,7 @@ Int_t StxMaker::Init(){
 }
 //_____________________________________________________________________________
 Int_t StxMaker::Make(){
+  Int_t ok = kStOK;
   mEvent = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
   if (! mEvent) {return kStWarn;};
   StEventHelper::Remove(mEvent,"StSPtrVecTrackDetectorInfo");
@@ -132,7 +135,10 @@ Int_t StxMaker::Make(){
   StEventHelper::Remove(mEvent,"StSPtrVecXiVertex");
   StEventHelper::Remove(mEvent,"StSPtrVecKinkVertex");
   //  StiKalmanTrackNode::SetExternalZofPVX(0);
-
+  St_g2t_track  *g2t_track  = (St_g2t_track  *) GetDataSet("geant/g2t_track");  
+  St_g2t_vertex *g2t_vertex = (St_g2t_vertex *) GetDataSet("geant/g2t_vertex"); 
+  StG2TrackVertexMap::instance(g2t_track,g2t_vertex);
+ 
   StxCAInterface::Instance().SetNewEvent();
   // Run reconstruction by the CA Tracker
   StxCAInterface::Instance().Run();
@@ -175,7 +181,12 @@ Int_t StxMaker::Make(){
     if (! FitTrack(tr)) continue;
     // Create StTrack
   }
-  return kStOK;
+  // Find Vertives
+  StMaker *KFV = GetMaker("KFVertex");
+  if (KFV) {
+    ok = KFV->Make();
+  }
+  return ok;
 }
 //________________________________________________________________________________
 #ifdef __HANDLER__
@@ -498,6 +509,7 @@ Int_t StxMaker::FillTrack(StTrack* gTrack, genfit::Track * kTrack)
   FillGeometry(gTrack, kTrack, true ); // outer geometry
   StuFixTopoMap(gTrack);
   FillFlags(gTrack);
+  gTrack->setIdTruth();
 #if 0
   if (!gTrack->IsPrimary()) 
 #endif
@@ -811,7 +823,9 @@ void StxMaker::FillDca(StTrack* stTrack, genfit::Track * track)
     track->getFittedState(-1).Print();
     return;
   }
-  state.Print();
+  if (Debug()) {
+    state.Print();
+  }
   KalmanFitStatus *fitStatus = track->getKalmanFitStatus();
   Double_t chi2 = fitStatus->getChi2();
   Int_t Ndf = fitStatus->getNdf();

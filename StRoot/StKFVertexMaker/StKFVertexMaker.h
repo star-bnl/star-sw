@@ -15,6 +15,8 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+#include <map>
+using std::map;
 #include "TObjArray.h"
 #include "TSpectrum.h"
 #include "Math/Functor.h"
@@ -31,20 +33,19 @@ class StGlobalTrack;
 class StPrimaryTrack;
 class StDcaGeometry;
 class StTrack;
+class StTrackNode;
 class StKFVerticesCollection;
 class StKFParticleInterface;
-class StKFVertex; 
+class StKFVertex;
 class StKFTrack;
-
 class StKFVertexMaker : public StMaker {
  public: 
   StKFVertexMaker(const Char_t *name="KFVertex");
-                                
   virtual                       ~StKFVertexMaker();						   		   
   KFParticle 	 	 	*AddBeamTrack();                                      		  		   
-  KFParticle 	 	 	*AddTrackAt(const KFParticle *particleO,Int_t kg);	   	  		   
   KFParticle 	 	 	*AddTrackAt(const StDcaGeometry *dca,Int_t kg);	   	  		   
   KFParticle     	 	*AddTrackAt(const StGlobalTrack *gTrack);		   	  		   
+  KFParticle 	 	 	*AddTrackAt(const KFParticle *particleO,Int_t kg);	   	  		   
   static Double_t	 	 AnnelingFcn(Double_t TInv=1);					  		   
   TCanvas        	 	*Canvas() {return fc1;}					  		   
   void           	 	 CalculateRank(StPrimaryVertex *primV);			  		   
@@ -53,7 +54,8 @@ class StKFVertexMaker : public StMaker {
   void           	 	 Clear(Option_t *option="");					  		   
   virtual Int_t  	 	 Init();							  		   
   void           	 	 Fit();							  		   
-  virtual StPrimaryTrack 	*FitTrack2Vertex(StKFVertex *V, StKFTrack* track) {return 0;}	  		   
+  virtual void                   ReFitToVertex();  
+  virtual StPrimaryTrack 	*FitTrack2Vertex(StKFVertex *V, StKFTrack* track);
   TH1F           	 	*GetVertexZPlots(Int_t pass = 0) {return fVertexZPlots[pass];}	  		   
   virtual Int_t  	 	 Make();							  		   
   Int_t          	 	 MakeParticles();						  		   
@@ -63,7 +65,6 @@ class StKFVertexMaker : public StMaker {
   void                   	 PrimaryVertices();	
   void                           ClearParentIDs();
   StKFVerticesCollection 	*PrimaryVertexSeeds(Int_t *parents);								   
-  void                   	 ReFitToVertex();  // refit Sti Track to primary vertices			   
   void                   	 SecondaryVertices();								   
   void                   	 SetCanvas(TCanvas *c1) {fc1 = c1;}						   
   void                   	 SetDefaultTempLog(Double_t tLog = 2) {fTempLog = tLog;}			   
@@ -99,6 +100,7 @@ class StKFVertexMaker : public StMaker {
   Int_t                          fLastGlobalId;
   StKFParticleInterface         *mStKFParticleInterface;            //!
   static Double_t                fgProbCut; // Cut for fits
+  static map<Int_t,StTrackNode*> fTrackNodeMap;
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
     static const char cvs[]="Tag $Name:  $ $Id: StKFVertexMaker.h,v 2.5 2018/01/03 21:23:36 smirnovd Exp $ built " __DATE__ " " __TIME__ ; 

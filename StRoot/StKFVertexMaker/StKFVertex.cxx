@@ -1,6 +1,6 @@
 // $Id: StKFVertex.cxx,v 2.5 2015/12/20 01:06:39 fisyak Exp $
-#include "StKFVertexMaker/StKFVertex.h"
-#include "StKFVertexMaker/StKFTrack.h"
+#include "StKFVertex.h"
+#include "StKFTrack.h"
 #include "TArrayC.h"
 #include "TArrayI.h"
 #include "TArrayD.h"

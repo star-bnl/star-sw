@@ -55,16 +55,32 @@ ClassImp(StiKFVertexMaker);
 #define PrPP(A,B)  if (Debug() > 1) {LOG_INFO << "StiKFVertexMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
 #define PrPP2(A,B) if (Debug() > 2) {LOG_INFO << "StiKFVertexMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
 #define PrParticle2(A) if (Debug() > 2) {cout << "StiKFVertexMaker::" << (#A)  << endl; PrintParticles();}
-static map<Int_t,StTrackNode*> TrackNodeMap;
-
-/* Bookkeeping: 
-   kg =  gTrack->key(); 
-   TObjArray *fParticles; // KF particles
-   fParticles[kg], kg = 0 -> beam line, kg > 0 kg == gTrack->key();
-   StKFVerticesCollection *fgcVertices;  // current vertex collection
-   fVertices        
-   
-*/
+//________________________________________________________________________________
+KFParticle *StiKFVertexMaker::AddTrackAt(const StiKalmanTrackNode *tNode, Int_t kg) {
+  if (! tNode) return 0;
+  Double_t xyzp[6], CovXyzp[21];
+  tNode->getXYZ(xyzp,CovXyzp);
+  Float_t xyzF[6], CovXyzF[21];
+  TCL::ucopy(xyzp,xyzF,6);
+  TCL::ucopy(CovXyzp,CovXyzF,21);
+  static KFPTrack track;
+  track.SetParameters(xyzF);
+  track.SetCovarianceMatrix(CovXyzF);
+  track.SetNDF(1);
+  //    track.SetChi2(GlobalTracks_mChiSqXY[k]);
+  track.SetId(kg);
+  Int_t q   = 1;
+  Int_t pdg = 211;
+  if (tNode->getCharge() < 0) {
+    q = -1;
+    pdg = -211;
+  } 
+  track.SetCharge(q);
+  KFParticle *particle = new KFParticle(track, pdg);
+  particle->SetId(kg);
+  fParticles->AddAtAndExpand(particle, kg);
+  return particle;
+}
 //________________________________________________________________________________
 StPrimaryTrack *StiKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   track) {
   StPrimaryTrack* pTrack = 0;
@@ -86,7 +102,7 @@ StPrimaryTrack *StiKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tr
       cout << endl;
     }
   }
-  StTrackNode *node = TrackNodeMap[kg];
+  StTrackNode *node = fTrackNodeMap[kg];
   if (! node) {
     UpdateParticleAtVertex(0, &track->Particle());
     return pTrack;
@@ -278,6 +294,24 @@ Int_t StiKFVertexMaker::Make() {
   ClearParentIDs();
   fgcVertices->UniqueTracks2VertexAssociation();
   
+#ifdef  __V0__
+#ifdef  __UseMakeV0__
+  // Loop for V0
+  UInt_t NoPV = pEvent->numberOfPrimaryVertices();
+  for (UInt_t ipv = 0; ipv < NoPV; ipv++) {
+    StPrimaryVertex *V0 = pEvent->primaryVertex(ipv);
+    if (! V0) continue;
+    UInt_t NoTracks = V0->numberOfDaughters();
+    if (NoTracks != 2) continue;
+    StTrackMassFit *pf = V0->parentMF();
+    assert(pf);
+    if (pf->kfParticle()->GetQ()) continue;
+    MakeV0(V0);
+  }
+#else /* !  __UseMakeV0__ */
+  ParticleFinder();
+#endif /*  __UseMakeV0__ */
+#endif /* __V0__ */
   SafeDelete(fgcVertices);
   return kStOK;
 }
@@ -335,12 +369,12 @@ void StiKFVertexMaker::ReFitToVertex() {
 	beam = kTRUE;
 	continue;
       }
-      nodes[itk] = TrackNodeMap[kg];
+      nodes[itk] = fTrackNodeMap[kg];
       if (! nodes[itk]) {
 	nodes[itk] = new StTrackNode;
 	StSPtrVecTrackNode& trNodeVec = pEvent->trackNodes(); 
 	trNodeVec.push_back(nodes[itk]);
-	TrackNodeMap[kg] = nodes[itk];
+	fTrackNodeMap[kg] = nodes[itk];
       }
       if (P.GetQ()) {
 	pTracks[itk] =  FitTrack2Vertex(V, track);
@@ -383,7 +417,7 @@ void StiKFVertexMaker::ReFitToVertex() {
       StTrackNode *nodepf = new StTrackNode;
       nodepf->addTrack(pf);
       Int_t kgp = KVx.Id();
-      TrackNodeMap[kgp] = nodepf;
+      fTrackNodeMap[kgp] = nodepf;
       StSPtrVecTrackNode& trNodeVec = pEvent->trackNodes(); 
       trNodeVec.push_back(nodepf);
       for (Int_t i = 0; i < NoTracks; i++) {
@@ -412,12 +446,12 @@ void StiKFVertexMaker::ReFitToVertex() {
   }
 }
 //________________________________________________________________________________
-void StiKFVertexMaker::UpdateParticleAtVertex(StiKalmanTrack *kTrack, KFParticle *particle) {
+void StiKFVertexMaker::UpdateParticleAtVertex(StiKalmanTrack *kTrack,KFParticle *particle) {
   StiKalmanTrackNode *extended = 0;
   if (kTrack) extended = kTrack->getInnerMostHitNode(3);
   if (! extended) {
     if (StKFVertex::Debug() > 2) {
-      cout << "StKFVertexMaker::UpdateParticleAtVertex extention to InnerMostNdode failed" << endl;
+      cout << "StiKFVertexMaker::UpdateParticleAtVertex extention to InnerMostNdode failed" << endl;
     }
     particle->NDF() = -1;
     particle->Chi2() = -1;;
@@ -439,51 +473,3 @@ void StiKFVertexMaker::UpdateParticleAtVertex(StiKalmanTrack *kTrack, KFParticle
 }
 //________________________________________________________________________________
 // $Log: StiKFVertexMaker.cxx,v $
-// Revision 2.7  2015/12/20 01:06:39  fisyak
-// Merge
-//
-// Revision 2.7  2015/01/05 21:04:31  fisyak
-// Add access to TMVA ranking
-//
-// Revision 1.3  2014/01/14 14:49:17  fisyak
-// Freeze
-//
-// Revision 1.2  2013/10/16 13:19:15  fisyak
-// Add beam line position to PV guess, add Z error in beam track, relax requirements on vertex seed
-//
-// Revision 1.1.1.1  2013/08/13 22:20:41  fisyak
-// Save m version
-//
-// Revision 2.5  2013/04/08 19:21:41  fisyak
-// Adjust for new KFParticle
-//
-// Revision 2.4  2013/01/28 21:51:17  fisyak
-// Correct ranking
-//
-// Revision 2.3  2013/01/17 15:57:25  fisyak
-// Add handles for debugging
-//
-// Revision 2.2  2012/09/16 21:38:42  fisyak
-// use of Tpc West Only and East Only tracks, clean up
-//
-// Revision 2.1  2012/05/07 14:56:14  fisyak
-// Add StiKFVertexMaker
-//
-// Revision 1.5  2012/04/13 14:42:58  fisyak
-// Freeze
-//
-// Revision 1.4  2012/03/29 23:35:47  fisyak
-// Fix problem with multiple beam tracks
-//
-// Revision 1.3  2012/03/26 23:42:35  fisyak
-// Add beam constrain
-//
-// Revision 1.2  2012/02/20 22:38:34  fisyak
-// Freeze before go for ranking
-//
-// Revision 1.1  2012/02/18 23:20:52  fisyak
-// Rename StKFVertexFitter => StiKFVertexMaker
-//
-// Revision 1.3  2012/02/07 19:38:26  fisyak
-// Repackage
-//

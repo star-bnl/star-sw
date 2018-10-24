@@ -1,0 +1,4 @@
+# $Id $
+# package StKFVertexMaker
+# author: 
+Library:libStiMaker.so:LIBS +=   -lStChain  -lStEvent  -lStEventUtilities -lStiPxl -lKFParticle

@@ -4,7 +4,7 @@
 #include "Riostream.h"
 #include "TObject.h"
 #include "TList.h"
-#include "StKFVertexMaker/StKFTrack.h"
+#include "StKFTrack.h"
 #include "KFParticle/KFVertex.h"
 #include "KFParticle/KFParticle.h"
 #include "TVector3.h"
@@ -26,8 +26,9 @@ public:
   StKFTrack*   Remove(StKFTrack *track)    {return (StKFTrack *) fKFTracks.Remove(track);}
   StKFTrack*   Remove(KFParticle *particle); 
   Int_t        ID()                  const {return   Vertex().Id();}
-  KFVertex     Vertex()              const {return *(KFVertex *) this;}
+  //  KFVertex     Vertex()              const {return *(KFVertex *) this;}
   KFVertex    &Vertex()                    {return *(KFVertex *) this;}
+  const KFVertex    &Vertex()        const {return *(KFVertex *) this;}
   TList       &Tracks()                    {return *&fKFTracks;}
   Int_t        NoTracks()            const;
   Int_t        Charge()              const {return   Vertex().GetQ();}
