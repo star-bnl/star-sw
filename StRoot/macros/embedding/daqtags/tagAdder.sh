@@ -23,7 +23,7 @@ do
     combrun=`grep $runNumber combined_runs.list`
     if [ -z "$combrun" ]; then
 	 #echo no change
-	 cp -p $tagDir/*$runNumber* $outDir/
+	 cp -p $tagDir/*$runNumber*.${tagtype}.root $outDir/
     else
 	 newFileName=$outDir/"${filetype}_"$runNumber"_raw_0000000.${tagtype}.root"
 	 echo $newFileName
