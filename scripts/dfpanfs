@@ -1,7 +1,10 @@
 #!/usr/local/bin/perl
 
 #
+# J. Lauret 2018 - added extenstion for GPFS
+#
 # J. Lauret May 2005
+#
 # handles df and PANFS StatFS 
 # Requires pan_statfs program.
 #
@@ -15,17 +18,22 @@
 #
 #
 
+# GPFS
+# if ( -x "/usr/lpp/mmfs/bin/mmrepquota")
+$AVAILTHRESH = 500*1024*1024;   # soft quota limit below hard quota for HPFS
+
+# PANfs
 if ( defined($ENV{OPTSTAR}) ){
-    $EXEC   = $ENV{OPTSTAR}."/bin/pan_statfs";
+    $PEXEC   = $ENV{OPTSTAR}."/bin/pan_statfs";
 } else {
-    $EXEC   = "/opt/star/bin/pan_statfs";
+    $PEXEC   = "/opt/star/bin/pan_statfs";
 }
 
 
 $result = `/bin/df -k $ARGV[0]`;
 
-if ($result =~ m/\/panasas/ && $ARGV[0] ne "" && -e $EXEC){
-    @lines = `$EXEC $ARGV[0]`;
+if ($result =~ m/\/panasas/ && $ARGV[0] ne "" && -e $PEXEC){
+    @lines = `$PEXEC $ARGV[0]`;
 
     #print  join("::",@lines)."\n";
 
@@ -74,6 +82,41 @@ if ($result =~ m/\/panasas/ && $ARGV[0] ne "" && -e $EXEC){
 	#print "------------------\n";
     }
 
+} elsif ( $result =~ m/\/gpfs/ && $ARGV[0] ne "" ){
+    #print "Yes\n";
+    # re-calculate based on $AVAILTHRESH
+    @items = split(/\n/,$result);
+
+    @vals = split(/ /,$items[1]);
+    $cnt=0;
+    for ($i=0 ; $i<=$#vals ; $i++){
+	$val = $vals[$i];
+	# and we count - first vaue is 1kblock, second is avail and third available
+	# we re-scale available and %tage
+	if ( $val != 0 ){
+	    $cnt++;
+	    if ( $cnt == 1){   $TOTALS = $val;}
+	    if ( $cnt == 2){   $USEDS  = $val;}
+	    if ( $cnt == 3){  
+	    	# rescale as needed
+	    	$val = ($val>$AVAILTHRESH)?$val-$AVAILTHRESH:0;
+	    	$vals[$i] = $val;
+	    }
+	    if ( $cnt == 4){
+		#print "$USEDS $TOTALS $AVAILTHRESH\n";
+		$val = ($USEDS+$AVAILTHRESH)/$TOTALS*100;
+		$val = 100 if ( $val > 100);
+		$val = sprintf("%d%%",$val);
+		$vals[$i] = $val;
+	    }
+	    #print "--> $val\n";
+	}
+    }
+    $items[1] = join(" ",@vals);
+
+    #print $result;
+    print "$items[0]\n";
+    print "$items[1]\n";    
 
 } else {
     print $result;

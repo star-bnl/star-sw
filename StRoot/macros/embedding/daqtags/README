@@ -46,6 +46,9 @@ MODIFY and run
 ./restage.sh
 to restage the daq/reco/tags files to daq/reco/tags directory.
 please do change the filelist names in restage.sh first!
+You can use 
+hpss_user.pl -p 
+to inspect the progress.
 
 Step 8:
 sometimes, some files in daq/reco/tags directories can not be restaged for some reasons, need to remove all of those files that have 

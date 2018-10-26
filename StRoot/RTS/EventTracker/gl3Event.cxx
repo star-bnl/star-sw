@@ -92,7 +92,8 @@ int gl3Event::readFromEvpReader(daqReader *rdr,
   setBField(bField);
 
   // need a tracker...
-  coordinateTransformer->Set_parameters_by_hand(0.581, 200.668, 201.138 );
+  coordinateTransformer->Set_parameters_by_hand(0.581, 200.668, 201.138 );   // AuAu200
+  //coordinateTransformer->Set_parameters_by_hand(0.6176, 200.668, 201.138 );    // 3.85GeV
   coordinateTransformer->LoadTPCLookupTable("/RTS/conf/L3/map.bin");
 
   FtfSl3 *tracker = new FtfSl3(coordinateTransformer);

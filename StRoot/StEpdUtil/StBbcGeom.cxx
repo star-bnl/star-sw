@@ -4,7 +4,6 @@
 
 using namespace std;
 
-ClassImp(StBbcGeom);
 
 StBbcGeom::StBbcGeom(){
   InitializeGeometry();
