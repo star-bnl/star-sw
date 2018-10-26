@@ -27,6 +27,7 @@ unsigned int    _seed      = 0;
 int    _unprimaries = 0;
 double _eventtime = 0;
 double _prodtime  = 0;
+double _magfield  = -5.005;
 
 int     _npart = 10;  // floor number of tracks per event
 float   _fpart = 0.05;  // fraction of track multiplicity to embed
@@ -208,6 +209,7 @@ void runEmbeddingSimulation2014(
 
   _tags->SetBranchAddress( "EvtTime",       &_eventtime );
   _tags->SetBranchAddress( "ProdTime",        &_prodtime );
+  _tags->SetBranchAddress( "magField",        &_magfield );
 
 
   _tags->GetEntry(0); // read in first event
@@ -370,7 +372,7 @@ void runEmbeddingSimulation2014(
   //
   // Setup geometry and set starsim to use agusread for input
   //
-  geometry(Form( " field=-5.005 %s", _geometry.Data()));
+  geometry(Form( " field=%f %s", _magfield, _geometry.Data()));
   command("gkine -4 0");
   
   /*
