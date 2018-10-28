@@ -16,7 +16,7 @@
 #include "StTrackGeometry.h"
 #include "StEvent/StTpcHit.h"
 #include "StEventUtilities/StEventHelper.h"
-#include "StEventUtilities/StuFixTopoMap.cxx"
+#include "StEventUtilities/StTrackUtilities.h"
 #include "TRMatrix.h"
 #include "TRVector.h"
 #include "KFParticle/KFVertex.h"
@@ -118,12 +118,6 @@ using namespace  genfit;
 using namespace  std;
 ClassImp(StxMaker);
 //_____________________________________________________________________________
-Int_t StxMaker::Init(){
-  // Create tables
-  // Create Histograms    
-  return StMaker::Init();
-}
-//_____________________________________________________________________________
 Int_t StxMaker::Make(){
   Int_t ok = kStOK;
   mEvent = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
@@ -186,6 +180,7 @@ Int_t StxMaker::Make(){
   if (KFV) {
     ok = KFV->Make();
   }
+  //  StTrackUtilities::instance()->FillPrimaryTracks();
   return ok;
 }
 //________________________________________________________________________________
@@ -248,14 +243,18 @@ Double_t StxMaker::ConvertCA2XYZ(const AliHLTTPCCAGBTrack &tr, TVector3 &pos, TV
     for (Int_t j = 0; j < 6; j++) 
       covM(i,j) = Cov(i,j);
 #ifdef __DEBUG__
-  covM.Print("");
+  if (Debug()) {
+    covM.Print("");
+  }
 #endif
   return charge;
 }
 //________________________________________________________________________________
 Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
+#if 0
   static TStopwatch *watch = new  TStopwatch;
   watch->Start(kTRUE);
+#endif
   //const genfit::eFitterType fitterId = genfit::SimpleKalman;
   const genfit::eFitterType fitterId = genfit::RefKalman;
   //const genfit::eFitterType fitterId = genfit::DafRef;
@@ -309,19 +308,6 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
       break;
   }
   fitter->setMaxIterations(nIter);
-  if (Debug()) {
-    fitter->setDebugLvl(10);
-    gGeoManager->SetVerboseLevel(5);
-#ifndef __TPC3D__ /* ! __TPC3D__ */
-    StTpcPlanarMeasurement::SetDebug(1);
-#endif /* ! __TPC3D__ */    
-  } else {
-    fitter->setDebugLvl(0);
-    gGeoManager->SetVerboseLevel(0);
-#ifndef __TPC3D__ /* ! __TPC3D__ */
-    StTpcPlanarMeasurement::SetDebug(0);
-#endif /* ! __TPC3D__ */ 
-  }
   /*if (dynamic_cast<genfit::DAF*>(fitter) != nullptr) {
     //static_cast<genfit::DAF*>(fitter)->setBetas(100, 50, 25, 12, 6, 3, 1, 0.5, 0.1);
     //static_cast<genfit::DAF*>(fitter)->setBetas(81, 8, 4, 0.5, 0.1);
@@ -334,6 +320,23 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
   //  genfit::FieldManager::getInstance()->useCache(true, 8);
   //  genfit::FieldManager::getInstance()->useCache(false, 0);
   genfit::MaterialEffects::getInstance()->init(new genfit::TGeoMaterialInterface());
+  if (Debug()) {
+    fitter->setDebugLvl(10);
+    //    gGeoManager->SetVerboseLevel(5);
+#ifndef __TPC3D__ /* ! __TPC3D__ */
+    StTpcPlanarMeasurement::SetDebug(1);
+#endif /* ! __TPC3D__ */    
+    genfit::MaterialEffects::getInstance()->setDebugLvl(2);
+    //    genfit::MaterialEffects::getInstance()->setDebugLvT(2);
+  } else {
+    fitter->setDebugLvl(0);
+    //    gGeoManager->SetVerboseLevel(0);
+#ifndef __TPC3D__ /* ! __TPC3D__ */
+    StTpcPlanarMeasurement::SetDebug(0);
+#endif /* ! __TPC3D__ */ 
+    genfit::MaterialEffects::getInstance()->setDebugLvl(0);
+    //    genfit::MaterialEffects::getInstance()->setDebugLvT(0);
+  }
   const Int_t pdg = 211; // -13;               // particle pdg code mu+
   //  const Double_t charge = TDatabasePDG::Instance()->GetParticle(pdg)->Charge()/(3.);
   //========== Reference  track ======================================================================
@@ -397,10 +400,10 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
     
     // do the fit
     fitter->processTrack(&fitTrack);
-    
     // print fit result
-    fitTrack.getFittedState().Print();
-    
+    if (Debug()) {
+	fitTrack.getFittedState().Print();
+      }
     //check
     fitTrack.checkConsistency();
   }
@@ -444,7 +447,9 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
     std::cout << "Exception, FillGlobalTrack" << std::endl;
     return kStErr;
   }  
+#if 0
   watch->Print("");
+#endif
   return kStOK;
 }
 // $Log: StxMaker.cxx,v $
@@ -476,13 +481,16 @@ void StxMaker::FillGlobalTrack(genfit::Track *kTrack) {
   //cout<<"Tester: Event Track Node Entries: "<<trackNode->entries()<<endl;
   //  mTrkNodeMap.insert(map<StxKalmanTrack*,StTrackNode*>::value_type (kTrack,trNodeVec.back()) );
   if (FillTrack(gTrack,kTrack)) {
+#if 0 /* keep rejected tracks */
     //    delete gTrack;
     delete trackNode;
     throw genfit::Exception("Consistency check failed ", __LINE__, __FILE__);
+#endif
   }
   trNodeVec.push_back(trackNode);
   return;
 }
+//_____________________________________________________________________________
 //_____________________________________________________________________________
 Int_t StxMaker::FillTrack(StTrack* gTrack, genfit::Track * kTrack)
 {
@@ -507,8 +515,8 @@ Int_t StxMaker::FillTrack(StTrack* gTrack, genfit::Track * kTrack)
   FillDetectorInfo(gTrack,kTrack,true); //3d argument used to increase/not increase the refCount. MCBS oct 04.
   FillGeometry(gTrack, kTrack, false); // inner geometry
   FillGeometry(gTrack, kTrack, true ); // outer geometry
-  StuFixTopoMap(gTrack);
-  FillFlags(gTrack);
+  StTrackUtilities::instance()->StFixTopoMap(gTrack);
+  StTrackUtilities::instance()->FillFlags(gTrack);
   gTrack->setIdTruth();
 #if 0
   if (!gTrack->IsPrimary()) 
@@ -517,7 +525,6 @@ Int_t StxMaker::FillTrack(StTrack* gTrack, genfit::Track * kTrack)
   Int_t iok = gTrack->bad();
   return iok;
 }
-//_____________________________________________________________________________
 //_____________________________________________________________________________
 /// use the vector of StHits to fill the detector info
 /// change: currently point and fit points are the same for genfit::Track s,
@@ -788,51 +795,45 @@ void StxMaker::FillFlags(StTrack* gTrack) {
   }
 }
 //_____________________________________________________________________________
-Double_t StxMaker::impactParameter(genfit::Track * track, StThreeVectorD &vertexPosition) {
-#if 0
-  return   track->InnerMostNode(2)->Helix()->helix().distance(vertexPosition);
-#else
-  return 0;
-#endif
-}
-//_____________________________________________________________________________
-Double_t StxMaker::impactParameter(StTrack* track, StThreeVectorD &vertex) {
-  return track->geometry()->helix().distance(vertex);
-}
-//_____________________________________________________________________________
-void StxMaker::FillDca(StTrack* stTrack, genfit::Track * track)
-{
+void StxMaker::FillDca(StTrack* stTrack, genfit::Track * track) {
   StGlobalTrack *gTrack = dynamic_cast<StGlobalTrack*>(stTrack);
   assert(gTrack);
-  static TVector3 linePoint(0,0,0);
-  static TVector3 lineDirection(0,0,1);
+  Float_t length = gTrack->length();
   const AbsTrackRep* rep = track->getCardinalRep();
   genfit::TrackPoint* point = track->getPointWithMeasurementAndFitterInfo(0, rep);
   genfit::AbsFitterInfo* fitterInfo = point->getFitterInfo(rep);
   const genfit::MeasuredStateOnPlane& stateI = fitterInfo->getFittedState(true);
   genfit::MeasuredStateOnPlane  state = stateI;
-  try{
-    //  Double_t s = 
-    rep->extrapolateToLine(state, linePoint, lineDirection);
+  Bool_t ok = kTRUE;
+  StPhysicalHelixD helixI = gTrack->geometry()->helix();
+  Double_t step = helixI.pathLength(0.0,0.0);
+  StThreeVectorD dcaH = helixI.at(step);
+  // No Dca for tracks outside of IFC
+  if (TMath::Abs(dcaH.z()) > 250 || dcaH.perp() > 50) ok = kFALSE;
+  Double_t s = 0;
+  if (ok) {
+    static TVector3 linePoint(0,0,0);
+    static TVector3 lineDirection(0,0,1);
+    try{
+      s = rep->extrapolateToLine(state, linePoint, lineDirection);
+    }
+    catch(genfit::Exception& e) {
+      std::cout << "Exception, fail to make DCA" << std::endl;
+      std::cout << "Inner Parameters" << std::endl << "====================" << endl;
+      track->getFittedState().Print();
+      std::cout << "Outer Parameters" << std::endl << "====================" << endl;
+      track->getFittedState(-1).Print();
+      s = 0;
+      ok = kFALSE;
+    }
+    if (Debug()) {
+      state.Print();
+    }
   }
-  catch(genfit::Exception& e) {
-    std::cout << "Exception, fail to make DCA" << std::endl;
-    std::cout << "Inner Parameters" << std::endl << "====================" << endl;
-    track->getFittedState().Print();
-    std::cout << "Outer Parameters" << std::endl << "====================" << endl;
-    track->getFittedState(-1).Print();
-    return;
-  }
-  if (Debug()) {
-    state.Print();
-  }
+  length -= s;
   KalmanFitStatus *fitStatus = track->getKalmanFitStatus();
   Double_t chi2 = fitStatus->getChi2();
   Int_t Ndf = fitStatus->getNdf();
-#if 0
-  TVectorD &stateKF  = state.getState();
-  Double_t charge = (stateKF[0] > 0) ? 1 : -1;
-#endif
   Double_t charge = state.getCharge();
   TVector3 mom, pos;
   TMatrixDSym cov(6,6);
@@ -863,71 +864,48 @@ void StxMaker::FillDca(StTrack* stTrack, genfit::Track * track)
   fParticle.SetId(kg);
   fParticle.AddDaughterId(kg);
   StTrackMassFit *dcaTrack = new StTrackMassFit(kg, &fParticle);
+  dcaTrack->setLength(length);
   gTrack->node()->addTrack(dcaTrack);
-  // 
-  Double_t pT = mom.Pt();
-  TVector3 field = FieldManager::getInstance()->getField()->get(pos);
-  static const Double_t EC = 2.99792458e-4;
-  Double_t hz = EC*field.Z();
-  Double_t qoverpT = charge/mom.Pt();
-  Double_t qoverpT2 = qoverpT * qoverpT;
-  Double_t curvature = - hz*qoverpT;
-  Double_t cosPsi = mom.X()/pT;
-  Double_t sinPsi = mom.Y()/pT;
-  Double_t Psi = TMath::ATan2(sinPsi, cosPsi);
-  Double_t tanL   = mom.Z()/pT;
-  Double_t Imp    = -pos.X()*sinPsi + pos.Y()*cosPsi;
-#if 0
-  Double_t dpTdpx = - mom.X()/pT;
-  Double_t dpTdpy = - mom.Y()/pT;
-#endif
-  Double_t V = - qoverpT;
-  Double_t dImpdPsi = -(pos.X()*cosPsi + pos.Y()*sinPsi);
-  Double_t dPsidpx  = -mom.Y()*qoverpT2;
-  Double_t dPsidpy  =  mom.X()*qoverpT2;
-  Double_t VpT2  = V/(pT*pT);
-  Double_t f[30] = {
-    //                 x,       y,    z,               px,               py,    pz	
-    /* Imp   */  -sinPsi,  cosPsi,    0, dImpdPsi*dPsidpx, dImpdPsi*dPsidpy,     0,
-    /* Z     */        0,       0,    1,                0,                0,     0,
-    /* Psi   */        0,       0,    0,          dPsidpx,          dPsidpy,     0,
-    /* -q/pT */        0,       0,    0,    -VpT2*mom.X(),    -VpT2*mom.Y(),     0,
-    /* tanL  */        0,       0,    0,    -tanL*mom.X(),    -tanL*mom.Y(),  1./pT
-  };
-  TRMatrix F(5,6,f);
-  TRSymMatrix C(6,CovXyzp);
-  TRSymMatrix Cov(F,TRArray::kAxSxAT,C);
-  Float_t setp[6];
-  setp[0] = Imp; 
-  setp[1] = pos.Z(); 
-  setp[2] = Psi; 
-  setp[3] = V; 
-  setp[4] = tanL; 
-  setp[5] = curvature;
-  Float_t sete[15];
-  for (Int_t i = 0; i < 15; i++) sete[i] = Cov[i];
-  StDcaGeometry *dca = new StDcaGeometry;
-  gTrack->setDcaGeometry(dca);
-  dca->set(setp,sete);
+  if (ok) {
+    Double_t pT = mom.Pt();
+    TVector3 field = FieldManager::getInstance()->getField()->get(pos);
+    static const Double_t EC = 2.99792458e-4;
+    Double_t hz = EC*field.Z();
+    Double_t qoverpT = charge/mom.Pt();
+    Double_t qoverpT2 = qoverpT * qoverpT;
+    Double_t curvature = - hz*qoverpT;
+    Double_t cosPsi = mom.X()/pT;
+    Double_t sinPsi = mom.Y()/pT;
+    Double_t Psi = TMath::ATan2(sinPsi, cosPsi);
+    Double_t tanL   = mom.Z()/pT;
+    Double_t Imp    = -pos.X()*sinPsi + pos.Y()*cosPsi;
+    Double_t V = - qoverpT;
+    Double_t dImpdPsi = -(pos.X()*cosPsi + pos.Y()*sinPsi);
+    Double_t dPsidpx  = -mom.Y()*qoverpT2;
+    Double_t dPsidpy  =  mom.X()*qoverpT2;
+    Double_t VpT2  = V/(pT*pT);
+    Double_t f[30] = {
+      //                 x,       y,    z,               px,               py,    pz	
+      /* Imp   */  -sinPsi,  cosPsi,    0, dImpdPsi*dPsidpx, dImpdPsi*dPsidpy,     0,
+      /* Z     */        0,       0,    1,                0,                0,     0,
+      /* Psi   */        0,       0,    0,          dPsidpx,          dPsidpy,     0,
+      /* -q/pT */        0,       0,    0,    -VpT2*mom.X(),    -VpT2*mom.Y(),     0,
+      /* tanL  */        0,       0,    0,    -tanL*mom.X(),    -tanL*mom.Y(),  1./pT
+    };
+    TRMatrix F(5,6,f);
+    TRSymMatrix C(6,CovXyzp);
+    TRSymMatrix Cov(F,TRArray::kAxSxAT,C);
+    Float_t setp[6];
+    setp[0] = Imp; 
+    setp[1] = pos.Z(); 
+    setp[2] = Psi; 
+    setp[3] = V; 
+    setp[4] = tanL; 
+    setp[5] = curvature;
+    Float_t sete[15];
+    for (Int_t i = 0; i < 15; i++) sete[i] = Cov[i];
+    StDcaGeometry *dca = new StDcaGeometry;
+    gTrack->setDcaGeometry(dca);
+    dca->set(setp,sete);
+  }
 }
-#if 0
-//_____________________________________________________________________________
-void StxMaker::FillStHitErr(StHit *hh,const StxKalmanTrackNode *node) {
-#if 0
-  Double_t stiErr[6];
-  TCL::ucopy(node->V().GetArray(),stiErr,6);
-#else
-  TRSymMatrix V(node->V());
-  Double_t stiErr[6] = {
-    0., 
-    0., V(0,0),
-    0., V(1,0), V(1,1)
-  };
-#endif
-  TRMatrix  R(3,3,node->Detector()->GetMatrix()->GetRotationMatrix());
-  TRSymMatrix StxErr(3,stiErr);
-  TRSymMatrix StErr(R,TRArray::kAxSxAT,StxErr);
-  StThreeVectorF f3(TMath::Sqrt(StErr(0,0)),TMath::Sqrt(StErr(1,1)),TMath::Sqrt(StErr(2,2)));
-  hh->setPositionError(f3);
-}
-#endif
