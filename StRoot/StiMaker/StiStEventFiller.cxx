@@ -564,7 +564,7 @@ using namespace std;
 
 
 #include "StEventUtilities/StEventHelper.h"
-#include "StEventUtilities/StuFixTopoMap.cxx"
+#include "StEventUtilities/StuFixTopoMap.h"
 //Sti
 #include "Sti/StiTrackContainer.h"
 #include "Sti/StiKalmanTrack.h"
