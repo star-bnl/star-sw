@@ -337,12 +337,13 @@ protected:
     UChar_t                 mNumberOfPossiblePointsFts;
     Float_t                 mImpactParameter;
     Float_t                 mLength;
-    StTrackGeometry*        mGeometry;
-    StTrackGeometry*        mOuterGeometry;
-    StExtGeometry*          mExtGeometry;
     Int_t                   mIdTruth; // MC track id
     UShort_t                mQuality; // quality of this information (percentage of hits coming from the above MC track)
     Int_t                   mIdParentVx; // MC Parent vertex Id
+    Char_t                  mEndT[1]; //!
+    StTrackGeometry*        mGeometry;
+    StTrackGeometry*        mOuterGeometry;
+    StExtGeometry*          mExtGeometry;
     StVertex               *mEndVertex;
 #ifdef  __kfpAtFirstHit__
     KFPTrack               *mKFPTrackAtFirstHit;
@@ -370,7 +371,7 @@ protected:
 #ifdef __kfpAtFirstHit__
     ClassDef(StTrack,16)
 #else
-    ClassDef(StTrack,15)
+    ClassDef(StTrack,17)
 #endif
 };
 #endif

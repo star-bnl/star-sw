@@ -64,7 +64,12 @@
 ClassImp(StPrimaryTrack)
 
 static const char rcsid[] = "$Id: StPrimaryTrack.cxx,v 1.1.1.1 2013/07/23 14:13:30 fisyak Exp $";
-
+StPrimaryTrack &StPrimaryTrack::operator=(const StTrack& track) {
+  if (this != &track) {
+    *((StTrack *) this) = track;
+  }
+  return *this;
+}
 void StPrimaryTrack::Streamer(TBuffer &R__b)
 {
     // Stream an object of class .

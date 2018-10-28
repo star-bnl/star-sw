@@ -195,8 +195,8 @@ void StTrack::setVertex(StVertex* val) {
 //________________________________________________________________________________
 
 StTrack::StTrack(const StTrack& track) {
-    for (Int_t bit = 14; bit < 23; bit++) if (track.TestBit(BIT(bit))) SetBit(BIT(bit));
-    memcpy (mBeg, track.mBeg, mEnd-mBeg+1);
+    for (Int_t bit = 14; bit < 22; bit++) if (track.TestBit(BIT(bit))) SetBit(BIT(bit));
+    memcpy (mBeg, track.mBeg, mEndT-mBeg+1);
     mTopologyMap = track.mTopologyMap;
     mFitTraits = track.mFitTraits;
     if (track.mGeometry)
@@ -225,8 +225,8 @@ StTrack::StTrack(const StTrack& track) {
 StTrack&
 StTrack::operator=(const StTrack& track) {
     if (this != &track) {
-        for (Int_t bit = 14; bit < 23; bit++) if (track.TestBit(BIT(bit))) SetBit(BIT(bit));
-        memcpy (mBeg, track.mBeg, mEnd-mBeg+1);
+        for (Int_t bit = 14; bit < 22; bit++) if (track.TestBit(BIT(bit))) SetBit(BIT(bit));
+        memcpy (mBeg, track.mBeg, mEndT-mBeg+1);
         mTopologyMap = track.mTopologyMap;
         mFitTraits = track.mFitTraits;
         if (mGeometry) delete mGeometry;
@@ -633,6 +633,9 @@ void StTrack::setIdTruth() // match with IdTruth
 
 ostream&  operator<<(ostream& os,  const StTrack& track) {
     os << Form("%4i ",track.key());
+    Double_t length = track.length();
+    if (length > 9999.) length = 9999.;
+    if (length > 0) os << Form(" L %8.3f ",length);
     if      (track.type() == global )                 os << "global ";
     else if (track.type() == primary)                 os << "primary";
     else if (track.type() == massFit)                {os << "massFit"; return os;}
@@ -670,9 +673,7 @@ ostream&  operator<<(ostream& os,  const StTrack& track) {
     else                                              os << " ";
     if (track.isRejected())                           os << "R";
     else                                              os << " ";
-    Double_t length = track.length();
-    if (length > 9999.) length = 9999.;
-    os << Form(" NP %2d L %8.3f", track.numberOfPossiblePoints(),length);
+    os << Form(" NP %2d", track.numberOfPossiblePoints());
     os << Form(" IdT: %4i Q:%3i", track.idTruth(), track.qaTruth());
     return os;
 }

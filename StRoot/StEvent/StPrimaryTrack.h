@@ -66,6 +66,7 @@ class StPrimaryTrack : public StTrack {
 public:
     StPrimaryTrack()  {/* noop */}
     ~StPrimaryTrack() {/* noop */}
+    StPrimaryTrack & operator=(const StTrack&);
     
     StTrackType type() const {return primary; }
     void Print(Option_t *option="") const {cout << option << *this << endl; }
