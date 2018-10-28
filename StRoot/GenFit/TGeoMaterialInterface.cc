@@ -20,7 +20,7 @@
 #include "TGeoMaterialInterface.h"
 #include "Exception.h"
 #include "IO.h"
-
+#include "TString.h"
 #include <TGeoMedium.h>
 #include <TGeoMaterial.h>
 #include <TGeoManager.h>
@@ -133,7 +133,6 @@ TGeoMaterialInterface::findNextBoundary(const RKTrackRep* rep,
     // inconsistent extrapolations.
     state7 = stateOrig;
     rep->RKPropagate(state7, nullptr, SA, stepSign*(s + step), varField);
-
     // Straight line distance² between extrapolation finish and
     // the end of the previously determined safe segment.
     double dist2 = (pow(state7[0] - oldState7[0], 2)
@@ -141,6 +140,12 @@ TGeoMaterialInterface::findNextBoundary(const RKTrackRep* rep,
         + pow(state7[2] - oldState7[2], 2));
     // Maximal lateral deviation².
     double maxDeviation2 = 0.25*(step*step - dist2);
+    if (debugLvT_ > 0) {
+      debugOut << "TGeoMaterialInterface::findNextBoundary" << gGeoManager->GetCurrentNavigator()->GetPath() 
+	       << Form("\tx:%f8.3,\ty:%f8.3,\tz:%f8.3,\tpx:%f8.3,\tpy:%f8.3,\tpz:%f8.3",
+		       state7[0],state7[1],state7[2],state7[3],state7[4],state7[5]) 
+	       << Form("\tq/p:%8.3f\tstep:%f8.3",state7[6],step)<< "\n";
+    }
 
     if (step > safety
         && maxDeviation2 > epsilon*epsilon) {

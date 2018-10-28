@@ -40,7 +40,7 @@ class AbsMaterialInterface : public TObject {
 
  public:
 
-  AbsMaterialInterface() : debugLvl_(0) {;};
+ AbsMaterialInterface() : debugLvl_(0), debugLvT_(0) {;};
   virtual ~AbsMaterialInterface(){;};
 
   /** @brief Initialize the navigator at given position and with given direction.  Return true if volume changed.
@@ -66,9 +66,11 @@ class AbsMaterialInterface : public TObject {
                                   bool varField = true) = 0;
 
   virtual void setDebugLvl(unsigned int lvl = 1) {debugLvl_ = lvl;}
+  virtual void setDebugLvT(unsigned int lvl = 1) {debugLvT_ = lvl;}
 
  protected:
   unsigned int debugLvl_;
+  unsigned int debugLvT_;
 
   //ClassDef(AbsMaterialInterface, 1);
 
