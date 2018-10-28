@@ -146,50 +146,58 @@ switch ( $STAR_HOST_SYS )
      setenv EXTRA_FLAGS " --cflags=-fdiagnostics-color=always --cxxflags=-fdiagnostics-color=always"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cxxflags=-msse --cxxflags=-msse2 --cxxflags=-msse3 --cxxflags=-msse4.1 --cxxflags=-mssse3"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=-msse --cflags=-msse2 --cflags=-msse3 --cflags=-msse4.1 --cflags=-mssse3"
+     setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=--std=c++17"
      breaksw
     case *gcc7*:
-#     setenv ENABLE_CXX11 "--enable-cxx17"
+     setenv ENABLE_CXX11 "--enable-cxx17"
      setenv EXTRA_FLAGS " --cflags=-fdiagnostics-color=always --cxxflags=-fdiagnostics-color=always"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cxxflags=-msse --cxxflags=-msse2 --cxxflags=-msse3 --cxxflags=-msse4.1 --cxxflags=-mssse3"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=-msse --cflags=-msse2 --cflags=-msse3 --cflags=-msse4.1 --cflags=-mssse3"
+     setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=--std=c++17"
      breaksw
-    case *_x8664_ggcc6*:
-#    setenv ENABLE_CXX11 "--enable-cxx14"
+    case *_x8664_gcc6*:
+     setenv ENABLE_CXX11 "--enable-cxx11"
      setenv EXTRA_FLAGS " --cflags=-fdiagnostics-color=always --cxxflags=-fdiagnostics-color=always"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cxxflags=-msse --cxxflags=-msse2 --cxxflags=-msse3 --cxxflags=-msse4.1 --cxxflags=-mssse3"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=-msse --cflags=-msse2 --cflags=-msse3 --cflags=-msse4.1 --cflags=-mssse3"
+     setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=--std=c++14"
      breaksw
     case *gcc6*:
-#    setenv ENABLE_CXX11 "--enable-cxx14"
+     setenv ENABLE_CXX11 "--enable-cxx11"
      setenv EXTRA_FLAGS " --cflags=-fdiagnostics-color=always --cxxflags=-fdiagnostics-color=always"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cxxflags=-msse --cxxflags=-msse2 --cxxflags=-msse3 --cxxflags=-msse4.1 --cxxflags=-mssse3"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=-msse --cflags=-msse2 --cflags=-msse3 --cflags=-msse4.1 --cflags=-mssse3"
+     setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=--std=c++14"
      breaksw
     case *_x8664_gcc5*:
     case *_x8664_gcc492*:
-     setenv ENABLE_CXX11 "--enable-cxx14"
+     setenv ENABLE_CXX11 "--enable-cxx11"
      setenv EXTRA_FLAGS " --cflags=-fdiagnostics-color=always --cxxflags=-fdiagnostics-color=always"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cxxflags=-msse --cxxflags=-msse2 --cxxflags=-msse3 --cxxflags=-msse4.1 --cxxflags=-mssse3"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=-msse --cflags=-msse2 --cflags=-msse3 --cflags=-msse4.1 --cflags=-mssse3"
+     setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=--std=c++14"
      breaksw
     case *gcc5*:
     case *gcc492*:
-#     setenv ENABLE_CXX11 "--enable-cxx14"
+     setenv ENABLE_CXX11 "--enable-cxx11"
      setenv EXTRA_FLAGS " --cflags=-fdiagnostics-color=always --cxxflags=-fdiagnostics-color=always"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cxxflags=-msse --cxxflags=-msse2 --cxxflags=-msse3 --cxxflags=-msse4.1 --cxxflags=-mssse3"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=-msse --cflags=-msse2 --cflags=-msse3 --cflags=-msse4.1 --cflags=-mssse3"
+     setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=--std=c++14"
      breaksw
     case *_x8664_gcc48*:
      setenv ENABLE_CXX11 "--enable-cxx11"
      setenv EXTRA_FLAGS " --cflags=-fdiagnostics-color=always --cxxflags=-fdiagnostics-color=always"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cxxflags=-msse --cxxflags=-msse2 --cxxflags=-msse3 --cxxflags=-msse4.1 --cxxflags=-mssse3"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=-msse --cflags=-msse2 --cflags=-msse3 --cflags=-msse4.1 --cflags=-mssse3"
+     setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=--std=c++11"
      breaksw
     case *gcc48*:
      setenv ENABLE_CXX11 "--enable-cxx11"
      setenv EXTRA_FLAGS " --cflags=-fdiagnostics-color=always --cxxflags=-fdiagnostics-color=always"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cxxflags=-msse --cxxflags=-msse2 --cxxflags=-msse3 --cxxflags=-msse4.1 --cxxflags=-mssse3"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=-msse --cflags=-msse2 --cflags=-msse3 --cflags=-msse4.1 --cflags=-mssse3"
+     setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=--std=c++11"
      breaksw
      case *gcc447*:
      setenv ENABLE_CXX11 ""
