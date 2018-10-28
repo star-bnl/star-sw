@@ -35,7 +35,6 @@ class StDcaGeometry;
 class StTrack;
 class StTrackNode;
 class StKFVerticesCollection;
-class StKFParticleInterface;
 class StKFVertex;
 class StKFTrack;
 class StKFVertexMaker : public StMaker {
@@ -60,8 +59,6 @@ class StKFVertexMaker : public StMaker {
   virtual Int_t  	 	 Make();							  		   
   Int_t          	 	 MakeParticles();						  		   
   Bool_t                         FillVertex(const KFParticle *KVx, StVertex *V);
-  Bool_t           	 	 MakeV0(StPrimaryVertex *V);                                          		   
-  Bool_t                         ParticleFinder();
   void                   	 PrimaryVertices();	
   void                           ClearParentIDs();
   StKFVerticesCollection 	*PrimaryVertexSeeds(Int_t *parents);								   
@@ -98,7 +95,6 @@ class StKFVertexMaker : public StMaker {
   StEvent                       *pEvent;
   Int_t                          fNGoodGlobals;
   Int_t                          fLastGlobalId;
-  StKFParticleInterface         *mStKFParticleInterface;            //!
   static Double_t                fgProbCut; // Cut for fits
   static map<Int_t,StTrackNode*> fTrackNodeMap;
   /// Displayed on session exit, leave it as-is please ...
