@@ -104,6 +104,7 @@
  * $Log
  **************************************************************************/
 #include "StEventTypes.h"
+extern "C" {
 
 bool StuFixTopoMap(StTrack* track)
 {
@@ -221,4 +222,5 @@ bool StuFixTopoMap(StTrack* track)
     StTrackTopologyMap newmap(word1, word2, word3);
     track->setTopologyMap(newmap);
     return true;
+}
 }
