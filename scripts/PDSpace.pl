@@ -24,11 +24,12 @@ $MAIN  = "/star/data";                                    # default base path
 # An array of disks to add to the $MAIN pattern - entries can also be wildcarded patterns
 # which will be used in a glob() statement or sunngle disk entries
 @ADDD  = (
-          "/star/institutions/*",
+          #"/star/institutions/*",
           "/star/subsys/*",
 	  "/star/u",
 	  "/star/simu",
 	  "/star/grid",
+	  "/star/embed",
 	  "/star/scratch",
 	  "/star/rcf",
 	  "/star/xrootd",
@@ -47,6 +48,7 @@ $MAIN  = "/star/data";                                    # default base path
           "/gpfs01/star/scratch"   => 1,
           "/gpfs01/star/pwg_tasks" => 1,
           "/gpfs01/star/pwg"       => 1,
+          "/gpfs01/star/embed"     => 1,
 
           "/star/subsys/*"         => 2,
           "/gpfs01/star/subsys"    => 2,
@@ -56,7 +58,7 @@ $MAIN  = "/star/data";                                    # default base path
           "/star/data14-17"        => 2,
           "/gpfs01/star/data18"    => 2,   # embedding - appears before a wildcard is OK
 
-          "/star/institutions/*"   => 3,
+          #"/star/institutions/*"   => 3,
 
           "/gpfs01/star/data*"     => 4, # a link reading will be done, duplicate removed
           "/gpfs03/star/data*"     => 4, # a link reading will be done, duplicate removed
@@ -73,7 +75,7 @@ $MAIN  = "/star/data";                                    # default base path
 %TITLES = (
             1 => "General space for users",
 	    2 => "Project reserved spaces",
-	    3 => "Institution disk space",
+	    #3 => "Institution disk space",
             4 => "Production",
 	    5 => "Miscellaneous space"
           );
@@ -149,7 +151,8 @@ $BREAK{"06"}   =  "Assigned TEMPORARY space for sub-systems and Core-Activities"
 $BREAK{"19"}   =  "Data Production Disks";
 
 # Addiitonal header based on patterns
-$BHEAD{"inst"} =  "Institution or specialized usage disks";
+#$BHEAD{"inst"} =  "Institution or specialized usage disks";
+$BHEAD{"inst"} =  "Specialized usage disks";
 $BEND          =  "#terminate header#" ;  # a random header pattern indicating it will not be re-used
 
 # A generic tag for addiitonal intremediate markers
