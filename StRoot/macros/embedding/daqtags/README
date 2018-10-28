@@ -7,6 +7,7 @@ modify daq.sh, change the file type (e.g. st_physics_adc), trgsetupname, and/or 
 run ./daq.sh to obtain the full list of available daq files on HPSS for a specific data configuration. 
 the list filename MUST end with .daq.list, "all.daq.list" will be used below as an example.
 NOTE that trgword is not a reliable keyword in get_file_list.pl, so do not use it in the conditions to select daq files.
+NOTE2: ONLY those st_XXX_adc daq files contain the raw ADC data, hence can be used for embedding.
 
 Step 2:
 obtain the list of good runs or bad runs from PA. (ignore this step if both of them can not be provided)
