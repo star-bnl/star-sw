@@ -1,5 +1,20 @@
-// $Id: St_geant_Maker.cxx,v 1.172 2018/10/16 01:07:12 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.173 2018/10/30 13:54:03 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.173  2018/10/30 13:54:03  jwebb
+// Implemented a templated method for creating and filling the g2t hit tables.
+//
+// This reduces the boilerplate code required when integrating a new detector
+// subsystem, and streamlines maintanence.
+//
+// We also add a summary printout of the number of hits found in each subsystem,
+// allowing nightly tests to keep track of changes in the geometry introduced
+// at the hit level.
+//
+// Code was tested for the first cut and last production geometry in each run
+// from 2005 to 2018.  For 1k pythia event -4.5 < eta < 4.5, geant.root file
+// size is nearly identical (~few to 50 bits/event) comparing old and new version
+// of St_geant_Maker.  When file compression is switched off, file size is identical.
+//
 // Revision 1.172  2018/10/16 01:07:12  perev
 // Two years old mistype fix
 //
@@ -760,7 +775,7 @@ St_geant_Maker::St_geant_Maker(const Char_t *name,Int_t nwgeant,Int_t nwpaw, Int
    fNwGeant(nwgeant), fNwPaw(nwpaw), fIwType(iwtype),
    fVolume(0), fTopGeoVolume(0), 
   fInputFile(""),fGeoDirectory(0), fEvtHddr(0), 
-  fRemakeGeometry(kFALSE),m_geom_gdat(0),mInitialization(""), mFieldOpt("")
+  fRemakeGeometry(kFALSE),m_geom_gdat(0),mInitialization(""), mFieldOpt(""), mHitCounts()
 {
   fgGeantMk = this;
   fgGeom  = new TDataSet("geom");  
@@ -1119,7 +1134,7 @@ Int_t St_geant_Maker::InitRun(Int_t run){
 }
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Make() {
-  Int_t    nhits,nhit1,nhit2,nhit3,nhit4,link=1,ide=1,npart,irun,ievt,iwtfl;
+  Int_t    /*nhits,nhit1,nhit2,nhit3,nhit4,*/link=1,ide=1,npart,irun,ievt,iwtfl;
   Float_t  vert[4],weigh;
   if (GetDebug()) { Do("debug on;"); } else {Do("debug off;"); }
   int iRes = 0; if(iRes) {/*touch*/};
@@ -1231,363 +1246,85 @@ Int_t St_geant_Maker::Make() {
   }
   //---------------------- inner part -------------------------//
 
-  // Note that we treat the SSD (or SISD as we call it in geo) on
-  // the same basis as the SVT, which applies since we decoupled
-  // the two detectors
-  nhits = 0;
-  geant3->Gfnhit("SVTH","SVTD", nhits);
-  if (nhits>0) { 
-    St_g2t_svt_hit *g2t_svt_hit = new St_g2t_svt_hit("g2t_svt_hit",nhits);
-    AddData(g2t_svt_hit); 
-    
-    /*iRes =*/ g2t_svt(g2t_track,g2t_svt_hit); if (Debug() > 1) g2t_svt_hit->Print(0,10);
-    //	     ===============================
-  }
+  // Silicon vertex tracker 
+  AddHits<St_g2t_svt_hit>( "SVTH", {"SVTD"}              , "g2t_svt_hit", g2t_svt ); 
 
-  nhits = 0;
-  geant3->Gfnhit("SISH","SFSD", nhits);
-  if (nhits>0) { 
-    St_g2t_ssd_hit *g2t_ssd_hit = new St_g2t_ssd_hit("g2t_ssd_hit",nhits);
-    AddData(g2t_ssd_hit);
-    
-    /*iRes =*/ g2t_ssd(g2t_track,g2t_ssd_hit); if (Debug() > 1) g2t_ssd_hit->Print(0,10);
-    //	     ===============================
-  }
+  // Heavy flavor tracker 
+  AddHits<St_g2t_ssd_hit>( "SISH", {"SFSD"}              , "g2t_ssd_hit", g2t_ssd ); 
+  AddHits<St_g2t_pix_hit>( "PIXH", {"PLAC"}              , "g2t_pix_hit", g2t_pix ); 
+  AddHits<St_g2t_ist_hit>( "ISTH", {"IBSS"}              , "g2t_ist_hit", g2t_ist ); 
 
-  
-  nhits = 0;
-  geant3->Gfnhit("PIXH","PLAC", nhits);
-  
-  if (nhits>0) { 
-    St_g2t_pix_hit *g2t_pix_hit = new St_g2t_pix_hit("g2t_pix_hit",nhits);
-    AddData(g2t_pix_hit);
-    
-    /*iRes =*/ g2t_pix(g2t_track,g2t_pix_hit); if (Debug() > 1) g2t_pix_hit->Print(0,10);
-    //	     ===============================
-  }
-  
-  nhits = 0;
-  geant3->Gfnhit("HPDH","YPLA", nhits);
-  
-  if (nhits>0) { 
-    St_g2t_hpd_hit *g2t_hpd_hit = new St_g2t_hpd_hit("g2t_hpd_hit",nhits);
-    AddData(g2t_hpd_hit);
-    
-    /*iRes =*/ g2t_hpd(g2t_track,g2t_hpd_hit); if (Debug() > 1) g2t_hpd_hit->Print(0,10);
-    //	     ===============================
-  }
+  // Legacy RnD detectors
+  AddHits<St_g2t_hpd_hit>( "HPDH", {"YPLA"}              , "g2t_hpd_hit", g2t_hpd ); 
+  AddHits<St_g2t_gem_hit>( "GEMH", {"GMDI"}              , "g2t_gem_hit", g2t_gem ); 
+  AddHits<St_g2t_igt_hit>( "IGTH", {"IGAL"}              , "g2t_igt_hit", g2t_igt ); 
+  AddHits<St_g2t_fst_hit>( "FSTH", {"FDSW"}              , "g2t_fst_hit", g2t_fst ); 
 
-  nhits = 0;
-  geant3->Gfnhit("ISTH","IBSS", nhits);
-  
-  if (nhits>0) { 
-    St_g2t_ist_hit *g2t_ist_hit = new St_g2t_ist_hit("g2t_ist_hit",nhits);
-    AddData(g2t_ist_hit);
-    
-    /*iRes =*/ g2t_ist(g2t_track,g2t_ist_hit); if (Debug() > 1) g2t_ist_hit->Print(0,10);
-    //	     ===============================
-  }
+  // Forward GEM tracker
+  AddHits<St_g2t_fgt_hit>( "FGTH", {"FGZC","FGZD","FZCB"}, "g2t_fgt_hit", g2t_fgt ); 
 
-  nhits = 0;
-  geant3->Gfnhit("GEMH","GMDI", nhits);
-  
-  if (nhits>0) { 
-    St_g2t_gem_hit *g2t_gem_hit = new St_g2t_gem_hit("g2t_gem_hit",nhits);
-    AddData(g2t_gem_hit);
-    
-    /*iRes =*/ g2t_gem(g2t_track,g2t_gem_hit); if (Debug() > 1) g2t_gem_hit->Print(0,10);
-    //	     ===============================
-  }
+  // TPC pse
+  AddHits<St_g2t_tpc_hit>( "TPCH", {"TPAD"}              , "g2t_tpc_hit", g2t_tpc ); 
+  AddHits<St_g2t_mwc_hit>( "TPCH", {"TMSE"}              , "g2t_mwc_hit", g2t_mwc ); 
 
-  nhits = 0;
-  geant3->Gfnhit("IGTH","IGAL", nhits);
-  
-  if (nhits>0) { 
-    St_g2t_igt_hit *g2t_igt_hit = new St_g2t_igt_hit("g2t_igt_hit",nhits);
-    AddData(g2t_igt_hit);
-    
-    /*iRes =*/ g2t_igt(g2t_track,g2t_igt_hit); if (Debug() > 1) g2t_igt_hit->Print(0,10);
-    //	     ===============================
-  }
+  // FTPC  
+  AddHits<St_g2t_ftp_hit>( "FTPH", {"FSEC"}              , "g2t_ftp_hit", g2t_ftp ); 
 
-  nhits = 0;
-  geant3->Gfnhit("FSTH","FDSW", nhits);
+  // BTOF 
+  AddHits<St_g2t_ctf_hit>( "BTOH", {"BXSA"}              , "g2t_ctb_hit", g2t_ctb ); 
+  AddHits<St_g2t_ctf_hit>( "BTOH", {"BCSB"}              , "g2t_tof_hit", g2t_tof ); 
+  AddHits<St_g2t_ctf_hit>( "BTOH", {"BRSG"}              , "g2t_tfr_hit", g2t_tfr ); 
   
-  if (nhits>0) { 
-    St_g2t_fst_hit *g2t_fst_hit = new St_g2t_fst_hit("g2t_fst_hit",nhits);
-    AddData(g2t_fst_hit);
-    
-    /*iRes =*/ g2t_fst(g2t_track,g2t_fst_hit); if (Debug() > 1) g2t_fst_hit->Print(0,10);
-    //	     ===============================
-  }
+  // Endcap TOF
+  AddHits<St_g2t_ctf_hit>( "ETOH", {"ECEL"}, "g2t_eto_hit", g2t_eto ); 
+  
+  // Ancient RICH
+  AddHits<St_g2t_rch_hit>( "RICH", {"RGAP","RSCI","FREO","QUAR"}, "g2t_rch_hit", g2t_rch ); 
+  
+  // Barrel  Calorimeter
+  AddHits<St_g2t_emc_hit>( "CALH", {"CSUP"}, "g2t_emc_hit", g2t_emc ); 
+  AddHits<St_g2t_emc_hit>( "CALH", {"CSDA"}, "g2t_smd_hit", g2t_smd ); 
 
-  int myNhits=0;
-  geant3->Gfnhit("FGTH","FGZC", myNhits);
-  nhits = myNhits;
-  geant3->Gfnhit("FGTH","FGZD", myNhits);
-  nhits+= myNhits;
-  geant3->Gfnhit("FGTH","FZCB", myNhits); // from FgtmGeoV.xml
-  nhits+= myNhits;
-  if (nhits>0) { 
-    St_g2t_fgt_hit *g2t_fgt_hit = new St_g2t_fgt_hit("g2t_fgt_hit",nhits);
-    AddData(g2t_fgt_hit);
-    
-    /*iRes =*/ g2t_fgt(g2t_track,g2t_fgt_hit); if (Debug() > 1) g2t_fgt_hit->Print(0,10);
-    //	     ===============================
-  }
+  // Endcap Calorimeter 
+  AddHits<St_g2t_emc_hit>( "ECAH",{"ESCI","ELGR", "EPCT" },"g2t_eem_hit", g2t_eem ); 
+  AddHits<St_g2t_emc_hit>( "ECAH",{"EXSE","EHMS"         },"g2t_esm_hit", g2t_esm ); 
 
-  geant3->Gfnhit("TPCH","TPAD", nhits);
-  if (nhits>0){ 
-    St_g2t_tpc_hit *g2t_tpc_hit = new St_g2t_tpc_hit("g2t_tpc_hit",nhits);
-    AddData(g2t_tpc_hit);
-    
-    /*iRes =*/ g2t_tpc(g2t_track,g2t_tpc_hit); if (Debug() > 1) g2t_tpc_hit->Print(0,10);
-    //	     ==============================
-  }
-  
-  
-  nhits = 0;
-  geant3->Gfnhit("TPCH","TMSE", nhits);
-  if (nhits>0) { 
-    St_g2t_mwc_hit *g2t_mwc_hit = new St_g2t_mwc_hit("g2t_mwc_hit",nhits);
-    AddData(g2t_mwc_hit);
-    iRes = g2t_mwc(g2t_track,g2t_mwc_hit);if (Debug() > 1) g2t_mwc_hit->Print(0,10);
-    //	     ==============================
-  }
-  
-  nhits = 0;
-  geant3->Gfnhit("FTPH","FSEC", nhits);
-  if (nhits>0){
-    St_g2t_ftp_hit *g2t_ftp_hit = new St_g2t_ftp_hit("g2t_ftp_hit",nhits);
-    AddData(g2t_ftp_hit);
-    iRes = g2t_ftp(g2t_track,g2t_ftp_hit);
-    //           ===============================
-  }
-  
-  nhits = 0;
-  geant3->Gfnhit("BTOH","BXSA", nhits);
-  if (nhits>0) { 
-    St_g2t_ctf_hit *g2t_ctb_hit = new St_g2t_ctf_hit("g2t_ctb_hit",nhits);
-    AddData(g2t_ctb_hit);
-    iRes = g2t_ctb(g2t_track,g2t_ctb_hit); if (Debug() > 1) g2t_ctb_hit->Print(0,10);
-    //           ==============================
-  }
-  
-  nhits = 0;
-  geant3->Gfnhit("BTOH","BCSB", nhits);
-  if (nhits>0) {
-    St_g2t_ctf_hit *g2t_tof_hit = new St_g2t_ctf_hit("g2t_tof_hit",nhits);
-    AddData(g2t_tof_hit);
-    iRes = g2t_tof(g2t_track,g2t_tof_hit); if (Debug() > 1) g2t_tof_hit->Print(0,10);
-    //           ==============================
-  }
-  
-  nhits = 0;
-  geant3->Gfnhit("BTOH","BRSG", nhits);
-  if (nhits>0) {
-    St_g2t_ctf_hit *g2t_tfr_hit = new St_g2t_ctf_hit("g2t_tfr_hit",nhits);
-    AddData(g2t_tfr_hit);
-    iRes = g2t_tfr(g2t_track,g2t_tfr_hit); if (Debug() > 1) g2t_tfr_hit->Print(0,10);
-    //           ==============================
-  }
+  // Vertex Position Detector
+  AddHits<St_g2t_vpd_hit>( "VPDH", {"VRAD"}, "g2t_vpd_hit", g2t_vpd ); 
 
-  nhits = 0;
-  geant3->Gfnhit("ETOH","ECEL", nhits);
-  //  LOG_INFO << "ETOF nhits = " << nhits << endm;
-  if (nhits>0) {
-    St_g2t_ctf_hit *g2t_eto_hit = new St_g2t_ctf_hit("g2t_eto_hit",nhits);
-    AddData(g2t_eto_hit);
-    iRes = g2t_eto(g2t_track,g2t_eto_hit); if (Debug() > 1) g2t_eto_hit->Print(0,10);
-    //           ==============================
-  }
+  // Photon Multiplicity Detector 
+  AddHits<St_g2t_pmd_hit>( "PHMH", {"PDGS"}              , "g2t_pmd_hit", g2t_pmd ); 
   
+  // Zero degree calorimeter 
+  AddHits<St_g2t_emc_hit>( "ZCAH", {"QSCI"}              , "g2t_zdc_hit", g2t_zdc ); 
   
-  nhit1 = nhit2 = nhit3 = nhit4 = 0;
-  geant3->Gfnhit("RICH","RGAP", nhit1);
-  geant3->Gfnhit("RICH","RCSI", nhit2);
-  geant3->Gfnhit("RICH","FREO", nhit3);
-  geant3->Gfnhit("RICH","QUAR", nhit4);
-  //  LOG_INFO  << nhit1 << " " << nhit2 << " " << nhit3 << " " << nhit4 << endm;
-  nhits=nhit1+nhit2+nhit3+nhit4;
-  if (nhits>0) {
-    St_g2t_rch_hit *g2t_rch_hit = new St_g2t_rch_hit("g2t_rch_hit",nhits);
-    AddData(g2t_rch_hit);
-    iRes = g2t_rch(g2t_track,g2t_rch_hit); if (Debug() > 1) g2t_rch_hit->Print(0,10);
-    //           ==============================
-  }
-  
-  //---------------------- calorimeters -------------------------//
-  nhits = 0;
-  geant3->Gfnhit("CALH","CSUP", nhits);
-  if (nhits>0) {
-    St_g2t_emc_hit *g2t_emc_hit = new St_g2t_emc_hit("g2t_emc_hit",nhits);
-    AddData(g2t_emc_hit);
-    iRes = g2t_emc(g2t_track,g2t_emc_hit); if (Debug() > 1) g2t_emc_hit->Print(0,10); 	 
-     //           ==============================
-  }
-  
-  nhits = 0;
-  geant3->Gfnhit("CALH","CSDA", nhits);
-  if (nhits>0) {
-    St_g2t_emc_hit *g2t_smd_hit = new St_g2t_emc_hit("g2t_smd_hit",nhits);
-    AddData(g2t_smd_hit);
-    iRes = g2t_smd(g2t_track,g2t_smd_hit); if (Debug() > 1) g2t_smd_hit->Print(0,10);
-    //           ==============================
-  }
-  
-  nhit1 = nhit2 = nhit3 = 0;
-  geant3->Gfnhit("ECAH","ESCI", nhit1);
-  geant3->Gfnhit("ECAH","ELGR", nhit2);
-  geant3->Gfnhit("ECAH","EPCT", nhit3);
-  nhits = nhit1+nhit2+nhit3; 
-  if (nhits>0) {
-    St_g2t_emc_hit *g2t_eem_hit = new St_g2t_emc_hit("g2t_eem_hit",nhits);
-    AddData(g2t_eem_hit);
-    iRes = g2t_eem(g2t_track,g2t_eem_hit); if (Debug() > 1) g2t_eem_hit->Print(0,10);
-    //           ==============================
-  }
-  nhit1 = nhit2 = 0;
-  geant3->Gfnhit("ECAH","EXSE", nhit1);
-  geant3->Gfnhit("ECAH","EHMS", nhit2);
-  nhits = nhit1+nhit2;
-  if (nhits>0) {
-    St_g2t_emc_hit *g2t_esm_hit = new St_g2t_emc_hit("g2t_esm_hit",nhits);
-    AddData(g2t_esm_hit);
-    iRes = g2t_esm(g2t_track,g2t_esm_hit); if (Debug() > 1) g2t_esm_hit->Print(0,10);
-    //           ==============================
-  }
-  
-  nhits = 0;
-  geant3->Gfnhit("VPDH","VRAD", nhits);
-  if (nhits>0) {
-    St_g2t_vpd_hit *g2t_vpd_hit = new St_g2t_vpd_hit("g2t_vpd_hit",nhits);
-    AddData(g2t_vpd_hit);
-    iRes = g2t_vpd(g2t_track,g2t_vpd_hit); if (Debug() > 1) g2t_vpd_hit->Print(0,10);
-    //           ==============================
-  }
-  
-  nhits = 0;
-  geant3->Gfnhit("PHMH","PDGS", nhits);
-  if (nhits>0) {
-    St_g2t_pmd_hit *g2t_pmd_hit = new St_g2t_pmd_hit("g2t_pmd_hit",nhits);
-    AddData(g2t_pmd_hit);
-    iRes = g2t_pmd(g2t_track,g2t_pmd_hit); if (Debug() > 1) g2t_pmd_hit->Print(0,10);
-    //           ==============================
-  }
-  
-  nhits = 0;
-  geant3->Gfnhit("ZCAH","QSCI", nhits);
-  if (nhits>0) {
-    St_g2t_emc_hit *g2t_zdc_hit = new St_g2t_emc_hit("g2t_zdc_hit",nhits);
-    AddData(g2t_zdc_hit);
-    iRes = g2t_zdc(g2t_track,g2t_zdc_hit); if (Debug() > 1) g2t_zdc_hit->Print(0,10);
-    //           ==============================
-  }
-  
-  
-  nhits = 0;
-  geant3->Gfnhit("BBCH","BPOL", nhits);
-  if (nhits>0) 
-    {
-      St_g2t_ctf_hit *g2t_bbc_hit = new St_g2t_ctf_hit("g2t_bbc_hit",nhits);
-      AddData(g2t_bbc_hit);
-      iRes = g2t_bbc(g2t_track,g2t_bbc_hit); if (Debug() > 1) g2t_bbc_hit->Print(0,10);
-      //           ==============================
-    }
+  // Beam beam counters  
+  AddHits<St_g2t_ctf_hit>( "BBCH", {"BPOL"}              , "g2t_bbc_hit", g2t_bbc ); 
 
-  nhit1 = nhit2 = nhit3 = 0;
-  geant3->Gfnhit("FPDH","FLGR",nhit1);
-  geant3->Gfnhit("FPDH","FLXF",nhit2);
-  geant3->Gfnhit("FPDH","FPSC",nhit3);
-  geant3->Gfnhit("FPDH","FOSC",nhit4);
-  nhits = nhit1+nhit2+nhit3+nhit4;
-  if (nhits>0) {
-    St_g2t_emc_hit* g2t_fpd_hit = new St_g2t_emc_hit("g2t_fpd_hit",nhits);
-    AddData(g2t_fpd_hit);
-    iRes = g2t_fpd(g2t_track,g2t_fpd_hit); if (Debug() > 1) g2t_fpd_hit->Print(0,10);
-    //           ==============================
-  }
+  // FPD/FPD++/FMS 
+  AddHits<St_g2t_emc_hit>( "FPDH", {"FLGR","FLXF","FPSC","FOSC"}, "g2t_fpd_hit", g2t_fpd ); 
 
-  nhits = 0;
-  geant3->Gfnhit("FSCH","FSCT", nhits);
-  if (nhits>0) {
-    St_g2t_emc_hit *g2t_fsc_hit = new St_g2t_emc_hit("g2t_fsc_hit",nhits);
-    AddData(g2t_fsc_hit);
-    iRes = g2t_fsc(g2t_track,g2t_fsc_hit); if (Debug() > 1) g2t_fsc_hit->Print(0,10);
-    //           ==============================
-  }
+  // RnD calorimenter
+  AddHits<St_g2t_emc_hit>( "FSCH", {"FSCT"}              , "g2t_fsc_hit", g2t_fsc ); 
 
-  nhits = 0; nhit1 = 0; nhit2 = 0; nhit3 = 0;
-  geant3->Gfnhit("MUTH","MIGG", nhit1);
-  geant3->Gfnhit("MUTH","MTTT", nhit2);
-  geant3->Gfnhit("MUTH","MTTF", nhit3); 
-  nhits=nhit1+nhit2+nhit3;
-  if (nhits>0) {
-    St_g2t_mtd_hit *g2t_mtd_hit = new St_g2t_mtd_hit("g2t_mtd_hit",nhits);
-    AddData(g2t_mtd_hit);
-    iRes = g2t_mtd(g2t_track,g2t_mtd_hit); if (Debug() > 1) g2t_mtd_hit->Print(0,10);
-    //           ==============================
-  }
+  // Muon tagging detector 
+  AddHits<St_g2t_mtd_hit>( "MUTH",{"MIGG","MTTT", "MTTF" },"g2t_mtd_hit", g2t_mtd ); 
  
-  nhits = 0;
-  geant3 -> Gfnhit("EIDH","TABD", nhits);
-  if ( nhits > 0 ) 
-    {
-      St_g2t_etr_hit *g2t_etr_hit = new St_g2t_etr_hit("g2t_etr_hit",nhits);
-      AddData(g2t_etr_hit);
-      iRes = g2t_etr( g2t_track, g2t_etr_hit); 
-      if ( Debug() > 1 ) g2t_etr_hit->Print(0,10);
-    }
+  // Endcap trd
+  AddHits<St_g2t_etr_hit>( "EIDH", {"TABD"}              , "g2t_etr_hit", g2t_etr ); 
   
+  // Legacy RnD Forward Hadron calorimeter 
+  AddHits<St_g2t_emc_hit>( "HCAH", {"HCEL","HCES","FPSC","BBCF","BBCB","LEDG","HSTP"} , "g2t_hca_hit", g2t_hca ); 
+  
+  // Forward tracker 
+  AddHits<St_g2t_fts_hit>( "FTSH",{"FTSA","FSIA", "FSIB", "FSIC"}, "g2t_fts_hit", g2t_fts ); 
 
-
-  nhits = 0; nhit1=nhit2=0;  
-  geant3 -> Gfnhit("HCAH","HCEL", nhit1); nhits+=nhit1;
-  geant3 -> Gfnhit("HCAH","HCES", nhit1); nhits+=nhit1;
-  geant3 -> Gfnhit("HCAH","FPSC", nhit1); nhits+=nhit1;
-  geant3 -> Gfnhit("HCAH","BBCF", nhit1); nhits+=nhit1;
-  geant3 -> Gfnhit("HCAH","BBCB", nhit1); nhits+=nhit1;
-  geant3 -> Gfnhit("HCAH","LEDG", nhit1); nhits+=nhit1; 
-  geant3 -> Gfnhit("HCAH","HSTP", nhit1); nhits+=nhit1;
-  if ( nhits > 0 ) 
-  {
-    St_g2t_emc_hit *g2t_hca_hit = new St_g2t_emc_hit("g2t_hca_hit",nhits);
-    AddData(g2t_hca_hit);
-    iRes = g2t_hca( g2t_track, g2t_hca_hit);
-  } 
-
-  nhits=nhit1=0;
-  geant3 -> Gfnhit("FTSH","FTSA", nhit1); nhits+=nhit1; nhit1=0;
-  geant3 -> Gfnhit("FTSH","FSIA", nhit1); nhits+=nhit1; nhit1=0;
-  geant3 -> Gfnhit("FTSH","FSIB", nhit1); nhits+=nhit1; nhit1=0;
-  geant3 -> Gfnhit("FTSH","FSIC", nhit1); nhits+=nhit1; nhit1=0;
-  if ( nhits > 0 ) {
-    St_g2t_fts_hit *g2t_fts_hit = new St_g2t_fts_hit("g2t_fts_hit",nhits);
-    AddData(  g2t_fts_hit );
-    iRes = g2t_fts( g2t_track, g2t_fts_hit );
-  };
-
-  nhits=0;
-
-  geant3 -> Gfnhit("EPDH","EPDT", nhits); 
-  if ( nhits > 0 ) {
-    St_g2t_epd_hit *g2t_epd_hit = new St_g2t_epd_hit("g2t_epd_hit",nhits);
-    m_DataSet->Add(  g2t_epd_hit );
-    /*iRes =*/ g2t_epd( g2t_track, g2t_epd_hit );
-  };
-
-
-
-  //------------------------all bloody detectors done--------------------//
-#if 0
-  Char_t *g2t = "g2t_";
-  Int_t  narg = 0;
-  addrfun address  = (addrfun ) csaddr(g2t);
-  if (address) csjcal(&address,&narg);
-#endif
+  // Event plane detector 
+  AddHits<St_g2t_epd_hit>( "EPDH", {"EPDT"}              , "g2t_epd_hit", g2t_epd ); 
   
   if (cflag->ieorun) return kStEOF; 
   if (cflag->ieotri) return kStErr; 
+
   if (IAttr("flux")) {
     static TH1D *Vx = 0, *Vy = 0, *Vz = 0;
     static TH2D *BbcC = 0;
@@ -1617,6 +1354,16 @@ Int_t St_geant_Maker::Make() {
     if (BbcW  <= 0) BbcW = 0.1;
     if (BbcE  <= 0) BbcE = 0.1;
     BbcC->Fill(TMath::Log10(BbcW),TMath::Log10(BbcE));
+  }
+
+  return kStOK;
+}
+//_____________________________________________________________________________
+int St_geant_Maker::Finish() {  
+  LOG_QA << "St_geant_Maker summary -QA- total number of active volumes with hits: " << mHitCounts.size() << endm;
+  LOG_QA << "St_geant_Maker summary -QA- list of volumes with hits: " << endm;
+  for ( auto i : mHitCounts ) {
+    LOG_QA << "St_geant_Maker summary -QA- g2t hits (" << i.first.c_str() << ") nhits = " << i.second << endm;
   }
   return kStOK;
 }

@@ -1,5 +1,20 @@
-// $Id: St_geant_Maker.h,v 1.56 2017/04/26 20:23:53 perev Exp $
+// $Id: St_geant_Maker.h,v 1.57 2018/10/30 13:54:04 jwebb Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.57  2018/10/30 13:54:04  jwebb
+// Implemented a templated method for creating and filling the g2t hit tables.
+//
+// This reduces the boilerplate code required when integrating a new detector
+// subsystem, and streamlines maintanence.
+//
+// We also add a summary printout of the number of hits found in each subsystem,
+// allowing nightly tests to keep track of changes in the geometry introduced
+// at the hit level.
+//
+// Code was tested for the first cut and last production geometry in each run
+// from 2005 to 2018.  For 1k pythia event -4.5 < eta < 4.5, geant.root file
+// size is nearly identical (~few to 50 bits/event) comparing old and new version
+// of St_geant_Maker.  When file compression is switched off, file size is identical.
+//
 // Revision 1.56  2017/04/26 20:23:53  perev
 // Remove delete
 //
@@ -109,6 +124,8 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #include "StMaker.h"
+#include <string>
+#include <functional> 
 //#define DetectorIndex
 #ifdef DetectorIndex
 #include "TArrayI.h"
@@ -120,6 +137,7 @@ class TShape;
 class TGeoVolume;
 class St_geom_gdat;
 class TFileSet;
+class St_g2t_track;
 class St_geant_Maker : public StMaker {
 protected:
   Int_t  fNwGeant;     // No. of words in GCBANK common block
@@ -141,7 +159,7 @@ protected:
                   St_geant_Maker(const char *name="geant",
 				 Int_t nwgeant=20,Int_t nwpaw=0, Int_t iwtype=0);
    virtual       ~St_geant_Maker(){};
-   virtual Int_t  Finish(){return kStOK;}
+   virtual Int_t  Finish();
    virtual Int_t  Init();
    virtual Int_t  InitRun(Int_t run);
    virtual void   SetDateTime(int idat=0,int itim=0);//
@@ -234,8 +252,37 @@ protected:
    static Gcphys_t  *cphys; //!
    static Int_t      nlev; //!
 
+    
+
+   /// Given a list of sensitive volumes within the (G3) hit container, loop over all
+   /// hits in those volumes and add them to a new g2t table.  
+   /// @param T specifies the type of the table
+   /// @param F specifies the functor class which retrieves the hits from geant
+   /// @param container is the name of the geant container
+   /// @param volumes is the list of sensitive volumes managed by the container
+   /// @param tablename is the name of the table to be created
+   /// @param g2t is the functor of class F passed
+   template<typename T, typename F>
+   int AddHits( std::string container, std::vector<std::string> volumes, std::string tablename, F g2t ){
+       int ntotal = 0, nhits = 0;
+       for ( auto v : volumes ) { 
+	 geant3->Gfnhit( container.c_str(), v.c_str(), nhits ); 
+	 std::string key = container + ":" + v;
+	 if (nhits) { mHitCounts[key] += nhits; mHitCounts["ALL"] += nhits; } 
+	 ntotal += nhits; 
+       } 
+       if ( ntotal <= 0 ) return ntotal;
+       T* table = new T( tablename.c_str(), ntotal );
+       auto* g2t_track = (St_g2t_track*)FindByName("g2t_track"); 
+       g2t( g2t_track, table );
+       AddData( table ); 
+       if ( Debug() > 1 ) table->Print(0,10);  
+       return ntotal;  
+   } 
+  std::map<std::string, int> mHitCounts;
+
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.56 2017/04/26 20:23:53 perev Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.57 2018/10/30 13:54:04 jwebb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 
