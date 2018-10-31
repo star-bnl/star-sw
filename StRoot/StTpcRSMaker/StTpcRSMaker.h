@@ -77,6 +77,7 @@ class StTpcRSMaker : public StMaker {
   static Double_t PadResponseFunc(Double_t *x, Double_t *p);
   static Double_t Gatti(Double_t *x, Double_t *p);
   static Double_t InducedCharge(Double_t s, Double_t h, Double_t ra, Double_t Va, Double_t &t0);
+  static Float_t  GetCutEle();
   static TF1F     *fgTimeShape3[2];  //!
   static TF1F     *fgTimeShape0[2];   //!
   Char_t   beg[1];                    //!

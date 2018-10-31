@@ -247,9 +247,9 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "H", const Char_t *O
   TTreeIter iter("TpcT");
   while ((file = (Char_t *) Dir.NextFile())) {
     TString File(file);
-    if (File.Contains("Plot") || File.Contains("Fit") || File.Contains("ADC") || File.Contains("Pads") || 
-	File.Contains("hist") || File.Contains("tags") || File.Contains("MuMc") ||
-	File.Contains("minimc") || File.Contains("event") ||
+     if (File.Contains("Plot") || File.Contains("Fit") || File.Contains("ADC") || File.Contains("Pads") || 
+	File.Contains("hist") || File.Contains("runco") || File.Contains("MuMc") ||
+	File.Contains("minimc") || File.Contains("event") || File.Contains("geant") ||
 	File.Contains("All") ||
 	File.Contains("MuDst.root")) continue;
     TFile *f = new TFile (File);
@@ -477,9 +477,11 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "H", const Char_t *O
     if (fRcTrack_fNpoints[0] < 10) continue;
     TVector3 mom(fRcTrack_fpx[0],fRcTrack_fpy[0],fRcTrack_fpz[0]);
 #if !defined( __LASER__ ) && !defined(__Cosmics__)
-    if (fNofPV != 1) continue;
-    if (TMath::Abs(fzV) > 20) continue;
+#if 0
+    //    if (fNofPV != 1) continue;
+    if (TMath::Abs(fzV) > 60) continue;
     if (TMath::Abs(fxV) > 1 || TMath::Abs(fyV) > 1) continue;
+#endif
     if (mom.Pt()  < 0.4 || mom.Pt()  > 0.6) continue;
 #if 0
     if (mom.Eta() <-1.0 || mom.Eta() > 0.0) continue;
@@ -489,7 +491,9 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "H", const Char_t *O
 #endif
     //    if (fNoPixels > 80) continue;
     //    if (fNoRcHit < NpadCut) continue;
+#if 0
     if (fRcHit_mCharge[0] < 1.e-6 || fRcHit_mCharge[0] > 100.e-6) continue;
+#endif
 #if 0
     Double_t pmag = mom.Mag();
     //    if (pMomin > 0 && pmag < pMomin || pMomax >0 && pmag > pMomax) continue;
@@ -992,7 +996,7 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
   while ((file = (Char_t *) Dir.NextFile())) {
     TString File(file);
     if (File.Contains("Plot") || File.Contains("Fit") || File.Contains("ADC") || File.Contains("Pads") || 
-	File.Contains("hist") || File.Contains("tags") || File.Contains("MuMc") ||
+	File.Contains("hist") || File.Contains("MuMc") ||
 	File.Contains("minimc") || File.Contains("event") ||
 	File.Contains("All") || File.Contains("Sparse") ||
 	File.Contains("MuDst.root")) continue;
@@ -1123,7 +1127,7 @@ void TpcTdENP(const Char_t *files="*.root", const Char_t *Out = "") {
   while ((file = (Char_t *) Dir.NextFile())) {
     TString File(file);
     if (File.Contains("Plot") || File.Contains("Fit") || File.Contains("ADC") || File.Contains("Pads") || 
-	File.Contains("hist") || File.Contains("tags") || File.Contains("MuMc") ||
+	File.Contains("hist") || File.Contains("MuMc") ||
 	File.Contains("minimc") || File.Contains("event") ||
 	File.Contains("All") || File.Contains("Sparse") ||
 	File.Contains("MuDst.root")) continue;
@@ -1222,7 +1226,7 @@ void TpcTPads(const Char_t *files="*.root", const Char_t *Out = "") {
     TString bN(gSystem->BaseName(file));
     cout << "File " << file << " bname = " << bN.Data() << endl;
     if (bN.Contains("Plot") || bN.Contains("Fit") || bN.Contains("ADC") || bN.Contains("Pads") || 
-	bN.Contains("hist") || bN.Contains("tags") || bN.Contains("MuMc") || bN.Contains("minimc") ||
+	bN.Contains("hist") || bN.Contains("MuMc") || bN.Contains("minimc") ||
 	bN.Contains("minimc") || bN.Contains("event") ||
 	bN.Contains("All") || bN.Contains("Sparse") ||
 	bN.Contains("MuDst.root")) continue;
@@ -3012,7 +3016,7 @@ void TpcTPadSp(const Char_t *Out = "SpXSpZ", const Char_t *files="*.root") {
   while ((file = (Char_t *) Dir.NextFile())) {
     TString File(file);
     if (File.Contains("Plot") || File.Contains("Fit") || File.Contains("ADC") || File.Contains("Pads") || 
-	File.Contains("hist") || File.Contains("tags") || File.Contains("MuMc") || File.Contains("minimc") ||
+	File.Contains("hist") || File.Contains("MuMc") || File.Contains("minimc") ||
 	File.Contains("minimc") || File.Contains("event") ||
 	File.Contains("Sparse") ||
 	File.Contains("All") ||
