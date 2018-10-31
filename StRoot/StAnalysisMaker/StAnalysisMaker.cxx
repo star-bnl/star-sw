@@ -753,6 +753,7 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
   StSPtrVecTrackNode& trackNode = event->trackNodes();
   UInt_t nTracks = trackNode.size();
   StTrackNode *node = 0;
+  UInt_t nGlobalTracks = 0;
   UInt_t nGoodTracks = 0;
   UInt_t nGoodFtpcTracks = 0;
   UInt_t nBeamBackTracks = 0;
@@ -771,6 +772,7 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
     node = trackNode[i]; if (!node) continue;
     gTrack = static_cast<StGlobalTrack*>(node->track(global));
     if (! gTrack) continue;
+    nGlobalTracks++;
     if (gTrack->flag() < 0) continue;
     if (TMath::Abs(gTrack->flag())%100 == 11) nShortTrackForEEmc++;
     if (gTrack->flag()/100 == 9) {
@@ -790,7 +792,7 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
     nGoodTracks++;
   }
   LOG_QA << "# track nodes:   \t"
-	 <<  nTracks << ": good globals with NFitP>="<< NoFitPointCutForGoodTrack << ": " << nGoodTracks;
+	 <<  nGlobalTracks << ": good globals with NFitP>="<< NoFitPointCutForGoodTrack << ": " << nGoodTracks;
   if (nGoodFtpcTracks) {LOG_QA << ": Ftpc tracks : " << nGoodFtpcTracks;}
   LOG_QA << endm;
   if (nBeamBackTracks)    {LOG_QA  << "BeamBack tracks: " << nBeamBackTracks << ": good ones: " << nGoodBeamBackTracks;}

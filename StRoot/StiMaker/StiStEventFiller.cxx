@@ -565,6 +565,7 @@ using namespace std;
 
 #include "StEventUtilities/StEventHelper.h"
 #include "StEventUtilities/StuFixTopoMap.h"
+#include "StEventUtilities/StTrackUtilities.h"
 //Sti
 #include "Sti/StiTrackContainer.h"
 #include "Sti/StiKalmanTrack.h"
@@ -1134,184 +1135,6 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   return;
 }
 
-///_____________________________________________________________________________
-/// data members from StEvent/StTrack.h
-///  The track flag (mFlag accessed via flag() method) definitions with ITTF 
-///(flag definition in EGR era can be found at  http://www.star.bnl.gov/STAR/html/all_l/html/dst_track_flags.html)
-///
-///  mFlag=zxyy, where  z = 1 for pile up track in TPC (otherwise 0) 
-///                     x indicates the detectors included in the fit and 
-///                    yy indicates the status of the fit. 
-///  Positive mFlag values are good fits, negative values are bad fits. 
-///
-///  The first digit indicates which detectors were used in the refit: 
-///
-///      x=1 -> TPC only 
-///      x=3 -> TPC       + primary vertex 
-///      x=5 -> SVT + TPC 
-///      x=6 -> SVT + TPC + primary vertex 
-///      x=7 -> FTPC only 
-///      x=8 -> FTPC      + primary 
-///      x=9 -> TPC beam background tracks            
-///
-///  The last two digits indicate the status of the refit: 
-///       = +x01 -> good track 
-///
-///       = -x01 -> Bad fit, outlier removal eliminated too many points 
-///       = -x02 -> Bad fit, not enough points to fit 
-///       = -x03 -> Bad fit, too many fit iterations 
-///       = -x04 -> Bad Fit, too many outlier removal iterations 
-///       = -x06 -> Bad fit, outlier could not be identified 
-///       = -x10 -> Bad fit, not enough points to start 
-///
-///       = -x11 -> Short track pointing to EEMC
-
-void StiStEventFiller::fillFlags(StTrack* gTrack) 
-{
-  Int_t flag = 0;
-  if (gTrack->type()==global) {
-    flag = 101; //change: make sure flag is ok
-  }
-  else if (gTrack->type()==primary) {
-    flag = 301;
-  }
-  StTrackFitTraits& fitTrait = gTrack->fitTraits();
-  //int tpcFitPoints = fitTrait.numberOfFitPoints(kTpcId);
-  int svtFitPoints = fitTrait.numberOfFitPoints(kSvtId);
-  int ssdFitPoints = fitTrait.numberOfFitPoints(kSsdId) +  fitTrait.numberOfFitPoints(kSstId);
-  int pxlFitPoints = fitTrait.numberOfFitPoints(kPxlId);
-  int istFitPoints = fitTrait.numberOfFitPoints(kIstId);
-  //  int totFitPoints = fitTrait.numberOfFitPoints();
-  /// In the flagging scheme, I will put in the cases for
-  /// TPC only, and TPC+SVT (plus their respective cases with vertex)
-  /// Ftpc case has their own code and SSD doesn't have a flag...
-
-  // first case is default above, tpc only = 101 and tpc+vertex = 301
-  // next case is:
-  // if the track has svt points, it will be an svt+tpc track
-  // (we assume that the ittf tracks start from tpc, so we don't
-  // use the "svt only" case.)
-  if (svtFitPoints+ssdFitPoints+pxlFitPoints+istFitPoints>0) {
-      if (gTrack->type()==global) {
-	flag = 501; //svt+tpc
-      }
-      else if (gTrack->type()==primary) {
-	flag = 601;  //svt+tpc+primary
-      }
-  }
-  const StTrackDetectorInfo *dinfo = gTrack->detectorInfo();
-  if (dinfo) {
-    Int_t NoTpcFitPoints = dinfo->numberOfPoints(kTpcId);
-    Int_t NoFtpcWestId   = dinfo->numberOfPoints(kFtpcWestId);
-    Int_t NoFtpcEastId   = dinfo->numberOfPoints(kFtpcEastId);
-    // Check that it could be TPC pile-up track, i.e. in the same half TPC (West East) 
-    // there are more than 2 hits with wrong Z -position
-    if (NoTpcFitPoints >= 11) {
-      const StPtrVecHit& hits = dinfo->hits(kTpcId);
-      Int_t Nhits = hits.size();
-      Int_t NoWrongSignZ = 0;
-      Int_t NoPositiveSignZ = 0;
-      Int_t NoNegativeSignZ = 0;
-      Int_t NoPromptHits = 0;
-      Double_t zE = -200, zW = 200;
-      Int_t    rE = 0, rW = 0;
-      Int_t   nW = 0, nE = 0;
-      for (Int_t i = 0; i < Nhits; i++) {
-	const StTpcHit *hit = (StTpcHit *) hits[i];
-	Double_t z = hit->position().z();
-	Int_t sector = hit->sector();
-	if (sector <= 12) nW++;
-	else              nE++;
-	Int_t row    = hit->padrow();
-	if ((z < -1.0 && sector <= 12) ||
-	    (z >  1.0 && sector >  12)) NoWrongSignZ++;
-	else {
-	  if (z < -1.0) {NoNegativeSignZ++; if (z > zE) {zE = z; rE = row;}}
-	  if (z >  1.0) {NoPositiveSignZ++; if (z < zW) {zW = z; rW = row;}}
-	}
-	if (TMath::Abs(209.4 - TMath::Abs(z)) < 3.0) NoPromptHits++;
-      }
-      if (NoWrongSignZ >= 2)                             gTrack->setPostCrossingTrack();
-      else {
-	if (NoPromptHits == 1)                           gTrack->setPromptTrack();
-	if (NoPositiveSignZ >= 2 && NoNegativeSignZ >=2) {
-	  if (zW - zE < 10 ||
-	      TMath::Abs(rW - rE) < 3) 
-	    gTrack->setMembraneCrossingTrack();
-	}
-      }
-      if (nW >  0 && nE == 0) gTrack->setWestTpcOnly();
-      if (nW == 0 && nE >  0) gTrack->setEastTpcOnly();
-    }
-    if (NoTpcFitPoints < 11 && NoFtpcWestId < 5 && NoFtpcEastId < 5) { 
-      // hadrcoded number correspondant to  __MIN_HITS_TPC__ 11 in StMuFilter.cxx
-      //keep most sig. digit, set last digit to 2, and set negative sign
-      gTrack->setRejected();
-      flag = - ((flag/100)*100 + 2); // -x02 
-      if (gTrack->geometry()) {
-	const StThreeVectorF &momentum = gTrack->geometry()->momentum();
-	if (momentum.pseudoRapidity() > 0.5) {
-	  const StTrackDetectorInfo *dinfo = gTrack->detectorInfo();
-	  const StPtrVecHit& hits = dinfo->hits();
-	  Int_t Nhits = hits.size();
-	  Bool_t ShortTrack2EMC = kFALSE;
-	  for (Int_t i = 0; i < Nhits; i++) {
-	    const StHit *hit = hits[i];
-	    if (hit->position().z() > 150.0) {
-	      ShortTrack2EMC = kTRUE;
-	      break;
-	    }
-	  }
-	  if (ShortTrack2EMC) {
-	    gTrack->setShortTrack2EMC();
-	    flag = (TMath::Abs(flag)/100)*100+11; ; // +x11 
-	  }
-	}
-      }
-    }
-  }
-  
-  gTrack->setFlag( flag);
-  if (gTrack->type()==global) {
-    // Match with fast detectors
-    StPhysicalHelixD hlx = gTrack->outerGeometry()->helix();
-    StiTrack2FastDetector t;
-    mFastDetectorMatcher->matchTrack2FastDetectors(&hlx,&t);
-    if (t.btofBin > 0) {
-      if (t.mBtof > 0) gTrack->setToFMatched();
-      else             gTrack->setToFNotMatched();
-    }
-    if (t.ctbBin > 0) {
-      if (t.mCtb  > 0) gTrack->setCtbMatched();
-      else             gTrack->setCtbNotMatched();
-    }
-    if (t.bemcBin > 0 || t.eemcBin > 0) {
-      Int_t W = 0;
-      if (t.bemcBin > 0) {
-	W = StBemcHitList::instance()->getFired(t.bemcBin);
-	if (W > 0) gTrack->setBemcMatched();
-	else      gTrack->setBemcNotMatched();
-      } else if (t.eemcBin > 0) {
-	W = StEemcHitList::instance()->getFired(t.eemcBin);
-	if (W > 0) gTrack->setEemcMatched();
-	else      gTrack->setEemcNotMatched();
-      }
-      if (W > 0) {
-	UInt_t fext = gTrack->flagExtension();
-	if (W > 7) W = 7;
-	fext &= ~7;
-	fext += W;
-	gTrack->setFlagExtension(fext);
-      }
-    }
-  } else if (gTrack->type()==primary) {
-    StTrackNode *n = gTrack->node();
-    assert(n);
-    StTrack *t = n->track(global);
-    assert(t);
-    gTrack->setFlagExtension(t->flagExtension());
-  }
-}
 //_____________________________________________________________________________
 void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track,StTrackDetectorInfo* detInfo )
 {
@@ -1350,7 +1173,7 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track,StTrackD
   fillFitTraits(gTrack, track);
   gTrack->setDetectorInfo(detInfo);
   StuFixTopoMap(gTrack);
-  fillFlags(gTrack);
+  StTrackUtilities::instance()->FillFlags(gTrack);
   if (!track->isPrimary()) fillDca(gTrack,track);
   return;
 }

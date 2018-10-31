@@ -677,7 +677,7 @@ void StKFVertexMaker::ReFitToVertex() {
 	fTrackNodeMap[kg] = nodes[itk];
       }
       if (P.GetQ()) {
-	pTracks[itk] =  FitTrack2Vertex(V, track);
+	pTracks[itk] =  FitTrack2Vertex(V, track, primV);
 #if 1 /* remove tracks which fails fit */
 	if (! pTracks[itk]) {
 	  delete V->Remove((StKFTrack*) track);
@@ -692,8 +692,7 @@ void StKFVertexMaker::ReFitToVertex() {
     for (Int_t i = 0; i < NoTracks; i++) {if (pTracks[i]) NoPrTracks++;}
     UInt_t NoPrTracksB = NoPrTracks;
     if (beam) NoPrTracksB += 2;
-    if (NoPrTracksB <= 2) 
-      {
+    if (NoPrTracksB <= 2)       {
       for (Int_t i = 0; i < NoTracks; i++) {
 	StPrimaryTrack *t = pTracks[i];
 	if (! t) continue;
@@ -715,6 +714,7 @@ void StKFVertexMaker::ReFitToVertex() {
       fTrackNodeMap[kgp] = nodepf;
       StSPtrVecTrackNode& trNodeVec = pEvent->trackNodes(); 
       trNodeVec.push_back(nodepf);
+#if 0
       for (Int_t i = 0; i < NoTracks; i++) {
 	if (! tracks[i]) continue;
 	if (! nodes[i]) continue;
@@ -723,12 +723,8 @@ void StKFVertexMaker::ReFitToVertex() {
 	  primV->addDaughter(t);
 	  // Done in FitTrack2Vertex    nodes[i]->addTrack(t);
 	}
-	PrPP(ReFitToVertex,tracks[i]->Particle());
-	StTrackMassFit *mf = new StTrackMassFit(tracks[i]->Id(),&tracks[i]->Particle());
-	PrPP(ReFitToVertex,*mf);
-	primV->addMassFit(mf);
-	nodes[i]->addTrack(mf);
       }
+#endif
 #if 1
       primV->setTrackNumbers();
       CalculateRank(primV);
@@ -743,10 +739,12 @@ void StKFVertexMaker::ReFitToVertex() {
   }
 }
 //________________________________________________________________________________
-StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   track) {
+StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   track, StPrimaryVertex *primV) {
   StPrimaryTrack* pTrack = 0;
   KFParticle P = track->Particle();
+  Float_t chi2 = P.GetChi2();
   P.SetProductionVertex((const KFVertex &)V->Vertex());
+  Float_t chi2AtVx = P.GetChi2();
   Int_t kg = P.Id();
   PrPP2(FitTrack2Vertex, *V);
   StTrackNode *node = fTrackNodeMap[kg];
@@ -775,10 +773,17 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tra
   pTrack = new StPrimaryTrack();
   *pTrack = *gTrack;
   node->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
-#if 0
+  primV->addDaughter(pTrack);
+  PrPP(FitTrack2Vertex,P);
+  StTrackMassFit *mf = new StTrackMassFit(kg,&P);
+  PrPP(FitTrack2Vertex,*mf);
+  primV->addMassFit(mf);
+  node->addTrack(mf);
   pTrack->setKey( gTrack->key());
   pTrack->setFlagExtension( gTrack->flagExtension());
   pTrack->setIdTruth(gTrack->idTruth(),gTrack->qaTruth());
+  pTrack->fitTraits().setChi2(chi2AtVx-chi2,1);
+#if 0
   StTrackDetectorInfo* detInfo = new StTrackDetectorInfo(*gTrack->detectorInfo());
   pTrack->setDetectorInfo(detInfo);
   StSPtrVecTrackDetectorInfo& detInfoVec = pEvent->trackDetectorInfo(); 

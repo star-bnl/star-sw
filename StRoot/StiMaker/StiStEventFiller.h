@@ -199,7 +199,6 @@ public:
     void fillFitTraits(StTrack* track, StiKalmanTrack* kTrack);
     void fillTrack(StTrack* track, StiKalmanTrack* kTrack,StTrackDetectorInfo* detInfo );
     void fillDca(StTrack* track, StiKalmanTrack* kTrack);
-    void fillFlags(StTrack* track);
     double impactParameter(StiKalmanTrack* kTrack, StThreeVectorD &vertexPosition);
     double impactParameter(StTrack* strack, StThreeVectorD &vertexPosition);
     void setPullEvent(StiPullEvent *pe) 		{mPullEvent=pe;}

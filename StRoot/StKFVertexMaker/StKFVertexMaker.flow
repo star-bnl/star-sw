@@ -50,6 +50,7 @@ StKFVertexMaker::Make
 		  fgcVertices->Fit()
 		  
 	ReFitToVertex();
+	  FitTrack2Vertex
 #if 0
 	MakeV0()
 #else 

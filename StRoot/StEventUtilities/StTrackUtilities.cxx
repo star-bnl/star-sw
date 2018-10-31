@@ -122,17 +122,19 @@ void StTrackUtilities::FillPrimaryTrack(StPrimaryTrack *pTrack) {
 ///
 ///       = -x11 -> Short track pointing to EEMC
 
-void StTrackUtilities::FillFlags(StTrack* gTrack) {
+void StTrackUtilities::FillFlags(StTrack* gTrack) 
+{
+  Int_t flag = 0;
   if (gTrack->type()==global) {
-    gTrack->setFlag(101); //change: make sure flag is ok
+    flag = 101; //change: make sure flag is ok
   }
   else if (gTrack->type()==primary) {
-    gTrack->setFlag(301);
+    flag = 301;
   }
   StTrackFitTraits& fitTrait = gTrack->fitTraits();
   //Int_t tpcFitPoints = fitTrait.numberOfFitPoints(kTpcId);
   Int_t svtFitPoints = fitTrait.numberOfFitPoints(kSvtId);
-  Int_t ssdFitPoints = fitTrait.numberOfFitPoints(kSsdId);
+  Int_t ssdFitPoints = fitTrait.numberOfFitPoints(kSsdId) +  fitTrait.numberOfFitPoints(kSstId);
   Int_t pxlFitPoints = fitTrait.numberOfFitPoints(kPxlId);
   Int_t istFitPoints = fitTrait.numberOfFitPoints(kIstId);
   //  Int_t totFitPoints = fitTrait.numberOfFitPoints();
@@ -147,10 +149,10 @@ void StTrackUtilities::FillFlags(StTrack* gTrack) {
   // use the "svt only" case.)
   if (svtFitPoints+ssdFitPoints+pxlFitPoints+istFitPoints>0) {
       if (gTrack->type()==global) {
-	  gTrack->setFlag(501); //svt+tpc
+	flag = 501; //svt+tpc
       }
       else if (gTrack->type()==primary) {
-	  gTrack->setFlag(601); //svt+tpc+primary
+	flag = 601;  //svt+tpc+primary
       }
   }
   const StTrackDetectorInfo *dinfo = gTrack->detectorInfo();
@@ -160,38 +162,111 @@ void StTrackUtilities::FillFlags(StTrack* gTrack) {
     Int_t NoFtpcEastId   = dinfo->numberOfPoints(kFtpcEastId);
     // Check that it could be TPC pile-up track, i.e. in the same half TPC (West East) 
     // there are more than 2 hits with wrong Z -position
-    Int_t flag = TMath::Abs(gTrack->flag());
     if (NoTpcFitPoints >= 11) {
       const StPtrVecHit& hits = dinfo->hits(kTpcId);
       Int_t Nhits = hits.size();
       Int_t NoWrongSignZ = 0;
+      Int_t NoPositiveSignZ = 0;
+      Int_t NoNegativeSignZ = 0;
+      Int_t NoPromptHits = 0;
+      Double_t zE = -200, zW = 200;
+      Int_t    rE = 0, rW = 0;
+      Int_t   nW = 0, nE = 0;
       for (Int_t i = 0; i < Nhits; i++) {
 	const StTpcHit *hit = (StTpcHit *) hits[i];
-	if ((hit->position().z() < -1.0 && hit->sector() <= 12) ||
-	    (hit->position().z() >  1.0 && hit->sector() >  12)) NoWrongSignZ++;
+	Double_t z = hit->position().z();
+	Int_t sector = hit->sector();
+	if (sector <= 12) nW++;
+	else              nE++;
+	Int_t row    = hit->padrow();
+	if ((z < -1.0 && sector <= 12) ||
+	    (z >  1.0 && sector >  12)) NoWrongSignZ++;
+	else {
+	  if (z < -1.0) {NoNegativeSignZ++; if (z > zE) {zE = z; rE = row;}}
+	  if (z >  1.0) {NoPositiveSignZ++; if (z < zW) {zW = z; rW = row;}}
+	}
+	if (TMath::Abs(209.4 - TMath::Abs(z)) < 3.0) NoPromptHits++;
       }
-      if (NoWrongSignZ >= 2) 
-	gTrack->setFlag((flag%1000) + 1000); // +1000
+      if (NoWrongSignZ >= 2)                             gTrack->setPostCrossingTrack();
+      else {
+	if (NoPromptHits == 1)                           gTrack->setPromptTrack();
+	if (NoPositiveSignZ >= 2 && NoNegativeSignZ >=2) {
+	  if (zW - zE < 10 ||
+	      TMath::Abs(rW - rE) < 3) 
+	    gTrack->setMembraneCrossingTrack();
+	}
+      }
+      if (nW >  0 && nE == 0) gTrack->setWestTpcOnly();
+      if (nW == 0 && nE >  0) gTrack->setEastTpcOnly();
     }
     if (NoTpcFitPoints < 11 && NoFtpcWestId < 5 && NoFtpcEastId < 5) { 
       // hadrcoded number correspondant to  __MIN_HITS_TPC__ 11 in StMuFilter.cxx
       //keep most sig. digit, set last digit to 2, and set negative sign
-      gTrack->setFlag(-(((flag/100)*100)+2)); // -x02 
+      gTrack->setRejected();
+      flag = - ((flag/100)*100 + 2); // -x02 
       if (gTrack->geometry()) {
 	const StThreeVectorF &momentum = gTrack->geometry()->momentum();
 	if (momentum.pseudoRapidity() > 0.5) {
 	  const StTrackDetectorInfo *dinfo = gTrack->detectorInfo();
 	  const StPtrVecHit& hits = dinfo->hits();
 	  Int_t Nhits = hits.size();
+	  Bool_t ShortTrack2EMC = kFALSE;
 	  for (Int_t i = 0; i < Nhits; i++) {
 	    const StHit *hit = hits[i];
 	    if (hit->position().z() > 150.0) {
-	      gTrack->setFlag((((flag/100)*100)+11)); // +x11 
-	      return;
+	      ShortTrack2EMC = kTRUE;
+	      break;
 	    }
+	  }
+	  if (ShortTrack2EMC) {
+	    gTrack->setShortTrack2EMC();
+	    flag = (TMath::Abs(flag)/100)*100+11; ; // +x11 
 	  }
 	}
       }
     }
+  }
+  
+  gTrack->setFlag( flag);
+  if (gTrack->type()==global) {
+#if 0
+    // Match with fast detectors
+    StPhysicalHelixD hlx = gTrack->outerGeometry()->helix();
+    StiTrack2FastDetector t;
+    mFastDetectorMatcher->matchTrack2FastDetectors(&hlx,&t);
+    if (t.btofBin > 0) {
+      if (t.mBtof > 0) gTrack->setToFMatched();
+      else             gTrack->setToFNotMatched();
+    }
+    if (t.ctbBin > 0) {
+      if (t.mCtb  > 0) gTrack->setCtbMatched();
+      else             gTrack->setCtbNotMatched();
+    }
+    if (t.bemcBin > 0 || t.eemcBin > 0) {
+      Int_t W = 0;
+      if (t.bemcBin > 0) {
+	W = StBemcHitList::instance()->getFired(t.bemcBin);
+	if (W > 0) gTrack->setBemcMatched();
+	else      gTrack->setBemcNotMatched();
+      } else if (t.eemcBin > 0) {
+	W = StEemcHitList::instance()->getFired(t.eemcBin);
+	if (W > 0) gTrack->setEemcMatched();
+	else      gTrack->setEemcNotMatched();
+      }
+      if (W > 0) {
+	UInt_t fext = gTrack->flagExtension();
+	if (W > 7) W = 7;
+	fext &= ~7;
+	fext += W;
+	gTrack->setFlagExtension(fext);
+      }
+    }
+#endif
+  } else if (gTrack->type()==primary) {
+    StTrackNode *n = gTrack->node();
+    assert(n);
+    StTrack *t = n->track(global);
+    assert(t);
+    gTrack->setFlagExtension(t->flagExtension());
   }
 }

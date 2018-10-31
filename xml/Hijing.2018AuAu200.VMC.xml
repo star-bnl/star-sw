@@ -6,6 +6,7 @@
 <command> 
   cd ${SUBMITTINGDIRECTORY}  
   set Name = `basename $PWD`
+  setup gcc631
 #  setenv NODEBUG yes
 #  setup 64b
 #  starver TFG18n
@@ -39,7 +40,8 @@
 #    root.exe -q -b -x 'bfc.C(100,"genIn,MC.2018,-bbcSim,StiCA'${KFVertex}',-hitfilt,-geantOut,-evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco'${sdt}',RunG.1","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
 #    root.exe -q -b -x 'bfc.C(100,"genIn,MC.2018,-bbcSim,StiCA'${KFVertex}',-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco'${sdt}',RunG.1,McTpcAna","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
 #    root.exe -q -b -x 'bfc.C(100,"genIn,MC.2018,NoiTPCLu,-bbcSim,StiCA'${KFVertex}',-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco'${sdt}',RunG.1,McTpcAna","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
-     root.exe -q -b -x 'bfc.C(100,"genIn,MC.2018,-bbcSim,StiCA'${KFVertex}',-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco'${sdt}',RunG.1,McTpcAna","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
+#     root.exe -q -b -x 'bfc.C(100,"genIn,MC.2018,-bbcSim,StiCA'${KFVertex}',-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco'${sdt}',RunG.1,McTpcAna","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
+     root.exe -q -b -x 'bfc.C(100,"genIn,MC.2018,-bbcSim,StiCA,StiKFVertex,-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco'${sdt}',RunG.1,McTpcAna","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
   endif
 </command>
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/Hijing/AuAu200/hijingAuAu200_*gener.root" />  -->

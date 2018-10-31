@@ -7,9 +7,9 @@
   cd ${SUBMITTINGDIRECTORY}  
   set Name = `basename $PWD`
   setenv NODEBUG yes
-  setup 64b
+#  setup 64b
 #  starver TFG18g
-  starver .DEV2 
+#  starver .DEV2 
 #  starver TFG17u 
 #  starver TFG17v 
   set file = $INPUTFILE0;
@@ -32,11 +32,13 @@
 #    root.exe -q -b -x 'bfc.C(1000,"genIn,MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco","'${file}'")' &gt;&amp; ${logName}
 #    root.exe -q -b -x 'bfc.C(1000,"genIn,MC.2016a,-bbcSim,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco,sdt20160504.180732","'${file}'")' &gt;&amp; ${logName}
 #    root.exe -q -b -x 'bfc.C(1000,"genIn,MC.2016a,istSlowSim,-bbcSim,StiCA,-hitfilt,StiHftC,geantOut,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco,sdt20160511,ZCut5cm","'${file}'")' &gt;&amp; ${logName}
-    root.exe -q -b -x 'bfc.C(100,"genIn,MC.2019,McTpcAna,-bbcSim,StiCA'${KFVertex}',-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco'${sdt}',ZCut5cm,RunG.1","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
+#    root.exe -q -b -x 'bfc.C(100,"genIn,MC.2019,McTpcAna,-bbcSim,StiCA'${KFVertex}',-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco'${sdt}',ZCut5cm,RunG.1","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
 #    root.exe -q -b -x 'bfc.C(100,"genIn,MC.2019,McTpcAna,-bbcSim,StiCA'${KFVertex}',-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco'${sdt}',ZCut5cm,RunG.1,NoiTPCLu","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
+    root.exe -q -b -x 'bfc.C(100,"genIn,MC.2019,McTpcAna,-bbcSim,StiCA,StiKFVertex,-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco'${sdt}',ZCut5cm,RunG.1","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
   endif
 </command>
-<input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/Hijing/AuAu200/hijingAuAu200_*gener.root" /> 
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/Hijing/AuAu200/hijingAuAu200_*gener.root" />  -->
+<input URL="file:/net/l401/data/scratch2/fisyak/simu/Hijing/AuAu200//hijingAuAu200_*gener.root" /> 
 <!-- <input URL="file:/net/l401/data/scratch2/fisyak/simu/Hijing/AuAu200//hijingAuAu200_*gener.root" /> -->
 <!-- <input URL="file:/net/l404/data/fisyak/simu/Hijing/AuAu200/hijingAuAu200_*gener.root" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/Hijing/AuAu200/hijingAuAu200_1_1000.gener.root" /> -->
