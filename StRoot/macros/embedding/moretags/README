@@ -64,6 +64,8 @@ embedding into rare triggered events (like HT triggered) or events with large ba
 Au+Au 7.7 GeV data), the effective events are only a small fraction of the total events in a daq file. 
 the embedding job will waste a lot of computing time in reading those unused events. in order to
 reduce this lost, the original daq files need to be chopped to keep those effective events only.
+For HFT embedding, the event selection can not be done inside the embedding macros, but can only
+be done at the daq level based on the output/st*chopper.txt files from makeMuDstQA.C.
 One need to first create another directory parallel to the original daq file directory created in Step 6
 of daqtags/README, for example /star/embed/daq/2016/auau200_hftphys_chop in parallel to /star/embed/daq/2016/auau200_hftphys.
 then one create the daq file list which is restaged in Step 7 of daqtags/README
