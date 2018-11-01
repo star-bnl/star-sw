@@ -67,7 +67,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.80 2018/10/17 20:45:28 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.81 2018/11/01 13:27:20 fisyak Exp $";
 #define __ClusterProfile__
 static Bool_t ClusterProfile = kFALSE;
 #define Laserino 170
@@ -2048,8 +2048,11 @@ typedef struct {
 }
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.80 2018/10/17 20:45:28 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.81 2018/11/01 13:27:20 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.81  2018/11/01 13:27:20  fisyak
+// Synchronize mCutEle with GEANT3 tracking media setting for TPCE_SENSITIVE_GAS, bug#3369
+//
 // Revision 1.80  2018/10/17 20:45:28  fisyak
 // Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
 //
