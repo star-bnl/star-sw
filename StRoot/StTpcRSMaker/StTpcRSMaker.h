@@ -127,14 +127,17 @@ class StTpcRSMaker : public StMaker {
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.31 2018/10/17 20:45:28 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.32 2018/11/01 13:27:20 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.31 2018/10/17 20:45:28 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.32 2018/11/01 13:27:20 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.32  2018/11/01 13:27:20  fisyak
+// Synchronize mCutEle with GEANT3 tracking media setting for TPCE_SENSITIVE_GAS, bug#3369
+//
 // Revision 1.31  2018/10/17 20:45:28  fisyak
 // Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
 //
