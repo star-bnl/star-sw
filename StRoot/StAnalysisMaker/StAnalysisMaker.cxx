@@ -176,7 +176,7 @@ void StAnalysisMaker::PrintStEvent(TString opt) {
 #ifdef StTrackMassFit_hh
 	  UInt_t nMassFits = vx->numberOfMassFits();
 	  for (UInt_t j = 0; j < nMassFits; j++) {
-	    const StTrackMassFit * track = vx->massFit(j);
+	    const StTrackMassFit * track = vx->MassFit(j);
 	    if (! track) continue;
 	    if (mOnlyIdT && track->idTruth() <= 0) continue;
 	    cout << *track << endl;
