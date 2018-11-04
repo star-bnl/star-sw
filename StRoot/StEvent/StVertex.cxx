@@ -74,6 +74,7 @@
 #include "TClass.h"
 #include "TFile.h"
 #include "StVertex.h"
+#include "StTrackNode.h"
 #include "StTrack.h"
 #include "StG2TrackVertexMap.h"
 #include "TString.h"
@@ -94,6 +95,21 @@ StVertex::StVertex()
     memset(mBeg, 0, mEnd-mBeg+1);
     mParent = 0;
 }
+//________________________________________________________________________________
+StVertex::~StVertex() {
+  StSPtrVecTrackMassFitIterator iter;
+  for (iter=mMassFits.begin(); iter != mMassFits.end(); iter++) {
+    StTrackMassFit* p = *iter;
+    if (! p) continue;
+    StTrackNode *node = p->node();
+    if (node) {
+      node->removeTrack(p);
+    }
+    removeMassFit(p);
+    delete p;
+  }
+}
+//________________________________________________________________________________
 
 Int_t
 StVertex::operator==(const StVertex& v) const
@@ -251,15 +267,15 @@ void StVertex::NotImplemented(const Char_t *method) const {
     cout << "StVertex::" << method << " is no implemented" <<  endl;
 }
 //______________________________________________________________________________
-StTrackMassFit* StVertex::massFit(UInt_t i){
+StTrackMassFit* StVertex::MassFit(UInt_t i){
     return i < mMassFits.size() ? mMassFits[i] : 0;
 }
 //______________________________________________________________________________
-const StTrackMassFit* StVertex::massFit(UInt_t i) const {
+const StTrackMassFit* StVertex::MassFit(UInt_t i) const {
     return i < mMassFits.size() ? mMassFits[i] : 0;
 }
 //______________________________________________________________________________
-StPtrVecTrackMassFit StVertex::massFits(StTrackFilter& filter) {
+StPtrVecTrackMassFit StVertex::MassFits(StTrackFilter& filter) {
     StPtrVecTrackMassFit vec;
     for (UInt_t i=0; i<mMassFits.size(); i++)
         if (filter(mMassFits[i])) vec.push_back(mMassFits[i]);

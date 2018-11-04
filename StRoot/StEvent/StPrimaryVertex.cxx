@@ -81,6 +81,7 @@
 #include "StGlobalTrack.h"
 #include "TMath.h"
 #include "StTrackGeometry.h"
+#include "StTrackNode.h"
 ClassImp(StPrimaryVertex)
 
 static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.20 2013/01/15 23:31:05 fisyak Exp $";
@@ -94,9 +95,21 @@ void StPrimaryVertex::init()
     mVertexFinderId = undefinedVertexFinder; 
     memset(mBeg, 0, mEnd-mBeg+1);
 }
-
-StPrimaryVertex::~StPrimaryVertex() {/* noop */};
-
+//________________________________________________________________________________
+StPrimaryVertex::~StPrimaryVertex() {
+  StSPtrVecPrimaryTrackIterator iter;
+  for (iter=mDaughters.begin(); iter != mDaughters.end(); iter++) {
+    StTrack* p = *iter;
+    if (! p) continue;
+    StTrackNode *node = p->node();
+    if (node) {
+      node->removeTrack(p);
+    }
+    removeDaughter(p);
+    //    delete p;
+  }
+}
+//________________________________________________________________________________
 StVertexId
 StPrimaryVertex::type() const { return kEventVtxId; }
 

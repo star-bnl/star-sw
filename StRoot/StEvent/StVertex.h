@@ -94,7 +94,7 @@ ostream&  operator<<(ostream& os,  const StVertex& v);
 class StVertex : public StMeasuredPoint {
 public:
     StVertex();
-    virtual ~StVertex() {}
+    virtual ~StVertex();
     
     int operator==(const StVertex&) const;
     int operator!=(const StVertex&) const;
@@ -118,10 +118,10 @@ public:
     virtual StTrack*       daughter(UInt_t)       {NotImplemented("daughter"); return 0;}
     virtual const StTrack* daughter(UInt_t) const {NotImplemented("daughter"); return 0;}
     virtual UInt_t         numberOfMassFits()    const {return mMassFits.size();}
-    virtual StTrackMassFit       *massFit(UInt_t);
-    virtual const StTrackMassFit *massFit(UInt_t) const;
-    virtual StPtrVecTrackMassFit  massFits(StTrackFilter&);
-    //?    virtual const StPtrVecTrackMassFit&  massFits() const  {return *&mMassFits;}
+    virtual StTrackMassFit       *MassFit(UInt_t);
+    virtual const StTrackMassFit *MassFit(UInt_t) const;
+    virtual StPtrVecTrackMassFit  MassFits(StTrackFilter&);
+    //?    virtual const StPtrVecTrackMassFit&  MassFits() const  {return *&mMassFits;}
 
     virtual void setKey(Int_t key) {mKey = key;}
     virtual void setFlag(Int_t val) { mFlag = val; }
