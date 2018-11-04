@@ -90,7 +90,7 @@ StMagFMaker::~StMagFMaker(){}
 //_____________________________________________________________________________
 Int_t StMagFMaker::InitRun(Int_t RunNo)
 {
-  if (StarMagField::Instance()->IsLocked()) {
+  if (StarMagField::Instance() && StarMagField::Instance()->IsLocked()) {
     // Passive mode, do not change scale factor
     gMessMgr->Info() << "StMagFMaker::InitRun passive mode. Don't update Mag.Field from DB" << endm;
   } else {
@@ -98,7 +98,8 @@ Int_t StMagFMaker::InitRun(Int_t RunNo)
     if (*SAttr("magFactor")) {fScale = DAttr("magFactor");}
     else                     {fScale = St_MagFactorC::instance()->ScaleFactor();}
     if (fabs(fScale) < 1e-3) fScale = 1e-3;
-    StarMagField::Instance()->SetFactor(fScale);
+    if (StarMagField::Instance())     StarMagField::Instance()->SetFactor(fScale);
+    else                          new StarMagField(StarMagField::kMapped, fScale);
   }
   St_Survey *tableSet = (St_Survey *) GetDataBase("StMagF/MagFieldRotation");
   if (tableSet) {
