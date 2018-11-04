@@ -470,6 +470,9 @@ void StxMaker::FillGlobalTrack(genfit::Track *kTrack) {
   // actual filling of StTrack from genfit::Track 
   StGlobalTrack* gTrack = new StGlobalTrack;
   trackNode->addTrack(gTrack);
+#if 0
+  trackNode->Print();
+#endif
   // filling successful, set up relationships between objects
   StSPtrVecTrackNode& trNodeVec = mEvent->trackNodes(); 
   UShort_t Id = trNodeVec.size() + 1;
@@ -714,11 +717,12 @@ void StxMaker::FillDca(StTrack* stTrack, genfit::Track * track) {
     }
     catch(genfit::Exception& e) {
       std::cout << "Exception, fail to make DCA" << std::endl;
-      std::cout << "Inner Parameters" << std::endl << "====================" << endl;
+      std::cout << "Inner Parameters" << std::endl << "====================" << std::endl;
       track->getFittedState().Print();
-      std::cout << "Outer Parameters" << std::endl << "====================" << endl;
+      std::cout << "Outer Parameters" << std::endl << "====================" << std::endl;
       track->getFittedState(-1).Print();
-      s = 0;
+      std::cout << "Dca from Helix\t" << dcaH << std::endl;
+     s = 0;
       ok = kFALSE;
     }
     if (Debug()) {
@@ -761,6 +765,9 @@ void StxMaker::FillDca(StTrack* stTrack, genfit::Track * track) {
   StTrackMassFit *dcaTrack = new StTrackMassFit(kg, &fParticle);
   dcaTrack->setLength(length);
   gTrack->node()->addTrack(dcaTrack);
+#if 0
+  gTrack->node()->Print();
+#endif
   if (ok) {
     Double_t pT = mom.Pt();
     TVector3 field = FieldManager::getInstance()->getField()->get(pos);

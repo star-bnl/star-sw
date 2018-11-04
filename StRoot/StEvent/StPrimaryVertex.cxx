@@ -97,6 +97,7 @@ void StPrimaryVertex::init()
 }
 //________________________________________________________________________________
 StPrimaryVertex::~StPrimaryVertex() {
+#if 0
   StSPtrVecPrimaryTrackIterator iter;
   for (iter=mDaughters.begin(); iter != mDaughters.end(); iter++) {
     StTrack* p = *iter;
@@ -108,6 +109,7 @@ StPrimaryVertex::~StPrimaryVertex() {
     removeDaughter(p);
     //    delete p;
   }
+#endif
 }
 //________________________________________________________________________________
 StVertexId

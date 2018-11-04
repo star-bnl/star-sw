@@ -97,6 +97,7 @@ StVertex::StVertex()
 }
 //________________________________________________________________________________
 StVertex::~StVertex() {
+#if 0
   StSPtrVecTrackMassFitIterator iter;
   for (iter=mMassFits.begin(); iter != mMassFits.end(); iter++) {
     StTrackMassFit* p = *iter;
@@ -108,6 +109,7 @@ StVertex::~StVertex() {
     removeMassFit(p);
     delete p;
   }
+#endif
 }
 //________________________________________________________________________________
 

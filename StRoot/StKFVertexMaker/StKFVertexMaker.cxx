@@ -628,14 +628,12 @@ void StKFVertexMaker::ReFitToVertex() {
     if (! V) continue;
     //    Bool_t ok = kTRUE;
     Int_t NoTracks = V->NoTracks();
+    // Ignore vertices with <= 2 no. of tracks
+    if (NoTracks <= 2) continue;
     KFVertex     &KVx = V->Vertex();
     // Store vertex
     primV = new StPrimaryVertex;
-    if (! FillVertex(&KVx,primV)) {
-      SafeDelete(primV);
-      delete fgcVertices->Vertices()->Remove(V);
-      continue;
-    }
+    FillVertex(&KVx,primV);
     primV->setRanking(333);
     primV->setNumTracksUsedInFinder(NoTracks);
     primV->setVertexFinderId(KFVertexFinder);
@@ -692,7 +690,7 @@ void StKFVertexMaker::ReFitToVertex() {
     for (Int_t i = 0; i < NoTracks; i++) {if (pTracks[i]) NoPrTracks++;}
     UInt_t NoPrTracksB = NoPrTracks;
     if (beam) NoPrTracksB += 2;
-    if (NoPrTracksB <= 2)       {
+    if (NoPrTracksB < 0) { // 2)       {
       for (Int_t i = 0; i < NoTracks; i++) {
 	StPrimaryTrack *t = pTracks[i];
 	if (! t) continue;
@@ -710,25 +708,15 @@ void StKFVertexMaker::ReFitToVertex() {
       primV->setParent(pf);
       StTrackNode *nodepf = new StTrackNode;
       nodepf->addTrack(pf);
+#if 0
+      nodepf->Print();
+#endif      
       Int_t kgp = KVx.Id();
       fTrackNodeMap[kgp] = nodepf;
       StSPtrVecTrackNode& trNodeVec = pEvent->trackNodes(); 
       trNodeVec.push_back(nodepf);
-#if 0
-      for (Int_t i = 0; i < NoTracks; i++) {
-	if (! tracks[i]) continue;
-	if (! nodes[i]) continue;
-	StPrimaryTrack *t = pTracks[i];
-	if (t) {
-	  primV->addDaughter(t);
-	  // Done in FitTrack2Vertex    nodes[i]->addTrack(t);
-	}
-      }
-#endif
-#if 1
       primV->setTrackNumbers();
       CalculateRank(primV);
-#endif
       pEvent->addPrimaryVertex(primV,orderByRanking);
       //      PrintPrimVertices();
       fVertices->AddLast(new KFVertex(KVx)); //<<<<<<<<<<<<<<<< ????????
@@ -770,30 +758,37 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tra
   if (! gTrack) {
     return pTrack;
   }
+#if 0
+  node->Print(); //<<<<<<<<<<<<<<<<<<<<<<
+#endif
   pTrack = new StPrimaryTrack();
   *pTrack = *gTrack;
-  node->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
   primV->addDaughter(pTrack);
   PrPP(FitTrack2Vertex,P);
+  node->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
+#if 0  
+  node->Print("");
+#endif
   StTrackMassFit *mf = new StTrackMassFit(kg,&P);
   PrPP(FitTrack2Vertex,*mf);
   primV->addMassFit(mf);
+#if 0
+  primV->Print();
+  for (UInt_t i = 0; i < primV->numberOfDaughters(); i++) {
+    primV->daughter(i)->Print();
+  }
+  for (UInt_t i = 0; i < primV->numberOfMassFits(); i++) {
+    primV->MassFit(i)->Print();
+  }
+#endif
   node->addTrack(mf);
+#if 0
+  node->Print("");
+#endif
   pTrack->setKey( gTrack->key());
   pTrack->setFlagExtension( gTrack->flagExtension());
   pTrack->setIdTruth(gTrack->idTruth(),gTrack->qaTruth());
   pTrack->fitTraits().setChi2(chi2AtVx-chi2,1);
-#if 0
-  StTrackDetectorInfo* detInfo = new StTrackDetectorInfo(*gTrack->detectorInfo());
-  pTrack->setDetectorInfo(detInfo);
-  StSPtrVecTrackDetectorInfo& detInfoVec = pEvent->trackDetectorInfo(); 
-  detInfoVec.push_back(detInfo);
-  StHelixModel *gOut = (StHelixModel *)gTrack->outerGeometry();
-  StTrackGeometry* geometry = new StHelixModel(gOut->charge(), gOut->psi(), gOut->curvature(), 
-					       gOut->dipAngle(), gOut->origin(), gOut->momentum(), gOut->helicity());
-  pTrack->setOuterGeometry(geometry);
-  //
-#endif
   StThreeVectorF origin(P.GetX(),P.GetY(),P.GetZ());
   StThreeVectorF field;
   StarMagField::Instance()->BField(origin.xyz(), field.xyz());
