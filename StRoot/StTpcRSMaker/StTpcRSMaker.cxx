@@ -67,7 +67,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.81 2018/11/01 13:27:20 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.82 2018/11/05 01:05:19 fisyak Exp $";
 #define __ClusterProfile__
 static Bool_t ClusterProfile = kFALSE;
 #define Laserino 170
@@ -147,8 +147,13 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     return kStFatal;
   }
   mCutEle = GetCutEle();
-  LOG_INFO << "StTpcRSMaker::InitRun: mCutEle set to = " << mCutEle << " from geant \"" << TpcMedium.Data() << "\" parameters" << endm;
-  assert(mCutEle > 0);
+  if (mCutEle > 0) {
+    LOG_INFO << "StTpcRSMaker::InitRun: mCutEle set to = " << mCutEle << " from geant \"" << TpcMedium.Data() << "\" parameters" << endm;
+  } else {
+    mCutEle = 1e-4;
+    LOG_ERROR << "StTpcRSMaker::InitRun: mCutEle has not been found in GEANT3 for \"" << TpcMedium.Data() << "\" parameters." 
+	      << "Probably due to missing  Set it to default " << mCutEle << endm;
+  }
   if (TESTBIT(m_Mode, kBICHSEL)) {
     LOG_INFO << "StTpcRSMaker:: use H.Bichsel model for dE/dx simulation" << endm;
     if (! mdNdEL10 || ! mdNdx) {
@@ -2048,8 +2053,11 @@ typedef struct {
 }
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.81 2018/11/01 13:27:20 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.82 2018/11/05 01:05:19 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.82  2018/11/05 01:05:19  fisyak
+// Replace assert to error message
+//
 // Revision 1.81  2018/11/01 13:27:20  fisyak
 // Synchronize mCutEle with GEANT3 tracking media setting for TPCE_SENSITIVE_GAS, bug#3369
 //
