@@ -1082,23 +1082,71 @@ void itpcInterpreter::fee_dbase(const char *fname)
 //	LOG(TERR,"ped_c %p: %d %d",ped_c,sector_id,rdo_id) ;
 
 	for(int i=1;i<=16;i++) {
-		char err_str[16] ;
+		char err_str[32] ;
 		if(fee[i].wire1_id == 0) continue ;	//skip non-FEEs
 
+		
 		itpcPed *p_c = (itpcPed *) ped_c ;
 		int err = 0 ;
 		int flag = 0 ;
+		int bad_pin = 0 ;
+		int reflow = 0 ;
 
 		for(int c=0;c<64;c++) {
 			if(p_c && p_c->fee_err[sector_id-1][rdo_id-1][i-1][c]) {
 				err++ ;
-				flag |= p_c->fee_err[sector_id-1][rdo_id-1][i-1][c] ;
-				LOG(ERR,"FEE 0x%08X, port %2d, channel %d - bad [0x%X]",fee[i].wire1_id,i,c,p_c->fee_err[sector_id-1][rdo_id-1][i-1][c]) ;
+
+				int fl = p_c->fee_err[sector_id-1][rdo_id-1][i-1][c] ; 
+				flag |= fl ;
+
+
+				if(fl & 3) {
+					bad_pin++ ;
+				}
+				else if(fl & 4) {
+					if(c<=31) reflow |= 1 ;
+					else reflow |= 2 ;
+				}
+
+
 
 			}
 			else {
 
 			}
+		}
+
+		if(err) {
+			err_str[0] = 0 ;
+
+			if(bad_pin <= 1) ;
+			else {
+				sprintf(err_str,"PINS_%d ",bad_pin) ;
+			}
+
+			
+			if(reflow) {
+				strcat(err_str,"REFLOW SAMPA ") ;
+			}
+			else if(bad_pin <= 1) {
+				goto skip_err ;
+			}
+
+			if(reflow & 1) {
+				strcat(err_str,"0 ") ;
+			}
+			if(reflow & 2) {
+				if(reflow & 1) {
+					strcat(err_str,"and 1") ;
+				}
+				else {
+					strcat(err_str,"1") ;
+				}
+			}		
+
+			LOG(ERR,"FEE 0x%08X, port %2d: BAD: %s",fee[i].wire1_id,i,err_str) ;
+
+			skip_err:;
 		}
 
 		if(err) {
