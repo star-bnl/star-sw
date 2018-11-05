@@ -38,7 +38,7 @@ itpcPed::~itpcPed()
 // rdo: 1 to 4
 void itpcPed::init(int sector, int rdo, u_int mask)
 {
-	LOG(TERR,"%s: sector %d, RDO %d, mask 0x%04X",__PRETTY_FUNCTION__,sector,rdo,mask) ;
+	LOG(NOTE,"%s: sector %d, RDO %d, mask 0x%04X",__PRETTY_FUNCTION__,sector,rdo,mask) ;
 
 	sector-- ;	// to start from 0
 	rdo-- ;		// to start from 0
