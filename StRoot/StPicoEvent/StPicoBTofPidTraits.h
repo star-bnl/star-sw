@@ -1,3 +1,11 @@
+/**
+ * \class StPicoBToPidTraits
+ * \brief Hold information about BTOF-matched tracks
+ *
+ * The class stores information about tracks that matched
+ * the Barrel Time-of-Flight detector
+ */
+
 #ifndef StPicoBTofPidTraits_h
 #define StPicoBTofPidTraits_h
 
@@ -21,9 +29,9 @@ class StPicoBTofPidTraits : public TObject {
   /// Print TOF PID traits information
   virtual void Print(const Char_t* option = "") const;
 
-  /**
-   * Getters
-   */
+  //
+  // Getters
+  //
 
   /// Return index of the assiciated track
   Int_t   trackIndex() const;
@@ -51,9 +59,9 @@ class StPicoBTofPidTraits : public TObject {
   /// Return z comonent of hit position
   Float_t btofHitPosZ() const;
 
-  /**
-   * Setters
-   */
+  //
+  // Setters
+  //
 
   /// Set assiciated track index
   void setTrackIndex(Int_t inx2PicoTrack);
@@ -104,9 +112,9 @@ class StPicoBTofPidTraits : public TObject {
   ClassDef(StPicoBTofPidTraits, 3);
 };
 
-/**
- * Getters
- */
+//
+// Getters
+//
 inline Int_t   StPicoBTofPidTraits::trackIndex() const { return mTrackIndex; }
 inline Int_t   StPicoBTofPidTraits::btofCellId() const { return (Int_t)mBTofCellId; }
 inline Int_t   StPicoBTofPidTraits::btofMatchFlag() const { return (Int_t)mBTofMatchFlag; }
@@ -120,9 +128,9 @@ inline Float_t StPicoBTofPidTraits::btofHitPosX() const { return (Float_t)mBTofH
 inline Float_t StPicoBTofPidTraits::btofHitPosY() const { return (Float_t)mBTofHitPosY / 100.; }
 inline Float_t StPicoBTofPidTraits::btofHitPosZ() const { return (Float_t)mBTofHitPosZ / 100.; }
 
-/**
- * Setters
- */
+//
+// Setters
+//
 inline void StPicoBTofPidTraits::setTrackIndex(Int_t idx2PicoTrack) 
 { mTrackIndex = (idx2PicoTrack > std::numeric_limits<short>::max()) ? -1 : (Short_t)idx2PicoTrack; }
 inline void StPicoBTofPidTraits::setTOF(Float_t tof) { mBTof = tof; }

@@ -1,3 +1,7 @@
+//
+// StPicoMtdPidTraits stores information related to the MTD-matched track
+//
+
 // C++ headers
 #include <limits>
 
@@ -70,7 +74,7 @@ void StPicoMtdPidTraits::setBeta(Float_t beta) {
 
 //_________________
 void StPicoMtdPidTraits::setDeltaY(Float_t dy) {
-  mDeltaY = ( fabs(dy * 200.) > std::numeric_limits<short>::max() ?
+  mDeltaY = ( TMath::Abs(dy * 200.) > std::numeric_limits<short>::max() ?
 	      ( (dy > 0) ? std::numeric_limits<short>::max() :
 		std::numeric_limits<short>::min() ) :
 	      (Short_t)( TMath::Nint( dy * 200.) ) );
@@ -78,8 +82,8 @@ void StPicoMtdPidTraits::setDeltaY(Float_t dy) {
 
 //_________________
 void StPicoMtdPidTraits::setDeltaZ(Float_t dz) {
-  /// Provides 1.5 cm precision
-  mDeltaZ = ( fabs(dz * 200.) > std::numeric_limits<short>::max() ?
+  // Provides 1.5 cm precision
+  mDeltaZ = ( TMath::Abs(dz * 200.) > std::numeric_limits<short>::max() ?
 	      ( (dz > 0) ? std::numeric_limits<short>::max() :
 		std::numeric_limits<short>::min() ) :
 	      (Short_t)( TMath::Nint( dz * 200. ) ) );

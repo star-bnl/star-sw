@@ -1,3 +1,7 @@
+//
+// The StPicoArrays holds names, types and initial sizes of the pico arrays
+//
+
 // PicoDst headers
 #include "StPicoArrays.h"
 

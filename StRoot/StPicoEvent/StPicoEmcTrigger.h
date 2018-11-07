@@ -1,3 +1,10 @@
+/**
+ * \class StPicoEmcTrigger
+ * \brief Holds EMC trigger information
+ *
+ * Holds EMC trigger information
+ */
+
 #ifndef StPicoEmcTrigger_h
 #define StPicoEmcTrigger_h
 
@@ -17,11 +24,11 @@ class StPicoEmcTrigger : public TObject {
   /// Destructor
   virtual ~StPicoEmcTrigger();
   /// Print EMC trigger information
-  virtual void Print(const Char_t* option = "") const;  ///< Print trigger info
+  virtual void Print(const Char_t* option = "") const;
 
-  /**
-   * Getters
-   */
+  //
+  // Getters
+  //
 
   /// Return flag:  0x1: ht0, 0x2: ht1, 0x4: ht2; 0x8: ht3
   ///               0x10: jp0, 0x20: jp1, 0x40: jp2
@@ -47,9 +54,9 @@ class StPicoEmcTrigger : public TObject {
   /// Check if the trigger is JP2
   bool isJP2() const;
 
-  /**
-   * Setters
-   */
+  //
+  // Setters
+  //
   
   /// Set trigger flag
   void setFlag(Int_t flag);
@@ -70,9 +77,9 @@ class StPicoEmcTrigger : public TObject {
   ClassDef(StPicoEmcTrigger, 1)
 };
 
-/**
- * Getters
- */
+//
+// Getters
+//
 inline UInt_t StPicoEmcTrigger::flag() const { return (UInt_t)mFlag; }
 inline Int_t StPicoEmcTrigger::id() const { return (Int_t)mId; }
 inline Int_t StPicoEmcTrigger::adc() const { return (Int_t)mAdc; }

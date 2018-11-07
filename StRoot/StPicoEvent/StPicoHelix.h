@@ -1,11 +1,12 @@
 /**
  * \class StPicoHelix
- * \author Grigory Nigmatkulov, May 07 2018
+ * \brief Helix parametrization that uses ROOT TVector3
  * 
  * Parametrization of a helix (modification of StHelix). Can also cope 
  * with straight tracks, i.e. with zero curvature. This represents only 
  * the mathematical model of a helix. See the SCL user guide for more.
  *
+ * \author Grigory Nigmatkulov, May 07 2018
  */
 
 #ifndef StPicoHelix_h
@@ -26,7 +27,7 @@
 #include "StarClassLibrary/SystemOfUnits.h"
 #endif
 
-/// Declare C++ namespaces
+// Declare C++ namespaces
 #if !defined(ST_NO_NAMESPACES)
 using std::pair;
 using std::swap;
@@ -35,8 +36,8 @@ using std::max;
 
 //_________________
 class StPicoHelix {
+  
  public:
-
   /// Default constructor
   StPicoHelix();
   
@@ -226,12 +227,12 @@ inline Int_t StPicoHelix::bad(Double_t WorldSize) const {
   
   //ierr = mOrigin.bad(WorldSize);
 
-  /// The line above is commented and the StThreeVector::bad(double)
-  /// is rewritten here
+  // The line above is commented and the StThreeVector::bad(double)
+  // is rewritten here
   for(Int_t iIter=0; iIter<3; iIter++) {
 
     Double_t tmpVal;
-    /// Value StThreeVector.mX1[iter] ???
+    // Value StThreeVector.mX1[iter] ???
     switch(iIter) {
     case 0: tmpVal = mOrigin.X(); break;
     case 1: tmpVal = mOrigin.Y(); break;

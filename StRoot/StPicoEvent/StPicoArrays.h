@@ -1,3 +1,11 @@
+/**
+ * \class StPicoArray
+ * \brief Stores pico arrays
+ *
+ * StPicoArrays is a pure C++ class that holds names of the pico arrays,
+ * names of TBrances and TClones arrays
+ */
+
 #ifndef StPicoArrays_h
 #define StPicoArrays_h
 

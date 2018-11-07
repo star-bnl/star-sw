@@ -1,3 +1,11 @@
+/**
+ * \class StPicoMtdPidTraits
+ * \brief Holds information about MTD-matched track
+ *
+ * The class stores information about related to the track
+ * that matched the Muon Telescope Detector (MTD)
+ */
+
 #ifndef StPicoMtdPidTraits_h
 #define StPicoMtdPidTraits_h
 
@@ -18,9 +26,9 @@ class StPicoMtdPidTraits : public TObject {
   /// Print MTD PID traits information
   virtual void Print(const Char_t* option = "") const;
 
-  /**
-   * Getters
-   */
+  //
+  // Getters
+  //
 
   /// Return assiciated track index
   Int_t    trackIndex()        const;
@@ -45,9 +53,9 @@ class StPicoMtdPidTraits : public TObject {
   /// Return beta
   Float_t  beta()              const;
 
-  /**
-   * Setters
-   */
+  //
+  // Setters
+  //
 
   /// Set track index of the associated track
   void setTrackIndex(Int_t index);
@@ -88,9 +96,9 @@ class StPicoMtdPidTraits : public TObject {
   ClassDef(StPicoMtdPidTraits, 3)
 };
 
-/**
- * Getters
- */
+//
+// Getters
+//
 inline Int_t    StPicoMtdPidTraits::trackIndex()        const { return mTrackIndex; }
 inline Int_t    StPicoMtdPidTraits::mtdHitIndex()       const { return mMtdHitIndex; }
 inline Int_t    StPicoMtdPidTraits::gChannel()          const { return mMtdHitChan; }
@@ -103,9 +111,9 @@ inline Float_t  StPicoMtdPidTraits::deltaZ()            const { return (Float_t)
 inline Float_t  StPicoMtdPidTraits::deltaTimeOfFlight() const { return mDeltaTimeOfFlight; }
 inline Float_t  StPicoMtdPidTraits::beta()              const { return (Float_t)mBeta / 20000.; }
 
-/**
- * Setters
- */
+//
+// Setters
+//
 inline void    StPicoMtdPidTraits::setTrackIndex(Int_t index) { mTrackIndex = (Short_t) index; }
 inline void    StPicoMtdPidTraits::setMtdHitIndex(Int_t index) { mMtdHitIndex = (Short_t) index; }
 inline void    StPicoMtdPidTraits::setMatchFlag(Char_t flag) { mMatchFlag = (Char_t)flag; }

@@ -1,3 +1,7 @@
+//
+// StPicoDst holds pointers to TClonesArrays with all data
+//
+
 // PicoDst headers
 #include "StPicoMessMgr.h"
 #include "StPicoEvent.h"

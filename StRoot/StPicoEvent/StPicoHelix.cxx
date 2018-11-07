@@ -1,12 +1,6 @@
-/**
- * \class StPicoHelix
- * \author Grigory Nigmatkulov, May 07 2018
- * 
- * Parametrization of a helix (modification of StHelix). Can also cope 
- * with straight tracks, i.e. with zero curvature. This represents only 
- * the mathematical model of a helix. See the SCL user guide for more.
- *
- */
+//
+// StPicoHelix is a helix parametrization that uses ROOT TVector3
+//
 
 // C++ headers
 #if !defined(ST_NO_NUMERIC_LIMITS)
@@ -114,10 +108,10 @@ void StPicoHelix::setCurvature(Double_t val) {
 #else
   if ( ::fabs(mCurvature) <= static_cast<Double_t>(0) ) {
 #endif
-    mSingularity = true;  /// straight line
+    mSingularity = true;  // straight line
   }
   else {
-    mSingularity = false; /// curved
+    mSingularity = false; // curved
   }
 }
 

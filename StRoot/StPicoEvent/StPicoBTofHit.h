@@ -1,3 +1,10 @@
+/**
+ * \class StPicoBTofHit
+ * \brief Stores BTOF hit information
+ *
+ * The StPicoBTofHit holds inofmation about hits in BTOF
+ */
+
 #ifndef StPicoBTofHit_h
 #define StPicoBTofHit_h
 
@@ -22,9 +29,9 @@ class StPicoBTofHit : public TObject {
   /// Print hit information
   virtual void Print(const Char_t* option = "") const;  ///< Print trigger info
 
-  /**
-   * Getters
-   */
+  //
+  // Getters
+  //
 
   /// Return ID of the hit
   Int_t   id() const;
@@ -35,9 +42,9 @@ class StPicoBTofHit : public TObject {
   /// Return cell number
   Int_t   cell() const;
 
-  /**
-   * Setters
-   */
+  //
+  // Setters
+  //
 
   /// Set ID of the hit
   void setId(Int_t id);
@@ -52,17 +59,17 @@ class StPicoBTofHit : public TObject {
   ClassDef(StPicoBTofHit, 2)
 };
 
-/**
- * Getters
- */
+//
+// Getters
+//
 inline Int_t StPicoBTofHit::id() const { return mId; }
 inline Int_t StPicoBTofHit::tray() const { return mId / 192 + 1; }
 inline Int_t StPicoBTofHit::module() const { return (mId % 192) / 6 + 1; }
 inline Int_t StPicoBTofHit::cell() const { return mId / 6 + 1; }
 
-/**
- * Setters
- */
+//
+// Setters
+//
 inline void StPicoBTofHit::setId(Int_t id) {
   if (id<0) {
     mId = -1;

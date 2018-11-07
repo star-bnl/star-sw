@@ -1,3 +1,11 @@
+/**
+ * \class StPicoBEmcPidTraits
+ * \brief
+ *
+ * Keep information about Barrel ElectroMagnetic Calorimeter (BEMC)
+ * matched tracks.
+ */
+
 #ifndef StPicoBEmcPidTraits_h
 #define StPicoBEmcPidTraits_h
 
@@ -20,9 +28,10 @@ class StPicoBEmcPidTraits: public TObject {
   /// Print BEMC PID traits information
   virtual void Print(const Char_t* option = "") const;
 
-  /**
-   * Getters
-   */
+  //
+  // Getters
+  //
+  
   /// Return track index
   Int_t   trackIndex() const;
   /// Associated BEMC cluster id (STAR standard clustering algorithm)
@@ -59,9 +68,10 @@ class StPicoBEmcPidTraits: public TObject {
   /// Phi distance to matched tower (cm)
   Float_t btowPhiDist() const;
 
-  /**
-   * Setters
-   */
+  //
+  // Setters
+  //
+  
   /// Set track index of the assiciated track
   void setTrackIndex(Int_t idx);
   /// Set BEMC ID
@@ -119,9 +129,9 @@ class StPicoBEmcPidTraits: public TObject {
   ClassDef(StPicoBEmcPidTraits, 1);
 };
 
-/**
- * Getters
- */
+//
+// Getters
+//
 inline Int_t   StPicoBEmcPidTraits::trackIndex() const { return (Int_t)mTrackIndex; }
 inline Int_t   StPicoBEmcPidTraits::bemcId() const { return (Int_t)mBemcId; }
 inline Int_t   StPicoBEmcPidTraits::bemcAdc0() const { return (Int_t)mBemcAdc0; }
@@ -141,9 +151,9 @@ inline Float_t StPicoBEmcPidTraits::btowE3() const { return (Float_t)mBtowE3 / 1
 inline Float_t StPicoBEmcPidTraits::btowEtaDist() const { return (Float_t)mBtowEtaDist / 10000.; }
 inline Float_t StPicoBEmcPidTraits::btowPhiDist() const { return (Float_t)mBtowPhiDist / 10000.; }
 
-/**
- * Setters
- */
+//
+// Setters
+//
 inline void StPicoBEmcPidTraits::setTrackIndex(Int_t idx) {
   mTrackIndex = (idx > std::numeric_limits<short>::max()) ? -1 : (Short_t)idx;
 }

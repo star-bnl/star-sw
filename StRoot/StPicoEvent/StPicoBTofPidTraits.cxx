@@ -1,3 +1,7 @@
+//
+// StPicoBTofPidTraits keeps information about tracks that matched BTOF
+//
+
 // C++ headers
 #include <limits>
 #include <cmath>
@@ -102,7 +106,9 @@ void StPicoBTofPidTraits::setHitPositionXYZ(Float_t x, Float_t y, Float_t z) {
 //_________________
 void StPicoBTofPidTraits::Print(const Char_t* option) const {
   LOG_INFO << " Matched track index = " << mTrackIndex << endm;
-  LOG_INFO << " BTOF cellId = " << btofCellId() << " tof = " << btof() << " beta = " << btofBeta() << endm;
-  LOG_INFO << " BTOF match = " << btofMatchFlag() << " yLocal/zLocal " << btofYLocal() << " " << btofZLocal() << endm;
+  LOG_INFO << " BTOF cellId = " << btofCellId() << " tof = " << btof()
+	   << " beta = " << btofBeta() << endm;
+  LOG_INFO << " BTOF match = " << btofMatchFlag() << " yLocal/zLocal "
+	   << btofYLocal() << " " << btofZLocal() << endm;
 }
 

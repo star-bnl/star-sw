@@ -1,14 +1,15 @@
 /**
- * Author: Grigory Nigmatkulov
- * Date: May 28, 2018
+ * \class StPicoDstReader
+ * \brief Allows to read picoDst file(s)
  *
- * Description:
  * This class allows to read picoDst.root file or a list of files
  * that contain picoDst and sets up pointers to the picoDst, and
  * certain TClonesArrays that keep Event, Track, BTofHit, etc...
  * One can also turn on or off certain branches using the 
  * SetStatus method.
  *
+ * \author Grigory Nigmatkulov
+ * \date May 28, 2018
  */
 
 #ifndef StPicoDstReader_h

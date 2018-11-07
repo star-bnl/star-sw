@@ -1,9 +1,12 @@
 /**
  * \class StPicoPhysicalHelix
- * \author Grigory Nigmatkulov, May 07 2018
+ * \brief Helis parametrization for the particle
  * 
- * Parametrization of a physical helix (modification of StPhysicalHelix).
+ * Parametrization of a physical helix (modification of StPhysicalHelix)
+ * that uses ROOT classes
  *
+ * \author Grigory Nigmatkulov 
+ * \date May 07 2018
  */
 
 #ifndef StPicoPhysicalHelix_h
