@@ -62,12 +62,19 @@ class StPicoBEmcPidTraits: public TObject {
   /**
    * Setters
    */
+  /// Set track index of the assiciated track
   void setTrackIndex(Int_t idx);
+  /// Set BEMC ID
   void setBEmcId(Int_t id);
+  /// Set ADC
   void setAdc0(Int_t adc);
+  /// Set energy
   void setEnergy(Float_t energy[5]);
+  /// Set distances
   void setDistances(Float_t dist[4]);
+  /// Set number of hits
   void setNHits(Int_t nhit[2]);
+  /// Set IDs of the towers
   void setNTOW(Int_t ntow[3]);
 
  private:

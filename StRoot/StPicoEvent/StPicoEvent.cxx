@@ -30,14 +30,15 @@ StPicoEvent::StPicoEvent(): TObject(),
   mBbcAdcEast{}, mBbcAdcWest{},
   mHighTowerThreshold{},
   mJetPatchThreshold{} {
-
-    if( !mTriggerIds.empty() ) {
-      mTriggerIds.clear();
-    }
+  /// Default constructor
+  if( !mTriggerIds.empty() ) {
+    mTriggerIds.clear();
+  }
 }
 
 //_________________
 StPicoEvent::StPicoEvent(const StPicoEvent &event) : TObject() {
+  /// Copy constructor
   mRunId = event.mRunId;
   mEventId = event.mEventId;
   mFillId = event.mFillId;
@@ -119,7 +120,7 @@ StPicoEvent::StPicoEvent(const StPicoEvent &event) : TObject() {
 }
 
 //_________________
-StPicoEvent::~StPicoEvent() { 
+StPicoEvent::~StPicoEvent() { /// Destructor
   /* empty */
 }
 
@@ -288,5 +289,17 @@ void StPicoEvent::setBbcAdcWest(Int_t iPMT, Float_t bbcAdcWest) {
   }
   else {
     /// Probably some information about this incident may be printed
+  }
+}
+
+//_________________
+void StPicoEvent::setBunchId(Int_t id) {
+  if( id<0 ) {
+    LOG_INFO << "StPicoEvent::setBunchID() - negative bunch ID = " << id << endm;
+  }
+  else {
+    mBunchCrossId = ( ( id > std::numeric_limits<unsigned short>::max() ) ?
+		      std::numeric_limits<unsigned short>::max() :
+		      (UChar_t)id );
   }
 }

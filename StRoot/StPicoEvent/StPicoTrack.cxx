@@ -24,12 +24,13 @@ StPicoTrack::StPicoTrack() : TObject(),
   mNSigmaProton( std::numeric_limits<short>::min() ),
   mNSigmaElectron( std::numeric_limits<short>::min() ),
   mTopologyMap{}, mBEmcPidTraitsIndex(-1), mBTofPidTraitsIndex(-1),
-  mMtdPidTraitsIndex(-1) {
+  mMtdPidTraitsIndex(-1) { /// Default constructor
   /* empty */
 }
 
 //_________________
 StPicoTrack::StPicoTrack(const StPicoTrack &track) : TObject() {
+  /// Copy constructor
   mId = track.mId;
   mChi2 = track.mChi2;
   mPMomentumX = track.mPMomentumX;
@@ -61,7 +62,7 @@ StPicoTrack::StPicoTrack(const StPicoTrack &track) : TObject() {
 }
 
 //_________________
-StPicoTrack::~StPicoTrack() {
+StPicoTrack::~StPicoTrack() { /// Destructor
   /* emtpy */
 }
 

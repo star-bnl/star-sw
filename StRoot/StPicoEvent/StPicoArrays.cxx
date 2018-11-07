@@ -58,6 +58,6 @@ int StPicoArrays::picoArraySizes [NAllPicoArrays] = { 1,
                                                     };
 
 //_________________
-StPicoArrays::StPicoArrays() {
+StPicoArrays::StPicoArrays() { /// Destructor
   /* empty */
 }

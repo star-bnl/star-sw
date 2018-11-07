@@ -25,15 +25,22 @@ class StPicoBTofHit : public TObject {
   /**
    * Getters
    */
+  /// Return ID of the hit
   Int_t   id() const;
+  /// Return tray number
   Int_t   tray() const;
+  /// Return module number
   Int_t   module() const;
+  /// Return cell number
   Int_t   cell() const;
 
   /**
    * Setters
    */
+
+  /// Set ID of the hit
   void setId(Int_t id);
+  /// Set ID of the track using track, module and cell
   void setId(Int_t tray, Int_t module, Int_t cell);
 
  private:
@@ -51,6 +58,7 @@ inline Int_t StPicoBTofHit::id() const { return mId; }
 inline Int_t StPicoBTofHit::tray() const { return mId / 192 + 1; }
 inline Int_t StPicoBTofHit::module() const { return (mId % 192) / 6 + 1; }
 inline Int_t StPicoBTofHit::cell() const { return mId / 6 + 1; }
+
 /**
  * Setters
  */

@@ -24,34 +24,58 @@ class StPicoBTofPidTraits : public TObject {
   /**
    * Getters
    */
+
+  /// Return index of the assiciated track
   Int_t   trackIndex() const;
+  /// Return BTOF cell ID (encoding = (tray-1)*192+(module-1)*6+(cell-1): -1 - no match )
   Int_t   btofCellId() const;
+  /// Return matching flag (0 - no match, 1 - one-to-one, 2 - one-to-multiple)
   Int_t   btofMatchFlag() const;
-  
+
+  /// Return time of flight
   Float_t btof() const;
+  /// Return beta (compression = beta * 20000)
   Float_t btofBeta() const;
+  /// Return yLocal (compression = yLocal * 1000)
   Float_t btofYLocal() const;
+  /// Return zLocal (compression = zLocal * 1000)
   Float_t btofZLocal() const;
-  
+
+  /// Return hit position
   TVector3 btofHitPos() const;
-  
+
+  /// Return x comonent of hit position
   Float_t btofHitPosX() const;
+  /// Return y comonent of hit position
   Float_t btofHitPosY() const;
+  /// Return z comonent of hit position
   Float_t btofHitPosZ() const;
 
   /**
    * Setters
    */
+
+  /// Set assiciated track index
   void setTrackIndex(Int_t inx2PicoTrack);
+  /// Set TOF cell ID which encodes tray, module and cell IDs
   void setBTofCellId(Int_t tray, Int_t module, Int_t cell);
+  /// Set TOF-matching flag
   void setBTofMatchFlag(UChar_t flag);
+  /// Set time of flight
   void setTOF(Float_t tof);
+  /// Set beta
   void setBeta(Float_t beta);
+  /// Set hit position (x,y,z)
   void setHitPositionXYZ(Float_t x, Float_t y, Float_t z);
+  /// Set hit position x (cm)
   void setHitPositionX(Float_t x);
+  /// Set hit position y (cm)
   void setHitPositionY(Float_t y);
+  /// Set hit position z (cm)
   void setHitPositionZ(Float_t z);
+  /// Set yLocal
   void setYLocal(Float_t yLocal);
+  /// Set zLocal
   void setZLocal(Float_t zLocal);
 
  private:
@@ -62,7 +86,7 @@ class StPicoBTofPidTraits : public TObject {
   Short_t   mBTofCellId;
   /// 0 - no match, 1 - one-to-one, 2 - one-to-multiple
   UChar_t   mBTofMatchFlag;
-  /// Time-Of-Flight (UShort_t or Float16_t with specification is not enough)
+  /// Time-Of-Flight
   Float_t mBTof;
   /// Beta * 20000
   UShort_t  mBTofBeta;
@@ -70,9 +94,11 @@ class StPicoBTofPidTraits : public TObject {
   Short_t   mBTofYLocal;
   /// zlocal * 1000
   Short_t   mBTofZLocal;
-  /// Projected hit positions (multiplied by 100)
+  /// Hit position projected on X plane (compression = position * 100)
   Short_t   mBTofHitPosX;
+  /// Hit position projected on Y plane (compression = position * 100)
   Short_t   mBTofHitPosY;
+  /// Hit position projected on Z plane (compression = position * 100)
   Short_t   mBTofHitPosZ;
 
   ClassDef(StPicoBTofPidTraits, 3);

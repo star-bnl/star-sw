@@ -22,24 +22,40 @@ class StPicoEmcTrigger : public TObject {
   /**
    * Getters
    */
+
+  /// Return flag:  0x1: ht0, 0x2: ht1, 0x4: ht2; 0x8: ht3
+  ///               0x10: jp0, 0x20: jp1, 0x40: jp2
   UInt_t  flag() const;
+  /// Return ID: bjp: 1-18, ht: 1-4800
   Int_t   id() const;
+  /// Return ADC
   Int_t   adc() const;
 
+  /// Check if the trigger is HT0
   bool isHT0() const;
+  /// Check if the trigger is HT1
   bool isHT1() const;
+  /// Check if the trigger is HT2
   bool isHT2() const;
+  /// Check if the trigger is HT3
   bool isHT3() const;
 
+  /// Check if the trigger is JP0
   bool isJP0() const;
+  /// Check if the trigger is JP1
   bool isJP1() const;
+  /// Check if the trigger is JP2
   bool isJP2() const;
 
   /**
    * Setters
    */
+  
+  /// Set trigger flag
   void setFlag(Int_t flag);
+  /// Set ID
   void setId(Int_t id);
+  /// Set ADC
   void setAdc(Int_t adc);
 
  protected:

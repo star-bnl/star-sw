@@ -25,15 +25,23 @@ class StPicoBTowHit : public TObject {
   /**
    * Getters
    */
+
+  /// Return ADC of the tower
   Int_t   adc() const;
+  /// Return energy of the tower
   Float_t energy() const;
+  /// Return if the tower is bad
   Bool_t  isBad() const;
+  /// Return softId
   Int_t   numericIndex2SoftId(Int_t idx) const;
 
   /**
    * Setters
    */
+
+  /// Set tower ADC
   void setAdc(Int_t adc);
+  /// Set tower energy
   void setEnergy(Float_t energy);
 
  protected:

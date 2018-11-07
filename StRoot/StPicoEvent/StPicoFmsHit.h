@@ -26,15 +26,23 @@ class StPicoFmsHit: public TObject {
   /**
    * Getters
    */
+
+  /// Return detector ID [0,31]
   Int_t detectorId() const;
+  /// Return channel [0,2047]
   Int_t channel() const;
+  /// Return ADC
   Int_t adc() const;
 
   /**
    * Setters
    */
+
+  /// Set channel and detector ID
   void setChannelDetectorId(Int_t channelId, Int_t detectorId);
+  /// Set ADC
   void setAdc(Float_t adc);
+  /// Set ADC
   void setAdc(Int_t adc);
   
  private:
