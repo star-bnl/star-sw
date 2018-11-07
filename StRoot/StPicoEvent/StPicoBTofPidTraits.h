@@ -1,10 +1,10 @@
 #ifndef StPicoBTofPidTraits_h
 #define StPicoBTofPidTraits_h
 
-/// C++ headers
+// C++ headers
 #include <limits>
 
-/// ROOT headers
+// ROOT headers
 #include "TObject.h"
 #include "TVector3.h"
 

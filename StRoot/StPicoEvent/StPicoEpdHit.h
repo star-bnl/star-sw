@@ -1,10 +1,10 @@
 #ifndef StPicoEpdHit_h
 #define StPicoEpdHit_h
 
-/// C++ headers
+// C++ headers
 #include <cstdlib>
 
-/// ROOT headers
+// ROOT headers
 #include "TObject.h"
 
 //

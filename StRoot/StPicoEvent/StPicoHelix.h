@@ -11,15 +11,15 @@
 #ifndef StPicoHelix_h
 #define StPicoHelix_h
 
-/// C++ headers
+// C++ headers
 #include <math.h>
 #include <utility>
 #include <algorithm>
 
-/// ROOT headers
+// ROOT headers
 #include "TVector3.h"
 
-/// PicoDst headers
+// PicoDst headers
 #ifdef _VANILLA_ROOT_
 #include "SystemOfUnits.h"
 #else

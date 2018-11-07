@@ -1,6 +1,7 @@
 #ifndef StPicoCommon_h
 #define StPicoCommon_h
 
+// C++ headers
 #include <set>
 
 //_________________

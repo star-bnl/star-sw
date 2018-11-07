@@ -1,11 +1,11 @@
-/// C++ headers
+// C++ headers
 #include <limits>
 
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoMessMgr.h"
 #include "StPicoMtdPidTraits.h"
 
-/// ROOT headers
+// ROOT headers
 #include "TMath.h"
 
 ClassImp(StPicoMtdPidTraits)

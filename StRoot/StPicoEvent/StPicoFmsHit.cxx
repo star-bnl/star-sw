@@ -1,8 +1,8 @@
-/// C++ headers
+// C++ headers
 #include <iostream>
 #include <limits>
 
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoMessMgr.h"
 #include "StPicoFmsHit.h"
 

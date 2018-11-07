@@ -1,11 +1,11 @@
-/// C++ headers
+// C++ headers
 #include <limits>
 #include <cmath>
 
-/// ROOT headers
+// ROOT headers
 #include "TMath.h"
 
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoMessMgr.h"
 #include "StPicoBTofPidTraits.h"
 

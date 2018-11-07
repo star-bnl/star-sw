@@ -1,7 +1,7 @@
 #ifndef StPicoFmsHit_h
 #define StPicoFmsHit_h
 
-/// ROOT headers
+// ROOT headers
 #include "TObject.h"
 
 /**

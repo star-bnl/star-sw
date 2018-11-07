@@ -1,14 +1,14 @@
 #ifndef StPicoTrack_h
 #define StPicoTrack_h
 
-/// C++ headers
+// C++ headers
 #include <cmath>
 
-/// ROOT headers
+// ROOT headers
 #include "TObject.h"
 #include "TVector3.h"
 
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoHelix.h"
 #include "StPicoPhysicalHelix.h"
 

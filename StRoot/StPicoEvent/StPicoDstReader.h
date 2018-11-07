@@ -14,14 +14,14 @@
 #ifndef StPicoDstReader_h
 #define StPicoDstReader_h
 
-/// ROOT headers
+// ROOT headers
 #include "TChain.h"
 #include "TTree.h"
 #include "TFile.h"
 #include "TString.h"
 #include "TClonesArray.h"
 
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoDst.h"
 #include "StPicoEvent.h"
 #include "StPicoArrays.h"

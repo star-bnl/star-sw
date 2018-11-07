@@ -1,10 +1,10 @@
 #ifndef StPicoBTofHit_h
 #define StPicoBTofHit_h
 
-/// C++ headers
+// C++ headers
 #include <limits>
 
-/// ROOT headers
+// ROOT headers
 #include "TObject.h"
 
 //_________________
@@ -25,6 +25,7 @@ class StPicoBTofHit : public TObject {
   /**
    * Getters
    */
+
   /// Return ID of the hit
   Int_t   id() const;
   /// Return tray number
