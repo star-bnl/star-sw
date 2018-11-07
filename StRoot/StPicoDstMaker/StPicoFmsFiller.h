@@ -1,3 +1,10 @@
+/**
+ * \class StPicoFmsFiller
+ * \brief Fills FMS information
+ *
+ * A helper class that stores FMS information to the PicoDst
+ */
+
 #ifndef StPicoFmsFiller_h
 #define StPicoFmsFiller_h
 
