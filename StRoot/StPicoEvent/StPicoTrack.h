@@ -1,3 +1,10 @@
+/**
+ * \class StPicoTrack
+ * \brief Holds information about track parameters
+ *
+ * The class stores information about the tracks reconstructed in TPC
+ */
+
 #ifndef StPicoTrack_h
 #define StPicoTrack_h
 
@@ -33,9 +40,9 @@ class StPicoTrack : public TObject {
   /// Print track parameters
   virtual void Print(const Char_t *option = "") const;
 
-  /**
-   * Getters
-   */
+  //
+  // Getters
+  //
 
   /// Return unique Id of the track
   Int_t   id() const;
@@ -60,8 +67,8 @@ class StPicoTrack : public TObject {
   /// Helix at point of DCA to StPicoEvent::mPrimaryVertex
   StPicoPhysicalHelix helix(Float_t const B) const;
 
-  /// Next functions return DCA (or its components) of the global track
-  /// to the point with coordinates (pVtxX, pVtxY, pVtxZ)
+  // Next functions return DCA (or its components) of the global track
+  // to the point with coordinates (pVtxX, pVtxY, pVtxZ)
 
   /// Return signed distance in x direction between the value and x position of the DCA point (gDCAx - x)
   Float_t gDCAx(Float_t pVtxX) const;
@@ -139,9 +146,9 @@ class StPicoTrack : public TObject {
   /// Return index to the corresponding MTD PID trait
   Int_t mtdPidTraitsIndex() const;
 
-  /**
-   * Setters
-   */
+  //
+  // Setters
+  //
 
   /// Set track ID
   void setId(Int_t id);
@@ -255,9 +262,9 @@ class StPicoTrack : public TObject {
   ClassDef(StPicoTrack, 4)
 };
 
-/**
- * Getters
- */
+//
+// Getters
+//
 inline void StPicoTrack::setBEmcPidTraitsIndex(Int_t index) { mBEmcPidTraitsIndex = (Short_t)index; }
 inline void StPicoTrack::setBTofPidTraitsIndex(Int_t index) { mBTofPidTraitsIndex = (Short_t)index; }
 inline void StPicoTrack::setMtdPidTraitsIndex(Int_t index) { mMtdPidTraitsIndex = (Short_t)index; }
@@ -307,9 +314,9 @@ inline Bool_t  StPicoTrack::isBemcTrack() const { return (mBEmcPidTraitsIndex<0)
 inline Bool_t  StPicoTrack::isMtdTrack() const { return (mMtdPidTraitsIndex<0) ? false : true; }
 inline Bool_t  StPicoTrack::isPrimary() const { return ( pMom().Mag()>0 ); }
 
-/**
- * Setters
- */
+//
+// Setters
+//
 inline void StPicoTrack::setId(Int_t id) { mId = (UShort_t)id; }
 inline void StPicoTrack::setNHitsFit(Int_t nhits) { mNHitsFit = (Char_t)nhits; }
 inline void StPicoTrack::setDedxError(Float_t dEdxError) { mDedxError = dEdxError; }

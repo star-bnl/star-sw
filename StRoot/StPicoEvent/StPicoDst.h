@@ -1,3 +1,10 @@
+/**
+ * \class StPicoDst
+ * \brief Main class that keeps TClonesArrays with main classes
+ *
+ * The StPicoDstClass holds pointers to the picoArrays with all data
+ */
+
 #ifndef StPicoDst_h
 #define StPicoDst_h
 

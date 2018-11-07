@@ -1,3 +1,11 @@
+/**
+ * \class StPicoEvent
+ * \brief Stores global information about the event
+ *
+ * The StPicoEvent class keeps variables that characterize event.
+ * Most of the members are copied from StMuEvent.
+ */
+
 #ifndef StPicoEvent_h
 #define StPicoEvent_h
 
@@ -22,9 +30,9 @@ class StPicoEvent : public TObject {
   /// Print some event information
   virtual void Print(const Char_t *option = "") const;
 
-  /**
-   * Getters
-   */
+  //
+  // Getters
+  //
 
   /// Return run ID
   Int_t    runId() const;
@@ -176,9 +184,9 @@ class StPicoEvent : public TObject {
   /// Return bunch crossing number
   Int_t    bunchId() const;
 
-  /**
-   * Setters
-   */
+  //
+  // Setters
+  //
 
   /// Set run ID
   void setRunId(Int_t id);
@@ -446,10 +454,9 @@ protected:
   ClassDef(StPicoEvent, 3)
 };
 
-/**
- * Getters
- */
-
+//
+// Getters
+//
 inline Int_t StPicoEvent::runId() const { return mRunId; }
 inline Int_t StPicoEvent::eventId() const { return mEventId; }
 inline Int_t StPicoEvent::fillId() const { return (Int_t)mFillId; }
@@ -542,10 +549,9 @@ inline Int_t StPicoEvent::jetPatchThreshold(const Int_t i) const { return mJetPa
 
 inline Int_t StPicoEvent::bunchId() const { return (Int_t)mBunchCrossId; }
 
-/**
- * Setters
- */
-
+//
+// Setters
+//
 inline void StPicoEvent::setRunId(Int_t runId) { mRunId = runId; }
 inline void StPicoEvent::setEventId(Int_t id) { mEventId = id; }
 inline void StPicoEvent::setFillId(Int_t id) { mFillId = (UShort_t)id; }

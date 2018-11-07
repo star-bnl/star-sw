@@ -1,3 +1,7 @@
+//
+// StPicoMtdHit holds information about MTD hit
+//
+
 // C++ headers
 #include <limits>
 
@@ -39,7 +43,7 @@ void StPicoMtdHit::setHitChannel(Int_t backleg, Int_t module, Int_t cell) {
   
   Int_t gchan = (backleg - 1) * 60 + (module - 1) * 12 + cell;
 
-  /// Check the range of the hit value
+  // Check the range of the hit value
   if( gchan < std::numeric_limits<short>::max() ) {
     mgChannel = (Short_t)gchan;
   }

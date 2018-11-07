@@ -1,3 +1,11 @@
+/**
+ * \class StPicoBTowHit
+ * \brief Holds information about BEMC tower
+ *
+ * The class holds information about the tower from
+ * the Barrel ElectroMagnetic Calorimeter (BEMC)
+ */
+
 #ifndef StPicoBTowHit_h
 #define StPicoBTowHit_h
 
@@ -22,10 +30,10 @@ class StPicoBTowHit : public TObject {
   /// Print tower information
   virtual void Print(const Char_t* option = "") const;
 
-  /**
-   * Getters
-   */
-
+  //
+  // Getters
+  //
+  
   /// Return ADC of the tower
   Int_t   adc() const;
   /// Return energy of the tower
@@ -35,10 +43,10 @@ class StPicoBTowHit : public TObject {
   /// Return softId
   Int_t   numericIndex2SoftId(Int_t idx) const;
 
-  /**
-   * Setters
-   */
-
+  //
+  // Setters
+  //
+  
   /// Set tower ADC
   void setAdc(Int_t adc);
   /// Set tower energy
@@ -54,9 +62,9 @@ class StPicoBTowHit : public TObject {
   ClassDef(StPicoBTowHit, 4)
 };
 
-/**
- * Getters
- */
+//
+// Getters
+//
 inline Int_t   StPicoBTowHit::adc() const { return (Int_t)mAdc; }
 inline Float_t StPicoBTowHit::energy() const { return (Float_t)mE / 1000.f; }
 inline Int_t StPicoBTowHit::numericIndex2SoftId(Int_t idx) const { return (idx+1); }

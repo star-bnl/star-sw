@@ -1,3 +1,7 @@
+//
+// StPicoBTowHit stores BEMC tower information
+//
+
 // C++ headers
 #include <limits>
 

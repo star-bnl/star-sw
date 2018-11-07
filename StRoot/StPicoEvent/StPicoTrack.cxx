@@ -1,3 +1,7 @@
+//
+// StPicoTrack holds information about the reconstructed tracks
+//
+
 // C+++ headers
 #include <limits>
 
@@ -106,7 +110,7 @@ void StPicoTrack::setChi2(Float_t chi2) {
 
 //_________________
 void StPicoTrack::setDedx(Float_t dEdx) {
-  /// In KeV/cm
+  // In KeV/cm
   mDedx = dEdx * 1.e6;
 }
 
@@ -117,7 +121,7 @@ void StPicoTrack::setNHitsMax(Int_t nhits) {
 
 //_________________
 void StPicoTrack::setNHitsPossible(Int_t nhits) {
-  /// For those who wants to have standard terminology
+  // For those who wants to have standard terminology
   setNHitsMax(nhits);
 }
 
@@ -132,7 +136,7 @@ void StPicoTrack::setTopologyMap(Int_t id, UInt_t word) {
     mTopologyMap[id] = word;
   }
   else {
-    /// Shouldn't here be a protection?
+    // Shouldn't here be a protection?
   }
 }
 
