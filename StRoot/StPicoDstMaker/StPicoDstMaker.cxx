@@ -1,10 +1,10 @@
-/// C++ headers
+// C++ headers
 #include <algorithm>
 #include <unordered_map>
 #include <string>
 #include <vector>
 
-/// ROOT headers
+// ROOT headers
 #include "TRegexp.h"
 #include "TChain.h"
 #include "TClonesArray.h"
@@ -12,7 +12,7 @@
 #include "TBranch.h"
 #include "TObjectSet.h"
 
-/// STAR headers
+// STAR headers
 #include "StChain/StChain.h"
 #include "StChain/StChainOpt.h"
 #include "St_base/StMessMgr.h"
@@ -34,6 +34,7 @@
 #include "StEvent/StEmcRawHit.h"
 #include "StEvent/StTriggerData.h"
 #include "StEvent/StEnumerations.h"
+#include "StEvent/StL0Trigger.h"
 
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
@@ -98,7 +99,7 @@ StPicoDstMaker::StPicoDstMaker(char const* name) :
   mModuleToQT{}, mModuleToQTPos{}, mQTtoModule{}, mQTSlewBinEdge{}, mQTSlewCorr{},
   mPicoArrays{}, mStatusArrays{},
   mFmsFiller(*mPicoDst) {
-    
+  
   streamerOff();
   createArrays();
   std::fill_n(mStatusArrays, sizeof(mStatusArrays) / sizeof(mStatusArrays[0]), 1);
@@ -107,6 +108,7 @@ StPicoDstMaker::StPicoDstMaker(char const* name) :
 //_________________
 StPicoDstMaker::StPicoDstMaker(PicoIoMode ioMode, char const* fileName, 
 			       char const* name) : StPicoDstMaker(name) {
+  /// Constructor that pics IO mode, filename and extension
   StMaker::m_Mode = ioMode;
   mInputFileName = fileName;
 }
@@ -1331,6 +1333,9 @@ void StPicoDstMaker::fillEvent() {
       picoEvent->setBbcAdcWest( pmtId, bbc.adc(iPMT) );
     }
   } //for(UInt_t iPMT=0; iPMT<bbc.numberOfPMTs(); ++iPMT)
+
+  /// Set bunch crossing ID
+  picoEvent->setBunchId( ev->l0Trigger().bunchCrossingId() );
 }
 
 //_________________
