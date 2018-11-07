@@ -21,29 +21,49 @@ class StPicoMtdPidTraits : public TObject {
   /**
    * Getters
    */
-  /// Matching information
+
+  /// Return assiciated track index
   Int_t    trackIndex()        const;
+  /// Return hit index
   Int_t    mtdHitIndex()       const;
+  /// Return hit channel
   Int_t    gChannel()          const;
+  /// Return backleg number
   Int_t    backleg()           const;
+  /// Return module number
   Int_t    module()            const;
+  /// Return cell number
   Int_t    cell()              const;
+  /// Return match flag
   Int_t    matchFlag()         const;
+  /// Return delta Y
   Float_t  deltaY()            const;
+  /// Return delta Z
   Float_t  deltaZ()            const;
+  /// Return difference between measured and expected time of flight
   Float_t  deltaTimeOfFlight() const;
+  /// Return beta
   Float_t  beta()              const;
 
   /**
    * Setters
    */
+
+  /// Set track index of the associated track
   void setTrackIndex(Int_t index);
+  /// Set MTD hit index
   void setMtdHitIndex(Int_t index);
+  /// Set match flag
   void setMatchFlag(Char_t flag);
+  /// Set delta Y
   void setDeltaY(Float_t dy);
+  /// Set delta Z
   void setDeltaZ(Float_t dz);
+  /// Set difference between measured and expected time of flight
   void setDeltaTimeOfFlight(Float_t t);
+  /// Set beta
   void setBeta(Float_t beta);
+  /// Set hit channel: (backleg-1) * 60 + (module-1) * 12 + cell
   void setHitChannel(Int_t backleg, Int_t module, Int_t cell);
 
  private:

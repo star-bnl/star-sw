@@ -6,6 +6,7 @@
 //_________________
 namespace StarPicoDst {
 
+  /// Define detector side
   enum DetectorSide {
     Undefined = 0,
     East = -1,
@@ -14,6 +15,7 @@ namespace StarPicoDst {
 
   extern std::set<DetectorSide> detectorSides;
 
+  /// Define charge
   enum Charge {
     Negative = -1,
     Positive = 1

@@ -1,4 +1,4 @@
-/*
+/**
  * Author: Grigory Nigmatkulov
  * Date: May 28, 2018
  *
@@ -9,7 +9,7 @@
  * One can also turn on or off certain branches using the 
  * SetStatus method.
  *
- **/
+ */
 
 #ifndef StPicoDstReader_h
 #define StPicoDstReader_h
@@ -76,9 +76,12 @@ class StPicoDstReader : public TObject {
   /// Pointer to the current tree
   TTree *mTree;
 
+  /// Event counter
   Int_t mEventCounter;
 
+  /// Pointers to pico arrays
   TClonesArray *mPicoArrays[StPicoArrays::NAllPicoArrays];
+  /// Status of pico arrays
   Char_t        mStatusArrays[StPicoArrays::NAllPicoArrays];
 
   ClassDef(StPicoDstReader, 0)
