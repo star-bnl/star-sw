@@ -1,13 +1,13 @@
 #ifndef StPicoDst_h
 #define StPicoDst_h
 
-/// ROOT headers
+// ROOT headers
 #include "TClonesArray.h"
 
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoArrays.h"
 
-/// Forward declarations
+// Forward declarations
 class StPicoEvent;
 class StPicoTrack;
 class StPicoEmcTrigger;

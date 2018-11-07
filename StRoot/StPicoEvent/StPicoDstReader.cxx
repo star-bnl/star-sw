@@ -11,14 +11,14 @@
  *
  **/
 
-/// C++ headers
+// C++ headers
 #include <string>
 #include <sstream>
 #include <iostream>
 #include <fstream>
 #include <assert.h>
 
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoMessMgr.h"
 #include "StPicoDstReader.h"
 #include "StPicoEvent.h"
@@ -38,7 +38,7 @@
 #include "StPicoArrays.h"
 #include "StPicoDst.h"
 
-/// ROOT headers
+// ROOT headers
 #include "TRegexp.h"
 
 ClassImp(StPicoDstReader)

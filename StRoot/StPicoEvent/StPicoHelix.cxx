@@ -8,7 +8,7 @@
  *
  */
 
-/// C++ headers
+// C++ headers
 #if !defined(ST_NO_NUMERIC_LIMITS)
 #    include <limits>
 #    if !defined(ST_NO_NAMESPACES)
@@ -18,10 +18,10 @@
 
 #define FOR_PICO_HELIX
 
-/// C++ headers
+// C++ headers
 #include <float.h>
 
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoHelix.h"
 #ifdef _VANILLA_ROOT_
 #include "PhysicalConstants.h"

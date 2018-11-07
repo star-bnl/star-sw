@@ -1,7 +1,7 @@
 #ifndef StPicoTrackCovMatrix_h
 #define StPicoTrackCovMatrix_h
 
-/// ROOT headers
+// ROOT headers
 #include "TObject.h"
 
 //_________________

@@ -9,10 +9,10 @@
 #ifndef StPicoPhysicalHelix_h
 #define StPicoPhysicalHelix_h
 
-/// ROOT headers
+// ROOT headers
 #include "TVector3.h"
 
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoHelix.h"
 
 //_________________

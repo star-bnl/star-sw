@@ -1,8 +1,8 @@
-/// C++ headers
+// C++ headers
 #include <bitset>
 #include <math.h>
 
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoMessMgr.h"
 #include "StPicoMtdTrigger.h"
 

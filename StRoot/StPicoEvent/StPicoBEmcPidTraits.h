@@ -1,7 +1,7 @@
 #ifndef StPicoBEmcPidTraits_h
 #define StPicoBEmcPidTraits_h
 
-/// ROOT headers
+// ROOT headers
 #include "TObject.h"
 
 //_________________

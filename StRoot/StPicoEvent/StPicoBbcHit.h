@@ -1,7 +1,7 @@
 #ifndef StPicoBbcHit_h
 #define StPicoBbcHit_h
 
-/// ROOT headers
+// ROOT headers
 #include "TObject.h"
 
 //

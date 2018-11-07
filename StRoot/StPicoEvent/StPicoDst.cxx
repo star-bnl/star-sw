@@ -1,4 +1,4 @@
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoMessMgr.h"
 #include "StPicoEvent.h"
 #include "StPicoTrack.h"

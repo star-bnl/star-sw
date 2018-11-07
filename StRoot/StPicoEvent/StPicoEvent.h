@@ -1,10 +1,10 @@
 #ifndef StPicoEvent_h
 #define StPicoEvent_h
 
-/// C++ headers
+// C++ headers
 #include <vector>
 
-/// ROOT headers
+// ROOT headers
 #include "TObject.h"
 #include "TVector3.h"
 

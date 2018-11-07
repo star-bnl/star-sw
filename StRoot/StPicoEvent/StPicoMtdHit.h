@@ -1,10 +1,10 @@
 #ifndef StPicoMtdHit_h
 #define StPicoMtdHit_h
 
-/// C++ headers
+// C++ headers
 #include <utility>
 
-/// ROOT headers
+// ROOT headers
 #include "TObject.h"
 
 //_________________

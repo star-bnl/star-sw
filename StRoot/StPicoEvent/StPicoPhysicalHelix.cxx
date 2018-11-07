@@ -6,10 +6,10 @@
  *
  */
 
-/// C++ headers
+// C++ headers
 #include <math.h>
 
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoHelix.h"
 #include "StPicoPhysicalHelix.h"
 #ifdef _VANILLA_ROOT_

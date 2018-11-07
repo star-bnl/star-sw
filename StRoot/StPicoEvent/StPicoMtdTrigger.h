@@ -8,7 +8,7 @@
 #ifndef StPicoMtdTrigger_h
 #define StPicoMtdTrigger_h
 
-/// ROOT headers
+// ROOT headers
 #include "TObject.h"
 
 //_________________
