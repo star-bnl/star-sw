@@ -1,10 +1,12 @@
 #ifndef StPicoUtilities_h
 #define StPicoUtilities_h
 
+// C++ headers
 #include <array>
 #include <string>
 #include <cmath>
 
+// MuDst headers
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 

@@ -1,9 +1,11 @@
 #include "TClonesArray.h"
 
+// MuDst headers
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuFmsCollection.h"
 #include "StMuDSTMaker/COMMON/StMuFmsHit.h"
 
+// PicoDst headers
 #include "StPicoDstMaker/StPicoFmsFiller.h"
 #include "StPicoEvent/StPicoDst.h"
 #include "StPicoEvent/StPicoFmsHit.h"
@@ -17,7 +19,6 @@ StPicoFmsFiller::StPicoFmsFiller(StPicoDst& picoDst) : mPicoDst(picoDst) {
  * Fills the FmsHit TObjArray in StPicoDst with StPicoFmsHit objects by
  * copying the corresponding data from StMuFmsCollection in StMuDst.
  */
-
 //_________________
 void StPicoFmsFiller::fill(const StMuDst& muDst, const StFmsDbMaker* fmsDbMaker) {
 
