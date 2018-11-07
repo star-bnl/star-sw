@@ -1,3 +1,41 @@
+/**
+ * \class StPicoDstMaker
+ * \brief Class that converts MuDst into PicoDst
+ *
+ * The class allows the conversion from MuDst to PicoDst
+ * using several options important options:
+ *
+ * \par Vertex selection criteria (PicoVtxMode)
+ * Since MuDst stored several vertices and PicoDst allows one to
+ * keep only one, the vertex selection criteria have been proposed.
+ * Currently, next options are available:
+ *   a) Default - select the first primary vertex (with index = 0)
+ *   b) VpdOrDefault - uses the  Default option at first, and then 
+ *      if BTOF info is available checks for the Vpd option.
+ *   c) Vpd - checks if BTof info is available then loops over primary
+ *      vertices and checks if |Vz - VpdVz|<mTpcVpdVzDiffCut. The first 
+ *      vertex that satisfies the cut is selected.
+ * Default is NotSet. In this case the program execution will be terminated.
+ * Has to be explicitly set.
+ *
+ * \par Vertex position (mTpcVpdVzDiffCut)
+ * There is a possibility to cut on the vertex position requiring
+ * the difference of vertex position along the beam direction (z) reconstructed
+ * in TPC and estimated via VPD by the absolute value to be less then mTpcVpdVzDiffCut.
+ * Default is 6 cm.
+ *
+ * \par Saving covariance matrix (PicoCovMtxMode)
+ * In order to store covariance matrix for each track one should specify
+ * PicoCovMtxMode with one of two words:
+ *   a) PicoCovMtxSkip - skip and not write covariance matrix
+ *   b) PicoCovMtxWrite - store covariance matrices. If covariance matrix 
+ *      does not exist, then it is filled with zeros
+ * Default is PicoCovMtxSkip.
+ *
+ * Additional information can be found here:
+ * <a href="https://drupal.star.bnl.gov/STAR/blog/gnigmat/picodst-format"> </a>
+ */
+
 #ifndef StPicoDstMaker_h
 #define StPicoDstMaker_h
 
@@ -43,10 +81,13 @@ class StPicoDstMaker : public StMaker {
 
   /// Init run
   virtual Int_t InitRun(Int_t const runnumber);
-  /// Standard STAR functions
+  /// Standard STAR Init() function called from StChain
   virtual Int_t Init();
+  /// Standard STAR Make() function called from StChain
   virtual Int_t Make();
+  /// Clear
   virtual void  Clear(Option_t* option = "");
+  /// Standard STAR Finish() function called from StChain
   virtual Int_t Finish();
 
   /// Print pico arrays
@@ -78,6 +119,7 @@ class StPicoDstMaker : public StMaker {
 
  private:
 
+  /// Turn-off ROOT streamers
   void streamerOff();
 
   void openWrite();
@@ -86,15 +128,22 @@ class StPicoDstMaker : public StMaker {
   Int_t openRead();
   void  read();
   void closeRead();
+  /// Set branch addresses
   void setBranchAddresses(TChain*);
 
+  /// Build EMC indexes
   void buildEmcIndex();
+  /// Initialize EMC related arrays
   void initEmc();
+  /// Finish EMC
   void finishEmc();
 
+  /// Initialize MTD information
   Bool_t initMtd(Int_t const runnumber);
 
+  /// Clear arrays
   void clearArrays();
+  /// Create arrays
   void createArrays();
 
   Int_t MakeRead();
@@ -119,7 +168,7 @@ class StPicoDstMaker : public StMaker {
   void fillMtdHits();
   /// Fill EPD hit information
   void fillEpdHits();
-  /// FIll BBC hit information
+  /// Fill BBC hit information
   void fillBbcHits();
 
  /**
@@ -221,7 +270,7 @@ class StPicoDstMaker : public StMaker {
 
   /// Get CVS status
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPicoDstMaker.h,v 1.21 2018/11/07 16:11:29 gnigmat Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPicoDstMaker.h,v 1.22 2018/11/07 19:54:50 gnigmat Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 

@@ -1,3 +1,8 @@
+//
+// StPicoFmsFiller is a helper class that stores FMS information to the PicoDst
+//
+
+// ROOT headers
 #include "TClonesArray.h"
 
 // MuDst headers
@@ -30,7 +35,6 @@ void StPicoFmsFiller::fill(const StMuDst& muDst, const StFmsDbMaker* fmsDbMaker)
     return;
   }
 
-  //
   TClonesArray *hitCollection = mPicoDst.picoArray(StPicoArrays::FmsHit);
 
   for (const TObject* obj : *muFmsHits) {
