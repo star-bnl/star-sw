@@ -724,7 +724,7 @@ int itpc_fcf_c::do_ch_sim(int row, int pad, u_short *tb_buff, u_short *track_id)
 
 	int t_start ;
 	int t_cou ;
-	u_short *p_start ;
+	u_short *p_start = 0 ;
 
 	offline = 1 ;	// juuuuust in case!
 	words_per_cluster = 4 ;	// added stuff

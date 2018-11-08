@@ -131,8 +131,12 @@ public:
 
 	} itpc_config[25] ;	// index is sector (from 1)
 
-	static int parse_config(const char *fname) ;
+	static int itpc_fee_map[24][4][16] ;
+	static u_int ifee_mask(int sec1, int rdo1) ; 
+	static int fee_map_check() ;
 
+	static int parse_config(const char *fname) ;
+	static int parse_default() ;
 
 } ;
 
