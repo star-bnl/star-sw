@@ -1,24 +1,15 @@
-/*
- * Author: Grigory Nigmatkulov
- * Date: May 28, 2018
- *
- * Description:
- * This class allows to read picoDst.root file or a list of files
- * that contain picoDst and sets up pointers to the picoDst, and
- * certain TClonesArrays that keep Event, Track, BTofHit, etc...
- * One can also turn on or off certain branches using the 
- * SetStatus method.
- *
- **/
+//
+// StPicoDstReader allows to read picoDst file or a list of files
+//
 
-/// C++ headers
+// C++ headers
 #include <string>
 #include <sstream>
 #include <iostream>
 #include <fstream>
 #include <assert.h>
 
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoMessMgr.h"
 #include "StPicoDstReader.h"
 #include "StPicoEvent.h"
@@ -38,7 +29,7 @@
 #include "StPicoArrays.h"
 #include "StPicoDst.h"
 
-/// ROOT headers
+// ROOT headers
 #include "TRegexp.h"
 
 ClassImp(StPicoDstReader)
@@ -74,7 +65,7 @@ void StPicoDstReader::clearArrays() {
 //_________________
 void StPicoDstReader::SetStatus(const Char_t *branchNameRegex, Int_t enable) {
   if(strncmp(branchNameRegex, "St", 2) == 0) {
-    /// Ignore first "St"
+    // Ignore first "St"
     branchNameRegex += 2; 
   }
 

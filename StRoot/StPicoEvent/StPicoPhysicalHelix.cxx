@@ -1,15 +1,11 @@
-/**
- * \class StPicoPhysicalHelix
- * \author Grigory Nigmatkulov, May 07 2018
- * 
- * Parametrization of a physical helix (modification of StPhysicalHelix).
- *
- */
+//
+// StPicoPhysicalHelix is a parametrization of a particle that moves along the helix
+//
 
-/// C++ headers
+// C++ headers
 #include <math.h>
 
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoHelix.h"
 #include "StPicoPhysicalHelix.h"
 #ifdef _VANILLA_ROOT_
@@ -88,7 +84,7 @@ TVector3 StPicoPhysicalHelix::momentum(Double_t B) const {
 
 //_________________
 TVector3 StPicoPhysicalHelix::momentumAt(Double_t S, Double_t B) const {
-  /// Obtain phase-shifted momentum from phase-shift of origin
+  // Obtain phase-shifted momentum from phase-shift of origin
   StPicoPhysicalHelix tmp(*this);
   tmp.moveOrigin(S);
   return tmp.momentum(B);
@@ -108,7 +104,7 @@ Double_t StPicoPhysicalHelix::geometricSignedDistance(Double_t x, Double_t y) {
   TVector3 position(x,y,0);
   TVector3 DCAVec = (DCA2dPosition-position);
   TVector3 momVec;
-  /// Deal with straight tracks
+  // Deal with straight tracks
   if (this->mSingularity) {
     momVec = this->at(1)- this->at(0);
     momVec.SetZ(0);
@@ -125,7 +121,7 @@ Double_t StPicoPhysicalHelix::geometricSignedDistance(Double_t x, Double_t y) {
 
 //_________________
 Double_t StPicoPhysicalHelix::curvatureSignedDistance(Double_t x, Double_t y) {
-  /// Protect against mH = 0 or zero field
+  // Protect against mH = 0 or zero field
   if (this->mSingularity || abs(this->mH)<=0) {
     return (this->geometricSignedDistance(x,y));
   }

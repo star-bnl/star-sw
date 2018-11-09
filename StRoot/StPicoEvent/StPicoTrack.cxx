@@ -1,10 +1,14 @@
-/// C+++ headers
+//
+// StPicoTrack holds information about the reconstructed tracks
+//
+
+// C+++ headers
 #include <limits>
 
-/// ROOT headers
+// ROOT headers
 #include "TMath.h"
 
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoMessMgr.h"
 #include "StPicoTrack.h"
 #ifdef  __TFG__VERSION__
@@ -34,12 +38,13 @@ StPicoTrack::StPicoTrack() : TObject(),
   mNSigmaProton( std::numeric_limits<short>::min() ),
   mNSigmaElectron( std::numeric_limits<short>::min() ),
   mTopologyMap{}, mBEmcPidTraitsIndex(-1), mBTofPidTraitsIndex(-1),
-  mMtdPidTraitsIndex(-1) {
+  mMtdPidTraitsIndex(-1) { /// Default constructor
   /* empty */
 }
 
 //_________________
 StPicoTrack::StPicoTrack(const StPicoTrack &track) : TObject() {
+  /// Copy constructor
   mId = track.mId;
   mChi2 = track.mChi2;
   mPMomentumX = track.mPMomentumX;
@@ -71,7 +76,7 @@ StPicoTrack::StPicoTrack(const StPicoTrack &track) : TObject() {
 }
 
 //_________________
-StPicoTrack::~StPicoTrack() {
+StPicoTrack::~StPicoTrack() { /// Destructor
   /* emtpy */
 }
 
@@ -115,7 +120,7 @@ void StPicoTrack::setChi2(Float_t chi2) {
 
 //_________________
 void StPicoTrack::setDedx(Float_t dEdx) {
-  /// In KeV/cm
+  // In KeV/cm
   mDedx = dEdx * 1.e6;
 }
 
@@ -126,7 +131,7 @@ void StPicoTrack::setNHitsMax(Int_t nhits) {
 
 //_________________
 void StPicoTrack::setNHitsPossible(Int_t nhits) {
-  /// For those who wants to have standard terminology
+  // For those who wants to have standard terminology
   setNHitsMax(nhits);
 }
 
@@ -141,7 +146,7 @@ void StPicoTrack::setTopologyMap(Int_t id, UInt_t word) {
     mTopologyMap[id] = word;
   }
   else {
-    /// Shouldn't here be a protection?
+    // Shouldn't here be a protection?
   }
 }
 

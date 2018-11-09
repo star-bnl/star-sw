@@ -44,8 +44,8 @@ public:
 
 	void calc() ;
 
-	int from_cache(const char *fname) ;
-	int to_cache(const char *fname=0) ;
+	int from_cache(const char *fname, int sec1, int rdo1) ;
+	int to_cache(const char *fname, int sec1, int rdo1) ;
 
 	int sanity(int mode) ;
 

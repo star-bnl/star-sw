@@ -1,7 +1,49 @@
- #ifndef StPicoDstMaker_h
+/**
+ * \class StPicoDstMaker
+ * \brief Class that converts MuDst into PicoDst
+ *
+ * The class allows the conversion from MuDst to PicoDst
+ * using several options important options:
+ *
+ * \par Vertex selection criteria (PicoVtxMode)
+ * Since MuDst stored several vertices and PicoDst allows one to
+ * keep only one, the vertex selection criteria have been proposed.
+ * Currently, next options are available:
+ *   a) Default - select the first primary vertex (with index = 0)
+ *   b) VpdOrDefault - uses the  Default option at first, and then 
+ *      if BTOF info is available checks for the Vpd option.
+ *   c) Vpd - checks if BTof info is available then loops over primary
+ *      vertices and checks if |Vz - VpdVz|<mTpcVpdVzDiffCut. The first 
+ *      vertex that satisfies the cut is selected.
+ * Default is NotSet. In this case the program execution will be terminated.
+ * Has to be explicitly set.
+ *
+ * \par Vertex position (mTpcVpdVzDiffCut)
+ * There is a possibility to cut on the vertex position requiring
+ * the difference of vertex position along the beam direction (z) reconstructed
+ * in TPC and estimated via VPD by the absolute value to be less then mTpcVpdVzDiffCut.
+ * Default is 6 cm.
+ *
+ * \par Saving covariance matrix (PicoCovMtxMode)
+ * In order to store covariance matrix for each track one should specify
+ * PicoCovMtxMode with one of two words:
+ *   a) PicoCovMtxSkip - skip and not write covariance matrix
+ *   b) PicoCovMtxWrite - store covariance matrices. If covariance matrix 
+ *      does not exist, then it is filled with zeros
+ * Default is PicoCovMtxSkip.
+ *
+ * Additional information can be found here:
+ * <a href="https://drupal.star.bnl.gov/STAR/blog/gnigmat/picodst-format"> </a>
+ */
+
+#ifndef StPicoDstMaker_h
 #define StPicoDstMaker_h
 #include <vector>
+
+// StChain headers
 #include "StChain/StMaker.h"
+
+// PicoDst headers
 #include "StPicoEvent/StPicoArrays.h"
 #include "StPicoDstMaker/StPicoFmsFiller.h"
 #include "StPicoEvent/StPicoDst.h"
@@ -22,11 +64,14 @@ class StPicoEvent;
 class StPicoDstMaker : public StMaker {
 
  public:
+
+  /// Write/Read mode: 1-write, 2-read
   enum PicoIoMode {IoWrite=1, IoRead=2};
 #ifndef __TFG__VERSION__
-
+  /// Primary vertex selection mode: 0-NotSet, 1-Default, 2-Vpd, 3-VpdOrDefault
   enum PicoVtxMode {NotSet=0, Default=1, Vpd=2, VpdOrDefault=3};
 #endif /* ! __TFG__VERSION__ */
+  /// Write or not write covariance matrix: 0-skip, 1-write
   enum PicoCovMtxMode {Skip=0, Write=1};
 
   /// Constructor
@@ -39,10 +84,13 @@ class StPicoDstMaker : public StMaker {
 
   /// Init run
   virtual Int_t InitRun(Int_t const runnumber);
-  /// Standard STAR functions
+  /// Standard STAR Init() function called from StChain
   virtual Int_t Init();
+  /// Standard STAR Make() function called from StChain
   virtual Int_t Make();
+  /// Clear
   virtual void  Clear(Option_t* option = "");
+  /// Standard STAR Finish() function called from StChain
   virtual Int_t Finish();
 
   /// Print pico arrays
@@ -58,11 +106,13 @@ class StPicoDstMaker : public StMaker {
   /// Returns pointer to the current TTree, the top level io structure
   TTree* tree();
 
-  /// Sets the split level for the file and all branches. Please refer to the ROOT manual (http://root.cern.ch) for more info
+  /// Sets the split level for the file and all branches.
+  /// Please refer to the ROOT manual (http://root.cern.ch) for more info
   void setSplit(int = 99);
   /// Sets the buffer size for all branches.
   void setBufferSize(int = 65536 * 4);
-  /// Sets the compression level for the file and all branches. 0 means no compression, 9 is the higher compression level.
+  /// Sets the compression level for the file and all branches. 0 means no compression,
+  /// 9 is the higher compression level.
   void setCompression(int comp = 9);
 #ifdef __TFG__VERSION__
   PicoVtxMode vtxMode() {return StMuDst::instance()->vtxMode();}
@@ -83,6 +133,7 @@ class StPicoDstMaker : public StMaker {
   void setCovMtxMode(const PicoCovMtxMode covMtxMode);
  private:
 
+  /// Turn-off ROOT streamers
   void streamerOff();
 
   void openWrite();
@@ -91,33 +142,47 @@ class StPicoDstMaker : public StMaker {
   Int_t openRead();
   void  read();
   void closeRead();
+  /// Set branch addresses
   void setBranchAddresses(TChain*);
 
+  /// Build EMC indexes
   void buildEmcIndex();
+  /// Initialize EMC related arrays
   void initEmc();
+  /// Finish EMC
   void finishEmc();
 
+  /// Initialize MTD information
   Bool_t initMtd(Int_t const runnumber);
 
+  /// Clear arrays
   void clearArrays();
+  /// Create arrays
   void createArrays();
 
   Int_t MakeRead();
   Int_t MakeWrite();
 
-  /// For READ mode
-  void fillEventHeader() const; //changes "global" variable, not this maker
+  /// Fill event header info
+  void fillEventHeader() const;
 
-  /// For WRITE mode
+  /// Fill track information
   void fillTracks();
+  /// Fill event information
   void fillEvent();
+  /// Fill EMC trigger information
   void fillEmcTrigger();
+  /// Fill MTD trigger
   void fillMtdTrigger();
+  /// Fill BEMC tower information
   void fillBTowHits();
+  /// Fill BTOF information
   void fillBTofHits();
+  /// FIll MTD information
   void fillMtdHits();
-
+  /// Fill EPD hit information
   void fillEpdHits();
+  /// Fill BBC hit information
   void fillBbcHits();
 
  /**
@@ -141,7 +206,9 @@ class StPicoDstMaker : public StMaker {
   * param[out]  towid[]  Unique ids of the three BEMC towers identified for ene[2], ene[3], and ene[4]
   */
   Bool_t getBEMC(const StMuTrack* t, int* id, int* adc, float* ene, float* d, int* nep, int* towid);
+  /// Set vertex mode attributes
   Int_t  setVtxModeAttr();
+  /// Set covariance matrix mode attributes
   Int_t  setCovMtxModeAttr();
 
   /// Selects a primary vertex from `muDst` vertex collection according to the
@@ -151,6 +218,7 @@ class StPicoDstMaker : public StMaker {
 #else /* ! __TFG__VERSION__ */
   Bool_t selectVertex();
 #endif /* __TFG__VERSION__ */
+  /// VpdVz-Vz cut value. Default is 5 cm.
   Float_t   mTpcVpdVzDiffCut;
 
   /// A pointer to the main input source containing all muDst `TObjArray`s
@@ -160,11 +228,16 @@ class StPicoDstMaker : public StMaker {
   /// A pointer to the main input/outpur picoDst structure containing all `TObjArray`s
   StPicoDst*  mPicoDst;
 
+  /// Pointer to the ECM collection
   StEmcCollection* mEmcCollection;
+  /// Pointer to the EMC position
   StEmcPosition*   mEmcPosition;
+  /// Pointer to the EMC geometry
   StEmcGeom*       mEmcGeom[4];
+  /// Pointer to the array of BEMC tower hits
   StEmcRawHit*     mEmcIndex[4800];
 
+  /// Magnetic field of the current event
   Float_t    mBField;
 
   /// Vertex selection mode
@@ -172,38 +245,51 @@ class StPicoDstMaker : public StMaker {
   /// Covariant matrix not write/write mode
   PicoCovMtxMode mCovMtxMode;
 
-  TString   mInputFileName;        //! *.list - MuDst or picoDst
-  TString   mOutputFileName;       //! FileName
+  /// *.list - MuDst or picoDst
+  TString   mInputFileName;
+  /// Output file name
+  TString   mOutputFileName;
+  /// Pointer to the output file
   TFile*    mOutputFile;
 
+  /// Pointer to the chain
   TChain*   mChain;
+  /// Pointer to the TTree with picoDst
   TTree*    mTTree;
 
+  /// Event counter
   int mEventCounter;
 
-  /// Parameters to control the storage of picoDst tree in write mode. Have no
-  /// effect when reading .picoDst.root files
-  ///@{
+  /// Splitting level of ROOT file
   int mSplit;
+  /// Compression level
   int mCompression;
+  /// Size of the buffer
   int mBufferSize;
-  ///@}
 
-  /// MTD map from backleg to QT
-  Int_t  mModuleToQT[30][5];        // Map from module to QT board index
-  Int_t  mModuleToQTPos[30][5];     // Map from module to the position on QA board
-  Int_t  mQTtoModule[8][8];         // Map from QT board to module
-  Int_t  mQTSlewBinEdge[8][16][8];  // Bin Edge for QT slewing correction
-  Int_t  mQTSlewCorr[8][16][8];     // QT Slewing correction
+  /// Map from module to QT board index
+  Int_t  mModuleToQT[30][5];
+  /// Map from module to the position on QA board
+  Int_t  mModuleToQTPos[30][5];
+  /// Map from QT board to module
+  Int_t  mQTtoModule[8][8];
+  /// Bin Edge for QT slewing correction
+  Int_t  mQTSlewBinEdge[8][16][8];
+  /// QT Slewing correction
+  Int_t  mQTSlewCorr[8][16][8];
 
+  /// Pointer to the pico arrays
   TClonesArray*   mPicoArrays[StPicoArrays::NAllPicoArrays];
-  Char_t          mStatusArrays[StPicoArrays::NAllPicoArrays];
+  /// Status arrays
+  char            mStatusArrays[StPicoArrays::NAllPicoArrays];
 
+  /// FMS filler
   StPicoFmsFiller  mFmsFiller;
   static StPicoDstMaker *fgPicoDstMaker; //!
 
+  /// Get CVS status
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPicoDstMaker.h,v 1.20 2018/09/05 18:53:06 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPicoDstMaker.h,v 1.22 2018/11/07 19:54:50 gnigmat Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 

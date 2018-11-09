@@ -1,10 +1,14 @@
-/// C++ headers
+//
+// StPicoBTowHit stores BEMC tower information
+//
+
+// C++ headers
 #include <limits>
 
-/// ROOT headers
+// ROOT headers
 #include "TMath.h"
 
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoMessMgr.h"
 #include "StPicoBTowHit.h"
 

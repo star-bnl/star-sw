@@ -159,11 +159,20 @@ void itpcPed::calc()
 }
 
 
-int itpcPed::from_cache(const char *fname)
+int itpcPed::from_cache(const char *fname, int sec1, int rdo1)
 {
-	FILE *f = fopen(fname,"r") ;
+	FILE *f ;
+	char fn[256] ;
+
+	if(fname==0) {
+		sprintf(fn,"/RTScache/itpc_pedestals_s%02d_r%d.txt",sec1,rdo1) ;
+	}
+	else strcpy(fn,fname) ;
+
+
+	f = fopen(fn,"r") ;
 	if(f==0) {
-		LOG(ERR,"%s: [%s]",fname,strerror(errno)) ;
+		LOG(ERR,"%s: [%s]",fn,strerror(errno)) ;
 		return -1 ;
 	}
 
@@ -306,21 +315,54 @@ int itpcPed::sanity(int mode)
 	return 0 ;
 }
 
-int itpcPed::to_cache(const char *fname)
+
+int itpcPed::to_cache(const char *fname, int sec1, int rdo1)
 {
 	FILE *outf ;
+	int s_start, s_stop ;
+	int r_start, r_stop ;
+
+	s_start = 1 ;
+	s_stop = 24 ;
+	
+	r_start = 1 ;
+	r_stop = 4 ;
 
 	if(fname) {
 		outf = fopen(fname,"w") ;
 		if(outf==0) {
 			LOG(ERR,"%s: %s [%s]",__PRETTY_FUNCTION__,fname,strerror(errno)) ;
-			outf = stdout ;
+			return -1 ;
 		}
 	}
-	else outf = stdout ;
+	else if(sec1 < 0) {
+		outf = stdout ;
+	}
+	else {
+		char fn[256] ;
 
-	for(int s=0;s<24;s++) {
-	for(int r=0;r<4;r++) {
+		s_start = sec1 ;
+		s_stop = sec1 ;
+
+		r_start = rdo1 ;
+		r_stop = rdo1 ;
+
+		sprintf(fn,"/RTScache/itpc_pedestals_s%02d_r%d.txt",sec1,rdo1) ;
+
+		outf = fopen(fn,"w") ;
+		if(outf==0) {
+			LOG(ERR,"%s: %s [%s]",__PRETTY_FUNCTION__,fn,strerror(errno)) ;
+			return -1 ;
+
+		}
+	}
+
+		
+	for(int sx=s_start;sx<=s_stop;sx++) {
+		int s = sx - 1 ;
+	for(int rx=r_start;rx<=r_stop;rx++) {
+		int r = rx - 1 ;
+
 		if(ped_p[s][r][0][0]==0) continue ;
 
 
@@ -377,8 +419,11 @@ int itpcPed::to_cache(const char *fname)
 
 
 
-	for(int s=0;s<24;s++) {
-	for(int r=0;r<4;r++) {
+	for(int sx=s_start;sx<=s_stop;sx++) {
+		int s = sx - 1 ;
+	for(int rx=r_start;rx<=r_stop;rx++) {
+		int r = rx - 1 ;
+
 		if(ped_p[s][r][0][0]==0) continue ;
 
 
