@@ -1,8 +1,6 @@
 /**
- *  Author: Grigory Nigmatkulov
- *  Date:   July 5, 2018
+ * \brief Helper script for runing picoDst analysis calling PicoDstAnalyzer.C
  *
- *  Description:
  *  This macros takes inFileName argument with a picoDst.root file
  *  or with a list of files (name.lis or name.list). It sets _VANILLA_ROOT_
  *  (necessary for standalone and can be skipped on RACF), loads pre compiled
@@ -18,8 +16,12 @@
  *          or /relative2currentDir/inFileName
  *  It is assumed that PicoDstAnalyzer.C is placed in the same
  *  directory where the RunAnalyzer.C is stored.
- **/
+ *
+ * \author Grigory Nigmatkulov
+ * \date July 5, 2018
+ */
 
+// ROOT headers
 #include "TROOT.h"
 #include "TSystem.h"
 #include "TString.h"
