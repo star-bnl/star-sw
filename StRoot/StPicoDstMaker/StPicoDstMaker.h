@@ -33,7 +33,7 @@
  * Default is PicoCovMtxSkip.
  *
  * Additional information can be found here:
- * <a href="https://drupal.star.bnl.gov/STAR/blog/gnigmat/picodst-format"> </a>
+ * <a href="https://drupal.star.bnl.gov/STAR/blog/gnigmat/picodst-format">The PicoDst format</a>
  */
 
 #ifndef StPicoDstMaker_h
@@ -164,7 +164,7 @@ class StPicoDstMaker : public StMaker {
   void fillBTowHits();
   /// Fill BTOF information
   void fillBTofHits();
-  /// FIll MTD information
+  /// Fill MTD information
   void fillMtdHits();
   /// Fill EPD hit information
   void fillEpdHits();
@@ -270,7 +270,7 @@ class StPicoDstMaker : public StMaker {
 
   /// Get CVS status
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPicoDstMaker.h,v 1.22 2018/11/07 19:54:50 gnigmat Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPicoDstMaker.h,v 1.23 2018/11/09 15:20:26 gnigmat Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 

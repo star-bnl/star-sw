@@ -112,7 +112,7 @@ StPicoDstMaker::StPicoDstMaker(char const* name) :
 //_________________
 StPicoDstMaker::StPicoDstMaker(PicoIoMode ioMode, char const* fileName, 
 			       char const* name) : StPicoDstMaker(name) {
-  /// Constructor that pics IO mode, filename and extension
+  // Constructor that pics IO mode, filename and extension
   StMaker::m_Mode = ioMode;
   mInputFileName = fileName;
 }
