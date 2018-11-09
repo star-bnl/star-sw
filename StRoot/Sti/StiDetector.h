@@ -51,6 +51,8 @@ public:
 //		Gas is under detector
     StiMaterial* getGas() const 		{ assert(gas); return gas; }
     StiMaterial* getMaterial() const 		{ assert(material) ;return material; }
+    double getCos() const 			{ return _cos; }
+    double getSin() const 			{ return _sin; }
 
     StiShape* getShape() const 			{ return shape; }
     StiPlacement* getPlacement() const 		{ return placement; }
