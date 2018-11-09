@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.659 2018/10/11 03:50:57 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.660 2018/11/09 03:53:22 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -773,6 +773,7 @@ Int_t StBFChain::Instantiate()
 	if( GetOption("OGridLeakFull")) mk->SetAttr("OGridLeakFull", kTRUE);
 	if( GetOption("OGGVoltErr") ) mk->SetAttr("OGGVoltErr" , kTRUE);
 	if( GetOption("OSectorAlign"))mk->SetAttr("OSectorAlign",kTRUE);
+	if( GetOption("ODistoSmear")) mk->SetAttr("ODistoSmear", kTRUE);
       }
       mk->PrintAttr();
     }
