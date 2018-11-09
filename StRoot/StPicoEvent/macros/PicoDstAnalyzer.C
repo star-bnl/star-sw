@@ -1,20 +1,21 @@
 /**
- * Author: Grigory Nigmatkulov
- * Date: May 29, 2018
+ * \brief Example of how to read a file (list of files) using StPicoEvent classes
  *
  * RunPicoDstAnalyzer.C is an example of reading STAR picoDst format.
  * One can use either picoDst file or a list of picoDst files (inFile.lis or
- * inFile.list) as an input, and preform physics analysis.
+ * inFile.list) as an input, and preform physics analysis
  *
- **/
+ * \author Grigory Nigmatkulov
+ * \date May 29, 2018
+ */
 
-/// This is needed for calling standalone classes (not needed on RACF)
+// This is needed for calling standalone classes (not needed on RACF)
 #define _VANILLA_ROOT_
 
-/// C++ headers
+// C++ headers
 #include <iostream>
 
-/// ROOT headers
+// ROOT headers
 #include "TROOT.h"
 #include "TFile.h"
 #include "TChain.h"
@@ -24,7 +25,7 @@
 #include "TH2.h"
 #include "TMath.h"
 
-/// PicoDst headers
+// PicoDst headers
 #include "../StPicoDstReader.h"
 #include "../StPicoDst.h"
 #include "../StPicoEvent.h"
@@ -35,14 +36,14 @@
 #include "../StPicoBTofPidTraits.h"
 #include "../StPicoTrackCovMatrix.h"
 
-/// Load libraries (for ROOT_VERSTION_CODE >= 393215)
+// Load libraries (for ROOT_VERSTION_CODE >= 393215)
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0) 
 R__LOAD_LIBRARY(../libStPicoDst)
 #endif
 
-/// inFile - is a name of name.picoDst.root file or a name
-///          of a name.lis(t) files that contains a list of
-///          name1.picoDst.root files
+// inFile - is a name of name.picoDst.root file or a name
+//          of a name.lis(t) files that contains a list of
+//          name1.picoDst.root files
 
 //_________________
 void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_3040006.picoDst.root") {
@@ -54,7 +55,7 @@ void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_30
 
   //Long64_t events2read = picoReader->chain()->GetEntries();
   
-  /// This is a way if you want to spead up IO
+  // This is a way if you want to spead up IO
   std::cout << "Explicit read status for some branches" << std::endl;
   picoReader->SetStatus("*",0);
   picoReader->SetStatus("Event",1);
@@ -78,7 +79,7 @@ void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_30
   std::cout << "Number of events to read: " << events2read
 	    << std::endl;
 
-  /// Histogramming
+  // Histogramming
   // Event
   TH1F *hRefMult = new TH1F("hRefMult",
 			    "Reference multiplicity;refMult",
@@ -135,7 +136,7 @@ void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_30
 				120, -0.5, 119.5);
 
 
-  /// Loop over events
+  // Loop over events
   for(Long64_t iEvent=0; iEvent<events2read; iEvent++) {
 
     std::cout << "Working on event #[" << (iEvent+1)
@@ -148,10 +149,10 @@ void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_30
       break;
     }
 
-    /// Retrieve picoDst
+    // Retrieve picoDst
     StPicoDst *dst = picoReader->picoDst();
 
-    /// Retrieve event information
+    // Retrieve event information
     StPicoEvent *event = dst->event();
     if( !event ) {
       std::cout << "Something went wrong, Master! Event is hiding from me..."
@@ -164,7 +165,7 @@ void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_30
     hVtxXvsY->Fill( event->primaryVertex().X(), event->primaryVertex().Y() );
     hVtxZ->Fill( event->primaryVertex().Z() );
 
-    /// Track analysis
+    // Track analysis
     Int_t nTracks = dst->numberOfTracks();
     Int_t nMatrices = dst->numberOfTrackCovMatrices();
     if(nTracks != nMatrices) {
@@ -172,10 +173,10 @@ void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_30
     }
     //std::cout << "Number of tracks in event: " << nTracks << std::endl;
     
-    /// Track loop
+    // Track loop
     for(Int_t iTrk=0; iTrk<nTracks; iTrk++) {
 
-      /// Retrieve i-th pico track
+      // Retrieve i-th pico track
       StPicoTrack *picoTrack = dst->track(iTrk);
       
       if(!picoTrack) continue;
@@ -186,7 +187,7 @@ void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_30
 	hPrimaryPtot->Fill( picoTrack->pMom().Mag() );
       }
       
-      /// Simple single-track cut
+      // Simple single-track cut
       if( picoTrack->gMom().Mag() < 0.1 ||
 	  picoTrack->gDCA(pVtx).Mag()>50. ) {
 	continue;
@@ -211,9 +212,9 @@ void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_30
       
       hTransvMomentum->Fill( picoTrack->gMom().Pt() );
 
-      /// Check if track has TOF signal
+      // Check if track has TOF signal
       if( picoTrack->isTofTrack() ) {
-	/// Retrieve corresponding trait
+	// Retrieve corresponding trait
 	StPicoBTofPidTraits *trait = dst->btofPidTraits( picoTrack->bTofPidTraitsIndex() );
 	if( !trait ) {
 	  std::cout << "O-oh... No BTofPidTrait # " << picoTrack->bTofPidTraitsIndex()
@@ -221,17 +222,17 @@ void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_30
 	  std::cout << "Check that you turned on the branch!" << std::endl;
 	  continue;
 	}
-	/// Fill beta
+	// Fill beta
 	hTofBeta->Fill( trait->btofBeta() );
       } //if( isTofTrack() )
       
     } //for(Int_t iTrk=0; iTrk<nTracks; iTrk++)
 
-    /// Hit analysis
+    // Hit analysis
     Int_t nBTofHits = dst->numberOfBTofHits();
     //std::cout << "Number of btofHits in event: " << nBTofHits << std::endl;
 
-    /// Hit loop
+    // Hit loop
     for(Int_t iHit=0; iHit<nBTofHits; iHit++) {
 
       StPicoBTofHit *btofHit = dst->btofHit(iHit);
