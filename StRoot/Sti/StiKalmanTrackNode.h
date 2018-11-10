@@ -96,6 +96,7 @@ public:
   /// Initialize this node with the given hit information
   void initialize(StiHit*h);
   void initialize(StiDetector *d);
+  void initialize(const double dir[3]); //dir[0]**2+dir[1]**2 ==1
 //void initialize(StiHit*h,double alpha, double eta, double curvature, double tanl);
   
   /// Sets the Kalman state of this node equal to that of the given node. 
