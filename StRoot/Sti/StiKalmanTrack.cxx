@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.156 2018/11/10 00:45:31 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.156 2018/11/10 00:45:31 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.157 2018/11/10 03:15:24 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.157 2018/11/10 03:15:24 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.157  2018/11/10 03:15:24  perev
+ * JetCorr fix +tuning
+ *
  * Revision 2.156  2018/11/10 00:45:31  perev
  * 1. for approx() added options:
  *    kAppGud - errors are correct
@@ -1760,8 +1763,8 @@ if(!myCanvas) {
 }
 #endif // APPROX_DEBUG
 
-//const double BAD_XI2[2]={70,5},XI2_FACT=1; 	// Tuned constants
-const double BAD_XI2[2]={99,22},XI2_FACT=9;	// The old constants
+  const double BAD_XI2[2]={70,5},XI2_FACT=1; 	// Tuned constants
+//const double BAD_XI2[2]={99,22},XI2_FACT=9;	// The old constants
 int nNode,nNodeIn,iNode=0;
   mXi2=0;
   StiHitErrs hr;
