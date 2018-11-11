@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.111 2018/04/11 02:35:57 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.111.2.1 2018/11/11 16:07:38 didenko Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.111.2.1  2018/11/11 16:07:38  didenko
+ * branch updates for S18c_embed
+ *
  * Revision 1.111  2018/04/11 02:35:57  genevb
  * Distortion smearing by calibration resolutions
  *
@@ -432,7 +435,6 @@ To do:  <br>
 #include "StDetectorDbMaker/St_tpcFieldCageShortC.h"
 #include "StDetectorDbMaker/StTpcSurveyC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
-#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StDetectorDbMaker/St_tpcCalibResolutionsC.h"
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
   //#include "StDetectorDbMaker/StDetectorDbMagnet.h"
@@ -560,7 +562,7 @@ void StMagUtilities::GetMagFactor ()
 void StMagUtilities::GetTPCParams ()  
 { 
   St_tpcWirePlanesC*    wires = StTpcDb::instance()->WirePlaneGeometry();
-  St_tpcPadConfigC*      pads = St_tpcPadConfigC::instance();
+  St_tpcPadPlanesC*      pads = StTpcDb::instance()->PadPlaneGeometry();
   St_tpcFieldCageC*     cages = StTpcDb::instance()->FieldCage();
   St_tpcDimensionsC*     dims = StTpcDb::instance()->Dimensions();
   if (! StTpcDb::IsOldScheme()) { // new schema
@@ -580,8 +582,8 @@ void StMagUtilities::GetTPCParams ()
   StarDriftV     =  1e-6*StTpcDb::instance()->DriftVelocity() ;        
   TPC_Z0         =  dims->gatingGridZ() ;
   IFCShift       =  cages->InnerFieldCageShift();
-  INNER          =  pads->innerPadRows(1); // Use Sector 1 for default values
-  TPCROWS        =  pads->padRows(1);
+  INNER          =  pads->innerPadRows(); // Use Sector 1 for default values
+  TPCROWS        =  pads->padRows();
   IFCRadius      =    47.90 ;  // Radius of the Inner Field Cage (GVB: not sure where in DB?)
   OFCRadius      =  dims->senseGasOuterRadius();
   INNERGGFirst   =  wires->firstInnerSectorGatingGridWire();
@@ -595,7 +597,7 @@ void StMagUtilities::GetTPCParams ()
   //                    (by 25 microns) from non-DB value (121.8000)
   WIREGAP        =  OUTERGGFirst - INNERGGLast;
   for ( Int_t i = 0 ; i < TPCROWS ; i++ )
-    TPCROWR[i] = pads->radialDistanceAtRow(1,i+1); // Use Sector 1 for default values
+    TPCROWR[i] = pads->radialDistanceAtRow(i+1); // Use Sector 1 for default values
 }
 
 void StMagUtilities::GetE()
@@ -638,17 +640,15 @@ void StMagUtilities::GetTPCVoltages (Int_t mode)
     TH1I innerVs("innerVs","innerVs",5,maxInner-3.5*stepsInner,maxInner+1.5*stepsInner);
     TH1I outerVs("outerVs","outerVs",5,maxOuter-3.5*stepsOuter,maxOuter+1.5*stepsOuter);
     for (Int_t i = 1 ; i < 25; i++ ) {
-      int inner = St_tpcPadConfigC::instance()->innerPadRows(i);
-      innerVs.Fill(anodeVolts->voltagePadrow(i,inner));
-      outerVs.Fill(anodeVolts->voltagePadrow(i,inner+1));
+      innerVs.Fill(anodeVolts->voltagePadrow(i,INNER));
+      outerVs.Fill(anodeVolts->voltagePadrow(i,INNER+1));
     }
     double cmnInner = innerVs.GetBinCenter(innerVs.GetMaximumBin());
     double cmnOuter = outerVs.GetBinCenter(outerVs.GetMaximumBin());
     cout << "StMagUtilities assigning common anode voltages as " << cmnInner << " , " << cmnOuter << endl;
     for (Int_t i = 1 ; i < 25; i++ ) {
-      int inner = St_tpcPadConfigC::instance()->innerPadRows(i);
-      GLWeights[i] = ( ( TMath::Abs(anodeVolts->voltagePadrow(i,inner  ) - cmnInner) < stepsInner/2. ) &&
-                       ( TMath::Abs(anodeVolts->voltagePadrow(i,inner+1) - cmnOuter) < stepsOuter/2. ) ? 1 : -1 );
+      GLWeights[i] = ( ( TMath::Abs(anodeVolts->voltagePadrow(i,INNER  ) - cmnInner) < stepsInner/2. ) &&
+                       ( TMath::Abs(anodeVolts->voltagePadrow(i,INNER+1) - cmnOuter) < stepsOuter/2. ) ? 1 : -1 );
     }
   } else if (mode & kFullGridLeak) {
 
@@ -661,12 +661,10 @@ void StMagUtilities::GetTPCVoltages (Int_t mode)
                      (GL_charge_y_hi[2]*GL_charge_y_hi[2] - GL_charge_y_lo[2]*GL_charge_y_lo[2]) ) ;
 
     for (Int_t i = 0 ; i < 24; i++ ) {
-      int inner = St_tpcPadConfigC::instance()->innerPadRows(i+1);
-      int lastrow = St_tpcPadConfigC::instance()->padRows(i+1);
       GLWeights[i   ] = GL_rho_inner_of_innerSec(anodeVolts->voltagePadrow(i+1,      1)) * norm ;
-      GLWeights[i+24] = GL_rho_outer_of_innerSec(anodeVolts->voltagePadrow(i+1,inner  )) * norm ;
-      GLWeights[i+48] = GL_rho_inner_of_outerSec(anodeVolts->voltagePadrow(i+1,inner+1)) * norm ;
-      GLWeights[i+72] = GL_rho_outer_of_outerSec(anodeVolts->voltagePadrow(i+1,lastrow)) * norm ;
+      GLWeights[i+24] = GL_rho_outer_of_innerSec(anodeVolts->voltagePadrow(i+1,INNER  )) * norm ;
+      GLWeights[i+48] = GL_rho_inner_of_outerSec(anodeVolts->voltagePadrow(i+1,INNER+1)) * norm ;
+      GLWeights[i+72] = GL_rho_outer_of_outerSec(anodeVolts->voltagePadrow(i+1,TPCROWS)) * norm ;
     }
   }
   
