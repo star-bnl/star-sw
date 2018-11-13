@@ -230,7 +230,9 @@ void StKFVertexMaker::Fit() {
   if (Debug())  StKFVertex::SetDebug(Debug());
   SafeDelete(fgcVertices);
   PrimaryVertices();
+#if 0
   SecondaryVertices();
+#endif
   if (! fgcVertices) return;
   if ( fgcVertices->IsEmpty()) {SafeDelete(fgcVertices); return;}
   //  fgcVertices->UniqueTracks2VertexAssociation(); // Make track associated with only vertex
