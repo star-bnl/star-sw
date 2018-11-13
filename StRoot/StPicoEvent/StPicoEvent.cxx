@@ -45,7 +45,7 @@ StPicoEvent::StPicoEvent(): TObject(),
   mBbcAdcEast{}, mBbcAdcWest{},
   mHighTowerThreshold{},
   mJetPatchThreshold{} {
-  /// Default constructor
+
   if( !mTriggerIds.empty() ) {
     mTriggerIds.clear();
   }
@@ -53,7 +53,7 @@ StPicoEvent::StPicoEvent(): TObject(),
 
 //_________________
 StPicoEvent::StPicoEvent(const StPicoEvent &event) : TObject() {
-  /// Copy constructor
+
   mRunId = event.mRunId;
   mEventId = event.mEventId;
   mFillId = event.mFillId;
@@ -135,7 +135,7 @@ StPicoEvent::StPicoEvent(const StPicoEvent &event) : TObject() {
 }
 
 //_________________
-StPicoEvent::~StPicoEvent() { /// Destructor
+StPicoEvent::~StPicoEvent() {
   /* empty */
 }
 

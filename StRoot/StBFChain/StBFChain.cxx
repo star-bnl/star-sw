@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.659 2018/10/11 03:50:57 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.660 2018/11/09 03:53:22 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -869,23 +869,24 @@ Int_t StBFChain::Instantiate()
 	//(void) printf("StBFChain:: Options list : %d %d %d %d %d %d %d %d\n",
 	//		  kPadrow13,kTwist,kClock,kMembrane,kEndcap,
 	//            kIFCShift,kSpaceCharge,kSpaceChargeR2);
-	if( GetOption("OBmap")      ) mk->SetAttr("OBmap"      , 1);
-	if( GetOption("OPr13")      ) mk->SetAttr("OPr13"      , 1);
-	if( GetOption("OPr40")      ) mk->SetAttr("OPr40"      , 1);
-	if( GetOption("OTwist")     ) mk->SetAttr("OTwist"     , 1);
-	if( GetOption("OClock")     ) mk->SetAttr("OClock"     , 1);
-	if( GetOption("OCentm")     ) mk->SetAttr("OCentm"     , 1);
-	if( GetOption("OECap")      ) mk->SetAttr("OECap"      , 1);
-	if( GetOption("OIFC")       ) mk->SetAttr("OIFC"       , 1);
-	if( GetOption("OSpaceZ")    ) mk->SetAttr("OSpaceZ"    , 1);
-	if( GetOption("OSpaceZ2")   ) mk->SetAttr("OSpaceZ2"   , 1);
-	if( GetOption("OShortR")    ) mk->SetAttr("OShortR"    , 1);
-	if( GetOption("OBMap2d")    ) mk->SetAttr("OBMap2d"    , 1);
-	if( GetOption("OGridLeak")  ) mk->SetAttr("OGridLeak"  , 1);
-	if( GetOption("OGridLeak3D")) mk->SetAttr("OGridLeak3D", 1);
-	if( GetOption("OGridLeakFull")) mk->SetAttr("OGridLeakFull", 1);
-	if( GetOption("OGGVoltErr") ) mk->SetAttr("OGGVoltErr" , 1);
-	if( GetOption("OSectorAlign"))mk->SetAttr("OSectorAlign",1);
+	if( GetOption("OBmap")      ) mk->SetAttr("OBmap"      , kTRUE);
+	if( GetOption("OPr13")      ) mk->SetAttr("OPr13"      , kTRUE);
+	if( GetOption("OPr40")      ) mk->SetAttr("OPr40"      , kTRUE);
+	if( GetOption("OTwist")     ) mk->SetAttr("OTwist"     , kTRUE);
+	if( GetOption("OClock")     ) mk->SetAttr("OClock"     , kTRUE);
+	if( GetOption("OCentm")     ) mk->SetAttr("OCentm"     , kTRUE);
+	if( GetOption("OECap")      ) mk->SetAttr("OECap"      , kTRUE);
+	if( GetOption("OIFC")       ) mk->SetAttr("OIFC"       , kTRUE);
+	if( GetOption("OSpaceZ")    ) mk->SetAttr("OSpaceZ"    , kTRUE);
+	if( GetOption("OSpaceZ2")   ) mk->SetAttr("OSpaceZ2"   , kTRUE);
+	if( GetOption("OShortR")    ) mk->SetAttr("OShortR"    , kTRUE);
+	if( GetOption("OBMap2d")    ) mk->SetAttr("OBMap2d"    , kTRUE);
+	if( GetOption("OGridLeak")  ) mk->SetAttr("OGridLeak"  , kTRUE);
+	if( GetOption("OGridLeak3D")) mk->SetAttr("OGridLeak3D", kTRUE);
+	if( GetOption("OGridLeakFull")) mk->SetAttr("OGridLeakFull", kTRUE);
+	if( GetOption("OGGVoltErr") ) mk->SetAttr("OGGVoltErr" , kTRUE);
+	if( GetOption("OSectorAlign"))mk->SetAttr("OSectorAlign",kTRUE);
+	if( GetOption("ODistoSmear")) mk->SetAttr("ODistoSmear", kTRUE);
       }
       mk->PrintAttr();
     }
