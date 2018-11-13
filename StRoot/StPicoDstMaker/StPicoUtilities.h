@@ -1,10 +1,19 @@
+/**
+ * \brief Utility that performs calculations
+ *
+ * The StPicoUtilities allows one to calculate some usefule
+ * quantities on the flight and then store them in PicoDst
+ */
+
 #ifndef StPicoUtilities_h
 #define StPicoUtilities_h
 
+// C++ headers
 #include <array>
 #include <string>
 #include <cmath>
 
+// MuDst headers
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 
@@ -38,16 +47,16 @@ namespace StPicoUtilities {
 
     std::array<int, 16> custom_refMult = {};
 
-    /// Loop over all primary tracks
+    // Loop over all primary tracks
     for (Int_t iTrk = 0; iTrk < muDst.primaryTracks()->GetEntries(); ++iTrk) {
 
-      /// Retrieve track
+      // Retrieve track
       StMuTrack* track = muDst.primaryTracks(iTrk);
 
-      /// Track must exist
+      // Track must exist
       if (!track) continue;
 
-      /// These first 3 checks are used for all refMult
+      // These first 3 checks are used for all refMult
       if( track->flag() < 0 ||
 	  fabs(track->momentum().mag()) < 1.e-10 ||
 	  track->dca().mag() > 3. ||
@@ -60,27 +69,27 @@ namespace StPicoUtilities {
       double const beta = track->btofPidTraits().beta();
       double const massSqr = (beta <= 1.e-5) ? -999. : track->momentum().mag2() * (std::pow(1. / beta, 2) - 1.);
 
-      /// Define refMultHalf, refMult2 and refMult3
+      // Define refMultHalf, refMult2 and refMult3
       if (track->nHitsFit(kTpcId) >= 10) {
 	
-        /// refMultHalf definition: pt> 0.1 && abs(dca) < 3 && nHitsTpc >= 10 && abs(eta) < 1
+        // refMultHalf definition: pt> 0.1 && abs(dca) < 3 && nHitsTpc >= 10 && abs(eta) < 1
         custom_refMult[refMultHalf | chargeName | tpcHalfName] += 1;
 	
-        /// refMult2 definition: pt> 0.1 && abs(dca) < 3 && nHitsTpc >= 10 && abs(eta) > 0.5 && abs(eta) < 1
+        // refMult2 definition: pt> 0.1 && abs(dca) < 3 && nHitsTpc >= 10 && abs(eta) > 0.5 && abs(eta) < 1
         if (fabs(eta) > 0.5) {
 	  custom_refMult[refMult2 | chargeName | tpcHalfName] += 1;
 	}
 	
-        /// refMult3 definition: pt> 0.1 && abs(dca) < 3 && nHitsTpc >= 10 && abs(eta) < 1 && Exclude protons
+        // refMult3 definition: pt> 0.1 && abs(dca) < 3 && nHitsTpc >= 10 && abs(eta) < 1 && Exclude protons
         if (track->nSigmaProton() < -3. && massSqr < 0.4) {
 	  custom_refMult[refMult3 | chargeName | tpcHalfName] += 1;
 	}
       } //if (track->nHitsFit(kTpcId) >= 10)
 
-      /// Define refMult4
+      // Define refMult4
       if (track->nHitsFit(kTpcId) >= 15) {
 	
-        /// refMult4 definition: pt> 0.1 && abs(dca) < 3 && nHitsTpc >= 15 && abs(eta) < 1 && Exclude kaons
+        // refMult4 definition: pt> 0.1 && abs(dca) < 3 && nHitsTpc >= 15 && abs(eta) < 1 && Exclude kaons
         if( (massSqr <= -990. && fabs(track->nSigmaKaon()) > 3) ||    // tof is not available
             (massSqr >  -990. && (massSqr > 0.6 || massSqr < 0.1)) ) {    // tof is available
           custom_refMult[refMult4 | chargeName | tpcHalfName] += 1;
@@ -93,4 +102,4 @@ namespace StPicoUtilities {
   } //std::array<int, 16> calculateRefMult(const StMuDst& muDst)
 }
 
-#endif
+#endif // #define StPicoUtilities_h

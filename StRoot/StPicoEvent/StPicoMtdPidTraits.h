@@ -1,7 +1,15 @@
+/**
+ * \class StPicoMtdPidTraits
+ * \brief Holds information about MTD-matched track
+ *
+ * The class stores information about related to the track
+ * that matched the Muon Telescope Detector (MTD)
+ */
+
 #ifndef StPicoMtdPidTraits_h
 #define StPicoMtdPidTraits_h
 
-/// ROOT headers
+// ROOT headers
 #include "TObject.h"
 
 //_________________
@@ -18,32 +26,52 @@ class StPicoMtdPidTraits : public TObject {
   /// Print MTD PID traits information
   virtual void Print(const Char_t* option = "") const;
 
-  /**
-   * Getters
-   */
-  /// Matching information
+  //
+  // Getters
+  //
+
+  /// Return assiciated track index
   Int_t    trackIndex()        const;
+  /// Return hit index
   Int_t    mtdHitIndex()       const;
+  /// Return hit channel
   Int_t    gChannel()          const;
+  /// Return backleg number
   Int_t    backleg()           const;
+  /// Return module number
   Int_t    module()            const;
+  /// Return cell number
   Int_t    cell()              const;
+  /// Return match flag
   Int_t    matchFlag()         const;
+  /// Return delta Y
   Float_t  deltaY()            const;
+  /// Return delta Z
   Float_t  deltaZ()            const;
+  /// Return difference between measured and expected time of flight
   Float_t  deltaTimeOfFlight() const;
+  /// Return beta
   Float_t  beta()              const;
 
-  /**
-   * Setters
-   */
+  //
+  // Setters
+  //
+
+  /// Set track index of the associated track
   void setTrackIndex(Int_t index);
+  /// Set MTD hit index
   void setMtdHitIndex(Int_t index);
+  /// Set match flag
   void setMatchFlag(Char_t flag);
+  /// Set delta Y
   void setDeltaY(Float_t dy);
+  /// Set delta Z
   void setDeltaZ(Float_t dz);
+  /// Set difference between measured and expected time of flight
   void setDeltaTimeOfFlight(Float_t t);
+  /// Set beta
   void setBeta(Float_t beta);
+  /// Set hit channel: (backleg-1) * 60 + (module-1) * 12 + cell
   void setHitChannel(Int_t backleg, Int_t module, Int_t cell);
 
  private:
@@ -68,9 +96,9 @@ class StPicoMtdPidTraits : public TObject {
   ClassDef(StPicoMtdPidTraits, 3)
 };
 
-/**
- * Getters
- */
+//
+// Getters
+//
 inline Int_t    StPicoMtdPidTraits::trackIndex()        const { return mTrackIndex; }
 inline Int_t    StPicoMtdPidTraits::mtdHitIndex()       const { return mMtdHitIndex; }
 inline Int_t    StPicoMtdPidTraits::gChannel()          const { return mMtdHitChan; }
@@ -83,9 +111,9 @@ inline Float_t  StPicoMtdPidTraits::deltaZ()            const { return (Float_t)
 inline Float_t  StPicoMtdPidTraits::deltaTimeOfFlight() const { return mDeltaTimeOfFlight; }
 inline Float_t  StPicoMtdPidTraits::beta()              const { return (Float_t)mBeta / 20000.; }
 
-/**
- * Setters
- */
+//
+// Setters
+//
 inline void    StPicoMtdPidTraits::setTrackIndex(Int_t index) { mTrackIndex = (Short_t) index; }
 inline void    StPicoMtdPidTraits::setMtdHitIndex(Int_t index) { mMtdHitIndex = (Short_t) index; }
 inline void    StPicoMtdPidTraits::setMatchFlag(Char_t flag) { mMatchFlag = (Char_t)flag; }

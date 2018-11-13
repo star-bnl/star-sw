@@ -1,4 +1,8 @@
-/// C++ headers
+//
+// StPicoEvent: holds the information about the event
+//
+
+// C++ headers
 #include <algorithm>
 #include <limits>
 
@@ -11,7 +15,7 @@
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 #include "StEventUtilities/StGoodTrigger.h"
 #endif /* __TFG__VERSION__ */
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoMessMgr.h"
 #include "StPicoEvent.h"
 ClassImp(StPicoEvent)
@@ -41,14 +45,15 @@ StPicoEvent::StPicoEvent(): TObject(),
   mBbcAdcEast{}, mBbcAdcWest{},
   mHighTowerThreshold{},
   mJetPatchThreshold{} {
-
-    if( !mTriggerIds.empty() ) {
-      mTriggerIds.clear();
-    }
+  /// Default constructor
+  if( !mTriggerIds.empty() ) {
+    mTriggerIds.clear();
+  }
 }
 
 //_________________
 StPicoEvent::StPicoEvent(const StPicoEvent &event) : TObject() {
+  /// Copy constructor
   mRunId = event.mRunId;
   mEventId = event.mEventId;
   mFillId = event.mFillId;
@@ -130,7 +135,7 @@ StPicoEvent::StPicoEvent(const StPicoEvent &event) : TObject() {
 }
 
 //_________________
-StPicoEvent::~StPicoEvent() { 
+StPicoEvent::~StPicoEvent() { /// Destructor
   /* empty */
 }
 
@@ -175,23 +180,23 @@ Bool_t StPicoEvent::IsGoodTrigger() {
 //_________________
 void StPicoEvent::setTriggerId(UInt_t id) {
 
-  /// If trigger list is not empty then loop over it
-  /// and check if the new trigger already in.
+  // If trigger list is not empty then loop over it
+  // and check if the new trigger already in.
   if( !mTriggerIds.empty() ) {
 
-    /// Assume that the new trigger is not in the list
+    // Assume that the new trigger is not in the list
     Bool_t isUsed = false;
 
-    /// Loop over the trigger list
+    // Loop over the trigger list
     for(UInt_t iIter=0; iIter<mTriggerIds.size(); iIter++) {
 
-      /// Compare triggers
+      // Compare triggers
       if( mTriggerIds.at(iIter) == id ) {
 	isUsed = true;
       }
     } //(unsigned int iIter=0; iIter<mTriggerIds.size(); iIter++)
 
-    /// If the trigger not in the list then add it
+    // If the trigger not in the list then add it
     if( !isUsed ) {
       mTriggerIds.push_back(id);
     }
@@ -204,29 +209,29 @@ void StPicoEvent::setTriggerId(UInt_t id) {
 //_________________
 void StPicoEvent::setTriggerIds(std::vector<unsigned int> newIds) {
 
-  /// Protection: work only if input vector has entries
+  // Protection: work only if input vector has entries
   if (!newIds.empty()) {
 
-    /// If trigger list is not empty then loop over it
-    /// and check if the new trigger already in.
+    // If trigger list is not empty then loop over it
+    // and check if the new trigger already in.
     if (!mTriggerIds.empty()) {
 
-      /// For each entry in the input vector
+      // For each entry in the input vector
       for (UInt_t iIter1= 0; iIter1<newIds.size(); iIter1++) {
 	
-        /// Assume that the new trigger is not in the list
+        // Assume that the new trigger is not in the list
         Bool_t isUsed = false;
 
-        /// Loop over existing trigger list
+        // Loop over existing trigger list
         for (UInt_t iIter2=0; iIter2<mTriggerIds.size(); iIter2++) {
 
-          /// Compare triggers
+          // Compare triggers
           if (mTriggerIds.at(iIter2) == newIds.at(iIter1)) {
             isUsed = true;
           }
         } //for (unsigned int iIter2=0; iIter2<mTriggerIds.size(); iIter2++)
 
-        /// The entry is unique then add it to the list
+        // The entry is unique then add it to the list
         if (!isUsed) {
           mTriggerIds.push_back(newIds.at(iIter1));
         }
@@ -245,7 +250,7 @@ void StPicoEvent::setNHitsHFT(Int_t layer, UShort_t word) {
     mNHitsHFT[layer] = (UShort_t)word;
   }
   else {
-    /// Probably some information about this incident may be printed
+    // Probably some information about this incident may be printed
   }
 }
 
@@ -255,7 +260,7 @@ void StPicoEvent::setZdcSmdEastHorizontal(Int_t strip, Float_t zdcSmdEastHorizon
     mZdcSmdEastHorizontal[strip] = (UShort_t)zdcSmdEastHorizontal;
   }
   else {
-    /// Probably some information about this incident may be printed
+    // Probably some information about this incident may be printed
   }
 }
 
@@ -265,7 +270,7 @@ void StPicoEvent::setZdcSmdEastVertical(Int_t strip, Float_t zdcSmdEastVertical)
     mZdcSmdEastVertical[strip] = (UShort_t)zdcSmdEastVertical;
   }
   else {
-    /// Probably some information about this incident may be printed
+    // Probably some information about this incident may be printed
   }
 }
 
@@ -275,7 +280,7 @@ void StPicoEvent::setZdcSmdWestHorizontal(Int_t strip, Float_t zdcSmdWestHorizon
     mZdcSmdWestHorizontal[strip] = (UShort_t)zdcSmdWestHorizontal;
   }
   else {
-    /// Probably some information about this incident may be printed
+    // Probably some information about this incident may be printed
   }
 }
 
@@ -285,7 +290,7 @@ void StPicoEvent::setZdcSmdWestVertical(Int_t strip, Float_t zdcSmdWestVertical)
     mZdcSmdWestVertical[strip] = (UShort_t)zdcSmdWestVertical;
   }
   else {
-    /// Probably some information about this incident may be printed
+    // Probably some information about this incident may be printed
   }
 }
 
@@ -295,7 +300,7 @@ void StPicoEvent::setBbcAdcEast(Int_t iPMT, Float_t bbcAdcEast) {
     mBbcAdcEast[iPMT] = (UShort_t)bbcAdcEast;
   }
   else {
-    /// Probably some information about this incident may be printed
+    // Probably some information about this incident may be printed
   }
 }
 
@@ -305,6 +310,18 @@ void StPicoEvent::setBbcAdcWest(Int_t iPMT, Float_t bbcAdcWest) {
     mBbcAdcWest[iPMT] = (UShort_t)bbcAdcWest;
   }
   else {
-    /// Probably some information about this incident may be printed
+    // Probably some information about this incident may be printed
+  }
+}
+
+//_________________
+void StPicoEvent::setBunchId(Int_t id) {
+  if( id<0 ) {
+    LOG_INFO << "StPicoEvent::setBunchID() - negative bunch ID = " << id << endm;
+  }
+  else {
+    mBunchCrossId = ( ( id > std::numeric_limits<unsigned short>::max() ) ?
+		      std::numeric_limits<unsigned short>::max() :
+		      (UChar_t)id );
   }
 }

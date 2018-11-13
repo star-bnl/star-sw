@@ -1,7 +1,11 @@
-/// C++ headers
+//
+// The StPicoEmc trigger class holds EMC trigger information
+//
+
+// C++ headers
 #include <limits>
 
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoMessMgr.h"
 #include "StPicoEmcTrigger.h"
 
@@ -16,9 +20,12 @@ StPicoEmcTrigger::StPicoEmcTrigger(): TObject(), mFlag(0), mId(0), mAdc(0) {
 StPicoEmcTrigger::StPicoEmcTrigger(Int_t flag, Int_t id, Int_t adc): StPicoEmcTrigger() {
 
   if (flag < 0 || id < 0 || adc < 0) return;
-  mFlag = (flag > std::numeric_limits<unsigned char>::max()) ? std::numeric_limits<unsigned char>::max() : (UChar_t)flag;
-  mId = (id > std::numeric_limits<unsigned short>::max()) ? std::numeric_limits<unsigned short>::max() : (UShort_t)id;
-  mAdc = (adc > std::numeric_limits<unsigned short>::max()) ? std::numeric_limits<unsigned short>::max() : (UShort_t)adc;
+  mFlag = ( (flag > std::numeric_limits<unsigned char>::max()) ?
+	    std::numeric_limits<unsigned char>::max() : (UChar_t)flag );
+  mId = ( (id > std::numeric_limits<unsigned short>::max()) ?
+	  std::numeric_limits<unsigned short>::max() : (UShort_t)id );
+  mAdc = ( (adc > std::numeric_limits<unsigned short>::max()) ?
+	   std::numeric_limits<unsigned short>::max() : (UShort_t)adc );
 }
 
 //_________________

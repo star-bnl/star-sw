@@ -1,7 +1,7 @@
-/// C++ headers
+// C++ headers
 #include <cstdlib>
 
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoBbcHit.h"
 
 // \class StPicoBbcHit
