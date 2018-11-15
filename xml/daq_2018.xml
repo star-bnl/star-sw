@@ -2,6 +2,7 @@
 <job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false">
         <command>
          cd ${SUBMITTINGDIRECTORY}
+   setenv StarEndMakerShell
    setenv STARFPE NO
    setenv NODEBUG yes
 #.DEV2
@@ -46,7 +47,7 @@
 #  root.exe -q -b 'bfc.C(10000,"P2018,EastOff,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  root.exe -q -b 'bfc.C(10000,"P2018,WestOff,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  root.exe -q -b 'bfc.C(10000,"P2018,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
-  root.exe -q -b 'bfc.C(2000,"P2018,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+  root.exe -q -b 'bfc.C(200,"P2018,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,evout,TObjTable","'${evtsFile}'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
@@ -66,5 +67,6 @@
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2018/168/*/st_physics_1*.daq" /> -->
 <!-- <input URL="file:/net/l404/data/fisyak/daq/2018/27GeV_production_2018/*/*/*.daq" /> -->
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2018/27GeV_production_2018/168/*/*.daq" /> -->
-<input URL="file:/star/data03/daq/2018/12*/*/st_physics_191*.daq" />
+<!-- <input URL="file:/star/data03/daq/2018/12*/*/st_physics_191*.daq" /> -->
+<input URL="file:/net/l401/data/scratch1/daq/2018/27GeV_production_2018/168/*/*.daq" />
 </job>
