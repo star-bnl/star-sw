@@ -156,7 +156,7 @@ Int_t StTreeMaker::Init()
 //_____________________________________________________________________________
 Int_t   StTreeMaker::Skip(int nskip)
 { 
-  assert(fTree);
+  if(!fTree) return 0;
   return fTree->Skip(nskip);
 }
 
