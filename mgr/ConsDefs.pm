@@ -99,7 +99,7 @@
  $CFLAGS       = $CXXFLAGS;
  if ($CXX eq 'g++') {
    if ($CXX_MAJOR > 4 or $CXX_MAJOR == 4 and $CXX_MINOR >= 6) {$CXXFLAGS .= " -fpermissive";}
-   if ($CXX_MAJOR > 6 or $CXX_MAJOR == 6 and $CXX_MINOR >= 3) {$CXXFLAGS .= " -Wmisleading-indentation -Wignored-attributes";}
+   if ($CXX_MAJOR > 6 or $CXX_MAJOR == 6 and $CXX_MINOR >= 3) {$CXXFLAGS .= " -Wno-misleading-indentation -Wno-ignored-attributes";}
    print "CXX_MAJOR = $CXX_MAJOR, CXX_MINOR = $CXX_MINOR => CXXFLAGS = $CXXFLAGS ==============\n";
  }
  my @words     = split(' ',$CFLAGS);# print "words = @words\n";

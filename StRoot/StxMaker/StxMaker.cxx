@@ -255,71 +255,75 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
   static TStopwatch *watch = new  TStopwatch;
   watch->Start(kTRUE);
 #endif
-  //const genfit::eFitterType fitterId = genfit::SimpleKalman;
-  const genfit::eFitterType fitterId = genfit::RefKalman;
-  //const genfit::eFitterType fitterId = genfit::DafRef;
-  //const genfit::eFitterType fitterId = genfit::DafSimple;
-  //const genfit::eMultipleMeasurementHandling mmHandling = genfit::weightedAverage;
-  //const genfit::eMultipleMeasurementHandling mmHandling = genfit::unweightedClosestToReference;
-  //const genfit::eMultipleMeasurementHandling mmHandling = genfit::unweightedClosestToPrediction;
-  //const genfit::eMultipleMeasurementHandling mmHandling = genfit::weightedClosestToReference;
-  //const genfit::eMultipleMeasurementHandling mmHandling = genfit::weightedClosestToPrediction;
-  //const genfit::eMultipleMeasurementHandling mmHandling = genfit::unweightedClosestToReferenceWire;
-  const genfit::eMultipleMeasurementHandling mmHandling = genfit::unweightedClosestToPredictionWire;
-  //const genfit::eMultipleMeasurementHandling mmHandling = genfit::weightedClosestToReferenceWire;
-  //const genfit::eMultipleMeasurementHandling mmHandling = genfit::weightedClosestToPredictionWire;
-  const Int_t nIter = 20; // max number of iterations
-  const Double_t dPVal = 1.E-3; // convergence criterion
-
-  //  const bool resort = false;
-  //  const bool prefit = false; // make a simple Kalman iteration before the actual fit
-  //  const bool refit  = false; // if fit did not converge, try to fit again
-
-  //  const bool twoReps = false; // test if everything works with more than one rep in the tracks
-
-  //  const bool checkPruning = true; // test pruning
-
-
-  const bool matFX = true; // false;         // include material effects; can only be disabled for RKTrackRep!
-
-  //  const bool onlyDisplayFailed = false; // only load non-converged tracks into the display
-
+  //static const genfit::eFitterType fitterId = genfit::SimpleKalman;
+  static const genfit::eFitterType fitterId = genfit::RefKalman;
+  //static const genfit::eFitterType fitterId = genfit::DafRef;
+  //static const genfit::eFitterType fitterId = genfit::DafSimple;
+  //static const genfit::eMultipleMeasurementHandling mmHandling = genfit::weightedAverage;
+  //static const genfit::eMultipleMeasurementHandling mmHandling = genfit::unweightedClosestToReference;
+  //static const genfit::eMultipleMeasurementHandling mmHandling = genfit::unweightedClosestToPrediction;
+  //static const genfit::eMultipleMeasurementHandling mmHandling = genfit::weightedClosestToReference;
+  //static const genfit::eMultipleMeasurementHandling mmHandling = genfit::weightedClosestToPrediction;
+  //static const genfit::eMultipleMeasurementHandling mmHandling = genfit::unweightedClosestToReferenceWire;
+  static const genfit::eMultipleMeasurementHandling mmHandling = genfit::unweightedClosestToPredictionWire;
+  //static const genfit::eMultipleMeasurementHandling mmHandling = genfit::weightedClosestToReferenceWire;
+  //static const genfit::eMultipleMeasurementHandling mmHandling = genfit::weightedClosestToPredictionWire;
+  static const Int_t nIter = 20; // max number of iterations
+  static const Double_t dPVal = 1.E-3; // convergence criterion
+  
+  //  static const bool resort = false;
+  //  static const bool prefit = false; // make a simple Kalman iteration before the actual fit
+  //  static const bool refit  = false; // if fit did not converge, try to fit again
+  
+  static const bool twoReps = false; // test if everything works with more than one rep in the tracks
+  
+  //  static const bool checkPruning = true; // test pruning
+  static const bool matFX = true; // false;         // include material effects; can only be disabled for RKTrackRep!
+  //  static const bool onlyDisplayFailed = false; // only load non-converged tracks into the display
+    
+  static genfit::AbsKalmanFitter* fitter = 0;
+  genfit::AbsTrackRep* rep = 0;
+  SafeDelete(rep);
+  static genfit::AbsTrackRep* secondRep = 0;
+  SafeDelete(secondRep);
+  if (! fitter) { // Initialize
 #ifdef __HANDLER__
-  signal(SIGSEGV, handler);   // install our handler
+    signal(SIGSEGV, handler);   // install our handler
 #endif
-  // init fitter
-  genfit::AbsKalmanFitter* fitter = 0;
-  switch (fitterId) {
+    // init fitter
+    switch (fitterId) {
     case genfit::SimpleKalman:
       fitter = new genfit::KalmanFitter(nIter, dPVal);
       fitter->setMultipleMeasurementHandling(mmHandling);
       break;
-
     case genfit::RefKalman:
       fitter = new genfit::KalmanFitterRefTrack(nIter, dPVal);
       fitter->setMultipleMeasurementHandling(mmHandling);
       break;
-
     case genfit::DafSimple:
       fitter = new genfit::DAF(false);
       break;
     case genfit::DafRef:
       fitter = new genfit::DAF();
       break;
-  }
-  fitter->setMaxIterations(nIter);
-  /*if (dynamic_cast<genfit::DAF*>(fitter) != nullptr) {
+    }
+    fitter->setMaxIterations(nIter);
+    /*if (dynamic_cast<genfit::DAF*>(fitter) != nullptr) {
     //static_cast<genfit::DAF*>(fitter)->setBetas(100, 50, 25, 12, 6, 3, 1, 0.5, 0.1);
     //static_cast<genfit::DAF*>(fitter)->setBetas(81, 8, 4, 0.5, 0.1);
     static_cast<genfit::DAF*>(fitter)->setAnnealingScheme(100, 0.1, 5);
     //static_cast<genfit::DAF*>(fitter)->setConvergenceDeltaWeight(0.0001);
     //fitter->setMaxIterations(nIter);
-  }*/
+    }*/
+    
+    genfit::FieldManager::getInstance()->init(new genfit::StarField());
+    //  genfit::FieldManager::getInstance()->useCache(true, 8);
+    //  genfit::FieldManager::getInstance()->useCache(false, 0);
+    genfit::MaterialEffects::getInstance()->init(new genfit::TGeoMaterialInterface());
+    
 
-  genfit::FieldManager::getInstance()->init(new genfit::StarField());
-  //  genfit::FieldManager::getInstance()->useCache(true, 8);
-  //  genfit::FieldManager::getInstance()->useCache(false, 0);
-  genfit::MaterialEffects::getInstance()->init(new genfit::TGeoMaterialInterface());
+  } // end of initialization
+  // Set Debug flags
   if (Debug()) {
     fitter->setDebugLvl(10);
     //    gGeoManager->SetVerboseLevel(5);
@@ -348,13 +352,12 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
   StxNodeErrs errs;
   StxCAInterface::Instance().ConvertPars(caPar, alpha, pars, errs);
   Double_t sign = ConvertCA2XYZ(tr, posSeed, momSeed, covSeed);
-  genfit::AbsTrackRep* rep = new genfit::RKTrackRep(sign*pdg);
+  rep = new genfit::RKTrackRep(sign*pdg);
   if (Debug()) rep->setDebugLvl();
   rep->setPropDir(1);
-  //  genfit::AbsTrackRep* secondRep = 0;
-  //  if (twoReps) secondRep = new genfit::RKTrackRep(sign*-211);
   genfit::MeasuredStateOnPlane stateSeed(rep);
   stateSeed.setPosMomCov(posSeed, momSeed, covSeed);
+  if (twoReps) secondRep = new genfit::RKTrackRep(sign*-211);
   // create track
   //  genfit::Track* secondTrack(nullptr);
   //  genfit::Track  fitTrack(rep, posSeed, momSeed);

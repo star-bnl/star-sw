@@ -64,7 +64,10 @@ StTpcPlanarMeasurement::StTpcPlanarMeasurement(const StTpcHit *hit,TrackPoint* t
     cout << "Illegal path " << path.Data() << endl;
     assert(0);
   }
-  TGeoPhysicalNode *nodeP = gGeoManager->MakePhysicalNode(path);
+  TObjArray *nodes = gGeoManager->GetListOfPhysicalNodes();
+  TGeoPhysicalNode *nodeP = 0;
+  if (nodes) nodeP = (TGeoPhysicalNode *) nodes->FindObject(path);
+  if (! nodeP) nodeP =gGeoManager->MakePhysicalNode(path);
   if (! nodeP) {
     cout << "TGeoPhysicalNode with path " << path.Data() << " does not exists" << endl;
     assert(0);

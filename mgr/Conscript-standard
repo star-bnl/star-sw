@@ -81,7 +81,7 @@ $env1 = $env->clone('Package'  => $pkg, 'LIBPATH' => $LIBPATH);
 
 if ( ($Dir =~ m/StRoot.*Pool\//   && $Dir !~ /StRoot.*Pool\/St/)   ||
      ($Dir =~ m/StRoot.*Client\// && $Dir !~ /StRoot.*Client\/St/) ||
-     ($Dir =~ m/StarVMC\/minicern/  || $Dir =~ m/StarGenerator/ )
+      $Dir =~ m/StarGenerator/ 
    ) {
   # Added 2003. In Construct, the logic is such
   # that the Pool directories have their sub-directories
@@ -102,7 +102,6 @@ if ( ($Dir =~ m/StRoot.*Pool\//   && $Dir !~ /StRoot.*Pool\/St/)   ||
   } else {
     $pkg =~ s/Pool\//Pool/      if ($pkg =~ m/Pool/  );
     $pkg =~ s/Client\//Client/  if ($pkg =~ m/Client/);
-    $pkg = "StarMiniCern"       if ($pkg =~ m/minicern/);
     print "\t[".File::Basename::basename($Dir)."] (possible name clash) changed to $pkg\n";
   }
   $PKG = $pkg;
@@ -756,42 +755,17 @@ if ( $pkg =~ m/^StEventDisplay/ || $#uiQT >= 0 || $OnlinePackage ) {
   $FPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{FPPFLAGS};
   $CPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{CPPFLAGS};
 #  print "====================== FPPFLAGS = $FPPFLAGS\n====================== CPPFLAGS = $CPPFLAGS\n";
-} elsif ($pkg eq 'StarMiniCern') {
-  $FPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{FPPFLAGS};
-  $CPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{CPPFLAGS};
-  $FCPATH = "#StarVMC/minicern" . $main::PATH_SEPARATOR . $INCLUDE;
-  $CPPPATH .= $main::PATH_SEPARATOR . "#StarVMC/minicern";
-  my @srcC = ();
-  foreach my $s (@src) {
-    my $dirL  = File::Basename::dirname($s);
-    my $sdir = File::Basename::basename($dirL);
-    next if $s eq 'uset.F' and $STAR_SYS =~ /sun4x_/;
-    next if $sdir eq 'hpxgs'; # hpux macos
-    next if $sdir eq 'sungs'; # sun
-    next if $sdir eq 'allgs';
-    next if $sdir eq 'lnxgs';
-    next if $sdir eq 'lnxppcgs';
-    next if $sdir eq 'qutyinv';
-    next if $sdir eq 'qutyz32';
-    push @srcC, $s;
-  }
-  @src = @srcC;
-  if ($#src >= 0) {
-    push @src, "lnxgs/rdmin.F"  if $STAR_SYS =~ /^rh/ or $STAR_SYS =~ /^i386/ or $STAR_SYS =~ /^sl/;
-  }
-  if ($FC eq 'g77') {
-    $LIBS .= " -lg2c";
-  }
 } elsif ($pkg eq 'geant3') { 
 #  $SO_PKG = "";
 #  $LIB_PKG = "lib" . $pkg . "." . $env1->{SUFLIB};
+  $LIBS .= " -lminicern";
   $FPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{FPPFLAGS};
   $CPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{CPPFLAGS};
-  $FCPATH = "#StarVMC/geant3" . $main::PATH_SEPARATOR . "#StarVMC/geant3/minicern" . $main::PATH_SEPARATOR . $INCLUDE .
+  $FCPATH = "#StarVMC/geant3" . $main::PATH_SEPARATOR . $INCLUDE .
     $main::PATH_SEPARATOR . $env1->{Packages}->{CERNLIB}->{INCDIR};
-  if ($FC eq 'ifort') {
-    $FCPATH .= $main::PATH_SEPARATOR . "#StarVMC/geant3/minicern/kerngen"; # bug in ifort with include path
-  }
+#  if ($FC eq 'ifort') {
+#    $FCPATH .= $main::PATH_SEPARATOR . "#StarVMC/geant3/minicern/kerngen"; # bug in ifort with include path
+#  }
   $CPPPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{CERNLIB}->{INCDIR};
   my @dirs = qw (added gbase gcons geocad ggeom gheisha ghits ghrout ghutils 
 		 giface giopa gkine gparal gphys gscan gstrag gtrak matx55 miface 

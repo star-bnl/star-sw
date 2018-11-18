@@ -20,11 +20,12 @@
 #include "tables/St_g2t_track_Table.h" 
 #include "tables/St_g2t_tpc_hit_Table.h"
 #include "TDatabasePDG.h"
-  //to obtain error coefficients
+//to obtain error coefficients
 #include "StDetectorDbMaker/StiTpcInnerHitErrorCalculator.h"
 #include "StDetectorDbMaker/StiTpcOuterHitErrorCalculator.h"
 #include "StDetectorDbMaker/StiTPCHitErrorCalculator.h"
-  //to get Magnetic Field
+#include "RTS/src/DAQ_TPX/tpxFCF_flags.h" // for FCF flag definition
+//to get Magnetic Field
 #include "StarMagField/StarMagField.h"
 #include "TStopwatch.h"
 #include <vector>
@@ -68,6 +69,8 @@ void StxCAInterface::MakeHits() {
 	  for (Long64_t k = 0; k < NoHits; k++) {
 	    const StTpcHit *tpcHit = static_cast<const StTpcHit *> (hits[k]);
 	    if ( ! tpcHit) continue;
+	    if (tpcHit->flag() & FCF_CHOPPED || tpcHit->flag() & FCF_SANITY)     continue; // ignore hits marked by AfterBurner as chopped or bad sanity
+	    if (tpcHit->pad() > 182 || tpcHit->timeBucket() > 511) continue; // some garbadge  for y2001 daq
 	    //	    Int_t Id = fCaHits.size();
 	    Int_t Id = fSeedHits.size();
 	    StThreeVectorD glob(tpcHit->position());

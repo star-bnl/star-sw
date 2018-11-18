@@ -260,7 +260,7 @@ Bfc_st BFC[] = { // standard chains
   {"MC2018",      "","","MC2018.Ideal,vmc,VMCAlignment,sdt20180426.122000"                ,"","","",kFALSE},
   {"XC",          "","","TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,"
    "OSpaceZ2,OGridLeak3D,CorrX,tpcDB,TpcHitMover"
-   ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,Stx,Idst,BAna"       
+   ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,Stx,KFVertex,Idst,BAna"       
    ,                                                                                       "","","",kFALSE},
   {"XC2017I",     "","","y2017,XC",                                                        "","","",kFALSE},
   {"XC2018I",     "","","y2018,XC",                                                        "","","",kFALSE},
@@ -1332,7 +1332,7 @@ Bfc_st BFC[] = { // standard chains
   {"StarMiniCern","" ,"","geant3",""                       ,"","STAR addition to minicern OBSOLETE",kFALSE},
   {"mysql"       ,"" ,"","",""                                            ,"libmysqlclient","MySQL",kFALSE},
   {"libPhysics"  ,"" ,"","",""                                              ,"libPhysics","TVector",kFALSE},
-  {"geant3vmc"  ,"" ,"","-usexgeom,-xgeometry","","libGeom,libVMC,minicern,libgeant3", "VMC geant3",kFALSE},
+  {"geant3vmc"  ,"" ,"","-usexgeom,-xgeometry","",                  "Geom,VMC,geant3", "VMC geant3",kFALSE},
   {"geant3"      ,"" ,"","geant3vmc",""   ,"EG,Pythia6,EGPythia6","VMC geant3 plus ROOT EG,pythia6",kFALSE},
   {"geometry"    ,"" ,"","",""                                    ,"geometry","geometry+Mag.Field",kFALSE},
   {"StarMagField","", "","magF"                          ,"","VMC,StarMagField","Load StarMagField",kFALSE},
