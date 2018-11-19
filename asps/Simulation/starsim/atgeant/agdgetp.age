@@ -1,7 +1,10 @@
 *
-* $Id: agdgetp.age,v 1.2 2016/06/21 14:23:19 jwebb Exp $
+* $Id: agdgetp.age,v 1.3 2018/11/19 20:56:29 perev Exp $
 * $Name:  $
 * $Log: agdgetp.age,v $
+* Revision 1.3  2018/11/19 20:56:29  perev
+* 64bits locf ==>longF agdgetp.age
+*
 * Revision 1.2  2016/06/21 14:23:19  jwebb
 * Retire unused DB / Zebra interface.
 *
@@ -54,7 +57,8 @@
    INTEGER          Nbp,IP1STACK,    IP2STACK,    IEND,IDSTACK
    COMMON /RBSTACK/ Nbp,IP1STACK(20),IP2STACK(20),IEND,IDSTACK(20)
 
-   Integer       LENOCC,LOCF,JBIT,Iname,Ns,LL,IL,Ia,Ib,Id,LP,JP,La,Lb,Lc,i,J,L,
+   Integer *8    LongF
+   Integer       LENOCC,JBIT,Iname,Ns,LL,IL,Ia,Ib,Id,LP,JP,La,Lb,Lc,i,J,L,
                  Lvl,LL1,Link,Lk,Flag,Num(Lb),Map(2,LL1),Nch,IDYN,istat,jstat,
                  Inew,ie,Ipath(5),Lus,K,I0,I1,m1,m2,m3,n1,n2,n3,Lo,Io,L1,
                  Iprin,Ivar,Ivalue,JOX,Kstat/0/
@@ -78,8 +82,8 @@ REPLACE [ERR#{#}] with [;    IF (#1) {  IQUEST(1)=0;
     typ=name; <W> %L(Module),%L(Bank),LL,%L(Bpath),(num(i),i=1,lb)
     (' error in USE operator called from ',A,' for bank ',A,' L =',i3/ _
      '***** #2 *****'/6x,'The path is ',A,' with IDN =',10i5 )
-    if (typ=='R') <W> %L(Name),Value; (6x,'Looking for variable ',A,' =',G10.3)
-    if (typ=='I') <W> %L(Name),Value; (6x,'Looking for variable ',A,' =',I6)
+    if (typ=='R') <W> %L(Name), Value; (6x,'Looking for variable ',A,' =',G10.3)
+    if (typ=='I') <W> %L(Name),iValue; (6x,'Looking for variable ',A,' =',I6)
     Return; }
   ]
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -131,8 +135,10 @@ else
 } }
 *
 *                                            explicit parameter request
+* If Lk>0 & Ia>=0 & Name!=' '
+* { Ib=LONGF(Value)-LONGF(Par)+1;  Err 1>Ib|Ib>LL {variable is not in the bank}
  If Lk>0 & Ia>=0 & Name!=' '
- { Ib=LOCF(Value)-LOCf(Par)+1;  Err 1>Ib|Ib>LL {variable is not in the bank}
+ { Ib=LONGF(Value)-LONGF(Par)+1;  Err 1>Ib|Ib>LL {variable is not in the bank}
    Call UCOPY(Value,Ivalue,1);
    Ia=0; T=name; Lo=Lk; Io=Ia;  
    L1=IQ(LK-1); n1=-IQ(Lk-5);   if (n1>0) L1=IQ(LK-1)/n1;
