@@ -1,8 +1,12 @@
 *
-* $Id: agsbegm.age,v 1.2 2018/09/07 19:32:34 jwebb Exp $
+* $Id: agsbegm.age,v 1.3 2018/11/19 20:56:29 perev Exp $
 * $Name:  $
 * $Log: agsbegm.age,v $
+* Revision 1.3  2018/11/19 20:56:29  perev
+* 64bits locf ==>longF agdgetp.age
+*
 * Revision 1.2  2018/09/07 19:32:34  jwebb
+*
 * Add exception rule for a specific geometry (KludGeo), disabling any attempt
 * to use it unless it is being run in a "dev" library (dev, .dev*, adev, etc...).
 * Users should watch out when using KludGeo.
@@ -43,7 +47,8 @@
 #include "geant321/gcflag.inc"
 #include "atlsim/agcdocl.inc"
 #include "slug/sclink.inc"
-   Integer           AgPFLAG,LENOCC,MEMGETF,LOCF,n,m;  parameter (n=100)
+   Integer *8        LONGF
+   Integer           LOCF,AgPFLAG,LENOCC,MEMGETF,n,m;  parameter (n=100)
    Character         Module*(*),Stage*4,Cmother*4,Cs*1,Chdir0*6/' '/,CWD*80
    Character*42      STAR_LEVEL, STAR_USER
    Integer           IPR,i,Idet,Lrecl/0/,Istat/-1/,Itry,Lun/61/
@@ -55,6 +60,8 @@
    Logical           EXST,Opnd,First/.true./
    Integer           LRZDOC
    Common /AgCZDOC/  LRZDOC
+   integer kBUF; parameter (kBUF = 256000)
+   integer BUFF(kBUF)
 #include "slug/stafunc.inc" 
                                * * *
    IPR=%Iprin;    Check %Module != Module;
@@ -128,9 +135,12 @@
        If Iquest(1)!=0 {<w>Iquest(1); (' problem opening detm.rz IQUEST=',i6);}
      }
      ELSE
-     { LUN = MEMGETF(Lrecl*5000+1000)-LOCF(IQ)+1; IQ(LUN)=LRecl
-       Call RZMAKE (IQ(LUN),%CHdir,2,'HH',CHTAG,5000,'MO');
-       LRZDOC=LOCF(IQ(LUN));
+     { 
+*VP    LUN = MEMGETF(Lrecl*5000+1000)-LONGF(IQ)+1; IQ(LUN)=LRecl
+*VP    LUN = LONGF(BUFF) -LONGF(IQ)+1; IQ(LUN)=LRecl
+       BUFF(1) = LRecl
+       Call RZMAKE (BUFF,%CHdir,2,'HH',CHTAG,1000,'MO');
+       LRZDOC=LOCF(BUFF);
        IF (EXST & IWTYP>0) <w>; (' presence of detm.rz may be dangerous ')
      }
    }
