@@ -1,9 +1,12 @@
 #!/opt/star/bin/perl
 #use Env;
 ############################################################
-# $Id: Conscript,v 1.21 2016/04/27 11:29:09 jeromel Exp $
+# $Id: Conscript,v 1.22 2018/11/19 20:52:40 perev Exp $
 #
 # $Log: Conscript,v $
+# Revision 1.22  2018/11/19 20:52:40  perev
+# 64bits change the include paths
+#
 # Revision 1.21  2016/04/27 11:29:09  jeromel
 # Fix regexp issue
 #
@@ -63,6 +66,7 @@ my $pkg  = "starsim";
 my $PKG = $pkg;     print "Run cons in $Dir for $PKG\n";
 my $SO_PKG = $PKG . "." . $env->{SUFSOLIB};# print "SO_PKG = $SO_PKG\n";
 my $LIBPKG = "lib" . $PKG . "." . $env->{SUFLIB};
+$FCPATH  = "#asps/Simulation/starsim/comis";
 $FCPATH  = "#asps/Simulation/starsim/include";
 $FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/gcalor/include";
 $FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/geant321/include";
@@ -76,7 +80,8 @@ $FPPFLAGS .= " -DCPP_VERS=\"'v*'\"";
 $FPPFLAGS .= " -DCPP_DATE=\"`date +%%y%%m%%d`\"";
 $FPPFLAGS .= " -DCPP_TIME=\"`date +%%H%%M`\"";
 $CPPFLAGS .= " -Df2cFortran";
-$CPPPATH  = "#asps/Simulation/starsim/include";
+$CPPPATH  = "#asps/Simulation/starsim/comis";
+$CPPPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/starsim/include";
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{INCDIR}; 
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/include";
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/src/pawlib/paw/ntuple";
