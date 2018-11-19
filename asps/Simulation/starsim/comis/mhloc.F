@@ -1,7 +1,10 @@
 *
-* $Id: mhloc.F,v 1.1 2004/09/24 18:57:04 fisyak Exp $
+* $Id: mhloc.F,v 1.2 2018/11/19 20:44:06 perev Exp $
 *
 * $Log: mhloc.F,v $
+* Revision 1.2  2018/11/19 20:44:06  perev
+* 64bits add files
+*
 * Revision 1.1  2004/09/24 18:57:04  fisyak
 * Fix comis for Scientific Linux
 *
@@ -27,23 +30,29 @@
 *
 #include "comis/pilot.h"
 *-- Author : V.Berezhnoi
+*-- Author : V.Perev
       FUNCTION MHLOC(N)
-*      COMMON /MDIND/ MSTCK,MHEAP
+#include "comis/cspar.inc"
+#include "comis/mdpool.inc"
+#include "comis/mdloc.inc"
+      integer fist/0/
+      save fist
 *----------------------------------
-C      COMMON/MDPOOL/IQ(6)
-      INTEGER CSALLO
-      L=N*4
-      IM=CSALLO(L)
-*yf 092404      MHLOC=IM/4+1
-      MHLOC=IM+1
-*----------
-*#if defined(CERNLIB_ALIGN)
-*      NN=N
-*      IF(MOD(NN,2).EQ.1) NN=NN+1
-*      MHLOC=MDLH(MHEAP,NN)
-*#endif
-*#if !defined(CERNLIB_ALIGN)
-*      MHLOC=MDLH(MHEAP,N)
-*#endif
-*----------
+      if (fist.eq.0) then
+        IQ(1) = 0
+        fist = 1946
+	IQlast = 0
+	IQfree = 0
+      endif
+      call assert(n.le.kPAGE)
+
+      if (IQfree .NE. 0 ) then
+        MHLOC=IQfree
+        IQfree = IQ(IQfree)
+      else
+        call assert(IQlast+kPAGE .lt. LHP)
+        MHLOC=IQlast+1
+        IQlast = IQlast + kPAGE
+      endif
+      return
       END
