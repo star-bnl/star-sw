@@ -1,9 +1,12 @@
 /*
- * $Id: locf.c,v 1.1.1.1 2004/07/17 20:01:56 perev Exp $
+ * $Id: locf.c,v 1.2 2018/11/19 23:55:48 perev Exp $
  *
  * $Log: locf.c,v $
- * Revision 1.1.1.1  2004/07/17 20:01:56  perev
- * STAR version of Geant321 TGeant3 etc
+ * Revision 1.2  2018/11/19 23:55:48  perev
+ * 64bits return diff of pointers
+ *
+ * Revision 1.4  2004/07/29 14:06:07  mclareni
+ * Alice version for 64-bit pointer systems using the CERNLIB_QMLXIA64 cpp flag
  *
  * Revision 1.2  2002/12/02 16:37:45  brun
  * Changes from Federico Carminati and Peter Hristov who ported the system
@@ -32,65 +35,15 @@
  * Kernlib
  *
  */
-#include "kerngen/pilot.h"
-#include "kerngen/fortranc.h"
-#if defined(CERNLIB_LXIA64)
-#include "stdio.h"
-#endif
-
-#if defined(CERNLIB_MSSTDCALL) && defined(CERNLIB_LOCF_CHARACTER)
-# define Dummy2LocPar  ,_dummy
-# define DummyDef     int _dummy;
-#else
-# define Dummy2LocPar  
-# define DummyDef
-#endif
-
-#if defined(CERNLIB_QMIRTD)
-#include "irtdgs/locf.c"
-#elif defined(CERNLIB_QMVAOS)
-#include "vaogs/locf.c"
-#else
 /*>    ROUTINE LOCF
   CERN PROGLIB# N100    LOCF            .VERSION KERNFOR  4.36  930602
 */
-#define NADUPW 4   /* Number of ADdress Units Per Word */
-#define LADUPW 2   /* Logarithm base 2 of ADdress Units Per Word */
-#if defined(CERNLIB_QX_SC)
-unsigned int type_of_call locf_(iadr Dummy2LocPar)
-#elif defined(CERNLIB_QXNO_SC)
-unsigned int type_of_call locf(iadr Dummy2LocPar)
-#elif defined(CERNLIB_QXCAPT)
-unsigned int type_of_call LOCF(iadr Dummy2LocPar)
-#endif
-   char *iadr;
-#ifdef DummDef
-   DummyDef
-#endif
+#include <assert.h>
+
+static int myBase=0;
+int  locf_(char *iadr )
 {
-#if defined(CERNLIB_LXIA64)
-  const unsigned long long int mask=0x00000000ffffffff;
-  static unsigned long long int base=1;
-  unsigned long long int jadr=(unsigned long long int) iadr;
-  unsigned long long int jadrl = ((mask & jadr) >> LADUPW);
-
-  if (base == 1) {
-    base = (~mask & jadr);
-  } else if(base != (~mask & jadr)) {
-    printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-    printf("locf_() Warning: changing base from %lx to %lx!!!\n",
-    	   base, (~mask & jadr));
-    printf("This may result in program crash or incorrect results\n");
-    printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-  }
-  return ((unsigned) jadrl);
-#else
-  return( ((unsigned) iadr) >> LADUPW );
-#endif
+  int myDif = (((unsigned long)iadr)>>2) - (((unsigned long)&myBase)>>2);
+  assert(((((unsigned long)&myBase)>>2)+myDif)<<2 ==(unsigned long)iadr);
+  return myDif;
 }
-#undef Dummy2LocPar
-#undef DummyDef
-#undef CERNLIB_LOCF_CHARACTER
-/*> END <----------------------------------------------------------*/
-#endif
-
