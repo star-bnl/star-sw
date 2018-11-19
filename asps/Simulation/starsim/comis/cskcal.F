@@ -1,8 +1,12 @@
 *
-* $Id: cskcal.F,v 1.1.1.1 2004/01/12 23:49:39 potekhin Exp $
+* $Id: cskcal.F,v 1.2 2018/11/19 20:44:06 perev Exp $
 *
 * $Log: cskcal.F,v $
+* Revision 1.2  2018/11/19 20:44:06  perev
+* 64bits add files
+*
 * Revision 1.1.1.1  2004/01/12 23:49:39  potekhin
+*
 *
 * Revision 1.1  2003/10/03 13:24:30  nevski
 * make comis call re-entrant
@@ -84,131 +88,6 @@
          IPC=IPC+NPAR*3+3
        ENDIF
 ** BYTE ADDRESS
-#if defined(CERNLIB_VAX)
-      ITAN=ITA+1
-      DO 9203 K=ITAN,ITA+NPAR
-        IB1=KD(I2)/100
-        IF(IB1.NE.7)THEN
-          IA(K)=IA(K)*NBYTPW
-        ELSE
-          IF(IQ(IA(K)+KSIFCS).LT.0)THEN
-*  this is an external f77 routine, pass its address
-            IA(K)=IQ(IA(K)+KSADGP)
-          ELSE
-*  this is an external comis routine, pass pointer to cs_routine
-            IA(K)=LOCB(IA(K))
-          ENDIF
-        ENDIF
-        I2=I2+KS
- 9203 CONTINUE
-*      ITP=IABS(ITYPGP)
-      IF(ITP.EQ.1.OR.ITP.EQ.4.OR.ITP.EQ.6)THEN
-        ICSRES=CSCALI(%VAL(IADGP),NPAR,IA(ITAN))
-      ELSEIF(ITP.EQ.2)THEN
-        RCSRES=CSCALR(%VAL(IADGP),NPAR,IA(ITAN))
-      ELSEIF(ITP.EQ.5)THEN
-        DCSRES=CSCALD(%VAL(IADGP),NPAR,IA(ITAN))
-      ELSEIF(ITP.EQ.7)THEN
-*  I think it will works correctly
-        DCSRES=CSCALD(%VAL(IADGP),NPAR,IA(ITAN))
-      ENDIF
-#endif
-#if defined(CERNLIB_APOLLO)
-      NOPAR=NPAR
-      I=1
-      DO 9203 K=ITA+1,ITA+NPAR
-*      DO 9203 K=ITAN,IFP-1
-        IB1=KD(I2)/100
-        IF(IB1.NE.7)THEN
-*** if not external
-          IT=MOD(KD(I2),100)
-          IF(IT.EQ.3)THEN
-*** if arg is character then additionel arg. needed
-             NOPAR=NOPAR+1
-***            puts byte-address of char. var.
-             IF77PL(I)=MIWORD(IA(K)+1)
-***            puts len*2**16 of char var
-             IF77PL(41-I)=MOD(MIWORD(IA(K)),KON3)*KON3
-***            puts address of length descriptor
-             IF77PL(NOPAR)=IADDR(IF77PL(41-I))
-           ELSE
-***    it is arithmetic args: converts word-address to byte-address
-             IF77PL(I)=IA(K)*NBYTPW
-           ENDIF
-        ELSE
-***   it is external name: takes 'address' of routine from cs-table
-          IF(IQ(IA(K)+KSIFCS).LT.0)THEN
-*  this is an external f77 routine, pass its address
-            IF77PL(I)=IQ(IA(K)+KSADGP)
-          ELSE
-*  this is an external comis routine, pass pointer to cs_routine
-            IF77PL(I)=IADDR(IA(K))
-          ENDIF
-        ENDIF
-        I2=I2+KS
-        I=I+1
- 9203 CONTINUE
-***  the arg-list is ready, now calls user's routine
-*      IT=IABS(ITYPGP)
-      JNAME=IADGP
-      IF(ITP.EQ.1.OR.ITP.EQ.4.OR.ITP.EQ.6)THEN
-***     calls int or log function
-        ICSRES=CSCALI(INAME,NOPAR,IF77PL(1))
-      ELSEIF(ITP.EQ.2)THEN
-***     calls real function
-        RCSRES=CSCALR(INAME,NOPAR,IF77PL(1))
-      ELSEIF(ITP.EQ.5)THEN
-***     calls double precision function or complex
-        DCSRES=CSCALD(INAME,NOPAR,IF77PL(1))
-      ELSEIF(ITP.EQ.7)THEN
-*  I think it will works correctly
-***     calls complex function
-        DCSRES=CSCALD(INAME,NOPAR,IF77PL(1))
-      ENDIF
-#endif
-#if defined(CERNLIB_IBM)
-      I=3
-      IF77PL(1)=IBZ00
-      IF77PL(2)=NPAR*4
-      DO 9203 K=ITA+1,ITA+NPAR
-*      DO 9203 K=ITAN,IFP-1
-        IB1=KD(I2)/100
-        IF(IB1.NE.7)THEN
-          IT=MOD(KD(I2),100)
-          IF(IT.EQ.3)THEN
-             IF77PL(I)=MIWORD(IA(K)+1)
-             IF77PL(NPAR+I)=MJCHAR(IF77PL(43-I))
-             IF77PL(43-I)=MOD(MIWORD(IA(K)),KON3)
-           ELSE
-             IF77PL(I)=IA(K)*NBYTPW
-           ENDIF
-        ELSE
-          IF(IQ(IA(K)+KSIFCS).LT.0)THEN
-*  this is an external f77 routine, pass its address
-            IF77PL(I)=IQ(IA(K)+KSADGP)
-          ELSE
-*  this is an external comis routine, pass pointer to cs_routine
-            IF77PL(I)=LOCB(IA(K))
-          ENDIF
-        ENDIF
-        CALL SBIT1(IF77PL(NPAR*2+2),32)
-        I2=I2+KS
-        I=I+1
- 9203 CONTINUE
-*      IT=IABS(ITYPGP)
-      IF(ITP.EQ.1.OR.ITP.EQ.4.OR.ITP.EQ.6)THEN
-        ICSRES=CSCALI(IADGP,NPAR,IF77PL(3))
-      ELSEIF(ITP.EQ.2)THEN
-        RCSRES=CSCALR(IADGP,NPAR,IF77PL(3))
-      ELSEIF(ITP.EQ.5)THEN
-        DCSRES=CSCALD(IADGP,NPAR,IF77PL(3))
-      ELSEIF(ITP.EQ.7)THEN
-*  I think it will works correctly
-        DCSRES=CSCALD(IADGP,NPAR,IF77PL(3))
-      ENDIF
-*+SELF,IF=SGI,IBMRT,DECS,HPUX,SUN,MSDOS.
-*                                      ,LINUX.
-#endif
 #if defined(CERNLIB_STDUNIX)
       NOPAR=NPAR
       I=1
@@ -230,7 +109,8 @@
              IF77PL(NOPAR)=MOD(MIWORD(IA(K)),KON3)
 #endif
            ELSE
-             IF77PL(I)=IA(K)*NBYTPW
+!//VP             IF77PL(I)=IA(K)*NBYTPW
+             IF77PL(I)=IA(K)
            ENDIF
         ELSE
           IF(IQ(IA(K)+KSIFCS).LT.0)THEN
@@ -256,42 +136,6 @@
         DCSRES=CSCALD(IADGP,NOPAR,IF77PL(1))
       ENDIF
 *+SELF,IF=UNIX,IF=-SGI,IF=-IBMRT,IF=-DECS,IF=-HPUX,IF=-SUN,IF=-MSDOS.
-#endif
-#if (defined(CERNLIB_UNIX))&&(!defined(CERNLIB_STDUNIX))
-      I=1
-      DO 9203 K=ITA+1,ITA+NPAR
-*      DO 9203 K=ITAN,IFP-1
-        IB1=KD(I2)/100
-        IF(IB1.NE.7)THEN
-          IT=MOD(KD(I2),100)
-          IF(IT.EQ.3)THEN
-             IF77PL(I)=MIWORD(IA(K)+1)
-          ELSE
-             IF77PL(I)=IA(K)*NBYTPW
-          ENDIF
-        ELSE
-          IF(IQ(IA(K)+KSIFCS).LT.0)THEN
-*  this is an external f77 routine, pass its address
-            IF77PL(I)=IQ(IA(K)+KSADGP)
-          ELSE
-*  this is an external comis routine, pass pointer to cs_routine
-            IF77PL(I)=LOCB(IA(K))
-          ENDIF
-        ENDIF
-        I2=I2+KS
-        I=I+1
- 9203 CONTINUE
-*      IT=IABS(ITYPGP)
-      IF(ITP.EQ.1.OR.ITP.EQ.4.OR.ITP.EQ.6)THEN
-        ICSRES=CSCALI(IADGP,NPAR,IF77PL(1))
-      ELSEIF(ITP.EQ.2)THEN
-        RCSRES=CSCALR(IADGP,NPAR,IF77PL(1))
-      ELSEIF(ITP.EQ.5)THEN
-        DCSRES=CSCALD(IADGP,NPAR,IF77PL(1))
-      ELSEIF(ITP.EQ.7)THEN
-*  I think it will works correctly
-        DCSRES=CSCALD(IADGP,NPAR,IF77PL(1))
-      ENDIF
 #endif
 * 9301 CONTINUE
       RETURN
