@@ -374,7 +374,7 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
 	Int_t AdcSum = 0;
 	Int_t Id = rHit->idTruth();
 	for (Int_t k = 0; k < nPixels; k++) {
-	  if (Pixels[k].idTruth() == Id) {
+	  if (Pixels[k].idTruth() == 65535 || Pixels[k].idTruth() == Id) {
 	    fCluster->AddPixel(&Pixels[k]);
 	    AdcSum += Pixels[k].adc();
 	  }
