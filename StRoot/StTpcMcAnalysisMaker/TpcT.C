@@ -12,7 +12,7 @@
 //#define runY2008
 //#define __LASER__
 //#define __Cosmics__
-//#define __REAL_DATA__
+#define __REAL_DATA__
 //#define __useGainT0__
 //#define __PADCorrection__
 //#define __PRINCIPLE__
@@ -537,7 +537,7 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "H", const Char_t *O
     Double_t cosL2I = 1. + fRcTrack_fpz[0]*fRcTrack_fpz[0]/(fRcTrack_fpx[0]*fRcTrack_fpx[0] + fRcTrack_fpy[0]*fRcTrack_fpy[0]);
     profdL[io]->Fill(zRc,cosL2I);
     for (Int_t i = 0; i < fNoPixels; i++) {
-      if (fRcHit_mIdTruth[0] != fPixels_mIdTruth[i]) continue;
+      if ( fPixels_mIdTruth[i] != 65535 && fRcHit_mIdTruth[0] != fPixels_mIdTruth[i]) continue;
       pad = fPixels_mPad[i];
       tb  = fPixels_mTimeBin[i];
       if (tb  >= 512) continue;
@@ -556,7 +556,7 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "H", const Char_t *O
     Int_t pMax = -1;
     Double_t AtMax = -1; 
     for  (Int_t i = 0; i < fNoPixels; i++) {
-      if (fRcHit_mIdTruth[0] != fPixels_mIdTruth[i]) continue;
+      if (fPixels_mIdTruth[i] != 65535 && fRcHit_mIdTruth[0] != fPixels_mIdTruth[i]) continue;
       pad = fPixels_mPad[i];
       tb  = fPixels_mTimeBin[i];
       if (tb  < kTbMin  || tb  > kTbMax) continue;
