@@ -44,12 +44,14 @@
 *	matName - name of material
 
 +CDE,TYPING,GCBANK,GCVOLU,GCUNIT.
- integer  agvolume,node,par,pos,mot,old,LOCB,par1,np,ish,npar,natt,npr
+ integer  *8 node
+ integer  agvolume,par,pos,mot,old,LOCB,par1,np,ish,npar,natt,npr
  integer  matName(6);
  
 *
  Integer k,n,mother,daughter,where,who,copy,found,ier,ia,mcopy,nvol
- Integer item(20),count(20),list(20),nodes(0:20),
+ Integer *8 nodes(0:20)
+ Integer item(20),count(20),list(20),
          Lnam(20),Lnum(20),Iax(20),Lvol(20);
  Integer birth(50000);
  save    k,mother,daughter,where,found,birth;
@@ -127,7 +129,8 @@
 end
 
   subroutine navigate
-  integer agvolume,found,node,i1,i2,moth,old,dum(6)
+  integer *8 node
+  integer agvolume,found,i1,i2,moth,old,dum(6)
   node=0; found=0;
   while agvolume(node,i1,i2,moth,old,0,0,0,dum)>0  {  found+=1; node=found; }
   print *,' found objects =',found;
