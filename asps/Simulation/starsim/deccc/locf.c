@@ -1,7 +1,10 @@
 /*
- * $Id: locf.c,v 1.1 2018/11/19 23:20:12 perev Exp $
+ * $Id: locf.c,v 1.2 2018/11/21 23:15:26 perev Exp $
  *
  * $Log: locf.c,v $
+ * Revision 1.2  2018/11/21 23:15:26  perev
+ * Test for zero added
+ *
  * Revision 1.1  2018/11/19 23:20:12  perev
  * 64bits new comis files added from /CERN
  *
@@ -75,6 +78,7 @@ int  locb_(char *iadr )
 }
 char *getPntF(int myDif)
 {
+  if (!myDif) return 0;
   if ((myDif&kMAZK)==kMASK) {
     return (char*)csvplong(myDif);
   } else {
@@ -83,6 +87,7 @@ char *getPntF(int myDif)
 }
 char *getPntB(int myDif)
 {
+  if (!myDif) return 0;
   if ((myDif&kMAZK)==kMASK) {
     char *ret = (char*)csvplong(myDif);
     return ret;
