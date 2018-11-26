@@ -1,7 +1,10 @@
 /*
- * $Id: locf.c,v 1.2 2018/11/21 23:15:26 perev Exp $
+ * $Id: locf.c,v 1.3 2018/11/26 22:55:06 perev Exp $
  *
  * $Log: locf.c,v $
+ * Revision 1.3  2018/11/26 22:55:06  perev
+ * Remove too strong test
+ *
  * Revision 1.2  2018/11/21 23:15:26  perev
  * Test for zero added
  *
@@ -64,7 +67,7 @@ int  locf_(char *iadr )
 {
   int myDif = (((unsigned long)iadr)>>2) - ((myBase)>>2);
   assert((((myBase)>>2)+myDif)<<2 ==(unsigned long)iadr);
-  assert((myDif&kMAZK)!=kMASK);
+//  assert((myDif&kMAZK)!=kMASK);
   return myDif;
 }
 
@@ -73,7 +76,7 @@ int  locb_(char *iadr )
   assert(myBase>=0);
   int myDif = (unsigned long)iadr - myBase;
   assert((((myBase))+myDif) ==(unsigned long)iadr);
-  assert((myDif&kMAZK)!=kMASK);
+//  assert((myDif&kMAZK)!=kMASK);
   return myDif;
 }
 char *getPntF(int myDif)
