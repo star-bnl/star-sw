@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.159 2018/11/27 20:21:16 smirnovd Exp $
- * $Id: StiKalmanTrack.cxx,v 2.159 2018/11/27 20:21:16 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.160 2018/11/27 20:21:24 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.160 2018/11/27 20:21:24 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.160  2018/11/27 20:21:24  smirnovd
+ * Remove debug code
+ *
  * Revision 2.159  2018/11/27 20:21:16  smirnovd
  * Remove commented out code
  *
@@ -738,7 +741,6 @@ int StiKalmanTrack::initialize(const std::vector<StiHit*> &hits)
   }
 
   int ierr = approx(kAppRR|kAppUPD);
-StiDebug::Count("Xi2Helx1",mXi2);
   if (!ierr) return 0;
   BFactory::Free(this);
   return 1;  
@@ -1715,34 +1717,11 @@ void StiKalmanTrack::print(const char *opt) const
     node->print(opt);
   }
 }
-//#define APPROX_DEBUG
-#ifdef APPROX_DEBUG
-#include "TCanvas.h"
-#include "TH1F.h"
-#include "TProfile.h"
-#endif // APPROX_DEBUG
 
-#if 1 //My last version fix + tune
 //_____________________________________________________________________________
 int StiKalmanTrack::approx(int mode, int)
 {
-static int nCall=0; nCall++;
-StiDebug::Break(nCall);
 if (!mode) mode = kAppRR | kAppUPD;
-#ifdef APPROX_DEBUG
-static TCanvas *myCanvas=0;
-static TH1  *H[4];
-
-if(!myCanvas) {
-   myCanvas=new TCanvas("Approx","",600,800);
-   H[0] = new TH1F("Approx0l","Approx0l", 100,0,5);
-   H[1] = new TH1F("Approx1l","Approx1l", 100,0,5);
-   H[2] = new TProfile("Approx0 ","Approx0",  30,0,30);
-   H[3] = new TProfile("Approx1 ","Approx1 ", 30,0,30);
-   myCanvas->Divide(1,4);
-   for (int i=0;i<4;i++) {myCanvas->cd(i+1); H[i]->Draw();}
-}
-#endif // APPROX_DEBUG
 
 //const double BAD_XI2[2]={70,5},XI2_FACT=1; 	// Tuned constants
 const double BAD_XI2[2]={99,22},XI2_FACT=9;	// The old constants
@@ -1839,7 +1818,6 @@ int nNode,nNodeIn,iNode=0;
   }   
   return 0;
 } 
-#endif
 //_____________________________________________________________________________
 double StiKalmanTrack::diff(const StiNodePars &p1,const StiNodeErrs &e1
                            ,const StiNodePars &p2,const StiNodeErrs &e2,int &igor) 
