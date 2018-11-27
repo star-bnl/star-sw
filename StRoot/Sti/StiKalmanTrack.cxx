@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.158 2018/11/13 18:40:20 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.158 2018/11/13 18:40:20 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.159 2018/11/27 20:21:16 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.159 2018/11/27 20:21:16 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.159  2018/11/27 20:21:16  smirnovd
+ * Remove commented out code
+ *
  * Revision 2.158  2018/11/13 18:40:20  perev
  * Put back constant for approx()
  *
@@ -609,7 +612,6 @@
 #include "StThreeVectorD.hh"
 #include "StPhysicalHelixD.hh"
 #include "THelixTrack.h"
-//#include "ThreePoint.h"
 
 #include "StHit.h"
 
@@ -720,18 +722,11 @@ void StiKalmanTrack::setKalmanTrackNodeFactory(Factory<StiKalmanTrackNode>* val)
 //_____________________________________________________________________________
 int StiKalmanTrack::initialize(const std::vector<StiHit*> &hits)
 {
-  //cout << "StiKalmanTrack::initialize() -I- Started"<<endl;
   reset();
-  //StiKalmanTrackNode * node  = 0;
   const StiDetector* detector=0;
   UInt_t nhits = hits.size();
   setSeedHitCount(nhits);
 
-//   int thpOn = 0;
-//   ThreePoint thp;
-
-  StiKalmanTrackNode *nBuf[3];
-  double dir[3];
   for (UInt_t ihit=0;ihit<nhits;ihit++)
   {
     StiHit *hit = hits[ihit];	//loop from in to out to keep sign of dir
@@ -740,23 +735,7 @@ int StiKalmanTrack::initialize(const std::vector<StiHit*> &hits)
     StiKalmanTrackNode * n = trackNodeFactory->getInstance();
     n->initialize(hit);
     add(n,kOutsideIn);
-//     if (!thpOn) continue;
-// 
-//     double pos[3]={hit->x_g(),hit->y_g(),hit->z_g()};
-//     thp.Add(pos);
-//     nBuf[0]=nBuf[1]; nBuf[1]=nBuf[2]; nBuf[2] = n;
-//     if (ihit < 2) continue;
-//     if (ihit== 2) {
-//       thp.GetDir(0,dir);
-//       nBuf[0]->initialize(dir);
-//     }
-//     thp.GetDir(1,dir);
-//     nBuf[1]->initialize(dir);
   }
-//   if (thpOn) {
-//   thp.GetDir(2,dir);
-//   nBuf[2]->initialize(dir);
-//   }
 
   int ierr = approx(kAppRR|kAppUPD);
 StiDebug::Count("Xi2Helx1",mXi2);
@@ -768,7 +747,6 @@ StiDebug::Count("Xi2Helx1",mXi2);
 int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *firstPars, StiNodePars *lastPars, StiNodeErrs *firstErrs, StiNodeErrs *lastErrs)
 {
   reset();
-  //StiKalmanTrackNode * node  = 0;
   const StiDetector* detector=0;
   UInt_t nhits = hits.size();
   setSeedHitCount(nhits);
