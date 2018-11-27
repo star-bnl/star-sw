@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.162 2018/11/27 20:21:38 smirnovd Exp $
- * $Id: StiKalmanTrack.cxx,v 2.162 2018/11/27 20:21:38 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.163 2018/11/27 20:21:44 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.163 2018/11/27 20:21:44 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.163  2018/11/27 20:21:44  smirnovd
+ * Properly set default mode for StiKalmanTrack::approx()
+ *
  * Revision 2.162  2018/11/27 20:21:38  smirnovd
  * Remove unused local variables
  *
@@ -1727,8 +1730,6 @@ void StiKalmanTrack::print(const char *opt) const
 //_____________________________________________________________________________
 int StiKalmanTrack::approx(int mode)
 {
-if (!mode) mode = kAppRR | kAppUPD;
-
 //const double BAD_XI2[2]={70,5},XI2_FACT=1; 	// Tuned constants
 const double BAD_XI2[2]={99,22},XI2_FACT=9;	// The old constants
   mXi2=0;
