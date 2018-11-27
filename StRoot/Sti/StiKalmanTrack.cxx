@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.160 2018/11/27 20:21:24 smirnovd Exp $
- * $Id: StiKalmanTrack.cxx,v 2.160 2018/11/27 20:21:24 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.161 2018/11/27 20:21:32 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.161 2018/11/27 20:21:32 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.161  2018/11/27 20:21:32  smirnovd
+ * Remove unused function argument
+ *
  * Revision 2.160  2018/11/27 20:21:24  smirnovd
  * Remove debug code
  *
@@ -1719,7 +1722,7 @@ void StiKalmanTrack::print(const char *opt) const
 }
 
 //_____________________________________________________________________________
-int StiKalmanTrack::approx(int mode, int)
+int StiKalmanTrack::approx(int mode)
 {
 if (!mode) mode = kAppRR | kAppUPD;
 
