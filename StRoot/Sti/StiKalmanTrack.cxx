@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.161 2018/11/27 20:21:32 smirnovd Exp $
- * $Id: StiKalmanTrack.cxx,v 2.161 2018/11/27 20:21:32 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.162 2018/11/27 20:21:38 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.162 2018/11/27 20:21:38 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.162  2018/11/27 20:21:38  smirnovd
+ * Remove unused local variables
+ *
  * Revision 2.161  2018/11/27 20:21:32  smirnovd
  * Remove unused function argument
  *
@@ -1728,19 +1731,17 @@ if (!mode) mode = kAppRR | kAppUPD;
 
 //const double BAD_XI2[2]={70,5},XI2_FACT=1; 	// Tuned constants
 const double BAD_XI2[2]={99,22},XI2_FACT=9;	// The old constants
-int nNode,nNodeIn,iNode=0;
   mXi2=0;
   StiHitErrs hr;
 //		Loop over nodes and collect global xyz
 
   StiKTNIterator source;
   StiKalmanTrackNode *targetNode;
-  nNode=0;
+  int nNode=0;
   THelixFitter circ;
   THelixTrack  cirl;
   int zeroH = -1;
   for (source=rbegin();(targetNode=source());++source) {
-    iNode++;
     if (!targetNode->isValid()) 	continue;
     const StiHit * hit = targetNode->getHit();
     if (!hit) 				continue;
@@ -1757,8 +1758,6 @@ int nNode,nNodeIn,iNode=0;
     nNode++;
   }  
   if (!nNode) 				return 1; 
-  nNodeIn = nNode;
-  int nPnts = nNode;
   
   
   mXi2 =circ.Fit();
@@ -1768,9 +1767,7 @@ int nNode,nNodeIn,iNode=0;
   
   double s=0,xyz[3]; 
   double curv = circ.GetRho();
-  iNode = 0;
   for (source=rbegin();(targetNode=source());++source) {
-    iNode++;
     if (!targetNode->isValid()) 	continue;
     const StiHit *hit = targetNode->getHit();
     if (hit) {
