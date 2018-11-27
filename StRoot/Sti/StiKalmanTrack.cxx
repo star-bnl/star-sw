@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.164 2018/11/27 20:21:51 smirnovd Exp $
- * $Id: StiKalmanTrack.cxx,v 2.164 2018/11/27 20:21:51 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.165 2018/11/27 20:21:57 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.165 2018/11/27 20:21:57 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.165  2018/11/27 20:21:57  smirnovd
+ * Correct indentation, white space, and comments
+ *
  * Revision 2.164  2018/11/27 20:21:51  smirnovd
  * Use bitwise AND operator instead of logical one
  *
@@ -1735,11 +1738,11 @@ void StiKalmanTrack::print(const char *opt) const
 //_____________________________________________________________________________
 int StiKalmanTrack::approx(int mode)
 {
-//const double BAD_XI2[2]={70,5},XI2_FACT=1; 	// Tuned constants
-const double BAD_XI2[2]={99,22},XI2_FACT=9;	// The old constants
+  //const double BAD_XI2[2] = {70,5}, XI2_FACT = 1; // Tuned constants
+  const double BAD_XI2[2] = {99,22}, XI2_FACT = 9;
   mXi2=0;
   StiHitErrs hr;
-//		Loop over nodes and collect global xyz
+  // Loop over nodes and collect global xyz
 
   StiKTNIterator source;
   StiKalmanTrackNode *targetNode;
@@ -1747,7 +1750,7 @@ const double BAD_XI2[2]={99,22},XI2_FACT=9;	// The old constants
   THelixFitter circ;
   THelixTrack  cirl;
   int zeroH = -1;
-  for (source=rbegin();(targetNode=source());++source) {
+  for (source = rbegin(); targetNode = source(); ++source) {
     if (!targetNode->isValid()) 	continue;
     const StiHit * hit = targetNode->getHit();
     if (!hit) 				continue;
@@ -1757,23 +1760,22 @@ const double BAD_XI2[2]={99,22},XI2_FACT=9;	// The old constants
       zeroH = fabs(hz)<=kZEROHZ;
     }
     circ.Add(hit->x_g(),hit->y_g(),hit->z_g());
-    if (mode&kAppRR) {
-    hr = targetNode->getGlobalHitErrs(hit);
-    circ.AddErr(hr.G(),hr.hZZ);
+    if (mode & kAppRR) {
+      hr = targetNode->getGlobalHitErrs(hit);
+      circ.AddErr(hr.G(),hr.hZZ);
     }
     nNode++;
-  }  
+  }
   if (!nNode) 				return 1; 
   
-  
   mXi2 =circ.Fit();
-  if (mXi2>BAD_XI2[mode&kAppGud]) return 2; //Xi2 too bad, no updates
+  if (mXi2 > BAD_XI2[mode & kAppGud]) return 2; //Xi2 too bad, no updates
   if (zeroH) circ.Set(kZEROCURV);
-  if (mode&kAppRR) circ.MakeErrs();
-  
+  if (mode & kAppRR) circ.MakeErrs();
+
   double s=0,xyz[3]; 
   double curv = circ.GetRho();
-  for (source=rbegin();(targetNode=source());++source) {
+  for (source = rbegin(); targetNode = source(); ++source) {
     if (!targetNode->isValid()) 	continue;
     const StiHit *hit = targetNode->getHit();
     if (hit) {
@@ -1788,8 +1790,8 @@ const double BAD_XI2[2]={99,22},XI2_FACT=9;	// The old constants
     double ds = circ.Path(xyz[0],xyz[1]);
     circ.Move(ds);
     s+=ds;
-    int upd = (mode&kAppUPD);
-    upd |= ((mode&kAppUpd) && (targetNode==firstNode));
+    int upd = (mode & kAppUPD);
+    upd |= ((mode & kAppUpd) && (targetNode == firstNode));
     if (!upd) continue;
     cirl = circ;
     double alfa = targetNode->getAlpha();
@@ -1812,18 +1814,18 @@ const double BAD_XI2[2]={99,22},XI2_FACT=9;	// The old constants
     targetNode->fitPars() = P;
     int ians = targetNode->nudge();
     if(ians) {nNode--; targetNode->setInvalid();continue;}
-    if (mode&kAppRR) {
+    if (mode & kAppRR) {
       P = targetNode->fitPars();
       StiNodeErrs &E = targetNode->fitErrs();
       cirl.StiEmx(E.G());
       TCL::vscale(&(E._cPX),hh,&(E._cPX),5);
       E._cPP*=hh; E._cTP*=hh;
-      if ((mode&kAppGud)==0 && mXi2>XI2_FACT) E*=mXi2/XI2_FACT;
+      if ((mode & kAppGud) == 0 && mXi2 > XI2_FACT) E*=mXi2/XI2_FACT;
       E.check("In aprox");
-    }   
-  }   
+    }
+  }
   return 0;
-} 
+}
 //_____________________________________________________________________________
 double StiKalmanTrack::diff(const StiNodePars &p1,const StiNodeErrs &e1
                            ,const StiNodePars &p2,const StiNodeErrs &e2,int &igor) 

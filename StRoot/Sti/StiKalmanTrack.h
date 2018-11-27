@@ -83,8 +83,8 @@ class StiKalmanTrack : public StiTrack
 {
  public:
 
+  /// Modes for calculating approximate track parameters
   enum { kAppGud =1, kAppRR=2, kAppUpd = 4, kAppUPD = 8 };
-
   
   /*! 
     Constructor
