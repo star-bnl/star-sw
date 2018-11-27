@@ -1,11 +1,16 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.163 2018/11/27 20:21:44 smirnovd Exp $
- * $Id: StiKalmanTrack.cxx,v 2.163 2018/11/27 20:21:44 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.164 2018/11/27 20:21:51 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.164 2018/11/27 20:21:51 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.164  2018/11/27 20:21:51  smirnovd
+ * Use bitwise AND operator instead of logical one
+ *
+ * This is the correct way to check a bit set in 'mode'
+ *
  * Revision 2.163  2018/11/27 20:21:44  smirnovd
  * Properly set default mode for StiKalmanTrack::approx()
  *
@@ -1783,8 +1788,8 @@ const double BAD_XI2[2]={99,22},XI2_FACT=9;	// The old constants
     double ds = circ.Path(xyz[0],xyz[1]);
     circ.Move(ds);
     s+=ds;
-    int upd = (mode&&kAppUPD);
-    upd |= ((mode&&kAppUpd) && (targetNode==firstNode));
+    int upd = (mode&kAppUPD);
+    upd |= ((mode&kAppUpd) && (targetNode==firstNode));
     if (!upd) continue;
     cirl = circ;
     double alfa = targetNode->getAlpha();
