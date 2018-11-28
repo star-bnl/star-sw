@@ -214,8 +214,8 @@ StBFChain *bfc(Int_t First, Int_t Last,
       } else                                   {
 	tChain += ",vmc,CorrX";
       }
+      tChain += ",RunG.1";
     }
-    tChain += ",RunG.1";
   }
   if (gClassTable->GetID("StBFChain") < 0) Load(tChain.Data());
   chain = (StBFChain *) StMaker::New("StBFChain", chainName);
