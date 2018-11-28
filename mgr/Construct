@@ -242,8 +242,8 @@ if ($STAR_HOST_SYS =~ /gcc447/) {# no c++11
 #   push @items, "StStrangeMuDstMaker";
 # }
 #push @items, "StiCA";
-push @items, "StarVMC/xgeometry";
-push @items, "GenFit";
+#push @items, "StarVMC/xgeometry";
+#push @items, "GenFit";
 # closing exclusion list
 my $items = "";# print "items $#items  = @items\n";
 if ( defined($SKIP_DIRS) ){ $items = join("|",split(" ",$SKIP_DIRS));}
