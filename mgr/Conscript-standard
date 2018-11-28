@@ -244,8 +244,16 @@ if ( $DirPath =~ /StarVMC/ or
 #-
 # print "Geom = @xmlGeo\n";
 
-
-
+#VP
+#	#print "-=-=-=-=- LALALA -=-=-=-\n";
+#	# 2018/01 issue after updating to AgML 2.0
+#	# TODO problem with optimization in xgeometry and StarGeometry
+#        $DEBUG = "-O1 -g"; #VP
+#	if ( $DEBUG =~ /-O/ ){   # there is an optimization used
+#	    $DEBUG = "-O1 -g";   # switch to a lower optimization level
+#	    $FDEBUG= "-O1 -g";
+#	}
+#VP
 print "find in $Dir ========\n" if $param::debug;
 my (@src, @h_files, @idlM, @idlL, @srcL, @h_filesL, @h_filesX, @srcX, @uiQT, @qrcQT);
 my @idlL     = script::find_idl($Dir); #print "pkg = $pkg; idlL = @idlL =======\n";
@@ -990,19 +998,17 @@ if ($pkg =~ /^Ag.*Geometry/) {
       if ($geom =~ /y2010x$/) {next;} # take out for them moment all geometies which ends with x
       $geom =~ s/ear//;
       push @versionList, $geom;
-      $tagList{$words[1]} = $geom;
+      $tagList{$words[1]} = $geom; # print "geom = $geom\n";
       if ($words[5] =~ /xgeometry/) {
-	$xgeomList{$words[1]} = $geom; #print " xgeomList{$words[1]} =  $xgeomList{$words[1]}\n";
+	$xgeomList{$words[1]} = $geom; print " xgeomList{$words[1]} =  $xgeomList{$words[1]}\n" if $param::debug;
       }
       if ($words[5] =~ /AgML/) {
-	$AgMLList{$words[1]} = $geom; #print " AgMLList{$words[1]} =  $AgMLList{$words[1]}\n";
+	$AgMLList{$words[1]} = $geom; print " AgMLList{$words[1]} =  $AgMLList{$words[1]}\n" if $param::debug;
       }
     }
     close(SCAN);
     @versionList = script::sortu(@versionList);
-    if ($param::debug) {
-      print "versionList = @versionList\n";
-    }
+    print "versionList = @versionList\n"  if $param::debug;
     if ($pkg eq 'AgMLGeometry') {#print "pkg = $pkg\n ";
       foreach my $tag ( sort keys %tagList ) {
 	my $geom = $AgMLList{$tag};
@@ -1017,7 +1023,7 @@ if ($pkg =~ /^Ag.*Geometry/) {
       if ( -d "./StarDb/starsim") {
 	my %geomList = ();
 	foreach my $tag ( sort keys %tagList ) {
-	  my $geom = $tagList{$tag}; #print "AgiGeometry: tag = $tag, geom = $geom, geomList{$geom} = $geomList{$geom}\n";
+	  my $geom = $tagList{$tag}; print "AgiGeometry: tag = $tag, geom = $geom, geomList{$geom} = $geomList{$geom}\n" if $param::debug;
 	  next if ! $geom;
 	  next if $geomList{$geom};
 	  $geomList{$geom} = $geom;
@@ -1038,7 +1044,8 @@ TDataSet *CreateTable() {
 	  my $geom_h = $geom . ".h";
 	  my $geometry = "Geometry." . $geom . ".C";
 	  my $hall = "HALL." . $geom . ".root";
-	  my $NoAst2Root = $STAR_SYS =~ /x86/ || $STAR_SYS =~ /darwin/ || $CC eq 'icc';
+#	  my $NoAst2Root = $STAR_SYS =~ /x86/ || $STAR_SYS =~ /darwin/ || $CC eq 'icc';
+	  my $NoAst2Root = 0;
 	  if ($NoAst2Root) {# platform with no root4star or icc
 	    my $glob = ".sl*/obj/StarDb/AgiGeometry/" .$geom_h ;
 	    my @dirs = glob $glob;# print "glob = $glob $dirs = @dirs\n"; 

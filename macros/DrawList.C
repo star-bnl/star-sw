@@ -364,7 +364,7 @@ void DrawFList(const Char_t *pattern = "OuterPadRcNoiseConv*", const Char_t *cti
       }
       h->Draw();
       c->Update();
-      leg->AddEntry(h, gSystem->DirName(f->GetName()));
+      leg->AddEntry(h, gSystem->BaseName(gSystem->DirName(f->GetName())));
       TPaveStats *st = (TPaveStats*) h->FindObject("stats");
       if (st) {
 	//	st->Print();

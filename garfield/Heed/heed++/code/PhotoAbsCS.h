@@ -599,13 +599,13 @@ class MolecPhotoAbsCS {
   }
 
   /// Photo-absorption cross-section [Mbarn] at a given energy [MeV].
-  virtual double get_ACS(double energy) const;
+  double get_ACS(double energy) const;
   /// Integral photo-absorption cross-section.
-  virtual double get_integral_ACS(double energy1, double energy2) const;
+  double get_integral_ACS(double energy1, double energy2) const;
   /// Photo-ionization cross-section [Mbarn] at a given energy [MeV].
-  virtual double get_ICS(double energy) const;
+  double get_ICS(double energy) const;
   /// Integral photo-ionization cross-section.
-  virtual double get_integral_ICS(double energy1, double energy2) const;
+  double get_integral_ICS(double energy1, double energy2) const;
 
   /// Sum up the atomic numbers of all atoms in the molecule.
   int get_total_Z() const;
@@ -632,8 +632,8 @@ class MolecPhotoAbsCS {
                   const AtomPhotoAbsCS* fatom3, int fqatom_ps3, double fW = 0.0,
                   double fF = standard_factor_Fano);
   /// Destructor
-  virtual ~MolecPhotoAbsCS() {}
-  virtual void print(std::ostream& file, int l) const;
+  ~MolecPhotoAbsCS() {}
+  void print(std::ostream& file, int l) const;
 
  private:
   /// Total number of atoms, NOT number of sorts, NOT qel in atom.

@@ -67,7 +67,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.82 2018/11/05 01:05:19 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.83 2018/11/20 19:51:15 fisyak Exp $";
 #define __ClusterProfile__
 static Bool_t ClusterProfile = kFALSE;
 #define Laserino 170
@@ -587,8 +587,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   static Int_t minRow    = IAttr("minRow");
   static Int_t maxRow    = IAttr("maxRow");
   // constants
-#ifdef __DEBUG__
   static Int_t iBreak = 0;
+#ifdef __DEBUG__
   if (Debug()%10) {
     gBenchmark->Reset();
     gBenchmark->Start("TpcRS");
@@ -752,7 +752,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 #endif
 	transform(coorG, coorLT,sector,row); PrPP(Make,coorLT);
 	Int_t ior = (row <= St_tpcPadConfigC::instance()->numberOfInnerRows(sector)) ? 0 : 1;
-	//	if (io >= 0 && io != ior) break;
+	if (io >= 0 && io != ior) break;
 	io = ior;
 	TrackSegmentHits[nSegHits].TrackId    = Id;
 	TrackSegmentHits[nSegHits].tpc_hitC = tpc_hitC;
@@ -2053,8 +2053,11 @@ typedef struct {
 }
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.82 2018/11/05 01:05:19 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.83 2018/11/20 19:51:15 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.83  2018/11/20 19:51:15  fisyak
+// Temporarely disable __STOPPED_ELECTRONS__ to check effect of this on no. of primary tracks for 2010 AuAu200 sample
+//
 // Revision 1.82  2018/11/05 01:05:19  fisyak
 // Replace assert to error message
 //

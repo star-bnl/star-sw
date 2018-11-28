@@ -15,11 +15,17 @@
 
 /*
 $Log: gcadd.cxx,v $
-Revision 1.2  2005/02/07 21:08:51  fisyak
-rename antique TGeant3 to TGiant3
+Revision 1.1.1.3  2009/02/18 20:31:44  fisyak
+*** empty log message ***
 
-Revision 1.1  2000/01/04 16:04:06  fisyak
-move TGiant3 to root4star executable
+Revision 1.1.1.1  2002/07/24 15:56:24  rdm
+initial import into CVS
+
+Revision 1.1.1.1  2002/06/16 15:17:54  hristov
+Separate distribution  of Geant3
+
+Revision 1.5  2000/12/20 09:46:49  alibrary
+dlsym not supported on HP, reverting to gcomad
 
 Revision 1.3  1999/09/29 09:24:14  fca
 Introduction of the Copyright and cvs Log
@@ -27,6 +33,7 @@ Introduction of the Copyright and cvs Log
 */
 
 #if defined(CERNLIB_WINNT)
+  #define gcaddb GCADDB
   #define gcaddc GCADDC
   #define gcaddf GCADDF
   #define gcaddd GCADDD
@@ -34,6 +41,7 @@ Introduction of the Copyright and cvs Log
   #define gcaddl GCADDL
   #define type_of_call _stdcall
 #else
+  #define gcaddb gcaddb_
   #define gcaddc gcaddc_
   #define gcaddf gcaddf_
   #define gcaddd gcaddd_
@@ -42,6 +50,10 @@ Introduction of the Copyright and cvs Log
   #define type_of_call
 #endif
 
+extern "C" bool* type_of_call gcaddb(bool *arg)
+{
+  return arg;
+}
 extern "C" char* type_of_call gcaddc(char *arg)
 {
   return arg;

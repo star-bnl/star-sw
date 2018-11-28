@@ -238,20 +238,25 @@ Bfc_st BFC[] = { // standard chains
   {"MC.2016","","","y2016,TpcRS,pxlFastSim,istSim,sstfast,emcY2,EEfs,TpxClu,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,evout,IdTruth,geantout,big,Sti,Agi"
    ,                                                                                      "","","",kFALSE},
+  {"MC.y2016","","","MC.2016",                                                            "","","",kFALSE},
   {"MC.2016a","","","y2016a,TpcRS,pxlFastSim,istSim,sstfast,emcY2,EEfs,TpxClu,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,evout,IdTruth,geantout,big,Sti,Agi"
    ,                                                                                      "","","",kFALSE},
+  {"MC.y2016a","","","MC.2016a",                                                          "","","",kFALSE},
   {"MC.2017","","","y2017,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
+  {"MC.y2017","","","MC.2017",                                                            "","","",kFALSE},
   {"MC.2018","","","y2018,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
+  {"MC.y2018","","","MC.2018",                                                            "","","",kFALSE},
   {"MC.2019","","","y2019,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
-  {"MC.StiCA",   "","","StiCA,-hitfilt,StiKFVertex,geantOut,noRunco,noHistos,20Muons,OSpaceZ2,"
-   "OGridLeak3D,CorrX,StiPulls,picoWrite,PicoVtxVpd,RunG.1,McTpcAna,tags"                 ,"","","",kFALSE},
+  {"MC.y2019","","","MC.2019",                                                            "","","",kFALSE},
+  {"MC.StiCA",   "","","StiCA,-hitfilt,KFVertex,geantOut,noRunco,noHistos,20Muons,OSpaceZ2,"
+   "OGridLeak3D,CorrX,StiPulls,picoWrite,PicoVtxVpd,RunG.1,McTpcAna,tags"                  ,"","","",kFALSE},
   {"MC2016.Ideal","","","MC.2016a,istSlowSim,pxlSlowSim,StiHftC,MC.StiCA"                 ,"","","",kFALSE},
   {"MC2016",      "","","MC2016.Ideal,VMCAlignment,sdt20160301"                           ,"","","",kFALSE},
   {"MC2017.Ideal","","","MC.2017,MC.StiCA"                                                ,"","","",kFALSE},
@@ -349,6 +354,9 @@ Bfc_st BFC[] = { // standard chains
   {"RC.y2016.nohft","","","P2016,btof,mtd,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D"
    ,                                                                                       "","","",kFALSE},
   {"RC.y2016","","","RC.y2016.nohft,pxlHit,istHit,sstHit",                                 "","","",kFALSE},
+  {"RC.y2017","","","P2017a,btof,mtd,BEmcChkStat,StiCA,CorrX,OSpaceZ2,OGridLeakFull,-hitfilt,evout,NoHistos,noTags,noRunco,"
+   ,                                                                                       "","","",kFALSE},
+
   {"MC nightlies and Eval","--","-----------","------------------------------------------","","","",kFALSE},
   {"test_MC.stan.y2000","","","MC.y2000,Sti,fzin,MiniMcMk","",""
    ,"/star/rcf/simu/cocktail/hadronic/default/standard/year_1h/half_field/hadronic_on/Gstardata/"
