@@ -41,7 +41,7 @@ StiTrack *StiCATpcSeedFinder::findTrack(double rMin)
     mSeeds = &caTrackerInt.GetSeeds();
     if (!mSeeds->size()) { mEnded = 2; return 0;}
     sort(mSeeds->begin(), mSeeds->end(),SeedsCompareStatus );
-#if 1
+#if 0
     LOG_ERROR << "StiCATpcSeedFinder::findTrack: no. of seeds found = " << mSeeds->size() << endm;
     Int_t seedNo = 0;
     for (auto aSeed : *mSeeds) {
