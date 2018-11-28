@@ -1,5 +1,11 @@
-* $Id: gzebra.F,v 1.1.1.1 2004/01/12 23:49:41 potekhin Exp $
+* $Id: gzebra.F,v 1.3 2018/11/26 19:47:47 perev Exp $
 * $Log: gzebra.F,v $
+* Revision 1.3  2018/11/26 19:47:47  perev
+* Increase Zebra to 20M words
+*
+* Revision 1.2  2018/11/19 21:23:41  perev
+* 64bits Use array in common instead of malloc
+*
 * Revision 1.1.1.1  2004/01/12 23:49:41  potekhin
 *
 *
@@ -24,35 +30,19 @@ C.    ******************************************************************
 C.
 #include "geant321/gcbank.inc"
 #include "geant321/gcflag.inc"
-       INTEGER I1,I2,Itry,LL,KWW,MEMGETF,LOCF,NZEB
+       common/GCBANK/IGC(20000000),IGCZ
+
+       INTEGER Itry,KWW,MEMGETF,LOCF,NZEB
 C.
 C.    ------------------------------------------------------------------
 C.
-       NZEBRA = abs(NZEB)
-#ifndef __NON_ELASTIC_ZEBRA__
-       NZEBRA = max(NZEBRA,1000000)
-       I1     = LOCF   (IQ)
-       Do iTry=0,5
-          I2  = MEMGETF (NZEBRA+1000)
-          IF (I2.GT.I1) GO TO 11
-          NZEBRA = (NZEBRA/15000)*10000
-          PRINT *,'* GZEBRA: requested memory size reduced to ',
-     >               Nzebra,' *'
-       enddo
-       PRINT *,' iTRY,NZEBRA,I1,I2 =', iTRY,NZEBRA,I1,I2
-       STOP    ' GZEBRA: FATAL - CAN NOT ALLOCATE MEMORY '
-C
-#endif /*  __NON_ELASTIC_ZEBRA__ */
-  11   LL     = max    (I2-I1,0)
-       NZEBRA = LL + NZEBRA
-       KWW    = LL + 100
-C
-       CALL MZSTOR (IXSTOR,'/GCBANK/',' ',FENDQ,LQ,LR1,WS,
-     >                                    LQ(KWW+100),LQ(NZEBRA-100))
-       IF (IDEBUG.GE.3) CALL MZLOGL(IXSTOR,0)
-       I1     = KWBANK
-       CALL MZWORK (IXSTOR,LQ(I1),LQ(KWW),5)
-       CALL GWORK  (KWBANK-100)
+#if 1
+      NZEBRA = locf(IGCZ)-locf(iq(1)) 
+      CALL MZEBRA(-1)
+      CALL MZSTOR(IXSTOR,'/GCBANK/',' ',FENDQ,LQ,LR1,WS,LQ(KWWORK+100)
+     +            ,LQ(NZEBRA-30))
+      CALL MZLOGL(IXSTOR,0)
+#endif
 C
       END
 

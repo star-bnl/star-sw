@@ -105,15 +105,10 @@
      character     command*32,Cword*4,C*1,fext*16,S5*5,cext*4,cb*4/'no'/
      character*256 string1,string2,string3,fname,HOME/' '/
      integer       itring1(65),filt_act
-     integer       LENOCC,SYSTEMF,
+     integer       LENOCC,CSADDR,SYSTEMF,CS_SHL_LOAD,
                    Ipar(10),Lux,Iseed,Npar,Len1,Len2,Len3,Lhome/-1/,IHG/1/,
-                   I1,I2,I,Ip,Kp,Jp,L1,L2,L,M,Lc,J,K,i0,j0,id,
-                   id1,id2,Ival,Ier,Iprin/1/,Li/20/,Nblk/1024/
-#ifdef CERNLIB_QMLXIA64
-     integer*8     CSADDR,CS_SHL_LOAD,Lad,Iad,Jad,address
-#else
-     integer       CSADDR,CS_SHL_LOAD,Lad,Iad,Jad,address
-#endif
+                   I1,I2,I,Ip,Kp,Jp,L1,L2,L,M,Lc,J,K,i0,j0,id,Lad,Iad,Jad,
+                   id1,id2,address,Ival,Ier,Iprin/1/,Li/20/,Nblk/1024/
      Character     mname*256, library*512, stringL*1024,cline*1024
      data          mname/' '/,library/' '/,stringL/' '/,cline/' '/
 *    character*80  exten/'.make'/

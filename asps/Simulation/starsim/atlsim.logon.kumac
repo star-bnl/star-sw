@@ -79,11 +79,11 @@ Macro TRACE [1]=show [2]=0
    import itrace   
 
    if     [1]=on  then
-*     if     [2]>0 then
-*       itrace = [itrace]+[2]
-*     elseif [itrace]=0 then
+     if     [2]>0 then
+       itrace = [itrace]+[2]
+     elseif [itrace]=0 then
        itrace = 1
-*     endif
+     endif
    elseif [1]=off then
      if     [2]>0 then
        itrace = [itrace]-[2]

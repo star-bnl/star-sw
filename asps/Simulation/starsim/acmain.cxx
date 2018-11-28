@@ -51,9 +51,20 @@ int main   (int argc, char *argv[])
   agmain_();
 }
 
+#if defined(CERNLIB_LINUX)
+int   MAIN__                 (){ return printf(" MAIN__ called \n"); }
+void  G77_date_y2kbuggy_0    (){printf(" G77_date_y2kbuggy_0 called \n"); }
+void  G77_vxtidate_y2kbuggy_0(){printf(" G77_vxtidate_y2kbuggy_0 called \n");}
+#endif
 
 extern "C"  int   iargcf_  ();
 extern "C"  int   getargf_ (int*, char*, int);
+#if defined(CERNLIB_LINUX)
+extern "C"  int   iargc_  ();
+extern "C"  int   getarg_ (int*, char*, int);
+int iargcf_()  {return  iargcf_();}
+int   getargf_ (int*k, char*args, int n) {return getarg_ (k, args, n);}
+#else
 /* define a uniform GETARG function for all compilers */
 extern "C"  int   iargc_  ();
 extern "C"  int   getarg_ (int*, char*, int);
@@ -63,4 +74,5 @@ int getargf_ (int *k, char *args, int n)
   strncpy(args,Margv[*k],i); memset (args+i,' ',n-i); return 0;
 }
 
+#endif
 
