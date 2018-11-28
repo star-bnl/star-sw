@@ -9,11 +9,7 @@
 //
 ///////////////////////////////////////////
 
-<<<<<<< matchTpcFieldCageShorts.C
 #if !defined(__CINT__) && !defined(__CLING__)
-=======
-#if !defined(__CINT__) || defined(__MAKECINT__)
->>>>>>> 1.5
 #include "TROOT.h"
 #include "TFile.h"
 #include "TNtupleD.h"
