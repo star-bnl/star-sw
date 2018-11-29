@@ -60,14 +60,14 @@
 //#define ElectronHack
 //#define __LASERINO__
 #define Old_dNdx_Table
-//#define __STOPPED_ELECTRONS__
+#define __STOPPED_ELECTRONS__
 //#define __DEBUG__
 #if defined(__DEBUG__)
 #define PrPP(A,B) if (Debug()%10 > 2) {LOG_INFO << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.83 2018/11/20 19:51:15 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.84 2018/11/29 22:19:49 fisyak Exp $";
 #define __ClusterProfile__
 static Bool_t ClusterProfile = kFALSE;
 #define Laserino 170
@@ -752,7 +752,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 #endif
 	transform(coorG, coorLT,sector,row); PrPP(Make,coorLT);
 	Int_t ior = (row <= St_tpcPadConfigC::instance()->numberOfInnerRows(sector)) ? 0 : 1;
-	//	if (io >= 0 && io != ior) break;
+	if (io >= 0 && io != ior) break;
 	io = ior;
 	TrackSegmentHits[nSegHits].TrackId    = Id;
 	TrackSegmentHits[nSegHits].tpc_hitC = tpc_hitC;
@@ -2053,8 +2053,11 @@ typedef struct {
 }
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.83 2018/11/20 19:51:15 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.84 2018/11/29 22:19:49 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.84  2018/11/29 22:19:49  fisyak
+// Restore __STOPPED_ELECTRONS__, split for Inner and Outer sectors, adjusted gain for Run XVIII
+//
 // Revision 1.83  2018/11/20 19:51:15  fisyak
 // Temporarely disable __STOPPED_ELECTRONS__ to check effect of this on no. of primary tracks for 2010 AuAu200 sample
 //
