@@ -4,12 +4,13 @@
   cd ${SUBMITTINGDIRECTORY}  
 #  starver .DEV2 
 #  setup gcc45
+#  setup 32b
   set evtsFile = $INPUTFILE0;
   if (! -r ${evtsFile}) exit 1;
   echo "${evtsFile}"
   set file     = `basename $evtsFile .daq`
   set logFile  = ${file}B.log
-  root.exe -q -b 'TpcRS.C(9999,"rc.y2010","'${evtsFile}'","")' &gt;&amp; ${logFile}
+  root.exe -q -b 'TpcRS.C(500,"rc.y2010","'${evtsFile}'","")' &gt;&amp; ${logFile}
 </command>
 <stdout URL="file:./sched$JOBID.log" />
 <input URL="file:/star/data03/daq/2010/070/*/st_physics_adc*.daq" />

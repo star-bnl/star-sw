@@ -8,3 +8,4 @@ end
 set l = `awk -F_ '{print $2}' hold | awk -F\. '{print $1}' | xargs | sed -e 's/ /,/g'`
 echo $l
 rm hold
+#  lsf -r 129 4A46500935233CCB56450949D47CA985.session.xml

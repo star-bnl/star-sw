@@ -632,5 +632,47 @@ void MakeTpcAvgPowerSupply(Int_t year = 2017) {
   delete [] runs;
   fSumF->Write();
 }
+//________________________________________________________________________________
+Int_t EmptyRuns() {
+  Int_t LastRun = -1;
+  TFileSet *dir = new TFileSet(".");
+  TDataSetIter next(dir);
+  TDataSet *s = 0;
+  TDataSet *slast = 0;
+  Int_t dOld = 0, tOld = 0;
+  Int_t d = 0, t = 0;
+  while ((s = next())) {
+    if (TString(s->GetTitle()) != "file") continue;
+    TString name(s->GetName());
+    if (! name.Contains("TpcAvgPowerSupply") || ! name.Contains(".root")) continue;
+    Int_t n = sscanf(name.Data(),"TpcAvgPowerSupply.%d.%d.root",&d,&t);
+    if (n != 2) continue;
+    TFile *f = new TFile(name.Data());
+    if (f) {
+      St_TpcAvgPowerSupply *p = (St_TpcAvgPowerSupply *) f->Get("TpcAvgPowerSupply");
+      if (p) {
+	TpcAvgPowerSupply_st *avgI = p->GetTable();
+	Float_t Voltage[2] = {0,0};
+	for (Int_t io = 0; io < 2; io++) {
+	  for (Int_t module = 0; module < NUM_CARDS; module++) {
+	    for (Int_t channel = 0; channel < NUM_CHANNELS; channel++) {
+	      Int_t sec  = sector(module,channel);
+	      Int_t socket  = channel%4 + 4*io + 1;
+	      Int_t l    = 8*(sec-1)+socket-1;
+	      Voltage[io] += avgI->Voltage[l];
+	    }
+	  }
+	}
+	if (Voltage[0] < 0.1 && Voltage[1] < 0.1) {
+	  cout << name.Data() << " run = " << avgI->run << endl;
+	}
+      }
+      delete f;
+    }
+  }
+  return LastRun;
+}
+//________________________________________________________________________________
+
 /*
  */
