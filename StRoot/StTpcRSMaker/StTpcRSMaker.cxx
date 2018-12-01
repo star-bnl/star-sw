@@ -59,7 +59,7 @@
 #include "tables/St_g2t_vertex_Table.h" 
 //#define ElectronHack
 //#define __LASERINO__
-//#define Old_dNdx_Table
+#define Old_dNdx_Table
 #define __STOPPED_ELECTRONS__
 #define __DEBUG__
 #if defined(__DEBUG__)
@@ -67,7 +67,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.83 2018/11/20 19:51:15 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.84 2018/11/29 22:19:49 fisyak Exp $";
 #define __ClusterProfile__
 static Bool_t ClusterProfile = kFALSE;
 #define Laserino 170
@@ -99,8 +99,6 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   StMaker(name),
   mLaserScale(1),
   minSignal(1e-4),
-  innerSectorAnodeVoltage(1170),
-  outerSectorAnodeVoltage(1390),
   ElectronRange(0.0055), // Electron Range(.055mm)
   ElectronRangeEnergy(3000), // eV
   ElectronRangePower(1.78), // sigma =  ElectronRange*(eEnery/ElectronRangeEnergy)**ElectronRangePower
@@ -228,29 +226,53 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
   Double_t timeBinMax = 44.5;
   const Char_t *Names[2] = {"I","O"};
   Double_t CathodeAnodeGap[2] = {0.2, 0.4};
-  innerSectorAnodeVoltage = outerSectorAnodeVoltage = 0;
-  Int_t nAliveInner = 0;
-  Int_t nAliveOuter = 0;
   for (Int_t sector = 1; sector <= 24; sector++) {
+    innerSectorAnodeVoltage[sector-1] = outerSectorAnodeVoltage[sector-1] = 0;
+    Int_t nAliveInner = 0;
+    Int_t nAliveOuter = 0;
     for (Int_t row = 1; row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
       if (St_tpcPadConfigC::instance()->IsRowInner(sector,row)) {
 	nAliveInner++;
-	innerSectorAnodeVoltage += St_tpcAnodeHVavgC::instance()->voltagePadrow(sector,row);
+	innerSectorAnodeVoltage[sector-1] += St_tpcAnodeHVavgC::instance()->voltagePadrow(sector,row);
       } else {
 	nAliveOuter++;
-	outerSectorAnodeVoltage += St_tpcAnodeHVavgC::instance()->voltagePadrow(sector,row);
+	outerSectorAnodeVoltage[sector-1] += St_tpcAnodeHVavgC::instance()->voltagePadrow(sector,row);
+      }
+    }
+    if (! nAliveInner && ! nAliveOuter) {
+      LOG_INFO << "Illegal date/time. Tpc sector " << sector << " Anode Voltage is not set to run condition: AliveInner: " << nAliveInner 
+	       << "\tAliveOuter: " << nAliveOuter 
+	       << "\tStop the run" << endm;
+      assert(nAliveInner || nAliveOuter);
+    } else {
+      if (nAliveInner > 1) innerSectorAnodeVoltage[sector-1] /= nAliveInner;
+      if (nAliveOuter > 1) outerSectorAnodeVoltage[sector-1] /= nAliveOuter;
+    }
+    for (Int_t io = 0; io < 2; io++) {// In/Out
+      if (io == 0) {
+	if (sector > 1 && TMath::Abs(innerSectorAnodeVoltage[sector-1] - innerSectorAnodeVoltage[sector-2]) < 1) {
+	  InnerAlphaVariation[sector-1] = InnerAlphaVariation[sector-2];
+	} else {
+	  LOG_INFO << "Inner Sector " << sector << " ======================" << endm;
+	  InnerAlphaVariation[sector-1] = InducedCharge(anodeWirePitch,
+							CathodeAnodeGap[io],
+							anodeWireRadius,
+							innerSectorAnodeVoltage[sector-1], t0IO[io]);
+	}
+      }
+      else {
+	if (sector > 1 && TMath::Abs(outerSectorAnodeVoltage[sector-1] - outerSectorAnodeVoltage[sector-2]) < 1) {
+	  OuterAlphaVariation[sector-1] = OuterAlphaVariation[sector-2];
+	} else {
+	  LOG_INFO << "Outer Sector " << sector << " ======================" << endm;
+	  OuterAlphaVariation[sector-1] = InducedCharge(anodeWirePitch,
+							CathodeAnodeGap[io],
+							anodeWireRadius,
+							outerSectorAnodeVoltage[sector-1], t0IO[io]);
+	}
       }
     }
   }
-  if (! nAliveInner && ! nAliveOuter) {
-    LOG_INFO << "Illegal date/time. Tpc Anode Voltage is not set to run condition: AliveInner: " << nAliveInner 
-	     << "\tAliveOuter: " << nAliveOuter 
-	     << "\tStop the run" << endm;
-    assert(nAliveInner || nAliveOuter);
-  }
-  if (nAliveInner > 1) innerSectorAnodeVoltage /= nAliveInner;
-  if (nAliveOuter > 1) outerSectorAnodeVoltage /= nAliveOuter;
-  
   for (Int_t io = 0; io < 2; io++) {// In/Out
     //  mPolya = new TF1F("Polya;x = G/G_0;signal","sqrt(x)/exp(1.5*x)",0,10); // original Polya 
     //  mPolya = new TF1F("Polya;x = G/G_0;signal","pow(x,0.38)*exp(-1.38*x)",0,10); //  Valeri Cherniatin
@@ -261,20 +283,6 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
     if (gamma <= 0) gamma = 1.38;
     mPolya[io] = new TF1F(io == 0 ? "PolyaInner;x = G/G_0;signal" : "PolyaOuter;x = G/G_0;signal",polya,0,10,3);
     mPolya[io]->SetParameters(gamma, 0., 1./gamma);
-    if (io == 0) {
-      LOG_INFO << "Inner Sector ======================" << endm;
-      InnerAlphaVariation = InducedCharge(anodeWirePitch,
-					  CathodeAnodeGap[io],
-					  anodeWireRadius,
-					  innerSectorAnodeVoltage, t0IO[io]);
-    }
-    else {
-      LOG_INFO << "Outer Sector ======================" << endm;
-      OuterAlphaVariation = InducedCharge(anodeWirePitch,
-					  CathodeAnodeGap[io],
-					  anodeWireRadius,
-					  outerSectorAnodeVoltage, t0IO[io]);
-    }
     Double_t params3[7] = {t0IO[io], 
 			   St_TpcResponseSimulatorC::instance()->tauF(), 
 			   St_TpcResponseSimulatorC::instance()->tauP(), 
@@ -1175,7 +1183,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	      TCL::vadd(xyzE.position().xyz(),xyzR.GetArray(),xyzE.position().xyz(),3);
 	    }
 	    Double_t y = xyzE.position().y();
-	    Double_t alphaVariation = InnerAlphaVariation;
+	    Double_t alphaVariation = InnerAlphaVariation[sector-1];
 	    // Transport to wire
 	    if (y < lastInnerSectorAnodeWire) {
 	      WireIndex = TMath::Nint((y - firstInnerSectorAnodeWire)/anodeWirePitch) + 1;
@@ -1189,7 +1197,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	      WireIndex = TMath::Nint((y - firstOuterSectorAnodeWire)/anodeWirePitch) + 1;
 	      if (WireIndex <= 1 || WireIndex >= numberOfOuterSectorAnodeWires) continue;
 	      yOnWire = firstOuterSectorAnodeWire + (WireIndex-1)*anodeWirePitch;
-	      alphaVariation = OuterAlphaVariation;
+	      alphaVariation = OuterAlphaVariation[sector-1];
 	    }
 	    Double_t distanceToWire = y - yOnWire; // Calculated effective distance to wire affected by Lorentz shift 
 	    xOnWire = xyzE.position().x();
@@ -1569,8 +1577,10 @@ void  StTpcRSMaker::Print(Option_t */* option */) const {
   PrPP(Print, St_TpcResponseSimulatorC::instance()->AveragePedestalRMS());
   PrPP(Print, St_TpcResponseSimulatorC::instance()->AveragePedestalRMSX());
   PrPP(Print, St_TpcResponseSimulatorC::instance()->FanoFactor());
-  PrPP(Print, innerSectorAnodeVoltage);
-  PrPP(Print, outerSectorAnodeVoltage);
+  for (Int_t sector = 1; sector <= 24; sector++) {
+    PrPP(Print, innerSectorAnodeVoltage[sector-1]);
+    PrPP(Print, outerSectorAnodeVoltage[sector-1]);
+  }
   PrPP(Print, St_TpcResponseSimulatorC::instance()->K3IP());
   PrPP(Print, St_TpcResponseSimulatorC::instance()->K3IR());
   PrPP(Print, St_TpcResponseSimulatorC::instance()->K3OP());
@@ -2053,8 +2063,11 @@ typedef struct {
 }
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.83 2018/11/20 19:51:15 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.84 2018/11/29 22:19:49 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.84  2018/11/29 22:19:49  fisyak
+// Restore __STOPPED_ELECTRONS__, split for Inner and Outer sectors, adjusted gain for Run XVIII
+//
 // Revision 1.83  2018/11/20 19:51:15  fisyak
 // Temporarely disable __STOPPED_ELECTRONS__ to check effect of this on no. of primary tracks for 2010 AuAu200 sample
 //
