@@ -93,8 +93,8 @@ class StTpcRSMaker : public StMaker {
   TF1F  *mGG;                         //! Gating Grid Transperency
   TF1   *mHeed;                       //!
   StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
-  Double_t InnerAlphaVariation;       //!
-  Double_t OuterAlphaVariation;       //!
+  Double_t InnerAlphaVariation[24];   //!
+  Double_t OuterAlphaVariation[24];   //!
   Altro *mAltro;                      //!
   Char_t end[1];                      //!
   Double_t             mLaserScale;   //!
@@ -112,8 +112,8 @@ class StTpcRSMaker : public StMaker {
   Double_t numberOfElectronsPerADCcount; //!
   Double_t anodeWireRadius;           //!
   const Double_t minSignal;           //!
-  Double_t innerSectorAnodeVoltage;   //!
-  Double_t outerSectorAnodeVoltage;   //!
+  Double_t innerSectorAnodeVoltage[24];//!
+  Double_t outerSectorAnodeVoltage[24];//!
   const Double_t ElectronRange;       //!
   const Double_t ElectronRangeEnergy; //!
   const Double_t ElectronRangePower;  //!

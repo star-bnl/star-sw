@@ -1,5 +1,5 @@
 /* cd ~/work/Tpc/Current/2018
-   root.exe -b -q  lmysql.C 'MakeTpcAvgPowerSupply.C+(2018)' >& MakeTpcAvgPowerSupply.`date +%m%d%y`.log &
+   root.exe -b -q  lmysql.C 'MakeTpcAvgPowerSupply2017.C+(2017)' >& MakeTpcAvgPowerSupply.`date +%m%d%y`.log &
    mv MakeTpcAvgPowerSupply.2017.root MakeTpcAvgPowerSupply.`date +%m%d%y`.root
    cd ../
    put2DB.pl 'StarDb/Calibrations/tpc/TpcAvg*.root' | tee 2017/put2DB.`date +%m%d%y`.log
@@ -297,7 +297,7 @@ Int_t LastProcessedRun(TpcAvgPowerSupply_st *avgI, Double_t AcCharge[2]) {
   return LastRun;
 }
 //________________________________________________________________________________
-void MakeTpcAvgPowerSupply(Int_t year = 2017) {
+void MakeTpcAvgPowerSupply2017(Int_t year = 2017) {
   TDatime d(10000*(year-1) + 1201,0);
   Int_t u95 = d.Convert();
   TDatime nextyear(10000*(year+1) + 101, 0);

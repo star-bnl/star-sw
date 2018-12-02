@@ -82,9 +82,6 @@ enum nodeQA {kKeepHit=1,kGoodHit=2};
 class StiKalmanTrack : public StiTrack 
 {
  public:
-
-  /// Modes for calculating approximate track parameters
-  enum { kAppGud =1, kAppRR=2, kAppUpd = 4, kAppUPD = 8 };
   
   /*! 
     Constructor
@@ -269,7 +266,6 @@ class StiKalmanTrack : public StiTrack
   int     getCharge()const;   	// charge of the particle
   double  getChi2()  const;   	// chi2/ndf of fit 
   double  getChi2Max() const;   // maximal chi2 
-  double  getXi2  () const { return mXi2;}   // helix chi2 
   double  getDca2(StiTrack *t) const;   // distance of closest approach to given track - 2D calc
   double  getDca3(StiTrack *t) const;   // distance of closest approach to given track - 3D calc
 
@@ -282,12 +278,12 @@ class StiKalmanTrack : public StiTrack
   int  legal(const StiHit* stiHit) const;
   StiKalmanTrackNode * extrapolateToBeam();
   StiKalmanTrackNode * extrapolateToRadius(double radius);
-  int approx(int mode = (kAppRR | kAppUPD));
+  int approx(int mode=0,int nNodes=999);
   
   void reduce();
 
   void print(const char *opt="") const;
-  static void setDebug(int d = 0) {_debug = d;}
+  static void setDebug(int m = 0) {_debug = m;}
   static int  debug() {return _debug;}
   StiKalmanTrack &operator=(const StiKalmanTrack &tk);
   int rejectByHitSet()  const;
@@ -335,7 +331,6 @@ protected:
   char      mCombUsed; 	  // save which combinatoric style was used
   int     mVertex;
   long    mFlag;         //A flag to pack w/ topo info
-  double  mXi2;
   double  _dca;
 
  public:

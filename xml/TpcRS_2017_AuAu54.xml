@@ -6,6 +6,7 @@
   cd ${SUBMITTINGDIRECTORY}  
 #  starver .DEV2 
 #  setup gcc451
+#  setup debug
   setup 32b
   set evtsFile = $INPUTFILE0;
   set file     = `basename $evtsFile .MuDst`

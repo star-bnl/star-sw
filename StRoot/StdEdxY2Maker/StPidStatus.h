@@ -4,6 +4,7 @@
 #include "StBTofPidTraits.h"
 #include "StDedxPidTraits.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
+#include "StPicoEvent/StPicoTrack.h"
 class StGlobalTrack;
 class StdEdxStatus {
  public:
@@ -47,6 +48,7 @@ class StPidStatus {
  public:
   StPidStatus(StGlobalTrack *gTrack = 0);
   StPidStatus(StMuTrack *muTrack = 0);
+  StPidStatus(StPicoTrack *picoTrack = 0);
   virtual ~StPidStatus() {}
   void Clear() {memset(mBeg,0,mEnd-mBeg+1);}
   Int_t Status() {return PiDStatus;}

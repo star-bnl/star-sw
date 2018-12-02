@@ -171,11 +171,6 @@ Int_t StiKalmanTrackFinder::Fit(StiKalmanTrack *track, Double_t rMin) {
 
   do { //technical do
     track->setFlag(-1);
-    int opt = StiKalmanTrack::kAppRR|StiKalmanTrack::kAppUPD;
-    status = track->approx(opt); // should be filled by track->initialize()
-StiDebug::Count("Xi2Helx2",track->getXi2());
-    if (status) 	{nTSeed++; errType = abs(status)*100 + kApproxFail; break;}
-
     status = track->fit(kOutsideIn);
     if (status) 	{nTSeed++; errType = abs(status)*100 + kFitFail; break;}
     status = extendTrack(track,rMin); // 0 = OK 

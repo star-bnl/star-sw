@@ -4,6 +4,7 @@
 #include "StGlobalTrack.h"
 #include "StTrackGeometry.h"
 #include "TMath.h"
+#include "TVector3.h"
 //________________________________________________________________________________
 StPidStatus::StPidStatus(StGlobalTrack *gTrack) : PiDStatus(-1) {// , gTrack(Track) {
   Clear();
@@ -73,6 +74,26 @@ StPidStatus::StPidStatus(StMuTrack *muTrack) : PiDStatus(-1) {
   Set();
 }
 //________________________________________________________________________________
+StPidStatus::StPidStatus(StPicoTrack *picoTrack) : PiDStatus(-1) {
+  Clear();
+  if (! picoTrack) return;
+  TVector3 gMom = picoTrack->gMom();
+  g3 = StThreeVectorF(gMom.X(), gMom.Y(), gMom.Z()); // p of global track
+  static StDedxPidTraits pidI70; //!
+  static StDedxPidTraits pidFit; //!
+  static StDedxPidTraits pidI70U; //!
+  static StDedxPidTraits pidFitU; //!
+  static StDedxPidTraits pidNdx; //!
+  static StDedxPidTraits pidNdxU;//!
+  pidI70 = StDedxPidTraits(kTpcId, kTruncatedMeanId, picoTrack->nHitsDedx(), 
+			   picoTrack->dEdx(), picoTrack->dEdxError());
+  fI70 = StdEdxStatus(&pidI70);
+  pidFit = StDedxPidTraits(kTpcId, kLikelihoodFitId, picoTrack->nHitsDedx(), 
+			   picoTrack->dEdx(), picoTrack->dEdxError());
+  fFit = StdEdxStatus(&pidFit);
+  Set();
+}
+//________________________________________________________________________________
 void StPidStatus::Set() {
   if (! fI70.fPiD && ! fFit.fPiD && ! fdNdx.fPiD) return;
   PiDStatus = 0;
@@ -113,10 +134,12 @@ void StPidStatus::Set() {
 	break;
       default: continue;
       }
-      fStatus[m]->dev[l] = TMath::Log(fStatus[m]->I()/fStatus[m]->Pred[l]);
-      fStatus[m]->devS[l] = -999;
-      if (fStatus[m]->D() > 0) {
-	fStatus[m]->devS[l] = fStatus[m]->dev[l]/fStatus[m]->D();
+      if (fStatus[m]->I() > 0) {
+	fStatus[m]->dev[l] = TMath::Log(fStatus[m]->I()/fStatus[m]->Pred[l]);
+	fStatus[m]->devS[l] = -999;
+	if (fStatus[m]->D() > 0) {
+	  fStatus[m]->devS[l] = fStatus[m]->dev[l]/fStatus[m]->D();
+	}
       }
       if (fStatus[m]->Pred[l] < PredBMN[0]) PredBMN[0] = fStatus[m]->Pred[l];
       if (fStatus[m]->Pred[l] > PredBMN[1]) PredBMN[1] = fStatus[m]->Pred[l];
