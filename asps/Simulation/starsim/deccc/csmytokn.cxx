@@ -10,13 +10,15 @@ extern "C" unsigned long csvplong (         int  tokn);
 static std::map<unsigned long,int> mapLong;
 static std::vector<unsigned long>  vecLong;
 #define kMASK 0x40000000
-#define kMAZK 0xE0000000
+#define kMAZK 0xEF000000
 int csvptokn_(unsigned long addr)
 {
   int &tokn = mapLong[addr];
+  assert (tokn>=0 && tokn < 0x00FFFFFF);
   if (!tokn) {
     vecLong.push_back(addr);
     tokn = vecLong.size();
+    assert(tokn < 0xFFFFFF);
   }
   return tokn|kMASK;
 }
