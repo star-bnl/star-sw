@@ -1,5 +1,6 @@
 #include "EMC_SmdReader.hh"
 #include "StMessMgr.h"
+#include "TTimeStamp.h"
 #include <assert.h>
 #define MAX_ADC 0xFFF
 #include <time.h>
@@ -15,24 +16,17 @@ EMC_SmdReader::EMC_SmdReader(EventReader* er,Bank_EMCP *pEMCP): pBankEMCP(pEMCP)
     mNSMD = 8;
 
     EventInfo info=er->getEventInfo();
-    unsigned int UnixTime=info.UnixTime;
-    struct tm *time=gmtime((time_t*) &UnixTime);
-    int year=1900+time->tm_year;
-    int month=1+time->tm_mon;
-    int day=time->tm_mday;
-    int hour1=time->tm_hour;
-    int min=time->tm_min;
-    int sec=time->tm_sec;
-    char text1[80],text2[80];
-    sprintf(text1,"%04d%02d%02d",year,month,day);
-    sprintf(text2,"%02d%02d%02d",hour1,min,sec);
-    unsigned int date=atoi(text1);
-    unsigned int hour=atoi(text2);
+    TTimeStamp ts(info.UnixTime);
+    UInt_t year,month,day,hour1,min,sec;
+    ts.GetDate(1,0,&year,&month,&day);
+    ts.GetTime(1,0,&hour1,&min,&sec);
+    UInt_t date= day + 100*(month+100*year );  
+    UInt_t hour= sec + 100*(min  +100*hour1);
+    
     decoder = new StEmcDecoder(date,hour);
 
-    if(date>20041201)
-        mNSMD = 12;
-    LOG_INFO<<"EMC_SMDreader** Event time (Unix time) = "<<UnixTime<<"  NSMD = "<<mNSMD<<endm;
+    if(date>20041201) mNSMD = 12;
+    LOG_INFO<<"EMC_SMDreader** Event time (Unix time) = "<<info.UnixTime<<"  NSMD = "<<mNSMD<<endm;
     Initialize();
 }
 /////////////////////////////////////////////////////////////////////
