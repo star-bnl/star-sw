@@ -1,5 +1,19 @@
-* $Id: g2t_volume_id.g,v 1.89 2018/07/24 18:46:14 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.90 2018/12/03 21:08:53 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.90  2018/12/03 21:08:53  jwebb
+* g2t_volume_id for TPC is split out into a separate subroutine.
+*
+* Code is added to recognize iTPC era geometry, and setup the appropriate
+* TPAD volume mappings.
+*
+* (Support for iTPC R&D models retired).
+*
+* Code was tested on simulations from y2003 to 2018.  Output of fz2root is
+* identical on a hit-by-hit basis on the first production quality geometry
+* from each year.  y2019 simulations of single muons show the expected
+* number of hits on tracks.  note-- prompt hit region has not been
+* vetted, but no issues expected as we do not change the prompt-hit logic.
+*
 * Revision 1.89  2018/07/24 18:46:14  jwebb
 * Updates to EPD geometry and numbering from Prashanth.
 *
@@ -205,7 +219,8 @@
 *              CALB_Nmodule(1) and (2), not on RICH presence !     *
 ********************************************************************
       implicit none
-      integer  g2t_volume_id
+      integer :: g2t_volume_id
+      integer :: g2t_tpc_volume_id
 +CDE,gcunit.
 * 
       Character*3      Csys
@@ -326,6 +341,10 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *             print *,'              : ISTB version of code=', ismg_code
              istVersion=ismg_code
           endif
+
+
+
+
 
 
    """This is a hack.  For some reason that I have yet to determine, the PIXL"""
@@ -491,28 +510,9 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       else if (Csys=='tpc') then
-*2*                                        Peter M. Jacobs
-        tpgv  = numbv(1)
-        tpss  = numbv(2)
-        sector= tpss+12*(tpgv-1) 
-        tpad  = numbv(3)
-        isdet = 0
 
-        If  (tpcg_version==1) then
-          If (cd=='TPAI')  isdet=1
-          If (cd=='TPAO')  isdet=2
-*PN:      outermost pseudopadrow:
-          If (cd=='TPAO' & tpad==14) tpad=45
-        else
-!//		tpad >nbpads (73) prompt hits
-          if (tpad .gt. nbpads) tpad = tpad - nbpads
-          isdet = isdets(tpad);
-          tpad  = tpads (tpad);
+        volume_id = g2t_tpc_volume_id( numbv )
 
-        endif
-
-        volume_id=100000*isdet+100*sector+tpad
-*
       else if (Csys=='mwc') then
 *3*
         rileft    = numbv(1)
@@ -1203,3 +1203,132 @@ c$$$    write (*,*) numbv
 
     end
       
+    Integer function g2t_tpc_volume_id ( numbv )
+      Integer, intent(in) :: numbv(15)
+
+      Logical :: first = .true.
+      
+      Structure  TPCC  { version,misalign  }      
+      Structure  TPCG  { version,tpadconfig  }
+      Structure  TPRS  { sec,nrow }
+
+
+      Integer ::       Iprin,Nvb
+      Character(len=4) ::           cs,cd
+      COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
+
+      Integer :: npadi = 0, npado = 0, npad = 0
+      Integer,Parameter :: fpad = 1
+      Integer,Parameter :: fsec = 100
+
+      Integer :: tpads(156), isdet(156), i, j, n, m
+
+      Integer :: tpgv, tpss, pad, det, prompt, sector
+
+
+      if ( first ) then
+
+         call rbpushd  "save current zebra directory"
+         first = .false.
+         USE /DETM/TPCE/TPCC       stat=itpcc
+         USE /DETM/TPCE/TPCG       stat=itpcg
+         USE /DETM/TPCE/TPRS       stat=itprs
+         npadi = TPRS_nrow
+         USE /DETM/TPCE/TPRS       stat=itprs 
+         npado = TPRS_nrow
+         call rbpopd   "restore original zebra directory"
+
+
+        !write (*,*) 'We are in FIRST', itpcg, itprs
+        !write (*,*) 'We have TPCC  version    = ', TPCC_version
+        !write (*,*) 'We have TPCG  version    = ', TPCG_version
+        !write (*,*) 'We have TPCG  tpadconfig = ', TPCG_tpadconfig
+        !write (*,*) 'We have TPRS(sec=1) nrow = ', npadi
+        !write (*,*) 'We have TPRS(sec=2) nrow = ', npado
+
+
+         ! zero out both arrays to start
+         tpads(1:156) = 0
+         isdet(1:156) = 0  
+
+         ! Default will be the TPC pre iTPC upgrade
+
+
+
+         npad = 73 """13 inner + 2x13 fake + 32 outer + 2 fake """
+
+         tpads(1:73) = (/     1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 
+                              4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 
+                              7, 8, 8, 8, 9, 9, 9,10,10,10, 
+                             11,11,11,12,12,12,13,13,13,14, 
+                             14,15,16,17,18,19,20,21,22,23, 
+                             24,25,26,27,28,29,30,31,32,33, 
+                             34,35,36,37,38,39,40,41,42,43, 
+                             44,45,45   /)
+
+         isdet(1:73) = (/ 1, 0, 2, 1, 0, 2, 1, 0, 2, 1,
+                          0, 2, 1, 0, 2, 1, 0, 2, 1, 0,
+                          2, 1, 0, 2, 1, 0, 2, 1, 0, 2,
+	                  1, 0, 2, 1, 0, 2, 1, 0, 2, 1,
+	                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		          0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		          0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                          0, 0, 2 /)
+
+         ! Otherwise handle the iTPC upgrade inner = 40 rows outer = 32
+         if (TPCC_version.ge.6) then
+
+         write (*,*) 'Info :: g2t_volume_id :: iTPC geometry will be decoded'
+
+         npad = 76 """ 40 inner + 2 fake + 32 outer + 2 fake """
+
+         tpads(1:76) = (/   1,  1,  2,  3,  4,  5,  6,  7,  8,  9,
+                           10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+                           20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+                           30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+                           40, 40, 41, 41, 42, 43, 44, 45, 46, 47, 48, 49,
+                           50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+                           60, 61, 62, 63, 64, 65, 66, 67, 68, 69,
+                           70, 71, 72, 72 /)
+                      
+         isdet(1:76) = (/   1,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+                            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+                            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+                            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+                            0,  2,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+                            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+                            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+                            0,  0,  0,  2 /)
+                      
+
+         endif
+
+      endif!first           
+
+      tpgv = numbv(1)
+      tpss = numbv(2)
+      sector  = tpss + 12*(tpgv - 1)    
+      pad  = numbv(3)
+      det  = 0
+
+      If  (tpcg_version==1) then
+
+          If (cd=='TPAI')  det=1
+          If (cd=='TPAO')  det=2
+*PN:      outermost pseudopadrow:
+          If (cd=='TPAO' & pad==14) pad=45
+
+      else
+
+          if (pad .gt. npad) pad = pad - npad
+
+          det = isdet(pad); ! flag as fake or not
+          pad = tpads(pad); ! remap fake padrows onto nearest real one
+
+        endif      
+
+      g2t_tpc_volume_id = 100000*det + 100*sector + pad
+
+
+      RETURN
+    end
