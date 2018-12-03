@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.174 2018/11/21 23:05:27 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.175 2018/12/03 00:56:32 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.175  2018/12/03 00:56:32  perev
+// Use uint64_t + cleanup
+//
 // Revision 1.174  2018/11/21 23:05:27  perev
 // 64bits
 //
@@ -700,25 +703,25 @@ typedef long int (*addrfun)();
 R__EXTERN "C" {
   void *getPntB(int myDif);
   void type_of_call geometry();
-  Int_t type_of_call agstroot();
+  int type_of_call agstroot();
   void type_of_call *csaddr(char *name, int l77name=0);
   long int type_of_call csjcal(
 			       addrfun *fun, /* addres of external routine */
 			       int  *narg,   /* number   of arguments      */
 			       ...);         /* other narg arguments       */
   
-  Int_t type_of_call g2t_volume_id (DEFCHARD, int* DEFCHARL);
+  int type_of_call g2t_volume_id (DEFCHARD, int* DEFCHARL);
   void type_of_call g2r_get_sys (DEFCHARD, DEFCHARD, int&, int& DEFCHARL DEFCHARL);
-  void type_of_call gfrotm   (Int_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&);
-  void type_of_call gfxzrm   (Int_t &NLEV_0,Float_t &X,Float_t &Y,Float_t &Z,
+  void type_of_call gfrotm   (int&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&);
+  void type_of_call gfxzrm   (int &NLEV_0,Float_t &X,Float_t &Y,Float_t &Z,
 			      Float_t &TET1,Float_t &PHI1,
 			      Float_t &TET2,Float_t &PHI2,
 			      Float_t &TET3,Float_t &PHI3,Float_t &TYPE);
-  void type_of_call agnzgete (Int_t &ILK,Int_t &IDE,
-			      Int_t &NPART,Int_t &IRUN,Int_t &IEVT,DEFCHARD CGNAM,
-			      Float_t *VERT,Int_t &IWTFL,Float_t &WEIGH DEFCHARL);
-  void type_of_call dzddiv   (Int_t &,Int_t &,DEFCHARD,DEFCHARD,
-			      Int_t &,Int_t &,Int_t &,Int_t & DEFCHARL DEFCHARL);
+  void type_of_call agnzgete (int &ILK,int &IDE,
+			      int &NPART,int &IRUN,int &IEVT,DEFCHARD CGNAM,
+			      Float_t *VERT,int &IWTFL,Float_t &WEIGH DEFCHARL);
+  void type_of_call dzddiv   (int &,int &,DEFCHARD,DEFCHARD,
+			      int &,int &,int &,int & DEFCHARL DEFCHARL);
   /*
    * Input : ILK   - Link number  : 1 = primary, 2 = secondary (obsolete)    *
    *         IDE   - ID of event in gate ( ZEBRA IDN)                        *
@@ -727,18 +730,18 @@ R__EXTERN "C" {
    *         IEVT  - event number as recorded by generator                   *
    *         CGNAM - generator name                                          *
    *         VERT(4)- x,y,z,t of event (metres,seconds or mm,mm/c)           *
-   *         IWTFL - weight flag                                             *
+   *         IWTFL - weight flintag                                             *
    *         WEIGH - event weight                                            *
    */
-  void type_of_call rootmaptable_(DEFCHARD,DEFCHARD,DEFCHARD, Int_t&,Char_t * 
+  void type_of_call rootmaptable_(DEFCHARD,DEFCHARD,DEFCHARD, int&,Char_t * 
 				  DEFCHARL DEFCHARL DEFCHARL);
-  Int_t type_of_call agvolume(uint64_t&, int&, int&, int&, Int_t&
-                             ,Int_t&,    int&, Int_t&,    int *);
-  Int_t type_of_call agvoluma(void*,void*,void*,void*,void*,void*,void*,void*,void*,void*);
-  void type_of_call uhtoc(Int_t&,Int_t &,DEFCHARD,Int_t& DEFCHARL);
+  int type_of_call agvolume(uint64_t&, uint64_t&, uint64_t&, uint64_t&, int&
+                             ,int&,    uint64_t&, int&,    int *);
+  int type_of_call agvoluma(void*,void*,void*,void*,void*,void*,void*,void*,void*,void*);
+  void type_of_call uhtoc(int&,int &,DEFCHARD,int& DEFCHARL);
   int  type_of_call agfdig0 (const char*,const char*,int,int);
   void type_of_call agfdpar (float &hits,const char *chit, float &alim, float &blim, float &bin, int);
-  void type_of_call agfpath(Int_t *);
+  void type_of_call agfpath(int *);
   void type_of_call dstkine();
 }
 Char_t type_of_call *acfromr(Float_t r=8009359);
@@ -748,7 +751,7 @@ Gclink_t *St_geant_Maker::clink;
 Gcflag_t *St_geant_Maker::cflag; 
 Gcvolu_t *St_geant_Maker::cvolu; 
 Gcnum_t  *St_geant_Maker::cnum; 
-Int_t    *St_geant_Maker::z_iq, *St_geant_Maker::z_lq; 
+int    *St_geant_Maker::z_iq, *St_geant_Maker::z_lq; 
 Float_t  *St_geant_Maker::z_q; 
 Gcsets_t *St_geant_Maker::csets;
 Gckine_t *St_geant_Maker::ckine;
@@ -757,8 +760,8 @@ Gctrak_t *St_geant_Maker::ctrak;
 Gcmate_t *St_geant_Maker::cmate;
 Gccuts_t *St_geant_Maker::ccuts;
 Gcphys_t *St_geant_Maker::cphys;
-Int_t     St_geant_Maker::nlev;
-static Int_t irot = 0;
+int     St_geant_Maker::nlev;
+static int irot = 0;
 static TVolume *topnode=0;
 typedef struct {
   Float_t par[50];
@@ -767,7 +770,7 @@ typedef struct {
   Float_t lseen, lstyle, lwidth, lcolor, lfill;
 } attributes;
 
-static Int_t ifz = 0;
+static int ifz = 0;
 ClassImp(St_geant_Maker)
   
 TDataSet *St_geant_Maker::fgGeom = 0;
@@ -775,7 +778,7 @@ TGiant3  *St_geant_Maker::geant3 = 0;
 St_geant_Maker *St_geant_Maker::fgGeantMk = 0;
 static TTreeIter *MuDstIter = 0;
 //_____________________________________________________________________________
-St_geant_Maker::St_geant_Maker(const Char_t *name,Int_t nwgeant,Int_t nwpaw, Int_t iwtype):
+St_geant_Maker::St_geant_Maker(const Char_t *name,int nwgeant,int nwpaw, int iwtype):
   StMaker(name), 
    fNwGeant(nwgeant), fNwPaw(nwpaw), fIwType(iwtype),
    fVolume(0), fTopGeoVolume(0), 
@@ -854,7 +857,7 @@ TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppM
   return ds;  
 }
 //_____________________________________________________________________________
-Int_t St_geant_Maker::Init(){
+int St_geant_Maker::Init(){
   // Initialize GEANT
   if (  geant3) return kStOK;
   PrintInfo();
@@ -865,8 +868,8 @@ Int_t St_geant_Maker::Init(){
   cflag  = (Gcflag_t *) geant3->Gcflag();
   cvolu  = (Gcvolu_t *) geant3->Gcvolu();
   cnum   = (Gcnum_t  *) geant3->Gcnum();
-  z_iq   = (Int_t    *) geant3->Iq();
-  z_lq   = (Int_t    *) geant3->Lq();
+  z_iq   = (int    *) geant3->Iq();
+  z_lq   = (int    *) geant3->Lq();
   z_q    = (Float_t  *) geant3->Q();
   csets  = (Gcsets_t *) geant3->Gcsets();
   ckine  = (Gckine_t *) geant3->Gckine();
@@ -957,7 +960,7 @@ Int_t St_geant_Maker::Init(){
   return kStOK;
 }
 //________________________________________________________________________________
-Int_t St_geant_Maker::InitRun(Int_t run){
+int St_geant_Maker::InitRun(int run){
   static Bool_t InitRunDone = kFALSE;
   if (InitRunDone) return kStOK;
   InitRunDone = kTRUE;
@@ -1096,7 +1099,7 @@ Int_t St_geant_Maker::InitRun(Int_t run){
 	  {"ZeroMagF",          0.0}
 	};
 	TString FieldOption("");
-	for (Int_t i = 0; i < 5; i++) {
+	for (int i = 0; i < 5; i++) {
 	  if (TMath::Abs(mfscale - FieldOptions[i].scale) < 2.e-2) {
 	    FieldOption = FieldOptions[i].name;
 	    break;
@@ -1138,8 +1141,8 @@ Int_t St_geant_Maker::InitRun(Int_t run){
   return kStOK;
 }
 //_____________________________________________________________________________
-Int_t St_geant_Maker::Make() {
-  Int_t    /*nhits,nhit1,nhit2,nhit3,nhit4,*/link=1,ide=1,npart,irun,ievt,iwtfl;
+int St_geant_Maker::Make() {
+  int    /*nhits,nhit1,nhit2,nhit3,nhit4,*/link=1,ide=1,npart,irun,ievt,iwtfl;
   Float_t  vert[4],weigh;
   if (GetDebug()) { Do("debug on;"); } else {Do("debug off;"); }
   int iRes = 0; if(iRes) {/*touch*/};
@@ -1190,8 +1193,8 @@ Int_t St_geant_Maker::Make() {
 	
 	// Obsoleted: --max--
 	// 	fEvtHddr->SetGenerType((int)p->phep[2]);
-	// 	Int_t west = (int)p->phep[4];
-	// 	Int_t east = (int)(1000.*p->phep[4]-1000.*((float)west));
+	// 	int west = (int)p->phep[4];
+	// 	int east = (int)(1000.*p->phep[4]-1000.*((float)west));
 	// 	fEvtHddr->SetAWest(west);
 	// 	fEvtHddr->SetAEast(east);
 	
@@ -1203,8 +1206,8 @@ Int_t St_geant_Maker::Make() {
 	  fEvtHddr->SetRunNumber((int)p->vhep[0]);
 	  
 	  fEvtHddr->SetEventNumber((int)p->vhep[1]);
-	  Int_t id = p->jdahep[0];
-	  Int_t it = p->jdahep[1];
+	  int id = p->jdahep[0];
+	  int it = p->jdahep[1];
 	  
 	  if (id <=        0) id = 19991231;
 	  if (id <= 19000000) id +=19000000;
@@ -1349,9 +1352,9 @@ Int_t St_geant_Maker::Make() {
     }
     Double_t BbcW = 0, BbcE = 0;
     St_g2t_ctf_hit *g2t_bbc_hit = (St_g2t_ctf_hit *) GetDataSet("g2t_bbc_hit");
-    Int_t N = g2t_bbc_hit->GetNRows();
+    int N = g2t_bbc_hit->GetNRows();
     g2t_ctf_hit_st *bbc = g2t_bbc_hit->GetTable();
-    for (Int_t i = 0; i < N; i++, bbc++) {
+    for (int i = 0; i < N; i++, bbc++) {
       if (bbc->tof > 100e-9) continue;
       if (bbc->volume_id < 2000) BbcW++;
       else                       BbcE++;
@@ -1386,25 +1389,25 @@ void St_geant_Maker::LoadGeometry(const Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::Draw(const char* opt)
 { 
-  Int_t two = 2;
-  Int_t zero = 0;
-  Int_t one = 1;
+  int two = 2;
+  int zero = 0;
+  int one = 1;
   const char *path = " ";
   Dzddiv (two,zero,path,opt,one,zero,one,one);
 }
 //_____________________________________________________________________________
 void St_geant_Maker::Do(const Char_t *job)
 {  
-  Int_t l=strlen(job);
+  int l=strlen(job);
   if (l) geant3->Kuexel(job);
 }
 //_____________________________________________________________________________
 
 //_____________________________________________________________________________
-TVolume *St_geant_Maker::MakeVolume(TString *name, Int_t ivo, Int_t Nlevel, Int_t *Names, Int_t *Numbers){
+TVolume *St_geant_Maker::MakeVolume(TString *name, int ivo, int Nlevel, int *Names, int *Numbers){
   TVolume *node = 0;
-  Int_t   jvolum  = clink->jvolum;
-  Int_t jvo = z_lq[jvolum-ivo];
+  int   jvolum  = clink->jvolum;
+  int jvo = z_lq[jvolum-ivo];
   if (jvo) {
     node = (TVolume *) topnode->FindObject(name->Data());
     if (! node) {
@@ -1413,21 +1416,21 @@ TVolume *St_geant_Maker::MakeVolume(TString *name, Int_t ivo, Int_t Nlevel, Int_
       node = new TVolume(name->Data(), name->Data(), shape);
     }
     
-    Int_t nin =(Int_t) z_q[jvo+3];
+    int nin =(int) z_q[jvo+3];
     if (nin > 0) 
       {
 	Nlevel++;
-	for (Int_t in=1; in<= nin; in++) 
+	for (int in=1; in<= nin; in++) 
 	  {
-	    Int_t jin   =        z_lq[jvo-in];
-	    Int_t ivom  = (Int_t) z_q[jin+2];
-	    Int_t nuser = (Int_t) z_q[jin+3];
+	    int jin   =        z_lq[jvo-in];
+	    int ivom  = (int) z_q[jin+2];
+	    int nuser = (int) z_q[jin+3];
 	    TString  namem((const Char_t *) &(z_iq[jvolum+ivom]), 4);
 	    
 	    Names[Nlevel] = z_iq[jvolum+ivom];
 	    Numbers[Nlevel] = nuser;
-	    Int_t   nlevv = Nlevel+1;
-	    // Int_t   Ierr; 
+	    int   nlevv = Nlevel+1;
+	    // int   Ierr; 
 	    Float_t xx[3], theta1,phi1, theta2,phi2, theta3,phi3, type;
 	    
 	    geant3->Glvolu(nlevv, Names, Numbers);
@@ -1455,25 +1458,25 @@ TVolume *St_geant_Maker::MakeVolume(TString *name, Int_t ivo, Int_t Nlevel, Int_
   return node;
 }
 //_____________________________________________________________________________
-TShape *St_geant_Maker::MakeShape(TString *name, Int_t ivo){
+TShape *St_geant_Maker::MakeShape(TString *name, int ivo){
   // make geant3 volume
   typedef enum {BOX=1,TRD1,TRD2,TRAP,TUBE,TUBS,CONE,CONS,SPHE,PARA,
 		PGON,PCON,ELTU,HYPE,GTRA=28,CTUB} shapes;
-  Int_t jvolum  = clink->jvolum;
-  Int_t jvo = z_lq[jvolum-ivo];
+  int jvolum  = clink->jvolum;
+  int jvo = z_lq[jvolum-ivo];
   TShape*  t;
   shapes   shape  = (shapes) z_q[jvo+2];
-  Int_t    numed  = (Int_t)  z_q[jvo+4];
-  Int_t    npar   = (Int_t)  z_q[jvo+5];
+  int    numed  = (int)  z_q[jvo+4];
+  int    npar   = (int)  z_q[jvo+5];
   params  *p      = (params *)&z_q[jvo+7];
   attributes *att = (attributes *)(&z_q[jvo+7] + npar);
-  Int_t    jtmed  = clink->jtmed;
-  Int_t    jtm    =          z_lq[jtmed-numed];
-  Int_t    nmat   =          (int)z_q[jtm+6];
-  Int_t    jmate  = clink->jmate;
-  Int_t    jma    =          z_lq[jmate-nmat];
-  Int_t    nmixt  = (Int_t)  z_q[jma+11];
-  Int_t    nm     = TMath::Abs(nmixt);
+  int    jtmed  = clink->jtmed;
+  int    jtm    =          z_lq[jtmed-numed];
+  int    nmat   =          (int)z_q[jtm+6];
+  int    jmate  = clink->jmate;
+  int    jma    =          z_lq[jmate-nmat];
+  int    nmixt  = (int)  z_q[jma+11];
+  int    nm     = TMath::Abs(nmixt);
   
   Char_t   astring[20];
   if (nm <= 1)  sprintf (astring,"mat%i",nmat); 
@@ -1558,7 +1561,7 @@ TShape *St_geant_Maker::MakeShape(TString *name, Int_t ivo){
 //_____________________________________________________________________________
 void St_geant_Maker::Call(const Char_t *name)
 {  
-  Int_t  narg = 0;
+  int  narg = 0;
   addrfun *address  = (addrfun *) csaddr_((Char_t *)name, strlen(name));
   if (address) csjcal_(address, &narg);
 }
@@ -1585,17 +1588,17 @@ TDataSet *St_geant_Maker::Work()
     InitRun(-1);
   }
   struct  Medium 
-  { Char_t name[20]; Int_t nmat, isvol, ifield; Float_t fieldm; };
+  { Char_t name[20]; int nmat, isvol, ifield; Float_t fieldm; };
   struct  Volume
-  { Char_t name[4],nick[4]; Int_t npar; Float_t par[50]; };
+  { Char_t name[4],nick[4]; int npar; Float_t par[50]; };
   char matName[24];  
-  //  Int_t node = 0;
+  //  int node = 0;
   //  TVolume   *volume=0;
   TVolume   *node=0;
   
   Float_t   *volu=0, *position=0, *mother=0, *p=0;
-  Int_t     who=0, copy=0, npar=0;
-  Int_t     nvol=cnum->nvolum;
+  int     who=0, copy=0, npar=0;
+  int     nvol=cnum->nvolum;
   Float_t   theta1,phi1, theta2,phi2, theta3,phi3, type;
   TObjArray nodes(nvol+1);
   
@@ -1613,16 +1616,16 @@ TDataSet *St_geant_Maker::Work()
 		    PGON,PCON,ELTU,HYPE,GTRA=28,CTUB} shapes;
       TShape*  t;
       shapes   shape   = (shapes) volu[1];
-      //Int_t    nin     = 0;
-      //   Int_t    medium  = (Int_t)  volu[3]; 
-      Int_t    np      = (Int_t)  volu[4];
+      //int    nin     = 0;
+      //   int    medium  = (int)  volu[3]; 
+      int    np      = (int)  volu[4];
       Float_t* p0      = volu+6;
       Float_t* att     = p0+np;
       Char_t   name[]  = {0,0,0,0,0};
       Char_t   nick[]  = {0,0,0,0,0};
       float    xx[3]   = {0.,0.,0.};
       TVolume *newVolume = 0;
-      //if (mother)  nin = (Int_t) mother[2];
+      //if (mother)  nin = (int) mother[2];
       TVolume *Hp      = 0;
       
       strncpy(nick,(const Char_t*)&cvolu->names[cvolu->nlevel-1],4);
@@ -1657,7 +1660,7 @@ TDataSet *St_geant_Maker::Work()
 				   p[0],p[1],p[2],p[3],p[4],p[5]);          break;
 	    case PGON: t=new TPGON(nick,"PGON",matName,p[0],p[1],(int)p[2],(int)p[3]);  
 	      { Float_t *pp = p+4;
-	      for (Int_t i=0; i<p[3]; i++) {
+	      for (int i=0; i<p[3]; i++) {
 		Float_t z    = *pp++;
 		Float_t rmin = *pp++;
 		Float_t rmax = *pp++;
@@ -1668,7 +1671,7 @@ TDataSet *St_geant_Maker::Work()
 	      }                                              break;
 	    case PCON: t=new TPCON(nick,"PCON",matName,p[0],p[1],(int)p[2]);
 	      { Float_t *pp = p+3;
-	      for (Int_t i=0; i<p[2]; i++) {
+	      for (int i=0; i<p[2]; i++) {
 		Float_t z    = *pp++;
 		Float_t rmin = *pp++;
 		Float_t rmax = *pp++;
@@ -1719,37 +1722,37 @@ TDataSet *St_geant_Maker::Work()
 }
 //_____________________________________________________________________________
 void St_geant_Maker::Mark(TVolume *topvol) {
-  Int_t JSET = clink->jset;
+  int JSET = clink->jset;
   if (JSET <= 0) return;
-  Int_t  NSET=z_iq[JSET-1];
+  int  NSET=z_iq[JSET-1];
   Char_t Uset[5], Udet[5], Uvol[5];
   memset (Uset, 0, 5);
   memset (Udet, 0, 5);
   memset (Uvol, 0, 5);
-  for (Int_t ISET=1;ISET<=NSET;ISET++) {
-    Int_t JS=z_lq[JSET-ISET];
+  for (int ISET=1;ISET<=NSET;ISET++) {
+    int JS=z_lq[JSET-ISET];
     if (JS <= 0) continue;
-    Int_t NDET=z_iq[JS-1];
+    int NDET=z_iq[JS-1];
     memcpy (Uset, &z_iq[JSET+ISET], 4);
-    for (Int_t IDET=1;IDET<=NDET;IDET++) {
-      Int_t JD=z_lq[JS-IDET];
+    for (int IDET=1;IDET<=NDET;IDET++) {
+      int JD=z_lq[JS-IDET];
       if (JD <=0) continue;
-      Int_t NV=z_iq[JD+2];
-      Int_t NWHI=z_iq[JD+7];
-      Int_t NWDI=z_iq[JD+8];
+      int NV=z_iq[JD+2];
+      int NWHI=z_iq[JD+7];
+      int NWDI=z_iq[JD+8];
       memcpy (Udet, &z_iq[JS+IDET], 4);
       LOG_INFO  << "  Set " << Uset << " Detector " << Udet
 	   << "  NV " << NV << " NWHI " << NWHI << " NWDI " << NWDI << endm;
-      Int_t JDU = z_lq[JD-3];
+      int JDU = z_lq[JD-3];
       if (JDU > 0) {
-	Int_t i1 = (int)z_q[JDU+3], i2 = (int)z_q[JDU+5];
+	int i1 = (int)z_q[JDU+3], i2 = (int)z_q[JDU+5];
 	LOG_INFO  << " Volume/Bits :" << i1 << "/" << i2 <<  endm;
-	for (Int_t i=i1;i<i2;i += 3) {
-	  Int_t j   = JDU+i;
-	  Int_t iv  = (int)z_q[j+1];
-	  Int_t Nmx = (int)z_q[j+2];
-	  Int_t Nam = (int)z_iq[clink->jvolum+iv];
-	  Int_t Nb  = (int)z_q[j+3];
+	for (int i=i1;i<i2;i += 3) {
+	  int j   = JDU+i;
+	  int iv  = (int)z_q[j+1];
+	  int Nmx = (int)z_q[j+2];
+	  int Nam = (int)z_iq[clink->jvolum+iv];
+	  int Nb  = (int)z_q[j+3];
 	  memcpy (Uvol, &Nam, 4);
 	  LOG_INFO  << "\t" << Uvol << "\t" << Nmx << "\t" << Nb << endm;
 	}
@@ -1757,7 +1760,7 @@ void St_geant_Maker::Mark(TVolume *topvol) {
       else {
 	if (NV > 0) {
 	  LOG_INFO  << " Volume/Bits ";
-	  for (Int_t I=1; I<=NV; I++) {
+	  for (int I=1; I<=NV; I++) {
 	    memcpy (Uvol, &z_iq[JD+2*I+9], 4);
 	    LOG_INFO  << "\t" << Uvol << "/\t" << z_iq[JD+2*I+10];
 	  }
@@ -1772,11 +1775,11 @@ void St_geant_Maker::Mark(TVolume *topvol) {
     LOG_INFO  << "Set/Det \t" << csets->iset << "/" << csets->idet 
 	 << "\tidtype = \t" << csets->idtype
 	 << "\tnvname = \t" << csets->nvname << endm; 
-    Int_t nLev, lNam[15], lNum[15];
+    int nLev, lNam[15], lNum[15];
     Char_t Name[4];
     geant3->Gfpath(csets->iset,csets->idet,csets->numbv, nLev, lNam, lNum);
-    Int_t four = 4;
-    for (Int_t i=0; i< nLev; i++) {
+    int four = 4;
+    for (int i=0; i< nLev; i++) {
       uhtoc(lNam[i],four,PASSCHARD(Name),four PASSCHARL(Name));
       LOG_INFO  << "\t" << Name << "\t" << lNum[i];
     }
@@ -1839,13 +1842,13 @@ TString St_geant_Maker::GetVolumeSrcFile(const char *volumeName) const
   return "";
 }
 //_____________________________________________________________________________
-Int_t St_geant_Maker::SetInputFile(const char *file)
+int St_geant_Maker::SetInputFile(const char *file)
 {
   fInputFile = file;
   return kStOK;
 }
 //_____________________________________________________________________________
-Int_t St_geant_Maker::Skip(Int_t Nskip)
+int St_geant_Maker::Skip(int Nskip)
 {
   if (Nskip >= 0) {
     Char_t kuip[20];
@@ -1859,7 +1862,7 @@ Int_t St_geant_Maker::Skip(Int_t Nskip)
 }
 //_____________________________________________________________________________
 void type_of_call rootmaptable_(const Char_t* cdest,const Char_t* table , const Char_t* spec, 
-				Int_t &k, Char_t *iq, 
+				int &k, Char_t *iq, 
 				const int lCdest,const int lTable, const int lSpec)
 { 
   Char_t *Cdest = new char[(lCdest+1)]; strncpy(Cdest,cdest,lCdest); Cdest[lCdest] = 0;
@@ -1872,7 +1875,7 @@ void type_of_call rootmaptable_(const Char_t* cdest,const Char_t* table , const 
 }
 //_____________________________________________________________________________
 void St_geant_Maker::RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec, 
-				  Int_t &k, Char_t *iq)
+				  int &k, Char_t *iq)
 {
   TString TableName(Table); 
   TString t = TableName.Strip();
@@ -1889,7 +1892,7 @@ void St_geant_Maker::RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec,
 #endif
   if (fgGeantMk->Debug() > 1) {
     if (table) {
-      Int_t N = table->GetNRows(); 
+      int N = table->GetNRows(); 
       if (N > 10) N = 10; table->Print(0,N);
     }
     else LOG_DEBUG << "St_geant_Maker::Dictionary for table :" << t.Data() 
@@ -1898,22 +1901,22 @@ void St_geant_Maker::RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec,
   }
 }
 //_____________________________________________________________________________
-Int_t St_geant_Maker::G2t_volume_id(const Char_t *name, Int_t *numbv){
+int St_geant_Maker::G2t_volume_id(const Char_t *name, int *numbv){
   return g2t_volume_id(PASSCHARD(name),numbv PASSCHARL(name));
 }
 //_____________________________________________________________________________
-Int_t St_geant_Maker::Agvolume(TVolume *&node, Float_t *&par, Float_t *&pos
-                              ,Float_t *&mot,  Int_t &who,    Int_t &copy
-			      ,Float_t *&par1, Int_t &npar,   char matName[24])
+int St_geant_Maker::Agvolume(TVolume *&node, Float_t *&par, Float_t *&pos
+                              ,Float_t *&mot,  int &who,    int &copy
+			      ,Float_t *&par1, int &npar,   char matName[24])
 {
-  int myPar=0,myPos=0,myMot=0,myPar1=0;
   uint64_t myNode = (uint64_t)node;
+  uint64_t myPar=0,myPos=0,myMot=0,myPar1=0;
   int ans = agvolume(myNode,myPar,myPos,myMot,who,copy,myPar1,npar,(int*)matName);
   node = (TVolume *)myNode;
-  par  = (float*)getPntB(myPar);
-  pos  = (float*)getPntB(myPos);
-  mot  = (float*)getPntB(myMot);
-  par1 = (float*)getPntB(myPar1);
+  par  = (float*)myPar;
+  pos  = (float*)myPos;
+  mot  = (float*)myMot;
+  par1 = (float*)myPar1;
 
   matName[20]=0; char *cc = strstr(matName," "); if (cc) *cc=0;
   return ans;
@@ -1921,9 +1924,9 @@ Int_t St_geant_Maker::Agvolume(TVolume *&node, Float_t *&par, Float_t *&pos
 }
 
 //_____________________________________________________________________________
-void St_geant_Maker::Agnzgete (Int_t &ILK,Int_t &IDE,
-			       Int_t &NPART,Int_t &IRUN,Int_t &IEVT,const Char_t *CGNAM,
-			       Float_t *VERT,Int_t &IWTFL,Float_t &WEIGH){
+void St_geant_Maker::Agnzgete (int &ILK,int &IDE,
+			       int &NPART,int &IRUN,int &IEVT,const Char_t *CGNAM,
+			       Float_t *VERT,int &IWTFL,Float_t &WEIGH){
   agnzgete (ILK,IDE,NPART,IRUN,IEVT,PASSCHARD(CGNAM),VERT,IWTFL,WEIGH
 	    PASSCHARL(CGNAM));
 }
@@ -1944,12 +1947,12 @@ void St_geant_Maker::Geometry() {
    }
 }
 //______________________________________________________________________________
-Int_t St_geant_Maker::Agstroot() {
+int St_geant_Maker::Agstroot() {
 //VP not used  AgstHits();
   return agstroot();
 }
 //_____________________________________________________________________________
-void St_geant_Maker::Gfxzrm(Int_t & Nlevel, 
+void St_geant_Maker::Gfxzrm(int & Nlevel, 
 			    Float_t &x, Float_t &y, Float_t &z,
 			    Float_t &Theta1, Float_t & Phi1,
 			    Float_t &Theta2, Float_t & Phi2,
@@ -1961,22 +1964,22 @@ void St_geant_Maker::Gfxzrm(Int_t & Nlevel,
 	 Theta3, Phi3, Type);
 } 
 //_____________________________________________________________________________
-void St_geant_Maker::Dzddiv(Int_t& idiv ,Int_t &Ldummy,const Char_t* path,const Char_t* opt,
-			    Int_t& one,Int_t &two,Int_t &three,Int_t& iw){
+void St_geant_Maker::Dzddiv(int& idiv ,int &Ldummy,const Char_t* path,const Char_t* opt,
+			    int& one,int &two,int &three,int& iw){
   dzddiv (idiv,Ldummy,PASSCHARD(path),PASSCHARD(opt),
 	  one,two,three,iw PASSCHARL(path) PASSCHARL(opt));
 }
 //________________________________________________________________________________
-void St_geant_Maker::SetDateTime(Int_t idat, Int_t itime) {
+void St_geant_Maker::SetDateTime(int idat, int itime) {
   //  if ( m_Mode%100 == 1 || ! fEvtHddr ) return;
   if (IAttr("KeepRunNumber") || ! fEvtHddr ) return;
   if (! m_geom_gdat) { // taken from starsim/agzio/agfinfo.age
     LOG_INFO << "St_geant_Maker:: geom_gdat table is missing. Try to get it from GEANT." << endm;
-    Int_t jrung = clink->jrung;
+    int jrung = clink->jrung;
     if (jrung > 0 && z_iq[jrung-1]>=10) {
-      Int_t jrunh = z_lq[jrung-1];
+      int jrunh = z_lq[jrung-1];
       if (jrunh > 0) {
-	Int_t l = z_iq[jrunh-1];
+	int l = z_iq[jrunh-1];
 	Char_t *buf = new Char_t[4*l+1];
 	memcpy (buf,  &z_iq[jrunh+1], 4*l);
 	buf[4*l] = '\0';
@@ -1996,16 +1999,16 @@ void St_geant_Maker::SetDateTime(Int_t idat, Int_t itime) {
 	    line.ToLower();
 	    if (Debug()) LOG_INFO  << line << endm;
 	    if (line.Contains("detp")) {
-	      Int_t indx = line.Index("year");
+	      int indx = line.Index("year");
 	      if (indx) {
-		Int_t end = line.Index(" ",1,indx,TString::kExact);
+		int end = line.Index(" ",1,indx,TString::kExact);
 		if (end > indx) {
 		  version = TString(line(indx,end-indx));
 		}
 	      }
 	      indx = line.Index("field");
 	      if (indx) {
-		Int_t eq = line.Index("=",indx+4,TString::kExact);
+		int eq = line.Index("=",indx+4,TString::kExact);
 		sscanf(line.Data()+eq+1,"%f",&mfscale);
 	      }
 	    }
@@ -2034,8 +2037,8 @@ void St_geant_Maker::SetDateTime(Int_t idat, Int_t itime) {
     version.Strip();
     version.ToLower();
     if (version != "") {
-      Int_t id = St_db_Maker::AliasDate(version.Data());
-      Int_t it = St_db_Maker::AliasTime(version.Data());
+      int id = St_db_Maker::AliasDate(version.Data());
+      int it = St_db_Maker::AliasTime(version.Data());
       if (id &&  GetDate() >= 20330101) {
 	LOG_INFO << "St_geant_Maker::SetDateTime Date/Time = " 
 			 << id << "/" << it << "\tas " << version << endm;
@@ -2049,7 +2052,7 @@ Char_t *acfromr(Float_t r) {// 'TYPE'
   const Char_t *S=" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz ";
   Char_t *charm = new Char_t[5];
   memset (&charm[0], 0, 5);
-  Int_t k = (int) r;
+  int k = (int) r;
   for (int i = 3; i >= 0; i--) {
     int j = 077 & k; k = k >> 6; charm[i] = S[j];
     //    LOG_INFO  << "i\t" << i << "\tj\t" << j << "\tk\t" << k << "\t" << charm[i] << endm;
@@ -2058,43 +2061,43 @@ Char_t *acfromr(Float_t r) {// 'TYPE'
   return charm;
 }
 //________________________________________________________________________________
-Int_t St_geant_Maker::AgstHits() 
+int St_geant_Maker::AgstHits() 
 {
   if (! geant3) return kStErr;
-  Int_t JSET = clink->jset;
+  int JSET = clink->jset;
   if (JSET <= 0) return kStErr;
-  Int_t  NSET=z_iq[JSET-1];
+  int  NSET=z_iq[JSET-1];
   Char_t Uset[8], Udet[8], Uvol[8];
   memset (Uset, 0, 8);
   memset (Udet, 0, 8);
   memset (Uvol, 0, 8);
   TDataSet *m_Detectors = new TDataSet("Detectors"); AddConst(m_Detectors);
-  for (Int_t ISET=1;ISET<=NSET;ISET++) {
-    Int_t JS=z_lq[JSET-ISET];
+  for (int ISET=1;ISET<=NSET;ISET++) {
+    int JS=z_lq[JSET-ISET];
     if (JS <= 0) continue;
-    Int_t NDET=z_iq[JS-1];
+    int NDET=z_iq[JS-1];
     memcpy (Uset, &z_iq[JSET+ISET], 4);
     TDataSet *set = new TDataSet(Uset);
     m_Detectors->Add(set);
-    for (Int_t IDET=1;IDET<=NDET;IDET++) {
-      Int_t JD=z_lq[JS-IDET];
+    for (int IDET=1;IDET<=NDET;IDET++) {
+      int JD=z_lq[JS-IDET];
       if (JD <=0) continue;
-      Int_t NV=z_iq[JD+2];
-      Int_t NWHI=z_iq[JD+7];
-      Int_t NWDI=z_iq[JD+8];
+      int NV=z_iq[JD+2];
+      int NWHI=z_iq[JD+7];
+      int NWDI=z_iq[JD+8];
       memcpy (Udet, &z_iq[JS+IDET], 4);
       if (Debug()) {
 	LOG_INFO  << "  Set " << Uset << " Detector " << Udet
 	     << "  NV " << NV << " NWHI " << NWHI << " NWDI " << NWDI << endm;
       }
-      Int_t JDU = z_lq[JD-3];
-      Int_t ivd = 0;
+      int JDU = z_lq[JD-3];
+      int ivd = 0;
       if (JDU > 0) {
 	TDataSet *det = new TDataSet(Udet);
 	set->Add(det);
 	St_det_user *detu = new St_det_user("User",1); det->Add(detu);
 	det_user_st rowU;
-	Int_t i;
+	int i;
 	rowU.i0      = (int) z_q[JDU+1]; 
 	rowU.N       = (int) z_q[JDU+2]; 
 	rowU.i1      = (int) z_q[JDU+3]; 
@@ -2134,8 +2137,8 @@ Int_t St_geant_Maker::AgstHits()
 	agfdpar(hits[0],chit,alim[0],blim[0],bin[0],4);	
 	for (i = 0; i < rowU.N; i++) {
 	  memset(&rowH,0,detuH->GetRowSize());
-	  Int_t j = JDU + rowU.i0 + 10*i;
-	  //	  Int_t Nam   = (int) z_q[j+ 1];//     encoded hit name in Display code
+	  int j = JDU + rowU.i0 + 10*i;
+	  //	  int Nam   = (int) z_q[j+ 1];//     encoded hit name in Display code
 	  //	  memcpy (&rowH.hit[0], &chit[4*i], 4);
 	  Char_t *HitName = acfromr(z_q[j+ 1]);
 	  memcpy (&rowH.hit[0], HitName, 4);
@@ -2172,15 +2175,15 @@ Int_t St_geant_Maker::AgstHits()
 	if (Debug()) detuH->Print(0,rowU.N);
 	for (i = rowU.i1; i < rowU.i2; i += 3) {
 	  memset(&rowV,0,detuV->GetRowSize());
-	  Int_t j    = JDU+i;
-	  Int_t iv   = (int) z_q[j+1];
+	  int j    = JDU+i;
+	  int iv   = (int) z_q[j+1];
 	  rowV.Ncopy = (int) z_q[j+2];
-	  Int_t Nam  = (int) z_iq[clink->jvolum+iv];
+	  int Nam  = (int) z_iq[clink->jvolum+iv];
 	  rowV.Nb    = (int) z_q[j+3];
 	  memcpy (&rowV.VName[0], &Nam, 4);
 	  Char_t Udvol[] = "     ";
           if (rowV.Nb > 0) {
-	    Int_t Namd = (int) z_iq[JD+2*ivd+11]; ivd++;
+	    int Namd = (int) z_iq[JD+2*ivd+11]; ivd++;
 	    memcpy (Udvol, &Namd, 4);
 	  }
 	  if (Debug()) {
@@ -2191,12 +2194,12 @@ Int_t St_geant_Maker::AgstHits()
 	}
 	if (Debug()) {
 	  for (; ivd<NV; ivd++) {
-	    Int_t Namd = (int) z_iq[JD+2*ivd+11]; ivd++;
+	    int Namd = (int) z_iq[JD+2*ivd+11]; ivd++;
 	    Char_t Udvol[] = "     ";
 	    memcpy (Udvol, &Namd, 4);
 	    LOG_INFO  << "\t" << "    " <<  "/" << Udvol << endm;
 	  }
-	  Int_t n = detuV->GetNRows();
+	  int n = detuV->GetNRows();
 	  detuV->Print(0,n);
 	}
       }
@@ -2210,41 +2213,41 @@ void St_geant_Maker::DetSetIndex() {
   TString vers = mInitialization;
   vers.ReplaceAll("detp geometry ","");
   LOG_INFO  << "St_geant_Maker::DetSetIndex for geometry version " << vers << endm;
-  Int_t JSET = clink->jset;
+  int JSET = clink->jset;
   if (JSET <= 0) return;
-  Int_t  NSET=z_iq[JSET-1];
+  int  NSET=z_iq[JSET-1];
   Char_t Uset[5], Udet[5], Uvol[5];
   memset (Uset, 0, 5);
   memset (Udet, 0, 5);
   memset (Uvol, 0, 5);
-  for (Int_t ISET=1;ISET<=NSET;ISET++) {
-    Int_t JS=z_lq[JSET-ISET];
+  for (int ISET=1;ISET<=NSET;ISET++) {
+    int JS=z_lq[JSET-ISET];
     if (JS <= 0) continue;
-    Int_t NDET=z_iq[JS-1];
+    int NDET=z_iq[JS-1];
     memcpy (Uset, &z_iq[JSET+ISET], 4);
     TString set(Uset);
     set.ToLower();
-    for (Int_t IDET=1;IDET<=NDET;IDET++) {
-      Int_t JD=z_lq[JS-IDET];
+    for (int IDET=1;IDET<=NDET;IDET++) {
+      int JD=z_lq[JS-IDET];
       if (JD <=0) continue;
       memcpy (Udet, &z_iq[JS+IDET], 4);
       agfdig0(Uset,Udet,strlen(Uset),strlen(Udet));
-      Int_t JDU = z_lq[JD-3];
+      int JDU = z_lq[JD-3];
       if (JDU > 0) {
-	Int_t i1      = (int) z_q[JDU+3];
-	Int_t i2      = (int) z_q[JDU+5];
-	Int_t Nva     = (int) z_q[JDU+4]; 
-	Int_t Nvb     = (int) z_q[JDU+6]; 
+	int i1      = (int) z_q[JDU+3];
+	int i2      = (int) z_q[JDU+5];
+	int Nva     = (int) z_q[JDU+4]; 
+	int Nvb     = (int) z_q[JDU+6]; 
 	LOG_INFO  << "  Set " << Uset << " Detector " << Udet << "\tNva = " << Nva << "\tNvb = " << Nvb << endm;
 	TArrayI NVmax(Nvb);
-	Int_t ivv = 0;
+	int ivv = 0;
 	TString fmt("");
-	for (Int_t i = i1; i < i2; i += 3) {
-	  Int_t j     = JDU+i;
-	  Int_t iv    = (int) z_q[j+1];
-	  Int_t Ncopy = (int) z_q[j+2];
-	  Int_t Nam   = (int) z_iq[clink->jvolum+iv];
-	  Int_t Nb    = (int) z_q[j+3];
+	for (int i = i1; i < i2; i += 3) {
+	  int j     = JDU+i;
+	  int iv    = (int) z_q[j+1];
+	  int Ncopy = (int) z_q[j+2];
+	  int Nam   = (int) z_iq[clink->jvolum+iv];
+	  int Nb    = (int) z_q[j+3];
 	  memcpy (&Uvol[0], &Nam, 4);
 	  //	  LOG_INFO  <<  Uvol << " copy " << Ncopy << " bits " << Nb << endm;  
 	  fmt += "/";
@@ -2254,7 +2257,7 @@ void St_geant_Maker::DetSetIndex() {
 	}
 	TString CSYS("");
 	TString Vol(Uvol);
-	for (Int_t i = 0; i < NoDetectors; i++) 
+	for (int i = 0; i < NoDetectors; i++) 
 	  if (TString(Detectors[i].det) == Vol && TString(Detectors[i].set) != "") {
 	    CSYS = Detectors[i].Csys;
 	    break;
@@ -2264,22 +2267,22 @@ void St_geant_Maker::DetSetIndex() {
 	  DumpIndex(Uvol, vers, fmt, NVmax, Ids0);
 	  continue;
 	}
-        Int_t Nelem = 1;
+        int Nelem = 1;
 	LOG_INFO  << "format: " << fmt << endm;
 	LOG_INFO  << "NVmax";
-	for (Int_t i = 0; i < Nvb; i++) {Nelem *= NVmax[i]; LOG_INFO  << "[" << NVmax[i] << "]";}
+	for (int i = 0; i < Nvb; i++) {Nelem *= NVmax[i]; LOG_INFO  << "[" << NVmax[i] << "]";}
 	LOG_INFO  << endm;
-	Int_t numbv[15];
-	memset (numbv, 0, 15*sizeof(Int_t));
+	int numbv[15];
+	memset (numbv, 0, 15*sizeof(int));
 	TArrayI Ids(Nelem);
-	for (Int_t elem = 0; elem < Nelem; elem++) {
-	  Int_t e = elem;
-	  for (Int_t i = Nvb-1; i >= 0; i--) {
+	for (int elem = 0; elem < Nelem; elem++) {
+	  int e = elem;
+	  for (int i = Nvb-1; i >= 0; i--) {
 	    numbv[i] = e%NVmax[i] + 1;
 	    e = e/NVmax[i];
 	  }
-	  //	  Int_t volid = G2t_volume_id(set.Data(), numbv);
-	  Int_t volid = G2t_volume_id(CSYS.Data(), numbv);
+	  //	  int volid = G2t_volume_id(set.Data(), numbv);
+	  int volid = G2t_volume_id(CSYS.Data(), numbv);
 	  if (volid < 0) volid = 0;
 	  Ids[elem] = volid;
 	}
@@ -2301,11 +2304,11 @@ void St_geant_Maker::DumpIndex(const Char_t *name, const Char_t *vers, const Cha
   out.open(fOut.Data());
   out << "TDataSet *CreateTable() {" << endl;
   out << "  if (!gROOT->GetClass(\"StarVMCDetector\")) return 0;" << endl;
-  Int_t NV = NVmax.GetSize();
-  Int_t Nelem = Ids.GetSize();
+  int NV = NVmax.GetSize();
+  int Nelem = Ids.GetSize();
   if (NV > 0) {
-    out << "  Int_t NVmax[" << NV << "] = {";
-    for (Int_t i = 0; i < NV; i++) {
+    out << "  int NVmax[" << NV << "] = {";
+    for (int i = 0; i < NV; i++) {
       out << NVmax[i];
       if (i < NV - 1) out << ",";
       else           out << "};";
@@ -2313,15 +2316,15 @@ void St_geant_Maker::DumpIndex(const Char_t *name, const Char_t *vers, const Cha
     out << endl;
     
     if (Nelem > 0) {
-      out << "  Int_t Ids[" << Nelem << "] = {" << endl;
+      out << "  int Ids[" << Nelem << "] = {" << endl;
       out << "\t";
-      Int_t nn = 20;
+      int nn = 20;
       if (Ids[0] > 0 && TMath::Log10(Ids[0]) > 7) nn = 10;
-      Int_t nvl = NVmax[NV-1];
+      int nvl = NVmax[NV-1];
       if (nvl > 5 && nvl < nn) nn = NVmax[NV-1];
       if (nn >= nvl) nvl = Nelem;
-      Int_t j = 0;
-      for (Int_t i = 0; i < Nelem; i++) {
+      int j = 0;
+      for (int i = 0; i < Nelem; i++) {
 	out << Ids[i];
 	j++;
 	if (i < Nelem - 1) {
@@ -2350,36 +2353,36 @@ void dstkine() {
   St_geant_Maker::instance()->KinematicsFromMuDst();
 }
 //_____________________________________________________________________________
-Int_t St_geant_Maker::SetDatimeFromMuDst() {
+int St_geant_Maker::SetDatimeFromMuDst() {
   KinematicsFromMuDst(1);
   return kStOK;
 }
 //_____________________________________________________________________________
-Int_t St_geant_Maker::KinematicsFromMuDst(Int_t flag) {
+int St_geant_Maker::KinematicsFromMuDst(int flag) {
   TTreeIter &muDstIter = *MuDstIter;
-  static const Int_t*&      MuEvent_mEventInfo_mRunId                = muDstIter("MuEvent.mEventInfo.mRunId");
-  static const Int_t*&      MuEvent_mEventInfo_mId                   = muDstIter("MuEvent.mEventInfo.mId");
-  static const Int_t*&      MuEvent_mEventInfo_mTime                 = muDstIter("MuEvent.mEventInfo.mTime"); 
-  static const Int_t*&      MuEvent_mEventSummary_mNumberOfTracks    = muDstIter("MuEvent.mEventSummary.mNumberOfTracks");
-  static const Int_t&       NoPrimaryVertices                        = muDstIter("PrimaryVertices");
+  static const int*&      MuEvent_mEventInfo_mRunId                = muDstIter("MuEvent.mEventInfo.mRunId");
+  static const int*&      MuEvent_mEventInfo_mId                   = muDstIter("MuEvent.mEventInfo.mId");
+  static const int*&      MuEvent_mEventInfo_mTime                 = muDstIter("MuEvent.mEventInfo.mTime"); 
+  static const int*&      MuEvent_mEventSummary_mNumberOfTracks    = muDstIter("MuEvent.mEventSummary.mNumberOfTracks");
+  static const int&       NoPrimaryVertices                        = muDstIter("PrimaryVertices");
   static const Float_t*&    PrimaryVertices_mPosition_mX1            = muDstIter("PrimaryVertices.mPosition.mX1");
   static const Float_t*&    PrimaryVertices_mPosition_mX2            = muDstIter("PrimaryVertices.mPosition.mX2");
   static const Float_t*&    PrimaryVertices_mPosition_mX3            = muDstIter("PrimaryVertices.mPosition.mX3");
-  static const Int_t&       NoPrimaryTracks                          = muDstIter("PrimaryTracks");
-  static const Int_t*&      PrimaryTracks_mIndex2Global              = muDstIter("PrimaryTracks.mIndex2Global");
-  static const Int_t*&      PrimaryTracks_mVertexIndex               = muDstIter("PrimaryTracks.mVertexIndex");
+  static const int&       NoPrimaryTracks                          = muDstIter("PrimaryTracks");
+  static const int*&      PrimaryTracks_mIndex2Global              = muDstIter("PrimaryTracks.mIndex2Global");
+  static const int*&      PrimaryTracks_mVertexIndex               = muDstIter("PrimaryTracks.mVertexIndex");
   static const Float_t*&    PrimaryTracks_mP_mX1                     = muDstIter("PrimaryTracks.mP.mX1");
   static const Float_t*&    PrimaryTracks_mP_mX2                     = muDstIter("PrimaryTracks.mP.mX2");
   static const Float_t*&    PrimaryTracks_mP_mX3                     = muDstIter("PrimaryTracks.mP.mX3");
   static const Short_t*&    PrimaryTracks_mHelix_mQ                  = muDstIter("PrimaryTracks.mHelix.mQ");
-  static const Int_t*&      PrimaryTracks_mNSigmaElectron            = muDstIter("PrimaryTracks.mNSigmaElectron");
-  static const Int_t*&      PrimaryTracks_mNSigmaPion                = muDstIter("PrimaryTracks.mNSigmaPion");
-  static const Int_t*&      PrimaryTracks_mNSigmaKaon                = muDstIter("PrimaryTracks.mNSigmaKaon");
-  static const Int_t*&      PrimaryTracks_mNSigmaProton              = muDstIter("PrimaryTracks.mNSigmaProton");
+  static const int*&      PrimaryTracks_mNSigmaElectron            = muDstIter("PrimaryTracks.mNSigmaElectron");
+  static const int*&      PrimaryTracks_mNSigmaPion                = muDstIter("PrimaryTracks.mNSigmaPion");
+  static const int*&      PrimaryTracks_mNSigmaKaon                = muDstIter("PrimaryTracks.mNSigmaKaon");
+  static const int*&      PrimaryTracks_mNSigmaProton              = muDstIter("PrimaryTracks.mNSigmaProton");
   static const Short_t*&    GlobalTracks_mFlag                       = muDstIter("GlobalTracks.mFlag");
   //#define __USE_GLOBAL__
 #ifdef __USE_GLOBAL__
-  static const Int_t&       NoGlobalTracks                           = muDstIter("GlobalTracks");
+  static const int&       NoGlobalTracks                           = muDstIter("GlobalTracks");
   static const Float_t*&    GlobalTracks_mP_mX1                      = muDstIter("GlobalTracks.mP.mX1");
   static const Float_t*&    GlobalTracks_mP_mX2                      = muDstIter("GlobalTracks.mP.mX2");
   static const Float_t*&    GlobalTracks_mP_mX3                      = muDstIter("GlobalTracks.mP.mX3");
@@ -2387,18 +2390,18 @@ Int_t St_geant_Maker::KinematicsFromMuDst(Int_t flag) {
   static const Float_t*&    GlobalTracks_mFirstPoint_mX1             = muDstIter("GlobalTracks.mFirstPoint.mX1");
   static const Float_t*&    GlobalTracks_mFirstPoint_mX2             = muDstIter("GlobalTracks.mFirstPoint.mX2");
   static const Float_t*&    GlobalTracks_mFirstPoint_mX3             = muDstIter("GlobalTracks.mFirstPoint.mX3");
-  static const Int_t*&      GlobalTracks_mNSigmaElectron             = muDstIter("GlobalTracks.mNSigmaElectron");
-  static const Int_t*&      GlobalTracks_mNSigmaPion                 = muDstIter("GlobalTracks.mNSigmaPion");
-  static const Int_t*&      GlobalTracks_mNSigmaKaon                 = muDstIter("GlobalTracks.mNSigmaKaon");
-  static const Int_t*&      GlobalTracks_mNSigmaProton               = muDstIter("GlobalTracks.mNSigmaProton");
+  static const int*&      GlobalTracks_mNSigmaElectron             = muDstIter("GlobalTracks.mNSigmaElectron");
+  static const int*&      GlobalTracks_mNSigmaPion                 = muDstIter("GlobalTracks.mNSigmaPion");
+  static const int*&      GlobalTracks_mNSigmaKaon                 = muDstIter("GlobalTracks.mNSigmaKaon");
+  static const int*&      GlobalTracks_mNSigmaProton               = muDstIter("GlobalTracks.mNSigmaProton");
 #endif
   static const Double_t __SIGMA_SCALE__ = 1000.;
-  static Int_t flagS = -1;
+  static int flagS = -1;
   if (flagS != 1) {
     flagS = flag;
     do {
       if (! MuDstIter->Next()) {return kStEOF;}
-      Int_t id, it;
+      int id, it;
       TUnixTime ut(MuEvent_mEventInfo_mTime[0]); ut.GetGTime(id,it);
       fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
       if (!fEvtHddr) {                            // Standalone run
@@ -2416,23 +2419,23 @@ Int_t St_geant_Maker::KinematicsFromMuDst(Int_t flag) {
   flagS = flag;
   Float_t v[3];
   Float_t plab[3];
-  Int_t nvtx;
-  Int_t ipart;
-  static Int_t pId[4][2] = {
+  int nvtx;
+  int ipart;
+  static int pId[4][2] = {
     { 2, 3}, // e+, e-
     {11,12}, // K+, K-
     {14,15}, // p, pbar
     { 8, 9}  // pi+, pi-
   };
-  for (Int_t l = 0; l < NoPrimaryVertices; l++) {
+  for (int l = 0; l < NoPrimaryVertices; l++) {
     v[0] = PrimaryVertices_mPosition_mX1[l];
     v[1] = PrimaryVertices_mPosition_mX2[l];
     v[2] = PrimaryVertices_mPosition_mX3[l];
     nvtx = geant3->Gsvert(v, 0, 0);
     assert(nvtx == l+1);
-    for (Int_t k = 0; k < NoPrimaryTracks; k++) {
+    for (int k = 0; k < NoPrimaryTracks; k++) {
       if (l != PrimaryTracks_mVertexIndex[k]) continue;
-      Int_t kg = PrimaryTracks_mIndex2Global[k];
+      int kg = PrimaryTracks_mIndex2Global[k];
       if (GlobalTracks_mFlag[kg] < 100) continue;
       plab[0] = PrimaryTracks_mP_mX1[k];
       plab[1] = PrimaryTracks_mP_mX2[k];
@@ -2443,11 +2446,11 @@ Int_t St_geant_Maker::KinematicsFromMuDst(Int_t flag) {
 	PrimaryTracks_mNSigmaKaon[k]/__SIGMA_SCALE__,
 	PrimaryTracks_mNSigmaProton[k]/__SIGMA_SCALE__,
 	PrimaryTracks_mNSigmaPion[k]/__SIGMA_SCALE__};
-      Int_t s = 0;
+      int s = 0;
       if (PrimaryTracks_mHelix_mQ[k] < 0) s = 1;
       ipart = pId[3][s];
       Double_t nSigmaMin = 1e9;
-      for (Int_t i = 0; i < 4; i++) {
+      for (int i = 0; i < 4; i++) {
 	if (TMath::Abs(nSigma[i]) <  nSigmaMin) {
 	  nSigmaMin = TMath::Abs(nSigma[i]); 
 	  ipart = pId[i][s];
@@ -2462,7 +2465,7 @@ Int_t St_geant_Maker::KinematicsFromMuDst(Int_t flag) {
     }
   }
 #ifdef __USE_GLOBAL__
-  for (Int_t kg = 0; kg < NoGlobalTracks; kg++) {
+  for (int kg = 0; kg < NoGlobalTracks; kg++) {
     if (GlobalTracks_mFlag[kg] < 100) continue;
     Double_t nSigmaMin = 1e9;
     Double_t nSigma[4] = {
@@ -2470,9 +2473,9 @@ Int_t St_geant_Maker::KinematicsFromMuDst(Int_t flag) {
       GlobalTracks_mNSigmaKaon[kg]/__SIGMA_SCALE__,
       GlobalTracks_mNSigmaProton[kg]/__SIGMA_SCALE__,
       GlobalTracks_mNSigmaPion[kg]/__SIGMA_SCALE__};
-    Int_t s = 0;
+    int s = 0;
     if (GlobalTracks_mHelix_mQ[kg] < 0) s = 1;
-    for (Int_t k = 0; k < NoPrimaryTracks; k++) {
+    for (int k = 0; k < NoPrimaryTracks; k++) {
       if (kg == PrimaryTracks_mIndex2Global[k]) {
 	goto NEXTGL;
       }
@@ -2485,7 +2488,7 @@ Int_t St_geant_Maker::KinematicsFromMuDst(Int_t flag) {
     plab[1] = GlobalTracks_mP_mX2[kg];
     plab[2] = GlobalTracks_mP_mX3[kg];
     ipart = pId[3][s];
-    for (Int_t i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++) {
       if (TMath::Abs(nSigma[i]) <  nSigmaMin) {
 	nSigmaMin = TMath::Abs(nSigma[i]); 
 	ipart = pId[i][s];
@@ -2503,8 +2506,8 @@ Int_t St_geant_Maker::KinematicsFromMuDst(Int_t flag) {
   return kStOK;
 }
 //________________________________________________________________________________
-Int_t St_geant_Maker::ipartx(Int_t id) {
-  Int_t                            ipartxf = -1;
+int St_geant_Maker::ipartx(int id) {
+  int                            ipartxf = -1;
   if      (id == 1)                ipartxf = 1;  // gamma
   else if (id == 2 || id == 3)     ipartxf = 2;  // e+/-
   else if (id == 5 || id == 6)     ipartxf = 3;  // mu+/-
@@ -2521,7 +2524,7 @@ Float_t St_geant_Maker::dose(Float_t Z) {
    *  Arguments   : Z   Atom number                                       */
   static TGraph *graph = 0;
   if (! graph) {
-    Int_t n = 43;
+    int n = 43;
     Double_t x[] = {11., 12., 13., 14., 15., 17., 18., 19., 20., 22.,
 		    23., 24., 25., 26., 27., 28., 29., 30., 32., 33.,
 		    34., 35., 38., 40., 41., 42., 43., 46., 47., 48.,
@@ -2544,14 +2547,14 @@ Float_t St_geant_Maker::dose(Float_t Z) {
 }
 //________________________________________________________________________________
 void St_geant_Maker::usflux() {
-  Int_t        id;
+  int        id;
   Float_t      OmegaN;
-  Int_t        i;
+  int        i;
   Float_t      ZZ, RR;
-  Int_t        NstepB;
+  int        NstepB;
   Float_t      stepF, destepF, XYZ[3];
   Float_t      RADIUS;
-  Int_t        p;
+  int        p;
   enum {Nregions = 1, Nparts = 5, NH1T = 3, NH2T = 9};
   const Char_t *NameV[Nregions] = {""};//,"Wall","Tunnel"};
   static TH1D *histV1[Nregions][NH1T][Nparts];
@@ -2568,17 +2571,17 @@ void St_geant_Maker::usflux() {
     Double_t ystep =  2;
     Double_t xmax  = 2000, xmin = - xmax;
     Double_t ymax  = 1000, ymin =      0;
-    Int_t nx = (xmax - xmin)/xstep;
-    Int_t ny = (ymax - ymin)/ystep;
+    int nx = (xmax - xmin)/xstep;
+    int ny = (ymax - ymin)/ystep;
     struct Name_t {
       const Char_t *Name;
       const Char_t *Title;
     };
     struct NameX_t {
       Name_t name;
-      Int_t nX;
+      int nX;
       Double_t xMin, xMax;
-      Int_t nY;
+      int nY;
       Double_t yMin, yMax;
     };
     tofg = new TH2D("tofg","log_{10} (tof [nsec]) @ step versus particle type",140,-1,13,50,0.5,50.5);
@@ -2606,14 +2609,14 @@ void St_geant_Maker::usflux() {
       {{"DepEnergy" ,"Deposited energy at step (keV) for %s"         }, nx, xmin, xmax, ny, ymin, ymax}
     };
     for (p = 0; p < Nparts; p++) {
-      for (Int_t r = 0; r < Nregions; r++) {
-	for (Int_t t = 0; t < NH1T; t++) {
+      for (int r = 0; r < Nregions; r++) {
+	for (int t = 0; t < NH1T; t++) {
 	  TString Name(Types1[t].name.Name); Name += Particles[p].Name; Name += NameV[r];
 	  TString Title(Form(Types1[t].name.Title,Particles[p].Title,NameV[r]));
 	  histV1[r][t][p] = 
 	    new TH1D(Name,Title,Types1[t].nX,Types1[t].xMin,Types1[t].xMax);
 	}
-	for (Int_t t = 0; t < NH2T; t++) {
+	for (int t = 0; t < NH2T; t++) {
 	  TString Name(Types2[t].name.Name); Name += Particles[p].Name; Name += NameV[r];
 	  TString Title(Form(Types2[t].name.Title,Particles[p].Title,NameV[r]));
 	  histV2[r][t][p] = 
@@ -2624,7 +2627,7 @@ void St_geant_Maker::usflux() {
     return;
   }
   // Fill histograms
-  Int_t Ipart = ckine->ipart%100;
+  int Ipart = ckine->ipart%100;
   p = ipartx (Ipart);
   Double_t tofg10 = - 1;
   if (ctrak->tofg > 0) tofg10 = TMath::Log10(1e9*ctrak->tofg);
@@ -2635,7 +2638,7 @@ void St_geant_Maker::usflux() {
     return;
   }
   if (ctrak->upwght < 1) ctrak->upwght = 1;
-  Int_t r = 0;
+  int r = 0;
   RR = TMath::Sqrt(ctrak->vect[0]*ctrak->vect[0] + ctrak->vect[1]*ctrak->vect[1]);
   ZZ = ctrak->vect[2];
   Double_t Phi = TMath::RadToDeg()*TMath::ATan2(ctrak->vect[1],ctrak->vect[0]);
@@ -2671,12 +2674,12 @@ void St_geant_Maker::usflux() {
       if (ctrak->inwvol == 1) {
 	histV2[r][3][p]->Fill(ZZ, RR);
       }
-      for (Int_t i = 0; i < cking->ngkine; i++) {
-	id = ((Int_t)cking->gkin[i][4])%100;
+      for (int i = 0; i < cking->ngkine; i++) {
+	id = ((int)cking->gkin[i][4])%100;
 	p = ipartx (id);
 	if (p >= 0) {
 	  Char_t name[12];
-	  Int_t itrtyp;
+	  int itrtyp;
 	  Float_t mass, charge, tlife;
 	  TGiant3::Geant3()->Gfpart(id,name,itrtyp,mass,charge,tlife);
 	  histV2[r][4][p]->Fill(ZZ, RR);
@@ -2692,7 +2695,7 @@ void St_geant_Maker::usflux() {
     // Star density
     if (cking->ngkine > 0)        {
       if (ctrak->vect[6] > 0.300 && p <= 0) {
-	for (Int_t i = 0; i < ctrak->nmec; i++) {
+	for (int i = 0; i < ctrak->nmec; i++) {
 	  if (ctrak->lmec[i] >= 12 && ctrak->lmec[i] <= 20) {
 	    if ( p>=0 ) histV2[r][6][p]->Fill(ZZ, RR); 
 	    OmegaN = dose(cmate->z);
