@@ -1,7 +1,10 @@
 *
-* $Id: cspmd1.F,v 1.1 2018/11/19 20:44:06 perev Exp $
+* $Id: cspmd1.F,v 1.2 2018/12/03 00:49:08 perev Exp $
 *
 * $Log: cspmd1.F,v $
+* Revision 1.2  2018/12/03 00:49:08  perev
+* Replace csvptokn to locb
+*
 * Revision 1.1  2018/11/19 20:44:06  perev
 * 64bits add files
 *
@@ -14,6 +17,6 @@
 *-- Author : V.Berezhnoi
       SUBROUTINE CSPMD1(M,MD,P1)
       INTEGER M(10),MD(11)
-      integer csvptokn
-      M(1)=csvptokn(P1)
+      integer locb
+      M(1)=locb(P1)
       END
