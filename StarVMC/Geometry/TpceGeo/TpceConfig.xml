@@ -1,7 +1,7 @@
 <Document file="StarVMC/Geometry/TpceGeo/TpceConfig.xml">
 <Detector name="TPCE" comment="STAR Time Projection Chamber">
 <Modules>
-TpceGeo2,  TpceGeo3a,  TpceGeo4, TpceGeo1, TpceGeo5
+TpceGeo2,  TpceGeo3a,  TpceGeo4, TpceGeo1, TpceGeo5, TpceGeo6
 </Modules>
 
 <!-- Only most recent -->
@@ -52,9 +52,11 @@ TpceGeo2,  TpceGeo3a,  TpceGeo4, TpceGeo1, TpceGeo5
 
 </Setup>
 <Setup name="TPCEv5" module="TpceGeo5" onoff="on" simu="2" comment="Version 5: implements full sensitivity for TPC gas volume">
-  <Init struct="tpcc" var="version"    value="3.1" />
   <Init struct="tpcc" var="misalign"   value="0" />
-  <Init struct="tpcg" var="rmax"       value="207.77" />
+</Setup>
+
+<Setup name="TPCEv6" module="TpceGeo6" onoff="on" simu="2" comment="Version 6: padrows reflect iTPC geometry">
+  <Init struct="tpcc" var="misalign"   value="0" />
 </Setup>
 
 </Detector>
