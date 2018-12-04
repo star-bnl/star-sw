@@ -96,6 +96,13 @@
     <var name="Dz"      value="{807.72,2020.0 }"  comment=" Dz(1) is distance to east/west wall from center of STAR, Dz(2) depth into tunnels "  />
     <var name="Dconc"   value="91.44"             comment=" concrete thickness 36inches"  />
   </Fill>
+   <Fill name="CAVE" comment="Star CAVE Geometry"  >
+    <var name="version" value="6"                 comment=" version "  />
+    <var name="Rmin"    value="0"                 comment=" Inner radius of cave had better be zero "  />
+    <var name="Rmax"    value="{1575.02,329.95 }" comment=" furthest distance to a concrete wall "  />
+    <var name="Dz"      value="{807.72,2020.0 }"  comment=" Dz(1) is distance to east/west wall from center of STAR, Dz(2) depth into tunnels "  />
+    <var name="Dconc"   value="91.44"             comment=" concrete thickness 36inches"  />
+  </Fill>
             
   <Fill name="CDIM" comment="Cave Dimensions"  >
     <var name="version"   value="1.000"              comment=" version "  />
