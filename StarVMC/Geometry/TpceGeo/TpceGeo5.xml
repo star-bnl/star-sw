@@ -399,14 +399,14 @@
         </Structure>
 
         <Fill name="TPCC" comment="Selected TPCG version subversion">
-	  <var name="version" value="3.0" commenet="Default is 3.0" />
+	  <var name="version" value="5.0" commenet="Default is 5.0" />
 	  <var name="misalign" value="0" comment="0: ideal 1: global position" />
 	</Fill>
         
         <Fill name="TPCG" comment="// TPC basic dimensions"  >
             <var name="version" value="3.0" comment="// version    =&gt; current version "  />
             <var name="Rmin" value="46.107" comment="// Rmin          =&gt; TPC envelope inner radius "  />
-            <var name="Rmax" value="206.75/cos15" comment="// Rmax          =&gt; TPC envelope outer radius "  />
+            <var name="Rmax" value="207.77" comment="// Rmax          =&gt; TPC envelope outer radius "  />
             <var name="RminIFC" value="46.6" comment="// RminIFC    =&gt; inner radius TPC IFC  : A.Lebedev measurement 10/16/08 "  />
             <var name="LengthT" value="2*271.0" comment="// LengthT    =&gt; TPC full length up to front of EEMC "  />
             <var name="Length" value="2*259.685" comment="// Length        =&gt; TPC full length including RDOs "  />
@@ -460,19 +460,14 @@
             <var name="dAnode" value="{0.2 ,0.4 }" comment="// Inner/Outer anode width "  />
             <var name="zGatingGrid" value="TPCG_LengthV/2 -(TPCG_dGateGround+2*TPCG_dAnode(2))" comment="//  "  />
             <var name="zGroundGrid" value="TPCG_zGatingGrid+TPCG_dGateGround" comment="// "  />
-            <var name="DeadZone" value="12." comment="// Dead zone before GatingGrid. No hits there "  />
-	    <var name="tofmax"   value="1.0E-6" comment="// Max time of flight" />
-	    <var name="NTPSSdiv" value="304"    comment="Number of radial TPSS divisions (304 is approx 0.5cm cylindrical divisions)" />
+            <var name="DeadZone" value="14." comment="// Dead zone before GatingGrid. No hits there "  />
+	    <var name="tofmax"   value="32.0E-6" comment="// Max time of flight" />
+	    <var name="NTPSSdiv" value="100"    comment="Number of radial TPSS divisions (304 is approx 0.5cm cylindrical divisions)" />
         </Fill>
-	<Fill name="TPCG" comment="Subversion 1">
-	  <var name="version"  value="3.1"     comment="selector" />
-	  <var name="rmax"     value="207.77"  comment="Max envelope radius" />
-	  <var name="deadzone" value="14"      comment="Extend deadzone before gating grid" />
-	  <var name="tofmax"   value="32.0E-6" comment="Increase maximum TOF for particles" />
-	</Fill>
+
         
-	<Use struct="TPCC"                                             />
-        <Use struct="TPCG"    select="version"    value="TPCC_version" />
+	<Use struct="TPCC"  />
+        <Use struct="TPCG"  />
 
         <Fill name="TPRS" comment="// sector of padrows"  >
             <var name="sec" value="1" comment="// sector number: 1 for inner, 2 for outer "  />
