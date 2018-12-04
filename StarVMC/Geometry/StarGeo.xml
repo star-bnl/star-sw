@@ -10,15 +10,16 @@
     <Construct sys="shld" config="SHLDon"  />
     <Construct sys="zcal" config="ZCALon"  />
     <Construct sys="scon" config="SCON14"  />
-    <Construct sys="pipe" config="PIPE12"  />
-    <Construct sys="tpce" config="TPCE31"  />
+    <!--Construct sys="pipe" config="PIPE12"-->
+    <Construct sys="pipe" config="PIPE12ft" />
+    <Construct sys="targ" config="TARGv1"  /> <!-- fixed target geometry -->
+    <Construct sys="tpce" config="TPCEv6"  />
     <Construct sys="btof" config="BTOFv8"  />
     <Construct sys="vpdd" config="VPDD08"  />
     <Construct sys="calb" config="CALB02"  />
     <Construct sys="ecal" config="ECALv6"  />
     <Construct sys="bbcm" config="BBCMin"  />
     <Construct sys="epdm" config="EPDMv1"  />
-    <Construct sys="fpdm" config="FPDMv4"  />
     <Construct sys="magp" config="MAGPon"  />
     <Construct sys="mutd" config="MUTD16"  />
     <Construct sys="etof" config="ETOFv14f"  />
