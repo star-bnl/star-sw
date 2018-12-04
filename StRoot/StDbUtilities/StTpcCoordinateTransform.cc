@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.50 2018/10/17 20:45:24 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.51 2018/12/04 19:38:07 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.51  2018/12/04 19:38:07  fisyak
+ * Add J.Thomas fix for iTPC survey
+ *
  * Revision 1.50  2018/10/17 20:45:24  fisyak
  * Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
  *
@@ -347,9 +350,9 @@ Double_t StTpcCoordinateTransform::padFromX(Double_t x, Int_t sector, Int_t row)
   Double_t xL = x;
   Int_t NiRows = St_tpcPadConfigC::instance()->numberOfInnerRows(sector);
   if (NiRows != 13 && row <= NiRows) {
-    // iTPC Survey
-    Double_t yRef = St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,NiRows) - 0.565;
-    Double_t xHit = -xL;
+    // iTPC Survey, see  Jim Thomas comments in StTpcCoordinateTransform::xFromPad
+    Double_t yRef = St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,NiRows) + 0.565;
+    Double_t xHit = xL;
     Double_t yHit = St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,row) - yRef;
     St_iTPCSurveyC *sur = St_iTPCSurveyC::instance();
     Double_t dx = sur->dx(sector-1);
@@ -357,7 +360,7 @@ Double_t StTpcCoordinateTransform::padFromX(Double_t x, Int_t sector, Int_t row)
     Double_t Xscale = sur->ScaleX(sector-1);
 //  Double_t Yscale = sur->ScaleY(sector-1);
     Double_t theta  = sur->Angle(sector-1);
-             xL = -(xHit*(1. - Xscale) - dx + theta*yHit);
+             xL = xHit*(1. - Xscale) - dx + theta*yHit;
 //  Double_t yL = yHit*(1. - Yscale) - dy - theta*xHit + yRef;
   }
   Double_t probablePad = (npads+1.)/2. - xL/pitch;
@@ -387,9 +390,11 @@ Double_t StTpcCoordinateTransform::xFromPad(Int_t sector, Int_t row, Double_t pa
   if (NiRows == 13 || row > NiRows) {
     return xPad;
   }
-  // iTPC Survey
-  Double_t yRef = St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,NiRows) - 0.565;
-  Double_t xL = - xPad;
+  // iTPC Survey, Jim Thomas correction 08/21/18
+  // The change in the yRef comes about because the origin of the coordinate system is 0.565 mm above the center of PadRow 40.   
+  // The changes for the X coordinates come about because of the reversal of pad counting by the DAQ guys … as you know.  
+  Double_t yRef = St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,NiRows) + 0.565; // Change sign in front of 0.565
+  Double_t xL = xPad;  // Eliminate -1 in front of xPad
   Double_t yL = St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,row) - yRef;
   St_iTPCSurveyC *sur = St_iTPCSurveyC::instance();
   Double_t dx = sur->dx(sector-1);
@@ -397,7 +402,7 @@ Double_t StTpcCoordinateTransform::xFromPad(Int_t sector, Int_t row, Double_t pa
   Double_t Xscale = sur->ScaleX(sector-1);
 //Double_t Yscale = sur->ScaleY(sector-1);
   Double_t theta  = sur->Angle(sector-1);
-  Double_t xHit = -( xL*(1. + Xscale) + dx - theta*yL);
+  Double_t xHit = xL*(1. + Xscale) + dx - theta*yL; // Eliminate -1 in front of whole expression and delete ( )
 //Double_t yHit = yL*(1. + Yscale) + dy + theta*xL + yRef;
   return xHit;
 }
