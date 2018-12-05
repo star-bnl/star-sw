@@ -31,9 +31,9 @@ def setup_parser():
    parser.add_argument("-prodname", dest="prodName",help="production name")
    parser.add_argument("-r", dest="embedRequestID",help="embedding request ID")
 
-   parser.add_argument("-geantid", dest="geantPID",help="geant PID")
+   parser.add_argument("-geantid", dest="geantPID",help="geant PID",default='8')
    parser.add_argument("-particle", dest="particleName",help="geant particle name")
-   parser.add_argument("-mode", dest="ptMode",help="pt mode")
+   parser.add_argument("-mode", dest="ptMode",help="pt mode",default='FlatPt')
 
    parser.add_argument("-simulator", dest="simulatorMode",help="simulator mode",default='0')
    parser.add_argument("-zerobias", dest="zerobiasMode",help="zerobias mode",default='0')
@@ -46,16 +46,16 @@ def setup_parser():
    parser.add_argument("-vrcut", dest="vrcut",help="r-vertex cut",default='100')
 
 
-   parser.add_argument("-ymin", dest="ymin",help="ymin")
-   parser.add_argument("-ymax", dest="ymax",help="ymax")
+   parser.add_argument("-ymin", dest="ymin",help="ymin",default='-1')
+   parser.add_argument("-ymax", dest="ymax",help="ymax",default='1')
    parser.add_argument("-ptmin", dest="ptmin",help="ymin")
    parser.add_argument("-ptmax", dest="ptmax",help="ymax")
 
-   parser.add_argument("-mult", dest="mult",help="mult")
+   parser.add_argument("-mult", dest="mult",help="mult",default='1')
    parser.add_argument("-local", dest="local",help="local script generated", action="store_true", default=False)
 
    parser.add_argument("-daq", dest="daqPath",help=" daq path")
-   parser.add_argument("-tag", dest="tagPath",help=" tag path")
+   parser.add_argument("-tag", dest="tagPath",help=" tag path",default="")
    parser.add_argument("-outPath", dest="outPath",help="output path",default='${SCRATCH}/embedding')
 
    parser.add_argument("-fSetRange", dest="fSetRange",help="range of fSET, '-' separated")
