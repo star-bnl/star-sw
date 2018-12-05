@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.51 2018/12/04 19:38:07 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.52 2018/12/05 14:56:28 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.52  2018/12/05 14:56:28  fisyak
+ * Fix a bug with radial row position
+ *
  * Revision 1.51  2018/12/04 19:38:07  fisyak
  * Add J.Thomas fix for iTPC survey
  *
@@ -467,13 +470,13 @@ Int_t StTpcCoordinateTransform::rowFromLocalY(Double_t y, Int_t sector) {
 		       - St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i-2))/2;
       } else {
 	Radii[i-1] = (St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i-1) +
-		      St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i-1))/2;
+		      St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i))/2;
       }
     }
   }
-  if (y < Radii[1]) return 1;
-  if (y > Radii[Nrows]) return Nrows;
-  Long64_t row = TMath::BinarySearch(Nrows+1, Radii, y);
+  Long64_t row = TMath::BinarySearch(Nrows+1, Radii, y) + 1;
+  if (row <= 0) row = 1;
+  if (row > Nrows) row = Nrows;
   return row;
 #else
   if (! Nrows) {
