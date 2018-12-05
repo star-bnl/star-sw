@@ -336,7 +336,7 @@ setenv HEED_DATABASE ${GARFIELD_HOME}/Heed/heed++/database
 
 if ( $STAR_LEVEL == "cal" ) then
     # do not redefine STAR in this case - this is used in cons
-    # heavily for finding includes and such. But define lib
+    # heavily for finding includxfes and such. But define lib
     # and conditionally bin so PATH and LD path will be set 
     # properly. cd to STARL instead.
     if ( ! $?STAR_BIN ) then
@@ -360,18 +360,18 @@ setenv MY_BIN          .${STAR_HOST_SYS}/bin
 
 
 # YP fix
-if( ! $?DOMAINNAME) then
-    if ( -x "domainname" ) then
-	setenv DOMAINNAME `domainname`
-    else
-	setenv DOMAINNAME "(none)"
-    endif
-
-    # Fake it
-    if ( "$DOMAINNAME" == "(none)") then
-       setenv DOMAINNAME `hostname | sed 's/^[^\.]*\.//'`
-    endif
-endif
+#if( ! $?DOMAINNAME) then
+#    if ( -x "domainname" ) then
+#	setenv DOMAINNAME `domainname`
+#    else
+#	setenv DOMAINNAME "(none)"
+#    endif
+#    setenv DOMAINNAME `hostname -d`
+#    # Fake it
+#    if ( "$DOMAINNAME" == "(none)") then
+#       setenv DOMAINNAME `hostname | sed 's/^[^\.]*\.//'`
+#    endif
+#endif
 
 
 
@@ -383,7 +383,11 @@ endif
 # Each Grid site should have an entry.
 # Only sites having local DB rules could have an entry.
 #
-if ( ! $?SITE ) then
+if ( $?SITE ) then
+#echo "SITE ===> $SITE"
+else
+    setenv DOMAINNAME `hostname -d`
+#    echo "DOMAINNAME ==> $DOMAINNAME"
     switch ($DOMAINNAME)
 	case "nersc.gov":    # <--- or whatever domainame returns
 	    setenv SITE "LBL"
