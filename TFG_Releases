@@ -31,4 +31,5 @@
  TFG18l Freeze iTPCalignment, and 2018 isobar dE/dx calibration      2018-07-31 20:22:29 -0400  (tag: TFG18l)
  TFG18m 2018 isobar and 27 AuAu dE/dx calibration, GN PicoDst        2018-08-22 11:58:30 -0400  (HEAD -> master, tag: TFG18m_2)
  TFG18n 2018 fix iTPC dE/dx, fix dE/dx to Ifit on PicoDst, MuMcAna   2018-09-10 15:26:28 -0400  (HEAD -> master, tag: TFG18n_3)
+        VP modification for 64 bits                                  2018-11-29 11:47:49 -0500  (tag: v-11-29-18RCF)
  .DEV2  head of TFG git repository, no V5          
