@@ -227,12 +227,23 @@
 #else
 #include "TCernLib.h"
 #endif
+#include "TEnv.h"
 ClassImp(StTpcDbMaker)
 //_____________________________________________________________________________
 Int_t StTpcDbMaker::InitRun(int runnumber){
   static Bool_t Done = kFALSE;
   if (Done) return kStOK;
   Done = kTRUE;
+  Int_t iNewTpcAlignment = 0;
+  if (GetDateTime().GetYear() >= 2013) {
+    iNewTpcAlignment = 1;
+  }
+  Int_t iNewTpcAlignmentOld = gEnv->GetValue("NewTpcAlignment",0);
+  if (iNewTpcAlignment != iNewTpcAlignmentOld) {
+    gMessMgr->QAInfo() << "ReSet environment NewTpcAlignment (year >= 2013)  from " << iNewTpcAlignmentOld << " to " << iNewTpcAlignment << endm;
+    gEnv->SetValue("NewTpcAlignment", iNewTpcAlignment);
+  }
+ 
   // Create Needed Tables:    
   if (! IAttr("Simu")) {
     Float_t gFactor = StarMagField::Instance()->GetFactor();

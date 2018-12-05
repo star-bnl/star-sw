@@ -709,7 +709,7 @@ Int_t StdEdxY2Maker::Make(){
 	if (pTrack->vertex() != pEvent->primaryVertex()) continue; // only the first primary vertex
 	//      if ( ((StPrimaryVertex *) pTrack->vertex() )->numMatchesWithBEMC() <= 0) continue;
       } else {// try to use VpdZ to select best vertex
-	if (pTrack->vertex() != pVbest) continue;
+	if (pVbest && pTrack->vertex() != pVbest) continue;
       }
 #endif /* __BEST_VERTEX__ */
       Histogramming(gTrack);

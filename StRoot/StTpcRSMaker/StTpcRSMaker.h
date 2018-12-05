@@ -22,9 +22,13 @@ using namespace units;
 #include "StTpcDb/StTpcDb.h"
 #include "StMagF.h"
 #include "TArrayF.h"
+#include "TArrayI.h"
 class Altro;
 class StTpcdEdxCorrection;
 class StTpcDigitalSector;
+class HitPoint_t;
+class g2t_tpc_hit_st;
+class g2t_vertex_st;
 struct SignalSum_t {
   Float_t      Sum;
   Short_t      Adc;
@@ -77,6 +81,11 @@ class StTpcRSMaker : public StMaker {
   static Double_t PadResponseFunc(Double_t *x, Double_t *p);
   static Double_t Gatti(Double_t *x, Double_t *p);
   static Double_t InducedCharge(Double_t s, Double_t h, Double_t ra, Double_t Va, Double_t &t0);
+#if defined(__CINT__) || defined(__CLING__)
+  Bool_t TrackSegment2Propagate(g2t_tpc_hit_st *tpc_hitC, g2t_vertex_st *gver, Int_t *nSegHits, HitPoint_t *TrackSegmentHits);
+#else
+  Bool_t TrackSegment2Propagate(g2t_tpc_hit_st *tpc_hitC, g2t_vertex_st *gver, Int_t &nSegHits, HitPoint_t *TrackSegmentHits);
+#endif
   static Float_t  GetCutEle();
   static TF1F     *fgTimeShape3[2];  //!
   static TF1F     *fgTimeShape0[2];   //!
@@ -124,6 +133,10 @@ class StTpcRSMaker : public StMaker {
   const Int_t NoOfPads;               //!
   const Int_t NoOfTimeBins;           //!
   Double_t   mCutEle;                 //! cut for delta electrons
+  Double_t   msMin, msMax;            //!
+  TArrayI    mNoTpcHitsAll;           //!
+  TArrayI    mNoTpcHitsReal;          //!
+  Int_t      mNSplittedHits;          //!
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 

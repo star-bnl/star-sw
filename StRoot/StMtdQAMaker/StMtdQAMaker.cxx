@@ -598,6 +598,11 @@ Int_t StMtdQAMaker::processMuDst()
 	      else               bin = (qt-1)*4+(pos-1)/2+1;
 	      mhMtdVpdTacDiffMT001Mth->Fill(bin, tacDiffQT);
 	      mhMtdVpdTacDiffMT101Mth->Fill(bin, tacDiffMT101);
+	      if(isMuonCandidate(pt, nSigmaPi, dz, dy, dtof, kTRUE))
+		{
+		  mhMtdVpdTacDiffMT001Muon->Fill(bin, tacDiffQT);
+		  mhMtdVpdTacDiffMT101Muon->Fill(bin, tacDiffMT101);
+		}
 	    }
 	  
 	  if(isMuonCandidate(pTrack))
@@ -608,11 +613,6 @@ Int_t StMtdQAMaker::processMuDst()
 	      mhMuonPhiVsEta->Fill(eta, phi);
 	      mhMuonMap->Fill(backleg, (module-1)*12+cell+1);
 	      muonId.push_back(i);
-	      if(mTrigUtil)
-		{
-		  mhMtdVpdTacDiffMT001Muon->Fill(bin, tacDiffQT);
-		  mhMtdVpdTacDiffMT101Muon->Fill(bin, tacDiffMT101);
-		}
 	    }
 	}
     }
@@ -709,7 +709,7 @@ Int_t StMtdQAMaker::processMuDst()
 		{
 		  nMT101signal++;
 		  Int_t mxq_tacSum = mTrigUtil->getQtTacSumHighestTwo(im+1, j);
-		  Int_t mxq_tacPos = mTrigUtil->getQtPosSumHighestTwo(im+1, j);
+		  Int_t mxq_tacPos = mTrigUtil->getQtPosHighestTwo(im+1, j);
 		  mhMixMtdTacSumvsMxqMtdTacSum[im][j]->Fill(mxq_tacSum/8,mix_tacSum);
 		  int bin = 0;
 		  if(mRunYear!=2016) bin = im*8+mxq_tacPos;
@@ -1094,6 +1094,11 @@ Int_t StMtdQAMaker::processPicoDst()
 	      else               bin = (qt-1)*4+(pos-1)/2+1;
 	      mhMtdVpdTacDiffMT001Mth->Fill(bin, tacDiffQT);
 	      mhMtdVpdTacDiffMT101Mth->Fill(bin, tacDiffMT101);
+	      if(isMuonCandidate(pt, nSigmaPi, dz, dy, dtof, kTRUE))
+		{
+		  mhMtdVpdTacDiffMT001Muon->Fill(bin, tacDiffQT);
+		  mhMtdVpdTacDiffMT101Muon->Fill(bin, tacDiffMT101);
+		}
 	    }
 	  
 	  if(isMuonCandidate(pTrack))
@@ -1104,11 +1109,6 @@ Int_t StMtdQAMaker::processPicoDst()
 	      mhMuonPhiVsEta->Fill(eta, phi);
 	      mhMuonMap->Fill(backleg, (module-1)*12+cell+1);
 	      muonId.push_back(i);
-	      if(mTrigUtil)
-		{
-		  mhMtdVpdTacDiffMT001Muon->Fill(bin, tacDiffQT);
-		  mhMtdVpdTacDiffMT101Muon->Fill(bin, tacDiffMT101);
-		}
 	    }
 	}
     }
@@ -1155,7 +1155,7 @@ Int_t StMtdQAMaker::processPicoDst()
 	    {
 	      Int_t mix_tacSum = mTrigUtil->getMT101Tac(im+1, j);
 	      Int_t mxq_tacSum = mTrigUtil->getQtTacSumHighestTwo(im+1, j);
-	      Int_t mxq_tacPos = mTrigUtil->getQtPosSumHighestTwo(im+1, j);
+	      Int_t mxq_tacPos = mTrigUtil->getQtPosHighestTwo(im+1, j);
 	      if(mix_tacSum>0) 
 		{
 		  nMT101signal++;
@@ -1838,7 +1838,7 @@ void StMtdQAMaker::printConfig()
   printf("Minimum fraction of fit hits: %4.2f\n",mMinFitHitsFraction);
   printf("Maximum dca: %1.2f\n",mMaxDca);
   printf("Muon PID cuts:\n");
-  printf("    p_{T} > %1.1f GeV/c \n", mMinMuonPt);
+  printf("    pt > %1.1f GeV/c \n", mMinMuonPt);
   printf("    %1.1f < NsigmaPi < %1.1f\n",mMinNsigmaPi,mMaxNsigmaPi);
   printf("    MTD hit trigger: %s\n",decision[mMtdHitTrigger]);
   printf("    %1.0f < dz < %1.0f cm\n",mMinMuonDeltaZ,mMaxMuonDeltaZ);
@@ -1981,7 +1981,7 @@ Bool_t StMtdQAMaker::isMuonCandidate(const StPicoTrack *track)
 //_____________________________________________________________________________
 Bool_t StMtdQAMaker::isMuonCandidate(const Double_t pt, const Double_t nSigmaPi, const Double_t dz, const Double_t dy, const Double_t dtof, const Bool_t isTrig)
 {
-  if(pt>mMinMuonPt)                                   return kFALSE;
+  if(pt<mMinMuonPt)                                   return kFALSE;
   if(nSigmaPi<mMinNsigmaPi || nSigmaPi>mMaxNsigmaPi)  return kFALSE;
   if(dz<mMinMuonDeltaZ || dz>mMaxMuonDeltaZ)          return kFALSE;
   if(dy<mMinMuonDeltaY || dy>mMaxMuonDeltaY)          return kFALSE;
@@ -2046,8 +2046,11 @@ Double_t StMtdQAMaker::rotatePhi(Double_t phi) const
 }
 
 //
-//// $Id: StMtdQAMaker.cxx,v 1.19 2018/11/29 20:29:10 marr Exp $
+//// $Id: StMtdQAMaker.cxx,v 1.20 2018/12/04 13:34:29 marr Exp $
 //// $Log: StMtdQAMaker.cxx,v $
+//// Revision 1.20  2018/12/04 13:34:29  marr
+//// i) Fill MtdVpdTacSum histograms for muon candidates without requiring firing the trigger ii) Fix a bug related a changed in MtdTrigUtil
+////
 //// Revision 1.19  2018/11/29 20:29:10  marr
 //// Major update to QAMaker: i) add picoDst code; ii) remove cosmic type; iii) Add run-dependent QA plots; iv) modifications to regular histograms
 ////
