@@ -1,8 +1,5 @@
-// $Id: St_geant_Maker.cxx,v 1.174 2018/11/21 23:05:27 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.173 2018/10/30 13:54:03 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
-// Revision 1.174  2018/11/21 23:05:27  perev
-// 64bits
-//
 // Revision 1.173  2018/10/30 13:54:03  jwebb
 //
 // Implemented a templated method for creating and filling the g2t hit tables.
@@ -703,7 +700,6 @@
 #endif
 typedef long int (*addrfun)(); 
 R__EXTERN "C" {
-  void *getPntB(int myDif);
   void type_of_call geometry();
   Int_t type_of_call agstroot();
   void type_of_call *csaddr(char *name, int l77name=0);
@@ -738,8 +734,8 @@ R__EXTERN "C" {
    */
   void type_of_call rootmaptable_(DEFCHARD,DEFCHARD,DEFCHARD, Int_t&,Char_t * 
 				  DEFCHARL DEFCHARL DEFCHARL);
-  Int_t type_of_call agvolume(uint64_t&, int&, int&, int&, Int_t&
-                             ,Int_t&,    int&, Int_t&,    int *);
+  Int_t type_of_call agvolume(TVolume*&, Float_t*&, Float_t*&, Float_t*&, Int_t&
+                             ,Int_t&,    Float_t*&, Int_t&,    int *);
   Int_t type_of_call agvoluma(void*,void*,void*,void*,void*,void*,void*,void*,void*,void*);
   void type_of_call uhtoc(Int_t&,Int_t &,DEFCHARD,Int_t& DEFCHARL);
   int  type_of_call agfdig0 (const char*,const char*,int,int);
@@ -920,12 +916,6 @@ Int_t St_geant_Maker::Init(){
       }
     }
   }
-  return kStOK;
-}
-//________________________________________________________________________________
-Int_t St_geant_Maker::InitRun(Int_t run){
-  if (fInitRunDone) return kStOK;
-  fInitRunDone = kTRUE;
   if (! ifz) {
     // Default cuts
     //  CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
@@ -972,15 +962,21 @@ Int_t St_geant_Maker::InitRun(Int_t run){
       //      Do("CUTS     1e-5   1e-5   1e-3  1e-14   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3     1e-3");
       Do("CUTS     1e-5   1e-5   1e-3  1e-14   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3     1e3");
     }
-#if 0
-    LOG_INFO << "St_geant_Maker::InitRun -- Do geometry initialization" << endm;
-    LOG_INFO << "St_geant_Maker::InitRun -- with " << mInitialization.Data() << endm;
-    if (mInitialization != "") {Do(mInitialization.Data()); mInitialization = "";}
-#endif
-    Geometry();
-    Do("physi");
-    Do("gclose all");
   }
+  return kStOK;
+}
+//________________________________________________________________________________
+Int_t St_geant_Maker::InitRun(Int_t run){
+  if (fInitRunDone) return kStOK;
+  fInitRunDone = kTRUE;
+#if 0
+  LOG_INFO << "St_geant_Maker::InitRun -- Do geometry initialization" << endm;
+  LOG_INFO << "St_geant_Maker::InitRun -- with " << mInitialization.Data() << endm;
+  if (mInitialization != "") {Do(mInitialization.Data()); mInitialization = "";}
+#endif
+  Geometry();
+  Do("physi");
+  Do("gclose all");
   Agstroot();
   if (IAttr("RunG")) {
     LOG_INFO << "St_geant_Maker::InitRun -- Set RunG/rndm " << IAttr("RunG") << endl;
@@ -1904,15 +1900,8 @@ Int_t St_geant_Maker::Agvolume(TVolume *&node, Float_t *&par, Float_t *&pos
                               ,Float_t *&mot,  Int_t &who,    Int_t &copy
 			      ,Float_t *&par1, Int_t &npar,   char matName[24])
 {
-  int myPar=0,myPos=0,myMot=0,myPar1=0;
-  uint64_t myNode = (uint64_t)node;
-  int ans = agvolume(myNode,myPar,myPos,myMot,who,copy,myPar1,npar,(int*)matName);
-  node = (TVolume *)myNode;
-  par  = (float*)getPntB(myPar);
-  pos  = (float*)getPntB(myPos);
-  mot  = (float*)getPntB(myMot);
-  par1 = (float*)getPntB(myPar1);
 
+  int ans = agvolume(node,par,pos,mot,who,copy,par1,npar,(int*)matName);
   matName[20]=0; char *cc = strstr(matName," "); if (cc) *cc=0;
   return ans;
 

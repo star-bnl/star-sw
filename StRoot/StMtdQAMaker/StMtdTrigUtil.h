@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StMtdTrigUtil.h,v 1.1 2018/11/29 20:27:27 marr Exp $ 
+ * $Id: StMtdTrigUtil.h,v 1.2 2018/12/03 16:56:09 marr Exp $ 
  * StMtdTrigUtil: this class reads in the MTD trigger information and 
  * determines the trigger unit that fire the MTD trigger
  * Author: Rongrong Ma
@@ -34,7 +34,8 @@ class StMtdTrigUtil: public StMaker {
   Int_t    getQtPos(const int backleg, const int module)  { return mModuleToQTPos[backleg-1][module-1]; }
   Int_t    getQtTacSum(const Int_t qt, const Int_t pos)   { return mQtTacSum[qt-1][pos-1]; }
   Int_t    getQtTacSumHighestTwo(const Int_t qt, const Int_t index)   { return mQtTacSumHighestTwo[qt-1][index]; }
-  Int_t    getQtPosSumHighestTwo(const Int_t qt, const Int_t index)   { return mQtPosHighestTwo[qt-1][index]; }
+  Int_t    getQtPosHighestTwo(const Int_t qt, const Int_t index)      { return mQtPosHighestTwo[qt-1][index]; }
+  Int_t    getQtPosTrig(const Int_t qt, const Int_t index){ return mQtPosTrig[qt-1][index]; }
   Int_t    getMT101Tac(const Int_t qt, const Int_t index) { return mMT101Tac[qt-1][index]; }
   Int_t    getMT101Id(const Int_t qt, const Int_t index)  { return mMT101Id[qt-1][index];  }
   Int_t    getTF201TriggerBit()                           { return mTF201TriggerBit;       }
