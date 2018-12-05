@@ -283,9 +283,7 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
     
   static genfit::AbsKalmanFitter* fitter = 0;
   genfit::AbsTrackRep* rep = 0;
-  SafeDelete(rep);
   static genfit::AbsTrackRep* secondRep = 0;
-  SafeDelete(secondRep);
   if (! fitter) { // Initialize
 #ifdef __HANDLER__
     signal(SIGSEGV, handler);   // install our handler
