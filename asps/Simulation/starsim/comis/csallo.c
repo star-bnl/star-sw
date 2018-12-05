@@ -76,14 +76,24 @@ int type_of_call csallo_(lenb)
 #endif
  int *lenb;
 {
-  unsigned long lpntr;
-  int pntr; 
 
+#ifdef CERNLIB_QMLXIA64
+  long lpntr;
+#else
+  unsigned long lpntr;
+#endif
+  int pntr; 
+#ifdef CERNLIB_QMLXIA64
+  lpntr= (long)( malloc(*lenb) );
+  pntr=lpntr - iqpntr;
+#else
   lpntr= (unsigned long)( malloc(*lenb) );
-  /*  pntr=lpntr - iqpntr; */
   pntr=(lpntr - iqpntr);
+#endif
   assert((lpntr - iqpntr)==pntr);
-  pntr/=sizeof(int); /* yf 092404 */
+#ifndef CERNLIB_QMLXIA64
+  pntr/=sizeof(int);  /*  yf 092404   */
+#endif
   return pntr;
 }
 

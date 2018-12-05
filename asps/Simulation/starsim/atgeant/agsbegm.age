@@ -1,10 +1,7 @@
 *
-* $Id: agsbegm.age,v 1.3 2018/11/19 20:56:29 perev Exp $
+* $Id: agsbegm.age,v 1.2 2018/09/07 19:32:34 jwebb Exp $
 * $Name:  $
 * $Log: agsbegm.age,v $
-* Revision 1.3  2018/11/19 20:56:29  perev
-* 64bits locf ==>longF agdgetp.age
-*
 * Revision 1.2  2018/09/07 19:32:34  jwebb
 *
 * Add exception rule for a specific geometry (KludGeo), disabling any attempt
@@ -47,21 +44,20 @@
 #include "geant321/gcflag.inc"
 #include "atlsim/agcdocl.inc"
 #include "slug/sclink.inc"
-   Integer *8        LONGF
-   Integer           LOCF,AgPFLAG,LENOCC,MEMGETF,n,m;  parameter (n=100)
+   Integer           AgPFLAG,LENOCC,MEMGETF,LOCF,n,m;  parameter (n=100)
    Character         Module*(*),Stage*4,Cmother*4,Cs*1,Chdir0*6/' '/,CWD*80
    Character*42      STAR_LEVEL, STAR_USER
    Integer           IPR,i,Idet,Lrecl/0/,Istat/-1/,Itry,Lun/61/
    Character*8       CHTAG(2)/'Bank-ID','Bank-ID'/,CHDIR(n),omod
    Real              Xtime,XXtime
    Common /AgCMTIME/ Xtime,XXtime
+#ifndef __NON_ELASTIC_ZEBRA__
    Integer           AgIPAW,IwTyp
    COMMON /AgCIPAW/  AgIPAW,IwTyp
+#endif /* ! __NON_ELASTIC_ZEBRA__ */
    Logical           EXST,Opnd,First/.true./
    Integer           LRZDOC
    Common /AgCZDOC/  LRZDOC
-   integer kBUF; parameter (kBUF = 256000)
-   integer BUFF(kBUF)
 #include "slug/stafunc.inc" 
                                * * *
    IPR=%Iprin;    Check %Module != Module;
@@ -109,11 +105,14 @@
    }            }
 
                               * * *
+#ifndef __NON_ELASTIC_ZEBRA__
    ENTRY AGSBEGD
 
    If (LdArea(1)=0) call MZLINT(IxCONS,'AGCDOCL',LDarea,L1Doc,Lpar)
    CALL RZCDIR(CWD,'R')
+#endif /* ! __NON_ELASTIC_ZEBRA__ */
    INQUIRE(FILE='detm.rz',OPENED=opnd)
+#ifndef __NON_ELASTIC_ZEBRA__
    If LUN==61 & .not.opnd  " & LVGEOM(1)>=0 "
    {
      Istat=0; Lrecl=256;  %ChDir='RZDOC'
@@ -135,17 +134,23 @@
        If Iquest(1)!=0 {<w>Iquest(1); (' problem opening detm.rz IQUEST=',i6);}
      }
      ELSE
-     { 
-*VP    LUN = MEMGETF(Lrecl*5000+1000)-LONGF(IQ)+1; IQ(LUN)=LRecl
-*VP    LUN = LONGF(BUFF) -LONGF(IQ)+1; IQ(LUN)=LRecl
-       BUFF(1) = LRecl
-       Call RZMAKE (BUFF,%CHdir,2,'HH',CHTAG,1000,'MO');
-       LRZDOC=LOCF(BUFF);
+     { LUN = MEMGETF(Lrecl*5000+1000)-LOCF(IQ)+1; IQ(LUN)=LRecl
+       Call RZMAKE (IQ(LUN),%CHdir,2,'HH',CHTAG,5000,'MO');
+       LRZDOC=LOCF(IQ(LUN));
        IF (EXST & IWTYP>0) <w>; (' presence of detm.rz may be dangerous ')
      }
    }
-
+#else /* __NON_ELASTIC_ZEBRA__ */
+   If .not.opnd
+   {  Lrecl=256;   INQUIRE(FILE='detm.rz',EXIST=EXST);  %ChDir='RZDOC'
+      If !EXST { Call RZOPEN (Lun,%CHdir,'detm.rz','NWX', Lrecl,Istat)
+                 Call RZMAKE (Lun,%CHdir,2,'HH',CHTAG,5000,'XO')
+                 call RZCLOS (%Chdir,' ')
+               }
+      Call RZOPEN (Lun,%ChDir, 'detm.rz','UWXD',Lrecl,Istat);
+#endif /* __NON_ELASTIC_ZEBRA__ */
 *
+#ifndef __NON_ELASTIC_ZEBRA__
    If (Istat==0)
    {
        CALL RZCDIR('//'//%ChDIR,' ')
@@ -159,7 +164,22 @@
    If (IDebug>2) Call ZVERIF(0,0,' module started ')
 *
 * from pawrop: bug in RZOPEN with C I/O, TOPDIR is not returned correctly
+#else /* __NON_ELASTIC_ZEBRA__ */
+* from pawrop:
+*--- bug in RZOPEN with C I/O, TOPDIR is not returned correctly ---
+#endif /* __NON_ELASTIC_ZEBRA__ */
 *     IF (IOPTC!=0 & LUN <10) WRITE(TOPDIR,'(3HLUN,i1)') LUN
 *     IF (IOPTC!=0 & LUN>=10) WRITE(TOPDIR,'(3HLUN,i2)') LUN
 *
+#ifdef __NON_ELASTIC_ZEBRA__
+      Call RZLOGL (Lun,-3);    "  Call RZCDIR (ChDir0,'P') "
+      Do Itry=1,2
+      {  Call RZFILE(Lun,%ChDir,'UDX'); if (Iquest(1)==0) Break
+         Call Rzfree('RZFILE');         Call RZEND(%Chdir)
+      }
+      If Istat!=0     { <w>; (' detm.rz absent - no documentation available');}
+      If Iquest(1)!=0 { <w>Iquest(1);(' problem opening detm.rz, IQUEST=',i6);}
+*     Chdir0=%Chdir
+   }
+#endif /* __NON_ELASTIC_ZEBRA__ */
    END

@@ -18,7 +18,6 @@ C
 #include "geant321/gcbank.inc"
 #include "geant321/gccurs.inc"
 #include "geant321/gccuts.inc"
-!#include "geant321/gcmore.inc"
 #include "geant321/gcdraw.inc"
 #include "geant321/gcfdim.inc"
 #include "geant321/gcflag.inc"
@@ -76,8 +75,6 @@ C
      +              RMAX1,RMAX2,JPORJJ,ITSTCU,IOLDCU,ISCOP,
      +              NTIM,NTFLAG,LPASS,JSC
 *
-      COMMON/GCCHAN/LSAMVL
-      LOGICAL LSAMVL
 
 #include "geant321/gcstak.inc"
 #include "geant321/gcstra.inc"
@@ -111,21 +108,13 @@ C
      >                 PhiMin1,PhiMax1,Ptflag,Zmin,Zmax,
      >                 Pxmin,Pxmax,Pymin,Pymax,Pzmin,Pzmax
 #endif
-*#include "geant321/trcom3.inc"
-      DOUBLE PRECISION A2, B, S, TN, T, COSL, SINL, COSP, SINP, COSL1
-      INTEGER          NEW
-      COMMON /TRCOM3/ A2(5,5), B(5,5), S(15),
-     +     TN(3), T(5), COSL, SINL, COSP, SINP, COSL1, NEW
-* Commons for GEANE
 *
       COMMON / QUEST / IQUEST(100)
-*
-!#include "geant321/sckine.inc"
       CHARACTER *(*) CHCOMM
-#if __SIZEOF_POINTER__==8
+#if defined(CERNLIB_DECS)
       INTEGER*8 GCADDI, GCADDF, GCADDL, GCADDC, GCADDD, IADD
 #else          
-      INTEGER   GCADDI, GCADDF, GCADDL, GCADDC, GCADDD, IADD
+      INTEGER GCADDI, GCADDF, GCADDL, GCADDC, GCADDD
 #endif
 *
       IF(CHCOMM.EQ.'GCASHO') THEN
@@ -138,8 +127,6 @@ C
          IADD=GCADDI(INTFLA)
       ELSE IF(CHCOMM.EQ.'GCCUTS') THEN
          IADD=GCADDF(CUTGAM)
-      ELSE IF(CHCOMM.EQ.'GCMORE') THEN
-         IADD=GCADDF(GCALPHA)
       ELSE IF(CHCOMM.EQ.'GCDRAW') THEN
          IADD=GCADDI(NUMNOD)
       ELSE IF(CHCOMM.EQ.'GCFDIM') THEN
@@ -186,14 +173,12 @@ C
          IADD=GCADDC(GNASH)
       ELSE IF(CHCOMM.EQ.'GCMZFO') THEN
          IADD=GCADDI(IOMATE)
-      ELSE IF(CHCOMM.EQ.'GCNUM' ) THEN
+      ELSE IF(CHCOMM.EQ.'GCNUM') THEN
          IADD=GCADDI(NMATE)
       ELSE IF(CHCOMM.EQ.'GCOMIS') THEN
          IADD=GCADDI(KUINIT)
       ELSE IF(CHCOMM.EQ.'GCONST') THEN
          IADD=GCADDF(PI)
-      ELSE IF(CHCOMM.EQ.'GCONSX') THEN
-         IADD=GCADDF(EMMU)
       ELSE IF(CHCOMM.EQ.'GCOPTI') THEN
          IADD=GCADDI(IOPTIM)
       ELSE IF(CHCOMM.EQ.'GCPARA') THEN
@@ -222,9 +207,9 @@ C
          IADD=GCADDI(NCVERT)
       ELSE IF(CHCOMM.EQ.'GCRAYT') THEN
          IADD=GCADDI(INTEN)
-      ELSE IF(CHCOMM.EQ.'GCRZ1' ) THEN
+      ELSE IF(CHCOMM.EQ.'GCRZ1') THEN
          IADD=GCADDI(NRECRZ)
-      ELSE IF(CHCOMM.EQ.'GCRZ2' ) THEN
+      ELSE IF(CHCOMM.EQ.'GCRZ2') THEN
          IADD=GCADDC(RZTAGS)
       ELSE IF(CHCOMM.EQ.'GCSCAL') THEN
          IADD=GCADDI(ISLINK)
@@ -270,28 +255,20 @@ C
          IADD=GCADDF(AIEL)
       ELSE IF(CHCOMM.EQ.'GCTLIT') THEN
          IADD=GCADDF(THRIND)
-      ELSE IF(CHCOMM.EQ.'QUEST' ) THEN
+      ELSE IF(CHCOMM.EQ.'QUEST') THEN
          IADD=GCADDI(IQUEST)
       ELSE IF(CHCOMM.EQ.'ERTRIO') THEN
          IADD=GCADDD(ERDTRP)
-      ELSE IF(CHCOMM.EQ.'ERTRIO1') THEN
-         IADD=GCADDI(IERTR)
       ELSE IF(CHCOMM.EQ.'EROPTS') THEN
          IADD=GCADDF(ERPLI)
       ELSE IF(CHCOMM.EQ.'EROPTC') THEN
          IADD=GCADDC(CHOPTI)
       ELSE IF(CHCOMM.EQ.'ERWORK') THEN
          IADD=GCADDD(EI)
-      ELSE IF(CHCOMM.EQ.'TRCOM3') THEN
-         IADD=GCADDD(A2)
       ELSE IF(CHCOMM.EQ.'GCBANK') THEN
          IADD=GCADDI(NZEBRA)
       ELSE IF(CHCOMM.EQ.'AgCKINE') THEN
          IADD=GCADDI(IKineOld)
-      ELSE IF(CHCOMM.EQ.'GCCHAN') THEN
-         IADD=GCADDB(LSAMVL)
-      ELSE IF(CHCOMM.EQ.'SCKINE') THEN
-         IADD=GCADDI(MTRACK)
       ELSE
          WRITE(6,123) CHCOMM
          IADD=0

@@ -1,12 +1,9 @@
 #!/usr/bin/env perl
 #use Env;
 ############################################################
-# $Id: Conscript,v 1.22 2018/11/19 20:52:40 perev Exp $
+# $Id: Conscript,v 1.21 2016/04/27 11:29:09 jeromel Exp $
 #
 # $Log: Conscript,v $
-# Revision 1.22  2018/11/19 20:52:40  perev
-# 64bits change the include paths
-#
 # Revision 1.21  2016/04/27 11:29:09  jeromel
 # Fix regexp issue
 #
@@ -65,8 +62,7 @@ my $CPPPATH = $env->{CPPPATH};
 my $pkg  = "starsim"; 
 my $PKG = $pkg;     print "Run cons in $Dir for $PKG\n";
 my $SO_PKG = $PKG . "." . $env->{SUFSOLIB};# print "SO_PKG = $SO_PKG\n";
-my $LIBPKG = "lib" . $PKG . "." . $env->{SUFLIB};
-$FCPATH  = "#asps/Simulation/starsim/comis";
+my $LIBPKG = "lib" . $PKG . "." . $env->{SUFLIB};# print "LIBPKG = $LIBPKG =========\n";
 $FCPATH  = "#asps/Simulation/starsim/include";
 $FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/gcalor/include";
 $FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/geant321/include";
@@ -81,8 +77,7 @@ $FPPFLAGS .= " -DCPP_VERS=\"'v*'\"";
 $FPPFLAGS .= " -DCPP_DATE=\"`date +%%y%%m%%d`\"";
 $FPPFLAGS .= " -DCPP_TIME=\"`date +%%H%%M`\"";
 $CPPFLAGS .= " -Df2cFortran";
-$CPPPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/starsim/comis";
-$CPPPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/starsim/include";
+$CPPPATH  = "#" . $main::PATH_SEPARATOR . "#asps/Simulation/starsim/include";
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{INCDIR}; 
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/include";
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/src/pawlib/paw/ntuple";
@@ -95,10 +90,10 @@ if ($STAR_SYS =~ /^rh/ or $STAR_SYS =~ /^sl/ or $STAR_SYS =~ /^i386/) {
   $CPPFLAGS .= " -DCERNLIB_MYSQL";
   $CPPFLAGS .= " -Df2cFortran -DCERNLIB_QMGLIBC";
 }
-#if ($STAR_SYS =~ /x8664/ || $STAR_SYS =~ /darwin/) {
-#  $FPPFLAGS .= " -DCERNLIB_QMLXIA64 -D__NON_ELASTIC_ZEBRA__ ";
-#  $CPPFLAGS .= " -DCERNLIB_QMLXIA64 -D__NON_ELASTIC_ZEBRA__";
-#}
+if ($STAR_SYS =~ /x8664/ || $STAR_SYS =~ /darwin/) {
+  $FPPFLAGS .= " -DCERNLIB_QMLXIA64 -D__NON_ELASTIC_ZEBRA__ ";
+  $CPPFLAGS .= " -DCERNLIB_QMLXIA64 -D__NON_ELASTIC_ZEBRA__";
+}
 #  $FPPFLAGS .= " -D__NON_ELASTIC_ZEBRA__ ";
 #  $CPPFLAGS .= " -D__NON_ELASTIC_ZEBRA__";
 
