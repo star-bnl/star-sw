@@ -1,7 +1,7 @@
 #! /usr/bin/env tcsh 
 set list = "";
-set host = `hostname | awk -F\. '{print $1}'`
-switch ($HOSTNAME) 
+set domain = `hostname -d`
+switch ($domain) 
   case "*local":
   case "*starp.bnl.gov":
     set list = "gcc gcc521 gcc631" # gcc7";
