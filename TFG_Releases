@@ -33,4 +33,5 @@
  TFG18n 2018 fix iTPC dE/dx, fix dE/dx to Ifit on PicoDst, MuMcAna   2018-09-10 15:26:28 -0400  (HEAD -> master, tag: TFG18n_3)
  TFG18o GenFit for Stx                                               2018-10-31 12:13:03 -0400  (HEAD -> master, tag: TFG18o)
         VP modification for 64 bits                                  2018-11-29 11:47:49 -0500  (tag: v-11-29-18RCF)
+ TFG18p	reshape TpcRS, freeze GenFit                                 2018-12-06 16:37:33 -0500  (HEAD -> master, tag: TFG18p)
  .DEV2  head of TFG git repository, no V5          
