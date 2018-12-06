@@ -363,7 +363,7 @@ setenv MY_BIN          .${STAR_HOST_SYS}/bin
 #if( ! $?DOMAINNAME) then
 #    if ( -x "domainname" ) then
 #	setenv DOMAINNAME `domainname`
-#    else
+#    elsecd
 #	setenv DOMAINNAME "(none)"
 #    endif
 #    setenv DOMAINNAME `hostname -d`
@@ -372,7 +372,9 @@ setenv MY_BIN          .${STAR_HOST_SYS}/bin
 #       setenv DOMAINNAME `hostname | sed 's/^[^\.]*\.//'`
 #    endif
 #endif
-
+if( ! $?DOMAINNAME) then
+  setenv DOMAINNAME `hostname -d`
+endif
 
 
 
