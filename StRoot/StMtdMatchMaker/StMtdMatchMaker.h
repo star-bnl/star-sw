@@ -6,11 +6,14 @@
  *
  * The MTD MatchMaker matches STAR tracks to the MTD MRPCs.
  * 
- * $Id: StMtdMatchMaker.h,v 1.19 2018/09/04 19:29:14 marr Exp $
+ * $Id: StMtdMatchMaker.h,v 1.20 2018/12/06 18:11:13 marr Exp $
  */
 /*****************************************************************
  *
  * $Log: StMtdMatchMaker.h,v $
+ * Revision 1.20  2018/12/06 18:11:13  marr
+ * Improvement: extrapolate tracks to the proper primary vertex when available. This eliminates large negative dTof values
+ *
  * Revision 1.19  2018/09/04 19:29:14  marr
  * Use the pairD definition in StHelixD.hh
  *
@@ -333,10 +336,10 @@ class StMtdMatchMaker: public StMaker
 		bool validTrack(MtdTrack mtt);
 
 		/// used in project2Mtd() 
-		bool matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,const StPhysicalHelixD &helix, Int_t gq, mtdCellHitVector& allCellsHitVec,unsigned int iNode, StThreeVectorD globalPos);
+		bool matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,const StPhysicalHelixD &helix, Int_t gq, mtdCellHitVector& allCellsHitVec,unsigned int iNode, StThreeVectorD pVtx);
 
 		virtual const char *GetCVS() const
-	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.19 2018/09/04 19:29:14 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.20 2018/12/06 18:11:13 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 		ClassDef(StMtdMatchMaker,2)
 };
 
