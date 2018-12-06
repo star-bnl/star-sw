@@ -1,7 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.72 2018/06/21 15:46:21 perev Exp $
- * $Id: StTpcDbMaker.cxx,v 1.72 2018/06/21 15:46:21 perev Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.76 2018/12/06 19:30:59 genevb Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -12,8 +11,14 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
- * Revision 1.72  2018/06/21 15:46:21  perev
- * Restore removed by mistake line
+ * Revision 1.76  2018/12/06 19:30:59  genevb
+ * Check on StMagUtilities instance from StTpcDb instead of global
+ *
+ * Revision 1.75  2018/12/05 18:12:09  genevb
+ * Use NoReset attribute to prevent reinstantiation of StMagUtilities
+ *
+ * Revision 1.74  2018/07/06 22:13:16  smirnovd
+ * [Cosmetic] Remove unused variables and commented code
  *
  * Revision 1.71  2018/06/21 01:47:18  perev
  * iTPCheckIn
@@ -284,7 +289,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
   }
   StTpcDb::instance()->SetDriftVelocity();
   
-  if (IAttr("ExB")) {
+  if (IAttr("ExB") && !((StTpcDb::instance()->ExB()) && IAttr("NoReset"))) {
     // Backward compatibility preserved.
     Int_t mask=1;                                    // Al Saulys request
     if        ( IAttr("EB1") ){      // Do nothing (i.e. bit 1 at 0)
