@@ -1,16 +1,19 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.75 2018/12/05 18:12:09 genevb Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.75.2.1 2018/12/06 22:19:25 jeromel Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
  *
- * Description:  
+ * Description:
  *This make initializes and controls the TPC interface to the database
  *
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.75.2.1  2018/12/06 22:19:25  jeromel
+ * No changes (ignore)
+ *
  * Revision 1.75  2018/12/05 18:12:09  genevb
  * Use NoReset attribute to prevent reinstantiation of StMagUtilities
  *
@@ -250,7 +253,7 @@
 ClassImp(StTpcDbMaker)
 //_____________________________________________________________________________
 Int_t StTpcDbMaker::InitRun(int runnumber){
-  // Create Needed Tables:    
+  // Create Needed Tables:
   //Float_t gFactor = StarMagField::Instance()->GetFactor();
   // Set Table Flavors
   if (! IAttr("Simu")) {
@@ -290,7 +293,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     gMessMgr->Info() << "StTpcDbMaker::Using any drift velocity" << endm;
   }
   StTpcDb::instance()->SetDriftVelocity();
-  
+
   if (IAttr("ExB") && !(StMagUtilities::Instance() && IAttr("NoReset"))) {
     // Backward compatibility preserved.
     Int_t mask=1;                                    // Al Saulys request
@@ -338,7 +341,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
 }
 //_____________________________________________________________________________
 Int_t StTpcDbMaker::Make(){
-  // check that TPC is tripped 
+  // check that TPC is tripped
   if (St_tpcAnodeHVavgC::instance()->tripped()) {
     gMessMgr->Info() << "StTpcDbMaker::TPC has tripped - declaring EOF to avoid possibly bad data" << endm;
     return kStEOF;
