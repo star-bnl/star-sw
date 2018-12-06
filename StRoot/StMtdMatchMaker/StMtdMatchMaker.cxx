@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.40 2018/09/04 19:29:14 marr Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.41 2018/12/06 18:11:13 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.41  2018/12/06 18:11:13  marr
+ * Improvement: extrapolate tracks to the proper primary vertex when available. This eliminates large negative dTof values
+ *
  * Revision 1.40  2018/09/04 19:29:14  marr
  * Use the pairD definition in StHelixD.hh
  *
@@ -982,11 +985,11 @@ void StMtdMatchMaker::project2Mtd(mtdCellHitVector daqCellsHitVec,mtdCellHitVect
 	int nAllTracks=0;
 	ngTracks = 0;
 
+	StThreeVectorD pVtx(0,0,0);
 	UInt_t Nnodes = 0;
 	if(mMuDstIn){
 		Nnodes = mMuDst->numberOfGlobalTracks();
 		for(UInt_t iNode=0;iNode<Nnodes;iNode++){
-			StThreeVectorD globalPos(-999,-999,-999);
 			StMuTrack *theTrack=mMuDst->globalTracks(iNode);
 			if(!theTrack) continue;
 			if(!validTrack(theTrack)) continue;
@@ -998,9 +1001,17 @@ void StMtdMatchMaker::project2Mtd(mtdCellHitVector daqCellsHitVec,mtdCellHitVect
 			  pIndex = it->second;
 			if(pIndex>=0) isPrimary=kTRUE;
 		
-			const StMuBTofPidTraits tofpid = theTrack->btofPidTraits();
-			globalPos = tofpid.position();
-			if(matchTrack2Mtd(daqCellsHitVec,theTrack->outerHelix(),theTrack->charge(),allCellsHitVec,iNode,globalPos)){
+			pVtx = mMuDst->event()->primaryVertexPosition();
+			if(isPrimary) 
+			  {
+			    int vtxIndex = ((StMuTrack *)mMuDst->array(muPrimary)->UncheckedAt(pIndex))->vertexIndex();
+			    if(vtxIndex>-1) 
+			      {
+				StMuPrimaryVertex *vertex = mMuDst->primaryVertex(vtxIndex);
+				if(vertex) pVtx = vertex->position();
+			      }
+			  }
+			if(matchTrack2Mtd(daqCellsHitVec,theTrack->outerHelix(),theTrack->charge(),allCellsHitVec,iNode,pVtx)){
 			  nAllTracks++;
 			  if(isPrimary) nPrimaryHits++;
 			}
@@ -1024,12 +1035,15 @@ void StMtdMatchMaker::project2Mtd(mtdCellHitVector daqCellsHitVec,mtdCellHitVect
 			      }
 			  }
 
-
+			
+			pVtx = mEvent->primaryVertex()->position();
 			bool isPrimary =kFALSE;
 			StPrimaryTrack *pTrack =dynamic_cast<StPrimaryTrack*>(theTrack->node()->track(primary));
 			if(pTrack) 
 			  {
 			    isPrimary = kTRUE;
+			    pVtx = pTrack->vertex()->position();
+
 			    //clean up any association done before
 			    StSPtrVecTrackPidTraits& ptraits = pTrack->pidTraits();
 			    for (StSPtrVecTrackPidTraitsIterator it = ptraits.begin(); it != ptraits.end(); it++)
@@ -1042,16 +1056,7 @@ void StMtdMatchMaker::project2Mtd(mtdCellHitVector daqCellsHitVec,mtdCellHitVect
 			      }
 			  }
 			if(!validTrack(theTrack)) continue;
-
-			StThreeVectorD globalPos(-999,-999,-999);
-			for (unsigned int it=0;it<traits.size();it++){
-				if (traits[it]->detector() == kTofId) {
-					StBTofPidTraits* tofpid = dynamic_cast<StBTofPidTraits*>(traits[it]);
-					if(tofpid) globalPos = tofpid->position();
-				}
-			}
-
-			if(matchTrack2Mtd(daqCellsHitVec,theTrack->outerGeometry()->helix(),theTrack->geometry()->charge(),allCellsHitVec,iNode,globalPos)){
+			if(matchTrack2Mtd(daqCellsHitVec,theTrack->outerGeometry()->helix(),theTrack->geometry()->charge(),allCellsHitVec,iNode,pVtx)){
 				nAllTracks++;
 				if(isPrimary) nPrimaryHits++;
 			}
@@ -1063,18 +1068,10 @@ void StMtdMatchMaker::project2Mtd(mtdCellHitVector daqCellsHitVec,mtdCellHitVect
 
 
 /// Match extrapolated TPC tracks to hits in the MTD
-bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,const StPhysicalHelixD &helix, Int_t gq, mtdCellHitVector& allCellsHitVec, unsigned int iNode, StThreeVectorD globalPos){
+bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,const StPhysicalHelixD &helix, Int_t gq, mtdCellHitVector& allCellsHitVec, unsigned int iNode, StThreeVectorD pVtx){
 	float mField = 0;
 	if(mMuDstIn) mField = mMuDst->event()->runInfo().magneticField();
 	else mField = mEvent->runInfo()->magneticField();
-
-	StThreeVectorD pVtx(0,0,0);
-	if(mMuDstIn) pVtx = mMuDst->event()->primaryVertexPosition();
-	else{
-		if (mEvent->primaryVertex()){
-			pVtx = mEvent->primaryVertex()->position();
-		}
-	}
 
 	StThreeVector<double> dcaPos  = helix.at(helix.pathLength(pVtx));
 	StThreeVector<double> dca     = dcaPos - pVtx;
