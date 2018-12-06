@@ -29,6 +29,7 @@ class StTpcDigitalSector;
 class HitPoint_t;
 class g2t_tpc_hit_st;
 class g2t_vertex_st;
+class StTpcCoordinateTransform;
 struct SignalSum_t {
   Float_t      Sum;
   Short_t      Adc;
@@ -44,6 +45,7 @@ class StTpcRSMaker : public StMaker {
 	      kDistortion  = 4,// include distortions
 	      kNoToflight  = 5 // don't account for particle time of flight
   };
+  enum {kPadMax = 32, kTimeBacketMax = 64, kRowMax = 72};
   StTpcRSMaker(const char *name="TpcRS");
   virtual              ~StTpcRSMaker();
   virtual Int_t         InitRun(int runnumber);
@@ -81,12 +83,16 @@ class StTpcRSMaker : public StMaker {
   static Double_t PadResponseFunc(Double_t *x, Double_t *p);
   static Double_t Gatti(Double_t *x, Double_t *p);
   static Double_t InducedCharge(Double_t s, Double_t h, Double_t ra, Double_t Va, Double_t &t0);
-#if defined(__CINT__) || defined(__CLING__)
-  Bool_t TrackSegment2Propagate(g2t_tpc_hit_st *tpc_hitC, g2t_vertex_st *gver, Int_t *nSegHits, HitPoint_t *TrackSegmentHits);
-#else
-  Bool_t TrackSegment2Propagate(g2t_tpc_hit_st *tpc_hitC, g2t_vertex_st *gver, Int_t &nSegHits, HitPoint_t *TrackSegmentHits);
-#endif
   static Float_t  GetCutEle();
+#if defined(__CINT__) 
+  Bool_t TrackSegment2Propagate(g2t_tpc_hit_st *tpc_hitC, g2t_vertex_st *gver, HitPoint_t *TrackSegmentHits);
+  void   GenerateSignal(HitPoint_t *TrackSegmentHits,Int_t sector, Int_t rowMin, Int_t rowMax, Double_t sigmaJitterT, Double_t sigmaJitterX);
+  Double_t dEdxCorrection(HitPoint_t *TrackSegmentHits);
+#else
+  Bool_t TrackSegment2Propagate(g2t_tpc_hit_st *tpc_hitC, g2t_vertex_st *gver, HitPoint_t &TrackSegmentHits);
+  void   GenerateSignal(HitPoint_t &TrackSegmentHits, Int_t sector, Int_t rowMin, Int_t rowMax, Double_t sigmaJitterT, Double_t sigmaJitterX);
+  Double_t dEdxCorrection(HitPoint_t &TrackSegmentHits);
+#endif
   static TF1F     *fgTimeShape3[2];  //!
   static TF1F     *fgTimeShape0[2];   //!
   Char_t   beg[1];                    //!
@@ -96,6 +102,7 @@ class StTpcRSMaker : public StMaker {
   TH1D*    mdNdxL10;                  //!
   TH1D*    mdNdEL10;                  //!
   TF1F  *mShaperResponses[2][24];     //!
+  TF1F  *mShaperResponse;             //!
   TF1F  *mChargeFraction[2][24];      //!
   TF1F  *mPadResponseFunction[2][24]; //!
   TF1F  *mPolya[2];                   //!
@@ -105,8 +112,6 @@ class StTpcRSMaker : public StMaker {
   Double_t InnerAlphaVariation[24];   //!
   Double_t OuterAlphaVariation[24];   //!
   Altro *mAltro;                      //!
-  Char_t end[1];                      //!
-  Double_t             mLaserScale;   //!
   // local variables
   Int_t numberOfSectors;              //!
   Int_t NoPads;                       //!
@@ -120,23 +125,36 @@ class StTpcRSMaker : public StMaker {
   Double_t anodeWirePitch;            //!
   Double_t numberOfElectronsPerADCcount; //!
   Double_t anodeWireRadius;           //!
-  const Double_t minSignal;           //!
   Double_t innerSectorAnodeVoltage[24];//!
   Double_t outerSectorAnodeVoltage[24];//!
-  const Double_t ElectronRange;       //!
-  const Double_t ElectronRangeEnergy; //!
-  const Double_t ElectronRangePower;  //!
   Double_t      mtauIntegrationX[2];  //! for TPX inner=0/outer=1
   Double_t      mtauCX[2];            //! -"- 
   Double_t    mLocalYDirectionCoupling[2][24][7]; //!
-  const Int_t NoOfSectors;            //!
-  const Int_t NoOfPads;               //!
-  const Int_t NoOfTimeBins;           //!
-  Double_t   mCutEle;                 //! cut for delta electrons
   Double_t   msMin, msMax;            //!
   TArrayI    mNoTpcHitsAll;           //!
   TArrayI    mNoTpcHitsReal;          //!
   Int_t      mNSplittedHits;          //!
+  Double_t xOnWire, yOnWire, zOnWire; //!
+  Double_t mGainLocal;                //!
+  Double_t QAv;                       //!
+  Double_t TotalSignal;               //!
+  Int_t pad0;                         //!
+  Int_t tbk0;                         //!
+  Double_t TotalSignalInCluster;      //!
+  Double_t padsdE[kPadMax];           //!
+  Double_t tbksdE[kTimeBacketMax];    //!
+  Double_t rowsdEH[kRowMax];          //!
+  Double_t rowsdE[kRowMax];           //!
+  Char_t end[1];                      //!
+  Double_t             mLaserScale;   //!
+  const Double_t minSignal;           //!
+  const Double_t ElectronRange;       //!
+  const Double_t ElectronRangeEnergy; //!
+  const Double_t ElectronRangePower;  //!
+  const Int_t NoOfSectors;            //!
+  const Int_t NoOfPads;               //!
+  const Int_t NoOfTimeBins;           //!
+  Double_t   mCutEle;                 //! cut for delta electrons
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
