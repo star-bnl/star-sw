@@ -1811,6 +1811,7 @@ Bfc_st BFC[] = { // standard chains
    ,                               "StMuDSTMaker,StPass0CalibMaker","Calibrate SpaceCharge scalers",kFALSE},
   {"compend"     ,"","","event,detDb","StEventCompendiumMaker","StEventCompendiumMaker"
    ,                                                             "Fill event summary in ITTF Chain",kFALSE},
+  {"shadow"      ,"","","event,compend"                         ,"StShadowMaker","StShadowMaker","",kFALSE},
   {"TpcAligner"    ,"","","Alignment"         ,"StTpcAlignerMaker","StTpcAlignerMaker","TpcAligner",kFALSE},
   {"pec"         ,"PeC","","Event"                       ,"StPeCMaker","StPeCMaker","PCollAnalysis",kFALSE},
   {"RichSpectra"         ,"","",""                                       ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
