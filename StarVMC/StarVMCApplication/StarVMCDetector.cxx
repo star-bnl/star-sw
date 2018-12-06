@@ -247,7 +247,7 @@ void StarVMCDetector::SetNVmax(Int_t N, Int_t *array) {
   fNVmax.Set(N, array);
   if (fN10.GetSize() == 0) {
     fN10.Set(N);
-    fN10[N-1] = 1;
+    if (N > 0) fN10[N-1] = 1;
     for (Int_t i = N-2; i >= 0; i--) {
       fN10[i] = (Int_t ) TMath::Power(10,(Int_t)(TMath::Log10(fNVmax[i])+1))*fN10[i+1];
     }
