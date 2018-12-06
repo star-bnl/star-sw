@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.75 2018/12/05 18:12:09 genevb Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.76 2018/12/06 19:30:59 genevb Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.76  2018/12/06 19:30:59  genevb
+ * Check on StMagUtilities instance from StTpcDb instead of global
+ *
  * Revision 1.75  2018/12/05 18:12:09  genevb
  * Use NoReset attribute to prevent reinstantiation of StMagUtilities
  *
@@ -291,7 +294,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
   }
   StTpcDb::instance()->SetDriftVelocity();
   
-  if (IAttr("ExB") && !(StMagUtilities::Instance() && IAttr("NoReset"))) {
+  if (IAttr("ExB") && !((StTpcDb::instance()->ExB()) && IAttr("NoReset"))) {
     // Backward compatibility preserved.
     Int_t mask=1;                                    // Al Saulys request
     if        ( IAttr("EB1") ){      // Do nothing (i.e. bit 1 at 0)
