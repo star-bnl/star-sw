@@ -11,7 +11,7 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
 	    Double_t Philow=-TMath::DegToRad()*25, Double_t Phihigh=-TMath::DegToRad()*35,
 	    Double_t Zlow=0, Double_t Zhigh=0, Int_t Npart = 20, const Char_t *opt = "BLG") 
 #endif
-  {
+{
   if ( gClassTable->GetID("TGiant3") >= 0) { // root4star
     if (gClassTable->GetID("St_geant_Maker") < 0) {
       cout << "You have to use root4star with St_geant_Maker already loaded" << endl; 
@@ -31,11 +31,13 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
     cout << "Set kine : " << kine.Data() << endl;
     St_geant_Maker::instance()->Do(kine.Data());
     St_geant_Maker::instance()->Do("gspread 0. 0. 0.");
+    }
+#if 0
     //                              CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
     //                          Do("CUTS     1e-5   1e-5   1e-3  1e-14   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3     10");
     //                          Do("CUTS     1e-5   1e-5   1e-3  1e-14   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3     1e-3");
-    }
     St_geant_Maker::instance()->Do("CUTS     1e-5   1e-5   1e-3  1e-14   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3     1e3");
+#endif
     St_geant_Maker::instance()->Do("DCAY 0");
     St_geant_Maker::instance()->Do("ANNI 0");
     St_geant_Maker::instance()->Do("BREM 0");
