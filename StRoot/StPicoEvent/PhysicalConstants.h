@@ -5,7 +5,7 @@
 #define HEP_PHYSICAL_CONSTANTS_H
 
 /// ROOT headers
-#include <TMath.h>
+#include "TMath.h"
 
 /// PicoDst headers
 #include "SystemOfUnits.h"
@@ -85,8 +85,8 @@ static const double electron_Compton_length = hbarc/electron_mass_c2;
 static const double Bohr_radius = electron_Compton_length/fine_structure_const;
 
 static const double alpha_rcl2 = fine_structure_const
-                                   *classic_electr_radius
-                                   *classic_electr_radius;
+                                  *classic_electr_radius
+                                  *classic_electr_radius;
 
 static const double twopi_mc2_rcl2 = twopi*electron_mass_c2
                                              *classic_electr_radius

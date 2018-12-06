@@ -5,8 +5,7 @@
 #include <limits>
 
 /// ROOT headers
-#include <TObject.h>
-#include <TMath.h>
+#include "TObject.h"
 
 //_________________
 class StPicoBTowHit : public TObject {
@@ -41,22 +40,17 @@ class StPicoBTowHit : public TObject {
 
   /// ADC
   UShort_t mAdc;
-  /// Energy
-  Float16_t mE; //[-5,35,16]
+  /// Energy * 1000
+  Short_t mE;
 
-  ClassDef(StPicoBTowHit, 3)
+  ClassDef(StPicoBTowHit, 4)
 };
-
-/**
- * Setters
- */
-inline void StPicoBTowHit::setEnergy(Float_t energy) { mE = energy; }
 
 /**
  * Getters
  */
 inline Int_t   StPicoBTowHit::adc() const { return (Int_t)mAdc; }
-inline Float_t StPicoBTowHit::energy() const { return mE; }
+inline Float_t StPicoBTowHit::energy() const { return (Float_t)mE / 1000.f; }
 inline Int_t StPicoBTowHit::numericIndex2SoftId(Int_t idx) const { return (idx+1); }
 
 #endif

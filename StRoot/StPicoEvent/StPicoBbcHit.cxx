@@ -1,8 +1,8 @@
-/// PicoDst headers
-#include "StPicoBbcHit.h"
-
 /// C++ headers
 #include <cstdlib>
+
+/// PicoDst headers
+#include "StPicoBbcHit.h"
 
 // \class StPicoBbcHit
 // \author Mike Lisa

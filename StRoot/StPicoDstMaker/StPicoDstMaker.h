@@ -24,7 +24,7 @@ class StPicoDstMaker : public StMaker {
  public:
   enum PicoIoMode {IoWrite=1, IoRead=2};
   enum PicoVtxMode {NotSet=0, Default=1, Vpd=2, VpdOrDefault=3};
-  enum PicoCovMtxMode {NotDefined=0, Skip=1, Write=2};
+  enum PicoCovMtxMode {Skip=0, Write=1};
 
   /// Constructor
   StPicoDstMaker(char const* name = "PicoDst");
@@ -182,6 +182,11 @@ class StPicoDstMaker : public StMaker {
   char            mStatusArrays[StPicoArrays::NAllPicoArrays];
 
   StPicoFmsFiller  mFmsFiller;
+
+  virtual const char *GetCVS() const {
+    static const char cvs[]="Tag $Name:  $ $Id: StPicoDstMaker.h,v 1.20 2018/09/05 18:53:06 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
+    return cvs;
+  }
 
   ClassDef(StPicoDstMaker, 0)
 };
