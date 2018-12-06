@@ -289,7 +289,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
   }
   StTpcDb::instance()->SetDriftVelocity();
   
-  if (IAttr("ExB") && !((StTpcDb::instance()->ExB()) && IAttr("NoReset"))) {
+  if (IAttr("ExB")) { 
     // Backward compatibility preserved.
     Int_t mask=1;                                    // Al Saulys request
     if        ( IAttr("EB1") ){      // Do nothing (i.e. bit 1 at 0)
