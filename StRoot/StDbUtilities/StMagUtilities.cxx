@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.116 2018/10/19 20:41:28 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.117 2018/12/06 19:36:45 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.117  2018/12/06 19:36:45  genevb
+ * Move Instance() definition to resolve undefined symbol
+ *
  * Revision 1.116  2018/10/19 20:41:28  genevb
  * Clean up after Y. Fisyak modifications (which were for iTPC, not dE/dx), and add new PredictSpaceCharge() using real hit radii
  *
@@ -503,6 +506,8 @@ struct Distortion_t {
 };
 static Distortion_t D;
 static const Char_t *Dnames = {"sector:xL:yL:zL:xLC:yLC:zLC"};
+//________________________________________________________________________________
+StMagUtilities* StMagUtilities::Instance()  { return fgInstance; }
 //________________________________________________________________________________
 void    StMagUtilities::SetDoDistortionT  (TFile *f) {
   if (! f) return;

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.65 2018/10/19 20:41:29 genevb Exp $
+ * $Id: StMagUtilities.h,v 1.66 2018/12/06 19:36:45 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.66  2018/12/06 19:36:45  genevb
+ * Move Instance() definition to resolve undefined symbol
+ *
  * Revision 1.65  2018/10/19 20:41:29  genevb
  * Clean up after Y. Fisyak modifications (which were for iTPC, not dE/dx), and add new PredictSpaceCharge() using real hit radii
  *
@@ -405,7 +408,7 @@ class StMagUtilities {
   StMagUtilities ( StTpcDb* dbin = 0,Int_t mode = 0 ) ;
   StMagUtilities ( const StarMagField::EBField map, const Float_t factor, Int_t mode );
   virtual ~StMagUtilities () {fgInstance = 0;}
-  static StMagUtilities *Instance() {return fgInstance;}
+  static StMagUtilities *Instance();
 
   virtual void    BField ( const Float_t x[], Float_t B[] ) 
   {StarMagField::Instance()->BField(x,B);}
@@ -540,6 +543,7 @@ class StMagUtilities {
 };
 
 #endif
+
 
 
 
