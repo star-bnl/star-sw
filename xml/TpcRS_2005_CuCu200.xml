@@ -4,7 +4,8 @@
 <command> 
 #  source ~/.tcshrc
   cd ${SUBMITTINGDIRECTORY}  
-  setenv NODEBUG yes
+#  setenv NODEBUG yes
+  setup 32b
   FPE_OFF
   starver .DEV2 
 #  setup gcc
