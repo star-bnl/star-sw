@@ -5,10 +5,10 @@
 <command> 
   cd ${SUBMITTINGDIRECTORY}  
   set Name = `basename $PWD`
-  setenv NODEBUG yes
+#  setenv NODEBUG yes
   setenv STARFPE NO
-  setup 64b
-  starver TFG18o
+#  setup 64b
+  starver TFG18p
   echo $INPUTFILE0 | grep ':'
   if (! $?) then
     set rung  = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
@@ -19,7 +19,7 @@
     exit 1;
   endif
   set name = ""
-  foreach name (D02KmTsq D0K0s2KmTsq D0K0s2pimTsq D0KpimTsq DK2pimTsq DK0spimTsq DsK0sK0spimTsq DsK0sKmTsq DsKKpimTsq Lc3pimTsq LcKppimTsq 20Muons D0K3pimTsq DK0s3pimTsq DsK0sK2pimTsq DK2pi  DsKKpi  LcKppi ) 
+  foreach name (D02KmTsq D0K0s2KmTsq D0K0s2pimTsq D0KpimTsq DK2pimTsq DK0spimTsq DsK0sK0spimTsq DsK0sKmTsq DsKKpimTsq Lc3pimTsq LcKppimTsq 20Muons D0K3pimTsq DK0s3pimTsq DsK0sK2pimTsq DK2pi  DsKKpi  LcKppi HyperTriton) 
     echo $Name | grep $name
     if (! $?) break;
 #    if ($name == $Name) break;
@@ -51,5 +51,5 @@
     root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'","'${tag}'")' &gt;&amp; ${logFile}
   endif
 </command>
-<input URL="command:RunId.pl 1 1 50" />
+<input URL="command:RunId.pl 1 10 100" />
 </job>
