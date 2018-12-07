@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimReadout.cc,v 1.21 2011/07/26 09:40:52 jcs Exp $
+// $Id: StFtpcSlowSimReadout.cc,v 1.22 2018/12/07 18:00:17 genevb Exp $
 // $Log: StFtpcSlowSimReadout.cc,v $
+// Revision 1.22  2018/12/07 18:00:17  genevb
+// Use TRandom and allow control of the seed
+//
 // Revision 1.21  2011/07/26 09:40:52  jcs
 // Change LOG_DEBUG statement to print out 2 ftpcAmpSlope values to be able to
 // check which ftpcAmpSlope table is being used
@@ -95,6 +98,7 @@
 #include "StFtpcClusterMaker/StFtpcParamReader.hh"
 #include "StFtpcClusterMaker/StFtpcDbReader.hh"
 #include "TF1.h"
+#include "TRandom.h"
 
 
 #ifndef DEBUG
@@ -106,6 +110,8 @@ StFtpcSlowSimReadout::StFtpcSlowSimReadout(StFtpcParamReader *paramReader,
 					   float *adcIn, 
 					   const StFtpcSlowSimField *field)
 {
+  if (!(gRandom->GetSeed())) gRandom->SetSeed(20181207);
+  LOG_INFO << "FtpcSlowSim Seed used = " << gRandom->GetSeed() << endm;
   mParam=paramReader;
   mDb=dbReader;
   mRandomNumberGenerator = mParam->randomNumberGenerator();
@@ -561,8 +567,7 @@ int StFtpcSlowSimReadout::sample_polya(const float gain)
   
     if (mRandomNumberGenerator == 0) 
       {
-	// use generator from math.h
-        ran = (float) rand() / (float) RAND_MAX;
+        ran = gRandom->Rndm();
       } 
     else 
       {
