@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.41 2018/12/06 18:11:13 marr Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.42 2018/12/07 13:16:48 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.42  2018/12/07 13:16:48  marr
+ * Bug fix: check the existence of vertex when analyzing StEvent
+ *
  * Revision 1.41  2018/12/06 18:11:13  marr
  * Improvement: extrapolate tracks to the proper primary vertex when available. This eliminates large negative dTof values
  *
@@ -1035,14 +1038,14 @@ void StMtdMatchMaker::project2Mtd(mtdCellHitVector daqCellsHitVec,mtdCellHitVect
 			      }
 			  }
 
-			
-			pVtx = mEvent->primaryVertex()->position();
+			if (mEvent->primaryVertex()) pVtx = mEvent->primaryVertex()->position();
+			else pVtx.set(0,0,0);  
 			bool isPrimary =kFALSE;
 			StPrimaryTrack *pTrack =dynamic_cast<StPrimaryTrack*>(theTrack->node()->track(primary));
 			if(pTrack) 
 			  {
 			    isPrimary = kTRUE;
-			    pVtx = pTrack->vertex()->position();
+			    if(pTrack->vertex()) pVtx = pTrack->vertex()->position();
 
 			    //clean up any association done before
 			    StSPtrVecTrackPidTraits& ptraits = pTrack->pidTraits();
