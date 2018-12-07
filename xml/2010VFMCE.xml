@@ -38,7 +38,7 @@
   set sdt = "";
   set VFMCE = "";
   echo $Name | grep -i Ideal
-  if ($?) set sdt = ",sdt20160301";
+#  if ($?) set sdt = ",sdt20100301";
   echo $Name | grep -i 20Muons
   if ( $? ) set VFMCE = ",VFMCE";
   set Chain = ${chain}${VFMCE}${sdt}",Rung."${rung}
