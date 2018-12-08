@@ -45,9 +45,13 @@ public:
 	fcs_data_c() {
 		sector = 1 ;
 		rdo = 1 ;
-		ch = -1 ;
-		tb_cou = 0 ;
+
 		version = 0 ;
+		board_id = 0 ;
+		run_type = 0 ;
+		run_number = 0 ;
+
+		log_level = 0 ;
 	} ;
 
 	~fcs_data_c() {;} ;
@@ -55,38 +59,64 @@ public:
 	
 	int start(u_short *d16, int shorts) ;
 	int event() ;
+	int event_pre_fy19() ;
+	int hdr_event() ;
 	int accum(int ch, int tb, u_short adc) ;
 
 	u_short *dta_p ;
 	u_short *dta_stop ;
+	u_short *dta_start ;
+	int dta_shorts ;
 
 	struct fcs_ped_t {
-		double mean[16] ;
-		double rms[16] ;
-		u_int cou[16] ;
+		double mean[32] ;
+		double rms[32] ;
+		u_int cou[32] ;
 	} ;
 
-	struct fcs_ped_t ped ;
-	int ped_run ;
+
+
+	void run_start(u_int run_number, int type) ;
+	void run_stop() ;
 	void ped_start() ;
 	void ped_stop() ;
 
 	//globals
+	u_char log_level ;
 	u_int run_number ;
-	double fee_currents[16][3] ;
+	int run_type ;
+	u_int events ;
 
-	// temporary storage for 1 channel
+	// for a specific board
+	int sector ;
+	int rdo ;
+	u_short board_id ;
+	double fee_currents[32][3] ;
+	struct fcs_ped_t ped ;
+
+	// temporary storage for the current board and event
+	u_int version ;
+	u_int hdr_trg_word ;
+	u_int hdr_rhic_counter ;
+	u_char trgd_event ;
+
+	int ch ;
+	int tb_cou ;
+	u_short adc[48*1024] ;
+
+
+	// I don't remember what the stuff is? Pre FY19.
 	int first_rhic_strobe_tick ;
 	int trigger_tick ;
 
-	u_int version ;
+
 	u_int rhic_start ;
 
-	int sector ;
-	int rdo ;
-	int ch ;
-	int tb_cou ;
-	u_short adc[32*1024] ;
+	
+	
+
+
+
 } ;
 
 
