@@ -8,7 +8,6 @@
 #include "BtofHitList.h"
 
 #include "StMaker.h"
-#include "StBTofUtil/StBTofGeometry.h"
 #include "StBTofUtil/StBTofTables.h"
 #include "StBTofCollection.h"
 

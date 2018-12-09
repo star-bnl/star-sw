@@ -38,7 +38,23 @@ StPicoBEmcPidTraits::StPicoBEmcPidTraits(Int_t index, Int_t id, Int_t adc0, Floa
   mBemcSmdNPhi     = (nhit[1] > std::numeric_limits<unsigned char>::max()) ? std::numeric_limits<unsigned char>::max() : (UChar_t)(nhit[1]);
 
   mBtowId       = (ntow[0] <= 0 || ntow[0] > 4800) ? -1 : (Short_t)ntow[0];
-  mBtowId23     = (ntow[1] < 0 || ntow[1] >= 9 || ntow[2] < 0 || ntow[2] >= 9) ? -1 : (Char_t)(ntow[1] * 10 + ntow[2]);
+
+  //Logic: If at least one closest to the mactched tower was
+  //found than we check the second one. The 1st and the 2nd
+  //digits of mBtowId23 represent Ids of the 1st and the 2nd highest
+  //towers that are the closest to the track-matched one, respectively.
+  if (ntow[1] < 0 || ntow[1] >= 9) {
+    if (!(ntow[2] < 0 || ntow[2] >= 9))  { //If 2 towers were found
+      mBtowId23 = (Char_t)(ntow[1] * 10 + ntow[2]);
+    }
+    else {                                 //If only 1 tower was found
+      mBtowId23 = (Char_t)(ntow[1] * 10 + 9); 
+    }
+  }
+  else { //If none of the towers with energy>0.2 GeV were found near the matched tower
+    mBtowId23 = 99;
+  }
+
   mBtowE        = getConstrainedShort(e[2] * 1000.);
   mBtowE2       = getConstrainedShort(e[3] * 1000.);
   mBtowE3       = getConstrainedShort(e[4] * 1000.);

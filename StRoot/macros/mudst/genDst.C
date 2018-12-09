@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: genDst.C,v 1.2 2017/12/15 18:36:53 genevb Exp $
+// $Id: genDst.C,v 1.3 2018/03/16 18:41:14 genevb Exp $
 // Author: G. Van Buren (BNL)
 //
 // Description:
@@ -13,6 +13,8 @@
 //
 // Example options for creating PicoDsts:
 // picoDst
+// btofMatch
+// btofStartless
 // mtdMatch
 // y2017a
 //
@@ -72,7 +74,7 @@ void loadLibsPico()
   gSystem->Load("libStPicoDstMaker");
 }
 
-void loadLibsAgML(const char* tag=0)
+void loadLibsAgML()
 {
   // load support libraries.  util will fail to load for agml 1.0, but you can ignore the error
   gSystem->Load("libStarAgmlUtil");
@@ -81,6 +83,41 @@ void loadLibsAgML(const char* tag=0)
   // load geometry modules and master steering codes...
   gSystem->Load("libGeometry");
   gSystem->Load("libStarGeometry");
+}
+
+void loadLibsMtd()
+{
+  gSystem->Load("StDetectorDbMaker");
+  gSystem->Load("StarMagField");
+  gSystem->Load("StMagF");
+  gSystem->Load("StMtdUtil");
+  gSystem->Load("StMtdMatchMaker");
+  gSystem->Load("StMtdCalibMaker");
+}
+
+void loadLibsBTof()
+{
+  gSystem->Load("StBTofUtil");
+  gSystem->Load("StVpdCalibMaker");
+  gSystem->Load("StBTofCalibMaker");
+  gSystem->Load("StBTofMatchMaker");
+}
+
+void procGeoTag(TObjArray* optionTokens)
+{
+  if (TClass::GetClass("AgBlock")) return; // arbitrarily chosen AgML class
+  loadLibsAgML();
+
+  const char* tag = 0;
+  for (int tk=0; tk < optionTokens->GetEntries(); tk++) {
+    TString& tok = ((TObjString*) (optionTokens->At(tk)))->String();
+    if (tok.BeginsWith("y20")){
+      tag = tok.Data();
+      optionTokens->RemoveAt(tk);
+      optionTokens->Compress();
+      break;
+    }  
+  }
 
   // Let agml know we want the ROOT geometry
   AgModule::SetStacker( new StarTGeoStacker );
@@ -95,14 +132,15 @@ void loadLibsAgML(const char* tag=0)
   }
 }
 
-void loadLibsMtd()
+bool findAndRemoveOption(const char* optionName, TObjArray* optionTokens)
 {
-  gSystem->Load("StDetectorDbMaker");
-  gSystem->Load("StarMagField");
-  gSystem->Load("StMagF");
-  gSystem->Load("StMtdUtil");
-  gSystem->Load("StMtdMatchMaker");
-  gSystem->Load("StMtdCalibMaker");
+  TObject* obj = optionTokens->FindObject(optionName);
+  if (obj) {
+    optionTokens->Remove(obj);
+    optionTokens->Compress();
+    return true;
+  }
+  return false;
 }
 
 void genDst(unsigned int First,
@@ -134,8 +172,6 @@ void genDst(unsigned int First,
   StMaker* processMaker = 0;
   TFile* outFile = 0;
   TTree* muDstTreeOut = 0;
-  TObject* obj = 0;
-  int tk = 0;
 
   // Basic decisions based on options
   TString Options = options;
@@ -144,10 +180,7 @@ void genDst(unsigned int First,
   TObjArray* optionTokens = Options.Tokenize(optDelim);
   optionTokens->SetOwner(kTRUE);
 
-  if (obj = optionTokens->FindObject("picodst")) {
-
-    optionTokens->Remove(obj);
-    optionTokens->Compress();
+  if (findAndRemoveOption("picodst",optionTokens)) {
 
     loadLibsPico();
 
@@ -177,22 +210,29 @@ void genDst(unsigned int First,
     trigSimu->useOfflineDB();
     trigSimu->bemc->setConfig(StBemcTriggerSimu::kOffline);
 
-    if (obj = optionTokens->FindObject("mtdmatch")) {
+    if (findAndRemoveOption("btofmatch",optionTokens)) {
 
-      optionTokens->Remove(obj);
-      optionTokens->Compress();
+      procGeoTag(optionTokens);
+      loadLibsBTof();
 
-      const char* tag = 0;
-      for (tk=0; tk < optionTokens->GetEntries(); tk++) {
-        TString& tok = ((TObjString*) (optionTokens->At(tk)))->String();
-        if (tok.BeginsWith("y20")){
-          tag = tok.Data();
-          optionTokens->RemoveAt(tk);
-          optionTokens->Compress();
-          break;
-        }  
+      // instantiate both VPD and BTOF CalibMakers and MatchMaker and point them to the MuDST
+      StBTofMatchMaker* btofMatch = new StBTofMatchMaker();
+      btofMatch->setMuDstIn();
+      StVpdCalibMaker *vpdCalib = new StVpdCalibMaker();
+      vpdCalib->setMuDstIn();
+      StBTofCalibMaker *btofCalib = new StBTofCalibMaker();
+      btofCalib->setMuDstIn();
+
+      if (findAndRemoveOption("btofstartless",optionTokens)) {
+        //Disable the VPD as start detector, BTOF calib maker will switch to the "start-less" algorithm.
+        vpdCalib->setUseVpdStart(kFALSE);
       }
-      loadLibsAgML(tag);
+
+    }
+
+    if (findAndRemoveOption("mtdmatch",optionTokens)) {
+
+      procGeoTag(optionTokens);
       loadLibsMtd();
 
       StMagFMaker* magfMk = new StMagFMaker;
@@ -245,7 +285,7 @@ void genDst(unsigned int First,
 
   // Set additional options as maker attributes
   if (processMaker) {
-    for (tk=0; tk < optionTokens->GetEntries(); tk++) {
+    for (int tk=0; tk < optionTokens->GetEntries(); tk++) {
       TString& tok = ((TObjString*) (optionTokens->At(tk)))->String();
       Ssiz_t delim = tok.First(':');
       if (delim < 0) {
@@ -314,6 +354,9 @@ void genDst(unsigned int Last,
 /////////////////////////////////////////////////////////////////////////////
 //
 // $Log: genDst.C,v $
+// Revision 1.3  2018/03/16 18:41:14  genevb
+// Add BTof-matching
+//
 // Revision 1.2  2017/12/15 18:36:53  genevb
 // Remove explicit function of StPicoDstMaker...params should be passed by attribute
 //
