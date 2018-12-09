@@ -64,6 +64,9 @@ public:
 
 	u_char fee_err[24][4][16][64] ;
 
+	u_short pulser_peak_timebin ;	// because of differences in lab vs STAR
+	u_char pulser_in_star ;	// because it is noisy
+
 private:
 
 	u_short fee_mask[24][4] ;

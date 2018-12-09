@@ -1,7 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.93 2018/06/21 22:23:08 perev Exp $
+// $Id: StTrsMaker.cxx,v 1.94 2018/12/07 17:59:39 genevb Exp $
 //
 
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.94  2018/12/07 17:59:39  genevb
+// Avoid using 0 as random seed when intent is to fix seed
+//
 // Revision 1.93  2018/06/21 22:23:08  perev
 // TpcGroup fixes
 //
@@ -417,7 +420,7 @@ using std::max;
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.93 2018/06/21 22:23:08 perev Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.94 2018/12/07 17:59:39 genevb Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -670,7 +673,9 @@ Int_t StTrsMaker::Make(){
     St_g2t_event *g2tevent = (St_g2t_event *)(geant("g2t_event"));
     if ( !g2tevent  )  return kStWarn;
     g2t_event_st *event = g2tevent->GetTable();
-    StTrsRandom::inst().SetSeed(event->ge_rndm[0]^event->ge_rndm[1]);
+    seed = event->ge_rndm[0]^event->ge_rndm[1];
+    if (seed) StTrsRandom::inst().SetSeed(seed);
+    gMessMgr->QAInfo()  << "========= TRS Seed  used = " <<  StTrsRandom::inst().GetSeed()<< endm;
 
     
     St_g2t_tpc_hit *g2t_tpc_hit =

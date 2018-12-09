@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include <rtsLog.h>
 #include <DAQ_ITPC/itpcCore.h>
@@ -14,6 +15,9 @@ itpcPed::itpcPed()
 {
 	memset(ped_p,0,sizeof(ped_p)) ;
 	memset(padplane_id,0,sizeof(padplane_id)) ;
+
+	pulser_peak_timebin = 90 ;	// as on the iFEE test stand in the lab!
+	pulser_in_star = 0 ;
 }
 
 
@@ -239,6 +243,11 @@ int itpcPed::sanity(int mode)
 	u_int bad_cou =0 ;
 	u_int good_cou =0 ;
 
+	if(mode) {
+		LOG(INFO,"Using pulser peak timebin %d, in STAR %c",
+		    pulser_peak_timebin, pulser_in_star?'Y':'N') ;
+	}
+
 	for(int s=0;s<24;s++) {
 	for(int r=0;r<4;r++) {
 		if(ped_p[s][r][0][0]==0) continue ;
@@ -282,15 +291,24 @@ int itpcPed::sanity(int mode)
 				m_ped /= m_cou ;
 				m_rms /= m_cou ;
 
-				double pulser = pt->ped[90] - m_ped ; 	// this is where the pulser on the FEE QA stand resides
+				double pulser = pt->ped[pulser_peak_timebin] - m_ped ; 	// this is where the pulser on the FEE QA stand resides
 
 				int bad = 0 ;
 
 				if(row) {	// only for connected pads!
-					if((m_rms<0.5) || (m_rms>1.8)) bad |= 1 ;
 					if((m_ped<40)||(m_ped>150)) bad |= 2 ;
+					if(m_rms < 0.5) bad |= 1 ;
 
-					if(pulser < 200 && mode == 1) bad |= 4 ;
+
+					// only check for non-pulser events because the STAR pulser is very noisy
+					if(mode==1 && pulser_in_star) {
+						if(m_rms>2.6) bad |= 1 ;
+					}
+					else {
+						if(m_rms>1.8) bad |= 1 ;
+					}
+
+					if(mode==1 && pulser < 200) bad |= 4 ;
 				}
 
 				if(bad) {
@@ -298,6 +316,7 @@ int itpcPed::sanity(int mode)
 					fee_err[s][r][p][c] |= bad ;
 					//LOG(TERR,"sector %d, rdo %d, port %d",s,r,p) ;
 					LOG(WARN,"Bad FEE Ch: Port %d, Channel %d (Padplane Id %d, rp %d:%d): flag 0x%0X: %.1f +- %.1f, %.1f",p+1,c,fee_id,row,pad,bad,m_ped,m_rms,pulser) ;
+					usleep(1000) ;
 				}
 				else {
 					good_cou++ ;
