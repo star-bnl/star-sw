@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.y2011.C,v 1.11 2018/12/03 22:42:18 fisyak Exp $
+// $Id: TpcResponseSimulator.y2011.C,v 1.12 2018/12/09 23:21:53 fisyak Exp $
 // $Log: TpcResponseSimulator.y2011.C,v $
+// Revision 1.12  2018/12/09 23:21:53  fisyak
+// Adjust TpcRS parameters
+//
 // Revision 1.11  2018/12/03 22:42:18  fisyak
 // Adjust gains in Simulation
 //
@@ -88,9 +91,9 @@ TDataSet *CreateTable() {
   row.OmegaTauScaleO        = 1.8  *1.201;  //HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
   // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
   // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
-  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 6.99114715017355337e-01 -8.07784e-03 -2.15639e-02;
+  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 6.99114715017355337e-01 -8.07784e-03 -2.15639e-02 + 0.0216009;
   row.SecRowCorIW[1] = row.SecRowCorIE[1] =                                       8.87382e-03;
-  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 9.79357470004933006e-01 +1.95399e-02 -1.47185e-01;
+  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 9.79357470004933006e-01 +1.95399e-02 -1.47185e-01 + 0.0216009;
   row.SecRowCorOW[1] = row.SecRowCorOE[1] =                                       1.08062e-03;
   // SecRow3CGFdaq_2011_pp500LowLum => Inner: 3.26428e-01 - -5.01720e-04*y; Outer: 2.68883e-01 + 1.23403e-04*y
   //                                          3.22907e-01                          2.72715e-01
