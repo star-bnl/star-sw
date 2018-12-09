@@ -22,9 +22,14 @@ using namespace units;
 #include "StTpcDb/StTpcDb.h"
 #include "StMagF.h"
 #include "TArrayF.h"
+#include "TArrayI.h"
 class Altro;
 class StTpcdEdxCorrection;
 class StTpcDigitalSector;
+class HitPoint_t;
+class g2t_tpc_hit_st;
+class g2t_vertex_st;
+class StTpcCoordinateTransform;
 struct SignalSum_t {
   Float_t      Sum;
   Short_t      Adc;
@@ -40,6 +45,7 @@ class StTpcRSMaker : public StMaker {
 	      kDistortion  = 4,// include distortions
 	      kNoToflight  = 5 // don't account for particle time of flight
   };
+  enum {kPadMax = 32, kTimeBacketMax = 64, kRowMax = 72};
   StTpcRSMaker(const char *name="TpcRS");
   virtual              ~StTpcRSMaker();
   virtual Int_t         InitRun(int runnumber);
@@ -78,6 +84,15 @@ class StTpcRSMaker : public StMaker {
   static Double_t Gatti(Double_t *x, Double_t *p);
   static Double_t InducedCharge(Double_t s, Double_t h, Double_t ra, Double_t Va, Double_t &t0);
   static Float_t  GetCutEle();
+#if defined(__CINT__) 
+  Bool_t TrackSegment2Propagate(g2t_tpc_hit_st *tpc_hitC, g2t_vertex_st *gver, HitPoint_t *TrackSegmentHits);
+  void   GenerateSignal(HitPoint_t *TrackSegmentHits,Int_t sector, Int_t rowMin, Int_t rowMax, Double_t sigmaJitterT, Double_t sigmaJitterX);
+  Double_t dEdxCorrection(HitPoint_t *TrackSegmentHits);
+#else
+  Bool_t TrackSegment2Propagate(g2t_tpc_hit_st *tpc_hitC, g2t_vertex_st *gver, HitPoint_t &TrackSegmentHits);
+  void   GenerateSignal(HitPoint_t &TrackSegmentHits, Int_t sector, Int_t rowMin, Int_t rowMax, Double_t sigmaJitterT, Double_t sigmaJitterX);
+  Double_t dEdxCorrection(HitPoint_t &TrackSegmentHits);
+#endif
   static TF1F     *fgTimeShape3[2];  //!
   static TF1F     *fgTimeShape0[2];   //!
   Char_t   beg[1];                    //!
@@ -87,17 +102,16 @@ class StTpcRSMaker : public StMaker {
   TH1D*    mdNdxL10;                  //!
   TH1D*    mdNdEL10;                  //!
   TF1F  *mShaperResponses[2][24];     //!
+  TF1F  *mShaperResponse;             //!
   TF1F  *mChargeFraction[2][24];      //!
   TF1F  *mPadResponseFunction[2][24]; //!
   TF1F  *mPolya[2];                   //!
   TF1F  *mGG;                         //! Gating Grid Transperency
   TF1   *mHeed;                       //!
   StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
-  Double_t InnerAlphaVariation;       //!
-  Double_t OuterAlphaVariation;       //!
+  Double_t InnerAlphaVariation[24];   //!
+  Double_t OuterAlphaVariation[24];   //!
   Altro *mAltro;                      //!
-  Char_t end[1];                      //!
-  Double_t             mLaserScale;   //!
   // local variables
   Int_t numberOfSectors;              //!
   Int_t NoPads;                       //!
@@ -111,15 +125,32 @@ class StTpcRSMaker : public StMaker {
   Double_t anodeWirePitch;            //!
   Double_t numberOfElectronsPerADCcount; //!
   Double_t anodeWireRadius;           //!
-  const Double_t minSignal;           //!
-  Double_t innerSectorAnodeVoltage;   //!
-  Double_t outerSectorAnodeVoltage;   //!
-  const Double_t ElectronRange;       //!
-  const Double_t ElectronRangeEnergy; //!
-  const Double_t ElectronRangePower;  //!
+  Double_t innerSectorAnodeVoltage[24];//!
+  Double_t outerSectorAnodeVoltage[24];//!
   Double_t      mtauIntegrationX[2];  //! for TPX inner=0/outer=1
   Double_t      mtauCX[2];            //! -"- 
   Double_t    mLocalYDirectionCoupling[2][24][7]; //!
+  Double_t   msMin, msMax;            //!
+  TArrayI    mNoTpcHitsAll;           //!
+  TArrayI    mNoTpcHitsReal;          //!
+  Int_t      mNSplittedHits;          //!
+  Double_t xOnWire, yOnWire, zOnWire; //!
+  Double_t mGainLocal;                //!
+  Double_t QAv;                       //!
+  Double_t TotalSignal;               //!
+  Int_t pad0;                         //!
+  Int_t tbk0;                         //!
+  Double_t TotalSignalInCluster;      //!
+  Double_t padsdE[kPadMax];           //!
+  Double_t tbksdE[kTimeBacketMax];    //!
+  Double_t rowsdEH[kRowMax];          //!
+  Double_t rowsdE[kRowMax];           //!
+  Char_t end[1];                      //!
+  Double_t             mLaserScale;   //!
+  const Double_t minSignal;           //!
+  const Double_t ElectronRange;       //!
+  const Double_t ElectronRangeEnergy; //!
+  const Double_t ElectronRangePower;  //!
   const Int_t NoOfSectors;            //!
   const Int_t NoOfPads;               //!
   const Int_t NoOfTimeBins;           //!
@@ -127,14 +158,17 @@ class StTpcRSMaker : public StMaker {
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.32 2018/11/01 13:27:20 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.33 2018/12/09 23:22:59 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.32 2018/11/01 13:27:20 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.33 2018/12/09 23:22:59 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.33  2018/12/09 23:22:59  fisyak
+// Reshape
+//
 // Revision 1.32  2018/11/01 13:27:20  fisyak
 // Synchronize mCutEle with GEANT3 tracking media setting for TPCE_SENSITIVE_GAS, bug#3369
 //

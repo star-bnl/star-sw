@@ -45,15 +45,15 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     ChainOpt+= "ftpc,trgd,ZDCvtx,Corr3,DbV20060421,useCDV,ITTF,tofDat,NosstIT,NosvtIT,SCEbyE,OGridLeak,OShortR,OSpaceZ2,TpxClu,TpxRaw";//-VFMinuit,";
     ChainOpt+= ",useInTracker";
     ChainOpt += ",McTpcAna,";
-  } else if (! RunOpt.Contains("RC.y",TString::kIgnoreCase) &&  
-	     ! RunOpt.Contains("MC.y",TString::kIgnoreCase)) {
+  } else if ( RunOpt.Contains("RC.y",TString::kIgnoreCase) ||
+	      RunOpt.Contains("MC.y",TString::kIgnoreCase)) {
     ChainOpt = RunOpt;
     ChainOpt += ",MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2";
     //  ChainOpt += "Corr4";// no dynamical distortion ! ,OSpaceZ2,OGridLeak3D,"; // check that StTpcRSMaker::kDistortion bit is set
     //  ChainOpt += "EvOut,MuDST,MiniMcMk,McTpcAna,IdTruth,useInTracker,-hitfilt,";
     //  ChainOpt += ",CMuDst,MiniMcMk,IdTruth,useInTracker,tree,";
     //    ChainOpt += ",CMuDst,McAna,IdTruth,useInTracker,tree,KFVertex,xgeometry,";
-    ChainOpt += ",CMuDst,IdTruth,useInTracker,tree,KFVertex,xgeometry,";
+    ChainOpt += ",CMuDst,IdTruth,useInTracker,tree,StiKFVertex,xgeometry,";
     ChainOpt += "bbcSim,btofsim,btofMatch,btofCalib,";
     ChainOpt += "EvOut,-hitfilt,";
     ChainOpt += "McTpcAna,";
