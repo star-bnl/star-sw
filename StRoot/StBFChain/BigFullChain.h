@@ -169,6 +169,9 @@ Bfc_st BFC[] = { // standard chains
   {"MC.y2005"        ,"","","tpcRS,srs,fss,ssd,y2005x,Idst,IAna,l0,tpcI,tpxClu,ftpc,SvtCL,svtDb,"
    "SsdIt,SvtIt,VFMinuit,geant,evout,tags,bbcSim,tofsim,emcY2,EEfs,GeantOut,big,useXGeom"
    ,                                                                                       "","","",kFALSE},
+  {"MC.y2005.noSvt"        ,"","","tpcRS,fss,y2005x,Idst,IAna,l0,tpcI,tpxClu,ftpc,"
+   "-SsdIt,-SvtIt,VFMinuit,geant,evout,tags,bbcSim,tofsim,emcY2,EEfs,GeantOut,big,useXGeom"
+   ,                                                                                       "","","",kFALSE},
   {"MC.y2006"        ,"","","tpcRS,fss,y2006h,Idst,IAna,l0,tpcI,tpxClu,ftpc,VFMinuit,NoSsdIt,NoSvtIt"
    ",MakeEvent,bbcSim,tofsim,tags,emcY2,EEfs,evout,IdTruth,geantout,big,useXGeom",         "","","",kFALSE},
   {"MC.y2007"        ,"","","tpcRS,srs,ssd,fss,y2007,Idst,BAna,tpcI,tpxClu,ftpc,SvtIt,SsdIt,"
@@ -295,6 +298,7 @@ Bfc_st BFC[] = { // standard chains
   {"RC.pp.y2004"     ,"","","pp2004,DbV20041213,beamLine"                                 ,"","","",kFALSE},
   {"RC.y2005"        ,"","","P2005,tofDat,MakeEvent,ssddat,sptd,SsdIt,SvtIt,pmdRaw,OShortR,OSpaceZ2"
    ,                                                                                       "","","",kFALSE},
+  {"RC.y2005.nosvt" ,"","","P2005,tofDat,MakeEvent,pmdRaw,OShortR,OSpaceZ2",               "","","",kFALSE},
   {"RC.pp.y2005"     ,"","","pp2005a,tofdat,OSpaceZ2,OGridLeak3D"                         ,"","","",kFALSE},
   {"RC.pp.y2006"     ,"","","pp2006b,OSpaceZ2,OGridLeak3D"                                ,"","","",kFALSE},
   {"RC.y2007"        ,"","","DbV20080418,B2007g,IAna,KeepSvtHit,hitfilt,VFMinuit3,emcDY2,ftpc,trgd,"
