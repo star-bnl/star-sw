@@ -18,4 +18,6 @@
   endif
 </command>
 <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/daq_2010_AuAu200F/*MuDst.root" />
+<stdout URL="file:./sched$JOBID.log" />
+
 </job>

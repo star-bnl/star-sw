@@ -21,9 +21,11 @@
 #  starver SL17i
 #root4star -q -b 'bfc.C(100,"P2005 DbV20060421 useCDV ITTF tofDat -svtIT SCEbyE OGridLeak OShortR OSpaceZ2 -hitfilt","'${evtsFile}'")' &gt;&amp; ${logFile}
 #root.exe -q -b 'bfc.C(9999,"P2005 DbV20060421 useCDV ITTF tofDat -svtIT SCEbyE OGridLeak OShortR OSpaceZ2 -hitfilt McTpcAna","'${evtsFile}'")' &gt;&amp; ${logFile}
- root.exe -q -b 'TpcRS.C(500,"rc.y2005","'${evtsFile}'","")' &gt;&amp; ${logFile}
+# root.exe -q -b 'TpcRS.C(1000,"rc.y2005","'${evtsFile}'","")' &gt;&amp; ${logFile}
+ root.exe -q -b 'TpcRS.C(1000,"rc.y2005.noSvt","'${evtsFile}'","")' &gt;&amp; ${logFile}
 </command>
 <stdout URL="file:./sched$JOBID.log" />
 <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2005/059/st_physics_adc_*.daq" />
+<input URL="file:/star/data03/daq/2005/059/st_physics_adc_*.daq" />
 
 </job>

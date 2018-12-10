@@ -16,8 +16,9 @@
   set logFile  = ${file}B.log
   set f=`find . -maxdepth 1 -type f -name "${file}*.root"`
   if ("$f" == "") then
-    root4star -q -b 'TpcRS.C(4000,"MC.y2005,TpcRS","'${evtsFile}'","Bichsel,PhysicsOff")' &gt;&amp; ${logFile}
+    root4star -q -b 'TpcRS.C(4000,"MC.y2005.noSvt,TpcRS","'${evtsFile}'","Bichsel,PhysicsOff")' &gt;&amp; ${logFile}
   endif
 </command>
-<input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/daq_2005_CuCu200/*MuDst.root" /> 
+<stdout URL="file:./sched$JOBID.log" />
+<input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/daq_2005_CuCu200G/*MuDst.root" /> 
 </job>
