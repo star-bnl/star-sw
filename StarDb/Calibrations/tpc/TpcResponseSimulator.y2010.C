@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.y2010.C,v 1.15 2018/12/03 22:42:18 fisyak Exp $
+// $Id: TpcResponseSimulator.y2010.C,v 1.16 2018/12/09 23:21:53 fisyak Exp $
 // $Log: TpcResponseSimulator.y2010.C,v $
+// Revision 1.16  2018/12/09 23:21:53  fisyak
+// Adjust TpcRS parameters
+//
 // Revision 1.15  2018/12/03 22:42:18  fisyak
 // Adjust gains in Simulation
 //
