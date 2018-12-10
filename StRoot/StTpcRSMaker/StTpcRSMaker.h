@@ -158,14 +158,17 @@ class StTpcRSMaker : public StMaker {
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.32 2018/11/01 13:27:20 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.33 2018/12/09 23:22:59 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.32 2018/11/01 13:27:20 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.33 2018/12/09 23:22:59 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.33  2018/12/09 23:22:59  fisyak
+// Reshape
+//
 // Revision 1.32  2018/11/01 13:27:20  fisyak
 // Synchronize mCutEle with GEANT3 tracking media setting for TPCE_SENSITIVE_GAS, bug#3369
 //

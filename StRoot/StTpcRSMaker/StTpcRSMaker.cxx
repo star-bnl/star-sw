@@ -77,7 +77,7 @@ struct HitPoint_t {
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.84 2018/11/29 22:19:49 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.85 2018/12/09 23:22:59 fisyak Exp $";
 #define __ClusterProfile__
 static Bool_t ClusterProfile = kFALSE;
 #define Laserino 170
@@ -2084,8 +2084,11 @@ Double_t StTpcRSMaker::dEdxCorrection(HitPoint_t &TrackSegmentHits) {
 //________________________________________________________________________________
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.84 2018/11/29 22:19:49 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.85 2018/12/09 23:22:59 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.85  2018/12/09 23:22:59  fisyak
+// Reshape
+//
 // Revision 1.84  2018/11/29 22:19:49  fisyak
 // Restore __STOPPED_ELECTRONS__, split for Inner and Outer sectors, adjusted gain for Run XVIII
 //
