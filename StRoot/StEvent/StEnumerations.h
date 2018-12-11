@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.66 2018/04/30 23:18:10 smirnovd Exp $
+ * $Id: StEnumerations.h,v 2.67 2018/12/11 19:53:10 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.67  2018/12/11 19:53:10  ullrich
+ * Added RICHf.
+ *
  * Revision 2.66  2018/04/30 23:18:10  smirnovd
  * [Cosmetic] Minor changes in various files
  *
@@ -618,6 +621,18 @@ enum StFpostConstants {
     kFpostNSlat=43,
     kFpostMaxSlat=241,
     kFpostNCandidate=6
+};
+
+enum StRHICfConstants{
+    kRHICfNtower=2,     // 0=small, 1=large                                                                                    
+    kRHICfNplate=16,    // longitudinal segmentations      
+    kRHICfNlayer=4,     // bar layers (longitudinal)                                                                           
+    kRHICfNxy=2,        // 0=x, 1=y                                                                                            
+    kRHICfNbarSmall=20, // bar# (0-19 for small)                                                                               
+    kRHICfNbarLarge=40, // bar# (0-39 for large)
+    kRHICfNcad=10,      // Local counts for DAQ
+    kRHICfNtdc=256,     // TDC
+    kRHICfNgpio=54      // Flags                                
 };
 
 /** For more IST related constants see StRoot/StIstUtil/StistConsts.h */

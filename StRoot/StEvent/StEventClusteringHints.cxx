@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.cxx,v 2.40 2018/07/09 14:54:37 ullrich Exp $
+ * $Id: StEventClusteringHints.cxx,v 2.41 2018/12/11 19:53:10 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.cxx,v $
+ * Revision 2.41  2018/12/11 19:53:10  ullrich
+ * Added RICHf.
+ *
  * Revision 2.40  2018/07/09 14:54:37  ullrich
  * Changed to add ETof.
  *
@@ -134,7 +137,7 @@
 #include "StEventClusteringHints.h"
 #include <algorithm>
 
-static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.40 2018/07/09 14:54:37 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.41 2018/12/11 19:53:10 ullrich Exp $";
 
 ClassImp(StEventClusteringHints)
 
@@ -177,6 +180,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StSPtrVecCalibrationVertex",  "evt_vertices", 5);
     setBranch("StEmcCollection",             "evt_emc",      6);
     setBranch("StFmsCollection",             "evt_emc",      6);
+    setBranch("StRHICfCollection",           "evt_emc",      6);
     setBranch("StRichCollection",            "evt_aux",      7);
     setBranch("StTofCollection",             "evt_aux",      7);
     setBranch("StBTofCollection",            "evt_aux",      7);
@@ -205,6 +209,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StEventClusteringHints",      "event", 1);
     setBranch("StEmcCollection",             "event", 1);
     setBranch("StFmsCollection",             "event", 1);
+    setBranch("StRHICfCollection",           "event", 1);
     setBranch("StRichCollection",            "event", 1);
     setBranch("StTofCollection",             "event", 1);
     setBranch("StBTofCollection",            "event", 1);
