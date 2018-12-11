@@ -123,12 +123,12 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
       if (cor->min < cor->max)   X = TMath::Max(0.,TMath::Min(1.,(X - cor->min)/( cor->max - cor->min)));
       break;
     case 3:
-      if (TMath::Abs(TMath::Abs(x) - 1) < 1.e-7) X = 0;
-      else                                       X = TMath::Log(1. - TMath::Abs(x));
+      if (TMath::Abs(x) >= 1) X = 0;
+      else                    X = TMath::Log(1. - TMath::Abs(x));
       break;
     case 4:
-      if (TMath::Abs(TMath::Abs(x) - 1) < 1.e-7) X = 0;
-      else                                       X = TMath::Sign(TMath::Log(1. - TMath::Abs(x)),x);
+      if (TMath::Abs(x) >= 1) X = 0;
+      else                    X = TMath::Sign(TMath::Log(1. - TMath::Abs(x)),x);
       break;
     case 5:
       if (x < 1e-7) X = -16.118;

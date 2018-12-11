@@ -796,6 +796,11 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	}
 	// dE/dx correction
 	Double_t dEdxCor = dEdxCorrection(TrackSegmentHits[iSegHits]);
+#ifdef __DEBUG__
+	if (TMath::IsNaN(dEdxCor)) {
+	  iBreak++;
+	}
+#endif
 	if (dEdxCor <= 0.) continue;
 	if (ClusterProfile) {
 	  checkList[io][4]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),dEdxCor);
@@ -1993,6 +1998,12 @@ void StTpcRSMaker::GenerateSignal(HitPoint_t &TrackSegmentHits, Int_t sector, In
       for(Int_t itbin=bin_low;itbin<=bin_high;itbin++, index++){
 	Double_t signal = XYcoupling*TimeCouplings[itbin-bin_low];
 	if (signal < minSignal)  continue;
+#ifdef __DEBUG__
+	static Int_t iBreak = 0;
+	if (TMath::IsNaN(signal) || TMath::IsNaN(SignalSum[index].Sum)) {
+	  iBreak++;
+	}
+#endif
 	TotalSignalInCluster += signal;
 	SignalSum[index].Sum += signal;
 	if (ClusterProfile) {
@@ -2031,6 +2042,7 @@ void StTpcRSMaker::GenerateSignal(HitPoint_t &TrackSegmentHits, Int_t sector, In
 Double_t StTpcRSMaker::dEdxCorrection(HitPoint_t &TrackSegmentHits) {
   Double_t dEdxCor = 1;
   if (m_TpcdEdxCorrection) {
+    dEdxCor = -1;
     Double_t dStep =  TMath::Abs(TrackSegmentHits.tpc_hitC->ds);
     dEdxY2_t CdEdx;
     memset (&CdEdx, 0, sizeof(dEdxY2_t));
@@ -2056,9 +2068,9 @@ Double_t StTpcRSMaker::dEdxCorrection(HitPoint_t &TrackSegmentHits) {
 	(tpcHit->idTruth() && tpcHit->qaTruth() > 95)) CdEdx.lSimulated = tpcHit->idTruth();
 #endif
     CdEdx.F.dx     = dStep;
-    CdEdx.xyz[0] = TrackSegmentHits.xyzG.position().x();
-    CdEdx.xyz[1] = TrackSegmentHits.xyzG.position().y();
-    CdEdx.xyz[2] = TrackSegmentHits.xyzG.position().z();
+    CdEdx.xyz[0] = TrackSegmentHits.coorLS.position().x();
+    CdEdx.xyz[1] = TrackSegmentHits.coorLS.position().y();
+    CdEdx.xyz[2] = TrackSegmentHits.coorLS.position().z();
     Double_t probablePad = St_tpcPadConfigC::instance()->numberOfPadsAtRow(CdEdx.sector,CdEdx.row)/2;
     Double_t pitch = (CdEdx.row <= St_tpcPadConfigC::instance()->numberOfInnerRows(CdEdx.sector)) ?
       St_tpcPadConfigC::instance()->innerSectorPadPitch(CdEdx.sector) :

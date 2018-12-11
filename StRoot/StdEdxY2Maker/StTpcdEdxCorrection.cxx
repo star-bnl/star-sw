@@ -225,6 +225,8 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   VarXs[ktpcGasTemperature]    = gas->outputGasTemperature;     
   VarXs[ktpcWaterOut]          = gas->ppmWaterOut;     
   VarXs[kEdge]                 = CdEdx.PhiR;
+  if (VarXs[kEdge] < -1) VarXs[kEdge] = -1;
+  if (VarXs[kEdge] >  1) VarXs[kEdge] =  1;    
   VarXs[kPhiDirection]         = (TMath::Abs(CdEdx.xyzD[0]) > 1.e-7) ? TMath::Abs(CdEdx.xyzD[1]/CdEdx.xyzD[0]) : 999.;
   VarXs[kTanL]                 = CdEdx.TanL;     
   VarXs[ktpcTime]              = CdEdx.tpcTime; 
