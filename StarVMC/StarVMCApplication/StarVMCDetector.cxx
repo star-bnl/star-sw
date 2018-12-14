@@ -244,7 +244,7 @@ St_g2t_Chair *StarVMCDetector::NewChair(const Char_t *type, const Char_t *name) 
 }
 //________________________________________________________________________________
 void StarVMCDetector::SetNVmax(Int_t N, Int_t *array) {
-  fNVmax.Set(N, array);
+  if (N) fNVmax.Set(N, array);
   if (fN10.GetSize() == 0) {
     fN10.Set(N);
     if (N > 0) fN10[N-1] = 1;

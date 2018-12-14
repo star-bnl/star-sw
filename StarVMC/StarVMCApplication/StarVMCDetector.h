@@ -19,7 +19,7 @@ class StarVMCDetector : public TDataSet {
   void SetChair(St_g2t_Chair *Chair=0) {fChair = Chair;}
   void SetFMT(const Char_t *fmt);
   void SetNVmax(Int_t N, Int_t *array);
-  void SetNVp10(Int_t N, Int_t *array) {fN10.Set(N, array);}
+  void SetNVp10(Int_t N, Int_t *array) {if (N) fN10.Set(N, array);}
   void SetIds(Int_t N=0, Int_t *array=0);
   const TString &GetFMT()   const {return *&fFMT;}
   const TArrayI &GetNVmax() const {return *&fNVmax;}
