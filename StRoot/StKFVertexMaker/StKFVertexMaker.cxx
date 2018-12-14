@@ -34,6 +34,8 @@
 #include "StTMVARank/TMVArank.h"
 #include "StTMVARank/StTMVARanking.h"
 #include "StarMagField/StarMagField.h"
+#include "StGenericVertexMaker/StGenericVertexFinder.h"
+#include "StGenericVertexMaker/StGenericVertexMaker.h"
 using namespace TMVA;
 ClassImp(StKFVertexMaker);
 #ifdef StTrackMassFit_hh
@@ -250,11 +252,14 @@ Int_t StKFVertexMaker::Make() {
     return kStOK;        // if no event, we're done
   }
   StKFVertex::ResetTotalNoVertices();
-#if 0
+#if 1
   // add Fixed Primary vertex if any
-  if (StiToolkit::instance()->getVertexFinder() && (IAttr("VFFV") || IAttr("VFMCE"))) {
-    StiToolkit::instance()->getVertexFinder()->fit(pEvent);
-    const std::vector<StiHit*> *vertexes = StiToolkit::instance()->getVertexFinder()->result();
+  StGenericVertexFinder *mGVF = 0;
+  StGenericVertexMaker* gvm = (StGenericVertexMaker*)StMaker::GetChain()->GetMaker("GenericVertex");
+  if (gvm) mGVF = gvm->GetGenericFinder();
+  if (mGVF && (IAttr("VFFV") || IAttr("VFMCE"))) {
+    mGVF->fit(pEvent);
+    const std::vector<StPrimaryVertex> *vertexes = mGVF->result();
     if (vertexes) StKFVertex::ResetTotalNoVertices(vertexes->size());
     UInt_t NoPV = pEvent->numberOfPrimaryVertices();
     for (UInt_t ipv = 0; ipv < NoPV; ipv++) {
