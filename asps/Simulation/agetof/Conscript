@@ -31,14 +31,14 @@ my $CERNLIBS   = "-L$ROOTSYS/lib -lminicern"; #print "CERNLIBS = $CERNLIBs =====
 my $CXX_VERSION= $env->{CXX_VERSION};
 
 
-#if ($FC eq 'pgf77') {# || $STAR_SYS =~ /x86_darwin/) 
-#  $CERNLIBS = `cernlib kernlib`;
-#  chomp($CERNLIBS);
-#    $FC       = $env->{G77}; 
-#    print "set FC => $FC ==============================\n" if $param::debug;
-#    $FFLAGS   = $env->{G77FLAGS}; 
-#    $FEXTEND  = $env->{G77EXTEND};
-#}
+if ($FC eq 'pgf77') {# || $STAR_SYS =~ /x86_darwin/) 
+  $CERNLIBS = `cernlib kernlib`;
+  chomp($CERNLIBS);
+#  $FC       = $env->{G77}; 
+  print "set FC => $FC ==============================\n" if $param::debug;
+  $FFLAGS   = $env->{G77FLAGS}; 
+  $FEXTEND  = $env->{G77EXTEND};
+}
 my $LD        = $env->{LD}; #!
 # if ($LD eq 'g++') {
 #  $LD = "gcc";
