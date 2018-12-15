@@ -82,8 +82,9 @@ TDataSet *CreateTable() {
   row.OmegaTauScaleO        = 1.8; // i 1.8  *1.201;  //HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
   // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
   // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
-  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 9.13547015017355246e-01 + 6.84784e-03 -1.83501e-01; 
-  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 1.08188887000493295e+00  -2.77741e-02 -8.03032e-02;
+  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 9.13547015017355246e-01 + 6.84784e-03 -1.83501e-01 -7.48405e-02; 
+  row.SecRowCorIW[1] = row.SecRowCorIE[1] =                                                     4.30534e-03;
+  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 1.08188887000493295e+00  -2.77741e-02 -8.03032e-02 -2.59166e-02;
   /* SecRow3CGFTpcRS_2005_CuCu22_a :  FitP->Draw("sigma:y>>s(45,0.5,45.5)","(i&&j)/dsigma**2","profg")
                                       Inner : 3.40619e-01, Outer:  2.97670e-01
       SecRow3CGFTpcRS_2005_CuCu22_a : Inner : 3.21839e-01, Outer:  2.86936e-01
