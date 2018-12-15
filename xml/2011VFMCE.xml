@@ -9,7 +9,7 @@
   setenv STARFPE NO
 #  setup 64b
 #  setup gcc
-#  starver TFG18n
+  starver TFG18n
   echo $INPUTFILE0 | grep ':'
   if (! $?) then
     set rung  = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
@@ -35,12 +35,12 @@
 #  set chain = "MC.2016a,istSlowSim"${Sti}",StiPulls,-hitfilt,StiHftC,beamLine,-geantOut,-evout,noRunco,noHistos,noTags,vmc,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
 #  set chain = "MC.2016a,istSlowSim"${Sti}",StiPulls,-hitfilt,KFVertex,StiHftC,beamLine,geantOut,evout,picoWrite,PicoVtxVpd,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
 #  set chain = "MC.2016a,istSlowSim"${Sti}",StiPulls,-hitfilt,KFVertex,StiHftC,beamLine,-geantOut,-evout,picoWrite,PicoVtxVpd,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
- # set chain = "MC.y2010a"${Sti}",-hitfilt,KFVertex,-geantOut,-evout,picoWrite,PicoVtxVpd,noRunco,noHistos,noTags,vmc,VMCAlignment,Corr4,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
- set chain = "TpcRS,TpxClu,y2010a,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,tpcDB,TpcHitMover,btofsim,btofMatch,btofCalib,evout,IdTruth,geantout"${Sti}",-hitfilt,KFVertex,-geantOut,-evout,picoWrite,PicoVtxVpd,noRunco,noHistos,noTags,vmc,Corr4,OSpaceZ2,OGridLeak3D,McEvent,"${name};
+ # set chain = "MC.y2011"${Sti}",-hitfilt,KFVertex,-geantOut,-evout,picoWrite,PicoVtxVpd,noRunco,noHistos,noTags,vmc,VMCAlignment,Corr4,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
+ set chain = "TpcRS,TpxClu,y2011,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,tpcDB,TpcHitMover,btofsim,btofMatch,btofCalib,evout,IdTruth,geantout"${Sti}",-hitfilt,KFVertex,-geantOut,-evout,picoWrite,PicoVtxVpd,noRunco,noHistos,noTags,vmc,Corr4,OSpaceZ2,OGridLeak3D,"${name};
  set sdt = "";
   set VFMCE = "";
   echo $Name | grep -i Ideal
-#  if ($?) set sdt = ",sdt20100301";
+#  if ($?) set sdt = ",sdt20110301";
   echo $Name | grep -i 20Muons
   if ( $? ) set VFMCE = ",VFMCE";
   set Chain = ${chain}${VFMCE}${sdt}",Rung."${rung}
@@ -53,5 +53,5 @@
     root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'","'${tag}'")' &gt;&amp; ${logFile}
   endif
 </command>
-<input URL="command:RunId.pl 2001 10000 1000" />
+<input URL="command:RunId.pl 1 100 100" />
 </job>
