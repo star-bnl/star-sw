@@ -112,46 +112,27 @@ switch ($pkg)
 
     case "PGI":
     case "pgi":
-      # PGI compiler - this may be used
-      if ( ! $?PGI) then
-        # should be defined but does not hurt for now to protect
-        if ( ! $?USE_64BITS ) then
-	   setenv USE_64BITS 0
-	endif
-	if ( $USE_64BITS == 1 ) then
-	   set x="/usr/pgi64 /usr/pgi"
-	else
-	   set x="/usr/pgi"
-	endif
-
-	foreach d ($x)
-	    if ( -d $d ) then
-		#echo "Setting PGI to $d"
-		setenv PGI $d
-		break
-	    endif
-	end
-      endif
-      if ( $?PGI ) then
-	if ( ! -d $PGI/linux86/bin && -e $PGI/linux86 ) then
-	    set version=`ls  $PGI/linux86/ | tail -1`
-	    setenv PGI_V linux86/$version
-	else
-	    setenv PGI_V linux86
-	endif
-	setenv PATH `${GROUP_DIR}/dropit -p $PGI/$PGI_V/bin -p $PATH`
-	if ( -d $PGI/$PGI_V/man) then
+#% setenv PGI /software/pgi
+#% set path=(/software/pgi/linux86-64/18.10/bin $path)
+#% setenv MANPATH "$MANPATH":/software/pgi/linux86-64/18.10/man
+#% setenv LM_LICENSE_FILE /software/pgi/license.dat:"$LM_LICENSE_FILE"      # PGI compiler - this may be used
+    if ( ! $?PGI) then
+      if(-d /software/pgi) then
+	setenv PGI /software/pgi
+	setenv USE_64BITS 1
+	setenv PGI_V linux86-64/18.10
+	if (-d $PGI/$PGI_V/bin) then
+	  setenv PATH `${GROUP_DIR}/dropit -p $PGI/$PGI_V/bin -p $PATH`
+	  if ( -d $PGI/$PGI_V/man) then
 	    setenv MANPATH `${GROUP_DIR}/dropit -p ${MANPATH} -p ${PGI}/${PGI_V}/man`
+          endif
+          setenv LM_LICENSE_FILE $PGI/license.dat
 	else
-	    setenv MANPATH `${GROUP_DIR}/dropit -p ${MANPATH} -p ${PGI}/man`
-	    #alias  pgman 'man -M $PGI/man'
+	  unsetenv PGI
 	endif
-	setenv PGILIB  ${PGI}/${PGI_V}/lib
-	setenv LM_LICENSE_FILE $PGI/license.dat
       endif
-      breaksw
-
-
+    endif
+    breaksw
 
     case "OSG":
     case "Grid":
