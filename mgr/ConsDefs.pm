@@ -37,6 +37,9 @@
  $CXX          = `root-config --cxx`; chomp($CXX);
  $SO           = $CXX;
  $FC           = `root-config --f77`; chomp($FC);
+ if ($PGI) {
+   $FC    = "pgf77";
+ }
  $LD           = `root-config  --ld`; chomp($LD);
  $LDFLAGS      = `root-config  --ldflags`; chomp($LDFLAGS); 
  $LDFLAGS     .= " -rdynamic";
@@ -156,13 +159,20 @@
     $CXXFLAGS .= " -Wall -Woverloaded-virtual -Wcast-align -fno-threadsafe-statics";
     $CFLAGS   .= " -Wall -Wcast-align";
     $FFLAGS   .= " -fPIC -pipe";
-    $FFLAGS   .= " -std=legacy -fno-second-underscore -fno-automatic -Waliasing -Wampersand -Wsurprising -Wintrinsics-std -Wno-tabs -Wintrinsic-shadow -Wsurprising -Wcast-align"; # -Wline-truncation  -W
-   $FEXTEND = "-ffixed-line-length-132";
+    if ($FC eq 'pgf77') {
+      $FFLAGS = "";
+      $FEXTEND = "-Mextend";
+    } else {
+      $FFLAGS   .= " -std=legacy -fno-second-underscore -fno-automatic -Waliasing -Wampersand -Wsurprising -Wintrinsics-std -Wno-tabs -Wintrinsic-shadow -Wsurprising -Wcast-align"; # -Wline-truncation  -W
+      $FEXTEND = "-ffixed-line-length-132";
+    }
    $CERNLIB_FPPFLAGS .= " -DCERNLIB_GCC" . $CXX_MAJOR;
    
  } else {
    if ($CXX eq "icc" or $CXX eq "icpc") {
      $SOFLAGS      .= " -shared -u*";
+	$PGI           = "";
+	$PGILIB        = "";
      if ($USE_64BITS){
        $LDFLAGS  .= " -m64";
        $SOFLAGS  .= " -m64";
