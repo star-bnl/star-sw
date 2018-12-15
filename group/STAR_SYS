@@ -211,6 +211,9 @@ if ("${STAR_SYS}" == "sl64_x8664_gcc447") setenv STAR_HOST_SYS sl64_x8664_gcc482
 if ($?DECHO) echo "STAR_SYS = ${STAR_SYS}, STAR_HOST_SYS = ${STAR_HOST_SYS}"
 
 #  $Log: STAR_SYS,v $
+#  Revision 1.57  2018/12/14 19:03:38  jeromel
+#  Cosmetic change
+#
 #  Revision 1.56  2016/04/28 14:44:25  jeromel
 #  Allow for wildcard support of compiler family (so we can specify STARCMPL to anything defining STAR_SYS / STAR_HOST_SYS properly)
 #
@@ -390,5 +393,5 @@ if ($?DECHO) echo "STAR_SYS = ${STAR_SYS}, STAR_HOST_SYS = ${STAR_HOST_SYS}"
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 2016/04/28 14:44:25 $
+#             Last modification $Date: 2018/12/14 19:03:38 $
 #

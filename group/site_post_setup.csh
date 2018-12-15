@@ -30,9 +30,9 @@ switch ($DOMAINNAME)
    case "usatlas.bnl.gov":
     setenv WWW_HOME     "http://www.rhic.bnl.gov"
     setenv NNTPSERVER   "news.bnl.gov"
-    setenv http_proxy   "http://proxy.sec.bnl.local:3128/"
-    setenv https_proxy  "http://proxy.sec.bnl.local:3128/"
-    setenv ftp_proxy    "http://proxy.sec.bnl.local:3128/"
+#    setenv http_proxy   "http://proxy.sec.bnl.local:3128/"
+#    setenv https_proxy  "http://proxy.sec.bnl.local:3128/"
+#    setenv ftp_proxy    "http://proxy.sec.bnl.local:3128/"
     breaksw
 
   default:
