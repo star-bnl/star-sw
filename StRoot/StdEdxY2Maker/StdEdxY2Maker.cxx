@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.95 2018/10/18 20:17:32 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.96 2018/12/16 14:27:27 fisyak Exp $
 //#define CompareWithToF 
 //#define __USEZ3A__
 //#define __CHECK_LargedEdx__
@@ -709,7 +709,7 @@ Int_t StdEdxY2Maker::Make(){
 	if (pTrack->vertex() != pEvent->primaryVertex()) continue; // only the first primary vertex
 	//      if ( ((StPrimaryVertex *) pTrack->vertex() )->numMatchesWithBEMC() <= 0) continue;
       } else {// try to use VpdZ to select best vertex
-	if (pTrack->vertex() != pVbest) continue;
+	if (pVbest && pTrack->vertex() != pVbest) continue;
       }
 #endif /* __BEST_VERTEX__ */
       Histogramming(gTrack);
