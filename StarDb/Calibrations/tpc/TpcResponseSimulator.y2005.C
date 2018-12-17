@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.C,v 1.15 2018/10/17 20:45:17 fisyak Exp $
-// $Log: TpcResponseSimulator.C,v $
+// $Id: TpcResponseSimulator.y2005.C,v 1.1 2018/12/16 20:37:45 fisyak Exp $
+// $Log: TpcResponseSimulator.y2005.C,v $
+// Revision 1.1  2018/12/16 20:37:45  fisyak
+// Ajust 2005 CuCu200
+//
 // Revision 1.15  2018/10/17 20:45:17  fisyak
 // Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
 //
