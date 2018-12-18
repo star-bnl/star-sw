@@ -139,7 +139,9 @@ int gl3HistoManager::listenAtPort(int port)
     gl3Address.sin_addr.s_addr = INADDR_ANY; // automatically fill with my IP
     bzero(&(gl3Address.sin_zero), 8);        // zero the rest of the struct
 
-    if (::bind(socketFd, (struct sockaddr *)&gl3Address, sizeof(struct sockaddr)) == -1) {
+    
+    if (bind(socketFd, (struct sockaddr *)&gl3Address, 
+	     sizeof(struct sockaddr)) == -1) {
 	LOG(ERR, "gl3HistoManager::listen: bind: %s\n",strerror(errno) ,0,0,0,0);
 	return -1;  
     }
