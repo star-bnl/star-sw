@@ -557,6 +557,9 @@ Int_t StBFChain::Instantiate()
     // ---
     //		Sti(ITTF) start
     // ---
+    if (maker == "StxMaker" && GetOption("StxCA")) {
+      mk->SetAttr("Undefined", 1); // switch off Fit
+    }
     if (maker == "StiMaker" || maker == "StiVMCMaker" || maker == "StvMaker" || maker == "StxMaker") {
       if ( maker == "StvMaker" &&  GetOption("StvCA")) {
 	//      mk->SetAttr("seedFinders","CA","Stv");              // for CA seed finder

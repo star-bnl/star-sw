@@ -34,8 +34,8 @@ class StxMaker : public StMaker {
   void FillGlobalTrack(genfit::Track *kTrack);
   void FillPrimaryTracks();
   void FillPrimaryTrack(StPrimaryTrack *pTrack);
-  Int_t FillDetectorInfo(StTrack *gTrack, genfit::Track * track, bool refCountIncr) ;
-  void FillGeometry(StTrack* gTrack, genfit::Track * track, bool outer);
+  Int_t FillDetectorInfo(StTrack *gTrack, genfit::Track * track, Bool_t refCountIncr) ;
+  void FillGeometry(StTrack* gTrack, genfit::Track * track, Bool_t outer);
   Int_t FillTrack(StTrack* gTrack, genfit::Track * track);
   void FillDca(StTrack* stTrack, genfit::Track * track);
   /// Displayed on session exit, leave it as-is please ...

@@ -255,40 +255,60 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
   static TStopwatch *watch = new  TStopwatch;
   watch->Start(kTRUE);
 #endif
-  //static const genfit::eFitterType fitterId = genfit::SimpleKalman;
-  static const genfit::eFitterType fitterId = genfit::RefKalman;
-  //static const genfit::eFitterType fitterId = genfit::DafRef;
-  //static const genfit::eFitterType fitterId = genfit::DafSimple;
-  //static const genfit::eMultipleMeasurementHandling mmHandling = genfit::weightedAverage;
-  //static const genfit::eMultipleMeasurementHandling mmHandling = genfit::unweightedClosestToReference;
-  //static const genfit::eMultipleMeasurementHandling mmHandling = genfit::unweightedClosestToPrediction;
-  //static const genfit::eMultipleMeasurementHandling mmHandling = genfit::weightedClosestToReference;
-  //static const genfit::eMultipleMeasurementHandling mmHandling = genfit::weightedClosestToPrediction;
-  //static const genfit::eMultipleMeasurementHandling mmHandling = genfit::unweightedClosestToReferenceWire;
-  static const genfit::eMultipleMeasurementHandling mmHandling = genfit::unweightedClosestToPredictionWire;
-  //static const genfit::eMultipleMeasurementHandling mmHandling = genfit::weightedClosestToReferenceWire;
-  //static const genfit::eMultipleMeasurementHandling mmHandling = genfit::weightedClosestToPredictionWire;
+  static genfit::eFitterType          fitterId = genfit::Undefined;
+  static genfit::eMultipleMeasurementHandling mmHandling = genfit::undefined;
   static const Int_t nIter = 20; // max number of iterations
   static const Double_t dPVal = 1.E-3; // convergence criterion
-  
-  //  static const bool resort = false;
-  //  static const bool prefit = false; // make a simple Kalman iteration before the actual fit
-  //  static const bool refit  = false; // if fit did not converge, try to fit again
-  
-  static const bool twoReps = false; // test if everything works with more than one rep in the tracks
-  
-  //  static const bool checkPruning = true; // test pruning
-  static const bool matFX = true; // false;         // include material effects; can only be disabled for RKTrackRep!
-  //  static const bool onlyDisplayFailed = false; // only load non-converged tracks into the display
-    
+#if 0
+  static Bool_t resort = kFALSE;
+  static Bool_t prefit = kFALSE; // make a simple Kalman iteration before the actual fit
+  static Bool_t refit  = kFALSE; // if fit did not converge, try to fit again
+  static Bool_t twoReps = kFALSE; // test if everything works with more than one rep in the tracks
+#endif
+  static const Bool_t matFX = kTRUE; // kFALSE;         // include material effects; can only be disabled for RKTrackRep!
+#if 0
+  static Bool_t checkPruning = kFALSE;
+  static const Bool_t onlyDisplayFailed = kFALSE; // only load non-converged tracks into the display
+#endif
+  //
+  static Bool_t Initialized = kFALSE;
   static genfit::AbsKalmanFitter* fitter = 0;
   genfit::AbsTrackRep* rep = 0;
+#if 0
   static genfit::AbsTrackRep* secondRep = 0;
-  if (! fitter) { // Initialize
+#endif
+  if (! Initialized) {
+    if      (IAttr("Undefined"))      fitterId = genfit::Undefined;
+    else if (IAttr("SimpleKalman"))   fitterId = genfit::SimpleKalman;
+    else if (IAttr("DafRef"))         fitterId = genfit::DafRef;
+    else if (IAttr("DafSimple"))      fitterId = genfit::DafSimple;
+    else if (IAttr("RefKalman"))      fitterId = genfit::RefKalman;
+    else                              fitterId = genfit::RefKalman;
+    //
+    if      (IAttr("weightedAverage"))                   mmHandling = genfit::weightedAverage;
+    else if (IAttr("unweightedClosestToReference"))      mmHandling = genfit::unweightedClosestToReference;
+    else if (IAttr("unweightedClosestToPrediction"))     mmHandling = genfit::unweightedClosestToPrediction;
+    else if (IAttr("weightedClosestToReference"))        mmHandling = genfit::weightedClosestToReference;
+    else if (IAttr("weightedClosestToPrediction"))       mmHandling = genfit::weightedClosestToPrediction;
+    else if (IAttr("unweightedClosestToReferenceWire"))  mmHandling = genfit::unweightedClosestToReferenceWire;
+    else if (IAttr("unweightedClosestToPredictionWire")) mmHandling = genfit::unweightedClosestToPredictionWire;
+    else if (IAttr("weightedClosestToReferenceWire"))    mmHandling = genfit::weightedClosestToReferenceWire;
+    else if (IAttr("weightedClosestToPredictionWire"))   mmHandling = genfit::weightedClosestToPredictionWire;
+    else                                                 mmHandling = genfit::unweightedClosestToPredictionWire;
+    //
+#if 0
+    if      (IAttr("prefit"))  prefit = kTRUE;
+    if      (IAttr("resort"))  resort = kTRUE;
+    if      (IAttr("refit"))   refit = kTRUE;
+#endif
+    //  
+#if 0
+    if (IAttr("twoReps")) twoReps = kTRUE;
+    if (IAttr("checkPruning")) checkPruning = kTRUE;
+#endif
 #ifdef __HANDLER__
     signal(SIGSEGV, handler);   // install our handler
 #endif
-    // init fitter
     switch (fitterId) {
     case genfit::SimpleKalman:
       fitter = new genfit::KalmanFitter(nIter, dPVal);
@@ -299,31 +319,31 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
       fitter->setMultipleMeasurementHandling(mmHandling);
       break;
     case genfit::DafSimple:
-      fitter = new genfit::DAF(false);
+      fitter = new genfit::DAF(kFALSE);
       break;
     case genfit::DafRef:
       fitter = new genfit::DAF();
       break;
+    default:
+      break;
     }
-    fitter->setMaxIterations(nIter);
-    /*if (dynamic_cast<genfit::DAF*>(fitter) != nullptr) {
-    //static_cast<genfit::DAF*>(fitter)->setBetas(100, 50, 25, 12, 6, 3, 1, 0.5, 0.1);
-    //static_cast<genfit::DAF*>(fitter)->setBetas(81, 8, 4, 0.5, 0.1);
-    static_cast<genfit::DAF*>(fitter)->setAnnealingScheme(100, 0.1, 5);
-    //static_cast<genfit::DAF*>(fitter)->setConvergenceDeltaWeight(0.0001);
-    //fitter->setMaxIterations(nIter);
-    }*/
-    
+    if (fitter) {
+      if (dynamic_cast<genfit::DAF*>(fitter) != nullptr) {
+	static_cast<genfit::DAF*>(fitter)->setAnnealingScheme(100, 0.1, 5);
+	static_cast<genfit::DAF*>(fitter)->setConvergenceDeltaWeight(0.0001);
+      }
+      fitter->setMaxIterations(nIter);
+    }
     genfit::FieldManager::getInstance()->init(new genfit::StarField());
-    //  genfit::FieldManager::getInstance()->useCache(true, 8);
-    //  genfit::FieldManager::getInstance()->useCache(false, 0);
+    if (IAttr("useCache")) genfit::FieldManager::getInstance()->useCache(kTRUE, 8);
+    else                   genfit::FieldManager::getInstance()->useCache(kFALSE, 0);
     genfit::MaterialEffects::getInstance()->init(new genfit::TGeoMaterialInterface());
-    
-
+    if (!matFX) genfit::MaterialEffects::getInstance()->setNoEffects();
+    Initialized = kTRUE;
   } // end of initialization
   // Set Debug flags
   if (Debug()) {
-    fitter->setDebugLvl(10);
+    if (fitter) fitter->setDebugLvl(10);
     //    gGeoManager->SetVerboseLevel(5);
 #ifndef __TPC3D__ /* ! __TPC3D__ */
     StTpcPlanarMeasurement::SetDebug(1);
@@ -331,7 +351,7 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
     genfit::MaterialEffects::getInstance()->setDebugLvl(2);
     //    genfit::MaterialEffects::getInstance()->setDebugLvT(2);
   } else {
-    fitter->setDebugLvl(0);
+    if (fitter) fitter->setDebugLvl(0);
     //    gGeoManager->SetVerboseLevel(0);
 #ifndef __TPC3D__ /* ! __TPC3D__ */
     StTpcPlanarMeasurement::SetDebug(0);
@@ -352,25 +372,20 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
   Double_t sign = ConvertCA2XYZ(tr, posSeed, momSeed, covSeed);
   rep = new genfit::RKTrackRep(sign*pdg);
   if (Debug()) rep->setDebugLvl();
+  // propagation direction. (-1, 0, 1) -> (backward, auto, forward).
   rep->setPropDir(1);
   genfit::MeasuredStateOnPlane stateSeed(rep);
   stateSeed.setPosMomCov(posSeed, momSeed, covSeed);
+#if 0
   if (twoReps) secondRep = new genfit::RKTrackRep(sign*-211);
   // create track
   //  genfit::Track* secondTrack(nullptr);
   //  genfit::Track  fitTrack(rep, posSeed, momSeed);
+#endif
   TVectorD  state7(6);
   TMatrixDSym origCov(6);
   stateSeed.get6DStateCov(state7, origCov);
   genfit::Track fitTrack(rep, state7, origCov);
-
-  //  genfit::Track  fitTrack(rep, stateSeed, covSeed);
-  
-  // smeared start state
-  //  genfit::MeasuredStateOnPlane stateSmeared(rep);
-  //  rep->setPosMomCov(stateSeed, posSeed, momSeed, covSeed);
-  // propagation direction. (-1, 0, 1) -> (backward, auto, forward).
-  if (!matFX) genfit::MaterialEffects::getInstance()->setNoEffects();
   // remember original initial state
   const genfit::StateOnPlane stateRefOrig(stateSeed);
   //========== Mesurements ======================================================================
@@ -400,7 +415,7 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
     fitTrack.checkConsistency();
     
     // do the fit
-    fitter->processTrack(&fitTrack);
+    if (fitter) fitter->processTrack(&fitTrack);
     // print fit result
     if (Debug()) {
 	fitTrack.getFittedState().Print();
@@ -413,34 +428,35 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
     std::cout << e.what();
     return kStErr;
   }
-  KalmanFitStatus *fitStatus = fitTrack.getKalmanFitStatus();
-  if (! fitStatus || !(fitStatus->isFitConvergedFully() || fitStatus->isFitConvergedPartially())) {
-    return kStErr;
+  if (fitter) {
+    KalmanFitStatus *fitStatus = fitTrack.getKalmanFitStatus();
+    if (! fitStatus || !(fitStatus->isFitConvergedFully() || fitStatus->isFitConvergedPartially())) {
+      return kStErr;
+    }
+    //_________ Fill StTrack _______________
+    //  UInt_t npoints = fitTrack.getNumPoints();
+    if (Debug()) {
+      std::cout << "Inner Parameters" << std::endl << "====================" << endl;
+      fitTrack.getFittedState().Print();
+    }
+    //  const AbsTrackRep* rep = fitTrack.getCardinalRep();
+    genfit::TrackPoint* point = fitTrack.getPointWithMeasurementAndFitterInfo(0, rep);
+    genfit::AbsFitterInfo* fitterInfo = point->getFitterInfo(rep);
+    const genfit::MeasuredStateOnPlane& measuredPointStateI = fitterInfo->getFittedState(kTRUE);
+    TVector3 posI, momI;
+    TMatrixDSym covI(6,6);
+    measuredPointStateI.getPosMomCov(posI, momI, covI);
+    if (Debug()) {
+      std::cout << "Outer Parameters" << std::endl << "====================" << endl;
+      fitTrack.getFittedState(-1).Print();
+    }
+    point = fitTrack.getPointWithMeasurementAndFitterInfo(-1, rep);
+    fitterInfo = point->getFitterInfo(rep);
+    const genfit::MeasuredStateOnPlane& measuredPointStateO = fitterInfo->getFittedState(kTRUE);
+    TVector3 posO, momO;
+    TMatrixDSym covO(6,6);
+    measuredPointStateO.getPosMomCov(posO, momO, covO);
   }
-  //_________ Fill StTrack _______________
-  //  UInt_t npoints = fitTrack.getNumPoints();
-  
-  if (Debug()) {
-    std::cout << "Inner Parameters" << std::endl << "====================" << endl;
-    fitTrack.getFittedState().Print();
-  }
-  //  const AbsTrackRep* rep = fitTrack.getCardinalRep();
-  genfit::TrackPoint* point = fitTrack.getPointWithMeasurementAndFitterInfo(0, rep);
-  genfit::AbsFitterInfo* fitterInfo = point->getFitterInfo(rep);
-  const genfit::MeasuredStateOnPlane& measuredPointStateI = fitterInfo->getFittedState(true);
-  TVector3 posI, momI;
-  TMatrixDSym covI(6,6);
-  measuredPointStateI.getPosMomCov(posI, momI, covI);
-  if (Debug()) {
-    std::cout << "Outer Parameters" << std::endl << "====================" << endl;
-    fitTrack.getFittedState(-1).Print();
-  }
-  point = fitTrack.getPointWithMeasurementAndFitterInfo(-1, rep);
-  fitterInfo = point->getFitterInfo(rep);
-  const genfit::MeasuredStateOnPlane& measuredPointStateO = fitterInfo->getFittedState(true);
-  TVector3 posO, momO;
-  TMatrixDSym covO(6,6);
-  measuredPointStateO.getPosMomCov(posO, momO, covO);
   try{
     FillGlobalTrack(&fitTrack);
   }
@@ -513,12 +529,14 @@ Int_t StxMaker::FillTrack(StTrack* gTrack, genfit::Track * kTrack)
   //
   // above is no longer used, instead use kITKalmanfitId as fitter and tpcOther as finding method
   //  gTrack->setEncodedMethod(mStxEncoded);
-  Double_t tlen = kTrack->getTrackLen();
-  assert(tlen >0.0 && tlen<1000.);
-  gTrack->setLength(tlen);// someone removed this, grrrr!!!!
-  FillDetectorInfo(gTrack,kTrack,true); //3d argument used to increase/not increase the refCount. MCBS oct 04.
-  FillGeometry(gTrack, kTrack, false); // inner geometry
-  FillGeometry(gTrack, kTrack, true ); // outer geometry
+  if (kTrack->getPointWithMeasurementAndFitterInfo(0,0)) {
+    Double_t tlen = kTrack->getTrackLen();
+    assert(tlen >0.0 && tlen<1000.);
+    gTrack->setLength(tlen);// someone removed this, grrrr!!!!
+  }
+  FillDetectorInfo(gTrack,kTrack,kTRUE); //3d argument used to increase/not increase the refCount. MCBS oct 04.
+  FillGeometry(gTrack, kTrack, kFALSE); // inner geometry
+  FillGeometry(gTrack, kTrack, kTRUE ); // outer geometry
   StTrackUtilities::instance()->StFixTopoMap(gTrack);
   StTrackUtilities::instance()->FillFlags(gTrack);
   gTrack->setIdTruth();
@@ -535,7 +553,7 @@ Int_t StxMaker::FillTrack(StTrack* gTrack, genfit::Track * kTrack)
 /// if this gets modified later in ITTF, this must be changed here
 /// but maybe use track->PointCount() later?
 //_____________________________________________________________________________
-Int_t StxMaker::FillDetectorInfo(StTrack *gTrack, genfit::Track * track, bool refCountIncr) {
+Int_t StxMaker::FillDetectorInfo(StTrack *gTrack, genfit::Track * track, Bool_t refCountIncr) {
   //  output array actually is count[maxDetId+1][3] 
   //  count[0] all detectors
   //  count[detId] for particular detector
@@ -584,13 +602,30 @@ Int_t StxMaker::FillDetectorInfo(StTrack *gTrack, genfit::Track * track, bool re
   }
   genfit::TrackPoint *flTP[2] = {firstTP, lastTP};
   for (Int_t i = 0; i < 2; i++) {
-    if (! flTP[i]) continue;
-    genfit::AbsFitterInfo* fitterInfo = flTP[i]->getFitterInfo();
-    const genfit::MeasuredStateOnPlane& measuredPointState = fitterInfo->getFittedState(true);
-    TVector3 pos = measuredPointState.getPos();
-    StThreeVectorF posF(pos.X(), pos.Y(), pos.Z());
-    if (! i) detInfo->setFirstPoint(posF);
-    else     detInfo->setLastPoint (posF);
+    genfit::TrackPoint *tp = flTP[i];
+    if (! tp) continue;
+    genfit::AbsFitterInfo* fitterInfo = tp->getFitterInfo();
+    if (fitterInfo) {
+      const genfit::MeasuredStateOnPlane& measuredPointState = fitterInfo->getFittedState(kTRUE);
+      TVector3 pos = measuredPointState.getPos();
+      StThreeVectorF posF(pos.X(), pos.Y(), pos.Z());
+      if (! i) detInfo->setFirstPoint(posF);
+      else     detInfo->setLastPoint (posF);
+    } else {
+      for (std::vector< genfit::AbsMeasurement* >::const_iterator im = tp->getRawMeasurements().begin(); 
+	   im !=  tp->getRawMeasurements().end(); ++im) {
+#ifndef __TPC3D__ /* ! __TPC3D__ */
+	const StTpcPlanarMeasurement *measurement =  dynamic_cast<StTpcPlanarMeasurement *>(*im);
+#else /* __TPC3D__ */
+	const StTpc3DMeasurement *measurement =  dynamic_cast<StTpc3DMeasurement *>(*im);
+#endif /* ! __TPC3D__ */
+	if (! measurement) continue;
+	StHit *hit = (StHit*) measurement->Hit();
+	if (! hit) continue;
+	if (! i) detInfo->setFirstPoint(hit->position());
+	else     detInfo->setLastPoint (hit->position());
+      }
+    }
   }
   // fitTraits
   // mass
@@ -605,30 +640,23 @@ Int_t StxMaker::FillDetectorInfo(StTrack *gTrack, genfit::Track * track, bool re
   Float_t x[6],covMFloat[15];
   node->GlobalTpt(x,covMFloat);
 #else
-  Float_t covMFloat[15];
+  Float_t covMFloat[15] = {0};
 #endif
   KalmanFitStatus *fitStatus = track->getKalmanFitStatus();
-  Float_t chi2[2];
-  //get chi2/dof
-  chi2[0] = fitStatus->getChi2()/fitStatus->getNdf();
-  chi2[1] = -999; // change: here goes an actual probability, need to calculate?
+  Float_t chi2[2] = {0, -999};
+  if (fitStatus) {
+    //get chi2/dof
+    chi2[0] = fitStatus->getChi2()/fitStatus->getNdf();
 #if 0
-  // December 04: The second element of the array will now hold the incremental chi2 of adding
-  // the vertex for primary tracks
-  if (gTrack->type()==primary) {
-    assert(node->Detector()==0);
-    chi2[1]=node->Chi2();
+  } else {
+    const TVectorD &seed = track->getStateSeed();
+    const TMatrixDSym &seedCov = track->getCovSeed();
+#endif
   }
-#endif    
   // setFitTraits uses assignment operator of StTrackFitTraits, which is the default one,
   // which does a memberwise copy.  Therefore, constructing a local instance of 
   // StTrackFitTraits is fine, as it will get properly copied.
   StTrackFitTraits fitTraits(geantIdPidHyp,0,chi2,covMFloat);
-#if 0
-  if (gTrack->type()==primary) {
-     fitTraits.setPrimaryVertexUsedInFit(true);
-  }
-#endif
   for (Int_t i=1;i<kMaxDetectorId;i++) {
     if(!dets[i][0]) continue;
     gTrack->setNumberOfPossiblePoints((UChar_t)dets[i][0],(StDetectorId)i);
@@ -645,27 +673,38 @@ Int_t StxMaker::FillDetectorInfo(StTrack *gTrack, genfit::Track * track, bool re
   return kStOk;
 }
 //_____________________________________________________________________________
-void StxMaker::FillGeometry(StTrack* gTrack, genfit::Track * track, bool outer) {
+void StxMaker::FillGeometry(StTrack* gTrack, genfit::Track * track, Bool_t outer) {
   assert(gTrack);
   assert(track) ;
   genfit::AbsTrackRep* rep = 0;
   genfit::TrackPoint* point = 0;
+  TVector3 pos, mom;
+  TMatrixDSym cov(6);
+  Double_t charge = 0;
   if (! outer) point = track->getPointWithMeasurementAndFitterInfo(0, rep);
   else         point = track->getPointWithMeasurementAndFitterInfo(-1, rep);
-  genfit::AbsFitterInfo* fitterInfo = point->getFitterInfo(rep);
-  const genfit::MeasuredStateOnPlane& measuredPointState = fitterInfo->getFittedState(true);
-  TVector3 pos, mom;
-  TMatrixDSym cov(6,6);
-  measuredPointState.getPosMomCov(pos, mom, cov);
+  if ( point) {
+    genfit::AbsFitterInfo* fitterInfo = point->getFitterInfo(rep);
+    const genfit::MeasuredStateOnPlane& measuredPointState = fitterInfo->getFittedState(kTRUE);
+    measuredPointState.getPosMomCov(pos, mom, cov);
+    charge = measuredPointState.getCharge();
+  } else {
+    const TVectorD  &stateSeed = track->getStateSeed();
+    pos = TVector3(stateSeed(0),stateSeed(1),stateSeed(2));
+    mom = TVector3(stateSeed(3),stateSeed(4),stateSeed(5));
+    cov  = track->getCovSeed();
+    rep = track->getCardinalRep();
+    if (rep) charge = rep->getPDGCharge();
+  }
   TVector3 field = FieldManager::getInstance()->getField()->get(pos);
   StThreeVectorF origin(pos.X(),pos.Y(),pos.Z());
   static const Double_t EC = 2.99792458e-4;
   StThreeVectorF p(mom.X(), mom.Y(), mom.Z());
   Double_t hz = EC*field.Z();
-  Double_t qovepT = measuredPointState.getCharge()/mom.Pt();
+  Double_t qovepT = charge/mom.Pt();
   Double_t curvature = - hz*qovepT;
   Double_t helicity = (curvature < 0) ? -1 : 1;
-  StTrackGeometry* geometry = new StHelixModel(short(measuredPointState.getCharge()),
+  StTrackGeometry* geometry = new StHelixModel(short(charge),
 					       mom.Phi(),
 					       fabs(curvature), 
 					       TMath::PiOver2() - mom.Theta(),
@@ -700,9 +739,26 @@ void StxMaker::FillDca(StTrack* stTrack, genfit::Track * track) {
   Float_t length = gTrack->length();
   const AbsTrackRep* rep = track->getCardinalRep();
   genfit::TrackPoint* point = track->getPointWithMeasurementAndFitterInfo(0, rep);
-  genfit::AbsFitterInfo* fitterInfo = point->getFitterInfo(rep);
-  const genfit::MeasuredStateOnPlane& stateI = fitterInfo->getFittedState(true);
-  genfit::MeasuredStateOnPlane  state = stateI;
+  genfit::MeasuredStateOnPlane  state;
+  if (point) {
+    genfit::AbsFitterInfo* fitterInfo = point->getFitterInfo(rep);
+    const genfit::MeasuredStateOnPlane& stateI = fitterInfo->getFittedState(kTRUE);
+    state = stateI;
+  } else {
+    length = 100; // TO DO
+    gTrack->setLength(length);
+    // form state from seed
+    const TVectorD  &stateSeed = track->getStateSeed();
+    TVector3 pos, mom;
+    TMatrixDSym cov(6);
+    pos = TVector3(stateSeed(0),stateSeed(1),stateSeed(2));
+    mom = TVector3(stateSeed(3),stateSeed(4),stateSeed(5));
+    cov  = track->getCovSeed();
+    rep = track->getCardinalRep();
+    genfit::MeasuredStateOnPlane stateI(rep);
+    stateI.setPosMomCov(stateSeed,cov);
+    state = stateI;
+  }
   Bool_t ok = kTRUE;
   StPhysicalHelixD helixI = gTrack->geometry()->helix();
   Double_t step = helixI.pathLength(0.0,0.0);
@@ -723,7 +779,7 @@ void StxMaker::FillDca(StTrack* stTrack, genfit::Track * track) {
       std::cout << "Outer Parameters" << std::endl << "====================" << std::endl;
       track->getFittedState(-1).Print();
       std::cout << "Dca from Helix\t" << dcaH << std::endl;
-     s = 0;
+      s = 0;
       ok = kFALSE;
     }
     if (Debug()) {
@@ -732,8 +788,12 @@ void StxMaker::FillDca(StTrack* stTrack, genfit::Track * track) {
   }
   length -= s;
   KalmanFitStatus *fitStatus = track->getKalmanFitStatus();
-  Double_t chi2 = fitStatus->getChi2();
-  Int_t Ndf = fitStatus->getNdf();
+  Double_t chi2 = 0;
+  Int_t Ndf = -1; 
+  if (fitStatus) {
+    chi2 = fitStatus->getChi2();
+    Ndf = fitStatus->getNdf();
+  }
   Double_t charge = state.getCharge();
   TVector3 mom, pos;
   TMatrixDSym cov(6,6);

@@ -252,36 +252,36 @@ Int_t StKFVertexMaker::Make() {
     return kStOK;        // if no event, we're done
   }
   StKFVertex::ResetTotalNoVertices();
-#if 1
   // add Fixed Primary vertex if any
-  StGenericVertexFinder *mGVF = 0;
-  StGenericVertexMaker* gvm = (StGenericVertexMaker*)StMaker::GetChain()->GetMaker("GenericVertex");
-  if (gvm) mGVF = gvm->GetGenericFinder();
-  if (mGVF && (IAttr("VFFV") || IAttr("VFMCE"))) {
-    mGVF->fit(pEvent);
-    const std::vector<StPrimaryVertex> *vertexes = mGVF->result();
-    if (vertexes) StKFVertex::ResetTotalNoVertices(vertexes->size());
-    UInt_t NoPV = pEvent->numberOfPrimaryVertices();
-    for (UInt_t ipv = 0; ipv < NoPV; ipv++) {
-      StPrimaryVertex *Vp = pEvent->primaryVertex(ipv);
-      if (Vp && ! Vp->key()) {
-	Vp->setKey(ipv+1);
+  if (IAttr("VFFV") || IAttr("VFMCE")) {
+    StGenericVertexFinder *mGVF = 0;
+    StGenericVertexMaker* gvm = (StGenericVertexMaker*)StMaker::GetChain()->GetMaker("GenericVertex");
+    if (gvm) mGVF = gvm->GetGenericFinder();
+    if (mGVF) {
+      mGVF->fit(pEvent);
+      const std::vector<StPrimaryVertex> *vertexes = mGVF->result();
+      if (vertexes) StKFVertex::ResetTotalNoVertices(vertexes->size());
+      UInt_t NoPV = pEvent->numberOfPrimaryVertices();
+      for (UInt_t ipv = 0; ipv < NoPV; ipv++) {
+	StPrimaryVertex *Vp = pEvent->primaryVertex(ipv);
+	if (Vp && ! Vp->key()) {
+	  Vp->setKey(ipv+1);
+	}
+	Vp->setIdTruth();
+	KFParticle KVx;
+	KVx.Initialize();
+	KVx.SetId(Vp->key());
+	TCL::ucopy(Vp->position().xyz(), &KVx.Parameter(0), 3);
+	TCL::ucopy(Vp->covariance(), &KVx.Covariance(0), 6);
+	KVx.NDF() = 1;
+	KVx.SetIdTruth(Vp->idTruth(),Vp->qaTruth());
+	// copy Point fit as MassFit
+	StTrackMassFit *pf = new StTrackMassFit(KVx.Id(),&KVx);
+	PrPP(Make,*pf);
+	Vp->setParent(pf);
       }
-      Vp->setIdTruth();
-      KFParticle KVx;
-      KVx.Initialize();
-      KVx.SetId(Vp->key());
-      TCL::ucopy(Vp->position().xyz(), &KVx.Parameter(0), 3);
-      TCL::ucopy(Vp->covariance(), &KVx.Covariance(0), 6);
-      KVx.NDF() = 1;
-      KVx.SetIdTruth(Vp->idTruth(),Vp->qaTruth());
-      // copy Point fit as MassFit
-      StTrackMassFit *pf = new StTrackMassFit(KVx.Id(),&KVx);
-      PrPP(Make,*pf);
-      Vp->setParent(pf);
     }
   }
-#endif
   Double_t bField = 0;
   if (pEvent->runInfo()) bField = pEvent->runInfo()->magneticField();
   KFParticle::SetField(bField);

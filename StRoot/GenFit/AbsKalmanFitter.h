@@ -33,6 +33,7 @@ namespace genfit {
 class KalmanFitterInfo;
 
 enum eMultipleMeasurementHandling {
+  undefined, /**< udefined */
   weightedAverage, /**<  weighted average between measurements; used by DAF */
   unweightedAverage, /**<  average between measurements, all weighted with 1 */
   weightedClosestToReference, /**<  closest to reference, weighted with its weight_ */

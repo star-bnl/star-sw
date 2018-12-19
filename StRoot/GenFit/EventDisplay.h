@@ -39,6 +39,7 @@
 namespace genfit {
 
 enum eFitterType {
+  Undefined, 
   SimpleKalman,
   RefKalman,
   DafSimple,

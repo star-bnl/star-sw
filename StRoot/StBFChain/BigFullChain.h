@@ -1799,6 +1799,7 @@ Bfc_st BFC[] = { // standard chains
   {"HLTCA","","Sti","Sti,-Stv,StiLib,StiLibs,TMVARank","StHLTCAMaker","TPCCATracker,StiMaker,StHLTCAMaker"
    ,                                                                           "HLT reconstruction",kFALSE},
   {"Stx","","","VMCAppl" ,"StxMaker","libEve,GenFit,TPCCATracker,StxMaker","eXpress Reconstruction",kFALSE},
+  {"StxCA","","","Stx"                                 ,"","","eXpress Reconstruction with CA only",kFALSE},
   {"KFVertex",""  ,"Stx","-VFMinuit,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2,TMVARank"
    ,"StKFVertexMaker","MathMore,Spectrum,StKFVertexMaker"
    ,                                                 "KFParticle based multi vertex reconstruction",kFALSE},
