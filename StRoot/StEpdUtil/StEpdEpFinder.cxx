@@ -14,7 +14,7 @@
 using namespace std;
 
 
-StEpdEpFinder::StEpdEpFinder(int nCentBins, char const* CorrectionFile) : mFormatUsed(2), mThresh(0.3), mMax(2.0), mWeightingScheme(0)
+StEpdEpFinder::StEpdEpFinder(int nEventTypeBins, char const* CorrectionFile) : mFormatUsed(2), mThresh(0.3), mMax(2.0), mWeightingScheme(0)
 {
 
   cout << "\n**********\n*  Welcome to the EPD Event Plane finder.\n"
@@ -23,6 +23,8 @@ StEpdEpFinder::StEpdEpFinder(int nCentBins, char const* CorrectionFile) : mForma
        << "*  This code is currently configured to go up to order=" << _EpOrderMax << "\n"
        << "*  To include higher orders, edit StEpdUtil/StEpdEpInfo.h\n**********\n";
 
+
+  mNumberOfEventTypeBins = nEventTypeBins;
 
   mEpdGeom = new StEpdGeom();
 
@@ -50,7 +52,7 @@ StEpdEpFinder::StEpdEpFinder(int nCentBins, char const* CorrectionFile) : mForma
     }
   }
   else{
-    for (int ew=0; ew<3; ew++){
+    for (int ew=0; ew<2; ew++){
       for (int order=1; order<_EpOrderMax+1; order++){
 	mEpdShiftInput_sin[ew][order-1] = (TProfile2D*)mCorrectionInputFile->Get(Form("EpdShiftEW%dPsi%d_sin",ew,order));
 	mEpdShiftInput_cos[ew][order-1] = (TProfile2D*)mCorrectionInputFile->Get(Form("EpdShiftEW%dPsi%d_cos",ew,order));
@@ -68,9 +70,9 @@ StEpdEpFinder::StEpdEpFinder(int nCentBins, char const* CorrectionFile) : mForma
   for (int ew=0; ew<2; ew++){
     for (int order=1; order<_EpOrderMax+1; order++){
       mEpdShiftOutput_sin[ew][order-1] = new TProfile2D(Form("EpdShiftEW%dPsi%d_sin",ew,order),Form("EpdShiftEW%dPsi%d_sin",ew,order),
-							_EpTermsMax,0.5,1.0*_EpTermsMax+.5,nCentBins,-0.5,(double)nCentBins-0.5,-1.0,1.0);
+							_EpTermsMax,0.5,1.0*_EpTermsMax+.5,nEventTypeBins,-0.5,(double)nEventTypeBins-0.5,-1.0,1.0);
       mEpdShiftOutput_cos[ew][order-1] = new TProfile2D(Form("EpdShiftEW%dPsi%d_cos",ew,order),Form("EpdShiftEW%dPsi%d_cos",ew,order),
-							_EpTermsMax,0.5,1.0*_EpTermsMax+.5,nCentBins,-0.5,(double)nCentBins-0.5,-1.0,1.0);
+							_EpTermsMax,0.5,1.0*_EpTermsMax+.5,nEventTypeBins,-0.5,(double)nEventTypeBins-0.5,-1.0,1.0);
     }
     mPhiWeightOutput[ew]   = new TH2D(Form("PhiWeightEW%d",ew),Form("Tile Weight divided by Averaged EW=%d",ew),12,0.5,12.5,31,0.5,31.5); // bins are PP,TT 
     mPhiAveraged[ew]       = new TH2D(Form("PhiAveraged%d",ew),Form("Average for this phi EW=%d",ew),12,0.5,12.5,31,0.5,31.5); // just for normalization. discard after use
@@ -78,23 +80,28 @@ StEpdEpFinder::StEpdEpFinder(int nCentBins, char const* CorrectionFile) : mForma
   for (int order=1; order<_EpOrderMax+1; order++){
     mEpdShiftOutput_sin[2][order-1] = new TProfile2D(Form("EpdShiftFullEventPsi%d_sin",order),
 						     Form("EpdShiftFullEventPsi%d_sin",order),
-						     _EpTermsMax,0.5,1.0*_EpTermsMax+.5,nCentBins,-0.5,(double)nCentBins-0.5,-1.0,1.0);
+						     _EpTermsMax,0.5,1.0*_EpTermsMax+.5,nEventTypeBins,-0.5,(double)nEventTypeBins-0.5,-1.0,1.0);
     mEpdShiftOutput_cos[2][order-1] = new TProfile2D(Form("EpdShiftFullEventPsi%d_cos",order),
 						     Form("EpdShiftFullEventPsi%d_cos",order),
-						     _EpTermsMax,0.5,1.0*_EpTermsMax+.5,nCentBins,-0.5,(double)nCentBins-0.5,-1.0,1.0);
+						     _EpTermsMax,0.5,1.0*_EpTermsMax+.5,nEventTypeBins,-0.5,(double)nEventTypeBins-0.5,-1.0,1.0);
   }
 
   // now stuff for the "Resolution File"
   mResolutionOutputFile = new TFile("EpResolutions.root","RECREATE");
-  for (int order=1; order<_EpOrderMax; order++){
-    mAveCosDeltaPsi[order-1] = new TProfile(Form("AveCosDeltaPsi%d",order),Form("#langle cos(%d#Psi_{E,%d}-%d#Psi_{W,%d} #rangle",order,order,order,order),
-				    nCentBins,-0.5,(double)nCentBins-0.5,-1.0,1.0);
+  for (int order=1; order<=_EpOrderMax; order++){
+    mAveCosDeltaPsi[order-1] = new TProfile(Form("AveCosDeltaPsi%d",order),
+					    Form("#LT cos(%d#Psi_{E,%d}-%d#Psi_{W,%d} #GT (weighted and shifted)",order,order,order,order),
+					    nEventTypeBins,-0.5,(double)nEventTypeBins-0.5,-1.0,1.0);
   }
 }
-
+//------------------------------------------------------------------------------------------------------------
 void StEpdEpFinder::SetEtaWeights(int order, TH2D EtaWeights){
   if (OrderOutsideRange(order)){
-    cout << "Ignoring your eta weights\n";
+    cout << "Order outside range - Ignoring your eta weights\n";
+    return;
+  }
+  if (EtaWeights.GetYaxis()->GetNbins() != mNumberOfEventTypeBins){
+    cout << "Wrong number of EventType bins - Ignoring your eta weights\n";
     return;
   }
   mWeightingScheme = 1;
@@ -134,10 +141,33 @@ void StEpdEpFinder::Finish(){
   cout << "StEpdEpFinder out!\n\n";
 }
 
-StEpdEpInfo StEpdEpFinder::Results(TClonesArray* EpdHits, TVector3 primVertex, int CentId){
+//==================================================================================================================
+StEpdEpInfo StEpdEpFinder::Results(TClonesArray* EpdHits, TVector3 primVertex, int EventTypeId){
+
+  if ((EventTypeId<0)||(EventTypeId>=mNumberOfEventTypeBins)){
+    cout << "You are asking for an undefined EventType - fail!\n";
+    assert(0);
+  }
+
   StEpdEpInfo result;
 
   double pi = TMath::Pi();
+
+
+  // This below is for normalizing Q-vectors
+  double TotalWeight4Ring[2][16][2];                // for normalizing Q-vector: indices EW, ring,  (nonPhiWeighted or PhiWeighted)
+  double TotalWeight4Side[2][_EpOrderMax][2];       // for normalizing Q-vector: indices EW, order, (nonPhiWeighted or PhiWeighted)  ** depends on Order because eta-weight depends on order
+  for (int iew=0; iew<2; iew++){
+    for (int phiWeightedOrNo=0; phiWeightedOrNo<2; phiWeightedOrNo++){
+      for (int order=1; order<_EpOrderMax+1; order++){
+	TotalWeight4Side[iew][order-1][phiWeightedOrNo] = 0;
+      }
+      for (int iring=0; iring<16; iring++){
+	TotalWeight4Ring[iew][iring][phiWeightedOrNo] = 0;
+      }
+    }
+  }
+
 
   //--------------------------------- begin loop over hits ---------------------------------------
   for (int hit=0; hit<EpdHits->GetEntries(); hit++){
@@ -180,26 +210,61 @@ StEpdEpInfo StEpdEpFinder::Results(TClonesArray* EpdHits, TVector3 primVertex, i
 	for (int tt=2*(ring-1); tt<2*ring; tt++) mPhiAveraged[EW]->Fill(pp,tt,TileWeight/24.0);
       }
     }
+    //--------------------------------
     // now calculate Q-vectors
+    //--------------------------------
+
+    double PhiWeightedTileWeight = TileWeight;
+    if (mPhiWeightInput[EW]) PhiWeightedTileWeight /= mPhiWeightInput[EW]->GetBinContent(PP,TT);
+    TotalWeight4Ring[EW][ring][0] += TileWeight;
+    TotalWeight4Ring[EW][ring][1] += PhiWeightedTileWeight;
+
     for (int order=1; order<_EpOrderMax+1; order++){
-      double TotalWeight =  RingOrEtaWeight(ring,eta,order,CentId) * TileWeight;
-      double WtSine   = TotalWeight*sin(phi*(double)order);
-      double WtCosine = TotalWeight*cos(phi*(double)order);
-      result.QrawOneSide[EW][order-1][0]      += WtCosine;
-      result.QrawOneSide[EW][order-1][1]      += WtSine;
-      result.QringRaw[EW][order-1][0][ring-1] += WtCosine;
-      result.QringRaw[EW][order-1][1][ring-1] += WtSine;
-      if (mPhiWeightInput[EW]){
-	WtSine   /= mPhiWeightInput[EW]->GetBinContent(PP,TT);
-	WtCosine /= mPhiWeightInput[EW]->GetBinContent(PP,TT);
+      double etaWeight = RingOrEtaWeight(ring,eta,order,EventTypeId);
+      TotalWeight4Side[EW][order-1][0] += fabs(etaWeight) * TileWeight;             // yes the fabs() makes sense.  The sign in the eta weight is equivalent to a trigonometric phase.
+      TotalWeight4Side[EW][order-1][1] += fabs(etaWeight) * PhiWeightedTileWeight;  // yes the fabs() makes sense.  The sign in the eta weight is equivalent to a trigonometric phase.
+
+      double Cosine = cos(phi*(double)order);
+      double Sine   = sin(phi*(double)order);
+
+      result.QrawOneSide[EW][order-1][0]      += etaWeight * TileWeight * Cosine;
+      result.QrawOneSide[EW][order-1][1]      += etaWeight * TileWeight * Sine;
+      result.QringRaw[EW][order-1][0][ring-1] += TileWeight * Cosine;
+      result.QringRaw[EW][order-1][1][ring-1] += TileWeight * Sine;
+
+      result.QphiWeightedOneSide[EW][order-1][0]      += etaWeight * PhiWeightedTileWeight * Cosine;
+      result.QphiWeightedOneSide[EW][order-1][1]      += etaWeight * PhiWeightedTileWeight * Sine;
+      result.QringPhiWeighted[EW][order-1][0][ring-1] += PhiWeightedTileWeight * Cosine;
+      result.QringPhiWeighted[EW][order-1][1][ring-1] += PhiWeightedTileWeight * Sine;
+    }
+  }  // loop over hits
+  //--------------------------------- end loop over hits ---------------------------------------
+
+  // at this point, we are finished with the detector hits, and deal only with the Q-vectors,
+
+  // first, normalize the Q's...
+  for (int EW=0; EW<2; EW++){
+    for (int order=1; order<_EpOrderMax+1; order++){
+      if (TotalWeight4Side[EW][order-1][0]>0.0001){
+	result.QrawOneSide[EW][order-1][0] /= TotalWeight4Side[EW][order-1][0];
+	result.QrawOneSide[EW][order-1][1] /= TotalWeight4Side[EW][order-1][0];
       }
-      result.QphiWeightedOneSide[EW][order-1][0]      += WtCosine;
-      result.QphiWeightedOneSide[EW][order-1][1]      += WtSine;
-      result.QringPhiWeighted[EW][order-1][0][ring-1] += WtCosine;
-      result.QringPhiWeighted[EW][order-1][1][ring-1] += WtSine;
+      if (TotalWeight4Side[EW][order-1][1]>0.0001){
+	result.QphiWeightedOneSide[EW][order-1][0] /= TotalWeight4Side[EW][order-1][1];
+	result.QphiWeightedOneSide[EW][order-1][1] /= TotalWeight4Side[EW][order-1][1];
+      }
+      for (int ring=0; ring<16; ring++){
+	if (TotalWeight4Ring[EW][ring][0]>0.001){
+	  result.QringRaw[EW][order-1][0][ring] /= TotalWeight4Ring[EW][ring][0];
+	  result.QringRaw[EW][order-1][1][ring] /= TotalWeight4Ring[EW][ring][0];
+	}
+	if (TotalWeight4Ring[EW][ring][1]>0.001){
+	  result.QringPhiWeighted[EW][order-1][0][ring] /= TotalWeight4Ring[EW][ring][1];
+	  result.QringPhiWeighted[EW][order-1][1][ring] /= TotalWeight4Ring[EW][ring][1];
+	}
+      }
     }
   }
-  //--------------------------------- end loop over hits ---------------------------------------
 
   // Before going any farther, flip the sign of the 1st-order Q-vector on the East side.
   //  I want the rapidity-odd first-order event plane.  If you want something else, then
@@ -212,6 +277,8 @@ StEpdEpInfo StEpdEpFinder::Results(TClonesArray* EpdHits, TVector3 primVertex, i
       result.QringPhiWeighted[0][0][xy][iring]  *= -1.0;
     }
   }
+
+  // at this point, we are finished with the Q-vectors and just use them to get angles Psi
 
   //---------------------------------
   // Calculate unshifted EP angles
@@ -247,8 +314,8 @@ StEpdEpInfo StEpdEpFinder::Results(TClonesArray* EpdHits, TVector3 primVertex, i
       if (mEpdShiftInput_sin[ewFull][order-1] != 0){
 	for (int i=1; i<=_EpTermsMax; i++){
 	  double tmp = (double)(order*i);
-	  double sinAve = mEpdShiftInput_sin[ewFull][order-1]->GetBinContent(i,CentId+1);    /// note the "+1" since CentId begins at zero
-	  double cosAve = mEpdShiftInput_cos[ewFull][order-1]->GetBinContent(i,CentId+1);    /// note the "+1" since CentId begins at zero
+	  double sinAve = mEpdShiftInput_sin[ewFull][order-1]->GetBinContent(i,EventTypeId+1);    /// note the "+1" since EventTypeId begins at zero
+	  double cosAve = mEpdShiftInput_cos[ewFull][order-1]->GetBinContent(i,EventTypeId+1);    /// note the "+1" since EventTypeId begins at zero
 	  result.PsiPhiWeightedAndShifted[ewFull][order-1] +=
 	    2.0*(cosAve*sin(tmp*result.PsiPhiWeighted[ewFull][order-1]) - sinAve*cos(tmp*result.PsiPhiWeighted[ewFull][order-1]))/tmp;
 	}
@@ -258,6 +325,13 @@ StEpdEpInfo StEpdEpFinder::Results(TClonesArray* EpdHits, TVector3 primVertex, i
       }
     }
   }
+
+  // for the Resolutions file.
+  for (int order=1; order<=_EpOrderMax; order++){
+    mAveCosDeltaPsi[order-1]->Fill((double)EventTypeId,
+				   cos(((double)order)*(result.PsiPhiWeightedAndShifted[0][order-1]-result.PsiPhiWeightedAndShifted[1][order-1])));
+  }
+
   //---------------------------------
   // Now calculate shift histograms for a FUTURE run (if you want it)
   //---------------------------------
@@ -265,8 +339,8 @@ StEpdEpInfo StEpdEpFinder::Results(TClonesArray* EpdHits, TVector3 primVertex, i
     for (int ewFull=0; ewFull<3; ewFull++){
       for (int order=1; order<_EpOrderMax+1; order++){
 	double tmp = (double)(order*i);
-	mEpdShiftOutput_sin[ewFull][order-1]->Fill(i,CentId,sin(tmp*result.PsiPhiWeighted[ewFull][order-1]));
-	mEpdShiftOutput_cos[ewFull][order-1]->Fill(i,CentId,cos(tmp*result.PsiPhiWeighted[ewFull][order-1]));
+	mEpdShiftOutput_sin[ewFull][order-1]->Fill(i,EventTypeId,sin(tmp*result.PsiPhiWeighted[ewFull][order-1]));
+	mEpdShiftOutput_cos[ewFull][order-1]->Fill(i,EventTypeId,cos(tmp*result.PsiPhiWeighted[ewFull][order-1]));
       }
     }
   }
@@ -274,7 +348,8 @@ StEpdEpInfo StEpdEpFinder::Results(TClonesArray* EpdHits, TVector3 primVertex, i
   return result;
 }
 
-double StEpdEpFinder::RingOrEtaWeight(int ring, double eta, int order, int centId){
+//==================================================================================================================
+double StEpdEpFinder::RingOrEtaWeight(int ring, double eta, int order, int EventTypeId){
   switch (mWeightingScheme){
   case 0:                                         // no weighting
     return 1.0;
@@ -283,7 +358,7 @@ double StEpdEpFinder::RingOrEtaWeight(int ring, double eta, int order, int centI
     { // must explicitly scope with {} if there is a declaration statement in a case
       if (mEtaWeights[order-1]==0) return 1.0;      // user never defined weights for this order
       int etaBin = mEtaWeights[order-1]->GetXaxis()->FindBin(fabs(eta));
-      return mEtaWeights[order-1]->GetBinContent(etaBin,centId+1);      // note the "+1" since centId starts at zero
+      return mEtaWeights[order-1]->GetBinContent(etaBin,EventTypeId+1);      // note the "+1" since EventTypeId starts at zero
       break;
     }
   case 2:                                         // ring-based weights
@@ -294,6 +369,7 @@ double StEpdEpFinder::RingOrEtaWeight(int ring, double eta, int order, int centI
   }
 }
 
+//==================================================================================================================
 double StEpdEpFinder::GetPsiInRange(double Qx, double Qy, int order){
   double temp;
   if ((Qx==0.0)||(Qy==0.0)) temp=-999;
@@ -306,6 +382,7 @@ double StEpdEpFinder::GetPsiInRange(double Qx, double Qy, int order){
   return temp;
 }
 
+//==================================================================================================================
 bool StEpdEpFinder::OrderOutsideRange(int order){
   if (order < 1) {
     cout << "\n*** Invalid order specified ***\n";
@@ -321,10 +398,10 @@ bool StEpdEpFinder::OrderOutsideRange(int order){
 }
 
 
+//==================================================================================================================
 TString StEpdEpFinder::Report(){
-
   TString rep = Form("This is the StEpdEpFinder Report:\n");
-  rep += Form("Number of centrality bins = %d\n",mNumberOfCentralityBins);
+  rep += Form("Number of EventType bins = %d\n",mNumberOfEventTypeBins);
   rep += Form("Format of input data = %d  [note: 0=StEvent, 1=StMuDst, 2=StPicoDst]\n",mFormatUsed);
   rep += Form("Threshold (in MipMPV units) = %f  and MAX weight = %f\n",mThresh,mMax);
   rep += Form("Weighting scheme used=%d  [note: 0=none, 1=eta-based weighting, 2=ring-based weighting]\n",mWeightingScheme);
@@ -334,13 +411,13 @@ TString StEpdEpFinder::Report(){
         rep += Form("No eta weighing for order n=%d\n",order);
       }
       else{
-        rep += Form("Weights for order %d  W[j] means weight for centrality bin j\n",order);
+        rep += Form("Weights for order %d  W[j] means weight for EventType bin j\n",order);
         rep += Form("eta");
-        for (int centId=0; centId<mEtaWeights[order-1]->GetYaxis()->GetNbins(); centId++){rep += Form("\t\tW[%d]",centId);}
+	for (int EventTypeId=0; EventTypeId<mNumberOfEventTypeBins; EventTypeId++){rep += Form("\t\tW[%d]",EventTypeId);}
         rep += Form("\n");
         for (int iEtaBin=1; iEtaBin<=mEtaWeights[order-1]->GetXaxis()->GetNbins(); iEtaBin++){
           rep += Form("%f",mEtaWeights[order-1]->GetXaxis()->GetBinCenter(iEtaBin));
-          for (int iCentBin=1; iCentBin<=mEtaWeights[order-1]->GetYaxis()->GetNbins(); iCentBin++){rep += Form("\t%f",mEtaWeights[order-1]->GetBinContent(iEtaBin,iCentBin));}
+	  for (int EventTypeId=0; EventTypeId<mEtaWeights[order-1]->GetYaxis()->GetNbins(); EventTypeId++){rep += Form("\t%f",mEtaWeights[order-1]->GetBinContent(iEtaBin,EventTypeId+1));}
           rep += Form("\n");
         }
       }
