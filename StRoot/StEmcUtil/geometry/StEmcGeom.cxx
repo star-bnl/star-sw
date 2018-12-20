@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.12 2012/04/03 00:04:04 perev Exp $
+ * $Id: StEmcGeom.cxx,v 1.13 2018/12/20 22:07:05 perev Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.13  2018/12/20 22:07:05  perev
+ * Remove creating and deleting StMaker
+ *
  * Revision 1.12  2012/04/03 00:04:04  perev
  * Defence against zero size table added
  *
@@ -980,8 +983,7 @@ StEmcGeom::getGeantGeometryTable()
 	mCalr = 0;
 	mCalg_st = 0;
 	mCalr_st = 0;
-	StMaker maker;
-	mChain = maker.GetChain();
+	mChain = StMaker::GetChain();
 
 	if(mChain) mGeantGeom = mChain->GetDataSet(".const/geom");
 
