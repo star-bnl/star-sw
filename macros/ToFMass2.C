@@ -1,5 +1,6 @@
 /*
    MuDst->Draw("ToFMass2(PrimaryTracks.mP.mX1,PrimaryTracks.mP.mX2,PrimaryTracks.mP.mX3,PrimaryTracks.mBTofPidTraits.mBeta):PrimaryTracks.mPt>>M2(100,0,5,150,-0.05,1.45)","PrimaryTracks.mBTofPidTraits.mBeta>0","colz")
+   MuDst->Draw("ToFMass2(PrimaryTracks.mP.mX1,PrimaryTracks.mP.mX2,PrimaryTracks.mP.mX3,PrimaryTracks.mBTofPidTraits.mBeta):PrimaryTracks.mPt>>M2(100,0,5,150,-0.05,1.45)","PrimaryTracks.mBTofPidTraits.mBeta>0&PrimaryTracks.mIdTruth>0&&PrimaryTracks.mIdTruth<10000","colz")
 */
 
 #include "Rtypes.h"
