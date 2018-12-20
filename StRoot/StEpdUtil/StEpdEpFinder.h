@@ -102,7 +102,7 @@ class StEpdEpFinder{
   /// the file StEpdEpFinderCorrectionHistograms_OUTPUT.root if he wants to use it.
   /// \param CorrectionFileName     Full name of the .root file with correction histograms.
   /// \param nEventTypeBins        Number of EventType bins that the user is using.  Up to the user to have a consistent usage, here and in analysis.
-  StEpdEpFinder(int nEventTypeBins=10, char const* CorrectionFileName="StEpdEpFinderCorrectionHistograms_INPUT.root");
+  StEpdEpFinder(int nEventTypeBins=10, char const* OutFileName="StEpdEpFinderCorrectionHistograms_OUTPUT.root", char const* CorrectionFileName="StEpdEpFinderCorrectionHistograms_INPUT.root");
   ~StEpdEpFinder(){/* no-op */};
 
   /// sets eta-based weights and sets the flag indicating that eta-based weights will be used
