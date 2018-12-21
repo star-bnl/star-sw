@@ -14,7 +14,7 @@
 using namespace std;
 
 
-StEpdEpFinder::StEpdEpFinder(int nEventTypeBins, char const* CorrectionFile) : mFormatUsed(2), mThresh(0.3), mMax(2.0), mWeightingScheme(0)
+StEpdEpFinder::StEpdEpFinder(int nEventTypeBins, char const* OutFileName, char const* CorrectionFile) : mFormatUsed(2), mThresh(0.3), mMax(2.0), mWeightingScheme(0)
 {
 
   cout << "\n**********\n*  Welcome to the EPD Event Plane finder.\n"
@@ -66,7 +66,7 @@ StEpdEpFinder::StEpdEpFinder(int nEventTypeBins, char const* CorrectionFile) : m
   }
   // ----------------------------------- Stuff written to the "Correction File" -----------------------------------------                                                   
   // "Shift correction" histograms that we produce and OUTPUT                                                                                                               
-  mCorrectionOutputFile = new TFile("./StEpdEpFinderCorrectionHistograms_OUTPUT.root","RECREATE");
+  mCorrectionOutputFile = new TFile(OutFileName,"RECREATE");
   for (int ew=0; ew<2; ew++){
     for (int order=1; order<_EpOrderMax+1; order++){
       mEpdShiftOutput_sin[ew][order-1] = new TProfile2D(Form("EpdShiftEW%dPsi%d_sin",ew,order),Form("EpdShiftEW%dPsi%d_sin",ew,order),
@@ -87,7 +87,9 @@ StEpdEpFinder::StEpdEpFinder(int nEventTypeBins, char const* CorrectionFile) : m
   }
 
   // now stuff for the "Resolution File"
-  mResolutionOutputFile = new TFile("EpResolutions.root","RECREATE");
+  TString ResolutionFileName = "Resolution_";
+  ResolutionFileName += OutFileName;
+  mResolutionOutputFile = new TFile(ResolutionFileName,"RECREATE");
   for (int order=1; order<=_EpOrderMax; order++){
     mAveCosDeltaPsi[order-1] = new TProfile(Form("AveCosDeltaPsi%d",order),
 					    Form("#LT cos(%d#Psi_{E,%d}-%d#Psi_{W,%d} #GT (weighted and shifted)",order,order,order,order),
