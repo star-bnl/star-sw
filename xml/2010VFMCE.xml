@@ -53,5 +53,5 @@
     root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'","'${tag}'")' &gt;&amp; ${logFile}
   endif
 </command>
-<input URL="command:RunId.pl 2001 10000 1000" />
+<input URL="command:RunId.pl 10001 10010 100" />
 </job>

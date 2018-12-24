@@ -1,5 +1,6 @@
 /* Global Alignment
    FPE_OFF
+   setup debug
    root.exe -q -b 'lMuDst.C(-1,"./*MuDst.root","RMuDst,mysql,magF,nodefault","MuTpcG.root")'  MuTpcG.C+
    root.exe lMuDst.C MuTpcG.root
    .L MuTpcG.C+
@@ -74,6 +75,7 @@
 class StMuDstMaker;
 #endif
 #endif
+#define __FIXED_TARGET__
 StMuDstMaker* MuDstMaker = 0;
 struct PlotName_t {
   const Char_t *Name;
@@ -227,8 +229,8 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
   const static TDatime t0(tZero,0);
   const static Int_t timeOffSet = t0.Convert();
 #ifdef __FIXED_TARGET__
-  const Int_t nZ = 500;
-  const Double_t Zmin = 200;
+  const Int_t nZ = 1000;
+  const Double_t Zmin = 150;
   const Double_t Zmax = 250;
 #else
   const Int_t nZ = 2000;
@@ -237,7 +239,7 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
 #endif  
   if (! dZ) {
     NPART = new TH1D("npart","no accepted particles",500,0,5000);
-    dZ = new TH2F("dZ","dZ (W - E)/2 versus Z",nZ,Zmin,Zmax,1600,-2.,2.);
+    dZ = new TH2F("dZ","dZ (W - E)/2 versus Z",nZ,Zmin,Zmax,2000,-20.,20.);
     const static Int_t tMin = 20140410;
     const static Int_t tMax = 20140411;
     TDatime t1(tMin,0); // min Time and
@@ -250,8 +252,8 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
     
     dX = new TH2F("dX","dX (W - E)/2 versus Z",nZ,Zmin,Zmax,400,-1.,1.);
     dY = new TH2F("dY","dY (W - E)/2 versus Z",nZ,Zmin,Zmax,400,-1.,1.);
-    X = new TH2F("X","X (W + E)/2 versus Z",nZ,Zmin,Zmax,100,-1.,1.);
-    Y = new TH2F("Y","Y (W + E)/2 versus Z",nZ,Zmin,Zmax,100,-1.,1.);
+    X = new TH2F("X","X (W + E)/2 versus Z",nZ,Zmin,Zmax,500,-5.,5.);
+    Y = new TH2F("Y","Y (W + E)/2 versus Z",nZ,Zmin,Zmax,500,-5.,5.);
     Zchisq = new TH2F("Zchisq","chisq between the highest rank vertex and this one", 100,-25,25,500,0,500);
     dXS = new TH3F("dXS","dX in SCS versus sector and Z",24,0.5,24.5,nZ,Zmin,Zmax,500,-0.05,0.05);
     dYS = new TH3F("dYS","dY in SCS versus sector and Z",24,0.5,24.5,nZ,Zmin,Zmax,500,-1.0,1.0);
