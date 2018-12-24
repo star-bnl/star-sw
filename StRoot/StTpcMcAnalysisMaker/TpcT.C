@@ -150,6 +150,17 @@ const Int_t  nBins[NoDim]  = {    2,    2,      7,        7,      22,     32,  2
 const Var_t  xMin          = {  0.5,  0.5,    0.5,      0.5,    -1.1,   -1.5,  -5,     3,   -0.5,   -0.5,-0.5};
 const Var_t  xMax          = { 24.5, 64.5,    7.5,     21.5,     1.1,    1.5, 215,     9,    0.5,    0.5, 0.5};
 //________________________________________________________________________________
+Bool_t AcceptFile(const TString &File) {
+  Bool_t ok = kTRUE;
+  if (File.Contains("Plot") || File.Contains("Fit") || File.Contains("ADC") || File.Contains("Pads") || 
+      File.Contains("hist") || File.Contains("runco") || File.Contains("MuMc") ||
+      File.Contains("minimc") || File.Contains("event") || File.Contains("geant") ||
+      File.Contains("hist") || File.Contains("runco") || File.Contains("geant") ||
+      File.Contains("All") ||
+      File.Contains("MuDst.root")) ok = kFALSE;
+  return ok;
+}
+//________________________________________________________________________________
 void SetInnerPadrows() {
   if (NoInnerRows > 0) return;
   TH3 *h3 = (TH3 *) gDirectory->Get("SecRow3");
@@ -247,11 +258,7 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "H", const Char_t *O
   TTreeIter iter("TpcT");
   while ((file = (Char_t *) Dir.NextFile())) {
     TString File(file);
-     if (File.Contains("Plot") || File.Contains("Fit") || File.Contains("ADC") || File.Contains("Pads") || 
-	File.Contains("hist") || File.Contains("runco") || File.Contains("MuMc") ||
-	File.Contains("minimc") || File.Contains("event") || File.Contains("geant") ||
-	File.Contains("All") ||
-	File.Contains("MuDst.root")) continue;
+    if (! AcceptFile(File)) continue;
     TFile *f = new TFile (File);
     if (f) {
       TTree *tree = (TTree *) f->Get("TpcT");
@@ -995,11 +1002,7 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
   TTreeIter iter("TpcT");
   while ((file = (Char_t *) Dir.NextFile())) {
     TString File(file);
-    if (File.Contains("Plot") || File.Contains("Fit") || File.Contains("ADC") || File.Contains("Pads") || 
-	File.Contains("hist") || File.Contains("MuMc") ||
-	File.Contains("minimc") || File.Contains("event") ||
-	File.Contains("All") || File.Contains("Sparse") ||
-	File.Contains("MuDst.root")) continue;
+    if (! AcceptFile(File)) continue;
     TFile *f = new TFile (File);
     if (f) {
       TTree *tree = (TTree *) f->Get("TpcT");
@@ -1126,11 +1129,7 @@ void TpcTdENP(const Char_t *files="*.root", const Char_t *Out = "") {
   TTreeIter iter("TpcT");
   while ((file = (Char_t *) Dir.NextFile())) {
     TString File(file);
-    if (File.Contains("Plot") || File.Contains("Fit") || File.Contains("ADC") || File.Contains("Pads") || 
-	File.Contains("hist") || File.Contains("MuMc") ||
-	File.Contains("minimc") || File.Contains("event") ||
-	File.Contains("All") || File.Contains("Sparse") ||
-	File.Contains("MuDst.root")) continue;
+    if (! AcceptFile(File)) continue;
     TFile *f = new TFile (File);
     if (f) {
       TTree *tree = (TTree *) f->Get("TpcT");
@@ -1225,11 +1224,6 @@ void TpcTPads(const Char_t *files="*.root", const Char_t *Out = "") {
     TString File(file);
     TString bN(gSystem->BaseName(file));
     cout << "File " << file << " bname = " << bN.Data() << endl;
-    if (bN.Contains("Plot") || bN.Contains("Fit") || bN.Contains("ADC") || bN.Contains("Pads") || 
-	bN.Contains("hist") || bN.Contains("MuMc") || bN.Contains("minimc") ||
-	bN.Contains("minimc") || bN.Contains("event") ||
-	bN.Contains("All") || bN.Contains("Sparse") ||
-	bN.Contains("MuDst.root")) continue;
     TFile *f = new TFile (File);
     if (f) {
       TTree *tree = (TTree *) f->Get("TpcT");
@@ -3015,12 +3009,7 @@ void TpcTPadSp(const Char_t *Out = "SpXSpZ", const Char_t *files="*.root") {
   TTreeIter iter("TpcT");
   while ((file = (Char_t *) Dir.NextFile())) {
     TString File(file);
-    if (File.Contains("Plot") || File.Contains("Fit") || File.Contains("ADC") || File.Contains("Pads") || 
-	File.Contains("hist") || File.Contains("MuMc") || File.Contains("minimc") ||
-	File.Contains("minimc") || File.Contains("event") ||
-	File.Contains("Sparse") ||
-	File.Contains("All") ||
-	File.Contains("MuDst.root")) continue;
+    if (! AcceptFile(File)) continue;
     TFile *f = new TFile (File);
     if (f) {
       TTree *tree = (TTree *) f->Get("TpcT");
@@ -4321,14 +4310,7 @@ void T0Offsets(const Char_t *files="*.root", const Char_t *Out = "") {
   TTreeIter iter("TpcT");
   while ((file = (Char_t *) Dir.NextFile())) {
     TString File(file);
-    if (File.Contains("Plot") || File.Contains("Fit") || File.Contains("ADC") || File.Contains("Pads") || 
-	File.Contains("hist") || 
-	//	File.Contains("tags") || 
-	File.Contains("MuMc") || File.Contains("minimc") ||
-	File.Contains("minimc") || File.Contains("event") ||
-	File.Contains("Sparse") ||
-	File.Contains("All") ||
-	File.Contains("MuDst.root")) continue;
+    if (! AcceptFile(File)) continue;
     TFile *f = new TFile (File);
     if (f) {
       TTree *tree = (TTree *) f->Get("TpcT");
