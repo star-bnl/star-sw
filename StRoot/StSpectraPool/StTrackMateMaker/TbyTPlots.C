@@ -171,7 +171,7 @@ void DrawFitPnts(Int_t ping=0) {
   cTitle += gTitle;
   cTitle += "Fit Points Corr";
   if (ping) cTitle += " Matched";
-  c1 = new TCanvas(cTitle,cTitle,400,400); c1->SetLeftMargin(0.14);
+  c1 = new TCanvas(cTitle,cTitle,800,800); c1->SetLeftMargin(0.14);
   c1->SetLogz();
   fitPtsHist->SetStats(0);
   fitPtsHist->GetXaxis()->SetRange(0,46);
@@ -215,7 +215,7 @@ void DrawHitPattern() {
   if (! HftPattern) return;
   //  cTitle += gTitle;
   cTitle = "HFT Hit Pattern";
-  c1 = new TCanvas(cTitle,cTitle,400,400); c1->SetLeftMargin(0.14);
+  c1 = new TCanvas(cTitle,cTitle,800,800); c1->SetLeftMargin(0.14);
   //  HftPattern->GetYaxis()->SetRange(0,45);
   const Char_t *charge[2] = {"P","N"};
   const Char_t *ON[2]     = {"Old","New"};
@@ -249,13 +249,13 @@ void DrawRelMomDifNft(Int_t k=0, Int_t kase=0) {
   cTitle  = gTitle;
   cTitle += "P diff vs NoFitPnts for "; cTitle += GPTitle[k];
   if (kase) cTitle += " with pT > 0.5 GeV/c";
-  c1 = new TCanvas(cTitle,cTitle,400,400); c1->SetLeftMargin(0.14);
+  c1 = new TCanvas(cTitle,cTitle,800,800); c1->SetLeftMargin(0.14);
   TString cTitle2(cTitle);
   cTitle2 += " Shift";
-  TCanvas* c2 = new TCanvas(cTitle2,cTitle2,400,400); c2->SetLeftMargin(0.14);
+  TCanvas* c2 = new TCanvas(cTitle2,cTitle2,800,800); c2->SetLeftMargin(0.14);
   TString cTitle3(cTitle);
   cTitle3 += " Sigma";
-  TCanvas* c3 = new TCanvas(cTitle3,cTitle3,400,400); c3->SetLeftMargin(0.14);
+  TCanvas* c3 = new TCanvas(cTitle3,cTitle3,800,800); c3->SetLeftMargin(0.14);
   Double_t ymax = pTDifNFP[0]->GetMaximum();
   if (pTDifNFP[1]->GetMaximum() > ymax) ymax = pTDifNFP[1]->GetMaximum();
   c1->cd();
@@ -363,7 +363,7 @@ void EffRefMult(Int_t k = 0) {
   cTitle  = gTitle; cTitle += GP[k];
   TString hTitle("Momentum Dist"); hTitle += " for "; hTitle += GPTitle[k];
   cTitle += " "; cTitle += hTitle;
-  c1 = new TCanvas(cTitle,cTitle,400,400); c1->SetLeftMargin(0.14);
+  c1 = new TCanvas(cTitle,cTitle,800,800); c1->SetLeftMargin(0.14);
   c1->SetLogy();
   c1->SetTicks(1,1);
   //  gStyle->SetOptTitle(0);
@@ -420,7 +420,7 @@ void DrawEfficiency(Int_t k = 0, Double_t pmax = 5.0) {
   TString hTitle("");
   hTitle += GPTitle[k]; hTitle +=" track efficiencies vs pT"; 
   cTitle += hTitle;
-  TCanvas* c1 = new TCanvas(cTitle,cTitle,400,400);// c1->SetLeftMargin(0.14);
+  TCanvas* c1 = new TCanvas(cTitle,cTitle,800,800);// c1->SetLeftMargin(0.14);
   //  c1->SetTicks(1,1);
   TH1F* dummyeff= c1->DrawFrame(0.0,emin,pmax, 1.01);
   dummyeff->SetTitle(hTitle);
@@ -474,7 +474,7 @@ void DrawEfficiency(Int_t k = 0, Double_t pmax = 5.0) {
     effNewP->Draw("same");
     leg4->AddEntry(effOldP,Form("%s efficiency %s",Old.Data(),NewName.Data()));
     leg4->AddEntry(effNewP,Form("%s efficiency %s",New.Data(),NewName.Data()));
-    TCanvas* c3 = new TCanvas(NewcName,NewcName,400,400);// c3->SetLeftMargin(0.14);
+    TCanvas* c3 = new TCanvas(NewcName,NewcName,800,800);// c3->SetLeftMargin(0.14);
   //  c3->SetTicks(1,1);
     TH1F* dummyeff3= c3->DrawFrame(0.0,emin,pmax, 1.01);
     TString ttitle(hTitle);
@@ -512,7 +512,7 @@ void DrawPhiEfficiency(Int_t k = 0) {
   TString hTitle("");
   hTitle += GPTitle[k]; hTitle +=" track efficiencies vs #phi"; 
   cTitle += hTitle;
-  TCanvas* c1 = new TCanvas(cTitle,cTitle,400,400);// c1->SetLeftMargin(0.14);
+  TCanvas* c1 = new TCanvas(cTitle,cTitle,800,800);// c1->SetLeftMargin(0.14);
   //  c1->SetTicks(1,1);
   TH1F* dummyeff= c1->DrawFrame(-180,emin,180, 1.01);
   dummyeff->SetTitle(hTitle);
@@ -566,7 +566,7 @@ void DrawPhiEfficiency(Int_t k = 0) {
     effNewP->Draw("same");
     leg4->AddEntry(effOldP,Form("%s efficiency %s",Old.Data(),NewName.Data()));
     leg4->AddEntry(effNewP,Form("%s efficiency %s",New.Data(),NewName.Data()));
-    TCanvas* c3 = new TCanvas(NewcName,NewcName,400,400);// c3->SetLeftMargin(0.14);
+    TCanvas* c3 = new TCanvas(NewcName,NewcName,800,800);// c3->SetLeftMargin(0.14);
   //  c3->SetTicks(1,1);
     TH1F* dummyeff3= c3->DrawFrame(-180,emin,180, 1.01);
     TString ttitle(hTitle);
@@ -595,7 +595,7 @@ void DrawEffVsMult(Int_t k = 0) {
   TString hTitle("");
   hTitle += " Efficiencies"; hTitle += " versus Multiplicity for "; hTitle += GPTitle[k];
   cTitle += hTitle;
-  TCanvas* cnv4 = new TCanvas(cTitle,cTitle,400,400); c1 = cnv4; c1->SetLeftMargin(0.14);
+  TCanvas* cnv4 = new TCanvas(cTitle,cTitle,800,800); c1 = cnv4; c1->SetLeftMargin(0.14);
   c1->SetTicks(1,1);
   TH2D *pTEf[4];
   TH1D *pTEfP[4];
@@ -672,7 +672,7 @@ void DrawpTDiff(Int_t k=0, Double_t pmax = 5.0) {
   TString hTitle("");
   hTitle += Form("<p_{T}^{%s} - p_{T}^{%s}> (GeV/c) versus p_{T}",Old.Data(),New.Data()); hTitle += " for "; hTitle += GPTitle[k];
   cTitle += "<p_{T}^{Old} - p_{T}^{New}> (GeV/c) versus p_{T}"; cTitle += " for "; cTitle += GPTitle[k];
-  TCanvas* ptdiffgrcnv = new TCanvas(cTitle,cTitle,400,400); c1 = ptdiffgrcnv; c1->SetLeftMargin(0.14);
+  TCanvas* ptdiffgrcnv = new TCanvas(cTitle,cTitle,800,800); c1 = ptdiffgrcnv; c1->SetLeftMargin(0.14);
   TH1F* dummy2 = c1->DrawFrame(0,-.05,pmax, 0.05);
   dummy2->SetTitle(hTitle);
   dummy2->SetXTitle("p_{T} (GeV/c)");
@@ -709,7 +709,7 @@ void DrawPhiDiff(Int_t k=0, const Char_t *opt = "Phi") {
   if (TString(opt).Contains("EP"))  hTitle += " and #eta > 0";
   if (TString(opt).Contains("EN"))  hTitle += " and #eta < 0";
   cTitle += hTitle;
-  TCanvas* ptdiffgrcnv = new TCanvas(cTitle,cTitle,400,400); c1 = ptdiffgrcnv; c1->SetLeftMargin(0.14);
+  TCanvas* ptdiffgrcnv = new TCanvas(cTitle,cTitle,800,800); c1 = ptdiffgrcnv; c1->SetLeftMargin(0.14);
   TH1F* dummy2 = c1->DrawFrame(-TMath::Pi(),-.01,TMath::Pi(),.02);
   dummy2->SetTitle(hTitle);
   dummy2->SetXTitle("#phi");
@@ -765,12 +765,12 @@ void DrawRpTDiff(Int_t k = 0, const Char_t *opt="pTdiffR", Double_t pmax = 5.0) 
     sTitle = Form("Sigma of Relative difference pT (%s - %s)/%s vs pT", Old.Data(), New.Data(), New.Data());
   }
   cTitle += " for "; cTitle += GPTitle[k];
-  c1 = new TCanvas(cTitle,cTitle,400,400); c1->SetLeftMargin(0.14);
+  c1 = new TCanvas(cTitle,cTitle,800,800); c1->SetLeftMargin(0.14);
   c1->SetTicks(1,1);
   c1->SetLeftMargin(0.15);
   TString cTitle2(cTitle);
   cTitle2 += "Sigma";
-  TCanvas *c2 = new TCanvas(cTitle2,cTitle2,400,400); c2->SetLeftMargin(0.14);
+  TCanvas *c2 = new TCanvas(cTitle2,cTitle2,800,800); c2->SetLeftMargin(0.14);
   c2->SetTicks(1,1);
   c2->SetLeftMargin(0.15);
   TString cTitle3(cTitle);
