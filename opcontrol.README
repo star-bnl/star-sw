@@ -1,0 +1,39 @@
+ opcontrol --start ( If there are any issues in starting like --vm-linux just follow the instructions)
+
+ run <example>
+
+ opcontrol --dump
+
+ opreport -l <example> > <outputfile>
+
+ opcontrol --stop (stops collecting the data)
+
+ opcontrol --shutdown (Stops the demon)
+
+ opcontrol --reset (clears the profile data which was stored in the sample file given)
+
+
+================================================================================
+operf root.exe -q -b 'bfc.C(0,"xc2018I,vmc")' Run1Ev.C
+
+================================================================================
+valgrind --tool=callgrind [callgrind options] your-program [program options]
+callgrind_control -e -b
+callgrind_annotate [options] callgrind.out.<pid>
+callgrind_annotate --inclusive=yes --tree=both  callgrind.out.<pid>
+callgrind_annotate ---auto=yes  -inclusive=yes --tree=both --toggle-collect=function_name callgrind.out.<pid>
+
+callgrind_annotate --auto=yes --inclusive=yes --tree=both --toggle-collect=function_name callgrind.out.1154284
+callgrind_annotate --auto=yes --inclusive=yes --tree=both  callgrind.out.1154284
+
+
+================================================================================
+ source /opt/intel_17/parallel_studio_xe_2017/bin/psxevars.csh
+    amplxe-gui
+
+
+
+bfc.C(0,"P2018,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,HLTCA,KFVertex,evout,Stx","/net/l401/data/scratch1/daq/2018/27GeV_production_2018/168/19168040/st_physics_19168040_raw_1000003.daq")
+
+
+kcachegrind callgrind.out.1154284
