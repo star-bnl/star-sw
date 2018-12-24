@@ -1,5 +1,5 @@
 #include "StxCAInterface.h"
-
+#include "TPCCATracker/AliHLTTPCCAGBTracker.h"
 #include "TPCCATracker/AliHLTTPCCAGBHit.h"
 #include "TPCCATracker/AliHLTTPCCAGBTrack.h"
 #include "TPCCATracker/AliHLTTPCCAParam.h"
@@ -116,68 +116,54 @@ void StxCAInterface::MakeHits() {
   }
 } // void StxCAInterface::MakeHits()
 //________________________________________________________________________________
-void StxCAInterface::ConvertPars(const AliHLTTPCCATrackParam& caPar, double _alpha, StxNodePars& nodePars, StxNodeErrs& nodeErrs)
+void StxCAInterface::ConvertPars(const AliHLTTPCCATrackParam& caPar, Double_t _alpha, StxCApar& stxPar)
 {
   // set jacobian integral coef 
   //                      y   z eta ptin tanl  
   static Double_t JI[5] {-1, -1, -1,   1, -1};
   // get parameters
-  nodePars.x()    =         caPar.GetX();
-  nodePars.y()    = JI[0] * caPar.GetY();
-  nodePars.z()    = JI[1] * caPar.GetZ();
-  nodePars.eta()  = JI[2] * asin(caPar.GetSinPhi()); // (signed curvature)*(local Xc of helix axis - X current point on track)
-  nodePars.ptin() = JI[3] * caPar.GetQPt();          // signed invert pt [sign = sign(-qB)]
-  nodePars.tanl() = JI[4] * caPar.GetDzDs();         // tangent of the track momentum dip angle
+  stxPar.pars.x()    =         caPar.GetX();
+  stxPar.pars.y()    = JI[0] * caPar.GetY();
+  stxPar.pars.z()    = JI[1] * caPar.GetZ();
+  stxPar.pars.eta()  = JI[2] * asin(caPar.GetSinPhi()); // (signed curvature)*(local Xc of helix axis - X current point on track)
+  stxPar.pars.ptin() = JI[3] * caPar.GetQPt();          // signed invert pt [sign = sign(-qB)]
+  stxPar.pars.tanl() = JI[4] * caPar.GetDzDs();         // tangent of the track momentum dip angle
   // set jacobian integral coef
   Double_t J[5]; 
-  J[0] = JI[0];                     // y
-  J[1] = JI[1];                     // z
-  J[2] = JI[2]/cos(nodePars.eta()); // eta
-  J[3] = JI[3];                     // ptin
-  J[4] = JI[4];                     // tanl
+  J[0] = JI[0];                        // y
+  J[1] = JI[1];                        // z
+  J[2] = JI[2]/cos(stxPar.pars.eta()); // eta
+  J[3] = JI[3];                        // ptin
+  J[4] = JI[4];                        // tanl
   
     // get cov matrises
   const float *caCov = caPar.GetCov();
-//   double nodeCov[15];
-//   for (int i1 = 0, i = 0; i1 < 5; i1++){
-//     for (int i2 = 0; i2 <= i1; i2++, i++){
-//       nodeCov[i] = J[i1]*J[i2]*caCov[i];
-//     }
-//   }
-  // if ( (caCov[0] <= 0) || (caCov[2] <= 0) || (caCov[5] <= 0) || (caCov[9] <= 0) || (caCov[14] <= 0))
-  //   cout << "Warrning: Bad CA Cov Matrix." << endl;
-  // if ( (nodeCov[0] <= 0) || (nodeCov[2] <= 0) || (nodeCov[5] <= 0) || (nodeCov[9] <= 0) || (nodeCov[14] <= 0))
-  //   cout << "Warrning: Bad Node Cov Matrix." << endl;
 
-  double *A = nodeErrs.G();
-/*  for (int i1 = 0, i = 0; i1 < 5; i1++){
-    for (int i2 = 0; i2 <= i1; i2++, i++){
-      A[i+i1+2] = caCov[i];
-    }
-  }*/
+  Double_t *A = stxPar.errs.G();
   
-  nodeErrs._cYY = caCov[ 0];
-  nodeErrs._cZY = caCov[ 1]*J[0]*J[1];
-  nodeErrs._cZZ = caCov[ 2]*J[0]*J[1];
-  nodeErrs._cEY = caCov[ 3]*J[0]*J[2];
-  nodeErrs._cEZ = caCov[ 4]*J[1]*J[2];
-  nodeErrs._cEE = caCov[ 5]*J[2]*J[2];
-  nodeErrs._cTY = caCov[ 6]*J[0]*J[4];
-  nodeErrs._cTZ = caCov[ 7]*J[1]*J[4];
-  nodeErrs._cTE = caCov[ 8]*J[2]*J[4];    
-  nodeErrs._cTT = caCov[ 9]*J[4]*J[4];
-  nodeErrs._cPY = caCov[10]*J[0]*J[3];
-  nodeErrs._cPZ = caCov[11]*J[1]*J[3];
-  nodeErrs._cPE = caCov[12]*J[2]*J[3];
-  nodeErrs._cTP = caCov[13]*J[4]*J[3];
-  nodeErrs._cPP = caCov[14]*J[3]*J[3];
-#if 1  
+  stxPar.errs._cYY = caCov[ 0];
+  stxPar.errs._cZY = caCov[ 1]*J[0]*J[1];
+  stxPar.errs._cZZ = caCov[ 2]*J[0]*J[1];
+  stxPar.errs._cEY = caCov[ 3]*J[0]*J[2];
+  stxPar.errs._cEZ = caCov[ 4]*J[1]*J[2];
+  stxPar.errs._cEE = caCov[ 5]*J[2]*J[2];
+  stxPar.errs._cTY = caCov[ 6]*J[0]*J[4];
+  stxPar.errs._cTZ = caCov[ 7]*J[1]*J[4];
+  stxPar.errs._cTE = caCov[ 8]*J[2]*J[4];    
+  stxPar.errs._cTT = caCov[ 9]*J[4]*J[4];
+  stxPar.errs._cPY = caCov[10]*J[0]*J[3];
+  stxPar.errs._cPZ = caCov[11]*J[1]*J[3];
+  stxPar.errs._cPE = caCov[12]*J[2]*J[3];
+  stxPar.errs._cTP = caCov[13]*J[4]*J[3];
+  stxPar.errs._cPP = caCov[14]*J[3]*J[3];
+
   A[0] = 1; // don't use parameter X
   A[1] = 0;
   A[3] = 0;
   A[6] = 0;
   A[10] = 0;
   A[15] = 0;
-#endif
+  stxPar.chi2 = caPar.Chi2();
+  stxPar.NDF  = caPar.NDF();
 }
 //________________________________________________________________________________
