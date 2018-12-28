@@ -46,6 +46,7 @@
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StDbUtilities/StCoordinates.hh" 
 #endif /* __TPC_LOCAL_COORDINATES__ */
+#include "RTS/src/DAQ_TPX/tpxFCF_flags.h" // for FCF flag definition
 //
 //  The following line defines a static string. Currently it contains
 //  the cvs Id. The compiler will put the string (literally) in the
@@ -379,6 +380,7 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
 		if (! tpcHit) continue;
 		if (mOnlyIdT && tpcHit->idTruth() <= 0) continue;
 		if (IdTruth >= 0 && tpcHit->idTruth() != IdTruth) continue;
+		if (tpcHit->flag() & FCF_CHOPPED || tpcHit->flag() & FCF_SANITY)     continue; // ignore hits marked by AfterBurner as chopped or bad sanity
 		if (! plot) 		tpcHit->Print();
 		else {
 		  if (Nt) {
