@@ -71,4 +71,5 @@
 <!-- <input URL="file:/star/data03/daq/2018/12*/*/st_physics_191*.daq" /> -->
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2018/27GeV_production_2018/168/19168025/st_physics_19168025_raw_2000002.daq" /> -->
 <input URL="file:/net/l401/data/scratch1/daq/2018/27GeV_production_2018/168/*/*.daq" />
+<!-- <input URL="file:/net/l401/data/scratch1/daq/2018/production_3p85GeV_fixedTarget_2018/*/*/*.daq" /> -->
 </job>

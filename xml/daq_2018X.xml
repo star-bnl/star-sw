@@ -50,8 +50,8 @@
 #  root.exe -q -b 'bfc.C(10000,"P2018,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  root.exe -q -b 'bfc.C(2000,"P2018,-StiCA,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,Stx,KFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  root.exe -q -b 'bfc.C(100,"B2018,UseXgeom,BAna,mtd,btof,BEmcChkStat,emcDY2,fpd,trgd,ZDCvtx,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,Stx,KFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
-#  root.exe -q -b 'bfc.C(200,"P2018,Stx,KFVertex,-StiCA,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,Stx,KFVertex,evout,TObjTable","'${evtsFile}'")' &gt;&amp; ${logFile}
-  root.exe -q -b 'bfc.C(200,"P2018,StxCA,KFVertex,-StiCA,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,Stx,KFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+  root.exe -q -b 'bfc.C(200,"P2018,Stx,KFVertex,-StiCA,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,Stx,KFVertex,evout,TObjTable","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(200,"P2018,StxCA,KFVertex,-StiCA,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,Stx,KFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
@@ -73,5 +73,6 @@
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2018/27GeV_production_2018/168/*/*.daq" /> -->
 <!-- <input URL="file:/star/data03/daq/2018/12*/*/st_physics_191*.daq" /> -->
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2018/27GeV_production_2018/168/19168025/st_physics_19168025_raw_2000002.daq" /> -->
+<!-- <input URL="file:/net/l401/data/scratch1/daq/2018/27GeV_production_2018/168/*/*.daq" /> -->
 <input URL="file:/net/l401/data/scratch1/daq/2018/27GeV_production_2018/168/*/*.daq" />
 </job>

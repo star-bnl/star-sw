@@ -1,14 +1,20 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false">
+<job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="true">
         <command>
          cd ${SUBMITTINGDIRECTORY}
    setenv StarEndMakerShell
    setenv STARFPE NO
    setenv NODEBUG yes
+#SL18f
+   setup gcc
+   setup 32b
+   starver SL18h
+# dev
+#   starver dev
 #.DEV2
 #   setup gcc
-   setup 64b
-   starver .DEV2
+#   setup 64b
+#   starver .DEV2
 #   starver TFG18m
 #dev
 #   setup gcc
@@ -49,7 +55,9 @@
 #  root.exe -q -b 'bfc.C(10000,"P2018,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  root.exe -q -b 'bfc.C(200,"P2018,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,evout,TObjTable","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  root.exe -q -b 'bfc.C(1000,"P2018,TpxRaw,TpxClu,McTpcAna,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
-  root.exe -q -b 'bfc.C(1000,"P2018,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(1000,"P2018,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+# SL18f
+   root4star -q -b 'bfc.C(1000,"P2018a,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,evout,-picowrite,-picodst","'${evtsFile}'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
@@ -72,6 +80,7 @@
 <!-- <input URL="file:/star/data03/daq/2018/12*/*/st_physics_191*.daq" /> -->
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2018/27GeV_production_2018/*/*/*_adc_*.daq" /> -->
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2018/production_3p85GeV_fixedTarget_2018/*/*/*_adc_*.daq" /> -->
-<input URL="file:/net/l401/data/scratch1/daq/2018/production_3p85GeV_fixedTarget_2018/*/*/*.daq" />
+<!-- <input URL="file:/net/l401/data/scratch1/daq/2018/production_3p85GeV_fixedTarget_2018/*/*/*.daq" /> -->
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2018/production_26p5GeV_fixedTarget_2018/*/*/*_adc_*.daq" /> -->
+<input URL="file:/net/l401/data/scratch1/daq/2018/27GeV_production_2018/168/*/*.daq" />
 </job>
