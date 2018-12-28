@@ -408,13 +408,15 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
     fitTrack.checkConsistency();
     
     // do the fit
-    if (fitter) fitter->processTrack(&fitTrack);
-    // print fit result
-    if (Debug()) {
+    if (fitter) {
+      fitter->processTrack(&fitTrack);
+      // print fit result
+      if (Debug()) {
 	fitTrack.getFittedState().Print();
       }
-    //check
-    fitTrack.checkConsistency();
+      //check
+      fitTrack.checkConsistency();
+    }
   }
   catch(genfit::Exception& e){
     std::cout<<"Exception, next track"<<std::endl;
