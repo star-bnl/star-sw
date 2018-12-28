@@ -589,7 +589,7 @@ Int_t icol,islas;
     //		Not FOUND
     NOTFOUND:
       if (!dowMk && GetDebug()>1) //PrintWarning message
-	if ((MaxWarnings--) > 0) Warning("GetDataSet"," \"%s\" Not Found ***\n",(const char*)actInput);
+	if ((MaxWarnings--) > 0) Warning("GetDataSet"," \"%s\" Not Found ***",(const char*)actInput);
       dataset = 0; continue;
 
     //		DataSet FOUND
@@ -599,7 +599,7 @@ Int_t icol,islas;
 	   LOG_INFO << Form("<%s::%s> DataSet %s FOUND in %s"
 			     ,ClassName(),"GetDataSet",logInput,(const char*)dataset->Path()) << endm;
 #else
-      printf("Remark: <%s::%s> DataSet %s FOUND in %s\n"
+      printf("Remark: <%s::%s> DataSet %s FOUND in %s"
       ,ClassName(),"GetDataSet",logInput,(const char*)dataset->Path());
 #endif
     break;
@@ -1027,7 +1027,7 @@ void StMaker::PrintInfo()
    if (cvs && cvs[0]) built = strstr(cvs,"built");
    else cvs = "No CVS tag was defined";
 #ifdef STAR_LOGGER       
-   if (built > cvs) { LOG_QA << Form("QAInfo:%-20s %s from %.*s",ClassName(),built,built-cvs,cvs)<< endm; }
+   if (built > cvs) { LOG_QA << Form("QAInfo:%-20s %s from %.*s",ClassName(),built,int(built-cvs),cvs)<< endm; }
    else             { LOG_QA << Form("QAInfo:%-20s    from %s",ClassName(),cvs) << endm; }
 #else   
    if (built > cvs) printf("QAInfo:%-20s %s from %.*s\n",ClassName(),built,built-cvs,cvs);
