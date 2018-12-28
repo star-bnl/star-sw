@@ -2405,7 +2405,7 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 				
 
 			
-				if(do_print) {
+				if(do_print && dd->ncontent) {
 					int rdo = (dd->row >> 4)+1;
 					int port = (dd->row & 0xF)+1 ;
 					int ch = (dd->pad) & 0xFF ;
@@ -2430,7 +2430,7 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 
 				pixels += dd->ncontent ;
 
-				if(do_print) {
+				if(do_print && dd->ncontent) {
 					printf("ITPC ADC: sector %2d, row %2d, pad %3d: %3d timebins\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
 
 					for(u_int i=0;i<dd->ncontent;i++) {
@@ -2450,7 +2450,7 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 				clusters += dd->ncontent ;
 				
 
-				if(do_print) {
+				if(do_print&& dd->ncontent) {
 					printf("ITPC CLD: sector %2d, row %2d: %3d clusters\n",dd->sec,dd->row,dd->ncontent) ;
 
 					for(u_int i=0;i<dd->ncontent;i++) {
