@@ -1,6 +1,0 @@
-<StDbServer>
-<server> pdsf </server>
-<host> stardb.nersc.gov </host>
-<port> 3306 </port>
-<socket> /tmp/mysql.sock </socket>
-</StDbServer>
