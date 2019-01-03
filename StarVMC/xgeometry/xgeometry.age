@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.31 2018/07/23 19:09:21 jwebb Exp $
+* $Id: xgeometry.age,v 1.32 2019/01/03 23:14:04 jwebb Exp $
 
 
 
@@ -2514,6 +2514,7 @@ If LL>0
   case y2018x { y2018x: y2018 experimentap TPC geometry; Geom =        'y2018x    '; call geom_y2018x;} 
 
   case y2019 { y2019: y2019 first cut geometry; Geom =        'y2019     '; call geom_y2019;} 
+  case y2019a { y2019: y2019a production release; Geom =        'y2019a    '; call geom_y2019a;} 
 
   Case ftsver1  { y2017 : y2017 baseline w/ ids and fts v1;     Geom = 'ftsver1   '; call geom_ftsver1;}
   Case ftsver2  { y2017 : y2017 baseline w/ ids and fts v2;     Geom = 'ftsver2   '; call geom_ftsver2;}
@@ -4642,8 +4643,11 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.31 2018/07/23 19:09:21 jwebb Exp $
+* $Id: xgeometry.age,v 1.32 2019/01/03 23:14:04 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.32  2019/01/03 23:14:04  jwebb
+* y2019a geometry first production release.
+*
 * Revision 1.31  2018/07/23 19:09:21  jwebb
 * Make y2018a available to starsim
 *
