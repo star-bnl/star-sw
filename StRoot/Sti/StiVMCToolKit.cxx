@@ -179,7 +179,7 @@ void StiVMCToolKit::PrintShape(TGeoShape *shape) {
   Double_t *XY;
   Double_t dZ;
   //  Double_t paramsBB[3];
-  Double_t paramsBC[3];
+  Double_t paramsBC[4];
   Int_t i, j;
   Int_t Nz = 0;
   shape->GetBoundingCylinder(paramsBC);
@@ -297,7 +297,7 @@ Double_t StiVMCToolKit::GetShapeVolume(TGeoShape *shape) {
   TGeoConeSeg *cons = 0;
   TGeoEltu *eltu = 0;
   Double_t volume = 0;
-  Double_t paramsBC[3];
+  Double_t paramsBC[4];
   Double_t volBB = 0;
   Double_t volBC = 0;
   Int_t i;
