@@ -142,6 +142,8 @@ endsw
     setenv EXTRA_FLAGS ""
 switch ( $STAR_HOST_SYS )  
     case *_x8664_gcc7*:
+#     setup PGI
+#     if (-e $PGI/$PGI_V/bin/pgf77) setenv F77 pgf77
      setenv ENABLE_CXX11 "--enable-cxx17"
      setenv EXTRA_FLAGS " --cflags=-fdiagnostics-color=always --cxxflags=-fdiagnostics-color=always"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cxxflags=-msse --cxxflags=-msse2 --cxxflags=-msse3 --cxxflags=-msse4.1 --cxxflags=-mssse3"
@@ -261,6 +263,7 @@ echo "EXTRA_FLAGS = $EXTRA_FLAGS"
     --with-mysql-incdir=$MYSQLINCDIR --with-mysql-libdir=$MYSQLCLILIB \
     --with-fftw3-incdir=$XOPTSTAR/include --with-fftw3-libdir=$XOPTSTAR/lib \
     --with-xrootd=$XOPTSTAR \
+    --with-f77=$F77 \
     --all \
     $DISABLE \
     $ENABLE_CXX11 $EXTRA_FLAGS

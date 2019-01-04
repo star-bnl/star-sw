@@ -74,12 +74,13 @@ set dirlist = $STAR_LIB
 #set  dirlist = `echo /software/intel_17/compilers_and_libraries_2017.0.098/linux/compiler/lib/*`
 #set  dirlist  = $STAR_LIB
 set dirlist = "/opt/rh/devtoolset-7/root/usr/lib/gcc/x86_64-redhat-linux/7/"
+#set dirlist = $PGILIB
 foreach p ($dirlist) 
     set list = `echo ${p}/*.so* ${p}/*.a ${p}/*.o` 
 #    set list = `echo ${p}/libboost*.so`
 #    set list = `echo $STAR/.sl44_gcc346/lib/*.so` #echo ${p}/lib*.so*`
     foreach lib ($list) 
 	echo "lib = " $lib 
-	nm -p $lib |  grep -i _gfortran_stop_numeric_f08
+	nm -p $lib |  grep -i quadmath_snprintf
     end
 end

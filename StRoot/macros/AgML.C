@@ -8,6 +8,7 @@ void AgML(const Char_t *tag="y2013_2", const Char_t *geom="") {
   if (Geom == "") Geom = Tag;
 #if 1
   gSystem->Load("St_base");
+  gSystem->Load("StChain");
   if (gSystem->Load("liblog4cxx.so") >=  0) {             //  StMemStat::PrintMem("load log4cxx");
     cout << " + liblog4cxx.so";
     if(gSystem->Load("libStStarLogger.so") >= 0) {              //  StMemStat::PrintMem("load log4cxx");
