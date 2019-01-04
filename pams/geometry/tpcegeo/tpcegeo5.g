@@ -185,7 +185,6 @@ Content   TPCE,TOFC,TOFS,TOST,TOKA,TONX,TOAD,TOHA,TPGV,TPSS,
         Real tpgvLeng,tofcLeng,tpgvz;
         Integer i_sec,i_row;
 External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
-
 !//  derive radii of larger structureures
         Real    tpgvIR; !// TPC gas inner radius
 

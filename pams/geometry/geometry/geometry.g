@@ -1498,6 +1498,7 @@ replace [exe BTOFv8;] with [;BTOF=on; BtofConfig=13; Itof=8 "call btofgeo8";]
 """ TPC Configurations                                                      """
 """     Naming convention is offset by 1 from the corresponding module.     """
 """                                                                         """
+#if 0
 """ TPCE00  Module: tpcegeo                                                 """
 """ TPCE01  Module: tpcegeo                                                 """
 """ TPCE02  Module: tpcegeo1                                                """
@@ -1507,9 +1508,10 @@ replace [exe BTOFv8;] with [;BTOF=on; BtofConfig=13; Itof=8 "call btofgeo8";]
 """                                                                         """
 """ TPCE31 revises this scheme.  It corresponds to the version number (3)   """
 """        and subversion number (1). TPCE30 == TPCE04r.                    """
+#endif
 """ TPCE51 revises this scheme.  It corresponds to the version number (5)   """
 
-
+#if 0
 replace [exe TPCE00;] with [;"New version of the TPC backplane "; TpceConfig = 1;]
 replace [exe TPCE01;] with [;"New version of the TPC backplane "; TpceConfig = 1;
                              "gas density correction";            DensConfig = 1;]
@@ -1524,6 +1526,22 @@ replace [exe TPCE04r;] with [;"New version of the TPC backplane "; TpceConfig = 
                               "radius correction";                 RmaxConfig = 1;]
 replace [exe TPCE30;] with [;"Equivalent to TPCE04r"; exe TPCE30; ]
 replace [exe TPCE31;] with [;"                     "; TpceConfig = 31; ]
+#else
+replace [exe TPCE00;] with [;"New version of the TPC backplane "; TpceConfig = 51;]
+replace [exe TPCE01;] with [;"New version of the TPC backplane "; TpceConfig = 51;
+                             "gas density correction";            DensConfig =  1;]
+replace [exe TPCE02;] with [;"New version of the TPC backplane "; TpceConfig = 51;
+                             "gas density correction";            DensConfig =  1;]
+replace [exe TPCE03;] with [;"New version of the TPC backplane "; TpceConfig = 51;
+                             "gas density correction";            DensConfig =  1;]
+replace [exe TPCE04;] with [;"New version of the TPC backplane "; TpceConfig = 51;
+                             "gas density correction";            DensConfig =  1;]
+replace [exe TPCE04r;] with [;"New version of the TPC backplane "; TpceConfig = 51;
+                              "gas density correction";            DensConfig = 1;
+                              "radius correction";                 RmaxConfig = 1;]
+replace [exe TPCE30;] with [;"Equivalent to TPCE04r"; exe TPCE30; ]
+replace [exe TPCE31;] with [;"                     "; TpceConfig = 31; ]
+#endif
 replace [exe TPCE05r;] with [;"New version of the TPC backplane "; TpceConfig = 51;
                               "gas density correction";            DensConfig = 1;
                               "radius correction";                 RmaxConfig = 1;]
@@ -1567,7 +1585,7 @@ replace [exe TPCE05rZ;] with [;"New version of the TPC backplane "; TpceConfig =
 	                      ;"Set the 2018 TPAD config, iTPC only in sector 20"; TpadConfig=9;]
 replace [exe TPCE51;] with [;"                     "; TpceConfig = 51; ]
 
-
+#if 0
 
 replace [exe tpcx10;] with [;"TPC test version";    TpcxConfig=1;
                             ;"Disable old TPC";     TpceConfig=0;
@@ -1578,7 +1596,7 @@ replace [exe tpcx11;] with [;"TPC test version";    TpcxConfig=1;
 replace [exe tpcx16;] with ["TPC test version";     TpcxConfig=2;
                             "Disable old TPC";      TpceConfig=0;
                             ;"Set 6th TPAD config"; TpadConfig=6;]
-                            
+#endif                            
 
 replace [exe ISTB00;] with [;ISTB=on;IstbConfig=-1;]
 
@@ -2768,11 +2786,11 @@ REPLACE [exe devE;] with ["DEVE eSTAR upgrade geometry";
        EIDD=on; 
        EiddConfig=1; ]
 
-
+#if 0
 Replace [exe devT;] with ["DEVT TPC Upgrade Geometry";
        exe devE;    "eSTAR baseline";
        exe Tpcx10;  "TPC upgrade geometry w/ default pads"; ]
-
+#endif
 
 ** Aliases to devE and devT geometries to work around the field bug **
 Replace [exe estar1;] with [exe devE;]
