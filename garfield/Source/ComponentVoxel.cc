@@ -21,6 +21,8 @@ void ComponentVoxel::ElectricField(const double x, const double y,
                                    int& status) {
 
   m = nullptr;
+  status = 0;
+
   // Make sure the field map has been loaded.
   if (!m_ready) {
     std::cerr << m_className << "::ElectricField:\n"
@@ -29,25 +31,13 @@ void ComponentVoxel::ElectricField(const double x, const double y,
     return;
   }
 
-  // Get the mesh element.
-  unsigned int i = 0, j = 0, k = 0;
-  bool xMirrored = false, yMirrored = false, zMirrored = false;
-  if (!GetElement(x, y, z, i, j, k, xMirrored, yMirrored, zMirrored)) {
+  status = 0;
+  int region = -1;
+  if (!GetField(x, y, z, m_efields, ex, ey, ez, p, region)) {
     status = -11;
     return;
   }
-  status = 0;
-  // Get the electric field and potential.
-  const Element& element = m_efields[i][j][k]; 
-  ex = element.fx;
-  ey = element.fy;
-  ez = element.fz;
-  if (xMirrored) ex = -ex;
-  if (yMirrored) ey = -ey;
-  if (zMirrored) ez = -ez;
-  p = element.v;
-  // Get the medium.
-  const int region = m_regions[i][j][k];
+
   if (region < 0 || region > (int)m_media.size()) {
     m = nullptr;
     status = -5;
@@ -103,26 +93,17 @@ void ComponentVoxel::MagneticField(const double x, const double y,
                                    double& bx, double& by, double& bz,
                                    int& status) {
 
+  status = 0;
   if (!m_hasBfield) {
     return ComponentBase::MagneticField(x, y, z, bx, by, bz, status);
   }
 
-  // Get the mesh element.
-  unsigned int i = 0, j = 0, k = 0;
-  bool xMirrored = false, yMirrored = false, zMirrored = false;
-  if (!GetElement(x, y, z, i, j, k, xMirrored, yMirrored, zMirrored)) {
+  int region = -1;
+  double p = 0.;
+  if (!GetField(x, y, z, m_bfields, bx, by, bz, p, region)) {
     status = -11;
-    return;
   }
-  status = 0;
-  // Get the field.
-  const Element& element = m_bfields[i][j][k]; 
-  bx = element.fx;
-  by = element.fy;
-  bz = element.fz;
-  if (xMirrored) bx = -bx;
-  if (yMirrored) by = -by;
-  if (zMirrored) bz = -bz;
+
 }
 
 Medium* ComponentVoxel::GetMedium(const double x, const double y,
@@ -176,6 +157,9 @@ void ComponentVoxel::SetMesh(const unsigned int nx, const unsigned int ny,
   m_xMax = xmax;
   m_yMax = ymax;
   m_zMax = zmax;
+  m_dx = (m_xMax - m_xMin) / m_nX;
+  m_dy = (m_yMax - m_yMin) / m_nY;
+  m_dz = (m_zMax - m_zMin) / m_nZ;
   m_hasMesh = true;
 }
 
@@ -188,6 +172,7 @@ bool ComponentVoxel::LoadElectricField(const std::string& filename,
                                        const double scaleP) {
   
   m_ready = false;
+  m_efields.clear();
   m_hasPotential = m_hasEfield = false;
   if (!m_hasMesh) {
     std::cerr << m_className << "::LoadElectricField:\n"
@@ -630,6 +615,117 @@ Medium* ComponentVoxel::GetMedium(const unsigned int i) const {
     return nullptr;
   }
   return m_media[i];
+}
+
+bool ComponentVoxel::GetField(const double xi, const double yi, 
+    const double zi, 
+    const std::vector<std::vector<std::vector<Element> > >& field,
+    double& fx, double& fy, double& fz, double& p, int& region) {
+
+  if (!m_hasMesh) {
+    std::cerr << m_className << "::GetField: Mesh is not set.\n";
+    return false;
+  }
+
+  // Reduce the point to the basic cell (in case of periodicity) and 
+  // check if it is inside the mesh.
+  bool xMirrored = false;
+  const double x = Reduce(xi, m_xMin, m_xMax, m_periodic[0], 
+                          m_mirrorPeriodic[0], xMirrored);
+  if (x < m_xMin || x > m_xMax) return false;
+  bool yMirrored = false;
+  const double y = Reduce(yi, m_yMin, m_yMax, m_periodic[1], 
+                          m_mirrorPeriodic[1], yMirrored);
+  if (y < m_yMin || y > m_yMax) return false;
+  bool zMirrored = false;
+  const double z = Reduce(zi, m_zMin, m_zMax, m_periodic[2], 
+                          m_mirrorPeriodic[2], zMirrored);
+  if (z < m_zMin || z > m_zMax) return false;
+
+  // Get the indices.
+  const double sx = (x - m_xMin) / m_dx; 
+  const double sy = (y - m_yMin) / m_dy; 
+  const double sz = (z - m_zMin) / m_dz; 
+  unsigned int i = static_cast<unsigned int>(sx);
+  unsigned int j = static_cast<unsigned int>(sy);
+  unsigned int k = static_cast<unsigned int>(sz);
+  if (i >= m_nX) i = m_nX - 1;
+  if (j >= m_nY) j = m_nY - 1;
+  if (k >= m_nZ) k = m_nZ - 1;
+  region = m_regions[i][j][k];
+
+  // Get the field and potential.
+  if (m_interpolate) {
+    // Get the "nodes" (voxel centres) surrounding the point.
+    double vx = sx - i;
+    double vy = sy - j;
+    double vz = sz - k;
+    int i0 = i;
+    int j0 = j;
+    int k0 = k;
+    if (vx < 0.5) {
+      --i0;
+      vx += 0.5;
+    }
+    if (vy < 0.5) {
+      --j0;
+      vy += 0.5;
+    }
+    if (vz < 0.5) {
+      --k0;
+      vz += 0.5;
+    }
+    unsigned int i1 = i0 + 1;
+    unsigned int j1 = j0 + 1;
+    unsigned int k1 = k0 + 1;
+    const bool perx = m_periodic[0] || m_mirrorPeriodic[0];
+    const bool pery = m_periodic[1] || m_mirrorPeriodic[1];
+    const bool perz = m_periodic[2] || m_mirrorPeriodic[2];
+    if (i0 < 0) i0 = perx ? m_nX - 1 : 0;
+    if (j0 < 0) j0 = pery ? m_nY - 1 : 0;
+    if (k0 < 0) k0 = perz ? m_nZ - 1 : 0;
+    if (i1 >= m_nX) i1 = perx ? 0 : m_nX - 1;
+    if (j1 >= m_nY) j1 = pery ? 0 : m_nY - 1;
+    if (k1 >= m_nZ) k1 = perz ? 0 : m_nZ - 1; 
+    const Element& n000 = field[i0][j0][k0];
+    const Element& n100 = field[i1][j0][k0];
+    const Element& n010 = field[i0][j1][k0];
+    const Element& n110 = field[i1][j1][k0];
+    const Element& n001 = field[i0][j0][k1];
+    const Element& n101 = field[i1][j0][k1];
+    const Element& n011 = field[i0][j1][k1];
+    const Element& n111 = field[i1][j1][k1];
+   
+    const double ux = 1. - vx; 
+    const double uy = 1. - vy; 
+    const double uz = 1. - vz; 
+    fx = ((n000.fx * ux + n100.fx * vx) * uy + 
+          (n010.fx * ux + n110.fx * vx) * vy) * uz +
+         ((n001.fx * ux + n101.fx * vx) * uy + 
+          (n011.fx * ux + n111.fx * vx) * vy) * vz;
+    fy = ((n000.fy * ux + n100.fy * vx) * uy + 
+          (n010.fy * ux + n110.fy * vx) * vy) * uz +
+         ((n001.fy * ux + n101.fy * vx) * uy + 
+          (n011.fy * ux + n111.fy * vx) * vy) * vz;
+    fz = ((n000.fz * ux + n100.fz * vx) * uy + 
+          (n010.fz * ux + n110.fz * vx) * vy) * uz +
+         ((n001.fz * ux + n101.fz * vx) * uy + 
+          (n011.fz * ux + n111.fz * vx) * vy) * vz;
+    p = ((n000.v * ux + n100.v * vx) * uy + 
+         (n010.v * ux + n110.v * vx) * vy) * uz +
+        ((n001.v * ux + n101.v * vx) * uy + 
+         (n011.v * ux + n111.v * vx) * vy) * vz;
+  } else {
+    const Element& element = field[i][j][k]; 
+    fx = element.fx;
+    fy = element.fy;
+    fz = element.fz;
+    p = element.v;
+  }
+  if (xMirrored) fx = -fx;
+  if (yMirrored) fy = -fy;
+  if (zMirrored) fz = -fz;
+  return true;
 }
 
 bool ComponentVoxel::GetElement(const double xi, const double yi,

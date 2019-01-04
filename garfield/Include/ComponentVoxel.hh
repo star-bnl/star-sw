@@ -30,6 +30,9 @@ class ComponentVoxel : public ComponentBase {
   void MagneticField(const double x, const double y, const double z,
                      double& bx, double& by, double& bz, int& status) override;
 
+  /// Interpolate between field values at the element centres.
+  void EnableInterpolation(const bool on = true) { m_interpolate = on; }
+
   /// Offset coordinates in the weighting field, such that the
   /// same numerical weighting field map can be used for electrodes at
   /// different positions.
@@ -109,6 +112,9 @@ class ComponentVoxel : public ComponentBase {
   unsigned int m_nX = 0, m_nY = 0, m_nZ = 0;
   double m_xMin = 0., m_yMin = 0., m_zMin = 0.;
   double m_xMax = 0., m_yMax = 0., m_zMax = 0.;
+  double m_dx = 0., m_dy = 0., m_dz = 0.;
+
+  bool m_interpolate = false;
 
   bool m_hasMesh = false;
   bool m_hasPotential = false;
@@ -132,6 +138,10 @@ class ComponentVoxel : public ComponentBase {
   void Reset() override;
   void UpdatePeriodicity() override;
 
+  /// Look up/interpolate the field at a given point.
+  bool GetField(const double x, const double y, const double z,
+    const std::vector<std::vector<std::vector<Element> > >& field,
+    double& fx, double& fy, double& fz, double& p, int& region);
   /// Reduce a coordinate to the basic cell (in case of periodicity).
   double Reduce(const double xin, const double xmin, const double xmax,
                 const bool simplePeriodic, const bool mirrorPeriodic,
