@@ -41,6 +41,7 @@ set version  = 0;
 set location = 0;
 if ( $#argv > 0 ) set version  = $1
 if ( $#argv > 1 ) set location = $2
+#echo "==================== setup $pkg $version $location ===================="
 setenv oldSTAR_HOST_SYS $STAR_HOST_SYS
 
 source $GROUP_DIR/unix_programs.csh
@@ -123,6 +124,7 @@ switch ($pkg)
 	setenv PGI_V linux86-64/18.10
 	if (-d $PGI/$PGI_V/bin) then
 	  setenv PATH `${GROUP_DIR}/dropit -p $PGI/$PGI_V/bin -p $PATH`
+	  setenv PGILIB $PGI/$PGI_V/lib
 	  if ( -d $PGI/$PGI_V/man) then
 	    setenv MANPATH `${GROUP_DIR}/dropit -p ${MANPATH} -p ${PGI}/${PGI_V}/man`
           endif
@@ -423,24 +425,10 @@ switch ($pkg)
           setenv X_SCLS  `basename $devtools`
 	endif
 	breaksw
-	case "gcc8*":
-	setenv devtools /opt/rh/devtoolset-7
-	if (-r ${devtools}) then
-	  setenv PATH  ${devtools}/root/usr/bin:${PATH}
-	  setenv LD_LIBRARY_PATH  ${devtools}/root/usr/lib64:${devtools}/root/usr/lib:${LD_LIBRARY_PATH}
-	  setenv INFOPATH  ${devtools}/root/usr/share/info
-	  setenv PCP_DIR   ${devtools}/root
-          setenv PERL5LIB  ${devtools}/root/usr/lib64/perl5/vendor_perl:${devtools}/root/usr/lib/perl5:${devtools}/root/usr/share/perl5/vendor_perl:${PERL5LIB}
-	  setenv PYTHONPATH  ${devtools}/root/usr/lib64/python2.7/site-packages:${devtools}/root/usr/lib/python2.7/site-packages:/opt/rh/devtoolset-3/root/usr/lib64/python2.6/site-packages:/opt/rh/devtoolset-3/root/usr/lib/python2.6/site-packages
-	  setenv PKG_CONFIG_PATH  	
-	  setenv XDG_CONFIG_DIRS  ${devtools}/root/etc/xdg:/etc/xdg
-	  setenv XDG_DATA_DIRS  ${devtools}/root/usr/share:/usr/local/share:/usr/share
-          setenv X_SCLS  `basename $devtools`
-	endif
-	breaksw
 	case "gcc8*":  # has not finished yet
           setenv SPACK_ROOT /net/l409/software/fisyak/STAR/sources/spack
           source $SPACK_ROOT/share/spack/setup-env.csh
+	breaksw
 	case "gcc":
 	breaksw
 	default:
