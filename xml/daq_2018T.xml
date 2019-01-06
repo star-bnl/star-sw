@@ -51,7 +51,7 @@
 #  root.exe -q -b 'bfc.C(10000,"P2018,WestOff,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  root.exe -q -b 'bfc.C(10000,"P2018,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  root.exe -q -b 'bfc.C(200,"P2018a,-hitfilt,iTpcIT,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
-  root.exe -q -b 'bfc.C(200,"P2018a,-hitfilt,iTpcIT,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+  root.exe -q -b 'bfc.C(200,"P2018a,-hitfilt,iTpcIT,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,evout,-picoWrite,-picoDst","'${evtsFile}'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
