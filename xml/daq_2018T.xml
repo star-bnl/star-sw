@@ -1,28 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false">
+<job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="true">
         <command>
          cd ${SUBMITTINGDIRECTORY}
-   setenv StarEndMakerShell
-   setenv STARFPE NO
-#   setup gcc631
-    setup gcc731
-#   unsetenv NODEBUG yes
-#.DEV2
-#   setup gcc73
-#   setup 64b
-#   starver .DEV2
-#   starver TFG18m
-#dev
-#   setup gcc
-#   starver dev
-# SL16j
-#   starver SL16j
-# SL17d
-#   setup gcc
-#   starver SL17d
-#TFG17e
-#   setup 64b
-#   starver TFG17e
 #  echo $INPUTFILE0 | grep ':'
 #  if (! $?) then
 #    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
@@ -41,6 +20,28 @@
   if ( -r $logFile) exit 0;
   set muFile = ${filel}.MuDst.root
   if (-r $muFile) exit 0;
+   setenv StarEndMakerShell
+   setenv STARFPE NO
+   source ~/bin/SetVersion.csh
+#   setup gcc631
+#   setup gcc731
+#   unsetenv NODEBUG yes
+#.DEV2
+#   setup gcc73
+#   setup 64b
+#   starver .DEV2
+#   starver TFG18m
+#dev
+#   setup gcc
+#   starver dev
+# SL16j
+#   starver SL16j
+# SL17d
+#   setup gcc
+#   starver SL17d
+#TFG17e
+#   setup 64b
+#   starver TFG17e
 #  root.exe -q -b 'bfc.C(1000,"P2018,useCDV,Tpx,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX,dEdxCalib","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
 #  root.exe -q -b 'bfc.C(10000,"P2018,useCDV,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  root.exe -q -b 'bfc.C(1000,"P2018,useCDV,Tpx,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
@@ -49,7 +50,8 @@
 #  root.exe -q -b 'bfc.C(10000,"P2018,EastOff,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  root.exe -q -b 'bfc.C(10000,"P2018,WestOff,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  root.exe -q -b 'bfc.C(10000,"P2018,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
-  root.exe -q -b 'bfc.C(200,"P2018,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(200,"P2018a,-hitfilt,iTpcIT,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+  root.exe -q -b 'bfc.C(200,"P2018a,-hitfilt,iTpcIT,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />

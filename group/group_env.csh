@@ -83,8 +83,8 @@ if ( $?DECHO) echo "$self :: Executing STAR_SYS"
 source ${GROUP_DIR}/STAR_SYS;#  echo "STAR_HOST_SYS = $STAR_HOST_SYS"
 
 # Define /opt/star (or equivalent)
-    if (-r ${STAR_ROOT}/opt/star) then
-      setenv OPTSTAR ${STAR_ROOT}/opt/star
+    if (-r ${AFS_RHIC}/opt/star) then
+      setenv OPTSTAR ${AFS_RHIC}/opt/star
     else 
       if (-r /opt/star) then 
         setenv OPTSTAR /opt/star

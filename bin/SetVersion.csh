@@ -19,36 +19,33 @@ else
   setenv USE_64BITS 0
 endif
 switch ($case) 
-  case "*gcc482*" : 
-    setup gcc482   
+  case "*gcc4*" : 
+    setup gcc4   
   breaksw
-  case "*gcc485*" : 
-    setup gcc485   
+  case "*gcc5*" : 
+    setup gcc5 
   breaksw
-  case "*gcc492*" : 
-    setup gcc492 
+  case "*gcc6*" : 
+    setup gcc6 
   breaksw
-  case "*gcc520*" : 
-    setup gcc520 
-  breaksw
-  case "*gcc521*" : 
-    setup gcc521 
-  breaksw
-  case "*gcc620*" : 
-    setup gcc620 
+  case "*gcc7*" : 
+    setup gcc7 
   breaksw
   case "*icc*" : 
     setup icc
   breaksw
+    default:
+    setup gcc
 endsw
 
 switch ($case) 
-  case "*SL15j*" :   
-    source /gpfs01/star/subsys-tpc/fisyak/STAR/packages/.DEV2/unsetupDEV2.csh
-    setenv STAR_LEVEL SL15j;       
-  case "*SL16d*" :   
-    source /gpfs01/star/subsys-tpc/fisyak/STAR/packages/.DEV2/unsetupDEV2.csh
-    setenv STAR_LEVEL SL16d;       
+  case "*SL18f*" :   
+#   source $STAR_PATH/.DEV2/unsetupDEV2.csh
+    setenv STAR_LEVEL SL18f;       
+    breaksw 
+ case "*SL18h*" :   
+#   source $STAR_PATH/.DEV2/unsetupDEV2.csh
+    setenv STAR_LEVEL SL18h;       
   breaksw
   case "*TFG17o*": 
     setenv STAR_LEVEL TFG17o; 
@@ -73,6 +70,9 @@ switch ($case)
   breaksw
   case "*TFG16f*": 
     setenv STAR_LEVEL TFG16f; 
+  breaksw
+  case "*TFG19a*": 
+    setenv STAR_LEVEL TFG19a; 
   breaksw
   case "*devC*":   
     setenv STAR_LEVEL DEV2/devC

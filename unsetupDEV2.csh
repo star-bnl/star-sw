@@ -8,14 +8,13 @@ unsetenv CINTSYSDIR
 unsetenv CLHEP_BASE_DIR
 unsetenv DB_SERVER_LOCAL_CONFIG
 unsetenv GARFIELD_HOME
-unsetenv GROUP_DIR
-unsetenv GROUP_PATH
+#unsetenv GROUP_DIR
+#unsetenv GROUP_PATH
 unsetenv GROUPPATH
 unsetenv HEED_DATABASE
 unsetenv IVROOT
 unsetenv LD_LIBRARY_PATH
 unsetenv MANPATH
-unsetenv optstar
 unsetenv OPTSTAR
 unsetenv PATH
 unsetenv PROD_LOG
@@ -37,14 +36,21 @@ unsetenv STAR_PAMS
 unsetenv STAR_PATH
 unsetenv STAR_ROOT
 unsetenv STAR_SCRIPTS
-unsetenv STAR
-unsetenv TMVASYS
+#setenv optstar /afs/rhic.bnl.gov/opt/star
+#setenv xoptstar $optstar
+#setenv OPTSTAR /afs/rhic.bnl.gov/opt/star
+#setenv XOPTSTAR $OPTSTAR
+unsetenv optstar
 unsetenv xoptstar
+unsetenv OPTSTAR
+unsetenv XOPTSTAR
+setenv STAR /afs/rhic.bnl.gov/star/packages/dev
+unsetenv TMVASYS
 unsetenv XOPTSTAR
 source /afs/rhic.bnl.gov/star/group/templates/cshrc
 source /afs/rhic.bnl.gov/star/group/templates/login
-setup gcc
 starver dev
+setup gcc
 if ($?QTDIR) then 
   setenv LD_LIBRARY_PATH ${QTDIR}/lib:${LD_LIBRARY_PATH}
   setenv PATH ${QTDIR}/bin:${PATH}
