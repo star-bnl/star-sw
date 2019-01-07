@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.32 2018/06/06 18:03:59 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.33 2019/01/07 15:50:12 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.33  2019/01/07 15:50:12  ullrich
+ * Added StTriggerData2019.
+ *
  * Revision 2.32  2018/06/06 18:03:59  ullrich
  * Added fcts: epdNHits, vpdADCSum, vpdMeanTimeDifference (Akio)
  *
@@ -109,7 +112,7 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.32 2018/06/06 18:03:59 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.33 2019/01/07 15:50:12 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
@@ -313,9 +316,12 @@ unsigned short StTriggerData::fmsADC(int crt, int adr, int ch, int prepost) cons
 unsigned short StTriggerData::fmsTDC(int crt, int adr, int ch, int prepost) const {return 0;}
 unsigned short StTriggerData::epdTimeDifference() const {return 0;}
 bool           StTriggerData::epdHitLayer2(StBeamDirection eastwest) const {return false;}
-unsigned short StTriggerData::epdLayer0t(int ch, int prepost) const {return 0;}
 unsigned short StTriggerData::epdLayer1(int ch, int prepost) const {return 0;}
+unsigned short StTriggerData::epdLayer1a(int ch, int prepost) const {return 0;}
+unsigned short StTriggerData::epdLayer1b(int ch, int prepost) const {return 0;}
+unsigned short StTriggerData::epdLayer0t(int ch, int prepost) const {return 0;}
 unsigned short StTriggerData::epdLayer0a(int ch, int prepost) const {return 0;}
+unsigned char  StTriggerData::epdLayer0h(int ch, int prepost) const {return 0;}
 unsigned short StTriggerData::epdADC(int crt, int adr, int ch, int prepost) const {return 0;}
 unsigned short StTriggerData::epdTDC(int crt, int adr, int ch, int prepost) const {return 0;}
 unsigned short StTriggerData::epdNHits(StBeamDirection eastwest, int prepost) const {return 0;}

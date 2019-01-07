@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.53 2018/06/06 18:03:59 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.54 2019/01/07 15:50:12 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.54  2019/01/07 15:50:12  ullrich
+ * Added StTriggerData2019.
+ *
  * Revision 2.53  2018/06/06 18:03:59  ullrich
  * Added fcts: epdNHits, vpdADCSum, vpdMeanTimeDifference (Akio)
  *
@@ -330,9 +333,12 @@ public:
     //EPD
     virtual unsigned short epdTimeDifference() const;
     virtual bool           epdHitLayer2(StBeamDirection eastwest) const;
-    virtual unsigned short epdLayer0t(int ch, int prepost=0) const;
     virtual unsigned short epdLayer1(int ch, int prepost=0) const;
+    virtual unsigned short epdLayer1a(int ch, int prepost=0) const;
+    virtual unsigned short epdLayer1b(int ch, int prepost=0) const;
+    virtual unsigned short epdLayer0t(int ch, int prepost=0) const;
     virtual unsigned short epdLayer0a(int ch, int prepost=0) const;
+    virtual unsigned char  epdLayer0h(int ch, int prepost=0) const;
     virtual unsigned short epdADC(int crt, int adr, int ch, int prepost=0) const;
     virtual unsigned short epdTDC(int crt, int adr, int ch, int prepost=0) const;
     virtual unsigned short epdNHits(StBeamDirection eastwest, int prepost=0) const;
