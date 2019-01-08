@@ -1,0 +1,16 @@
+/* etofDetResolution.idl
+*
+* table: etofDetResolution
+*
+* description: detector resolution (localX, localY, time)
+*              of each etof counter
+*
+* author: Florian Seck ( TU Darmstadt )
+*
+*/
+
+struct etofDetResolution {
+	float  detectorResX[108];  /* detector resolution in local X (cm)  */
+	float  detectorResY[108];  /* detector resolution in local Y (cm)  */
+	float  detectorResT[108];  /* detector resolution in time (ns)     */
+};
