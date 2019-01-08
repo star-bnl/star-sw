@@ -36,6 +36,8 @@ public:
     TH1 *array[];
     struct {
       TH1 *h2_tpc;
+      TH1 *h2_itpc;
+      TH1 *h2_tpx;
       TH1 *h0_evt_size;
       //TH1 *h10_bemc_evsize;
       //TH1 *h11_ftp_evsize;
