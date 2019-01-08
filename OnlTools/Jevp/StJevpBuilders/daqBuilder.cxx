@@ -44,7 +44,9 @@ daqBuilder::~daqBuilder() {
 void daqBuilder::initialize(int argc, char *argv[]) {
 
   // Initialization of histograms.
-  contents.h2_tpc = new TH1F("h2_tpc","Log of TPC Buffer Size",50,0,10);
+  contents.h2_tpc  = new TH1F("h2_tpc","Log of TPC Buffer Size",50,0,10);
+  contents.h2_itpc = new TH1F("h2_itpc","Log of iTPC Buffer Size",50,0,10);
+  contents.h2_tpx  = new TH1F("h2_tpx","Log of  TPX Buffer Size",50,0,10);
   contents.h0_evt_size = new TH1F("h0_evt_size","Log of Event Size",50,1,10);
   //contents.h10_bemc_evsize = new TH1F("h10_bemc_evsize","log of BEMC Buffer Size",30,0,6);
   //contents.h11_ftp_evsize = new TH1F("h11_ftp_evsize","log of FTPC Buffer Size",50,0,10);
@@ -66,6 +68,18 @@ void daqBuilder::initialize(int argc, char *argv[]) {
 
   int n=0;
   plots[n] = new JevpPlot(contents.h2_tpc);
+  plots[n]->addHisto(contents.h2_itpc);
+  contents.h2_itpc->SetLineColor(kBlue);
+  plots[n]->addHisto(contents.h2_tpx);
+  contents.h2_tpx->SetLineColor(kRed);
+  plots[n]->setLegend(.78,.6,.98,.7);
+  plots[n]->getHisto(0)->setLegText("tpx+itpc");
+  plots[n]->getHisto(1)->setLegText("itpc");
+  plots[n]->getHisto(2)->setLegText("tpx");
+  plots[n]->getHisto(0)->setLegArgs("l");
+  plots[n]->getHisto(1)->setLegArgs("l");
+  plots[n]->getHisto(2)->setLegArgs("l");
+ 
   plots[++n] = new JevpPlot(contents.h0_evt_size);
   //plots[++n] = new JevpPlot(contents.h10_bemc_evsize);
   //plots[++n] = new JevpPlot(contents.h11_ftp_evsize);
@@ -116,7 +130,10 @@ void daqBuilder::event(daqReader *rdr)
     }
 #endif
 
-    int tpc_size = rdr->getDetectorSize("tpx");
+    int tpx_size = rdr->getDetectorSize("tpx");
+    int itpc_size = rdr->getDetectorSize("itpc");
+
+    int tpc_size = tpx_size+itpc_size;
     int bemc_size = rdr->getDetectorSize("btow");
     //  int eemc_size = rdr->getDetectorSize("etow");
     //  int bsmd_size = rdr->getDetectorSize("bsmd");
@@ -129,6 +146,8 @@ void daqBuilder::event(daqReader *rdr)
     //printf("rdr->getDetectorSize(): %d  evtSize : %d  (diff=%d)\n", sz, rdr->event_size,rdr->event_size-sz);
 
     contents.h2_tpc->Fill(safelog(tpc_size));
+    contents.h2_itpc->Fill(safelog(itpc_size));
+    contents.h2_tpx->Fill(safelog(tpx_size));
     contents.h0_evt_size->Fill(safelog(sz));
     //contents.h10_bemc_evsize->Fill(safelog(bemc_size));
     //contents.h11_ftp_evsize->Fill(safelog(ftp_size));
