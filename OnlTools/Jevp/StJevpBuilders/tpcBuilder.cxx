@@ -1,4 +1,4 @@
-// $Id: tpcBuilder.cxx,v 1.1 2019/01/08 18:20:49 videbaks Exp $
+// $Id: tpcBuilder.cxx,v 1.2 2019/01/08 21:03:11 videbaks Exp $
 //
 #include <stdio.h>
 #include <stdlib.h>
@@ -708,7 +708,10 @@ void tpcBuilder::event(daqReader *rdr)
     daq_dta *dd = rdr->det("itpc")->get("adc",s) ;
 
 
-    if(dd) {   // regular data... Note its always there even if empty
+    if(dd) {   
+      // regular data... Note its always there even if empty
+      // e.g. for Run 18 data there are data banks for all sectors?
+      //
       has_adc = 1;
       tpc_max_channels += tpc_max_channels_inner_sector;
       itpc_max_channels += tpc_max_channels_inner_sector;
