@@ -1,0 +1,14 @@
+/* etofDigiTotCorr.idl
+*
+* table: etofDigiTotCorr
+*
+* description: correction factor to be applied to each channel
+*              on the digi level
+*
+* author: Florian Seck ( TU Darmstadt )
+*
+*/
+
+struct etofDigiTotCorr {
+	float  totCorr[6912];  /* tot correction factor for etof digis */
+};

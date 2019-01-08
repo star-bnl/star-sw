@@ -1,0 +1,16 @@
+/* etofDigiSlewCorr.idl
+*
+* table: etofSlewTimeCorr
+*
+* description: correction parameter to be applied to each channel (6912)
+*              and tot bin (30) on the digi level --> 207360 values
+*
+* author: Florian Seck ( TU Darmstadt )
+*
+*/
+
+struct etofDigiSlewCorr {
+	unsigned short channelId[207360];    /* channel id */
+	unsigned short upperTotEdge[207360]; /* edge of tot intervals for corr */
+	short          corr[207360]; /* correction parameter to be applied to the digi time */
+};

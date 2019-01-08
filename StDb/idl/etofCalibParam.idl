@@ -1,0 +1,15 @@
+/* etofCalibParam.idl
+*
+* table: etofCalibParam
+*
+* description: calibration parameters used in the
+*              etof calibmaker
+*
+* author: Florian Seck ( TU Darmstadt )
+*
+*/
+
+struct etofCalibParam {
+	float   get4TotBinWidthNs;  /* tot bin width to ns conversion */
+	octet   minDigisInSlewBin;  /* min number of digis per slewing bin */
+};
