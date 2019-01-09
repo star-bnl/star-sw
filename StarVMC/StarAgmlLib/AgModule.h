@@ -4,7 +4,6 @@
 #include "AgBlock.h"
 #include "Mortran.h"
 #include "AgDetp.h"
-#include "AgStructure.h"
 #include <string>
 using namespace std;
 
@@ -33,8 +32,6 @@ class AgModule : public AgBlock
   /// for the production of the subdetectors defined in the module.
   AgBlock *AddBlock( const Char_t *name, AgBlock *block );
 
-  /// Returns a pointer to the requested data structure
-  AgStructure *GetStructure( const Char_t *name );
 
   TDataSet *DataSet(){ return mDataSet; }
   static TDataSet *Geom();
