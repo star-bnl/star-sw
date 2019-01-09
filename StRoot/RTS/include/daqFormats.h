@@ -30,22 +30,22 @@ typedef unsigned char UINT8 ;
 #include <trgStructures_32.h>
 #else	// after version 0x40, no TRGD
 #define NOTRGD
-#if (TRG_VERSION == 0x40)
-#include <trgDataDefs_40.h>
-#elif (TRG_VERSION == 0x41) 
-#include <trgDataDefs_41.h>
-#elif (TRG_VERSION == 0x42)
-#include <trgDataDefs_42.h>
-#elif (TRG_VERSION == 0x43)
-#include <trgDataDefs_43.h>
-#elif (TRG_VERSION == 0x44)
-#include <trgDataDefs_44.h>
-#else
-#ifndef TRG_VERSION
-#define TRG_VERSION 0x45 
-#endif
-#include <trgDataDefs_45.h>
-#endif
+ #if (TRG_VERSION == 0x40)
+  #include <trgDataDefs_40.h>
+ #elif (TRG_VERSION == 0x41) 
+  #include <trgDataDefs_41.h>
+ #elif (TRG_VERSION == 0x42)
+  #include <trgDataDefs_42.h>
+ #elif (TRG_VERSION == 0x43)
+  #include <trgDataDefs_43.h>
+ #elif (TRG_VERSION == 0x44)
+  #include <trgDataDefs_44.h>
+ #elif (TRG_VERSION == 0x45)
+  #include <trgDataDefs_45.h>
+ #else
+  #define TRG_VERSION 0x46 
+  #include <trgDataDefs_46.h>
+ #endif
 #endif
 
 #define FMT_ADCD	(1 << 0)

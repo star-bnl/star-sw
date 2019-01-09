@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.50 2018/11/30 20:04:01 dmitry Exp $
+ * $Id: StDbManagerImpl.cc,v 1.51 2019/01/08 19:12:54 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.51  2019/01/08 19:12:54  dmitry
+ * new subsystem: ETOF
+ *
  * Revision 1.50  2018/11/30 20:04:01  dmitry
  * new detector added - RHICf
  *
@@ -437,6 +440,7 @@ addDbDomain(dbFps,"fps");
 addDbDomain(dbSst,"sst");
 addDbDomain(dbEpd,"epd");
 addDbDomain(dbRhicf,"rhicf");
+addDbDomain(dbEtof,"etof");
 }
 
 ////////////////////////////////////////////////////////////////
