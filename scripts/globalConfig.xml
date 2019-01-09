@@ -608,6 +608,30 @@ initializer. -->
                 </object>
           </void>
 
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HLT ONLINE queues ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+          <void method="add">
+               <object id="BNL_condor_online_quick_CpuModelNumber45" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="getValuesFrom">             <object idref="BNL_condor_cas_long"/>      </void> 
+                    <void method="setID">                     <string>bnl_condor_online_quick_CpuModelNumber45</string></void>
+                </object>
+          </void>
+
+          <void method="add">
+               <object id="BNL_condor_online_quick_CpuModelNumber62" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="getValuesFrom">             <object idref="BNL_condor_cas_long"/>      </void> 
+                    <void method="setID">                     <string>bnl_condor_online_quick_CpuModelNumber62</string></void>
+                </object>
+          </void>
+
+          <void method="add">
+               <object id="BNL_condor_online_quick_CpuModelNumber63" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="getValuesFrom">             <object idref="BNL_condor_cas_long"/>      </void> 
+                    <void method="setID">                     <string>bnl_condor_online_quick_CpuModelNumber63</string></void>
+                </object>
+          </void>
+
+
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of of quick condor queues, for use with the CondorFastDispatcher ~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
 
@@ -1205,6 +1229,33 @@ initializer. -->
             <void property="clusterName"><string>star.bnl.gov</string></void>
       </object>
     </void>
+
+<!-- ********************************** Other HLT Online Policies ********************************* -->
+
+     <void method="put">
+      <string>bnl_condor_online_CpuModelNumber45</string>
+      <object id="bnl_condor_online_Policy_CpuModelNumber45" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+            <void method="addQueue"><object idref="BNL_condor_online_quick_CpuModelNumber45"/></void>
+            <void property="clusterName"><string>star.bnl.gov</string></void>
+      </object>
+     </void>
+
+    <void method="put">
+      <string>bnl_condor_online_CpuModelNumber62</string>
+      <object id="bnl_condor_online_Policy_CpuModelNumber62" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+            <void method="addQueue"><object idref="BNL_condor_online_quick_CpuModelNumber62"/></void>
+            <void property="clusterName"><string>star.bnl.gov</string></void>
+      </object>
+    </void>
+   
+    <void method="put">
+      <string>bnl_condor_online_CpuModelNumber63</string>
+      <object id="bnl_condor_online_Policy_CpuModelNumber63" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+            <void method="addQueue"><object idref="BNL_condor_online_quick_CpuModelNumber63"/></void>
+            <void property="clusterName"><string>star.bnl.gov</string></void>
+      </object>
+    </void>
+
 
     
 <!-- ************************************ End of Condor Policy ************************************ -->
@@ -2511,6 +2562,80 @@ when_to_transfer_output = ON_EXIT</string>
                 </object>
             </void>
             
+
+
+<!-- *********************************************** HLT Dispatchers ***************************************************** -->
+
+
+
+             <void method="add">
+                <object id="Fast_condor_Dispatcher_CpuModelNumber45" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">
+                    <void property="submitCommand">      <string>condor_submit</string>   </void>
+                    <void property="condorOptions">
+<string>should_transfer_files = YES
+when_to_transfer_output = ON_EXIT</string>
+                   </void>
+                    <void method="addRequirement"> <string> (CpuModelNumber == 45 ) </string> </void>
+                    <void property="priorityUsed"><boolean>true</boolean>           </void>
+                    <void property="priorityMax"><double>20</double>                </void>
+                    <void property="priorityMin"><double>0</double>                 </void>
+                    <void property="defaultStorageSpace"><int>-1</int></void>
+                    <void property="maxAttempts">   <int>1</int>                     </void>
+                    <void property="msBtwnFailure"> <int>10000</int>                 </void>
+                    <void property="msBtwnSuccess"> <int>1000</int>                  </void>
+                    <void property="application">   <object idref="CSHApplication"/> </void>
+                </object>
+            </void>
+
+
+
+             <void method="add">
+                <object id="Fast_condor_Dispatcher_CpuModelNumber62" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">
+                    <void property="submitCommand">      <string>condor_submit</string>   </void>
+                    <void property="condorOptions">
+<string>should_transfer_files = YES
+when_to_transfer_output = ON_EXIT</string>
+                   </void>
+                    <void method="addRequirement"><string> (CpuModelNumber == 62 ) </string> </void>
+                    <void property="priorityUsed"><boolean>true</boolean>           </void>
+                    <void property="priorityMax"><double>20</double>                </void>
+                    <void property="priorityMin"><double>0</double>                 </void>
+                    <void property="defaultStorageSpace"><int>-1</int></void>
+                    <void property="maxAttempts">   <int>1</int>                     </void>
+                    <void property="msBtwnFailure"> <int>10000</int>                 </void>
+                    <void property="msBtwnSuccess"> <int>1000</int>                  </void>
+                    <void property="application">   <object idref="CSHApplication"/> </void>
+                </object>
+            </void>
+
+
+
+             <void method="add">
+                <object id="Fast_condor_Dispatcher_CpuModelNumber63" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">
+                    <void property="submitCommand">      <string>condor_submit</string>   </void>
+                    <void property="condorOptions">
+<string>should_transfer_files = YES
+when_to_transfer_output = ON_EXIT</string>
+                   </void>
+                    <void method="addRequirement"><string> (CpuModelNumber == 63 )  </string> </void>
+                    <void property="priorityUsed"><boolean>true</boolean>           </void>
+                    <void property="priorityMax"><double>20</double>                </void>
+                    <void property="priorityMin"><double>0</double>                 </void>
+                    <void property="defaultStorageSpace"><int>-1</int></void>
+                    <void property="maxAttempts">   <int>1</int>                     </void>
+                    <void property="msBtwnFailure"> <int>10000</int>                 </void>
+                    <void property="msBtwnSuccess"> <int>1000</int>                  </void>
+                    <void property="application">   <object idref="CSHApplication"/> </void>
+                </object>
+            </void>
+
+
+
+
+
+<!-- ******************************************** End of HLT Dispatchers ***************************************************** -->
+
+
 
             <void method="add">
                 <object id="Generic_condorG_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorGRSLDispatcher">
@@ -4288,6 +4413,57 @@ end
                         </void>
                     </object>
                 </void>
+
+
+<!-- ****************************************************** new *********************************************************************** -->
+               <void method="addAccessPoint">
+                   <object class="gov.bnl.star.offline.scheduler.LocalAccessPoint">
+                        <void method="addAccessMethod">
+                            <object class="gov.bnl.star.offline.scheduler.AccessMethod">
+                                <void property="dispatcher">       <object idref="Fast_condor_Dispatcher_CpuModelNumber45"/>     </void>  <!--SHould chaneg to generic name-->
+                                <void property="batchSystem">      <string>condor</string>                 </void>    <!-- This is used for logging -->
+                                <void method="addQueue">           <object idref="BNL_condor_online_quick_CpuModelNumber45"/>    </void>    <!-- Even if batch system does not have a concept of queues a queue object must still be passed which states parameters such as runtime limit. -->
+                            </object>
+                        </void>
+                    </object>
+                </void>
+
+
+
+               <void method="addAccessPoint">
+                   <object class="gov.bnl.star.offline.scheduler.LocalAccessPoint">
+                        <void method="addAccessMethod">
+                            <object class="gov.bnl.star.offline.scheduler.AccessMethod">
+                                <void property="dispatcher">       <object idref="Fast_condor_Dispatcher_CpuModelNumber62"/>     </void>  <!--SHould chaneg to generic name-->
+                                <void property="batchSystem">      <string>condor</string>                 </void>    <!-- This is used for logging -->
+                                <void method="addQueue">           <object idref="BNL_condor_online_quick_CpuModelNumber62"/>    </void>    <!-- Even if batch system does not have a concept of queues a queue object must still be passed which states parameters such as runtime limit. -->
+                            </object>
+                        </void>
+                    </object>
+                </void>
+
+
+               <void method="addAccessPoint">
+                   <object class="gov.bnl.star.offline.scheduler.LocalAccessPoint">
+                        <void method="addAccessMethod">
+                            <object class="gov.bnl.star.offline.scheduler.AccessMethod">
+                                <void property="dispatcher">       <object idref="Fast_condor_Dispatcher_CpuModelNumber63"/>     </void>  <!--SHould chaneg to generic name-->
+                                <void property="batchSystem">      <string>condor</string>                 </void>    <!-- This is used for logging -->
+                                <void method="addQueue">           <object idref="BNL_condor_online_quick_CpuModelNumber63"/>    </void>    <!-- Even if batch system does not have a concept of queues a queue object must still be passed which states parameters such as runtime limit. -->
+                            </object>
+                        </void>
+                    </object>
+                </void>
+
+
+<!-- ************************************************************************************************************************************************ -->
+
+
+
+
+
+
+
                 
                 
                 <void method="addAccessPoint">
