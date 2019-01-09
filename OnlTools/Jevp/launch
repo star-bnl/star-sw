@@ -111,7 +111,7 @@ evplibs="   gSystem->Load("\""PDFUtil"\""); "
 #fi
 
 evplibs="$evplibs   gSystem->Load("\""Jevp"\"");  "
-evplibs="$evplibs   gSystem->Load("\""libQtRootGui.so"\"");  "
+#evplibs="$evplibs   gSystem->Load("\""libQtRootGui.so"\"");  "
 
 cat >${shellname}<<ROOTMACRO
 {
