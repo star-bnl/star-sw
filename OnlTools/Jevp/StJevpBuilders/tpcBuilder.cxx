@@ -1,4 +1,4 @@
-// $Id: tpcBuilder.cxx,v 1.2 2019/01/08 21:03:11 videbaks Exp $
+// $Id: tpcBuilder.cxx,v 1.3 2019/01/09 20:56:26 videbaks Exp $
 //
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,7 +7,6 @@
 #include "DAQ_READER/daqReader.h"
 #include "DAQ_READER/daq_dta.h"
 #include "DAQ_READER/daq_det.h"
-
 #include "Jevp/StJevpPlot/RunStatus.h"
 #include "StEvent/StTriggerData.h"
 #include <TH1I.h>
@@ -38,6 +37,7 @@
 #define checkcld 1
 #define checklaser 1
 //#define fv 1
+#define fvd 0
 
 ClassImp(tpcBuilder);
   
@@ -696,6 +696,14 @@ void tpcBuilder::event(daqReader *rdr)
 
   for(int s=1;s<=24;s++) {
 
+#if fvd
+    daq_dta *dda = rdr->det("tpx")->get("adc",s) ;
+    cout << "tpx adc " << dda << endl;
+    daq_dta *ddb = rdr->det("itpc")->get("adc",s) ;
+    cout << "itpc adc " << ddb << endl;
+#endif
+
+ 
     double charge_count_sector = 0;
     memset(channel_counts, 0, sizeof(channel_counts));
     memset(charge_counts, 0,  sizeof(charge_counts));
@@ -706,83 +714,94 @@ void tpcBuilder::event(daqReader *rdr)
     // get itpc data
     //
     daq_dta *dd = rdr->det("itpc")->get("adc",s) ;
-
-
+#if fvd
+    cout << "itpc adc" << endl;
+#endif
+    
     if(dd) {   
-      // regular data... Note its always there even if empty
-      // e.g. for Run 18 data there are data banks for all sectors?
+    // regular data... Note its always there even if empty
+    // e.g. for Run 18 data there are data banks for all sectors?
+    //
+    has_adc = 1;
+    tpc_max_channels += tpc_max_channels_inner_sector;
+    itpc_max_channels += tpc_max_channels_inner_sector;
+    
+    while(dd->iterate()) {
+      if (dd->ncontent == 0) continue;
+      // skip padrow _tb0
+      // These are pins on SAMPA not connected to pads.
       //
-      has_adc = 1;
-      tpc_max_channels += tpc_max_channels_inner_sector;
-      itpc_max_channels += tpc_max_channels_inner_sector;
-
-      while(dd->iterate()) {
-	if (dd->ncontent == 0) continue;
-	// skip padrow _tb0
-	// These are pins on SAMPA not connected to pads.
-	//
-	if((dd->pad < 1 ) || 
-	   (dd->row < 1))
-	  {
-	    continue;
-	  }
-
-
-	pixel_count += dd->ncontent ;
-	itpc_pixel_count += dd->ncontent ;
-	if(dd->ncontent > 0) {
-	  channel_counts[dd->pad][dd->row] = 1;
+      if((dd->pad < 1 ) || 
+	 (dd->row < 1))
+	{
+	  continue;
 	}
-
-	for(u_int i=0;i<dd->ncontent;i++) {
-	  int tb = dd->adc[i].tb;
-	  int adc = dd->adc[i].adc;
-	  if((dd->pad >= Npads1) ||
-	     (dd->row >= Nrows1) ||
-	     (tb >= 512)) {
-	    LOG(ERR, "event=%d pad=%d row=%d tb=%d out of range.  Ignore.", event_no, dd->pad, dd->row, tb);
-	  }
-	  else {
-      // this cut was used in run18 due to partial lack of pedetsal sub..
-      // remove timebins where GG osc is important.
-	    if(tb>32 && tb<430) {
-	      charge_counts[dd->pad][dd->row] += adc;
-	    }
-	    tb_charge_counts[tb] += adc;
-	  }
+      
+      
+      pixel_count += dd->ncontent ;
+      itpc_pixel_count += dd->ncontent ;
+      if(dd->ncontent > 0) {
+	channel_counts[dd->pad][dd->row] = 1;
+      }
+      
+      for(u_int i=0;i<dd->ncontent;i++) {
+	int tb = dd->adc[i].tb;
+	int adc = dd->adc[i].adc;
+	if((dd->pad >= Npads1) ||
+	   (dd->row >= Nrows1) ||
+	   (tb >= 512)) {
+	  LOG(ERR, "event=%d pad=%d row=%d tb=%d out of range.  Ignore.", event_no, dd->pad, dd->row, tb);
 	}
-      } // end dd
-
-      for(int i=1;i<Npads1;i++) {
-	for(int j=1;j<41;j++) {
-	  channel_count += channel_counts[i][j];
-	  charge_count += charge_counts[i][j];
-	  charge_count_sector += charge_counts[i][j];
-
-	  if(charge_counts[i][j] > 0 ) {
-	    contents.h_itpc_phi_charge->Fill(mPhiAngleMap[s-1][j-1][i-1],charge_counts[i][j]);
-	    ((TH2D *)contents.array[s + q_idx - 1])->Fill(i, j, charge_counts[i][j]);
+	else {
+	  // this cut was used in run18 due to partial lack of pedetsal sub..
+	  // remove timebins where GG osc is important.
+	  if(tb>32 && tb<430) {
+	    charge_counts[dd->pad][dd->row] += adc;
 	  }
+	  tb_charge_counts[tb] += adc;
 	}
       }
-
-      for(int i=0;i<512;i++) {
-	contents.array[s + qs_idx - 1]->Fill(i,tb_charge_counts[i]);
-      }
-      contents.h_itpc_sector_charge->Fill(s, charge_count_sector);
-      //
-      //  tpx data
-      //     
-      memset(tb_charge_counts, 0, sizeof(tb_charge_counts));
-      charge_count_sector = 0.0;
-
-      daq_dta *dd = rdr->det("tpx")->get("adc",s) ;
-      if(dd) {   // regular data...
-	has_adc = 1;
-	tpc_max_channels += tpc_max_channels_outer_sector;
+    }  // end iterate
+    
+    for(int i=1;i<Npads1;i++) {
+      for(int j=1;j<41;j++) {
+	channel_count += channel_counts[i][j];
+	charge_count += charge_counts[i][j];
+	charge_count_sector += charge_counts[i][j];
 	
-	while(dd->iterate()) 
-	  {
+	if(charge_counts[i][j] > 0 ) {
+	  contents.h_itpc_phi_charge->Fill(mPhiAngleMap[s-1][j-1][i-1],charge_counts[i][j]);
+	  ((TH2D *)contents.array[s + q_idx - 1])->Fill(i, j, charge_counts[i][j]);
+	}
+      }
+    }  // end i,j
+    
+    for(int i=0;i<512;i++) {
+      contents.array[s + qs_idx - 1]->Fill(i,tb_charge_counts[i]);
+    }
+    contents.h_itpc_sector_charge->Fill(s, charge_count_sector);
+    
+    }  //end if(dd)
+ 
+    //
+    //  tpx data
+    //     
+    memset(tb_charge_counts, 0, sizeof(tb_charge_counts));
+    charge_count_sector = 0.0;
+
+    dd = rdr->det("tpx")->get("adc",s) ;
+#if fvd
+    cout << "tpx " << dd << endl;
+#endif
+    if(dd) {   // regular data...
+      has_adc = 1;
+      tpc_max_channels += tpc_max_channels_outer_sector;
+      
+      while(dd->iterate())
+#if fvd
+	cout << "Sector " << s << " " << dd->ncontent << endl;
+#endif
+      {
 	//
 	// skip rows < 14 ! should not apear in run 19 data
 	//
@@ -811,13 +830,12 @@ void tpcBuilder::event(daqReader *rdr)
 	      LOG(ERR, "event=%d pad=%d row=%d tb=%d out of range.  Ignore.", event_no, dd->pad, dd->row, tb);
            }
 	    else {
-		charge_counts[dd->pad][dd->row+27] += adc;
+	      charge_counts[dd->pad][dd->row+27] += adc;
 	      tb_charge_counts[tb] += adc;  	  }
 	  }
-	}
-      } // end dd
+      }
       
-	//
+      //
       // All data have been looked at
       //
       
@@ -838,7 +856,7 @@ void tpcBuilder::event(daqReader *rdr)
 	}
       }
       contents.h_tpx_sector_charge->Fill(s,charge_count_sector);      
-    }
+  }  // end dd
 
     //
     // go to clusters
