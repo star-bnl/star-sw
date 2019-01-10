@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.cxx,v 1.15 2018/03/28 02:01:50 jdb Exp $
+ * $Id: StBTofSimMaker.cxx,v 1.16 2019/01/10 22:26:33 genevb Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -93,7 +93,7 @@ int StBTofSimMaker::Init()
 {
 	Reset();
 	//mSimDb = new StTofSimParam(); //  Moved to InitRun
-	if (Debug()) mSimDb->print();
+	//if (Debug()) mSimDb->print(); //  Moved to InitRun
 	if(mBookHisto) bookHistograms();
 
 	return StMaker::Init();
@@ -133,6 +133,7 @@ int StBTofSimMaker::InitRun(int runnumber)
 	mSimResDb = new StBTofSimResParams();
 	mSimResDb->loadParams();
 	//mSimDb->init();   // Only enable to pull calibration values from db
+	if (Debug()) mSimDb->print();
 	StVpdSimMaker *vpdSim = (StVpdSimMaker *)GetMaker("VpdSim");
 	
 	//! Determine if VpdSimMaker was run
