@@ -292,8 +292,15 @@ void etofBuilder::event( daqReader *rdr ) {
 
 
 void etofBuilder::startrun( daqReader *rdr ) {
-    year = (int) getStTriggerData( rdr )->year();
 
+  //  There can be events with no trigger data!
+  //  in special runs!
+  //
+  //
+  //year = (int) getStTriggerData( rdr )->year();
+  year = (rdr->run / 1000000) + 1999;
+  LOG(DBG, "rdr->run=%d year=%d", rdr->run, year);
+    
     if( year == 2018 ) {
         gdpbMap    = gdpbMap2018;
         gdpbRevMap = gdpbRevMap2018;
