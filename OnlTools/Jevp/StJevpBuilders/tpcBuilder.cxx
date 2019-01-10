@@ -1,4 +1,4 @@
-// $Id: tpcBuilder.cxx,v 1.3 2019/01/09 20:56:26 videbaks Exp $
+// $Id: tpcBuilder.cxx,v 1.4 2019/01/10 14:07:18 evpdaq Exp $
 //
 #include <stdio.h>
 #include <stdlib.h>
@@ -637,6 +637,8 @@ void tpcBuilder::startrun(daqReader *rdr) {
   drift_vel = 0;
   event_no=0;
   run = rdr->run;
+
+  tpcDataInThisRun=0;
 }
 
 #define safelog(x) ((x > 0) ? log10(x) : 0)
@@ -719,67 +721,70 @@ void tpcBuilder::event(daqReader *rdr)
 #endif
     
     if(dd) {   
-    // regular data... Note its always there even if empty
-    // e.g. for Run 18 data there are data banks for all sectors?
-    //
-    has_adc = 1;
-    tpc_max_channels += tpc_max_channels_inner_sector;
-    itpc_max_channels += tpc_max_channels_inner_sector;
-    
-    while(dd->iterate()) {
-      if (dd->ncontent == 0) continue;
-      // skip padrow _tb0
-      // These are pins on SAMPA not connected to pads.
+      if(tpcDataInThisRun==0) addServerTags("tpc");
+      tpcDataInThisRun = 1;
+
+      // regular data... Note its always there even if empty
+      // e.g. for Run 18 data there are data banks for all sectors?
       //
-      if((dd->pad < 1 ) || 
-	 (dd->row < 1))
-	{
-	  continue;
-	}
-      
-      
-      pixel_count += dd->ncontent ;
-      itpc_pixel_count += dd->ncontent ;
-      if(dd->ncontent > 0) {
-	channel_counts[dd->pad][dd->row] = 1;
-      }
-      
-      for(u_int i=0;i<dd->ncontent;i++) {
-	int tb = dd->adc[i].tb;
-	int adc = dd->adc[i].adc;
-	if((dd->pad >= Npads1) ||
-	   (dd->row >= Nrows1) ||
-	   (tb >= 512)) {
-	  LOG(ERR, "event=%d pad=%d row=%d tb=%d out of range.  Ignore.", event_no, dd->pad, dd->row, tb);
-	}
-	else {
-	  // this cut was used in run18 due to partial lack of pedetsal sub..
-	  // remove timebins where GG osc is important.
-	  if(tb>32 && tb<430) {
-	    charge_counts[dd->pad][dd->row] += adc;
+      has_adc = 1;
+      tpc_max_channels += tpc_max_channels_inner_sector;
+      itpc_max_channels += tpc_max_channels_inner_sector;
+    
+      while(dd->iterate()) {
+	if (dd->ncontent == 0) continue;
+	// skip padrow _tb0
+	// These are pins on SAMPA not connected to pads.
+	//
+	if((dd->pad < 1 ) || 
+	   (dd->row < 1))
+	  {
+	    continue;
 	  }
-	  tb_charge_counts[tb] += adc;
+      
+      
+	pixel_count += dd->ncontent ;
+	itpc_pixel_count += dd->ncontent ;
+	if(dd->ncontent > 0) {
+	  channel_counts[dd->pad][dd->row] = 1;
 	}
-      }
-    }  // end iterate
+      
+	for(u_int i=0;i<dd->ncontent;i++) {
+	  int tb = dd->adc[i].tb;
+	  int adc = dd->adc[i].adc;
+	  if((dd->pad >= Npads1) ||
+	     (dd->row >= Nrows1) ||
+	     (tb >= 512)) {
+	    LOG(ERR, "event=%d pad=%d row=%d tb=%d out of range.  Ignore.", event_no, dd->pad, dd->row, tb);
+	  }
+	  else {
+	    // this cut was used in run18 due to partial lack of pedetsal sub..
+	    // remove timebins where GG osc is important.
+	    if(tb>32 && tb<430) {
+	      charge_counts[dd->pad][dd->row] += adc;
+	    }
+	    tb_charge_counts[tb] += adc;
+	  }
+	}
+      }  // end iterate
     
-    for(int i=1;i<Npads1;i++) {
-      for(int j=1;j<41;j++) {
-	channel_count += channel_counts[i][j];
-	charge_count += charge_counts[i][j];
-	charge_count_sector += charge_counts[i][j];
+      for(int i=1;i<Npads1;i++) {
+	for(int j=1;j<41;j++) {
+	  channel_count += channel_counts[i][j];
+	  charge_count += charge_counts[i][j];
+	  charge_count_sector += charge_counts[i][j];
 	
-	if(charge_counts[i][j] > 0 ) {
-	  contents.h_itpc_phi_charge->Fill(mPhiAngleMap[s-1][j-1][i-1],charge_counts[i][j]);
-	  ((TH2D *)contents.array[s + q_idx - 1])->Fill(i, j, charge_counts[i][j]);
+	  if(charge_counts[i][j] > 0 ) {
+	    contents.h_itpc_phi_charge->Fill(mPhiAngleMap[s-1][j-1][i-1],charge_counts[i][j]);
+	    ((TH2D *)contents.array[s + q_idx - 1])->Fill(i, j, charge_counts[i][j]);
+	  }
 	}
-      }
-    }  // end i,j
+      }  // end i,j
     
-    for(int i=0;i<512;i++) {
-      contents.array[s + qs_idx - 1]->Fill(i,tb_charge_counts[i]);
-    }
-    contents.h_itpc_sector_charge->Fill(s, charge_count_sector);
+      for(int i=0;i<512;i++) {
+	contents.array[s + qs_idx - 1]->Fill(i,tb_charge_counts[i]);
+      }
+      contents.h_itpc_sector_charge->Fill(s, charge_count_sector);
     
     }  //end if(dd)
  
@@ -794,6 +799,9 @@ void tpcBuilder::event(daqReader *rdr)
     cout << "tpx " << dd << endl;
 #endif
     if(dd) {   // regular data...
+      if(tpcDataInThisRun==0) addServerTags("tpc");
+      tpcDataInThisRun = 1;
+      
       has_adc = 1;
       tpc_max_channels += tpc_max_channels_outer_sector;
       
@@ -806,33 +814,33 @@ void tpcBuilder::event(daqReader *rdr)
 	// skip rows < 14 ! should not apear in run 19 data
 	//
 	if((dd->pad < 1 ) || 
-	  (dd->row < 14))
+	   (dd->row < 14))
 	  {
-	     continue;
+	    continue;
           }
 	  
-	  // 
-	  // update padrow count for outer sectors
-	  //
+	// 
+	// update padrow count for outer sectors
+	//
 	  
-	  pixel_count += dd->ncontent ;
+	pixel_count += dd->ncontent ;
 	  
-	  if(dd->ncontent > 0) {
-	    channel_counts[dd->pad][dd->row+27] = 1;
+	if(dd->ncontent > 0) {
+	  channel_counts[dd->pad][dd->row+27] = 1;
+	}
+	  
+	for(u_int i=0;i<dd->ncontent;i++) {
+	  int tb = dd->adc[i].tb;
+	  int adc = dd->adc[i].adc;
+	  if((dd->pad >= Npads1) ||
+	     (dd->row +27 >= Nrows1) ||
+	     (tb >= 512)) {
+	    LOG(ERR, "event=%d pad=%d row=%d tb=%d out of range.  Ignore.", event_no, dd->pad, dd->row, tb);
 	  }
-	  
-	  for(u_int i=0;i<dd->ncontent;i++) {
-	    int tb = dd->adc[i].tb;
-	    int adc = dd->adc[i].adc;
-	    if((dd->pad >= Npads1) ||
-	       (dd->row +27 >= Nrows1) ||
-	       (tb >= 512)) {
-	      LOG(ERR, "event=%d pad=%d row=%d tb=%d out of range.  Ignore.", event_no, dd->pad, dd->row, tb);
-           }
-	    else {
-	      charge_counts[dd->pad][dd->row+27] += adc;
-	      tb_charge_counts[tb] += adc;  	  }
-	  }
+	  else {
+	    charge_counts[dd->pad][dd->row+27] += adc;
+	    tb_charge_counts[tb] += adc;  	  }
+	}
       }
       
       //
@@ -856,7 +864,7 @@ void tpcBuilder::event(daqReader *rdr)
 	}
       }
       contents.h_tpx_sector_charge->Fill(s,charge_count_sector);      
-  }  // end dd
+    }  // end dd
 
     //
     // go to clusters
@@ -873,6 +881,9 @@ void tpcBuilder::event(daqReader *rdr)
 
     dd = rdr->det("itpc")->get("cld",s) ;
     if(dd) {
+      if(tpcDataInThisRun==0) addServerTags("tpc");
+      tpcDataInThisRun = 1;
+
       has_cld = 1;
       cl_max_channels += tpc_max_channels_inner_sector;
       itpc_cl_max_channels += tpc_max_channels_inner_sector;
@@ -917,6 +928,9 @@ void tpcBuilder::event(daqReader *rdr)
     
     dd = rdr->det("tpx")->get("cld",s) ;
     if(dd) {
+      if(tpcDataInThisRun==0) addServerTags("tpc");
+      tpcDataInThisRun = 1;
+
       has_cld = 1;
       cl_max_channels += tpc_max_channels_outer_sector;  // This will not work properly for run18 and earlier data
 
@@ -964,30 +978,30 @@ void tpcBuilder::event(daqReader *rdr)
   //FV This whole scaling does not make much sense to me. Commented out.
   //
   /*    
-  if(has_adc) {
+	if(has_adc) {
 
-    n_adc++;
-    double adc_scale = (double)(n_adc-1) / (double)n_adc;
-    if(n_adc == 1) adc_scale = 1;
+	n_adc++;
+	double adc_scale = (double)(n_adc-1) / (double)n_adc;
+	if(n_adc == 1) adc_scale = 1;
 
-    for(int i=1;i<=24;i++) {
-      contents.array[i + qs_idx - 1]->Scale(adc_scale);
-    }
-    contents.h_itpc_phi_charge->Scale(adc_scale);
-    contents.h_itpc_sector_charge->Scale(adc_scale);
-  }
+	for(int i=1;i<=24;i++) {
+	contents.array[i + qs_idx - 1]->Scale(adc_scale);
+	}
+	contents.h_itpc_phi_charge->Scale(adc_scale);
+	contents.h_itpc_sector_charge->Scale(adc_scale);
+	}
 
-  if(has_cld) {
-    n_cld++;   
-    double cld_scale = (double)(n_cld-1) / (double)n_cld;
-    if(n_cld == 1) cld_scale = 1;
+	if(has_cld) {
+	n_cld++;   
+	double cld_scale = (double)(n_cld-1) / (double)n_cld;
+	if(n_cld == 1) cld_scale = 1;
 
-    for(int i=1;i<=24;i++) {
-      extras.array[i + cl_qs_idx - 1]->Scale(cld_scale);
-    }
-    extras.cl_itpc_phi_charge->Scale(cld_scale);
-    extras.cl_itpc_sector_charge->Scale(cld_scale);
-  }
+	for(int i=1;i<=24;i++) {
+	extras.array[i + cl_qs_idx - 1]->Scale(cld_scale);
+	}
+	extras.cl_itpc_phi_charge->Scale(cld_scale);
+	extras.cl_itpc_sector_charge->Scale(cld_scale);
+	}
   */
 
 
@@ -1033,11 +1047,11 @@ void tpcBuilder::event(daqReader *rdr)
       if(1) {    // inneficient!  write all of them :-)
 	FILE *f = fopen("/RTS/conf/handler/.l4_drift_velocity","w");
 	if(f) {
-	    fprintf(f, "%lf", drift_vel);
-	    fclose(f);
+	  fprintf(f, "%lf", drift_vel);
+	  fclose(f);
 	}
 	else {
-	    LOG(OPER, "Can't access drift velocity file!");
+	  LOG(OPER, "Can't access drift velocity file!");
 	}
 
 	f = fopen("/RTS/conf/handler/.l4_drift_velocity_run","w");
@@ -1046,7 +1060,7 @@ void tpcBuilder::event(daqReader *rdr)
 	  fclose(f);
 	}
 	else {
-	    LOG(OPER, "Can't access drift velocity run number file!");
+	  LOG(OPER, "Can't access drift velocity run number file!");
 	}
       }
       
