@@ -57,7 +57,9 @@
 #  root.exe -q -b 'bfc.C(1000,"P2018,TpxRaw,TpxClu,McTpcAna,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  root.exe -q -b 'bfc.C(1000,"P2018,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
 # SL18f
-   root4star -q -b 'bfc.C(1000,"P2018a,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,evout,-picowrite,-picodst","'${evtsFile}'")' &gt;&amp; ${logFile}
+#   root4star -q -b 'bfc.C(1000,"P2018a,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,evout,-picowrite,-picodst","'${evtsFile}'")' &gt;&amp; ${logFile}
+# TFG
+   root.exe -q -b 'bfc.C(1000,"P2018a,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,evout,-picowrite,-picodst","'${evtsFile}'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />

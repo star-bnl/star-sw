@@ -1,0 +1,80 @@
+08/27/18 -08/29/18
+Filesystem                   Size  Used Avail Use% Mounted on
+l401:/data/scratch1           17T   15T  2.5T  86% /net/l401/data/scratch1
+     7.8T    daq    
+     6.5T    fisyak/
+             reco/2018
+                  1.9T    27GeV_production_2018		    
+		  244G    27GeV_production_2018.DEV2	    
+		  243G    27GeV_production_2018.DEV2.noAlig   
+		  3.8T    27GeV_production_2018NewAlignment   
+		  6.8G    27GeV_production_2018testAlignment  
+		  249G    27GeV_production_2018.TFG18m	    
+		  512     dump.080418			    
+		  48G     TbyT				    
+  		  3.8G    TbyT.DEV2_TFG18m                    
+     7.7G    kehw/  
+     512     mzyzak/
+     468M    pkisel/
+l401:/data/scratch2           17T   13T  3.9T  78% /net/l401/data/scratch2
+
+l402:/data                    11T  2.5T  7.3T  25% /net/l402/data
+     117G    daq	    
+             88G     2014
+	     15G     2016
+	     16G     2017
+     911G    fisyak	  Whole software  
+     1.5G    iraklic	    
+     320G    kehw	    
+     533G    kocmic	    
+     174G    pfederic    
+     0       scratch1    
+     0       scratch2    
+     422G    tb	    
+     1.1M    xanthus     
+l403:/data                    11T  9.2T  508G  95% /net/l403/data
+  2.4G    clone 
+  9.2T    fisyak
+          3.3T    Femto   Clean ?
+                  1.3T    2016 
+		  1.3T    2016A
+		  722G    2016B
+                  293M    2016picoDST
+	  6.0T    reco    Clean ?
+                  3.0T    2016
+                          697G    AuAu200_adcKFVCA 
+			  2.3T    Embedding         
+                  3.0T    2018D
+                          37G     16x		     
+	                  3.0T    27GeV_production_2018
+
+  6.9G    kehw  
+  29M     mysql 
+  9.3G    mzyzak
+l404:/data                    11T  9.1T  700G  93% /net/l404/data
+     l3.7G    clone	   
+      8.9T    fisyak	   
+              56M     abelouso	
+	      238G    daq		
+	      3.0M    garfield	
+	      65M     gkozlov		
+	      4.0K    GL		
+	      28K     gphysi.dat	
+	      632K    HFT		
+	      67G     Histograms	
+	      40M     Irakli		
+	      580K    kehw		
+	      20K     LADR-x.eps	
+	      391M    Maksym		
+	      2.0G    MuDst		
+	      12G     Nightlies	
+	      4.0K    noqt		
+	      2.6T    Pico		BES-I
+	      592K    prodlog		
+	      14M     psn0668		
+	      4.9T    reco		
+	      35G     simu		
+	      264K    Test		
+  	      1.1T    Tpc               ?        
+      83G     kehw	   
+      96G     pfederic   

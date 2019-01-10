@@ -1,0 +1,17 @@
+find . -name cpu_per_event -size 0 -exec rm {} \;
+foreach d (`ls -1d T*`)
+  cd ${d}; pwd;
+  if (! -r cpu_per_event) cpu_per_event.csh | tee cpu_per_event
+  cd -;
+end
+
+foreach d  (`ls -1d T*`)
+  if (-r ${d}/cpu_per_event) continue;
+  cd ${d}
+  pwd;
+  rm *.*
+  lsf ~/xml/daq_2018T.xml
+  sed '/Priority/ a request_afs = 1' sche*.condor > new.condor
+  condor_submit new.condor
+  cd -
+end
