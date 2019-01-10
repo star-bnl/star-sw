@@ -1,0 +1,6 @@
+#!/bin/bash
+
+args="$*"
+cmdstr="OnlTools/Jevp/StJevpViewer/runViewer.C()"
+
+root4star  "$cmdstr"
