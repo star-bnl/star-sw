@@ -29,351 +29,510 @@
 
 
 
-ClassImp(etofBuilder);
+ClassImp( etofBuilder );
 
-typedef JevpPlot * ptrJevpPlot;
+typedef JevpPlot* ptrJevpPlot;
 
 
-etofBuilder::etofBuilder(JevpServer *parent) : JevpBuilder(parent) {
-  plotsetname = (char *)"etof";
+etofBuilder::etofBuilder( JevpServer *parent ) : JevpBuilder( parent ) {
+  plotsetname = ( char* ) "etof";
 
-  int np = sizeof(contents) / sizeof(TH1 *);
+  int np = sizeof( contents ) / sizeof( TH1* );
 
-  plots = new ptrJevpPlot[np]();
+  plots = new ptrJevpPlot[ np ]();
+
   // start with histograms undefined...
-  memset(&contents, 0, sizeof(contents));
-  memset(plots, 0, sizeof(JevpPlot *) * np);
+  memset( &contents, 0, sizeof( contents ) );
+  memset( plots, 0, sizeof( JevpPlot* ) *np );
 }
 
 etofBuilder::~etofBuilder() {
   // Delete any existing histograms...
-  int n = sizeof(contents) / sizeof(TH1 *);
-  for(int i=0;i<n;i++) {
-    if(plots[i]) delete plots[i];
+  int n = sizeof( contents ) / sizeof( TH1* );
+  for( int i=0; i<n; i++ ) {
+    if( plots[ i ] ) delete plots[ i ];
   }
   delete plots;
 }
 
-void etofBuilder::initialize(int argc, char *argv[]) {
+void etofBuilder::initialize( int argc, char *argv[] ) {
 
-	LOG(NOTE, "etofBuilder::initialize");
+    LOG( NOTE, "etofBuilder::initialize" );
 
-	// initialize rocMap
-	rocMap[ 0x18f6 ] = 0; 
-	rocMap[ 0x0b59 ] = 1;
-	rocMap[ 0x1898 ] = 2;
-	rocMap[ 0x5f64 ] = 3;
-	rocMap[ 0x18e6 ] = 4;
+    nrOfGdpbInSys       = 12;
+    nrOfGbtxPerGdpb     =  6;
+    nrOfFeePerGbtx      =  5;
+    nrOfGet4PerFee      =  8;
+    nrOfChannelsPerGet4 =  4;
 
-	for ( auto kv : rocMap ){
-		LOG( INFO, "%hu = %#06x", kv.second , kv.first );
-		rocrMap[ kv.second ] = kv.first;
-	}
-	
-	// initialize Get4 to PADI conversion
-        int channelMap[32] = {
-		3,  2,  1,  0, 
-		23, 22, 21, 20,
-                 7,  6,  5,  4,
-                27, 26, 25, 24,
-                11, 10,  9,  8,
-                31, 30, 29, 28,
-                15, 14, 13, 12,
-                19, 18, 17, 16 };
-	
-	
-	for(int i=0; i<32; i++) {
-		Get4ToPadi.push_back( channelMap[i] );
-		LOG( INFO, "channelMap (%d) = %d", i, Get4ToPadi[i]);                        
+    nrOfChannelsPerFee  = nrOfChannelsPerGet4 * nrOfGet4PerFee;
+    nrOfGet4PerGbtx     = nrOfGet4PerFee      * nrOfFeePerGbtx;
+    nrOfChannelsPerGdpb = nrOfChannelsPerGet4 * nrOfGet4PerGbtx * nrOfGbtxPerGdpb;
+
+    // map form Id (hex number) of the GDPB to the running number ( 0 to nrOfGdpb-1 )
+    gdpbMap2018[ 0x18f6 ] = 0;
+    gdpbMap2018[ 0x0b59 ] = 1;
+    gdpbMap2018[ 0x1898 ] = 2;
+    gdpbMap2018[ 0x5f64 ] = 3;
+    gdpbMap2018[ 0x18e6 ] = 4;
+
+    gdpbMap2019[ 0x1970 ] = 0;
+    gdpbMap2019[ 0x18f6 ] = 1;
+    gdpbMap2019[ 0x0b59 ] = 2;
+    gdpbMap2019[ 0x1898 ] = 3;
+    gdpbMap2019[ 0x5bb0 ] = 4; //gdpbMap2019[ 0x5f64 ] = 4;
+    gdpbMap2019[ 0x18e6 ] = 5;
+    gdpbMap2019[ 0x6141 ] = 6;
+    gdpbMap2019[ 0x0b5c ] = 7;
+    gdpbMap2019[ 0x1861 ] = 8;
+    gdpbMap2019[ 0x0b39 ] = 9;
+    gdpbMap2019[ 0x5f71 ] = 10;
+    gdpbMap2019[ 0x18b6 ] = 11;
+
+    for ( auto kv : gdpbMap2018 ) {
+        gdpbRevMap2018[  kv.second ] = kv.first;
+    }
+    for ( auto kv : gdpbMap2019 ) {
+        gdpbRevMap2019[  kv.second ] = kv.first;
+    }
+
+    gdpbMap    = gdpbMap2019;
+    gdpbRevMap = gdpbRevMap2019;
+
+
+    vector<int> sector;
+    sector.push_back( 13 );
+    sector.push_back( 14 );
+    sector.push_back( 15 );
+    sector.push_back( 16 );
+    sector.push_back( 17 );
+    sector.push_back( 18 );
+    sector.push_back( 19 );
+    sector.push_back( 20 );
+    sector.push_back( 21 );
+    sector.push_back( 22 );
+    sector.push_back( 23 );
+    sector.push_back( 24 );
+
+    // initialize the eLink to Get4 conversion
+    int eLinkToGet4Array[ 40 ] = {
+        27,  2,  7,  3, 31, 26, 30,  1,
+        33, 37, 32, 13,  9, 14, 10, 15,
+        17, 21, 16, 35, 34, 38, 25, 24,
+         0,  6, 20, 23, 18, 22, 28,  4,
+        29,  5, 19, 36, 39,  8, 12, 11 };
+
+
+    for( size_t i = 0; i < nrOfGet4PerGbtx; i++ ) {
+        eLinkToGet4.push_back( eLinkToGet4Array[ i ] );
+        LOG( DBG, "elinkToGet4 (%d) = %d\n", i, eLinkToGet4[ i ] );
+    }
+
+    // initialize Get4 to PADI channel conversion
+    int get4ToPadiArray[ 32 ] = {
+         3,  2,  1,  0, 
+        23, 22, 21, 20,
+         7,  6,  5,  4,
+        27, 26, 25, 24,
+        11, 10,  9,  8,
+        31, 30, 29, 28,
+        15, 14, 13, 12,
+        19, 18, 17, 16 };
+
+
+    for( size_t i = 0; i < nrOfChannelsPerFee; i++ ) {
+        get4ToPadi.push_back( get4ToPadiArray[ i ] );
+        LOG( DBG, "get4ToPadi (%d) = %d\n", i, get4ToPadi[ i ] );
+    }
+
+
+    // Build Root Histograms...
+    contents.nDigis             = new TH1D( "nDigis", "nHitMsg;# digis;# events", 300, 0, 300 );
+
+    contents.nDigisVsTofTrgMult = new TH2D( "nDigisVsTofTrgMult", "# digis vs bTof multiplicity;# digis;bTof mult in trigger data", 300, 0, 300, 200, 0, 800 ); 
+
+    contents.digiTot            = new TH1D( "digiTot",           "digi tot;tot (bins);#digis", 256,  0,  256 );
+    contents.digiTimeToTrigger  = new TH1D( "digiTimeToTrigger", "digi time to trigger;time to trigger (ms);# digis", 600, -5, 5 );
+
+    contents.digiCoarseTs       = new TH1D( "digiCoarseTs", "digi coarse Ts;coarse Ts (bins);# digis", 4096,   0, 4096 );
+    contents.digiFineTs         = new TH1D( "digiFineTs",   "digi fine Ts;fine Ts (bins);# digis",     112,   0,  112 );
+
+
+    for( size_t i=0; i<nrOfGdpbInSys; i++ ) {
+        contents.nDigisPerGdpb[ i ]                  = new TH1D( TString::Format( "nDigisPerGdpb_%d", i ),  TString::Format( "# digis on Gdpb %#06x (sector %d);# digis;# events",  gdpbRevMap[ i ], sector[ i ] ),  50, 0,  50 );
+        contents.digiTotPerGdpb[ i ]                 = new TH1D( TString::Format( "digiTotPerGdpb_%d", i ), TString::Format( "digi tot on Gdpb %#06x (sector %d);# digis;# events", gdpbRevMap[ i ], sector[ i ] ), 256, 0, 256 );
+        contents.digiMappedChannelNumberPerGdpb[ i ] = new TH1D( TString::Format( "digiMappedChannelNumberPerGdpb_%d", i), TString::Format( "mapped channel number on Gdpb %#06x (sector %d);mapped channel;# digis", gdpbRevMap[ i ], sector[ i ] ), 961, -1, 960 );
+    }
+
+
+    int np = sizeof( contents ) / sizeof( TH1* );
+
+    for( int i = 0; i < np; i++ ) {
+        contents.array[ i ]->SetLineColor( kBlue );
+        //contents.array[ i ]->SetFillColor( kRed );
+
+        JevpPlot* jp = new JevpPlot( contents.array[ i ] );
+        jp->logy = 1;
+
+
+        if( contents.array[ i ] == contents.nDigisVsTofTrgMult ||
+            contents.array[ i ] == contents.digiCoarseTs       ||
+            contents.array[ i ] == contents.digiCoarseTs       ) {
+            jp->logy = 0;
         }
 
-        NrOfChannelsPerGet4 = 4;
-        NrOfGet4PerFeb      = 8;
-        NrOfChannelsPerCard = 32;                                               
+        if( contents.array[ i ] == contents.nDigisVsTofTrgMult ) {
+            jp->optlogz = 1;
+        }
+        /*
+        if (contents.array[i] == contents.hitMapCounter[0] ||
+            contents.array[i] == contents.hitMapCounter[1] ||
+            contents.array[i] == contents.hitMapCounter[2] ||
+            contents.array[i] == contents.hitMapCounter[3] ||
+            contents.array[i] == contents.hitMapCounter[4] ||
+            contents.array[i] == contents.hitMapCounter[5] ||
+            contents.array[i] == contents.hitMapCounter[6] ||
+            contents.array[i] == contents.hitMapCounter[7] ||
+            contents.array[i] == contents.hitMapCounter[8] ) {
+            jp->gridx = 0;
+        }
+        */
 
-		
-	// initialize counter geometry map
-	counterPlotMap[ 0 ] = 3;	
-	counterPlotMap[ 1 ] = 0;	
-	counterPlotMap[ 2 ] = 6;	
-	counterPlotMap[ 3 ] = 4;	
-	counterPlotMap[ 4 ] = 1;	
-	counterPlotMap[ 5 ] = 7;	
-	counterPlotMap[ 6 ] = 5;	
-	counterPlotMap[ 7 ] = 2;	
-	counterPlotMap[ 8 ] = 8;	
+        addPlot( jp );
+    }
 
-	for ( auto kv : counterPlotMap ){
-		counterPlotrMap[ kv.second ] = kv.first;
-	}
+    resetAllPlots();
+}
 
-	
-	// Build Root Histograms...
-	contents.nHits             = new TH1D( "nHits",             "ETOF # hits; # hits",                                     250,  0, 250 );
-	contents.nHitsVsTofTrgMult = new TH2D( "nHitsVsTofTrgMult", "ETOF # hits vs Tof trigger data multiplicity; # hits in eTOF; Tof mult in trigger data", 100, 0, 200, 100, 0, 800 );
-        
-	contents.nEpochMismatch    = new TH1D( "nEpochMismatch",    "ETOF # of Epoch Mismatch / roc; roc; # Epoch Mismatch",     5,  0,   5 );
-        contents.nEpochLoss        = new TH1D( "nEpochLoss",        "ETOF # of Epoch loss / roc; roc; # Epoch Lost",             5,  0,   5 );
-        contents.nEpochSync        = new TH1D( "nEpochSync",        "ETOF # of Epoch Sync / roc; roc; # Epoch Sync",             5,  0,   5 );
-        contents.nEpochDataLoss    = new TH1D( "nEpochDataLoss",    "ETOF # of Epoch Data loss / roc; roc; # Epoch Data Lost",   5,  0,   5 );
-        
-	contents.totAll            = new TH1D( "totAll",            "ETOF ToT of all hits; ToT",                               256,  0, 256 );
-        contents.hitTimeToTrigger  = new TH1D( "hitTimeToTrigger",  "ETOF hit time to Trigger; t_{hit} - t_{trigger} (#mus)",  600, -3,   3 );
-        
-	contents.hitMap            = new TH2D( "hitMap",            "ETOF hit map; roc; get4Id",                                 5,  0,   5, 32, 0, 32 );
-        contents.hitMapChannelId   = new TH2D( "hitMapChannelId",   "ETOF hit map channel; roc; channelId",                      5,  0,   5,  4, 0,  4 );
+void etofBuilder::event( daqReader *rdr ) {
+    LOG( DBG, "-------------START EVENT----------" );
 
-	for( int i = 0; i < 9; i++) {
-                int module  = counterPlotMap[ i ] / 3;
-                int counter = counterPlotMap[ i ] % 3;
-                contents.hitMapCounter[ i ] = new TH2D( TString::Format( "hitMapCounter_%d", i ), TString::Format( "ETOF hit map module %d  counter %d", module, counter ), 2, 0, 2, 32, 0, 32 );
-                contents.hitMapCounter[ i ]->GetXaxis()->SetTitle( "side" );
-                contents.hitMapCounter[ i ]->GetYaxis()->SetTitle( "31 - strip" );
+    StTriggerData* trgd = getStTriggerData( rdr );
+    if( !trgd ) return;
+
+    float TofTrgMult = (float) trgd->tofMultiplicity( 0 );
+
+
+    daq_dta  *dd;
+    daq_etof *etof = ( daq_etof* ) rdr->det( "etof" );
+    dd = etof->get( "raw" );
+
+    if( !dd ) {
+        if( trgd ) delete trgd;
+        return;
+    }
+
+    map< unsigned int, unsigned short > nDigisInGdpb;
+    for( const auto& kv: gdpbMap ) {
+        nDigisInGdpb[ kv.first ] = 0;
+    }
+
+    while ( dd->iterate() ) {
+
+        unsigned int inputSizeBytes = dd->ncontent;
+        unsigned int inputLength = inputSizeBytes / sizeof( uint64_t );
+
+        LOG( DBG, "inputSizeBytes=%d", inputSizeBytes );
+        LOG( DBG, "inputLength=%d = inputSizeBytes / %d", inputLength, sizeof( uint64_t ) );
+
+        uint64_t* messageBuffer = static_cast< uint64_t* > ( dd->Void );
+
+        uint64_t     trgGdpbFullTs   =   messageBuffer[ 0 ];
+        uint64_t     trgStarFullTs   =   messageBuffer[ 1 ];
+        unsigned int starToken       = ( messageBuffer[ 2 ] >> 32 ) & 0xFFF;
+        unsigned int starDaqCmdIn    = ( messageBuffer[ 2 ] >> 16 ) & 0x00F;
+        unsigned int starTrigCmdIn   = ( messageBuffer[ 2 ]       ) & 0x00F;
+        uint64_t     eventStatusFlag =   messageBuffer[ 3 ];
+
+        LOG( DBG, "trgGdpbFullTs=%lu",    trgGdpbFullTs   );
+        LOG( DBG, "trgStarFullTs=%lu",    trgStarFullTs   );
+        LOG( DBG, "starToken=%lu",        starToken       );
+        LOG( DBG, "starDaqCmdIn=%lu",     starDaqCmdIn    );
+        LOG( DBG, "starTrigCmdIn=%lu",    starTrigCmdIn   );
+        LOG( DBG, "eventStatusFlag=%lu",  eventStatusFlag );
+
+        // ------------------------------------------------------------------------------------------------------
+        // determine number of full messages to read:
+        // the packed version sent to the STAR DAQ systems is made of a 256 bit header (4 long unsigned integers)
+        // followed by a buffer of gdpb::FullMessage (128 bit each).
+        //
+        // gdbp::Message     = 64 bit message as received from the eTOF gDPB boards
+        // gdpb::FullMessage = 128 bit message, obtained by combining a
+        //                     64 bit extended epoch (bits 127-64) with a gdpb::Message (bits 63-0)
+        // ------------------------------------------------------------------------------------------------------
+
+         // check if there are messages & process them
+        if( inputLength > 4 ) {
+            size_t nFullMessagesToRead = ( ( inputSizeBytes / sizeof( uint64_t ) ) - 4 ) / 2;
+
+            if( year == 2018 ) {
+                processMessages2018( messageBuffer, nFullMessagesToRead, nDigisInGdpb );
+            }
+            else{
+                processMessages( messageBuffer, nFullMessagesToRead, nDigisInGdpb );
+            }
         }
 
-	contents.fineTimeAll   = new TH1D( "fineTimeAll",  "ETOF Fine Ts",   115, 0,  115 );
-	contents.coarseTimeAll = new TH1D( "coarseTimeAll","ETOF Coarse Ts", 300, 0, 4200 );
-	
-	for ( size_t i = 0; i < 18; i++ ) {
-		int roc  = i / 4;
-		int card = i % 4;
-		contents.fineTimeGet4card  [ i ] = new TH1D( TString::Format("fineTimeGet4card_%u",   (unsigned int) i ), TString::Format( "ETOF Fine Time ROC %#06x, Get4 card %d",   rocrMap[ roc ], card ), 115, 0,  115 );
-		contents.coarseTimeGet4card[ i ] = new TH1D( TString::Format("coarseTimeGet4card_%u", (unsigned int) i ), TString::Format( "ETOF Coarse Time ROC %#06x, Get4 card %d", rocrMap[ roc ], card ), 300, 0, 4200 );
-	}
+    } // dd->iterate
 
-	for ( size_t i = 0; i < 20; i++ ) {
-		int roc  = i / 4;
-		int chan = i % 4;
-		contents.fineTime[i] = new TH1D( TString::Format("fineTime_%u", (unsigned int) i ), TString::Format( "ETOF Fine Time ROC %#06x, chan %d", rocrMap[ roc ], chan ), 115, 0, 115 );
-	}
-	
-	
-	LOG(INFO, "rocrMap.size() = %lu", rocrMap.size());
-	for ( size_t i = 0; i < rocrMap.size(); i++ ){
-		char buf[50];
-		LOG( INFO, "%#06x", rocrMap[i] );
-		sprintf( buf, "%#06x", rocrMap[i] );
-                
-		contents.hitMap         ->GetXaxis()->SetBinLabel( i+1, buf );
-                contents.hitMapChannelId->GetXaxis()->SetBinLabel( i+1, buf );
-                
-		contents.nEpochMismatch ->GetXaxis()->SetBinLabel( i+1, buf );
-                contents.nEpochLoss     ->GetXaxis()->SetBinLabel( i+1, buf );
-                contents.nEpochSync     ->GetXaxis()->SetBinLabel( i+1, buf );
-                contents.nEpochDataLoss ->GetXaxis()->SetBinLabel( i+1, buf );
-	}
-	
-	int np = sizeof(contents) / sizeof(TH1 *);
-	// JevpPlot *plots[np];
-	
-	for ( int i = 0; i < np; i++ ){
-		contents.array[i]->SetLineColor( kBlue );		
-		
-		if (contents.array[i] == contents.nEpochMismatch || contents.array[i] == contents.nEpochLoss ||
-		    contents.array[i] == contents.nEpochLoss     || contents.array[i] == contents.nEpochDataLoss )
-			contents.array[i]->SetFillColor( kRed );
+    if( trgd ) delete trgd;
 
-		JevpPlot *jp =  new JevpPlot( contents.array[i] );
-		jp->logy = 0;
+    size_t nDigis = 0;
+    for( size_t i=0; i<nrOfGdpbInSys; i++ ) { 
+        if( gdpbRevMap.count( i ) > 0 ) {
+            contents.nDigisPerGdpb[ i ]->Fill( nDigisInGdpb.at( gdpbRevMap.at( i ) ) );
 
-		if (contents.array[i] == contents.nHits || contents.array[i] == contents.hitTimeToTrigger || contents.array[i] == contents.totAll)
-			jp->logy = 1;
-		if (contents.array[i] == contents.nHitsVsTofTrgMult) {
-			jp->optlogz = 1;
-		}
-		if (contents.array[i] == contents.hitMapCounter[0] ||
-		    contents.array[i] == contents.hitMapCounter[1] ||
-		    contents.array[i] == contents.hitMapCounter[2] ||
-		    contents.array[i] == contents.hitMapCounter[3] ||
-		    contents.array[i] == contents.hitMapCounter[4] ||
-		    contents.array[i] == contents.hitMapCounter[5] ||
-		    contents.array[i] == contents.hitMapCounter[6] ||
-		    contents.array[i] == contents.hitMapCounter[7] ||
-	    	    contents.array[i] == contents.hitMapCounter[8]
-		 )	
-			jp->gridx = 0;
+            nDigis += nDigisInGdpb.at( gdpbRevMap.at( i ) );
+        }
+    }
 
-	
-		addPlot( jp );
-	}
-
-  resetAllPlots();
+    contents.nDigis->Fill( nDigis );
+    contents.nDigisVsTofTrgMult->Fill( nDigis, TofTrgMult );
 }
 
-void etofBuilder::event(daqReader *rdr) {
-  //rtsLogLevel(INFO);    // Nope!  This changes the log level for the server!  Don't do it!!!!!!!!!!!
-  // if you wan't to modify log levels in debug mode, use the -loglevel command line argument!
 
+void etofBuilder::startrun( daqReader *rdr ) {
+    year = (int) getStTriggerData( rdr )->year();
 
-    // if(disable_builder) return;
-    // assert(0);
+    if( year == 2018 ) {
+        gdpbMap    = gdpbMap2018;
+        gdpbRevMap = gdpbRevMap2018;
 
-	LOG( DBG, "-------------START EVENT----------" );
+        for( size_t i = 0; i<nrOfGdpbInSys; i++ ) {
+            if( i < gdpbRevMap.size() ) {
+                contents.nDigisPerGdpb[ i ] ->SetTitle( TString::Format( "# digis on Gdpb %#06x (sector %d);# digis;# events",  gdpbRevMap[ i ], 18 ) );
+                contents.digiTotPerGdpb[ i ]->SetTitle( TString::Format( "digi tot on Gdpb %#06x (sector %d);# digis;# events", gdpbRevMap[ i ], 18 ) );
+                contents.digiMappedChannelNumberPerGdpb[ i ]->SetTitle( TString::Format( "mapped channel number on Gdpb %#06x (sector %d);mapped channel;# digis", gdpbRevMap[ i ], 18 ) );
+            }
+            else {
+                contents.nDigisPerGdpb[ i ]                 ->SetTitle( TString::Format( "not existing ...;# digis;# events" ) );
+                contents.digiTotPerGdpb[ i ]                ->SetTitle( TString::Format( "not existing ...;# digis;# events" ) );
+                contents.digiMappedChannelNumberPerGdpb[ i ]->SetTitle( TString::Format( "not existing ...;# digis;# events" ) );
+            }
+        }
+    }
+    else {
+        gdpbMap    = gdpbMap2019;
+        gdpbRevMap = gdpbRevMap2019;
+    }
 
-        StTriggerData* trgd = getStTriggerData( rdr );        
-        if( !trgd ) return;
-        float TofTrgMult = (float) trgd->tofMultiplicity( 0 );
-
-
-	daq_dta *dd;
-	daq_etof *etof = (daq_etof*)rdr->det("etof");
-	dd = etof->get("raw");
-
-	if(!dd) {
-	    if( trgd ) delete trgd;
-	    return;
-	}
-
-	
-
-	size_t nHits = 0;
-	while ( dd->iterate() ){
-
-		int iInputSizeBytes = dd->ncontent;
-		Int_t iInputSzLg = iInputSizeBytes / sizeof( ULong64_t );
-
-		LOG(DBG, "iInputSizeBytes=%d", iInputSizeBytes );
-		LOG(DBG, "iInputSzLg=%d = iInputSizeBytes / %d", iInputSzLg, sizeof( ULong64_t ) );
-
-		ULong64_t * pulLongBuff      = static_cast< ULong64_t * >(dd->Void);
-		ULong64_t ulTrgGdpbFullTs    = pulLongBuff[0];
-		ULong64_t ulTrgStarFullTs    = pulLongBuff[1];
-		UInt_t    uStarToken         = (pulLongBuff[2] >> 32) & 0xFFF;
-		UInt_t    uStarDaqCmdIn      = (pulLongBuff[2] >> 16) & 0x00F;
-		UInt_t    uStarTrigCmdIn     = (pulLongBuff[2]      ) & 0x00F;
-		ULong64_t fulEventStatusFlag = pulLongBuff[3];
-
-		LOG(DBG, "ulTrgGdpbFullTs=%lu",    ulTrgGdpbFullTs );
-		LOG(DBG, "ulTrgStarFullTs=%lu",    ulTrgStarFullTs );
-		LOG(DBG, "uStarToken=%lu",         uStarToken );
-		LOG(DBG, "uStarDaqCmdIn=%lu",      uStarDaqCmdIn );
-		LOG(DBG, "uStarTrigCmdIn=%lu",     uStarTrigCmdIn );
-		LOG(DBG, "fulEventStatusFlag=%lu", fulEventStatusFlag );
-
-		if ( iInputSzLg > 4){
-			UInt_t uMsgsToRead = iInputSzLg - 4;
-			for( UInt_t uMsgIdx = 0; uMsgIdx < uMsgsToRead / 2; uMsgIdx++)
-			{
-				gdpb::FullMessage mess( pulLongBuff[4 + 2 * uMsgIdx], pulLongBuff[4 + 2 * uMsgIdx + 1] );
-				// mess.PrintMessage( gdpb::msg_print_Prefix | gdpb::msg_print_Data);
-
-				if ( mess.isGet4Hit32Msg() ){	
-					unsigned int rocId      = mess.getRocNumber();
-                                        unsigned int get4ChipId = mess.getGdpbGenChipId();
-                                        unsigned int get4ChanId = mess.getGdpbHitChanId();
-
-                                        // check if the reported rocId, ChipId and ChannelId make sense
-                                        if( rocMap.count( rocId ) > 0 && get4ChipId < 32 && get4ChanId < 4 ) {
-						nHits ++;
-
-						contents.totAll->Fill( mess.getGdpbHit32Tot() );
-					
-						// calculate time difference to trigger	
-						double dTriggerTime = static_cast< double_t > ( ulTrgGdpbFullTs );
-                                                double dMessageFullTime = mess.GetFullTimeNs();
-                                                double dTimeToTrg = ( dMessageFullTime - dTriggerTime ) / 1000.;
-
-                                                contents.hitTimeToTrigger->Fill( dTimeToTrg );
-
-						 
-						// do some mapping from rocId, get4ChipId, get4ChanId to module, counter, Get4 cardNr ...
-						//unsigned int channelNr         = get4ChipId * NrOfChannelsPerGet4 + get4ChanId;
-                                                unsigned int channelNrInCard   = (get4ChipId % NrOfGet4PerFeb) * NrOfChannelsPerGet4 + get4ChanId;
-                                                unsigned int cardNr            = (get4ChipId / NrOfGet4PerFeb);
-                                                //unsigned int remappedChannelNr = cardNr * NrOfChannelsPerCard + Get4ToPadi[ channelNrInCard ];	
-
-						unsigned int strip = Get4ToPadi[ channelNrInCard ];
-                                                unsigned int side  = 0;
-                                                
-						if( cardNr % 2 == 1) {
-                                                        strip = 31 - strip;
-                                                        side  = 1;
-                                                }
-						
-						unsigned int counterIndex; 						
-						if( cardNr / 2 == 0 ) {
-							if( rocMap[ rocId ] == 0 )      counterIndex = 2;
-							else if( rocMap[ rocId ] == 1 ) counterIndex = 0;
-							else if( rocMap[ rocId ] == 2 ) counterIndex = 5;
-							else if( rocMap[ rocId ] == 3 ) counterIndex = 8;
-							else if( rocMap[ rocId ] == 4 ) counterIndex = 6;
-						}
-						else {
-							if( rocMap[ rocId ] == 0 )      counterIndex = 1;
-							else if( rocMap[ rocId ] == 1 ) counterIndex = 3;
-							else if( rocMap[ rocId ] == 2 ) counterIndex = 4;
-							else if( rocMap[ rocId ] == 3 ) counterIndex = 7;
-						}
-
-						contents.hitMap         ->Fill( rocMap[ rocId ], get4ChipId );
-                                                contents.hitMapChannelId->Fill( rocMap[ rocId ], get4ChanId );
-						
-						contents.hitMapCounter[ counterPlotrMap[counterIndex] ]->Fill( side, 31 - strip );
-						
-
-						// fine & coarse time histograms
-						int fineTs   = mess.getGdpbHitFullTs() % 112;
-						int coarseTs = mess.getGdpbHitFullTs() / 112;
-						contents.fineTimeAll  ->Fill( fineTs   );
-						contents.coarseTimeAll->Fill( coarseTs );
-
-						contents.fineTimeGet4card  [ rocMap[ rocId ] * 4 + cardNr ]->Fill( fineTs );
-						contents.coarseTimeGet4card[ rocMap[ rocId ] * 4 + cardNr ]->Fill( coarseTs );
-						
-						contents.fineTime[ rocMap[ rocId ] * 4 + get4ChanId ]->Fill( fineTs );
-					} 
-					else {
-						LOG( DBG, "some id is out of range: rocId %d    get4ChipId %d    get4ChannelId %d", rocId, get4ChipId, get4ChanId );
-						//mess.PrintMessage( gdpb::msg_print_Prefix | gdpb::msg_print_Data);
-					}
-				} // end of things to do with hit message
-
-				if ( mess.isEpoch2Msg() ){
-				  // JML  Messages every event kills the logs!
-
-
-				  //LOG( INFO, "getEpoch2EpochLost=%d", mess.getEpoch2EpochLost() );
-				  //LOG( INFO, "getEpoch2DataLost=%d", mess.getEpoch2DataLost() );
-				  //LOG( INFO, "getEpoch2Sync=%d", mess.getEpoch2Sync() );
-				  //LOG( INFO, "roc=%08x, chan=%d", mess.getRocNumber(), mess.getGdpbHitChanId());
-
-
-					int rocN = rocMap[mess.getRocNumber()];
-					if ( mess.getEpoch2EpochMissmatch() )
-						contents.nEpochMismatch->Fill( rocN );
-					if ( mess.getEpoch2EpochLost() )
-						contents.nEpochLoss->Fill( rocN );
-					if ( mess.getEpoch2DataLost() )
-						contents.nEpochDataLoss->Fill( rocN );
-					if ( mess.getEpoch2Sync() )
-						contents.nEpochSync->Fill( rocN );
-
-				} // end of things to do with epoch2 message
-
-			} // end message loop
-		} // check if there are messages
-	} // dd->iterate
-	if( trgd ) delete trgd;
-			
-	contents.nHits->Fill( nHits );
-	contents.nHitsVsTofTrgMult->Fill( nHits, TofTrgMult );
-
-	//rtsLogLevel(INFO);    // Nope!  This changes the log level for the server.  Don't do it!!!!!!!
+    resetAllPlots();
 }
 
-void etofBuilder::startrun(daqReader *rdr) {
-  resetAllPlots();
-}
 
-void etofBuilder::stoprun(daqReader *rdr) {
+void etofBuilder::stoprun( daqReader *rdr ) {
   
 }
 
-void etofBuilder::main(int argc, char *argv[])
-{
+
+void etofBuilder::main( int argc, char *argv[] ) {
   etofBuilder me;
-  
 
-  me.Main(argc, argv);
+  me.Main( argc, argv );
 }
 
+
+void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessagesToRead, map<unsigned int, unsigned short>& nDigisPerGdpb ) {
+    LOG( DBG, " # of full messages to read: %d", nFullMessagesToRead );
+
+    for( size_t msgIndex = 0; msgIndex < nFullMessagesToRead; msgIndex++ ) {
+        gdpbv100::FullMessage mess( messageBuffer[ 4 + 2 * msgIndex ], messageBuffer[ 4 + 2 * msgIndex + 1 ] );
+        //mess.PrintMessage( gdpbv100::msg_print_Prefix | gdpbv100::msg_print_Data );
+
+        if( mess.isStarTrigger() ) {
+            unsigned int gdpb = mess.getGdpbGenGdpbId();                    
+            if( mess.getStarTrigMsgIndex() == 0 ) {
+                LOG( DBG, "--> STAR trigger message from AFCK %#06x", gdpb );
+            }
+        }
+        else if( mess.isHitMsg() ) {
+            unsigned int gdpb = mess.getGdpbGenGdpbId();
+            unsigned int chip = mess.getGdpbGenChipId();
+            unsigned int chan = mess.getGdpbHitChanId();
+
+            // remove completely empty messages (128 bits of 0)
+            if( gdpb == 0 && chip == 0 && chan == 0 ) {
+                LOG( DBG, "empty message (?): %lu %lu", messageBuffer[ 4 + 2 * msgIndex ], messageBuffer[ 4 + 2 * msgIndex + 1 ] );
+                continue;
+            }
+
+            // check if the reported chip && channel ids make sense
+            if( gdpbMap.count( gdpb ) > 0 && chip < 256 && chan < 4 ) {
+
+                if( mess.getGdpbHit32DllLck() != 1 ) {
+                    LOG( DBG, " *** warning: DLL Lock = 0 " );
+                }
+
+                unsigned int mappedChannelNumber = hardwareMapChannelNumber( chip, chan );
+
+                LOG( DBG, "--> hit message from AFCK %#06x with mappedChannelNr %d", gdpb, mappedChannelNumber );
+
+                if( gdpbMap.count( gdpb ) ) {
+                    contents.digiMappedChannelNumberPerGdpb[ gdpbMap.at( gdpb ) ]->Fill( mappedChannelNumber );
+                }
+
+                nDigisPerGdpb.at( gdpb ) += 1;
+
+                // calculate time difference to trigger 
+                double triggerTime   = messageBuffer[ 0 ] * gdpbv100::kdClockCycleSizeNs;
+                double digiFullTime  = mess.GetFullTimeNs();
+                double timeToTrigger = ( digiFullTime - triggerTime ) / 1000.;
+
+                contents.digiTimeToTrigger->Fill( timeToTrigger );
+
+
+                unsigned int tot = mess.getGdpbHit32Tot();
+
+                contents.digiTot->Fill( tot );
+
+                if( gdpbMap.count( gdpb ) ) {
+                    contents.digiTotPerGdpb[ gdpbMap.at( gdpb ) ]->Fill( tot);
+                }
+
+
+                // fine & coarse time
+                int fineTs   = mess.getGdpbHitFullTs() % 112;
+                int coarseTs = mess.getGdpbHitFullTs() / 112;
+
+                contents.digiFineTs  ->Fill( fineTs   );
+                contents.digiCoarseTs->Fill( coarseTs );
+            }
+            else {
+                LOG( DBG, "some id is out of range: gdpbId %#06x    chip %d    channel %d", gdpb, chip, chan );
+                //mess.PrintMessage( gdpbv100::msg_print_Prefix | gdpbv100::msg_print_Data );
+            }
+        }
+        else if( mess.isEpochMsg() ) {
+            LOG( DBG, "EPOCH message" );
+            //mess.PrintMessage( gdpbv100::msg_print_Prefix | gdpbv100::msg_print_Data );
+        }
+        else if( mess.isGet4SlCtrMsg() ) {
+            LOG( DBG, "GET4 slow control message" );
+            //mess.PrintMessage( gdpbv100::msg_print_Prefix | gdpbv100::msg_print_Data );
+        }
+        else if( mess.isSysMsg() ) {
+            LOG( DBG, "SYSTEM message" );
+            //mess.PrintMessage( gdpbv100::msg_print_Prefix | gdpbv100::msg_print_Data );
+        }
+    } // message loop
+}
+
+
+unsigned int etofBuilder::hardwareMapElinkGet4Id( const unsigned int& chip ) {
+    return eLinkToGet4.at( chip % nrOfGet4PerGbtx ) + nrOfGet4PerGbtx * ( chip / nrOfGet4PerGbtx );
+}
+
+unsigned int etofBuilder::hardwareMapChannelNumberInFee( const unsigned int& chip, const unsigned int& chan ) {
+    return ( hardwareMapElinkGet4Id( chip ) % nrOfGet4PerFee ) * nrOfChannelsPerGet4 + chan;
+}
+
+unsigned int etofBuilder::hardwareMapFeeNumber( const unsigned int& chip ) {
+    return hardwareMapElinkGet4Id( chip ) / nrOfGet4PerFee;
+}
+
+unsigned int etofBuilder::hardwareMapChannelNumber( const unsigned int& chip, const unsigned int& chan ) {
+    return hardwareMapFeeNumber( chip ) * nrOfChannelsPerFee + get4ToPadi.at( hardwareMapChannelNumberInFee( chip, chan ) );
+}
+
+
+
+
+
+void etofBuilder::processMessages2018( uint64_t* messageBuffer, size_t nFullMessagesToRead, map<unsigned int, unsigned short>& nDigisPerGdpb ) {
+    LOG( DBG, " # of full messages to read: %d", nFullMessagesToRead );
+
+    for( size_t msgIndex = 0; msgIndex < nFullMessagesToRead; msgIndex++ ) {
+        gdpb::FullMessage mess( messageBuffer[4 + 2 * msgIndex], messageBuffer[4 + 2 * msgIndex + 1] );
+        //mess.PrintMessage( gdpb::msg_print_Prefix | gdpb::msg_print_Data);
+
+        if ( mess.isGet4Hit32Msg() ){
+            unsigned int gdpb = mess.getRocNumber();
+            unsigned int chip = mess.getGdpbGenChipId();
+            unsigned int chan = mess.getGdpbHitChanId();
+
+            // check if the reported gdpb, chip and channel ids make sense
+            if( gdpbMap.count( gdpb ) > 0 && chip < 32 && chan < 4 ) {
+                nDigisPerGdpb.at( gdpb ) += 1;
+
+                contents.digiTot->Fill( mess.getGdpbHit32Tot() );
+
+                if( gdpbMap.count( gdpb ) ) {
+                    contents.digiTotPerGdpb[ gdpbMap.at( gdpb ) ]->Fill( mess.getGdpbHit32Tot() );
+                }
+
+                // calculate time difference to trigger 
+                double triggerTime   = static_cast< double > ( messageBuffer[ 0 ] );
+                double digiFullTime  = mess.GetFullTimeNs();
+                double timeToTrigger = ( digiFullTime - triggerTime ) / 1000.;
+
+                contents.digiTimeToTrigger->Fill( timeToTrigger );
+
+
+                // do some mapping from gdpb, chip, chan to module, counter, side ...
+                unsigned int channelNrInCard   = ( chip % nrOfGet4PerFee ) * nrOfChannelsPerGet4 + chan;
+                unsigned int feeNr             = ( chip / nrOfGet4PerFee );
+
+                unsigned int mappedChannelNumber = feeNr * nrOfChannelsPerFee + get4ToPadi[ channelNrInCard ];
+
+                if( gdpbMap.count( gdpb ) ) {
+                    contents.digiMappedChannelNumberPerGdpb[ gdpbMap.at( gdpb ) ]->Fill( mappedChannelNumber );
+                }
+
+                /*
+                unsigned int strip = get4ToPadi.at( channelNrInCard );
+                unsigned int side  = 0;
+
+                if( feeNr % 2 == 1) {
+                    strip = 31 - strip;
+                    side  = 1;
+                }
+
+                unsigned int counterIndex;                      
+                if( feeNr / 2 == 0 ) {
+                    if( gdpbMap.at( gdpb ) == 0 )      counterIndex = 2;
+                    else if( gdpbMap.at( gdpb ) == 1 ) counterIndex = 0;
+                    else if( gdpbMap.at( gdpb ) == 2 ) counterIndex = 5;
+                    else if( gdpbMap.at( gdpb ) == 3 ) counterIndex = 8;
+                    else if( gdpbMap.at( gdpb ) == 4 ) counterIndex = 6;
+                }
+                else {
+                    if( gdpbMap.at( gdpb ) == 0 )      counterIndex = 1;
+                    else if( gdpbMap.at( gdpb ) == 1 ) counterIndex = 3;
+                    else if( gdpbMap.at( gdpb ) == 2 ) counterIndex = 4;
+                    else if( gdpbMap.at( gdpb ) == 3 ) counterIndex = 7;
+                }
+                */
+
+                // fine & coarse time
+                int fineTs   = mess.getGdpbHitFullTs() % 112;
+                int coarseTs = mess.getGdpbHitFullTs() / 112;
+
+                contents.digiFineTs  ->Fill( fineTs   );
+                contents.digiCoarseTs->Fill( coarseTs );
+            }
+            else {
+                LOG( DBG, "some id is out of range: gdpbId %#06x    chip %d    channel %d", gdpb, chip, chan );
+                //mess.PrintMessage( gdpb::msg_print_Prefix | gdpb::msg_print_Data);
+            }
+            
+        } // end of things to do with hit message
+
+        
+        if ( mess.isEpoch2Msg() ){
+            if ( mess.getEpoch2EpochMissmatch() ) {
+                //contents.nEpochMismatch->Fill( gdpbMap.at( mess.getRocNumber() ) );
+            }
+            if ( mess.getEpoch2EpochLost() ) {
+                //contents.nEpochLoss->Fill( gdpbMap.at( mess.getRocNumber() ) );
+            }
+            if ( mess.getEpoch2DataLost() ) {
+                //contents.nEpochDataLoss->Fill( gdpbMap.at( mess.getRocNumber() ) );
+            }
+            if ( mess.getEpoch2Sync() ) {
+                //contents.nEpochSync->Fill( gdpbMap.at( mess.getRocNumber() ) );
+            }
+
+        } // end of things to do with epoch2 message
+
+    } // end message loop
+}
