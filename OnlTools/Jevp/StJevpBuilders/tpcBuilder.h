@@ -16,6 +16,8 @@ class tpcBuilder : public JevpBuilder {
   int nlasers;
   double drift_vel;
 
+  int tpcDataInThisRun;
+
   tpcBuilder(JevpServer *parent=NULL); 
   ~tpcBuilder();
   

@@ -42,7 +42,8 @@
 #include "Jevp/StJevpBuilders/l3Builder.h"
 #include "Jevp/StJevpBuilders/tofBuilder.h"
 #include "Jevp/StJevpBuilders/mtdBuilder.h"
-#include "Jevp/StJevpBuilders/tpxBuilder.h"
+//#include "Jevp/StJevpBuilders/tpxBuilder.h"
+#include "Jevp/StJevpBuilders/tpcBuilder.h"
 #include "Jevp/StJevpBuilders/trgBuilder.h"
 #include "Jevp/StJevpBuilders/upcBuilder.h"
 //#include "Jevp/StJevpBuilders/fgtBuilder.h"
@@ -56,7 +57,7 @@
 #include "Jevp/StJevpBuilders/ppBuilder.h"
 #include "Jevp/StJevpBuilders/fpsBuilder.h"
 #include "Jevp/StJevpBuilders/epdBuilder.h"
-#include "Jevp/StJevpBuilders/itpcBuilder.h"
+//#include "Jevp/StJevpBuilders/itpcBuilder.h"
 #include "Jevp/StJevpBuilders/etofBuilder.h"
 
 #include <RTS/include/SUNRT/clockClass.h>
@@ -681,7 +682,8 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 	builders.Add(new l3Builder(this));
 	builders.Add(new tofBuilder(this));
 	builders.Add(new mtdBuilder(this));
-	builders.Add(new tpxBuilder(this));
+	//builders.Add(new tpxBuilder(this));
+	builders.Add(new tpcBuilder(this));
 	builders.Add(new trgBuilder(this));
 	builders.Add(new upcBuilder(this));
 	//builders.Add(new fgtBuilder(this));
@@ -694,7 +696,7 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 	//builders.Add(new ssdBuilder(this));
 	builders.Add(new ppBuilder(this));
 	builders.Add(new epdBuilder(this));
-	builders.Add(new itpcBuilder(this));
+	//builders.Add(new itpcBuilder(this));
 	builders.Add(new etofBuilder(this));
     }
     else {
