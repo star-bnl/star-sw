@@ -16,10 +16,10 @@ class DSMLayer_LD301_2009;
 using namespace std;
 
 #ifdef __ROOT__
-#include "RTS/trg/include/trgDataDefs.h"
+#include "RTS/trg/include/trgDataDefs_46.h"
 #include "RTS/trg/include/trgConfNum.h"
 #else
-#include "trgDataDefs.h"
+#include "trgDataDefs_46.h"
 #include "trgConfNum.h"
 #endif
 

@@ -13,7 +13,7 @@
 #include <DAQ_READER/daqReader.h>
 #include <DAQ_READER/daq_dta.h>
 
-#include <trgDataDefs.h>
+//#include <trgDataDefs.h>
 #include "trgConfNum.h"
 
 // only the detectors we will use need to be included
