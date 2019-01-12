@@ -5,7 +5,7 @@
 #include "DAQ_READER/daqReader.h"
 #include "DAQ_READER/daq_dta.h"
 #include "DAQ_READER/daq_det.h"
-#include "RTS/trg/include/trgDataDefs.h"
+#include "RTS/trg/include/trgDataDefs_46.h"
 #include "L2UpsilonResult.h"
 #include "Jevp/StJevpPlot/RunStatus.h"
 #include "StEvent/StTriggerData.h"
