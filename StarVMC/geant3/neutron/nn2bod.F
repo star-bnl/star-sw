@@ -35,7 +35,9 @@ C       N,2N REACTION (I.E. MT-24).
 #include "geant321/mpstor.inc"
 #include "geant321/mnutrn.inc"
       DIMENSION D(*),LD(*)
+#if __GNUC__ < 7
       SAVE
+#endif
 C       TRANSFER THE RECOILING COMPOUND NUCLEUS PARAMETERS OUT OF
 C       COMMON RECOIL FOR USE IN THE MOMENTUM BALANCE EQUATIONS
       ERCN=ER

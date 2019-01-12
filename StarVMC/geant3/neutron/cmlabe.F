@@ -33,8 +33,10 @@ C       EXIT PARAMETERS FOR THE RECOIL NUCLEUS.
 #include "geant321/mmass.inc"
 #include "geant321/mupsca.inc"
 #include "geant321/mpstor.inc"
+#if __GNUC__ < 7
       DIMENSION D(*),LD(*)
       SAVE
+#endif
       MT=0
       IF(ID.EQ.2)MT=2
 C       IFLG EQUAL TO ONE IMPLIES LABORATORY COORDINATE SYSTEM

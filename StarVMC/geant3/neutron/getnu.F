@@ -26,7 +26,9 @@ C       THIS ROUTINE SELECTS THE AVERAGE NUMBER OF NEUTRONS
 C       BORN FROM A FISSION REACTION (I.E. NU-BAR)
 #include "geant321/minput.inc"
       DIMENSION D(*),LD(*),C(4)
+#if __GNUC__ < 7
       SAVE
+#endif
       IP=1
       XNU=0.0
       LNU=LD(IP)

@@ -23,7 +23,9 @@ C       THIS ROUTINE SAMPLES AN EXIT ENERGY FROM
 C       AN ENERGY DEPENDENT WATT SPECTRUM
 #include "geant321/minput.inc"
       DIMENSION FSE(*),IFSE(*)
+#if __GNUC__ < 7
       SAVE
+#endif
       IP=1
       NR=IFSE(IP)
       NE=IFSE(IP+1)

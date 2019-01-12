@@ -274,19 +274,30 @@ C
 C
 C     Errors
 C
-  910 WRITE (CHMAIL, 1000) LINAM(NLEV)
+ 910  WRITE (CHMAIL, 1000) LINAM(NLEV)
       CALL GMAIL (0,0)
  1000 FORMAT (' GGDETV : Hanging volume ',A4)
       GO TO 990
-  920 CHMAIL=' GGDETV : Parameter NLVMAX too small'
+#if __GNUC__ < 7
+ 920  CHMAIL=' GGDETV : Parameter NLVMAX too small'
       CALL GMAIL (0,0)
       GO TO 990
-  930 CHMAIL=' GGDETV : Parameter NSKMAX too small'
+ 930  CHMAIL=' GGDETV : Parameter NSKMAX too small'
       CALL GMAIL (0,0)
       GO TO 990
-  940 CHMAIL=' GGDETV : NVMAX (= size of NUMBV) too small'
+ 940  CHMAIL=' GGDETV : NVMAX (= size of NUMBV) too small'
       CALL GMAIL (0,0)
-  990 IEOTRI = 1
-C
-  999 RETURN
+#else 
+ 920  write(CHMAIL,1920)
+ 1920 format(' GGDETV : Parameter NLVMAX too small')
+      GO TO 990
+ 930  write(CHMAIL,1930)
+ 1930 format(' GGDETV : Parameter NSKMAX too small')
+      GO TO 990
+ 940  write(CHMAIL,1940)
+ 1940 format(' GGDETV : NVMAX (= size of NUMBV) too small')
+#endif
+ 990  IEOTRI = 1
+C     
+ 999  RETURN
       END

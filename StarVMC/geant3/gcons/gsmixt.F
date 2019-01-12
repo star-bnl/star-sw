@@ -158,8 +158,13 @@ C
 C
       GO TO 99
 C
+#if __GNUC__ < 7
   90  CHMAIL=' ***** GSMIXT ERROR. MIXTURE WITH NO COMPONENTS'
       CALL GMAIL(0,0)
+#else
+  90  write(CHMAIL,1090) 
+ 1090 format(' ***** GSMIXT ERROR. MIXTURE WITH NO COMPONENTS')
+#endif
 C
   99  RETURN
 10000 FORMAT(' *** GSMIXT ***: Warning, material redefinition:')

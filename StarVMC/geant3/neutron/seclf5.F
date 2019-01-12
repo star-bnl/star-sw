@@ -26,7 +26,9 @@ C       THIS ROUTINE SAMPLES AN EXIT ENERGY FROM
 C       A GENERAL EVAPORATION SPECTRUM
 #include "geant321/minput.inc"
       DIMENSION FSE(*),IFSE(*)
+#if __GNUC__ < 7
       SAVE
+#endif
 C       DETERMINE THETA
       IP=1
       NR=IFSE(IP)

@@ -26,7 +26,9 @@ C        THIS ROUTINE SAMPLES AN EXIT ENERGY FROM
 C        A TABULATED DISTRIBUTION
 #include "geant321/minput.inc"
       DIMENSION FSE(*),IFSE(*)
+#if __GNUC__ < 7
       SAVE
+#endif
       C=0.
       IP=1
       NRE=IFSE(IP)

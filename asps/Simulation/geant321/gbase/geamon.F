@@ -81,7 +81,9 @@ C.
             ENDIF
          ENDIF
 *
+#if __GNUC__ < 7
          CALL UMLOG('GEANTMON',CHMAIL(1:LNBLNK(CHMAIL)))
+#endif
 *
       ENDIF
 *

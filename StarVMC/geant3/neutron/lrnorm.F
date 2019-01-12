@@ -29,7 +29,9 @@ C       CHARGED PARTICLE EMISSION
 #include "geant321/mmicab.inc"
       DIMENSION D(*),LD(*),IDICTS(NNR,NNUC),LDICT(NNR,NNUC),
      +LR(NQ,NNUC)
+#if __GNUC__ < 7
       SAVE
+#endif
 C       INITIALIZE VARIABLES USED IN THE CALCULATION
       SUM=0.0
       SUM4=SIGNIS

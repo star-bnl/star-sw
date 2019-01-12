@@ -204,9 +204,13 @@ C
          DO 100 NHP1=1,NHM,NH1
             NHP2=NHP1+NH1-1
             NHP2=MIN(NHP2,NHM)
+#if __GNUC__ < 7
             WRITE(CHMAIL(IP0+1:),4000)(HITS(L),L=NHP1,NHP2)
-            CALL GMAIL(0,0)
+           CALL GMAIL(0,0)
             CHMAIL(1:IP0)=' '
+#else
+            WRITE(CHMAIL,4000)(HITS(L),L=NHP1,NHP2)
+#endif
  100     CONTINUE
       ENDIF
 C

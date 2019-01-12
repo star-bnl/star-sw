@@ -106,13 +106,17 @@ C.
             MECA = CHNMEC(IMEC)
             CALL GFTMAT(IMATE,IPART,MECA,KDIM,TKIN,VALUE,PCUT,IXST)
             IF(IXST.EQ.0) GO TO 60
+#if __GNUC__ < 7
             CHMAIL='1'
             CALL GMAIL(0,0)
+#endif
             WRITE(CHMAIL,10100)(IQ(JMA+I),I=1,5),MECA,(IQ(JPA+J),J=1,5)
+#if __GNUC__ < 7
             CALL GMAIL(0,0)
             CHMAIL(31:)='-----------------------------------------'
             CALL GMAIL(0,1)
             CHMAIL=' '
+#endif
             DO 30  K=1,5
    30       CALL GEVKEV(PCUT(K),CU(K),KU(K))
             WRITE(CHMAIL,10200) (CU(K),KU(K),K=1,5)
@@ -174,13 +178,17 @@ C.
 * *** print total cross section
       IF (MECAN.EQ.'ALL') THEN
          MECA = 'SIGT'
+#if __GNUC__ < 7
          CHMAIL='1'
          CALL GMAIL(0,0)
+#endif
          WRITE(CHMAIL,10100)(IQ(JMA+I),I=1,5),MECA,(IQ(JPA+J),J=1,5)
+#if __GNUC__ < 7
          CALL GMAIL(0,0)
          CHMAIL(31:)='-----------------------------------------'
          CALL GMAIL(0,1)
          CHMAIL=' '
+#endif
          DO 70  K=1,5
    70    CALL GEVKEV(PCUT(K),CU(K),KU(K))
          WRITE(CHMAIL,10200) (CU(K),KU(K),K=1,5)

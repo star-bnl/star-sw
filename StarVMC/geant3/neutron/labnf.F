@@ -35,7 +35,9 @@ C       ENERGY AND DIRECTION COSINES EQUAL TO ZERO.
 #include "geant321/mmass.inc"
 #include "geant321/mpstor.inc"
       DIMENSION D(*),LD(*),FM(*)
+#if __GNUC__ < 7
       SAVE
+#endif
       MT=18
 C       CALCULATE THE NEUTRON EXIT DIRECTIONAL COSINES
       POX = 0.0

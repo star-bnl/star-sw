@@ -31,7 +31,9 @@ C       IN MEDIA NMED
 C
       DIMENSION D(*),LD(*),KM(*),RHO(*),IN(*),IDICTS(NNR,NNUC),
      +          LDICT(NNR,NNUC)
+#if __GNUC__ < 7
       SAVE
+#endif
 C
       R=FLTRNF(0)
       NOA=0

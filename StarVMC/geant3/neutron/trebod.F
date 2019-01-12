@@ -35,7 +35,9 @@ C       THE COLLISION PRODUCTS AND STORES THEM IN THE RECOIL BANK.
 #include "geant321/mmass.inc"
 #include "geant321/mpstor.inc"
       DIMENSION D(*),LD(*),ER1(3)
+#if __GNUC__ < 7
       SAVE
+#endif
 C loop over no. of emmitted particles CZ July 30,1992
       NPN = 1
       IF(MT.EQ.112) NPN = 2

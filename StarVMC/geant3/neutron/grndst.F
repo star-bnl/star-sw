@@ -32,7 +32,9 @@ C       THE COLLISION PRODUCTS AND STORES THEM IN THE RECOIL BANK.
 #include "geant321/mmass.inc"
 #include "geant321/mpstor.inc"
       DIMENSION D(*),LD(*)
+#if __GNUC__ < 7
       SAVE
+#endif
       NPN = 1
       IF(MT.EQ.108) NPN = 2
       IF(MT.EQ.109) NPN = 3

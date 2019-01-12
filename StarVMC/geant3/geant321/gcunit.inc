@@ -24,10 +24,10 @@
 #if !defined(CERNLIB_INCLUDE)
       COMMON/GCUNIT/LIN,LOUT,NUNITS,LUNITS(5)
       INTEGER LIN,LOUT,NUNITS,LUNITS
-      COMMON/GCMAIL/CHMAIL
-#if _GNUC_ >= 7
+#if __GNUC__ >= 7
       integer chmail /6/
 #else
+      COMMON/GCMAIL/CHMAIL
       CHARACTER*132 CHMAIL
 #endif
 C

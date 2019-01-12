@@ -36,8 +36,13 @@ C--------------------------------------------------------------------
       KZ2  = NINT (Z2)
       N1= KA1 - KZ1
       N2= KA2 - KZ2
+#if __GNUC__ < 7
       IF (N1 .LE. 0) STOP 105
       IF (N2 .LE. 0) STOP 106
+#else
+      IF (N1 .LE. 0) STOP
+      IF (N2 .LE. 0) STOP
+#endif
       IZZ1 = NINT ( WAPS (KA1,1) )
       IZZ2 = NINT ( WAPS (KA2,1) )
       IF ( KZ1 .LT. IZZ1 .OR. KZ1 .GT. IZZ1 + 9 ) THEN

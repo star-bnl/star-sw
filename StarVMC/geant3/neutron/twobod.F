@@ -32,7 +32,9 @@ C       THE COLLISION PRODUCTS AND STORES THEM IN THE RECOIL BANK.
 #include "geant321/mmass.inc"
 #include "geant321/mpstor.inc"
       DIMENSION D(*),LD(*)
+#if __GNUC__ < 7
       SAVE
+#endif
       PRXO = 0.0
       PRYO = 0.0
       PRZO = 0.0

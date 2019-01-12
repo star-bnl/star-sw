@@ -22,7 +22,11 @@
       COMMON/GCUNIT/LIN,LOUT,NUNITS,LUNITS(5)
       INTEGER LIN,LOUT,NUNITS,LUNITS
       COMMON/GCMAIL/CHMAIL
+#if __GNUC__ < 7
       CHARACTER*132 CHMAIL
+#else
+      integer chmail/6/
+#endif
 C
 #endif
 *

@@ -109,6 +109,7 @@ C.
 *
 * *** Print  bin meaning
       IF (IDM.GE.0) THEN
+#if __GNUC__ < 7
          CHMAIL='1'
          CALL GMAIL(0,0)
          CHMAIL=' '
@@ -116,6 +117,7 @@ C.
          CALL GMAIL(0,0)
          CHMAIL(31:)='--------------------------'
          CALL GMAIL(0,1)
+#endif
          NROW = (KDIM-1)/NCOL + 1
          DO 20  IR=1,NROW
             DO 10  IC=1,NCOL

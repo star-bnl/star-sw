@@ -27,7 +27,9 @@ C only p = 0, D = 7, T = 8, He3 = 9, alpha=10
      +                                0 , 7 , 8 , -1,
      +                               -1 ,-1 , 9 , 10/
       LOGICAL NOP
+#if __GNUC__ < 7
       SAVE
+#endif
 C first check, if ZEBRA still in order
       IF(LD(LMAG1).NE.NMAGIC.OR.LD(LMAG2).NE.NMAGIC) THEN
          WRITE(*,*) ' CALOR: ZEBRA banks screwed up --> STOP'

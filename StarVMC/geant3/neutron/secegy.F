@@ -23,7 +23,9 @@ C       THIS ROUTINE SELECTS A PARTIAL ENERGY DISTRIBUTION
 C       TO SAMPLE THE EXIT ENERGY FROM
 #include "geant321/minput.inc"
       DIMENSION FSE(*),IFSE(*)
+#if __GNUC__ < 7
       SAVE
+#endif
       EX = 0.0
       IPP=1
       N=1

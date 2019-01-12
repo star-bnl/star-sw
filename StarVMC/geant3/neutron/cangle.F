@@ -21,7 +21,9 @@
       SUBROUTINE CANGLE(D,LD,E,FM,LEN)
 C       THIS ROUTINE SELECTS THE SCATTERING ANGLE AT A COLLISION
       DIMENSION D(*),LD(*)
+#if __GNUC__ < 7
       SAVE
+#endif
       I=0
       IPP=1
       NR=LD(IPP)

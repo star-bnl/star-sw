@@ -31,7 +31,9 @@ C       EXIT PARAMETRS FOR THE RECOIL NUCLEUS.
 #include "geant321/mmass.inc"
 #include "geant321/mpstor.inc"
       DIMENSION D(*),LD(*),FM(*)
+#if __GNUC__ < 7
       SAVE
+#endif
       MT=0
       IF(ID.EQ.8)MT=16
       IF(ID.EQ.9)MT=17

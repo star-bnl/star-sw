@@ -33,6 +33,7 @@ C.
 C.
 C.    ------------------------------------------------------------------
 C.
+#if __GNUC__ < 7
       DO 10 I=1,LINBEF
         WRITE (LOUT,1000)
    10 CONTINUE
@@ -47,4 +48,5 @@ C.
    40 CONTINUE
  1000 FORMAT (1X)
  2000 FORMAT (A)
+#endif
       END

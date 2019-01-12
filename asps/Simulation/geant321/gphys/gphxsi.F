@@ -186,10 +186,17 @@ c
                   ELSEIF(CHGROU.EQ.'3') THEN
                      EUP(I) = ESHL(4)
                   ELSE
+#if __GNUC__ < 7
                      CHMAIL = ' GPHXSI Error: Inconsistent data for L '
      +               //'shell.  Maximum coded L3. Found shell '
      +               //'name: '//CRNGUP(I,IZ)
                      CALL GMAIL(0,0)
+#else
+                     write(CHMAIL,12345) CRNGUP(I,IZ)
+12345                format(' GPHXSI Error: Inconsistent data for L '
+     +                    //'shell.  Maximum coded L3. Found shell '
+     +                    //'name: a')
+#endif
                   ENDIF
                ELSEIF(CHSHEL.EQ.'M') THEN
                   IF(CHGROU.EQ.'1') THEN
@@ -203,10 +210,17 @@ c
                   ELSEIF(CHGROU.EQ.'5') THEN
                      EUP(I) = ESHL(9)
                   ELSE
+#if __GNUC__ < 7
                      CHMAIL = ' GPHXSI Error: Inconsistent data for M '
      +               //'shell.  Maximum coded M5. Found shell '
      +               //'name: '//CRNGUP(I,IZ)
                      CALL GMAIL(0,0)
+#else
+                     write(CHMAIL,12346) CRNGUP(I,IZ)
+12346 format(' GPHXSI Error: Inconsistent data for M '
+     +               //'shell.  Maximum coded M5. Found shell '
+     +               //'name: a')
+#endif
                   ENDIF
                ELSEIF(CHSHEL.EQ.'N') THEN
                   IF(CHGROU.EQ.'1') THEN
@@ -224,10 +238,12 @@ c
                   ELSEIF(CHGROU.EQ.'7') THEN
                      EUP(I) = ESHL(16)
                   ELSE
+#if __GNUC__ < 7
                      CHMAIL = ' GPHXSI Error: Inconsistent data for N '
      +               //'shell. Maximum coded N7. Found shell name:'
      +               //' '//CRNGUP(I,IZ)
                      CALL GMAIL(0,0)
+#endif
                   ENDIF
                ELSEIF(CHSHEL.EQ.'O') THEN
                   IF(CHGROU.EQ.'1') THEN
@@ -241,10 +257,12 @@ c
                   ELSEIF(CHGROU.EQ.'5') THEN
                      EUP(I) = ESHL(21)
                   ELSE
+#if __GNUC__ < 7
                      CHMAIL = ' GPHXSI Error: Inconsistent data for O '
      +               //'shell.  Maximum code O5. Found shell name:'
      +               //' '//CRNGUP(I,IZ)
                      CALL GMAIL(0,0)
+#endif
                   ENDIF
                ELSEIF(CHSHEL.EQ.'P') THEN
                   IF(CHGROU.EQ.'1') THEN
@@ -254,10 +272,12 @@ c
                   ELSEIF(CHGROU.EQ.'3') THEN
                      EUP(I) = ESHL(24)
                   ELSE
+#if __GNUC__ < 7
                      CHMAIL = ' GPHXSI Error: Inconsistent data for P '
      +               //'shell.  Maximum coded P3. Found shell '
      +               //'name: '//CRNGUP(I,IZ)
                      CALL GMAIL(0,0)
+#endif
                   ENDIF
                ELSE
                   READ(CRNGUP(I,IZ),'(F6.0)') EUP(I)
@@ -266,7 +286,11 @@ c
                   WRITE(CHMAIL,'(A44,I5)') ' GPHXSI Error: Upper limit '
      +            //'= 0. Interval:',I
                   CALL GMAIL(0,0)
+#if __GNUC__ < 7
                   STOP 14
+#else
+                  stop
+#endif
                ENDIF
    90       CONTINUE
   100       CONTINUE
@@ -359,9 +383,13 @@ c                  Q(JPHFN+KFN) = TMP(J,I)*Q(JPHXS+1+2*NZ+N)
                   IF(WS(4*NZ+I).LE.AMINV) L = L+1
   210          CONTINUE
                IF(L.LT.1) THEN
+#if __GNUC__ < 7
                   CHMAIL = ' GPHXSI Error: Zero intervals found.'
                   CALL GMAIL(0,0)
                   STOP 16
+#else
+                  stop
+#endif
                ENDIF
 * Copy to JPHXS bank
                Q(IPIMAX) = Q(IPIMAX)+1.
@@ -418,7 +446,9 @@ c                     QS = QS+WS(I)*WS(IPOINT)
          ENDIF
       ELSEIF(Z.GT.100.) THEN
 * Just in case we got called
+#if __GNUC__ < 7
          CHMAIL = ' GPHXSI Error: Z > 100. No Sandia parameters. '
          CALL GMAIL(0,0)
+#endif
       ENDIF
       END
