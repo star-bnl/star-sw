@@ -3,7 +3,7 @@
 
 #include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
-#include "RTS/trg/include/trgDataDefs.h"
+//#include "RTS/trg/include/trgDataDefs.h"
 
 //#include "RunStatus.h"
 
