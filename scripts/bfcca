@@ -611,7 +611,7 @@ if ( ! open(FO,">$PWD/$JOB_ID.csh") ){
 	    print FO
 		"echo \"$PRGM :: Calibration pass is starting on \`/bin/date\`\"\n",
 		"echo \"\"\n",
-		"$RPROG -b -q '$BFC(10000,\"$chainopt\",\"$CINPUTFILE\")'\n",
+		"$RPROG -b -q '$BFC(50000,\"$chainopt\",\"$CINPUTFILE\")'\n",
 		"echo \"$PRGM :: Calibration is done on \`/bin/date\`\"\n";
 	} else {
 	    # This happened in 2005. The disk would be present, the file seen
