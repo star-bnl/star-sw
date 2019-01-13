@@ -1,7 +1,7 @@
 /*
-   cd ~/work/Tpc/Current/2018
-   root.exe -b -q  lmysql.C 'MakeTpcAvgPowerSupply.C+(2018)' >& MakeTpcAvgPowerSupply.`date +%m%d%y`.log &
-   mv MakeTpcAvgPowerSupply.2018.root MakeTpcAvgPowerSupply.2018.`date +%m%d%y`.root
+   cd ~/work/Tpc/Current/2019
+   root.exe -b -q  lmysql.C 'MakeTpcAvgPowerSupply.C+(2019)' >& MakeTpcAvgPowerSupply.`date +%m%d%y`.log &
+   mv MakeTpcAvgPowerSupply.2019.root MakeTpcAvgPowerSupply.2019.`date +%m%d%y`.root
    put2DB.pl 'StarDb/Calibrations/tpc/TpcAvg*.root' | tee put2DB.`date +%m%d%y`.log
    put2DB.pl 'StarDb/Calibrations/tpc/TpcAvg*.root'
    root.exe  'Db.C("StarDb/Calibrations/tpc/TpcAvgPowerSupply")'
@@ -283,7 +283,7 @@ Int_t LastProcessedRun(TpcAvgPowerSupply_st *avgI, Double_t AcCharge[2]) {
   return LastRun;
 }
 //________________________________________________________________________________
-void MakeTpcAvgPowerSupply(Int_t year = 2017) {
+void MakeTpcAvgPowerSupply(Int_t year = 2019) {
   TDatime d(10000*(year-1) + 1201,0);
   Int_t u95 = d.Convert();
   TDatime nextyear(10000*(year+1) + 101, 0);
