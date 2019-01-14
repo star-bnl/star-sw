@@ -2,9 +2,9 @@
 <job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false">
         <command>
   cd ${SUBMITTINGDIRECTORY}
-  setenv NODEBUG yes
+#  setenv NODEBUG yes
   FPE_OFF
-  setup 64b
+#  setup 64b
   set run = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
   set dir = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
   set output  = LaserPlots.${run}.root
