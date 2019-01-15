@@ -207,6 +207,7 @@ int getConfNumForNode(int node);
 UINT16 getTrgDetRequiredMask(char *node, int board=-1);
 
 //void writeRCCNF(char *fn, STAR_CFG *cfg);   // write rc def file...
+void writeRCCNF(char *fn, SimpleXmlDoc *xml);
 
 //bool node_inrun(int node, STAR_CFG *cfg);
 //bool system_inrun(int sys, STAR_CFG *cfg);
