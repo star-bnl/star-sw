@@ -7,10 +7,10 @@
 #define kZEROCURV (kZEROHZ*kZEROPTI) 	//minimal/zero curvature
 #define kBIGPT    10                    //Pt when energy loss ignored
 class AliHLTTPCCATrackParam;
-class StTpcHit;
+class StHit;
 struct SeedHit_t {
   Int_t padrow, status, taken, track_key ; //"m" for modified
-  const StTpcHit  *hit;
+  const StHit  *hit;
   Int_t      Id; // from CA
 };
 class StxNodePars {

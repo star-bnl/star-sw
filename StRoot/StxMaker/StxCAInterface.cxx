@@ -51,16 +51,10 @@ void StxCAInterface::MakeHits() {
     StTpcSectorHitCollection* sectorCollection = TpcHitCollection->sector(i);
     if (sectorCollection) {
       Int_t numberOfPadrows = sectorCollection->numberOfPadrows();
-#if 1 /* Sti Convention */
       Int_t sector = i + 1;
       Double_t beta = (sector <= 12) ? (60 - 30*(sector - 1)) : (120 + 30 *(sector - 13));
       Double_t cb   = TMath::Cos(TMath::DegToRad()*beta);
       Double_t sb   = TMath::Sin(TMath::DegToRad()*beta);
-#else
-      AliHLTTPCCAParam &SlicePar = fCaParam[i];
-      Double_t cb   = SlicePar.CosAlpha();
-      Double_t sb   = SlicePar.SinAlpha();
-#endif
       for (int j = 0; j< numberOfPadrows; j++) {
 	StTpcPadrowHitCollection *rowCollection = sectorCollection->padrow(j);
 	if (rowCollection) {
@@ -74,10 +68,6 @@ void StxCAInterface::MakeHits() {
 	    //	    Int_t Id = fCaHits.size();
 	    Int_t Id = fSeedHits.size();
 	    StThreeVectorD glob(tpcHit->position());
-	    //  StTpcCoordinateTransform tran(gStTpcDb);
-	    //  StTpcLocalSectorCoordinate loc;
-	    //	tran(glob,loc,tpcHit->sector(),tpcHit->padrow());
-	    
 	    // obtain seed Hit
 	    SeedHit_t hitc;
 	    hitc.padrow = tpcHit->padrow();
@@ -90,10 +80,6 @@ void StxCAInterface::MakeHits() {
 	    //yf      if (  hit->timesUsed()) 	continue;//VP
 	    // convert to CA Hit
 	    AliHLTTPCCAGBHit caHit;
-// 	    caHit.SetX( loc.position().x() );
-// 	    //	    caHit.SetX( loc.position() ); // take position of the row
-// 	    caHit.SetY( - loc.position().y() );
-// 	    caHit.SetZ( - loc.position().z() );
 	    Double_t xL =  cb*glob.x() + sb*glob.y();
 	    Double_t yL = -sb*glob.x() + cb*glob.y();
 	    Double_t zL =                  glob.z();
@@ -113,6 +99,81 @@ void StxCAInterface::MakeHits() {
 	}
       }
     }
+#if 0
+    // BToF hits
+    StBTofCollection *bToFcol = pEvent->btofCollection();
+    if (!bToFcol) {
+      LOG_ERROR <<"\StxCAInterface::MakeHits:\tNo StBTofCollection"<<endm;
+      continue;
+    }
+    StSPtrVecBTofHit& vec = bToFcol->tofHits();
+    Int_t nBToFHit=0;
+    for(UInt_t j=0; j<vec.size(); j++)	{
+    StBTofHit *aHit = vec[j];
+#if 0
+    if(!aHit)   throw runtime_error("StiBTofHitLoader::loadHits(StEvent*) -E- NULL hit in container");
+#else
+    assert(aHit);
+#endif
+    if (_debug) {
+      LOG_INFO <<Form("hit tray: %i module: %i cell: %i\n",aHit->tray(), aHit->module(), aHit->cell()) << endm;
+    }
+    if (aHit->tray()   <= 0 || aHit->tray()   > StBTofHit::kNTray   ||
+	aHit->module() <= 0 || aHit->module() > StBTofHit::kNModule ||
+	aHit->cell()   <= 0 || aHit->cell()   > StBTofHit::kNCell) continue;
+    Int_t stiTray = aHit->tray();
+    if (aHit->tray() > 60) stiTray = 176 - aHit->tray();
+    stiTray = (stiTray+59)%60 + 1;
+    detector= _detector->getDetector(0,stiTray-1);
+#if 0
+    if(!detector)       throw runtime_error("StiBTofHitLoader::loadHits(StEvent*) -E- NULL detector pointer");
+#else
+    assert(detector);
+#endif
+    if (_debug) {
+      LOG_INFO <<"add hit to detector:\t"<<detector->getName()<<endm;
+    }
+    if (_debug) {
+      Double_t angle    = detector->getPlacement()->getNormalRefAngle();
+      Double_t radius   = detector->getPlacement()->getNormalRadius();
+      Double_t zcenter  = detector->getPlacement()->getZcenter();
+      Double_t halfDepth = detector->getShape()->getHalfDepth();
+      Double_t halfWidth = detector->getShape()->getHalfWidth();
+      Double_t thick     = detector->getShape()->getThickness();
+      LOG_INFO << " detector info " << *detector << endm;
+      LOG_INFO << " radius = "<< radius << " angle = " << angle << " zCenter = " << zcenter << endm;
+      LOG_INFO << " depth = " << halfDepth << " Width = " << halfWidth << " thickness= " << thick << endm; 
+      LOG_INFO << " key 1 : " << detector->getKey(1) <<" key 2 : " << detector->getKey(2) << endm; 
+    }
+    StiHit *stiHit=_hitFactory->getInstance();
+#if 0
+    if(!stiHit) throw runtime_error("StiBTofHitLoader::loadHits(StEvent*) -E- stiHit==0");
+#else
+    assert(stiHit);
+#endif
+    stiHit->reset();
+    TGeoHMatrix *rot = (TGeoHMatrix *) StiBTofDetectorBuilder::RotMatrices()->FindObject(Form("BTof_Tray_%i_Module_%i",aHit->tray(),aHit->module())); 
+    assert(rot);
+    const Float_t *xyzLF = aHit->position().xyz();
+    Double_t xyzL[3] = {xyzLF[0], xyzLF[1], xyzLF[2]};
+    Double_t xyzG[3];
+    rot->LocalToMaster(xyzL,xyzG);
+    stiHit->setGlobal(detector,aHit,xyzG[0],xyzG[1],xyzG[2],aHit->charge());
+#if 0
+    stiHit->set(detector, aHit, aHit->charge(),
+		      radius+aHit->position().x(), yoffset+aHit->position().y(), zcenter+aHit->position().z());
+#endif    
+    _hitContainer->add(stiHit);
+    if (_debug) {
+      LOG_INFO <<" nBToFHit = "<<nBToFHit
+	       <<" Tray = "<<aHit->tray()<<" Module = "<<aHit->module()<<" Cell = "<<aHit->cell()
+	       <<" x = "<<aHit->position().x()<<" y = "<<aHit->position().y()<<" z = "<<aHit->position().z()<<endm;
+    }
+    //done loop over hits
+    nBToFHit++;
+  }
+  LOG_INFO <<"StiBTofHitLoader:loadHits -I- Loaded "<<nBToFHit<<" BTof hits."<<endm;
+#endif /* BTOF */  
   }
 } // void StxCAInterface::MakeHits()
 //________________________________________________________________________________

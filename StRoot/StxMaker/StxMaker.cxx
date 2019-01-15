@@ -153,7 +153,8 @@ Int_t StxMaker::Make(){
     for ( Int_t iHit = 0; iHit < NHits; iHit++ ){ 
       const Int_t index = StxCAInterface::Instance().GetTracker()->TrackHit( tr.FirstHitRef() + iHit );
       const Int_t hId   = StxCAInterface::Instance().GetTracker()->Hit( index ).ID();
-      const StTpcHit *tpcHit = fSeedHits[hId].hit;
+      const StHit    *hit    = fSeedHits[hId].hit;
+      const StTpcHit *tpcHit = dynamic_cast<const StTpcHit *>(hit);
       if (! tpcHit) {
 	if (Debug()) {LOG_WARN << "StxMaker::Make pointer to StTpcHit is zero" << endm;}
 	continue;
@@ -395,7 +396,9 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
   for ( Int_t iHit = 0; iHit < NHits; iHit++ ){ 
     const Int_t index = StxCAInterface::Instance().GetTracker()->TrackHit( tr.FirstHitRef() + iHit );
     const Int_t hId   = StxCAInterface::Instance().GetTracker()->Hit( index ).ID();
-    const StTpcHit *tpcHit = fSeedHits[hId].hit;
+    const StHit    *hit    = fSeedHits[hId].hit;
+    const StTpcHit *tpcHit = dynamic_cast<const StTpcHit *>(hit);
+    if (! tpcHit) continue;
 #ifndef __TPC3D__ /* ! __TPC3D__ */
     genfit::PlanarMeasurement* measurement = new StTpcPlanarMeasurement(tpcHit, nullptr);
 #else /* __TPC3D__ */
