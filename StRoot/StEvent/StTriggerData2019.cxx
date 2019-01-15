@@ -19,7 +19,7 @@
 #include <assert.h>
 #include <iostream>
 #include "StTriggerData2019.h"
-
+#include "TBuffer.h"
 ClassImp(StTriggerData2019)
 
 StTriggerData2019::StTriggerData2019():mData()
