@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: genDst.C,v 1.3 2018/03/16 18:41:14 genevb Exp $
+// $Id: genDst.C,v 1.4 2019/01/15 17:24:29 genevb Exp $
 // Author: G. Van Buren (BNL)
 //
 // Description:
@@ -63,13 +63,17 @@ void loadLibsVF()
 void loadLibsPico()
 {
 
+  // EMCs and FMS need DB+converters
   gSystem->Load("StEmcRawMaker");
   gSystem->Load("StEmcADCtoEMaker");
   gSystem->Load("StPreEclMaker");
   gSystem->Load("StEpcMaker");
   gSystem->Load("StEEmcDbMaker");
+  gSystem->Load("StFmsUtil");
+  gSystem->Load("StFmsDbMaker");
   gSystem->Load("StTriggerUtilities");
 
+  // The PicoDst
   gSystem->Load("libStPicoEvent");
   gSystem->Load("libStPicoDstMaker");
 }
@@ -201,6 +205,9 @@ void genDst(unsigned int First,
     adc2e->saveAllStEvent(true);
     StPreEclMaker* pre_ecl = new StPreEclMaker();
     StEpcMaker* epc = new StEpcMaker();
+
+    // FMS
+    StFmsDbMaker* fmsDb = new StFmsDbMaker("fmsDb");
 
     // Trigger simulator
     StTriggerSimuMaker* trigSimu = new StTriggerSimuMaker;
@@ -354,6 +361,9 @@ void genDst(unsigned int Last,
 /////////////////////////////////////////////////////////////////////////////
 //
 // $Log: genDst.C,v $
+// Revision 1.4  2019/01/15 17:24:29  genevb
+// Added FMS
+//
 // Revision 1.3  2018/03/16 18:41:14  genevb
 // Add BTof-matching
 //
