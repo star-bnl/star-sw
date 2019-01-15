@@ -356,8 +356,8 @@ static const StarDetectorMap_t Detectors[] = {
   {kSvtId                ,"svt","SVTT","svtd","g2t_svt_hit","g2t_svt_hit","StSvtHitCollection"},
   {kSvtId                ,"svt","SVTT","SVTD","g2t_svt_hit","g2t_svt_hit","StSvtHitCollection"},
   {kTofId     		 ,"tfr","BTOF","BRSG","g2t_ctf_hit","g2t_tfr_hit","StBTofCollection"},      // the sensitive gas layer in the TOFr module
-  {kTofId     		 ,"tof","BTOF","BCSB","g2t_ctf_hit","g2t_tof_hit","StBTofCollection"},      // the active trigger scintillator SLAB for tof
-  {kUnknownId     	 ,"gmt","BTOF","GEMG","g2t_ctf_hit","g2t_gmt_hit",""},                      // the active trigger scintillator SLAB for ctb
+  {kTofId     		 ,"tof","BTOF","BCSB","g2t_ctf_hit","g2t_tof_hit","StBTofCollection"},      // the sensitive gas layer in the TOFr module
+  {kGmtId       	 ,"gmt","BTOF","GEMG","g2t_ctf_hit","g2t_gmt_hit",""},                      // the sensitive gas layer in the GMT  module
   {kTpcId     		 ,"tpc","TPCE","tpad","g2t_tpc_hit","g2t_tpc_hit","StTpcHitCollection"},
   {kTpcId     		 ,"tpc","TPCE","TPAD","g2t_tpc_hit","g2t_tpc_hit","StTpcHitCollection"},
   {kUnknownId            ,"vpd","VPDD","VRAD","g2t_vpd_hit","g2t_vpd_hit",""},                      // light-producing layer (scintillator or quartz) 

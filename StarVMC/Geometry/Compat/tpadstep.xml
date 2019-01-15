@@ -1,0 +1,5 @@
+<Document name="tpadstep.xml">
+<Export language="Mortran">
+<Import file="pams/geometry/tpcegeo/tpadstep.g" verbatim="true" />
+</Export>
+</Document>
