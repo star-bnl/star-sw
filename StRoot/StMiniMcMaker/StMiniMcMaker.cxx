@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.49 2018/01/03 18:18:10 genevb Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.50 2019/01/15 19:24:33 genevb Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -131,7 +131,7 @@ StMiniMcMaker::StMiniMcMaker(const Char_t *name, const Char_t *title)
   mGhost(kTRUE), 
   mMinPt(0),mMaxPt(99999),
   mNSplit(0),mNRc(0),mNGhost(0),mNContam(0),
-  mNMatched(0),mNMatGlob(0)
+  mNMatched(0),mNMatGlob(0), mMainVtx(-1)
     
 {
     
@@ -1269,7 +1269,7 @@ void StMiniMcMaker::fillTrackPairInfo(	StMiniMcPair* miniMcPair,
   //
   StContamPair* contamPair = dynamic_cast<StContamPair*>(miniMcPair);
   if(contamPair){
-    const StMcTrack*    mcTParent = mcTrack->parent();
+    const StMcTrack*    mcTParent = (mcTrack ? mcTrack->parent() : 0);
     
     if (mcTParent){
       contamPair->setParentGeantId(mcTrack->parent()->geantId());
@@ -1543,8 +1543,8 @@ void StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
   // - Store the Soft Id of the highest tower
   // - Store the energy of StEmcPoint related to this track, if any.
   StEmcPosition emcPos;
-  StThreeVectorD *pos = new StThreeVectorD(0,0,0);
-  StThreeVectorD *mom = new StThreeVectorD(0,0,0);
+  StThreeVectorD pos(0,0,0);
+  StThreeVectorD mom(0,0,0);
   double magField = mRcEvent->runInfo()->magneticField();
 
   if (Debug()>2) {
@@ -1563,18 +1563,18 @@ void StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
   bool projOk;
   
   if (prTrack) {
-    projOk = emcPos.trackOnEmc(pos,mom,prTrack,magField*kilogauss/tesla);
+    projOk = emcPos.trackOnEmc(&pos,&mom,prTrack,magField*kilogauss/tesla);
   }
   else {
-    projOk = emcPos.trackOnEmc(pos,mom,glTrack,magField*kilogauss/tesla);
+    projOk = emcPos.trackOnEmc(&pos,&mom,glTrack,magField*kilogauss/tesla);
   }
   if (projOk) {
     // Track hits BEMC.  Find the 9 closest towers around the projection.
     // Sort them according to energy.  Keep the highest 3.
-    int softIdProj;
+    int softIdProj(-1);
     std::vector<StEmcRawHit*> towersOfTrack;
     StEmcGeom* emcGeom = StEmcGeom::getEmcGeom("bemc");
-    emcGeom->getId(pos->phi(),pos->pseudoRapidity(),softIdProj); // softId range [1,4800];
+    emcGeom->getId(pos.phi(),pos.pseudoRapidity(),softIdProj); // softId range [1,4800];
     for(int idEta=-1; idEta<2; ++idEta) {
       for (int idPhi=-1; idPhi<2; ++idPhi) {
 	int towerId = emcPos.getNextTowerId(softIdProj,idEta,idPhi);
@@ -1597,7 +1597,7 @@ void StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
     if (Debug()>1) {
       cout << "Outer Helix " << glTrack->outerGeometry()->helix() << endl;
       cout << "Track Projects to tower " << softIdProj << endl;
-      cout << "Track hits at R= " << pos->perp() << " eta,phi: " << pos->pseudoRapidity() << ", " << pos->phi() << endl;
+      cout << "Track hits at R= " << pos.perp() << " eta,phi: " << pos.pseudoRapidity() << ", " << pos.phi() << endl;
       cout << "Track Has " << towersOfTrack.size() << " total candidate towers" << endl;
     }
     if (towersOfTrack.size()>0) {
@@ -1720,7 +1720,7 @@ void  StMiniMcMaker::fillMcTrackInfo(StTinyMcTrack* tinyMcTrack,
 	   bhi!=bemcHitsSorted.end();
 	   ++bhi) {
 	StMcCalorimeterHit* bh = *bhi;
-	float eta;
+	float eta(0);
 	emcGeom->getEta(bh->module(),bh->eta(),eta);
 	sumEnergy += (*bhi)->dE()*scaleFactor(eta);
 	if (Debug()>2) cout << bh->dE()*scaleFactor(eta) << endl;
@@ -1729,7 +1729,7 @@ void  StMiniMcMaker::fillMcTrackInfo(StTinyMcTrack* tinyMcTrack,
       size_t maxHits = 3;
       if (bemcHitsSorted.size()<maxHits) maxHits=bemcHitsSorted.size();
       for (size_t iCalHit=0; iCalHit<maxHits; ++iCalHit) {
-	float eta;
+	float eta(0);
 	emcGeom->getEta(bemcHitsSorted[iCalHit]->module(),bemcHitsSorted[iCalHit]->eta(),eta);	
 	tinyMcTrack->setEmcEnergyMcHit(bemcHitsSorted[iCalHit]->dE()*scaleFactor(eta),iCalHit);
 	emcGeom->getId(bemcHitsSorted[iCalHit]->module(),
@@ -2339,6 +2339,9 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
 }
 /*
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.50  2019/01/15 19:24:33  genevb
+ * Kill some memory leaks (thanks, Coverity)
+ *
  * Revision 1.49  2018/01/03 18:18:10  genevb
  * idTruths and keys moved from short to int
  *
@@ -2534,7 +2537,7 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.49 2018/01/03 18:18:10 genevb Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.50 2019/01/15 19:24:33 genevb Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
