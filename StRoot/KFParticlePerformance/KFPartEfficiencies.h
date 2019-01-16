@@ -92,21 +92,21 @@ class KFPartEfficiencies :public TObject
       KFEfficiencyParticleInfo("#Sigma^0b",        "Sigma0 b      ",      -3212, 1.0f, 3.0f, 1.192642   , 7.4e-20,    0, 0.0030), //10
       KFEfficiencyParticleInfo("#Sigma^+",         "Sigma+        ",       3222, 1.0f, 3.0f, 1.18937    , 0.8018e-10, 1, 0.0030), //11
       KFEfficiencyParticleInfo("#Sigma^-b",        "Sigma- b      ",      -3222, 1.0f, 3.0f, 1.18937    , 0.8018e-10,-1, 0.0030), //12
-      KFEfficiencyParticleInfo("K*0",              "K*0           ",        313, 0.6f, 2.6f, 0.8958     , 1.38e-23,   0, 0.0300), //13
-      KFEfficiencyParticleInfo("K*0b",             "K*0 b         ",       -313, 0.6f, 2.6f, 0.8958     , 1.38e-23,   0, 0.0300), //14
-      KFEfficiencyParticleInfo("K*+",              "K*+           ",        323, 0.6f, 2.6f, 0.89166    , 1.30e-23,   1, 0.0300), //15
-      KFEfficiencyParticleInfo("K*-",              "K*-           ",       -323, 0.6f, 2.6f, 0.89166    , 1.30e-23,  -1, 0.0300), //16
-      KFEfficiencyParticleInfo("K*0_{K0,#pi0}",    "K*0_K0pi0     ",     100313, 0.6f, 2.6f, 0.8958     , 1.38e-23,   0, 0.0030), //17
-      KFEfficiencyParticleInfo("K*+_{K+,#pi0}",    "K*+_K+pi0     ",     100323, 0.6f, 2.6f, 0.89166    , 1.30e-23,   1, 0.0030), //18
-      KFEfficiencyParticleInfo("K*-_{K-,#pi0}",    "K*-_K-pi0     ",    -100323, 0.6f, 2.6f, 0.89166    , 1.30e-23,  -1, 0.0030), //19
+      KFEfficiencyParticleInfo("K*0",              "K*0           ",        313, 0.6f, 3.6f, 0.8958     , 1.38e-23,   0, 0.0300), //13
+      KFEfficiencyParticleInfo("K*0b",             "K*0 b         ",       -313, 0.6f, 3.6f, 0.8958     , 1.38e-23,   0, 0.0300), //14
+      KFEfficiencyParticleInfo("K*+",              "K*+           ",        323, 0.6f, 3.6f, 0.89166    , 1.30e-23,   1, 0.0300), //15
+      KFEfficiencyParticleInfo("K*-",              "K*-           ",       -323, 0.6f, 3.6f, 0.89166    , 1.30e-23,  -1, 0.0300), //16
+      KFEfficiencyParticleInfo("K*0_{K0,#pi0}",    "K*0_K0pi0     ",     100313, 0.6f, 3.6f, 0.8958     , 1.38e-23,   0, 0.0030), //17
+      KFEfficiencyParticleInfo("K*+_{K+,#pi0}",    "K*+_K+pi0     ",     100323, 0.6f, 3.6f, 0.89166    , 1.30e-23,   1, 0.0030), //18
+      KFEfficiencyParticleInfo("K*-_{K-,#pi0}",    "K*-_K-pi0     ",    -100323, 0.6f, 3.6f, 0.89166    , 1.30e-23,  -1, 0.0030), //19
       KFEfficiencyParticleInfo("Sigma*+",          "Sigma*+       ",       3224, 1.0f, 3.0f, 1.3828     , 1.83e-23,   1, 0.0100), //20
       KFEfficiencyParticleInfo("Sigma*-",          "Sigma*-       ",       3114, 1.0f, 3.0f, 1.3872     , 1.67e-23,  -1, 0.0100), //21
       KFEfficiencyParticleInfo("Sigma*+b",         "Sigma*+ b     ",      -3114, 1.0f, 3.0f, 1.3828     , 1.83e-23,  -1, 0.0100), //22
       KFEfficiencyParticleInfo("Sigma*-b",         "Sigma*- b     ",      -3224, 1.0f, 3.0f, 1.3872     , 1.67e-23,   1, 0.0100), //23
       KFEfficiencyParticleInfo("Sigma*0",          "Sigma*0       ",       3214, 1.0f, 3.0f, 1.3837     , 1.83e-23,   0, 0.0030), //24
       KFEfficiencyParticleInfo("Sigma*0b",         "Sigma*0 b     ",      -3214, 1.0f, 3.0f, 1.3837     , 1.83e-23,   0, 0.0030), //25
-      KFEfficiencyParticleInfo("Lambda*",          "Lambda*       ",       3124, 1.4f, 3.4f, 1.5195     , 4.22e-23,   0, 0.0100), //26
-      KFEfficiencyParticleInfo("Lambda*b",         "Lambda* b     ",      -3124, 1.4f, 3.4f, 1.5195     , 4.22e-23,   0, 0.0100), //27
+      KFEfficiencyParticleInfo("Lambda*",          "Lambda*       ",       3124, 1.4f, 4.4f, 1.5195     , 4.22e-23,   0, 0.0100), //26
+      KFEfficiencyParticleInfo("Lambda*b",         "Lambda* b     ",      -3124, 1.4f, 4.4f, 1.5195     , 4.22e-23,   0, 0.0100), //27
       KFEfficiencyParticleInfo("Xi*0",             "Xi*0          ",       3324, 1.4f, 3.4f, 1.53180    , 7.23e-23,   0, 0.0100), //28
       KFEfficiencyParticleInfo("Xi*0b",            "Xi*0 b        ",      -3324, 1.4f, 3.4f, 1.53180    , 7.23e-23,   0, 0.0100), //29
       KFEfficiencyParticleInfo("Xi*-_{LK}",        "Xi*-_lk       ",    1003314, 1.4f, 3.4f, 1.823      , 2.74e-23,  -1, 0.0030), //30
@@ -273,13 +273,13 @@ class KFPartEfficiencies :public TObject
       KFEfficiencyParticleInfo("He4-",             "He4-          ",-1000020040, 0.0f, 4.5f, 3.728400   , 1.0e20,    -2, 0.0030), //184
 //background for subtraction
       KFEfficiencyParticleInfo("pi+pi+",           "pi+pi+        ",       9001, 0.0f, 2.0f, 0          , 1.0e20,     0, 0.0030), //185
-      KFEfficiencyParticleInfo("pi+K+",            "pi+K+         ",       9002, 0.6f, 5.6f, 0          , 1.0e20,     0, 0.0030), //186
-      KFEfficiencyParticleInfo("K+K+",             "K+K+          ",       9003, 0.8f, 3.8f, 0          , 1.0e20,     0, 0.0030), //187
-      KFEfficiencyParticleInfo("K+p+",             "K+p+          ",       9004, 1.4f, 5.4f, 0          , 1.0e20,     0, 0.0030), //188
+      KFEfficiencyParticleInfo("pi+K+",            "pi+K+         ",       9002, 0.6f, 3.6f, 0          , 1.0e20,     0, 0.0030), //186
+      KFEfficiencyParticleInfo("K+K+",             "K+K+          ",       9003, 0.8f, 2.8f, 0          , 1.0e20,     0, 0.0030), //187
+      KFEfficiencyParticleInfo("K+p+",             "K+p+          ",       9004, 1.4f, 4.4f, 0          , 1.0e20,     0, 0.0030), //188
       KFEfficiencyParticleInfo("pi-pi-",           "pi-pi-        ",      -9001, 0.0f, 2.0f, 0          , 1.0e20,     0, 0.0030), //189
-      KFEfficiencyParticleInfo("pi-K-",            "pi-K-         ",      -9002, 0.6f, 5.6f, 0          , 1.0e20,     0, 0.0030), //190
-      KFEfficiencyParticleInfo("K-K-",             "K-K-          ",      -9003, 0.8f, 3.8f, 0          , 1.0e20,     0, 0.0030), //191
-      KFEfficiencyParticleInfo("K-p-",             "K-p-          ",      -9004, 1.4f, 5.4f, 0          , 1.0e20,     0, 0.0030), //192
+      KFEfficiencyParticleInfo("pi-K-",            "pi-K-         ",      -9002, 0.6f, 3.6f, 0          , 1.0e20,     0, 0.0030), //190
+      KFEfficiencyParticleInfo("K-K-",             "K-K-          ",      -9003, 0.8f, 2.8f, 0          , 1.0e20,     0, 0.0030), //191
+      KFEfficiencyParticleInfo("K-p-",             "K-p-          ",      -9004, 1.4f, 4.4f, 0          , 1.0e20,     0, 0.0030), //192
 //V0
       KFEfficiencyParticleInfo("V0",               "V0            ",  123456789, 0.3f, 1.3f, 0          , 0,          0, 0.0030)  //193
     };

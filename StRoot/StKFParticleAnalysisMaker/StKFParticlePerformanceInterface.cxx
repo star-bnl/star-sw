@@ -94,6 +94,16 @@ void StKFParticlePerformanceInterface::SetPrintEffFrequency(Int_t n)
   fKFTopoPerformance->SetPrintEffFrequency(n); 
 }
 
+void StKFParticlePerformanceInterface::SetCentralityBin(const int iBin)
+{ 
+  fKFTopoPerformance->SetCentralityBin(iBin); 
+}
+
+void StKFParticlePerformanceInterface::SetCentralityWeight(const float weight)
+{ 
+  fKFTopoPerformance->SetCentralityWeight(weight); 
+}
+
 int StKFParticlePerformanceInterface::GetNReconstructedParticles()
 {
   return fKFTopoPerformance->GetTopoReconstructor()->GetParticles().size();
@@ -101,7 +111,7 @@ int StKFParticlePerformanceInterface::GetNReconstructedParticles()
 
 bool StKFParticlePerformanceInterface::GetParticle(KFParticle& particle, const int iParticle)
 {
-  if(iParticle<0 || iParticle>=fKFTopoPerformance->GetTopoReconstructor()->GetParticles().size())
+  if(iParticle<0 || iParticle>=int(fKFTopoPerformance->GetTopoReconstructor()->GetParticles().size()))
   {
     std::cout << "Error!!!    StKFParticlePerformanceInterface::GetParticle()   iParticle " << iParticle << " size " << GetNReconstructedParticles() << std::endl;
     return 0;

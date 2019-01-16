@@ -9,17 +9,15 @@
 #include "TH2F.h"
 
 #include "StPicoDstMaker/StPicoDstMaker.h"
-#include "StPicoEvent/StPicoDst.h"
 #include "StPicoEvent/StPicoArrays.h"
+#include "StPicoEvent/StPicoDst.h"
 #include "StPicoEvent/StPicoEvent.h"
 #include "StPicoEvent/StPicoTrack.h"
-#include "StPicoEvent/StPicoTrackCovMatrix.h"
 #include "StPicoEvent/StPicoBTofPidTraits.h"
 
 #include "StBichsel/Bichsel.h"
 #include "StBichsel/StdEdxModel.h"
 #include "StProbPidTraits.h"
-#include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuBTofHit.h"
 #include "StMuDSTMaker/COMMON/StMuMcVertex.h"
 #include "StMuDSTMaker/COMMON/StMuMcTrack.h"
@@ -30,9 +28,9 @@ StKFParticleInterface::StKFParticleInterface():
   fKFParticleTopoReconstructor(0), fParticles(0), fParticlesPdg(0), fNHftHits(0),
   fCollectTrackHistograms(false), fCollectPIDHistograms(false),
   fStrictTofPID(true), fCleanKaonsWitTof(true), fdEdXMode(1), fTriggerMode(false),
-  fChiPrimaryCut(18.6), fChiPrimaryMaxCut(2e4)
+  fChiPrimaryCut(18.6), fChiPrimaryMaxCut(2e4), fCleanLowPVTrackEvents(false), fUseHFTTracksOnly(false)
 {
-  fKFParticleTopoReconstructor = new KFParticleTopoReconstructor(); // TODO don't recreate with each event
+  fKFParticleTopoReconstructor = new KFParticleTopoReconstructor();
   fgStKFParticleInterface = this;
   // set default cuts
   SetPrimaryProbCut(0.0001); // 0.01% to consider primary track as a secondary;
@@ -114,6 +112,7 @@ void StKFParticleInterface::AddDecayToReconstructionList(Int_t pdg) {
    fKFParticleTopoReconstructor->GetKFParticleFinder()->AddDecayToReconstructionList(pdg);
 }
 std::vector<KFParticle> const &StKFParticleInterface::GetParticles() const { return fKFParticleTopoReconstructor->GetParticles(); }
+void StKFParticleInterface::RemoveParticle(const int iParticle) { fKFParticleTopoReconstructor->RemoveParticle(iParticle); }
 const std::vector<KFParticle>* StKFParticleInterface::GetSecondaryCandidates() const {return fKFParticleTopoReconstructor->GetKFParticleFinder()->GetSecondaryCandidates();                           } // Get secondary particles with the mass constraint
 const std::vector<KFParticle>& StKFParticleInterface::GetSecondaryK0() const {return fKFParticleTopoReconstructor->GetKFParticleFinder()->GetSecondaryK0();                           } // Get secondary particles with the mass constraint
 const std::vector<KFParticle>& StKFParticleInterface::GetSecondaryLambda() const {return fKFParticleTopoReconstructor->GetKFParticleFinder()->GetSecondaryLambda();                           } // Get secondary particles with the mass constraint
@@ -276,19 +275,11 @@ void StKFParticleInterface::CollectPIDHistograms()
   fCollectPIDHistograms = true;
 }
 
-bool StKFParticleInterface::IsGoodPV(const KFVertex& V)
+bool StKFParticleInterface::IsGoodPV(const KFVertex& pv)
 {
-#if 0
-  bool isGoodPV = (V.X() > -0.3) && (V.X() < -0.1) &&
-                  (V.Y() > -0.27) && (V.Y() < -0.13);
+  bool isGoodPV = (pv.X() > -0.3) && (pv.X() < -0.1) &&
+                  (pv.Y() > -0.27) && (pv.Y() < -0.1);
   return isGoodPV;
-#else
-  if (StMuDst::VxXmin() < StMuDst::VxXmax() && ! (StMuDst::VxXmin() < V.X() && V.X() < StMuDst::VxXmax())) {return kFALSE;}
-  if (StMuDst::VxYmin() < StMuDst::VxYmax() && ! (StMuDst::VxYmin() < V.Y() && V.Y() < StMuDst::VxYmax())) {return kFALSE;}
-  if (StMuDst::VxZmin() < StMuDst::VxZmax() && ! (StMuDst::VxZmin() < V.Z() && V.Z() < StMuDst::VxZmax())) {return kFALSE;}
-  if (StMuDst::VxRmax() > 0 && TMath::Sqrt(V.X()*V.X() + V.Y()*V.Y())  > StMuDst::VxRmax())                {return kFALSE;}
-  return kTRUE;
-#endif
 }
 
 bool StKFParticleInterface::GetTrack(const StDcaGeometry& dcaG, KFPTrack& track, int q, int index)
@@ -319,7 +310,7 @@ bool StKFParticleInterface::GetTrack(const StDcaGeometry& dcaG, KFPTrack& track,
   return true;
 }
 
-std::vector<int> StKFParticleInterface::GetTofPID(double m2, double p, int q)
+std::vector<int> StKFParticleInterface::GetTofPID(double m2, double p, int q, const int trackId)
 {
   static const int order = 4;
   static const double parMean[6][order+1] = { { 0.02283190,-0.01482910, 0.01883130,-0.01824250, 0.00409811  }, //pi+
@@ -353,6 +344,7 @@ std::vector<int> StKFParticleInterface::GetTofPID(double m2, double p, int q)
       sigma += parSigma[iSet][iTerm]*TMath::Power(x,iTerm);  
     
     nSigmas[iHypothesys] = fabs((m2 - mean)/sigma);
+    fTrackPidTof[iHypothesys][trackId] = nSigmas[iHypothesys];
   }
   
   double minNSigma = nSigmas[0];
@@ -384,10 +376,14 @@ std::vector<int> StKFParticleInterface::GetTofPID(double m2, double p, int q)
   return tofPID;
 }
 
-std::vector<int> StKFParticleInterface::GetPID(double m2, double p, int q, double dEdXPull[7], bool isTofm2)
+std::vector<int> StKFParticleInterface::GetPID(double m2, double p, int q, double dEdX, double dEdXPull[7], bool isTofm2, const int trackId)
 {
   vector<int> ToFPDG;
-  ToFPDG = GetTofPID(m2, p, q);
+  if(isTofm2)
+    ToFPDG = GetTofPID(m2, p, q, trackId);
+  
+  for(int iPdg=0; iPdg<3; iPdg++)
+    fTrackPidTpc[iPdg][trackId] = dEdXPull[iPdg];
   
   vector<int> dEdXPDG;
   float nSigmaCut = 3.f; //TODO
@@ -415,39 +411,43 @@ std::vector<int> StKFParticleInterface::GetPID(double m2, double p, int q, doubl
           totalPDG.push_back(ToFPDG[iTofPDG]);        
   }
   
-  if( p < 1.5 )
-  {    
-    if(p > 0.6)
-    {
-      float sigmaDCut = -3./0.9*(p-0.6) + 3.;
-      if(dEdXPull[3] < sigmaDCut) 
-        totalPDG.push_back(1000010020*q);
-    }
-    else
-    {
-      if(dEdXPull[3] < 3.) totalPDG.push_back(1000010020*q);
-    }
-  }
-  if( p < 1.5 )
   {
-    if(p > 0.6)
-    {
-      float sigmaTCut = -3./0.9*(p-0.6) + 3.;
-      if(dEdXPull[4] < sigmaTCut) 
+//    if(dEdXPull[5] < nSigmaCut) totalPDG.push_back(1000020030*q);
+//    if(dEdXPull[6] < nSigmaCut) { totalPDG.push_back(1000020040*q); }
+    
+    if(dEdXPull[3] < nSigmaCut && dEdXPull[2] > nSigmaCut) 
+      if( isTofm2 && (m2 > 2 && m2<6) ) //if( !isTofm2 || (isTofm2 && (m2 > 2 && m2<6)) )
+        totalPDG.push_back(1000010020*q); 
+    if(dEdXPull[4] < nSigmaCut && dEdXPull[3] > nSigmaCut) 
+      if( isTofm2 && (m2 > 5) ) //if( !isTofm2 || (isTofm2 && (m2 > 5)) )
         totalPDG.push_back(1000010030*q);
+   
+    if(p>0.6 && p<1.8)
+    {
+      double lowerParameters[4] = {2.48051e+01,-1.40961e+00, 2.54327e-01, 2.07450e-01};
+      double lowerHe3Bound = lowerParameters[0]*TMath::Power(p, lowerParameters[1] + lowerParameters[2]*log(p) + lowerParameters[3]*log(p)*log(p));
+      
+      double upperParameters[4] = {3.36169e+01,-1.33686e+00, 2.82856e-01, 1.91841e-01};
+      double upperHe3Bound = upperParameters[0]*TMath::Power(p, upperParameters[1] + upperParameters[2]*log(p) + upperParameters[3]*log(p)*log(p));
+      
+      if(dEdX > lowerHe3Bound && dEdX < upperHe3Bound && dEdX > 9.) 
+        if( !isTofm2 || (isTofm2 && (m2>1.) && (m2<5.) ) )
+          totalPDG.push_back(1000020030*q);
+      if(dEdX > upperHe3Bound && dEdX > 9.)               
+        if( !isTofm2 || (isTofm2 && (m2>2.5) && (m2<6.) ) )
+          totalPDG.push_back(1000020040*q);
     }
-    else
+    else if(p>=1.8 && dEdX > 9.)
     {
-      if(dEdXPull[4] < 3.) 
-        totalPDG.push_back(1000010030*q);
-    }        
+      if(dEdXPull[5] < nSigmaCut && dEdXPull[4] > nSigmaCut) 
+        if( !isTofm2 || (isTofm2 && (m2>1.) && (m2<5.) ) )
+          totalPDG.push_back(1000020030*q);
+      if(dEdXPull[6] < nSigmaCut && dEdXPull[5] > nSigmaCut) 
+        if( !isTofm2 || (isTofm2 && (m2>2.5) && (m2<6.) ) )
+          totalPDG.push_back(1000020040*q);
+    }
   }
-//     if(p > 1.3)
-  {
-    if(dEdXPull[5] < nSigmaCut) totalPDG.push_back(1000020030*q);
-    if(dEdXPull[6] < nSigmaCut) { totalPDG.push_back(1000020040*q); }
-  }
-  
+    
   if(totalPDG.size() == 0)
     totalPDG.push_back(-1);
   
@@ -495,6 +495,7 @@ void StKFParticleInterface::AddTrackToParticleList(const KFPTrack& track, int nH
       primaryTrackList.push_back(nPartSaved);
     }
     if(fTriggerMode && chiPrim > fChiPrimaryMaxCut) continue;
+//     if( chiPrim > 1.e6 ) continue;
     particle.SetId(index);
     particles[nPartSaved] = particle;
 
@@ -519,6 +520,7 @@ void StKFParticleInterface::FillPIDHistograms(StPicoTrack *gTrack, const std::ve
       {
         fHistodEdXwithToFTracks[iTrackHisto] -> Fill(momentum, gTrack->dEdx());
         fHistoTofPIDTracks[iTrackHisto] -> Fill(momentum, m2tof);
+        
         if(abs(pdg)==211)
         {
           fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(0.139570, fdEdXMode, 1));
@@ -598,6 +600,18 @@ void StKFParticleInterface::OpenCharmTriggerCompression(int nTracksTriggered, in
   }
 }
 
+void StKFParticleInterface::ResizeTrackPidVectors(const int nTracks)
+{
+  for(int iHypothesis=0; iHypothesis<3; iHypothesis++)
+  {
+    fTrackPidTof[iHypothesis].clear();
+    fTrackPidTof[iHypothesis].resize(nTracks, -1);
+    
+    fTrackPidTpc[iHypothesis].clear();
+    fTrackPidTpc[iHypothesis].resize(nTracks, -1);
+  }
+}
+
 bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& triggeredTracks)
 {
   triggeredTracks.resize(0);
@@ -608,7 +622,7 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
     
   StPicoEvent* picoEvent = picoDst->event();
   if(!picoEvent) return 0;
-
+  
   const TVector3 picoPV = picoEvent->primaryVertex();
   const TVector3 picoPVError = picoEvent->primaryVertexError();
   
@@ -619,7 +633,7 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
   double dz = picoPVError.z();
   primVtx_tmp.SetCovarianceMatrix( dx*dx, 0, dy*dy, 0, 0, dz*dz );
   primaryVertex = KFVertex(primVtx_tmp);
-  if(!IsGoodPV(primaryVertex)) return 0;
+//   if(!IsGoodPV(primaryVertex)) return 0;
   
   Int_t nGlobalTracks = picoDst->numberOfTracks( );
   
@@ -627,6 +641,7 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
   fNHftHits.resize(nGlobalTracks*7);
   fParticlesPdg.resize(nGlobalTracks*7);
   int nPartSaved = 0;
+  int nUsedTracks = 0;
   
   for (Int_t iTrack = 0; iTrack < nGlobalTracks; iTrack++) 
   {
@@ -636,6 +651,16 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
     if (  gTrack->nHitsFit() < 15) continue;
     if (  gTrack->dEdxError() < 0.04 || gTrack->dEdxError() > 0.12 ) continue;
     const int index = gTrack->id();
+    
+    int nHftHitsInTrack = 0;
+    if(gTrack->hasPxl1Hit()) nHftHitsInTrack++;
+    if(gTrack->hasPxl2Hit()) nHftHitsInTrack++;
+    if(gTrack->hasIstHit()) nHftHitsInTrack++;
+//       if(gTrack->hasSstHit()) nHftHitsInTrack++;
+    if(fCollectTrackHistograms) fTrackHistograms[0]->Fill(nHftHitsInTrack);
+    
+    if(fUseHFTTracksOnly && nHftHitsInTrack < 3) continue;
+    
     StPicoTrackCovMatrix *cov = picoDst->trackCovMatrix(iTrack);
     const StDcaGeometry dcaG = cov->dcaGeometry();
     Int_t q = 1; if (gTrack->charge() < 0) q = -1;
@@ -675,14 +700,7 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
                            fabs(gTrack->dEdxPull(2.809413, fdEdXMode, 2)),   //5 - He3
                            fabs(gTrack->dEdxPull(3.728400, fdEdXMode, 2))};  //6 - He4
     
-    vector<int> totalPDG = GetPID(m2tof, track.GetP(), q, dEdXPull, isTofm2);
-    
-    int nHftHitsInTrack = 0;
-    if(gTrack->hasPxl1Hit()) nHftHitsInTrack++;
-    if(gTrack->hasPxl2Hit()) nHftHitsInTrack++;
-    if(gTrack->hasIstHit()) nHftHitsInTrack++;
-//       if(gTrack->hasSstHit()) nHftHitsInTrack++;
-    if(fCollectTrackHistograms) fTrackHistograms[0]->Fill(nHftHitsInTrack);
+    vector<int> totalPDG = GetPID(m2tof, track.GetP(), q, gTrack->dEdx(), dEdXPull, isTofm2, index);
     
     int nPartSaved0 = nPartSaved;
     AddTrackToParticleList(track, nHftHitsInTrack, index, totalPDG, primaryVertex, primaryTrackList, fNHftHits, fParticlesPdg, fParticles, nPartSaved); 
@@ -692,11 +710,15 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
     
     //fill PID histograms if they are created
     if(fCollectPIDHistograms) FillPIDHistograms(gTrack, totalPDG, isTofm2, m2tof);
+    
+    nUsedTracks++;
   }
-
+  
   fParticles.resize(nPartSaved);
   fParticlesPdg.resize(nPartSaved);
   fNHftHits.resize(nPartSaved);
+  
+  if( fCleanLowPVTrackEvents && ( 10*primaryTrackList.size() < (nUsedTracks - primaryTrackList.size()) ) ) return 0;
   
   const Double_t field = picoEvent->bField();  
   SetField(field);
@@ -759,7 +781,7 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
     kfVertex.SetChi2(Vtx->chiSquared());
     primaryVertex = KFVertex(kfVertex);
   }  
-  if(!IsGoodPV(primaryVertex)) return 0;
+//   if(!IsGoodPV(primaryVertex)) return 0;
 
   Int_t nGlobalTracks = muDst->numberOfGlobalTracks();
   
@@ -767,6 +789,7 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
   fNHftHits.resize(nGlobalTracks*7);
   fParticlesPdg.resize(nGlobalTracks*7);
   int nPartSaved = 0;
+  int nUsedTracks = 0;
   
   for (Int_t iTrack = 0; iTrack < nGlobalTracks; iTrack++) 
   {
@@ -778,7 +801,21 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
     if (  gTrack->nHitsFit() < 15) continue;
     if (  gTrack->probPidTraits().dEdxErrorFit() < 0.04 || gTrack->probPidTraits().dEdxErrorFit() > 0.12 ) continue;
     
+    int nHftHitsInTrack = gTrack->nHitsFit(kIstId) + gTrack->nHitsFit(kSsdId) + gTrack->nHitsFit(kPxlId);
+    if(fCollectTrackHistograms) fTrackHistograms[0]->Fill(nHftHitsInTrack);
+    if(fUseHFTTracksOnly && nHftHitsInTrack < 3) continue;
+    
     const int index = gTrack->id();
+    
+    mcIndices[index] = gTrack->idTruth()-1;
+    if(mcIndices[index] >= int(mcTracks.size()))
+      mcIndices[index] = -1;
+    if(mcIndices[index] > -1)
+    {
+      mcTracks[mcIndices[index]].SetReconstructed();
+      if(!processSignal) continue;
+    }
+    else if(processSignal) continue;
     
     Int_t dcaGeometryIndex = gTrack->index2Cov();
     if (dcaGeometryIndex < 0) continue;
@@ -806,19 +843,12 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
     double lengthTof = btofPid.pathLength();
     if(lengthTof < 0.)
     {
-      StPhysicalHelixD innerHelix = gTrack->helix();
-      StPhysicalHelixD outerHelix = gTrack->outerHelix();
-#ifdef __TFG__VERSION__
       const StThreeVectorF & tofPoint  = btofPid.position();
       const StThreeVectorF & dcaPoint  = gTrack->dca(bestPV);
+      StPhysicalHelixD innerHelix = gTrack->helix();
       double dlDCA = fabs( innerHelix.pathLength( StThreeVector<double>(dcaPoint.x(), dcaPoint.y(), dcaPoint.z()) ) );
+      StPhysicalHelixD outerHelix = gTrack->outerHelix();
       double dlTOF = fabs( outerHelix.pathLength( StThreeVector<double>(tofPoint.x(), tofPoint.y(), tofPoint.z()) ) );
-#else /* ! __TFG__VERSION__ */
-      const Float_t *xyzP = btofPid.position().xyz();
-      const Float_t *xyzD = gTrack->dca(bestPV).xyz();
-      double dlDCA = fabs( innerHelix.pathLength( StThreeVector<double>(xyzD)));
-      double dlTOF = fabs( outerHelix.pathLength( StThreeVector<double>(xyzP)));
-#endif /* __TFG__VERSION__ */
       
       double l = gTrack->length();
       lengthTof = l + dlDCA + dlTOF;
@@ -852,28 +882,18 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
                            fabs(gTrack->dEdxPull(2.809413, fdEdXMode, 2)),   //5 - He3
                            fabs(gTrack->dEdxPull(3.728400, fdEdXMode, 2))};  //6 - He4
     
-    vector<int> totalPDG = GetPID(m2tof, track.GetP(), q, dEdXPull, isTofm2);
-    
-    int nHftHitsInTrack = gTrack->nHitsFit(kIstId) + gTrack->nHitsFit(kSsdId) + gTrack->nHitsFit(kPxlId);
-    if(fCollectTrackHistograms) fTrackHistograms[0]->Fill(nHftHitsInTrack);
-    
-    mcIndices[index] = gTrack->idTruth()-1;
-    if(mcIndices[index] >= int(mcTracks.size()))
-      mcIndices[index] = -1;
-    if(mcIndices[index] > -1)
-    {
-      mcTracks[mcIndices[index]].SetReconstructed();
-      if(!processSignal) continue;
-    }
-    else if(processSignal) continue;
+    vector<int> totalPDG = GetPID(m2tof, track.GetP(), q, gTrack->dEdx()*1.e6, dEdXPull, isTofm2, index);
         
     AddTrackToParticleList(track, nHftHitsInTrack, index, totalPDG, primaryVertex, primaryTrackList, fNHftHits, fParticlesPdg, fParticles, nPartSaved);         
+    nUsedTracks++;
   }
 
   fParticles.resize(nPartSaved);
   fParticlesPdg.resize(nPartSaved);
   fNHftHits.resize(nPartSaved);
-  
+
+  if( fCleanLowPVTrackEvents && ( 10*primaryTrackList.size() < (nUsedTracks - primaryTrackList.size()) ) ) return 0;
+
   const Double_t field = muDst->event()->magneticField();
   SetField(field);
 

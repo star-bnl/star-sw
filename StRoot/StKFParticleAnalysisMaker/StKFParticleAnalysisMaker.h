@@ -15,14 +15,17 @@
 
 class StKFParticleInterface;
 class StKFParticlePerformanceInterface;
+class KFParticle;
 class StPicoDst;
 class StMuDst;
 class TNtuple;
 class TFile;
+class TChain;
+class StRefMultCorr;
 
 class StKFParticleAnalysisMaker : public StMaker {
  private:
-  static const int fNNTuples = 4;
+  static const int fNNTuples = 8;
   Char_t                mBeg[1];        //!
   StMuDst                          *fMuDst;
   StPicoDst                        *fPicoDst;                          //!
@@ -33,17 +36,47 @@ class StKFParticleAnalysisMaker : public StMaker {
   int fNTuplePDG[fNNTuples];
   TString fNtupleNames[fNNTuples];
   TString fNtupleCutNames[fNNTuples];
-  TString fTMVACutFile[fNNTuples];
-  double fTMVACut[fNNTuples];
-  TMVA::Reader* fTMVAReader[fNNTuples];
+  std::vector<TString> fDaughterNames[fNNTuples];
+  vector< vector<TString> > fTMVACutFile[fNNTuples];
+  vector< vector<double> > fTMVACut[fNNTuples];
+  vector< vector<TMVA::Reader*> > fTMVAReader[fNNTuples];
+  std::vector<int> fTMVACentralityBins[fNNTuples];
+  std::vector<double> fTMVAPtBins[fNNTuples];
   Char_t                mEnd[1];        //!
   std::vector<float> fTMVAParticleParameters[fNNTuples];
+  int fNTrackTMVACuts;
   bool fIsPicoAnalysis;
   int fdEdXMode;
   Bool_t fStoreTmvaNTuples;
   Bool_t fProcessSignal;
+  Bool_t fCollectTrackHistograms;
   Bool_t fCollectPIDHistograms;
   Bool_t fTMVAselection;
+  
+  //Centrality and flow
+  Bool_t fFlowAnalysis;
+  TChain* fFlowChain;
+  int fFlowRunId;
+  int fFlowEventId;
+  int fCentrality;
+  std::vector<TString> fFlowFiles;
+  std::map<long, int> fFlowMap;
+  
+  bool fRunCentralityAnalysis;
+  StRefMultCorr *fRefmultCorrUtil;
+  TString fCentralityFile;
+  
+  bool fAnalyseDsPhiPi;
+
+  void GetDaughterParameters(const int iReader, int& iDaughterTrack, int& iDaughterParticle, KFParticle& particle);
+  void GetParticleParameters(const int iReader, KFParticle& particle);
+  long  GetUniqueEventId(const int iRun, const int iEvent) const;
+  
+  int GetTMVACentralityBin(int iReader, int centrality);
+  int GetTMVAPtBin(int iReader, double pt);
+  void SetTMVACentralityBins(int iReader, TString bins);
+  void SetTMVAPtBins(int iReader, TString bins);
+  void SetTMVABins(int iReader, TString centralityBins="-1:1000", TString ptBins="-1.:1000.");
   
  public: 
   StKFParticleAnalysisMaker(const char *name="KFParticleAnalysis");
@@ -52,6 +85,7 @@ class StKFParticleAnalysisMaker : public StMaker {
   virtual Int_t  InitRun(Int_t runumber);
   void           BookVertexPlots();
   virtual Int_t  Make();
+  virtual Int_t  Finish();
   Bool_t         Check();
   void AnalysePicoDst() { fIsPicoAnalysis = true;  }
   void AnalyseMuDst()   { fIsPicoAnalysis = false; }
@@ -62,16 +96,33 @@ class StKFParticleAnalysisMaker : public StMaker {
   }
   void ProcessSignal() { fProcessSignal = true; }
   void StoreTMVANtuples() { fStoreTmvaNTuples = true; }
+  void CollectTrackHistograms() { fCollectTrackHistograms = true; }
   void CollectPIDHistograms() { fCollectPIDHistograms = true; }
   void UseTMVA() { fTMVAselection = true; }
-  void SetTMVAcutFileD0(TString file)    { fTMVACutFile[0] = file; }
-  void SetTMVAcutFileDPlus(TString file) { fTMVACutFile[1] = file; }
-  void SetTMVAcutFileDs(TString file)    { fTMVACutFile[2] = file; }
-  void SetTMVAcutFileLc(TString file)    { fTMVACutFile[3] = file; }
-  void SetTMVAcutD0(double cut)    { fTMVACut[0] = cut; }
-  void SetTMVAcutDPlus(double cut) { fTMVACut[1] = cut; }
-  void SetTMVAcutDs(double cut)    { fTMVACut[2] = cut; }
-  void SetTMVAcutLc(double cut)    { fTMVACut[3] = cut; }
+  void SetTMVABinsD0   (TString centralityBins, TString ptBins) { SetTMVABins(0, centralityBins, ptBins); }
+  void SetTMVABinsDPlus(TString centralityBins, TString ptBins) { SetTMVABins(1, centralityBins, ptBins); }
+  void SetTMVABinsDs   (TString centralityBins, TString ptBins) { SetTMVABins(2, centralityBins, ptBins); }
+  void SetTMVABinsLc   (TString centralityBins, TString ptBins) { SetTMVABins(3, centralityBins, ptBins); }
+  void SetTMVABinsD0KK (TString centralityBins, TString ptBins) { SetTMVABins(4, centralityBins, ptBins); }
+  void SetTMVABinsD04  (TString centralityBins, TString ptBins) { SetTMVABins(5, centralityBins, ptBins); }
+  void SetTMVABinsBPlus(TString centralityBins, TString ptBins) { SetTMVABins(6, centralityBins, ptBins); }
+  void SetTMVABinsB0   (TString centralityBins, TString ptBins) { SetTMVABins(7, centralityBins, ptBins); }
+  void SetTMVAcutsD0   (TString file, double cut, int iCentralityBin = 0, int iPtBin = 0) { fTMVACutFile[0][iCentralityBin][iPtBin] = file; fTMVACut[0][iCentralityBin][iPtBin] = cut; }
+  void SetTMVAcutsDPlus(TString file, double cut, int iCentralityBin = 0, int iPtBin = 0) { fTMVACutFile[1][iCentralityBin][iPtBin] = file; fTMVACut[1][iCentralityBin][iPtBin] = cut; }
+  void SetTMVAcutsDs   (TString file, double cut, int iCentralityBin = 0, int iPtBin = 0) { fTMVACutFile[2][iCentralityBin][iPtBin] = file; fTMVACut[2][iCentralityBin][iPtBin] = cut; }
+  void SetTMVAcutsLc   (TString file, double cut, int iCentralityBin = 0, int iPtBin = 0) { fTMVACutFile[3][iCentralityBin][iPtBin] = file; fTMVACut[3][iCentralityBin][iPtBin] = cut; }
+  void SetTMVAcutsD0KK (TString file, double cut, int iCentralityBin = 0, int iPtBin = 0) { fTMVACutFile[4][iCentralityBin][iPtBin] = file; fTMVACut[4][iCentralityBin][iPtBin] = cut; }
+  void SetTMVAcutsD04  (TString file, double cut, int iCentralityBin = 0, int iPtBin = 0) { fTMVACutFile[5][iCentralityBin][iPtBin] = file; fTMVACut[5][iCentralityBin][iPtBin] = cut; }
+  void SetTMVAcutsBPlus(TString file, double cut, int iCentralityBin = 0, int iPtBin = 0) { fTMVACutFile[6][iCentralityBin][iPtBin] = file; fTMVACut[6][iCentralityBin][iPtBin] = cut; }
+  void SetTMVAcutsB0   (TString file, double cut, int iCentralityBin = 0, int iPtBin = 0) { fTMVACutFile[7][iCentralityBin][iPtBin] = file; fTMVACut[7][iCentralityBin][iPtBin] = cut; }
+  
+  void RunFlowAnalysis()         { fFlowAnalysis = true; }
+  void AddFlowFile(TString file) { fFlowFiles.push_back(file); }
+  
+  void RunCentralityAnalysis() { fRunCentralityAnalysis = true; }
+  void SetCentralityFile(TString file) { fCentralityFile = file; }
+  
+  void AnalyseDsPhiPi() { fAnalyseDsPhiPi = true; }
   
   ClassDef(StKFParticleAnalysisMaker,0)   //
 };

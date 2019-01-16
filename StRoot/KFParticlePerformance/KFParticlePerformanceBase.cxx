@@ -725,6 +725,8 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
     histoParameters2D[iPart][1]->GetXaxis()->SetTitle("Z [cm]");
     histoParameters2D[iPart][1]->GetYaxis()->SetTitle("R [cm]");
   }
+  else if(histoParameters2D)
+    histoParameters2D[iPart][1] = NULL;
   
   //create armenteros plot
   if(IsCollectArmenteros(iPart))
@@ -735,6 +737,9 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
     histoParameters2D[iPart][2]->GetXaxis()->SetTitle("#alpha (p_{L}^{+}-p_{L}^{-})/(p_{L}^{+}+p_{L}^{-})");
     histoParameters2D[iPart][2]->GetYaxis()->SetTitle("q_{t} [GeV/c]");
   }
+  else if(histoParameters2D)
+    histoParameters2D[iPart][2] = NULL;
+  
   //create y-mt plot
   histoParameters2D[iPart][3] = new TH2F(parName2D[3].Data(),parTitle2D[3].Data(),
                                          nBins[3],xMin[3], xMax[3],     //y
@@ -772,6 +777,13 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
       histoParameters3D[iPart][2+iCH]->GetYaxis()->SetTitle(parAxisName[centralityHisto[iCH]]);
       histoParameters3D[iPart][2+iCH]->GetZaxis()->SetTitle("M");
     }
+  }
+  else if(histoParameters3D)
+  {
+    histoParameters3D[iPart][0] = NULL;
+    histoParameters3D[iPart][1] = NULL;
+    for(int iCH = 0; iCH<3; iCH++)
+      histoParameters3D[iPart][2+iCH] = NULL;
   }
 }
 
