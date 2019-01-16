@@ -13,7 +13,7 @@
 #include <iomanip>
 using namespace std;
 
-void readtofGeomAlign(const char* time = "2010-01-01 00:00:00")
+void readtofGeomAlign(const char* time = "2029-12-31 23:59:59")
 {
   //-- load dBase and Table definition libraries
   gSystem->Load("St_base");
