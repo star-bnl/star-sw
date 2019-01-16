@@ -26,6 +26,8 @@ class StKFParticlePerformanceInterface: public TObject
   
   void SetEffFileName(const TString& name) { fEfffileName = name; }
   void SetPrintEffFrequency(Int_t n = 100);
+  void SetCentralityBin(const int iBin);
+  void SetCentralityWeight(const float weight);
   
   int  GetNReconstructedParticles();
   bool GetParticle(KFParticle& particle, const int iParticle);

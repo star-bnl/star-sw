@@ -75,6 +75,15 @@ class StKFParticleInterface: public TObject
   void CollectTrackHistograms();
   void CollectPIDHistograms();
   
+  //PID hypothesis, should be resized from outside
+  void ResizeTrackPidVectors(const int nTracks);
+  const float GetdEdXNSigmaPion(const int trackId)   const { return fTrackPidTpc[0][trackId]; }
+  const float GetdEdXNSigmaKaon(const int trackId)   const { return fTrackPidTpc[1][trackId]; }
+  const float GetdEdXNSigmaProton(const int trackId) const { return fTrackPidTpc[2][trackId]; }
+  const float GetTofNSigmaPion(const int trackId)    const { return fTrackPidTof[0][trackId]; }
+  const float GetTofNSigmaKaon(const int trackId)    const { return fTrackPidTof[1][trackId]; }
+  const float GetTofNSigmaProton(const int trackId)  const { return fTrackPidTof[2][trackId]; }
+
   //PID cuts 
   void SetStrictTofPidMode() { fStrictTofPID = true;  }
   void SetSoftTofPidMode()   { fStrictTofPID = false; }
@@ -84,6 +93,9 @@ class StKFParticleInterface: public TObject
   //KF Particle Finder cuts
   void SetChiPrimaryCut(float cut)  { fChiPrimaryCut = cut; }
   void SetChiPrimaryMaxCut(float cut)  { fChiPrimaryMaxCut = cut; }
+  //Event cuts
+  void CleanLowPVTrackEvents() { fCleanLowPVTrackEvents = true; }
+  void UseHFTTracksOnly()      { fUseHFTTracksOnly = true; }
   
   KFParticleFinder* GetKFParticleFinder();
   //KF Particle Finder cuts
@@ -114,8 +126,8 @@ class StKFParticleInterface: public TObject
   double InversedChi2Prob(double p, int ndf) const;
   bool IsGoodPV(const KFVertex& pv);
   bool GetTrack(const StDcaGeometry& dcaG, KFPTrack& track, int q, int index);
-  std::vector<int> GetTofPID(double m2, double p, int q);
-  std::vector<int> GetPID(double m2, double p, int q, double dEdXPull[7], bool isTofm2);
+  std::vector<int> GetTofPID(double m2, double p, int q, const int trackId);
+  std::vector<int> GetPID(double m2, double p, int q, double dEdX, double dEdXPull[7], bool isTofm2, const int trackId);
   void AddTrackToParticleList(const KFPTrack& track, int nHftHitsInTrack, int index, const std::vector<int>& totalPDG, KFVertex& pv, std::vector<int>& primaryTrackList,
                               std::vector<int>& nHftHits, std::vector<int>& particlesPdg, std::vector<KFParticle>& particles, int& nPartSaved);
   void FillPIDHistograms(StPicoTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2, float m2tof);
@@ -142,6 +154,10 @@ class StKFParticleInterface: public TObject
   TH2F* fHistodEdXZ[NTrackHistoFolders];
   std::map<int, int> fTrackPdgToHistoIndex;
   
+  //PID information with respect to the trackID
+  std::vector<float> fTrackPidTof[3];
+  std::vector<float> fTrackPidTpc[3];
+  
   //PID cuts
   bool fStrictTofPID;
   bool fCleanKaonsWitTof;
@@ -152,6 +168,9 @@ class StKFParticleInterface: public TObject
   float fChiPrimaryCut;
   float fChiPrimaryMaxCut;
   static StKFParticleInterface* fgStKFParticleInterface;
+  //Event cuts
+  bool fCleanLowPVTrackEvents;
+  bool fUseHFTTracksOnly;
   ClassDef(StKFParticleInterface,1)
 };
 

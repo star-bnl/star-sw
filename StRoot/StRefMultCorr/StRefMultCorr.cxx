@@ -444,7 +444,6 @@ Double_t StRefMultCorr::getScaleForWeight() const
       }
       if(mName.CompareTo("grefmult_P16id", TString::kIgnoreCase) == 0) {
         if(VPD5weight==0) VPD5weight=1;
-        if(mRefMult_corr>650) VPD5weight=1;  // Run14 and Run16 prod 1/2 stop value
       }
     }
   }
@@ -546,28 +545,28 @@ Int_t StRefMultCorr::getCentralityBin9() const
 const Char_t* StRefMultCorr::getTable() const
 {
   if ( mName.CompareTo("refmult", TString::kIgnoreCase) == 0 ) {
-    return "StRoot/StRefMultCorr/Centrality_def_refmult.txt";
+    return "/gpfs01/star/pwg/mzyzak/Femto/Template/StRoot/StRefMultCorr/Centrality_def_refmult.txt";
   }
   else if ( mName.CompareTo("refmult2", TString::kIgnoreCase) == 0 ) {
-    return "StRoot/StRefMultCorr/Centrality_def_refmult2.txt";
+    return "/gpfs01/star/pwg/mzyzak/Femto/Template/StRoot/StRefMultCorr/Centrality_def_refmult2.txt";
   }
   else if ( mName.CompareTo("refmult3", TString::kIgnoreCase) == 0 ) {
-    return "StRoot/StRefMultCorr/Centrality_def_refmult3.txt";
+    return "/gpfs01/star/pwg/mzyzak/Femto/Template/StRoot/StRefMultCorr/Centrality_def_refmult3.txt";
   }
   else if ( mName.CompareTo("toftray", TString::kIgnoreCase) == 0 ) {
-    return "StRoot/StRefMultCorr/Centrality_def_toftray.txt";
+    return "/gpfs01/star/pwg/mzyzak/Femto/Template/StRoot/StRefMultCorr/Centrality_def_toftray.txt";
   }
   else if ( mName.CompareTo("grefmult", TString::kIgnoreCase) == 0 ) {
-    return "StRoot/StRefMultCorr/Centrality_def_grefmult.txt";
+    return "/gpfs01/star/pwg/mzyzak/Femto/Template/StRoot/StRefMultCorr/Centrality_def_grefmult.txt";
   }
   else if ( mName.CompareTo("grefmult_P16id", TString::kIgnoreCase) == 0 ) {
-      return "StRoot/StRefMultCorr/Centrality_def_grefmult_P16id.txt";
+      return "/gpfs01/star/pwg/mzyzak/Femto/Template/StRoot/StRefMultCorr/Centrality_def_grefmult_P16id.txt";
   }
   else if ( mName.CompareTo("grefmult_VpdMB30", TString::kIgnoreCase) == 0 ) {
-      return "StRoot/StRefMultCorr/Centrality_def_grefmult_VpdMB30.txt";
+      return "/gpfs01/star/pwg/mzyzak/Femto/Template/StRoot/StRefMultCorr/Centrality_def_grefmult_VpdMB30.txt";
   }
   else if ( mName.CompareTo("grefmult_VpdMBnoVtx", TString::kIgnoreCase) == 0 ) {
-      return "StRoot/StRefMultCorr/Centrality_def_grefmult_VpdMBnoVtx.txt";
+      return "/gpfs01/star/pwg/mzyzak/Femto/Template/StRoot/StRefMultCorr/Centrality_def_grefmult_VpdMBnoVtx.txt";
   }
   else{
     Error("StRefMultCorr::getTable", "No implementation for %s", mName.Data());
@@ -658,13 +657,13 @@ void StRefMultCorr::readBadRuns()
   for(Int_t i=0; i<7; i++) {
     cout << "StRefMultCorr::readBadRuns  For " << mName << ": open " << flush ;
     const Int_t year = 2010 + i ;
-    Char_t* inputFileName(Form("StRoot/StRefMultCorr/bad_runs_refmult_year%d.txt", year));
-    if(mName.CompareTo("grefmult_P16id", TString::kIgnoreCase) == 0) //read bad runs for VPDMB5
-        sprintf(inputFileName,"StRoot/StRefMultCorr/bad_runs_refmult_year%d_P16id.txt",year);
+    Char_t* inputFileName(Form("/gpfs01/star/pwg/mzyzak/Femto/Template/StRoot/StRefMultCorr/bad_runs_refmult_year%d.txt", year));
+    if(mName.CompareTo("grefmult_P16id", TString::kIgnoreCase) == 0) //read bad runs for VPDMB5, add bad runs for Run16 (now no bad runs for Run16 available)
+        sprintf(inputFileName,"/gpfs01/star/pwg/mzyzak/Femto/Template/StRoot/StRefMultCorr/bad_runs_refmult_year%d_P16id.txt",year);
     else if(mName.CompareTo("grefmult_VpdMB30", TString::kIgnoreCase) == 0) //read bad runs for VPDMB30
-        sprintf(inputFileName,"StRoot/StRefMultCorr/bad_runs_refmult_year%d_VpdMB30.txt",year);
+        sprintf(inputFileName,"/gpfs01/star/pwg/mzyzak/Femto/Template/StRoot/StRefMultCorr/bad_runs_refmult_year%d_VpdMB30.txt",year);
     else if(mName.CompareTo("grefmult_VpdMBnoVtx", TString::kIgnoreCase) == 0) //read bad runs for VPDMB-noVtx
-        sprintf(inputFileName,"StRoot/StRefMultCorr/bad_runs_refmult_year%d_VpdMBnoVtx.txt",year);
+        sprintf(inputFileName,"/gpfs01/star/pwg/mzyzak/Femto/Template/StRoot/StRefMultCorr/bad_runs_refmult_year%d_VpdMBnoVtx.txt",year);
     else
         ;//
     cout << "bad run file: " << inputFileName << endl;
