@@ -6,7 +6,7 @@
 // Xin Dong, 04/14/2010
 //
 
- 
+
 // #include "StDbLib/StDbManager.hh"
 // #include "StDbLib/StDbConfigNode.hh"
 // #include "StDbLib/StDbTable.h"
@@ -16,7 +16,7 @@
 #include <fstream>
 using namespace std;
 
-void readtofTOffset(const char* time = "2010-01-01 00:00:00")
+void readtofTOffset(string ZReadTime = "2029-12-31 23:59:59")
 {
   const int mNTray = 120;
   const Int_t mNTOF = 192;
@@ -38,11 +38,10 @@ void readtofTOffset(const char* time = "2010-01-01 00:00:00")
   //-- connect to the db & get an empty container
   StDbConfigNode* configNode = dbManager->initConfig("Calibrations_tof");
 
-  string ZReadTime = time;
   dbManager->setRequestTime(ZReadTime.c_str());
 
   StDbTable* tofTOffset = configNode->addDbTable("tofTOffset");
- 
+
   dbManager->fetchDbTable(tofTOffset);
 
   cout<<tofTOffset->getVersion()<<endl;
@@ -53,7 +52,7 @@ void readtofTOffset(const char* time = "2010-01-01 00:00:00")
 
 
   tofTOffset_st* tZero = static_cast<tofTOffset_st*>(tofTOffset->GetTable());
-  
+
   if(!tZero) {
     cout << " ahhhhhh! " << endl;
     return;
@@ -90,7 +89,7 @@ void readtofTOffset(const char* time = "2010-01-01 00:00:00")
          outData << tZero[i].T0[index] << endl;
        }
      }
-  }    
+  }
   outData.close();
 
   cout<<tofTOffset->getVersion()<<endl;

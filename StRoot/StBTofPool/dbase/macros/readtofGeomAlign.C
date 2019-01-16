@@ -13,7 +13,7 @@
 #include <iomanip>
 using namespace std;
 
-void readtofGeomAlign(const char* time = "2029-12-31 23:59:59")
+void readtofGeomAlign(string ZReadTime = "2029-12-31 23:59:59")
 {
   //-- load dBase and Table definition libraries
   gSystem->Load("St_base");
@@ -33,7 +33,7 @@ void readtofGeomAlign(const char* time = "2029-12-31 23:59:59")
 
   //-- connect to the db & get an empty container
   StDbConfigNode* configNode = dbManager->initConfig("Calibrations_tof");
-  string ZReadTime = time;
+  //string ZReadTime = time;
   dbManager->setRequestTime(ZReadTime.c_str());
 
   StDbTable* tofGeomAlign = configNode->addDbTable("tofGeomAlign");

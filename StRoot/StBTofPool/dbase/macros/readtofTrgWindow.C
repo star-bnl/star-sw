@@ -6,7 +6,7 @@
 #include <fstream>
 using namespace std;
 
-void readtofTrgWindow(const char* time = "2011-01-01 00:00:00") {
+void readtofTrgWindow(string ZReadTime = "2029-12-31 23:59:59") {
 
   const Int_t NTRAY = 120;
   const Int_t NVPDTRAY = 2;
@@ -28,7 +28,6 @@ void readtofTrgWindow(const char* time = "2011-01-01 00:00:00") {
   //-- connect to the db & get an empty container
   StDbConfigNode* configNode = dbManager->initConfig("Calibrations_tof");
 
-  string ZReadTime = time;
   dbManager->setRequestTime(ZReadTime.c_str());
 
   //-- add table to the container with descriptor given by Database
