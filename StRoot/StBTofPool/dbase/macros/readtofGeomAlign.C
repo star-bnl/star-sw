@@ -1,7 +1,7 @@
-// macro to read tof Geom Align data 
+// macro to read tof Geom Align data
 //
 
- 
+
 // #include "StDbLib/StDbManager.hh"
 // #include "StDbLib/StDbConfigNode.hh"
 // #include "StDbLib/StDbTable.h"
@@ -59,20 +59,20 @@ void readtofGeomAlign(const char* time = "2010-01-01 00:00:00")
   }
 
   ofstream outData;
-  outData.open("geomAlign_readback.txt");
+  outData.open("geomAlign_readback.dat");
 
   for(int i=0;i<nRows;i++) {
     int tray = i+1;
-    cout << " trayId=" << tray 
-	 << " phi0=" << tofAlign[i].phi0 
+    cout << " trayId=" << tray
+	 << " phi0=" << tofAlign[i].phi0
 	 << " z0=" << tofAlign[i].z0
 	 << " x0=" << tofAlign[i].x0
 	 << " a0=" << tofAlign[i].angle0 << endl;
     outData << setw(6)  << tray
 	    << setw(15) << tofAlign[i].phi0
-	    << setw(15) << tofAlign[i].z0 
+	    << setw(15) << tofAlign[i].z0
 	    << setw(15) << tofAlign[i].x0
-	    << setw(15) << tofAlign[i].angle0 
+	    << setw(15) << tofAlign[i].angle0
 	    << endl;
   }
 
