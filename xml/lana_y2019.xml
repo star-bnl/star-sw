@@ -45,10 +45,10 @@
   endif
 </command>
 <!-- <input URL="file:/star/data03/daq/2018/*/*/st_laser_adc*.daq"/>  -->
-<!-- <input URL="command:Lana2018.pl"/> -->
+<input URL="command:Lana2019.pl"/>
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2018/088/19088006/st_laser_19088006_raw_0000007.daq" /> -->
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2018/169/*/st_laser_adc_19169021*.daq" /> -->
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2018/*/*/st_laser_*.daq" /> -->
-<input URL="file:/net/l401/data/scratch1/daq/2019/*/*/st_laser_*.daq" />
+<!-- <input URL="file:/net/l401/data/scratch1/daq/2019/*/*/st_laser_*.daq" /> -->
 <!-- <input URL="file:/hlt/cephfs/daq/2019/*/*/st_laser_*.daq" /> -->
 </job>
