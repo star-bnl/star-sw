@@ -6,7 +6,7 @@
 #include <fstream>
 using namespace std;
 
-void readvpdDelay(const char* time = "2010-01-01 00:00:00") {
+void readvpdDelay(string ZReadTime = "2029-12-31 23:59:59") {
 
   const Int_t NVPD = 38;
 
@@ -25,7 +25,6 @@ void readvpdDelay(const char* time = "2010-01-01 00:00:00") {
   //-- connect to the db & get an empty container
   StDbConfigNode* configNode = dbManager->initConfig("Calibrations_tof");
 
-  string ZReadTime = time;
   dbManager->setRequestTime(ZReadTime.c_str());
 
   //-- add table to the container with descriptor given by Database
