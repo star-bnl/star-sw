@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.141 2018/01/17 17:15:59 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.142 2019/01/16 23:38:29 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.142  2019/01/16 23:38:29  perev
+// Fix wrong order in if (Jason)
+//
 // Revision 1.141  2018/01/17 17:15:59  perev
 // Enhanced test to skip wrong file name corrected
 //
@@ -414,7 +417,7 @@ Int_t St_db_Maker::Init()
    fDataBase=0;
    Snapshot(0);
    int snap = fDataBase!=0;
-   for (int idir=0; !fDirs[idir].IsNull() && !snap && idir < 10; idir++) {//loop over dirs
+   for (int idir=0;!snap && idir < 10 && !fDirs[idir].IsNull(); idir++) {//loop over dirs
 
      dir = fDirs[idir];
      gSystem->ExpandPathName(dir);
