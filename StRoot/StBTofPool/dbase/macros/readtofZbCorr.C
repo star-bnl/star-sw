@@ -6,7 +6,7 @@
 // Xin Dong, 04/14/2010
 //
 
- 
+
 // #include "StDbLib/StDbManager.hh"
 // #include "StDbLib/StDbConfigNode.hh"
 // #include "StDbLib/StDbTable.h"
@@ -18,9 +18,9 @@
 #include "iomanip.h"
 using namespace std;
 
-void readtofZbCorr(const char* time = "2010-01-01 00:00:00")
+void readtofZbCorr(string ZReadTime = "2029-12-31 23:59:59")
 {
-  const int mNTray = 120;  
+  const int mNTray = 120;
   const int mNTDIG = 8;
   const int mNVPD = 19;
 
@@ -39,11 +39,10 @@ void readtofZbCorr(const char* time = "2010-01-01 00:00:00")
   //-- connect to the db & get an empty container
   StDbConfigNode* configNode = dbManager->initConfig("Calibrations_tof");
 
-  string ZReadTime = time;
   dbManager->setRequestTime(ZReadTime.c_str());
 
   StDbTable* tofZbCorr = configNode->addDbTable("tofZbCorr");
- 
+
   dbManager->fetchDbTable(tofZbCorr);
 
   cout<<tofZbCorr->getVersion()<<endl;
@@ -53,7 +52,7 @@ void readtofZbCorr(const char* time = "2010-01-01 00:00:00")
 
 
   tofZbCorr_st* zcorr = static_cast<tofZbCorr_st*>(tofZbCorr->GetTable());
-  
+
   if(!zcorr) {
     cout << " ahhhhhh! " << endl;
     return;

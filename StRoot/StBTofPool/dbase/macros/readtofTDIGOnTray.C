@@ -3,10 +3,10 @@
 // based on
 //  http://www.star.bnl.gov/STAR/comp/db/StoreDbTable.cc.html
 //
-// Jing Liu, 03/10/2005 
+// Jing Liu, 03/10/2005
 //
 
- 
+
 // #include "StDbLib/StDbManager.hh"
 // #include "StDbLib/StDbConfigNode.hh"
 // #include "StDbLib/StDbTable.h"
@@ -16,7 +16,7 @@
 #include <fstream>
 using namespace std;
 
-void readtofTDIGOnTray()
+void readtofTDIGOnTray(string ZReadTime = "2029-12-31 23:59:59")
 {
   //-- load dBase and Table definition libraries
   gSystem->Load("St_base");
@@ -33,11 +33,10 @@ void readtofTDIGOnTray()
   //-- connect to the db & get an empty container
   StDbConfigNode* configNode = dbManager->initConfig("Calibrations_tof");
 
-  string ZReadTime = "2011-04-20 00:00:00";
   dbManager->setRequestTime(ZReadTime.c_str());
 
   StDbTable* tofmaptable = configNode->addDbTable("tofTDIGOnTray");
- 
+
   dbManager->fetchDbTable(tofmaptable);
 
   cout<<tofmaptable->getVersion()<<endl;

@@ -1,4 +1,4 @@
-// $Id: storevpdTotCorr.C,v 1.2 2014/11/24 22:18:54 geurts Exp $
+// $Id: storevpdTotCorr.C,v 1.3 2019/01/16 16:18:36 geurts Exp $
 // macro to upload tofr5 INL tables to database
 //
 // based on http://www.star.bnl.gov/STAR/comp/db/StoreDbTable.cc.html
@@ -6,6 +6,9 @@
 // Xin Dong, 02/18/2005 
 // ---
 // $Log: storevpdTotCorr.C,v $
+// Revision 1.3  2019/01/16 16:18:36  geurts
+// minor updates
+//
 // Revision 1.2  2014/11/24 22:18:54  geurts
 // Add striciter protection against non-existing files (bail out), and reduce excessive std output
 //
@@ -50,7 +53,7 @@ void storevpdTotCorr(const Bool_t mTest = 1)
 //  TString StoreTime = "2010-03-18 18:00:00";   // 62 GeV preliminary
 //  TString StoreTime = "2010-04-08 15:00:00";   // 39 GeV preliminary
 //  TString StoreTime = "2010-04-24 03:50:00";   // 7.7GeV preliminary
-  int corralgo = 0; // 1:enable self-calibrated BTOF; 0=use VPD
+  int corralgo = 1; // 1:enable self-calibrated BTOF; 0=use VPD
   ifstream inTime;
   inTime.open("input/timestamp");
   string time;
