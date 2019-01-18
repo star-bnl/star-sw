@@ -2121,7 +2121,7 @@ class Struct( Handler ): # new style structures
             membid += "struct %s {\n"%myvar
             membid += '  static const char *name() { return  "%s"; }\n'%myvar
 
-            membid += '  static int Offset(){ return offsetof( struct %s_t, %s ); }\n'%(name,myvar)
+            membid += '  static size_t Offset(){ return offsetof( struct %s_t, %s ); }\n'%(name,myvar)
             
 #           if lastvar == None:
 #               membid += '  static int Offset(){ return 0; }\n'
@@ -2130,7 +2130,7 @@ class Struct( Handler ): # new style structures
 
 
             membid += '  static void* address(){ \n'
-            membid += '         long long iadd = (long long)%s_info::address;\n'%name
+            membid += '         size_t iadd = (size_t)%s_info::address;\n'%name
             membid += '         iadd += Offset();\n'
             membid += '         return (void *)iadd;}\n'
 
