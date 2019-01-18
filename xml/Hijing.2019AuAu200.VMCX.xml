@@ -8,7 +8,7 @@
   set Name = `basename $PWD`
   setenv NODEBUG yes
 #  setup 64b
-#  starver TFG18g
+  starver TFG19a
 #  starver .DEV2 
 #  starver TFG17u 
 #  starver TFG17v 

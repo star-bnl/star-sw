@@ -291,7 +291,9 @@ void MakeTpcAvgPowerSupply(Int_t year = 2019) {
   struct FitP_t {
     Float_t run, uBegin, uStop, uEnd, channel, module, io, sector, socket, meanV, rmsV, Vfit, meanC, rmsC, Cfit, Charge, FitStatus, AcChargeI, AcChargeO, np;
   };
-  TFile *fSumF = new TFile(Form("MakeTpcAvgPowerSupply.%i.root",year),"update");
+  TDatime now;
+  
+  TFile *fSumF = new TFile(Form("MakeTpcAvgPowerSupply.%02i%02i%02i.root",now.GetDay(),now.GetMonth(),now.GetYear()%100),"update");
   TNtuple *FitP = 0;
   if (fSumF) FitP = (TNtuple *) fSumF->Get("FitP");
   if (!FitP) {
@@ -484,6 +486,7 @@ void MakeTpcAvgPowerSupply(Int_t year = 2019) {
     }
     if (! NoRowsRead) {
       //      SafeDelete(runs[r]); 
+      cout << "Skip run[" << r << "] = " << runs[r] << " with NoRowsRead = " << NoRowsRead << endl;
       continue;
     }
     // Fit
@@ -603,6 +606,18 @@ void MakeTpcAvgPowerSupply(Int_t year = 2019) {
       }
     }
     if (! runs[r]) continue;
+    Float_t VoltagesIO[2] = {0,0}; 
+    for (Int_t sec = 1; sec <= 24; sec++) {
+      for (Int_t socket = 1; socket <= 8; socket++) {
+	if (socket <= 4) VoltagesIO[0] += avgC.Voltage[8*(sec-1)+socket-1];
+	else             VoltagesIO[1] += avgC.Voltage[8*(sec-1)+socket-1];
+      }
+    }
+    if (VoltagesIO[0] <= 0.1 && VoltagesIO[1] <= 0.1) {
+      //      SafeDelete(runs[r]); 
+      cout << "Skip run[" << r << "] = " << runs[r]->run << " with VoltagesI = " << VoltagesIO[0] << " and VoltagesO = " << VoltagesIO[1] << endl;
+      continue;
+    }
     TString fOut =  Form("TpcAvgPowerSupply.%8i.%06i.root",runs[r]->start.GetDate(),runs[r]->start.GetTime());
     TFile *outf = new TFile(fOut.Data(),"recreate");
     TpcAvgPowerSupply->Write();

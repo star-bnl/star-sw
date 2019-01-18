@@ -13,10 +13,12 @@
      set b = `basename ${f} .PicoDst.root`; mv ${b}* Zombie/
    end
  */
-
-// #include "TDirIter.h"
-// #include "TFile.h"
-void Recover(Char_t *files ="./*.MuDst.root") {
+#if !defined(__CINT__) && !defined(__CLING__) && ! defined(__MAKECINT__)
+#include "Riostream.h"
+#include "TDirIter.h"
+#include "TFile.h"
+#endif
+void Recover(const Char_t *files ="./*.MuDst.root") {
   TDirIter Dir(files);
   Char_t *file = 0;
   Int_t NFiles = 0;

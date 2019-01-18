@@ -1,3 +1,4 @@
+#if 0
 void Run1Ev(Int_t NEvents=1, Int_t iD = 5, 
 	    Double_t pTlow=1,Double_t pThigh=1,
 	    Double_t Ylow=-.1, Double_t Yhigh=-.1,
@@ -5,10 +6,10 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
 	    Double_t Zlow=0, Double_t Zhigh=0, Int_t Npart = 1, const Char_t *opt = "G") 
 #else
 void Run1Ev(Int_t NEvents=1, Int_t iD = 5, 
-	    Double_t pTlow=0.602,Double_t pThigh=0.602,
-	    Double_t Ylow=-.1, Double_t Yhigh=-.1,
-	    Double_t Philow=-TMath::DegToRad()*25, Double_t Phihigh=-TMath::DegToRad()*35,
-	    Double_t Zlow=0, Double_t Zhigh=0, Int_t Npart = 20, const Char_t *opt = "BLG") 
+	    Double_t pTlow=10,Double_t pThigh=10,
+	    Double_t Ylow=.0, Double_t Yhigh=.0,
+	    Double_t Philow=0, Double_t Phihigh=0,
+	    Double_t Zlow=10, Double_t Zhigh=10, Int_t Npart = 1, const Char_t *opt = "G") 
 #endif
 {
   if ( gClassTable->GetID("TGiant3") >= 0) { // root4star
