@@ -36,18 +36,21 @@ void StTinyMcTrack::Print(Option_t *option) const {
       Double_t R = mStopR;
       if (R < 0) R = 0;
       if (R > 999.99) R = 999.99;
-//    cout << Form("Mc%2i%8.3f%8.3f%8.3f%8.3f%5i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%8.3f%4i%8.3f%8.3f%4i%4i%4i%4i%2i", 
-      cout << Form("Mc%2i%8.3f%8.3f%8.3f%8.3f%5i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%6i%8.3f%4i%4i%8.3f%8.3f%4i%4i%2i",
-		   (int) mIsValid, mPtMc,  mPzMc,  mEtaMc,  mPhiMc,  
-		   mNHitMc,  mNSvtHitMc,  mNSsdHitMc,  mNFtpcHitMc,
-		   mNBemcHitMc, mNBprsHitMc, mNBsmdeHitMc, mNBsmdpHitMc,
-		   mNEemcHitMc, mNEprsHitMc, mNEsmduHitMc, mNEsmdvHitMc,		  
-		   mGeantId,  mChargeMc,  R,  mKey,  mParentKey, mEmcEnergyMcHit[0], mEmcEnergyMcSum, mEmcSoftIdHiTowerMc[0], mNAssocGl,  mNAssocPr,  (int) mIsPrimary) << endl;
+// //    cout << Form("Mc%2i%8.3f%8.3f%8.3f%8.3f%5i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%8.3f%4i%8.3f%8.3f%4i%4i%4i%4i%2i", 
+//       cout << Form("Mc%2i%8.3f%8.3f%8.3f%8.3f%5i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%6i%8.3f%4i%4i%8.3f%8.3f%4i%4i%2i",
+// 		   (int) mIsValid, mPtMc,  mPzMc,  mEtaMc,  mPhiMc,  
+// 		   mNHitMc,  mNSvtHitMc,  mNSsdHitMc,  mNFtpcHitMc,
+// 		   mNBemcHitMc, mNBprsHitMc, mNBsmdeHitMc, mNBsmdpHitMc,
+// 		   mNEemcHitMc, mNEprsHitMc, mNEsmduHitMc, mNEsmdvHitMc,		  
+// 		   mGeantId,  mChargeMc,  R,  mKey,  mParentKey, mEmcEnergyMcHit[0], mEmcEnergyMcSum, mEmcSoftIdHiTowerMc[0], mNAssocGl,  mNAssocPr,  (int) mIsPrimary) << endl;
     }
   }
 }
 //
 // $Log: StTinyMcTrack.cxx,v $
+// Revision 1.7  2019/01/18 01:10:15  perev
+// OverComplicated print commented out
+//
 // Revision 1.6  2011/02/16 00:49:06  perev
 // geandId could be zero
 //
