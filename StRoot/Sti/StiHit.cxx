@@ -239,17 +239,20 @@ static int nCall =0; nCall++;
 
   Form("**** StiHit.%s too far: x=%f pos=%g dif=%g ****\n"
         ,detector->getName().c_str(),mx,pos,dif)
-        << endm;
+        << endm;xs
 }
 
 //_____________________________________________________________________________
  void StiHit::addTimesUsed()
 {
     mTimesUsed++;
-    assert(mTimesUsed <=mMaxTimes);
+    //    assert(mTimesUsed <=mMaxTimes);
+    if (mTimesUsed > mMaxTimes) {
+      LOG_ERROR << "StiHit::addTimesUsed : mTimesUsed = " << mTimesUsed << " > mMaxTimes " << mMaxTimes <<endm;
+    }
 }
 //_____________________________________________________________________________
- void StiHit::subTimesUsed()
+ void StiHit::subTimesUsed()xs
 {
     mTimesUsed--;
     assert(mTimesUsed>=0);
