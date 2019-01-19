@@ -239,7 +239,7 @@ static int nCall =0; nCall++;
 
   Form("**** StiHit.%s too far: x=%f pos=%g dif=%g ****\n"
         ,detector->getName().c_str(),mx,pos,dif)
-        << endm;xs
+        << endm;
 }
 
 //_____________________________________________________________________________
