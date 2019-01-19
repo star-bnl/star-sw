@@ -4,6 +4,7 @@
 #include <math.h>
 #include <errno.h>
 #include <unistd.h>
+#include <time.h>
 
 #include <rtsLog.h>
 #include <DAQ_ITPC/itpcCore.h>
@@ -38,6 +39,37 @@ itpcPed::~itpcPed()
 
 }
 
+int itpcPed::kill_non_phys()
+{
+	int cou = 0 ;
+
+	for(int s=0;s<24;s++) {
+	for(int r=0;r<4;r++) {
+	for(int p=0;p<16;p++) {
+	for(int c=0;c<64;c++) {
+		if(ped_p[s][r][p][c]) ;
+		else continue ;
+
+		int row, pad, fee_id ;
+		fee_id = padplane_id[s][r][p] ;
+
+
+		itpc_ifee_to_rowpad(fee_id,c,row,pad) ;
+
+		if(row==0) {
+			cou++ ;
+			LOG(NOTE,"Non-phys ch %d: %d %d %d %d: fee_id %d, rp %d:%d",cou,s+1,r+1,p+1,c,row,pad) ;
+
+			ped_p[s][r][p][c]->c_ped = 1023.0 ;
+		}
+
+	}}}}
+
+
+	return cou ;
+}
+
+
 // sector: 1 to 24
 // rdo: 1 to 4
 void itpcPed::init(int sector, int rdo, u_int mask)
@@ -57,7 +89,6 @@ void itpcPed::init(int sector, int rdo, u_int mask)
 	}
 
 	
-
 	fee_mask[sector][rdo] = mask ;
 
 }
@@ -75,6 +106,8 @@ void itpcPed::set_padplane_id(int sector, int rdo, int port, int id)
 	
 void itpcPed::clear()
 {
+	memset(evts,0,sizeof(evts)) ;
+
 	for(int s=0;s<24;s++) {
 	for(int r=0;r<4;r++) {
 	for(int p=0;p<16;p++) {
@@ -94,14 +127,14 @@ void itpcPed::clear()
 // sector, rdo, port, channel, timebin, value
 void itpcPed::accum(int sector, int rdo, int port,int fee_id, int ch, int tb, int adc_val)
 {
-//	if(port==0 && ch==0 && tb==0) {
-//		LOG(TERR,"%s: %d",__PRETTY_FUNCTION__,adc_val) ;
-//	}
-
 	ped_t *pt = ped_p[sector][rdo][port][ch] ;
 
-//if(tb==185) printf("GAGA %d %d %d %d = %d\n",sector,rdo,port,ch,adc_val) ;
-	
+	if(pt==0) return ;	// super-precaution
+
+	if(evts[sector][rdo]<250) {
+		evts[sector][rdo]++ ;
+	}
+
 	pt->ped[tb] += adc_val ;
 	pt->rms[tb] += adc_val*adc_val ;
 	pt->cou[tb]++ ;
@@ -243,6 +276,18 @@ int itpcPed::sanity(int mode)
 	u_int bad_cou =0 ;
 	u_int good_cou =0 ;
 
+	char fname[128] ;
+	sprintf(fname,"/log/itpc/itpc_log_%02d.txt",sector_id) ;
+	FILE *f = fopen(fname,"a") ;
+	if(f==0) {
+		LOG(ERR,"sanity: %s [%s]",fname,strerror(errno)) ;
+	}
+	else {
+		time_t now = time(0) ;
+
+		fprintf(f,"Run %08u, Sector %2d, Run-type %d. Date %s",run_number,sector_id,run_type,ctime(&now)) ;
+	}
+
 	if(mode) {
 		LOG(INFO,"Using pulser peak timebin %d, in STAR %c",
 		    pulser_peak_timebin, pulser_in_star?'Y':'N') ;
@@ -251,6 +296,10 @@ int itpcPed::sanity(int mode)
 	for(int s=0;s<24;s++) {
 	for(int r=0;r<4;r++) {
 		if(ped_p[s][r][0][0]==0) continue ;
+
+		if(evts[s][r]<100) {	// no point in complaining if there's not enough events
+			continue ;
+		}
 
 		for(int p=0;p<16;p++) {
 			if(fee_mask[s][r] & (1<<p)) ;
@@ -296,27 +345,37 @@ int itpcPed::sanity(int mode)
 				int bad = 0 ;
 
 				if(row) {	// only for connected pads!
-					if((m_ped<40)||(m_ped>150)) bad |= 2 ;
-					if(m_rms < 0.5) bad |= 1 ;
+					if((m_ped<20)||(m_ped>150)) bad |= 1 ;
+					if(m_rms < 0.5) bad |= 2 ;
 
 
 					// only check for non-pulser events because the STAR pulser is very noisy
 					if(mode==1 && pulser_in_star) {
-						if(m_rms>2.6) bad |= 1 ;
+						// The STAR TPC pulser introduces so much noise
+						// it is not worth looking at it.
+						//if(m_rms>3) bad |= 4 ;
+						
 					}
 					else {
-						if(m_rms>1.8) bad |= 1 ;
+						if(m_rms>1.8) bad |= 4 ;
 					}
 
-					if(mode==1 && pulser < 200) bad |= 4 ;
+					if(mode==1 && pulser < 200) bad |= 8 ;
 				}
 
 				if(bad) {
 					bad_cou++ ;
 					fee_err[s][r][p][c] |= bad ;
-					//LOG(TERR,"sector %d, rdo %d, port %d",s,r,p) ;
-					LOG(WARN,"Bad FEE Ch: Port %d, Channel %d (Padplane Id %d, rp %d:%d): flag 0x%0X: %.1f +- %.1f, %.1f",p+1,c,fee_id,row,pad,bad,m_ped,m_rms,pulser) ;
-					usleep(1000) ;
+					
+					if(f) {
+						fprintf(f,"  Bad FEE Ch: RDO %d, Port #%d, Ch %d (Padplane %d, rp %d:%d): flag 0x%X: %.1f +- %.1f, %.1f\n",
+							r+1,p+1,c,fee_id,row,pad,bad,m_ped,m_rms,pulser) ;
+					}
+
+					LOG(WARN,"Bad FEE Ch: RDO %d, Port #%d, Ch %d (Padplane %d, rp %d:%d): flag 0x%X: %.1f +- %.1f, %.1f",
+					    r+1,p+1,c,fee_id,row,pad,bad,m_ped,m_rms,pulser) ;
+
+					usleep(1000) ;	// to give time for the printout
 				}
 				else {
 					good_cou++ ;
@@ -327,6 +386,10 @@ int itpcPed::sanity(int mode)
 	}
 	}
 
+	if(f) {
+		fprintf(f,"Bad channels: %d/%d\n",bad_cou,bad_cou+good_cou) ;
+		fclose(f) ;
+	}
 
 	LOG(INFO,"Bad channels: %d/%d",bad_cou,bad_cou+good_cou) ;
 

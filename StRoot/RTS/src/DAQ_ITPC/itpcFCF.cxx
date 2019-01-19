@@ -413,6 +413,10 @@ int itpc_fcf_c::init(int sec, const char *fname)
 		
 		if(sec_gains[sec]==0) continue ;	// not for me!
 
+		if(ch<0) {	// kill entire FEE!
+			LOG(ERR,"%d %d %d kill FEE not implemented",sec,rdo,port) ;
+			continue ;
+		}
 
 
 		gain_rp_t (*sr)[MAX_PHYS_PAD+1] = (gain_rp_t (*)[MAX_PHYS_PAD+1]) sec_gains[sec] ;
@@ -443,6 +447,7 @@ int itpc_fcf_c::init(int sec, const char *fname)
 	fclose(f) ;
 
 	if(ch_bad) LOG(WARN,"...with %d/%d bad channels",ch_bad,ch_all) ;
+	else LOG(TERR,"...with %d/%d no bad channels",ch_bad,ch_all) ;
 
 	return 0 ;
 }
@@ -583,6 +588,7 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 	int t_stop_last ;
 	u_short *s1_data ;
 	int t_cou ;
+	int err = 0 ;
 
 	seq_cou = 0;
 	int word32 = (words/3) + (words%3?1:0) ;
@@ -605,6 +611,7 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 
 	if((word32*3)>=MAX_TB_EVER) {
 		LOG(ERR,"%d:#%d: FEE %d:%d, words %d",rdo,port,fee_id,fee_ch,words) ;
+		err |= 1 ;
 		goto err_ret ;
 	}
 
@@ -615,6 +622,7 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 		if(d & 0xC0000000) {
 			seq_cou = 0 ;
 			LOG(ERR,"%d:#%d: FEE %d:%d, words %d",rdo,port,fee_id,fee_ch,words) ;
+			err |= 2 ;
 			goto err_ret ;
 		}
 
@@ -637,13 +645,15 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 		int t_stop = t_start + t_cou - 1 ;
 
 		if(t_start <= t_stop_last) {
-			LOG(WARN,"%d:#%d: FEE %d:%d, words %d: %d <= %d",rdo,port,fee_id,fee_ch,words,t_start,t_stop_last) ;
+			LOG(ERR,"%d:#%d: FEE %d:%d, words %d: %d <= %d",rdo,port,fee_id,fee_ch,words,t_start,t_stop_last) ;
 			seq_cou = 0 ;
+			err |= 4 ;
 			goto err_ret ;
 		}
 		if(t_stop > 511) {
-			LOG(WARN,"%d:#%d: FEE %d:%d, words %d: %d > 511",fee_id,rdo,port,fee_ch,words,t_stop) ;
+			LOG(ERR,"%d:#%d: FEE %d:%d, words %d: %d > 511",rdo,port,fee_id,fee_ch,words,t_stop) ;
 			seq_cou = 0 ;
+			err |= 4 ;
 			goto err_ret ;
 		}
 
@@ -686,6 +696,7 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 //	s_count = s1_data - row_pad[row][pad].s1_data ;
 	s_count = s1_data - get_row_pad(row,pad)->s1_data ;
 	if(s_count >= s1_data_length) {
+		err |= 8 ;
 		LOG(ERR,"In trouble at RP %d:%d",row,pad) ;
 	}
 
@@ -703,7 +714,7 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 //	row_pad[row][pad].s1_len = seq_cou ;
 	get_row_pad(row,pad)->s1_len = seq_cou ;	// sequence count!
 
-	return 0 ;	
+	return err ;	
 }
 
 // Called by the raw data unpacker: fee_id and fee_ch are _physical_ channels
