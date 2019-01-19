@@ -53,6 +53,7 @@
 #define MAX_TCD 20
 
 #define MAX_NODES 400
+#define MAX_EVBS 15
 
 #define MAX_THREADS 400
 #define MAX_STR_LEN 40
@@ -282,11 +283,11 @@ class EvbChooser
   int getEvb4Token(int token) { return evb4token[token]; }
 
  private:
-  int evbNodes[10][5];          // idx to server by evb/server
-  int nevbserv[10];             // nservers by evb
+  int evbNodes[MAX_EVBS][5];          // idx to server by evb/server
+  int nevbserv[MAX_EVBS];             // nservers by evb
 
-  int evt_ctrs_by_server[10];
-  int weights_by_evb[10];
+  int evt_ctrs_by_server[MAX_EVBS];
+  int weights_by_evb[MAX_EVBS];
   int weights_set;
 
   void readWeights();
