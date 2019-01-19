@@ -44,6 +44,7 @@ public:
 
 static daq_det_itpc_factory itpc_factory ;
 
+int daq_itpc::no_sw16 = 0 ;
 
 
 daq_itpc::daq_itpc(daqReader *rts_caller) 
@@ -326,6 +327,7 @@ daq_dta *daq_itpc::handle_raw(int sec, int rdo)
 	assert(caller) ;
 
 
+	this->no_sw16 = 1 ;
 
 	if((sec <= 0)||(sec>24)) {
 		min_sec = 1 ;
@@ -468,7 +470,7 @@ daq_dta *daq_itpc::handle_sampa(int sec, int rdo, int in_adc)
 
 	it->ped_c = &sampa_c ;
 	it->run_start(0) ;	// just in case
-	it->start_event(0) ;
+	it->start_event(0) ;	// I don't thihnk I need this?
 
 
 	for(int s=min_sec;s<=max_sec;s++) {
@@ -723,6 +725,9 @@ int daq_itpc::get_token(char *addr, int words)
 
 static inline u_int sw16(u_int d)
 {
+	daq_itpc *p ;
+	if(p->no_sw16) return d ;
+
 	d = ((d>>16)&0xFFFF)|(d<<16) ;
 
 /*
@@ -765,14 +770,18 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	int rdo_version ;
 	char buff[128] ;
 	int buff_cou ;
+	u_int want_dump = 0 ;
 
 	u_int *d = (u_int *)addr + 4 ;	// skip header
 	words -= 4 ;
 
 	// NOTE that since Dec 2017 the 16 bit words are swapped!!!
+	// eh, are you sure???
+	
 
 	// since there are buggy TEF events without the start comma lets' search for it
 	for(int i=0;i<16;i++) {
+		LOG(DBG,"%d = 0x%08X",i,d[i]) ;
 		if(d[i] == 0xCCCC001C) {
 			d = d + i ;
 			words-- ;
@@ -907,9 +916,11 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 
 	if(evt_status) {
 		LOG(ERR,"RDO %d: get_l2: evt status 0x%08X, trg_fired 0x%08X, trg_cou %d",rdo,evt_status,trg_fired,trg_cou) ;
-		trg[0].t = -ETIMEDOUT ;
-		trg[0].daq = trg[0].trg = 0 ;
-		return 1 ;
+
+		// We'll let it pass for now with just the error message
+//		trg[0].t = -ETIMEDOUT ;
+//		trg[0].daq = trg[0].trg = 0 ;
+//		return 1 ;
 	}
 
 	//LOG(TERR,"trg_cou %d, fired %d",trg_cou,trg_fired) ;
@@ -936,8 +947,27 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		}
 	}
 	
+	// switch on logging...
+#if 0
+	if(1) {
+		for(int i=0;i<=trg_cou;i++) {
+			u_int v = trg[i].reserved[0];
+			u_int t ;
+			u_int trg_cmd ;
+			u_int daq_cmd ;
+
+			t = ((v>>8)&0xF)<<8 ;
+			t |= ((v>>12)&0xF)<<4 ;
+			t |= ((v>>16)&0xF) ;
+
+			trg_cmd = v & 0xF ;
+			daq_cmd = (v>>4) & 0xF ;
 
 
+			LOG(TERR,"%d: %d/%d = 0x%08X = %d %d %d",rdo,i,trg_cou,trg[i].reserved[0],t,trg_cmd,daq_cmd) ;
+		}
+	}
+#endif
 	
 	if(trg_cou==0 && trg[0].reserved[0]==0) {	// Monitoring Event
 		trg[0].t = 4096 ;
@@ -949,7 +979,8 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 
 	// get prompt trigger/token
 	t_cou = 0 ;
-	if(trg[0].reserved[0]==0) {
+//	if(trg[0].reserved[0]==0) {
+	if(!(trg[0].reserved[0] & 0x00200000)) {	// didn't fire the FEE
 		trg[t_cou].t = 4097 ;
 		trg[t_cou].daq = 0 ;
 		trg[t_cou].trg = 0 ;
@@ -958,28 +989,60 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	else {
 		u_int v = trg[0].reserved[0] ;
 		u_int t ;
+		u_int trg_cmd ;
+		u_int daq_cmd ;
 
 		t = ((v>>8)&0xF)<<8 ;
 		t |= ((v>>12)&0xF)<<4 ;
 		t |= ((v>>16)&0xF) ;
 
-		trg[t_cou].trg = v & 0xF ;
-		trg[t_cou].daq = (v>>4) & 0xF ;
-		trg[t_cou].t = t ; 
+		trg_cmd = v & 0xF ;
+		daq_cmd = (v>>4) & 0xF ;
+
 
 		if(((v&0xFFF00000) != 0x04300000)&&((v&0xFFF00000)!=0x08300000)) {	// 0x043 external trigger, 0x083 local trigger
-			LOG(ERR,"RDO %d: 0x%08X: %d %d %d",rdo,trg[0].reserved[0],trg[0].t,trg[0].trg,trg[0].daq) ;
+			LOG(ERR,"RDO %d: trigger odd: 0x%08X: %d %d %d",rdo,v,t,trg_cmd,daq_cmd) ;
 		}
-			
-		t_cou++ ;
+
+
+
+		if((t!=0) && (trg_cmd>=4) && (trg_cmd<=11)) {
+
+		
+			trg[t_cou].trg = trg_cmd ;
+			trg[t_cou].daq = daq_cmd ;
+			trg[t_cou].t = t ; 
+
+
+			//if(((v&0xFFF00000) != 0x04300000)&&((v&0xFFF00000)!=0x08300000)) {	// 0x043 external trigger, 0x083 local trigger
+			//	LOG(ERR,"RDO %d: trigger odd: 0x%08X: %d %d %d",rdo,trg[0].reserved[0],trg[0].t,trg[0].trg,trg[0].daq) ;
+			//}
+		
+			t_cou++ ;
+		}
+		else {
+
+			LOG(ERR,"%d: odd prompt trigger T %d, trg 0x%X, daq 0x%X [0x%08X]",rdo,t,trg_cmd,daq_cmd,v) ;
+
+			trg[t_cou].t = 4097 ;
+			trg[t_cou].trg = 0 ;
+			trg[t_cou].daq = 0 ;
+
+			t_cou++ ;
+		}
 
 	}
+
+
 
 	for(u_int i=1;i<(trg_cou+1);i++) {
 		u_int v = trg[i].reserved[0] ;
 		u_int t ;
 
-		if(v==0) continue ;
+		if(v==0) {	// eh?
+			want_dump |= 1 ;
+			continue ;	// eh?
+		}
 
 		t = ((v>>8)&0xF)<<8 ;
 		t |= ((v>>12)&0xF)<<4 ;
@@ -988,6 +1051,19 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		trg[t_cou].trg = v & 0xF ;
 		trg[t_cou].daq = (v>>4) & 0xF ;
 		trg[t_cou].t = t ; 
+
+		if(t==0 || trg[t_cou].trg==0) {
+			want_dump |= 2 ;
+			continue ;
+		}
+
+		if(trg[t_cou].trg==4 || trg[t_cou].trg==8 || trg[t_cou].trg==10 || trg[t_cou].trg==14 || trg[t_cou].trg==15) ;
+		else {
+			if(trg[t_cou].trg==2 && trg[t_cou].daq==3 && trg[t_cou].t==10) ;	// skip the special clear at run-start
+			else {
+				want_dump |= 0x10 ;
+			}
+		}
 
 		//LOG(TERR,"trg %d: 0x%08X: trg %d",i,v,v&0xF) ;
 
@@ -997,34 +1073,61 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 			//    trg[t_cou].t,trg[t_cou].trg,trg[t_cou].daq) ;
 			
 
-			if((v&0xFFF00000) != 0x04300000) {
+			if((v&0xFFF00000) != 0x04300000) {	// normal prompt trigger?
 				LOG(NOTE,"RDO %d: %d/%d: 0x%08X: %d %d %d",rdo,i,(trg_cou+1),
 				    v,
 				    trg[t_cou].t,trg[t_cou].trg,trg[t_cou].daq) ;
 			}
 			else {
+				//want_dump |= 4 ;
 				continue ;
 			}
 		}
-		if(trg[t_cou].trg==14) {	// HACK!!!
-			continue ;
-		}
 
-		//if(trg[t_cou].trg==2 && trg[t_cou].t==10 && trg[t_cou].daq==3) continue ;
-		if(trg[t_cou].trg<=2) {
-			LOG(WARN,"%d: odd trg_cmd: T %d, trg %d, daq %d",rdo,trg[t_cou].t,trg[t_cou].trg,trg[t_cou].daq) ;
-			continue ;
-		}
+		if(trg[t_cou].trg==14) continue ;	// I don't care about L1
+		if(trg[t_cou].trg==2) continue ;
+
+
+//		if(trg[t_cou].trg==2 && trg[t_cou].t==10 && trg[t_cou].daq==3) continue ;
+
+//		if(trg[t_cou].trg<=2) {
+//			want_dump |= 8 ;
+//			//LOG(WARN,"%d: odd trg_cmd: T %d, trg %d, daq %d",rdo,trg[t_cou].t,trg[t_cou].trg,trg[t_cou].daq) ;
+//			continue ;
+//		}
+
+
 		t_cou++ ;
 	}
 
+#if 0
+	if(want_dump) {
+		for(u_int i=1;i<(trg_cou+1);i++) {
+			u_int v = trg[i].reserved[0] ;
+			u_int t ;
+			int trg, daq ;
 
-//	for(int i=0;i<t_cou;i++) {
-//		const char *s = "" ;
-//		if((trg[i].reserved[0] & 0xFFF00000)!=0x04300000) s = "OVERRUN" ;
-//
-//		LOG(TERR,"%d: %d/%d: T %d, trg %d [0x%08X %s]",rdo,i+1,t_cou,trg[i].t,trg[i].trg, trg[i].reserved[0],s) ;
-//	}
+			t = ((v>>8)&0xF)<<8 ;
+			t |= ((v>>12)&0xF)<<4 ;
+			t |= ((v>>16)&0xF) ;
+
+			trg = v & 0xF ;
+			daq = (v>>4) & 0xF ;
+
+			LOG(ERR,"RDO %d: %d: %d %d %d [0x%08X;0x%X]",rdo,i,t,trg,daq,v,want_dump) ;
+		}	
+	}
+#endif
+
+	if(t_cou==0) {	// wha?
+		LOG(ERR,"t_cou = 0?") ;
+		
+		trg[t_cou].t = 4097 ;
+		trg[t_cou].daq = 0 ;
+		trg[t_cou].trg = 0 ;
+		t_cou++ ;
+
+	}
 
 	return t_cou ;
 
