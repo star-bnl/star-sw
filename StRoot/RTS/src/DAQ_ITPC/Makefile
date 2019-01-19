@@ -44,7 +44,7 @@ daq_itpc.o: ../../../../StRoot/RTS/include/rtsLog.h
 daq_itpc.o: ../../../../StRoot/RTS/include/rtsSystems.h
 daq_itpc.o: ../../../../StRoot/RTS/include/daqFormats.h
 daq_itpc.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-daq_itpc.o: ../../trg/include/trgDataDefs_45.h
+daq_itpc.o: ../../trg/include/trgDataDefs_46.h
 daq_itpc.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 daq_itpc.o: ../SFS/sfs_index.h
 daq_itpc.o: ../SFS/fs_index.h

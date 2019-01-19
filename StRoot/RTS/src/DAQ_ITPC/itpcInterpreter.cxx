@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <math.h>
+#include <stdlib.h>
 
 #include <rtsLog.h>
 #include <DAQ_READER/daq_dta.h>
@@ -104,80 +105,77 @@ int itpcInterpreter::itpc_fee_map[24][4][16] = {
 	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}    
 
 },
-{//S13 NOT right
-	{49,46, 0,52,54, 0, 0,47, 0,50,55,53, 0,48, 0,51}, 
-	{40,32,43,36,41,33, 0,37, 0,38,44,34,45,39,42,35}, 
-	{12, 0,19, 1,24, 7,28,17,20, 2,29, 8,25,13,21, 3}, 
-	{14, 9,30, 4,59,22,15,10,31, 5,27,18,23,11, 0, 0}
+{//S13
+	{49,52,46, 0, 0, 54,0,47, 0,50, 0,55,48, 0,51,53}, 
+	{36,32,40,43,37,33, 0,41, 0,44,38,34,42,45,39,35},  
+	{ 7, 1,17,12,24,19,13, 8,28, 2, 0,20,29,25,21, 3}, 
+	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}    
 },
 {//S14
-	{49,46, 0,52,54, 0, 0,47, 0,50,55,53, 0,48, 0,51}, 
-	{40,32,43,36,41,33, 0,37, 0,38,44,34,45,39,42,35}, 
-	{12, 0,19, 1,24, 7,28,17,20, 2,29, 8,25,13,21, 3}, 
-	{14, 9,30, 4,59,22,15,10,31, 5,27,18,23,11, 0, 0}
+	{49,52,46, 0, 0, 54,0,47, 0,50, 0,55,48, 0,51,53}, 
+	{36,32,40,43,37,33, 0,41, 0,44,38,34,42,45,39,35},  
+	{ 7, 1,17,12,24,19,13, 8,28, 2, 0,20,29,25,21, 3}, 
+	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}    
 },
 {//S15
-	{49,46, 0,52,54, 0, 0,47, 0,50,55,53, 0,48, 0,51}, 
-	{40,32,43,36,41,33, 0,37, 0,38,44,34,45,39,42,35}, 
-	{12, 0,19, 1,24, 7,28,17,20, 2,29, 8,25,13,21, 3}, 
-	{14, 9,30, 4,59,22,15,10,31, 5,27,18,23,11, 0, 0}
-},
-{//S16 -- scanned but fees missing
 	{49,52,46, 0, 0, 54,0,47, 0,50, 0,55,48, 0,51,53}, 
-//	{36,32,40,43,37,33, 0,41, 0,44,38,34,42,45,39,35}, 
-	{36,32,40,43,37,33, 0,41, 0,44,38,34,42,45,39, 0}, // RDO2: bad FEE 16
+	{36,32,40,43,37,33, 0,41, 0,44,38,34,42,45,39,35},  
 	{ 7, 1,17,12,24,19,13, 8,28, 2, 0,20,29,25,21, 3}, 
-	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}
+	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}    
 },
-{//S17 - scanned but old map
-	{46,49, 0,52,54, 0, 0,47, 0,55,50,51, 0,53, 0,48}, 
-	{43,41,37,33,36,40,44, 0,42,45,38,34,39,30,35,31}, 
-	{ 0,28, 7, 1,17,12,32,19,29,24,25,20, 2, 8,13, 3}, 
-	{ 0,26,27,21,22,23,18,15,14,16, 9, 4,10, 5,11, 6}
-},
-{//S18 -- scanned but old map
-	{49,46, 0,52,54, 0, 0,47, 0,50,55,53, 0,48, 0,51}, 
-	{40,32,43,36,41,33, 0,37, 0,38,44,34,45,39,42,35}, 
-	{12, 0,19, 1,24, 7,28,17,20, 2,29, 8,25,13,21, 3}, 
-	{14, 9,30, 4,59,22,15,10,31, 5,27,18,23,11, 0, 0}
-},
-{//S19 - scanned but errors on 1 & 2, padplane 35 & 43 duplicated
-	{49,52,46, 0, 0, 54,0,43, 0,50, 0,55,48, 0,35,53}, // RDO1: port 8 should be 47, port 15 should be 51
-	{36,32,40,43,37,33, 0,41, 0,44,38,34,42,45,39,35}, 
-	{ 7, 1,17,12,24,19,13, 8,28, 2, 0,20,29,25,21, 3}, 
-	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}
-},
-{//S20 - scanned but fees missing
+{//S16
 	{49,52,46, 0, 0, 54,0,47, 0,50, 0,55,48, 0,51,53}, 
-//	{36,32,40,43,37,33, 0,41, 0,44,38,34,42,45,39,35}, 
-	{36,32, 0,43,37,33, 0,41, 0,44,38,34,42,45,39,35}, // RDO2: 3 missing
+	{36,32,40,43,37,33, 0,41, 0,44,38,34,42,45,39,35},  
 	{ 7, 1,17,12,24,19,13, 8,28, 2, 0,20,29,25,21, 3}, 
-//	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}
-	{ 9, 4,26,14,15,10,30,22,27, 5,31, 0,18,16,11, 6}  // RDO4: 12 missing
+	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}    
+},
+{//S17
+	{49,52,46, 0, 0, 54,0,47, 0,50, 0,55,48, 0,51,53}, 
+	{36,32,40,43,37,33, 0,41, 0,44,38,34,42,45,39,35},  
+	{ 7, 1,17,12,24,19,13, 8,28, 2, 0,20,29,25,21, 3}, 
+	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}    
+},
+{//S18
+	{49,52,46, 0, 0, 54,0,47, 0,50, 0,55,48, 0,51,53}, 
+	{36,32,40,43,37,33, 0,41, 0,44,38,34,42,45,39,35},  
+	{ 7, 1,17,12,24,19,13, 8,28, 2, 0,20,29,25,21, 3}, 
+	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}    
+},
+{//S19
+	{49,52,46, 0, 0, 54,0,47, 0,50, 0,55,48, 0,51,53}, 
+	{36,32,40,43,37,33, 0,41, 0,44,38,34,42,45,39,35},  
+	{ 7, 1,17,12,24,19,13, 8,28, 2, 0,20,29,25,21, 3}, 
+	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}    
+},
+{//S20
+	{49,52,46, 0, 0, 54,0,47, 0,50, 0,55,48, 0,51,53}, 
+	{36,32,40,43,37,33, 0,41, 0,44,38,34,42,45,39,35},  
+	{ 7, 1,17,12,24,19,13, 8,28, 2, 0,20,29,25,21, 3}, 
+	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}    
 },
 {//S21
-	{49,46, 0,52,54, 0, 0,47, 0,50,55,53, 0,48, 0,51}, 
-	{40,32,43,36,41,33, 0,37, 0,38,44,34,45,39,42,35}, 
-	{12, 0,19, 1,24, 7,28,17,20, 2,29, 8,25,13,21, 3}, 
-	{14, 9,30, 4,59,22,15,10,31, 5,27,18,23,11, 0, 0}
+	{49,52,46, 0, 0, 54,0,47, 0,50, 0,55,48, 0,51,53}, 
+	{36,32,40,43,37,33, 0,41, 0,44,38,34,42,45,39,35},  
+	{ 7, 1,17,12,24,19,13, 8,28, 2, 0,20,29,25,21, 3}, 
+	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}    
 },
 {//S22
-	{49,46, 0,52,54, 0, 0,47, 0,50,55,53, 0,48, 0,51}, 
-	{40,32,43,36,41,33, 0,37, 0,38,44,34,45,39,42,35}, 
-	{12, 0,19, 1,24, 7,28,17,20, 2,29, 8,25,13,21, 3}, 
-	{14, 9,30, 4,59,22,15,10,31, 5,27,18,23,11, 0, 0}
+	{49,52,46, 0, 0, 54,0,47, 0,50, 0,55,48, 0,51,53}, 
+	{36,32,40,43,37,33, 0,41, 0,44,38,34,42,45,39,35},  
+	{ 7, 1,17,12,24,19,13, 8,28, 2, 0,20,29,25,21, 3}, 
+	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}    
 },
 {//S23
-	{49,46, 0,52,54, 0, 0,47, 0,50,55,53, 0,48, 0,51}, 
-	{40,32,43,36,41,33, 0,37, 0,38,44,34,45,39,42,35}, 
-	{12, 0,19, 1,24, 7,28,17,20, 2,29, 8,25,13,21, 3}, 
-	{14, 9,30, 4,59,22,15,10,31, 5,27,18,23,11, 0, 0}
+	{49,52,46, 0, 0, 54,0,47, 0,50, 0,55,48, 0,51,53}, 
+	{36,32,40,43,37,33, 0,41, 0,44,38,34,42,45,39,35},  
+	{ 7, 1,17,12,24,19,13, 8,28, 2, 0,20,29,25,21, 3}, 
+	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}    
 },
 {//S24
-	{49,46, 0,52,54, 0, 0,47, 0,50,55,53, 0,48, 0,51}, 
-	{40,32,43,36,41,33, 0,37, 0,38,44,34,45,39,42,35}, 
-	{12, 0,19, 1,24, 7,28,17,20, 2,29, 8,25,13,21, 3}, 
-	{14, 9,30, 4,59,22,15,10,31, 5,27,18,23,11, 0, 0}
+	{49,52,46, 0, 0, 54,0,47, 0,50, 0,55,48, 0,51,53}, 
+	{36,32,40,43,37,33, 0,41, 0,44,38,34,42,45,39,35},  
+	{ 7, 1,17,12,24,19,13, 8,28, 2, 0,20,29,25,21, 3}, 
+	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}    
 },
 } ;
 
@@ -275,7 +273,8 @@ int itpcInterpreter::parse_default()
 		for(int i=0;i<16;i++) {
 			if(mask & (1<<i)) itpc_config[sec].rdo[rb].fee_count++ ;
 		}
-		LOG(TERR,"S%02d:%d: fee mask 0x%04X, fee_count %d",sec,rb+1,mask,itpc_config[sec].rdo[rb].fee_count) ;
+		
+		//LOG(TERR,"S%02d:%d: fee mask 0x%04X, fee_count %d",sec,rb+1,mask,itpc_config[sec].rdo[rb].fee_count) ;
 		
 		for(int port=0;port<16;port++) {
 			itpc_config[sec].rdo[rb].fee[port].wire1 = 0 ;
@@ -292,6 +291,7 @@ int itpcInterpreter::parse_default()
 int itpcInterpreter::parse_config(const char *fname) 
 {
 	LOG(ERR,"Should not use parse_config") ;
+	return -1 ;
 
 	if(fname==0) fname = "/RTS/conf/itpc/itpc_config.txt" ;
 
@@ -390,7 +390,7 @@ itpcInterpreter::itpcInterpreter()
 	ped_c = 0 ;
 }
 
-atomic_t itpcInterpreter::run_errors[4][8] ;
+atomic_t itpcInterpreter::run_errors[4][16] ;
 
 void itpcInterpreter::run_start(u_int run)
 {
@@ -427,7 +427,7 @@ void itpcInterpreter::run_stop()
 
 	if(id==1) {
 		for(int i=0;i<4;i++) {
-			for(int j=0;j<8;j++) {
+			for(int j=0;j<16;j++) {
 				if(atomic_read(&run_errors[i][j])) {
 					LOG(ERR,"RDO %d: error type %d = %u",i+1,j,atomic_read(&run_errors[i][j])) ;
 				}
@@ -468,6 +468,7 @@ void itpcInterpreter::stop_event()
 	}
 	
 }
+
 
 
 static inline u_int sw16(u_int d)
@@ -801,6 +802,7 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 	return d ;
 }
 
+// Used when not running FCF
 int itpcInterpreter::sampa_ch_scan()
 {
 	int err = 0 ;
@@ -867,9 +869,11 @@ int itpcInterpreter::sampa_ch_scan()
 	if(ped_c) ped_c->ch_done(err) ;
 
 	if(err) {
-		for(int i=0;i<tb_cou;i++) {
-			LOG(NOTE,"%d/%d = %u",i,tb_cou,tb_buff[i]) ;
-		}
+		//run_err_add(rdo_id,6) ;
+
+//		for(int i=0;i<tb_cou;i++) {
+//			LOG(NOTE,"%d/%d = %u",i,tb_cou,tb_buff[i]) ;
+//		}
 	}
 
 	return err ;
@@ -949,7 +953,7 @@ u_int *itpcInterpreter::sampa_ch_hunt(u_int *start, u_int *end)
 	l_sampa_bx |= (h[3]<<1) ;
 	l_sampa_bx |= (h[4]&0x1FF)<<11 ;
 
-	LOG(WARN,"....... %d %d %u",sampa_id,sampa_ch,l_sampa_bx) ;
+//	LOG(WARN,"....... %d %d %u",sampa_id,sampa_ch,l_sampa_bx) ;
 
 	// check parity
 	p_cou = 0 ;
@@ -1003,7 +1007,7 @@ u_int *itpcInterpreter::sampa_ch_hunt(u_int *start, u_int *end)
 
 	err_ret:;
 	if(err) {
-		LOG(WARN,"... 0x%08X 0x%08X",hdr[0],hdr[1]) ;
+//		LOG(WARN,"... 0x%08X 0x%08X",hdr[0],hdr[1]) ;
 		goto retry ;
 	}
 
@@ -1117,22 +1121,28 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 		break ;
 	}
 		
+
+// I don't really need this check; it's handled by missing channel later on
+#if 0
 	if(ch_loop_cou==1) {
 		switch(lane) {
 		case 0 :
 		case 2 :
 			if(sampa_ch != 0) {
-				LOG(WARN,"sampa_ch %d",sampa_ch) ;
+				// this happens if I'm missing a channel
+				LOG(WARN,"first in lane sampa_ch is %d not 0?",sampa_ch) ;
 			}
 			break ;
 		case 1 :
 		case 3 :
 			if(sampa_ch != 16) {
-				LOG(WARN,"sampa_ch %d",sampa_ch) ;
+				// this happens if I'm missing a channel
+				LOG(WARN,"first in lane sampa_ch is %d not 16?",sampa_ch) ;
 			}
 			break ;
 		}
 	}
+#endif
 
 	if(sampa_id & 1) fee_ch = sampa_ch + 32 ;
 	else fee_ch = sampa_ch ;
@@ -1182,6 +1192,9 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 
 	switch(type) {
 	case 0 :	// heartbeat
+		LOG(WARN,"%d: Type %d, words %d, SAMPA %d:%d, BX %u, errors %d:%d, fee_port %d, lane_hdr 0x%08X",
+		    rdo_id,type,words,sampa_id,sampa_ch,l_sampa_bx,parity_err,hamming_err,fee_port,lane_hdr) ;
+
 		if(words != 0) {
 			err |= 2 ;
 			goto err_ret ;
@@ -1210,7 +1223,10 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 		sampa_bx = l_sampa_bx ;
 	}
 	else if(sampa_bx != l_sampa_bx) {
-		LOG(WARN,"%d:#%02d:%d expect %u, got %u",rdo_id,fee_port,fee_ch,sampa_bx,l_sampa_bx) ;
+		if(abs(sampa_bx - l_sampa_bx)>1) {
+			// I could have a difference of 1 here...
+			//LOG(WARN,"%d:#%02d:%d expect %u, got %u",rdo_id,fee_port,fee_ch,sampa_bx,l_sampa_bx) ;
+		}
 	}
 
 
@@ -1220,19 +1236,19 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 	//LOG(TERR,"words %d, word32 %d",words,word32) ;
 	tb_cou = words ;
 
-	if(ped_c && ped_c->want_data) {	// I will handle my own data
+	if(ped_c && ped_c->want_data) {	// I will handle my own data; FCF
 
 		ped_c->sector = sector_id ;
 		ped_c->rdo = rdo_id ;
 		ped_c->port = fee_port ;
 
-		if(ped_c->do_ch(fee_id, fee_ch, data, words)<0) {
-			//err |= 0x200 ;
+		if(ped_c->do_ch(fee_id, fee_ch, data, words)) {
+			err |= 0x400 ;
 		}
 
 		data += word32 ;
 	}
-	else {
+	else {				// done in pedestal runs
 
 		int t_cou = 0 ;	// local
 		for(u_int i=0;i<word32;i++) {
@@ -1244,6 +1260,7 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 				i-- ;
 
 				if(d==0x980000F8) {	//end of event!!!
+					LOG(ERR,"Returning here") ;
 					return data-1 ;
 				}
 				continue ;
@@ -1257,7 +1274,7 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 		}
 
 		if(sampa_ch_scan()<0) {
-			err |= 0x200 ;
+			err |= 0x400 ;
 		}
 	}
 
@@ -1267,6 +1284,9 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 	
 
 	if(err) {
+		if(err & 0x400) {	// various timebin errors
+			run_err_add(rdo_id,6) ;
+		}
 		LOG(ERR,"%d: Last SAMPA: FEE #%d: %d:%d = 0x%08X [err 0x%0x]",rdo_id,fee_port,sampa_id,sampa_ch,*data,err) ;
 	}
 	else {
@@ -1290,9 +1310,9 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 		//if((data[0] & 0x0FFFFFFF)!=(first_b & 0x0FFFFFFF)) {
 		//	LOG(ERR,"bad start/stop 0x%08X 0x%08X",first_b,data[0]) ;
 		//}
-		if(ch_loop_cou != 16) {
-			LOG(ERR,"Found only %d channels; datum is 0x%08X 0x%08X, last ch is %d, bx %u",ch_loop_cou,data[0],data[1],sampa_ch,sampa_bx) ;
-			LOG(ERR,"   first_b 0x%08X, 0x%08X 0x%08X",first_b,data[-2],data[-1]) ;
+		if(ch_loop_cou != 16) {	// this is a SAMPA2 bug!!!
+			//LOG(ERR,"Found only %d channels; datum is 0x%08X 0x%08X, last ch is %d, bx %u",ch_loop_cou,data[0],data[1],sampa_ch,sampa_bx) ;
+			//LOG(ERR,"   first_b 0x%08X, 0x%08X 0x%08X",first_b,data[-2],data[-1]) ;
 		}
 		data++ ;	// move to the 0xB... of the next lane!
 		return data ;	//keep the signature
@@ -1634,6 +1654,8 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 	u_int soft_err = 0 ;
 	int fee_cou = 0 ;
 
+	int expect_fee_cou = itpc_config[sector_id].rdo[rdo_id-1].fee_count ;
+
 	fee_port = 0 ;
 
 	//data[0] is 0x98000vv4
@@ -1698,7 +1720,10 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 			if(f_id[0]==f_id[2]) f_ok |= 0x20 ;
 		}
 
-		if(f_ok!=0x3F) {	// all was NOT OK
+		if(f_ok!=0x3F) {	// all was NOT OK; hm, this happens ALL the time
+			// I see e.g.
+			// 
+			//LOG(ERR,"%d: 0x%08X 0x%08X 0x%08X [0x%02X] (not an error)",rdo_id,data[0],data[1],data[2],f_ok) ;
 			run_err_add(rdo_id,0) ;
 		}
 
@@ -1716,7 +1741,10 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		}
 	}
 	
-	//at this point data[0]==0x00004321 ;
+	//at this point data[0]==0x00004321 
+	// UNLESS there's a complete screwup which needs recovery!!!
+	// The screwup usually happens when the FEE has a FIFO overrun for some reason
+
 	fee_id = (data[0]>>16) & 0x3F ;
 		
 	switch(fee_version) {
@@ -1732,7 +1760,7 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 
 		if(data[6] != ((fee_id<<16)|0x60000010)) err |= 0x80000 ;	// end of FEE hdr
 
-		if(err) {
+		if(err) {	// this is a complete screwup!
 			run_err_add(rdo_id,3) ;
 			goto done ;
 		}
@@ -1761,9 +1789,21 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		u_int expect_mask ;
 
 		if((*data & 0xFC000000) != 0xB0000000) {
-			run_err_add(rdo_id,1) ;
-			LOG(ERR,"%d:#%02d: lane %d: bad sig 0x%08X",rdo_id,fee_port,i,*data) ;
-			run_err_add(rdo_id,4) ;
+			// bits 0x1011abxx e.g. 0xB4
+			// a is sync_fifo_overflow
+			// b is fifo_overflow and once they latch I _must_ auto-recover!
+
+			if((*data & 0xF0000000) == 0xB0000000) {
+				
+				run_err_add(rdo_id,1) ;
+				LOG(ERR,"%d:#%02d: lane %d: FIFO overflow 0x%08X",rdo_id,fee_port,i,*data) ;
+
+			}
+			else {
+				run_err_add(rdo_id,4) ;
+				LOG(ERR,"%d:#%02d: lane %d: bad sig 0x%08X",rdo_id,fee_port,i,*data) ;
+			}
+
 			err |= 0x100 ;
 			goto done ;
 		}
@@ -1781,14 +1821,38 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		found_ch_mask = 0 ;
 		data = sampa_lane_scan(data,data_end) ;
 
-		if(found_ch_mask != expect_mask) {
+		if(found_ch_mask != expect_mask) {	// SAMPA2 error!!!
 			run_err_add(rdo_id,2) ;
-			dbg_level = 1 ;
-			LOG(ERR,"%d: fee_port %d: missing channels in lane %d: expect 0x%08X, got 0x%08X",
-				rdo_id,fee_port,i,expect_mask,found_ch_mask) ;
-			soft_err |= 0x100 ;
-			err |= 0x400 ;
-			goto done ;
+			//dbg_level = 1 ;
+			LOG(ERR,"%d: evt %d: fee_port %d: missing channels in lane %d: expect 0x%08X, got 0x%08X",
+				rdo_id,evt_ix,fee_port,i,expect_mask,found_ch_mask) ;
+
+			// enumarte in FEE port
+#if 0
+			for(int j=0;j<32;j++) {
+				if(expect_mask & (1<<j)) {
+					if(!(found_ch_mask & (1<<j))) {
+						int ch ;
+
+						switch(i) {
+						case 0 :
+						case 1 :
+							ch = j ;
+							break ;
+						case 2 :
+						case 3 :
+							ch = j + 32 ;
+							break ;
+						}
+
+						LOG(ERR,"%d:#%d ch %d missing",rdo_id,fee_port,ch) ;
+					}
+				}
+			}
+#endif
+			//soft_err |= 0x100 ;
+			//err |= 0x400 ;
+			//goto done ;
 		}
 
 		if(data==0) {
@@ -1856,11 +1920,14 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		}
 
 		if(data[0] != ((fee_id<<16)|0xA0000010)) err |= 0x10 ;
+
 //		if(data[7] != ((fee_id<<16)|0x40000010)) err |= 0x20 ;	// this is the last guy and can misfire
+
 		if((data[1] & 0xFFFF)||(data[2]&0xFFFF)||(data[3]&0xFFFF)||(data[4]&0xFFFF)) {
 			LOG(ERR,"%d:#%02d: event errors: 0x%X 0x%X 0x%X 0x%X",rdo_id,fee_port,
 			    data[1],data[2],data[3],data[4]) ;
 		}
+
 		if(err) {
 			run_err_add(rdo_id,5) ;
 			goto done ;
@@ -1873,17 +1940,30 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 	data += 8 ;	// start of new FEE
 
 	if(data > data_end) goto done ;
+
 	if(data[0]==0x98001000) goto done ;	// end of FEE section marker!!!
+
 	if(data[1]==0x98001000) {
 		//LOG(WARN,"%d:#%d, fee_count %d -- delayed end-event marker?",rdo_id,fee_port,fee_cou) ;
 		data++ ;	// advance so not to confuse further checks
 		goto done ;	// occassionally a "delayed FEE" is the last one
 	}
+
 	if(data[0]==0x980000FC) goto done ;	// RDO-mon start
+
 	if(itpc_config[sector_id-1].rdo[rdo_id-1].fee_count && (fee_cou>itpc_config[sector_id-1].rdo[rdo_id-1].fee_count)) {
-		LOG(WARN,"RDO %d: fee_count %d",rdo_id,fee_cou) ;
+		LOG(ERR,"RDO %d: fee_count %d",rdo_id,fee_cou) ;
 		goto done ;
 	}
+
+	// a bug which causes the 1st FEE datum 0x80xx0010 to seep in
+	if((data[0]&0xFF00FFFF)==0x80000010 && fee_cou==expect_fee_cou) {
+		if(data[1]==0x980000FC) {
+			data++ ;
+			goto done ;
+		}
+	}
+
 	goto fee_start ;
 
 
@@ -1891,10 +1971,13 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 
 	// end of FEE
 	
+
 	if(err || soft_err) {
 		run_err_add(rdo_id,7) ;
 
-		LOG(ERR,"%d:#%02d(id %d,cou %d) evt %d: error 0x%X 0x%X",rdo_id,fee_port,fee_id,fee_cou,evt_ix,err,soft_err) ;
+		LOG(ERR,"%d:#%02d(id %d,cou %d) evt %d: error 0x%X 0x%X",
+		    rdo_id,fee_port,fee_id,fee_cou,evt_ix,err,soft_err) ;
+
 		for(int i=-4;i<8;i++) {
 			LOG(ERR,".... %d = 0x%08X",i,data[i]) ;	
 		}
@@ -1902,11 +1985,19 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		if(err || soft_err) return -1 ;
 	}
 
+	// this only works online
+	if(realtime) {
+		if(fee_cou != expect_fee_cou) {
+			LOG(ERR,"%d: fees found %d, expect %d",rdo_id,fee_cou,expect_fee_cou) ;
+		}
+	}
+
 	after_fee:;
 
 	switch(data[0]) {
 	case 0x98001000 :	// trigger data
 		if(data[1]!=0) {
+			run_err_add(rdo_id,8) ;
 			LOG(ERR,"RDO %d: bad event status 0x%08X",rdo_id,data[1]) ;
 		}
 		break ;

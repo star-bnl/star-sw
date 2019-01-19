@@ -67,7 +67,7 @@ public:
 	u_int evt_err[8] ;	// zapped before every event, logged after
 
 	//run errors, for all RDOs, for all workers!
-	static atomic_t run_errors[4][8] ;
+	static atomic_t run_errors[4][16] ;
 
 	// various variables filled in as we go
 	u_int rdo_wire1_id ;

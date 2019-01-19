@@ -15,6 +15,8 @@ public:
 	virtual int do_ch(int fee_id, int fee_ch, u_int *data, int words) { return 0 ; } ;
 
 	int run_type ;
+	u_int run_number ;
+	int sector_id ;	// actual PC
 
 	int want_data ;
 	u_int data ;
@@ -37,6 +39,11 @@ public:
 	~itpcPed() ;
 
 	void init(int sector, int rdo, u_int fee_mask) ;
+
+	void set_fee_mask(int sector, int rdo, u_int f_mask) {
+		fee_mask[sector-1][rdo-1] = f_mask ;
+	}
+
 	void set_padplane_id(int sector, int rdo, int port, int id) ;
 	void clear() ;
 
@@ -49,6 +56,8 @@ public:
 
 	int sanity(int mode) ;
 
+	int kill_non_phys() ;
+
 	struct ped_t {
 		double ped[512] ;
 		double rms[512] ;
@@ -59,6 +68,8 @@ public:
 		u_int c_cou ;
 	} *ped_p[24][4][16][64] ;
 
+
+	u_char evts[24][4] ;
 
 	u_char padplane_id[24][4][16] ;
 
