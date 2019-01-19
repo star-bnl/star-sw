@@ -197,8 +197,8 @@ Int_t StTrackMateMaker::Make(){
   //eventBr->Fill();
   LOG_INFO << "Tpc Hits" << endm;
   // Note:
-  // For StTpcHits: sector = [1-24], padrow = [1-45]
-  // For StTpcHitCollections: sector [0-23], padrow = [0,44]
+  // For StTpcHits: sector = [1-24], padrow = [1-72]
+  // For StTpcHitCollections: sector [0-23], padrow = [0,71]
   const StTpcHitCollection* tpchitcoll1 = rEvent1->tpcHitCollection();
   const StTpcHitCollection* tpchitcoll2 = rEvent2->tpcHitCollection();
   if (! tpchitcoll1 || ! tpchitcoll2) {
@@ -209,7 +209,7 @@ Int_t StTrackMateMaker::Make(){
     for (size_t iSec=0; iSec<tpchitcoll1->numberOfSectors(); ++iSec) { // [0,23]
       const StTpcSectorHitCollection* sectorcoll1 = tpchitcoll1->sector(iSec);
       const StTpcSectorHitCollection* sectorcoll2 = tpchitcoll2->sector(iSec);
-      for (size_t iPadR=0; iPadR<sectorcoll1->numberOfPadrows(); ++iPadR) { //[0,44]
+      for (size_t iPadR=0; iPadR<sectorcoll1->numberOfPadrows(); ++iPadR) { //[0,71]
 	const StTpcPadrowHitCollection* padrowcoll1 = sectorcoll1->padrow(iPadR);
 	const StTpcPadrowHitCollection* padrowcoll2 = sectorcoll2->padrow(iPadR);
 	LOG_INFO << "Sector(+1) " << iSec+1 << ", Padrow(+1) " << iPadR+1 << endm;

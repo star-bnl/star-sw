@@ -174,8 +174,8 @@ void DrawFitPnts(Int_t ping=0) {
   c1 = new TCanvas(cTitle,cTitle,800,800); c1->SetLeftMargin(0.14);
   c1->SetLogz();
   fitPtsHist->SetStats(0);
-  fitPtsHist->GetXaxis()->SetRange(0,46);
-  //  fitPtsHist->GetYaxis()->SetRange(0,45);
+  fitPtsHist->GetXaxis()->SetRange(0,73);
+  //  fitPtsHist->GetYaxis()->SetRange(0,72);
   fitPtsHist->Draw("colz");
   Int_t nx = fitPtsHist->GetNbinsX();
   Int_t ny = fitPtsHist->GetNbinsY();
@@ -216,7 +216,7 @@ void DrawHitPattern() {
   //  cTitle += gTitle;
   cTitle = "HFT Hit Pattern";
   c1 = new TCanvas(cTitle,cTitle,800,800); c1->SetLeftMargin(0.14);
-  //  HftPattern->GetYaxis()->SetRange(0,45);
+  //  HftPattern->GetYaxis()->SetRange(0,72);
   const Char_t *charge[2] = {"P","N"};
   const Char_t *ON[2]     = {"Old","New"};
   TString same("");
@@ -960,11 +960,11 @@ void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
     // Fit pts correlation
     //________________________________________________________________________________
     Name = "fitPtsHist", Title = Form("Fit Pts %s vs %s",Old.Data(), New.Data());
-    TH2D* fitPtsHist = new TH2D(Name,Title,51,-0.5,50.5,51,-0.5,50.5);
+    TH2D* fitPtsHist = new TH2D(Name,Title,73,-0.5,72.5,73,-0.5,72.5);
     fitPtsHist->SetXTitle(Form("fit points, %s",New.Data()));
     fitPtsHist->SetYTitle(Form("fit points, %s",Old.Data()));
     Name = "fitPtsHistPing", Title = Form("Fit Pts %s vs %s matched", Old.Data(), New.Data());
-    TH2D* fitPtsHistPing = new TH2D(Name,Title,51,-0.5,50.5,51,-0.5,50.5);
+    TH2D* fitPtsHistPing = new TH2D(Name,Title,73,-0.5,72.5,73,-0.5,72.5);
     fitPtsHist->SetXTitle(Form("fit points, %s",New.Data()));
     fitPtsHist->SetYTitle(Form("fit points, %s",Old.Data()));
     // Primary to Global ratio for HFT hit pattern (pxl + 10*ist + 100*ssd)
@@ -980,13 +980,13 @@ void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
       for (Int_t c = 0; c < 2; c++) {
 	Name = Form("pTDifNFP%s%s",GP[k],charge[c]);
 	Title = Form("Relative Momentum difference vs no. of %s fit pts for %s tracks",New.Data(),GPTitle[k]);
-	pTDifNFP[k][c] = new TH2D(Name,Title, 7,10.,45.,200,-.2,.2);
+	pTDifNFP[k][c] = new TH2D(Name,Title, 7,10.,72.,200,-.2,.2);
 	pTDifNFP[k][c]->SetYTitle(Form("Momentum Difference (pT_%s - pT_%s)/pT_%s",Old.Data(),New.Data(),New.Data()));
 	pTDifNFP[k][c]->SetXTitle(Form("No. %s fit points",New.Data()));
 	pTDifNFP[k][c]->SetMarkerStyle(20);
 	Name = Form("pTDifNFP5%s%s",GP[k],charge[c]);
 	Title = Form("Relative Momentum difference vs no. of %s fit pts for %s tracks with pT > 0.5 GeV/c",New.Data(),GPTitle[k]);
-	pTDifNFP5[k][c] = new TH2D(Name,Title, 7,10.,45.,200,-.2,.2);
+	pTDifNFP5[k][c] = new TH2D(Name,Title, 63,9.5,72.5.,200,-.2,.2);
 	pTDifNFP5[k][c]->SetYTitle(Form("Momentum Difference (pT_%s - pT_%s)/pT_%s", Old.Data(), New.Data(), New.Data()));
 	pTDifNFP5[k][c]->SetXTitle(Form("No. %s fit points",New.Data()));
 	pTDifNFP5[k][c]->SetMarkerStyle(20);
