@@ -44,6 +44,8 @@ private:
 	int fcf_det_orient ;
 	
 
+
+
 	static const char *help_string ;
 protected:
 
@@ -68,6 +70,7 @@ public:
                 static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
 	}
 
+	static int no_sw16 ;
 } ;
 
 
