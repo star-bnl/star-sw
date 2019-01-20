@@ -1660,7 +1660,7 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 
 	//data[0] is 0x98000vv4
 
-	trg = data[1] ;
+	trg = data[1] ;		// trigger_fired
 	if(trg==0) return 0 ;	// no triggers
 
 	// start of FEE is at data[2] ;
@@ -1672,17 +1672,14 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 	// start of FEE is 0x80ff0010 ;
 
 	fee_version = 0 ;
-	if(data[0] == 0x98001000) return 0 ;	// no FEEs
+
+	if(data[0] == 0x98001000) return 0 ;	// no FEEs; 
+
+	if(fee_cou==0) fee_evt_cou++ ;
 
 	fee_port = 0 ;	// claim unknown
 	fee_id = 0 ;	// claim unknown
 	fee_cou++ ;	// so it starts from 1
-
-//	if(fee_cou==16) {
-//		for(int i=0;i<16;i++) {
-//			LOG(TERR,"... %d: 0x%08X",i,data[i]) ;
-//		}
-//	}
 
 	if((data[0] & 0xFFC0FFFF)==0x80000001) {
 		fee_version = 0 ;
@@ -1919,8 +1916,15 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 					
 		}
 
+
 		if(data[0] != ((fee_id<<16)|0xA0000010)) err |= 0x10 ;
 
+//		if(data[7] != ((fee_id<<16)|0x40000010)) {
+//			for(int i=0;i<8;i++) {
+//				LOG(TERR,"%d: %d: 0x%08X",rdo_id,i,data[i]) ;
+//			}
+//		}
+		
 //		if(data[7] != ((fee_id<<16)|0x40000010)) err |= 0x20 ;	// this is the last guy and can misfire
 
 		if((data[1] & 0xFFFF)||(data[2]&0xFFFF)||(data[3]&0xFFFF)||(data[4]&0xFFFF)) {
@@ -1994,12 +1998,30 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 
 	after_fee:;
 
+	// I can either have the trailer with the trigger data
+	// OR I can have the monitoring event following...
+
 	switch(data[0]) {
-	case 0x98001000 :	// trigger data
-		if(data[1]!=0) {
+	case 0x98001000 :	// start of trailer
+		if(data[1]!=0) {	// event status
 			run_err_add(rdo_id,8) ;
 			LOG(ERR,"RDO %d: bad event status 0x%08X",rdo_id,data[1]) ;
 		}
+
+		{
+		int trg_cou = data[2] ;
+		
+		data += 2+trg_cou+1 ;
+		}
+
+		if(data[0] != 0x58001001) {
+			LOG(ERR,"RDO %d: no end-of-trailer 0x%08X",rdo_id,data[0]) ;
+		}
+
+		data++ ;
+
+		//LOG(TERR,"%d: 0x%08X 0x%08X 0x%08X 0x%08X",rdo_id,data[1],data[3],data[4],data[5]) ;
+
 		break ;
 	case 0x980000FC :	// RDO_mon
 		data++ ;
