@@ -75,7 +75,7 @@
 class StMuDstMaker;
 #endif
 #endif
-#define __FIXED_TARGET__
+//#define __FIXED_TARGET__
 StMuDstMaker* MuDstMaker = 0;
 struct PlotName_t {
   const Char_t *Name;
