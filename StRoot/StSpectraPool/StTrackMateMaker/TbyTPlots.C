@@ -986,7 +986,7 @@ void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
 	pTDifNFP[k][c]->SetMarkerStyle(20);
 	Name = Form("pTDifNFP5%s%s",GP[k],charge[c]);
 	Title = Form("Relative Momentum difference vs no. of %s fit pts for %s tracks with pT > 0.5 GeV/c",New.Data(),GPTitle[k]);
-	pTDifNFP5[k][c] = new TH2D(Name,Title, 63,9.5,72.5.,200,-.2,.2);
+	pTDifNFP5[k][c] = new TH2D(Name,Title, 63, 9.5, 72.5, 200,-.2,.2);
 	pTDifNFP5[k][c]->SetYTitle(Form("Momentum Difference (pT_%s - pT_%s)/pT_%s", Old.Data(), New.Data(), New.Data()));
 	pTDifNFP5[k][c]->SetXTitle(Form("No. %s fit points",New.Data()));
 	pTDifNFP5[k][c]->SetMarkerStyle(20);
