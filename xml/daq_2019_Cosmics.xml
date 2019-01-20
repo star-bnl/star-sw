@@ -39,6 +39,6 @@ root.exe -q -b 'bfc.C(100000,"P2018a,gmt,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkSt
 <!-- <input URL="file:/star/data03/daq/2018/108/*/st_cosmic*.daq" /> -->
 <!-- <input URL="file:/gpfs01/star/pwg/iraklic/iTPC/Cosmics/Cosmics2018/*event.root" /> -->
 <!-- <input URL="file:/star/data03/daq/2018/108/19108054/st_cosmic_adc_19108054_raw_5500008.daq" /> -->
-<!-- <input URL="file:/net/l401/data/scratch1/daq/2019/*/*/st_cosmic_*.daq" /> -->
-<input URL="file:/hlt/cephfs/daq/2019/*/*/st_cosmic_*.daq" />
+<input URL="file:/net/l401/data/scratch1/daq/2019/*/*/st_cosmic_*.daq" />
+<!-- <input URL="file:/hlt/cephfs/daq/2019/*/*/st_cosmic_*.daq" /> -->
 </job>
