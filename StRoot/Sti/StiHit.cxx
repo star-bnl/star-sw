@@ -252,7 +252,7 @@ static int nCall =0; nCall++;
     }
 }
 //_____________________________________________________________________________
- void StiHit::subTimesUsed()xs
+ void StiHit::subTimesUsed()
 {
     mTimesUsed--;
     assert(mTimesUsed>=0);
