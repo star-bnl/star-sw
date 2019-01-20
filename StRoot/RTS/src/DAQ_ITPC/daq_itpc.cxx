@@ -912,10 +912,25 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	}
 
 	evt_status = sw16(d[trl_ix++]) ;
-	trg_cou = sw16(d[trl_ix++]) ;
+	trg_cou = sw16(d[trl_ix++]) & 0xFFFF ;
 
 	if(evt_status) {
-		LOG(ERR,"RDO %d: get_l2: evt status 0x%08X, trg_fired 0x%08X, trg_cou %d",rdo,evt_status,trg_fired,trg_cou) ;
+		int b_cou = 0 ;
+
+
+		for(int i=0;i<32;i++) {
+			if(evt_status & (1<<i)) {
+				if(i%2) {	
+					LOG(ERR," %d:#%d overwritten",rdo,i/2+1) ;
+				}
+				else {	
+					LOG(ERR," %d:#%d timeout",rdo,i/2+1) ;
+				}
+				b_cou++ ;
+			}
+		}
+
+		LOG(ERR,"%d: evt_status 0x%08X, trg_fired 0x%08X, trg_cou %d, errs %d",rdo,evt_status,trg_fired,trg_cou,b_cou) ;
 
 		// We'll let it pass for now with just the error message
 //		trg[0].t = -ETIMEDOUT ;
