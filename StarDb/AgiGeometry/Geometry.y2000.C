@@ -2,7 +2,7 @@
 TDataSet *CreateTable() {
   TEnv *configGeom = new TEnv("configGeom");
  configGeom ->SetValue("isvt",3);
- configGeom ->SetValue("itpc",-1);
+ configGeom ->SetValue("itpc",4);
  configGeom ->SetValue("ibtf",8);
  configGeom ->SetValue("ical",12);
  configGeom ->SetValue("ivpd",-1);
@@ -13,6 +13,7 @@ TDataSet *CreateTable() {
  configGeom ->SetValue("ifsc",-1);
  configGeom ->SetValue("imtd",-1);
  configGeom ->SetValue("svtg_version",2);
+ configGeom ->SetValue("tpcg_version",5);
  configGeom ->SetValue("btog_version",5);
  configGeom ->SetValue("btog_choice",1);
  configGeom ->SetValue("btog_posit1(1)",32);
