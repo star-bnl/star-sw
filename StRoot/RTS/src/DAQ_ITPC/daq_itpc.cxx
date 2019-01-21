@@ -766,6 +766,7 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	int t_cou = 0 ;
 	u_int evt_status ;
 	int trl_ix ;
+	int trl_stop_ix ;
 	u_int ds ;
 	int rdo_version ;
 	char buff[128] ;
@@ -884,6 +885,7 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	}
 
 	trl_ix = -1 ;
+	trl_stop_ix = -1 ;
 
 	// hunt backwards for the signature but skup a bunch of last words which are just
 	// filler (sentinels) == 0
@@ -892,11 +894,14 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 			trl_ix = i ;
 			break ;
 		}
+		if(sw16(d[i]) == 0x58001001) {
+			trl_stop_ix = i ;
+		}
 	}
 
 
 	if(trl_ix < 0) {
-		LOG(ERR,"No trailer found") ;
+		LOG(ERR,"%d: no trailer found",rdo) ;
 		err |= 0x20 ;
 		goto err_end ;
 	}
@@ -905,7 +910,7 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 
 	if(rdo_version==0) {
 		if(sw16(d[trl_ix++]) != 0xABCD0000) {
-			LOG(ERR,"Wrong trailer word ABCD") ;
+			LOG(ERR,"%d: wrong trailer word ABCD",rdo) ;
 			err |= 0x40 ;
 			goto err_end ;
 		}
@@ -914,23 +919,38 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	evt_status = sw16(d[trl_ix++]) ;
 	trg_cou = sw16(d[trl_ix++]) & 0xFFFF ;
 
+
 	if(evt_status) {
 		int b_cou = 0 ;
+		u_int fee_status = 0xABCDEF12 ;
+
+		if(trl_stop_ix>0) {
+			u_int s ;
+
+			trl_stop_ix++ ;
+
+			s = (sw16(d[trl_stop_ix++]))<<16 ;
+			s |= sw16(d[trl_stop_ix++]) ;
+
+
+			fee_status = s ;
+			//LOG(TERR,"fee status 0x%08X",s) ;
+		}
 
 
 		for(int i=0;i<32;i++) {
 			if(evt_status & (1<<i)) {
 				if(i%2) {	
-					LOG(ERR," %d:#%d overwritten",rdo,i/2+1) ;
+					LOG(ERR," %d:#%d overwritten!!!",rdo,i/2+1) ;
 				}
 				else {	
-					LOG(ERR," %d:#%d timeout",rdo,i/2+1) ;
+					//LOG(ERR," %d:#%d timeout",rdo,i/2+1) ;
 				}
 				b_cou++ ;
 			}
 		}
 
-		LOG(ERR,"%d: evt_status 0x%08X, trg_fired 0x%08X, trg_cou %d, errs %d",rdo,evt_status,trg_fired,trg_cou,b_cou) ;
+		LOG(ERR,"%d: evt_status 0x%08X:0x%08X, trg_fired 0x%08X, trg_cou %d, errs %d",rdo,evt_status,fee_status,trg_fired,trg_cou,b_cou) ;
 
 		// We'll let it pass for now with just the error message
 //		trg[0].t = -ETIMEDOUT ;
@@ -943,7 +963,7 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	trg[0].reserved[0] = trg_fired ;
 
 	if(trg_cou > 128) {
-		LOG(ERR,"Bad trg cou 0x%08X",trg_cou) ;
+		LOG(ERR,"%d: bad trg cou 0x%08X",rdo,trg_cou) ;
 		err |= 0x80 ;
 		goto err_end ;
 	}
@@ -1016,7 +1036,7 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 
 
 		if(((v&0xFFF00000) != 0x04300000)&&((v&0xFFF00000)!=0x08300000)) {	// 0x043 external trigger, 0x083 local trigger
-			LOG(ERR,"RDO %d: trigger odd: 0x%08X: %d %d %d",rdo,v,t,trg_cmd,daq_cmd) ;
+			LOG(ERR,"%d: trigger odd: 0x%08X: %d %d %d",rdo,v,t,trg_cmd,daq_cmd) ;
 		}
 
 
@@ -1129,13 +1149,13 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 			trg = v & 0xF ;
 			daq = (v>>4) & 0xF ;
 
-			LOG(ERR,"RDO %d: %d: %d %d %d [0x%08X;0x%X]",rdo,i,t,trg,daq,v,want_dump) ;
+			LOG(ERR,"%d: %d: %d %d %d [0x%08X;0x%X]",rdo,i,t,trg,daq,v,want_dump) ;
 		}	
 	}
 #endif
 
 	if(t_cou==0) {	// wha?
-		LOG(ERR,"t_cou = 0?") ;
+		LOG(ERR,"%d: t_cou = 0?",rdo) ;
 		
 		trg[t_cou].t = 4097 ;
 		trg[t_cou].daq = 0 ;
@@ -1148,7 +1168,7 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 
 	err_end:;
 
-	LOG(ERR,"RDO %d: Error in get_l2 0x%X [words %d]",rdo,err,words) ;
+	LOG(ERR,"%d: Error in get_l2 0x%X [words %d]",rdo,err,words) ;
 
 	return 0 ;
 

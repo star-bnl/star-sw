@@ -2020,7 +2020,11 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 
 		data++ ;
 
-		//LOG(TERR,"%d: 0x%08X 0x%08X 0x%08X 0x%08X",rdo_id,data[1],data[3],data[4],data[5]) ;
+		//data[0] & data[1] are the FEE stop,start pairs (hi,lo) 
+		//for(int i=0;i<8;i++) {
+		//	LOG(TERR,"%d: %d: 0x%08X",rdo_id,i,data[i]) ;
+		//}
+
 
 		break ;
 	case 0x980000FC :	// RDO_mon
