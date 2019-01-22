@@ -282,7 +282,7 @@ Bfc_st BFC[] = { // standard chains
    "OSpaceZ2,OGridLeak3D,CorrX,tpcDB,TpcHitMover"
    ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,sdt20180426.122000,StiCALib,HLTCA,Idst,BAna"       
    ,                                                                                       "","","",kFALSE},
-  {"MC2019.Ideal","","","MC.2019,MC.StiCA"                                                ,"","","",kFALSE},
+  {"MC2019.Ideal","","","MC.2019,MC.StiCA,vmc,NewTpcAlignment"                            ,"","","",kFALSE},
   {"MC2019",      "","","MC2019.Ideal"                                                    ,"","","",kFALSE},
   {"RC----------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"RC.y2000"        ,"","","p2000,VFMinuit,CMuDst,NosvtIT,NossdIT,NosstIT"               ,"","","",kFALSE},
