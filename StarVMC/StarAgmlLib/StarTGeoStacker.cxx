@@ -180,8 +180,10 @@ Bool_t Compare( TGeoVolume *volume, AgShape *agshape )
       equal&= ( agshape->par("hx")==((TGeoCtub*)tgshape)->GetNhigh()[0] );
       equal&= ( agshape->par("hy")==((TGeoCtub*)tgshape)->GetNhigh()[1] );
       equal&= ( agshape->par("hz")==((TGeoCtub*)tgshape)->GetNhigh()[2] );
+      // coverity[fallthrough]
     case (AgShape::kTubs):
       angle(TubeSeg,phi1,GetPhi1); angle(TubeSeg, phi2, GetPhi2);
+      // coverity[fallthrough]
     case (AgShape::kTube):
       check(Tube,rmin,GetRmin); check(Tube,rmax,GetRmax); check(Tube,dz,GetDz);
       break;
@@ -193,6 +195,7 @@ Bool_t Compare( TGeoVolume *volume, AgShape *agshape )
 
     case (AgShape::kCons): // Cone family
       angle(ConeSeg,phi1,GetPhi1); angle(ConeSeg,phi2,GetPhi2);
+      // coverity[fallthrough]
     case (AgShape::kCone):
       check(Cone,dz,GetDz); check(Cone,rmn1,GetRmin1); check(Cone,rmx1,GetRmax1); check(Cone,rmn2,GetRmin2); check(Cone,rmx2,GetRmax2);
       break;
@@ -209,8 +212,9 @@ Bool_t Compare( TGeoVolume *volume, AgShape *agshape )
       break;
 
     case (AgShape::kPgon): // Polycone family
-      check(Pgon,npdiv,GetNedges)
-      case (AgShape::kPcon):
+      check(Pgon,npdiv,GetNedges);
+      // coverity[fallthrough]
+    case (AgShape::kPcon):
       angle(Pcon,phi1,GetPhi1); check(Pcon,dphi,GetDphi); check(Pcon,nz,GetNz);
       for ( UInt_t i=0;i<(UInt_t)agshape->par("nz");i++ )
 	{
@@ -380,8 +384,8 @@ TGeoMedium *GetMedium( TString name, AgMedium *medium )
 // ------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------- BEGIN --
 // ------------------------------------------------------------------------------------------------------------
-StarTGeoStacker::StarTGeoStacker( const Char_t *name, const Char_t *title )
-  : StarAgmlStacker(name,title)
+StarTGeoStacker::StarTGeoStacker( const Char_t *_name, const Char_t *title )
+  : StarAgmlStacker(_name,title)
 {
 
   // Ensure that we have a geometry manager
@@ -800,7 +804,6 @@ Bool_t sanityCheck( TGeoVolume *volume )
 {
   
   TGeoShape *shape = volume->GetShape();
-  TString    typeof = shape->ClassName();
   
   // Shape with volume=0 is probably an error
   if ( shape->Capacity() <= 0. )

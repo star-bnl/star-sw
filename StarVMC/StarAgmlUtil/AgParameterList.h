@@ -51,7 +51,7 @@ public:
   const char* group() { return _Group.c_str();  }
   const char* table() { return _Table.c_str();  }
   const char* chair() { return _Chair.c_str();  }
-  const int   row()   { return _Row; }
+        int   row()   { return _Row; }
 
 private:
 protected:
