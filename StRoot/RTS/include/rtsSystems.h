@@ -446,7 +446,7 @@ extern inline const char *getTrgDetBitName(int x) {
 #define EVBX_NODES(x)   ((DAQ_SYSTEM<<12) | (EVB_SUBSYS<<8) | (x))
 #define EVBX_NODE_COUNT	10	// was 6 before FY13; in a run epoch, used by monitoring and RICH scalers!
 
-#define MAX_EVB_NODES 10
+#define MAX_EVB_NODES 14
 
 #define GB_NODES(x)	((DAQ_SYSTEM<<12) | (GB_SUBSYS<<8 ) | (x))
 #define GB_NODE		GB_NODES(1)
