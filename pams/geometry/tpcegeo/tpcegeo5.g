@@ -143,7 +143,7 @@
 character *4 voluName;
 Content   TPCE,TOFC,TOFS,TOST,TOKA,TONX,TOAD,TOHA,TPGV,TPSS,
           TIFC,TIAL,TIKA,TINX,TPCW,TWSS,TWGI,TPCM,TPEA,
-          TESS,TSWH,TMWC,TMEA,TMSE,TIAG,TOAE,TPAD,TPAI,TPAO,TDEA,
+          TESS,TMWC,TMEA,TMSE,TIAG,TOAE,TPAD,TPAI,TPAO,TDEA,
           THOL,THRA,THLA,TALC,TAEC,TCEX,TCRX,TSAW,
           TWGC,TWGB,TPIP,TMAN,TRDV,TRDS,TRDC,TIAD,TOIG,
           FEES,FEEP,FEER,FEEI,FEEA,
@@ -722,7 +722,7 @@ USE TECW
 Block TPCE is the TPC envelope
 *
       material  Air
-      Medium    Standard
+      medium  STANDARD
       Attribute TPCE  seen=0 colo=kRed
 !//   shape     TUBE  rmin=tpcg_rmin  rmax=tpcg_rmax  dz=tpcg_lengthT/2
       shape     TUBE  rmin=tpcg_rmin  rmax=tpcg_rmax  dz=tpcg_DzEnvelop
@@ -733,19 +733,18 @@ Block TPCE is the TPC envelope
       zTIFCend = TPCG_LengthW/2 + 0.97;                 !// write(*,*) 'zTIFCend', zTIFCend; !// end of TIFC + flange
       zTIFCFlangeBegin = zTIFCend - 1*INCH;             !// write(*,*) 'zTIFCFlangeBegin' , zTIFCFlangeBegin;
       half = 1
+!                                z=+tpgvz,
+!                                z=-tpgvz,
       Create and position  TPGV kONLY = 'ONLY',
-                                z=+tpgvz,
                                 thetax=90 thetay=90 thetaz=0,
                                 phix = 75 phiy =-15 phiz=0
       half = 2
       if (TPCG_TpadConfig != 9) {	
                  position  TPGV kONLY = 'ONLY',
-                                z=-tpgvz,
                                 thetax=90 thetay=90 thetaz=180,
                                 phix =105 phiy =195 phiz=0
       } else {
       Create and position  TPGV kONLY = 'ONLY',
-                                z=-tpgvz,
                                 thetax=90 thetay=90 thetaz=180,
                                 phix =105 phiy =195 phiz=0
       }	
@@ -755,13 +754,54 @@ Block TPCE is the TPC envelope
 
       Create and position TIFC        "   inner cage   "
       Create and position TOFC        "   outer cage   "
-
-     do iSecAng = 0,360-30,30
-       Create and Position TSWH            alphaz=iSecAng kOnly='MANY'
-       Create and Position TSWH ort = XY-Z alphaz=iSecAng kOnly='MANY'
-     endDo
-
 endBlock !// end TPCE
+*
+******************************************************************************
+*                       section one - sensitive gas                          *
+******************************************************************************
+*
+Block TPGV is the Gas Volume placed in TPC
+*
+      Attribute TPGV      seen=1  colo=kRed
+#if 0
+!      Material P10
+!      SHAPE     TUBE  rmin=tpgvIR  rmax=tpcg_SenGasOR  dz=tpgvLeng/2
+!!//VP      Create    TPSS
+!     sector = 12*(half-1)
+!     if (half == 2 & TPCG_TpadConfig == 9) {
+!      SHAPE     TUBE  rmin=tpgvIR+0.1  rmax=tpcg_SenGasOR  dz=tpgvLeng/2
+!     }	
+!     do iSecAng = 15,360-15,30
+!       sector = sector + 1
+!       Create and Position TPSS            alphaz=iSecAng kOnly='ONLY'
+!     endDo
+#else
+      Medium    Standard
+      SHAPE     PCON    Phi1=-15  Dphi=360  Nz=8,
+      zi ={TPCG_MembTHK/2,zWheel1                 ,zWheel1                 ,zTOFCend,
+           zTOFCend      ,zTIFCFlangeBegin        ,zTIFCFlangeBegin        ,TPCG_DzEnvelop},
+      Rmn={tifcOR        ,tifcOR                  ,tifcOR                  ,tifcOR,
+           tifcOR        ,TPCG_tifcRF+TPCG_tifcDRT,TPCG_tifcRF+TPCG_tifcDRT,TPCG_tifcRF+TPCG_tifcDRT},
+      Rmx={tofcIR        ,tofcIR                  ,TPCG_WheelOR1           ,TPCG_WheelOR1,
+           TPCG_WheelOR  ,TPCG_WheelOR            ,TPCG_WheelOR            ,TPCG_WheelOR}
+
+     if (half == 2 & TPCG_TpadConfig == 9) {
+      SHAPE     PCON    Phi1=-15  Dphi=360  Nz=8,
+      zi ={TPCG_MembTHK/2,zWheel1                 ,zWheel1                 ,zTOFCend,
+           zTOFCend      ,zTIFCFlangeBegin        ,zTIFCFlangeBegin        ,TPCG_DzEnvelop},
+      Rmn={tifcOR        ,tifcOR                  ,tifcOR                  ,tifcOR,
+           tifcOR        ,TPCG_tifcRF+TPCG_tifcDRT,TPCG_tifcRF+TPCG_tifcDRT,TPCG_tifcRF+TPCG_tifcDRT},
+      Rmx={tofcIR        ,tofcIR                  ,TPCG_WheelOR1           ,TPCG_WheelOR1,
+           TPCG_WheelOR  ,TPCG_WheelOR            ,TPCG_WheelOR            ,TPCG_WheelOR}
+      SHAPE     TUBE  rmin=tpgvIR+0.1  rmax=tpcg_SenGasOR  dz=tpgvLeng/2
+     }	
+     do iSecAng = 15,360-15,30
+       sector = sector + 1
+       Create and Position TPSS  z=(TPCG_MembTHK+tpgvLeng)/2       alphaz=iSecAng kOnly='ONLY'
+       Create and Position TSAW                                    alphaz=iSecAng Konly='ONLY'
+     endDo
+#endif
+endblock
 *
 *******************************************************************************
 *
@@ -952,23 +992,6 @@ endBlock        "end TOHA"
 !//   //  TpcSectorWhole->SetVisibility(1);
 !//   TpcSectorWhole->SetLineColor(kBlack);
 
-*
-*------------------------------------------------------------------------------
-*
-Block TSWH  TpcSectorWhole is Sector as Whole
-      medium  STANDARD
-      Attribute TSWH      seen=1  colo=kViolet
-      SHAPE     PCON    Phi1=-15  Dphi=30  Nz=8,
-      zi ={TPCG_MembTHK/2,zWheel1                 ,zWheel1                 ,zTOFCend,
-           zTOFCend      ,zTIFCFlangeBegin        ,zTIFCFlangeBegin        ,TPCG_DzEnvelop},
-      Rmn={tifcOR        ,tifcOR                  ,tifcOR                  ,tifcOR,
-           tifcOR        ,TPCG_tifcRF+TPCG_tifcDRT,TPCG_tifcRF+TPCG_tifcDRT,TPCG_tifcRF+TPCG_tifcDRT},
-      Rmx={tofcIR        ,tofcIR                  ,TPCG_WheelOR1           ,TPCG_WheelOR1,
-           TPCG_WheelOR  ,TPCG_WheelOR            ,TPCG_WheelOR            ,TPCG_WheelOR}
-
-      Create and Position TSAW Konly='Many'
-
-endBlock        "end TSWH"
 
 *
 *------------------------------------------------------------------------------
@@ -1725,30 +1748,11 @@ Block FEES  TFEESocket
       Attribute FEES      seen=1  colo=kBlue
       SHAPE     BOX    dX=6.2/20, dY=57./20, dZ=5.8/20
 endBlock        "end FEES"
-*
-******************************************************************************
-*                       section one - sensitive gas                          *
-******************************************************************************
-*
-Block TPGV is the Gas Volume placed in TPC
-*
-      Attribute TPGV      seen=1  colo=kRed
-      Material P10
-      SHAPE     TUBE  rmin=tpgvIR  rmax=tpcg_SenGasOR  dz=tpgvLeng/2
-!//VP      Create    TPSS
-     sector = 12*(half-1)
-     if (half == 2 & TPCG_TpadConfig == 9) {
-      SHAPE     TUBE  rmin=tpgvIR+0.1  rmax=tpcg_SenGasOR  dz=tpgvLeng/2
-     }	
-     do iSecAng = 15,360-15,30
-       sector = sector + 1
-       Create and Position TPSS            alphaz=iSecAng kOnly='ONLY'
-     endDo
-endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block  TPSS is a division of gas volume corresponding to a supersectors
       attribute TPSS  seen=1  colo=kBlue
 !//      shape Division  NDIV=12  IAXIS=2
+      Material P10
       SHAPE TUBS rmin=tpgvIR  rmax=tpcg_SenGasOR  dz=tpgvLeng/2 Phi1=-15 Phi2=15
 *
      if (sector == 20 & TPCG_TpadConfig == 9) {
@@ -1768,9 +1772,8 @@ Block  TPSS is a division of gas volume corresponding to a supersectors
          zDed = TPCG_zGatingGrid - TPCG_DeadZone;
 	 zPmt = TPCG_zGatingGrid;
          dx=tprs_width/2;
-                             dz = (zEnd - zBeg)/2; z= (zEnd + zBeg)/2 -tpgvz;
-	                     dz1= TPCG_DeadZone/2; z1=TPCG_zGatingGrid  - dz1 -dz;
-!//        write(*,*) 'zBeg,zDed,Zpmt,zEnd,dz1,z1 = ',zBeg,zDed,Zpmt,zEnd,dz1,z1;
+	 dz = (zEnd - zBeg)/2;  z = 0;
+	 dz1= TPCG_DeadZone/2; z1=TPCG_zGatingGrid  - dz1 -dz;
 *        position within supersector (this assumes rectangular padrows)
            do i_row = 1,nint(tprs_nRow)
               dy=tprs_npads(i_row)*tprs_pitch/2;
@@ -1782,7 +1785,7 @@ Block  TPSS is a division of gas volume corresponding to a supersectors
 	        dx1 = ((tprs_Rpads(i_row)-tprs_width/2)-(tprs_Rpads(i_row-1)+tprs_width/2))/2
                 x   = ((tprs_Rpads(i_row)-tprs_width/2)+(tprs_Rpads(i_row-1)+tprs_width/2))/2
                 Create and Position TPAD  x=x z=z dx=dx1 dy=dy dz=dz
-!//              write(*,*) 'TPAD.A Sec=',i_sec,AG_NCOPY,'row=',i_row,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
+
               endif
               x=tprs_Rpads(i_row);
               Create and Position TPAD  x=x z=z dx=dx dy=dy dz=dz
