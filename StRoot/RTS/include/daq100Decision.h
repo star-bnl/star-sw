@@ -32,7 +32,12 @@ extern inline int daq100Decision(int t, u_int daq_cmd, u_int run_type, u_int cl_
 	}
 
 	// raw formatting
+#define ITPC_TOKEN_HACK
+#ifdef ITPC_TOKEN_HACK
+	if(daq_cmd & 0x1) {
+#else
 	if(daq_cmd & DAQCMD_FMT_ONLY) {	// always i.e. zerobias
+#endif
 		fmt = 1 ;
 	}
 	else {
