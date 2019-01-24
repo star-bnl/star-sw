@@ -149,20 +149,30 @@ Int_t StxMaker::Make(){
     const AliHLTTPCCAGBTrack &tr = StxCAInterface::Instance().GetTracker()->Track( iTr );
     Int_t NoHitsTotal = 0;
     Int_t NoHitsUsed = 0;
+    Int_t NoTpcHitsUsed = 0;
+    Int_t NoNonTpcHitsUsed = 0;
     Int_t NHits = tr.NHits();
     for ( Int_t iHit = 0; iHit < NHits; iHit++ ){ 
       const Int_t index = StxCAInterface::Instance().GetTracker()->TrackHit( tr.FirstHitRef() + iHit );
       const Int_t hId   = StxCAInterface::Instance().GetTracker()->Hit( index ).ID();
       const StHit    *hit    = fSeedHits[hId].hit;
       const StTpcHit *tpcHit = dynamic_cast<const StTpcHit *>(hit);
+#if 0      
       if (! tpcHit) {
 	if (Debug()) {LOG_WARN << "StxMaker::Make pointer to StTpcHit is zero" << endm;}
 	continue;
       }
+#else
+#endif
       NoHitsTotal++;
-      if (! tpcHit->usedInFit()) continue;
+      if (! hit->usedInFit()) continue;
+      if (tpcHit) NoTpcHitsUsed++;
+      else        NoNonTpcHitsUsed++;
       NoHitsUsed++;
     }
+#if 0
+    cout << "Track #" << iTr << "\tNoTpcHitsUsed = " << NoTpcHitsUsed << "\tNoNonTpcHitsUsed = " << NoNonTpcHitsUsed << endl;
+#endif
     if (NoHitsTotal < 10) {
       if (Debug()) {LOG_WARN << "StxMaker::Make no. of hits for the track candidate " << NoHitsTotal << " is too low. Reject it." << endm;}
       continue;
