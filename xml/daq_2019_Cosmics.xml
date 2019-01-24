@@ -18,25 +18,24 @@
 #  endif
   foreach  evtsFile(`cat $FILELIST`) 
   echo "${evtsFile}"
-  set bf        = `basename $evtsFile`
-  set filel1    = `basename $evtsFile .daq`
-  set filel     = `basename $evtsFile .root`
-  set output  = ${filel1}.event.root
   if (! -r ${evtsFile}) continue;
+  set filel        = `basename $evtsFile .daq`
+  set bf           = `basename $filel .root`
+  set output  = ${bf}.event.root
   set logFile  = ${bf}B.log
 #  if ( -r $logFile) continue;
-  set muFile = ${filel1}.MuDst.root
+  set muFile = ${bf}.MuDst.root
   if (-r $muFile) continue;
   cp ${evtsFile} ${SCRATCH}/
   set input = ${SCRATCH}/${bf}
-#root.exe -q -b 'bfc.C(1000,"P2014,TpxRaw,TpxClu2D,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,CorrX,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${input}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
-#root.exe -q -b 'bfc.C(1000,"P2018,TpxRaw,TpxClu,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,CorrX,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${input}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+#root.exe -q -b 'bfc.C(1000,"P2014,TpxRaw,TpxClu2D,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,CorrX,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${input}'","'$output'","'${bf}.root'")' &gt;&amp; ${logFile}
+#root.exe -q -b 'bfc.C(1000,"P2018,TpxRaw,TpxClu,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,CorrX,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${input}'","'$output'","'${bf}.root'")' &gt;&amp; ${logFile}
 #root.exe -q -b 'bfc.C(100000,"P2018a,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,OGridLeak3D,useCDV,CorrX,-evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${input}'")' &gt;&amp; ${logFile}
 #root.exe -q -b 'bfc.C(100000,"P2018a,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,OGridLeak3D,useCDV,CorrX,OPr40,-evout,NoHistos,noTags,noRunco,StiCA,KFVertex,-picoWrite","'${input}'")' &gt;&amp; ${logFile}  end
 root.exe -q -b 'bfc.C(100000,"P2018a,gmt,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,OGridLeak3D,CorrX,OPr40,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,-picoWrite,-picoDst,Cosmics","'${input}'")' &gt;&amp; ${logFile}  end
 #root.exe -q -b 'bfc.C(100000,"P2019,TpxRaw,TpxClu,gmt,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,OGridLeak3D,CorrX,OPr40,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,-picoWrite,-picoDst,Cosmics","'${input}'")' &gt;&amp; ${logFile}  end
 cp -p ${logFile} ${SUBMITTINGDIRECTORY}/
-cp -p ${filel1}.*.root ${SUBMITTINGDIRECTORY}/
+cp -p ${bf}.*.root ${SUBMITTINGDIRECTORY}/
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
