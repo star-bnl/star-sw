@@ -2,26 +2,6 @@
 <job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false">
         <command>
          cd ${SUBMITTINGDIRECTORY}
-   setenv StarEndMakerShell
-   setenv STARFPE NO
-   setup gcc631
-#   unsetenv NODEBUG yes
-#.DEV2
-#   setup gcc
-   setup 64b
-   starver .DEV2
-#   starver TFG18m
-#dev
-#   setup gcc
-#   starver dev
-# SL16j
-#   starver SL16j
-# SL17d
-#   setup gcc
-#   starver SL17d
-#TFG17e
-#   setup 64b
-#   starver TFG17e
 #  echo $INPUTFILE0 | grep ':'
 #  if (! $?) then
 #    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
@@ -40,6 +20,9 @@
   if ( -r $logFile) exit 0;
   set muFile = ${filel}.MuDst.root
   if (-r $muFile) exit 0;
+   setenv StarEndMakerShell
+   setenv STARFPE NO
+   source ~/bin/SetVersion.csh
 #  root.exe -q -b 'bfc.C(1000,"P2018,useCDV,Tpx,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX,dEdxCalib","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
 #  root.exe -q -b 'bfc.C(10000,"P2018,useCDV,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  root.exe -q -b 'bfc.C(1000,"P2018,useCDV,Tpx,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
@@ -72,7 +55,7 @@
 <!-- <input URL="file:/net/l404/data/fisyak/daq/2018/27GeV_production_2018/*/*/*.daq" /> -->
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2018/27GeV_production_2018/168/*/*.daq" /> -->
 <!-- <input URL="file:/star/data03/daq/2018/12*/*/st_physics_191*.daq" /> -->
-<!-- <input URL="file:/net/l401/data/scratch1/daq/2018/27GeV_production_2018/168/19168025/st_physics_19168025_raw_2000002.daq" /> -->
-<!-- <input URL="file:/net/l401/data/scratch1/daq/2018/27GeV_production_2018/168/*/*.daq" /> -->
+<!-- <input URL="file:/net/l401/data/scratch1/daq/2018/27GeV_production_2018/168/19168025/st_physics_19168025_raw_2000002.daq" />  -->
 <input URL="file:/net/l401/data/scratch1/daq/2018/27GeV_production_2018/168/*/*.daq" />
+<!-- <input URL="file:/net/l401/data/scratch1/daq/2018/production_3p85GeV_fixedTarget_2018/*/*/*.daq" /> -->
 </job>

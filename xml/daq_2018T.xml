@@ -23,25 +23,6 @@
    setenv StarEndMakerShell
    setenv STARFPE NO
    source ~/bin/SetVersion.csh
-#   setup gcc631
-#   setup gcc731
-#   unsetenv NODEBUG yes
-#.DEV2
-#   setup gcc73
-#   setup 64b
-#   starver .DEV2
-#   starver TFG18m
-#dev
-#   setup gcc
-#   starver dev
-# SL16j
-#   starver SL16j
-# SL17d
-#   setup gcc
-#   starver SL17d
-#TFG17e
-#   setup 64b
-#   starver TFG17e
 #  root.exe -q -b 'bfc.C(1000,"P2018,useCDV,Tpx,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX,dEdxCalib","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
 #  root.exe -q -b 'bfc.C(10000,"P2018,useCDV,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  root.exe -q -b 'bfc.C(1000,"P2018,useCDV,Tpx,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
