@@ -19,8 +19,9 @@
 ]>
 <Scatalog version="1.0.1">
                <Server scope="Analysis" accessMode="read">
-<!--                               <Host name="l401.l4.bnl.local" port="3316" machinePower="1.0" /> -->
-<!--                               <Host name="l4evp.starp.bnl.gov" port="3316" machinePower="1.0" /> -->
-                           <Host name="l409.l4.bnl.local" port="3316" machinePower="1.0" />
+                               <Host name="l402.l4.bnl.local" port="3316" machinePower="1.0" />
+                               <Host name="l403.l4.bnl.local" port="3316" machinePower="1.0" />
+                               <Host name="l404.l4.bnl.local" port="3316" machinePower="1.0" />
+                               <Host name="l409.l4.bnl.local" port="3316" machinePower="1.0" /> 
                 </Server> 
 </Scatalog>
