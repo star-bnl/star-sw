@@ -1,6 +1,6 @@
 /**
  * This builder is for HLT online QA
- * Basic HLT plots[#0-47] include information of global/primary track, event,
+ * Basic HLT plots[#0-46] include information of global/primary track, event,
  * EMC, ToF and HLT heavy-fragment. All of above are designed to show in
  * STAR run monitor. JPsi plots[#0-13] including J/Psi invariant mass,
  * two daughters(e) info, and corresponding plots for di-pion, di-muon, should be
@@ -160,7 +160,7 @@ void l4Builder::initialize(int argc, char *argv[])
 	gStyle->SetPadGridX(0);
 	gStyle->SetPadGridY(0);
 
-	for(int i = 0; i < 47; i++) {
+	for(int i = 0; i < 46; i++) {
 	        HltPlots[i] = new JevpPlot();
 		HltPlots[i]->gridx = 0;
 		HltPlots[i]->gridy = 0;
@@ -261,7 +261,7 @@ void l4Builder::initialize(int argc, char *argv[])
 	defineHltPlots_UPC();
 	defineDiElectron2TwrPlots();
 	setAllPlots();
-	for(int i = 0; i < 47; i++) {
+	for(int i = 0; i < 46; i++) {
 		LOG(DBG, "Adding plot %d", i);
 		addPlot(HltPlots[i]);
 	}
@@ -305,7 +305,7 @@ void l4Builder::startrun(daqReader *rdr)
     //printf("hello there. This is startrun\n");
 	runnumber = rdr->run;
 
-	int initialno = 47;
+	int initialno = 46;
 	for(int i = 0; i < initialno; i++) {
 		getPlotByIndex(i)->getHisto(0)->histo->Reset();
 	}
@@ -583,9 +583,13 @@ void l4Builder::writeHistogram()
 	char histfile[256];
 	sprintf(histfile, "%s/run14_hlt_%d_current_hist.root", Destindir, runnumber);
 	TFile file(histfile, "RECREATE");
-	int initialno = 47;
+	int initialno = 46;
 
-	for(int i = 0; i < initialno; i++) getPlotByIndex(i)->getHisto(0)->histo->Write();
+	for(int i = 0; i < initialno; i++) {
+	    HltPlots[i]->getHisto(0)->histo->Write();
+	    HltPlots[i]->getElements()->Write();
+	}
+
 	if(BESGoodFilled){
 		for(int i = 0; i < 5; i++)BesGoodPlots[i]->getHisto(0)->histo->Write();
 	}
@@ -756,8 +760,9 @@ void l4Builder::event(daqReader *rdr)
 	}
 	// Check Version
 	if(hlt_eve->version != HLT_GL3_VERSION) {
-		LOG(DBG, "ERROR: HLTFormats version doesn't match DAQ file version!");
-		cout << "DAQ version is " << hlt_eve->version << " while HLTFormats version is " << HLT_GL3_VERSION << endl;
+		LOG(ERR, "ERROR: HLTFormats version doesn't match DAQ file version!");
+		LOG(ERR, "DAQ data version is %X, but HLTFormats version is %X", 
+		    hlt_eve->version, HLT_GL3_VERSION);
 		return;
 	}
 
@@ -812,6 +817,15 @@ void l4Builder::event(daqReader *rdr)
 	    hEvtsAccpt->GetXaxis()->SetBinLabel(8, "FixedTargetMonitor");
 	    hEvtsAccpt->GetXaxis()->SetBinLabel(9, "BesGood");
 
+	    // run summary
+	    if (1 == eventCounter) {
+		char summaryText[128];
+		sprintf(summaryText, "Runnumber: %d", runnumber);
+		hltSummaryLine1->SetText(summaryText);
+		sprintf(summaryText, "bField = %8.4f", hlt_eve->bField);
+		hltSummaryLine2->SetText(summaryText);
+	    }
+
 	    // fill events
 	    if(!EventFilled) {
 	      EventFilled = true;
@@ -835,10 +849,10 @@ void l4Builder::event(daqReader *rdr)
 	    hVertexXY->Fill(vertX, vertY);
 	    hVertexR->Fill(vertR);
 	    
-	    hFixed_VertexZ->Fill(vertZ);
-	    if (vertZ > 190 && vertZ < 210) {
-	    	hFixed_VertexXY->Fill(vertX, vertY);
-	    }
+	    // hFixed_VertexZ->Fill(vertZ);
+	    // if (vertZ > 190 && vertZ < 210) {
+	    // 	hFixed_VertexXY->Fill(vertX, vertY);
+	    // }
 
 	    hLm_VertexX->Fill(lmvertX);
 	    hLm_VertexY->Fill(lmvertY);
@@ -2253,13 +2267,13 @@ void l4Builder::defineHltPlots()
 
 	// Tracks
 	index++; //1
-	hnhits = new TH1I("nHits", "nHits", 50, 0, 50);
+	hnhits = new TH1I("nHits", "nHits", 80, 0, 80);
 	ph = new PlotHisto();
 	ph->histo = hnhits;
 	HltPlots[index]->addHisto(ph);
 
 	index++; //2
-	hnDedx = new TH1I("nDedx", "nDedx", 50, 0, 50);
+	hnDedx = new TH1I("nDedx", "nDedx", 80, 0, 80);
 	ph = new PlotHisto();
 	ph->histo = hnDedx;
 	HltPlots[index]->addHisto(ph);
@@ -2404,33 +2418,33 @@ void l4Builder::defineHltPlots()
 	HltPlots[index]->addHisto(ph);
 
 	index++; //24
-	hLm_VertexX = new TH1D("Lm_VertexX", "Lm_VertexX", 200, -2., 2.);
+	hLm_VertexX = new TH1D("Lm_VertexX", "Lm_VertexX", 100, -5., 5.);
 	ph = new PlotHisto();
 	ph->histo = hLm_VertexX;
 	HltPlots[index]->addHisto(ph);
 
 	index++; //25
-	hLm_VertexY = new TH1D("Lm_VertexY", "Lm_VertexY", 200, -2., 2.);
+	hLm_VertexY = new TH1D("Lm_VertexY", "Lm_VertexY", 100, -5., 5.);
 	ph = new PlotHisto();
 	ph->histo = hLm_VertexY;
 	HltPlots[index]->addHisto(ph);
 
 	index++; //26
-	hLm_VertexZ = new TH1D("Lm_VertexZ", "Lm_VertexZ", 100, -10., 10.);
+	hLm_VertexZ = new TH1D("Lm_VertexZ", "Lm_VertexZ", 880, -210., 210.);
 	ph = new PlotHisto();
 	ph->histo = hLm_VertexZ;
 	HltPlots[index]->addHisto(ph);
 
 	index++; //27
 	HltPlots[index]->logy = 1;
-	hglobalMult = new TH1I("globalMult", "globalMult", 10000, 0, 10000);
+	hglobalMult = new TH1I("globalMult", "globalMult", 5000, 0, 5000);
 	ph = new PlotHisto();
 	ph->histo = hglobalMult;
 	HltPlots[index]->addHisto(ph);
 
 	index++; //28
 	HltPlots[index]->logy = 1;
-	hprimaryMult = new TH1I("primaryMult", "primaryMult", 2000, 0, 2000);
+	hprimaryMult = new TH1I("primaryMult", "primaryMult", 1000, 0, 1000);
 	ph = new PlotHisto();
 	ph->histo = hprimaryMult;
 	HltPlots[index]->addHisto(ph);
@@ -2544,17 +2558,41 @@ void l4Builder::defineHltPlots()
 	ph->histo = hVzDiff;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //45
-	hFixed_VertexZ = new TH1D("Fixed_VertexZ", "Fixed_VertexZ", 200, 190., 210.);
-	ph = new PlotHisto();
-	ph->histo = hFixed_VertexZ;
-	HltPlots[index]->addHisto(ph);
+	index++; // 45
+	HltPlots[index]->setOptStat(0);
+	TH1I* h = new TH1I("hltSummary", "HLT Summary", 64, 0, 63);
+	h->GetXaxis()->SetTickLength(0);
+	h->GetXaxis()->SetLabelOffset(99);
+	h->GetXaxis()->SetLabelColor(kWhite);
+	h->GetYaxis()->SetTickLength(0);
+	h->GetYaxis()->SetLabelOffset(99);
+	h->GetYaxis()->SetLabelColor(kWhite);
+	HltPlots[index]->addHisto(h);
 
-	index++; //46
-	hFixed_VertexXY = new TH2D("Fixed_VertexXY", "Fixed_VertexXY", 100, -5., 5., 100, -5., 5.);
-	ph = new PlotHisto();
-	ph->histo = hFixed_VertexXY;
-	HltPlots[index]->addHisto(ph);
+	// x: real coordinate
+	// y: NDC
+	hltSummaryLine1 = new JLatex(2, 0.8, "");
+	hltSummaryLine1->SetTextSize(0.05);
+	hltSummaryLine1->SetName("hltSummaryLine1");
+	HltPlots[index]->addElement(hltSummaryLine1);
+
+	hltSummaryLine2 = new JLatex(2, 0.7, "");
+	hltSummaryLine2->SetTextSize(0.05);
+	hltSummaryLine2->SetName("hltSummaryLine2");
+	HltPlots[index]->addElement(hltSummaryLine2);
+
+
+	// index++; //45
+	// hFixed_VertexZ = new TH1D("Fixed_VertexZ", "Fixed_VertexZ", 200, 190., 210.);
+	// ph = new PlotHisto();
+	// ph->histo = hFixed_VertexZ;
+	// HltPlots[index]->addHisto(ph);
+
+	// index++; //46
+	// hFixed_VertexXY = new TH2D("Fixed_VertexXY", "Fixed_VertexXY", 100, -5., 5., 100, -5., 5.);
+	// ph = new PlotHisto();
+	// ph->histo = hFixed_VertexXY;
+	// HltPlots[index]->addHisto(ph);
 }
 
 void l4Builder::defineBeamPlots()
@@ -3222,13 +3260,13 @@ void l4Builder::defineDiMuonPlots()
 void l4Builder::defineHltPlots_UPC()
 {
         index = 0;//0
-	hnhits_UPC = new TH1I("nHits_UPC", "nHits_UPC", 50, 0, 50);
+	hnhits_UPC = new TH1I("nHits_UPC", "nHits_UPC", 80, 0, 80);
 	ph = new PlotHisto();
 	ph->histo = hnhits_UPC;
 	HltPlots_UPC[index]->addHisto(ph);
 
 	index++; //1
-	hnDedx_UPC = new TH1I("nDedx_UPC", "nDedx_UPC", 50, 0, 50);
+	hnDedx_UPC = new TH1I("nDedx_UPC", "nDedx_UPC", 80, 0, 80);
 	ph = new PlotHisto();
 	ph->histo = hnDedx_UPC;
 	HltPlots_UPC[index]->addHisto(ph);
