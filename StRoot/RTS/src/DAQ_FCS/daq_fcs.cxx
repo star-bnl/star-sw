@@ -764,8 +764,8 @@ void fcs_data_c::run_start(u_int run, int type)
 
 void fcs_data_c::run_stop()
 {
-//	if(run_type==1) ped_stop() ;
-	ped_stop() ;
+	if(run_type==1) ped_stop() ;
+
 }
 
 void fcs_data_c::ped_start()
@@ -799,7 +799,7 @@ void fcs_data_c::ped_stop()
 		char fname[128] ;
 
 		if(run_number) {
-			sprintf(fname,"/RTScache/fcs_pedestals_%08u.txt",run_number) ;
+			sprintf(fname,"/RTScache/fcs_pedestals_s%02d_r%d_%08u.txt",sector,rdo,run_number) ;
 		}
 		else {
 			
@@ -817,17 +817,19 @@ void fcs_data_c::ped_stop()
 			return ;
 		}
 
+		fprintf(pedf,"#Sector %2d, RDO %d\n",sector,rdo) ;
 		fprintf(pedf,"#RUN %u\n",run_number) ;
 		fprintf(pedf,"#TIME %u\n",(unsigned int)now) ;
 		char *ctm = ctime(&now) ;
 		fprintf(pedf,"#DATE %s",ctm) ;
+		
 		fprintf(pedf,"\n") ;
 
 		for(int c=0;c<32;c++) {
-			LOG(TERR,"PEDs: %2d %.3f %.3f %.3f %.3f %.3f",c,ped.mean[c],ped.rms[c],
+			LOG(TERR,"PEDs: S%02d:%d: %2d %.3f %.3f %.3f %.3f %.3f",sector,rdo,c,ped.mean[c],ped.rms[c],
 				fee_currents[c][0],fee_currents[c][1],fee_currents[c][2]) ;
 
-
+		
 			fprintf(pedf,"%2d %f %f %.3f %.3f %.3f\n",c,ped.mean[c],ped.rms[c],
 				fee_currents[c][0],fee_currents[c][1],fee_currents[c][2]) ;
 
