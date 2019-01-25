@@ -43,7 +43,7 @@ class l4Builder : public JevpBuilder {
 		 * @see 
 		 * @author 
 		 */  
-		JevpPlot *HltPlots[47];
+		JevpPlot *HltPlots[46];
 		JevpPlot *BeamPlots[3];
 		JevpPlot *BesGoodPlots[5];
 		JevpPlot *HLTGood2Plots[4];
@@ -207,8 +207,11 @@ class l4Builder : public JevpBuilder {
 		TH1D *hLm_VertexZ;
 		TH1I *hglobalMult;
 		TH1I *hprimaryMult;
-		TH1D *hFixed_VertexZ;
-		TH2D* hFixed_VertexXY;
+		
+		JLatex* hltSummaryLine1;
+		JLatex* hltSummaryLine2;
+		/* TH1D *hFixed_VertexZ; */
+		/* TH2D* hFixed_VertexXY; */
 
 		/*   TH1I *hLmPrimaryMult; */
 
