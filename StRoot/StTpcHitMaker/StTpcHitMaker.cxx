@@ -443,9 +443,10 @@ Int_t StTpcHitMaker::Make() {
 	mQuery = Form("%s[%i]",tpcDataNames[k],sector);
       StRtsTable *daqTpcTable = GetNextDaqElement(mQuery);
       if (! daqTpcTable) continue;
-      if (! daqTpcTable->GetNRows()) continue;
+      Int_t Nrows = daqTpcTable->GetNRows();
+      //      if (! Nrows) continue;
       kReaderType = (EReaderType) k;
-      if (kReaderType > kLegacyTpx) kMin = kLegacyTpx;
+      //      if (kReaderType > kLegacyTpx) kMin = kLegacyTpx;
       while (daqTpcTable) {
 	if (Sector() == sector) {
 	  if (Debug()/100 > 0) {
