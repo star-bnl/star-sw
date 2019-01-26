@@ -836,7 +836,7 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 
 	if(found) {
 		LOG(INFO,"TPX found [%s;%d]",fstr,s_cou) ;
-		printf("TPX pixels %u xing %d\n",tot_pixels,bunch_xing) ;
+//		printf("TPX pixels %u xing %d\n",tot_pixels,bunch_xing) ;
 	}
 
 
@@ -2357,6 +2357,8 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 	int ped_found = 0 ;
 	int clusters = 0 ;
 	int pixels = 0 ;
+	
+	int sec[25] ;
 
 	daq_dta *dd ;
 
@@ -2364,12 +2366,14 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 
 	memset(rdos,0,sizeof(rdos)) ;
 
+	memset(sec,0,sizeof(sec)) ;
+	
 	if(strcasestr(do_print,"itpc")) ;	// leave as is...
 	else do_print = 0 ;
 
-	for(int s=20;s<=20;s++) {
+	for(int s=1;s<=24;s++) {
 		
-#if 1
+#if 0
 		dd = rdr->det("itpc")->get("raw",s) ;
 
 		if(dd) {
@@ -2396,6 +2400,10 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 		}
 #endif
 
+
+
+
+
 #if 1
 		// In SAMPA form
 		dd = rdr->det("itpc")->get("sampa",s) ;
@@ -2411,7 +2419,7 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 					int ch = (dd->pad) & 0xFF ;
 					int fee_id = (dd->pad >> 8) ;
 
-					printf("ITPC SAMPA: sector %2d, RDO %d, FEE #%02d (padplane %02d), CH %2d: %3d timebins\n",dd->sec,rdo,port,fee_id,ch,dd->ncontent) ;
+					if(dd->ncontent) printf("ITPC SAMPA: sector %2d, RDO %d, FEE #%02d (padplane %02d), CH %2d: %3d timebins\n",dd->sec,rdo,port,fee_id,ch,dd->ncontent) ;
 
 					for(u_int i=0;i<dd->ncontent;i++) {
 						printf("\ttb %3d = %4d ADC\n",dd->adc[i].tb,dd->adc[i].adc) ;
@@ -2420,6 +2428,7 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 			}
 		}
 #endif
+
 
 #if 1
 		// In Row/Pad form
@@ -2430,8 +2439,10 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 
 				pixels += dd->ncontent ;
 
+				sec[dd->sec] += dd->ncontent ;
+
 				if(do_print) {
-					printf("ITPC ADC: sector %2d, row %2d, pad %3d: %3d timebins\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
+					if(dd->ncontent) printf("ITPC ADC: sector %2d, row %2d, pad %3d: %3d timebins\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
 
 					for(u_int i=0;i<dd->ncontent;i++) {
 						printf("\ttb %3d = %4d ADC\n",dd->adc[i].tb,dd->adc[i].adc) ;
@@ -2512,25 +2523,29 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 	int found = 0 ;
 	if(adc_found || cld_found || ped_found) found = 1 ;
 
-	int rdos_found = 0 ;
-	for(int i=0;i<4;i++) {
-		if(rdos[i]) rdos_found++ ;
-	}
+//	int rdos_found = 0 ;
+//	for(int i=0;i<4;i++) {
+//		if(rdos[i]) rdos_found++ ;
+//	}
 
 	char fstr[128] ;
 	fstr[0] = 0 ;
 
 	if(adc_found) {
-		sprintf(fstr,"ADC(%d) ",rdos_found) ;
+		sprintf(fstr,"ADC ") ;
+
+//		for(int i=1;i<=24;i++) {
+//			LOG(TERR,"   %2d = %d",i,sec[i]) ;
+//		}
 	}
 	if(cld_found) strcat(fstr,"CLD ") ;
 	if(ped_found) strcat(fstr,"PEDRMS ") ;
 
 	if(found) {
 		LOG(INFO,"ITPC found [%s] pixels %d, clusters %d",fstr,pixels,clusters) ;
-		for(int i=0;i<4;i++) {
-			LOG(TERR,"   RDO %d: ave words %.1f",i+1,det_raw_bytes[i]/det_events/4) ;
-		}
+//		for(int i=0;i<4;i++) {
+//			LOG(TERR,"   RDO %d: ave words %.1f",i+1,det_raw_bytes[i]/det_events/4) ;
+//		}
 	}
 	
 
@@ -2577,6 +2592,7 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 			raw_found = 1 ;
 
 			if(do_print) {
+				// prints out Sector, RDO, channel
 				printf("FCS: [%d,%d,%d] %d words\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
 				u_short *d16 = (u_short *)dd->Void ;
 
@@ -2633,10 +2649,12 @@ static int stgc_doer(daqReader *rdr, const char *do_print)
 	}
 #endif
 
+	
 	for(int r=1;r<=6;r++) {
 		dd = rdr->det("stgc")->get("altro",r) ;	
 
 		while(dd && dd->iterate()) {	//per xing and per RDO
+			if(raw_found==0 && do_print) printf("STGC event\n") ;
 			raw_found = 1 ;
 
 			if(do_print) {
