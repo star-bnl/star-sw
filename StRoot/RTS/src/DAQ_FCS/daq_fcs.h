@@ -51,6 +51,7 @@ public:
 		run_type = 0 ;
 		run_number = 0 ;
 
+		realtime = 0 ;
 		log_level = 0 ;
 	} ;
 
@@ -87,6 +88,8 @@ public:
 	int run_type ;
 	u_int events ;
 
+	u_char realtime ;	// to disable some checks
+
 	// for a specific board
 	int sector ;
 	int rdo ;
@@ -100,10 +103,12 @@ public:
 	u_int hdr_rhic_counter ;
 	u_char trgd_event ;
 
+
+
 	int ch ;
 	int tb_cou ;
 	u_short adc[48*1024] ;
-
+	int ch_count ;
 
 	// I don't remember what the stuff is? Pre FY19.
 	int first_rhic_strobe_tick ;
