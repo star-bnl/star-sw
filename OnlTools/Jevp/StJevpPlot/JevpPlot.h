@@ -97,7 +97,7 @@ class JevpPlot : public TObject {
   
     void addElement(TObject *element);
     void removeElement(TObject *element);
-  
+    TList* getElements() { return &elements; }  
     TList histos;
 
     ULong_t Hash() const;
