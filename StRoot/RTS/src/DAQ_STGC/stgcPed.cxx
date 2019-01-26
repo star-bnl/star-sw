@@ -74,15 +74,23 @@ void stgcPed::init(int sec, int active_rbs)
 
 void stgcPed::smooth()
 {
+	LOG(TERR,"Running smooth...") ;
+
+	LOG(TERR,"I have %f",peds[2][0].ped[0]) ;
+
 	for(int a=0;a<256;a++) {
 	for(int c=0;c<16;c++) {
 		double sum = 0.0 ;
 		double cou = 0.0 ;
 		double rms = 0.0 ;
 
+		
+
 		for(int t=0;t<512;t++) {
 			double ped = peds[a][c].ped[t] ;
-			double p_rms = peds[c][c].rms[t] ;
+			double p_rms = peds[a][c].rms[t] ;
+
+			if(a==2 && c==0) LOG(TERR,"tb %d = %f %f",t,ped,p_rms) ;
 
 			if(ped==0.0 && p_rms==0.0) break ;
 			if(ped>1022 && p_rms>9) break ;
@@ -100,15 +108,17 @@ void stgcPed::smooth()
 		rms = sqrt(rms-sum*sum) ;
 
 		for(int t=0;t<512;t++) {
-			if(t<cou) {
-				peds[a][c].ped[t] = sum - 10 ;
+//			if(t<(int)cou) {
+				peds[a][c].ped[t] = sum ;
 				peds[a][c].rms[t] = rms ;
-			}
-			else {
-				peds[a][c].ped[t] = 1023.0 ;
-				peds[a][c].rms[t] = 9 ;
-			}
+//			}
+//			else {
+//				peds[a][c].ped[t] = 1023.0 ;
+//				peds[a][c].rms[t] = 9 ;
+//			}
 		}
+
+		LOG(TERR,"A%d:%d - %d %d",a,c,(int)cou,(int)peds[a][c].ped[15]) ;
 	}
 	}
 
@@ -212,7 +222,7 @@ void stgcPed::calc()
 				peds[a][c].rms[t] = rr ;
 			}
 		}
-		LOG(TERR,"AID %d:%d = %f +- %f",a,c,peds[a][c].ped[0],peds[a][c].rms[0]) ;
+		LOG(TERR,"AID %d:%d = %f +- %f",a,c,peds[a][c].ped[15],peds[a][c].rms[15]) ;
 	}
 	}
 
@@ -257,7 +267,12 @@ int stgcPed::to_altro(char *buff, int rb, int timebins)
 //	LOG(TERR,"Preparing pedestals for Slo%02d:%d (Shw%02d:%d)...",sector,rb+1,s_real,r_real) ;
 
 	for(a=0;a<256;a++) {
+
+
+
 	if(!altro_found[a]) continue ;
+
+	LOG(TERR,"ALTRO %d: found %d",a,altro_found[a]) ;
 
 	for(ch=0;ch<16;ch++) {
 
@@ -272,7 +287,7 @@ int stgcPed::to_altro(char *buff, int rb, int timebins)
 
 		// get the corresponding row & pad
 
-		struct peds *ped = &(peds[a][ch]) ;
+		struct stgcPed::peds *ped = &(peds[a][ch]) ;
 
 
 		// pedestal memory for the altro is really odd
@@ -281,6 +296,9 @@ int stgcPed::to_altro(char *buff, int rb, int timebins)
 		// of trigger...
 		for(t=15;t<timebins+15;t++) {
 			*ptr++ = (u_short) ped->ped[t] ;
+
+			if(ch==0 && t<40) LOG(TERR,"A%d:%d: %d: tb %d = %d",a,ch,tcou,t,(u_short)ped->ped[t]) ;
+
 			if((row==42)&&(pad==140)) {
 				//LOG(TERR,"%d,%d = %d",t,tcou,(u_short)ped->ped[t]) ;
 			}
@@ -371,6 +389,9 @@ int stgcPed::from_cache(char *fname, u_int rb_msk)
 
 	int err = 0 ;
 
+	memset(peds,0,sizeof(peds)) ;
+	memset(altro_found,0,sizeof(altro_found)) ;
+
 	for(int rdo=1;rdo<=6;rdo++) {
 		if(rb_mask & (1<<(rdo-1))) ;
 		else continue ;
@@ -387,10 +408,12 @@ int stgcPed::from_cache(char *fname, u_int rb_msk)
 
 		LOG(NOTE,"Loading pedestals from cache \"%s\"...",fn) ;
 
+
 		while(!feof(f)) {
-			int r, p , t ;
+			u_int r, p , t ;
 			float pp, rr ;
 			char buff[64] ;
+			int bad = 0 ;
 
 			if(fgets(buff,sizeof(buff),f)==0) continue ;
 			
@@ -402,11 +425,24 @@ int stgcPed::from_cache(char *fname, u_int rb_msk)
 
 			int ret = sscanf(buff,"%d %d %d %f %f",&r,&p,&t,&pp,&rr) ;
 			if(ret != 5) continue ;
+			
+			if(r>=256) bad = 1 ;
+			if(p>=16) bad = 1 ;
+			if(t>=512) bad = 1 ;
+
+			if(bad) {
+				LOG(ERR,"WHA %d %d",r,p) ;
+				continue ;
+			}
 
 			altro_found[r]++ ;
 
+			
+
 			peds[r][p].ped[t] = pp ;
 			peds[r][p].rms[t] = rr ;
+
+			if(p==0 && t==20) LOG(TERR,"S%d:%d: %f %f",r,p,pp,rr) ;
 		}
 
 		fclose(f) ;
