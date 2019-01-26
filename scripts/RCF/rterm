@@ -259,8 +259,12 @@ if ("$node" == "") then
 	    set pool="-pool onlam3.starp.bnl.gov:9618";     
  	else
 	    # RCF
-	    set node="rcas6+"
-	    set pool="-pool  condor02.rcf.bnl.gov:9664" 
+            set node="rcas6+"
+            set pool="RANDOM"
+            set rhost="rcas"
+            set rdomain="rcf.bnl.gov"
+            set rstart=6005
+            set rrange=6
         endif
 	breaksw;
 
@@ -315,7 +319,11 @@ else
 	breaksw;
 
        case "rcas6*":
-        set pool="-pool condor02.rcf.bnl.gov:9664"
+        set pool="RANDOM"
+        set rhost="rcas"
+        set rdomain="rcf.bnl.gov"
+        set rstart=6005
+        set rrange=6
         breaksw;
 
        case "rcas4*":
@@ -574,15 +582,21 @@ end
 #
 # Execute this command now
 #
-if ("$SLOGIN" == "") then
-    echo "Could not find slogin program"
+if ( $node == "") then
+    # Hum ... something went wrong 
+    echo "Something went wrong - failed to select a valid node!"
+    echo "Try using a specific node name as first argument"
 else
-    if ($inter) then
-	echo "Opening a connection to [$node] for $user $extra"
-	$SLOGIN $port $user@$node
+    if ("$SLOGIN" == "") then
+	echo "Could not find slogin program"
     else
-	echo "Opening a $col terminal on $node for $user $extra"
-	$TERM_PRGM -sl 500 -sb +si -sk -T "$user@$node" -n "Xterm_$node" -bg $TERM_BKG_COLOR $TERM_OPTIONS -e $SLOGIN $X11Opt $port $user@$node &
+	if ($inter) then
+	    echo "Opening a connection to [$node] for $user $extra"
+	    $SLOGIN $port $user@$node
+	else
+	    echo "Opening a $col terminal on $node for $user $extra"
+	    $TERM_PRGM -sl 500 -sb +si -sk -T "$user@$node" -n "Xterm_$node" -bg $TERM_BKG_COLOR $TERM_OPTIONS -e $SLOGIN $X11Opt $port $user@$node &
+	endif
     endif
 endif
 
