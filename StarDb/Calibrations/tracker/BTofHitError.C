@@ -1,6 +1,6 @@
 TDataSet *CreateTable() { 
   // -----------------------------------------------------------------
-  // db/.data/StarDb/Calibrations/tracker/.ssdHitError/ssdHitError Allocated rows: 1  Used rows: 1  Row size: 48 bytes
+  // db/.data/StarDb/Calibrations/tracker/.BTofHitError/BTofHitError Allocated rows: 1  Used rows: 1  Row size: 48 bytes
   //  Table: HitError_st[0]--> HitError_st[0]
   // ====================================================================
   // ------  Test whether this table share library was loaded ------
