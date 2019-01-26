@@ -104,7 +104,7 @@ daq_dta *daq_fcs::handle_raw()
 {
 	char str[128] ;
 	int min_rdo = 1 ;
-	int max_rdo = 2 ;
+	int max_rdo = 8 ;
 	char *full_name ;
 	int got_any = 0 ;
 
@@ -128,6 +128,8 @@ daq_dta *daq_fcs::handle_raw()
 		if(full_name==0) {
 			sprintf(str,"%s/sec01/rdo%d/raw",sfs_name,r) ;
 			full_name = caller->get_sfs_name(str) ;
+
+			LOG(NOTE,"str %s, full_name %s",str,full_name) ;
 			if(full_name) version = 2018 ;
 		}
 
@@ -187,7 +189,7 @@ daq_dta *daq_fcs::handle_adc()
 
 		fcs_c.start(ptr,dta->ncontent/2) ;
 
-		//LOG(TERR,"Hello again") ;
+		//LOG(TERR,"Hello again %d %d %d = %d %d",fcs_c.sector,fcs_c.rdo, fcs_c.ch,dta->sec,dta->rdo) ;
 
 		while(fcs_c.event()) {
 
@@ -203,7 +205,8 @@ daq_dta *daq_fcs::handle_adc()
 			//	LOG(WARN,"RHIC %d, Trg %d",fcs_c.first_rhic_strobe_tick,fcs_c.trigger_tick) ;
 			//}
 
-			adc->finalize(fcs_c.tb_cou, fcs_c.sector, fcs_c.rdo, fcs_c.ch) ;			
+			LOG(DBG,"... %d %d %d %d",fcs_c.tb_cou,fcs_c.sector,fcs_c.rdo,fcs_c.ch) ;
+			adc->finalize(fcs_c.tb_cou, dta->sec, dta->rdo, fcs_c.ch) ;			
 		}
 	}
 
@@ -254,7 +257,8 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	int trg_cmd, daq_cmd ;
 	int t_hi, t_mid, t_lo ;
 
-
+//	LOG(TERR,"get_l2: %p %d %p %d",addr,words,trg,rdo) ;
+	if(addr==0) return 0 ;
 
 	//LOG(WARN,"get_l2") ;
 //	for(int i=0;i<16;i++) {
@@ -306,10 +310,12 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 
 	t_lo |= (t_hi<<8) | (t_mid << 4) ;
 
-//	LOG(TERR,"Event: trg_word 0x%08X: trg_cmd 0x%X, daq_cmd 0x%X, token %d",trg_word,trg_cmd,daq_cmd,t_lo) ;
+//	LOG(TERR,"%d: words %d: trg_word 0x%08X: trg_cmd 0x%X, daq_cmd 0x%X, token %d",rdo,words,
+//	    trg_word,trg_cmd,daq_cmd,t_lo) ;
 
 	if(trg_cmd==0) {
-		LOG(NOTE,"trg_cmd=0 in event 0x%04X",hdr) ;		
+		//LOG(WARN,"trg_cmd=0 in event type 0x%04X",hdr) ;
+		// Monitoring event...
 		goto err_end ;
 	}
 	else {
@@ -325,7 +331,7 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		}
 		else {
 			if(trg_cmd != 4) {
-				LOG(NOTE,"Unusal trg_cmd=0x%X in event 0x%04X",trg_cmd,hdr) ;
+				LOG(WARN,"Unusal trg_cmd=0x%X in event 0x%04X",trg_cmd,hdr) ;
 			}
 		}
 	}
@@ -373,6 +379,7 @@ int fcs_data_c::start(u_short *d16, int shorts)
 	d = (u_int *)d16 ;
 
 	rhic_start = 0;
+	ch_count = 0 ;
 
 
 	
@@ -476,13 +483,19 @@ int fcs_data_c::hdr_event()
 
 	//I will need the board id as a sector/id combo
 	hdr_board_id = dta_p[3] ;
-	if(hdr_board_id != board_id) {
+
+	// this won't work Offline
+	if(realtime && (hdr_board_id != board_id)) {
 		LOG(ERR,"evt %d: board_id: expected 0x%04X, received 0x%04X",events,board_id,hdr_board_id) ;
 	}
 
 	//extract trigger_word and rhic_counter
 	hdr_trg_word = ((dta_p[5]&0xF)<<16) | dta_p[4] ;
 	hdr_rhic_counter = (dta_p[7]<<16)|dta_p[6] ;
+
+
+	sector = (hdr_board_id >> 11)+1 ;
+	rdo = ((hdr_board_id >> 8) & 0x7)+1 ;
 
 	LOG(DBG,"HDR: trg_word 0x%05X, %d",hdr_trg_word,hdr_rhic_counter) ;
 
@@ -491,6 +504,8 @@ int fcs_data_c::hdr_event()
 	dta_p += 8 ;
 
 	if(dta_p[0]==0xEEEE && dta_p[1]==0xEEEE) {	// start of ASCII
+		char ctmp[64] ;
+
 		dta_p += 2 ;	// adjust
 		u_int *d32 = (u_int *)dta_p ;
 
@@ -499,13 +514,25 @@ int fcs_data_c::hdr_event()
 		LOG(NOTE,"ASCII contribution - words %d",words) ;
 
 		int end_marker = 0 ;
+		u_int cou = 0 ;
 		for(int i=0;i<words;i++) {
 			u_int asc = d32[i] ;
 
 			if((asc&0xFF00FFFF)==0xF5009800) {
 				char c = (asc>>16)&0xFF ;
 
-				printf("%c",c) ;
+				if(cou>sizeof(ctmp)) ;
+				else {
+					if(c=='\n') {
+						ctmp[cou] = 0 ;
+						LOG(TERR,"0x%X: \"%s\"",board_id,ctmp) ;
+						cou = 0 ;
+					}
+					else {
+						ctmp[cou] = c ;
+						cou++ ;
+					}
+				}
 			}
 
 			dta_p += 2 ;
@@ -517,11 +544,12 @@ int fcs_data_c::hdr_event()
 
 		}
 
+		ctmp[cou] = 0 ;
 		if(!end_marker) {
-			LOG(ERR,"ASCII but no end-marker!") ;
+			LOG(WARN,"%d: ASCII[%d] but no end-marker \"%s\"",0,cou,ctmp) ;
 		}
 		else {
-			LOG(NOTE,"ASCII OK") ;
+			LOG(NOTE,"%d: ASCII[%d] \"%s\"",0,cou,ctmp) ;
 		}
 
 	}
@@ -548,10 +576,14 @@ int fcs_data_c::event()
 	if(dta_p[0]==0xE800) return 0 ;	// end of event
 
 
+
+
+
 	// from class
 	tb_cou = 0 ;
 	ch = -1 ;
 
+	ch_count++ ;
 
 	u_int rhic_cou_xpect = hdr_rhic_counter & 0x7F ;
 	u_int board_id_xpect = board_id & 0xFF ;
@@ -568,6 +600,7 @@ int fcs_data_c::event()
 		u_int trg_word ;
 		u_int rhic_cou ;
 		u_int board ;
+		u_char complain =  0 ;
 
 		h[0] = *dta_p++ ;
 		h[1] = *dta_p++ ;
@@ -579,9 +612,14 @@ int fcs_data_c::event()
 		trg_word = ((h[2]&0xFF)<<12)|(h[1]) ;
 		rhic_cou = h[2]>>8 ;
 
-		if((board_id_xpect != board)||(hdr_trg_word!=trg_word)|(rhic_cou_xpect!=rhic_cou)) {
+		if(realtime && (board_id_xpect != board)) complain = 1 ;
+		
+		if((hdr_trg_word!=trg_word)|(rhic_cou_xpect!=rhic_cou)) {
+			complain = 1 ;
+		}
 
-			LOG(ERR,"Evt %d, ch %d: 0x%X 0x%05X %d expected: 0x%X 0x%05X %d seen",events,ch,
+		if(complain) {
+			LOG(ERR,"Evt %d, ch %d[%d]: 0x%X 0x%05X %d expected: 0x%X 0x%05X %d seen",events,ch,ch_count,
 			    board_id_xpect,hdr_trg_word,rhic_cou_xpect,
 			    board,trg_word,rhic_cou) ;
 

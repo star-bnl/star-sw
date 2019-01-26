@@ -44,7 +44,7 @@ daq_fcs.o: ../../../../StRoot/RTS/include/rtsLog.h
 daq_fcs.o: ../../../../StRoot/RTS/include/rtsSystems.h
 daq_fcs.o: ../../../../StRoot/RTS/include/daqFormats.h
 daq_fcs.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-daq_fcs.o: ../../../../StRoot/RTS/trg/include/trgDataDefs_45.h
+daq_fcs.o: ../../trg/include/trgDataDefs_46.h
 daq_fcs.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 daq_fcs.o: ../SFS/sfs_index.h
 daq_fcs.o: ../SFS/fs_index.h
