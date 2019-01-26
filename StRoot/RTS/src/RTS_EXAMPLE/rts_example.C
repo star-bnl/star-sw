@@ -2627,7 +2627,7 @@ static int stgc_doer(daqReader *rdr, const char *do_print)
 
 
 	
-#if 0
+#if 1
 	dd = rdr->det("stgc")->get("raw") ;
 	
 
@@ -2636,12 +2636,12 @@ static int stgc_doer(daqReader *rdr, const char *do_print)
 			raw_found = 1 ;
 
 			if(do_print) {
-				printf("STGC ALTRO: sec %02d, RDO %d: bytes %d\n",dd->sec,dd->rdo,dd->ncontent) ;
+				printf("STGC RAW: sec %02d, RDO %d: bytes %d\n",dd->sec,dd->rdo,dd->ncontent) ;
 				
-				u_int *d = (u_int *)dd->Void ;
-				for(u_int i=0;i<dd->ncontent/4;i++) {
-					printf("  %d/%d = 0x%04X\n",i,dd->ncontent/4,d[i]) ;
-				}
+				//u_int *d = (u_int *)dd->Void ;
+				//for(u_int i=0;i<dd->ncontent/4;i++) {
+				//	printf("  %d/%d = 0x%04X\n",i,dd->ncontent/4,d[i]) ;
+				//}
 			}
 
 		}
