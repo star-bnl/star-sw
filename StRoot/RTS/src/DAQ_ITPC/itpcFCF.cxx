@@ -253,6 +253,7 @@ int itpc_fcf_c::init(daq_dta *gain)
 			sr[row][p].gain = gp[p].gain ;
 			sr[row][p].t0 = gp[p].t0 ;
 
+
 			if(gp[p].gain < 0.01) {
 				int p1 = p - 1;
 				int p2 = p + 1 ;
@@ -265,6 +266,8 @@ int itpc_fcf_c::init(daq_dta *gain)
 				sr[row][p].flags |= 3 ;	// bad and edge
 				sr[row][p1].flags |= 2 ;	// just edge
 				sr[row][p2].flags |= 2 ;	// just edge
+
+
 
 				bad_ch++ ;
 			}
@@ -367,6 +370,7 @@ int itpc_fcf_c::init(int sec, const char *fname)
 			gain_p[r][p].t0 = 0.0 ;
 
 			//if(p==1 || p==rowlen[r]) gain_p[r][p].flags = 0x2 ;	// edge
+
 			if(p==1 || p==x_max(r,0)) gain_p[r][p].flags = 0x2 ;	// edge
 			else gain_p[r][p].flags = 0 ;
 
@@ -738,7 +742,7 @@ int itpc_fcf_c::do_ch_sim(int row, int pad, u_short *tb_buff, u_short *track_id)
 	u_short *p_start = 0 ;
 
 	offline = 1 ;	// juuuuust in case!
-	words_per_cluster = 4 ;	// added stuff
+ 	words_per_cluster = 4 ;	// added stuff
 	if(track_dta==0) {
 		track_dta = (u_short *)malloc(MAX_BLOB_SIZE*2) ;
 	}
@@ -765,6 +769,8 @@ int itpc_fcf_c::do_ch_sim(int row, int pad, u_short *tb_buff, u_short *track_id)
 	//condition data ala cuts
 	if(det_type==1 && y_is_timebin) {	// only for ITPC in normal orientation!
 
+// also removed the cuts in the Offline version on 26-Jan-2019
+#if 0
 		for(int i=0;i<512;i++) {
 			if(i>425) tb_buff[i] = 0 ;
 			else if((i>=26)&&(i<=31)) tb_buff[i]= 0 ;
@@ -772,6 +778,7 @@ int itpc_fcf_c::do_ch_sim(int row, int pad, u_short *tb_buff, u_short *track_id)
 				if(tb_buff[i]<=4) tb_buff[i] = 0 ;
 			}
 		}
+#endif
 	}
 
 	for(int i=0;i<MAX_TB_EVER;i++) {

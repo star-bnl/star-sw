@@ -2008,7 +2008,7 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 							LOG(NOTE,"RDO %d: T %d: FIFO: BUSY overrun: 0x%08X",rdo.rdo,trgs[cou].t,dta) ;
 						}
 						else {
-							LOG(ERR,"RDO %d: T %d: FIFO: BUSY overrun: 0x%08X",rdo.rdo,trgs[cou].t,dta) ;
+							LOG(ERR,"RDO S%d:%d: T %d: FIFO: BUSY overrun: 0x%08X",rdo.sector,rdo.rdo,trgs[cou].t,dta) ;
 							err = 1 ;
 						}
 					}

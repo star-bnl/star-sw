@@ -1917,7 +1917,10 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		}
 
 
-		if(data[0] != ((fee_id<<16)|0xA0000010)) err |= 0x10 ;
+		if(data[0] != ((fee_id<<16)|0xA0000010)) {
+			err |= 0x10 ;
+			LOG(ERR,"%d:#02d: hdr FEE word 0x%08X",rdo_id,fee_port,data[0]) ;
+		}
 
 //		if(data[7] != ((fee_id<<16)|0x40000010)) {
 //			for(int i=0;i<8;i++) {
@@ -1925,10 +1928,13 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 //			}
 //		}
 		
-//		if(data[7] != ((fee_id<<16)|0x40000010)) err |= 0x20 ;	// this is the last guy and can misfire
+		if(data[7] != ((fee_id<<16)|0x40000010)) {
+			LOG(ERR,"%d:#02d: last FEE word 0x%08X",rdo_id,fee_port,data[7]) ;
+			err |= 0x20 ;	// this is the last guy and can misfire
+		}
 
 		if((data[1] & 0xFFFF)||(data[2]&0xFFFF)||(data[3]&0xFFFF)||(data[4]&0xFFFF)) {
-			LOG(ERR,"%d:#%02d: event errors: 0x%X 0x%X 0x%X 0x%X",rdo_id,fee_port,
+			LOG(ERR,"%d:#%02d: FEE event errors: 0x%X 0x%X 0x%X 0x%X",rdo_id,fee_port,
 			    data[1],data[2],data[3],data[4]) ;
 		}
 
