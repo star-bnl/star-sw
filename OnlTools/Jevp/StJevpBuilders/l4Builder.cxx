@@ -654,7 +654,7 @@ void l4Builder::writeHistogram()
 void l4Builder::main(int argc, char *argv[])
 {
 	l4Builder me;
-	//-------------------
+        //-------------------
 	getcwd(me.Currentdir, 256);
 	char tmp[256];
 	getcwd(tmp, 256);
@@ -696,20 +696,21 @@ void l4Builder::event(daqReader *rdr)
 	//   //if (trg & minbias)  //start of check for minbias.
 	//   //***********************************************************************************************
 
-	int		triggerBitHighPt	     = 0x10000;
-	int		triggerBitDiElectron	     = 0x20000;
-	int		triggerBitHeavyFragment	     = 0x40000;
-	int		triggerBitBesgoodEvents	     = 0x200000;
-	int		triggerBitLowMult	     = 0x1000000;
-	int		triggerBitUPC		     = 0x4000000;
-	int		triggerBitUPCDiElectron	     = 0x2000000;
-	int		triggerBitDiMuon	     = 0x8000000;
-	int		triggerBitFixedTarget	     = 0x10000000;
-	int		triggerBitFixedTargetMonitor = 0x20000000;
-	int		triggerBitBesMonitor	     = 0x40000000;
-	unsigned int	triggerBitHLTGood2	     = 0x80000000;
-	unsigned int	triggerBitDiElectron2Twr     = 0x00000001;	// start to up lower 16 bit.
-	unsigned int	triggerBitMTDQuarkonium	     = 0x00400000;
+	unsigned int triggerBitHighPt             = 0x00010000;
+	unsigned int triggerBitDiElectron         = 0x00020000;
+	unsigned int triggerBitHeavyFragment      = 0x00040000;
+        unsigned int triggerBitAllEvents          = 0x00080000;
+	unsigned int triggerBitBesgoodEvents      = 0x00200000;
+        unsigned int triggerBitLowMult            = 0x01000000;
+	unsigned int triggerBitUPCDiElectron	  = 0x02000000;
+	unsigned int triggerBitUPC		  = 0x04000000;
+	unsigned int triggerBitDiMuon             = 0x08000000;
+	unsigned int triggerBitFixedTarget	  = 0x10000000;
+	unsigned int triggerBitFixedTargetMonitor = 0x20000000;
+	unsigned int triggerBitBesMonitor	  = 0x40000000;
+	unsigned int triggerBitHLTGood2           = 0x80000000;
+	unsigned int triggerBitDiElectron2Twr     = 0x00000001; // start to up lower 16 bit.
+	unsigned int triggerBitMTDQuarkonium	  = 0x00400000;
 
 	//EXTRACT L4 TRACK INFO FROM DAQ FILE
 	//daq_dta *dd  = rdr->det("l3")->get("legacy");
@@ -779,43 +780,27 @@ void l4Builder::event(daqReader *rdr)
 		TriggerFilled = true;
 		addServerTags("L4Trigger");
 	    }
-	    if(decision & triggerBitDiMuon) {
+	    if(decision & triggerBitAllEvents) {
 	      hEvtsAccpt->Fill(0.);
 	    }
-	    if(decision & triggerBitMTDQuarkonium) {
-	      hEvtsAccpt->Fill(1.);
+	    if(decision & triggerBitBesgoodEvents) {
+		hEvtsAccpt->Fill(1.);
 	    }
 	    if(decision & triggerBitHLTGood2) {
 	      hEvtsAccpt->Fill(2.);
 	    }
-	    if(decision & triggerBitDiElectron) {
-	      hEvtsAccpt->Fill(3.);
-	    }
-	    if(decision & triggerBitDiElectron2Twr) {
-	      hEvtsAccpt->Fill(4.);
-	    }
-	    if(decision & triggerBitHeavyFragment) {
-	      hEvtsAccpt->Fill(5.);
-	    }
 	    if(decision & triggerBitFixedTarget) {
-		hEvtsAccpt->Fill(6);
+		hEvtsAccpt->Fill(3);
 	    }
 	    if(decision & triggerBitFixedTargetMonitor) {
-		hEvtsAccpt->Fill(7);
-	    }
-	    if(decision & triggerBitBesgoodEvents) {
-		hEvtsAccpt->Fill(8);
+		hEvtsAccpt->Fill(4);
 	    }
 
-	    hEvtsAccpt->GetXaxis()->SetBinLabel(1, "DiMuon");
-	    hEvtsAccpt->GetXaxis()->SetBinLabel(2, "MTDQuarkonium");
+	    hEvtsAccpt->GetXaxis()->SetBinLabel(1, "AllEvents");
+	    hEvtsAccpt->GetXaxis()->SetBinLabel(2, "HLTGood");
 	    hEvtsAccpt->GetXaxis()->SetBinLabel(3, "HLTGood2");
-	    hEvtsAccpt->GetXaxis()->SetBinLabel(4, "DiElectron");
-	    hEvtsAccpt->GetXaxis()->SetBinLabel(5, "DIEP2Twr");
-	    hEvtsAccpt->GetXaxis()->SetBinLabel(6, "HeavyFragment");
-	    hEvtsAccpt->GetXaxis()->SetBinLabel(7, "FixedTarget");
-	    hEvtsAccpt->GetXaxis()->SetBinLabel(8, "FixedTargetMonitor");
-	    hEvtsAccpt->GetXaxis()->SetBinLabel(9, "BesGood");
+	    hEvtsAccpt->GetXaxis()->SetBinLabel(4, "FixedTarget");
+	    hEvtsAccpt->GetXaxis()->SetBinLabel(5, "FixedTargetMon");
 
 	    // run summary
 	    if (1 == eventCounter) {
@@ -1057,20 +1042,27 @@ void l4Builder::event(daqReader *rdr)
 	      float pt = hlt_gt->globalTrack[i].pt;
 	      float pz = hlt_gt->globalTrack[i].tanl * pt;
 	      float p  = TMath::Sqrt(pt*pt+pz*pz);
-	      float eta = 0.0;
+
+              float phi = hlt_gt->globalTrack[i].psi;
+              if(phi < 0.0) phi += twopi;
+
+              float eta = 0.0;
 	      if(p==pz&&pz>0) eta = 10e10 ;
 	      if(p==pz&&pz<0) eta = -10e10 ;
 	      eta = 0.5*TMath::Log((p+pz)/(p-pz)); 
 	      
 	      hGlob_Eta->Fill(eta);	      
 
+#if 0
 	      if(nHits >= 25 && fabs(eta) < 1.) {
-		float phi = hlt_gt->globalTrack[i].psi;
-		if(phi < 0.0) phi += twopi;
 		hGlob_Pt->Fill(pt);
 		hGlob_Phi->Fill(phi);
 	      }
-	    }
+# else
+              hGlob_Pt->Fill(pt);
+              hGlob_Phi->Fill(phi);
+#endif
+            }
 	  }
 
 
@@ -3685,12 +3677,6 @@ void l4Builder::setAllPlots()
 	hFixedTargetMonitorVertexXY->GetYaxis()->SetTitle("VertexY (cm)");
 	hFixedTargetMonitorVr->GetXaxis()->SetTitle("VertexR (cm)");
 	//hFixedTargetMonitorVertexXY->GetZaxis()->SetRangeUser(1.e-10,1.e30);
-	hEvtsAccpt->GetXaxis()->SetBinLabel(1, "DiMuon");
-	hEvtsAccpt->GetXaxis()->SetBinLabel(2, "MTDQuarkonium");	
-	hEvtsAccpt->GetXaxis()->SetBinLabel(3, "HLTGood2");  
-	hEvtsAccpt->GetXaxis()->SetBinLabel(4, "DiElectron");
-	hEvtsAccpt->GetXaxis()->SetBinLabel(5, "DIEP2Twr");
-	hEvtsAccpt->GetXaxis()->SetBinLabel(6, "HeavyFragment"); 
 
 	hGlob_Phi_UPC->SetMinimum(0.);
 	hPrim_Phi_UPC->SetMinimum(0.);
