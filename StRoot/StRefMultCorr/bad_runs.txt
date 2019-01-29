@@ -1,6 +1,9 @@
 //----------------------------------------------------------------------------------------------------
-// $Id: bad_runs.txt,v 1.2 2011/11/08 19:31:07 hmasui Exp $
+// $Id: bad_runs.txt,v 1.1 2019/01/28 20:26:09 gnigmat Exp $
 // $Log: bad_runs.txt,v $
+// Revision 1.1  2019/01/28 20:26:09  gnigmat
+// The first commit of the StRefMultCorr
+//
 // Revision 1.2  2011/11/08 19:31:07  hmasui
 // Update bad run list for 200 GeV
 //
