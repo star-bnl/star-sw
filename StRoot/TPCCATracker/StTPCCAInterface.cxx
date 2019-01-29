@@ -212,6 +212,7 @@ void StTPCCAInterface::MakeSettings()
     SlicePar.SetISlice( iSlice );
     SlicePar.SetNRows ( NRows ); 
     SlicePar.SetNInnerRows ( NoOfInnerRows ); 
+    SlicePar.SetNTpcRows ( NRows ); 
     Double_t beta = 0;
     if (sector > 12) beta = (24-sector)*2.*TMath::Pi()/12.;
     else             beta =     sector *2.*TMath::Pi()/12.;

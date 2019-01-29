@@ -359,9 +359,9 @@ int_m AliHLTTPCCATrackletConstructor::ExtrapolateTracklet( TrackMemory &r, const
 
   const float_v kFactor = AliHLTTPCCAParameters::HitPickUpFactor * AliHLTTPCCAParameters::HitPickUpFactor * 3.5f * 3.5f;
   const float_v two( 2.f );
-
-  const float_v sy2 = CAMath::Min( two, kFactor * ( r.fParam.GetErr2Y() + err2Y ) );
-  const float_v sz2 = CAMath::Min( two, kFactor * ( r.fParam.GetErr2Z() + err2Z ) );
+  const float_v twentyfive (25.f );
+  const float_v sy2 = CAMath::Min( twentyfive, kFactor * ( r.fParam.GetErr2Y() + err2Y ) );
+  const float_v sz2 = CAMath::Min( twentyfive, kFactor * ( r.fParam.GetErr2Z() + err2Z ) );
 
   activeF = static_cast<float_m>( active );
   debugF() << "activeF: " << activeF;
@@ -513,9 +513,10 @@ int_m AliHLTTPCCATrackletConstructor::ExtendTracklet( TrackMemory &r, const int 
 
   const float_v kFactor = AliHLTTPCCAParameters::HitPickUpFactor * AliHLTTPCCAParameters::HitPickUpFactor * 3.5f * 3.5f;
   const float_v two( 2.f );
+  const float_v twentyfive( 25.f );
 
-  const float_v sy2 = CAMath::Min( two, kFactor * ( r.fParam.GetErr2Y() + err2Y ) );
-  const float_v sz2 = CAMath::Min( two, kFactor * ( r.fParam.GetErr2Z() + err2Z ) );
+  const float_v sy2 = CAMath::Min( twentyfive, kFactor * ( r.fParam.GetErr2Y() + err2Y ) );
+  const float_v sz2 = CAMath::Min( twentyfive, kFactor * ( r.fParam.GetErr2Z() + err2Z ) );
 
 
   activeExtraMaskF &= dy * dy <= sy2 && dz * dz <= sz2;

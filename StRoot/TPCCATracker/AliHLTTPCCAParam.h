@@ -61,6 +61,7 @@ class AliHLTTPCCAParam
     int NRows8() const { return fNRows + float_v::Size - (fNRows-1)%float_v::Size - 1;} // NRows8 % float_v::Size == 0 && NRows + float_v::Size > NRows8 >= NRows
 //
     int NInnerRows() const { return fNInnerRows; }
+    int NTpcRows()   const { return fNTpcRows; }
   
     const float *RowX() const { return &(fRowX[0]); }
     float RowX( int iRow ) const { return fRowX[iRow]; }
@@ -93,6 +94,7 @@ class AliHLTTPCCAParam
     void SetISlice( int v ) {  fISlice = v;}
     void SetNRows( int v ) {  fNRows = v; fRowX.resize(fNRows);}
     void SetNInnerRows( int v ) { fNInnerRows = v;}
+    void SetNTpcRows( int v ) { fNTpcRows = v;}
     void SetRowX( int iRow, float v ) {  fRowX[iRow] = v; }
     void SetAlpha( float v ) {  fAlpha = v;}
     void SetDAlpha( float v ) {  fDAlpha = v;}
@@ -147,6 +149,7 @@ class AliHLTTPCCAParam
 
     int fISlice; // slice number
     int fNRows; // number of rows
+    int fNTpcRows; // total number of Tpc rows  
     int fNInnerRows; // number of inner rows
 
     float fAlpha, fDAlpha; // slice angle and angular size
@@ -167,7 +170,7 @@ class AliHLTTPCCAParam
 
     vector<float> fRowX;// X-coordinate of rows 
     int   fRecoType;		   // 0=Sti error parametrization; 1=Stv
-    float fParamS0Par[2][3][7];    // cluster error parameterization coeficients
+    float fParamS0Par[2][4][7];    // cluster error parameterization coeficients; 0 -> iTPC, 1 -> oTPC, 2 -> BToF, 3 -> EToF
     float fPolinomialFieldBz[6];   // field coefficients
 
   private:
@@ -188,12 +191,13 @@ class AliHLTTPCCAParam
       return type;
     }
 */
-    inline int errorType( int row ) const {
-      int type = 0;
-      type = ( row < fNInnerRows ? 0 : 1 );
-      return type;
-    }
-    inline uint_v errorType( int_v row ) const {
+  inline int errorType( int row) const {
+    //    if (CAMath::Abs(z) > 210) return 3; // EToF
+    if (row < fNInnerRows )   return 0; // Inner Tpc
+    if (row < fNTpcRows )     return 1; // Outer Tpc
+    return 2;                           // BToF
+  }
+    inline uint_v errorType( int_v row) const {
       uint_v type( 7 );
       type.setZero( row < fNInnerRows );
       //type( row > 126 ) = 7;
@@ -332,7 +336,7 @@ inline void AliHLTTPCCAParam::GetClusterErrors2( int iRow, const TrackParamVecto
   const float_v one = float_v(Vc::One);
   const float_v zero = float_v(Vc::Zero);
   float_v z = t.Z();
-  const int type = errorType( iRow );
+  const int type = errorType( iRow);// , z);
   z = (200.f - CAMath::Abs(z)) * 0.01f;
   z(z < zero) = zero;
 
@@ -346,9 +350,10 @@ inline void AliHLTTPCCAParam::GetClusterErrors2( int iRow, const TrackParamVecto
   const float *c = fParamS0Par[0][type];
   float_v v = c[0] + c[1]*z/cos2Phi + c[2]*tg2Phi;
   float_v w = c[3] + c[4]*z*(one + tg2Lambda) + c[5]*tg2Lambda;
+#if 0
   v(v>one) = one;
   w(w>one) = one;
-
+#endif
   const float_v errmin=1e-6f;
   v(v<errmin) = errmin;
   w(w<errmin) = errmin;
@@ -389,7 +394,9 @@ inline void AliHLTTPCCAParam::GetClusterErrors2( uint_v rowIndexes, const TrackP
   }
 //  v += z * float_v( c + 1, type )/cos2Phi +  float_v( c + 2, type ) *tg2Phi;
   v += z * v1/cos2Phi +  v2 *tg2Phi;
+#if 0
   v(v>one) = one;
+#endif
   v(v<errmin) = errmin;
   *Err2Y = CAMath::Abs( v );
 
@@ -399,7 +406,9 @@ inline void AliHLTTPCCAParam::GetClusterErrors2( uint_v rowIndexes, const TrackP
   }
 //  v += z * float_v( c + 4, type )*(one + tg2Lambda) + float_v( c + 5, type )*tg2Lambda;
   v += z * v4*(one + tg2Lambda) + v5*tg2Lambda;
+#if 0
   v(v>one) = one;
+#endif
   v(v<errmin) = errmin;
   *Err2Z = CAMath::Abs( v );
 }

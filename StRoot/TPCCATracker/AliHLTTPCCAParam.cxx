@@ -33,7 +33,7 @@ AliHLTTPCCAParam::AliHLTTPCCAParam()
     fZMin( 0.0529937 ), fZMax( 249.778 ), fErrX( 0 ), fErrY( 0 ), fErrZ( 0.228808 ), fPadPitch( 0.4 ), fBz( -5. ),
     fHitPickUpFactor( 1. ),
     fMaxTrackMatchDRow( 4 ), fTrackConnectionFactor( 3.5 ), fTrackChiCut( 3.5 ), fTrackChi2Cut( 10 ) // are rewrited from file. See operator>>()
-   ,fRecoType(0) //Default is Sti
+  ,fRecoType(0) //Default is Sti
 {
   // constructor
 ///mvz start
@@ -79,7 +79,7 @@ AliHLTTPCCAParam::AliHLTTPCCAParam()
   fParamS0Par[1][2][4] = 0.0179946f;
   fParamS0Par[1][2][5] = 0.000425504f;
   fParamS0Par[1][2][6] = 20.9294f;*/
-
+  
   fParamS0Par[0][0][0] = 0.0004f;
   fParamS0Par[0][0][1] = 0.001720216f;
   fParamS0Par[0][0][2] = 0.0236289f;
