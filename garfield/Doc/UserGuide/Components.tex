@@ -81,7 +81,7 @@ When the geometry is scanned
 (triggered, for instance, by calling \texttt{GetMedium}), the  
 first medium found is returned. 
 The sequence of the scan is reversed with respect to the 
-assembly fo the geometry. 
+assembly of the geometry. 
 Hence, the last medium added to the geometry is considered the innermost. 
 
 For more complex structures, the class \texttt{GeometryRoot} can be used 
@@ -268,7 +268,7 @@ Analogous functions are available for \(y\) and \(z\).
 In order to assess the quality of the mesh, 
 one can retrieve the dimensions of each mesh element using
 \begin{lstlisting}
-GetElement(const int i, double& vol, double& dmin, double& dmax);
+bool GetElement(const unsigned int i, double& vol, double& dmin, double& dmax);
 \end{lstlisting}
 \begin{description}
 \item[i] index of the element
@@ -283,10 +283,10 @@ ComponentAnsys123* fm = new ComponentAnsys123();
 ...
 TH1F* hAspectRatio = new TH1F("hAspectRatio"; "Aspect Ratio", 100, 0., 50.);
 TH1F* hSize = new TH1F("hSize", "Element Size", 100, 0., 30.);
-const int nel = fm->GetNumberOfElements();
+const unsigned int nel = fm->GetNumberOfElements();
 // Loop over the elements.
 double volume, dmin, dmax;
-for (int i = nel; i--;) {
+for (unsigned int i = 0; i < nel; ++i) {
   fm->GetElement(i, volume, dmin, dmax);
   if (dmin > 0.) hAspectRatio->Fill(dmax / dmin);
   hSize->Fill(volume);
@@ -306,8 +306,8 @@ Synopsys Sentaurus \cite{Synopsys} can be imported with the classes
 
 The function to import the field map is 
 \begin{lstlisting}
-bool Initialise(const std::string gridfilename,
-                const std::string datafilename);
+bool Initialise(const std::string& gridfilename,
+                const std::string& datafilename);
 \end{lstlisting}
 \begin{description}
   \item[gridfilename]
@@ -339,9 +339,9 @@ the regions of the device where charge transport is to be enabled
 need to be associated with \texttt{Medium} classes. 
 \begin{lstlisting}
 // Get the number of regions in the device
-int GetNumberOfRegions();
+unsigned int GetNumberOfRegions();
 // Associate a region with a Medium class
-void SetMedium(const int ireg, Medium* m);
+void SetMedium(const unsigned int ireg, Medium* m);
 \end{lstlisting}
 \begin{description}
   \item[ireg]
@@ -352,7 +352,7 @@ void SetMedium(const int ireg, Medium* m);
 
 The name of a region can be retrieved with
 \begin{lstlisting}
-void GetRegion(const int i, std::string& name, bool& active);
+void GetRegion(const unsigned int i, std::string& name, bool& active);
 \end{lstlisting}
 \begin{description}
   \item[name] 
@@ -455,6 +455,15 @@ bool LoadMagneticField(const std::string& filename, const std::string& format,
 The available formats are the same as for the electric field (except for the 
 extra columns for potential and region index).
 
+By default, the field and potential are assumed to be constant throughout 
+a voxel. Alternatively, the fields/potentials given in the field map file
+can be interpreted to be the values at the voxel centres and the 
+fields/potentials at intermediate points be determined by trilinear interpolation.
+This feature can be activated using the function
+\begin{lstlisting}
+void EnableInterpolation(const bool on = true);
+\end{lstlisting} 
+ 
 \subsection{Visualizing the Mesh}
 
 For visualizing the mesh imported from a FEM field map, the class 

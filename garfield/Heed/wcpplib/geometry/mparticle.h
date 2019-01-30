@@ -22,33 +22,37 @@ namespace Heed {
 
 class mparticle : public gparticle {
  public:
-  /// Mass (not mass * speed_of_light^2)
-  double mass = 0.;
+  /// Default constructor.
+  mparticle() = default;
+  /// Constructor, \f$\gamma - 1\f$ calculated from the from velocity vector.
+  mparticle(manip_absvol* primvol, const point& pt, const vec& vel, 
+            vfloat ftime, double fmass);
+  /// Destructor.
+  virtual ~mparticle() {}
 
-  double orig_kin_energy;
-  double orig_gamma_1;  // gamma-1
-  double prev_kin_energy;
-  double prev_gamma_1;  // gamma-1
-  double curr_kin_energy;
-  double curr_gamma_1;  // gamma-1
+  /// Get the current kinetic energy.
+  double kinetic_energy() const { return m_curr_ekin; }
 
-  /// Check consistency of kin_energy, gamma_1, speed, speed_of_light and mass.
-  void check_consistency() const;
+  void print(std::ostream& file, int l) const override;
+  mparticle* copy() const override { return new mparticle(*this); }
 
+
+ protected:
   void step(std::vector<gparticle*>& secondaries) override;
 
   /// Set curvature. Calls force().
-  /// If force is zero, returns fs_cf=0; frelcen=dv0;
-  /// If force is zero, and currpos.dir==dv0, makes, in addition,  fmrange=0;
-  /// If currpos.dir==dv0, makes currpos.dir=unit_vec(f);
-  /// If force is parallel or anti-parallel to dir, makes fs_cf=0; frelcen=dv0;
-  /// If force is anti-parallel to dir, restricts range till exceeding
-  /// kinetic energy.
-  void curvature(int& fs_cf, vec& frelcen, vfloat& fmrange, 
+  /// - If force is zero, set curved = false, frelcen = (0, 0, 0).
+  ///   - If, in addition, currpos.dir == (0, 0, 0), set fmrange = 0.
+  /// - If currpos.dir == (0, 0, 0), set currpos.dir = unit_vec(f).
+  /// - If force is parallel or anti-parallel to dir, 
+  ///   set curved = false, frelcen = (0, 0, 0).
+  /// - If force is anti-parallel to dir, restrict range till exceeding
+  ///   kinetic energy.
+  void curvature(bool& curved, vec& frelcen, vfloat& fmrange, 
                  vfloat prec) override;
 
   /// The force is considered to be split in two components.
-  /// One component, namely f, can be in any direction and is
+  /// One component, f, can be in any direction and is
   /// capable of doing work. The other one is always normal to dir
   /// and cannot do work. The latter can represent the magnetic component of 
   /// the Lorentz force.
@@ -62,19 +66,29 @@ class mparticle : public gparticle {
   /// The dimension of f_perp is [weight] / [time];
   virtual int force(const point& pt, vec& f, vec& f_perp, vfloat& mrange);
 
-  /// Set new speed, direction and time for currpos.
+  /// Mass (not mass * speed_of_light^2)
+  double m_mass = 0.;
+
+  /// Current kinetic energy
+  double m_curr_ekin = 0.;
+  /// Original kinetic energy
+  double m_orig_ekin = 0.;
+  /// Previous kinetic energy
+  double m_prev_ekin = 0.;
+
+  /// Current \f$\gamma - 1\f$
+  double m_curr_gamma_1 = 0.;
+  /// Original \f$\gamma - 1\f$
+  double m_orig_gamma_1 = 0.;
+  /// Previous \f$\gamma - 1\f$
+  double m_prev_gamma_1 = 0.;
+
+ private:
+  /// Check consistency of kinetic energy, \f$\gamma - 1\f$, speed, and mass.
+  void check_consistency() const;
+  /// Set new speed, direction and time for the current position.
   void new_speed();
 
-  /// Default constructor.
-  mparticle() = default;
-  /// Constructor, \f$\gamma - 1\f$ calculated from the from velocity vector.
-  mparticle(manip_absvol* primvol, const point& pt, const vec& vel, vfloat time,
-            double fmass);
-  /// Destructor.
-  virtual ~mparticle() {}
-
-  void print(std::ostream& file, int l) const override;
-  mparticle* copy() const override { return new mparticle(*this); }
 };
 
 std::ostream& operator<<(std::ostream& file, const mparticle& f);

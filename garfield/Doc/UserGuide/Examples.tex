@@ -11,7 +11,8 @@ the use of finite element field maps are dealt with in
 Sec.~\ref{Sec:ExampleGem}. 
 
 Sample macros and further examples can be found on the webpage 
-(\href{http://garfieldpp.web.cern.ch/garfieldpp/}{cern.ch/garfieldpp}). 
+%(\href{http://garfieldpp.web.cern.ch/garfieldpp/}{cern.ch/garfieldpp}). 
+(\url{http://garfieldpp.web.cern.ch/garfieldpp/}).
  
 \subsection{Drift Tube}\label{Sec:ExampleTube}
 
@@ -23,7 +24,7 @@ of the electric field \(\mathbf{E}\)
 (and, in general, also the magnetic field \(\mathbf{B}\) 
 as well as the angle between \(\mathbf{E}\) and \(\mathbf{B}\)).
 In this example, we use a gas mixture of 93\% argon and 7\% 
-carbon dioxide at a pressure of 3~atm and room temperature.
+carbon dioxide at a pressure of 3\,atm and room temperature.
 \begin{lstlisting}
 MediumMagboltz* gas = new MediumMagboltz();
 gas->SetComposition("ar", 93., "co2", 7.);
@@ -33,7 +34,7 @@ gas->SetTemperature(293.15);
 \end{lstlisting} 
 We also have to specify the number of electric fields to be 
 included in the table and the electric field range to be covered. 
-Here we use 20 field points between 100~V/cm and 100~kV/cm 
+Here we use 20 field points between 100\,V\,/\,cm and 100\,kV\,/\,cm 
 with logarithmic spacing. 
 \begin{lstlisting}
 gas->SetFieldGrid(100., 100.e3, 20, true);
@@ -110,7 +111,7 @@ sensor->AddElectrode(cmp, "s");
 
 In this (not very realistic) example, we want to calculate only the 
 electron signal. We set the time interval within which the 
-signal is recorded by the sensor to 2~ns, with a binning of 0.02~ns. 
+signal is recorded by the sensor to 2\,ns, with a binning of 0.02\,ns. 
 \begin{lstlisting}
 const double tMin = 0.;
 const double tMax = 2.;
@@ -193,23 +194,23 @@ gas->SetTemperature(293.15);
 gas->SetPressure(760.);
 \end{lstlisting}
 
-In this example, we calculate electron avalanches using 
+In this example, we will calculate electron avalanches using 
 ``microscopic'' Monte Carlo simulation, based directly on the 
 electron-atom/molecule cross-sections in the Magboltz database. 
  
-\begin{lstlisting}
-gas->SetMaxElectronEnergy(200.);
-const bool verbose = true;
-gas->Initialise(verbose);
-\end{lstlisting}
+%\begin{lstlisting}
+%gas->SetMaxElectronEnergy(200.);
+%const bool verbose = true;
+%gas->Initialise(verbose);
+%\end{lstlisting}
 
 In order to track a particle through the detector we have to 
 tell \texttt{ComponentAnsys123} which field map material corresponds 
 to which \texttt{Medium}.
 \begin{lstlisting}
-const int nMaterials = fm->GetNumberOfMaterials();
-for (int i = 0; i < nMaterials; ++i) {
-  const double eps = fm->GetPermmittivity(i);
+const unsigned int nMaterials = fm->GetNumberOfMaterials();
+for (unsigned int i = 0; i < nMaterials; ++i) {
+  const double eps = fm->GetPermittivity(i);
   if (fabs(eps - 1.) < 1.e-3) fm->SetMedium(i, gas);
 }
 // Print a list of the field map materials (for information).

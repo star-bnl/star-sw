@@ -5,8 +5,8 @@
 namespace Heed {
 
 eparticle::eparticle(manip_absvol* primvol, const point& pt, const vec& vel,
-                     vfloat time, particle_def* fpardef, HeedFieldMap* fieldmap)
-    : mparticle(primvol, pt, vel, time, fpardef->mass), 
+                     vfloat ftime, particle_def* fpardef, HeedFieldMap* fieldmap)
+    : mparticle(primvol, pt, vel, ftime, fpardef->mass), 
       particle_type(fpardef), m_fieldMap(fieldmap) {
 }
 

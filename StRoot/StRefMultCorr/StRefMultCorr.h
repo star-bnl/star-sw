@@ -1,6 +1,9 @@
 //------------------------------------------------------------------------------
-// $Id: StRefMultCorr.h,v 1.9 2015/05/22 06:52:07 hmasui Exp $
+// $Id: StRefMultCorr.h,v 1.2 2019/01/28 20:33:06 gnigmat Exp $
 // $Log: StRefMultCorr.h,v $
+// Revision 1.2  2019/01/28 20:33:06  gnigmat
+// Update of the StRefMultCorr.h
+//
 // Revision 1.9  2015/05/22 06:52:07  hmasui
 // Add grefmult for Run14 Au+Au 200 GeV
 //

@@ -169,6 +169,28 @@ void TransportPhoton(const double x0, const double y0, const double z0,
            in the photon conversion
 \end{description}
 
+\subsection{Magnetic fields}
+
+By default, Heed does not take the electric and magnetic field in the sensor into account for 
+calculating the charged-particle trajectory. In order to use the electric and/or magnetic field  
+in the stepping algorithm, the functions 
+\begin{lstlisting}
+EnableElectricField();
+EnableMagneticField();
+\end{lstlisting}
+need to be called before simulating a track.
+Depending on the strength of the magnetic field, it might be necessary to adapt the 
+limits/parameters used in the stepping algorithm in order to obtain a smoothly curved 
+trajectory as, for instance, in the example below.
+\begin{lstlisting}
+ // Get the default parameters.
+ double maxrange = 0., rforstraight = 0., stepstraight = 0., stepcurved = 0.;
+ track->GetSteppingLimits(maxrange, rforstraight, stepstraight, stepcurved);
+ // Reduce the step size [rad]. 
+ stepcurved = 0.02;
+ track->SetSteppingLimits(maxrange, rforstraight, stepstraight, stepcurved);
+\end{lstlisting} 
+
 \section{SRIM}
 SRIM\footnote{Stopping and Range of Ions in Matter, \href{www.srim.org}{www.srim.org}} is a program for simulating the energy loss of ions in matter. 
 It produces tables of stopping powers, range and straggling parameters that 

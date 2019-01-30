@@ -134,12 +134,12 @@ and angles in rad.
 The gas tables are interpolated using Newton polynomials. 
 The order of the interpolation polynomials can be set by means of
 \begin{lstlisting}
-void SetInterpolationMethodVelocity(const int intrp);
-void SetInterpolationMethodDiffusion(const int intrp);
-void SetInterpolationMethodTownsend(const int intrp);
-void SetInterpolationMethodAttachment(const int intrp);
-void SetInterpolationMethodIonMobility(const int intrp);
-void SetInterpolationMethodIonDissociation(const int intrp);
+void SetInterpolationMethodVelocity(const unsigned int intrp);
+void SetInterpolationMethodDiffusion(const unsigned int intrp);
+void SetInterpolationMethodTownsend(const unsigned int intrp);
+void SetInterpolationMethodAttachment(const unsigned int intrp);
+void SetInterpolationMethodIonMobility(const unsigned int intrp);
+void SetInterpolationMethodIonDissociation(const unsigned int intrp);
 \end{lstlisting}
 \begin{description}
 \item[intrp]
@@ -200,7 +200,8 @@ for semiconducting media.
 \begin{lstlisting}
 bool GetElectronCollision(const double e, int& type, int& level,
                           double& e1, double& dx, double& dy, double& dz,
-                          int& nion, int& ndx, int& band);
+                          std::vector<std::pair<int, double> >& secondaries,
+                          int& ndx, int& band);
 \end{lstlisting}
 \begin{description}
   \item[e]          electron energy prior to the collision
@@ -209,9 +210,11 @@ bool GetElectronCollision(const double e, int& type, int& level,
   \item[level]      index of the collision process
   \item[e1]         electron energy after the collision
   \item[dx, dy, dz] incoming and outgoing direction
-  \item[nion]       number of ``ionisation products'' 
+  \item[secondaries] list of ``ionisation products'' 
                     (\textit{i.\,e.} electrons and ions) 
-                    created in the collision
+                    created in the collision. 
+                    The first (integer) number in the pair is a flag indicating whether 
+                    it is an ion or an electron. The second number corresponds to the kinetic energy. 
   \item[ndxc]       number of ``deexcitation products'' 
                     created in the collision
   \item[band]       band index (irrelevant for gases) 
@@ -243,7 +246,7 @@ daughter class \texttt{MediumMagboltz}.
 While \texttt{MediumGas} deals only with the interpolation of gas tables 
 and the import of gas files, 
 \texttt{MediumMagboltz} -- owing to an interface to the 
-Magboltz program \cite{Biagi1999} -- allows the calculation 
+Magboltz program \cite{Biagi1999} -- can be used for the calculation 
 of transport parameters. 
 In addition, the latter class provides access to the 
 electron-molecule scattering cross-sections used in Magboltz and is 
@@ -280,7 +283,7 @@ Note that the density is calculated using the ideal gas law.
 
 In the following example the gas mixture is set 
 to Ar/CH\(_{4}\) (80/20) at 
-atmospheric pressure and 20\(^{\circ}\)~C.
+atmospheric pressure and 20\(^{\circ}\)\,C.
 \begin{lstlisting}
 MediumMagboltz* gas = new MediumMagboltz();
 // Set the composition
@@ -322,8 +325,9 @@ mixtures using semi-classical Monte Carlo simulation.
 It includes a database of electron-atom/molecule cross-sections 
 for a large number of detection gases. 
 
-\texttt{MediumMagboltz} allows running Magboltz for a 
-given electric field, magnetic field and field angle:
+In order to run Magboltz via the \texttt{MediumMagboltz} interface class
+given electric field, magnetic field and field angle, the following 
+function is provided:
 \begin{lstlisting}
 void RunMagboltz(const double e, const double b, const double btheta,
                  const int ncoll, bool verbose, 
@@ -371,7 +375,7 @@ for all values of \(\mathbf{E}\), \(\mathbf{B}\),
 and \(\theta\) included in the current field grid, 
 the function
 \begin{lstlisting}
-void GenerateGasTable(const int numCollisions);
+void GenerateGasTable(const int numCollisions, const bool verbose);
 \end{lstlisting}
 can be used.
  
@@ -424,7 +428,7 @@ The parameters of the cross-section terms in the present gas mixture
 can be retrieved via
 \begin{lstlisting}
 int GetNumberOfLevels();
-bool GetLevel(const int i, int& ngas, int& type, std::string& descr, double& e);
+bool GetLevel(const unsigned int i, int& ngas, int& type, std::string& descr, double& e);
 \end{lstlisting}
 \begin{description}
   \item[i] index of the cross-section term
@@ -441,10 +445,10 @@ For this purpose, \texttt{MediumMagboltz} keeps track of the number of times
 the individual levels are sampled in \texttt{GetElectronCollision}. 
 These counters are accessible through the functions
 \begin{lstlisting}
-int GetNumberOfElectronCollisions();
-int GetNumberOfElectronCollisions(int& nElastic, int& nIonising, int& nAttachment,
+unsigned int GetNumberOfElectronCollisions();
+unsigned int GetNumberOfElectronCollisions(int& nElastic, int& nIonising, int& nAttachment,
                                   int& nInelastic, int& nExcitation, int& nSuperelastic);
-int GetNumberOfElectronCollisions(const int level);
+unsigned int GetNumberOfElectronCollisions(const unsigned int level);
 \end{lstlisting}
 The first function returns total number of electron collisions (\textit{i.\,e.} calls 
 to \texttt{GetElectronCollisions}) since the last reset. 

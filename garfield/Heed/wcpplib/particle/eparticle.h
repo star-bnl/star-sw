@@ -15,7 +15,7 @@ namespace Heed {
 class eparticle : public mparticle, public particle_type {
  public:
   /// Default constructor
-  eparticle()  = default;
+  eparticle() = default;
   /// Constructor using velocity vector.
   eparticle(manip_absvol* primvol, const point& pt, const vec& vel, vfloat time,
             particle_def* fpardef, HeedFieldMap* fieldmap);
@@ -25,11 +25,12 @@ class eparticle : public mparticle, public particle_type {
   eparticle* copy() const override { return new eparticle(*this); }
   void print(std::ostream& file, int l) const override;
 
+ protected:
   /// Calculate force components.
   int force(const point& pt, vec& f, vec& f_perp, vfloat& mrange) override;
   // mrange - distance at which the force should not change much
 
- protected:
+  /// Pointer to field map.
   HeedFieldMap* m_fieldMap = nullptr;
 };
 }

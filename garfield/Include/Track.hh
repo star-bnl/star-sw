@@ -19,7 +19,19 @@ class Track {
   /// Destructor
   virtual ~Track() {}
 
-  /// Set the type of particle.
+  /// Set the type of charged particle.
+  /// - electron,e-
+  /// - positron,e+
+  /// - muon,mu-
+  /// - mu+
+  /// - pion,pi-
+  /// - pi+
+  /// - kaon,K-
+  /// - K+
+  /// - proton,p
+  /// - anti-proton,p-bar 
+  /// - deuteron,d
+  /// - alpha
   virtual void SetParticle(const std::string& part);
 
   /// Set the particle energy.
@@ -35,11 +47,17 @@ class Track {
   /// Set the kinetic energy of the particle.
   void SetKineticEnergy(const double ekin);
 
+  /// Return the particle energy.
   double GetEnergy() const { return m_energy; }
+  /// Return the \f$\beta\gamma\f$ of the projectile.
   double GetBetaGamma() const { return sqrt(m_beta2 / (1. - m_beta2)); }
+  /// Return the speed (\f$\beta = v/c\f$) of the projectile.
   double GetBeta() const { return sqrt(m_beta2); }
+  /// Return the Lorentz factor of the projectile.
   double GetGamma() const { return sqrt(1. / (1. - m_beta2)); }
+  /// Return the particle momentum.
   double GetMomentum() const { return m_mass * sqrt(m_beta2 / (1. - m_beta2)); }
+  /// Return the kinetic energy of the projectile.
   double GetKineticEnergy() const { return m_energy - m_mass; }
 
   /// Get the charge of the projectile.
@@ -47,6 +65,7 @@ class Track {
   /// Get the mass [eV / c2] of the projectile.
   double GetMass() const { return m_mass; }
 
+  /// Set the sensor through which to transport the particle. 
   void SetSensor(Sensor* s);
 
   /// Calculate a new track starting from (x0, y0, z0) at time t0
@@ -70,7 +89,9 @@ class Track {
   /// Get the stopping power (mean energy loss [eV] per cm).
   virtual double GetStoppingPower() { return 0.; }
 
+  /// Switch on plotting.
   void EnablePlotting(ViewDrift* viewer);
+  /// Switch off plotting. 
   void DisablePlotting();
 
   void EnableDebugging() { m_debug = true; }

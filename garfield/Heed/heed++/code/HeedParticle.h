@@ -8,8 +8,7 @@
 namespace Heed {
 extern long last_particle_number;
 
-/// Definition of the particle which can be traced through the geometry.
-/// Also the definition of cluster (energy transfer), and particle bank.
+/// Charged particle which can be traced through the geometry.
 ///
 /// 2003, I. Smirnov
 
@@ -28,20 +27,22 @@ class HeedParticle : public eparticle {
   /// Destructor
   virtual ~HeedParticle() {}
 
-  virtual void physics(std::vector<gparticle*>& secondaries);
-  virtual HeedParticle* copy() const { return new HeedParticle(*this); }
-  virtual void print(std::ostream& file, int l) const;
+  HeedParticle* copy() const override { return new HeedParticle(*this); }
+  void print(std::ostream& file, int l) const override;
+
+ protected:
+  void physics(std::vector<gparticle*>& secondaries) override;
 
  private:
-  bool s_print_listing;
-  long particle_number;
+  bool m_print_listing = false;
+  long m_particle_number;
 
-  bool s_loss_only;
-  std::vector<double> etransf;
-  std::vector<long> natom;
-  std::vector<long> nshell;
+  bool m_loss_only = false;
+  std::vector<double> m_etransf;
+  std::vector<long> m_natom;
+  std::vector<long> m_nshell;
 
-  bool s_store_clusters;
+  bool m_store_clusters = false;
   std::vector<HeedCluster> m_clusterBank;
 };
 }

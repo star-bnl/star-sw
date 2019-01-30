@@ -184,7 +184,7 @@ Int_t StKFParticleAnalysisMaker::Init()
     gDirectory = curDirectory;
   }
   
-  fRefmultCorrUtil = CentralityMaker::instance()->getgRefMultCorr_P16id();
+  fRefmultCorrUtil = CentralityMaker::instance()->getgRefMultCorr();
   fRefmultCorrUtil->setVzForWeight(6, -6.0, 6.0);
   fRefmultCorrUtil->readScaleForWeight("/gpfs01/star/pwg/pfederic/qVectors/StRoot/StRefMultCorr/macros/weight_grefmult_VpdnoVtx_Vpd5_Run16.txt"); //for new StRefMultCorr, Run16, SL16j
   

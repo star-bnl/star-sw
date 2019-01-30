@@ -37,7 +37,7 @@ class stvpoint {
   /// 2 - on the border of an embraced volume
   int sb = 0; 
   /// "Entering flag".
-  /// 1 - entering new volume, 0 otherwise. i
+  /// 1 - entering new volume, 0 otherwise. 
   /// Embraced volume is also considered new.
   int s_ent = 0;  
 
@@ -46,8 +46,9 @@ class stvpoint {
   vfloat prange = 0.;
   vfloat time = 0.;
 
-  // constructors
+  /// Default constructor.
   stvpoint() = default;
+  /// Constructor.
   stvpoint(const point& fpt, const vec& fdir, vfloat fspeed,
            manip_absvol_treeid& ftid, vfloat fprange, vfloat ftime, int fsb,
            int fs_ent, manip_absvol* faeid)
@@ -65,8 +66,15 @@ class stvpoint {
     dirloc = dir;
     tid.up_absref(&dirloc);
   }
-  stvpoint(const stvpoint& pstv, const trajestep& ts,  // in the local system
-           vfloat mrange,  // may be less than one in ts
+  /** Constructor.
+    * \param pstv previous point
+    * \param ts trajectory step (in the local system)
+    * \param mrange step length (may be less than the one in ts)
+    * \param fsb position flag 
+    * \param fs_ent "entering" flag
+    * \param faeid next volume
+    **/
+  stvpoint(const stvpoint& pstv, const trajestep& ts, vfloat mrange,
            int fsb, int fs_ent, manip_absvol* faeid)
       : pt(),
         dir(),
@@ -77,8 +85,7 @@ class stvpoint {
         sb(fsb),
         s_ent(fs_ent),
         next_eid(faeid),
-        prange(mrange),
-        time(pstv.time + mrange / pstv.speed) {
+        prange(mrange) {
     if (pstv.speed == 0) {
       time = pstv.time;  // just to put anything
     } else {
@@ -91,8 +98,14 @@ class stvpoint {
     dir = dirloc;
     tid.down_absref(&dir);
   }
-
-  stvpoint(const stvpoint& pstv, const trajestep& ts,  // in the local system
+  /** Constructor.
+    * \param pstv previous point
+    * \param ts trajectory step (in the local system)
+    * \param fsb position flag 
+    * \param fs_ent "entering" flag
+    * \param faeid next volume
+    **/
+  stvpoint(const stvpoint& pstv, const trajestep& ts,
            int fsb, int fs_ent, manip_absvol* faeid)
       : pt(),
         dir(),
@@ -103,8 +116,7 @@ class stvpoint {
         sb(fsb),
         s_ent(fs_ent),
         next_eid(faeid),
-        prange(ts.mrange),
-        time(pstv.time + ts.mrange / pstv.speed) {
+        prange(ts.mrange) {
     if (pstv.speed == 0) {
       time = pstv.time;  // just to put anything
     } else {
@@ -119,28 +131,14 @@ class stvpoint {
     dir = dirloc;
     tid.down_absref(&dir);
   }
-  stvpoint(const stvpoint& fp)
-      : pt(fp.pt),
-        dir(fp.dir),
-        ptloc(fp.ptloc),
-        dirloc(fp.dirloc),
-        speed(fp.speed),
-        tid(fp.tid),
-        sb(fp.sb),
-        s_ent(fp.s_ent),
-        next_eid(fp.next_eid),
-        prange(fp.prange),
-        time(fp.time) {}
+  /// Copy constructor.
+  stvpoint(const stvpoint& fp) = default;
   void print(std::ostream& file, int l) const;
 };
 
-extern trajestep_limit gtrajlim;
-
-/// "Geometric particle" (particle which does not interact with materials).
-/// It moves along a polyline line or circle from one volume to another.
-/// The flying is represented by changing of class members representing
-/// particle position.
-/// Interacted particle should be derived class from this one.
+/// "Geometric particle" (particle that does not interact with materials).
+/// It moves along a polyline or circle from one volume to another.
+/// Classes for interacting particles should be derived from this base class.
 
 class gparticle {
  public:
@@ -152,75 +150,116 @@ class gparticle {
   /// Destructor.
   virtual ~gparticle() {}
 
-  bool s_life = false;
-  /// Step number.
-  long nstep = 0;
-  /// Range from origin to currpos.
-  double total_range_from_origin = 0.; 
-  /// Number of previous steps with zero range (including this step).
-  long n_zero_step = 0; 
-
-  static constexpr long max_q_zero_step = 100;
-  stvpoint origin;
-  stvpoint prevpos;
-  stvpoint currpos;
-  stvpoint nextpos;
-  // current relcen computed
-  // at the last call of calc_step_to_bord(), only for debug print
-  vec curr_relcen;  
-
-  /// Assign prevpos = currpos and currpos = nextpos,
-  /// calls change_vol if necessary and update nextpos =calc_step_to_bord().
-  // Derived versions can also recalculate direction of move currpos
-  // right after the call of currpos=nextpos;.
-  // This is especially important in the case when the move is done
-  // by straight steps, but there is a field (magnetic) of any
-  // force which deflects the trajectory slightly. In this case
-  // at the end point of each interval the velocity is corrected (but the
-  // point currpos is not).
-  virtual void step(std::vector<gparticle*>& secondaries);
-
-  virtual void change_vol(void) { currpos.tid.G_lavol()->income(this); }
-  virtual void curvature(int& fs_cf, vec& frelcen, vfloat& fmrange,
-                         vfloat prec);
-  // Allows to set curvature.
-  // For flying particle it is expected to call another function
-  // so as to obtain value and direction of force.
-  // Can also change currpos.dir.
-  // prec is used to find out if the force is parallel or antiparallel to dir
-  // In the latter case the range is restricted by the stop point.
-  // Thus this prec does not depend on order of geometry sizes.
-  // In calc_step_to_bord() it is set to gtrajlim.max_straight_arange.
-  // vec& frelcen: position of the center of circumf. relatively currpos
-
-  virtual void physics_after_new_speed(std::vector<gparticle*>& /*secondaries*/) {}
-  // Allows to apply any other processes, to turn the trajectory, kill
-  // the particle and so on.
-  virtual void physics(std::vector<gparticle*>& /*secondaries*/) {}
-  // Allows to apply any other processes, to turn the trajectory, kill
-  // the particle and so on.
-  virtual void physics_mrange(double& fmrange);
-  // Allows to reduce maximal possible range due to continuous processes.
-  // Called from calc_step_to_bord() after the call of curvature(...)
-  // but before considering the crossing with volumes.
-  // Therefore mrange may be reduced after this.
-
-  /// Produces nextpos
-  virtual stvpoint calc_step_to_bord();
-
-  stvpoint switch_new_vol();
-
   /// Transport the particle.
   virtual void fly(std::vector<gparticle*>& secondaries) {
     mfunname("virtual void gparticle::fly()");
-    while (s_life) {
+    while (m_alive) {
       step(secondaries);
       physics(secondaries);
     }
   }
+
+  /// Set limits/parameters for trajectory steps.
+  void set_step_limits(const vfloat fmax_range, 
+                       const vfloat frad_for_straight,
+                       const vfloat fmax_straight_arange,
+                       const vfloat fmax_circ_arange) {
+    m_max_range = fmax_range;
+    m_rad_for_straight = frad_for_straight;
+    m_max_straight_arange = fmax_straight_arange;
+    m_max_circ_arange = fmax_circ_arange;
+  }
+
+  /// Get the current position of the particle.
+  const vec& position() const { return m_currpos.pt.v; }
+  /// Get the current time of the particle.
+  vfloat time() const { return m_currpos.time; }
+  /// Get the current direction of the particle.
+  const vec& direction() const { return m_currpos.dir; }
+
+  /// Print-out.
   virtual void print(std::ostream& file, int l) const;
+  /// Clone the particle.
   virtual gparticle* copy() const { return new gparticle(*this); }
 
+ protected:
+  /// Assign prevpos = currpos and currpos = nextpos,
+  /// call change_vol if necessary and update nextpos = calc_step_to_bord().
+  /// Derived versions can also recalculate the direction at currpos
+  /// right after updating currpos = nextpos.
+  /// This is especially important in the case when the motion is approximated
+  /// by straight-line steps, but there is a (magnetic) field which slightly  
+  /// deflects the trajectory. In this case, the velocity is corrected 
+  /// at the end point of each interval, but the position is not.
+  virtual void step(std::vector<gparticle*>& secondaries);
+
+  /// Move from one volume to another.
+  virtual void change_vol() { m_currpos.tid.G_lavol()->income(this); }
+
+  /** Set curvature. Can also change the direction at the current position.
+    * \param curved 
+    *        flag whether the trajectory is curved
+    * \param frelcen
+    *        position of the centre of rotation relative to currpos.
+    * \param fmrange
+    *        step range
+    * \param prec 
+    *        tolerance for checking if the force is parallel or antiparallel to
+    *        dir. In the latter case, the range is restricted by the end point.
+    *        In calc_step_to_bord() it is set to m_max_straight_arange.
+    */
+  virtual void curvature(bool& curved, vec& frelcen, vfloat& fmrange,
+                         vfloat prec);
+
+  /// Apply any other processes (turn the trajectory, kill the particle, ...).
+  virtual void physics_after_new_speed(std::vector<gparticle*>& /*secondaries*/) {}
+
+  /// Apply any other processes (turn the trajectory, kill the particle, ...).
+  virtual void physics(std::vector<gparticle*>& /*secondaries*/) {}
+
+  /// Reduce the maximal possible range due to continuous processes.
+  /// Called from calc_step_to_bord after the call of curvature.
+  /// but before considering the crossing with volumes.
+  /// Therefore mrange may be reduced after this.
+  virtual void physics_mrange(double& fmrange);
+
+  /// Determine next position.
+  virtual stvpoint calc_step_to_bord();
+
+  /// Generate next position in new volume.
+  stvpoint switch_new_vol();
+
+  /// Status flag whether the particle is active.
+  bool m_alive = false;
+
+  /// Step number.
+  long m_nstep = 0;
+  /// Max. number of zero-steps allowed.
+  static constexpr long m_max_qzero_step = 100;
+  /// Number of previous steps with zero range (including this step).
+  long m_nzero_step = 0; 
+
+  /// Original point.
+  stvpoint m_origin;
+  /// Range from origin to current position.
+  double m_total_range_from_origin = 0.; 
+
+  /// Previous point.
+  stvpoint m_prevpos;
+  /// Current point.
+  stvpoint m_currpos;
+  /// Next point.
+  stvpoint m_nextpos;
+
+ private:
+  /// Max. length of trajectory steps.
+  vfloat m_max_range = 100. * CLHEP::cm;
+  /// Bending radius beyond which to use straight-line steps.
+  vfloat m_rad_for_straight = 1000. * CLHEP::cm;
+  /// Angular step limit when using straight-line approximation.
+  vfloat m_max_straight_arange = 0.1 * CLHEP::rad;
+  /// Angular step limit for curved lines.
+  vfloat m_max_circ_arange = 0.2 * CLHEP::rad;
 };
 }
 
