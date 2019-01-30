@@ -1,12 +1,14 @@
 #ifndef _DAQ_L4_H_
 #define _DAQ_L4_H_
 
+#pragma pack(1)
 struct l4_gl3_t {
 	char *buff ;
 	int bytes ;
 	char name[32] ;
 	char data[] ;
 } ;
+#pragma pack()
 
 #ifndef DAQ_L4_DATA_STRUCTURE
 #include <DAQ_READER/daq_det.h>
