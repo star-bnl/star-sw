@@ -80,7 +80,7 @@ class ViewField {
   /** Make a 1D plot of the electric potential or field along a line.
     * \param x0,y0,z0 starting point
     * \param x1,y1,z1 end point
-    * \param quantity to be plotted (see PlotContour)
+    * \param option quantity to be plotted (see PlotContour)
     **/
   void PlotProfile(const double x0, const double y0, const double z0,
                    const double x1, const double y1, const double z1,
@@ -113,7 +113,7 @@ class ViewField {
     * \param label identifier of the electrode
     * \param x0,y0,z0 starting point
     * \param x1,y1,z1 end point
-    * \param quantity to be plotted (see PlotContour)
+    * \param option quantity to be plotted (see PlotContour)
     **/
   void PlotProfileWeightingField(const std::string& label,
                    const double x0, const double y0, const double z0,

@@ -20,33 +20,32 @@ using CLHEP::cm;
 using CLHEP::MeV;
 
 HeedParticle::HeedParticle(manip_absvol* primvol, const point& pt,
-                           const vec& vel, vfloat time, particle_def* fpardef,
-                           HeedFieldMap* fieldmap, const bool fs_loss_only,
-                           const bool fs_print_listing)
-    : eparticle(primvol, pt, vel, time, fpardef, fieldmap),
-      s_print_listing(fs_print_listing),
-      particle_number(last_particle_number++),
-      s_loss_only(fs_loss_only),
-      s_store_clusters(false) {
+                           const vec& vel, vfloat ftime, particle_def* fpardef,
+                           HeedFieldMap* fieldmap, const bool floss_only,
+                           const bool fprint_listing)
+    : eparticle(primvol, pt, vel, ftime, fpardef, fieldmap),
+      m_print_listing(fprint_listing),
+      m_particle_number(last_particle_number++),
+      m_loss_only(floss_only) {
 
   mfunname("HeedParticle::HeedParticle(...)");
-  etransf.reserve(100);
-  natom.reserve(100);
-  nshell.reserve(100);
+  m_etransf.reserve(100);
+  m_natom.reserve(100);
+  m_nshell.reserve(100);
 }
 
 void HeedParticle::physics(std::vector<gparticle*>& secondaries) {
   mfunname("void HeedParticle::physics()");
-  if (s_print_listing) {
+  if (m_print_listing) {
     mcout << "HeedParticle::physics is started\n";
-    Iprintn(mcout, currpos.prange);
+    Iprintn(mcout, m_currpos.prange);
   }
-  etransf.clear();
-  natom.clear();
-  nshell.clear();
-  if (currpos.prange <= 0.0) return;
+  m_etransf.clear();
+  m_natom.clear();
+  m_nshell.clear();
+  if (m_currpos.prange <= 0.0) return;
   // Get local volume.
-  const absvol* av = currpos.tid.G_lavol();
+  const absvol* av = m_currpos.tid.G_lavol();
   auto etcs = dynamic_cast<const EnTransfCS*>(av);
   if (!etcs) return;
   HeedMatterDef* hmd = etcs->hmd;
@@ -55,57 +54,57 @@ void HeedParticle::physics(std::vector<gparticle*>& secondaries) {
   const double* aetemp = emesh->get_ae();
   PointCoorMesh<double, const double*> pcm(emesh->get_q() + 1, &(aetemp));
   const long qa = matter->qatom();
-  if (s_print_listing) Iprintn(mcout, qa);
-  basis tempbas(currpos.dir, "tempbas");
+  if (m_print_listing) Iprintn(mcout, qa);
+  basis tempbas(m_currpos.dir, "tempbas");
   for (long na = 0; na < qa; ++na) {
-    if (s_print_listing) Iprintn(mcout, na);
+    if (m_print_listing) Iprintn(mcout, na);
     const long qs = hmd->apacs[na]->get_qshell();
     for (long ns = 0; ns < qs; ++ns) {
-      if (s_print_listing) Iprintn(mcout, ns);
+      if (m_print_listing) Iprintn(mcout, ns);
       if (etcs->quan[na][ns] <= 0.0) continue;
       // Sample the number of collisions for this shell.
       int ierror = 0;
-      const long qt = pois(etcs->quan[na][ns] * currpos.prange / cm, ierror);
+      const long qt = pois(etcs->quan[na][ns] * m_currpos.prange / cm, ierror);
       check_econd11a(ierror, == 1,
                      " etcs->quan[na][ns]=" << etcs->quan[na][ns]
                                             << " currpos.prange/cm="
-                                            << currpos.prange / cm << '\n',
+                                            << m_currpos.prange / cm << '\n',
                      mcerr);
-      if (s_print_listing) Iprintn(mcout, qt);
+      if (m_print_listing) Iprintn(mcout, qt);
       if (qt <= 0) continue;
-      point curpt = prevpos.pt;
-      vec dir = unit_vec(currpos.pt - prevpos.pt);
-      const double range = (currpos.pt - prevpos.pt).length();
-      if (s_print_listing) Iprint3n(mcout, curpt, dir, range);
+      point curpt = m_prevpos.pt;
+      vec dir = unit_vec(m_currpos.pt - m_prevpos.pt);
+      const double range = (m_currpos.pt - m_prevpos.pt).length();
+      if (m_print_listing) Iprint3n(mcout, curpt, dir, range);
       for (long nt = 0; nt < qt; ++nt) {
         // Sample the energy transfer in this collision.
         const double rn = SRANLUX();
-        if (s_print_listing) Iprint3n(mcout, rn, etcs, etcs->fadda[na][ns][1]);
+        if (m_print_listing) Iprint3n(mcout, rn, etcs, etcs->fadda[na][ns][1]);
         const double r = t_hisran_step_ar<
             double, std::vector<double>, PointCoorMesh<double, const double*> >(
             pcm, etcs->fadda[na][ns], rn);
 
         // Convert to internal units.
         const double et = r * MeV;
-        etransf.push_back(et);
-        natom.push_back(na);
-        nshell.push_back(ns);
-        if (s_print_listing) Iprint2n(mcout, nt, et);
+        m_etransf.push_back(et);
+        m_natom.push_back(na);
+        m_nshell.push_back(ns);
+        if (m_print_listing) Iprint2n(mcout, nt, et);
         // Sample the position of the collision.
         const double arange = SRANLUX() * range;
         point pt = curpt + dir * arange;
         point ptloc = pt;
-        prevpos.tid.up_absref(&ptloc);
-        if (s_loss_only) continue;
-        if (s_print_listing) mcout << "generating new cluster\n";
-        if (s_store_clusters) {
+        m_prevpos.tid.up_absref(&ptloc);
+        if (m_loss_only) continue;
+        if (m_print_listing) mcout << "generating new cluster\n";
+        if (m_store_clusters) {
           m_clusterBank.emplace_back(
-              HeedCluster(et, 0, pt, ptloc, prevpos.tid, na, ns));
+              HeedCluster(et, 0, pt, ptloc, m_prevpos.tid, na, ns));
         }
         // Generate a virtual photon.
-        const double Ep0 = mass * c_squared + curr_kin_energy;
-        const double Ep1 = Ep0 - etransf.back();
-        const double Mp = mass * c_squared;
+        const double Ep0 = m_mass * c_squared + m_curr_ekin;
+        const double Ep1 = Ep0 - m_etransf.back();
+        const double Mp = m_mass * c_squared;
         const double Mt = electron_def.mass * c_squared;
         double theta_p, theta_t;
         theta_two_part(Ep0, Ep1, Mp, Mt, theta_p, theta_t);
@@ -113,45 +112,43 @@ void HeedParticle::physics(std::vector<gparticle*>& secondaries) {
         vel.random_conic_vec(fabs(theta_t));
         vel.down(&tempbas);  // direction is OK
         vel *= c_light;
-        // HS
-        double speed = vel.length();
-        double time = arange / speed;
-        if (s_print_listing) mcout << "generating new virtual photon\n";
-        HeedPhoton* hp = new HeedPhoton(currpos.tid.eid[0], pt, vel,
-                                        time, particle_number, et, m_fieldMap);
-        hp->s_photon_absorbed = true;
-        hp->s_delta_generated = false;
-        hp->na_absorbing = na;
-        hp->ns_absorbing = ns;
+        const double t = m_prevpos.time + arange / m_prevpos.speed;
+        if (m_print_listing) mcout << "generating new virtual photon\n";
+        HeedPhoton* hp = new HeedPhoton(m_currpos.tid.eid[0], pt, vel, t,
+                                        m_particle_number, et, m_fieldMap);
+        hp->m_photon_absorbed = true;
+        hp->m_delta_generated = false;
+        hp->m_na_absorbing = na;
+        hp->m_ns_absorbing = ns;
         secondaries.push_back(hp);
       }
     }
   }
-  if (s_print_listing) {
-    const double sum = std::accumulate(etransf.begin(), etransf.end(), 0.);
-    Iprint2n(mcout, etransf.size(), sum);
+  if (m_print_listing) {
+    const double sum = std::accumulate(m_etransf.begin(), m_etransf.end(), 0.);
+    Iprint2n(mcout, m_etransf.size(), sum);
     mcout << "Exiting HeedParticle::physics\n";
   }
 }
 
 void HeedParticle::print(std::ostream& file, int l) const {
   if (l < 0) return;
-  Ifile << "HeedParticle (l=" << l << "): particle_number=" << particle_number
+  Ifile << "HeedParticle (l=" << l << "): particle_number=" << m_particle_number
         << " type=";
   print_notation(file);
   file << std::endl;
   if (l == 1) return;
   mparticle::print(file, l - 1);
-  const double sum = std::accumulate(etransf.begin(), etransf.end(), 0.);
+  const double sum = std::accumulate(m_etransf.begin(), m_etransf.end(), 0.);
   Iprintn(mcout, sum);
-  Iprintn(mcout, etransf.size());
+  Iprintn(mcout, m_etransf.size());
   if (l >= 5) {
     Ifile << "   nt  natom nshell transferred energy\n";
-    const long qt = etransf.size();
+    const long qt = m_etransf.size();
     for (long nt = 0; nt < qt; nt++) {
-      Ifile << std::setw(3) << nt << ' ' << std::setw(3) << natom[nt] << ' '
-            << std::setw(3) << nshell[nt] << ' ' << std::setw(12) << etransf[nt]
-            << '\n';
+      Ifile << std::setw(3) << nt << ' ' << std::setw(3) << m_natom[nt] << ' '
+            << std::setw(3) << m_nshell[nt] << ' ' 
+            << std::setw(12) << m_etransf[nt] << '\n';
     }
   }
 }

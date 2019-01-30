@@ -1,18 +1,8 @@
 
 \section{Installation}
 
-The source code is hosted on a Subversion\footnote{
-For more information about Subversion, 
-have a look at \url{http://svn.web.cern.ch/svn/docs.php} and the 
-documents listed there.} (svn) repository 
-managed by the CERN Central SVN service.
-Web interfaces for browsing the code are available at:
-\begin{itemize}
-  \item
-  \url{http://svnweb.cern.ch/world/wsvn},
-  \item
-  \url{http://svnweb.cern.ch/trac/garfield}.
-\end{itemize}
+The source code is hosted on a GitLab\footnote{https://gitlab.cern.ch/help/gitlab-basics/start-using-git.md} repository,
+\url{https://gitlab.cern.ch/garfield/garfieldpp}.
 
 The following instructions describe how to download 
 and build Garfield++ from source. 
@@ -42,25 +32,16 @@ setenv GARFIELD_HOME /home/mydir/garfield
   If unsure which shell you are using, 
   type \texttt{echo \${SHELL}}.
   \item
-  Download (``check out'') the code from the repository.
-  This can be done via SSH access or via HTTP access.
-  For SSH access, give the command
+  Download the code from the repository, either 
+  using SSH access\footnote{See \url{https://gitlab.cern.ch/help/gitlab-basics/create-your-ssh-keys.md}
+for instructions how to create and upload the SSH keys for gitlab.} 
   \begin{lstlisting}
-svn co svn+ssh://username@svn.cern.ch/reps/garfield/trunk $GARFIELD_HOME
+git clone ssh://git@gitlab.cern.ch:7999/garfield/garfieldpp.git $GARFIELD_HOME
   \end{lstlisting}
-  where \texttt{username} is your CERN afs login.  
-  For HTTPS access, give the command
+  or HTTPS access
   \begin{lstlisting}
-svn co https://username@svn.cern.ch/reps/garfield/trunk $GARFIELD_HOME
+git clone https://gitlab.cern.ch/garfield/garfieldpp.git $GARFIELD_HOME
   \end{lstlisting}
-  or, if you do not have a CERN account,
-  \begin{lstlisting}
-svn co http://svn.cern.ch/guest/garfield/trunk $GARFIELD_HOME 
-  \end{lstlisting}
-  Alternatively, 
-  you can download the tarballs from the web interface 
-  (see the above address) and extract them in the 
-  \texttt{\$GARFIELD\_HOME} directory.
   \item
   Change to the \texttt{\${GARFIELD\_HOME}} directory 
   (\texttt{cd \$GARFIELD\_HOME}).
@@ -74,7 +55,7 @@ svn co http://svn.cern.ch/guest/garfield/trunk $GARFIELD_HOME
   If necessary, adapt the \texttt{makefile} according 
   to your configuration. 
   By default, \texttt{gfortran} is used as Fortran compiler. 
-  In order to use a different compiler (e. g. \texttt{g77}), 
+  In order to use a different compiler 
   you can modify the definition of the variable \texttt{\$FC} in the 
   \texttt{makefile} accordingly.
   \item
@@ -109,9 +90,9 @@ export HEED_DATABASE=$GARFIELD_HOME/Heed/heed++/database/
   Add this line also to your \texttt{.bashrc}/\texttt{.cshrc} as well.
 \end{itemize}
 
-After the initial ``check-out'', the command 
+After the initial download,
 \begin{lstlisting}
-svn update
+git pull
 \end{lstlisting}
 followed by \texttt{make} 
 (in case of trouble: try \texttt{make clean; make}),
