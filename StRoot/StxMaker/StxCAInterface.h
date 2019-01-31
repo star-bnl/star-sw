@@ -105,11 +105,15 @@ class StxCAInterface : public StTPCCAInterface {
 #else
   static  void ConvertPars(const AliHLTTPCCATrackParam* caPar, Double_t _alpha, StxCApar* stxPar); 
 #endif
+  static void SetDebug(Int_t k = 1) {fDebug = k;}
+  static Int_t Debug() {return fDebug;}
  protected:
+  
+  virtual void MakeSettings(); // fill fCaParam
   virtual void MakeHits();     // fill fCaHits & fSeedHits
   virtual void MakeSeeds(){}   // fill fSeeds & fTrackParameters
-
   vector<SeedHit_t>       fSeedHits;          // hits to make seeds
   static StxCAInterface  *fgStxCAInterface;
+  static Int_t            fDebug;
 };
 #endif //  __StxCAInterface_h__

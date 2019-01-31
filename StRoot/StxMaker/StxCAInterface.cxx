@@ -16,7 +16,9 @@
 #include "StTpcDb/StTpcDb.h"
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StDbUtilities/StTpcLocalSectorCoordinate.hh"
-  // for MCdata
+#include "StBTofHit.h"
+#include "StBTofCollection.h"
+// for MCdata
 #include "tables/St_g2t_track_Table.h" 
 #include "tables/St_g2t_tpc_hit_Table.h"
 #include "TDatabasePDG.h"
@@ -24,14 +26,21 @@
 #include "StDetectorDbMaker/StiTpcInnerHitErrorCalculator.h"
 #include "StDetectorDbMaker/StiTpcOuterHitErrorCalculator.h"
 #include "StDetectorDbMaker/StiTPCHitErrorCalculator.h"
+#include "StDetectorDbMaker/StiBTofHitErrorCalculator.h"
 #include "RTS/src/DAQ_TPX/tpxFCF_flags.h" // for FCF flag definition
 //to get Magnetic Field
 #include "StarMagField/StarMagField.h"
+#include "TGeoManager.h"
+#include "TGeoMatrix.h"
+#include "TGeoPhysicalNode.h"
+#include "TGeoBBox.h"
+#include "StarVMC/StarVMCApplication/StarVMCDetector.h"
 #include "TStopwatch.h"
 #include <vector>
 #include <algorithm>
 using std::vector;
 StxCAInterface *StxCAInterface::fgStxCAInterface = 0;
+Int_t StxCAInterface::fDebug = 0;
 //________________________________________________________________________________
 StxCAInterface &StxCAInterface::Instance() {
   if (! fgStxCAInterface) fgStxCAInterface = new StxCAInterface(); 
@@ -41,20 +50,128 @@ StxCAInterface &StxCAInterface::Instance() {
 StxCAInterface::StxCAInterface() : StTPCCAInterface() {
 }
 //________________________________________________________________________________
+void StxCAInterface::MakeSettings() {
+  
+  const int NSlices = 24; //TODO initialize from StRoot
+  for ( int iSlice = 0; iSlice < NSlices; iSlice++ ) {
+    AliHLTTPCCAParam SlicePar;
+    //    memset(&SlicePar, 0, sizeof(AliHLTTPCCAParam));
+
+    Int_t sector = iSlice+1;
+      // Int_t sector = iSlice;
+    const int NoOfInnerRows = St_tpcPadConfigC::instance()->innerPadRows(sector);
+    const int NRows = St_tpcPadConfigC::instance()->padRows(sector);
+    SlicePar.SetISlice( iSlice );
+    SlicePar.SetNInnerRows ( NoOfInnerRows ); 
+    SlicePar.SetNTpcRows ( NRows ); 
+    SlicePar.SetNRows ( NRows + 2); // +2 for BToF
+    
+    Double_t beta = 0;
+    if (sector > 12) beta = (24-sector)*2.*TMath::Pi()/12.;
+    else             beta =     sector *2.*TMath::Pi()/12.;
+    SlicePar.SetAlpha  ( beta );
+    SlicePar.SetDAlpha  ( 30*TMath::DegToRad() );                        //TODO initialize from StRoot
+    SlicePar.SetCosAlpha ( TMath::Cos(SlicePar.Alpha()) );
+    SlicePar.SetSinAlpha ( TMath::Sin(SlicePar.Alpha()) );
+    SlicePar.SetAngleMin ( SlicePar.Alpha() - 0.5*SlicePar.DAlpha() );
+    SlicePar.SetAngleMax ( SlicePar.Alpha() + 0.5*SlicePar.DAlpha() );
+    SlicePar.SetRMin     (  51. );                                        //TODO initialize from StRoot
+    SlicePar.SetRMax     ( 223. );                                        //TODO initialize from StRoot
+    SlicePar.SetErrX     (   0. );                                        //TODO initialize from StRoot
+    SlicePar.SetErrY     (   0.12 ); // 0.06  for Inner                        //TODO initialize from StRoot
+    SlicePar.SetErrZ     (   0.16 ); // 0.12  for Inner                NodePar->fitPars()        //TODO initialize from StRoot
+      //   SlicePar.SetPadPitch (   0.675 );// 0.335 -"-
+    float x[3]={0,0,0},b[3];
+    StarMagField::Instance()->BField(x,b);
+    SlicePar.SetBz       ( - b[2] );   // change sign because change z
+    if (sector <= 12) {
+      SlicePar.SetZMin     (   0. );                                        //TODO initialize from StRoot
+      SlicePar.SetZMax     ( 210. );                                        //TODO initialize from StRoot
+    } else {
+      SlicePar.SetZMin     (-210. );                                        //TODO initialize from StRoot
+      SlicePar.SetZMax     (   0. );                                        //TODO initialize from StRoot
+    }
+    for( int iR = 0; iR < SlicePar.NRows(); iR++){
+      if (iR < SlicePar.NTpcRows()    )
+	SlicePar.SetRowX(iR, St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,iR+1));
+      else 
+	if (iR == SlicePar.NRows()) SlicePar.SetRowX(iR, 214.5); // ToF 
+	else                        SlicePar.SetRowX(iR, 211.5); // ToF
+	
+    }
+
+    Double_t *coeffInner = 0;
+    if (St_tpcPadConfigC::instance()->iTPC(sector)) {
+      coeffInner = StiTPCHitErrorCalculator::instance()->coeff();
+    } else {
+      coeffInner = StiTpcInnerHitErrorCalculator::instance()->coeff();
+    }
+    for(int iCoef=0; iCoef<6; iCoef++)
+    {
+      SlicePar.SetParamS0Par(0, 0, iCoef, (float)coeffInner[iCoef] );
+    }  
+    SlicePar.SetParamS0Par(0, 0, 6, 0.0f );
+    
+    Double_t *coeffOuter =StiTpcOuterHitErrorCalculator::instance()->coeff();
+    for(int iCoef=0; iCoef<6; iCoef++)
+    {
+      SlicePar.SetParamS0Par(0, 1, iCoef, (float)coeffOuter[iCoef] );
+    }
+    SlicePar.SetParamS0Par(0, 1, 6, 0.0f );
+
+    Double_t *coeffBToF =StiBTofHitErrorCalculator::instance()->coeff();
+    for(int iCoef=0; iCoef<6; iCoef++)
+    {
+      SlicePar.SetParamS0Par(0, 2, iCoef, (float)coeffBToF[iCoef] );
+    }
+    SlicePar.SetParamS0Par(0, 2, 6, 0.0f );
+
+    SlicePar.SetParamS0Par(1, 0, 0, 0.0f );
+    SlicePar.SetParamS0Par(1, 0, 1, 0.0f );
+    SlicePar.SetParamS0Par(1, 0, 2, 0.0f );
+    SlicePar.SetParamS0Par(1, 0, 3, 0.0f );
+    SlicePar.SetParamS0Par(1, 0, 4, 0.0f );
+    SlicePar.SetParamS0Par(1, 0, 5, 0.0f );
+    SlicePar.SetParamS0Par(1, 0, 6, 0.0f );
+    SlicePar.SetParamS0Par(1, 1, 0, 0.0f );
+    SlicePar.SetParamS0Par(1, 1, 1, 0.0f );
+    SlicePar.SetParamS0Par(1, 1, 2, 0.0f );
+    SlicePar.SetParamS0Par(1, 1, 3, 0.0f );
+    SlicePar.SetParamS0Par(1, 1, 4, 0.0f );
+    SlicePar.SetParamS0Par(1, 1, 5, 0.0f );
+    SlicePar.SetParamS0Par(1, 1, 6, 0.0f );
+    SlicePar.SetParamS0Par(1, 2, 0, 0.0f );
+    SlicePar.SetParamS0Par(1, 2, 1, 0.0f );
+    SlicePar.SetParamS0Par(1, 2, 2, 0.0f );
+    SlicePar.SetParamS0Par(1, 2, 3, 0.0f );
+    SlicePar.SetParamS0Par(1, 2, 4, 0.0f );
+    SlicePar.SetParamS0Par(1, 2, 5, 0.0f );
+    SlicePar.SetParamS0Par(1, 2, 6, 0.0f );
+    
+    fCaParam.push_back(SlicePar);
+  } // for iSlice
+} // void StTPCCAInterface::MakeSettings()
+//________________________________________________________________________________
 void StxCAInterface::MakeHits() {
   StEvent   *pEvent = dynamic_cast<StEvent*>( StMaker::GetTopChain()->GetInputDS("StEvent") );
   if (! pEvent) return;
   StTpcHitCollection* TpcHitCollection = pEvent->tpcHitCollection();
-  if (! TpcHitCollection) { cout << "No TPC Hit Collection" << endl; return;}
+  if (! TpcHitCollection) { LOG_ERROR << "StxCAInterface::MakeHits: No TPC Hit Collection" << endm; return;}
+  // BToF hits
+  Int_t nBToFHit = 0;
+  StBTofCollection *bToFcol = pEvent->btofCollection();
+  if (!bToFcol) {
+    LOG_ERROR << "StxCAInterface::MakeHits:\tNo StBTofCollection" << endm;
+  }
   UInt_t numberOfSectors = TpcHitCollection->numberOfSectors();
   for (UInt_t i = 0; i< numberOfSectors; i++) {
     StTpcSectorHitCollection* sectorCollection = TpcHitCollection->sector(i);
+    Int_t numberOfPadrows = sectorCollection->numberOfPadrows();
+    Int_t sector = i + 1;
+    Double_t beta = (sector <= 12) ? (60 - 30*(sector - 1)) : (120 + 30 *(sector - 13));
+    Double_t cb   = TMath::Cos(TMath::DegToRad()*beta);
+    Double_t sb   = TMath::Sin(TMath::DegToRad()*beta);
     if (sectorCollection) {
-      Int_t numberOfPadrows = sectorCollection->numberOfPadrows();
-      Int_t sector = i + 1;
-      Double_t beta = (sector <= 12) ? (60 - 30*(sector - 1)) : (120 + 30 *(sector - 13));
-      Double_t cb   = TMath::Cos(TMath::DegToRad()*beta);
-      Double_t sb   = TMath::Sin(TMath::DegToRad()*beta);
       for (int j = 0; j< numberOfPadrows; j++) {
 	StTpcPadrowHitCollection *rowCollection = sectorCollection->padrow(j);
 	if (rowCollection) {
@@ -65,7 +182,6 @@ void StxCAInterface::MakeHits() {
 	    if ( ! tpcHit) continue;
 	    if (tpcHit->flag() & FCF_CHOPPED || tpcHit->flag() & FCF_SANITY)     continue; // ignore hits marked by AfterBurner as chopped or bad sanity
 	    if (tpcHit->pad() > 182 || tpcHit->timeBucket() > 511) continue; // some garbadge  for y2001 daq
-	    //	    Int_t Id = fCaHits.size();
 	    Int_t Id = fSeedHits.size();
 	    StThreeVectorD glob(tpcHit->position());
 	    // obtain seed Hit
@@ -95,86 +211,93 @@ void StxCAInterface::MakeHits() {
 	    //	    caHit.SetID( tpcHit->id() );
 	    fIdTruth.push_back( tpcHit->idTruth() );
 	    fCaHits.push_back(caHit);
+	    
 	  }
 	}
       }
     }
-#if 0
-    // BToF hits
-    StBTofCollection *bToFcol = pEvent->btofCollection();
-    if (!bToFcol) {
-      LOG_ERROR <<"\StxCAInterface::MakeHits:\tNo StBTofCollection"<<endm;
-      continue;
-    }
+  }
+  LOG_INFO << "StxCAInterface::MakeHits:  Loaded " << fCaHits.size() << " TPC hits." << endm;
+#if 1
+  // BToF hits
+  if (bToFcol) {
     StSPtrVecBTofHit& vec = bToFcol->tofHits();
-    Int_t nBToFHit=0;
     for(UInt_t j=0; j<vec.size(); j++)	{
-    StBTofHit *aHit = vec[j];
+      StBTofHit *aHit = vec[j];
+      if(!aHit)   continue;
+      if (Debug()) {
+	LOG_INFO <<Form("hit tray: %i module: %i cell: %i",aHit->tray(), aHit->module(), aHit->cell()) << endm;
+      }
+      // Sanity check	
+      if (aHit->tray()   <  1 || aHit->tray()   > StBTofHit::kNTray   ||
+	  aHit->module() <= 0 || aHit->module() > StBTofHit::kNModule ||
+	  aHit->cell()   <= 0 || aHit->cell()   > StBTofHit::kNCell) continue;
+      Int_t iSlice = (aHit->tray() - 1)/5;
+      Int_t sector = iSlice + 1;
 #if 0
-    if(!aHit)   throw runtime_error("StiBTofHitLoader::loadHits(StEvent*) -E- NULL hit in container");
-#else
-    assert(aHit);
+      Int_t half = (sector <= 12) ? 1 : 2;
+      Int_t indx[3] = {half, (aHit->tray()-1)%60+1, aHit->module()};
+      static TString path2ToF("HALL_1/CAVE_1/TpcRefSys_1/BTOF_1/BTOH_%d/BSEC_%d/BTRA_1/BXTR_1/BRTC_1/BGMT_1/BRMD_%d/BRDT_1/BRSG_3");
 #endif
-    if (_debug) {
-      LOG_INFO <<Form("hit tray: %i module: %i cell: %i\n",aHit->tray(), aHit->module(), aHit->cell()) << endm;
+      TString path = aHit->GetPath(); // (StarVMCDetector::FormPath(path2ToF,3,indx));
+      if (! gGeoManager->CheckPath(path)) {
+	cout << "Illegal path " << path.Data() << endl;
+	assert(0);
+      }
+      Double_t beta = (sector <= 12) ? (60 - 30*(sector - 1)) : (120 + 30 *(sector - 13));
+      Double_t cb   = TMath::Cos(TMath::DegToRad()*beta);
+      Double_t sb   = TMath::Sin(TMath::DegToRad()*beta);
+      TObjArray *nodes = gGeoManager->GetListOfPhysicalNodes();
+      TGeoPhysicalNode *nodeP = 0;
+      if (nodes) nodeP = (TGeoPhysicalNode *) nodes->FindObject(path);
+      if (! nodeP) nodeP =gGeoManager->MakePhysicalNode(path);
+      if (! nodeP) {
+	cout << "TGeoPhysicalNode with path " << path.Data() << " does not exists" << endl;
+	assert(0);
+      }
+      StThreeVectorD local(0, aHit->position().y(), 0);
+      static StThreeVectorD glob;
+      nodeP->GetMatrix()->LocalToMaster(local.xyz(), glob.xyz());
+      // obtain seed Hit
+      Int_t Id = fSeedHits.size();
+      SeedHit_t hitc;
+      Int_t row = fCaParam[iSlice].NTpcRows() + 1 + aHit->tray()%2;
+      hitc.padrow =  row;
+      hitc.status = 0;
+      hitc.taken = 0;
+      hitc.track_key = aHit->idTruth();
+      hitc.hit  = aHit;
+      hitc.Id = Id;
+      fSeedHits.push_back(hitc);
+      //yf      if (  hit->timesUsed()) 	continue;//VP
+      // convert to CA Hit
+      AliHLTTPCCAGBHit caHit;
+      Double_t xL =  cb*glob.x() + sb*glob.y();
+      Double_t yL = -sb*glob.x() + cb*glob.y();
+      Double_t zL =                  glob.z();
+      caHit.SetX(   xL);
+      caHit.SetY( - yL);
+      caHit.SetZ( - zL);
+      // caHit.SetErrX(   );
+      static Float_t BTofPadWidth  =   3.45;        //! Pad Width    
+      static Float_t BTofPadLength = 2*4.70;        //! Pad Length
+      static Double_t sigma_y = BTofPadWidth/TMath::Sqrt(12.);
+      static Double_t sigma_z = BTofPadLength/TMath::Sqrt(12.);
+      caHit.SetErrY( sigma_y );
+      caHit.SetErrZ( sigma_z );
+      caHit.SetISlice(sector - 1 );
+      caHit.SetIRow( row - 1 );
+      caHit.SetID( Id );
+      //	    caHit.SetID( tpcHit->id() );
+      fIdTruth.push_back( aHit->idTruth() );
+      fCaHits.push_back(caHit);
+      
+      //done loop over hits
+      nBToFHit++;
     }
-    if (aHit->tray()   <= 0 || aHit->tray()   > StBTofHit::kNTray   ||
-	aHit->module() <= 0 || aHit->module() > StBTofHit::kNModule ||
-	aHit->cell()   <= 0 || aHit->cell()   > StBTofHit::kNCell) continue;
-    Int_t stiTray = aHit->tray();
-    if (aHit->tray() > 60) stiTray = 176 - aHit->tray();
-    stiTray = (stiTray+59)%60 + 1;
-    detector= _detector->getDetector(0,stiTray-1);
-#if 0
-    if(!detector)       throw runtime_error("StiBTofHitLoader::loadHits(StEvent*) -E- NULL detector pointer");
-#else
-    assert(detector);
-#endif
-    if (_debug) {
-      LOG_INFO <<"add hit to detector:\t"<<detector->getName()<<endm;
-    }
-    if (_debug) {
-      Double_t angle    = detector->getPlacement()->getNormalRefAngle();
-      Double_t radius   = detector->getPlacement()->getNormalRadius();
-      Double_t zcenter  = detector->getPlacement()->getZcenter();
-      Double_t halfDepth = detector->getShape()->getHalfDepth();
-      Double_t halfWidth = detector->getShape()->getHalfWidth();
-      Double_t thick     = detector->getShape()->getThickness();
-      LOG_INFO << " detector info " << *detector << endm;
-      LOG_INFO << " radius = "<< radius << " angle = " << angle << " zCenter = " << zcenter << endm;
-      LOG_INFO << " depth = " << halfDepth << " Width = " << halfWidth << " thickness= " << thick << endm; 
-      LOG_INFO << " key 1 : " << detector->getKey(1) <<" key 2 : " << detector->getKey(2) << endm; 
-    }
-    StiHit *stiHit=_hitFactory->getInstance();
-#if 0
-    if(!stiHit) throw runtime_error("StiBTofHitLoader::loadHits(StEvent*) -E- stiHit==0");
-#else
-    assert(stiHit);
-#endif
-    stiHit->reset();
-    TGeoHMatrix *rot = (TGeoHMatrix *) StiBTofDetectorBuilder::RotMatrices()->FindObject(Form("BTof_Tray_%i_Module_%i",aHit->tray(),aHit->module())); 
-    assert(rot);
-    const Float_t *xyzLF = aHit->position().xyz();
-    Double_t xyzL[3] = {xyzLF[0], xyzLF[1], xyzLF[2]};
-    Double_t xyzG[3];
-    rot->LocalToMaster(xyzL,xyzG);
-    stiHit->setGlobal(detector,aHit,xyzG[0],xyzG[1],xyzG[2],aHit->charge());
-#if 0
-    stiHit->set(detector, aHit, aHit->charge(),
-		      radius+aHit->position().x(), yoffset+aHit->position().y(), zcenter+aHit->position().z());
-#endif    
-    _hitContainer->add(stiHit);
-    if (_debug) {
-      LOG_INFO <<" nBToFHit = "<<nBToFHit
-	       <<" Tray = "<<aHit->tray()<<" Module = "<<aHit->module()<<" Cell = "<<aHit->cell()
-	       <<" x = "<<aHit->position().x()<<" y = "<<aHit->position().y()<<" z = "<<aHit->position().z()<<endm;
-    }
-    //done loop over hits
-    nBToFHit++;
   }
-  LOG_INFO <<"StiBTofHitLoader:loadHits -I- Loaded "<<nBToFHit<<" BTof hits."<<endm;
+  LOG_INFO <<"StxCAInterface::MakeHits: Loaded "<< nBToFHit << " BTof hits."<<endm;
 #endif /* BTOF */  
-  }
 } // void StxCAInterface::MakeHits()
 //________________________________________________________________________________
 void StxCAInterface::ConvertPars(const AliHLTTPCCATrackParam& caPar, Double_t _alpha, StxCApar& stxPar)

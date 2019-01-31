@@ -165,12 +165,12 @@ Int_t StxMaker::Make(){
 #else
 #endif
       NoHitsTotal++;
-      if (! hit->usedInFit()) continue;
       if (tpcHit) NoTpcHitsUsed++;
       else        NoNonTpcHitsUsed++;
+      if (! hit->usedInFit()) continue;
       NoHitsUsed++;
     }
-#if 0
+#if 1
     cout << "Track #" << iTr << "\tNoTpcHitsUsed = " << NoTpcHitsUsed << "\tNoNonTpcHitsUsed = " << NoNonTpcHitsUsed << endl;
 #endif
     if (NoHitsTotal < 10) {
@@ -407,14 +407,24 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
     const Int_t index = StxCAInterface::Instance().GetTracker()->TrackHit( tr.FirstHitRef() + iHit );
     const Int_t hId   = StxCAInterface::Instance().GetTracker()->Hit( index ).ID();
     const StHit    *hit    = fSeedHits[hId].hit;
-    const StTpcHit *tpcHit = dynamic_cast<const StTpcHit *>(hit);
-    if (! tpcHit) continue;
+    if (! hit) continue;
+    const StTpcHit *tpcHit = 0;
+    genfit::PlanarMeasurement* measurement = 0;
+    switch (hit->detector()) {
+    case kTpcId:
+      tpcHit = (const StTpcHit *) hit;
 #ifndef __TPC3D__ /* ! __TPC3D__ */
-    genfit::PlanarMeasurement* measurement = new StTpcPlanarMeasurement(tpcHit, nullptr);
+      measurement = new StTpcPlanarMeasurement(tpcHit, nullptr);
 #else /* __TPC3D__ */
-    genfit::AbsMeasurement* measurement = new StTpc3DMeasurement(tpcHit, nullptr);
+      measurement = new StTpc3DMeasurement(tpcHit, nullptr);
 #endif /* ! __TPC3D__ */
-    fitTrack.insertPoint(new genfit::TrackPoint(measurement, &fitTrack));
+      break;
+    default:
+      break;
+    }
+    if ( measurement ) {
+      fitTrack.insertPoint(new genfit::TrackPoint(measurement, &fitTrack));
+    }
   }
   try{
     //check

@@ -32,34 +32,55 @@ StTpcPlanarMeasurement::StTpcPlanarMeasurement(const StTpcHit *hit,TrackPoint* t
   detId_ = (Int_t) fHit->detector();
   hitId_ = fHit->id();
   Int_t sector = fHit->sector();
+  Int_t rowRC = fHit->padrow();
+#if 0
   Int_t half   = (sector  - 1)/12 + 1;
   Int_t sectorVMC = (sector - 1)%12 + 1;
-  Int_t rowRC = fHit->padrow();
   Int_t rowVMC = 0;
+#endif 
   Int_t NoOfInnerRows = St_tpcPadConfigC::instance()->innerPadRows(sector);
   Int_t NoOfRows = St_tpcPadConfigC::instance()->padRows(sector);
   fErrCalc = 0;
   if (NoOfInnerRows == 13) {
-    if (rowRC <= NoOfInnerRows) {rowVMC = 3*(rowRC -  1) +  2;  fErrCalc = StiTpcInnerHitErrorCalculator::instance(); }
-    else                        {rowVMC =   (rowRC - 14  + 41); fErrCalc = StiTpcOuterHitErrorCalculator::instance(); }
+    if (rowRC <= NoOfInnerRows) {
+#if 0
+      rowVMC = 3*(rowRC -  1) +  2;  
+#endif
+      fErrCalc = StiTpcInnerHitErrorCalculator::instance(); 
+    }  else {
+#if 0
+      rowVMC =   (rowRC - 14  + 41); 
+#endif
+      fErrCalc = StiTpcOuterHitErrorCalculator::instance(); 
+    }
+#if 0
     if (rowVMC > 72)   rowVMC = 72;
+#endif
   } else {// iTPC
     if (rowRC <= NoOfInnerRows) {
+#if 0
       rowVMC = rowRC + 1; 
       if (rowVMC <  2) rowVMC =  2; 
       if (rowVMC > 41) rowVMC = 41;
+#endif
       fErrCalc = StiTPCHitErrorCalculator::instance(); 
     } else {
+#if 0
       rowVMC = rowRC + 3;
       if (rowVMC < 44) rowVMC = 44;
       if (rowRC > NoOfRows) rowRC = NoOfRows;
+#endif
       fErrCalc = StiTpcOuterHitErrorCalculator::instance(); 
     }
   }
   Int_t planeId = 100*sector + rowRC;
+  TString path = hit->GetPath(); // 
+#if 0
   Int_t indx[3] = {half, sectorVMC, rowVMC};
   static TString path2TPC("/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_%d/TPSS_%d/TPAD_%d");
-  TString path(StarVMCDetector::FormPath(path2TPC,3,indx));
+  TString pathO = StarVMCDetector::FormPath(path2TPC,3,indx);
+  assert(pathO == path);
+#endif
   if (! gGeoManager->CheckPath(path)) {
     cout << "Illegal path " << path.Data() << endl;
     assert(0);
