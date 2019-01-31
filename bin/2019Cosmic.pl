@@ -22,15 +22,15 @@ use File::Basename;
 # my @list = `$cmd`;
 # #my @list = `get_file_list.pl -delim '/' -keys 'path,filename' -cond 'magscale=ReversedFullField,filetype=online_daq,filename~st_gmt,trgsetupname=CosmicLocalClock,tpx=1,gmt=1,sanity=1,events>10000' -limit 50`;
 #my @list = glob "/net/l401/data/scratch1/daq/2019/*/*/st_cosmic_*.daq";
-my @list = glob "/hlt/cephfs/daq/2019/*/*/st_cosmic_*.daq";
+my @list = glob "/hlt/cephfs/daq/2019/*/*/*cosmic_*.daq /hlt/cephfs/daq/2019/*/*/*gmt*.daq";
 foreach my $file (@list) {
   chomp($file);
-  my $bf = File::Basename::basename($file);
+  my $bf = File::Basename::basename($file,".daq");
   my $f = File::Basename::dirname($file);
   my $run = File::Basename::basename($f);
 #  print "file = $file, bf = $bf, f = $f, run = $run\n";
   if ($run < 20018043) {next;}
-  my $root = $bf . ".MuDst.root";
+  my $root = $bf . ".MuDst.root"; #print "root = $root\n";
   if (-r $root) {next;}
   print "string:$file\n";
 #  last;

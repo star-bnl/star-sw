@@ -1,4 +1,4 @@
-#! /usr/local/bin/tcsh -f
+#! /usr/bin/tcsh -f
 rsync -avz -h                        \
     --include='*.root'                  \
     --exclude='*.log' --exclude='*.dat' \
