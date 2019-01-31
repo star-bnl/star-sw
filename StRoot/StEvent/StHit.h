@@ -164,10 +164,13 @@ public:
     virtual StDetectorId   detector() const = 0;
     virtual Int_t          volumeID() const {return 0;}
     virtual void           Print(Option_t *option="") const;
-    
+    virtual const Char_t  *GetPath() const {NotImplemented("StHit::GetPath"); return 0;}  
+    static  void           SetFTM(const Char_t *p=0) {NotImplemented("StHit::StFMT");}  
+    static  const Char_t  *GetFMT() {NotImplemented("StHit::StFMT"); return 0;}  
+    static  const Char_t  *FormPath(const Char_t *FMT, Int_t N, Int_t *numbv);
 protected:
-    UInt_t bits(unsigned int, unsigned int) const;
-    
+    UInt_t         bits(unsigned int, unsigned int) const;
+    static void    NotImplemented(const Char_t *method);
     UInt_t         mHardwarePosition;
     StThreeVectorF mPositionError; 
     Float_t        mCharge;

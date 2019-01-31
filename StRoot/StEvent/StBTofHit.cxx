@@ -34,6 +34,8 @@
 #include "StTrack.h"
 #include "TString.h"
 const Float_t StBTofHit::mBTofPadWidth = 3.45; 
+TString StBTofHit::fgFMT("HALL_1/CAVE_1/TpcRefSys_1/BTOF_1/BTOH_%d/BSEC_%d/BTRA_1/BXTR_1/BRTC_1/BGMT_1/BRMD_%d/BRDT_1/BRSG_3");
+
 ClassImp(StBTofHit);
 //________________________________________________________________________________
 StBTofHit::StBTofHit() {
@@ -71,3 +73,10 @@ ostream& operator<<(ostream &os, const StBTofHit& hit) {
   return os;
 }
 //________________________________________________________________________________
+//________________________________________________________________________________
+const Char_t *StBTofHit::GetPath() const {
+  Int_t indx[3] = {(tray()-1)/60+1, (tray()-1)%60+1, module()};
+  static TString path;
+  path = FormPath(fgFMT,3,indx);
+  return path.Data();
+}

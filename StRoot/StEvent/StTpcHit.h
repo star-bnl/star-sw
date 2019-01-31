@@ -115,7 +115,7 @@
 #include "StHit.h"
 #include "StMemoryPool.hh"
 #include "TMath.h"
-
+#include "TString.h"
 class StTpcHit : public StHit {
   
  public:
@@ -170,21 +170,24 @@ class StTpcHit : public StHit {
     virtual const StThreeVectorF& positionL() const {return *&mPositionL;}
     virtual void setPositionU(const StThreeVectorF& p) {mPositionU = p;}
     virtual void setPositionL(const StThreeVectorF& p) {mPositionL = p;}
-    
+    static  const Char_t  *GetFMT()                     {return fgFMT.Data();}  
+    static  void           SetFMT(const Char_t *path=0) {fgFMT = path;}  
+    virtual const Char_t  *GetPath() const;    
 protected:
     static StMemoryPool mPool;  //!
-    UChar_t     mMinpad;     /* central pad - lowest pad id in this hit*/
-    UChar_t     mMaxpad;     /* highest pad id in this hit - central pad */
-    UChar_t     mMintmbk;    /* central timebucket - lowest time bucket in hit*/
-    UChar_t     mMaxtmbk;    /* highest time bucket in hit - central timebucket */
-    Short_t     mMcl_x;      /* average pad*64 */
-    Short_t     mMcl_t;      /* average timebucket*64 */
-    UShort_t    mAdc;        /* cluster ADC sum */
-    Float_t     mChargeModified; //!
+    UChar_t        mMinpad;     /* central pad - lowest pad id in this hit*/	    
+    UChar_t        mMaxpad;     /* highest pad id in this hit - central pad */	    
+    UChar_t        mMintmbk;    /* central timebucket - lowest time bucket in hit*/    
+    UChar_t        mMaxtmbk;    /* highest time bucket in hit - central timebucket */  
+    Short_t        mMcl_x;      /* average pad*64 */				    
+    Short_t        mMcl_t;      /* average timebucket*64 */			    
+    UShort_t       mAdc;        /* cluster ADC sum */				    
+    Float_t        mChargeModified; //!                                                
     StThreeVectorF mPositionU; //  upper position = y_local + padlength/2.
     StThreeVectorF mPositionL; //  lower position = y_local - padlength/2.
     Float_t        mdX;        //  estimated dX from StdEdxY2Maker
-    ClassDef(StTpcHit,10)
+    static TString fgFMT;        
+    ClassDef(StTpcHit,11)
 };
 ostream&              operator<<(ostream& os, StTpcHit const & v);
 

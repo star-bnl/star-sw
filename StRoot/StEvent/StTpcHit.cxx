@@ -74,12 +74,13 @@
  **************************************************************************/
 #include "StTpcHit.h"
 #include "StTrack.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.19 2011/10/17 00:13:49 fisyak Exp $";
-
+TString StTpcHit::fgFMT("/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_%d/TPSS_%d/TPAD_%d");
 StMemoryPool StTpcHit::mPool(sizeof(StTpcHit));
 
 ClassImp(StTpcHit)
-
+//________________________________________________________________________________
 void StTpcHit::setExtends(Float_t cl_x, Float_t cl_t, Short_t mnpad, Short_t mxpad, Short_t mntmbk, Short_t mxtmbk) {
   setPadTmbk(cl_x, cl_t);
   Short_t pad  = TMath::Nint(mMcl_x/64.);
@@ -89,7 +90,7 @@ void StTpcHit::setExtends(Float_t cl_x, Float_t cl_t, Short_t mnpad, Short_t mxp
   mMintmbk = time - mntmbk;
   mMaxtmbk = mxtmbk - time;
 }
-
+//________________________________________________________________________________
 ostream&  operator<<(ostream& os, const StTpcHit& v)
 {
     return os << Form("Tpc s/r %3i/%3i ",v.sector(),v.padrow())
@@ -99,4 +100,35 @@ ostream&  operator<<(ostream& os, const StTpcHit& v)
 		      (Int_t) v.minTmbk(), (Int_t) v.maxTmbk(),(Int_t) v.timeBucketsInHit(),
 		      v.timeBucket(),v.pad(), v.adc());  
 }
+//________________________________________________________________________________
 void   StTpcHit::Print(Option_t *option) const {cout << *this << endl;}
+//________________________________________________________________________________
+const Char_t *StTpcHit::GetPath() const {
+  Int_t sec = sector();
+  Int_t half   = (sec  - 1)/12 + 1;
+  Int_t sectorVMC = (sec - 1)%12 + 1;
+  Int_t rowRC = padrow();
+  Int_t rowVMC = 0;
+  Int_t NoOfInnerRows = St_tpcPadConfigC::instance()->innerPadRows(sec);
+  Int_t NoOfRows = St_tpcPadConfigC::instance()->padRows(sec);
+  if (NoOfInnerRows == 13) {
+    if (rowRC <= NoOfInnerRows) {rowVMC = 3*(rowRC -  1) +  2;  }
+    else                        {rowVMC =   (rowRC - 14  + 41); }
+    if (rowVMC > 72)   rowVMC = 72;
+  } else {// iTPC
+    if (rowRC <= NoOfInnerRows) {
+      rowVMC = rowRC + 1; 
+      if (rowVMC <  2) rowVMC =  2; 
+      if (rowVMC > 41) rowVMC = 41;
+    } else {
+      rowVMC = rowRC + 3;
+      if (rowVMC < 44) rowVMC = 44;
+      if (rowRC > NoOfRows) rowRC = NoOfRows;
+    }
+  }
+  //  Int_t planeId = 100*sec + rowRC;
+  Int_t indx[3] = {half, sectorVMC, rowVMC};
+  static TString path;
+  path = FormPath(fgFMT,3,indx);
+  return path.Data();
+}

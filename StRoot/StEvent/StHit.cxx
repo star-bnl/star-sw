@@ -105,7 +105,7 @@
 #include "StTrack.h"
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
-
+#include "TError.h"
 static const char rcsid[] = "$Id: StHit.cxx,v 2.28 2016/02/25 17:07:14 ullrich Exp $";
 
 ClassImp(StHit)
@@ -221,3 +221,36 @@ ostream&  operator<<(ostream& os, const StHit& v)
 
 //______________________________________________________________________________
 void StHit::Print(Option_t *option) const {cout << *this << endl;}
+//______________________________________________________________________________
+void StHit::NotImplemented(const Char_t *method) {
+    cout << "StHit::" << method << " is no implemented" <<  endl;
+}
+//________________________________________________________________________________
+const Char_t *StHit::FormPath(const Char_t *FMT, Int_t N, Int_t *numbv)  {
+  switch (N) {
+  case  1: return Form(FMT, numbv[0]);
+  case  2: return Form(FMT, numbv[0],numbv[1]);
+  case  3: return Form(FMT, numbv[0],numbv[1],numbv[2]);
+  case  4: return Form(FMT, numbv[0],numbv[1],numbv[2],numbv[3]);
+  case  5: return Form(FMT, numbv[0],numbv[1],numbv[2],numbv[3],numbv[4]);
+  case  6: return Form(FMT, numbv[0],numbv[1],numbv[2],numbv[3],numbv[4],numbv[5]);
+  case  7: return Form(FMT, numbv[0],numbv[1],numbv[2],numbv[3],numbv[4],numbv[5],numbv[6]);
+  case  8: return Form(FMT, numbv[0],numbv[1],numbv[2],numbv[3],numbv[4],numbv[5],numbv[6],numbv[7]);
+  case  9: return Form(FMT, numbv[0],numbv[1],numbv[2],numbv[3],numbv[4],numbv[5],numbv[6],numbv[7],numbv[8]);
+  case 10: return Form(FMT, numbv[0],numbv[1],numbv[2],numbv[3],numbv[4],numbv[5],numbv[6],numbv[7],numbv[8],numbv[9]); 
+  case 11: return Form(FMT, numbv[0],numbv[1],numbv[2],numbv[3],numbv[4],numbv[5],numbv[6],numbv[7],numbv[8],numbv[9],	   
+		       numbv[10]);
+  case 12: return Form(FMT, numbv[0],numbv[1],numbv[2],numbv[3],numbv[4],numbv[5],numbv[6],numbv[7],numbv[8],numbv[9],
+		       numbv[10],numbv[11]);
+  case 13: return Form(FMT, numbv[0],numbv[1],numbv[2],numbv[3],numbv[4],numbv[5],numbv[6],numbv[7],numbv[8],numbv[9],
+		       numbv[10],numbv[11],numbv[12]);
+  case 14: return Form(FMT, numbv[0],numbv[1],numbv[2],numbv[3],numbv[4],numbv[5],numbv[6],numbv[7],numbv[8],numbv[9],
+		       numbv[10],numbv[11],numbv[12],numbv[13]);
+  case 15: return Form(FMT, numbv[0],numbv[1],numbv[2],numbv[3],numbv[4],numbv[5],numbv[6],numbv[7],numbv[8],numbv[9],
+		       numbv[10],numbv[11],numbv[12],numbv[13],numbv[14]);
+  default:
+    ::Error("StHit::FormPath","illegal NVL = %i",N);
+    assert(0);
+  }
+  return 0;
+}

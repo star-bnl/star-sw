@@ -39,6 +39,8 @@
 #include "StContainers.h"
 
 class StTrack;
+class StBTofHit;
+ostream& operator<<(ostream&, const StBTofHit&); // Printing operator
 
 class StBTofHit : public StHit {
 public:
@@ -72,7 +74,10 @@ public:
     static Float_t    padWidth()            { return mBTofPadWidth;}
     StDetectorId   detector() const;
     Int_t volumeID() const {return 0;}
-
+    virtual void           Print(Option_t *option="") const {cout << *this << endl;}
+    static  const Char_t  *GetFMT()                     {return fgFMT.Data();}  
+    static  void           SetFMT(const Char_t *path=0) {fgFMT = path;}  
+    virtual const Char_t  *GetPath() const;    
 protected:
     UChar_t   mTray;
     UChar_t   mModule;
@@ -88,10 +93,10 @@ protected:
 #else
     StLink<StTrack>  mAssociatedTrack;
 #endif //__CINT__
+    static TString fgFMT;        
     ClassDef(StBTofHit,3)
 };
 
 inline StDetectorId StBTofHit::detector() const {return kBTofId;}
 
-ostream& operator<<(ostream&, const StBTofHit&); // Printing operator
 #endif
