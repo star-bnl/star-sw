@@ -360,10 +360,14 @@ Int_t StdEdxY2Maker::Make(){
 	}
 	Int_t sector = tpcHit->sector();
 	if (sector < sectorMin || sector > sectorMax) continue;
+
 	Int_t row    = tpcHit->padrow();
-	if (! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue; // iTpx
+	if (! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue;
 	xyz[3] = StThreeVectorD(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z());
 	//________________________________________________________________________________      
+	dx = tpcHit->dX();
+	static StGlobalDirection  globalDirectionOfTrack;
+	if (dx <= 0.0) {
 	StThreeVectorD middle = xyz[3];
 	StThreeVectorD upper(tpcHit->positionU().x(),tpcHit->positionU().y(),tpcHit->positionU().z());
 	StThreeVectorD lower(tpcHit->positionL().x(),tpcHit->positionL().y(),tpcHit->positionL().z());
@@ -394,7 +398,7 @@ Int_t StdEdxY2Maker::Make(){
 	if (dx <= 0.0) {if (Debug() > 1) {cout << "negative dx " << dx << endl;}
 	  continue;
 	}
-	StGlobalDirection  globalDirectionOfTrack(dirG);
+	globalDirectionOfTrack = StGlobalDirection(dirG);
 	for (Int_t l = 0; l < 4; l++) {
 	  StGlobalCoordinate globalOfTrack(xyz[l].x(),xyz[l].y(),xyz[l].z());
 	  transform(globalOfTrack,localSect[l],sector,row);
@@ -450,13 +454,15 @@ Int_t StdEdxY2Maker::Make(){
 	  if (dx <= 0.0) {if (Debug() > 1) {cout << "negative dx " << dx << endl;}
 	    continue;
 	  }
-	  StGlobalDirection  globalDirectionOfTrack(dirG);
+	  globalDirectionOfTrack = StGlobalDirection(dirG);
 	  for (Int_t l = 0; l < 4; l++) {
 	    StGlobalCoordinate globalOfTrack(xyz[l].x(),xyz[l].y(),xyz[l].z());
 	    transform(globalOfTrack,localSect[l],sector,row);
 	  }
 	}
 #endif /* __PROMPT_HITS__ */
+	tpcHit->setdX(dx);
+	} // end of dx calculation
 	TrackLengthTotal += dx;
 	transform(localSect[0],PadOfTrack);
 	transform(globalDirectionOfTrack,localDirectionOfTrack,sector,row);
@@ -508,7 +514,6 @@ Int_t StdEdxY2Maker::Make(){
 	if ((TESTBIT(m_Mode, kPadSelection)) && iokCheck) {BadHit(3, tpcHit->position()); continue;}
 	if ((TESTBIT(m_Mode, kPadSelection)) && (dx < 0.5 || dx > 25.)) {BadHit(4, tpcHit->position()); continue;}
 	// Corrections
-	tpcHit->setdX(dx);
 	CdEdx[NdEdx].Reset();
 	CdEdx[NdEdx].resXYZ[0] = localSect[3].position().x() - localSect[0].position().x();
 	CdEdx[NdEdx].resXYZ[1] = localSect[3].position().y() - localSect[0].position().y();
