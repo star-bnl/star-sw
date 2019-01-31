@@ -80,7 +80,7 @@ public:
     const char* branchName(const char*) const;  // get branch name for given class name
     int branchId(const char*) const;            // return unique ID for given branch
     void SetParent(TObject *par){fParent=par;}
-#if !defined(__CINT__)    
+#if !defined(__CINT__1)    
     vector<string> listOfBranches() const;      // list of all branches for given mode (miniDST or DST)         
     vector<string> listOfClasses() const;       // list of all top level classes known     
     vector<string> listOfClasses(const char*) const;  // list of all top level classes for a given branch

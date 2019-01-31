@@ -351,7 +351,7 @@ StEventClusteringHints::print(ostream& os)
 	    cout << '\t' << classes[k] << endl;
     }
 }
-
+#if 0
 static TBuffer&  operator<<(TBuffer& buf, const map<string,string> &s)
 {
   TString ts1,ts2;
@@ -396,7 +396,6 @@ static TBuffer&  operator>>(TBuffer& buf,      map<string,int> & s)
 }
 
 
-
 void StEventClusteringHints::Streamer(TBuffer &R__b)
 {
 // Stream an object of class StEventClusteringHints
@@ -421,3 +420,4 @@ void StEventClusteringHints::Streamer(TBuffer &R__b)
       R__b.SetByteCount(R__c, kTRUE);
    }
 }
+#endif
