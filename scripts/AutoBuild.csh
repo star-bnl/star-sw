@@ -1,7 +1,7 @@
 #!/bin/csh
 #
 # Wrapper to autobuild
-# J.Lauret 2001 - 2011
+# J.Lauret 2001 - 2019
 #
 # Current target for this script
 #
@@ -17,7 +17,7 @@
 #   SL53
 #   SL64
 #   new        a generic target for new systems
-#   
+#
 #              <--- all of those targets were consolidated into one block
 #
 #   64bits     build 64 bits verison of dev, whatever the OS
@@ -29,7 +29,7 @@
 #
 #   Insure     Builds Insure++ compilation
 #   gprof      Builds with gprof options
-# 
+#
 #   inter      Builds as per the default target but do not perform
 #              post compilation tasks (and do not send Email if
 #              failure) and do NOT perform cvs co either (-s -i)
@@ -50,7 +50,9 @@
 #
 
 # Grab it from env
-if ( ! $?AFS_RHIC ) setenv AFS_RHIC /afs/rhic.bnl.gov
+if ( ! $?AFS_RHIC ) setenv AFS_RHIC  /afs/rhic.bnl.gov
+if ( ! $?STARCVMFS) setenv STARCVMFS /cvmfs/star.sdcc.bnl.gov
+
 
 # In case of token failure, send an Email to
 set EMAIL="jeromel@bnl.gov,didenko@bnl.gov"
@@ -59,7 +61,10 @@ set EMAIL="jeromel@bnl.gov,didenko@bnl.gov"
 set SCRIPTD=$AFS_RHIC/star/packages/scripts
 
 # Loading of the star environment etc ...
-setenv GROUP_DIR $AFS_RHIC/star/group
+if ( ! $?GROUP_DIR ) then
+    setenv GROUP_DIR $AFS_RHIC/star/group
+endif
+
 if ( -r  $GROUP_DIR/star_login.csh ) then
 	source $GROUP_DIR/star_login.csh
 
@@ -167,9 +172,15 @@ if ( -r  $GROUP_DIR/star_login.csh ) then
 	    case "gprof":
 	    case "gcc":
 	    case "icc":
-		set LPATH=$AFS_RHIC/star/packages/adev
+		set LPATH=$STAR_PATH/adev
 		set SPATH=$AFS_RHIC/star/doc/www/comp/prod/Sanity
-		
+
+		# check if path exists, use save fall back
+		if ( ! -d $SPATH ) then
+		    if ( ! -d $HOME/Sanity ) /bin/mkdir $HOME/Sanity
+		    setenv SPATH $HOME/Sanity
+                endif
+
 		# this is only for double checking. AutoBuild.pl is
 		# impermeable to external env changes (start a new process)
 		# so modifications has to be passed at command line level
@@ -191,9 +202,9 @@ if ( -r  $GROUP_DIR/star_login.csh ) then
 		if ( $OKBUILD ) then
 		    setenv AutoBuild_setup_cmd "setup $1 $2"
 		    if ("$3" == "") then
-			$SCRIPTD/AutoBuild.pl -1 -k -i -R -t -T $1$2 -B -p $LPATH 
+			$SCRIPTD/AutoBuild.pl -1 -k -i -R -t -T $1$2 -B -p $LPATH
 		    else
-			$SCRIPTD/AutoBuild.pl $3 -k -i -R -t -T $1$2 -B -p $LPATH 
+			$SCRIPTD/AutoBuild.pl $3 -k -i -R -t -T $1$2 -B -p $LPATH
 		    endif
 		    if( -e $HOME/AutoBuild-linux-$1$2.html) then
 			/bin/mv -f $HOME/AutoBuild-linux-$1$2.html $SPATH/AutoBuild-$1$2.html
@@ -242,7 +253,7 @@ if ( -r  $GROUP_DIR/star_login.csh ) then
 		endif
 		cd $LPATH
 		echo "Cleaning older libraries"
-		mgr/CleanLibs obj 1	
+		mgr/CleanLibs obj 1
 		if ( ! $?XTRACMD ) then
 		    echo "Cleaning emacs flc files"
 		    /usr/bin/find StRoot/ -name '*.flc' -exec rm -f {} \;
