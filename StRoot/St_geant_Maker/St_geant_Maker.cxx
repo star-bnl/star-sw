@@ -974,7 +974,9 @@ Int_t St_geant_Maker::InitRun(Int_t run){
   LOG_INFO << "St_geant_Maker::InitRun -- with " << mInitialization.Data() << endm;
   if (mInitialization != "") {Do(mInitialization.Data()); mInitialization = "";}
 #endif
-  Geometry();
+  if (! ifz) {
+    Geometry();
+  }
   Do("physi");
   Do("gclose all");
   Agstroot();
