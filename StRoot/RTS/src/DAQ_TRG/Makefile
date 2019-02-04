@@ -44,7 +44,7 @@ trgReader10.o: ../../../../StRoot/RTS/include/rtsLog.h
 trgReader10.o: ../../../../StRoot/RTS/include/rtsSystems.h
 trgReader10.o: ../../../../StRoot/RTS/include/daqFormats.h
 trgReader10.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-trgReader10.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
+trgReader10.o: ../../trg/include/trgStructures_32.h
 trgReader10.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 trgReader10.o: ../../../../StRoot/RTS/include/rts.h
 trgReader10.o: daq_trg.h
@@ -52,7 +52,7 @@ trgReader10.o: ../DAQ_READER/daq_det.h
 trgReader12.o: ../../../../StRoot/RTS/include/rtsLog.h
 trgReader12.o: ../../../../StRoot/RTS/include/daqFormats.h
 trgReader12.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-trgReader12.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
+trgReader12.o: ../../trg/include/trgStructures_32.h
 trgReader12.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 trgReader12.o: ../../../../StRoot/RTS/include/rtsSystems.h
 trgReader12.o: daq_trg.h
@@ -61,7 +61,7 @@ trgReader20.o: ../../../../StRoot/RTS/include/rtsLog.h
 trgReader20.o: ../../../../StRoot/RTS/include/rtsSystems.h
 trgReader20.o: ../../../../StRoot/RTS/include/daqFormats.h
 trgReader20.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-trgReader20.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
+trgReader20.o: ../../trg/include/trgStructures_32.h
 trgReader20.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 trgReader20.o: ../../../../StRoot/RTS/include/rts.h
 trgReader20.o: daq_trg.h
@@ -71,7 +71,7 @@ trgReader21.o: ../../../../StRoot/RTS/include/rtsSystems.h
 trgReader21.o: ../../../../StRoot/RTS/include/rts.h
 trgReader21.o: ../../../../StRoot/RTS/include/daqFormats.h
 trgReader21.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-trgReader21.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
+trgReader21.o: ../../trg/include/trgStructures_32.h
 trgReader21.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 trgReader21.o: daq_trg.h
 trgReader21.o: ../DAQ_READER/daq_det.h
@@ -79,7 +79,7 @@ trgReader22.o: ../../../../StRoot/RTS/include/rtsLog.h
 trgReader22.o: ../../../../StRoot/RTS/include/rtsSystems.h
 trgReader22.o: ../../../../StRoot/RTS/include/daqFormats.h
 trgReader22.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-trgReader22.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
+trgReader22.o: ../../trg/include/trgStructures_32.h
 trgReader22.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 trgReader22.o: ../../../../StRoot/RTS/include/rts.h
 trgReader22.o: daq_trg.h
@@ -89,7 +89,7 @@ trgReader30.o: ../../../../StRoot/RTS/include/rts.h
 trgReader30.o: ../../../../StRoot/RTS/include/rtsSystems.h
 trgReader30.o: ../../../../StRoot/RTS/include/daqFormats.h
 trgReader30.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-trgReader30.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
+trgReader30.o: ../../trg/include/trgStructures_32.h
 trgReader30.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 trgReader30.o: daq_trg.h
 trgReader30.o: ../DAQ_READER/daq_det.h
@@ -98,14 +98,14 @@ trgReader32.o: ../../../../StRoot/RTS/include/rts.h
 trgReader32.o: ../../../../StRoot/RTS/include/rtsSystems.h
 trgReader32.o: ../../../../StRoot/RTS/include/daqFormats.h
 trgReader32.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-trgReader32.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
+trgReader32.o: ../../trg/include/trgStructures_32.h
 trgReader32.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 trgReader32.o: daq_trg.h
 trgReader32.o: ../DAQ_READER/daq_det.h
 trg_reader.o: ../../../../StRoot/RTS/include/rtsLog.h
 trg_reader.o: ../../../../StRoot/RTS/include/daqFormats.h
 trg_reader.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-trg_reader.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
+trg_reader.o: ../../trg/include/trgStructures_32.h
 trg_reader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 trg_reader.o: ../../../../StRoot/RTS/include/rts.h
 trg_reader.o: ../../../../StRoot/RTS/include/rtsSystems.h

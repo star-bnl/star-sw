@@ -47,9 +47,9 @@ emc_reader.o: ../../../../StRoot/RTS/include/rtsSystems.h
 emc_reader.o: ../../../../StRoot/RTS/include/rts.h
 emc_reader.o: ../../../../StRoot/RTS/include/daqFormats.h
 emc_reader.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-emc_reader.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
+emc_reader.o: ../../trg/include/trgStructures_32.h
 emc_reader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
-emc_reader.o: ../../../../StRoot/RTS/trg/include/trgStructures.h
+emc_reader.o: ../../trg/include/trgStructures.h
 emc_reader.o: daq_emc.h
 emc_reader.o: ../DAQ_READER/daq_det.h
 emcReader.o: ../DAQ_READER/daqReader.h
@@ -64,7 +64,7 @@ emc_single_reader.o: ../../../../StRoot/RTS/include/rtsLog.h
 emc_single_reader.o: ../../../../StRoot/RTS/include/rtsSystems.h
 emc_single_reader.o: ../../../../StRoot/RTS/include/daqFormats.h
 emc_single_reader.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-emc_single_reader.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
+emc_single_reader.o: ../../trg/include/trgStructures_32.h
 emc_single_reader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 emc_single_reader.o: ../../../../StRoot/RTS/include/rts.h
 emc_single_reader.o: ../DAQ_READER/daq_det.h
