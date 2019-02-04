@@ -630,7 +630,11 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   if (g2t_track) tpc_track = g2t_track->GetTable();
   St_g2t_vertex  *g2t_ver = (St_g2t_vertex *) GetDataSet("geant/g2t_vertex");// if (!g2t_ver)      return kStWarn;
   g2t_vertex_st     *gver = 0;
-  if (g2t_ver) gver = g2t_ver->GetTable();
+  Int_t NV = 0;
+  if (g2t_ver) {
+    gver = g2t_ver->GetTable();
+    NV = g2t_ver->GetNRows();
+  }
   g2t_tpc_hit_st *tpc_hit_begin = g2t_tpc_hit->GetTable();
   g2t_tpc_hit_st *tpc_hit = tpc_hit_begin;
   if (m_TpcdEdxCorrection) {
@@ -674,6 +678,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
       Double_t mass = 0;
       if (tpc_track) {
 	id3        = tpc_track[Id-1].start_vertex_p;
+	assert(id3 > 0 && id3 <= NV);
 	ipart      = tpc_track[Id-1].ge_pid;
 	charge     = (Int_t) tpc_track[Id-1].charge;
 	StParticleDefinition *particle = StParticleTable::instance()->findParticleByGeantId(ipart);

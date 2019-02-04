@@ -373,6 +373,7 @@ void StarMCHits::PreTrack() {
     vertex.next_prim_v_p= 0              ;// next primary vertex
     fg2t_vertex->AddAt(&vertex);
     fvertexCurrent      = fg2t_vertex->GetTable() + nv;
+    nv++;
   }
   Int_t nt = fg2t_track->GetNRows();
   g2t_track_st track;
@@ -381,7 +382,8 @@ void StarMCHits::PreTrack() {
   //    track.eg_label       = particle->GetIdGen();
   track.eg_pid         = part->GetPdgCode();
   track.ge_pid         = TVirtualMC::GetMC()->IdFromPDG(track.eg_pid);
-  track.start_vertex_p = IdV;
+  assert( fvertexCurrent->id > 0 &&  fvertexCurrent->id <= nv);
+  track.start_vertex_p = fvertexCurrent->id;
   track.p[0]           = part->Px();
   track.p[1]           = part->Py();
   track.p[2]           = part->Pz();
