@@ -1,5 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstdint>
 
 #include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
@@ -10,11 +11,11 @@
 
 #include "Jevp/StJevpPlot/RunStatus.h"
 #include "StEvent/StTriggerData.h"
+#include <TStyle.h>
 #include <TH1D.h>
 #include <TH2D.h>
 
-#include <TMath.h>
-#include <math.h>
+#include <cmath>
 #include "etofBuilder.h"
 #include <RTS/include/rtsLog.h>
 
@@ -55,7 +56,7 @@ etofBuilder::~etofBuilder() {
   delete plots;
 }
 
-void etofBuilder::initialize( int argc, char *argv[] ) {
+void etofBuilder::initialize( int argc, char* argv[] ) {
 
     LOG( NOTE, "etofBuilder::initialize" );
 
@@ -66,10 +67,11 @@ void etofBuilder::initialize( int argc, char *argv[] ) {
     nrOfChannelsPerGet4 =  4;
 
     nrOfChannelsPerFee  = nrOfChannelsPerGet4 * nrOfGet4PerFee;
+    nrOfChannelsPerGbtx = nrOfChannelsPerFee  * nrOfFeePerGbtx;
     nrOfGet4PerGbtx     = nrOfGet4PerFee      * nrOfFeePerGbtx;
     nrOfChannelsPerGdpb = nrOfChannelsPerGet4 * nrOfGet4PerGbtx * nrOfGbtxPerGdpb;
 
-    // map form Id (hex number) of the GDPB to the running number ( 0 to nrOfGdpb-1 )
+    // map form id (hex number) of the GDPB to the running number ( 0 to nrOfGdpb-1 )
     gdpbMap2018[ 0x18f6 ] = 0;
     gdpbMap2018[ 0x0b59 ] = 1;
     gdpbMap2018[ 0x1898 ] = 2;
@@ -129,6 +131,8 @@ void etofBuilder::initialize( int argc, char *argv[] ) {
     }
 
     // initialize Get4 to PADI channel conversion
+/*
+    // 2018 version
     int get4ToPadiArray[ 32 ] = {
          3,  2,  1,  0, 
         23, 22, 21, 20,
@@ -138,6 +142,16 @@ void etofBuilder::initialize( int argc, char *argv[] ) {
         31, 30, 29, 28,
         15, 14, 13, 12,
         19, 18, 17, 16 };
+*/
+    int get4ToPadiArray[ 32 ] = {
+         3,  2,  1,  0,
+         7,  6,  5,  4,
+        11, 10,  9,  8,
+        15, 14, 13, 12,
+        19, 18, 17, 16,
+        23, 22, 21, 20,
+        27, 26, 25, 24,
+        31, 30, 29, 28  };
 
 
     for( size_t i = 0; i < nrOfChannelsPerFee; i++ ) {
@@ -149,13 +163,13 @@ void etofBuilder::initialize( int argc, char *argv[] ) {
     // Build Root Histograms...
     contents.nDigis             = new TH1D( "nDigis", "nHitMsg;# digis;# events", 300, 0, 300 );
 
-    contents.nDigisVsTofTrgMult = new TH2D( "nDigisVsTofTrgMult", "# digis vs bTof multiplicity;# digis;bTof mult in trigger data", 300, 0, 300, 200, 0, 800 ); 
+    contents.nDigisVsTofTrgMult = new TH2D( "nDigisVsTofTrgMult", "# digis vs bTof multiplicity;# digis;bTof mult in trigger data;# events", 300, 0, 300, 200, 0, 800 ); 
 
     contents.digiTot            = new TH1D( "digiTot",           "digi tot;tot (bins);#digis", 256,  0,  256 );
     contents.digiTimeToTrigger  = new TH1D( "digiTimeToTrigger", "digi time to trigger;time to trigger (ms);# digis", 600, -5, 5 );
 
-    contents.digiCoarseTs       = new TH1D( "digiCoarseTs", "digi coarse Ts;coarse Ts (bins);# digis", 4096,   0, 4096 );
-    contents.digiFineTs         = new TH1D( "digiFineTs",   "digi fine Ts;fine Ts (bins);# digis",     112,   0,  112 );
+    contents.digiCoarseTs       = new TH1D( "digiCoarseTs", "digi coarse Ts;coarse Ts (bins);# digis",  300, 0, 4800 );
+    contents.digiFineTs         = new TH1D( "digiFineTs",   "digi fine Ts;fine Ts (bins);# digis",      112, 0,  112 );
 
 
     for( size_t i=0; i<nrOfGdpbInSys; i++ ) {
@@ -164,26 +178,70 @@ void etofBuilder::initialize( int argc, char *argv[] ) {
         contents.digiMappedChannelNumberPerGdpb[ i ] = new TH1D( TString::Format( "digiMappedChannelNumberPerGdpb_%d", i), TString::Format( "mapped channel number on Gdpb %#06x (sector %d);mapped channel;# digis", gdpbRevMap[ i ], sector[ i ] ), 961, -1, 960 );
     }
 
+    contents.digiDensityAllChannels = new TH2D( "digiDensityAllChannels", "digi density;;(counter-1) * 3 + strip;# digis", 72, 0.5, 72.5, 96, 0.5, 96.5 );
+    for( size_t i=0; i<12; i++ ) {
+        contents.digiDensityAllChannels->GetXaxis()->SetBinLabel( i * 6 + 1, Form( "%d-1-1", i + 13 ) );
+        contents.digiDensityAllChannels->GetXaxis()->SetBinLabel( i * 6 + 2, Form( "%d-1-2", i + 13 ) );
+        contents.digiDensityAllChannels->GetXaxis()->SetBinLabel( i * 6 + 3, Form( "%d-2-1", i + 13 ) );
+        contents.digiDensityAllChannels->GetXaxis()->SetBinLabel( i * 6 + 4, Form( "%d-2-2", i + 13 ) );
+        contents.digiDensityAllChannels->GetXaxis()->SetBinLabel( i * 6 + 5, Form( "%d-3-1", i + 13 ) );
+        contents.digiDensityAllChannels->GetXaxis()->SetBinLabel( i * 6 + 6, Form( "%d-3-2", i + 13 ) );
+    }
+    contents.digiDensityAllChannels->GetXaxis()->SetLabelSize(   0.03  );
+    contents.digiDensityAllChannels->GetXaxis()->SetLabelOffset( 0.004 );
+    contents.digiDensityAllChannels->GetXaxis()->SetLabelFont(   102   );
+    contents.digiDensityAllChannels->GetYaxis()->SetTickLength(  0.01  );
+
+    contents.digiDensityAllChannels->GetYaxis()->SetTitleSize(   0.05  );
+    contents.digiDensityAllChannels->GetYaxis()->SetTitleOffset( 0.9   );
+    contents.digiDensityAllChannels->GetYaxis()->CenterTitle(    true  );
+    contents.digiDensityAllChannels->GetYaxis()->SetTickLength(  0.01  );
+
+    contents.digiDensityAllChannels->GetZaxis()->SetTitleSize(   0.05  );
+    contents.digiDensityAllChannels->GetZaxis()->SetTitleOffset( 0.95  );
+    contents.digiDensityAllChannels->GetZaxis()->CenterTitle(    true  );
+    contents.digiDensityAllChannels->GetZaxis()->SetTickLength(  0.01  );
+
+
+    for( size_t i=0; i<11; i++ ) {
+        contents.triggerTimeDiffSectors[ i ] = new TH1D( TString::Format( "triggerTimeDiffSector13to%d", i+14 ), TString::Format( "trigger time difference sector 13 to %d;# clock cycles;# events", i + 14 ), 160, -9.5, 150.5 );
+    }
+
+    contents.missingTriggerTs = new TH1D( "missingTriggerTs", "missing trigger timestamps per sector;sector;# missing trigger timestamps", 12, 13, 25 );
+
 
     int np = sizeof( contents ) / sizeof( TH1* );
 
-    for( int i = 0; i < np; i++ ) {
+    for( int i = 0; i < np; i++ ) {        
         contents.array[ i ]->SetLineColor( kBlue );
         //contents.array[ i ]->SetFillColor( kRed );
 
         JevpPlot* jp = new JevpPlot( contents.array[ i ] );
         jp->logy = 1;
+        jp->setOptStat( 0 );
 
 
-        if( contents.array[ i ] == contents.nDigisVsTofTrgMult ||
-            contents.array[ i ] == contents.digiCoarseTs       ||
-            contents.array[ i ] == contents.digiCoarseTs       ) {
+        if( contents.array[ i ] == contents.nDigisVsTofTrgMult     ||
+            contents.array[ i ] == contents.digiCoarseTs           ||
+            contents.array[ i ] == contents.digiFineTs             ||
+            contents.array[ i ] == contents.digiDensityAllChannels ) {
             jp->logy = 0;
         }
 
-        if( contents.array[ i ] == contents.nDigisVsTofTrgMult ) {
+        if( contents.array[ i ] == contents.nDigisVsTofTrgMult     ||
+            contents.array[ i ] == contents.digiDensityAllChannels ) {
             jp->optlogz = 1;
         }
+
+        for( int j=0; j<11; j++ ) {
+            if( contents.array[ i ] == contents.triggerTimeDiffSectors[ j ] ) {
+                jp->setOptStat( 111110 );
+            }
+        }
+        if( contents.array[ i ] == contents.missingTriggerTs ) {
+            jp->setOptStat( 1 );
+        }
+
         /*
         if (contents.array[i] == contents.hitMapCounter[0] ||
             contents.array[i] == contents.hitMapCounter[1] ||
@@ -206,12 +264,12 @@ void etofBuilder::initialize( int argc, char *argv[] ) {
 
 void etofBuilder::event( daqReader *rdr ) {
     LOG( DBG, "-------------START EVENT----------" );
-
+ 
+    float TofTrgMult = 0;
     StTriggerData* trgd = getStTriggerData( rdr );
-    if( !trgd ) return;
-
-    float TofTrgMult = (float) trgd->tofMultiplicity( 0 );
-
+    if( trgd ) {
+        TofTrgMult = (float) trgd->tofMultiplicity( 0 );
+    }
 
     daq_dta  *dd;
     daq_etof *etof = ( daq_etof* ) rdr->det( "etof" );
@@ -221,6 +279,8 @@ void etofBuilder::event( daqReader *rdr ) {
         if( trgd ) delete trgd;
         return;
     }
+
+    vector< vector< gdpbv100::FullMessage > > triggerMessages( gdpbMap.size() );
 
     map< unsigned int, unsigned short > nDigisInGdpb;
     for( const auto& kv: gdpbMap ) {
@@ -269,7 +329,7 @@ void etofBuilder::event( daqReader *rdr ) {
                 processMessages2018( messageBuffer, nFullMessagesToRead, nDigisInGdpb );
             }
             else{
-                processMessages( messageBuffer, nFullMessagesToRead, nDigisInGdpb );
+                processMessages( messageBuffer, nFullMessagesToRead, triggerMessages, nDigisInGdpb );
             }
         }
 
@@ -298,8 +358,8 @@ void etofBuilder::startrun( daqReader *rdr ) {
   //
   //
   //year = (int) getStTriggerData( rdr )->year();
-  year = (rdr->run / 1000000) + 1999;
-  LOG(DBG, "rdr->run=%d year=%d", rdr->run, year);
+  year = ( rdr->run / 1000000 ) + 1999;
+  LOG( DBG, "rdr->run=%d year=%d", rdr->run, year );
     
     if( year == 2018 ) {
         gdpbMap    = gdpbMap2018;
@@ -339,7 +399,7 @@ void etofBuilder::main( int argc, char *argv[] ) {
 }
 
 
-void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessagesToRead, map<unsigned int, unsigned short>& nDigisPerGdpb ) {
+void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessagesToRead, vector< vector < gdpbv100::FullMessage > >& triggerMessages, map< unsigned int, unsigned short >& nDigisPerGdpb ) {
     LOG( DBG, " # of full messages to read: %d", nFullMessagesToRead );
 
     for( size_t msgIndex = 0; msgIndex < nFullMessagesToRead; msgIndex++ ) {
@@ -350,6 +410,9 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
             unsigned int gdpb = mess.getGdpbGenGdpbId();                    
             if( mess.getStarTrigMsgIndex() == 0 ) {
                 LOG( DBG, "--> STAR trigger message from AFCK %#06x", gdpb );
+            }
+            if( gdpbMap.count( gdpb ) ) {
+                triggerMessages.at( gdpbMap.at( gdpb ) ).push_back( mess );
             }
         }
         else if( mess.isHitMsg() ) {
@@ -364,7 +427,7 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
             }
 
             // check if the reported chip && channel ids make sense
-            if( gdpbMap.count( gdpb ) > 0 && chip < 256 && chan < 4 ) {
+            if( gdpbMap.count( gdpb ) > 0 && chip < 240 && chan < 4 ) {
 
                 if( mess.getGdpbHit32DllLck() != 1 ) {
                     LOG( DBG, " *** warning: DLL Lock = 0 " );
@@ -379,6 +442,18 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
                 }
 
                 nDigisPerGdpb.at( gdpb ) += 1;
+
+
+                unsigned int sector  = hardwareMapSector( gdpb );
+                unsigned int module  = hardwareMapModule(  mappedChannelNumber );
+                unsigned int counter = hardwareMapCounter( mappedChannelNumber );
+                unsigned int strip   = hardwareMapStrip(   mappedChannelNumber );
+                unsigned int side    = hardwareMapSide(    mappedChannelNumber );
+
+                LOG( DBG, "--> hit message on sector %d module %d counter %d strip %d side %d", sector, module, counter, strip, side );
+
+                contents.digiDensityAllChannels->Fill( ( sector - 13 ) * 6 + ( module - 1 ) * 2 + side, ( counter - 1 ) * 32 + strip );
+
 
                 // calculate time difference to trigger 
                 double triggerTime   = messageBuffer[ 0 ] * gdpbv100::kdClockCycleSizeNs;
@@ -422,6 +497,44 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
             //mess.PrintMessage( gdpbv100::msg_print_Prefix | gdpbv100::msg_print_Data );
         }
     } // message loop
+
+    // deal with trigger and reset times of the different AFCKs
+    map< short, uint64_t > gdpbTsMap;
+    map< short, uint64_t > starTsMap;
+
+    for( size_t i = 0; i < nrOfGdpbInSys; i++ ) {
+        if( triggerMessages.at( i ).size() != 4 ) {
+            contents.missingTriggerTs->Fill( i + 13 );
+            continue;
+        }
+
+        uint64_t gdpbTsMsb = triggerMessages[ i ][ 0 ].getGdpbTsMsbStarA();
+        uint64_t gdpbTsLsb = triggerMessages[ i ][ 1 ].getGdpbTsLsbStarB();
+        uint64_t starTsMsb = triggerMessages[ i ][ 1 ].getStarTsMsbStarB();
+        uint64_t starTsMid = triggerMessages[ i ][ 2 ].getStarTsMidStarC();
+
+        uint64_t newGdpbTsFull = ( gdpbTsMsb << 24 )
+                               + ( gdpbTsLsb       );
+
+        uint64_t newStarTsFull = ( starTsMsb << 48 )
+                               + ( starTsMid <<  8 )
+                               + triggerMessages[ i ][ 3 ].getStarTsLsbStarD();
+
+        gdpbTsMap[ i ] = newGdpbTsFull;
+        starTsMap[ i ] = newStarTsFull;
+
+        LOG( DBG, "gdpbTs(%d): %lld", i,  ( long long ) gdpbTsMap.at( i ) );
+        LOG( DBG, "starTs(%d): %lld", i,  ( long long ) starTsMap.at( i ) );
+    }
+
+    if( gdpbTsMap.count( 0 ) ) {
+        for( size_t i=0; i<11; i++ ) {
+            if( gdpbTsMap.count( i+1 ) ) {
+                contents.triggerTimeDiffSectors[ i ]->Fill( gdpbTsMap.at( 0 ) - gdpbTsMap.at( i+1 ) );
+            }
+        }
+    }
+
 }
 
 
@@ -441,11 +554,41 @@ unsigned int etofBuilder::hardwareMapChannelNumber( const unsigned int& chip, co
     return hardwareMapFeeNumber( chip ) * nrOfChannelsPerFee + get4ToPadi.at( hardwareMapChannelNumberInFee( chip, chan ) );
 }
 
+unsigned int etofBuilder::hardwareMapSector( const unsigned int& gdpb ) {
+    if( gdpbMap.count( gdpb ) == 0 ) {
+        return 0;
+    }
+    return gdpbMap.at( gdpb ) + 13;
+}
+
+unsigned int etofBuilder::hardwareMapModule( const unsigned int& mappedChannelNr ) {    
+    return mappedChannelNr / ( 2 * nrOfChannelsPerGbtx ) + 1;
+}
+
+unsigned int etofBuilder::hardwareMapCounter( const unsigned int& mappedChannelNr ) {
+    return ( ( mappedChannelNr % ( 2 * nrOfChannelsPerGbtx ) ) / nrOfChannelsPerFee ) % nrOfFeePerGbtx + 1;
+}
+
+unsigned int etofBuilder::hardwareMapSide( const unsigned int& mappedChannelNr ) {
+    return ( mappedChannelNr % ( 2 * nrOfChannelsPerGbtx ) ) / nrOfChannelsPerGbtx + 1;
+}
+
+unsigned int etofBuilder::hardwareMapStrip( const unsigned int& mappedChannelNr ) {
+    unsigned int strip = ( mappedChannelNr % ( 2 * nrOfChannelsPerGbtx ) ) % nrOfChannelsPerFee;
+
+    if( hardwareMapSide( mappedChannelNr ) == 1 ) {
+        return strip + 1;
+    }
+    else{
+        return 32 - strip;
+    }
+}
 
 
 
 
-void etofBuilder::processMessages2018( uint64_t* messageBuffer, size_t nFullMessagesToRead, map<unsigned int, unsigned short>& nDigisPerGdpb ) {
+
+void etofBuilder::processMessages2018( uint64_t* messageBuffer, size_t nFullMessagesToRead, map< unsigned int, unsigned short >& nDigisPerGdpb ) {
     LOG( DBG, " # of full messages to read: %d", nFullMessagesToRead );
 
     for( size_t msgIndex = 0; msgIndex < nFullMessagesToRead; msgIndex++ ) {
