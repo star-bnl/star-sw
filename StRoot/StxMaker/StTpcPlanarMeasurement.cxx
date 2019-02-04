@@ -20,26 +20,26 @@
 #include "StarVMC/StarVMCApplication/StarVMCDetector.h"
 #include "TMath.h"
 using namespace genfit;
-Int_t StTpcPlanarMeasurement::fDebug = 0;
 //________________________________________________________________________________
 StTpcPlanarMeasurement::StTpcPlanarMeasurement(int nDim)
-  : PlanarMeasurement(nDim), fHit(0), fErrCalc(0) {}
+  : StPlanarMeasurement(nDim) {}
 //________________________________________________________________________________
 StTpcPlanarMeasurement::StTpcPlanarMeasurement(const TVectorD& rawHitCoords, const TMatrixDSym& rawHitCov, int detId, int hitId, TrackPoint* trackPoint)
-  : PlanarMeasurement(rawHitCoords, rawHitCov, detId, hitId, trackPoint), fHit(0), fErrCalc(0) {}
+  : StPlanarMeasurement(rawHitCoords, rawHitCov, detId, hitId, trackPoint)  {}
 //________________________________________________________________________________
-StTpcPlanarMeasurement::StTpcPlanarMeasurement(const StTpcHit *hit,TrackPoint* trackPoint) : PlanarMeasurement(2), fHit(hit), fErrCalc(0) {
+StTpcPlanarMeasurement::StTpcPlanarMeasurement(const StTpcHit *hit,TrackPoint* trackPoint) : StPlanarMeasurement(2) {
+  fHit = hit;
   detId_ = (Int_t) fHit->detector();
   hitId_ = fHit->id();
-  Int_t sector = fHit->sector();
-  Int_t rowRC = fHit->padrow();
+  Int_t sector = hit->sector();
+  Int_t rowRC = hit->padrow();
 #if 0
   Int_t half   = (sector  - 1)/12 + 1;
   Int_t sectorVMC = (sector - 1)%12 + 1;
   Int_t rowVMC = 0;
 #endif 
   Int_t NoOfInnerRows = St_tpcPadConfigC::instance()->innerPadRows(sector);
-  Int_t NoOfRows = St_tpcPadConfigC::instance()->padRows(sector);
+  //  Int_t NoOfRows = St_tpcPadConfigC::instance()->padRows(sector);
   fErrCalc = 0;
   if (NoOfInnerRows == 13) {
     if (rowRC <= NoOfInnerRows) {

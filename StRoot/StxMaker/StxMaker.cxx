@@ -14,6 +14,7 @@
 #include "StEvent/StHelixModel.h"
 #include "StTrackGeometry.h"
 #include "StEvent/StTpcHit.h"
+#include "StEvent/StBTofHit.h"
 #include "StEventUtilities/StEventHelper.h"
 #include "StEventUtilities/StTrackUtilities.h"
 #include "TRMatrix.h"
@@ -70,8 +71,10 @@
 
 #include "GenFit/HelixTrackModel.h"
 #include "GenFit/MeasurementCreator.h"
+#include "StPlanarMeasurement.h"
 #include "StTpcPlanarMeasurement.h"
 #include "StTpc3DMeasurement.h"
+#include "StBTofPlanarMeasurement.h"
 #include "StG2TrackVertexMap.h"
 
 #include "TApplication.h"
@@ -409,6 +412,7 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
     const StHit    *hit    = fSeedHits[hId].hit;
     if (! hit) continue;
     const StTpcHit *tpcHit = 0;
+    const StBTofHit *tofHit = 0;
     genfit::PlanarMeasurement* measurement = 0;
     switch (hit->detector()) {
     case kTpcId:
@@ -418,6 +422,10 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
 #else /* __TPC3D__ */
       measurement = new StTpc3DMeasurement(tpcHit, nullptr);
 #endif /* ! __TPC3D__ */
+      break;
+    case kBTofId:
+      tofHit = (const StBTofHit*) hit;
+      measurement = new StBTofPlanarMeasurement(tofHit, nullptr);
       break;
     default:
       break;
@@ -602,11 +610,7 @@ Int_t StxMaker::FillDetectorInfo(StTrack *gTrack, genfit::Track * track, Bool_t 
     for (std::vector< genfit::AbsMeasurement* >::const_iterator im = tp->getRawMeasurements().begin(); 
 	 im !=  tp->getRawMeasurements().end(); ++im) {
       dets[0][kPP]++;
-#ifndef __TPC3D__ /* ! __TPC3D__ */
-      const StTpcPlanarMeasurement *measurement =  dynamic_cast<StTpcPlanarMeasurement *>(*im);
-#else /* __TPC3D__ */
-      const StTpc3DMeasurement *measurement =  dynamic_cast<StTpc3DMeasurement *>(*im);
-#endif /* ! __TPC3D__ */
+      const StPlanarMeasurement *measurement =  dynamic_cast<StPlanarMeasurement *>(*im);
       if (! measurement) continue;
       if (! firstTP) firstTP = tp;
       lastTP = tp;
@@ -620,10 +624,6 @@ Int_t StxMaker::FillDetectorInfo(StTrack *gTrack, genfit::Track * track, Bool_t 
       if (fitStatus && ! tp->hasFitterInfo(rep)) continue;
       dets[0][kFP]++; dets[detId][kFP]++;
       detInfo->addHit((StHit *) hit,refCountIncr);
-#if 0
-      if (!refCountIncr) 	continue;
-      hit->setFitFlag(stiHit->timesUsed());
-#endif
       Int_t used = hit->usedInFit();
       used++;
       hit->setFitFlag(used);
@@ -643,13 +643,9 @@ Int_t StxMaker::FillDetectorInfo(StTrack *gTrack, genfit::Track * track, Bool_t 
     } else {
       for (std::vector< genfit::AbsMeasurement* >::const_iterator im = tp->getRawMeasurements().begin(); 
 	   im !=  tp->getRawMeasurements().end(); ++im) {
-#ifndef __TPC3D__ /* ! __TPC3D__ */
-	const StTpcPlanarMeasurement *measurement =  dynamic_cast<StTpcPlanarMeasurement *>(*im);
-#else /* __TPC3D__ */
-	const StTpc3DMeasurement *measurement =  dynamic_cast<StTpc3DMeasurement *>(*im);
-#endif /* ! __TPC3D__ */
+	const StPlanarMeasurement *measurement =  dynamic_cast<StPlanarMeasurement *>(*im);
 	if (! measurement) continue;
-	StHit *hit = (StHit*) measurement->Hit();
+	const StHit *hit = measurement->Hit();
 	if (! hit) continue;
 	if (! i) detInfo->setFirstPoint(hit->position());
 	else     detInfo->setLastPoint (hit->position());

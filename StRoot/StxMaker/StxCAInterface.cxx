@@ -64,8 +64,12 @@ void StxCAInterface::MakeSettings() {
     SlicePar.SetISlice( iSlice );
     SlicePar.SetNInnerRows ( NoOfInnerRows ); 
     SlicePar.SetNTpcRows ( NRows ); 
-    SlicePar.SetNRows ( NRows + 2); // +2 for BToF
-    
+#define __SPLIT_TOF__
+#ifdef __SPLIT_TOF__
+    SlicePar.SetNRows ( NRows + 4); // +4 for BToF
+#else /* ! __SPLIT_TOF__ */
+    SlicePar.SetNRows ( NRows + 1); // +1 for BToF
+#endif     
     Double_t beta = 0;
     if (sector > 12) beta = (24-sector)*2.*TMath::Pi()/12.;
     else             beta =     sector *2.*TMath::Pi()/12.;
@@ -94,10 +98,15 @@ void StxCAInterface::MakeSettings() {
     for( int iR = 0; iR < SlicePar.NRows(); iR++){
       if (iR < SlicePar.NTpcRows()    )
 	SlicePar.SetRowX(iR, St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,iR+1));
-      else 
-	if (iR == SlicePar.NRows()) SlicePar.SetRowX(iR, 214.5); // ToF 
-	else                        SlicePar.SetRowX(iR, 211.5); // ToF
-	
+      else {
+#ifdef __SPLIT_TOF__
+	Int_t mc = iR -  SlicePar.NTpcRows();
+	Float_t X = 211.1 + 0.2*mc;
+	SlicePar.SetRowX(iR, X); // ToF 
+#else /* ! __SPLIT_TOF__ */
+	SlicePar.SetRowX(iR, 211.5); // ToF 
+#endif     
+      }
     }
 
     Double_t *coeffInner = 0;
@@ -261,7 +270,11 @@ void StxCAInterface::MakeHits() {
       // obtain seed Hit
       Int_t Id = fSeedHits.size();
       SeedHit_t hitc;
-      Int_t row = fCaParam[iSlice].NTpcRows() + 1 + aHit->tray()%2;
+#ifdef __SPLIT_TOF__
+      Int_t row = fCaParam[iSlice].NTpcRows() + 2*aHit->tray()%2 + aHit->cell()%2;
+#else /* ! __SPLIT_TOF__ */
+      Int_t row = fCaParam[iSlice].NTpcRows();
+#endif     
       hitc.padrow =  row;
       hitc.status = 0;
       hitc.taken = 0;

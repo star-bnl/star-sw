@@ -10,6 +10,8 @@
 
 #include <cassert>
 using namespace genfit;
+Int_t StPlanarMeasurement::fDebug = 0;
+
 //________________________________________________________________________________
 StPlanarMeasurement::StPlanarMeasurement(int nDim)
   : PlanarMeasurement(nDim), fHit(0), fErrCalc(0) {}

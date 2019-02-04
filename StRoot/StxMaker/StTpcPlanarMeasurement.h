@@ -1,13 +1,13 @@
 #ifndef StTpcPlanarMeasurement_h
 #define StTpcPlanarMeasurement_h
 #include "TVectorD.h"
-#include "GenFit/PlanarMeasurement.h"
+#include "StPlanarMeasurement.h"
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
 class StTpcHit;
 #if 0
 class genfit::StateOnPlane;
 #endif
-class StTpcPlanarMeasurement : public genfit::PlanarMeasurement {
+class StTpcPlanarMeasurement : public StPlanarMeasurement {
  public:
   StTpcPlanarMeasurement(int nDim = 2);
   StTpcPlanarMeasurement(const TVectorD& rawHitCoords, const TMatrixDSym& rawHitCov, int detId, int hitId, genfit::TrackPoint* trackPoint);
@@ -22,11 +22,7 @@ class StTpcPlanarMeasurement : public genfit::PlanarMeasurement {
   virtual       TMatrixDSym& getRawHitCov(const genfit::StateOnPlane *state=0);
   static        void SetDebug(Int_t k) {fDebug = k;}
   virtual       Int_t Debug() {return fDebug;}
-  virtual const StTpcHit *Hit() const {return fHit;}
  protected:
-  const StTpcHit  *fHit; 
-  StiHitErrorCalculator *fErrCalc;
-  static Int_t    fDebug;
  public:
   ClassDef(StTpcPlanarMeasurement,1)
 };

@@ -20,9 +20,12 @@ class StPlanarMeasurement : public genfit::PlanarMeasurement {
 #endif
   virtual       TVectorD& getRawHitCoords(const genfit::StateOnPlane *state=0);
   virtual       TMatrixDSym& getRawHitCov(const genfit::StateOnPlane *state=0);
+  virtual const StHit *Hit() const {return fHit;}
+  virtual       StiHitErrorCalculator* ErrCalc() const {return fErrCalc;}
  protected:
   const StHit  *fHit; 
   StiHitErrorCalculator *fErrCalc;
+  static Int_t    fDebug;
  public:
   ClassDef(StPlanarMeasurement,1)
 };
