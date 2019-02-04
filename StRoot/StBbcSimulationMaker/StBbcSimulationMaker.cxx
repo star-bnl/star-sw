@@ -337,8 +337,11 @@ Int_t StBbcSimulationMaker::Make()
      if (g2t_track) track = g2t_track->GetTable();
      St_g2t_vertex  *g2t_ver = (St_g2t_vertex *) GetDataSet("geant/g2t_vertex");// if (!g2t_ver)      return kStWarn;
      g2t_vertex_st     *gver = 0;
-     if (g2t_ver) gver = g2t_ver->GetTable();
-     
+     Int_t NV = 0;
+     if (g2t_ver) {
+       gver = g2t_ver->GetTable();
+       NV = g2t_ver->GetNRows();
+     }     
      Short_t nBBChits = g2t_bbc_hit->GetNRows();
      BbcTOF TOFdata;
      BbcDE DEdata;
@@ -348,6 +351,7 @@ Int_t StBbcSimulationMaker::Make()
        Int_t Id         = bbc_hit[iBBChit].track_p;
        Int_t id3 = 0;
        if (track)  id3        = track[Id-1].start_vertex_p;
+       assert(id3 > 0 && id3 <= NV);
        Double_t tof = 0;
        if (gver) tof = gver[id3-1].ge_tof;
        //       if (TMath::Abs(tof) > 50e-9) continue; // 50 ns cut
