@@ -73,6 +73,8 @@ public:
   Char_t         beg[1]; // !
   Int_t    TriggerId;
   Double_t field;
+  Double_t driftVel;
+  Double_t freq;
   Double_t charge;
   Int_t    NoFitPoints;
   Double_t pX, pY, pZ;

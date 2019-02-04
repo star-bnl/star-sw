@@ -59,11 +59,11 @@ setenv GROUP_DIR ${STAR_ROOT}/packages/.DEV2/group
 #unsetenv STAR
 source ${GROUP_DIR}/group_env.csh
 #source ${GROUP_DIR}/setup    gcc482
-if (-d /net/l402/data/fisyak/STAR) then
-source ${GROUP_DIR}/setup    gcc521
-else
-#source ${GROUP_DIR}/setup    gcc
-endif
+#if (-d /net/l402/data/fisyak/STAR) then
+#source ${GROUP_DIR}/setup    gcc521
+#else
+source ${GROUP_DIR}/setup    gcc
+#endif
 source ${GROUP_DIR}/setup    32b
 #setup gcc492
 #setup 32b

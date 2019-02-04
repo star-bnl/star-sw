@@ -51,7 +51,7 @@ struct PlotName_t {
   Int_t nz;
   Double_t zmin, zmax;
 };
-enum {NPlots = 20, NFPlots=14, NwsPlots=38, NwsFPlots=32};
+enum {NPlots = 21, NFPlots=14, NwsPlots=38, NwsFPlots=32};
 const  PlotName_t plotNameD[NPlots] = {// plots for drift
   {"dXdy"     ,"dX  versus  tX         =>  dy",    100,  -0.5,  0.5, 500, -1.000, 1.000}, // 0 -> <dx>, dy   
   {"dXdalpha" ,"dX  versus -tX*zO      =>  alpha", 100,  -60.,  40., 500, -1.000, 1.000}, // 1 -> <dx>, alpha
@@ -72,7 +72,8 @@ const  PlotName_t plotNameD[NPlots] = {// plots for drift
   {"dZ"       ,"dZ  versus Z"                    , 200,    10,  210, 500, -1.000, 1.000}, //16
   {"dnX"      ,"dnX versus Z"                    , 200,    10,  210, 500, -0.025, 0.025}, //17
   {"dnY"      ,"dnY versus Z"                    , 200,    10,  210, 500, -0.025, 0.025}, //18
-  {"dnZ"      ,"dnZ versus Z"                    , 200,    10,  210, 500, -0.025, 0.025}  //19
+  {"dnZ"      ,"dnZ versus Z"                    , 200,    10,  210, 500, -0.025, 0.025}, //19
+  {"dT"       ,"dT (time buckets)  versus Z"     , 200,    10,  210, 500, -2.000, 2.000}  //20
 };
 const  PlotName_t plotNameWS[NwsPlots] = {// plots for drift
   { "dYdxS", "ly => xS",							  100,-1.0,  1.0,100, -1.000, 1.000}, // 0
@@ -129,6 +130,8 @@ void TpcAlignerDrawIO(const Char_t *files = "*.root", Bool_t laser = kFALSE) {
     iter.AddFile(file); NFiles++;
   }
   const Double_t&    field                                    = iter("field");
+  const Double_t&    driftVel                                 = iter("driftVel"); // cm/mkmsec
+  const Double_t&    freq                                     = iter("freq");    // MHz
 #if 0
   const Double_t&    charge                                   = iter("charge");
   const Int_t&       NoFitPoints                              = iter("NoFitPoints");
@@ -178,7 +181,7 @@ void TpcAlignerDrawIO(const Char_t *files = "*.root", Bool_t laser = kFALSE) {
   Out.ReplaceAll(".root","Plots");
   Out.ReplaceAll("*","");
   //  Out += ".2GeVC";
-  if (TMath::Abs(field) > 1)   Out += ".1GeVC";
+  //  if (TMath::Abs(field) > 1)   Out += ".1GeVC";
   if (laser) Out += ".Laser";
   Out += ".Cut";
   Out += ".Errors";
@@ -196,6 +199,7 @@ void TpcAlignerDrawIO(const Char_t *files = "*.root", Bool_t laser = kFALSE) {
 			  plotNameD[i].nz, 0.0, 0.0);
 #endif
   }
+  TH1D *dv = new TH1D("DV","pc Drift Velocisies", 100, 5, 6);
   TH1D *LSF[24];
   for (Int_t sec = 1; sec <= 24; sec++) LSF[sec-1] = new TH1D(Form("LSF_%02i",sec),Form("Matrix and right part for Least Squared Fit for sector = %02i",sec),28,0,28.);
   Int_t Ntracks = 0;
@@ -205,6 +209,7 @@ void TpcAlignerDrawIO(const Char_t *files = "*.root", Bool_t laser = kFALSE) {
     } else         {if (TriggerId < 310811 || TriggerId > 310813) continue; // not Cosmic
     }
 #endif
+    if (TMath::Abs(field) < 1.0) continue;
     if (In_sector != Out_sector) continue;
     if (In_Chi2 > 5.0 || Out_Chi2 > 5.0) continue;
     TVector3 pxyz(pX,pY,pZ);
@@ -312,7 +317,8 @@ dnZ[ 0, 0, 0,     -nyW, nxW,         0,  0,0,     nyW,-nxW,        0] */
 	       mX(1)  , rO.Z() , // "dZ"       ,"dZ  versus Z"                   
 	       mX(2)  , rO.Z() , // "dnX"      ,"dnX versus Z"                   
 	       mX(3)  , rO.Z() , // "dnY"      ,"dnY versus Z"                   
-	       mX(4)  , rO.Z()   // "dnZ"      ,"dnZ versus Z"                        
+	       mX(4)  , rO.Z() , // "dnZ"      ,"dnZ versus Z"                        
+	       mX(1)/(driftVel/freq)  , rO.Z()  // "dT"       ,"dT  versus Z"
 	       ); PrPP(V);
     for (Int_t i = 0; i < NPlots; i++) plots3D[i]->Fill(sector, V(i,1), V(i,0));
     if (Ntracks%10000 == 0) {cout << "read track no\t" << Ntracks << endl;}

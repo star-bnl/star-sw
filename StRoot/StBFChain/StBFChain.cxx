@@ -1644,7 +1644,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("-AgMLutil","Default,-TGiant3");
       if (! (GetOption("Stv") || GetOption("Stx") )) {
 	if (! (GetOption("VMC") || GetOption("VMCPassive"))) {
-	  SetOption("VMCPassive","Default,-TGiant3");
+	  SetOption("VMCPassive","Default,-TGiant3,-VMC");
 	}
 	//yf	SetOption("pgf77","Default,-TGiant3");
 	SetOption("mysql","Default,-TGiant3");

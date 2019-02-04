@@ -243,6 +243,8 @@ Int_t StTpcAlignerMaker::Make(){
     return kStOK;        // if no event, we're done
   }
   if (pEvent->runInfo()) bField = pEvent->runInfo()->magneticField();//*kilogauss;
+  Float_t driftVel = 1e-6*gStTpcDb->DriftVelocity(); // cm/mkmsec
+  Float_t freq     = gStTpcDb->Electronics()->samplingFrequency(); // MHz
   Int_t TriggerId = 0;
   static Int_t goodIds[8] = {9200,9201,               // laser
 			     310811, 310812, 310813,  // cosmic
@@ -389,6 +391,8 @@ Int_t StTpcAlignerMaker::Make(){
     fTpcInOutMatch->Clear();
     fTpcInOutMatch->TriggerId = TriggerId;
     fTpcInOutMatch->field  = bField;
+    fTpcInOutMatch->driftVel = driftVel;
+    fTpcInOutMatch->freq      = freq;
     fTpcInOutMatch->charge = gTrack->geometry()->charge();
     fTpcInOutMatch->pX     = pxyz.x();
     fTpcInOutMatch->pY     = pxyz.y();
@@ -473,8 +477,7 @@ Int_t StTpcAlignerMaker::Make(){
 	tpcHits[N].x = local.position().x();
 	tpcHits[N].y = local.position().y();
 #ifdef __TIME_CORRECTION__
-	Float_t driftvel = 1e-6*gStTpcDb->DriftVelocity(sector+1); // cm/mkmsec
-	tpcHits[N].z = local.position().z() - driftvel*time;
+	tpcHits[N].z = local.position().z() - driftVel*time;
 #else
 	tpcHits[N].z = local.position().z();
 #endif

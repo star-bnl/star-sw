@@ -5642,8 +5642,8 @@ c     write(*,*) 'FHCM'
 !//       if (MFLD & MfldConfig!=0) call AgDETP add ('MFLG(1).version=',MfldConfig,1)
 !//       Call mfldgeo;
 !//      CONSTRUCT mfldgeo(magField);
-      call gufld(magX,magB);
-      write(*,*) 'MFLD magField,Bz = ',magField,magB(3)
+!//      call gufld(magX,magB);
+!//      write(*,*) 'MFLD magField,Bz = ',magField,magB(3)
    }
 *
    if JVOLUM>0

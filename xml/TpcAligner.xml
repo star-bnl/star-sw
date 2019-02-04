@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!-- <job maxFilesPerProcess="20" fileListSyntax="paths"> -->
-<job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="paths">
+<job maxFilesPerProcess="5" fileListSyntax="paths"> 
+<!-- <job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="paths"> -->
 	<command>
          cd ${SUBMITTINGDIRECTORY}
   setenv STARFPE NO
-  setenv NODEBUG yes
-  setup 64b
+#  setenv NODEBUG yes
+#  setup 64b
   foreach  evtsFile(`cat $FILELIST`) 
 #  set evtsFile = $INPUTFILE0;
   echo "${evtsFile}"
   if (! -r ${evtsFile}) continue;
-  set file     = `basename $evtsFile .root`
+  set file     = `basename $evtsFile .event.root`
   set dir      = `dirname  $evtsFile`;          
   set logFile  = ${file}B.log
   if ( -r $logFile) continue;
@@ -24,7 +24,7 @@
 <!-- <input URL="command:EandBSample.pl" /> -->
 <!-- <input URL="file:/gpfs01/star/pwg/iraklic/iTPC/Cosmics/Cosmics2018/*event.root" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/Alignment/Y201?RC.E/*event.root" /> -->
-<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/Alignment/Y2011RC.E/st_tofcosmic_12*event.root" /> -->
+<!-- <input URL="file:x/gpfs01/star/subsys-tpc/fisyak/Tpc/Alignment/Y2011RC.E/st_tofcosmic_12*event.root" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/Alignment/Y2011RC.F/st_tofcosmic_12*event.root" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/Alignment/Y2010RC.E/st_tofcosmic_11159008_raw_2020001_25001.event.root" />  -->
 <!-- <input URL="file:/star/data06/TPCCalib/Y2011RC.G/FF/*1_50000.event.root" /> -->

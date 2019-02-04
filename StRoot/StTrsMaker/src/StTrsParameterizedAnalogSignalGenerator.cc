@@ -494,7 +494,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 	  //   cout<<Dx<<" "<<D[2]<<" "<<mDriftVelocity<<endl;
           
 	  if( z < 0.0) { // account anode wire pad plane space
-	    mCentralRow = transformer.rowFromLocal(iter->position());
+	    mCentralRow = transformer.rowFromLocal(iter->position(),sector);
 	    if ((mCentralRow <= 13 && z > -0.2) || 
 		(mCentralRow >  13  && z > -0.4)) {z = - z;}
 	    else {
@@ -591,7 +591,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 	    // StTpcLocalSectorCoordinate  xyCoord(iter->position(),12);
 	    //  transformer(xyCoord,mTpcRaw);
 	    //
-	    mCentralRow = transformer.rowFromLocal(iter->position())-1;
+	    mCentralRow = transformer.rowFromLocal(iter->position())-1,sector;
 	   
 	  
 	    // Calculate the row/pad limits
