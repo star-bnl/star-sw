@@ -74,7 +74,7 @@
 #define TCD_BBC         7	//0x11, trigger-only; unused
 #define TCD_ETOW        8	//0x12,
 #define TCD_MTD_QT      9	//0x13, trigger-only; unused
-#define TCD_STGC        10	//0x14, was RHICF; Sep 16: was IST, Jun 2013: was FGT before; Aug 26, 2009: was FPD's before
+//#define TCD_STGC        10	//0x14, was RHICF; Sep 16: was IST, Jun 2013: was FGT before; Aug 26, 2009: was FPD's before
 #define TCD_TOF         11      //0x15,
 #define TCD_PP          12      //0x16
 #define TCD_MTD         13      //0x17
@@ -99,7 +99,7 @@
 #define ESMD_GRP	6
 #define TPX_GRP		7
 #define FCS_GRP		8
-#define STGC_GRP        9	// was RHICF
+//#define STGC_GRP        9	// was RHICF; still not used in FY19
 //#define xxx_GRP		10	// unused
 //#define xxx_GRP		11	// but still unused
 //#define xxx_GRP		12	// unused
@@ -889,9 +889,10 @@ extern inline int rts2tcd(int rts)
 		return TCD_ETOF ;
 	case GMT_ID :
 		return TCD_GMT ;
-	case STGC_ID :
-		return TCD_STGC ;
+//	case STGC_ID :
+//		return TCD_STGC ;
 	case FCS_ID :
+	case STGC_ID :	// for FY19
 		return TCD_FCS ;
 	default :
 		return -1 ;
@@ -923,8 +924,8 @@ extern inline int tcd2rts(int tcd)
 		return ETOF_ID ;
 	case TCD_GMT :
 		return GMT_ID ;
-	case TCD_STGC :
-		return STGC_ID ;
+//	case TCD_STGC :
+//		return STGC_ID ;
 	case TCD_FCS :
 		return FCS_ID ;
 	default :
@@ -974,11 +975,12 @@ extern inline unsigned long long grp2rts_mask(int grp)
 	  ret |= (1ll << TPX_SYSTEM);
 	  ret |= (1ll << ITPC_SYSTEM);
 	}
-	if(grp & (1ll << STGC_GRP)) {
-	  ret |= (1LL << STGC_SYSTEM);	// NOTE 1LL!
-	}
+//	if(grp & (1ll << STGC_GRP)) {
+//	  ret |= (1LL << STGC_SYSTEM);	// NOTE 1LL!
+//	}
 	if(grp & (1ll << FCS_GRP)) {
 	  ret |= (1ll << FCS_SYSTEM);
+	  ret |= (1ll << STGC_SYSTEM);	  // for FY19
 	}
 	if(grp & (1ll << MTD_GRP)) {
 	  ret |= (1ll << MTD_SYSTEM);
@@ -1016,9 +1018,10 @@ extern inline int rts2grp(int rts)
 		return GMT_GRP;
 	case ETOF_ID :
 		return ETOF_GRP;
-	case STGC_ID :
-		return STGC_GRP;
+//	case STGC_ID :
+//		return STGC_GRP;
 	case FCS_ID :
+	case STGC_ID :			// for FY19
 		return FCS_GRP ;
         case TPC_ID:                    // Shares the TPC TCD...
         case ITPC_ID:                    // Shares the TPC TCD...
@@ -1099,5 +1102,5 @@ extern inline int GET_SUBSYSTEM(unsigned short node)
 
 #endif /* _RTS_SYSTEMS_H_ */
 
-;
+
 
