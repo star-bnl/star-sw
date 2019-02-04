@@ -33,7 +33,7 @@ bsmd_reader.o: ../../../../StRoot/RTS/include/rtsLog.h
 bsmd_reader.o: ../../../../StRoot/RTS/include/rtsSystems.h
 bsmd_reader.o: ../../../../StRoot/RTS/include/daqFormats.h
 bsmd_reader.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-bsmd_reader.o: ../../../../StRoot/RTS/trg/include/trgDataDefs_45.h
+bsmd_reader.o: ../../trg/include/trgDataDefs_46.h
 bsmd_reader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 bsmd_reader.o: ../../../../StRoot/RTS/include/rts.h
 bsmd_reader.o: ../DAQ_READER/daq_det.h

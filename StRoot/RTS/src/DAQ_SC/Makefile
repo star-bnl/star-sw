@@ -32,7 +32,7 @@ daq_sc.o: ../../../../StRoot/RTS/include/rtsLog.h
 daq_sc.o: ../../../../StRoot/RTS/include/rtsSystems.h
 daq_sc.o: ../../../../StRoot/RTS/include/daqFormats.h
 daq_sc.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-daq_sc.o: ../../../../StRoot/RTS/trg/include/trgDataDefs_45.h
+daq_sc.o: ../../trg/include/trgDataDefs_46.h
 daq_sc.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 daq_sc.o: ../SFS/sfs_index.h
 daq_sc.o: ../SFS/fs_index.h
@@ -47,7 +47,7 @@ daq_sc.o: ../DAQ_READER/daq_det.h
 sc_reader.o: ../../../../StRoot/RTS/include/rtsLog.h
 sc_reader.o: ../../../../StRoot/RTS/include/daqFormats.h
 sc_reader.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-sc_reader.o: ../../../../StRoot/RTS/trg/include/trgDataDefs_45.h
+sc_reader.o: ../../trg/include/trgDataDefs_46.h
 sc_reader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 sc_reader.o: ../../../../StRoot/RTS/include/rtsSystems.h
 sc_reader.o: ../../../../StRoot/RTS/include/rts.h

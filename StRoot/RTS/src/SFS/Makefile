@@ -73,7 +73,7 @@ sfs_index_daq.o: ../../include/rtsLog.h
 sfs_index_daq.o: ../../include/rts.h
 sfs_index_daq.o: ../../include/daqFormats.h
 sfs_index_daq.o: ../../include/SECTOR/sector.h
-sfs_index_daq.o: ../../trg/include/trgDataDefs_45.h
+sfs_index_daq.o: ../../trg/include/trgDataDefs_46.h
 sfs_index_daq.o: ../../include/L3/L3Formats.h
 blastSFS.o: ../../include/SUNRT/clock.h
 daq_test.o: sfs_index.h

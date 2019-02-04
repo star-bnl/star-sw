@@ -43,7 +43,7 @@ daq_det.o: ../../../../StRoot/RTS/include/rts.h
 daq_det.o: ../../../../StRoot/RTS/include/rtsSystems.h
 daq_det.o: ../../../../StRoot/RTS/include/daqFormats.h
 daq_det.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-daq_det.o: ../../../../StRoot/RTS/trg/include/trgDataDefs_45.h
+daq_det.o: ../../trg/include/trgDataDefs_46.h
 daq_det.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 daq_det.o: ../SFS/sfs_index.h
 daq_det.o: ../SFS/fs_index.h
@@ -60,7 +60,7 @@ daq_dta.o: daq_dta_structs.h
 daqReader.o: ../../../../StRoot/RTS/include/iccp2k.h
 daqReader.o: ../../../../StRoot/RTS/include/daqFormats.h
 daqReader.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-daqReader.o: ../../../../StRoot/RTS/trg/include/trgDataDefs_45.h
+daqReader.o: ../../trg/include/trgDataDefs_46.h
 daqReader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 daqReader.o: ../../../../StRoot/RTS/include/rtsLog.h
 daqReader.o: ../../../../StRoot/RTS/include/iccp.h

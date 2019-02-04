@@ -39,7 +39,7 @@ daq_ftp.o: daq_ftp.h
 daq_ftp.o: ../DAQ_READER/daq_det.h
 ftp_reader.o: ../../../../StRoot/RTS/include/daqFormats.h
 ftp_reader.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-ftp_reader.o: ../../../../StRoot/RTS/trg/include/trgDataDefs_45.h
+ftp_reader.o: ../../trg/include/trgDataDefs_46.h
 ftp_reader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 ftp_reader.o: ../../../../StRoot/RTS/include/rtsSystems.h
 ftp_reader.o: ../../../../StRoot/RTS/include/rtsLog.h
