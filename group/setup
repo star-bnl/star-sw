@@ -228,9 +228,9 @@ switch ($pkg)
 	    if ( ! $?CERN ) then
 		# Define one value - some of the path below are historical
 		if ( $USE_64BITS == 1) then
-		    set x="${STAR_BASE_PATH}/cern64 ${STAR_BASE_PATH}/cern ${AFS_RHIC}/asis/@sys/cern64 ${AFS_RHIC}/asis/@sys/cern /usr/local/cern64 /usr/local/cern /common/star/cern64 /common/star/cern"
+		    set x="/cern64 /cern ${AFS_RHIC}/asis/@sys/cern64 ${AFS_RHIC}/asis/@sys/cern /usr/local/cern64 /usr/local/cern /common/star/cern64 /common/star/cern /software/fisyak/STAR/cern64"
 		else
-		    set x="${STAR_BASE_PATH}/cern ${AFS_RHIC}/asis/@sys/cern /usr/local/cern /common/star/cern"
+		    set x="/cern ${AFS_RHIC}/asis/@sys/cern /usr/local/cern /common/star/cern /software/fisyak/STAR/cern"
 		endif
             else
 		# Either it was set before by the search above or there is an 
@@ -263,7 +263,7 @@ switch ($pkg)
 	    if ( ! $?CERN ) then
 		# this can happen only when the full search path finds nothing
 		if ( $?DECHO ) echo "Could not find a valid path for defining CERN, default to /cern"
-		setenv CERN ${STAR_BASE_PATH}/cern
+		setenv CERN /cern
 	    endif
         endif
 	
@@ -381,6 +381,7 @@ switch ($pkg)
 	endif
 	breaksw
 	case "gcc5*":
+	setenv USE_64BITS 1
 	setenv devtools /opt/rh/devtoolset-4
 	if (-r ${devtools}) then
 	  setenv PATH  ${devtools}/root/usr/bin:${PATH}
@@ -396,6 +397,7 @@ switch ($pkg)
 	endif
 	breaksw
 	case "gcc6*":
+	setenv USE_64BITS 1
 	setenv devtools /opt/rh/devtoolset-6
 	if (-r ${devtools}) then
 	  setenv PATH  ${devtools}/root/usr/bin:${PATH}
@@ -411,6 +413,7 @@ switch ($pkg)
 	endif
 	breaksw
 	case "gcc7*":
+	setenv USE_64BITS 1
 	setenv devtools /opt/rh/devtoolset-7
 	if (-r ${devtools}) then
 	  setenv PATH  ${devtools}/root/usr/bin:${PATH}
@@ -426,6 +429,7 @@ switch ($pkg)
 	endif
 	breaksw
 	case "gcc8*":  # has not finished yet
+	setenv USE_64BITS 1
           setenv SPACK_ROOT /net/l409/software/fisyak/STAR/sources/spack
           source $SPACK_ROOT/share/spack/setup-env.csh
 	breaksw
@@ -475,47 +479,6 @@ switch ($pkg)
 	endif
 	 source ${GROUP_DIR}/.starver $STAR_LEVEL
 	breaksw
-
-
-
-    #
-    # kind of obsolete but may re-add later
-    #
-    case "g4":
-    case "G4":
-         #=====#
-	if (-f $GROUP_DIR/g4env.csh) source $GROUP_DIR/G4env.csh
-	breaksw
-
-    case "cc4":
-    case "CC4":
-         #=====#
-	if ($?USE_CC5 != 0) unsetenv USE_CC5
-        if ( -x $GROUP_DIR/dropit) then
-          setenv PATH `$GROUP_DIR/dropit WS5.0`
-          setenv PATH `$GROUP_DIR/dropit .sun4x_56_CC5`
-          setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH 5.0`
-          setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH .sun4x_56_CC5`
-        endif
-	setenv USE_CC4; starver $STAR_LEVEL
-	breaksw
-    case "cc5":
-    case "CC5":
-         #=====#
-	if ($?USE_CC4 != 0) unsetenv USE_CC4
-        if ( -x $GROUP_DIR/dropit) then
-          setenv PATH `$GROUP_DIR/dropit SUNWspro`
-          setenv PATH `$GROUP_DIR/dropit .sun4x_56`
-          setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH SUNWspro`
-          setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH .sun4x_56`
-        endif
-	starver $STAR_LEVEL
-	breaksw
-
-    case "KCC":
-    case "kcc":
-      setenv USE_KCC;  starver $STAR_LEVEL
-      breaksw
     default:
       echo "No valid package found for $pkg key"
       breaksw
