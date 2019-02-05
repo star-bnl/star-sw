@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.660.2.1 2018/12/06 22:24:03 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.660.2.2 2019/02/05 02:42:09 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -877,6 +877,10 @@ Int_t StBFChain::Instantiate()
       if (FiltTrgFlavor.Length())
         SetFlavor((FiltTrgFlavor += "+ofl").Data(),"trgOfflineFilter");
     }
+    if (maker == "StTagsMaker"){
+      if ( GetOption("shadow")    ) mk->SetAttr("shadow",kTRUE);
+    }
+
   Add2Chain:
     if (! mk) continue;
     if (name == "") strncpy (fBFC[i].Name,(Char_t *) mk->GetName() , sizeof(fBFC[i].Name));

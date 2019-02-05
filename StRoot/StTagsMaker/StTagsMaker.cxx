@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.cxx,v 1.21 2009/11/23 16:47:59 fisyak Exp $
+// $Id: StTagsMaker.cxx,v 1.21.16.1 2019/02/05 02:43:36 genevb Exp $
 // $Log: StTagsMaker.cxx,v $
+// Revision 1.21.16.1  2019/02/05 02:43:36  genevb
+// shadow the tags also
+//
 // Revision 1.21  2009/11/23 16:47:59  fisyak
 // Add Primary vertex position errors
 //
@@ -79,6 +82,7 @@
 #include "StTriggerData.h"
 #include "StEventUtilities/StuRefMult.hh"
 #include "StEventUtilities/StuFtpcRefMult.hh"
+#include "StShadowMaker/StShadowMaker.h"
 static TClass *tabClass = 0;
 static TTree  *fTree = 0; //!
 static TDataSet *fTagsList =  new TDataSet("TagList");
@@ -173,6 +177,10 @@ Int_t StTagsMaker::Make(){
 	  StEvtHddr *lEvtHddr = (StEvtHddr *) ds;
 	  lEvtHddr->FillTag(&fEvtHddr);
 	  address = &fEvtHddr;
+          if (IAttr("shadow")) {
+            fEvtHddr.mRunNumber   = StShadowMaker::getRunNumber(  fEvtHddr.mRunNumber  );
+            fEvtHddr.mEventNumber = StShadowMaker::getEventNumber(fEvtHddr.mEventNumber);
+          }
 	  cl = gROOT->GetClass("EvtHddr_st");
 	}
 	if (cl) {
