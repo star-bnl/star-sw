@@ -204,7 +204,7 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
 
 
     for( size_t i=0; i<11; i++ ) {
-        contents.triggerTimeDiffSectors[ i ] = new TH1D( TString::Format( "triggerTimeDiffSector13to%d", i+14 ), TString::Format( "trigger time difference sector 13 to %d;# clock cycles;# events", i + 14 ), 160, -9.5, 150.5 );
+        contents.triggerTimeDiffSectors[ i ] = new TH1D( TString::Format( "triggerTimeDiffSector13to%d", i+14 ), TString::Format( "trigger time difference sector 13 - %d;# clock cycles;# events", i + 14 ), 200, -99.5, 100.5 );
     }
 
     contents.missingTriggerTs = new TH1D( "missingTriggerTs", "missing trigger timestamps per sector;sector;# missing trigger timestamps", 12, 13, 25 );
@@ -530,7 +530,7 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
     if( gdpbTsMap.count( 0 ) ) {
         for( size_t i=0; i<11; i++ ) {
             if( gdpbTsMap.count( i+1 ) ) {
-                contents.triggerTimeDiffSectors[ i ]->Fill( gdpbTsMap.at( 0 ) - gdpbTsMap.at( i+1 ) );
+                contents.triggerTimeDiffSectors[ i ]->Fill( ( int64_t ) ( gdpbTsMap.at( 0 ) - gdpbTsMap.at( i+1 ) ) );
             }
         }
     }
