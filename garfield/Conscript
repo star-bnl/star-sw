@@ -10,14 +10,14 @@ my $pkg = "Garfield";
 my $SO_PKG= "lib" . $pkg . "." . $env->{SUFSOLIB};
 my $ObjDir = "#" . $obj_dir; 
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
-my @src = script::find_sources($Dir);# print "src = @src\n";
-my @hfiles = script::find_hfiles($Dir);
+my @src = script::find_sources($Dir); print "src = @src\n";
+my @hfiles = script::find_hfiles($Dir); print "hfiles = @hfiles\n";
 #Command $env, @srcc, qq(make installdirs; make);
 if ($#src > -1) {
   script::Keep $SO_PKG;
+  LinkedModule $env, $SO_PKG, @src;
 #  Program      $env2 $pkg, @src;
-#  LinkedModule $env, $SO_PKG, @src;
 #
-  Command $env ($SO_PKG), (@src, @hfiles, "makefile"),  qq(cd $obj_dir; make);
+#  Command $env ($SO_PKG), (@src, @hfiles, "makefile"),  qq(cd $obj_dir; make);
   Install $env $LIB, $SO_PKG;
 }
