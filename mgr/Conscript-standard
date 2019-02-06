@@ -706,6 +706,12 @@ if ( $pkg =~ m/^StEventDisplay/ || $#uiQT >= 0 || $OnlinePackage ) {
   $CPPPATH .= $main::PATH_SEPARATOR .  $env->{ENV}->{OPTSTAR} . "/include/eigen3";
   if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
   print "CPPPATH = $CPPPATH\n" if $param::debug;
+} elsif ( $pkg =~ m/^garfield$/ ) {
+  $CPPPATH = "#" . $Dir .  $main::PATH_SEPARATOR . "#" .  $Dir . "/Include" .  $main::PATH_SEPARATOR . "#" .  $Dir . "/Heed";
+  if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
+  print "CPPPATH = $CPPPATH\n" if $param::debug;
+  $CPPFLAGS .= " -DNOT_INCLUDE_GASLIB_IN_PACSLIB -DGARFIELD_HEED_INTERFACE -DUSE_SRANLUX -DEXCLUDE_FUNCTIONS_WITH_HISTDEF -DINS_CRETURN -DFUNNAMESTACK";
+  $SO_PKG = "Garfield." . $env1->{SUFSOLIB};
 } elsif ( $pkg =~ m/^StAssociationMaker$/ ||
 	  $pkg =~ m/EmcUtil$/             ||
 	  $pkg =~ m/St_geant_Maker$/      ||
