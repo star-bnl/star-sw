@@ -9,81 +9,36 @@ namespace Garfield {
 
 SolidBox::SolidBox(const double cx, const double cy, const double cz,
                    const double lx, const double ly, const double lz)
-    : Solid(),
-      m_cX(cx), m_cY(cy), m_cZ(cz),
-      m_lX(lx), m_lY(ly), m_lZ(lz),
-      m_dX(0.), m_dY(0.), m_dZ(1.),
-      m_cPhi(1.), m_sPhi(0.),
-      m_cTheta(1.), m_sTheta(0.) {
-
-  std::cout << "SolidBox:\n";
-  std::cout << "    " << cx - lx << " < x [cm] < " << cx + lx << "\n";
-  std::cout << "    " << cy - ly << " < y [cm] < " << cy + ly << "\n";
-  std::cout << "    " << cz - lz << " < z [cm] < " << cz + lz << "\n";
-}
+    : Solid(cx, cy, cz, "SolidBox"),
+      m_lX(lx), m_lY(ly), m_lZ(lz) {}
 
 SolidBox::SolidBox(const double cx, const double cy, const double cz,
                    const double lx, const double ly, const double lz,
                    const double dx, const double dy, const double dz)
-    : Solid(),
-      m_cX(cx), m_cY(cy), m_cZ(cz),
-      m_lX(lx), m_lY(ly), m_lZ(lz),
-      m_dX(0.), m_dY(0.), m_dZ(1.),
-      m_cPhi(1.), m_sPhi(0.),
-      m_cTheta(1.), m_sTheta(0.) {
+    : SolidBox(cx, cy, cz, lx, ly, lz) {
 
-  const double d = sqrt(dx * dx + dy * dy + dz * dz);
-  if (d < Small) {
-    std::cerr << "SolidBox: Direction vector has zero norm.\n";
-  } else {
-    m_dX = dx / d;
-    m_dY = dy / d;
-    m_dZ = dz / d;
-    double phi, theta;
-    const double dt = sqrt(m_dX * m_dX + m_dY * m_dY);
-    if (dt < Small) {
-      phi = 0.;
-      if (m_dZ > 0.) {
-        theta = 0.;
-      } else {
-        theta = Pi;
-      }
-    } else {
-      phi = atan2(m_dY, m_dX);
-      theta = atan2(dt, m_dZ);
-    }
-    m_cTheta = cos(theta);
-    m_sTheta = sin(theta);
-    m_cPhi = cos(phi);
-    m_sPhi = sin(phi);
-  }
+  SetDirection(dx, dy, dz);
 }
 
 bool SolidBox::IsInside(const double x, const double y, 
                         const double z) const {
 
-  // Transform the point to local coordinates
-  const double dx = x - m_cX;
-  const double dy = y - m_cY;
-  const double dz = z - m_cZ;
-  const double u =  m_cPhi * m_cTheta * dx + m_sPhi * m_cTheta * dy - m_sTheta * dz;
-  const double v = -m_sPhi * dx + m_cPhi * dy;
-  const double w =  m_cPhi * m_sTheta * dx + m_sPhi * m_sTheta * dy + m_cTheta * dz;
+  // Transform the point to local coordinates.
+  double u = x, v = y, w = z;
+  ToLocal(x, y, z, u, v, w);
 
-  // See whether the point is inside
+  // See whether the point is inside.
   if (fabs(u) > m_lX || fabs(v) > m_lY || fabs(w) > m_lZ) {
     if (m_debug) {
-      std::cout << "SolidBox::IsInside:\n";
-      std::cout << "    (" << x << ", " << y << ", " << z << ") "
-                << " is outside.\n";
+      std::cout << "SolidBox::IsInside: (" << x << ", " << y << ", " << z 
+                << ") is outside.\n";
     }
     return false;
   }
 
   if (m_debug) {
-    std::cout << "SolidBox::IsInside:\n";
-    std::cout << "    (" << x << ", " << y << ", " << z << ") "
-              << " is inside.\n";
+    std::cout << "SolidBox::IsInside: (" << x << ", " << y << ", " << z 
+              << ") is inside.\n";
   }
 
   return true;
@@ -112,14 +67,6 @@ bool SolidBox::GetBoundingBox(double& xmin, double& ymin, double& zmin,
   return true;
 }
 
-bool SolidBox::GetCenter(double& x, double& y, double& z) const {
-
-  x = m_cX;
-  y = m_cY;
-  z = m_cZ;
-  return true;
-}
-
 bool SolidBox::GetDimensions(double& l1, double& l2, double& l3) const {
 
   l1 = m_lX;
@@ -128,23 +75,12 @@ bool SolidBox::GetDimensions(double& l1, double& l2, double& l3) const {
   return true;
 }
 
-bool SolidBox::GetOrientation(double& ctheta, double& stheta, double& cphi,
-                              double& sphi) const {
-
-  ctheta = m_cTheta;
-  stheta = m_sTheta;
-  cphi = m_cPhi;
-  sphi = m_sPhi;
-  return true;
-}
-
 void SolidBox::SetHalfLengthX(const double lx) {
 
   if (lx > 0.) {
     m_lX = lx;
   } else {
-    std::cerr << "SolidBox::SetHalfLengthX:\n";
-    std::cerr << "    Half-length must be > 0.\n";
+    std::cerr << "SolidBox::SetHalfLengthX: Half-length must be > 0.\n";
   }
 }
 
@@ -153,8 +89,7 @@ void SolidBox::SetHalfLengthY(const double ly) {
   if (ly > 0.) {
     m_lY = ly;
   } else {
-    std::cerr << "SolidBox::SetHalfLengthY:\n";
-    std::cerr << "    Half-length must be > 0.\n";
+    std::cerr << "SolidBox::SetHalfLengthY: Half-length must be > 0.\n";
   }
 }
 
@@ -163,8 +98,124 @@ void SolidBox::SetHalfLengthZ(const double lz) {
   if (lz > 0.) {
     m_lZ = lz;
   } else {
-    std::cerr << "SolidBox::SetHalfLengthZ:\n";
-    std::cerr << "    Half-length must be > 0.\n";
+    std::cerr << "SolidBox::SetHalfLengthZ: Half-length must be > 0.\n";
   }
+}
+
+
+bool SolidBox::SolidPanels(std::vector<Panel>& panels) {
+
+  const auto nPanels = panels.size();
+  double xv0, yv0, zv0;
+  double xv1, yv1, zv1;
+  double xv2, yv2, zv2;
+  double xv3, yv3, zv3;
+  // Draw the 6 sides of the box, start with the x = xmin face.
+  if (m_lY > 0 && m_lZ > 0) {
+    ToGlobal(-m_lX, -m_lY, -m_lZ, xv0, yv0, zv0);
+    ToGlobal(-m_lX, +m_lY, -m_lZ, xv1, yv1, zv1);
+    ToGlobal(-m_lX, +m_lY, +m_lZ, xv2, yv2, zv2);
+    ToGlobal(-m_lX, -m_lY, +m_lZ, xv3, yv3, zv3);
+    // Colour(-m_cPhi * m_cTheta, -m_sPhi * m_cTheta, +m_sTheta, wcol);
+    Panel newpanel;
+    newpanel.a = -m_cPhi * m_cTheta;
+    newpanel.b = -m_sPhi * m_cTheta;
+    newpanel.c = +m_sTheta;
+    newpanel.xv = {xv0, xv1, xv2, xv3};
+    newpanel.yv = {yv0, yv1, yv2, yv3};
+    newpanel.zv = {zv0, zv1, zv2, zv3};
+    newpanel.colour = 0;
+    newpanel.volume = 0;
+    panels.push_back(std::move(newpanel));
+  }
+  // The x = xmax face.
+  if (m_lX > 0 && m_lY > 0 && m_lZ > 0) {
+    ToGlobal(+m_lX, -m_lY, -m_lZ, xv0, yv0, zv0);
+    ToGlobal(+m_lX, +m_lY, -m_lZ, xv1, yv1, zv1);
+    ToGlobal(+m_lX, +m_lY, +m_lZ, xv2, yv2, zv2);
+    ToGlobal(+m_lX, -m_lY, +m_lZ, xv3, yv3, zv3);
+    Panel newpanel;
+    newpanel.a = m_cPhi * m_cTheta;
+    newpanel.b = m_sPhi * m_cTheta;
+    newpanel.c = -m_sTheta;
+    newpanel.xv = {xv0, xv1, xv2, xv3};
+    newpanel.yv = {yv0, yv1, yv2, yv3};
+    newpanel.zv = {zv0, zv1, zv2, zv3};
+    newpanel.colour = 0;
+    newpanel.volume = 0;
+    panels.push_back(std::move(newpanel));
+  }
+  // The y = ymin face.
+  if (m_lX > 0 && m_lZ > 0) {
+    ToGlobal(-m_lX, -m_lY, -m_lZ, xv0, yv0, zv0);
+    ToGlobal(+m_lX, -m_lY, -m_lZ, xv1, yv1, zv1);
+    ToGlobal(+m_lX, -m_lY, +m_lZ, xv2, yv2, zv2);
+    ToGlobal(-m_lX, -m_lY, +m_lZ, xv3, yv3, zv3);
+    Panel newpanel;
+    newpanel.a = m_sPhi;
+    newpanel.b = -m_cPhi;
+    newpanel.c = 0;
+    newpanel.xv = {xv0, xv1, xv2, xv3};
+    newpanel.yv = {yv0, yv1, yv2, yv3};
+    newpanel.zv = {zv0, zv1, zv2, zv3};
+    newpanel.colour = 0;
+    newpanel.volume = 0;
+    panels.push_back(std::move(newpanel));
+  }
+  // The y = ymax face.
+  if (m_lX > 0 && m_lY > 0 && m_lZ > 0) {
+    ToGlobal(-m_lX, +m_lY, -m_lZ, xv0, yv0, zv0);
+    ToGlobal(+m_lX, +m_lY, -m_lZ, xv1, yv1, zv1);
+    ToGlobal(+m_lX, +m_lY, +m_lZ, xv2, yv2, zv2);
+    ToGlobal(-m_lX, +m_lY, +m_lZ, xv3, yv3, zv3);
+    Panel newpanel;
+    newpanel.a = -m_sPhi;
+    newpanel.b = +m_cPhi;
+    newpanel.c = 0;
+    newpanel.xv = {xv0, xv1, xv2, xv3};
+    newpanel.yv = {yv0, yv1, yv2, yv3};
+    newpanel.zv = {zv0, zv1, zv2, zv3};
+    newpanel.colour = 0;
+    newpanel.volume = 0;
+    panels.push_back(std::move(newpanel));
+  }
+  // The z = zmin face.
+  if (m_lX > 0 && m_lY > 0) {
+    ToGlobal(-m_lX, -m_lY, -m_lZ, xv0, yv0, zv0);
+    ToGlobal(-m_lX, +m_lY, -m_lZ, xv1, yv1, zv1);
+    ToGlobal(+m_lX, +m_lY, -m_lZ, xv2, yv2, zv2);
+    ToGlobal(+m_lX, -m_lY, -m_lZ, xv3, yv3, zv3);
+    Panel newpanel;
+    newpanel.a = -m_cPhi * m_sTheta;
+    newpanel.b = -m_sPhi * m_sTheta;
+    newpanel.c = -m_cTheta;
+    newpanel.xv = {xv0, xv1, xv2, xv3};
+    newpanel.yv = {yv0, yv1, yv2, yv3};
+    newpanel.zv = {zv0, zv1, zv2, zv3};
+    newpanel.colour = 0;
+    newpanel.volume = 0;
+    panels.push_back(std::move(newpanel));
+  }
+  // The z = zmax face.
+  if (m_lX > 0 && m_lY > 0 && m_lZ > 0) {
+    ToGlobal(-m_lX, -m_lY, +m_lZ, xv0, yv0, zv0);
+    ToGlobal(-m_lX, +m_lY, +m_lZ, xv1, yv1, zv1);
+    ToGlobal(+m_lX, +m_lY, +m_lZ, xv2, yv2, zv2);
+    ToGlobal(+m_lX, -m_lY, +m_lZ, xv3, yv3, zv3);
+    Panel newpanel;
+    newpanel.a = +m_cPhi * m_sTheta;
+    newpanel.b = +m_sPhi * m_sTheta;
+    newpanel.c = +m_cTheta;
+    newpanel.xv = {xv0, xv1, xv2, xv3};
+    newpanel.yv = {yv0, yv1, yv2, yv3};
+    newpanel.zv = {zv0, zv1, zv2, zv3};
+    newpanel.colour = 0;
+    newpanel.volume = 0;
+    panels.push_back(std::move(newpanel));
+  }
+  // Done, check panel count.
+  std::cout << "SolidBox::SolidPanels: " 
+            << panels.size() - nPanels << " panels.\n";
+  return true;
 }
 }

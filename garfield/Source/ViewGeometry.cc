@@ -91,7 +91,7 @@ void ViewGeometry::Plot() {
     }
     // Get the center coordinates.
     double x0 = 0., y0 = 0., z0 = 0.;
-    if (!solid->GetCenter(x0, y0, z0)) {
+    if (!solid->GetCentre(x0, y0, z0)) {
       std::cerr << m_className << "::Plot: Could not determine solid centre.\n";
       continue;
     }

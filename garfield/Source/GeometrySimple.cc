@@ -124,6 +124,8 @@ void GeometrySimple::PrintSolids() {
       std::cout << "box      ";
     } else if (m_solids[i].first->IsTube()) {
       std::cout << "tube     ";
+    } else if (m_solids[i].first->IsSphere()) {
+      std::cout << "sphere   ";
     } else {
       std::cout << "unknown  ";
     }

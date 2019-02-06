@@ -227,9 +227,18 @@ $(OBJDIR)/Heed/kinem.o: \
 	@echo $@
 	$(CXX) $(CFLAGS) $< -o $@
 
+<<<<<<< HEAD
 $(OBJDIR)/Heed/line.o: \
 	$(HEEDDIR)/wcpplib/math/line.cpp\
 	$(HEEDDIR)/wcpplib/math/line.h
+=======
+$(OBJDIR)/Solid.o: \
+	$(SRCDIR)/Solid.cc $(INCDIR)/Solid.hh
+	@echo $@
+	@$(CXX) $(CFLAGS) $< -o $@
+$(OBJDIR)/SolidBox.o: \
+	$(SRCDIR)/SolidBox.cc $(INCDIR)/SolidBox.hh
+>>>>>>> 88a0b69545e26ad4dbc2b0ec8a0fb59548abc1fb
 	@echo $@
 	$(CXX) $(CFLAGS) $< -o $@
 

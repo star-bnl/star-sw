@@ -3,73 +3,42 @@
 
 #include "SolidTube.hh"
 #include "FundamentalConstants.hh"
-#include "GarfieldConstants.hh"
 
 namespace Garfield {
 
 SolidTube::SolidTube(const double cx, const double cy, const double cz,
                      const double rmin, const double rmax, const double lz)
-    : Solid(),
-      m_cX(cx), m_cY(cy), m_cZ(cz),
-      m_rMin(rmin), m_rMax(rmax),
-      m_lZ(lz),
-      m_dX(0.), m_dY(0.), m_dZ(1.),
-      m_cPhi(1.), m_sPhi(0.),
-      m_cTheta(1.), m_sTheta(0.) {}
+    : Solid(cx, cy, cz, "SolidTube"),
+      m_rMin(rmin), m_rMax(rmax), m_r(rmax),
+      m_lZ(lz) {}
 
 SolidTube::SolidTube(const double cx, const double cy, const double cz,
                      const double rmin, const double rmax, const double lz,
                      const double dx, const double dy, const double dz)
-    : Solid(),
-      m_cX(cx), m_cY(cy), m_cZ(cz),
-      m_rMin(rmin), m_rMax(rmax),
-      m_lZ(lz),
-      m_dX(0.), m_dY(0.), m_dZ(1.),
-      m_cPhi(1.), m_sPhi(0.),
-      m_cTheta(1.), m_sTheta(0.) {
+    : SolidTube(cx, cy, cz, rmin, rmax, lz) {
 
-  const double d = sqrt(dx * dx + dy * dy + dz * dz);
-  if (d < Small) {
-    std::cerr << "SolidTube: Direction vector has zero norm.\n";
-  } else {
-    m_dX = dx / d;
-    m_dY = dy / d;
-    m_dZ = dz / d;
-    double phi, theta;
-    const double dt = sqrt(m_dX * m_dX + m_dY * m_dY);
-    if (dt < Small) {
-      phi = 0.;
-      if (m_dZ > 0.) {
-        theta = 0.;
-      } else {
-        theta = Pi;
-      }
-    } else {
-      phi = atan2(m_dY, m_dX);
-      theta = atan2(dt, m_dZ);
-    }
-    m_cTheta = cos(theta);
-    m_sTheta = sin(theta);
-    m_cPhi = cos(phi);
-    m_sPhi = sin(phi);
-  }
+  SetDirection(dx, dy, dz);
 }
+
+SolidTube::SolidTube(const double cx, const double cy, const double cz,
+                     const double r, const double lz)
+    : SolidTube(cx, cy, cz, 0., r, lz) {}
+
+SolidTube::SolidTube(const double cx, const double cy, const double cz,
+                     const double r, const double lz,
+                     const double dx, const double dy, const double dz)
+    : SolidTube(cx, cy, cz, 0., r, lz, dx, dy, dz) {}
 
 bool SolidTube::IsInside(const double x, const double y, const double z) const {
 
-  // Transform the point to local coordinates
-  const double dx = x - m_cX;
-  const double dy = y - m_cY;
-  const double dz = z - m_cZ;
-  const double u = m_cPhi * m_cTheta * dx + m_sPhi * m_cTheta * dy - m_sTheta * dz;
-  const double v = -m_sPhi * dx + m_cPhi * dy;
-  const double w = m_cPhi * m_sTheta * dx + m_sPhi * m_sTheta * dy + m_cTheta * dz;
+  // Transform the point to local coordinates.
+  double u = x, v = y, w = z;
+  ToLocal(x, y, z, u, v, w);
 
   if (fabs(w) > m_lZ) {
     if (m_debug) {
-      std::cout << "SolidTube::IsInside:\n";
-      std::cout << "    (" << x << ", " << y << ", " << z << ")"
-                << " is outside.\n";
+      std::cout << "SolidTube::IsInside: (" << x << ", " << y << ", " << z 
+                << ") is outside.\n";
     }
     return false;
   }
@@ -77,17 +46,15 @@ bool SolidTube::IsInside(const double x, const double y, const double z) const {
   const double r = sqrt(u * u + v * v);
   if (r >= m_rMin && r <= m_rMax) {
     if (m_debug) {
-      std::cout << "SolidTube::IsInside:\n";
-      std::cout << "    (" << x << ", " << y << ", " << z << ")"
-                << " is inside.\n";
+      std::cout << "SolidTube::IsInside: (" << x << ", " << y << ", " << z 
+                << ") is inside.\n";
     }
     return true;
   }
 
   if (m_debug) {
-    std::cout << "SolidTube::IsInside:\n";
-    std::cout << "    (" << x << ", " << y << ", " << z << ") "
-              << " is outside.\n";
+    std::cout << "SolidTube::IsInside: (" << x << ", " << y << ", " << z 
+              << ") is outside.\n";
   }
   return false;
 }
@@ -115,14 +82,6 @@ bool SolidTube::GetBoundingBox(double& xmin, double& ymin, double& zmin,
   return true;
 }
 
-bool SolidTube::GetCenter(double& x, double& y, double& z) const {
-
-  x = m_cX;
-  y = m_cY;
-  z = m_cZ;
-  return true;
-}
-
 bool SolidTube::GetDimensions(double& l1, double& l2, double& l3) const {
 
   l1 = m_rMin;
@@ -131,21 +90,10 @@ bool SolidTube::GetDimensions(double& l1, double& l2, double& l3) const {
   return true;
 }
 
-bool SolidTube::GetOrientation(double& ctheta, double& stheta, double& cphi,
-                               double& sphi) const {
-
-  ctheta = m_cTheta;
-  stheta = m_sTheta;
-  cphi = m_cPhi;
-  sphi = m_sPhi;
-  return true;
-}
-
 void SolidTube::SetInnerRadius(const double rmin) {
 
   if (rmin <= 0.) {
-    std::cerr << "SolidTube::SetInnerRadius:\n";
-    std::cerr << "    Radius must be > 0.\n";
+    std::cerr << "SolidTube::SetInnerRadius: Radius must be > 0.\n";
     return;
   }
   if (rmin >= m_rMax) {
@@ -159,8 +107,7 @@ void SolidTube::SetInnerRadius(const double rmin) {
 void SolidTube::SetOuterRadius(const double rmax) {
 
   if (rmax <= 0.) {
-    std::cerr << "SolidTube::SetOuterRadius:\n";
-    std::cerr << "    Radius must be > 0.\n";
+    std::cerr << "SolidTube::SetOuterRadius: Radius must be > 0.\n";
     return;
   }
   if (rmax <= m_rMin) {
@@ -171,13 +118,156 @@ void SolidTube::SetOuterRadius(const double rmax) {
   m_rMax = rmax;
 }
 
-void SolidTube::SetHalfLengthZ(const double lz) {
+void SolidTube::SetRadius(const double r) {
+
+  if (r <= 0.) {
+    std::cerr << "SolidTube::SetRadius: Radius must be > 0.\n";
+    return;
+  }
+  m_r = r;
+}
+
+void SolidTube::SetHalfLength(const double lz) {
 
   if (lz <= 0.) {
-    std::cerr << "SolidTube::SetHalfLengthZ:\n";
-    std::cerr << "    Half-length must be > 0.\n";
+    std::cerr << "SolidTube::SetHalfLength: Half-length must be > 0.\n";
     return;
   }
   m_lZ = lz;
+}
+
+void SolidTube::SetSectors(const unsigned int n) {
+
+  if (n < 1) {
+    std::cerr << "SolidTube::SetSectors: Number must be > 0.\n";
+    return;
+  }
+  m_n = n;
+}
+
+bool SolidTube::SolidPanels(std::vector<Panel>& panels) {
+
+  // AROT Rotation angle: m_rot
+  // N    Number of sectors: m_n
+  // R    Radius of cylinder: m_r
+  // ZL   half-length m_lZ
+  // X0   centre m_cX
+  // Y0   centre m_cY
+  // Z0   centre m_cZ
+  // A    direction vector m_dX
+  // B    direction vector m_dY
+  // C    direction vector m_dZ
+
+  const unsigned int nPanels = panels.size();
+  // Direction vector.
+  const double fnorm = sqrt(m_dX * m_dX + m_dY * m_dY + m_dZ * m_dZ);
+  if (fnorm <= 0) {
+    std::cerr << "SolidTube::SolidPanels:\n"
+              << "    Zero norm direction vector; no panels generated.\n";
+    return false;
+  }
+  
+  // Set the mean or the outer radius.
+  double r = m_r;
+  if (m_average) {
+    const double alpha = Pi / (4. * (m_n - 1.));
+    r = 2 * m_r / (1. + asinh(tan(alpha)) * cos(alpha) / tan(alpha));
+  }
+
+  const unsigned int nPoints = 4 * (m_n - 1);
+  // Create the top lid.
+  if (m_toplid) {
+    std::vector<double> xv;
+    std::vector<double> yv;
+    std::vector<double> zv;
+    for (unsigned int i = 1; i <= nPoints; i++) {
+      const double alpha = m_rot + HalfPi * (i - 1.) / (m_n - 1.);
+      double x, y, z;
+      ToGlobal(r * cos(alpha), r * sin(alpha), m_lZ, x, y, z);
+      // Rotate into place.
+      xv.push_back(x);
+      yv.push_back(y);
+      zv.push_back(z);
+    }
+    Panel newpanel;
+    newpanel.a = m_cPhi * m_sTheta;
+    newpanel.b = m_sPhi * m_sTheta;
+    newpanel.c = m_cTheta;
+    newpanel.xv = xv;
+    newpanel.yv = yv;
+    newpanel.zv = zv;
+    newpanel.colour = 0;
+    newpanel.volume = 0;
+    panels.push_back(std::move(newpanel));
+  }
+  // Create the bottom lid.
+  if (m_bottomlid) {
+    std::vector<double> xv;
+    std::vector<double> yv;
+    std::vector<double> zv;
+    for (unsigned int i = 1; i <= nPoints; i++) {
+      const double alpha = m_rot + HalfPi * (i - 1.) / (m_n - 1.);
+      double x, y, z;
+      ToGlobal(r * cos(alpha), r * sin(alpha), -m_lZ, x, y, z);
+      // Rotate into place.
+      xv.push_back(x);
+      yv.push_back(y);
+      zv.push_back(z);
+    }
+    Panel newpanel;
+    newpanel.a = -m_cPhi * m_sTheta;
+    newpanel.b = -m_sPhi * m_sTheta;
+    newpanel.c = -m_cTheta;
+    newpanel.xv = xv;
+    newpanel.yv = yv;
+    newpanel.zv = zv;
+    newpanel.colour = 0;
+    newpanel.volume = 0;
+    panels.push_back(std::move(newpanel));
+  }
+  // Create the side panels.
+  double u = r * cos(m_rot);
+  double v = r * sin(m_rot);
+  // Rotate into place.
+  double xv0, yv0, zv0;
+  ToGlobal(u, v, -m_lZ, xv0, yv0, zv0);
+  double xv1, yv1, zv1;
+  ToGlobal(u, v, +m_lZ, xv1, yv1, zv1);
+  // Go around the cylinder.
+  for (unsigned int i = 2; i <= nPoints + 1; i++) {
+    // Bottom and top of the line along the axis of the cylinder.
+    double alpha = m_rot + HalfPi * (i - 1.) / (m_n - 1.);
+    u = r * cos(alpha);
+    v = r * sin(alpha);
+    // Rotate into place.
+    double xv2, yv2, zv2;
+    ToGlobal(u, v, +m_lZ, xv2, yv2, zv2);
+    double xv3, yv3, zv3;
+    ToGlobal(u, v, -m_lZ, xv3, yv3, zv3);
+    // Store the plane.
+    Panel newpanel;
+    alpha = m_rot + HalfPi * (i - 1.5) / (m_n - 1.);
+    const double cAlpha = cos(alpha);
+    const double sAlpha = sin(alpha);
+    newpanel.a = m_cPhi * m_cTheta * cAlpha - m_sPhi * sAlpha;
+    newpanel.b = m_sPhi * m_cTheta * cAlpha + m_cPhi * sAlpha;
+    newpanel.c = -m_sTheta * cAlpha;
+    newpanel.xv = {xv0, xv1, xv2, xv3};
+    newpanel.yv = {yv0, yv1, yv2, yv3};
+    newpanel.zv = {zv0, zv1, zv2, zv3};
+    newpanel.colour = 0;
+    newpanel.volume = 0;
+    panels.push_back(std::move(newpanel));
+    // Shift the points.
+    xv0 = xv3;
+    yv0 = yv3;
+    zv0 = zv3;
+    xv1 = xv2;
+    yv1 = yv2;
+    zv1 = zv2;
+  }
+  std::cout << "SolidTube::SolidPanels: "
+            << panels.size() - nPanels << " panels.\n";
+  return true;
 }
 }
