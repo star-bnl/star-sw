@@ -9,5 +9,7 @@ struct g2t_ctf_hit {
         float s_track;
         float tof;
         float x[3];
+        float xG[3];
+        float pG[3];
 };
 

@@ -52,6 +52,13 @@ Int_t St_g2t_Chair::fDebug = 0;
   g2t_ ## A ## _hit.track_p       = vect.iTrack;			\
   g2t_ ## A ## _hit.volume_id     = vect.VolumeId;			\
   G2UpdateTrack(A,B)
+#define G2TFillTrackHitGlobal(A,B)					\
+  g2t_ ## A ## _hit.xG[0]          = vect.Middle.Global.xyzT.X();	\
+  g2t_ ## A ## _hit.xG[1]          = vect.Middle.Global.xyzT.Y();	\
+  g2t_ ## A ## _hit.xG[2]          = vect.Middle.Global.xyzT.Z();	\
+  g2t_ ## A ## _hit.pG[0]          = vect.Middle.Global.pxyzE.X();	\
+  g2t_ ## A ## _hit.pG[1]          = vect.Middle.Global.pxyzE.Y();	\
+  g2t_ ## A ## _hit.pG[2]          = vect.Middle.Global.pxyzE.Z();	
 #define G2TFillTrackHitLocal(A,B)					\
   g2t_ ## A ## _hit.id            = nok;				\
   g2t_ ## A ## _hit.x[0]          = vect.Middle.Local.xyzT.X();		\
@@ -108,6 +115,7 @@ void St_g2t_hitsC::Fill(GHit_t &vect) {}
 void St_g2t_ctf_hitC::Fill(GHit_t &vect) {
   G2TBookTrackHit(ctf);
   g2t_ctf_hit.s_track       = vect.Sleng;	
+  G2TFillTrackHitGlobal(ctf,ctb);
   G2TFillTrackHitLocal(ctf,ctb);
   table->AddAt(&g2t_ctf_hit);
   if (Debug()) table->Print(nok-1,2);		

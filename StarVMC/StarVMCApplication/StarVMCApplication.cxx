@@ -740,7 +740,7 @@ void StarVMCApplication::ForceDecay(const Char_t *nameP,
   }
   TGeant3TGeo *g3 = (TGeant3TGeo *)TVirtualMC::GetMC();
   TParticlePDG *p = TDatabasePDG::Instance()->GetParticle(nameP);
-  if (! p) return;
+  assert(p);
   Int_t pdg = p->PdgCode();
   if (! pdg) return;
   Int_t iD  = g3->IdFromPDG(pdg);
@@ -765,7 +765,7 @@ void StarVMCApplication::ForceDecay(const Char_t *nameP,
       p = TDatabasePDG::Instance()->GetParticle(modes[m][j]);
       if (! p) { 
 	LOG_ERROR << "p for " << modes[m][j] << " is not found" << endm; 
-	continue;
+	assert(p);
       }
       pdg = p->PdgCode();
       Line += modes[m][j];
