@@ -334,6 +334,7 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
       break;
     }
     if (fitter) {
+      fitter->setDebugLvl(Debug());
       if (dynamic_cast<genfit::DAF*>(fitter) != nullptr) {
 	static_cast<genfit::DAF*>(fitter)->setAnnealingScheme(100, 0.1, 5);
 	static_cast<genfit::DAF*>(fitter)->setConvergenceDeltaWeight(0.0001);
@@ -343,7 +344,10 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
     genfit::FieldManager::getInstance()->init(new genfit::StarField());
     if (IAttr("useCache")) genfit::FieldManager::getInstance()->useCache(kTRUE, 8);
     else                   genfit::FieldManager::getInstance()->useCache(kFALSE, 0);
-    genfit::MaterialEffects::getInstance()->init(new genfit::TGeoMaterialInterface());
+    genfit::TGeoMaterialInterface *geoMat = new genfit::TGeoMaterialInterface();
+    geoMat->setDebugLvl(Debug());
+    geoMat->setDebugLvT(Debug());
+    genfit::MaterialEffects::getInstance()->init(geoMat);
     if (!matFX) genfit::MaterialEffects::getInstance()->setNoEffects();
     // Set Debug flags
     if (Debug()) {
@@ -406,6 +410,7 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
     cout << "posSeed\t"; fCA2Gen[0].pos.Print("");
     cout << "NHits = " << NHits << endl;
   }
+  StPlanarMeasurement::SetHitId(0);
   for ( Int_t iHit = 0; iHit < NHits; iHit++ ){ 
     const Int_t index = StxCAInterface::Instance().GetTracker()->TrackHit( tr.FirstHitRef() + iHit );
     const Int_t hId   = StxCAInterface::Instance().GetTracker()->Hit( index ).ID();
@@ -601,7 +606,6 @@ Int_t StxMaker::FillDetectorInfo(StTrack *gTrack, genfit::Track * track, Bool_t 
 
   memset(dets,0,sizeof(dets));
   KalmanFitStatus *fitStatus = track->getKalmanFitStatus();
-  genfit::TrackPoint *firstTP = 0, *lastTP = 0;
   const AbsTrackRep* rep = track->getCardinalRep();
   StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
   for (std::vector< genfit::TrackPoint* >::const_iterator it = track->getPointsWithMeasurement().begin(); 
@@ -612,8 +616,6 @@ Int_t StxMaker::FillDetectorInfo(StTrack *gTrack, genfit::Track * track, Bool_t 
       dets[0][kPP]++;
       const StPlanarMeasurement *measurement =  dynamic_cast<StPlanarMeasurement *>(*im);
       if (! measurement) continue;
-      if (! firstTP) firstTP = tp;
-      lastTP = tp;
       //      Int_t detId = measurement->getPlaneId()/10000 + 1;
       Int_t detId = measurement->getDetId();
       dets[0][kPP]++; dets[detId][kPP]++;
@@ -629,6 +631,8 @@ Int_t StxMaker::FillDetectorInfo(StTrack *gTrack, genfit::Track * track, Bool_t 
       hit->setFitFlag(used);
     }
   }
+  genfit::TrackPoint *firstTP = track->getPointWithMeasurementAndFitterInfo(0);
+  genfit::TrackPoint *lastTP  = track->getPointWithMeasurementAndFitterInfo(-1);
   genfit::TrackPoint *flTP[2] = {firstTP, lastTP};
   for (Int_t i = 0; i < 2; i++) {
     genfit::TrackPoint *tp = flTP[i];

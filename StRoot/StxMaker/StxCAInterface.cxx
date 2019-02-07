@@ -264,9 +264,11 @@ void StxCAInterface::MakeHits() {
 	cout << "TGeoPhysicalNode with path " << path.Data() << " does not exists" << endl;
 	assert(0);
       }
-      StThreeVectorD local(0, aHit->position().y(), 0);
+      StThreeVectorD local(0, aHit->locPosition().y(), 0);
       static StThreeVectorD glob;
       nodeP->GetMatrix()->LocalToMaster(local.xyz(), glob.xyz());
+      StThreeVectorF posF(glob.x(), glob.y(), glob.z());
+      aHit->setPosition(posF);
       // obtain seed Hit
       Int_t Id = fSeedHits.size();
       SeedHit_t hitc;

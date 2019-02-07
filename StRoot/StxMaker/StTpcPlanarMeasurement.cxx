@@ -27,60 +27,25 @@ StTpcPlanarMeasurement::StTpcPlanarMeasurement(int nDim)
 StTpcPlanarMeasurement::StTpcPlanarMeasurement(const TVectorD& rawHitCoords, const TMatrixDSym& rawHitCov, int detId, int hitId, TrackPoint* trackPoint)
   : StPlanarMeasurement(rawHitCoords, rawHitCov, detId, hitId, trackPoint)  {}
 //________________________________________________________________________________
-StTpcPlanarMeasurement::StTpcPlanarMeasurement(const StTpcHit *hit,TrackPoint* trackPoint) : StPlanarMeasurement(2) {
-  fHit = hit;
-  detId_ = (Int_t) fHit->detector();
-  hitId_ = fHit->id();
+StTpcPlanarMeasurement::StTpcPlanarMeasurement(const StTpcHit *hit,TrackPoint* trackPoint) : StPlanarMeasurement(hit, trackPoint) {
   Int_t sector = hit->sector();
   Int_t rowRC = hit->padrow();
-#if 0
-  Int_t half   = (sector  - 1)/12 + 1;
-  Int_t sectorVMC = (sector - 1)%12 + 1;
-  Int_t rowVMC = 0;
-#endif 
   Int_t NoOfInnerRows = St_tpcPadConfigC::instance()->innerPadRows(sector);
-  //  Int_t NoOfRows = St_tpcPadConfigC::instance()->padRows(sector);
-  fErrCalc = 0;
   if (NoOfInnerRows == 13) {
     if (rowRC <= NoOfInnerRows) {
-#if 0
-      rowVMC = 3*(rowRC -  1) +  2;  
-#endif
       fErrCalc = StiTpcInnerHitErrorCalculator::instance(); 
     }  else {
-#if 0
-      rowVMC =   (rowRC - 14  + 41); 
-#endif
       fErrCalc = StiTpcOuterHitErrorCalculator::instance(); 
     }
-#if 0
-    if (rowVMC > 72)   rowVMC = 72;
-#endif
   } else {// iTPC
     if (rowRC <= NoOfInnerRows) {
-#if 0
-      rowVMC = rowRC + 1; 
-      if (rowVMC <  2) rowVMC =  2; 
-      if (rowVMC > 41) rowVMC = 41;
-#endif
       fErrCalc = StiTPCHitErrorCalculator::instance(); 
     } else {
-#if 0
-      rowVMC = rowRC + 3;
-      if (rowVMC < 44) rowVMC = 44;
-      if (rowRC > NoOfRows) rowRC = NoOfRows;
-#endif
       fErrCalc = StiTpcOuterHitErrorCalculator::instance(); 
     }
   }
   Int_t planeId = 100*sector + rowRC;
   TString path = hit->GetPath(); // 
-#if 0
-  Int_t indx[3] = {half, sectorVMC, rowVMC};
-  static TString path2TPC("/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_%d/TPSS_%d/TPAD_%d");
-  TString pathO = StarVMCDetector::FormPath(path2TPC,3,indx);
-  assert(pathO == path);
-#endif
   if (! gGeoManager->CheckPath(path)) {
     cout << "Illegal path " << path.Data() << endl;
     assert(0);
@@ -117,11 +82,6 @@ StTpcPlanarMeasurement::StTpcPlanarMeasurement(const StTpcHit *hit,TrackPoint* t
   DT.SetTranslation(shiftG);
   Double_t xyzLT[3];
   DT.MasterToLocal(xyzG, xyzLT);
-#if 0
-  Double_t PosG[3] = {posSeed.x(), posSeed.y(), posSeed.z()}; 
-  Double_t PosL[3];
-  DT.MasterToLocal(PosG,PosL);
-#endif
   TVector3 o(shiftG);
   const Double_t *r = DT.GetRotationMatrix();
   TVector3 u(r[1],r[4],r[7]);
@@ -131,9 +91,6 @@ StTpcPlanarMeasurement::StTpcPlanarMeasurement(const StTpcHit *hit,TrackPoint* t
   rawHitCoords_[0] = xyzL[1];
   rawHitCoords_[1] = xyzL[2];
   Double_t ecross = 0.12*0.12, edip = 0.16*0.16;
-#if 0
-  fErrCalc->calculateError(xyzL[2], pars.eta(), pars.tanl(), ecross, edip);
-#endif
   rawHitCov_(0,0) = ecross;
   rawHitCov_(1,1) = edip;
   if (Debug()) {
@@ -143,12 +100,6 @@ StTpcPlanarMeasurement::StTpcPlanarMeasurement(const StTpcHit *hit,TrackPoint* t
     fHit->Print();
   }
 }
-#if 0
-//________________________________________________________________________________
-const TVectorD& StTpcPlanarMeasurement::getRawHitCoords(genfit::StateOnPlane *state) const {return genfit::AbsMeasurement::getRawHitCoords(state);}
-//________________________________________________________________________________
-const TMatrixDSym& StTpcPlanarMeasurement::getRawHitCov(genfit::StateOnPlane *state) const {return genfit::AbsMeasurement::getRawHitCov(state);}
-#endif
 //________________________________________________________________________________
 TVectorD& StTpcPlanarMeasurement::getRawHitCoords(const genfit::StateOnPlane *state) {return genfit::AbsMeasurement::getRawHitCoords(state);}
 //________________________________________________________________________________

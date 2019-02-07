@@ -25,9 +25,6 @@ StBTofPlanarMeasurement::StBTofPlanarMeasurement(const TVectorD& rawHitCoords, c
   : StPlanarMeasurement(rawHitCoords, rawHitCov, detId, hitId, trackPoint) {}
 //________________________________________________________________________________
 StBTofPlanarMeasurement::StBTofPlanarMeasurement(const StBTofHit *hit,TrackPoint* trackPoint) : StPlanarMeasurement(2) {
-  fHit = hit;
-  detId_ = (Int_t) fHit->detector();
-  hitId_ = fHit->id();
   Int_t tray = hit->tray();
   Int_t moduleRC = hit->module();
   fErrCalc = StiBTofHitErrorCalculator::instance(); 
@@ -48,7 +45,7 @@ StBTofPlanarMeasurement::StBTofPlanarMeasurement(const StBTofHit *hit,TrackPoint
   const TGeoHMatrix &D = *nodeP->GetMatrix();
   //  genfit::eMeasurementType type = genfit::Spacepoint;
   //  measurementTypes.push_back(type);
-  Double_t xyzL[3] = {hit->position().x(),hit->position().y(),hit->position().z()};
+  Double_t xyzL[3] = {hit->locPosition().x(),hit->locPosition().y(),hit->locPosition().z()};
   Double_t xyzG[3];
   D.LocalToMaster(xyzL,xyzG);
   TGeoHMatrix DT(D);
@@ -79,12 +76,6 @@ StBTofPlanarMeasurement::StBTofPlanarMeasurement(const StBTofHit *hit,TrackPoint
     hit->Print();
   }
 }
-#if 0
-//________________________________________________________________________________
-const TVectorD& StBTofPlanarMeasurement::getRawHitCoords(genfit::StateOnPlane *state) const {return genfit::AbsMeasurement::getRawHitCoords(state);}
-//________________________________________________________________________________
-const TMatrixDSym& StBTofPlanarMeasurement::getRawHitCov(genfit::StateOnPlane *state) const {return genfit::AbsMeasurement::getRawHitCov(state);}
-#endif
 //________________________________________________________________________________
 TVectorD& StBTofPlanarMeasurement::getRawHitCoords(const genfit::StateOnPlane *state) {return genfit::AbsMeasurement::getRawHitCoords(state);}
 //________________________________________________________________________________

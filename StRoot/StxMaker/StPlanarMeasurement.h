@@ -22,10 +22,14 @@ class StPlanarMeasurement : public genfit::PlanarMeasurement {
   virtual       TMatrixDSym& getRawHitCov(const genfit::StateOnPlane *state=0);
   virtual const StHit *Hit() const {return fHit;}
   virtual       StiHitErrorCalculator* ErrCalc() const {return fErrCalc;}
+  static  void  SetDebug(Int_t k = 1) {fDebug = k;}
+  static  Int_t Debug() {return fDebug;}
+  static   void SetHitId(Int_t Id) {fHitId = Id;}
  protected:
   const StHit  *fHit; 
   StiHitErrorCalculator *fErrCalc;
   static Int_t    fDebug;
+  static Int_t    fHitId;
  public:
   ClassDef(StPlanarMeasurement,1)
 };
