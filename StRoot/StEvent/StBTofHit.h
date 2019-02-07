@@ -70,7 +70,7 @@ public:
     void setAssociatedTrack(StTrack*);
     void setPathLength(Float_t p = 0)       { mPathLength = p;}
     void setTime(Float_t p = 0)             { mTime = p;}
-    const StThreeVectorF& position() const;
+    const StThreeVectorF& locPosition() const;
     static Float_t    padWidth()            { return mBTofPadWidth;}
     StDetectorId   detector() const;
     Int_t volumeID() const {return 0;}

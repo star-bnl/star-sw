@@ -55,9 +55,11 @@ const StTrack* StBTofHit::associatedTrack() const { return mAssociatedTrack; }
 void
 StBTofHit::setAssociatedTrack(StTrack* val) { mAssociatedTrack = val; }
 //________________________________________________________________________________
-const StThreeVectorF& StBTofHit::position() const {
+const StThreeVectorF& StBTofHit::locPosition() const {
   static StThreeVectorF pos;
-  pos.set(0.,mBTofPadWidth*(cell() - 3.5), 0.);
+  //    Int_t icell = Int_t((ylocal + mBTofPadWidth * mNCell/2) / mBTofPadWidth) + 1;
+  Double_t ylocal = mBTofPadWidth*(cell() - 1 - kNCell/2);
+  pos.set(0., ylocal, 0.);
   return *&pos;
 }
 //________________________________________________________________________________
@@ -69,7 +71,8 @@ ostream& operator<<(ostream &os, const StBTofHit& hit) {
      << Form(" TeTime %7.2f",hit.trailingEdgeTime())
      << Form(" Track %5i",(hit.associatedTrack() ? hit.associatedTrack()->key() : 0))
      << Form(" IdTruth %5i",hit.idTruth())
-     << Form(" Quality%3i",hit.qaTruth());
+     << Form(" Quality%3i",hit.qaTruth())
+     << " xyzL: " << hit.locPosition() << " G: " << hit.position();
   return os;
 }
 //________________________________________________________________________________
