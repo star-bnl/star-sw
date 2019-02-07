@@ -214,8 +214,8 @@ Int_t StTpcRTSHitMaker::Make() {
 #endif
     Int_t NoAdcs = 0;
     daq_dta *dtas[2] = {
-      fTpx ?  fTpx->put("adc_sim",0,St_tpcPadConfigC::instance()->numberOfRows(sec)+1,0,mTpx_RowLen[sec-1]) : 0,
-      St_tpcPadConfigC::instance()->iTPC(sec) && fiTpc ? fiTpc->put("adc_sim",0,St_tpcPadConfigC::instance()->numberOfRows(sec)+1,0,mTpx_RowLen[sec-1]) : 0
+      fTpx ?  fTpx->put("adc_sim",0,St_tpcPadConfigC::instance()->numberOfRows(sec),0,mTpx_RowLen[sec-1]) : 0,
+      St_tpcPadConfigC::instance()->iTPC(sec) && fiTpc ? fiTpc->put("adc_sim",0,St_tpcPadConfigC::instance()->numberOfRows(sec),0,mTpx_RowLen[sec-1]) : 0
     };
     for (Int_t row = minRow; row <= TMath::Min(maxRow,digitalSector->numberOfRows()); row++) {
       if (! St_tpcPadGainT0BC::instance()->livePadrow(sec,row)) continue;
