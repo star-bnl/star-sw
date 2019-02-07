@@ -9,7 +9,7 @@
   setenv STARFPE NO
 #  setup 64b
 #  setup gcc
-#  starver TFG19a
+  starver TFG19a
   echo $INPUTFILE0 | grep ':'
   if (! $?) then
     set rung  = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
@@ -52,5 +52,5 @@
     root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'","'${tag}'")' &gt;&amp; ${logFile}
   endif
 </command>
-<input URL="command:RunId.pl 1 100 100" />
+<input URL="command:RunId.pl 101 200 100" />
 </job>

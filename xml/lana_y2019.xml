@@ -4,7 +4,7 @@
 <command> 
 #  source ~/.tcshrc
   cd ${SUBMITTINGDIRECTORY}  
-#  starver TFG19a
+  starver TFG19a
 #  setenv NODEBUG yes
 #  setup 64b
 #  setup gcc
@@ -19,7 +19,7 @@
   set logFile  = ${file}B.log
   set f=`find . -maxdepth 1 -type f -name "${file}*.root"`
   setenv STARFPE NO
-  if ("$f" == "") then
+  if ("$f" == "") thenxf
     if (-r $logFile) rm $logFile
 #    root.exe -q -b -x 'bfc.C(99999,"lana,B2014,LaserIT,StiCA,KFVertex,Corr4,analysis,NoHistos,NoRunco,-HitFilt,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
 #    root.exe -q -b -x 'bfc.C(99999,"lana,B2014,LaserIT,StiCA,KFVertex,CorrX,OGridLeak3D,OSpaceZ2,analysis,NoHistos,NoRunco,-HitFilt,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
