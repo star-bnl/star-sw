@@ -84,7 +84,7 @@ TGeoMaterialInterface::findNextBoundary(const RKTrackRep* rep,
 
   double s = 0;  // trajectory length to boundary
 
-  const unsigned maxIt = 300;
+  const unsigned maxIt = 30;//yf 300;
   unsigned it = 0;
 
   // Initialize the geometry to the current location (set by caller).
