@@ -93,20 +93,20 @@ void StiBTofHitLoader::loadHits(StEvent* source,
     stiHit->reset();
     TGeoHMatrix *rot = (TGeoHMatrix *) StiBTofDetectorBuilder::RotMatrices()->FindObject(Form("BTof_Tray_%i_Module_%i",aHit->tray(),aHit->module())); 
     assert(rot);
-    const Float_t *xyzLF = aHit->position().xyz();
+    const Float_t *xyzLF = aHit->locPosition().xyz();
     Double_t xyzL[3] = {xyzLF[0], xyzLF[1], xyzLF[2]};
     Double_t xyzG[3];
     rot->LocalToMaster(xyzL,xyzG);
     stiHit->setGlobal(detector,aHit,xyzG[0],xyzG[1],xyzG[2],aHit->charge());
 #if 0
     stiHit->set(detector, aHit, aHit->charge(),
-		      radius+aHit->position().x(), yoffset+aHit->position().y(), zcenter+aHit->position().z());
+		      radius+aHit->locPosition().x(), yoffset+aHit->locPosition().y(), zcenter+aHit->locPosition().z());
 #endif    
     _hitContainer->add(stiHit);
     if (_debug) {
       LOG_INFO <<" nHit = "<<nHit
 	       <<" Tray = "<<aHit->tray()<<" Module = "<<aHit->module()<<" Cell = "<<aHit->cell()
-	       <<" x = "<<aHit->position().x()<<" y = "<<aHit->position().y()<<" z = "<<aHit->position().z()<<endm;
+	       <<" x = "<<aHit->locPosition().x()<<" y = "<<aHit->locPosition().y()<<" z = "<<aHit->locPosition().z()<<endm;
     }
     //done loop over hits
     nHit++;
