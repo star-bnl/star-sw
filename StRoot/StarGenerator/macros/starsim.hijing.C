@@ -12,6 +12,8 @@ StarGenEvent   *event       = 0;
 class StarPrimaryMaker;
 StarPrimaryMaker *_primary = 0;
 
+class StarHijing;
+StarHijing *hijing = 0; 
 // ----------------------------------------------------------------------------
 void geometry( TString tag, Bool_t agml=true )
 {
@@ -36,7 +38,6 @@ void trig( Int_t n=0 )
     _primary -> event() -> Print();
   }
 }
-StarHijing *hijing = 0; 
 // ----------------------------------------------------------------------------
 void Hijing()
 {
