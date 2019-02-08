@@ -68,8 +68,8 @@ HEEDOBJS += \
 
 # Compilation flags
 CFLAGS = -Wall -Wextra -pedantic -ansi -Wabi -Wno-long-long -Wshadow \
-	`root-config --cflags` \
-	-fpic -Os -c \
+        `root-config --cflags` \
+        -fpic -Os -c \
 	-I$(INCDIR) -I$(HEEDDIR) \
 	-DGARFIELD_HEED_INTERFACE -DUSE_SRANLUX \
 	-DEXCLUDE_FUNCTIONS_WITH_HISTDEF -DINS_CRETURN 
@@ -83,19 +83,7 @@ endif
 LDFLAGS = `root-config --glibs` -lGeom -lgfortran -lm
 
 .PHONY:	all  showbuild 
-all:	$(HEEDOBJS) lib
-
-lib:	$(LIBDIR)/libGarfield.so 
-$(LIBDIR)/libGarfield.so:	$(OBJECTS) $(wildcard $(OBJDIR)/Heed/*.o)
-	@echo Creating library libGarfield...
-#	ar rcs $(LIBDIR)/libGarfield.a $(OBJECTS) \
-#	$(wildcard $(OBJDIR)/Heed/*.o) 
-#	ranlib $(LIBDIR)/libGarfield.a
-	`root-config --ld` -o $(LIBDIR)/libGarfield.so $(LDFLAGS)  $(OBJECTS) \
-	$(wildcard $(OBJDIR)/Heed/*.o)
-#	`root-config --ld` -o $(LIBDIR)/libGarfield.so `root-config --ldflags` -shared -Wl,-Bdynamic -lgfortran $<
-	touch $(OBJDIR)/last_updated_on
-	@echo Finished.
+all:	$(HEEDOBJS) 
 
 clean:
 	@echo Removing Heed object files...
@@ -238,12 +226,10 @@ $(OBJDIR)/Heed/kinem.o: \
 	$(HEEDDIR)/wcpplib/math/kinem.h
 	@echo $@
 	$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/Solid.o: \
-	$(SRCDIR)/Solid.cc $(INCDIR)/Solid.hh
-	@echo $@
-	@$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/SolidBox.o: \
-	$(SRCDIR)/SolidBox.cc $(INCDIR)/SolidBox.hh
+
+$(OBJDIR)/Heed/line.o: \
+	$(HEEDDIR)/wcpplib/math/line.cpp\
+	$(HEEDDIR)/wcpplib/math/line.h
 	@echo $@
 	$(CXX) $(CFLAGS) $< -o $@
 
