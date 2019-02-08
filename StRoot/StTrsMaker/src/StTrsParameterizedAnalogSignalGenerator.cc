@@ -591,7 +591,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 	    // StTpcLocalSectorCoordinate  xyCoord(iter->position(),12);
 	    //  transformer(xyCoord,mTpcRaw);
 	    //
-	    mCentralRow = transformer.rowFromLocal(iter->position())-1,sector;
+	    mCentralRow = transformer.rowFromLocal(iter->position(),sector)-1;
 	   
 	  
 	    // Calculate the row/pad limits
