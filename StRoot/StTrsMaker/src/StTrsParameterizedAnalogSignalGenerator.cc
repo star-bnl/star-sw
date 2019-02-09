@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.43 2018/06/21 22:23:08 perev Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.44 2019/02/08 21:33:54 iraklic Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -11,6 +11,9 @@
  *
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.44  2019/02/08 21:33:54  iraklic
+ * adding sector to the function call [iTPC related changes] : this also partial respons to ticket #3376
+ *
  * Revision 1.43  2018/06/21 22:23:08  perev
  * TpcGroup fixes
  *
@@ -591,7 +594,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 	    // StTpcLocalSectorCoordinate  xyCoord(iter->position(),12);
 	    //  transformer(xyCoord,mTpcRaw);
 	    //
-	    mCentralRow = transformer.rowFromLocal(iter->position(),sector)-1;
+	    mCentralRow = transformer.rowFromLocal(iter->position(), sector)-1;
 	   
 	  
 	    // Calculate the row/pad limits
