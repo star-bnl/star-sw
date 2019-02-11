@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHit.h,v 2.2 2018/07/13 14:55:09 ullrich Exp $
+ * $Id: StETofHit.h,v 2.3 2019/02/11 18:53:09 ullrich Exp $
  *
  * Author: Philipp Weidenkaff, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofHit.h,v $
+ * Revision 2.3  2019/02/11 18:53:09  ullrich
+ * Added additional access functions to get the associated track & idTruth and qaTruth variables for simulated Hits.
+ *
  * Revision 2.2  2018/07/13 14:55:09  ullrich
  * Added getter function for the associated hit (Florian)
  *
@@ -110,6 +113,21 @@ public:
     ** @brief pointer to the track which has been matched to this hit
     **/
     StTrack* associatedTrack();
+    
+    /**
+    ** @brief pointer to the track which has been matched to this hit
+    **/
+    StTrack* associatedTrack() const;
+
+
+    /**
+    ** @brief mc-true associated track id in simulation
+    **/
+    unsigned int idTruth()     const;
+    /**
+    ** @brief quality of this information (percentage of charge produced by mIdTruth)
+    **/
+    unsigned int qaTruth()     const;
 
 
     /**
@@ -137,8 +155,9 @@ public:
     void setLocalY     ( const double& Y     );
 
 
-    
     void setAssociatedTrack( StTrack* trk );
+
+    void setIdTruth( unsigned short idtruth, unsigned short qatruth=0 );
 
 
 private:
@@ -155,6 +174,9 @@ private:
     Double_t    mLocalY;
 
     StTrack*    mAssociatedTrack;  //$LINK
+
+    UShort_t     mIdTruth;
+    UShort_t     mQuality;
 
 
 
@@ -176,8 +198,11 @@ inline unsigned int StETofHit::clusterSize() const { return mClusterSize; };
 inline double StETofHit::localX()   const { return mLocalX; };
 inline double StETofHit::localY()   const { return mLocalY; };
 
-inline StTrack* StETofHit:: associatedTrack()  { return mAssociatedTrack; };
+inline StTrack* StETofHit::associatedTrack()       { return mAssociatedTrack; };
+inline StTrack* StETofHit::associatedTrack() const { return mAssociatedTrack; };
 
+inline unsigned int StETofHit::idTruth()     const { return mIdTruth; }
+inline unsigned int StETofHit::qaTruth()     const { return mQuality; }
 
 inline void StETofHit::setSector(  const unsigned int sector  )  { mSector   = sector;  }
 inline void StETofHit::setZPlane(  const unsigned int zPlane  )  { mZPlane   = zPlane;  }
