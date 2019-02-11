@@ -70,7 +70,9 @@ class etofBuilder : public JevpBuilder {
         TH1* digiDensityAllChannels;
 
         TH1* triggerTimeDiffSectors[ 11 ];
+        TH1* resetTimeDiffSectors[ 11 ];
         TH1* missingTriggerTs;
+        TH1* triggerTimeToResetTime;
       };
     } contents;
 

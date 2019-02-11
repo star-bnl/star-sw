@@ -16,6 +16,7 @@
 #include <TH2D.h>
 
 #include <cmath>
+#include <algorithm>
 #include "etofBuilder.h"
 #include <RTS/include/rtsLog.h>
 
@@ -204,10 +205,13 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
 
 
     for( size_t i=0; i<11; i++ ) {
-        contents.triggerTimeDiffSectors[ i ] = new TH1D( TString::Format( "triggerTimeDiffSector13to%d", i+14 ), TString::Format( "trigger time difference sector 13 - %d;# clock cycles;# events", i + 14 ), 200, -99.5, 100.5 );
+        contents.triggerTimeDiffSectors[ i ] = new TH1D( TString::Format( "triggerTimeDiffSector13to%d", i+14 ), TString::Format( "trigger time difference sector 13 - %d;# clock cycles;# events", i + 14 ), 200,  -99.5, 100.5 );
+        contents.resetTimeDiffSectors[ i ]   = new TH1D( TString::Format( "resetTimeDiffSector24to%d",   i+13 ), TString::Format( "reset time difference sector 24 - %d;# clock cycles;# events",   i + 13 ), 200,  -99.5, 100.5 );
+
     }
 
-    contents.missingTriggerTs = new TH1D( "missingTriggerTs", "missing trigger timestamps per sector;sector;# missing trigger timestamps", 12, 13, 25 );
+    contents.missingTriggerTs       = new TH1D( "missingTriggerTs",       "missing trigger timestamps per sector;sector;# missing trigger timestamps", 12, 13, 25 );
+    contents.triggerTimeToResetTime = new TH1D( "triggerTimeToResetTime", "trigger time to reset time;time difference (s);#events", 1000, 1, 2001 );
 
 
     int np = sizeof( contents ) / sizeof( TH1* );
@@ -237,10 +241,18 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
             if( contents.array[ i ] == contents.triggerTimeDiffSectors[ j ] ) {
                 jp->setOptStat( 111110 );
             }
+            if( contents.array[ i ] == contents.resetTimeDiffSectors[ j ] ) {
+                jp->setOptStat( 1 );
+            }
         }
         if( contents.array[ i ] == contents.missingTriggerTs ) {
             jp->setOptStat( 1 );
         }
+        if( contents.array[ i ] == contents.triggerTimeToResetTime ) {
+            jp->logx = 1;
+            jp->logy = 0;
+        }
+
 
         /*
         if (contents.array[i] == contents.hitMapCounter[0] ||
@@ -534,6 +546,37 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
             }
         }
     }
+    if( starTsMap.count( 11 ) ) {
+        for( size_t i=0; i<11; i++ ) {
+            if( starTsMap.count( i ) ) {
+                int64_t diff = ( int64_t ) ( starTsMap.at( 11 ) - starTsMap.at( i ) );
+                if( diff < 100 && diff > -99 ) {
+                    contents.resetTimeDiffSectors[ i ]->Fill( diff );
+                }
+            }
+        }
+    }
+
+
+    map< uint64_t, short > countsGdpbTs;
+    for( const auto& kv : gdpbTsMap ) ++countsGdpbTs[ kv.second ];
+
+    auto iterGdpb = std::max_element( countsGdpbTs.begin(), countsGdpbTs.end(),
+                                      []( const pair< uint64_t, short >& p1, const pair< uint64_t, short >& p2 ) {
+                                      return p1.second < p2.second; } );
+
+    map< uint64_t, short > countsStarTs;
+    for( const auto& kv : starTsMap ) ++countsStarTs[ kv.second ];
+
+    auto iterStar = std::max_element( countsStarTs.begin(), countsStarTs.end(),
+                                      []( const pair< uint64_t, short >& p1, const pair< uint64_t, short >& p2 ) {
+                                      return p1.second < p2.second; } );
+
+
+    int64_t mostProbableTriggerTime = iterGdpb->first;
+    int64_t mostProbableResetTime   = iterStar->first;
+
+    contents.triggerTimeToResetTime->Fill( ( mostProbableTriggerTime - mostProbableResetTime ) * 6.25 * 1.e-9 );
 
 }
 
