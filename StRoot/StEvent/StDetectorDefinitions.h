@@ -38,6 +38,9 @@
 ** ETR             = 35
 ** SST             = 36
 ** GMT             = 37
+** FTS             = 38
+** iTPC            = 39
+** ETof            = 40
 */
 
 
@@ -125,6 +128,12 @@
 #define kiTpcIdentifier               39
 
 /*
+ ** eTOF
+ */
+#define kETofIdentifier               40
+
+
+/*
 **  The following are more or less virtual detectors.
 **  Depending on funding or policy this stuff might
 **  happen or not. (OBSOLETE)
@@ -140,9 +149,12 @@
 
 #endif /*STDETECTORDEFINITIONS*/
 
-/* $Id: StDetectorDefinitions.h,v 2.14 2018/03/27 02:40:12 genevb Exp $
+/* $Id: StDetectorDefinitions.h,v 2.15 2019/02/11 18:49:59 ullrich Exp $
 **
 ** $Log: StDetectorDefinitions.h,v $
+** Revision 2.15  2019/02/11 18:49:59  ullrich
+** Added EToF.
+**
 ** Revision 2.14  2018/03/27 02:40:12  genevb
 ** Introduce kiTpcId
 **

@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.67 2018/12/11 19:53:10 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.68 2019/02/11 18:51:31 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.68  2019/02/11 18:51:31  ullrich
+ * Added EToF.
+ *
  * Revision 2.67  2018/12/11 19:53:10  ullrich
  * Added RICHf.
  *
@@ -292,6 +295,7 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kGmtId       = kGmtIdentifier,
                    kFtsId       = kFtsIdentifier,
                    kiTpcId      = kiTpcIdentifier,
+                   kETofId      = kETofIdentifier,
                    kMaxDetectorId = 41};
 
 /*!
