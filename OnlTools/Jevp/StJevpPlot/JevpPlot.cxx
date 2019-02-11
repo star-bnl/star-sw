@@ -495,7 +495,10 @@ void JevpPlot::draw()
     //
     // The update is done at the end of all the drawing, as obviously it should be...
     TVirtualPad *save = gPad;
-    gPad = NULL;
+    // Somehow underflow / overflow stats are handled by the gPad
+    // probably the source of the slowdown in root!
+    if(optstat != 111110) 
+      gPad = NULL;
     gStyle->SetOptStat(optstat);
     gPad = save;
 

@@ -500,6 +500,9 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    refplotdir = (char *)"/a/l4jevp/refplots";
 	    rootfiledir = (char *)"/a/l4jevp/rootfiles";
 	}
+	else if (strcmp(argv[i], "-padd")==0) {
+	  myport = JEVP_PORT + 10;
+	}
 	else if (strcmp(argv[i], "-test")==0) {
 	    nodb = 1;
 	    log_output = RTS_LOG_STDERR;
