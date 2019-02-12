@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.67 2018/12/11 19:53:10 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.68 2019/02/11 18:51:31 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.68  2019/02/11 18:51:31  ullrich
+ * Added EToF.
+ *
  * Revision 2.67  2018/12/11 19:53:10  ullrich
  * Added RICHf.
  *
@@ -253,7 +256,6 @@ enum StChargeSign {negative, positive};
  */
 enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kTpcId       = kTpcIdentifier,
-                   kiTpcId      = kTpcIdentifier,
                    kSvtId       = kSvtIdentifier,
                    kRichId      = kRichIdentifier,
                    kFtpcWestId  = kFtpcWestIdentifier,
@@ -290,9 +292,11 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kRpsId       = kRpsIdentifier,
                    kMtdId       = kMtdIdentifier,
                    kSstId       = kSstIdentifier,
-		   kGmtId       = kGmtIdentifier,
-		   kFtsId       = kFtsIdentifier,
-                   kMaxDetectorId = 40};
+                   kGmtId       = kGmtIdentifier,
+                   kFtsId       = kFtsIdentifier,
+                   kiTpcId      = kiTpcIdentifier,
+                   kETofId      = kETofIdentifier,
+                   kMaxDetectorId = 41};
 
 /*!
  * \enum StTrackType

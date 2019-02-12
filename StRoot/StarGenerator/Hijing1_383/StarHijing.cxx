@@ -28,8 +28,8 @@ TGenericTable *regtable( const Char_t *type, const Char_t *name, void *address )
 // ----------------------------------------------------------------------------
 // Remap hijing's random number generator to StarRandom
 extern "C" {
-  Double_t rlustar_( Int_t *idummy ){    return StarRandom::Instance().flat();  };
-  Float_t  rndmstar_( Int_t *idummy ){    return StarRandom::Instance().flat();  };
+  float rlustar_( Int_t *idummy ){    return StarRandom::Instance().flat();  };
+  float rndmstar_( Int_t *idummy ){    return StarRandom::Instance().flat();  };
 };
 Double_t rndm(){ return StarRandom::Instance().flat(); }
 // ----------------------------------------------------------------------------
