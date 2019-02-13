@@ -3,6 +3,7 @@
 //#define __USEZ3A__
 //#define __CHECK_LargedEdx__
 //#define __Use_dNdx__
+//#define __TEST_DX__
 #define __BEST_VERTEX__
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
@@ -234,6 +235,16 @@ void StdEdxY2Maker::AddEdxTraits(StTrack *tracks[2], dst_dedx_st &dedx){
 }
 //_____________________________________________________________________________
 Int_t StdEdxY2Maker::Make(){ 
+#ifdef __TEST_DX__
+  Double_t dX_GenFit = 0;
+  TH3F *dXTest = 0;
+  if (! dXTest) {
+    TFile  *f = GetTFile();
+    assert(f);
+    f->cd();
+    dXTest = new TH3F("dxTest","dX = dX_GenFit - dX_Propagete versus setor and dX_GenFit",24,0.5,24.5,100,-1.,9.,100,-0.1,0.1);
+  }
+#endif /* __TEST_DX__ */
   tpcTime = GetDateTime().Convert() - timeOffSet;
   static  StTpcLocalSectorCoordinate        localSect[4];
   static  StTpcPadCoordinate                PadOfTrack, Pad;
@@ -366,6 +377,10 @@ Int_t StdEdxY2Maker::Make(){
 	xyz[3] = StThreeVectorD(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z());
 	//________________________________________________________________________________      
 	dx = tpcHit->dX();
+#ifdef __TEST_DX__
+	dX_GenFit = dx;
+	dx = 0;
+#endif /* __TEST_DX__ */
 	static StGlobalDirection  globalDirectionOfTrack;
 	if (dx <= 0.0) {
 	StThreeVectorD middle = xyz[3];
@@ -395,6 +410,9 @@ Int_t StdEdxY2Maker::Make(){
 	if (Propagate(upper,normal,helixI,helixO,xyz[1],dirG,s_out,w_out)) {BadHit(2,tpcHit->position()); continue;}
 	if (Propagate(lower,normal,helixI,helixO,xyz[2],dirG,s_in ,w_in )) {BadHit(2,tpcHit->position()); continue;}
 	dx = ((s_out[0] - s_in[0])*w[1] + (s_out[1] - s_in[1])*w[0]);
+#ifdef __TEST_DX__
+	  dXTest->Fill(sector, dX_GenFit, dX_GenFit - dx);
+#endif /* __TEST_DX__ */
 	if (dx <= 0.0) {if (Debug() > 1) {cout << "negative dx " << dx << endl;}
 	  continue;
 	}
@@ -451,6 +469,9 @@ Int_t StdEdxY2Maker::Make(){
 	  s_in[0]  = TMath::Max(s_inP[0] , s_in[0] );
 	  s_in[1]  = TMath::Max(s_inP[1] , s_in[1] );
 	  dx = ((s_out[0] - s_in[0])*w[1] + (s_out[1] - s_in[1])*w[0]);
+#ifdef __TEST_DX__
+	  dXTest->Fill(sector, dX_GenFit, dX_GenFit - dx);
+#endif /* __TEST_DX__ */
 	  if (dx <= 0.0) {if (Debug() > 1) {cout << "negative dx " << dx << endl;}
 	    continue;
 	  }
