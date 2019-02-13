@@ -95,6 +95,7 @@ ostream&  operator<<(ostream& os, const StTpcHit& v)
 {
     return os << Form("Tpc s/r %3i/%3i ",v.sector(),v.padrow())
 	      << *((StHit *)&v)
+	      << Form(" dX %5.2f",v.dX())
 	      << Form(" pmin/max %3i/%3i np %2i tmin/max %3i/%3i nt %2i tm %6.2f pad %6.2f adc %4i",
 		      (Int_t)  v.minPad(), (Int_t)  v.maxPad(),(Int_t) v.padsInHit(), 
 		      (Int_t) v.minTmbk(), (Int_t) v.maxTmbk(),(Int_t) v.timeBucketsInHit(),

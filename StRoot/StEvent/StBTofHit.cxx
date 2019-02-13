@@ -34,7 +34,7 @@
 #include "StTrack.h"
 #include "TString.h"
 const Float_t StBTofHit::mBTofPadWidth = 3.45; 
-TString StBTofHit::fgFMT("HALL_1/CAVE_1/TpcRefSys_1/BTOF_1/BTOH_%d/BSEC_%d/BTRA_1/BXTR_1/BRTC_1/BGMT_1/BRMD_%d/BRDT_1/BRSG_3");
+TString StBTofHit::fgFMT("HALL_1/CAVE_1/TpcRefSys_1/BTOF_1/BTOH_%d/BSEC_%d/BTRA_1/BXTR_1/BRTC_1/BGMT_1/BRMD_%d/BRDT_1");// /BRSG_3");
 
 ClassImp(StBTofHit);
 //________________________________________________________________________________

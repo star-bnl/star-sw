@@ -156,7 +156,7 @@ class StTpcHit : public StHit {
     Float_t  pad() const {return static_cast<float>(mMcl_x)/64.;}
     UShort_t adc() const {return mAdc;}
     Float_t  chargeModified() const {return mChargeModified;}
-    Float_t  dX() {return mdX;}
+    Float_t  dX() const {return mdX;}
     void     Print(Option_t *option="") const;
     virtual Bool_t   IsSortable() const { return kTRUE; }
     virtual Int_t    Compare(const TObject *obj) const {
