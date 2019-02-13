@@ -19,7 +19,9 @@ void dZ() {
     TH1 *dZ_z = (TH1*) gDirectory->Get("dZ_z");
     if (! dZ_z) continue;
     c1->Update();
-    cout << F.Data() << "\tmean = " << dZ_z->GetMean() << "\tRMS = " << dZ_z->GetRMS() << endl;
+    cout << F.Data() << "\tmean = " << dZ_z->GetMean() << "\tRMS = " << dZ_z->GetRMS() 
+	 << "\tsector 4 " << dZ_z->GetBinContent(4) << "\t sector 22 " <<  dZ_z->GetBinContent(22)
+	 << endl;
     if (! Ask()) continue;
   }
 }

@@ -29,8 +29,9 @@ foreach my $file (@list) {
   my $f = File::Basename::dirname($file);
   my $run = File::Basename::basename($f);
 # print "file = $file, bf = $bf, f = $f, run = $run\n";
-# if ($run < 20018043) {next;} # FF
-  if ($run < 20035041) {next;} # RF
+  if ($run < 20018043) {next;} # Field On
+  if ($run > 20035041) {next;} # FF
+# if ($run < 20035041) {next;} # RF
   my $root = $bf . ".MuDst.root"; #print "root = $root\n";
   if (-r $root) {next;}
   print "string:$file\n";

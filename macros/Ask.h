@@ -1,8 +1,9 @@
 #include "Riostream.h"
-#include "Rtypes.h"
-static Int_t _debugAsk = 1;
+#include "TROOT.h"
+static Int_t _debugAsk = 1; 
 //________________________________________________________________________________
 Bool_t Ask() {
+  if (gROOT->IsBatch()) return kFALSE;
   static Bool_t fAsk = kTRUE;
   char symbol;
   if (fAsk){

@@ -11,9 +11,10 @@ void Agufld(const Char_t *field = "FieldOn") {
 //   } else {
 //   }
   if (gClassTable->GetID("StarMagField") < 0) {
-#if 0
+#if 1
     gROOT->LoadMacro("bfc.C");
-    TString Chain("MagF,mysql,y2011,nodefault,");
+    //    TString Chain("MagF,mysql,y2011,nodefault,");
+    TString Chain("MagF,mysql,sdt20190211,nodefault,");
     Chain += field;
     bfc(1,Chain,0);
 #else
