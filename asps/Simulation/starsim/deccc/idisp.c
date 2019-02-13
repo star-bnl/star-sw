@@ -1,7 +1,10 @@
 /*
-* $Id: idisp.c,v 1.4 2005/07/18 22:22:11 fisyak Exp $
+* $Id: idisp.c,v 1.5 2019/02/13 17:02:43 jwebb Exp $
 * $Name:  $
 * $Log: idisp.c,v $
+* Revision 1.5  2019/02/13 17:02:43  jwebb
+* Fix for 64 bit adresses.
+*
 * Revision 1.4  2005/07/18 22:22:11  fisyak
 * Add flag WithoutPGI to get free_ and malloc_ without PGI
 *
@@ -23,11 +26,11 @@
 /*CMZ :          28/05/2000  14.36.45  by  Pavel Nevski*/
 /*-- Author :    Pavel Nevski   01/09/99*/
 /* provide displacements for pgf77 simulation */
-int idisp0_ (a,b)   char  *a,*b;     { return  b-a;    }
-int idisp1_ (a,b)   char  *a,*b;     { return (b-a)+1; }
-int idisp2_ (a,b)   short *a,*b;     { return (b-a)+1; }
-int idisp4_ (a,b)   int   *a,*b;     { return (b-a)+1; }
-int iponter_(a,b)   int   *a,**b;    { return (*b-a);  }
+__UINT64_TYPE__ idisp0_ (a,b)   char  *a,*b;     { return (b-a);    }
+__UINT64_TYPE__ idisp1_ (a,b)   char  *a,*b;     { return (b-a)+(__UINT64_TYPE__)1; }
+__UINT64_TYPE__ idisp2_ (a,b)   short *a,*b;     { return (b-a)+(__UINT64_TYPE__)1; }
+__UINT64_TYPE__ idisp4_ (a,b)   int   *a,*b;     { return (b-a)+(__UINT64_TYPE__)1; }
+__UINT64_TYPE__ iponter_(a,b)   int   *a,**b;    { return (*b-a);  }
 #ifdef  WithoutPGI
 #include <stdlib.h>
 int malloc_(int  *size){return (int) malloc((size_t) *size);}
