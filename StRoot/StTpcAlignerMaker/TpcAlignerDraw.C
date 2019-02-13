@@ -1,5 +1,5 @@
 /*
-  root.exe -q -b TpcAlignerDraw.C+
+  root.exe -q -b TpcAlignerDraw.C+ >& TpcAlignerDraw.log &
 foreach f (`ls -1d 2014*.root`)
 set b = `basename ${f} .root`; root.exe -q -b 'TpcAlignerDraw.C+(0,"'${f}'")' >& ${b}.log &
 end
@@ -7,6 +7,17 @@ FPE_OFF
 foreach f (`ls -1d 2014*.IO*.Errors.root`)
 set b = `basename ${f} .root`; root.exe -q -b ${f} 'TpcAlignerDraw.C+(2)' >& ${b}.Fit.log &
 end
+
+@ count = 0
+foreach r (`ls -1d st_*.root | sed -e 's/st_//' -e 's/adc_//' -e 's/hltcosmic_//' -e 's/gmt_//' | awk -F_ '{print $1}' | sort -u`)
+  set file = st${r}Plots.Cut.Errors.root
+  if (-r ${file}) continue;
+  root.exe -q -b 'TpcAlignerDraw.C+(0,"st*'${r}'*.root")' >& ${r}.log &
+    @ count++;  echo "count $count";
+    if ($count > 40) break;
+end
+
+
 */
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "Riostream.h"
@@ -178,6 +189,7 @@ void TpcAlignerDrawIO(const Char_t *files = "*.root", Bool_t laser = kFALSE) {
 #endif
   // Book Histograms
   TString Out(files); 
+  Out.ReplaceAll("st_","");
   Out.ReplaceAll(".root","Plots");
   Out.ReplaceAll("*","");
   //  Out += ".2GeVC";

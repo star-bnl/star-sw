@@ -1,3 +1,6 @@
+/*
+  root.exe MakeInnerOuterSector.C
+*/
 //#define __TpcInnerSector__ 
 class St_db_Maker;
 class TTable;
@@ -133,25 +136,28 @@ void MakeInnerOuterSector(const Char_t *opt = 0){
 	     << "\ty " << Pass[r].Data[i].y << "+/-" <<Pass[r].Data[i].Dy
 	     << "\tz " << Pass[r].Data[i].z << "+/-" <<Pass[r].Data[i].Dz << endl;
 	Double_t xyz[3] = {0, 0, 0};
-#if 1 /* no alpha, beta rotation */
+#if 0 /* alpha, beta rotations */
 	if (Pass[r].Data[i].Dalpha >= 0) dR.RotateX(TMath::RadToDeg()*Pass[r].Data[i].alpha*1e-3);
 	if (Pass[r].Data[i].Dbeta  >= 0) dR.RotateY(TMath::RadToDeg()*Pass[r].Data[i].beta *1e-3);
-	if (Pass[r].Data[i].Dgamma >= 0) dR.RotateZ(TMath::RadToDeg()*Pass[r].Data[i].gamma*1e-3);
 #endif /* no beta rotation */
+	if (Pass[r].Data[i].Dgamma >= 0) dR.RotateZ(TMath::RadToDeg()*Pass[r].Data[i].gamma*1e-3);
 	if (Pass[r].Data[i].Dx >= 0) xyz[0] =  1e-4*Pass[r].Data[i].x;
 	if (Pass[r].Data[i].Dy >= 0) xyz[1] =  1e-4*Pass[r].Data[i].y;
 	if (Pass[r].Data[i].Dz >= 0) xyz[2] =  1e-4*Pass[r].Data[i].z;
 	dR.SetTranslation(xyz);           cout << "dR\t"; dR.Print();
       }
-      //    dR = StTpcDb::instance()->Flip().Inverse()*dR*StTpcDb::instance()->Flip(); cout << "F^-1 dR F\t"; dR.Print();
+  //new:  global = Tpc2GlobalMatrix() * SupS2Tpc(sector) * StTpcSuperSectorPosition(sector) * Flip() * {StTpcInnerSectorPosition(sector)} | StTpcOuterSectorPosition(sector)}
+      TGeoHMatrix dR1 = FlipI * dR * Flip; cout << "F^-1 dR F\t"; dR1.Print();
       //      TGeoHMatrix dRI = dR.Inverse(); cout << "dR^-1\t"; dRI.Print();
       //      TGeoHMatrix dRT = FlipI * dRI * Flip; cout << "F^-1 dR^-1 F\t"; dRT.Print();
       //      TGeoHMatrix dRT = FlipI * dR * Flip; cout << "F^-1 dR F\t"; dRT.Print();
+      TGeoHMatrix dRI = dR1.Inverse(); cout << "dR^-1\t"; dRI.Print();
 #ifndef __TpcInnerSector__
       LS = dR * LSold; cout << "LS_new\t"; LS.Print();
 #else /* __TpcInnerSector__ */
-      //      LS = LSold.Inverse() * dR.Inverse(); cout << "LS_new\t"; LS.Print();
-      LS = dR.Inverse() * LSold; cout << "LS_new\t"; LS.Print();
+      //      TGeoHMatrix LSoldI = LSold.Inverse();
+      //      LS = LSoldI * dRI; cout << "LS_new\t"; LS.Print();
+      LS = dRI * LSold; cout << "LS_new\t"; LS.Print();
 #endif /* !  __TpcInnerSector__ */
       //      LS = dRT * LSold; cout << "LS_new\t"; LS.Print();
       Survey_st row; memset (&row, 0, sizeof(Survey_st));
