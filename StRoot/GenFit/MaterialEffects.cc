@@ -222,7 +222,7 @@ void MaterialEffects::stepper(const RKTrackRep* rep,
 
   static const double maxRelMomLoss = .01; // maximum relative momentum loss allowed
   static const double Pmin   = 4.E-3;           // minimum momentum for propagation [GeV]
-  static const double minStep = 1.E-4; // 1 µm
+  static const double minStep = 10.E-4; // 1 µm => 10 µm (YF)
 
   // check momentum
   if(mom < Pmin){

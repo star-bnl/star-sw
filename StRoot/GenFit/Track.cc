@@ -922,8 +922,12 @@ double Track::getTrackLen(AbsTrackRep* rep, int startId, int endId) const {
 
   for (std::vector<TrackPoint*>::const_iterator pointIt = trackPoints_.begin() + startId; pointIt != trackPoints_.begin() + endId; ++pointIt) {
     if (! (*pointIt)->hasFitterInfo(rep)) {
+#ifdef __NO_YF__
       Exception e("Track::getTracklength: trackPoint has no fitterInfo", __LINE__,__FILE__);
       throw e;
+#else
+      continue;
+#endif
     }
 
     if (pointIt != trackPoints_.begin() + startId) {
