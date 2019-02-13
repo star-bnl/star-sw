@@ -64,12 +64,17 @@ void StxCAInterface::MakeSettings() {
     SlicePar.SetISlice( iSlice );
     SlicePar.SetNInnerRows ( NoOfInnerRows ); 
     SlicePar.SetNTpcRows ( NRows ); 
+    //#define __ADD_TOF__
+#ifndef __ADD_TOF__
+    SlicePar.SetNRows ( NRows );
+#else
 #define __SPLIT_TOF__
 #ifdef __SPLIT_TOF__
     SlicePar.SetNRows ( NRows + 4); // +4 for BToF
 #else /* ! __SPLIT_TOF__ */
     SlicePar.SetNRows ( NRows + 1); // +1 for BToF
 #endif     
+#endif /* ! __ADD_TOFF__ */
     Double_t beta = 0;
     if (sector > 12) beta = (24-sector)*2.*TMath::Pi()/12.;
     else             beta =     sector *2.*TMath::Pi()/12.;
@@ -98,6 +103,7 @@ void StxCAInterface::MakeSettings() {
     for( int iR = 0; iR < SlicePar.NRows(); iR++){
       if (iR < SlicePar.NTpcRows()    )
 	SlicePar.SetRowX(iR, St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,iR+1));
+#ifndef __ADD_TOF__
       else {
 #ifdef __SPLIT_TOF__
 	Int_t mc = iR -  SlicePar.NTpcRows();
@@ -107,6 +113,7 @@ void StxCAInterface::MakeSettings() {
 	SlicePar.SetRowX(iR, 211.5); // ToF 
 #endif     
       }
+#endif /* ! __ADD_TOF__ */
     }
 
     Double_t *coeffInner = 0;
@@ -166,12 +173,6 @@ void StxCAInterface::MakeHits() {
   if (! pEvent) return;
   StTpcHitCollection* TpcHitCollection = pEvent->tpcHitCollection();
   if (! TpcHitCollection) { LOG_ERROR << "StxCAInterface::MakeHits: No TPC Hit Collection" << endm; return;}
-  // BToF hits
-  Int_t nBToFHit = 0;
-  StBTofCollection *bToFcol = pEvent->btofCollection();
-  if (!bToFcol) {
-    LOG_ERROR << "StxCAInterface::MakeHits:\tNo StBTofCollection" << endm;
-  }
   UInt_t numberOfSectors = TpcHitCollection->numberOfSectors();
   for (UInt_t i = 0; i< numberOfSectors; i++) {
     StTpcSectorHitCollection* sectorCollection = TpcHitCollection->sector(i);
@@ -227,7 +228,13 @@ void StxCAInterface::MakeHits() {
     }
   }
   LOG_INFO << "StxCAInterface::MakeHits:  Loaded " << fCaHits.size() << " TPC hits." << endm;
-#if 1
+#ifdef __ADD_TOF__
+  // BToF hits
+  Int_t nBToFHit = 0;
+  StBTofCollection *bToFcol = pEvent->btofCollection();
+  if (!bToFcol) {
+    LOG_ERROR << "StxCAInterface::MakeHits:\tNo StBTofCollection" << endm;
+  }
   // BToF hits
   if (bToFcol) {
     StSPtrVecBTofHit& vec = bToFcol->tofHits();
@@ -312,7 +319,7 @@ void StxCAInterface::MakeHits() {
     }
   }
   LOG_INFO <<"StxCAInterface::MakeHits: Loaded "<< nBToFHit << " BTof hits."<<endm;
-#endif /* BTOF */  
+#endif /* ! __ADD_TOF__  */  
 } // void StxCAInterface::MakeHits()
 //________________________________________________________________________________
 void StxCAInterface::ConvertPars(const AliHLTTPCCATrackParam& caPar, Double_t _alpha, StxCApar& stxPar)

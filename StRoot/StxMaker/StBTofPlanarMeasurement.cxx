@@ -49,15 +49,14 @@ StBTofPlanarMeasurement::StBTofPlanarMeasurement(const StBTofHit *hit,TrackPoint
   Double_t xyzG[3];
   D.LocalToMaster(xyzL,xyzG);
   TGeoHMatrix DT(D);
+  Double_t *r = DT.GetRotationMatrix();
   if (DT.Determinant() < 0) {
-    Double_t *r = DT.GetRotationMatrix();
     //      for (Int_t i = 0; i < 9; i++) r[i] = - r[i];
     r[1] = - r[1];
     r[4] = - r[4];
     r[7] = - r[7];
   }
   TVector3 o(DT.GetTranslation());
-  const Double_t *r = DT.GetRotationMatrix();
   TVector3 u(r[1],r[4],r[7]);
   TVector3 v(r[2],r[5],r[8]);
   setPlane(genfit::SharedPlanePtr(new genfit::DetPlane(o,u,v)),planeId);

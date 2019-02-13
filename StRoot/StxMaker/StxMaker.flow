@@ -253,12 +253,15 @@ StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr)
               genfit::RKTrackRep::RKutta
                 genfit::RKTrackRep::estimateStep <<<<<<<<<<<<<<<
                   genfit::MaterialEffects::stepper
+		    genfit::TGeoMaterialInterface::findNextBoundary
+                      TGeoManager::FindNextBoundary
                     genfit::TGeoMaterialInterface::initTrack
                       TGeoManger::IsSameLocation
                       TGeoManger::SetCurrentDirection
                     genfit::TGeoMaterialInterface::findNextBoundary
                       TGeoManager::FindNextBoundary
                         TGeoNavigator::FindNextBoundary
+	                  TGeoNavigator:FindNextBoundary
         genfit::KalmanFitterRefTrack::fitTrack
           genfit::KalmanFitterRefTrack::processTrackPoint
 	    >> get predicted state p_ and cov. matrix C_

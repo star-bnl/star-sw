@@ -173,7 +173,7 @@ Int_t StxMaker::Make(){
       if (! hit->usedInFit()) continue;
       NoHitsUsed++;
     }
-#if 1
+#if 0
     cout << "Track #" << iTr << "\tNoTpcHitsUsed = " << NoTpcHitsUsed << "\tNoNonTpcHitsUsed = " << NoNonTpcHitsUsed << endl;
 #endif
     if (NoHitsTotal < 10) {
@@ -352,7 +352,7 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
     // Set Debug flags
     if (Debug()) {
       if (fitter) fitter->setDebugLvl(10);
-      //    gGeoManager->SetVerboseLevel(5);
+      gGeoManager->SetVerboseLevel(5);
 #ifndef __TPC3D__ /* ! __TPC3D__ */
       StTpcPlanarMeasurement::SetDebug(1);
 #endif /* ! __TPC3D__ */    
@@ -360,7 +360,7 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
       //    genfit::MaterialEffects::getInstance()->setDebugLvT(2);
     } else {
       if (fitter) fitter->setDebugLvl(0);
-      //    gGeoManager->SetVerboseLevel(0);
+      gGeoManager->SetVerboseLevel(0);
 #ifndef __TPC3D__ /* ! __TPC3D__ */
       StTpcPlanarMeasurement::SetDebug(0);
 #endif /* ! __TPC3D__ */ 
@@ -439,6 +439,9 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
       fitTrack.insertPoint(new genfit::TrackPoint(measurement, &fitTrack));
     }
   }
+  TVector3 posI = stateRefOrig.getPos();
+  //  gGeoManager->SetCurrentPoint(posI.X(), posI.Y(), posI.Z());
+  gGeoManager->FindNode(posI.X(), posI.Y(), posI.Z());
   try{
     //check
     fitTrack.checkConsistency();
@@ -451,7 +454,7 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
 	fitTrack.getFittedState().Print();
       }
       //check
-      fitTrack.checkConsistency();
+      //      fitTrack.checkConsistency();
     }
   }
   catch(genfit::Exception& e){
@@ -611,6 +614,7 @@ Int_t StxMaker::FillDetectorInfo(StTrack *gTrack, genfit::Track * track, Bool_t 
   for (std::vector< genfit::TrackPoint* >::const_iterator it = track->getPointsWithMeasurement().begin(); 
        it != track->getPointsWithMeasurement().end(); ++it) {
     genfit::TrackPoint *tp = *it;
+    genfit::AbsFitterInfo* fitterInfo = tp->getFitterInfo();
     for (std::vector< genfit::AbsMeasurement* >::const_iterator im = tp->getRawMeasurements().begin(); 
 	 im !=  tp->getRawMeasurements().end(); ++im) {
       dets[0][kPP]++;
@@ -629,6 +633,51 @@ Int_t StxMaker::FillDetectorInfo(StTrack *gTrack, genfit::Track * track, Bool_t 
       Int_t used = hit->usedInFit();
       used++;
       hit->setFitFlag(used);
+      // dX calculation
+      /*
+  	     ( 1 -g  b )               (   u_x -g*u_y + b*u_z)                (   v_x -g*v_y + b*v_z) 
+	R =  ( g  1 -a ); u' = R * u = ( g*u_x +  u_y - a*u_z);	 v' = R * v = ( g*v_x +  v_y - a*v_z);
+	     (-b  a  1 )               (-b*u_x +a*u_y +   u_z) 	              (-b*v_x +a*v_y +   v_z)  
+
+	     (w,u,v)     - original
+             (w1,u1,x1)  - new => (R w, R u, R v);
+                           ( i   j   k  )
+              w = u x v =  ( u_x u_y u_z) = (u_y*v_z - u_z*v_y, v_x*u_y - v_y*u_x, u_x*v_y + v_x*u_y)
+                           ( v_x v_y v_z)
+                           (   w_x -g*w_y + b*w_z)   (u'_y*v'_z - u'_z*v'_y)        (-g*w_y + b*w_z)
+	      w' = R * w = ( g*w_x +  w_y - a*w_z) = (v'_x*u'_y - v'_y*u'_x) = w +  ( g*w_x - a*w_z)
+                           (-b*w_x +a*w_y +  w_z)    (u'_x*v'_y + v'_x*u'_y)        (-b*w_x + a*w_y)
+
+                           (( g*u_x +  u_y - a*u_z)*(-b*v_x +a*v_y +   v_z) - (-b*u_x +a*u_y +   u_z)*( g*v_x +  v_y - a*v_z))
+		=          ((   v_x -g*v_y + b*v_z)*( g*u_x +  u_y - a*u_z) - ( g*v_x +  v_y - a*v_z)*(   u_x -g*u_y + b*u_z))
+ 			   ((   u_x -g*u_y + b*u_z)*( g*v_x +  v_y - a*v_z) + (   v_x -g*v_y + b*v_z)*( g*u_x +  u_y - a*u_z))
+
+
+                           (( g*u_x +  u_y - a*u_z)*(-b*v_x) +( g*u_x +  u_y - a*u_z)(a*v_y) +   ( g*u_x +  u_y - a*u_z)*(v_z) - (-b*u_x +a*u_y +   u_z)*( g*v_x) - (-b*u_x +a*u_y +   u_z*v_y - a*v_z))
+              w' = 	   ((   v_x -g*v_y + b*v_z)*( g*u_x +  u_y - a*u_z) - ( g*v_x +  v_y - a*v_z)*(   u_x -g*u_y + b*u_z))
+			   ((   u_x -g*u_y + b*u_z)*( g*v_x +  v_y - a*v_z) + (   v_x -g*v_y + b*v_z)*( g*u_x +  u_y - a*u_z))
+
+       */
+      if (! fitterInfo) continue;
+      genfit::MeasuredStateOnPlane& measuredPointState =  (genfit::MeasuredStateOnPlane&) fitterInfo->getFittedState(kTRUE);
+      if (detId == kTpcId) {
+	StTpcHit *tpcHit = (StTpcHit *) hit;
+	genfit::DetPlane &startPlane = (*(measuredPointState.getPlane()));
+	Double_t dx[2] = {0};
+	TVector3 O(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z());
+	TVector3 dO;
+	for (Int_t i = 0; i < 2; i++) {
+	  if (! i) dO = TVector3(tpcHit->positionU().x(),tpcHit->positionU().y(),tpcHit->positionU().z());
+	  else     dO = TVector3(tpcHit->positionL().x(),tpcHit->positionL().y(),tpcHit->positionL().z());
+	  dO -= O;
+	  genfit::DetPlane *aPlane = new genfit::DetPlane(startPlane);
+	  TVector3 o = startPlane.getO();
+	  aPlane->setO(o+dO);
+	  genfit::StateOnPlane state = *measuredPointState.clone();
+	  dx[i] = state.extrapolateToPlane(genfit::SharedPlanePtr(aPlane),i);
+	}
+	tpcHit->setdX(TMath::Abs(dx[0])+TMath::Abs(dx[1]));
+      }
     }
   }
   genfit::TrackPoint *firstTP = track->getPointWithMeasurementAndFitterInfo(0);

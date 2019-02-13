@@ -61,15 +61,16 @@ StTpcPlanarMeasurement::StTpcPlanarMeasurement(const StTpcHit *hit,TrackPoint* t
   const TGeoHMatrix &D = *nodeP->GetMatrix();
   //  genfit::eMeasurementType type = genfit::Spacepoint;
   //  measurementTypes.push_back(type);
-  Double_t xyzG[3] = {fHit->position().x(),fHit->position().y(),fHit->position().z()};
+  Double_t xyzG[3]  = {fHit->position().x(), fHit->position().y(), fHit->position().z() };
+  Double_t xyzGU[3] = { hit->positionU().x(), hit->positionU().y(), hit->positionU().z()};
+  Double_t xyzGL[3] = { hit->positionL().x(), hit->positionL().y(), hit->positionL().z()};
   Double_t xyzL[3];
   D.MasterToLocal(xyzG, xyzL);
   // Shift center of pad row
   Double_t shiftG[3];
   TGeoHMatrix DT(D);
+  Double_t *r = DT.GetRotationMatrix();
   if (DT.Determinant() < 0) {
-    Double_t *r = DT.GetRotationMatrix();
-    //      for (Int_t i = 0; i < 9; i++) r[i] = - r[i];
     r[1] = - r[1];
     r[4] = - r[4];
     r[7] = - r[7];
@@ -80,10 +81,11 @@ StTpcPlanarMeasurement::StTpcPlanarMeasurement(const StTpcHit *hit,TrackPoint* t
     D.LocalToMaster(shiftL,shiftG);
   }
   DT.SetTranslation(shiftG);
-  Double_t xyzLT[3];
-  DT.MasterToLocal(xyzG, xyzLT);
+  Double_t xyzLT[3], xyzLTU[3], xyzLTL[3];;
+  DT.MasterToLocal(xyzG,  xyzLT);
+  DT.MasterToLocal(xyzGU, xyzLTU);
+  DT.MasterToLocal(xyzGL, xyzLTL);
   TVector3 o(shiftG);
-  const Double_t *r = DT.GetRotationMatrix();
   TVector3 u(r[1],r[4],r[7]);
   TVector3 v(r[2],r[5],r[8]);
   DT.MasterToLocal(xyzG, xyzL);
