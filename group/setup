@@ -327,8 +327,8 @@ switch ($pkg)
     case "gcc*":
 	if ( $?DECHO ) echo "===================== case gcc $pkg =============="
       if ( -x $GROUP_DIR/dropit ) then
-	setenv PATH            `$GROUP_DIR/dropit alt $STAR_HOST_SYS gcc4 /opt/rh/devtoolset`
-	setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH alt $STAR_HOST_SYS gcc4 /opt/rh/devtoolset`
+	setenv PATH            `$GROUP_DIR/dropit alt $STAR_HOST_SYS gcc /opt/rh/devtoolset`
+	setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH alt $STAR_HOST_SYS gcc /opt/rh/devtoolset`
       endif
       setenv  STARCMPL "gcc"
       setenv xSTARCMPL $pkg; # "gcc";
@@ -442,8 +442,6 @@ switch ($pkg)
 	  setenv PYTHONPATH  ${devtools}/lib64/python2.7/site-packages:${devtools}/lib/python2.7/site-packages:/opt/rh/devtoolset-3/lib64/python2.6/site-packages:/opt/rh/devtoolset-3/lib/python2.6/site-packages
 	  setenv PKG_CONFIG_PATH  	
 	endif
-	breaksw
-	case "gcc":
 	breaksw
 	default:
 	breaksw
