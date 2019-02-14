@@ -26,7 +26,7 @@ endif
 #DEFINES += -DDO_DBG
 
 
-OBJS := daq_fcs.o
+OBJS := daq_fcs.o fcs_data_c.o
 
 LIBS = libfcs.a
 
@@ -56,4 +56,7 @@ daq_fcs.o: ../../../../StRoot/RTS/include/rts.h
 daq_fcs.o: ../DAQ_READER/daq_dta_structs.h
 daq_fcs.o: daq_fcs.h
 daq_fcs.o: ../DAQ_READER/daq_det.h
+daq_fcs.o: fcs_data_c.h
+fcs_data_c.o: ../../../../StRoot/RTS/include/rtsLog.h
+fcs_data_c.o: fcs_data_c.h
 daq_fcs.o: ../DAQ_READER/daq_det.h
