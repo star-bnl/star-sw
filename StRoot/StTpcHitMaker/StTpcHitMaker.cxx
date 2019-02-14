@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.74 2018/10/17 20:45:27 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.75 2019/02/14 17:40:39 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.75  2019/02/14 17:40:39  fisyak
+ * Fix selection for row number (Thanks Iraklii for checking)
+ *
  * Revision 1.74  2018/10/17 20:45:27  fisyak
  * Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
  *
