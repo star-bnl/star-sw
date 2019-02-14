@@ -20,6 +20,7 @@ enum E_Failed {kBigVari=-1,kBigErrs=-99};
 
 public:	
 StvFitter(const char *name="DefaultFitter");
+      void    Set(int idir) 		{ mDir = idir; }
       void    Set(const StvNodePars *inPars, const StvFitErrs *inErrs
                  ,      StvNodePars *otPars=0,     StvFitErrs *otErrs=0);
       void    Set(const StvNodePars *inPars, const StvFitErrs *inErrs
@@ -50,6 +51,7 @@ protected:
       char         mBeg[1];
       char         mFailed; 	//Fail flag. Something completely wrong
       char         mKase; 	//0=fit to hit,1=refit,2=fit to vertex
+      char         mDir;	//Direction of moving (0=Outside==>inside)
 const StvNodePars *mInPars;	//1st input params
 const StvFitErrs  *mInErrs;	//1st input params errors
 const StvNodePars *mJnPars;	//2nd input params
