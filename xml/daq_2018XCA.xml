@@ -3,8 +3,8 @@
         <command>
          cd ${SUBMITTINGDIRECTORY}
 #   source ~/bin/SetVersion.csh
-#starver TFG19a
-    starver .DEV2
+starver TFG19b
+#    starver .DEV2
 #  echo $INPUTFILE0 | grep ':'
 #  if (! $?) then
 #    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
@@ -61,5 +61,6 @@
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2018/27GeV_production_2018/168/*/*.daq" /> -->
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2018/production_3p85GeV_fixedTarget_2018/*/*/*.daq" /> -->
 <!-- <input URL="file:/star/data03/daq/2018/16*/*/*.daq" /> -->
-<input URL="file:/net/l401/data/scratch1/daq/2018/27GeV_production_2018/168/*/*.daq" />
+<!-- <input URL="file:/net/l401/data/scratch1/daq/2018/27GeV_production_2018/168/*/*.daq" /> -->
+<input URL="file:/star/data03/daq/2018/162/19162040/st_physics_*.daq" />
 </job>

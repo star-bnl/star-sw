@@ -572,7 +572,7 @@ Replace [^+([NUMBER][OPR][NUMBER]]   with  [^+([COMPUTE  #1#2#3]]
 Replace [;STRUCTURE/#/;] with [;[EMIT STRUCTURE]/#1/;]
 %V1
 Replace [;STRUCTURE/#/;] with [
-         {IF}[COPY X]{}{ELSE}{;INTEGER IDISP1,IDISP2,IDISP4,IDISP0,IPONTER;}
+         {IF}[COPY X]{}{ELSE}{;INTEGER *8 IDISP1,IDISP2,IDISP4,IDISP0,IPONTER;}
          [SETR R=1] [SETR X=0]   ;"*";"staf structure /#1/";
          ^bla(#1)]
 Replace [^bla(#)#;]                                   with  [;"#2";  ^bla(#1)]
@@ -584,10 +584,11 @@ Replace [^bla(#) [TSYS]*[NUMBER] [IDENT](#)#;]        with  ["*";"#6";#2*#3 #1__
          DFN[.#1__#4(##+TYPE_#1_#4(]      AS [\#1__#4(##1+#2_#3(]
          DFN[\#1__#4(]                    AS [#1__#4(]
          {IF}'#2'='CHARACTER' {
-           DFN[\#1__#4(##+CHARACTER_##(#1,##))]     AS
-           [#1__#4(##1)(IDISP0(#1,##3)+1:IDISP0(#1,##3)+##2)]
-           DFN[\#1__#4(##+CHARACTER_##(#1,##))(##:##)]     AS
-           [#1__#4(##1)(IDISP0(#1,##3)+##4:IDISP0(#1,##3)+##5)] }
+           "handle struct.string = char"
+           DFN[\#1__#4(##+CHARACTER_##(#1,##))]        AS [#1__#4(IDISP4(#1,##3))(1:##2)]
+           "handle struct.string(a:b) = char   ... I think"
+           DFN[\#1__#4(##+CHARACTER_##(#1,##))(##:##)] AS [#1__#4(IDISP4(#1,##3))(##4:##5)]
+         }
          [SETR X=((([COPY X]+#3-1)/#3)*#3)]
          [SETR Y=[COPY X]+1] [SETR X=[COPY X]+#3*#5] [SETR Z=([COPY Y]+3)/4]
          [EMIT Equivalence (#1__#4,#1([COPY Y]:[COPY X]));
