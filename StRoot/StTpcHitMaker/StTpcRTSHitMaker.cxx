@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.54 2018/10/17 20:45:27 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.55 2019/02/14 17:40:39 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -173,8 +173,9 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 }
 //________________________________________________________________________________
 Int_t StTpcRTSHitMaker::Make() {
-  gBenchmark->Reset();
-  gBenchmark->Start("StTpcRTSHitMaker::Make");
+  TBenchmark *myBenchmark = new TBenchmark();
+  myBenchmark->Reset();
+  //  myBenchmark->Start("StTpcRTSHitMaker::Make");
   static  Short_t ADCs[__MaxNumberOfTimeBins__];
   static UShort_t IDTs[__MaxNumberOfTimeBins__];
   StEvent*   rEvent      = (StEvent*)    GetInputDS("StEvent");
@@ -213,8 +214,8 @@ Int_t StTpcRTSHitMaker::Make() {
 #endif
     Int_t NoAdcs = 0;
     daq_dta *dtas[2] = {
-      fTpx ?  fTpx->put("adc_sim",0,St_tpcPadConfigC::instance()->numberOfRows(sec)+1,0,mTpx_RowLen[sec-1]) : 0,
-      St_tpcPadConfigC::instance()->iTPC(sec) && fiTpc ? fiTpc->put("adc_sim",0,St_tpcPadConfigC::instance()->numberOfRows(sec)+1,0,mTpx_RowLen[sec-1]) : 0
+      fTpx ?  fTpx->put("adc_sim",0,St_tpcPadConfigC::instance()->numberOfRows(sec),0,mTpx_RowLen[sec-1]) : 0,
+      St_tpcPadConfigC::instance()->iTPC(sec) && fiTpc ? fiTpc->put("adc_sim",0,St_tpcPadConfigC::instance()->numberOfRows(sec),0,mTpx_RowLen[sec-1]) : 0
     };
     for (Int_t row = minRow; row <= TMath::Min(maxRow,digitalSector->numberOfRows()); row++) {
       if (! St_tpcPadGainT0BC::instance()->livePadrow(sec,row)) continue;
@@ -240,9 +241,9 @@ Int_t StTpcRTSHitMaker::Make() {
 	  }
 	}
 	if (l > 0) {
-	  gBenchmark->Start("StTpcRTSHitMaker::Make::finalize");
+	  myBenchmark->Start("StTpcRTSHitMaker::Make::finalize");
 	  dta->finalize(l,sec,row,pad);
-	  gBenchmark->Stop("StTpcRTSHitMaker::Make::finalize");
+	  myBenchmark->Stop("StTpcRTSHitMaker::Make::finalize");
 	  NoAdcs += l;
 	}
       } // pad loop
@@ -449,8 +450,9 @@ Int_t StTpcRTSHitMaker::Make() {
     return kStSkip;
   }
   if (! IAttr("NoTpxAfterBurner")) StTpcHitMaker::AfterBurner(hitCollection);
-  gBenchmark->Stop("StTpcRTSHitMaker::Make");
-  gBenchmark->Show("StTpcRTSHitMaker::Make");
-  gBenchmark->Show("StTpcRTSHitMaker::Make::finalize");
+  myBenchmark->Stop("StTpcRTSHitMaker::Make");
+  myBenchmark->Show("StTpcRTSHitMaker::Make");
+  myBenchmark->Show("StTpcRTSHitMaker::Make::finalize");
+  delete myBenchmark;
   return kStOK;
 }

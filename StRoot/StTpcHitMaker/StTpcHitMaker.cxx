@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.74 2018/10/17 20:45:27 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.75 2019/02/14 17:40:39 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.75  2019/02/14 17:40:39  fisyak
+ * Fix selection for row number (Thanks Iraklii for checking)
+ *
  * Revision 1.74  2018/10/17 20:45:27  fisyak
  * Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
  *
@@ -274,6 +277,12 @@ static Int_t _debug = 0;
 #ifdef __NOT_ZERO_SUPPRESSED_DATA__
 #include "StDetectorDbMaker/St_tpcPedestalC.h"
 #endif
+static  const Char_t *Names[StTpcHitMaker::kAll] = {"undef",
+						    "tpc_hits","tpx_hits","itpc_hits",
+						    "TpcPulser","TpxPulser","iTPCPulser",
+						    "TpcDumpPxls2Nt","TpxDumpPxls2Nt",
+						    "TpcRaw","TpxRaw","iTPCRaw",
+						    "TpcAvLaser","TpxAvLaser"};
 //_____________________________________________________________
 StTpcHitMaker::StTpcHitMaker(const char *name) : StRTSBaseMaker("tpc",name), kMode(kUndefined),
 						 kReaderType(kUnknown), mQuery(""), fTpc(0), fAvLaser(0), fSectCounts(0) {
@@ -285,13 +294,7 @@ StTpcHitMaker::StTpcHitMaker(const char *name) : StRTSBaseMaker("tpc",name), kMo
 //_____________________________________________________________
 Int_t StTpcHitMaker::Init() {
  LOG_INFO << "StTpcHitMaker::Init as\t"  << GetName() << endm;
-  const Char_t *Names[kAll] = {"undef",
-			       "tpc_hits","tpx_hits","itpc_hits",
-			       "TpcPulser","TpxPulser","iTPCPulser"
-			       "TpcDumpPxls2Nt","TpxDumpPxls2Nt",
-			       "TpcRaw","TpxRaw","iTPCRaw",
-			       "TpcAvLaser","TpxAvLaser"};
-  TString MkName(GetName());
+   TString MkName(GetName());
   for (Int_t k = 1; k < kAll; k++) {
     if (MkName.CompareTo(Names[k],TString::kIgnoreCase) == 0) {kMode = (EMode) k; break;}
   }
@@ -435,42 +438,54 @@ Int_t StTpcHitMaker::Make() {
     fId = 0;
     // invoke tpcReader to fill the TPC DAQ sector structure
     Int_t hitsAdded = 0;
-    for (Int_t k = kStandardiTPC;  k > 0; k--) {
+    Int_t kMin = kUnknown;
+    for (Int_t k = kStandardiTPC;  k > kMin; k--) {
       if (k > kLegacyTpx) 
 	mQuery = Form("%s/%s[%i]",tpcDataNames[k],cldadc.Data(),sector);
       else
 	mQuery = Form("%s[%i]",tpcDataNames[k],sector);
       StRtsTable *daqTpcTable = GetNextDaqElement(mQuery);
       if (! daqTpcTable) continue;
+      Int_t Nrows = daqTpcTable->GetNRows();
+      //      if (! Nrows) continue;
       kReaderType = (EReaderType) k;
+      //      if (kReaderType > kLegacyTpx) kMin = kLegacyTpx;
       while (daqTpcTable) {
 	if (Sector() == sector) {
-	  fTpc = 0;
-	  if (kReaderType == kLegacyTpx || kReaderType == kLegacyTpc) fTpc = (tpc_t*)*DaqDta()->begin();
-	  Int_t row = St_tpcPadConfigC::instance()->numberOfRows(sector);
-	  if (row >= minRow && row <= maxRow) {
-	    switch (kMode) {
-	    case kTpc: 
-	    case kiTPC: 
-	    case kTpx:            hitsAdded += UpdateHitCollection(sector); break;
-	    case kTpcPulser:       
-	    case kTpxPulser:      if (fTpc) DoPulser(sector);               break;
-	    case kTpcAvLaser:   
-	    case kTpxAvLaser:   
-	      if ( fTpc)                    TpcAvLaser(sector);
-	      else 	                        TpxAvLaser(sector);
-	      fSectCounts->Fill(sector);
-	      break;
-	    case kTpcDumpPxls2Nt:  
-	    case kTpxDumpPxls2Nt: if (fTpc) DumpPixels2Ntuple(sector);     break;
-	    case kTpcRaw: 
-	    case kTpxRaw: 
-	    case kiTPCRaw: 
-	      if ( fTpc) RawTpcData(sector);
-	      else 	     RawTpxData(sector);          
-	      break;
-	    default:
-	      break;
+	  if (Debug()/100 > 0) {
+	    daqTpcTable->Print(0,10);
+	  }
+	  if (daqTpcTable->GetNRows()) {
+	    fTpc = 0;
+	    if (kReaderType == kLegacyTpx || kReaderType == kLegacyTpc) fTpc = (tpc_t*)*DaqDta()->begin();
+	    Int_t row = RowNumber();
+	    if (row >= minRow && row <= maxRow) {
+	      if (Debug()) {
+		LOG_INFO << "StTpcHitMaker::Make(" << Names[kMode] << ") => " << tpcDataNames[k] << " for sector = " << sector << " row = " << row << endm;
+	      }
+	      switch (kMode) {
+	      case kTpc: 
+	      case kiTPC: 
+	      case kTpx:            hitsAdded += UpdateHitCollection(sector); break;
+	      case kTpcPulser:       
+	      case kTpxPulser:      if (fTpc) DoPulser(sector);               break;
+	      case kTpcAvLaser:   
+	      case kTpxAvLaser:   
+		if ( fTpc)          TpcAvLaser(sector);
+		else 	          TpxAvLaser(sector);
+		fSectCounts->Fill(sector);
+		break;
+	      case kTpcDumpPxls2Nt:  
+	      case kTpxDumpPxls2Nt: if (fTpc) DumpPixels2Ntuple(sector);     break;
+	      case kTpcRaw: 
+	      case kTpxRaw: 
+	      case kiTPCRaw: 
+		if ( fTpc) RawTpcData(sector);
+		else 	 RawTpxData(sector);          
+		break;
+	      default:
+		break;
+	      }
 	    }
 	  }
 	}
@@ -597,13 +612,6 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t
   UInt_t hw = 1;   // detid_tpc
   hw += sector << 4;     // (row/100 << 4);   // sector
   hw += row    << 9;     // (row%100 << 9);   // row
-#if 0  
-  Int_t npads = TMath::Abs(cluster.p2 - cluster.p1) + 1;
-  hw += (npads   << 15);  // npads
-  
-  Int_t ntmbk = TMath::Abs(cluster.t2 - cluster.t1) + 1;
-  hw += (ntmbk << 22);  // ntmbks...
-#endif
   static StThreeVector<double> hard_coded_errors(fgDp,fgDt,fgDperp);
 
   Double_t gain = (row<=St_tpcPadConfigC::instance()->innerPadRows(sector)) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
@@ -625,8 +633,9 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t
 			       , cluster.charge
 			       , cluster.flags);
   if (hit->minTmbk() == 0) bin0Hits++;
-//  LOG_INFO << p << " sector " << sector << " row " << row << endm;
-
+  if (Debug()) {
+    LOG_INFO << "StTpcHitMaker::CreateTpcHit fromt tpc_cl\t" <<*hit << endm;
+  }
   return hit;
 }
 //_____________________________________________________________
@@ -655,13 +664,6 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
   UInt_t hw = 1;   // detid_tpc
   hw += sector << 4;     // (row/100 << 4);   // sector
   hw += row    << 9;     // (row%100 << 9);   // row
-#if 0  
-  Int_t npads = TMath::Abs(cluster.p2 - cluster.p1) + 1;
-  hw += (npads   << 15);  // npads
-  
-  Int_t ntmbk = TMath::Abs(cluster.t2 - cluster.t1) + 1;
-  hw += (ntmbk << 22);  // ntmbks...
-#endif
   static StThreeVector<double> hard_coded_errors(fgDp,fgDt,fgDperp);
 
   StTpcHit *hit = StTpcHitFlag(global.position(),hard_coded_errors,hw,q
@@ -678,7 +680,9 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
 			       , cluster.charge
 			       , cluster.flags);
   if (hit->minTmbk() == 0) bin0Hits++;
-//  LOG_INFO << p << " sector " << sector << " row " << row << endm;
+  if (Debug()) {
+    LOG_INFO << "StTpcHitMaker::CreateTpcHit fromt daq_cld\t" <<*hit << endm;
+  }
   return hit;
 }
 //________________________________________________________________________________
@@ -987,10 +991,11 @@ Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
   Int_t Total_data = 0;
   Int_t r=RowNumber() ;	// I count from 1
   if(r==0) return 0 ;	// TPC does not support unphysical rows so we skip them
-  r-- ;			// TPC wants from 0
   Int_t p = Pad() - 1 ;	// ibid.
+  r-- ;			// TPC wants from 0
   if (p < 0 || p >= St_tpcPadConfigC::instance()->padsPerRow(sector,r+1)) return 0;
   TGenericTable::iterator iword = DaqDta()->begin();
+  if (iword ==  DaqDta()->end()) return 0;
   Int_t some_data = 0;
   do {
     if (some_data) {
@@ -999,10 +1004,10 @@ Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
       if (! digitalSector) digitalSector = GetDigitalSector(sector);
       Int_t ntbold = digitalSector->numberOfTimeBins(r_old+1,p_old+1);
       if (ntbold) {
-#if 0
-	LOG_INFO << "digitalSector " << sector 
-		 << " already has " << ntbold << " time bins at row/pad " << r_old+1 <<  "/" << p_old+1 << endm;
-#endif
+	if (Debug()) {
+	  LOG_INFO << "digitalSector " << sector << " row " << r+1 << " pad " << p + 1
+		   << " already has " << ntbold << " time bins at row/pad " << r_old+1 <<  "/" << p_old+1 << endm;
+	}
 	digitalSector->getTimeAdc(r_old+1,p_old+1,ADCs2,IDTs2);
 	//	if (IAttr("UseTonkoClusterAnnotation")) {
 	if (TonkoAnn) {
@@ -1038,6 +1043,10 @@ Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
       some_data++ ;	// I don't know the bytecount but I'll return something...
     }
   } while (some_data);
+  if (Debug() && Total_data > 0) {
+    LOG_INFO << "StTpcHitMaker::RawTpxData \tsector = " << sector << "\trow = " << r+1 << "\tpad = " << p+1 << endm;
+    digitalSector->PrintTimeAdc(r+1,p+1);
+  }
   return Total_data;
 }
 //________________________________________________________________________________
