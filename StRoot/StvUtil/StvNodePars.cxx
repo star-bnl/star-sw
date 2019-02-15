@@ -212,6 +212,7 @@ static StvFitPars fp;
   sub(_d,what._d,dif);
   fp.mFita = dot(dif,_tkdir[kKU]);
   fp.mLama = dot(dif,_tkdir[kKV]);
+  fp.mPinv = _pinv - what._pinv;
   return fp;
 }
 //______________________________________________________________________________
@@ -265,8 +266,11 @@ StvFitPars StvNodePars::delta() const
    fp.mPinv = fabs(_pinv)*0.1+1e-2;
    return fp;
 }
-
-
+//_____________________________________________________________________________
+int StvNodePars::getDir() const
+{
+  return (_x[0]*_d[0]+_x[1]*_d[1] <0)? 0:1;
+}
 // //_____________________________________________________________________________
 // StvFitPars StvNodePars::delta() const
 // {
@@ -316,7 +320,7 @@ void StvFitErrs::Update(const TkDir_t &tkdir)
 
   double U0U1 = dot(tkdir[kKU],mTkDir[kKU]); 
   double U0V1 = dot(tkdir[kKU],mTkDir[kKV]); 
-  double V0U1 = dot(tkdir[kKV],mTkDir[kKU]); 
+  double V0U1 = U0V1; 
   double V0V1 = dot(tkdir[kKV],mTkDir[kKV]); 
   
   double T[5][5] = {{U0U1, U0V1,    0,    0, 0}
