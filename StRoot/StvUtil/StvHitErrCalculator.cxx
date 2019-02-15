@@ -93,13 +93,7 @@ void StvHitErrCalculator::SetTrack(const double tkDir[3])
 //______________________________________________________________________________
 void StvHitErrCalculator::SetTkDir(const double tkDir[3][3])
 {  
-  if (kKT) {
-    TCL::ucopy(tkDir[2],mTG[0],3);
-    TCL::ucopy(tkDir[0],mTG[1],3);
-    TCL::ucopy(tkDir[1],mTG[2],3);
-  } else {
-    TCL::ucopy(tkDir[0],mTG[0],3*3);
-  }
+  TCL::ucopy(tkDir[0],mTG[0],3*3);
 }
 //______________________________________________________________________________
 int StvHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRr[3])
