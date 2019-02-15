@@ -133,6 +133,7 @@ double getPsi()  const { return atan2(_d[1],_d[0]);};
 double getPtin() const { return _pinv/getCosL()   ;};
 double getPt()   const { return 1./fabs(getPtin());};
 double getCurv() const ;
+   int getDir() const;
 const TkDir_t &getTkDir() const {return _tkdir;}
   void reverse(); 
   void operator+=(const StvFitPars &fp);
@@ -285,8 +286,8 @@ inline void StvNodePars::reverse()
   _pinv = -_pinv;
   for (int i=0;i<3;i++) {
    _d[i]       =-_d[i]; 
-   _tkdir[0][i]=-_tkdir[0][i];
-   _tkdir[2][i]=-_tkdir[2][i];}
+   _tkdir.Backward();
+  }
 }
 //------------------------------------------------------------------------------
 inline double vsuma(double *a,int na) 
