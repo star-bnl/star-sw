@@ -13,7 +13,6 @@
 #include "StvUtil/StvHitErrCalculator.h"
 #include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 
-static const char *BOTOHO = gSystem->Getenv("BOTOHO");
 StvFitter *StvFitter::mgFitter=0;
 #define VDOT(a,b)   ( a[0]*b[0]+a[1]*b[1]+a[2]*b[2])
 #define DIST(a,b)   ((a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1])+(a[2]-b[2])*(a[2]-b[2]))
@@ -641,12 +640,7 @@ void StvFitter::Prep()
   mTkPars = *mInPars;
 //		Track Frame
   const TkDir_t &tkd = mTkPars.getTkDir();
-  if (kKT) {
-    TCL::ucopy(tkd[0],mDcaFrame[1],6);
-    TCL::ucopy(tkd[2],mDcaFrame[0],3);
-  }else{
-    TCL::ucopy(tkd[0],mDcaFrame[0],9);
-  }
+  TCL::ucopy(tkd[0],mDcaFrame[0],9);
 }
 //______________________________________________________________________________
 double StvFitter::Xi2(const StvHit *hit)
@@ -708,6 +702,12 @@ double StvFitter::Xi2(const StvHit *hit)
   mDcaL=VDOT(mDcaFrame[2],dca);
 //		small account non zero distance to hit along track
 
+#if 0
+//		small account non zero distance to hit along track
+  double dS = mDcaT*mTkPars.getCosL();
+  mDcaP-= 0.5*mTkPars.getCurv()*dS*dS;
+#endif
+
   double G[3]; TCL::ucopy(*mInErrs,G,3);
   if (mKase==0) {// Include Hit Errs
     for (int j=0;j<3;j++) {G[j]+=mHitErrs[j];}
@@ -752,13 +752,6 @@ StvDebug::Break(nCall);
   }
   *mOtErrs = mInErrs->mTkDir;
 
-  double fak = 1.;
-  for (int i=0;i<5;i++) {
-    double f = fabs(mQQPars[i])/(mDelta[i]*kDeltaFactor);
-    if (fak<f) fak=f;
-  }
-  if (fak>1.) { mFailed = kBigVari; TCL::vscale(mQQPars,1./fak,mQQPars,5);}
-
   *mOtPars+= mQQPars;
 
   mOtErrs->Update(mOtPars->getTkDir());
@@ -785,6 +778,21 @@ int StvFitter::Hpdate()
   assert(fabs(mXi2-myXi2)<1e-2*mXi2);
   mFailed = (myXi2>kXtraBigXi2); 
   *mOtPars = mTkPars;
+#if 1
+  if (!mFailed) {
+    do {
+      double old = pow(myHitPars.mU,2)+pow(myHitPars.mV,2);
+      double now = pow(myHitPars.mU-mQQPars.mU,2)+pow(myHitPars.mV-mQQPars.mV,2);
+      if (now<old) break;
+      double dir = (myHitPars.mU*mQQPars.mFita +myHitPars.mV*mQQPars.mLama);
+      double nor = sqrt((pow(mQQPars.mU  ,2)+pow(mQQPars.mV  ,2))
+               *      (pow(myHitPars.mU,2)+pow(myHitPars.mV,2)));
+     dir/=nor;
+     if (dir > 0) break;
+     printf ("####WRONG old-now =%g dir=%g @@@@@@@@@@@@@@@@@@@@@@\n",old-now,dir);
+    } while(0);
+  }
+#endif
   return mFailed;
 }  
 //______________________________________________________________________________
