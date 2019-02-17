@@ -44,12 +44,14 @@
 *	matName - name of material
 
 +CDE,TYPING,GCBANK,GCVOLU,GCUNIT.
- integer  agvolume,node,par,pos,mot,old,LOCB,par1,np,ish,npar,natt,npr
+ integer  *8 node,par,pos,mot,LONGB,par1
+ integer  agvolume,np,ish,npar,natt,npr
  integer  matName(6);
  
 *
  Integer k,n,mother,daughter,where,who,copy,found,ier,ia,mcopy,nvol
- Integer item(20),count(20),list(20),nodes(0:20),
+ Integer *8 nodes(0:20)
+ Integer item(20),count(20),list(20),
          Lnam(20),Lnum(20),Iax(20),Lvol(20);
  Integer birth(50000);
  save    k,mother,daughter,where,found,birth;
@@ -83,8 +85,8 @@
    who=Q(where+2); 
  }
    daughter=LQ(JVOLUM-who); found+=1; 
-   par=LOCB(Q(daughter+1)); np=Q(daughter+5); ish=Q(daughter+2);
-   pos=LOCB(Q(where+1)); 
+   par=LONGB(Q(daughter+1)); np=Q(daughter+5); ish=Q(daughter+2);
+   pos=LONGB(Q(where+1)); 
 
 
    numed = Q(daughter+4);
@@ -94,7 +96,7 @@
    call uhtoc(Q(jmat+1),99,matName,20);
    
    mot=0; mcopy=1;  
-   if (k>1) { mot=LOCB(Q(mother+1)); mcopy=Lnum(k-1); }
+   if (k>1) { mot=LONGB(Q(mother+1)); mcopy=Lnum(k-1); }
    node=nodes(k-1); agvolume=1;
    Lnam(k)=IQ(JVOLUM+who); Lnum(k)=copy; Lvol(k)=who;
 
@@ -116,7 +118,7 @@
       call AgT2A(PARA(4))
    }
 
-   par1=LOCB(para); 
+   par1=LONGB(para); 
    call UCOPY(Lnam(k),para(npar+1),1);
   
 *  call UHTOC(Lnam(k),4,cn,4)
@@ -127,9 +129,10 @@
 end
 
   subroutine navigate
-  integer agvolume,found,node,i1,i2,moth,old,dum(6)
-  node=0; found=0;
-  while agvolume(node,i1,i2,moth,old,0,0,0,dum)>0  {  found+=1; node=found; }
+  integer *8 node,i1,i2,moth, par1
+  integer agvolume,found,old,dum(6)
+  node=0; found=0; par1=0;
+  while agvolume(node,i1,i2,moth,old,0,par1,0,dum)>0  {  found+=1; node=found; }
   print *,' found objects =',found;
   end
 
