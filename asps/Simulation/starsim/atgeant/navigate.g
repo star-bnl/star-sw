@@ -44,7 +44,11 @@
 *	matName - name of material
 
 +CDE,TYPING,GCBANK,GCVOLU,GCUNIT.
+#if __SIZEOF_POINTER__==8
  integer  *8 node,par,pos,mot,LONGB,par1
+#else
+ integer     node,par,pos,mot,LONGB,par1
+#endif
  integer  agvolume,np,ish,npar,natt,npr
  integer  matName(6);
  
@@ -129,7 +133,11 @@
 end
 
   subroutine navigate
+#if __SIZEOF_POINTER__==8
   integer *8 node,i1,i2,moth, par1
+#else
+  integer    node,i1,i2,moth, par1
+#endif
   integer agvolume,found,old,dum(6)
   node=0; found=0; par1=0;
   while agvolume(node,i1,i2,moth,old,0,par1,0,dum)>0  {  found+=1; node=found; }
