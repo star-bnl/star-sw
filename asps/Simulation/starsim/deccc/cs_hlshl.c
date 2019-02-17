@@ -1,6 +1,9 @@
 /*
-* $Id: cs_hlshl.c,v 1.2 2004/06/26 00:10:43 potekhin Exp $
+* $Id: cs_hlshl.c,v 1.3 2018/11/19 23:13:52 perev Exp $
 * $Log: cs_hlshl.c,v $
+* Revision 1.3  2018/11/19 23:13:52  perev
+* 64bits function pointer ==> token
+*
 * Revision 1.2  2004/06/26 00:10:43  potekhin
 * Removed an unused integer and added stdlib where appropriate.
 *
@@ -27,7 +30,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
+int csToken(long);
 void strNcpy (lib,path,n)
    char *lib,*path;
    int n;
@@ -268,7 +271,7 @@ void cs_shl_unload_(path, n)
    return;
 }
 /****************************************************************************/
-void * cs_get_func_(sym,n)
+int cs_get_func_(sym,n)
    char *sym;
    int n;
 {
@@ -276,11 +279,6 @@ void * cs_get_func_(sym,n)
    struct files      *f;
    void   *fill_procaddr;
    char   procname[MAXLENFL];
-#ifdef ALPHA_OSF
-         int jumpad_();
-         unsigned long ptr = (unsigned long)jumpad_;
-#endif
-
    strNcpy(procname, sym, n);
 
 /* --   Search for all files -- */
@@ -288,20 +286,15 @@ void * cs_get_func_(sym,n)
    f = first_file;
    while (f != NULL)
    { p = searchproc(procname, f->first_proc);
-     if (p != NULL) return (void *)(p->funcptr);
+     if (p != NULL) return csToken(p->funcptr);
      fill_procaddr =  dlsym(f->file_handle, procname);
      if (fill_procaddr != (void *) NULL)
      {   p = (struct procedures *) malloc(sizeof(struct procedures));
          strcpy(p->procname, procname);
-#ifdef ALPHA_OSF
-         ptr = (unsigned long) fill_procaddr - ptr;
-         p->funcptr = (int (*) ()) ptr;
-#else
          p->funcptr = (int (*) ()) fill_procaddr;
-#endif
          p->next = f->first_proc;
          f->first_proc = p;
-         return (void *)(p->funcptr);
+         return csToken(p->funcptr);
      }
      f = f->next;
    } /* end while */
