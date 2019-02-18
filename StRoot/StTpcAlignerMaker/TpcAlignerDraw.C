@@ -190,14 +190,14 @@ void TpcAlignerDrawIO(const Char_t *files = "*.root", Bool_t laser = kFALSE) {
   // Book Histograms
   TString Out(files); 
   Out.ReplaceAll("st_","");
-  Out.ReplaceAll(".root","Plots");
+  Out.ReplaceAll(".root","");
   Out.ReplaceAll("*","");
   //  Out += ".2GeVC";
   //  if (TMath::Abs(field) > 1)   Out += ".1GeVC";
   if (laser) Out += ".Laser";
-  Out += ".Cut";
-  Out += ".Errors";
-  Out += ".root";
+  //  Out += ".Cut";
+  //  Out += ".Errors";
+  Out += "_IO.root";
   TFile *fOut = new TFile(Out,"recreate");
   TH3F *plots3D[NPlots];
   for (Int_t i = 0; i < NPlots; i++) {

@@ -1,5 +1,8 @@
 /* ======================================================================== */
 /*  file: tpc.dem  */
+/* 
+	run as   bacth("tpc.dem");
+*/
 /*  Tpc Outer to Inner sector Alignment problems */
 /* ------------------------------------
    (alpha,beta,gamma) => (a,b,g)
@@ -14,9 +17,9 @@ W2S = RS^-1 * w2s * RW = (-gS   1  aS  -yS) * (r21  r22  r23   ty) * ( gW   1 -a
                             (1  0  0)
           RotateX(alpha) =  (0  1 -a); Rx: matrix([1,0,0,0],[0,1,-a,0],[0,a,1,0],[0,0,0,1]);
                             (0  a  1)  
-Rx: matrix([1,0,0,0],[0,1,-a,0],[0,a,1,0],[0,0,0,1])$
-Ry: matrix([1,0,b,0],[0,1,0,0],[-b,0,1,0],[0,0,0,1])$
-Rz: matrix([1,-g,0,0],[g,1,0,0],[0,0,1,0],[0,0,0,1])$
+Rx: matrix([1,0,0,0],[0,1,-a,0],[0,a,1,0],[0,0,0,1]);
+Ry: matrix([1,0,b,0],[0,1,0,0],[-b,0,1,0],[0,0,0,1]);
+Rz: matrix([1,-g,0,0],[g,1,0,0],[0,0,1,0],[0,0,0,1]);
 Ryx: Ry.Rx;
 Rzyx: Rz.Ryx;
 ------------------------------------ */
@@ -406,16 +409,16 @@ from sector "w" to sector "s". U means "w" in coordinate system of "s".
 delta_ws = D_ws + A
 ================================================================================*/
 D_WS : columnvector([xU_W - xS_S,zU_W - zS_S,nxU_W - nxS_S,nyU_W - nyS_S,nzU_W - nzS_S]); /* difference between prediction from sector "w" and measurement in sector "s" in coordinate system of "s"*/
-A_WS : matrix{[-1, lx,  0,                       -lx*r33*ZW-lx*r32*YW-lx*r31*XW-lx*tz,-r33*ZW-r32*YW-r31*XW-tz, (r23+lx*r13)*ZW+(r22+lx*r12)*YW+(r21+lx*r11)*XW+ty+lx*tx],
+A_WS : matrix([-1, lx,  0,                       -lx*r33*ZW-lx*r32*YW-lx*r31*XW-lx*tz,-r33*ZW-r32*YW-r31*XW-tz, (r23+lx*r13)*ZW+(r22+lx*r12)*YW+(r21+lx*r11)*XW+ty+lx*tx],
               [ 0, lz, -1,(-lz*r33-r23)*ZW+(-lz*r32-r22)*YW+(-lz*r31-r21)*XW-lz*tz-ty, r13*ZW+r12*YW+r11*XW+tx,                      lz*r13*ZW+lz*r12*YW+lz*r11*XW+lz*tx],
               [ 0,  0,  0,                                                          0,-r33*nzW-r32*nyW-r31*nxW,                                  r23*nzW+r22*nyW+r21*nxW],
               [ 0,  0,  0,                                    r33*nzW+r32*nyW+r31*nxW,                       0,                                 -r13*nzW-r12*nyW-r11*nxW],
-              [ 0,  0,  0,                                   -r23*nzW-r22*nyW-r21*nxW, r13*nzW+r12*nyW+r11*nxW,                                                        0]};
-B_WS : martix{[r11-lx*r21, r12-lx*r22, r13-lx*r23, (lx*r22-r12)*ZW+(r13-lx*r23)*YW, (r11-lx*r21)*ZW+(lx*r23-r13)*XW, (lx*r21-r11)*YW+(r12-lx*r22)*XW],           
+              [ 0,  0,  0,                                   -r23*nzW-r22*nyW-r21*nxW, r13*nzW+r12*nyW+r11*nxW,                                                        0]);
+B_WS : martix([r11-lx*r21, r12-lx*r22, r13-lx*r23, (lx*r22-r12)*ZW+(r13-lx*r23)*YW, (r11-lx*r21)*ZW+(lx*r23-r13)*XW, (lx*r21-r11)*YW+(r12-lx*r22)*XW],           
               [r31-lz*r21, r32-lz*r22, r33-lz*r23, (lz*r22-r32)*ZW+(r33-lz*r23)*YW, (r31-lz*r21)*ZW+(lz*r23-r33)*XW, (lz*r21-r31)*YW+(r32-lz*r22)*XW],
               [         0,          0,          0,                 r13*nyW-r12*nzW,                 r11*nzW-r13*nxW,                 r12*nxW-r11*nyW],
               [         0,          0,          0,                 r23*nyW-r22*nzW,                 r21*nzW-r23*nxW,                 r22*nxW-r21*nyW],
-              [         0,          0,          0,                 r33*nyW-r32*nzW,                 r31*nzW-r33*nxW,                 r32*nxW-r31*nyW]};
+              [         0,          0,          0,                 r33*nyW-r32*nzW,                 r31*nzW-r33*nxW,                 r32*nxW-r31*nyW]);
 xi_S : columnvector([x_S,y_S,z_S,a_S,b_S,g_S]); /* parameters for sector "s" */
 xi_W : columnvector([x_W,y_W,z_W,a_W,b_W,g_W]); /* parameters for sector "w" */
 G_WS; /* invertex covariance matrix for "s" + "w" */
