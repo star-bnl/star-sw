@@ -33,7 +33,7 @@ class etofBuilder : public JevpBuilder {
 
   private:
     // -------------------------------
-    void processMessages( uint64_t* messageBuffer, size_t nFullMessagesToRead, vector < vector < gdpbv100::FullMessage > >& triggerMessages, map< unsigned int, unsigned short >& nDigisInGdpb );
+    void processMessages( uint64_t* messageBuffer, size_t nFullMessagesToRead, float& tofTrgMult );
 
     unsigned int hardwareMapElinkGet4Id( const unsigned int& chip );
     unsigned int hardwareMapChannelNumberInFee( const unsigned int& chip, const unsigned int& chan );
@@ -46,7 +46,7 @@ class etofBuilder : public JevpBuilder {
     unsigned int hardwareMapSide(    const unsigned int& mappedChannelNr );
     unsigned int hardwareMapStrip(   const unsigned int& mappedChannelNr );
 
-    void processMessages2018( uint64_t* messageBuffer, size_t nFullMessagesToRead, map< unsigned int, unsigned short >& nDigisInGdpb );
+    void processMessages2018( uint64_t* messageBuffer, size_t nFullMessagesToRead, float& tofTrgMult );
     // --------------------------------
 
     int disable_builder;

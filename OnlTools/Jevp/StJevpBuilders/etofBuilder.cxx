@@ -167,7 +167,7 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
     contents.nDigisVsTofTrgMult = new TH2D( "nDigisVsTofTrgMult", "# digis vs bTof multiplicity;# digis;bTof mult in trigger data;# events", 300, 0, 300, 200, 0, 800 ); 
 
     contents.digiTot            = new TH1D( "digiTot",           "digi tot;tot (bins);#digis", 256,  0,  256 );
-    contents.digiTimeToTrigger  = new TH1D( "digiTimeToTrigger", "digi time to trigger;time to trigger (ms);# digis", 600, -5, 5 );
+    contents.digiTimeToTrigger  = new TH1D( "digiTimeToTrigger", "digi time to trigger;time to trigger (#mus);# digis", 600, -5, 5 );
 
     contents.digiCoarseTs       = new TH1D( "digiCoarseTs", "digi coarse Ts;coarse Ts (bins);# digis",  300, 0, 4800 );
     contents.digiFineTs         = new TH1D( "digiFineTs",   "digi fine Ts;fine Ts (bins);# digis",      112, 0,  112 );
@@ -277,10 +277,10 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
 void etofBuilder::event( daqReader *rdr ) {
     LOG( DBG, "-------------START EVENT----------" );
  
-    float TofTrgMult = 0;
+    float tofTrgMult = 0;
     StTriggerData* trgd = getStTriggerData( rdr );
     if( trgd ) {
-        TofTrgMult = (float) trgd->tofMultiplicity( 0 );
+        tofTrgMult = (float) trgd->tofMultiplicity( 0 );
     }
 
     daq_dta  *dd;
@@ -290,13 +290,6 @@ void etofBuilder::event( daqReader *rdr ) {
     if( !dd ) {
         if( trgd ) delete trgd;
         return;
-    }
-
-    vector< vector< gdpbv100::FullMessage > > triggerMessages( gdpbMap.size() );
-
-    map< unsigned int, unsigned short > nDigisInGdpb;
-    for( const auto& kv: gdpbMap ) {
-        nDigisInGdpb[ kv.first ] = 0;
     }
 
     while ( dd->iterate() ) {
@@ -338,28 +331,15 @@ void etofBuilder::event( daqReader *rdr ) {
             size_t nFullMessagesToRead = ( ( inputSizeBytes / sizeof( uint64_t ) ) - 4 ) / 2;
 
             if( year == 2018 ) {
-                processMessages2018( messageBuffer, nFullMessagesToRead, nDigisInGdpb );
+                processMessages2018( messageBuffer, nFullMessagesToRead, tofTrgMult );
             }
             else{
-                processMessages( messageBuffer, nFullMessagesToRead, triggerMessages, nDigisInGdpb );
+                processMessages( messageBuffer, nFullMessagesToRead, tofTrgMult );
             }
         }
-
     } // dd->iterate
 
     if( trgd ) delete trgd;
-
-    size_t nDigis = 0;
-    for( size_t i=0; i<nrOfGdpbInSys; i++ ) { 
-        if( gdpbRevMap.count( i ) > 0 ) {
-            contents.nDigisPerGdpb[ i ]->Fill( nDigisInGdpb.at( gdpbRevMap.at( i ) ) );
-
-            nDigis += nDigisInGdpb.at( gdpbRevMap.at( i ) );
-        }
-    }
-
-    contents.nDigis->Fill( nDigis );
-    contents.nDigisVsTofTrgMult->Fill( nDigis, TofTrgMult );
 }
 
 
@@ -411,8 +391,15 @@ void etofBuilder::main( int argc, char *argv[] ) {
 }
 
 
-void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessagesToRead, vector< vector < gdpbv100::FullMessage > >& triggerMessages, map< unsigned int, unsigned short >& nDigisPerGdpb ) {
+void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessagesToRead, float& tofTrgMult ) {
     LOG( DBG, " # of full messages to read: %d", nFullMessagesToRead );
+
+    map< unsigned int, unsigned short > nDigisPerGdpb;
+    for( const auto& kv: gdpbMap ) {
+        nDigisPerGdpb[ kv.first ] = 0;
+    }
+
+    vector< vector< gdpbv100::FullMessage > > triggerMessages( gdpbMap.size() );
 
     for( size_t msgIndex = 0; msgIndex < nFullMessagesToRead; msgIndex++ ) {
         gdpbv100::FullMessage mess( messageBuffer[ 4 + 2 * msgIndex ], messageBuffer[ 4 + 2 * msgIndex + 1 ] );
@@ -420,95 +407,12 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
 
         if( mess.isStarTrigger() ) {
             unsigned int gdpb = mess.getGdpbGenGdpbId();                    
-            if( mess.getStarTrigMsgIndex() == 0 ) {
-                LOG( DBG, "--> STAR trigger message from AFCK %#06x", gdpb );
-            }
+
             if( gdpbMap.count( gdpb ) ) {
                 triggerMessages.at( gdpbMap.at( gdpb ) ).push_back( mess );
             }
         }
-        else if( mess.isHitMsg() ) {
-            unsigned int gdpb = mess.getGdpbGenGdpbId();
-            unsigned int chip = mess.getGdpbGenChipId();
-            unsigned int chan = mess.getGdpbHitChanId();
-
-            // remove completely empty messages (128 bits of 0)
-            if( gdpb == 0 && chip == 0 && chan == 0 ) {
-                LOG( DBG, "empty message (?): %lu %lu", messageBuffer[ 4 + 2 * msgIndex ], messageBuffer[ 4 + 2 * msgIndex + 1 ] );
-                continue;
-            }
-
-            // check if the reported chip && channel ids make sense
-            if( gdpbMap.count( gdpb ) > 0 && chip < 240 && chan < 4 ) {
-
-                if( mess.getGdpbHit32DllLck() != 1 ) {
-                    LOG( DBG, " *** warning: DLL Lock = 0 " );
-                }
-
-                unsigned int mappedChannelNumber = hardwareMapChannelNumber( chip, chan );
-
-                LOG( DBG, "--> hit message from AFCK %#06x with mappedChannelNr %d", gdpb, mappedChannelNumber );
-
-                if( gdpbMap.count( gdpb ) ) {
-                    contents.digiMappedChannelNumberPerGdpb[ gdpbMap.at( gdpb ) ]->Fill( mappedChannelNumber );
-                }
-
-                nDigisPerGdpb.at( gdpb ) += 1;
-
-
-                unsigned int sector  = hardwareMapSector( gdpb );
-                unsigned int module  = hardwareMapModule(  mappedChannelNumber );
-                unsigned int counter = hardwareMapCounter( mappedChannelNumber );
-                unsigned int strip   = hardwareMapStrip(   mappedChannelNumber );
-                unsigned int side    = hardwareMapSide(    mappedChannelNumber );
-
-                LOG( DBG, "--> hit message on sector %d module %d counter %d strip %d side %d", sector, module, counter, strip, side );
-
-                contents.digiDensityAllChannels->Fill( ( sector - 13 ) * 6 + ( module - 1 ) * 2 + side, ( counter - 1 ) * 32 + strip );
-
-
-                // calculate time difference to trigger 
-                double triggerTime   = messageBuffer[ 0 ] * gdpbv100::kdClockCycleSizeNs;
-                double digiFullTime  = mess.GetFullTimeNs();
-                double timeToTrigger = ( digiFullTime - triggerTime ) / 1000.;
-
-                contents.digiTimeToTrigger->Fill( timeToTrigger );
-
-
-                unsigned int tot = mess.getGdpbHit32Tot();
-
-                contents.digiTot->Fill( tot );
-
-                if( gdpbMap.count( gdpb ) ) {
-                    contents.digiTotPerGdpb[ gdpbMap.at( gdpb ) ]->Fill( tot);
-                }
-
-
-                // fine & coarse time
-                int fineTs   = mess.getGdpbHitFullTs() % 112;
-                int coarseTs = mess.getGdpbHitFullTs() / 112;
-
-                contents.digiFineTs  ->Fill( fineTs   );
-                contents.digiCoarseTs->Fill( coarseTs );
-            }
-            else {
-                LOG( DBG, "some id is out of range: gdpbId %#06x    chip %d    channel %d", gdpb, chip, chan );
-                //mess.PrintMessage( gdpbv100::msg_print_Prefix | gdpbv100::msg_print_Data );
-            }
-        }
-        else if( mess.isEpochMsg() ) {
-            LOG( DBG, "EPOCH message" );
-            //mess.PrintMessage( gdpbv100::msg_print_Prefix | gdpbv100::msg_print_Data );
-        }
-        else if( mess.isGet4SlCtrMsg() ) {
-            LOG( DBG, "GET4 slow control message" );
-            //mess.PrintMessage( gdpbv100::msg_print_Prefix | gdpbv100::msg_print_Data );
-        }
-        else if( mess.isSysMsg() ) {
-            LOG( DBG, "SYSTEM message" );
-            //mess.PrintMessage( gdpbv100::msg_print_Prefix | gdpbv100::msg_print_Data );
-        }
-    } // message loop
+    } // first message loop
 
     // deal with trigger and reset times of the different AFCKs
     map< short, uint64_t > gdpbTsMap;
@@ -573,11 +477,112 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
                                       return p1.second < p2.second; } );
 
 
-    int64_t mostProbableTriggerTime = iterGdpb->first;
-    int64_t mostProbableResetTime   = iterStar->first;
+    int64_t mostFrequentTriggerTime = iterGdpb->first;
+    int64_t mostFrequentResetTime   = iterStar->first;
 
-    contents.triggerTimeToResetTime->Fill( ( mostProbableTriggerTime - mostProbableResetTime ) * 6.25 * 1.e-9 );
+    contents.triggerTimeToResetTime->Fill( ( mostFrequentTriggerTime - mostFrequentResetTime ) * gdpbv100::kdClockCycleSizeNs * 1.e-9 );
 
+
+
+
+    for( size_t msgIndex = 0; msgIndex < nFullMessagesToRead; msgIndex++ ) {
+        gdpbv100::FullMessage mess( messageBuffer[ 4 + 2 * msgIndex ], messageBuffer[ 4 + 2 * msgIndex + 1 ] );
+        //mess.PrintMessage( gdpbv100::msg_print_Prefix | gdpbv100::msg_print_Data );
+
+        if( mess.isHitMsg() ) {
+            unsigned int gdpb = mess.getGdpbGenGdpbId();
+            unsigned int chip = mess.getGdpbGenChipId();
+            unsigned int chan = mess.getGdpbHitChanId();
+
+            // remove completely empty messages (128 bits of 0)
+            if( gdpb == 0 && chip == 0 && chan == 0 ) {
+                LOG( DBG, "empty message (?): %lu %lu", messageBuffer[ 4 + 2 * msgIndex ], messageBuffer[ 4 + 2 * msgIndex + 1 ] );
+                continue;
+            }
+
+            // check if the reported chip && channel ids make sense
+            if( gdpbMap.count( gdpb ) > 0 && chip < 240 && chan < 4 ) {
+
+                if( mess.getGdpbHit32DllLck() != 1 ) {
+                    LOG( DBG, " *** warning: DLL Lock = 0 " );
+                }
+
+                unsigned int mappedChannelNumber = hardwareMapChannelNumber( chip, chan );
+
+                LOG( DBG, "--> hit message from AFCK %#06x with mappedChannelNr %d", gdpb, mappedChannelNumber );
+
+                if( gdpbMap.count( gdpb ) ) {
+                    contents.digiMappedChannelNumberPerGdpb[ gdpbMap.at( gdpb ) ]->Fill( mappedChannelNumber );
+                }
+
+                nDigisPerGdpb.at( gdpb ) += 1;
+
+
+                unsigned int sector  = hardwareMapSector( gdpb );
+                unsigned int module  = hardwareMapModule(  mappedChannelNumber );
+                unsigned int counter = hardwareMapCounter( mappedChannelNumber );
+                unsigned int strip   = hardwareMapStrip(   mappedChannelNumber );
+                unsigned int side    = hardwareMapSide(    mappedChannelNumber );
+
+                LOG( DBG, "--> hit message on sector %d module %d counter %d strip %d side %d", sector, module, counter, strip, side );
+
+                contents.digiDensityAllChannels->Fill( ( sector - 13 ) * 6 + ( module - 1 ) * 2 + side, ( counter - 1 ) * 32 + strip );
+
+
+                // calculate time difference to trigger 
+                double triggerTime   = mostFrequentTriggerTime * gdpbv100::kdClockCycleSizeNs;
+                double digiFullTime  = mess.GetFullTimeNs();
+                double timeToTrigger = ( digiFullTime - triggerTime ) / 1000.;
+
+                contents.digiTimeToTrigger->Fill( timeToTrigger );
+
+
+                unsigned int tot = mess.getGdpbHit32Tot();
+
+                contents.digiTot->Fill( tot );
+
+                if( gdpbMap.count( gdpb ) ) {
+                    contents.digiTotPerGdpb[ gdpbMap.at( gdpb ) ]->Fill( tot);
+                }
+
+
+                // fine & coarse time
+                int fineTs   = mess.getGdpbHitFullTs() % 112;
+                int coarseTs = mess.getGdpbHitFullTs() / 112;
+
+                contents.digiFineTs  ->Fill( fineTs   );
+                contents.digiCoarseTs->Fill( coarseTs );
+            }
+            else {
+                LOG( DBG, "some id is out of range: gdpbId %#06x    chip %d    channel %d", gdpb, chip, chan );
+                //mess.PrintMessage( gdpbv100::msg_print_Prefix | gdpbv100::msg_print_Data );
+            }
+        }
+        else if( mess.isEpochMsg() ) {
+            LOG( DBG, "EPOCH message" );
+            //mess.PrintMessage( gdpbv100::msg_print_Prefix | gdpbv100::msg_print_Data );
+        }
+        else if( mess.isGet4SlCtrMsg() ) {
+            LOG( DBG, "GET4 slow control message" );
+            //mess.PrintMessage( gdpbv100::msg_print_Prefix | gdpbv100::msg_print_Data );
+        }
+        else if( mess.isSysMsg() ) {
+            LOG( DBG, "SYSTEM message" );
+            //mess.PrintMessage( gdpbv100::msg_print_Prefix | gdpbv100::msg_print_Data );
+        }
+    } // second message loop
+
+    size_t nDigis = 0;
+    for( size_t i=0; i<nrOfGdpbInSys; i++ ) { 
+        if( gdpbRevMap.count( i ) > 0 ) {
+            contents.nDigisPerGdpb[ i ]->Fill( nDigisPerGdpb.at( gdpbRevMap.at( i ) ) );
+
+            nDigis += nDigisPerGdpb.at( gdpbRevMap.at( i ) );
+        }
+    }
+
+    contents.nDigis->Fill( nDigis );
+    contents.nDigisVsTofTrgMult->Fill( nDigis, tofTrgMult );
 }
 
 
@@ -631,8 +636,13 @@ unsigned int etofBuilder::hardwareMapStrip( const unsigned int& mappedChannelNr 
 
 
 
-void etofBuilder::processMessages2018( uint64_t* messageBuffer, size_t nFullMessagesToRead, map< unsigned int, unsigned short >& nDigisPerGdpb ) {
+void etofBuilder::processMessages2018( uint64_t* messageBuffer, size_t nFullMessagesToRead, float& tofTrgMult ) {
     LOG( DBG, " # of full messages to read: %d", nFullMessagesToRead );
+
+    map< unsigned int, unsigned short > nDigisPerGdpb;
+    for( const auto& kv: gdpbMap ) {
+        nDigisPerGdpb[ kv.first ] = 0;
+    }
 
     for( size_t msgIndex = 0; msgIndex < nFullMessagesToRead; msgIndex++ ) {
         gdpb::FullMessage mess( messageBuffer[4 + 2 * msgIndex], messageBuffer[4 + 2 * msgIndex + 1] );
@@ -728,4 +738,16 @@ void etofBuilder::processMessages2018( uint64_t* messageBuffer, size_t nFullMess
         } // end of things to do with epoch2 message
 
     } // end message loop
+
+    size_t nDigis = 0;
+    for( size_t i=0; i<nrOfGdpbInSys; i++ ) { 
+        if( gdpbRevMap.count( i ) > 0 ) {
+            contents.nDigisPerGdpb[ i ]->Fill( nDigisPerGdpb.at( gdpbRevMap.at( i ) ) );
+
+            nDigis += nDigisPerGdpb.at( gdpbRevMap.at( i ) );
+        }
+    }
+
+    contents.nDigis->Fill( nDigis );
+    contents.nDigisVsTofTrgMult->Fill( nDigis, tofTrgMult );
 }
