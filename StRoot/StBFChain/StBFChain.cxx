@@ -1677,6 +1677,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
   }
   if (! GetOption("AgML") && ! GetOption("VmcGeo") && ! GetOption("Agi")) SetOption("Agi","Default Geometry");
   if (!GetOption("Eval") && GetOption("AllEvent"))  SetOption("Eval","-Eval,AllEvent");
+#if 0
   if ( GetOption("Stx")) {
     for (k = 1; k<fNoChainOptions;k++) {
       if (GetOption(k)) {
@@ -1688,6 +1689,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
       }
     }
   }
+#endif
   // Print set values
   St_Bfc *Bfc = new St_Bfc("BFChain",fNoChainOptions);
   AddRunco(Bfc);
