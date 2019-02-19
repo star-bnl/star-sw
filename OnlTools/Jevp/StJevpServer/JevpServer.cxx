@@ -440,6 +440,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    myport = JEVP_PORT;
 	}
 	else if (strcmp(argv[i], "-l4production") == 0) {
+	    log_port = 8009;
 	    LOG("JEFF", "Using L4");
 	    isL4 = 1;
 	    log_dest = (char *)"172.17.0.1";
@@ -452,6 +453,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    rootfiledir = (char *)"/a/l4jevp/rootfiles";
 	}
 	else if (strcmp(argv[i], "-l4test") == 0) {
+	  log_port = 8009;
 	    LOG("JEFF", "Using L4 test");
 	    isL4 = 1;
 	    nodb = 0;
@@ -491,7 +493,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
 
 	    LOG("JEFF", "Update L4 DB");
 	    isL4 = 1;
-	    log_dest = (char *)"172.17.0.1";
+	    log_output = RTS_LOG_STDERR;
 	    nodb = 0;
       
 	    clientdatadir = (char *)"/a/l4jevp/client";
