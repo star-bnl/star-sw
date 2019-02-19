@@ -1,21 +1,23 @@
 /***************************************************************************
  *
- * $Id: StETofGeometry.h,v 1.1 2018/07/25 14:34:40 jeromel Exp $
+ * $Id: StETofGeometry.h,v 1.2 2019/02/19 20:20:11 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
  *
  * Description: Collection of geometry classes for the eTOF:
- *              - eTOF geometry constants
  *              - StETofNode: generic eTOF geometry object initialized via
  *                TGeoManager
- *              - StETofModule, StETofCounter inherit from StETofNode
+ *              - StETofGeomModule, StETofGeomCounter inherit from StETofNode
  *              - StETofGeometry builds the geometry and features all
  *                necessary methods to match track helices with eTOF hits
  *
  ***************************************************************************
  *
  * $Log: StETofGeometry.h,v $
+ * Revision 1.2  2019/02/19 20:20:11  fseck
+ * update after second part of eTOF code review
+ *
  * Revision 1.1  2018/07/25 14:34:40  jeromel
  * First version, reviewed Raghav+Jerome
  *
@@ -32,41 +34,11 @@
 #include "StThreeVectorD.hh"
 #include "StHelixD.hh"
 
+#include "StETofUtil/StETofConstants.h"
+
 class TNamed;
-//class TObject;
 
-class StMaker;
 class StETofGeomCounter;
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-//
-// ETofGeomConstants
-// =================
-//
-///////////////////////////////////////////////////////////////////////////////////////////////////
-namespace ETofGeomConst {
-
-const int nSectors  = 12;
-const int nPlanes   =  3;
-const int nModules  = nSectors * nPlanes;
-const int nCounters =  3;
-const int nStrips   =  32;
-
-const int sectorStart  = 13;
-const int sectorStop   = 24;
-const int zPlaneStart  =  1;
-const int zPlaneStop   =  3; 
-const int counterStart =  1;
-const int counterStop  =  3; 
-const int stripStart   =  1;
-const int stripStop    =  32; 
-
-// copied from ETofGeo0.xml
-// these are the zplanes of the three modules starting with the closest to IP
-const float zplanes[ 3 ] = { 209.0 - 489.01, 209.0 - 501.01, 209.0 - 513.01 };
-
-}
-
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -84,7 +56,7 @@ public:
     StETofNode( const TGeoPhysicalNode& gpNode );
     StETofNode( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy );
 
-    void	convertPos( StETofNode* from, const double* pos_from, StETofNode* to, double* pos_to );
+    void    convertPos( StETofNode* from, const double* pos_from, StETofNode* to, double* pos_to );
 
     void    local2Master( const double* local,  double* master );
     void    master2Local( const double* master, double* local  );
@@ -92,7 +64,7 @@ public:
     bool    isLocalPointIn(  const double* local );
     bool    isGlobalPointIn( const StThreeVectorD& global );
 
-    void    buildMembers();        // function to fill member variables like center position, min/max eta or phi of the node
+    void    buildMembers(); // function to fill member variables like center position, min/max eta or phi of the node
 
     double  calcPhi( const double& rel_local_y, const double& rel_local_x ); 
     double  calcEta( const double& rel_local_x );
@@ -111,10 +83,13 @@ public:
     StThreeVectorD  centerPos()     const;
     StThreeVectorD  xyPlaneNormal() const;
 
-    
-    static  void    debugOn();
-    static  void    debugOff();
-    static  bool    isDebugOn();
+    void            setSafetyMargins( const double* margins );
+    double          safetyMarginX() const;
+    double          safetyMarginY() const;
+
+    void            debugOn();
+    void            debugOff();
+    bool            isDebugOn()     const;
 
     virtual void    print( const Option_t* opt = "" ) const;
 
@@ -127,14 +102,15 @@ private:
     double          mEtaMax;
     StThreeVectorD  mCenter;
     StThreeVectorD  mNormal;
-    // TODO: add apropriate get and set functions
+    double          mSafetyMarginX;
+    double          mSafetyMarginY;
 
-    static bool     mDebug;     // control message printing of this class
+    bool            mDebug;     // control message printing of this class
 
     ClassDef( StETofNode, 1 )
 };
 
-    
+
 inline TGeoHMatrix*     StETofNode::geoMatrix()     const { return mGeoMatrix; }
 inline TGeoBBox*        StETofNode::box()           const { return mBox;       }
 
@@ -146,11 +122,14 @@ inline double           StETofNode::etaMax()        const { return mEtaMax; }
 inline StThreeVectorD   StETofNode::centerPos()     const { return mCenter; }
 inline StThreeVectorD   StETofNode::xyPlaneNormal() const { return mNormal; }
 
+inline double           StETofNode::safetyMarginX() const { return mSafetyMarginX; };
+inline double           StETofNode::safetyMarginY() const { return mSafetyMarginY; };
 
-inline void  StETofNode::debugOn()   { mDebug = true;  }
-inline void  StETofNode::debugOff()  { mDebug = false; }
+
+inline void  StETofNode::debugOn()  { mDebug = true;  }
+inline void  StETofNode::debugOff() { mDebug = false; }
     
-inline bool  StETofNode::isDebugOn() { return mDebug;  }
+inline bool  StETofNode::isDebugOn() const { return mDebug; }
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -169,23 +148,25 @@ public:
     
     void  addCounter( const TGeoPhysicalNode& gpNode, const int moduleId, const int counterId );  
     void  addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId );
+    void  addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const double* safetyMargins );
 
     StETofGeomCounter* counter( const unsigned int i ) const;  
+
+    void  clearCounters(); 
 
     int   numberOfCounters()  const;
 
     int   calcSector( const int moduleId );
     int   calcPlane(  const int moduleId );
-    
+
 
     int   moduleIndex() const;
     int   sector()      const;
     int   plane()       const;
 
-
-    static void debugOn();
-    static void debugOff();
-    static bool isDebugOn();
+    void  debugOn();
+    void  debugOff();
+    bool  isDebugOn()   const;
 
     virtual void    print( const Option_t* opt="" ) const;
 
@@ -194,12 +175,12 @@ private:
     int     mSector;      // sector (13-24)
     int	    mPlane;       // z-plane (1-3)
 
-    vector< StETofGeomCounter* > mETofCounter;	
+    std::vector< StETofGeomCounter* > mETofCounter;	
 
-    static bool mDebug;     // control message printing of this class
+    bool    mDebug;       // control message printing of this class
 
 
-	ClassDef( StETofGeomModule, 1 )
+    ClassDef( StETofGeomModule, 1 )
 };
 
 
@@ -208,10 +189,10 @@ inline int   StETofGeomModule::moduleIndex()      const { return mModuleIndex;  
 inline int   StETofGeomModule::sector()           const { return mSector;             }
 inline int   StETofGeomModule::plane()            const { return mPlane;              }
 
-inline void  StETofGeomModule::debugOn()   { mDebug = true;  }
-inline void  StETofGeomModule::debugOff()  { mDebug = false; }
+inline void  StETofGeomModule::debugOn()  { mDebug = true;  }
+inline void  StETofGeomModule::debugOff() { mDebug = false; }
     
-inline bool  StETofGeomModule::isDebugOn() { return mDebug;  }
+inline bool  StETofGeomModule::isDebugOn() const { return mDebug; }
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -236,16 +217,16 @@ public:
 
     int calcSector( const int moduleId );
     int calcPlane(  const int moduleId );
-    
+
 
     int     moduleIndex()   const;
     int     sector()        const;
     int     plane()         const;
     int     counterIndex()  const;
 
-    static void debugOn();
-    static void debugOff();
-    static bool isDebugOn();
+    void    debugOn();
+    void    debugOff();
+    bool    isDebugOn()     const;
 
     virtual void    print( const Option_t *opt="" ) const;
 
@@ -254,11 +235,10 @@ private:
     int     mSector;        // sector (13-24)
     int     mPlane;         // z-plane (1-3)
     int     mCounterIndex;  // counter index (0-2)   
-    
-    float   mStripX[ ETofGeomConst::nStrips + 1 ]; // X range of strips
 
+    float   mStripX[ eTofConst::nStrips + 1 ]; // X range of strips
 
-    static bool mDebug;   // control message printing of this class
+    bool    mDebug;         // control message printing of this class
 
 
     ClassDef( StETofGeomCounter, 1 )
@@ -269,10 +249,10 @@ inline int   StETofGeomCounter::sector()         const { return mSector;       }
 inline int   StETofGeomCounter::plane()          const { return mPlane;        }
 inline int   StETofGeomCounter::counterIndex()   const { return mCounterIndex; }
 
-inline void  StETofGeomCounter::debugOn()   { mDebug = true;  }
-inline void  StETofGeomCounter::debugOff()  { mDebug = false; }
+inline void  StETofGeomCounter::debugOn()  { mDebug = true;  }
+inline void  StETofGeomCounter::debugOff() { mDebug = false; }
     
-inline bool  StETofGeomCounter::isDebugOn() { return mDebug;  }
+inline bool  StETofGeomCounter::isDebugOn() const { return mDebug; }
 
 
 
@@ -288,26 +268,31 @@ public:
     StETofGeometry( const char* name = "etofGeo", const char* title = "simplified ETOF Geometry" );
     ~StETofGeometry();
 
-    void init( StMaker* maker, TGeoManager* geoManager );
+    void init( TGeoManager* geoManager, const double* safetyMargins );
+
+    void reset();
 
     bool isInitDone() const;
     bool setInitFlag( const bool initFlag );
 
     std::string formTGeoPath( const TGeoManager* geoManager, int plane, int sector, int counter = -1 );
     std::string formTGeoPath( const TGeoManager* geoManager, int plane, int sector, int counter, int gap );
-    
+
     int calcModuleIndex( const int& sector, const int& plane ); 
     int calcVolumeIndex( const int& sector, const int& plane, const int& counter, const int& strip );
+
+    void decodeVolumeIndex( const int& volumeId, int& sector, int& plane, int& counter, int& strip );
 
     StETofNode* findETofNode( const int moduleId, const int counter );
 
     void hitLocal2Master( const int moduleId, const int counter, const double* local,  double* master );
 
     StThreeVectorD helixCrossETofPlane( const StHelixD& helix );
-    vector< int >  helixCrossSector( const StHelixD& helix );
-    vector< int >  sectorAtPhi( const double& angle );
+    std::vector< int >  helixCrossSector( const StHelixD& helix );
+    std::vector< int >  sectorAtPhi( const double& angle );
 
-    bool    helixCrossCounter( const StHelixD& helix, vector< int >& idVec );  
+    void    helixCrossCounter( const StHelixD& helix, std::vector< int >& idVec, std::vector< StThreeVectorD >& crossVec,
+                               std::vector< StThreeVectorD >& localVec, std::vector< double >& thetaVec );
 
     void    logPoint( const char* text, const StThreeVectorD& point );
 
@@ -315,21 +300,17 @@ public:
     StETofGeomModule* module( const unsigned int i );
     unsigned int      nValidModules() const;
 
-
-
-    static void debugOn();
-    static void debugOff();
-    static bool isDebugOn();
+    void debugOn();
+    void debugOff();
+    bool isDebugOn() const;
 
 
 private:
-    StETofGeomModule* mETofModule[ ETofGeomConst::nModules ];
+    StETofGeomModule* mETofModule[ eTofConst::nModules ];
 
     unsigned int      mNValidModules;  // amount of loaded modules
     bool              mInitFlag;       // flag of initialization, true if done
-
-
-    static bool mDebug;   // control message printing of this class
+    bool              mDebug;          // control message printing of this class
 
 
     ClassDef( StETofGeometry, 1 )
@@ -342,12 +323,10 @@ inline unsigned int StETofGeometry::nValidModules() const { return mNValidModule
 inline bool  StETofGeometry::setInitFlag( const bool initFlag ) { return mInitFlag = initFlag; }
 
 
+inline void  StETofGeometry::debugOn()  { mDebug = true;  }
+inline void  StETofGeometry::debugOff() { mDebug = false; }
 
-inline void  StETofGeometry::debugOn()   { mDebug = true;  }
-inline void  StETofGeometry::debugOff()  { mDebug = false; }
-    
-inline bool  StETofGeometry::isDebugOn() { return mDebug;  }
-
+inline bool  StETofGeometry::isDebugOn() const { return mDebug; }
 
 
 
