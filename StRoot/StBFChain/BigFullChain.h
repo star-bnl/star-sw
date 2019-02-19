@@ -1586,13 +1586,12 @@ Bfc_st BFC[] = { // standard chains
   // ETOF chains - do they have to be before the VPD / vpdsim?
   {"ETofDat",   "etof_raw","ETofChain", "db, ETofUtil", "StETofDigiMaker",  "StEvent,StETofDigiMaker",
                                                                                   "ETOF digi maker",kFALSE},
-  //{"ETofCalib", "",        "ETofChain", "db, ETofUtil", "StETofCalibMaker", "StETofCalibMaker",
-  //                                                                               "ETOF calibration",kFALSE},
-  //{"ETofHit",   "",        "ETofChain", "db",          "StETofHitMaker",   "StETofHitMaker",
-  //                                                                                 "ETOF hit maker",kFALSE},
-  {"ETofQa",    "",        "ETofChain", "db",          "StETofQAMaker",    "StETofQAMaker",
-                                                                                    "ETOF QA maker",kFALSE},
-  
+  {"ETofCalib", "",  "ETofChain", "db, ETofUtil, muDst", "StETofCalibMaker", "StETofCalibMaker",
+                                                                                 "ETOF calibration",kFALSE},
+  {"ETofSim" ,  "",        "ETofChain", "",                    "StETofSimMaker",  "StETofSimMaker",
+                                                                                   "ETOF simulator",kFALSE},
+
+
 
   // left MTD chain for sumulation alone here
   {"mtdSim"    ,"","MtdChain","","StMtdSimMaker",           "StEvent,StMtdSimMaker","MTD Simulator",kFALSE},
@@ -1756,6 +1755,15 @@ Bfc_st BFC[] = { // standard chains
   {"btofMatch" ,"","","db,BTofUtil,vpdCalib,btofCalib","StBTofMatchMaker","StBTofMatchMaker"
    ,                                                                      "TPC-BTOF track matching",kFALSE},
   {"btofCalib","","","db,BTofUtil",        "StBTofCalibMaker","StBTofCalibMaker","BTOF calibration",kFALSE},
+
+  // ETOF hit building and track matching after bTofCalib - needs to be after btof	
+  {"ETofHit",   "",      "ETofChain", "db, ETofUtil, muDst", "StETofHitMaker",   "StETofHitMaker",
+                                                                                   "ETOF hit maker",kFALSE},
+  {"ETofMatch",  "",     "ETofChain", "db, ETofUtil, muDst", "StETofMatchMaker", "StETofMatchMaker",
+                                                                                 "ETOF match maker",kFALSE},
+  {"ETofQa",     "",     "ETofChain", "db, ETofUtil, muDst", "StETofQAMaker",    "StETofQAMaker",
+                                                                                    "ETOF QA maker",kFALSE},
+
 
   // the below needs to be done earlier to save time - leaving here for documentation purposes as two
   // makers are part of the same library (let's not forget this)
