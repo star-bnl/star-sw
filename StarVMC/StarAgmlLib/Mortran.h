@@ -70,7 +70,7 @@ template <typename T> class Array_t
 
 template <typename T> std::ostream &operator<<( std::ostream &out, Array_t<T> &array ){ return array.Out(out); }
 
-template <typename T> Array_t<T>::Array_t(int n, int m) : _size(n*m), _n(n), _m(m)
+template <typename T> Array_t<T>::Array_t(int N, int M) : _size(N*M), _n(N), _m(M)
 {
   mData.resize( size() );
   SetRange( 1, size()+1 ); // fortran 1D range
