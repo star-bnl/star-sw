@@ -77,8 +77,8 @@ struct isEqual {
   bool operator()( const S* str ){ 
     return _value == *(T*)((long long)(str)+_offset); 
   }
-  isEqual &operator=( const T value ) {
-    _value = value;
+  isEqual &operator=( const T xvalue ) {
+    _value = xvalue;
     return *(this);
   };
   T value(){ return _value; }
