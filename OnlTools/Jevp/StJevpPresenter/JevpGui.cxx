@@ -991,9 +991,9 @@ void JevpGui::readDisplayFromServer()
     double t1 = clock.record_time();
 
     //printf("Got something ret=%d mess=0x%x\n",ret,mess);
-    long x = (int)mess->GetClass();
+    //long x = (int)mess->GetClass();
 
-    LOG(DBG,"--->0x%x\n",x);// , x[0],x[1],x[2],x[3]);
+    //LOG(DBG,"--->0x%x\n",x);// , x[0],x[1],x[2],x[3]);
 
     if(strcmp(mess->GetClass()->GetName(), "EvpMessage") != 0) {
       LOG(ERR,"Didn't get a DisplayDefSender class\n");
