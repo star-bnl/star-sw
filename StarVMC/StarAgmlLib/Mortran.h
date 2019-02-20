@@ -33,7 +33,7 @@ template <typename T> class Array_t
   const T &at( int i )        const { 
     if ( i>=size() or i<0 )
       {
-	std::cout << Form("Array_t out of bounds error for array at address %p",this) << std::endl;
+	std::cout << Form("Array_t out of bounds error for array at address %p",(void*)this) << std::endl;
 	assert(0);
       } return mData[i]; }             /// 1D c-style accessor
 
@@ -41,7 +41,7 @@ template <typename T> class Array_t
   T &at( int i )         { 
     if ( i>=size() or i<0 )
       {
-	std::cout << Form("Array_t out of bounds error for array at address %p",this) << std::endl;
+	std::cout << Form("Array_t out of bounds error for array at address %p",(void*)this) << std::endl;
 	assert(0);
       } return mData[i]; }             /// 1D c-style accessor
 
