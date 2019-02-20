@@ -255,7 +255,7 @@ index_entry *PdfIndex::add_child(index_entry *p, char *name, int page, float pos
   }
 
   if((index == NULL) || (p == NULL) || (p->child != NULL)) {
-    printf("AddChild: Error index=0x%x p=0x%x child=0x%x",(unsigned int)index, (unsigned int)p, (unsigned int)(p ? p->child : 0));
+    printf("AddChild: Error index=0x%lx p=0x%lx child=0x%lx",(long) index, (long) p, (long) (p ? p->child : 0));
     return NULL;
   }
 
@@ -273,7 +273,7 @@ index_entry *PdfIndex::add_sibling(index_entry *p, char *name, int page, float p
   }
 
   if((index == NULL) || (p == NULL) || (p->next != NULL)) {
-    printf("AddSib:  Error index=0x%x p=0x%x child=0x%x",(unsigned int)index,(unsigned int)p, (unsigned int)(p ? p->next : 0));
+    printf("AddSib:  Error index=0x%lx p=0x%lx child=0x%lx",(long) index,(long) p, (long) (p ? p->next : 0));
     return NULL;
   }
   
@@ -294,7 +294,7 @@ void PdfIndex::dump(index_entry *e, int tabs, int format) {
   }
 
   if(format == 1) {
-    printf("%d --------------\n%s------------\n",strlen(e->data), e->data);
+    printf("%ld --------------\n%s------------\n",(long) strlen(e->data), e->data);
   }
   if(e->child) dump(e->child, tabs+1, format);
   if(e->next) dump(e->next, tabs, format);
