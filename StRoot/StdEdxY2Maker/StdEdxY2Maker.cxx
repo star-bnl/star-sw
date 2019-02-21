@@ -382,76 +382,23 @@ Int_t StdEdxY2Maker::Make(){
 	dx = 0;
 #endif /* __TEST_DX__ */
 	static StGlobalDirection  globalDirectionOfTrack;
+	Int_t iokCheck = 0;
 	if (dx <= 0.0) {
-	StThreeVectorD middle = xyz[3];
-	StThreeVectorD upper(tpcHit->positionU().x(),tpcHit->positionU().y(),tpcHit->positionU().z());
-	StThreeVectorD lower(tpcHit->positionL().x(),tpcHit->positionL().y(),tpcHit->positionL().z());
-	StThreeVectorD dif = upper - lower;
-	StThreeVectorD normal = dif.unit();
+	  StThreeVectorD middle = xyz[3];
+	  StThreeVectorD upper(tpcHit->positionU().x(),tpcHit->positionU().y(),tpcHit->positionU().z());
+	  StThreeVectorD lower(tpcHit->positionL().x(),tpcHit->positionL().y(),tpcHit->positionL().z());
+	  StThreeVectorD dif = upper - lower;
+	  StThreeVectorD normal = dif.unit();
 #if 0
-	if (St_tpcPadConfigC::instance()->numberOfRows(sector) == 45) {// ! iTpx
-	  // Check that Voltage above "-100V" from nominal, mark as unrecoverable
-	  Double_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sector,row);
-	  if ((row <= St_tpcPadConfigC::instance()->innerPadRows(sector) && 1170 - V > 100) || 
-	      (row >  St_tpcPadConfigC::instance()->innerPadRows(sector) && 1390 - V > 100)) {BadHit(9,tpcHit->position()); continue;}
-	}
-#endif
-	// check that helix prediction is consistent with measurement
-	if (Propagate(middle,normal,helixI,helixO,xyz[0],dirG,s,w)) {BadHit(2,tpcHit->position()); continue;}
-	if (Debug() > 1) {
-	  cout << " Prediction:\t" << xyz[0] 
-	       << "\tat s=\t" << s[0] << "/" << s[1] 
-	       << "\tw = " << w[0] << "/" << w[1] << endl;
-	}
-	dif = xyz[3] - xyz[0];
-	if (dif.perp() > 2.0) {if (Debug() > 1) {cout << "Prediction is to far from hit:\t" << xyz[3] << endl;}
-	  continue;
-	}
-	if (Propagate(upper,normal,helixI,helixO,xyz[1],dirG,s_out,w_out)) {BadHit(2,tpcHit->position()); continue;}
-	if (Propagate(lower,normal,helixI,helixO,xyz[2],dirG,s_in ,w_in )) {BadHit(2,tpcHit->position()); continue;}
-	dx = ((s_out[0] - s_in[0])*w[1] + (s_out[1] - s_in[1])*w[0]);
-#ifdef __TEST_DX__
-	  dXTest->Fill(sector, dX_GenFit, dX_GenFit - dx);
-#endif /* __TEST_DX__ */
-	if (dx <= 0.0) {if (Debug() > 1) {cout << "negative dx " << dx << endl;}
-	  continue;
-	}
-	globalDirectionOfTrack = StGlobalDirection(dirG);
-	for (Int_t l = 0; l < 4; l++) {
-	  StGlobalCoordinate globalOfTrack(xyz[l].x(),xyz[l].y(),xyz[l].z());
-	  transform(globalOfTrack,localSect[l],sector,row);
-	}
-#ifdef __PROMPT_HITS__
-	Double_t zP = TMath::Abs(xyz[0].z());
-	//----------------------------- Prompt Hits ? ------------------------------
-	if (zP > 205.0 && zP < 215.) {
-	  Int_t iWestEast = 0;
-	  if (sector > 12) iWestEast = 1;
-	  Int_t io = 0;
-	  if (row > St_tpcPadConfigC::instance()->innerPadRows(sector)) io = 1;
-	  static Double_t z[2][3] = { 
-	    // Anodes         GG          Pads
-	    { -0.6 - 0.2,     0,  -0.6 - 2*0.2}, // Inner
-	    { -0.6 - 0.4,     0,  -0.6 - 2*0.4}  // Outer
-	  };
-	  StTpcLocalSectorDirection  dirLS(0.,0.,(iWestEast) ? 1 : -1,sector,row);  if (Debug()>1) cout << "dirLS\t" << dirLS << endl;
-	  StGlobalDirection directionG;
-	  transform(dirLS,directionG);
-	  const StThreeVectorD PromptNormal(directionG.position());
-	  StTpcLocalSectorCoordinate local;
-	  StThreeVectorD  anode, gg, pads;
-	  StThreeVectorD* PromptPlanes[3] = {&anode, &gg, &pads};
-	  StGlobalCoordinate glob;
-	  Double_t y = transform.yFromRow(row);
-	  for (Int_t l = 0; l < 3; l++) {
-	    local = StTpcLocalSectorCoordinate(0.,y, z[io][l], sector, row);
-	    transform(local,glob);
-	    *PromptPlanes[l] = glob.position();
-	    if (Debug()>1) cout << "mPromptPosition[" << sector-1 << "][" << row-1 << "][" << l << "] = " 
-				<< *PromptPlanes[l]  << endl;
+	  if (St_tpcPadConfigC::instance()->numberOfRows(sector) == 45) {// ! iTpx
+	    // Check that Voltage above "-100V" from nominal, mark as unrecoverable
+	    Double_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sector,row);
+	    if ((row <= St_tpcPadConfigC::instance()->innerPadRows(sector) && 1170 - V > 100) || 
+		(row >  St_tpcPadConfigC::instance()->innerPadRows(sector) && 1390 - V > 100)) {BadHit(9,tpcHit->position()); continue;}
 	  }
+#endif
 	  // check that helix prediction is consistent with measurement
-	  if (Propagate(*((const StThreeVectorD *) &anode),PromptNormal,helixI,helixO,xyz[0],dirG,s,w)) {BadHit(2,tpcHit->position()); continue;}
+	  if (Propagate(middle,normal,helixI,helixO,xyz[0],dirG,s,w)) {BadHit(2,tpcHit->position()); continue;}
 	  if (Debug() > 1) {
 	    cout << " Prediction:\t" << xyz[0] 
 		 << "\tat s=\t" << s[0] << "/" << s[1] 
@@ -461,13 +408,8 @@ Int_t StdEdxY2Maker::Make(){
 	  if (dif.perp() > 2.0) {if (Debug() > 1) {cout << "Prediction is to far from hit:\t" << xyz[3] << endl;}
 	    continue;
 	  }
-	  static Double_t s_inP[2], s_outP[2];
-	  if (Propagate(*((const StThreeVectorD *) &pads),PromptNormal,helixI,helixO,xyz[1],dirG,s_outP,w_out)) {BadHit(2,tpcHit->position()); continue;}
-	  if (Propagate(*((const StThreeVectorD *) &gg  ),PromptNormal,helixI,helixO,xyz[2],dirG,s_inP ,w_in )) {BadHit(2,tpcHit->position()); continue;}
-	  s_out[0] = TMath::Min(s_outP[0], s_out[0]);
-	  s_out[1] = TMath::Min(s_outP[1], s_out[1]);
-	  s_in[0]  = TMath::Max(s_inP[0] , s_in[0] );
-	  s_in[1]  = TMath::Max(s_inP[1] , s_in[1] );
+	  if (Propagate(upper,normal,helixI,helixO,xyz[1],dirG,s_out,w_out)) {BadHit(2,tpcHit->position()); continue;}
+	  if (Propagate(lower,normal,helixI,helixO,xyz[2],dirG,s_in ,w_in )) {BadHit(2,tpcHit->position()); continue;}
 	  dx = ((s_out[0] - s_in[0])*w[1] + (s_out[1] - s_in[1])*w[0]);
 #ifdef __TEST_DX__
 	  dXTest->Fill(sector, dX_GenFit, dX_GenFit - dx);
@@ -480,55 +422,116 @@ Int_t StdEdxY2Maker::Make(){
 	    StGlobalCoordinate globalOfTrack(xyz[l].x(),xyz[l].y(),xyz[l].z());
 	    transform(globalOfTrack,localSect[l],sector,row);
 	  }
-	}
+#ifdef __PROMPT_HITS__
+	  Double_t zP = TMath::Abs(xyz[0].z());
+	  //----------------------------- Prompt Hits ? ------------------------------
+	  if (zP > 205.0 && zP < 215.) {
+	    Int_t iWestEast = 0;
+	    if (sector > 12) iWestEast = 1;
+	    Int_t io = 0;
+	    if (row > St_tpcPadConfigC::instance()->innerPadRows(sector)) io = 1;
+	    static Double_t z[2][3] = { 
+	      // Anodes         GG          Pads
+	      { -0.6 - 0.2,     0,  -0.6 - 2*0.2}, // Inner
+	      { -0.6 - 0.4,     0,  -0.6 - 2*0.4}  // Outer
+	    };
+	    StTpcLocalSectorDirection  dirLS(0.,0.,(iWestEast) ? 1 : -1,sector,row);  if (Debug()>1) cout << "dirLS\t" << dirLS << endl;
+	    StGlobalDirection directionG;
+	    transform(dirLS,directionG);
+	    const StThreeVectorD PromptNormal(directionG.position());
+	    StTpcLocalSectorCoordinate local;
+	    StThreeVectorD  anode, gg, pads;
+	    StThreeVectorD* PromptPlanes[3] = {&anode, &gg, &pads};
+	    StGlobalCoordinate glob;
+	    Double_t y = transform.yFromRow(row);
+	    for (Int_t l = 0; l < 3; l++) {
+	      local = StTpcLocalSectorCoordinate(0.,y, z[io][l], sector, row);
+	      transform(local,glob);
+	      *PromptPlanes[l] = glob.position();
+	      if (Debug()>1) cout << "mPromptPosition[" << sector-1 << "][" << row-1 << "][" << l << "] = " 
+				  << *PromptPlanes[l]  << endl;
+	    }
+	    // check that helix prediction is consistent with measurement
+	    if (Propagate(*((const StThreeVectorD *) &anode),PromptNormal,helixI,helixO,xyz[0],dirG,s,w)) {BadHit(2,tpcHit->position()); continue;}
+	    if (Debug() > 1) {
+	      cout << " Prediction:\t" << xyz[0] 
+		   << "\tat s=\t" << s[0] << "/" << s[1] 
+		   << "\tw = " << w[0] << "/" << w[1] << endl;
+	    }
+	    dif = xyz[3] - xyz[0];
+	    if (dif.perp() > 2.0) {if (Debug() > 1) {cout << "Prediction is to far from hit:\t" << xyz[3] << endl;}
+	      continue;
+	    }
+	    static Double_t s_inP[2], s_outP[2];
+	    if (Propagate(*((const StThreeVectorD *) &pads),PromptNormal,helixI,helixO,xyz[1],dirG,s_outP,w_out)) {BadHit(2,tpcHit->position()); continue;}
+	    if (Propagate(*((const StThreeVectorD *) &gg  ),PromptNormal,helixI,helixO,xyz[2],dirG,s_inP ,w_in )) {BadHit(2,tpcHit->position()); continue;}
+	    s_out[0] = TMath::Min(s_outP[0], s_out[0]);
+	    s_out[1] = TMath::Min(s_outP[1], s_out[1]);
+	    s_in[0]  = TMath::Max(s_inP[0] , s_in[0] );
+	    s_in[1]  = TMath::Max(s_inP[1] , s_in[1] );
+	    dx = ((s_out[0] - s_in[0])*w[1] + (s_out[1] - s_in[1])*w[0]);
+#ifdef __TEST_DX__
+	    dXTest->Fill(sector, dX_GenFit, dX_GenFit - dx);
+#endif /* __TEST_DX__ */
+	    if (dx <= 0.0) {if (Debug() > 1) {cout << "negative dx " << dx << endl;}
+	      continue;
+	    }
+	    globalDirectionOfTrack = StGlobalDirection(dirG);
+	    for (Int_t l = 0; l < 4; l++) {
+	      StGlobalCoordinate globalOfTrack(xyz[l].x(),xyz[l].y(),xyz[l].z());
+	      transform(globalOfTrack,localSect[l],sector,row);
+	    }
+	  }
 #endif /* __PROMPT_HITS__ */
-	tpcHit->setdX(dx);
+	  tpcHit->setdX(dx);
+	  if (sector != Pad.sector() || // ? && TMath::Abs(xyz[0].x()) > 20.0 ||
+	      row    != Pad.row()) {
+	    LOG_WARN << "StdEdxY2Maker:: mismatched Sector " 
+		     << Pad.sector() << " / " << sector
+		     << " Row " << Pad.row() << " / " << row 
+		     << "pad " << Pad.pad() << " TimeBucket :" << Pad.timeBucket() 
+		     << endm;
+	    iokCheck++;
+	  }
+	  Double_t pad = tpcHit->pad();
+	  if (pad == 0) pad = Pad.pad();
+	  if (Pad.timeBucket() < 0         ||
+	      Pad.timeBucket() >= numberOfTimeBins) {
+	    LOG_WARN << "StdEdxY2Maker:: TimeBucket out of range: " 
+		     << Pad.timeBucket() << endm;
+	    iokCheck++;
+	  }
+	  if (sector != PadOfTrack.sector() || 
+	      row != PadOfTrack.row() ||	
+	      TMath::Abs(Pad.pad()-PadOfTrack.pad()) > 5) {
+	    if (Debug() > 1) {
+	      LOG_WARN << "StdEdxY2Maker::	Helix Prediction " 
+		       << "Sector = " 
+		       << PadOfTrack.sector() << "/" 
+		       << sector 
+		       << " Row = " << PadOfTrack.row() << "/" 
+		       << row 
+		       << " Pad = " << PadOfTrack.pad() << "/" 
+		       << Pad.pad() 
+		       << " from Helix  is not matched with point/" << endm;;
+	      LOG_WARN << "StdEdxY2Maker:: Coordinates Preiction: " 
+		       << xyz[0] << "/Hit " << tpcHit->position()
+		       << endm;
+	    }
+	    iokCheck++;
+	  }
+	  
+	} else {
+	  // Nothing for precalculated dx
 	} // end of dx calculation
 	TrackLengthTotal += dx;
 	transform(localSect[0],PadOfTrack);
 	transform(globalDirectionOfTrack,localDirectionOfTrack,sector,row);
 	transform(localSect[3],Pad);
 	//________________________________________________________________________________      
-	Int_t iokCheck = 0;
-	if (sector != Pad.sector() || // ? && TMath::Abs(xyz[0].x()) > 20.0 ||
-	    row    != Pad.row()) {
-	  LOG_WARN << "StdEdxY2Maker:: mismatched Sector " 
-			      << Pad.sector() << " / " << sector
-			      << " Row " << Pad.row() << " / " << row 
-			      << "pad " << Pad.pad() << " TimeBucket :" << Pad.timeBucket() 
-			      << endm;
-	  iokCheck++;
-	}
-	Double_t pad = tpcHit->pad();
-	if (pad == 0) pad = Pad.pad();
-	if (Pad.timeBucket() < 0         ||
-	    Pad.timeBucket() >= numberOfTimeBins) {
-	  LOG_WARN << "StdEdxY2Maker:: TimeBucket out of range: " 
-			      << Pad.timeBucket() << endm;
-	  iokCheck++;
-	}
-	if (sector != PadOfTrack.sector() || 
-	    row != PadOfTrack.row() ||	
-	    TMath::Abs(Pad.pad()-PadOfTrack.pad()) > 5) {
-	  if (Debug() > 1) {
-	    LOG_WARN << "StdEdxY2Maker::	Helix Prediction " 
-				<< "Sector = " 
-				<< PadOfTrack.sector() << "/" 
-				<< sector 
-				<< " Row = " << PadOfTrack.row() << "/" 
-				<< row 
-				<< " Pad = " << PadOfTrack.pad() << "/" 
-				<< Pad.pad() 
-				<< " from Helix  is not matched with point/" << endm;;
-	    LOG_WARN << "StdEdxY2Maker:: Coordinates Preiction: " 
-				<< xyz[0] << "/Hit " << tpcHit->position()
-				<< endm;
-	  }
-	  iokCheck++;
-	}
 	if (tpcHit->charge() <= 0) {
 	  LOG_WARN << "StdEdxY2Maker:: deposited charge : " <<  tpcHit->charge() 
-			      << " <= 0" << endm;
+		   << " <= 0" << endm;
 	  iokCheck++;
 	}
 	//	if ((TESTBIT(m_Mode, kXYZcheck)) && (TESTBIT(m_Mode, kCalibration))) XyzCheck(&global, iokCheck);
