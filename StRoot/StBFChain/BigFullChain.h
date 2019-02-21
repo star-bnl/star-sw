@@ -1107,11 +1107,19 @@ Bfc_st BFC[] = { // standard chains
 
 
   {"B2018a"  ,"","","ry2018a,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite","",""
-   ,                                                     "Base chain for run 2018 data (tpc)",kFALSE},
+   ,                                                           "Base chain for run 2018 data (tpc)",kFALSE},
 
   {"P2018a","" ,"",
    "B2018a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,beamline3D,l3onl,emcDY2,epdHit,fpd,trgd,ZDCvtx,analysis"
-   ,              "","","Base chain for year 2018 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+   ,                    "","","Base chain for year 2018 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+
+  // 
+  {"B2019a" ,"","","ry2018a,in,tpcX,UseXgeom,iTpcIT,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite",
+   "","",                                                      "Base chain for run 2019 data (tpc)",kFALSE},
+
+  {"P2019a","" ,"",
+   "B2019a,ITTF,BAna,iTpcIT,hitfilt,VFMinuit,beamline3D,etofa,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
+   ,    "","",                "Base chain for year 2019 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 
 
   // Other chains/Calibration
@@ -1764,6 +1772,8 @@ Bfc_st BFC[] = { // standard chains
   {"ETofQa",     "",     "ETofChain", "db, ETofUtil, muDst", "StETofQAMaker",    "StETofQAMaker",
                                                                                     "ETOF QA maker",kFALSE},
 
+  {"ETofA",      "",       "", "etofdat,ETofCalib,etofhit,ETofMatch","","... ETOF chain for data",  kFALSE},
+ 
 
   // the below needs to be done earlier to save time - leaving here for documentation purposes as two
   // makers are part of the same library (let's not forget this)
