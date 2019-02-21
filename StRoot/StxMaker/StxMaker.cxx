@@ -652,10 +652,22 @@ Int_t StxMaker::FillDetectorInfo(StTrack *gTrack, genfit::Track * track, Bool_t 
 		=          ((   v_x -g*v_y + b*v_z)*( g*u_x +  u_y - a*u_z) - ( g*v_x +  v_y - a*v_z)*(   u_x -g*u_y + b*u_z))
  			   ((   u_x -g*u_y + b*u_z)*( g*v_x +  v_y - a*v_z) + (   v_x -g*v_y + b*v_z)*( g*u_x +  u_y - a*u_z))
 
+                           (( g*u_x +  u_y - a*u_z)*(-b*v_x) + ( g*u_x +  u_y - a*u_z)*(a*v_y) +   ( g*u_x +  u_y - a*u_z)*(v_z) - (-b*u_x +a*u_y +   u_z)*( g*v_x) + (-b*u_x +a*u_y +   u_z)*(  v_y) - (-b*u_x +a*u_y +   u_z)*(a*v_z))
+		=          ((   v_x -g*v_y + b*v_z)*( g*u_x) + (   v_x -g*v_y + b*v_z)*(  u_y) - (   v_x -g*v_y + b*v_z)*(a*u_z) - ( g*v_x +  v_y - a*v_z)*(   u_x) - ( g*v_x +  v_y - a*v_z)*(g*u_y) + ( g*v_x +  v_y - a*v_z)*(b*u_z))
+ 			   ((   u_x -g*u_y + b*u_z)*( g*v_x) + (   u_x -g*u_y + b*u_z)*(  v_y) - (   u_x -g*u_y + b*u_z)*(a*v_z) + (   v_x -g*v_y + b*v_z)*( g*u_x) + (   v_x -g*v_y + b*v_z)*(u_y  ) - (   v_x -g*v_y + b*v_z)*(a*u_z))
 
-                           (( g*u_x +  u_y - a*u_z)*(-b*v_x) +( g*u_x +  u_y - a*u_z)(a*v_y) +   ( g*u_x +  u_y - a*u_z)*(v_z) - (-b*u_x +a*u_y +   u_z)*( g*v_x) - (-b*u_x +a*u_y +   u_z*v_y - a*v_z))
-              w' = 	   ((   v_x -g*v_y + b*v_z)*( g*u_x +  u_y - a*u_z) - ( g*v_x +  v_y - a*v_z)*(   u_x -g*u_y + b*u_z))
-			   ((   u_x -g*u_y + b*u_z)*( g*v_x +  v_y - a*v_z) + (   v_x -g*v_y + b*v_z)*( g*u_x +  u_y - a*u_z))
+                           ((          u_y         *(-b*v_x) + (          u_y        )*(a*v_y) + ( g*u_x +  u_y - a*u_z)*(  v_z) - (                  u_z)*( g*v_x) + (-b*u_x +a*u_y +   u_z)*(  v_y) - (                  u_z)*(a*v_z))
+		=          ((   v_x               )*( g*u_x) + (   v_x -g*v_y + b*v_z)*(  u_y) - (   v_x               )*(a*u_z) - ( g*v_x +  v_y - a*v_z)*(   u_x) - (          v_y        )*(g*u_y) + (          v_y        )*(b*u_z)) 
+ 			   ((   u_x               )*( g*v_x) + (   u_x -g*u_y + b*u_z)*(  v_y) - (   u_x               )*(a*v_z) + (   v_x               )*( g*u_x) + (   v_x -g*v_y + b*v_z)*(u_y  ) - (   v_x               )*(a*u_z))
+
+                           ((       -b*u_y*v_x + a*u_y*v_y + g*u_x*v_z +  u_y*v_z - a*u_z*v_z) - g*u_z*v_x - b*u_x*v_y + a*u_y*v_y + u_z* v_y - a* u_z*v_z)
+		=          ((   g*v_x*u_x + v_x*u_y - g*v_y*u_y + b*v_z* u_y - a*v_x*u_z - g*v_x*u_x -  v_y*u_x + a*v_z*u_x - g*v_y*u_y + b*v_y*u_z       ) 
+ 			   ((   g*u_x*v_x + u_x*v_y -g*u_y*v_y + b*u_z*v_y  - a*u_x*v_z  + g*v_x*u_x +  v_x*u_y -g*v_y*u_y + b*v_z*u_y  - a*v_x*u_z       )
+
+                           ((   u_y*v_z + u_z* v_y      + a*u_y*v_y + a*u_y*v_y  - a* u_z*v_z   - a*u_z*v_z) - g*u_z*v_x - b*u_x*v_y + -b*u_y*v_x + g*u_x*v_z)
+		=          ((   g*v_x*u_x + v_x*u_y - g*v_y*u_y + b*v_z* u_y - a*v_x*u_z - g*v_x*u_x -  v_y*u_x + a*v_z*u_x - g*v_y*u_y + b*v_y*u_z       ) 
+ 			   ((   g*u_x*v_x + u_x*v_y -g*u_y*v_y + b*u_z*v_y  - a*u_x*v_z  + g*v_x*u_x +  v_x*u_y -g*v_y*u_y + b*v_z*u_y  - a*v_x*u_z       )
+
 
        */
       if (! fitterInfo) continue;
