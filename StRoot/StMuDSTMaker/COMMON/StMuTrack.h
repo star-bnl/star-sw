@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.53 2019/02/21 13:32:54 jdb Exp $
+ * $Id: StMuTrack.h,v 1.54 2019/02/21 14:00:02 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -222,7 +222,7 @@ protected:
   friend class StMuDst;
   friend class StMuDstFilterMaker;
   friend class StMuMomentumShiftMaker;
-  ClassDef(StMuTrack,15)
+  ClassDef(StMuTrack,16)
 };
 
 inline short StMuTrack::id() const {return mId;}
@@ -280,6 +280,9 @@ ostream&              operator<<(ostream& os, StMuTrack const & v);
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.54  2019/02/21 14:00:02  jdb
+ * Bumped the ClassDef versions in MuDst where eTOF was added. I also added the etofTypes to the LinkDef file
+ *
  * Revision 1.53  2019/02/21 13:32:54  jdb
  * Inclusion of ETOF MuDst code. This code adds support for the full set of ETOF data which includes EtofDigi, EtofHit, EtofHeader. The code essentially copies similar structures from StEvent and additionally rebuilds the maps between Digis and Hits. Accessor methods are added based on the pattern from BTOF to provide access to data at various levels. The code for accessing the PID traits provided by ETOF is also provided
  *

@@ -13,6 +13,7 @@
 #pragma link C++ enum pmdTypes;
 #pragma link C++ enum tofTypes;
 #pragma link C++ enum btofTypes;
+#pragma link C++ enum etofTypes;
 #pragma link C++ enum epdTypes;
 #pragma link C++ enum mtdTypes;
 #pragma link C++ enum eztTypes;
