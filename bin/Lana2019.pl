@@ -9,6 +9,7 @@ if (-d "/hlt/cephfs/daq/2019/") {
   @list = glob "/star/data03/daq/2019/*/*/st_laser*.daq";
 }
 #print "list = @list\n";
+my $NoJobs = 0;
 foreach my $fullpath (@list) {
   my $file = File::Basename::basename($fullpath,".daq");
   my $rootfile = "./" . $file . ".laser.root";
@@ -21,4 +22,6 @@ foreach my $fullpath (@list) {
   $rootfile .= "_adc.laser.root";
   if (-r $rootfile) {next;}
   print "string:$fullpath\n";
+  $NoJobs++;
 }
+if (! $NoJobs) {die "No jobs";}

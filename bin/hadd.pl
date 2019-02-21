@@ -54,6 +54,7 @@ my $tags = join '|', @tags;
 print "found tags = $#tags : @tags   ==> $tags\n";
 #if ($#tags < 0) {die "No tags found";}
 my $glob = $ARG{files}; print "glob = $glob\n"; 
+my $outn =$glob; $outn =~ s#\*##g; $outn =~ s#\.root##;
 my $FilesPerJob = $ARG{FilesPerJob}; print "FilesPerJob = $FilesPerJob\n";
 my $Out = $ARG{Out}; print "Out = $Out\n";
 my @Files = glob "$glob"; 
@@ -112,7 +113,7 @@ foreach my $tag (@tags) {
   }
 }
 #die;
-my $XML = "hadd.xml";
+my $XML = "hadd" . $outn . ".xml";
 open (XML,">$XML") or die "Can't open $XML";
 #
 print XML '<?xml version="1.0" encoding="utf-8" ?> 
@@ -149,7 +150,7 @@ foreach my $key (sort keys %TagList) {
 #    print "b/e => $be[0] - $be[1]";
 #    my $job = $be[0] . "_" . $be[1];
     my $job = $jb;
-    my $name     = $ARG{prefix} . $key . "_". $dir . "_" . $job;
+    my $name     = $ARG{prefix} . $key . "_". $dir . $outn . "_" . $job;
     my $rootfile = $name. ".root";
     my $log      = $name. ".log";
     if ( -r $rootfile ) {print  "\tDone\n"; next;}

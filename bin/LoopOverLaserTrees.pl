@@ -21,7 +21,10 @@ foreach my $file (@list) {
   if ($runs{$r}) {next;}
   $runs{$r} = $dir;
 }
+my $Njobs = 0;
 foreach my $key ( sort keys %runs ) {
 #  print "$key => $runs{$key}\n";
   print "string:$key:$runs{$key}\n";
+  $Njobs++;
 }
+if (! $Njobs) {die "No jobs";}

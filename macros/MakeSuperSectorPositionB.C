@@ -1,5 +1,5 @@
 /*
-  root.exe MuAuAu200A710.root lDb.C 'MakeSuperSectorPositionB.C(20140101,731)'
+  root.exe Pass13_W2S.root   lDb.C 'MakeSuperSectorPositionB.C(20140101,731)'
  */
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "Riostream.h"
@@ -54,7 +54,7 @@ struct data_t {
   }
 };
 //________________________________________________________________________________
-void MakeSuperSectorPositionB(Int_t date = 20140101, Int_t time = 720){
+void MakeSuperSectorPositionB(Int_t date = 20190101, Int_t time = 13){
   const Char_t *plots[3] = {"dXS","dYS","dZS"};
   data_t Data[24]; memset(Data, 0, sizeof(Data));
   gStyle->SetOptStat(0);

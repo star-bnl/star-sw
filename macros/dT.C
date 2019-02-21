@@ -1,3 +1,6 @@
+/*
+   root.exe st200*rPlots.Cut.Errors.root dT.C
+*/
 #include "Ask.h"
 void dT() {
   Int_t NF = 0;
@@ -30,7 +33,8 @@ void dT() {
     for (Int_t sector = 1; sector <= 24; sector++) {
       Double_t v = dT_zx_1->GetBinContent(sector);
       if (TMath::Abs(v) < 0.1) continue;
-      cout << "\tsector  " << sector << "\tdT = " << v;
+      Double_t dv = dT_zx_1->GetBinError(sector);
+      cout << "\tsector  " << sector << "\tdT = " << v << " +/- " << dv;
     }
     cout << endl;
     if (! Ask()) continue;

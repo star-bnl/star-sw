@@ -23,9 +23,13 @@
     set bf           = `basename $filel .root`
     set output  = ${bf}.event.root
     set logFile  = ${bf}B.log
-#   if ( -r $logFile) continue;
+    if ( -r $logFile) continue;
+    set llogFile = log/${logFile}
+    if ( -r $llogFile) continue;
     set muFile = ${SUBMITTINGDIRECTORY}/${bf}.MuDst.root
    if (-r $muFile) continue;
+    set mmuFile = ${SUBMITTINGDIRECTORY}/MuDst/${bf}.MuDst.root
+   if (-r $mmuFile) continue;
 #   cp ${evtsFile} ${SCRATCH}/
 #   set input = ${SCRATCH}/${bf}.daq
     set bla = ${SUBMITTINGDIRECTORY}/${bf}.bla.root
