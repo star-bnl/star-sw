@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.63 2018/03/15 22:00:35 smirnovd Exp $
+ * $Id: StMuDstMaker.h,v 1.64 2019/02/21 13:32:54 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -176,7 +176,7 @@ class StMuDstMaker : public StIOInterFace {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.63 2018/03/15 22:00:35 smirnovd Exp $ built " __DATE__ " " __TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.64 2019/02/21 13:32:54 jdb Exp $ built " __DATE__ " " __TIME__ ;
     return cvs;
   }
 
@@ -294,6 +294,7 @@ virtual   void closeRead();
   void fillTof(StEvent* ev);
   /// dongx
   void fillBTof(StEvent* ev);
+  void fillETof(StEvent* ev); // jdb
   void fillMtd(StEvent* ev);
   void fillFgt(StEvent* ev);
 
@@ -353,6 +354,7 @@ virtual   void closeRead();
   TClonesArray** mTofArrays;    //[__NTOFARRAYS__    ];
   /// dongx
   TClonesArray** mBTofArrays;   //[__NBTOFARRAYS__   ];
+  TClonesArray** mETofArrays;   //[__NETofARRAYS__    ];  /// jdb
   TClonesArray** mEpdArrays;    //[__NEPDARRAYS__    ];  /// MALisa
   TClonesArray** mMtdArrays;    //[__NMTDARRAYS__    ];
   TClonesArray** mFgtArrays;    //[__NFGTARRAYS__    ];
@@ -407,6 +409,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.64  2019/02/21 13:32:54  jdb
+ * Inclusion of ETOF MuDst code. This code adds support for the full set of ETOF data which includes EtofDigi, EtofHit, EtofHeader. The code essentially copies similar structures from StEvent and additionally rebuilds the maps between Digis and Hits. Accessor methods are added based on the pattern from BTOF to provide access to data at various levels. The code for accessing the PID traits provided by ETOF is also provided
+ *
  * Revision 1.63  2018/03/15 22:00:35  smirnovd
  * Fix linker error by removing declared but undefined functions
  *
