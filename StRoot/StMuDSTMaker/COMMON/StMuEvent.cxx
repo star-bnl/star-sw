@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.29 2017/04/17 20:40:56 smirnovd Exp $
+ * $Id: StMuEvent.cxx,v 1.30 2019/02/21 13:32:54 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -33,6 +33,8 @@
 #include "StMuDst.h"
 #include "StMuPrimaryVertex.h"
 #include "StMuBTofHit.h"
+#include "StMuETofHit.h"
+#include "StMuETofDigi.h"
 
 #include "TClonesArray.h"
 #include "TObject.h"
@@ -279,6 +281,13 @@ unsigned short StMuEvent::btofTrayMultiplicity(){
 
 }
 
+unsigned short StMuEvent::etofHitMultiplicity(){
+  return (unsigned short) StMuDst::numberOfETofHit();
+}
+unsigned short StMuEvent::etofDigiMultiplicity(){
+  return (unsigned short) StMuDst::numberOfETofDigi();
+}
+
 float StMuEvent::nearestVertexZ(int vtx_id){
 
 	float dz = 999.0;
@@ -300,6 +309,9 @@ float StMuEvent::nearestVertexZ(int vtx_id){
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.30  2019/02/21 13:32:54  jdb
+ * Inclusion of ETOF MuDst code. This code adds support for the full set of ETOF data which includes EtofDigi, EtofHit, EtofHeader. The code essentially copies similar structures from StEvent and additionally rebuilds the maps between Digis and Hits. Accessor methods are added based on the pattern from BTOF to provide access to data at various levels. The code for accessing the PID traits provided by ETOF is also provided
+ *
  * Revision 1.29  2017/04/17 20:40:56  smirnovd
  * StMuEvent: Declare getters const. They don't modify anything
  *

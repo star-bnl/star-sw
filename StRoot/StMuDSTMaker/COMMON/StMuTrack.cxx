@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.53 2017/04/17 20:41:07 smirnovd Exp $
+ * $Id: StMuTrack.cxx,v 1.54 2019/02/21 13:32:54 jdb Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -15,6 +15,8 @@
 ///dongx
 #include "StEvent/StBTofHit.h"
 #include "StEvent/StBTofPidTraits.h"
+#include "StEvent/StETofHit.h"
+#include "StEvent/StETofPidTraits.h"
 #include "StEvent/StMtdHit.h"
 #include "StEvent/StMtdPidTraits.h"
 #include "StarClassLibrary/SystemOfUnits.h"
@@ -226,6 +228,9 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
  /// dongx
   mIndex2BTofHit = -1;   // filled later
   fillMuBTofPidTraits(track);
+
+  mIndex2ETofHit = -1;    
+  fillMuETofPidTraits(track);
 
   mIndex2MtdHit = -1;    
   fillMuMtdPidTraits(track);
@@ -470,6 +475,23 @@ void StMuTrack::fillMuBTofPidTraits(const StTrack* t) {
     }    
   }
 }
+
+void StMuTrack::fillMuETofPidTraits( const StTrack* t ) {
+  StETofPidTraits* etofPidTraits = nullptr;
+
+  // set etof pid traits per default to 0 ...
+  mETofPidTraits.setETofPidTraits( etofPidTraits );
+
+  StPtrVecTrackPidTraits traits = t->pidTraits( kETofId );
+  UInt_t size = traits.size();
+  for( UInt_t i = 0; i < size; i++ ) {
+    if( ( etofPidTraits = dynamic_cast< StETofPidTraits* >( traits[ i ] ) ) ) {   
+      mETofPidTraits.setETofPidTraits( etofPidTraits );
+    }    
+  }
+}
+
+
 void StMuTrack::fillMuMtdPidTraits(const StTrack* t) {
   StMtdPidTraits* mtdPidTraits = 0;
   StPtrVecTrackPidTraits traits = t->pidTraits(kMtdId);
@@ -718,6 +740,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.54  2019/02/21 13:32:54  jdb
+ * Inclusion of ETOF MuDst code. This code adds support for the full set of ETOF data which includes EtofDigi, EtofHit, EtofHeader. The code essentially copies similar structures from StEvent and additionally rebuilds the maps between Digis and Hits. Accessor methods are added based on the pattern from BTOF to provide access to data at various levels. The code for accessing the PID traits provided by ETOF is also provided
+ *
  * Revision 1.53  2017/04/17 20:41:07  smirnovd
  * StMuTrack: Add additional info to Print()
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.35 2017/04/17 20:40:56 smirnovd Exp $
+ * $Id: StMuEvent.h,v 1.36 2019/02/21 13:32:54 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -89,6 +89,8 @@ class StMuEvent : public TObject {
   unsigned short refMultFtpc(int vtx_id = -1);
   unsigned short grefmult(int vtx_id=-1);
   unsigned short btofTrayMultiplicity();
+  unsigned short etofHitMultiplicity();
+  unsigned short etofDigiMultiplicity();
   float nearestVertexZ(int vtx_id=-1);
 
 	/// Currently not filled properly.
@@ -232,6 +234,9 @@ inline unsigned int StMuEvent::numberOfSsdHits() { return mNHitsHFT[3]; }
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.36  2019/02/21 13:32:54  jdb
+ * Inclusion of ETOF MuDst code. This code adds support for the full set of ETOF data which includes EtofDigi, EtofHit, EtofHeader. The code essentially copies similar structures from StEvent and additionally rebuilds the maps between Digis and Hits. Accessor methods are added based on the pattern from BTOF to provide access to data at various levels. The code for accessing the PID traits provided by ETOF is also provided
+ *
  * Revision 1.35  2017/04/17 20:40:56  smirnovd
  * StMuEvent: Declare getters const. They don't modify anything
  *

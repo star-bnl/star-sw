@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.128 2018/03/01 20:42:38 jdb Exp $
+ * $Id: StMuDstMaker.cxx,v 1.129 2019/02/21 13:32:54 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -67,6 +67,10 @@
 #include "StMuEpdHitCollection.h"  // MALisa
 #include "StEvent/StEpdCollection.h" // MALisa
 #include "StMuEpdUtil.h"    // MALisa
+#include "StMuETofCollection.h"  // fseck
+#include "StMuETofHeader.h"      // fseck
+#include "StMuETofDigi.h"        // fseck
+#include "StMuETofHit.h"         // fseck
 #include "StMuFgtStrip.h"
 #include "StMuFgtCluster.h"
 #include "StMuFgtStripAssociation.h"
@@ -82,6 +86,8 @@
 #include "StEvent/StBTofCollection.h"
 #include "StEvent/StBTofRawHit.h"
 #include "StEvent/StBTofHeader.h"
+#include "StEvent/StETofCollection.h" //fseck
+
 #include "StMuBTofHit.h"
 #include "StMuBTofHitCollection.h"
 #include "StMuBTofUtil.h"
@@ -199,8 +205,9 @@ void StMuDstMaker::assignArrays()
   mPmdArrays      = mEmcArrays     + __NEMCARRAYS__;    
   mFmsArrays      = mPmdArrays     + __NPMDARRAYS__;      
   mTofArrays      = mFmsArrays     + __NFMSARRAYS__;    
-  mBTofArrays     = mTofArrays     + __NTOFARRAYS__;   /// dongx
-  mEpdArrays      = mBTofArrays    + __NBTOFARRAYS__;  /// MALisa
+  mBTofArrays     = mTofArrays     + __NTOFARRAYS__;    /// dongx
+  mETofArrays     = mBTofArrays    + __NBTOFARRAYS__;   /// jdb
+  mEpdArrays      = mETofArrays    + __NETOFARRAYS__;   /// MALisa
   mMtdArrays      = mEpdArrays     + __NEPDARRAYS__;   /// dongx  
   mFgtArrays      = mMtdArrays     + __NMTDARRAYS__;      
   mEztArrays      = mFgtArrays     + __NFGTARRAYS__;
@@ -215,6 +222,7 @@ void StMuDstMaker::clearArrays()
     __NMCARRAYS__+
     __NEMCARRAYS__+
     __NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+  /// dongx
+    __NETOFARRAYS__+ //jdb
     __NEPDARRAYS__+     // MALisa
     __NMTDARRAYS__+__NFGTARRAYS__;
 
@@ -241,6 +249,7 @@ void StMuDstMaker::zeroArrays()
 			__NMCARRAYS__+
 			__NEMCARRAYS__+
 			__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__ /// dongx
+      +__NETOFARRAYS__ //jdb
 			+ __NEPDARRAYS__  // MALisa
             +__NMTDARRAYS__+__NFGTARRAYS__],(char)0,__NEZTARRAYS__);
   
@@ -257,6 +266,7 @@ void StMuDstMaker::zeroArrays()
    PmdAll     - all branches related to Pmd
    TofAll     - all branches related to Tof
    BTofAll    - all branches related to BTof  /// dongx
+   ETofAll    - all branches related to ETof  /// fseck
    MTDAll     - all branches related to MTD
    FgtAll     - all branches related to Fgt
 
@@ -269,6 +279,7 @@ void StMuDstMaker::zeroArrays()
    SetStatus("PmdAll"    ,1)  // all standard Pmd     branches ON
    SetStatus("TofAll"    ,1)  // all standard Tof     branches ON
    SetStatus("BTofAll"   ,1)  // all standard BTof    branches ON  /// dongx
+   SetStatus("ETofAll"   ,1)  // all standard ETof    branches ON  /// fseck
    SetStatus("EpdAll"    ,1)  // all standard Epd     branches ON  /// MALisa
    SetStatus("MTDAll"    ,1)  // all standard Mtd     branches ON
    SetStatus("FgtAll"    ,1)  // all standard Fgt     branches ON
@@ -280,16 +291,16 @@ void StMuDstMaker::zeroArrays()
 void StMuDstMaker::SetStatus(const char *arrType,int status)
 {
 #ifndef __NO_STRANGE_MUDST__
-  static const char *specNames[]={"MuEventAll","StrangeAll","MCAll","EmcAll","PmdAll","FMSAll","TofAll","BTofAll","EpdAll","MTDAll","FgtAll","EztAll",0};  /// dongx, MALisa
+  static const char *specNames[]={"MuEventAll","StrangeAll","MCAll","EmcAll","PmdAll","FMSAll","TofAll","BTofAll","ETofAll","EpdAll","MTDAll","FgtAll","EztAll",0};  /// dongx, MALisa
 #else
-  static const char *specNames[]={"MuEventAll",             "MCAll","EmcAll","PmdAll","FMSAll","TofAll","BTofAll","EpdAll","MTDAll","FgtAll","EztAll",0};  /// dongx, MALisa
+  static const char *specNames[]={"MuEventAll",             "MCAll","EmcAll","PmdAll","FMSAll","TofAll","BTofAll","ETofAll","EpdAll","MTDAll","FgtAll","EztAll",0};  /// dongx, MALisa
 #endif
   static const int   specIndex[]={
   0, __NARRAYS__,
   #ifndef __NO_STRANGE_MUDST__
       __NSTRANGEARRAYS__,
   #endif
-  __NMCARRAYS__,__NEMCARRAYS__,__NPMDARRAYS__,__NFMSARRAYS__,__NTOFARRAYS__,__NBTOFARRAYS__,__NEPDARRAYS__,__NMTDARRAYS__,__NFGTARRAYS__,__NEZTARRAYS__,-1};
+  __NMCARRAYS__,__NEMCARRAYS__,__NPMDARRAYS__,__NFMSARRAYS__,__NTOFARRAYS__,__NBTOFARRAYS__,__NETOFARRAYS__,__NEPDARRAYS__,__NMTDARRAYS__,__NFGTARRAYS__,__NEZTARRAYS__,-1};
 
     // jdb fixed with new implementation, 
     // this method was broken for several years
@@ -962,6 +973,7 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
     fillFms(ev);
     fillTof(ev);
     fillBTof(ev); 
+    fillETof(ev);
     fillEpd(ev);  // MALisa
     fillMtd(ev);
     fillFgt(ev);
@@ -1023,6 +1035,7 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
 
   mStMuDst->set(this);
   mStMuDst->fixTofTrackIndices();
+  mStMuDst->fixETofTrackIndices();
   mStMuDst->fixMtdTrackIndices();
   mStMuDst->fixTrackIndicesG(mStMuDst->numberOfPrimaryVertices());
 }
@@ -1175,6 +1188,45 @@ void StMuDstMaker::fillBTof(StEvent* ev) {
 
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+/// jdb & fseck
+void StMuDstMaker::fillETof( StEvent* ev ) {
+  DEBUGMESSAGE2( "" );
+
+  const StETofCollection* eTofColl = ev->etofCollection();
+  if( !eTofColl )
+    return;
+
+  StTimer timer;
+  timer.start();
+
+  StMuETofCollection muETofColl( eTofColl ); 
+
+  // fill etof digis from StMuETofCollection    
+  for(size_t i=0; i < (size_t) muETofColl.digisPresent(); i++ ) {
+    StMuETofDigi* pDigi = ( StMuETofDigi* ) muETofColl.etofDigi( i );
+    if( !pDigi ) continue;
+    addType( mETofArrays[ muETofDigi ], *pDigi );
+  }
+  
+  // fill etof hits from StMuETofCollection
+  for(size_t i=0; i < (size_t) muETofColl.hitsPresent(); i++ ) {
+    StMuETofHit* pHit = ( StMuETofHit* ) muETofColl.etofHit( i );
+    if( !pHit ) continue;
+    addType( mETofArrays[ muETofHit ], *pHit );
+  }
+  
+  //fill etof header from StMuETofCollection
+  StMuETofHeader* pHeader = muETofColl.etofHeader();
+  if( pHeader ) {
+    addType( mETofArrays[ muETofHeader ], *pHeader );
+  }
+  
+  timer.stop();
+  DEBUGVALUE2( timer.elapsedTime() );
 }
 // -------------------------------------------------------------------------
 // -------------------------------------------------------------------------
@@ -1375,7 +1427,7 @@ void StMuDstMaker::fillEzt(StEvent* ev) {
                       __NSTRANGEARRAYS__+
 #endif
                       __NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+
-				      __NTOFARRAYS__+__NBTOFARRAYS__+__NEPDARRAYS__+__NMTDARRAYS__+__NFGTARRAYS__]; /// dongx, MALisa
+				      __NTOFARRAYS__+__NBTOFARRAYS__+__NETOFARRAYS__+__NEPDARRAYS__+__NMTDARRAYS__+__NFGTARRAYS__]; /// dongx, MALisa
   if(eztArrayStatus[muEztHead]){
     EztEventHeader* header = mEzTree->copyHeader(ev);
     addType(mEztArrays[muEztHead], *header);
@@ -1870,6 +1922,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.129  2019/02/21 13:32:54  jdb
+ * Inclusion of ETOF MuDst code. This code adds support for the full set of ETOF data which includes EtofDigi, EtofHit, EtofHeader. The code essentially copies similar structures from StEvent and additionally rebuilds the maps between Digis and Hits. Accessor methods are added based on the pattern from BTOF to provide access to data at various levels. The code for accessing the PID traits provided by ETOF is also provided
+ *
  * Revision 1.128  2018/03/01 20:42:38  jdb
  * mEpdUtil was not initialized in the second StMuDstMaker ctor, causing seg fault when deleted - added initialization to second ctor solves issue
  *
