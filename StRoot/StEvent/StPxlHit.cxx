@@ -28,6 +28,7 @@
  * 
  **************************************************************************/ 
 #include <algorithm>
+#include "Stiostream.h"
 #include "StPxlHit.h"
 
 ClassImp(StPxlHit)
@@ -131,15 +132,12 @@ void StPxlHit::setLocalPosition(Float_t u, Float_t v, Float_t w)
 	mLocalPosition[2] = w;
 }
 
-ostream& operator<<(ostream& os, const StPxlHit& hit)
+
+ostream& operator<<(ostream& os, const StPxlHit& v)
 {
-    os << "HFT Hit -I- \tSector:"<< static_cast<int>(hit.sector()) 
-       << " ladder: "<< static_cast<int>(hit.ladder())
-       << " sensor: "<< static_cast<int>(hit.sensor()) 
-       << " localPosition[0]/localPosition[1]/localPosition[2] : " << hit.localPosition(0)
-       << "/" << hit.localPosition(1) 
-       << "/" << hit.localPosition(2)
-       << " kDetectorId : " << hit.detector() 
-       << endl;
-    return os;
+  return os << Form("Pxl s/l/S %3i/%3i%3i ",v.sector(),v.ladder(),v.sensor()) 
+	    << *((StHit *)&v)
+	    << Form("xyzL:%10.3f%10.3f%10.3f",v.localPosition(0),v.localPosition(1),v.localPosition(2));
 }
+//________________________________________________________________________________
+void   StPxlHit::Print(Option_t *option) const {cout << *this << endl;}

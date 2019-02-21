@@ -83,9 +83,9 @@ public:
     void setMeanRow(float);
     void setMeanColumn(float);
     void setNRawHits(UChar_t);
-    
+    void Print(Option_t *option="") const;
     virtual bool isSortable() const;
-    
+        
     void* operator new(size_t sz,void *p)     { return p;}
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
