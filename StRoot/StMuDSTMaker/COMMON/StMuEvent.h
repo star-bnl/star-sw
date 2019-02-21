@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.36 2019/02/21 13:32:54 jdb Exp $
+ * $Id: StMuEvent.h,v 1.37 2019/02/21 14:00:02 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -166,7 +166,7 @@ class StMuEvent : public TObject {
   friend class StMuDstMaker;
   friend class StMuMomentumShiftMaker;
   friend class StMuL3EventSummary;
-  ClassDef(StMuEvent,14)
+  ClassDef(StMuEvent,15)
 };
 
 inline int StMuEvent::eventId() { return mEventInfo.id();}
@@ -234,6 +234,9 @@ inline unsigned int StMuEvent::numberOfSsdHits() { return mNHitsHFT[3]; }
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.37  2019/02/21 14:00:02  jdb
+ * Bumped the ClassDef versions in MuDst where eTOF was added. I also added the etofTypes to the LinkDef file
+ *
  * Revision 1.36  2019/02/21 13:32:54  jdb
  * Inclusion of ETOF MuDst code. This code adds support for the full set of ETOF data which includes EtofDigi, EtofHit, EtofHeader. The code essentially copies similar structures from StEvent and additionally rebuilds the maps between Digis and Hits. Accessor methods are added based on the pattern from BTOF to provide access to data at various levels. The code for accessing the PID traits provided by ETOF is also provided
  *
