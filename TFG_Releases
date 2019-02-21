@@ -36,7 +36,8 @@
  TFG18p	reshape TpcRS, freeze GenFit                                 2018-12-07 10:14:16 -0500  (HEAD -> master, tag: TFG18p_1, TFG18p_1)
  TFG18q fix a bug in TpcRS and VMCAppl                               2018-12-15 10:14:16 -0500  (HEAD -> master, tag: TFG18q)
  TFG19a Freeze Stx, StEvent with VMC path                            2019-02-04 16:24:49 -0500  (HEAD -> master, tag: TFG19a_12)
- TFG19b Freeze Stx, StEvent with VMC path                            2019-02-12 16:24:49 -0500  (HEAD -> master, tag: TFG19b)
+ TFG19b Freeze Stx, StEvent with VMC path                            2019-02-12 22:42:25 -0500  (HEAD -> master, tag: TFG19b, origin/master, origin/HEAD)
+ TFG19c Freeze library for eXpress production (+64bits)              2019-02-21 22:42:25 -0500  (HEAD -> master, tag: TFG19c, origin/master, origin/HEAD)
  .DEV2  head of TFG git repository
   DEV2  head of TFG git repository build with ROOT6
 
