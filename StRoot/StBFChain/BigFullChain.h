@@ -1114,12 +1114,12 @@ Bfc_st BFC[] = { // standard chains
    ,                    "","","Base chain for year 2018 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 
   // 
-  {"B2019a" ,"","","ry2018a,in,tpcX,UseXgeom,iTpcIT,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite",
+  {"B2019a" ,"","","ry2019a,in,tpcX,UseXgeom,iTpcIT,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite",
    "","",                                                      "Base chain for run 2019 data (tpc)",kFALSE},
 
   {"P2019a","" ,"",
-   "B2019a,ITTF,BAna,iTpcIT,hitfilt,VFMinuit,beamline3D,etofa,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
-   ,    "","",               "Base chain for year 2019 AA data - no Corr (+ l3, epd, etof, b-emc)",kFALSE},
+   "B2019a,ITTF,BAna,iTpcIT,hitfilt,VFMinuit,beamline3D,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
+   ,    "","",        "Base chain for year 2019 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
 
 
   // Other chains/Calibration
