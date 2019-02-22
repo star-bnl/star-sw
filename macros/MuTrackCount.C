@@ -36,7 +36,7 @@ void Print(Int_t RunOld, TH1F *NgT) {
   Double_t NoEntries = NgT->GetEntries();
   if (NoEntries > 0) {
     Double_t NoHigh = NgT->Integral(11,500);
-    cout << "Run " << RunOld << " no. of event " << NoEntries << " with No. Track > 10 : " << NoHigh/NoEntries*100 << " %%" << endl;
+    cout << "Run " << RunOld << " no. of event " << NoEntries << " with No. Track > 10 : " << NoHigh/NoEntries*100 << " %" << endl;
     Fit.run = RunOld;
     Fit.noevents = NoEntries;
     Fit.noev10 = NoHigh;
