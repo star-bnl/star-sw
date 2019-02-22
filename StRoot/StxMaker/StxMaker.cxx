@@ -282,6 +282,7 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
 #endif
   //
   static genfit::AbsKalmanFitter* fitter = 0;
+  static genfit::GFGbl*           gbl    = 0;
   static Bool_t Initialized = kFALSE;
   if (! Initialized) {
     if      (IAttr("Undefined"))      fitterId = genfit::Undefined;
@@ -866,12 +867,14 @@ void StxMaker::FillDca(StTrack* stTrack, genfit::Track * track) {
       s = rep->extrapolateToLine(state, linePoint, lineDirection);
     }
     catch(genfit::Exception& e) {
-      std::cout << "Exception, fail to make DCA" << std::endl;
-      std::cout << "Inner Parameters" << std::endl << "====================" << std::endl;
-      track->getFittedState().Print();
-      std::cout << "Outer Parameters" << std::endl << "====================" << std::endl;
-      track->getFittedState(-1).Print();
-      std::cout << "Dca from Helix\t" << dcaH << std::endl;
+      if (Debug()) {
+	std::cout << "Exception, fail to make DCA" << std::endl;
+	std::cout << "Inner Parameters" << std::endl << "====================" << std::endl;
+	track->getFittedState().Print();
+	std::cout << "Outer Parameters" << std::endl << "====================" << std::endl;
+	track->getFittedState(-1).Print();
+	std::cout << "Dca from Helix\t" << dcaH << std::endl;
+      }
       s = 0;
       ok = kFALSE;
     }
