@@ -67,8 +67,8 @@
 
 #include <TVector3.h>
 
-//#define DEBUG
-//#define OUTPUT
+#define DEBUG
+#define OUTPUT
 
 
 #ifdef DEBUG
