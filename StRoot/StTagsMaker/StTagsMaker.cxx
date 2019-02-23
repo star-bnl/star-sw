@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.cxx,v 1.21.16.1 2019/02/05 02:43:36 genevb Exp $
+// $Id: StTagsMaker.cxx,v 1.21.16.2 2019/02/23 06:02:31 genevb Exp $
 // $Log: StTagsMaker.cxx,v $
+// Revision 1.21.16.2  2019/02/23 06:02:31  genevb
+// Use initial run number consistently
+//
 // Revision 1.21.16.1  2019/02/05 02:43:36  genevb
 // shadow the tags also
 //
@@ -178,7 +181,9 @@ Int_t StTagsMaker::Make(){
 	  lEvtHddr->FillTag(&fEvtHddr);
 	  address = &fEvtHddr;
           if (IAttr("shadow")) {
-            fEvtHddr.mRunNumber   = StShadowMaker::getRunNumber(  fEvtHddr.mRunNumber  );
+            fEvtHddr.mRunNumber = StShadowMaker::getRunNumber();
+            if (fEvtHddr.mOldRunNumber>0)
+              fEvtHddr.mOldRunNumber = fEvtHddr.mRunNumber;
             fEvtHddr.mEventNumber = StShadowMaker::getEventNumber(fEvtHddr.mEventNumber);
           }
 	  cl = gROOT->GetClass("EvtHddr_st");
