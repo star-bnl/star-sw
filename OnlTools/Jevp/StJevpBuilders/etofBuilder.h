@@ -73,6 +73,10 @@ class etofBuilder : public JevpBuilder {
         TH1* resetTimeDiffSectors[ 11 ];
         TH1* missingTriggerTs;
         TH1* triggerTimeToResetTime;
+
+        TH1* pulserDigiTimeDiff[ 216 ];
+        TH1* pulserDigiTimeDiffOverflow[ 216 ];
+        
       };
     } contents;
 
