@@ -74,11 +74,18 @@ class etofBuilder : public JevpBuilder {
         TH1* missingTriggerTs;
         TH1* triggerTimeToResetTime;
 
-        TH1* pulserDigiTimeDiff[ 216 ];
+        TH1* pulserDigiTimeDiff[ 216 ];      
+      };
+    } contents;
+    
+    union {
+      TH1* array[];
+      struct {
         TH1* pulserDigiTimeDiffOverflow[ 216 ];
         
       };
-    } contents;
+    } extras;
+
 
     JevpPlot **plots;
 
