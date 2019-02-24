@@ -218,7 +218,8 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
         int cou = (i %  6) / 2 + 1;
         int sid = (i %  2) + 1;
         contents.pulserDigiTimeDiff[ i ] = new TH1D( Form( "pulserDigiTimeDiff_%d", i ), Form( "sector %d module %d counter %d side %d to reference pulser;#Delta T (ns)", sec, mod, cou, sid ), 360, -540.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
-        contents.pulserDigiTimeDiffOverflow[ i ] = new TH1D( Form( "pulserDigiTimeDiffOverflow_%d", i ), Form( "sector %d module %d counter %d side %d to reference pulser;#Delta T (ns)", sec, mod, cou, sid ), 360, -540.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+        extras.pulserDigiTimeDiffOverflow[ i ] = new TH1D( Form( "pulserDigiTimeDiffOverflow_%d", i ), Form( "sector %d module %d counter %d side %d to reference pulser;#Delta T (ns)", sec, mod, cou, sid ), 360, -540.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+        extras.pulserDigiTimeDiffOverflow[ i ]->SetLineColor( kRed );
     }
 
 
@@ -227,12 +228,6 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
     for( size_t i=0; i<np; i++ ) {        
         contents.array[ i ]->SetLineColor( kBlue );
         //contents.array[ i ]->SetFillColor( kRed );
-
-        for( size_t j=0; j<216; j++ ) {
-            if( contents.array[ i ] == contents.pulserDigiTimeDiffOverflow[ j ] ) {
-                contents.array[ i ]->SetLineColor( kRed );
-            }
-        }
 
         JevpPlot* jp = new JevpPlot( contents.array[ i ] );
         jp->logy = 1;
@@ -262,6 +257,7 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
         for( size_t j=0; j<216; j++ ) {
             if( contents.array[ i ] == contents.pulserDigiTimeDiff[ j ] ) {
                 jp->setOptStat( 10 );
+                jp->addHisto( extras.pulserDigiTimeDiffOverflow[ j ] );
             }
         }
 
@@ -666,8 +662,8 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
             float diff = pulserTimestamp.at( i ) - pulserTimestamp.at( 0 );
             contents.pulserDigiTimeDiff[ i ]->Fill( diff );
 
-            if( diff >  10. ) contents.pulserDigiTimeDiffOverflow[ i ]->Fill(   9.5 );
-            if( diff < -30. ) contents.pulserDigiTimeDiffOverflow[ i ]->Fill( -29.5 );
+            if( diff >  10. ) extras.pulserDigiTimeDiffOverflow[ i ]->Fill(   9.5 );
+            if( diff < -30. ) extras.pulserDigiTimeDiffOverflow[ i ]->Fill( -29.5 );
         }
     }
     //pulserTimestamp.clear();
