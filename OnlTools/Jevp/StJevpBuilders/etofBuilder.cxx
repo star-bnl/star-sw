@@ -164,19 +164,19 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
     // Build Root Histograms...
     contents.nDigis             = new TH1D( "nDigis", "nHitMsg;# digis;# events", 300, 0, 300 );
 
-    contents.nDigisVsTofTrgMult = new TH2D( "nDigisVsTofTrgMult", "# digis vs bTof multiplicity;# digis;bTof mult in trigger data;# events", 300, 0, 300, 200, 0, 800 ); 
+    contents.nDigisVsTofTrgMult = new TH2D( "nDigisVsTofTrgMult", "# digis vs bTof multiplicity;# digis;bTof mult in trigger data;# events", 300, 0, 300, 200, 0, 400 ); 
 
-    contents.digiTot            = new TH1D( "digiTot",           "digi tot;tot (bins);#digis", 256,  0,  256 );
-    contents.digiTimeToTrigger  = new TH1D( "digiTimeToTrigger", "digi time to trigger;time to trigger (#mus);# digis", 600, -5, 5 );
+    contents.digiTot            = new TH1D( "digiTot",           "digi tot;tot (bins);#digis", 256, 0, 256 );
+    contents.digiTimeToTrigger  = new TH1D( "digiTimeToTrigger", "digi time to trigger;time to trigger (#mus);# digis", 500, -4., 1. );
 
     contents.digiCoarseTs       = new TH1D( "digiCoarseTs", "digi coarse Ts;coarse Ts (bins);# digis",  300, 0, 4800 );
     contents.digiFineTs         = new TH1D( "digiFineTs",   "digi fine Ts;fine Ts (bins);# digis",      112, 0,  112 );
 
 
     for( size_t i=0; i<nrOfGdpbInSys; i++ ) {
-        contents.nDigisPerGdpb[ i ]                  = new TH1D( TString::Format( "nDigisPerGdpb_%d", i ),  TString::Format( "# digis on Gdpb %#06x (sector %d);# digis;# events",  gdpbRevMap[ i ], sector[ i ] ),  50, 0,  50 );
+        contents.nDigisPerGdpb[ i ]                  = new TH1D( TString::Format( "nDigisPerGdpb_%d", i ),  TString::Format( "# digis on Gdpb %#06x (sector %d);# digis;# events",  gdpbRevMap[ i ], sector[ i ] ), 100, 0, 100 );
         contents.digiTotPerGdpb[ i ]                 = new TH1D( TString::Format( "digiTotPerGdpb_%d", i ), TString::Format( "digi tot on Gdpb %#06x (sector %d);# digis;# events", gdpbRevMap[ i ], sector[ i ] ), 256, 0, 256 );
-        contents.digiMappedChannelNumberPerGdpb[ i ] = new TH1D( TString::Format( "digiMappedChannelNumberPerGdpb_%d", i), TString::Format( "mapped channel number on Gdpb %#06x (sector %d);mapped channel;# digis", gdpbRevMap[ i ], sector[ i ] ), 961, -1, 960 );
+        contents.digiMappedChannelNumberPerGdpb[ i ] = new TH1D( TString::Format( "digiMappedChannelNumberPerGdpb_%d", i), TString::Format( "mapped channel number on Gdpb %#06x (sector %d);mapped channel;# digis", gdpbRevMap[ i ], sector[ i ] ), 965, -5, 960 );
     }
 
     contents.digiDensityAllChannels = new TH2D( "digiDensityAllChannels", "digi density;;(counter-1) * 3 + strip;# digis", 72, 0.5, 72.5, 96, 0.5, 96.5 );
@@ -207,18 +207,32 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
     for( size_t i=0; i<11; i++ ) {
         contents.triggerTimeDiffSectors[ i ] = new TH1D( TString::Format( "triggerTimeDiffSector13to%d", i+14 ), TString::Format( "trigger time difference sector 13 - %d;# clock cycles;# events", i + 14 ), 200,  -99.5, 100.5 );
         contents.resetTimeDiffSectors[ i ]   = new TH1D( TString::Format( "resetTimeDiffSector24to%d",   i+13 ), TString::Format( "reset time difference sector 24 - %d;# clock cycles;# events",   i + 13 ), 200,  -99.5, 100.5 );
-
     }
 
     contents.missingTriggerTs       = new TH1D( "missingTriggerTs",       "missing trigger timestamps per sector;sector;# missing trigger timestamps", 12, 13, 25 );
     contents.triggerTimeToResetTime = new TH1D( "triggerTimeToResetTime", "trigger time to reset time;time difference (s);#events", 1000, 1, 2001 );
 
+    for( size_t i=0; i<216; i++ ) {
+        int sec = (i / 18) + 13;
+        int mod = (i % 18) / 6 + 1;
+        int cou = (i %  6) / 2 + 1;
+        int sid = (i %  2) + 1;
+        contents.pulserDigiTimeDiff[ i ] = new TH1D( Form( "pulserDigiTimeDiff_%d", i ), Form( "sector %d module %d counter %d side %d to reference pulser;#Delta T (ns)", sec, mod, cou, sid ), 360, -540.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+        contents.pulserDigiTimeDiffOverflow[ i ] = new TH1D( Form( "pulserDigiTimeDiffOverflow_%d", i ), Form( "sector %d module %d counter %d side %d to reference pulser;#Delta T (ns)", sec, mod, cou, sid ), 360, -540.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+    }
 
-    int np = sizeof( contents ) / sizeof( TH1* );
 
-    for( int i = 0; i < np; i++ ) {        
+    size_t np = sizeof( contents ) / sizeof( TH1* );
+
+    for( size_t i=0; i<np; i++ ) {        
         contents.array[ i ]->SetLineColor( kBlue );
         //contents.array[ i ]->SetFillColor( kRed );
+
+        for( size_t j=0; j<216; j++ ) {
+            if( contents.array[ i ] == contents.pulserDigiTimeDiffOverflow[ j ] ) {
+                contents.array[ i ]->SetLineColor( kRed );
+            }
+        }
 
         JevpPlot* jp = new JevpPlot( contents.array[ i ] );
         jp->logy = 1;
@@ -237,14 +251,20 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
             jp->optlogz = 1;
         }
 
-        for( int j=0; j<11; j++ ) {
+        for( size_t j=0; j<11; j++ ) {
             if( contents.array[ i ] == contents.triggerTimeDiffSectors[ j ] ) {
-                jp->setOptStat( 111110 );
+                jp->setOptStat( 110010 );
             }
             if( contents.array[ i ] == contents.resetTimeDiffSectors[ j ] ) {
                 jp->setOptStat( 1 );
             }
         }
+        for( size_t j=0; j<216; j++ ) {
+            if( contents.array[ i ] == contents.pulserDigiTimeDiff[ j ] ) {
+                jp->setOptStat( 10 );
+            }
+        }
+
         if( contents.array[ i ] == contents.missingTriggerTs ) {
             jp->setOptStat( 1 );
         }
@@ -477,17 +497,22 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
                                       return p1.second < p2.second; } );
 
 
-    int64_t mostFrequentTriggerTime = iterGdpb->first;
-    int64_t mostFrequentResetTime   = iterStar->first;
+    int64_t mostFrequentTriggerTs = iterGdpb->first;
+    int64_t mostFrequentResetTs   = iterStar->first;
 
-    contents.triggerTimeToResetTime->Fill( ( mostFrequentTriggerTime - mostFrequentResetTime ) * gdpbv100::kdClockCycleSizeNs * 1.e-9 );
+    double triggerTime = mostFrequentTriggerTs * gdpbv100::kdClockCycleSizeNs;
+
+    contents.triggerTimeToResetTime->Fill( ( mostFrequentTriggerTs - mostFrequentResetTs ) * gdpbv100::kdClockCycleSizeNs * 1.e-9 );
 
 
-
+    size_t nDigisInTimingWindow = 0;
+    vector< vector< gdpbv100::FullMessage > > pulser( 216 );
 
     for( size_t msgIndex = 0; msgIndex < nFullMessagesToRead; msgIndex++ ) {
         gdpbv100::FullMessage mess( messageBuffer[ 4 + 2 * msgIndex ], messageBuffer[ 4 + 2 * msgIndex + 1 ] );
         //mess.PrintMessage( gdpbv100::msg_print_Prefix | gdpbv100::msg_print_Data );
+
+        
 
         if( mess.isHitMsg() ) {
             unsigned int gdpb = mess.getGdpbGenGdpbId();
@@ -514,9 +539,7 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
                 if( gdpbMap.count( gdpb ) ) {
                     contents.digiMappedChannelNumberPerGdpb[ gdpbMap.at( gdpb ) ]->Fill( mappedChannelNumber );
                 }
-
                 nDigisPerGdpb.at( gdpb ) += 1;
-
 
                 unsigned int sector  = hardwareMapSector( gdpb );
                 unsigned int module  = hardwareMapModule(  mappedChannelNumber );
@@ -526,15 +549,11 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
 
                 LOG( DBG, "--> hit message on sector %d module %d counter %d strip %d side %d", sector, module, counter, strip, side );
 
-                contents.digiDensityAllChannels->Fill( ( sector - 13 ) * 6 + ( module - 1 ) * 2 + side, ( counter - 1 ) * 32 + strip );
-
-
                 // calculate time difference to trigger 
-                double triggerTime   = mostFrequentTriggerTime * gdpbv100::kdClockCycleSizeNs;
                 double digiFullTime  = mess.GetFullTimeNs();
-                double timeToTrigger = ( digiFullTime - triggerTime ) / 1000.;
+                double timeToTrigger = digiFullTime - triggerTime;
 
-                contents.digiTimeToTrigger->Fill( timeToTrigger );
+                contents.digiTimeToTrigger->Fill( timeToTrigger / 1000. );
 
 
                 unsigned int tot = mess.getGdpbHit32Tot();
@@ -545,13 +564,52 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
                     contents.digiTotPerGdpb[ gdpbMap.at( gdpb ) ]->Fill( tot);
                 }
 
+                bool isPulser = false;
+                if( mappedChannelNumber % 32 == 0 ) {
+                    if( tot > 112 && tot < 127 ) {
+                        if( sector == 15 ||
+                            sector == 16 ||
+                            sector == 21 ||
+                            sector == 22 )  {
+                                isPulser = true;
+                        }
+                    }
+                    else if( tot > 54 && tot < 65 ) {
+                        if( sector == 13 ||
+                            sector == 14 ||
+                            sector == 17 ||
+                            sector == 18 ||
+                            sector == 19 ||
+                            sector == 20 ||
+                            sector == 23 ||
+                            sector == 24 )  {
+                                isPulser = true;
+                        }
+                    }
+                    if( sector == 24 && module == 2 && side == 1 ) {
+                        isPulser = true;
+                    }
+                }
 
-                // fine & coarse time
-                int fineTs   = mess.getGdpbHitFullTs() % 112;
-                int coarseTs = mess.getGdpbHitFullTs() / 112;
+                if( isPulser ) {
+                    pulser.at( ( sector - 13 ) * 18 + ( module - 1 ) * 6 + ( counter - 1 ) * 2 + ( side - 1 ) ).push_back( mess );
+                }
 
-                contents.digiFineTs  ->Fill( fineTs   );
-                contents.digiCoarseTs->Fill( coarseTs );
+
+                //digi inside timing window
+                if( timeToTrigger > -2100 && timeToTrigger < -1600 ) {
+                    nDigisInTimingWindow++;
+
+                    contents.digiDensityAllChannels->Fill( ( sector - 13 ) * 6 + ( module - 1 ) * 2 + side, ( counter - 1 ) * 32 + strip );
+
+                    // fine & coarse time
+                    int fineTs   = mess.getGdpbHitFullTs() % 112;
+                    int coarseTs = mess.getGdpbHitFullTs() / 112;
+
+                    contents.digiFineTs  ->Fill( fineTs   );
+                    contents.digiCoarseTs->Fill( coarseTs );
+
+                }
             }
             else {
                 LOG( DBG, "some id is out of range: gdpbId %#06x    chip %d    channel %d", gdpb, chip, chan );
@@ -572,17 +630,48 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
         }
     } // second message loop
 
-    size_t nDigis = 0;
     for( size_t i=0; i<nrOfGdpbInSys; i++ ) { 
         if( gdpbRevMap.count( i ) > 0 ) {
             contents.nDigisPerGdpb[ i ]->Fill( nDigisPerGdpb.at( gdpbRevMap.at( i ) ) );
+        }
+    }
+    contents.nDigis->Fill( nDigisInTimingWindow );
+    contents.nDigisVsTofTrgMult->Fill( nDigisInTimingWindow, tofTrgMult );
 
-            nDigis += nDigisPerGdpb.at( gdpbRevMap.at( i ) );
+
+
+    map< short, double > pulserTimestamp;
+
+    for( size_t i=0; i<216; i++ ) {
+        if( pulser.at( i ).size() > 0 ) {
+
+            double bestDiff = 100000.;
+            int index = -1;
+
+            for( size_t j=0; j<pulser.at( i ).size(); j++ ) {
+                double timeDiff = pulser.at( i ).at( j ).GetFullTimeNs() - triggerTime;
+                
+                // remove digis outside the "peak" region ... they are likely misidentified noise
+                if( fabs( timeDiff - 50. ) < bestDiff ) {
+                    bestDiff = fabs( timeDiff - 50. );
+                    index = j;
+                }
+            }
+            pulserTimestamp[ i ] = pulser.at( i ).at( index ).GetFullTimeNs();
         }
     }
 
-    contents.nDigis->Fill( nDigis );
-    contents.nDigisVsTofTrgMult->Fill( nDigis, tofTrgMult );
+    for( size_t i=0; i<216; i++ ) {
+        if( pulserTimestamp.count( 0 ) && pulserTimestamp.count( i ) ) {
+            float diff = pulserTimestamp.at( i ) - pulserTimestamp.at( 0 );
+            contents.pulserDigiTimeDiff[ i ]->Fill( diff );
+
+            if( diff >  10. ) contents.pulserDigiTimeDiffOverflow[ i ]->Fill(   9.5 );
+            if( diff < -30. ) contents.pulserDigiTimeDiffOverflow[ i ]->Fill( -29.5 );
+        }
+    }
+    //pulserTimestamp.clear();
+
 }
 
 
