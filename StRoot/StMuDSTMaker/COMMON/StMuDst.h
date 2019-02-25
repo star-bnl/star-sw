@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.54 2018/02/27 04:11:57 jdb Exp $
+ * $Id: StMuDst.h,v 1.56 2019/02/21 14:00:02 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -56,6 +56,11 @@ class StBTofCollection;
 class StMuBTofHit;
 class StBTofRawHit;
 class StBTofHeader;
+class StETofCollection;   // fseck
+class StMuETofCollection; // fseck
+class StMuETofHeader;     // fseck
+class StMuETofDigi;       // fseck
+class StMuETofHit;        // fseck
 class StMuEpdHitCollection;  // MALisa
 class StMuEpdHit;            // MALisa
 class EztEventHeader;
@@ -119,6 +124,7 @@ public:
 		    TClonesArray** pmd_ptca=0, 
 		    TClonesArray** tof_ptca=0, 
 		    TClonesArray** btof_ptca=0,
+                    TClonesArray** etof_col=0,  // jdb
 		    TClonesArray**  epd_col=0,  // MALisa
 		    TClonesArray** mtd_ptca=0,
 		    TClonesArray** fgt_ptca=0,
@@ -150,9 +156,11 @@ public:
   static StTrack* createStTrack(const StMuTrack*);
   // dongx
   static void fixTofTrackIndices(TClonesArray* btofHit, TClonesArray* primary, TClonesArray* global);
+  static void fixETofTrackIndices(TClonesArray* btofHit, TClonesArray* primary, TClonesArray* global);
   static void fixMtdTrackIndices(TClonesArray* mtdHit, TClonesArray* primary, TClonesArray* global);
   //
   void fixTofTrackIndices();
+  void fixETofTrackIndices();
   void fixMtdTrackIndices();
 
   void setMtdArray(StMtdCollection *mtd_coll); 
@@ -170,6 +178,13 @@ public:
   static Double_t    VxZmax()   {return fgVxZmax;}  	
   static Double_t    VxRmax()   {return fgVxRmax;}    
   static PicoVtxMode VtxMode()  {return mVtxMode;}   
+  
+  // fseck
+  void setETofArray( const StETofCollection* etof_coll );
+  void addETofHit( const StMuETofHit* hit );
+
+
+
  protected:
   static Double_t  fgerMax;
   static Double_t  fgdca3Dmax; 
@@ -201,6 +216,8 @@ public:
   TClonesArray** tofArrays;
   // array of TClonesArrays for the stuff inherited from the BTOF // dongx
   TClonesArray** btofArrays;  
+  /// array of TClonesArrays for ETof
+  TClonesArray** etofArrays;
   // array of TClonesArrays for Epd
   TClonesArray** epdArrays;
   // array of TClonesArrays for the stuff inherited from the Mtd
@@ -256,6 +273,8 @@ public:
   static TClonesArray* tofArray(Int_t type) ;
   // returns pointer to the n-th TClonesArray from the btof arrays // dongx
   static TClonesArray* btofArray(Int_t type) ;
+  /// returns pointer to the n-th TClonesArray from the etof arrays // FS
+    static TClonesArray* etofArray(int type) ;
   // returns pointer to the n-th TClonesArray from the mtd arrays
   static TClonesArray* mtdArray(Int_t type) ;
   // returns pointer to the n-th TClonesArray from the fgt arrays
@@ -387,10 +406,18 @@ public:
   // returns pointer to the btofHeader - dongx
   static StBTofHeader* btofHeader() ;
 
-  static StMuEpdHit* epdHit(int i) ;
+  // fseck ---
+  /// returns pointer to the i-th StMuEtofDigi
+    static StMuETofDigi* etofDigi(Int_t  i);
+  /// returns pointer to the i-th StMuETofHit
+      static StMuETofHit* etofHit(Int_t  i);
+  /// returns pointer to the StMuETofHeader
+	static StMuETofHeader* etofHeader();
 
-  static StMuMtdHit* mtdHit(int i) ;
-  static StMuMtdRawHit* mtdRawHit(int i) ;
+  static StMuEpdHit* epdHit(Int_t  i) ;
+
+  static StMuMtdHit* mtdHit(Int_t  i) ;
+  static StMuMtdRawHit* mtdRawHit(Int_t  i) ;
   static StMuMtdHeader* mtdHeader() ;
     
     
@@ -451,7 +478,11 @@ public:
   static UInt_t numberOfBTofHit()       ;
   static UInt_t numberOfBTofRawHit()    ;
 
-  static unsigned int numberOfEpdHit()       ;
+  // fseck
+  static unsigned int numberOfETofDigi();
+  static unsigned int numberOfETofHit();
+
+  static unsigned int numberOfEpdHit();
 
   static unsigned int numberOfMTDHit()       ;
   static unsigned int numberOfBMTDRawHit()    ;
@@ -484,6 +515,9 @@ public:
   // dongx
   static UInt_t GetNBTofHit()         ;
   static UInt_t GetNBTofRawHit()      ;
+  // fseck
+  static unsigned int GetNETofDigi();
+  static unsigned int GetNETofHit();
 
   static unsigned int GetNEpdHit()         ;
 
@@ -593,7 +627,7 @@ public:
   static void SetTpcVpdVzDiffCut(Float_t cut = 3) { instance()->mTpcVpdVzDiffCut = cut;}
   
   // Increment this by 1 every time the class structure is changed
-  ClassDef(StMuDst,4)
+  ClassDef(StMuDst,5)
 };
 
 #endif
@@ -601,6 +635,12 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.56  2019/02/21 14:00:02  jdb
+ * Bumped the ClassDef versions in MuDst where eTOF was added. I also added the etofTypes to the LinkDef file
+ *
+ * Revision 1.55  2019/02/21 13:32:54  jdb
+ * Inclusion of ETOF MuDst code. This code adds support for the full set of ETOF data which includes EtofDigi, EtofHit, EtofHeader. The code essentially copies similar structures from StEvent and additionally rebuilds the maps between Digis and Hits. Accessor methods are added based on the pattern from BTOF to provide access to data at various levels. The code for accessing the PID traits provided by ETOF is also provided
+ *
  * Revision 1.54  2018/02/27 04:11:57  jdb
  * Added epdArrays
  *

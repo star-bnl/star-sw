@@ -3,6 +3,7 @@ DETP geom devT
 * field=-5  hadr_off=1
 *DETP geom field=-5
 *DETP geom hadr_off=1
+  gexec $STAR_LIB/StarAgmlUtil.so
 gexec $STAR_LIB/xgeometry.so
 *gexec $STAR_LIB/geometry.so
 gclos all

@@ -1,5 +1,6 @@
 *  starsim -w 1 -b y2010.kumac
 DETP geom y2010c  field=-5  hadr_off=1
+  gexec $STAR_LIB/StarAgmlUtil.so
 gexec $STAR_LIB/xgeometry.so
 * DETP geom y2010a  field=-5  hadr_off=1
 *gexec $STAR_LIB/geometry.so

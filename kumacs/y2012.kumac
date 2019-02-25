@@ -1,5 +1,6 @@
 *  starsim -w 1 -b y2012.kumac
 DETP geom y2012b  field=-5  hadr_off=1
+  gexec $STAR_LIB/StarAgmlUtil.so
 gexec $STAR_LIB/StarMagFieldNoDict.so
 gexec $STAR_LIB/xgeometry.so
 gclos all

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.69 2018/02/27 04:11:57 jdb Exp $
+ * $Id: StMuDst.cxx,v 1.70 2019/02/21 13:32:54 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -40,6 +40,11 @@
 #include "StBTofHeader.h"
 #include "StBTofPidTraits.h"
 #include "StMuBTofHit.h"
+#include "StETofCollection.h"         // fseck
+#include "StMuETofCollection.h"       // fseck
+#include "StMuETofHeader.h"           // fseck
+#include "StMuETofDigi.h"             // fseck
+#include "StMuETofHit.h"              // fseck
 #include "StMuEpdHitCollection.h"     // MALisa
 #include "StMuEpdHit.h"              // MALisa
 #include "StMuMtdHit.h"
@@ -70,6 +75,7 @@ static TH2F *pVxy = 0;
 StMuDst *StMuDst::fgMuDst = 0;
 ClassImp(StMuDst);
 //________________________________________________________________________________
+
 StMuDst::StMuDst() {
   DEBUGMESSAGE("");
   fgMuDst = this;
@@ -98,7 +104,8 @@ void StMuDst::unset() {
     tofArrays     = 0;
     btofArrays    = 0;   // dongx
     mtdArrays     = 0;   // dongx
-    epdArrays      = 0;   // MALisa
+    etofArrays    = 0;   // jdb
+    epdArrays     = 0;   // MALisa
     fgtArrays     = 0;
     mMuEmcCollectionArray = 0;
     mMuEmcCollection = 0; 
@@ -125,9 +132,10 @@ void StMuDst::set(StMuDstMaker* maker) {
   fmsArrays     = maker->mFmsArrays;
   pmdArrays     = maker->mPmdArrays;
   tofArrays     = maker->mTofArrays;
-  btofArrays    = maker->mBTofArrays;   // dongx
+  btofArrays    = maker->mBTofArrays;    // dongx
+  etofArrays    = maker->mETofArrays;    // jdb
   epdArrays     = maker->mEpdArrays;    // MALisa
-  mtdArrays    = maker->mMtdArrays;  
+  mtdArrays     = maker->mMtdArrays;
   fgtArrays     = maker->mFgtArrays;
 
 
@@ -195,7 +203,8 @@ void StMuDst::set(TClonesArray** theArrays,
 		  TClonesArray** thePmdArrays,
 		  TClonesArray** theTofArrays,
 		  TClonesArray** theBTofArrays,    // dongx
-		  TClonesArray** theEpdArrays,     // MALisa
+		  TClonesArray** theETofArrays,    // jdb
+                  TClonesArray** theEpdArrays,     // MALisa
 		  TClonesArray** theMTDArrays,
 		  TClonesArray** theFgtArrays,
 		  TClonesArray** theEztArrays,
@@ -219,6 +228,7 @@ void StMuDst::set(TClonesArray** theArrays,
   pmdArrays     = thePmdArrays;
   tofArrays     = theTofArrays;
   btofArrays    = theBTofArrays;    // dongx
+  etofArrays    = theETofArrays;    // jdb
   epdArrays     = theEpdArrays;     // MALisa
   mMuEmcCollectionArray = emc_arr;  
   mMuEmcCollection = emc; 
@@ -448,6 +458,86 @@ void StMuDst::fixTofTrackIndices(TClonesArray* btofHit, TClonesArray* primary, T
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+void StMuDst::fixETofTrackIndices() {
+  /// global and primary tracks share the same id, so we can fix the 
+  /// index2Global up in case they got out of order (e.g. by removing 
+  /// a track from the TClonesArrays
+    fixETofTrackIndices( etofArrays[muETofHit], arrays[muPrimary], arrays[muGlobal] );  
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuDst::fixETofTrackIndices( TClonesArray* etofHit, TClonesArray* primary, TClonesArray* global ) {
+
+  if( !( primary && global && etofHit ) ) return;
+  DEBUGMESSAGE1("");
+  StTimer timer;
+  timer.start();
+
+  int nPrimaries = primary->GetEntriesFast();
+  int nGlobals   = global->GetEntriesFast();
+  int nETofHits  = etofHit->GetEntriesFast();
+  // map to keep track of index numbers, key is track->id(), value is index of track in MuDst
+  map<short,unsigned short> etofIndex;
+  map<short,unsigned short> globalIndex;
+  map<short,unsigned short> primaryIndex;
+
+  for( int i=0; i<nETofHits; i++ ) {
+    StMuETofHit* t = (StMuETofHit*) etofHit->UncheckedAt(i);
+    if( t ) {
+      etofIndex[t->associatedTrackId()] = i+1;  // starting from 1
+    }
+  }
+
+  for( int i=0; i<nGlobals; i++ ) {
+    StMuTrack* g = (StMuTrack*) global->UncheckedAt(i);
+    if( g ) {
+      globalIndex[g->id()] = i+1;
+
+      if( etofIndex[g->id()] ) {
+        g->setIndex2ETofHit( etofIndex[g->id()]-1 );
+      }
+      else {
+        g->setIndex2ETofHit( -1 );
+      }
+    }
+  }
+  for( int i=0; i<nPrimaries; i++ ) {
+    StMuTrack* p = (StMuTrack*) primary->UncheckedAt(i);
+    if( p ) {
+      primaryIndex[p->id()] = i+1;
+
+      if( etofIndex[p->id()] ) {
+        p->setIndex2ETofHit( etofIndex[p->id()]-1 );
+      }
+      else {
+        p->setIndex2ETofHit( -1 );
+      }
+    }
+  }
+
+  /// set the indices for ETofHits
+  for( int i=0; i<nETofHits; i++ ) {
+    StMuETofHit* t = (StMuETofHit*) etofHit->UncheckedAt( i );
+    if( t ) {
+      if( globalIndex[t->associatedTrackId()] )
+        t->setIndex2Global( globalIndex[t->associatedTrackId()]-1 );
+      else
+        t->setIndex2Global( -1 );
+
+      if(primaryIndex[t->associatedTrackId()])
+        t->setIndex2Primary( primaryIndex[t->associatedTrackId()]-1 );
+      else
+        t->setIndex2Primary( -1 );
+    }
+  }
+
+  DEBUGVALUE2(timer.elapsedTime());
+}
+
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
 void StMuDst::fixMtdTrackIndices() {
   /// global and primary tracks share the same id, so we can fix the 
   /// index2Global up in case they got out of order (e.g. by removing 
@@ -544,7 +634,43 @@ void StMuDst::setMtdArray(StMtdCollection *mtd_coll) {
     }
 }
 
+//-----------------------------------------------------------------------
+void StMuDst::setETofArray( const StETofCollection* etof_coll ) {
+  /// reset ETOF digi/hit array and header when running eTOF related Makers
+  /// on muDst in afterburner mode
 
+  etofArrays[ muETofDigi ]->Clear();
+  etofArrays[ muETofHit  ]->Clear();
+  StMuETofCollection muETofColl( etof_coll );
+
+  for( size_t i=0; i < (size_t) muETofColl.digisPresent(); i++ ) {
+    StMuETofDigi* etofDigi = ( StMuETofDigi* ) muETofColl.etofDigi( i );
+    new( ( *etofArrays[ muETofDigi ] )[ i ] ) StMuETofDigi( *etofDigi );
+  }
+
+  for( size_t i=0; i < (size_t) muETofColl.hitsPresent(); i++ ) {
+    StMuETofHit* etofHit = ( StMuETofHit* ) muETofColl.etofHit( i );
+    new( ( *etofArrays[ muETofHit ] )[ i ] ) StMuETofHit( *etofHit );
+  }
+
+  StMuETofHeader* etofHead = muETofColl.etofHeader();
+  if( etofHead ) {
+    etofArrays[ muETofHeader ]->Clear();
+    new( ( *etofArrays[ muETofHeader ] )[ 0 ] ) StMuETofHeader( *etofHead );
+  }
+}
+
+//-----------------------------------------------------------------------
+void StMuDst::addETofHit( const StMuETofHit* hit ) {
+  /// add etof hit to the hit array in muDst
+  if( hit ) {
+    unsigned int index = etofArrays[ muETofHit ]->GetEntriesFast();
+    LOG_DEBUG << "hit will be added as index: " << index << endm;
+
+    new( ( *etofArrays[ muETofHit ] )[ index ] ) StMuETofHit( *hit );
+  }
+  LOG_DEBUG << "done. -> new array size: " << etofArrays[ muETofHit ]->GetEntriesFast() << endm;
+}
 
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -813,6 +939,9 @@ StTrack* StMuDst::createStTrack(const StMuTrack* track) {
 
   // set the btofPidTraits - dongx
   t->addPidTraits(track->btofPidTraits().createBTofPidTraits());
+
+  // set the etofPidTraits - fseck
+  t->addPidTraits(track->etofPidTraits().createETofPidTraits());
 
   return t;
 }
@@ -1689,6 +1818,8 @@ TClonesArray* StMuDst::pmdArray(Int_t type) { return instance()->pmdArrays[type]
 TClonesArray* StMuDst::tofArray(Int_t type) { return instance()->tofArrays[type]; }
   // returns pointer to the n-th TClonesArray from the btof arrays // dongx
 TClonesArray* StMuDst::btofArray(Int_t type) { return instance()->btofArrays[type]; }
+  /// returns pointer to the n-th TClonesArray from the etof arrays // FS
+TClonesArray* StMuDst::etofArray(int type) { return instance()->etofArrays[type]; }
   // returns pointer to the n-th TClonesArray from the mtd arrays
 TClonesArray* StMuDst::mtdArray(Int_t type) { return instance()->mtdArrays[type]; }
   // returns pointer to the n-th TClonesArray from the fgt arrays
@@ -1819,10 +1950,17 @@ StBTofRawHit* StMuDst::btofRawHit(Int_t i) { return (StBTofRawHit*)instance()->b
   // returns pointer to the btofHeader - dongx
 StBTofHeader* StMuDst::btofHeader() { return (StBTofHeader*)instance()->btofArrays[muBTofHeader]->UncheckedAt(0); }
 
+  // returns pointer to the i-th muETofHit
+StMuETofHit* StMuDst::etofHit(Int_t i) { return (StMuETofHit*)instance()->etofArrays[muETofHit]->UncheckedAt(i); }
+  // returns pointer to the i-th etofRawHit - dongx
+StMuETofDigi* StMuDst::etofDigi(Int_t i) { return (StMuETofDigi*)instance()->etofArrays[muETofDigi]->UncheckedAt(i); }
+  // returns pointer to the etofHeader - dongx
+StMuETofHeader* StMuDst::etofHeader() { return (StMuETofHeader*)instance()->etofArrays[muETofHeader]->UncheckedAt(0); }
+
 StMuEpdHit* StMuDst::epdHit(int i) { return (StMuEpdHit*)instance()->epdArrays[muEpdHit]->UncheckedAt(i); }  // MALisa
 
-StMuMtdHit* StMuDst::mtdHit(int i) { return (StMuMtdHit*)instance()->mtdArrays[muMTDHit]->UncheckedAt(i); }
-  StMuMtdRawHit* StMuDst::mtdRawHit(int i) { return (StMuMtdRawHit*)instance()->mtdArrays[muMTDRawHit]->UncheckedAt(i); }
+StMuMtdHit* StMuDst::mtdHit(Int_t  i) { return (StMuMtdHit*)instance()->mtdArrays[muMTDHit]->UncheckedAt(i); }
+  StMuMtdRawHit* StMuDst::mtdRawHit(Int_t  i) { return (StMuMtdRawHit*)instance()->mtdArrays[muMTDRawHit]->UncheckedAt(i); }
   StMuMtdHeader* StMuDst::mtdHeader() { return (StMuMtdHeader*)instance()->mtdArrays[muMTDHeader]->UncheckedAt(0); } 
     
     
@@ -1883,6 +2021,8 @@ UInt_t StMuDst::numberOfTofRawData()    { return instance()->tofArrays[muTofRawD
 UInt_t StMuDst::numberOfBTofHit()       { return instance()->btofArrays[muBTofHit]->GetEntriesFast(); }
 UInt_t StMuDst::numberOfBTofRawHit()    { return instance()->btofArrays[muBTofRawHit]->GetEntriesFast(); }
 
+UInt_t StMuDst::numberOfETofDigi()     { return instance()->epdArrays[muETofDigi]->GetEntriesFast(); }
+UInt_t StMuDst::numberOfETofHit()      { return instance()->epdArrays[muTofHit]->GetEntriesFast(); }
 UInt_t StMuDst::numberOfEpdHit()       { return instance()->epdArrays[muEpdHit]->GetEntriesFast(); }
 
 UInt_t StMuDst::numberOfMTDHit()       { return instance()->mtdArrays[muMTDHit]->GetEntriesFast(); }
@@ -1917,6 +2057,9 @@ UInt_t StMuDst::GetNTofRawData()      { return instance()->numberOfTofRawData();
 UInt_t StMuDst::GetNBTofHit()         { return instance()->numberOfBTofHit(); }
 UInt_t StMuDst::GetNBTofRawHit()      { return instance()->numberOfBTofRawHit(); }
 
+UInt_t StMuDst::GetNETofDigi()        { return instance()->numberOfETofDigi(); }
+UInt_t StMuDst::GetNETofHit()         { return instance()->numberOfETofHit(); }
+
 UInt_t StMuDst::GetNEpdHit()         { return instance()->numberOfEpdHit(); }
 
 UInt_t StMuDst::GetNMTDHit()         { return instance()->numberOfMTDHit(); }
@@ -1924,6 +2067,9 @@ UInt_t StMuDst::GetNMTDRawHit()      { return instance()->numberOfBMTDRawHit(); 
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.70  2019/02/21 13:32:54  jdb
+ * Inclusion of ETOF MuDst code. This code adds support for the full set of ETOF data which includes ETofDigi, ETofHit, ETofHeader. The code essentially copies similar structures from StEvent and additionally rebuilds the maps between Digis and Hits. Accessor methods are added based on the pattern from BTOF to provide access to data at various levels. The code for accessing the PID traits provided by ETOF is also provided
+ *
  * Revision 1.69  2018/02/27 04:11:57  jdb
  * Added epdArrays
  *

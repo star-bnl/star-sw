@@ -19,6 +19,7 @@
   root.exe -q -b 'TpcAligner.C(9999999,"'${evtsFile}'")' &gt;&amp;  ${logFile}
   mv ${file}* ${SUBMITTINGDIRECTORY}/
   end
+
 	</command>
 	<stdout URL="file:./sched$JOBID.log" />
 	<stderr URL="file:./sched$JOBID.err" />

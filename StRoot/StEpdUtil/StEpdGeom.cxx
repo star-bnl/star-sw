@@ -16,7 +16,7 @@
 #include "TRandom3.h"
 #include "TMath.h"
 
-
+ClassImp(StEpdGeom)
 
 
 StEpdGeom::StEpdGeom() : mPP(0), mTT(0), mEW(0){

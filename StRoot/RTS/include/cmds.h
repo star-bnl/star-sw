@@ -187,7 +187,8 @@
 #define L4_SHIPEVENT                   0xab
 #define L4_SHIPEVENTDONE               0xac
 #define L4_EVP_DONE                    0xad
-
+#define L4_LOCALWRITE                  0xae
+#define L4_LOCALWRITEDONE              0xaf
 
 // SL3
 #define SL3_SEND_RESULTS	       0xa0	// SL3->DET, DET->RB

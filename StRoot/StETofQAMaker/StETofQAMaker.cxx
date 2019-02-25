@@ -459,7 +459,7 @@ StETofQAMaker::fillHistos()
 
     double triggerTime = etofHeader->trgGdpbFullTime() - ( etofHeader->rocStarTs().at( 0x18e6 ) * dCoarseClockCycleNs );//using the only working reset time in 2018 for now
 
-    ULong64_t iBTofOverflows = ( ULong64_t ) ( triggerTime / dBTofTimeRange );
+    Long64_t iBTofOverflows = ( Long64_t ) ( triggerTime / dBTofTimeRange );
 
     triggerTime-= iBTofOverflows*dBTofTimeRange;
     LOG_INFO << "corrected trigger time: "<< triggerTime <<" ns" << endm;
