@@ -2,7 +2,7 @@
 <job maxFilesPerProcess="10" fileListSyntax="paths"> 
 <!-- <job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="paths"> -->
 	<command>
-         cd ${SUBMITTINGDIRECTORY}
+#         cd ${SUBMITTINGDIRECTORY}
   setenv STARFPE NO
 #  setenv NODEBUG yes
 #  setup 64b
@@ -14,9 +14,12 @@
   set file     = `basename $evtsFile .event.root`
   set dir      = `dirname  $evtsFile`;          
   set logFile  = ${file}B.log
-  if ( -r $logFile) continue;
+  if ( -r ${SUBMITTINGDIRECTORY}/$logFile) continue;
   root.exe -q -b 'TpcAligner.C(9999999,"'${evtsFile}'")' &gt;&amp;  ${logFile}
+    mv ${logFile} ${SUBMITTINGDIRECTORY}/
+    mv ${bf}*.root ${SUBMITTINGDIRECTORY}/
   end
+
 	</command>
 	<stdout URL="file:./sched$JOBID.log" />
 	<stderr URL="file:./sched$JOBID.err" />

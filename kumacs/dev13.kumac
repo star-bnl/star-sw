@@ -1,5 +1,6 @@
 *  starsim -w 1 -b dev13.kumac
 detp geom dev13
 *  field=-5  hadr_off=1
+  gexec $STAR_LIB/StarAgmlUtil.so
 gexec $STAR_LIB/xgeometry.so
 gclos all

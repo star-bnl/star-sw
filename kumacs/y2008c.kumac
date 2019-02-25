@@ -1,4 +1,5 @@
 *  starsim -w 1 -b y2008.kumac
 detp geom y2008c field=-2.5
+  gexec $STAR_LIB/StarAgmlUtil.so
 gexec $STAR_LIB/StarMagFieldNoDict.so
 gexec $STAR_LIB/xgeometry.so
