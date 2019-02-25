@@ -482,10 +482,10 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
 		  if (! nPixels) continue;
 		  Int_t AdcSum = 0;
 		  Int_t Id = rHit->idTruth();
-		  for (Int_t k = 0; k < nPixels; k++) {
-		    if (Pixels[k].idTruth() == Id) {
-		      fCluster->AddPixel(&Pixels[k]);
-		      AdcSum += Pixels[k].adc();
+		  for (Int_t l = 0; l < nPixels; l++) {
+		    if (Pixels[l].idTruth() == Id) {
+		      fCluster->AddPixel(&Pixels[l]);
+		      AdcSum += Pixels[l].adc();
 		    }
 		  }
 		  if (Debug() > 1) cout << "\taccepted\t" <<  AdcSum << "\t" 

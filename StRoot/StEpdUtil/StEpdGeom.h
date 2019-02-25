@@ -216,6 +216,8 @@ class StEpdGeom{
   /// \eastwest         east (-1) or west (+1) wheel
   short Row(short position, short tilenumber, short eastwest);
 
+  ClassDef(StEpdGeom,0)
+
 };
 
 inline bool StEpdGeom::IsWest(short uniqueID){return uniqueID>0;}

@@ -1173,8 +1173,7 @@ Bfc_st BFC[] = { // standard chains
   {"B2018a"  ,"","","ry2018,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite","",""
    ,                                                           "Base chain for run 2018 data (tpc)",kFALSE},
 #endif
-  
-  {"P2018a","" ,"",
+  {"P2018a",  
    "B2018a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,beamline3D,emcDY2,epdHit,fpd,trgd,ZDCvtx,analysis"
    ,                    "","","Base chain for year 2018 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   {"B2019"  ,"","","r2019,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout,CorrX","",""
@@ -1182,6 +1181,12 @@ Bfc_st BFC[] = { // standard chains
   {"P2019","" ,"",
    "B2019,StiCA,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
    ,                 "","","Production chain for year 2019 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+  // 
+  {"B2019a" ,"","","ry2019a,in,tpcX,UseXgeom,iTpcIT,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite",
+   "","",                                                      "Base chain for run 2019 data (tpc)",kFALSE},
+  {"P2019a","" ,"",
+   "B2019a,ITTF,BAna,iTpcIT,hitfilt,VFMinuit,beamline3D,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
+   ,    "","",        "Base chain for year 2019 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
   // Other chains/Calibration
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    ,                                                                "Laser Calibration Chain (tcl)",kFALSE},
@@ -1678,17 +1683,13 @@ Bfc_st BFC[] = { // standard chains
 #else
   {"btofMixer"    ,"","","","",""                                               "ignore BTof Mixer",kFALSE},
 #endif
-
   // ETOF chains - do they have to be before the VPD / vpdsim?
-  {"ETofDat",   "etof_raw","ETofChain", "db, ETofUtil", "StETofDigiMaker",  "StEvent,StETofDigiMaker"
-   ,                                                                              "ETOF digi maker",kFALSE},
-  //{"ETofCalib", "",        "ETofChain", "db, ETofUtil", "StETofCalibMaker", "StETofCalibMaker",
-  //                                                                               "ETOF calibration",kFALSE},
-  //{"ETofHit",   "",        "ETofChain", "db",          "StETofHitMaker",   "StETofHitMaker",
-  //                                                                                 "ETOF hit maker",kFALSE},
-  {"ETofQa",    "",        "ETofChain", "db",      "StETofQAMaker","StETofQAMaker",   "ETOF QA maker",kFALSE},
-  
-
+  {"ETofDat",   "etof_raw","ETofChain", "db, ETofUtil", "StETofDigiMaker",  "StEvent,StETofDigiMaker",
+                                                                                  "ETOF digi maker",kFALSE},
+  {"ETofCalib", "",  "ETofChain", "db, ETofUtil, muDst", "StETofCalibMaker", "StETofCalibMaker",
+                                                                                 "ETOF calibration",kFALSE},
+  {"ETofSim" ,  "",        "ETofChain", "",                    "StETofSimMaker",  "StETofSimMaker",
+                                                                                   "ETOF simulator",kFALSE},
   // left MTD chain for sumulation alone here
   {"mtdSim"    ,"","","","StMtdSimMaker,StEvent",                   "StMtdSimMaker","MTD Simulator",kFALSE},
   // Time Of Flight related options
@@ -1850,6 +1851,14 @@ Bfc_st BFC[] = { // standard chains
   {"btofMatch" ,"","","db,BTofUtil","StBTofMatchMaker","StBTofMatchMaker","TPC-BTOF track matching",kFALSE},
   {"btofCalib","","","db,BTofUtil",        "StBTofCalibMaker","StBTofCalibMaker","BTOF calibration",kFALSE},
   {"UseMCTstart","","","",                                       "","","Use MC Time start for BTOF",kFALSE},
+  // ETOF hit building and track matching after bTofCalib - needs to be after btof	
+  {"ETofHit",   "",      "ETofChain", "db, ETofUtil, muDst", "StETofHitMaker",   "StETofHitMaker",
+                                                                                   "ETOF hit maker",kFALSE},
+  {"ETofMatch",  "",     "ETofChain", "db, ETofUtil, muDst", "StETofMatchMaker", "StETofMatchMaker",
+                                                                                 "ETOF match maker",kFALSE},
+  {"ETofQa",     "",     "ETofChain", "db, ETofUtil, muDst", "StETofQAMaker",    "StETofQAMaker",
+                                                                                    "ETOF QA maker",kFALSE},
+  {"ETofA",  "",    "","etofdat,ETofCalib,etofhit,ETofMatch","","... ETOF chain options for data",  kFALSE},
   // the below needs to be done earlier to save time - leaving here for documentation purposes as two
   // makers are part of the same library (let's not forget this)
   //{"mtdTrkMask"  ,"","","db",    "StMtdTrackingMaskMaker","StMtdEvtFilterMaker","MTD track masking",kFALSE},
@@ -1944,7 +1953,8 @@ Bfc_st BFC[] = { // standard chains
   {"PicoCovMtxWrite","","","-PicoCovMtxSkip"   ,"" ,"","Write track covariance matrices to picoDst",kFALSE},
   {"femtoDst"    ,"","","KFPInter","StFemtoDstMaker"
    ,                                            "StKFParticleAnalysisMaker","Load FemtoDST library",kFALSE},
-
+  {"PicoBEmcSmdSkip" ,"","",""                     ,"" ,"","Do not write BSMD to picoDst (default)",kFALSE},
+  {"PicoBEmcSmdWrite","","","-PicoBEmcSmdSkip"                      ,"" ,"","Write BSMD to picoDst",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
 #ifndef __NoDisplay__
   {"Display"     ,"","","TbUtil,St_geom,Stu"
