@@ -1880,6 +1880,8 @@ Bfc_st BFC[] = { // standard chains
   {"PicoVtxVpd"     ,"","","-PicoVtxDefault"             ,"" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
   {"PicoCovMtxSkip" ,"","",""       ,"" ,"","Do not write covariance matrices to picoDst (default)",kFALSE},
   {"PicoCovMtxWrite","","","-PicoCovMtxSkip"   ,"" ,"","Write track covariance matrices to picoDst",kFALSE},
+  {"PicoBEmcSmdSkip" ,"","",""                     ,"" ,"","Do not write BSMD to picoDst (default)",kFALSE},
+  {"PicoBEmcSmdWrite","","","-PicoBEmcSmdSkip"                      ,"" ,"","Write BSMD to picoDst",kFALSE},
 
 
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
