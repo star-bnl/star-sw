@@ -273,7 +273,7 @@ Bfc_st BFC[] = { // standard chains
   {"XC2017I",     "","","y2017,XC",                                                        "","","",kFALSE},
   {"XC2018I",     "","","y2018,XC",                                                        "","","",kFALSE},
   {"XC2018",      "","","y2018,XC,sdt20180426.122000",                                     "","","",kFALSE},
-  {"XC2019",      "","","y2019,XC",                                                        "","","",kFALSE},
+  {"XC2019",      "","","y2019,XC,sdt20190301",                                            "","","",kFALSE},
   {"XC2019I",     "","","y2019,XC",                                                        "","","",kFALSE},
   {"HLT2017",     "","","y2017,TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,"
    "OSpaceZ2,OGridLeak3D,CorrX,tpcDB,TpcHitMover"
@@ -1770,6 +1770,7 @@ Bfc_st BFC[] = { // standard chains
   {"StiPulls" ,"","",""                                         ,"","", "Request to make Sti Pulls",kFALSE},
   {"StvPulls" ,"","",""                                         ,"","", "Request to make Stv Pulls",kFALSE},
   {"StiLib"   ,"","",""                                           ,"","Sti,StiUtilities","Load Sti",kFALSE},
+  {"KeepStiLib"   ,"","",""                                                  ,"","","Keep Sti Libs",kFALSE},
   {"TPCCA"   ,"","",""                                              ,"","TPCCATracker","Load TPCCA",kFALSE},
   {"StiCALib" ,"","","StiLib,TPCCA"                                       ,"","StiCA","Load Sti+CA",kFALSE},
   {"StiTpc"   ,"","","TpcDb,tpc_T,dbutil,detDb,StarMagField,magF"        ,"","StiTpc","Load StiTpc",kFALSE},
