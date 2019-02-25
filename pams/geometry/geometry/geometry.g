@@ -1,1210 +1,6 @@
 * $Id: geometry.g,v 1.297 2016/07/29 18:56:00 jwebb Exp $
-* $Log: geometry.g,v $
-* Revision 1.297  2016/07/29 18:56:00  jwebb
-* Add support for y2014c / y2015d / y2016a geometries, taking into account lasted changes in IST and SST
-*
-* Revision 1.296  2016/06/13 15:53:49  jwebb
-* Corrected logic error which creates mtd twice in y2015c+
-*
-* Revision 1.295  2016/03/07 14:47:00  jwebb
-* Case statement in geometry.g to support y2016c tag.
-*
-* Revision 1.294  2016/03/04 22:32:33  jwebb
-* Corrections to MTD radii, y2015c tag added.
-*
-* Revision 1.293  2016/02/04 16:33:35  jwebb
-* Fixed bug 3187: y2016 geometry was not completely setup in geometry.g.
-*
-* Revision 1.292  2015/12/02 15:02:35  jwebb
-* Add y2016 first cut geometry.
-*
-* Revision 1.291  2015/11/02 15:26:53  jwebb
-* Add MutdGeo7 module with corrected radii.  Define y2015b production geometry tag to use latest MTD geometry.
-*
-* Revision 1.290  2015/10/12 18:36:35  jwebb
-* Initial version of dev2020 geometry tag including forward tracking system.
-*
-* Revision 1.289  2015/07/14 21:12:53  jwebb
-* Added y2015a production geometry, initial release
-*
-* Revision 1.288  2015/06/19 13:48:25  jwebb
-* Added HCAL test configuration (hctest)
-*
-* Revision 1.287  2015/06/08 18:10:38  jwebb
-* Enable secondary tracking (hit association) for pixel (and FGT) -- AgSFlag('SIMU',2).
-*
-* Revision 1.286  2015/05/19 19:29:20  jwebb
-* Associate hits on 2ndary tracks to the track, not the primary track which initiates decay/shower.  https://www.star.bnl.gov/rt3/Ticket/Display.html?id=3092
-*
-* Revision 1.285  2015/04/17 19:14:51  jwebb
-* ... also need to be careful to call the right geometry module.  Needed an extra flag in geometry.g to handle this.
-*
-* Revision 1.284  2015/04/17 14:54:59  jwebb
-* Corrected configuration error in VPD in y2015/agml/agstar geometry.
-*
-* Revision 1.283  2015/01/06 19:45:16  jwebb
-* Correct version of VPD in 2015
-*
-* Revision 1.282  2015/01/06 19:06:46  jwebb
-* Added FGT to HCAL dev2016 geometry
-*
-* Revision 1.281  2015/01/06 15:58:40  jwebb
-* Add HCAL to dev2016
-*
-* Revision 1.280  2014/12/22 22:21:22  jwebb
-* dev2016 geometry implemented in starsim
-*
-* Revision 1.279  2014/08/18 18:50:38  jwebb
-* Updated y2014 tag w/ MTD y2014 configuration, not available for fast offline production.  Change required so that MTD match maker can run on all y2014 tags.  MTD does not participate in tracking and is outside of the acceptance of the tracker, so this modification does not affect the reproducability of the fast offline period.
-*
-* Revision 1.278  2014/05/14 20:02:49  jwebb
-* Support for FMS preshower in dev15a.  Support for HCAL test in y2014b.  Support for HCAL proposal in dev15b.
-*
-* Revision 1.277  2014/04/02 21:03:16  jwebb
-* y2014x geometry is moved to y2014a production.
-*
-* Revision 1.276  2014/03/24 19:58:30  jwebb
-* Setup y2014a candidate as y2014a.
-*
-* Revision 1.275  2014/03/17 21:30:18  jwebb
-* Fix bug in y2013 definitions eliminating pixel support tube.
-*
-* Revision 1.274  2014/03/11 18:24:15  jwebb
-* Defined y2013_1a, _1b, _1c, _2a, _2b, _2c geometry tags.
-*
-* y2013_1x and y2013_2x were mistakenly used in the y2013 data production, using
-* library SL14a.  The tags y2013_1c and y2013_2c freeze the y2013_1x and y2013_2x
-* geometry tags ase they exist in SL14a.  They are equivalent to the geometries
-* used in y2013 data production.
-*
-* Added y2010x asymptotic tag for STV testing.
-*
-* Revision 1.273  2014/02/11 21:42:40  jwebb
-* kOnly --> konly.
-*
-* Revision 1.272  2014/01/24 19:45:13  jwebb
-* Revert to CaveGeo for y2014 geometry.
-*
-* Revision 1.271  2014/01/23 23:04:39  jwebb
-* Make sure pixl support shows up in y2014.
-*
-* Revision 1.270  2014/01/23 17:04:34  jwebb
-* Added y2013b production geometries with extra HFT dead material near east
-* poletip.  Modified y2014 first cut.
-*
-* Revision 1.269  2013/12/09 14:45:58  jwebb
-* Changes to pixel detector for y2014.
-*
-* Revision 1.268  2013/12/04 20:01:33  jwebb
-* Removes FGT cables from IDSM in y2014.
-*
-* Revision 1.267  2013/12/03 16:54:36  jwebb
-* Added y2014 first cut geometry.
-*
-* Revision 1.266  2013/09/30 16:12:09  jwebb
-* Fixes for IDSM / PIPE.
-*
-* Revision 1.265  2013/09/12 18:09:21  jwebb
-* Moved IDS construction before beam pipe.
-*
-* Revision 1.264  2013/09/11 14:27:21  jwebb
-* Added case statements to enable y2013a geometries.
-*
-* Revision 1.263  2013/09/10 18:59:04  jwebb
-* Definitions for y2013a, new beam pipe module and new ist module.
-*
-* Revision 1.262  2013/08/13 18:55:54  jwebb
-* Defined a CONSTRUCT keyword in geometry.g.  CONSTRUCT calls a geometry
-* module using comis.  If the subroutine is not linked with the program,
-* it will not be called and a warning will be issued.  This warning can
-* be caught and parsed for dependency analysis.
-*
-* For the case where one or more moduels are missing, a fortran STOP will
-* be issued to prevent invalid geometries from being used.
-*
-* Revision 1.261  2013/07/10 21:19:08  jwebb
-* Correction to eStar2 definition.
-*
-* Revision 1.260  2013/07/09 18:37:00  jwebb
-* Additions to support eStar2 model.
-*
-* Revision 1.259  2013/05/22 14:39:15  jwebb
-* Added new version of the CAVE as CAVE05.  Better dimensions, walls, platform,
-* crates.  The y2013x (asymptotic) STAR uses CAVE05.  First cut geometry remains
-* at CAVE04.
-*
-* Revision 1.258  2013/02/26 15:25:32  jwebb
-* Updates to the Y2013 first cut and asymptotic tags.  Pixel support tube
-* remains in place when pixel detector is removed.
-*
-* Revision 1.257  2013/02/21 22:51:24  jwebb
-* Defined pixel detector in and out geometries.
-*
-* Revision 1.256  2013/02/06 21:58:09  jwebb
-* Corrections to y2013 geometry tag.  Addition of y2012b geometry tag to
-* properly include the MTD.
-*
-* Revision 1.255  2013/02/05 21:26:31  jwebb
-* Corrected double placement of volume in PixlGeo5
-*
-* Revision 1.254  2013/02/05 16:58:36  jwebb
-* Definition of the y2013 and y2013x geometry tags.
-*
-* Revision 1.253  2013/01/22 18:27:10  jwebb
-* Defined Y2013x geometry.
-*
-* Revision 1.252  2013/01/17 21:04:52  jwebb
-* Support for improved magnet model, improved trim coil description, in y2013x
-* geometry tag.
-*
-* Revision 1.251  2012/12/19 14:48:39  jwebb
-* Updates to support y2013 version of MTD.
-*
-* Revision 1.250  2012/12/14 16:13:56  jwebb
-* Updates for y2013 geometry.
-*
-* Revision 1.249  2012/11/02 15:03:21  jwebb
-* Fix format statement for SL4.4.
-*
-* Revision 1.248  2012/11/01 20:49:16  jwebb
-* Add TOF_MAX configuration option.
-*
-* Revision 1.247  2012/08/27 17:50:28  jwebb
-* Added estar1 and tpciv1 geometry tags.
-*
-* Revision 1.246  2012/08/27 14:56:12  jwebb
-* Added vfgt to definition of the estar development geometry.
-*
-* Revision 1.245  2012/07/02 18:50:36  jwebb
-* Few more modifications for dev14 geometry.  Add VPD and PXST to dev14.
-*
-* Revision 1.244  2012/06/29 15:10:51  jwebb
-* Added DEV14 geometry tag.
-*
-* Revision 1.243  2012/05/31 20:57:28  jwebb
-* Added y2012a production tag
-*
-* Revision 1.242  2012/05/07 21:44:06  jwebb
-* Added "devT" geometry tag for TPC upgrade studies.
-*
-* Revision 1.241  2012/03/28 15:14:17  jwebb
-* Switched pipe12 (old beam pipe) to pipev1 (new narrow beam pipe) for dev13
-* geometry with the HFT.
-*
-* Revision 1.240  2011/11/22 15:09:19  jwebb
-* Added "devE" tag for eStar development.
-*
-* Revision 1.239  2011/10/13 18:23:58  jwebb
-* Added production geometry tag y2011a.  Tag y2011a is consistent with the y2011
-* geometry tag, as it exists in the SL11c and SL11d libraries.  y2011a should be
-* used for any reproduction of production series PL11ic and PL11id.
-*
-* Revision 1.238  2011/10/07 19:44:45  jwebb
-* Switched versions of the PIXL detector.
-*
-* Revision 1.237  2011/10/06 20:38:22  jwebb
-* Fixed FGT setup.
-*
-* Revision 1.236  2011/10/06 19:54:48  jwebb
-* Moved IDSM earlier in the call sequence.
-*
-* Revision 1.235  2011/10/06 15:52:05  jwebb
-* Added dev13 tag.
-*
-* Revision 1.234  2011/10/06 14:54:00  jwebb
-* Added DEV13 geometry.  Removed pmd from y2012.  Added pixl to complete.
-*
-* Revision 1.233  2011/10/03 22:03:06  jwebb
-* Redefined the "complete" geometry for use in anticipated simulations with
-* FGT.  Did not add the HFT as we do not yet have a geometry for that.
-*
-* Revision 1.232  2011/08/19 16:44:14  jwebb
-* Definition of Y2012 geometry tag (1st cut).
-*
-* Revision 1.231  2011/07/20 20:23:47  jwebb
-* Upgr23 tag defined with FSC geometry and FMS in open position.
-*
-* Revision 1.230  2011/07/18 15:53:12  jwebb
-* Reverted to single FGT "upgr2012" geometry.
-*
-* Revision 1.229  2011/07/06 17:39:01  jwebb
-* Defined upgr2012a: 2-disk FGT
-*
-* Revision 1.228  2011/05/12 19:42:42  jwebb
-* Definition of upgr2012 geometry now includes IdsmGeo1 and FgtdGeo3 by default.
-*
-* Revision 1.227  2011/05/02 20:22:16  jwebb
-* Added code to pass configuration of the MTD to the mutdgeo4 module.
-*
-* Revision 1.226  2011/04/25 18:27:00  jwebb
-* Added Y2008e tag, which implements the LOW_EM central calorimeter cuts in
-* the y2008 geometry.
-*
-* Revision 1.225  2011/04/11 17:37:56  jwebb
-* Introduce UPGR2012 geometry as y2011 with inner detectors (FGT, SSD) and
-* supports removed.
-*
-* Revision 1.224  2011/03/11 00:05:18  jwebb
-* Added Y2008d, Y2009d, Y2010c and updated Y2011 geometry tags.  These tags
-* now contain an improved model of the SVT support cone... specifically the
-* support rods.  Previous geometry assumed solid carbon.  Now we assume a
-* carbon-fiber nomex sandwich.
-*
-* Revision 1.223  2010/12/22 00:13:00  jwebb
-* Correction to the documentation bank in the fzd file for y2008c geometry.
-*
-* Revision 1.222  2010/12/21 17:21:31  jwebb
-* Added Y2008c tag.
-* Added Y2009c tag.
-* Added y2010b tag.
-*
-* These three tags represent the current best model of the STAR detector,
-* including TOF geometry, for Y2008 - Y2010.  Previous models used a TPC
-* envelope which was too large and overlapped with 'kOnly' volumes in the
-* TOF, causing 'odd' hit distributions.
-*
-* Revision 1.221  2010/12/17 20:01:24  jwebb
-*
-* Defined TPCE04r (reduced TPC envelope radius) and BTOF67 (btof sensitive
-* volume size fix) and incorporated them into Y2011 tag.
-*
-* Revision 1.220  2010/11/12 20:04:14  jwebb
-* Added y2008b geometry tag with most recent models of the TPC, endcap
-* and barrel.
-*
-* Revision 1.219  2010/10/31 16:27:32  jwebb
-* Switch PHMD on.  Modified configuration of MUTD at request of Bill Llope.
-*
-* Revision 1.218  2010/07/30 18:31:29  jwebb
-* Added development / baseline y2011 geometry tag and reduced the number
-* of write statements.
-*
-* Revision 1.217  2010/07/12 18:47:20  jwebb
-* Added y2005i tag to provide up-to-date version of ecal in y2005 geometry
-* and to provide 10 keV transport cuts in calorimeters.
-*
-* Revision 1.216  2010/06/01 18:57:41  jwebb
-* Modified geometry.g so that seperate particle transport cuts can be
-* used in the BEMC and EEMC.  This is needed for the spin/dijet simulation
-* request summarized here:
-*
-* http://drupal.star.bnl.gov/STAR/starsimrequests/2010/may/26/filtered-dijet-simulation
-*
-* The simulation request applies filters which select out barrel- and
-* adjacent-jetpatch triggers.  Thus, the endcap is only important for
-* trigger response.  Requestors have noted a x2 increase in speed when
-* EEMC is run with higher tracking cuts than in the BEMC.
-*
-* We define the Y2009b tag to apply the 10keV default tracking cuts in
-* the BEMC, and revert the EEMC to the 80kev/1MeV (photon/electron) cuts.
-*
-* Revision 1.215  2010/05/25 21:21:50  jwebb
-* y2010a geometry tag commit.  Tag is identical to y2010, except dependency
-* on y2009a is removed.
-*
-* Revision 1.214  2010/04/19 16:16:03  jwebb
-* Restored code to save geometry tag and field setting in the FZD file.
-*
-* Revision 1.213  2010/04/13 21:47:52  jwebb
-* Added PHMD to y2010 geometry in preparation for y2010 simulations.
-*
-* Revision 1.212  2009/12/23 21:39:23  jwebb
-* (1) Code modified to use 10 keV e- and gamma transport cuts in the barrel
-*     and endcap calorimeters.   Note that this only takes effect in geometries
-*     using the ecalgeo6 and calbgeo2 geometries.
-*
-* (2) Explicitly disabled effects of (1) for existing geometry tags (y2000-
-*     y2008).
-*
-* (3) Side effects possible in upgrade geometries (i.e. calorimeter cuts may
-*     be effected depending on specific geometry options).
-*
-* Revision 1.211  2009/12/22 13:42:16  jwebb
-* Added options to set geant tracking cuts for electrons and photons in the
-* B/EEMC to 10, 30, 100 or 1000 keV.
-*
-* Revision 1.210  2009/11/24 23:49:28  jwebb
-* Changed to the TPCE04 model of the TPC in y2006h.  This is the current best
-* geometry of the TPC.  TPCE04 is present in tags from y2005 to present.
-*
-* Revision 1.209  2009/11/19 18:24:15  perev
-* y2009a and inherited from it y2010
-*
-* Revision 1.208  2009/11/18 20:46:34  jwebb
-* Y2009A production tag added:
-*
-* (1) Y2009A includes the new model of the EEMC
-* (2) Revert to old model of EEMC in Y2009 tag for compat w/ W preproduction.
-* (3) Removed the y2006dev tag
-* (4) Added y2006 h tag, which is y2006g + new model of the endcap.
-*
-* Revision 1.207  2009/11/17 16:18:47  jwebb
-* Added y2006dev with new endcap model.  y2006dev (and future y200[3-8]dev)
-* will be for testing purposes only.
-*
-* Revision 1.206  2009/11/16 22:37:48  jwebb
-* Added logic to support multiple ecalgeoX files (subroutines).  ecalgeo6
-* (version 6.1) set as default version for y2009 tag.
-*
-* Revision 1.205  2009/10/29 00:00:21  perev
-* y2010=y2009+Full BTOF
-*
-* Revision 1.204  2009/09/25 18:02:16  perev
-* Comment corrected
-*
-* Revision 1.203  2009/09/24 00:36:57  perev
-* BTOFc6 <== BTOFc7 in y2009 F.Geurts
-*
-* Revision 1.202  2009/09/23 23:28:51  perev
-* BugFix. pipe14==>pipe12 in y2008 & y2009
-*
-* Revision 1.201  2009/08/28 16:50:12  perev
-* CleanUp of write(*,*)
-*
-* Revision 1.200  2009/08/26 20:13:15  perev
-* JanB pixel off for upgr16
-*
-* Revision 1.199  2009/08/21 18:33:01  perev
-* PMD off for y2009
-*
-* Revision 1.198  2009/08/19 22:48:11  perev
-* Jan: thinner beam pipe for upgr16
-*
-* Revision 1.197  2009/08/18 17:29:13  perev
-* F.Geurts TOF for run 9
-*
-* Revision 1.196  2009/08/14 22:38:06  perev
-* Remove Cone fr upgr16 (Jan request)
-*
-* Revision 1.195  2009/07/14 01:02:59  perev
-* Increase interaction/decay volume
-*
-* Revision 1.194  2009/06/22 22:21:44  perev
-* Remove redundant messages
-*
-* Revision 1.193  2009/04/20 23:14:22  perev
-* upgr22 fhcmgeo
-*
-* Revision 1.192  2009/03/20 02:57:12  perev
-* upgr16a == upgr16 +tpc2009
-*
-* Revision 1.191  2009/03/13 21:08:27  perev
-* y2005h, y2007h added
-*
-* Revision 1.190  2009/03/07 01:04:00  perev
-* SSD shield fix + cleanup
-*
-* Revision 1.189  2009/02/22 21:36:23  perev
-* Y2009 born
-*
-* Revision 1.188  2009/02/20 21:35:05  perev
-* upgr15 full tof. Jonathan/Spiros
-*
-* Revision 1.187  2009/02/19 00:27:22  perev
-* Upgr15==>macros
-*
-* Revision 1.186  2009/02/13 19:20:34  perev
-* back BTOF for 2008. Again itof=6 bTofConfig=11
-*
-* Revision 1.185  2009/01/13 03:19:12  perev
-* Mag field nou controlled from starsim. BugFix
-*
-* Revision 1.184  2009/01/12 00:31:44  perev
-* Bug fix in ON logic(VP)
-*
-* Revision 1.183  2009/01/08 20:16:46  perev
-* Fix y2008a and y2009 btof
-*
-* Revision 1.182  2009/01/06 04:05:48  perev
-* For y2008a,y2009 elliptic rods
-*
-* Revision 1.181  2009/01/03 23:03:36  perev
-* BtofConfig=6 in 2008a,2009
-*
-* Revision 1.180  2008/12/30 19:41:09  perev
-* 1st version of y2009
-*
-* Revision 1.179  2008/12/15 01:03:56  perev
-* CleanUp
-*
-* Revision 1.178  2008/12/12 20:45:13  perev
-* upgr16/17 btofConfig=6
-*
-* Revision 1.177  2008/12/08 23:02:20  perev
-* C++ style comment removed
-*
-* Revision 1.176  2008/12/08 19:28:29  didenko
-* fixed typo
-*
-* Revision 1.175  2008/12/05 23:46:25  perev
-* y2008 bTofConfig=6 now(jan)
-*
-* Revision 1.174  2008/12/01 23:45:10  perev
-* ubgr16 last vers BTOF
-*
-* Revision 1.173  2008/11/30 01:30:53  perev
-* modifs for extending alpha,theta,phi,ort commandas
-*
-* Revision 1.172  2008/11/19 04:08:25  perev
-*  updates to the corrected(vp) starsim
-*
-* Revision 1.171  2008/10/13 03:21:35  perev
-* upgr17 added Wei(MingZhang)
-*
-* Revision 1.170  2008/10/13 00:22:19  perev
-* upgr16 pipe changed to provisional
-*
-* Revision 1.168  2008/09/25 03:05:58  perev
-* upgr16 (Jan)
-*
-* Revision 1.167  2008/06/03 22:27:16  fisyak
-* Add y2005g and y2007g geometries for SVT with latest Renes corrections
-*
-* Revision 1.166  2008/04/23 22:00:29  perev
-* tofZ0=0.00 ==> tofZ0=-0.50 /xin
-*
-* Revision 1.165  2008/03/20 18:45:28  perev
-* Simplest.gerrit upgr15 added
-*
-* Revision 1.164  2008/01/21 01:11:02  perev
-* TOF weight corrected
-*
-* Revision 1.163  2007/11/13 21:38:08  perev
-* pipeFlag and nSvtLayer==7 added
-*
-* Revision 1.162  2007/11/07 21:25:41  perev
-* btofgeo6 added by X.Dong
-*
-* Revision 1.161  2007/11/06 01:19:35  perev
-* y2008 geo
-*
-* Revision 1.160  2007/10/13 01:27:27  perev
-* u2007 ==> upgr20
-*
-* Revision 1.159  2007/09/28 18:54:08  perev
-* dongx/TOFr/y8update
-*
-* Revision 1.158  2007/09/25 19:56:14  perev
-* U2007A added
-*
-* Revision 1.157  2007/09/21 20:30:08  perev
-* Add U2007 geometry
-*
-* Revision 1.156  2007/08/15 18:06:22  potekhin
-* Seec omment at
-* http://drupal.star.bnl.gov/STAR/comp/simu/geometry0/changes-beampipe-support
-* about the newest round of the SVT corrections (Carbon used to construct water
-* channels as opposed to Beryllium). The difference of 0.4 to 0.6% of rad length
-* is big enough to warrant the creation of a new tag, in this case Y2007A.
-* The SVT code version activated in this tag is 10.
-*
-* Revision 1.155  2007/07/12 20:16:47  potekhin
-* Added the following geometry tags:
-* a) Y2008   -- first cut, will be improved
-* b) UPGR14  -- UPGR13 sans IST
-* c) DEV2007 -- sandbox for what-if studies, non-production grade
-*
-* Revision 1.154  2007/04/13 17:54:58  potekhin
-* Based on a comment by Akio, remove the PHMD (photon
-* multiplicity detector) from the Y2006 configuration, to
-* reflect the actual setup for that year. The new tag is Y2006C
-*
-* Revision 1.153  2007/03/21 21:08:05  potekhin
-* A cleaner version of managing the HFT (pixlgeo) versions
-*
-* Revision 1.152  2007/03/15 19:56:16  potekhin
-* Provide versioning for the thicker active Si layer
-* in pixlgeo3, via setting the structure elements
-*
-* Revision 1.151  2007/03/09 21:40:48  potekhin
-* UPGR13 modifications: (a) FSTD is out (b) modified SSD with carbon parts,
-* for R&D purposes (c) modified IST with single sided inner layer for the
-* April proposal
-*
-* Revision 1.150  2007/02/23 21:45:40  potekhin
-* a) re-instated the calls to IGT codes to keep a degree
-* of backward compatibility (for early UPGRXX tags)
-* b) deleted the previosuly commented out IST1 tag (as
-* advertised earlier, it was officially retired)
-* c) put in the dead material version of SSD into UPGR13 (SSD5)
-*
-* Revision 1.149  2007/02/23 21:20:02  potekhin
-* In the R and D tag UPGR13, removed the prototype support
-* cone on the East side on Gerrit  request. Corrected the
-* steering logic for the new FGT (former IGT) to integrate
-* the newer code obtained form Gerrit.
-*
-* Revision 1.148  2007/02/22 22:37:39  potekhin
-* Correcting a simple typo (accidentally hit delete)
-*
-* Revision 1.147  2007/02/22 22:21:18  potekhin
-* As stated in the S&C meeting, the recent correction
-* for the dead material in the SSD should be propagated
-* into earlier model-years, therefore creating new tags.
-* Only two such tags were necessary and have been created:
-* Y2005F and Y2006B. In addition to the SSD configuration,
-* they also feature a newer version of the CALB code,
-* which they share with Y2007.
-*
-* Revision 1.146  2007/02/16 22:57:50  potekhin
-* As per Xins communications, the correct logic for year 2007
-* in the upVPD code is triggered when the config flag is set to 7.
-* I make this tweak in steering for Y2007.
-*
-* Revision 1.145  2007/02/13 20:42:29  potekhin
-* Along the lines previously discussed, replace the IGT
-* by the FGT in the UPGRXX tags; in this case, by creating
-* a new tag UPGR13, which is the continuation of the UPGR07
-* line and will be further tuned.
-*
-* Revision 1.144  2007/02/09 22:04:37  potekhin
-* a) added steering for new code and settings for TOF, upVPD and FPD/FMS
-* b) retired IST1 (commented out, to be deleted later)
-*
-* Revision 1.143  2007/02/02 18:20:46  potekhin
-* The updated FMS code (fpdgeo) needs more space at the
-* end of the cave, so we need to add some. We will reflect
-* the more precise dimensions in cavegeo.g - here we just
-* add the requisite configuration flag for Y2007
-*
-* Revision 1.142  2007/02/02 17:18:40  potekhin
-* Added logic to include the updated SSD code
-*
-* Revision 1.141  2006/12/21 23:06:17  potekhin
-* Previous versions of UPGRxx geometries were deficient
-* is that there was a clash between the IGT disks and
-* other elements of the central tracker system. This lead
-* to a loss of hits in the IGT, a problem which was mitigated
-* in private versions of the code. To avoid prolifirations
-* of the latter, we need to introduce a corrected tag,
-* which is UPGR12, based on UPGR05 but with different
-* disk radii.
-*
-* Revision 1.140  2006/12/18 23:28:33  potekhin
-* Introduced geometry tags UPGR10 and UPGR11 (as discussed
-* in appropriate fora) which utilize source files istbgeo4 and 5.
-* Made some cosmetic changes to the code layout.
-*
-* Revision 1.139  2006/12/14 21:36:25  potekhin
-* Add tag UPGR09 with sttering logic
-* for the ISTB with only the outer layer...
-*
-* Revision 1.138  2006/12/12 22:32:19  potekhin
-* a) enable a cleaner barrel EMC code in Y2007
-* b) re-instate UPGR06 for the upcoming simulation
-*
-* Revision 1.137  2006/12/01 19:26:58  potekhin
-* Removing the SSD from the R&D geometry UPGR05, resulting
-* in a new configuration, UPGR08
-*
-* Revision 1.136  2006/11/28 00:02:09  potekhin
-* Added Y2007 and set it up to include the new FMS (FPD)
-*
-* Revision 1.135  2006/11/22 17:41:49  potekhin
-* Added a tag which will be used exclusively for the material
-* balance effect study, i.e. it won`t contains any realistic
-* detectors in the center of STAR, and feature a variable
-* thickness cylinder instead.
-*
-* Revision 1.134  2006/11/18 02:56:17  potekhin
-* Rewrote UPGR01 to better conform with
-* other UPGR0X tags in terms of actual code
-* (same version of SSD, identical flags in most
-* places). UPGR01 is HFT+SSD in central tracking,
-* and nothing else.
-*
-* Revision 1.133  2006/11/14 00:21:03  potekhin
-* Improved steering for the IGTD (gem disks), in order to
-* provide the possibility of a proper versioning. This is
-* done now via the IgtdConfig variable
-*
-* Revision 1.132  2006/11/01 00:21:09  potekhin
-* As discussed in appropriate fora, we need to introduce a HPD-less
-* tag for our TUP study. Let there be UPGR07.
-*
-* Revision 1.131  2006/10/21 18:14:21  potekhin
-* a) Added steering for the TUP support structure
-* b) optionally change the radius of the FSTD (to better fit with
-* the rest of TUP
-* c) using a more precise version of SSD code in UPGR05
-*
-* Revision 1.129  2006/10/09 16:19:17  potekhin
-* Due to the ongoing SSD studies, we need to refine the 2005 tag,
-* so as to include Lilian code that were checked into CVS in
-* early 2006 but were valid in 2005 as well. We have therefore created
-* the tag Y2005E, which is an improvement over Y2005D (more precise SSD),
-* bigger SVT shield (to accomodate the SSD) and a full barrel calorimeter.
-*
-* Revision 1.128  2006/10/02 21:37:03  potekhin
-* Added steering logic for the new tag UPGR05, which
-* includes the HFT (former pixel), HPD, IST and SSD,
-* but no SVT. GEM detectors are also excluded.
-*
-* Revision 1.127  2006/09/15 19:56:31  potekhin
-* Due to ongoing development, we need to create a new tag,
-* UPGR04, and steering logic for the new detector HPDT
-*
-* Revision 1.126  2006/07/07 17:41:28  potekhin
-* Fixing a very old and inconsequential typo in the
-* assignment of a variable for the "minimum Si layer"
-* (which I doubt was previously used)
-*
-* Revision 1.125  2006/06/12 18:34:28  potekhin
-* Created the tag Y2006A, which will allow for the all-new
-* FPD to be properly included, as well as otherpotential changes
-* to be implemented in mid-year.
-*
-* Revision 1.124  2006/06/08 19:36:36  potekhin
-* By an unfortunate slip of the wrist, I deleted year2000
-* and year2001 during the previous check-in. Now they are restored.
-*
-* Revision 1.123  2006/06/02 17:34:37  potekhin
-* a) removed the PIX1 tag that was reliably
-* confirmed as obsolete
-* b) added the SISD_OFF flag that facilitates
-* creation of test geometries in which both the SVT
-* and the SSD are taken out. Needed for R&D.
-*
-* Revision 1.122  2006/05/05 17:38:41  potekhinconfig
-* Just rename the IST2 to UPGR03 to stivk with
-* previously chosen naming convention.
-*
-* Revision 1.121  2006/05/05 17:24:58  potekhin
-* Need a new R&D tag, IST2, to properly manage
-* the configuration of an alternative tracking upgrade project.
-* Other changes -- in DEV2005 -- are due to the SVT study, and
-* since this is not a production tag, are immaterial.
-*
-* Revision 1.120  2006/03/21 23:51:41  potekhin
-* Fairly significant additions:
-* (a) add steering for the muon trigger system, "MUTD"
-* (b) specify a complete barrel calorimeter for Y2006
-* (c) add steering for the corrected SSD (sisdgeo3)
-* (d) add steering for a small modifications in the SVT shield in Y2006
-*
-* Revision 1.119  2006/01/18 23:06:13  potekhin
-* Introducing the baseline year 2006 geometry, which is "the best"
-* Y2005 geo plus the bugfix in the TPC backplane (not too important).
-* Pending a better definition of the SSD from Lilian which we`ll have
-* to version and maybe cut new tags of 2004-5 geometries if there is
-* a need.
-*
-* As agreed, created UPGR01 and UPGR02 (note cautious use of namespace),
-* which are basically SSD+HFT and IST+HFT. Note that NONE of engineering
-* detail is available in either case, and less so for the integration
-* structural elements. We expect to do a lot of development in this area
-* as new facts and engineering data are provided. This cut will allow us
-* to proceed with tracking studies in the near term.
-*
-* Fixed a comment and added a couple more.
-*
-* Revision 1.118  2005/10/20 20:17:47  potekhin
-* a) added a few parameters to the "low_em" setting to
-* better simulate soft EM processes, if needed
-* b) added logic for calling the latest svttgeo6
-* c) added Y2003C, Y2004D and Y2005D to take advantage of this
-* new SVT geometry file. Added same to DEV2005 for development
-* purposes
-*
-* Revision 1.117  2005/10/06 17:54:57  potekhin
-* a) in DEV2005, provide a way to use a highly customised version of the SVT
-* b) create a key that enables the user to lower the electromagnetic processes
-* GEANT cut to 10 keV, from the KUMAC script without the need to recompile.
-*
-* Revision 1.116  2005/09/26 21:44:18  potekhin
-* We need a convenient way to optionally remove the SVT from
-* the simulation, to facilitate conversion and brems studies.
-* To this end, add  "SVTT_OFF" to the list of options
-*
-* Revision 1.115  2005/09/02 18:20:35  potekhin
-* Added separate config variables for the Quad section
-* (which includes D0) -- way upstream area
-*
-* Revision 1.114  2005/08/16 00:56:13  potekhin
-* Modified the development tag DEV2005 to configure the
-* geometry for the shielding studies. Added steering for
-* the shield and renamed a variable to avoid naming clash.
-* Also, removed ZCAL from this tag, because it would take
-* time to reconsile its geometry with the shield, and it`s
-* not too important for teh shielding study.
-*
-* Revision 1.113  2005/07/14 22:13:32  potekhin
-* In the tag PIX1:
-* Need to actuate a thinner pipe as well as an updated
-* pixel detector geometry, to include an exoskeleton
-* for the beampipe (R&D request from Kai et al.)
-*
-* Revision 1.112  2005/06/28 16:18:22  potekhin
-* Add config variables and steering for the GEM
-* barrel tracker -- only inlfated in the tag IST1.
-*
-* Revision 1.111  2005/06/03 15:54:43  potekhin
-* As agreed with all parties, we would like to run the 2004 simulation
-* with  improved geometry. In particular, the pp physics groups are calling
-* for an updated version of Y2003X (full calorimeter). We have no other
-* option but to create a new tag, Y2004Y, to reflect that.
-*
-* Revision 1.110  2005/05/26 16:03:31  potekhin
-* a) As advertised before, removed the various Year 1 tags,
-* as they were taking space and weren't used anymore
-* b) Included the updated TPC backplane into the tag Y2004C,
-* along with FTRO. This makes sense as (1) it wasn't used
-* in production yet (2) similar updates were done in the
-* latest 2005 tag.
-* c) Improved formatting and comments in select places
-*
-* Revision 1.109  2005/04/15 15:28:23  potekhin
-* a) Corrected a comment that could surreptitiously break the Mortan
-* parsing and cause a bug, of the type : !----- your text here ----
-* b) Improved the formatting of comments and fixed a typo
-* c) As agreed with Jerome, added a special development tag DEV2005,
-* which will allows as to better insure consistency and backward
-* compatibility of the code when working on the improvements in the
-* current tag. Production with such a development tag will be
-* prohibited and effectively disabled, as implied in its designation.
-*
-* Revision 1.108  2005/04/11 17:47:09  potekhin
-* Add the tag Y2005C, as authorized by Jerome, in order to activate
-* the latest TOF upgrades from Xin
-*
-* Revision 1.107  2005/04/07 19:52:30  potekhin
-* As per Janet`s note, update the FTPC config
-* in Y2004C (Ar+CO2)
-*
-* Revision 1.106  2005/04/04 22:13:37  potekhin
-* Creating a new Y2004C per the request from Jamie and A.Wetzler.
-* It contains a better version of the SSD (unavailable back in 2004),
-* the correction for the hybrid chip assembly length in the SVT
-* and extra copper in the cones, i.e. the components that make
-* difference in conversion studies
-*
-* Revision 1.105  2005/03/25 17:28:24  potekhin
-* Added the corrected SSD ladder positions (as per Lilian
-* communication) to the tag y2005b
-*
-* Revision 1.104  2005/03/25 02:13:59  potekhin
-* A very significant set of code changes, related to
-* versioning: The CorrNum variable turned out to be
-* unwieldy, dur to combinatorially large number of various
-* individual detector correctionds. Accordingly, it has
-* been retired.
-*
-* I have extended the set of "Config" variables
-* to describe the parameters previously wrapped into
-* CorrNum. This appears to work nicely.
-*
-* The tag y2005b will contain the latest improvements,
-* done in this new scheme of versioning:
-* a) SVT elelctronics mother volume length bug fix
-* b) Ar+C02 mix in the FTPC
-* c) SSD ladder radius corection (to be double-checked with Lilian)
-*
-* Better diagnostic printout and code simplification.
-*
-* Revision 1.103  2005/03/08 01:05:35  potekhin
-* Created a new tag, y2005b, which is necessary to optionally
-* activate the updated version of the TPC geometry. Introduced
-* simple logic to handle same, similar to the versioning of
-* other detectors (TpceConfig)
-*
-* Revision 1.102  2005/02/19 05:26:29  potekhin
-* a) Corrected the comment for tag IST1
-* b) Added the FGTD activation in same
-*
-* Revision 1.101  2005/02/02 00:16:09  potekhin
-* We now have a new estimate of the copper cable mass, for
-* the cables feeding the SVT and residing on the support cones.
-* Included in the code now are the switches and logic to allow
-* the updated configuration to be created.
-*
-* Revision 1.100  2005/01/19 16:40:53  potekhin
-* We extended the y2005x tag from y2004x and made
-* a mistake of creating only a half barrel of the SSD,
-* which in fact has now been completed. I fixed that
-* in y2205x and y2005 now.
-*
-* Revision 1.99  2005/01/03 22:11:23  potekhin
-* Need to update the experimental IST1 tag to better
-* refelct the needs of the new tracking group. Took
-* out the FTPC, put in the Pixel and SSD, and made
-* provisions for the latter to work w/o the SVT
-* volumes.
-*
-* Revision 1.98  2004/12/07 00:46:04  potekhin
-* We need to steer the newly added FSTD (forward tracker).
-* For now I add it to the experimental tag IST1, which is
-* used for development only.
-*
-* Revision 1.97  2004/11/02 19:00:55  potekhin
-* Added the Y2005 tag which we need for testing and
-* for general consistency. It will be subject to possible
-* changes, and for the time being is same as the latest
-* cut of the year 2004 (Y2004B).
-*
-* Revision 1.96  2004/10/28 22:05:53  potekhin
-* Changed the coding convention for the SSD geometry
-* "levels", which specify which file to load.
-*
-* Revision 1.95  2004/10/26 21:46:23  potekhin
-* 1) Cleaned out the remaining test code from Y2004B
-* 2) Created Y2005X which is same as Y2004B except for
-* the full barrel calorimeter as per Thomas` request
-*
-* Revision 1.94  2004/10/26 21:11:00  potekhin
-* 1) Moved filling of GDAT to the end of code after a consultation
-* with Pavel -- this is less error prone as by this time the main
-* Zebra bank is properly populated
-* 2) Chaged the Y2004B to activate the sisdgeo1
-*
-* Revision 1.93  2004/09/11 01:16:32  potekhin
-* Two additions:
-* (a) Geo tag Y2004B will include the most recent enhancements
-* such as the FTPC readout cage. In this cut, this is a modified
-* geo and work in progress
-* (b) Geo tag PIX1, based on the request from the pixel group.
-* The inner layer of SVT has been removed such that it can coexist with
-* the innder pixel based tracker
-*
-* Revision 1.92  2004/07/15 16:30:08  potekhin
-* Since the "MITT" detector was updated and became ISTB,
-* this needs to be reflected in the main geometry steering.
-* The new tag replaces MITT1 and is called IST1
-*
-* Revision 1.91  2004/06/28 22:53:45  potekhin
-* The emergence of two new detectors, the Pixel and
-* the other dubbed MITT, necessitates the creation
-* of dedicated geometries that can be used for R&D
-* for both. The previous COMPLETE geometry was not
-* well suited for this at all, and didn`t allow
-* proper versioning. Hence, the new MITT1 tag has
-* been created, on same footing as COMPLETE but
-* with a different structure.
-*
-* Revision 1.90  2004/05/10 21:49:38  potekhin
-* For consistency, the SSD config in the y2004a tag should
-* be equal 2 (even if the SSD data won`t be used)
-*
-* Revision 1.89  2004/04/28 23:30:37  potekhin
-* Deleted an unnecessary line setting the
-* PHMD version. It will be done throught the
-* structure PMVR anyway.
-*
-* Revision 1.88  2004/04/28 00:35:40  potekhin
-* Extra detail in steering the PHMD geo, see the PHMD code
-*
-* Revision 1.87  2004/04/14 20:54:27  potekhin
-* Changed the Y2004A to Y2004X to emphasize the fact
-* that this is a variation of asymptotic geometry
-* and not a corecction of the actual one. This
-* complies with the naming scheme we used in 2003.
-*
-* Revision 1.86  2004/04/14 19:02:12  potekhin
-* Introducing the geometry Y2004A, which is same as
-* Y2004 but with full Barrel Calorimeter, a-la Y2003X,
-* as per requests of PWG`s. Subject to final approval.
-*
-* Revision 1.85  2004/03/31 16:37:51  potekhin
-* Added version control for the FPD,
-* via the variable FpdmConfig
-*
-* Revision 1.84  2004/03/24 23:33:48  potekhin
-* Added proper VPD versioning as discussed with the team.
-* No numerical data here, just config flag.
-*
-* Revision 1.83  2004/03/10 20:11:34  potekhin
-* In Y2004, set the TOF config to 7 as requested by B.Llope,
-* to reflect the current configuration.
-*
-* Revision 1.82  2004/03/04 02:38:38  potekhin
-* Added modifications COMPLETE, to exclude SISD
-* as per Kai request -- won`t affect anybody else
-*
-* Revision 1.81  2004/02/10 00:27:57  potekhin
-* The SVT group wanted the correction in the SVT geometry,
-* which we discovered that we needed earlier this year, to
-* be applied RETROACTIVELY to year2001 geometry tag.
-* This breaks compatibility of the simulated SVT data
-* between earlier simulation runs and the ones to
-* follow, however this has been signed off by Helen
-* and Jerome as an acceptable compromise. The CorrNum
-* for year2001 is now set to 1.
-*
-* Revision 1.80  2004/01/29 20:46:45  potekhin
-* Disabled the long since obsoleted version of TOF,
-* because this piece of code would need to be rewritten
-* to be compiled with a variety of compiler options.
-*
-* Revision 1.79  2004/01/22 00:21:32  potekhin
-* Provide a facility to position the SVT with the MANY option,
-* which we`ll likely need due to overlap of the PIXL (embedded
-* in SVT) and the mother volume of the beampipe
-*
-* Revision 1.78  2004/01/19 22:53:27  potekhin
-* A small additional piece of logic to steer the
-* construction of the barrel calorimeter, better
-* code layout and comments
-*
-* Revision 1.77  2003/12/17 22:15:18  potekhin
-* a) In accordance with recent modifications, we also
-* introduce the configuration variable for the beam
-* pipe, instead of keeping its actual parameters here
-* b) corrected the COMPLETE geometry with the newest
-* version of the svtt code (with ssd separated out)
-* c) removed obsolete variables and logic, streamlined
-* the code
-* d) better comments and formatting in a few places
-*
-* Revision 1.76  2003/12/03 19:53:04  potekhin
-* a) Corrected a small but annoying bug in
-* propagating the geo tag to reco:
-* one of the characters was copied twice
-* because of the indexing error
-*
-* b) Added the "shift" angle for the second half
-* barrel in Y2004
-*
-* Revision 1.75  2003/11/20 02:58:10  potekhin
-* Changed the correction number scheme, such that it
-* allows for a new layout of the SVT to be implemented --
-* the one without the nested SSD. This is achieved by
-* calling the new code, svttgeo3.
-*
-* Changed the SSD config number in y2004 to "2": 10 ladders,
-* the "1" being one ladder installed previosuly and "3"
-* being the complete 20 ladder config.
-*
-* Made smallchanges in the barrel config flag for y2004,
-* improved comments and cleaned out unused variables.
-*
-* Revision 1.74  2003/11/14 22:56:19  potekhin
-* We are about to redo a sim run with y2003x,
-* and it seems that me might put in some of the
-* prior corrections as well. Therefore, I`m changing
-* the correctin level to 2.
-*
-* Revision 1.73  2003/11/13 00:54:50  potekhin
-* Create a facility to modify the TPC
-* gas density programmatically
-*
-* Revision 1.72  2003/11/13 00:21:42  potekhin
-* The modification flag we introduced earlier
-* to reflect variations in the dimensions of
-* certain support structured of SVT takes a borader
-* meaning than just the shield, hence we rename
-* the variable to SupportVer
-*
-* Revision 1.71  2003/11/12 18:45:09  potekhin
-* As per Fabrice, change the number of layer in the
-* SVT to 7 to ensure that the ssd in its current
-* version is also included
-*
-* Revision 1.70  2003/10/30 00:15:42  potekhin
-* To perfect our already sophisticated taxonomy of
-* the geometry tags, we rename Y2003C into Y2004,
-* because the run for which it is meant will start
-* in early 2004 anyway. Anyone to confuse 2003
-* and 2004, from now on, will be jailed and
-* possibly deported.
-*
-* Revision 1.69  2003/10/29 22:07:30  potekhin
-* Two changes:
-* 1) As agreed, I swap the tags y2003(b,c) to arrange
-* them chronologically for better mneumonics
-* 2) Introduced variable for steering of the Silicon Strip
-* Detector code (which needs to be written)
-*
-* Revision 1.68  2003/10/28 00:01:59  potekhin
-* As agreed with Jerome, we shall prevent
-* proliferation of custom geometries to reduce
-* the various dependencies between simu and reco
-* and databases. Therefore, the experimental
-* geometry "ASYMPT1" has been removed and has
-* taken place of the "COMPLETE", which is our
-* official sandbox. The Pixel Detector is
-* defined in it right now.
-*
-* Revision 1.67  2003/10/15 23:19:35  potekhin
-* Due to an apparent need to have the "most precise"
-* geometry describing the STAR configuration in the
-* spring 03 run, we introduce the tag Y2003C. It
-* includes all the corrections first introduced in
-* Y2003A, but also has the extra material in the
-* SVT that we recently added in the GEANT model
-* and which had been missing before.
-*
-* Revision 1.66  2003/10/10 23:59:18  potekhin
-* Per Jerome`s suggestion, which I agree with, we should
-* semantically separate our current geometry tags from the
-* future development ones. Also, it makes sense to have a more
-* complete (as compared to 2003) geometry, for the pixel
-* studies. Therefore, the pixel testbed tag has been
-* renamed and the STAR detector more fully populated.
-* It`s now ASYMPT1, and the indexing may continue.
-*
-* Revision 1.65  2003/10/10 23:15:35  potekhin
-* In previous check-n: forgot to mention the new CorrNum=3
-* which actually programmatically modifies the inner radius of
-* the shield in the SVT -- otherwise the pixel detector won`t
-* fit. Plus, put in extra flags PIXL_ON and PIPE_OFF to facilitate
-* experimentation.
-*
-* Revision 1.64  2003/10/10 23:12:56  potekhin
-* The fact is, we will need a suitable specialized geometry
-* for the pixel detector development, as it will require
-* a different beampipe and other modifications. I hereby
-* create the tag y2003c which will serve this purpose.
-* Right now it disables the old beampipe w/o offering anything
-* in its place -- this is subject to change as we assimilate
-* the new pipe design.
-*
-* Improved comments and structure in a few places
-*
-* Revision 1.63  2003/10/01 23:44:17  potekhin
-* Code modifications related to persisting the vital
-* geometry/version data, for now the magnetic field
-* scale and the geometry tag
-*
-* 1) Change the semantics of the variable Geom, which was hacky
-* anyway, and put the mwx=1 in the individual year_1 branches
-* themselves (a lot cleaner than a prior obscure "if")
-*
-* 2) Store the complete geometry tag in the variable Geom,
-* which is 8 characters long
-*
-* 3) Change the subroutine "geometry" into a "module",
-* which process instruments it (via Mortran) to access
-* and manipulate ZEBRA banks as structures
-*
-* 4) Introduce the bank GDAT, as a sub-bank of GEOM,
-* which for now contains the field scale and the tag.
-*
-* Revision 1.62  2003/09/29 19:48:41  potekhin
-* 1) Fixed typos in comments
-*
-* 2) Created a few options that allow the user to selectively include
-* certain detectors such as svtt, ECAL, CALB into the minimal geometry,
-* thus facilitating the creation of custom geometries on the fly --
-* useful for debugging and detector exploration
-*
-* 3) Improved the PHMD logic
-*
-* 4) last but not least -- the shift variable for CALB was changed from
-* {75,75} (incorrect) to {75,105} in geometry y2003x (full).
-*
-* Revision 1.61  2003/09/18 22:09:34  potekhin
-* Corrected a small comment typo and added the full
-* endcap wheel to the  new flagship geometry, y2003b.
-* This is done with fill mode 3.
-*
-* Revision 1.60  2003/09/17 23:10:42  potekhin
-* Small improvements to the Correction Level
-* logic.
-*
-* Revision 1.59  2003/08/21 20:29:27  potekhin
-* As per discussion with Jerome, I`m introducing
-* a cleaner versioning of the 2003 geometries:
-*
-* y2003a is now really the corrected year2003,
-* without any additions -- the SVT layer positions
-* have been updated and the old supogeo bug fixed.
-*
-* y2003b has same corrections as y2003a but will also
-* include extra material in the SVT, new ECAL configuration
-* as well as a new FPD, plus the Photon Multiplicity Detector.
-* Other changes will be done as needed. So for practical
-* purposes, this will be the actual Fall`03 geometry.
-*
-* Revision 1.58  2003/08/05 23:37:09  potekhin
-* Continued to use the CorrNum "correction level" to
-* correct older geometry bugs in a controlled and versioned
-* manner. Keep the newer version of the FTPC support pieces,
-* and add a call the new SVTT module, which will
-* include a number of corrections.
-*
-* Revision 1.57  2003/07/03 04:45:20  potekhin
-* Added the "special" variation of the year 2003 geometry, which has
-* a complete set of the barrel and endcap calorimeter elements. This
-* is needed primarily for heavy flavor studies and other rare signals.
-* The tag is y2003x.
-*
-* Also, fixed a subtle bug in the configuration of the endcap calorimeter.
-* It did not affect previous simulations, but would manifest itself
-* in a complete configurations such as this one.
-*
-* Revision 1.56  2003/05/01 23:00:16  potekhin
-* Photon Multiplicity Detector is now part of the
-* GEANT geometry version "y2003a", with proper
-* versioning of its position
-*
-* Revision 1.55  2003/04/29 21:04:55  potekhin
-* To keep the consistency of current simulation runs,
-* the geometry "year2003" is frozen. All the corrections
-* will go into "y2003a", and there will be a number of those.
-* Such geometry has been added to this present source file.
-* In the current cut of y2003a, to be tested, we corrected
-* the supogeo and the offset of the ECAL phi position.
-* We are also awaiting further corrections from the SVT group.
-*
-* Revision 1.55  2003/04/29 16:57:00  potekhin
-* New geometry y2003a -- corrected
-*
-* Revision 1.54  2002/12/10 01:48:25  potekhin
-* Important: the hadronic interactions are now indeed actuated in GCALOR
-*
-* Revision 1.53  2002/12/05 23:28:41  potekhin
-* Streamlined the BTOF config logic
-*
-* Revision 1.52  2002/11/27 21:53:14  potekhin
-* code improvement for readability etc -- moved bbcmgeo call
-*
-* Revision 1.51  2002/11/03 02:16:10  nevski
-* geometry up to 2003 introduced
-*
-* Revision 1.50  2002/10/28 15:49:35  nevski
-* fpd as a separate detector added
-*
-* Revision 1.49  2002/10/28 15:42:29  nevski
-* introducing 2002 version
-*
-* Revision 1.48  2001/09/10 17:39:34  nevski
-* do not set MFLD datacards without a DETP GEOM
-*
-* Revision 1.47  2001/05/22 17:40:47  nevski
-* field find tuning
-*
-* Revision 1.46  2001/05/21 21:07:05  nevski
-* Steves field map added
-*
-* Revision 1.45  2001/04/09 15:31:35  nevski
-* second version of cerenkov light properties introduced
-*
-* Revision 1.44  2001/03/16 22:09:13  nevski
-* some clean-up
-*
-* Revision 1.43  2001/03/16 00:32:06  nevski
-* switch on/off cooling water
-*
-* Revision 1.42  2001/03/15 01:24:47  nevski
-* default BTOF forced to no TOF tray
-*
-* Revision 1.41  2001/03/15 01:14:20  nevski
-* first approach to forward pion detector
-*
-* Revision 1.40  2001/03/13 20:56:31  nevski
-* variable RICH position taken from DB
-*
-* Revision 1.39  2001/03/12 01:01:30  nevski
-* mwc x-hits corrected
-*
-* Revision 1.38  2001/02/13 02:28:52  nevski
-* Y2B: extend CALB patch, add VPD
-*
-* Revision 1.37  2001/02/07 02:09:09  nevski
-* 6 silicon layers in y_2b geometry
-*
-* Revision 1.36  2000/11/22 17:51:41  nevski
-* tof geometry versions 1/2 preserved in btofgeo1, version 3 goes in btofgeo2
-***************************************************************************
+
+
 
 """                                                                               """
 """ Define a CONSTRUCT command to check for the presence of modules using CsADDR. """
@@ -5681,3 +4477,1209 @@ c  =============================================================================
    }
 
    END
+* $Log: geometry.g,v $
+* Revision 1.297  2016/07/29 18:56:00  jwebb
+* Add support for y2014c / y2015d / y2016a geometries, taking into account lasted changes in IST and SST
+*
+* Revision 1.296  2016/06/13 15:53:49  jwebb
+* Corrected logic error which creates mtd twice in y2015c+
+*
+* Revision 1.295  2016/03/07 14:47:00  jwebb
+* Case statement in geometry.g to support y2016c tag.
+*
+* Revision 1.294  2016/03/04 22:32:33  jwebb
+* Corrections to MTD radii, y2015c tag added.
+*
+* Revision 1.293  2016/02/04 16:33:35  jwebb
+* Fixed bug 3187: y2016 geometry was not completely setup in geometry.g.
+*
+* Revision 1.292  2015/12/02 15:02:35  jwebb
+* Add y2016 first cut geometry.
+*
+* Revision 1.291  2015/11/02 15:26:53  jwebb
+* Add MutdGeo7 module with corrected radii.  Define y2015b production geometry tag to use latest MTD geometry.
+*
+* Revision 1.290  2015/10/12 18:36:35  jwebb
+* Initial version of dev2020 geometry tag including forward tracking system.
+*
+* Revision 1.289  2015/07/14 21:12:53  jwebb
+* Added y2015a production geometry, initial release
+*
+* Revision 1.288  2015/06/19 13:48:25  jwebb
+* Added HCAL test configuration (hctest)
+*
+* Revision 1.287  2015/06/08 18:10:38  jwebb
+* Enable secondary tracking (hit association) for pixel (and FGT) -- AgSFlag('SIMU',2).
+*
+* Revision 1.286  2015/05/19 19:29:20  jwebb
+* Associate hits on 2ndary tracks to the track, not the primary track which initiates decay/shower.  https://www.star.bnl.gov/rt3/Ticket/Display.html?id=3092
+*
+* Revision 1.285  2015/04/17 19:14:51  jwebb
+* ... also need to be careful to call the right geometry module.  Needed an extra flag in geometry.g to handle this.
+*
+* Revision 1.284  2015/04/17 14:54:59  jwebb
+* Corrected configuration error in VPD in y2015/agml/agstar geometry.
+*
+* Revision 1.283  2015/01/06 19:45:16  jwebb
+* Correct version of VPD in 2015
+*
+* Revision 1.282  2015/01/06 19:06:46  jwebb
+* Added FGT to HCAL dev2016 geometry
+*
+* Revision 1.281  2015/01/06 15:58:40  jwebb
+* Add HCAL to dev2016
+*
+* Revision 1.280  2014/12/22 22:21:22  jwebb
+* dev2016 geometry implemented in starsim
+*
+* Revision 1.279  2014/08/18 18:50:38  jwebb
+* Updated y2014 tag w/ MTD y2014 configuration, not available for fast offline production.  Change required so that MTD match maker can run on all y2014 tags.  MTD does not participate in tracking and is outside of the acceptance of the tracker, so this modification does not affect the reproducability of the fast offline period.
+*
+* Revision 1.278  2014/05/14 20:02:49  jwebb
+* Support for FMS preshower in dev15a.  Support for HCAL test in y2014b.  Support for HCAL proposal in dev15b.
+*
+* Revision 1.277  2014/04/02 21:03:16  jwebb
+* y2014x geometry is moved to y2014a production.
+*
+* Revision 1.276  2014/03/24 19:58:30  jwebb
+* Setup y2014a candidate as y2014a.
+*
+* Revision 1.275  2014/03/17 21:30:18  jwebb
+* Fix bug in y2013 definitions eliminating pixel support tube.
+*
+* Revision 1.274  2014/03/11 18:24:15  jwebb
+* Defined y2013_1a, _1b, _1c, _2a, _2b, _2c geometry tags.
+*
+* y2013_1x and y2013_2x were mistakenly used in the y2013 data production, using
+* library SL14a.  The tags y2013_1c and y2013_2c freeze the y2013_1x and y2013_2x
+* geometry tags ase they exist in SL14a.  They are equivalent to the geometries
+* used in y2013 data production.
+*
+* Added y2010x asymptotic tag for STV testing.
+*
+* Revision 1.273  2014/02/11 21:42:40  jwebb
+* kOnly --> konly.
+*
+* Revision 1.272  2014/01/24 19:45:13  jwebb
+* Revert to CaveGeo for y2014 geometry.
+*
+* Revision 1.271  2014/01/23 23:04:39  jwebb
+* Make sure pixl support shows up in y2014.
+*
+* Revision 1.270  2014/01/23 17:04:34  jwebb
+* Added y2013b production geometries with extra HFT dead material near east
+* poletip.  Modified y2014 first cut.
+*
+* Revision 1.269  2013/12/09 14:45:58  jwebb
+* Changes to pixel detector for y2014.
+*
+* Revision 1.268  2013/12/04 20:01:33  jwebb
+* Removes FGT cables from IDSM in y2014.
+*
+* Revision 1.267  2013/12/03 16:54:36  jwebb
+* Added y2014 first cut geometry.
+*
+* Revision 1.266  2013/09/30 16:12:09  jwebb
+* Fixes for IDSM / PIPE.
+*
+* Revision 1.265  2013/09/12 18:09:21  jwebb
+* Moved IDS construction before beam pipe.
+*
+* Revision 1.264  2013/09/11 14:27:21  jwebb
+* Added case statements to enable y2013a geometries.
+*
+* Revision 1.263  2013/09/10 18:59:04  jwebb
+* Definitions for y2013a, new beam pipe module and new ist module.
+*
+* Revision 1.262  2013/08/13 18:55:54  jwebb
+* Defined a CONSTRUCT keyword in geometry.g.  CONSTRUCT calls a geometry
+* module using comis.  If the subroutine is not linked with the program,
+* it will not be called and a warning will be issued.  This warning can
+* be caught and parsed for dependency analysis.
+*
+* For the case where one or more moduels are missing, a fortran STOP will
+* be issued to prevent invalid geometries from being used.
+*
+* Revision 1.261  2013/07/10 21:19:08  jwebb
+* Correction to eStar2 definition.
+*
+* Revision 1.260  2013/07/09 18:37:00  jwebb
+* Additions to support eStar2 model.
+*
+* Revision 1.259  2013/05/22 14:39:15  jwebb
+* Added new version of the CAVE as CAVE05.  Better dimensions, walls, platform,
+* crates.  The y2013x (asymptotic) STAR uses CAVE05.  First cut geometry remains
+* at CAVE04.
+*
+* Revision 1.258  2013/02/26 15:25:32  jwebb
+* Updates to the Y2013 first cut and asymptotic tags.  Pixel support tube
+* remains in place when pixel detector is removed.
+*
+* Revision 1.257  2013/02/21 22:51:24  jwebb
+* Defined pixel detector in and out geometries.
+*
+* Revision 1.256  2013/02/06 21:58:09  jwebb
+* Corrections to y2013 geometry tag.  Addition of y2012b geometry tag to
+* properly include the MTD.
+*
+* Revision 1.255  2013/02/05 21:26:31  jwebb
+* Corrected double placement of volume in PixlGeo5
+*
+* Revision 1.254  2013/02/05 16:58:36  jwebb
+* Definition of the y2013 and y2013x geometry tags.
+*
+* Revision 1.253  2013/01/22 18:27:10  jwebb
+* Defined Y2013x geometry.
+*
+* Revision 1.252  2013/01/17 21:04:52  jwebb
+* Support for improved magnet model, improved trim coil description, in y2013x
+* geometry tag.
+*
+* Revision 1.251  2012/12/19 14:48:39  jwebb
+* Updates to support y2013 version of MTD.
+*
+* Revision 1.250  2012/12/14 16:13:56  jwebb
+* Updates for y2013 geometry.
+*
+* Revision 1.249  2012/11/02 15:03:21  jwebb
+* Fix format statement for SL4.4.
+*
+* Revision 1.248  2012/11/01 20:49:16  jwebb
+* Add TOF_MAX configuration option.
+*
+* Revision 1.247  2012/08/27 17:50:28  jwebb
+* Added estar1 and tpciv1 geometry tags.
+*
+* Revision 1.246  2012/08/27 14:56:12  jwebb
+* Added vfgt to definition of the estar development geometry.
+*
+* Revision 1.245  2012/07/02 18:50:36  jwebb
+* Few more modifications for dev14 geometry.  Add VPD and PXST to dev14.
+*
+* Revision 1.244  2012/06/29 15:10:51  jwebb
+* Added DEV14 geometry tag.
+*
+* Revision 1.243  2012/05/31 20:57:28  jwebb
+* Added y2012a production tag
+*
+* Revision 1.242  2012/05/07 21:44:06  jwebb
+* Added "devT" geometry tag for TPC upgrade studies.
+*
+* Revision 1.241  2012/03/28 15:14:17  jwebb
+* Switched pipe12 (old beam pipe) to pipev1 (new narrow beam pipe) for dev13
+* geometry with the HFT.
+*
+* Revision 1.240  2011/11/22 15:09:19  jwebb
+* Added "devE" tag for eStar development.
+*
+* Revision 1.239  2011/10/13 18:23:58  jwebb
+* Added production geometry tag y2011a.  Tag y2011a is consistent with the y2011
+* geometry tag, as it exists in the SL11c and SL11d libraries.  y2011a should be
+* used for any reproduction of production series PL11ic and PL11id.
+*
+* Revision 1.238  2011/10/07 19:44:45  jwebb
+* Switched versions of the PIXL detector.
+*
+* Revision 1.237  2011/10/06 20:38:22  jwebb
+* Fixed FGT setup.
+*
+* Revision 1.236  2011/10/06 19:54:48  jwebb
+* Moved IDSM earlier in the call sequence.
+*
+* Revision 1.235  2011/10/06 15:52:05  jwebb
+* Added dev13 tag.
+*
+* Revision 1.234  2011/10/06 14:54:00  jwebb
+* Added DEV13 geometry.  Removed pmd from y2012.  Added pixl to complete.
+*
+* Revision 1.233  2011/10/03 22:03:06  jwebb
+* Redefined the "complete" geometry for use in anticipated simulations with
+* FGT.  Did not add the HFT as we do not yet have a geometry for that.
+*
+* Revision 1.232  2011/08/19 16:44:14  jwebb
+* Definition of Y2012 geometry tag (1st cut).
+*
+* Revision 1.231  2011/07/20 20:23:47  jwebb
+* Upgr23 tag defined with FSC geometry and FMS in open position.
+*
+* Revision 1.230  2011/07/18 15:53:12  jwebb
+* Reverted to single FGT "upgr2012" geometry.
+*
+* Revision 1.229  2011/07/06 17:39:01  jwebb
+* Defined upgr2012a: 2-disk FGT
+*
+* Revision 1.228  2011/05/12 19:42:42  jwebb
+* Definition of upgr2012 geometry now includes IdsmGeo1 and FgtdGeo3 by default.
+*
+* Revision 1.227  2011/05/02 20:22:16  jwebb
+* Added code to pass configuration of the MTD to the mutdgeo4 module.
+*
+* Revision 1.226  2011/04/25 18:27:00  jwebb
+* Added Y2008e tag, which implements the LOW_EM central calorimeter cuts in
+* the y2008 geometry.
+*
+* Revision 1.225  2011/04/11 17:37:56  jwebb
+* Introduce UPGR2012 geometry as y2011 with inner detectors (FGT, SSD) and
+* supports removed.
+*
+* Revision 1.224  2011/03/11 00:05:18  jwebb
+* Added Y2008d, Y2009d, Y2010c and updated Y2011 geometry tags.  These tags
+* now contain an improved model of the SVT support cone... specifically the
+* support rods.  Previous geometry assumed solid carbon.  Now we assume a
+* carbon-fiber nomex sandwich.
+*
+* Revision 1.223  2010/12/22 00:13:00  jwebb
+* Correction to the documentation bank in the fzd file for y2008c geometry.
+*
+* Revision 1.222  2010/12/21 17:21:31  jwebb
+* Added Y2008c tag.
+* Added Y2009c tag.
+* Added y2010b tag.
+*
+* These three tags represent the current best model of the STAR detector,
+* including TOF geometry, for Y2008 - Y2010.  Previous models used a TPC
+* envelope which was too large and overlapped with 'kOnly' volumes in the
+* TOF, causing 'odd' hit distributions.
+*
+* Revision 1.221  2010/12/17 20:01:24  jwebb
+*
+* Defined TPCE04r (reduced TPC envelope radius) and BTOF67 (btof sensitive
+* volume size fix) and incorporated them into Y2011 tag.
+*
+* Revision 1.220  2010/11/12 20:04:14  jwebb
+* Added y2008b geometry tag with most recent models of the TPC, endcap
+* and barrel.
+*
+* Revision 1.219  2010/10/31 16:27:32  jwebb
+* Switch PHMD on.  Modified configuration of MUTD at request of Bill Llope.
+*
+* Revision 1.218  2010/07/30 18:31:29  jwebb
+* Added development / baseline y2011 geometry tag and reduced the number
+* of write statements.
+*
+* Revision 1.217  2010/07/12 18:47:20  jwebb
+* Added y2005i tag to provide up-to-date version of ecal in y2005 geometry
+* and to provide 10 keV transport cuts in calorimeters.
+*
+* Revision 1.216  2010/06/01 18:57:41  jwebb
+* Modified geometry.g so that seperate particle transport cuts can be
+* used in the BEMC and EEMC.  This is needed for the spin/dijet simulation
+* request summarized here:
+*
+* http://drupal.star.bnl.gov/STAR/starsimrequests/2010/may/26/filtered-dijet-simulation
+*
+* The simulation request applies filters which select out barrel- and
+* adjacent-jetpatch triggers.  Thus, the endcap is only important for
+* trigger response.  Requestors have noted a x2 increase in speed when
+* EEMC is run with higher tracking cuts than in the BEMC.
+*
+* We define the Y2009b tag to apply the 10keV default tracking cuts in
+* the BEMC, and revert the EEMC to the 80kev/1MeV (photon/electron) cuts.
+*
+* Revision 1.215  2010/05/25 21:21:50  jwebb
+* y2010a geometry tag commit.  Tag is identical to y2010, except dependency
+* on y2009a is removed.
+*
+* Revision 1.214  2010/04/19 16:16:03  jwebb
+* Restored code to save geometry tag and field setting in the FZD file.
+*
+* Revision 1.213  2010/04/13 21:47:52  jwebb
+* Added PHMD to y2010 geometry in preparation for y2010 simulations.
+*
+* Revision 1.212  2009/12/23 21:39:23  jwebb
+* (1) Code modified to use 10 keV e- and gamma transport cuts in the barrel
+*     and endcap calorimeters.   Note that this only takes effect in geometries
+*     using the ecalgeo6 and calbgeo2 geometries.
+*
+* (2) Explicitly disabled effects of (1) for existing geometry tags (y2000-
+*     y2008).
+*
+* (3) Side effects possible in upgrade geometries (i.e. calorimeter cuts may
+*     be effected depending on specific geometry options).
+*
+* Revision 1.211  2009/12/22 13:42:16  jwebb
+* Added options to set geant tracking cuts for electrons and photons in the
+* B/EEMC to 10, 30, 100 or 1000 keV.
+*
+* Revision 1.210  2009/11/24 23:49:28  jwebb
+* Changed to the TPCE04 model of the TPC in y2006h.  This is the current best
+* geometry of the TPC.  TPCE04 is present in tags from y2005 to present.
+*
+* Revision 1.209  2009/11/19 18:24:15  perev
+* y2009a and inherited from it y2010
+*
+* Revision 1.208  2009/11/18 20:46:34  jwebb
+* Y2009A production tag added:
+*
+* (1) Y2009A includes the new model of the EEMC
+* (2) Revert to old model of EEMC in Y2009 tag for compat w/ W preproduction.
+* (3) Removed the y2006dev tag
+* (4) Added y2006 h tag, which is y2006g + new model of the endcap.
+*
+* Revision 1.207  2009/11/17 16:18:47  jwebb
+* Added y2006dev with new endcap model.  y2006dev (and future y200[3-8]dev)
+* will be for testing purposes only.
+*
+* Revision 1.206  2009/11/16 22:37:48  jwebb
+* Added logic to support multiple ecalgeoX files (subroutines).  ecalgeo6
+* (version 6.1) set as default version for y2009 tag.
+*
+* Revision 1.205  2009/10/29 00:00:21  perev
+* y2010=y2009+Full BTOF
+*
+* Revision 1.204  2009/09/25 18:02:16  perev
+* Comment corrected
+*
+* Revision 1.203  2009/09/24 00:36:57  perev
+* BTOFc6 <== BTOFc7 in y2009 F.Geurts
+*
+* Revision 1.202  2009/09/23 23:28:51  perev
+* BugFix. pipe14==>pipe12 in y2008 & y2009
+*
+* Revision 1.201  2009/08/28 16:50:12  perev
+* CleanUp of write(*,*)
+*
+* Revision 1.200  2009/08/26 20:13:15  perev
+* JanB pixel off for upgr16
+*
+* Revision 1.199  2009/08/21 18:33:01  perev
+* PMD off for y2009
+*
+* Revision 1.198  2009/08/19 22:48:11  perev
+* Jan: thinner beam pipe for upgr16
+*
+* Revision 1.197  2009/08/18 17:29:13  perev
+* F.Geurts TOF for run 9
+*
+* Revision 1.196  2009/08/14 22:38:06  perev
+* Remove Cone fr upgr16 (Jan request)
+*
+* Revision 1.195  2009/07/14 01:02:59  perev
+* Increase interaction/decay volume
+*
+* Revision 1.194  2009/06/22 22:21:44  perev
+* Remove redundant messages
+*
+* Revision 1.193  2009/04/20 23:14:22  perev
+* upgr22 fhcmgeo
+*
+* Revision 1.192  2009/03/20 02:57:12  perev
+* upgr16a == upgr16 +tpc2009
+*
+* Revision 1.191  2009/03/13 21:08:27  perev
+* y2005h, y2007h added
+*
+* Revision 1.190  2009/03/07 01:04:00  perev
+* SSD shield fix + cleanup
+*
+* Revision 1.189  2009/02/22 21:36:23  perev
+* Y2009 born
+*
+* Revision 1.188  2009/02/20 21:35:05  perev
+* upgr15 full tof. Jonathan/Spiros
+*
+* Revision 1.187  2009/02/19 00:27:22  perev
+* Upgr15==>macros
+*
+* Revision 1.186  2009/02/13 19:20:34  perev
+* back BTOF for 2008. Again itof=6 bTofConfig=11
+*
+* Revision 1.185  2009/01/13 03:19:12  perev
+* Mag field nou controlled from starsim. BugFix
+*
+* Revision 1.184  2009/01/12 00:31:44  perev
+* Bug fix in ON logic(VP)
+*
+* Revision 1.183  2009/01/08 20:16:46  perev
+* Fix y2008a and y2009 btof
+*
+* Revision 1.182  2009/01/06 04:05:48  perev
+* For y2008a,y2009 elliptic rods
+*
+* Revision 1.181  2009/01/03 23:03:36  perev
+* BtofConfig=6 in 2008a,2009
+*
+* Revision 1.180  2008/12/30 19:41:09  perev
+* 1st version of y2009
+*
+* Revision 1.179  2008/12/15 01:03:56  perev
+* CleanUp
+*
+* Revision 1.178  2008/12/12 20:45:13  perev
+* upgr16/17 btofConfig=6
+*
+* Revision 1.177  2008/12/08 23:02:20  perev
+* C++ style comment removed
+*
+* Revision 1.176  2008/12/08 19:28:29  didenko
+* fixed typo
+*
+* Revision 1.175  2008/12/05 23:46:25  perev
+* y2008 bTofConfig=6 now(jan)
+*
+* Revision 1.174  2008/12/01 23:45:10  perev
+* ubgr16 last vers BTOF
+*
+* Revision 1.173  2008/11/30 01:30:53  perev
+* modifs for extending alpha,theta,phi,ort commandas
+*
+* Revision 1.172  2008/11/19 04:08:25  perev
+*  updates to the corrected(vp) starsim
+*
+* Revision 1.171  2008/10/13 03:21:35  perev
+* upgr17 added Wei(MingZhang)
+*
+* Revision 1.170  2008/10/13 00:22:19  perev
+* upgr16 pipe changed to provisional
+*
+* Revision 1.168  2008/09/25 03:05:58  perev
+* upgr16 (Jan)
+*
+* Revision 1.167  2008/06/03 22:27:16  fisyak
+* Add y2005g and y2007g geometries for SVT with latest Renes corrections
+*
+* Revision 1.166  2008/04/23 22:00:29  perev
+* tofZ0=0.00 ==> tofZ0=-0.50 /xin
+*
+* Revision 1.165  2008/03/20 18:45:28  perev
+* Simplest.gerrit upgr15 added
+*
+* Revision 1.164  2008/01/21 01:11:02  perev
+* TOF weight corrected
+*
+* Revision 1.163  2007/11/13 21:38:08  perev
+* pipeFlag and nSvtLayer==7 added
+*
+* Revision 1.162  2007/11/07 21:25:41  perev
+* btofgeo6 added by X.Dong
+*
+* Revision 1.161  2007/11/06 01:19:35  perev
+* y2008 geo
+*
+* Revision 1.160  2007/10/13 01:27:27  perev
+* u2007 ==> upgr20
+*
+* Revision 1.159  2007/09/28 18:54:08  perev
+* dongx/TOFr/y8update
+*
+* Revision 1.158  2007/09/25 19:56:14  perev
+* U2007A added
+*
+* Revision 1.157  2007/09/21 20:30:08  perev
+* Add U2007 geometry
+*
+* Revision 1.156  2007/08/15 18:06:22  potekhin
+* Seec omment at
+* http://drupal.star.bnl.gov/STAR/comp/simu/geometry0/changes-beampipe-support
+* about the newest round of the SVT corrections (Carbon used to construct water
+* channels as opposed to Beryllium). The difference of 0.4 to 0.6% of rad length
+* is big enough to warrant the creation of a new tag, in this case Y2007A.
+* The SVT code version activated in this tag is 10.
+*
+* Revision 1.155  2007/07/12 20:16:47  potekhin
+* Added the following geometry tags:
+* a) Y2008   -- first cut, will be improved
+* b) UPGR14  -- UPGR13 sans IST
+* c) DEV2007 -- sandbox for what-if studies, non-production grade
+*
+* Revision 1.154  2007/04/13 17:54:58  potekhin
+* Based on a comment by Akio, remove the PHMD (photon
+* multiplicity detector) from the Y2006 configuration, to
+* reflect the actual setup for that year. The new tag is Y2006C
+*
+* Revision 1.153  2007/03/21 21:08:05  potekhin
+* A cleaner version of managing the HFT (pixlgeo) versions
+*
+* Revision 1.152  2007/03/15 19:56:16  potekhin
+* Provide versioning for the thicker active Si layer
+* in pixlgeo3, via setting the structure elements
+*
+* Revision 1.151  2007/03/09 21:40:48  potekhin
+* UPGR13 modifications: (a) FSTD is out (b) modified SSD with carbon parts,
+* for R&D purposes (c) modified IST with single sided inner layer for the
+* April proposal
+*
+* Revision 1.150  2007/02/23 21:45:40  potekhin
+* a) re-instated the calls to IGT codes to keep a degree
+* of backward compatibility (for early UPGRXX tags)
+* b) deleted the previosuly commented out IST1 tag (as
+* advertised earlier, it was officially retired)
+* c) put in the dead material version of SSD into UPGR13 (SSD5)
+*
+* Revision 1.149  2007/02/23 21:20:02  potekhin
+* In the R and D tag UPGR13, removed the prototype support
+* cone on the East side on Gerrit  request. Corrected the
+* steering logic for the new FGT (former IGT) to integrate
+* the newer code obtained form Gerrit.
+*
+* Revision 1.148  2007/02/22 22:37:39  potekhin
+* Correcting a simple typo (accidentally hit delete)
+*
+* Revision 1.147  2007/02/22 22:21:18  potekhin
+* As stated in the S&C meeting, the recent correction
+* for the dead material in the SSD should be propagated
+* into earlier model-years, therefore creating new tags.
+* Only two such tags were necessary and have been created:
+* Y2005F and Y2006B. In addition to the SSD configuration,
+* they also feature a newer version of the CALB code,
+* which they share with Y2007.
+*
+* Revision 1.146  2007/02/16 22:57:50  potekhin
+* As per Xins communications, the correct logic for year 2007
+* in the upVPD code is triggered when the config flag is set to 7.
+* I make this tweak in steering for Y2007.
+*
+* Revision 1.145  2007/02/13 20:42:29  potekhin
+* Along the lines previously discussed, replace the IGT
+* by the FGT in the UPGRXX tags; in this case, by creating
+* a new tag UPGR13, which is the continuation of the UPGR07
+* line and will be further tuned.
+*
+* Revision 1.144  2007/02/09 22:04:37  potekhin
+* a) added steering for new code and settings for TOF, upVPD and FPD/FMS
+* b) retired IST1 (commented out, to be deleted later)
+*
+* Revision 1.143  2007/02/02 18:20:46  potekhin
+* The updated FMS code (fpdgeo) needs more space at the
+* end of the cave, so we need to add some. We will reflect
+* the more precise dimensions in cavegeo.g - here we just
+* add the requisite configuration flag for Y2007
+*
+* Revision 1.142  2007/02/02 17:18:40  potekhin
+* Added logic to include the updated SSD code
+*
+* Revision 1.141  2006/12/21 23:06:17  potekhin
+* Previous versions of UPGRxx geometries were deficient
+* is that there was a clash between the IGT disks and
+* other elements of the central tracker system. This lead
+* to a loss of hits in the IGT, a problem which was mitigated
+* in private versions of the code. To avoid prolifirations
+* of the latter, we need to introduce a corrected tag,
+* which is UPGR12, based on UPGR05 but with different
+* disk radii.
+*
+* Revision 1.140  2006/12/18 23:28:33  potekhin
+* Introduced geometry tags UPGR10 and UPGR11 (as discussed
+* in appropriate fora) which utilize source files istbgeo4 and 5.
+* Made some cosmetic changes to the code layout.
+*
+* Revision 1.139  2006/12/14 21:36:25  potekhin
+* Add tag UPGR09 with sttering logic
+* for the ISTB with only the outer layer...
+*
+* Revision 1.138  2006/12/12 22:32:19  potekhin
+* a) enable a cleaner barrel EMC code in Y2007
+* b) re-instate UPGR06 for the upcoming simulation
+*
+* Revision 1.137  2006/12/01 19:26:58  potekhin
+* Removing the SSD from the R&D geometry UPGR05, resulting
+* in a new configuration, UPGR08
+*
+* Revision 1.136  2006/11/28 00:02:09  potekhin
+* Added Y2007 and set it up to include the new FMS (FPD)
+*
+* Revision 1.135  2006/11/22 17:41:49  potekhin
+* Added a tag which will be used exclusively for the material
+* balance effect study, i.e. it won`t contains any realistic
+* detectors in the center of STAR, and feature a variable
+* thickness cylinder instead.
+*
+* Revision 1.134  2006/11/18 02:56:17  potekhin
+* Rewrote UPGR01 to better conform with
+* other UPGR0X tags in terms of actual code
+* (same version of SSD, identical flags in most
+* places). UPGR01 is HFT+SSD in central tracking,
+* and nothing else.
+*
+* Revision 1.133  2006/11/14 00:21:03  potekhin
+* Improved steering for the IGTD (gem disks), in order to
+* provide the possibility of a proper versioning. This is
+* done now via the IgtdConfig variable
+*
+* Revision 1.132  2006/11/01 00:21:09  potekhin
+* As discussed in appropriate fora, we need to introduce a HPD-less
+* tag for our TUP study. Let there be UPGR07.
+*
+* Revision 1.131  2006/10/21 18:14:21  potekhin
+* a) Added steering for the TUP support structure
+* b) optionally change the radius of the FSTD (to better fit with
+* the rest of TUP
+* c) using a more precise version of SSD code in UPGR05
+*
+* Revision 1.129  2006/10/09 16:19:17  potekhin
+* Due to the ongoing SSD studies, we need to refine the 2005 tag,
+* so as to include Lilian code that were checked into CVS in
+* early 2006 but were valid in 2005 as well. We have therefore created
+* the tag Y2005E, which is an improvement over Y2005D (more precise SSD),
+* bigger SVT shield (to accomodate the SSD) and a full barrel calorimeter.
+*
+* Revision 1.128  2006/10/02 21:37:03  potekhin
+* Added steering logic for the new tag UPGR05, which
+* includes the HFT (former pixel), HPD, IST and SSD,
+* but no SVT. GEM detectors are also excluded.
+*
+* Revision 1.127  2006/09/15 19:56:31  potekhin
+* Due to ongoing development, we need to create a new tag,
+* UPGR04, and steering logic for the new detector HPDT
+*
+* Revision 1.126  2006/07/07 17:41:28  potekhin
+* Fixing a very old and inconsequential typo in the
+* assignment of a variable for the "minimum Si layer"
+* (which I doubt was previously used)
+*
+* Revision 1.125  2006/06/12 18:34:28  potekhin
+* Created the tag Y2006A, which will allow for the all-new
+* FPD to be properly included, as well as otherpotential changes
+* to be implemented in mid-year.
+*
+* Revision 1.124  2006/06/08 19:36:36  potekhin
+* By an unfortunate slip of the wrist, I deleted year2000
+* and year2001 during the previous check-in. Now they are restored.
+*
+* Revision 1.123  2006/06/02 17:34:37  potekhin
+* a) removed the PIX1 tag that was reliably
+* confirmed as obsolete
+* b) added the SISD_OFF flag that facilitates
+* creation of test geometries in which both the SVT
+* and the SSD are taken out. Needed for R&D.
+*
+* Revision 1.122  2006/05/05 17:38:41  potekhinconfig
+* Just rename the IST2 to UPGR03 to stivk with
+* previously chosen naming convention.
+*
+* Revision 1.121  2006/05/05 17:24:58  potekhin
+* Need a new R&D tag, IST2, to properly manage
+* the configuration of an alternative tracking upgrade project.
+* Other changes -- in DEV2005 -- are due to the SVT study, and
+* since this is not a production tag, are immaterial.
+*
+* Revision 1.120  2006/03/21 23:51:41  potekhin
+* Fairly significant additions:
+* (a) add steering for the muon trigger system, "MUTD"
+* (b) specify a complete barrel calorimeter for Y2006
+* (c) add steering for the corrected SSD (sisdgeo3)
+* (d) add steering for a small modifications in the SVT shield in Y2006
+*
+* Revision 1.119  2006/01/18 23:06:13  potekhin
+* Introducing the baseline year 2006 geometry, which is "the best"
+* Y2005 geo plus the bugfix in the TPC backplane (not too important).
+* Pending a better definition of the SSD from Lilian which we`ll have
+* to version and maybe cut new tags of 2004-5 geometries if there is
+* a need.
+*
+* As agreed, created UPGR01 and UPGR02 (note cautious use of namespace),
+* which are basically SSD+HFT and IST+HFT. Note that NONE of engineering
+* detail is available in either case, and less so for the integration
+* structural elements. We expect to do a lot of development in this area
+* as new facts and engineering data are provided. This cut will allow us
+* to proceed with tracking studies in the near term.
+*
+* Fixed a comment and added a couple more.
+*
+* Revision 1.118  2005/10/20 20:17:47  potekhin
+* a) added a few parameters to the "low_em" setting to
+* better simulate soft EM processes, if needed
+* b) added logic for calling the latest svttgeo6
+* c) added Y2003C, Y2004D and Y2005D to take advantage of this
+* new SVT geometry file. Added same to DEV2005 for development
+* purposes
+*
+* Revision 1.117  2005/10/06 17:54:57  potekhin
+* a) in DEV2005, provide a way to use a highly customised version of the SVT
+* b) create a key that enables the user to lower the electromagnetic processes
+* GEANT cut to 10 keV, from the KUMAC script without the need to recompile.
+*
+* Revision 1.116  2005/09/26 21:44:18  potekhin
+* We need a convenient way to optionally remove the SVT from
+* the simulation, to facilitate conversion and brems studies.
+* To this end, add  "SVTT_OFF" to the list of options
+*
+* Revision 1.115  2005/09/02 18:20:35  potekhin
+* Added separate config variables for the Quad section
+* (which includes D0) -- way upstream area
+*
+* Revision 1.114  2005/08/16 00:56:13  potekhin
+* Modified the development tag DEV2005 to configure the
+* geometry for the shielding studies. Added steering for
+* the shield and renamed a variable to avoid naming clash.
+* Also, removed ZCAL from this tag, because it would take
+* time to reconsile its geometry with the shield, and it`s
+* not too important for teh shielding study.
+*
+* Revision 1.113  2005/07/14 22:13:32  potekhin
+* In the tag PIX1:
+* Need to actuate a thinner pipe as well as an updated
+* pixel detector geometry, to include an exoskeleton
+* for the beampipe (R&D request from Kai et al.)
+*
+* Revision 1.112  2005/06/28 16:18:22  potekhin
+* Add config variables and steering for the GEM
+* barrel tracker -- only inlfated in the tag IST1.
+*
+* Revision 1.111  2005/06/03 15:54:43  potekhin
+* As agreed with all parties, we would like to run the 2004 simulation
+* with  improved geometry. In particular, the pp physics groups are calling
+* for an updated version of Y2003X (full calorimeter). We have no other
+* option but to create a new tag, Y2004Y, to reflect that.
+*
+* Revision 1.110  2005/05/26 16:03:31  potekhin
+* a) As advertised before, removed the various Year 1 tags,
+* as they were taking space and weren't used anymore
+* b) Included the updated TPC backplane into the tag Y2004C,
+* along with FTRO. This makes sense as (1) it wasn't used
+* in production yet (2) similar updates were done in the
+* latest 2005 tag.
+* c) Improved formatting and comments in select places
+*
+* Revision 1.109  2005/04/15 15:28:23  potekhin
+* a) Corrected a comment that could surreptitiously break the Mortan
+* parsing and cause a bug, of the type : !----- your text here ----
+* b) Improved the formatting of comments and fixed a typo
+* c) As agreed with Jerome, added a special development tag DEV2005,
+* which will allows as to better insure consistency and backward
+* compatibility of the code when working on the improvements in the
+* current tag. Production with such a development tag will be
+* prohibited and effectively disabled, as implied in its designation.
+*
+* Revision 1.108  2005/04/11 17:47:09  potekhin
+* Add the tag Y2005C, as authorized by Jerome, in order to activate
+* the latest TOF upgrades from Xin
+*
+* Revision 1.107  2005/04/07 19:52:30  potekhin
+* As per Janet`s note, update the FTPC config
+* in Y2004C (Ar+CO2)
+*
+* Revision 1.106  2005/04/04 22:13:37  potekhin
+* Creating a new Y2004C per the request from Jamie and A.Wetzler.
+* It contains a better version of the SSD (unavailable back in 2004),
+* the correction for the hybrid chip assembly length in the SVT
+* and extra copper in the cones, i.e. the components that make
+* difference in conversion studies
+*
+* Revision 1.105  2005/03/25 17:28:24  potekhin
+* Added the corrected SSD ladder positions (as per Lilian
+* communication) to the tag y2005b
+*
+* Revision 1.104  2005/03/25 02:13:59  potekhin
+* A very significant set of code changes, related to
+* versioning: The CorrNum variable turned out to be
+* unwieldy, dur to combinatorially large number of various
+* individual detector correctionds. Accordingly, it has
+* been retired.
+*
+* I have extended the set of "Config" variables
+* to describe the parameters previously wrapped into
+* CorrNum. This appears to work nicely.
+*
+* The tag y2005b will contain the latest improvements,
+* done in this new scheme of versioning:
+* a) SVT elelctronics mother volume length bug fix
+* b) Ar+C02 mix in the FTPC
+* c) SSD ladder radius corection (to be double-checked with Lilian)
+*
+* Better diagnostic printout and code simplification.
+*
+* Revision 1.103  2005/03/08 01:05:35  potekhin
+* Created a new tag, y2005b, which is necessary to optionally
+* activate the updated version of the TPC geometry. Introduced
+* simple logic to handle same, similar to the versioning of
+* other detectors (TpceConfig)
+*
+* Revision 1.102  2005/02/19 05:26:29  potekhin
+* a) Corrected the comment for tag IST1
+* b) Added the FGTD activation in same
+*
+* Revision 1.101  2005/02/02 00:16:09  potekhin
+* We now have a new estimate of the copper cable mass, for
+* the cables feeding the SVT and residing on the support cones.
+* Included in the code now are the switches and logic to allow
+* the updated configuration to be created.
+*
+* Revision 1.100  2005/01/19 16:40:53  potekhin
+* We extended the y2005x tag from y2004x and made
+* a mistake of creating only a half barrel of the SSD,
+* which in fact has now been completed. I fixed that
+* in y2205x and y2005 now.
+*
+* Revision 1.99  2005/01/03 22:11:23  potekhin
+* Need to update the experimental IST1 tag to better
+* refelct the needs of the new tracking group. Took
+* out the FTPC, put in the Pixel and SSD, and made
+* provisions for the latter to work w/o the SVT
+* volumes.
+*
+* Revision 1.98  2004/12/07 00:46:04  potekhin
+* We need to steer the newly added FSTD (forward tracker).
+* For now I add it to the experimental tag IST1, which is
+* used for development only.
+*
+* Revision 1.97  2004/11/02 19:00:55  potekhin
+* Added the Y2005 tag which we need for testing and
+* for general consistency. It will be subject to possible
+* changes, and for the time being is same as the latest
+* cut of the year 2004 (Y2004B).
+*
+* Revision 1.96  2004/10/28 22:05:53  potekhin
+* Changed the coding convention for the SSD geometry
+* "levels", which specify which file to load.
+*
+* Revision 1.95  2004/10/26 21:46:23  potekhin
+* 1) Cleaned out the remaining test code from Y2004B
+* 2) Created Y2005X which is same as Y2004B except for
+* the full barrel calorimeter as per Thomas` request
+*
+* Revision 1.94  2004/10/26 21:11:00  potekhin
+* 1) Moved filling of GDAT to the end of code after a consultation
+* with Pavel -- this is less error prone as by this time the main
+* Zebra bank is properly populated
+* 2) Chaged the Y2004B to activate the sisdgeo1
+*
+* Revision 1.93  2004/09/11 01:16:32  potekhin
+* Two additions:
+* (a) Geo tag Y2004B will include the most recent enhancements
+* such as the FTPC readout cage. In this cut, this is a modified
+* geo and work in progress
+* (b) Geo tag PIX1, based on the request from the pixel group.
+* The inner layer of SVT has been removed such that it can coexist with
+* the innder pixel based tracker
+*
+* Revision 1.92  2004/07/15 16:30:08  potekhin
+* Since the "MITT" detector was updated and became ISTB,
+* this needs to be reflected in the main geometry steering.
+* The new tag replaces MITT1 and is called IST1
+*
+* Revision 1.91  2004/06/28 22:53:45  potekhin
+* The emergence of two new detectors, the Pixel and
+* the other dubbed MITT, necessitates the creation
+* of dedicated geometries that can be used for R&D
+* for both. The previous COMPLETE geometry was not
+* well suited for this at all, and didn`t allow
+* proper versioning. Hence, the new MITT1 tag has
+* been created, on same footing as COMPLETE but
+* with a different structure.
+*
+* Revision 1.90  2004/05/10 21:49:38  potekhin
+* For consistency, the SSD config in the y2004a tag should
+* be equal 2 (even if the SSD data won`t be used)
+*
+* Revision 1.89  2004/04/28 23:30:37  potekhin
+* Deleted an unnecessary line setting the
+* PHMD version. It will be done throught the
+* structure PMVR anyway.
+*
+* Revision 1.88  2004/04/28 00:35:40  potekhin
+* Extra detail in steering the PHMD geo, see the PHMD code
+*
+* Revision 1.87  2004/04/14 20:54:27  potekhin
+* Changed the Y2004A to Y2004X to emphasize the fact
+* that this is a variation of asymptotic geometry
+* and not a corecction of the actual one. This
+* complies with the naming scheme we used in 2003.
+*
+* Revision 1.86  2004/04/14 19:02:12  potekhin
+* Introducing the geometry Y2004A, which is same as
+* Y2004 but with full Barrel Calorimeter, a-la Y2003X,
+* as per requests of PWG`s. Subject to final approval.
+*
+* Revision 1.85  2004/03/31 16:37:51  potekhin
+* Added version control for the FPD,
+* via the variable FpdmConfig
+*
+* Revision 1.84  2004/03/24 23:33:48  potekhin
+* Added proper VPD versioning as discussed with the team.
+* No numerical data here, just config flag.
+*
+* Revision 1.83  2004/03/10 20:11:34  potekhin
+* In Y2004, set the TOF config to 7 as requested by B.Llope,
+* to reflect the current configuration.
+*
+* Revision 1.82  2004/03/04 02:38:38  potekhin
+* Added modifications COMPLETE, to exclude SISD
+* as per Kai request -- won`t affect anybody else
+*
+* Revision 1.81  2004/02/10 00:27:57  potekhin
+* The SVT group wanted the correction in the SVT geometry,
+* which we discovered that we needed earlier this year, to
+* be applied RETROACTIVELY to year2001 geometry tag.
+* This breaks compatibility of the simulated SVT data
+* between earlier simulation runs and the ones to
+* follow, however this has been signed off by Helen
+* and Jerome as an acceptable compromise. The CorrNum
+* for year2001 is now set to 1.
+*
+* Revision 1.80  2004/01/29 20:46:45  potekhin
+* Disabled the long since obsoleted version of TOF,
+* because this piece of code would need to be rewritten
+* to be compiled with a variety of compiler options.
+*
+* Revision 1.79  2004/01/22 00:21:32  potekhin
+* Provide a facility to position the SVT with the MANY option,
+* which we`ll likely need due to overlap of the PIXL (embedded
+* in SVT) and the mother volume of the beampipe
+*
+* Revision 1.78  2004/01/19 22:53:27  potekhin
+* A small additional piece of logic to steer the
+* construction of the barrel calorimeter, better
+* code layout and comments
+*
+* Revision 1.77  2003/12/17 22:15:18  potekhin
+* a) In accordance with recent modifications, we also
+* introduce the configuration variable for the beam
+* pipe, instead of keeping its actual parameters here
+* b) corrected the COMPLETE geometry with the newest
+* version of the svtt code (with ssd separated out)
+* c) removed obsolete variables and logic, streamlined
+* the code
+* d) better comments and formatting in a few places
+*
+* Revision 1.76  2003/12/03 19:53:04  potekhin
+* a) Corrected a small but annoying bug in
+* propagating the geo tag to reco:
+* one of the characters was copied twice
+* because of the indexing error
+*
+* b) Added the "shift" angle for the second half
+* barrel in Y2004
+*
+* Revision 1.75  2003/11/20 02:58:10  potekhin
+* Changed the correction number scheme, such that it
+* allows for a new layout of the SVT to be implemented --
+* the one without the nested SSD. This is achieved by
+* calling the new code, svttgeo3.
+*
+* Changed the SSD config number in y2004 to "2": 10 ladders,
+* the "1" being one ladder installed previosuly and "3"
+* being the complete 20 ladder config.
+*
+* Made smallchanges in the barrel config flag for y2004,
+* improved comments and cleaned out unused variables.
+*
+* Revision 1.74  2003/11/14 22:56:19  potekhin
+* We are about to redo a sim run with y2003x,
+* and it seems that me might put in some of the
+* prior corrections as well. Therefore, I`m changing
+* the correctin level to 2.
+*
+* Revision 1.73  2003/11/13 00:54:50  potekhin
+* Create a facility to modify the TPC
+* gas density programmatically
+*
+* Revision 1.72  2003/11/13 00:21:42  potekhin
+* The modification flag we introduced earlier
+* to reflect variations in the dimensions of
+* certain support structured of SVT takes a borader
+* meaning than just the shield, hence we rename
+* the variable to SupportVer
+*
+* Revision 1.71  2003/11/12 18:45:09  potekhin
+* As per Fabrice, change the number of layer in the
+* SVT to 7 to ensure that the ssd in its current
+* version is also included
+*
+* Revision 1.70  2003/10/30 00:15:42  potekhin
+* To perfect our already sophisticated taxonomy of
+* the geometry tags, we rename Y2003C into Y2004,
+* because the run for which it is meant will start
+* in early 2004 anyway. Anyone to confuse 2003
+* and 2004, from now on, will be jailed and
+* possibly deported.
+*
+* Revision 1.69  2003/10/29 22:07:30  potekhin
+* Two changes:
+* 1) As agreed, I swap the tags y2003(b,c) to arrange
+* them chronologically for better mneumonics
+* 2) Introduced variable for steering of the Silicon Strip
+* Detector code (which needs to be written)
+*
+* Revision 1.68  2003/10/28 00:01:59  potekhin
+* As agreed with Jerome, we shall prevent
+* proliferation of custom geometries to reduce
+* the various dependencies between simu and reco
+* and databases. Therefore, the experimental
+* geometry "ASYMPT1" has been removed and has
+* taken place of the "COMPLETE", which is our
+* official sandbox. The Pixel Detector is
+* defined in it right now.
+*
+* Revision 1.67  2003/10/15 23:19:35  potekhin
+* Due to an apparent need to have the "most precise"
+* geometry describing the STAR configuration in the
+* spring 03 run, we introduce the tag Y2003C. It
+* includes all the corrections first introduced in
+* Y2003A, but also has the extra material in the
+* SVT that we recently added in the GEANT model
+* and which had been missing before.
+*
+* Revision 1.66  2003/10/10 23:59:18  potekhin
+* Per Jerome`s suggestion, which I agree with, we should
+* semantically separate our current geometry tags from the
+* future development ones. Also, it makes sense to have a more
+* complete (as compared to 2003) geometry, for the pixel
+* studies. Therefore, the pixel testbed tag has been
+* renamed and the STAR detector more fully populated.
+* It`s now ASYMPT1, and the indexing may continue.
+*
+* Revision 1.65  2003/10/10 23:15:35  potekhin
+* In previous check-n: forgot to mention the new CorrNum=3
+* which actually programmatically modifies the inner radius of
+* the shield in the SVT -- otherwise the pixel detector won`t
+* fit. Plus, put in extra flags PIXL_ON and PIPE_OFF to facilitate
+* experimentation.
+*
+* Revision 1.64  2003/10/10 23:12:56  potekhin
+* The fact is, we will need a suitable specialized geometry
+* for the pixel detector development, as it will require
+* a different beampipe and other modifications. I hereby
+* create the tag y2003c which will serve this purpose.
+* Right now it disables the old beampipe w/o offering anything
+* in its place -- this is subject to change as we assimilate
+* the new pipe design.
+*
+* Improved comments and structure in a few places
+*
+* Revision 1.63  2003/10/01 23:44:17  potekhin
+* Code modifications related to persisting the vital
+* geometry/version data, for now the magnetic field
+* scale and the geometry tag
+*
+* 1) Change the semantics of the variable Geom, which was hacky
+* anyway, and put the mwx=1 in the individual year_1 branches
+* themselves (a lot cleaner than a prior obscure "if")
+*
+* 2) Store the complete geometry tag in the variable Geom,
+* which is 8 characters long
+*
+* 3) Change the subroutine "geometry" into a "module",
+* which process instruments it (via Mortran) to access
+* and manipulate ZEBRA banks as structures
+*
+* 4) Introduce the bank GDAT, as a sub-bank of GEOM,
+* which for now contains the field scale and the tag.
+*
+* Revision 1.62  2003/09/29 19:48:41  potekhin
+* 1) Fixed typos in comments
+*
+* 2) Created a few options that allow the user to selectively include
+* certain detectors such as svtt, ECAL, CALB into the minimal geometry,
+* thus facilitating the creation of custom geometries on the fly --
+* useful for debugging and detector exploration
+*
+* 3) Improved the PHMD logic
+*
+* 4) last but not least -- the shift variable for CALB was changed from
+* {75,75} (incorrect) to {75,105} in geometry y2003x (full).
+*
+* Revision 1.61  2003/09/18 22:09:34  potekhin
+* Corrected a small comment typo and added the full
+* endcap wheel to the  new flagship geometry, y2003b.
+* This is done with fill mode 3.
+*
+* Revision 1.60  2003/09/17 23:10:42  potekhin
+* Small improvements to the Correction Level
+* logic.
+*
+* Revision 1.59  2003/08/21 20:29:27  potekhin
+* As per discussion with Jerome, I`m introducing
+* a cleaner versioning of the 2003 geometries:
+*
+* y2003a is now really the corrected year2003,
+* without any additions -- the SVT layer positions
+* have been updated and the old supogeo bug fixed.
+*
+* y2003b has same corrections as y2003a but will also
+* include extra material in the SVT, new ECAL configuration
+* as well as a new FPD, plus the Photon Multiplicity Detector.
+* Other changes will be done as needed. So for practical
+* purposes, this will be the actual Fall`03 geometry.
+*
+* Revision 1.58  2003/08/05 23:37:09  potekhin
+* Continued to use the CorrNum "correction level" to
+* correct older geometry bugs in a controlled and versioned
+* manner. Keep the newer version of the FTPC support pieces,
+* and add a call the new SVTT module, which will
+* include a number of corrections.
+*
+* Revision 1.57  2003/07/03 04:45:20  potekhin
+* Added the "special" variation of the year 2003 geometry, which has
+* a complete set of the barrel and endcap calorimeter elements. This
+* is needed primarily for heavy flavor studies and other rare signals.
+* The tag is y2003x.
+*
+* Also, fixed a subtle bug in the configuration of the endcap calorimeter.
+* It did not affect previous simulations, but would manifest itself
+* in a complete configurations such as this one.
+*
+* Revision 1.56  2003/05/01 23:00:16  potekhin
+* Photon Multiplicity Detector is now part of the
+* GEANT geometry version "y2003a", with proper
+* versioning of its position
+*
+* Revision 1.55  2003/04/29 21:04:55  potekhin
+* To keep the consistency of current simulation runs,
+* the geometry "year2003" is frozen. All the corrections
+* will go into "y2003a", and there will be a number of those.
+* Such geometry has been added to this present source file.
+* In the current cut of y2003a, to be tested, we corrected
+* the supogeo and the offset of the ECAL phi position.
+* We are also awaiting further corrections from the SVT group.
+*
+* Revision 1.55  2003/04/29 16:57:00  potekhin
+* New geometry y2003a -- corrected
+*
+* Revision 1.54  2002/12/10 01:48:25  potekhin
+* Important: the hadronic interactions are now indeed actuated in GCALOR
+*
+* Revision 1.53  2002/12/05 23:28:41  potekhin
+* Streamlined the BTOF config logic
+*
+* Revision 1.52  2002/11/27 21:53:14  potekhin
+* code improvement for readability etc -- moved bbcmgeo call
+*
+* Revision 1.51  2002/11/03 02:16:10  nevski
+* geometry up to 2003 introduced
+*
+* Revision 1.50  2002/10/28 15:49:35  nevski
+* fpd as a separate detector added
+*
+* Revision 1.49  2002/10/28 15:42:29  nevski
+* introducing 2002 version
+*
+* Revision 1.48  2001/09/10 17:39:34  nevski
+* do not set MFLD datacards without a DETP GEOM
+*
+* Revision 1.47  2001/05/22 17:40:47  nevski
+* field find tuning
+*
+* Revision 1.46  2001/05/21 21:07:05  nevski
+* Steves field map added
+*
+* Revision 1.45  2001/04/09 15:31:35  nevski
+* second version of cerenkov light properties introduced
+*
+* Revision 1.44  2001/03/16 22:09:13  nevski
+* some clean-up
+*
+* Revision 1.43  2001/03/16 00:32:06  nevski
+* switch on/off cooling water
+*
+* Revision 1.42  2001/03/15 01:24:47  nevski
+* default BTOF forced to no TOF tray
+*
+* Revision 1.41  2001/03/15 01:14:20  nevski
+* first approach to forward pion detector
+*
+* Revision 1.40  2001/03/13 20:56:31  nevski
+* variable RICH position taken from DB
+*
+* Revision 1.39  2001/03/12 01:01:30  nevski
+* mwc x-hits corrected
+*
+* Revision 1.38  2001/02/13 02:28:52  nevski
+* Y2B: extend CALB patch, add VPD
+*
+* Revision 1.37  2001/02/07 02:09:09  nevski
+* 6 silicon layers in y_2b geometry
+*
+* Revision 1.36  2000/11/22 17:51:41  nevski
+* tof geometry versions 1/2 preserved in btofgeo1, version 3 goes in btofgeo2
+***************************************************************************
