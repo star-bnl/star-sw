@@ -81,8 +81,8 @@ class etofBuilder : public JevpBuilder {
     union {
       TH1* array[];
       struct {
-        TH1* pulserDigiTimeDiffOverflow[ 216 ];
-        
+        TH1* triggerTimeDiffSectorsOverflow[ 11 ];
+        TH1* pulserDigiTimeDiffOverflow[ 216 ];  
       };
     } extras;
 
