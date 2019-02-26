@@ -1,4 +1,4 @@
-// $Id: tpcBuilder.cxx,v 1.4 2019/01/10 14:07:18 evpdaq Exp $
+// $Id: tpcBuilder.cxx,v 1.5 2019/02/26 19:49:55 videbaks Exp $
 //
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,7 +36,7 @@
 
 #define checkcld 1
 #define checklaser 1
-//#define fv 1
+#define fv 0
 #define fvd 0
 
 ClassImp(tpcBuilder);
@@ -45,7 +45,7 @@ ClassImp(tpcBuilder);
 // 
 static const int NTPCpads[72] = {
     52, 54, 56, 58, 60, 62, 62, 64, 66, 68,
-    70, 71, 74, 74, 76, 78, 80, 82, 84, 86,
+    70, 72, 74, 74, 76, 78, 80, 82, 84, 86,
     86, 88, 90, 92, 94, 96, 98, 98,100,102,
     104,106,108,110,110,112,114,116,118,120,
     98,100,102,104,106,106,108,110,112,112,114,116,118,120,122,122, //Outer 
@@ -805,30 +805,33 @@ void tpcBuilder::event(daqReader *rdr)
       has_adc = 1;
       tpc_max_channels += tpc_max_channels_outer_sector;
       
-      while(dd->iterate())
+      while(dd->iterate()){
 #if fvd
 	cout << "Sector " << s << " " << dd->ncontent << endl;
 #endif
-      {
+#if fvd
+	cout << "    " << dd->pad << " " << dd->row << endl;
+#endif
 	//
-	// skip rows < 14 ! should not apear in run 19 data
+	// skip rows < 14 ! should not appear in run 19 data
 	//
 	if((dd->pad < 1 ) || 
 	   (dd->row < 14))
 	  {
 	    continue;
           }
-	  
+	
 	// 
 	// update padrow count for outer sectors
 	//
-	  
+	
 	pixel_count += dd->ncontent ;
-	  
+	
 	if(dd->ncontent > 0) {
 	  channel_counts[dd->pad][dd->row+27] = 1;
 	}
-	  
+	
+	
 	for(u_int i=0;i<dd->ncontent;i++) {
 	  int tb = dd->adc[i].tb;
 	  int adc = dd->adc[i].adc;
@@ -838,8 +841,30 @@ void tpcBuilder::event(daqReader *rdr)
 	    LOG(ERR, "event=%d pad=%d row=%d tb=%d out of range.  Ignore.", event_no, dd->pad, dd->row, tb);
 	  }
 	  else {
-	    charge_counts[dd->pad][dd->row+27] += adc;
-	    tb_charge_counts[tb] += adc;  	  }
+#if fvd
+	    cout << dd->pad << " " << dd->row << " " << tb << " " << adc <<endl;
+#endif
+	    //
+	    //  Remove pads that are also hot and cannot be masked
+	    //  with pedestals
+	    if(tb > 24){
+	      if(s==4)
+		if(dd->row+27 == 72 && dd->pad==110){
+		  continue;
+		}
+	      if(s==12){
+		if(dd->pad==19 && dd->row+27==43)
+		  continue;
+	      }
+	      if(s==22){
+		if(dd->pad==71 && dd->row+27==56)
+		  continue;
+	      }
+	      charge_counts[dd->pad][dd->row+27] += adc;
+	    }
+	    tb_charge_counts[tb] += adc;  
+	  }
+	  
 	}
       }
       
@@ -976,6 +1001,8 @@ void tpcBuilder::event(daqReader *rdr)
   // must also scale tpx differently.
 
   //FV This whole scaling does not make much sense to me. Commented out.
+  // It does make some sense since it tries to ensure that adc 
+  // and clusters are on approximately the same scale
   //
   /*    
 	if(has_adc) {
@@ -1080,12 +1107,13 @@ void tpcBuilder::event(daqReader *rdr)
     LOG(WARN, "Trigger command other than 4,8,9,10: evt %d, token=%d, cmd=%d",rdr->seq, rdr->token, rdr->trgcmd);
   }
 
+  //
   // Normalize the charge histos
   //
   // adc vs sector
   // phy disto
 
-#ifdef fv
+#if fv
   printf("End event %d \n",event_no);
 #endif
 }
