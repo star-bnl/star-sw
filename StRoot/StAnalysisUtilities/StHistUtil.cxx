@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.103 2018/07/06 22:13:04 smirnovd Exp $
+// $Id: StHistUtil.cxx,v 2.104 2019/02/25 19:20:18 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.104  2019/02/25 19:20:18  genevb
+// Sector numbering fix
+//
 // Revision 2.103  2018/07/06 22:13:04  smirnovd
 // [Cosmetic] Changes in white space
 //
@@ -1341,7 +1344,7 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
           if (oName.Contains("PointRPTpc") ||
               oName.Contains("PointXYTpc") ) {
             // Draw sector boundaries and label
-            int eastsec = (oName.Contains("TpcE") ? 12 : 0);
+            int eastsec = (oName.Contains("TpcE") || oName.Contains("TpcQE") ? 12 : 0);
             ruler.SetLineColor(0);
             ruler.SetLineStyle(2);
             float sz = latex.GetTextSize();
