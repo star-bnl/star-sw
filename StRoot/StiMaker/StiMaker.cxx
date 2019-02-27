@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.241 2018/07/06 22:13:05 smirnovd Exp $
+// $Id: StiMaker.cxx,v 1.241.4.1 2019/02/27 21:32:53 genevb Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -383,25 +383,25 @@ Int_t StiMaker::InitRun(int run)
     _fitter  = dynamic_cast<StiKalmanTrackFitter *>(_toolkit->getTrackFitter());
 
     //if (*SAttr("useMCS")) StiKalmanTrackNode::setMCS(IAttr("useMCS"));
-  }
 
-  _eventFiller=0;
-  if (IAttr("useEventFiller")) {
-    _eventFiller =  new StiStEventFiller();
-    _eventFiller->setUseAux(IAttr("useAux"));
-    InitPulls();
+    _eventFiller=0;
+    if (IAttr("useEventFiller")) {
+      _eventFiller =  new StiStEventFiller();
+      _eventFiller->setUseAux(IAttr("useAux"));
+      InitPulls();
+    }
+    _trackContainer = _toolkit->getTrackContainer();
+    _vertexFinder   = 0;
+    if (GetTopChain()->GetMakerInheritsFrom("StGenericVertexMaker")) {
+      _vertexFinder   = _toolkit->getVertexFinder();
+    }
+    if (_tracker) {
+      _tracker->initialize();
+      _tracker->clear();
+    }
+    _initialized=true;
+    cout <<"StiMaker::InitRun() -I- Initialization Segment Completed"<<endl;
   }
-  _trackContainer = _toolkit->getTrackContainer();
-  _vertexFinder   = 0;
-  if (GetTopChain()->GetMakerInheritsFrom("StGenericVertexMaker")) {
-    _vertexFinder   = _toolkit->getVertexFinder();
-  }
-  if (_tracker) {
-    _tracker->initialize();
-    _tracker->clear();
-  }
-  _initialized=true;
-  cout <<"StiMaker::InitRun() -I- Initialization Segment Completed"<<endl;
 
   return StMaker::InitRun(run);
 }
@@ -727,8 +727,11 @@ void StiMaker::FinishTracks (int gloPri)
 }
 
 
-// $Id: StiMaker.cxx,v 1.241 2018/07/06 22:13:05 smirnovd Exp $
+// $Id: StiMaker.cxx,v 1.241.4.1 2019/02/27 21:32:53 genevb Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.241.4.1  2019/02/27 21:32:53  genevb
+// Avoid unnecessary re-initializations in InitRun()
+//
 // Revision 1.241  2018/07/06 22:13:05  smirnovd
 // [Cosmetic] Changes in white space
 //
