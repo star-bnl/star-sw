@@ -16,6 +16,9 @@ if [ $# -eq 0 ]; then
  fi
  if test ! "x$NODEBUG" = "x"; then
   d=opt
+  if test "x$NODEBUG" = "x-O3"; then
+  d=opt3
+  fi
  else 
   d=debug
  fi
@@ -26,7 +29,7 @@ fi
 
 # Begin source code.
 case $TERM in
- xterm|vt100|vt220|xterms|aixterm)          # vt100 tool
+ xterm|vt100|vt220|xterms|aixterm|xterm*)          # vt100 tool
  echo "]0;${TNAME}"
  ;;
 
