@@ -176,6 +176,9 @@ rts_example.trg.o: ../DAQ_L4/daq_l4.h
 rts_example.trg.o: ../DAQ_FGT/daq_fgt.h
 rts_example.trg.o: ../DAQ_MTD/daq_mtd.h
 rts_example.trg.o: ../DAQ_PXL/daq_pxl.h
+sfs_stuff.o: ../../../../StRoot/RTS/include/rtsLog.h
+sfs_stuff.o: ../DAQ_READER/daqReader.h
+sfs_stuff.o: ../DAQ_READER/daqConfig.h
 testReader2.o: ../../../../StRoot/RTS/include/rtsLog.h
 testReader2.o: ../../../../StRoot/RTS/include/rtsSystems.h
 testReader2.o: ../DAQ_READER/daqReader.h

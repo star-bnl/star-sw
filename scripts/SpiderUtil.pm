@@ -24,7 +24,7 @@ require Exporter;
 
 
 use vars qw($SPDR::VERSION);
-$SPDR::VERSION = "V01.000";
+$SPDR::VERSION = "V01.001";
 $SPDR::NAME    = "SpiderUtil";
 
 # Now global variables and default values
@@ -103,7 +103,9 @@ sub ToFromCache
     }
     if ( ! defined($SPDR::XSELF) ){
 	$SPDR::XSELF  = $SPDR::SELF;
-	$SPDR::XSELF .= $SPDR::SCAND if ( $SPDR::XSELF !~ m/$SPDR::SCAND/);
+	if ( defined($SPDR::SCAND) ){
+	    $SPDR::XSELF .= $SPDR::SCAND if ( $SPDR::XSELF !~ m/$SPDR::SCAND/);
+	}
 	$SPDR::XSELF  =~ s/[+\/\*]/_/g; 
     }
     if ( ! defined($SPDR::CACHELM) ){  $SPDR::CACHELM = 10;} # cache limit
@@ -113,7 +115,12 @@ sub ToFromCache
     # get cache count for this pass
     if ( ! defined($SPDR::CACHECNT) ){
 	$kk=0;
-	$SPDR::CACHEDIR = $ENV{HOME}."/.cache";
+	#$SPDR::CACHEDIR = $ENV{HOME}."/.cache";
+	if ( ! defined($user = $ENV{USER}) ){
+	    chomp($user = `/bin/whoami`);
+	}
+	$SPDR::CACHEDIR  = "/tmp/$user/.cache";
+	if ( ! -e "/tmp/$user" ){    mkdir("/tmp/$user")   ;}
 	if ( ! -e $SPDR::CACHEDIR ){ mkdir($SPDR::CACHEDIR);}
 	while ( -e "$SPDR::CACHEDIR/$SPDR::XSELF"."_$kk.lis"){  $kk++;}
 	if ( $kk > ($SPDR::CACHELM+$SPDR::CACHOFF) ){

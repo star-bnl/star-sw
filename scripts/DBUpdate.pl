@@ -16,6 +16,7 @@ if ($#ARGV == -1){
      [user] [password]
 
  Options are
+   -d                 turn on debugging
    -o outputFile      redirect output to file outputFile
    -of markerFile      on finding, create markerFile delete otherwise if exists
 
@@ -51,7 +52,7 @@ if ($#ARGV == -1){
 
  Arguments are
    ARGV0   the base path of a disk to scan (default /star/data06)
-   ARGV1   the filetype (default .MuDst.root ). If null, it will
+   ARGV1   the filetype (default .picoDst.root ). If null, it will
            search for all files
    ARGV2   this scripts limits it to a sub-directory "reco" starting
            from ARGV0. Use this argument to overwrite.
@@ -170,6 +171,9 @@ for ($i=0 ; $i <= $#ARGV ; $i++){
     } elsif ($ARGV[$i] eq "-t"){
 	$SPDR->CheckTime($ARGV[++$i]);
 
+    } elsif ($ARGV[$i] eq "-d"){
+	$DEBUG   = 1;
+
     } elsif ($ARGV[$i] eq "-l"){
 	$DOSL    = 1;
 
@@ -220,16 +224,24 @@ $SPDR->SetCacheName($SCAND);
 
 #@ALL =( "$SCAND/$SUB/FPDXmas/FullField/P02ge/2002/013/st_physics_3013016_raw_0018.MuDst.root",
 #	"$SCAND/$SUB/FPDXmas/FullField/P02ge/2002/013/st_physics_3013012_raw_0008.MuDst.root");
+#@ALL = (
+#    "/star/data19/reco/dAu200_production_2016/ReversedFullField/P17id/2016/134/1713404/st_mtd_17134045_raw_3000044.picoDst.root",
+#    "/star/data19/reco/dAu200_production_2016/ReversedFullField/P17id/2016/134/1713404/st_mtd_adc_17134045_raw_5500054.MuDst.root"
+#    );
+
+
 
 $failed = $unkn = $old = $new = 0;
 $DOIT   = ($#ALL == -1);
 
 
-if ( ! defined($FTYPE) ){  $FTYPE = ".MuDst.root";}
+if ( ! defined($FTYPE) ){  $FTYPE = ".picoDst.root";}
 $FTYPE =~ s/^\s*(.*?)\s*$/$1/;   # trim leading/trailing
 
-
-#print "Scanning $SCAND/$SUB\n";
+if ( $DEBUG ){
+    print "Debug: Scanning $SCAND/$SUB all=$#ALL doit=$DOIT ftype=$FTYPE dosl=$DOSL\n";
+    print "Debug: -e failed on  $SCAND/$SUB\n" if ( ! -e  "$SCAND/$SUB");
+}
 
 $stimer = time();
 if( $DOIT && -e "$SCAND/$SUB"){
@@ -298,6 +310,7 @@ else {                   print "Password for $user : ";
 #
 # Now connect
 #
+$fC->set_thresholds(0,0,0) if ($DEBUG);
 if ( ! $fC->connect($user,$passwd,$port,$host,$db) ){
     &Stream("Error: Could not connect to $host $db using $user (passwd=OK)");
     goto FINAL_EXIT;
@@ -312,6 +325,7 @@ $fC->Require("V01.307");             # pathcomment and nodecomment requires a mi
 # Temporary so we get it once only
 chomp($NODE    = `/bin/hostname`);
 &Stream("Info : We are on $NODE started on ".localtime());
+&Stream("Info : Arguments [".join(" ",@ARGV)."]");
 
 
 undef(@TEMP);  # to be sure
@@ -425,7 +439,9 @@ foreach  $file (@ALL){
 		#print "Cloning of $file did not occur\n";
 
 	    } else {
-	        &Stream("$mess File cloned ".sprintf("%.2f %%",($new/($#ALL+1))*100))
+	        &Stream("$mess cloned".
+			" new=".sprintf("%.2f%%",($new/($#ALL+1))*100).
+		        " old=".sprintf("%.2f%%",($old/($#ALL+1))*100))
 		    if ($new % 10 == 0);
 		$fC->set_context("persistent= 0");
 

@@ -57,6 +57,7 @@ daq_fcs::daq_fcs(daqReader *rts_caller)
 
 	raw = new daq_dta ;
 	adc = new daq_dta ;
+	zs = new daq_dta ;
 
 	LOG(DBG,"%s: constructor: caller %p",name,rts_caller) ;
 	return ;
@@ -68,6 +69,7 @@ daq_fcs::~daq_fcs()
 
 	delete raw ;
 	delete adc ;
+	delete zs ;
 
 	return ;
 }
@@ -93,6 +95,10 @@ daq_dta *daq_fcs::get(const char *bank, int sec, int raw, int pad, void *p1, voi
 	else if(strcasecmp(bank,"adc")==0) {
 		if((present & DET_PRESENT_SFS)==0) return 0 ;		// no DDL
 		return handle_adc() ;		// actually sec, rdo; r1 is the number of bytes
+	}
+	else if(strcasecmp(bank,"zs")==0) {
+		if((present & DET_PRESENT_SFS)==0) return 0 ;		// no DDL
+		return handle_zs() ;		// actually sec, rdo; r1 is the number of bytes
 	}
 	else {
 		LOG(ERR,"%s: unknown bank type \"%s\"",name,bank) ;
@@ -139,9 +145,9 @@ daq_dta *daq_fcs::handle_raw()
 		
 		int size = caller->sfs->fileSize(full_name) ;	// this is bytes
 
-		LOG(DBG,"Got size %d",size) ;
+		LOG(DBG,"S%d:%d: Got size %d",1,r,size) ;
 		if(size <= 0) {
-			LOG(DBG,"%s: %s: not found in this event",name,str) ;
+			LOG(NOTE,"%s: %s: not found in this event",name,str) ;
 			return 0 ;
 		}
 
@@ -162,6 +168,110 @@ daq_dta *daq_fcs::handle_raw()
 
 	if(got_any) {
 		return raw ;
+	}
+	else return 0 ;
+
+}
+
+daq_dta *daq_fcs::handle_zs()
+{
+	char str[128] ;
+	u_int min_rdo = 1 ;
+	u_int max_rdo = 8 ;
+	char *full_name ;
+	int got_any = 0 ;
+
+	// bring in the bacon from the SFS file....
+	assert(caller) ;
+
+	zs->create(8*1024,"fcs_zs",rts_id,DAQ_DTA_STRUCT(daq_adc_tb)) ;
+
+	for(u_int r=min_rdo;r<=max_rdo;r++) {
+		sprintf(str,"%s/sec01/rdo%d/zs",sfs_name,r) ;
+		full_name = caller->get_sfs_name(str) ;
+
+		LOG(DBG,"full %s, str %s",full_name,str) ;
+
+		if(full_name==0) continue ;
+		
+		int bytes = caller->sfs->fileSize(full_name) ;	// this is bytes
+
+		LOG(DBG,"S%d:%d: Got size %d",1,r,bytes) ;
+		if(bytes <= 0) {
+			LOG(NOTE,"%s: %s: not found in this event",name,str) ;
+			continue ;
+		}
+
+
+
+		char *st = (char *)malloc(bytes) ;
+
+		caller->sfs->read(full_name, st, bytes) ;
+
+		LOG(DBG,"sfs read succeeded") ;
+
+		u_short *zs_start = (u_short *)st ;
+		u_short *zs_dta = zs_start ;
+		u_int *zs_int = (u_int *)st ;
+
+		LOG(NOTE,"... RDO %d, shorts %d",zs_int[0],zs_int[1]) ;
+
+		if(zs_int[0] != r) {
+			LOG(ERR,"Expect %d, read %d",r,zs_int[0]) ;
+			free(st) ;
+			continue ;
+		}
+
+		if(zs_int[1] == 0) {
+			free(st) ;
+			continue ;
+		}
+
+
+		u_short *zs_end = zs_dta + zs_int[1] ;
+
+		zs_dta += 2*2 ;
+
+		while(zs_dta < zs_end) {
+			int ch = *zs_dta++ ;
+			int seq_cou = *zs_dta++ ;
+			int a_cou = 0 ;
+
+			LOG(DBG,"Ch %d, seq %d: %d",ch,seq_cou,zs_end-zs_dta) ;
+
+			if(seq_cou==0) continue ;
+
+			got_any = 1 ;
+			
+			daq_adc_tb *a_t = (daq_adc_tb *) zs->request(8*1024) ;
+
+			for(int i=0;i<seq_cou;i++) {
+				int t_start = *zs_dta++ ;
+				int t_cou = *zs_dta++ ;
+				int t_end = t_start + t_cou ;
+
+				LOG(DBG,"..... t_start %d, t_cou %d",t_start,t_cou) ;
+
+				for(int t=t_start;t<t_end;t++) {
+					u_short d = *zs_dta++ ;
+
+					a_t[a_cou].adc = d ;
+					a_t[a_cou].tb = t ;
+					a_cou++ ;
+				}
+
+			}
+			
+			zs->finalize(a_cou,1,r,ch) ;
+		}
+		
+		free(st) ;
+	}
+
+	zs->rewind() ;
+
+	if(got_any) {
+		return zs ;
 	}
 	else return 0 ;
 
@@ -206,7 +316,7 @@ daq_dta *daq_fcs::handle_adc()
 			//	LOG(WARN,"RHIC %d, Trg %d",fcs_c.first_rhic_strobe_tick,fcs_c.trigger_tick) ;
 			//}
 
-			LOG(DBG,"... %d %d %d %d",fcs_c.tb_cou,fcs_c.sector,fcs_c.rdo,fcs_c.ch) ;
+
 			adc->finalize(fcs_c.tb_cou, dta->sec, dta->rdo, fcs_c.ch) ;			
 		}
 	}
@@ -321,18 +431,28 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	}
 	else {
 		if(t_lo==0) {
-			LOG(ERR,"Token-0 in triggered event 0x%04X: trg_cmd 0x%05X",hdr,trg_word) ;
-
-			u_short *d16 = (u_short *)d ;
-			for(int i=0;i<16;i++) {
-				LOG(TERR,"... %d = 0x%04X",i,d16[i]) ;
+			if(trg_cmd==5) {	// allowed for self-triggered!
+				t_lo = 4095 ;	// use this particular token!
 			}
+			else {
+				LOG(ERR,"Token-0 in triggered event 0x%04X: trg_cmd 0x%05X",hdr,trg_word) ;
 
-			goto err_end ;
+				u_short *d16 = (u_short *)d ;
+				for(int i=0;i<16;i++) {
+					LOG(TERR,"... %d = 0x%04X",i,d16[i]) ;
+				}
+
+				goto err_end ;
+			}
 		}
 		else {
-			if(trg_cmd != 4) {
-				LOG(WARN,"Unusal trg_cmd=0x%X in event 0x%04X",trg_cmd,hdr) ;
+			switch(trg_cmd) {
+			case 4 :
+			case 5 :
+				break ;
+			default :
+				LOG(WARN,"Unusual trg_cmd=0x%X in event 0x%04X",trg_cmd,hdr) ;
+				break ;
 			}
 		}
 	}
