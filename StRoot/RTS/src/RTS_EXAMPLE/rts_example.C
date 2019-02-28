@@ -113,8 +113,8 @@ int altro_override[256] ;
 extern int *tpx_altro_to_row_override ;
 
 
-static double det_raw_bytes[6] ;
-static u_int det_events ;
+//static double det_raw_bytes[6] ;
+//static u_int det_events ;
 
 
 static class daqReader *evp = 0 ;			// tha main guy
@@ -2631,10 +2631,10 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 			zs_found = 1  ;
 
 			if(do_print) {
-				printf("FCS ZS: [%d,%d,%d] %d ADCs\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
+				printf("FCS ZS: [Sector %d, RDO %d, Ch %2d] %d ADCs\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
 
 				for(u_int i=0;i<dd->ncontent;i++) {
-					printf(" %5d = 0x%X = %4u\n",dd->adc[i].tb,dd->adc[i].adc>>12,dd->adc[i].adc&0xFFF) ;
+					printf(" TB %5d, flags %d, ADC %4u\n",dd->adc[i].tb,dd->adc[i].adc>>12,dd->adc[i].adc&0xFFF) ;
 				}
 			}
 		}
