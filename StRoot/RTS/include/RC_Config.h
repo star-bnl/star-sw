@@ -303,6 +303,7 @@ class EvbChooser
 
 struct RHIC_Trigger {
     char marker[4];
+    int idx;           // which counter
     int type;          // 1 counter, 2 scaler
     int tm;            // 
     int source;        // 0 - 20 (evb),   100 (L0)
