@@ -32,6 +32,13 @@
  *      does not exist, then it is filled with zeros
  * Default is PicoCovMtxSkip.
  *
+ *\par Saving BEmc SMD hits (PicoBEmcSmdMode)
+ * To save the BEmc SMD eta/phi hits near a BHT2/3 trigger tower, one should specify
+ * PicoBEmcSmdMode with one of two words:
+ *   a) PicoBEmcSmdSkip - skip and don't write SMD hits for BHT2/3 triggers
+ *   b) PicoBEmcSmdWrite - save BEmc SMD hits within 1.5 tower radius of every BHT3
+ * Default is PicoBEmcSmdSkip.
+ *
  * Additional information can be found here:
  * <a href="https://drupal.star.bnl.gov/STAR/blog/gnigmat/picodst-format">The PicoDst format</a>
  */
@@ -70,6 +77,8 @@ class StPicoDstMaker : public StMaker {
   enum PicoVtxMode {NotSet=0, Default=1, Vpd=2, VpdOrDefault=3};
   /// Write or not write covariance matrix: 0-skip, 1-write
   enum PicoCovMtxMode {Skip=0, Write=1};
+  /// Write or not write the BEmc SMD hits associated with a BHT2/3 trigger: 0-skip, 1-write
+  enum PicoBEmcSmdMode {SmdSkip=0, SmdWrite=1};
 
   /// Constructor
   StPicoDstMaker(char const* name = "PicoDst");
@@ -116,6 +125,8 @@ class StPicoDstMaker : public StMaker {
   void setVtxMode(const PicoVtxMode vtxMode);
   /// Set to write or not to write covariant matrix
   void setCovMtxMode(const PicoCovMtxMode covMtxMode);
+  /// Set to write or not write BEmc Smd hits
+  void setBEmcSmdMode(const PicoBEmcSmdMode bemcSmdMode);
 
  private:
 
@@ -196,6 +207,8 @@ class StPicoDstMaker : public StMaker {
   Int_t  setVtxModeAttr();
   /// Set covariance matrix mode attributes
   Int_t  setCovMtxModeAttr();
+  /// Set BEmc Smd mode attributes
+  Int_t  setBEmcSmdModeAttr();
 
   /// Selects a primary vertex from `muDst` vertex collection according to the
   /// vertex selection mode `mVtxMode` specified by the user.
@@ -226,6 +239,8 @@ class StPicoDstMaker : public StMaker {
   PicoVtxMode mVtxMode;
   /// Covariant matrix not write/write mode
   PicoCovMtxMode mCovMtxMode;
+  /// BEmc Smd not write/write mode
+  PicoBEmcSmdMode mBEmcSmdMode;
 
   /// *.list - MuDst or picoDst
   TString   mInputFileName;
@@ -270,7 +285,7 @@ class StPicoDstMaker : public StMaker {
 
   /// Get CVS status
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPicoDstMaker.h,v 1.23 2018/11/09 15:20:26 gnigmat Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPicoDstMaker.h,v 1.24 2019/02/28 14:15:15 gnigmat Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -285,5 +300,6 @@ inline void StPicoDstMaker::setCompression(int comp) { mCompression = comp; }
 inline void StPicoDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 inline void StPicoDstMaker::setVtxMode(const PicoVtxMode vtxMode) { mVtxMode = vtxMode; }
 inline void StPicoDstMaker::setCovMtxMode(const PicoCovMtxMode covMtxMode) { mCovMtxMode = covMtxMode; }
+inline void StPicoDstMaker::setBEmcSmdMode(const PicoBEmcSmdMode bemcSmdMode) { mBEmcSmdMode = bemcSmdMode; }
 
 #endif
