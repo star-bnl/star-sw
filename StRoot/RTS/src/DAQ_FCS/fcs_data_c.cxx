@@ -9,17 +9,6 @@
 
 #include <rtsLog.h>
 
-#if 0
-#include <rtsSystems.h>
-#include <daqFormats.h>
-
-#include <SFS/sfs_index.h>
-
-#include <DAQ_READER/daqReader.h>
-#include <DAQ_READER/daq_dta.h>
-
-#endif
-
 #include "fcs_data_c.h"
 
 static inline u_int sw16(u_int d)
@@ -33,7 +22,166 @@ static inline u_int sw16(u_int d)
         return d ;
 }
 
+double fcs_data_c::fee_currents[8][32][3] ;	// 8 RDOs, 32 channel
+struct fcs_data_c::fcs_ped_t fcs_data_c::ped[8] ;	// 8 RDO
+u_int fcs_data_c::run_number ;
+u_int fcs_data_c::run_type ;
 
+
+
+	
+int fcs_data_c::zs_start(u_short *buff)
+{
+	int thr ;
+	int l_cou ;
+	
+	if(ch==32) {
+		thr = 0 ;
+		l_cou =1 ;
+	}
+	else {
+		thr = (int)(ped[rdo-1].mean[ch] + n_sigma * ped[rdo-1].rms[ch] + 0.5) ;
+		l_cou = n_cou ;
+	}
+
+	int t_cou = 0 ;
+	int t_start = 0 ;
+	int t_stop ;
+	int got_one = 0 ;
+
+	
+	for(int i=0;i<tb_cou;i++) {
+		short d = adc[i] & 0xFFF ;
+
+//		printf("CH %d: %d = %d < thr %d: t_start %d, t_cou %d\n",ch,i,d,thr,t_start,t_cou) ;
+
+		if(d <= thr) {	// datum needs to be greater than the threshold
+			if(t_cou >= l_cou) {
+				t_stop = t_start + t_cou ;
+
+				t_start -= n_pre ;
+				if(t_start < 0) t_start = 0 ;
+
+				t_stop += n_post ;
+				if(t_stop >= tb_cou) t_stop = (tb_cou-1) ;
+				
+				if(got_one==0) {	// first one
+					memset(mark,0,tb_cou) ;
+				}
+
+				got_one = 1;
+				for(;t_start<=t_stop;t_start++) {
+					mark[t_start] = 1 ;
+				}
+			}
+			t_cou = 0 ;
+		}
+		else {
+			if(t_cou==0) {
+				t_start = i ;				
+			}
+			t_cou++ ;
+		}
+
+	}
+
+
+
+	//finalize
+	if(t_cou >= l_cou) {
+		t_stop = t_start + t_cou ;
+
+		t_start -= n_pre ;
+		if(t_start < 0) t_start = 0 ;
+
+		t_stop += n_post ;
+		if(t_stop >= tb_cou) t_stop = (tb_cou-1) ;
+
+		if(got_one==0) {
+			memset(mark,0,tb_cou) ;
+		}
+
+		got_one = 1 ;
+				
+		for(;t_start<=t_stop;t_start++) {
+			mark[t_start] = 1 ;
+		}
+
+	}
+
+
+	if(got_one==0) return 0 ;	// nothing found
+
+	u_short *dp ;
+
+	dp = (u_short *)buff ;
+
+
+	
+	int i_ped ;
+
+	if(ch==32) i_ped = 0 ;
+	else i_ped = (int)(ped[rdo-1].mean[ch]+0.5) ;
+
+	int seq_cou = 0 ;
+
+	// and now go through the "mark"
+	u_short *dstart = dp ;
+
+	dstart[0] = ch ;
+	dstart[1] = 0 ;	// count of sequences
+
+	dp += 2 ;	// skip the header
+
+	u_short *t_cou_p = dp + 1 ;
+	t_cou = 0 ;
+
+	for(int i=0;i<tb_cou;i++) {
+		if(mark[i]) {
+//			printf("Mark at %d\n",i) ;
+
+			if(t_cou==0) {
+				*dp++ = i ;
+				t_cou_p = dp++ ;
+				t_start = i ;
+			}
+
+			short i_adc = adc[i] & 0xFFF ;
+			short fla = adc[i] >> 12 ;
+
+			i_adc -= i_ped ;
+			if(i_adc < 0) i_adc = 0 ;
+
+			i_adc |= (fla<<12) ;
+
+			*dp++ = i_adc ;
+
+			t_cou++ ;
+		}
+		else {
+			if(t_cou) {
+				*t_cou_p = t_cou ;
+				seq_cou++ ;
+//				printf("ZS: Ch %d:%d: seq %d: t_start %d, t_cou %d\n",rdo,ch,seq_cou,t_start,t_cou) ;
+			}
+			t_cou = 0 ;
+		}
+	}
+
+	if(t_cou) {
+		*t_cou_p = t_cou ;
+		seq_cou++ ;
+//		printf("ZS: Ch %d:%d: seq %d(last): t_start %d, t_cou %d\n",rdo,ch,seq_cou,t_start,t_cou) ;
+	}
+
+	dstart[1] = seq_cou ;
+
+//	printf("... ZS is now %d shorts\n",(int)(dp-dstart)) ;
+
+	return dp-dstart ;	// shorts
+
+
+}
 
 
 /*******************************/
@@ -52,7 +200,7 @@ int fcs_data_c::start(u_short *d16, int shorts)
 
 	rhic_start = 0;
 	ch_count = 0 ;
-
+	ch_mask_seen = 0 ;
 
 	
 //	for(int i=0;i<16;i++) {
@@ -144,14 +292,11 @@ int fcs_data_c::hdr_event()
 {
 	u_short hdr_board_id ;
 
-#if 0
-	int cou ;	
-	cou = dta_shorts - 8 + 4 ;
-	if(cou > 10000) cou = 10000 ;
-	for(int i=0;i<cou;i++) {
-		LOG(TERR,"...data9802: %d = 0x%04X",i,dta_p[i]) ;
-	}
-#endif 
+
+//	for(int i=0;i<32;i++) {
+//		LOG(TERR,"... %d 0x%04X",i,dta_p[i]) ;
+//	}
+
 
 	//I will need the board id as a sector/id combo
 	hdr_board_id = dta_p[3] ;
@@ -197,7 +342,7 @@ int fcs_data_c::hdr_event()
 				else {
 					if(c=='\n') {
 						ctmp[cou] = 0 ;
-						LOG(TERR,"0x%X: \"%s\"",board_id,ctmp) ;
+						LOG(TERR,"S%d:%d:%d: \"%s\"",sector,rdo,events,ctmp) ;
 						cou = 0 ;
 					}
 					else {
@@ -225,6 +370,16 @@ int fcs_data_c::hdr_event()
 		}
 
 	}
+	else if(dta_p[0]==0xFFFF && dta_p[1]==0xFFFF) {	// bug: end-of-ascii without ascii
+		LOG(WARN,"ASCII bug") ;
+		dta_p += 2 ;
+	}
+#if 0
+	else if(dta_p[0]==0xFFFF) {
+		LOG(ERR,"BAD 0xFFFF bug") ;
+		dta_p++ ;
+	}
+#endif
 
 //	LOG(TERR,"... 0x%X 0x%X",dta_p[0],dta_p[1]) ;
 
@@ -235,6 +390,23 @@ int fcs_data_c::hdr_event()
 } 
 
 
+// how==0 : OK
+// else: some error
+int fcs_data_c::event_end(int how)
+{
+	if(!trgd_event) return 0 ;
+
+	if(ch_mask_seen != 0x1FFFFFFFFLL) {
+		LOG(ERR,"event_end: %d: mask not-complete 0x%llX",events,ch_mask_seen) ;
+	}
+
+	if(ch_count != 33) {
+		LOG(ERR,"event_end: %d: chs found %d",events,ch_count) ;
+	}
+
+	return 0 ;
+}
+
 // this gets called over and over again for each channel!
 int fcs_data_c::event()
 {
@@ -243,13 +415,24 @@ int fcs_data_c::event()
 		return event_pre_fy19() ;
 	}
 
-	if(!trgd_event) return 0 ;
-	
-	if(dta_p[0]==0xE800) return 0 ;	// end of event
+	if(!trgd_event) {
+		event_end(0) ;
+		return 0 ;
+	}
 
+	if(dta_p[0]==0xE800) {
+		event_end(0) ;
+		return 0 ;	// end of event
+	}
 
-
-
+	// this is pretty critical...
+//	if(*dta_p == 0xFFFF) {
+	while(*dta_p == 0xFFFF) {
+		LOG(ERR,"S%d:%d: events %d: BUG 0xFFFF",sector,rdo,events) ;
+		//event_end(1) ;
+		//return 0 ;
+		dta_p++ ;
+	}
 
 	// from class
 	tb_cou = 0 ;
@@ -273,8 +456,9 @@ int fcs_data_c::event()
 		u_int rhic_cou ;
 		u_int board ;
 		u_char complain =  0 ;
+		u_short *dbg_h = dta_p ;
 
-		h[0] = *dta_p++ ;
+		h[0] = *dta_p++ ;	// 0x20cc
 		h[1] = *dta_p++ ;
 		h[2] = *dta_p++ ;
 
@@ -284,28 +468,43 @@ int fcs_data_c::event()
 		trg_word = ((h[2]&0xFF)<<12)|(h[1]) ;
 		rhic_cou = h[2]>>8 ;
 
+		//complain = 1 ;
 		if(realtime && (board_id_xpect != board)) complain = 1 ;
-		
+
+		if(ch>32) complain = 1 ;
+		else {
+			if(ch_mask_seen & (1LL<<ch)) {
+				LOG(ERR,"event %d: ch duplicate %d",events,ch) ;
+				complain = 1 ;
+			}
+			ch_mask_seen |= (1LL<<ch) ;
+		}
+
 		if((hdr_trg_word!=trg_word)|(rhic_cou_xpect!=rhic_cou)) {
 			complain = 1 ;
 		}
 
 		if(complain) {
-			LOG(ERR,"Evt %d, ch %d[%d]: 0x%X 0x%05X %d expected: 0x%X 0x%05X %d seen",events,ch,ch_count,
+			LOG(ERR,"S%d:%d: Evt %d, ch %d[%d]: 0x%X 0x%05X %d expected: 0x%X 0x%05X %d seen",sector,rdo,
+			    events,ch,ch_count,
 			    board_id_xpect,hdr_trg_word,rhic_cou_xpect,
 			    board,trg_word,rhic_cou) ;
+
+			LOG(ERR,"   0x%04X 0x%04X 0x%04X 0x%04X",dbg_h[-1],dbg_h[0],dbg_h[1],dbg_h[2]) ;
 
 		}
 	
 		while(dta_p<dta_stop) {
 			u_short d = *dta_p++ ;
 
-			//printf("... %d = 0x%04X [%u]\n",tb_cou,d,d) ;
+			//LOG(TERR,".... ch %d = %d = 0x%X",ch,tb_cou,d) ;
 
-			//if(tb_cou==0) LOG(TERR,".... ch %d = %d = 0x%X",ch,tb_cou,d) ;
+			if((d & 0x8000) && (d != 0xFFFF)) {
+				LOG(ERR,"... ch %d: tb_cou %d: 0x%04X",ch,tb_cou,d) ;
+			}
 
 			if(d==0xFFFF) {		// last item of adc_single
-				//LOG(TERR,"... tb_cou %d",tb_cou) ;
+				//LOG(TERR,"... tb_cou %d: 0x%04X",tb_cou,d) ;
 				break ;
 			}
 
@@ -315,16 +514,16 @@ int fcs_data_c::event()
 					//LOG(TERR,"... first rhic strobe at %d",tb_cou) ;
 				}
 			}
-			if(d & 0x8000) {
+			if(d & 0x4000) {
 				if(trigger_tick < 0) {
 					trigger_tick = tb_cou ;
 					//LOG(TERR,"... trigger tick at %d",tb_cou) ;
 				}
 			}
 
-//			accum(ch,tb_cou,d&0xFFF) ;
 			if(accum(ch,tb_cou,d)<0) {
 				LOG(ERR,"Event too big, ch %d, tb %d",ch,tb_cou) ;
+				event_end(1) ;
 				return 0 ;
 			}
 
@@ -342,8 +541,254 @@ int fcs_data_c::event()
 
 	//LOG(TERR,"0x%08X 0x%08X 0x%08X: 0x%08X",dta_p[0],dta_p[1],dta_p[2],rhic_end) ;	
 
+	event_end(0) ;
 	return 0 ;
 }
+
+
+int fcs_data_c::accum(u_int ch, u_int tb, u_short sadc)
+{
+	//protect structures
+	if(tb>=(sizeof(adc)/sizeof(adc[0]))) {
+		return -1 ;
+	}
+
+	adc[tb] = sadc ;	//but store the full data, with flags
+
+	sadc &= 0xFFF ;	//zap the flags
+
+	if(ch>=32) return 0 ;	// skip non-ADC channels
+
+	switch(run_type) {
+	case 1 :
+	case 5 :
+		ped[rdo-1].mean[ch] += (double)sadc ;
+		ped[rdo-1].rms[ch] += (double)sadc * (double)sadc ;
+		ped[rdo-1].cou[ch]++ ;
+		break ;
+	}
+
+	return 0 ;
+
+}
+
+
+void fcs_data_c::run_start(u_int run, int type)
+{
+	run_number = run ;
+	run_type = type ;
+
+	events = 0 ;
+
+	switch(run_type) {
+	case 1 :
+	case 5 :
+		ped_start() ;
+		break ;
+	}
+}
+
+void fcs_data_c::run_stop()
+{
+	switch(run_type) {
+	case 1 :
+	case 5 :
+		ped_stop() ;
+		break ;
+	}
+
+}
+
+void fcs_data_c::ped_start()
+{
+	int i = rdo - 1 ;
+
+	memset(ped[i].mean,0,sizeof(ped[i].mean)) ;
+	memset(ped[i].rms,0,sizeof(ped[i].rms)) ;
+	memset(ped[i].cou,0,sizeof(ped[i].cou)) ;
+
+
+}
+
+
+void fcs_data_c::ped_stop()
+{
+
+	for(int c=0;c<32;c++) {
+		if(ped[rdo-1].cou[c]) {
+			ped[rdo-1].mean[c] /= ped[rdo-1].cou[c] ;
+			ped[rdo-1].rms[c] /= ped[rdo-1].cou[c] ;
+
+			ped[rdo-1].rms[c] = sqrt(ped[rdo-1].rms[c]-ped[rdo-1].mean[c]*ped[rdo-1].mean[c]) ;
+		}
+		else {
+			ped[rdo-1].mean[c] = -1.0 ;
+		}
+
+	}
+
+	//pedestal dump...
+	FILE *pedf ;
+
+	time_t now = time(0) ;
+	struct tm *tm = localtime(&now) ;
+
+	char fname[128] ;
+
+	if(run_number) {
+		sprintf(fname,"/RTScache/fcs_pedestals_s%02d_r%d_%08u.txt",sector,rdo,run_number) ;
+	}
+	else {
+		sprintf(fname,"/RTScache/fcs_pedestals_%d_%d_%d_%d_%d.txt",
+			tm->tm_year+1900,
+			tm->tm_mon+1,
+			tm->tm_mday,
+			tm->tm_hour,
+			tm->tm_min) ;
+	}
+
+	pedf = fopen(fname,"w") ;
+	if(pedf==0) {
+		LOG(ERR,"Can't open %s [%s]",fname,strerror(errno)) ;
+		return ;
+	}
+
+	fprintf(pedf,"#Sector %2d, RDO %d\n",sector,rdo) ;
+	fprintf(pedf,"#RUN %u\n",run_number) ;
+	fprintf(pedf,"#TIME %u\n",(unsigned int)now) ;
+	char *ctm = ctime(&now) ;
+	fprintf(pedf,"#DATE %s",ctm) ;
+	
+	fprintf(pedf,"\n") ;
+
+	for(int c=0;c<32;c++) {
+		LOG(TERR,"PEDs: S%02d:%d: %2d %.3f %.3f %.3f %.3f %.3f",sector,rdo,c,ped[rdo-1].mean[c],ped[rdo-1].rms[c],
+			fee_currents[rdo-1][c][0],fee_currents[rdo-1][c][1],fee_currents[rdo-1][c][2]) ;
+
+		
+		fprintf(pedf,"%2d %f %f %.3f %.3f %.3f\n",c,ped[rdo-1].mean[c],ped[rdo-1].rms[c],
+			fee_currents[rdo-1][c][0],fee_currents[rdo-1][c][1],fee_currents[rdo-1][c][2]) ;
+
+	}
+
+	fclose(pedf) ;
+
+}
+
+int fcs_data_c::gain_from_cache(const char *fname)
+{
+	char ff[128] ;
+
+	if(id != 0) return 0 ;	// just ID0
+
+
+	// set defaults!
+	for(int i=0;i<8;i++) {
+		for(int c=0;c<32;c++) {
+			ped[i].gain[c] = 1.0 ;
+			ped[i].i_gain[c] = (1<<6) ;
+		}
+	}
+
+
+	if(fname==0) {
+		sprintf(ff,"/RTS/conf/fcs/fcs_gains.txt") ;
+	}
+	else {
+		strcpy(ff,fname) ;
+	}
+
+	FILE *f = fopen(ff,"r") ;
+	if(f==0) {
+		LOG(ERR,"Can't open %s [%s]",ff,strerror(errno)) ;
+		return -1 ;
+	}
+
+	LOG(INFO,"S%d: opened gains %s",sector,ff) ;
+
+
+	while(!feof(f)) {
+		char buff[128] ;
+
+		if(fgets(buff,sizeof(buff),f)==0) continue ;
+
+		if(buff[0]=='#') continue ;
+		if(buff[0]==0) continue ;
+
+		int sec, rdo, ch ;
+		float gain ;
+
+		int ret = sscanf(buff,"%d %d %d %f",&sec,&rdo,&ch,&gain) ;
+
+		if(ret!=4) continue ;
+
+		if(sec != sector) continue ;
+
+		ped[rdo-1].gain[ch] = gain ;
+		ped[rdo-1].i_gain[ch] = (int)(64.0 * gain + 0.5) ;
+			
+		LOG(NOTE,"Gains S%d:%d:%d = %d",sector,rdo,ch,ped[rdo-1].i_gain[ch]) ;
+		
+	}
+
+	fclose(f) ;
+
+	return 0 ;
+
+}
+
+int fcs_data_c::ped_from_cache(const char *fname)
+{
+	char ff[128] ;
+
+
+
+	if(fname==0) {
+		sprintf(ff,"/RTScache/fcs_pedestals_s%02d_r%d.txt",sector,rdo) ;
+	}
+	else {
+		strcpy(ff,fname) ;
+	}
+
+	FILE *f = fopen(ff,"r") ;
+	if(f==0) {
+		LOG(ERR,"Can't open %s [%s]",ff,strerror(errno)) ;
+		return -1 ;
+	}
+
+	LOG(INFO,"S%d:%d: opened pedestals %s",sector,rdo,ff) ;
+
+	while(!feof(f)) {
+		char buff[128] ;
+
+		if(fgets(buff,sizeof(buff),f)==0) continue ;
+
+		if(buff[0]=='#') continue ;
+		if(buff[0]==0) continue ;
+
+		int c ;
+		float p,r,d ;
+
+		int ret = sscanf(buff,"%d %f %f %f %f %f",&c,&p,&r,&d,&d,&d) ;
+
+		if(ret!=6) continue ;
+
+		ped[rdo-1].mean[c] =  p ;
+		ped[rdo-1].rms[c] = r ;
+		ped[rdo-1].cou[c] = 0 ;
+
+		ped[rdo-1].i_ped[c] = (u_short)(p*8.0+0.5) ;
+
+//		ped[rdo-1].f_gain[c] = 1.0 ;
+//		ped[rdo-1].gain[c] = (1<<6) ;
+		
+	}
+
+	fclose(f) ;
+
+	return 0 ;
+}
+
 
 int fcs_data_c::event_pre_fy19()
 {
@@ -439,113 +884,3 @@ int fcs_data_c::event_pre_fy19()
 	return 0 ;
 }
 
-
-int fcs_data_c::accum(int ch, int tb, u_short sadc)
-{
-	if((u_int)tb>=sizeof(adc)/sizeof(adc[0])) {
-		return -1 ;
-	}
-
-	adc[tb] = sadc ;	//but store the full data, with flags
-
-	sadc &= 0xFFF ;	//zap the flags
-
-	if((run_type==1) & (ch<32)) {
-		//if(tb==0) LOG(TERR,"Accum: ch %d = %d",ch,sadc) ;
-
-		ped.mean[ch] += (double)sadc ;
-		ped.rms[ch] += (double)sadc * (double)sadc ;
-		ped.cou[ch]++ ;
-	}
-
-	return 0 ;
-
-}
-
-
-void fcs_data_c::run_start(u_int run, int type)
-{
-	run_number = run ;
-	run_type = type ;
-
-	events = 0 ;
-	ped_start() ;
-}
-
-void fcs_data_c::run_stop()
-{
-	if(run_type==1) ped_stop() ;
-
-}
-
-void fcs_data_c::ped_start()
-{
-	memset(&ped,0,sizeof(ped)) ;
-}
-
-
-void fcs_data_c::ped_stop()
-{
-
-	for(int c=0;c<32;c++) {
-		if(ped.cou[c]) {
-			ped.mean[c] /= ped.cou[c] ;
-			ped.rms[c] /= ped.cou[c] ;
-
-			ped.rms[c] = sqrt(ped.rms[c]-ped.mean[c]*ped.mean[c]) ;
-		}
-		else {
-			ped.mean[c] = -1.0 ;
-		}
-
-	}
-
-		//pedestal dump...
-		FILE *pedf ;
-
-		time_t now = time(0) ;
-		struct tm *tm = localtime(&now) ;
-
-		char fname[128] ;
-
-		if(run_number) {
-			sprintf(fname,"/RTScache/fcs_pedestals_s%02d_r%d_%08u.txt",sector,rdo,run_number) ;
-		}
-		else {
-			
-			sprintf(fname,"/RTScache/fcs_pedestals_%d_%d_%d_%d_%d.txt",
-				tm->tm_year+1900,
-				tm->tm_mon+1,
-				tm->tm_mday,
-				tm->tm_hour,
-				tm->tm_min) ;
-		}
-
-		pedf = fopen(fname,"w") ;
-		if(pedf==0) {
-			LOG(ERR,"Can't open %s [%s]",fname,strerror(errno)) ;
-			return ;
-		}
-
-		fprintf(pedf,"#Sector %2d, RDO %d\n",sector,rdo) ;
-		fprintf(pedf,"#RUN %u\n",run_number) ;
-		fprintf(pedf,"#TIME %u\n",(unsigned int)now) ;
-		char *ctm = ctime(&now) ;
-		fprintf(pedf,"#DATE %s",ctm) ;
-		
-		fprintf(pedf,"\n") ;
-
-		for(int c=0;c<32;c++) {
-			LOG(TERR,"PEDs: S%02d:%d: %2d %.3f %.3f %.3f %.3f %.3f",sector,rdo,c,ped.mean[c],ped.rms[c],
-				fee_currents[c][0],fee_currents[c][1],fee_currents[c][2]) ;
-
-		
-			fprintf(pedf,"%2d %f %f %.3f %.3f %.3f\n",c,ped.mean[c],ped.rms[c],
-				fee_currents[c][0],fee_currents[c][1],fee_currents[c][2]) ;
-
-		}
-
-		fclose(pedf) ;
-
-
-}
