@@ -613,6 +613,9 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 	char s_mask[24] ;
 	u_int tot_pixels = 0 ;
 	daq_dta *dd ;
+	u_int sec_cou[24] ;
+
+	memset(sec_cou,0,sizeof(sec_cou)) ;
 
 	//tpx_rdo_override = 3 ;
 
@@ -739,7 +742,7 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 			cld_found = 1 ;
 
 			s_mask[dd->sec-1]=1 ;
-
+			sec_cou[dd->sec-1] += dd->ncontent ;
 
 			if(do_print) {
 				printf("TPX: sec %02d, row %2d: %3d clusters (evt %d)\n",dd->sec,dd->row,dd->ncontent,good) ;
@@ -817,6 +820,10 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 
 	if(cld_found) {
 		strcat(fstr,"CLD ") ;
+//		for(int i=0;i<24;i++) {
+//			printf("%d 1 %d %d\n",good,i+1,sec_cou[i]) ;
+//			LOG(TERR,"TPX %d %d",i+1,sec_cou[i]) ;
+//		}
 	}
 	if(adc_found) {
 		strcat(fstr,"ADC " ) ;
@@ -2406,7 +2413,7 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 
 
 
-#if 1
+#if 0
 		// In SAMPA form
 		dd = rdr->det("itpc")->get("sampa",s) ;
 		if(dd) {
@@ -2441,7 +2448,7 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 
 				pixels += dd->ncontent ;
 
-				sec[dd->sec] += dd->ncontent ;
+
 
 				if(do_print) {
 					if(dd->ncontent) printf("ITPC ADC: sector %2d, row %2d, pad %3d: %3d timebins\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
@@ -2462,6 +2469,8 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 
 				clusters += dd->ncontent ;
 				
+
+				sec[dd->sec] += dd->ncontent ;
 
 				if(do_print) {
 					printf("ITPC CLD: sector %2d, row %2d: %3d clusters\n",dd->sec,dd->row,dd->ncontent) ;
@@ -2540,7 +2549,13 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 //			LOG(TERR,"   %2d = %d",i,sec[i]) ;
 //		}
 	}
-	if(cld_found) strcat(fstr,"CLD ") ;
+	if(cld_found) {
+		strcat(fstr,"CLD ") ;
+//		for(int i=1;i<=24;i++) {
+//			printf("%d 2 %d %d\n",good,i,sec[i]) ;
+//			LOG(TERR,"   %2d = %d",i,sec[i]) ;
+//		}
+	}
 	if(ped_found) strcat(fstr,"PEDRMS ") ;
 
 	if(found) {
@@ -2558,12 +2573,12 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 static int fcs_doer(daqReader *rdr, const char *do_print)
 {
 	int raw_found = 0 ;
+	int zs_found = 0 ;
+
 	daq_dta *dd ;
 
 	if(strcasestr(do_print,"fcs")) ;	// leave as is...
 	else do_print = 0 ;
-
-
 	
 
 #if 0
@@ -2610,9 +2625,37 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 
 	}
 
+	dd = rdr->det("fcs")->get("zs") ;
+	if(dd) {
+		while(dd->iterate()) {
+			zs_found = 1  ;
+
+			if(do_print) {
+				printf("FCS ZS: [%d,%d,%d] %d ADCs\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
+
+				for(u_int i=0;i<dd->ncontent;i++) {
+					printf(" %5d = 0x%X = %4u\n",dd->adc[i].tb,dd->adc[i].adc>>12,dd->adc[i].adc&0xFFF) ;
+				}
+			}
+		}
+	}
+
+	char fstr[128] ;
+	fstr[0] = 0 ;
+
+
+
+	if(zs_found) {
+		strcat(fstr,"ZS") ;
+	}
 
 	if(raw_found) {
-		LOG(INFO,"FCS found") ;
+		if(zs_found) strcat(fstr," ") ;
+		strcat(fstr,"ADC") ;
+	}
+
+	if(raw_found || zs_found) {
+		LOG(INFO,"FCS found [%s]",fstr) ;
 	}
 
 	return raw_found ;
