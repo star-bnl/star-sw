@@ -79,7 +79,7 @@ use RunDAQ;
 use CRSQueues;
 
 
-$ThisYear = 2018;                 # Block to consider. Completely artificial
+$ThisYear = 2019;                 # Block to consider. Completely artificial
                                   # and used to preserve older options in if
                                   # block along with current option.
 $HPSS     = 1;                    # turn to 0 for UNIX staging only
@@ -484,7 +484,8 @@ if ( $ThisYear == 2005 ){
           $ThisYear == 2015 ||
           $ThisYear == 2016 ||  
           $ThisYear == 2017 ||
-          $ThisYear == 2018 ) {
+          $ThisYear == 2018 ||
+          $ThisYear == 2019 ) {
     $TREEMODE= 1;
     $LIB     = "dev";
 
@@ -612,10 +613,14 @@ if ( $ThisYear == 2005 ){
    } elsif ($ThisYear == 2018) {
         $DCHAIN{"AuAu"} = $DCHAIN{"AuZr"} = $DCHAIN{"ZrZr"} = $DCHAIN{"RuRu"} = "P2018a,StiCA,btof,mtd,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeak3D,-hitfilt";
 
-   } else {
-        $DCHAIN{"PPPP"} =
-            "P2016,btof,mtd,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt";
-        $DCHAIN{"AuAu"} = "P2016,btof,mtd,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt";
+   } elsif ($ThisYear == 2019) {
+       # can eventualy move btof/mtd to the base chain later
+       $DCHAIN{"AuAu"} = "P2019a,StiCA,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeakFull,-OPr13,OPr40,-hitfilt,QAalltrigs";
+
+   #} else {
+   #     $DCHAIN{"PPPP"} =
+   #         "P2016,btof,mtd,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt";
+   #     $DCHAIN{"AuAu"} = "P2016,btof,mtd,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt";
     }
 
 
@@ -1967,7 +1972,7 @@ sub Submit
     }
 
     # little hack for BES in 2018 
-    if ( $trgsn =~ m/fixedtarget/i && $ThisYear == 2018){
+    if ( $trgsn =~ m/fixedtarget/i && $ThisYear >= 2018){
 	$chain .= ",-beamline3D";
 	print "$SELF : Altering chain to $chain\n";
     }
@@ -2242,7 +2247,7 @@ __EOF__
                 `/bin/mv $jfile ../archive`; 
 		    # Mark it so we can set status 1 later
 #		    print "$SELF : Successful submission of $file ($queue,$spill) on ".
-			localtime()."\n";
+#			localtime()."\n";
 
 		    rdaq_set_execdate($obj,undef,$file);  # set execdate, more or less meaning submit
 		    rdaq_set_message($SSELF,"Submitted",$file);
