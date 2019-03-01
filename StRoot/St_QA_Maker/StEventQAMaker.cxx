@@ -114,6 +114,7 @@ Int_t StEventQAMaker::Init() {
 
   qaEvents = 0;
   if (printTpcHits) allTrigs = kTRUE;
+allTrigs=kTRUE;
   return StQAMakerBase::Init();
 }
 
@@ -329,8 +330,10 @@ Int_t StEventQAMaker::Make() {
   }  // allTrigs
 
   // some identified StQAHistSetType values
-  if (run_year >=19) {
-    if (realData) histsSet = StQA_run18; // for now, everything from run17 on uses this set
+  if (run_year >=20) {
+    if (realData) histsSet = StQA_run19; // for now, everything from run19 on uses this set
+  } else if (run_year >=19) {
+    if (realData) histsSet = StQA_run18; // for now, everything from run18 on uses this set
   } else if (run_year >=18) {
     if (realData) histsSet = StQA_run17; // for now, everything from run17 on uses this set
   } else if (run_year >=16) {
@@ -380,6 +383,7 @@ Int_t StEventQAMaker::Make() {
       case (StQA_run15):
       case (StQA_run17):
       case (StQA_run18):
+      case (StQA_run19):
       case (StQA_AuAu) :
       case (StQA_dAu)  : break;
       default: nEvClasses=1; evClasses[0] = 1;
@@ -474,7 +478,8 @@ void StEventQAMaker::MakeHistGlob() {
     if (globtrk->flag() <= 0) continue;
 
     StTrackDetectorInfo* detInfo = globtrk->detectorInfo();
-    if (map.hasHitInDetector(kTpcId) && PCThits(detInfo)) continue;
+    if ((map.hasHitInDetector(kTpcId) || map.hasHitInDetector(kiTpcId))
+        && PCThits(detInfo)) continue;
 
     StTrackGeometry* geom = globtrk->geometry();
     StDcaGeometry* dcageom = ((StGlobalTrack*) globtrk)->dcaGeometry();
@@ -614,11 +619,28 @@ void StEventQAMaker::MakeHistGlob() {
       
       // TPC padrow histogram
       Int_t minpadrow = 0;
-      while (minpadrow < 72) {
-        minpadrow++;
-        if ((minpadrow <= 45 && map.hasHitInRow(kTpcId,minpadrow)) ||
-            map.hasHitInRow(kiTpcId,minpadrow))
-          break;
+      if (hitsAvail) {
+        minpadrow = 999;
+        StPtrVecHit tpc_hits = detInfo->hits(kTpcId);
+        for (UInt_t k=0;k<tpc_hits.size();k++) {
+          StTpcHit* hit = (StTpcHit*) (tpc_hits[k]);
+          if ((Int_t) hit->padrow() < minpadrow) minpadrow = (Int_t) hit->padrow();
+        }
+      } else {
+        if (histsSet>=StQA_run19) {
+          while (minpadrow < 72) {
+            minpadrow++;
+            if ((minpadrow <= 40 && map.hasHitInRow(kiTpcId,minpadrow)) ||
+                (minpadrow > 40 && map.hasHitInRow(kTpcId,minpadrow-27)))
+              break;
+          }
+        } else {
+          // won't work for sector 20 in Run 18 if iTPC tracking is on!
+          while (minpadrow < 45) {
+            minpadrow++;
+            if (map.hasHitInRow(kTpcId,minpadrow)) break;
+          }
+        }
       }
       hists->m_glb_padfT->Fill(minpadrow);
       
@@ -1049,7 +1071,8 @@ void StEventQAMaker::MakeHistPrim() {
       if (primtrk->flag()>0) {
         StTrackDetectorInfo* detInfo = primtrk->detectorInfo();
         const StTrackTopologyMap& map=primtrk->topologyMap();
-        if (map.hasHitInDetector(kTpcId) && PCThits(detInfo)) continue;
+        if ((map.hasHitInDetector(kTpcId) || map.hasHitInDetector(kiTpcId))
+            && PCThits(detInfo)) continue;
 
         StTrackGeometry* geom = primtrk->geometry();
 	// due to variation on "kalman fitting" of primary tracks
@@ -2857,8 +2880,11 @@ void StEventQAMaker::MakeHistEPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.134 2018/07/06 22:13:04 smirnovd Exp $
+// $Id: StEventQAMaker.cxx,v 2.135 2019/03/01 19:40:37 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.135  2019/03/01 19:40:37  genevb
+// Some minor Run 19 preparations, including first padrow hit
+//
 // Revision 2.134  2018/07/06 22:13:04  smirnovd
 // [Cosmetic] Changes in white space
 //
