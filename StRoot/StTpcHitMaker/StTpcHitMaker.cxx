@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.75 2019/02/14 17:40:39 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.76 2019/03/01 15:50:20 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.76  2019/03/01 15:50:20  fisyak
+ * Fix bug. 3385
+ *
  * Revision 1.75  2019/02/14 17:40:39  fisyak
  * Fix selection for row number (Thanks Iraklii for checking)
  *
@@ -449,7 +452,7 @@ Int_t StTpcHitMaker::Make() {
       Int_t Nrows = daqTpcTable->GetNRows();
       //      if (! Nrows) continue;
       kReaderType = (EReaderType) k;
-      //      if (kReaderType > kLegacyTpx) kMin = kLegacyTpx;
+      //if (kReaderType > kLegacyTpx) kMin = kLegacyTpx;
       while (daqTpcTable) {
 	if (Sector() == sector) {
 	  if (Debug()/100 > 0) {
@@ -1331,6 +1334,7 @@ THnSparseF *StTpcHitMaker::CompressTHn(THnSparseF *hist, Double_t compress) {
 Int_t StTpcHitMaker::RowNumber(){
   Int_t sector = DaqDta()->Sector();
   Int_t row = DaqDta()->Row();
+  if (row == 0 && (kReaderType == kLegacyTpc || kReaderType == kLegacyTpx)) row = 1;
   if (kReaderType != kStandardiTPC) {
     if (St_tpcPadConfigC::instance()->iTpc(sector) && row > 13) {
       row += 41-14;
