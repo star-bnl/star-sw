@@ -5,7 +5,7 @@
  * This class allows to read picoDst.root file or a list of files
  * that contain picoDst and sets up pointers to the picoDst, and
  * certain TClonesArrays that keep Event, Track, BTofHit, etc...
- * One can also turn on or off certain branches using the 
+ * One can also turn on or off certain branches using the
  * SetStatus method.
  *
  * \author Grigory Nigmatkulov
@@ -44,17 +44,17 @@ class StPicoDstReader : public TObject {
   TChain *chain();
   /// Return pointer to the current TTree
   TTree *tree();
-  
+
   /// Set enable/disable branch matching when reading picoDst
   void SetStatus(const Char_t* branchNameRegex, Int_t enable);
 
   /// Calls openRead()
   void Init();
   /// Read next event in the chain
-  Bool_t ReadPicoEvent(Long64_t iEvent);
+  Bool_t readPicoEvent(Long64_t iEvent);
   /// Close files and finilize
   void Finish();
-  
+
  private:
 
   /// Name of the inputfile (or of the inputfiles.list)
@@ -62,7 +62,7 @@ class StPicoDstReader : public TObject {
 
   /// Turn off streamers
   void streamerOff();
-  
+
   /// Create TClonesArray of pico classes and set them to picoDst
   void createArrays();
   /// Clear all TClonesArrays with picoDst classes

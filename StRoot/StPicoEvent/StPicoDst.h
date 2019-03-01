@@ -31,6 +31,8 @@ class StPicoBEmcPidTraits;
 class StPicoBTofPidTraits;
 class StPicoMtdPidTraits;
 class StPicoTrackCovMatrix;
+class StPicoBEmcSmdEHit;
+class StPicoBEmcSmdPHit;
 
 //_________________
 class StPicoDst {
@@ -83,6 +85,10 @@ class StPicoDst {
   static StPicoMtdPidTraits* mtdPidTraits(Int_t i) { return (StPicoMtdPidTraits*)picoArrays[StPicoArrays::MtdPidTraits]->UncheckedAt(i); }
   /// Return pointer to i-th track covariance matrix
   static StPicoTrackCovMatrix* trackCovMatrix(Int_t i) { return (StPicoTrackCovMatrix*)picoArrays[StPicoArrays::TrackCovMatrix]->UncheckedAt(i); }
+  /// Return pointer to i-th BEMC SMD eta hit
+  static StPicoBEmcSmdEHit* bemcSmdEHit(Int_t i) { return (StPicoBEmcSmdEHit*)picoArrays[StPicoArrays::BEmcSmdEHit]->UncheckedAt(i); }
+  /// Return pointer to i-th BEMC SMD phi hit
+  static StPicoBEmcSmdPHit* bemcSmdPHit(Int_t i) { return (StPicoBEmcSmdPHit*)picoArrays[StPicoArrays::BEmcSmdPHit]->UncheckedAt(i); }
 
   /// Return number of tracks
   static UInt_t numberOfTracks() { return picoArrays[StPicoArrays::Track]->GetEntries(); }
@@ -110,6 +116,11 @@ class StPicoDst {
   static UInt_t numberOfMtdPidTraits() { return picoArrays[StPicoArrays::MtdPidTraits]->GetEntries(); }
   /// Return number of track covariance matrices
   static UInt_t numberOfTrackCovMatrices() { return picoArrays[StPicoArrays::TrackCovMatrix]->GetEntries(); }
+  /// Return number of BEMC SMD eta hits
+  static UInt_t numberOfBEmcSmdEHits() { return picoArrays[StPicoArrays::BEmcSmdEHit]->GetEntries(); }
+  /// Return number of BEMC SMD phi hits
+  static UInt_t numberOfBEmcSmdPHits() { return picoArrays[StPicoArrays::BEmcSmdPHit]->GetEntries(); }
+
 
   /// Print information
   void print() const;
@@ -136,6 +147,10 @@ class StPicoDst {
 #endif /* __TFG__VERSION__ */
   /// Print track covariance matrix info
   static void printTrackCovMatrices();
+  /// Print BEMC SMD eta info
+  static void printBEmcSmdEHits();
+  /// Print BEMC SMD phi info
+  static void printBEmcSmdPHits();
 
  private:
 #ifdef __TFG__VERSION__

@@ -26,6 +26,8 @@
 #include "StPicoBTofPidTraits.h"
 #include "StPicoMtdPidTraits.h"
 #include "StPicoTrackCovMatrix.h"
+#include "StPicoBEmcSmdEHit.h"
+#include "StPicoBEmcSmdPHit.h"
 #include "StPicoArrays.h"
 #include "StPicoDst.h"
 
@@ -38,7 +40,7 @@ ClassImp(StPicoDstReader)
 StPicoDstReader::StPicoDstReader(const Char_t* inFileName) :
   mPicoDst(new StPicoDst()), mChain(NULL), mTree(NULL),
   mEventCounter(0), mPicoArrays{}, mStatusArrays{} {
-    
+
   streamerOff();
   createArrays();
   std::fill_n(mStatusArrays, sizeof(mStatusArrays) / sizeof(mStatusArrays[0]), 1);
@@ -66,7 +68,7 @@ void StPicoDstReader::clearArrays() {
 void StPicoDstReader::SetStatus(const Char_t *branchNameRegex, Int_t enable) {
   if(strncmp(branchNameRegex, "St", 2) == 0) {
     // Ignore first "St"
-    branchNameRegex += 2; 
+    branchNameRegex += 2;
   }
 
   TRegexp re(branchNameRegex, 1);
@@ -100,7 +102,7 @@ void StPicoDstReader::setBranchAddresses(TChain *chain) {
     chain->SetBranchAddress(bname, mPicoArrays + i);
     assert(tb->GetAddress() == (char*)(mPicoArrays + i));
   }
-  mTree = mChain->GetTree();  
+  mTree = mChain->GetTree();
 }
 
 //_________________
@@ -121,6 +123,8 @@ void StPicoDstReader::streamerOff() {
   StPicoBEmcPidTraits::Class()->IgnoreTObjectStreamer();
   StPicoMtdPidTraits::Class()->IgnoreTObjectStreamer();
   StPicoTrackCovMatrix::Class()->IgnoreTObjectStreamer();
+  StPicoBEmcSmdEHit::Class()->IgnoreTObjectStreamer();
+  StPicoBEmcSmdPHit::Class()->IgnoreTObjectStreamer();
 }
 
 //_________________
@@ -143,18 +147,18 @@ void StPicoDstReader::Finish() {
 
 //_________________
 void StPicoDstReader::Init() {
-  
+
   if(!mChain) {
     mChain = new TChain("PicoDst");
   }
 
   std::string const dirFile = mInputFileName.Data();
-  
+
   if( dirFile.find(".list") != std::string::npos ||
       dirFile.find(".lis") != std::string::npos ) {
-    
+
     std::ifstream inputStream( dirFile.c_str() );
-    
+
     if(!inputStream) {
       LOG_ERROR << "ERROR: Cannot open list file " << dirFile << endm;
     }
@@ -171,8 +175,8 @@ void StPicoDstReader::Init() {
         } //if(ftmp && !ftmp->IsZombie() && ftmp->GetNkeys())
 
         if (ftmp) {
-	  ftmp->Close();
-	}
+	        ftmp->Close();
+        } //if (ftmp)
       } //if(file.find(".picoDst.root") != std::string::npos)
     } //while (getline(inputStream, file))
 
@@ -194,10 +198,10 @@ void StPicoDstReader::Init() {
 }
 
 //_________________
-Bool_t StPicoDstReader::ReadPicoEvent(Long64_t iEvent) {
+Bool_t StPicoDstReader::readPicoEvent(Long64_t iEvent) {
 
   Int_t mStatusRead = true; // true - okay, false - nothing to read
-  
+
   if (!mChain) {
     LOG_WARN << " No input files ... ! EXIT" << endm;
     mStatusRead = false;
@@ -211,17 +215,16 @@ Bool_t StPicoDstReader::ReadPicoEvent(Long64_t iEvent) {
     }
 
     LOG_WARN << "Encountered invalid entry or I/O error while reading event "
-	     << mEventCounter << " from \"" << mChain->GetName() << "\" input tree\n";
+	           << mEventCounter << " from \"" << mChain->GetName() << "\" input tree\n";
     bytes = mChain->GetEntry(mEventCounter++);
     nCycles++;
     LOG_WARN << "Not input has been found for: " << nCycles << " times" << endm;
     if(nCycles >= 10) {
       LOG_ERROR << "Terminating StPicoDstReader::ReadProcess(Long64_t) after "
-		<< nCycles << " times!" << endm;
+		            << nCycles << " times!" << endm;
       mStatusRead = false;
       break;
     }
   }
   return mStatusRead;
 }
-			    
