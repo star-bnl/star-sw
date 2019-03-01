@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.50 2018/07/03 21:33:34 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.51 2019/03/01 19:40:38 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.51  2019/03/01 19:40:38  genevb
+// Some minor Run 19 preparations, including first padrow hit
+//
 // Revision 2.50  2018/07/03 21:33:34  genevb
 // Introduce EPD (code provided by J. Ewigleben)
 //
@@ -350,6 +353,7 @@ void StQAMakerBase::BookHist() {
   // Real data with event classes for different triggers
 
     // any new StQAHistSetType values
+    case (StQA_run19) :
     case (StQA_run18) :
     case (StQA_run17) :
     case (StQA_run15) :
