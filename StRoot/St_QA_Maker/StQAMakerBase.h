@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.29 2018/07/03 21:33:34 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.30 2019/03/01 19:40:38 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.30  2019/03/01 19:40:38  genevb
+// Some minor Run 19 preparations, including first padrow hit
+//
 // Revision 2.29  2018/07/03 21:33:34  genevb
 // Introduce EPD (code provided by J. Ewigleben)
 //
@@ -111,7 +114,8 @@ enum StQAHistSetType {
   StQA_run14 = 9,
   StQA_run15 = 10,
   StQA_run17 = 11,
-  StQA_run18 = 12
+  StQA_run18 = 12,
+  StQA_run19 = 13
   // when adding more, search for StQAHistSetType for other changes
 };
 
@@ -153,7 +157,7 @@ class StQAMakerBase : public StMaker {
   virtual void   UseHistSet(Int_t s) { histsSet=s; }
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.29 2018/07/03 21:33:34 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.30 2019/03/01 19:40:38 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
