@@ -114,7 +114,6 @@ Int_t StEventQAMaker::Init() {
 
   qaEvents = 0;
   if (printTpcHits) allTrigs = kTRUE;
-allTrigs=kTRUE;
   return StQAMakerBase::Init();
 }
 
@@ -2880,8 +2879,11 @@ void StEventQAMaker::MakeHistEPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.135 2019/03/01 19:40:37 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.136 2019/03/03 06:27:42 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.136  2019/03/03 06:27:42  genevb
+// Oops - left in a debugging line - removing
+//
 // Revision 2.135  2019/03/01 19:40:37  genevb
 // Some minor Run 19 preparations, including first padrow hit
 //
