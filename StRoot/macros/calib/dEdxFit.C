@@ -1175,6 +1175,54 @@ TH2F *ProjectX(TH3F *hist, const Char_t *Name="_yz",const Int_t binx1=0,const In
   return h;
 } 
 //________________________________________________________________________________
+Double_t funFreq(Double_t *x, Double_t *par) {
+  Double_t value = 0;
+  return par[3] + TMath::Exp(par[0])*TMath::Freq(-(x[0]-par[1])*par[2]);
+}
+//________________________________________________________________________________
+TF1 *FunFreq() {
+  TF1 *f = (TF1*) gROOT->GetFunction("FunFreq");
+  if (! f) {
+    f = new TF1("FunFreq",funFreq,205,215,4);
+    f->SetParNames("Norm","#mu","1/#sigma","grass");
+    f->SetParameters(0,208,1.,0);
+    f->SetParLimits(0,-10,20);
+    f->SetParLimits(1,-1000,1000);
+    //    f->SetParLimits(2,0,10);
+  }
+  return f;
+}
+//________________________________________________________________________________
+TF1 *FitFreq(TH1 *proj, Option_t *opt="") { // Fit by Freq function
+  if (! proj) return 0;
+  TString Opt(opt);
+  //  Bool_t quet = Opt.Contains("Q",TString::kIgnoreCase);
+  TF1 *g2 = FunFreq();
+  Double_t total = proj->Integral()*proj->GetBinWidth(5);
+  if (total < 1e3) return 0;
+  g2->SetParameters(0,208,1.,0);
+  Int_t iok = proj->Fit(g2,Opt.Data());
+  if ( iok < 0) {
+    cout << g2->GetName() << " fit has failed with " << iok << " for " 
+	 << proj->GetName() << "/" << proj->GetTitle() << " Try one again" << endl; 
+    proj->Fit(g2,Opt.Data());
+  }
+  Opt += "m";
+  iok = proj->Fit(g2,Opt.Data());
+  if (! Opt.Contains("q",TString::kIgnoreCase)) {
+    Double_t params[10];
+    g2->GetParameters(params);
+    Double_t X = params[1];
+    Double_t Y = TMath::Exp(params[0]);
+    TPolyMarker *pm = new TPolyMarker(1, &X, &Y);
+    proj->GetListOfFunctions()->Add(pm);
+    pm->SetMarkerStyle(23);
+    pm->SetMarkerColor(kRed);
+    pm->SetMarkerSize(1.3);
+  }
+  return g2;
+}
+//________________________________________________________________________________
 TF1 *FitGP(TH1 *proj, Option_t *opt="RQ", Double_t nSigma=3, Int_t pow=3, Double_t zmin = -0.2, Double_t zmax = 0.2) {
   if (! proj) return 0;
   TString Opt(opt);
@@ -3365,6 +3413,7 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
       if (TString(FitName) == "GP") g = FitGP(proj,opt,nSigma,pow,zmin,zmax);
       else if (TString(FitName) == "ADC") g = FitADC(proj,opt,nSigma,pow);
       else if (TString(FitName) == "G2") g = FitG2(proj,opt);
+      else if (TString(FitName) == "Freq") g = FitFreq(proj,opt);
       else if (TString(FitName) == "NF" && dim == 3) {
 	TH3 *hists[5] = {0};
 	static const Char_t *names[5] = {"pi","P","K","e","d"};
