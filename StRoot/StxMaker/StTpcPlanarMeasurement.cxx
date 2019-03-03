@@ -89,7 +89,9 @@ StTpcPlanarMeasurement::StTpcPlanarMeasurement(const StTpcHit *hit,TrackPoint* t
   TVector3 u(r[1],r[4],r[7]);
   TVector3 v(r[2],r[5],r[8]);
   DT.MasterToLocal(xyzG, xyzL);
-  setPlane(genfit::SharedPlanePtr(new genfit::DetPlane(o,u,v)),planeId);
+  genfit::DetPlane *aPlane = new genfit::DetPlane(o,u,v);
+  genfit::SharedPlanePtr aPlanePtr(aPlane);
+  setPlane(aPlanePtr,planeId);
   rawHitCoords_[0] = xyzL[1];
   rawHitCoords_[1] = xyzL[2];
   Double_t ecross = 0.12*0.12, edip = 0.16*0.16;

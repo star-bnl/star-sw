@@ -282,7 +282,7 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
 #endif
   //
   static genfit::AbsKalmanFitter* fitter = 0;
-  static genfit::GFGbl*           gbl    = 0;
+  //  static genfit::GFGbl*           gbl    = 0;
   static Bool_t Initialized = kFALSE;
   if (! Initialized) {
     if      (IAttr("Undefined"))      fitterId = genfit::Undefined;
@@ -634,6 +634,7 @@ Int_t StxMaker::FillDetectorInfo(StTrack *gTrack, genfit::Track * track, Bool_t 
       Int_t used = hit->usedInFit();
       used++;
       hit->setFitFlag(used);
+#if 0
       // dX calculation
       /*
   	     ( 1 -g  b )               (   u_x -g*u_y + b*u_z)                (   v_x -g*v_y + b*v_z) 
@@ -678,19 +679,21 @@ Int_t StxMaker::FillDetectorInfo(StTrack *gTrack, genfit::Track * track, Bool_t 
 	genfit::DetPlane &startPlane = (*(measuredPointState.getPlane()));
 	Double_t dx[2] = {0};
 	TVector3 O(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z());
+	TVector3 o = startPlane.getO();
 	TVector3 dO;
+	genfit::DetPlane *aPlane = new genfit::DetPlane(startPlane);
+	genfit::SharedPlanePtr aPlanePtr(aPlane);
 	for (Int_t i = 0; i < 2; i++) {
 	  if (! i) dO = TVector3(tpcHit->positionU().x(),tpcHit->positionU().y(),tpcHit->positionU().z());
 	  else     dO = TVector3(tpcHit->positionL().x(),tpcHit->positionL().y(),tpcHit->positionL().z());
 	  dO -= O;
-	  genfit::DetPlane *aPlane = new genfit::DetPlane(startPlane);
-	  TVector3 o = startPlane.getO();
 	  aPlane->setO(o+dO);
 	  genfit::StateOnPlane state = *measuredPointState.clone();
-	  dx[i] = state.extrapolateToPlane(genfit::SharedPlanePtr(aPlane),i);
+	  dx[i] = state.extrapolateToPlane(aPlanePtr,i);
 	}
 	tpcHit->setdX(TMath::Abs(dx[0])+TMath::Abs(dx[1]));
       }
+#endif
     }
   }
   genfit::TrackPoint *firstTP = track->getPointWithMeasurementAndFitterInfo(0);
