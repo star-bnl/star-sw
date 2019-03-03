@@ -5,5 +5,8 @@ root.exe -b -q lmysql.C 'MakeTpcAvgPowerSupply.C+(2019)' > & MakeTpcAvgPowerSupp
 #    --include='*.root'                  \
 #    --exclude='*.log' --exclude='*.dat' \
 #    ./ rftpexp01.rhic.bnl.gov:/gpfs01/star/subsys-tpc/fisyak/Tpc/Current/2019/ >& rsync.`date +%m%d%y`.log
+#foreach f (`ls -1d *.root`)
+#  mv ${f} ${f}.HOLD
+#end
 
 

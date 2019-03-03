@@ -1,13 +1,14 @@
 /* 
    root.exe -q -b TpcPrompt.C >& TpcPrompt.log &
-   root.exe -q -b 'Chain.C+("*.root","TpcHit")' 'TpcPrompt.C+(tChain)' 
+   root.exe -q -b 'Chain.C+("hlt*.root","TpcHit")' 'TpcPrompt.C+(tChain)' 
 
    Fit
    root.exe -q -b TpcHit.root TpcPrompt.C+
 Draw();
- root.exe -q -b lBichsel.C TpcHitZT.root  'dEdxFit.C+("Z","GP","R",-1,-1,1,1,10,1,206,212)' >& Z.log &
- root.exe -q -b lBichsel.C TpcHitZT.root  'dEdxFit.C+("ZL","GP","R",-1,-1,1,1,10,1,0,3.0)' >& ZL.log &
- root.exe -q -b lBichsel.C TpcHitZT.root  'dEdxFit.C+("T","GP","R",-1,-1,1,1,10,1,0,12.0)' >& T.log &
+ root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("Z","GP","R",-1,-1,1,1,10,1,206,212)' >& Z.log &
+ root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("ZL","GP","R",-1,-1,1,1,10,1,0,3.0)' >& ZL.log &
+ root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("T","GP","R",-1,-1,1,1,10,1,0,12.0)' >& T.log &
+ root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("ZLM","Freq","R",-1,-1,1,1,10,1,0,12.0)' >& TFreq.log &
 */
 #if !defined(__CINT__)
 // code that should be seen ONLY by the compiler
@@ -80,19 +81,26 @@ using namespace RooFit ;
 #include "TpcHit.h"
 void  TpcHit::Fill(Long64_t entry) {
   static TH3F *hist3DZ = 0, *hist3DT = 0, *hist3DZL = 0;
+  static TH3F *hist3DMZ = 0, *hist3DMT = 0, *hist3DMZL = 0;
   if (! hist3DZ) {
     TDirectory *old = gDirectory;
-    TString fName(gDirectory->GetName());
-    fName.ReplaceAll(".root","ZLT.root");
-    fOut = new TFile(fName,"recreate");
-    hist3DZ  = new TH3F("Z","|z| versus sector and row",24,0.5,24.5,72,0.5,72.5,130,200,213);
-    hist3DZL = new TH3F("ZL","Drift distance sector local versus sector and row",24,0.5,24.5,72,0.5,72.5,100,-2,3);
-    hist3DT  = new TH3F("T","time bucket versus sector and row",24,0.5,24.5,72,0.5,72.5,200,0,20);
+    fOut = new TFile("TpcHitZTMfl0.root","recreate");
+    hist3DZ  = new TH3F("Z","|z| versus sector and row",24,0.5,24.5,72,0.5,72.5,260,200,213);
+    hist3DZL = new TH3F("ZL","Drift distance sector local versus sector and row",24,0.5,24.5,72,0.5,72.5,500,-10,10);
+    hist3DT  = new TH3F("T","time bucket versus sector and row",24,0.5,24.5,72,0.5,72.5,500,0,20);
+    hist3DMZ  = new TH3F("ZM","Membrane |z| versus sector and row",24,0.5,24.5,72,0.5,72.5,400,-10,10);
+    hist3DMZL = new TH3F("ZLM","Membrane Drift distance sector local versus sector and row",24,0.5,24.5,72,0.5,72.5,400,200,220);
+    hist3DMT  = new TH3F("TM","Membrane time bucket versus sector and row",24,0.5,24.5,72,0.5,72.5,400,320,360);
     gDirectory = old;
   }
-  hist3DZ->Fill(sector,row,TMath::Abs(z));
-  hist3DZL->Fill(sector,row,TMath::Abs(zL));
-  hist3DT->Fill(sector,row,timebucket);
+  if (! fl) {
+    hist3DZ->Fill(sector,row,TMath::Abs(z));
+    hist3DZL->Fill(sector,row,zL);
+    hist3DT->Fill(sector,row,timebucket);
+    hist3DMZ->Fill(sector,row,z);
+    hist3DMZL->Fill(sector,row,zL);
+    hist3DMT->Fill(sector,row,timebucket);
+  }
 }
 //________________________________________________________________________________
 void TpcHit::Loop() {
@@ -225,7 +233,7 @@ void ClusterSize(const Char_t *f0 = "AuAu200AltroDef/st_physics_adc_15152001_raw
       projy->SetLineColor(f+1);
       i = 3;
       kf = 3*i + k + 1;
-      c1->cd(kf);
+      c1->cd(kf); 
       ly[k]->AddEntry(projy,Form("Altro Cut = %i",AltroCut[f]));
       if ( f) {projy->Draw(); projy->SetXTitle("no. of pads");}
       else    {projy->Draw("sames"); ly[k]->Draw();}
@@ -458,7 +466,7 @@ void TpcPrompt(Int_t Nevents = 1000000,
 
   //  TString Chain("in,StEvent,tpcDb,analysis,magF,NoDefault,tpcHitMover,OSpaceZ2,OGridLeak3D,Corr4,mysql");
   //  TString Chain("in,StEvent,trgD,tpcDb,analysis,magF,NoDefault,mysql");
-  TString Chain("in,StEvent,tpcDb,detDb,CorrX,quiet,analysis,mysql,NoDefault");
+  TString Chain("in,TpcHitMover,StEvent,tpcDb,detDb,CorrX,OSpaceZ2,OGridLeak3D,quiet,analysis,mysql,NoDefault");
   //  TString Chain("in,StEvent,tpcDb,analysis,magF,NoDefault,tpcHitMover,OSpaceZ2,OGridLeak3D,CorrX");
   if (TString(daqfile).EndsWith(".daq")) Chain += ",tpx,TpcHitMover,CorrX";
   TString TreeFile(treefile);
@@ -472,8 +480,8 @@ void TpcPrompt(Int_t Nevents = 1000000,
   for (Int_t ev = 0; ev < Nevents; ev++) {
     Int_t iMake = chain->MakeEvent();
     if (iMake%10 == kStEOF || iMake%10==kStFatal)	break;
-    //    StAnalysisMaker::PrintTpcHits(0,0,2);
-    StAnalysisMaker::PrintTpcHits(0,0,1);
+    StAnalysisMaker::PrintTpcHits(0,0,2);
+    //    StAnalysisMaker::PrintTpcHits(0,0,1);
   }
 }
 #endif 

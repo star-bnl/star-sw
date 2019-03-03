@@ -25,9 +25,9 @@ if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0)
 		PressureC 
 		Time TimeC
 		Voltage VoltageC Qcm QcmC AvCurrentC
-		Z3C Z3iTPCC 
-		dX3C dX3iTPCC xyPad3C
-	      ); # PressureTC Volt VoltC Z3OC Zdc3C Edge3 Edge3C  xyPad3C Edge3C TanL3DC TanL3DiTPCC 
+		Z3C 
+		dX3C  xyPad3C
+	      ); # PressureTC Volt VoltC Z3OC Zdc3C Edge3 Edge3C  xyPad3C Edge3C TanL3DC TanL3DiTPCC  Z3iTPCC dX3iTPCC
 #		flowRateExhaustP flowRateRecirculationP
 #		ppmOxygenInP  inputGasTemperatureP 
 #		percentMethaneInP percentMethaneInPA percentMethaneInPC
@@ -35,9 +35,9 @@ if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0)
   @histRL5 = @histGF;
   @histGP = qw (
 		 TPoints70 TPointsF TPoints70U TPointsFU  TPointsN TPointsNU
-		 TPoints70iTPC TPointsFiTPC TPoints70UiTPC TPointsFUiTPC  TPointsNiTPC TPointsNUiTPC
-		 EtaF Eta70 EtaiTPCF EtaiTPC70 
+		 EtaF Eta70 
 	      );
+#		 EtaiTPCF EtaiTPC70 TPoints70iTPC TPointsFiTPC TPoints70UiTPC TPointsFUiTPC  TPointsNiTPC TPointsNUiTPC
 #		 I70eP I70eN I70protonP I70protonN I70kaonP I70kaonN I70piP I70piN I70muP I70muN I70deuteronP I70deuteronN I70tritonP I70tritonN I70He3P I70He3N I70alphaP I70alphaN 
 #		 fitZeP fitZeN fitZprotonP fitZprotonN fitZkaonP fitZkaonN fitZpiP fitZpiN fitZmuP fitZmuN fitZdeuteronP fitZdeuteronN fitZtritonP fitZtritonN fitZHe3P fitZHe3N fitZalphaP fitZalphaN 
 #		 fitNeP fitNeN fitNprotonP fitNprotonN fitNkaonP fitNkaonN fitNpiP fitNpiN fitNmuP fitNmuN fitNdeuteronP fitNdeuteronN fitNtritonP fitNtritonN fitNHe3P fitNHe3N fitNalphaP fitNalphaN 
@@ -46,7 +46,8 @@ if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0)
 #  @histXF = @histNF;
   @histADC = qw(I3DZ O3DZ X3DZ I3DTanL O3DTanL X3DTanL I3DdX O3DdX X3DdX IC3DZ OC3DZ XC3DZ IC3DTanL OC3DTanL XC3DTanL IC3DdX OC3DdX XC3DdX);
 }
-print "fit.pl for  @rootfiles \n";
+
+print "fit.pl for  @rootfiles \n"; 
 if ($#histGF >= 0) {print " with GF: @histGF \n";}
 if ($#histGP >= 0) {print " with GP: @histGP \n";}
 if ($#histRL5 >= 0){print " with RL5:@histRL5\n";}

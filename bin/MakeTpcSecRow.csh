@@ -236,7 +236,7 @@
 #root.exe -q -b   $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20180518.000111.root  SecRow3CGFRunXVIII113.root 'MakeTpcSecRowB.C(20180518,113)' >& MakeTpcSecRowB.20180312,113.log
 #root.exe -q -b   $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20180518.000113.root  SecRow3CGFRunXVIII114.root 'MakeTpcSecRowB.C(20180518,114)' >& MakeTpcSecRowB.20180312,114.log
 #root.exe -q -b   $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20180518.000113.root  SecRow3CGFRunXVIII115.root 'MakeTpcSecRowB.C(20180518,115)' >& MakeTpcSecRowB.20180312,115.log
-root.exe -q -b   $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20180518.000115.root  SecRow3CGFRunXVIII131.root 'MakeTpcSecRowB.C(20180518,131)' >& MakeTpcSecRowB.20180312,131.log
+#root.exe -q -b   $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20180518.000115.root  SecRow3CGFRunXVIII131.root 'MakeTpcSecRowB.C(20180518,131)' >& MakeTpcSecRowB.20180312,131.log
 
                  
 # 2018 isobar
@@ -246,3 +246,8 @@ root.exe -q -b   $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20180518.000115.root  
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20180312.000022.root SecRow3CGFRunXVIII26.root 'MakeTpcSecRowB.C(20180312,26)' >& MakeTpcSecRowB.20180312,26.log
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20180312.000026.root SecRow3CGFRunXVIII28.root 'MakeTpcSecRowB.C(20180312,28)' >& MakeTpcSecRowB.20180312,28.log
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20180312.000028.root SecRow3CGFRunXVIII29.root 'MakeTpcSecRowB.C(20180312,29)' >& MakeTpcSecRowB.20180312,29.log
+
+# 2019 
+#root.exe -q -b  SecRow3CGFdEdx.root  'MakeTpcSecRowB.C(20190201,1)' >& MakeTpcSecRowB.20190201,1.log
+#root.exe -q -b  /net/l401/data/scratch2/fisyak/reco/2019/StiCA/056/dEdx/Fit/SecRow3CGFdEdx.root  'MakeTpcSecRowB.C(20190201,2)' >& MakeTpcSecRowB.20190201,2.log
+root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20190201.000002.root /net/l404/data/fisyak/Tpc/dEdx/057/Fit/SecRow3CGFdEdx57.root  'MakeTpcSecRowB.C(20190201,3)' >& MakeTpcSecRowB.20190201,3.log

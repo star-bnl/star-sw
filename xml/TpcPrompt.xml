@@ -1,25 +1,29 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
-<job  name="TpcPrompt" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<job  name="TpcPrompt" maxFilesPerProcess="10"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
 <stdout URL="file:./sched$JOBID.log" />
 <stderr URL="file:./sched$JOBID.err" />
 <command> 
    cd ${SUBMITTINGDIRECTORY}  
    setenv STARFPE NO
-   setenv NODEBUG yes
-   setup 64b
+#   setenv NODEBUG yes
+#   setup 64b
 #   starver TFG18k
-   staver .DEV2 
-  set file = `basename ${INPUTFILE0} .event.root`;
+#   staver .DEV2 
+  foreach  evtsFile(`cat $FILELIST`) 
+  set file = `basename ${evtsFile} .event.root`;
   echo "${file}"
   set logFile  = ${file}B.log
 #  set f=`find . -maxdepth 1 -type f -name "*${file}*.root"`
 #  if ("${f}" == "") then
-    root.exe -x -q -b 'TpcPrompt.C(1000000,"'${INPUTFILE0}'","'${file}'.root")' &gt;&amp; ${logFile}
+    root.exe -x -q -b 'TpcPrompt.C(1000000,"'${evtsFile}'","'${file}'.root")' &gt;&amp; ${logFile}
 #  endif
+  end
 </command>
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/TpcRS_2016sdt/*event.root" /> -->
-<input URL="command:dEdxSample.pl" />
+<!-- <input URL="command:dEdxSample.pl" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2014/TFG17vnoV5/*event.root" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2014/TFG17vnoV5.Altro4/*event.root" /> -->
+<!-- <input URL="file:/net/l401/data/scratch2/fisyak/reco/2019/StiCA/054/*/*event.root" /> -->
+<input URL="file:/net/l401/data/scratch2/fisyak/reco/2019/StiCA/057/*/*event.root" />
 </job>
