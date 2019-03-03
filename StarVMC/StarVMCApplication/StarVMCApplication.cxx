@@ -711,6 +711,7 @@ Ist: SensorGlobal = TpcOnGlobal * IdsOnTpc * PstOnIds * IstOnPst * LadderOnIst[l
   //  gGeoManager->RefreshPhysicalNodes();
 #else
   gGeoManager->GetParallelWorld()->CloseGeometry();
+  // gGeoManager->SetUseParallelWorldNav(kTRUE); // It does not work ?
 #endif
   fAlignmentDone = kTRUE;
   return fAlignmentDone;
