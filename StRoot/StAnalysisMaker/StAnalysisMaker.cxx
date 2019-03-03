@@ -385,7 +385,7 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
 		else {
 		  if (Nt) {
 		    const StThreeVectorF& xyz = tpcHit->position();
-		    if (plot == 2 && TMath::Abs(xyz.z()) < 195.0) continue;
+		    if (plot == 2 && (TMath::Abs(xyz.z()) > 15.0) && TMath::Abs(xyz.z()) < 190.0) continue;
 #ifdef __TPC_LOCAL_COORDINATES__
 		    StTpcCoordinateTransform tran;
 		    StGlobalCoordinate glob(xyz);
