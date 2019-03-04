@@ -2,12 +2,14 @@
 #define _StEpdEpFinder
 
 class TVector3;
-class TH2D;
+//class TH2D;
 class TFile;
 class TProfile;
 class TProfile2D;
 class StEpdGeom;
 class TClonesArray;
+
+#include "TH2D.h"
 
 /*************************************
  * \author Mike Lisa
@@ -186,7 +188,7 @@ class StEpdEpFinder{
 
   
 
-
+  ClassDef(StEpdEpFinder,0)
 
 };
 
