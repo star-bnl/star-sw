@@ -13,6 +13,7 @@
 //#include <fstream>
 using namespace std;
 
+ClassImp(StEpdEpFinder)
 
 StEpdEpFinder::StEpdEpFinder(int nEventTypeBins, char const* OutFileName, char const* CorrectionFile) : mFormatUsed(2), mThresh(0.3), mMax(2.0), mWeightingScheme(0)
 {
