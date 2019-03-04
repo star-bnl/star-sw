@@ -634,7 +634,7 @@ Int_t StxMaker::FillDetectorInfo(StTrack *gTrack, genfit::Track * track, Bool_t 
       Int_t used = hit->usedInFit();
       used++;
       hit->setFitFlag(used);
-#if 1
+#if 0
       // dX calculation
       /*
   	     ( 1 -g  b )               (   u_x -g*u_y + b*u_z)                (   v_x -g*v_y + b*v_z) 
