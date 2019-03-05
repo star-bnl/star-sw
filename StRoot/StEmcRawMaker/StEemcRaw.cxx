@@ -174,7 +174,11 @@ Bool_t StEemcRaw::headersAreSick(StEmcRawMaker* maker, StEmcRawData *raw, int to
 	//if (fiber->type == 'S' && !esmd) continue;
 
         if(raw->sizeHeader(icr)<=0) {
-	 LOG_WARN <<Form("StEemcRaw::headersAreSick() sizeHeader(icr=%d)<=0,  crID=%d, skip it\n",icr,fiber->crID)<<endm;
+	  static Int_t count = 0;
+	  if (count < 20) {
+	    count++;
+	 LOG_WARN <<Form("StEemcRaw::headersAreSick() sizeHeader(icr=%d)<=0,  crID=%d, skip it",icr,fiber->crID)<<endm;
+	  }
 	  continue;  //drop cartes not present in data blocks
 	}
 	// printf(" EEMC raw-->pix crID=%d type=%c \n",fiber->crID,fiber->type);
