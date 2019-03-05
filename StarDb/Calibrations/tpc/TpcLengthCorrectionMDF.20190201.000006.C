@@ -56,7 +56,7 @@ TDataSet *CreateTable() {
   memset(&row,0,tableSet->GetRowSize()); //  TPoints70UGPdEdx5 Tpc/dEdx/057.5/Fit; h2mdf("sigma",5,1,20)     
   row.nrows      = nrows;
   row.idx        =     2;// 
-   row.PolyType =        1;
+  row.PolyType =        1;
   row.NVariables =      2;
   row.NCoefficients =   20;
   row.XMin[ 0] =     2.3514;  row.XMin[ 1] =      0.625;
@@ -102,7 +102,7 @@ TDataSet *CreateTable() {
   row.CoefficientsRMS[14] =       0.0012217;  row.CoefficientsRMS[15] =       0.0005466;
   row.CoefficientsRMS[16] =      0.00082813;  row.CoefficientsRMS[17] =      0.00020881;
   row.CoefficientsRMS[18] =      0.00011711;  row.CoefficientsRMS[19] =      0.00034226;
- tableSet->AddAt(&row);// 1 -> sigma.I70   						       
+  tableSet->AddAt(&row);// 1 -> sigma.I70   						       
   memset(&row,0,tableSet->GetRowSize()); //  TPointsNUGPdEdx5 Tpc/dEdx/057.5/Fit; h2mdf("mu",5,1,20);         
   row.nrows      = nrows;
   row.idx        =     3;// 
@@ -164,7 +164,6 @@ TDataSet *CreateTable() {
   memset(&row,0,tableSet->GetRowSize()); //  TPointsFUGPdEdx5 Tpc/dEdx/057.5/Fit; h2mdf("sigma",5,1,20);      
   row.nrows      = nrows;
   row.idx        =     6;// 
-  tableSet->AddAt(&row);// 5 -> sigma.Ifit	     
   row.PolyType =        1;
   row.NVariables =      2;
   row.NCoefficients =   20;
@@ -211,6 +210,7 @@ TDataSet *CreateTable() {
   row.CoefficientsRMS[14] =      0.00028308;  row.CoefficientsRMS[15] =       0.0002484;
   row.CoefficientsRMS[16] =      0.00030323;  row.CoefficientsRMS[17] =      0.00010797;
   row.CoefficientsRMS[18] =      0.00022695;  row.CoefficientsRMS[19] =      0.00021827;
+  tableSet->AddAt(&row);// 5 -> sigma.Ifit	     
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
 }
