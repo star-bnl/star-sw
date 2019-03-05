@@ -235,6 +235,7 @@ void StdEdxY2Maker::AddEdxTraits(StTrack *tracks[2], dst_dedx_st &dedx){
 }
 //_____________________________________________________________________________
 Int_t StdEdxY2Maker::Make(){ 
+  static Bool_t ForcedX = IAttr("ForcedX");
 #ifdef __TEST_DX__
   Double_t dX_GenFit = 0;
   TH3F *dXTest = 0;
@@ -377,6 +378,7 @@ Int_t StdEdxY2Maker::Make(){
 	xyz[3] = StThreeVectorD(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z());
 	//________________________________________________________________________________      
 	dx = tpcHit->dX();
+	if (ForcedX) dx = 0;
 #ifdef __TEST_DX__
 	dX_GenFit = dx;
 	dx = 0;

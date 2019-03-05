@@ -909,6 +909,7 @@ Int_t StBFChain::Instantiate()
       SETBIT(Mode,StdEdxY2Maker::kAlignment);
       LOG_INFO << " set dEdxY2 Mode " << Mode << " =======================================" << endm;
       mk->SetMode(Mode); 
+      if (GetOption("ForcedX")) mk->SetAttr("ForcedX", 1);
     }
 #if 0
     if (maker == "StSvtDbMaker" || maker == "StSsdDbMaker"){
