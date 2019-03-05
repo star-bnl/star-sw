@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false">
         <command>
-         cd ${SUBMITTINGDIRECTORY}
+#         cd ${SUBMITTINGDIRECTORY}
    setenv StarEndMakerShell
    setenv STARFPE NO
    setup debug
-#   setenv NODEBUG yes
-#   setup  gcc631
-#   setup 64b
+   setenv NODEBUG yes
+   setup  gcc631
+   setup 64b
    starver TFG19c
      set evtsFile = $INPUTFILE0;
      set f        = 1
@@ -17,11 +17,17 @@
   set output  = ${filel}.event.root
   if (! -r ${evtsFile}) exit 1;
   set logFile  = ${filel}B.log
-  if ( -r $logFile) exit 0;
+  if ( -r ${SUBMITTINGDIRECTORY}/$logFile) exit 0;
   set muFile = ${filel}.MuDst.root
-  if (-r $muFile) exit 0;
+  if (-r ${SUBMITTINGDIRECTORY}/$muFile) exit 0;
+  set bla = ${SUBMITTINGDIRECTORY}/${filel}.bla.root
+  if (-r ${bla}) exit 0;
+  touch ${bla}
 # TFG
-   root.exe -q -b 'bfc.C(100,"P2019,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,Stx,-StiCA,-Sti,KFVertex,evout,picoWrite,1PicoVtxDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+#   root.exe -q -b 'bfc.C(100,"P2019a,-hitfilt,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,Stx,-StiCA,-Sti,KFVertex,evout,picoWrite,PicoVtxDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+   root.exe -q -b 'bfc.C(10000,"P2019,-hitfilt,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,Stx,-StiCA,-Sti,KFVertex,evout,picoWrite,PicoVtxDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+   cp  ${filel}* ${SUBMITTINGDIRECTORY}
+   rm ${bla}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
