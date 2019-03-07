@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
-#include <algorithm>
 
 #include "Sensor.hh"
 #include "GarfieldConstants.hh"
@@ -13,15 +12,37 @@ namespace Garfield {
 
 double Sensor::m_signalConversion = ElementaryCharge;
 
-Sensor::Sensor() {}
+Sensor::Sensor()
+    : m_lastComponent(-1),
+      m_nTimeBins(200),
+      m_tStart(0.),
+      m_tStep(10.),
+      m_nEvents(0),
+      m_hasTransferFunction(false),
+      m_fTransfer(0),
+      m_hasNoiseFunction(false),
+      m_fNoise(0),
+      m_hasUserArea(false),
+      m_xMinUser(0.),
+      m_yMinUser(0.),
+      m_zMinUser(0.),
+      m_xMaxUser(0.),
+      m_yMaxUser(0.),
+      m_zMaxUser(0.),
+      m_debug(false) {
+
+  m_className = "Sensor";
+
+}
 
 ComponentBase* Sensor::GetComponent(const unsigned int i) {
 
   if (i >= m_components.size()) {
-    std::cerr << m_className << "::GetComponent: Index out of range.\n";
-	  return nullptr;	
+    std::cerr << m_className << "::GetComponent:\n";
+	  std::cerr << "    Component " << i << " does not exist.\n";
+	  return NULL;	
 	};
-	return m_components[i];
+	return m_components[i].comp;
 }
 
 void Sensor::ElectricField(const double x, const double y, const double z,
@@ -30,13 +51,14 @@ void Sensor::ElectricField(const double x, const double y, const double z,
 
   ex = ey = ez = v = 0.;
   status = -10;
-  medium = nullptr;
+  medium = NULL;
   double fx, fy, fz, p;
-  Medium* med = nullptr;
+  Medium* med = NULL;
   int stat;
   // Add up electric field contributions from all components.
-  for (auto component : m_components) {
-    component->ElectricField(x, y, z, fx, fy, fz, p, med, stat);
+  const unsigned int nComponents = m_components.size();
+  for (unsigned int i = 0; i < nComponents; ++i) {
+    m_components[i].comp->ElectricField(x, y, z, fx, fy, fz, p, med, stat);
     if (status != 0) {
       status = stat;
       medium = med;
@@ -56,13 +78,14 @@ void Sensor::ElectricField(const double x, const double y, const double z,
 
   ex = ey = ez = 0.;
   status = -10;
-  medium = nullptr;
+  medium = NULL;
   double fx, fy, fz;
-  Medium* med = nullptr;
+  Medium* med = NULL;
   int stat;
   // Add up electric field contributions from all components.
-  for (auto component : m_components) {
-    component->ElectricField(x, y, z, fx, fy, fz, med, stat);
+  const unsigned int nComponents = m_components.size();
+  for (unsigned int i = 0; i < nComponents; ++i) {
+    m_components[i].comp->ElectricField(x, y, z, fx, fy, fz, med, stat);
     if (status != 0) {
       status = stat;
       medium = med;
@@ -81,8 +104,9 @@ void Sensor::MagneticField(const double x, const double y, const double z,
   bx = by = bz = 0.;
   double fx, fy, fz;
   // Add up contributions.
-  for (auto component : m_components) {
-    component->MagneticField(x, y, z, fx, fy, fz, status);
+  const unsigned int nComponents = m_components.size();
+  for (unsigned int i = 0; i < nComponents; ++i) {
+    m_components[i].comp->MagneticField(x, y, z, fx, fy, fz, status);
     if (status != 0) continue;
     bx += fx;
     by += fy;
@@ -97,10 +121,11 @@ void Sensor::WeightingField(const double x, const double y, const double z,
   wx = wy = wz = 0.;
   double fx = 0., fy = 0., fz = 0.;
   // Add up field contributions from all components.
-  for (const auto& electrode : m_electrodes) {
-    if (electrode.label == label) {
+  const unsigned int nElectrodes = m_electrodes.size();
+  for (unsigned int i = 0; i < nElectrodes; ++i) {
+    if (m_electrodes[i].label == label) {
       fx = fy = fz = 0.;
-      electrode.comp->WeightingField(x, y, z, fx, fy, fz, label);
+      m_electrodes[i].comp->WeightingField(x, y, z, fx, fy, fz, label);
       wx += fx;
       wy += fy;
       wz += fz;
@@ -113,9 +138,10 @@ double Sensor::WeightingPotential(const double x, const double y,
 
   double v = 0.;
   // Add up contributions from all components.
-  for (const auto& electrode : m_electrodes) {
-    if (electrode.label == label) {
-      v += electrode.comp->WeightingPotential(x, y, z, label);
+  const unsigned int nElectrodes = m_electrodes.size();
+  for (unsigned int i = 0; i < nElectrodes; ++i) {
+    if (m_electrodes[i].label == label) {
+      v += m_electrodes[i].comp->WeightingPotential(x, y, z, label);
     }
   }
   return v;
@@ -124,21 +150,22 @@ double Sensor::WeightingPotential(const double x, const double y,
 bool Sensor::GetMedium(const double x, const double y, const double z,
                        Medium*& m) {
 
-  m = nullptr;
+  m = NULL;
 
   // Make sure there is at least one component.
-  if (m_components.empty()) return false;
+  if (m_lastComponent < 0) return false;
 
   // Check if we are still in the same component as in the previous call.
-  if (m_lastComponent) {
-    m = m_lastComponent->GetMedium(x, y, z);
-    if (m) return true;
-  }
+  m = m_components[m_lastComponent].comp->GetMedium(x, y, z);
+  // Cross-check that the medium is defined.
+  if (m) return true;
 
-  for (auto component : m_components) {
-    m = component->GetMedium(x, y, z);
+  const unsigned int nComponents = m_components.size();
+  for (unsigned int i = 0; i < nComponents; ++i) {
+    m = m_components[i].comp->GetMedium(x, y, z);
+    // Cross-check that the medium is defined.
     if (m) {
-      m_lastComponent = component;
+      m_lastComponent = i;
       return true;
     }
   }
@@ -149,7 +176,8 @@ bool Sensor::SetArea() {
 
   if (!GetBoundingBox(m_xMinUser, m_yMinUser, m_zMinUser, m_xMaxUser,
                       m_yMaxUser, m_zMaxUser)) {
-    std::cerr << m_className << "::SetArea: Bounding box is not known.\n";
+    std::cerr << m_className << "::SetArea:\n";
+    std::cerr << "    Bounding box is not known.\n";
     return false;
   }
 
@@ -260,9 +288,10 @@ bool Sensor::IsInArea(const double x, const double y, const double z) {
 bool Sensor::IsWireCrossed(const double x0, const double y0, const double z0,
                            const double x1, const double y1, const double z1,
                            double& xc, double& yc, double& zc) {
-
-  for (auto component : m_components) {
-    if (component->IsWireCrossed(x0, y0, z0, x1, y1, z1, xc, yc, zc)) {
+  const unsigned int nComponents = m_components.size();
+  for (unsigned int i = 0; i < nComponents; ++i) {
+    if (m_components[i].comp->IsWireCrossed(x0, y0, z0, 
+                                            x1, y1, z1, xc, yc, zc)) {
       return true;
     }
   }
@@ -273,8 +302,11 @@ bool Sensor::IsInTrapRadius(const double q0, const double x0,
                             const double y0, double z0, double& xw,
                             double& yw, double& rw) {
 
-  for (auto component : m_components) {
-    if (component->IsInTrapRadius(q0, x0, y0, z0, xw, yw, rw)) return true;
+  const unsigned int nComponents = m_components.size();
+  for (unsigned int i = 0; i < nComponents; ++i) {
+    if (m_components[i].comp->IsInTrapRadius(q0, x0, y0, z0, xw, yw, rw)) {
+      return true;
+    }
   }
   return false;
 }
@@ -282,45 +314,50 @@ bool Sensor::IsInTrapRadius(const double q0, const double x0,
 void Sensor::AddComponent(ComponentBase* comp) {
 
   if (!comp) {
-    std::cerr << m_className << "::AddComponent: Null pointer.\n";
+    std::cerr << m_className << "::AddComponent:\n    Null pointer.\n";
     return;
   }
 
-  m_components.push_back(comp);
+  component newComponent;
+  newComponent.comp = comp;
+  m_components.push_back(newComponent);
+  if (m_components.size() == 1) m_lastComponent = 0;
 }
 
 void Sensor::AddElectrode(ComponentBase* comp, const std::string& label) {
 
   if (!comp) {
-    std::cerr << m_className << "::AddElectrode: Null pointer.\n";
+    std::cerr << m_className << "::AddElectrode:\n    Null pointer.\n";
     return;
   }
-  for (const auto& electrode : m_electrodes) {
-    if (electrode.label == label) {
-      std::cout << m_className << "::AddElectrode:\n"
-                << "    Warning: An electrode with label \"" << label
-                << "\" exists already. Weighting fields will be summed up.\n";
+  const unsigned int nElectrodes = m_electrodes.size();
+  for (unsigned int i = 0; i < nElectrodes; ++i) {
+    if (m_electrodes[i].label == label) {
+      std::cout << m_className << "::AddElectrode:\n";
+      std::cout << "    Warning: An electrode with label \"" << label
+                << "\" exists already.\n";
+      std::cout << "    Weighting fields will be summed up.\n";
       break;
     }
   }
 
-  Electrode electrode;
-  electrode.comp = comp;
-  electrode.label = label;
-  electrode.signal.resize(m_nTimeBins);
-  electrode.electronsignal.resize(m_nTimeBins);
-  electrode.ionsignal.resize(m_nTimeBins);
-  m_electrodes.push_back(std::move(electrode));
-  std::cout << m_className << "::AddElectrode:\n"
-            << "    Added readout electrode \"" << label << "\".\n"
-            << "    All signals are reset.\n";
+  electrode newElectrode;
+  newElectrode.comp = comp;
+  newElectrode.label = label;
+  m_electrodes.push_back(newElectrode);
+  m_electrodes.back().signal.resize(m_nTimeBins);
+  m_electrodes.back().electronsignal.resize(m_nTimeBins);
+  m_electrodes.back().ionsignal.resize(m_nTimeBins);
+  std::cout << m_className << "::AddElectrode:\n";
+  std::cout << "    Added readout electrode \"" << label << "\".\n";
+  std::cout << "    All signals are reset.\n";
   ClearSignal();
 }
 
 void Sensor::Clear() {
 
   m_components.clear();
-  m_lastComponent = nullptr;
+  m_lastComponent = -1;
   m_electrodes.clear();
   m_nTimeBins = 200;
   m_tStart = 0.;
@@ -334,12 +371,13 @@ bool Sensor::GetVoltageRange(double& vmin, double& vmax) {
   // We don't know the range yet.
   bool set = false;
   // Loop over the components.
-  for (auto component : m_components) {
-    double umin = 0., umax = 0.;
-    if (!component->GetVoltageRange(umin, umax)) continue;
+  double umin, umax;
+  const unsigned int nComponents = m_components.size();
+  for (unsigned int i = 0; i < nComponents; ++i) {
+    if (!m_components[i].comp->GetVoltageRange(umin, umax)) continue;
     if (set) {
-      vmin = std::min(umin, vmin);
-      vmax = std::max(umax, vmax);
+      if (umin < vmin) vmin = umin;
+      if (umax > vmax) vmax = umax;
     } else {
       vmin = umin;
       vmax = umax;
@@ -349,8 +387,8 @@ bool Sensor::GetVoltageRange(double& vmin, double& vmax) {
 
   // Warn if we still don't know the range.
   if (!set) {
-    std::cerr << m_className << "::GetVoltageRange:\n"
-              << "    Sensor voltage range not known.\n";
+    std::cerr << m_className << "::GetVoltageRange:\n";
+    std::cerr << "    Sensor voltage range not known.\n";
     vmin = vmax = 0.;
     return false;
   }
@@ -364,11 +402,14 @@ bool Sensor::GetVoltageRange(double& vmin, double& vmax) {
 
 void Sensor::ClearSignal() {
 
-  for (auto& electrode : m_electrodes) {
-    electrode.charge = 0.;
-    electrode.signal.assign(m_nTimeBins, 0.);
-    electrode.electronsignal.assign(m_nTimeBins, 0.);
-    electrode.ionsignal.assign(m_nTimeBins, 0.);
+  const unsigned int nElectrodes = m_electrodes.size();
+  for (unsigned int i = 0; i < nElectrodes; ++i) {
+    m_electrodes[i].charge = 0.;
+    for (int j = m_nTimeBins; j--;) {
+      m_electrodes[i].signal[j] = 0.;
+      m_electrodes[i].electronsignal[j] = 0.;
+      m_electrodes[i].ionsignal[j] = 0.;
+    }
   }
   m_nEvents = 0;
 }
@@ -404,13 +445,15 @@ void Sensor::AddSignal(const double q, const double t, const double dt,
     std::cout << "    Charge: " << q << "\n";
     std::cout << "    Velocity: (" << vx << ", " << vy << ", " << vz << ")\n";
   }
-  for (auto& electrode : m_electrodes) {
+  const unsigned int nElectrodes = m_electrodes.size();
+  for (unsigned int i = 0; i < nElectrodes; ++i) {
     // Calculate the weighting field for this electrode
-    electrode.comp->WeightingField(x, y, z, wx, wy, wz, electrode.label);
+    m_electrodes[i].comp->WeightingField(x, y, z, wx, wy, wz, 
+                                         m_electrodes[i].label);
     // Calculate the induced current
     const double cur = -q * (wx * vx + wy * vy + wz * vz);
     if (m_debug) {
-      std::cout << "    Electrode " << electrode.label << ":\n";
+      std::cout << "    Electrode " << m_electrodes[i].label << ":\n";
       std::cout << "      Weighting field: (" << wx << ", " << wy << ", " << wz
                 << ")\n";
       std::cout << "      Induced charge: " << cur* dt << "\n";
@@ -418,38 +461,38 @@ void Sensor::AddSignal(const double q, const double t, const double dt,
     double delta = m_tStart + (bin + 1) * m_tStep - t;
     // Check if the provided timestep extends over more than one time bin
     if (dt > delta) {
-      electrode.signal[bin] += cur * delta;
+      m_electrodes[i].signal[bin] += cur * delta;
       if (q < 0) {
-        electrode.electronsignal[bin] += cur * delta;
+        m_electrodes[i].electronsignal[bin] += cur * delta;
       } else {
-        electrode.ionsignal[bin] += cur * delta;
+        m_electrodes[i].ionsignal[bin] += cur * delta;
       }
       delta = dt - delta;
       unsigned int j = 1;
       while (delta > m_tStep && bin + j < m_nTimeBins) {
-        electrode.signal[bin + j] += cur * m_tStep;
+        m_electrodes[i].signal[bin + j] += cur * m_tStep;
         if (q < 0) {
-          electrode.electronsignal[bin + j] += cur * m_tStep;
+          m_electrodes[i].electronsignal[bin + j] += cur * m_tStep;
         } else {
-          electrode.ionsignal[bin + j] += cur * m_tStep;
+          m_electrodes[i].ionsignal[bin + j] += cur * m_tStep;
         }
         delta -= m_tStep;
         ++j;
       }
       if (bin + j < m_nTimeBins) {
-        electrode.signal[bin + j] += cur * delta;
+        m_electrodes[i].signal[bin + j] += cur * delta;
         if (q < 0) {
-          electrode.electronsignal[bin + j] += cur * delta;
+          m_electrodes[i].electronsignal[bin + j] += cur * delta;
         } else {
-          electrode.ionsignal[bin + j] += cur * delta;
+          m_electrodes[i].ionsignal[bin + j] += cur * delta;
         }
       }
     } else {
-      electrode.signal[bin] += cur * dt;
+      m_electrodes[i].signal[bin] += cur * dt;
       if (q < 0) {
-        electrode.electronsignal[bin] += cur * dt;
+        m_electrodes[i].electronsignal[bin] += cur * dt;
       } else {
-        electrode.ionsignal[bin] += cur * dt;
+        m_electrodes[i].ionsignal[bin] += cur * dt;
       }
     }
   }
@@ -460,20 +503,23 @@ void Sensor::AddInducedCharge(const double q, const double x0, const double y0,
                               const double z1) {
 
   if (m_debug) std::cout << m_className << "::AddInducedCharge:\n";
-  for (auto& electrode : m_electrodes) {
+  double w0 = 0., w1 = 0.;
+  const unsigned int nElectrodes = m_electrodes.size();
+  for (unsigned int i = 0; i < nElectrodes; ++i) {
     // Calculate the weighting potential at the starting point.
-    auto cmp = electrode.comp;
-    const double w0 = cmp->WeightingPotential(x0, y0, z0, electrode.label);
+    w0 = m_electrodes[i]
+             .comp->WeightingPotential(x0, y0, z0, m_electrodes[i].label);
     // Calculate the weighting potential at the end point.
-    const double w1 = cmp->WeightingPotential(x1, y1, z1, electrode.label);
-    electrode.charge += q * (w1 - w0);
+    w1 = m_electrodes[i]
+             .comp->WeightingPotential(x1, y1, z1, m_electrodes[i].label);
+    m_electrodes[i].charge += q * (w1 - w0);
     if (m_debug) {
-      std::cout << "    Electrode " << electrode.label << ":\n";
+      std::cout << "    Electrode " << m_electrodes[i].label << ":\n";
       std::cout << "      Weighting potential at (" << x0 << ", " << y0 << ", "
                 << z0 << "): " << w0 << "\n";
       std::cout << "      Weighting potential at (" << x1 << ", " << y1 << ", "
                 << z1 << "): " << w1 << "\n";
-      std::cout << "      Induced charge: " << electrode.charge << "\n";
+      std::cout << "      Induced charge: " << m_electrodes[i].charge << "\n";
     }
   }
 }
@@ -505,10 +551,11 @@ void Sensor::SetTimeWindow(const double tstart, const double tstep,
 
   std::cout << m_className << "::SetTimeWindow:\n";
   std::cout << "    Resetting all signals.\n";
-  for (auto& electrode : m_electrodes) {
-    electrode.signal.assign(m_nTimeBins, 0.);
-    electrode.electronsignal.assign(m_nTimeBins, 0.);
-    electrode.ionsignal.assign(m_nTimeBins, 0.);
+  const unsigned int nElectrodes = m_electrodes.size();
+  for (unsigned int i = 0; i < nElectrodes; ++i) {
+    m_electrodes[i].signal.assign(m_nTimeBins, 0.);
+    m_electrodes[i].electronsignal.assign(m_nTimeBins, 0.);
+    m_electrodes[i].ionsignal.assign(m_nTimeBins, 0.);
   }
   m_nEvents = 0;
 }
@@ -519,8 +566,10 @@ double Sensor::GetElectronSignal(const std::string& label,
   if (m_nEvents == 0) return 0.;
   if (bin >= m_nTimeBins) return 0.;
   double sig = 0.;
-  for (const auto& electrode : m_electrodes) {
-    if (electrode.label == label) sig += electrode.electronsignal[bin];
+  const unsigned int nElectrodes = m_electrodes.size();
+  for (unsigned int i = 0; i < nElectrodes; ++i) {
+    if (m_electrodes[i].label == label)
+      sig += m_electrodes[i].electronsignal[bin];
   }
   if (m_debug) {
     std::cout << m_className << "::GetElectronSignal:\n";
@@ -536,8 +585,9 @@ double Sensor::GetIonSignal(const std::string& label, const unsigned int bin) {
   if (m_nEvents == 0) return 0.;
   if (bin >= m_nTimeBins) return 0.;
   double sig = 0.;
-  for (const auto& electrode : m_electrodes) {
-    if (electrode.label == label) sig += electrode.ionsignal[bin];
+  const unsigned int nElectrodes = m_electrodes.size();
+  for (unsigned int i = 0; i < nElectrodes; ++i) {
+    if (m_electrodes[i].label == label) sig += m_electrodes[i].ionsignal[bin];
   }
   if (m_debug) {
     std::cout << m_className << "::GetIonSignal:\n";
@@ -553,8 +603,9 @@ double Sensor::GetSignal(const std::string& label, const unsigned int bin) {
   if (m_nEvents == 0) return 0.;
   if (bin >= m_nTimeBins) return 0.;
   double sig = 0.;
-  for (const auto& electrode : m_electrodes) {
-    if (electrode.label == label) sig += electrode.signal[bin];
+  const unsigned int nElectrodes = m_electrodes.size();
+  for (unsigned int i = 0; i < nElectrodes; ++i) {
+    if (m_electrodes[i].label == label) sig += m_electrodes[i].signal[bin];
   }
   if (m_debug) {
     std::cout << m_className << "::GetSignal:\n";
@@ -569,8 +620,9 @@ double Sensor::GetInducedCharge(const std::string& label) {
 
   if (m_nEvents == 0) return 0.;
   double charge = 0.;
-  for (const auto& electrode : m_electrodes) {
-    if (electrode.label == label) charge += electrode.charge;
+  const unsigned int nElectrodes = m_electrodes.size();
+  for (unsigned int i = 0; i < nElectrodes; ++i) {
+    if (m_electrodes[i].label == label) charge += m_electrodes[i].charge;
   }
   if (m_debug) {
     std::cout << m_className << "::GetInducedCharge:\n";
@@ -607,7 +659,7 @@ void Sensor::SetTransferFunction(const std::vector<double>& times,
   }
   m_transferFunctionTimes = times;
   m_transferFunctionValues = values;
-  m_fTransfer = nullptr;
+  m_fTransfer = NULL;
   m_hasTransferFunction = true;
 }
 
@@ -622,15 +674,22 @@ double Sensor::InterpolateTransferFunctionTable(double t) {
     return 0.;
   }
   // Find the proper interval in the table.
-  const auto begin = m_transferFunctionTimes.cbegin();
-  const auto it1 = std::upper_bound(begin, m_transferFunctionTimes.cend(), t);
-  if (it1 == begin) return m_transferFunctionValues.front();
-  const auto it0 = std::prev(it1);
-  const auto f0 = m_transferFunctionValues[it0 - begin];
-  const auto f1 = m_transferFunctionValues[it1 - begin];
-
+  int iLow = 0;
+  int iUp = m_transferFunctionTimes.size() - 1;
+  int iM;
+  while (iUp - iLow > 1) {
+    iM = (iUp + iLow) >> 1;
+    if (t >= m_transferFunctionTimes[iM]) {
+      iLow = iM;
+    } else {
+      iUp = iM;
+    }
+  }
   // Linear interpolation.
-  return f0 + (t - *it0) * (f1 - f0) / (*it1 - *it0);
+  return m_transferFunctionValues[iLow] +
+         (t - m_transferFunctionTimes[iLow]) *
+             (m_transferFunctionValues[iUp] - m_transferFunctionValues[iLow]) /
+             (m_transferFunctionTimes[iUp] - m_transferFunctionTimes[iLow]);
 }
 
 double Sensor::GetTransferFunction(const double t) {
@@ -684,14 +743,16 @@ bool Sensor::ConvoluteSignal() {
 
   std::vector<double> tmpSignal(m_nTimeBins, 0.);
   // Loop over all electrodes.
-  for (auto& electrode : m_electrodes) {
+  const unsigned int nElectrodes = m_electrodes.size();
+  for (unsigned int i = 0; i < nElectrodes; ++i) {
     for (unsigned int j = 0; j < m_nTimeBins; ++j) {
       tmpSignal[j] = 0.;
       for (unsigned int k = 0; k < m_nTimeBins; ++k) {
-        tmpSignal[j] += m_tStep * cnvTab[iOffset + j - k] * electrode.signal[k];
+        tmpSignal[j] +=
+            m_tStep * cnvTab[iOffset + j - k] * m_electrodes[i].signal[k];
       }
     }
-    electrode.signal.swap(tmpSignal);
+    m_electrodes[i].signal = tmpSignal;
   }
   return true;
 }
@@ -704,15 +765,17 @@ bool Sensor::IntegrateSignal() {
     return false;
   }
 
-  for (auto& electrode : m_electrodes) {
+  const unsigned int nElectrodes = m_electrodes.size();
+  for (unsigned int i = 0; i < nElectrodes; ++i) {
     for (unsigned int j = 0; j < m_nTimeBins; ++j) {
-      electrode.signal[j] *= m_tStep;
-      electrode.electronsignal[j] *= m_tStep;
-      electrode.ionsignal[j] *= m_tStep;
+      m_electrodes[i].signal[j] *= m_tStep;
+      m_electrodes[i].electronsignal[j] *= m_tStep;
+      m_electrodes[i].ionsignal[j] *= m_tStep;
       if (j > 0) {
-        electrode.signal[j] += electrode.signal[j - 1];
-        electrode.electronsignal[j] += electrode.electronsignal[j - 1];
-        electrode.ionsignal[j] += electrode.ionsignal[j - 1];
+        m_electrodes[i].signal[j] += m_electrodes[i].signal[j - 1];
+        m_electrodes[i].electronsignal[j] +=
+            m_electrodes[i].electronsignal[j - 1];
+        m_electrodes[i].ionsignal[j] += m_electrodes[i].ionsignal[j - 1];
       }
     }
   }
@@ -722,7 +785,8 @@ bool Sensor::IntegrateSignal() {
 void Sensor::SetNoiseFunction(double (*f)(double t)) {
 
   if (f == 0) {
-    std::cerr << m_className << "::SetNoiseFunction: Null pointer.\n";
+    std::cerr << m_className << "::SetNoiseFunction:\n";
+    std::cerr << "    Function pointer is null.\n";
     return;
   }
   m_fNoise = f;
@@ -738,14 +802,14 @@ void Sensor::AddNoise(const bool total, const bool electron, const bool ion) {
   }
   if (m_nEvents == 0) m_nEvents = 1;
 
-  for (auto& electrode : m_electrodes) {
-    double t = m_tStart + 0.5 * m_tStep;
+  const unsigned int nElectrodes = m_electrodes.size();
+  for (unsigned int i = 0; i < nElectrodes; ++i) {
     for (unsigned int j = 0; j < m_nTimeBins; ++j) {
+      const double t = m_tStart + (j + 0.5) * m_tStep;
       const double noise = m_fNoise(t);
-      if (total) electrode.signal[j] += noise;
-      if (electron) electrode.electronsignal[j] += noise;
-      if (ion) electrode.ionsignal[j] += noise;
-      t += m_tStep;
+      if (total) m_electrodes[i].signal[j] += noise;
+      if (electron) m_electrodes[i].electronsignal[j] += noise;
+      if (ion) m_electrodes[i].ionsignal[j] += noise;
     }
   }
 }
@@ -770,11 +834,12 @@ bool Sensor::ComputeThresholdCrossings(const double thr,
   std::vector<double> signal(m_nTimeBins, 0.);
   // Loop over the electrodes.
   bool foundLabel = false;
-  for (const auto& electrode : m_electrodes) {
-    if (electrode.label == label) {
+  const unsigned int nElectrodes = m_electrodes.size();
+  for (unsigned int j = 0; j < nElectrodes; ++j) {
+    if (m_electrodes[j].label == label) {
       foundLabel = true;
       for (unsigned int i = 0; i < m_nTimeBins; ++i) {
-        signal[i] += electrode.signal[i];
+        signal[i] += m_electrodes[j].signal[i];
       }
     }
   }
@@ -838,21 +903,21 @@ bool Sensor::ComputeThresholdCrossings(const double thr,
                                  (fall && values.back() < values[0]))) {
         // Compute the crossing time.
         double tcr = Numerics::Divdif(times, values, nValues, thr, iOrder);
-        ThresholdCrossing newCrossing;
+        thresholdCrossing newCrossing;
         newCrossing.time = tcr;
         newCrossing.rise = rise;
-        m_thresholdCrossings.push_back(std::move(newCrossing));
+        m_thresholdCrossings.push_back(newCrossing);
         times.clear();
         values.clear();
-        times.emplace_back(tNew);
-        values.emplace_back(vNew);
+        times.push_back(tNew);
+        values.push_back(vNew);
         nValues = 1;
       } else {
         // No crossing, simply reset the vector.
         times.clear();
         values.clear();
-        times.emplace_back(tNew);
-        values.emplace_back(vNew);
+        times.push_back(tNew);
+        values.push_back(vNew);
         nValues = 1;
       }
     }
@@ -861,10 +926,10 @@ bool Sensor::ComputeThresholdCrossings(const double thr,
         ((rise && values.back() > values[0]) ||
          (fall && values.back() < values[0]))) {
       double tcr = Numerics::Divdif(times, values, nValues, thr, iOrder);
-      ThresholdCrossing newCrossing;
+      thresholdCrossing newCrossing;
       newCrossing.time = tcr;
       newCrossing.rise = rise;
-      m_thresholdCrossings.push_back(std::move(newCrossing));
+      m_thresholdCrossings.push_back(newCrossing);
     }
     if (rise) {
       rise = false;
@@ -916,8 +981,9 @@ bool Sensor::GetBoundingBox(double& xmin, double& ymin, double& zmin,
   bool set = false;
   // Loop over the fields
   double x0, y0, z0, x1, y1, z1;
-  for (auto component : m_components) {
-    if (!component->GetBoundingBox(x0, y0, z0, x1, y1, z1)) continue;
+  const unsigned int nComponents = m_components.size();
+  for (unsigned int i = 0; i < nComponents; ++i) {
+    if (!m_components[i].comp->GetBoundingBox(x0, y0, z0, x1, y1, z1)) continue;
     if (set) {
       if (x0 < xmin) xmin = x0;
       if (y0 < ymin) ymin = y0;
@@ -940,8 +1006,12 @@ bool Sensor::GetBoundingBox(double& xmin, double& ymin, double& zmin,
   if (!set) {
     std::cerr << m_className << "::GetBoundingBox:\n";
     std::cerr << "    Sensor bounding box not known.\n";
-    xmin = ymin = zmin = 0.;
-    xmax = ymax = zmax = 0.;
+    xmin = 0.;
+    ymin = 0.;
+    zmin = 0.;
+    xmax = 0.;
+    ymax = 0.;
+    zmax = 0.;
     return false;
   }
 

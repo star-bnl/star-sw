@@ -11,15 +11,14 @@ namespace Garfield {
 class MediumMagboltz : public MediumGas {
 
  public:
-  /// Constructor
+  // Constructor
   MediumMagboltz();
-  /// Destructor
+  // Destructor
   virtual ~MediumMagboltz() {}
 
-  /// Set the highest electron energy to be included
-  //// in the scattering rates table.
+  // Set/get the highest electron energy to be included
+  // in the scattering rates table
   bool SetMaxElectronEnergy(const double e);
-  /// Get the highest electron energy in the scattering rates table.
   double GetMaxElectronEnergy() const { return m_eFinal; }
 
   // Set/get the highest photon energy to be included
@@ -74,27 +73,31 @@ class MediumMagboltz : public MediumGas {
   void PrintGas();
 
   // Get the overall null-collision rate [ns-1]
-  double GetElectronNullCollisionRate(const int band) override;
+  double GetElectronNullCollisionRate(const int band);
   // Get the (real) collision rate [ns-1] at a given electron energy e [eV]
-  double GetElectronCollisionRate(const double e, const int band) override;
+  double GetElectronCollisionRate(const double e, const int band);
   // Get the collision rate [ns-1] for a specific level
   double GetElectronCollisionRate(const double e, const unsigned int level,
                                   const int band);
   // Sample the collision type
   bool GetElectronCollision(const double e, int& type, int& level, double& e1,
-                            double& dx, double& dy, double& dz, 
-                            std::vector<std::pair<int, double> >& secondaries,
-                            int& ndxc, int& band) override;
+                            double& dx, double& dy, double& dz, int& nion,
+                            int& ndxc, int& band);
+  unsigned int GetNumberOfIonisationProducts() const { 
+    return m_ionProducts.size(); 
+  }
+  bool GetIonisationProduct(const unsigned int i, int& type, 
+                            double& energy) const;
   void ComputeDeexcitation(int iLevel, int& fLevel);
-  unsigned int GetNumberOfDeexcitationProducts() const override { 
+  unsigned int GetNumberOfDeexcitationProducts() const { 
     return m_dxcProducts.size();
   }
   bool GetDeexcitationProduct(const unsigned int i, double& t, double& s, 
-                              int& type, double& energy) const override;
+                              int& type, double& energy) const;
 
-  double GetPhotonCollisionRate(const double e) override;
+  double GetPhotonCollisionRate(const double e);
   bool GetPhotonCollision(const double e, int& type, int& level, double& e1,
-                          double& ctheta, int& nsec, double& esec) override;
+                          double& ctheta, int& nsec, double& esec);
 
   // Reset the collision counters
   void ResetCollisionCounters();
@@ -160,12 +163,12 @@ class MediumMagboltz : public MediumGas {
   double m_eFinal, m_eStep;
   double m_eHigh, m_eHighLog;
   double m_lnStep;
-  bool m_useAutoAdjust = true;
+  bool m_useAutoAdjust;
 
   // Flag enabling/disabling output of cross-section table to file
-  bool m_useCsOutput = false;
+  bool m_useCsOutput;
   // Number of different cross-section types in the current gas mixture
-  unsigned int m_nTerms = 0;
+  unsigned int m_nTerms;
   // Recoil energy parameter
   double m_rgas[m_nMaxGases];
   // Opal-Beaty-Peterson splitting parameter [eV]
@@ -178,28 +181,28 @@ class MediumMagboltz : public MediumGas {
   double m_tbGreenSawada[m_nMaxGases];
   bool m_hasGreenSawada[m_nMaxGases];
   // Energy loss
-  std::vector<double> m_energyLoss;
+  double m_energyLoss[nMaxLevels];
   // Cross-section type
-  std::vector<int> m_csType;
+  int m_csType[nMaxLevels];
   // Parameters for calculation of scattering angles
-  bool m_useAnisotropic = true;
+  bool m_useAnisotropic;
   double m_scatParameter[nEnergySteps][nMaxLevels];
   double m_scatParameterLog[nEnergyStepsLog][nMaxLevels];
-  std::vector<int> m_scatModel;
+  int m_scatModel[nMaxLevels];
   double m_scatCut[nEnergySteps][nMaxLevels];
   double m_scatCutLog[nEnergyStepsLog][nMaxLevels];
 
   // Level description
-  std::vector<std::string> m_description;
+  char m_description[nMaxLevels][50];
 
   // Total collision frequency
-  std::vector<double> m_cfTot;
-  std::vector<double> m_cfTotLog;
+  double m_cfTot[nEnergySteps];
+  double m_cfTotLog[nEnergyStepsLog];
   // Null-collision frequency
   double m_cfNull;
   // Collision frequencies
-  std::vector<std::vector<double> > m_cf;
-  std::vector<std::vector<double> > m_cfLog;
+  double m_cf[nEnergySteps][nMaxLevels];
+  double m_cfLog[nEnergyStepsLog][nMaxLevels];
 
   // Collision counters
   // 0: elastic
@@ -214,18 +217,18 @@ class MediumMagboltz : public MediumGas {
 
   // Penning transfer
   // Penning transfer probability (by level)
-  std::vector<double> m_rPenning;
+  double m_rPenning[nMaxLevels];
   // Mean distance of Penning ionisation (by level)
-  std::vector<double> m_lambdaPenning;
+  double m_lambdaPenning[nMaxLevels];
   // Number of Penning ionisations
-  unsigned int m_nPenning = 0;
+  unsigned int m_nPenning;
 
   // Deexcitation
   // Flag enabling/disabling detailed simulation of de-excitation process
-  bool m_useDeexcitation = false;
+  bool m_useDeexcitation;
   // Flag enabling/disable radiation trapping
   // (absorption of photons discrete excitation lines)
-  bool m_useRadTrap = true;
+  bool m_useRadTrap;
 
   struct deexcitation {
     // Gas component
@@ -261,6 +264,13 @@ class MediumMagboltz : public MediumGas {
   // Mapping between deexcitations and cross-section terms.
   int m_iDeexcitation[nMaxLevels];
 
+  // List of ionisation products.
+  struct ionProd {
+    int type;
+    double energy;
+  };
+  std::vector<ionProd> m_ionProducts;
+
   // List of de-excitation products
   int nDeexcitationProducts;
   struct dxcProd {
@@ -283,13 +293,13 @@ class MediumMagboltz : public MediumGas {
   // Scaling factor for excitation cross-sections
   double m_scaleExc[m_nMaxGases];
   // Flag selecting secondary electron energy distribution model
-  bool m_useOpalBeaty = true;
-  bool m_useGreenSawada = false;
+  bool m_useOpalBeaty;
+  bool m_useGreenSawada;
 
   // Energy spacing of photon collision rates table
   double m_eFinalGamma, m_eStepGamma;
   // Number of photon collision cross-section terms
-  int m_nPhotonTerms;
+  int nPhotonTerms;
   // Total photon collision frequencies
   std::vector<double> m_cfTotGamma;
   // Photon collision frequencies

@@ -18,7 +18,7 @@ extern long last_particle_number;
 class HeedPhoton : public gparticle {
  public:
   /// Default constructor.
-  HeedPhoton() = default;
+  HeedPhoton() : gparticle(), m_fieldMap(NULL) {}
   /// Constructor.
   HeedPhoton(manip_absvol* primvol, const point& pt, const vec& vel,
              vfloat time, long fparent_particle_number, double fenergy,
@@ -26,39 +26,33 @@ class HeedPhoton : public gparticle {
   /// Destructor
   virtual ~HeedPhoton() {}
 
-  void print(std::ostream& file, int l) const override;
-  HeedPhoton* copy() const override { return new HeedPhoton(*this); }
+  virtual void physics_after_new_speed(std::vector<gparticle*>& secondaries);
+  virtual void physics(std::vector<gparticle*>& secondaries);
+  virtual void print(std::ostream& file, int l) const;
+  virtual HeedPhoton* copy() const { return new HeedPhoton(*this); }
 
-  long m_particle_number;
-  long m_parent_particle_number;
-
+  long particle_number;
+  long parent_particle_number;
   /// Photon energy [MeV]
-  double m_energy;
-
-  /// Flag whether the photon has been absorbed.
+  double energy;
+  /// Flag whether the photon has been absorbed.,
   /// Used in physics_after_new_speed.
-  bool m_photon_absorbed = false;
+  bool s_photon_absorbed;
   /// Index of absorbing atom.
-  long m_na_absorbing;
+  long na_absorbing;
   /// Index of absorbing shell
-  long m_ns_absorbing;
+  long ns_absorbing;
 
 #ifdef SFER_PHOTOEL
   int s_sfer_photoel;
 #endif
-
   /// Flag that delta-electrons are already generated (or cannot be created).
-  bool m_delta_generated = false;
-
- protected:
-  void physics_after_new_speed(std::vector<gparticle*>& secondaries) override;
-  void physics(std::vector<gparticle*>& secondaries) override;
+  bool s_delta_generated;
 
  private:
   /// Flag to print internal algorithms of a selected event
-  bool m_print_listing = false;
-
-  HeedFieldMap* m_fieldMap = nullptr;
+  bool s_print_listing;
+  HeedFieldMap* m_fieldMap;
 };
 }
 

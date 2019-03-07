@@ -9,7 +9,18 @@
 
 namespace Garfield {
 
-TrackElectron::TrackElectron() : Track() {
+TrackElectron::TrackElectron()
+    : m_ready(false),
+      m_x(0.),
+      m_y(0.),
+      m_z(0.),
+      m_t(0.),
+      m_dx(0.),
+      m_dy(0),
+      m_dz(1.),
+      m_mediumName(""),
+      m_mediumDensity(0.),
+      m_mfp(0.) {
 
   m_className = "TrackElectron";
 
@@ -26,7 +37,8 @@ TrackElectron::TrackElectron() : Track() {
 void TrackElectron::SetParticle(const std::string& particle) {
 
   if (particle != "electron" && particle != "e" && particle != "e-") {
-    std::cerr << m_className << "::SetParticle: Only electrons are allowed.\n";
+    std::cerr << m_className << "::SetParticle:\n";
+    std::cerr << "    Only electrons can be transported.\n";
   }
 }
 
@@ -38,12 +50,13 @@ bool TrackElectron::NewTrack(const double x0, const double y0, const double z0,
 
   // Make sure the sensor has been set.
   if (!m_sensor) {
-    std::cerr << m_className << "::NewTrack: Sensor is not defined.\n";
+    std::cerr << m_className << "::NewTrack:\n";
+    std::cerr << "    Sensor is not defined.\n";
     return false;
   }
 
   // Get the medium at this location and check if it is "ionisable".
-  Medium* medium = nullptr; 
+  Medium* medium = NULL; 
   if (!m_sensor->GetMedium(x0, y0, z0, medium)) {
     std::cerr << m_className << "::NewTrack:\n";
     std::cerr << "    No medium at initial position.\n";
@@ -88,7 +101,12 @@ bool TrackElectron::NewTrack(const double x0, const double y0, const double z0,
       std::cout << "    Direction vector has zero norm.\n";
       std::cout << "    Initial direction is randomized.\n";
     }
-    RndmDirection(m_dx, m_dy, m_dz);
+    const double ctheta = 1. - 2. * RndmUniform();
+    const double stheta = sqrt(1. - ctheta * ctheta);
+    const double phi = TwoPi * RndmUniform();
+    m_dx = cos(phi) * stheta;
+    m_dy = sin(phi) * stheta;
+    m_dz = ctheta;
   } else {
     // Normalize the direction vector.
     m_dx = dx0 / dd;
@@ -127,7 +145,7 @@ bool TrackElectron::GetCluster(double& xcls, double& ycls, double& zcls,
     return false;
   }
 
-  Medium* medium = nullptr;
+  Medium* medium = NULL;
   if (!m_sensor->GetMedium(m_x, m_y, m_z, medium)) {
     m_ready = false;
     return false;
@@ -198,8 +216,7 @@ double TrackElectron::GetStoppingPower() {
     return 0.;
   }
 
-  constexpr double prefactor = 4 * Pi * HbarC * HbarC / 
-    (ElectronMass * ElectronMass);
+  const double prefactor = 4 * Pi * pow(HbarC / ElectronMass, 2);
   const double lnBg2 = log(m_beta2 / (1. - m_beta2));
 
   double dedx = 0.;
@@ -376,8 +393,7 @@ bool TrackElectron::SetupGas(Medium* gas) {
 
 bool TrackElectron::UpdateCrossSection() {
 
-  constexpr double prefactor = 4 * Pi * HbarC * HbarC / 
-    (ElectronMass * ElectronMass);
+  const double prefactor = 4 * Pi * pow(HbarC / ElectronMass, 2);
   const double lnBg2 = log(m_beta2 / (1. - m_beta2));
   // Parameter X in the Sternheimer fit formula
   const double eta = m_mediumDensity / LoschmidtNumber;

@@ -2,7 +2,6 @@
 #define G_VIEW_SIGNAL
 
 #include <string>
-#include <memory>
 
 #include <TCanvas.h>
 #include <TH1D.h>
@@ -24,7 +23,7 @@ class ViewSignal {
 
   /// Set the sensor from which to retrieve the signal.
   void SetSensor(Sensor* s);
-  /// Set the pad on which to draw the histogram.
+  /// Set the pad on which to draw the histogram. 
   void SetCanvas(TCanvas* c);
 
   /** Plot the signal.
@@ -36,37 +35,36 @@ class ViewSignal {
   void PlotSignal(const std::string& label, const bool total = true,
                   const bool electron = false, const bool ion = false);
   /** Retrieve the histogram for the induced signal.
-    * \param h histogram to be returned
+    * \param h histogram to be returned 
                ('t': total, 'e': electron-induced, 'h': ion-induced).
-    **/
-  TH1D* GetHistogram(const char h = 't') {
-    return h == 'e' ? m_hSignalElectrons.get() : 'i' ? m_hSignalIons.get()
-                                                     : m_hSignal.get();
+    **/ 
+  TH1D* GetHistogram(const char h = 't') { 
+    return h == 'e' ? m_hSignalElectrons : 'i' ? m_hSignalIons : m_hSignal; 
   }
 
   /// Enable/disable debugging output.
   void EnableDebugging(const bool on = true) { m_debug = on; }
 
  private:
-  std::string m_className = "ViewSignal";
+  std::string m_className;
 
   // Options
-  bool m_debug = false;
+  bool m_debug;
 
   // Sensor
-  Sensor* m_sensor = nullptr;
+  Sensor* m_sensor;
 
   // Canvas
-  TCanvas* m_canvas = nullptr;
-  bool m_hasExternalCanvas = false;
+  TCanvas* m_canvas;
+  bool m_hasExternalCanvas;
 
   // Histograms
-  std::unique_ptr<TH1D> m_hSignal;
-  std::unique_ptr<TH1D> m_hSignalElectrons;
-  std::unique_ptr<TH1D> m_hSignalIons;
+  TH1D* m_hSignal;
+  TH1D* m_hSignalElectrons;
+  TH1D* m_hSignalIons;
 
   // Threshold crossings
-  std::unique_ptr<TGraph> m_gCrossings;
+  TGraph* m_gCrossings;
 
   // Find an unused histogram name.
   std::string FindHistogramName(const std::string& base) const;

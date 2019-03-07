@@ -33,7 +33,7 @@ class plane : public absref {
   vec Gdir(void) const { return dir; }
 
  protected:
-  virtual absref_transmit get_components() override;
+  virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
   static absref(absref::*aref[2]);
 
  public:

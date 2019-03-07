@@ -10,7 +10,13 @@
 
 namespace Garfield {
 
-ViewGeometry::ViewGeometry() {
+ViewGeometry::ViewGeometry()
+    : m_className("ViewGeometry"),
+      m_debug(false),
+      m_canvas(NULL),
+      m_hasExternalCanvas(false),
+      m_geometry(NULL),
+      m_geoManager(NULL) {
 
   plottingEngine.SetDefaultStyle();
 }
@@ -36,7 +42,7 @@ void ViewGeometry::SetCanvas(TCanvas* c) {
   if (!c) return;
   if (!m_hasExternalCanvas && m_canvas) {
     delete m_canvas;
-    m_canvas = nullptr;
+    m_canvas = NULL;
   }
   m_canvas = c;
   m_hasExternalCanvas = true;
@@ -68,7 +74,7 @@ void ViewGeometry::Plot() {
     std::cerr << m_className << "::Plot: Cannot retrieve bounding box.\n";
     return;
   }
-  m_geoManager.reset(new TGeoManager("ViewGeometryGeoManager", ""));
+  m_geoManager = new TGeoManager("ViewGeometryGeoManager", "");
   TGeoMaterial* matVacuum = new TGeoMaterial("Vacuum", 0., 0., 0.);
   TGeoMedium* medVacuum = new TGeoMedium("Vacuum", 1, matVacuum);
   m_media.push_back(medVacuum);
@@ -91,8 +97,9 @@ void ViewGeometry::Plot() {
     }
     // Get the center coordinates.
     double x0 = 0., y0 = 0., z0 = 0.;
-    if (!solid->GetCentre(x0, y0, z0)) {
-      std::cerr << m_className << "::Plot: Could not determine solid centre.\n";
+    if (!solid->GetCenter(x0, y0, z0)) {
+      std::cerr << m_className << "::Plot:\n"
+                << "    Could not determine solid center.\n";
       continue;
     }
     // Get the rotation.
@@ -106,7 +113,7 @@ void ViewGeometry::Plot() {
     double matrix[9] = {cphi * ctheta, -sphi, cphi * stheta,
                         sphi * ctheta,  cphi, sphi * stheta,
                               -stheta,     0,        ctheta};
-    TGeoVolume* volume = nullptr;
+    TGeoVolume* volume = NULL;
     if (solid->IsTube()) {
       double rmin = 0., rmax = 0., lz = 0.;
       if (!solid->GetDimensions(rmin, rmax, lz)) {
@@ -163,7 +170,8 @@ void ViewGeometry::Plot() {
 
 void ViewGeometry::Reset() {
 
- for (auto it = m_volumes.begin(), end = m_volumes.end(); it != end; ++it) {
+ for (std::vector<TGeoVolume*>::iterator it = m_volumes.begin();
+      it != m_volumes.end(); ++it) {
     if (*it) {
       TGeoShape* shape = (*it)->GetShape();
       if (shape) delete shape;
@@ -171,7 +179,8 @@ void ViewGeometry::Reset() {
     }
   }
   m_volumes.clear();
-  for (auto it = m_media.begin(), end = m_media.end(); it != end; ++it) {
+  for (std::vector<TGeoMedium*>::iterator it = m_media.begin();
+       it != m_media.end(); ++it) {
     if (*it) {
       TGeoMaterial* material = (*it)->GetMaterial();
       if (material) delete material;
@@ -180,7 +189,11 @@ void ViewGeometry::Reset() {
   }
   m_media.clear();
 
-  m_geoManager.reset(nullptr);
+  if (m_geoManager) {
+    delete m_geoManager;
+    m_geoManager = NULL;
+  }
+
 }
 
 }

@@ -45,17 +45,17 @@ class box : public absvol {
   void init_prec();
   void init_planes();
 
-  int check_point_inside(const point& fpt, const vec& dir) const override;
+  virtual int check_point_inside(const point& fpt, const vec& dir) const;
 
   /// Range till exit from given volume or to entry only.
-  int range_ext(trajestep& fts, int s_ext) const override;
-  void income(gparticle* gp) override;
-  void chname(char* nm) const override;
-  void print(std::ostream& file, int l) const override;
-  box* copy() const override;
+  virtual int range_ext(trajestep& fts, int s_ext) const;
+  virtual void income(gparticle* gp);
+  virtual void chname(char* nm) const;
+  virtual void print(std::ostream& file, int l) const;
+  virtual box* copy() const;
 
  protected:
-  absref_transmit get_components() override;
+  virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
 };
 
 /// Box "manipulator".
@@ -68,10 +68,10 @@ class manip_box : public manip_absvol, public box {
   /// Destructor
   virtual ~manip_box() {}
 
-  absvol* Gavol() const override;
-  void chname(char* nm) const override;
-  void print(std::ostream& file, int l) const override;
-  manip_box* copy() const override;
+  virtual absvol* Gavol() const;
+  virtual void chname(char* nm) const;
+  virtual void print(std::ostream& file, int l) const;
+  virtual manip_box* copy() const;
 };
 
 // *****   sh_manip_box  ********
@@ -86,13 +86,13 @@ class sh_manip_box : public sh_manip_absvol, public box {
   /// Destructor
   virtual ~sh_manip_box() {}
 
-  absvol* Gavol() const override;
-  void chname(char* nm) const override;
-  void print(std::ostream& file, int l) const override;
-  sh_manip_box* copy() const override;
+  virtual absvol* Gavol() const;
+  virtual void chname(char* nm) const;
+  virtual void print(std::ostream& file, int l) const;
+  virtual sh_manip_box* copy() const;
 
  protected:
-  absref_transmit get_components() override;
+  virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
 };
 }
 

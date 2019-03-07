@@ -18,8 +18,8 @@ namespace Heed {
 absref absref::*(plane::aref[2]) = {(absref absref::*)&plane::piv,
                                     (absref absref::*)&plane::dir};
 
-absref_transmit plane::get_components() {
-  return absref_transmit(2, aref);
+void plane::get_components(ActivePtr<absref_transmit>& aref_tran) {
+  aref_tran.pass(new absref_transmit(2, aref));
 }
 
 plane::plane(const straight& sl, const point& pt) : piv(sl.Gpiv()), dir() {

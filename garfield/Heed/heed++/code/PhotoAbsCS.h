@@ -6,17 +6,17 @@
 #include <cmath>
 #include <cfloat>
 #include <climits>
-#include <memory>
+#include "wcpplib/safetl/AbsPtr.h"
 #include "wcpplib/clhep_units/WPhysicalConstants.h"
 #include "heed++/code/PhysicalConstants.h"
 
 namespace Heed {
 
 /// TRK sum rule [1/MeV], constant per one electron.
-constexpr double Thomas_sum_rule_const =
+const double Thomas_sum_rule_const =
     2 * CLHEP::pi2 * CLHEP::fine_structure_const / CLHEP::electron_mass_c2;
 /// TRK sum rule [Mb * MeV].
-constexpr double Thomas_sum_rule_const_Mb =
+const double Thomas_sum_rule_const_Mb =
     Thomas_sum_rule_const * 1.0E-6 / C1_MEV2_BN;
 
 /// Photoabsorption cross-section base class.
@@ -74,19 +74,19 @@ class PhotoAbsCS {
 
  protected:
   std::string name;
-  int number = 0;
+  int number;
   int Z;
   double threshold;  // in MeV
 };
 
 /// Smoothed/smeared photoabsorption cross-section
 class AveragePhotoAbsCS : public PhotoAbsCS {
-  std::shared_ptr<PhotoAbsCS> real_pacs;
+  ActivePtr<PhotoAbsCS> real_pacs;
   double width;
   /// Max. number of integration steps (in get_integral_CS).
   /// If real q is more, the function calls PhotoAbsCs::get_integral_CS.
   long max_q_step;
-  /// Integration step, for example, 1/20 of the width.
+  /// Integration step, for example, 1/20 from width.
   double step;
 
  public:
@@ -106,13 +106,13 @@ class AveragePhotoAbsCS : public PhotoAbsCS {
                     long fmax_q_step);
   /// Destructor
   virtual ~AveragePhotoAbsCS() {}
-  double get_CS(double energy) const override;
-  double get_integral_CS(double energy1, double energy2) const override;
+  virtual double get_CS(double energy) const;
+  virtual double get_integral_CS(double energy1, double energy2) const;
 
-  void scale(double fact) override;
+  virtual void scale(double fact);
 
-  void print(std::ostream& file, int l) const override;
-  AveragePhotoAbsCS* copy() const override {
+  virtual void print(std::ostream& file, int l) const;
+  virtual AveragePhotoAbsCS* copy() const {
     return new AveragePhotoAbsCS(*this);
   }
 };
@@ -126,17 +126,17 @@ class HydrogenPhotoAbsCS : public PhotoAbsCS {
   HydrogenPhotoAbsCS();
   /// Destructor
   virtual ~HydrogenPhotoAbsCS() {}
-  double get_CS(double energy) const override;
-  double get_integral_CS(double energy1, double energy2) const override;
-  void scale(double fact) override;
+  virtual double get_CS(double energy) const;
+  virtual double get_integral_CS(double energy1, double energy2) const;
+  virtual void scale(double fact);
 
-  void print(std::ostream& file, int l) const override;
-  HydrogenPhotoAbsCS* copy() const override {
+  virtual void print(std::ostream& file, int l) const;
+  virtual HydrogenPhotoAbsCS* copy() const {
     return new HydrogenPhotoAbsCS(*this);
   }
 
  private:
-  double prefactor = 1.;
+  double prefactor;
 };
 
 /// Typically this is for reading Experimental CS, for example of argon,
@@ -160,7 +160,7 @@ class HydrogenPhotoAbsCS : public PhotoAbsCS {
 class SimpleTablePhotoAbsCS : public PhotoAbsCS {
  public:
   /// Default constructor.
-  SimpleTablePhotoAbsCS() = default;
+  SimpleTablePhotoAbsCS();
   /// Constructor for reading table from file.
   SimpleTablePhotoAbsCS(const std::string& fname, int fZ, double fthreshold,
                         const std::string& ffile_name);
@@ -188,13 +188,13 @@ class SimpleTablePhotoAbsCS : public PhotoAbsCS {
   /// Both functions allow to use the straight interpolation to threshold
   void remove_leading_tiny(double level);
 
-  double get_CS(double energy) const override;
-  double get_integral_CS(double energy1, double energy2) const override;
+  virtual double get_CS(double energy) const;
+  virtual double get_integral_CS(double energy1, double energy2) const;
   const std::vector<double>& get_arr_ener() const { return ener; }
   const std::vector<double>& get_arr_CS() const { return cs; }
-  void scale(double fact) override;
-  void print(std::ostream& file, int l) const override;
-  SimpleTablePhotoAbsCS* copy() const override {
+  virtual void scale(double fact);
+  virtual void print(std::ostream& file, int l) const;
+  virtual SimpleTablePhotoAbsCS* copy() const {
     return new SimpleTablePhotoAbsCS(*this);
   }
 
@@ -222,12 +222,11 @@ class PhenoPhotoAbsCS : public PhotoAbsCS {
                   double fpower = 2.75);
   /// Destructor.
   virtual ~PhenoPhotoAbsCS() {}
-
-  double get_CS(double energy) const override;
-  double get_integral_CS(double energy1, double energy2) const override;
-  void scale(double fact) override;
-  void print(std::ostream& file, int l) const override;
-  PhenoPhotoAbsCS* copy() const override { return new PhenoPhotoAbsCS(*this); }
+  virtual double get_CS(double energy) const;
+  virtual double get_integral_CS(double energy1, double energy2) const;
+  virtual void scale(double fact);
+  virtual void print(std::ostream& file, int l) const;
+  virtual PhenoPhotoAbsCS* copy() const { return new PhenoPhotoAbsCS(*this); }
 
  private:
   double power;
@@ -247,13 +246,13 @@ class PhenoPhotoAbsCS : public PhotoAbsCS {
 /// in this class, get_channel returns 0, which must be interpreted as
 /// the use of standard channel.
 
-class AtomicSecondaryProducts {
+class AtomicSecondaryProducts : public RegPassivePtr {
  public:
   /// Constructor
   AtomicSecondaryProducts()
       : channel_prob_dens(), electron_energy(), photon_energy() {}
   /// Destructor
-  ~AtomicSecondaryProducts() {}
+  virtual ~AtomicSecondaryProducts() {}
   /// Sample a channel (photon and electron energies in MeV).
   /// Return 1 if the channel is generated and 0 if not.
   int get_channel(std::vector<double>& felectron_energy,
@@ -272,7 +271,7 @@ class AtomicSecondaryProducts {
                    const std::vector<double>& fphoton_energy,
                    int s_all_rest = 0);
 
-  void print(std::ostream& file, int l) const;
+  virtual void print(std::ostream& file, int l) const;
 
  protected:
   // Probability of specific channel.
@@ -283,7 +282,7 @@ class AtomicSecondaryProducts {
 };
 
 /// Atomic photoabsorption cross-section abstract base class.
-class AtomPhotoAbsCS {
+class AtomPhotoAbsCS : public RegPassivePtr {
  public:
   /// Default constructor.
   AtomPhotoAbsCS();
@@ -394,7 +393,7 @@ class SimpleAtomPhotoAbsCS : public AtomPhotoAbsCS {
   SimpleAtomPhotoAbsCS(int fZ, const std::string& ffile_name);
   /// Constructor with one prepared preliminary shell with Z electrons.
   /// Convenient for hydrogen.
-  SimpleAtomPhotoAbsCS(int fZ, std::shared_ptr<PhotoAbsCS> fasc);
+  SimpleAtomPhotoAbsCS(int fZ, const PhotoAbsCS& fasc);
   /// Destructor
   virtual ~SimpleAtomPhotoAbsCS() {}
 
@@ -411,7 +410,7 @@ class SimpleAtomPhotoAbsCS : public AtomPhotoAbsCS {
                                   double energy2) const;
 
   virtual int get_main_shell_number(int nshell) const {
-    return m_acs[nshell]->get_number();
+    return acs[nshell]->get_number();
   }
   virtual void print(std::ostream& file, int l) const;
   virtual SimpleAtomPhotoAbsCS* copy() const {
@@ -421,10 +420,10 @@ class SimpleAtomPhotoAbsCS : public AtomPhotoAbsCS {
  protected:
   /// Filename (saved for printing).
   std::string file_name;
-  std::vector<std::shared_ptr<PhotoAbsCS> > m_acs;
+  std::vector<ActivePtr<PhotoAbsCS> > acs;
 };
 
-constexpr double low_boundary_of_excitations = 0.7; // from ionization threshold
+const double low_boundary_of_excitations = 0.7;  // from ionization threshold
 
 /// Atomic photo-absorption with excitation.
 class ExAtomPhotoAbsCS : public AtomPhotoAbsCS {
@@ -443,7 +442,7 @@ class ExAtomPhotoAbsCS : public AtomPhotoAbsCS {
                                   double energy2) const;
 
   virtual int get_main_shell_number(int nshell) const {
-    return m_acs[nshell]->get_number();
+    return acs[nshell]->get_number();
   }
 
   // Width [MeV]
@@ -543,7 +542,7 @@ class ExAtomPhotoAbsCS : public AtomPhotoAbsCS {
   std::string BT_file_name;
   /// Ionization cross-section (the name acs is misleading).
   /// Excitations are added separately as height_of_excitation.
-  std::vector<std::shared_ptr<PhotoAbsCS> > m_acs;
+  std::vector<ActivePtr<PhotoAbsCS> > acs;
 
   // 3 variables for printing listings
   double integ_abs_before_corr;
@@ -572,7 +571,7 @@ class ExAtomPhotoAbsCS : public AtomPhotoAbsCS {
 
 //---------------------------------------------------------
 
-constexpr double standard_factor_Fano = 0.19;
+const double standard_factor_Fano = 0.19;
 
 #define CALC_W_USING_CHARGES
 // the opposite is just averaging potentials
@@ -582,30 +581,30 @@ constexpr double standard_factor_Fano = 0.19;
 // The opposite case is preserved for debug and research purposes.
 // F is calculated by the same way as W
 
-constexpr double coef_I_to_W = 2.0;
+const double coef_I_to_W = 2.0;
 
 /// Molecular photoabsorption cross-section.
 /// Molecules refer to atoms by passive pointers.
 /// If atom is changed, its image for molecule is also changed.
 
-class MolecPhotoAbsCS {
+class MolecPhotoAbsCS : public RegPassivePtr {
  public:
   /// Total number of atoms of all sorts in the molecule.
   int get_qatom() const { return qatom; }
   /// Number of atoms of a particular sort in the molecule.
   int get_qatom_ps(const int n) const { return qatom_ps[n]; }
-  const AtomPhotoAbsCS* get_atom(const int n) { 
+  const PassivePtr<const AtomPhotoAbsCS> get_atom(const int n) { 
     return atom[n]; 
   }
 
   /// Photo-absorption cross-section [Mbarn] at a given energy [MeV].
-  double get_ACS(double energy) const;
+  virtual double get_ACS(double energy) const;
   /// Integral photo-absorption cross-section.
-  double get_integral_ACS(double energy1, double energy2) const;
+  virtual double get_integral_ACS(double energy1, double energy2) const;
   /// Photo-ionization cross-section [Mbarn] at a given energy [MeV].
-  double get_ICS(double energy) const;
+  virtual double get_ICS(double energy) const;
   /// Integral photo-ionization cross-section.
-  double get_integral_ICS(double energy1, double energy2) const;
+  virtual double get_integral_ICS(double energy1, double energy2) const;
 
   /// Sum up the atomic numbers of all atoms in the molecule.
   int get_total_Z() const;
@@ -615,35 +614,35 @@ class MolecPhotoAbsCS {
   double get_F() const { return F; }
 
   /// Default constructor.
-  MolecPhotoAbsCS() = default;
+  MolecPhotoAbsCS() : qatom(0) {}
   /// Constructor for one sort of atoms.
   /// If fW == 0.0, the program assigns it as 2 * mean(I_min).
-  MolecPhotoAbsCS(const AtomPhotoAbsCS* fatom, int fqatom, double fW = 0.0,
+  MolecPhotoAbsCS(const AtomPhotoAbsCS& fatom, int fqatom, double fW = 0.0,
                   double fF = standard_factor_Fano);
   /// Constructor for two sorts of atoms.
   /// If fW == 0.0, the program assigns it as 2 * mean(I_min).
-  MolecPhotoAbsCS(const AtomPhotoAbsCS* fatom1, int fqatom_ps1,
-                  const AtomPhotoAbsCS* fatom2, int fqatom_ps2, double fW = 0.0,
+  MolecPhotoAbsCS(const AtomPhotoAbsCS& fatom1, int fqatom_ps1,
+                  const AtomPhotoAbsCS& fatom2, int fqatom_ps2, double fW = 0.0,
                   double fF = standard_factor_Fano);
   /// Constructor for three sorts of atoms.
   /// If fW == 0.0, the program assigns it as 2 * mean(I_min).
-  MolecPhotoAbsCS(const AtomPhotoAbsCS* fatom1, int fqatom_ps1,
-                  const AtomPhotoAbsCS* fatom2, int fqatom_ps2,
-                  const AtomPhotoAbsCS* fatom3, int fqatom_ps3, double fW = 0.0,
+  MolecPhotoAbsCS(const AtomPhotoAbsCS& fatom1, int fqatom_ps1,
+                  const AtomPhotoAbsCS& fatom2, int fqatom_ps2,
+                  const AtomPhotoAbsCS& fatom3, int fqatom_ps3, double fW = 0.0,
                   double fF = standard_factor_Fano);
   /// Destructor
-  ~MolecPhotoAbsCS() {}
-  void print(std::ostream& file, int l) const;
+  virtual ~MolecPhotoAbsCS() {}
+  virtual void print(std::ostream& file, int l) const;
 
  private:
   /// Total number of atoms, NOT number of sorts, NOT qel in atom.
-  int qatom = 0;
+  int qatom;
   std::vector<int> qatom_ps;
-  std::vector<const AtomPhotoAbsCS*> atom;
+  std::vector<PassivePtr<const AtomPhotoAbsCS> > atom;
   /// Mean work per pair production [MeV].
-  double W = 0.;
+  double W;
   /// Fano factor.
-  double F = standard_factor_Fano;
+  double F;
 };
 std::ostream& operator<<(std::ostream& file, const MolecPhotoAbsCS& f);
 }

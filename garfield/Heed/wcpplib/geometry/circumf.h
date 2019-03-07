@@ -63,7 +63,7 @@ class circumf : public absref {
   /// Radius, >0.
   vfloat rad;  
 
-  virtual absref_transmit get_components() override;
+  virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
   static absref(absref::*aref[2]);
 
 };

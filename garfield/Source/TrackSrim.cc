@@ -120,8 +120,21 @@ void PrintSettings(const std::string& hdr,
 namespace Garfield {
 
 TrackSrim::TrackSrim()
-    : Track() {
+    : Track(),
+      m_precisevavilov(false),
+      m_useTransStraggle(true),
+      m_useLongStraggle(false),
+      m_chargeset(false),
+      m_density(-1.0),
+      m_work(-1.),
+      m_fano(-1.),
+      m_a(-1.), 
+      m_z(-1.),
+      m_maxclusters(-1),
+      m_model(4),
+      m_nsize(-1) {
   m_className = "TrackSrim";
+  m_mass = -1.;
 }
 
 bool TrackSrim::ReadFile(const std::string& file) {
@@ -729,7 +742,12 @@ bool TrackSrim::NewTrack(const double x0, const double y0, const double z0,
                 << "    Initial direction is randomized.\n";
     }
     // Null vector. Sample the direction isotropically.
-    RndmDirection(xdir, ydir, zdir);
+    const double ctheta = 1. - 2. * RndmUniform();
+    const double stheta = sqrt(1. - ctheta * ctheta);
+    const double phi = TwoPi * RndmUniform();
+    xdir = cos(phi) * stheta;
+    ydir = sin(phi) * stheta;
+    zdir = ctheta;
   } else {
     // Normalise the direction vector.
     xdir /= normdir;

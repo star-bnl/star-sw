@@ -2,8 +2,6 @@
 #define G_VIEW_GEOMETRY
 
 #include <string>
-#include <vector>
-#include <memory>
 
 #include <TCanvas.h>
 #include <TGeoManager.h>
@@ -33,21 +31,21 @@ class ViewGeometry {
   void EnableDebugging(const bool on = true) { m_debug = on; }
 
  private:
-  std::string m_className = "ViewGeometry";
+  std::string m_className;
 
   // Options
-  bool m_debug = false;
+  bool m_debug;
 
   // Canvas
-  TCanvas* m_canvas = nullptr;
-  bool m_hasExternalCanvas = false;
+  TCanvas* m_canvas;
+  bool m_hasExternalCanvas;
 
-  GeometrySimple* m_geometry = nullptr;
+  GeometrySimple* m_geometry;
 
   std::vector<TGeoVolume*> m_volumes;
   std::vector<TGeoMedium*> m_media;
 
-  std::unique_ptr<TGeoManager> m_geoManager;
+  TGeoManager* m_geoManager;
 
   void Reset();
 

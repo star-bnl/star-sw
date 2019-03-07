@@ -20,7 +20,7 @@ class Sensor {
   /// Add a component.
   void AddComponent(ComponentBase* comp);
   unsigned int GetNumberOfComponents() const { return m_components.size(); }
-  ComponentBase* GetComponent(const unsigned int i);
+  ComponentBase* GetComponent(const unsigned int componentNumber);
 
   /// Add an electrode.
   void AddElectrode(ComponentBase* comp, const std::string& label);
@@ -117,14 +117,17 @@ class Sensor {
   void DisableDebugging() { m_debug = false; }
 
  private:
-  std::string m_className = "Sensor";
+  std::string m_className;
 
   // Components
-  std::vector<ComponentBase*> m_components;
-  ComponentBase* m_lastComponent = nullptr;
+  struct component {
+    ComponentBase* comp;
+  };
+  std::vector<component> m_components;
+  int m_lastComponent;
 
   // Electrodes
-  struct Electrode {
+  struct electrode {
     ComponentBase* comp;
     std::string label;
     std::vector<double> signal;
@@ -132,39 +135,38 @@ class Sensor {
     std::vector<double> ionsignal;
     double charge;
   };
-  std::vector<Electrode> m_electrodes;
+  std::vector<electrode> m_electrodes;
 
   // Time window for signals
-  unsigned int m_nTimeBins = 200;
-  double m_tStart = 0.;
-  double m_tStep = 10.;
-  unsigned int m_nEvents = 0;
+  unsigned int m_nTimeBins;
+  double m_tStart, m_tStep;
+  unsigned int m_nEvents;
   static double m_signalConversion;
 
   // Transfer function
-  bool m_hasTransferFunction = false;
-  double (*m_fTransfer)(double t) = nullptr;
+  bool m_hasTransferFunction;
+  double (*m_fTransfer)(double t);
   std::vector<double> m_transferFunctionTimes;
   std::vector<double> m_transferFunctionValues;
 
   // Noise
-  bool m_hasNoiseFunction = false;
-  double (*m_fNoise)(double t) = nullptr;
+  bool m_hasNoiseFunction;
+  double (*m_fNoise)(double t);
 
-  struct ThresholdCrossing {
+  struct thresholdCrossing {
     double time;
     bool rise;
   };
-  std::vector<ThresholdCrossing> m_thresholdCrossings;
+  std::vector<thresholdCrossing> m_thresholdCrossings;
   double m_thresholdLevel;
 
   // User bounding box
-  bool m_hasUserArea = false;
-  double m_xMinUser = 0., m_yMinUser = 0., m_zMinUser = 0.;
-  double m_xMaxUser = 0., m_yMaxUser = 0., m_zMaxUser = 0.;
+  bool m_hasUserArea;
+  double m_xMinUser, m_yMinUser, m_zMinUser;
+  double m_xMaxUser, m_yMaxUser, m_zMaxUser;
 
   // Switch on/off debugging messages
-  bool m_debug = false;
+  bool m_debug;
 
   // Return the current sensor size
   bool GetBoundingBox(double& xmin, double& ymin, double& zmin, double& xmax,

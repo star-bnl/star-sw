@@ -13,36 +13,35 @@ namespace Garfield {
 class MediumGas : public Medium {
 
  public:
-  /// Constructor
+  // Constructor
   MediumGas();
-  /// Destructor
+  // Destructor
   virtual ~MediumGas() {}
 
-  bool IsGas() const override { return true; }
+  bool IsGas() const { return true; }
 
-  /// Set the gas mixture.
+  // Set/get the gas mixture
   bool SetComposition(const std::string& gas1, const double f1 = 1.,
                       const std::string& gas2 = "", const double f2 = 0.,
                       const std::string& gas3 = "", const double f3 = 0.,
                       const std::string& gas4 = "", const double f4 = 0.,
                       const std::string& gas5 = "", const double f5 = 0.,
                       const std::string& gas6 = "", const double f6 = 0.);
-  /// Retrieve the gas mixture.
+
   void GetComposition(std::string& gas1, double& f1, std::string& gas2,
                       double& f2, std::string& gas3, double& f3,
                       std::string& gas4, double& f4, std::string& gas5,
                       double& f5, std::string& gas6, double& f6);
-  void GetComponent(const unsigned int i, std::string& label, 
-                    double& f) override;
+  void GetComponent(const unsigned int i, std::string& label, double& f);
 
-  void SetAtomicNumber(const double z) override;
-  double GetAtomicNumber() const override;
-  void SetAtomicWeight(const double a) override;
-  double GetAtomicWeight() const override;
-  void SetNumberDensity(const double n) override;
-  double GetNumberDensity() const override;
-  void SetMassDensity(const double rho) override;
-  double GetMassDensity() const override;
+  void SetAtomicNumber(const double z);
+  double GetAtomicNumber() const;
+  void SetAtomicWeight(const double a);
+  double GetAtomicWeight() const;
+  void SetNumberDensity(const double n);
+  double GetNumberDensity() const;
+  void SetMassDensity(const double rho);
+  double GetMassDensity() const;
 
   bool LoadGasFile(const std::string& filename);
   bool WriteGasFile(const std::string& filename);
@@ -59,26 +58,25 @@ class MediumGas : public Medium {
   void SetInterpolationMethodIonisationRates(const int intrp);
 
   // Scaling laws.
-  // TODO: cache scaling factors.
-  double ScaleElectricField(const double e) const override {
+  double ScaleElectricField(const double e) const {
     return e * m_pressureTable / m_pressure;
   }
-  double UnScaleElectricField(const double e) const override {
+  double UnScaleElectricField(const double e) const {
     return e * m_pressure / m_pressureTable;
   }
-  double ScaleDiffusion(const double d) const override {
+  double ScaleDiffusion(const double d) const {
     return d * sqrt(m_pressureTable / m_pressure);
   }
-  double ScaleDiffusionTensor(const double d) const override {
+  double ScaleDiffusionTensor(const double d) const {
     return d * m_pressureTable / m_pressure;
   }
-  double ScaleTownsend(const double alpha) const override {
+  double ScaleTownsend(const double alpha) const {
     return alpha * m_pressure / m_pressureTable;
   }
-  double ScaleAttachment(const double eta) const override {
+  double ScaleAttachment(const double eta) const {
     return eta * m_pressure / m_pressureTable;
   }
-  double ScaleLorentzAngle(const double lor) const override {
+  double ScaleLorentzAngle(const double lor) const {
     return lor * m_pressure / m_pressureTable;
   }
 
@@ -96,12 +94,12 @@ class MediumGas : public Medium {
 
   // Penning transfer
   // Flag enabling/disabling Penning transfer
-  bool m_usePenning = false;
+  bool m_usePenning;
   // Penning transfer probability
-  double m_rPenningGlobal = 0.;
+  double m_rPenningGlobal;
   double m_rPenningGas[m_nMaxGases];
   // Mean distance of Penning ionisation
-  double m_lambdaPenningGlobal = 0.;
+  double m_lambdaPenningGlobal;
   double m_lambdaPenningGas[m_nMaxGases];
 
   // Pressure at which the transport parameter table was calculated
@@ -110,33 +108,34 @@ class MediumGas : public Medium {
   double m_temperatureTable;
 
   // Table of Townsend coefficients without Penning transfer
-  std::vector<std::vector<std::vector<double> > > m_eTownsendNoPenning;
+  std::vector<std::vector<std::vector<double> > > m_tabTownsendNoPenning;
 
   // Tables for excitation and ionisation rates
-  std::vector<std::vector<std::vector<std::vector<double> > > > m_excRates;
-  std::vector<std::vector<std::vector<std::vector<double> > > > m_ionRates;
+  bool m_hasExcRates, m_hasIonRates;
+  std::vector<std::vector<std::vector<std::vector<double> > > > m_tabExcRates;
+  std::vector<std::vector<std::vector<std::vector<double> > > > m_tabIonRates;
 
   // Store excitation and ionization information
-  struct ExcListElement {
+  struct excListElement {
     std::string label;
     double energy;
     double prob;
     double rms;
     double dt;
   };
-  std::vector<ExcListElement> m_excitationList;
+  std::vector<excListElement> m_excitationList;
 
-  struct IonListElement {
+  struct ionListElement {
     std::string label;
     double energy;
   };
-  std::vector<IonListElement> m_ionisationList;
+  std::vector<ionListElement> m_ionisationList;
 
   // Extrapolation/interpolation for excitation and ionisation rates.
-  std::pair<unsigned int, unsigned int> m_extrExcRates = {0, 1};
-  std::pair<unsigned int, unsigned int> m_extrIonRates = {0, 1};
-  unsigned int m_intpExcRates = 2;
-  unsigned int m_intpIonRates = 2;
+  unsigned int m_extrLowExcRates, m_extrHighExcRates;
+  unsigned int m_extrLowIonRates, m_extrHighIonRates;
+  unsigned int m_intpExcRates;
+  unsigned int m_intpIonRates;
 
   bool GetGasInfo(const std::string& gasname, double& a, double& z) const;
   bool GetGasName(const int gasnumber, const int version, std::string& gasname);

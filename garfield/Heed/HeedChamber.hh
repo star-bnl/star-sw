@@ -29,14 +29,14 @@ class HeedChamber : public Heed::sh_manip_absvol,
     s_sensitive = true;
   }
 
-  Garfield::HeedChamber* copy() const override {
+  virtual Garfield::HeedChamber* copy() const {
     return new Garfield::HeedChamber(*this);
   }
-  absvol* Gavol() const override { return (Heed::box*)this; }
+  virtual absvol* Gavol() const { return (Heed::box*)this; }
 
  protected:
-  Heed::absref_transmit get_components() override {
-    return sh_manip_absvol::get_components();
+  virtual void get_components(Heed::ActivePtr<Heed::absref_transmit>& aref_tran) {
+    sh_manip_absvol::get_components(aref_tran);
   }
 };
 }
