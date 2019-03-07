@@ -1,8 +1,9 @@
 #ifndef PARTICLE_DEF_H
 #define PARTICLE_DEF_H
 
-#include <string>
 #include <list>
+
+#include "wcpplib/safetl/AbsPtr.h"
 
 namespace Heed {
 
@@ -10,9 +11,9 @@ namespace Heed {
 
 class spin_def {
  public:
-  float total = 0.;
-  float projection = 0.;
-  spin_def() = default;
+  float total;
+  float projection;
+  spin_def() : total(0), projection(0) {}
   spin_def(float ftotal, float fprojection);
 };
 std::ostream& operator<<(std::ostream& file, const spin_def& f);
@@ -34,24 +35,34 @@ std::ostream& operator<<(std::ostream& file, const spin_def& f);
 /// When the user program wants to refer to particle,
 /// it has to use either char* (string) notation, or pointer (or reference)
 /// to one of these objects.
+/// As usually, in the case of pointers I recommend to use protected pointers
+/// to external objects PassivePtr.
 /// The user pogram can initialize the new particles.
 /// The standard particles are initiated right here, below.
 ///
 /// 1999 - 2004,   I. Smirnov
 
-class particle_def {
+class particle_def : public RegPassivePtr {
  public:
-  std::string name = "none";
+  std::string name;
   /// Short name to make data summary files short.
-  std::string notation = "none";
-  double mass = 0.;
-  double charge = 0.;
+  std::string notation;
+  double mass;
+  double charge;
   // The following is not yet used in programs
-  int lepton_n = 0;
-  int baryon_n = 0;
-  float spin = 0.;
+  int lepton_n;
+  int baryon_n;
+  float spin;
   spin_def isospin;
-  particle_def() {
+  particle_def()
+      : name("none"),
+        notation("none"),
+        mass(0),
+        charge(0),
+        lepton_n(0),
+        baryon_n(0),
+        spin(0),
+        isospin(0, 0) {
     particle_def::get_logbook().push_back(this);
   }
   particle_def(const std::string& fname, const std::string& fnotation,
@@ -64,7 +75,7 @@ class particle_def {
                          fspin, spin_def(fisospin_total, fisospin_proj));
   }
 
-  particle_def(const particle_def& f) {
+  particle_def(const particle_def& f) : RegPassivePtr() {
     *this = f;
     verify();
     particle_def::get_logbook().push_back(this);
@@ -134,8 +145,8 @@ extern particle_def user_particle_def;
 
 class particle_type {
  public:
-  particle_def* pardef = nullptr;
-  particle_type() = default;
+  PassivePtr<particle_def> pardef;
+  particle_type() : pardef(NULL) {}
   particle_type(particle_def* f) : pardef(f) {}
   particle_type(const char* name, int s = 0);
   // name is notation or name.
@@ -146,10 +157,10 @@ class particle_type {
   //   If s==0, the program is terminated
   //   Otherwise the pardef is set to NULL
   int operator==(const particle_type& f) {
-    return pardef == f.pardef ? 1 : 0;
+    return pardef.getver() == f.pardef.getver() ? 1 : 0;
   }
   int operator!=(const particle_type& f) {
-    return pardef != f.pardef ? 1 : 0;
+    return pardef.getver() != f.pardef.getver() ? 1 : 0;
   }
   void print_notation(std::ostream& file) const;
 };

@@ -77,23 +77,35 @@ MatterDef::MatterDef(const std::string& fname, const std::string& fnotation,
 void MatterDef::verify() {
   mfunnamep("void MatterDef::verify(void)");
   if (nameh == "none" && notationh == "none") return;
-  for (auto matter : MatterDef::get_logbook()) {
-    if (matter->nameh != nameh && matter->notationh != notationh) continue;
-    funnw.ehdr(mcerr);
-    mcerr << "cannot initialize two matters with the same name or notation\n";
-    mcerr << "name=" << nameh << " notation=" << notationh << '\n';
-    spexit(mcerr);
+  std::list<MatterDef*>& logbook = MatterDef::get_logbook();
+  std::list<MatterDef*>::const_iterator it;
+  std::list<MatterDef*>::const_iterator end = logbook.end();
+  for (it = logbook.begin(); it != end; ++it) {
+    if ((*it)->nameh == nameh || (*it)->notationh == notationh) {
+      funnw.ehdr(mcerr);
+      mcerr << "cannot initialize two matters "
+            << "with the same name or notation\n";
+      mcerr << "name=" << nameh << " notation=" << notationh << '\n';
+      spexit(mcerr);
+    }
   }
 }
 
 void MatterDef::verify(const std::string& fname, const std::string& fnotation) {
-  mfunnamep("void MatterDef::verify(const std::string& const std::string&)");
-  for (auto matter : MatterDef::get_logbook()) {
-    if (matter->nameh != fname && matter->notationh != fnotation) continue;
-    funnw.ehdr(mcerr);
-    mcerr << "cannot initialize two matters with the same name or notation\n";
-    mcerr << "name=" << fname << " notation=" << fnotation << '\n';
-    spexit(mcerr);
+  mfunnamep(
+      "void MatterDef::verify(const std::string& fname, const std::string& "
+      "fnotation)");
+  std::list<MatterDef*>& logbook = MatterDef::get_logbook();
+  std::list<MatterDef*>::const_iterator it;
+  std::list<MatterDef*>::const_iterator end = logbook.end();
+  for (it = logbook.begin(); it != end; ++it) {
+    if ((*it)->nameh == fname || (*it)->notationh == fnotation) {
+      funnw.ehdr(mcerr);
+      mcerr << "cannot initialize two matters "
+            << "with the same name or notation\n";
+      mcerr << "name=" << fname << " notation=" << fnotation << '\n';
+      spexit(mcerr);
+    }
   }
 }
 
@@ -103,8 +115,11 @@ void MatterDef::print(std::ostream& file, int l) const {
 
 void MatterDef::printall(std::ostream& file) {
   Ifile << "MatterDef::printall:\n";
-  for (auto matter : MatterDef::get_logbook()) {
-    matter->print(file, 1);
+  std::list<MatterDef*>& logbook = MatterDef::get_logbook();
+  std::list<MatterDef*>::const_iterator it;
+  std::list<MatterDef*>::const_iterator end = logbook.end();
+  for (it = logbook.begin(); it != end; ++it) {
+    (*it)->print(file, 1);
   }
 }
 
@@ -118,10 +133,13 @@ const std::list<MatterDef*>& MatterDef::get_const_logbook() {
 }
 
 MatterDef* MatterDef::get_MatterDef(const std::string& fnotation) {
-  for (auto matter : MatterDef::get_logbook()) {
-    if (matter->notation() == fnotation) return matter;
+  std::list<MatterDef*>& logbook = MatterDef::get_logbook();
+  std::list<MatterDef*>::const_iterator it;
+  std::list<MatterDef*>::const_iterator end = logbook.end();
+  for (it = logbook.begin(); it != end; ++it) {
+    if ((*it)->notation() == fnotation) return *it;
   }
-  return nullptr;
+  return NULL;
 }
 
 std::ostream& operator<<(std::ostream& file, const MatterDef& f) {

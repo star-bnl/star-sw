@@ -16,17 +16,26 @@ using CLHEP::electron_mass_c2;
 using CLHEP::fine_structure_const;
 using CLHEP::Avogadro;
 
+HeedMatterDef::HeedMatterDef()
+    : eldens_cm_3(0.0),
+      eldens(0.0),
+      xeldens(0.0),
+      wpla(0.0),
+      radiation_length(0.0),
+      Rutherford_const(0.0),
+      W(0.0),
+      F(0.0) {}
+
 HeedMatterDef::HeedMatterDef(EnergyMesh* fenergy_mesh, MatterDef* amatter,
-                             const std::vector<AtomPhotoAbsCS*>& faapacs, 
-                             double fW, double fF)
-    : matter(amatter), W(fW), F(fF), energy_mesh(fenergy_mesh) {
+                             AtomPhotoAbsCS* faapacs[], double fW, double fF)
+    : W(fW), F(fF), energy_mesh(fenergy_mesh) {
   mfunname("HeedMatterDef::HeedMatterDef(...)");
-  check_econd11(matter, == nullptr, mcerr);
+  matter.put(amatter);
   check_econd11(matter->qatom(), <= 0, mcerr);
   const long q = matter->qatom();
-  apacs.resize(q, nullptr);
+  apacs.resize(q);
   for (long n = 0; n < q; ++n) {
-    apacs[n] = faapacs[n];
+    apacs[n].put(faapacs[n]);
     check_econd12(matter->atom(n)->Z(), !=, apacs[n]->get_Z(), mcerr);
   }
   check_econd11(F, == 0.0, mcerr);
@@ -52,14 +61,13 @@ HeedMatterDef::HeedMatterDef(EnergyMesh* fenergy_mesh, MatterDef* amatter,
 }
 
 HeedMatterDef::HeedMatterDef(EnergyMesh* fenergy_mesh, GasDef* agas,
-                             const std::vector<MolecPhotoAbsCS*>& fampacs, 
-                             double fW, double fF)
-    : matter(agas), W(fW), F(fF), energy_mesh(fenergy_mesh) {
+                             MolecPhotoAbsCS* fampacs[], double fW, double fF)
+    : W(fW), F(fF), energy_mesh(fenergy_mesh) {
   mfunname("HeedMatterDef::HeedMatterDef(...)");
-  check_econd11(agas, == nullptr, mcerr);
+  matter.put(agas);
   check_econd11(agas->qmolec(), <= 0, mcerr);
   const long qat = agas->qatom();
-  apacs.resize(qat, nullptr);
+  apacs.resize(qat);
   const long qmol = agas->qmolec();
   long nat = 0;
   for (long nmol = 0; nmol < qmol; ++nmol) {
@@ -68,7 +76,7 @@ HeedMatterDef::HeedMatterDef(EnergyMesh* fenergy_mesh, GasDef* agas,
     // number of different atoms in mol
     const long qa = agas->molec(nmol)->qatom();
     for (long na = 0; na < qa; ++na) {
-      apacs[nat] = fampacs[nmol]->get_atom(na);
+      apacs[nat].put(fampacs[nmol]->get_atom(na).getver());
       check_econd12(apacs[nat]->get_Z(), !=, agas->molec(nmol)->atom(na)->Z(),
                     mcerr);
       nat++;
@@ -112,8 +120,7 @@ HeedMatterDef::HeedMatterDef(EnergyMesh* fenergy_mesh, GasDef* agas,
 
 HeedMatterDef::HeedMatterDef(EnergyMesh* fenergy_mesh,
                              const std::string& gas_notation,
-                             const std::vector<MolecPhotoAbsCS*>& fampacs, 
-                             double fW, double fF)
+                             MolecPhotoAbsCS* fampacs[], double fW, double fF)
     : W(fW), F(fF), energy_mesh(fenergy_mesh) {
   mfunnamep("HeedMatterDef::HeedMatterDef(...)");
   MatterDef* amat = MatterDef::get_MatterDef(gas_notation);
@@ -126,7 +133,7 @@ HeedMatterDef::HeedMatterDef(EnergyMesh* fenergy_mesh,
     spexit(mcerr);
   }
 
-  matter = agas;
+  matter.put(agas);
   check_econd11(agas->qmolec(), <= 0, mcerr);
   const long qat = agas->qatom();
   apacs.resize(qat);
@@ -138,7 +145,7 @@ HeedMatterDef::HeedMatterDef(EnergyMesh* fenergy_mesh,
     // quantity of different atoms in molecule.
     const long qa = agas->molec(nmol)->qatom();
     for (long na = 0; na < qa; ++na) {
-      apacs[nat] = fampacs[nmol]->get_atom(na);
+      apacs[nat].put(fampacs[nmol]->get_atom(na).getver());
       check_econd12(apacs[nat]->get_Z(), !=, agas->molec(nmol)->atom(na)->Z(),
                     mcerr);
       nat++;

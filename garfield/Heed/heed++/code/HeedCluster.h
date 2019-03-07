@@ -7,9 +7,10 @@
 namespace Heed {
 
 /// Cluster.
-class HeedCluster {
+class HeedCluster : public RegPassivePtr {
  public:
-  HeedCluster() = default;
+  HeedCluster()
+      : transferred_energy(0.0), estimated_qel(0), natom(0), nshell(0) {}
   HeedCluster(double ftransferred_energy, long festimated_qel, const point& fpt,
               const point& fptloc, const manip_absvol_treeid& ftid, long fnatom,
               long fnshell)
@@ -21,18 +22,18 @@ class HeedCluster {
         natom(fnatom),
         nshell(fnshell) {}
   /// Energy transfer in internal units.
-  double transferred_energy = 0.;
+  double transferred_energy;
 
-  long estimated_qel = 0;
+  long estimated_qel;
   /// Coordinates in the first system of the tree.
   point pt;
   /// Coordinates in the local system (the last system in the tree).
   point ptloc;
 
   manip_absvol_treeid tid;
-  long natom = 0;
-  long nshell = 0;
-  void print(std::ostream& file, int l) const;
+  long natom;
+  long nshell;
+  virtual void print(std::ostream& file, int l) const;
 };
 }
 

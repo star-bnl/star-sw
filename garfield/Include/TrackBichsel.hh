@@ -32,25 +32,25 @@ class TrackBichsel : public Track {
 
  private:
   /// Particle rel. momentum.
-  double m_bg = 3.16228;
+  double m_bg;
   /// Particle speed
   double m_speed;
 
   // Particle position and direction
-  double m_x = 0., m_y = 0., m_z = 0., m_t = 0.;
-  double m_dx = 0., m_dy = 0., m_dz = 1.;
+  double m_x, m_y, m_z, m_t;
+  double m_dx, m_dy, m_dz;
 
   /// Inverse mean free path
-  double m_imfp = 4.05090e4;
+  double m_imfp;
 
-  std::string m_datafile = "SiM0invw.inv";
+  std::string m_datafile;
   /// Table of cumulative distribution functions
   std::vector<std::vector<double> > m_cdf;
-  int m_iCdf = 2;
-  int m_nCdfEntries = -1;
+  int m_iCdf;
+  int m_nCdfEntries;
 
-  bool m_isInitialised = false;
-  bool m_isInMedium = false;
+  bool m_isInitialised;
+  bool m_isInMedium;
 
   double GetInverseMeanFreePath(const double bg);
   bool LoadCrossSectionTable(const std::string& filename);

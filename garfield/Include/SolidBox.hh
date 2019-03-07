@@ -20,27 +20,29 @@ class SolidBox : public Solid {
   /// Destructor
   ~SolidBox() {}
 
-  bool IsInside(const double x, const double y, const double z) const override;
-  bool GetBoundingBox(double& xmin, double& ymin, double& zmin, 
-                      double& xmax, double& ymax, double& zmax) const override;
-  bool IsBox() const override { return true; }
+  virtual bool IsInside(const double x, const double y, const double z) const;
+  virtual bool GetBoundingBox(double& xmin, double& ymin, double& zmin, 
+                              double& xmax, double& ymax, double& zmax) const;
+  virtual bool IsBox() const { return true; }
 
-  bool GetDimensions(double& l1, double& l2, double& l3) const override;
-
-  double GetHalfLengthX() const override { return m_lX; }
-  double GetHalfLengthY() const override { return m_lY; }
-  double GetHalfLengthZ() const override { return m_lZ; }
+  virtual bool GetCenter(double& x, double& y, double& z) const;
+  virtual bool GetDimensions(double& l1, double& l2, double& l3) const;
+  virtual bool GetOrientation(double& ctheta, double& stheta, double& cphi,
+                              double& sphi) const;
 
   void SetHalfLengthX(const double lx);
   void SetHalfLengthY(const double ly);
   void SetHalfLengthZ(const double lz);
 
-  bool SolidPanels(std::vector<Panel>& panels) override;
-
  private:
-  /// Half lengths.
-  double m_lX = 0., m_lY = 0., m_lZ = 0.;
-
+  // Center of the box
+  double m_cX, m_cY, m_cZ;
+  // Half lengths
+  double m_lX, m_lY, m_lZ;
+  // Direction
+  double m_dX, m_dY, m_dZ;
+  double m_cPhi, m_sPhi;
+  double m_cTheta, m_sTheta;
 };
 }
 

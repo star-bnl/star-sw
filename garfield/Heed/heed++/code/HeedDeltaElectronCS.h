@@ -18,7 +18,7 @@ namespace Heed {
 /// Cross sections and various parameters for delta-electron transport.
 /// 2003, I. Smirnov
 
-class HeedDeltaElectronCS {
+class HeedDeltaElectronCS : public RegPassivePtr {
  public:
   /// Default constructor
   HeedDeltaElectronCS();
@@ -31,16 +31,18 @@ class HeedDeltaElectronCS {
   double get_sigma(double energy, double nscat) const;
   // copy of similar thing from ElElasticScatLowSigma
 
-  void print(std::ostream& file, int l) const;
-  HeedDeltaElectronCS* copy() const { return new HeedDeltaElectronCS(*this); }
+  virtual void print(std::ostream& file, int l) const;
+  virtual HeedDeltaElectronCS* copy() const {
+    return new HeedDeltaElectronCS(*this);
+  }
 
-  static constexpr long q_angular_mesh = 50;
-  static constexpr double low_cut_angle_deg = 20.;
+  static const long q_angular_mesh = 50;
+  static const double low_cut_angle_deg;
 
-  HeedMatterDef* hmd = nullptr;
-  ElElasticScat* ees = nullptr;
-  ElElasticScatLowSigma* eesls = nullptr;
-  PairProd* pairprod = nullptr;  // in eV
+  PassivePtr<HeedMatterDef> hmd;
+  PassivePtr<ElElasticScat> ees;
+  PassivePtr<ElElasticScatLowSigma> eesls;
+  PassivePtr<PairProd> pairprod;  // in eV
   /// Table of velocities
   std::vector<double> beta;
   /// Table of momenta [MeV/c]

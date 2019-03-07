@@ -10,38 +10,37 @@ namespace Garfield {
 class ComponentTcad3d : public ComponentBase {
 
  public:
-  /// Constructor
+  // Constructor
   ComponentTcad3d();
-  /// Destructor
+  // Destructor
   ~ComponentTcad3d() {}
 
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, double& v, Medium*& m,
-                     int& status) override;
+                     int& status);
   void ElectricField(const double x, const double y, const double z, double& ex,
-                     double& ey, double& ez, Medium*& m, int& status) override;
+                     double& ey, double& ez, Medium*& m, int& status);
 
-  Medium* GetMedium(const double x, const double y, const double z) override;
+  Medium* GetMedium(const double x, const double y, const double z);
 
-  bool GetVoltageRange(double& vmin, double& vmax) override;
+  bool GetVoltageRange(double& vmin, double& vmax);
   bool GetBoundingBox(double& xmin, double& ymin, double& zmin, double& xmax,
-                      double& ymax, double& zmax) override;
+                      double& ymax, double& zmax);
 
-  /// Import mesh and field map from files.
+  // Import mesh and field map from files.
   bool Initialise(const std::string& gridfilename,
                   const std::string& datafilename);
 
-  /// List all currently defined regions.
+  // List all currently defined regions.
   void PrintRegions();
-  /// Get the number of regions in the device.
+  // Get the number of regions in the device.
   unsigned int GetNumberOfRegions() const { return m_regions.size(); }
   void GetRegion(const unsigned int ireg, std::string& name, 
                  bool& active) const;
   void SetDriftRegion(const unsigned int ireg);
   void UnsetDriftRegion(const unsigned int ireg);
-  /// Set the medium for a given region
+  // Set/get the medium for a given region
   void SetMedium(const unsigned int ireg, Medium* m);
-  /// Get the medium for a given region
   bool GetMedium(const unsigned int ireg, Medium*& m) const;
 
   int GetNumberOfElements() const { return m_elements.size(); }
@@ -56,7 +55,7 @@ class ComponentTcad3d : public ComponentBase {
 
  private:
   // Max. number of vertices per element
-  static constexpr int nMaxVertices = 7;
+  static const int nMaxVertices = 7;
 
   // Regions
   struct Region {
@@ -112,18 +111,19 @@ class ComponentTcad3d : public ComponentBase {
   };
 
   // Voltage range
-  double m_pMin = 0.;
-  double m_pMax = 0.;
+  double m_pMin, m_pMax;
 
   // Bounding box
   double m_xMinBB, m_yMinBB, m_zMinBB;
   double m_xMaxBB, m_yMaxBB, m_zMaxBB;
 
   // Element from the previous call
-  int m_lastElement = 0;
+  int m_lastElement;
 
-  void Reset() override;
-  void UpdatePeriodicity() override;
+  // Reset the component
+  void Reset();
+  // Periodicities
+  void UpdatePeriodicity();
 
   bool CheckElement(const double x, const double y, const double z,
                     const Element& element, double w[nMaxVertices]) const {

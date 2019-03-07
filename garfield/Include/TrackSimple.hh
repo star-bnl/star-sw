@@ -34,17 +34,17 @@ class TrackSimple : public Track {
                           double& tcls, int& n, double& e, double& extra);
 
  protected:
-  bool m_isReady = false;
+  bool m_isReady;
 
   // Particle position, time and direction
-  double m_x = 0., m_y = 0., m_z = 0., m_t = 0.;
-  double m_dx = 0., m_dy = 0., m_dz = 0.;
+  double m_x, m_y, m_z, m_t;
+  double m_dx, m_dy, m_dz;
   // Mean free path (mean spacing between adjacent clusters)
-  double m_mfp = 0.04;
+  double m_mfp;
   // Average energy per cluster
-  double m_eloss = 2530.;
+  double m_eloss;
 
-  bool m_useEqualSpacing = false;
+  bool m_useEqualSpacing;
 };
 }
 

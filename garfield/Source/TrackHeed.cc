@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 
 #include "wcpplib/matter/GasLib.h"
 #include "wcpplib/matter/MatterDef.h"
@@ -30,7 +31,9 @@ namespace {
 
 void ClearBank(std::vector<Heed::gparticle*>& bank) {
 
-  for (auto particle : bank) if (particle) delete particle;
+  std::vector<Heed::gparticle*>::iterator it;
+  std::vector<Heed::gparticle*>::const_iterator end = bank.end();
+  for (it = bank.begin(); it != end; ++it) if (*it) delete *it;
   bank.clear();
 }
 
@@ -44,18 +47,66 @@ long last_particle_number;
 
 }
 
+extern Heed::trajestep_limit Heed::gtrajlim;
+Heed::trajestep_limit Heed::gtrajlim( 100. * Heed::CLHEP::cm, 
+                                     1000. * Heed::CLHEP::cm, 
+                                     0.1 * Heed::CLHEP::rad,
+                                     0.2 * Heed::CLHEP::rad);
+
 // Actual class implementation
 
 namespace Garfield {
 
-TrackHeed::TrackHeed() : Track() {
+TrackHeed::TrackHeed()
+    : m_ready(false),
+      m_hasActiveTrack(false),
+      m_mediumDensity(-1.),
+      m_mediumName(""),
+      m_usePhotonReabsorption(true),
+      m_usePacsOutput(false),
+      m_doDeltaTransport(true),
+      m_matter(NULL),
+      m_gas(NULL),
+      m_material(NULL),
+      m_atPacs(NULL),
+      m_molPacs(NULL),
+      m_emin(2.e-6),
+      m_emax(2.e-1),
+      m_nEnergyIntervals(200),
+      m_energyMesh(NULL),
+      m_transferCs(NULL),
+      m_elScat(NULL),
+      m_lowSigma(NULL),
+      m_pairProd(NULL),
+      m_deltaCs(NULL),
+      m_chamber(NULL),
+      m_lX(0.),
+      m_lY(0.),
+      m_lZ(0.),
+      m_cX(0.),
+      m_cY(0.),
+      m_cZ(0.) {
 
   m_className = "TrackHeed";
   m_conductionElectrons.reserve(1000);
   m_conductionIons.reserve(1000);
 }
 
-TrackHeed::~TrackHeed() {}
+TrackHeed::~TrackHeed() {
+
+  if (m_matter) delete m_matter;
+  if (m_gas) delete m_gas;
+  if (m_material) delete m_material;
+  if (m_atPacs) delete m_atPacs;
+  if (m_molPacs) delete m_molPacs;
+  if (m_energyMesh) delete m_energyMesh;
+  if (m_transferCs) delete m_transferCs;
+  if (m_elScat) delete m_elScat;
+  if (m_lowSigma) delete m_lowSigma;
+  if (m_pairProd) delete m_pairProd;
+  if (m_deltaCs) delete m_deltaCs;
+  if (m_chamber) delete m_chamber;
+}
 
 bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
                          const double t0, const double dx0, const double dy0,
@@ -66,15 +117,65 @@ bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
 
   // Make sure the sensor has been set.
   if (!m_sensor) {
-    std::cerr << m_className << "::NewTrack: Sensor is not defined.\n";
+    std::cerr << m_className << "::NewTrack:\n"
+              << "    Sensor is not defined.\n";
     return false;
   }
 
-  bool update = false;
-  if (!UpdateBoundingBox(update)) return false;
+  // Get the bounding box.
+  double xmin = 0., ymin = 0., zmin = 0.;
+  double xmax = 0., ymax = 0., zmax = 0.;
+  if (!m_sensor->GetArea(xmin, ymin, zmin, xmax, ymax, zmax)) {
+    std::cerr << m_className << "::NewTrack:\n"
+              << "    Drift area is not set.\n";
+    return false;
+  }
+  // Check if the bounding box has changed.
+  const double lx = fabs(xmax - xmin);
+  const double ly = fabs(ymax - ymin);
+  const double lz = fabs(zmax - zmin);
+  if (m_debug) {
+    std::cout << m_className << "::NewTrack:\n"
+              << "    Bounding box dimensions:\n"
+              << "      x: " << lx << " cm\n"
+              << "      y: " << ly << " cm\n"
+              << "      z: " << lz << " cm\n";
+  }
+  if (fabs(lx - m_lX) > Small || fabs(ly - m_lY) > Small || fabs(lz - m_lZ) > Small) {
+    m_lX = lx;
+    m_lY = ly;
+    m_lZ = lz;
+    m_isChanged = true;
+  }
+  // Update the center of the bounding box.
+  if (std::isinf(xmin) || std::isinf(xmax)) {
+    m_cX = 0.;
+  } else {
+    m_cX = 0.5 * (xmin + xmax);
+  }
+  if (std::isinf(ymin) || std::isinf(ymax)) {
+    m_cY = 0.;
+  } else {
+    m_cY = 0.5 * (ymin + ymax);
+  }
+  if (std::isinf(zmin) || std::isinf(zmax)) {
+    m_cZ = 0.;
+  } else {
+    m_cZ = 0.5 * (zmin + zmax);
+  }
+  if (m_debug) {
+    std::cout << m_className << "::NewTrack:\n"
+              << "    Center of bounding box:\n"
+              << "      x: " << m_cX << " cm\n"
+              << "      y: " << m_cY << " cm\n"
+              << "      z: " << m_cZ << " cm\n";
+  }
+
+  m_fieldMap.SetSensor(m_sensor);
+  m_fieldMap.SetCentre(m_cX, m_cY, m_cZ);
 
   // Make sure the initial position is inside an ionisable medium.
-  Medium* medium = nullptr;
+  Medium* medium = NULL;
   if (!m_sensor->GetMedium(x0, y0, z0, medium)) {
     std::cerr << m_className << "::NewTrack:\n"
               << "    No medium at initial position.\n";
@@ -116,7 +217,12 @@ bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
                 << "    Initial direction is randomized.\n";
     }
     // Null vector. Sample the direction isotropically.
-    RndmDirection(dx, dy, dz);
+    const double ctheta = 1. - 2. * RndmUniform();
+    const double stheta = sqrt(1. - ctheta * ctheta);
+    const double phi = TwoPi * RndmUniform();
+    dx = cos(phi) * stheta;
+    dy = sin(phi) * stheta;
+    dz = ctheta;
   } else {
     // Normalise the direction vector.
     dx /= d;
@@ -176,13 +282,8 @@ bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
     }
   }
 
-  Heed::HeedParticle particle(m_chamber.get(), p0, velocity, t0,
+  Heed::HeedParticle particle(m_chamber, p0, velocity, t0,
                               particleType, &m_fieldMap);
-  // Set the step limits.
-  particle.set_step_limits(m_maxStep * Heed::CLHEP::cm,
-                           m_radStraight * Heed::CLHEP::cm,
-                           m_stepAngleStraight * Heed::CLHEP::rad,
-                           m_stepAngleCurved * Heed::CLHEP::rad);
   // Transport the particle.
   particle.fly(m_particleBank);
   m_bankIterator = m_particleBank.begin();
@@ -256,8 +357,6 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
     return false;
   }
 
-  if (m_particleBank.empty()) return false;
-
   std::vector<Heed::gparticle*>::const_iterator end = m_particleBank.end();
   if (m_bankIterator == end) {
     std::cerr << m_className << "::GetCluster:\n"
@@ -266,7 +365,7 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
   }
 
   // Look for the next cluster (i. e. virtual photon) in the list.
-  Heed::HeedPhoton* virtualPhoton = nullptr;
+  Heed::HeedPhoton* virtualPhoton = NULL;
   for (; m_bankIterator != end; ++m_bankIterator) {
     // Convert the particle to a (virtual) photon.
     virtualPhoton = dynamic_cast<Heed::HeedPhoton*>(*m_bankIterator);
@@ -279,15 +378,15 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
 
     // Get the location of the interaction (convert from mm to cm
     // and shift with respect to bounding box center).
-    xcls = virtualPhoton->position().x * 0.1 + m_cX;
-    ycls = virtualPhoton->position().y * 0.1 + m_cY;
-    zcls = virtualPhoton->position().z * 0.1 + m_cZ;
-    tcls = virtualPhoton->time();
+    xcls = virtualPhoton->currpos.pt.v.x * 0.1 + m_cX;
+    ycls = virtualPhoton->currpos.pt.v.y * 0.1 + m_cY;
+    zcls = virtualPhoton->currpos.pt.v.z * 0.1 + m_cZ;
+    tcls = virtualPhoton->currpos.time;
     // Skip clusters outside the drift area or outside the active medium.
     if (!IsInside(xcls, ycls, zcls)) continue;
     // Add the first ion (at the position of the cluster).
-    m_conductionIons.emplace_back(
-        Heed::HeedCondElectron(xcls, ycls, zcls, tcls));
+    m_conductionIons.push_back(
+        Heed::HeedCondElectron(virtualPhoton->currpos.pt, tcls));
     ++m_bankIterator;
     break;
   }
@@ -301,19 +400,21 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
   // Transport the virtual photon.
   virtualPhoton->fly(secondaries);
   // Get the transferred energy (convert from MeV to eV).
-  e = virtualPhoton->m_energy * 1.e6;
+  e = virtualPhoton->energy * 1.e6;
 
   while (!secondaries.empty()) {
     std::vector<Heed::gparticle*> newSecondaries;
     // Loop over the secondaries.
-    for (auto secondary : secondaries) {
+    std::vector<Heed::gparticle*>::iterator it;
+    std::vector<Heed::gparticle*>::const_iterator send = secondaries.end();
+    for (it = secondaries.begin(); it != send; ++it) {
       // Check if it is a delta electron.
-      auto delta = dynamic_cast<Heed::HeedDeltaElectron*>(secondary);
+      Heed::HeedDeltaElectron* delta = dynamic_cast<Heed::HeedDeltaElectron*>(*it);
       if (delta) {
-        extra += delta->kinetic_energy() * 1.e6;
-        const double x = delta->position().x * 0.1 + m_cX;
-        const double y = delta->position().y * 0.1 + m_cY;
-        const double z = delta->position().z * 0.1 + m_cZ;
+        extra += delta->curr_kin_energy * 1.e6;
+        const double x = delta->currpos.pt.v.x * 0.1 + m_cX;
+        const double y = delta->currpos.pt.v.y * 0.1 + m_cY;
+        const double z = delta->currpos.pt.v.z * 0.1 + m_cZ;
         if (!IsInside(x, y, z)) continue;
         if (m_doDeltaTransport) {
           // Transport the delta electron.
@@ -328,33 +429,35 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
         } else {
           // Add the delta electron to the list, for later use.
           deltaElectron newDeltaElectron;
-          newDeltaElectron.x = delta->position().x * 0.1 + m_cX;
-          newDeltaElectron.y = delta->position().y * 0.1 + m_cY;
-          newDeltaElectron.z = delta->position().z * 0.1 + m_cZ;
-          newDeltaElectron.t = delta->time();
-          newDeltaElectron.e = delta->kinetic_energy() * 1.e6;
-          newDeltaElectron.dx = delta->direction().x;
-          newDeltaElectron.dy = delta->direction().y;
-          newDeltaElectron.dz = delta->direction().z;
-          m_deltaElectrons.push_back(std::move(newDeltaElectron));
+          newDeltaElectron.x = delta->currpos.pt.v.x * 0.1 + m_cX;
+          newDeltaElectron.y = delta->currpos.pt.v.y * 0.1 + m_cY;
+          newDeltaElectron.z = delta->currpos.pt.v.z * 0.1 + m_cZ;
+          newDeltaElectron.t = delta->currpos.time;
+          newDeltaElectron.e = delta->curr_kin_energy * 1.e6;
+          newDeltaElectron.dx = delta->currpos.dir.x;
+          newDeltaElectron.dy = delta->currpos.dir.y;
+          newDeltaElectron.dz = delta->currpos.dir.z;
+          m_deltaElectrons.push_back(newDeltaElectron);
         }
         continue;
       } 
       // Check if it is a real photon.
-      auto photon = dynamic_cast<Heed::HeedPhoton*>(secondary);
+      Heed::HeedPhoton* photon = dynamic_cast<Heed::HeedPhoton*>(*it);
       if (!photon) {
         std::cerr << m_className << "::GetCluster:\n"
                   << "    Particle is neither an electron nor a photon.\n";
       }
-      extra += photon->m_energy * 1.e6;
-      const double x = photon->position().x * 0.1 + m_cX;
-      const double y = photon->position().y * 0.1 + m_cY;
-      const double z = photon->position().z * 0.1 + m_cZ;
+      extra += photon->energy * 1.e6;
+      const double x = photon->currpos.pt.v.x * 0.1 + m_cX;
+      const double y = photon->currpos.pt.v.y * 0.1 + m_cY;
+      const double z = photon->currpos.pt.v.z * 0.1 + m_cZ;
       if (!IsInside(x, y, z)) continue;
       // Transport the photon.
       if (m_usePhotonReabsorption) photon->fly(newSecondaries);
     }
-    for (auto secondary : secondaries) if (secondary) delete secondary;
+    for (it = secondaries.begin(); it != secondaries.end(); ++it) {
+      if (*it) delete *it;
+    }
     secondaries.clear();
     secondaries.swap(newSecondaries);
   }
@@ -382,9 +485,9 @@ bool TrackHeed::GetElectron(const unsigned int i,
       return false;
     }
 
-    x = m_conductionElectrons[i].x * 0.1 + m_cX;
-    y = m_conductionElectrons[i].y * 0.1 + m_cY;
-    z = m_conductionElectrons[i].z * 0.1 + m_cZ;
+    x = m_conductionElectrons[i].ptloc.v.x * 0.1 + m_cX;
+    y = m_conductionElectrons[i].ptloc.v.y * 0.1 + m_cY;
+    z = m_conductionElectrons[i].ptloc.v.z * 0.1 + m_cZ;
     t = m_conductionElectrons[i].time;
     e = 0.;
     dx = dy = dz = 0.;
@@ -418,9 +521,9 @@ bool TrackHeed::GetIon(const unsigned int i,
     return false;
   }
 
-  x = m_conductionIons[i].x * 0.1 + m_cX;
-  y = m_conductionIons[i].y * 0.1 + m_cY;
-  z = m_conductionIons[i].z * 0.1 + m_cZ;
+  x = m_conductionIons[i].ptloc.v.x * 0.1 + m_cX;
+  y = m_conductionIons[i].ptloc.v.y * 0.1 + m_cY;
+  z = m_conductionIons[i].ptloc.v.z * 0.1 + m_cZ;
   t = m_conductionIons[i].time;
   return true;
 }
@@ -459,11 +562,38 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
     return;
   }
 
+  // Get the bounding box.
+  double xmin, ymin, zmin;
+  double xmax, ymax, zmax;
+  if (!m_sensor->GetArea(xmin, ymin, zmin, xmax, ymax, zmax)) {
+    std::cerr << m_className << "::TransportDeltaElectron:\n"
+              << "    Drift area is not set.\n";
+    m_ready = false;
+    return;
+  }
+  // Check if the bounding box has changed.
   bool update = false;
-  if (!UpdateBoundingBox(update)) return;
+  const double lx = fabs(xmax - xmin);
+  const double ly = fabs(ymax - ymin);
+  const double lz = fabs(zmax - zmin);
+  if (fabs(lx - m_lX) > Small || fabs(ly - m_lY) > Small || fabs(lz - m_lZ) > Small) {
+    m_lX = lx;
+    m_lY = ly;
+    m_lZ = lz;
+    m_isChanged = true;
+    update = true;
+    m_hasActiveTrack = false;
+  }
+  // Update the center of the bounding box.
+  m_cX = 0.5 * (xmin + xmax);
+  m_cY = 0.5 * (ymin + ymax);
+  m_cZ = 0.5 * (zmin + zmax);
+
+  m_fieldMap.SetSensor(m_sensor);
+  m_fieldMap.SetCentre(m_cX, m_cY, m_cZ);
 
   // Make sure the initial position is inside an ionisable medium.
-  Medium* medium = nullptr;
+  Medium* medium = NULL;
   if (!m_sensor->GetMedium(x0, y0, z0, medium)) {
     std::cerr << m_className << "::TransportDeltaElectron:\n"
               << "    No medium at initial position.\n";
@@ -503,7 +633,7 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
   // Make sure the kinetic energy is positive.
   if (e0 <= 0.) {
     // Just create a conduction electron on the spot.
-    m_conductionElectrons.emplace_back(Heed::HeedCondElectron(p0, t0));
+    m_conductionElectrons.push_back(Heed::HeedCondElectron(p0, t0));
     nel = 1;
     return;
   }
@@ -513,7 +643,12 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
   const double d = sqrt(dx * dx + dy * dy + dz * dz);
   if (d <= 0.) {
     // Null vector. Sample the direction isotropically.
-    RndmDirection(dx, dy, dz);
+    const double phi = TwoPi * RndmUniform();
+    const double ctheta = 1. - 2. * RndmUniform();
+    const double stheta = sqrt(1. - ctheta * ctheta);
+    dx = cos(phi) * stheta;
+    dy = sin(phi) * stheta;
+    dz = ctheta;
   } else {
     // Normalise the direction vector.
     dx /= d;
@@ -530,7 +665,7 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
 
   // Transport the electron.
   std::vector<Heed::gparticle*> secondaries;
-  Heed::HeedDeltaElectron delta(m_chamber.get(), p0, velocity, t0, 0, &m_fieldMap);
+  Heed::HeedDeltaElectron delta(m_chamber, p0, velocity, t0, 0, &m_fieldMap);
   delta.fly(secondaries);
   ClearBank(secondaries);
 
@@ -566,16 +701,44 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
 
   // Make sure the sensor has been set.
   if (!m_sensor) {
-    std::cerr << m_className << "::TransportPhoton: Sensor is not defined.\n";
+    std::cerr << m_className << "::TransportPhoton:\n"
+              << "    Sensor is not defined.\n";
     m_ready = false;
     return;
   }
 
+  // Get the bounding box.
+  double xmin, ymin, zmin;
+  double xmax, ymax, zmax;
+  if (!m_sensor->GetArea(xmin, ymin, zmin, xmax, ymax, zmax)) {
+    std::cerr << m_className << "::TransportPhoton:\n"
+              << "    Drift area is not set.\n";
+    m_ready = false;
+    return;
+  }
+  // Check if the bounding box has changed.
   bool update = false;
-  if (!UpdateBoundingBox(update)) return;
+  const double lx = fabs(xmax - xmin);
+  const double ly = fabs(ymax - ymin);
+  const double lz = fabs(zmax - zmin);
+  if (fabs(lx - m_lX) > Small || fabs(ly - m_lY) > Small || fabs(lz - m_lZ) > Small) {
+    m_lX = lx;
+    m_lY = ly;
+    m_lZ = lz;
+    m_isChanged = true;
+    update = true;
+    m_hasActiveTrack = false;
+  }
+  // Update the center of the bounding box.
+  m_cX = 0.5 * (xmin + xmax);
+  m_cY = 0.5 * (ymin + ymax);
+  m_cZ = 0.5 * (zmin + zmax);
+
+  m_fieldMap.SetSensor(m_sensor);
+  m_fieldMap.SetCentre(m_cX, m_cY, m_cZ);
 
   // Make sure the initial position is inside an ionisable medium.
-  Medium* medium = nullptr;
+  Medium* medium = NULL;
   if (!m_sensor->GetMedium(x0, y0, z0, medium)) {
     std::cerr << m_className << "::TransportPhoton:\n"
               << "    No medium at initial position.\n";
@@ -616,7 +779,12 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
   const double d = sqrt(dx * dx + dy * dy + dz * dz);
   if (d <= 0.) {
     // Null vector. Sample the direction isotropically.
-    RndmDirection(dx, dy, dz);
+    const double phi = TwoPi * RndmUniform();
+    const double ctheta = 1. - 2. * RndmUniform();
+    const double stheta = sqrt(1. - ctheta * ctheta);
+    dx = cos(phi) * stheta;
+    dy = sin(phi) * stheta;
+    dz = ctheta;
   } else {
     // Normalise the direction vector.
     dx /= d;
@@ -631,8 +799,9 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
   Heed::point p0((x0 - m_cX) * 10., (y0 - m_cY) * 10., (z0 - m_cZ) * 10.);
 
   // Create and transport the photon.
-  Heed::HeedPhoton photon(m_chamber.get(), p0, velocity, t0, 0, e0 * 1.e-6, 
+  Heed::HeedPhoton photon(m_chamber, p0, velocity, t0, 0, e0 * 1.e-6, 
                           &m_fieldMap);
+  ClearParticleBank();
   std::vector<Heed::gparticle*> secondaries;
   photon.fly(secondaries);
 
@@ -642,7 +811,7 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
     std::vector<Heed::gparticle*>::iterator it;
     for (it = secondaries.begin(); it != secondaries.end(); ++it) {
       // Check if it is a delta electron.
-      auto delta = dynamic_cast<Heed::HeedDeltaElectron*>(*it);
+      Heed::HeedDeltaElectron* delta = dynamic_cast<Heed::HeedDeltaElectron*>(*it);
       if (delta) {
         if (m_doDeltaTransport) {
           // Transport the delta electron.
@@ -657,20 +826,20 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
         } else {
           // Add the delta electron to the list, for later use.
           deltaElectron newDeltaElectron;
-          newDeltaElectron.x = delta->position().x * 0.1 + m_cX;
-          newDeltaElectron.y = delta->position().y * 0.1 + m_cY;
-          newDeltaElectron.z = delta->position().z * 0.1 + m_cZ;
-          newDeltaElectron.t = delta->time();
-          newDeltaElectron.e = delta->kinetic_energy() * 1.e6;
-          newDeltaElectron.dx = delta->direction().x;
-          newDeltaElectron.dy = delta->direction().y;
-          newDeltaElectron.dz = delta->direction().z;
-          m_deltaElectrons.push_back(std::move(newDeltaElectron));
+          newDeltaElectron.x = delta->currpos.pt.v.x * 0.1 + m_cX;
+          newDeltaElectron.y = delta->currpos.pt.v.y * 0.1 + m_cY;
+          newDeltaElectron.z = delta->currpos.pt.v.z * 0.1 + m_cZ;
+          newDeltaElectron.t = delta->currpos.time;
+          newDeltaElectron.e = delta->curr_kin_energy * 1.e6;
+          newDeltaElectron.dx = delta->currpos.dir.x;
+          newDeltaElectron.dy = delta->currpos.dir.y;
+          newDeltaElectron.dz = delta->currpos.dir.z;
+          m_deltaElectrons.push_back(newDeltaElectron);
         }
         continue;
       }
       // Check if it is a fluorescence photon.
-      auto fluorescencePhoton = dynamic_cast<Heed::HeedPhoton*>(*it);
+      Heed::HeedPhoton* fluorescencePhoton = dynamic_cast<Heed::HeedPhoton*>(*it);
       if (!fluorescencePhoton) {
         std::cerr << m_className << "::TransportPhoton:\n"
                   << "    Unknown secondary particle.\n";
@@ -683,7 +852,7 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
     secondaries.swap(newSecondaries);
     ClearBank(newSecondaries);
   }
-  ClearBank(secondaries);
+
   // Get the total number of electrons produced in this step.
   nel = m_doDeltaTransport ? m_conductionElectrons.size() : 
                              m_deltaElectrons.size();
@@ -699,15 +868,15 @@ void TrackHeed::SetEnergyMesh(const double e0, const double e1,
                               const int nsteps) {
 
   if (fabs(e1 - e0) < Small) {
-    std::cerr << m_className << "::SetEnergyMesh:\n"
-              << "    Invalid energy range:\n"
-              << "    " << e0 << " < E [eV] < " << e1 << "\n";
+    std::cerr << m_className << "::SetEnergyMesh:\n";
+    std::cerr << "    Invalid energy range:\n";
+    std::cerr << "    " << e0 << " < E [eV] < " << e1 << "\n";
     return;
   }
 
   if (nsteps <= 0) {
-    std::cerr << m_className << "::SetEnergyMesh:\n"
-              << "    Number of intervals must be > 0.\n";
+    std::cerr << m_className << "::SetEnergyMesh:\n";
+    std::cerr << "    Number of intervals must be > 0.\n";
     return;
   }
 
@@ -765,7 +934,11 @@ bool TrackHeed::Setup(Medium* medium) {
   }
 
   // Setup the energy mesh.
-  m_energyMesh.reset(new Heed::EnergyMesh(m_emin, m_emax, m_nEnergyIntervals));
+  if (m_energyMesh) {
+    delete m_energyMesh;
+    m_energyMesh = NULL;
+  }
+  m_energyMesh = new Heed::EnergyMesh(m_emin, m_emax, m_nEnergyIntervals);
 
   if (medium->IsGas()) {
     if (!SetupGas(medium)) return false;
@@ -775,9 +948,15 @@ bool TrackHeed::Setup(Medium* medium) {
 
   // Energy transfer cross-section
   // Set a flag indicating whether the primary particle is an electron.
-  m_transferCs.reset(new Heed::EnTransfCS(1.e-6 * m_mass, GetGamma() - 1., 
-                                          m_isElectron, m_matter.get(), 
-                                          long(m_q)));
+  const int sel = m_isElectron ? 1 : 0;
+  const double gamma = GetGamma();
+
+  if (m_transferCs) {
+    delete m_transferCs;
+    m_transferCs = NULL;
+  }
+  m_transferCs =
+      new Heed::EnTransfCS(1.e-6 * m_mass, gamma - 1, sel, m_matter, long(m_q));
 
   if (!SetupDelta(databasePath)) return false;
 
@@ -799,8 +978,12 @@ bool TrackHeed::Setup(Medium* medium) {
 
   Heed::fixsyscoor primSys(Heed::point(0., 0., 0.), 
                            Heed::basis("primary"), "primary");
-  m_chamber.reset(new HeedChamber(primSys, m_lX, m_lY, m_lZ, 
-                                  *m_transferCs.get(), *m_deltaCs.get()));
+  if (m_chamber) {
+    delete m_chamber;
+    m_chamber = NULL;
+  }
+  m_chamber = new HeedChamber(primSys, m_lX, m_lY, m_lZ, 
+                              *m_transferCs, *m_deltaCs);
   m_fieldMap.SetSensor(m_sensor);
   return true;
 }
@@ -819,7 +1002,11 @@ bool TrackHeed::SetupGas(Medium* medium) {
     return false;
   }
 
-  std::vector<Heed::MolecPhotoAbsCS*> molPacs(nComponents, nullptr);
+  if (m_molPacs) {
+    delete m_molPacs;
+    m_molPacs = NULL;
+  }
+  m_molPacs = new Heed::MolecPhotoAbsCS* [nComponents];
   std::vector<std::string> notations;
   std::vector<double> fractions;
 
@@ -837,97 +1024,97 @@ bool TrackHeed::SetupGas(Medium* medium) {
     if (gasname == "cC3H6") gasname = "C3H6";
     // Find the corresponding photoabsorption cross-section.
     if (gasname == "CF4")
-      molPacs[i] = &Heed::CF4_MPACS;
+      m_molPacs[i] = &Heed::CF4_MPACS;
     else if (gasname == "Ar")
-      molPacs[i] = &Heed::Ar_MPACS;
+      m_molPacs[i] = &Heed::Ar_MPACS;
     else if (gasname == "He")
-      molPacs[i] = &Heed::He_MPACS;
+      m_molPacs[i] = &Heed::He_MPACS;
     else if (gasname == "Ne")
-      molPacs[i] = &Heed::Ne_MPACS;
+      m_molPacs[i] = &Heed::Ne_MPACS;
     else if (gasname == "Kr")
-      molPacs[i] = &Heed::Kr_MPACS;
+      m_molPacs[i] = &Heed::Kr_MPACS;
     else if (gasname == "Xe")
-      molPacs[i] = &Heed::Xe_MPACS;
+      m_molPacs[i] = &Heed::Xe_MPACS;
     else if (gasname == "CH4")
-      molPacs[i] = &Heed::CH4_MPACS;
+      m_molPacs[i] = &Heed::CH4_MPACS;
     else if (gasname == "C2H6")
-      molPacs[i] = &Heed::C2H6_MPACS;
+      m_molPacs[i] = &Heed::C2H6_MPACS;
     else if (gasname == "C3H8")
-      molPacs[i] = &Heed::C3H8_MPACS;
+      m_molPacs[i] = &Heed::C3H8_MPACS;
     else if (gasname == "C4H10")
-      molPacs[i] = &Heed::C4H10_MPACS;
+      m_molPacs[i] = &Heed::C4H10_MPACS;
     else if (gasname == "CO2")
-      molPacs[i] = &Heed::CO2_MPACS;
+      m_molPacs[i] = &Heed::CO2_MPACS;
     else if (gasname == "C5H12")
-      molPacs[i] = &Heed::C5H12_MPACS;
+      m_molPacs[i] = &Heed::C5H12_MPACS;
     else if (gasname == "Water")
-      molPacs[i] = &Heed::H2O_MPACS;
+      m_molPacs[i] = &Heed::H2O_MPACS;
     else if (gasname == "O2")
-      molPacs[i] = &Heed::O2_MPACS;
+      m_molPacs[i] = &Heed::O2_MPACS;
     else if (gasname == "N2" || gasname == "N2 (Phelps)")
-      molPacs[i] = &Heed::N2_MPACS;
+      m_molPacs[i] = &Heed::N2_MPACS;
     else if (gasname == "NO")
-      molPacs[i] = &Heed::NO_MPACS;
+      m_molPacs[i] = &Heed::NO_MPACS;
     else if (gasname == "N2O")
-      molPacs[i] = &Heed::N2O_MPACS;
+      m_molPacs[i] = &Heed::N2O_MPACS;
     else if (gasname == "C2H4")
-      molPacs[i] = &Heed::C2H4_MPACS;
+      m_molPacs[i] = &Heed::C2H4_MPACS;
     else if (gasname == "C2H2")
-      molPacs[i] = &Heed::C2H2_MPACS;
+      m_molPacs[i] = &Heed::C2H2_MPACS;
     else if (gasname == "H2")
-      molPacs[i] = &Heed::H2_MPACS;
+      m_molPacs[i] = &Heed::H2_MPACS;
     else if (gasname == "CO")
-      molPacs[i] = &Heed::CO_MPACS;
+      m_molPacs[i] = &Heed::CO_MPACS;
     else if (gasname == "Methylal")
-      molPacs[i] = &Heed::Methylal_MPACS;
+      m_molPacs[i] = &Heed::Methylal_MPACS;
     else if (gasname == "DME")
-      molPacs[i] = &Heed::DME_MPACS;
+      m_molPacs[i] = &Heed::DME_MPACS;
     else if (gasname == "C2F6")
-      molPacs[i] = &Heed::C2F6_MPACS;
+      m_molPacs[i] = &Heed::C2F6_MPACS;
     else if (gasname == "SF6")
-      molPacs[i] = &Heed::SF6_MPACS;
+      m_molPacs[i] = &Heed::SF6_MPACS;
     else if (gasname == "NH3")
-      molPacs[i] = &Heed::NH3_MPACS;
+      m_molPacs[i] = &Heed::NH3_MPACS;
     else if (gasname == "C3H6")
-      molPacs[i] = &Heed::C3H6_MPACS;
+      m_molPacs[i] = &Heed::C3H6_MPACS;
     else if (gasname == "CH3OH")
-      molPacs[i] = &Heed::CH3OH_MPACS;
+      m_molPacs[i] = &Heed::CH3OH_MPACS;
     else if (gasname == "C2H5OH")
-      molPacs[i] = &Heed::C2H5OH_MPACS;
+      m_molPacs[i] = &Heed::C2H5OH_MPACS;
     else if (gasname == "C3H7OH")
-      molPacs[i] = &Heed::C3H7OH_MPACS;
+      m_molPacs[i] = &Heed::C3H7OH_MPACS;
     else if (gasname == "Cs")
-      molPacs[i] = &Heed::Cs_MPACS;
+      m_molPacs[i] = &Heed::Cs_MPACS;
     else if (gasname == "F2")
-      molPacs[i] = &Heed::F2_MPACS;
+      m_molPacs[i] = &Heed::F2_MPACS;
     else if (gasname == "CS2")
-      molPacs[i] = &Heed::CS2_MPACS;
+      m_molPacs[i] = &Heed::CS2_MPACS;
     else if (gasname == "COS")
-      molPacs[i] = &Heed::COS_MPACS;
+      m_molPacs[i] = &Heed::COS_MPACS;
     else if (gasname == "CD4")
-      molPacs[i] = &Heed::CH4_MPACS;
+      m_molPacs[i] = &Heed::CH4_MPACS;
     else if (gasname == "BF3")
-      molPacs[i] = &Heed::BF3_MPACS;
+      m_molPacs[i] = &Heed::BF3_MPACS;
     else if (gasname == "C2HF5")
-      molPacs[i] = &Heed::C2HF5_MPACS;
+      m_molPacs[i] = &Heed::C2HF5_MPACS;
     else if (gasname == "C2H2F4")
-      molPacs[i] = &Heed::C2H2F4_MPACS;
+      m_molPacs[i] = &Heed::C2H2F4_MPACS;
     else if (gasname == "CHF3")
-      molPacs[i] = &Heed::CHF3_MPACS;
+      m_molPacs[i] = &Heed::CHF3_MPACS;
     else if (gasname == "CF3Br")
-      molPacs[i] = &Heed::CF3Br_MPACS;
+      m_molPacs[i] = &Heed::CF3Br_MPACS;
     else if (gasname == "C3F8")
-      molPacs[i] = &Heed::C3F8_MPACS;
+      m_molPacs[i] = &Heed::C3F8_MPACS;
     else if (gasname == "O3")
-      molPacs[i] = &Heed::O3_MPACS;
+      m_molPacs[i] = &Heed::O3_MPACS;
     else if (gasname == "Hg")
-      molPacs[i] = &Heed::Hg_MPACS;
+      m_molPacs[i] = &Heed::Hg_MPACS;
     else if (gasname == "H2S")
-      molPacs[i] = &Heed::H2S_MPACS;
+      m_molPacs[i] = &Heed::H2S_MPACS;
     else if (gasname == "GeH4")
-      molPacs[i] = &Heed::GeH4_MPACS;
+      m_molPacs[i] = &Heed::GeH4_MPACS;
     else if (gasname == "SiH4")
-      molPacs[i] = &Heed::SiH4_MPACS;
+      m_molPacs[i] = &Heed::SiH4_MPACS;
     else {
       std::cerr << m_className << "::SetupGas:\n    Photoabsorption "
                 << "cross-section for " << gasname << " not available.\n";
@@ -945,8 +1132,8 @@ bool TrackHeed::SetupGas(Medium* medium) {
         double e = m_energyMesh->get_e(i);
         pacsfile << 1.e6 * e << "  ";
         for (int j = 0; j < nComponents; ++j) {
-          pacsfile << molPacs[j]->get_ACS(e) << "  "
-                   << molPacs[j]->get_ICS(e) << "  ";
+          pacsfile << m_molPacs[j]->get_ACS(e) << "  "
+                   << m_molPacs[j]->get_ICS(e) << "  ";
         }
         pacsfile << "\n";
       }
@@ -955,15 +1142,23 @@ bool TrackHeed::SetupGas(Medium* medium) {
   }
 
   const std::string gasname = FindUnusedMaterialName(medium->GetName());
-  m_gas.reset(new Heed::GasDef(gasname, gasname, nComponents, notations, 
-                               fractions, pressure, temperature, -1.));
+  if (m_gas) {
+    delete m_gas;
+    m_gas = NULL;
+  }
+
+  m_gas = new Heed::GasDef(gasname, gasname, nComponents, notations, fractions,
+                           pressure, temperature, -1.);
 
   const double w = std::max(medium->GetW() * 1.e-6, 0.);
   double f = medium->GetFanoFactor();
   if (f <= 0.) f = Heed::standard_factor_Fano;
 
-  m_matter.reset(new Heed::HeedMatterDef(m_energyMesh.get(), m_gas.get(), 
-                                         molPacs, w, f));
+  if (m_matter) {
+    delete m_matter;
+    m_matter = NULL;
+  }
+  m_matter = new Heed::HeedMatterDef(m_energyMesh, m_gas, m_molPacs, w, f);
 
   return true;
 }
@@ -976,7 +1171,11 @@ bool TrackHeed::SetupMaterial(Medium* medium) {
                          Heed::CLHEP::cm3;
 
   const int nComponents = medium->GetNumberOfComponents();
-  std::vector<Heed::AtomPhotoAbsCS*> atPacs(nComponents, nullptr);
+  if (m_atPacs) {
+    delete m_atPacs;
+    m_atPacs = NULL;
+  }
+  m_atPacs = new Heed::AtomPhotoAbsCS* [nComponents];
 
   std::vector<std::string> notations;
   std::vector<double> fractions;
@@ -985,20 +1184,20 @@ bool TrackHeed::SetupMaterial(Medium* medium) {
     double frac;
     medium->GetComponent(i, materialName, frac);
     if (materialName == "C")
-      atPacs[i] = &Heed::Carbon_PACS;
+      m_atPacs[i] = &Heed::Carbon_PACS;
     else if (materialName == "Si")
-      atPacs[i] = &Heed::Silicon_crystal_PACS;
-    // else if (materialName == "Si") atPacs[i] = &Heed::Silicon_G4_PACS;
+      m_atPacs[i] = &Heed::Silicon_crystal_PACS;
+    // else if (materialName == "Si") m_atPacs[i] = &Heed::Silicon_G4_PACS;
     else if (materialName == "Ga")
-      atPacs[i] = &Heed::Gallium_PACS;
+      m_atPacs[i] = &Heed::Gallium_PACS;
     else if (materialName == "Ge")
-      atPacs[i] = &Heed::Germanium_PACS;
+      m_atPacs[i] = &Heed::Germanium_PACS;
     else if (materialName == "As")
-      atPacs[i] = &Heed::Arsenic_PACS;
+      m_atPacs[i] = &Heed::Arsenic_PACS;
     else if (materialName == "Cd")
-      atPacs[i] = &Heed::Cadmium_PACS;
+      m_atPacs[i] = &Heed::Cadmium_PACS;
     else if (materialName == "Te")
-      atPacs[i] = &Heed::Tellurium_PACS;
+      m_atPacs[i] = &Heed::Tellurium_PACS;
     else {
       std::cerr << m_className << "::SetupMaterial:\n";
       std::cerr << "    Photoabsorption cross-section data for " << materialName
@@ -1017,7 +1216,7 @@ bool TrackHeed::SetupMaterial(Medium* medium) {
         double e = m_energyMesh->get_e(i);
         pacsfile << 1.e6 * e << "  ";
         for (int j = 0; j < nComponents; ++j) {
-          pacsfile << atPacs[j]->get_ACS(e) << "  " << atPacs[j]->get_ICS(e)
+          pacsfile << m_atPacs[j]->get_ACS(e) << "  " << m_atPacs[j]->get_ICS(e)
                    << "  ";
         }
         pacsfile << "\n";
@@ -1025,17 +1224,24 @@ bool TrackHeed::SetupMaterial(Medium* medium) {
     }
     pacsfile.close();
   }
+  if (m_material) {
+    delete m_material;
+    m_material = NULL;
+  }
   const std::string materialName = FindUnusedMaterialName(medium->GetName());
-  m_material.reset(new Heed::MatterDef(materialName, materialName, nComponents,
-                                       notations, fractions, density, 
-                                       temperature));
+  m_material = new Heed::MatterDef(materialName, materialName, nComponents,
+                                   notations, fractions, density, temperature);
 
   double w = medium->GetW() * 1.e-6;
   if (w < 0.) w = 0.;
   double f = medium->GetFanoFactor();
   if (f <= 0.) f = Heed::standard_factor_Fano;
 
-  m_matter.reset(new Heed::HeedMatterDef(m_energyMesh.get(), m_material.get(), atPacs, w, f));
+  if (m_matter) {
+    delete m_matter;
+    m_matter = NULL;
+  }
+  m_matter = new Heed::HeedMatterDef(m_energyMesh, m_material, m_atPacs, w, f);
 
   return true;
 }
@@ -1044,19 +1250,35 @@ bool TrackHeed::SetupDelta(const std::string& databasePath) {
 
   // Load elastic scattering data.
   std::string filename = databasePath + "cbdel.dat";
-  m_elScat.reset(new Heed::ElElasticScat(filename));
+  if (m_elScat) {
+    delete m_elScat;
+    m_elScat = NULL;
+  }
+  m_elScat = new Heed::ElElasticScat(filename);
 
   filename = databasePath + "elastic_disp.dat";
-  m_lowSigma.reset(new Heed::ElElasticScatLowSigma(m_elScat.get(), filename));
+  if (m_lowSigma) {
+    delete m_lowSigma;
+    m_lowSigma = NULL;
+  }
+  m_lowSigma = new Heed::ElElasticScatLowSigma(m_elScat, filename);
 
   // Load data for calculation of ionization.
   // Get W value and Fano factor.
   const double w = m_matter->W * 1.e6;
   const double f = m_matter->F;
   filename = databasePath + "delta_path.dat";
-  m_pairProd.reset(new Heed::PairProd(filename, w, f));
+  if (m_pairProd) {
+    delete m_pairProd;
+    m_pairProd = NULL;
+  }
+  m_pairProd = new Heed::PairProd(filename, w, f);
 
-  m_deltaCs.reset(new Heed::HeedDeltaElectronCS(m_matter.get(), m_elScat.get(), m_lowSigma.get(), m_pairProd.get()));
+  if (m_deltaCs) {
+    delete m_deltaCs;
+    m_deltaCs = NULL;
+  }
+  m_deltaCs = new Heed::HeedDeltaElectronCS(m_matter, m_elScat, m_lowSigma, m_pairProd);
   return true;
 }
 
@@ -1068,7 +1290,9 @@ std::string TrackHeed::FindUnusedMaterialName(const std::string& namein) {
   std::string nameout = namein;
   unsigned int counter = 0;
   while (Heed::MatterDef::get_MatterDef(nameout)) {
-    nameout = namein + "_" + std::to_string(counter);
+    std::stringstream ss;
+    ss << namein << "_" << counter;
+    nameout = ss.str();
     ++counter;
   }
   return nameout;
@@ -1087,7 +1311,7 @@ bool TrackHeed::IsInside(const double x, const double y, const double z) {
   // Check if the point is inside the drift area.
   if (!m_sensor->IsInArea(x, y, z)) return false;
   // Check if the point is inside a medium.
-  Medium* medium = nullptr;
+  Medium* medium = NULL;
   if (!m_sensor->GetMedium(x, y, z, medium)) return false;
   // Make sure the medium has not changed.
   if (medium->GetName() != m_mediumName ||
@@ -1095,54 +1319,6 @@ bool TrackHeed::IsInside(const double x, const double y, const double z) {
       !medium->IsIonisable()) {
     return false;
   }
-  return true;
-}
-
-bool TrackHeed::UpdateBoundingBox(bool& update) {
-
-  // Get the bounding box.
-  double xmin = 0., ymin = 0., zmin = 0.;
-  double xmax = 0., ymax = 0., zmax = 0.;
-  if (!m_sensor->GetArea(xmin, ymin, zmin, xmax, ymax, zmax)) {
-    std::cerr << m_className << "::UpdateBoundingBox: Drift area is not set.\n";
-    m_ready = false;
-    return false;
-  }
-  // Check if the bounding box has changed.
-  const double lx = fabs(xmax - xmin);
-  const double ly = fabs(ymax - ymin);
-  const double lz = fabs(zmax - zmin);
-  if (m_debug) {
-    std::cout << m_className << "::UpdateBoundingBox:\n"
-              << "    Bounding box dimensions:\n"
-              << "      x: " << lx << " cm\n"
-              << "      y: " << ly << " cm\n"
-              << "      z: " << lz << " cm\n";
-  }
-  if (fabs(lx - m_lX) > Small || fabs(ly - m_lY) > Small || 
-      fabs(lz - m_lZ) > Small) {
-    m_lX = lx;
-    m_lY = ly;
-    m_lZ = lz;
-    m_isChanged = true;
-    update = true;
-    m_hasActiveTrack = false;
-  }
-  // Update the center of the bounding box.
-  m_cX = (std::isinf(xmin) || std::isinf(xmax)) ? 0. : 0.5 * (xmin + xmax);
-  m_cY = (std::isinf(ymin) || std::isinf(ymax)) ? 0. : 0.5 * (ymin + ymax);
-  m_cZ = (std::isinf(zmin) || std::isinf(zmax)) ? 0. : 0.5 * (zmin + zmax);
-  if (m_debug) {
-    std::cout << m_className << "::UpdateBoundingBox:\n"
-              << "    Center of bounding box:\n"
-              << "      x: " << m_cX << " cm\n"
-              << "      y: " << m_cY << " cm\n"
-              << "      z: " << m_cZ << " cm\n";
-  }
-
-  m_fieldMap.SetSensor(m_sensor);
-  m_fieldMap.SetCentre(m_cX, m_cY, m_cZ);
-
   return true;
 }
 

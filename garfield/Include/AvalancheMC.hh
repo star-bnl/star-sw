@@ -6,7 +6,6 @@
 
 #include "Sensor.hh"
 #include "ViewDrift.hh"
-#include "FundamentalConstants.hh"
 
 namespace Garfield {
 
@@ -26,20 +25,20 @@ class AvalancheMC {
 
   /// Switch on drift line plotting.
   void EnablePlotting(ViewDrift* view);
-  void DisablePlotting() { m_viewer = nullptr; }
+  void DisablePlotting() { m_viewer = NULL; }
 
   /// Switch on calculation of induced currents (default: disabled).
-  void EnableSignalCalculation() { m_doSignal = true; }
-  void DisableSignalCalculation() { m_doSignal = false; }
+  void EnableSignalCalculation() { m_useSignal = true; }
+  void DisableSignalCalculation() { m_useSignal = false; }
 
   /// Switch on calculation of induced charge (default: disabled).
-  void EnableInducedChargeCalculation() { m_doInducedCharge = true; }
-  void DisableInducedChargeCalculation() { m_doInducedCharge = false; }
+  void EnableInducedChargeCalculation() { m_useInducedCharge = true; }
+  void DisableInducedChargeCalculation() { m_useInducedCharge = false; }
 
   /** Switch on equilibration of multiplication and attachment
     * over the drift line (default: enabled) */
-  void EnableProjectedPathIntegration() { m_doEquilibration = true; }
-  void DisableProjectedPathIntegration() { m_doEquilibration = false; }
+  void EnableProjectedPathIntegration() { m_useEquilibration = true; }
+  void DisableProjectedPathIntegration() { m_useEquilibration = false; }
 
   /// Switch on diffusion (default: enabled)
   void EnableDiffusion() { m_useDiffusion = true; }
@@ -51,9 +50,12 @@ class AvalancheMC {
   void DisableAttachment() { m_useAttachment = false; }
 
   /// Switch on calculating trapping with TCAD traps.
-  void EnableTcadTraps(const bool on = true) { m_useTcadTrapping = on; }
+  void EnableTcadTraps() { m_useTcadTrapping = true; }
+  void DisableTcadTraps() { m_useTcadTrapping = false; }
+
   /// Switch on TCAD velocity maps
-  void EnableTcadVelocity(const bool on = true) { m_useTcadVelocity = on; }
+  void EnableTcadVelocity() { m_useTcadVelocity = true; }
+  void DisableTcadVelocity() { m_useTcadVelocity = false; }
 
   /// Enable use of magnetic field in stepping algorithm.
   void EnableMagneticField() { m_useBfield = true; }
@@ -65,7 +67,7 @@ class AvalancheMC {
   void SetDistanceSteps(const double d = 0.001);
   /** Use exponentially distributed time steps with mean equal
     * to the specified multiple of the collision time (default model).*/
-  void SetCollisionSteps(const unsigned int n = 100);
+  void SetCollisionSteps(const int n = 100);
 
   /// Define a time interval (only carriers inside the interval are drifted).
   void SetTimeWindow(const double t0, const double t1);
@@ -89,7 +91,7 @@ class AvalancheMC {
   }
 
   /// Return the number of electrons and ions/holes in the avalanche.
-  void GetAvalancheSize(unsigned int& ne, unsigned int& ni) const {
+  void GetAvalancheSize(int& ne, int& ni) const {
     ne = m_nElectrons;
     ni = m_nIons;
   }
@@ -149,48 +151,45 @@ class AvalancheMC {
   void DisableDebugging() { m_debug = false; }
 
  private:
-  std::string m_className = "AvalancheMC";
+  std::string m_className;
 
-  /// Numerical constant used during stepping.
-  static constexpr double c1 = ElectronMass / (SpeedOfLight * SpeedOfLight);
+  /// Numerical prefactor
+  static double c1;
 
-  Sensor* m_sensor = nullptr;
+  Sensor* m_sensor;
 
   struct DriftPoint {
-    double x, y, z, t;       //< Position.
-    unsigned int ne, nh, ni; //< Number of secondaries produced at this point.
+    double x, y, z, t; //< Position.
+    int ne, nh, ni;    //< Number of secondaries produced at this point.
   };
   /// Current drift line
   std::vector<DriftPoint> m_drift;
 
-  enum StepSizeModel {
-    FixedTime,
-    FixedDistance,
-    CollisionTime
+  struct AvalPoint {
+    double x, y, z, t;
+    int ne, nh, ni;
   };
-  /// Step size model.
-  StepSizeModel m_stepModel = CollisionTime;
 
+  /// Step size model
+  int m_stepModel;
   /// Fixed time step
-  double m_tMc = 0.02;
+  double m_tMc;
   /// Fixed distance step
-  double m_dMc = 0.001;
+  double m_dMc;
   /// Sample step size according to collision time
-  int m_nMc = 100;
+  int m_nMc;
 
   /// Flag whether a time window should be used.
-  bool m_hasTimeWindow = false;
-  /// Lower limit of the time window.
-  double m_tMin = 0.;
-  /// Upper limit of the time window.
-  double m_tMax = 0.;
+  bool m_hasTimeWindow;
+  /// Time window
+  double m_tMin, m_tMax;
 
   /// Number of electrons produced
-  unsigned int m_nElectrons = 0;
+  unsigned int m_nElectrons;
   /// Number of holes produced
-  unsigned int m_nHoles = 0;
+  unsigned int m_nHoles;
   /// Number of ions produced
-  unsigned int m_nIons = 0;
+  unsigned int m_nIons;
 
   struct EndPoint {
     double x0, y0, z0, t0; //< Starting point.
@@ -204,25 +203,27 @@ class AvalancheMC {
   /// Endpoints of all ions in the avalanche
   std::vector<EndPoint> m_endpointsIons;
 
-  ViewDrift* m_viewer = nullptr;
+  ViewDrift* m_viewer;
 
-  bool m_doSignal = false;
-  bool m_doInducedCharge = false;
-  bool m_doEquilibration = true;
-  bool m_useDiffusion = true;
-  bool m_useAttachment = true;
-  bool m_useBfield = false;
-  bool m_useIons = true;
-  double m_scaleElectronSignal = 1.;
-  double m_scaleHoleSignal = 1.;
-  double m_scaleIonSignal = 1.;
+  bool m_useSignal;
+  bool m_useInducedCharge;
+  bool m_useEquilibration;
+  bool m_useDiffusion;
+  bool m_useAttachment;
+  bool m_useBfield;
+  bool m_useIons;
+  bool m_withElectrons;
+  bool m_withHoles;
+  double m_scaleElectronSignal;
+  double m_scaleHoleSignal;
+  double m_scaleIonSignal;
 
-  /// Use traps from the field component (TCAD).
-  bool m_useTcadTrapping = false;
-  /// Take the velocity from the field component (TCAD).
-  bool m_useTcadVelocity = false;
+  /// Use traps from the field component, ComponentTcad2d;
+  bool m_useTcadTrapping;
+  /// Take the velocity from the field component, ComponentTcad2d;
+  bool m_useTcadVelocity;
 
-  bool m_debug = false;
+  bool m_debug;
 
   /// Compute a drift line with starting point (x0, y0, z0).
   bool DriftLine(const double x0, const double y0, const double z0,
@@ -230,22 +231,7 @@ class AvalancheMC {
   /// Compute an avalanche with starting point (x0, y0, z0).
   bool Avalanche(const double x0, const double y0, const double z0,
                  const double t0, const unsigned int ne, const unsigned int nh,
-                 const unsigned int ni, const bool withElectrons,
-                 const bool withHoles);
-
-  void AddPoint(const double x, const double y, const double z, const double t,
-                const unsigned int ne, const unsigned int nh, 
-                const unsigned int ni, std::vector<DriftPoint>& points) { 
-    DriftPoint point;
-    point.x = x;
-    point.y = y;
-    point.z = z;
-    point.t = t;
-    point.ne = ne;
-    point.nh = nh;
-    point.ni = ni;
-    points.push_back(std::move(point));
-  }
+                 const unsigned int ni);
 
   /// Compute electric and magnetic field at a given position.
   int GetField(const double x, const double y, const double z,
@@ -273,11 +259,9 @@ class AvalancheMC {
                        std::vector<double>& etas) const;
   bool Equilibrate(std::vector<double>& alphas) const; 
   /// Compute the induced signal for the current drift line.
-  void ComputeSignal(const double q, 
-                     const std::vector<DriftPoint>& driftLine) const;
+  void ComputeSignal(const double q) const;
   /// Compute the induced charge for the current drift line.
-  void ComputeInducedCharge(const double q,
-                            const std::vector<DriftPoint>& driftLine) const;
+  void ComputeInducedCharge(const double q) const;
 };
 }
 

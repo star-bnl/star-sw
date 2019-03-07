@@ -9,26 +9,33 @@ namespace Garfield {
 class ComponentComsol : public ComponentFieldMap {
 
  public:
-  /// Default constructor
+  // Constructors
   ComponentComsol();
   ComponentComsol(std::string mesh, std::string mplist, std::string field);
-  /// Destructor
+  // Destructor
   ~ComponentComsol() {}
 
   void ElectricField(const double x, const double y, const double z, double& ex,
-                     double& ey, double& ez, Medium*& m, int& status) override;
+                     double& ey, double& ez, Medium*& m, int& status);
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, double& v, Medium*& m,
-                     int& status) override;
+                     int& status);
 
   void WeightingField(const double x, const double y, const double z,
                       double& wx, double& wy, double& wz,
-                      const std::string& label) override;
+                      const std::string& label);
 
   double WeightingPotential(const double x, const double y, const double z,
-                            const std::string& label) override;
+                            const std::string& label);
 
-  Medium* GetMedium(const double x, const double y, const double z) override;
+  Medium* GetMedium(const double x, const double y, const double z);
+
+  virtual bool IsInBoundingBox(const double x, const double y, 
+                               const double z) const {
+    return x >= xMinBoundingBox && x <= xMaxBoundingBox &&
+           y >= yMinBoundingBox && y <= yMaxBoundingBox &&
+           z >= zMinBoundingBox && y <= zMaxBoundingBox;
+  }
 
   bool Initialise(std::string header = "mesh.mphtxt",
                   std::string mplist = "dielectrics.dat",
@@ -37,11 +44,11 @@ class ComponentComsol : public ComponentFieldMap {
   bool SetWeightingField(std::string file, std::string label);
 
  protected:
-  void UpdatePeriodicity() override { UpdatePeriodicityCommon(); }
+  // Verify periodicities
+  void UpdatePeriodicity() { UpdatePeriodicityCommon(); }
 
-  double GetElementVolume(const unsigned int i) override;
-  void GetAspectRatio(const unsigned int i, 
-                      double& dmin, double& dmax) override;
+  double GetElementVolume(const unsigned int i);
+  void GetAspectRatio(const unsigned int i, double& dmin, double& dmax);
 
   struct nodeCmp {
     bool operator()(const ComponentFieldMap::Node& lhs,

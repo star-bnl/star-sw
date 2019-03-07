@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.104 2019/02/25 19:20:18 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.105 2019/03/04 20:55:59 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.105  2019/03/04 20:55:59  genevb
+// Improve RDO layout for iTPC
+//
 // Revision 2.104  2019/02/25 19:20:18  genevb
 // Sector numbering fix
 //
@@ -892,7 +895,7 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             if (SingleTpcSectorReference && onamebase.Contains("iTpcSector")) {
               // last parameter is the single sector to use for reference:
               // e.g. TpcSector14 => TpcSector20 if the number is "20"
-              onamebase.Replace(onamebase.Index("iTpcSector")+10,2,"20");
+              onamebase.Replace(onamebase.Index("iTpcSector")+10,2,"17");
             } else if (SingleTpcSectorReference && onamebase.Contains("TpcSector")) {
               // last parameter is the single sector to use for reference:
               // e.g. TpcSector20 => TpcSector14 if the number is "14"
@@ -1173,7 +1176,7 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             // Draw RDO boundaries
             ruler.SetLineColor(1);
             ruler.SetLineWidth(1);
-            // between RDOs 2-6, draw +/- (npads_row1+npads_row2)/2 * (pitch/2)
+            // between RDOs 4-8, draw +/- (npads_row1+npads_row2)/2 * (pitch/2)
             float pitch = 0.67/2.0; // 6.7mm pitch
             ruler.DrawLine(-137*pitch,64.5,137*pitch,64.5);
             ruler.DrawLine(-123*pitch,56.5,123*pitch,56.5);
@@ -1192,47 +1195,42 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             ruler.DrawLine((row_width-in_step1)*pitch,row1,(row_width-in_step1)*pitch,row2);
             ruler.DrawLine(-(row_width-in_step2)*pitch,row3,-(row_width-in_step2)*pitch,row2);
             ruler.DrawLine((row_width-in_step2)*pitch,row3,(row_width-in_step2)*pitch,row2);
+            // between RDOs 2-3&4
             bool east = (atoi(&(oName.Data()[oName.Last('r')+1])) > 12);
-            pitch = (east ? -0.50 : 0.50); // 5.0mm pitch, switch orientation for east
-            float p01 = -46*pitch; float row01 = 22.5;
-            float p02 = -36*pitch; float row02 = 22.5;
-            float p03 = -36*pitch; float row03 = 21.5;
-            float p04 = -39*pitch; float row04 = 21.5;
-            float p05 = -39*pitch; float row05 = 20.5;
-            float p06 = -19*pitch; float row06 = 20.5;
-            float p07 = -19*pitch; float row07 = 22.5;
-            float p08 =  -9*pitch; float row08 = 22.5;
-            float p09 =  -9*pitch; float row09 = 23.5;
-            float p10 =  -2*pitch; float row10 = 23.5;
-            float p11 =  -2*pitch; float row11 = 24.5;
-            float p12 =   2*pitch; float row12 = 24.5;
-            float p13 =   2*pitch; float row13 = 23.5;
-            float p14 =   9*pitch; float row14 = 23.5;
-            float p15 =   9*pitch; float row15 = 22.5;
-            float p16 =  35*pitch; float row16 = 22.5;
-            float p17 =  35*pitch; float row17 = 23.5;
-            float p18 =  31*pitch; float row18 = 23.5;
-            float p19 =  31*pitch; float row19 = 24.5;
-            float p20 =  46*pitch; float row20 = 24.5;
-            ruler.DrawLine(p01,row01,p02,row02);
-            ruler.DrawLine(p02,row02,p03,row03);
-            ruler.DrawLine(p03,row03,p04,row04);
-            ruler.DrawLine(p04,row04,p05,row05);
-            ruler.DrawLine(p05,row05,p06,row06);
-            ruler.DrawLine(p06,row06,p07,row07);
-            ruler.DrawLine(p07,row07,p08,row08);
-            ruler.DrawLine(p08,row08,p09,row09);
-            ruler.DrawLine(p09,row09,p10,row10);
-            ruler.DrawLine(p10,row10,p11,row11);
-            ruler.DrawLine(p11,row11,p12,row12);
-            ruler.DrawLine(p12,row12,p13,row13);
-            ruler.DrawLine(p13,row13,p14,row14);
-            ruler.DrawLine(p14,row14,p15,row15);
-            ruler.DrawLine(p15,row15,p16,row16);
-            ruler.DrawLine(p16,row16,p17,row17);
-            ruler.DrawLine(p17,row17,p18,row18);
-            ruler.DrawLine(p18,row18,p19,row19);
-            ruler.DrawLine(p19,row19,p20,row20);
+            pitch = (east ? 0.50 : -0.50); // 5.0mm pitch, switch orientation for east vs. west
+            float p01 = 46*pitch; float row01 = 22.5;
+            float p02 = 36*pitch; float row02 = 22.5;
+            float p03 = 36*pitch; float row03 = 21.5;
+            float p04 = 39*pitch; float row04 = 21.5;
+            float p05 = 39*pitch; float row05 = 20.5;
+            float p06 = 19*pitch; float row06 = 20.5;
+            float p07 = 19*pitch; float row07 = 22.5;
+            float p08 =  9*pitch; float row08 = 22.5;
+            float p09 =  9*pitch; float row09 = 23.5;
+            float p10 =  2*pitch; float row10 = 23.5;
+            float p11 =  2*pitch; float row11 = 24.5;
+            ruler.DrawLine( p01,row01, p02,row02);
+            ruler.DrawLine( p02,row02, p03,row03);
+            ruler.DrawLine( p03,row03, p04,row04);
+            ruler.DrawLine( p04,row04, p05,row05);
+            ruler.DrawLine( p05,row05, p06,row06);
+            ruler.DrawLine( p06,row06, p07,row07);
+            ruler.DrawLine( p07,row07, p08,row08);
+            ruler.DrawLine( p08,row08, p09,row09);
+            ruler.DrawLine( p09,row09, p10,row10);
+            ruler.DrawLine( p10,row10, p11,row11);
+            ruler.DrawLine(-p01,row01,-p02,row02);
+            ruler.DrawLine(-p02,row02,-p03,row03);
+            ruler.DrawLine(-p03,row03,-p04,row04);
+            ruler.DrawLine(-p04,row04,-p05,row05);
+            ruler.DrawLine(-p05,row05,-p06,row06);
+            ruler.DrawLine(-p06,row06,-p07,row07);
+            ruler.DrawLine(-p07,row07,-p08,row08);
+            ruler.DrawLine(-p08,row08,-p09,row09);
+            ruler.DrawLine(-p09,row09,-p10,row10);
+            ruler.DrawLine(-p10,row10,-p11,row11);
+            ruler.DrawLine(-p11,row11, p11,row11);
+            // between RDOs 3-4
             p01 =   0*pitch; row01 = 24.5;
             p02 =   0*pitch; row02 = 26.5;
             p03 =  -7*pitch; row03 = 26.5;
@@ -1244,9 +1242,9 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             p09 =  11*pitch; row09 = 32.5;
             p10 =  11*pitch; row10 = 35.5;
             p11 =  10*pitch; row11 = 35.5;
-            p12 =  10*pitch; row12 = 36.5;
-            p13 =   0*pitch; row13 = 36.5;
-            p14 =   0*pitch; row14 = 40.5;
+            float p12 =  10*pitch; float row12 = 36.5;
+            float p13 =   0*pitch; float row13 = 36.5;
+            float p14 =   0*pitch; float row14 = 40.5;
             ruler.DrawLine(p01,row01,p02,row02);
             ruler.DrawLine(p02,row02,p03,row03);
             ruler.DrawLine(p03,row03,p04,row04);
@@ -1264,7 +1262,7 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             latex.SetTextAlign(32);
             latex.DrawLatex(50,5,"RDO 1");
             latex.DrawLatex(50,18,"2");
-            latex.DrawLatex(50,33,(east ? "4 , 3" : "3 , 4"));
+            latex.DrawLatex(50,33,(east ? "3 , 4" : "4 , 3"));
             latex.DrawLatex(50,44,"5");
             latex.DrawLatex(50,52,"6");
             latex.DrawLatex(50,60,"7");

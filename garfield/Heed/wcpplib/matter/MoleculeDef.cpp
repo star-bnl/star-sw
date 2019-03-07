@@ -59,20 +59,36 @@ std::ostream& operator<<(std::ostream& file, const VanDerWaals& f) {
   return file;
 }
 
-MoleculeDef::MoleculeDef() {
+/*
+//This is not finished
+double VanDerWaals::pressure(double M, // the number of moles
+                             double volume,
+                             double T)
+{
+  mfunname("double VanDerWaals::pressure(double M, double volume, double T)");
+  const double rydberg = k_Boltzmann * Avogadro;
+  double pa = M * (
+  Parabol par(
+}
+*/
+
+MoleculeDef::MoleculeDef() : nameh("none"), notationh("none") {
   MoleculeDef::get_logbook().push_back(this);
 }
 
 MoleculeDef::MoleculeDef(const std::string& fname, const std::string& fnotation,
                          long fqatom, const std::vector<std::string>& fatom_not,
                          const std::vector<long>& fqatom_ps,
-                         std::shared_ptr<VanDerWaals> fvdw)
+                         ActivePtr<VanDerWaals> fawls)
     : AtomMixDef(fqatom, fatom_not, fqatom_ps),
       nameh(fname),
       notationh(fnotation),
-      qatom_psh(fqatom_ps) {
+      qatom_psh(fqatom_ps),
+      Z_totalh(0),
+      A_totalh(0.0),
+      tqatomh(0),
+      awlsh(fawls) {
   mfunname("MoleculeDef::MoleculeDef(...)");
-  m_vdw = std::move(fvdw);
   for (long n = 0; n < qatom(); n++) {
     Z_totalh += qatom_psh[n] * atom(n)->Z();
     A_totalh += qatom_psh[n] * atom(n)->A();
@@ -86,14 +102,16 @@ MoleculeDef::MoleculeDef(const std::string& fname, const std::string& fnotation,
 // one atom in molecule
 MoleculeDef::MoleculeDef(const std::string& fname, const std::string& fnotation,
                          const std::string& fatom_not, long fqatom_ps,
-                         std::shared_ptr<VanDerWaals> fvdw)
+                         ActivePtr<VanDerWaals> fawls)
     : AtomMixDef(fatom_not),
       nameh(fname),
       notationh(fnotation),
       qatom_psh(1, fqatom_ps),
-      tqatomh(fqatom_ps) {
+      Z_totalh(0),
+      A_totalh(0.0),
+      tqatomh(fqatom_ps),
+      awlsh(fawls) {
   mfunname("MoleculeDef::MoleculeDef(...)");
-  m_vdw = std::move(fvdw);
   Z_totalh = atom(0)->Z() * fqatom_ps;
   A_totalh = atom(0)->A() * fqatom_ps;
   verify();
@@ -104,13 +122,16 @@ MoleculeDef::MoleculeDef(const std::string& fname, const std::string& fnotation,
 MoleculeDef::MoleculeDef(const std::string& fname, const std::string& fnotation,
                          const std::string& fatom_not1, long fqatom_ps1,
                          const std::string& fatom_not2, long fqatom_ps2,
-                         std::shared_ptr<VanDerWaals> fvdw)
+                         ActivePtr<VanDerWaals> fawls)
     : AtomMixDef(fatom_not1, fqatom_ps1, fatom_not2, fqatom_ps2),
       nameh(fname),
       notationh(fnotation),
-      qatom_psh(2) {
+      qatom_psh(2),
+      Z_totalh(0),
+      A_totalh(0.0),
+      tqatomh(0),
+      awlsh(fawls) {
   mfunname("MoleculeDef::MoleculeDef(...)");
-  m_vdw = std::move(fvdw);
   qatom_psh[0] = fqatom_ps1;
   qatom_psh[1] = fqatom_ps2;
   for (long n = 0; n < qatom(); n++) {
@@ -128,14 +149,17 @@ MoleculeDef::MoleculeDef(const std::string& fname, const std::string& fnotation,
                          const std::string& fatom_not1, long fqatom_ps1,
                          const std::string& fatom_not2, long fqatom_ps2,
                          const std::string& fatom_not3, long fqatom_ps3,
-                         std::shared_ptr<VanDerWaals> fvdw)
+                         ActivePtr<VanDerWaals> fawls)
     : AtomMixDef(fatom_not1, fqatom_ps1, fatom_not2, fqatom_ps2, fatom_not3,
                  fqatom_ps3),
       nameh(fname),
       notationh(fnotation),
-      qatom_psh(3) {
+      qatom_psh(3),
+      Z_totalh(0),
+      A_totalh(0.0),
+      tqatomh(0),
+      awlsh(fawls) {
   mfunname("MoleculeDef::MoleculeDef(...)");
-  m_vdw = std::move(fvdw);
   qatom_psh[0] = fqatom_ps1;
   qatom_psh[1] = fqatom_ps2;
   qatom_psh[2] = fqatom_ps3;
@@ -155,20 +179,26 @@ void MoleculeDef::print(std::ostream& file, int l) const {
 
 void MoleculeDef::printall(std::ostream& file) {
   Ifile << "MoleculeDef::printall:\n";
-  for (auto molecule : MoleculeDef::get_logbook()) {
-    file << molecule;
-  }
+  std::list<MoleculeDef*>& logbook = MoleculeDef::get_logbook();
+  std::list<MoleculeDef*>::const_iterator it;
+  std::list<MoleculeDef*>::const_iterator end = logbook.end();
+  for (it = logbook.begin(); it != end; ++it) file << (*it);
 }
 
 void MoleculeDef::verify() {
   mfunnamep("void MoleculeDef::verify()");
   if (nameh == "none" && notationh == "none") return;
-  for (auto molecule : MoleculeDef::get_logbook()) {
-    if (molecule->nameh != nameh && molecule->notationh != notationh) continue;
-    funnw.ehdr(mcerr);
-    mcerr << "cannot initialize two molecules with the same name or notation\n";
-    mcerr << "name=" << nameh << " notation=" << notationh << '\n';
-    spexit(mcerr);
+  std::list<MoleculeDef*>& logbook = MoleculeDef::get_logbook();
+  std::list<MoleculeDef*>::const_iterator it;
+  std::list<MoleculeDef*>::const_iterator end = logbook.end();
+  for (it = logbook.begin(); it != end; ++it) {
+    if ((*it)->nameh == nameh || (*it)->notationh == notationh) {
+      funnw.ehdr(mcerr);
+      mcerr << "can not initialize two molecules "
+            << "with the same name or notation\n";
+      mcerr << "name=" << nameh << " notation=" << notationh << '\n';
+      spexit(mcerr);
+    }
   }
 }
 
@@ -182,20 +212,23 @@ const std::list<MoleculeDef*>& MoleculeDef::get_const_logbook() {
 }
 
 MoleculeDef* MoleculeDef::get_MoleculeDef(const std::string& fnotation) {
-  for (auto molecule : MoleculeDef::get_logbook()) {
-    if (molecule->notation() == fnotation) return molecule;
+  std::list<MoleculeDef*>& logbook = MoleculeDef::get_logbook();
+  std::list<MoleculeDef*>::const_iterator it;
+  std::list<MoleculeDef*>::const_iterator end = logbook.end();
+  for (it = logbook.begin(); it != end; ++it) {
+    if ((*it)->notation() == fnotation) return *it;
   }
-  return nullptr;
+  return NULL;
 }
 
 std::ostream& operator<<(std::ostream& file, const MoleculeDef& f) {
-  mfunnamep("std::ostream& operator << (std::ostream&, const MoleculeDef&)");
-  constexpr double gpm = gram / mole;
+  mfunnamep(
+      "std::ostream& operator << (std::ostream& file, const MoleculeDef& f)");
   Ifile << "MoleculeDef: name=" << std::setw(10) << f.name()
         << " notation=" << std::setw(3) << f.notation() << '\n';
   indn.n += 2;
   Ifile << "Z_total()=" << std::setw(3) << f.Z_total()
-        << " A_total()/(gram/mole)=" << f.A_total() / gpm 
+        << " A_total()/(gram/mole)=" << f.A_total() / (gram / mole)
         << " tqatom()=" << f.tqatom() << '\n';
   Iprintn(file, f.qatom());
   indn.n += 2;
@@ -205,7 +238,8 @@ std::ostream& operator<<(std::ostream& file, const MoleculeDef& f) {
   }
   indn.n -= 2;
   f.AtomMixDef::print(file, 1);
-  VanDerWaals* at = f.vdw().get();
+  Iprintn(mcout, f.awls());
+  VanDerWaals* at = f.awls().get();
   if (at) {
     Ifile << "Density at the crucial conditions for ideal gas (for debug):\n";
     double rydberg = k_Boltzmann * Avogadro;  // more precise

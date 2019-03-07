@@ -2,6 +2,7 @@
 #define ENERGYMESH_H
 
 #include <vector>
+#include "wcpplib/safetl/AbsPtr.h"
 
 namespace Heed {
 
@@ -29,14 +30,16 @@ namespace Heed {
 ///
 /// 2003, I. Smirnov
 
-class EnergyMesh {
+class EnergyMesh : public RegPassivePtr {
  public:
   /// Default constructor.
-  EnergyMesh() = default;
+  EnergyMesh() : q(0), emin(0.0), emax(0.0) {}
   /// Constructor from min./max energy and number of bins.
   EnergyMesh(double femin, double femax, long fq);
   /// Constructor from a list of energies.
   EnergyMesh(const std::vector<double>& fec);
+  /// Destructor
+  virtual ~EnergyMesh() {}
 
   /// Return number of bins.
   inline long get_q() const { return q; }
@@ -57,18 +60,18 @@ class EnergyMesh {
   long get_interval_number_between_centers(const double ener) const;  // left
   friend std::ostream& operator<<(std::ostream& file, EnergyMesh& f);
 
-  EnergyMesh* copy() const { return new EnergyMesh(*this); }
-  void print(std::ostream& file, int l) const;
+  virtual EnergyMesh* copy() const { return new EnergyMesh(*this); }
+  virtual void print(std::ostream& file, int l) const;
 
  private:
   /// qener-1 is maximal possible number of bins
   static const int pqener = 1001;
   /// Number of intervals
-  long q = 0;
+  long q;
   /// Left side of the first interval
-  double emin = 0.;
+  double emin;
   /// Right side of the last interval
-  double emax = 0.;
+  double emax;
   /// Left side of interval, q + 1 numbers
   double e[pqener];
   /// Center of interval, q numbers

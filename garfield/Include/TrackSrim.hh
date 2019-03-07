@@ -52,7 +52,7 @@ class TrackSrim : public Track {
   int GetTargetClusterSize() const { return m_nsize; }
 
   void SetClustersMaximum(const int n) { m_maxclusters = n; }
-  int GetClustersMaximum() const { return m_maxclusters; }
+  int SetClustersMaximum() const { return m_maxclusters; }
 
   bool ReadFile(const std::string& file);
   void Print();
@@ -68,30 +68,30 @@ class TrackSrim : public Track {
 
  protected:
   /// Use precise Vavilov generator
-  bool m_precisevavilov = false;
+  bool m_precisevavilov;
   /// Include transverse straggling
-  bool m_useTransStraggle = true;
+  bool m_useTransStraggle;
   /// Include longitudinal straggling
-  bool m_useLongStraggle = false;
+  bool m_useLongStraggle;
 
   /// Charge gas been defined
-  bool m_chargeset = false;
+  bool m_chargeset;
   /// Density [g/cm3]
-  double m_density = -1.;
+  double m_density;
   /// Work function [eV]
-  double m_work = -1.;
+  double m_work;
   /// Fano factor [-]
-  double m_fano = -1.;
+  double m_fano;
   /// Charge of ion
   double m_q;
   /// Mass of ion [MeV]
-  double m_mass = -1.;
+  double m_mass;
   /// A and Z of the gas
-  double m_a = -1.;
-  double m_z = -1.;
+  double m_a;
+  double m_z;
 
   /// Maximum number of clusters allowed (infinite if 0)
-  int m_maxclusters = -1;
+  int m_maxclusters;
   /// Energy in energy loss table [MeV]
   std::vector<double> m_ekin;
   /// EM energy loss [MeV cm2/g]
@@ -109,9 +109,9 @@ class TrackSrim : public Track {
   unsigned int m_currcluster;
   /// Fluctuation model (0 = none, 1 = Landau, 2 = Vavilov,
   ///                    3 = Gaussian, 4 = Combined)
-  unsigned int m_model = 4;
+  unsigned int m_model;
   /// Targeted cluster size
-  int m_nsize = -1;
+  int m_nsize;
   struct cluster {
     double x, y, z, t; // Cluster location and time
     double ec;         // Energy spent to make the clusterec

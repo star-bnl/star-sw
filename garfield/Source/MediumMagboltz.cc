@@ -2,7 +2,7 @@
 #include <iomanip>
 #include <fstream>
 #include <cmath>
-#include <algorithm>
+
 #include <map>
 
 #include <TMath.h>
@@ -27,6 +27,15 @@ MediumMagboltz::MediumMagboltz()
       m_eHigh(1.e4),
       m_eHighLog(log(m_eHigh)),
       m_lnStep(1.),
+      m_useAutoAdjust(true),
+      m_useCsOutput(false),
+      m_nTerms(0),
+      m_useAnisotropic(true),
+      m_nPenning(0),
+      m_useDeexcitation(false),
+      m_useRadTrap(true),
+      m_useOpalBeaty(true),
+      m_useGreenSawada(false),
       m_eFinalGamma(20.),
       m_eStepGamma(m_eFinalGamma / nEnergyStepsGamma) {
  
@@ -62,19 +71,11 @@ MediumMagboltz::MediumMagboltz()
   // Disable Penning transfer.
   Magboltz::inpt_.ipen = 0;
 
-  // Initialise Penning parameters.
-  m_rPenning.assign(nMaxLevels, 0.);
-  m_lambdaPenning.assign(nMaxLevels, 0.);
-
-  m_energyLoss.assign(nMaxLevels, 0.);
-  m_csType.assign(nMaxLevels, 0);
-  m_scatModel.assign(nMaxLevels, 0);
-  m_description.assign(nMaxLevels, std::string(50, ' '));
-
-  m_cfTot.assign(nEnergySteps, 0.);
-  m_cfTotLog.assign(nEnergyStepsLog, 0.);
-  m_cf.assign(nEnergySteps, std::vector<double>(nMaxLevels, 0.));
-  m_cfLog.assign(nEnergyStepsLog, std::vector<double>(nMaxLevels, 0.));
+  // Initialise Penning parameters
+  for (int i = nMaxLevels; i--;) {
+    m_rPenning[i] = 0.;
+    m_lambdaPenning[i] = 0.;
+  }
 
   m_isChanged = true;
 
@@ -87,14 +88,18 @@ MediumMagboltz::MediumMagboltz()
   for (int i = nCsTypes; i--;) m_nCollisions[i] = 0;
   for (int i = nCsTypesGamma; i--;) m_nPhotonCollisions[i] = 0;
 
+  m_ionProducts.clear();
+  m_dxcProducts.clear();
+
   for (unsigned int i = 0; i < m_nMaxGases; ++i) m_scaleExc[i] = 1.;
 }
 
 bool MediumMagboltz::SetMaxElectronEnergy(const double e) {
 
   if (e <= Small) {
-    std::cerr << m_className << "::SetMaxElectronEnergy:\n"
-              << "    Provided value (" << e << " eV) is too small.\n";
+    std::cerr << m_className << "::SetMaxElectronEnergy:\n";
+    std::cerr << "    Provided upper electron energy limit (" << e
+              << " eV) is too small.\n";
     return false;
   }
   m_eFinal = e;
@@ -119,8 +124,9 @@ bool MediumMagboltz::SetMaxElectronEnergy(const double e) {
 bool MediumMagboltz::SetMaxPhotonEnergy(const double e) {
 
   if (e <= Small) {
-    std::cerr << m_className << "::SetMaxPhotonEnergy:\n"
-              << "    Provided value (" << e << " eV) is too small.\n";
+    std::cerr << m_className << "::SetMaxPhotonEnergy:\n";
+    std::cerr << "    Provided upper photon energy limit (" << e
+              << " eV) is too small.\n";
     return false;
   }
   m_eFinalGamma = e;
@@ -198,8 +204,9 @@ void MediumMagboltz::EnablePenningTransfer(const double r,
                                            const double lambda) {
 
   if (r < 0. || r > 1.) {
-    std::cerr << m_className << "::EnablePenningTransfer:\n"
-              << "    Transfer probability must be in the range [0, 1].\n";
+    std::cerr << m_className << "::EnablePenningTransfer:\n";
+    std::cerr << "    Penning transfer probability must be "
+              << " in the range [0, 1].\n";
     return;
   }
 
@@ -231,8 +238,9 @@ void MediumMagboltz::EnablePenningTransfer(const double r, const double lambda,
                                            std::string gasname) {
 
   if (r < 0. || r > 1.) {
-    std::cerr << m_className << "::EnablePenningTransfer:\n"
-              << "    Transfer probability must be in the range [0, 1].\n";
+    std::cerr << m_className << "::EnablePenningTransfer:\n";
+    std::cerr << "    Penning transfer probability must be "
+              << " in the range [0, 1].\n";
     return;
   }
 
@@ -410,7 +418,8 @@ bool MediumMagboltz::Initialise(const bool verbose) {
 
   if (!m_isChanged) {
     if (m_debug) {
-      std::cerr << m_className << "::Initialise: Nothing changed.\n";
+      std::cerr << m_className << "::Initialise:\n";
+      std::cerr << "    Nothing changed.\n";
     }
     return true;
   }
@@ -437,9 +446,11 @@ void MediumMagboltz::PrintGas() {
     int type = m_csType[i] % nCsTypes;
     int ngas = int(m_csType[i] / nCsTypes);
     // Description (from Magboltz)
+    std::string descr = std::string(50, ' ');
+    for (int j = 50; j--;) descr[j] = m_description[i][j];
     // Threshold energy
     double e = m_rgas[ngas] * m_energyLoss[i];
-    std::cout << "    Level " << i << ": " << m_description[i] << "\n";
+    std::cout << "    Level " << i << ": " << descr << "\n";
     std::cout << "        Type " << type;
     if (type == ElectronCollisionTypeElastic) {
       std::cout << " (elastic)\n";
@@ -632,9 +643,8 @@ double MediumMagboltz::GetElectronCollisionRate(const double e,
 
 bool MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
                                           double& e1, double& dx, double& dy,
-                                          double& dz, 
-                                          std::vector<std::pair<int, double> >& secondaries, 
-                                          int& ndxc, int& band) {
+                                          double& dz, int& nion, int& ndxc,
+                                          int& band) {
 
   // Check if the electron energy is within the currently set range.
   if (e > m_eFinal && m_useAutoAdjust) {
@@ -676,13 +686,23 @@ bool MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
 
     // Sample the scattering process.
     const double r = RndmUniform();
-    if (r <= m_cf[iE][0]) {
-      level = 0;
-    } else if (r >= m_cf[iE][m_nTerms -1]) {
-      level = m_nTerms - 1; 
+    int iLow = 0;
+    int iUp = m_nTerms - 1;
+    if (r <= m_cf[iE][iLow]) {
+      level = iLow;
+    } else if (r >= m_cf[iE][iUp]) {
+      level = iUp;
     } else {
-      const auto begin = m_cf[iE].cbegin();
-      level = std::lower_bound(begin, begin + m_nTerms, r) - begin;
+      int iMid;
+      while (iUp - iLow > 1) {
+        iMid = (iLow + iUp) >> 1;
+        if (r < m_cf[iE][iMid]) {
+          iUp = iMid;
+        } else {
+          iLow = iMid;
+        }
+      }
+      level = iUp;
     }
     // Get the angular distribution parameters.
     angCut = m_scatCut[iE][level];
@@ -695,13 +715,23 @@ bool MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
     if (iE >= nEnergyStepsLog) iE = nEnergyStepsLog - 1;
     // Sample the scattering process.
     const double r = RndmUniform();
-    if (r <= m_cfLog[iE][0]) {
-      level = 0;
-    } else if (r >= m_cfLog[iE][m_nTerms - 1]) {
-      level = m_nTerms - 1;
+    int iLow = 0;
+    int iUp = m_nTerms - 1;
+    if (r <= m_cfLog[iE][iLow]) {
+      level = iLow;
+    } else if (r >= m_cfLog[iE][iUp]) {
+      level = iUp;
     } else {
-      const auto begin = m_cfLog[iE].cbegin();
-      level = std::lower_bound(begin, begin + m_nTerms, r) - begin;
+      int iMid;
+      while (iUp - iLow > 1) {
+        iMid = (iLow + iUp) >> 1;
+        if (r < m_cfLog[iE][iMid]) {
+          iUp = iMid;
+        } else {
+          iLow = iMid;
+        }
+      }
+      level = iUp;
     }
     // Get the angular distribution parameters.
     angCut = m_scatCutLog[iE][level];
@@ -717,7 +747,7 @@ bool MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
 
   // Get the energy loss for this process.
   double loss = m_energyLoss[level];
-  ndxc = 0;
+  nion = ndxc = 0;
 
   if (type == ElectronCollisionTypeIonisation) {
     // Sample the secondary electron energy according to
@@ -741,10 +771,17 @@ bool MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
     }
     if (esec <= 0) esec = Small;
     loss += esec;
+    m_ionProducts.clear();
     // Add the secondary electron.
-    secondaries.emplace_back(std::make_pair(IonProdTypeElectron, esec));
+    ionProd newIonProd;
+    newIonProd.type = IonProdTypeElectron;
+    newIonProd.energy = esec;
+    m_ionProducts.push_back(newIonProd);
     // Add the ion.
-    secondaries.emplace_back(std::make_pair(IonProdTypeIon, 0.));
+    newIonProd.type = IonProdTypeIon;
+    newIonProd.energy = 0.;
+    m_ionProducts.push_back(newIonProd);
+    nion = 2;
   } else if (type == ElectronCollisionTypeExcitation) {
     // if (m_gas[igas] == "CH4" && loss * m_rgas[igas] < 13.35 && e > 12.65) {
     //   if (RndmUniform() < 0.5) {
@@ -782,7 +819,7 @@ bool MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
         }
         newDxcProd.energy = esec;
         newDxcProd.type = DxcProdTypeElectron;
-        m_dxcProducts.push_back(std::move(newDxcProd));
+        m_dxcProducts.push_back(newDxcProd);
         ndxc = 1;
         ++m_nPenning;
       }
@@ -806,9 +843,9 @@ bool MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
         ctheta0 = (ctheta0 + angPar) / (1. + angPar * ctheta0);
         break;
       default:
-        std::cerr << m_className << "::GetElectronCollision:\n"
-                  << "    Unknown scattering model.\n"
-                  << "    Using isotropic distribution.\n";
+        std::cerr << m_className << "::GetElectronCollision:\n";
+        std::cerr << "    Unknown scattering model. \n";
+        std::cerr << "    Using isotropic distribution.\n";
         break;
     }
   }
@@ -837,6 +874,7 @@ bool MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
   const double phi = TwoPi * RndmUniform();
   const double cphi = cos(phi);
   const double sphi = sin(phi);
+
   if (argZ == 0.) {
     dz = ctheta;
     dx = cphi * stheta;
@@ -864,6 +902,20 @@ bool MediumMagboltz::GetDeexcitationProduct(const unsigned int i, double& t, dou
   s = m_dxcProducts[i].s;
   type = m_dxcProducts[i].type;
   energy = m_dxcProducts[i].energy;
+  return true;
+}
+
+bool MediumMagboltz::GetIonisationProduct(const unsigned int i, int& type,
+                                          double& energy) const {
+
+  if (i >= m_ionProducts.size()) {
+    std::cerr << m_className << "::GetIonisationProduct:\n"
+              << "    Index (" << i << ") out of range.\n";
+    return false;
+  }
+
+  type = m_ionProducts[i].type;
+  energy = m_ionProducts[i].energy;
   return true;
 }
 
@@ -984,13 +1036,23 @@ bool MediumMagboltz::GetPhotonCollision(const double e, int& type, int& level,
     r *= RndmUniform();
   }
 
-  if (r <= m_cfGamma[iE][0]) {
-    level = 0;
-  } else if (r >= m_cfGamma[iE][m_nPhotonTerms - 1]) {
-    level = m_nPhotonTerms - 1;
+  int iLow = 0;
+  int iUp = nPhotonTerms - 1;
+  if (r <= m_cfGamma[iE][iLow]) {
+    level = iLow;
+  } else if (r >= m_cfGamma[iE][iUp]) {
+    level = iUp;
   } else {
-    const auto begin = m_cfGamma[iE].cbegin();
-    level = std::lower_bound(begin, begin + m_nPhotonTerms, r) - begin;
+    int iMid;
+    while (iUp - iLow > 1) {
+      iMid = (iLow + iUp) >> 1;
+      if (r < m_cfGamma[iE][iMid]) {
+        iUp = iMid;
+      } else {
+        iLow = iMid;
+      }
+    }
+    level = iUp;
   }
 
   nsec = 0;
@@ -1079,7 +1141,8 @@ bool MediumMagboltz::GetLevel(const unsigned int i, int& ngas, int& type,
   type = m_csType[i] % nCsTypes;
   ngas = int(m_csType[i] / nCsTypes);
   // Description (from Magboltz)
-  descr = m_description[i];
+  descr = std::string(50, ' ');
+  for (int j = 50; j--;) descr[j] = m_description[i][j];
   // Threshold energy
   e = m_rgas[ngas] * m_energyLoss[i];
   if (m_debug) {
@@ -1481,16 +1544,16 @@ bool MediumMagboltz::Mixer(const bool verbose) {
   const double prefactor = dens * SpeedOfLight * sqrt(2. / ElectronMass);
 
   // Fill the electron energy array, reset the collision rates.
-  m_cfTot.assign(nEnergySteps, 0.);
   for (int i = nEnergySteps; i--;) {
+    m_cfTot[i] = 0.;
     for (int j = nMaxLevels; j--;) {
       m_cf[i][j] = 0.;
       m_scatParameter[i][j] = 0.5;
       m_scatCut[i][j] = 1.;
     }
   }
-  m_cfTotLog.assign(nEnergyStepsLog, 0.);
   for (int i = nEnergyStepsLog; i--;) {
+    m_cfTotLog[i] = 0.;
     for (int j = nMaxLevels; j--;) {
       m_cfLog[i][j] = 0.;
       m_scatParameter[i][j] = 0.5;
@@ -1499,8 +1562,8 @@ bool MediumMagboltz::Mixer(const bool verbose) {
   }
 
   m_deexcitations.clear();
-  m_scatModel.assign(nMaxLevels, 0);
   for (int i = nMaxLevels; i--;) {
+    m_scatModel[i] = 0;
     m_iDeexcitation[i] = -1;
     m_wOpalBeaty[i] = 1.;
   }
@@ -1569,7 +1632,11 @@ bool MediumMagboltz::Mixer(const bool verbose) {
 
   // Loop over the gases in the mixture.
   for (unsigned int iGas = 0; iGas < m_nComponents; ++iGas) {
-    Magboltz::inpt_.efinal = std::min(m_eFinal, m_eHigh);
+    if (m_eFinal <= m_eHigh) {
+      Magboltz::inpt_.efinal = m_eFinal;
+    } else {
+      Magboltz::inpt_.efinal = m_eHigh;
+    }
     Magboltz::inpt_.estep = m_eStep;
 
     // Number of inelastic cross-section terms
@@ -1616,6 +1683,7 @@ bool MediumMagboltz::Mixer(const bool verbose) {
                 << ") exceeded.\n";
       return false;
     }
+
     double van = m_fraction[iGas] * prefactor;
 
     int np = np0;
@@ -1627,10 +1695,12 @@ bool MediumMagboltz::Mixer(const bool verbose) {
     // Elastic scattering
     ++m_nTerms;
     m_scatModel[np] = kEl[1];
-    const double r = 1. + 0.5 * e[1];
+    const double r = 1. + e[1] / 2.;
     m_rgas[iGas] = r;
     m_energyLoss[np] = 0.;
-    m_description[np] = std::string(scrpt[1], scrpt[1] + 50);
+    for (int j = 0; j < 50; ++j) {
+      m_description[np][j] = scrpt[1][j];
+    }
     m_csType[np] = nCsTypes * iGas + ElectronCollisionTypeElastic;
     bool withIon = false;
     // Ionisation
@@ -1651,7 +1721,9 @@ bool MediumMagboltz::Mixer(const bool verbose) {
             m_wOpalBeaty[np] = 200.;
           }
         }
-        m_description[np] = std::string(scrpt[2 + j], scrpt[2 + j] + 50);
+        for (int k = 0; k < 50; ++k) {
+          m_description[np][k] = scrpt[2 + j][k];
+        }
         m_csType[np] = nCsTypes * iGas + ElectronCollisionTypeIonisation;
         if (m_useCsOutput) {
           outfile << "# " << m_description[np] << "\n";
@@ -1671,7 +1743,9 @@ bool MediumMagboltz::Mixer(const bool verbose) {
         m_gsGreenSawada[iGas] = eoby[0];
         m_tbGreenSawada[iGas] = 2 * e[2];
         m_ionPot[iGas] = e[2];
-        m_description[np] = std::string(scrpt[2], scrpt[2] + 50);
+        for (int j = 0; j < 50; ++j) {
+          m_description[np][j] = scrpt[2][j];
+        }
         m_csType[np] = nCsTypes * iGas + ElectronCollisionTypeIonisation;
         if (m_useCsOutput) {
           outfile << "# ionisation (gross)\n";
@@ -1683,7 +1757,9 @@ bool MediumMagboltz::Mixer(const bool verbose) {
     ++np;
     m_scatModel[np] = 0;
     m_energyLoss[np] = 0.;
-    m_description[np] = std::string(scrpt[2 + nIon], scrpt[2 + nIon] + 50);
+    for (int j = 0; j < 50; ++j) {
+      m_description[np][j] = scrpt[2 + nIon][j];
+    }
     m_csType[np] = nCsTypes * iGas + ElectronCollisionTypeAttachment;
     if (m_useCsOutput) {
       outfile << "# attachment\n";
@@ -1694,7 +1770,9 @@ bool MediumMagboltz::Mixer(const bool verbose) {
       ++np;
       m_scatModel[np] = kIn[j];
       m_energyLoss[np] = eIn[j] / r;
-      m_description[np] = std::string(scrpt[5 + nIon + j], scrpt[5 + nIon + j] + 50);
+      for (int k = 0; k < 50; ++k) {
+        m_description[np][k] = scrpt[5 + nIon + j][k];
+      }
       if ((m_description[np][1] == 'E' && m_description[np][2] == 'X') ||
           (m_description[np][0] == 'E' && m_description[np][1] == 'X') ||
           (m_gas[iGas] == "N2" && eIn[j] > 6.)) {
@@ -1802,6 +1880,7 @@ bool MediumMagboltz::Mixer(const bool verbose) {
       }
       if (m_useCsOutput) outfile << "\n";
     }
+
     if (m_eFinal <= m_eHigh) continue;
     // Fill the high-energy part (logarithmic binning).
     // Calculate the growth factor.
@@ -2122,7 +2201,7 @@ void MediumMagboltz::ComputeAngularCut(const double parIn, double& cut,
     return;
   }
 
-  constexpr double rads = 2. / Pi;
+  const double rads = 2. / Pi;
   const double cns = parIn - 0.5;
   const double thetac = asin(2. * sqrt(cns - cns * cns));
   const double fac = (1. - cos(thetac)) / pow(sin(thetac), 2.);
@@ -5050,7 +5129,7 @@ bool MediumMagboltz::ComputePhotonCollisionTable(const bool verbose) {
   for (int j = nEnergyStepsGamma; j--;) m_cfGamma[j].clear();
   csTypeGamma.clear();
 
-  m_nPhotonTerms = 0;
+  nPhotonTerms = 0;
   for (unsigned int i = 0; i < m_nComponents; ++i) {
     const double prefactor = dens * SpeedOfLight * m_fraction[i];
     // Check if optical data for this gas is available.
@@ -5067,7 +5146,7 @@ bool MediumMagboltz::ComputePhotonCollisionTable(const bool verbose) {
     if (!data.IsAvailable(gasname)) return false;
     csTypeGamma.push_back(i * nCsTypesGamma + PhotonCollisionTypeIonisation);
     csTypeGamma.push_back(i * nCsTypesGamma + PhotonCollisionTypeInelastic);
-    m_nPhotonTerms += 2;
+    nPhotonTerms += 2;
     for (int j = 0; j < nEnergyStepsGamma; ++j) {
       // Retrieve total photoabsorption cross-section and ionisation yield.
       data.GetPhotoabsorptionCrossSection(gasname, (j + 0.5) * m_eStepGamma, cs,
@@ -5086,7 +5165,7 @@ bool MediumMagboltz::ComputePhotonCollisionTable(const bool verbose) {
     csfile.open("csgamma.txt", std::ios::out);
     for (int j = 0; j < nEnergyStepsGamma; ++j) {
       csfile << (j + 0.5) * m_eStepGamma << "  ";
-      for (int i = 0; i < m_nPhotonTerms; ++i) csfile << m_cfGamma[j][i] << "  ";
+      for (int i = 0; i < nPhotonTerms; ++i) csfile << m_cfGamma[j][i] << "  ";
       csfile << "\n";
     }
     csfile.close();
@@ -5094,7 +5173,7 @@ bool MediumMagboltz::ComputePhotonCollisionTable(const bool verbose) {
 
   // Calculate the cumulative rates.
   for (int j = 0; j < nEnergyStepsGamma; ++j) {
-    for (int i = 0; i < m_nPhotonTerms; ++i) {
+    for (int i = 0; i < nPhotonTerms; ++i) {
       if (i > 0) m_cfGamma[j][i] += m_cfGamma[j][i - 1];
     }
   }
@@ -5407,20 +5486,35 @@ void MediumMagboltz::GenerateGasTable(const int numColl, const bool verbose) {
   const unsigned int nEfields = m_eFields.size();
   const unsigned int nBfields = m_bFields.size();
   const unsigned int nAngles = m_bAngles.size();
-  InitTable(nEfields, nBfields, nAngles, m_eVelocityE, 0.);
-  InitTable(nEfields, nBfields, nAngles, m_eVelocityB, 0.);
-  InitTable(nEfields, nBfields, nAngles, m_eVelocityExB, 0.);
-  InitTable(nEfields, nBfields, nAngles, m_eDiffLong, 0.);
-  InitTable(nEfields, nBfields, nAngles, m_eDiffTrans, 0.);
-  InitTable(nEfields, nBfields, nAngles, m_eLorentzAngle, 0.);
-  InitTable(nEfields, nBfields, nAngles, m_eTownsend, -30.);
-  InitTable(nEfields, nBfields, nAngles, m_eTownsendNoPenning, -30.);
-  InitTable(nEfields, nBfields, nAngles, m_eAttachment, -30.);
+  InitParamArrays(nEfields, nBfields, nAngles, tabElectronVelocityE, 0.);
+  InitParamArrays(nEfields, nBfields, nAngles, tabElectronVelocityB, 0.);
+  InitParamArrays(nEfields, nBfields, nAngles, tabElectronVelocityExB, 0.);
+  InitParamArrays(nEfields, nBfields, nAngles, tabElectronDiffLong, 0.);
+  InitParamArrays(nEfields, nBfields, nAngles, tabElectronDiffTrans, 0.);
+  InitParamArrays(nEfields, nBfields, nAngles, tabElectronLorentzAngle, 0.);
+  InitParamArrays(nEfields, nBfields, nAngles, tabElectronTownsend, -30.);
+  InitParamArrays(nEfields, nBfields, nAngles, m_tabTownsendNoPenning, -30.);
+  InitParamArrays(nEfields, nBfields, nAngles, tabElectronAttachment, -30.);
 
-  m_excRates.clear();
+  m_hasElectronVelocityE = true;
+  m_hasElectronVelocityB = true;
+  m_hasElectronVelocityExB = true;
+  m_hasElectronDiffLong = true;
+  m_hasElectronDiffTrans = true;
+  m_hasElectronAttachment = true;
+  m_hasElectronLorentzAngle = true;
+
+  m_hasExcRates = false;
+  m_tabExcRates.clear();
   m_excitationList.clear();
-  m_ionRates.clear();
+  m_hasIonRates = false;
+  m_tabIonRates.clear();
   m_ionisationList.clear();
+
+  m_hasIonMobility = false;
+  m_hasIonDissociation = false;
+  m_hasIonDiffLong = false;
+  m_hasIonDiffTrans = false;
 
   // gasBits = "TFTTFTFTTTFFFFFF";
   // The version number is 11 because there are slight
@@ -5441,35 +5535,33 @@ void MediumMagboltz::GenerateGasTable(const int numColl, const bool verbose) {
 
   // Run through the grid of E- and B-fields and angles.
   for (unsigned int i = 0; i < nEfields; ++i) {
-    const double e = m_eFields[i];
     for (unsigned int j = 0; j < nAngles; ++j) {
-      const double a = m_bAngles[j];
       for (unsigned int k = 0; k < nBfields; ++k) {
-        const double b = m_bFields[k];
         if (m_debug) {
-          std::cout << m_className << "::GenerateGasTable: E = " << e 
-                    << " V/cm, B = " << b << " T, angle: " << a << " rad\n";
+          std::cout << m_className << "::GenerateGasTable:\n"
+                    << "    E = " << m_eFields[i] << " V/cm, B = " 
+                    << m_bFields[k] << " T, angle: " << m_bAngles[j] << " rad\n";
         }
-        RunMagboltz(e, b, a, numColl, verbose, vx, vy, vz, difl, dift, 
-                    alpha, eta, lor, vxerr, vyerr, vzerr,
+        RunMagboltz(m_eFields[i], m_bFields[k], m_bAngles[j], numColl, verbose, vx,
+                    vy, vz, difl, dift, alpha, eta, lor, vxerr, vyerr, vzerr,
                     diflerr, difterr, alphaerr, etaerr, lorerr, alphatof);
-        m_eVelocityE[j][k][i] = vz;
-        m_eVelocityExB[j][k][i] = vy;
-        m_eVelocityB[j][k][i] = vx;
-        m_eDiffLong[j][k][i] = difl;
-        m_eDiffTrans[j][k][i] = dift;
-        m_eLorentzAngle[j][k][i] = lor;
+        tabElectronVelocityE[j][k][i] = vz;
+        tabElectronVelocityExB[j][k][i] = vy;
+        tabElectronVelocityB[j][k][i] = vx;
+        tabElectronDiffLong[j][k][i] = difl;
+        tabElectronDiffTrans[j][k][i] = dift;
+        tabElectronLorentzAngle[j][k][i] = lor;
         if (alpha > 0.) {
-          m_eTownsend[j][k][i] = log(alpha);
-          m_eTownsendNoPenning[j][k][i] = log(alpha);
+          tabElectronTownsend[j][k][i] = log(alpha);
+          m_tabTownsendNoPenning[j][k][i] = log(alpha);
         } else {
-          m_eTownsend[j][k][i] = -30.;
-          m_eTownsendNoPenning[j][k][i] = -30.;
+          tabElectronTownsend[j][k][i] = -30.;
+          m_tabTownsendNoPenning[j][k][i] = -30.;
         }
         if (eta > 0.) {
-          m_eAttachment[j][k][i] = log(eta);
+          tabElectronAttachment[j][k][i] = log(eta);
         } else {
-          m_eAttachment[j][k][i] = -30.;
+          tabElectronAttachment[j][k][i] = -30.;
         }
       }
     }

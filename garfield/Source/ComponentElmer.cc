@@ -9,17 +9,17 @@
 
 namespace {
 
-void PrintErrorReadingFile(const std::string& hdr, const std::string& file,
+void printErrorReadingFile(const std::string& hdr, const std::string& file,
                            const int line) { 
-  std::cerr << hdr << "\n    Error reading file " << file << " (line " 
-            << line << ").\n";
+  std::cerr << hdr << ":\n    Error reading file " << file << " (line " 
+           << line << ").\n";
 }
 
-void PrintErrorOpeningFile(const std::string& hdr, 
+void printErrorOpeningFile(const std::string& hdr, 
                            const std::string& filetype, 
                            const std::string& filename) {
 
-  std::cerr << hdr << "\n    Could not open " << filetype << " file "
+  std::cerr << hdr << ":\n    Could not open " << filetype << " file "
             << filename << " for reading.\n";
   std::cerr << "    The file perhaps does not exist.\n";
 }
@@ -51,7 +51,6 @@ bool ComponentElmer::Initialise(const std::string& header,
                                 const std::string& volt, 
                                 const std::string& unit) {
 
-  const std::string hdr = m_className + "::Initialise:";
   m_debug = false;
   m_ready = false;
   m_warning = false;
@@ -68,7 +67,7 @@ bool ComponentElmer::Initialise(const std::string& header,
   std::ifstream fheader;
   fheader.open(header.c_str(), std::ios::in);
   if (fheader.fail()) {
-    PrintErrorOpeningFile(hdr, "header", header);
+    printErrorOpeningFile(m_className + "::Initialise", "header", header);
   }
 
   // Temporary variables for use in file reading
@@ -83,10 +82,11 @@ bool ComponentElmer::Initialise(const std::string& header,
   nNodes = ReadInteger(token, 0, readerror);
   token = strtok(NULL, " ");
   nElements = ReadInteger(token, 0, readerror);
-  std::cout << hdr << "\n    Read " << nNodes << " nodes and " << nElements
+  std::cout << m_className << "::Initialise:\n    Read " << nNodes 
+            << " nodes and " << nElements
             << " elements from file " << header << ".\n";
   if (readerror) {
-    PrintErrorReadingFile(hdr, header, il);
+    printErrorReadingFile(m_className + "::Initialise", header, il);
     fheader.close();
     return false;
   }
@@ -98,7 +98,7 @@ bool ComponentElmer::Initialise(const std::string& header,
   std::ifstream fnodes;
   fnodes.open(nlist.c_str(), std::ios::in);
   if (fnodes.fail()) {
-    PrintErrorOpeningFile(hdr, "nodes", nlist);
+    printErrorOpeningFile(m_className + "::Initialise", "nodes", nlist);
   }
 
   // Check the value of the unit.
@@ -116,13 +116,19 @@ bool ComponentElmer::Initialise(const std::string& header,
              strcmp(unit.c_str(), "meter") == 0) {
     funit = 100.0;
   } else {
-    std::cerr << hdr << " Unknown length unit " << unit << ".\n";
+    std::cerr << m_className << "::Initialise:\n"
+              << "    Unknown length unit " << unit << ".\n";
     ok = false;
     funit = 1.0;
   }
-  if (m_debug) std::cout << hdr << " Unit scaling factor = " << funit << ".\n";
+  if (m_debug) {
+    std::cout << m_className << "::Initialise:\n"
+              << "    Unit scaling factor = " << funit << ".\n";
+  }
 
   // Read the nodes from the file.
+  Node newNode;
+  newNode.w.clear();
   for (il = 0; il < nNodes; il++) {
 
     // Get a line from the nodes file.
@@ -140,18 +146,16 @@ bool ComponentElmer::Initialise(const std::string& header,
     token = strtok(NULL, " ");
     double znode = ReadDouble(token, -1, readerror);
     if (readerror) {
-      PrintErrorReadingFile(hdr, nlist, il);
+      printErrorReadingFile(m_className + "::Initialise", nlist, il);
       fnodes.close();
       return false;
     }
 
     // Set up and create a new node.
-    Node newNode;
-    newNode.w.clear();
     newNode.x = xnode * funit;
     newNode.y = ynode * funit;
     newNode.z = znode * funit;
-    nodes.push_back(std::move(newNode));
+    nodes.push_back(newNode);
   }
 
   // Close the nodes file.
@@ -161,7 +165,7 @@ bool ComponentElmer::Initialise(const std::string& header,
   std::ifstream fvolt;
   fvolt.open(volt.c_str(), std::ios::in);
   if (fvolt.fail()) {
-    PrintErrorOpeningFile(hdr, "potentials", volt);
+    printErrorOpeningFile(m_className + "::Initialise", "potentials", volt);
   }
 
   // Reset the line counter.
@@ -176,8 +180,8 @@ bool ComponentElmer::Initialise(const std::string& header,
 
   // Should have stopped: if not, print error message.
   if (!readstop) {
-    std::cerr << hdr << "\n    Error reading past header of potentials file " 
-              << volt << ".\n";
+    std::cerr << m_className << "::Initialise:\n    Error reading past header "
+              << "of potentials file " << volt << ".\n";
     fvolt.close();
     return false;
   }
@@ -190,11 +194,12 @@ bool ComponentElmer::Initialise(const std::string& header,
 
   // Read the potentials.
   for (int tl = 0; tl < nNodes; tl++) {
+    double v;
     fvolt.getline(line, size, '\n');
     token = strtok(line, " ");
-    double v = ReadDouble(token, -1, readerror);
+    v = ReadDouble(token, -1, readerror);
     if (readerror) {
-      PrintErrorReadingFile(hdr, volt, il);
+      printErrorReadingFile(m_className + "::Initialise", volt, il);
       fvolt.close();
       return false;
     }
@@ -209,15 +214,15 @@ bool ComponentElmer::Initialise(const std::string& header,
   std::ifstream fmplist;
   fmplist.open(mplist.c_str(), std::ios::in);
   if (fmplist.fail()) {
-    PrintErrorOpeningFile(hdr, "materials", mplist);
+    printErrorOpeningFile(m_className + "::Initialise", "materials", mplist);
   }
 
   // Read the dielectric constants from the materials file.
   fmplist.getline(line, size, '\n');
   token = strtok(line, " ");
   if (readerror) {
-    std::cerr << hdr << "\n    Error reading number of materials from " 
-              << mplist << ".\n";
+    std::cerr << m_className << "::Initialise:\n    "
+              << "Error reading number of materials from " << mplist << ".\n";
     fmplist.close();
     ok = false;
     return false;
@@ -227,7 +232,7 @@ bool ComponentElmer::Initialise(const std::string& header,
   for (unsigned int i = 0; i < m_nMaterials; ++i) {
     materials[i].ohm = -1;
     materials[i].eps = -1;
-    materials[i].medium = nullptr;
+    materials[i].medium = NULL;
   }
   for (il = 2; il < ((int)m_nMaterials + 2); il++) {
     fmplist.getline(line, size, '\n');
@@ -236,14 +241,14 @@ bool ComponentElmer::Initialise(const std::string& header,
     token = strtok(NULL, " ");
     double dc = ReadDouble(token, -1.0, readerror);
     if (readerror) {
-      PrintErrorReadingFile(hdr, mplist, il);
+      printErrorReadingFile(m_className + "::Initialise", mplist, il);
       fmplist.close();
       ok = false;
       return false;
     }
     materials[il - 2].eps = dc;
-    std::cout << hdr << "\n    Set material " << il - 2 << " of " 
-              << m_nMaterials << " to eps " << dc << ".\n";
+    std::cout << m_className << "::Initialise:\n    Set material " << il - 2
+              << " of " << m_nMaterials << " to eps " << dc << ".\n";
   }
 
   // Close the materials file.
@@ -255,7 +260,7 @@ bool ComponentElmer::Initialise(const std::string& header,
   for (unsigned int imat = 0; imat < m_nMaterials; ++imat) {
     if (materials[imat].eps < 0) continue;
     if (materials[imat].eps == 0) {
-      std::cerr << hdr << "\n    Material " << imat
+      std::cerr << m_className << "::Initialise:\n    Material " << imat
                 << " has been assigned a permittivity equal to zero in\n    "
                 << mplist << ".\n";
       ok = false;
@@ -266,12 +271,17 @@ bool ComponentElmer::Initialise(const std::string& header,
   }
 
   if (epsmin < 0.) {
-    std::cerr << hdr << "\n    No material with positive permittivity found \n"
+    std::cerr << m_className << "::Initialise:\n"
+              << "    No material with positive permittivity found \n"
               << "    in material list " << mplist << ".\n";
     ok = false;
   } else {
     for (unsigned int imat = 0; imat < m_nMaterials; ++imat) {
-      materials[imat].driftmedium = imat == iepsmin ? true : false;
+      if (imat == iepsmin) {
+        materials[imat].driftmedium = true;
+      } else {
+        materials[imat].driftmedium = false;
+      }
     }
   }
 
@@ -279,7 +289,7 @@ bool ComponentElmer::Initialise(const std::string& header,
   std::ifstream felems;
   felems.open(elist.c_str(), std::ios::in);
   if (felems.fail()) {
-    PrintErrorOpeningFile(hdr, "elements", elist);
+    printErrorOpeningFile(m_className + "::Initialise", "elements", elist);
   }
 
   // Read the elements and their material indices.
@@ -332,7 +342,7 @@ bool ComponentElmer::Initialise(const std::string& header,
 
     // Check synchronisation.
     if (readerror) {
-      PrintErrorReadingFile(hdr, elist, il);
+      printErrorReadingFile(m_className + "::Initialise", elist, il);
       felems.close();
       ok = false;
       return false;
@@ -340,7 +350,8 @@ bool ComponentElmer::Initialise(const std::string& header,
 
     // Check the material number and ensure that epsilon is non-negative.
     if (imat < 0 || imat > (int)m_nMaterials) {
-      std::cerr << hdr << "\n    Out-of-range material number on file " << elist
+      std::cerr << m_className << "::Initialise:\n";
+      std::cerr << "    Out-of-range material number on file " << elist
                 << " (line " << il << ").\n";
       std::cerr << "    Element: " << il << ", material: " << imat << "\n";
       std::cerr << "    nodes: (" << in0 << ", " << in1 << ", " << in2 << ", "
@@ -349,22 +360,25 @@ bool ComponentElmer::Initialise(const std::string& header,
       ok = false;
     }
     if (materials[imat].eps < 0) {
-      std::cerr << hdr << "\n    Element " << il << " in element list " 
-                << elist << "\n    uses material " << imat
-                << " which has not been assigned a positive permittivity in "
-                << mplist << ".\n";
+      std::cerr << m_className << "::Initialise:\n";
+      std::cerr << "    Element " << il << " in element list " << elist << "\n";
+      std::cerr << "    uses material " << imat
+                << " which has not been assigned\n";
+      std::cerr << "    a positive permittivity in material list " << mplist
+                << ".\n";
       ok = false;
     }
 
     // Check the node numbers.
     if (in0 < 1 || in1 < 1 || in2 < 1 || in3 < 1 || in4 < 1 || in5 < 1 ||
         in6 < 1 || in7 < 1 || in8 < 1 || in9 < 1) {
-      std::cerr << hdr << "\n    Found a node number < 1 on file " << elist 
-                << " (line " << il << ").\n    Element: " << il 
-                << ", material: " << imat << "\n    nodes: (" 
-                << in0 << ", " << in1 << ", " << in2 << ", " << in3 << ", " 
-                << in4 << ", " << in5 << ", " << in6 << ", " << in7 << ", " 
-                << in8 << ", " << in9 << ")\n";
+      std::cerr << m_className << "::Initialise:\n";
+      std::cerr << "    Found a node number < 1 on file " << elist << " (line "
+                << il << ").\n";
+      std::cerr << "    Element: " << il << ", material: " << imat << "\n";
+      std::cerr << "    nodes: (" << in0 << ", " << in1 << ", " << in2 << ", "
+                << in3 << ", " << in4 << ", " << in5 << ", " << in6 << ", "
+                << in7 << ", " << in8 << ", " << in9 << ")\n";
       ok = false;
     }
     if (in0 > highestnode) highestnode = in0;
@@ -388,8 +402,8 @@ bool ComponentElmer::Initialise(const std::string& header,
         in4 == in5 || in4 == in6 || in4 == in7 || in4 == in8 || in4 == in9 ||
         in5 == in6 || in5 == in7 || in5 == in8 || in5 == in9 || in6 == in7 ||
         in6 == in8 || in6 == in9 || in7 == in8 || in7 == in9 || in8 == in9) {
-      std::cerr << hdr << "\n    Element " << il << " of file " << elist 
-                << " is degenerate,\n"
+      std::cerr << m_className << "::Initialise:\n    Element " << il 
+                << " of file " << elist << " is degenerate,\n"
                 << "    no such elements are allowed in this type of map.\n";
       ok = false;
     }
@@ -420,12 +434,12 @@ bool ComponentElmer::Initialise(const std::string& header,
   if (ok) {
     m_ready = true;
   } else {
-    std::cerr << hdr << "\n    Field map could not be "
+    std::cerr << m_className << "::Initialise:\n    Field map could not be "
               << "read and cannot be interpolated.\n";
     return false;
   }
 
-  std::cout << hdr << " Finished.\n";
+  std::cout << m_className << "::Initialise:\n    Finished.\n";
 
   // Remove weighting fields (if any).
   wfields.clear();
@@ -440,7 +454,6 @@ bool ComponentElmer::Initialise(const std::string& header,
 
 bool ComponentElmer::SetWeightingField(std::string wvolt, std::string label) {
 
-  const std::string hdr = m_className + "::SetWeightingField:"; 
   if (!m_ready) {
     PrintNotReady("SetWeightingField");
     std::cerr << "    Weighting field cannot be added.\n";
@@ -454,7 +467,9 @@ bool ComponentElmer::SetWeightingField(std::string wvolt, std::string label) {
   std::ifstream fwvolt;
   fwvolt.open(wvolt.c_str(), std::ios::in);
   if (fwvolt.fail()) {
-    PrintErrorOpeningFile(hdr, "potential", wvolt);
+    printErrorOpeningFile(m_className + "::SetWeightingField", 
+                          "potential", wvolt);
+
     return false;
   }
 
@@ -474,8 +489,8 @@ bool ComponentElmer::SetWeightingField(std::string wvolt, std::string label) {
       nodes[j].w.resize(nWeightingFields);
     }
   } else {
-    std::cout << hdr << "\n    Replacing existing weighting field " 
-              << label << ".\n";
+    std::cout << m_className << "::SetWeightingField:\n"
+              << "    Replacing existing weighting field " << label << ".\n";
   }
   wfields[iw] = label;
   wfieldsOk[iw] = false;
@@ -497,8 +512,8 @@ bool ComponentElmer::SetWeightingField(std::string wvolt, std::string label) {
 
   // Should have stopped: if not, print error message.
   if (!readstop) {
-    std::cerr << hdr << "\n    Error reading past header of potentials file " 
-              << wvolt << ".\n";
+    std::cerr << m_className << "::SetWeightingField:\n    Error reading past "
+              << "header of potentials file " << wvolt << ".\n";
     fwvolt.close();
     ok = false;
     return false;
@@ -517,7 +532,7 @@ bool ComponentElmer::SetWeightingField(std::string wvolt, std::string label) {
     token = strtok(line, " ");
     v = ReadDouble(token, -1, readerror);
     if (readerror) {
-      PrintErrorReadingFile(hdr, wvolt, il);
+      printErrorReadingFile(m_className + "::SetWeightingField", wvolt, il);
       fwvolt.close();
       ok = false;
       return false;
@@ -528,12 +543,13 @@ bool ComponentElmer::SetWeightingField(std::string wvolt, std::string label) {
 
   // Close the potentials file.
   fwvolt.close();
-  std::cout << hdr << "\n    Read potentials from file " << wvolt << ".\n";
+  std::cout << m_className << "::SetWeightingField:\n"
+            << "    Read potentials from file " << wvolt.c_str() << ".\n";
 
   // Set the ready flag.
   wfieldsOk[iw] = ok;
   if (!ok) {
-    std::cerr << hdr << "\n    Field map could not "
+    std::cerr << m_className << "::SetWeightingField:\n    Field map could not "
               << "be read and cannot be interpolated.\n";
     return false;
   }
@@ -564,7 +580,7 @@ void ComponentElmer::ElectricField(const double xin, const double yin,
   // Initial values
   ex = ey = ez = volt = 0.;
   status = 0;
-  m = nullptr;
+  m = NULL;
 
   // Do not proceed if not properly initialised.
   if (!m_ready) {
@@ -587,10 +603,11 @@ void ComponentElmer::ElectricField(const double xin, const double yin,
     return;
   }
 
-  const Element& element = elements[imap];
   if (m_debug) {
-    PrintElement("ElectricField", x, y, z, t1, t2, t3, t4, element, 10);
+    PrintElement("ElectricField", x, y, z, t1, t2, t3, t4, imap, 10);
   }
+
+  const Element& element = elements[imap];
   const Node& n0 = nodes[element.emap[0]];
   const Node& n1 = nodes[element.emap[1]];
   const Node& n2 = nodes[element.emap[2]];
@@ -601,41 +618,36 @@ void ComponentElmer::ElectricField(const double xin, const double yin,
   const Node& n7 = nodes[element.emap[7]];
   const Node& n8 = nodes[element.emap[8]];
   const Node& n9 = nodes[element.emap[9]];
-  // Shorthands.
-  const double fourt1 = 4 * t1;
-  const double fourt2 = 4 * t2;
-  const double fourt3 = 4 * t3;
-  const double fourt4 = 4 * t4;
-  const double invdet = 1. / det;
   // Tetrahedral field
   volt = n0.v * t1 * (2 * t1 - 1) + n1.v * t2 * (2 * t2 - 1) +
          n2.v * t3 * (2 * t3 - 1) + n3.v * t4 * (2 * t4 - 1) +
          4 * n4.v * t1 * t2 + 4 * n5.v * t1 * t3 + 4 * n6.v * t1 * t4 +
          4 * n7.v * t2 * t3 + 4 * n8.v * t2 * t4 + 4 * n9.v * t3 * t4;
-  ex = -(n0.v * (fourt1 - 1) * jac[0][1] + n1.v * (fourt2 - 1) * jac[1][1] +
-         n2.v * (fourt3 - 1) * jac[2][1] + n3.v * (fourt4 - 1) * jac[3][1] +
-         n4.v * (fourt2 * jac[0][1] + fourt1 * jac[1][1]) +
-         n5.v * (fourt3 * jac[0][1] + fourt1 * jac[2][1]) +
-         n6.v * (fourt4 * jac[0][1] + fourt1 * jac[3][1]) +
-         n7.v * (fourt3 * jac[1][1] + fourt2 * jac[2][1]) +
-         n8.v * (fourt4 * jac[1][1] + fourt2 * jac[3][1]) +
-         n9.v * (fourt4 * jac[2][1] + fourt3 * jac[3][1])) * invdet;
-  ey = -(n0.v * (fourt1 - 1) * jac[0][2] + n1.v * (fourt2 - 1) * jac[1][2] +
-         n2.v * (fourt3 - 1) * jac[2][2] + n3.v * (fourt4 - 1) * jac[3][2] +
-         n4.v * (fourt2 * jac[0][2] + fourt1 * jac[1][2]) +
-         n5.v * (fourt3 * jac[0][2] + fourt1 * jac[2][2]) +
-         n6.v * (fourt4 * jac[0][2] + fourt1 * jac[3][2]) +
-         n7.v * (fourt3 * jac[1][2] + fourt2 * jac[2][2]) +
-         n8.v * (fourt4 * jac[1][2] + fourt2 * jac[3][2]) +
-         n9.v * (fourt4 * jac[2][2] + fourt3 * jac[3][2])) * invdet;
-  ez = -(n0.v * (fourt1 - 1) * jac[0][3] + n1.v * (fourt2 - 1) * jac[1][3] +
-         n2.v * (fourt3 - 1) * jac[2][3] + n3.v * (fourt4 - 1) * jac[3][3] +
-         n4.v * (fourt2 * jac[0][3] + fourt1 * jac[1][3]) +
-         n5.v * (fourt3 * jac[0][3] + fourt1 * jac[2][3]) +
-         n6.v * (fourt4 * jac[0][3] + fourt1 * jac[3][3]) +
-         n7.v * (fourt3 * jac[1][3] + fourt2 * jac[2][3]) +
-         n8.v * (fourt4 * jac[1][3] + fourt2 * jac[3][3]) +
-         n9.v * (fourt4 * jac[2][3] + fourt3 * jac[3][3])) * invdet;
+  const double invdet = 1. / det;
+  ex = -(n0.v * (4 * t1 - 1) * jac[0][1] + n1.v * (4 * t2 - 1) * jac[1][1] +
+         n2.v * (4 * t3 - 1) * jac[2][1] + n3.v * (4 * t4 - 1) * jac[3][1] +
+         n4.v * (4 * t2 * jac[0][1] + 4 * t1 * jac[1][1]) +
+         n5.v * (4 * t3 * jac[0][1] + 4 * t1 * jac[2][1]) +
+         n6.v * (4 * t4 * jac[0][1] + 4 * t1 * jac[3][1]) +
+         n7.v * (4 * t3 * jac[1][1] + 4 * t2 * jac[2][1]) +
+         n8.v * (4 * t4 * jac[1][1] + 4 * t2 * jac[3][1]) +
+         n9.v * (4 * t4 * jac[2][1] + 4 * t3 * jac[3][1])) * invdet;
+  ey = -(n0.v * (4 * t1 - 1) * jac[0][2] + n1.v * (4 * t2 - 1) * jac[1][2] +
+         n2.v * (4 * t3 - 1) * jac[2][2] + n3.v * (4 * t4 - 1) * jac[3][2] +
+         n4.v * (4 * t2 * jac[0][2] + 4 * t1 * jac[1][2]) +
+         n5.v * (4 * t3 * jac[0][2] + 4 * t1 * jac[2][2]) +
+         n6.v * (4 * t4 * jac[0][2] + 4 * t1 * jac[3][2]) +
+         n7.v * (4 * t3 * jac[1][2] + 4 * t2 * jac[2][2]) +
+         n8.v * (4 * t4 * jac[1][2] + 4 * t2 * jac[3][2]) +
+         n9.v * (4 * t4 * jac[2][2] + 4 * t3 * jac[3][2])) * invdet;
+  ez = -(n0.v * (4 * t1 - 1) * jac[0][3] + n1.v * (4 * t2 - 1) * jac[1][3] +
+         n2.v * (4 * t3 - 1) * jac[2][3] + n3.v * (4 * t4 - 1) * jac[3][3] +
+         n4.v * (4 * t2 * jac[0][3] + 4 * t1 * jac[1][3]) +
+         n5.v * (4 * t3 * jac[0][3] + 4 * t1 * jac[2][3]) +
+         n6.v * (4 * t4 * jac[0][3] + 4 * t1 * jac[3][3]) +
+         n7.v * (4 * t3 * jac[1][3] + 4 * t2 * jac[2][3]) +
+         n8.v * (4 * t4 * jac[1][3] + 4 * t2 * jac[3][3]) +
+         n9.v * (4 * t4 * jac[2][3] + 4 * t3 * jac[3][3])) * invdet;
 
   // Transform field to global coordinates
   UnmapFields(ex, ey, ez, x, y, z, xmirr, ymirr, zmirr, rcoordinate, rotation);
@@ -693,10 +705,11 @@ void ComponentElmer::WeightingField(const double xin, const double yin,
   // Check if the point is in the mesh.
   if (imap < 0) return;
 
-  const Element& element = elements[imap];
   if (m_debug) {
-    PrintElement("WeightingField", x, y, z, t1, t2, t3, t4, element, 10, iw);
+    PrintElement("WeightingField", x, y, z, t1, t2, t3, t4, imap, 10, iw);
   }
+
+  const Element& element = elements[imap];
   const Node& n0 = nodes[element.emap[0]];
   const Node& n1 = nodes[element.emap[1]];
   const Node& n2 = nodes[element.emap[2]];
@@ -707,43 +720,38 @@ void ComponentElmer::WeightingField(const double xin, const double yin,
   const Node& n7 = nodes[element.emap[7]];
   const Node& n8 = nodes[element.emap[8]];
   const Node& n9 = nodes[element.emap[9]];
-  // Shorthands.
-  const double fourt1 = 4 * t1;
-  const double fourt2 = 4 * t2;
-  const double fourt3 = 4 * t3;
-  const double fourt4 = 4 * t4;
-  const double invdet = 1. / det;
   // Tetrahedral field
-  wx = -(n0.w[iw] * (fourt1 - 1) * jac[0][1] +
-         n1.w[iw] * (fourt2 - 1) * jac[1][1] +
-         n2.w[iw] * (fourt3 - 1) * jac[2][1] +
-         n3.w[iw] * (fourt4 - 1) * jac[3][1] +
-         n4.w[iw] * (fourt2 * jac[0][1] + fourt1 * jac[1][1]) +
-         n5.w[iw] * (fourt3 * jac[0][1] + fourt1 * jac[2][1]) +
-         n6.w[iw] * (fourt4 * jac[0][1] + fourt1 * jac[3][1]) +
-         n7.w[iw] * (fourt3 * jac[1][1] + fourt2 * jac[2][1]) +
-         n8.w[iw] * (fourt4 * jac[1][1] + fourt2 * jac[3][1]) +
-         n9.w[iw] * (fourt4 * jac[2][1] + fourt3 * jac[3][1])) * invdet;
-  wy = -(n0.w[iw] * (fourt1 - 1) * jac[0][2] +
-         n1.w[iw] * (fourt2 - 1) * jac[1][2] +
-         n2.w[iw] * (fourt3 - 1) * jac[2][2] +
-         n3.w[iw] * (fourt4 - 1) * jac[3][2] +
-         n4.w[iw] * (fourt2 * jac[0][2] + fourt1 * jac[1][2]) +
-         n5.w[iw] * (fourt3 * jac[0][2] + fourt1 * jac[2][2]) +
-         n6.w[iw] * (fourt4 * jac[0][2] + fourt1 * jac[3][2]) +
-         n7.w[iw] * (fourt3 * jac[1][2] + fourt2 * jac[2][2]) +
-         n8.w[iw] * (fourt4 * jac[1][2] + fourt2 * jac[3][2]) +
-         n9.w[iw] * (fourt4 * jac[2][2] + fourt3 * jac[3][2])) * invdet;
-  wz = -(n0.w[iw] * (fourt1 - 1) * jac[0][3] +
-         n1.w[iw] * (fourt2 - 1) * jac[1][3] +
-         n2.w[iw] * (fourt3 - 1) * jac[2][3] +
-         n3.w[iw] * (fourt4 - 1) * jac[3][3] +
-         n4.w[iw] * (fourt2 * jac[0][3] + fourt1 * jac[1][3]) +
-         n5.w[iw] * (fourt3 * jac[0][3] + fourt1 * jac[2][3]) +
-         n6.w[iw] * (fourt4 * jac[0][3] + fourt1 * jac[3][3]) +
-         n7.w[iw] * (fourt3 * jac[1][3] + fourt2 * jac[2][3]) +
-         n8.w[iw] * (fourt4 * jac[1][3] + fourt2 * jac[3][3]) +
-         n9.w[iw] * (fourt4 * jac[2][3] + fourt3 * jac[3][3])) * invdet;
+  const double invdet = 1. / det;
+  wx = -(n0.w[iw] * (4 * t1 - 1) * jac[0][1] +
+         n1.w[iw] * (4 * t2 - 1) * jac[1][1] +
+         n2.w[iw] * (4 * t3 - 1) * jac[2][1] +
+         n3.w[iw] * (4 * t4 - 1) * jac[3][1] +
+         n4.w[iw] * (4 * t2 * jac[0][1] + 4 * t1 * jac[1][1]) +
+         n5.w[iw] * (4 * t3 * jac[0][1] + 4 * t1 * jac[2][1]) +
+         n6.w[iw] * (4 * t4 * jac[0][1] + 4 * t1 * jac[3][1]) +
+         n7.w[iw] * (4 * t3 * jac[1][1] + 4 * t2 * jac[2][1]) +
+         n8.w[iw] * (4 * t4 * jac[1][1] + 4 * t2 * jac[3][1]) +
+         n9.w[iw] * (4 * t4 * jac[2][1] + 4 * t3 * jac[3][1])) * invdet;
+  wy = -(n0.w[iw] * (4 * t1 - 1) * jac[0][2] +
+         n1.w[iw] * (4 * t2 - 1) * jac[1][2] +
+         n2.w[iw] * (4 * t3 - 1) * jac[2][2] +
+         n3.w[iw] * (4 * t4 - 1) * jac[3][2] +
+         n4.w[iw] * (4 * t2 * jac[0][2] + 4 * t1 * jac[1][2]) +
+         n5.w[iw] * (4 * t3 * jac[0][2] + 4 * t1 * jac[2][2]) +
+         n6.w[iw] * (4 * t4 * jac[0][2] + 4 * t1 * jac[3][2]) +
+         n7.w[iw] * (4 * t3 * jac[1][2] + 4 * t2 * jac[2][2]) +
+         n8.w[iw] * (4 * t4 * jac[1][2] + 4 * t2 * jac[3][2]) +
+         n9.w[iw] * (4 * t4 * jac[2][2] + 4 * t3 * jac[3][2])) * invdet;
+  wz = -(n0.w[iw] * (4 * t1 - 1) * jac[0][3] +
+         n1.w[iw] * (4 * t2 - 1) * jac[1][3] +
+         n2.w[iw] * (4 * t3 - 1) * jac[2][3] +
+         n3.w[iw] * (4 * t4 - 1) * jac[3][3] +
+         n4.w[iw] * (4 * t2 * jac[0][3] + 4 * t1 * jac[1][3]) +
+         n5.w[iw] * (4 * t3 * jac[0][3] + 4 * t1 * jac[2][3]) +
+         n6.w[iw] * (4 * t4 * jac[0][3] + 4 * t1 * jac[3][3]) +
+         n7.w[iw] * (4 * t3 * jac[1][3] + 4 * t2 * jac[2][3]) +
+         n8.w[iw] * (4 * t4 * jac[1][3] + 4 * t2 * jac[3][3]) +
+         n9.w[iw] * (4 * t4 * jac[2][3] + 4 * t3 * jac[3][3])) * invdet;
 
   // Transform field to global coordinates
   UnmapFields(wx, wy, wz, x, y, z, xmirr, ymirr, zmirr, rcoordinate, rotation);
@@ -787,10 +795,11 @@ double ComponentElmer::WeightingPotential(const double xin, const double yin,
   const int imap = FindElement13(x, y, z, t1, t2, t3, t4, jac, det);
   if (imap < 0) return 0.;
 
-  const Element& element = elements[imap];
   if (m_debug) {
-    PrintElement("WeightingPotential", x, y, z, t1, t2, t3, t4, element, 10, iw);
+    PrintElement("WeightingPotential", x, y, z, t1, t2, t3, t4, imap, 10, iw);
   }
+
+  const Element& element = elements[imap];
   const Node& n0 = nodes[element.emap[0]];
   const Node& n1 = nodes[element.emap[1]];
   const Node& n2 = nodes[element.emap[2]];
@@ -823,7 +832,7 @@ Medium* ComponentElmer::GetMedium(const double xin, const double yin,
   // Do not proceed if not properly initialised.
   if (!m_ready) {
     PrintNotReady("GetMedium");
-    return nullptr;
+    return NULL;
   }
   if (m_warning) PrintWarning("GetMedium");
 
@@ -835,7 +844,7 @@ Medium* ComponentElmer::GetMedium(const double xin, const double yin,
       std::cout << m_className << "::GetMedium:\n    Point ("
                 << x << ", " << y << ", " << z << ") is not in the mesh.\n";
     }
-    return nullptr;
+    return NULL;
   }
   const Element& element = elements[imap];
   if (element.matmap >= m_nMaterials) {
@@ -844,10 +853,10 @@ Medium* ComponentElmer::GetMedium(const double xin, const double yin,
                 << x << ", " << y << ", " << z 
                 << ") has out of range material number " << imap << ".\n";
     }
-    return nullptr;
+    return NULL;
   }
 
-  if (m_debug) PrintElement("GetMedium", x, y, z, t1, t2, t3, t4, element, 10);
+  if (m_debug) PrintElement("GetMedium", x, y, z, t1, t2, t3, t4, imap, 10);
 
   return materials[element.matmap].medium;
 }

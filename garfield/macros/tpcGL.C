@@ -327,8 +327,7 @@ yPad[0] ________________________| |	| | ..........................    AnodeW ySe
     for (Int_t i = 0; i <= ng[io]; ++i) {
       x = xGGmin[io] + ggWpitch*i;
       if (x < xmin || x > xmax) continue;
-      //      Double_t v = vGG + dvGG*(1 - 2*((i + io)%2));
-      Double_t v = vGG + dvGG*(1 - 2*((i + 1)%2)); // 02/11/19 A.Lebedev : GG has -190 V for the first (0)  and last wire for both Inner and Outer
+      Double_t v = vGG + dvGG*(1 - 2*((i + io)%2));
       if (io == 0 && i == ng[io]) {cout << "The last  GG wire Inner Sector potential " << v << endl;}
       if (io == 1 && i ==      0) {cout << "The first GG wire Outer Sector potential " << v << endl;}
       comp->AddWire(x, yGG, dGG, v, "g");

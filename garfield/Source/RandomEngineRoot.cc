@@ -5,21 +5,19 @@ namespace Garfield {
 
 RandomEngineRoot randomEngine;
 
-RandomEngineRoot::RandomEngineRoot() 
-  : RandomEngine(), 
-    m_rng(0) {
+RandomEngineRoot::RandomEngineRoot() : rng(0) {
 
-  std::cout << "RandomEngineRoot:\n"
-            << "    Generator type: TRandom3\n"
-            << "    Seed: " << m_rng.GetSeed() << "\n";
+  std::cout << "RandomEngineRoot:\n";
+  std::cout << "    Generator type: TRandom3\n";
+  std::cout << "    Seed: " << rng.GetSeed() << "\n";
 }
 
 RandomEngineRoot::~RandomEngineRoot() {}
 
-void RandomEngineRoot::Seed(const unsigned int s) {
+void RandomEngineRoot::Seed(unsigned int s) {
 
-  m_rng.SetSeed(s);
-  std::cout << "RandomEngineRoot::Seed:\n"
-            << "    Seed: " << m_rng.GetSeed() << "\n";
+  rng.SetSeed(s);
+  std::cout << "RandomEngineRoot::Seed:\n";
+  std::cout << "    Seed: " << rng.GetSeed() << "\n";
 }
 }

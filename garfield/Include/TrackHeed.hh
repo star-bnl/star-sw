@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <list>
-#include <memory>
 
 #include "Track.hh"
 #ifndef __CINT__
@@ -43,11 +42,11 @@ class TrackHeed : public Track {
   /// Destructor
   virtual ~TrackHeed();
 
-  bool NewTrack(const double x0, const double y0, const double z0,
-                const double t0, const double dx0, const double dy0,
-                const double dz0) override;
-  bool GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
-                  int& n, double& e, double& extra) override;
+  virtual bool NewTrack(const double x0, const double y0, const double z0,
+                        const double t0, const double dx0, const double dy0,
+                        const double dz0);
+  virtual bool GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
+                          int& n, double& e, double& extra);
   bool GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
                   int& ne, int& ni, double& e, double& extra);
   /** Retrieve the properties of a conduction or delta electron 
@@ -69,114 +68,46 @@ class TrackHeed : public Track {
   bool GetIon(const unsigned int i, 
               double& x, double& y, double& z, double& t) const;
 
-  double GetClusterDensity() override;
-  double GetStoppingPower() override;
-  /// Return the W value of the medium (of the last simulated track).
+  virtual double GetClusterDensity();
+  virtual double GetStoppingPower();
   double GetW() const;
-  /// Return the Fano factor of the medium (of the last simulated track).
   double GetFanoFactor() const;
 
-  /** Simulate a delta electron.
-    * \param x0,y0,z0 initial position of the delta electron
-    * \param t0 initial time
-    * \param e0 initial kinetic energy of the delta electron
-    * \param dx0,dy0,dz0 initial direction of the delta electron
-    * \param ne,ni number of electrons/ions produced by the delta electron
-    **/ 
   void TransportDeltaElectron(const double x0, const double y0, const double z0,
                               const double t0, const double e0,
                               const double dx0, const double dy0,
-                              const double dz0, int& ne, int& ni);
-  /** Simulate a delta electron.
-    * \param x0,y0,z0 initial position of the delta electron
-    * \param t0 initial time
-    * \param e0 initial kinetic energy of the delta electron
-    * \param dx0,dy0,dz0 initial direction of the delta electron
-    * \param ne number of electrons produced by the delta electron
-    **/ 
+                              const double dz0, int& nel, int& ni);
   void TransportDeltaElectron(const double x0, const double y0, const double z0,
                               const double t0, const double e0,
                               const double dx0, const double dy0,
-                              const double dz0, int& ne);
+                              const double dz0, int& nel);
 
-  /** Simulate a photon.
-    * \param x0,y0,z0 initial position of the photon
-    * \param t0 initial time
-    * \param e0 initial energy of the photon
-    * \param dx0,dy0,dz0 initial direction of the photon
-    * \param ne,ni number of electrons/ions produced by the photon
-    **/
   void TransportPhoton(const double x0, const double y0, const double z0,
                        const double t0, const double e0, const double dx0,
-                       const double dy0, const double dz0, int& ne, int& ni);
-  /** Simulate a photon.
-    * \param x0,y0,z0 initial position of the photon
-    * \param t0 initial time
-    * \param e0 initial energy of the photon
-    * \param dx0,dy0,dz0 initial direction of the photon
-    * \param ne number of electrons produced by the photon
-    **/
+                       const double dy0, const double dz0, int& nel, int& ni);
   void TransportPhoton(const double x0, const double y0, const double z0,
                        const double t0, const double e0, const double dx0,
-                       const double dy0, const double dz0, int& ne);
+                       const double dy0, const double dz0, int& nel);
 
-  /// Take the electric field into account in the stepping algorithm.
+  // Specify whether the electric and magnetic field should be
+  // taken into account in the stepping algorithm.
   void EnableElectricField();
-  /// Do not take the electric field into account in the stepping algorithm.
   void DisableElectricField();
-  /// Take the magnetic field into account in the stepping algorithm.
   void EnableMagneticField();
-  /// Do not take the magnetic field into account in the stepping algorithm.
   void DisableMagneticField();
 
-  /** Set parameters for calculating the particle trajectory.
-    * \param maxStep 
-    *        maximum step length
-    * \param radStraight 
-    *        radius beyond which to approximate circles by polylines.
-    * \param stepAngleStraight
-    *        max. angular step (in radian) when using polyline steps.
-    * \param stepAngleCurved
-    *        max. angular step (in radian) when using circular steps.
-    **/ 
-  void SetSteppingLimits(const double maxStep, const double radStraight, 
-                         const double stepAngleStraight, 
-                         const double stepAngleCurved) {
-    m_maxStep = maxStep;
-    m_radStraight = radStraight;
-    m_stepAngleStraight = stepAngleStraight;
-    m_stepAngleCurved = stepAngleCurved;
-  }
-  void GetSteppingLimits(double& maxStep, double& radStraight, 
-                         double& stepAngleStraight, double& stepAngleCurved) {
-    maxStep = m_maxStep;
-    radStraight = m_radStraight;
-    stepAngleStraight = m_stepAngleStraight;
-    stepAngleCurved = m_stepAngleCurved;
-  }
-
-  /// Switch simulation of delta electrons on.
   void EnableDeltaElectronTransport() { m_doDeltaTransport = true; }
-  /// Switch simulation of delta electrons off.
   void DisableDeltaElectronTransport() { m_doDeltaTransport = false; }
 
-  /// Simulate (or not) the photons produced in the atomic relaxation cascade.
-  void EnablePhotonReabsorption(const bool on = true) { 
-    m_usePhotonReabsorption = on; 
-  }
+  void EnablePhotonReabsorption() { m_usePhotonReabsorption = true; }
+  void DisablePhotonReabsorption() { m_usePhotonReabsorption = false; }
 
-  /// Write the photoabsorption cross-sections used to a text file.
-  void EnablePhotoAbsorptionCrossSectionOutput(const bool on) { 
-    m_usePacsOutput = on; 
-  }
-  /** Specify the energy mesh to be used.
-    * \param e0,e1 lower/higher limit of the energy range [eV]
-    * \param nsteps number of intervals
-    **/
+  void EnablePhotoAbsorptionCrossSectionOutput() { m_usePacsOutput = true; }
+  void DisablePhotoAbsorptionCrossSectionOutput() { m_usePacsOutput = false; }
   void SetEnergyMesh(const double e0, const double e1, const int nsteps);
 
-  /// Define particle mass and charge (for exotic particles).
-  /// For standard particles Track::SetParticle should be used.
+  // Define particle mass and charge (for exotic particles).
+  // For standard particles Track::SetParticle should be used.
   void SetParticleUser(const double m, const double z);
 
  private:
@@ -184,16 +115,16 @@ class TrackHeed : public Track {
   TrackHeed(const TrackHeed& heed);
   TrackHeed& operator=(const TrackHeed& heed);
 
-  bool m_ready = false;
-  bool m_hasActiveTrack = false;
+  bool m_ready;
+  bool m_hasActiveTrack;
 
-  double m_mediumDensity = -1.;
-  std::string m_mediumName = "";
+  double m_mediumDensity;
+  std::string m_mediumName;
 
-  bool m_usePhotonReabsorption = true;
-  bool m_usePacsOutput = false;
+  bool m_usePhotonReabsorption;
+  bool m_usePacsOutput;
 
-  bool m_doDeltaTransport = true;
+  bool m_doDeltaTransport;
   struct deltaElectron {
     double x, y, z, t;
     double e;
@@ -203,41 +134,37 @@ class TrackHeed : public Track {
   std::vector<Heed::HeedCondElectron> m_conductionElectrons;
   std::vector<Heed::HeedCondElectron> m_conductionIons;
 
+  // Primary particle
+  Heed::HeedParticle* m_particle;
+
   // Material properties
-  std::unique_ptr<Heed::HeedMatterDef> m_matter;
-  std::unique_ptr<Heed::GasDef> m_gas;
-  std::unique_ptr<Heed::MatterDef> m_material;
+  Heed::HeedMatterDef* m_matter;
+  Heed::GasDef* m_gas;
+  Heed::MatterDef* m_material;
+
+  // Photoabsorption cross-sections
+  Heed::AtomPhotoAbsCS** m_atPacs;
+  Heed::MolecPhotoAbsCS** m_molPacs;
 
   // Energy mesh
-  double m_emin = 2.e-6;
-  double m_emax = 2.e-1;
-  unsigned int m_nEnergyIntervals = 200;
-  std::unique_ptr<Heed::EnergyMesh> m_energyMesh;
+  double m_emin, m_emax;
+  int m_nEnergyIntervals;
+  Heed::EnergyMesh* m_energyMesh;
 
   // Cross-sections
-  std::unique_ptr<Heed::EnTransfCS> m_transferCs;
-  std::unique_ptr<Heed::ElElasticScat> m_elScat;
-  std::unique_ptr<Heed::ElElasticScatLowSigma> m_lowSigma;
-  std::unique_ptr<Heed::PairProd> m_pairProd;
-  std::unique_ptr<Heed::HeedDeltaElectronCS> m_deltaCs;
+  Heed::EnTransfCS* m_transferCs;
+  Heed::ElElasticScat* m_elScat;
+  Heed::ElElasticScatLowSigma* m_lowSigma;
+  Heed::PairProd* m_pairProd;
+  Heed::HeedDeltaElectronCS* m_deltaCs;
 
   // Interface classes
-  std::unique_ptr<HeedChamber> m_chamber;
+  HeedChamber* m_chamber;
   Heed::HeedFieldMap m_fieldMap;
 
   // Bounding box
-  double m_lX = 0., m_lY = 0., m_lZ = 0.;
-  double m_cX = 0., m_cY = 0., m_cZ = 0.;
-
-  // Stepping parameters.
-  /// Max. step length.
-  double m_maxStep = 100.;
-  /// Bending radius beyond which to use straight-line approximation.
-  double m_radStraight = 1000.;
-  /// Angular step for curved trajectories approximated by straight-line steps.
-  double m_stepAngleStraight = 0.1;
-  /// Angular step for curved lines.
-  double m_stepAngleCurved = 0.2;
+  double m_lX, m_lY, m_lZ;
+  double m_cX, m_cY, m_cZ;
 
 #ifndef __CINT__
   std::vector<Heed::gparticle*> m_particleBank;
@@ -250,7 +177,6 @@ class TrackHeed : public Track {
   std::string FindUnusedMaterialName(const std::string& namein);
   void ClearParticleBank(); 
   bool IsInside(const double x, const double y, const double z);
-  bool UpdateBoundingBox(bool& update);
 };
 }
 

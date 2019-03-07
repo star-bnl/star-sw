@@ -49,32 +49,42 @@ class MediumCdTe : public Medium {
   void SetLowFieldMobility(const double mue, const double muh);
   void SetSaturationVelocity(const double vsate, const double vsath);
 
+  bool GetOpticalDataRange(double& emin, double& emax, 
+                           const unsigned int i = 0);
+  bool GetDielectricFunction(const double e, double& eps1, double& eps2,
+                             const unsigned int i = 0);
+
  private:
-  // Band gap energy [eV]
-  // m_bandGap = 1.44;
+  // double m_bandGap;
+
   // Low-field mobility
-  double m_eMobility = 1.1e-6;
-  double m_hMobility = 0.1e-6;
+  double m_eMobility, m_hMobility;
   // Saturation velocity
-  double m_eSatVel = 1.02e-2;
-  double m_hSatVel = 0.72e-2;
+  double m_eSatVel, m_hSatVel;
   // Hall factor
-  double m_eHallFactor = 1.15;
-  double m_hHallFactor = 0.7;
+  double m_eHallFactor, m_hHallFactor;
 
   // Trapping parameters
-  double m_eTrapCs = 1.e-15;
-  double m_hTrapCs = 1.e-15;
-  double m_eTrapDensity = 1.e13;
-  double m_hTrapDensity = 1.e13;
-  double m_eTrapTime = 0.;
-  double m_hTrapTime = 0.;
-  unsigned int m_trappingModel = 0;
+  double m_eTrapCs, m_hTrapCs;
+  double m_eTrapDensity, m_hTrapDensity;
+  double m_eTrapTime, m_hTrapTime;
+  unsigned int m_trappingModel;
 
   // Models
-  bool m_hasUserMobility = false;
-  bool m_hasUserSaturationVelocity = false;
+  bool m_hasUserMobility;
+  bool m_hasUserSaturationVelocity;
 
+  // Optical data
+  std::string m_opticalDataFile;
+  struct opticalData {
+    // Energy [eV]
+    double energy;
+    // Dielectric function
+    double eps1, eps2;
+  };
+  std::vector<opticalData> m_opticalDataTable;
+
+  bool LoadOpticalData(const std::string& filename);
 };
 }
 

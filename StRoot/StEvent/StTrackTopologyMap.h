@@ -96,7 +96,8 @@ class StTrackTopologyMap : public StObject {
     int            largestGap(StDetectorId) const;
     
 protected:
-    bool bit(int) const;             // range 0-63
+    bool bit(int) const;     // range 0-63
+    bool iTpcBit(int) const; // range 0-63
     bool ftpcFormat() const;
     bool hftFormat() const;  // TPC tracks with HFT (Run13++) hit format
     

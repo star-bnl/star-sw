@@ -92,42 +92,41 @@ class ViewFEMesh {
   }
 
  private:
-  std::string m_className = "ViewFEMesh";
-  std::string m_label = "Mesh";
+  std::string m_className;
+  std::string m_label;
 
   // Options
-  bool m_debug = false;
-  bool m_fillMesh = false;
+  bool m_debug;
+  bool m_fillMesh;
 
   // Canvas
-  TCanvas* m_canvas = nullptr;
-  bool m_hasExternalCanvas = false;
+  TCanvas* m_canvas;
+  bool m_hasExternalCanvas;
 
   // Viewing plane
   double project[3][3];
   double plane[4];
 
   // Box dimensions
-  bool m_hasUserArea = false;
-  double m_xMin = -1., m_yMin = -1., m_zMin = -1.;
-  double m_xMax =  1., m_yMax =  1., m_zMax =  1.;
+  bool m_hasUserArea;
+  double m_xMin, m_yMin, m_zMin;
+  double m_xMax, m_yMax, m_zMax;
 
   // The field map object
-  ComponentFieldMap* m_component = nullptr;
+  ComponentFieldMap* m_component;
 
   // Optional associated ViewDrift object
-  ViewDrift* m_viewDrift = nullptr;
-  bool m_plotMeshBorders = false;
+  ViewDrift* m_viewDrift;
+  bool m_plotMeshBorders;
 
   // Axes
-  TGaxis* m_xaxis = nullptr;
-  TGaxis* m_yaxis = nullptr;
-  TH2D* m_axes = nullptr;
-  bool m_drawAxes = false;
+  TGaxis* m_xaxis, *m_yaxis;
+  TH2D* m_axes;
+  bool m_drawAxes;
 
   // The mesh, stored as a vector of TPolyLine(3D) objects
-  std::vector<TPolyLine> m_mesh;
-  std::vector<TPolyLine> m_driftLines;
+  std::vector<TPolyLine*> m_mesh;
+  std::vector<TPolyLine*> m_driftLines;
 
 // The color map
 #ifndef __CINT__
@@ -140,12 +139,7 @@ class ViewFEMesh {
   // Element plotting methods
   void DrawElements();
   void DrawCST(ComponentCST* componentCST);
-
-  /// Return true if the specified point is in the view region.
-  bool InView(const double x, const double y) const {
-    return (x >= m_xMin && x <= m_xMax && y >= m_yMin && y <= m_yMax);
-  }
-
+  bool InView(double x, double y);
   bool LinesCrossed(double x1, double y1, double x2, double y2, double u1,
                     double v1, double u2, double v2, double& xc, double& yc);
   bool OnLine(double x1, double y1, double x2, double y2, double u, double v);
