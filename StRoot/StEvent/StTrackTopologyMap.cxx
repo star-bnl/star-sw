@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.cxx,v 2.20 2016/02/24 18:51:09 ullrich Exp $
+ * $Id: StTrackTopologyMap.cxx,v 2.22 2019/03/04 17:02:16 ullrich Exp $
  *
  * Author: Thomas Ullrich, Aug 1999
  ***************************************************************************
@@ -119,6 +119,12 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.cxx,v $
+ * Revision 2.22  2019/03/04 17:02:16  ullrich
+ * Modified iTpcBit() to simplify querying the topology map for hits in the outer sectors
+ *
+ * Revision 2.21  2018/03/27 02:41:00  genevb
+ * iTPC modifications, plus proper use of booleans
+ *
  * Revision 2.20  2016/02/24 18:51:09  ullrich
  * Made kSsd and kSst equivalent in numberOfHits()
  *
@@ -190,13 +196,19 @@ using std::adjacent_difference;
 using std::max_element;
 #endif
 
-static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.20 2016/02/24 18:51:09 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.22 2019/03/04 17:02:16 ullrich Exp $";
 
 ClassImp(StTrackTopologyMap)
 bool
 StTrackTopologyMap::bit(int i) const
 {
     return i>31 ? (mMap1>>(i-32) & 1U) : (mMap0>>i & 1U);
+}
+
+bool
+StTrackTopologyMap::iTpcBit(int i) const
+{
+    return (i < 41 ? (mMap_iTpc>>i & 1ULL) : bit(i-20));
 }
 
 bool
