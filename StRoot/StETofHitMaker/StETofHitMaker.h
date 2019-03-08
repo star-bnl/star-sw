@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHitMaker.h,v 1.1 2019/02/19 19:52:28 jeromel Exp $
+ * $Id: StETofHitMaker.h,v 1.2 2019/03/08 19:03:35 fseck Exp $
  *
  * Author: Philipp Weidenkaff & Florian Seck, April 2018
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StETofHitMaker.h,v $
+ * Revision 1.2  2019/03/08 19:03:35  fseck
+ * moved QA histograms for clustered hits into separate function
+ *
  * Revision 1.1  2019/02/19 19:52:28  jeromel
  * Reviewed code provided by F.Seck
  *
@@ -86,7 +89,9 @@ private:
 
     double startTime();
 
-    void fillQA( const double& tstart );
+    void fillUnclusteredHitQA( const double& tstart );
+
+    void fillHitQA( const bool isMuDst, const double& tstart );
 
     unsigned int detectorToKey( const unsigned int detectorId );
 
