@@ -87,7 +87,7 @@ Int_t StLaserAvClusterMaker::Make(){
   }
   Double_t samplingFrequency     = 1.e6*gStTpcDb->Electronics()->samplingFrequency(); // Hz
   Double_t TimeBinWidth = 1e9/samplingFrequency; // nsec
-  Double_t zBinWidth     =  gStTpcDb->DriftVelocity()/samplingFrequency;
+  Double_t zBinWidth     =  gStTpcDb->DriftVelocity(20,0)/samplingFrequency;
   if (fCluster == 0) return kStWarn;
   Long64_t nentries = fCluster->fChain->GetEntries();
   Long64_t nbytes = 0, nb = 0;
