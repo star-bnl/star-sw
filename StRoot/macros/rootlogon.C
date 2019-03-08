@@ -163,7 +163,9 @@
     TString GIT_VERSION; 
     if (! gSystem->AccessPathName(STAR_GIT,kReadPermission)) {
       GIT_VERSION = ", git = ";
-      GIT_VERSION += gSystem->GetFromPipe("git --git-dir=$STAR/.git describe --all");
+      GIT_VERSION += gSystem->GetFromPipe("git --git-dir=$STAR/.git describe --all"); 
+      GIT_VERSION += ",tag:";
+      GIT_VERSION += gSystem->GetFromPipe("git --git-dir=$STAR/.git describe --always"); 
     }
     TString ROOT_LEVEL("$ROOT_LEVEL");         gSystem->ExpandPathName(ROOT_LEVEL);
     TString GARFIELD_HOME("$GARFIELD_HOME");   gSystem->ExpandPathName(GARFIELD_HOME);
