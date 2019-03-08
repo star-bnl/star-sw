@@ -31,7 +31,7 @@
 #include "FundamentalConstants.hh"
 #include "Random.hh"
 #include "Plotting.hh"
-//#define __DriftVelocity__
+#define __DriftVelocity__
 using namespace Garfield;
 
 void tpc(Int_t nEvents = 10000, const Char_t *file = "") {
@@ -67,8 +67,12 @@ void tpc(Int_t nEvents = 10000, const Char_t *file = "") {
     vAnode = 1100;
   } else if (IO.Contains("1135",TString::kIgnoreCase)) {
     vAnode = 1135;
+  } else if (IO.Contains("1070",TString::kIgnoreCase)) {
+    vAnode = 1070;
   } else if (IO.Contains("1170",TString::kIgnoreCase)) {
     vAnode = 1170;
+  } else if (IO.Contains("1200",TString::kIgnoreCase)) {
+    vAnode = 1200;
   } else if (IO.Contains("1345",TString::kIgnoreCase)) {
     vAnode = 1345;
   } else if (IO.Contains("1390",TString::kIgnoreCase)) {
@@ -314,7 +318,7 @@ void tpc(Int_t nEvents = 10000, const Char_t *file = "") {
     sensor->NewSignal();
     if (! Prompt) {
       x0 = xmin + RndmUniform() * (xmax - xmin);
-      y0 = yGate - 0.1;
+      y0 = yGate; // - 0.1;
     } else {
       x0 = xmin + RndmUniform() * (xmax - xmin);
       y0 = ySens + 2*gap*RndmUniform();
