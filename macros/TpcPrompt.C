@@ -490,4 +490,22 @@ void TpcPrompt(Int_t Nevents = 1000000,
       set run = `echo $f | awk -F\_ '{print $3}'`;
       root.exe -q -b 'TpcPrompt.C(100000,"'${f}'","TpcHit'${run}'.root")' >& ${run}.log &
    end
+--------------------------------------------------------------------------------
+Membrane:  ZLMFreqTpcHitZTMfl0.root
+1. match Inner and Outer: 
+FitP->Draw("(mu-208.707):y>>Z(72,0.5,72.5)","i&&j","prof")
+Z->Fit("pol2","er","",0.5,40.5)
+pol2->Eval(40.5);// => -1.42279472751408842e-01
+Z->Fit("pol2","er","",40.5,72.5);
+pol2->Eval(40.5);// => -4.34622712046779991e-01
+FitP->Draw("(mu-208.707)-(-1.42279472751408842e-01):y>>ZI(72,0.5,72.5)","i&&j&&j<=40","prof")
+FitP->Draw("(mu-208.707)-(-4.34622712046779991e-01):y>>ZO(72,0.5,72.5)","i&&j&&j>40","prof")
+TProfile *z = new TProfile(*ZI)
+z->Add(ZO)
+
+FitP->Draw("((mu-208.707)-(-1.42279472751408842e-01))/208.707:y>>zI(72,0.5,72.5)","i&&j&&j<=40","prof")
+FitP->Draw("((mu-208.707)-(-4.34622712046779991e-01))/208.07:y>>zO(72,0.5,72.5)","i&&j&&j>40","prof")
+TProfile *z = new TProfile(*zI)
+z->Add(zO)
+z->Fit("pol2","e")
  */

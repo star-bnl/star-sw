@@ -1,7 +1,7 @@
 /* Global Alignment
    FPE_OFF
    setup debug
-   root.exe -q -b 'lMuDst.C(-1,"./*MuDst.root","RMuDst,mysql,magF,nodefault","MuTpcG.root")'  MuTpcG.C+
+   root.exe -q -b 'lMuDst.C(-1,"./*MuDst.root","RMuDst,tpcDb,mysql,magF,nodefault","MuTpcG.root")'  MuTpcG.C+
    root.exe lMuDst.C MuTpcG.root
    .L MuTpcG.C+
    Draw();
@@ -218,7 +218,7 @@ Double_t Chi2Vx(StMuPrimaryVertex *VtxH, StMuPrimaryVertex *Vtx) {
 }
 //________________________________________________________________________________
 void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
-  static TH2F *dZ = 0,  *dX, *dY, *X, *Y,    *Zchisq, *dZT;
+  static TH2F *dZ = 0,  *dX, *dY, *X, *Y,    *Zchisq, *dZT, *dT;
   static TH3F *dXS,   *dYS,   *dZS, *dXYS, *dXTpcS,   *dYTpcS,   *dZTpcS;
   static TH3F *dXSPhi,   *dYSPhi,   *dZSPhi, *dXSDip,   *dYSDip,   *dZSDip;
   static TH3F ***plots3D;
@@ -239,11 +239,12 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
 #endif  
   if (! dZ) {
     NPART = new TH1D("npart","no accepted particles",500,0,5000);
-    dZ = new TH2F("dZ","dZ (W - E)/2 versus Z",nZ,Zmin,Zmax,2000,-20.,20.);
-    const static Int_t tMin = 20140410;
+    dZ = new TH2F("dZ","dZ (W - E)/2 versus Z",nZ,Zmin,Zmax,400,-2.,2.);
+    dT = new TH2F("dT","dT(#musec) (W - E)/2 versus Z",nZ,Zmin,Zmax,500,-0.5,0.5);
+    const static Int_t tMin = 20190225;;
     const static Int_t tMax = 20140411;
     TDatime t1(tMin,0); // min Time and
-    TDatime t2(tMax,0); // max 
+    TDatime t2; // now (tMax,0); // max 
     
     UInt_t i1 = t1.Convert() - timeOffSet;
     UInt_t i2 = t2.Convert() - timeOffSet;
@@ -255,12 +256,12 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
     X = new TH2F("X","X (W + E)/2 versus Z",nZ,Zmin,Zmax,500,-5.,5.);
     Y = new TH2F("Y","Y (W + E)/2 versus Z",nZ,Zmin,Zmax,500,-5.,5.);
     Zchisq = new TH2F("Zchisq","chisq between the highest rank vertex and this one", 100,-25,25,500,0,500);
-    dXS = new TH3F("dXS","dX in SCS versus sector and Z",24,0.5,24.5,nZ,Zmin,Zmax,500,-0.05,0.05);
+    dXS = new TH3F("dXS","dX in SCS versus sector and Z",24,0.5,24.5,nZ,Zmin,Zmax,500,-1.0,1.0);
     dYS = new TH3F("dYS","dY in SCS versus sector and Z",24,0.5,24.5,nZ,Zmin,Zmax,500,-1.0,1.0);
-    dZS = new TH3F("dZS","dZ in SCS versus sector and Z",24,0.5,24.5,nZ,Zmin,Zmax,500,-0.5,0.5);
-    dXTpcS = new TH3F("dXTpcS","dX in Tpc CS versus sector and Z",24,0.5,24.5,nZ,Zmin,Zmax,500,-0.05,0.05);
-    dYTpcS = new TH3F("dYTpcS","dY in Tpc CS versus sector and Z",24,0.5,24.5,nZ,Zmin,Zmax,500,-0.5,0.5);
-    dZTpcS = new TH3F("dZTpcS","dZ in Tpc CS versus sector and Z",24,0.5,24.5,nZ,Zmin,Zmax,500,-0.5,0.5);
+    dZS = new TH3F("dZS","dZ in SCS versus sector and Z",24,0.5,24.5,nZ,Zmin,Zmax,500,-1.0,1.0);
+    dXTpcS = new TH3F("dXTpcS","dX in Tpc CS versus sector and Z",24,0.5,24.5,nZ,Zmin,Zmax,500,-1.0,1.0);
+    dYTpcS = new TH3F("dYTpcS","dY in Tpc CS versus sector and Z",24,0.5,24.5,nZ,Zmin,Zmax,500,-1.0,1.0);
+    dZTpcS = new TH3F("dZTpcS","dZ in Tpc CS versus sector and Z",24,0.5,24.5,nZ,Zmin,Zmax,500,-1.0,1.0);
     dXYS   = new TH3F("dXYS","X and Y versus sector",24,0.5,24.5,100,-1.0,1.0,100,-1.0,1.0);
     dXSPhi = new TH3F("dXSPhi","dX in SCS versus sector and Phi",24,0.5,24.5,100,-0.5,0.5,500,-1.0,1.0);
     dYSPhi = new TH3F("dYSPhi","dY in SCS versus sector and Phi",24,0.5,24.5,100,-0.5,0.5,500,-1.0,1.0);
@@ -406,6 +407,7 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
     PrPP(Vertex[ivx]);
     delete [] parts;
   }
+  Double_t driftVel =StTpcDb::instance()->DriftVelocity()*1e-6;
   if (Vertex[1].GetChi2() > 0 && Vertex[2].GetChi2() > 0) {
     StThreeVectorD W(Vertex[1].GetX(), Vertex[1].GetY(), Vertex[1].GetZ());
     StThreeVectorD E(Vertex[2].GetX(), Vertex[2].GetY(), Vertex[2].GetZ());
@@ -418,6 +420,7 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
       dX->Fill(sum.z(),dif.x());
       dY->Fill(sum.z(),dif.y());
       dZ->Fill(sum.z(),dif.z());
+      dT->Fill(sum.z(),dif.z()/driftVel);
       dZT->Fill(date,dif.z());
       X->Fill(sum.z(),sum.x());
       Y->Fill(sum.z(),sum.y());
@@ -627,10 +630,10 @@ void MuTpcG(Long64_t nEvents = 10000000) {
   MuDstMaker->SetStatus("StStMuMcVertex",1);
   MuDstMaker->SetStatus("StStMuMcTrack",1);
 #endif
-  StMaker *detDb = chain->Maker("detDb");
-  detDb->SetActive(kFALSE);
-  StMaker *tpcDB = chain->Maker("tpcDB");
-  tpcDB->SetActive(kFALSE);
+  //  StMaker *detDb = chain->Maker("detDb");
+  //  detDb->SetActive(kFALSE);
+  //  StMaker *tpcDB = chain->Maker("tpcDB");
+  //  tpcDB->SetActive(kFALSE);
   MuDstMaker->SetStatus("*",0);
   const Char_t *ActiveBranches[] = {"MuEvent"
 				    ,"PrimaryVertices"

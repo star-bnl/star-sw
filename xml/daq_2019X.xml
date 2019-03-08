@@ -2,9 +2,8 @@
 <job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false">
         <command>
 #         cd ${SUBMITTINGDIRECTORY}
-   setenv StarEndMakerShell
+#  setenv StarEndMakerShell
    setenv STARFPE NO
-   setup debug
    setenv NODEBUG yes
    setup  gcc631
    setup 64b

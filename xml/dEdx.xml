@@ -31,8 +31,30 @@
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/TpcRS_2016sdt/*event.root" /> -->
 <!-- <input URL="command:dEdxSample.pl" /> -->
 <!-- <input URL="file:/net/l401/data/scratch2/fisyak/reco/2019/StiCA/056/*/*event.root" /> -->
-<input URL="file:/net/l401/data/scratch2/fisyak/reco/2019/StiCA/057/*/*event.root" />
+<!-- <input URL="file:/net/l401/data/scratch2/fisyak/reco/2019/StiCA/057/*/*event.root" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/net/l401/data/scratch2/reco/2019/06*/*/*event.root" /> -->
+<!-- <input URL="file:/net/l401/data/scratch2/reco/2019/06*/*/*event.root" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2014/TFG17vnoV5/*event.root" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2014/TFG17vnoV5.Altro4/*event.root" /> -->
 <!-- <output fromScratch="*.root" toURL="/net/l404/data/fisyak/Histograms/RunXVIII/RunXVIII102/" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/net/l401/data/scratch2/reco/2019/063/20063015/hlt_20063015_10_03_000.event.root" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/net/l401/data/scratch2/reco/2019/063/20063015/hlt_20063015_10_04_000.event.root" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/net/l401/data/scratch2/reco/2019/063/20063015/hlt_20063015_11_01_000.event.root" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/net/l401/data/scratch2/reco/2019/063/20063015/hlt_20063015_11_02_000.event.root" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/net/l401/data/scratch2/reco/2019/063/20063015/hlt_20063015_11_03_000.event.root" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/net/l401/data/scratch2/reco/2019/063/20063015/hlt_20063015_11_04_000.event.root" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/net/l401/data/scratch2/reco/2019/063/20063015/hlt_20063015_12_02_000.event.root" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/net/l401/data/scratch2/reco/2019/063/20063015/hlt_20063015_12_03_000.event.root" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/net/l401/data/scratch2/reco/2019/063/20063015/hlt_20063015_13_01_000.event.root" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/net/l401/data/scratch2/reco/2019/063/20063015/hlt_20063015_13_02_000.event.root" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/net/l401/data/scratch2/reco/2019/063/20063015/hlt_20063015_13_03_000.event.root" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/net/l401/data/scratch2/reco/2019/063/20063015/hlt_20063015_13_04_000.event.root" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/net/l401/data/scratch2/reco/2019/063/20063015/hlt_20063015_14_01_000.event.root" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/net/l401/data/scratch2/reco/2019/063/20063015/hlt_20063015_14_02_000.event.root" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/net/l401/data/scratch2/reco/2019/063/20063015/hlt_20063015_14_03_000.event.root" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/net/l401/data/scratch2/reco/2019/063/20063015/hlt_20063015_14_04_000.event.root" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/net/l401/data/scratch2/reco/2019/063/20063015/hlt_20063015_15_01_000.event.root" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/net/l401/data/scratch2/reco/2019/063/20063015/hlt_20063015_15_02_000.event.root" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/net/l401/data/scratch2/reco/2019/063/20063015/hlt_20063015_15_03_000.event.root" /> -->
+<input URL="file://l405.l4.bnl.local/net/l401/data/scratch2/reco/2019/063/20063015/hlt_20063015_15_04_000.event.root" />
 </job>
