@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHitMaker.cxx,v 1.1 2019/02/19 19:52:28 jeromel Exp $
+ * $Id: StETofHitMaker.cxx,v 1.2 2019/03/08 19:07:20 fseck Exp $
  *
  * Author: Philipp Weidenkaff & Florian Seck, April 2018
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StETofHitMaker.cxx,v $
+ * Revision 1.2  2019/03/08 19:07:20  fseck
+ * introduced dead time handling + fixed clustering to only pick up hits on adjacent strips + moved QA histograms for clustered hits into separate function + added correlation plots to bTOF hits
+ *
  * Revision 1.1  2019/02/19 19:52:28  jeromel
  * Reviewed code provided by F.Seck
  *
@@ -33,11 +36,13 @@
 
 #include "StBTofCollection.h"
 #include "StBTofHeader.h"
+#include "StBTofHit.h"
 
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuETofDigi.h"
 #include "StMuDSTMaker/COMMON/StMuETofHit.h"
+#include "StMuDSTMaker/COMMON/StMuBTofHit.h"
 
 #include "StChain/StChainOpt.h" // for renaming the histogram file
 
@@ -270,7 +275,6 @@ StETofHitMaker::Make()
             return kStOk;
         }
     }
-
 }
 
 //_____________________________________________________________
@@ -324,7 +328,7 @@ StETofHitMaker::processStEvent()
     double tstart = startTime();  
     
     if( mDoQA ) {
-        fillQA( tstart );
+        fillUnclusteredHitQA( tstart );
     }
 
     mergeClusters( isMuDst );
@@ -336,26 +340,7 @@ StETofHitMaker::processStEvent()
         StSPtrVecETofHit& etofHits = etofCollection->etofHits();
         LOG_INFO << "processStEvent() - etof hit collection: " << etofHits.size() << " entries" << endm;
 
-
-        for( size_t i=0; i<etofHits.size(); i++ ) {
-            if( mDebug ) {
-                LOG_DEBUG << ( *etofHits[ i ] ) << endm;
-            }
-
-            // fill histogram to be saved in .hist.root file
-            string histNamePos = "clusteredHit_pos_s" + std::to_string( etofHits[ i ]->sector() ) + "m" + std::to_string( etofHits[ i ]->zPlane() ) + "c" + std::to_string( etofHits[ i ]->counter() );
-            mHistograms.at( histNamePos )->Fill( etofHits[ i ]->localX(), etofHits[ i ]->localY() );
-            
-            // if tstart exists
-            if( fabs( tstart ) > 0.001 && fabs( tstart + 999.) > 0.001 ) {
-                double tof = etofHits[ i ]->time() - tstart;
-                if( tof < 0 ) {
-                    tof += eTofConst::bTofClockCycle;
-                }
-
-                mHistograms.at( "clusteredHit_tof_fullrange" )->Fill( tof );
-            }
-        }
+        fillHitQA( isMuDst, tstart );
     }
     else {
         LOG_INFO << "processStEvent() - no hits" << endm;
@@ -407,7 +392,7 @@ StETofHitMaker::processMuDst()
 
     double tstart = startTime();   
     if( mDoQA ) {
-        fillQA( tstart );
+        fillUnclusteredHitQA( tstart );
     }
 
     mergeClusters( isMuDst );
@@ -419,31 +404,7 @@ StETofHitMaker::processMuDst()
         size_t nHits = mMuDst->numberOfETofHit();
         LOG_INFO << "processMuDst() - etof hits: " << nHits << " entries" << endm;
 
-        for( size_t i=0; i<nHits; i++ ) {
-            StMuETofHit* aHit = mMuDst->etofHit( i );
-            
-            if( mDebug ) {
-                LOG_DEBUG << "hit (" << i << "): sector,plane,counter=" << aHit->sector() << ",";
-                LOG_DEBUG << aHit->zPlane() << "," << aHit->counter() << " time=" << aHit->time();
-                LOG_DEBUG << " localX=" << aHit->localX() << " localY=" << aHit->localY();
-                LOG_DEBUG << " clustersize=" << aHit->clusterSize() << endm;
-            }
-
-            // fill histogram to be saved in .hist.root file
-            string histNamePos = "clusteredHit_pos_s" + std::to_string( aHit->sector() ) + "m" + std::to_string( aHit->zPlane() ) + "c" + std::to_string( aHit->counter() );
-            mHistograms.at( histNamePos )->Fill( aHit->localX(), aHit->localY() );
-            
-            // if tstart exists
-            if( fabs( tstart ) > 0.001 && fabs( tstart + 999.) > 0.001 ) {
-                double tof = aHit->time() - tstart;
-                if( tof < 0 ) {
-                    tof += eTofConst::bTofClockCycle;
-                }
-
-                mHistograms.at( "clusteredHit_tof_fullrange" )->Fill( tof );
-            }
-        }
-
+        fillHitQA( isMuDst, tstart );
     }
     else {
         LOG_INFO << "processMuDst() - no hits" << endm;
@@ -508,9 +469,9 @@ StETofHitMaker::fillStorage( StETofDigi* aDigi, unsigned int index )
         return false;
     }
 
-    if ( aDigi->calibTime() == 0 && aDigi->calibTot() == -1 ) {
+    if( fabs( aDigi->calibTime() ) < 1e-5 && aDigi->calibTot() < 0 ) {
         if( mDebug ) {
-            LOG_DEBUG << "fillStorage() - digi not calibrated, most likely since it is outside the trigger window. Ignore." << endm;
+            LOG_DEBUG << "fillStorage() - digi not calibrated, most likely since it is outside the trigger window or pulser. Ignore." << endm;
         }
         return false;
     }
@@ -662,26 +623,52 @@ StETofHitMaker::matchSides()
         unsigned int stripIndex             = kv->first;
         std::vector< StETofDigi* > *digiVec = &( kv->second );
 
-        //timeorder digis from both sides via lambda functions of C++11
+        // timeorder digis from both sides via lambda functions of C++11
         std::sort( digiVec->begin(), digiVec->end(), [] ( StETofDigi* lhs, StETofDigi* rhs ) {
                                                         return lhs->calibTime() < rhs->calibTime();
                                                     }
                  );
 
         //--------------------------------------------------------------------------------
-        //print out for testing
-        if( mDebug && digiVec->size() > 0 ) {
-            LOG_DEBUG << stripIndex << "  size: " << digiVec->size() << endm;
+        // print out for testing
+        if( mDebug ) {
+            LOG_INFO << stripIndex << "  size: " << digiVec->size() << endm;
 
             for( size_t i=0; i<digiVec->size(); i++ ) {
-                LOG_DEBUG << "matchSides() - DIGI: " << digiVec->at( i ) << "  ";
-                LOG_DEBUG << "calibTime=" << setprecision( 16 ) << digiVec->at( i )->calibTime() << "  " << endm;
-                LOG_DEBUG << "calibTot="  << setprecision( 4 )  << digiVec->at( i )->calibTot()  << "  ";
-                LOG_DEBUG << "side="      << setprecision( 4 )  << digiVec->at( i )->side()      << endm;
+                LOG_INFO << "matchSides() - DIGI: " << digiVec->at( i ) << "  ";
+                LOG_INFO << "calibTime=" << setprecision( 16 ) << digiVec->at( i )->calibTime() << "  " << endm;
+                LOG_INFO << "calibTot="  << setprecision( 4 )  << digiVec->at( i )->calibTot()  << "  ";
+                LOG_INFO << "side="      << setprecision( 4 )  << digiVec->at( i )->side()      << endm;
             }
         }
         //--------------------------------------------------------------------------------
-        
+
+
+        // remove digis from the vector that fall within the dead time caused by another digi on the same side of a strip
+        std::vector< double > deadTime( 2, -60. );
+
+        for( auto it = digiVec->begin(); it != digiVec->end(); it++ ) {
+            if( (*it)->rawTime() - deadTime.at( (*it)->side() - 1 ) < 50. ) { //TODO: move to DB. use raw time
+
+                if( mDebug ) {
+                    LOG_INFO << "digi within dead time --> ignore ... ( geomId : " << stripIndex * 10 + (*it)->side();
+                    LOG_INFO << " dead time: "  << setprecision( 16 ) << deadTime.at( (*it)->side() - 1 );
+                    LOG_INFO << " calib time: " << setprecision( 16 ) << (*it)->calibTime();
+                    LOG_INFO << " difference: " << (*it)->calibTime() - deadTime.at( (*it)->side() - 1 ) << endm;
+                }
+
+                delete *it;
+                digiVec->erase( it );
+                it--;
+            }
+            else {
+                deadTime.at( (*it)->side() - 1 ) = (*it)->rawTime();
+            }
+        }
+
+
+
+
         double posX     = 0.0;
         double posY     = 0.0;
         double time     = 0.0;
@@ -689,7 +676,7 @@ StETofHitMaker::matchSides()
         double totSum   = 0.0;
 
 
-        //loop over digis on the same strip
+        // loop over digis on the same strip
         while( digiVec->size() > 1 ) {
             if( mDebug ) { 
                 LOG_DEBUG << stripIndex << " -- digiVec->size() -- " << digiVec->size() << endm;
@@ -746,7 +733,7 @@ StETofHitMaker::matchSides()
             }
 
             if( digiVec->size() < 2 ) {
-                //only one digi left on strip. break loop.
+                // only one digi left on strip. break loop.
                 break;
             }
 
@@ -891,7 +878,7 @@ StETofHitMaker::matchSides()
 
 //_____________________________________________________________
 void
-StETofHitMaker::fillQA( const double& tstart )
+StETofHitMaker::fillUnclusteredHitQA( const double& tstart )
 {
     if( !mDoQA ) {
         return;
@@ -961,7 +948,7 @@ StETofHitMaker::fillQA( const double& tstart )
             // ---------------------------------------
         } // end of loop over hits in hitVec    
     } // end of loop over mStoreHit
-}//::fillQA
+}//::fillUnclusteredHitQA
 
 //_____________________________________________________________
 void
@@ -1000,8 +987,8 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
             
             // currently only one-strip clusters --> lowest and highest strip identical
             unsigned int clusterSize = pHit->clusterSize();
-            int lowestStrip  = ( int ) pHit->localX();
-            int highestStrip = ( int ) pHit->localX();
+            int lowestStrip  = ceil( pHit->localX() / eTofConst::stripPitch );
+            int highestStrip = lowestStrip;
 
 
             unsigned int index = 1;
@@ -1021,17 +1008,24 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
                 //calculate distance measures
                 double timeDiff = pHit->time() - pMergeHit->time();
                 double posYDiff = ( pHit->localY() - pMergeHit->localY() ) / mSigVel.at( detIndex ); // divide by signal velocity
-                
-                bool isLowerAdjecentStip  = ( ( int ) pMergeHit->localX() > -1.01 + lowestStrip  ); 
-                bool isHigherAdjecentStip = ( ( int ) pMergeHit->localX() <  1.01 + highestStrip ); 
-                
+
+                bool isHigherAdjacentStip = false;                
+                bool isLowerAdjacentStip  = false;
+
+                if( ceil( pMergeHit->localX() / eTofConst::stripPitch ) - highestStrip == 1 ) {
+                    isHigherAdjacentStip = true;
+                }
+                else if( ceil( pMergeHit->localX() / eTofConst::stripPitch ) - lowestStrip == -1 ) {
+                    isLowerAdjacentStip = true;
+                }
+
                 // check merging condition: X is not convoluted into the clusterbuilding radius 
-                // since it is not supposed to be zero --> check if X position is on a adjecent strip
-                if( ( sqrt( timeDiff * timeDiff + posYDiff * posYDiff ) ) < mMergingRadius  &&
-                    ( isLowerAdjecentStip || isHigherAdjecentStip ) )
+                // since it is not supposed to be zero --> check if X position is on a adjacent strip
+                if( ( isHigherAdjacentStip || isLowerAdjacentStip ) && 
+                    ( sqrt( timeDiff * timeDiff + posYDiff * posYDiff ) ) < mMergingRadius )
                 {
                     if( mDebug ) {
-                        LOG_DEBUG << "mergeClusters() - merging is going on" << endm;
+                        LOG_DEBUG << "mergeClusters() - merging is going on" << endm; 
                     }
                     //merge hit into cluster
                     double hitWeight = pMergeHit->totalTot();
@@ -1043,11 +1037,17 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
 
                     clusterSize++;
 
-                    if( isLowerAdjecentStip  ) {
-                        lowestStrip = ( int ) pMergeHit->localX();
+                    if( isHigherAdjacentStip ) {
+                        highestStrip++;
                     }
-                    if( isHigherAdjecentStip ) {
-                        highestStrip = ( int ) pMergeHit->localX();
+                    else if( isLowerAdjacentStip  ) {
+                        lowestStrip--;
+                    }
+
+                    if( mDebug ) {
+                        LOG_DEBUG << "mergeClusters() - detector: " << detIndex << " seed hit localX: " << pHit->localX();
+                        LOG_DEBUG << " <>  hit to merge localX: " << pMergeHit->localX();
+                        LOG_DEBUG << " <> weighted localX: " << weightedPosX / weightsTotSum << endm; 
                     }
 
                     // merge contained digi index vectors
@@ -1196,6 +1196,156 @@ StETofHitMaker::assignAssociatedHits( const bool isMuDst )
 
 
 //_____________________________________________________________
+void
+StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
+{
+    if( !isMuDst ) {
+        // --------------------------------------------------------
+        // analyze hits in eTOF
+        // --------------------------------------------------------
+        const StSPtrVecETofHit& etofHits = mEvent->etofCollection()->etofHits();
+
+        size_t nHitsETof = etofHits.size();
+        double averageETofHitTime = 0.;
+
+        for( size_t i=0; i<etofHits.size(); i++ ) {
+            StETofHit* aHit = etofHits[ i ];
+
+            if( !aHit ) {
+                nHitsETof--;
+                continue;
+            }
+
+            if( mDebug ) {
+                LOG_DEBUG << *aHit << endm;
+            }
+
+            averageETofHitTime += aHit->time();
+
+            // fill histogram to be saved in .hist.root file
+            string histNamePos = "etofHit_pos_s" + std::to_string( aHit->sector() ) + "m" + std::to_string( aHit->zPlane() ) + "c" + std::to_string( aHit->counter() );
+            mHistograms.at( histNamePos )->Fill( aHit->localX(), aHit->localY() );
+            
+            // if tstart exists
+            if( fabs( tstart ) > 0.001 && fabs( tstart + 999.) > 0.001 ) {
+                double tof = aHit->time() - tstart;
+                if( tof < 0 ) {
+                    tof += eTofConst::bTofClockCycle;
+                }
+
+                mHistograms.at( "etofHit_tof_fullrange" )->Fill( tof );
+            }
+        }
+        averageETofHitTime /= nHitsETof;
+
+        // --------------------------------------------------------
+        // analyze hits in bTOF to get the eTOF-bTOF correlation
+        // --------------------------------------------------------
+        StBTofCollection* btofCollection = mEvent->btofCollection();
+
+        if( !btofCollection || !btofCollection->hitsPresent() ) {
+            LOG_WARN << "fillHitQA - no btof collection or no bTof hits present" << endm;
+            return;
+        }
+
+        const StSPtrVecBTofHit& btofHits = btofCollection->tofHits();
+
+        size_t nHitsBTof = btofHits.size();
+        double averageBTofHitTime = 0.;
+
+        for( size_t i=0; i<btofHits.size(); i++ ) {
+            StBTofHit* aHit = btofHits[ i ];
+
+            if( !aHit ) {
+                nHitsBTof--;
+                continue;
+            }
+
+            averageBTofHitTime += aHit->leadingEdgeTime();
+        }
+        averageBTofHitTime /= nHitsBTof;
+
+        float diff = averageETofHitTime - averageBTofHitTime;
+        if( diff < 0 ) diff += eTofConst::bTofClockCycle;
+
+        mHistograms.at( "averageTimeDiff_etofHits_btofHits" )->Fill( diff );
+        mHistograms.at( "multiplicity_etofHits_btofHits"    )->Fill( nHitsETof, nHitsBTof );
+    }
+    else {
+        // --------------------------------------------------------
+        // analyze hits in eTOF
+        // --------------------------------------------------------
+        size_t nHitsETof = mMuDst->numberOfETofHit();
+        double averageETofHitTime = 0.;
+
+        for( size_t i=0; i<mMuDst->numberOfETofHit(); i++ ) {
+            StMuETofHit* aHit = mMuDst->etofHit( i );
+
+            if( !aHit ) {
+                nHitsETof--;
+                continue;
+            }
+        
+            if( mDebug ) {
+                LOG_DEBUG << "hit (" << i << "): sector,plane,counter=" << aHit->sector() << ",";
+                LOG_DEBUG << aHit->zPlane() << "," << aHit->counter() << " time=" << aHit->time();
+                LOG_DEBUG << " localX=" << aHit->localX() << " localY=" << aHit->localY();
+                LOG_DEBUG << " clustersize=" << aHit->clusterSize() << endm;
+            }
+
+            averageETofHitTime += aHit->time();
+
+            // fill histogram to be saved in .hist.root file
+            string histNamePos = "etofHit_pos_s" + std::to_string( aHit->sector() ) + "m" + std::to_string( aHit->zPlane() ) + "c" + std::to_string( aHit->counter() );
+            mHistograms.at( histNamePos )->Fill( aHit->localX(), aHit->localY() );
+
+            // if tstart exists
+            if( fabs( tstart ) > 0.001 && fabs( tstart + 999.) > 0.001 ) {
+                double tof = aHit->time() - tstart;
+                if( tof < 0 ) {
+                    tof += eTofConst::bTofClockCycle;
+                }
+
+                mHistograms.at( "etofHit_tof_fullrange" )->Fill( tof );
+            }
+        }
+        averageETofHitTime /= nHitsETof;
+
+        // --------------------------------------------------------
+        // analyze hits in bTOF to get the eTOF-bTOF correlation
+        // --------------------------------------------------------
+        if( !mMuDst->btofArray( muBTofHit ) || !mMuDst->numberOfBTofHit() ) {
+            LOG_WARN << "fillHitQA - no btof hit array or no btof hits present" << endm;
+            return;
+        }
+
+        size_t nHitsBTof = mMuDst->numberOfBTofHit();
+        double averageBTofHitTime = 0.;
+
+        for( size_t i=0; i<mMuDst->numberOfBTofHit(); i++ ) {
+            StMuBTofHit* aHit = mMuDst->btofHit( i );
+            
+            if( !aHit ) {
+                nHitsBTof--;
+                continue;
+            }
+
+            averageBTofHitTime += aHit->leadingEdgeTime();
+        }
+        averageBTofHitTime /= nHitsBTof;
+
+        double diff = averageETofHitTime - averageBTofHitTime;
+        if( diff < 0 ) diff += eTofConst::bTofClockCycle;
+
+        mHistograms.at( "averageTimeDiff_etofHits_btofHits" )->Fill( diff );
+        mHistograms.at( "multiplicity_etofHits_btofHits"    )->Fill( nHitsETof, nHitsBTof );
+    }
+
+    LOG_DEBUG << "fillHitQA() - histograms filled" << endm;   
+}//::fillHitQA
+
+
+//_____________________________________________________________
 // setHistFileName uses the string argument from the chain being run to set
 // the name of the output histogram file.
 void
@@ -1232,16 +1382,23 @@ StETofHitMaker::bookHistograms()
 {
     LOG_INFO << "bookHistograms() ... " << endm;
 
-    mHistograms[ "clusteredHit_tof_fullrange" ] = new TH1F( "clusteredHit_tof_fullrange", "clustered hit time of flight;time of flight (ns);# clustered hits", 5000, -800., eTofConst::bTofClockCycle );
-    AddHist( mHistograms.at( "clusteredHit_tof_fullrange" ) );
+    mHistograms[ "averageTimeDiff_etofHits_btofHits" ] = new TH1F( "averageTimeDiff_etofHits_btofHits", "difference between average times in bTOF and eTOF hits;#DeltaT (ns);# events", 26000, -800, eTofConst::bTofClockCycle ); 
+    mHistograms[ "multiplicity_etofHits_btofHits"    ] = new TH2F( "multiplicity_etofHits_btofHits", "multiplicity correlation between bTOF and eTOF;# eTOF hits;# bTOF hits", 200, 0, 200, 500, 0, 1000 );
+    mHistograms[ "etofHit_tof_fullrange"             ] = new TH1F( "etofHit_tof_fullrange", "eTOF hit time of flight;time of flight (ns);# hits", 5000, -800., eTofConst::bTofClockCycle );
+
+    AddHist( mHistograms.at( "averageTimeDiff_etofHits_btofHits" ) );
+    AddHist( mHistograms.at( "multiplicity_etofHits_btofHits"    ) );
+    AddHist( mHistograms.at( "etofHit_tof_fullrange"             ) );
+
+
 
     for( int sector = eTofConst::sectorStart; sector <= eTofConst::sectorStop; sector++ ) {
         for( int plane = eTofConst::zPlaneStart; plane <= eTofConst::zPlaneStop; plane++ ) {
             for( int counter = eTofConst::counterStart; counter <= eTofConst::counterStop; counter++ ) {
-                std::string histName_clusteredHit_pos = "clusteredHit_pos_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+                std::string histName_etofHit_pos = "etofHit_pos_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
 
-                mHistograms[ histName_clusteredHit_pos ] = new TH2F( Form("clusteredHit_pos_s%d_m%d_c%d", sector, plane, counter ), "clustered hit localXY;local X (cm);local Y (cm)", 50, -25., 25., 200, -100., 100. );
-                AddHist( mHistograms.at( histName_clusteredHit_pos ) );
+                mHistograms[ histName_etofHit_pos ] = new TH2F( Form("etofHit_pos_s%d_m%d_c%d", sector, plane, counter ), "eTOF hit localXY;local X (cm);local Y (cm)", 68, -17., 17., 400, -200., 200. );
+                AddHist( mHistograms.at( histName_etofHit_pos ) );
             }
         }
     }
@@ -1261,7 +1418,7 @@ StETofHitMaker::bookHistograms()
                     std::string histName_unclusteredHit_tof = "unclusteredHit_tof_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
 
                     mHistograms[ histName_unclusteredHit_tot ] = new TH2F( Form("unclusteredHit_tot_s%d_m%d_c%d", sector, plane, counter ), "unclustered hit tot; tot (ns);local X (cm)", 1000, 0.,   80., 32, -16., 16. );
-                    mHistograms[ histName_unclusteredHit_pos ] = new TH2F( Form("unclusteredHit_pos_s%d_m%d_c%d", sector, plane, counter ), "unclustered hit localXY; local X (cm);local Y (cm)", 50, -25., 25., 200, -100., 100. );
+                    mHistograms[ histName_unclusteredHit_pos ] = new TH2F( Form("unclusteredHit_pos_s%d_m%d_c%d", sector, plane, counter ), "unclustered hit localXY; local X (cm);local Y (cm)", 50, -25., 25., 400, -200., 200. );
                     mHistograms[ histName_unclusteredHit_tof ] = new TH2F( Form("unclusteredHit_tof_s%d_m%d_c%d", sector, plane, counter ), "unclustered hit time of flight; time of flight (ns);local X (cm)", 5000, 0., 1000., 32, -16., 16. );
                 }
             }
