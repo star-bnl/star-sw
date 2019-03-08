@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofMatchMaker.cxx,v 1.1 2019/02/19 19:52:28 jeromel Exp $
+ * $Id: StETofMatchMaker.cxx,v 1.2 2019/03/08 19:09:31 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StETofMatchMaker.cxx,v $
+ * Revision 1.2  2019/03/08 19:09:31  fseck
+ * added a few eTOF histograms to the .hist.root files for offline QA
+ *
  * Revision 1.1  2019/02/19 19:52:28  jeromel
  * Reviewed code provided by F.Seck
  *
@@ -133,9 +136,7 @@ StETofMatchMaker::Init()
 
     LOG_INFO << "isSimulation flag was set to: " << mIsSim << endm;
 
-    if( mDoQA ) {
-        bookHistograms();
-    }
+    bookHistograms();
 
     return kStOk;
 }
@@ -428,9 +429,7 @@ StETofMatchMaker::Make()
     //.........................................................................
     // H. fill QA histograms
     //
-    if( mDoQA ) {
-        fillQaHistograms( finalMatchVec );
-    }
+    fillQaHistograms( finalMatchVec );
 
 
     LOG_INFO << "Make() -- event done ... bye-bye" << endm;
@@ -731,8 +730,9 @@ StETofMatchMaker::readETofDetectorHits( eTofHitVec& detectorHitVec )
 
         LOG_DEBUG << "global (eta, phi): " << hit_eta << ", " << hit_phi << endm;
 
+        mHistograms.at( "eTofHits_globalXY" )->Fill( globalPos.x(), globalPos.y() );
+
         if( mDoQA ) {
-            mHistograms.at( "eTofHits_globalXY" )->Fill( globalPos.x(), globalPos.y() );
             mHistograms.at( "eTofHits_phi_eta"  )->Fill( hit_phi, hit_eta );
 
             if( hit.sector == 18 || hit.sector == 24 ) {
@@ -1101,11 +1101,12 @@ StETofMatchMaker::matchETofHits( eTofHitVec& detectorHitVec, eTofHitVec& interse
                     LOG_INFO << " with (deltaX, deltaY) = (" << deltaX << ", " << deltaY << ")" << endm;
                 }
 
+                mHistograms.at( "matchCand_globalXY" )->Fill( matchCand.globalPos.x(), matchCand.globalPos.y() );
+
                 if( mDoQA ) {
                     float matchCandPhi = matchCand.globalPos.phi();
                     if ( matchCandPhi < 0. ) matchCandPhi += 2. * M_PI;
 
-                    mHistograms.at( "matchCand_globalXY" )->Fill( matchCand.globalPos.x(), matchCand.globalPos.y() );
                     mHistograms.at( "matchCand_phi_eta"  )->Fill( matchCandPhi, matchCand.globalPos.pseudoRapidity() );
 
                     mHistograms.at( "matchCand_deltaX" )->Fill( deltaX ); 
@@ -1822,10 +1823,6 @@ StETofMatchMaker::expectedTimeOfFlight( const double& pathLength, const double& 
 void
 StETofMatchMaker::fillQaHistograms( eTofHitVec& finalMatchVec )
 {
-    if( !mDoQA ) {
-        return;
-    }
-
     for( auto& matchCand : finalMatchVec ) {
 
         int charge;
@@ -1866,51 +1863,51 @@ StETofMatchMaker::fillQaHistograms( eTofHitVec& finalMatchVec )
             if( pTrack->dEdx() ) dEdx = pTrack->dEdx() * 1.e6;
         }
 
-        int sign = ( charge  < 0 ) ? -1 : ( charge > 0 );
+        int sign   = ( charge  < 0 ) ? -1 : ( charge > 0 );
+        float beta = matchCand.beta;
 
-        float tof        = matchCand.tof;
-        float pathlength = matchCand.pathLength;
-        float beta       = matchCand.beta;
-
-        float m2   = mom * mom * ( -1 + 1 / ( beta * beta ) );
-
-        if( mDebug ) {
-            LOG_INFO << "momentum: " << mom << " ... beta: " << beta << " ... m^2: " << m2 << " ... dEdx: " << dEdx << endm;
-        }
-
-        mHistograms.at( "matchCand_beta_mom"     )->Fill(        mom, 1. / beta );
         mHistograms.at( "matchCand_beta_signmom" )->Fill( sign * mom, 1. / beta );
 
-        mHistograms.at( "matchCand_m2_mom"     )->Fill(        mom, m2 );
-        mHistograms.at( "matchCand_m2_signmom" )->Fill( sign * mom, m2 );
+        if( mDebug ) {
+            float tof        = matchCand.tof;
+            float pathlength = matchCand.pathLength;
+            float m2         = mom * mom * ( -1 + 1 / ( beta * beta ) );
+
+            LOG_INFO << "momentum: " << mom << " ... beta: " << beta << " ... m^2: " << m2 << " ... dEdx: " << dEdx << endm;
+
+            mHistograms.at( "matchCand_beta_mom"     )->Fill(        mom, 1. / beta );
+
+            mHistograms.at( "matchCand_m2_mom"     )->Fill(        mom, m2 );
+            mHistograms.at( "matchCand_m2_signmom" )->Fill( sign * mom, m2 );
 
 
-        // plots per counter
-        std::string histName_beta_mom = "matchCand_beta_mom_s" + std::to_string( matchCand.sector ) + "m" + std::to_string( matchCand.plane ) + "c" + std::to_string( matchCand.counter );
-        mHistograms.at( histName_beta_mom )->Fill( mom, 1. / beta );
+            // plots per counter
+            std::string histName_beta_mom = "matchCand_beta_mom_s" + std::to_string( matchCand.sector ) + "m" + std::to_string( matchCand.plane ) + "c" + std::to_string( matchCand.counter );
+            mHistograms.at( histName_beta_mom )->Fill( mom, 1. / beta );
 
-        // expected time of flight for mass hypothesis pion
-        float tofpi = expectedTimeOfFlight( pathlength , mom, pion_plus_mass_c2 );
+            // expected time of flight for mass hypothesis pion
+            float tofpi = expectedTimeOfFlight( pathlength , mom, pion_plus_mass_c2 );
 
-        std::string histName_t0corr_mom  = "matchCand_t0corr_mom_s" + std::to_string( matchCand.sector ) + "m" + std::to_string( matchCand.plane ) + "c" + std::to_string( matchCand.counter );
-        mHistograms.at( histName_t0corr_mom )->Fill( mom, tof - tofpi );
+            std::string histName_t0corr_mom  = "matchCand_t0corr_mom_s" + std::to_string( matchCand.sector ) + "m" + std::to_string( matchCand.plane ) + "c" + std::to_string( matchCand.counter );
+            mHistograms.at( histName_t0corr_mom )->Fill( mom, tof - tofpi );
 
-        std::string histName_t0corr_mom_zoom = "matchCand_t0corr_mom_zoom_s" + std::to_string( matchCand.sector ) + "m" + std::to_string( matchCand.plane ) + "c" + std::to_string( matchCand.counter );
-        mHistograms.at( histName_t0corr_mom_zoom )->Fill( mom, tof - tofpi );
-        
-        if( sqrt( pow( matchCand.deltaX, 2 ) )// + pow( matchCand.deltaY, 2 ) )
-            < deltaRcut ) {
+            std::string histName_t0corr_mom_zoom = "matchCand_t0corr_mom_zoom_s" + std::to_string( matchCand.sector ) + "m" + std::to_string( matchCand.plane ) + "c" + std::to_string( matchCand.counter );
+            mHistograms.at( histName_t0corr_mom_zoom )->Fill( mom, tof - tofpi );
+            
+            if( sqrt( pow( matchCand.deltaX, 2 ) )// + pow( matchCand.deltaY, 2 ) )
+                < deltaRcut ) {
 
-            mHistograms.at( "matchCand_beta_mom_matchDistCut" )->Fill( mom, 1. / beta );
-            mHistograms.at( "matchCand_m2_mom_matchDistCut"   )->Fill( mom, m2        );
+                mHistograms.at( "matchCand_beta_mom_matchDistCut" )->Fill( mom, 1. / beta );
+                mHistograms.at( "matchCand_m2_mom_matchDistCut"   )->Fill( mom, m2        );
 
-            std::string histName_t0corr_mom_zoom_cut  = "matchCand_t0corr_mom_zoom_cut_s" + std::to_string( matchCand.sector ) + "m" + std::to_string( matchCand.plane ) + "c" + std::to_string( matchCand.counter );
+                std::string histName_t0corr_mom_zoom_cut  = "matchCand_t0corr_mom_zoom_cut_s" + std::to_string( matchCand.sector ) + "m" + std::to_string( matchCand.plane ) + "c" + std::to_string( matchCand.counter );
 
-            mHistograms.at( histName_t0corr_mom_zoom_cut )->Fill( mom, tof - tofpi );
+                mHistograms.at( histName_t0corr_mom_zoom_cut )->Fill( mom, tof - tofpi );
+            }
+
+            if( fabs(mom - 1) < 0.1 && dEdx > 0 ) mHistograms.at( "matchCand_dEdx_beta_mom1gev" )->Fill( 1. / beta, dEdx );
+            if( fabs(mom - 2) < 0.1 && dEdx > 0 ) mHistograms.at( "matchCand_dEdx_beta_mom2gev" )->Fill( 1. / beta, dEdx );
         }
-
-        if( fabs(mom - 1) < 0.1 && dEdx > 0 ) mHistograms.at( "matchCand_dEdx_beta_mom1gev" )->Fill( 1. / beta, dEdx );
-        if( fabs(mom - 2) < 0.1 && dEdx > 0 ) mHistograms.at( "matchCand_dEdx_beta_mom2gev" )->Fill( 1. / beta, dEdx );
     }
 }
 
@@ -1974,200 +1971,207 @@ StETofMatchMaker::bookHistograms()
 {
     LOG_INFO << "bookHistograms" << endm;
 
-    // histograms to test sector & module numbering
-    mHistograms[ "eTofSectors" ] = new TH2F( "QA_eTofSectors", "center of modules in global XY;x (cm);y (cm)", 100, -300, 300, 100, -300, 300 );
-    mHistograms[ "eTofModules" ] = new TH2F( "QA_eTofModules", "center of modules in global XY;x (cm);y (cm)", 100, -300, 300, 100, -300, 300 );
-
-    // event-level QA
-    mHistograms[ "eventCounter" ] = new TH1F( "QA_eventCounter","eventCounter;;# events", 10, 0.5, 10.5 );
-
-
-    // ----------
-    // step - A -
-    // ----------
-    mHistograms[ "eTofHits_globalXY" ] = new TH2F( "A_eTofHits_globalXY", "global XY;x (cm);y (cm)", 400, -300.,     300., 400, -300., 300. );
-    mHistograms[ "eTofHits_phi_eta"  ] = new TH2F( "A_eTofHits_phi_eta",  "eta vs. phi; #phi; #eta", 400,    0., 2 * M_PI, 400,  -1.7, -0.9 );
-
-    mHistograms[ "eTofHits_globalYZ" ] = new TH2F( "A_eTofHits_globalYZ", "global YZ for sector 18 & 24;y (cm);z (cm)", 400, -300., 300., 100, -310., -270. );
-
-    for( int sector = eTofConst::sectorStart; sector <= eTofConst::sectorStop; sector++ ) {
-        for( int plane = eTofConst::zPlaneStart; plane <= eTofConst::zPlaneStop; plane++ ) {
-            for( int counter = eTofConst::counterStart; counter <= eTofConst::counterStop; counter++ ) {
-                std::string histName_hit_localXY  = "eTofHits_localXY_s"  + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
-                std::string histName_hit_globalXY = "eTofHits_globalXY_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
-                std::string histName_hit_eta_phi  = "eTofHits_phi_eta_s"  + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
-
-                // local XY per counter
-                mHistograms[ histName_hit_localXY ]  = new TH2F( Form( "A_eTofHits_localXY_s%dm%dc%d",  sector, plane, counter ), Form( "local XY  sector %d module %d counter %d;x (cm);y (cm)", sector, plane, counter ),   40,  -20.,  20.,  50, -25., 25. );
-
-                // global XY per counter
-                mHistograms[ histName_hit_globalXY ] = new TH2F( Form( "A_eTofHits_globalXY_s%dm%dc%d", sector, plane, counter ), Form( "global XY  sector %d module %d counter %d;x (cm);y (cm)", sector, plane, counter ), 200, -300., 300., 200, -300., 300. );
-
-                // eta vs. phi per counter
-                mHistograms[ histName_hit_eta_phi ]  = new TH2F( Form( "A_eTofHits_phi_eta_s%dm%dc%d",  sector, plane, counter ), Form( "eta vs. phi  sector %d module %d counter %d; #phi; #eta", sector, plane, counter ), 200, 0., 2 * M_PI, 200, -1.7, -0.9 );
-            }
-        }
-    }
-
-    mHistograms[ "detectorHitMult" ]  = new TH1F( "A_detectorHitMult",  "detectorHitMult;multiplicity;# events",  100, 0., 100. );
-
-
-    // --------------
-    // track-level QA
-    // --------------
-    mHistograms[ "track_phi_eta" ] = new TH2F( "QA_track_phi_eta", "eta vs. phi; #phi; #eta", 400, 0., 2 * M_PI, 800, -1.7, 1.7 );
-    mHistograms[ "track_phi_pt"  ] = new TH2F( "QA_track_phi_pt",  "pt vs. phi; #phi; #pt",   400, 0., 2 * M_PI, 400,   0.,  5. );
-
-    mHistograms[ "nHits" ]            = new TH1F( "QA_nHits",            "nHitsTpc;nHitsFit;# tracks",                50, 0., 50. );
-    mHistograms[ "nHits_etofregion" ] = new TH1F( "QA_nHits_etofregion", "nHitsTpc in etof region;nHitsFit;# tracks", 50, 0., 50. );
-
-    mHistograms[ "track_pt_nHits" ] = new TH2F( "QA_track_pt_nHits", "track nHitsTpc vs. p_{T};p_{T} (GeV/c);nHitsFit", 400, 0., 2., 50, 0., 50. );
-
-    mHistograms[ "trackProj_globalXY" ] = new TH2F( "QA_trackProj_globalXY", "global XY;x (cm);y (cm)", 400, -300.,     300., 400, -300., 300. );
-    mHistograms[ "trackProj_phi_eta"  ] = new TH2F( "QA_trackProj_phi_eta",  "eta vs. phi; #phi; #eta", 400,    0., 2 * M_PI, 400,  -1.7, -0.9 );
-
-
-    // ----------
-    // step - B -
-    // ----------
-
-    mHistograms[ "intersection_globalXY" ] = new TH2F( "B_intersection_globalXY", "global XY;x (cm);y (cm)", 400, -300.,     300., 400, -300., 300. );
-    mHistograms[ "intersection_phi_eta"  ] = new TH2F( "B_intersection_phi_eta",  "eta vs. phi; #phi; #eta", 400,    0., 2 * M_PI, 400,  -1.7, -0.9 );
-
-    mHistograms[ "intersectionMult" ]         = new TH1F( "B_intersectionMult",         "intersectionMult;multiplicity;# events",                    100, 0., 100. );
-    mHistograms[ "intersectionMult_primary" ] = new TH1F( "B_intersectionMult_primary", "intersectionMult for primary tracks;multiplicity;# events", 100, 0., 100. );
-
-    mHistograms[ "intersection_perTrack" ] = new TH1F( "B_intersection_perTrack", "intersections per track;# intersections;# tracks", 50, 0., 50. );  
-
-
-    // track-level QA plots for tracks that have an intersection with eTof volume(s)
-    mHistograms[ "intersection_track_pt_eta"  ] = new TH2F( "B_intersection_track_pt_eta",  "eta vs. pt;p_{T} (GeV/c);#eta", 400, 0.,       5., 400, -2.,     -0.7 );
-    mHistograms[ "intersection_track_pt_phi"  ] = new TH2F( "B_intersection_track_pt_phi",  "phi vs. pt;p_{T} (GeV/c);#phi", 400, 0.,       5., 400,  0., 2 * M_PI );
-    mHistograms[ "intersection_track_phi_eta" ] = new TH2F( "B_intersection_track_phi_eta", "eta vs. phi;#phi;#eta",         400, 0., 2 * M_PI, 400, -2.,     -0.9 );
-
-    mHistograms[ "intersection_track_nHitsTpc" ] = new TH1F( "B_intersection_track_nHitsTpc", "nHitsTpc;nHitsFit;# tracks", 50, 0., 50. );
-
-    mHistograms[ "intersection_track_mom_dEdx"     ] = new TH2F( "B_intersection_track_mom_dEdx",     "dE/dx vs. mom;mom (GeV/c);dE/dx (keV/cm)",     100, 0., 5., 100,   0., 10. );
-    mHistograms[ "intersection_track_mom_nsigmaPi" ] = new TH2F( "B_intersection_track_mom_nsigmaPi", "n#sigma_{#pi} vs. mom; mom (GeV/c);n#sigma_{#pi}", 100, 0., 5., 100, -10., 10. );  
-
-
-    // ----------
-    // step - C -
-    // ----------
-    mHistograms[ "detHitvsInter_X" ] = new TH2F( "C_detHitvsInter_X" , "detectorHit vs. intersection X;detectorHit X (cm);intersection X (cm)", 400, -300., 300., 400, -300., 300.);
-    mHistograms[ "detHitvsInter_Y" ] = new TH2F( "C_detHitvsInter_Y" , "detectorHit vs. intersection Y;detectorHit Y (cm);intersection Y (cm)", 400, -300., 300., 400, -300., 300.);
-
-    mHistograms[ "detHitvsInter_localX" ] = new TH2F( "C_detHitvsInter_localX" , "detectorHit vs. intersection X;detectorHit local X (cm);intersection local X (cm)",  40, -20., 20.,  80, -20., 20.);
-    mHistograms[ "detHitvsInter_localY" ] = new TH2F( "C_detHitvsInter_localY" , "detectorHit vs. intersection Y;detectorHit local Y (cm);intersection local Y (cm)", 200, -50., 50.,  80, -20., 20.);
-
-
-    for( int sector = eTofConst::sectorStart; sector <= eTofConst::sectorStop; sector++ ) {
-        for( int plane = eTofConst::zPlaneStart; plane <= eTofConst::zPlaneStop; plane++ ) {
-            std::string histName_detHitvsInter_strip = "detHitvsInter_strip_s" + std::to_string( sector ) + "m" + std::to_string( plane );
-
-            mHistograms[ histName_detHitvsInter_strip ] = new TH2F( Form( "C_detHitvsInter_strip_s%dm%d", sector, plane ), Form( "detectorHit vs. intersection on sector %d module %d;detectorHit strip;intersection strip", sector, plane ), 96, -0.5, 95.5, 96, -0.5, 95.5 );
-        }
-    }
-
-    mHistograms[ "moduleIndex_deltaX" ] = new TH2F( "C_moduleIndex_deltaX", "module index vs. local #Delta X;module index;#DeltaX (cm)", 36, -0.5, 35.5, 100, -50., 50. );
-    mHistograms[ "moduleIndex_deltaY" ] = new TH2F( "C_moduleIndex_deltaY", "module index vs. local #Delta Y;module index;#DeltaY (cm)", 36, -0.5, 35.5, 100, -50., 50. );
-
-    mHistograms[ "matchCand_globalXY" ] = new TH2F( "C_matchCand_globalXY", "global XY;x (cm);y (cm)", 400, -300.,     300., 400, -300., 300. );
-    mHistograms[ "matchCand_phi_eta"  ] = new TH2F( "C_matchCand_phi_eta",  "eta vs. phi; #phi; #eta", 400,    0., 2 * M_PI, 400,  -1.7, -0.9 );
-
-    mHistograms[ "matchCand_deltaX" ] = new TH1F( "C_matchCand_deltaX" , "match candidate delta X;match candidate #DeltaX (cm); #match cand", 400, -15., 15. );
-    mHistograms[ "matchCand_deltaY" ] = new TH1F( "C_matchCand_deltaY" , "match candidate delta Y;match candidate #DeltaY (cm); #match cand", 400, -15., 15. );
-
-
-    for( int sector = eTofConst::sectorStart; sector <= eTofConst::sectorStop; sector++ ) {
-        for( int plane = eTofConst::zPlaneStart; plane <= eTofConst::zPlaneStop; plane++ ) {
-            for( int counter = eTofConst::counterStart; counter <= eTofConst::counterStop; counter++ ) {
-                std::string histName_deltaX = "matchCand_deltaX_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
-                std::string histName_deltaY = "matchCand_deltaY_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
-
-                mHistograms[ histName_deltaX ] = new TH1F( Form( "C_matchCand_deltaX_s%dm%dc%d", sector, plane, counter ) , Form( "match candidate delta X in sector %d module %d counter %d;match candidate #DeltaX (cm); #match cand", sector, plane, counter ), 400, -15., 15. );
-                mHistograms[ histName_deltaY ] = new TH1F( Form( "C_matchCand_deltaY_s%dm%dc%d", sector, plane, counter ) , Form( "match candidate delta Y in sector %d module %d counter %d;match candidate #DeltaY (cm); #match cand", sector, plane, counter ), 400, -15., 15. );
-            }
-        }
-    }
-
-    mHistograms[ "matchCand_deltaX_nHitsTpc" ] = new TH2F( "C_matchCand_deltaX_nHitsTpc" , "match candidate delta X vs. nHitsFit in TPC;nHitsFit in TPC;match candidate #DeltaX (cm)", 50, 0., 50., 400, -15., 15. );
-    mHistograms[ "matchCand_deltaY_nHitsTpc" ] = new TH2F( "C_matchCand_deltaY_nHitsTpc" , "match candidate delta Y vs. nHitsFit in TPC;nHitsFit in TPC;match candidate #DeltaY (cm)", 50, 0., 50., 400, -15., 15. );
-
-    mHistograms[ "matchCandMult" ] = new TH1F( "C_matchCandMult", "matchCandMult;multiplicity;# events", 100, 0., 100. );
-
-
-    // ----------
-    // step - D -
-    // ----------
-    mHistograms[ "trackMatchMultPerDetectorHit" ] = new TH1F( "D_trackMatchMultPerDetectorHit", "multiplicity of tracks pointing to the same detector hit;#tracks;#detector hits", 15, 0., 15. );
-
-    mHistograms[ "singleTrackMatchMult" ] = new TH1F( "D_singleTrackMatchMult", "singleTrackMatchMult;multiplicity;# events", 100, 0., 100. );
-
-
-    // ----------
-    // step - E -
-    // ----------
-    mHistograms[ "hitMultPerTrack" ] = new TH1F( "E_hitMultPerTrack", "multiplicity of hit matched to the same track;#hits;#tracks", 15, 0., 15. );
-
-    mHistograms[ "finalMatch_pt" ] = new TH1F( "E_finalMatch_pt", "p_{T} distribution of matched tracks", 200, 0., 2. );
-
-    mHistograms[ "finalMatchMult" ] = new TH1F( "E_finalMatchMult", "finalMatchMult;multiplicity;# events", 100, 0., 100. );
-
-
-    // ----------
-    // step - F -
-    // ----------
-
-    mHistograms[ "finalMatchMultGlobal"  ] = new TH1F( "F_finalMatchMultGlobal",  "finalMatchMultGlobal;multiplicity;# events",  100, 0., 100. );
-    mHistograms[ "finalMatchMultPrimary" ] = new TH1F( "F_finalMatchMultPrimary", "finalMatchMultPrimary;multiplicity;# events", 100, 0., 100. );
-
-
-    // ----------
-    // step - G -
-    // ----------
-
-    mHistograms[ "matchCand_timeOfFlight" ] = new TH1F( "G_matchCand_timeOfFlight", "match candidate time of flight;ToF (ns);# match candidates", 2000, -400., 600. );
-
-    mHistograms[ "matchCand_timeOfFlight_pathLength" ] = new TH2F( "G_matchCand_timeOfFlight_pathLength", "match candidate pathlength vs. time of flight;ToF (ns);pathlength (cm)", 1000, -400., 600., 800, 200., 600. );
-
-
-    mHistograms[ "matchCand_beta_mom"     ] = new TH2F( "G_matchCand_beta_mom"     , "match candidate 1/beta vs. momentum;p (GeV/c);1/#beta",         400,   0., 10., 1000, 0.8, 2. );
+    mHistograms[ "eTofHits_globalXY" ]      = new TH2F( "A_eTofHits_globalXY",       "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
+    mHistograms[ "matchCand_globalXY" ]     = new TH2F( "C_matchCand_globalXY",      "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
     mHistograms[ "matchCand_beta_signmom" ] = new TH2F( "G_matchCand_beta_signmom" , "match candidate 1/beta vs. momentum;q/|q| * p (GeV/c);1/#beta", 400, -10., 10., 1000, 0.8, 2. );
 
-    mHistograms[ "matchCand_beta_mom_matchDistCut" ] = new TH2F( "G_matchCand_beta_mom_matchDistCut" , "match candidate 1/beta vs. momentum;p (GeV/c);1/#beta", 400, 0., 10., 1000, 0.8, 2. );
+    AddHist( mHistograms.at( "eTofHits_globalXY" ) );
+    AddHist( mHistograms.at( "matchCand_globalXY" ) );
+    AddHist( mHistograms.at( "matchCand_beta_signmom" ) );
 
 
-    mHistograms[ "matchCand_m2_signmom" ] = new TH2F( "G_matchCand_m2_signmom" , "match candidate m^{2} vs. momentum;q/|q| * p (GeV/c);m^{2} (GeV^{2}/c^{4})", 400, -10., 10., 1000, -0.2, 1.3 );
-    mHistograms[ "matchCand_m2_mom"     ] = new TH2F( "G_matchCand_m2_mom"     , "match candidate m^{2} vs. momentum;p (GeV/c);m^{2} (GeV^{2}/c^{4})",         400,   0., 10., 1000, -0.2, 1.3 );
+    if( mDoQA ) {
+        // histograms to test sector & module numbering
+        mHistograms[ "eTofSectors" ] = new TH2F( "QA_eTofSectors", "center of modules in global XY;x (cm);y (cm)", 100, -300, 300, 100, -300, 300 );
+        mHistograms[ "eTofModules" ] = new TH2F( "QA_eTofModules", "center of modules in global XY;x (cm);y (cm)", 100, -300, 300, 100, -300, 300 );
 
-    mHistograms[ "matchCand_m2_mom_matchDistCut" ] = new TH2F( "G_matchCand_m2_mom_matchDistCut" , "match candidate m^{2} vs. momentum;p (GeV/c);m^{2} (GeV^{2}/c^{4})", 400, 0., 10., 1000, -0.2, 1.3 );
+        // event-level QA
+        mHistograms[ "eventCounter" ] = new TH1F( "QA_eventCounter","eventCounter;;# events", 10, 0.5, 10.5 );
 
 
-    for( int sector = eTofConst::sectorStart; sector <= eTofConst::sectorStop; sector++ ) {
-        for( int plane = eTofConst::zPlaneStart; plane <= eTofConst::zPlaneStop; plane++ ) {
-            for( int counter = eTofConst::counterStart; counter <= eTofConst::counterStop; counter++ ) {
+        // ----------
+        // step - A -
+        // ----------
+        mHistograms[ "eTofHits_phi_eta"  ] = new TH2F( "A_eTofHits_phi_eta",  "eta vs. phi; #phi; #eta", 400,    0., 2 * M_PI, 400,  -1.7, -0.9 );
 
-                std::string histName_beta_mom = "matchCand_beta_mom_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
-                
-                mHistograms[ histName_beta_mom ] = new TH2F( Form( "G_matchCand_beta_mom_s%dm%dc%d", sector, plane, counter ), Form( "match candidate 1/beta vs. momentum in sector %d module %d counter %d;p (GeV/c);1/#beta", sector, plane, counter), 200, 0., 10., 500, 0.8, 2. );
-                
-                std::string histName_t0corr_mom  = "matchCand_t0corr_mom_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+        mHistograms[ "eTofHits_globalYZ" ] = new TH2F( "A_eTofHits_globalYZ", "global YZ for sector 18 & 24;y (cm);z (cm)", 400, -300., 300., 100, -310., -270. );
 
-                mHistograms[ histName_t0corr_mom ] = new TH2F( Form( "G_matchCand_t0corr_mom_s%dm%dc%d", sector, plane, counter ),  Form( "measured tof - tof_{#pi} vs. momentum in sector %d module %d counter %d;mom (GeV/c);#Delta time (ns)",  sector, plane, counter ), 400,     0.,  10., 1000, -500., 500. );
+        for( int sector = eTofConst::sectorStart; sector <= eTofConst::sectorStop; sector++ ) {
+            for( int plane = eTofConst::zPlaneStart; plane <= eTofConst::zPlaneStop; plane++ ) {
+                for( int counter = eTofConst::counterStart; counter <= eTofConst::counterStop; counter++ ) {
+                    std::string histName_hit_localXY  = "eTofHits_localXY_s"  + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+                    std::string histName_hit_globalXY = "eTofHits_globalXY_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+                    std::string histName_hit_eta_phi  = "eTofHits_phi_eta_s"  + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
 
-                std::string histName_t0corr_mom_zoom      = "matchCand_t0corr_mom_zoom_s"     + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
-                std::string histName_t0corr_mom_zoom_cut  = "matchCand_t0corr_mom_zoom_cut_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
-         
-                mHistograms[ histName_t0corr_mom_zoom     ] = new TH2F( Form( "G_matchCand_t0corr_mom_zoom_s%dm%dc%d",     sector, plane, counter ),  Form( "measured tof - tof_{#pi} vs. momentum in sector %d module %d counter %d;mom (GeV/c);#Delta time (ns)", sector, plane, counter ), 200, 0., 3., 1000, -5., 5. );
-                mHistograms[ histName_t0corr_mom_zoom_cut ] = new TH2F( Form( "G_matchCand_t0corr_mom_zoom_cut_s%dm%dc%d", sector, plane, counter ),  Form( "measured tof - tof_{#pi} vs. momentum in sector %d module %d counter %d;mom (GeV/c);#Delta time (ns)", sector, plane, counter ), 200, 0., 3., 1000, -5., 5. );
+                    // local XY per counter
+                    mHistograms[ histName_hit_localXY ]  = new TH2F( Form( "A_eTofHits_localXY_s%dm%dc%d",  sector, plane, counter ), Form( "local XY  sector %d module %d counter %d;x (cm);y (cm)", sector, plane, counter ),   40,  -20.,  20.,  50, -25., 25. );
+
+                    // global XY per counter
+                    mHistograms[ histName_hit_globalXY ] = new TH2F( Form( "A_eTofHits_globalXY_s%dm%dc%d", sector, plane, counter ), Form( "global XY  sector %d module %d counter %d;x (cm);y (cm)", sector, plane, counter ), 200, -300., 300., 200, -300., 300. );
+
+                    // eta vs. phi per counter
+                    mHistograms[ histName_hit_eta_phi ]  = new TH2F( Form( "A_eTofHits_phi_eta_s%dm%dc%d",  sector, plane, counter ), Form( "eta vs. phi  sector %d module %d counter %d; #phi; #eta", sector, plane, counter ), 200, 0., 2 * M_PI, 200, -1.7, -0.9 );
+                }
             }
         }
+
+        mHistograms[ "detectorHitMult" ]  = new TH1F( "A_detectorHitMult",  "detectorHitMult;multiplicity;# events",  100, 0., 100. );
+
+
+        // --------------
+        // track-level QA
+        // --------------
+        mHistograms[ "track_phi_eta" ] = new TH2F( "QA_track_phi_eta", "eta vs. phi; #phi; #eta", 400, 0., 2 * M_PI, 800, -1.7, 1.7 );
+        mHistograms[ "track_phi_pt"  ] = new TH2F( "QA_track_phi_pt",  "pt vs. phi; #phi; #pt",   400, 0., 2 * M_PI, 400,   0.,  5. );
+
+        mHistograms[ "nHits" ]            = new TH1F( "QA_nHits",            "nHitsTpc;nHitsFit;# tracks",                50, 0., 50. );
+        mHistograms[ "nHits_etofregion" ] = new TH1F( "QA_nHits_etofregion", "nHitsTpc in etof region;nHitsFit;# tracks", 50, 0., 50. );
+
+        mHistograms[ "track_pt_nHits" ] = new TH2F( "QA_track_pt_nHits", "track nHitsTpc vs. p_{T};p_{T} (GeV/c);nHitsFit", 400, 0., 2., 50, 0., 50. );
+
+        mHistograms[ "trackProj_globalXY" ] = new TH2F( "QA_trackProj_globalXY", "global XY;x (cm);y (cm)", 400, -300.,     300., 400, -300., 300. );
+        mHistograms[ "trackProj_phi_eta"  ] = new TH2F( "QA_trackProj_phi_eta",  "eta vs. phi; #phi; #eta", 400,    0., 2 * M_PI, 400,  -1.7, -0.9 );
+
+
+        // ----------
+        // step - B -
+        // ----------
+
+        mHistograms[ "intersection_globalXY" ] = new TH2F( "B_intersection_globalXY", "global XY;x (cm);y (cm)", 400, -300.,     300., 400, -300., 300. );
+        mHistograms[ "intersection_phi_eta"  ] = new TH2F( "B_intersection_phi_eta",  "eta vs. phi; #phi; #eta", 400,    0., 2 * M_PI, 400,  -1.7, -0.9 );
+
+        mHistograms[ "intersectionMult" ]         = new TH1F( "B_intersectionMult",         "intersectionMult;multiplicity;# events",                    100, 0., 100. );
+        mHistograms[ "intersectionMult_primary" ] = new TH1F( "B_intersectionMult_primary", "intersectionMult for primary tracks;multiplicity;# events", 100, 0., 100. );
+
+        mHistograms[ "intersection_perTrack" ] = new TH1F( "B_intersection_perTrack", "intersections per track;# intersections;# tracks", 50, 0., 50. );  
+
+
+        // track-level QA plots for tracks that have an intersection with eTof volume(s)
+        mHistograms[ "intersection_track_pt_eta"  ] = new TH2F( "B_intersection_track_pt_eta",  "eta vs. pt;p_{T} (GeV/c);#eta", 400, 0.,       5., 400, -2.,     -0.7 );
+        mHistograms[ "intersection_track_pt_phi"  ] = new TH2F( "B_intersection_track_pt_phi",  "phi vs. pt;p_{T} (GeV/c);#phi", 400, 0.,       5., 400,  0., 2 * M_PI );
+        mHistograms[ "intersection_track_phi_eta" ] = new TH2F( "B_intersection_track_phi_eta", "eta vs. phi;#phi;#eta",         400, 0., 2 * M_PI, 400, -2.,     -0.9 );
+
+        mHistograms[ "intersection_track_nHitsTpc" ] = new TH1F( "B_intersection_track_nHitsTpc", "nHitsTpc;nHitsFit;# tracks", 50, 0., 50. );
+
+        mHistograms[ "intersection_track_mom_dEdx"     ] = new TH2F( "B_intersection_track_mom_dEdx",     "dE/dx vs. mom;mom (GeV/c);dE/dx (keV/cm)",     100, 0., 5., 100,   0., 10. );
+        mHistograms[ "intersection_track_mom_nsigmaPi" ] = new TH2F( "B_intersection_track_mom_nsigmaPi", "n#sigma_{#pi} vs. mom; mom (GeV/c);n#sigma_{#pi}", 100, 0., 5., 100, -10., 10. );  
+
+
+        // ----------
+        // step - C -
+        // ----------
+        mHistograms[ "detHitvsInter_X" ] = new TH2F( "C_detHitvsInter_X" , "detectorHit vs. intersection X;detectorHit X (cm);intersection X (cm)", 400, -300., 300., 400, -300., 300.);
+        mHistograms[ "detHitvsInter_Y" ] = new TH2F( "C_detHitvsInter_Y" , "detectorHit vs. intersection Y;detectorHit Y (cm);intersection Y (cm)", 400, -300., 300., 400, -300., 300.);
+
+        mHistograms[ "detHitvsInter_localX" ] = new TH2F( "C_detHitvsInter_localX" , "detectorHit vs. intersection X;detectorHit local X (cm);intersection local X (cm)",  40, -20., 20.,  80, -20., 20.);
+        mHistograms[ "detHitvsInter_localY" ] = new TH2F( "C_detHitvsInter_localY" , "detectorHit vs. intersection Y;detectorHit local Y (cm);intersection local Y (cm)", 200, -50., 50.,  80, -20., 20.);
+
+
+        for( int sector = eTofConst::sectorStart; sector <= eTofConst::sectorStop; sector++ ) {
+            for( int plane = eTofConst::zPlaneStart; plane <= eTofConst::zPlaneStop; plane++ ) {
+                std::string histName_detHitvsInter_strip = "detHitvsInter_strip_s" + std::to_string( sector ) + "m" + std::to_string( plane );
+
+                mHistograms[ histName_detHitvsInter_strip ] = new TH2F( Form( "C_detHitvsInter_strip_s%dm%d", sector, plane ), Form( "detectorHit vs. intersection on sector %d module %d;detectorHit strip;intersection strip", sector, plane ), 96, -0.5, 95.5, 96, -0.5, 95.5 );
+            }
+        }
+
+        mHistograms[ "moduleIndex_deltaX" ] = new TH2F( "C_moduleIndex_deltaX", "module index vs. local #Delta X;module index;#DeltaX (cm)", 36, -0.5, 35.5, 100, -50., 50. );
+        mHistograms[ "moduleIndex_deltaY" ] = new TH2F( "C_moduleIndex_deltaY", "module index vs. local #Delta Y;module index;#DeltaY (cm)", 36, -0.5, 35.5, 100, -50., 50. );
+
+        mHistograms[ "matchCand_phi_eta"  ] = new TH2F( "C_matchCand_phi_eta",  "eta vs. phi; #phi; #eta", 400,    0., 2 * M_PI, 400,  -1.7, -0.9 );
+
+        mHistograms[ "matchCand_deltaX" ] = new TH1F( "C_matchCand_deltaX" , "match candidate delta X;match candidate #DeltaX (cm); #match cand", 400, -15., 15. );
+        mHistograms[ "matchCand_deltaY" ] = new TH1F( "C_matchCand_deltaY" , "match candidate delta Y;match candidate #DeltaY (cm); #match cand", 400, -15., 15. );
+
+
+        for( int sector = eTofConst::sectorStart; sector <= eTofConst::sectorStop; sector++ ) {
+            for( int plane = eTofConst::zPlaneStart; plane <= eTofConst::zPlaneStop; plane++ ) {
+                for( int counter = eTofConst::counterStart; counter <= eTofConst::counterStop; counter++ ) {
+                    std::string histName_deltaX = "matchCand_deltaX_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+                    std::string histName_deltaY = "matchCand_deltaY_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+
+                    mHistograms[ histName_deltaX ] = new TH1F( Form( "C_matchCand_deltaX_s%dm%dc%d", sector, plane, counter ) , Form( "match candidate delta X in sector %d module %d counter %d;match candidate #DeltaX (cm); #match cand", sector, plane, counter ), 400, -15., 15. );
+                    mHistograms[ histName_deltaY ] = new TH1F( Form( "C_matchCand_deltaY_s%dm%dc%d", sector, plane, counter ) , Form( "match candidate delta Y in sector %d module %d counter %d;match candidate #DeltaY (cm); #match cand", sector, plane, counter ), 400, -15., 15. );
+                }
+            }
+        }
+
+        mHistograms[ "matchCand_deltaX_nHitsTpc" ] = new TH2F( "C_matchCand_deltaX_nHitsTpc" , "match candidate delta X vs. nHitsFit in TPC;nHitsFit in TPC;match candidate #DeltaX (cm)", 50, 0., 50., 400, -15., 15. );
+        mHistograms[ "matchCand_deltaY_nHitsTpc" ] = new TH2F( "C_matchCand_deltaY_nHitsTpc" , "match candidate delta Y vs. nHitsFit in TPC;nHitsFit in TPC;match candidate #DeltaY (cm)", 50, 0., 50., 400, -15., 15. );
+
+        mHistograms[ "matchCandMult" ] = new TH1F( "C_matchCandMult", "matchCandMult;multiplicity;# events", 100, 0., 100. );
+
+
+        // ----------
+        // step - D -
+        // ----------
+        mHistograms[ "trackMatchMultPerDetectorHit" ] = new TH1F( "D_trackMatchMultPerDetectorHit", "multiplicity of tracks pointing to the same detector hit;#tracks;#detector hits", 15, 0., 15. );
+
+        mHistograms[ "singleTrackMatchMult" ] = new TH1F( "D_singleTrackMatchMult", "singleTrackMatchMult;multiplicity;# events", 100, 0., 100. );
+
+
+        // ----------
+        // step - E -
+        // ----------
+        mHistograms[ "hitMultPerTrack" ] = new TH1F( "E_hitMultPerTrack", "multiplicity of hit matched to the same track;#hits;#tracks", 15, 0., 15. );
+
+        mHistograms[ "finalMatch_pt" ] = new TH1F( "E_finalMatch_pt", "p_{T} distribution of matched tracks", 200, 0., 2. );
+
+        mHistograms[ "finalMatchMult" ] = new TH1F( "E_finalMatchMult", "finalMatchMult;multiplicity;# events", 100, 0., 100. );
+
+
+        // ----------
+        // step - F -
+        // ----------
+
+        mHistograms[ "finalMatchMultGlobal"  ] = new TH1F( "F_finalMatchMultGlobal",  "finalMatchMultGlobal;multiplicity;# events",  100, 0., 100. );
+        mHistograms[ "finalMatchMultPrimary" ] = new TH1F( "F_finalMatchMultPrimary", "finalMatchMultPrimary;multiplicity;# events", 100, 0., 100. );
+
+
+        // ----------
+        // step - G -
+        // ----------
+
+        mHistograms[ "matchCand_timeOfFlight" ] = new TH1F( "G_matchCand_timeOfFlight", "match candidate time of flight;ToF (ns);# match candidates", 2000, -400., 600. );
+
+        mHistograms[ "matchCand_timeOfFlight_pathLength" ] = new TH2F( "G_matchCand_timeOfFlight_pathLength", "match candidate pathlength vs. time of flight;ToF (ns);pathlength (cm)", 1000, -400., 600., 800, 200., 600. );
+
+
+        mHistograms[ "matchCand_beta_mom"     ] = new TH2F( "G_matchCand_beta_mom"     , "match candidate 1/beta vs. momentum;p (GeV/c);1/#beta",         400,   0., 10., 1000, 0.8, 2. );
+
+        mHistograms[ "matchCand_beta_mom_matchDistCut" ] = new TH2F( "G_matchCand_beta_mom_matchDistCut" , "match candidate 1/beta vs. momentum;p (GeV/c);1/#beta", 400, 0., 10., 1000, 0.8, 2. );
+
+
+        mHistograms[ "matchCand_m2_signmom" ] = new TH2F( "G_matchCand_m2_signmom" , "match candidate m^{2} vs. momentum;q/|q| * p (GeV/c);m^{2} (GeV^{2}/c^{4})", 400, -10., 10., 1000, -0.2, 1.3 );
+        mHistograms[ "matchCand_m2_mom"     ] = new TH2F( "G_matchCand_m2_mom"     , "match candidate m^{2} vs. momentum;p (GeV/c);m^{2} (GeV^{2}/c^{4})",         400,   0., 10., 1000, -0.2, 1.3 );
+
+        mHistograms[ "matchCand_m2_mom_matchDistCut" ] = new TH2F( "G_matchCand_m2_mom_matchDistCut" , "match candidate m^{2} vs. momentum;p (GeV/c);m^{2} (GeV^{2}/c^{4})", 400, 0., 10., 1000, -0.2, 1.3 );
+
+
+        for( int sector = eTofConst::sectorStart; sector <= eTofConst::sectorStop; sector++ ) {
+            for( int plane = eTofConst::zPlaneStart; plane <= eTofConst::zPlaneStop; plane++ ) {
+                for( int counter = eTofConst::counterStart; counter <= eTofConst::counterStop; counter++ ) {
+
+                    std::string histName_beta_mom = "matchCand_beta_mom_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+                    
+                    mHistograms[ histName_beta_mom ] = new TH2F( Form( "G_matchCand_beta_mom_s%dm%dc%d", sector, plane, counter ), Form( "match candidate 1/beta vs. momentum in sector %d module %d counter %d;p (GeV/c);1/#beta", sector, plane, counter), 200, 0., 10., 500, 0.8, 2. );
+                    
+                    std::string histName_t0corr_mom  = "matchCand_t0corr_mom_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+
+                    mHistograms[ histName_t0corr_mom ] = new TH2F( Form( "G_matchCand_t0corr_mom_s%dm%dc%d", sector, plane, counter ),  Form( "measured tof - tof_{#pi} vs. momentum in sector %d module %d counter %d;mom (GeV/c);#Delta time (ns)",  sector, plane, counter ), 400,     0.,  10., 1000, -500., 500. );
+
+                    std::string histName_t0corr_mom_zoom      = "matchCand_t0corr_mom_zoom_s"     + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+                    std::string histName_t0corr_mom_zoom_cut  = "matchCand_t0corr_mom_zoom_cut_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+             
+                    mHistograms[ histName_t0corr_mom_zoom     ] = new TH2F( Form( "G_matchCand_t0corr_mom_zoom_s%dm%dc%d",     sector, plane, counter ),  Form( "measured tof - tof_{#pi} vs. momentum in sector %d module %d counter %d;mom (GeV/c);#Delta time (ns)", sector, plane, counter ), 200, 0., 3., 1000, -5., 5. );
+                    mHistograms[ histName_t0corr_mom_zoom_cut ] = new TH2F( Form( "G_matchCand_t0corr_mom_zoom_cut_s%dm%dc%d", sector, plane, counter ),  Form( "measured tof - tof_{#pi} vs. momentum in sector %d module %d counter %d;mom (GeV/c);#Delta time (ns)", sector, plane, counter ), 200, 0., 3., 1000, -5., 5. );
+                }
+            }
+        }
+
+        mHistograms[ "matchCand_dEdx_beta_mom1gev" ] = new TH2F( "G_matchCand_dEdx_beta_mom1gev", "dE/dx vs. 1/#beta at p=1 GeV;1/#beta;dE/dx (keV/cm)", 800, 0.8, 1.8, 800, 0., 15. );
+        mHistograms[ "matchCand_dEdx_beta_mom2gev" ] = new TH2F( "G_matchCand_dEdx_beta_mom2gev", "dE/dx vs. 1/#beta at p=2 GeV;1/#beta;dE/dx (keV/cm)", 800, 0.8, 1.8, 800, 0., 15. );
     }
-
-    mHistograms[ "matchCand_dEdx_beta_mom1gev" ] = new TH2F( "G_matchCand_dEdx_beta_mom1gev", "dE/dx vs. 1/#beta at p=1 GeV;1/#beta;dE/dx (keV/cm)", 800, 0.8, 1.8, 800, 0., 15. );
-    mHistograms[ "matchCand_dEdx_beta_mom2gev" ] = new TH2F( "G_matchCand_dEdx_beta_mom2gev", "dE/dx vs. 1/#beta at p=2 GeV;1/#beta;dE/dx (keV/cm)", 800, 0.8, 1.8, 800, 0., 15. );
-
 
     for( auto& kv : mHistograms ) {
         kv.second->SetDirectory( 0 );
