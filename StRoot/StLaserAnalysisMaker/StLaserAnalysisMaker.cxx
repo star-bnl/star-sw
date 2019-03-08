@@ -312,10 +312,10 @@ Int_t StLaserAnalysisMaker::Make(){
   StEvtHddr *EvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
   if (! EvtHddr) return kStWarn;
   event->SetHeader(EvtHddr->GetEventNumber(), EvtHddr->GetRunNumber(), EvtHddr->GetDate(), EvtHddr->GetTime(),
-		   gStTpcDb->Electronics()->tZero(), gStTpcDb->DriftVelocity(), gStTpcDb->Electronics()->samplingFrequency(), 
+		   gStTpcDb->Electronics()->tZero(), gStTpcDb->DriftVelocity(24,0), gStTpcDb->Electronics()->samplingFrequency(), 
 		   EvtHddr->GetInputTriggerMask());
-  event->SetDVWest(gStTpcDb->DriftVelocity(1));
-  event->SetDVEast(gStTpcDb->DriftVelocity(13));
+  event->SetDVWest(gStTpcDb->DriftVelocity(1,0));
+  event->SetDVEast(gStTpcDb->DriftVelocity(13,0));
 #if 0
   event->SetScaleY(gStTpcDb->ScaleY());
 #endif

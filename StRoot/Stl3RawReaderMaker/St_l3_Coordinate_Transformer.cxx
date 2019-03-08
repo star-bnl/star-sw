@@ -320,7 +320,7 @@ void St_l3_Coordinate_Transformer::Use_transformation_provided_by_db()
   StTpcCoordinateTransform tra(gStTpcDb);
 
   // shaping time
-  double tau3 = 3 * (gStTpcDb->Electronics()->tau() * 1e-09) * (gStTpcDb->DriftVelocity()) ;
+  double tau3 = 3 * (gStTpcDb->Electronics()->tau() * 1e-09) * (gStTpcDb->DriftVelocity(24,0)) ;
 
   // inner row (5) in sector 1 
   padco.setSector(1);

@@ -54,7 +54,6 @@ void StiTpcHitLoader::loadHits(StEvent* source,
       else                stiSector = 11 - (sector-11)%12;
     }
     _maxRow = St_tpcPadConfigC::instance()->padRows(sector+1);
-    Float_t driftvel = 1e-6*gStTpcDb->DriftVelocity(sector+1); // cm/mkmsec
     for (UInt_t row=_minRow-1; row<_maxRow; row++) {
       //cout << "StiTpcHitLoader:loadHits() -I- Loading row:"<<row<<" sector:"<<sector<<endl;
       const StTpcPadrowHitCollection* padrowHits = secHits->padrow(row);
@@ -92,6 +91,7 @@ void StiTpcHitLoader::loadHits(StEvent* source,
         stiHit->reset();
         stiHit->setGlobal(detector,hit,hit->position().x(),hit->position().y(), hit->position().z(),hit->charge());
         hitTest.add(hit->position().x(),hit->position().y(), hit->position().z());
+	Float_t driftvel = 1e-6*gStTpcDb->DriftVelocity(sector+1,row+1); // cm/mkmsec
 	if (hit->sector() <= 12) stiHit->setVz( driftvel);
 	else                     stiHit->setVz(-driftvel);
         _hitContainer->add( stiHit );

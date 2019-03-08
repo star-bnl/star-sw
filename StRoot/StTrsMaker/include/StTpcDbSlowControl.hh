@@ -119,7 +119,7 @@ private:
 //     double mOSGasGainb;
 };
 
-inline double StTpcDbSlowControl::driftVelocity(int sector) const {return gTpcDbPtr->DriftVelocity(sector)*(centimeter/(second));}
+inline double StTpcDbSlowControl::driftVelocity(int sector) const {return gTpcDbPtr->DriftVelocity(sector,0)*(centimeter/(second));}
     // Voltages
 inline double StTpcDbSlowControl::driftVoltage() const{return gTpcDbPtr->SlowControlSim()->driftVoltage()*volt;}
 inline double StTpcDbSlowControl::innerSectorAnodeVoltage() const{return gTpcDbPtr->SlowControlSim()->innerSectorAnodeVoltage()*volt;}

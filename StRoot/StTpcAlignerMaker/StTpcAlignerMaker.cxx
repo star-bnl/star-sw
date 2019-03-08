@@ -243,7 +243,7 @@ Int_t StTpcAlignerMaker::Make(){
     return kStOK;        // if no event, we're done
   }
   if (pEvent->runInfo()) bField = pEvent->runInfo()->magneticField();//*kilogauss;
-  Float_t driftVel = 1e-6*gStTpcDb->DriftVelocity(); // cm/mkmsec
+  Float_t driftVel = 1e-6*gStTpcDb->DriftVelocity(24,0); // cm/mkmsec
   Float_t freq     = gStTpcDb->Electronics()->samplingFrequency(); // MHz
   Int_t TriggerId = 0;
   static Int_t goodIds[8] = {9200,9201,               // laser

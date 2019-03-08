@@ -601,7 +601,7 @@ void StMagUtilities::GetTPCParams ()
     WESTCLOCKERROR =   1e3*cages->WestClockError();
     mDistortionMode= 0;
   }
-  StarDriftV     =  1e-6*StTpcDb::instance()->DriftVelocity() ;        
+  StarDriftV     =  1e-6*StTpcDb::instance()->DriftVelocity(24,0) ;        
   TPC_Z0         =  dims->gatingGridZ() ;
   IFCShift       =  cages->InnerFieldCageShift();
   for (Int_t sec = 1; sec <= 24; sec++) {

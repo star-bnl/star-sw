@@ -531,8 +531,8 @@ StEventMaker::makeEvent()
     if (mCurrentEvent->summary())
         mCurrentRunInfo->setMagneticField(mCurrentEvent->summary()->magneticField());
     if (gStTpcDb) {
-        mCurrentRunInfo->setTpcDriftVelocity(east, gStTpcDb->DriftVelocity());
-        mCurrentRunInfo->setTpcDriftVelocity(west, gStTpcDb->DriftVelocity());
+      mCurrentRunInfo->setTpcDriftVelocity(east, gStTpcDb->DriftVelocity(12,0));
+      mCurrentRunInfo->setTpcDriftVelocity(west, gStTpcDb->DriftVelocity(24,0));
     }
     if (dbBeamInfo) {
         mCurrentRunInfo->setCenterOfMassEnergy(dbBeamInfo->getBlueEnergy() + dbBeamInfo->getYellowEnergy());

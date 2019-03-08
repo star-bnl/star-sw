@@ -314,7 +314,7 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
   t0offset *= mTimeBinWidth;
   if (! useT0 && useTau) // for cluster
     t0offset -= 3.0 * St_tss_tssparC::instance()->tau();   // correct for convolution lagtime
-  Double_t t0zoffset = t0offset*StTpcDb::instance()->DriftVelocity(sector)*1e-6;
+  Double_t t0zoffset = t0offset*StTpcDb::instance()->DriftVelocity(sector,row)*1e-6;
   Double_t tb = tBFromZ(a.position().z()+zoffset-t0zoffset,sector,row,probablePad);
   b = StTpcPadCoordinate(sector, row, probablePad, tb);
 }
@@ -336,7 +336,7 @@ void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLoc
   t0offset *= mTimeBinWidth;
   if (! useT0 && useTau) // for cluster
     t0offset -= 3.0 * St_tss_tssparC::instance()->tau();   // correct for convolution lagtime
-  Double_t t0zoffset = t0offset*StTpcDb::instance()->DriftVelocity(a.sector())*1e-6;
+  Double_t t0zoffset = t0offset*StTpcDb::instance()->DriftVelocity(a.sector(),a.row())*1e-6;
   //t0 offset -- DH  27-Mar-00
   Double_t z = zFromTB(a.timeBucket(),a.sector(),a.row(),a.pad())-zoffset+t0zoffset;
   tmp.setZ(z);
@@ -430,7 +430,7 @@ Double_t StTpcCoordinateTransform::zFromTB(Double_t tb, Int_t sector, Int_t row,
     tbx += St_tpcRDOT0offsetC::instance()->T0(sector,row,pad);
   }
   Double_t time = t0 + tbx*mTimeBinWidth; 
-  Double_t z = StTpcDb::instance()->DriftVelocity(sector)*1e-6*time;
+  Double_t z = StTpcDb::instance()->DriftVelocity(sector,row)*1e-6*time;
   return z;
 }
 //________________________________________________________________________________
@@ -444,7 +444,7 @@ Double_t StTpcCoordinateTransform::tBFromZ(Double_t z, Int_t sector, Int_t row, 
   Double_t elecT0 = StTpcDb::instance()->Electronics()->tZero();          // units are us 
   Double_t sectT0 = St_tpcPadrowT0C::instance()->T0(sector,row);// units are us 
   Double_t t0 = trigT0 + elecT0 + sectT0;
-  Double_t time = z / (StTpcDb::instance()->DriftVelocity(sector)*1e-6);
+  Double_t time = z / (StTpcDb::instance()->DriftVelocity(sector,row)*1e-6);
   Int_t l = sector;
   if ( St_tpcPadConfigC::instance()->IsRowInner(sector,row)) l += 24;
   Double_t tb = (time - t0)/mTimeBinWidth - St_tpcSectorT0offsetC::instance()->t0offset(l);

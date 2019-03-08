@@ -354,8 +354,8 @@ void StiVMCMaker::loadTpcHits(StEvent *pEvent) {
       cout << "StiVMCMaker::loadTpcHits -W- no hits for sector:"<<sector<<endl;
       break;
     }
-    Float_t driftvel = 1e-6*gStTpcDb->DriftVelocity(sec); // cm/mkmsec
     for (UInt_t padrow = 0; padrow < secHits->numberOfPadrows(); padrow++) {
+      Float_t driftvel = 1e-6*gStTpcDb->DriftVelocity(sec,padrow+1); // cm/mkmsec
       //cout << "StiTpcHitLoader:loadHits() -I- Loading row:"<<row<<" sector:"<<sector<<endl;
       const StTpcPadrowHitCollection* padrowHits = secHits->padrow(padrow);
       if (!padrowHits) break;

@@ -190,6 +190,7 @@
 #include "TGeoManager.h"
 #include "StDetectorDbMaker/StTpcSurveyC.h"
 #include "StDetectorDbMaker/St_tpcDriftVelocityC.h"
+#include "StDetectorDbMaker/St_TpcDriftVelRowCorC.h"
 #include "StarMagField.h"
 #include "TEnv.h"
 StTpcDb* gStTpcDb = 0;
@@ -235,29 +236,22 @@ StTpcDb::~StTpcDb() {
   SafeDelete(mFlip);
   gStTpcDb = 0;
 }
-#if 0
-//________________________________________________________________________________
-Float_t StTpcDb::ScaleY() {return St_tpcDriftVelocityC::instance()->scaleY();}
 //-----------------------------------------------------------------------------
-float StTpcDb::DriftVelocity(Int_t sector, Double_t Y) {
+float StTpcDb::DriftVelocity(Int_t sector, Int_t row) {
   static UInt_t u2007 = TUnixTime(20070101,0,1).GetUTime(); // 
   assert(mUc > 0);
   if (mUc < u2007) sector = 24;
   UInt_t kase = 1;
   if (sector <= 12) kase = 0;
-  return 1e6*mDriftVel[kase]*(1 + ScaleY()*Y);
+  Float_t DV =1e6*mDriftVel[kase];
+  if (row > 0) {
+    // Extra row correction
+    if (St_TpcDriftVelRowCorC::instance()->idx()) {
+      DV *= (1. + St_TpcDriftVelRowCorC::instance()->CalcCorrection(0,row));
+    }
+  }
+  return DV;
 }
-#else
-//-----------------------------------------------------------------------------
-float StTpcDb::DriftVelocity(Int_t sector) {
-  static UInt_t u2007 = TUnixTime(20070101,0,1).GetUTime(); // 
-  assert(mUc > 0);
-  if (mUc < u2007) sector = 24;
-  UInt_t kase = 1;
-  if (sector <= 12) kase = 0;
-  return 1e6*mDriftVel[kase];
-}
-#endif
 //-----------------------------------------------------------------------------
 void StTpcDb::SetDriftVelocity() {
   static UInt_t u0 = 0; // beginTime of current Table
