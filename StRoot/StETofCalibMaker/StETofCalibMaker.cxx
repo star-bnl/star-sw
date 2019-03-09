@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StETofCalibMaker.cxx,v 1.1 2019/02/19 19:52:28 jeromel Exp $
+ * $Id: StETofCalibMaker.cxx,v 1.2 2019/03/08 19:01:07 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofCalibMaker.cxx,v $
+ * Revision 1.2  2019/03/08 19:01:07  fseck
+ * pick up the right trigger and reset time on event-by-event basis  +  fix to clearing of calibrated tot in afterburner mode  +  flag pulser digis
+ *
  * Revision 1.1  2019/02/19 19:52:28  jeromel
  * Reviewed code provided by F.Seck
  *
@@ -21,6 +24,7 @@
 #include <sstream>
 #include <fstream>
 #include <cmath>
+#include <iterator>
 
 #include "TString.h"
 #include "TFile.h"
@@ -75,6 +79,8 @@ StETofCalibMaker::StETofCalibMaker( const char* name )
   mGet4TotBinWidthNs( 1. ),
   mMinDigisPerSlewBin( 25 ),
   mResetTimeCorr( 0. ),
+  mTriggerTime( 0. ),
+  mResetTime( 0. ),
   mDebug( false )
 {
     /// default constructor
@@ -82,6 +88,7 @@ StETofCalibMaker::StETofCalibMaker( const char* name )
 
     mStatus.clear();
     mTimingWindow.clear();
+    mPulserWindow.clear();
     mSignalVelocity.clear();
     mDigiTotCorr.clear();
     mDigiSlewCorr.clear();
@@ -207,6 +214,7 @@ StETofCalibMaker::InitRun( Int_t runnumber )
 
     // timing window
     mTimingWindow.clear();
+    mPulserWindow.clear();
 
     if( mFileNameTimingWindow.empty() ) {
         LOG_INFO << "etofTimingWindow: no filename provided --> load database table" << endm;
@@ -225,6 +233,7 @@ StETofCalibMaker::InitRun( Int_t runnumber )
             int key = timingWindowTable->afckAddress[ i ];
             if( key > 0 ) {
                 mTimingWindow[ key ] = std::make_pair( timingWindowTable->timingMin[ i ], timingWindowTable->timingMax[ i ] );
+                mPulserWindow[ key ] = std::make_pair( timingWindowTable->pulserMin[ i ], timingWindowTable->pulserMax[ i ] );
             }
         }
     }
@@ -261,20 +270,27 @@ StETofCalibMaker::InitRun( Int_t runnumber )
         
             if( address > 0 ) {
                 mTimingWindow[ address ] = std::make_pair( times.at( 0 ), times.at( 1 ) );
+                mPulserWindow[ address ] = std::make_pair( times.at( 3 ), times.at( 4 ) );
             }
         }
         paramFile.close();
 
         if( mTimingWindow.size() > 12 ) {
             LOG_ERROR << " too many entries in mTimingWindow map ...." << endm;
-            return kStFatal;  
+            return kStFatal;
+        }
+        if( mPulserWindow.size() > 12 ) {
+            LOG_ERROR << " too many entries in mPulserWindow map ...." << endm;
+            return kStFatal;
         }
     }
 
     for( const auto& kv : mTimingWindow ) {
         LOG_DEBUG << "AFCK address: 0x" << std::hex << kv.first << std::dec << " --> timing window from " << kv.second.first << " to " << kv.second.second << " ns" << endm;
     }
-
+    for( const auto& kv : mPulserWindow ) {
+        LOG_DEBUG << "AFCK address: 0x" << std::hex << kv.first << std::dec << " --> pulser window from " << kv.second.first << " to " << kv.second.second << " ns" << endm;
+    }
     // --------------------------------------------------------------------------------------------
 
     // calib param
@@ -839,8 +855,10 @@ StETofCalibMaker::processStEvent()
     size_t nDigis = etofDigis.size();
     LOG_INFO << "processStEvent() - # fired eTOF digis : " << nDigis << endm;
 
+    mTriggerTime = triggerTime( etofHeader );
+    mResetTime   = resetTime(   etofHeader );
 
-    /// loop over digis
+    /// first loop over digis to apply hardware mappping and find the pulsers
     for( size_t i=0; i<nDigis; i++ ) {
         StETofDigi* aDigi =  etofDigis[ i ];
 
@@ -855,11 +873,23 @@ StETofCalibMaker::processStEvent()
         /// sector, zplane, counter, strip, side 
         applyMapping( aDigi );
 
+        /// flag pulser digis
+        flagPulserDigis( aDigi, i );
+    }
+
+    /// second loop to apply calibrations to (non-pulser) digis inside the timing window
+    for( size_t i=0; i<nDigis; i++ ) {
+        StETofDigi* aDigi =  etofDigis[ i ];
+
+        if( !aDigi ) {
+            LOG_WARN << "No digi found" << endm;
+            continue;
+        }
         /// calculate calibrated time and tot for the digi
         /// only for digis inside the timing window
         applyCalibration( aDigi, etofHeader );
 
-    } // end loop over digis
+    }
 }
 
 
@@ -892,8 +922,10 @@ StETofCalibMaker::processMuDst()
     size_t nDigis = mMuDst->numberOfETofDigi();
     LOG_INFO << "processMuDst() - # fired eTOF digis : " << nDigis << endm;
 
+    mTriggerTime = triggerTime( ( StETofHeader* ) etofHeader );
+    mResetTime   = resetTime(   ( StETofHeader* ) etofHeader );
 
-    /// loop over digis
+    /// first loop over digis to apply hardware mappping and find the pulsers
     for( size_t i=0; i<nDigis; i++ ) {
         StMuETofDigi* aDigi = mMuDst->etofDigi( i );
 
@@ -908,11 +940,24 @@ StETofCalibMaker::processMuDst()
         /// sector, zplane, counter, strip, side 
         applyMapping( aDigi );
 
+        /// flag pulser digis
+        flagPulserDigis( aDigi, i );
+    }
+
+    /// second loop to apply calibrations to (non-pulser) digis inside the timing window
+    for( size_t i=0; i<nDigis; i++ ) {
+        StMuETofDigi* aDigi = mMuDst->etofDigi( i );
+
+        if( !aDigi ) {
+            LOG_WARN << "No digi found" << endm;
+            continue;
+        }
         /// calculate calibrated time and tot for the digi
         /// only for digis inside the timing window
         applyCalibration( aDigi, etofHeader );
 
-    } // end loop over digis
+    }
+
 }
 //_____________________________________________________________
 
@@ -935,7 +980,7 @@ StETofCalibMaker::resetToRaw( StETofDigi* aDigi )
 {
     aDigi->setGeoAddress( 0, 0, 0, 0, 0 );
     aDigi->setCalibTime( 0. );
-    aDigi->setCalibTot(  0. );
+    aDigi->setCalibTot( -1. );
 
     aDigi->setAssociatedHit( nullptr );
 }
@@ -986,6 +1031,61 @@ StETofCalibMaker::applyMapping( StETofDigi* aDigi )
 
 //_____________________________________________________________
 /*!
+ * flag pulser digis ( set calibTot=-999 )
+ */
+void
+StETofCalibMaker::flagPulserDigis( StETofDigi* aDigi, unsigned int index )
+{
+    bool isPulser = false;
+
+    float timeToTrigger = aDigi->rawTime() - mTriggerTime;
+
+    // pulser channel
+    if( ( aDigi->strip() == 1 && aDigi->side() == 1 ) || ( aDigi->strip() == 32 && aDigi->side() == 2 ) ) {
+
+        if( timeToTrigger > mPulserWindow.at( aDigi->rocId() ).first  &&
+            timeToTrigger < mPulserWindow.at( aDigi->rocId() ).second  )
+        {
+            float tot = aDigi->rawTot();
+            
+            int sector = aDigi->sector();
+
+            if( tot > 90 && tot < 105 ) {
+                if( sector == 15 ||
+                    sector == 16 ||
+                    sector == 21 ||
+                    sector == 22 )  {
+                        isPulser = true;
+                }
+            }
+            else if( tot > 44 && tot < 55 ) {
+                if( sector == 13 ||
+                    sector == 14 ||
+                    sector == 17 ||
+                    sector == 18 ||
+                    sector == 19 ||
+                    sector == 20 ||
+                    sector == 23 ||
+                    sector == 24 )  {
+                        isPulser = true;
+                }
+            }
+
+            if( tot > 9  && tot < 18 && sector == 24 && aDigi->zPlane() == 2 && aDigi->side() == 1 ) {
+                isPulser = true;
+            }
+
+        }
+    }
+
+    if( isPulser ) {
+        aDigi->setCalibTot( -999. );
+    }
+}
+
+
+//_____________________________________________________________
+/*!
  * apply calibrations
  */
 void
@@ -999,18 +1099,25 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
         return;
     }
 
-    float timeToTrigger = aDigi->rawTime() - triggerTime( etofHeader, aDigi->rocId() );
+    // ignore digis flaged as pulsers ( calibTot = -999. )
+    if( fabs( aDigi->calibTot() + 999. ) < 1.e-5 ) {
+        if( mDebug ) {
+            LOG_INFO << "digi flaged as pulser --> skip" << endm;
+        }
+        return;
+    }
+
+    float timeToTrigger = aDigi->rawTime() - mTriggerTime;
 
     // check if digi is inside the timing window and only calibrate those, do nothing digis outside the window ( calibTime = 0, calibTot = -1 )
     if( timeToTrigger > mTimingWindow.at( aDigi->rocId() ).first  &&
-        timeToTrigger < mTimingWindow.at( aDigi->rocId() ).second )
+        timeToTrigger < mTimingWindow.at( aDigi->rocId() ).second  )
     {
-        //double calibTot = aDigi->rawTot() * mGet4TotBinWidthNs * calibTotFactor( aDigi );
         double calibTot = aDigi->rawTot() * mGet4TotBinWidthNs * calibTotFactor( aDigi );
 
         aDigi->setCalibTot( calibTot );
 
-        double calibTime = aDigi->rawTime() - resetTime( etofHeader, aDigi->rocId() )
+        double calibTime = aDigi->rawTime() - mResetTime
                                             - resetTimeCorr()
                                             - calibTimeOffset(   aDigi )
                                             - slewingTimeOffset( aDigi );
@@ -1038,7 +1145,7 @@ StETofCalibMaker::resetToRaw( StMuETofDigi* aDigi )
 {
     aDigi->setGeoAddress( 0, 0, 0, 0, 0 );
     aDigi->setCalibTime( 0. );
-    aDigi->setCalibTot(  0. );
+    aDigi->setCalibTot( -1. );
 
     aDigi->setAssociatedHitId( -1 );
 }
@@ -1049,6 +1156,14 @@ void
 StETofCalibMaker::applyMapping( StMuETofDigi* aDigi )
 {
     applyMapping( ( StETofDigi* ) aDigi );
+}
+
+
+//_____________________________________________________________
+void
+StETofCalibMaker::flagPulserDigis( StMuETofDigi* aDigi, unsigned int index )
+{
+    flagPulserDigis( ( StETofDigi* ) aDigi, index );
 }
 
 
@@ -1161,15 +1276,58 @@ StETofCalibMaker::slewingTimeOffset( StETofDigi* aDigi )
  * get trigger time from StETofHeader
  */
 double
-StETofCalibMaker::triggerTime( StETofHeader* header, int id )
+StETofCalibMaker::triggerTime( StETofHeader* header )
 {
+    // initialize trigger time with the one from the header in case the map of trigger time stamps per AFCK is empty
     double triggerTime = header->trgGdpbFullTime();
 
-    if( header->rocGdpbTs().count( id ) ) {
-        triggerTime = header->rocGdpbTs().at( id ) * eTofConst::coarseClockCycle;
+    // count the occurance of a given trigger time stamp in the GdbpTs map of the eTOF header
+    std::map< uint64_t, short > countsGdpbTs;
+    for( const auto& kv : header->rocGdpbTs() ) {
+        if( mDebug ) {
+            LOG_DEBUG << "triggerTime (" << std::hex << "Ox" << kv.first << std::dec << ")  " << kv.second * eTofConst::coarseClockCycle * 1.e-9 << endm; 
+        }
+        ++countsGdpbTs[ kv.second ];
     }
 
-    LOG_DEBUG << "trigger time (ns): " << triggerTime << endm;
+    // combine adjacent trigger times to get the number of right trigger time stamps without outliers
+    std::map< uint64_t, short > combinedCountsGdpbTs;
+    for( auto it = countsGdpbTs.begin(); it != countsGdpbTs.end(); it++ ) {
+        if( mDebug ) {
+            LOG_INFO << it->first << "  " << it->second << endm;
+        }
+        auto next = std::next( it, 1 );
+
+        if( next != countsGdpbTs.end() &&  abs( next->first - it->first ) == 1 ) {
+            combinedCountsGdpbTs[ it->first ] = it->second + next->second;
+        }
+        else if( next == countsGdpbTs.end() && combinedCountsGdpbTs.size() == 0 ) {
+            combinedCountsGdpbTs[ it->first ] = it->second;
+        }
+    }
+
+    if( mDebug ) {
+        for( const auto& kv : combinedCountsGdpbTs ) {
+            LOG_INFO << "combined counts for adjacent trigger TS: " << kv.first << "  " << kv.second << endm;
+        }
+    }
+    
+    // take the trigger Ts that occured most often in the combined counting map
+    if( combinedCountsGdpbTs.size() > 0 ) {
+        auto it = std::max_element( combinedCountsGdpbTs.begin(), combinedCountsGdpbTs.end(),
+                                    []( const pair< uint64_t, short >& p1, const pair< uint64_t, short >& p2 ) {
+                                    return p1.second < p2.second; } );
+
+        triggerTime = it->first * eTofConst::coarseClockCycle;
+        
+        if( mDebug ) {
+            LOG_INFO << "trigger TS: " << it->first << endm;
+        }
+    }
+
+    if( mDebug ) {
+        LOG_INFO << "trigger time (ns): " << triggerTime << endm;
+    }
 
     return triggerTime;
 }
@@ -1180,22 +1338,44 @@ StETofCalibMaker::triggerTime( StETofHeader* header, int id )
  * get reset time from StETofHeader
  */
 double
-StETofCalibMaker::resetTime( StETofHeader* header, int id )
+StETofCalibMaker::resetTime( StETofHeader* header )
 {
-    double resetTime = header->trgStarFullTime();
+    // count the occurance of a given reset time stamp in the StarTs map of the eTOF header
+    std::map< uint64_t, short > countsStarTs;
+    for( const auto& kv : header->rocStarTs() ) {
+        if( mDebug ) {
+            LOG_DEBUG << "resetTime (" << std::hex << "Ox" << kv.first << std::dec << ")  " << kv.second * eTofConst::coarseClockCycle * 1.e-9 << endm; 
+        }
+        
+        // in Run18 only one of the AFCKs was giving the correct reset time: 0x18e6
+        if( mRunYear == 2018 && kv.first != 0x18e6 ) continue;
 
-    // in year 2018 only the reset time of AFCK 0x18e6 was usefull
-    if( mRunYear == 2018 ) id = 0x18e6;
-
-    if( header->rocStarTs().count( id ) ) {
-        resetTime = header->rocStarTs().at( id ) * eTofConst::coarseClockCycle;
+        ++countsStarTs[ kv.second ];
     }
 
-    if( mDebug ) {
-        LOG_DEBUG << "reset time (ns): " << resetTime << endm;
+
+
+
+    while( countsStarTs.size() > 0 ) {
+        auto it = std::max_element( countsStarTs.begin(), countsStarTs.end(),
+                                    []( const pair< uint64_t, short >& p1, const pair< uint64_t, short >& p2 ) {
+                                    return p1.second < p2.second; } );
+
+        double resetTime = it->first * eTofConst::coarseClockCycle;
+
+        // trigger - reset time should be on the order of a few second up to 45 minutes ( run length )
+        if( fabs( mTriggerTime - resetTime ) * 1.e-9 < 3000 ) {
+            if( mDebug ) {
+                LOG_DEBUG << "reset time (ns): " << resetTime << " --> difference to trigger time in secoonds: " << ( mTriggerTime - resetTime ) * 1.e-9 << endm;
+            }
+            return resetTime;
+        }
+        else {
+            countsStarTs.erase( it );
+        }
     }
 
-    return resetTime;
+    return 0.;
 }
 
 
