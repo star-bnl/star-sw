@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StETofCalibMaker.h,v 1.1 2019/02/19 19:52:28 jeromel Exp $
+ * $Id: StETofCalibMaker.h,v 1.2 2019/03/08 19:01:01 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofCalibMaker.h,v $
+ * Revision 1.2  2019/03/08 19:01:01  fseck
+ * pick up the right trigger and reset time on event-by-event basis  +  fix to clearing of calibrated tot in afterburner mode  +  flag pulser digis
+ *
  * Revision 1.1  2019/02/19 19:52:28  jeromel
  * Reviewed code provided by F.Seck
  *
@@ -59,13 +62,13 @@ public:
     void processMuDst();
 
     /// read calibration parameters from file
-    void setFileNameCalibParam( const char* fileName );
-    void setFileNameElectronicsMap( const char* fileName );
-    void setFileNameStatusMap( const char* fileName );
-    void setFileNameTimingWindow( const char* fileName );
-    void setFileNameSignalVelocity( const char* fileName );
+    void setFileNameCalibParam(      const char* fileName );
+    void setFileNameElectronicsMap(  const char* fileName );
+    void setFileNameStatusMap(       const char* fileName );
+    void setFileNameTimingWindow(    const char* fileName );
+    void setFileNameSignalVelocity(  const char* fileName );
     void setFileNameCalibHistograms( const char* fileName );
-    void setFileNameResetTimeCorr( const char* fileName );
+    void setFileNameResetTimeCorr(   const char* fileName );
 
     void setDebug( const bool debug );
 
@@ -75,10 +78,12 @@ private:
 
     void resetToRaw      ( StETofDigi* aDigi );
     void applyMapping    ( StETofDigi* aDigi );
+    void flagPulserDigis ( StETofDigi* aDigi, unsigned int index );
     void applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader );
 
     void resetToRaw      ( StMuETofDigi* aDigi );
     void applyMapping    ( StMuETofDigi* aDigi );
+    void flagPulserDigis ( StMuETofDigi* aDigi, unsigned int index );
     void applyCalibration( StMuETofDigi* aDigi, StMuETofHeader* etofHeader );
 
 
@@ -88,8 +93,8 @@ private:
 
     double resetTimeCorr() const;
 
-    double triggerTime( StETofHeader* etofHeader, int rocId );
-    double resetTime  ( StETofHeader* etofHeader, int rocId );
+    double triggerTime( StETofHeader* etofHeader );
+    double resetTime  ( StETofHeader* etofHeader );
 
     unsigned int channelToKey(         const unsigned int channelId  );
     unsigned int channelToDetectorKey( const unsigned int channelId  );
@@ -113,7 +118,11 @@ private:
     Int_t         mMinDigisPerSlewBin;      // minimal required statistics per channel and TOT bin to apply slewing corrections
     Float_t       mResetTimeCorr;           // additional offset for the whole system in case reset time was not saved correctly
 
+    Double_t      mTriggerTime;             // trigger time in ns
+    Double_t      mResetTime;               // reset time in ns 
+
     std::map< UInt_t, std::pair< Float_t, Float_t > >  mTimingWindow;    // timing window for each AFCK
+    std::map< UInt_t, std::pair< Float_t, Float_t > >  mPulserWindow;    // pulser window for each AFCK
     std::map< UInt_t, UInt_t >   mStatus;          // status of each channel: 0 - not existing/not working, 1 - working
     std::map< UInt_t, Float_t >  mSignalVelocity;  // signal velocities in each detector
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofDigiMaker.cxx,v 1.3 2019/02/19 20:32:09 fseck Exp $
+ * $Id: StETofDigiMaker.cxx,v 1.4 2019/03/08 18:45:40 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StETofDigiMaker.cxx,v $
+ * Revision 1.4  2019/03/08 18:45:40  fseck
+ * save middle value of tot bin as raw tot of the digi
+ *
  * Revision 1.3  2019/02/19 20:32:09  fseck
  * update for unpacking year 2019+ daq files
  *
@@ -40,8 +43,6 @@
 #include "StETofUtil/StETofConstants.h"
 #include "StETofUtil/StETofMessageFormat.h"
 
-
-const double get4TotBinWidthNs = 1. ; //0.4; // width of get4 tot bins in ns
 
 //_____________________________________________________________
 StETofDigiMaker::StETofDigiMaker( const char* name )
@@ -365,7 +366,7 @@ StETofDigiMaker::fillETofDigi( gdpbv100::FullMessage& mess )
                                               mess.getGdpbGenChipId(),
                                               mess.getGdpbHitChanId(),
                                               mess.GetFullTimeNs(),
-                                              mess.getGdpbHit32Tot() * get4TotBinWidthNs ) );
+                                              ( double ) mess.getGdpbHit32Tot() + 0.5 ) );
 }
 
 
@@ -567,5 +568,5 @@ StETofDigiMaker::fillETofDigi( gdpb::FullMessage& mess )
                                               mess.getGdpbGenChipId(),
                                               mess.getGdpbHitChanId(),
                                               mess.GetFullTimeNs(),
-                                              mess.getGdpbHit32Tot() * get4TotBinWidthNs ) );
+                                              ( double ) mess.getGdpbHit32Tot() + 0.5 ) );
 }

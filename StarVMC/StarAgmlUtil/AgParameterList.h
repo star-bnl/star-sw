@@ -4,7 +4,7 @@
 #include <map>
 #include <vector>
 #include <algorithm>
-
+#include <cassert>
 //
 // Templated parameter list.  Meant to be a replacement for functionality duplicated in
 // AgPlacement, AgTransform, probably elsewhere as well.
@@ -34,8 +34,8 @@ public:
   virtual  bool  hasPar( const char* name ) const { std::string key=name; return (std::find(mParameterList.begin(),mParameterList.end(),key) != mParameterList.end() && mParameterList.size()>0); }
   //  virtual  bool  hasPar( std::string name ) const { return hasPar(name.c_str()); }
 
-  /// Unset specified parameter
-  virtual  void  unSet( const char *name ) { std::string key; typename std::map<std::string,T>::iterator pos = mParameters.find(key); if (pos!=mParameters.end()) mParameters.erase(pos); };
+  /// Unset specified parameter... likely never used and can be removed...
+  virtual  void  unSet( const char *name ) { assert(0/*deprecated?*/); std::string key=name; typename std::map<std::string,T>::iterator pos = mParameters.find(key); if (pos!=mParameters.end()) mParameters.erase(pos); };
   //  virtual  void  unSet( std::string name ) { unSet( name.c_str() ); }
 
   enum { kOnly=0, kMany };
