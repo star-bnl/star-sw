@@ -27,11 +27,13 @@ void Update();
 void AddHit(const float *x,const float *dir,float layer);
 void SetErr(float err) 			{mErr=err;}
 void SetSgn(int dir=1) { mSgn = dir; }
-void SetVtx(const float vtx[3]) { memcpy(mVtx,vtx,sizeof(mVtx));}
+void SetVtx(const float vtx[3]) { 
+  mIsVtx=0; memset(mVtx,0,sizeof(mVtx));
+  if (vtx) {memcpy(mVtx,vtx,sizeof(mVtx));mIsVtx=1;};}
 
 int  Reject(const float x[3],const void* hp);	// 0  :x accepted
-					// >0 :x rejected
-					//-1 =x     accepted and lims updated
+						// >0 :x rejected
+						// -1 =x     accepted and lims updated
 private:
 void UpdateLims();		//Update  limits
 
@@ -40,12 +42,13 @@ public:
 char  mBeg[1];
 int   mJst;
 const void* mHp;
+int   mIsVtx;
 float mVtx[3];
 float mErr;
-float mRxy2;
-float mRxy;
+float mRxy2;		//Rxy**2 of previous hit
+float mRxy;		//Rxy    of previous hit
 float mDelta;
-float mZ2;
+float mMaxStep;
 float mDir[3]; 		// track direction
 float mLayer;
 const float *mHitDir; 	// hit plane direction
@@ -60,8 +63,8 @@ float mHitPrj;
 float mMinPrj;
 float mMinImp;
 
-const float *mX[100];
-const float *mHit;
+const float *mX[100];	//array of hit coordinates pointers
+const float *mHit;	//current (last accepted) hit coordinates
 float mS[100];
 int   mNPnt;
 char  mEnd[1];
@@ -83,7 +86,7 @@ public:
   void      ShowIn();
    int      Reject(const float x[3])		{return mSel.Reject(x,0)>0;}	
 void SetSgn(int dir=1) { fSgn = dir; mSel.SetSgn(dir);}
-void SetVtx(const float vtx[3]) { StvSeedFinder::SetVtx(vtx); mSel.SetVtx(fVtx);}
+void SetVtx(const float vtx[3]) { StvSeedFinder::SetVtx(vtx); mSel.SetVtx(vtx);}
 
 protected:
 
