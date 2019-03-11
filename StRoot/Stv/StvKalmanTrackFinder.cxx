@@ -295,9 +295,9 @@ const StHitPlane *prevHitPlane=0;
     curNode->SetPre(par[0],err[0],0);
     innNode->SetDer(derivFit,idir);
 
-    if (!localHits)	 continue;	//Never hits in curNode 
     curNode->SetHitPlane(mHitter->GetHitPlane());
     
+    if (!localHits)	 continue;	//Never hits in curNode 
     if (!localHits->size()) {//No hits in curNode
       mySkip = mHitCounter->AddNit();
       if (mySkip) break;
