@@ -45,10 +45,16 @@ inline static double dot(const double *a,const double *b)
 //_____________________________________________________________________________
 inline static double dot2(const double *a,const double *b)
 {return a[0]*b[0]+a[1]*b[1];}
+
 //_____________________________________________________________________________
 inline static void sub(const double a[3],const double b[3],double c[3])
 {
   c[0] = a[0]-b[0]; c[1] = a[1]-b[1]; c[2] = a[2]-b[2];
+}
+//_____________________________________________________________________________
+inline static void mpy(const double a[3],double fak,double c[3])
+{
+  c[0] = fak*a[0]; c[1] = fak*a[1]; c[2] = fak*a[2];
 }
 
 //______________________________________________________________________________ 
@@ -63,7 +69,6 @@ void Multiply(Mtx55D_t &res, const Mtx55D_t &A,const Mtx55D_t &B)
           double *resi =res[i];
     for (int k=0;k<5;k++) {
       const double &bjk = Bj[k];
-      if (!bjk) continue;
       resi[k] += aij*bjk;
   } } }
 }
@@ -737,6 +742,29 @@ double T[5][5] =
   if (radErr) TCL::trasat(T[0],*fitErr,radErr,5,5); 
 
 }
+//_____________________________________________________________________________
+void StvNodePars::make2nd()
+{
+///	make second order
+  double curv = getCurv();
+  double sinL = dot(_h,_tkdir[kKT])/_h[3];
+  double cosL = sqrt((1.+sinL)*(1-sinL));
+  double alfa = cosL/_h[3];
+  double ort[3];
+  for (int i=0;i<3;i++) {ort[i] = _tkdir[kKT][i]-_h[i]*alfa;}
+  double nor = sqrt(dot(ort,ort));
+  for (int k=0;k<3;k++) {
+    _tkdir[kKdDdL][k] = 0.5*dot(ort,_tkdir[k])/nor*curv*cosL*cosL;
+  }
+
+}
+
+
+
+
+
+
+
 //______________________________________________________________________________
 const StvFitPars &StvFitPars::operator*(const StvFitDers &t) const  
 {

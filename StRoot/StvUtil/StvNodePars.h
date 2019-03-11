@@ -136,6 +136,7 @@ double getCurv() const ;
    int getDir() const;
 const TkDir_t &getTkDir() const {return _tkdir;}
   void reverse(); 
+  void make2nd(); 
   void operator+=(const StvFitPars &fp);
   const StvFitPars &operator-(const StvNodePars &fp) const;
 StvFitPars delta() const;
