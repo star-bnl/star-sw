@@ -1,7 +1,7 @@
 /* Global Alignment
    FPE_OFF
    setup debug
-   root.exe -q -b 'lMuDst.C(-1,"./*MuDst.root","RMuDst,tpcDb,mysql,magF,nodefault","MuTpcG.root")'  MuTpcG.C+
+   root.exe -q -b 'lMuDst.C(-1,"./*MuDst.root","RMuDst,tpcDb,mysql,magF,nodefault","MuTpcG.root")'  MuTpcG.C+ >& MuTpcG.log &
    root.exe lMuDst.C MuTpcG.root
    .L MuTpcG.C+
    Draw();

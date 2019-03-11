@@ -5,12 +5,14 @@
    Fit
    root.exe -q -b TpcHit.root TpcPrompt.C+
 Draw();
+ ln -s ~/macros/.sl* .
  root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("Z","GP","R",-1,-1,1,1,10,1,206,212)' >& Z.log &
  root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("ZL","GP","R",-1,-1,1,1,10,1,0,3.0)' >& ZL.log &
  root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("T","GP","R",-1,-1,1,1,10,1,0,12.0)' >& T.log &
- root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("ZLM","Freq","R",-1,-1,1,1,10,1,0,12.0)' >& TFreq.log &
+ root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("ZLM","Freq","R",-1,-1,1,1,10,1,200,220.0)' >& TFreq.log &
 */
-#if !defined(__CINT__)
+#if !defined(__CINT__)psf
+
 // code that should be seen ONLY by the compiler
 #else
 #if !defined(__CINT__) || defined(__MAKECINT__)

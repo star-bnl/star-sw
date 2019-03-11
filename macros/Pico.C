@@ -1,9 +1,9 @@
 /*
-  root.exe lMuDst.C 'PicodEdx.C+("/gpfs01/star/pwg_tasks/hf05/Pico/BES-I/AuAu27_production_2011/2011/172/12172013/*.picoDst.root","PicoOut.root")'
-  root.exe 'lMuDst.C(0,"/gpfs01/star/pwg_tasks/hf05/Pico/BES-I/AuAu62_productionP10ik/2010/078/11078018/*picoDst.root","PicoOut.root")' PicodEdx.C+
-  root.exe 'lMuDst.C(0,"/net/l404/data/fisyak/Pico/2016/125/17125034/st_physics_17125034_raw_5500079.picoDst.root","ldEdxY2,RpicoDst","PicoOut.root")' PicodEdx.C+
-  root.exe lMuDst.C 'PicodEdx.C+("/star/subsys/tpc/fisyak/reco/2014/50M/SL15StiCAKFV/130/15130037/st_physics_15130037_raw_3000030_5368_5369.MuDst.root")'
-  root.exe PicodEdx_Sparse_pT100_eta24.NewdX.root doFractionFit.C
+  root.exe lMuDst.C 'Pico.C+("/gpfs01/star/pwg_tasks/hf05/Pico/BES-I/AuAu27_production_2011/2011/172/12172013/*.picoDst.root","PicoOut.root")'
+  root.exe 'lMuDst.C(0,"/gpfs01/star/pwg_tasks/hf05/Pico/BES-I/AuAu62_productionP10ik/2010/078/11078018/*picoDst.root","PicoOut.root")' Pico.C+
+  root.exe 'lMuDst.C(0,"/net/l404/data/fisyak/Pico/2016/125/17125034/st_physics_17125034_raw_5500079.picoDst.root","ldEdxY2,RpicoDst","PicoOut.root")' Pico.C+
+  root.exe lMuDst.C 'Pico.C+("/star/subsys/tpc/fisyak/reco/2014/50M/SL15StiCAKFV/130/15130037/st_physics_15130037_raw_3000030_5368_5369.MuDst.root")'
+  root.exe Pico1_Sparse_pT100_eta24.NewdX.root doFractionFit.C
   
   
   gStyle->SetOptStat(0)
@@ -218,8 +218,8 @@ Int_t IndexH(const Char_t *name) {
   return index;
 }
 //________________________________________________________________________________
-void PicodEdx(const Char_t *files ="./*.picot.root",
-	      const Char_t *Out = "PicodEdx.root"){
+void Pico(const Char_t *files ="./*.picot.root",
+	      const Char_t *Out = "Pico1.root"){
   //  static const Double_t sigmaB[2] = {6.26273e-01, -5.80915e-01}; // Global Tracks, wrt Bichsel
   if (!m_Bichsel) {
     gSystem->Load("libStBichsel"); 
