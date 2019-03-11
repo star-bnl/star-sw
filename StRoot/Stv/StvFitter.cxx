@@ -702,7 +702,7 @@ double StvFitter::Xi2(const StvHit *hit)
   mDcaL=VDOT(mDcaFrame[2],dca);
 //		small account non zero distance to hit along track
 
-#if 0
+#if 1
 //		small account non zero distance to hit along track
   double dS = mDcaT*mTkPars.getCosL();
   mDcaP-= 0.5*mTkPars.getCurv()*dS*dS;
@@ -735,7 +735,7 @@ double StvFitter::Xi2()
   mXi2 = JoinTwo(5,(const double*)F      ,(const double*)(*mInErrs)
                 ,5,Zero                  ,(const double*)(*mJnErrs)
 		  ,(      double*)mQQPars,(      double*)  mQQErrs );
-  mFailed = (mXi2>kXtraBigXi2); 
+  if (mXi2>kXtraBigXi2) mXi2 = kXtraBigXi2; 
   return mXi2;
 }  
 //______________________________________________________________________________
@@ -743,7 +743,7 @@ int StvFitter::Update()
 {
 static int nCall=0; nCall++;
 StvDebug::Break(nCall);
-  if(mFailed>0) return mFailed;
+//  if(mFailed>0) return mFailed;
   mFailed = 0;
   switch (mKase) {
     case 0: mFailed = Hpdate(); break;		//Hit+Track
@@ -756,7 +756,7 @@ StvDebug::Break(nCall);
 
   mOtErrs->Update(mOtPars->getTkDir());
 
-  return mFailed;
+  return 0;
 }
 //______________________________________________________________________________
 int StvFitter::Hpdate()
@@ -776,7 +776,7 @@ int StvFitter::Hpdate()
 		        ,  mQQPars  ,*mOtErrs);
 
   assert(fabs(mXi2-myXi2)<1e-2*mXi2);
-  mFailed = (myXi2>kXtraBigXi2); 
+  assert(myXi2<kXtraBigXi2); 
   *mOtPars = mTkPars;
 #if 1
   if (!mFailed) {
@@ -793,7 +793,7 @@ int StvFitter::Hpdate()
     } while(0);
   }
 #endif
-  return mFailed;
+  return 0;
 }  
 //______________________________________________________________________________
 int StvFitter::Vpdate()
@@ -820,7 +820,7 @@ int StvFitter::Jpdate()
 ///		this is Update for sub track+sub track fit (join)
   *mOtPars = *mJnPars; 
   *mOtErrs =  mQQErrs;   
-  return mFailed;
+  return 0;
 }
 //______________________________________________________________________________
 double StvFitter::TooBig(StvFitPars &fp, int *mask) const
