@@ -138,10 +138,10 @@ static const double c45 = cos(3.14/180*45);
 
 //		mTL = (cos(Lam)*cos(Phi),cos(Lam)*sin(Phi),sin(Lam))
   mSl = mTL[2],mCl2 = ((1-mSl)*(1+mSl));
-  if (mCl2<k2MinCosLam) 				return 1; //Lambda too big
+  if (mCl2<k2MinCosLam) mCl2 = k2MinCosLam; 		//Lambda too big
   mCl=sqrt(mCl2); mSp = mTL[1]/mCl; mCp = mTL[0]/mCl; 
 
-  if (fabs(mCp) < kMinCosPsi) 				return 2; //Phi (psi) too big
+  if (fabs(mCp) < kMinCosPsi) mCp = (	mCp<0)? -kMinCosPsi:kMinCosPsi; //Phi (psi) too big
   mSp2 = mSp*mSp; mCp2 = mCp*mCp; mSl2=mSl*mSl;
   mCpCl = fabs(mCp*mCl); if (mCpCl < kMinCpCl) mCpCl = kMinCpCl;
 
@@ -174,11 +174,10 @@ int StvHitErrCalculator::CalcDcaErrs(const float hiPos[3]
 //------------------------------------------------------------------------------
 static const double kMicron2 = 1.5e-8;
    mCp2 = -1; 			//To test of calling CalcLocals
-   double detRr[3];
-   int ans = CalcDetErrs(hiPos,hiDir,detRr);
+   double detRr[3]={0};
+   CalcDetErrs(hiPos,hiDir,detRr);
    if (detRr[0]<kMicron2) detRr[0]=kMicron2;
    if (detRr[2]<kMicron2) detRr[2]=kMicron2;
-   if (ans) return ans;
    double dudy = DOT(mTG[1],hiDir[1]);
    double dudz = DOT(mTG[1],hiDir[2]);
    double dvdy = DOT(mTG[2],hiDir[1]);
@@ -201,9 +200,8 @@ static int nCall = 0; nCall++;
 /// Calculate hit error matrix in DCA  system. In this system
 /// track is along x axis, Y axis comes thru hit point 
    mCp2 = -1; 			//To test of calling CalcLocals
-   int ans = CalcDetErrs(hiPos,hiDir,0);
-   if (mCp2 <= -1) {ans = CalcLocals(hiDir);}
-   if (ans) return ans;
+   CalcDetErrs(hiPos,hiDir,0);
+   if (mCp2 <= -1) {CalcLocals(hiDir);}
    TCL::trasat(mTT[0],mDRr,mTRr,3,3); 
 //   TCL::tratsa(mTT[0],mDRr,mTRr,3,3); 
    if (!hRr) return 0;
@@ -284,8 +282,7 @@ int StvTpcHitErrCalculator::CalcDetErrs(const float hiPos[3]
   double Rxy = sqrt(hiPos[0]*hiPos[0]+hiPos[1]*hiPos[1]);
   if ( Rxy < 100 ) {assert( strstr(GetName(),"Inner"));}
 
-  int ans = CalcLocals(hiDir);
-  if (ans) return ans;
+  CalcLocals(hiDir);
 
   memset(mDD[0],0,mNPar*sizeof(mDD[0]));
   memset(mDRr,0,sizeof(mDRr));
@@ -378,8 +375,7 @@ int StvTpcGeoErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3
 /// Calculate hit error matrix in local detector system. In this system
 /// detector plane is x = const 
 
-  int ans =CalcLocals(hiDir);
-  if (ans) return ans;
+  CalcLocals(hiDir);
 
   memset(mDD[0],0,mNPar*sizeof(mDD[0]));
   double myTp = mSp/mCp, myTp2 = myTp*myTp;
@@ -424,8 +420,7 @@ int StvTpcStiErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3
 /// detector plane is x = const 
 // <dX*dX>  = DD/12
 // 
-  int ans = CalcLocals(hiDir);
-  if (ans) return ans;
+  CalcLocals(hiDir);
   mZSpan = fabs(fabs(hiPos[2])-210)/100;
   mCpCl = 1;
   double myTp = mSp/mCp, myTp2 = myTp*myTp;
