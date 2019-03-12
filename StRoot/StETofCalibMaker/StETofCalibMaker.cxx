@@ -30,6 +30,7 @@
 #include "TFile.h"
 #include "TH1F.h"
 #include "TProfile.h"
+#include "TMath.h"
 
 #include "StEvent.h"
 #include "StETofCollection.h"
@@ -1100,7 +1101,7 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
     }
 
     // ignore digis flaged as pulsers ( calibTot = -999. )
-    if( fabs( aDigi->calibTot() + 999. ) < 1.e-5 ) {
+    if( TMath::Abs( aDigi->calibTot() + 999. ) < 1.e-5 ) {
         if( mDebug ) {
             LOG_INFO << "digi flaged as pulser --> skip" << endm;
         }
@@ -1189,7 +1190,7 @@ StETofCalibMaker::calibTotFactor( StETofDigi* aDigi )
     if( mDigiTotCorr.count( key ) ) {
         float binContent = mDigiTotCorr.at( key )->GetBinContent( bin );
 
-        if( fabs( binContent ) > 1e-5 ) {
+        if( TMath::Abs( binContent ) > 1e-5 ) {
             if( mDebug ) {
                 LOG_DEBUG << "calibTotFactor: histogram with key " << key << " at bin " << bin << " -> return bin content: " << binContent << endm;
             }
@@ -1282,7 +1283,7 @@ StETofCalibMaker::triggerTime( StETofHeader* header )
     double triggerTime = header->trgGdpbFullTime();
 
     // count the occurance of a given trigger time stamp in the GdbpTs map of the eTOF header
-    std::map< uint64_t, short > countsGdpbTs;
+    std::map< ULong64_t, short > countsGdpbTs;
     for( const auto& kv : header->rocGdpbTs() ) {
         if( mDebug ) {
             LOG_DEBUG << "triggerTime (" << std::hex << "Ox" << kv.first << std::dec << ")  " << kv.second * eTofConst::coarseClockCycle * 1.e-9 << endm; 
@@ -1291,14 +1292,14 @@ StETofCalibMaker::triggerTime( StETofHeader* header )
     }
 
     // combine adjacent trigger times to get the number of right trigger time stamps without outliers
-    std::map< uint64_t, short > combinedCountsGdpbTs;
+    std::map< ULong64_t, short > combinedCountsGdpbTs;
     for( auto it = countsGdpbTs.begin(); it != countsGdpbTs.end(); it++ ) {
         if( mDebug ) {
             LOG_INFO << it->first << "  " << it->second << endm;
         }
         auto next = std::next( it, 1 );
 
-        if( next != countsGdpbTs.end() &&  abs( next->first - it->first ) == 1 ) {
+        if( next != countsGdpbTs.end() &&  TMath::Abs(Long64_t (next->first - it->first )) == 1 ) {
             combinedCountsGdpbTs[ it->first ] = it->second + next->second;
         }
         else if( next == countsGdpbTs.end() && combinedCountsGdpbTs.size() == 0 ) {
@@ -1315,7 +1316,7 @@ StETofCalibMaker::triggerTime( StETofHeader* header )
     // take the trigger Ts that occured most often in the combined counting map
     if( combinedCountsGdpbTs.size() > 0 ) {
         auto it = std::max_element( combinedCountsGdpbTs.begin(), combinedCountsGdpbTs.end(),
-                                    []( const pair< uint64_t, short >& p1, const pair< uint64_t, short >& p2 ) {
+                                    []( const pair< ULong64_t, short >& p1, const pair< ULong64_t, short >& p2 ) {
                                     return p1.second < p2.second; } );
 
         triggerTime = it->first * eTofConst::coarseClockCycle;
@@ -1341,7 +1342,7 @@ double
 StETofCalibMaker::resetTime( StETofHeader* header )
 {
     // count the occurance of a given reset time stamp in the StarTs map of the eTOF header
-    std::map< uint64_t, short > countsStarTs;
+    std::map< ULong64_t, short > countsStarTs;
     for( const auto& kv : header->rocStarTs() ) {
         if( mDebug ) {
             LOG_DEBUG << "resetTime (" << std::hex << "Ox" << kv.first << std::dec << ")  " << kv.second * eTofConst::coarseClockCycle * 1.e-9 << endm; 
@@ -1358,13 +1359,13 @@ StETofCalibMaker::resetTime( StETofHeader* header )
 
     while( countsStarTs.size() > 0 ) {
         auto it = std::max_element( countsStarTs.begin(), countsStarTs.end(),
-                                    []( const pair< uint64_t, short >& p1, const pair< uint64_t, short >& p2 ) {
+                                    []( const pair< ULong64_t, short >& p1, const pair< ULong64_t, short >& p2 ) {
                                     return p1.second < p2.second; } );
 
         double resetTime = it->first * eTofConst::coarseClockCycle;
 
         // trigger - reset time should be on the order of a few second up to 45 minutes ( run length )
-        if( fabs( mTriggerTime - resetTime ) * 1.e-9 < 3000 ) {
+        if( TMath::Abs( mTriggerTime - resetTime ) * 1.e-9 < 3000 ) {
             if( mDebug ) {
                 LOG_DEBUG << "reset time (ns): " << resetTime << " --> difference to trigger time in secoonds: " << ( mTriggerTime - resetTime ) * 1.e-9 << endm;
             }
