@@ -56,7 +56,7 @@ class etofBuilder : public JevpBuilder {
       struct {
         TH1* nDigis;
         TH1* nDigisVsTofTrgMult;
-        
+
         TH1* digiTot;
         TH1* digiTimeToTrigger;
 
@@ -66,23 +66,28 @@ class etofBuilder : public JevpBuilder {
         TH1* nDigisPerGdpb[ 12 ];
         TH1* digiTotPerGdpb[ 12 ];
         TH1* digiMappedChannelNumberPerGdpb[ 12 ];
+        TH1* nPulsersPerSide[ 12 ];
 
         TH1* digiDensityAllChannels;
+        TH1* digiDensityInTimingWindow;
 
         TH1* triggerTimeDiffSectors[ 11 ];
-        TH1* resetTimeDiffSectors[ 11 ];
+        TH1* resetTimeDiffSectors[ 12 ];
         TH1* missingTriggerTs;
         TH1* triggerTimeToResetTime;
 
-        TH1* pulserDigiTimeDiff[ 216 ];      
+        TH1* pulserDigiTimeDiff[ 216 ];
       };
     } contents;
     
     union {
       TH1* array[];
       struct {
+        TH1* nMissingPulsersPerSide[ 12 ];
         TH1* triggerTimeDiffSectorsOverflow[ 11 ];
-        TH1* pulserDigiTimeDiffOverflow[ 216 ];  
+        TH1* resetTimeDiffSectorsOverflow[ 12 ];
+        TH1* pulserDigiTimeDiffOverflow[ 216 ];
+
       };
     } extras;
 
@@ -101,7 +106,12 @@ class etofBuilder : public JevpBuilder {
 
     std::vector< unsigned int > get4ToPadi;
     std::vector< unsigned int > eLinkToGet4;
+
+    std::map< int, int > pulserPeakTot;
 #endif
+
+    TLatex* resetTimeLabel1;
+    TLatex* resetTimeLabel2;
 
     unsigned int nrOfGdpbInSys;
     unsigned int nrOfGbtxPerGdpb;

@@ -161,10 +161,27 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
     }
 
 
+    pulserPeakTot[ 13 ] = 49;
+    pulserPeakTot[ 14 ] = 49;
+    pulserPeakTot[ 15 ] = 98;
+    pulserPeakTot[ 16 ] = 98;
+    pulserPeakTot[ 17 ] = 49;
+    pulserPeakTot[ 18 ] = 49;
+    pulserPeakTot[ 19 ] = 49;
+    pulserPeakTot[ 20 ] = 49;
+    pulserPeakTot[ 21 ] = 98;
+    pulserPeakTot[ 22 ] = 98;
+    pulserPeakTot[ 23 ] = 49;
+    pulserPeakTot[ 24 ] = 49;
+
+    pulserPeakTot[ 2421 ] = 15;
+
+
+
     // Build Root Histograms...
     contents.nDigis             = new TH1D( "nDigis", "# digis inside timing window;# digis;# events", 300, 0, 300 );
 
-    contents.nDigisVsTofTrgMult = new TH2D( "nDigisVsTofTrgMult", "# digis vs bTOF multiplicity;# digis in timing window;bTof mult in trigger data;# events", 300, 0, 300, 200, 0, 400 ); 
+    contents.nDigisVsTofTrgMult = new TH2D( "nDigisVsTofTrgMult", "# digis vs bTOF multiplicity;# digis in timing window;bTof mult in trigger data;# events", 200, 0, 400, 200, 0, 800 ); 
 
     contents.digiTot            = new TH1D( "digiTot",           "digi tot;tot (bins);#digis", 256, 0, 256 );
     contents.digiTimeToTrigger  = new TH1D( "digiTimeToTrigger", "digi time to trigger;time to trigger (#mus);# digis", 500, -4., 1. );
@@ -177,9 +194,42 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
         contents.nDigisPerGdpb[ i ]                  = new TH1D( Form( "nDigisPerGdpb_%d", i ),  Form( "# digis on Gdpb %#06x (sector %d);# digis;# events",  gdpbRevMap[ i ], sector[ i ] ), 100, 0, 100 );
         contents.digiTotPerGdpb[ i ]                 = new TH1D( Form( "digiTotPerGdpb_%d", i ), Form( "digi tot on Gdpb %#06x (sector %d);# digis;# events", gdpbRevMap[ i ], sector[ i ] ), 256, 0, 256 );
         contents.digiMappedChannelNumberPerGdpb[ i ] = new TH1D( Form( "digiMappedChannelNumberPerGdpb_%d", i), Form( "mapped channel number on Gdpb %#06x (sector %d);mapped channel;# digis", gdpbRevMap[ i ], sector[ i ] ), 965, -5, 960 );
+        contents.nPulsersPerSide[ i ]                = new TH1D( Form( "nPulsersPerSide_%d", i ),  Form( "# pulsers on Gdpb %#06x (sector %d);# digis;# events",  gdpbRevMap[ i ], sector[ i ] ), 18, 0, 18 );
+
+        contents.nPulsersPerSide[ i ]->GetXaxis()->SetLabelFont( 102 );
+
+        contents.nPulsersPerSide[ i ]->GetXaxis()->SetBinLabel( 1, "1-1-1" );
+        contents.nPulsersPerSide[ i ]->GetXaxis()->SetBinLabel( 2, "1-1-2" );
+        contents.nPulsersPerSide[ i ]->GetXaxis()->SetBinLabel( 3, "1-2-1" );
+        contents.nPulsersPerSide[ i ]->GetXaxis()->SetBinLabel( 4, "1-2-2" );
+        contents.nPulsersPerSide[ i ]->GetXaxis()->SetBinLabel( 5, "1-3-1" );
+        contents.nPulsersPerSide[ i ]->GetXaxis()->SetBinLabel( 6, "1-3-2" );
+
+        contents.nPulsersPerSide[ i ]->GetXaxis()->SetBinLabel( 7, "2-1-1" );
+        contents.nPulsersPerSide[ i ]->GetXaxis()->SetBinLabel( 8, "2-1-2" );
+        contents.nPulsersPerSide[ i ]->GetXaxis()->SetBinLabel( 9, "2-2-1" );
+        contents.nPulsersPerSide[ i ]->GetXaxis()->SetBinLabel( 10, "2-2-2" );
+        contents.nPulsersPerSide[ i ]->GetXaxis()->SetBinLabel( 11, "2-3-1" );
+        contents.nPulsersPerSide[ i ]->GetXaxis()->SetBinLabel( 12, "2-3-2" );
+
+        contents.nPulsersPerSide[ i ]->GetXaxis()->SetBinLabel( 13, "3-1-1" );
+        contents.nPulsersPerSide[ i ]->GetXaxis()->SetBinLabel( 14, "3-1-2" );
+        contents.nPulsersPerSide[ i ]->GetXaxis()->SetBinLabel( 15, "3-2-1" );
+        contents.nPulsersPerSide[ i ]->GetXaxis()->SetBinLabel( 16, "3-2-2" );
+        contents.nPulsersPerSide[ i ]->GetXaxis()->SetBinLabel( 17, "3-3-1" );
+        contents.nPulsersPerSide[ i ]->GetXaxis()->SetBinLabel( 18, "3-3-2" );
+
+        contents.nPulsersPerSide[ i ]->SetMinimum( 0.9 );
+
+        extras.nMissingPulsersPerSide[ i ] = new TH1D( Form( "nMissingPulsersPerSide_%d", i ), "", 18, 0, 18 );
+        extras.nMissingPulsersPerSide[ i ]->SetLineColor( kRed );
     }
 
-    contents.digiDensityAllChannels = new TH2D( "digiDensityAllChannels", "digi density;;(counter-1) * 3 + strip;# digis", 72, 0.5, 72.5, 96, 0.5, 96.5 );
+
+
+
+
+    contents.digiDensityAllChannels = new TH2D( "digiDensityAllChannels", "digi density all;;(counter-1) * 3 + strip;# digis", 72, 0.5, 72.5, 96, 0.5, 96.5 );
     for( size_t i=0; i<12; i++ ) {
         contents.digiDensityAllChannels->GetXaxis()->SetBinLabel( i * 6 + 1, Form( "%d-1-1", i + 13 ) );
         contents.digiDensityAllChannels->GetXaxis()->SetBinLabel( i * 6 + 2, Form( "%d-1-2", i + 13 ) );
@@ -191,7 +241,7 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
     contents.digiDensityAllChannels->GetXaxis()->SetLabelSize(   0.03  );
     contents.digiDensityAllChannels->GetXaxis()->SetLabelOffset( 0.004 );
     contents.digiDensityAllChannels->GetXaxis()->SetLabelFont(   102   );
-    contents.digiDensityAllChannels->GetYaxis()->SetTickLength(  0.01  );
+    contents.digiDensityAllChannels->GetXaxis()->SetTickLength(  0.01  );
 
     contents.digiDensityAllChannels->GetYaxis()->SetTitleSize(   0.05  );
     contents.digiDensityAllChannels->GetYaxis()->SetTitleOffset( 0.9   );
@@ -203,26 +253,38 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
     contents.digiDensityAllChannels->GetZaxis()->CenterTitle(    true  );
     contents.digiDensityAllChannels->GetZaxis()->SetTickLength(  0.01  );
 
+    contents.digiDensityAllChannels->SetMinimum( 1. );
+
+    contents.digiDensityInTimingWindow = (TH2D* ) contents.digiDensityAllChannels->Clone( "digiDensityInTimingWindow" );
+    contents.digiDensityInTimingWindow->SetTitle( "digi density in timing window;;(counter-1) * 3 + strip;# digis" );
+
 
     for( size_t i=0; i<11; i++ ) {
         contents.triggerTimeDiffSectors[ i ] = new TH1D( Form( "triggerTimeDiffSector13to%d", i+14 ), Form( "trigger time difference sector 13 - %d;# clock ticks;# events", i + 14 ), 200,  -99.5, 100.5 );
         extras.triggerTimeDiffSectorsOverflow[ i ] = new TH1D( Form( "triggerTimeDiffSector13to%dOverflow", i+14 ), Form( "trigger time difference sector 13 - %d;# clock ticks;# events", i + 14 ), 200,  -99.5, 100.5 );
         extras.triggerTimeDiffSectorsOverflow[ i ]->SetLineColor( kRed );
         extras.triggerTimeDiffSectorsOverflow[ i ]->SetFillColor( kRed );
+    }
 
-        contents.resetTimeDiffSectors[ i ] = new TH1D( Form( "resetTimeDiffSector24to%d",   i+13 ), Form( "reset time difference sector 24 - %d;# clock ticks;# events", i + 13 ), 200,  -99.5, 100.5 );
+    for( size_t i=0; i<12; i++ ) {
+        contents.resetTimeDiffSectors[ i ] = new TH1D( Form( "resetTimeDiffSector%dtoRef", i+13 ), Form( "reset time diff. sector %d to most freq.;# clock ticks;# events", i + 13 ), 21,  -10.5, 10.5 );
+        extras.resetTimeDiffSectorsOverflow[ i ] = new TH1D( Form( "resetTimeDiffSector%dtoRefOverflow", i+13 ), Form( "reset time diff. sector %d to most freq.;# clock ticks;# events", i + 13 ), 21,  -10.5, 10.5 );
+        extras.resetTimeDiffSectorsOverflow[ i ]->SetLineColor( kRed );
+        extras.resetTimeDiffSectorsOverflow[ i ]->SetFillColor( kRed );
     }
 
     contents.missingTriggerTs       = new TH1D( "missingTriggerTs",       "missing trigger timestamps per sector;sector;# missing trigger timestamps", 12, 13, 25 );
     contents.triggerTimeToResetTime = new TH1D( "triggerTimeToResetTime", "trigger time to reset time;time difference (s);#events", 1000, 1, 2001 );
+
+    contents.missingTriggerTs->SetMinimum( 0.9 );
 
     for( size_t i=0; i<216; i++ ) {
         int sec = (i / 18) + 13;
         int mod = (i % 18) / 6 + 1;
         int cou = (i %  6) / 2 + 1;
         int sid = (i %  2) + 1;
-        contents.pulserDigiTimeDiff[ i ] = new TH1D( Form( "pulserDigiTimeDiff_%d", i ), Form( "sector %d module %d counter %d side %d to reference pulser;#Delta T (ns)", sec, mod, cou, sid ), 405, -540.5 * ( 6.25 / 112 ), 270.5 * ( 6.25 / 112 ) );
-        extras.pulserDigiTimeDiffOverflow[ i ] = new TH1D( Form( "pulserDigiTimeDiffOverflow_%d", i ), Form( "sector %d module %d counter %d side %d to reference pulser;#Delta T (ns)", sec, mod, cou, sid ), 405, -540.5 * ( 6.25 / 112 ), 270.5 * ( 6.25 / 112 ) );
+        contents.pulserDigiTimeDiff[ i ] = new TH1D( Form( "pulserDigiTimeDiff_%d", i ), Form( "sector %d module %d counter %d side %d to reference pulser;#Delta T (ns)", sec, mod, cou, sid ),               360, -540.5 * ( 6.25 / 112 ), 540.5 * ( 6.25 / 112 ) );
+        extras.pulserDigiTimeDiffOverflow[ i ] = new TH1D( Form( "pulserDigiTimeDiffOverflow_%d", i ), Form( "sector %d module %d counter %d side %d to reference pulser;#Delta T (ns)", sec, mod, cou, sid ), 360, -540.5 * ( 6.25 / 112 ), 540.5 * ( 6.25 / 112 ) );
         extras.pulserDigiTimeDiffOverflow[ i ]->SetLineColor( kRed );
         extras.pulserDigiTimeDiffOverflow[ i ]->SetFillColor( kRed );
     }
@@ -244,19 +306,33 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
             jp->logy = 0;
         }
 
-        if( contents.array[ i ] == contents.digiDensityAllChannels ) {
+        if( contents.array[ i ] == contents.digiDensityAllChannels    ||
+            contents.array[ i ] == contents.digiDensityInTimingWindow  ) {
             jp->logy = 0;
+            jp->optlogz = 1;
             jp->setOptStat( 0 );
         }
 
-        if( contents.array[ i ] == contents.nDigisVsTofTrgMult     ||
-            contents.array[ i ] == contents.digiDensityAllChannels ) {
+
+        for( size_t j=0; j<12; j++ ) {
+            if( contents.array[ i ] == contents.nPulsersPerSide[ j ] ) {
+                jp->setOptStat( 0 );
+                jp->addHisto( extras.nMissingPulsersPerSide[ j ] );
+            }
+        }
+
+        if( contents.array[ i ] == contents.nDigisVsTofTrgMult ) {
             jp->optlogz = 1;
         }
 
         for( size_t j=0; j<11; j++ ) {
             if( contents.array[ i ] == contents.triggerTimeDiffSectors[ j ] ) {
                 jp->addHisto( extras.triggerTimeDiffSectorsOverflow[ j ] );
+            }
+        }
+        for( size_t j=0; j<12; j++ ) {
+            if( contents.array[ i ] == contents.resetTimeDiffSectors[ j ] ) {
+                jp->addHisto( extras.resetTimeDiffSectorsOverflow[ j ] );
             }
         }
         for( size_t j=0; j<216; j++ ) {
@@ -268,6 +344,13 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
         if( contents.array[ i ] == contents.triggerTimeToResetTime ) {
             jp->logx = 1;
             jp->logy = 0;
+
+            resetTimeLabel1 = new TLatex();
+            resetTimeLabel2 = new TLatex();
+            resetTimeLabel1->SetNDC();
+            resetTimeLabel2->SetNDC();
+            jp->addElement( resetTimeLabel1 );
+            jp->addElement( resetTimeLabel2 );
         }
 
 
@@ -472,17 +555,7 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
                 }
                 if( diff < -99 ) {
                     extras.triggerTimeDiffSectorsOverflow[ i ]->AddBinContent( 1, 1 );
-                    extras.triggerTimeDiffSectorsOverflow[ i ]->AddBinContent( 2, 1 );   
-                }
-            }
-        }
-    }
-    if( starTsMap.count( 11 ) ) {
-        for( size_t i=0; i<11; i++ ) {
-            if( starTsMap.count( i ) ) {
-                int64_t diff = ( int64_t ) ( starTsMap.at( 11 ) - starTsMap.at( i ) );
-                if( diff < 100 && diff > -99 && starTsMap.at( i ) != 0 ) {
-                    contents.resetTimeDiffSectors[ i ]->Fill( diff );
+                    extras.triggerTimeDiffSectorsOverflow[ i ]->AddBinContent( 2, 1 );
                 }
             }
         }
@@ -496,20 +569,73 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
                                       []( const pair< uint64_t, short >& p1, const pair< uint64_t, short >& p2 ) {
                                       return p1.second < p2.second; } );
 
+    int64_t mostFrequentTriggerTs = 0;
+    if( gdpbTsMap.size() > 0 ) {
+        mostFrequentTriggerTs = iterGdpb->first;
+    }
+
+
+
     map< uint64_t, short > countsStarTs;
-    for( const auto& kv : starTsMap ) ++countsStarTs[ kv.second ];
+    for( const auto& kv : starTsMap ) {
+        if( kv.second == 0 ) continue;
 
-    auto iterStar = std::max_element( countsStarTs.begin(), countsStarTs.end(),
-                                      []( const pair< uint64_t, short >& p1, const pair< uint64_t, short >& p2 ) {
-                                      return p1.second < p2.second; } );
+        ++countsStarTs[ kv.second ];
+    }
+
+    int64_t mostFrequentResetTs  = 0;
+    int     nCorrectResetSignals = 0;
+
+    if( countsStarTs.size() > 0 ) {
+        auto iterStar = std::max_element( countsStarTs.begin(), countsStarTs.end(),
+                                        []( const pair< uint64_t, short >& p1, const pair< uint64_t, short >& p2 ) {
+                                        return p1.second < p2.second; } );
+
+        mostFrequentResetTs  = iterStar->first;
+        nCorrectResetSignals = iterStar->second;
+    }
 
 
-    int64_t mostFrequentTriggerTs = iterGdpb->first;
-    int64_t mostFrequentResetTs   = iterStar->first;
+
+    for( size_t i=0; i<12; i++ ) {
+        if( starTsMap.count( i ) ) {
+            int64_t diff = ( int64_t ) ( starTsMap.at( i ) - mostFrequentResetTs );
+            
+            if( starTsMap.at( i ) == 0 ) continue;
+
+            contents.resetTimeDiffSectors[ i ]->Fill( diff );
+
+            if( diff > 10 ) {
+                extras.resetTimeDiffSectorsOverflow[ i ]->AddBinContent( 21, 1 );
+            }
+            else if( diff < -10 ) {
+                extras.resetTimeDiffSectorsOverflow[ i ]->AddBinContent( 1, 1 ); 
+            }
+        }
+    }
+
 
     double triggerTime = mostFrequentTriggerTs * gdpbv100::kdClockCycleSizeNs;
 
     contents.triggerTimeToResetTime->Fill( ( mostFrequentTriggerTs - mostFrequentResetTs ) * gdpbv100::kdClockCycleSizeNs * 1.e-9 );
+
+
+    //add label
+    char t1[ 256 ];
+    char t2[ 256 ];
+
+    sprintf( t1, "reset time stamp: %lld", ( long long int ) mostFrequentResetTs );
+    sprintf( t2, "reported by %d sector(s)", nCorrectResetSignals );
+    
+    if( mostFrequentResetTs == 0 ) {
+        resetTimeLabel1->SetTextColor( kRed );
+        resetTimeLabel2->SetTextColor( kRed );
+    } else {
+        resetTimeLabel1->SetTextColor( kGreen );
+        resetTimeLabel2->SetTextColor( kGreen );
+    }
+    resetTimeLabel1->SetText( 0.12, 0.85, t1 );
+    resetTimeLabel2->SetText( 0.12, 0.80, t2 );
 
 
     size_t nDigisInTimingWindow = 0;
@@ -543,9 +669,9 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
 
                 LOG( DBG, "--> hit message from AFCK %#06x with mappedChannelNr %d", gdpb, mappedChannelNumber );
 
-                if( gdpbMap.count( gdpb ) ) {
-                    contents.digiMappedChannelNumberPerGdpb[ gdpbMap.at( gdpb ) ]->Fill( mappedChannelNumber );
-                }
+                //if( gdpbMap.count( gdpb ) ) {
+                //    contents.digiMappedChannelNumberPerGdpb[ gdpbMap.at( gdpb ) ]->Fill( mappedChannelNumber );
+                //}
                 nDigisPerGdpb.at( gdpb ) += 1;
 
                 unsigned int sector  = hardwareMapSector( gdpb );
@@ -556,12 +682,13 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
 
                 LOG( DBG, "--> hit message on sector %d module %d counter %d strip %d side %d", sector, module, counter, strip, side );
 
+                contents.digiDensityAllChannels->Fill( ( sector - 13 ) * 6 + ( module - 1 ) * 2 + side, ( counter - 1 ) * 32 + strip );
+
                 // calculate time difference to trigger 
                 double digiFullTime  = mess.GetFullTimeNs();
                 double timeToTrigger = digiFullTime - triggerTime;
 
                 contents.digiTimeToTrigger->Fill( timeToTrigger / 1000. );
-
 
                 unsigned int tot = mess.getGdpbHit32Tot();
 
@@ -573,34 +700,16 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
 
                 bool isPulser = false;
                 if( mappedChannelNumber % 32 == 0 ) {
-                    if( tot > 112 && tot < 127 ) {
-                        if( sector == 15 ||
-                            sector == 16 ||
-                            sector == 21 ||
-                            sector == 22 )  {
-                                isPulser = true;
-                        }
-                    }
-                    else if( tot > 54 && tot < 65 ) {
-                        if( sector == 13 ||
-                            sector == 14 ||
-                            sector == 17 ||
-                            sector == 18 ||
-                            sector == 19 ||
-                            sector == 20 ||
-                            sector == 23 ||
-                            sector == 24 )  {
-                                isPulser = true;
-                        }
+                    if( timeToTrigger > 40. && timeToTrigger < 100. ) {
+                        isPulser = true;
                     }
 
-                    if( sector == 24 && module == 2 && side == 1 && fabs( timeToTrigger - 50 ) < 200 ) {
-                        if( tot > 3 && tot < 12 ) {
-                            isPulser = true;
-                        }
-                        else if( tot > 40 && tot < 55 ) {
-                            isPulser = true;
-                        }
+                    if( fabs( tot - pulserPeakTot.at( sector ) ) < 10 ) {
+                        isPulser = true;
+                    }
+
+                    if( sector == 24 && module == 2 && side == 1 && fabs( tot - pulserPeakTot.at( 2421 ) ) < 10 ) {
+                        isPulser = true;
                     }
                 }
 
@@ -613,14 +722,17 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
                         nDigisInTimingWindow++;
                     }
 
-                    contents.digiDensityAllChannels->Fill( ( sector - 13 ) * 6 + ( module - 1 ) * 2 + side, ( counter - 1 ) * 32 + strip );
+                    // cut out the pulser time window 
+                    if( fabs( timeToTrigger - 50. ) > 200. ) {
+                        contents.digiDensityInTimingWindow->Fill( ( sector - 13 ) * 6 + ( module - 1 ) * 2 + side, ( counter - 1 ) * 32 + strip );
 
-                    // fine & coarse time
-                    int fineTs   = mess.getGdpbHitFullTs() % 112;
-                    int coarseTs = mess.getGdpbHitFullTs() / 112;
+                        // fine & coarse time
+                        int fineTs   = mess.getGdpbHitFullTs() % 112;
+                        int coarseTs = mess.getGdpbHitFullTs() / 112;
 
-                    contents.digiFineTs  ->Fill( fineTs   );
-                    contents.digiCoarseTs->Fill( coarseTs );
+                        contents.digiFineTs  ->Fill( fineTs   );
+                        contents.digiCoarseTs->Fill( coarseTs );
+                    }
                 }
 
             }
@@ -661,39 +773,58 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
             double bestDiff = 100000.;
             int index = -1;
 
+            int sector  = ( i / 18 ) + 13;
+            int module  = ( i % 18 ) / 6 + 1;
+            int counter = ( i %  6 ) / 2 + 1;
+            int side    = ( i %  2 ) + 1;
+
             for( size_t j=0; j<pulser.at( i ).size(); j++ ) {
-                double timeDiff = pulser.at( i ).at( j ).GetFullTimeNs() - triggerTime;
+                double timeToTrigger = pulser.at( i ).at( j ).GetFullTimeNs() - triggerTime;
+
+                int k = sector;
+                if( sector == 24 && module == 2 && side == 1 ) k = 2421;
+                double totToPeak = pulser.at( i ).at( j ).getGdpbHit32Tot() - pulserPeakTot.at( k );
+
+                if( pulser.at( i ).size() > 1 ) LOG( DBG, "%d pulsers @ %d-%d-%d %d: time to trigger: %5.2f  tot: %d", pulser.at( i ).size(), sector, module, counter, side, timeToTrigger, pulser.at( i ).at( j ).getGdpbHit32Tot() );
+
                 
                 // remove digis outside the "peak" region ... they are likely misidentified noise
-                if( fabs( timeDiff - 50. ) < bestDiff ) {
-                    bestDiff = fabs( timeDiff - 50. );
+                double currentDiff = fabs( timeToTrigger - 50. ) * 0.1 + fabs( totToPeak );
+                if( currentDiff < bestDiff ) {
+                    bestDiff = currentDiff;
                     index = j;
                 }
             }
+            if( pulser.at( i ).size() > 1 ) LOG( DBG, "-->selected index: %d", index );
+
             pulserTimestamp[ i ] = pulser.at( i ).at( index ).GetFullTimeNs();
+            contents.nPulsersPerSide[ i / 18 ]->Fill( ( i % 18 ) );
+        }
+        else {
+            extras.nMissingPulsersPerSide[ i / 18 ]->Fill( ( i % 18 ) );
         }
     }
+
+    size_t nBinsPulserDiff = contents.pulserDigiTimeDiff[ 0 ]->GetNbinsX();
+    float  min = contents.pulserDigiTimeDiff[ 0 ]->GetXaxis()->GetXmin();
+    float  max = contents.pulserDigiTimeDiff[ 0 ]->GetXaxis()->GetXmax();
 
     for( size_t i=0; i<216; i++ ) {
         if( pulserTimestamp.count( 0 ) && pulserTimestamp.count( i ) ) {
             float diff = pulserTimestamp.at( i ) - pulserTimestamp.at( 0 );
             contents.pulserDigiTimeDiff[ i ]->Fill( diff );
 
-            if( diff >  10. ) {
-                extras.pulserDigiTimeDiffOverflow[ i ]->AddBinContent( 400, 1 );
-                extras.pulserDigiTimeDiffOverflow[ i ]->AddBinContent( 401, 1 );
-                extras.pulserDigiTimeDiffOverflow[ i ]->AddBinContent( 402, 1 );
-                extras.pulserDigiTimeDiffOverflow[ i ]->AddBinContent( 403, 1 );
-                extras.pulserDigiTimeDiffOverflow[ i ]->AddBinContent( 404, 1 );
-                extras.pulserDigiTimeDiffOverflow[ i ]->AddBinContent( 405, 1 );
+            if( diff > max ) {
+                for( size_t j=0; j<10; j++ ) {
+                    extras.pulserDigiTimeDiffOverflow[ i ]->AddBinContent( nBinsPulserDiff - j, 1 );
+                    LOG( DBG, "pulser channel %d with difference: %5.2f", i, diff );
+                }
             }
-            if( diff < -30. ) {
-                extras.pulserDigiTimeDiffOverflow[ i ]->AddBinContent( 1, 1 );
-                extras.pulserDigiTimeDiffOverflow[ i ]->AddBinContent( 2, 1 );
-                extras.pulserDigiTimeDiffOverflow[ i ]->AddBinContent( 3, 1 );
-                extras.pulserDigiTimeDiffOverflow[ i ]->AddBinContent( 4, 1 );
-                extras.pulserDigiTimeDiffOverflow[ i ]->AddBinContent( 5, 1 );
-                extras.pulserDigiTimeDiffOverflow[ i ]->AddBinContent( 6, 1 );
+            if( diff < min ) {
+                for( size_t j=0; j<10; j++ ) {
+                    extras.pulserDigiTimeDiffOverflow[ i ]->AddBinContent( j+1, 1 );
+                    LOG( DBG, "pulser channel %d with difference: %5.2f", i, diff );
+                }
             }
         }
     }
