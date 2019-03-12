@@ -270,8 +270,12 @@ const MeasuredStateOnPlane& KalmanFitterInfo::getFittedState(bool biased) const 
       fittedStateBiased_.reset(new MeasuredStateOnPlane(calcAverageState(*forwardUpdate_, *backwardPrediction_)));
     }
     catch(Exception& e){
+#if 0
       Exception e2("KKalmanFitterInfo::getFittedState - illegal matrix", __LINE__,__FILE__);
       throw e2;
+#else
+      throw;
+#endif
     }
     
     return *fittedStateBiased_;

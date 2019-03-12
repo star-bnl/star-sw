@@ -946,6 +946,13 @@ KalmanFitterRefTrack::processTrackPoint(KalmanFitterInfo* fi, const KalmanFitter
     C_ = prevFi->getUpdate(direction)->getCov();
     C_.Similarity(F);
     C_ += N;
+    TDecompChol d(C_);
+    Bool_t success = d.Decompose();
+    if (!success) {
+      Exception e("KalmanFitterRefTrack::processTrackPoint: ill-conditioned covariance matrix.", __LINE__,__FILE__);
+      throw e;
+    }
+    
     fi->setPrediction(new MeasuredStateOnPlane(p_, C_, fi->getReferenceState()->getPlane(), fi->getReferenceState()->getRep(), fi->getReferenceState()->getAuxInfo()), direction);
     if (debugLvl_ > 1) {
       debugOut << "\033[31m";

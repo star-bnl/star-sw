@@ -22,7 +22,7 @@
 
 #ifndef genfit_Exception_h
 #define genfit_Exception_h
-
+#ifndef __CINT__
 #include <exception>
 #include <string>
 #include <vector>
@@ -106,5 +106,5 @@ class Exception : public std::exception {
 
 } /* End of namespace genfit */
 /** @} */
-
+#endif // __CINT__
 #endif // genfit_Exception_h
