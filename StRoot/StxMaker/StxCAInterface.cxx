@@ -188,10 +188,11 @@ void StxCAInterface::MakeHits() {
 	  StSPtrVecTpcHit &hits = rowCollection->hits();
 	  Long64_t NoHits = hits.size();
 	  for (Long64_t k = 0; k < NoHits; k++) {
-	    const StTpcHit *tpcHit = static_cast<const StTpcHit *> (hits[k]);
+	    StTpcHit *tpcHit = static_cast<StTpcHit *> (hits[k]);
 	    if ( ! tpcHit) continue;
 	    if (tpcHit->flag() & FCF_CHOPPED || tpcHit->flag() & FCF_SANITY)     continue; // ignore hits marked by AfterBurner as chopped or bad sanity
 	    if (tpcHit->pad() > 182 || tpcHit->timeBucket() > 511) continue; // some garbadge  for y2001 daq
+	    tpcHit->setFitFlag(0);
 	    Int_t Id = fSeedHits.size();
 	    StThreeVectorD glob(tpcHit->position());
 	    // obtain seed Hit
