@@ -5,6 +5,8 @@
 #include "TApplication.h"
 #include "TFile.h"
 #include "TError.h"
+#include "Riostream.h"
+#include <exception>
 StCloseFileOnTerminate *StCloseFileOnTerminate::fgCloseFileOnTerminate = 0;
 //_________________________________________________________
 StCloseFileOnTerminate:: StCloseFileOnTerminate() : TSignalHandler(kSigTermination, kFALSE)
@@ -18,6 +20,7 @@ StCloseFileOnTerminate &StCloseFileOnTerminate::Instantiate()
   if (! fgCloseFileOnTerminate ) {
      fgCloseFileOnTerminate = new StCloseFileOnTerminate;
      ::Warning("StCloseFileOnTerminate::Instantiate","Asynch signal handler has been created");
+     std::set_terminate([](){ std::cout << "Unhandled exception\n"; fgCloseFileOnTerminate->Notify(); std::abort();});
   }
   return *fgCloseFileOnTerminate;
 }
