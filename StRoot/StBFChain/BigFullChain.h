@@ -1179,7 +1179,7 @@ Bfc_st BFC[] = { // standard chains
   {"B2019"  ,"","","r2019,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout,CorrX","",""
    ,                                                     "Production chain for run 2019 data (tpc)",kFALSE},
   {"P2019","" ,"",
-   "B2019,StiCA,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
+   "B2019,StiCA,UseXgeom,BAna,hitfilt,VFMinuit,btof,mtd,l3onl,emcDY2,btof,mtd,epdHit,,trgd,ZDCvtx,analysis"
    ,                 "","","Production chain for year 2019 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   // 
   {"B2019a" ,"","","ry2019a,in,tpcX,UseXgeom,iTpcIT,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite",
