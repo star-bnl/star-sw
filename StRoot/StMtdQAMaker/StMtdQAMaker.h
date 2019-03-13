@@ -48,6 +48,7 @@ class StMtdQAMaker : public StMaker {
   void     setMtdTrigUtil(StMtdTrigUtil* trig);
   void     setVertexMode(const Int_t mode);
   void     setMaxVtxZ(const Double_t max);
+  void     setApplyMaxVtxDzCut(const Bool_t cut);
   void     setMaxVtxDz(const Double_t max);
   void     setTrackPtLimits(const Double_t min, const Double_t max);
   void     setTrackPhiLimits(const Double_t min, const Double_t max);
@@ -107,6 +108,7 @@ class StMtdQAMaker : public StMaker {
   
   // track quality cuts
   Double_t         mMaxVtxZ;                                   // Maximum vertex z
+  Bool_t           mApplyVtxDzCut;                             // 
   Double_t         mMaxVtxDz;                                  // Maximum dz between VPD and TPC
   Double_t         mMinTrkPt;                                  // Minimum track pt
   Double_t         mMaxTrkPt;                                  // Maximum track pt
@@ -304,6 +306,7 @@ inline void StMtdQAMaker::setPrintMemory(const Bool_t pMem)        { mPrintMemor
 inline void StMtdQAMaker::setPrintCpu(const Bool_t pCpu)           { mPrintCpu = pCpu;         }
 inline void StMtdQAMaker::setPrintConfig(const Bool_t print)       { mPrintConfig = print;     }
 inline void StMtdQAMaker::setVertexMode(const Int_t mode)          { mVertexMode = mode;       }
+inline void StMtdQAMaker::setApplyMaxVtxDzCut(const Bool_t cut)    { mApplyVtxDzCut = cut;     }
 inline void StMtdQAMaker::setMaxVtxZ(const Double_t max)           { mMaxVtxZ = max;           }
 inline void StMtdQAMaker::setMaxVtxDz(const Double_t max)          { mMaxVtxDz = max;          }
 inline void StMtdQAMaker::setMinNHitsFit(const Int_t min)          { mMinNHitsFit = min;       }

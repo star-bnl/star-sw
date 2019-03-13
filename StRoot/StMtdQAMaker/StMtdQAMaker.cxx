@@ -75,7 +75,7 @@ StMtdQAMaker::StMtdQAMaker(const Char_t *name) :
   mStEvent(NULL), mMuDst(NULL), mPicoDst(NULL), mTrigUtil(NULL),
   mRunId(-1), mRunYear(-1), mCollisionSystem("pp"), mVertexMode(1),
   mPrintMemory(kFALSE), mPrintCpu(kFALSE), mPrintConfig(kFALSE), mTriggerIDs(0),
-  mMaxVtxZ(100.), mMaxVtxDz(3.),
+  mMaxVtxZ(100.), mApplyVtxDzCut(kTRUE), mMaxVtxDz(3.),
   mMinTrkPt(1.0), mMaxTrkPt(100), mMinTrkPhi(0.), mMaxTrkPhi(2*pi), mMinTrkEta(-1), mMaxTrkEta(1),
   mMinNHitsFit(15), mMinNHitsDedx(10), mMinFitHitsFraction(0.52), mMaxDca(3.), 
   mMinMuonPt(1.3), mMinNsigmaPi(-2), mMaxNsigmaPi(3), mMinMuonDeltaZ(-20.), mMaxMuonDeltaZ(20.),
@@ -441,7 +441,7 @@ Int_t StMtdQAMaker::processMuDst()
   mhVtxZDiff->Fill(tpcvz-vpdvz);
   mhVtxZDiffVsTpcVz->Fill(tpcvz, tpcvz-vpdvz);
   if(fabs(tpcvz)>mMaxVtxZ)        return kStOK;
-  if(fabs(tpcvz-vpdvz)>mMaxVtxDz) return kStOK;
+  if(mApplyVtxDzCut && fabs(tpcvz-vpdvz)>mMaxVtxDz) return kStOK;
   mhEventStat->Fill(3.5);
   for(UInt_t i=0; i<mTriggerIDs.size(); i++)
     {
@@ -949,7 +949,7 @@ Int_t StMtdQAMaker::processPicoDst()
   mhVtxZDiff->Fill(tpcvz-vpdvz);
   mhVtxZDiffVsTpcVz->Fill(tpcvz, tpcvz-vpdvz);
   if(fabs(tpcvz)>mMaxVtxZ)        return kStOK;
-  if(fabs(tpcvz-vpdvz)>mMaxVtxDz) return kStOK;
+  if(mApplyVtxDzCut && fabs(tpcvz-vpdvz)>mMaxVtxDz) return kStOK;
   mhEventStat->Fill(3.5);
   for(UInt_t i=0; i<mTriggerIDs.size(); i++)
     {
@@ -2046,8 +2046,11 @@ Double_t StMtdQAMaker::rotatePhi(Double_t phi) const
 }
 
 //
-//// $Id: StMtdQAMaker.cxx,v 1.20 2018/12/04 13:34:29 marr Exp $
+//// $Id: StMtdQAMaker.cxx,v 1.21 2019/03/13 20:49:18 marr Exp $
 //// $Log: StMtdQAMaker.cxx,v $
+//// Revision 1.21  2019/03/13 20:49:18  marr
+//// Add option to stwich on/off VtxDz cut
+////
 //// Revision 1.20  2018/12/04 13:34:29  marr
 //// i) Fill MtdVpdTacSum histograms for muon candidates without requiring firing the trigger ii) Fix a bug related a changed in MtdTrigUtil
 ////
