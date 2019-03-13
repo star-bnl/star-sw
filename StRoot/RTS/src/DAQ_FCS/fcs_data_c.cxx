@@ -26,7 +26,7 @@ double fcs_data_c::fee_currents[8][32][3] ;	// 8 RDOs, 32 channel
 struct fcs_data_c::fcs_ped_t fcs_data_c::ped[8] ;	// 8 RDO
 u_int fcs_data_c::run_number ;
 u_int fcs_data_c::run_type ;
-
+struct fcs_data_c::rdo_map_t fcs_data_c::rdo_map[8] ;
 
 
 	
@@ -34,14 +34,19 @@ int fcs_data_c::zs_start(u_short *buff)
 {
 	int thr ;
 	int l_cou ;
-	
-	if(ch==32) {
+	int l_pre, l_post ;
+
+	if(ch==32) {	// this is the trigger data channel, no need to go pre/post
 		thr = 0 ;
-		l_cou =1 ;
+		l_cou = 1 ;
+		l_pre = 0 ;
+		l_post = 0 ;
 	}
 	else {
 		thr = (int)(ped[rdo-1].mean[ch] + n_sigma * ped[rdo-1].rms[ch] + 0.5) ;
 		l_cou = n_cou ;
+		l_pre = n_pre ;
+		l_post = n_post ;
 	}
 
 	int t_cou = 0 ;
@@ -59,18 +64,18 @@ int fcs_data_c::zs_start(u_short *buff)
 			if(t_cou >= l_cou) {
 				t_stop = t_start + t_cou ;
 
-				t_start -= n_pre ;
+				t_start -= l_pre ;
 				if(t_start < 0) t_start = 0 ;
 
-				t_stop += n_post ;
-				if(t_stop >= tb_cou) t_stop = (tb_cou-1) ;
+				t_stop += l_post ;
+				if(t_stop > tb_cou) t_stop = tb_cou ;
 				
 				if(got_one==0) {	// first one
 					memset(mark,0,tb_cou) ;
 				}
 
 				got_one = 1;
-				for(;t_start<=t_stop;t_start++) {
+				for(;t_start<t_stop;t_start++) {
 					mark[t_start] = 1 ;
 				}
 			}
@@ -91,11 +96,11 @@ int fcs_data_c::zs_start(u_short *buff)
 	if(t_cou >= l_cou) {
 		t_stop = t_start + t_cou ;
 
-		t_start -= n_pre ;
+		t_start -= l_pre ;
 		if(t_start < 0) t_start = 0 ;
 
-		t_stop += n_post ;
-		if(t_stop >= tb_cou) t_stop = (tb_cou-1) ;
+		t_stop += l_post ;
+		if(t_stop > tb_cou) t_stop = tb_cou ;
 
 		if(got_one==0) {
 			memset(mark,0,tb_cou) ;
@@ -103,7 +108,7 @@ int fcs_data_c::zs_start(u_short *buff)
 
 		got_one = 1 ;
 				
-		for(;t_start<=t_stop;t_start++) {
+		for(;t_start<t_stop;t_start++) {
 			mark[t_start] = 1 ;
 		}
 
@@ -246,9 +251,8 @@ int fcs_data_c::start(u_short *d16, int shorts)
 
 				dta_p = d16 ;
 
-				hdr_event() ;
+				return hdr_event() ;
 
-				return 1 ;
 			}
 			LOG(ERR,"uknown version 0x%04X",d16[2]) ;
 			return 0 ;
@@ -288,9 +292,15 @@ int fcs_data_c::start(u_short *d16, int shorts)
 
 // at entry dta_p points to the start-comma of the event
 // at exit, dta_p must point to start of ADC data
+// returns
+//	>0 if all OK and triggered event
+//	0 is all OK and not a triggered event
+//	<0 is not all OK
 int fcs_data_c::hdr_event()
 {
-	u_short hdr_board_id ;
+	u_short *start_p = dta_p ;
+
+//	u_short hdr_board_id ;
 
 
 //	for(int i=0;i<32;i++) {
@@ -301,6 +311,17 @@ int fcs_data_c::hdr_event()
 	//I will need the board id as a sector/id combo
 	hdr_board_id = dta_p[3] ;
 
+	sector = ((hdr_board_id >> 11) & 0x1F)+1 ;
+	rdo = ((hdr_board_id >> 8) & 0x7)+1 ;
+
+	hdr_det = (hdr_board_id >> 6) & 0x3 ;
+	hdr_ns = (hdr_board_id >> 5) & 1 ;
+	hdr_dep = hdr_board_id & 0x1F ;
+
+
+//	LOG(TERR,"... 0x%X S%d:%d %d %d %d",hdr_board_id,sector,rdo,hdr_det,hdr_ns,hdr_dep) ;
+
+
 	// this won't work Offline
 	if(realtime && (hdr_board_id != board_id)) {
 		LOG(ERR,"evt %d: board_id: expected 0x%04X, received 0x%04X",events,board_id,hdr_board_id) ;
@@ -310,9 +331,6 @@ int fcs_data_c::hdr_event()
 	hdr_trg_word = ((dta_p[5]&0xF)<<16) | dta_p[4] ;
 	hdr_rhic_counter = (dta_p[7]<<16)|dta_p[6] ;
 
-
-	sector = (hdr_board_id >> 11)+1 ;
-	rdo = ((hdr_board_id >> 8) & 0x7)+1 ;
 
 	LOG(DBG,"HDR: trg_word 0x%05X, %d",hdr_trg_word,hdr_rhic_counter) ;
 
@@ -328,7 +346,7 @@ int fcs_data_c::hdr_event()
 
 		int words = (dta_shorts - 8 - 2)/2 ;	// adjust
 
-		LOG(NOTE,"ASCII contribution - words %d",words) ;
+		LOG(TERR,"ASCII contribution - words %d[%d]: sector %d, rdo %d, hdr_trg_word 0x%X",words,dta_shorts,sector,rdo,hdr_trg_word) ;
 
 		int end_marker = 0 ;
 		u_int cou = 0 ;
@@ -351,6 +369,9 @@ int fcs_data_c::hdr_event()
 					}
 				}
 			}
+			else if(asc != 0xFFFFFFFF) {
+				LOG(WARN,"ASCII wha %d: 0x%08X",i,asc) ;
+			}
 
 			dta_p += 2 ;
 
@@ -363,15 +384,18 @@ int fcs_data_c::hdr_event()
 
 		ctmp[cou] = 0 ;
 		if(!end_marker) {
-			LOG(WARN,"%d: ASCII[%d] but no end-marker \"%s\"",0,cou,ctmp) ;
+			LOG(WARN,"S%d:%d:%d: ASCII[%d] but no end-marker \"%s\"",sector,rdo,events,cou,ctmp) ;
 		}
-		else {
-			LOG(NOTE,"%d: ASCII[%d] \"%s\"",0,cou,ctmp) ;
+		else if(cou) {
+			LOG(WARN,"S%d:%d:%d: ASCII[%d] \"%s\"",sector,rdo,events,cou,ctmp) ;
 		}
 
 	}
 	else if(dta_p[0]==0xFFFF && dta_p[1]==0xFFFF) {	// bug: end-of-ascii without ascii
-		LOG(WARN,"ASCII bug") ;
+		LOG(WARN,"S%d:%d:%d: ASCII bug: 0x%X, 0x%X",sector,rdo,events,hdr_trg_word,dta_p[2]) ;
+		for(int i=0;i<32;i++) {
+			LOG(TERR,"... %d = 0x%04X",i,start_p[i]) ;
+		}
 		dta_p += 2 ;
 	}
 #if 0
@@ -383,10 +407,16 @@ int fcs_data_c::hdr_event()
 
 //	LOG(TERR,"... 0x%X 0x%X",dta_p[0],dta_p[1]) ;
 
-	if(dta_p[0]==0xE800) trgd_event = 0 ;
-	else trgd_event = 1 ;
+	if(dta_p[0]==0xE800) {
+		trgd_event = 0 ;
+		return 0 ;	// no triggered
+	}
+	else {
+		trgd_event = 1 ;
+		return 1 ;
+	}
 
-	return 0 ;	
+
 } 
 
 
@@ -619,10 +649,15 @@ void fcs_data_c::ped_stop()
 			ped[rdo-1].mean[c] /= ped[rdo-1].cou[c] ;
 			ped[rdo-1].rms[c] /= ped[rdo-1].cou[c] ;
 
-			ped[rdo-1].rms[c] = sqrt(ped[rdo-1].rms[c]-ped[rdo-1].mean[c]*ped[rdo-1].mean[c]) ;
+			ped[rdo-1].rms[c] -= ped[rdo-1].mean[c] * ped[rdo-1].mean[c] ;
+
+			if(ped[rdo-1].rms[c] < 0.0) ped[rdo-1].rms[c] = 0.0 ;
+
+			ped[rdo-1].rms[c] = sqrt(ped[rdo-1].rms[c]) ;
 		}
 		else {
 			ped[rdo-1].mean[c] = -1.0 ;
+			ped[rdo-1].rms[c] = 0.0 ;
 		}
 
 	}
@@ -654,7 +689,7 @@ void fcs_data_c::ped_stop()
 	}
 
 	fprintf(pedf,"#Sector %2d, RDO %d\n",sector,rdo) ;
-	fprintf(pedf,"#RUN %u\n",run_number) ;
+	fprintf(pedf,"#RUN %08u, type %d\n",run_number,run_type) ;
 	fprintf(pedf,"#TIME %u\n",(unsigned int)now) ;
 	char *ctm = ctime(&now) ;
 	fprintf(pedf,"#DATE %s",ctm) ;
@@ -884,3 +919,74 @@ int fcs_data_c::event_pre_fy19()
 	return 0 ;
 }
 
+int fcs_data_c::load_rdo_map(const char *fname)
+{
+	if(id != 0) return 0 ;
+
+	memset(rdo_map,0,sizeof(rdo_map)) ;
+
+	FILE *f = fopen(fname,"r") ;
+	if(f == 0) {
+		LOG(ERR,"Can't open map file %s [%s]",fname,strerror(errno)) ;
+		return -1 ;
+	}
+
+	LOG(INFO,"Opened %s",fname) ;
+
+	while(!feof(f)) {
+		char buff[128] ;
+
+		int s,r,d,n,b ;
+
+		buff[0] =0 ;
+
+		if(fgets(buff,sizeof(buff),f)==0) continue ;
+
+		if(buff[0]=='#') continue ;
+		if(buff[0]=='\n') continue ;
+		if(buff[0]==0) continue ;
+
+		int ret = sscanf(buff,"%d %d %d %d %d",&s,&r,&d,&n,&b) ;
+
+		if(ret != 5) continue ;
+
+		if(sector != s) continue ;
+
+		r-- ;
+
+		LOG(TERR,"Mapping S%d:%d --> %d,%d,%d",sector,r+1,d,n,b) ;
+
+		rdo_map[r].det = d ;
+		rdo_map[r].ns = n ;
+		rdo_map[r].dep = b ;
+	}
+
+	fclose(f) ;
+
+	return 0 ;
+}
+
+void fcs_data_c::set_rdo(int rdo1)
+{
+	rdo = rdo1 ;
+
+	set_board_id() ;
+} ;
+
+
+u_short fcs_data_c::set_board_id()
+{
+	int sec = sector - 1 ;
+	int r = rdo - 1 ;
+
+	int det = rdo_map[r].det ;
+	int ns = rdo_map[r].ns ;
+	int dep = rdo_map[r].dep ;
+	
+	board_id = (sec<<11)|(rdo<<8)|(det<<6)|(ns<<5)|dep ;
+
+	return board_id ;
+}
+
+
+		

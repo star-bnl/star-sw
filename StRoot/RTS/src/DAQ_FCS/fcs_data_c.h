@@ -82,13 +82,18 @@ public:
 
 	// for a specific instance
 	u_char sector ;
-	u_char rdo ;
+//	u_char rdo ;
 	u_short board_id ;
 
 	// temporary storage for the current board and event
 	u_int version ;
 	u_int hdr_trg_word ;
 	u_int hdr_rhic_counter ;
+	u_short hdr_board_id ;
+	u_int hdr_det ;
+	u_int hdr_ns ;
+	u_int hdr_dep ;
+
 	u_char trgd_event ;
 
 	int ch ;
@@ -103,15 +108,26 @@ public:
 	int first_rhic_strobe_tick ;
 	int trigger_tick ;
 
-
+	struct rdo_map_t {
+		u_char det ;	//0=ECAL,1=HCAL,2=PRE,3=Main
+		u_char ns ;	//0=North,1=South
+		u_char dep ;	// from 0 ;
+	} ;
 
 	// statics, common to all instalnces
 	static double fee_currents[8][32][3] ;	// 8 RDOs, 32 channels
 	static struct fcs_ped_t ped[8] ;	// 8 RDOs
 	static u_int run_number ;
 	static u_int run_type ;
+	static struct rdo_map_t rdo_map[8] ;
 
-	
+	int load_rdo_map(const char *fname) ;
+	void set_rdo(int rdo1) ;
+
+	u_char rdo ;
+private:
+	u_short set_board_id() ;
+
 } ;
 
 
