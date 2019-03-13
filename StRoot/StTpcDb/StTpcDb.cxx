@@ -247,7 +247,7 @@ float StTpcDb::DriftVelocity(Int_t sector, Int_t row) {
   if (row > 0) {
     // Extra row correction
     if (St_TpcDriftVelRowCorC::instance()->idx()) {
-      DV *= (1. + St_TpcDriftVelRowCorC::instance()->CalcCorrection(0,row));
+      DV *= (1. - St_TpcDriftVelRowCorC::instance()->CalcCorrection(0,row));
     }
   }
   return DV;
