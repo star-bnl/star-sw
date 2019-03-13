@@ -1199,7 +1199,7 @@ TF1 *FitFreq(TH1 *proj, Option_t *opt="") { // Fit by Freq function
   //  Bool_t quet = Opt.Contains("Q",TString::kIgnoreCase);
   TF1 *g2 = FunFreq();
   Double_t total = proj->Integral()*proj->GetBinWidth(5);
-  if (total < 1e3) return 0;
+  if (total < 1) return 0;
   g2->SetParameters(0,208,1.,0);
   Int_t iok = proj->Fit(g2,Opt.Data());
   if ( iok < 0) {
