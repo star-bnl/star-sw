@@ -1,4 +1,4 @@
-/*  Tpc Super Sector Position
+/*  Tpc Super Sector Position based on MuTpcG.C
     root.exe lDb.C MakeTpcSuperSector.C+
     > MakeSuperSectorPositionB()
 */
@@ -65,16 +65,11 @@ void MakeSuperSectorPositionB(){
     GL.SetRotation(&TpcSuperSectorOld[i].r00);
     GL.SetTranslation(&TpcSuperSectorOld[i].t0); cout << "s: " << i+1 << " GL\t"; GL.Print();
     TGeoHMatrix dR;
-#if 0
     dR.RotateX(-TMath::RadToDeg()*Passes[NP-1].Data[i].alpha*1e-3*1.0);
-    dR.RotateY(-TMath::RadToDeg()*Passes[NP-1].Data[i].beta*1e-3*1.0); 
-#else
-    dR.RotateX(TMath::RadToDeg()*Passes[NP-1].Data[i].alpha*1e-3*1.0);
-    dR.RotateY(TMath::RadToDeg()*Passes[NP-1].Data[i].beta*1e-3*1.0); 
 #if 0
+    dR.RotateY(-TMath::RadToDeg()*Passes[NP-1].Data[i].beta*1e-3*1.0); 
+#endif
     dR.RotateZ(TMath::RadToDeg()*Passes[NP-1].Data[i].gamma*1e-3*1.0);
-#endif
-#endif
     Double_t xyz[3];
     Double_t dxyz[3], drot[3];
     xyz[0] = 1e-4*Passes[NP-1].Data[i].x*1.0;
@@ -101,7 +96,7 @@ void MakeSuperSectorPositionB(){
   }
   TString fOut =  Form("TpcSuperSectorPositionB.%8i.%06i.C", date, time);
   ofstream out;
-  cout << "Create " << fOut << endl;
+  cout << "Create " << fOut.Data() << endl;
   out.open(fOut.Data());
   out << "TDataSet *CreateTable() {" << endl;
   out << "  if (!gROOT->GetClass(\"St_Survey\")) return 0;" << endl;
