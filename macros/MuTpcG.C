@@ -973,7 +973,9 @@ void Draw() {
 	    line = "";
 	    lineC = Form("\t{%2i",sector);
 	    TString Reject("R");
+#ifndef  __LSF_ONLY__
 	    if (plotNameD[j].flag) Reject = "A";
+#endif
 	    for (Int_t m = 0; m < 6; m++) {
 	      if (! Vals[m].iFlag) {
 		line  += "|               ";
@@ -982,7 +984,6 @@ void Draw() {
 		line  += Form("|%7.2f+-%5.2f ", Vals[m].val,TMath::Min(99.99,Vals[m].valError)); 
 		lineC += Form(",%7.2f,%5.2f", Vals[m].val,TMath::Min(99.99,Vals[m].valError)); 
 		if (Reject != "R") {
-#ifndef  __LSF_ONLY__
 		  if (charge == 0) {
 		    if (ValA[m].iFlag) {
 		      Double_t w0 = 1./(Vals[m].valError*Vals[m].valError);
@@ -994,7 +995,6 @@ void Draw() {
 		      ValA[m] = Vals[m];
 		    }
 		  }
-#endif
 		}
 	      }
 	    }

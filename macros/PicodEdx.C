@@ -1,4 +1,5 @@
 /*
+  root.exe lMuDst.C 'PicodEdx.C+("/net/l401/data/scratch2/kehw/reco/2019/069/20069033/hlt_20069033_10_01_002.picoDst.root","PicoOut.root")'
   root.exe lMuDst.C 'PicodEdx.C+("/gpfs01/star/pwg_tasks/hf05/Pico/BES-I/AuAu27_production_2011/2011/172/12172013/*.picoDst.root","PicoOut.root")'
   root.exe 'lMuDst.C(0,"/gpfs01/star/pwg_tasks/hf05/Pico/BES-I/AuAu62_productionP10ik/2010/078/11078018/*picoDst.root","PicoOut.root")' PicodEdx.C+
   root.exe 'lMuDst.C(0,"/net/l404/data/fisyak/Pico/2016/125/17125034/st_physics_17125034_raw_5500079.picoDst.root","ldEdxY2,RpicoDst","PicoOut.root")' PicodEdx.C+

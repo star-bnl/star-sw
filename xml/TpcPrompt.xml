@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
-<job  name="TpcPrompt" maxFilesPerProcess="10"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<job  name="TpcPrompt" maxFilesPerProcess="5"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
 <stdout URL="file:./sched$JOBID.log" />
 <stderr URL="file:./sched$JOBID.err" />
 <command> 
