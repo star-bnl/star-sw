@@ -2609,8 +2609,15 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 			raw_found = 1 ;
 
 			if(do_print) {
+				int sector = ((dd->sec >> 11) & 0x1F)+1 ;
+				int rdo = ((dd->sec >> 8) & 0x7)+1 ;
+				int det = (dd->sec >> 6) & 0x3;
+				int ns = (dd-> sec >> 5) & 1 ;
+				int dep = dd->row ;
+				int ch = dd->pad ;
+
 				// prints out Sector, RDO, channel
-				printf("FCS: [%d,%d,%d] %d words\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
+				printf("FCS ADC: S%d:%d [det %d, ns %d, dep %d] ch %d, %d words\n",sector,rdo,det,ns,dep,ch,dd->ncontent) ;
 				u_short *d16 = (u_short *)dd->Void ;
 
 				for(u_int i=0;i<dd->ncontent;i++) {
@@ -2631,7 +2638,15 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 			zs_found = 1  ;
 
 			if(do_print) {
-				printf("FCS ZS: [Sector %d, RDO %d, Ch %2d] %d ADCs\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
+				int sector = ((dd->sec >> 11) & 0x1F)+1 ;
+				int rdo = ((dd->sec >> 8) & 0x7)+1 ;
+				int det = (dd->sec >> 6) & 0x3;
+				int ns = (dd-> sec >> 5) & 1 ;
+				int dep = dd->row ;
+				int ch = dd->pad ;
+
+
+				printf("FCS ZS: S%d:%d [det %d, ns %d, dep %d] ch %d, %d ADCs\n",sector,rdo,det,ns,dep,ch,dd->ncontent) ;
 
 				for(u_int i=0;i<dd->ncontent;i++) {
 					printf(" TB %5d, flags %d, ADC %4u\n",dd->adc[i].tb,dd->adc[i].adc>>12,dd->adc[i].adc&0xFFF) ;
