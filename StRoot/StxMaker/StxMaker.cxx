@@ -443,6 +443,7 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
   TVector3 posI = stateRefOrig.getPos();
   //  gGeoManager->SetCurrentPoint(posI.X(), posI.Y(), posI.Z());
   gGeoManager->FindNode(posI.X(), posI.Y(), posI.Z());
+  Int_t ok = kStOK;
   try{
     //check
     fitTrack.checkConsistency();
@@ -457,15 +458,18 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
       //check
       //      fitTrack.checkConsistency();
     }
-  }
-  catch(genfit::Exception& e){
+  }  catch(genfit::Exception& e){
     std::cout<<"Exception, next track"<<std::endl;
     std::cout << e.what();
-    return kStErr;
+    ok = kStErr;
+  } catch (...) {
+    std::cout<<"Unknown Exception, next track"<<std::endl;
+    ok = kStErr;
   }
+  if (ok != kStOK) return ok;
   if (fitter) {
     KalmanFitStatus *fitStatus = fitTrack.getKalmanFitStatus();
-    if (! fitStatus || !(fitStatus->isFitConvergedFully() || fitStatus->isFitConvergedPartially())) {
+    if (! fitStatus || !(fitStatus->isFitConvergedFully())) {// || fitStatus->isFitConvergedPartially())) {
       return kStErr;
     }
     //_________ Fill StTrack _______________
@@ -478,6 +482,10 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
     genfit::TrackPoint* point = fitTrack.getPointWithMeasurementAndFitterInfo(0, rep);
     genfit::AbsFitterInfo* fitterInfo = point->getFitterInfo(rep);
     const genfit::MeasuredStateOnPlane& measuredPointStateI = fitterInfo->getFittedState(kTRUE);
+    if (! &measuredPointStateI) {
+      ok = kStErr;
+      return ok;
+    }
     TVector3 posI, momI;
     TMatrixDSym covI(6,6);
     measuredPointStateI.getPosMomCov(posI, momI, covI);
@@ -497,12 +505,12 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
   }
   catch(genfit::Exception& e) {
     std::cout << "Exception, FillGlobalTrack" << std::endl;
-    return kStErr;
+    ok = kStErr;
   }  
 #if 0
   watch->Print("");
 #endif
-  return kStOK;
+  return ok;
 }
 // $Log: StxMaker.cxx,v $
 //_____________________________________________________________________________
