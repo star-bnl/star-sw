@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.50 2018/05/02 21:07:40 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.51 2019/03/14 02:31:52 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.51  2019/03/14 02:31:52  genevb
+// Introduce iTPC plots
+//
 // Revision 2.50  2018/05/02 21:07:40  genevb
 // Initial accomodation for iTPC
 //
@@ -271,6 +274,8 @@
   ":tpx,svt;tpc,svt:QaGtrkRZf0TS",
   ":tpx,svt:QaPtrkRZf0",
   ":tpx,svt;tpc,svt:QaPtrkRZf0TS",
+  ":itpc:TPC_adc_sec_inner",
+  ":itpc:TPC_adc_sec_outer",
   ":bsmd:bsmdeClNum",
   ":bsmd:bsmdeEta",
   ":bsmd:bsmdpClNum",
