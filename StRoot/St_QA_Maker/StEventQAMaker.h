@@ -77,6 +77,7 @@ class StEventQAMaker : public StQAMakerBase {
   virtual void   MakeHistSST();
   virtual void   MakeHistRP();
   virtual void   MakeHistEPD();
+  virtual void   MakeHistiTPC();
   
   virtual void   AllTriggers() { allTrigs = kTRUE; }
 
@@ -84,15 +85,18 @@ class StEventQAMaker : public StQAMakerBase {
 
   /// the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.24 2018/07/03 21:33:34 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.25 2019/03/14 02:31:53 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
   ClassDef(StEventQAMaker,0)   //StAF chain virtual base class for Makers
 };
     
 #endif
 
-// $Id: StEventQAMaker.h,v 2.24 2018/07/03 21:33:34 genevb Exp $
+// $Id: StEventQAMaker.h,v 2.25 2019/03/14 02:31:53 genevb Exp $
 // $Log: StEventQAMaker.h,v $
+// Revision 2.25  2019/03/14 02:31:53  genevb
+// Introduce iTPC plots
+//
 // Revision 2.24  2018/07/03 21:33:34  genevb
 // Introduce EPD (code provided by J. Ewigleben)
 //
