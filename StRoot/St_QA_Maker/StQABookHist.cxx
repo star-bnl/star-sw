@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.79 2018/07/03 21:33:34 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.80 2019/03/14 02:31:53 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.80  2019/03/14 02:31:53  genevb
+// Introduce iTPC plots
+//
 // Revision 2.79  2018/07/03 21:33:34  genevb
 // Introduce EPD (code provided by J. Ewigleben)
 //
@@ -902,6 +905,16 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   }
 
 
+// for iTPC
+  for(int i = 0; i < 24; i++) { 
+    m_TPC_ch_time_inner[i] = 0;
+    m_TPC_ch_time_outer[i] = 0;
+    m_TPC_ch_nrow[i] = 0;
+  }
+  m_TPC_adc_sec_inner = 0;
+  m_TPC_adc_sec_outer = 0;
+
+
 }
 //_____________________________________________________________________________
 void StQABookHist::BookHist(Int_t hSet){
@@ -937,7 +950,10 @@ void StQABookHist::BookHist(Int_t hSet){
     BookHistIST();
     BookHistHFT();
   }
-  if (histsSet>=StQA_run18) BookHistEPD();
+  if (histsSet>=StQA_run18) {
+    BookHistEPD();
+    BookHistiTPC();
+  }
 
   
 }
@@ -2333,6 +2349,48 @@ void StQABookHist::BookHistEPD(){
     }
   }
     
+}
+//_____________________________________________________________________________
+void StQABookHist::BookHistiTPC(){
+  char nameiTPC[60], titleiTPC[60];
+  for(int i = 0; i < 24; i++)
+    {
+      sprintf(nameiTPC,"TPC_charge_time_inner_s%d",   i+1);
+      sprintf(titleiTPC,"TPC adc vs time-bin inner sector %d",   i+1);
+      m_TPC_ch_time_inner[i] = QAH::H2F(nameiTPC, titleiTPC, 50, 0, 511, 250 , 0, 500);
+      m_TPC_ch_time_inner[i] ->SetXTitle("time bin");
+      m_TPC_ch_time_inner[i] ->SetYTitle("adc");
+    }
+  
+  for(int i = 0; i < 24; i++)
+    {
+      sprintf(nameiTPC,"TPC_charge_time_outer_s%d",   i+1);
+      sprintf(titleiTPC,"TPC adc vs time-bin outer sector %d",   i+1);
+      m_TPC_ch_time_outer[i] = QAH::H2F(nameiTPC, titleiTPC, 50, 0, 511, 250 , 0, 500);
+      m_TPC_ch_time_outer[i] ->SetXTitle("time bin");
+      m_TPC_ch_time_outer[i] ->SetYTitle("adc");
+    }
+  
+  for(int i = 0; i < 24; i++)
+    {
+      sprintf(nameiTPC,"TPC_charge_nrow_s%d",   i+1);
+      sprintf(titleiTPC,"TPC adc vs pad-row sector %d",   i+1);
+      m_TPC_ch_nrow[i] = QAH::H2F(nameiTPC, titleiTPC, 72 ,0.5, 72.5, 250 , 0, 500);
+      m_TPC_ch_nrow[i] ->SetXTitle("pad row");
+      m_TPC_ch_nrow[i] ->SetYTitle("adc");
+    }
+
+  sprintf(nameiTPC,"TPC_adc_sec_inner");
+  sprintf(titleiTPC,"TPC adc vs sector inner");
+  m_TPC_adc_sec_inner = QAH::H2F(nameiTPC, titleiTPC, 24 ,0.5, 24.5, 250 , 0, 500);
+  m_TPC_adc_sec_inner ->SetXTitle("sector");
+  m_TPC_adc_sec_inner ->SetYTitle("adc");
+  
+  sprintf(nameiTPC,"TPC_adc_sec_outer");
+  sprintf(titleiTPC,"TPC adc vs sector outer");
+  m_TPC_adc_sec_outer = QAH::H2F(nameiTPC, titleiTPC, 24 ,0.5, 24.5, 250 , 0, 500);
+  m_TPC_adc_sec_outer ->SetXTitle("sector");
+  m_TPC_adc_sec_outer ->SetYTitle("adc");
 }
 //_____________________________________________________________________________
 

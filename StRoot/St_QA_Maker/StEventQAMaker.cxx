@@ -2877,10 +2877,64 @@ void StEventQAMaker::MakeHistEPD() {
   }
 
 }
+//_____________________________________________________________________________
+void StEventQAMaker::MakeHistiTPC() {
+  StSPtrVecTrackNode & trackNode = event->trackNodes();
+  int nTracks = trackNode.size();
+
+  StTrackNode * node = 0;
+  //cout << "Number of tracks : " << nTracks << endl;
+  for (int track = 0; track < nTracks; track++) {
+    node = trackNode[track];
+    if (!node)  continue;
+    //			GLOBAL TRACKS
+    StGlobalTrack* gTrack = static_cast<StGlobalTrack*>(node->track(global));
+    if (!gTrack)  continue;
+    if (! gTrack->detectorInfo())  continue;
+    StPtrVecHit ghvec = gTrack->detectorInfo()->hits();
+    StTrackGeometry * gTrackParams = gTrack->geometry();
+    if (!gTrackParams) continue;
+
+    for (unsigned int hit = 0; hit < ghvec.size(); hit++) {
+      //if (hvec[hit]->detector() == kTpcId) {
+      StTpcHit *tpcHit = static_cast<StTpcHit *> (ghvec[hit]);
+      
+      //if (!tpcHit || tpcHit->sector() != 20) continue;
+      
+      if (!tpcHit) continue;
+      if (tpcHit->flag() != 0) continue;
+      int sec_index = tpcHit -> sector() - 1;
+      hists->m_TPC_ch_nrow[sec_index]-> Fill(tpcHit->padrow(), tpcHit->adc());
+      
+      //alternative way: map.hasHitInDetector(kTpcId) else 
+      /*Int_t minpadrow = 0;
+        if ((minpadrow <= 45 && map.hasHitInRow(kTpcId,minpadrow)) ||
+        map.hasHitInRow(kiTpcId,minpadrow))
+        break;
+        }
+      */
+      
+      if(tpcHit->padrow()>=45) 
+        {
+          hists->m_TPC_ch_time_outer[sec_index]-> Fill(tpcHit->timeBucket(), tpcHit->adc());
+          hists->m_TPC_adc_sec_outer->Fill(tpcHit->sector(), tpcHit->adc());
+        }
+      else
+        {
+          hists->m_TPC_ch_time_inner[sec_index]-> Fill(tpcHit->timeBucket(), tpcHit->adc());
+          hists->m_TPC_adc_sec_inner->Fill(tpcHit->sector(), tpcHit->adc());
+        }
+      	  
+    }
+  }
+}
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.136 2019/03/03 06:27:42 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.137 2019/03/14 02:31:52 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.137  2019/03/14 02:31:52  genevb
+// Introduce iTPC plots
+//
 // Revision 2.136  2019/03/03 06:27:42  genevb
 // Oops - left in a debugging line - removing
 //

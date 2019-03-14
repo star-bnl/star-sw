@@ -166,6 +166,8 @@
   ":tpx,tof:QaTofMatchvsModule",
   ":tof:QaTofHitvsVpdHit",
   ":tpx,tof:QaTofVpdZvsTpcZ",
+  ":itpc:TPC_adc_sec_inner",
+  ":itpc:TPC_adc_sec_outer",
   ":tof:QaTofPID",
   ":mtd:QaMtdNHits",
   ":mtd:QaMtdHitMap",
