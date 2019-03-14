@@ -227,36 +227,46 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
 
 
 
-
-
-    contents.digiDensityAllChannels = new TH2D( "digiDensityAllChannels", "digi density all;;(counter-1) * 3 + strip;# digis", 72, 0.5, 72.5, 96, 0.5, 96.5 );
+    contents.digiDensityInTimingWindow = new TH2D( "digiDensityInTimingWindow", "digi density in timing window;;(counter-1) * 3 + strip;# digis", 72, 0.5, 72.5, 96, 0.5, 96.5 );
     for( size_t i=0; i<12; i++ ) {
-        contents.digiDensityAllChannels->GetXaxis()->SetBinLabel( i * 6 + 1, Form( "%d-1-1", i + 13 ) );
-        contents.digiDensityAllChannels->GetXaxis()->SetBinLabel( i * 6 + 2, Form( "%d-1-2", i + 13 ) );
-        contents.digiDensityAllChannels->GetXaxis()->SetBinLabel( i * 6 + 3, Form( "%d-2-1", i + 13 ) );
-        contents.digiDensityAllChannels->GetXaxis()->SetBinLabel( i * 6 + 4, Form( "%d-2-2", i + 13 ) );
-        contents.digiDensityAllChannels->GetXaxis()->SetBinLabel( i * 6 + 5, Form( "%d-3-1", i + 13 ) );
-        contents.digiDensityAllChannels->GetXaxis()->SetBinLabel( i * 6 + 6, Form( "%d-3-2", i + 13 ) );
+        contents.digiDensityInTimingWindow->GetXaxis()->SetBinLabel( i * 6 + 1, Form( "%d-1-1", i + 13 ) );
+        contents.digiDensityInTimingWindow->GetXaxis()->SetBinLabel( i * 6 + 2, Form( "%d-1-2", i + 13 ) );
+        contents.digiDensityInTimingWindow->GetXaxis()->SetBinLabel( i * 6 + 3, Form( "%d-2-1", i + 13 ) );
+        contents.digiDensityInTimingWindow->GetXaxis()->SetBinLabel( i * 6 + 4, Form( "%d-2-2", i + 13 ) );
+        contents.digiDensityInTimingWindow->GetXaxis()->SetBinLabel( i * 6 + 5, Form( "%d-3-1", i + 13 ) );
+        contents.digiDensityInTimingWindow->GetXaxis()->SetBinLabel( i * 6 + 6, Form( "%d-3-2", i + 13 ) );
     }
-    contents.digiDensityAllChannels->GetXaxis()->SetLabelSize(   0.03  );
+    contents.digiDensityInTimingWindow->GetXaxis()->SetLabelSize(   0.03  );
+    contents.digiDensityInTimingWindow->GetXaxis()->SetLabelOffset( 0.004 );
+    contents.digiDensityInTimingWindow->GetXaxis()->SetLabelFont(   102   );
+    contents.digiDensityInTimingWindow->GetXaxis()->SetTickLength(  0.01  );
+
+    contents.digiDensityInTimingWindow->GetYaxis()->SetTitleSize(   0.05  );
+    contents.digiDensityInTimingWindow->GetYaxis()->SetTitleOffset( 0.9   );
+    contents.digiDensityInTimingWindow->GetYaxis()->CenterTitle(    true  );
+    contents.digiDensityInTimingWindow->GetYaxis()->SetTickLength(  0.01  );
+
+    contents.digiDensityInTimingWindow->GetZaxis()->SetTitleSize(   0.05  );
+    contents.digiDensityInTimingWindow->GetZaxis()->SetTitleOffset( 0.95  );
+    contents.digiDensityInTimingWindow->GetZaxis()->CenterTitle(    true  );
+    contents.digiDensityInTimingWindow->GetZaxis()->SetTickLength(  0.01  );
+
+    contents.digiDensityInTimingWindow->SetMinimum( 1. );
+
+    contents.digiDensityAllChannels = (TH2D* ) contents.digiDensityInTimingWindow->Clone( "digiDensityAllChannels" );
+    contents.digiDensityAllChannels->SetTitle( "digi density all;sector;(counter-1) * 3 + strip;# digis" );
+
+    for( size_t i=0; i<12; i++ ) {
+        contents.digiDensityAllChannels->GetXaxis()->SetBinLabel( i * 6 + 1, Form( "%d", i + 13 ) );
+        contents.digiDensityAllChannels->GetXaxis()->SetBinLabel( i * 6 + 2, "" );
+        contents.digiDensityAllChannels->GetXaxis()->SetBinLabel( i * 6 + 3, "" );
+        contents.digiDensityAllChannels->GetXaxis()->SetBinLabel( i * 6 + 4, "" );
+        contents.digiDensityAllChannels->GetXaxis()->SetBinLabel( i * 6 + 5, "" );
+        contents.digiDensityAllChannels->GetXaxis()->SetBinLabel( i * 6 + 6, "" );
+    }
+    contents.digiDensityAllChannels->GetXaxis()->SetLabelSize(   0.045  );
+    contents.digiDensityAllChannels->GetXaxis()->LabelsOption( "h" );
     contents.digiDensityAllChannels->GetXaxis()->SetLabelOffset( 0.004 );
-    contents.digiDensityAllChannels->GetXaxis()->SetLabelFont(   102   );
-    contents.digiDensityAllChannels->GetXaxis()->SetTickLength(  0.01  );
-
-    contents.digiDensityAllChannels->GetYaxis()->SetTitleSize(   0.05  );
-    contents.digiDensityAllChannels->GetYaxis()->SetTitleOffset( 0.9   );
-    contents.digiDensityAllChannels->GetYaxis()->CenterTitle(    true  );
-    contents.digiDensityAllChannels->GetYaxis()->SetTickLength(  0.01  );
-
-    contents.digiDensityAllChannels->GetZaxis()->SetTitleSize(   0.05  );
-    contents.digiDensityAllChannels->GetZaxis()->SetTitleOffset( 0.95  );
-    contents.digiDensityAllChannels->GetZaxis()->CenterTitle(    true  );
-    contents.digiDensityAllChannels->GetZaxis()->SetTickLength(  0.01  );
-
-    contents.digiDensityAllChannels->SetMinimum( 1. );
-
-    contents.digiDensityInTimingWindow = (TH2D* ) contents.digiDensityAllChannels->Clone( "digiDensityInTimingWindow" );
-    contents.digiDensityInTimingWindow->SetTitle( "digi density in timing window;;(counter-1) * 3 + strip;# digis" );
 
 
     for( size_t i=0; i<11; i++ ) {
@@ -313,6 +323,10 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
             jp->setOptStat( 0 );
         }
 
+        if( contents.array[ i ] == contents.digiDensityAllChannels ) {
+            //jp->gridx = 0;
+            //jp->gridy = 0;
+        }
 
         for( size_t j=0; j<12; j++ ) {
             if( contents.array[ i ] == contents.nPulsersPerSide[ j ] ) {
@@ -615,9 +629,10 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
     }
 
 
-    double triggerTime = mostFrequentTriggerTs * gdpbv100::kdClockCycleSizeNs;
+    double triggerTime    = mostFrequentTriggerTs * gdpbv100::kdClockCycleSizeNs;
+    double triggerToReset = ( mostFrequentTriggerTs - mostFrequentResetTs ) * gdpbv100::kdClockCycleSizeNs * 1.e-9;
 
-    contents.triggerTimeToResetTime->Fill( ( mostFrequentTriggerTs - mostFrequentResetTs ) * gdpbv100::kdClockCycleSizeNs * 1.e-9 );
+    contents.triggerTimeToResetTime->Fill( triggerToReset );
 
 
     //add label
@@ -625,14 +640,14 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
     char t2[ 256 ];
 
     sprintf( t1, "reset time stamp: %lld", ( long long int ) mostFrequentResetTs );
-    sprintf( t2, "reported by %d sector(s)", nCorrectResetSignals );
+    sprintf( t2, "reported by %d sectors", nCorrectResetSignals );
     
-    if( mostFrequentResetTs == 0 ) {
-        resetTimeLabel1->SetTextColor( kRed );
-        resetTimeLabel2->SetTextColor( kRed );
+    if( mostFrequentResetTs == 0 || triggerToReset > 5000 ) {
+        resetTimeLabel1->SetTextColor( kRed+1 );
+        resetTimeLabel2->SetTextColor( kRed+1 );
     } else {
-        resetTimeLabel1->SetTextColor( kGreen );
-        resetTimeLabel2->SetTextColor( kGreen );
+        resetTimeLabel1->SetTextColor( kGreen+1 );
+        resetTimeLabel2->SetTextColor( kGreen+1 );
     }
     resetTimeLabel1->SetText( 0.12, 0.85, t1 );
     resetTimeLabel2->SetText( 0.12, 0.80, t2 );
@@ -720,11 +735,11 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
                     //digi inside timing window
                     if( fabs( timeToTrigger + 1845. ) < 150. ) {
                         nDigisInTimingWindow++;
+                        contents.digiDensityInTimingWindow->Fill( ( sector - 13 ) * 6 + ( module - 1 ) * 2 + side, ( counter - 1 ) * 32 + strip );
                     }
 
                     // cut out the pulser time window 
                     if( fabs( timeToTrigger - 50. ) > 200. ) {
-                        contents.digiDensityInTimingWindow->Fill( ( sector - 13 ) * 6 + ( module - 1 ) * 2 + side, ( counter - 1 ) * 32 + strip );
 
                         // fine & coarse time
                         int fineTs   = mess.getGdpbHitFullTs() % 112;
