@@ -75,7 +75,7 @@ StMtdQAMaker::StMtdQAMaker(const Char_t *name) :
   mStEvent(NULL), mMuDst(NULL), mPicoDst(NULL), mTrigUtil(NULL),
   mRunId(-1), mRunYear(-1), mCollisionSystem("pp"), mVertexMode(1),
   mPrintMemory(kFALSE), mPrintCpu(kFALSE), mPrintConfig(kFALSE), mTriggerIDs(0),
-  mMaxVtxZ(100.), mApplyVtxDzCut(kTRUE), mMaxVtxDz(3.),
+  mMaxVtxZ(100.), mMaxVtxR(2.), mApplyVtxDzCut(kTRUE), mMaxVtxDz(3.),
   mMinTrkPt(1.0), mMaxTrkPt(100), mMinTrkPhi(0.), mMaxTrkPhi(2*pi), mMinTrkEta(-1), mMaxTrkEta(1),
   mMinNHitsFit(15), mMinNHitsDedx(10), mMinFitHitsFraction(0.52), mMaxDca(3.), 
   mMinMuonPt(1.3), mMinNsigmaPi(-2), mMaxNsigmaPi(3), mMinMuonDeltaZ(-20.), mMaxMuonDeltaZ(20.),
@@ -441,6 +441,7 @@ Int_t StMtdQAMaker::processMuDst()
   mhVtxZDiff->Fill(tpcvz-vpdvz);
   mhVtxZDiffVsTpcVz->Fill(tpcvz, tpcvz-vpdvz);
   if(fabs(tpcvz)>mMaxVtxZ)        return kStOK;
+  if(sqrt(verPos.x()*verPos.x()+verPos.y()*verPos.y())>mMaxVtxR) return kStOK;
   if(mApplyVtxDzCut && fabs(tpcvz-vpdvz)>mMaxVtxDz) return kStOK;
   mhEventStat->Fill(3.5);
   for(UInt_t i=0; i<mTriggerIDs.size(); i++)
@@ -949,6 +950,7 @@ Int_t StMtdQAMaker::processPicoDst()
   mhVtxZDiff->Fill(tpcvz-vpdvz);
   mhVtxZDiffVsTpcVz->Fill(tpcvz, tpcvz-vpdvz);
   if(fabs(tpcvz)>mMaxVtxZ)        return kStOK;
+  if(sqrt(verPos.x()*verPos.x()+verPos.y()*verPos.y())>mMaxVtxR) return kStOK; 
   if(mApplyVtxDzCut && fabs(tpcvz-vpdvz)>mMaxVtxDz) return kStOK;
   mhEventStat->Fill(3.5);
   for(UInt_t i=0; i<mTriggerIDs.size(); i++)
@@ -1385,7 +1387,7 @@ void StMtdQAMaker::bookHistos()
   mhVtxZDiffDefault = new TH1F("hVtxZDiffDefault","TPC vz - VPD vz (default); #Deltavz (cm)",200,-20,20);
   AddHist(mhVtxZDiffDefault);
 
-  mhVtxClosestIndex = new TH1F("hVtxClosestIndex","Index of TPC vertex closest to VPD vertex (ranking>0)",50,0,50);
+  mhVtxClosestIndex = new TH1F("hVtxClosestIndex","TPC vertex index closest to VPD (ranking>0)",50,0,50);
   AddHist(mhVtxClosestIndex);
 
   mhVtxZvsVpdVzClosest = new TH2F("hVtxZvsVpdVzClosest","Primary vertex z: VPD vs TPC (closest);vz_{TPC} (cm);vz_{VPD} (cm)",201,-201,201,201,-201,201);
@@ -1829,6 +1831,7 @@ void StMtdQAMaker::printConfig()
   printf("=== Configuration for StMtdQAMaker ===\n");
   printf("Use vertex that is %s\n",vtxmode[mVertexMode]);
   printf("Maximum vertex z: %1.0f\n",mMaxVtxZ);
+  printf("Maximum vertex r: %1.0f\n",mMaxVtxR);
   printf("Maximum vz diff: %1.0f\n",mMaxVtxDz);
   printf("Track pt  range: [%1.2f, %1.2f]\n",mMinTrkPt,mMaxTrkPt);
   printf("Track phi range: [%1.2f, %1.2f]\n",mMinTrkPhi,mMaxTrkPhi);
@@ -2046,8 +2049,11 @@ Double_t StMtdQAMaker::rotatePhi(Double_t phi) const
 }
 
 //
-//// $Id: StMtdQAMaker.cxx,v 1.21 2019/03/13 20:49:18 marr Exp $
+//// $Id: StMtdQAMaker.cxx,v 1.22 2019/03/14 13:11:56 marr Exp $
 //// $Log: StMtdQAMaker.cxx,v $
+//// Revision 1.22  2019/03/14 13:11:56  marr
+//// Add option to apply vertex vr cut
+////
 //// Revision 1.21  2019/03/13 20:49:18  marr
 //// Add option to stwich on/off VtxDz cut
 ////
