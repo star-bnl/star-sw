@@ -68,9 +68,9 @@ void trgBuilder::initialize(int argc, char *argv[]) {
     init_zdc_smd();
     // Build Root Histograms...
     // Trigger / ZDC
-    contents.h76_zdc_time_east = new TH1D("h76_zdc_time_east", "ZDC Time East",200,0,1500); 
+    contents.h76_zdc_time_east = new TH1D("h76_zdc_time_east", "ZDC Time East",200,0,1800); 
     //msimko: Upper limit was changed from 1000 to 1500 for pp ... still works well for A+A 2016
-    contents.h77_zdc_time_west = new TH1D("h77_zdc_time_west", "ZDC Time West",200,0,1500); 
+    contents.h77_zdc_time_west = new TH1D("h77_zdc_time_west", "ZDC Time West",200,0,1800); 
     //msimko: Upper limit was changed from 1000 to 1500 for pp ... still works well for A+A 2016
     contents.h78_zdc_timediff_east_west = new TH1D("h78_zdc_timediff_east_west","ZDC Time (West - East)",200,-2000,2000);
     contents.h146_zdc_Vertex_cm = new TH1D("h146_zdc_Vertex_cm","Vertex Position from ZDC (cm)",50, -100, 100);
