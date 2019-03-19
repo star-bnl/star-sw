@@ -68,29 +68,31 @@ void trgBuilder::initialize(int argc, char *argv[]) {
     init_zdc_smd();
     // Build Root Histograms...
     // Trigger / ZDC
+
     contents.h76_zdc_time_east = new TH1D("h76_zdc_time_east", "ZDC Time East",200,0,1800); 
-    //msimko: Upper limit was changed from 1000 to 1500 for pp ... still works well for A+A 2016
+    //lkramarik: Upper limit was changed from 1500 to 1800 for 2019 (peak at maximum that is at ~1600)
     contents.h77_zdc_time_west = new TH1D("h77_zdc_time_west", "ZDC Time West",200,0,1800); 
-    //msimko: Upper limit was changed from 1000 to 1500 for pp ... still works well for A+A 2016
+    //lkramarik: Upper limit was changed from 1500 to 1800 for 2019
+
     contents.h78_zdc_timediff_east_west = new TH1D("h78_zdc_timediff_east_west","ZDC Time (West - East)",200,-2000,2000);
     contents.h146_zdc_Vertex_cm = new TH1D("h146_zdc_Vertex_cm","Vertex Position from ZDC (cm)",50, -100, 100);
-    //msimko: Upper limit changed to 4000 for A+A collisions (changed from 300 for p+p)
-    contents.h480_zdc_unatt_eastsum = new TH1D("h480_zdc_unatt_eastsum","ZDC Unattenuated East Sum",200,0,4000);
-    contents.h481_zdc_unatt_westsum = new TH1D("h481_zdc_unatt_westsum","ZDC Unattenuated West Sum",200,0,4000);
+    //lkramarik: Upper limit changed to 1500 for A+A 2019 collisions (changed from 4000)
+    contents.h480_zdc_unatt_eastsum = new TH1D("h480_zdc_unatt_eastsum","ZDC Unattenuated East Sum",200,0,1500);
+    contents.h481_zdc_unatt_westsum = new TH1D("h481_zdc_unatt_westsum","ZDC Unattenuated West Sum",200,0,1500);
   
     // Trigger / ZDC_seg
-    //msimko: Upper limit changed to 4000 for A+A collisions (changed from 300 for p+p)
-    contents.h474_zdc_unatt_east1 = new TH1D("h474_zdc_unatt_east1","ZDC Unattenuated East1",200,0,4000);
-    contents.h475_zdc_unatt_west1 = new TH1D("h475_zdc_unatt_west1","ZDC Unattenuated West1",200,0,4000);
-    contents.h476_zdc_unatt_east2 = new TH1D("h476_zdc_unatt_east2","ZDC Unattenuated East2",200,0,4000);
-    contents.h477_zdc_unatt_west2 = new TH1D("h477_zdc_unatt_west2","ZDC Unattenuated West2",200,0,4000);
-    contents.h478_zdc_unatt_east3 = new TH1D("h478_zdc_unatt_east3","ZDC Unattenuated East3",200,0,4000);
-    contents.h479_zdc_unatt_west3 = new TH1D("h479_zdc_unatt_west3","ZDC Unattenuated West3",200,0,4000);
+    //lkramarik: Upper limit changed to 1500 for A+A 2019 collisions (changed from 4000)
+    contents.h474_zdc_unatt_east1 = new TH1D("h474_zdc_unatt_east1","ZDC Unattenuated East1",200,0,1500);
+    contents.h475_zdc_unatt_west1 = new TH1D("h475_zdc_unatt_west1","ZDC Unattenuated West1",200,0,1500);
+    contents.h476_zdc_unatt_east2 = new TH1D("h476_zdc_unatt_east2","ZDC Unattenuated East2",200,0,1500);
+    contents.h477_zdc_unatt_west2 = new TH1D("h477_zdc_unatt_west2","ZDC Unattenuated West2",200,0,1500);
+    contents.h478_zdc_unatt_east3 = new TH1D("h478_zdc_unatt_east3","ZDC Unattenuated East3",200,0,1500);
+    contents.h479_zdc_unatt_west3 = new TH1D("h479_zdc_unatt_west3","ZDC Unattenuated West3",200,0,1500);
 
     // Trigger / ZDC sums
-    //msimko: Upper limit changed to 3000 for A+A collisions (changed from 300 for pp)
-    contents.h482_zdc_sum_bbc = new TH2D("h482_zdc_sum_bbc","ZDC Sum vs. BBC Sum",100,0,60000,100,0,3000);
-    contents.h483_zdc_hardwaresum = new TH1D("h483_zdc_hardwaresum","ZDC hardware Sum Central",300,0,3000);
+    //lkramarik: Upper limit changed to 2000 for A+A 2019 collisions (changed from 3000)
+    contents.h482_zdc_sum_bbc = new TH2D("h482_zdc_sum_bbc","ZDC Sum vs. BBC Sum",100,0,60000,100,0,2000);
+    contents.h483_zdc_hardwaresum = new TH1D("h483_zdc_hardwaresum","ZDC hardware Sum Central",300,0,2000);
   
     // Trigger / Bunch Crossing Counter
     contents.h266_bbc_bunchid_y = new TH1D("h266_bbc_bunchid_y","Bunch Crossing Counter (Yellow)",120,-0.5,119.5);
