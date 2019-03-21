@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: genDst.C,v 1.4 2019/01/15 17:24:29 genevb Exp $
+// $Id: genDst.C,v 1.5 2019/03/21 18:53:34 jeromel Exp $
 // Author: G. Van Buren (BNL)
 //
 // Description:
@@ -335,6 +335,13 @@ void genDst(unsigned int First,
      eventCount++;
   }
   fullChain.Finish();
+
+  //
+  // ATTENTION - please DO NOT change the format of the next 2 lines,
+  //   they are used by our DataManagement parsers to detect a generation 
+  //   was succesful and thereafter Catalog the produced files.
+  //   Thank you.
+  //
   gMessMgr->QAInfo() << "NumberOfEvents= " << eventCount << endm;
   gMessMgr->QAInfo() << "Run completed " << endm;
 
@@ -361,6 +368,9 @@ void genDst(unsigned int Last,
 /////////////////////////////////////////////////////////////////////////////
 //
 // $Log: genDst.C,v $
+// Revision 1.5  2019/03/21 18:53:34  jeromel
+// Added ATTENTION message
+//
 // Revision 1.4  2019/01/15 17:24:29  genevb
 // Added FMS
 //

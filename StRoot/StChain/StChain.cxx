@@ -192,14 +192,22 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
      mNTotal++;
      evnt.Stop("QAInfo:");
      //  evnt.Show("QAInfo:");
+     
+     //
+     // ATTENTION - please DO NOT change the format of the next line,
+     //   they are used by our parsers to detect a generation 
+     //   was succesful and thereafter Catalog the produced files (or
+     //   add useful info to our trackijg DB). Thank you.
+     //
      LOG_QA << Form
      /*printf */ ("QAInfo: Done with Event [no. %d/run %d/evt. %d/Date.Time %d.%d/sta %d] Real Time = %10.2f seconds Cpu Time =  %10.2f seconds",
 	jCur,GetRunNumber(),GetEventNumber(),GetDate(), GetTime(),
 	     iMake,evnt.GetRealTime("QAInfo:"),evnt.GetCpuTime("QAInfo:")) 
      << endm;
+
 #ifdef STAR_TRACKING 
 #ifdef OLDTRACKING    
-// Add a record to MySQL tracking Db     
+  // Add a record to MySQL tracking Db     
   LOG_QA << "Events="       << mNTotal
          << ",Failed="      << mNFailed
          << ",StepEventId=" << "'EventFinish'"
@@ -283,8 +291,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.82 2016/05/26 15:27:11 jeromel Exp $
+// $Id: StChain.cxx,v 1.83 2019/03/21 18:56:46 jeromel Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.83  2019/03/21 18:56:46  jeromel
+// Added ATTENTION message
+//
 // Revision 1.82  2016/05/26 15:27:11  jeromel
 // Missing init added
 //
