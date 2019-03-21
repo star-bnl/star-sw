@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.142 2019/01/16 23:38:29 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.143 2019/03/21 19:00:37 jeromel Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.143  2019/03/21 19:00:37  jeromel
+// Added ATTENTION message
+//
 // Revision 1.142  2019/01/16 23:38:29  perev
 // Fix wrong order in if (Jason)
 //
@@ -830,6 +833,12 @@ SWITCH:  switch (kase) {
       if( ! ((val->fTimeMin.Get()<= uevent) && (uevent<val->fTimeMax.Get()) )){
 //	wrong timing. We can forgive it, if it is RunLog. Akio case
         if (val->Path().Contains("RunLog/onl")) break;
+	
+	//
+	// ATTENTION: do not change te format of the next line.
+	//   CheckFail is verified by production parsers to detect
+	//   fatal DB initialization issues.
+	//
         (void) printf("CheckFail:: Assert will fail for Table %s TimeMin=%d TimeMax=%d uevent=%d\n",
                       val->GetName(),val->fTimeMin.Get(),val->fTimeMax.Get(),uevent);
         (void) printf("\tTimeMin "); val->fTimeMin.Print();
