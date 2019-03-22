@@ -193,6 +193,7 @@ void StxCAInterface::MakeHits() {
 	    if (tpcHit->flag() & FCF_CHOPPED || tpcHit->flag() & FCF_SANITY)     continue; // ignore hits marked by AfterBurner as chopped or bad sanity
 	    if (tpcHit->pad() > 182 || tpcHit->timeBucket() > 511) continue; // some garbadge  for y2001 daq
 	    tpcHit->setFitFlag(0);
+	    tpcHit->setdX(0);
 	    Int_t Id = fSeedHits.size();
 	    StThreeVectorD glob(tpcHit->position());
 	    // obtain seed Hit
