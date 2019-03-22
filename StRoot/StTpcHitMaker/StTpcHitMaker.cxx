@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.76 2019/03/01 15:50:20 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.77 2019/03/22 18:08:46 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.77  2019/03/22 18:08:46  fisyak
+ * recover skip of legacy if exists Tpx or iTpc. Checked by Irakli
+ *
  * Revision 1.76  2019/03/01 15:50:20  fisyak
  * Fix bug. 3385
  *
@@ -449,10 +452,10 @@ Int_t StTpcHitMaker::Make() {
 	mQuery = Form("%s[%i]",tpcDataNames[k],sector);
       StRtsTable *daqTpcTable = GetNextDaqElement(mQuery);
       if (! daqTpcTable) continue;
-      Int_t Nrows = daqTpcTable->GetNRows();
+      //      Int_t Nrows = daqTpcTable->GetNRows();
       //      if (! Nrows) continue;
       kReaderType = (EReaderType) k;
-      //if (kReaderType > kLegacyTpx) kMin = kLegacyTpx;
+      if (kReaderType > kLegacyTpx) kMin = kLegacyTpx;
       while (daqTpcTable) {
 	if (Sector() == sector) {
 	  if (Debug()/100 > 0) {
