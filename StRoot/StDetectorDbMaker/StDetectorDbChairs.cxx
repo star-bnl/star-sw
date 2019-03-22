@@ -1315,8 +1315,8 @@ St_SurveyC::St_SurveyC(St_Survey *table) : TChair(table), fRotations(0)  {
   for (UInt_t i = 0; i < N; i++) {
     fRotations[i] = new TGeoHMatrix;
     TGeoHMatrix &rot = *fRotations[i];
-    if (! i) rot.SetName(Table()->GetName());
-    else     rot.SetName(Form("%s_%i",Table()->GetName(),i));
+    if (N == 1) rot.SetName(Table()->GetName());
+    else        rot.SetName(Form("%s_%i",Table()->GetName(),i+1));
     rot.SetRotation(Rotation(i));
     rot.SetTranslation(Translation(i));
     Normalize(rot);
