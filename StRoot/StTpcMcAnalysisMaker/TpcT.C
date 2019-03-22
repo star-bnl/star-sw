@@ -59,8 +59,8 @@
 #include "TMDFParameters.h"
 #endif
 #endif
-static Int_t NoInnerRows = -1; // Tpx
-static Int_t NoOfRows    = -1;
+static Int_t NoInnerRows = 40; //-1; // Tpx
+static Int_t NoOfRows    = 72;; //-1;
 TMultiDimFit* MDfit = 0;
 TFile *fOut = 0;
 //#include "StTpcMcAnalysisMaker/TpcCluster.h"
@@ -1787,7 +1787,8 @@ Outer
    6  adcL3        0.00000e+00     fixed    
  Font metric w =  133  h =  21 points= 9 pixels= 12 QFont( "Arial,9,12,0,80,0,0,0,0,0" ) 
   */
-  const Char_t *histNames[4] = {"inner","outer","innerR","outerR"};
+  //  const Char_t *histNames[4] = {"inner","outer","innerR","outerR"};
+  const Char_t *histNames[4] = {"IZ","OZ","innerR","outerR"};
   const Char_t *parNames[7] = {"offset","z","zxAdcL","adcL","adcL2","scale"};
   TF2 *f2;
   TF1 *f1;
