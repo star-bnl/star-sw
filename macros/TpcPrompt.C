@@ -468,7 +468,8 @@ void TpcPrompt(Int_t Nevents = 1000000,
 
   //  TString Chain("in,StEvent,tpcDb,analysis,magF,NoDefault,tpcHitMover,OSpaceZ2,OGridLeak3D,Corr4,mysql");
   //  TString Chain("in,StEvent,trgD,tpcDb,analysis,magF,NoDefault,mysql");
-  TString Chain("in,TpcHitMover,StEvent,tpcDb,detDb,CorrX,OSpaceZ2,OGridLeak3D,quiet,analysis,mysql,NoDefault");
+  //  TString Chain("in,TpcHitMover,StEvent,tpcDb,detDb,CorrX,OSpaceZ2,OGridLeak3D,quiet,analysis,mysql,NoDefault");
+  TString Chain("in,tpx,TpcHitMover,StEvent,tpcDb,detDb,CorrX,OSpaceZ2,OGridLeak3D,quiet,analysis,mysql,NoDefault");
   //  TString Chain("in,StEvent,tpcDb,analysis,magF,NoDefault,tpcHitMover,OSpaceZ2,OGridLeak3D,CorrX");
   if (TString(daqfile).EndsWith(".daq")) Chain += ",tpx,TpcHitMover,CorrX";
   TString TreeFile(treefile);

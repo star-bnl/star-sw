@@ -1,5 +1,5 @@
 /*
-   root.exe st200*rPlots.Cut.Errors.root dT.C
+   root.exe st*IO*.root dT.C
 */
 #include "Ask.h"
 void dT() {

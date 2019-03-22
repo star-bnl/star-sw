@@ -840,7 +840,7 @@ void Draw() {
     out  << "__________________________________________________________________________________________________ " << sector << endl;
     cout << "__________________________________________________________________________________________________ " << sector << endl;
     Val_t ValA[7]; memset (ValA, 0, sizeof(ValA));
-    //#define __LSF_ONLY__
+#define __LSF_ONLY__
 #define __LSF__
 #define __FITSLICES__
 #ifdef __LSF__
