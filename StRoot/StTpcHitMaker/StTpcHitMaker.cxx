@@ -452,7 +452,7 @@ Int_t StTpcHitMaker::Make() {
       //      Int_t Nrows = daqTpcTable->GetNRows();
       //      if (! Nrows) continue;
       kReaderType = (EReaderType) k;
-      //if (kReaderType > kLegacyTpx) kMin = kLegacyTpx;
+      if (kReaderType > kLegacyTpx) kMin = kLegacyTpx;
       while (daqTpcTable) {
 	if (Sector() == sector) {
 	  if (Debug()/100 > 0) {
