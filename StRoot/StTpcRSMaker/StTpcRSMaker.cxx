@@ -203,7 +203,7 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     Int_t Mask = -1; // 22 bits
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection);
     CLRBIT(Mask,StTpcdEdxCorrection::kdXCorrection);
-    CLRBIT(Mask,StTpcdEdxCorrection::kEdge);
+    //    CLRBIT(Mask,StTpcdEdxCorrection::kEdge);
     //    CLRBIT(Mask,StTpcdEdxCorrection::kTanL);
     m_TpcdEdxCorrection = new StTpcdEdxCorrection(Mask, Debug());
   }
@@ -1178,7 +1178,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
       if (Debug()) LOG_INFO << "StTpcRSMaker: Done with sector\t" << sector << " total no. of hit = " << NoHitsInTheSector << endm;
       if (Debug() > 2) digitalSector->Print();
 #ifdef __LASERINO__
-      for (Int_t row = 1; row <= Sx[t_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
+      for (Int_t row = 1; row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
 	Int_t Npads = digitalSector->numberOfPadsInRow(row);
 	map<Int_t,Int_t> ADCmap2Track;
         for(Int_t pad = 1; pad <= Npads; pad++) {
