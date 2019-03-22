@@ -358,6 +358,21 @@ void StTpcDb::SetTpcRotations() {
           TPCE        (           TPGV                      ) * (              TPSS                                   )
      StTpcPosition * ((Shift(half) * StTpcHalfPosition(half)) * (rotmS(sector,iPhi) * StTpcSuperSectorPosition) * Flip) * (StTpcInnerSectorPosition || StTpcOuterSectorPosition)
         kTpcRefSys *          kTpcHalf                        *               kTpcPad       
+        kTpcRefSys *          kSupS2Tpc                                                           
+
+	kTpc2GlobalMatrix := StTpcPosition
+	kSupS2Tpc       :=                 (Shift(half) * StTpcHalfPosition(half)) * (rotmS(sector,iPhi) * StTpcSuperSectorPosition)
+	kSupS2Glob      := StTpcPosition * kSupS2Tpc
+        kSubSInner2SupS := Flip * StTpcInnerSectorPosition
+        kSubSOuter2SupS := Flip * StTpcOuterSectorPosition
+        kSubSInner2Tpc  := kSupS2Tpc * kSubSInner2SupS
+        kSubSOuter2Tpc  := kSupS2Tpc * kSubSOuter2SupS
+	kPadInner2SupS  := kSubSInner2SupS
+        kPadOuter2SupS  := kSubSOuter2SupS
+        kPadInner2Tpc   := kSupS2Tpc * kPadInner2SupS                              == kSubSInner2Tpc
+	kPadOuter2Tpc   := kSupS2Tpc * PadOuter2SupS  = kSupS2Tpc * kSubSOuter2SupS = kSubSOuter2Tpc
+	kPadInner2Glob  := kTpc2GlobalMatrix * kPadInner2Tpc = kTpc2GlobalMatrix * kSubSInner2Tpc
+	kPadOuter2Glob  := kTpc2GlobalMatrix * kPadOuter2Tpc = kTpc2GlobalMatrix * kSubSOuter2Tpc
   */
   assert(Dimensions()->numberOfSectors() == 24);
   Float_t gFactor = StarMagField::Instance()->GetFactor();
