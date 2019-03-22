@@ -1,0 +1,8 @@
+#! /usr/local/bin/tcsh -f
+cd ~/repository
+ setenv file update`date +"%d_%h_%Y"`_$1
+ find . -mtime -$1 -type f -cpio /scratch/fisyak/$file
+cd /scratch/fisyak
+gzip  $file
+gunzip  ${file}.gz
+cpio -idv <  $file

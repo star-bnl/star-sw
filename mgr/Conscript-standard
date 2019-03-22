@@ -29,6 +29,7 @@ my $SO_PKG_PLAIN = "";
 my $SO_PKGT = "";
 my $SO_MAP  = "";
 my $SO_MAPT = "";
+my $ROOTCINT_CPPFLAGS = "";
 my $pkg;
 my $PKG;
 my $OnlinePackage=0;
@@ -712,6 +713,7 @@ if ( $pkg =~ m/^StEventDisplay/ || $#uiQT >= 0 || $OnlinePackage ) {
   print "CPPPATH = $CPPPATH\n" if $param::debug;
   $CPPFLAGS .= " -DNOT_INCLUDE_GASLIB_IN_PACSLIB -DGARFIELD_HEED_INTERFACE -DUSE_SRANLUX -DEXCLUDE_FUNCTIONS_WITH_HISTDEF -DINS_CRETURN -DFUNNAMESTACK";
   $SO_PKG = "Garfield." . $env1->{SUFSOLIB};
+  $ROOTCINT_CPPFLAGS .= " -Doverride -Ddefault=0 -Dconstexpr";
 } elsif ( $pkg =~ m/^StAssociationMaker$/ ||
 	  $pkg =~ m/EmcUtil$/             ||
 	  $pkg =~ m/St_geant_Maker$/      ||
@@ -1335,7 +1337,7 @@ if ( $#Defs > -1) {# &&  $pkg !~ m/^GenFit$/ ) {
        $RCINTPL = "RootCint.pl";
      }
      Command $env2 [@CintFiles], @defs,
-       qq($RCINTPL "%>" "%<" "$ROOTCINT_CPPPATH $CPPFLAGS" );
+       qq($RCINTPL "%>" "%<" "$ROOTCINT_CPPPATH $ROOTCINT_CPPFLAGS $CPPFLAGS" );
    } else {
 #else /* __NEW__ */
      #  print "rootcling = $env->{Packages}->{ROOT}->{ROOTCLING}, defs = @defs\n";

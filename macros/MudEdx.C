@@ -390,6 +390,10 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
   //         Now iterations
   Var_t Var;
   TChain *tree = maker->chain();
+  if (! tree ) {
+    cout << "No TTree found. Exit." << endl;
+    return;
+  }
   Long64_t nentries = tree->GetEntries();
   if (nentries <= 0) return;
 #ifdef DEBUG

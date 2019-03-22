@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.30 2019/03/01 19:40:38 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.31 2019/03/14 02:31:53 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.31  2019/03/14 02:31:53  genevb
+// Introduce iTPC plots
+//
 // Revision 2.30  2019/03/01 19:40:38  genevb
 // Some minor Run 19 preparations, including first padrow hit
 //
@@ -157,7 +160,7 @@ class StQAMakerBase : public StMaker {
   virtual void   UseHistSet(Int_t s) { histsSet=s; }
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.30 2019/03/01 19:40:38 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.31 2019/03/14 02:31:53 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -246,6 +249,7 @@ class StQAMakerBase : public StMaker {
   virtual void MakeHistSST() {}
   virtual void MakeHistRP () {}
   virtual void MakeHistEPD() {}
+  virtual void MakeHistiTPC() {}
 
   ClassDef(StQAMakerBase,0)   //needed for all code that will be used in CINT
 };

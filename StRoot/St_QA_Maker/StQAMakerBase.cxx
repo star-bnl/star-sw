@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.51 2019/03/01 19:40:38 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.52 2019/03/14 02:31:53 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.52  2019/03/14 02:31:53  genevb
+// Introduce iTPC plots
+//
 // Revision 2.51  2019/03/01 19:40:38  genevb
 // Some minor Run 19 preparations, including first padrow hit
 //
@@ -301,7 +304,10 @@ Int_t StQAMakerBase::Make() {
   // histograms from Roman-Pot in StEvent
   if (histsSet>=StQA_run15) MakeHistRP();
   // histograms from EPD in StEvent
-  if (histsSet>=StQA_run18) MakeHistEPD();
+  if (histsSet>=StQA_run18) {
+    MakeHistEPD();
+    MakeHistiTPC();
+  }
 
   eventCount++;
   return kStOk;
