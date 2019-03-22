@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.105 2019/03/04 20:55:59 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.106 2019/03/14 02:31:52 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.106  2019/03/14 02:31:52  genevb
+// Introduce iTPC plots
+//
 // Revision 2.105  2019/03/04 20:55:59  genevb
 // Improve RDO layout for iTPC
 //
@@ -349,6 +352,7 @@
 #include "StMaker.h"
 #include "TF1.h"
 #include "TH3.h"
+#include "TProfile.h"
 
 #include "StHistUtil.h"
 
@@ -971,6 +975,7 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
           if (oName.EndsWith("PVsDedx") ||
               oName.Contains("fms_qt_") ||
               oName.Contains("fpd_channel_") ||
+              oName.Contains("TofPID") ||
               oName.Contains("RP_cluster_xy") ||
               oName.Contains("TpcSector") ||
               oName.Contains("PointRPTpc") ||
@@ -1262,7 +1267,7 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             latex.SetTextAlign(32);
             latex.DrawLatex(50,5,"RDO 1");
             latex.DrawLatex(50,18,"2");
-            latex.DrawLatex(50,33,(east ? "3 , 4" : "4 , 3"));
+            latex.DrawLatex(50,33,(east ? "4 , 3" : "3 , 4"));
             latex.DrawLatex(50,44,"5");
             latex.DrawLatex(50,52,"6");
             latex.DrawLatex(50,60,"7");
@@ -1382,6 +1387,52 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             latex.SetTextSize(sz);
             latex.SetTextColor(1);
             latex.SetTextAngle(0);
+          }
+
+          if ((chkdim == 2) && (oName.Contains("TPC_charge"))) {
+            TH2F* hobj_TPC_charge = (TH2F*) hobj;
+
+            TProfile *prof_hobjTPC = (TProfile*) hobj_TPC_charge->ProfileX();
+            prof_hobjTPC->SetMarkerStyle(20);
+            prof_hobjTPC->SetMarkerSize(0.6);
+            prof_hobjTPC->SetMarkerColor(6);
+            prof_hobjTPC->SetLineColor(6);
+            
+            //landau fit
+            static TF1 *flandau = 0;
+            if (!flandau) flandau = new TF1("flandau", "[0]*TMath::Landau(x,[1],[2])",0,200);
+            flandau->SetParameters(2e-3*(hobj->GetEntries()), 125, 30);
+            hobj_TPC_charge->FitSlicesY(flandau);
+            hobj->Draw("colz");
+            TH1D *mean_landau = (TH1D*) (gDirectory->Get(Form("%s_1",hobj_TPC_charge->GetName())));
+            if (mean_landau) {
+              mean_landau->SetMarkerStyle(20);
+              mean_landau->SetMarkerSize(0.6);
+              mean_landau->SetMarkerColor(1);
+              mean_landau->Draw("same p");
+            } else {
+              LOG_WARN << "TPC_charge Landau FitSlicesY failed for " << hobj->GetName() << endm;
+            }
+            
+            //rms landau
+            //TH1D *mean_landau2 = (TH1D*) (gDirectory->Get(Form("%s_2",hobj_TPC_charge_lan->GetName())));
+            //if (mean_landau2) {
+            //  mean_landau2->SetMarkerStyle(20);
+            //  mean_landau2->SetMarkerSize(0.6);
+            //  mean_landau2->SetMarkerColor(2);
+            //  mean_landau2->Draw("same p");
+            //}
+            
+            prof_hobjTPC->Draw("same p");
+            
+            //draw a legend
+            TLegend *ilegend = new TLegend(0.15,0.80,0.38,0.90);
+            ilegend->SetFillColor(0);
+            ilegend->SetHeader("Legend");
+            ilegend->SetMargin(0.25);
+            ilegend->AddEntry(prof_hobjTPC,"Profile mean","pz");
+            ilegend->AddEntry(mean_landau,"Landau MPV","pz");
+            ilegend->Draw();
           }
 
           if (padAdvance) {if (gPad) gPad->Update();}

@@ -1,10 +1,7 @@
 *
-* $Id: gtrack.F,v 1.1.1.3 2009/02/18 20:33:33 fisyak Exp $
+* $Id$
 *
 * $Log: gtrack.F,v $
-* Revision 1.1.1.3  2009/02/18 20:33:33  fisyak
-* *** empty log message ***
-*
 * Revision 1.1.1.1  2002/07/24 15:56:26  rdm
 * initial import into CVS
 *
@@ -74,7 +71,8 @@ C.
 #endif
 C.
 C.    ------------------------------------------------------------------
-      ISTOP = 0
+C.    ISTOP = 0
+      IF (ISTOP .NE. 0) GO TO 999
       EPSCUR = EPSMAC
       NSTOUT = 0
       INWOLD = 0
