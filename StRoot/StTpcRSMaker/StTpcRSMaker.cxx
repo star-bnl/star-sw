@@ -203,6 +203,7 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     Int_t Mask = -1; // 22 bits
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection);
     CLRBIT(Mask,StTpcdEdxCorrection::kdXCorrection);
+    CLRBIT(Mask,StTpcdEdxCorrection::kEdge);
     //    CLRBIT(Mask,StTpcdEdxCorrection::kTanL);
     m_TpcdEdxCorrection = new StTpcdEdxCorrection(Mask, Debug());
   }
@@ -1177,7 +1178,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
       if (Debug()) LOG_INFO << "StTpcRSMaker: Done with sector\t" << sector << " total no. of hit = " << NoHitsInTheSector << endm;
       if (Debug() > 2) digitalSector->Print();
 #ifdef __LASERINO__
-      for (Int_t row = 1; row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
+      for (Int_t row = 1; row <= Sx[t_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
 	Int_t Npads = digitalSector->numberOfPadsInRow(row);
 	map<Int_t,Int_t> ADCmap2Track;
         for(Int_t pad = 1; pad <= Npads; pad++) {
@@ -2044,7 +2045,7 @@ void StTpcRSMaker::GenerateSignal(HitPoint_t &TrackSegmentHits, Int_t sector, In
 Double_t StTpcRSMaker::dEdxCorrection(HitPoint_t &TrackSegmentHits) {
   Double_t dEdxCor = 1;
   if (m_TpcdEdxCorrection) {
-    dEdxCor = -1;
+    //    dEdxCor = -1;
     Double_t dStep =  TMath::Abs(TrackSegmentHits.tpc_hitC->ds);
     dEdxY2_t CdEdx;
     memset (&CdEdx, 0, sizeof(dEdxY2_t));
@@ -2058,7 +2059,7 @@ Double_t StTpcRSMaker::dEdxCorrection(HitPoint_t &TrackSegmentHits) {
     CdEdx.edge   = CdEdx.pad;
     if (CdEdx.edge > 0.5*St_tpcPadConfigC::instance()->numberOfPadsAtRow(CdEdx.sector,CdEdx.row)) 
       CdEdx.edge += 1 - St_tpcPadConfigC::instance()->numberOfPadsAtRow(CdEdx.sector,CdEdx.row);
-  CdEdx.F.dE     = 1;
+    CdEdx.F.dE     = 1;
 #if 0
     CdEdx.dCharge= tpcHit->chargeModified() - tpcHit->charge();
     Int_t p1 = tpcHit->minPad();
