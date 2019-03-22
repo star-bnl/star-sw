@@ -80,9 +80,9 @@ Int_t StTpcHitMover::Make() {
 	Int_t numberOfPadrows = sectorCollection->numberOfPadrows();
 	for (int j = 0; j< numberOfPadrows; j++) {
 	  Int_t row = j + 1;
-	  Int_t io = 0;
-	  if (row > St_tpcPadConfigC::instance()->innerPadRows(sector)) io = 1;
-	  Double_t padlength = (io == 0) ? 
+	  Int_t io = 1;
+	  if (row > St_tpcPadConfigC::instance()->innerPadRows(sector)) io = 0;
+	  Double_t padlength = (io == 1) ? 
 	    St_tpcPadConfigC::instance()->innerSectorPadLength(sector) : 
 	    St_tpcPadConfigC::instance()->outerSectorPadLength(sector);
 	  StTpcPadrowHitCollection *rowCollection = sectorCollection->padrow(j);
@@ -113,8 +113,6 @@ Int_t StTpcHitMover::Make() {
 		  Float_t time = tpcHit->timeBucket();
 		  if (! StTpcDb::IsOldScheme()) {
 		    if (St_tpcTimeBucketCorC::instance()->getNumRows()) {
-		      Int_t io = 0;
-		      if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) io = 1;
 		      Double_t noTmbks = tpcHit->maxTmbk() - tpcHit->minTmbk() + 1;
 		      time += St_tpcTimeBucketCorC::instance()->CalcCorrection(io, noTmbks);
 		    }
