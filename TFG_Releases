@@ -38,6 +38,7 @@
  TFG19a Freeze Stx, StEvent with VMC path                            2019-02-04 16:24:49 -0500  (HEAD -> master, tag: TFG19a_12)
  TFG19b Freeze Stx, StEvent with VMC path                            2019-02-12 22:42:25 -0500  (HEAD -> master, tag: TFG19b, origin/master, origin/HEAD)
  TFG19c Freeze library for eXpress production (+64bits)              2019-03-05 11:27:28 -0500  (HEAD -> master, tag: TFG19c_3)
+ TFG19d Freeze library for eXpress production with intermediate cal. 2019-03-21 11:27:28 -0500  (HEAD -> master, tag: TFG19d)
  .DEV2  head of TFG git repository
   DEV2  head of TFG git repository build with ROOT6
 
