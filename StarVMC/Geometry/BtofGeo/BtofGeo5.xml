@@ -275,8 +275,7 @@
         <Fill name="BTOG" comment="Barrel Trigger, CTB/TOF Basic dimensions"  >
             <var name="Version" value="6" comment=" geometry version "  />
             <var name="Rmin" value="207.80" comment=" minimum CTB/TOF system radius (as built) "  />
-<!--            <var name="Rmax" value="221.00" comment=" maximum CTB/TOF system radius "  /> -->
-            <var name="Rmax" value="223.50" comment=" minimum CALB system radius "  />
+            <var name="Rmax" value="219.5" comment=" maximum CTB/TOF system radius "  />
             <var name="dz" value="246.0" comment=" CTB/TOF tube half length "  />
             <var name="choice" value="11" comment=" 1=CTB, 2=Full-TOFp, 3=25% TOFp, 4=1 tray-TOFp, *                               ! 5=1 tray-TOFr, 6=Full-TOFr, 7=TOFp+TOFrp Run-IV"  />
             <var name="posit1" value="{32,33}" comment=" TOFp tray position (0) choice 4 or 5 -&gt; run-2,3 posn "  />

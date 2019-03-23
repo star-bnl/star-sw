@@ -214,7 +214,7 @@
   </Content>
     
     <varlist type="float" comment=" Half Width of IST ladder mother volume" >  HalfLadWdt/3.6559/</varlist>
-    <varlist type="float" comment=" Half Thickness of IST ladder mother volume" >   HalfLadThk/1.8957/</varlist>
+    <varlist type="float" comment=" Half Thcikness of IST ladder mother volume" >   HalfLadThk/1.8957/</varlist>
     <varlist type="float" comment=" Half Length of IST ladder mother volume" >    HalfLadLen/40.0877/</varlist>
     <!-- carbon honeycomb -->
     <varlist type="float" comment=" Half Width of Choneycomb in Stave" > HalfCombWdt/1.800/</varlist>

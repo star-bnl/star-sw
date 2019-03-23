@@ -306,8 +306,7 @@
         <Fill name="BTOG" comment="Barrel Trigger, CTB/TOF Basic dimensions"  >
             <var name="Version" value="6" comment=" geometry version "  />
             <var name="Rmin" value="207.80" comment=" minimum CTB/TOF system radius (as built) "  />
-<!--            <var name="Rmax" value="221.00" comment=" maximum CTB/TOF system radius "  /> -->
-            <var name="Rmax" value="223.50" comment=" minimum CALB system radius "  /> 
+            <var name="Rmax" value="221.00" comment=" maximum CTB/TOF system radius "  />
             <var name="dz" value="246.0" comment=" CTB/TOF tube half length "  />
             <var name="X0" value="0.0" comment=" radial global offset  "  />
             <var name="Z0" value="0.0" comment=" z distance of tray edge to TPC centralplane (previous TrayEdgeZ moved here) "  />

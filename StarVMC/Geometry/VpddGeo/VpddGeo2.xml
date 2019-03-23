@@ -1471,7 +1471,7 @@
             
         </Block>
         
-        <Block name="VDET" comment="is a single detector (Radiator+converter and PMT+electronics)"  >
+        <Block name="VDET" comment="is a single detector (Radiator+converter and PMT+electroncs)"  >
             <If expr="kDetStyle&lt;2"  >
                 <Material name="IRON"  />
                 <Attribute for="VDET" seen="1" serial="0" colo="1"  />

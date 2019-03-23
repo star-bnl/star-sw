@@ -1496,6 +1496,7 @@ replace [exe BTOFc6;] with [;" F.Geurts";BTOF=on; BtofConfig=12; Itof=6 " call b
 replace [exe BTOFc7;] with [;" F.Geurts";BTOF=on; BtofConfig=12; Itof=7 " call btofgeo7 ";]
 
 replace [exe BTOFv8;] with [;BTOF=on; BtofConfig=13; Itof=8 "call btofgeo8";]
+replace [exe ETOF;] with [;ETOF=on; EtofConfig=1;  "call etofgeo0";]
 """ ----------------------------------------------------------------------- """
 """ TPC Configurations                                                      """
 """     Naming convention is offset by 1 from the corresponding module.     """
@@ -2693,6 +2694,7 @@ REPLACE [exe y2018;] with ["Y2018 development tag";
 REPLACE [exe y2019;] with ["Y2019 development tag";
     exe TPCE05rY;   "Y : TPC upgrade studies 40 inner pad rows 0.500 x 1.60"; 
     exe BTOFv8;      "time of flight";
+    exe ETOF;        "EToF"	
     exe CALB02;      "updated bemc model";
     exe ECALv6;      "several bugfixes in eemc geometry";
     exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
@@ -2955,7 +2957,7 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               PIXL,ISTB,GEMB,FSTD,FTRO,FGTD,
               SHLD,QUAD,MUTD,IGTD,HPDT,ITSP,
               DUMM,SCON,IDSM,FSCE,EIDD,ISTD,
-              PXST,PSUP,HCAL,FTSD
+              PXST,PSUP,HCAL,FTSD,ETOF
 
 
 * Qualifiers:  TPC        TOF         etc
@@ -2992,7 +2994,7 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               FgtdConfig, TpceConfig, PhmdConfig, SvshConfig, SupoConfig, FtpcConfig, CaveConfig,
               ShldConfig, QuadConfig, MutdConfig, HpdtConfig, IgtdConfig, MfldConfig, EcalConfig,
               FhcmConfig, RmaxConfig, IdsmConfig, FsceConfig, EiddConfig, TpcxConfig, TpadConfig,
-              IstdConfig, PxstConfig, MagpConfig, HcalConfig, FtsdConfig
+              IstdConfig, PxstConfig, MagpConfig, HcalConfig, FtsdConfig, EtofConfig
 
    Integer                                        VpddModule/0/
 
@@ -3747,7 +3749,7 @@ If LL>0
   Case hctest  {
 
   "Switch off all detectors" 
-  {PIPE,SVTT,SISD,TPCE,FTPC,BTOF,VPDD,MAGP,CALB,ECAL,UPST,
+  {PIPE,SVTT,SISD,TPCE,FTPC,BTOF,ETOF,VPDD,MAGP,CALB,ECAL,UPST,
    RICH,ZCAL,MFLD,BBCM,FPDM,PHMD,PIXL,ISTB,GEMB,FSTD,FTRO,FGTD,
    SHLD,QUAD,MUTD,IGTD,HPDT,ITSP,DUMM,SCON,IDSM,FSCE,EIDD,ISTD, 
    PXST,PSUP,HCAL}=off;
@@ -5307,9 +5309,15 @@ c    write(*,*) 'BTOF'
       IF Itof=7 {  CONSTRUCT btofgeo7; }     !F.Geurts fixes to sensitive volumes
       IF Itof=8 {  CONSTRUCT btofgeo8; }    
    } 
+* - etof system should be on (for year 19):      DETP BTOF BTOG.choice=2
+   If (ETOF) { CONSTRUCT etofgeo0; }
+*    write(*,*) 'ETOF'
+*     call AgDETP new ('ETOF')
+*     call AgDETP add ('etog.choice=',EtofConfig,1)
+*     CONSTRUCT etofgeo0; }
+*}
 
    Call AGSFLAG('SIMU',1)
-
 
 ********************* Vertex Position Detector *******************
    If (LL>0 & VPDD) then

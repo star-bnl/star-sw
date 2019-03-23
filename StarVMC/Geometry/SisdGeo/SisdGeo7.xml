@@ -493,9 +493,7 @@
         <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
             <var name="version" value="7" comment=" geometry version " />
             <var name="ladderMap" value="{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}" comment=" presence of ladders " />
-            <!--<var name="ladderAngle" value="{81.0,99.0,117.0,135.0,153.0,171.0,189.0,207.0,225.0,243.0,261.0,279.0,297.0,315,333,351,9.0,27.0,45.0,63.0}" comment=" individual angles " />-->
-            <!-- JB : below is the correct ladder numbering -->
-            <var name="ladderAngle" value="{81.0, 63.0, 45.0, 27.0, 9.0, 351.0, 333.0, 315.0, 297.0, 279.0, 261.0, 243.0, 225.0, 207.0, 189.0, 171.0, 153.0, 135.0, 117.0, 99.0}" comment=" individual angles " />
+            <var name="ladderAngle" value="{81.0,99.0,117.0,135.0,153.0,171.0,189.0,207.0,225.0,243.0,261.0,279.0,297.0,315,333,351,9.0,27.0,45.0,63.0}" comment=" individual angles " />
             <var name="ladderTilt" value="{-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0}" comment=" individual tilts " />
             <var name="ladderRadius" value="{22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3}" comment=" individual radii " />
         </Fill>
