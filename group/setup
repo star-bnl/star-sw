@@ -8,6 +8,11 @@ if ($#argv == 0 || $#argv > 3 || "$1" == "help" || "$1" == "-h") then
    % setup 'Package' {version}
 
  where packages stands for one of
+   cvmfs|afs                        reset the environment to switch between
+                                    afs or cvmfs based install. Warning: this
+                                    will remove all ENV variable and reload 
+                                    the STAR login.
+
    debug|DEBUG                      switch the environment to the debug version of 
                                     the STAR software
    nodebug|NODEBUG                  switch the environment to the nodebug (optimized) 
@@ -47,6 +52,43 @@ setenv oldSTAR_HOST_SYS $STAR_HOST_SYS
 source $GROUP_DIR/unix_programs.csh
 
 switch ($pkg)
+    case "cvmfs":
+    case "afs":
+      if ( -e $HOME/.login ) then
+	#set saved_home=$HOME
+	#set saved_display=$DISPLAY
+	#unsetenv *
+	#setenv HOME     $saved_home
+	#setenv DISPLAY  $saved_display
+	unsetenv star_login_csh star_cshrc_csh 
+	unsetenv STAR OPTSTAR XOPTSTAR optstar xoptstar
+	unsetenv PATH LD_LIBRARY_PATH GROUP_DIR GROUP_PATH GROUPPATH
+	unsetenv ROOT ROOTSYS
+	unsetenv STAF* STAR_* 
+	unsetenv XROOTDSYS XrdSecPWDALOGFILE XrdSecPWDSRVPUK
+	unsetenv CERN QTDIR CLHEP_BASE_DIR
+	if ( $?WNOSG ) then
+	    set test1=`echo $WNOSG | $GREP afs`
+	    set test2=`echo $WNOSG | $GREP cvmfs`
+	    # if defined as AFS and we we asked for cvmfs, undefine
+	    if ( "$test1" != "" && $pkg == "cvmfs") then
+		unsetenv WNOSG
+	    endif	
+	    # if defined as CVMFS and we we asked for afs, undefine
+	    if ( "$test2" != "" && $pkg == "afs") then
+		unsetenv WNOSG
+	    endif
+        endif
+
+	if ( $pkg == "cvmfs") then
+	    setenv    USE_CVMFS 1
+	else
+	    unsetenv  USE_CVMFS
+        endif
+	source $HOME/.cshrc
+      endif
+      breaksw
+
     case "64bits":
     case "64b":
       setenv USE_64BITS 1

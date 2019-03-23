@@ -26,8 +26,13 @@ if ( ! $?star_login_csh ) then
     if ( $?DECHO ) echo "$self :: star_login_csh not defined, trying"
 
     # in case this is installed locally, check path
-    if( ! $?AFS_RHIC) then
-	if( $?GROUP_DIR ) then
+    if( ! $?AFS_RHIC ) then
+	if ( $?USE_CMFS ) then
+	  # define as-is, no check (this entire block may
+	  # actually have negative side effects on HPC
+	  setenv AFS_RHIC  /afs/rhic.bnl.gov
+	else
+	  if( $?GROUP_DIR ) then
 	    if ( $?DECHO ) echo "$self :: GROUP_DIR is defined"
 	    if ( -x $GROUP_DIR/chkread ) then
 		if ( $?DECHO ) then
@@ -51,10 +56,11 @@ if ( ! $?star_login_csh ) then
 	    # attempt to some fantasy path ... ATTENTION
 	    # This value will be checked in  group_env
 	    if ( ! $?AFS_RHIC ) setenv AFS_RHIC /Path_Not_Found_STAR_Login_Failure
-        else
+          else
 	    # old mode - GROUP_DIR not defined prior
 	    setenv AFS_RHIC  /afs/rhic.bnl.gov
-	endif
+	  endif
+        endif  # USE_CVMFS
     else
         if ( $?DECHO ) echo "$self :: AFS path pre-defined"
     endif

@@ -62,23 +62,45 @@ if ($ARGV[0] eq "-g"){
     # some to STDOUT
     if ($pgmf =~ /no root4star in/i){ $pgmf = "";}
 
-    if ( $pgmf ne "" ){
+   if ( $pgmf ne "" ){
 	$createTime = (stat($pgmf))[10];
 	($cmin,$chr,$cdy,$cmo,$cyr) = (localtime($createTime))[1,2,3,4,5];
 	$cmo = $cmo +1;
 	$year = $cyr - 100;
 	if ( $cyr > 99 ) {$year = sprintf("%2.2d", $cyr - 100 )}
-	$pgmf =~ s,/afs/rhic/star/packages/,,g;
-	$pgmf =~ s,/afs/rhic\.bnl\.gov/star/packages/,,g;
+
+	# remove path
+	$pgmf =~ s,.*packages/,,g;
 	$pgmf =~ s,/bin/root4star,,g;
+	$pgmf =~ s,/BIN/root4star,,g;
+
     } else {
-	$pgmf = "unknown";
-	$cmo  = $cdy = $year = $chr = $cmin = "?";
+	$origin = "unknown";
+	$pgmf   = ".".$ENV{STAR_HOST_SYS};
+	$cmo    = $cdy = $year = $chr = $cmin = "?";
     }
     my $debug = "_debug";
     if ($ENV{NODEBUG}) {$debug = "_opt";}
     chomp($host = `/bin/hostname`);
-    print "$host;CERN-$ENV{CERN_LEVEL};STAR-$VERSION;root4star-$cmo/$cdy/$year-$chr:$cmin-$pgmf;root-$ENV{ROOT_LEVEL},$ENV{STAR_HOST_SYS}$debug\n";
+#    print "$host;CERN-$ENV{CERN_LEVEL};STAR-$VERSION;root4star-$cmo/$cdy/$year-$chr:$cmin-$pgmf;root-$ENV{ROOT_LEVEL},$ENV{STAR_HOST_SYS}$debug\n";
+
+    # guess where this is installed
+    $origin = $ENV{STAR};
+    if ( $origin =~ m/\/afs/){
+	$origin = "AFS";
+    } elsif ( $origin =~ m/\/cvmfs/){
+	$origin = "CVMFS";
+    } else {
+	$origin =~ m/(\/\w+)(.*)/;
+	$origin = $1;
+    }
+
+
+
+    $ROOT = "ROOT-$ENV{ROOT_LEVEL}";
+    if ( defined($tmp = $ENV{QTDIR}) ){ $tmp =~ s/.*\///; $ROOT .= "-$tmp";}
+
+    print "$host;CERN-$ENV{CERN_LEVEL};$ROOT;STAR-$VERSION;root4star-$cmo/$cdy/$year-$chr:$cmin-$pgmf;$origin\n";
 }
 
 
