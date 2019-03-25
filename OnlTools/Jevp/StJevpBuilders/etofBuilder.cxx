@@ -356,7 +356,7 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
         }
 
         if( contents.array[ i ] == contents.triggerTimeToResetTime ) {
-            jp->logx = 1;
+            //jp->logx = 1;
             jp->logy = 0;
 
             resetTimeLabel1 = new TLatex();
