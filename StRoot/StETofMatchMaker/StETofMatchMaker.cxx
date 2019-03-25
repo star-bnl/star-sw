@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofMatchMaker.cxx,v 1.2 2019/03/08 19:09:31 fseck Exp $
+ * $Id: StETofMatchMaker.cxx,v 1.3 2019/03/25 01:05:48 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StETofMatchMaker.cxx,v $
+ * Revision 1.3  2019/03/25 01:05:48  fseck
+ * added more histograms for offline QA
+ *
  * Revision 1.2  2019/03/08 19:09:31  fseck
  * added a few eTOF histograms to the .hist.root files for offline QA
  *
@@ -370,6 +373,8 @@ StETofMatchMaker::Make()
 
         return kStOk;
     }
+
+    mHistograms.at( "intersectionMult_etofMult" )->Fill( detectorHitVec.size(), intersectionVec.size() );
 
     //.........................................................................
     // C. match detector hits to track intersections
@@ -871,6 +876,8 @@ StETofMatchMaker::findTrackIntersections( eTofHitVec& intersectionVec )
             }
         }
     }   // end of MuDst processing
+
+    LOG_INFO << "# tracks in the event: " << nNodes << "  ... out of which " << intersectionVec.size() << " intersect with eTOF" << endm;
 
     if( mDoQA ) {
         mHistograms.at( "intersectionMult" )->Fill( intersectionVec.size() );
@@ -1490,7 +1497,7 @@ StETofMatchMaker::calculatePidVariables( eTofHitVec& finalMatchVec )
     double tstart = startTime();
     //TODO: introduce proper methods to decide which start-time will be used ( VPD/bTOF or eTOF ) in the future
 
-    if( !mIsSim && ( fabs( tstart ) < 0.0001 ) ) {
+    if( !mIsSim && ( fabs( tstart ) < 0.01 || fabs( tstart + 9999. ) < 0.01 ) ) {
         if( mDebug ) {
             LOG_INFO << "calculatePidVariables() -- no valid start time avaiable ... skip filling pidTraits with more information" << endm;
         }
@@ -1608,6 +1615,7 @@ StETofMatchMaker::calculatePidVariables( eTofHitVec& finalMatchVec )
                 mHistograms.at( "matchCand_timeOfFlight"            )->Fill( tof );
                 mHistograms.at( "matchCand_timeOfFlight_pathLength" )->Fill( tof, pathLength );
             }
+            mHistograms.at( "matchCand_timeOfFlight_pathLength_zoom" )->Fill( tof, pathLength );
 
             pidTraits->setPathLength( pathLength );
             pidTraits->setBeta( beta );
@@ -1717,6 +1725,7 @@ StETofMatchMaker::calculatePidVariables( eTofHitVec& finalMatchVec )
                 mHistograms.at( "matchCand_timeOfFlight"            )->Fill( tof );
                 mHistograms.at( "matchCand_timeOfFlight_pathLength" )->Fill( tof, pathLength );
             }
+            mHistograms.at( "matchCand_timeOfFlight_pathLength_zoom" )->Fill( tof, pathLength );
 
             pidTraits.setPathLength( pathLength );
             pidTraits.setBeta( beta );
@@ -1772,7 +1781,7 @@ StETofMatchMaker::startTime()
     if( tstart > eTofConst::bTofClockCycle ) {
         tstart -= eTofConst::bTofClockCycle;
     }
-    else if( tstart < 0. ) {
+    else if( tstart < 0. && fabs( tstart + 9999.) > 0.001 ) {
         tstart += eTofConst::bTofClockCycle;
     }
 
@@ -1866,9 +1875,12 @@ StETofMatchMaker::fillQaHistograms( eTofHitVec& finalMatchVec )
         int sign   = ( charge  < 0 ) ? -1 : ( charge > 0 );
         float beta = matchCand.beta;
 
+        // skip events with no valid start time
+        if( beta == 0 ) continue;
+
         mHistograms.at( "matchCand_beta_signmom" )->Fill( sign * mom, 1. / beta );
 
-        if( mDebug ) {
+        if( mDoQA ) {
             float tof        = matchCand.tof;
             float pathlength = matchCand.pathLength;
             float m2         = mom * mom * ( -1 + 1 / ( beta * beta ) );
@@ -1971,14 +1983,18 @@ StETofMatchMaker::bookHistograms()
 {
     LOG_INFO << "bookHistograms" << endm;
 
-    mHistograms[ "eTofHits_globalXY" ]      = new TH2F( "A_eTofHits_globalXY",       "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
-    mHistograms[ "matchCand_globalXY" ]     = new TH2F( "C_matchCand_globalXY",      "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
-    mHistograms[ "matchCand_beta_signmom" ] = new TH2F( "G_matchCand_beta_signmom" , "match candidate 1/beta vs. momentum;q/|q| * p (GeV/c);1/#beta", 400, -10., 10., 1000, 0.8, 2. );
+    mHistograms[ "eTofHits_globalXY" ]         = new TH2F( "A_eTofHits_globalXY",         "global XY;x (cm);y (cm)",                                            400, -300., 300.,  400, -300., 300. );
+    mHistograms[ "intersectionMult_etofMult" ] = new TH2F( "B_intersectionMult_etofMult", "multiplicity correlation;# eTOF hits;#track intersections;# events", 200,    0., 200.,  200,    0., 200. );
+    mHistograms[ "matchCand_globalXY" ]        = new TH2F( "C_matchCand_globalXY",        "global XY;x (cm);y (cm)",                                            400, -300., 300.,  400, -300., 300. );
+    mHistograms[ "matchCand_beta_signmom" ]    = new TH2F( "G_matchCand_beta_signmom" ,   "match candidate 1/beta vs. momentum;q/|q| * p (GeV/c);1/#beta",      400,  -10.,  10., 1000,   0.8,   2. );
+    mHistograms[ "matchCand_timeOfFlight_pathLength_zoom" ] = new TH2F( "G_matchCand_timeOfFlight_pathLength", "match candidate pathlength vs. time of flight;ToF (ns);pathlength (cm)", 800, -25., 75., 800, 200., 600. );
 
-    AddHist( mHistograms.at( "eTofHits_globalXY" ) );
-    AddHist( mHistograms.at( "matchCand_globalXY" ) );
-    AddHist( mHistograms.at( "matchCand_beta_signmom" ) );
 
+    AddHist( mHistograms.at( "eTofHits_globalXY"         ) );
+    AddHist( mHistograms.at( "intersectionMult_etofMult" ) );
+    AddHist( mHistograms.at( "matchCand_globalXY"        ) );
+    AddHist( mHistograms.at( "matchCand_beta_signmom"    ) );
+    AddHist( mHistograms.at( "matchCand_timeOfFlight_pathLength_zoom" ) );
 
     if( mDoQA ) {
         // histograms to test sector & module numbering
