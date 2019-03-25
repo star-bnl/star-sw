@@ -284,7 +284,7 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
     }
 
     contents.missingTriggerTs       = new TH1D( "missingTriggerTs",       "missing trigger timestamps per sector;sector;# missing trigger timestamps", 12, 13, 25 );
-    contents.triggerTimeToResetTime = new TH1D( "triggerTimeToResetTime", "trigger time to reset time;time difference (s);#events", 1000, 1, 2001 );
+    contents.triggerTimeToResetTime = new TH1D( "triggerTimeToResetTime", "trigger time to reset time;time difference (s);#events", 200, 0, 2000 );
 
     contents.missingTriggerTs->SetMinimum( 0.9 );
 
@@ -363,6 +363,8 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
             resetTimeLabel2 = new TLatex();
             resetTimeLabel1->SetNDC();
             resetTimeLabel2->SetNDC();
+            resetTimeLabel1->SetTextSize( 0.04 );
+            resetTimeLabel2->SetTextSize( 0.04 );
             jp->addElement( resetTimeLabel1 );
             jp->addElement( resetTimeLabel2 );
         }
@@ -649,8 +651,8 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
         resetTimeLabel1->SetTextColor( kGreen+1 );
         resetTimeLabel2->SetTextColor( kGreen+1 );
     }
-    resetTimeLabel1->SetText( 0.12, 0.85, t1 );
-    resetTimeLabel2->SetText( 0.12, 0.80, t2 );
+    resetTimeLabel1->SetText( 0.12, 0.90, t1 );
+    resetTimeLabel2->SetText( 0.12, 0.86, t2 );
 
 
     size_t nDigisInTimingWindow = 0;
