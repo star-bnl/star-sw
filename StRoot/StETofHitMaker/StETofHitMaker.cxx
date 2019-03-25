@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHitMaker.cxx,v 1.2 2019/03/08 19:07:20 fseck Exp $
+ * $Id: StETofHitMaker.cxx,v 1.3 2019/03/25 01:07:40 fseck Exp $
  *
  * Author: Philipp Weidenkaff & Florian Seck, April 2018
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StETofHitMaker.cxx,v $
+ * Revision 1.3  2019/03/25 01:07:40  fseck
+ * added more correlation & average hit time histograms for offline QA
+ *
  * Revision 1.2  2019/03/08 19:07:20  fseck
  * introduced dead time handling + fixed clustering to only pick up hits on adjacent strips + moved QA histograms for clustered hits into separate function + added correlation plots to bTOF hits
  *
@@ -38,11 +41,15 @@
 #include "StBTofHeader.h"
 #include "StBTofHit.h"
 
+#include "StEpdCollection.h"
+#include "StEpdHit.h"
+
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuETofDigi.h"
 #include "StMuDSTMaker/COMMON/StMuETofHit.h"
 #include "StMuDSTMaker/COMMON/StMuBTofHit.h"
+#include "StMuDSTMaker/COMMON/StMuEpdHit.h"
 
 #include "StChain/StChainOpt.h" // for renaming the histogram file
 
@@ -980,6 +987,10 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
             // scale with tot for weigthed average
             double weight = pHit->totalTot();
 
+            if( weight==0 ) {
+                weight = 0.001;
+            }
+
             double weightedTime  = pHit->time()   * weight;
             double weightedPosX  = pHit->localX() * weight;
             double weightedPosY  = pHit->localY() * weight;
@@ -1029,7 +1040,11 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
                     }
                     //merge hit into cluster
                     double hitWeight = pMergeHit->totalTot();
-                    
+
+                    if( hitWeight==0 ) {
+                        hitWeight = 0.001;
+                    }
+
                     weightedTime   += ( pMergeHit->time()   * hitWeight );
                     weightedPosX   += ( pMergeHit->localX() * hitWeight );
                     weightedPosY   += ( pMergeHit->localY() * hitWeight );
@@ -1205,14 +1220,13 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
         // --------------------------------------------------------
         const StSPtrVecETofHit& etofHits = mEvent->etofCollection()->etofHits();
 
-        size_t nHitsETof = etofHits.size();
+        int    nHitsETof = 0;
         double averageETofHitTime = 0.;
 
         for( size_t i=0; i<etofHits.size(); i++ ) {
             StETofHit* aHit = etofHits[ i ];
 
             if( !aHit ) {
-                nHitsETof--;
                 continue;
             }
 
@@ -1220,23 +1234,23 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
                 LOG_DEBUG << *aHit << endm;
             }
 
-            averageETofHitTime += aHit->time();
+            updateCyclicRunningMean( aHit->time(), averageETofHitTime, nHitsETof, eTofConst::bTofClockCycle );
 
             // fill histogram to be saved in .hist.root file
             string histNamePos = "etofHit_pos_s" + std::to_string( aHit->sector() ) + "m" + std::to_string( aHit->zPlane() ) + "c" + std::to_string( aHit->counter() );
             mHistograms.at( histNamePos )->Fill( aHit->localX(), aHit->localY() );
             
             // if tstart exists
-            if( fabs( tstart ) > 0.001 && fabs( tstart + 999.) > 0.001 ) {
+            if( fabs( tstart ) > 0.001 && fabs( tstart - ( eTofConst::bTofClockCycle - 9999. ) ) > 0.001 ) {
                 double tof = aHit->time() - tstart;
-                if( tof < 0 ) {
+                if( tof < -800 ) {
                     tof += eTofConst::bTofClockCycle;
                 }
 
+                mHistograms.at( "etofHit_tof"           )->Fill( tof );
                 mHistograms.at( "etofHit_tof_fullrange" )->Fill( tof );
             }
         }
-        averageETofHitTime /= nHitsETof;
 
         // --------------------------------------------------------
         // analyze hits in bTOF to get the eTOF-bTOF correlation
@@ -1250,39 +1264,84 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
 
         const StSPtrVecBTofHit& btofHits = btofCollection->tofHits();
 
-        size_t nHitsBTof = btofHits.size();
+        int    nHitsBTof = 0;
         double averageBTofHitTime = 0.;
 
         for( size_t i=0; i<btofHits.size(); i++ ) {
             StBTofHit* aHit = btofHits[ i ];
 
             if( !aHit ) {
-                nHitsBTof--;
                 continue;
             }
 
-            averageBTofHitTime += aHit->leadingEdgeTime();
+            updateCyclicRunningMean( aHit->leadingEdgeTime(), averageBTofHitTime, nHitsBTof, eTofConst::bTofClockCycle );
+
+            // if doQA && tstart exists
+            if( mDoQA && fabs( tstart ) > 0.001 && fabs( tstart - ( eTofConst::bTofClockCycle - 9999. ) ) > 0.001 ) {
+                double tof = aHit->leadingEdgeTime() - tstart;
+                if( tof < 0 ) {
+                    tof += eTofConst::bTofClockCycle;
+                }
+
+                mHistograms.at( "btofHit_tof_fullrange" )->Fill( tof );
+            }
         }
-        averageBTofHitTime /= nHitsBTof;
 
         float diff = averageETofHitTime - averageBTofHitTime;
-        if( diff < 0 ) diff += eTofConst::bTofClockCycle;
+        if( diff < -800 ) diff += eTofConst::bTofClockCycle;
 
         mHistograms.at( "averageTimeDiff_etofHits_btofHits" )->Fill( diff );
         mHistograms.at( "multiplicity_etofHits_btofHits"    )->Fill( nHitsETof, nHitsBTof );
+
+        // --------------------------------------------------------
+        // analyze correlation with EPD East
+        // --------------------------------------------------------
+        StEpdCollection* epdCollection = mEvent->epdCollection();
+        if( !epdCollection || !epdCollection->hitsPresent() ) {
+            LOG_WARN << "fillHitQA - no epd collection or no epd hits present" << endm;
+            return;
+        }
+        
+        const StSPtrVecEpdHit& epdHits = epdCollection->epdHits();
+
+        float nHitsEpdEast = 0.;
+
+        LOG_INFO << epdHits.size() << " ### " << endm;
+
+        for( size_t i=0; i<epdHits.size(); i++ ) {
+            StEpdHit* epdHit = epdHits[ i ];
+            if( !epdHit ) {
+                continue;
+            }
+
+            if( epdHit->nMIP() < 0.3 ) continue;
+            if( epdHit->id() > 0 )     continue; //positive id is the west side
+            
+            if( epdHit->nMIP() < 5 ) {
+                nHitsEpdEast += epdHit->nMIP();
+            }
+            else {
+                nHitsEpdEast += 5;  //high hits are dominated by landau fluctuations
+            }
+        }
+
+        mHistograms.at( "multiplicity_etofHits_epdEast" )->Fill( nHitsETof, nHitsEpdEast );
+        if( mDoQA ) {
+            mHistograms.at( "multiplicity_btofHits_epdEast" )->Fill( nHitsBTof, nHitsEpdEast );
+        }
+
     }
     else {
         // --------------------------------------------------------
         // analyze hits in eTOF
         // --------------------------------------------------------
-        size_t nHitsETof = mMuDst->numberOfETofHit();
+        int    nHitsETof = 0;
         double averageETofHitTime = 0.;
 
         for( size_t i=0; i<mMuDst->numberOfETofHit(); i++ ) {
             StMuETofHit* aHit = mMuDst->etofHit( i );
 
             if( !aHit ) {
-                nHitsETof--;
                 continue;
             }
         
@@ -1293,23 +1352,23 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
                 LOG_DEBUG << " clustersize=" << aHit->clusterSize() << endm;
             }
 
-            averageETofHitTime += aHit->time();
+            updateCyclicRunningMean( aHit->time(), averageETofHitTime, nHitsETof, eTofConst::bTofClockCycle );
 
             // fill histogram to be saved in .hist.root file
             string histNamePos = "etofHit_pos_s" + std::to_string( aHit->sector() ) + "m" + std::to_string( aHit->zPlane() ) + "c" + std::to_string( aHit->counter() );
             mHistograms.at( histNamePos )->Fill( aHit->localX(), aHit->localY() );
 
             // if tstart exists
-            if( fabs( tstart ) > 0.001 && fabs( tstart + 999.) > 0.001 ) {
+            if( fabs( tstart ) > 0.001 && fabs( tstart - ( eTofConst::bTofClockCycle - 9999. ) ) > 0.001 ) {
                 double tof = aHit->time() - tstart;
-                if( tof < 0 ) {
+                if( tof < -800 ) {
                     tof += eTofConst::bTofClockCycle;
                 }
 
+                mHistograms.at( "etofHit_tof"           )->Fill( tof );
                 mHistograms.at( "etofHit_tof_fullrange" )->Fill( tof );
             }
         }
-        averageETofHitTime /= nHitsETof;
 
         // --------------------------------------------------------
         // analyze hits in bTOF to get the eTOF-bTOF correlation
@@ -1319,26 +1378,68 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
             return;
         }
 
-        size_t nHitsBTof = mMuDst->numberOfBTofHit();
+        int    nHitsBTof = 0;
         double averageBTofHitTime = 0.;
 
         for( size_t i=0; i<mMuDst->numberOfBTofHit(); i++ ) {
             StMuBTofHit* aHit = mMuDst->btofHit( i );
             
             if( !aHit ) {
-                nHitsBTof--;
                 continue;
             }
 
-            averageBTofHitTime += aHit->leadingEdgeTime();
+            updateCyclicRunningMean( aHit->leadingEdgeTime(), averageBTofHitTime, nHitsBTof, eTofConst::bTofClockCycle );
+
+            // if doQA && tstart exists
+            if( mDoQA && fabs( tstart ) > 0.001 && fabs( tstart - ( eTofConst::bTofClockCycle - 9999. ) ) > 0.001 ) {
+                double tof = aHit->leadingEdgeTime() - tstart;
+                if( tof < -800 ) {
+                    tof += eTofConst::bTofClockCycle;
+                }
+
+                mHistograms.at( "btofHit_tof_fullrange" )->Fill( tof );
+            }
         }
-        averageBTofHitTime /= nHitsBTof;
 
         double diff = averageETofHitTime - averageBTofHitTime;
-        if( diff < 0 ) diff += eTofConst::bTofClockCycle;
+        if( diff < -800 ) diff += eTofConst::bTofClockCycle;
 
         mHistograms.at( "averageTimeDiff_etofHits_btofHits" )->Fill( diff );
         mHistograms.at( "multiplicity_etofHits_btofHits"    )->Fill( nHitsETof, nHitsBTof );
+
+        // --------------------------------------------------------
+        // analyze correlation with EPD East
+        // --------------------------------------------------------
+        if( !mMuDst->epdHits() || !mMuDst->numberOfEpdHit() ) {
+            LOG_WARN << "fillHitQA - no epd hit array or no epd hits present" << endm;
+            return;
+        }
+
+        size_t nHitsEpd = mMuDst->numberOfEpdHit();
+        float nHitsEpdEast = 0.;
+
+        for( size_t i=0; i<nHitsEpd; i++ ) {
+            StMuEpdHit* epdHit = mMuDst->epdHit( i );
+            if( !epdHit ) {
+                continue;
+            }
+
+            if( epdHit->nMIP() < 0.3 ) continue;
+            if( epdHit->id() > 0 )     continue; //positive id is the west side
+            
+            if( epdHit->nMIP() < 5 ) {
+                nHitsEpdEast += epdHit->nMIP();
+            }
+            else {
+                nHitsEpdEast += 5;  //high hits are dominated by landau fluctuations
+            }
+        }
+
+        mHistograms.at( "multiplicity_etofHits_epdEast" )->Fill( nHitsETof, nHitsEpdEast );
+        if( mDoQA ) {
+            mHistograms.at( "multiplicity_btofHits_epdEast" )->Fill( nHitsBTof, nHitsEpdEast );
+        }
+
     }
 
     LOG_DEBUG << "fillHitQA() - histograms filled" << endm;   
@@ -1382,15 +1483,22 @@ StETofHitMaker::bookHistograms()
 {
     LOG_INFO << "bookHistograms() ... " << endm;
 
-    mHistograms[ "averageTimeDiff_etofHits_btofHits" ] = new TH1F( "averageTimeDiff_etofHits_btofHits", "difference between average times in bTOF and eTOF hits;#DeltaT (ns);# events", 26000, -800, eTofConst::bTofClockCycle ); 
-    mHistograms[ "multiplicity_etofHits_btofHits"    ] = new TH2F( "multiplicity_etofHits_btofHits", "multiplicity correlation between bTOF and eTOF;# eTOF hits;# bTOF hits", 200, 0, 200, 500, 0, 1000 );
+    mHistograms[ "etofHit_tof"                       ] = new TH1F( "etofHit_tof",           "eTOF hit time of flight;time of flight (ns);# hits", 2000, -100., 150 );
     mHistograms[ "etofHit_tof_fullrange"             ] = new TH1F( "etofHit_tof_fullrange", "eTOF hit time of flight;time of flight (ns);# hits", 5000, -800., eTofConst::bTofClockCycle );
+    mHistograms[ "averageTimeDiff_etofHits_btofHits" ] = new TH1F( "averageTimeDiff_etofHits_btofHits", "difference between average times in bTOF and eTOF hits;#DeltaT (ns);# events", 26000, -800, eTofConst::bTofClockCycle ); 
+    mHistograms[ "multiplicity_etofHits_btofHits"    ] = new TH2F( "multiplicity_etofHits_btofHits", "multiplicity correlation between bTOF and eTOF;# eTOF hits;# bTOF hits",         200, 0, 200, 500, 0, 1000 );
+    mHistograms[ "multiplicity_etofHits_epdEast"     ] = new TH2F( "multiplicity_etofHits_epdEast",  "multiplicity correlation between eTOF and east EPD;# eTOF hits;# hits east EPD", 200, 0, 200, 200, 0, 1000 );
 
+    AddHist( mHistograms.at( "etofHit_tof"                       ) );
+    AddHist( mHistograms.at( "etofHit_tof_fullrange"             ) );
     AddHist( mHistograms.at( "averageTimeDiff_etofHits_btofHits" ) );
     AddHist( mHistograms.at( "multiplicity_etofHits_btofHits"    ) );
-    AddHist( mHistograms.at( "etofHit_tof_fullrange"             ) );
+    AddHist( mHistograms.at( "multiplicity_etofHits_epdEast"     ) );
 
-
+    if( mDoQA ) {
+        mHistograms[ "btofHit_tof_fullrange"         ] = new TH1F( "btofHit_tof_fullrange", "bTOF hit time of flight;time of flight (ns);# hits", 5000, -800., eTofConst::bTofClockCycle );
+        mHistograms[ "multiplicity_btofHits_epdEast" ] = new TH2F( "multiplicity_btofHits_epdEast", "multiplicity correlation between bTOF and east EPD;# bTOF hits;# hits east EPD", 200, 0, 1000, 200, 0, 1000 );
+    }
 
     for( int sector = eTofConst::sectorStart; sector <= eTofConst::sectorStop; sector++ ) {
         for( int plane = eTofConst::zPlaneStart; plane <= eTofConst::zPlaneStop; plane++ ) {
@@ -1460,4 +1568,31 @@ StETofHitMaker::detectorToKey( const unsigned int detectorId ) {
     unsigned int counter  = (   detectorId % eTofConst::nCounters                                     ) + eTofConst::counterStart;
 
     return sector * 100 + zPlane * 10  + counter;
+}
+
+//_____________________________________________________________
+void
+StETofHitMaker::updateCyclicRunningMean( const double& value, double& mean, int& count, const double& range )
+{
+    double valIn = value;
+    if( mean - value < -0.9 * range ) {
+        valIn -= range;  
+    } 
+    else if( mean - value > 0.9 * range ) {
+        valIn += range;
+    }
+
+    count++;
+
+    double scaling = 1. / count;
+
+    if( mDebug ) {
+        LOG_INFO << "old mean: " << mean << "  scaling: " << scaling << " value in: " << valIn << endm;
+    }
+
+    mean = valIn * scaling + mean * ( 1. - scaling );
+
+    if( mDebug ) {
+        LOG_INFO << "new mean: " << mean << endm;
+    }
 }
