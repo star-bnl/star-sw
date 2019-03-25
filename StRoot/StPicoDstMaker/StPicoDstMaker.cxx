@@ -508,7 +508,15 @@ Int_t StPicoDstMaker::openRead() {
 
     int nFile = 0;
     string file;
-    while (getline(inputStream, file)) {
+    size_t pos;
+    while ( getline(inputStream, file) ) {
+      // NOTE: our external formatters may pass "file NumEvents"
+      //       Take only the first part
+      //cout << "DEBUG found " <<  file << endl;
+      pos = file.find_first_of(" ");
+      if (pos!=string::npos ) file.erase(pos,file.length()-pos);
+      //cout << "DEBUG found [" <<  file << "]" << endl;
+
       if (file.find(".picoDst.root") != string::npos) {
         TFile* ftmp = TFile::Open(file.c_str());
         if (ftmp && !ftmp->IsZombie() && ftmp->GetNkeys()) {
@@ -522,11 +530,11 @@ Int_t StPicoDstMaker::openRead() {
     } // while (getline(inputStream, file))
 
     LOG_INFO << " Total " << nFile << " files have been read in. " << endm;
-  }
-  else if (dirFile.find(".picoDst.root") != string::npos) {
+
+  } else if (dirFile.find(".picoDst.root") != string::npos) {
     mChain->Add(dirFile.c_str());
-  }
-  else {
+
+  } else {
     LOG_WARN << " No good input file to read ... " << endm;
   }
 
@@ -1427,12 +1435,12 @@ void StPicoDstMaker::fillEmcTrigger() {
 
 	  // Loop over eta strips
 	  for (unsigned int i=1; i<=smde->numberOfModules(); i++) {
-	    
+
 	    StEmcModule* module = smde->module(i);
 	    StSPtrVecEmcRawHit& aHit = module->hits();
-	    
+
 	    if (aHit.size() < 1) continue;
-	    
+
 	    for (unsigned int j=0; j<aHit.size(); j++) {
 	      Int_t id = -1;
 	      Float_t smdPhi = 0.;
@@ -1454,12 +1462,12 @@ void StPicoDstMaker::fillEmcTrigger() {
 
 	  // Loop over phi strips
 	  for (unsigned int i=1; i<=smdp->numberOfModules(); i++) {
-	    
+
 	    StEmcModule* module = smdp->module(i);
 	    StSPtrVecEmcRawHit& aHit = module->hits();
-	    
+
 	    if (aHit.size() < 1) continue;
-	    
+
 	    for (unsigned int j=0; j<aHit.size(); j++) {
 	      Int_t id = -1;
 	      Float_t smdPhi = 0.;
