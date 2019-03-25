@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StETofCalibMaker.cxx,v 1.2 2019/03/08 19:01:07 fseck Exp $
+ * $Id: StETofCalibMaker.cxx,v 1.3 2019/03/25 01:09:46 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofCalibMaker.cxx,v $
+ * Revision 1.3  2019/03/25 01:09:46  fseck
+ * added first version of pulser correction procedure + fix in reading parameters from db
+ *
  * Revision 1.2  2019/03/08 19:01:07  fseck
  * pick up the right trigger and reset time on event-by-event basis  +  fix to clearing of calibrated tot in afterburner mode  +  flag pulser digis
  *
@@ -81,6 +84,7 @@ StETofCalibMaker::StETofCalibMaker( const char* name )
   mResetTimeCorr( 0. ),
   mTriggerTime( 0. ),
   mResetTime( 0. ),
+  mPulserPeakTime( 0. ),
   mDebug( false )
 {
     /// default constructor
@@ -92,6 +96,9 @@ StETofCalibMaker::StETofCalibMaker( const char* name )
     mSignalVelocity.clear();
     mDigiTotCorr.clear();
     mDigiSlewCorr.clear();
+
+    mPulserPeakTot.clear();
+    mPulserTimeDiff.clear();
 }
 
 
@@ -234,6 +241,8 @@ StETofCalibMaker::InitRun( Int_t runnumber )
             if( key > 0 ) {
                 mTimingWindow[ key ] = std::make_pair( timingWindowTable->timingMin[ i ], timingWindowTable->timingMax[ i ] );
                 mPulserWindow[ key ] = std::make_pair( timingWindowTable->pulserMin[ i ], timingWindowTable->pulserMax[ i ] );
+
+                mPulserPeakTime = timingWindowTable->pulserPeak[ i ];
             }
         }
     }
@@ -271,6 +280,8 @@ StETofCalibMaker::InitRun( Int_t runnumber )
             if( address > 0 ) {
                 mTimingWindow[ address ] = std::make_pair( times.at( 0 ), times.at( 1 ) );
                 mPulserWindow[ address ] = std::make_pair( times.at( 3 ), times.at( 4 ) );
+
+                mPulserPeakTime = times.at( 5 );
             }
         }
         paramFile.close();
@@ -291,6 +302,7 @@ StETofCalibMaker::InitRun( Int_t runnumber )
     for( const auto& kv : mPulserWindow ) {
         LOG_DEBUG << "AFCK address: 0x" << std::hex << kv.first << std::dec << " --> pulser window from " << kv.second.first << " to " << kv.second.second << " ns" << endm;
     }
+    LOG_INFO << "pulser time peak at " << mPulserPeakTime << " ns" << endm;
     // --------------------------------------------------------------------------------------------
 
     // calib param
@@ -428,17 +440,22 @@ StETofCalibMaker::InitRun( Int_t runnumber )
         etofDigiTotCorr_st* digiTotCorrTable = etofDigiTotCorr->GetTable();
         
         for( size_t i=0; i<eTofConst::nChannelsInSystem; i++ ) {
-            unsigned int key = channelToDetectorKey( i );
+            unsigned int key = channelToKey( i );
+            unsigned int detector = key / 1000;
 
-            if( mDigiTotCorr.count( key ) == 0 ) {
-                TString name  = Form( "digiTotCorr_%d", key );
-                mDigiTotCorr[ key ] = new TH1F( name, name, 2 * eTofConst::nStrips, 0, 2 * eTofConst::nStrips );
+            if( mDigiTotCorr.count( detector ) == 0 ) {
+                TString name  = Form( "digiTotCorr_%d", detector );
+                mDigiTotCorr[ detector ] = new TH1F( name, name, 2 * eTofConst::nStrips, 0, 2 * eTofConst::nStrips );
             }
 
             unsigned int strip = ( key % 1000 ) / 10;
             unsigned int side  = key % 10;
 
-            mDigiTotCorr.at( key )->SetBinContent( strip + eTofConst::nStrips * ( side-1 ) , digiTotCorrTable->totCorr[ i ] );
+            if( mDebug ) {
+                LOG_DEBUG << i << "  " << detector << "  " << strip << " " << side << "  " << digiTotCorrTable->totCorr[ i ] << endm;
+            }
+
+            mDigiTotCorr.at( detector )->SetBinContent( strip + eTofConst::nStrips * ( side - 1 ) , digiTotCorrTable->totCorr[ i ] );
         }
 
         for( auto& kv : mDigiTotCorr ) {
@@ -463,17 +480,22 @@ StETofCalibMaker::InitRun( Int_t runnumber )
         etofDigiTimeCorr_st* digiTimeCorrTable = etofDigiTimeCorr->GetTable();
         
         for( size_t i=0; i<eTofConst::nChannelsInSystem; i++ ) {
-            unsigned int key = channelToDetectorKey( i );
+            unsigned int key = channelToKey( i );
+            unsigned int detector = key / 1000;
 
-            if( mDigiTimeCorr.count( key ) == 0 ) {
-                TString name  = Form( "digiTimeCorr_%d", key );
-                mDigiTimeCorr[ key ] = new TH1F( name, name, 2 * eTofConst::nStrips, 0, 2 * eTofConst::nStrips );
+            if( mDigiTimeCorr.count( detector ) == 0 ) {
+                TString name  = Form( "digiTimeCorr_%d", detector );
+                mDigiTimeCorr[ detector ] = new TH1F( name, name, 2 * eTofConst::nStrips, 0, 2 * eTofConst::nStrips );
             }
 
             unsigned int strip = ( key % 1000 ) / 10;
             unsigned int side  = key % 10;
 
-            mDigiTimeCorr.at( key )->SetBinContent( strip + eTofConst::nStrips * ( side-1 ) , digiTimeCorrTable->timeCorr[ i ] );
+            if( mDebug ) {
+                LOG_DEBUG << i << "  " << detector << "  " << strip << " " << side << "  " << digiTimeCorrTable->timeCorr[ i ] << endm;
+            }
+
+            mDigiTimeCorr.at( detector )->SetBinContent( strip + eTofConst::nStrips * ( side - 1 ) , digiTimeCorrTable->timeCorr[ i ] );
         }
 
         for( auto& kv : mDigiTimeCorr ) {
@@ -486,7 +508,6 @@ StETofCalibMaker::InitRun( Int_t runnumber )
         //-------------------
         LOG_INFO << "etofDigiSlewCorr: no filename provided --> load database table" << endm;
 
-        // (1) position offset +  (2) T0 offset
         dbDataSet = GetDataBase( "Calibrations/etof/etofDigiSlewCorr" );
 
         St_etofDigiSlewCorr* etofDigiSlewCorr = static_cast< St_etofDigiSlewCorr* > ( dbDataSet->Find( "etofDigiSlewCorr" ) );
@@ -523,7 +544,7 @@ StETofCalibMaker::InitRun( Int_t runnumber )
                 mDigiSlewCorr[ key ] = new TProfile( name, name, etofSlewing::nTotBins, binEdges.data() );
             }
 
-            // fill the histograms with weight, so that GetBinEnrties( bin ) is larger that mMinDigisPerSlewBin
+            // fill the histograms with weight, so that GetBinEnties( bin ) is larger that mMinDigisPerSlewBin
             for( size_t j=0; j<etofSlewing::nTotBins; j++ ) {
                 float totCenter = mDigiSlewCorr.at( key )->GetBinCenter( j+1 ); 
                 mDigiSlewCorr.at( key )->Fill( totCenter, corr.at( j ), mMinDigisPerSlewBin + 1 );
@@ -576,7 +597,7 @@ StETofCalibMaker::InitRun( Int_t runnumber )
                     if( hProfile ) {
                         for( size_t i=1; i<=2 * eTofConst::nStrips; i++ ) {
                             if( hProfile->GetBinContent( i ) != 0 ) {
-                                mDigiTotCorr.at( key )->SetBinContent( i , 2. /  ( hProfile->GetBinContent( i ) * 0.4 ) );
+                                mDigiTotCorr.at( key )->SetBinContent( i , 2. / hProfile->GetBinContent( i ) );
                             }
                             else {
                                 mDigiTotCorr.at( key )->SetBinContent( i , 1. );
@@ -643,7 +664,7 @@ StETofCalibMaker::InitRun( Int_t runnumber )
 
                         // check if channel-wise slewing parameters are available otherwise (due to low statistics) use detector-wise
                         if( !hProfile ) {
-                            LOG_WARN << "unable to find histogram: " << hname << "--> check detector-wise" << endm;
+                            LOG_DEBUG << "unable to find histogram: " << hname << "--> check detector-wise" << endm;
                             hname    = Form( "calib_Sector%02d_ZPlane%d_Det%d_AvCluWalk_pfx", sector, zPlane, counter );
                             hProfile = ( TProfile* ) histFile->Get( hname );
                         }
@@ -669,7 +690,7 @@ StETofCalibMaker::InitRun( Int_t runnumber )
                             }
                         }
                         else{
-                            LOG_WARN << "unable to find histogram: " << hname << endm;
+                            LOG_DEBUG << "unable to find histogram: " << hname << endm;
                         }
 
                     }
@@ -745,6 +766,26 @@ StETofCalibMaker::InitRun( Int_t runnumber )
 
     // --------------------------------------------------------------------------------------------
 
+    // temporary initialization for pulser peak TOT values.... TODO: move to database
+    for( size_t i=0; i<216; i++ ) {
+        unsigned int key = sideToKey( i );
+        
+        if( key / 1000 == 13 || key / 1000 == 14 || key / 1000 == 17 ||
+            key / 1000 == 18 || key / 1000 == 19 || key / 1000 == 20 ||
+            key / 1000 == 23 || key / 1000 == 24 ) {
+            mPulserPeakTot[ key ] = 49.5;
+        }
+        else {
+            mPulserPeakTot[ key ] = 98.5;
+        }
+    }
+
+    mPulserPeakTot[ 24211 ] = 15.5;
+    mPulserPeakTot[ 24221 ] = 15.5;
+    mPulserPeakTot[ 24231 ] = 15.5;
+    
+    // --------------------------------------------------------------------------------------------
+
     return kStOk;
 }
 
@@ -777,6 +818,8 @@ StETofCalibMaker::FinishRun( Int_t runnumber )
     }
     mDigiSlewCorr.clear();
 
+    mPulserPeakTot.clear();
+    mPulserTimeDiff.clear();
 
     return kStOk;
 }
@@ -792,7 +835,7 @@ StETofCalibMaker::Finish()
 //_____________________________________________________________
 Int_t
 StETofCalibMaker::Make()
-{ 
+{
     LOG_DEBUG << "StETofCalibMaker::Make(): starting ..." << endm;
 
     mEvent = ( StEvent* ) GetInputDS( "StEvent" );
@@ -828,7 +871,7 @@ StETofCalibMaker::Make()
 //_____________________________________________________________
 void
 StETofCalibMaker::processStEvent()
-{ 
+{
     StETofCollection* etofCollection = mEvent->etofCollection();
 
     if( !etofCollection ) {
@@ -858,6 +901,8 @@ StETofCalibMaker::processStEvent()
     mTriggerTime = triggerTime( etofHeader );
     mResetTime   = resetTime(   etofHeader );
 
+    std::map< unsigned int, std::vector< unsigned int > > pulserCandMap;
+
     /// first loop over digis to apply hardware mappping and find the pulsers
     for( size_t i=0; i<nDigis; i++ ) {
         StETofDigi* aDigi =  etofDigis[ i ];
@@ -874,8 +919,15 @@ StETofCalibMaker::processStEvent()
         applyMapping( aDigi );
 
         /// flag pulser digis
-        flagPulserDigis( aDigi, i );
+        if( mRunYear != 2018 ) {
+            flagPulserDigis( aDigi, i, pulserCandMap );
+        }
     }
+
+    LOG_INFO << "size of pulserCandMap: " << pulserCandMap.size() << endm;
+
+    calculatePulserOffsets( pulserCandMap );
+
 
     /// second loop to apply calibrations to (non-pulser) digis inside the timing window
     for( size_t i=0; i<nDigis; i++ ) {
@@ -888,7 +940,6 @@ StETofCalibMaker::processStEvent()
         /// calculate calibrated time and tot for the digi
         /// only for digis inside the timing window
         applyCalibration( aDigi, etofHeader );
-
     }
 }
 
@@ -896,7 +947,7 @@ StETofCalibMaker::processStEvent()
 //_____________________________________________________________
 void
 StETofCalibMaker::processMuDst()
-{ 
+{
     LOG_DEBUG << "processMuDst(): starting ..." << endm;
 
 
@@ -925,6 +976,8 @@ StETofCalibMaker::processMuDst()
     mTriggerTime = triggerTime( ( StETofHeader* ) etofHeader );
     mResetTime   = resetTime(   ( StETofHeader* ) etofHeader );
 
+    std::map< unsigned int, std::vector< unsigned int >> pulserCandMap;
+
     /// first loop over digis to apply hardware mappping and find the pulsers
     for( size_t i=0; i<nDigis; i++ ) {
         StMuETofDigi* aDigi = mMuDst->etofDigi( i );
@@ -941,8 +994,15 @@ StETofCalibMaker::processMuDst()
         applyMapping( aDigi );
 
         /// flag pulser digis
-        flagPulserDigis( aDigi, i );
+        if( mRunYear != 2018 ) {
+            flagPulserDigis( aDigi, i, pulserCandMap );
+        }
     }
+
+    LOG_INFO << "size of pulserCandMap: " << pulserCandMap.size() << endm;
+
+    calculatePulserOffsets( pulserCandMap );
+
 
     /// second loop to apply calibrations to (non-pulser) digis inside the timing window
     for( size_t i=0; i<nDigis; i++ ) {
@@ -955,9 +1015,7 @@ StETofCalibMaker::processMuDst()
         /// calculate calibrated time and tot for the digi
         /// only for digis inside the timing window
         applyCalibration( aDigi, etofHeader );
-
     }
-
 }
 //_____________________________________________________________
 
@@ -1031,55 +1089,121 @@ StETofCalibMaker::applyMapping( StETofDigi* aDigi )
 
 //_____________________________________________________________
 /*!
- * flag pulser digis ( set calibTot=-999 )
+ * flag pulser digis
  */
 void
-StETofCalibMaker::flagPulserDigis( StETofDigi* aDigi, unsigned int index )
+StETofCalibMaker::flagPulserDigis( StETofDigi* aDigi, unsigned int index, std::map< unsigned int, std::vector< unsigned int > >& pulserDigiMap )
 {
-    bool isPulser = false;
+    bool isPulserCand = false;
 
-    float timeToTrigger = aDigi->rawTime() - mTriggerTime;
+    unsigned int key = aDigi->sector() * 1000 + aDigi->zPlane() * 100 + aDigi->counter() * 10 + aDigi->side();
 
     // pulser channel
     if( ( aDigi->strip() == 1 && aDigi->side() == 1 ) || ( aDigi->strip() == 32 && aDigi->side() == 2 ) ) {
+        float timeToTrigger = aDigi->rawTime() - mTriggerTime;
+        float totToPeak     = aDigi->rawTot()  - mPulserPeakTot.at( key );
 
-        if( timeToTrigger > mPulserWindow.at( aDigi->rocId() ).first  &&
-            timeToTrigger < mPulserWindow.at( aDigi->rocId() ).second  )
-        {
-            float tot = aDigi->rawTot();
-            
-            int sector = aDigi->sector();
+        if( timeToTrigger > mPulserWindow.at( aDigi->rocId() ).first  && timeToTrigger < mPulserWindow.at( aDigi->rocId() ).second  ) {
+            isPulserCand = true;
+        }
 
-            if( tot > 90 && tot < 105 ) {
-                if( sector == 15 ||
-                    sector == 16 ||
-                    sector == 21 ||
-                    sector == 22 )  {
-                        isPulser = true;
-                }
-            }
-            else if( tot > 44 && tot < 55 ) {
-                if( sector == 13 ||
-                    sector == 14 ||
-                    sector == 17 ||
-                    sector == 18 ||
-                    sector == 19 ||
-                    sector == 20 ||
-                    sector == 23 ||
-                    sector == 24 )  {
-                        isPulser = true;
-                }
-            }
-
-            if( tot > 9  && tot < 18 && sector == 24 && aDigi->zPlane() == 2 && aDigi->side() == 1 ) {
-                isPulser = true;
-            }
-
+        if( fabs( totToPeak ) < 10 ) {
+            isPulserCand = true;
         }
     }
 
-    if( isPulser ) {
-        aDigi->setCalibTot( -999. );
+    if( isPulserCand ) {
+        pulserDigiMap[ key ].push_back( index );
+    }
+}
+
+
+//_____________________________________________________________
+/*!
+ * calculate pulser timing offsets & set calib tot of used pulsers to -999;
+ * the offsets are stored as member variable of the CalibMaker and keep set for the next event
+ * in case some of the pulsers are missing
+ */
+void
+StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< unsigned int > >& pulserDigiMap )
+{
+    if( mDebug ) {
+        for( auto it=pulserDigiMap.begin(); it!=pulserDigiMap.end(); it++ ) {
+            LOG_DEBUG << "channel: " << it->first << "   nCandidates: " << it->second.size() << endm;
+        }
+    }
+
+    double referenceTime = 0.;
+
+    for( auto it=pulserDigiMap.begin(); it!=pulserDigiMap.end(); it++ ) {
+        if( it->second.size() == 0 ) {
+            continue;
+        }
+        int sideIndex = it->first;
+
+        double bestDiff  = 100000;
+        int candIndex = -1;
+
+        for( size_t j=0; j<it->second.size(); j++ ) {
+            double pulserTime = 0.;
+            double pulserTot  = 0.;
+            if( mEvent ) {
+                pulserTime = ( mEvent->etofCollection()->etofDigis() )[ it->second.at( j ) ]->rawTime();
+                pulserTot  = ( mEvent->etofCollection()->etofDigis() )[ it->second.at( j ) ]->rawTot();
+            }
+            else if( mMuDst ) {
+                pulserTime = mMuDst->etofDigi( it->second.at( j ) )->rawTime();
+                pulserTot  = mMuDst->etofDigi( it->second.at( j ) )->rawTot();
+            }
+
+            double timeToTrigger = pulserTime - mTriggerTime;
+            double totToPeak     = pulserTot  - mPulserPeakTot.at( sideIndex );
+
+            if( it->second.size() > 1 ) {
+                LOG_INFO << it->second.size() <<  " pulsers @ " << sideIndex << " : timeToTrigger: " << timeToTrigger << "  tot: " << pulserTot << endm;
+            }
+            
+            // find "best fitting digi", remove other digis (likely misidentified noise)
+            double currentDiff = fabs( timeToTrigger - mPulserPeakTime ) * 0.1 + fabs( totToPeak );
+            if( currentDiff < bestDiff ) {
+                bestDiff = currentDiff;
+                candIndex = j;
+            }
+        }
+
+        if( it->second.size() > 1 ) {
+            LOG_INFO << " --> selected CAND-INDEX: " << candIndex << endm;
+        }
+
+        double pulserTime = 0.;
+        if( mEvent ) {
+            pulserTime = ( mEvent->etofCollection()->etofDigis() )[ it->second.at( candIndex ) ]->rawTime();
+
+            // set calibTot to -999. to exclude it from being calibrated in the next step --> pulser will not be used to build hits
+            mEvent->etofCollection()->etofDigis() [ it->second.at( candIndex ) ]->setCalibTot( -999. );
+        }
+        else if( mMuDst ) {
+            pulserTime = mMuDst->etofDigi( it->second.at( candIndex ) )->rawTime();
+
+            // set calibTot to -999. to exclude it from being calibrated in the next step --> pulser will not be used to build hits
+            mMuDst->etofDigi( it->second.at( candIndex ) )->setCalibTot( -999. );
+        }
+
+        if( sideIndex == 13111 ) {
+            referenceTime = pulserTime;
+        }
+
+        // due to ordering of entries in a map the reference pulser should always come first (if it is there)
+        // so the reference time should already be set to some non-zero value
+        if( referenceTime != 0 ) {
+            mPulserTimeDiff[ sideIndex ] = pulserTime - referenceTime;
+        }
+    }
+
+    if( mDebug ) {
+        for( const auto& kv : mPulserTimeDiff ) {
+            LOG_INFO << "channel: " << kv.first << "   timeDiff: " << kv.second << endm;
+        }
     }
 }
 
@@ -1120,7 +1244,8 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
         double calibTime = aDigi->rawTime() - mResetTime
                                             - resetTimeCorr()
                                             - calibTimeOffset(   aDigi )
-                                            - slewingTimeOffset( aDigi );
+                                            - slewingTimeOffset( aDigi )
+                                            - applyPulserOffset( aDigi );
 
         aDigi->setCalibTime( calibTime );
 
@@ -1161,9 +1286,9 @@ StETofCalibMaker::applyMapping( StMuETofDigi* aDigi )
 
 //_____________________________________________________________
 void
-StETofCalibMaker::flagPulserDigis( StMuETofDigi* aDigi, unsigned int index )
+StETofCalibMaker::flagPulserDigis( StMuETofDigi* aDigi, unsigned int index, std::map< unsigned int, std::vector< unsigned int > >& pulserDigiMap )
 {
-    flagPulserDigis( ( StETofDigi* ) aDigi, index );
+    flagPulserDigis( ( StETofDigi* ) aDigi, index, pulserDigiMap );
 }
 
 
@@ -1268,6 +1393,23 @@ StETofCalibMaker::slewingTimeOffset( StETofDigi* aDigi )
         }
         return 0.;
     }
+}
+
+
+//_____________________________________________________________
+/*!
+ * apply pulser time difference offsets to the digis
+ */
+double
+StETofCalibMaker::applyPulserOffset( StETofDigi* aDigi )
+{
+    int key = aDigi->sector() * 1000 + aDigi->zPlane() * 100 + aDigi->counter() * 10 + aDigi->side();
+
+    if( !mPulserTimeDiff.count( key ) ) {
+        return 0.;
+    }
+
+    return mPulserTimeDiff.at( key );
 }
 
 
@@ -1388,18 +1530,7 @@ StETofCalibMaker::channelToKey( const unsigned int channelId ) {
     unsigned int strip    = ( ( channelId % eTofConst::nChannelsPerCounter ) / eTofConst::nSides              ) + eTofConst::stripStart;
     unsigned int side     =   ( channelId % eTofConst::nSides )                                                 + eTofConst::sideStart;
 
-    return sector * 100000 + zPlane * 10000  + counter * 1000 + strip * 10 + side;
-}
-
-
-//_____________________________________________________________
-unsigned int
-StETofCalibMaker::channelToDetectorKey( const unsigned int channelId ) {
-    unsigned int sector   = (   channelId                                    / eTofConst::nChannelsPerSector  ) + eTofConst::sectorStart;
-    unsigned int zPlane   = ( ( channelId % eTofConst::nChannelsPerSector  ) / eTofConst::nChannelsPerModule  ) + eTofConst::zPlaneStart;
-    unsigned int counter  = ( ( channelId % eTofConst::nChannelsPerModule  ) / eTofConst::nChannelsPerCounter ) + eTofConst::counterStart;
-
-    return sector * 100 + zPlane * 10  + counter;
+    return sector * 100000 + zPlane * 10000 + counter * 1000 + strip * 10 + side;
 }
 
 
@@ -1410,5 +1541,17 @@ StETofCalibMaker::detectorToKey( const unsigned int detectorId ) {
     unsigned int zPlane   = ( ( detectorId % eTofConst::nCountersPerSector  ) / eTofConst::nCounters  ) + eTofConst::zPlaneStart;
     unsigned int counter  = (   detectorId % eTofConst::nCounters                                     ) + eTofConst::counterStart;
 
-    return sector * 100 + zPlane * 10  + counter;
+    return sector * 100 + zPlane * 10 + counter;
+}
+
+
+//_____________________________________________________________
+unsigned int
+StETofCalibMaker::sideToKey( const unsigned int sideId ) {
+    unsigned int sector   = (   sideId / ( eTofConst::nCountersPerSector * eTofConst::nSides ) )    + eTofConst::sectorStart;
+    unsigned int zPlane   = ( ( sideId % ( eTofConst::nCountersPerSector * eTofConst::nSides ) ) / (  eTofConst::nCounters * eTofConst::nSides ) ) + eTofConst::zPlaneStart;
+    unsigned int counter  = ( ( sideId % ( eTofConst::nCounters          * eTofConst::nSides ) ) /    eTofConst::nSides  ) + eTofConst::counterStart;
+    unsigned int side     = (   sideId % eTofConst::nSides                                     )    + eTofConst::sideStart;
+
+    return sector * 1000 + zPlane * 100 + counter * 10 + side;
 }
