@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHitMaker.h,v 1.2 2019/03/08 19:03:35 fseck Exp $
+ * $Id: StETofHitMaker.h,v 1.3 2019/03/25 01:08:21 fseck Exp $
  *
  * Author: Philipp Weidenkaff & Florian Seck, April 2018
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StETofHitMaker.h,v $
+ * Revision 1.3  2019/03/25 01:08:21  fseck
+ * added cyclic mean calculation function for average hit time
+ *
  * Revision 1.2  2019/03/08 19:03:35  fseck
  * moved QA histograms for clustered hits into separate function
  *
@@ -92,6 +95,7 @@ private:
     void fillUnclusteredHitQA( const double& tstart );
 
     void fillHitQA( const bool isMuDst, const double& tstart );
+    void updateCyclicRunningMean( const double& value, double& mean, int& count, const double& range );
 
     unsigned int detectorToKey( const unsigned int detectorId );
 

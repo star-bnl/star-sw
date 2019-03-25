@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StETofCalibMaker.h,v 1.2 2019/03/08 19:01:01 fseck Exp $
+ * $Id: StETofCalibMaker.h,v 1.3 2019/03/25 01:09:17 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofCalibMaker.h,v $
+ * Revision 1.3  2019/03/25 01:09:17  fseck
+ * added first version of pulser correction procedure
+ *
  * Revision 1.2  2019/03/08 19:01:01  fseck
  * pick up the right trigger and reset time on event-by-event basis  +  fix to clearing of calibrated tot in afterburner mode  +  flag pulser digis
  *
@@ -78,27 +81,31 @@ private:
 
     void resetToRaw      ( StETofDigi* aDigi );
     void applyMapping    ( StETofDigi* aDigi );
-    void flagPulserDigis ( StETofDigi* aDigi, unsigned int index );
+    void flagPulserDigis ( StETofDigi* aDigi, unsigned int index, std::map< unsigned int, std::vector< unsigned int > >& pulserCandMap );
     void applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader );
+
 
     void resetToRaw      ( StMuETofDigi* aDigi );
     void applyMapping    ( StMuETofDigi* aDigi );
-    void flagPulserDigis ( StMuETofDigi* aDigi, unsigned int index );
+    void flagPulserDigis ( StMuETofDigi* aDigi, unsigned int index, std::map< unsigned int, std::vector< unsigned int > >& pulserCandMap );
     void applyCalibration( StMuETofDigi* aDigi, StMuETofHeader* etofHeader );
+
+    void calculatePulserOffsets( std::map< unsigned int, std::vector< unsigned int > >& pulserCandMap );
 
 
     double calibTotFactor (    StETofDigi* aDigi );
     double calibTimeOffset(    StETofDigi* aDigi );
-    double slewingTimeOffset ( StETofDigi* aDigi );
+    double slewingTimeOffset(  StETofDigi* aDigi );
+    double applyPulserOffset(  StETofDigi* aDigi );
 
     double resetTimeCorr() const;
 
     double triggerTime( StETofHeader* etofHeader );
     double resetTime  ( StETofHeader* etofHeader );
 
-    unsigned int channelToKey(         const unsigned int channelId  );
-    unsigned int channelToDetectorKey( const unsigned int channelId  );
-    unsigned int detectorToKey(        const unsigned int detectorId );
+    unsigned int channelToKey(  const unsigned int channelId  );
+    unsigned int detectorToKey( const unsigned int detectorId );
+    unsigned int sideToKey(     const unsigned int sideId     );
 
 
     StEvent*             mEvent;
@@ -121,6 +128,8 @@ private:
     Double_t      mTriggerTime;             // trigger time in ns
     Double_t      mResetTime;               // reset time in ns 
 
+    Float_t       mPulserPeakTime;          // pulser peak time relative to the trigger time in ns
+
     std::map< UInt_t, std::pair< Float_t, Float_t > >  mTimingWindow;    // timing window for each AFCK
     std::map< UInt_t, std::pair< Float_t, Float_t > >  mPulserWindow;    // pulser window for each AFCK
     std::map< UInt_t, UInt_t >   mStatus;          // status of each channel: 0 - not existing/not working, 1 - working
@@ -129,6 +138,9 @@ private:
     std::map< UInt_t, TH1F* >     mDigiTotCorr;     // factor to calibrate TOT  per channel saved in one histogram (64 bins) per counter accessed by detectorId as key
     std::map< UInt_t, TH1F* >     mDigiTimeCorr;    // offset to calibrate time per channel saved in one histogram (64 bins) per counter accessed by detectorId as key
     std::map< UInt_t, TProfile* > mDigiSlewCorr;    // offset to account for slewing corrections per channel saved in a histogram (~30 TOT bins) accessed by channelId as key
+
+    std::map< UInt_t, Float_t >   mPulserPeakTot;   // TOT of pulsers on each side of the RPC counters (as key)
+    std::map< UInt_t, Double_t >  mPulserTimeDiff;  // pulser time difference with respect to the reference pulser for each detector side as key
 
     Bool_t        mDebug;
 
