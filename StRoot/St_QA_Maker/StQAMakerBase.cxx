@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.52 2019/03/14 02:31:53 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.53 2019/03/26 15:29:38 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.53  2019/03/26 15:29:38  genevb
+// Introduce ETOF
+//
 // Revision 2.52  2019/03/14 02:31:53  genevb
 // Introduce iTPC plots
 //
@@ -216,8 +219,10 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
 
 // Roman-Pot histograms
 //  m_RP_ClusterLength=0; // testing
-  for (i=0; i<kRP_MAXSEQ; i++ )
-    m_RP_clusters_xy[i] = 0 ;
+  for (i=0; i<kRP_MAXSEQ; i++) m_RP_clusters_xy[i] = 0 ;
+
+// ETOF histograms
+  for (i=0; i<8; i++) m_etofHist[i] = 0;
 
 }
 //_____________________________________________________________________________
@@ -408,6 +413,7 @@ void StQAMakerBase::BookHist() {
   BookHistFcl();
   if (histsSet>=StQA_run13) BookHistFMS(); 
   if (histsSet>=StQA_run15) BookHistRP();
+  if (histsSet>=StQA_run19) BookHistETOF();
 
   Int_t tempClass2 = eventClass;
   // Must book the histograms with no special prefix now
@@ -592,6 +598,31 @@ void StQAMakerBase::BookHistRP(){
      m_RP_clusters_xy[i] = QAH::H2F(strs, strl, 96, 0., 768., 96, 0., 768. );
   }
 
+}
+//_____________________________________________________________________________
+void StQAMakerBase::BookHistETOF(){
+
+  // Get ETOF histograms ETOF hit & match makers
+  if (!(m_etofHist[0])) {
+    int etofCnt = 0;
+    // First try to get histograms from StEtofHitMaker
+    StMaker* ehMaker = GetMaker("etofHit");
+    if (ehMaker) {
+      m_etofHist[etofCnt++] = (TH1*) (ehMaker->GetHist("etofHit_tof"));
+      m_etofHist[etofCnt++] = (TH1*) (ehMaker->GetHist("averageTimeDiff_etofHits_btofHits"));
+      m_etofHist[etofCnt++] = (TH1*) (ehMaker->GetHist("multiplicity_etofHits_btofHits"));
+      m_etofHist[etofCnt++] = (TH1*) (ehMaker->GetHist("multiplicity_etofHits_epdEast"));
+    }
+    // First try to get histograms from StEtofHitMaker
+    StMaker* emMaker = GetMaker("etofMatch");
+    if (emMaker) {
+      m_etofHist[etofCnt++] = (TH1*) (emMaker->GetHist("A_eTofHits_globalXY"));
+      m_etofHist[etofCnt++] = (TH1*) (emMaker->GetHist("B_intersectionMult_etofMult"));
+      m_etofHist[etofCnt++] = (TH1*) (emMaker->GetHist("G_matchCand_beta_signmom"));
+      m_etofHist[etofCnt++] = (TH1*) (emMaker->GetHist("G_matchCand_timeOfFlight_pathLength"));
+    }
+    for (int i=0; i<etofCnt; i++) AddHist(m_etofHist[i]);
+  }
 }
 //_____________________________________________________________________________
 

@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.106 2019/03/14 02:31:52 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.107 2019/03/26 15:29:35 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.107  2019/03/26 15:29:35  genevb
+// Introduce ETOF
+//
 // Revision 2.106  2019/03/14 02:31:52  genevb
 // Introduce iTPC plots
 //
@@ -2530,6 +2533,8 @@ void StHistUtil::SetDefaultPrintList(const Char_t *dirName, const Char_t *analTy
       if (!(ilgString.BeginsWith("fcl") ||
             ilgString.BeginsWith("fms_qt_") ||
             ilgString.BeginsWith("Z3A") ||
+            ilgString.Contains("etof",TString::ECaseCompare::kIgnoreCase) ||
+            ilgString.BeginsWith("G_matchCand_") ||
             ilgString.BeginsWith("fpd_channel_"))) {
         for (Int_t k=0; k<numOfPosPrefixes; k++) {
           TString listString = type;
