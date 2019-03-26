@@ -555,33 +555,33 @@ Int_t StPicoDstMaker::openRead() {
 
     int nFile = 0;
     string file;
-    while (getline(inputStream, file)) {
-#ifndef __TFG__VERSION__
-      if (file.find(".picoDst.root") != string::npos) {
-#else /* __TFG__VERSION__ */
+    size_t pos;
+    while ( getline(inputStream, file) ) {
+      // NOTE: our external formatters may pass "file NumEvents"
+      //       Take only the first part
+      //cout << "DEBUG found " <<  file << endl;
+      pos = file.find_first_of(" ");
+      if (pos!=string::npos ) file.erase(pos,file.length()-pos);
+      //cout << "DEBUG found [" <<  file << "]" << endl;
+      
       if (file.find(".picoDst.root")  != string::npos ||
 	  file.find(".femtoDst.root") != string::npos) {
-#endif /* ! __TFG__VERSION__ */
         TFile* ftmp = TFile::Open(file.c_str());
         if (ftmp && !ftmp->IsZombie() && ftmp->GetNkeys()) {
           LOG_INFO << " Read in picoDst file " << file << endm;
           mChain->Add(file.c_str());
           ++nFile;
         }
-
+	
         if (ftmp) ftmp->Close();
       }
     } // while (getline(inputStream, file))
-
+    
     LOG_INFO << " Total " << nFile << " files have been read in. " << endm;
   }
-#ifdef __TFG__VERSION__
   else if (! gSystem->AccessPathName(dirFile.c_str()) &&
 	   (dirFile.find(".picoDst.root")  != string::npos ||
 	    dirFile.find(".femtoDst.root")  != string::npos)) {
-#else /* ! __TFG__VERSION__ */
-  else if (dirFile.find(".picoDst.root") != string::npos) {
-#endif /* __TFG__VERSION__ */
     mChain->Add(dirFile.c_str());
   }
   else {
@@ -1628,12 +1628,12 @@ void StPicoDstMaker::fillEmcTrigger() {
 
 	  // Loop over eta strips
 	  for (unsigned int i=1; i<=smde->numberOfModules(); i++) {
-	    
+
 	    StEmcModule* module = smde->module(i);
 	    StSPtrVecEmcRawHit& aHit = module->hits();
-	    
+
 	    if (aHit.size() < 1) continue;
-	    
+
 	    for (unsigned int j=0; j<aHit.size(); j++) {
 	      Int_t id = -1;
 	      Float_t smdPhi = 0.;
@@ -1655,12 +1655,12 @@ void StPicoDstMaker::fillEmcTrigger() {
 
 	  // Loop over phi strips
 	  for (unsigned int i=1; i<=smdp->numberOfModules(); i++) {
-	    
+
 	    StEmcModule* module = smdp->module(i);
 	    StSPtrVecEmcRawHit& aHit = module->hits();
-	    
+
 	    if (aHit.size() < 1) continue;
-	    
+
 	    for (unsigned int j=0; j<aHit.size(); j++) {
 	      Int_t id = -1;
 	      Float_t smdPhi = 0.;
