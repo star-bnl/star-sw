@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.51 2019/03/14 02:31:52 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.52 2019/03/26 15:29:37 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.52  2019/03/26 15:29:37  genevb
+// Introduce ETOF
+//
 // Revision 2.51  2019/03/14 02:31:52  genevb
 // Introduce iTPC plots
 //
@@ -321,4 +324,12 @@
   ":mtd:QaMtdNHits",
   ":mtd:QaMtdHitMap",
   ":mtd:QaMtdNMatchHits",
-  ":mtd:QaMtdMatchHitMap"
+  ":mtd:QaMtdMatchHitMap",
+  ":etof:etofHit_tof",
+  ":etof,tof:averageTimeDiff_etofHits_btofHits",
+  ":etof,tof:multiplicity_etofHits_btofHits",
+  ":etof:multiplicity_etofHits_epdEast",
+  ":etof,tpx:A_eTofHits_globalXY",
+  ":etof,tpx:B_intersectionMult_etofMult",
+  ":etof,tpx:G_matchCand_beta_signmom",
+  ":etof,tpx:G_matchCand_timeOfFlight_pathLength"
