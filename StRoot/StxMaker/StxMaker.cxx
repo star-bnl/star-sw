@@ -823,10 +823,11 @@ void StxMaker::FillGeometry(StTrack* gTrack, genfit::Track * track, Bool_t outer
 #ifdef  __kfpAtFirstHit__
   Double_t xyzp[6] = {pos.X(), pos.Y(), pos.Z(), mom.X(), mom.Y(), mom.Z()};
   Double_t CovXyzp[21];
-  Int_t ii = 0;
+  Int_t ij = 0;
   for (Int_t i = 0; i < 6; i++)
-    for (Int_t j = 0; j < = i; j++)
-      CovXyzp[ii] = cov(i,j);
+    for (Int_t j = 0; j < = i; j++) {
+      CovXyzp[ij] = cov(i,j); ij++;
+    }
   KFPTrack *KFPTrackAtHit = new KFPTrack();
   KFPTrackAtHit->SetID(gTrack->key());
   KFPTrackAtHit->SetCharge(track->getCharge());
