@@ -16,8 +16,6 @@ class St_iTPCSurveyC : public TChair {
   Float_t 	ScaleX(Int_t i = 0) 	const {return Struct(i)->ScaleX;}
   Float_t 	ScaleY(Int_t i = 0) 	const {return Struct(i)->ScaleY;}
   Char_t* 	comment(Int_t i = 0) 	const {return Struct(i)->comment;}
-  const TGeoHMatrix  &GetMatrix(Int_t i = 0);
-  const TGeoHMatrix  &GetMatrix4Id(Int_t id);
  protected:
   St_iTPCSurveyC(St_iTPCSurvey *table=0) : TChair(table) {}
   virtual ~St_iTPCSurveyC() {fgInstance = 0;}
