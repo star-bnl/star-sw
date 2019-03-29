@@ -234,8 +234,9 @@ void MakeSuperSectorPositionB(){
     drot[2] = Passes[NP-1].Data[i].Dgamma*1e-3;
     memcpy(&row[i].sigmaRotX, drot, 3*sizeof(Double_t));
     memcpy(&row[i].sigmaTrX, dxyz, 3*sizeof(Double_t));
-    cout << "Additional rotation for Inner Sector\t"; dR[i].Print();
+    cout << "Additional rotation for Super Sector\t"; dR[i].Print();
     cout << "dR" << i << ":"; dR[i].Print("");
+    cout << "dRC" << i << ":"; dRC[i].Print("");
     //    TGeoHMatrix dRC = dR[i]*RAvI[part]; cout << "dRC:"; dRC.Print("");
     //    TGeoHMatrix GLnew = StTpcDb::instance()->Flip().Inverse()*dR[i]*StTpcDb::instance()->Flip()*GL; GLnew.Print(); // Flip 03/14/19
     //    TGeoHMatrix GLnew = GL*dR[i]; GLnew.Print(); // used till 03/13/19 and after 03/15/19
