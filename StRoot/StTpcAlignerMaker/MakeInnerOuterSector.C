@@ -1,7 +1,7 @@
 /*
   root.exe MakeInnerOuterSector.C
 */
-//#define __TpcInnerSector__ 
+#define __TpcInnerSector__ 
 class St_db_Maker;
 class TTable;
 St_db_Maker *dbMk = 0;
@@ -146,12 +146,12 @@ void MakeInnerOuterSector(const Char_t *opt = 0){
 	if (Pass[r].Data[i].Dz >= 0) xyz[2] =  1e-4*Pass[r].Data[i].z;
 	dR.SetTranslation(xyz);           cout << "dR\t"; dR.Print();
       }
-  //new:  global = Tpc2GlobalMatrix() * SupS2Tpc(sector) * StTpcSuperSectorPosition(sector) * Flip() * {StTpcInnerSectorPosition(sector)} | StTpcOuterSectorPosition(sector)}
-      TGeoHMatrix dR1 = FlipI * dR * Flip; cout << "F^-1 dR F\t"; dR1.Print();
-      //      TGeoHMatrix dRI = dR.Inverse(); cout << "dR^-1\t"; dRI.Print();
+      //new:  global = Tpc2GlobalMatrix() * SupS2Tpc(sector) * StTpcSuperSectorPosition(sector) * Flip() * {StTpcInnerSectorPosition(sector)} | StTpcOuterSectorPosition(sector)}
+      //      TGeoHMatrix dR1 = FlipI * dR * Flip; cout << "F^-1 dR F\t"; dR1.Print();
+      TGeoHMatrix dRI = dR.Inverse(); cout << "dR^-1\t"; dRI.Print();
       //      TGeoHMatrix dRT = FlipI * dRI * Flip; cout << "F^-1 dR^-1 F\t"; dRT.Print();
       //      TGeoHMatrix dRT = FlipI * dR * Flip; cout << "F^-1 dR F\t"; dRT.Print();
-      TGeoHMatrix dRI = dR1.Inverse(); cout << "dR^-1\t"; dRI.Print();
+      //      TGeoHMatrix dRI = dR1.Inverse(); cout << "dR^-1\t"; dRI.Print();
 #ifndef __TpcInnerSector__
       LS = dR * LSold; cout << "LS_new\t"; LS.Print();
 #else /* __TpcInnerSector__ */

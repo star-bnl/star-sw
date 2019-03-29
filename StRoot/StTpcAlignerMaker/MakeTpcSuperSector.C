@@ -121,11 +121,14 @@ Euler Rotation in Tait-Bryan angles
     Pass.Data[i].beta  *= -1.;
     Pass.Data[i].gamma *= -1.;
 #endif
+    //#define __ROTATION__
+#ifdef __ROTATION__
     dR[i].RotateX( TMath::RadToDeg()*Pass.Data[i].alpha*1e-3*scale);
 #if 0
     dR[i].RotateY( TMath::RadToDeg()*Pass.Data[i].beta*1e-3*scale); 
 #endif
     dR[i].RotateZ( TMath::RadToDeg()*Pass.Data[i].gamma*1e-3*scale);  // swap sign 03/13/19
+#endif /* __ROTATION__ */
     dR[i].SetTranslation(xyz);
     Rideal[i]     = StTpcDb::instance()->SupS2Glob(i+1); cout << "Ideal:"; Rideal[i].Print();
     RidealI[i]    = Rideal[i].Inverse(); cout << "Inverse:"; RidealI[i].Print();
