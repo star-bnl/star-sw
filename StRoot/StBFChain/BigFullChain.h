@@ -249,23 +249,35 @@ Bfc_st BFC[] = { // standard chains
   {"MC.2017","","","y2017,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
+  {"MC2016.Ideal","","","MC.2016a,istSlowSim,pxlSlowSim,StiHftC,MC.StiCA"                 ,"","","",kFALSE},
+  {"MC2016",      "","","MC2016.Ideal,VMCAlignment,sdt20160301"                           ,"","","",kFALSE},
   {"MC.y2017","","","MC.2017",                                                            "","","",kFALSE},
+  {"MC2017.Ideal","","","MC.2017,MC.StiCA"                                                ,"","","",kFALSE},
+  {"MC2017",      "","","MC2017.Ideal"                                                    ,"","","",kFALSE},
   {"MC.2018","","","y2018,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
   {"MC.y2018","","","MC.2018",                                                            "","","",kFALSE},
+  {"MC2018.Ideal","","","MC.2018,MC.StiCA,NewTpcAlignment"                                ,"","","",kFALSE},
+  {"MC2018",      "","","MC2018.Ideal,vmc,VMCAlignment,sdt20180426.122000"                ,"","","",kFALSE},
+  {"MC.2019","","","y2019,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
+   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
+   ,                                                                                      "","","/",kFALSE},
   {"MC.2019","","","y2019,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
   {"MC.y2019","","","MC.2019",                                                            "","","",kFALSE},
+  {"MC.2019a","","","y2019a,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
+   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
+   ,                                                                                      "","","/",kFALSE},
+  {"MC.y2019a","","","MC.2019a",                                                            "","","",kFALSE},
+  {"MC.y2019a","","","MC.2019a",                                                            "","","",kFALSE},
+  {"MC.2019a","","","y2019a,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
+   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,ETofSim,etofa,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
+   ,                                                                                      "","","/",kFALSE},
+  {"MC.y2019a","","","MC.2019a",                                                            "","","",kFALSE},
   {"MC.StiCA",   "","","StiCA,-hitfilt,StiKFVertex,geantOut,noRunco,noHistos,20Muons,OSpaceZ2,"
    "OGridLeak3D,CorrX,StiPulls,picoWrite,PicoVtxVpd,RunG.1,McTpcAna,tags"                  ,"","","",kFALSE},
-  {"MC2016.Ideal","","","MC.2016a,istSlowSim,pxlSlowSim,StiHftC,MC.StiCA"                 ,"","","",kFALSE},
-  {"MC2016",      "","","MC2016.Ideal,VMCAlignment,sdt20160301"                           ,"","","",kFALSE},
-  {"MC2017.Ideal","","","MC.2017,MC.StiCA"                                                ,"","","",kFALSE},
-  {"MC2017",      "","","MC2017.Ideal"                                                    ,"","","",kFALSE},
-  {"MC2018.Ideal","","","MC.2018,MC.StiCA,NewTpcAlignment"                                ,"","","",kFALSE},
-  {"MC2018",      "","","MC2018.Ideal,vmc,VMCAlignment,sdt20180426.122000"                ,"","","",kFALSE},
   {"XC",          "","","TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,"
    "OSpaceZ2,OGridLeak3D,CorrX,tpcDB,TpcHitMover"
    ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,Stx,KFVertex,Idst,BAna"       
