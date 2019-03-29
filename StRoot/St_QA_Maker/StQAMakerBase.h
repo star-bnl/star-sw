@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.31 2019/03/14 02:31:53 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.32 2019/03/26 15:29:38 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.32  2019/03/26 15:29:38  genevb
+// Introduce ETOF
+//
 // Revision 2.31  2019/03/14 02:31:53  genevb
 // Introduce iTPC plots
 //
@@ -160,7 +163,7 @@ class StQAMakerBase : public StMaker {
   virtual void   UseHistSet(Int_t s) { histsSet=s; }
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.31 2019/03/14 02:31:53 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.32 2019/03/26 15:29:38 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -203,6 +206,9 @@ class StQAMakerBase : public StMaker {
   //  TH1F     *m_RP_ClusterLength; // testing
   TH2F     *m_RP_clusters_xy[kRP_MAXSEQ] ; // cluster positions
 
+  // ETOF histograms
+  TH1      *m_etofHist[8]; //!
+
 // **************** Members For Internal Use ***************************
  protected:
   TString QAMakerType;  // character string to prepend to each hist name/title
@@ -228,6 +234,7 @@ class StQAMakerBase : public StMaker {
   virtual void BookHistFMS();
   virtual void BookHistDE();
   virtual void BookHistRP();
+  virtual void BookHistETOF();
 
   virtual void MakeHistGlob() = 0;
   virtual void MakeHistDE() = 0;
