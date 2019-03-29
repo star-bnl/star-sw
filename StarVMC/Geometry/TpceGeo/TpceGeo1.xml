@@ -518,7 +518,7 @@
             <Material name="p10"  />
             <Material stemax="2.5*tprs_width" isvol="1" name="sensitive_gas"  />
             <Shape type="BOX" dz="0" dx="0" dy="0"  />
-            <Par name="STRA" value="1."  />
+<!--            <Par name="STRA" value="1."  /> -->
 
             <Instrument block="TPAD">
 
@@ -535,7 +535,7 @@
                  <Hit meas="lptot" nbits="18" min="-3" max="2" />
                  <Hit meas="sleng" bins="0.1" min="0"  max="800" />
                  <Hit meas="tof"   nbits="16"  min="0"  max="1.0E-6" />
-                 <Hit meas="lgam"  nbits="16"  min="-2" max="+2" />
+                 <Hit meas="lgam"  nbits="16"  min="-4" max="+6" />
                  <Hit meas="step"  nbits="11"  min="0"  max="10" />
                  <Hit meas="user"  nbits="21"  min="-0.01" max="0.01" />
 
@@ -774,7 +774,7 @@
             <Attribute for="TMEA" seen="1" colo="4"  />
             <Shape type="TRD1" dz="tecw_MWChei/2" dx2="tecw_MWCout/2" dx1="tecw_MWCinn/2" dy="tecw_MWCdepth/2"  />
             <Create block="TMSE"  />
-            <Par name="STRA" value="1."  />
+<!--            <Par name="STRA" value="1."  /> -->
         </Block>
         
         <Block name="TMSE" comment="is a single sensitive volume"  >
@@ -798,7 +798,7 @@
                  <Hit meas="tof"   nbits="16"  min="0"  max="1.0E-6" />
                  <Hit meas="ptot"  nbits="16"  min="0"  max="100"    />
                  
-                 <Hit meas="lgam"  nbits="16"  min="-2" max="+2"     />
+                 <Hit meas="lgam"  nbits="16"  min="-4" max="+6"     />
                  <Hit meas="elos"  nbits="16"  min="0." max="0.01"   />
 
             </Instrument>
@@ -820,7 +820,7 @@
                  <Hit meas="tof"   nbits="16"  min="0"  max="1.0E-6" />
                  <Hit meas="ptot"  nbits="16"  min="0"  max="100"    />
                  
-                 <Hit meas="lgam"  nbits="16"  min="-2" max="+2"     />
+                 <Hit meas="lgam"  nbits="16"  min="-4" max="+6"     />
                  <Hit meas="elos"  nbits="16"  min="0." max="0.01"   />
 
             </Instrument>

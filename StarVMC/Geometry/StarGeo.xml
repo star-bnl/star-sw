@@ -116,7 +116,7 @@
     <Construct sys="scon" config="SCON14"  />
     <Construct sys="pipe" config="PIPE12ft"  />
     <Construct sys="targ" config="TARGv1"  /> <!-- fixed target geometry -->
-    <Construct sys="tpce" config="TPCEv5"  />
+    <Construct sys="tpce" config="TPCE31"  />
     <Construct sys="btof" config="BTOFv8"  />
     <Construct sys="vpdd" config="VPDD08"  />
     <Construct sys="calb" config="CALB02"  />

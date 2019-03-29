@@ -757,7 +757,7 @@
             
         </Block>
         
-        <Block name="VDET" comment="is a single detector (Radiator+converter and PMT+electroncs)"  >
+        <Block name="VDET" comment="is a single detector (Radiator+converter and PMT+electronics)"  >
             <Material name="IRON"  />
             <Attribute for="VDET" seen="1" serial="0" colo="7"  />
             <Shape type="TUBE" rmax="vpdg_DETrad" rmin="0" dz="vpdg_DETlen/2"  />

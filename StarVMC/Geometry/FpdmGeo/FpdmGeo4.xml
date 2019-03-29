@@ -1183,7 +1183,7 @@
 	   rmx="{PRSW_DBox(1)/2.0,PRSW_DBox(1)/2.0}" 
 	   />  
 
-    debug=1	     
+    debug = 0 <!-- debug=1	    yf  -->
     <If expr="debug.ge.1" > 
       npstype=0 
       cpstype(1)=1

@@ -67,7 +67,7 @@ September 2014 FV
             PXLA, <!-- is the Pixl Sector volume -->
             PXCA, PXCC, PXCD, PXCE, PXCF, PXCG, PXCH, PXCB, 
             PXRB, PXTR, PXTM, PXTL, PXTJ, PXTI, PXLB, PXIB,
-            LADR, GLUA, GLUB, GLUC, ALCA, CFBK, <!-- Ladder mother volume = PLAC + SFIR + SFIL -->
+            LADR, LADX, GLUA, GLUB, GLUC, ALCA, CFBK, <!-- Ladder mother volume = PLAC + SFIR + SFIL -->
             PXSI, PLAC, DRIV, 
             DTCA, DTCB, DTCC, DTCD, DTCE, DTCF, DTCG, DTCH,
             DTSA, DTSB, DTSC, DTSD, DTSE, DTSF, DTSG, DTSH,
@@ -318,12 +318,20 @@ side sector beam" > BullHornLength/0.325/</varlist>
 
     <Mixture name="matCuCable" dens="4.37" >
     <Component name="Cu" a="63.54" z="29" w="0.802"/>
-    <Component name="kapton" a="12.767" z="6.36" w="0.198"/>
+<!--    <Component name="kapton" a="12.767" z="6.36" w="0.198"/> -->
+    <Component name="O" a="16" z="8" w="0.209235*0.198"/>
+    <Component name="N" a="15" z="7" w="0.073270*0.198"/>
+    <Component name="C" a="12" z="6" w="0.691133*0.198"/>
+    <Component name="H" a="1"  z="1" w="0.026362*0.198"/>
     </Mixture>
 
     <Mixture name="matAlCable" dens="1.936" >
     <Component name="Aluminium" a="27" z="13" w="0.626"/>
-    <Component name="kapton" a="12.767" z="6.36" w="0.374"/>
+<!--    <Component name="kapton" a="12.767" z="6.36" w="0.374"/> -->
+    <Component name="O" a="16" z="8" w="0.209235*0.374"/>
+    <Component name="N" a="15" z="7" w="0.073270*0.374"/>
+    <Component name="C" a="12" z="6" w="0.691133*0.374"/>
+    <Component name="H" a="1"  z="1" w="0.026362*0.374"/>
     </Mixture>
 
     <!-- first we create the main volume 
@@ -1568,57 +1576,64 @@ side sector beam" > BullHornLength/0.325/</varlist>
     <Medium name ="MedAir" epsil="0.001"/>
     <Attribute for="LADR" seen="1" colo="920"/>
     <Shape type="BOX" dx="1.245" dy="ladderhalfthickness" dz="15.325" />
-       yp = -(ladderhalfthickness -glucthickness - backingThickness - glubthickness - LADR_cablethickness - gluathickness - 0.0025)
-
-
-
+      <Create block="LADX"/>
     <Do var="sens" from="1" to="SENP_sensor">
       zsensor = SENP_zpos(sens)
-      <Create block="PXSI"/>
-      <Placement in="LADR" x="0.0848" y="yp" z="zsensor" block="PXSI">
+      <Placement in="LADR" x="0" y="0" z="zsensor" block="LADX">
       </Placement>
     </Do>
-    yp = yp - 0.005 
-
+    <Create block="DRIV" />
+    <Placement block="DRIV" x="0.01475" y="0.02725" z="-10.589">
+    </Placement>
+    </Volume>
+    <!-- close LADR -->
+   <!--  BOX for silicon active wafer -->
+    <Volume name="LADX" comment="first ladder prototype">
+    <Material name="Air"/>
+    <Medium name ="MedAir" epsil="0.001"/>
+    <Attribute for="LADX" seen="0" colo="920"/>
+    <Shape type="BOX" dx="1.245" dy="ladderhalfthickness" dz="1.0120" />
+     <Create block="PXSI"/>
+       yp = -(ladderhalfthickness -glucthickness - backingThickness - glubthickness - LADR_cablethickness - gluathickness - 0.0025)
+     <Placement in="LADX" x="0.0848" y="yp" z="0" block="PXSI">
+    </Placement>
     <!-- Glue for CMOS sensors --> 
     <Create block="GLUA" />
-    <Placement block="GLUA" in="LADR" x="0.0485" y="yp" z="4.8855">
+       yp = yp - 0.005  
+    <Placement block="GLUA" in="LADX" x="0.0485" y="yp" z="0">
     </Placement>
-     yp = -(ladderhalfthickness -glucthickness - backingThickness - glubthickness - LADR_cablethickness/2.0)
 
     <Create block="ALCA" />
-    <Placement block="ALCA" x="0.01475" y="yp" z="cableZOffset">
+     yp = -(ladderhalfthickness -glucthickness - backingThickness - glubthickness - LADR_cablethickness/2.0)
+    <Placement block="ALCA" x="0" y="yp" z="0">
     </Placement>
 
     <!-- Glue for Al/Cu Cable --> 
-   yp = -(ladderhalfthickness -glucthickness - backingThickness - glubthickness/2)
     <Create block="GLUB" />
-    <Placement block="GLUB" x="0.0" y="yp" z="0.065">
+   yp = -(ladderhalfthickness -glucthickness - backingThickness - glubthickness/2)
+    <Placement block="GLUB" x="0.01475" y="yp" z="0">
     </Placement>
 
     <!-- Carbon Fiber backing on ladder --> 
 
-    yp = -(ladderhalfthickness -glucthickness - backingThickness/2.0)
     <Create block="CFBK" />
-    <Placement block="CFBK" x="0.0" y="yp" z="backingZOffset" />
+    yp = -(ladderhalfthickness -glucthickness - backingThickness/2.0)
+    <Placement block="CFBK" x="0.0" y="yp" z="0">
+    </Placement>
 
-
-    yp = -(ladderhalfthickness -glucthickness/2.0)
     <Create block="GLUC" />
-    <Placement block="GLUC" x="0.4995" y="yp" z="0.065">
+    yp = -(ladderhalfthickness -glucthickness/2.0)
+    <Placement block="GLUC" x="0.4995" y="yp" z="0">
     </Placement>
 
-    <Create block="DRIV" />
-    <Placement block="DRIV" x="0.01475" y="0.02725" z="-10.589">
-    </Placement>
 
     </Volume>
-    <!-- close LADR -->
+    <!-- close LADX -->
 
     <Volume name="GLUA" comment="Glue for CMOS sensors"  >
     <Attribute for="GLUA" seen="1" colo="800" />
     <Material name="matAdhesive" />
-    <Shape type="BOX" dx="1.1715" dy="gluathickness/2.0" dz="10.1295" />
+    <Shape type="BOX" dx="1.1715" dy="gluathickness/2.0" dz="1.0120" />
     </Volume>
 
     <Volume name="ALCA" comment=""  >
@@ -1631,25 +1646,25 @@ side sector beam" > BullHornLength/0.325/</varlist>
       <Material name="matCuCable" />
      </Else>
     </If>
-    <Shape type="BOX" dx="1.23025" dy="LADR_cablethickness/2.0" dz="cableLength" />
+    <Shape type="BOX" dx="1.23025" dy="LADR_cablethickness/2.0" dz="1.0120" />
     </Volume>
 
     <Volume name="GLUB" comment="Glue for Al/Cu Cable"  >
     <Attribute for="GLUB" seen="1" colo="629" />
     <Material name="matAdhesive" />
-    <Shape type="BOX" dx="1.245" dy="glubthickness/2.0" dz="14.95" />
+    <Shape type="BOX" dx="1.245" dy="glubthickness/2.0" dz="1.0120" />
     </Volume>
 
     <Volume name="CFBK" comment="Carbon Fiber backing on ladder"  >
     <Attribute for="CFBK" seen="1" colo="1" />
     <Material name="CBMix" />
-    <Shape type="BOX" dx="1.245" dy="backingThickness/2.0" dz="backingLength" />
+    <Shape type="BOX" dx="1.245" dy="backingThickness/2.0" dz="1.0120" />
     </Volume>
 
     <Volume name="GLUC" comment=""  >
     <Attribute for="GLUC" seen="1" colo="629" />
     <Material name="matAdhesive" />
-    <Shape type="BOX" dx="0.7205" dy="glucthickness/2.0" dz="14.95" />
+    <Shape type="BOX" dx="0.7205" dy="glucthickness/2.0" dz="1.0120" />
     </Volume>
 
     <Volume name="DRIV" comment=""  >
