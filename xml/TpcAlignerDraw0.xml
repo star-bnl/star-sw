@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!-- <job maxFilesPerProcess="1" fileListSyntax="paths">  -->
-<job maxFilesPerProcess="10" filesPerHour="1" fileListSyntax="paths">
+<job maxFilesPerProcess="5" filesPerHour="1" fileListSyntax="paths">
 	<command>
          cd ${SUBMITTINGDIRECTORY}
   setenv STARFPE NO
@@ -18,7 +18,7 @@
 	</command>
 	<stdout URL="file:./sched$JOBID.log" />
 	<stderr URL="file:./sched$JOBID.err" />
-<input URL="command:TpcAlignerDrawSample.pl" />
+<input URL="command:TpcAlignerDrawSample0.pl" />
 <!-- <input URL="command:CosmicsAnalysis.pl" /> -->
 <!-- <input URL="command:EandBSample.pl" /> -->
 <!-- <input URL="file:/gpfs01/star/pwg/iraklic/iTPC/Cosmics/Cosmics2018/*event.root" /> -->

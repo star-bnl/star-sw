@@ -16,7 +16,7 @@
 #  set f    = `echo $file | awk -F\: '{print $2}'`
 #  set l    = `echo $file | awk -F\: '{print $3}'`
   set file1 = `basename ${file} .event.root`;
-  set name  = `basename 
+  set name  = `basename ${file1} .daq`;
   echo "${name}"
   set logName  = ${name}B.log
   set generF   = ${name}.MuDst.root

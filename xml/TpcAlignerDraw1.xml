@@ -1,6 +1,6 @@
 <?xcond.ml version="1.0" encoding="utf-8" ?>
 <!-- <job maxFilesPerProcess="1" fileListSyntax="paths">  -->
-<job maxFilesPerProcess="10" filesPerHour="1" fileListSyntax="paths">
+<job maxFilesPerProcess="5" filesPerHour="1" fileListSyntax="paths">
 	<command>
          cd ${SUBMITTINGDIRECTORY}
   setenv STARFPE NO

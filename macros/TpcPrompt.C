@@ -355,7 +355,7 @@ void T0Fit(TH3F *D = 0, Int_t iX = 0, Int_t iY = 0) {
   if (iX) {Out += "_x"; Out += iX;}
   if (iY) {Out += "_y"; Out += iY;}
   Double_t sign = 1;
-  if (TString(D->GetName()).BeginsWith("Z")) sign = -1;
+  //  if (TString(D->GetName()).BeginsWith("Z")) sign = -1;
   
   Out += ".root";
   TFile *fOut = new TFile(Out,"recreate");
@@ -405,7 +405,8 @@ void T0Fit(TH3F *D = 0, Int_t iX = 0, Int_t iY = 0) {
       f->ReleaseParameter(1);         f->SetParLimits(1,params[1]-20,params[1]+20);
       f->ReleaseParameter(2);         f->SetParLimits(2,0.1,2);
       f->ReleaseParameter(3);         f->SetParLimits(3,2,50);
-      res = proj->Fit(f,"erm","",0.5,5.5);
+      //      res = proj->Fit(f,"erm","",0.5,5.5);
+      res = proj->Fit(f,"em");
       //    if (res) continue;
       //      c1->Modified();
       //      c1->Update();

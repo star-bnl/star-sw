@@ -221,6 +221,7 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
   static TH2F *dZ = 0,  *dX, *dY, *X, *Y,    *Zchisq, *dZT, *dT;
   static TH3F *dXS,   *dYS,   *dZS, *dXYS, *dXTpcS,   *dYTpcS,   *dZTpcS;
   static TH3F *dXSPhi,   *dYSPhi,   *dZSPhi, *dXSDip,   *dYSDip,   *dZSDip;
+  static TH2F *pTSP, *pTSN;
   static TH3F ***plots3D;
   static TH1D *LSF[3][24];
   static TH1D *Chi2T[3];
@@ -255,6 +256,8 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
     dY = new TH2F("dY","dY (W - E)/2 versus Z",nZ,Zmin,Zmax,400,-1.,1.);
     X = new TH2F("X","X (W + E)/2 versus Z",nZ,Zmin,Zmax,500,-5.,5.);
     Y = new TH2F("Y","Y (W + E)/2 versus Z",nZ,Zmin,Zmax,500,-5.,5.);
+    pTSP = new TH2F("pTSP","pT versus sector for positive primary tracks",24,0.5,24.5,100,0.0,5.0);
+    pTSN = new TH2F("pTSN","pT versus sector for negative primary tracks",24,0.5,24.5,100,0.0,5.0);
     Zchisq = new TH2F("Zchisq","chisq between the highest rank vertex and this one", 100,-25,25,500,0,500);
     dXS = new TH3F("dXS","dX in SCS versus sector and Z",24,0.5,24.5,nZ,Zmin,Zmax,500,-1.0,1.0);
     dYS = new TH3F("dYS","dY in SCS versus sector and Z",24,0.5,24.5,nZ,Zmin,Zmax,500,-1.0,1.0);
@@ -324,6 +327,7 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
     VtxH = Vtx;
   }
   if (! VtxH) return;
+  StMuDst::setVertexIndex(VtxH->id());
   StThreeVectorD VGlob(VtxH->position().xyz());                 PrPP(VGlob);
   const TGeoHMatrix &Tpc2Global = StTpcDb::instance()->Tpc2GlobalMatrix();
   StThreeVectorD VTpc;                                
@@ -335,6 +339,20 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
     Int_t sector = SectorNumber(gTrack->firstPoint()); PrPP3(sector);
     if (SectorNumber(gTrack->lastPoint()) != sector) continue;
     PrPP3(*gTrack);
+    StMuTrack *pTrack = 0;
+    Int_t NPT = StMuDst::primaryTracks()->GetEntriesFast();
+    for (Int_t k = 0; k < NPT; k++) {
+      StMuTrack *p = (StMuTrack *) (*StMuDst::primaryTracks())[k];
+      if (p->index2Global() == gTrack->id()) {
+	pTrack = p;
+	break;
+      }
+    }
+    if (pTrack) {
+      Double_t pT = pTrack->pt();
+      if (pTrack->charge() > 0) pTSP->Fill(sector,pT);
+      else                      pTSN->Fill(sector,pT);
+    }
     Short_t id = gTrack->id();
     Int_t kgc = gTrack->index2Cov();
     if (kgc < 0) continue;
@@ -828,12 +846,12 @@ void Draw() {
       out  <<  "| x mkm         | y mkm         | z mkm         |alpha mrad     |beta mrad      |gamma mrad     |Comment" << endl;
       cout <<  "_______________________________________________________________________________________________________"  << endl;
       cout <<  "| x mkm         | y mkm         | z mkm         |alpha mrad     |beta mrad      |gamma mrad     |Comment" << endl;
-      outC << "struct data_t {" << endl;
-      outC << "\tInt_t sector;" << endl;
-      outC << "\tDouble_t x, Dx, y, Dy, z, Dz, alpha, Dalpha, beta, Dbeta, gamma, Dgamma;" << endl;
-      outC << "\tconst Char_t *Comment;" << endl;
-      outC << "};" << endl;
-      outC << "data_t Data[] = {" << endl;
+//       outC << "struct data_t {" << endl;
+//       outC << "\tInt_t sector;" << endl;
+//       outC << "\tDouble_t x, Dx, y, Dy, z, Dz, alpha, Dalpha, beta, Dbeta, gamma, Dgamma;" << endl;
+//       outC << "\tconst Char_t *Comment;" << endl;
+//       outC << "};" << endl;
+//       outC << "data_t Data[] = {" << endl;
     }
     head++;
     Int_t sector = i;
@@ -1065,5 +1083,24 @@ void Draw() {
 }
 /*
   dZ->FitSlicesY(0,0,-1,0,"QNRG3S")
+.L PrintTH1.C
+TCanvas *c1 = new TCanvas(); c1->Divide(1,3);
+c1->cd(1)->SetLogz(1);  dXS->Project3D("zx")->Draw("colz"); dXS_zx->FitSlicesY(); dXS_zx_1->Draw("same"); PrintTH1(dXS_zx_1);
+c1->cd(2)->SetLogz(1);  dYS->Project3D("zx")->Draw("colz"); dYS_zx->FitSlicesY(); dYS_zx_1->Draw("same"); PrintTH1(dYS_zx_1);
+c1->cd(3)->SetLogz(1);  dZS->Project3D("zx")->Draw("colz"); dZS_zx->FitSlicesY(); dZS_zx_1->Draw("same"); PrintTH1(dZS_zx_1);
+
+TCanvas *c1 = new TCanvas(); c1->Divide(1,4);
+c1->cd(1);  dT->ProjectionY()->Fit("gaus"); cout << Form(" dT: %6.4f +/- %6.4f",gaus->GetParameter(1), gaus->GetParameter(2)) << endl;
+c1->cd(2);  dZ->ProjectionY()->Fit("gaus"); cout << Form(" dZ: %6.4f +/- %6.4f",gaus->GetParameter(1), gaus->GetParameter(2)) << endl;
+c1->cd(3);  dX->ProjectionY()->Fit("gaus"); cout << Form(" dX: %6.4f +/- %6.4f",gaus->GetParameter(1), gaus->GetParameter(2)) << endl;
+c1->cd(4);  dY->ProjectionY()->Fit("gaus"); cout << Form(" dY: %6.4f +/- %6.4f",gaus->GetParameter(1), gaus->GetParameter(2)) << endl;
+
+
+
+
+for (int i = 1; i <= 24; i++) {TH1 *proj = pTSP->ProjectionY(Form("pTP%i",i),i,i); proj->Draw("samee");}
+for (int i = 1; i <= 24; i++) {TH1 *proj = pTSN->ProjectionY(Form("pTN%i",i),i,i); proj->SetMarkerColor(2); proj->Draw("samee");}
+
+
  */
   

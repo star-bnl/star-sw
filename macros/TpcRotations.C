@@ -1,5 +1,9 @@
 /*
-  root.exe lDb.C TpcRotations.C
+  root.exe lDb.C 'TpcRotations.C+(20190101,401)'
+  root.exe lDb.C 'TpcRotations.C+(20190101,402)'
+  root.exe lDb.C *.root 
+    .L TpcRotations.C+
+    Compare(_file0,_file1,20190101,403)
  */
 
 #if !defined(__CINT__)
@@ -36,7 +40,7 @@
 #include "St_db_Maker/St_db_Maker.h"
 #endif
 //________________________________________________________________________________
-void TpcRotations(Int_t date = 20180101, Int_t time = 0) {
+void TpcRotations(Int_t date = 0, Int_t time = 0) {
   StMaker *chain = StChain::GetChain();
   St_db_Maker *dbMk = (St_db_Maker *) chain->Maker("db");
   if (! dbMk) return;
@@ -103,7 +107,7 @@ void MakeSurveyTable(TGeoHMatrix rot[24], const Char_t *tableName =" TpcSuperSec
   out.close(); 
 }
 //________________________________________________________________________________
-void Compare(TFile *file0 = 0, TFile *file1 = 0) {
+void Compare(TFile *file0 = 0, TFile *file1 = 0, Int_t date = 20190101, Int_t time = 402) {
   static TGeoHMatrix I("Indentity"); I.SetBit(TGeoMatrix::kGeoGenTrans); I.SetBit(TGeoMatrix::kGeoRotation);
   if (! file0 || ! file1) return;
   const Char_t *Names[9] = {"Tpc2Glob", "SupS_%02dtoTpc","SubS_%02dInner2SupS","SubS_%02dOuter2SupS","SubS_%02dInner2Tpc","SubS_%02dOuter2Tpc","TpcSuperSectorPositionB_%d","TpcOuterSectorPositionB_%d","TpcInnerSectorPositionB_%d"};
@@ -186,6 +190,6 @@ void Compare(TFile *file0 = 0, TFile *file1 = 0) {
     Inner[sector-1] = Super[sector-1].Inverse() * S_old * I_old; cout << "Inner[" << sector-1 <<"]:"; Inner[sector-1].Print();
     cout << "Done with sector " << sector <<" ================================================================================" << endl;
   }
-  MakeSurveyTable(Super,"TpcSuperSectorPositionB",20190101,300);
-  MakeSurveyTable(Inner,"TpcInnerSectorPositionB",20190101,300);
+  MakeSurveyTable(Super,"TpcSuperSectorPositionB",date,time);
+  MakeSurveyTable(Inner,"TpcInnerSectorPositionB",date,time);
 }
