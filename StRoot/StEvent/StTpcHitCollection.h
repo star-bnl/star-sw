@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcHitCollection.h,v 2.6 2019/04/02 15:32:42 smirnovd Exp $
+ * $Id: StTpcHitCollection.h,v 2.7 2019/04/02 15:32:49 smirnovd Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitCollection.h,v $
+ * Revision 2.7  2019/04/02 15:32:49  smirnovd
+ * Add iterator to loop over StTpcHits in StTpcHitContainer
+ *
  * Revision 2.6  2019/04/02 15:32:42  smirnovd
  * Add accessors to StTpcHitContainer
  *
@@ -37,6 +40,8 @@
 #ifndef StTpcHitCollection_hh
 #define StTpcHitCollection_hh
 
+#include <iterator>
+
 #include "StObject.h"
 #include "StTpcSectorHitCollection.h"
 
@@ -56,6 +61,30 @@ public:
     const StTpcSectorHitCollection* sector(unsigned int) const;
 
     const StSPtrVecTpcHit* hits(int sectorId, int padrowId) const;
+
+    /// An iterator over StTpcHits in a StTpcHitCollection
+    class StTpcHitIter : public std::iterator<std::input_iterator_tag, StTpcHit*>
+    {
+    public:
+      static StTpcHitIter begin(StTpcHitCollection& c);
+      static StTpcHitIter end(StTpcHitCollection& c);
+
+      StTpcHitIter& operator++();
+      bool operator==(const StTpcHitIter &other) const;
+      bool operator!=(const StTpcHitIter &other) const;
+      const StTpcHit* operator*() const;
+
+    private:
+      StTpcHitIter(StTpcHitCollection& c, int l1=0, int l2=0) : coll(c), iSector(l1), iPadrow(l2), iHit(0) {}
+
+      StTpcHitCollection& coll;
+      std::size_t iSector = 0;
+      std::size_t iPadrow = 0;
+      std::size_t iHit = 0;
+    };
+
+    StTpcHitIter begin() { return StTpcHitIter::begin(*this); }
+    StTpcHitIter end()   { return StTpcHitIter::end(*this); }
 
 private:
     enum { mNumberOfSectors = 24 };
