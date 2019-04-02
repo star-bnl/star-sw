@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcHitCollection.h,v 2.5 2019/04/02 15:32:33 smirnovd Exp $
+ * $Id: StTpcHitCollection.h,v 2.6 2019/04/02 15:32:42 smirnovd Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitCollection.h,v $
+ * Revision 2.6  2019/04/02 15:32:42  smirnovd
+ * Add accessors to StTpcHitContainer
+ *
  * Revision 2.5  2019/04/02 15:32:33  smirnovd
  * Remove commented code
  *
@@ -47,9 +50,12 @@ public:
     bool          addHit(StTpcHit*);
     unsigned int  numberOfHits() const;
     unsigned int  numberOfSectors() const {return mNumberOfSectors; }
+    unsigned int  numberOfPadrows(int sectorId) const { return sector(sectorId) ? sector(sectorId)->numberOfPadrows() : 0; }
     
     StTpcSectorHitCollection*       sector(unsigned int);
     const StTpcSectorHitCollection* sector(unsigned int) const;
+
+    const StSPtrVecTpcHit* hits(int sectorId, int padrowId) const;
 
 private:
     enum { mNumberOfSectors = 24 };

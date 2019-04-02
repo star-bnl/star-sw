@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitCollection.cxx,v 2.5 2009/11/23 16:34:07 fisyak Exp $
+ * $Id: StTpcHitCollection.cxx,v 2.6 2019/04/02 15:32:42 smirnovd Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitCollection.cxx,v $
+ * Revision 2.6  2019/04/02 15:32:42  smirnovd
+ * Add accessors to StTpcHitContainer
+ *
  * Revision 2.5  2009/11/23 16:34:07  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -30,7 +33,7 @@
 #include "StTpcPadrowHitCollection.h"
 #include "StTpcHit.h"
 
-static const char rcsid[] = "$Id: StTpcHitCollection.cxx,v 2.5 2009/11/23 16:34:07 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcHitCollection.cxx,v 2.6 2019/04/02 15:32:42 smirnovd Exp $";
 
 ClassImp(StTpcHitCollection)
 
@@ -79,4 +82,12 @@ StTpcHitCollection::sector(unsigned int i) const
         return &(mSectors[i]);
     else
         return 0;
+}
+
+const StSPtrVecTpcHit*
+StTpcHitCollection::hits(int sectorId, int padrowId) const
+{
+    const StTpcSectorHitCollection* sc = (sectorId < mNumberOfSectors ? sector(sectorId) : nullptr);
+    const StTpcPadrowHitCollection* pc = (sc && padrowId < sc->numberOfPadrows() ? sc->padrow(padrowId) : nullptr);
+    return pc ? &pc->hits() : nullptr;
 }
