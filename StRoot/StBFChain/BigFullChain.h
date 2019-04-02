@@ -1185,7 +1185,7 @@ Bfc_st BFC[] = { // standard chains
   {"B2018a"  ,"","","ry2018,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite","",""
    ,                                                           "Base chain for run 2018 data (tpc)",kFALSE},
 #endif
-  {"P2018a",  
+  {"P2018a", "" ,"",
    "B2018a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,beamline3D,emcDY2,epdHit,fpd,trgd,ZDCvtx,analysis"
    ,                    "","","Base chain for year 2018 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   {"B2019"  ,"","","r2019,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout,CorrX","",""
