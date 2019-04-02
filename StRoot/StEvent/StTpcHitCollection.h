@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcHitCollection.h,v 2.4 2009/11/23 16:34:07 fisyak Exp $
+ * $Id: StTpcHitCollection.h,v 2.5 2019/04/02 15:32:33 smirnovd Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitCollection.h,v $
+ * Revision 2.5  2019/04/02 15:32:33  smirnovd
+ * Remove commented code
+ *
  * Revision 2.4  2009/11/23 16:34:07  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -40,8 +43,6 @@ class StTpcHitCollection : public StObject {
 public:
     StTpcHitCollection();
     ~StTpcHitCollection();
-    // StTpcHitCollection(const StTpcHitCollection&);            use default
-    // StTpcHitCollection& operator=(const StTpcHitCollection&); use default
     
     bool          addHit(StTpcHit*);
     unsigned int  numberOfHits() const;
