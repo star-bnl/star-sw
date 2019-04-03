@@ -273,6 +273,9 @@ void l4Builder::initialize(int argc, char *argv[])
        	        LOG(DBG, "Adding plot %d", i);
 	        addPlot(BesGoodPlots[i]);
 	}
+	for(int i=0;i<2;i++) {
+	    addPlot(BesMontinorPlots[i]);
+	}
 	for(int i = 0; i < 6; i++) {
 	    addPlot(FixedTargetPlots[i]);
 	}
@@ -2636,7 +2639,7 @@ void l4Builder::defineBesGoodPlots()
 	BesGoodPlots[index]->addHisto(ph);
 
 	index++; //1
-	hBesGoodVertexZ = new TH1D("BesGood_VertexZ","BesGood_VertexZ",100,-200.,200.);
+	hBesGoodVertexZ = new TH1D("BesGood_VertexZ","BesGood_VertexZ",200,-200.,200.);
 	ph = new PlotHisto();
 	ph->histo = hBesGoodVertexZ;
 	BesGoodPlots[index]->addHisto(ph);
@@ -2670,7 +2673,7 @@ void l4Builder::defineHLTGood2Plots()
 	HLTGood2Plots[index]->addHisto(ph);
 
 	index++; //1
-	hHLTGood2VertexZ = new TH1D("HLTGood2_VertexZ","HLTGood2_VertexZ",200,-50.,50.);
+	hHLTGood2VertexZ = new TH1D("HLTGood2_VertexZ","HLTGood2_VertexZ",220,-220, 220);
 	ph = new PlotHisto();
 	ph->histo = hHLTGood2VertexZ;
 	HLTGood2Plots[index]->addHisto(ph);
