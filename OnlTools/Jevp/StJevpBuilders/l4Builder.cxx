@@ -160,7 +160,7 @@ void l4Builder::initialize(int argc, char *argv[])
 	gStyle->SetPadGridX(0);
 	gStyle->SetPadGridY(0);
 
-	for(int i = 0; i < 46; i++) {
+	for(int i = 0; i < 47; i++) {
 	        HltPlots[i] = new JevpPlot();
 		HltPlots[i]->gridx = 0;
 		HltPlots[i]->gridy = 0;
@@ -261,7 +261,7 @@ void l4Builder::initialize(int argc, char *argv[])
 	defineHltPlots_UPC();
 	defineDiElectron2TwrPlots();
 	setAllPlots();
-	for(int i = 0; i < 46; i++) {
+	for(int i = 0; i < 47; i++) {
 		LOG(DBG, "Adding plot %d", i);
 		addPlot(HltPlots[i]);
 	}
@@ -305,7 +305,7 @@ void l4Builder::startrun(daqReader *rdr)
     //printf("hello there. This is startrun\n");
 	runnumber = rdr->run;
 
-	int initialno = 46;
+	int initialno = 47;
 	for(int i = 0; i < initialno; i++) {
 		getPlotByIndex(i)->getHisto(0)->histo->Reset();
 	}
@@ -583,7 +583,7 @@ void l4Builder::writeHistogram()
 	char histfile[256];
 	sprintf(histfile, "%s/run14_hlt_%d_current_hist.root", Destindir, runnumber);
 	TFile file(histfile, "RECREATE");
-	int initialno = 46;
+	int initialno = 47;
 
 	for(int i = 0; i < initialno; i++) {
 	    HltPlots[i]->getHisto(0)->histo->Write();
@@ -848,7 +848,8 @@ void l4Builder::event(daqReader *rdr)
 	    //hVzDiff->Fill(VzVpd - lmvertZ);
 	    hVzvpd->Fill(VzVpd);
 	    hVzDiff->Fill(VzVpd - vertZ);
-
+            hVertexRZ->Fill(vertZ, vertR);
+            
 	    if(daqID & upc) {
 	      hVertexX_UPC->Fill(vertX);
 	      hVertexY_UPC->Fill(vertY);
@@ -2573,6 +2574,12 @@ void l4Builder::defineHltPlots()
 	hltSummaryLine2->SetName("hltSummaryLine2");
 	HltPlots[index]->addElement(hltSummaryLine2);
 
+
+	index++; // 46
+	hVertexRZ = new TH2D("VertexRZ", "Vertex R vs Z", 420, -210, 210, 50, 0, 5);
+	ph = new PlotHisto();
+	ph->histo = hVertexRZ;
+	HltPlots[index]->addHisto(ph);
 
 	// index++; //45
 	// hFixed_VertexZ = new TH1D("Fixed_VertexZ", "Fixed_VertexZ", 200, 190., 210.);
