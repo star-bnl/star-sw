@@ -1385,9 +1385,12 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
     digitalSector->clear();
   for (row = 1;  row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
     Int_t NoOfPadsAtRow = St_tpcPadConfigC::instance()->padsPerRow(sector,row);
-    Double_t pedRMS = St_TpcResponseSimulatorC::instance()->AveragePedestalRMSX();
-    if (St_tpcPadConfigC::instance()->iTPC(sector) && St_tpcPadConfigC::instance()->IsRowInner(sector,row)) 
-      pedRMS = St_TpcResponseSimulatorC::instance()->AveragePedestalRMS();
+    Double_t pedRMS = St_TpcResponseSimulatorC::instance()->AveragePedestalRMS();
+    if (St_tpcAltroParamsC::instance()->N(sector-1) > 0) {
+      if (! (St_tpcPadConfigC::instance()->iTPC(sector) && St_tpcPadConfigC::instance()->IsRowInner(sector,row))) {
+	pedRMS = St_TpcResponseSimulatorC::instance()->AveragePedestalRMSX();
+      }
+    }
 #ifdef __DEBUG__
     Float_t AdcSumBeforeAltro = 0, AdcSumAfterAltro = 0;
 #endif /*     __DEBUG__ */
