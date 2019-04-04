@@ -3,7 +3,7 @@
 use Env;
 use File::Find;
 #if (defined($AFS)) {$File::Find::dont_use_nlink;}
-require "find.pl";
+#require "find.pl";
 my $dir = ".";
 if ($#ARGV > -1) {$dir = $ARGV[0];}
 print "Find dead link in $dir\n";
