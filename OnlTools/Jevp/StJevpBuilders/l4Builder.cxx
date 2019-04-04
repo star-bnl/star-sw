@@ -179,10 +179,10 @@ void l4Builder::initialize(int argc, char *argv[])
 		BesGoodPlots[i]->setPalette(1);
 	}
 	for(int i = 0; i < 2; i++) {
-		BesMontinorPlots[i] = new JevpPlot();
-		BesMontinorPlots[i]->gridx = 0;
-		BesMontinorPlots[i]->gridy = 0;
-		BesMontinorPlots[i]->setPalette(1);
+		BesMonitorPlots[i] = new JevpPlot();
+		BesMonitorPlots[i]->gridx = 0;
+		BesMonitorPlots[i]->gridy = 0;
+		BesMonitorPlots[i]->setPalette(1);
 	}
 	for(int i = 0; i < 4; i++) {
 		HLTGood2Plots[i] = new JevpPlot();
@@ -250,7 +250,7 @@ void l4Builder::initialize(int argc, char *argv[])
 	defineBeamPlots();
 	defineBesGoodPlots();
 	defineHLTGood2Plots();
-	defineBesMontinorPlots();
+	defineBesMonitorPlots();
 	defineFixedTargetPlots();
 	defineFixedTargetMonitorPlots();
 	defineHeavyFragmentPlots();
@@ -274,7 +274,7 @@ void l4Builder::initialize(int argc, char *argv[])
 	        addPlot(BesGoodPlots[i]);
 	}
 	for(int i=0;i<2;i++) {
-	    addPlot(BesMontinorPlots[i]);
+	    addPlot(BesMonitorPlots[i]);
 	}
 	for(int i = 0; i < 6; i++) {
 	    addPlot(FixedTargetPlots[i]);
@@ -314,7 +314,7 @@ void l4Builder::startrun(daqReader *rdr)
 	}
 	for(int i = 0; i < 5; i++)BesGoodPlots[i]->getHisto(0)->histo->Reset();
 	for(int i = 0; i < 4; i++)HLTGood2Plots[i]->getHisto(0)->histo->Reset();
-	for(int i = 0; i < 2; i++)BesMontinorPlots[i]->getHisto(0)->histo->Reset();
+	for(int i = 0; i < 2; i++)BesMonitorPlots[i]->getHisto(0)->histo->Reset();
 	for(int i = 0; i < 6; i++)FixedTargetPlots[i]->getHisto(0)->histo->Reset();
 	for(int i = 0; i < 6; i++)FixedTargetMonitorPlots[i]->getHisto(0)->histo->Reset();
 	for(int i = 0; i < 1; i++){
@@ -600,7 +600,7 @@ void l4Builder::writeHistogram()
 		for(int i = 0; i < 4; i++)HLTGood2Plots[i]->getHisto(0)->histo->Write();
 	}
 	if(BESMonitorFilled){
-		for(int i = 0; i < 2; i++)BesMontinorPlots[i]->getHisto(0)->histo->Write();
+		for(int i = 0; i < 2; i++)BesMonitorPlots[i]->getHisto(0)->histo->Write();
 	}
 	if(FixedTargetFilled){
 		for(int i = 0; i < 6; i++)FixedTargetPlots[i]->getHisto(0)->histo->Write();
@@ -2692,20 +2692,20 @@ void l4Builder::defineHLTGood2Plots()
 	HLTGood2Plots[index]->addHisto(ph);
 }
 
-void l4Builder::defineBesMontinorPlots()
+void l4Builder::defineBesMonitorPlots()
 {
 	index = 0;
-	BesMontinorPlots[index]->setDrawOpts("colz");
+	BesMonitorPlots[index]->setDrawOpts("colz");
 	hBesMonitorVertexXY = new TH2D("BesMonitor_VertexXY", "BesMonitor_VertexXY", 200, -5, 5, 200, -5, 5);
 	ph = new PlotHisto();
 	ph->histo = hBesMonitorVertexXY;
-	BesMontinorPlots[index]->addHisto(ph);
+	BesMonitorPlots[index]->addHisto(ph);
 
 	index++; //1
 	hBesMonitorVr = new TH1D("BesMonitor_Vr", "BesMonitor_Vr", 100, 0, 5);
 	ph = new PlotHisto();
 	ph->histo = hBesMonitorVr;
-	BesMontinorPlots[index]->addHisto(ph);
+	BesMonitorPlots[index]->addHisto(ph);
 }
 
 void l4Builder::defineFixedTargetPlots()
