@@ -469,7 +469,11 @@ protected:
   /// Number of bunch crossing
   UChar_t  mBunchCrossId;
 
+#ifdef __TFG__VERSION__
+  ClassDef(StPicoEvent, 4)
+#else /* ! __TFG__VERSION__ */
   ClassDef(StPicoEvent, 3)
+#endif /* __TFG__VERSION__ */
 };
 
 //
