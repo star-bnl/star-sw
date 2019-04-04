@@ -178,7 +178,7 @@ void l4Builder::initialize(int argc, char *argv[])
 		BesGoodPlots[i]->gridy = 0;
 		BesGoodPlots[i]->setPalette(1);
 	}
-	for(int i = 0; i < 2; i++) {
+	for(int i = 0; i < 4; i++) {
 		BesMonitorPlots[i] = new JevpPlot();
 		BesMonitorPlots[i]->gridx = 0;
 		BesMonitorPlots[i]->gridy = 0;
@@ -273,8 +273,8 @@ void l4Builder::initialize(int argc, char *argv[])
        	        LOG(DBG, "Adding plot %d", i);
 	        addPlot(BesGoodPlots[i]);
 	}
-	for(int i=0;i<2;i++) {
-	    addPlot(BesMonitorPlots[i]);
+	for(int i = 0; i < 4; i++) {
+            addPlot(BesMonitorPlots[i]);
 	}
 	for(int i = 0; i < 6; i++) {
 	    addPlot(FixedTargetPlots[i]);
@@ -314,7 +314,7 @@ void l4Builder::startrun(daqReader *rdr)
 	}
 	for(int i = 0; i < 5; i++)BesGoodPlots[i]->getHisto(0)->histo->Reset();
 	for(int i = 0; i < 4; i++)HLTGood2Plots[i]->getHisto(0)->histo->Reset();
-	for(int i = 0; i < 2; i++)BesMonitorPlots[i]->getHisto(0)->histo->Reset();
+	for(int i = 0; i < 4; i++)BesMonitorPlots[i]->getHisto(0)->histo->Reset();
 	for(int i = 0; i < 6; i++)FixedTargetPlots[i]->getHisto(0)->histo->Reset();
 	for(int i = 0; i < 6; i++)FixedTargetMonitorPlots[i]->getHisto(0)->histo->Reset();
 	for(int i = 0; i < 1; i++){
@@ -600,7 +600,7 @@ void l4Builder::writeHistogram()
 		for(int i = 0; i < 4; i++)HLTGood2Plots[i]->getHisto(0)->histo->Write();
 	}
 	if(BESMonitorFilled){
-		for(int i = 0; i < 2; i++)BesMonitorPlots[i]->getHisto(0)->histo->Write();
+		for(int i = 0; i < 4; i++)BesMonitorPlots[i]->getHisto(0)->histo->Write();
 	}
 	if(FixedTargetFilled){
 		for(int i = 0; i < 6; i++)FixedTargetPlots[i]->getHisto(0)->histo->Write();
@@ -893,10 +893,12 @@ void l4Builder::event(daqReader *rdr)
 	    if(decision & triggerBitBesMonitor) {
 	      if(!BESMonitorFilled) {
 		BESMonitorFilled = true;
-		addServerTags("L4BesGoodMonitor");
+		addServerTags("L4BesMonitor");
 	      }
 	      hBesMonitorVertexXY->Fill(vertX, vertY);
 	      hBesMonitorVr->Fill(vertR);
+              hBesMonitorVz->Fill(vertZ);
+              hBesMonitorVertexRZ->Fill(vertZ, vertR);
 	    }
 	    
 	    //FixedTarget
@@ -2705,6 +2707,18 @@ void l4Builder::defineBesMonitorPlots()
 	hBesMonitorVr = new TH1D("BesMonitor_Vr", "BesMonitor_Vr", 100, 0, 5);
 	ph = new PlotHisto();
 	ph->histo = hBesMonitorVr;
+	BesMonitorPlots[index]->addHisto(ph);
+
+	index++; //2
+	hBesMonitorVz = new TH1D("BesMonitor_Vz", "BesMonitor_Vz", 220, -220, 220);
+	ph = new PlotHisto();
+	ph->histo = hBesMonitorVz;
+	BesMonitorPlots[index]->addHisto(ph);
+
+	index++; //3
+	hBesMonitorVertexRZ = new TH2D("BesMonitor_VertexRZ", "BesMonitor_VertexRZ", 220, -220, 220, 100, 0, 5);
+	ph = new PlotHisto();
+	ph->histo = hBesMonitorVertexRZ;
 	BesMonitorPlots[index]->addHisto(ph);
 }
 
