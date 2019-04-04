@@ -2581,7 +2581,7 @@ void l4Builder::defineHltPlots()
 
 
 	index++; // 46
-	hVertexRZ = new TH2D("VertexRZ", "Vertex R vs Z", 420, -210, 210, 50, 0, 5);
+	hVertexRZ = new TH2D("VertexRZ", "Vertex R vs Z;Vertex Z (cm);Vertex R (cm) ", 420, -210, 210, 50, 0, 5);
 	ph = new PlotHisto();
 	ph->histo = hVertexRZ;
 	HltPlots[index]->addHisto(ph);
@@ -2710,13 +2710,13 @@ void l4Builder::defineBesMonitorPlots()
 	BesMonitorPlots[index]->addHisto(ph);
 
 	index++; //2
-	hBesMonitorVz = new TH1D("BesMonitor_Vz", "BesMonitor_Vz", 220, -220, 220);
+	hBesMonitorVz = new TH1D("BesMonitor_Vz", "BesMonitor_Vz;Vertex Z (cm)", 220, -220, 220);
 	ph = new PlotHisto();
 	ph->histo = hBesMonitorVz;
 	BesMonitorPlots[index]->addHisto(ph);
 
 	index++; //3
-	hBesMonitorVertexRZ = new TH2D("BesMonitor_VertexRZ", "BesMonitor_VertexRZ", 220, -220, 220, 100, 0, 5);
+	hBesMonitorVertexRZ = new TH2D("BesMonitor_VertexRZ", "BesMonitor_VertexRZ;Vertex Z (cm);Vertex R (cm)", 220, -220, 220, 100, 0, 5);
 	ph = new PlotHisto();
 	ph->histo = hBesMonitorVertexRZ;
 	BesMonitorPlots[index]->addHisto(ph);
