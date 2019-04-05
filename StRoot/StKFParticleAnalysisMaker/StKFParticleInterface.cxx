@@ -9,6 +9,8 @@
 #include "TH2F.h"
 
 #include "StPicoDstMaker/StPicoDstMaker.h"
+#include "StPicoEvent/StPicoHelix.h"
+#include "StPicoEvent/StPicoPhysicalHelix.h"
 #include "StPicoEvent/StPicoArrays.h"
 #include "StPicoEvent/StPicoDst.h"
 #include "StPicoEvent/StPicoEvent.h"
@@ -77,7 +79,7 @@ void StKFParticleInterface::ReconstructParticles()
 void StKFParticleInterface::ReconstructTopology()
 { 
   fKFParticleTopoReconstructor->Init( fParticles, &fParticlesPdg );
-  fKFParticleTopoReconstructor->ReconstructPrimVertex(0);
+  fKFParticleTopoReconstructor->ReconstructPrimVertex();
   fKFParticleTopoReconstructor->SortTracks();
   fKFParticleTopoReconstructor->ReconstructParticles();
   
@@ -193,16 +195,16 @@ void StKFParticleInterface::CollectTrackHistograms()
   dirs[1]->cd();
   
   fTrackHistograms2D[0] = (TH2F *)   dirs[1]->Get("hdEdX");
-  if (! fTrackHistograms2D[0]) fTrackHistograms2D[0] = new TH2F("hdEdX", "hdEdX", 2000, 0, 10, 3000, 0, 30);
+  if (! fTrackHistograms2D[0]) fTrackHistograms2D[0] = new TH2F("hdEdX", "hdEdX", 1000, 0, 10, 200, 0, 200);
 
   fTrackHistograms2D[1] = (TH2F *)   dirs[1]->Get("hdEdXPos");
-  if (! fTrackHistograms2D[1]) fTrackHistograms2D[1] = new TH2F("hdEdXPos", "hdEdXPos", 2000, 0, 10, 3000, 0, 30);
+  if (! fTrackHistograms2D[1]) fTrackHistograms2D[1] = new TH2F("hdEdXPos", "hdEdXPos", 1000, 0, 10, 200, 0, 200);
   
   fTrackHistograms2D[2] = (TH2F *)   dirs[1]->Get("hdEdXNeg");
-  if (! fTrackHistograms2D[2]) fTrackHistograms2D[2] = new TH2F("hdEdXNeg", "hdEdXNeg", 2000, 0, 10, 3000, 0, 30);
+  if (! fTrackHistograms2D[2]) fTrackHistograms2D[2] = new TH2F("hdEdXNeg", "hdEdXNeg", 1000, 0, 10, 200, 0, 200);
   
   fTrackHistograms2D[3] = (TH2F *)   dirs[1]->Get("hdEdXwithToF");
-  if (! fTrackHistograms2D[3]) fTrackHistograms2D[3] = new TH2F("hdEdXwithToF", "hdEdXwithToF", 2000, 0, 10, 3000, 0, 30);
+  if (! fTrackHistograms2D[3]) fTrackHistograms2D[3] = new TH2F("hdEdXwithToF", "hdEdXwithToF", 1000, 0, 10, 200, 0, 200);
   
   fTrackHistograms2D[4] = (TH2F *)   dirs[1]->Get("hTofPID");
   if (! fTrackHistograms2D[4]) fTrackHistograms2D[4] = new TH2F("hTofPID", "hTofPID", 300, 0, 15, 1100, -1, 10);
@@ -250,10 +252,10 @@ void StKFParticleInterface::CollectPIDHistograms()
     fTrackPdgToHistoIndex[ pdgTrackHisto[iTrackHisto] ] = iTrackHisto;
     
     fHistodEdXTracks[iTrackHisto] = (TH2F *)   dirs[2]->Get("hdEdX");
-    if (! fHistodEdXTracks[iTrackHisto]) fHistodEdXTracks[iTrackHisto] = new TH2F("hdEdX", "hdEdX", 2000, 0, 10, 3000, 0, 30);
+    if (! fHistodEdXTracks[iTrackHisto]) fHistodEdXTracks[iTrackHisto] = new TH2F("hdEdX", "hdEdX", 1000, 0, 10, 200, 0, 200);
 
     fHistodEdXwithToFTracks[iTrackHisto] = (TH2F *)   dirs[2]->Get("hdEdXwithToF");
-    if (! fHistodEdXwithToFTracks[iTrackHisto]) fHistodEdXwithToFTracks[iTrackHisto] = new TH2F("hdEdXwithToF", "hdEdXwithToF", 2000, 0, 10, 3000, 0, 30);
+    if (! fHistodEdXwithToFTracks[iTrackHisto]) fHistodEdXwithToFTracks[iTrackHisto] = new TH2F("hdEdXwithToF", "hdEdXwithToF", 1000, 0, 10, 200, 0, 200);
   
     fHistoTofPIDTracks[iTrackHisto] = (TH2F *)   dirs[2]->Get("hTofPID");
     if (! fHistoTofPIDTracks[iTrackHisto]) fHistoTofPIDTracks[iTrackHisto] = new TH2F("hTofPID", "hTofPID", 300, 0, 15, 1100, -1, 10);
@@ -416,36 +418,96 @@ std::vector<int> StKFParticleInterface::GetPID(double m2, double p, int q, doubl
 //    if(dEdXPull[6] < nSigmaCut) { totalPDG.push_back(1000020040*q); }
     
     if(dEdXPull[3] < nSigmaCut && dEdXPull[2] > nSigmaCut) 
-      if( isTofm2 && (m2 > 2 && m2<6) ) //if( !isTofm2 || (isTofm2 && (m2 > 2 && m2<6)) )
+      if( isTofm2 && (m2 > 3 && m2<4.2) ) //if( !isTofm2 || (isTofm2 && (m2 > 2 && m2<6)) )
         totalPDG.push_back(1000010020*q); 
     if(dEdXPull[4] < nSigmaCut && dEdXPull[3] > nSigmaCut) 
-      if( isTofm2 && (m2 > 5) ) //if( !isTofm2 || (isTofm2 && (m2 > 5)) )
+      if( isTofm2 && (m2 > 6.8 && m2<9.1) ) //if( !isTofm2 || (isTofm2 && (m2 > 5)) )
         totalPDG.push_back(1000010030*q);
+//     //deutrons
+//     if(p<1.)
+//     {
+//       if(dEdXPull[3] < nSigmaCut && dEdXPull[2] > nSigmaCut) 
+//         if( !isTofm2 || (isTofm2 && (m2 > 2.5 && m2<5)) )
+//           totalPDG.push_back(1000010020*q); 
+//     }
+//     else
+//     {
+//       if(dEdXPull[3] < nSigmaCut) 
+//         if( isTofm2 && (m2 > 2.5 && m2<5) )
+//           totalPDG.push_back(1000010020*q); 
+//     }
+//     //tritons
+//     if(p<1.5)
+//     {
+//       if(dEdXPull[4] < nSigmaCut && dEdXPull[3] > nSigmaCut) 
+//         if( !isTofm2 || (isTofm2 && (m2 > 6.5 && m2<9.5)) )
+//           totalPDG.push_back(1000010030*q);
+//     }
+//     else
+//     {
+//       if(dEdXPull[4] < nSigmaCut) 
+//         if( isTofm2 && (isTofm2 && (m2 > 6.5 && m2<9.5)) )
+//           totalPDG.push_back(1000010030*q);
+//     }
    
-    if(p>0.6 && p<1.8)
+    //He3   
+    if(p<3.0)
     {
-      double lowerParameters[4] = {2.48051e+01,-1.40961e+00, 2.54327e-01, 2.07450e-01};
+      double lowerParameters[4] = {2.39306e+01,-1.30404e+00, 3.49649e-01, 1.77215e-01};
       double lowerHe3Bound = lowerParameters[0]*TMath::Power(p, lowerParameters[1] + lowerParameters[2]*log(p) + lowerParameters[3]*log(p)*log(p));
       
-      double upperParameters[4] = {3.36169e+01,-1.33686e+00, 2.82856e-01, 1.91841e-01};
+      double upperParameters[4] = {3.37337e+01,-1.28763e+00, 2.96525e-01, 1.23583e-01};
       double upperHe3Bound = upperParameters[0]*TMath::Power(p, upperParameters[1] + upperParameters[2]*log(p) + upperParameters[3]*log(p)*log(p));
       
-      if(dEdX > lowerHe3Bound && dEdX < upperHe3Bound && dEdX > 9.) 
-        if( !isTofm2 || (isTofm2 && (m2>1.) && (m2<5.) ) )
-          totalPDG.push_back(1000020030*q);
-      if(dEdX > upperHe3Bound && dEdX > 9.)               
-        if( !isTofm2 || (isTofm2 && (m2>2.5) && (m2<6.) ) )
-          totalPDG.push_back(1000020040*q);
+      if(dEdX > lowerHe3Bound && dEdX < upperHe3Bound) 
+      {
+        if(p<1.0)
+        {
+          if( isTofm2 && (m2>1.) && (m2<3.) )
+            totalPDG.push_back(1000020030*q);
+        }
+        else
+        {
+          if( !isTofm2 || (isTofm2 && (m2>1.) && (m2<3.) ) )
+            totalPDG.push_back(1000020030*q);
+        }
+      }
     }
-    else if(p>=1.8 && dEdX > 9.)
+    else if(p>=3.0 && dEdX > 11. && dEdX < 14.)
     {
-      if(dEdXPull[5] < nSigmaCut && dEdXPull[4] > nSigmaCut) 
-        if( !isTofm2 || (isTofm2 && (m2>1.) && (m2<5.) ) )
+      if(dEdXPull[5] < nSigmaCut) 
+        if( !isTofm2 || (isTofm2 && (m2>1.) && (m2<3.) ) )
           totalPDG.push_back(1000020030*q);
-      if(dEdXPull[6] < nSigmaCut && dEdXPull[5] > nSigmaCut) 
-        if( !isTofm2 || (isTofm2 && (m2>2.5) && (m2<6.) ) )
-          totalPDG.push_back(1000020040*q);
     }
+    //He4
+    if(p<4.0)
+    {
+      double lowerParameters[4] = {3.36203e+01,-1.38323e+00, 2.81519e-01, 1.17049e-01};
+      double lowerHe4Bound = lowerParameters[0]*TMath::Power(p, lowerParameters[1] + lowerParameters[2]*log(p) + lowerParameters[3]*log(p)*log(p));
+      
+      double upperParameters[4] = {4.76691e+01,-1.47154e+00, 2.58628e-01, 1.40531e-01};
+      double upperHe4Bound = upperParameters[0]*TMath::Power(p, upperParameters[1] + upperParameters[2]*log(p) + upperParameters[3]*log(p)*log(p));
+      
+      if(dEdX > lowerHe4Bound && dEdX < upperHe4Bound) 
+      {
+        if(p<1.0)
+        {
+          if( isTofm2 && (m2>3) && (m2<4.2) )
+            totalPDG.push_back(1000020040*q);
+        }
+        else
+        {
+          if( !isTofm2 || (isTofm2 && (m2>3) && (m2<4.2) ) )
+            totalPDG.push_back(1000020040*q);
+        }
+      }
+    }
+    else if(p>=4.0 && dEdX > 11. && dEdX < 14.)
+    {
+      if(dEdXPull[6] < nSigmaCut) 
+        if( !isTofm2 || (isTofm2 && (m2>3) && (m2<4.2) ) )
+          totalPDG.push_back(1000020040*q);
+    } 
   }
     
   if(totalPDG.size() == 0)
@@ -466,6 +528,12 @@ void StKFParticleInterface::AddTrackToParticleList(const KFPTrack& track, int nH
     KFPTrack trackPDG = track;
     if(abs(pdg) == 1000020030 || abs(pdg) == 1000020040)
     {
+      float r = sqrt(trackPDG.GetX()*trackPDG.GetX() + trackPDG.GetY()*trackPDG.GetY());
+      float dx = (trackPDG.GetX() - pv.X());
+      float dy = (trackPDG.GetY() - pv.Y());
+      float dz = (trackPDG.GetZ() - pv.Z());
+      float l = sqrt(dx*dx + dy*dy + dz*dz);
+      if(!(r<2. && l<2.)) continue;
       trackPDG.SetCharge( trackPDG.Charge()*2.f );
       trackPDG.SetPx( trackPDG.GetPx()*2.f );
       trackPDG.SetPy( trackPDG.GetPy()*2.f );
@@ -495,6 +563,7 @@ void StKFParticleInterface::AddTrackToParticleList(const KFPTrack& track, int nH
       primaryTrackList.push_back(nPartSaved);
     }
     if(fTriggerMode && chiPrim > fChiPrimaryMaxCut) continue;
+    if(chiPrim > fChiPrimaryMaxCut) continue;
 //     if( chiPrim > 1.e6 ) continue;
     particle.SetId(index);
     particles[nPartSaved] = particle;
@@ -544,6 +613,34 @@ void StKFParticleInterface::FillPIDHistograms(StPicoTrack *gTrack, const std::ve
           fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(0.938272, fdEdXMode, 1));
           float betaGamma = TMath::Log10(momentum/0.938272);
           float z = gTrack->dEdxPull(0.938272, fdEdXMode, 1)*gTrack->dEdxError();
+          fHistodEdXZ[iTrackHisto]->Fill(betaGamma, z);
+        }
+        if(abs(pdg)==1000010020)
+        {
+          fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(1.876124, fdEdXMode, 1));
+          float betaGamma = TMath::Log10(momentum/1.876124);
+          float z = gTrack->dEdxPull(1.876124, fdEdXMode, 1)*gTrack->dEdxError();
+          fHistodEdXZ[iTrackHisto]->Fill(betaGamma, z);
+        }
+        if(abs(pdg)==1000010030)
+        {
+          fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(2.809432, fdEdXMode, 1));
+          float betaGamma = TMath::Log10(momentum/2.809432);
+          float z = gTrack->dEdxPull(2.809432, fdEdXMode, 1)*gTrack->dEdxError();
+          fHistodEdXZ[iTrackHisto]->Fill(betaGamma, z);
+        }
+        if(abs(pdg)==1000020030)
+        {
+          fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(2.809413, fdEdXMode, 2));
+          float betaGamma = TMath::Log10(momentum/2.809413);
+          float z = gTrack->dEdxPull(2.809413, fdEdXMode, 2)*gTrack->dEdxError();
+          fHistodEdXZ[iTrackHisto]->Fill(betaGamma, z);
+        }
+        if(abs(pdg)==1000020040)
+        {
+          fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(3.728400, fdEdXMode, 2));
+          float betaGamma = TMath::Log10(momentum/3.728400);
+          float z = gTrack->dEdxPull(3.728400, fdEdXMode, 2)*gTrack->dEdxError();
           fHistodEdXZ[iTrackHisto]->Fill(betaGamma, z);
         }
       }
@@ -659,7 +756,8 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
 //       if(gTrack->hasSstHit()) nHftHitsInTrack++;
     if(fCollectTrackHistograms) fTrackHistograms[0]->Fill(nHftHitsInTrack);
     
-    if(fUseHFTTracksOnly && nHftHitsInTrack < 3) continue;
+//     if(fUseHFTTracksOnly && nHftHitsInTrack < 3) continue;
+    if(fUseHFTTracksOnly && !gTrack->hasIstHit()) continue;
     
     StPicoTrackCovMatrix *cov = picoDst->trackCovMatrix(iTrack);
     const StDcaGeometry dcaG = cov->dcaGeometry();
@@ -685,13 +783,27 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
         m2tof = track.GetP()*track.GetP()*(1./betaTof2 - 1.);
         isTofm2 = true;
       }
+      else
+      {
+        const TVector3 & tofPoint  = btofPid->btofHitPos();
+        StPicoPhysicalHelix innerHelix = gTrack->helix(picoEvent->bField());
+        double lengthTof = fabs( innerHelix.pathLength( tofPoint ));
+        
+        double timeTof = btofPid->btof();
+        if(timeTof > 0. && lengthTof > 0.)
+        {
+          m2tof = track.GetP()*track.GetP()*(1./((lengthTof/timeTof/29.9792458)*(lengthTof/timeTof/29.9792458))-1.);
+          isTofm2 = true;
+        }
+      }
+      
       if(fCollectTrackHistograms)
       {
         fTrackHistograms2D[3]->Fill(track.GetP(), gTrack->dEdx());
         fTrackHistograms2D[4]->Fill(track.GetP(), m2tof);
       }
     }
-
+    
     double dEdXPull[7] = { fabs(gTrack->dEdxPull(0.139570, fdEdXMode, 1)),   //0 - pi
                            fabs(gTrack->dEdxPull(0.493677, fdEdXMode, 1)),   //1 - K
                            fabs(gTrack->dEdxPull(0.938272, fdEdXMode, 1)),   //2 - p
@@ -709,7 +821,13 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
       triggeredTracks.push_back(iTrack);
     
     //fill PID histograms if they are created
-    if(fCollectPIDHistograms) FillPIDHistograms(gTrack, totalPDG, isTofm2, m2tof);
+    if(fCollectPIDHistograms) 
+    {
+      vector<int> selectedPdg;
+      for(int iPdg = nPartSaved0; iPdg<nPartSaved; iPdg++)
+        selectedPdg.push_back(fParticlesPdg[iPdg]);
+      FillPIDHistograms(gTrack, selectedPdg, isTofm2, m2tof);
+    }
     
     nUsedTracks++;
   }
@@ -719,6 +837,7 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
   fNHftHits.resize(nPartSaved);
   
   if( fCleanLowPVTrackEvents && ( 10*primaryTrackList.size() < (nUsedTracks - primaryTrackList.size()) ) ) return 0;
+  if( fCleanLowPVTrackEvents && sqrt(dx*dx + dy*dy) > 0.1 ) return 0;
   
   const Double_t field = picoEvent->bField();  
   SetField(field);
@@ -727,15 +846,20 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
   InitParticles();
 
   //read PV
-  AddPV(primaryVertex, primaryTrackList);
+//   AddPV(primaryVertex, primaryTrackList);
+
+  //reconstruct short-lived particles
+  ReconstructTopology();
+  
   if(fCollectTrackHistograms)
   {
+    dx = sqrt(fKFParticleTopoReconstructor->GetPrimVertex().GetErrX());
+    dy = sqrt(fKFParticleTopoReconstructor->GetPrimVertex().GetErrY());
+    
     fTrackHistograms[1]->Fill(sqrt(dx*dx + dy*dy));
     fTrackHistograms2D[5]->Fill( nPartSaved, sqrt(dx*dx + dy*dy) );
-    fTrackHistograms2D[6]->Fill( primaryTrackList.size(), sqrt(dx*dx + dy*dy) );
-  }  
-  //reconstruct short-lived particles
-  ReconstructParticles();
+    fTrackHistograms2D[6]->Fill( fKFParticleTopoReconstructor->GetPVTrackIndexArray().size(), sqrt(dx*dx + dy*dy) );
+  }
   
   return 1;
 }

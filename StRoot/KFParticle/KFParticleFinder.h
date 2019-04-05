@@ -253,6 +253,7 @@ class KFParticleFinder
   void SetChi2CutCharm2D(float cut)     { fCutsCharm[0] = cut; }
   
   void AddDecayToReconstructionList(int pdg) { fDecayReconstructionList[pdg] = true; }
+  const std::map<int,bool> GetReconstructionList() const { return fDecayReconstructionList; }
     
  private:
 

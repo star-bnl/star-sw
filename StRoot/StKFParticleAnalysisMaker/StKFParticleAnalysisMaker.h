@@ -67,6 +67,7 @@ class StKFParticleAnalysisMaker : public StMaker {
   TString fCentralityFile;
   
   bool fAnalyseDsPhiPi;
+  std::vector<int> fDecays;
 
   void GetDaughterParameters(const int iReader, int& iDaughterTrack, int& iDaughterParticle, KFParticle& particle);
   void GetParticleParameters(const int iReader, KFParticle& particle);
@@ -123,6 +124,8 @@ class StKFParticleAnalysisMaker : public StMaker {
   void SetCentralityFile(TString file) { fCentralityFile = file; }
   
   void AnalyseDsPhiPi() { fAnalyseDsPhiPi = true; }
+  
+  void AddDecayToReconstructionList( int iDecay );
   
   ClassDef(StKFParticleAnalysisMaker,0)   //
 };

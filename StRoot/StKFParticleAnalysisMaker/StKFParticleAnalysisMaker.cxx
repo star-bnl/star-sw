@@ -37,7 +37,7 @@ ClassImp(StKFParticleAnalysisMaker);
 StKFParticleAnalysisMaker::StKFParticleAnalysisMaker(const char *name) : StMaker(name), fNTrackTMVACuts(0), fIsPicoAnalysis(true), fdEdXMode(1), 
   fStoreTmvaNTuples(false), fProcessSignal(false), fCollectTrackHistograms(false), fCollectPIDHistograms(false),fTMVAselection(false), 
   fFlowAnalysis(false), fFlowChain(NULL), fFlowRunId(-1), fFlowEventId(-1), fCentrality(-1), fFlowFiles(), fFlowMap(), 
-  fRunCentralityAnalysis(0), fRefmultCorrUtil(0), fCentralityFile(""), fAnalyseDsPhiPi(false)
+  fRunCentralityAnalysis(0), fRefmultCorrUtil(0), fCentralityFile(""), fAnalyseDsPhiPi(false), fDecays(0)
 {
   memset(mBeg,0,mEnd-mBeg+1);
   
@@ -184,7 +184,7 @@ Int_t StKFParticleAnalysisMaker::Init()
     gDirectory = curDirectory;
   }
   
-  fRefmultCorrUtil = CentralityMaker::instance()->getgRefMultCorr();
+  fRefmultCorrUtil = CentralityMaker::instance()->getgRefMultCorr_P16id();
   fRefmultCorrUtil->setVzForWeight(6, -6.0, 6.0);
   fRefmultCorrUtil->readScaleForWeight("/gpfs01/star/pwg/pfederic/qVectors/StRoot/StRefMultCorr/macros/weight_grefmult_VpdnoVtx_Vpd5_Run16.txt"); //for new StRefMultCorr, Run16, SL16j
   
@@ -269,6 +269,8 @@ void StKFParticleAnalysisMaker::BookVertexPlots()
   PrintMem(dirs[1]->GetPath());
   
   fStKFParticleInterface = new StKFParticleInterface;
+  for(int iDecay=0; iDecay<fDecays.size(); iDecay++)
+    fStKFParticleInterface->AddDecayToReconstructionList( fDecays[iDecay] );
   bool storeMCHistograms = false;
   if(!fIsPicoAnalysis && fProcessSignal) storeMCHistograms = true;
   fStKFParticlePerformanceInterface = new StKFParticlePerformanceInterface(fStKFParticleInterface->GetTopoReconstructor(), storeMCHistograms);
@@ -430,9 +432,16 @@ Int_t StKFParticleAnalysisMaker::Make()
         {
           const int daughterId = particle.DaughterIds()[iD];
           const KFParticle daughter = fStKFParticleInterface->GetParticles()[daughterId];
-          if(abs(daughter.GetPDG())==211 && daughter.GetP() > 0.5)
+          if(abs(daughter.GetPDG())==211 && daughter.GetP() > 0.7)
+            fStKFParticleInterface->RemoveParticle(iParticle);
+          if(abs(daughter.GetPDG())!=211 && daughter.GetP() < 0.5) //TODO remove me
             fStKFParticleInterface->RemoveParticle(iParticle);
         }
+        
+        float l = sqrt(particle.X()*particle.X() + particle.Y()*particle.Y() + particle.Z()*particle.Z());
+        float r = sqrt(particle.X()*particle.X() + particle.Y()*particle.Y());
+        if(r > 50)// || (r>2.5 && r<3.6) || (r>7.5&&r<8.8))
+          fStKFParticleInterface->RemoveParticle(iParticle);
       }
     }
     
@@ -655,3 +664,5 @@ void StKFParticleAnalysisMaker::SetTMVABins(int iReader, TString centralityBins,
     fTMVAReader[iReader][iCentralityBin].resize(nPtBins);
   }
 }
+
+void StKFParticleAnalysisMaker::AddDecayToReconstructionList( int iDecay ) { fDecays.push_back(iDecay); }

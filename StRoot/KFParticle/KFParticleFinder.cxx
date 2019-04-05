@@ -738,6 +738,12 @@ inline void KFParticleFinder::ConstructV0(KFPTrackVector* vTracks,
   float_m isHyperNuclei = saveParticle && float_m(abs(mother.PDG()) > 3000 && abs(mother.PDG()) < 3104);
   
   saveParticle &= ( ((isK0 || isLambda || isHyperNuclei) && lMin > float_v(fLCut)) || !(isK0 || isLambda || isHyperNuclei) );
+  
+  float_v p1p2 = posDaughter.Px()*negDaughter.Px() + posDaughter.Py()*negDaughter.Py() + posDaughter.Pz()*negDaughter.Pz();
+  float_v p12  = posDaughter.Px()*posDaughter.Px() + posDaughter.Py()*posDaughter.Py() + posDaughter.Pz()*posDaughter.Pz();
+  float_v p22  = negDaughter.Px()*negDaughter.Px() + negDaughter.Py()*negDaughter.Py() + negDaughter.Pz()*negDaughter.Pz();
+  saveParticle &= p1p2 > -p12;
+  saveParticle &= p1p2 > -p22;
 
   float_m saveMother(false);
   
@@ -1236,12 +1242,12 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
                     motherPDG( isSecondary && (abs(trackPdgPos[iPDGPos])==  211) && int_m(abs(trackPdgNeg) ==  321) ) =   421; //D0 -> pi+ K-
                 }
                 
-//                 if( (iTrTypeNeg == 0) && (iTrTypePos == 0) )
-//                 {
-//                   float_v chiprimCut = fCuts2D[0];
-//                   chiprimCut( float_m(abs(motherPDG) == 421 || abs(motherPDG) == 426) ) = fCutCharmChiPrim;
-//                   active[iPDGPos] &= int_m(chiPrimNeg > chiprimCut) && int_m(chiPrimPos > chiprimCut);
-//                 }
+                if( (iTrTypeNeg == 0) && (iTrTypePos == 0) )
+                {
+                  float_v chiprimCut = fCuts2D[0];
+                  chiprimCut( float_m(abs(motherPDG) == 421 || abs(motherPDG) == 426) ) = fCutCharmChiPrim;
+                  active[iPDGPos] &= int_m(chiPrimNeg > chiprimCut) && int_m(chiPrimPos > chiprimCut);
+                }
                 
                 active[iPDGPos] &= (motherPDG != -1);
                 if(!(fDecayReconstructionList.empty()))

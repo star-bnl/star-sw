@@ -21,7 +21,7 @@ StKFParticlePerformanceInterface::StKFParticlePerformanceInterface(const KFParti
   TDirectory *dir = TDirectory::CurrentDirectory();
   if(!storeMCHistograms)
     fKFTopoPerformance->DoNotStoreMCHistograms();
-  fKFTopoPerformance->CreateHistos("",dir);
+  fKFTopoPerformance->CreateHistos("",dir,tr->GetKFParticleFinder()->GetReconstructionList());
   
   TFile::CurrentFile() = curFile;
   TDirectory::CurrentDirectory() = curDirectory;
