@@ -1,9 +1,6 @@
 //----------------------------------------------------------------------------------------------------
-// $Id: CentralityMaker.h,v 1.1 2019/01/28 20:26:08 gnigmat Exp $
+// $Id: CentralityMaker.h,v 1.5 2015/05/22 06:51:58 hmasui Exp $
 // $Log: CentralityMaker.h,v $
-// Revision 1.1  2019/01/28 20:26:08  gnigmat
-// The first commit of the StRefMultCorr
-//
 // Revision 1.5  2015/05/22 06:51:58  hmasui
 // Add grefmult for Run14 Au+Au 200 GeV
 //
@@ -52,6 +49,9 @@ class CentralityMaker {
     StRefMultCorr* getRefMult3Corr() ; // For refmult3
     StRefMultCorr* getTofTrayMultCorr() ; // For TOF tray multiplicity
     StRefMultCorr* getgRefMultCorr()  ; // For grefmult //Run14 AuAu200GeV
+    StRefMultCorr* getgRefMultCorr_P16id()  ; // For grefmult //Run14 AuAu200GeV, P16id
+    StRefMultCorr* getgRefMultCorr_VpdMB30()  ; // for VPDMB-30; |vz| < 30
+    StRefMultCorr* getgRefMultCorr_VpdMBnoVtx()  ; //  for VPDMB-noVtx; |vz| < 100
 
     // Print help messages
     void help() const ;
@@ -66,6 +66,9 @@ class CentralityMaker {
     StRefMultCorr* fRefMult3Corr ; // refmult3 based centrality
     StRefMultCorr* fTofTrayMultCorr ; // tofTrayMult based centrality
     StRefMultCorr* fgRefMultCorr  ; // grefmult based centrality
+    StRefMultCorr* fgRefMultCorr_P16id  ; // grefmult based centrality, P16id
+    StRefMultCorr* fgRefMultCorr_VpdMB30; // for VPDMB-30; |vz| < 30
+    StRefMultCorr* fgRefMultCorr_VpdMBnoVtx; //  for VPDMB-noVtx; |vz| < 100
 
     ClassDef(CentralityMaker, 0)
 };
