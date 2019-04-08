@@ -179,9 +179,9 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
 
 
     // Build Root Histograms...
-    contents.nDigis             = new TH1D( "nDigis", "# digis inside timing window;# digis;# events", 300, 0, 300 );
+    contents.nDigis             = new TH1D( "nDigis", "# digis inside timing window;# digis;# events", 300, 0, 600 );
 
-    contents.nDigisVsTofTrgMult = new TH2D( "nDigisVsTofTrgMult", "# digis vs bTOF multiplicity;# digis in timing window;bTof mult in trigger data;# events", 200, 0, 400, 200, 0, 800 ); 
+    contents.nDigisVsTofTrgMult = new TH2D( "nDigisVsTofTrgMult", "# digis vs bTOF multiplicity;# digis in timing window;bTof mult in trigger data;# events", 200, 0, 800, 200, 0, 800 ); 
 
     contents.digiTot            = new TH1D( "digiTot",           "digi tot;tot (bins);#digis", 256, 0, 256 );
     contents.digiTimeToTrigger  = new TH1D( "digiTimeToTrigger", "digi time to trigger;time to trigger (#mus);# digis", 500, -4., 1. );
@@ -191,8 +191,9 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
 
 
     for( size_t i=0; i<nrOfGdpbInSys; i++ ) {
-        contents.nDigisPerGdpb[ i ]                  = new TH1D( Form( "nDigisPerGdpb_%d", i ),  Form( "# digis on Gdpb %#06x (sector %d);# digis;# events",  gdpbRevMap[ i ], sector[ i ] ), 100, 0, 100 );
+        contents.nDigisPerGdpb[ i ]                  = new TH1D( Form( "nDigisPerGdpb_%d", i ),  Form( "# digis on Gdpb %#06x (sector %d);# digis;# events",  gdpbRevMap[ i ], sector[ i ] ), 150, 0, 150 );
         contents.digiTotPerGdpb[ i ]                 = new TH1D( Form( "digiTotPerGdpb_%d", i ), Form( "digi tot on Gdpb %#06x (sector %d);# digis;# events", gdpbRevMap[ i ], sector[ i ] ), 256, 0, 256 );
+        contents.digiTotPerGdpbInTimingWindow[ i ]   = new TH1D( Form( "digiTotPerGdpbInTimingWindow_%d", i ), Form( "digi tot on Gdpb %#06x (sector %d) in timing window;# digis;# events", gdpbRevMap[ i ], sector[ i ] ), 50, 0, 50 ); 
         contents.digiMappedChannelNumberPerGdpb[ i ] = new TH1D( Form( "digiMappedChannelNumberPerGdpb_%d", i), Form( "mapped channel number on Gdpb %#06x (sector %d);mapped channel;# digis", gdpbRevMap[ i ], sector[ i ] ), 965, -5, 960 );
         contents.nPulsersPerSide[ i ]                = new TH1D( Form( "nPulsersPerSide_%d", i ),  Form( "# pulsers on Gdpb %#06x (sector %d);# digis;# events",  gdpbRevMap[ i ], sector[ i ] ), 18, 0, 18 );
 
@@ -256,6 +257,31 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
     contents.digiDensityAllChannels = (TH2D* ) contents.digiDensityInTimingWindow->Clone( "digiDensityAllChannels" );
     contents.digiDensityAllChannels->SetTitle( "digi density all;sector;(counter-1) * 3 + strip;# digis" );
 
+
+    contents.digiDensityAllStrips = new TH2D( "digiDensityAllStrips", "digi density per strip;sector (module);(counter-1) * 3 + strip;# digis", 36, 0.5, 36.5, 96, 0.5, 96.5 );
+    contents.digiDensityAllStrips->SetMinimum( 1. ); 
+    for( size_t i=0; i<12; i++ ) {
+        contents.digiDensityAllStrips->GetXaxis()->SetBinLabel( i * 3 + 2, Form( "%d", i + 13 ) );
+    }
+    contents.digiDensityAllStrips->GetXaxis()->LabelsOption( "h" );
+
+    contents.digiDensityAllStrips->GetXaxis()->SetLabelSize(   0.055 );
+    contents.digiDensityAllStrips->GetXaxis()->SetLabelOffset( 0.014 );
+    contents.digiDensityAllStrips->GetXaxis()->SetTickLength(  0.01  );
+    contents.digiDensityAllStrips->GetYaxis()->SetTitleOffset( 1.4   );
+
+    contents.digiDensityAllStrips->GetYaxis()->SetTitleSize(   0.05  );
+    contents.digiDensityAllStrips->GetYaxis()->SetTitleOffset( 0.9   );
+    contents.digiDensityAllStrips->GetYaxis()->CenterTitle(    true  );
+    contents.digiDensityAllStrips->GetYaxis()->SetTickLength(  0.01  );
+
+    contents.digiDensityAllStrips->GetZaxis()->SetTitleSize(   0.05  );
+    contents.digiDensityAllStrips->GetZaxis()->SetTitleOffset( 0.95  );
+    contents.digiDensityAllStrips->GetZaxis()->CenterTitle(    true  );
+    contents.digiDensityAllStrips->GetZaxis()->SetTickLength(  0.01  );   
+
+
+
     for( size_t i=0; i<12; i++ ) {
         contents.digiDensityAllChannels->GetXaxis()->SetBinLabel( i * 6 + 1, Form( "%d", i + 13 ) );
         contents.digiDensityAllChannels->GetXaxis()->SetBinLabel( i * 6 + 2, "" );
@@ -287,6 +313,7 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
     contents.triggerTimeToResetTime = new TH1D( "triggerTimeToResetTime", "trigger time to reset time;time difference (s);#events", 200, 0, 2000 );
 
     contents.missingTriggerTs->SetMinimum( 0.9 );
+    contents.triggerTimeToResetTime->GetXaxis()->SetNdivisions( 4 );
 
     for( size_t i=0; i<216; i++ ) {
         int sec = (i / 18) + 13;
@@ -310,22 +337,48 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
         jp->setOptStat( 10 );
 
 
-        if( contents.array[ i ] == contents.nDigisVsTofTrgMult     ||
-            contents.array[ i ] == contents.digiCoarseTs           ||
-            contents.array[ i ] == contents.digiFineTs              ) {
+        if( contents.array[ i ] == contents.nDigisVsTofTrgMult ||
+            contents.array[ i ] == contents.digiCoarseTs       ||
+            contents.array[ i ] == contents.digiFineTs          ) {
             jp->logy = 0;
         }
 
+        for( size_t j=0; j<12; j++ ) {
+            if( contents.array[ i ] == contents.digiTotPerGdpbInTimingWindow[ j ] ) {
+                jp->logy = 0;
+            }
+        }
+
         if( contents.array[ i ] == contents.digiDensityAllChannels    ||
+            contents.array[ i ] == contents.digiDensityAllStrips      ||
             contents.array[ i ] == contents.digiDensityInTimingWindow  ) {
             jp->logy = 0;
             jp->optlogz = 1;
             jp->setOptStat( 0 );
         }
 
-        if( contents.array[ i ] == contents.digiDensityAllChannels ) {
-            //jp->gridx = 0;
-            //jp->gridy = 0;
+        if( contents.array[ i ] == contents.digiDensityAllStrips ) {
+
+            TLatex* moduleLabel1[ 12 ];
+            TLatex* moduleLabel2[ 12 ];
+            TLatex* moduleLabel3[ 12 ];
+            for( int k=0; k<12; k++ ) {
+                moduleLabel1[ k ] = new TLatex( 3 * k + 0.7, -3, "1" );
+                moduleLabel2[ k ] = new TLatex( 3 * k + 1.7, -3, "2" );
+                moduleLabel3[ k ] = new TLatex( 3 * k + 2.7, -3, "3" );
+
+                moduleLabel1[ k ]->SetTextSize( 0.0325 );
+                moduleLabel2[ k ]->SetTextSize( 0.0325 );
+                moduleLabel3[ k ]->SetTextSize( 0.0325 );
+
+                moduleLabel1[ k ]->SetTextColor( kBlue+1 );
+                moduleLabel2[ k ]->SetTextColor( kBlue+1 );
+                moduleLabel3[ k ]->SetTextColor( kBlue+1 );
+
+                jp->addElement( moduleLabel1[ k ] );
+                jp->addElement( moduleLabel2[ k ] );
+                jp->addElement( moduleLabel3[ k ] );
+            }
         }
 
         for( size_t j=0; j<12; j++ ) {
@@ -356,7 +409,6 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
         }
 
         if( contents.array[ i ] == contents.triggerTimeToResetTime ) {
-            //jp->logx = 1;
             jp->logy = 0;
 
             resetTimeLabel1 = new TLatex();
@@ -368,21 +420,6 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
             jp->addElement( resetTimeLabel1 );
             jp->addElement( resetTimeLabel2 );
         }
-
-
-        /*
-        if (contents.array[i] == contents.hitMapCounter[0] ||
-            contents.array[i] == contents.hitMapCounter[1] ||
-            contents.array[i] == contents.hitMapCounter[2] ||
-            contents.array[i] == contents.hitMapCounter[3] ||
-            contents.array[i] == contents.hitMapCounter[4] ||
-            contents.array[i] == contents.hitMapCounter[5] ||
-            contents.array[i] == contents.hitMapCounter[6] ||
-            contents.array[i] == contents.hitMapCounter[7] ||
-            contents.array[i] == contents.hitMapCounter[8] ) {
-            jp->gridx = 0;
-        }
-        */
 
         addPlot( jp );
     }
@@ -712,7 +749,7 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
                 contents.digiTot->Fill( tot );
 
                 if( gdpbMap.count( gdpb ) ) {
-                    contents.digiTotPerGdpb[ gdpbMap.at( gdpb ) ]->Fill( tot);
+                    contents.digiTotPerGdpb[ gdpbMap.at( gdpb ) ]->Fill( tot );
                 }
 
                 bool isPulser = false;
@@ -738,6 +775,10 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
                     if( fabs( timeToTrigger + 1845. ) < 150. ) {
                         nDigisInTimingWindow++;
                         contents.digiDensityInTimingWindow->Fill( ( sector - 13 ) * 6 + ( module - 1 ) * 2 + side, ( counter - 1 ) * 32 + strip );
+
+                        if( gdpbMap.count( gdpb ) ) {
+                            contents.digiTotPerGdpbInTimingWindow[ gdpbMap.at( gdpb ) ]->Fill( tot );
+                        }
                     }
 
                     // cut out the pulser time window 
@@ -846,6 +887,21 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
         }
     }
 
+
+    // loop over modules
+    for( int i=0; i<36; i++ ) {
+        // loop over strips
+        for( int j=0; j<96; j++ ) {
+
+            int binContentSideOne = contents.digiDensityAllChannels->GetBinContent( ( i * 2 ) + 1, j + 1 );
+            int binContentSideTwo = contents.digiDensityAllChannels->GetBinContent( ( i * 2 ) + 2, j + 1 );
+
+            if( binContentSideOne && binContentSideTwo ) {
+                contents.digiDensityAllStrips->SetBinContent( i + 1, j + 1 ,binContentSideOne + binContentSideTwo );
+            }
+
+        }
+    }
 }
 
 
