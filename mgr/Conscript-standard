@@ -400,9 +400,9 @@ if ( $pkg eq 'sim' or $pkg eq 'gen' ) {
     Install $env1 $LIB, $xgeometry;
     $lib = $LIB . "/lib" . $xgeometry;
     InstallAs $env1 $lib, $xgeometry;
-    $LIBPKG = "libxgeometry." . $env1->{SUFLIB};
-    Library   $env1 $LIBPKG, @srcE;
-    Install $env1 $LIB,    $LIBPKG;
+#    $LIBPKG = "libxgeometry." . $env1->{SUFLIB};
+#    Library   $env1 $LIBPKG, @srcE;
+#    Install $env1 $LIB,    $LIBPKG;
     $LIBPKG = "";
   }
 }  
