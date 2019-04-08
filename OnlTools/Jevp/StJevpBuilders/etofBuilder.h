@@ -65,10 +65,12 @@ class etofBuilder : public JevpBuilder {
 
         TH1* nDigisPerGdpb[ 12 ];
         TH1* digiTotPerGdpb[ 12 ];
+        TH1* digiTotPerGdpbInTimingWindow[ 12 ];
         TH1* digiMappedChannelNumberPerGdpb[ 12 ];
         TH1* nPulsersPerSide[ 12 ];
 
         TH1* digiDensityAllChannels;
+        TH1* digiDensityAllStrips;
         TH1* digiDensityInTimingWindow;
 
         TH1* triggerTimeDiffSectors[ 11 ];
