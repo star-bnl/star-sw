@@ -1,6 +1,6 @@
 #!/usr/bin/env perl -d
 Import qw ( env CWD INCLUDE LIB BIN BUILD OBJ);
-( my $build = $OBJ ) =~ s/\#//g;                        # print "CWD = $CWD\n";
+( my $build = $OBJ ) =~ s/\#//g;                        # print "CWD = $CWD, BIN = $BIN\n";
 $build =~ s/\\/\//g;                                    # print "OBJ = $OBJ build = $build\n";
 # print "MAIN = $MAIN\n";
 my $DirPath = DirPath '.';                              # print "DirPath = $DirPath\n";
