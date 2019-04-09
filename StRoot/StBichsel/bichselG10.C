@@ -231,7 +231,7 @@ Double_t dNdx(Double_t *x,Double_t *par) {
   if (par[1] > 1.0) charge = par[1];
   poverm *= charge;
   scale *= charge*charge;
-  return  TMath::Log10(scale*StdEdxModel::instance()->dNdx(poverm,charge));//TMath::Exp(7.81779499999999961e-01));
+  return  TMath::Log10(scale*StdEdxModssel::instance()->dNdx(poverm,charge));//TMath::Exp(7.81779499999999961e-01));
 }
 #if !defined(__CINT__) && !defined(__CLING__)
 //________________________________________________________________________________
@@ -333,7 +333,7 @@ void bichselG10(const Char_t *type="z") {
     Int_t dx = 1;
     Char_t *FunName = Form("%s%s%i",FNames[f],Names[h],(int)log2dx[dx]);
     cout << "Make " << h << "\t" << FunName << endl;
-    Double_t xmin = -1;
+    Double_t xmin = -1.5;
     //    if (h == 0 || h >= 5) xmin = -0.75;
     if (h == 4) xmin = -0.70;
     if (h == 6) xmin = -0.50;
