@@ -111,8 +111,8 @@ $env2 = $env->clone('FC'           => $FC,
 		    'Libraries'    => $Libraries
 		   );
 
-my $LIBSN = $LIBS; $LIBSN =~ s/-lRint/-lRint -lNew/;
-$envN = $env2->clone('LIBS'         => $LIBSN);
+#my $LIBSN = $LIBS; $LIBSN =~ s/-lRint/-lRint -lNew/;
+#$envN = $env2->clone('LIBS'         => $LIBSN);
 my @src = qw(MAIN_rmain.cxx);#  dummy.g);
 my @dirs = split /$main::PATH_SEPARATOR/,$env->{CPPPATH};
 if ($FC =~ /g77/ || $FC =~ /gfortran/) { push @src, "df.F";}
@@ -202,8 +202,8 @@ if ($#src > -1) {
   }
   my @o = Objects $env2 @src;
   script::Keep $pkgN;
-  Program      $envN $pkgN, @o;
-  Install $envN $BIN, $pkgN;
+#  Program      $envN $pkgN, @o;
+#  Install $envN $BIN, $pkgN;
   my $Starsim = "#asps/Simulation/starsim/";
   my @list = qw(atlsim.makefile atlsim.bank atlsim.logon.kumac);
   foreach my $f (@list) {
