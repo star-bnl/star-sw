@@ -10,9 +10,9 @@
 // code that should always be seen
 #endif
 #endif
-#if ROOT_VERSION_CODE >= ROOT_VERSION(5,34,18)
+//#if ROOT_VERSION_CODE >= ROOT_VERSION(5,34,18)
 //#define __USE_ROOFIT__
-#endif
+//#endif
 //________________________________________________________________________________
 #if !defined(__CINT__) && !defined(__CLING__) || defined(__MAKECINT__)
 #include "Riostream.h"
@@ -2122,25 +2122,29 @@ void FitB4G(Int_t icase = 0, Int_t hyp=-1, Int_t bin=0,
   if (f) {delete f;}
 }
 //________________________________________________________________________________
-Int_t FitG(TH1 *proj, TF1 *g, TF1 *ga){//, Double_t scaleM=-2., Double_t scaleP=2.) {
+TF1 *FitG(TH1 *proj, TF1 *g=0, TF1 *ga=0){//, Double_t scaleM=-2., Double_t scaleP=2.) {
+  if (! g) return 0;
   Double_t params[10];
-  proj->Fit("g","R");
+  proj->Fit(g,"R");
   Double_t chisq = g->GetChisquare();
-  if (chisq <= 0. || chisq > 1.e10) return -1;
-  g->GetParameters(params);
-  params[3] = 0;
-  params[4] = 0;
-  params[5] = 0;
-  params[6] = 0;
-  params[7] = 0;
-  params[8] = 0;
-  params[9] = 0;
-  ga->SetParameters(params);
-  proj->Fit("ga","r");
-  //  proj->Fit("ga","rIM");
-  chisq = g->GetChisquare();
-  if (chisq <= 0. || chisq > 1.e10) return -1;
-  return 0;
+  if (chisq <= 0. || chisq > 1.e10) return 0;
+  if (ga) {
+    g->GetParameters(params);
+    params[3] = 0;
+    params[4] = 0;
+    params[5] = 0;
+    params[6] = 0;
+    params[7] = 0;
+    params[8] = 0;
+    params[9] = 0;
+    ga->SetParameters(params);
+    proj->Fit(ga,"r");
+    //  proj->Fit("ga","rIM");
+    chisq = g->GetChisquare();
+    if (chisq <= 0. || chisq > 1.e10) return 0;
+    return ga;
+  }
+  return g;
 }
 //________________________________________________________________________________
 Int_t FitGG(TH1 *proj, TF1 *g1, TF1 *g2=0, TF1 *ga2=0, Double_t scaleM=-2., Double_t scaleP=2.) {
@@ -2507,15 +2511,34 @@ Double_t gmp(Double_t *x, Double_t *p) {
 }
 //________________________________________________________________________________
 TF1 *GMP() { // Fit Gamma + grass
-  TF1 * f = new TF1("GMP",gmp,0.5,15.5,6);
-  f->SetParNames("normL", "mu", "sigma", "gamma", "grass","sign");
-  f->SetParameters(4.17880, 2.86452, 0.2, 6.0, 2.1);
-  f->SetParLimits(0,0,50);
-  f->SetParLimits(1,2,26);
-  f->SetParLimits(2,0.1,2);
-  f->SetParLimits(3,2,50);
-  f->SetParLimits(4,0,1e3);
-  f->FixParameter(5,1.);
+  static TF1 *f = 0;
+  if (! f) {
+    f = new TF1("GMP",gmp,-5,5,6);
+    f->SetParNames("normL", "mu", "sigma", "gamma", "grass","sign");
+    f->SetParameters(4.17880, 2.86452, 0.2, 6.0, 0., 1.);
+    f->SetParLimits(0,0,50);
+    f->SetParLimits(1,-10,10);
+    f->SetParLimits(2,0.1,2);
+    f->SetParLimits(3,2,50);
+    f->SetParLimits(4,0,1e3);
+    f->FixParameter(5,1.);
+  }
+  return f;
+}
+//________________________________________________________________________________
+TF1 *GMN() { // Fit Gamma + grass  with reverse sign
+  static TF1 *f = 0;
+  if (!f ) {
+    f = new TF1("GMN",gmp,-5,5,6);
+    f->SetParNames("normL", "mu", "sigma", "gamma", "grass","sign");
+    f->SetParameters(4.17880, 2.86452, 0.2, 6.0, 0., 1.);
+    f->SetParLimits(0,0,50);
+    f->SetParLimits(1,-10,10);
+    f->SetParLimits(2,0.1,2);
+    f->SetParLimits(3,2,50);
+    f->SetParLimits(4,0,1e3);
+    f->FixParameter(5,-1.);
+  }
   return f;
 }
 //#define DEBUG
@@ -3414,6 +3437,8 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
       else if (TString(FitName) == "ADC") g = FitADC(proj,opt,nSigma,pow);
       else if (TString(FitName) == "G2") g = FitG2(proj,opt);
       else if (TString(FitName) == "Freq") g = FitFreq(proj,opt);
+      else if (TString(FitName) == "GMP") g = FitG(proj,GMP());
+      else if (TString(FitName) == "GMN") g = FitG(proj,GMN());
       else if (TString(FitName) == "NF" && dim == 3) {
 	TH3 *hists[5] = {0};
 	static const Char_t *names[5] = {"pi","P","K","e","d"};
