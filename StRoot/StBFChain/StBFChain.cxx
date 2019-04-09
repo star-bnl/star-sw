@@ -665,6 +665,7 @@ Int_t StBFChain::Instantiate()
 	  GetOption("Stv") || GetOption("Stx") ||
 	  GetOption("StiVMC"     ) ) mk->SetAttr("ITTF"         , 1);
       if (GetOption("VFMinuit"   ) ) mk->SetAttr("VFMinuit"   	, 1);
+      if (GetOption("VFMinuitX"  ) ) mk->SetAttr("VFMinuitX"  	, 1);
       if (GetOption("VFppLMV"    ) ) mk->SetAttr("VFppLMV"    	, 1);
       if (GetOption("VFppLMV5"   ) ) mk->SetAttr("VFppLMV5"   	, 1);
       if (GetOption("VFPPV"      ) ) mk->SetAttr("VFPPV"      	, 1);
@@ -699,6 +700,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("beamLine"   ) ) mk->SetAttr("BeamLine"   	, 1);
       if (GetOption("VFFV"       ) ) mk->SetAttr("VFFV"       	, 1);
       if (GetOption("VFMCE"      ) ) mk->SetAttr("VFMCE"      	, 1);
+      if (GetOption("VFMinuitX"  ) ) mk->SetAttr("VFMinuitX"  	, 1);
     }
     if (maker=="StAssociationMaker") {
 

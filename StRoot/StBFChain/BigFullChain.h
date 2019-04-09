@@ -1769,6 +1769,7 @@ Bfc_st BFC[] = { // standard chains
   {"genvtx","","","TMVARank,EEmcUtil","StGenericVertexMaker","Minuit,StGenericVertexMakerNoSti"
    ,                                "Generic Vertex Finder library (default is MinuitVertexFinder)",kFALSE},
   {"VFMinuit"  ,""  ,""  ,"genvtx"                   ,"","","... Generic VF will use Minuit method",kFALSE},
+  {"VFMinuitX" ,""  ,""  ,"genvtx"  ,"","","... Generic VF will use Minuit method with Stx tracker",kFALSE},
   {"CtbMatchVtx"    ,""  ,"","VFMinuit",""              ,"","... CTB Matching ON in Vertex Finding",kFALSE},
   {"VFMinuit2"      ,""  ,"","VFMinuit","","","... Generic VF will use Minuit method w/rank mode 2",kFALSE},
   {"VFMinuit3"      ,""  ,"","VFMinuit","","","... Generic VF will use Minuit method w/rank mode 3",kFALSE},
