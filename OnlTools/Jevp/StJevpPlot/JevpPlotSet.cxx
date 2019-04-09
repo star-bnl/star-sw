@@ -287,6 +287,13 @@ void JevpPlotSet::_startrun(daqReader *rdr)
     disabled = 0;
     strcpy(myname, plotsetname);
 
+
+    char timelog_fn[256];
+    sprintf(timelog_fn, "/tmp/timelog_%s_%d.txt", myname, rdr->run);
+
+    startTime = time(NULL);
+    timelog_fd = open(timelog_fn, O_CREAT |O_WRONLY);
+    
     processingTime = 0;
     numberOfEventsRun = 0;
 
@@ -331,6 +338,8 @@ void JevpPlotSet::_stoprun(daqReader *rdr)
     PCPC(-1);
 
     builderStatus.setStatus("stopped");
+
+    close(timelog_fd);
 
     PCP;
 }
@@ -392,8 +401,14 @@ void JevpPlotSet::_event(daqReader *rdr)
 
     evt_cnt++;
 
+    double tm = processingTimer->record_time();
+    processingTime += tm;
 
-    processingTime += processingTimer->record_time();
+    char str[256];
+    sprintf(str, "%ld %lf\n",startTime - time(NULL), tm); 
+
+    write(timelog_fd, str, strlen(str));
+    
     numberOfEventsRun++;
 }
 
