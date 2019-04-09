@@ -300,6 +300,7 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
   if (ev%1000 == 0) cout << "Read event\t" << ev << endl;
   StMuEvent* muEvent = mu->event(); // get a pointer to the class holding event-wise information
   Double_t Bz = muEvent->magneticField();
+  Double_t vpdZ = muEvent->vpdVz();
   KFParticle::SetField(Bz);
   //  KFParticle::SetField(-Bz);
   // cout << " #" << ev; 
@@ -323,6 +324,7 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
   for (Int_t l = 0; l < NoPrimaryVertices; l++) {
     StMuPrimaryVertex *Vtx = (StMuPrimaryVertex *) PrimaryVertices->UncheckedAt(l);
     if (! AcceptVX(Vtx)) continue;
+    if (vpdZ > -250 && TMath::Abs(Vtx->position().z() - vpdZ) > 10.0) continue;
     if (VtxH && Vtx->noTracks() < VtxH->noTracks()) continue;
     VtxH = Vtx;
   }
@@ -351,7 +353,7 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
     if (pTrack) {
       Double_t pT = pTrack->pt();
       if (pTrack->charge() > 0) pTSP->Fill(sector,pT);
-      else                      pTSN->Fill(sector,pT);
+      else                                       pTSN->Fill(sector,pT);
     }
     Short_t id = gTrack->id();
     Int_t kgc = gTrack->index2Cov();
@@ -635,19 +637,6 @@ void MuTpcG(Long64_t nEvents = 10000000) {
   StBFChain *chain = (StBFChain *) StMaker::GetTopChain();
   MuDstMaker = (StMuDstMaker *) chain->Maker("MuDst");
   if (! MuDstMaker) return;
-  MuDstMaker->SetStatus("*",0);
-  MuDstMaker->SetStatus("MuEvent",1);
-  MuDstMaker->SetStatus("PrimaryVertices",1);
-  MuDstMaker->SetStatus("PrimaryTracks",1);
-  MuDstMaker->SetStatus("GlobalTracks",1);
-  MuDstMaker->SetStatus("CovGlobTrack",1);
-  MuDstMaker->SetStatus("BTof*",1);
-  MuDstMaker->SetStatus("Emc*",1);
-  MuDstMaker->SetStatus("MTD*",1);
-#if 0
-  MuDstMaker->SetStatus("StStMuMcVertex",1);
-  MuDstMaker->SetStatus("StStMuMcTrack",1);
-#endif
   //  StMaker *detDb = chain->Maker("detDb");
   //  detDb->SetActive(kFALSE);
   //  StMaker *tpcDB = chain->Maker("tpcDB");
@@ -858,7 +847,7 @@ void Draw() {
     out  << "__________________________________________________________________________________________________ " << sector << endl;
     cout << "__________________________________________________________________________________________________ " << sector << endl;
     Val_t ValA[7]; memset (ValA, 0, sizeof(ValA));
-#define __LSF_ONLY__
+    //#define __LSF_ONLY__
 #define __LSF__
 #define __FITSLICES__
 #ifdef __LSF__

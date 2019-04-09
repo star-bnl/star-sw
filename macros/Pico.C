@@ -5,7 +5,7 @@
   root.exe lMuDst.C 'Pico.C+("/star/subsys/tpc/fisyak/reco/2014/50M/SL15StiCAKFV/130/15130037/st_physics_15130037_raw_3000030_5368_5369.MuDst.root")'
   root.exe Pico1_Sparse_pT100_eta24.NewdX.root doFractionFit.C
   
-  
+  PicoDst->Draw("Track->gMom().Phi():Track->gMom().Eta()","Track->isPrimary()&&Track->nHits()>15&&Track->charge()<0","colz")
   gStyle->SetOptStat(0)
   FitP->Draw("mu:y>>P(720,-360,360,100,-0.1,0.1)","i&&j&&abs(x)<3&&x>0.3","colz")
   FitP->Draw("mu:y>>N(720,-360,360,100,-0.1,0.1)","i&&j&&abs(x)<3&&x<-0.3","colz")
@@ -54,6 +54,9 @@
 #include "TLegend.h"
 #include "StPicoEvent/StPicoEvent.h"
 #include "StPicoEvent/StPicoTrack.h"
+#include "StDcaGeometry.h"
+#include "TRSymMatrix.h"
+#include "THelixTrack.h"
 #define ClassStMessMgr
 #define StMessMgr Int_t
 #include "StPicoDstMaker/StPicoDstMaker.h"
@@ -220,6 +223,7 @@ Int_t IndexH(const Char_t *name) {
 //________________________________________________________________________________
 void Pico(const Char_t *files ="./*.picot.root",
 	      const Char_t *Out = "Pico1.root"){
+#ifndef __CINT__
   //  static const Double_t sigmaB[2] = {6.26273e-01, -5.80915e-01}; // Global Tracks, wrt Bichsel
   if (!m_Bichsel) {
     gSystem->Load("libStBichsel"); 
@@ -234,34 +238,49 @@ void Pico(const Char_t *files ="./*.picot.root",
   Int_t      nZBins = 200;
   Double_t ZdEdxMin = -5;
   Double_t ZdEdxMax =  5;
-  TH1F *PrimMult = new TH1F("PrimMult","No. of total Primary tracks in event",100,0,5000);
+  TH1F *VxZ     = new TH1F("VxZ","Vertex Z",210,-210.,210.);
+  TH2F *Vxy     = new TH2F("Vxy","Vertex XY",200,-2.,2.,200,-2.,2.);
+  TH2F *VxErrXYmultL = new TH2F("VxErrXYmultL","VxErr_{XY} versus log_{10}(Mult)", 100,0,3, 250, 0, 10.0);
+  TH2F *VxErrZmultL = new TH2F("VxErrZmultL","VxErr_{Z} versus log_{10}(Mult)",    100,0,3, 250, 0, 10.0);
+  TH2F *EtapT   = new TH2F("EtapT","tracks versus  #eta pT/q",100,-2.5,2.5,100,-5,5.);
+  TH1F *PrimMult = new TH1F("PrimMult","No. of total Primary tracks in event",5000,0,5000);
   TH1F *RefMultPos = new TH1F("RefMultPos","Ref. multiplicity the first vertex",500,0,500);
   TH1F *RefMultNeg = new TH1F("RefMultNeg","Ref. multiplicity the first vertex",500,0,500);
-  TH1F *GoodPrimTracks = new TH1F("GoodPrimTracks","No. of good Primary track at the first vertex",100,0,2000);
-  TH2F *TPoints70   = new TH2F("TPoints70","dEdx(I70)/Pion versus Length in Tpc  for All",
-			       210,10,220., 500,-1.,4.);
-  TH2F *TPointsF   = new TH2F("TPointsF","dEdx(fit)/Pion versus Length in Tpc  for All",
-			      210,10,220., 500,-1.,4.);
-  TH2F *TPointsN   = new TH2F("TPointsN","dNdx(fit)/Pion versus Length in Tpc  for All",
-			      210,10,220., 500,-1.,4.);
-  TH2F *TdEdxP70    = new TH2F("TdEdxP70","log10(dE/dx(I70)(keV/cm)) versus log10(p(GeV/c))", 
-			       150,-1.,2., 500,-1.,4.);
-  TH2F *TdEdxP7040cm    = new TH2F("TdEdxP7040cm","log10(dE/dx(I70)(keV/cm)) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm", 
-				   150,-1.,2., 500,0.,2.5);
-  TH2F *TdEdxPF    = new TH2F("TdEdxPF","log10(dE/dx(fit)(keV/cm)) versus log10(p(GeV/c))", 
-			      150,-1.,2., 500,0.,2.5);
-  TH2F *TdEdxPF40cm    = new TH2F("TdEdxPF40cm","log10(dE/dx(fit)(keV/cm)) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm", 
-				  150,-1.,2., 500,0.,2.5);
-  TH2F *TdEdxPN    = new TH2F("TdEdxPN","log10(dN/dx(fit)(1/cm) versus log10(p(GeV/c))", 
-			      150,-1.,2., 500,0.5,3.0);
-  TH2F *TdEdxPN40cm    = new TH2F("TdEdxPN40cm","log10(dN/dx(fit)(1/cm) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm", 
-				  150,-1.,2., 500,0.5,3.0);
-  TH2F *Pull70 = new TH2F("Pull70","log(I70/I(pi)))/D70  versus track length", 
-			  150,10.,160,nZBins,ZdEdxMin,ZdEdxMax);
-  TH2F *FitPull= new TH2F("FitPull","(zFit - log(I(pi)))/dzFit  versus track length", 
-			  150,10.,160,nZBins,ZdEdxMin,ZdEdxMax);
-  TH2F *PullN = new TH2F("PullN","log(dN/dx/I(pi)))/DN  versus track length", 
-			 150,10.,160,nZBins,ZdEdxMin,ZdEdxMax);
+  TH1F *GoodPrimTracks = new TH1F("GoodPrimTracks","No. of good Primary track at the first vertex",2000,0,2000);
+  TH2F *dcaXYInvpT = new TH2F("dcaXYInvpT","dca_{XY} versus 1/pT", 100,0,10, 500, -2.5, 2.5);
+  TH2F *dcaZInvpT = new TH2F("dcaZInvpT","dca_{Z} versus 1/pT", 100,0,10, 500, -2.5, 2.5);
+  TH2F *zZ       = new TH2F("zZ","zTpc - zVpd versus zTpc for highest rank vertex", 200, -200, 200, 100, -50, 50);
+#ifdef     __Use_dNdx__
+  enum  {kTotalMethods = 6};
+#else
+  enum  {kTotalMethods = 2};
+#endif
+  static StDedxMethod kTPoints[kTotalMethods] = {// {"F","70","FU","70U","N", "NU"};
+    kLikelihoodFitId         // F
+    ,kTruncatedMeanId         // 70
+#ifdef     __Use_dNdx__
+    ,kWeightedTruncatedMeanId // FU
+    ,kEnsembleTruncatedMeanId  // 70U
+    ,kOtherMethodId           // N
+    ,kOtherMethodId2          // NU
+#endif
+  };
+  static TH2F *fTdEdx[3][5];
+  for (Int_t k = 0; k < kTotalMethods; k++) {
+    const Char_t *parN[5] = {"","pi","e","K","P"};
+    const Char_t *parT[5] = {"All","|nSigmaPion| < 1","|nSigmaElectron| < 1","|nSigmaKaon| < 1","|nSigmaProton| < 1"};
+    const Char_t *FitName[3] = {"I70","F","N"};
+    Double_t ymin = 0, ymax = 2.5;
+    if (k == 2) {ymin = 0.75; ymax = 3.25;}
+    for (Int_t t = 0; t < 1; t++) {//5; t++) {
+      TString Title(Form("log10(dE/dx(%s)(keV/cm)) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm %s",FitName[k],parT[t]));
+      if (k == 2) Title = Form("log10(dN/dx) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm %s",parT[t]);
+      fTdEdx[k][t] = new TH2F(Form("TdEdx%s%s",FitName[k],parN[t]),Title,
+			      350,-1.5,2., 500, ymin, ymax);
+      fTdEdx[k][t]->SetMarkerStyle(1);
+      fTdEdx[k][t]->SetMarkerColor(t+1);
+    }
+  } 
   TString TitleX("z - z_{#pi} versus ");
   for (Int_t i = 0; i < NoDim; i++) {
     if (i) {TitleX += " ";}
@@ -275,20 +294,35 @@ void Pico(const Char_t *files ="./*.picot.root",
   for (Int_t i = 0; i <= Nphi; i++) phiBins[i] = -360.5 + (720./Nphi)*i;
   for (Int_t i = 0; i <= Nz;   i++) zBins[i] = -5 + 10./Nz*i;
   for (Int_t i = 0; i <= NL;   i++) LBins[i] = 2*i;
+#if 0
   TH2F *TPs[3]        = {TPoints70, TPointsF, TPointsN};
   TH2F *Pulls[3]      = {Pull70, FitPull, PullN};
-  TH2F *TdEdxs[3]     = {TdEdxP70, TdEdxPF, TdEdxPN};
-  TH2F *TdEdxs40cm[3] = {TdEdxP7040cm, TdEdxPF40cm, TdEdxPN40cm};
-  TH1F *cpTh     = new TH1F("cpTh","q*pT distribution",500,-pTMax,pTMax); 
-  TH1F *Etah     = new TH1F("Etah","Eta distribution",100,-5.,5.);
-  TH2F *zZ       = new TH2F("zZ","zTpc - zVpd versus zTpc for highest rank vertex", 200, -200, 200, 100, -50, 50); 
+#endif
+  TH1F *EtaP     = new TH1F("EtaP","Eta(+) distribution",100,-5.,5.);
+  TH1F *EtaN     = new TH1F("EtaN","Eta(-) distribution",100,-5.,5.);
   delete [] etaBins;
   delete [] phiBins;
   delete [] zBins;
   delete [] LBins;
+#if 0
   Hists2D I70("I70");
   Hists2D fitZ("fitZ");
   Hists2D fitN("fitN");
+#endif
+  static TH2F *Eta[2] = {0};     // 0 -> F, 1 -> 70
+  // TPoints block
+  for (Int_t t = 0; t < 2; t++) {
+    const Char_t *N[6] = {"F","70","FU","70U","N", "NU"};
+    const Char_t *T[6] = {"dEdx(fit)/Pion",
+			  "dEdx(I70)/Pion",
+			  "dEdx(fit_uncorrected)/Pion ",
+			  "dEdx(I70_uncorrected)/Pion",
+			  "dNdx/Pion",
+			  "dNdx(uncorrected)/Pion"};
+    Eta[t] = new TH2F(Form("Eta%s",N[t]),
+		      Form("%s for primary tracks versus Eta for |zPV| < 10cm and TpcLength > 40cm, TPC - iTPC",T[t]),
+		      100,-2.5,2.5,500,-1.,4.);
+  }
 #if 1
   maker = new StPicoDstMaker(StPicoDstMaker::IoRead,files);
   maker->Init();
@@ -345,11 +379,32 @@ void Pico(const Char_t *files ="./*.picot.root",
     Int_t NoGlobalTracks = pico->numberOfTracks( );  if (Debug()) {cout << "\tGlobalTracks " << NoGlobalTracks;}
     if (Debug())                                                               {cout << endl;}
     TVector3 pRcVx = picoEvent->primaryVertex();
-    Double_t zTpc = pRcVx.z();
+    TVector3 pRcVxError = picoEvent->primaryVertexError();
+    Double_t xyzV[3] = {pRcVx.x(), pRcVx.y(), pRcVx.z()};
+    Double_t zTpc = xyzV[2];
+    Double_t vzVpd = picoEvent->vzVpd();
+    zZ->Fill(zTpc, zTpc - vzVpd);
+    if (TMath::Abs(zTpc - vzVpd) > 10.0) continue;
+    VxZ->Fill(pRcVx.z());
+    Vxy->Fill(pRcVx.x(),pRcVx.y());
     PrimMult->Fill(NoGlobalTracks);
     RefMultPos->Fill(picoEvent->refMultPos());
     RefMultNeg->Fill(picoEvent->refMultNeg());
+    
+    // Count no. of good primary tracks
     Int_t noGoodPrimTracks = 0;
+    for (Int_t k = 0; k < NoGlobalTracks; k++) {
+      StPicoTrack *gTrack = pico->track(k);
+      if (!gTrack) continue;
+      StPicoTrack *pTrack = gTrack;
+      if (!gTrack->isPrimary()) continue;
+      StPicoTrackCovMatrix *gCov = pico->trackCovMatrix(k);
+      if (! gCov) continue;
+      noGoodPrimTracks++;
+    }
+    GoodPrimTracks->Fill(noGoodPrimTracks);
+    VxErrXYmultL->Fill(TMath::Log10(noGoodPrimTracks), pRcVxError.Pt());
+    VxErrZmultL->Fill(TMath::Log10(noGoodPrimTracks), pRcVxError.z());
     Bool_t HFTon = kFALSE;
     for (Int_t k = 0; k < NoGlobalTracks; k++) {
       StPicoTrack *gTrack = pico->track(k);
@@ -358,7 +413,19 @@ void Pico(const Char_t *files ="./*.picot.root",
       if (!gTrack->isPrimary()) continue;
       StPicoTrackCovMatrix *gCov = pico->trackCovMatrix(k);
       if (! gCov) continue;
+      Int_t charge = gTrack->charge();
+      Int_t sCharge = (charge + 1)%2;
+      EtapT->Fill(pTrack->pMom().Eta(), charge*pTrack->pMom().Pt());
       StDcaGeometry dcaG  = gCov->dcaGeometry();
+      Double_t xyzp[6], CovXyzp[21];
+      dcaG.GetXYZ(xyzp,CovXyzp);
+      THelixTrack     thelixK =  dcaG.thelix();
+      Double_t dca[2], ermx[3];
+      thelixK.Dca(xyzV,dca[0],dca[1],ermx,2);
+      Double_t pMom = pTrack->pMom().Mag();
+      Double_t pTinv = 1./pTrack->pMom().Pt();
+      dcaXYInvpT->Fill(pTinv, dca[0]);
+      dcaZInvpT->Fill(pTinv, dca[1]);
       KFParticle particle = dcaG.Particle(k);
 #ifdef DEBUG
       cout << k << "\t" << particle <<endl;
@@ -367,14 +434,14 @@ void Pico(const Char_t *files ="./*.picot.root",
       if (PiD.PiDStatus < 0) continue;
       memset (&Var.refMult, 0, sizeof(Var_t));
       Var.refMult = NoGlobalTracks;
-      Int_t charge = gTrack->charge();
-      Int_t sCharge = (charge + 1)%2;
       Double_t p = gTrack->gMom().Mag();
-      //      Double_t Zs[3] = {dEdxL[0] - zPred[0][kPidPion], dEdxL[1] - zPred[1][kPidPion], dEdxL[2] - zPred[2][kPidPion]};
+      //      
       //      Double_t cpT = gTrack->charge()*pOut.perp();
       Double_t cpT = charge*pTrack->pPt();
       Var.cpT = cpT;
       Var.eta = pTrack->pMom().Eta();
+      if (charge > 0) EtaP->Fill(Var.eta);
+      else            EtaN->Fill(Var.eta);
       Double_t phi = TMath::RadToDeg()*pTrack->pMom().Phi();
       if (phi < 0) phi += 360;
       if (Var.eta < 0) phi -= 360;
@@ -387,13 +454,18 @@ void Pico(const Char_t *files ="./*.picot.root",
       Double_t sigmas[3] = {pTrack->dEdxError(), pTrack->dEdxError(), 0};
       Double_t nSigmasPi[3] = {PiD.fI70.D(), PiD.fFit.D(), PiD.fdNdx.D()};
       Double_t Zs[3] = {PiD.fI70.dev[kPidPion], PiD.fFit.dev[kPidPion], PiD.fdNdx.dev[kPidPion]};
-      for (Int_t m = 0; m < 3; m++) {// I70 && Fit && dNdx
+      for (Int_t k = 0; k < kTotalMethods; k++) {// I70 && Fit && dNdx
+	StDedxMethod m = kTPoints[k];
+	if (! PiD.Status(m)) continue;
 	if (sigmas[m] > 0) {
 	  Var.hyp = -1;
 	  Var.z = Zs[m];
 	  //	  TPs[m]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[m]);
 	  //	  Pulls[m]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[m]/sigmas[m]);
-	  TdEdxs[m]->Fill(TMath::Log10(p), dEdxL10[m]);
+	  fTdEdx[k][0]->Fill(TMath::Log10(p), dEdxL10[k]+6);
+	  if (pMom >= 0.4 && pMom <= 0.5) {
+	    Eta[k]->Fill(pTrack->pMom().Eta(),Zs[k]);
+	  }
 	}
       }
 #if 0
@@ -431,9 +503,8 @@ void Pico(const Char_t *files ="./*.picot.root",
 	}
       }
 #endif
-      noGoodPrimTracks++;
     } // track loop
-    GoodPrimTracks->Fill(noGoodPrimTracks);
   } // event loop
   if (fOut) fOut->Write();
+#endif /* !__CINT__ */
 }

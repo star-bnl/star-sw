@@ -1,6 +1,6 @@
 /*
-  root.exe lDb.C 'TpcRotations.C+(20190101,401)'
-  root.exe lDb.C 'TpcRotations.C+(20190101,402)'
+  root.exe lDb.C 'TpcRotations.C+(20180101,401)'
+  root.exe lDb.C 'TpcRotations.C+(20190101,510)'
   root.exe lDb.C *.root 
     .L TpcRotations.C+
     Compare(_file0,_file1,20190101,403)
@@ -62,6 +62,7 @@ void TpcRotations(Int_t date = 0, Int_t time = 0) {
   fOut->cd();
   TGeoHMatrix rot = StTpcDb::instance()->Tpc2GlobalMatrix(); rot.Print("");  rot.Write();
   for (Int_t sector = 1; sector <= 24; sector++) {
+#if 0
     rot = StTpcDb::instance()->SupS2Tpc(sector );       rot.Print(""); rot.Write(); 
     rot = StTpcDb::instance()->SubSInner2SupS(sector ); rot.Print(""); rot.Write(); 
     rot = StTpcDb::instance()->SubSOuter2SupS(sector ); rot.Print(""); rot.Write(); 
@@ -70,6 +71,9 @@ void TpcRotations(Int_t date = 0, Int_t time = 0) {
     rot = StTpcSuperSectorPosition::instance()->GetMatrix4Id(sector); rot.Print(""); rot.Write(); 
     rot = StTpcOuterSectorPosition::instance()->GetMatrix4Id(sector); rot.Print(""); rot.Write(); 
     rot = StTpcInnerSectorPosition::instance()->GetMatrix4Id(sector); rot.Print(""); rot.Write(); 
+#endif
+    rot = StTpcDb::instance()->SubSInner2Glob(sector);   rot.Print(""); rot.Write(); 
+    rot = StTpcDb::instance()->SubSOuter2Glob(sector);   rot.Print(""); rot.Write(); 
   }
   delete fOut;
 }
@@ -110,10 +114,11 @@ void MakeSurveyTable(TGeoHMatrix rot[24], const Char_t *tableName =" TpcSuperSec
 void Compare(TFile *file0 = 0, TFile *file1 = 0, Int_t date = 20190101, Int_t time = 402) {
   static TGeoHMatrix I("Indentity"); I.SetBit(TGeoMatrix::kGeoGenTrans); I.SetBit(TGeoMatrix::kGeoRotation);
   if (! file0 || ! file1) return;
-  const Char_t *Names[9] = {"Tpc2Glob", "SupS_%02dtoTpc","SubS_%02dInner2SupS","SubS_%02dOuter2SupS","SubS_%02dInner2Tpc","SubS_%02dOuter2Tpc","TpcSuperSectorPositionB_%d","TpcOuterSectorPositionB_%d","TpcInnerSectorPositionB_%d"};
-  TGeoHMatrix *rot[9][24][2] = {0};
+  enum { kSuperSector = 6, kInnerSector = 8, kOuterSector = 7, kTotal=11};
+  const Char_t *Names[kTotal] = {"Tpc2Glob", "SupS_%02dtoTpc","SubS_%02dInner2SupS","SubS_%02dOuter2SupS","SubS_%02dInner2Tpc","SubS_%02dOuter2Tpc",
+			     "TpcSuperSectorPositionB_%d","TpcOuterSectorPositionB_%d","TpcInnerSectorPositionB_%d","SubS_%02dInner2Glob","SubS_%02dOuter2Glob"};
+  TGeoHMatrix *rot[kTotal][24][2] = {0};
   TFile *files[2] = {file0, file1};
-  enum { kSuperSector = 6, kInnerSector = 8, kOuterSector = 7};
   /*
 	kTpc2GlobalMatrix := StTpcPosition
 	kSupS2Tpc       :=                 (Shift(half) * StTpcHalfPosition(half)) * (rotmS(sector,iPhi) * StTpcSuperSectorPosition)
@@ -128,11 +133,12 @@ void Compare(TFile *file0 = 0, TFile *file1 = 0, Int_t date = 20190101, Int_t ti
     rot[0][0][i] = (TGeoHMatrix *) files[i]->Get(Names[0]);
     if (! rot[0][0][i]) return;
     rot[0][0][i]->Print();
-    for (Int_t k = 1; k < 9; k++) {
+    for (Int_t k = 1; k < kTotal; k++) {
       for (Int_t sec = 0; sec < 24; sec++) {
 	Int_t sector = sec + 1;
 	Type = Form(Names[k],sector);
 	rot[k][sec][i] = (TGeoHMatrix *) files[i]->Get(Type);
+	if (! rot[k][sec][i] ) continue;
 	cout << "rot[" << k << "][" << sec << "][" << i << "]:"; rot[k][sec][i]->Print();
       }
     }
@@ -161,8 +167,8 @@ void Compare(TFile *file0 = 0, TFile *file1 = 0, Int_t date = 20190101, Int_t ti
   TGeoHMatrix Super[24];
   TGeoHMatrix Inner[24];
   for (Int_t sector = 1; sector <= 24; sector++) {
-    for (Int_t k = 1; k < 9; k++) {
-      if (k != kSuperSector && k != kInnerSector && k != kOuterSector) continue;
+    for (Int_t k = 1; k < kTotal; k++) {
+      //      if (k != kSuperSector && k != kInnerSector && k != kOuterSector) continue;
       TGeoHMatrix *rot0 = rot[k][sector-1][0];
       TGeoHMatrix *rot1 = rot[k][sector-1][1];
       if (! rot0 || ! rot1) {
@@ -179,6 +185,7 @@ void Compare(TFile *file0 = 0, TFile *file1 = 0, Int_t date = 20190101, Int_t ti
       cout << "diff:"; diff.Print();
       cout << "================================================================================" << endl;
     }
+#if 0
     TGeoHMatrix O_old(*rot[kOuterSector][sector-1][0]); cout << "O_old:"; O_old.Print();
     TGeoHMatrix O_new(*rot[kOuterSector][sector-1][1]); cout << "O_new:"; O_new.Print();
     TGeoHMatrix I_old(*rot[kInnerSector][sector-1][0]); cout << "I_old:"; I_old.Print();
@@ -189,7 +196,10 @@ void Compare(TFile *file0 = 0, TFile *file1 = 0, Int_t date = 20190101, Int_t ti
     Super[sector-1] = S_old * O_old * O_new.Inverse(); cout << "Super[" << sector-1 << "]:"; Super[sector-1].Print();
     Inner[sector-1] = Super[sector-1].Inverse() * S_old * I_old; cout << "Inner[" << sector-1 <<"]:"; Inner[sector-1].Print();
     cout << "Done with sector " << sector <<" ================================================================================" << endl;
+#endif
   }
+#if 0
   MakeSurveyTable(Super,"TpcSuperSectorPositionB",date,time);
   MakeSurveyTable(Inner,"TpcInnerSectorPositionB",date,time);
+#endif
 }

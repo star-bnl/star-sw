@@ -2,7 +2,7 @@
 use File::Basename;
 use Cwd;
 my $macro = "RunTbyT";
-my $debug = 0;
+my $debug = 1;
 my @FilesNew = glob "new/*.event.root"; print "FilesNew @FilesNew\n" if $debug;
 my @FilesOld = glob "old/*.event.root"; print "FilesOld @FilesOld\n" if $debug;
 
