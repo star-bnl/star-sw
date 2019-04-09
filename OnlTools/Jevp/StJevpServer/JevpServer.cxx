@@ -471,7 +471,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	  myport = JEVP_PORT+10;
 	  die = 1;
 	  log_level = (char *)WARN;
-	  throttle_time = .005;
+	  throttle_time = .05;
 	}
 	else if (strcmp(argv[i], "-nodie") == 0) {
 	  die = 0;

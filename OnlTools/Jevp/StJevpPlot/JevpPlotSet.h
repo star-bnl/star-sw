@@ -50,6 +50,10 @@ class JevpPlotSet : public TObject {
     return str;
   }
   
+
+  time_t startTime;
+  int timelog_fd;
+
   // Plot management
   //
   // Generally, one adds plots only at initialization
