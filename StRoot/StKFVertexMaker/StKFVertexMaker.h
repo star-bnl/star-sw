@@ -54,7 +54,9 @@ class StKFVertexMaker : public StMaker {
   virtual Int_t  	 	 Init();							  		   
   void           	 	 Fit();							  		   
   virtual void                   ReFitToVertex();  
+  virtual void                   ReFitToStVertex();  
   virtual StPrimaryTrack 	*FitTrack2Vertex(StKFVertex *V, StKFTrack* track, StPrimaryVertex *primV);
+  virtual StPrimaryTrack 	*FitTrack2Vertex(const KFParticle &VKF, KFParticle& P, const KFParticle* PO,StPrimaryVertex *primV);
   TH1F           	 	*GetVertexZPlots(Int_t pass = 0) {return fVertexZPlots[pass];}	  		   
   virtual Int_t  	 	 Make();							  		   
   Int_t          	 	 MakeParticles();						  		   

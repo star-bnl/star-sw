@@ -16,8 +16,18 @@ StKFVertexMaker::Make
 			For 2 passes {
 				PrimaryVertexSeeds();
 				fgcVertices->DoTrack2VertexAssociation
+                                                                    for each vtx {
+                                                                         for each track k {
+                                                                             Chi2s[k] = particle->GetDeviationFromVertex(vtx->Vertex());
+                                                                           }
+                                                                           sort over Chi2s
+                                                                          StKFTrack *track = new StKFTrack(particle,Chi2s[k]);
+                                                                          vtx->AddTrack(track);
+                                                                        }
+                                                                      UpdateWeights
 				AnnelingFcn(TMath::Exp(-TempLog))
 					 fgcVertices->Fit();
+                                                                                                MergeDuplicatedVertices
 						for each vertex vtx
 							vtx->CheckBeamConstraint();
 							vtx->Fit()

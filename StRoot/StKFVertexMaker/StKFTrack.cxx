@@ -1,5 +1,7 @@
 // $Id: StKFTrack.cxx,v 2.3 2015/12/20 01:06:39 fisyak Exp $
+#include "Riostream.h"
 #include "StKFTrack.h"
+Int_t StKFTrack::fDebug = 0;
 //________________________________________________________________________________
 StKFTrack::StKFTrack(const KFParticle *particle, Double_t chi2, Int_t iWE) : 
   fWeight(-1), fW(-1), fOrigKFParticle(particle), fWestOrEast(iWE) {
@@ -62,14 +64,29 @@ void StKFTrack::NormW(Double_t Norm) {
 void StKFTrack::ResetParticle() {
   fParticle = *fOrigKFParticle;
   if (fW <= 0.0 || fWeight <= 0) return;
+#if 1
   Double_t T = StAnneling::Temperature();
-  Float_t scale = T/fW;
-  if (fWeight > 0) scale /= fWeight;
+  Float_t scale = T*T;
+#if 0
+  if (T > 1.0) {
+    if (fW > 100*T)  scale = T/fW;
+    if (fWeight > 0) scale /= fWeight;
+  }
+#endif
+  if (fDebug) {
+    cout << "StKFTrack::ResetParticle: T = " << T << " fW = " << fW << " fWeight = " << fWeight << " scale " << scale << endl;
+    fParticle.Print("");
+  }
   Float_t *CovXyz  =  fParticle.CovarianceMatrix();
   //  for (Int_t j = 0; j < 21; j++) CovXyz[j] *= 1./fWeight;
   //  for (Int_t j = 0; j < 21; j++) CovXyz[j] *= 1./TMath::Sqrt(fW);
   //  for (Int_t j = 0; j < 21; j++) CovXyz[j] *= 1./(fW*fWeight);
   for (Int_t j = 0; j < 21; j++) CovXyz[j] *= scale;
+  if (fDebug) { 
+    fParticle.Print("");
+ }
+#endif
+  return;
 }
 //________________________________________________________________________________
 std::ostream&  operator<<(std::ostream& os,  const StKFTrack& p) {

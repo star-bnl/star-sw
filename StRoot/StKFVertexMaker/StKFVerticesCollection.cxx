@@ -65,7 +65,7 @@ ostream&  operator<<(ostream& os,  const StKFVerticesCollection& vc) {
 void StKFVerticesCollection::DoTrack2VertexAssociation(const TObjArray &particles, Int_t *Parents) {
   Int_t Ntracks = particles.GetEntriesFast();
   TArrayI Idx(Ntracks);
-  TArrayD Chi2s(Ntracks);
+  TArrayD Chi2s(Ntracks); 
   TIter next(&fVertices,kIterBackward);
   StKFVertex *vtx;
   while ((vtx = (StKFVertex *)  next())) {
@@ -80,6 +80,7 @@ void StKFVerticesCollection::DoTrack2VertexAssociation(const TObjArray &particle
       if (Parents[k]) continue;
       Double_t chi2il = particle->GetDeviationFromVertex(vtx->Vertex());
       if (chi2il < 0) continue;
+      if (Chi2s[k] <= chi2il) continue;
       Chi2s[k] = chi2il;
     }
     vtx->Clear();    
@@ -88,7 +89,7 @@ void StKFVerticesCollection::DoTrack2VertexAssociation(const TObjArray &particle
       Int_t k = Idx[j];
       particle = (KFParticle *) particles.UncheckedAt(k);
       if (! particle) continue;
-      if (Chi2s[k] > StAnneling::Chi2Cut()) break;
+      if (Chi2s[k] > StAnneling::Chi2Cut()) continue;
       StKFTrack *track = new StKFTrack(particle,Chi2s[k]);
       vtx->AddTrack(track);
     }

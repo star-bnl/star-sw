@@ -296,7 +296,7 @@ Bfc_st BFC[] = { // standard chains
    ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,sdt20180426.122000,StiCALib,HLTCA,Idst,BAna"       
    ,                                                                                       "","","",kFALSE},
   {"MC2019.Ideal","","","MC.2019,MC.StiCA,vmc,NewTpcAlignment"                            ,"","","",kFALSE},
-  {"MC2019",      "","","MC2019.Ideal"                                                    ,"","","",kFALSE},
+  {"MC2019",      "","","MC2019.sdt20190401"                                              ,"","","",kFALSE},
   {"RC----------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"RC.y2000"        ,"","","p2000,VFMinuit,CMuDst,NosvtIT,NossdIT,NosstIT"               ,"","","",kFALSE},
   {"RC.y2001"        ,"","","P2001a,VFMinuit,ZDCvtx,CMuDst,NosvtIT,NossdIT,NosstIT"       ,"","","",kFALSE},

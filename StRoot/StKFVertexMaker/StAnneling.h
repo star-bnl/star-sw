@@ -12,17 +12,8 @@ public:
   static void      SetChi2CutUniq(Double_t chi2Cut=13.81551055)  {fChi2CutUniq = chi2Cut;}
   static Double_t  Chi2Cut()     {return fChi2Cut;}
   static Double_t  Chi2CutUniq() {return fChi2CutUniq;}
-  static Double_t  Weight(Double_t chi2)   {
-    // J.Phys. G: Nucl. Part. Phys. 34 (2007) N343-N356. Eq.(8)
-#if 0
-    return // TMath::Sqrt(chi2)/ 
-      1.0/(1.0 + TMath::Exp(-(Chi2Cut()-chi2)/(2*Temperature())));
-#endif
-    return 
-      (TMath::Exp(-chi2/(2*fTemperature)) + TMath::Exp(-fChi2Cut/(2*fTemperature)))/
-      (                                1. + TMath::Exp(-fChi2Cut/(2*fTemperature)));
-  }
-private:
+  static Double_t  Weight(Double_t chi2);
+ private:
   static Double_t  fTemperature;
   static Double_t  fChi2Cut;
   static Double_t  fChi2CutUniq;

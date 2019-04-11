@@ -103,6 +103,7 @@ Bool_t StKFVertex::Fit() {
   Int_t i = 0;
   while ((Track = (StKFTrack *) next())) {
     particles[i] = &(Track->Particle());
+    PrPP(Tracks, *particles[i]);
     i++;
   }
   PrPP(Fit before,Vertex());
@@ -125,12 +126,13 @@ Bool_t StKFVertex::Fit() {
   //  Double_t prob = TMath::Prob(GetChi2(),GetNDF());
   TRSymMatrix CL(3,CovarianceMatrix());
   TRSymMatrix CLI(CL,TRArray::kInvertedA);
-  Bool_t fail = ! CLI.IsValid();
+  Bool_t bad = kFALSE;
+  if (! CLI.IsValid()) bad = kTRUE;
   TIter nextI(&fKFTracks,kIterBackward);
   Track = 0;
   i = N-1;
   while ((Track = (StKFTrack *) nextI())) {
-    if(fail || ! Flag[i])  delete Remove(Track);
+    if(bad || ! Flag[i])  delete Remove(Track);
     i--;
   }
   delete [] particles;

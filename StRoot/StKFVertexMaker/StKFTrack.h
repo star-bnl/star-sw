@@ -31,7 +31,8 @@ public:
   void        	    ResetParticle();                                  
   void              Print(Option_t *option="") const {if (option) {}; std::cout << *this << std::endl;}
   void              SetParent(Int_t Id) {((KFParticle *) fOrigKFParticle)->SetParentID(Id);}
-  static Int_t      CorrectGePid(Int_t gePid);
+  static Int_t    CorrectGePid(Int_t gePid);
+  static void    SetDebug(Int_t l=1) {fDebug = l;}
 private:
   Double_t          fWeight;  // adaptive weight 
   Double_t          fW;       // adaptive weigth for multi vertices
@@ -39,6 +40,7 @@ private:
   KFParticle        fParticle;// particle with modified covariance matrix accourdingly to weight
   const KFParticle *fOrigKFParticle; // 
   Int_t             fWestOrEast;  
+  static Int_t   fDebug;
   ClassDef(StKFTrack,0)
 };
 // $Log: StKFTrack.h,v $
