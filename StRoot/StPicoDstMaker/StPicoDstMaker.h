@@ -190,6 +190,8 @@ class StPicoDstMaker : public StMaker {
   void fillBTowHits();
   /// Fill BTOF information
   void fillBTofHits();
+  /// Fill ETOF information
+  void fillETofHits();
   /// Fill MTD information
   void fillMtdHits();
   /// Fill EPD hit information

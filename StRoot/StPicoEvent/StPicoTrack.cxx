@@ -38,7 +38,7 @@ StPicoTrack::StPicoTrack() : TObject(),
   mNSigmaProton( std::numeric_limits<short>::min() ),
   mNSigmaElectron( std::numeric_limits<short>::min() ),
   mTopologyMap{}, mBEmcPidTraitsIndex(-1), mBTofPidTraitsIndex(-1),
-  mMtdPidTraitsIndex(-1) {
+  mETofPidTraitsIndex(-1),mMtdPidTraitsIndex(-1) {
   /* empty */
 }
 
@@ -67,11 +67,13 @@ StPicoTrack::StPicoTrack(const StPicoTrack &track) : TObject() {
   mNSigmaKaon = track.mNSigmaKaon;
   mNSigmaProton = track.mNSigmaProton;
   mNSigmaElectron = track.mNSigmaElectron;
-  for(int iIter=0; iIter<3; iIter++) {
+
+  for(int iIter=0; iIter<eTopologyMap; iIter++) {
     mTopologyMap[iIter] = track.mTopologyMap[iIter];
   }
   mBEmcPidTraitsIndex = track.mBEmcPidTraitsIndex;
   mBTofPidTraitsIndex = track.mBTofPidTraitsIndex;
+  mETofPidTraitsIndex = track.mETofPidTraitsIndex;
   mMtdPidTraitsIndex = track.mMtdPidTraitsIndex;
 }
 

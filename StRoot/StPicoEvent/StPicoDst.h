@@ -10,6 +10,7 @@
 #if !defined (_VANILLA_ROOT_)
 #define __TFG__VERSION__
 #endif /* ! _VANILLA_ROOT_ */
+
 // ROOT headers
 #include "TClonesArray.h"
 
@@ -23,12 +24,14 @@ class StPicoEmcTrigger;
 class StPicoMtdTrigger;
 class StPicoBTowHit;
 class StPicoBTofHit;
+class StPicoETofHit;
 class StPicoMtdHit;
 class StPicoEpdHit;
 class StPicoBbcHit;
 class StPicoFmsHit;
 class StPicoBEmcPidTraits;
 class StPicoBTofPidTraits;
+class StPicoETofPidTraits;
 class StPicoMtdPidTraits;
 class StPicoTrackCovMatrix;
 class StPicoBEmcSmdEHit;
@@ -69,6 +72,8 @@ class StPicoDst {
   static StPicoBTowHit* btowHit(Int_t i) { return (StPicoBTowHit*)picoArrays[StPicoArrays::BTowHit]->UncheckedAt(i); }
   /// Return pointer to i-th btof hit
   static StPicoBTofHit* btofHit(Int_t i) { return (StPicoBTofHit*)picoArrays[StPicoArrays::BTofHit]->UncheckedAt(i); }
+  /// Return pointer to i-th etof hit
+  static StPicoETofHit* etofHit(Int_t i) { return (StPicoETofHit*)picoArrays[StPicoArrays::ETofHit]->UncheckedAt(i); }
   /// Return pointer to i-th mtd hit
   static StPicoMtdHit*  mtdHit(Int_t i) { return (StPicoMtdHit*)picoArrays[StPicoArrays::MtdHit]->UncheckedAt(i); }
   /// Return pointer to i-th bbc hit
@@ -81,6 +86,8 @@ class StPicoDst {
   static StPicoBEmcPidTraits* bemcPidTraits(Int_t i) { return (StPicoBEmcPidTraits*)picoArrays[StPicoArrays::BEmcPidTraits]->UncheckedAt(i); }
   /// Return pointer to i-th btof pidTraits
   static StPicoBTofPidTraits* btofPidTraits(Int_t i) { return (StPicoBTofPidTraits*)picoArrays[StPicoArrays::BTofPidTraits]->UncheckedAt(i); }
+  /// Return pointer to i-th etof pidTraits
+  static StPicoETofPidTraits* etofPidTraits(Int_t i) { return (StPicoETofPidTraits*)picoArrays[StPicoArrays::ETofPidTraits]->UncheckedAt(i); }
   /// Return pointer to i-th mtd pidTraits
   static StPicoMtdPidTraits* mtdPidTraits(Int_t i) { return (StPicoMtdPidTraits*)picoArrays[StPicoArrays::MtdPidTraits]->UncheckedAt(i); }
   /// Return pointer to i-th track covariance matrix
@@ -100,6 +107,8 @@ class StPicoDst {
   static UInt_t numberOfBTowHits() { return picoArrays[StPicoArrays::BTowHit]->GetEntries(); }
   /// Return number of BTOF hits
   static UInt_t numberOfBTofHits() { return picoArrays[StPicoArrays::BTofHit]->GetEntries(); }
+  /// Return number of ETOF hits
+  static UInt_t numberOfETofHits() { return picoArrays[StPicoArrays::ETofHit]->GetEntries(); }
   /// Return number of MTD hits
   static UInt_t numberOfMtdHits() { return picoArrays[StPicoArrays::MtdHit]->GetEntries(); }
   /// Return number of BBC hits
@@ -112,6 +121,8 @@ class StPicoDst {
   static UInt_t numberOfBEmcPidTraits() { return picoArrays[StPicoArrays::BEmcPidTraits] ->GetEntries(); }
   /// Return number of BTOF PID traits
   static UInt_t numberOfBTofPidTraits() { return picoArrays[StPicoArrays::BTofPidTraits]->GetEntries(); }
+    /// Return number of ETOF PID traits
+  static UInt_t numberOfETofPidTraits() { return picoArrays[StPicoArrays::ETofPidTraits]->GetEntries(); }
   /// Return number of MTD traits
   static UInt_t numberOfMtdPidTraits() { return picoArrays[StPicoArrays::MtdPidTraits]->GetEntries(); }
   /// Return number of track covariance matrices
@@ -132,6 +143,8 @@ class StPicoDst {
   static void printBTowHits();
   /// Print BTOF hit info
   static void printBTofHits();
+    /// Print ETOF hit info
+  static void printETofHits();
   /// Print MTD hit info
   static void printMtdHits();
   /// Print FMS hit info
@@ -140,6 +153,8 @@ class StPicoDst {
   static void printBEmcPidTraits();
   /// Print BTOF PID trait info
   static void printBTofPidTraits();
+  /// Print ETOF PID trait info
+  static void printETofPidTraits();
   /// Print MTD PID trait info
   static void printMtdPidTraits();
 #ifdef __TFG__VERSION__

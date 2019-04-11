@@ -44,6 +44,7 @@
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuBTofHit.h"
+#include "StMuDSTMaker/COMMON/StMuETofHit.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 #include "StMuDSTMaker/COMMON/StMuMtdHit.h"
@@ -78,10 +79,12 @@
 #include "StPicoEvent/StPicoEpdHit.h"
 #include "StPicoEvent/StPicoBTowHit.h"
 #include "StPicoEvent/StPicoBTofHit.h"
+#include "StPicoEvent/StPicoETofHit.h"
 #include "StPicoEvent/StPicoMtdHit.h"
 #include "StPicoEvent/StPicoFmsHit.h"
 #include "StPicoEvent/StPicoBEmcPidTraits.h"
 #include "StPicoEvent/StPicoBTofPidTraits.h"
+#include "StPicoEvent/StPicoETofPidTraits.h"
 #include "StPicoEvent/StPicoMtdPidTraits.h"
 #include "StPicoEvent/StPicoTrackCovMatrix.h"
 #include "StPicoEvent/StPicoBEmcSmdEHit.h"
@@ -216,6 +219,7 @@ void StPicoDstMaker::streamerOff() {
   StPicoEvent::Class()->IgnoreTObjectStreamer();
   StPicoTrack::Class()->IgnoreTObjectStreamer();
   StPicoBTofHit::Class()->IgnoreTObjectStreamer();
+  StPicoETofHit::Class()->IgnoreTObjectStreamer();
   StPicoBTowHit::Class()->IgnoreTObjectStreamer();
   StPicoMtdHit::Class()->IgnoreTObjectStreamer();
   StPicoBbcHit::Class()->IgnoreTObjectStreamer();
@@ -226,6 +230,7 @@ void StPicoDstMaker::streamerOff() {
   StPicoEmcTrigger::Class()->IgnoreTObjectStreamer();
   StPicoMtdTrigger::Class()->IgnoreTObjectStreamer();
   StPicoBTofPidTraits::Class()->IgnoreTObjectStreamer();
+  StPicoETofPidTraits::Class()->IgnoreTObjectStreamer();
   StPicoBEmcPidTraits::Class()->IgnoreTObjectStreamer();
   StPicoMtdPidTraits::Class()->IgnoreTObjectStreamer();
   StPicoTrackCovMatrix::Class()->IgnoreTObjectStreamer();
@@ -302,6 +307,7 @@ Int_t StPicoDstMaker::Init() {
     openWrite();
     initEmc();
     break;
+
   case PicoIoMode::IoRead:
     openRead();
     break;
@@ -572,11 +578,11 @@ Int_t StPicoDstMaker::openRead() {
           mChain->Add(file.c_str());
           ++nFile;
         }
-	
+
         if (ftmp) ftmp->Close();
       }
     } // while (getline(inputStream, file))
-    
+
     LOG_INFO << " Total " << nFile << " files have been read in. " << endm;
   }
   else if (! gSystem->AccessPathName(dirFile.c_str()) &&
@@ -613,6 +619,7 @@ Int_t StPicoDstMaker::openRead() {
     mChain->AddBranchToCache("*");
     mPicoDst->set(mPicoArrays);
   }
+
   return kStOK;
 }
 
@@ -747,11 +754,11 @@ Int_t StPicoDstMaker::MakeRead() {
     }
 
     LOG_WARN << "Encountered invalid entry or I/O error while reading event "
-            << mEventCounter << " from \"" << mChain->GetName() << "\" input tree\n";
+	     << mEventCounter << " from \"" << mChain->GetName() << "\" input tree\n";
     bytes = mChain->GetEntry(mEventCounter++);
   }
 
- fillEventHeader();
+  fillEventHeader();
 
   return kStOK;
 }
@@ -824,9 +831,9 @@ Int_t StPicoDstMaker::MakeWrite() {
   fillTracks();
   fillEvent();
   fillEmcTrigger();
-
   fillMtdTrigger();
   fillBTofHits();
+  fillETofHits();
   fillMtdHits();
   fillEpdHits();
   fillBbcHits();
@@ -1028,7 +1035,7 @@ void StPicoDstMaker::fillTracks() {
     picoTrk->setNSigmaProton( gTrk->nSigmaProton() );
 
     // Fill topology map (3 words)
-    for(UInt_t iMap=0; iMap<3; iMap++) {
+    for(UInt_t iMap=0; iMap<StPicoTrack::eTopologyMap; iMap++) {
       picoTrk->setTopologyMap( iMap, gTrk->topologyMap().data(iMap) );
     }
 
@@ -1224,6 +1231,56 @@ void StPicoDstMaker::fillTracks() {
 #endif /* __TFG__VERSION__ */
       
     } //if (gTrk->tofHit())
+
+    // ETOF information
+    if (gTrk->etofHit()) {
+
+      // Retrieve index in the PicoETofPidTraits pico array
+      Int_t etof_index = mPicoArrays[StPicoArrays::ETofPidTraits]->GetEntries();
+      // Create new empty instance
+      new((*(mPicoArrays[StPicoArrays::ETofPidTraits]))[etof_index]) StPicoETofPidTraits();
+
+      // Return pointer to the current trait
+      StPicoETofPidTraits *etofPidTraits = (StPicoETofPidTraits*)mPicoArrays[StPicoArrays::ETofPidTraits]->At( etof_index );
+     
+      // Fill traits information:
+
+      // Fill index of the corresponding pico track
+      etofPidTraits->setTrackIndex( counter );
+
+      // Hit index is properly set later in the fillETofHits() function
+      // --> for now temporarily save the StMuTrack id that will
+      //     be used to map to the index of StPicoETofHits in the StPicoArray --
+      etofPidTraits->setHitIndex( gTrk->id() );
+
+      /*
+      StMuETofHit* hit = (StMuETofHit*) gTrk->etofHit();
+      LOG_INFO << "corresponding muHit: " << hit->sector()
+               << " " << hit->zPlane() << " " << hit->counter()
+               << " " << hit->localX() << " " << hit->localY()
+               << " " << hit->time()   << " " << hit->totalTot()
+               << endm;
+      */
+
+      // Retrive and store etof pid traits information:      
+      // Matching information
+      etofPidTraits->setMatchFlag( (UChar_t)(gTrk->etofPidTraits().matchFlag()) );
+
+      // Time-of-flight and beta
+      etofPidTraits->setTof(  gTrk->etofPidTraits().timeOfFlight() );
+      etofPidTraits->setBeta( gTrk->etofPidTraits().beta() );
+
+      // Retrieve and store position of track crossing with etof volume
+      StThreeVectorF pos = gTrk->etofPidTraits().position();
+      etofPidTraits->setCrossingPos( pos.x(), pos.y(), pos.z() );
+
+      // Retrieve and store local Y and Z coordinates
+      etofPidTraits->setDeltaX( gTrk->etofPidTraits().deltaX() );
+      etofPidTraits->setDeltaY( gTrk->etofPidTraits().deltaY() );
+
+      // Set index of the corresponding etofPidTrait to the pico track
+      picoTrk->setETofPidTraitsIndex( etof_index );
+    } //if (gTrk->etofHit())
 
     // MTD information
     if (gTrk->mtdHit()) {
@@ -1501,6 +1558,8 @@ void StPicoDstMaker::fillEvent() {
   picoEvent->setGRefMult( ev->grefmult() );
   picoEvent->setNumberOfGlobalTracks( mMuDst->numberOfGlobalTracks() );
   picoEvent->setbTofTrayMultiplicity( ev->btofTrayMultiplicity() );
+  picoEvent->setETofHitMultiplicity( ev->etofHitMultiplicity() );
+  picoEvent->setETofDigiMultiplicity( ev->etofDigiMultiplicity() );
 
   // Store number of hits in HFT
   picoEvent->setNHitsHFT( 0, ev->numberOfPxlInnerHits() );
@@ -1628,12 +1687,12 @@ void StPicoDstMaker::fillEmcTrigger() {
 
 	  // Loop over eta strips
 	  for (unsigned int i=1; i<=smde->numberOfModules(); i++) {
-
+	    
 	    StEmcModule* module = smde->module(i);
 	    StSPtrVecEmcRawHit& aHit = module->hits();
-
+	    
 	    if (aHit.size() < 1) continue;
-
+	    
 	    for (unsigned int j=0; j<aHit.size(); j++) {
 	      Int_t id = -1;
 	      Float_t smdPhi = 0.;
@@ -1655,12 +1714,12 @@ void StPicoDstMaker::fillEmcTrigger() {
 
 	  // Loop over phi strips
 	  for (unsigned int i=1; i<=smdp->numberOfModules(); i++) {
-
+	    
 	    StEmcModule* module = smdp->module(i);
 	    StSPtrVecEmcRawHit& aHit = module->hits();
-
+	    
 	    if (aHit.size() < 1) continue;
-
+	    
 	    for (unsigned int j=0; j<aHit.size(); j++) {
 	      Int_t id = -1;
 	      Float_t smdPhi = 0.;
@@ -1862,6 +1921,70 @@ void StPicoDstMaker::fillBTofHits() {
     new((*(mPicoArrays[StPicoArrays::BTofHit]))[counter]) StPicoBTofHit(cellId);
   }
 }
+
+//_________________
+void StPicoDstMaker::fillETofHits() {
+
+  std::map< Int_t, Int_t > muTrackId2picoHitIndex;
+
+  for ( size_t i = 0; i < mMuDst->numberOfETofHit(); ++i) {
+    StMuETofHit* aHit = (StMuETofHit*)mMuDst->etofHit(i);
+
+    unsigned int geomId = (aHit->sector() - 13) * 9 + (aHit->zPlane() - 1) * 3 + aHit->counter();
+
+    StPicoETofHit picoHit = StPicoETofHit();
+    picoHit.setGeomId(geomId);
+    picoHit.setLocalX(aHit->localX());
+    picoHit.setLocalY(aHit->localY());
+    picoHit.setClusterSize(aHit->clusterSize());
+    picoHit.setTime(aHit->time());
+    picoHit.setTot(aHit->totalTot());
+    /*
+    LOG_INFO << "muHit sector  = "     << aHit->sector()
+           << " zPlane  = "     << aHit->zPlane()
+           << " counter = "     << aHit->counter()
+           << " localX = "      << aHit->localX()
+           << " localY = "      << aHit->localY()
+           << " clusterSize = " << aHit->clusterSize()
+           << " time = "        << aHit->time()
+           << " tot  = "        << aHit->totalTot()
+           << endm;
+
+    picoHit.Print();
+    */
+    int counter = mPicoArrays[StPicoArrays::ETofHit]->GetEntries();
+    new((*(mPicoArrays[StPicoArrays::ETofHit]))[counter]) StPicoETofHit(picoHit);
+
+    if( aHit->associatedTrackId() > -1 ) muTrackId2picoHitIndex[ aHit->associatedTrackId() ] = counter;
+  }
+
+  //LOG_INFO << "size of muTrackId2picoHitIndex map: " << muTrackId2picoHitIndex.size() << endm;
+
+  // set the eTOF hit index of the eTOF PID traits to their proper values
+  for( size_t i = 0; i < (size_t)mPicoArrays[StPicoArrays::ETofPidTraits]->GetEntriesFast(); ++i ) {
+    StPicoETofPidTraits* etofPidTraits = (StPicoETofPidTraits*)mPicoArrays[StPicoArrays::ETofPidTraits]->At( i );
+
+    int trackId = etofPidTraits->hitIndex();
+
+    if( muTrackId2picoHitIndex.count( trackId ) ) {
+      etofPidTraits->setHitIndex( muTrackId2picoHitIndex.at( trackId ) );
+    }
+    else {
+      etofPidTraits->setHitIndex( -1 );
+    }
+    /*
+    LOG_INFO << "muPidTrait (" << i << "): trackId = " << trackId << "  hit index: " << etofPidTraits->hitIndex() << endm;
+    if(etofPidTraits->hitIndex() > -1 ) {
+      StPicoETofHit* picoHit = (StPicoETofHit*)mPicoArrays[StPicoArrays::ETofHit]->At( etofPidTraits->hitIndex() );
+
+      if( picoHit ) {
+        picoHit->Print();
+      }
+    }
+    */
+  }
+}
+
 //_________________
 void StPicoDstMaker::fillBbcHits() {
   // Retrieve pointer to StMuEvent
