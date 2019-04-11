@@ -23,7 +23,7 @@
  if ( !$OPTSTAR ) { $OPTSTAR = "/opt/star"; } # print "OPTSTAR = $OPTSTAR\n"; die;
  if ( !$XOPTSTAR or $XOPTSTAR eq '/dev/null') { $XOPTSTAR = $OPTSTAR;} # print "OPTSTAR = $OPTSTAR\n"; die;
  my $host = hostname;
- $BUILD   = "#." . $STAR_HOST_SYS; print "build for $BUILD on host $host\n" unless ($param::quiet);
+ $BUILD   = "#." . $STAR_HOST_SYS; print "build for $BUILD on host $host, STAR_OB = $STAR_OBJ, STAR_LIB = $STAR_LIB,STAR_BIN = $STAR_BIN\n" unless ($param::quiet);
  $INCLUDE = $BUILD  . "/include";
  
  @search_files = ();
@@ -223,7 +223,7 @@
  #     print "CXX = $CXX, CXXFLAGS = $CXXFLAGS, CC = $CC, CFLAGS = $CFLAGS\n";
  # print "CXXFLAGS = $CXXFLAGS --------------------------------------------------------------------------------\n";
  # print "CC = $CC CXX = $CXX FC = $FC LD = $LD\n";
- $DEBUG        = "-g";
+ $DEBUG        = "-g";# -Og"; # -fstack-protector-all -fno-omit-frame-pointer"; # add from VP. Check impact on CPU
  $FDEBUG       = $DEBUG;
  $NOOPT        = "";
  if ( defined( $ARG{NODEBUG} ) || $NODEBUG ) {

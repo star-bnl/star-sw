@@ -43,7 +43,7 @@ my  $libPrefix = "lib";
 #}
 my $DEBUG   = $env->{DEBUG};
 my $FDEBUG  = $env->{FDEBUG};
-my $NOOPTIMIZED = $DEBUG; $NOOPTIMIZED =~ s/-O2//g; $NOOPTIMIZED =~ s/-O//g; 
+my $NOOPTIMIZED = $DEBUG; #$NOOPTIMIZED =~ s/-O2//g; $NOOPTIMIZED =~ s/-O//g; 
 my $CXXFLAGS= $env->{CXXFLAGS}; #print "CXXFLAGS = $CXXFLAGS --------------------------------------------------------------------------------\n";
 my $CFLAGS  = $env->{CFLAGS};
 my $FC      = $env->{FC};

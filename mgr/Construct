@@ -47,18 +47,18 @@ if ($def->{CXX}  =~ m/-Zoi/ ){
     $LIB = $BUILD . "/GLIB";
     $BIN = $BUILD . "/GBIN";
     $OBJ = $BUILD . "/GOBJ";
-} elsif ($def->{DEBUG}  eq "-g" ) {
-    $LIB = $BUILD . "/lib";
-    $BIN = $BUILD . "/bin";
-    $OBJ = $BUILD . "/obj";
 } elsif ($def->{DEBUG}  =~ m/-O3/) {
     $LIB = $BUILD . "/LIB3";
     $BIN = $BUILD . "/BIN3";
     $OBJ = $BUILD . "/OBJ3";
-} else {
+} elsif ($def->{DEBUG}  =~ m/-O/ && ! ($def->{DEBUG}  =~ m/-Og/)) {
     $LIB = $BUILD . "/LIB";
     $BIN = $BUILD . "/BIN";
     $OBJ = $BUILD . "/OBJ";
+} else {
+    $LIB = $BUILD . "/lib";
+    $BIN = $BUILD . "/bin";
+    $OBJ = $BUILD . "/obj";
 }
 
 
