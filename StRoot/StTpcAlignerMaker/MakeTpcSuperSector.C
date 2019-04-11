@@ -115,16 +115,16 @@ Euler Rotation in Tait-Bryan angles
     xyz[0] = 1e-4*Pass.Data[i].x*scale;
     xyz[1] = 1e-4*Pass.Data[i].y*scale;
     xyz[2] = 1e-4*Pass.Data[i].z*scale;
-    //#define __SWAP_SIGNS__
+#define __SWAP_SIGNS__  /* Pass 508 */
 #ifdef __SWAP_SIGNS__
     Pass.Data[i].alpha *= -1.;
     Pass.Data[i].beta  *= -1.;
     Pass.Data[i].gamma *= -1.;
 #endif
-    //#define __ROTATION__
+#define __ROTATION__
 #ifdef __ROTATION__
-    dR[i].RotateX( TMath::RadToDeg()*Pass.Data[i].alpha*1e-3*scale);
 #if 0
+    dR[i].RotateX( TMath::RadToDeg()*Pass.Data[i].alpha*1e-3*scale);
     dR[i].RotateY( TMath::RadToDeg()*Pass.Data[i].beta*1e-3*scale); 
 #endif
     dR[i].RotateZ( TMath::RadToDeg()*Pass.Data[i].gamma*1e-3*scale);  // swap sign 03/13/19
