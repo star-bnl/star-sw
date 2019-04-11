@@ -121,6 +121,10 @@ class StPicoEvent : public TObject {
   UShort_t numberOfGlobalTracks() const;
   /// Return number of hits in TOF trays
   UShort_t btofTrayMultiplicity() const;
+  /// Return number of hits in ETOF modules
+  UShort_t etofHitMultiplicity() const;
+  /// Return number of digis in ETOF modules
+  UShort_t etofDigiMultiplicity() const;
   /// Return number of hits in the inner PXL detector
   Int_t    numberOfPxlInnerHits() const;
   /// Return number of hits in the outer PXL detector
@@ -266,6 +270,10 @@ class StPicoEvent : public TObject {
   void setNumberOfGlobalTracks(UShort_t mult);
   /// Set total number of hits in TOF trays
   void setbTofTrayMultiplicity(UShort_t mult);
+    /// Set total number of hits in ETOF modules
+  void setETofHitMultiplicity(UShort_t mult);
+      /// Set total number of digis in ETOF modules
+  void setETofDigiMultiplicity(UShort_t mult);
   /// Set number of hits in i-th HFT layers (PXL, PXL, IST, SSD)
   void setNHitsHFT(Int_t layer, UShort_t word);
 
@@ -402,6 +410,10 @@ protected:
   UShort_t mNumberOfGlobalTracks ;
   /// Total hit multiplicity in TOF trays
   UShort_t mbTofTrayMultiplicity ;
+  /// Total hit multiplicity in ETOF modules
+  UShort_t mETofHitMultiplicity ;
+    /// Total digi multiplicity in ETOF modules
+  UShort_t mETofDigiMultiplicity ;
   /// Number of hits int HFT (in each of 4 layers)
   UShort_t mNHitsHFT[4];
 
@@ -470,7 +482,7 @@ protected:
   UChar_t  mBunchCrossId;
 
 #ifdef __TFG__VERSION__
-  ClassDef(StPicoEvent, 4)
+  ClassDef(StPicoEvent, 5)
 #else /* ! __TFG__VERSION__ */
   ClassDef(StPicoEvent, 3)
 #endif /* __TFG__VERSION__ */
@@ -535,6 +547,8 @@ inline Int_t StPicoEvent::refMult4() const { return (Int_t)(mRefMult4PosEast + m
 inline Int_t StPicoEvent::grefMult() const { return (Int_t)(mGRefMult); }
 inline UShort_t StPicoEvent::numberOfGlobalTracks() const { return mNumberOfGlobalTracks; }
 inline UShort_t StPicoEvent::btofTrayMultiplicity() const { return mbTofTrayMultiplicity; }
+inline UShort_t StPicoEvent::etofHitMultiplicity() const { return mETofHitMultiplicity; }
+inline UShort_t StPicoEvent::etofDigiMultiplicity() const { return mETofDigiMultiplicity; }
 inline Int_t StPicoEvent::numberOfPxlInnerHits() const { return (Int_t)(mNHitsHFT[0]); }
 inline Int_t StPicoEvent::numberOfPxlOuterHits() const { return (Int_t)(mNHitsHFT[1]); }
 inline Int_t StPicoEvent::numberOfIstHits() const { return (Int_t)(mNHitsHFT[2]); }
@@ -623,6 +637,8 @@ inline void StPicoEvent::setRefMultHalfPosWest(UShort_t mult) { mRefMultHalfPosW
 inline void StPicoEvent::setGRefMult(UShort_t mult) { mGRefMult = (UShort_t)mult; }
 inline void StPicoEvent::setNumberOfGlobalTracks(UShort_t mult) { mNumberOfGlobalTracks = (UShort_t)mult; }
 inline void StPicoEvent::setbTofTrayMultiplicity(UShort_t mult) { mbTofTrayMultiplicity = (UShort_t)mult; }
+inline void StPicoEvent::setETofHitMultiplicity(UShort_t mult) { mETofHitMultiplicity = (UShort_t)mult; }
+inline void StPicoEvent::setETofDigiMultiplicity(UShort_t mult) { mETofDigiMultiplicity = (UShort_t)mult; }
 
 inline void StPicoEvent::setNVpdHitsEast(UShort_t nHits) { mNVpdHitsEast = (UChar_t)nHits; }
 inline void StPicoEvent::setNVpdHitsWest(UShort_t nHits) { mNVpdHitsWest = (UChar_t)nHits; };

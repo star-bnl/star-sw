@@ -18,6 +18,7 @@
 // PicoDst headers
 #include "StPicoMessMgr.h"
 #include "StPicoEvent.h"
+
 ClassImp(StPicoEvent)
 
 //_________________
@@ -36,8 +37,8 @@ StPicoEvent::StPicoEvent(): TObject(),
   mRefMult3NegEast(0), mRefMult3PosEast(0), mRefMult3NegWest(0), mRefMult3PosWest(0),
   mRefMult4NegEast(0), mRefMult4PosEast(0), mRefMult4NegWest(0), mRefMult4PosWest(0),
   mRefMultHalfNegEast(0), mRefMultHalfPosEast(0), mRefMultHalfNegWest(0), mRefMultHalfPosWest(0),
-  mGRefMult(0), mNumberOfGlobalTracks(0), mbTofTrayMultiplicity(0), mNHitsHFT{},
-  mNVpdHitsEast(0), mNVpdHitsWest(0), mNTofT0(0), mVzVpd(-999.),
+  mGRefMult(0), mNumberOfGlobalTracks(0), mbTofTrayMultiplicity(0), mETofHitMultiplicity(0),
+  mETofDigiMultiplicity(0), mNHitsHFT{}, mNVpdHitsEast(0), mNVpdHitsWest(0), mNTofT0(0), mVzVpd(-999.),
   mZDCx(0), mBBCx(0), mBackgroundRate(0), mBbcBlueBackgroundRate(0), mBbcYellowBackgroundRate(0),
   mBbcEastRate(0), mBbcWestRate(0), mZdcEastRate(0), mZdcWestRate(0),
   mZdcSumAdcEast(0), mZdcSumAdcWest(0),
@@ -95,6 +96,8 @@ StPicoEvent::StPicoEvent(const StPicoEvent &event) : TObject() {
   mGRefMult = event.mGRefMult;
   mNumberOfGlobalTracks = event.mNumberOfGlobalTracks;
   mbTofTrayMultiplicity = event.mbTofTrayMultiplicity;
+  mETofHitMultiplicity  = event.mETofHitMultiplicity;
+  mETofDigiMultiplicity = event.mETofDigiMultiplicity;
   for(int iIter=0; iIter<4; iIter++) {
     mNHitsHFT[iIter] = event.mNHitsHFT[iIter];
   }

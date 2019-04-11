@@ -16,6 +16,8 @@
 #pragma link C++ class StPicoBTowHit+;
 #pragma link C++ class StPicoBTofPidTraits+;
 #pragma link C++ class StPicoBTofHit+;
+#pragma link C++ class StPicoETofPidTraits+;
+#pragma link C++ class StPicoETofHit+;
 #pragma link C++ class StPicoBEmcPidTraits+;
 #pragma link C++ class StPicoBbcHit+;
 #pragma link C++ class StPicoTrackCovMatrix+;

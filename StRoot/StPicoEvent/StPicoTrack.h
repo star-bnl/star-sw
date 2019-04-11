@@ -43,6 +43,11 @@ class StPicoTrack : public TObject {
   virtual ~StPicoTrack();
   /// Print track parameters
   virtual void Print(const Char_t *option = "") const;
+#ifdef __TFG__VERSION__ 
+  enum {eTopologyMap = 3};
+#else /* !  __TFG__VERSION__ */
+  enum {eTopologyMap = 2};
+#endif /* __TFG__VERSION__ */
 
   //
   // Getters
@@ -141,6 +146,8 @@ class StPicoTrack : public TObject {
   Bool_t hasHft4Layers() const;
   /// Return if track has TOF hit
   Bool_t isTofTrack() const;
+  /// Return if track has ETOF hit
+  Bool_t isETofTrack() const;
   /// Return if track has BEMC hit
   Bool_t isBemcTrack() const;
   /// Return if track has MTD hit
@@ -153,6 +160,8 @@ class StPicoTrack : public TObject {
   Int_t bemcPidTraitsIndex() const;
   /// Return index to the corresponding BTOF PID trait
   Int_t bTofPidTraitsIndex() const;
+  /// Return index to the corresponding ETOF PID trait
+  Int_t eTofPidTraitsIndex() const;
   /// Return index to the corresponding MTD PID trait
   Int_t mtdPidTraitsIndex() const;
 
@@ -210,6 +219,8 @@ class StPicoTrack : public TObject {
   void setBEmcPidTraitsIndex(Int_t index);
   /// Set index to BTOF PID traits
   void setBTofPidTraitsIndex(Int_t index);
+  /// Set index to ETOF PID traits
+  void setETofPidTraitsIndex(Int_t index);
   /// Set index to MTD PID traits
   void setMtdPidTraitsIndex(Int_t index);
 
@@ -260,16 +271,18 @@ class StPicoTrack : public TObject {
   /// nSigma(electron)  (encoding = nsigma * 1000)
   Short_t  mNSigmaElectron;
   /// Toplogy Map data0 and data1. See StEvent/StTrackTopologyMap.cxx
-  UInt_t   mTopologyMap[2];
+  UInt_t   mTopologyMap[eTopologyMap];
 
   /// Index of the BEMC pidTratis in the event
   Short_t  mBEmcPidTraitsIndex;
   /// Index of the BTOF pidTratis in the event
   Short_t  mBTofPidTraitsIndex;
+  /// Index of the ETOF pidTratis in the event
+  Short_t  mETofPidTraitsIndex;
   /// Index of the MTD  pidTratis in the event
   Short_t  mMtdPidTraitsIndex;
 
-  ClassDef(StPicoTrack, 4)
+  ClassDef(StPicoTrack, 5)
 };
 
 //
@@ -277,6 +290,7 @@ class StPicoTrack : public TObject {
 //
 inline void StPicoTrack::setBEmcPidTraitsIndex(Int_t index) { mBEmcPidTraitsIndex = (Short_t)index; }
 inline void StPicoTrack::setBTofPidTraitsIndex(Int_t index) { mBTofPidTraitsIndex = (Short_t)index; }
+inline void StPicoTrack::setETofPidTraitsIndex(Int_t index) { mETofPidTraitsIndex = (Short_t)index; }
 inline void StPicoTrack::setMtdPidTraitsIndex(Int_t index) { mMtdPidTraitsIndex = (Short_t)index; }
 inline Int_t   StPicoTrack::id() const { return mId; }
 inline Float_t StPicoTrack::chi2() const { return mChi2 / 1000.f; }
@@ -308,6 +322,7 @@ inline Float_t StPicoTrack::nSigmaElectron() const { return (Float_t)mNSigmaElec
 inline UInt_t  StPicoTrack::topologyMap(UInt_t idx) const { return mTopologyMap[idx]; }
 inline Int_t   StPicoTrack::bemcPidTraitsIndex() const { return mBEmcPidTraitsIndex; }
 inline Int_t   StPicoTrack::bTofPidTraitsIndex() const { return mBTofPidTraitsIndex; }
+inline Int_t   StPicoTrack::eTofPidTraitsIndex() const { return mETofPidTraitsIndex; }
 inline Int_t   StPicoTrack::mtdPidTraitsIndex() const { return mMtdPidTraitsIndex; }
 inline Bool_t  StPicoTrack::hasPxl1Hit() const { return hftHitsMap() >> 0 & 0x1; }
 inline Bool_t  StPicoTrack::hasPxl2Hit() const { return hftHitsMap() >> 1 & 0x3; }
@@ -320,6 +335,7 @@ inline Bool_t  StPicoTrack::hasHft4Layers() const {
   return hasPxl1Hit() && hasPxl2Hit() && hasIstHit() && hasSstHit();
 }
 inline Bool_t  StPicoTrack::isTofTrack() const { return (mBTofPidTraitsIndex<0) ? false : true; }
+inline Bool_t  StPicoTrack::isETofTrack() const { return (mETofPidTraitsIndex<0) ? false : true; }
 inline Bool_t  StPicoTrack::isBemcTrack() const { return (mBEmcPidTraitsIndex<0) ? false : true; }
 inline Bool_t  StPicoTrack::isMtdTrack() const { return (mMtdPidTraitsIndex<0) ? false : true; }
 inline Bool_t  StPicoTrack::isPrimary() const { return ( pMom().Mag()>0 ); }
