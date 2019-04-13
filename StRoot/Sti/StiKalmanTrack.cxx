@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.165 2018/11/27 20:21:57 smirnovd Exp $
- * $Id: StiKalmanTrack.cxx,v 2.165 2018/11/27 20:21:57 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.166 2019/04/13 02:11:27 genevb Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.166 2019/04/13 02:11:27 genevb Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.166  2019/04/13 02:11:27  genevb
+ * Remove swimming through hit-less TPC layers in initialize0 importing StiCA seeds (resolves RT3388)
+ *
  * Revision 2.165  2018/11/27 20:21:57  smirnovd
  * Correct indentation, white space, and comments
  *
@@ -769,50 +772,14 @@ int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *f
   const StiDetector* detector=0;
   UInt_t nhits = hits.size();
   setSeedHitCount(nhits);
-  StiDetectorContainer    *detectorContainer = StiToolkit::instance()->getDetectorContainer();
-  const StiDetector* detectorOld = 0;
-  StiHit *hit_Old = 0;
 
   for (UInt_t ihit = 0; ihit < nhits; ihit++)  {
     StiHit *hit = hits[ihit];
-
     detector = hit->detector();
     assert(detector);
-    // look for gaps in hit list
-    if (hit_Old && detector->getGroupId() == kTpcId) {
-      Double_t R_hit = detector->getPlacement()->getNormalRadius();
-      Double_t angle_hit = detector->getPlacement()->getNormalRefAngle();
-      detectorOld = hit_Old->detector();
-      Double_t R_hit_OLD = detectorOld->getPlacement()->getNormalRadius();
-      if (_debug && detectorOld == detector) {
-	cout << "The same detector for hit " << ihit << endl;
-	cout << "hit     \t" << *hit << endl;
-	if (hit_Old) 
-	  cout << "hitOld\t" << *hit_Old << endl;
-      }
-      Double_t angle_hit_OLD = detectorOld->getPlacement()->getNormalRefAngle();
-      if (TMath::Abs(angle_hit - angle_hit_OLD) < TMath::DegToRad()*5) { // the same sector
-	while ((R_hit < R_hit_OLD)) {
-	  detectorContainer->setToDetector( detectorOld );
-	  if ( detectorContainer->moveIn()) {
-	    StiDetector* d = detectorContainer->getCurrentDetector(); //**detectorContainer;
-	    if (d == detector) break;
-	    detectorOld = d;
-	    R_hit_OLD = detectorOld->getPlacement()->getNormalRadius();
-	    if (detectorOld->isActive()) {
-	      StiKalmanTrackNode * nI = trackNodeFactory->getInstance();
-	      nI->initialize(d);
-	      add(nI,kOutsideIn);
-	    }
-	  }
-	}
-      }
-    }
     StiKalmanTrackNode * n = trackNodeFactory->getInstance();
     n->initialize(hit);
     add(n,kOutsideIn);
-    detectorOld = (StiDetector*) detector;
-    hit_Old = hit;
   }  
   if (!firstPars)	{approx(); return 0;}
   else 			{firstNode->fitPars() = *firstPars;}
