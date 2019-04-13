@@ -152,15 +152,15 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
 
 //{"y2015x",      20141215,     0, "y2015x",   "y2015x asymptotic geometry with IST overlap correction, AgML,xgeometry"},
 //{"y2015a",      20141215,     1, "y2015a",   "y2015a production geometry, AgML,xgeometry"},
-  {"y2015b",      20141215,     2, "y2015b",   "y2015b production geometry with MTD radii corrections, AgML,xgeometry"},
-  {"y2015c",      20141215,     3, "y2015c",   "y2015c production geometry with MTD revised radii corrections, AgML,xgeometry"},
+//{"y2015b",      20141215,     2, "y2015b",   "y2015b production geometry with MTD radii corrections, AgML,xgeometry"},
+//{"y2015c",      20141215,     3, "y2015c",   "y2015c production geometry with MTD revised radii corrections, AgML,xgeometry"},
   {"y2015",       20141215,     4, "y2015d",   "y2015d production geometry with IST overlap correction, AgML,xgeometry"},
   {"y2015d",      20141215,     4, "y2015d",   "y2015d production geometry with IST overlap correction, AgML,xgeometry"},
 //{"y2015x",      20141215,120000, "y2015x",   "y2015d production geometry with IST overlap correction, AgML,xgeometry"},
   {"r2015",       20141220,     4, "y2015d",   "y2015d production geometry with IST overlap correction, AgML,xgeometry"},
 
 //{"y2016x",      20151215,     0, "y2016x",   "y2016 asymptotic geometry, AgML,xgeometry"},   // dev2016 is deprecated for reco
-  {"y2016",       20151215,     0, "y2016",    "y2016 development geometry, AgML,xgeometry"},   // dev2016 is deprecated for reco
+//{"y2016",       20151215,     0, "y2016",    "y2016 development geometry, AgML,xgeometry"},   // dev2016 is deprecated for reco
   {"y2016a",      20151215,     1, "y2016a",   "y2016 production geometry, AgML,xgeometry"},   // dev2016 is deprecated for reco
 //{"y2016x",      20151215,120000, "y2016x",   "y2016 production geometry, AgML,xgeometry"},   // dev2016 is deprecated for reco
   {"r2016",       20151220,     0, "y2016",    "y2016 development geometry, AgML,xgeometry"},   // dev2016 is deprecated for reco
@@ -221,8 +221,8 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
 //{"dev14",       20200102,    21, "dev14",    "dev geo for 2014,AgML,xgeometry"},  
 //{"eStar2",      20200102,    22, "eStar2",   "dev geometry for eStar"},
 // eStar simulations starting w/ timestamp 12/10/2020
-  {"eStar2",      20201210,     0, "eStar2",   "dev geometry for eStar,AgML,xgeometry"},
-  {"dev2020",     20201210,     1, "dev2020",  "development geometry for 2020+,AgML,xgeometry"},
+//{"eStar2",      20201210,     0, "eStar2",   "dev geometry for eStar,AgML,xgeometry"},
+//{"dev2020",     20201210,     1, "dev2020",  "development geometry for 2020+,AgML,xgeometry"},
 
   {0,                    0,     0,        0,    0}
 };
