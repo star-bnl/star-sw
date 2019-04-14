@@ -269,7 +269,7 @@ void StKFParticleAnalysisMaker::BookVertexPlots()
   PrintMem(dirs[1]->GetPath());
   
   fStKFParticleInterface = new StKFParticleInterface;
-  for(int iDecay=0; iDecay<fDecays.size(); iDecay++)
+  for(UInt_t iDecay=0; iDecay<fDecays.size(); iDecay++)
     fStKFParticleInterface->AddDecayToReconstructionList( fDecays[iDecay] );
   bool storeMCHistograms = false;
   if(!fIsPicoAnalysis && fProcessSignal) storeMCHistograms = true;
@@ -438,7 +438,7 @@ Int_t StKFParticleAnalysisMaker::Make()
             fStKFParticleInterface->RemoveParticle(iParticle);
         }
         
-        float l = sqrt(particle.X()*particle.X() + particle.Y()*particle.Y() + particle.Z()*particle.Z());
+	//        float l = sqrt(particle.X()*particle.X() + particle.Y()*particle.Y() + particle.Z()*particle.Z());
         float r = sqrt(particle.X()*particle.X() + particle.Y()*particle.Y());
         if(r > 50)// || (r>2.5 && r<3.6) || (r>7.5&&r<8.8))
           fStKFParticleInterface->RemoveParticle(iParticle);
