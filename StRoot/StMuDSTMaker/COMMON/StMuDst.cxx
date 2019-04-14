@@ -65,7 +65,7 @@ Double_t StMuDst::fgdca3Dmax = 0; // 50 cm
 Double_t StMuDst::fgVxXmin = 0, StMuDst::fgVxXmax = 0, StMuDst::fgVxYmin = 0, StMuDst::fgVxYmax = 0;
 Double_t StMuDst::fgVxZmin = 0, StMuDst::fgVxZmax = 0, StMuDst::fgVxRmax = 0;
 PicoVtxMode StMuDst::mVtxMode = NotSet; // This should always be ::NotSet, do not change it, see ::Init()
-Float_t   StMuDst::mTpcVpdVzDiffCut = 3;
+Float_t   StMuDst::mTpcVpdVzDiffCut = 6;
 //#define __HIST_PV__
 #ifdef __HIST_PV__
 static TH1F *hists[3] = {0};
