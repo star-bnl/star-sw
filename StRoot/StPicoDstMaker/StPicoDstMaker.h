@@ -226,16 +226,15 @@ class StPicoDstMaker : public StMaker {
   Int_t  setCovMtxModeAttr();
   /// Set BEmc Smd mode attributes
   Int_t  setBEmcSmdModeAttr();
-
+#ifdef __TFG__VERSION__
   /// Selects a primary vertex from `muDst` vertex collection according to the
   /// vertex selection mode `mVtxMode` specified by the user.
-#ifdef __TFG__VERSION__
     Bool_t selectVertex() {return StMuDst::instance()->selectVertex();}
 #else /* ! __TFG__VERSION__ */
   Bool_t selectVertex();
-#endif /* __TFG__VERSION__ */
   /// VpdVz-Vz cut value. Default is 5 cm.
   Float_t   mTpcVpdVzDiffCut;
+#endif /* __TFG__VERSION__ */
 
   /// A pointer to the main input source containing all muDst `TObjArray`s
   /// filled from corresponding muDst branches

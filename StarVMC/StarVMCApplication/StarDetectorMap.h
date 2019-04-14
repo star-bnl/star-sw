@@ -361,6 +361,8 @@ static const StarDetectorMap_t Detectors[] = {
   {kTpcId     		 ,"tpc","TPCE","tpad","g2t_tpc_hit","g2t_tpc_hit","StTpcHitCollection"},
   {kTpcId     		 ,"tpc","TPCE","TPAD","g2t_tpc_hit","g2t_tpc_hit","StTpcHitCollection"},
   {kUnknownId            ,"vpd","VPDD","VRAD","g2t_vpd_hit","g2t_vpd_hit",""},                      // light-producing layer (scintillator or quartz) 
+  {kETofId               ,"eto","ETOF","ECEL","g2t_ctf_hit","g2t_eto_hit","StETofCollection"},                      
+  {kEpdId                ,"epd","EPDM","EPDT","g2t_ctf_hit","g2t_epd_hit","StEpdCollection"},                      
   {kZdcWestId            ,"zdc","ZCAL","QSCI","g2t_emc_hit","g2t_zdc_hit",""}                       // sensitive Fiber layer 
 };
 static const Int_t NoDetectors = sizeof(Detectors)/sizeof(StarDetectorMap_t);

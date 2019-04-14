@@ -177,6 +177,7 @@ StVertex::positionError() const
 }
 
 void StVertex::setParent(StTrackMassFit* val) { 
+  assert(! mParent);
   mParent = val; 
   StTrackMassFit *mKFVertex = parent();
   if (mKFVertex) {

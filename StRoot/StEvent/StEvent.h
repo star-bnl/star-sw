@@ -318,6 +318,7 @@ public:
     unsigned int                        numberOfPrimaryVertices() const;
     StPrimaryVertex*                    primaryVertex(unsigned int = 0);
     const StPrimaryVertex*              primaryVertex(unsigned int = 0) const;
+    void                                sortVerticiesByRank();
 
     unsigned int                        numberOfCalibrationVertices() const;
     StCalibrationVertex*                calibrationVertex(unsigned int);

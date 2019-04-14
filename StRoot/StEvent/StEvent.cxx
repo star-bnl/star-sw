@@ -248,7 +248,7 @@
 #include "StGmtCollection.h"
 #include "StTrackNode.h"
 #include "StTrack.h"
-
+#include "Stiostream.h"
 #ifndef ST_NO_NAMESPACES
 using std::swap;
 #endif
@@ -1432,7 +1432,35 @@ StEvent::addPrimaryVertex(StPrimaryVertex* vertex, StPrimaryVertexOrder order)
         break;
     }
 }
-
+//________________________________________________________________________________
+void StEvent:: sortVerticiesByRank() {
+  StSPtrVecPrimaryVertex* vertexVector = 0;
+  _lookupOrCreate(vertexVector, mContent);
+  /* procedure bubbleSort( (*vertexVector) : list of sortable items ) */
+  UInt_t N =vertexVector->size();
+  UInt_t n = N;
+  Bool_t swapped = kFALSE;
+  do {
+    swapped = kFALSE;
+#if 0
+    for (UInt_t i = 0; i < N; i++) {
+      cout << "\trank[" << i << "] = " << (*vertexVector)[i]->ranking();
+    }
+    cout << endl;
+#endif
+    for (UInt_t i = 0; i < n-1; i++) {
+#if 0
+      cout << "i\t" << i << " rang[i] = " << (*vertexVector)[i]->ranking() << " rank[i+1] = " << (*vertexVector)[i+1]->ranking() << endl;
+#endif
+      if ((*vertexVector)[i]->ranking() < (*vertexVector)[i+1]->ranking())  {
+	swap((*vertexVector)[i], (*vertexVector)[i+1]);
+	swapped = kTRUE;
+      }
+    }
+    n = n - 1;
+  } while (swapped);
+}
+//________________________________________________________________________________
 void
 StEvent::addCalibrationVertex(StCalibrationVertex* vertex)
 {

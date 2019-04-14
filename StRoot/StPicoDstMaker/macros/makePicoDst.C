@@ -28,7 +28,7 @@
 #else
 class StGoodTrigger;
 #endif 
-void makePicoDst(TString triggerSet = "y2016") {
+void makePicoDst(TString triggerSet = "y2019") {
   Int_t nEvents = 10000000;
   StBFChain *chain = (StBFChain *) StMaker::GetTopChain();
   StMuDstMaker *MuDstMaker = (StMuDstMaker *) chain->Maker("MuDst");
@@ -50,11 +50,11 @@ void makePicoDst(TString triggerSet = "y2016") {
   StMaker *tpcDB = chain->Maker("tpcDB");
   tpcDB->SetActive(kFALSE);
   StPicoDstMaker *PicoDstMaker = (StPicoDstMaker *) chain->Maker("PicoDst");
-  if (triggerSet.Contains("y2010",TString::kIgnoreCase) || triggerSet.Contains("y2011",TString::kIgnoreCase)) {
-    PicoDstMaker->SetVxZrange(-70,70);
-    PicoDstMaker->SetVxRmax(2);
-  } else if (triggerSet.Contains("y2014",TString::kIgnoreCase) || triggerSet.Contains("y2016",TString::kIgnoreCase)) {
+  if (triggerSet.Contains("y2014",TString::kIgnoreCase) || triggerSet.Contains("y2016",TString::kIgnoreCase)) {
     PicoDstMaker->SetVxZrange(-6,6);
+    PicoDstMaker->SetVxRmax(2);
+  } else {
+    PicoDstMaker->SetVxZrange(-70,70);
     PicoDstMaker->SetVxRmax(2);
   }
   PicoDstMaker->SetMaxTrackDca(0);

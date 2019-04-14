@@ -1497,6 +1497,8 @@ replace [exe BTOFc7;] with [;" F.Geurts";BTOF=on; BtofConfig=12; Itof=7 " call b
 
 replace [exe BTOFv8;] with [;BTOF=on; BtofConfig=13; Itof=8 "call btofgeo8";]
 replace [exe ETOF;] with [;ETOF=on; EtofConfig=1;  "call etofgeo0";]
+replace [exe TARG;] with [;TARG=on; TargConfig=1;  "call TargGeo";]
+replace [exe EPDM;] with [;EPDM=on; EpdmConfig=1;  "call epdmgeo0";]
 """ ----------------------------------------------------------------------- """
 """ TPC Configurations                                                      """
 """     Naming convention is offset by 1 from the corresponding module.     """
@@ -1628,6 +1630,7 @@ replace [exe ITSPof;] with  [;ITSP=off;] "prototype of the Inner Tracker SuPport
 replace [exe FHCM01;] with  [;FhcmConfig=1;] 
 
 
+replace [exe EIDDv01;] with [;EiddConfig=1; EIDD=on; ]
 replace [exe EIDDv01;] with [;EiddConfig=1; EIDD=on; ]
 
 
@@ -2690,35 +2693,30 @@ REPLACE [exe y2018;] with ["Y2018 development tag";
     exe HCALv1;      "HCAL prototype";
 
 ];    
-
 REPLACE [exe y2019;] with ["Y2019 development tag";
+*                                          
+* yCaveGeo3 xUpstGeo xShldGeo xZcalGeo xSconGeo xPipeGeo xTargGeo xTpceGeo5a xBtofGeo8 xVpddGeo3 xCalbGeo2 xEcalGeo6 xBbcmGeo xEpdmGeo0 xMagpGeo xMutdGeo7 xEtofGeo0
+
     exe TPCE05rY;   "Y : TPC upgrade studies 40 inner pad rows 0.500 x 1.60"; 
     exe BTOFv8;      "time of flight";
-    exe ETOF;        "EToF"	
+    exe ETOF;        "EToF";
     exe CALB02;      "updated bemc model";
     exe ECALv6;      "several bugfixes in eemc geometry";
     exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
     exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
     exe BBCMon;      "beam beam counters";
-    exe FPDM03;      "Latest version of VPD";
-    exe VPDD07;      "Latest version of VPD";
+    exe VPDD08;      "Latest version of VPD";
     exe FTPCof;      "no FTPC";
     exe SVTTof;      "No SVT";
     exe SISDof;      "No sisd";
     exe PHMDof;      "Photon mult detector off";
-    exe MUTD14;      "Muon telescope detector";
+    exe MUTD16;      "Muon telescope detector";
     exe CAVE05;      "Cave and tunnel";
     exe PIPE12;      "The beam pipe";
-*   exe IDSM14;      "Inner detector support";
-*    exe SISD85;      "SSD version 7"
-*    exe PIPEv3;      "The small diameter beam pipe";
-*    exe ISTD02;      "IST version 2";
-*    exe PXST01;      "PIXEL detector support version 1";
-*    exe PIXL06;      "Full config of the pixl detector";
-*    exe DTUB01;      "DTUB";
-*    exe PSUP01;      "1st version of pixl supports";
-*    exe FGTDv56;     "12 disk FGT";
-    exe HCALv1;      "HCAL prototype";
+    exe TARG;
+    exe EPDM;
+*    call MagpGeo;
+
 ];
 
 REPLACE [exe dev2020;] with ["DEV 2020 first cut";
@@ -2957,7 +2955,7 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               PIXL,ISTB,GEMB,FSTD,FTRO,FGTD,
               SHLD,QUAD,MUTD,IGTD,HPDT,ITSP,
               DUMM,SCON,IDSM,FSCE,EIDD,ISTD,
-              PXST,PSUP,HCAL,FTSD,ETOF
+              PXST,PSUP,HCAL,FTSD,ETOF,TARG,EPDM
 
 
 * Qualifiers:  TPC        TOF         etc
@@ -2994,7 +2992,8 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               FgtdConfig, TpceConfig, PhmdConfig, SvshConfig, SupoConfig, FtpcConfig, CaveConfig,
               ShldConfig, QuadConfig, MutdConfig, HpdtConfig, IgtdConfig, MfldConfig, EcalConfig,
               FhcmConfig, RmaxConfig, IdsmConfig, FsceConfig, EiddConfig, TpcxConfig, TpadConfig,
-              IstdConfig, PxstConfig, MagpConfig, HcalConfig, FtsdConfig, EtofConfig
+              IstdConfig, PxstConfig, MagpConfig, HcalConfig, FtsdConfig, EtofConfig, TargConfig, EpdmConfig
+              
 
    Integer                                        VpddModule/0/
 
@@ -3752,7 +3751,7 @@ If LL>0
   {PIPE,SVTT,SISD,TPCE,FTPC,BTOF,ETOF,VPDD,MAGP,CALB,ECAL,UPST,
    RICH,ZCAL,MFLD,BBCM,FPDM,PHMD,PIXL,ISTB,GEMB,FSTD,FTRO,FGTD,
    SHLD,QUAD,MUTD,IGTD,HPDT,ITSP,DUMM,SCON,IDSM,FSCE,EIDD,ISTD, 
-   PXST,PSUP,HCAL}=off;
+   PXST,PSUP,HCAL,TARG,EPDM}=off;
 
    MFLD = on;
    exe CAVE04
@@ -5316,6 +5315,20 @@ c    write(*,*) 'BTOF'
 *     call AgDETP add ('etog.choice=',EtofConfig,1)
 *     CONSTRUCT etofgeo0; }
 *}
+* - targ system should be on (for year 19):      DETP BTOF BTOG.choice=2
+   If (TARG) { CONSTRUCT targgeo0; }
+*    write(*,*) 'TARG'
+*     call AgDETP new ('TARG')
+*     call AgDETP add ('etog.choice=',TargConfig,1)
+*     CONSTRUCT targgeo0; }
+*}
+* - epdm system should be on (for year 19):      DETP BTOF BTOG.choice=2
+   If (EPDM) { CONSTRUCT epdmgeo0; }
+*    write(*,*) 'EPDM'
+*     call AgDETP new ('EPDM')
+*     call AgDETP add ('etog.choice=',EpdmConfig,1)
+*     CONSTRUCT epdmgeo0; }
+*}
 
    Call AGSFLAG('SIMU',1)
 
@@ -5480,7 +5493,7 @@ c          write(*,*) '************** Creating the 2007-     version of the Barr
      IF MutdConfig=1 { CONSTRUCT mutdgeo; }
      IF MutdConfig=2 { CONSTRUCT mutdgeo2;}
      IF MutdConfig=3 { CONSTRUCT mutdgeo3;}
-     IF MutdConfig=4 | MutdConfig=5 | MutdConfig=12 | MutdConfig=13 
+     IF MutdConfig=4 | MutdConfig=5 | MutdConfig=12 | MutdConfig=13
      { 
          Call AgDetp ADD( 'MTDG.config=', MutdConfig, 1);   
          CONSTRUCT mutdgeo4;

@@ -133,6 +133,11 @@
  */
 #define kETofIdentifier               40
 
+/*
+ ** Epd
+ */
+#define kEpdIdentifier                41
+
 
 /*
 **  The following are more or less virtual detectors.

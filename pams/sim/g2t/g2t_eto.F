@@ -20,22 +20,17 @@
          i=i+1
          g2t_ctf_hit_h.nok            = i
          g2t_ctf_hit(i).id            = i
-
-*
-* always fill the local position of hit, regardless of the value of "Idigi"
-*
-         g2t_ctf_hit(i).x(1)        = x(1)
-         g2t_ctf_hit(i).x(2)        = x(2)
-         g2t_ctf_hit(i).x(3)        = x(3)
-*         g2t_ctf_hit(i).xx(1)       = xx(1)
-*         g2t_ctf_hit(i).xx(2)       = xx(2)
-*         g2t_ctf_hit(i).xx(3)       = xx(3)
-
          If (local) then
+           g2t_ctf_hit(i).x(1)        = x(1)
+           g2t_ctf_hit(i).x(2)        = x(2)
+           g2t_ctf_hit(i).x(3)        = x(3)
            g2t_ctf_hit(i).p(1)        = c(1)*p(4)
            g2t_ctf_hit(i).p(2)        = c(2)*p(4)
            g2t_ctf_hit(i).p(3)        = c(3)*p(4)
          else
+           g2t_ctf_hit(i).x(1)        = xx(1)
+           g2t_ctf_hit(i).x(2)        = xx(2)
+           g2t_ctf_hit(i).x(3)        = xx(3)
            g2t_ctf_hit(i).p(1)        = p(1)
            g2t_ctf_hit(i).p(2)        = p(2)
            g2t_ctf_hit(i).p(3)        = p(3)
@@ -49,7 +44,7 @@
 *
 *                  add to track linked list 
 *
-*        g2t_ctf_hit(i).next_tr_hit_p = g2t_track(trac).hit_eto_p
+         g2t_ctf_hit(i).next_tr_hit_p = g2t_track(trac).hit_eto_p
          g2t_track(trac).hit_eto_p    = i
          g2t_track(trac).n_eto_hit    = g2t_track(trac).n_eto_hit + 1
 

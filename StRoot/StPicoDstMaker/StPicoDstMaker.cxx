@@ -108,7 +108,9 @@ StPicoDstMaker *StPicoDstMaker::fgPicoDstMaker = 0;
 //_________________
 StPicoDstMaker::StPicoDstMaker(char const* name) :
   StMaker(name),
+#ifndef __TFG__VERSION__
   mTpcVpdVzDiffCut(6.),
+#endif /* !__TFG__VERSION__ */
   mMuDst(nullptr), mPicoDst(new StPicoDst()),
   mEmcCollection(nullptr), mEmcPosition(nullptr),
   mEmcGeom{}, mEmcIndex{},
@@ -331,15 +333,18 @@ Int_t StPicoDstMaker::Init() {
 #endif /* __TFG__VERSION__ */
   return kStOK;
 }
-
 //_________________
 Int_t StPicoDstMaker::setVtxModeAttr(){
 
   //Read the Tpc-Vpd cut from the input
   Float_t cut = DAttr("TpcVpdVzDiffCut");
+#ifdef __TFG__VERSION__
+  if ( cut != 0.0)  StMuDst::instance()->SetTpcVpdVzDiffCut(cut);
+  LOG_INFO << " StMuDst::instance()->TpcVpdVzDiffCut() = " << StMuDst::instance()->TpcVpdVzDiffCut() << endm;
+#else /*! __TFG__VERSION__ */
   if ( cut != 0.0)  mTpcVpdVzDiffCut = cut;
   LOG_INFO << " mTpcVpdVzDiffCut = " << mTpcVpdVzDiffCut << endm;
-
+#endif /* __TFG__VERSION__ */
   if (strcasecmp(SAttr("PicoVtxMode"), "PicoVtxDefault") == 0) {
     setVtxMode(PicoVtxMode::Default);
     LOG_INFO << " PicoVtxDefault is being used " << endm;
@@ -358,7 +363,6 @@ Int_t StPicoDstMaker::setVtxModeAttr(){
 
   return kStErr;
 }
-
 //_________________
 Int_t StPicoDstMaker::setCovMtxModeAttr() {
 
@@ -1929,7 +1933,7 @@ void StPicoDstMaker::fillETofHits() {
 
   for ( size_t i = 0; i < mMuDst->numberOfETofHit(); ++i) {
     StMuETofHit* aHit = (StMuETofHit*)mMuDst->etofHit(i);
-
+    if (! aHit) continue;
     unsigned int geomId = (aHit->sector() - 13) * 9 + (aHit->zPlane() - 1) * 3 + aHit->counter();
 
     StPicoETofHit picoHit = StPicoETofHit();
@@ -1963,7 +1967,7 @@ void StPicoDstMaker::fillETofHits() {
   // set the eTOF hit index of the eTOF PID traits to their proper values
   for( size_t i = 0; i < (size_t)mPicoArrays[StPicoArrays::ETofPidTraits]->GetEntriesFast(); ++i ) {
     StPicoETofPidTraits* etofPidTraits = (StPicoETofPidTraits*)mPicoArrays[StPicoArrays::ETofPidTraits]->At( i );
-
+    
     int trackId = etofPidTraits->hitIndex();
 
     if( muTrackId2picoHitIndex.count( trackId ) ) {
@@ -2207,7 +2211,13 @@ bool StPicoDstMaker::selectVertex() {
         if (!vtx) continue;
 
 	// Check TpcVz and VpdVz difference
-        if (fabs(vzVpd - vtx->position().z()) < mTpcVpdVzDiffCut) {
+        if (fabs(vzVpd - vtx->position().z()) < 
+#ifdef __TFG__VERSION__
+	    StMuDst::instance()->TpcVpdVzDiffCut()
+#else
+	    mTpcVpdVzDiffCut
+#endif 
+	    ) {
           mMuDst->setVertexIndex(iVtx);
           selectedVertex = mMuDst->primaryVertex();
           break;
