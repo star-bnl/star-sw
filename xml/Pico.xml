@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="10" fileListSyntax="paths" simulateSubmission ="false"> 
+<!-- <job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="paths"> -->
+	<command>
+         cd ${SUBMITTINGDIRECTORY}
+  setenv STARFPE NO
+#  setenv NODEBUG yes
+#  setup 64b
+#  starver TFG19d
+#  ln -s ${SUBMITTINGDIRECTORY}/StarDb .
+  ln -s ~/macros/.sl* .
+  foreach  dir(`cat $FILELIST`) 
+#  set dir = $INPUTFILE0;
+  echo "${dir}"
+  if (! -d ${dir}) continue;
+  set file     = `basename $dir`
+  set logFile  = ${file}B.log
+  if ( -r ${SUBMITTINGDIRECTORY}/$logFile) continue;
+  set output = ${file}.root
+  root.exe -q -b lMuDst.C 'Pico.C+("'${dir}'/*.picoDst.root","'${output}'")' &gt;&amp;  ${logFile}
+  mv ${file}* ${SUBMITTINGDIRECTORY}/
+  end
+
+	</command>
+	<stdout URL="file:./sched$JOBID.log" />
+	<stderr URL="file:./sched$JOBID.err" />
+<input URL="command:lsdir.pl" />
+<!-- <input URL="command:CosmicsAnalysis.pl" /> -->
+<!-- <input URL="command:EandBSample.pl" /> -->
+<!-- <input URL="file:/gpfs01/star/pwg/iraklic/iTPC/Cosmics/Cosmics2018/*event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/Alignment/Y201?RC.E/*event.root" /> -->
+<!-- <input URL="file:x/gpfs01/star/subsys-tpc/fisyak/Tpc/Alignment/Y2011RC.E/st_tofcosmic_12*event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/Alignment/Y2011RC.F/st_tofcosmic_12*event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/Alignment/Y2010RC.E/st_tofcosmic_11159008_raw_2020001_25001.event.root" />  -->
+<!-- <input URL="file:/star/data06/TPCCalib/Y2011RC.G/FF/*1_50000.event.root" /> -->
+<!--  <input URL="file:/star/data06/TPCCalib/Y2011RC.G/ZeroF/*.event.root" />  -->
+<!-- <input URL="file:/star/data06/TPCCalib/Y2011RC.G/RFF/*.event.root" />  -->
+<!-- <input URL="file:/star/data06/TPCCalib/Y2011RC.G/FF/*.event.root" /> -->
+</job>
