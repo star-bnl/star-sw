@@ -1191,6 +1191,46 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
       //      LOG_QA << Form("# BTof   hits:%5i: Matched with tracks:%5i",n,m) << endm; 
     }
   }
+  const StETofCollection* etof = event->etofCollection();
+  if (etof) {
+    const StSPtrVecETofHit& etofHits = etof->etofHits();
+    if (etofHits.size()) {
+      Int_t n = etofHits.size();
+      //      Int_t m = 0;
+      TotalNoOfHits = noBadHits = noHitsUsedInFit = TotalNoOfMcHits = noMcHitsUsedInFit = 0;
+      for(Int_t i=0;i<n;i++) { //loop on hits in modules
+	StETofHit *aHit = etofHits[i];
+	if(!aHit) continue;
+	TotalNoOfHits++;
+	if (aHit->associatedTrack()) noHitsUsedInFit++;
+	if (aHit->idTruth()) {
+	  TotalNoOfMcHits++;
+	  if (aHit->associatedTrack()) noMcHitsUsedInFit++;
+	}
+      }
+      PrintHitCounts("ETof",TotalNoOfHits, noBadHits, noHitsUsedInFit,  TotalNoOfMcHits, noMcHitsUsedInFit, " Matched with tracks");
+      //      LOG_QA << Form("# BTof   hits:%5i: Matched with tracks:%5i",n,m) << endm; 
+    }
+  }
+  const StEpdCollection* epd = event->epdCollection();
+  if (epd) {
+    const StSPtrVecEpdHit& epdHits = epd->epdHits();
+    if (epdHits.size()) {
+      Int_t n = epdHits.size();
+      //      Int_t m = 0;
+      TotalNoOfHits = noBadHits = noHitsUsedInFit = TotalNoOfMcHits = noMcHitsUsedInFit = 0;
+      for(Int_t i=0;i<n;i++) { //loop on hits in modules
+	StEpdHit *aHit = epdHits[i];
+	if(!aHit) continue;
+	TotalNoOfHits++;
+	if (aHit->idTruth()) {
+	  TotalNoOfMcHits++;
+	}
+      }
+      PrintHitCounts("Epd",TotalNoOfHits, noBadHits, noHitsUsedInFit,  TotalNoOfMcHits, noMcHitsUsedInFit, " Matched with tracks");
+      //      LOG_QA << Form("# BTof   hits:%5i: Matched with tracks:%5i",n,m) << endm; 
+    }
+  }
   const StMtdCollection* mtd = event->mtdCollection();
   if (mtd) {
     const StSPtrVecMtdHit& mtdHits = mtd->mtdHits();
