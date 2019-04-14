@@ -9,7 +9,6 @@
 #include "tables/St_g2t_hits_Table.h"     /* Done */
 #include "tables/St_g2t_ctf_hit_Table.h"  /* Done */
 #include "tables/St_g2t_emc_hit_Table.h"  /* Done */
-#include "tables/St_g2t_epd_hit_Table.h"  /* done */
 #include "tables/St_g2t_etr_hit_Table.h"  /* done */
 #include "tables/St_g2t_fgt_hit_Table.h"  /* Done */
 #include "tables/St_g2t_fst_hit_Table.h"  /* done */
@@ -79,14 +78,6 @@ class St_g2t_emc_hitC : public St_g2t_Chair	{
   virtual void    Fill(GHit_t &vect); 
   ClassDefChair(St_g2t_emc_hit,g2t_emc_hit_st)
   ClassDef(St_g2t_emc_hitC,1)
-};
-class St_g2t_epd_hitC : public St_g2t_Chair	{    
- public: 
-  St_g2t_epd_hitC(TTable *table=0): St_g2t_Chair(table) {}
-  virtual ~St_g2t_epd_hitC() {}
-  virtual void    Fill(GHit_t &vect); 
-  ClassDefChair(St_g2t_epd_hit,g2t_epd_hit_st)
-  ClassDef(St_g2t_epd_hitC,1)
 };
 class St_g2t_fgt_hitC : public St_g2t_Chair	{    
  public: 
