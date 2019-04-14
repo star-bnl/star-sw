@@ -1315,7 +1315,7 @@ Int_t St_geant_Maker::Make() {
   AddHits<St_g2t_fts_hit>( "FTSH",{"FTSA","FSIA", "FSIB", "FSIC"}, "g2t_fts_hit", g2t_fts ); 
 
   // Event plane detector 
-  AddHits<St_g2t_epd_hit>( "EPDH", {"EPDT"}              , "g2t_epd_hit", g2t_epd ); 
+  AddHits<St_g2t_ctf_hit>( "EPDH", {"EPDT"}              , "g2t_epd_hit", g2t_epd ); 
   
   if (cflag->ieorun) return kStEOF; 
   if (cflag->ieotri) return kStErr; 
