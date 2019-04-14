@@ -290,6 +290,9 @@ Int_t StKFVertexMaker::Make() {
 	StTrackMassFit *pf = new StTrackMassFit(KVx.Id(),&KVx);
 	PrPP(Make,*pf);
 	Vp->setParent(pf);
+	StTrackNode *nodepf = new StTrackNode;
+	nodepf->addTrack(pf);
+	pEvent->trackNodes().push_back(nodepf);
 	fgcVertices->AddVertex(&KVx);
       }
     }
@@ -304,6 +307,12 @@ Int_t StKFVertexMaker::Make() {
       mGVF->FillStEvent(pEvent);
       UInt_t NoPV = pEvent->numberOfPrimaryVertices();
       if (! NoPV) return kStOK;
+      for (UInt_t iv = 0; iv < NoPV; iv++) {
+	StPrimaryVertex *primV = pEvent->primaryVertex(iv);
+	if (! primV) continue;
+	primV->setRanking(primV->numTracksUsedInFinder()); 
+      }
+      pEvent->sortVerticiesByRank();
       for (UInt_t iv = 0; iv < NoPV; iv++) {
 	StPrimaryVertex *primV = pEvent->primaryVertex(iv);
 	if (primV && ! primV->key()) {
@@ -328,6 +337,7 @@ Int_t StKFVertexMaker::Make() {
 	trNodeVec.push_back(nodepf);
       }
       ReFitToStVertex();
+      pEvent->sortVerticiesByRank();
     }
   } else {
     Fit();
@@ -824,11 +834,12 @@ void StKFVertexMaker::ReFitToStVertex() {
       KFParticle *T = mf->kfParticle();
       if (! T) continue;
       KFParticle P = *T;
-      FitTrack2Vertex(*V, P, 0, primV);
+      FitTrack2Vertex(*V, P, primV);
     }
     if (beam ) primV->setBeamConstrained();
     primV->setTrackNumbers();
     CalculateRank(primV);
+#if 0
     UInt_t NoTracksP = primV->numberOfDaughters();
     if (NoTracksP < 1) { // 2)       {
       for (UInt_t i = 0; i < NoTracksP; i++) {
@@ -841,6 +852,7 @@ void StKFVertexMaker::ReFitToStVertex() {
       SafeDelete(primV);
       delete fgcVertices->Vertices()->Remove(V);
     }
+#endif
   }
 }
 #endif
@@ -848,12 +860,29 @@ void StKFVertexMaker::ReFitToStVertex() {
 StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   track, StPrimaryVertex *primV) {
   if (! V || ! track || ! primV) return 0;
   KFParticle &P = track->Particle();
-  const KFParticle   *PO = track->OrigParticle();
   const KFVertex &VKF = V->Vertex();
-  return FitTrack2Vertex(VKF, P, PO, primV);
+  StPrimaryTrack *pTrack = FitTrack2Vertex(VKF, P, primV);
+  if (pTrack) {
+    const KFParticle   *PO = track->OrigParticle();
+    if (Debug() > 2 && PO) {
+      const KFParticle *PS[2] = {PO, &P};
+      for (Int_t m = 0; m < 2; m++) {
+	if (! m) cout << "Original";
+	else     cout << "Fitted  ";
+	static const Char_t *names[6] = {"x","y","z","px","py","pz"};
+	for (Int_t j = 0; j < 6; j++) {
+	  cout << Form(" %2s: %8.3f +/- %8.3f",names[j], 
+		       PS[m]->GetParameter(j), 
+		       PS[m]->GetCovariance(j,j) > 0 ? TMath::Sqrt(PS[m]->GetCovariance(j,j)) : -13);
+	}
+	cout << endl;
+      }
+    }
+  }
+  return pTrack;
 }
 //________________________________________________________________________________
-StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(const KFParticle &Vtx, KFParticle& P, const KFParticle* PO,StPrimaryVertex *primV) {
+StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(const KFParticle &Vtx, KFParticle& P, StPrimaryVertex *primV) {
   StPrimaryTrack* pTrack = 0;
   Float_t chi2 = P.GetChi2();
   // Calculate Chi2 deviation from vertex
@@ -868,20 +897,6 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(const KFParticle &Vtx, KFPartic
   StTrackNode *node = fTrackNodeMap[kg];
   if (! node) {
     return pTrack;
-  }
-  if (Debug() > 2 && PO) {
-    const KFParticle *PS[2] = {PO, &P};
-    for (Int_t m = 0; m < 2; m++) {
-      if (! m) cout << "Original";
-      else     cout << "Fitted  ";
-      static const Char_t *names[6] = {"x","y","z","px","py","pz"};
-      for (Int_t j = 0; j < 6; j++) {
-	cout << Form(" %2s: %8.3f +/- %8.3f",names[j], 
-		     PS[m]->GetParameter(j), 
-		     PS[m]->GetCovariance(j,j) > 0 ? TMath::Sqrt(PS[m]->GetCovariance(j,j)) : -13);
-      }
-      cout << endl;
-    }
   }
   StGlobalTrack  *gTrack = static_cast<StGlobalTrack *>(node->track(global));
   if (! gTrack) {
