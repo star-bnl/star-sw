@@ -4,7 +4,6 @@
 ClassImp(St_g2t_Chair);
 ClassImp(St_g2t_ctf_hitC)
 ClassImp(St_g2t_emc_hitC)
-ClassImp(St_g2t_epd_hitC)
 ClassImp(St_g2t_fgt_hitC)
 ClassImp(St_g2t_ftp_hitC)
 ClassImp(St_g2t_gem_hitC)
@@ -152,11 +151,6 @@ void St_g2t_emc_hitC::Fill(GHit_t &vect) {
   table->AddAt(&g2t_emc_hit);    
   if (Debug()) table->Print(nok-1,2);		
 }
-//________________________________________________________________________________
-void St_g2t_epd_hitC::Fill(GHit_t &vect) {
-  G2TBookTrackHit(epd);
-  G2TFillTrackHitNoTOF(epd,epd);
-  if (Debug()) table->Print(nok-1,2);}
 //________________________________________________________________________________
 G2TTrackHit(fgt,fgt);
 G2TTrackHit(ftp,ftp);
