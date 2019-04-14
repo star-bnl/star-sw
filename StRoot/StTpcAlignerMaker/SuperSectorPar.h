@@ -5220,7 +5220,6 @@ SurveyPass_t Passes[] = {
    }
    }
    ,
-#endif
    {20190101,      509, "Pass509 StiCA.Minuit", // MuTpcG: 
    {//                  x             y             z         alpha          beta         gamma
 	{ 1,  -8.01, 0.91, -31.37, 2.10,  -8.09, 1.05,   0.05, 0.00,   0.05, 0.00,   0.26, 0.13,"Average "},
@@ -5248,8 +5247,9 @@ SurveyPass_t Passes[] = {
 	{23,  38.10, 0.88, -34.20, 2.06,  36.55, 1.06,  -0.05, 0.00,  -0.02, 0.00,  -1.46, 0.14,"Average "},
    }
    }
-#if 0
    ,
+#endif
+#if 1
    {20190101,      510, "Pass510AVGF StiCA.Minuit", // MuTpcG: 
    {//                  x             y             z         alpha          beta         gamma
 	{ 1, -12.82, 0.90,   7.91, 2.09,   5.58, 1.05,   0.05, 0.00,   0.05, 0.00,   0.34, 0.13,"Average "},

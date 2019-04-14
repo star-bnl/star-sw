@@ -221,8 +221,8 @@ Int_t IndexH(const Char_t *name) {
   return index;
 }
 //________________________________________________________________________________
-void Pico(const Char_t *files ="./*.picot.root",
-	      const Char_t *Out = "Pico1.root"){
+void Pico(const Char_t *files ="./*.picoDst.root",
+	      const Char_t *Out = "Pico.root"){
 #ifndef __CINT__
   //  static const Double_t sigmaB[2] = {6.26273e-01, -5.80915e-01}; // Global Tracks, wrt Bichsel
   if (!m_Bichsel) {
