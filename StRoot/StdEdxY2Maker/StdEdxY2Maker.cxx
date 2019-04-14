@@ -277,9 +277,12 @@ Int_t StdEdxY2Maker::Make(){
     if (tof->tofHeader()) VpdZ = tof->tofHeader()->vpdVz();
     if (TMath::Abs(VpdZ) < 200) {
       Double_t dZbest = 999;
-      StPrimaryVertex *pVertex = 0;
-      for (Int_t ipr=0;(pVertex=pEvent->primaryVertex(ipr));ipr++) {
-	Double_t dZ = TMath::Abs(pVertex->position().z()-VpdZ);
+      UInt_t NoPV = pEvent->numberOfPrimaryVertices();
+      for (UInt_t ipr = 0; ipr < NoPV; ipr++) {
+	StPrimaryVertex *pVertex = pEvent->primaryVertex(ipr);
+	if (! pVertex) continue;
+	Double_t zTPC = pVertex->position().z();
+	Double_t dZ = TMath::Abs(zTPC-VpdZ);
 	if (dZ < dZbest) {
 	  dZbest = dZ;
 	  pVbest = pVertex;
