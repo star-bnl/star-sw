@@ -14165,7 +14165,7 @@ gGeoManager->SetTopVolume(HALL);
    MAGP->AddNode(MPTV,2,new TGeoCombiTrans(0,0,-310.007,GetRot("180R")));
    MAGP->AddNode(MRGV,1,new TGeoTranslation(0,0,311.3824));
    MAGP->AddNode(MRGV,2,new TGeoCombiTrans(0,0,-311.3824,GetRot("180R")));
-  CAVE->AddNodeOverlap(MUTD,1,gGeoIdentity);
+  CAVE->AddNode(MUTD,1,gGeoIdentity);
    MUTD->AddNode(MUSC,1,GetRot("R210"));
     MUSC->AddNode(MTRA,1,new TGeoTranslation(395.593,0,-128.81));
      MTRA->AddNode(MXTR,1,new TGeoTranslation(1.055,0,2.190002));

@@ -8,7 +8,7 @@ TDataSet *CreateTable() {
  configGeom ->SetValue("ivpd",-1);
  configGeom ->SetValue("istb",-1);
  configGeom ->SetValue("ifpd",-1);
- configGeom ->SetValue("ifms",3);
+ configGeom ->SetValue("ifms",-1);
  configGeom ->SetValue("ifsc",-1);
  configGeom ->SetValue("tpcg_version",5);
  configGeom ->SetValue("tpcg_tpadconfig",8);
@@ -31,7 +31,6 @@ TDataSet *CreateTable() {
  configGeom ->SetValue("emcg_version",6.1);
  configGeom ->SetValue("emcg_onoff",1);
  configGeom ->SetValue("emcg_fillmode",3);
- configGeom ->SetValue("fmcg_version",8);
- configGeom ->SetValue("mtdg_version",1);
+ configGeom ->SetValue("mtdg_version",1.1);
   return CreateGeometry("y2019",configGeom);
 }
