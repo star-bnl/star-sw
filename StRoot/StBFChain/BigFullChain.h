@@ -279,7 +279,7 @@ Bfc_st BFC[] = { // standard chains
   {"MC.StiCA",   "","","StiCA,-hitfilt,StiKFVertex,geantOut,noRunco,noHistos,20Muons,OSpaceZ2,"
    "OGridLeak3D,CorrX,StiPulls,picoWrite,PicoVtxVpd,RunG.1,McTpcAna,tags"                  ,"","","",kFALSE},
   {"XC",          "","","TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,"
-   "OSpaceZ2,OGridLeak3D,CorrX,tpcDB,TpcHitMover"xf
+   "OSpaceZ2,OGridLeak3D,CorrX,tpcDB,TpcHitMover"
    ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,Stx,KFVertex,Idst,BAna"       
    ,                                                                                       "","","",kFALSE},
   {"XC2017I",     "","","y2017,XC",                                                        "","","",kFALSE},
