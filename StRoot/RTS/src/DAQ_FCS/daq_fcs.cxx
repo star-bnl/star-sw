@@ -320,6 +320,10 @@ daq_dta *daq_fcs::handle_adc()
 
 		fcs_data_c fcs_c ;
 
+
+		fcs_c.sector = dta->sec ;
+		fcs_c.set_rdo(dta->rdo) ;
+
 		fcs_c.start(ptr,dta->ncontent/2) ;
 
 		//LOG(TERR,"Hello again %d %d %d = %d %d",fcs_c.sector,fcs_c.rdo, fcs_c.ch,dta->sec,dta->rdo) ;
