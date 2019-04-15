@@ -22,13 +22,31 @@ static inline u_int sw16(u_int d)
         return d ;
 }
 
-double fcs_data_c::fee_currents[8][32][3] ;	// 8 RDOs, 32 channel
-struct fcs_data_c::fcs_ped_t fcs_data_c::ped[8] ;	// 8 RDO
+// this shouldn't really be static when running offline!
+//unsigned long long fcs_data_c::ch_mask[8] ;		// channel masks for the 8 RDOs; where are they? map file!
+struct fcs_data_c::fcs_ped_t fcs_data_c::ped[16][8] ;	// 8 RDO
+
+struct fcs_data_c::rdo_map_t fcs_data_c::rdo_map[16][8] ;	// 16 sectors, 8 RDOs each --> det,ns,dep
+struct fcs_data_c::det_map_t fcs_data_c::det_map[3][2][20] ;	// det,ns,dep --> sector RDO
+u_char fcs_data_c::rdo_map_loaded ;
+
+
 u_int fcs_data_c::run_number ;
 u_int fcs_data_c::run_type ;
-struct fcs_data_c::rdo_map_t fcs_data_c::rdo_map[8] ;
 
+// for ZS
+float fcs_data_c::n_sigma ;
+short fcs_data_c::n_pre ;
+short fcs_data_c::n_post ;
+short fcs_data_c::n_cou ;
 
+// set in send_config, for shared access during data-checking
+u_short fcs_data_c::ht_threshold ;
+u_short fcs_data_c::tb_pre ;
+u_short fcs_data_c::tb_all ;
+
+pthread_mutex_t fcs_data_c::ped_mutex ;
+	
 	
 int fcs_data_c::zs_start(u_short *buff)
 {
@@ -43,7 +61,7 @@ int fcs_data_c::zs_start(u_short *buff)
 		l_post = 0 ;
 	}
 	else {
-		thr = (int)(ped[rdo-1].mean[ch] + n_sigma * ped[rdo-1].rms[ch] + 0.5) ;
+		thr = (int)(ped[sector-1][rdo-1].mean[ch] + n_sigma * ped[sector-1][rdo-1].rms[ch] + 0.5) ;
 		l_cou = n_cou ;
 		l_pre = n_pre ;
 		l_post = n_post ;
@@ -126,7 +144,7 @@ int fcs_data_c::zs_start(u_short *buff)
 	int i_ped ;
 
 	if(ch==32) i_ped = 0 ;
-	else i_ped = (int)(ped[rdo-1].mean[ch]+0.5) ;
+	else i_ped = (int)(ped[sector-1][rdo-1].mean[ch]+0.5) ;
 
 	int seq_cou = 0 ;
 
@@ -311,20 +329,25 @@ int fcs_data_c::hdr_event()
 	//I will need the board id as a sector/id combo
 	hdr_board_id = dta_p[3] ;
 
-	sector = ((hdr_board_id >> 11) & 0x1F)+1 ;
-	rdo = ((hdr_board_id >> 8) & 0x7)+1 ;
+
+	hdr_sector = ((hdr_board_id >> 11) & 0x1F)+1 ;
+	hdr_rdo = ((hdr_board_id >> 8) & 0x7)+1 ;
 
 	hdr_det = (hdr_board_id >> 6) & 0x3 ;
 	hdr_ns = (hdr_board_id >> 5) & 1 ;
 	hdr_dep = hdr_board_id & 0x1F ;
 
 
-//	LOG(TERR,"... 0x%X S%d:%d %d %d %d",hdr_board_id,sector,rdo,hdr_det,hdr_ns,hdr_dep) ;
+//	LOG(TERR,"... 0x%X S%d:%d %d %d %d",hdr_board_id,hdr_sector,hdr_rdo,hdr_det,hdr_ns,hdr_dep) ;
 
 
-	// this won't work Offline
+	if((sector != hdr_sector) || (rdo != hdr_rdo)) {
+		LOG(ERR,"%d: sector %d:%d expected, received %d:%d [0x%X]",id,sector,rdo,hdr_sector,hdr_rdo,hdr_board_id) ;
+	}
+
+	// this won't work Offline because I don't have the real board id...
 	if(realtime && (hdr_board_id != board_id)) {
-		LOG(ERR,"evt %d: board_id: expected 0x%04X, received 0x%04X",events,board_id,hdr_board_id) ;
+		LOG(ERR,"%d: evt %d: board_id: expected 0x%04X, received 0x%04X",id,events,board_id,hdr_board_id) ;
 	}
 
 	//extract trigger_word and rhic_counter
@@ -334,6 +357,11 @@ int fcs_data_c::hdr_event()
 
 	LOG(DBG,"HDR: trg_word 0x%05X, %d",hdr_trg_word,hdr_rhic_counter) ;
 
+	trg_cmd = hdr_trg_word & 0xF ;
+	daq_cmd = (hdr_trg_word>>4) & 0xF ;
+	token = ((hdr_trg_word>>8)&0xF)<<8 ;
+	token |= ((hdr_trg_word>>12)&0xF)<<4 ;
+	token |= ((hdr_trg_word>>16)&0xF) ;
 
 	// skip to first datum
 	dta_p += 8 ;
@@ -346,7 +374,7 @@ int fcs_data_c::hdr_event()
 
 		int words = (dta_shorts - 8 - 2)/2 ;	// adjust
 
-		LOG(TERR,"ASCII contribution - words %d[%d]: sector %d, rdo %d, hdr_trg_word 0x%X",words,dta_shorts,sector,rdo,hdr_trg_word) ;
+		LOG(TERR,"ASCII contribution - words %d[%d]: sector %d, rdo %d, hdr_trg_word 0x%X, hdr_board 0x%X",words,dta_shorts,sector,rdo,hdr_trg_word,hdr_board_id) ;
 
 		int end_marker = 0 ;
 		u_int cou = 0 ;
@@ -426,13 +454,10 @@ int fcs_data_c::event_end(int how)
 {
 	if(!trgd_event) return 0 ;
 
-	if(ch_mask_seen != 0x1FFFFFFFFLL) {
-		LOG(ERR,"event_end: %d: mask not-complete 0x%llX",events,ch_mask_seen) ;
+	if(rdo_map_loaded && (ch_mask_seen != rdo_map[sector-1][rdo-1].ch_mask)) {
+		LOG(ERR,"%d: event_end: %d: RDO %d: mask not-complete 0x%llX",id,events,rdo,ch_mask_seen) ;
 	}
 
-	if(ch_count != 33) {
-		LOG(ERR,"event_end: %d: chs found %d",events,ch_count) ;
-	}
 
 	return 0 ;
 }
@@ -473,7 +498,7 @@ int fcs_data_c::event()
 	u_int rhic_cou_xpect = hdr_rhic_counter & 0x7F ;
 	u_int board_id_xpect = board_id & 0xFF ;
 
-//	for(int i=0;i<16;i++) {
+//	for(int i=-16;i<16;i++) {
 //		LOG(TERR,"in event %d = 0x%04X",i,dta_p[i]) ;
 //	}
 
@@ -488,9 +513,9 @@ int fcs_data_c::event()
 		u_char complain =  0 ;
 		u_short *dbg_h = dta_p ;
 
-		h[0] = *dta_p++ ;	// 0x20cc
-		h[1] = *dta_p++ ;
-		h[2] = *dta_p++ ;
+		h[0] = *dta_p++ ;	// board,channel
+		h[1] = *dta_p++ ;	// trigger cmd
+		h[2] = *dta_p++ ;	// rhic_cou, token lo
 
 		ch = h[0]&0x3F ;
 		board = (h[0] >> 6) ;
@@ -515,29 +540,40 @@ int fcs_data_c::event()
 		}
 
 		if(complain) {
-			LOG(ERR,"S%d:%d: Evt %d, ch %d[%d]: 0x%X 0x%05X %d expected: 0x%X 0x%05X %d seen",sector,rdo,
+			LOG(ERR,"%d: S%d:%d: Evt %d, ch %d[%d]: 0x%X 0x%05X %d expected: 0x%X 0x%05X %d seen",id,sector,rdo,
 			    events,ch,ch_count,
 			    board_id_xpect,hdr_trg_word,rhic_cou_xpect,
 			    board,trg_word,rhic_cou) ;
 
-			LOG(ERR,"   0x%04X 0x%04X 0x%04X 0x%04X",dbg_h[-1],dbg_h[0],dbg_h[1],dbg_h[2]) ;
+			LOG(ERR,"%d:   0x%04X 0x%04X 0x%04X 0x%04X",id,dbg_h[-1],dbg_h[0],dbg_h[1],dbg_h[2]) ;
 
 		}
 	
+
 		while(dta_p<dta_stop) {
 			u_short d = *dta_p++ ;
 
-			//LOG(TERR,".... ch %d = %d = 0x%X",ch,tb_cou,d) ;
-
-			if((d & 0x8000) && (d != 0xFFFF)) {
-				LOG(ERR,"... ch %d: tb_cou %d: 0x%04X",ch,tb_cou,d) ;
-			}
+			//if(ch==32 && tb_cou==2) LOG(TERR,".... ch %d = %d = 0x%X",ch,tb_cou,d) ;
 
 			if(d==0xFFFF) {		// last item of adc_single
 				//LOG(TERR,"... tb_cou %d: 0x%04X",tb_cou,d) ;
 				break ;
 			}
+			else if(d & 0x8000) {
+				LOG(ERR,"... ch %d: tb_cou %d: 0x%04X",ch,tb_cou,d) ;
+			}
 
+			//protect structures
+			if((u_int)tb_cou>=(sizeof(adc)/sizeof(adc[0]))) {
+				LOG(ERR,"Event too big, ch %d, tb %d",ch,tb_cou) ;
+				event_end(1) ;
+				return 0 ;
+			}
+
+			adc[tb_cou] = d ;	//but store the full data, with flags
+
+			// do I need any of this below? Nah...
+#if 0
 			if(d & 0x2000) {
 				if(first_rhic_strobe_tick < 0) {
 					first_rhic_strobe_tick = tb_cou ;
@@ -551,14 +587,19 @@ int fcs_data_c::event()
 				}
 			}
 
-			if(accum(ch,tb_cou,d)<0) {
-				LOG(ERR,"Event too big, ch %d, tb %d",ch,tb_cou) ;
-				event_end(1) ;
-				return 0 ;
-			}
+
+
+//			if(accum(ch,tb_cou,d)<0) {
+//				LOG(ERR,"Event too big, ch %d, tb %d",ch,tb_cou) ;
+//				event_end(1) ;
+//				return 0 ;
+//			}
+#endif
 
 			tb_cou++ ;
 		}
+
+		ana_ch() ;
 
 		//LOG(TERR,"0x%08X 0x%08X 0x%08X",dta_p[0],dta_p[1],dta_p[2]) ;
 
@@ -576,8 +617,54 @@ int fcs_data_c::event()
 }
 
 
-int fcs_data_c::accum(u_int ch, u_int tb, u_short sadc)
+int fcs_data_c::ana_ch()
 {
+	if(ch>=32) return 0 ;
+
+	switch(run_type) {
+	case 1 :
+	case 5 :
+		break ;
+	default:
+		return 0 ;
+	}
+
+	ped_lock() ;
+
+	for(int tb=0;tb<tb_cou;tb++) {
+		double sadc = (double)(adc[tb] & 0xFFF) ;
+
+		ped[sector-1][rdo-1].mean[ch] += sadc ;
+		ped[sector-1][rdo-1].rms[ch] += sadc * sadc ;
+		ped[sector-1][rdo-1].cou[ch]++ ;
+
+
+		ped[sector-1][rdo-1].tmp_val_8[ch] += sadc ;
+		ped[sector-1][rdo-1].tmp_cou_8[ch]++ ;
+
+		if(ped[sector-1][rdo-1].tmp_cou_8[ch]==8) {
+			double d = ped[sector-1][rdo-1].tmp_val_8[ch] ;
+
+			ped[sector-1][rdo-1].mean_8[ch] += d ;
+			ped[sector-1][rdo-1].rms_8[ch] += d*d ;
+			ped[sector-1][rdo-1].cou_8[ch]++ ;
+
+			ped[sector-1][rdo-1].tmp_val_8[ch] = 0.0 ;
+			ped[sector-1][rdo-1].tmp_cou_8[ch] = 0 ; 
+		}
+	}
+
+	ped_unlock() ;
+
+	return 0 ;
+}
+
+
+
+int fcs_data_c::accum_pre_fy19(u_int ch, u_int tb, u_short sadc)
+{
+	int fla ;
+
 	//protect structures
 	if(tb>=(sizeof(adc)/sizeof(adc[0]))) {
 		return -1 ;
@@ -585,16 +672,38 @@ int fcs_data_c::accum(u_int ch, u_int tb, u_short sadc)
 
 	adc[tb] = sadc ;	//but store the full data, with flags
 
-	sadc &= 0xFFF ;	//zap the flags
 
 	if(ch>=32) return 0 ;	// skip non-ADC channels
+
+
+	fla = sadc >> 12 ;	// flags
+	sadc &= 0xFFF ;	//zap the flags to get to raw ADC
+
 
 	switch(run_type) {
 	case 1 :
 	case 5 :
-		ped[rdo-1].mean[ch] += (double)sadc ;
-		ped[rdo-1].rms[ch] += (double)sadc * (double)sadc ;
-		ped[rdo-1].cou[ch]++ ;
+		ped[sector-1][rdo-1].mean[ch] += (double)sadc ;
+		ped[sector-1][rdo-1].rms[ch] += (double)sadc * (double)sadc ;
+		ped[sector-1][rdo-1].cou[ch]++ ;
+
+
+		ped[sector-1][rdo-1].tmp_val_8[ch] += (double)sadc ;
+		ped[sector-1][rdo-1].tmp_cou_8[ch]++ ;
+
+		if(ped[sector-1][rdo-1].tmp_cou_8[ch]==8) {
+			double d = ped[sector-1][rdo-1].tmp_val_8[ch] ;
+
+			ped[sector-1][rdo-1].mean_8[ch] += d ;
+			ped[sector-1][rdo-1].rms_8[ch] += d*d ;
+			ped[sector-1][rdo-1].cou_8[ch]++ ;
+
+			ped[sector-1][rdo-1].tmp_val_8[ch] = 0.0 ;
+			ped[sector-1][rdo-1].tmp_cou_8[ch] = 0 ; 
+		}
+
+
+
 		break ;
 	}
 
@@ -603,12 +712,12 @@ int fcs_data_c::accum(u_int ch, u_int tb, u_short sadc)
 }
 
 
+
 void fcs_data_c::run_start(u_int run, int type)
 {
-	run_number = run ;
-	run_type = type ;
 
 	events = 0 ;
+
 
 	switch(run_type) {
 	case 1 :
@@ -616,51 +725,118 @@ void fcs_data_c::run_start(u_int run, int type)
 		ped_start() ;
 		break ;
 	}
+
+	if(id==0) {
+		run_number = run ;
+		run_type = type ;
+
+		ped_mutex_init() ;
+	}
+	
 }
 
-void fcs_data_c::run_stop()
+void fcs_data_c::run_stop(int bad_ped)
 {
 	switch(run_type) {
 	case 1 :
 	case 5 :
-		ped_stop() ;
+		ped_stop(bad_ped) ;
 		break ;
 	}
 
 }
 
+// RDO-per-RDO
 void fcs_data_c::ped_start()
 {
-	int i = rdo - 1 ;
+	int r = rdo - 1 ;
+	int s = sector -1 ;
 
-	memset(ped[i].mean,0,sizeof(ped[i].mean)) ;
-	memset(ped[i].rms,0,sizeof(ped[i].rms)) ;
-	memset(ped[i].cou,0,sizeof(ped[i].cou)) ;
+	memset(ped[s][r].mean,0,sizeof(ped[s][r].mean)) ;
+	memset(ped[s][r].rms,0,sizeof(ped[s][r].rms)) ;
+	memset(ped[s][r].cou,0,sizeof(ped[s][r].cou)) ;
 
+	memset(ped[s][r].mean_8,0,sizeof(ped[s][r].mean_8)) ;
+	memset(ped[s][r].rms_8,0,sizeof(ped[s][r].rms_8)) ;
+	memset(ped[s][r].cou_8,0,sizeof(ped[s][r].cou_8)) ;
+
+	memset(ped[s][r].tmp_val_8,0,sizeof(ped[s][r].tmp_val_8)) ;
+	memset(ped[s][r].tmp_cou_8,0,sizeof(ped[s][r].tmp_cou_8)) ;
 
 }
 
-
-void fcs_data_c::ped_stop()
+// RDO per RDO
+void fcs_data_c::ped_stop(int bad_ped)
 {
+	char status[64] ;
+
+	int s = sector - 1 ;
+	int r = rdo - 1 ;
+	u_int max_c = 0 ;
+
+
+	if(rdo_map[s][r].det >= 3) {	// trigger DEPs
+		LOG(WARN,"S%d:%d is a DEP/IO -- skipping ped_stop",sector,rdo) ;
+		return ;
+	}
+
+
+	// check for bad pedestals... since we can have masked channels just find the max
+	for(int c=0;c<32;c++) {
+		if(ped[s][r].cou[c] > max_c) {
+			max_c = ped[s][r].cou[c] ;
+		}
+	}
+
+	if(max_c < 500) bad_ped |= 4 ;
 
 	for(int c=0;c<32;c++) {
-		if(ped[rdo-1].cou[c]) {
-			ped[rdo-1].mean[c] /= ped[rdo-1].cou[c] ;
-			ped[rdo-1].rms[c] /= ped[rdo-1].cou[c] ;
 
-			ped[rdo-1].rms[c] -= ped[rdo-1].mean[c] * ped[rdo-1].mean[c] ;
+		if(ped[s][r].cou[c]) {
+			ped[s][r].mean[c] /= ped[s][r].cou[c] ;
+			ped[s][r].rms[c] /= ped[s][r].cou[c] ;
 
-			if(ped[rdo-1].rms[c] < 0.0) ped[rdo-1].rms[c] = 0.0 ;
+			ped[s][r].rms[c] -= ped[s][r].mean[c] * ped[s][r].mean[c] ;
 
-			ped[rdo-1].rms[c] = sqrt(ped[rdo-1].rms[c]) ;
+			if(ped[s][r].rms[c] < 0.0) ped[s][r].rms[c] = 0.0 ;
+
+			ped[s][r].rms[c] = sqrt(ped[s][r].rms[c]) ;
 		}
 		else {
-			ped[rdo-1].mean[c] = -1.0 ;
-			ped[rdo-1].rms[c] = 0.0 ;
+			ped[s][r].mean[c] = -1.0 ;
+			ped[s][r].rms[c] = 0.0 ;
+
 		}
 
+		if(ped[s][r].cou_8[c]) {
+			ped[s][r].mean_8[c] /= ped[s][r].cou_8[c] ;
+			ped[s][r].rms_8[c] /= ped[s][r].cou_8[c] ;
+
+			ped[s][r].rms_8[c] -= ped[s][r].mean_8[c] * ped[s][r].mean_8[c] ;
+
+			if(ped[s][r].rms_8[c] < 0.0) ped[s][r].rms_8[c] = 0.0 ;
+
+			ped[s][r].rms_8[c] = sqrt(ped[s][r].rms_8[c]) ;
+
+
+		}
+		else {
+			ped[s][r].mean_8[c] = -1.0 ;
+			ped[s][r].rms_8[c] = 0.0 ;
+		}
+
+
 	}
+
+	if(bad_ped) {
+		strcpy(status," -- Bad: ") ;
+		if(bad_ped & 1) strcat(status,"wrong_run_type,") ;
+		if(bad_ped & 2) strcat(status,"beam_in_rhic,") ;
+		if(bad_ped & 4) strcat(status,"not_enough_events") ;
+
+		LOG(ERR,"S%d:%d pedestals %s",sector,rdo,status) ;
+	}
+	else status[0] = 0 ;
 
 	//pedestal dump...
 	FILE *pedf ;
@@ -688,21 +864,28 @@ void fcs_data_c::ped_stop()
 		return ;
 	}
 
-	fprintf(pedf,"#Sector %2d, RDO %d\n",sector,rdo) ;
-	fprintf(pedf,"#RUN %08u, type %d\n",run_number,run_type) ;
-	fprintf(pedf,"#TIME %u\n",(unsigned int)now) ;
+	int d = rdo_map[s][r].det ;
+	int n = rdo_map[s][r].ns ;
+	int p = rdo_map[s][r].dep ;
+
+	fprintf(pedf,"# Sector %2d, RDO %d\n",sector,rdo) ;
+	fprintf(pedf,"# Det %d, NS %d, DEP %d\n",d,n,p) ;
+	fprintf(pedf,"# RUN %08u, type %d %s\n",run_number,run_type,status) ;
+	fprintf(pedf,"# TIME %u\n",(unsigned int)now) ;
 	char *ctm = ctime(&now) ;
-	fprintf(pedf,"#DATE %s",ctm) ;
+	fprintf(pedf,"# DATE %s",ctm) ;
 	
 	fprintf(pedf,"\n") ;
 
 	for(int c=0;c<32;c++) {
-		LOG(TERR,"PEDs: S%02d:%d: %2d %.3f %.3f %.3f %.3f %.3f",sector,rdo,c,ped[rdo-1].mean[c],ped[rdo-1].rms[c],
-			fee_currents[rdo-1][c][0],fee_currents[rdo-1][c][1],fee_currents[rdo-1][c][2]) ;
+		LOG(TERR,"PEDs: S%02d:%d: %d: %.1f %.1f - %.1f %.1f",sector,rdo,c,
+		    ped[s][r].mean[c],ped[s][r].rms[c],
+		    ped[s][r].mean_8[c],ped[s][r].rms_8[c]) ;
 
 		
-		fprintf(pedf,"%2d %f %f %.3f %.3f %.3f\n",c,ped[rdo-1].mean[c],ped[rdo-1].rms[c],
-			fee_currents[rdo-1][c][0],fee_currents[rdo-1][c][1],fee_currents[rdo-1][c][2]) ;
+		fprintf(pedf,"%d %d %d %d %d %d %f %f %f %f\n",sector,rdo,d,n,p,c,
+			ped[s][r].mean[c],ped[s][r].rms[c],
+			ped[s][r].mean_8[c],ped[s][r].rms_8[c]) ;
 
 	}
 
@@ -710,91 +893,119 @@ void fcs_data_c::ped_stop()
 
 }
 
+// load_map MUST be called before!
 int fcs_data_c::gain_from_cache(const char *fname)
 {
-	char ff[128] ;
-
-	if(id != 0) return 0 ;	// just ID0
-
+	if(!rdo_map_loaded) {
+		LOG(ERR,"You must load the rdo map before!") ;
+	}
 
 	// set defaults!
-	for(int i=0;i<8;i++) {
-		for(int c=0;c<32;c++) {
-			ped[i].gain[c] = 1.0 ;
-			ped[i].i_gain[c] = (1<<6) ;
+	for(int s=0;s<16;s++) {
+		for(int i=0;i<8;i++) {
+			for(int c=0;c<32;c++) {
+				ped[s][i].el_gain[c] = 1.0 ;
+				ped[s][i].et_gain[c] = 1.0 ;
+			}
 		}
 	}
 
+	for(int v=0;v<2;v++) {
+		char ff[128] ;
 
-	if(fname==0) {
-		sprintf(ff,"/RTS/conf/fcs/fcs_gains.txt") ;
-	}
-	else {
-		strcpy(ff,fname) ;
-	}
-
-	FILE *f = fopen(ff,"r") ;
-	if(f==0) {
-		LOG(ERR,"Can't open %s [%s]",ff,strerror(errno)) ;
-		return -1 ;
-	}
-
-	LOG(INFO,"S%d: opened gains %s",sector,ff) ;
+		if(v==1 && fname) continue ;	// if given a filename, just assume el_gain
+		
+		if(fname) {
+			strncpy(ff,fname,sizeof(ff)) ;
+		}
+		else if(v==0) {
+			sprintf(ff,"/RTS/conf/fcs/fcs_electronics_gains.txt") ;
+		}
+		else {
+			sprintf(ff,"/RTS/conf/fcs/fcs_et_gains.txt") ;
+		}
 
 
-	while(!feof(f)) {
-		char buff[128] ;
+		FILE *f = fopen(ff,"r") ;
+		if(f==0) {
+			LOG(ERR,"Can't open %s [%s]",ff,strerror(errno)) ;
+			continue ;
+		}
 
-		if(fgets(buff,sizeof(buff),f)==0) continue ;
+		LOG(INFO,"Opened gains[%s] %s",v==0?"electronics":"Et",ff) ;
 
-		if(buff[0]=='#') continue ;
-		if(buff[0]==0) continue ;
 
-		int sec, rdo, ch ;
-		float gain ;
+		while(!feof(f)) {
+			char buff[128] ;
 
-		int ret = sscanf(buff,"%d %d %d %f",&sec,&rdo,&ch,&gain) ;
+			if(fgets(buff,sizeof(buff),f)==0) continue ;
 
-		if(ret!=4) continue ;
+			if(buff[0]=='#') continue ;
+			if(buff[0]==0) continue ;
 
-		if(sec != sector) continue ;
+			int ch ;
+			int det, ns, dep ;
+			float gain ;
 
-		ped[rdo-1].gain[ch] = gain ;
-		ped[rdo-1].i_gain[ch] = (int)(64.0 * gain + 0.5) ;
-			
-		LOG(NOTE,"Gains S%d:%d:%d = %d",sector,rdo,ch,ped[rdo-1].i_gain[ch]) ;
+			int ret = sscanf(buff,"%d %d %d %d %f",&det,&ns,&dep,&ch,&gain) ;
+
+			if(ret!=5) continue ;
+
+			int s = det_map[det][ns][dep].sector - 1 ;
+			int r = det_map[det][ns][dep].rdo - 1 ;
+
+			if(s<0 || r<0) continue ;	// bad map?
+			if(ch < 0) continue ;		// really bad!
+
+			if(v==0) {
+				ped[s][r].el_gain[ch] = gain ;
+			}
+			else {
+				ped[s][r].et_gain[ch] = gain ;
+			}
+		}
+
+		fclose(f) ;
 		
 	}
 
-	fclose(f) ;
+	for(int s=0;s<16;s++) {
+	for(int i=0;i<8;i++) {
+		for(int c=0;c<32;c++) {
+
+			double d = ped[s][i].el_gain[c] * ped[s][i].et_gain[c] ;
+			ped[s][i].i_gain[c] = (u_int)(d*64.0+0.5) ;
+
+			if(ped[s][i].i_gain[c]>1023) {	// 10 bit max!
+				LOG(ERR,"S%d:%d: ch %d -- gain correction too big",s+1,i+1,c,ped[s][i].i_gain[c]) ;
+			}
+			else {
+
+			}
+		}
+	}
+	}
 
 	return 0 ;
 
 }
 
-int fcs_data_c::ped_from_cache(const char *fname)
+
+// static; expect to have it called for each and every file so 
+// don't clear stuff etc.
+
+int fcs_data_c::ped_from_cache(const char *ff)
 {
-	char ff[128] ;
-
-
-
-	if(fname==0) {
-		sprintf(ff,"/RTScache/fcs_pedestals_s%02d_r%d.txt",sector,rdo) ;
-	}
-	else {
-		strcpy(ff,fname) ;
-	}
-
 	FILE *f = fopen(ff,"r") ;
 	if(f==0) {
-		LOG(ERR,"Can't open %s [%s]",ff,strerror(errno)) ;
+		LOG(WARN,"ped_from_cache: can't open %s [%s]",ff,strerror(errno)) ;
 		return -1 ;
 	}
 
-	LOG(INFO,"S%d:%d: opened pedestals %s",sector,rdo,ff) ;
+	LOG(INFO,"ped_from_cache: opened  %s",ff) ;
 
 	while(!feof(f)) {
-		char buff[128] ;
+		char buff[256] ;
 
 		if(fgets(buff,sizeof(buff),f)==0) continue ;
 
@@ -802,21 +1013,31 @@ int fcs_data_c::ped_from_cache(const char *fname)
 		if(buff[0]==0) continue ;
 
 		int c ;
-		float p,r,d ;
+		float p,r,pp,rr ;
+		int ss,rrd,dd,nn,ppp ;
 
-		int ret = sscanf(buff,"%d %f %f %f %f %f",&c,&p,&r,&d,&d,&d) ;
+		int ret = sscanf(buff,"%d %d %d %d %d %d %f %f %f %f",&ss,&rrd,&dd,&nn,&ppp,&c,&p,&r,&pp,&rr) ;
 
-		if(ret!=6) continue ;
+		if(ret!=10) continue ;
 
-		ped[rdo-1].mean[c] =  p ;
-		ped[rdo-1].rms[c] = r ;
-		ped[rdo-1].cou[c] = 0 ;
+		// single timebin: for ZS
+		ped[ss-1][rrd-1].mean[c] =  p ;
+		ped[ss-1][rrd-1].rms[c] = r ;
+		ped[ss-1][rrd-1].cou[c] = 0 ;	// irrelevant when loading from file
 
-		ped[rdo-1].i_ped[c] = (u_short)(p*8.0+0.5) ;
+		// 8xtimebin: for trigger
+		ped[ss-1][rrd-1].mean_8[c] =  pp ;
+		ped[ss-1][rrd-1].rms_8[c] = rr ;
+		ped[ss-1][rrd-1].cou_8[c] = 0 ;	// irrelevant when loading from file
 
-//		ped[rdo-1].f_gain[c] = 1.0 ;
-//		ped[rdo-1].gain[c] = (1<<6) ;
-		
+		u_short pppp = (u_short)(pp+0.5) ;
+
+		//if(pppp) {
+		//	LOG(TERR,"S%d:%d: %d",ss,rrd,pppp) ;
+		//}
+
+		ped[ss-1][rrd-1].i_ped[c] = pppp ;	// also for trigger
+
 	}
 
 	fclose(f) ;
@@ -830,8 +1051,8 @@ int fcs_data_c::event_pre_fy19()
 	tb_cou = 0 ;
 	ch = -1 ;
 
-	trigger_tick = -1 ;
-	first_rhic_strobe_tick = -1 ;
+//	trigger_tick = -1 ;
+//	first_rhic_strobe_tick = -1 ;
 
 	LOG(TERR,"event() version 0x%08X",version) ;
 	return 0 ;
@@ -884,6 +1105,7 @@ int fcs_data_c::event_pre_fy19()
 				break ;
 			}
 
+#if 0
 			if(d & 0x2000) {
 				if(first_rhic_strobe_tick < 0) {
 					first_rhic_strobe_tick = tb_cou ;
@@ -896,9 +1118,10 @@ int fcs_data_c::event_pre_fy19()
 					//LOG(TERR,"... trigger tick at %d",tb_cou) ;
 				}
 			}
+#endif
 
 //			accum(ch,tb_cou,d&0xFFF) ;
-			if(accum(ch,tb_cou,d)<0) {
+			if(accum_pre_fy19(ch,tb_cou,d)<0) {
 				LOG(ERR,"Event too big, ch %d, tb %d",ch,tb_cou) ;
 				return 0 ;
 			}
@@ -921,9 +1144,15 @@ int fcs_data_c::event_pre_fy19()
 
 int fcs_data_c::load_rdo_map(const char *fname)
 {
-	if(id != 0) return 0 ;
+//	if(id != 0) return 0 ;
 
+	rdo_map_loaded = 0 ;
 	memset(rdo_map,0,sizeof(rdo_map)) ;
+	memset(det_map,0,sizeof(det_map)) ;
+
+	if(fname==0) {
+		fname = "/RTS/conf/fcs/fcs_daq_map.txt" ;
+	}
 
 	FILE *f = fopen(fname,"r") ;
 	if(f == 0) {
@@ -933,10 +1162,12 @@ int fcs_data_c::load_rdo_map(const char *fname)
 
 	LOG(INFO,"Opened %s",fname) ;
 
+
 	while(!feof(f)) {
 		char buff[128] ;
 
 		int s,r,d,n,b ;
+		unsigned long long mask ;
 
 		buff[0] =0 ;
 
@@ -946,20 +1177,28 @@ int fcs_data_c::load_rdo_map(const char *fname)
 		if(buff[0]=='\n') continue ;
 		if(buff[0]==0) continue ;
 
-		int ret = sscanf(buff,"%d %d %d %d %d",&s,&r,&d,&n,&b) ;
+		int ret = sscanf(buff,"%d %d %d %d %d 0x%llX",&s,&r,&d,&n,&b,&mask) ;
 
-		if(ret != 5) continue ;
+		if(ret != 6) continue ;
 
-		if(sector != s) continue ;
+//		if(sector != s) continue ;
 
 		r-- ;
+		s-- ;
 
-		LOG(TERR,"Mapping S%d:%d --> %d,%d,%d",sector,r+1,d,n,b) ;
+		LOG(TERR,"Mapping S%d:%d --> %d,%d,%d, mask 0x%llX",s+1,r+1,d,n,b,mask) ;
 
-		rdo_map[r].det = d ;
-		rdo_map[r].ns = n ;
-		rdo_map[r].dep = b ;
+		// forward and reverse
+		rdo_map[s][r].det = d ;
+		rdo_map[s][r].ns = n ;
+		rdo_map[s][r].dep = b ;
+		rdo_map[s][r].ch_mask = mask ;
+
+		det_map[d][n][b].sector = s+1 ;
+		det_map[d][n][b].rdo = r+1 ;
 	}
+
+	rdo_map_loaded = 1 ;
 
 	fclose(f) ;
 
@@ -979,14 +1218,14 @@ u_short fcs_data_c::set_board_id()
 	int sec = sector - 1 ;
 	int r = rdo - 1 ;
 
-	int det = rdo_map[r].det ;
-	int ns = rdo_map[r].ns ;
-	int dep = rdo_map[r].dep ;
+	int det = rdo_map[sec][r].det ;
+	int ns = rdo_map[sec][r].ns ;
+	int dep = rdo_map[sec][r].dep ;
 	
-	board_id = (sec<<11)|(rdo<<8)|(det<<6)|(ns<<5)|dep ;
+
+	board_id = (sec<<11)|(r<<8)|(det<<6)|(ns<<5)|dep ;
+
+//	LOG(TERR,"set_board_id: %d %d --> %d %d %d --> 0x%X",sector,rdo,det,ns,dep,board_id) ;
 
 	return board_id ;
 }
-
-
-		
