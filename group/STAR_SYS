@@ -14,35 +14,61 @@ set self="STAR_SYS"
 # Sort it out otherwise via uname command
 #
 if ( "${STAR_SYS}" == "") then
+    if ( $?DECHO ) echo "$self :: STAR_SYS still empty - trying uname"
     # selection using uname -sr
     set mach_os = `uname -sr | sed -e 's/ //g' -e 's/\.//g' -e 's/(.*//'`
 
     switch ($mach_os)
+     case "Linux222":
+	if ( $?DECHO ) echo "$self :: Linux222 logic branching"
+	setenv STAR_SYS i386_redhat51
+	breaksw
+
      case "Linux*":
+	if ( $?DECHO ) echo "$self :: any Linux logic branching"
 	#setnenv STAR_SYS i386_redhat61
 	# Creating a sys name like <architecture>_<sysname><sysversion>
-	set sysname = `uname -s | tr '[A-Z]' '[a-z]'`
-	set architecture =  `uname -m | sed -e 's/_//g'`
-	set sysversion = `uname -r | $AWK -F- '{print $1}' | sed -e 's/\.//g'`
+	### 2019, trying to emulate x8664_sl7 or x8664_rh7 if exists
+	set redhat = ""
+	set architecture =  `/bin/uname -m | /bin/sed -e 's/_//g'`
+	set sysname = `/bin/uname -s | /usr/bin/tr '[A-Z]' '[a-z]'`
+	if ( "$sysname" == "linux") then
+	    if ( -e "/etc/redhat-release") then
+		if ( $?DECHO ) echo "$self :: -> using redhat-release to set arch"
+		set redhat = `$AWK '{print $1 $2}' /etc/redhat-release | /bin/sed "s/[a-z]//g" | $AWK '{print tolower($1)}'`
+		set redhat   = $redhat`$AWK '{for (i=1;i<=NF;i++) if ($i == "release" || $i == "Release") print $(i+1)}' /etc/redhat-release | /bin/sed "s/\..*//"`
+	    endif
+	endif
+	if ( "$redhat" != "") then
+	  set sysversion = ${redhat}
+	  set sysname    = ""
+	else
+	  set sysversion = `/bin/uname -r | $AWK -F- '{print $1}' | /bin/sed -e 's/\.//g'`
+        endif
 	setenv STAR_SYS ${architecture}_${sysname}${sysversion}
 	breaksw
 
      case "OSF1V32":
      case "OSF1V40":
+	if ( $?DECHO ) echo "$self :: Alpha OSF1 logic branch"
 	setenv STAR_SYS alpha_osf32c
 	breaksw
      case "OSF1*":
+	if ( $?DECHO ) echo "$self :: OSF1 logic branch"
 	setenv STAR_SYS osf1
 	breaksw
 
      case "SunOS54"
         setenv STAR_SYS sun4x_54
+	if ( $?DECHO ) echo "$self :: SunOSx454 logic branch (historical)"
 	breaksw
      case "SunOS551"
+	if ( $?DECHO ) echo "$self :: SunOSx455 logic branch (historical)"
         setenv STAR_SYS sun4x_55
 	breaksw
      case "SunOS5*":
-	switch ("`uname -p`")
+	if ( $?DECHO ) echo "$self :: SunOS generic logic branch"
+	switch ("`/bin/uname -p`")
 	    case "*86":
 		setenv STAR_SYS sunx86_55
 		breaksw
@@ -53,10 +79,12 @@ if ( "${STAR_SYS}" == "") then
 	breaksw
 
      case "CYGWIN*":
+	if ( $?DECHO ) echo "$self :: Cygwin detected"
 	setenv STAR_SYS "$mach_os"
 	breaksw
 
      default:
+	if ( $?DECHO ) echo "$self :: Bam!! Unknown"
 	setenv STAR_SYS unknown
 	breaksw
     endsw
@@ -80,7 +108,7 @@ setenv STAR_HOST_SYS $STAR_SYS
 
 # Initially did not think of 64 bit architecture
 # The thought of it and switched all to 64 but we need a way to support
-# both -m32 and -m64 ... So, will rely on USE_64BITS variable. 
+# both -m32 and -m64 ... So, will rely on USE_64BITS variable.
 # Default no.
 if ( ! $?USE_64BITS ) then
     setenv USE_64BITS 0
@@ -211,6 +239,18 @@ if ("${STAR_SYS}" == "sl64_x8664_gcc447") setenv STAR_HOST_SYS sl64_x8664_gcc482
 if ($?DECHO) echo "STAR_SYS = ${STAR_SYS}, STAR_HOST_SYS = ${STAR_HOST_SYS}"
 
 #  $Log: STAR_SYS,v $
+#  Revision 1.61  2019/04/08 20:26:59  jeromel
+#  Adjust
+#
+#  Revision 1.60  2019/04/08 20:01:22  jeromel
+#  Nope, not the same (fixed)
+#
+#  Revision 1.59  2019/04/08 19:43:43  jeromel
+#  More debug info
+#
+#  Revision 1.58  2019/04/08 19:31:57  jeromel
+#  Added debugging + change STAR_SYS logic (VM)
+#
 #  Revision 1.57  2018/12/14 19:03:38  jeromel
 #  Cosmetic change
 #
@@ -393,5 +433,5 @@ if ($?DECHO) echo "STAR_SYS = ${STAR_SYS}, STAR_HOST_SYS = ${STAR_HOST_SYS}"
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 2018/12/14 19:03:38 $
+#             Last modification $Date: 2019/04/08 20:26:59 $
 #
