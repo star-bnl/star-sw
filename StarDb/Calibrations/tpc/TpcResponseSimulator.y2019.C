@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.y2019.C,v 1.1 2018/02/16 20:56:50 perev Exp $
+// $Id: TpcResponseSimulator.y2019.C,v 1.2 2019/04/16 19:29:34 fisyak Exp $
 // $Log: TpcResponseSimulator.y2019.C,v $
+// Revision 1.2  2019/04/16 19:29:34  fisyak
+// Run XIX preliminary dE/dx calibration
+//
 // Revision 1.1  2018/02/16 20:56:50  perev
 // iTPC
 //
@@ -71,7 +74,7 @@ TDataSet *CreateTable() {
   row.K3OR       	    = 0.61;//(row)  for a/s = 2.5e-3 and h/s = 1.0 
   row.FanoFactor 	    = 0.3; //                                                                        
   row.AveragePedestal       = 50.0;// 
-  row.AveragePedestalRMS    = 1.4; // Old Tpc electronics 
+  row.AveragePedestalRMS    = 1.4; // Old Tpc electronics or iTPC
   row.AveragePedestalRMSX   = 0.7; // New Tpx electronics 
   row.tauIntegration        = 2.5*74.6e-9;//   secs 
   row.tauF                  = 394.0e-9;// secs Tpc 
