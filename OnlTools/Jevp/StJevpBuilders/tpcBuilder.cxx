@@ -1,4 +1,4 @@
-// $Id: tpcBuilder.cxx,v 1.5 2019/02/26 19:49:55 videbaks Exp $
+// $Id: tpcBuilder.cxx,v 1.6 2019/04/18 15:21:14 videbaks Exp $
 //
 #include <stdio.h>
 #include <stdlib.h>
@@ -761,6 +761,17 @@ void tpcBuilder::event(daqReader *rdr)
 	    // this cut was used in run18 due to partial lack of pedetsal sub..
 	    // remove timebins where GG osc is important.
 	    if(tb>32 && tb<430) {
+
+	      if(s==12){
+		if(dd->pad==41 && dd->row==26)
+		  continue;
+	      }
+
+	      if(s==14){
+		if(dd->pad==41 && dd->row==38)
+		  continue;
+	      }
+
 	      charge_counts[dd->pad][dd->row] += adc;
 	    }
 	    tb_charge_counts[tb] += adc;
@@ -855,10 +866,14 @@ void tpcBuilder::event(daqReader *rdr)
 	      if(s==12){
 		if(dd->pad==19 && dd->row+27==43)
 		  continue;
+
 	      }
+
 	      if(s==22){
 		if(dd->pad==71 && dd->row+27==56)
 		  continue;
+
+
 	      }
 	      charge_counts[dd->pad][dd->row+27] += adc;
 	    }
