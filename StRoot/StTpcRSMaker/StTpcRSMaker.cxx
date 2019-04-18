@@ -71,13 +71,13 @@ struct HitPoint_t {
 //#define __LASERINO__
 //#define Old_dNdx_Table
 #define __STOPPED_ELECTRONS__
-//#define __DEBUG__
+#define __DEBUG__
 #if defined(__DEBUG__)
 #define PrPP(A,B) if (Debug()%10 > 2) {LOG_INFO << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.86 2018/12/16 14:26:30 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.87 2019/04/18 14:02:23 fisyak Exp $";
 #define __ClusterProfile__
 static Bool_t ClusterProfile = kFALSE;
 #define Laserino 170
@@ -203,6 +203,7 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     Int_t Mask = -1; // 22 bits
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection);
     CLRBIT(Mask,StTpcdEdxCorrection::kdXCorrection);
+    //    CLRBIT(Mask,StTpcdEdxCorrection::kEdge);
     //    CLRBIT(Mask,StTpcdEdxCorrection::kTanL);
     m_TpcdEdxCorrection = new StTpcdEdxCorrection(Mask, Debug());
   }
@@ -630,7 +631,11 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   if (g2t_track) tpc_track = g2t_track->GetTable();
   St_g2t_vertex  *g2t_ver = (St_g2t_vertex *) GetDataSet("geant/g2t_vertex");// if (!g2t_ver)      return kStWarn;
   g2t_vertex_st     *gver = 0;
-  if (g2t_ver) gver = g2t_ver->GetTable();
+  Int_t NV = 0;
+  if (g2t_ver) {
+    gver = g2t_ver->GetTable();
+    NV = g2t_ver->GetNRows();
+  }
   g2t_tpc_hit_st *tpc_hit_begin = g2t_tpc_hit->GetTable();
   g2t_tpc_hit_st *tpc_hit = tpc_hit_begin;
   if (m_TpcdEdxCorrection) {
@@ -674,6 +679,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
       Double_t mass = 0;
       if (tpc_track) {
 	id3        = tpc_track[Id-1].start_vertex_p;
+	assert(id3 > 0 && id3 <= NV);
 	ipart      = tpc_track[Id-1].ge_pid;
 	charge     = (Int_t) tpc_track[Id-1].charge;
 	StParticleDefinition *particle = StParticleTable::instance()->findParticleByGeantId(ipart);
@@ -1379,9 +1385,12 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
     digitalSector->clear();
   for (row = 1;  row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
     Int_t NoOfPadsAtRow = St_tpcPadConfigC::instance()->padsPerRow(sector,row);
-    Double_t pedRMS = St_TpcResponseSimulatorC::instance()->AveragePedestalRMSX();
-    if (St_tpcPadConfigC::instance()->iTPC(sector) && St_tpcPadConfigC::instance()->IsRowInner(sector,row)) 
-      pedRMS = St_TpcResponseSimulatorC::instance()->AveragePedestalRMS();
+    Double_t pedRMS = St_TpcResponseSimulatorC::instance()->AveragePedestalRMS();
+    if (St_tpcAltroParamsC::instance()->N(sector-1) > 0) {
+      if (! (St_tpcPadConfigC::instance()->iTPC(sector) && St_tpcPadConfigC::instance()->IsRowInner(sector,row))) {
+	pedRMS = St_TpcResponseSimulatorC::instance()->AveragePedestalRMSX();
+      }
+    }
 #ifdef __DEBUG__
     Float_t AdcSumBeforeAltro = 0, AdcSumAfterAltro = 0;
 #endif /*     __DEBUG__ */
@@ -1897,7 +1906,7 @@ Bool_t StTpcRSMaker::TrackSegment2Propagate(g2t_tpc_hit_st *tpc_hitC, g2t_vertex
   Double_t tof = gver->ge_tof;
   //	if (! TESTBIT(m_Mode, kNoToflight)) 
   tof += tpc_hitC->tof;
-  Double_t driftLength = TrackSegmentHits.coorLS.position().z() + tof*gStTpcDb->DriftVelocity(sector); 
+  Double_t driftLength = TrackSegmentHits.coorLS.position().z() + tof*gStTpcDb->DriftVelocity(sector); // ,row); 
   if (driftLength > -1.0 && driftLength <= 0) {
     if ((row >  St_tpcPadConfigC::instance()->numberOfInnerRows(sector) && driftLength > -gStTpcDb->WirePlaneGeometry()->outerSectorAnodeWirePadPlaneSeparation()) ||
 	(row <= St_tpcPadConfigC::instance()->numberOfInnerRows(sector) && driftLength > -gStTpcDb->WirePlaneGeometry()->innerSectorAnodeWirePadPlaneSeparation())) 
@@ -2039,7 +2048,7 @@ void StTpcRSMaker::GenerateSignal(HitPoint_t &TrackSegmentHits, Int_t sector, In
 Double_t StTpcRSMaker::dEdxCorrection(HitPoint_t &TrackSegmentHits) {
   Double_t dEdxCor = 1;
   if (m_TpcdEdxCorrection) {
-    dEdxCor = -1;
+    //    dEdxCor = -1;
     Double_t dStep =  TMath::Abs(TrackSegmentHits.tpc_hitC->ds);
     dEdxY2_t CdEdx;
     memset (&CdEdx, 0, sizeof(dEdxY2_t));
@@ -2053,7 +2062,7 @@ Double_t StTpcRSMaker::dEdxCorrection(HitPoint_t &TrackSegmentHits) {
     CdEdx.edge   = CdEdx.pad;
     if (CdEdx.edge > 0.5*St_tpcPadConfigC::instance()->numberOfPadsAtRow(CdEdx.sector,CdEdx.row)) 
       CdEdx.edge += 1 - St_tpcPadConfigC::instance()->numberOfPadsAtRow(CdEdx.sector,CdEdx.row);
-  CdEdx.F.dE     = 1;
+    CdEdx.F.dE     = 1;
 #if 0
     CdEdx.dCharge= tpcHit->chargeModified() - tpcHit->charge();
     Int_t p1 = tpcHit->minPad();
@@ -2093,8 +2102,11 @@ Double_t StTpcRSMaker::dEdxCorrection(HitPoint_t &TrackSegmentHits) {
 //________________________________________________________________________________
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.86 2018/12/16 14:26:30 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.87 2019/04/18 14:02:23 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.87  2019/04/18 14:02:23  fisyak
+// Keep hits with bad dE/dx information, revisit handling of pedRMS for Tpx and iTPC
+//
 // Revision 1.86  2018/12/16 14:26:30  fisyak
 // Switch off DEBUG, use local position for phi correction
 //
