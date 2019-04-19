@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.38.2.1 2017/12/02 00:38:52 perev Exp $
+ * $Id: StvNode.cxx,v 1.38.2.2 2019/04/19 20:36:55 perev Exp $
  *
  * /author Victor Perev
  */
@@ -9,6 +9,7 @@
 #include <math.h>
 #include <stdio.h>
 #include "TString.h"
+#include "TVector3.h"
 
 #include "Stv/StvToolkit.h"
 #include "Stv/StvNode.h"
@@ -80,12 +81,11 @@ double StvNode::GetTime() const
 void StvNode::Print(const char *opt) const
 {
 static const char *txt = "X Y Z Pt Cu H R E Ep L Ps Tl P[ E[ Pa Sg";
-static const char *hhh = "x y z r e ";
+static const char *hhh = "x y z r e re";
   if (!opt || !opt[0]) opt = "_";
   TString myOpt(opt);myOpt+=" ";
   int dir = myOpt.Index("=");
   dir = (dir<0)? 2:myOpt[dir+1]-'0';
-  int djr = dir; if (djr>3) djr-=4;
   double val,err[2];
   const StvNodePars &fp= mFP[dir];
   const StvFitErrs  &fe= mFE[dir];
@@ -101,7 +101,7 @@ static const char *hhh = "x y z r e ";
   if (GetType()==kPrimNode) ts='P';
 
   printf("%p(%s)",(void*)this,ts.Data());
-  printf("\t%s=%g","Xi2",GetXi2(djr));
+  printf("\t%s=%g","Xi2",GetXi2(dir));
   int iopt=0;
   const char *myopt = myOpt.Data(); char*e;
   for (int i=0;txt[i];i++) {
@@ -143,21 +143,25 @@ static const char *hhh = "x y z r e ";
     for (int i=0; hhh[i];i++) {
        err[0]=-999;val=-999;
       if (hhh[i]==' ') continue;
-      if ((iopt=myOpt.Index(TString(hhh+i,2)))<0) continue;
-      if (hhh[i+1]==' ')        {//Single letter request 
-        if (hhh[i]=='r')        { val = hit->getRxy();}
-        else if (hhh[i]=='e')   {err[0] = sqrt(mHrr[0]); err[1] = sqrt(mHrr[2]);}
-      else                      {val = hit->x()[i/2];} 
-      if (fabs(val+999)>1e-6)   {printf("\th%c=%g",hhh[i],val);}
-      if (err[0]>-999)          {printf("\thh=%7.2g zz=%7.2g",err[0],err[1]);}
-      } else if (txt[i+1]=='[') {// now print by index
-
-      int idx = strtol(myopt+i+2,&e,10);
-      TString tnam(myopt+i,e-(myopt+i)+1);
-      if      (txt[i]=='e')     {val = mHrr[idx];}
-      printf("\t%s=%g",tnam.Data(),val);
-      } 
-    }
+      ts = hhh[i]; ts+=hhh[i+1];i++;
+      if (myOpt.Index(ts)<0) continue;
+      iopt=i/2;
+      switch(iopt) {
+	case 0:;case 1:; case 2:; 
+          val = hit->x()[iopt]; 		break;
+	case 3: val = hit->getRxy(); 	break;
+	case 4: {err[0] = sqrt(mHrr[0]); err[1] = sqrt(mHrr[2]); break;}
+	case 5: { //residual
+          TVector3 vhit(hit->x());
+          TVector3 vdir(fp._d); 
+          TVector3 vpos0(fp._x); 
+          val = (vpos0-vhit).Mag2()- pow((vpos0-vhit).Dot(vdir),2);
+          val = sqrt(val); break;
+	}
+      }
+      if (fabs(val+999)>1e-6)   {printf("\th%s=%g",ts.Data(),val);}
+      if (err[0]>-999)          {printf("\th%s=%7.2g %7.2g",ts.Data(),err[0],err[1]);}
+    } 
   }
 
   printf("\n");
@@ -219,4 +223,3 @@ StvELossTrak *StvNode::ResetELoss(const StvNodePars &pars,int dir)
   mELoss->Set(0,p);	
   return mELoss;
 }
- 

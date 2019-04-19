@@ -68,6 +68,7 @@ public:
   const StHitPlane *GetHitPlane() const 	{ return mHitPlane  ;}
   void  SetHitPlane(const StHitPlane *hitPlane) { mHitPlane=hitPlane;}
   void  SetELoss(StvELossTrak *el,int  )        { mELoss=el         ;}  
+  void  SetLen(double len)        		{ mLen = len        ;}  
   const StvELossTrak *GetELoss() const		{ return mELoss     ;}  
   
  double GetXi2(int dir=2) const 		{ return mXi2[dir]  ;}
