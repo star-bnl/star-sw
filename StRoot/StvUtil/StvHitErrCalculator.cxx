@@ -8,6 +8,7 @@
 #include "StvHitErrCalculator.h"
 #include "StvUtil/StvDebug.h"
 #include "Stv/StvHit.h"
+#include "THelix3d.h"
 #include <map>
 #include <string>
 
@@ -50,45 +51,6 @@ StvHitErrCalculator *StvHitErrCalculator::Inst(const char *name)
 void StvHitErrCalculator::SetPars(const double *par)
 {
   memcpy(mPar,par, GetNPars()*sizeof(*mPar));
-}
-//______________________________________________________________________________
-void StvHitErrCalculator::SetTrack(const float tkDir[3])
-{  
-  double d[3]={tkDir[0],tkDir[1],tkDir[2]};
-  SetTrack(d);
-}
-//______________________________________________________________________________
-void StvHitErrCalculator::SetTrack(const double tkDir[3])
-{  
-  double nor = (tkDir[0]*tkDir[0]+tkDir[1]*tkDir[1]+tkDir[2]*tkDir[2]);
-  nor = (fabs(nor-1)< 1e-2)? (nor+1)*0.5 : sqrt(nor);
-  TCL::vscale(tkDir,1./nor,mTG[0],3);
-  
-  nor = (1.-mTG[0][2])*(1+mTG[0][2]);
-  if (nor <1e-6) { 
-    mTG[1][0]=1; mTG[1][1]=0; mTG[1][2]=0;
-    mTG[2][0]=0; mTG[2][1]=1; mTG[2][2]=0;
-  } else {
-    nor = sqrt(nor);
-    mTG[1][0] = -mTG[0][1]/nor; mTG[1][1] = mTG[0][0]/nor;mTG[1][2] = 0;
-
-    mTG[2][0] = /*mTG[0][1]*mTG[1][2]*/-mTG[1][1]*mTG[0][2]  ;
-    mTG[2][1] =   mTG[0][2]*mTG[1][0]/*-mTG[1][2]*mTG[0][0]*/;
-    mTG[2][2] =   mTG[0][0]*mTG[1][1]  -mTG[1][0]*mTG[0][1]  ;
-  }
- for (int i=0;i<3;i++) {
- for (int k=0;k<3;k++) {
-   double dot = TCL::vdot(mTG[i],mTG[k],3);
-   if (i==k) dot--;
-   assert(fabs(dot)<1e-6);
- }}
-
- for (int i=0;i<3;i++) {
-   int j=(i+1)%3;int k=(j+1)%3;
-   double qwe =(TVector3(mTG[i]).Cross(TVector3(mTG[j]))).Dot(TVector3(mTG[k]));
-   assert(fabs(qwe-1)<1e-6);
- }
-
 }
 //______________________________________________________________________________
 void StvHitErrCalculator::SetTkDir(const double tkDir[3][3])
@@ -185,10 +147,13 @@ static const double kMicron2 = 1.5e-8;
    double T[2][2] = {{dudy,dudz}
                     ,{dvdy,dvdz}};
    TCL::trasat(T[0],detRr,hRr,2,2);
+
+   double myCos = DOT(mTG[0],hiDir[0]);
+   double qwe = (detRr[0]*detRr[2]-detRr[1]*detRr[1])*myCos*myCos;
+   qwe -= hRr[0]*hRr[2]-hRr[1]*hRr[1];
+   assert(fabs(qwe)<1e-6);
    if (hRr[0]<kMicron2) hRr[0]=kMicron2;
    if (hRr[2]<kMicron2) hRr[2]=kMicron2;
-//    assert(hRr[0]>1e-8);//???????????????????????????
-//    assert(hRr[2]>1e-8);
    return 0;
 } 
 #endif
@@ -508,7 +473,11 @@ static const char *titXYZ[6] = {"XX","YX","YY","ZX","ZY","XX"};
   StvTpcHitErrCalculator calc("TpcInnerHitErrs");
   int nPars = calc.GetNPars();
   calc.SetPars(par);
-  calc.SetTrack(Nt);
+  TkDir_t tkdir;
+  double H[3]={0,0,1};
+  THelix3d::MakeTkDir(Nt,H,tkdir);
+
+  calc.SetTkDir(tkdir);
   double hRR[6],dRR[10][3],dRRx[10][6];
 
   StvTpcHitErrCalculator calk("TpcInnerHitErrs.tmp");
@@ -535,7 +504,8 @@ static const char *tit[3] = {"Test CalcDetDers()","Test CalcDcaDers()","Test int
       if (delta<1e-6) delta=1e-6;
       myPar[ider]+=delta;
       calk.SetPars(myPar);
-      calk.SetTrack(Nt);
+      THelix3d::MakeTkDir(Nt,H,tkdir);
+      calc.SetTkDir(tkdir);
       double myRR[6];
       switch(detDca) {
         case 0: calk.CalcDetErrs(hiPos,hiDir,myRR);break;
@@ -619,7 +589,11 @@ void StvHitErrCalculator::Test(double phiG,double lamG)
   calc.SetPars(par);
   double np[3]={ cP,  sP, tL};
   double hitErr[3];
-  calc.SetTrack(np);
+  TkDir_t tkdir;
+  double H[3]={0,0,1};
+  THelix3d::MakeTkDir(np,H,tkdir);
+  calc.SetTkDir(tkdir);
+//  calc.SetTrack(np);
   float hiDir[3][3]={{1,0,0}
                     ,{0,1,0}
 		    ,{0,0,1}};
@@ -645,7 +619,9 @@ void StvHitErrCalculator::Test(double phiG,double lamG)
    for (int i=0;i<3;i++) { np[i] = myV[3][i];
    for (int j=0;j<3;j++) { hiDir[i][j] = myV[i][j]; }}
 //		Now try how life is here
-   calc.SetTrack(np);
+   THelix3d::MakeTkDir(np,H,tkdir);
+   calc.SetTkDir(tkdir);
+//   calc.SetTrack(np);
    calc.CalcDetErrs(0,hiDir,hitErr);
    printf("Det Rot   :  \tYY=%g \tYZ=%g \tZZ=%g \tTrace=%g\n"
         ,hitErr[0],hitErr[1],hitErr[2],hitErr[0]+hitErr[2]);
@@ -699,7 +675,12 @@ void StvHitErrCalculator::Dest(double phiG,double lamG)
 
   StvHitErrCalculator calc("",nPars);
   calc.SetPars(par);
-  calc.SetTrack(Nt);
+
+  TkDir_t tkdir;
+  double H[3]={0,0,1};
+  THelix3d::MakeTkDir(Nt,H,tkdir);
+  calc.SetTkDir(tkdir);
+//  calc.SetTrack(Nt);
   double hRR[3],dRR[10][3];
   calc.CalcDcaErrs(hiPos,hiDir,hRR);
   calc.CalcDcaDers(dRR);
@@ -716,7 +697,11 @@ void StvHitErrCalculator::Dest(double phiG,double lamG)
     myPar[ider]+=delta;
     calk.SetPars(myPar);
     myPar[ider]=par[ider];
-    calk.SetTrack(Nt);
+    TkDir_t tkdir;
+    double H[3]={0,0,1};
+    THelix3d::MakeTkDir(Nt,H,tkdir);
+    calc.SetTkDir(tkdir);
+///    calk.SetTrack(Nt);
     double myRR[3];
     calk.CalcDcaErrs(hiPos,hiDir,myRR);
     for (int j=0;j<3;j++) {

@@ -11,8 +11,6 @@ enum {kMaxPars=10};
 
 StvHitErrCalculator(const char *name,int nPars=2);
         void SetPars(const double *par);
-        void SetTrack(const double tkDir[3]);
-        void SetTrack(const float  tkDir[3]);
         void SetTkDir(const double tkDir[3][3]);
 virtual  int CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]);
 virtual  int CalcDcaErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]);
