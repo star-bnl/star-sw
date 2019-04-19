@@ -149,18 +149,15 @@ static StvToolkit* kit = StvToolkit::Inst();
   TRandom *myRandom = gRandom;
   gRandom = gMyRandom;
 
-  myInpPars = mInpPars; //????????????????????????????????????????????????
-  myOutPars = mOutPars; //????????????????????????????????????????????????
-
   mELoss = kit->GetELossTrak(); mSteps->Set(mELoss);
   mELoss->Reset();
   int myExit = 0;
   mInpPars->get(mHelix);
 myHelix = mHelix;
-//  assert(!mInpErrs->Sigre());	//Test signature
+  for (int i=0,li=0;i< 5;li+=++i) {assert((*mInpErrs)[li+i]>0);}
   mInpErrs->Get(mHelix);
-  mOutDeri->Clear();		//Unit matrix
   if (!mDir) mHelix->Backward();
+  mOutDeri->Clear();		//Unit matrix
   StvNodePars tmpPars;
   for (int iMany=0; iMany <kNMany;iMany++) {
     TVirtualMC::GetMC()->ProcessEvent();
@@ -174,7 +171,7 @@ myHelix = mHelix;
     mom.GetXYZT(p);;
     mOutPars->set(pos,p,pinv,kit->GetMag(pos));
     mOutErrs->Set(mHelix);
-    assert(mOutErrs->mPP>0);
+    for (int i=0,li=0;i< 5;li+=++i) {assert((*mOutErrs)[li+i]>0);}
     if (!mDir) {
       mOutPars->reverse();
       mOutDeri->Backward();
