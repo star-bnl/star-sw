@@ -39,7 +39,7 @@ public:
 const StvFitErrs& operator*(const StvFitDers &der) const;
       StvFitErrs& operator= (const THEmx3d_t  &emx  );
       StvFitErrs& operator= (const TkDir_t   &tkdir);
-             void Update(const TkDir_t &tkdir);
+//????             void Update(const TkDir_t &tkdir);
  void Set(const THelixTrack *he);
  void Set(const THelix3d *he);
  void Get(      THelix3d *he) const;
@@ -110,6 +110,7 @@ public:
   void set(const TRungeKutta *ht);
   void get(      TRungeKutta *ht) const;
   void move(double len, StvFitErrs *errs=0 );
+  void move(const double xyz[3]);
   void merge(const StvNodePars &other,double fak=0.5 );
   void add(const StvELossTrak *el,double len);
   
@@ -118,6 +119,7 @@ public:
 const double *dir() const {return _d;}
 const double *pos() const {return _x;}
       double *pos()       {return _x;}
+const double *mag() const {return _h;}
 double getSign() const	  {return _x[0]*_d[0]+_x[1]*_d[1];}
 double getP()    const;
 double getP2()   const;
@@ -236,6 +238,7 @@ std::vector<Aux> mMats;
 class StvNodeParsTest
 {
 public:
+virtual ~StvNodeParsTest(){}
 static void Test();
 static void TestDerRadial();
 static void TestGetRadial(int nEv=10000);
