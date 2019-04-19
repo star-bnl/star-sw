@@ -2,8 +2,14 @@
 #include "TSystem.h"
 #include "TVector3.h"
 #include "TSystem.h"
+#include "THelix3d.h"
+#include "TGeoManager.h"
+#include "TGeoVolume.h"
+#include "TGeoMaterial.h"
+#include "StvToolkit.h"
+#include "StvUtil/StvELossTrak.h"
 #include "StvUtil/StvDebug.h"
-#include "StvDraw.h"
+#include "StvUtil/StvGrappa.h"
 #include "StvTrack.h"
 #include "StvNode.h"
 #include "StvHit.h"
@@ -16,11 +22,11 @@
 //Constants for THelixFitter (Approx)
 static const double kBAD_XI2cm2 = 0.9*0.9	// max Xi2 in cm**2 without errs
                   , kBAD_XI2    = 50		// max Xi2 (with errs)
-                  , kBAD_RHO=0.1		// max curvature
+                  , kBAD_RHO=1./66.9		// max curvature(Pt=0.1GeV
                   , kMIN_Rxy=50;		// minimal radius for seed hits
 
 ClassImp(StvSeedFinder)
-
+StvSeedFinder* StvSeedFinder::fgCurrFinder = 0;
 //_____________________________________________________________________________
 StvSeedFinder::StvSeedFinder(const char *name):TNamed(name,"")
 { 
@@ -55,32 +61,29 @@ void StvSeedFinder::SetVtx(const float vtx[3])
 void StvSeedFinder::Show()
 {
   if (!fDraw) fDraw = NewDraw();
-  StvConstHits &ch = (StvConstHits &)fSeedHits;
-  fDraw->Road(fHelix,ch,kGlobalTrack,10.);
-  fDraw->UpdateModified();
-  fDraw->Wait();
+  fDraw->Zhow(&fSeedHits);
 }
 //_____________________________________________________________________________
-void StvSeedFinder::ShowRest(EDraw3DStyle style)
+void StvSeedFinder::ShowRest(int style)
 {
    if (!fDraw) fDraw = NewDraw();
-   std::vector<StvHit*> myHits;  
+   if (!style) style = kHit;
+   StvHits myHits;  
    const StVoidArr *hitArr =  StTGeoProxy::Inst()->GetSeedHits();
    int nHits =  hitArr->size();
    for (int iHit=0;iHit<nHits;iHit++) {
      StvHit *stiHit = (StvHit*)(*hitArr)[iHit];
      if (stiHit->isUsed()) continue;
-     myHits.push_back(stiHit);
+     const float *f = stiHit->x();
+     fDraw->Add(f[0],f[1],f[2],style);
    }
-   fDraw->Hits(myHits,style);
-   fDraw->UpdateModified();
-   fDraw->Wait();
+   fDraw->Show();
 }
 //_____________________________________________________________________________
 void StvSeedFinder::ShowIn()
 {
    if (!fDraw) fDraw = NewDraw();
-   std::vector<StvHit*> myHits;  
+   StvHits myHits;  
    const StVoidArr *hitArr =  StTGeoProxy::Inst()->GetSeedHits();
    int nHits =  hitArr->size();
    for (int iHit=0;iHit<nHits;iHit++) {
@@ -88,15 +91,12 @@ void StvSeedFinder::ShowIn()
      if (Reject(stiHit->x())) continue; 
      myHits.push_back(stiHit);
    }
-   fDraw->Hits(myHits,kUnusedHit);
-   fDraw->UpdateModified();
-   fDraw->Wait();
+   fDraw->Show(&myHits,kHit);
 }
 //_____________________________________________________________________________
-StvDraw *StvSeedFinder::NewDraw()
+StvGrappa *StvSeedFinder::NewDraw()
 {
-   StvDraw *dr = new StvDraw();
-   dr->SetBkColor(kWhite);
+   StvGrappa *dr = new StvGrappa();
    return dr;
 }
 
@@ -121,7 +121,7 @@ static int nCall=0; nCall++;
   }  
   fXi2[0] =circ.Fit();
   if (fXi2[0]>kBAD_XI2cm2) 		return 0; //Xi2 too bad, no updates
-  if (fabs(circ.GetRho()) >kBAD_RHO) 	return 0; //Too big curvature
+  if (fabs(circ.GetRho()*circ.GetCos()) >kBAD_RHO) 	return 0; //Too big curvature
 
   const double dBeg[3]={fBeg[0],fBeg[1],fBeg[2]};
   double l = circ.Path(dBeg); circ.Move(l);
@@ -138,7 +138,11 @@ static int nCall=0; nCall++;
 //		Set position errors for helix
     const StHitPlane *hp = hit->detector();
     StvHitErrCalculator* myHitErrCalc = (StvHitErrCalculator*)hp->GetHitErrCalc();
-    myHitErrCalc->SetTrack(circ.Dir());
+    TkDir_t tkdir;
+    double H[3]={0,0,1};
+    THelix3d::MakeTkDir(circ.Dir(),H,tkdir);
+    myHitErrCalc->SetTkDir(tkdir);
+
     double hRR[3];
 //     const Mtx33F_t &hd = hp->GetDir(fx);
 //     int ans = myHitErrCalc->CalcDcaErrs(fx,hd,hRR);
@@ -165,6 +169,68 @@ static int nCall=0; nCall++;
   }
   return &fHelix;
 }    
+//_____________________________________________________________________________
+void StvSeedFinder::Init( StvTrack *tk) const
+{
+static StTGeoProxy *prx = StTGeoProxy::Inst();
+static StvToolkit  *kit = StvToolkit::Inst();
+
+  double Xi2 = fHelix.Chi2();
+  THelixTrack circ(fHelix);
+  circ.Backward(); 	//Make direction In to Out
+  double s=0,xyz[3]; 
+  int iNode = 0;
+  StvNode *node=0,*preNode = 0;
+  for (int ihit=0;ihit<(int)fSeedHits.size();ihit++) {
+    iNode++;
+    StvHit *hit = fSeedHits[ihit];
+    const auto *xhit = hit->x();
+    for (int i=0; i<3;i++) {xyz[i] = xhit[i];}
+    double ds = circ.Path(xyz);
+    circ.Move(ds);
+    s+=ds;
+    node = kit->GetNode();
+    tk->push_front(node);
+    node->SetLen(s);
+    node->SetHit(hit);
+    const StHitPlane *hitPlane = hit->detector();
+    node->SetHitPlane(hitPlane);
+    node->SetType(StvNode::kRegNode);
+    StvNodePars &pars = node->GetFP(0);
+    StvFitErrs  &errs = node->GetFE(0);
+    pars.set(&circ);
+    errs.Set(&circ);
+    for (int i=0,li=0;i< 5;li+=++i) {assert(errs[li+i]>0);}
+    node->SetXDive(pars.pos());	
+    for (int i=0;i<2;i++) {
+      node->SetFit(pars,errs,i);
+      node->SetPre(pars,errs,i);
+      node->SetXi2(Xi2,i);
+    }
+//	Fill hitErrs    
+    auto *hitErrCalc = (StvHitErrCalculator*)hitPlane->GetHitErrCalc();
+    assert(hitErrCalc);
+    hitErrCalc->SetTkDir(pars.getTkDir());
+    double dcaHitErrs[3];
+    int ans = hitErrCalc->CalcDcaErrs(hit,dcaHitErrs);
+    assert(!ans);
+    node->SetHE(dcaHitErrs);
+    if (fabs(ds)<=0) continue;
+//		Fill ELoss
+    StvELossTrak *eloss = kit->GetELossTrak();
+    int voluId = hitPlane->GetVoluId();
+    TGeoVolume *volu = gGeoManager->GetVolume(voluId);
+    const TGeoMaterial *mate = volu->GetMaterial();
+    eloss->Set(mate,pars.getP());
+    eloss->Add(ds);
+    node->SetELoss(eloss,0);
+  }
+
+  return;
+} 
+
+
+
 #if 0
 #include "StarRoot/TIdTruUtil.h"
 //_____________________________________________________________________________
@@ -241,7 +307,7 @@ void StvSeedFinder::DrawHelix()
     StvDebug::AddGra(px[0],px[1],px[2],3);
     StvDebug::AddGra(fx[0],fx[1],fx[2],4);
   }
-//  StvDebug::ShowGra();
+  StvDebug::ShowGra();
 }
  
 //_____________________________________________________________________________

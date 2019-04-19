@@ -7,7 +7,7 @@
 #include "THelixTrack.h"
 #include "TNamed.h"
 #include "StvStl.h"
-#include "StDraw3D.h"
+#include "StvUtil/StvGrappa.h"
 
 #ifndef MAX
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
@@ -18,7 +18,7 @@
 
 
 /// \class StvSeedFinder
-class StvDraw;
+class StvGrappa;
 class StvHit;
 class StvTrack;
 class StvKonst_st;
@@ -41,18 +41,23 @@ public:
           void      SetIdTruth() 	{fIdTruth = 1; }
   virtual  int      IfVtx() const {return fVtx[2]<1e11;}
 
+
 virtual const StvHits *GetHits() const 	{return &fSeedHits;}
+virtual void  Init(StvTrack* tk) const; 
 
   virtual void Show();
-  virtual void ShowRest(EDraw3DStyle style = kUnusedHit);
+  virtual void ShowRest(int style = 0);
   virtual void ShowIn();
   virtual  int Reject(const float *x) 	{return 0;}
 
         double GetXi2(int i=1) const	{return fXi2[i];}
           void KNNMiMax(double &mi,double &ma);
           void DrawHelix();
+  void SetCurrent() 			{fgCurrFinder = this;}
+static  StvSeedFinder* GetCurrent() 	{return fgCurrFinder;}
+static  StvGrappa *NewDraw();
 
-static    StvDraw *NewDraw();
+static StvSeedFinder *fgCurrFinder;
 protected:
   const THelixTrack* Approx();
 protected:
@@ -61,10 +66,10 @@ int fMaxHits;		//Max number hits fo seed
 int fSgn;
 int fIdTruth;
 StvHits  fSeedHits;
-THelixFitter fHelix;
-StvDraw *fDraw;
 float fVtx[3];		//Vertex if already known
 double fXi2[2];		//Xi2[0] without hit errs,[1] with hit errs
+THelixFitter fHelix;
+StvGrappa *fDraw;
 ClassDef(StvSeedFinder,0);
 };
 
