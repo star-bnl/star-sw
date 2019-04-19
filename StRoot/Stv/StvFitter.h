@@ -75,4 +75,14 @@ static StvFitter *mgFitter;
 };
 #endif //__StvFitter_h_
 
+class TCLx 
+{
+public:
+static int trsinv2x2(const double *pM,double *pMi);
+static int trsinv3x3(const double *pM,double *pMi);
+static int trsinv4x4(const double *pM,double *pMi);
+static int trsinv5x5(const double *pM,double *pMi);
+static double sign(const double *a,int n);
+static void Test();
+};
 
