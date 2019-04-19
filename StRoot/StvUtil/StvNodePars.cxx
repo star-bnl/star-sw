@@ -207,6 +207,15 @@ static THelix3d th;
 }
 
 //______________________________________________________________________________
+void StvNodePars::move(const double xyz[3]) 
+{
+static THelix3d th;
+  get(&th); 
+  double len = th.Path(xyz);
+  th.Move(len);
+  set(&th); 
+}
+//______________________________________________________________________________
 const StvFitPars &StvNodePars::operator-(const StvNodePars& what) const
 {
 static StvFitPars fp;
@@ -223,7 +232,8 @@ static StvFitPars fp;
 //______________________________________________________________________________
 void StvNodePars::operator+=(const StvFitPars &fp)
 {
-  
+static StvToolkit *kit = StvToolkit::Inst();  
+
   if (_tkdir[0][0]>1) THelix3d::MakeTkDir(_d,_h,_tkdir);
   for (int i=0;i<3;i++) {
     _x[i]+= _tkdir[kKU][i]*fp.mU    + _tkdir[kKV][i]*fp.mV; 
@@ -235,6 +245,7 @@ void StvNodePars::operator+=(const StvFitPars &fp)
     nor = sqrt(nor);
     _d[0]/=nor; _d[1]/=nor; _d[2]/=nor;
   }
+  kit->GetMag(_x,_h); set(_h);
   THelix3d::MakeTkDir(_d,_h,_tkdir);
 }
 //_____________________________________________________________________________
@@ -319,26 +330,6 @@ void StvFitErrs::Add(const StvELossTrak *el,double len)
   mVV+= el->TotOrt2() 			*fakLen;
   mPP+= el->TotPinvErr2()		*fakLen;
 }
-//_____________________________________________________________________________
-void StvFitErrs::Update(const TkDir_t &tkdir)
-{
-
-  double U0U1 = dot(tkdir[kKU],mTkDir[kKU]); 
-  double U0V1 = dot(tkdir[kKU],mTkDir[kKV]); 
-  double V0U1 = U0V1; 
-  double V0V1 = dot(tkdir[kKV],mTkDir[kKV]); 
-  
-  double T[5][5] = {{U0U1, U0V1,    0,    0, 0}
-                   ,{V0U1, V0V1,    0,    0, 0}
-                   ,{   0,    0, U0U1, U0V1, 0}
-                   ,{   0,    0, V0U1, V0V1, 0}
-                   ,{   0,    0,    0,    0, 1}};
-  double qwe[15];
-  TCL::ucopy((const double*)*this,qwe,15);
-  TCL::trasat(T[0],qwe,*this,5,5);
-  TCL::ucopy (tkdir[0],mTkDir[0],3*3);
-}
-
 //_____________________________________________________________________________
 double StvNodePars::diff(const StvNodePars &other,const StvFitErrs &otherr) const 
 { 
