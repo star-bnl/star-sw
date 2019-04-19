@@ -24,18 +24,17 @@
 #include "Stv/StvHitter.h"
 #include "Stv/StvFitter.h"
 #include "Stv/StvTrackFitter.h"
-#include "Stv/StvDraw.h"
 #include "Stv/StvStl.h"
 #include "Stv/StvNode.h"
 #include "Stv/StvTrack.h"
 #include "Stv/StvHitCounter.h"
 ClassImp(StvKalmanTrackFinder)
-
+static int dbMask=0;
 
 typedef std::vector<StvNode*> 		StvNodeVec;
 typedef std::map<double,StvNode*> 	StvNodeMap;
 typedef StvNodeMap::iterator 		StvNodeMapIter ;
-static const double k57 = TMath::RadToDeg();
+//static const double k57 = TMath::RadToDeg();
 static int BOTOHO = (gSystem->Getenv("BOTOHO"))? atoi(gSystem->Getenv("BOTOHO")):0;
 //_____________________________________________________________________________
 StvKalmanTrackFinder::StvKalmanTrackFinder(const char *name):StvTrackFinder(name)
@@ -73,14 +72,7 @@ static int nTally = 0;
 static StvToolkit *kit = StvToolkit::Inst();
 enum {kRepeatSeedFinder = 2};
 
-double pt0BefRefit=0,pt0AftRefit=0;
-double pt1BefRefit=0,pt1AftRefit=0;
-int    nHits0BefRefit=0,nHits0AftRefit=0;
-int    nHits1BefRefit=0,nHits1AftRefit=0;
-
-
-
-  int nTrk = 0,nTrkTot=0,nAdded=0,nHits=0,nSits,nSeed=0,nSeedTot=0,myMask=0;
+  int nTrk = 0,nTrkTot=0,nAdded=0,nHits=0,nSeed=0,nSeedTot=0;
   StvSeedFinders *seedFinders = kit->SeedFinders();
   double aveRes=0,aveXi2=0,aveHits=0;
   mCurrTrak = 0;
@@ -89,94 +81,69 @@ int    nHits1BefRefit=0,nHits1AftRefit=0;
     mSeedFinder = (*seedFinders)[seedFinder];
     for (int repeat =0;repeat<kRepeatSeedFinder;repeat++) {//Repeat search the same seed finder 
       nTrk = 0;nSeed=0; mSeedFinder->Again(repeat);
+      int ans = 0,fail=13;
       while ((mSeedHelx = mSeedFinder->NextSeed())) 
       {
+
+        if (BOTOHO&64) mSeedFinder->DrawHelix();
 	nSeed++; nTally++; 
 
 	if (!mCurrTrak) mCurrTrak = kit->GetTrack();
 	mCurrTrak->CutTail();	//Clean track from previous failure
-
+        mSeedFinder->Init(mCurrTrak);
+        fail = 13;
+        do {
+	nHits = FindTrack(0);
+        
 //=============================
-	nAdded = FindTrack(0);
+        fail = 1;
+        if (nHits<3) break;
+        StvDebug::Count("FindTrack_0",nAdded);
+   	if (BOTOHO&1) StvDebug::Zhow(mCurrTrak);
 //=============================
-    if (BOTOHO&1) StvDebug::Zhow(mCurrTrak);
-
-//???        mCurrTrak->CutEnds();  	//remove ends without hits
-	int ans = 0,fail=13;
 //		Refit track   
-        nHits0BefRefit = mCurrTrak->GetNHits();
-	do {
-           if (nAdded<3) {fail = 7; mSeedFinder->FeedBack(0); break;}
-          fail = 1; if(nHits0BefRefit<3)	break;
+        if (nHits>3) {
+          ans = Refit(1);
+          if (BOTOHO&2) StvDebug::Zhow(mCurrTrak);
+        } 
 //=============================
-	  if(mRefit && nHits0BefRefit>=mKons->mMinHits) {
-	    ans = Refit(1);
-
- if (!ans && mCurrTrak->GetNHits()<=3) { ans=100;}
-
- if (BOTOHO&2) StvDebug::Zhow(mCurrTrak);
-
-
-StvNode *myNode = mCurrTrak->GetNode(StvTrack::kFirstPoint);
-pt0AftRefit = myNode->GetFP().getPt();
-            nHits0AftRefit = mCurrTrak->GetNHits();
-            myMask += 100*nHits0AftRefit;
-          if (nHits0AftRefit<=3)
-
-
-
-            fail = 3; if (nHits0AftRefit<3) 	break;
-          }
-//=============================
-	  nAdded = FindTrack(1);
-//=============================
-          if (nAdded<=0)			continue;;
-if (BOTOHO&4) StvDebug::Zhow(mCurrTrak);
-          nHits1BefRefit = mCurrTrak->GetNHits();
-          fail = 4; if (nHits1BefRefit<mKons->mMinHits) 	break;
-// 			few hits added. Refit track to beam again 
-//=============================
+	nAdded = FindTrack(1);
+        if (nAdded) {
+          StvDebug::Count("FindTrack_1",nAdded);
+          if (BOTOHO&4) StvDebug::Zhow(mCurrTrak);
 	  ans = Refit(0);
-if (BOTOHO&8) StvDebug::Zhow(mCurrTrak);
-
-          fail = 5; if (ans) 			break;
-          nHits = mCurrTrak->GetNHits();
-          myMask += 10000*nHits;
-
-          fail = 6; if (nHits<mKons->mMinHits) 	break;
-
-//=============================
-
-	} while((fail=0));		
+	  fail = 4;
+	  if (ans) break;
+          StvDebug::Count("Refit_1",mCurrTrak->GetNHits());
+          if (BOTOHO&8) StvDebug::Zhow(mCurrTrak);
+        }
+        nHits = mCurrTrak->GetNHits();
+        fail = 6; if (nHits<mKons->mMinHits) 	break;
+      } while((fail=0));		
       
-	nHits = mCurrTrak->GetNHits();
-	if (nHits < mKons->mMinHits)	fail+=100;		;
-        if (fail) nHits=0;
-	if (fail) 	{//Track is failed, release hits & continue
+      if (fail) 	{//Track is failed, release hits & continue
           mSeedFinder->FeedBack(0);
 	  mCurrTrak->CutTail();			
 	  continue;
-        }
-	StvNode *node = MakeDcaNode(mCurrTrak); if(node){};
-
-        mSeedFinder->FeedBack(mCurrTrak);
-
-        mCurrTrak->AddId(10*seedFinder+repeat);
-        mCurrTrak->SetUsed();
-	kit->GetTracks().push_back(mCurrTrak);
-	nTrk++;nTrkTot++;
-
-
-        aveHits+= nHits;
-	aveRes += mCurrTrak->GetRes();
-	aveXi2 += mCurrTrak->GetXi2();
-	mCurrTrak=0;
       }
-      nSeedTot+=nSeed;
-      Info("FindTracks:","SeedFinder(%s) Seeds=%d Tracks=%d ratio=%d\n"
-          ,mSeedFinder->GetName(),nSeed,nTrk,(100*nTrk)/(nSeed+1));
+      StvNode *node = MakeDcaNode(mCurrTrak); if(node){};
+
+      mSeedFinder->FeedBack(mCurrTrak);
+
+      mCurrTrak->AddId(10*seedFinder+repeat);
+      mCurrTrak->SetUsed();
+      kit->GetTracks().push_back(mCurrTrak);
+      nTrk++;nTrkTot++;
+      aveHits+= nHits;
+      aveRes += mCurrTrak->GetRes();
+      aveXi2 += mCurrTrak->GetXi2();
+      mCurrTrak=0;
+    }
+    nSeedTot+=nSeed;
+    Info("FindTracks:","SeedFinder(%s) Seeds=%d Tracks=%d ratio=%d\n"
+        ,mSeedFinder->GetName(),nSeed,nTrk,(100*nTrk)/(nSeed+1));
       
-      if (!nTrk ) break;
+    if (!nTrk ) break;
     }//End of repeat
   }//End of seed finders
 
@@ -201,23 +168,25 @@ double totLen=0;
 StvNode *curNode=0,*preNode=0,*innNode=0,*outNode=0;
 const StHitPlane *prevHitPlane=0;
 
-  mHitCounter->Clear();
   mDive->Reset();
   
-  if (mCurrTrak->empty()) {//Track empty, Backward tracking, to beam
-    StvDebug::ClearGra();
-    assert(!idir);
+  if (idir==0) {//Track with seed, Backward tracking, to beam
+    mHitCounter->Clear();
+    CountHits(mCurrTrak);
+    curNode = mCurrTrak->front();
+    par[0] = curNode->GetFP(0);
+    err[0] = curNode->GetFE(0);
+    nHits = mCurrTrak->GetNHits();
+    mDive->SetPrev(curNode->GetHitPlane()->GetName());	//define previous volume name to avoid doubling
+ #if 0
     par[0].set(mSeedHelx); 		//Set seed pars into par[0] and err[0]
     err[0].Set(mSeedHelx); err[0]*= kKalmanErrFact; 
-///=
-
-
     par[0].reverse();			//Seed direction OutIn but track direction is allways InOut	
     err[0].Backward();
-
+#endif
   } else 	{//Forward or backward tracking
  
-    curNode =(idir)? mCurrTrak->back(): mCurrTrak->front();
+    curNode = mCurrTrak->back();
     par[0] = curNode->GetFP(); err[0] = curNode->GetFE(); 	//Set outer node pars into par[0]
     nTotHits = mCurrTrak->GetNHits();
     mDive->SetPrev(curNode->GetHitPlane()->GetName());	//define previous volume name to avoid doubling
@@ -254,7 +223,8 @@ const StHitPlane *prevHitPlane=0;
     if (par[0].getRxy()     > mKons->mRxyMax) 	break;
     if (fabs(par[0].getCurv())>mKons->mMaxCurv)	break;	
     if (fabs(par[0].getPtin())>mKons->mMaxPti)	break;	
-
+double s=0;
+assert((s=TCLx::sign(err[0],5))>0);
     		
     const StvHits *localHits = 0; 
     if (idive & StvDiver::kDiveHits) {
@@ -303,7 +273,7 @@ const StHitPlane *prevHitPlane=0;
       if (mySkip) break;
       continue;
     } 
-//??    if (prevHitPlane == mHitter->GetHitPlane()) continue;
+    if (prevHitPlane == mHitter->GetHitPlane()) continue;
     prevHitPlane = mHitter->GetHitPlane();
 
     fitt->Prep();
@@ -332,8 +302,6 @@ const StHitPlane *prevHitPlane=0;
     if (minIdx){};
 
     if (mySkip) break; 		//Track Errors too big
-
-
     curNode->SetMem(minHit ,minXi2);
     if (minHit[0] ) 		{	// Fit succesful
       assert(minHit[0] != prevHit); 
@@ -341,6 +309,18 @@ const StHitPlane *prevHitPlane=0;
       myXi2 = fitt->Xi2(minHit[0]);
       int iuerr = fitt->Update(); 
       if (iuerr<=0 || (nHits<3)) {		//Hit accepted
+
+if (dbMask&1) {
+        TVector3 vhit(minHit[0]->x());
+        TVector3 vdir(par[0]._d); 
+        TVector3 vpos0(par[0]._x); 
+        TVector3 vpos1(par[1]._x); 
+        double dis0 = (vpos0-vhit).Mag2()- pow((vpos0-vhit).Dot(vdir),2);
+        dis0 = sqrt(dis0);
+        double dis1 = (vpos1-vhit).Mag2()- pow((vpos1-vhit).Dot(vdir),2);
+        dis1 = sqrt(dis1);
+        printf("OLD=%g NOW=%g dif=%g\n",dis0,dis1,dis0-dis1);
+}
 
         mHitCounter->AddHit();
 	nHits++;nTotHits++;assert(nHits<256);
@@ -380,6 +360,15 @@ assert(vsuma(curNode->GetFE(0).TkDir()[0],3*3)>0.1);
 
   return nHits;
 
+}
+//_____________________________________________________________________________
+void StvKalmanTrackFinder::CountHits(const StvTrack *tk)
+{  
+  for (StvNodeConstIter it=tk->begin();it!=tk->end(); ++it) {
+    StvNode *node = *it;
+    const StvHit *hit= node->GetHit();
+    if (hit) {mHitCounter->AddHit();} else {mHitCounter->AddNit();} 
+  }
 }
 //_____________________________________________________________________________
 int StvKalmanTrackFinder::Swim(int idir, int opt, const double target[3]
@@ -440,7 +429,7 @@ static StvToolkit *kit = StvToolkit::Inst();
   dcaNode->SetXi2(1e11,0);
   dcaNode->SetType(StvNode::kDcaNode);
   double testDca = TCL::vdot(dcaPars.dir(),dcaPars.pos(),2);
-  assert(fabs(testDca)<1e-3*(1+dcaNode->mLen));
+  assert(fabs(testDca)<1e-3*(1+fabs(dcaNode->mLen)));
 
   return dcaNode;
 }
@@ -489,5 +478,8 @@ static     StvToolkit *kit     = StvToolkit::Inst();
 //_____________________________________________________________________________
 int StvKalmanTrackFinder::Refit(int idir)
 {
-  return mTrackFitter->Refit(mCurrTrak,idir);
+  int ians = mTrackFitter->Refit(mCurrTrak,idir);
+  if ((idir==0 && BOTOHO&16) 
+    ||(idir==1 && BOTOHO&32)) StvDebug::Zhow(mCurrTrak);
+  return ians;
 }
