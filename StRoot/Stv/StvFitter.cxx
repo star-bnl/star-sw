@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <vector>
 #include "TSystem.h"
 #include "TMath.h"
 #include "TMatrixD.h"
@@ -21,7 +22,7 @@ StvFitter *StvFitter::mgFitter=0;
 
 static const double kXtraBigXi2 = 9e9;
 static const double kDeltaFactor = 1.5;
-
+static int dbMask = 0;///???????
 static inline double MyXi2(const double G[3],double dA,double dB)  
 {
   double Gdet = G[0]*G[2]-G[1]*G[1];
@@ -31,15 +32,6 @@ static inline double MyXi2(const double G[3],double dA,double dB)
   return Xi2;
 }
 
-class TCLx 
-{
-public:
-static int trsinv2x2(const double *pM,double *pMi);
-static int trsinv3x3(const double *pM,double *pMi);
-static int trsinv4x4(const double *pM,double *pMi);
-static int trsinv5x5(const double *pM,double *pMi);
-static void Test();
-};
 
 #include <assert.h>
 #include <math.h>
@@ -420,6 +412,75 @@ int TCLx::trsinv5x5(const double  *pMp,double  *pMi)
   } }
    return 0;
 }
+//____________________________________________________________
+double TCLx::sign(const double *a,int n)
+{
+   double ans=3e33;
+   double *aa = (double *)a;
+   double save = aa[0]; if (!save) aa[0] = 1;
+   std::vector <double> B(n*(n+1)/2);
+   double *b = &B[0];
+
+   // trchlu.F -- translated by f2c (version 19970219).
+   //
+   //see original documentation of CERNLIB package F112 
+
+   /* Local variables */
+   int ipiv, kpiv, i__, j;
+   double r__, dc;
+   int id, kd;
+   double sum;
+
+
+   /* CERN PROGLIB# F112    TRCHLU          .VERSION KERNFOR  4.16  870601 */
+   /* ORIG. 18/12/74 W.HART */
+
+
+   /* Parameter adjuTments */
+   --b;    --a;
+
+   /* Function Body */
+   ipiv = 0;
+
+   i__ = 0;
+
+   do {
+      ++i__;
+      ipiv += i__;
+      kpiv = ipiv;
+      r__ = a[ipiv];
+
+      for (j = i__; j <= n; ++j) {
+         sum = 0.;
+         if (i__ == 1)       goto L40;
+         if (r__ == 0.)      goto L42;
+         id = ipiv - i__ + 1;
+         kd = kpiv - i__ + 1;
+
+         do {
+            sum += b[kd] * b[id];
+            ++kd;   ++id;
+         } while (id < ipiv);
+
+L40:
+         sum = a[kpiv] - sum;
+L42:
+         if (j != i__) b[kpiv] = sum * r__;
+         else {
+            if (sum<ans) ans = sum;
+            if (sum<=0.) goto RETN;
+            dc = sqrt(sum);
+            b[kpiv] = dc;
+            if (r__ > 0.)  r__ = (double)1. / dc;
+         }
+         kpiv += j;
+      }
+
+   } while  (i__ < n);
+
+RETN: aa[0]=save; 
+   return ans;
+} /* trchlu_ */
 #include "TCernLib.h"
 #include "TRandom.h"
 
@@ -471,6 +532,9 @@ double JoinTwo(int nP1,const double *P1,const double *E1
 	               ,     double *PJ,      double *EJ)
 {
 static int nCall = 0;  nCall++;
+double s=0;
+assert((s=TCLx::sign(E1,nP1))>0);
+assert((s=TCLx::sign(E2,nP2))>0);
   assert(nP1<=nP2);
   int nE1 = nP1*(nP1+1)/2;
   int nE2 = nP2*(nP2+1)/2;
@@ -508,7 +572,7 @@ SWITCHa:  switch(kase) {
 //		Evaluate output error matrix
   TCL::trqsq(E2,E1aE2i,EJ,nP2);		// E2*(E1+E2)**(-1)*E2
   TCL::vsub (E2    ,EJ,EJ,nE2);         // E2 - E2*(E1+E2)**(-1)*E2
-assert(!(*a-1946));
+assert((s=TCLx::sign(EJ,nP2))>0);
   return Xi2;
 }
 //______________________________________________________________________________
@@ -653,16 +717,19 @@ double StvFitter::Xi2(const StvHit *hit)
 
   mHitPlane = mHit->detector();
 
+#if 1
 //	restore old parameters for nhits>1  
   mTkPars = *mInPars;
-
+  mTkErrs = *mInErrs;
 //		Hit position
   const float *hP = mHit->x();
-
-//		Track direction
-//double *tD = mTkPars._d;
 //		Start track position
   double *tP = mTkPars._x;
+  double *tD = mTkPars._d;
+//		Distance to DCA along track in xy
+  mDeltaL = DDOT(hP,tP,tD);  
+#endif  
+
 
   const TkDir_t &tkd = mTkPars.getTkDir();
 
@@ -704,8 +771,10 @@ double StvFitter::Xi2(const StvHit *hit)
 
 #if 1
 //		small account non zero distance to hit along track
-  double dS = mDcaT*mTkPars.getCosL();
-  mDcaP-= 0.5*mTkPars.getCurv()*dS*dS;
+//  mDcaP-= 0.5*mTkPars.getCurv()*mDeltaL*mDeltaL;
+    mTkPars.make2nd();
+    mDcaP -= mTkPars._tkdir[kKdDdL][kFita]*mDeltaL*mDeltaL;
+    mDcaL -= mTkPars._tkdir[kKdDdL][kLama]*mDeltaL*mDeltaL;
 #endif
 
   double G[3]; TCL::ucopy(*mInErrs,G,3);
@@ -743,19 +812,14 @@ int StvFitter::Update()
 {
 static int nCall=0; nCall++;
 StvDebug::Break(nCall);
-//  if(mFailed>0) return mFailed;
-  mFailed = 0;
   switch (mKase) {
     case 0: mFailed = Hpdate(); break;		//Hit+Track
     case 1: mFailed = Jpdate();	break; 		//Track join
     case 2: mFailed = Vpdate();	break;		//Vertex+track
   }
-  *mOtErrs = mInErrs->mTkDir;
-
+  *mOtErrs = mInErrs->mTkDir;		//set old value of tkdir
   *mOtPars+= mQQPars;
-
-  mOtErrs->Update(mOtPars->getTkDir());
-
+  mOtErrs->Update(mOtPars->getTkDir());//now new value of tkdir
   return 0;
 }
 //______________________________________________________________________________
@@ -763,8 +827,21 @@ int StvFitter::Hpdate()
 {
 ///		this is Update for track+hit fit
 		
+  mTkPars = *mInPars;
   mTkErrs = *mInErrs;
-
+//??  mTkPars.move(mDeltaL,&mTkErrs);
+  auto tP = mTkPars._x;
+  auto tD = mTkPars._d;
+//		Hit position
+  const float *hP = mHit->x();
+  TCL::ucopy(mTkPars.getTkDir()[0],mDcaFrame[0],9);
+//		Hit position wrt track 
+  double dca[3] = {hP[0]-tP[0],hP[1]-tP[1],hP[2]-tP[2]};
+#if 1
+  mDcaT=VDOT(mDcaFrame[0],dca);
+  mDcaP=VDOT(mDcaFrame[1],dca);
+  mDcaL=VDOT(mDcaFrame[2],dca);
+#endif
 
 //		New Z ortogonal to X (track direction)
   StvFitPars myHitPars(mDcaP, mDcaL );
@@ -775,14 +852,22 @@ int StvFitter::Hpdate()
                         ,5,myTrkPars, mTkErrs
 		        ,  mQQPars  ,*mOtErrs);
 
-  assert(fabs(mXi2-myXi2)<1e-2*mXi2);
+//////  assert(mXi2>myXi2);
   assert(myXi2<kXtraBigXi2); 
   *mOtPars = mTkPars;
 #if 1
   if (!mFailed) {
     do {
-      double old = pow(myHitPars.mU,2)+pow(myHitPars.mV,2);
-      double now = pow(myHitPars.mU-mQQPars.mU,2)+pow(myHitPars.mV-mQQPars.mV,2);
+      double old =   mTkErrs[0] +  mTkErrs[2];
+      double now = (*mOtErrs)[0]+(*mOtErrs)[2];
+      if (now>old) {
+      printf ("####WRONG old-now =%g old=%g @@@@@@@@@@@@@@@@@@@@@@\n",old-now,old);
+      }
+      old = pow(myHitPars.mU,2)+pow(myHitPars.mV,2);
+      now = pow(myHitPars.mU-mQQPars.mU,2)+pow(myHitPars.mV-mQQPars.mV,2);
+      old = sqrt(old); now = sqrt(now);
+if (dbMask&1) printf("Old = %g New = %g dif = %g\n",old,now,old-now);
+
       if (now<old) break;
       double dir = (myHitPars.mU*mQQPars.mFita +myHitPars.mV*mQQPars.mLama);
       double nor = sqrt((pow(mQQPars.mU  ,2)+pow(mQQPars.mV  ,2))
