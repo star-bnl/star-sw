@@ -1,3 +1,4 @@
+#if 0
 #include <string.h>
 #include "TSystem.h"
 #include "TBrowser.h"
@@ -308,3 +309,4 @@ void  StvDraw::All(const char *opt)
   }  
 }
 
+#endif
