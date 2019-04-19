@@ -1,7 +1,7 @@
 
 #ifndef StvDraw_HH
 #define StvDraw_HH
-#include "StDraw3D.h"
+#include "StvUtil/StvGrappa.h"
 
 class StvHit;
 class StvHits;
@@ -11,7 +11,7 @@ class StvTrack;
 class THelixTrack;
 class StvPoints;
 class TVector3;
-class StvDraw : public StDraw3D
+class StvDraw : public StvGrappa
 {
 public: 
 
