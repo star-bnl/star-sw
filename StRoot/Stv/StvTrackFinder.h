@@ -6,16 +6,12 @@
 #include "TNamed.h"
 
 /// \class StvTrackFinder
-class StvHit;
-class StvDraw;
-class StvPoints;
-class StvHits;
 class StvKonst_st;
 class StvTrackFitter;
 class StvTrackFinder : public TNamed
 {
 public:
-  StvTrackFinder(const char *name):TNamed(name,""){fDraw=0;fDoShow=0;mRefit=1;}
+  StvTrackFinder(const char *name):TNamed(name,""){mRefit=1;}
   virtual ~StvTrackFinder();
   virtual int       FindTracks()			=0;
   virtual int	    FindPrimaries(const StvHits &vtxs)	=0;
@@ -26,21 +22,11 @@ public:
           void      AddPoint(const double pt[3]);
           void      AddHits(const double pt[3]);
   virtual StvNode *MakeDcaNode(StvTrack *tk)=0;
-          void      Show();
-          void      DoShow(int lev);
-          int       DoShow() const {return fDoShow;};
           void SetRefit(int r=1)  {mRefit = r;} 
   
 protected:
-static StvDraw *NewDraw();
-protected:
 StvTrackFitter *mTrackFitter;
 int  mRefit; 	//refit flag
-int fDoShow;
-StvDraw *fDraw;
-StvPoints fShowTrak;
-StvHits   fShowTrakHits;
-StvHits   fShowFreeHits;
 private:
 
 ClassDef(StvTrackFinder,0);
