@@ -16,7 +16,6 @@
 #include "Stv/StvNode.h"
 #include "Stv/StvTrack.h"
 #include "StvUtil/StvDebug.h"
-#include "Stv/StvDraw.h"
 #endif
 
 #ifdef APPROX_DEBUG
@@ -137,11 +136,6 @@ if (!hel) StvDebug::Count("KNNRej",2);
 const StvHits *StvKNSeedFinder::GetHits() const 	
 {
      return (const StvHits*)(void*)(&(mSel.Get()));
-}     
-//_____________________________________________________________________________
-void StvKNSeedFinder::Show()  	
-{
-     mSel.Show();
 }     
 //_____________________________________________________________________________
 void StvKNSeedFinder::FeedBack(const StvTrack *tk)  	

@@ -499,70 +499,10 @@ static int nCall = 0; nCall++;
 
 }
 
-#if 1
 #include "TSystem.h"
 #include "TCanvas.h"
 #include "TGraph.h"
-#include "Stv/StvDraw.h"
 class StvHit;
-//______________________________________________________________________________
-void StvKNSeedSelector::Show() const
-{
-static TCanvas *myCanvas = 0;
-static TGraph  *szGraph  = 0;
-static TGraph  *ptGraph  = 0;
-static TGraph  *slGraph  = 0;
-  int startIdTru = GetIdTru(mStartHit);
-  std::vector<double> X[3],Y[3];
-  double reg[2][2]={{999,-999},{999,-999}};
-
-  TVector3 mainDir(mStartPos);mainDir*=(-1.);
-  mainDir = mainDir.Unit();
-  TVector3 myX(mainDir),myY(myX.Orthogonal()),myZ(myX.Cross(myY));		
-  
-  int nPts = mAux.size();
-  for (int ia =0;ia<nPts;ia++) {
-    if (!mAux[ia].mHit) continue;
-    TVector3 hit(mAux[ia].mDir);
-    double v = mAux[ia].mPhi;      
-    double u = mAux[ia].mThe;
-    u=u/M_PI*180;
-    v=v/M_PI*180;
-    assert(fabs(u)<360 && fabs(v)<360);
-    if (reg[0][0]>u) reg[0][0]=u;if (reg[0][1]<u) reg[0][1]=u;
-    if (reg[1][0]>v) reg[1][0]=v;if (reg[1][1]<v) reg[1][1]=v;
-    int k = (mAux[ia].mSel&1); 
-    int idt = GetIdTru(mAux[ia].mHit);
-    if (startIdTru && startIdTru == idt) k = 2;
-    X[k].push_back(u);Y[k].push_back(v);
-  }
-
-  if(!myCanvas) myCanvas = new TCanvas("KNSelector_Show","",600,800);
-  myCanvas->Clear();
-  delete szGraph; szGraph=0;
-  delete ptGraph; ptGraph=0; 
-  delete slGraph; slGraph=0;
-
-//		Define the scene
-  szGraph = new TGraph(2, reg[0], reg[1]);
-  szGraph->SetMarkerColor(kYellow);
-  szGraph->SetMarkerSize(5);
-  szGraph->Draw("AP");
-  int color[3]={kGreen,kRed,kMagenta};
-  for (int k=0;k<3;k++) {
-    if (!X[k].size()) continue;
-    ptGraph  = new TGraph(X[k].size(), &X[k][0], &Y[k][0]);
-    ptGraph->SetMarkerColor(color[k]);
-    ptGraph->SetMarkerSize(1);
-    ptGraph->Draw("Same *");
-  }
-
-  myCanvas->Modified();
-  myCanvas->Update();
-  while(!gSystem->ProcessEvents()){gSystem->Sleep(200);}; 
-
-}
-#endif //Show
 #include "Stv/StvHit.h"
 //______________________________________________________________________________
 int StvKNSeedSelector::GetIdTru(const void *hit) const

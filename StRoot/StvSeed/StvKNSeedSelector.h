@@ -51,7 +51,6 @@ virtual int GetIdTru(const void *hit) const;
       int  Select();  
 const VoidVec &Get() const { return mSel;} 
        int GetNHits() const{ return mSel.size();}
-      void Show() const;
 private:
       void Relink();
       void Update(int ia,int ib);

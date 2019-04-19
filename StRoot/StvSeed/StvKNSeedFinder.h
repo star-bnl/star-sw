@@ -34,7 +34,6 @@ public:
   void      Print(const char *opt="") const {;}
   const StvHits *GetHits() const; 	
   const float *Eigen(){return mSel.Eigen();}
-  virtual void Show();
 protected:
 
 protected:
