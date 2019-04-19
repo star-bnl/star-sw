@@ -36,6 +36,9 @@ StvNode *MakeDcaNode(StvTrack *tk);
             ,      StvFitDers  *derivFit);
    void	Reset();
    void	Clear(const char *opt="");
+
+protected:
+   void CountHits(const StvTrack *tk);
    
 
 protected:
