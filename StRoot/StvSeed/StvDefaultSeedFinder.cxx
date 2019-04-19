@@ -17,7 +17,6 @@
 #include "StvSeedConst.h"
 #include "Stv/StvConst.h"
 #include "StvUtil/StvDebug.h"
-#include "Stv/StvDraw.h"
 
 #include "StMessMgr.h" 
 
@@ -76,13 +75,6 @@ int StvDefaultSeedFinder::Again(int )
   *f1stHitMapIter = f1stHitMap->begin();
    mNDejavu = 0;
    return 1;
-}
-//_____________________________________________________________________________
-void StvDefaultSeedFinder::ShowIn()
-{
-   fDraw = StvDraw::Inst();
-   if (mSel.mPnt) fDraw->Hits(mSel.mNPnt,mSel.mPnt);
-   StvSeedFinder::ShowIn();
 }
 //_____________________________________________________________________________
 //	Start of Local auxiliary routines
@@ -161,7 +153,7 @@ const THelixTrack* StvDefaultSeedFinder::NextSeed()
 {
 static int nCall = 0; nCall++;
 std::vector<TObject*> mySeedObjs;
-
+  SetCurrent();
   StvHit *fstHit,*selHit=0;   
 
   LOG_DEBUG << "NextSeed() " << nCall << endm;

@@ -83,7 +83,6 @@ public:
   int       Again(int repeat);
   void      Reset();
   void      Print(const char *opt="") const 	{;}
-  void      ShowIn();
    int      Reject(const float x[3])		{return mSel.Reject(x,0)>0;}	
 void SetSgn(int dir=1) { fSgn = dir; mSel.SetSgn(dir);}
 void SetVtx(const float vtx[3]) { StvSeedFinder::SetVtx(vtx); mSel.SetVtx(vtx);}
