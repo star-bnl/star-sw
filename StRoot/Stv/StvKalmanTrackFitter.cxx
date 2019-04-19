@@ -56,6 +56,17 @@ int StvKalmanTrackFitter::Refit(StvTrack *trak,int dir, int lane, int mode)
 ///     fit direction is imagined from left to rite
 static int nCall=0; nCall++;
 
+#if 0
+for (auto &it = trak->begin();it != trak->end();++it) {
+  auto* node = *it;
+  double s=0;
+  assert((s=TCLx::sign(node->GetFE(),5))>0);
+rt((s=TCLx::sign(EJ,nP2))>0);
+#endif
+
+
+
+
 static StvFitter *fitt = StvFitter::Inst();
 
 //term	LEFT here: Curren Kalman chain of fits from left to rite
@@ -375,6 +386,7 @@ static const double kEps = 1.e-2,kEPS=1e-1;
 //_____________________________________________________________________________
 int StvKalmanTrackFitter::Propagate(StvNode  *node,StvNode *preNode,int dir,int lane)
 {
+double s=0;
 static int nCall=0; nCall++;
   StvNode *innNode=0,*outNode=0;
   if (innNode){}; if (outNode){};
@@ -383,29 +395,35 @@ static int nCall=0; nCall++;
 
   TRungeKutta myHlx;
   const StvNodePars &prePars =  preNode->mFP[lane];
-  assert(preNode->mFE[lane][0]>0);
-  assert(preNode->mFE[lane][2]>0);
+assert((s=TCLx::sign(preNode->mFE[lane],5))>0);
   const StvFitErrs  &preErrs =  preNode->mFE[lane];
   prePars.get(&myHlx);
   preErrs.Get(&myHlx);
+assert((s=TCLx::sign(*(myHlx.Emx()),5))>0);
+assert((s=TCLx::sign(preErrs,5))>0);
   double Xnode[3];
   if (node->mHit) 	{ TCL::ucopy(node->mHit->x(),Xnode,3);}
   else        		{ TCL::ucopy(node->mXDive   ,Xnode,3);}
-  double dis = sqrt(DIST2(Xnode,preNode->mFP[lane]._x));
-  if (!dir) dis = -dis;
-  myHlx.Move(dis);
+//   double dis = sqrt(DIST2(Xnode,preNode->mFP[lane]._x));
+//   if (!dir) dis = -dis;
+//   myHlx.Move(dis);
   double dS = myHlx.Path(Xnode);		
 //  if (fabs(dS)>1e3)				return 2;				
   assert(fabs(dS)<1e3);
   myHlx.Move();
+assert((s=TCLx::sign(*(myHlx.Emx()),5))>0);
   node->mPP[lane].set(&myHlx);
   int ifail = node->mPP[lane].check();  
   if(ifail) 					return ifail+100;
   node->mPE[lane].Set(&myHlx);
+assert((s=TCLx::sign(node->mPE[lane],5))>0);
   StvELossTrak *eloss = innNode->ResetELoss(prePars,dir);
   node->mPP[lane].add(eloss,dS);
   node->mPE[lane].Add(eloss,dS);
+
+assert((s=TCLx::sign(node->mPE[lane],5))>0);
   node->mPE[lane].Recov();
+assert((s=TCLx::sign(node->mPE[lane],5))>0);
   innNode->SetDer(*myHlx.Der(),lane);
 
   return 0;
