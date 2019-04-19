@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.17.4.1 2017/12/02 00:37:10 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.17.4.2 2019/04/19 21:24:10 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -90,9 +90,9 @@ void StvELossTrak::Set(const TGeoMaterial *mate,double p)
 void StvELossTrak::Add(double len)
 {
   assert(fX0>0);
-  fLen = len;
+  fLen = fabs(len);
   fTheta2 = fLen/fX0*fFak;
-  fOrth2  = fTheta2/3*len*len;
+  fOrth2  = fTheta2/3*fLen*fLen;
   fELoss  = fdEdX *fLen;
   fELossErr2 += fdEdXErr2*fLen;
 
@@ -101,7 +101,7 @@ void StvELossTrak::Add(double len)
   fTotOrth2  += fOrth2;
   fTotELossErr2 += fELossErr2;
   fTotELoss += fELoss;
-  fTotLen+=len;
+  fTotLen+=fLen;
 
   double fakNrj = -(fE/(fP*fP*fP));
   fPinvLoss = fELoss*fakNrj;
