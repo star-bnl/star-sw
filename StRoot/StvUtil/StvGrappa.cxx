@@ -1,4 +1,3 @@
-
 #include "TMath.h"
 #include "StvGrappa.h"
 #include "TCanvas.h"
@@ -16,9 +15,13 @@ enum StvGrappa2_e {kX,kY,kZ,kR};
 //______________________________________________________________________________
 StvGrappa::StvGrappa(const char* name) 
 {
+static int iGrappa=0;
 static int nCall=0; nCall++;
-  if (name && *name) { SetName(name);}
-  else { TString ts("Grappa_"); ts+=nCall; SetName(ts.Data());}
+  if (!name) name = "";
+  TString tsName(name);
+  if (!*name) { tsName = "Grappa_";}
+  tsName += iGrappa++;
+  SetName(tsName);
   memset(mBeg,0,mEnd-mBeg+1);
   mActive = 1;
 }
@@ -26,6 +29,7 @@ static int nCall=0; nCall++;
 void StvGrappa::Add(double x,double y,double z,int iObj)
 {
   if (!mActive) return;
+  mNTotal++;
   float r = sqrt(x*x+y*y);
   mPts[iObj][kX].push_back(x);
   mPts[iObj][kY].push_back(y);
@@ -40,6 +44,7 @@ void StvGrappa::Clear(const char *)
   for (int i=0;i<(int)mKeep.size();i++) { delete mKeep[i];}
   mKeep.clear();
   MyClear();
+  mState = 0;
 }
 
 //______________________________________________________________________________
@@ -64,12 +69,14 @@ int StvGrappa::NObj() const
 //______________________________________________________________________________
 void StvGrappa::MakeCanvas()
 {
-  if (!mCanvas) mCanvas = new TCanvas("C1","",600,800);
-    mCanvas->Divide(1,kNVal);
+  if (!mCanvas) {mCanvas = new TCanvas(GetName(),GetName(),600,800);
+                 mCanvas->Divide(1,kNVal);}
+  else          {mCanvas->Clear();};
 }
 //______________________________________________________________________________
 void StvGrappa::MySize (int iPad, int iX,int iY)
 {
+
    if (iPad==0) {
      for (int i=0;i<kNVal;i++) { mMiMax[i][0]=1e11; mMiMax[i][1]=-1e11;}
      for (int iObj=0;iObj<kNObj;iObj++) {
@@ -80,7 +87,6 @@ void StvGrappa::MySize (int iPad, int iX,int iY)
            if (mMiMax[iVal][0]>val) mMiMax[iVal][0]=val;
            if (mMiMax[iVal][1]<val) mMiMax[iVal][1]=val;
    } } } }
-
    TGraph *gra = new TGraph(2,mMiMax[iX],mMiMax[iY]);
    mCanvas->cd(iPad+1);
    gra->Draw("AP");
@@ -105,18 +111,28 @@ static const int iXY[kNPad][2] = {{0,1},{2,0},{2,1},{2,3}};
     mMarkerStyle = kFullDotMedium;
     mMarkerSize = 1;
     MyShow(iPad,kNode,iX,iY);
-//		Unused hits
+//		Unused not true hits
     mOpt = "P";
     mMarkerColor = kBlue;	//
-    mMarkerStyle = kCircle; 
+    mMarkerStyle = kFullDotMedium; 
     mMarkerSize = 1;
     MyShow(iPad,kHit,iX,iY);
-//		Used hits
-
+//		Unused true hits
+    mOpt = "P";
+    mMarkerColor = kRed;	//
+    mMarkerStyle = kFullDotMedium; 
+    mMarkerSize = 1;
+    MyShow(iPad,kThit,iX,iY);
+//		Used untrue hits
+    mOpt = "P";
+    mMarkerColor = kBlue;	//Blue
+    mMarkerStyle = kStar; mMarkerSize = 1;
+    MyShow(iPad,kHIT,iX,iY);
+//		Used True hits
     mOpt = "P";
     mMarkerColor = kRed;	//Red
     mMarkerStyle = kStar; mMarkerSize = 1;
-    MyShow(iPad,kHIT,iX,iY);
+    MyShow(iPad,kTHIT,iX,iY);
 //		Helix nodes
     mOpt = "PL";
     mMarkerColor = kYellow;	//
@@ -155,8 +171,34 @@ void StvGrappa::MyShow(int iPad,int iObj, int iX,int iY)
 //______________________________________________________________________________
 void StvGrappa::MySort()
 {
+static const double kMicron = 1e-4;
 std::vector<int> Idx;
 std::vector<float> Buf;
+#if 1
+//		cleanup same hits
+  for (int jObj:{kHIT,kTHIT}) {
+    int nj = mPts[jObj][0].size();
+    for (int j=0; j<nj;j++) {
+//??      int ii = 0;
+      for (int iObj:{kHit,kThit}) {
+	int ii = 0;
+	int ni = mPts[iObj][0].size();
+	for (int i = 0; i<ni; i++) {
+          int k = 0;
+          for (k=0;k<3; k++) {
+            if (fabs(mPts[iObj][k][i]-mPts[jObj][k][j])>kMicron) break;
+          };
+          if (k==3 || ii==i) continue;
+          for (int k=0;k<4; k++) {mPts[iObj][k][ii] = mPts[iObj][k][i];}
+          ii++;
+	}//end i
+	for (int k=0;k<4; k++) {mPts[iObj][k].resize(ii);}
+      }//end iObj
+    }//end j
+  }//end jObj
+#endif     
+#if 0
+//	Sorting
   for (int iObj=0;iObj<kNObj;iObj++) {
     int nSize = mPts[iObj][2].size();
     if (!nSize) continue;
@@ -168,11 +210,16 @@ std::vector<float> Buf;
       arr.swap(Buf);
       for (int i=0;i<nSize;i++) {arr[i]=Buf[Idx[i]];}
   } }
+#endif     
 }
 
 //______________________________________________________________________________
 void StvGrappa::Show(const StvTrack *tk)
 {
+  if (mState==0 || mState == 2) Clear();
+  mState = 2;
+  int qua = 0;
+  mTkTruth = tk->GetIdTru(&qua);
   for (StvNodeConstIter it=tk->begin();it!=tk->end();++it) {
     const StvNode *node = (*it);
     const StvHit *hit = node->GetHit();
@@ -180,13 +227,48 @@ void StvGrappa::Show(const StvTrack *tk)
     Add(Xd[0],Xd[1],Xd[2],kNode);
     if (!hit) continue;
     const float *Xf  = hit->x();
-    Add(Xf[0],Xf[1],Xf[2],kHIT);
+    StvGrappa_e ee = (mTkTruth && hit->idTru()==mTkTruth)? kTHIT:kHIT;
+    Add(Xf[0],Xf[1],Xf[2],ee);
+  }
+  Show();
+}
+//______________________________________________________________________________
+void StvGrappa::Show(const StvHits *tk,int objType)
+{
+  if (mState==0 || mState == 2) Clear();
+  mState = 2;
+  mTkTruth = 0;
+  for (int it=0;it<(int)tk->size();++it) {
+    const StvHit *hit = (*tk)[it];
+    const float *Xf  = hit->x();
+    Add(Xf[0],Xf[1],Xf[2],objType);
   }
   Show();
 }
 //______________________________________________________________________________
 double StvGrappa::Dist2(const StvTrack *tk,const float *xhit) const
 {
+  auto* node = tk->GetNode(StvTrack::kFirstPoint);
+  if (!node) return 1e11;
+  auto &par = node->GetFP(0);
+  int iq = par.getCharge();
+  const double *pos = par.pos();
+  double mom[3],xyz[3],hit[3]={xhit[0],xhit[1],xhit[2]};
+  par.getMom(mom);
+  const double *mag = par.mag();
+  
+  THelix3d helx(iq,pos,mom,mag);
+  double s = helx.Path(hit,xyz);
+  if (fabs(s)>1e3) return 1e11;
+  double dist2 = (TVector3(xyz)-TVector3(hit)).Mag2();
+  return dist2;
+}
+#if 0
+//______________________________________________________________________________
+double StvGrappa::Dist2(const StvTrack *tk,const float *xhit) const
+{
+static const double kKEEP = 0.9;
+
   TVector3 A,B,X(xhit);
   double a=1e11,b=1e11;
   for (StvNodeConstIter it=tk->begin();it!=tk->end();++it) {
@@ -199,16 +281,46 @@ double StvGrappa::Dist2(const StvTrack *tk,const float *xhit) const
       b = dis; B = N;
     }
   }
-  double ax = (A-X).Mag2();
-  double ba = (A-B).Mag2();
-  double axba = (A-X).Dot(B-A);
-  double dis = ax-axba*axba/ba;
+  double aMbaMb = (A-B).Dot(A-B);
+  double aMbbMx = (A-B).Dot(B-X);
+  double bMxbMx = (B-X).Dot(B-X);
+  double tau = -aMbbMx/aMbaMb;
+  if (tau<  -kKEEP) tau =-kKEEP;
+  if (tau> 1+kKEEP) tau = 1+kKEEP;
+  double dis = aMbaMb*tau*tau +2*aMbbMx*tau + bMxbMx;
+  return dis;
+}
+#endif
+//______________________________________________________________________________
+double StvGrappa::Dist2(const StvHits *tk,const float *xhit) const
+{
+enum { kKEEP = 3};
+  TVector3 A,B,X(xhit);
+  double a=1e11,b=1e11;
+  for (int it=0;it<(int)tk->size();++it) {
+    const StvHit *hit= (*tk)[it];
+    TVector3 N(hit->x());
+    double dis = (X-N).Mag2();
+    if (dis < a) {
+      b = a; B = A; a = dis; A = N;
+    } else if(dis < b) {
+      b = dis; B = N;
+    }
+  }
+  double aMbaMb = (A-B).Dot(A-B);
+  double aMbbMx = (A-B).Dot(B-X);
+  double bMxbMx = (B-X).Dot(B-X);
+  double tau = -aMbbMx/aMbaMb;
+  if (tau<  -kKEEP) tau =-kKEEP;
+  if (tau> 1+kKEEP) tau = 1+kKEEP;
+  double dis = aMbaMb*tau*tau +2*aMbbMx*tau + bMxbMx;
   return dis;
 }
 //______________________________________________________________________________
 void StvGrappa::MakeLims(const StvTrack *tk,double xMiMax[2][3]) const
 {
-
+  enum {k60 = 50};
+  double Rmax=9,Rmin=1e11;
   for (int i=0;i<3;i++) {
     xMiMax[0][i] = 1e11;    
     xMiMax[1][i] =-1e11;
@@ -216,28 +328,58 @@ void StvGrappa::MakeLims(const StvTrack *tk,double xMiMax[2][3]) const
   for (StvNodeConstIter it=tk->begin();it!=tk->end();++it) {
     const StvNode *node = (*it);
     const double *x = node->GetFP().pos();
+    double r = x[0]*x[0]+x[0]*x[0];
+    if (Rmin>r)Rmin=r; 
+    if (Rmax<r)Rmax=r; 
     for (int i=0;i<3;i++) {
       if (xMiMax[0][i]>x[i])  xMiMax[0][i]=x[i];  
       if (xMiMax[1][i]<x[i])  xMiMax[1][i]=x[i];
     }
   }
   for (int i=0;i<3;i++) {
-    xMiMax[0][i] = xMiMax[0][i]*1.1-33;    
-    xMiMax[1][i] = xMiMax[1][i]*1.1+33;
+    double range = xMiMax[1][i]-xMiMax[0][i];
+    xMiMax[0][i] -= range*0.8;
+    xMiMax[1][i] += range*0.8;
+  }
+  Rmin = sqrt(Rmin); Rmax = sqrt(Rmax);
+  
+
+  if (xMiMax[0][0]>k60) xMiMax[0][0]=k60;
+  if (xMiMax[0][1]>k60) xMiMax[0][1]=k60;
+}
+//______________________________________________________________________________
+void StvGrappa::MakeLims(const StvHits *tk,double xMiMax[2][3]) const
+{
+
+  for (int i=0;i<3;i++) {
+    xMiMax[0][i] = 1e11;    
+    xMiMax[1][i] =-1e11;
+  }
+  for (int it=0;it<(int)tk->size();++it) {
+    const StvHit *hit = (*tk)[it];
+    const float *x = hit->x();
+    for (int i=0;i<3;i++) {
+      if (xMiMax[0][i]>x[i])  xMiMax[0][i]=x[i];  
+      if (xMiMax[1][i]<x[i])  xMiMax[1][i]=x[i];
+    }
   }
 }
 //______________________________________________________________________________
 //______________________________________________________________________________
 void StvGrappa::Zhow(const StvTrack *tk)
 {
-enum {kCorrida=10};
-
+enum {kCorrida=20};
+  Clear();
+  mState = 1;
+  int qua=0;
+  mTkTruth = tk->GetIdTru(&qua);
   const StVoidArr *hitArr =  StTGeoProxy::Inst()->GetAllHits();
   double lims[2][3];
   MakeLims(tk,lims);
 
   for (int ihit=0;ihit<(int)hitArr->size(); ihit++) {
     const StvHit *hit = (StvHit*)(*hitArr)[ihit];
+    TestHit(hit);
     const float *f = hit->x();
     int rej = 0;
     for (int i=0;i<3;i++) {
@@ -247,7 +389,44 @@ enum {kCorrida=10};
     if (rej) continue;
     double dist2 = Dist2(tk,f);
     if (dist2 > kCorrida*kCorrida) continue;
-    Add(f[0],f[1],f[2],kHit);
+    StvGrappa_e ee = (mTkTruth && hit->idTru()==mTkTruth)? kThit:kHit;
+    Add(f[0],f[1],f[2],ee);
   }
   Show(tk);
+}
+//______________________________________________________________________________
+void StvGrappa::Zhow(const StvHits *tk, int objType)
+{
+enum {kCorrida=20};
+  Clear();
+  mState = 2;
+  const StVoidArr *hitArr =  StTGeoProxy::Inst()->GetAllHits();
+  double lims[2][3];
+  MakeLims(tk,lims);
+  for (int ihit=0;ihit<(int)hitArr->size(); ihit++) {
+    const StvHit *hit = (StvHit*)(*hitArr)[ihit];
+    const float *f = hit->x();
+    int rej = 0;
+    for (int i=0;i<3;i++) {
+      if (f[i] <lims[0][i]-kCorrida) {rej = 13; break;};    
+      if (f[i] >lims[1][i]+kCorrida) {rej = 13; break;};     
+    }
+    if (rej) continue;
+    double dist2 = Dist2(tk,f);
+    if (dist2 > kCorrida*kCorrida) continue;
+    
+    Add(f[0],f[1],f[2],kHit);
+  }
+  Show(tk,objType);
+}
+
+#include "StEvent/StHit.h"
+//______________________________________________________________________________
+void StvGrappa::TestHit(const StvHit *hit) const
+{
+    const float *f = hit->x();
+    const StHit *stHit = (const StHit*)hit->stHit();
+      
+    const StThreeVectorF& pos = stHit->position();
+    assert(fabs(f[2]-pos[2])<=0);
 }
