@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.33.2.1 2017/12/02 00:40:36 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.33.2.2 2019/04/19 23:53:26 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -29,7 +29,6 @@ Main tasks:
 #include "StEventUtilities/StEventHelper.h"
 #include "StEventUtilities/StEventHitIter.h"
 #include "StvUtil/StvDebug.h"
-#include "Stv/StvDraw.h"
 #include "Stv/StvStl.h"
 #include "StvStEventHitSelector.h"
 #include "Stv/StvToolkit.h"
@@ -101,36 +100,38 @@ static int myGraph=0;
 static StTGeoProxy* tgp = StTGeoProxy::Inst();
        tgp->SetHitLoadActor(mHitLoadActor);
 
-StvDraw *myDraw=0;
 StvHits *myHits=0;
-if (myGraph) { //create canvas
-  myDraw = new StvDraw();
-  myHits = new StvHits;
-  if (myHits) {/*noopt*/}
-}
   mHitIter->Reset(stev);
   int nSel = (mHitSelector)? mHitSelector->Edit(stev):-1;
   if (!nSel) return 0;
   const StHit *stHit=0;
   StDetectorId didOld = kUnknownId;
   int nTotHits = 0,nTotHitz=0,nTotGits=0, nHits=0,nHitz=0,nGits=0;
+  int nTotTrue = 0,nTrue=0;
 
   for (; ; ++(*mHitIter)) {
     stHit=*(*mHitIter);
+#if 1
+if (stHit) {
+StThreeVectorF v3f = stHit->position();
+StvDebug::Count("XYHits.sthit",v3f[0],v3f[1]    ,-220,220,-220,220);
+StvDebug::Count("ZRHits.sthit",v3f[2],v3f.perp(),-220,220,   0,220);
+}
+#endif
 //		If hit selector is ON and hit is not marked, ignore it
     StDetectorId did = mHitIter->DetectorId();
     
     if (did != didOld || !stHit) {
       if (didOld) {
-        Info("LoadHits","Loaded  %d good, recovered %d and failed %d %s hits"
-	    ,nHits,nHits-nGits,nHitz,StTGeoProxy::DetName(didOld));
+        Info("LoadHits","Loaded  %d good, recovered %d true %d and failed %d %s hits"
+	    ,nHits,nHits-nGits,nTrue,nHitz,StTGeoProxy::DetName(didOld));
       }
       didOld = did; 
       
       if (!stHit) break;
       Info("LoadHits","Start %s hits",StTGeoProxy::DetName(did));
       if (mHitLoadActor) mHitLoadActor->SetDetId(did);
-      nHits=0; nHitz=0,nGits=0;
+      nHits=0; nHitz=0,nGits=0,nTrue=0;
     }
     if (nSel> 0 && (!stHit->TestBit(StvStEventHitSelector::kMarked))) 	continue; // ignore not selected hit
     if (stHit->flag() & kFCF_CHOPPED || stHit->flag() & kFCF_SANITY)	continue; // ignore hits marked by AfterBurner as chopped o
@@ -145,13 +146,14 @@ if (myGraph) { //create canvas
     if (nStvHits) {
       nHits+=nStvHits;nTotHits+=nStvHits;nGits+=sure;nTotGits+=sure;
       if (mMaxTimes[mDetId]>1) mStvHit->setMaxTimes(mMaxTimes[mDetId]);
+      if (mStvHit->idTru())	{nTrue++;nTotTrue++;}
     }  
     else          {nHitz++;nTotHitz++;}
   }
   int nIniHits = tgp->InitHits();
   assert(nTotHits==nIniHits);
-  Info("LoadHits","Loaded %d good, recovered %d and failed %d of all hits"
-      ,nTotHits,nTotHits-nTotGits,nTotHitz);
+  Info("LoadHits","Loaded %d good, recovered %d true %d and failed %d of all hits"
+      ,nTotHits,nTotHits-nTotGits,nTotTrue,nTotHitz);
   return nTotHits;
 }
 
@@ -204,7 +206,7 @@ static int knt=0;knt++;
    if (!mStvHit) mStvHit= kit->GetHit();
 
    int idTru   = stHit->idTruth(); 
-   if (idTru<0 && idTru>10000) idTru=0;
+   if (idTru<0 && idTru>65534) idTru=0;
    UInt_t hard = stHit->hardwarePosition();
    if (!hard) hard = upath;
    StThreeVectorF v3f = stHit->position();
@@ -247,14 +249,12 @@ static int knt=0;knt++;
    }
    mStvHit->set(hp);
    
-#if 0
+#if 1
 static int nnn=0;nnn++;
-printf("%d  *** StvHitLoader::MakeStvHit %g %g %g  ***\n",nnn
-      ,mStvHit->x()[0],mStvHit->x()[1],mStvHit->x()[2]);
-//???StvDebug::Count("ZHits",mStvHit->x()[2]);
-//???StvDebug::Count("XYHits",mStvHit->x()[1],mStvHit->x()[1]);
-//???StvDebug::Count("ZXHits",mStvHit->x()[2],mStvHit->x()[0]);
-//???StvDebug::Count("ZYHits",mStvHit->x()[2],mStvHit->x()[1]);
+//printf("%d  *** StvHitLoader::MakeStvHit %g %g %g  ***\n",nnn
+//      ,mStvHit->x()[0],mStvHit->x()[1],mStvHit->x()[2]);
+StvDebug::Count("XYHits",mStvHit->x()[0],mStvHit->x()[1]  ,-220,220,-220,220);
+StvDebug::Count("ZRHits",mStvHit->x()[2],mStvHit->getRxy(),-220,220,   0,220);
 #endif
    return 1;
 }
