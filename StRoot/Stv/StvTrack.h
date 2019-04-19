@@ -44,7 +44,7 @@ const StvNode *GetNode(EPointType poTy) const;
    int GetTypeEnd () const	{return mTypeEnd;} 
 
 	 /// Returns the quality of track for montecarlo case
-double GetQua() const;  
+  int GetIdTru(int *qua=0) const;  
 
    	/// Delete all the nodes started form given
   void CutTail(const StvNode *start=0);

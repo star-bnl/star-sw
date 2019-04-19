@@ -7,9 +7,9 @@
 #include "Stv/StvHit.h"
 #include "Stv/StvNode.h"
 #include "Stv/StvTrack.h"
-#include "Stv/StvDraw.h"
 #include "Stv/StvToolkit.h"
 #include "StvUtil/StvKNNUtil.h"
+#include "StvUtil/StvDebug.h"
 #include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 int StvTrack::mgId=0;
 
@@ -295,22 +295,10 @@ double StvTrack::GetRes() const
   }  
   return (nRes)? res/nRes:0.;
 }
-  
-
 //_____________________________________________________________________________
 void StvTrack::Show() const
 {
-StvHits   showHits;
-StvPoints showTrak;
-  for (StvNodeConstIter it = begin();it != end();++it) 
-  {
-    const StvNode *node = *it;
-    const StvHit  *hit  = node->GetHit();
-    showTrak += node->GetFP();
-    if (hit) showHits+=(StvHit*)hit;
-  }
-  StvDraw::Inst()->Trak(showTrak,kGlobalTrack);
-  StvDraw::Inst()->Hits(showHits,kUsedHit    );
+StvDebug::Show(this);
 }
 //_____________________________________________________________________________
 int StvTrack::Check(const char *tit, int dirs) const
@@ -422,7 +410,7 @@ StvNode *StvTrack::GetMaxKnnNode()
 #include "StarRoot/TIdTruUtil.h"
 #include "StEvent/StRnDHit.h"
 //_____________________________________________________________________________
-double StvTrack::GetQua() const
+int StvTrack::GetIdTru(int *qua) const
 {
 
   TIdTruUtil idt;
@@ -435,21 +423,14 @@ double StvTrack::GetQua() const
     if (!(hit=node->GetHit())) 		 	continue;
     if ( node->GetXi2()>1000) 			continue;
     int idTru = hit->idTru();   
-#ifdef kFtsIdentifier
-    if (!idTru && hit->detectorId()==kFtsId) {
-      auto *rndHit = (StRnDHit*)hit->stHit();
-      int id0 = rndHit->extraByte0();
-      int id1 = rndHit->extraByte1();
-      assert (id0 && id1);
-      idt.Add(id0,50);
-      idt.Add(id1,50);
-      continue;
-    }       
-#endif
     idt.Add(idTru);
   }
-  if (!idt.GetIdTru()) return 0;
-  return idt.GetQua();
+  int idTru = idt.GetIdTru();
+  if (qua) {
+    if (!idTru) {*qua = 0;}
+    else 	{*qua = idt.GetQua()*100;}
+  } 
+  return idTru;
 
 }
 
