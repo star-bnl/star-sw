@@ -8,7 +8,6 @@
 #include "Stv/StvTrack.h"
 #include "StvUtil/StvELossTrak.h"
 #include "Stv/StvStl.h"
-#include "Stv/StvDraw.h"
 #include "StarMagField.h"
 #include "StvMaker/StvHitLoader.h"
 #include "Stv/StvSeedFinder.h"
