@@ -12,6 +12,7 @@
 #include "StDetectorDbMaker/St_tpcEffectiveGeomC.h"
 #include "StDetectorDbMaker/St_tpcTimeBucketCorC.h"
 #include "StDetectorDbMaker/St_spaceChargeCorC.h"
+#include "StDetectorDbMaker/St_tpcChargeEventC.h"
 #include "TMath.h"
 ClassImp(StTpcHitMover)
 #define __DEBUG__
@@ -61,6 +62,10 @@ Int_t StTpcHitMover::Make() {
   if (! gStTpcDb) {
     gMessMgr->Error() << "StTpcHitMover::Make TpcDb has not been instantiated " << endm;
     return kStErr;
+  }
+  if (pEvent && StMagUtilities::Instance() && StMagUtilities::Instance()->UsingDistortion(kAbortGap)) {
+    StTriggerData* trg = pEvent->triggerData();
+    if (trg) St_tpcChargeEventC::instance()->findChargeTimes(trg->bunchCounter());
   }
   if (! mTpcTransForm) mTpcTransForm = new StTpcCoordinateTransform(gStTpcDb);
   StTpcCoordinateTransform &transform = *mTpcTransForm;
@@ -168,8 +173,11 @@ void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StGlobalCoordinate &
   moveTpcHit(coorL,coorLTD);
   transform(coorLTD,coorG); PrPP(moveTpcHit,coorLTD); PrPP(moveTpcHit,coorG); 
 }
-// $Id: StTpcHitMoverMaker.cxx,v 1.29 2018/06/07 04:48:28 genevb Exp $
+// $Id: StTpcHitMoverMaker.cxx,v 1.30 2019/04/22 20:47:16 genevb Exp $
 // $Log: StTpcHitMoverMaker.cxx,v $
+// Revision 1.30  2019/04/22 20:47:16  genevb
+// Introducing codes for AbortGapCleaning distortion corrections
+//
 // Revision 1.29  2018/06/07 04:48:28  genevb
 // Explicit include for spaceChargeCor needed
 //

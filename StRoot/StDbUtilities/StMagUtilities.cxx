@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.117 2018/12/06 19:36:45 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.118 2019/04/22 20:47:11 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.118  2019/04/22 20:47:11  genevb
+ * Introducing codes for AbortGapCleaning distortion corrections
+ *
  * Revision 1.117  2018/12/06 19:36:45  genevb
  * Move Instance() definition to resolve undefined symbol
  *
@@ -413,7 +416,8 @@ enum   DistortSelect                                                  <br>
   kDisableTwistClock = 0x40000,  // Bit 19                            <br>
   kFullGridLeak      = 0x80000,  // Bit 20                            <br>
   kDistoSmearing     = 0x100000, // Bit 21                            <br>
-  kPadrow40          = 0x200000  // Bit 22                            <br>
+  kPadrow40          = 0x200000, // Bit 22                            <br>
+  kAbortGap          = 0x400000  // Bit 23                            <br>
 } ;                                                                   <br>
 
 Note that the option flag used in the chain is 2x larger 
@@ -457,6 +461,8 @@ To do:  <br>
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StDetectorDbMaker/St_tpcCalibResolutionsC.h"
+#include "StDetectorDbMaker/St_tpcChargeEventC.h"
+#include "StDetectorDbMaker/St_tpcSCGLC.h"
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
   //#include "StDetectorDbMaker/StDetectorDbMagnet.h"
 static Float_t  gFactor  = 1.0 ;        // Multiplicative factor (allows scaling and sign reversal)
@@ -539,6 +545,7 @@ StMagUtilities::StMagUtilities (StTpcDb* /* dbin */, Int_t mode )
   GetSpaceChargeR2()    ;    // Get the spacecharge variable R2 from the DB and EWRatio
   GetShortedRing()      ;    // Get the parameters that describe the shorted ring on the field cage
   GetGridLeak( mode )   ;    // Get the parameters that describe the gating grid leaks
+  GetAbortGapCharge()   ;    // Get the parameters that describe the Abort Gap charge events
   CommonStart( mode )   ;    // Read the Magnetic and Electric Field Data Files, set constants
   UseManualSCForPredict(kFALSE) ; // Initialize use of Predict() functions;
 }
@@ -556,6 +563,7 @@ StMagUtilities::StMagUtilities ( const StarMagField::EBField map, const Float_t 
   GetMagFactor()        ;        // Get the magnetic field scale factor from the StarMagField
   fTpcVolts      =  0   ;        // Do not get TpcVoltages out of the DB   - use defaults in CommonStart
   fOmegaTau      =  0   ;        // Do not get OmegaTau out of the DB      - use defaults in CommonStart
+  fAbortGapCharge=  0   ;        // Do not get AbortGap out of the DB      - use defaults in CommonStart
   ManualSpaceCharge(0)  ;        // Do not get SpaceCharge out of the DB   - use defaults inserted here.
   ManualSpaceChargeR2(0,1) ;     // Do not get SpaceChargeR2 out of the DB - use defaults inserted here, SpcChg and EWRatio
   ManualShortedRing(0,0,0,0,0) ; // No shorted rings
@@ -901,6 +909,14 @@ void StMagUtilities::ManualGGVoltError (Double_t east, Double_t west)
   deltaVGGWest = west;
 }
 
+void StMagUtilities::GetAbortGapCharge() {
+  fAbortGapCharge = St_tpcChargeEventC::instance() ;
+  AbortGapCharges = fAbortGapCharge->getCharges() ;
+  AbortGapTimes   = fAbortGapCharge->getTimes() ;
+  AbortGapChargeCoef = (St_tpcSCGLC::instance()->SC())[0] ; // temporary location for these?
+  IonDriftVel        = (St_tpcSCGLC::instance()->SC())[1] ; // temporary location for these?
+}
+
 //________________________________________
 
 //  Standard maps for E and B Field Distortions ... Note: These are no longer read from a file but are listed here (JT, 2009).
@@ -1039,6 +1055,11 @@ void StMagUtilities::CommonStart ( Int_t mode )
     }
   else  cout << "StMagUtilities::CommonSta  Using HV planes parameters from the DB."   << endl ; 
 
+  if ( fAbortGapCharge == 0 )
+    {
+      IonDriftVel = 181.67; // http://nuclear.ucdavis.edu/~bkimelman/protected/TPC_Meeting_Apr_10.pdf
+      cout << "StMagUtilities::CommonSta  WARNING -- Using default Ion Drift Velocity. " << endl ;
+    }
 
   // Parse the mode switch which was received from the Tpt maker
   // To turn on and off individual distortions, set these higher bits
@@ -1050,10 +1071,11 @@ void StMagUtilities::CommonStart ( Int_t mode )
     mDistortionMode &= ~(mDistortionMode & kClock);
     mDistortionMode &= ~(mDistortionMode & kFast2DBMap);
   }
-  if ( !( mode & ( kBMap | kPadrow13 | kPadrow40 | kTwist | kClock | kMembrane | kEndcap | kIFCShift | kSpaceCharge | kSpaceChargeR2 
-                         | kShortedRing | kFast2DBMap | kGridLeak | k3DGridLeak | kGGVoltError | kSectorAlign | kFullGridLeak))) 
+  if ( !( mode & ( kBMap | kPadrow13 | kPadrow40 | kTwist | kClock | kMembrane | kEndcap | kIFCShift | kSpaceCharge | kSpaceChargeR2 |
+                   kAbortGap | kShortedRing | kFast2DBMap | kGridLeak | k3DGridLeak | kGGVoltError | kSectorAlign | kFullGridLeak))) 
     {
        mDistortionMode |= kPadrow40 ;
+       mDistortionMode |= kAbortGap ;
        if (! (mDistortionMode & kDisableTwistClock)) {
 	 mDistortionMode |= kFast2DBMap ;
 	 mDistortionMode |= kTwist ;
@@ -1077,6 +1099,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
   if ( mDistortionMode & kIFCShift )      printf (" + IFCShift") ;
   if ( mDistortionMode & kSpaceCharge )   printf (" + SpaceCharge") ;
   if ( mDistortionMode & kSpaceChargeR2 ) printf (" + SpaceChargeR2") ;
+  if ( mDistortionMode & kAbortGap )      printf (" + AbortGapSpaceR2") ;
   if ( mDistortionMode & kMembrane )      printf (" + Central Membrane") ;
   if ( mDistortionMode & kEndcap )        printf (" + Endcap") ;
   if ( mDistortionMode & kShortedRing )   printf (" + ShortedRing") ;
@@ -1127,6 +1150,9 @@ void StMagUtilities::CommonStart ( Int_t mode )
   if (mDistortionMode & kDistoSmearing) {
   cout << "StMagUtilities::SmearCoefSC   =  " << SmearCoefSC << endl;
   cout << "StMagUtilities::SmearCoefGL   =  " << SmearCoefGL << endl;
+  }
+  if (mDistortionMode & kAbortGap) {
+  cout << "StMagUtilities::AbortGapCoef  =  " << AbortGapChargeCoef << endl;
   }
   cout << "StMagUtilities::IFCShift      =  " << IFCShift << " cm" << endl ;
   cout << "StMagUtilities::CathodeV      =  " << CathodeV << " volts" << endl ;
@@ -1312,6 +1338,11 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
 
   if (mDistortionMode & (kSpaceCharge | kSpaceChargeR2)) { 
       UndoSpaceChargeDistortion ( Xprime1, Xprime2, Sector ) ;
+      memcpy(Xprime1,Xprime2,threeFloats);
+  }
+
+  if (mDistortionMode & kAbortGap) {
+      UndoAbortGapDistortion ( Xprime1, Xprime2, Sector ) ;
       memcpy(Xprime1,Xprime2,threeFloats);
   }
 
@@ -2865,6 +2896,192 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 }
 
   
+//________________________________________
+  
+
+/// Abort Gap Cleaning Cycle space charge correction
+/*!
+  Calculate the 3D distortions due to the charge introduced by an Abort Gap Cleaning Cycle. 
+  As we understand the process, the abort gap cleaning cycle causes a burst of charge to appear 
+  in the TPC every few seconds (cycle time predefined by MCR).  The positive charge then dissapates
+  by drifting from the Central Membrane to the TPC readout planes. However, the drift time of the 
+  ions is very slow and so it takes approximately 0.75 seconds (279 cm/sec) to drift from CM to readout.
+
+  Gene proposed that we solve this problem by calculating the spacecharge in the TPC every 0.05 seconds
+  (or so) as the charge drifts to the readout plane.  Thus, a discretized solution.
+
+  Charge distribution: we do not know the distribution of charge in the TPC due to an abort gap
+  cleaning cycle.  We are going to start by assuming that the charge distribution has the same shape
+  as a normal event (approximately 1/R**2).  This assumption will hold at t=0, but then we will move 
+  the charge distribution in Z as time evolves. Thus, at 0.05 seconds the charge distribution in Z will
+  be shifted towards the endcaps by (about) 14 cm.  Repeat and shift every 0.05 seconds.
+
+  "const Float_t Time" is the time since the last cleaning of the abort gap. Typically 0 to 0.75 seconds
+  because 0.75 seconds is an estimate of the full length ion drift time.  Time > 0.75 s is a no-op.
+
+  This codes does not stack events.  It assumes that the time between Abort Gap cleaning cycles is > 0.75 seconds.
+  
+  This code is an extension of the "1/R**2 SpaceCharge Distortion" but allows for the possibility
+  of storing and applying N maps (where N ~ 15).  The following comments are excerpted from that code base:
+
+  Space Charge distortion using space charge from a real event (an assumption).  The best charge 
+  distribution for one event is Howard's fit to HiJet events. The radial distribution is approximately 
+  1/R**2, however we use a better parameterization in the code. The charge distribution has been
+  integrated over Z to simulate the linear increase of space charge in Z due to the slow drift velocity 
+  of the ions.  Electrostatic equations solved by relaxtion.  
+  Note that on 3/26/2008, we added a new element to the DB so that the space charge in the East and
+  West halves of the TPC can be different by a constant factor.  The constant is called "SpaceChargeEWRatio"
+  and is greater than 1.0 when there is more charge in the East half to the TPC.
+
+  Original work by Gene VanBuren, Benjamin Kimelman and Jim Thomas 
+*/
+
+void StMagUtilities::UndoAbortGapDistortion( const Float_t x[], Float_t Xprime[], Int_t Sector, Float_t TimeSinceDeposition ) 
+{
+  
+  const Int_t       ORDER     =    1 ;   // Linear interpolation = 1, Quadratic = 2   
+  
+  static  Bool_t DoOnceLocal = true ;
+  Float_t   Er_integral, Ephi_integral ;
+  Double_t  r, phi, z ;
+  const Int_t     TIMEBINS    =  15  ;  // Each time bin is 0.05 seconds          
+
+  static Float_t abortR2Er[TIMEBINS][EMap_nZ][EMap_nR] ;
+  //  static Float_t abortR2Er_Calc[EMap_nZ][EMap_nR] ;
+
+  const Int_t     ROWS        =  257 ;  // (2**n + 1)                             
+  const Int_t     COLUMNS     =  129 ;  // (2**m + 1)                             
+
+  cout << "StMagUtilities::UndoAbortGap TimeSinceDeposition=" << TimeSinceDeposition << endl;
+
+  Float_t AbortGapCharge = 0;
+  if (fAbortGapCharge) GetAbortGapCharge();
+  if (TimeSinceDeposition < 0) {
+    if (AbortGapCharges->GetSize() == 0) { memcpy(Xprime,x,threeFloats);  return ; }
+    AbortGapCharge = AbortGapChargeCoef * (*AbortGapCharges)[0];
+    TimeSinceDeposition = (Float_t) (*AbortGapTimes)[0];
+  } else {
+    if (fSpaceChargeR2) { GetSpaceChargeR2();} // need to reset it. 
+    AbortGapCharge = SpaceChargeR2; // test charge
+    TimeSinceDeposition = 0.1; // test time
+  }
+  
+
+  if (DoOnceLocal )
+    {
+      //      cout << "TPC_Z0/IonDriftVel: " << TPC_Z0 / IonDriftVel << endl;
+      cout << "StMagUtilities::UndoAbortGap  Please wait for the tables to fill ... ~5 seconds" << endl;
+      const Int_t     ITERATIONS  =  100 ;  // About 0.05 seconds per iteration       
+      const Double_t  GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
+      const Double_t  GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
+      Float_t  Rlist[ROWS], Zedlist[COLUMNS] ;
+     
+      //Fill arrays with initial conditions.  V on the boundary and Charge in the volume.                                                                                   
+      for ( Int_t k = 0 ; k < TIMEBINS ; k++ )
+	{
+	  Double_t driftZ = k * TPC_Z0 / TIMEBINS ;
+
+	  TMatrix ArrayV(ROWS,COLUMNS), Charge(ROWS,COLUMNS), ArrayE(ROWS,COLUMNS), EroverEz(ROWS,COLUMNS) ;
+
+	  for ( Int_t j = 0 ; j < COLUMNS ; j++ )
+	    {
+	      Double_t zed = j*GRIDSIZEZ ;
+	      Zedlist[j] = zed ;
+	      for ( Int_t i = 0 ; i < ROWS ; i++ )
+		{
+		  Double_t Radius = IFCRadius + i*GRIDSIZER ;
+		  ArrayV(i,j) = 0 ;
+		  Charge(i,j) = 0 ;
+		  Rlist[i] = Radius ;
+		}
+	    }
+	  // Set charge distribution                                                  
+	  for ( Int_t j = 1 ; j < COLUMNS-1 ; j++ )
+	    {
+	      Double_t zed = j*GRIDSIZEZ ;
+	      //int count = 0;
+	      for ( Int_t i = 1 ; i < ROWS-1 ; i++ )
+		{
+		  // section needs to be modified to produce different space charge distributions for each different map                                                     
+		  Double_t Radius = IFCRadius + i*GRIDSIZER ;
+		  Double_t zterm = OFCRadius*OFCRadius - IFCRadius*IFCRadius ;
+
+		  if ( zed <= TPC_Z0 - driftZ ) 
+		    {
+		      Charge(i,j) = zterm * SpaceChargeRadialDependence(Radius) ;
+		    }
+		  else Charge(i,j) = 0.0 ;
+		}
+	    }
+	  
+	  // Do Poisson relaxation for each time slice                                
+	  PoissonRelaxation( ArrayV, Charge, EroverEz, ITERATIONS ) ;
+	  //Interpolate results onto standard grid for Electric Fields                
+	  Int_t ilow=0, jlow=0 ;
+	  Float_t save_Er[2] ;
+	  for ( Int_t i = 0 ; i < EMap_nZ ; ++i )
+	    {
+	      z = TMath::Abs( eZList[i] ) ;
+	      for ( Int_t j = 0 ; j <EMap_nR ; ++j )
+		{ // Linear interpolation                                             
+		  r = eRList[j] ;
+		  Search( ROWS,    Rlist, r, ilow ) ;
+		  Search( COLUMNS, Zedlist, z, jlow ) ;
+		  if ( ilow < 0 ) ilow = 0 ;
+		  if ( jlow < 0 ) jlow = 0 ;
+		  if ( ilow + 1  >=  ROWS - 1 ) ilow =  ROWS - 2 ;
+		  if ( jlow + 1  >=  COLUMNS - 1 ) jlow =  COLUMNS - 2 ;
+		  save_Er[0] = EroverEz(ilow,jlow) + (EroverEz(ilow,jlow+1)-EroverEz(ilow,jlow))*(z-Zedlist[jlow])/GRIDSIZEZ ;
+		  save_Er[1] = EroverEz(ilow+1,jlow) + (EroverEz(ilow+1,jlow+1)-EroverEz(ilow+1,jlow))*(z-Zedlist[jlow])/GRIDSIZEZ ;
+		  abortR2Er[k][i][j] = save_Er[0] + (save_Er[1]-save_Er[0])*(r-Rlist[ilow])/GRIDSIZER ;
+		}
+	    }
+	}
+      
+      DoOnceLocal = false ;
+    }
+  
+  if (usingCartesian) Cart2Polar(x,r,phi);
+  else { r = x[0]; phi = x[1]; }
+  if ( phi < 0 ) phi += TMath::TwoPi() ;      // Table uses phi from 0 to 2*Pi        
+  z = LimitZ( Sector, x ) ;                   // Protect against discontinuity at CM  
+  
+  // Determine which time slice is closest                                            
+  Int_t timeSlice ;
+  Double_t closestTime = 1.0 ;
+  Double_t timeDiff ;
+
+  for ( Int_t k = 0 ; k < TIMEBINS ; k++ )
+    {
+      timeDiff = abs(TimeSinceDeposition - ( k * (TPC_Z0/TIMEBINS) / IonDriftVel ) ) ;
+      if ( timeDiff < abs(TimeSinceDeposition - closestTime) )
+	{
+	  closestTime = k * (TPC_Z0/TIMEBINS) / IonDriftVel ;
+	  timeSlice = k ;
+	}
+      if ( TimeSinceDeposition >= TPC_Z0/IonDriftVel ) timeSlice = -999 ;
+    }
+
+  if ( timeSlice != -999 )
+    {
+      Interpolate2DEdistortion( ORDER, r, z, abortR2Er[timeSlice], Er_integral ) ;
+      Ephi_integral = 0.0 ;  // E field is symmetric in phi                               
+      // Subtract to Undo the distortions and apply the EWRatio on the East end of the TPC
+      if ( r > 0.0 ) 
+        {
+          double Weight = AbortGapCharge * (doingDistortion ? SmearCoefSC : 1.0);
+          phi =  phi - Weight * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;     
+          r   =  r   - Weight * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
+        }
+    } 
+  
+  if (usingCartesian) Polar2Cart(r,phi,Xprime);
+  else { Xprime[0] = r; Xprime[1] = phi; }
+  Xprime[2] = x[2];
+
+}
+
+
 //________________________________________
 
 
