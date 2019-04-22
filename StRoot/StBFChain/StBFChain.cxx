@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.660.2.2 2019/02/05 02:42:09 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.660.2.3 2019/04/22 21:16:57 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -674,7 +674,8 @@ Int_t StBFChain::Instantiate()
       else if ( GetOption("PicoVtxDefault"))  mk->SetAttr("PicoVtxMode", "PicoVtxDefault");
       if ( GetOption("PicoCovMtxWrite"))      mk->SetAttr("PicoCovMtxMode", "PicoCovMtxWrite");
       else if ( GetOption("PicoCovMtxSkip"))  mk->SetAttr("PicoCovMtxMode", "PicoCovMtxSkip"); // Default mode
-      
+      if ( GetOption("PicoBEmcSmdWrite"))      mk->SetAttr("PicoBEmcSmdMode", "PicoBEmcSmdWrite");
+      else if ( GetOption("PicoBEmcSmdSkip"))  mk->SetAttr("PicoBEmcSmdMode", "PicoBEmcSmdSkip"); // Default mode
     }
 
 
@@ -776,6 +777,7 @@ Int_t StBFChain::Instantiate()
 	if( GetOption("OGGVoltErr") ) mk->SetAttr("OGGVoltErr" , kTRUE);
 	if( GetOption("OSectorAlign"))mk->SetAttr("OSectorAlign",kTRUE);
 	if( GetOption("ODistoSmear")) mk->SetAttr("ODistoSmear", kTRUE);
+	if( GetOption("OAbortGap"))   mk->SetAttr("OAbortGap"  , kTRUE);
       }
       mk->PrintAttr();
     }
