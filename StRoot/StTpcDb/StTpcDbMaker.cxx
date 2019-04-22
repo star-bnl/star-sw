@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.76 2018/12/06 19:30:59 genevb Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.77 2019/04/22 20:47:15 genevb Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.77  2019/04/22 20:47:15  genevb
+ * Introducing codes for AbortGapCleaning distortion corrections
+ *
  * Revision 1.76  2018/12/06 19:30:59  genevb
  * Check on StMagUtilities instance from StTpcDb instead of global
  *
@@ -244,6 +247,7 @@
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/StDetectorDbMagnet.h"
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
+#include "StDetectorDbMaker/St_tpcChargeEventC.h"
 #include "StEventTypes.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
@@ -326,6 +330,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     if( IAttr("OGGVoltErr") ) mask |= ( kGGVoltError  << 1);
     if( IAttr("OSectorAlign"))mask |= ( kSectorAlign  << 1);
     if( IAttr("ODistoSmear")) mask |= ( kDistoSmearing<< 1);
+    if( IAttr("OAbortGap"))   mask |= ( kAbortGap     << 1);
     LOG_QA << "Instantiate ExB The option passed will be " << Form("%d 0x%X\n",mask,mask) << endm;
     // option handling needs some clean up, but right now we stay compatible
     Int_t option = (mask & 0x7FFFFFFE) >> 1;
@@ -368,6 +373,10 @@ Int_t StTpcDbMaker::Make(){
 	    StTpcDb::instance()->SetTriggerId(TriggerId);
 	  }
 	}
+      }
+      if (IAttr("OAbortGap")) {
+        StTriggerData* trg = pEvent->triggerData();
+        if (trg) St_tpcChargeEventC::instance()->findChargeTimes(trg->bunchCounter());
       }
     }
   }
