@@ -1,5 +1,9 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.662 2019/04/22 20:47:07 genevb Exp $
+//<<<<<<< StBFChain.cxx
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.663 2019/04/23 15:30:07 jeromel Exp $
+//=======
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.663 2019/04/23 15:30:07 jeromel Exp $
+//>>>>>>> 1.660.2.3
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -15,6 +19,7 @@
 #include "StTreeMaker/StTreeMaker.h"
 #include "StIOMaker/StIOMaker.h"
 #include "StMessMgr.h"
+#include "StShadowMaker/StShadowMaker.h"
 #include "StEnumerations.h"
 #include "TTree.h"
 #include "TEnv.h"
@@ -673,9 +678,14 @@ Int_t StBFChain::Instantiate()
       else if ( GetOption("PicoVtxDefault"))  mk->SetAttr("PicoVtxMode", "PicoVtxDefault");
       if ( GetOption("PicoCovMtxWrite"))      mk->SetAttr("PicoCovMtxMode", "PicoCovMtxWrite");
       else if ( GetOption("PicoCovMtxSkip"))  mk->SetAttr("PicoCovMtxMode", "PicoCovMtxSkip"); // Default mode
+      //<<<<<<< StBFChain.cxx
       if ( GetOption("PicoBEmcSmdWrite"))      mk->SetAttr("PicoBEmcSmdMode", "PicoBEmcSmdWrite");
       else if ( GetOption("PicoBEmcSmdSkip"))  mk->SetAttr("PicoBEmcSmdMode", "PicoBEmcSmdSkip"); // Default mode
       
+      //=======
+      if ( GetOption("PicoBEmcSmdWrite"))      mk->SetAttr("PicoBEmcSmdMode", "PicoBEmcSmdWrite");
+      else if ( GetOption("PicoBEmcSmdSkip"))  mk->SetAttr("PicoBEmcSmdMode", "PicoBEmcSmdSkip"); // Default mode
+      //>>>>>>> 1.660.2.3
     }
 
 
@@ -739,7 +749,8 @@ Int_t StBFChain::Instantiate()
       if ( GetOption("useLDV")    ) mk->SetAttr("useLDV",kTRUE) ;// uses laserDV database
       if ( GetOption("useCDV")    ) mk->SetAttr("useCDV",kTRUE) ;// uses ofl database
       if ( GetOption("useNewLDV") ) mk->SetAttr("useNewLDV",kTRUE);// uses new laserDV
-      if (GetOption("ExB")){
+      if ( GetOption("shadow")    ) mk->SetAttr("NoReset",kTRUE);// no resetting ExB
+      if ( GetOption("ExB")){
 	mk->SetAttr("ExB", kTRUE);	// bit 0 is ExB ON or OFF
 	if      ( GetOption("EB1") ) mk->SetAttr("EB1", kTRUE);
 	else if ( GetOption("EB2") ) mk->SetAttr("EB2", kTRUE);
@@ -878,6 +889,10 @@ Int_t StBFChain::Instantiate()
       if (FiltTrgFlavor.Length())
         SetFlavor((FiltTrgFlavor += "+ofl").Data(),"trgOfflineFilter");
     }
+    if (maker == "StTagsMaker"){
+      if ( GetOption("shadow")    ) mk->SetAttr("shadow",kTRUE);
+    }
+
   Add2Chain:
     if (! mk) continue;
     if (name == "") strncpy (fBFC[i].Name,(Char_t *) mk->GetName() , sizeof(fBFC[i].Name));
@@ -1620,6 +1635,28 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
 	  }
 	} else {
 	  fFileOut = gSystem->BaseName(fInFile.Data());
+          if (GetOption("shadow")) {
+            TObjArray* fileOutTokens = fFileOut.Tokenize("_.");
+            TString& runToken = ((TObjString*) (fileOutTokens->At(2)))->String();
+            TString& seqToken = ((TObjString*) (fileOutTokens->At(4)))->String();
+            if (!(runToken.CompareTo("adc"))) {
+              runToken = ((TObjString*) (fileOutTokens->At(3)))->String();
+              seqToken = ((TObjString*) (fileOutTokens->At(5)))->String();
+            }
+            if (!(runToken.IsDigit())) {
+              LOG_ERROR << "Unable to locate run number in filename for shadowing." << endm;
+            } else {
+              fFileOut.ReplaceAll(runToken,Form("%d",
+                StShadowMaker::getRunNumber(runToken.Atoi())));
+            }
+            if (!(seqToken.IsDigit())) {
+              LOG_ERROR << "Unable to locate file sequence number in filename for shadowing." << endm;
+            } else {
+              fFileOut.ReplaceAll(seqToken,Form("%07d",
+                StShadowMaker::getFileSeq(seqToken.Atoi())));
+            }
+            delete fileOutTokens;
+          }
 	}
       } 
       if (fFileOut == "") {
