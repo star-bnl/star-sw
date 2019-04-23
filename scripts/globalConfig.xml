@@ -2550,9 +2550,8 @@ stream_error = false </string></void>
 <string>should_transfer_files = YES
 when_to_transfer_output = ON_EXIT</string>
                    </void>
-<!--
                     <void method="addRequirement"><string/> </void>
-                    <void property="priorityUsed"><boolean>true</boolean>           </void> -->
+                    <void property="priorityUsed"><boolean>true</boolean>           </void>
                     <void property="priorityMax"><double>20</double>                </void>
                     <void property="priorityMin"><double>0</double>                 </void>
                     <void property="defaultStorageSpace"><int>-1</int></void>
