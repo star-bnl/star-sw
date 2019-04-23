@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.cxx,v 1.17 2017/10/20 17:50:32 smirnovd Exp $
+ * $Id: StBTofCalibMaker.cxx,v 1.18 2019/04/23 05:49:57 jdb Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.cxx,v $
+ * Revision 1.18  2019/04/23 05:49:57  jdb
+ * Added function to allow forcing 0 starttime for totally startless BTOF usage in UPC
+ *
  * Revision 1.17  2017/10/20 17:50:32  smirnovd
  * Squashed commit of the following:
  *
@@ -136,30 +139,41 @@ const Double_t StBTofCalibMaker::mC_Light = C_C_LIGHT/1.e9;
 //_____________________________________________________________________________
 StBTofCalibMaker::StBTofCalibMaker(const char *name) : StMaker(name)
 {
-  /// default constructor
-  /// set the default parameters for TDC, ADC cut etc.
-  /// Reset the calibration parameters
-  setVPDHitsCut(1,1);
-  setOuterGeometry(true);
-
-  mEvent = 0;
-  mBTofHeader = 0;
-  mMuDst = 0;
-  mZCalibType = NOTSET;
-  mTotCalibType = NOTSET;
-
-  mSlewingCorr = kTRUE;
-  mMuDstIn = kFALSE;
-  mUseVpdStart = kTRUE;
-#if 0
-  setCreateHistoFlag(kFALSE);
-  //  setHistoFileName("btofcalib.root");
-#endif
-
-
-  StThreeVectorD MomFstPt(0.,0.,9999.);
-  StThreeVectorD origin(0.,0.,0.);
-  mBeamHelix = new StPhysicalHelixD(MomFstPt,origin,0.5*tesla,1.);
+    /// default constructor
+    /// set the default parameters for TDC, ADC cut etc.
+    /// Reset the calibration parameters
+    setVPDHitsCut(1,1);
+    setOuterGeometry(true);
+    
+    mEvent = 0;
+    mBTofHeader = 0;
+    mMuDst = 0;
+    mZCalibType = NOTSET;
+    mTotCalibType = NOTSET;
+    
+    mSlewingCorr = kTRUE;
+    mMuDstIn = kFALSE;
+    mUseVpdStart = kTRUE;
+    mForceTStartZero = false;
+     isMcFlag = kFALSE;
+    
+    setCreateHistoFlag(kFALSE);
+    setHistoFileName("btofcalib.root");
+    
+    // default initialization from database
+    //yf    mInitFromFile = kFALSE;
+    
+    // assign default locations and names to the calibration files
+    setCalibFileTot("/star/institutions/rice/calib/default/totCali_4DB.dat");
+    setCalibFileZhit("/star/institutions/rice/calib/default/zCali_4DB.dat");
+    setCalibFileT0("/star/institutions/rice/calib/default/t0_4DB.dat");
+    
+    
+    StThreeVectorD MomFstPt(0.,0.,9999.);
+    StThreeVectorD origin(0.,0.,0.);
+    mBeamHelix = new StPhysicalHelixD(MomFstPt,origin,0.5*tesla,1.);
+    
+    
 }
 
 //_____________________________________________________________________________
@@ -976,92 +990,101 @@ Double_t StBTofCalibMaker::tofAllCorr(const Double_t tof, const Double_t tot, co
 //_____________________________________________________________________________
 void StBTofCalibMaker::tstart(const Double_t vz, Double_t *tstart, Double_t *tdiff)
 {
-  *tstart = -9999.;
-  *tdiff = -9999.;
-
-  if(fabs(vz)>200.) {LOG_INFO << "tstart: vz too big" << endm; return;}
-
-  Double_t TSum = mTSumEast + mTSumWest;
-
-  if(mNEast+mNWest>0) {
-    *tstart = (TSum-(mNEast-mNWest)*vz/(C_C_LIGHT/1.e9))/(mNEast+mNWest);
-  }
-  if ( mNEast>=mVPDEastHitsCut && mNWest>=mVPDWestHitsCut ) {
-    *tdiff = (mTSumEast/mNEast - mTSumWest/mNWest)/2. - vz/(C_C_LIGHT/1.e9);
-  }
-
-  return;
+    if ( mForceTStartZero ){
+        *tstart = 0;
+        return;
+    }
+    *tstart = -9999.;
+    *tdiff = -9999.;
+    
+    if(fabs(vz)>200.) {LOG_INFO << "tstart: vz too big" << endm; return;}
+    
+    Double_t TSum = mTSumEast + mTSumWest;
+    
+    if(mNEast+mNWest>0) {
+        *tstart = (TSum-(mNEast-mNWest)*vz/(C_C_LIGHT/1.e9))/(mNEast+mNWest);
+    }
+    if ( mNEast>=mVPDEastHitsCut && mNWest>=mVPDWestHitsCut ) {
+        *tdiff = (mTSumEast/mNEast - mTSumWest/mNWest)/2. - vz/(C_C_LIGHT/1.e9);
+    }
+    
+    return;
 }
 
 //_____________________________________________________________________________
 void StBTofCalibMaker::tstart_NoVpd(const StBTofCollection *btofColl, const StPrimaryVertex *pVtx, Double_t *tstart)
 {
-  *tstart = -9999.;
-  if(!btofColl) return;
-
-  const StSPtrVecBTofHit &tofHits = btofColl->tofHits();
-  Int_t nCan = 0;
-  Double_t tSum = 0.;
-  Double_t t0[5000];
-  memset(t0, 0., sizeof(t0));
-  for(size_t i=0;i<tofHits.size();i++) {
-    StBTofHit *aHit = dynamic_cast<StBTofHit*>(tofHits[i]);
-    if(!aHit) continue;
-    int trayId = aHit->tray();
-    if(trayId>0&&trayId<=St_tofCorrC::mNTray) {
-      StGlobalTrack *gTrack = dynamic_cast<StGlobalTrack*>(aHit->associatedTrack());
-      if(!gTrack) continue;
-      StPrimaryTrack *pTrack = dynamic_cast<StPrimaryTrack*>(gTrack->node()->track(primary));
-      if(!pTrack) continue;
-      if(pTrack->vertex() != pVtx) continue;
-      StThreeVectorF mom = pTrack->geometry()->momentum();
-      double ptot = mom.mag();
-
-      // use lose cut for low energies to improve the efficiency - resolution is not a big issue
-      if(ptot<0.2 || ptot>0.6) continue;
-
-      static StTpcDedxPidAlgorithm PidAlgorithm;
-      static StPionPlus* Pion = StPionPlus::instance();
-      const StParticleDefinition* pd = pTrack->pidTraits(PidAlgorithm);
-      double nSigPi = -999.;
-      if(pd) {
-        nSigPi = PidAlgorithm.numberOfSigma(Pion);
-      }
-
-      if( fabs(nSigPi)>2.0 ) continue;
-
-      const StPtrVecTrackPidTraits& theTofPidTraits = pTrack->pidTraits(kTofId);
-      if(!theTofPidTraits.size()) continue;
-
-      StTrackPidTraits *theSelectedTrait = theTofPidTraits[theTofPidTraits.size()-1];
-      if(!theSelectedTrait) continue;
-
-      StBTofPidTraits *pidTof = dynamic_cast<StBTofPidTraits *>(theSelectedTrait);
-      if(!pidTof) continue;
-
-      double tot = aHit->tot(); // ns
-      double tof = aHit->leadingEdgeTime();
-      double zhit = pidTof->zLocal();
-
-      int moduleChan = (aHit->module()-1)*6 + (aHit->cell()-1);
-      Double_t tofcorr = tofAllCorr(tof, tot, zhit, trayId, moduleChan);
-      if(tofcorr<0.) continue;
-
-      StThreeVectorF primPos = pVtx->position();
-      StPhysicalHelixD helix = pTrack->geometry()->helix();
-      double L = tofPathLength(&primPos, &pidTof->position(), helix.curvature());
-      double tofPi = L*sqrt(M_PION_PLUS*M_PION_PLUS+ptot*ptot)/(ptot*(C_C_LIGHT/1.e9));
-
-      tSum += tofcorr - tofPi;
-      t0[nCan] = tofcorr - tofPi;
-      nCan++;
-      
+    if ( mForceTStartZero ){
+        *tstart = 0;
+        return;
     }
 
-  }
-
-  if(nCan<=0) {
     *tstart = -9999.;
+    if(!btofColl) return;
+    
+    const StSPtrVecBTofHit &tofHits = btofColl->tofHits();
+    Int_t nCan = 0;
+    Double_t tSum = 0.;
+    Double_t t0[5000];
+    memset(t0, 0., sizeof(t0));
+    for(size_t i=0;i<tofHits.size();i++) {
+        StBTofHit *aHit = dynamic_cast<StBTofHit*>(tofHits[i]);
+        if(!aHit) continue;
+        int trayId = aHit->tray();
+        if(trayId>0&&trayId<=mNTray) {
+            StGlobalTrack *gTrack = dynamic_cast<StGlobalTrack*>(aHit->associatedTrack());
+            if(!gTrack) continue;
+            StPrimaryTrack *pTrack = dynamic_cast<StPrimaryTrack*>(gTrack->node()->track(primary));
+            if(!pTrack) continue;
+            if(pTrack->vertex() != pVtx) continue;
+            StThreeVectorF mom = pTrack->geometry()->momentum();
+            double ptot = mom.mag();
+            
+            // use lose cut for low energies to improve the efficiency - resolution is not a big issue
+            if(ptot<0.2 || ptot>0.6) continue;
+            
+            static StTpcDedxPidAlgorithm PidAlgorithm;
+            static StPionPlus* Pion = StPionPlus::instance();
+            const StParticleDefinition* pd = pTrack->pidTraits(PidAlgorithm);
+            double nSigPi = -999.;
+            if(pd) {
+                nSigPi = PidAlgorithm.numberOfSigma(Pion);
+            }
+            
+            if( fabs(nSigPi)>2.0 ) continue;
+            
+            const StPtrVecTrackPidTraits& theTofPidTraits = pTrack->pidTraits(kTofId);
+            if(!theTofPidTraits.size()) continue;
+            
+            StTrackPidTraits *theSelectedTrait = theTofPidTraits[theTofPidTraits.size()-1];
+            if(!theSelectedTrait) continue;
+            
+            StBTofPidTraits *pidTof = dynamic_cast<StBTofPidTraits *>(theSelectedTrait);
+            if(!pidTof) continue;
+            
+            double tot = aHit->tot(); // ns
+            double tof = aHit->leadingEdgeTime();
+            double zhit = pidTof->zLocal();
+            
+            int moduleChan = (aHit->module()-1)*6 + (aHit->cell()-1);
+            Double_t tofcorr = tofAllCorr(tof, tot, zhit, trayId, moduleChan);
+            if(tofcorr<0.) continue;
+            
+            StThreeVectorF primPos = pVtx->position();
+            StPhysicalHelixD helix = pTrack->geometry()->helix();
+            double L = tofPathLength(&primPos, &pidTof->position(), helix.curvature());
+            double tofPi = L*sqrt(M_PION_PLUS*M_PION_PLUS+ptot*ptot)/(ptot*(C_C_LIGHT/1.e9));
+            
+            tSum += tofcorr - tofPi;
+            t0[nCan] = tofcorr - tofPi;
+            nCan++;
+            
+        }
+        
+    }
+    
+    if(nCan<=0) {
+        *tstart = -9999.;
     return;
   }
 
@@ -1087,58 +1110,80 @@ void StBTofCalibMaker::tstart_NoVpd(const StBTofCollection *btofColl, const StPr
 //_____________________________________________________________________________
 void StBTofCalibMaker::tstart_NoVpd(const StMuDst *muDst, const StMuPrimaryVertex *pVtx, Double_t *tstart)
 {
-  *tstart = -9999.;
-  if(!muDst) return;
-
-  Int_t nBTofHits = muDst->numberOfBTofHit();
-  Int_t nCan = 0;
-  Double_t tSum = 0.;
-  Double_t t0[5000];
-  memset(t0, 0., sizeof(t0));
-  for(int i=0;i<nBTofHits;i++) {
-    StMuBTofHit *aHit = (StMuBTofHit*)muDst->btofHit(i);
-    if(!aHit) continue;
-    int trayId = aHit->tray();
-    if(trayId>0&&trayId<=St_tofCorrC::mNTray) {
-      StMuTrack *gTrack = aHit->globalTrack();
-      if(!gTrack) continue;
-      StMuTrack *pTrack = aHit->primaryTrack();
-      if(!pTrack) continue;
-      StMuPrimaryVertex *aVtx = muDst->primaryVertex(pTrack->vertexIndex());
-      if(aVtx != pVtx) continue;
-      StThreeVectorF mom = pTrack->momentum();
-      double ptot = mom.mag();
-
-      // For low energies, lose cut to improve the efficiency in peripheral collisions - resolution should be not a big issue
-      if(ptot<0.2 || ptot>0.6) continue;
-      double nSigPi = pTrack->nSigmaPion();
-      if( fabs(nSigPi)>2. ) continue;
-
-      StMuBTofPidTraits pidTof = pTrack->btofPidTraits();
-
-      double tot = aHit->tot(); // ns
-      double tof = aHit->leadingEdgeTime();
-      double zhit = pidTof.zLocal();
-
-      int moduleChan = (aHit->module()-1)*6 + (aHit->cell()-1);
-      Double_t tofcorr = tofAllCorr(tof, tot, zhit, trayId, moduleChan);
-      if(tofcorr<0.) continue;
-
-      StThreeVectorF primPos = pVtx->position();
-      StPhysicalHelixD helix = pTrack->helix();
-      double L = tofPathLength(&primPos, &pidTof.position(), helix.curvature());
-      double tofPi = L*sqrt(M_PION_PLUS*M_PION_PLUS+ptot*ptot)/(ptot*(C_C_LIGHT/1.e9));
-
-      tSum += tofcorr - tofPi;
-      t0[nCan] = tofcorr - tofPi;
-      nCan++;
-      
+    if ( mForceTStartZero ){
+        *tstart = 0;
+        return;
     }
-
-  }
-
-  if(nCan<=0) {
     *tstart = -9999.;
+    if(!muDst) return;
+    
+    Int_t nBTofHits = muDst->numberOfBTofHit();
+    Int_t nCan = 0;
+    Double_t tSum = 0.;
+    Double_t t0[5000];
+    memset(t0, 0., sizeof(t0));
+    for(int i=0;i<nBTofHits;i++) {
+        StMuBTofHit *aHit = (StMuBTofHit*)muDst->btofHit(i);
+        if(!aHit) {
+            continue;
+        }
+        
+        isMcFlag = kFALSE;       // Check to see if the hit is simulated.
+        if ( aHit->qaTruth() == 1  ) {
+            isMcFlag = kTRUE;
+        }
+        
+        int trayId = aHit->tray();
+        if(trayId>0&&trayId<=mNTray) {
+            StMuTrack *gTrack = aHit->globalTrack();
+            if(!gTrack) continue;
+            StMuTrack *pTrack = aHit->primaryTrack();
+            if(!pTrack) continue;
+            StMuPrimaryVertex *aVtx = muDst->primaryVertex(pTrack->vertexIndex());
+            if(aVtx != pVtx) continue;
+            StThreeVectorF mom = pTrack->momentum();
+            double ptot = mom.mag();
+            
+            // For low energies, lose cut to improve the efficiency in peripheral collisions - resolution should be not a big issue
+            if(ptot<0.2 || ptot>0.6) continue;
+            double nSigPi = pTrack->nSigmaPion();
+
+            if( fabs(nSigPi)>2. ) continue;
+
+            
+            StMuBTofPidTraits pidTof = pTrack->btofPidTraits();
+            
+            double tot = aHit->tot(); // ns
+            double tof = aHit->leadingEdgeTime();
+            double zhit = pidTof.zLocal();
+            
+            int moduleChan = (aHit->module()-1)*6 + (aHit->cell()-1);
+            
+            Double_t tofcorr = tof;
+            if (!isMcFlag) {
+                tofcorr = tofAllCorr(tof, tot, zhit, trayId, moduleChan);
+                if(tofcorr<0.) {
+                    LOG_WARN << " Calibration failed! ... " << endm;
+                    continue;
+                }
+            }
+            if(tofcorr<0.) continue;
+            
+            StThreeVectorF primPos = pVtx->position();
+            StPhysicalHelixD helix = pTrack->helix();
+            double L = tofPathLength(&primPos, &pidTof.position(), helix.curvature());
+            double tofPi = L*sqrt(M_PION_PLUS*M_PION_PLUS+ptot*ptot)/(ptot*(C_C_LIGHT/1.e9));
+            
+            tSum += tofcorr - tofPi;
+            t0[nCan] = tofcorr - tofPi;
+            nCan++;
+            
+        }
+        
+    }
+    
+    if(nCan<=0) {
+        *tstart = -9999.;
     return;
   }
 

@@ -2,7 +2,7 @@
 <job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false">
         <command>
   cd ${SUBMITTINGDIRECTORY}
-  starver TFG19e
+  starver TFG19d
 #  setenv NODEBUG yes
   FPE_OFF
 #  setup 64b

@@ -1297,6 +1297,7 @@ Bfc_st BFC[] = { // standard chains
   {"OGGVoltErr"  ,""  ,"","",""                                   ,"","GG voltage error correction",kFALSE},
   {"OSectorAlign",""  ,"","",""                        ,"","Sector alignment distortion correction",kFALSE},
   {"ODistoSmear" ,""  ,"","",""    ,"","Distortion smearing accounting for calibration resolutions",kFALSE},
+  {"OAbortGap"   ,""  ,"","",""                ,"","Abort gap cleaning event distortion correction",kFALSE},
   {"AlignSectors",""  ,"","",""                                             ,"",STAR_CHAIN_OBSOLETE,kFALSE},
   {"DbRichSca"   ,""  ,"","detdb","","",                    "Force reading of Rich scalers from DB",kFALSE},
   {"EastOff"     ,""  ,"","",""                                  ,"","Disactivate East part of tpc",kFALSE},
@@ -1926,6 +1927,7 @@ Bfc_st BFC[] = { // standard chains
    ,                              "StMuDSTMaker,StPass0CalibMaker","Calibrate SpaceCharge scalers",kFALSE},
   {"compend"     ,"","","event,detDb","StEventCompendiumMaker","StEventCompendiumMaker"
    ,                                                             "Fill event summary in ITTF Chain",kFALSE},
+  {"shadow"      ,"","","event,compend"                         ,"StShadowMaker","StShadowMaker","",kFALSE},
   {"TpcAligner"    ,"","","Alignment"         ,"StTpcAlignerMaker","StTpcAlignerMaker","TpcAligner",kFALSE},
   {"pec"         ,"PeC","","Event"                       ,"StPeCMaker","StPeCMaker","PCollAnalysis",kFALSE},
   {"RichSpectra"         ,"","",""                      ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},

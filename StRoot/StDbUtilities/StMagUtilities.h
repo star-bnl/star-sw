@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.66 2018/12/06 19:36:45 genevb Exp $
+ * $Id: StMagUtilities.h,v 1.67 2019/04/22 20:47:12 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.67  2019/04/22 20:47:12  genevb
+ * Introducing codes for AbortGapCleaning distortion corrections
+ *
  * Revision 1.66  2018/12/06 19:36:45  genevb
  * Move Instance() definition to resolve undefined symbol
  *
@@ -228,7 +231,8 @@ enum   DistortSelect
   kDisableTwistClock = 0x40000,  // Bit 19
   kFullGridLeak      = 0x80000,  // Bit 20
   kDistoSmearing     = 0x100000, // Bit 21
-  kPadrow40          = 0x200000  // Bit 22
+  kPadrow40          = 0x200000, // Bit 22
+  kAbortGap          = 0x400000  // Bit 23
 } ;
 enum   CorrectSelect
 {
@@ -259,6 +263,7 @@ class St_tpcHighVoltagesC;
 class St_tpcOmegaTauC;
 class St_tpcGridLeakC;
 class St_spaceChargeCorC;
+class St_tpcChargeEventC;
 class TRandom;
 
 //class TMatrix ;
@@ -275,6 +280,7 @@ class StMagUtilities {
   St_tpcGridLeakC*           fGridLeak      ;
   St_tpcHVPlanesC*           fHVPlanes      ;
   St_tpcCalibResolutionsC*   fCalibResolutions ;
+  St_tpcChargeEventC*        fAbortGapCharge;
 
   virtual void    GetDistoSmearing ( Int_t mode) ;
   virtual void    GetMagFactor ()     ;
@@ -287,6 +293,7 @@ class StMagUtilities {
   virtual void    GetGridLeak ( Int_t mode ) ;
   virtual void    GetHVPlanes()       ;
   virtual void    GetE()              ;
+  virtual void    GetAbortGapCharge() ;
 
   virtual void    CommonStart ( Int_t mode ) ;
   virtual void    Search ( const Int_t N, const Float_t Xarray[], const Float_t x, Int_t &low ) 
@@ -390,6 +397,11 @@ class StMagUtilities {
   TRandom* mRandom                    ; // Random number generator (used in distortion smearing)
   Float_t  SmearCoefSC                ; // Distortion smearing coefficient for SpaceCharge
   Float_t  SmearCoefGL                ; // Distortion smearing coefficient for GridLeak
+  TArrayF* AbortGapCharges            ; // Charges deposited into the TPC due to Abort Gap Cleaning events
+  TArrayD* AbortGapTimes              ; // Times since charges deposited into the TPC due to Abort Gap Cleaning events
+  Float_t  AbortGapChargeCoef         ; // Scale factor for charge deposited due to Abort Gap Cleaning events
+  Float_t  IonDriftVel                ; // Drift velocity of ions in the TPC gas
+
 
 
   Float_t  shiftEr[EMap_nZ][EMap_nR] ;
@@ -421,6 +433,8 @@ class StMagUtilities {
   virtual void    BrBz3DField ( const Float_t r, const Float_t z, const Float_t phi,
 				Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value ) 
   {StarMagField::Instance()->BrBz3DField(r, z, phi, Br_value, Bz_value, Bphi_value);}
+
+  virtual bool    UsingDistortion( const DistortSelect distortion ) { return ((mDistortionMode & distortion) ? true : false); }
    
   virtual void    DoDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    UndoDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
@@ -445,6 +459,7 @@ class StMagUtilities {
   virtual void    UndoShortedRingDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    UndoGGVoltErrorDistortion ( const Float_t x[], Float_t Xprime[], Int_t Sector = -1 ) ;
   virtual void    UndoSectorAlignDistortion ( const Float_t x[], Float_t Xprime[], Int_t Sector = -1 ) ;
+  virtual void    UndoAbortGapDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1, Float_t TimeSinceDeposition = -1.0 ) ;
 
   virtual void    FixSpaceChargeDistortion ( const Int_t Charge, const Float_t x[3], const Float_t p[3],
 					     const Prime PrimaryOrGlobal, 

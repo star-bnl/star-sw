@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.h,v 1.11 2017/10/20 17:50:32 smirnovd Exp $
+ * $Id: StBTofCalibMaker.h,v 1.12 2019/04/23 05:49:57 jdb Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.h,v $
+ * Revision 1.12  2019/04/23 05:49:57  jdb
+ * Added function to allow forcing 0 starttime for totally startless BTOF usage in UPC
+ *
  * Revision 1.11  2017/10/20 17:50:32  smirnovd
  * Squashed commit of the following:
  *
@@ -131,6 +134,8 @@ public:
   Int_t getZCalibType();
   Int_t getTotCalibType();
 
+  void forceTStartZero();
+
 private:
 
   /// Calibration type
@@ -172,6 +177,19 @@ private:
   void writeHistograms();
         
 private:
+  enum{
+    mNTOF = 192,        // 192 for tof in Run 8++
+    mNTDIG = 8,         // 8 per tray in Run 8++
+    mNModule = 32,      // 32 for tofr5++ 
+    mNVPD = 19,         // 19 tubes at each side
+    mNCell = 6,         // 6 cells per module
+    mNBinMax = 60,      // 60 bins for T-Tot, T-Z correction
+
+    mNTray = 120,        // 120 trays in full
+    mWestVpdTrayId = 121,
+    mEastVpdTrayId = 122
+  };
+
   static const Double_t VHRBIN2PS; // Very High resolution mode, pico-second per bin
                                    // 1000*25/1024 (ps/chn)
   static const Double_t HRBIN2PS;  // High resolution mode, pico-second per bin
@@ -208,11 +226,13 @@ private:
     StBTofHeader*     mBTofHeader;
     StMuDst*          mMuDst;
     Bool_t            mMuDstIn;
+    Bool_t            isMcFlag;
 
     Bool_t            mOuterGeometry;
     Bool_t            mSlewingCorr;  //! switch for slewing correction since run 8
     Bool_t            mUseEventVertex; //! switch for using event vertices
     Bool_t            mUseVpdStart;  //! switch for vpd start
+    Bool_t            mForceTStartZero = false; //!switch to allow totally startless bTOF
 
     string mCalibFilePvpd; //! filename for pvpd calibration parameters
     string mCalibFileTot;  //! filename for ToT calibration parameters
@@ -224,11 +244,12 @@ private:
     TH1D*    hEventCounter;     //!
             
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.11 2017/10/20 17:50:32 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.12 2019/04/23 05:49:57 jdb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StBTofCalibMaker,3)
 };
 
+inline void StBTofCalibMaker::forceTStartZero(  ) { mForceTStartZero = true; }
 inline void StBTofCalibMaker::setVPDHitsCut(const Int_t ieast, const Int_t iwest) { mVPDEastHitsCut=ieast ; mVPDWestHitsCut=iwest; }
 inline void StBTofCalibMaker::setOuterGeometry(const bool val) { mOuterGeometry=val; }
 inline void StBTofCalibMaker::setSlewingCorr(const bool val) { mSlewingCorr=val; }

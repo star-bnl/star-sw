@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false">
+<job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false" copyInputLocally="false">
         <command>
 #         cd ${SUBMITTINGDIRECTORY}
 #   setenv StarEndMakerShell
@@ -36,4 +36,5 @@
 <!-- <input URL="file:/hlt/cephfs/daq/2019/054/20054064/hlt*.daq" /> -->
 <input URL="command:daq_2019.pl" />
 <!-- <input URL="file:/hlt/cephfs/daq/2019/06*/*/hlt*.daq" /> -->
+<!-- <input URL="file:/gpfs01/star/daq/2019/071/20071001/st_physics_2007100*.daq" /> -->
 </job>
