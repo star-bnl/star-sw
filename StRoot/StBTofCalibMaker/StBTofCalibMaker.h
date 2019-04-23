@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.h,v 1.11 2017/10/20 17:50:32 smirnovd Exp $
+ * $Id: StBTofCalibMaker.h,v 1.12 2019/04/23 05:49:57 jdb Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.h,v $
+ * Revision 1.12  2019/04/23 05:49:57  jdb
+ * Added function to allow forcing 0 starttime for totally startless BTOF usage in UPC
+ *
  * Revision 1.11  2017/10/20 17:50:32  smirnovd
  * Squashed commit of the following:
  *
@@ -130,6 +133,8 @@ public:
   Int_t getZCalibType();
   Int_t getTotCalibType();
 
+  void forceTStartZero();
+
 private:
 
   /// Calibration type
@@ -234,6 +239,7 @@ private:
     Bool_t            mUseEventVertex = kFALSE; //! switch for using event vertices
     Bool_t            mInitFromFile; //! switch for reading from files
     Bool_t            mUseVpdStart;  //! switch for vpd start
+    Bool_t            mForceTStartZero = false; //!switch to allow totally startless bTOF
 
     string mCalibFilePvpd; //! filename for pvpd calibration parameters
     string mCalibFileTot;  //! filename for ToT calibration parameters
@@ -245,11 +251,12 @@ private:
     TH1D*    hEventCounter = nullptr;     //!
             
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.11 2017/10/20 17:50:32 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.12 2019/04/23 05:49:57 jdb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StBTofCalibMaker,3)
 };
 
+inline void StBTofCalibMaker::forceTStartZero(  ) { mForceTStartZero = true; }
 inline void StBTofCalibMaker::setVPDHitsCut(const Int_t ieast, const Int_t iwest) { mVPDEastHitsCut=ieast ; mVPDWestHitsCut=iwest; }
 inline void StBTofCalibMaker::setOuterGeometry(const bool val) { mOuterGeometry=val; }
 inline void StBTofCalibMaker::setSlewingCorr(const bool val) { mSlewingCorr=val; }
