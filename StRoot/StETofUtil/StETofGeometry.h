@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofGeometry.h,v 1.2 2019/02/19 20:20:11 fseck Exp $
+ * $Id: StETofGeometry.h,v 1.3 2019/04/23 23:49:08 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StETofGeometry.h,v $
+ * Revision 1.3  2019/04/23 23:49:08  fseck
+ * added support for StPicoHelix
+ *
  * Revision 1.2  2019/02/19 20:20:11  fseck
  * update after second part of eTOF code review
  *
@@ -33,6 +36,9 @@
 
 #include "StThreeVectorD.hh"
 #include "StHelixD.hh"
+
+#include "TVector3.h"
+#include "StPicoEvent/StPicoHelix.h"
 
 #include "StETofUtil/StETofConstants.h"
 
@@ -63,6 +69,7 @@ public:
 
     bool    isLocalPointIn(  const double* local );
     bool    isGlobalPointIn( const StThreeVectorD& global );
+    bool    isGlobalPointIn( const TVector3& global );
 
     void    buildMembers(); // function to fill member variables like center position, min/max eta or phi of the node
 
@@ -73,6 +80,7 @@ public:
     StThreeVectorD  calcXYPlaneNormal();
 
     bool    helixCross( const StHelixD& helix, double& pathLength, StThreeVectorD& cross, double& theta );
+    bool    helixCross( const StPicoHelix& helix, double& pathLength, TVector3& cross, double& theta );
 
     TGeoHMatrix*    geoMatrix()     const;
     TGeoBBox*       box()           const;
@@ -268,6 +276,7 @@ public:
     StETofGeometry( const char* name = "etofGeo", const char* title = "simplified ETOF Geometry" );
     ~StETofGeometry();
 
+    void init( TGeoManager* geoManager );
     void init( TGeoManager* geoManager, const double* safetyMargins );
 
     void reset();
@@ -287,14 +296,29 @@ public:
 
     void hitLocal2Master( const int moduleId, const int counter, const double* local,  double* master );
 
+    std::vector< int >  sectorAtPhi( const double& angle );
+
+    //--------------------------------------------------------------------
+    // for the use in the MatchMaker or in running over StEvent/MuDst input
     StThreeVectorD helixCrossETofPlane( const StHelixD& helix );
     std::vector< int >  helixCrossSector( const StHelixD& helix );
-    std::vector< int >  sectorAtPhi( const double& angle );
 
     void    helixCrossCounter( const StHelixD& helix, std::vector< int >& idVec, std::vector< StThreeVectorD >& crossVec,
                                std::vector< StThreeVectorD >& localVec, std::vector< double >& thetaVec );
 
     void    logPoint( const char* text, const StThreeVectorD& point );
+    //--------------------------------------------------------------------
+
+    //--------------------------------------------------------------------
+    // for the use in running over picoDst input
+    TVector3 helixCrossETofPlane( const StPicoHelix& helix );
+    std::vector< int >  helixCrossSector( const StPicoHelix& helix );
+
+    void    helixCrossCounter( const StPicoHelix& helix, std::vector< int >& idVec, std::vector< TVector3 >& crossVec,
+                               std::vector< TVector3 >& localVec, std::vector< double >& thetaVec );
+
+    void    logPoint( const char* text, const TVector3& point );
+    //--------------------------------------------------------------------
 
 
     StETofGeomModule* module( const unsigned int i );
