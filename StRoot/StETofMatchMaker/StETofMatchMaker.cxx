@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofMatchMaker.cxx,v 1.4 2019/04/24 01:02:11 fseck Exp $
+ * $Id: StETofMatchMaker.cxx,v 1.5 2019/04/24 02:33:48 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StETofMatchMaker.cxx,v $
+ * Revision 1.5  2019/04/24 02:33:48  fseck
+ * start time fix to previous commit
+ *
  * Revision 1.4  2019/04/24 01:02:11  fseck
  * fix to start time for simulation and more histograms added to doQA mode
  *
@@ -1653,7 +1656,7 @@ StETofMatchMaker::calculatePidVariables( eTofHitVec& finalMatchVec, int& nPrimar
 
     //TODO: introduce proper methods to decide which start-time will be used ( VPD/bTOF or eTOF ) in the future
     if( !mIsSim ) {
-        startTime();
+        tstart = startTime();
         
         if( fabs( tstart ) < 0.01 || fabs( tstart + 9999. ) < 0.01 ) {
             if( mDebug ) {
