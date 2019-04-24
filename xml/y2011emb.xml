@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!-- <job simulateSubmission ="true" maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="paths"> -->
-<job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths">
+<job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" copyInputLocally="false">
 <!-- <job maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="xrootd"> -->
         <command>
          cd ${SUBMITTINGDIRECTORY}
