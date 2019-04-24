@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>copyInputLocally="false"
+<?xml version="1.0" encoding="utf-8" ?>
 <job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false" copyInputLocally="false">
         <command>
   cd ${SUBMITTINGDIRECTORY}
