@@ -182,7 +182,7 @@ my $ii = 0;
   }
 
   for ($i = 0; $i < scalar(@OUT_DIR8); $i++) {
-      $OUT_DIR[$ii] = $OUT_DIR7[$i];
+      $OUT_DIR[$ii] = $OUT_DIR8[$i];
       chop $OUT_DIR[$ii];
       print "Output Dir for NEW :", $OUT_DIR[$ii],"\n";
       $ii++;
@@ -1124,8 +1124,11 @@ $jrun = "Run not completed";
              $Err_messg = "Killed";
 
    }elsif ($line =~ /Abort/)  {
+       if($line =~ /UndoAbortGap/)  {
+	   $Err_messg = "none";
+       }else{
              $Err_messg = "Abort";
-
+       }
   }elsif ($line =~ /FATAL/ and $line =~ /floating point exception/) {
          $Err_messg = "Floating point exception";
 
