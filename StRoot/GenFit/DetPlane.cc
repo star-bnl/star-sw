@@ -19,16 +19,29 @@
 
 #include "DetPlane.h"
 #include "IO.h"
-
+#include <execinfo.h>
+#include <signal.h>
 #include <cassert>
 #include <cmath>
 #include <TMath.h>
 #include <TClass.h>
 #include <TBuffer.h>
-
 namespace genfit {
-
-
+#if 0
+  static Int_t count = 0;
+  void trace() {
+  void *array[5];
+  size_t size;
+  // get void*'s for all entries on the stack
+  size = backtrace(array, 5);
+  backtrace_symbols_fd(array, size, 2);
+  }
+#define __COUNT_ADD__ {debugOut << "DetPlane add count " << ++count << std::endl; trace(); }  
+#define __COUNT_SUB__ {debugOut << "DetPlane sub count " << --count << std::endl; trace(); }  
+#else
+#define __COUNT_ADD__
+#define __COUNT_SUB__
+#endif
 DetPlane::DetPlane(AbsFinitePlane* finite)
   :finitePlane_(finite)
 {
@@ -37,6 +50,7 @@ DetPlane::DetPlane(AbsFinitePlane* finite)
   u_.SetXYZ(1.,0.,0.);
   v_.SetXYZ(0.,1.,0.);
   // sane() not needed here
+__COUNT_ADD__
 }
 
 
@@ -47,6 +61,7 @@ DetPlane::DetPlane(const TVector3& o,
   :o_(o), u_(u), v_(v), finitePlane_(finite)
 {
   sane();
+__COUNT_ADD__
 }
 
 DetPlane::DetPlane(const TVector3& o,
@@ -55,10 +70,12 @@ DetPlane::DetPlane(const TVector3& o,
   :o_(o), finitePlane_(finite)
 {
   setNormal(n);
+__COUNT_ADD__
 }
 
 
 DetPlane::~DetPlane(){
+__COUNT_SUB__
   ;
 }
 
@@ -72,6 +89,7 @@ DetPlane::DetPlane(const DetPlane& rhs) :
   if(rhs.finitePlane_)
     finitePlane_.reset(rhs.finitePlane_->clone());
   else finitePlane_.reset();
+__COUNT_ADD__
 }
 
 
