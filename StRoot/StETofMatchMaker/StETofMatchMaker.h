@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofMatchMaker.h,v 1.1 2019/02/19 19:52:28 jeromel Exp $
+ * $Id: StETofMatchMaker.h,v 1.2 2019/04/24 01:02:02 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StETofMatchMaker.h,v $
+ * Revision 1.2  2019/04/24 01:02:02  fseck
+ * fix to start time for simulation and more histograms added to doQA mode
+ *
  * Revision 1.1  2019/02/19 19:52:28  jeromel
  * Reviewed code provided by F.Seck
  *
@@ -114,7 +117,7 @@ private:
     StETofGeometry* etofGeometry() const; // method to retrieve the ETofGeom
 
     void    readETofDetectorHits(   eTofHitVec& detectorHitVec  );
-    void    findTrackIntersections( eTofHitVec& intersectionVec );
+    void    findTrackIntersections( eTofHitVec& intersectionVec, int& nPrimaryWithIntersection );
 
     void    fillIndexToPrimaryMap();
     void    cleanUpTraits();
@@ -130,7 +133,7 @@ private:
     void    finalizeMatching(       eTofHitVec& singleTrackMatchVec, eTofHitVec& finalMatchVec );
 
     void    fillPidTraits(         eTofHitVec& finalMatchVec );
-    void    calculatePidVariables( eTofHitVec& finalMatchVec );
+    void    calculatePidVariables( eTofHitVec& finalMatchVec, int& nPrimaryWithPid );
 
     double  startTime();
     double  etofPathLength( const StThreeVectorD& beginPoint, const StThreeVectorD& endPoint, const double& curvature );

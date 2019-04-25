@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.662 2019/04/22 20:47:07 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.663 2019/04/23 15:30:07 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -16,6 +16,7 @@
 #include "StIOMaker/StIOMaker.h"
 #include "StMessMgr.h"
 #include "StStarLogger/StLoggerManager.h"
+#include "StShadowMaker/StShadowMaker.h"
 #include "StEnumerations.h"
 #include "TTree.h"
 #include "TEnv.h"
@@ -789,6 +790,9 @@ Int_t StBFChain::Instantiate()
       else if ( GetOption("PicoCovMtxSkip"))  mk->SetAttr("PicoCovMtxMode", "PicoCovMtxSkip"); // Default mode
       if ( GetOption("PicoBEmcSmdWrite"))      mk->SetAttr("PicoBEmcSmdMode", "PicoBEmcSmdWrite");
       else if ( GetOption("PicoBEmcSmdSkip"))  mk->SetAttr("PicoBEmcSmdMode", "PicoBEmcSmdSkip"); // Default mode
+      
+      if ( GetOption("PicoBEmcSmdWrite"))      mk->SetAttr("PicoBEmcSmdMode", "PicoBEmcSmdWrite");
+      else if ( GetOption("PicoBEmcSmdSkip"))  mk->SetAttr("PicoBEmcSmdMode", "PicoBEmcSmdSkip"); // Default mode
     }
 
 
@@ -1010,6 +1014,10 @@ Int_t StBFChain::Instantiate()
     }
     if (maker == "StIstRawHitMaker" && GetOption("istEmbed")) {
       mk->SetAttr("DoEmbedding", 1);
+    }
+
+    if (maker == "StTagsMaker"){
+      if ( GetOption("shadow")    ) mk->SetAttr("shadow",kTRUE);
     }
 
   Add2Chain:
@@ -1769,19 +1777,41 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
       else if (GetOption("hijing")) fFileOut = "hijing.root";
       else if (GetOption("VMC"))    fFileOut = "VMC.root";
       else if (GetOption("gstar"))  fFileOut = "gtrack.root";
-    }  else {
-      if (GetOption("fzin") || GetOption("fzinSDT") ||GetOption("ntin")) {
-	TObjArray words;
-	ParseString(GetFileIn(),words);
-	TIter nextL(&words);
-	TObjString *word = 0;
-	while ((word = (TObjString *) nextL())) {
-	  if (word->GetString().Contains(".fz") ||
-	      word->GetString().Contains(".nt")) {
-	    fFileOut = gSystem->BaseName(word->GetName());
-	    break;
-	  }
+    }  else if (GetOption("fzin") || GetOption("fzinSDT") ||GetOption("ntin")) {
+      TObjArray words;
+      ParseString(GetFileIn(),words);
+      TIter nextL(&words);
+      TObjString *word = 0;
+      while ((word = (TObjString *) nextL())) {
+	if (word->GetString().Contains(".fz") ||
+	    word->GetString().Contains(".nt")) {
+	  fFileOut = gSystem->BaseName(word->GetName());
+	  break;
 	}
+      }
+    } else {
+      fFileOut = gSystem->BaseName(fInFile.Data());
+      if (GetOption("shadow")) {
+	TObjArray* fileOutTokens = fFileOut.Tokenize("_.");
+	TString& runToken = ((TObjString*) (fileOutTokens->At(2)))->String();
+	TString& seqToken = ((TObjString*) (fileOutTokens->At(4)))->String();
+	if (!(runToken.CompareTo("adc"))) {
+	  runToken = ((TObjString*) (fileOutTokens->At(3)))->String();
+	  seqToken = ((TObjString*) (fileOutTokens->At(5)))->String();
+	}
+	if (!(runToken.IsDigit())) {
+	  LOG_ERROR << "Unable to locate run number in filename for shadowing." << endm;
+	} else {
+	  fFileOut.ReplaceAll(runToken,Form("%d",
+					    StShadowMaker::getRunNumber(runToken.Atoi())));
+	}
+	if (!(seqToken.IsDigit())) {
+	  LOG_ERROR << "Unable to locate file sequence number in filename for shadowing." << endm;
+	} else {
+	  fFileOut.ReplaceAll(seqToken,Form("%07d",
+					    StShadowMaker::getFileSeq(seqToken.Atoi())));
+	}
+	delete fileOutTokens;
       }
     }
   }    
