@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
-<job  name="TpcRS" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<job  name="TpcRS" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false">
 <stdout URL="file:./sched$JOBID.log" />
 <stderr URL="file:./sched$JOBID.err" />
 <command> 
@@ -18,7 +18,8 @@
   set logFile  = ${file}B.log
   set f=`find . -maxdepth 1 -type f -name "*${file}*.root"`
   if ("${f}" == "") then
-    root.exe -x -q -b 'dEdx.C(1000000,"'${INPUTFILE0}'","'${file}'.root",2)' &gt;&amp; ${logFile}
+#    root.exe -x -q -b 'dEdx.C(1000000,"'${INPUTFILE0}'","'${file}'.root",2)' &gt;&amp; ${logFile}
+    root.exe -x -q -b 'dEdx.C(1000,"'${INPUTFILE0}'","'${file}'.root",2)' &gt;&amp; ${logFile}
 #    root.exe -x -q -b 'dEdx.C(1000000,"'${fileB}'","'${file}'.root",2)' &gt;&amp; ${logFile}
 #   rm ${fileB}
 #   cp *.root ${SUBMITTINGDIRECTORY} 
@@ -29,7 +30,8 @@
 <!-- <input URL="file:/gpfs01/star/scratch/fisyak/reco/2018/isobar.DEV2Alignment/*.event.root" />  -->
 <!-- <input URL="file:/gpfs01/star/scratch/fisyak/reco/2018/isobar.DEV2Alignment/*.event.root" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/TpcRS_2016sdt/*event.root" /> -->
- <input URL="command:dEdxSample.pl" />
+<!--  <input URL="command:dEdxSample.pl" /> -->
+<input URL="file:/net/l403/data/fisyak/reco/2019/DEV2StiCA.Minuit/*event.root" />
 <!-- <input URL="file:/net/l401/data/scratch2/fisyak/reco/2019/StiCA/056/*/*event.root" /> -->
 <!-- <input URL="file:/net/l401/data/scratch2/fisyak/reco/2019/StiCA/057/*/*event.root" /> -->
 <!-- <input URL="file://l405.l4.bnl.local/net/l401/data/scratch2/reco/2019/06*/*/*event.root" /> -->
