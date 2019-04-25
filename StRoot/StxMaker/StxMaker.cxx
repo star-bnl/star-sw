@@ -119,6 +119,115 @@
 using namespace  genfit;
 using namespace  std;
 ClassImp(StxMaker);
+static genfit::eFitterType          fitterId = genfit::Undefined;
+static genfit::eMultipleMeasurementHandling mmHandling = genfit::undefined;
+static const Int_t nIter = 20; // max number of iterations
+static const Double_t dPVal = 1.E-3; // convergence criterion
+#if 0
+static Bool_t resort = kFALSE;
+static Bool_t prefit = kFALSE; // make a simple Kalman iteration before the actual fit
+static Bool_t refit  = kFALSE; // if fit did not converge, try to fit again
+static Bool_t twoReps = kFALSE; // test if everything works with more than one rep in the tracks
+#endif
+static const Bool_t matFX = kTRUE; // kFALSE;         // include material effects; can only be disabled for RKTrackRep!
+#if 0
+static Bool_t checkPruning = kFALSE;
+static const Bool_t onlyDisplayFailed = kFALSE; // only load non-converged tracks into the display
+#endif
+//
+static genfit::AbsKalmanFitter* fitter = 0;
+//  static genfit::GFGbl*           gbl    = 0;
+static Bool_t Initialized = kFALSE;
+//_____________________________________________________________________________
+Int_t StxMaker::InitRun(Int_t runumber) {
+  if (! Initialized) {
+    if      (IAttr("Undefined"))      fitterId = genfit::Undefined;
+    else if (IAttr("SimpleKalman"))   fitterId = genfit::SimpleKalman;
+    else if (IAttr("DafRef"))         fitterId = genfit::DafRef;
+    else if (IAttr("DafSimple"))      fitterId = genfit::DafSimple;
+    else if (IAttr("RefKalman"))      fitterId = genfit::RefKalman;
+    else                              fitterId = genfit::RefKalman;
+    //
+    if      (IAttr("weightedAverage"))                   mmHandling = genfit::weightedAverage;
+    else if (IAttr("unweightedClosestToReference"))      mmHandling = genfit::unweightedClosestToReference;
+    else if (IAttr("unweightedClosestToPrediction"))     mmHandling = genfit::unweightedClosestToPrediction;
+    else if (IAttr("weightedClosestToReference"))        mmHandling = genfit::weightedClosestToReference;
+    else if (IAttr("weightedClosestToPrediction"))       mmHandling = genfit::weightedClosestToPrediction;
+    else if (IAttr("unweightedClosestToReferenceWire"))  mmHandling = genfit::unweightedClosestToReferenceWire;
+    else if (IAttr("unweightedClosestToPredictionWire")) mmHandling = genfit::unweightedClosestToPredictionWire;
+    else if (IAttr("weightedClosestToReferenceWire"))    mmHandling = genfit::weightedClosestToReferenceWire;
+    else if (IAttr("weightedClosestToPredictionWire"))   mmHandling = genfit::weightedClosestToPredictionWire;
+    else                                                 mmHandling = genfit::unweightedClosestToPredictionWire;
+    //
+#if 0
+    if      (IAttr("prefit"))  prefit = kTRUE;
+    if      (IAttr("resort"))  resort = kTRUE;
+    if      (IAttr("refit"))   refit = kTRUE;
+#endif
+    //  
+#if 0
+    if (IAttr("twoReps")) twoReps = kTRUE;
+    if (IAttr("checkPruning")) checkPruning = kTRUE;
+#endif
+#ifdef __HANDLER__
+    signal(SIGSEGV, handler);   // install our handler
+#endif
+    switch (fitterId) {
+    case genfit::SimpleKalman:
+      fitter = new genfit::KalmanFitter(nIter, dPVal);
+      fitter->setMultipleMeasurementHandling(mmHandling);
+      break;
+    case genfit::RefKalman:
+      fitter = new genfit::KalmanFitterRefTrack(nIter, dPVal);
+      fitter->setMultipleMeasurementHandling(mmHandling);
+      break;
+    case genfit::DafSimple:
+      fitter = new genfit::DAF(kFALSE);
+      break;
+    case genfit::DafRef:
+      fitter = new genfit::DAF();
+      break;
+    default:
+      break;
+    }
+    if (fitter) {
+      fitter->setDebugLvl(Debug());
+      if (dynamic_cast<genfit::DAF*>(fitter) != nullptr) {
+	static_cast<genfit::DAF*>(fitter)->setAnnealingScheme(100, 0.1, 5);
+	static_cast<genfit::DAF*>(fitter)->setConvergenceDeltaWeight(0.0001);
+      }
+      fitter->setMaxIterations(nIter);
+    }
+    genfit::FieldManager::getInstance()->init(new genfit::StarField());
+    if (IAttr("useCache")) genfit::FieldManager::getInstance()->useCache(kTRUE, 8);
+    else                   genfit::FieldManager::getInstance()->useCache(kFALSE, 0);
+    genfit::TGeoMaterialInterface *geoMat = new genfit::TGeoMaterialInterface();
+    geoMat->setDebugLvl(Debug());
+    geoMat->setDebugLvT(Debug());
+    genfit::MaterialEffects::getInstance()->init(geoMat);
+    if (!matFX) genfit::MaterialEffects::getInstance()->setNoEffects();
+    // Set Debug flags
+    if (Debug()) {
+      if (fitter) fitter->setDebugLvl(10);
+      gGeoManager->SetVerboseLevel(5);
+#ifndef __TPC3D__ /* ! __TPC3D__ */
+      StTpcPlanarMeasurement::SetDebug(1);
+#endif /* ! __TPC3D__ */    
+      genfit::MaterialEffects::getInstance()->setDebugLvl(2);
+      //    genfit::MaterialEffects::getInstance()->setDebugLvT(2);
+    } else {
+      if (fitter) fitter->setDebugLvl(0);
+      gGeoManager->SetVerboseLevel(0);
+#ifndef __TPC3D__ /* ! __TPC3D__ */
+      StTpcPlanarMeasurement::SetDebug(0);
+#endif /* ! __TPC3D__ */ 
+      genfit::MaterialEffects::getInstance()->setDebugLvl(0);
+      //    genfit::MaterialEffects::getInstance()->setDebugLvT(0);
+    }
+    Initialized = kTRUE;
+  } // end of initialization
+  return kStOK;
+}
 //_____________________________________________________________________________
 Int_t StxMaker::Make(){
   Int_t ok = kStOK;
@@ -265,111 +374,6 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
   static TStopwatch *watch = new  TStopwatch;
   watch->Start(kTRUE);
 #endif
-  static genfit::eFitterType          fitterId = genfit::Undefined;
-  static genfit::eMultipleMeasurementHandling mmHandling = genfit::undefined;
-  static const Int_t nIter = 20; // max number of iterations
-  static const Double_t dPVal = 1.E-3; // convergence criterion
-#if 0
-  static Bool_t resort = kFALSE;
-  static Bool_t prefit = kFALSE; // make a simple Kalman iteration before the actual fit
-  static Bool_t refit  = kFALSE; // if fit did not converge, try to fit again
-  static Bool_t twoReps = kFALSE; // test if everything works with more than one rep in the tracks
-#endif
-  static const Bool_t matFX = kTRUE; // kFALSE;         // include material effects; can only be disabled for RKTrackRep!
-#if 0
-  static Bool_t checkPruning = kFALSE;
-  static const Bool_t onlyDisplayFailed = kFALSE; // only load non-converged tracks into the display
-#endif
-  //
-  static genfit::AbsKalmanFitter* fitter = 0;
-  //  static genfit::GFGbl*           gbl    = 0;
-  static Bool_t Initialized = kFALSE;
-  if (! Initialized) {
-    if      (IAttr("Undefined"))      fitterId = genfit::Undefined;
-    else if (IAttr("SimpleKalman"))   fitterId = genfit::SimpleKalman;
-    else if (IAttr("DafRef"))         fitterId = genfit::DafRef;
-    else if (IAttr("DafSimple"))      fitterId = genfit::DafSimple;
-    else if (IAttr("RefKalman"))      fitterId = genfit::RefKalman;
-    else                              fitterId = genfit::RefKalman;
-    //
-    if      (IAttr("weightedAverage"))                   mmHandling = genfit::weightedAverage;
-    else if (IAttr("unweightedClosestToReference"))      mmHandling = genfit::unweightedClosestToReference;
-    else if (IAttr("unweightedClosestToPrediction"))     mmHandling = genfit::unweightedClosestToPrediction;
-    else if (IAttr("weightedClosestToReference"))        mmHandling = genfit::weightedClosestToReference;
-    else if (IAttr("weightedClosestToPrediction"))       mmHandling = genfit::weightedClosestToPrediction;
-    else if (IAttr("unweightedClosestToReferenceWire"))  mmHandling = genfit::unweightedClosestToReferenceWire;
-    else if (IAttr("unweightedClosestToPredictionWire")) mmHandling = genfit::unweightedClosestToPredictionWire;
-    else if (IAttr("weightedClosestToReferenceWire"))    mmHandling = genfit::weightedClosestToReferenceWire;
-    else if (IAttr("weightedClosestToPredictionWire"))   mmHandling = genfit::weightedClosestToPredictionWire;
-    else                                                 mmHandling = genfit::unweightedClosestToPredictionWire;
-    //
-#if 0
-    if      (IAttr("prefit"))  prefit = kTRUE;
-    if      (IAttr("resort"))  resort = kTRUE;
-    if      (IAttr("refit"))   refit = kTRUE;
-#endif
-    //  
-#if 0
-    if (IAttr("twoReps")) twoReps = kTRUE;
-    if (IAttr("checkPruning")) checkPruning = kTRUE;
-#endif
-#ifdef __HANDLER__
-    signal(SIGSEGV, handler);   // install our handler
-#endif
-    switch (fitterId) {
-    case genfit::SimpleKalman:
-      fitter = new genfit::KalmanFitter(nIter, dPVal);
-      fitter->setMultipleMeasurementHandling(mmHandling);
-      break;
-    case genfit::RefKalman:
-      fitter = new genfit::KalmanFitterRefTrack(nIter, dPVal);
-      fitter->setMultipleMeasurementHandling(mmHandling);
-      break;
-    case genfit::DafSimple:
-      fitter = new genfit::DAF(kFALSE);
-      break;
-    case genfit::DafRef:
-      fitter = new genfit::DAF();
-      break;
-    default:
-      break;
-    }
-    if (fitter) {
-      fitter->setDebugLvl(Debug());
-      if (dynamic_cast<genfit::DAF*>(fitter) != nullptr) {
-	static_cast<genfit::DAF*>(fitter)->setAnnealingScheme(100, 0.1, 5);
-	static_cast<genfit::DAF*>(fitter)->setConvergenceDeltaWeight(0.0001);
-      }
-      fitter->setMaxIterations(nIter);
-    }
-    genfit::FieldManager::getInstance()->init(new genfit::StarField());
-    if (IAttr("useCache")) genfit::FieldManager::getInstance()->useCache(kTRUE, 8);
-    else                   genfit::FieldManager::getInstance()->useCache(kFALSE, 0);
-    genfit::TGeoMaterialInterface *geoMat = new genfit::TGeoMaterialInterface();
-    geoMat->setDebugLvl(Debug());
-    geoMat->setDebugLvT(Debug());
-    genfit::MaterialEffects::getInstance()->init(geoMat);
-    if (!matFX) genfit::MaterialEffects::getInstance()->setNoEffects();
-    // Set Debug flags
-    if (Debug()) {
-      if (fitter) fitter->setDebugLvl(10);
-      gGeoManager->SetVerboseLevel(5);
-#ifndef __TPC3D__ /* ! __TPC3D__ */
-      StTpcPlanarMeasurement::SetDebug(1);
-#endif /* ! __TPC3D__ */    
-      genfit::MaterialEffects::getInstance()->setDebugLvl(2);
-      //    genfit::MaterialEffects::getInstance()->setDebugLvT(2);
-    } else {
-      if (fitter) fitter->setDebugLvl(0);
-      gGeoManager->SetVerboseLevel(0);
-#ifndef __TPC3D__ /* ! __TPC3D__ */
-      StTpcPlanarMeasurement::SetDebug(0);
-#endif /* ! __TPC3D__ */ 
-      genfit::MaterialEffects::getInstance()->setDebugLvl(0);
-      //    genfit::MaterialEffects::getInstance()->setDebugLvT(0);
-    }
-    Initialized = kTRUE;
-  } // end of initialization
   const Int_t pdg = 211; // -13;               // particle pdg code mu+
   //  const Double_t charge = TDatabasePDG::Instance()->GetParticle(pdg)->Charge()/(3.);
   //========== Reference  track ======================================================================
@@ -482,10 +486,12 @@ Int_t StxMaker::FitTrack(const AliHLTTPCCAGBTrack &tr) {
     genfit::TrackPoint* point = fitTrack.getPointWithMeasurementAndFitterInfo(0, rep);
     genfit::AbsFitterInfo* fitterInfo = point->getFitterInfo(rep);
     const genfit::MeasuredStateOnPlane& measuredPointStateI = fitterInfo->getFittedState(kTRUE);
+#if 0
     if (! &measuredPointStateI) {
       ok = kStErr;
       return ok;
     }
+#endif
     TVector3 posI, momI;
     TMatrixDSym covI(6,6);
     measuredPointStateI.getPosMomCov(posI, momI, covI);
@@ -643,43 +649,6 @@ Int_t StxMaker::FillDetectorInfo(StTrack *gTrack, genfit::Track * track, Bool_t 
       used++;
       hit->setFitFlag(used);
 #if 0
-      // dX calculation
-      /*
-  	     ( 1 -g  b )               (   u_x -g*u_y + b*u_z)                (   v_x -g*v_y + b*v_z) 
-	R =  ( g  1 -a ); u' = R * u = ( g*u_x +  u_y - a*u_z);	 v' = R * v = ( g*v_x +  v_y - a*v_z);
-	     (-b  a  1 )               (-b*u_x +a*u_y +   u_z) 	              (-b*v_x +a*v_y +   v_z)  
-
-	     (w,u,v)     - original
-             (w1,u1,x1)  - new => (R w, R u, R v);
-                           ( i   j   k  )
-              w = u x v =  ( u_x u_y u_z) = (u_y*v_z - u_z*v_y, v_x*u_y - v_y*u_x, u_x*v_y + v_x*u_y)
-                           ( v_x v_y v_z)
-                           (   w_x -g*w_y + b*w_z)   (u'_y*v'_z - u'_z*v'_y)        (-g*w_y + b*w_z)
-	      w' = R * w = ( g*w_x +  w_y - a*w_z) = (v'_x*u'_y - v'_y*u'_x) = w +  ( g*w_x - a*w_z)
-                           (-b*w_x +a*w_y +  w_z)    (u'_x*v'_y + v'_x*u'_y)        (-b*w_x + a*w_y)
-
-                           (( g*u_x +  u_y - a*u_z)*(-b*v_x +a*v_y +   v_z) - (-b*u_x +a*u_y +   u_z)*( g*v_x +  v_y - a*v_z))
-		=          ((   v_x -g*v_y + b*v_z)*( g*u_x +  u_y - a*u_z) - ( g*v_x +  v_y - a*v_z)*(   u_x -g*u_y + b*u_z))
- 			   ((   u_x -g*u_y + b*u_z)*( g*v_x +  v_y - a*v_z) + (   v_x -g*v_y + b*v_z)*( g*u_x +  u_y - a*u_z))
-
-                           (( g*u_x +  u_y - a*u_z)*(-b*v_x) + ( g*u_x +  u_y - a*u_z)*(a*v_y) +   ( g*u_x +  u_y - a*u_z)*(v_z) - (-b*u_x +a*u_y +   u_z)*( g*v_x) + (-b*u_x +a*u_y +   u_z)*(  v_y) - (-b*u_x +a*u_y +   u_z)*(a*v_z))
-		=          ((   v_x -g*v_y + b*v_z)*( g*u_x) + (   v_x -g*v_y + b*v_z)*(  u_y) - (   v_x -g*v_y + b*v_z)*(a*u_z) - ( g*v_x +  v_y - a*v_z)*(   u_x) - ( g*v_x +  v_y - a*v_z)*(g*u_y) + ( g*v_x +  v_y - a*v_z)*(b*u_z))
- 			   ((   u_x -g*u_y + b*u_z)*( g*v_x) + (   u_x -g*u_y + b*u_z)*(  v_y) - (   u_x -g*u_y + b*u_z)*(a*v_z) + (   v_x -g*v_y + b*v_z)*( g*u_x) + (   v_x -g*v_y + b*v_z)*(u_y  ) - (   v_x -g*v_y + b*v_z)*(a*u_z))
-
-                           ((          u_y         *(-b*v_x) + (          u_y        )*(a*v_y) + ( g*u_x +  u_y - a*u_z)*(  v_z) - (                  u_z)*( g*v_x) + (-b*u_x +a*u_y +   u_z)*(  v_y) - (                  u_z)*(a*v_z))
-		=          ((   v_x               )*( g*u_x) + (   v_x -g*v_y + b*v_z)*(  u_y) - (   v_x               )*(a*u_z) - ( g*v_x +  v_y - a*v_z)*(   u_x) - (          v_y        )*(g*u_y) + (          v_y        )*(b*u_z)) 
- 			   ((   u_x               )*( g*v_x) + (   u_x -g*u_y + b*u_z)*(  v_y) - (   u_x               )*(a*v_z) + (   v_x               )*( g*u_x) + (   v_x -g*v_y + b*v_z)*(u_y  ) - (   v_x               )*(a*u_z))
-
-                           ((       -b*u_y*v_x + a*u_y*v_y + g*u_x*v_z +  u_y*v_z - a*u_z*v_z) - g*u_z*v_x - b*u_x*v_y + a*u_y*v_y + u_z* v_y - a* u_z*v_z)
-		=          ((   g*v_x*u_x + v_x*u_y - g*v_y*u_y + b*v_z* u_y - a*v_x*u_z - g*v_x*u_x -  v_y*u_x + a*v_z*u_x - g*v_y*u_y + b*v_y*u_z       ) 
- 			   ((   g*u_x*v_x + u_x*v_y -g*u_y*v_y + b*u_z*v_y  - a*u_x*v_z  + g*v_x*u_x +  v_x*u_y -g*v_y*u_y + b*v_z*u_y  - a*v_x*u_z       )
-
-                           ((   u_y*v_z + u_z* v_y      + a*u_y*v_y + a*u_y*v_y  - a* u_z*v_z   - a*u_z*v_z) - g*u_z*v_x - b*u_x*v_y + -b*u_y*v_x + g*u_x*v_z)
-		=          ((   g*v_x*u_x + v_x*u_y - g*v_y*u_y + b*v_z* u_y - a*v_x*u_z - g*v_x*u_x -  v_y*u_x + a*v_z*u_x - g*v_y*u_y + b*v_y*u_z       ) 
- 			   ((   g*u_x*v_x + u_x*v_y -g*u_y*v_y + b*u_z*v_y  - a*u_x*v_z  + g*v_x*u_x +  v_x*u_y -g*v_y*u_y + b*v_z*u_y  - a*v_x*u_z       )
-
-
-       */
       if (! fitterInfo) continue;
       genfit::MeasuredStateOnPlane& measuredPointState =  (genfit::MeasuredStateOnPlane&) fitterInfo->getFittedState(kTRUE);
       if (detId == kTpcId) {
@@ -689,15 +658,37 @@ Int_t StxMaker::FillDetectorInfo(StTrack *gTrack, genfit::Track * track, Bool_t 
 	TVector3 O(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z());
 	TVector3 o = startPlane.getO();
 	TVector3 dO;
-	genfit::DetPlane *aPlane = new genfit::DetPlane(startPlane);
-	genfit::SharedPlanePtr aPlanePtr(aPlane);
+#if 0
+	auto deleter = [](genfit::DetPlane *p){
+#if 0
+	  static Int_t count = 0;
+	  if (count < 13) {
+	    std::cout << "[deleter called]\n"; 
+	  }
+	  count++;
+#endif
+	  delete p;
+	};
+#endif
+	TVector3 Lab (tpcHit->position ().x(),tpcHit->position ().y(),tpcHit->position ().z());
+	TVector3 LabU(tpcHit->positionU().x(),tpcHit->positionU().y(),tpcHit->positionU().z());
+	TVector3 LabL(tpcHit->positionL().x(),tpcHit->positionL().y(),tpcHit->positionL().z());
+	TVector3 dist[3] = { startPlane.dist(Lab ),  startPlane.dist(LabU),  startPlane.dist(LabL),};
+	TVector3 diff = dist[1] - dist[2];
+	TVector3 u = diff.Unit();
+	Double_t proj = u*startPlane.getNormal(); 
+	if (TMath::Abs(proj+1) > 1e-7) {LOG_ERROR << "StxMaker::FillDetectorInfo proj+1 =" <<  proj+1 << " is too high. Pay attention." << endm;}
 	for (Int_t i = 0; i < 2; i++) {
-	  if (! i) dO = TVector3(tpcHit->positionU().x(),tpcHit->positionU().y(),tpcHit->positionU().z());
-	  else     dO = TVector3(tpcHit->positionL().x(),tpcHit->positionL().y(),tpcHit->positionL().z());
-	  dO -= O;
-	  aPlane->setO(o+dO);
+	  TVector3 o = startPlane.getO() - dist[i+1];
+	  TVector3 dd = dist[i+1] - dist[0];
+	  TVector3 n  = dd.Unit();
 	  genfit::StateOnPlane state = *measuredPointState.clone();
-	  dx[i] = state.extrapolateToPlane(aPlanePtr,i);
+#if 0
+	  std::shared_ptr< genfit::DetPlane > thePlanePtr(new genfit::DetPlane(o,n),deleter);
+#else
+	  std::shared_ptr< genfit::DetPlane > thePlanePtr(new genfit::DetPlane(o,n));
+#endif
+	  dx[i] = state.extrapolateToPlane(thePlanePtr);
 	}
 	tpcHit->setdX(TMath::Abs(dx[0])+TMath::Abs(dx[1]));
       }
