@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<job name="Timing" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<job name="Timing" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false">
 <command>
 #  source ~/.tcshrc
   cd ${SUBMITTINGDIRECTORY}  

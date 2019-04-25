@@ -1,4 +1,4 @@
-<job  name="lana" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<job  name="lana" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false">
 <stdout URL="file:./lana$JOBID.log" />
 <stderr URL="file:./lana$JOBID.err" />
 <command> 

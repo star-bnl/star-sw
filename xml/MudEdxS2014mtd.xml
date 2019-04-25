@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!-- <job maxFilesPerProcess="200" filesPerHour="1" fileListSyntax="paths"  simulateSubmission="true"> -->
-<job maxFilesPerProcess="20" filesPerHour="100" fileListSyntax="paths">
+<!-- <job maxFilesPerProcess="200" filesPerHour="1" fileListSyntax="paths"  simulateSubmission="true" copyInputLocally="false"> -->
+<job maxFilesPerProcess="20" filesPerHour="100" fileListSyntax="paths" copyInputLocally="false">
 	<command>
          cd ${SUBMITTINGDIRECTORY}
 #         setup 64b

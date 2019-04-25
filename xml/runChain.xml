@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?> 
-<job maxFilesPerProcess="1" minFilesPerProcess="1" filesPerHour="1" name="laserProc" simulateSubmission="false">
+<job maxFilesPerProcess="1" minFilesPerProcess="1" filesPerHour="1" name="laserProc" simulateSubmission="false" copyInputLocally="false">
     <command>
 
 starver dev

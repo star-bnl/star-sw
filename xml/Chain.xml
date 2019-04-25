@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?> 
-<!-- <job name="jobs" maxFilesPerProcess="10" simulateSubmission="false" fileListSyntax="paths"> -->
-<job name="jobs" maxFilesPerProcess="10" simulateSubmission="false" fileListSyntax="paths">
+<!-- <job name="jobs" maxFilesPerProcess="10" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false"> -->
+<job name="jobs" maxFilesPerProcess="10" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false">
          <command>
          cd ${SUBMITTINGDIRECTORY}
   set filelist = `cat $FILELIST | awk '{print $1}'`

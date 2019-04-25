@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?> 
-<!-- <job name="recoJob" maxFilesPerProcess="1" filesPerHour="1" simulateSubmission="false" fileListSyntax="paths"> -->
-<job name="recoJob" maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="paths">
+<!-- <job name="recoJob" maxFilesPerProcess="1" filesPerHour="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false"> -->
+<job name="recoJob" maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="paths" copyInputLocally="false">
 <command>
   cd ${SUBMITTINGDIRECTORY}  
 #  starver .DEV2 

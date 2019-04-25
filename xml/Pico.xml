@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<job maxFilesPerProcess="10" fileListSyntax="paths" simulateSubmission ="false"> 
-<!-- <job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="paths"> -->
+<job maxFilesPerProcess="10" fileListSyntax="paths" simulateSubmission ="false" copyInputLocally="false"> 
+<!-- <job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="paths" copyInputLocally="false"> -->
 	<command>
          cd ${SUBMITTINGDIRECTORY}
   setenv STARFPE NO

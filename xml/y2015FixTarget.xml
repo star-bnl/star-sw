@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!-- <job simulateSubmission ="true" maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="paths">  -->
+<!-- <job simulateSubmission ="true" maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="paths" copyInputLocally="false">  -->
 <job maxFilesPerProcess="1"  simulateSubmission ="false" filesPerHour="1" fileListSyntax="paths" copyInputLocally="false">
-<!-- <job maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="xrootd"> -->
+<!-- <job maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="xrootd" copyInputLocally="false"> -->
         <command>
          cd ${SUBMITTINGDIRECTORY}
   echo $INPUTFILE0 | grep ':'
