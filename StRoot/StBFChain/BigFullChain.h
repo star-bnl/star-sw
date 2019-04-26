@@ -1194,9 +1194,15 @@ Bfc_st BFC[] = { // standard chains
   // 
   {"B2019a" ,"","","ry2019a,in,tpcX,UseXgeom,iTpcIT,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite",
    "","",                                                      "Base chain for run 2019 data (tpc)",kFALSE},
+#if 1
+  {"P2019a","" ,"",
+   "B2019a,ITTF,BAna,iTpcIT,hitfilt,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
+   ,    "","",        "Base chain for year 2019 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
+#else
   {"P2019a","" ,"",
    "B2019a,ITTF,BAna,iTpcIT,hitfilt,VFMinuit,beamline3D,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
    ,    "","",        "Base chain for year 2019 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
+#endif
   // Other chains/Calibration
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    ,                                                                "Laser Calibration Chain (tcl)",kFALSE},
