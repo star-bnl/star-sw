@@ -1065,7 +1065,7 @@ Float_t St_tss_tssparC::gain(Int_t sector, Int_t row) {
     } else
 #endif
     if (v < gC->min(l) || v > gC->max(l)) return gain;
-    if (gC->min(l) < -150) {
+    if (gC->min(l) < -450) {
       // if range was expanded below 150 V then use only the linear approximation
       gain  = TMath::Exp(gC->CalcCorrection(l,v, 0., 2));
     } else {

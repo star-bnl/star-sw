@@ -55,4 +55,5 @@ struct TpcResponseSimulator {
   float  T0offset;        /* = 0.0   extra off set for Altro chip */
   float  T0offsetI;       /* = 0.0   extra off set for inner sector */
   float  T0offsetO;       /* = 0.0   extra off set for outer sector */
+  float  FirstRowC;       /* = 0.0   extra correction for the first pad row */
  };  

@@ -116,6 +116,7 @@ TDataSet *CreateTable() {
   // The corection has to be added                                                                    M             P
   //row.T0offset   = 0.50 + 1.65431e-01 -  3.45247e-01 -1.54583e+00 -2.90686e-03+ 1.54353e+00 + 0.0191135  -1.20938e-03 ; //E
   row.T0offset   = 0.50 -1.43663e-01 -0.00932877;//g // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
+  row.FirstRowC  = 0.05;  // extra correction for pad row 1 due to disabled firth 3 anode wires
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
