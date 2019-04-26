@@ -3047,7 +3047,7 @@ void StMagUtilities::UndoAbortGapDistortion( const Float_t x[], Float_t Xprime[]
   z = LimitZ( Sector, x ) ;                   // Protect against discontinuity at CM  
   
   // Determine which time slice is closest                                            
-  Int_t timeSlice ;
+  Int_t timeSlice = -999;
   Double_t closestTime = 1.0 ;
   Double_t timeDiff ;
 
