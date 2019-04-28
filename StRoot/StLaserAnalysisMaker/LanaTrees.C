@@ -573,6 +573,12 @@ TH1F *frame = c1->DrawFrame(632e6,5.46,644e6,5.57)
 .x DrawTime.C(frame)
 RunNT->Draw("dvAll:utime-788936400>>h2","ok<2","same")
 
+RunXIX
+TH1* frame = c1->DrawFrame(758e6,5.4,767.e6,5.6)
+frame->SetTitle("Drift velocitry")
+frame->GetXaxis()->SetTimeDisplay(1)
+c1->Update()
+
 
 
  */
