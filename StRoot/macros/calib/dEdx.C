@@ -58,7 +58,8 @@ void dEdx(Int_t nevents=1000,
   //  TString Chain("in,dEdxY2,magF,StEvent,AlignSectors,Corr4,OSpaceZ2");
   //  TString Chain("in,dEdxY2,magF,StEvent,St_geom,tofrMatch,tofpMatch,tofCalib,Corr4,OSpaceZ2");
   //  TString Chain("in,TpcHitMover,CorrX,OSpaceZ2,OGridLeak3D,dEdxY2,magF,StEvent,mysql,CMuDst,noHistos,noRunco,NoDefault"); // ,analysis
-  TString Chain("in,TpcHitMover,simu,CorrX,OSpaceZ2,OGridLeak3D,dEdxY2,magF,StEvent,mysql,NoDefault"); // ,analysis
+  //  TString Chain("in,TpcHitMover,simu,CorrX,OSpaceZ2,OGridLeak3D,dEdxY2,magF,StEvent,mysql,NoDefault"); // ,analysis
+  TString Chain("in,TpcHitMover,simu,CorrY,OSpaceZ2,OGridLeak3D,dEdxY2,magF,StEvent,mysql,NoDefault"); // ,analysis to add OPr40 for y2019
   TString STAR_VERSION(gSystem->Getenv("STAR_VERSION"));
   if (STAR_VERSION.BeginsWith("TFG") || STAR_VERSION.Contains("DEV2")) {
     Chain += ",quiet";

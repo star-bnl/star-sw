@@ -1335,7 +1335,7 @@ TF1 *FitADC(TH1 *proj, Option_t *opt="Q", Double_t nSigma=3, Int_t pow=3) {
   Int_t peak = proj->GetMaximumBin();
   Double_t peakX = proj->GetBinCenter(peak);
   params[0] = proj->GetBinContent(peak);
-  if (peakX > 0.5) {
+  if (peakX > 10.5) {
     params[1] = 0;
     params[2] = 0.2;
   }
