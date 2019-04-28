@@ -2011,7 +2011,7 @@ Bfc_st BFC[] = { // standard chains
   {"LAna"        ,"","","in,detDb,StEvent,tpcDb,TpcHitMover","StLaserAnalysisMaker"
    ,                                                   "StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"MuD0Anal"    ,"","","","StMuD0AnalysisMaker",         "StMuD0AnalysisMaker","MuDst D0 Analysis",kFALSE},
-  {"KFPInter"    ,"","","","KFParticle,picoDeps", "KFParticlePerformance,StKFParticleAnalysisMaker" 
+  {"KFPInter"    ,"","","KFParticle,picoDeps", "","KFParticlePerformance,StKFParticleAnalysisMaker" 
    ,                                                                    "STAR KFParticle interface",kFALSE},
   {"KFPAna"      ,"","","KFPInter","StKFParticleAnalysisMaker",      "", "STAR KFParticle analysis",kFALSE},
   {"MuMc"        ,"","","","StMuMcAnalysisMaker",             "StMuMcAnalysisMaker","MuMc Analysis",kFALSE},
