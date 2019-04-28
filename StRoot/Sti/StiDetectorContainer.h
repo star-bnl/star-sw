@@ -86,7 +86,7 @@ class StiDetectorContainer : public Named, public Described
   StiDetector* operator*() const;
   StiDetector* getCurrentDetector() const;
   ///Step in radially in STAR TPC global coordinates.
-  bool moveIn();
+  bool moveIn(double phiCut=-1.0, double zCut=-1.0, double rMin=-1.0);
   ///Set iterators to the detector nearest to the passed StiDetector pointer.
   void setToDetector(const StiDetector* layer);
   vector<StiDetector*> & getDetectors();
