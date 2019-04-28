@@ -24,4 +24,11 @@
                                <Host name="l404.l4.bnl.local" port="3316" machinePower="1.0" />
                                <Host name="l409.l4.bnl.local" port="3316" machinePower="1.0" /> 
                 </Server> 
+                <Server scope="Analysis" accessMode="write">
+                        <Host name="robinson.star.bnl.gov" port="3306"/>
+                </Server>
+
+                <Server scope="Production" user="starreco" accessMode="write">
+                        <Host name="robinson.star.bnl.gov" port="3306"/>
+                </Server>
 </Scatalog>
