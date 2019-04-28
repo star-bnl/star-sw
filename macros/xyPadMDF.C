@@ -178,7 +178,7 @@ void xyPadMDF1(const TH2D *total2D, Int_t max=7, Int_t maxTerm = 20){
 #endif
 }
 //____________________________________________________________________________
-void xyPadMDF(const Char_t  *total = "mu", Int_t max=7, Int_t maxTerm = 20, Int_t date = 20180312, Int_t time = 11){
+void xyPadMDF(const Char_t  *total = "mu", Int_t max=7, Int_t maxTerm = 20, Int_t date = 20190201, Int_t time = 709){
   TH2D *mu = (TH2D *) gDirectory->Get(total);
   if (! mu) {
     cout << "Histogram " << total << " has not been found " << endl;

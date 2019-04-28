@@ -1,6 +1,7 @@
 #! /bin/tcsh -f
 cd /net/l404/data/fisyak/Tpc/Current/2019 
 root.exe -b -q lmysql.C 'MakeTpcAvgPowerSupply.C+(2019)' > & MakeTpcAvgPowerSupply.`date +%m%d%y`.log
+if ($?) exit 1;
 #rsync -avz -h                        \
 #    --include='*.root'                  \
 #    --exclude='*.log' --exclude='*.dat' \
@@ -8,5 +9,6 @@ root.exe -b -q lmysql.C 'MakeTpcAvgPowerSupply.C+(2019)' > & MakeTpcAvgPowerSupp
 #foreach f (`ls -1d *.root`)
 #  mv ${f} ${f}.HOLD
 #end
-
-
+ls -1d TpcAvgPowerSupply.*.root
+if ($?) exit 0;
+put2DB.pl 'StarDb/Calibrations/tpc/TpcAvgPowerSupply.*.root'

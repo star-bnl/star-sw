@@ -22,8 +22,18 @@ foreach my $file (@list) {
   $runs{$r} = $dir;
 }
 my $Njobs = 0;
+my $now = time();
 foreach my $key ( sort keys %runs ) {
 #  print "$key => $runs{$key}\n";
+  my @files = glob "st_*" . $key . "*.root";# print "@files\n";
+  my $finished = 1;
+  foreach my $file (@files) {
+     my ($dev,$ino,$mode,$nlink,$uid,$gid,$dev, $size, $atime, $mtim, $ctime, $blksize,$blocks) = stat($file);
+     my $dt = $now - $ctime;
+#     print "$file dt = $dt\n";
+     if ($dt < 120) {$finished = 0; last;}
+  }
+  if (! $finished) {next;}
   print "string:$key:$runs{$key}\n";
   $Njobs++;
 }

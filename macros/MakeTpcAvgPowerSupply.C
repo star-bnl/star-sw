@@ -293,12 +293,10 @@ void MakeTpcAvgPowerSupply(Int_t year = 2019) {
   };
   TDatime now;
   
-  TFile *fSumF = new TFile(Form("MakeTpcAvgPowerSupply.%02i%02i%02i.root",now.GetDay(),now.GetMonth(),now.GetYear()%100),"update");
+  TFile *fSumF = new TFile(Form("MakeTpcAvgPowerSupply.%02i%02i%02i_%02i.root",now.GetDay(),now.GetMonth(),now.GetYear()%100,now.GetHour()),"pdate");
   TNtuple *FitP = 0;
   if (fSumF) FitP = (TNtuple *) fSumF->Get("FitP");
   if (!FitP) {
-    delete fSumF;
-    fSumF = new TFile(Form("MakeTpcAvgPowerSupply.%i.root",year),"recreate");
     FitP = new TNtuple("FitP","Fit results",
 		       "run:uBegin:uStop:uEnd:channel:module:io:sector:socket:meanV:rmsV:Vfit:meanC:rmsC:Cfit:Charge:FitStatus:AcChargeI:AcChargeO:np");
     FitP->SetMarkerStyle(20);

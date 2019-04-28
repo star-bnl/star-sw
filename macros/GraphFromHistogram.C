@@ -1,6 +1,6 @@
 #include "TGraphErrors.h"
 #include "TH1.h"
-TGraphErrors *GraphFromHistogram(TH1D *hist) {
+TGraphErrors *GraphFromHistogram(TH1D *hist, Bool_t Log10 = kTRUE) {
   if (! hist) return 0;
   Int_t npoints = hist->GetNbinsX();
   Double_t *x = new Double_t[npoints];
@@ -8,10 +8,16 @@ TGraphErrors *GraphFromHistogram(TH1D *hist) {
   Double_t *e = new Double_t[npoints];
   Int_t np = 0;
   for (Int_t i = 1; i <=  npoints; i++) {
-    e[np] = hist->GetBinError(i+1);
-    if (e[np] <= 0) continue;
-    x[np] = hist->GetBinCenter(i+1);
-    y[np] = hist->GetBinContent(i+1);
+    //    e[np] = hist->GetBinError(i);
+    e[np] = 0;
+    //    if (e[np] <= 0) continue;
+    Double_t X = hist->GetBinCenter(i);
+    if (Log10) {
+      x[np] = TMath::Power(10.,X);
+    } else {
+      x[np] = X;
+    }
+    y[np] = hist->GetBinContent(i);
     np++;
   }
   TGraphErrors *grr = new TGraphErrors(np, x, y, 0, e);

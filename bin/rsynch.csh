@@ -5,3 +5,7 @@ rsync -avz -h                        \
     ./ rftpexp01.rhic.bnl.gov:/gpfs01/star/subsys-tpc/fisyak/Tpc/Current/2019/
 
 # rsync -avz -h  --remove-source-files   -include='*event.root' ./ /hlt/cephfs/reco/2019/FF
+if ($?) exit 0;
+foreach f (`ls -1d *.root`)
+  mv ${f} ${f}.HOLD
+end

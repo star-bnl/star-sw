@@ -29,7 +29,8 @@ TGraphErrors *gr = 0;
 //________________________________________________________________________________
 void FitTH2R(TH2 *hist, TF1 *fun) {
   if (! hist) return;
-  SafeDelete(gr);
+  delete gr;
+  gr = 0;
   Int_t nX = hist->GetNbinsX();
   Int_t nY = hist->GetNbinsY();
   Double_t *x = new Double_t[nX*nY];
@@ -38,7 +39,7 @@ void FitTH2R(TH2 *hist, TF1 *fun) {
   Int_t N = 0;
   for (Int_t i = 1; i <= nX; i++) {
     for (Int_t j = 1; j <= nY; j++) {
-      if (hist->GetBinError(i,j) <= 0.1) continue;
+      if (hist->GetBinError(i,j) <= 0) continue;
       x[N] = hist->GetXaxis()->GetBinCenter(i);
       y[N] = hist->GetYaxis()->GetBinCenter(j);
       e[N] = hist->GetBinError(i,j);

@@ -59,7 +59,7 @@ my @opt = qw (GF GP NF);# XF);# RL5);
 my $XML = "fit.xml";
 open (XML,">$XML") or die "Can't open $XML";
 print XML '<?xml version="1.0" encoding="utf-8" ?>
-<job name="dEdxFit" maxFilesPerProcess="1" simulateSubmission="false" fileListSyntax="paths">
+<job name="dEdxFit" maxFilesPerProcess="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false">
 	 <command>
 setup 64b
 setenv NODEBUG yes
