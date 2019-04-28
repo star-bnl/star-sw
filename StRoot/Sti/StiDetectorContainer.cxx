@@ -148,25 +148,49 @@ being 'movedIn' from.  Therefore, a call to moveIn() usually need not be
 followed by a call to movePlusPhi() or moveMinusPhi(), except in cases of
 extreme assymetry, such as navigation through the Silicon Vertex Tracker.
 */
-bool StiDetectorContainer::moveIn()
+bool StiDetectorContainer::moveIn(double phiCut, double zCut, double rMin)
 {
 
   //remember where we started:
+  StiDetectorNodeVector::const_iterator oldPhiNodeP = mphi_it;
   const StiDetectorNode* oldPhiNode = *mphi_it;
+  bool foundIt = false;
 
   --mradial_it;
-//  mphi_it = (*mradial_it)->begin();
+  if (rMin >=0 && (*(*mradial_it)->begin())->getData()->getPlacement()->getNormalRadius() < rMin)
+    return false;
+
+  mphi_it = (*mradial_it)->begin();
 
   if ( (*mradial_it)->getChildCount() == oldPhiNode->getParent()->getChildCount()) {
     // cout <<"Index into array"<<endl;
     mphi_it = (*mradial_it)->begin()+oldPhiNode->getOrderKey().index;
-    return true;
+
+    foundIt = true;
   }
   else {
     // cout <<"Do linear search"<<endl;
-    mphi_it = (*mradial_it)->begin();
-    return setPhi( oldPhiNode->getOrderKey() );
+    foundIt = setPhi( oldPhiNode->getOrderKey() );
   }
+  if (foundIt) {
+    if (phiCut >= 0) {
+      double phiDiff = TMath::Abs((*mphi_it)->getData()->getPlacement()->getNormalRefAngle() -
+                                  oldPhiNode->getData()->getPlacement()->getNormalRefAngle());
+      if (phiDiff > TMath::Pi()) phiDiff = TMath::TwoPi() - phiDiff;
+      foundIt = (phiDiff <= phiCut);
+    }
+    if (foundIt && zCut >= 0) {
+      double zDiff = TMath::Abs((*mphi_it)->getData()->getPlacement()->getZcenter() -
+                                oldPhiNode->getData()->getPlacement()->getZcenter());
+      foundIt = (zDiff <= zCut);
+    }
+    if (!foundIt) {
+      // keep moving in with the new mradial_it
+      mphi_it = oldPhiNodeP;
+      return moveIn(phiCut,zCut);
+    }
+  }
+  return foundIt;
 }
 
 //______________________________________________________________________________
