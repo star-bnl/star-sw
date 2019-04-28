@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.166 2019/04/13 02:11:27 genevb Exp $
- * $Id: StiKalmanTrack.cxx,v 2.166 2019/04/13 02:11:27 genevb Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.167 2019/04/28 02:36:42 genevb Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.167 2019/04/28 02:36:42 genevb Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.167  2019/04/28 02:36:42  genevb
+ * Restore NHitsPossible by swimming through other layers in getAllPointCount() after removing from initalize0()
+ *
  * Revision 2.166  2019/04/13 02:11:27  genevb
  * Remove swimming through hit-less TPC layers in initialize0 importing StiCA seeds (resolves RT3388)
  *
@@ -992,6 +995,9 @@ void StiKalmanTrack::getAllPointCount(int count[1][3],int maxDetId) const
 //  count[detId][2] == number of fitted   points
 enum {kPP=0,kMP=1,kFP=2};
 
+  StiDetectorContainer    *detectorContainer = StiToolkit::instance()->getDetectorContainer();	 
+  const StiDetector* detectorOld = 0;	 
+ 
   memset(count[0],0,(maxDetId+1)*3*sizeof(int));
   StiKTNIterator it;
 
@@ -1002,11 +1008,30 @@ enum {kPP=0,kMP=1,kFP=2};
     if (!detector)		continue;
     int detId = detector->getGroupId();
     StiHit* h = node->getHit();
+    if (detectorOld && detId == kTpcId) {
+      Double_t R = detector->getPlacement()->getNormalRadius();
+      Double_t angle = detector->getPlacement()->getNormalRefAngle();
+      Double_t R_OLD = detectorOld->getPlacement()->getNormalRadius();
+      while (R < R_OLD) {
+        detectorContainer->setToDetector( detectorOld );
+        if ( detectorContainer->moveIn(TMath::DegToRad()*5,100,R)) {
+          StiDetector* d = detectorContainer->getCurrentDetector(); //**detectorContainer;	 
+          if (d == detector) break;
+          detectorOld = d;
+          R_OLD = detectorOld->getPlacement()->getNormalRadius();
+          Double_t angle_OLD = detectorOld->getPlacement()->getNormalRefAngle();
+          if (detectorOld->isActive() && R < R_OLD && TMath::Abs(angle - angle_OLD) < TMath::DegToRad()*5) { // the same sector
+            count[0][kPP]++; count[detId][kPP]++;
+          }
+        } else break;
+      }
+    }
 
 //fill possible points
     if (h || detector->isActive(node->getY(),node->getZ())) {
        count[0][kPP]++; count[detId][kPP]++;
     }
+    detectorOld = detector;
     
     if (!h ) 			continue;
 //fill measured points
@@ -1717,7 +1742,7 @@ int StiKalmanTrack::approx(int mode)
   THelixFitter circ;
   THelixTrack  cirl;
   int zeroH = -1;
-  for (source = rbegin(); targetNode = source(); ++source) {
+  for (source = rbegin(); (targetNode = source()); ++source) {
     if (!targetNode->isValid()) 	continue;
     const StiHit * hit = targetNode->getHit();
     if (!hit) 				continue;
@@ -1742,7 +1767,7 @@ int StiKalmanTrack::approx(int mode)
 
   double s=0,xyz[3]; 
   double curv = circ.GetRho();
-  for (source = rbegin(); targetNode = source(); ++source) {
+  for (source = rbegin(); (targetNode = source()); ++source) {
     if (!targetNode->isValid()) 	continue;
     const StiHit *hit = targetNode->getHit();
     if (hit) {
