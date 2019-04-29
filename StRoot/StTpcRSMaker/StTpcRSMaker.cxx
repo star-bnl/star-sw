@@ -77,7 +77,7 @@ struct HitPoint_t {
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.87 2019/04/18 14:02:23 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.88 2019/04/29 20:11:21 fisyak Exp $";
 #define __ClusterProfile__
 static Bool_t ClusterProfile = kFALSE;
 #define Laserino 170
@@ -119,7 +119,7 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
 {
   memset(beg, 0, end-beg+1);
   m_Mode = 0;
-  //  SETBIT(m_Mode,kPAI); 
+  //  SETBIT(m_Mode,kHEED); 
   SETBIT(m_Mode,kBICHSEL);  // Default is Bichsel
   SETBIT(m_Mode,kdEdxCorr);
   SETBIT(m_Mode,kDistortion);
@@ -717,6 +717,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
       Int_t sIndex = sortedIndex;
       if (Debug() > 13) cout << "sortedIndex = " << sortedIndex << "\tno_tpc_hits = " << no_tpc_hits << endl;
       Int_t ID = 0;
+      Int_t TrackDirection = 0; // 0 - increase no of row, 1 - decrease no of. row.
       for (nSegHits = 0, sIndex = sortedIndex;  
 	   sIndex < no_tpc_hits && nSegHits < NoMaxTrackSegmentHits - 1; sIndex++) {
 	indx = sorter.GetIndex(sIndex);
@@ -724,7 +725,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	if ((tpc_hitC->volume_id%10000)/100 != sector) break;
 	if (ID > 0 && ID != tpc_hitC->track_p) break;
 	ID = tpc_hitC->track_p;
-	Int_t TrackDirection = 0; // 0 - increase no of row, 1 - decrease no of. row.
 	if (nSegHits == 1) { // No Loopers !
 	  if (TrackSegmentHits[nSegHits-1].tpc_hitC->volume_id%100 <= tpc_hitC->volume_id%100) {
 	    TrackDirection = 0;
@@ -929,6 +929,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    NoElPerAdc = St_TpcResponseSimulatorC::instance()->NoElPerAdcO(); // outer TPX
 	  }
 	}
+	if (row == 1) dEdxCor *= TMath::Exp(St_TpcResponseSimulatorC::instance()->FirstRowC());
 	mGainLocal = Gain/dEdxCor/NoElPerAdc; // Account dE/dx calibration
 	// end of dE/dx correction
 	// generate electrons: No. of primary clusters per cm
@@ -1067,11 +1068,11 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	      WireIndex = TMath::Nint((y - firstInnerSectorAnodeWire)/anodeWirePitch) + 1;
 	      if (St_tpcPadConfigC::instance()->iTPC(sector)) {// two first and two last wires are removed, and 3rd wire is fat wiere
 		if (WireIndex <= 3 || WireIndex >= numberOfInnerSectorAnodeWires - 3) continue;
-	      } else { // old TPC the first and last wire are fat ones
+	      } else { // old TPC the first and last wires are fat ones
 		if (WireIndex <= 1 || WireIndex >= numberOfInnerSectorAnodeWires) continue;
 	      }
 	      yOnWire = firstInnerSectorAnodeWire + (WireIndex-1)*anodeWirePitch;
-	    } else { // the first and laste wires ae fat ones
+	    } else { // the first and last wires are fat ones
 	      WireIndex = TMath::Nint((y - firstOuterSectorAnodeWire)/anodeWirePitch) + 1;
 	      if (WireIndex <= 1 || WireIndex >= numberOfOuterSectorAnodeWires) continue;
 	      yOnWire = firstOuterSectorAnodeWire + (WireIndex-1)*anodeWirePitch;
@@ -2102,8 +2103,11 @@ Double_t StTpcRSMaker::dEdxCorrection(HitPoint_t &TrackSegmentHits) {
 //________________________________________________________________________________
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.87 2019/04/18 14:02:23 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.88 2019/04/29 20:11:21 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.88  2019/04/29 20:11:21  fisyak
+// Fix for TrackDirection, add extra correction for the 1st pad row
+//
 // Revision 1.87  2019/04/18 14:02:23  fisyak
 // Keep hits with bad dE/dx information, revisit handling of pedRMS for Tpx and iTPC
 //
