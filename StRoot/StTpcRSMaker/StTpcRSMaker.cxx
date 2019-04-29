@@ -77,7 +77,7 @@ struct HitPoint_t {
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.87 2019/04/18 14:02:23 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.88 2019/04/29 20:11:21 fisyak Exp $";
 #define __ClusterProfile__
 static Bool_t ClusterProfile = kFALSE;
 #define Laserino 170
@@ -2103,8 +2103,11 @@ Double_t StTpcRSMaker::dEdxCorrection(HitPoint_t &TrackSegmentHits) {
 //________________________________________________________________________________
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.87 2019/04/18 14:02:23 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.88 2019/04/29 20:11:21 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.88  2019/04/29 20:11:21  fisyak
+// Fix for TrackDirection, add extra correction for the 1st pad row
+//
 // Revision 1.87  2019/04/18 14:02:23  fisyak
 // Keep hits with bad dE/dx information, revisit handling of pedRMS for Tpx and iTPC
 //
