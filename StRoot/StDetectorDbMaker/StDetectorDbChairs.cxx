@@ -272,6 +272,8 @@ MakeChairInstance2(tpcCorrection,St_TpcPhiDirectionC,Calibrations/tpc/TpcPhiDire
 MakeChairInstance2(tpcCorrection,St_TpcdEdxCorC,Calibrations/tpc/TpcdEdxCor);
 #include "St_TpcLengthCorrectionBC.h"
 MakeChairInstance2(tpcCorrection,St_TpcLengthCorrectionBC,Calibrations/tpc/TpcLengthCorrectionB);
+#include "St_TpcDriftVelRowCorC.h"
+MakeChairInstance2(tpcCorrection,St_TpcDriftVelRowCorC,Calibrations/tpc/TpcDriftVelRowCor);
 #include "St_TpcLengthCorrectionMDF.h"
 MakeChairInstance2(MDFCorrection,St_TpcLengthCorrectionMDF,Calibrations/tpc/TpcLengthCorrectionMDF);
 #include "St_TpcPadCorrectionMDF.h"
@@ -1063,7 +1065,7 @@ Float_t St_tss_tssparC::gain(Int_t sector, Int_t row) {
     } else
 #endif
     if (v < gC->min(l) || v > gC->max(l)) return gain;
-    if (gC->min(l) < -150) {
+    if (gC->min(l) < -450) {
       // if range was expanded below 150 V then use only the linear approximation
       gain  = TMath::Exp(gC->CalcCorrection(l,v, 0., 2));
     } else {
@@ -1317,8 +1319,8 @@ St_SurveyC::St_SurveyC(St_Survey *table) : TChair(table), fRotations(0)  {
   for (UInt_t i = 0; i < N; i++) {
     fRotations[i] = new TGeoHMatrix;
     TGeoHMatrix &rot = *fRotations[i];
-    if (! i) rot.SetName(Table()->GetName());
-    else     rot.SetName(Form("%s_%i",Table()->GetName(),i));
+    if (N == 1) rot.SetName(Table()->GetName());
+    else        rot.SetName(Form("%s_%i",Table()->GetName(),i+1));
     rot.SetRotation(Rotation(i));
     rot.SetTranslation(Translation(i));
     Normalize(rot);
