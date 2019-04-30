@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.cxx,v 1.18 2019/04/23 05:49:57 jdb Exp $
+ * $Id: StBTofCalibMaker.cxx,v 1.17 2017/10/20 17:50:32 smirnovd Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,9 +12,6 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.cxx,v $
- * Revision 1.18  2019/04/23 05:49:57  jdb
- * Added function to allow forcing 0 starttime for totally startless BTOF usage in UPC
- *
  * Revision 1.17  2017/10/20 17:50:32  smirnovd
  * Squashed commit of the following:
  *
@@ -154,7 +151,6 @@ StBTofCalibMaker::StBTofCalibMaker(const char *name) : StMaker(name)
     mSlewingCorr = kTRUE;
     mMuDstIn = kFALSE;
     mUseVpdStart = kTRUE;
-    mForceTStartZero = false;
     isMcFlag = kFALSE;
     
     setCreateHistoFlag(kFALSE);
@@ -1617,10 +1613,6 @@ Double_t StBTofCalibMaker::tofAllCorr(const Double_t tof, const Double_t tot, co
 //_____________________________________________________________________________
 void StBTofCalibMaker::tstart(const Double_t vz, Double_t *tstart, Double_t *tdiff)
 {
-    if ( mForceTStartZero ){
-        *tstart = 0;
-        return;
-    }
     *tstart = -9999.;
     *tdiff = -9999.;
     
@@ -1641,11 +1633,6 @@ void StBTofCalibMaker::tstart(const Double_t vz, Double_t *tstart, Double_t *tdi
 //_____________________________________________________________________________
 void StBTofCalibMaker::tstart_NoVpd(const StBTofCollection *btofColl, const StPrimaryVertex *pVtx, Double_t *tstart)
 {
-    if ( mForceTStartZero ){
-        *tstart = 0;
-        return;
-    }
-
     *tstart = -9999.;
     if(!btofColl) return;
     
@@ -1736,10 +1723,6 @@ void StBTofCalibMaker::tstart_NoVpd(const StBTofCollection *btofColl, const StPr
 //_____________________________________________________________________________
 void StBTofCalibMaker::tstart_NoVpd(const StMuDst *muDst, const StMuPrimaryVertex *pVtx, Double_t *tstart)
 {
-    if ( mForceTStartZero ){
-        *tstart = 0;
-        return;
-    }
     *tstart = -9999.;
     if(!muDst) return;
     
