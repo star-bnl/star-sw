@@ -1934,7 +1934,11 @@ $jrun = "Run not completed";
              $Err_messg = "Killed";
 
    }elsif ($line =~ /Abort/)  {
-             $Err_messg = "Abort";
+        if($line =~ /UndoAbortGap/)  {
+           $Err_messg = "none";
+    }else{   
+          $Err_messg = "Abort";
+    }	  
 
    }elsif ($line =~ /StFATAL/)  {
              $Err_messg = "StFATAL";
