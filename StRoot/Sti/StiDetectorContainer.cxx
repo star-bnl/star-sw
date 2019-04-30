@@ -150,7 +150,7 @@ extreme assymetry, such as navigation through the Silicon Vertex Tracker.
 */
 bool StiDetectorContainer::moveIn(double phiCut, double zCut, double rMin)
 {
-
+  if (! *mphi_it || ! (*mphi_it)->getChildCount()) return false;
   //remember where we started:
   StiDetectorNodeVector::const_iterator oldPhiNodeP = mphi_it;
   const StiDetectorNode* oldPhiNode = *mphi_it;
