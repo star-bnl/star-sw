@@ -1534,7 +1534,7 @@ void StPicoDstMaker::fillEvent() {
 
   // Save various multiplicities
   picoEvent->setRefMultFtpcEast( ev->refMultFtpcEast() );
-  picoEvent->setRefMultFtpcEast( ev->refMultFtpcWest() );
+  picoEvent->setRefMultFtpcWest( ev->refMultFtpcWest() );
   picoEvent->setRefMultPos( ev->refMultPos() );
   picoEvent->setRefMultNeg( ev->refMultNeg() );
 
