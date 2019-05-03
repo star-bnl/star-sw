@@ -8,16 +8,11 @@
 #include "StBichsel/StdEdxModel.h"
 #include "StProbPidTraits.h"
 #include "StMuDSTMaker/COMMON/StMuBTofHit.h"
+#if 1
+#include "KFParticle/KFParticleSIMD.h"
+#endif
 #include "TSystem.h"
 #include "TArrayD.h"
-#if 0
-#include "KFParticle/KFVertex.h"
-#include "KFParticle/KFParticle.h"
-#include "KFParticle/KFParticleSIMD.h"
-#include "KFParticle/KFPTrack.h"
-#include "StKFParticleAnalysisMaker/StKFParticleInterface.h"
-#include "StKFParticleAnalysisMaker/StKFParticlePerformanceInterface.h"
-#endif
 ClassImp(StMuMcAnalysisMaker);
 StMuMcAnalysisMaker *StMuMcAnalysisMaker::fgStMuMcAnalysisMaker = 0;
 //                  [gp]     [type]           [particle] [pm]         [x]         [i]                  
@@ -114,7 +109,7 @@ StMuMcAnalysisMaker::StMuMcAnalysisMaker(const char *name) : StMaker(name), fPro
 }
 //________________________________________________________________________________
 StMuMcAnalysisMaker::~StMuMcAnalysisMaker() {
-#if 0
+#if 1
   SafeDelete(mStKFParticleInterface);
   SafeDelete(mStKFParticlePerformanceInterface);
 #endif
@@ -701,7 +696,7 @@ void StMuMcAnalysisMaker::BookVertexPlots(){
   dirs[1] = dirs[0]->GetDirectory(TracksVertices[1]); assert(dirs[1]);
   dirs[1]->cd();
   PrintMem(dirs[1]->GetPath());
-#if 0  
+#if 1  
   mStKFParticleInterface = new StKFParticleInterface;
   mStKFParticlePerformanceInterface = new StKFParticlePerformanceInterface(mStKFParticleInterface->GetTopoReconstructor());
 #endif
@@ -734,9 +729,7 @@ Int_t StMuMcAnalysisMaker::Make(){
       muDst->printMcTracks();
     }
   if (IAttr("TrackPlots"))  FillTrackPlots();
-#if 0
   if (IAttr("VertexPlots")) FillVertexPlots();
-#endif
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -962,11 +955,11 @@ void StMuMcAnalysisMaker::FillTrackPlots()
   }
 #endif
 }
-#if 0
+#if 1
 //_____________________________________________________________________________
 void StMuMcAnalysisMaker::FillVertexPlots(){
-//   StMuDst::instance()->printKFVertices();
-//   StMuDst::instance()->printKFTracks();
+  //   StMuDst::instance()->printKFVertices();
+  //   StMuDst::instance()->printKFTracks();
   //  return;
   static Int_t nTracksAll = 0;
 #if 0
@@ -1001,6 +994,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
   nStiVertex += NoKFVertices;
   
   Int_t NoPrimaryVertices = StMuDst::instance()->numberOfPrimaryVertices();  //if (_debugAsk) cout << "\tPrimaryVertices " << NoPrimaryVertices<< std::endl;
+  if (! NoPrimaryVertices) return;
   const int NoStVertices = 1; // NoPrimaryVertices;
   //  const int NoStVertices = NoPrimaryVertices;
   vector<KFVertex> PrimVertex(NoStVertices);
@@ -1008,7 +1002,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
   vector< vector<int> > PrimTracks(NoPrimaryVertices);
   
   float bestRank=-1000000;
-  //  int bestPV=-1;
+  int bestPV=-1;
   
   for (Int_t l = 0; l < NoPrimaryVertices; l++) {//NoPrimaryVertices; l++) {
     StMuPrimaryVertex *Vtx = StMuDst::instance()->primaryVertex(l);
@@ -1016,7 +1010,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
     //       Vtx->Print();
     if (bestRank < Vtx->ranking()) {
       bestRank = Vtx->ranking();
-      //      bestPV = l;
+      bestPV = l;
     }
     else continue;
     
@@ -1044,11 +1038,11 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
       
     }
   }
-  
+#ifdef __GoodPV__  
   bool isGoodPV = (PrimVertex[0].X() > -0.3) && (PrimVertex[0].X() < -0.1) &&
                   (PrimVertex[0].Y() > -0.27) && (PrimVertex[0].Y() < -0.13);
   if(!isGoodPV) return;
-  
+#endif /*   __GoodPV__ */
   Int_t NoGlobalTracks = StMuDst::instance()->numberOfGlobalTracks();
   
   //find max global track index
@@ -1544,7 +1538,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
 //   }
 //   mStKFParticleInterface->InitParticles();
   
-#if 1 /* Maksym reconstruction */
+#if 0 /* Maksym reconstruction */
 //   mStKFParticleInterface->ReconstructTopology();
    mStKFParticleInterface->ReconstructParticles();
 #else

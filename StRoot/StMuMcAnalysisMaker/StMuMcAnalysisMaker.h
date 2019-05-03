@@ -42,9 +42,12 @@
 #include "StMuDSTMaker/COMMON/StMuPrimaryTrackCovariance.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StarRoot/TPolynomial.h"
-#if 0
-#include "KFParticle/KFVertex.h"
+#if 1
 #include "KFParticle/KFParticle.h"
+#include "KFParticle/KFVertex.h"
+#include "KFParticle/KFPTrack.h"
+#include "StKFParticleAnalysisMaker/StKFParticleInterface.h"
+#include "StKFParticleAnalysisMaker/StKFParticlePerformanceInterface.h"
 #endif
 #include "StDcaGeometry.h"
 #include "TRSymMatrix.h"
@@ -129,7 +132,7 @@ class StMuMcAnalysisMaker : public StMaker {
 
   Char_t                mBeg[1];        //!
   StMuDst                          *muDst;                             //!
-#if 0
+#if 1
   StKFParticleInterface            *mStKFParticleInterface;            //!
   StKFParticlePerformanceInterface *mStKFParticlePerformanceInterface; //!
 #endif
@@ -150,9 +153,7 @@ class StMuMcAnalysisMaker : public StMaker {
   void           FillQAPr(TrackMatchType type,const StMuTrack *pTrack = 0, const StMuMcTrack *mcTrack = 0, const StMuPrimaryTrackCovariance *cov = 0); 
   void           FillQAPr(TrackMatchType type,const StMuTrack *pTrack, const StMuMcTrack *mcTrack, const KFParticle *particle);
   void           ForceAnimate(unsigned int times=0, int msecDelay=0); 
-#if 0
   void           FillVertexPlots();
-#endif
   Bool_t         Check();
   void           Draw(Option_t *option="");
   void           DrawQA(Int_t gp = -1, Int_t pp = -1, Int_t xx = -1, Int_t ii = -1);

@@ -8,13 +8,14 @@ void muMc(Int_t N = 1000000, const Char_t *input = "*.MuDst.root", const Char_t 
 #else
   //  gSystem->SetFPEMask(kInvalid | kDivByZero | kOverflow );
   gROOT->LoadMacro("lMuDst.C");
-  Char_t *file = gSystem->Which("./",output,kReadPermission);
+  //  Char_t *file = gSystem->Which("./",output,kReadPermission);
+  Char_t *file = 0;
   if (! file) {
-    lMuDst(-1,input,"RMuDst,MuMc,quiet,mysql,nodefault",output);
+    lMuDst(-1,input,"RMuDst,KFPInter,MuMc,quiet,mysql,nodefault",output);
     StMuMcAnalysisMaker *muMc = StMuMcAnalysisMaker::instance();
     if (muMc) {cout << "MuMcAnalysis has been found" << endl;}
     muMc->SetAttr("TrackPlots",1);
-    //    muMc->SetAttr("VertexPlots",1);
+    muMc->SetAttr("VertexPlots",1);
     //    muMc->SetAttr("StoreCutNTuples",1);
     chain->Init();
     chain->EventLoop(N);
