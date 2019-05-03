@@ -837,7 +837,7 @@ void KFTopoPerformance::MatchPV()
     for(int iRP=0; iRP < nPVTracks; iRP++)
     {
       const int rTrackId = tracks[iRP];
-      if ( !RtoMCParticleId[rTrackId].IsMatched() )
+      if (!RtoMCParticleId.size() || !RtoMCParticleId[rTrackId].IsMatched() )
       {
         nGhostTracks++;
         continue;
