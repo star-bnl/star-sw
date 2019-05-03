@@ -202,6 +202,16 @@ void JevpServer::debugBuilders(int line)
 void JevpServer::main(int argc, char *argv[])
 {
   // gErrorIgnoreLevel = kBreak;   // suppress root messages...
+
+  rtsLogOutput(RTS_LOG_STDERR);
+  //rtsLogAddDest(serv.log_dest, serv.log_port);
+  rtsLogLevel(WARN);
+
+  LOG("JEFF", "args:");
+  for(int i=0;i<argc;i++) {
+    LOG("JEFF", "argv[%d]=%s", i, argv[i]);
+  }
+
   serv.parseArgs(argc, argv);
 
   gMessMgr->SwitchOff("I");
@@ -476,7 +486,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	else if (strcmp(argv[i], "-nodie") == 0) {
 	  die = 0;
 	}
-	else if (strcmp(argv[i], "-buildpdf")) {
+	else if (strcmp(argv[i], "-buildpdf") == 0) {
 	    LOG("JEFF", "-buildpdf");
 	    log_output = RTS_LOG_STDERR;
 	    nodb = 1;
