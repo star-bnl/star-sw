@@ -929,7 +929,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    NoElPerAdc = St_TpcResponseSimulatorC::instance()->NoElPerAdcO(); // outer TPX
 	  }
 	}
+#ifndef __NO_1STROWCORRECTION__
 	if (row == 1) dEdxCor *= TMath::Exp(St_TpcResponseSimulatorC::instance()->FirstRowC());
+#endif /* __NO_1STROWCORRECTION__ */
 	mGainLocal = Gain/dEdxCor/NoElPerAdc; // Account dE/dx calibration
 	// end of dE/dx correction
 	// generate electrons: No. of primary clusters per cm
@@ -1066,11 +1068,15 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    // Transport to wire
 	    if (y <= lastInnerSectorAnodeWire) {
 	      WireIndex = TMath::Nint((y - firstInnerSectorAnodeWire)/anodeWirePitch) + 1;
+#ifndef __NO_1STROWCORRECTION__
 	      if (St_tpcPadConfigC::instance()->iTPC(sector)) {// two first and two last wires are removed, and 3rd wire is fat wiere
 		if (WireIndex <= 3 || WireIndex >= numberOfInnerSectorAnodeWires - 3) continue;
 	      } else { // old TPC the first and last wires are fat ones
 		if (WireIndex <= 1 || WireIndex >= numberOfInnerSectorAnodeWires) continue;
 	      }
+#else /* __NO_1STROWCORRECTION__ */
+	      if (WireIndex <= 1 || WireIndex >= numberOfInnerSectorAnodeWires) continue; // to check the 1-st pad row effect
+#endif /* ! __NO_1STROWCORRECTION__ */
 	      yOnWire = firstInnerSectorAnodeWire + (WireIndex-1)*anodeWirePitch;
 	    } else { // the first and last wires are fat ones
 	      WireIndex = TMath::Nint((y - firstOuterSectorAnodeWire)/anodeWirePitch) + 1;
