@@ -861,10 +861,10 @@ void AliHLTTPCCATrackletConstructor::run( unsigned int firstRow, unsigned int &t
       disp.DrawSliceHits(1, 0.5);
       disp.DrawSliceLinks(-1,-1,1);
       AliHLTTPCCADisplay::Instance().SaveCanvasToFile("NFinderTestXYZ.pdf");
-      disp.ClearViewPT();
-//      disp.ClearView();
-      disp.DrawSliceHitsPT(1, 0.5);
-      disp.DrawSliceLinksPT(-1,-1,1);
+//      disp.ClearViewPT();
+////      disp.ClearView();
+//      disp.DrawSliceHitsPT(1, 0.5);
+//      disp.DrawSliceLinksPT(-1,-1,1);
       disp.Ask();
     }
 //    if ( AliHLTTPCCADisplay::Instance().DrawType() == 1 )
@@ -1063,7 +1063,7 @@ void AliHLTTPCCATrackletConstructor::run( unsigned int firstRow, unsigned int &t
         ++r.fStage( !transported ); // all those where transportation failed go to DoneStage
       }
 #ifdef MAIN_DRAW
-      if ( AliHLTTPCCADisplay::Instance().DrawType() == 10 ) {
+      if ( AliHLTTPCCADisplay::Instance().DrawType() == 1 ) {
         for(int ii=0; ii<int_v::Size; ii++)
         {
           if(!(r.fStage[ii] < DoneStage)) continue;

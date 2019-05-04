@@ -52,11 +52,16 @@ class AliHLTTPCCAMergedTrack
       fNClusters = t.NClusters();
       // ---
       tIsMerged = false;
+      fUsed = t.Used();
       // ---
     }
     // ---
     void SetMerged() { tIsMerged = true; }
     bool IsMerged() const { return tIsMerged; }
+
+    void SetUsed() { fUsed = true; }
+    void SetNoUsed() { fUsed = false; }
+    bool Used() const { return fUsed; }
     // ---
   
   private:
@@ -69,6 +74,7 @@ class AliHLTTPCCAMergedTrack
     int fNClusters;                  //* number of track clusters
     // ---
     bool tIsMerged;
+    bool fUsed;
     // ---
 };
 
