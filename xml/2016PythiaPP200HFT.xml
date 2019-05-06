@@ -31,8 +31,8 @@
 #  if (! $?) set fitter = ",VFPPVnoCTB,StiCA";
   echo "fitter $fitter"
   set tagFile = ${file}.root
-#  root4star -q -b 'bfc.C('$f','$l',"MC.2016a,HijingAuAu200Z6cm,CorrX,OSpaceZ2,OGridLeak3D,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
-  root4star -q -b 'bfc.C('$f','$l',"MC.2016a,PythiaPP200HFT,Corr4,OSpaceZ2,OGridLeak3D,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+#  root4star -q -b 'bfc.C('$f','$l',"MC.2016a,HijingAuAu200Z6cm,CorrX,OSpaceZ2,OGridLeakFull,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+  root4star -q -b 'bfc.C('$f','$l',"MC.2016a,PythiaPP200HFT,Corr4,OSpaceZ2,OGridLeakFull,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
   endif
         </command>
         <stdout URL="file:./$JOBID.log" />

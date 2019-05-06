@@ -25,9 +25,9 @@
   echo $case | grep pileup
   set Nopileup = $?
   if ($Nopileup) then
-  root4star -q -b 'bfc.C(9999,"MC.y2010a,fzin'${fitter}',beamline,StiCA,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeak3D","'${evtsFile}'","","'${tagFile}'")' &gt;&amp; ${logFile}
+  root4star -q -b 'bfc.C(9999,"MC.y2010a,fzin'${fitter}',beamline,StiCA,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeakFull","'${evtsFile}'","","'${tagFile}'")' &gt;&amp; ${logFile}
   else 
-  root4star -q -b 'bfc.C(9999,"MC.y2010a,fzin'${fitter}',beamline,StiCA,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeak3D","'${evtsFile}'\n  gfile b '${dir}'/'${file}'_2000evts_minb.fzd\n mode TPCE back 4001400\n gback 400 400 0.1 106.6","","'${tagFile}'")' &gt;&amp; ${logFile}
+  root4star -q -b 'bfc.C(9999,"MC.y2010a,fzin'${fitter}',beamline,StiCA,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeakFull","'${evtsFile}'\n  gfile b '${dir}'/'${file}'_2000evts_minb.fzd\n mode TPCE back 4001400\n gback 400 400 0.1 106.6","","'${tagFile}'")' &gt;&amp; ${logFile}
   endif
         </command>
         <stdout URL="file:./$JOBID.log" />

@@ -19,7 +19,7 @@
     set evtsFile = $INPUTFILE0;
     set f        = 1
     set l        = 5000000
-    set chain    = "DbV20150316 P2014a pxlHit istHit btof mtd mtdCalib BEmcChkStat CorrX OSpaceZ2 OGridLeak3D -hitfilt";
+    set chain    = "DbV20150316 P2014a pxlHit istHit btof mtd mtdCalib BEmcChkStat CorrX OSpaceZ2 OGridLeakFull -hitfilt";
   endif
   echo "${evtsFile}"
   set filel    = `basename $evtsFile .daq`_${f}_${l}
@@ -31,7 +31,7 @@
   set blaFile = ${filel}.bla.root
   if (-r ${SUBMITTINGDIRECTORY}/${muFile}) exit 0;
   echo "Output MuDst file : $muFile" 
-# P15ic "DbV20150316 P2014a pxlHit istHit btof mtd mtdCalib BEmcChkStat CorrX OSpaceZ2 OGridLeak3D -hitfilt"
+# P15ic "DbV20150316 P2014a pxlHit istHit btof mtd mtdCalib BEmcChkStat CorrX OSpaceZ2 OGridLeakFull -hitfilt"
   echo $0 &gt; ${logFile}
   root4star -q -b 'bfc.C('$f','$l',"'${chain}'","'${evtsFile}'","'$output'")' &gt;&gt;&amp; ${logFile}
   if (-r  ${SUBMITTINGDIRECTORY}/${blaFile}) rm ${SUBMITTINGDIRECTORY}/${blaFile};

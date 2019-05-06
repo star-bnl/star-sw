@@ -33,7 +33,7 @@
 #Sti     
 root4star -q -b 'bfc.C('$f','$l',"RC.pp.y2013,Sti,NoRunco,NoTags,noHistos,TpcHitFilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
 #dev2 KF    root4star -q -b 'bfc.C('$f','$l',"RC.pp.y2013,StiCA,KFVertex,NoRunco,NoTags,noHistos,TpcHitFilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
-#eval    root4star -q -b 'bfc.C('$f','$l',"pp2013a,mtd,btof,fmsDat,fgt,fgtPoint,VFPPVnoCTB,beamline,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,NoRunco,NoTags,noHistos,-hitfilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#eval    root4star -q -b 'bfc.C('$f','$l',"pp2013a,mtd,btof,fmsDat,fgt,fgtPoint,VFPPVnoCTB,beamline,BEmcChkStat,Corr4,OSpaceZ2,OGridLeakFull,NoRunco,NoTags,noHistos,-hitfilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
 #    rm ${SUBMITTINGDIRECTORY}/${file}.bla.root
 #    mv *.log *.root  ${SUBMITTINGDIRECTORY}  
   endif

@@ -29,7 +29,7 @@
   set case = `basename $ddir`; echo "case = $case";
   if ($case == "PPV") set fitter = "";
   echo "fitter $fitter"
-#  set tagFile = ${filel}.root          #,Corr4,OSpaceZ2,OGridLeak3D,sdt20120401.060500
+#  set tagFile = ${filel}.root          #,Corr4,OSpaceZ2,OGridLeakFull,sdt20120401.060500
 #  root4star -q -b 'bfc.C(10000,"RC.pp.y2012b'${fitter}',StiCA,-evout,NoHistos,noTags,noRunco","'${evtsFile}'",0,"'${tagFile}'")' &gt;&amp; ${logFile}
 #  root4star -q -b 'bfc.C('${f}','${l}',"RC.pp.y2012b'${fitter}',StiCA,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
   root4star -q -b 'bfcMixer_Pythia.C('${f}','${l}',"'${fitter}'","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}

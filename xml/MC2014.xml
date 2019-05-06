@@ -45,13 +45,13 @@
 
 
   set tagFile = ${filel}.root
-#  root4star -q -b 'bfc.C(9999,"in'${fitter}',pp2013a,mtd,btof,fmsDat,fgt,fgtPoint,BEmcChkStat,beamline,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeak3D,Tree,ReadAll","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
-#  root4star -q -b 'bfc.C(9999,"in'${fitter}',pp2013a,mtd,btof,fgt,fgtPoint,BEmcChkStat,beamline,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeak3D,Tree,ReadAll","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
-#  root4star -q -b 'bfc.C(9999,"in'${fitter}',P2014a,bbcSim,btofsim,btofMatch,btofCalib,emcY2,EEfs,mtdSim,mtdMatch,BEmcChkStat,pxlHit,istHit,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,ReadAll,sdt20140330.151000,CorrX,OSpaceZ2,OGridLeak3D","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+#  root4star -q -b 'bfc.C(9999,"in'${fitter}',pp2013a,mtd,btof,fmsDat,fgt,fgtPoint,BEmcChkStat,beamline,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeakFull,Tree,ReadAll","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+#  root4star -q -b 'bfc.C(9999,"in'${fitter}',pp2013a,mtd,btof,fgt,fgtPoint,BEmcChkStat,beamline,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeakFull,Tree,ReadAll","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+#  root4star -q -b 'bfc.C(9999,"in'${fitter}',P2014a,bbcSim,btofsim,btofMatch,btofCalib,emcY2,EEfs,mtdSim,mtdMatch,BEmcChkStat,pxlHit,istHit,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,ReadAll,sdt20140330.151000,CorrX,OSpaceZ2,OGridLeakFull","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
 # no hft 
-  root4star -q -b 'bfc.C(9999,"in'${fitter}',P2014,bbcSim,btofsim,btofMatch,btofCalib,emcY2,EEfs,mtdSim,mtdMatch,BEmcChkStat,pxlHit,istHit,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,ReadAll,sdt20140330.151000,CorrX,OSpaceZ2,OGridLeak3D","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+  root4star -q -b 'bfc.C(9999,"in'${fitter}',P2014,bbcSim,btofsim,btofMatch,btofCalib,emcY2,EEfs,mtdSim,mtdMatch,BEmcChkStat,pxlHit,istHit,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,ReadAll,sdt20140330.151000,CorrX,OSpaceZ2,OGridLeakFull","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
 # with hft 
-#  root4star -q -b 'bfc.C(9999,"in'${fitter}',P2014a,IdealHFT,bbcSim,btofsim,pxlFastSim,istSim,btofMatch,btofCalib,emcY2,EEfs,mtdSim,mtdMatch,BEmcChkStat,pxlHit,istHit,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,ReadAll,sdt20140330.151000,CorrX,OSpaceZ2,OGridLeak3D","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+#  root4star -q -b 'bfc.C(9999,"in'${fitter}',P2014a,IdealHFT,bbcSim,btofsim,pxlFastSim,istSim,btofMatch,btofCalib,emcY2,EEfs,mtdSim,mtdMatch,BEmcChkStat,pxlHit,istHit,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,ReadAll,sdt20140330.151000,CorrX,OSpaceZ2,OGridLeakFull","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
   endif
         </command>
         <stdout URL="file:./$JOBID.log" />

@@ -10,8 +10,8 @@
 using namespace std;
 void star_mag_map() {
   const Char_t *files[7] = {
-    "star_field_dz=0.map",  "star_field_dz=5cm.map",  "star_field_dz=10cm.map",  "star_field_dz=15cm.map",
-    "star_field_plate_mu=1.map","star_field_plate_mu=1p2.map","star_field_plate_mu=1p5.map"
+    "5cm.map=0.map",  "5cm.map=5cm.map",  "5cm.map=10cm.map",  "5cm.map=15cm.map",
+    "1p5.map=1.map","1p5.map=1p2.map","1p5.map=1p5.map"
   };
   TFile *fOut = new TFile("StarFieldZ.root","update");
   Float_t R, Z, Br, Bz;
@@ -23,8 +23,8 @@ void star_mag_map() {
       continue;
     }
     TString name(files[f]);
-    name.ReplaceAll("star_field_dz=","");
-    name.ReplaceAll("star_field_plate_mu=","mu");
+    name.ReplaceAll("5cm.map=","");
+    name.ReplaceAll("1p5.map=","mu");
     name.ReplaceAll(".map","");
     TString Name("Br"); Name += name;
     TString Title("Br "); Title += files[f];

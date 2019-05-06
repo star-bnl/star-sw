@@ -42,7 +42,7 @@ void TpcRSo(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   if (! RunOpt.Contains("RC.y",TString::kIgnoreCase) &&  
       ! RunOpt.Contains("MC.y",TString::kIgnoreCase)) {
     ChainOpt = "MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,TpcHitMover,bigbig";
-    //  ChainOpt += "Corr4";// no dynamical distortion ! ,OSpaceZ2,OGridLeak3D,"; // check that StTpcRSMaker::kDistortion bit is set
+    //  ChainOpt += "Corr4";// no dynamical distortion ! ,OSpaceZ2,OGridLeakFull,"; // check that StTpcRSMaker::kDistortion bit is set
     //  ChainOpt += "EvOut,MuDST,MiniMcMk,McTpcAna,IdTruth,useInTracker,-hitfilt,";
     //  ChainOpt += ",CMuDst,MiniMcMk,IdTruth,useInTracker,tree,";
     //    ChainOpt += ",CMuDst,McAna,IdTruth,useInTracker,tree,KFVertex,xgeometry,";

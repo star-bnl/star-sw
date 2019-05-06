@@ -28,8 +28,8 @@
 # BAna   => dEdxY2,CMuDst,analysis
 #  root4star -q -b 'bfc.C('${f}','${l}',"B2011,BAna,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,pmdReco,btof,mtdDat,BEmcChkStat,Corr4,alignment,NoHistos,noRunco,noTags","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
 #  root4star -q -b 'bfc.C('${f}','${l}',"B2011,BAna,VFMinuit,l3onl,trgd,ZDCvtx,NosvtIT,NossdIT,btof,mtdDat,Corr4,alignment,NoHistos,noRunco,noTags","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
-#P2011a pmdReco btof mtdDat BEmcChkStat -evout Corr4 OSpaceZ2 OGridLeak3D -hitfilt
-  root4star -q -b 'bfc.C('${f}','${l}',"P2011a,pmdReco,btof,mtdDat,BEmcChkStat,Sti,-evout,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt,NoHistos,noRunco,noTags","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
+#P2011a pmdReco btof mtdDat BEmcChkStat -evout Corr4 OSpaceZ2 OGridLeakFull -hitfilt
+  root4star -q -b 'bfc.C('${f}','${l}',"P2011a,pmdReco,btof,mtdDat,BEmcChkStat,Sti,-evout,Corr4,OSpaceZ2,OGridLeakFull,-hitfilt,NoHistos,noRunco,noTags","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
 	</command>
 	<stdout URL="file:./$JOBID.log" />
 	<stderr URL="file:./$JOBID.err" />

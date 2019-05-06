@@ -24,16 +24,16 @@
   if (-r $muFile) exit 0;
 #  root.exe -q -b 'bfc.C('${f}','${l}',"B2014,in,tpcX,TpxClu2D,gmt,UseXgeom,tpcDB,TpcHitMover,StiCA,Cosmics,KFVertex,Corr4,evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
 #  root.exe -q -b 'bfc.C('${f}','${l}',"B2014,in,tpcX,TpxClu2D,gmt,UseXgeom,tpcDB,TpcHitMover,StiCA,KFVertex,Corr4,evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
-# P2014a mtd btof BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D -hitfilt
-# B2014,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis,mtd,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-hitfil
-# B2014,ITTF,BAna,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis,mtd,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco
-#  root.exe -q -b 'bfc.C('${f}','${l}',"B2014,ITTF,BAna,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis,mtd,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
-#  root.exe -q -b 'bfc.C('${f}','${l}',"B2014,ITTF,BAna,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis,mtd,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+# P2014a mtd btof BEmcChkStat Corr4 OSpaceZ2 OGridLeakFull -hitfilt
+# B2014,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis,mtd,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeakFull,-hitfil
+# B2014,ITTF,BAna,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis,mtd,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco
+#  root.exe -q -b 'bfc.C('${f}','${l}',"B2014,ITTF,BAna,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis,mtd,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C('${f}','${l}',"B2014,ITTF,BAna,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis,mtd,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
 # 2014/AuAu15C
-#  root.exe -q -b 'bfc.C('${f}','${l}',"B2014,ITTF,BAna,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
-#  root.exe -q -b 'bfc.C('${f}','${l}',"P2014a,-l3onl,-fpd,-hitfilt,gmt,Alignment,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
-#  root4star -q -b 'bfc.C(100,"P2014a,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
-  root4star -q -b 'bfc.C(200,"P2014a,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C('${f}','${l}',"B2014,ITTF,BAna,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C('${f}','${l}',"P2014a,-l3onl,-fpd,-hitfilt,gmt,Alignment,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#  root4star -q -b 'bfc.C(100,"P2014a,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+  root4star -q -b 'bfc.C(200,"P2014a,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />

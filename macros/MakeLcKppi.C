@@ -37,12 +37,12 @@ void MakeLcKppi(Int_t nevents=1, const Char_t *parn = "LcKppi",Int_t RunID = 1)
   RootFile += ".MuDst.root";
   //   TString Chain("AgML,TpcRS,bbcSim,btofsim,pxlFastSim,istSim,emcY2,eefs,TpxClu,y2014a,useXgeom,FieldOn,NoSsdIt"
   // 		",NoSvtIt,StiHftC,Idst,BAna,tpcDB,TpcHitMover,btofMatch,btofCalib,tags,emcY2,IdTruth,gstar"
-  // 		",Corr4,OSpaceZ2,OGridLeak3D"
+  // 		",Corr4,OSpaceZ2,OGridLeakFull"
   // 		",StiCA,beamline,KFVertex,StiHftC,pxlFastSim,ssdfast,useXgeom,VFMCE,noRunco,noHistos,noTags");
   //		",muMc"); 
   TString Chain("MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,VFMCE,noRunco,noHistos,noTags,");
-  Chain += "vmc,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,VMCAlignment,sdt20160301,";
-  //  Chain += "vmc,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,VMCAlignment,";
+  Chain += "vmc,CorrX,OSpaceZ2,OGridLeakFull,-useXgeom,VMCAlignment,sdt20160301,";
+  //  Chain += "vmc,CorrX,OSpaceZ2,OGridLeakFull,-useXgeom,VMCAlignment,";
   Chain += parn;
   Chain += Form(",rung.%i",RunID);
   chain = bfc(0,Chain.Data(),0,RootFile.Data(),MainFile.Data());

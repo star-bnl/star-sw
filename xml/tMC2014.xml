@@ -32,7 +32,7 @@
   echo $case | grep KF
   if (! $?) set fitter = ",KFVertex,StiCA";
   echo $case | grep Ideal
-  if ( $? ) set fitter = ${fitter}",CorrX,OSpaceZ2,OGridLeak3D";
+  if ( $? ) set fitter = ${fitter}",CorrX,OSpaceZ2,OGridLeakFull";
   echo "fitter $fitter"
   setenv STARFPE NO
   setenv NODEBUG yes
@@ -57,7 +57,7 @@
   endif
 #  set tagFile = ${filel}.root
 #  if (-r ${tagFile}) exit 0;
-#  root4star -q -b 'bfc.C(9999,"in'${fitter}',pp2013a,mtd,btof,fmsDat,fgt,fgtPoint,BEmcChkStat,beamline,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeak3D,Tree,ReadAll","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+#  root4star -q -b 'bfc.C(9999,"in'${fitter}',pp2013a,mtd,btof,fmsDat,fgt,fgtPoint,BEmcChkStat,beamline,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeakFull,Tree,ReadAll","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
 #  root4star -q -b 'bfc.C(9999,"in'${fitter}',pp2013a,mtd,btof,fgt,fgtPoint,BEmcChkStat,beamline,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Tree,ReadAll","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
 # with HFT
 #  root4star -q -b 'bfc.C(9999,"fzin,-in,y2014a,sdt20140330.151000,tpcRS,TpxClu,McEvent,pxlFastSim,istSim,bbcSim,btofsim,mtdSim,emcY2,EEfs,'${fitter}',P2014a,mtd,btof,fgt,fgtPoint,BEmcChkStat,beamline,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Tree,ReadAll","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
@@ -67,10 +67,10 @@
 #  root4star -q -b 'bfc.C(9999,"fzin,-in,y2014a,sdt20140330.151000,tpcRS,TpxClu,McEvent,bbcSim,btofsim,mtdSim,emcY2,EEfs,'${fitter}',P2014,mtd,btof,BEmcChkStat,beamline,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Tree,ReadAll","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
 # Ideal, with HFT
 #  root4star -q -b -x 'bfc.C(9999,"fzin,-in,y2014a,tpcRS,TpxClu,McEvent,pxlFastSim,istSim,bbcSim,btofsim,mtdSim,emcY2,EEfs,'${fitter}',P2014,mtd,btof,BEmcChkStat,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Tree,ReadAll","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
-#  root4star -q -b -x 'bfc.C(9999,"fzin,MC.2014,-hitfilt,Corr4,OSpaceZ2,OGridLeak3D,StiHftC,pxlFastSim,ssdfast,useXgeom,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcMk,-MiniMcEvent,'${fitter}'","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
-#  root4star -q -b -x 'bfc.C(9999,"fzin,MC.2014,-hitfilt,KFVertex,Corr4,OSpaceZ2,OGridLeak3D,StiHftC,pxlFastSim,ssdfast,useXgeom,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcMk,-MiniMcEvent,'${fitter}'","'${evtsFile}'","'${out}'")' &gt;&amp; ${logFile}
+#  root4star -q -b -x 'bfc.C(9999,"fzin,MC.2014,-hitfilt,Corr4,OSpaceZ2,OGridLeakFull,StiHftC,pxlFastSim,ssdfast,useXgeom,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcMk,-MiniMcEvent,'${fitter}'","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+#  root4star -q -b -x 'bfc.C(9999,"fzin,MC.2014,-hitfilt,KFVertex,Corr4,OSpaceZ2,OGridLeakFull,StiHftC,pxlFastSim,ssdfast,useXgeom,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcMk,-MiniMcEvent,'${fitter}'","'${evtsFile}'","'${out}'")' &gt;&amp; ${logFile}
 # Ideal, with HFT 
-  root4star -q -b -x 'bfc.C(100,"HijingAuAu200Z6cm,verybig,ReverseField,MC.2014,-hitfilt,Corr4,OSpaceZ2,OGridLeak3D,StiHftC,pxlFastSim,ssdfast,useXgeom,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcMk,-MiniMcEvent,'${fitter}',rung.'${rung}'",0,"'${out}'")' &gt;&amp; ${logFile}
+  root4star -q -b -x 'bfc.C(100,"HijingAuAu200Z6cm,verybig,ReverseField,MC.2014,-hitfilt,Corr4,OSpaceZ2,OGridLeakFull,StiHftC,pxlFastSim,ssdfast,useXgeom,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcMk,-MiniMcEvent,'${fitter}',rung.'${rung}'",0,"'${out}'")' &gt;&amp; ${logFile}
   endif
         </command>
         <stdout URL="file:./$JOBID.log" />

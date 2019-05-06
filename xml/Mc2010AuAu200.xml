@@ -32,9 +32,9 @@
   if (! $?) set fitter = "StiCA";
   echo "fitter $fitter"
   set tagFile = ${filel}.root
-#  root4star -q -b 'bfc.C(9999,"MC.y2010a,fzin,sdt20100218.060152,Sti,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeak3D","'${evtsFile}'")' &gt;&amp; ${logFile}
-#  root4star -q -b 'bfc.C('${f}','${l}',"MC.y2010a,fzin,sdt20100218.060152,'${fitter}',-hitfilt,evout,geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeak3D","'${evtsFile}'","'${evFile}'")' &gt;&amp; ${logFile}
-  root4star -q -b 'bfc.C('${f}','${l}',"MC.y2010a,fzin,sdt20100228.040000,'${fitter}',-hitfilt,evout,geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeak3D","'${evtsFile}'","'${evFile}'")' &gt;&amp; ${logFile}
+#  root4star -q -b 'bfc.C(9999,"MC.y2010a,fzin,sdt20100218.060152,Sti,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeakFull","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root4star -q -b 'bfc.C('${f}','${l}',"MC.y2010a,fzin,sdt20100218.060152,'${fitter}',-hitfilt,evout,geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeakFull","'${evtsFile}'","'${evFile}'")' &gt;&amp; ${logFile}
+  root4star -q -b 'bfc.C('${f}','${l}',"MC.y2010a,fzin,sdt20100228.040000,'${fitter}',-hitfilt,evout,geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeakFull","'${evtsFile}'","'${evFile}'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./$JOBID.log" />
         <stderr URL="file:./$JOBID.err" />

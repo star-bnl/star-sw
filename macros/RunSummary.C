@@ -157,6 +157,7 @@ void RunSummary(const Char_t *files = "*.root") {
     TString F = gSystem->BaseName(File);
     F.ReplaceAll("adc_","");
     F.ReplaceAll("st_W_",""); 
+    F.ReplaceAll("hlt_",""); 
     sscanf(F.Data(),"%i",&run); 
     Run = run%1000000;
     cout << " for Run " << run << "/" << Run << "\t" << File << "\t" << nFile++ << endl;

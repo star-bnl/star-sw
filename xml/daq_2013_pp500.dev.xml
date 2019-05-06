@@ -17,7 +17,7 @@
   if ("$f" == "") then
 #    touch ${SUBMITTINGDIRECTORY}/${file}.bla.root
 #    root4star -q -b 'bfc.C(1000,"RC.pp.y2013,StiCA,KFVertex,NoRunco,NoTags,noHistos","'${evtsFile}')' &gt;&amp; ${logFile}
-    root4star -q -b 'bfc.C(1000,"pp2013a,Sti,mtd,btof,fmsDat,fgt,fgtPoint,VFPPVnoCTB,beamline,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt,NoRunco,NoTags,noHistos","'${evtsFile}')' &gt;&amp; ${logFile}
+    root4star -q -b 'bfc.C(1000,"pp2013a,Sti,mtd,btof,fmsDat,fgt,fgtPoint,VFPPVnoCTB,beamline,BEmcChkStat,Corr4,OSpaceZ2,OGridLeakFull,-hitfilt,NoRunco,NoTags,noHistos","'${evtsFile}')' &gt;&amp; ${logFile}
 #    rm ${SUBMITTINGDIRECTORY}/${file}.bla.root
 #    mv *.log *.root  ${SUBMITTINGDIRECTORY}  
   endif

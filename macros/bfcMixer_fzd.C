@@ -59,7 +59,7 @@ void bfcMixer_fzd(Int_t First, Int_t Last, const Char_t *opt = "",
   chain1Opt += ",TpxRaw";
 #endif
   TString chain2Opt("fzin,gen_T,geomT,sim_T,TpcRS,nodefault");
-  TString chain3Opt("noInput,P2010a,useInTracker,Sti,VFPPVnoCTB,useBTOF4Vtx,BEmcChkStat,btof,fmsdat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt");
+  TString chain3Opt("noInput,P2010a,useInTracker,Sti,VFPPVnoCTB,useBTOF4Vtx,BEmcChkStat,btof,fmsdat,Corr4,OSpaceZ2,OGridLeakFull,-hitfilt");
   //  TString chain3Opt("noInput,useInTracker,pp2012b,StiCA,VFPPVnoCTB,BEmcChkStat,btof,fmsdat,-hitfilt");
   chain3Opt += ",TpcMixer"; 
   chain3Opt += ",TpxClu,-VFMinuit,VFPPVnoCTB,beamLine,-hitfilt";

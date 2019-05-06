@@ -28,9 +28,9 @@ foreach input (`cat $FILELIST`)
 #  root.exe -q -b 'bfc.C('${f}','${l}',"B2014,in,tpcX,TpxRaw,TpxClu2D,gmt,UseXgeom,tpcDB,TpcHitMover,StiCA,Cosmics,KFVertex,Corr4,evout,NoHistos,noTags,noRunco","'${input}'","'$output'")' &gt;&amp; ${logFile}
 #  root.exe -q -b 'bfc.C('${f}','${l}',"B2014,in,tpcX,TpxRaw,TpxClu2D,gmt,UseXgeom,tpcDB,TpcHitMover,StiCA,KFVertex,Corr4,evout,NoHistos,noTags,noRunco,BAna,","'${input}'","'$output'")' &gt;&amp; ${logFile}
 #eval
-#  root4star -q -b 'bfc.C('${f}','${l}',"B2014,in,tpcX,useXGeom,TpxRaw,tpcDB,TpcHitMover,StiCA,KFVertex,Corr4,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,BAna,","'${input}'","'$output'")' &gt;&amp; ${logFile}
+#  root4star -q -b 'bfc.C('${f}','${l}',"B2014,in,tpcX,useXGeom,TpxRaw,tpcDB,TpcHitMover,StiCA,KFVertex,Corr4,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,BAna,","'${input}'","'$output'")' &gt;&amp; ${logFile}
 #.dev2 + TpcAligne
-# root.exe -q -b 'bfc.C('${f}','${l}',"B2014,in,TpxRaw,tpxClu2D,gmt,UseXgeom,tpcDB,TpcHitMover,StiCA,KFVertex,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,BAna,TpcAligner","'${input}'","'${output}'","'${tFile}'")' &gt;&amp; ${logFile}
+# root.exe -q -b 'bfc.C('${f}','${l}',"B2014,in,TpxRaw,tpxClu2D,gmt,UseXgeom,tpcDB,TpcHitMover,StiCA,KFVertex,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,BAna,TpcAligner","'${input}'","'${output}'","'${tFile}'")' &gt;&amp; ${logFile}
 #08/29/14
   root.exe -q -b 'bfc.C('${f}','${l}',"B2014,in,TpxRaw,tpxClu2D,gmt,UseXgeom,tpcDB,TpcHitMover,StiCA,KFVertex,CorrX,evout,NoHistos,noTags,noRunco,BAna,TpcAligner","'${input}'","'${output}'","'${tFile}'")' &gt;&amp; ${logFile}
 end

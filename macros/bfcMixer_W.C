@@ -46,7 +46,7 @@ void bfcMixer_W(Int_t First = 1, Int_t Last = 100, const Char_t *opt = "",
   chain1Opt += ",TpxRaw";
 #endif
   TString chain2Opt(Form("pythiaEmbed,Wenu,gen_T,geomT,sim_T,TpcRS,fgtMc,nodefault,Rung.%i",ranseed));
-  TString chain3Opt("noInput,useInTracker,StiCA,VFPPVnoCTB,useBTOF4Vtx,BEmcChkStat,btof,fmsdat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt");
+  TString chain3Opt("noInput,useInTracker,StiCA,VFPPVnoCTB,useBTOF4Vtx,BEmcChkStat,btof,fmsdat,Corr4,OSpaceZ2,OGridLeakFull,-hitfilt");
   chain2Opt += ",";
   chain2Opt += geom;
   chain3Opt += ",";

@@ -18,11 +18,11 @@
 #    touch ${SUBMITTINGDIRECTORY}/${file}.bla.root
 #    root4star -q -b 'bfc.C(500,"RC.y2012,KFVertex,NoRunco,NoTags,noHistos","'${evtsFile}')' &gt;&amp; ${logFile}
 # dev
-#    root4star -q -b 'bfc.C(50000,"P2012a,BEmcChkStat,btof,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt,mtdDat,fmsDat,NoRunco,NoTags,noHistos","'${evtsFile}')' &gt;&amp; ${logFile}
+#    root4star -q -b 'bfc.C(50000,"P2012a,BEmcChkStat,btof,Corr4,OSpaceZ2,OGridLeakFull,-hitfilt,mtdDat,fmsDat,NoRunco,NoTags,noHistos","'${evtsFile}')' &gt;&amp; ${logFile}
 # .DEV2 Sti
-#    root.exe -q -b 'bfc.C(50000,"P2012a,BEmcChkStat,btof,CorrX,Sti,OSpaceZ2,OGridLeak3D,-hitfilt,mtdDat,fmsDat,NoRunco,NoTags,noHistos","'${evtsFile}')' &gt;&amp; ${logFile}
+#    root.exe -q -b 'bfc.C(50000,"P2012a,BEmcChkStat,btof,CorrX,Sti,OSpaceZ2,OGridLeakFull,-hitfilt,mtdDat,fmsDat,NoRunco,NoTags,noHistos","'${evtsFile}')' &gt;&amp; ${logFile}
 # .DEV2 StiCA
-    root.exe -q -b 'bfc.C(50000,"P2012a,BEmcChkStat,btof,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,mtdDat,fmsDat,NoRunco,NoTags,noHistos","'${evtsFile}')' &gt;&amp; ${logFile}
+    root.exe -q -b 'bfc.C(50000,"P2012a,BEmcChkStat,btof,CorrX,OSpaceZ2,OGridLeakFull,-hitfilt,mtdDat,fmsDat,NoRunco,NoTags,noHistos","'${evtsFile}')' &gt;&amp; ${logFile}
 #    rm ${SUBMITTINGDIRECTORY}/${file}.bla.root
 #    mv *.log *.root  ${SUBMITTINGDIRECTORY}  
   endif

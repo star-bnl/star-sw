@@ -59,7 +59,7 @@ void bfcMixer_Gstar(Int_t First, Int_t Last, const Char_t *opt = "",
   chain1Opt += ",TpxRaw";
 #endif
   TString chain2Opt(Form("gstar,useXgeom,gen_T,geomT,sim_T,TpcRS,nodefault,Rung.%i",ranseed));
-  TString chain3Opt("noInput,useInTracker,StiCA,VFPPVnoCTB,useBTOF4Vtx,BEmcChkStat,btof,fmsdat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt");
+  TString chain3Opt("noInput,useInTracker,StiCA,VFPPVnoCTB,useBTOF4Vtx,BEmcChkStat,btof,fmsdat,Corr4,OSpaceZ2,OGridLeakFull,-hitfilt");
   chain2Opt += ",";
   chain2Opt += geom;
   chain3Opt += ",";

@@ -22,7 +22,7 @@
   set l = 10;
   switch ($PWD) 
     case '*2013*': 
-set year  = "y2013_1x,beamline,sdt20130317.070000,Corr4,OSpaceZ2,OGridLeak3D"; breaksw
+set year  = "y2013_1x,beamline,sdt20130317.070000,Corr4,OSpaceZ2,OGridLeakFull"; breaksw
     case '*2014*': 
 set year  = "y2014a,beamline,sdt20140330";   breaksw
     case '*2015*': 

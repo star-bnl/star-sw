@@ -6,7 +6,12 @@
 <command> 
    cd ${SUBMITTINGDIRECTORY}  
    setenv STARFPE NO
-#   setenv NODEBUG yes
+   source $STAR/unsetupDEV2.csh
+   setup debug
+   setup gcc
+   setup 32b
+   starver dev
+#   setenv NODEBUG yess
 #   setup 64b
 #   starver TFG18m
 #   starver .DEV2 
@@ -25,7 +30,7 @@
 #   cp *.root ${SUBMITTINGDIRECTORY} 
    endif
 </command>
-<!-- <input URL="command:dEdxSample.pl" /> -->
+<input URL="command:dEdxSample.pl" />
 <!-- <input URL="file:/net/l403/data/fisyak/reco/2019/DEV2StiCA.Minuit/*event.root" /> -->
-<input URL="file:/net/l403/data/fisyak/reco/2019/DEV2StiCA.Minuit2/*event.root" />
+<!-- <input URL="file:/net/l403/data/fisyak/reco/2019/DEV2StiCA.Minuit2/*event.root" /> -->
 </job>

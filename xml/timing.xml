@@ -28,7 +28,7 @@
   echo ${BITS} | grep '64\.'
  if (! $?)  set exec = "root.exe"
 #  ${exec} -q -b 'bfc.C('$f','$l',"'$chain',Sti")' &gt;&amp; ${logFile}
- ${exec} -q -b 'bfc.C(100,"P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D","/star/rcf/test/daq/2010/029/st_physics_11029020_raw_1030002.daq")' &gt;&amp; ${logFile}
+ ${exec} -q -b 'bfc.C(100,"P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeakFull","/star/rcf/test/daq/2010/029/st_physics_11029020_raw_1030002.daq")' &gt;&amp; ${logFile}
 </command>
 <stdout URL="file:./$JOBID.log" />
 <!-- <input URL="command:Nightlies.pl" /> -->

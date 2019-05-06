@@ -59,7 +59,7 @@ void bfcMixer_StarLight(Int_t First, Int_t Last,Int_t ranseed=2, const Char_t *o
 #endif
   TString chain2Opt(Form("AuAu200StarLight_rho,gen_T,geomT,sim_T,TpcRS,nodefault,Rung.%i",ranseed));
   //  TString chain2Opt(Form("AuAu200StarLight_rho,gen_T,geomT,sim_T,TpcRS,nodefault,Rung.%i",ranseed));
-  TString chain3Opt("noInput,useInTracker,StiCA,VFPPVnoCTB,useBTOF4Vtx,BEmcChkStat,btof,fmsdat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt");
+  TString chain3Opt("noInput,useInTracker,StiCA,VFPPVnoCTB,useBTOF4Vtx,BEmcChkStat,btof,fmsdat,Corr4,OSpaceZ2,OGridLeakFull,-hitfilt");
   chain2Opt += ",";
   chain2Opt += geom;
   chain3Opt += ",";

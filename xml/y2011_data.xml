@@ -29,7 +29,7 @@
   set case = `basename $ddir`; echo "case = $case";
   if ($case == "PPV") set fitter = "";
   echo "fitter $fitter"
-#  set tagFile = ${filel}.root          #,Corr4,OSpaceZ2,OGridLeak3D,sdt20110401.060500
+#  set tagFile = ${filel}.root          #,Corr4,OSpaceZ2,OGridLeakFull,sdt20110401.060500
   root4star -q -b 'bfc.C('${f}','${l}',"RC.pp.y2011.VFPPV'${fitter}',StiCA,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./$JOBID.log" />

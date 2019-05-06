@@ -1,9 +1,6 @@
 /*
   root.exe lMuDst.C 'Pico.C+("/gpfs01/star/pwg_tasks/hf05/Pico/BES-I/AuAu27_production_2011/2011/172/12172013/*.picoDst.root","PicoOut.root")'
-  root.exe 'lMuDst.C(0,"/gpfs01/star/pwg_tasks/hf05/Pico/BES-I/AuAu62_productionP10ik/2010/078/11078018/*picoDst.root","PicoOut.root")' Pico.C+
-  root.exe 'lMuDst.C(0,"/net/l404/data/fisyak/Pico/2016/125/17125034/st_physics_17125034_raw_5500079.picoDst.root","ldEdxY2,RpicoDst","PicoOut.root")' Pico.C+
-  root.exe lMuDst.C 'Pico.C+("/star/subsys/tpc/fisyak/reco/2014/50M/SL15StiCAKFV/130/15130037/st_physics_15130037_raw_3000030_5368_5369.MuDst.root")'
-  root.exe Pico1_Sparse_pT100_eta24.NewdX.root doFractionFit.C
+  root.exe  lMuDst.C Pico.C+
   
   PicoDst->Draw("Track->gMom().Phi():Track->gMom().Eta()","Track->isPrimary()&&Track->nHits()>15&&Track->charge()<0","colz")
   gStyle->SetOptStat(0)

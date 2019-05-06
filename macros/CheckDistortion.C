@@ -1,4 +1,4 @@
-void CheckDistortion(const Char_t *opt="Corr4,OSpaceZ2,OGridLeak3D", Int_t date = 20120317, Int_t time = 150000, const Char_t *Out = 0) {
+void CheckDistortion(const Char_t *opt="Corr4,OSpaceZ2,OGridLeakFull", Int_t date = 20120317, Int_t time = 150000, const Char_t *Out = 0) {
   
   if (gClassTable->GetID("StMagUtilities") < 0) {
     gROOT->LoadMacro("bfc.C");
@@ -37,21 +37,21 @@ void CheckDistortion(const Char_t *opt="Corr4,OSpaceZ2,OGridLeak3D", Int_t date 
   Double_t Rmin =  57;
   Double_t Rmax = 192;
   TString Name("ddR");
-  Name += opt; 
+  //  Name += opt; 
   TString Title("Radial Distortion ( cm) versus R and Z at X = 0 for ");
   Title += opt; Title += " and "; Title += magF;
   TH2F *dR    = new TH2F(Name,  Title, nz, zmin, zmax, nr, Rmin, Rmax);
   dR->SetXTitle("Z (cm)");
   dR->SetYTitle("R (cm)");
   Name = "dRPhiY";
-  Name += opt; 
+  //  Name += opt; 
   Title = "R*Phi Distortion ( cm) versus Y and Z at   X = 0 for ";
   Title += opt; Title += " and "; Title += magF;
   TH2F *dRPhiY = new TH2F(Name,Title, nz, zmin, zmax, nr, Rmin, Rmax);
   dRPhiY->SetXTitle("Z (cm)");
   dRPhiY->SetYTitle("Y (cm)");
   Name = "dRPhiX";
-  Name += opt; 
+  //  Name += opt; 
   Title = "R*Phi Distortion ( cm) versus X and Z at   Y = 0 for ";
   Title += opt; Title += " and "; Title += magF;
   TH2F *dRPhiX = new TH2F(Name,Title, nz, zmin, zmax, nr, Rmin, Rmax);
@@ -82,3 +82,32 @@ void CheckDistortion(const Char_t *opt="Corr4,OSpaceZ2,OGridLeak3D", Int_t date 
   }
   fOut->Write();
 }
+/*
+  c1->Clear();
+  c1->Divide(1,3);
+  c1->cd(1); _file0->cd();
+  const Char_t *Name = "ddR";
+  TH2F *h0  = (TH2F*) gDirectory->Get(Name);
+  h0->Draw("colz");
+  c1->cd(2); _file1->cd();
+  TH2F *h1  = (TH2F*) gDirectory->Get(Name);
+  h1->Draw("colz");
+  c1->cd(3);
+  TH2F *d = new TH2F(*h0);
+  d->Add(h1,-1);
+  d->Draw("colz");
+
+  c1->Clear();
+  c1->Divide(1,3);
+  c1->cd(1); _file0->cd();
+  const Char_t *Name = "dRPhiY";
+  TH2F *h0  = (TH2F*) gDirectory->Get(Name);
+  h0->Draw("colz");
+  c1->cd(2); _file1->cd();
+  TH2F *h1  = (TH2F*) gDirectory->Get(Name);
+  h1->Draw("colz");
+  c1->cd(3);
+  TH2F *d = new TH2F(*h0);
+  d->Add(h1,-1);
+  d->Draw("colz");
+ */

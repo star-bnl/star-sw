@@ -50,14 +50,14 @@ void MakeV0(Int_t nevents=1, const Char_t *parn = "StK0s", Int_t RunID = 1)
   RootFile += ".MuDst.root";
   //   TString Chain("AgML,TpcRS,bbcSim,btofsim,pxlFastSim,istSim,emcY2,eefs,TpxClu,y2014a,useXgeom,FieldOn,NoSsdIt"
   // 		",NoSvtIt,StiHftC,Idst,BAna,tpcDB,TpcHitMover,btofMatch,btofCalib,tags,emcY2,IdTruth,gstar"
-  // 		",Corr4,OSpaceZ2,OGridLeak3D"
+  // 		",Corr4,OSpaceZ2,OGridLeakFull"
   // 		",StiCA,beamline,KFVertex,StiHftC,pxlFastSim,ssdfast,useXgeom,VFMCE,noRunco,noHistos,noTags");
   //		",muMc"); 
   TString Chain("MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,VFMCE,noRunco,noHistos,noTags,");
   if ( gClassTable->GetID("TGiant3") >= 0) { // root4star
-    Chain += ",gstarLib,Corr4,OSpaceZ2,OGridLeak3D,useXgeom";
+    Chain += ",gstarLib,Corr4,OSpaceZ2,OGridLeakFull,useXgeom";
   } else {
-    Chain += "vmc,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom"; //VMCAlignment,sdt20160301,
+    Chain += "vmc,CorrX,OSpaceZ2,OGridLeakFull,-useXgeom"; //VMCAlignment,sdt20160301,
   }
   Chain += Form(",rung.%i",RunID);
   chain = bfc(0,Chain.Data(),0,RootFile.Data(),MainFile.Data());

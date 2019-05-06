@@ -24,8 +24,8 @@
   if (-r ${bla}) exit 0;
   touch ${bla}
 # TFG
-#   root.exe -q -b 'bfc.C(200,"P2019,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
-   root.exe -q -b 'bfc.C(200,"P2019,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,","'${evtsFile}'")' &gt;&amp; ${logFile}
+#   root.exe -q -b 'bfc.C(200,"P2019,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+   root.exe -q -b 'bfc.C(200,"P2019,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,","'${evtsFile}'")' &gt;&amp; ${logFile}
    cp  ${filel}* ${SUBMITTINGDIRECTORY}
    rm ${bla}
         </command>

@@ -25,9 +25,9 @@
   set muFile = ${filel}.MuDst.root
   if (-r $muFile) exit 0;
 #  root.exe -q -b -x 'bfc.C('$f','$l',"pp2017,btof,-beamline,BEmcChkStat,StiCA,stipulls,CorrX,OSpaceZ2,OGridLeakFull,-hitfilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
-#  root.exe -q -b -x 'bfc.C('$f','$l',"pp2017,btof,-beamline,BEmcChkStat,StiCA,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
-#  root.exe -q -b -x 'bfc.C('$f','$l',"pp2017,btof,-beamline,BEmcChkStat,StiCA,stipulls,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
-#  root.exe -q -b -x 'bfc.C('$f','$l',"pp2017,btof,-beamline,BEmcChkStat,StiCA,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#  root.exe -q -b -x 'bfc.C('$f','$l',"pp2017,btof,-beamline,BEmcChkStat,StiCA,CorrX,OSpaceZ2,OGridLeakFull,-hitfilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#  root.exe -q -b -x 'bfc.C('$f','$l',"pp2017,btof,-beamline,BEmcChkStat,StiCA,stipulls,CorrX,OSpaceZ2,OGridLeakFull,-hitfilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#  root.exe -q -b -x 'bfc.C('$f','$l',"pp2017,btof,-beamline,BEmcChkStat,StiCA,CorrX,OSpaceZ2,OGridLeakFull,-hitfilt,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
 #  root.exe -q -b -x 'bfc.C(100,"p2017a,btof,-beamline,BEmcChkStat,StiCA,CorrX,OSpaceZ2,OGridLeakFull,-hitfilt,evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
  root.exe -q -b 'TpcRS.C(500,"rc.y2017","'${evtsFile}'","")' &gt;&amp; ${logFile}
         </command>

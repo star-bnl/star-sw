@@ -23,21 +23,21 @@
    setenv StarEndMakerShell
    setenv STARFPE NO
    source ~/bin/SetVersion.csh
-#  root.exe -q -b 'bfc.C(1000,"P2018,useCDV,Tpx,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX,dEdxCalib","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
-#  root.exe -q -b 'bfc.C(10000,"P2018,useCDV,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'")' &gt;&amp; ${logFile}
-#  root.exe -q -b 'bfc.C(1000,"P2018,useCDV,Tpx,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
-#  root.exe -q -b 'bfc.C(10000,"P2018,WestOff,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'")' &gt;&amp; ${logFile}
-#  root.exe -q -b 'bfc.C(10000,"P2018,EastOff,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
-#  root.exe -q -b 'bfc.C(10000,"P2018,EastOff,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
-#  root.exe -q -b 'bfc.C(10000,"P2018,WestOff,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
-#  root.exe -q -b 'bfc.C(10000,"P2018,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
-#  root.exe -q -b 'bfc.C(200,"P2018a,-hitfilt,iTpcIT,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
-#  root.exe -q -b 'bfc.C(200,"P2018a,-hitfilt,iTpcIT,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,evout,-picoWrite,-picoDst","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(1000,"P2018,useCDV,Tpx,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX,dEdxCalib","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(10000,"P2018,useCDV,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(1000,"P2018,useCDV,Tpx,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(10000,"P2018,WestOff,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(10000,"P2018,EastOff,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(10000,"P2018,EastOff,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(10000,"P2018,WestOff,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(10000,"P2018,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(200,"P2018a,-hitfilt,iTpcIT,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(200,"P2018a,-hitfilt,iTpcIT,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,evout,-picoWrite,-picoDst","'${evtsFile}'")' &gt;&amp; ${logFile}
 # SL18h
-#  root4star -q -b 'bfc.C(200,"P2018a,VmcPassive,-hitfilt,iTpcIT,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,evout,-picoWrite,-picoDst","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root4star -q -b 'bfc.C(200,"P2018a,VmcPassive,-hitfilt,iTpcIT,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,evout,-picoWrite,-picoDst","'${evtsFile}'")' &gt;&amp; ${logFile}
 # TFG
-#  root.exe -q -b 'bfc.C(200,"P2018a,-hitfilt,iTpcIT,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,evout,-picoWrite,-picoDst","'${evtsFile}'")' &gt;&amp; ${logFile}
-  root.exe -q -b 'bfc.C(200,"P2018a,-hitfilt,iTpcIT,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,evout,PicoVtxDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(200,"P2018a,-hitfilt,iTpcIT,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,evout,-picoWrite,-picoDst","'${evtsFile}'")' &gt;&amp; ${logFile}
+  root.exe -q -b 'bfc.C(200,"P2018a,-hitfilt,iTpcIT,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,evout,PicoVtxDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />

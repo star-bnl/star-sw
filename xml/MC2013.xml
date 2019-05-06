@@ -24,7 +24,7 @@
   echo $case | grep KF
   if (! $?) set fitter = ",KFVertex,StiCA";
   echo $case | grep NoExB
-  if ( $? ) set fitter = ${fitter}",Corr4,OSpaceZ2,OGridLeak3D";
+  if ( $? ) set fitter = ${fitter}",Corr4,OSpaceZ2,OGridLeakFull";
   echo "fitter $fitter"
   setenv STARFPE NO
   setenv NODEBUG yes
@@ -41,7 +41,7 @@
     starver DEV2/SL15
   endif
   set tagFile = ${filel}.root
-#  root4star -q -b 'bfc.C(9999,"in'${fitter}',pp2013a,mtd,btof,fmsDat,fgt,fgtPoint,BEmcChkStat,beamline,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeak3D,Tree,ReadAll","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+#  root4star -q -b 'bfc.C(9999,"in'${fitter}',pp2013a,mtd,btof,fmsDat,fgt,fgtPoint,BEmcChkStat,beamline,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeakFull,Tree,ReadAll","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
   root4star -q -b 'bfc.C(9999,"in'${fitter}',pp2013a,emcY2,mtd,btof,fgt,fgtPoint,BEmcChkStat,beamline,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Tree,ReadAll","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
   endif
         </command>

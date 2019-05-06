@@ -17,7 +17,7 @@
     set evtsFile = $INPUTFILE0;
     set f        = 1
     set l        = 5000000
-    set chain    = "DbV20150316 P2014a pxlHit istHit btof mtd mtdCalib BEmcChkStat CorrX OSpaceZ2 OGridLeak3D -hitfilt";
+    set chain    = "DbV20150316 P2014a pxlHit istHit btof mtd mtdCalib BEmcChkStat CorrX OSpaceZ2 OGridLeakFull -hitfilt";
   endif
   echo "${evtsFile}"
   set filel    = `basename $evtsFile .daq`_${f}_${l}
@@ -27,7 +27,7 @@
   if ( -r $logFile) exit 0;
   set muFile = ${filel}.MuDst.root
   if (-r $muFile) exit 0;
-# P15ic "DbV20150316 P2014a pxlHit istHit btof mtd mtdCalib BEmcChkStat CorrX OSpaceZ2 OGridLeak3D -hitfilt"
+# P15ic "DbV20150316 P2014a pxlHit istHit btof mtd mtdCalib BEmcChkStat CorrX OSpaceZ2 OGridLeakFull -hitfilt"
   root4star -q -b 'bfc.C('$f','$l',"'${chain}'","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./da2014$JOBID.log" />
