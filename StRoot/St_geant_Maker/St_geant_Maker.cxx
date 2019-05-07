@@ -2367,6 +2367,13 @@ Bool_t St_geant_Maker::GeometryVersion() {
 //_____________________________________________________________________________
 Int_t St_geant_Maker::SetDatimeFromMuDst() {
   KinematicsFromMuDst(1);
+  if (! StarMagField::Instance()) {
+    double fScale = 1;
+    if (*SAttr("magFactor")) {fScale = DAttr("magFactor");}
+    else                     {fScale = St_MagFactorC::instance()->ScaleFactor();}
+    if (fabs(fScale) < 1e-3) fScale = 1e-3;
+    new StarMagField(StarMagField::kMapped, fScale);
+  }
   return kStOK;
 }
 //_____________________________________________________________________________
