@@ -817,7 +817,7 @@ void Draw() {
   TString lineC("");
   ofstream out;
   ofstream outC;
-  TString Out("Results.IO_");
+  TString Out("Results.W2S_");
   Out += gSystem->BaseName(gDirectory->GetName());
   Out.ReplaceAll(".root","");
   Out.ReplaceAll("*","");

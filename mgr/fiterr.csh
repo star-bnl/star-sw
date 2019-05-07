@@ -124,7 +124,7 @@ EOF
 set myerr = $status
 echo '*** STI Ended *** Status=' $myerr
 echo '*** STI Ended *** Iter=' $iter >> sti.log
-if ($myerr) goto STIERR
+#if ($myerr) goto STIERR
 
 FIT:
 echo '*** FitErr Started *** Iter=' $iter

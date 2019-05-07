@@ -23,6 +23,7 @@
 #include "TInterpreter.h"
 #include "TPolinom.h"
 #include "THelixTrack.h"
+#include "tables/St_HitError_Table.h"
 #include <vector>
 //#endif
 #define SQ(X) ((X)*(X))
@@ -1062,7 +1063,10 @@ void DbInit()
      ready = 2006;
    } else {
     newdat = (TTable *)gInterpreter->Calc("new St_HitError(\"someHitError\",1)"); 
-    newdat->SetUsedRows(1);
+    HitError_st row;
+    memset(&row,0,newdat->GetRowSize());
+    newdat->AddAt(&row);
+    //    newdat->SetUsedRows(1);
    }
    assert(newdat);
    dbTab[idb] = newdat;

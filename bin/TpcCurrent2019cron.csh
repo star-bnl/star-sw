@@ -1,6 +1,6 @@
 #! /bin/tcsh -f
 cd /net/l404/data/fisyak/Tpc/Current/2019 
-root.exe -b -q lmysql.C 'MakeTpcAvgPowerSupply.C+(2019)' > & MakeTpcAvgPowerSupply.`date +%m%d%y`.log
+root.exe -b -q lmysql.C 'MakeTpcAvgPowerSupply.C+(2019)' > & MakeTpcAvgPowerSupply.`date +%m%d%y:%H%M`.log
 if ($?) exit 1;
 #rsync -avz -h                        \
 #    --include='*.root'                  \

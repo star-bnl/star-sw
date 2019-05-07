@@ -46,7 +46,9 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     ChainOpt+= ",useInTracker";
     ChainOpt += ",McTpcAna,";
   } else if ( RunOpt.Contains("RC.y",TString::kIgnoreCase) ||
-	      RunOpt.Contains("MC.y",TString::kIgnoreCase)) {
+	      RunOpt.Contains("MC.y",TString::kIgnoreCase) ||
+              RunOpt.Contains("RC20",TString::kIgnoreCase) ||
+	      RunOpt.Contains("MC20",TString::kIgnoreCase) ) {
     ChainOpt = RunOpt;
     ChainOpt += ",MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2";
     //  ChainOpt += "Corr4";// no dynamical distortion ! ,OSpaceZ2,OGridLeakFull,"; // check that StTpcRSMaker::kDistortion bit is set
