@@ -49,10 +49,13 @@ public:
   void Print(Option_t *option="") const {std::cout << option << *this << std::endl; }
   void PrintW(Option_t *option="") const;
   void SetMc();
-  Float_t   TimeMc()   const {return fTimeMc;}
+  Float_t   TimeMc()         const {return fTimeMc;}
+  void      SaveVxyz() {fVxyz = TVector3(GetX(), GetY(), GetZ());}
+  TVector3  GetDiff()        const {return TVector3(GetX(), GetY(), GetZ()) - fVxyz;}
   const TVector3 &XyzMc()    const {return *&fXyzMc;}
-  Int_t     NoDaughtersMc() const {return fNoDaughtersMc;}
-  Int_t     gePidMc()  const {return fgePidMc;}
+  const TVector3 &Vxyz()     const {return *&fVxyz;}
+  Int_t     NoDaughtersMc()  const {return fNoDaughtersMc;}
+  Int_t     gePidMc()        const {return fgePidMc;}
   Double_t  Chi2AtVx();
   static void      SetDebug(Int_t k = 0) {_debug = k;}
   static Int_t     Debug() {return _debug;}
@@ -62,6 +65,7 @@ private:
   TList     fKFTracks;
   Float_t   fTimeMc;
   TVector3  fXyzMc;
+  TVector3  fVxyz;
   Int_t     fNoDaughtersMc;
   Int_t     fgePidMc;
   static Int_t fTotalNoVertices;

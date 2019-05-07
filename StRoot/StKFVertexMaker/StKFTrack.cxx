@@ -66,7 +66,7 @@ void StKFTrack::ResetParticle() {
   if (fW <= 0.0 || fWeight <= 0) return;
 #if 1
   Double_t T = StAnneling::Temperature();
-  Float_t scale = T*T;
+  Float_t scale = T;
 #if 0
   if (T > 1.0) {
     if (fW > 100*T)  scale = T/fW;

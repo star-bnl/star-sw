@@ -192,9 +192,11 @@ void StKFVerticesCollection::MergeDuplicatedVertices() {
 }
 //________________________________________________________________________________
 Double_t StKFVerticesCollection::UpdateWeights() {
+#if 0
   if (StKFVertex::Debug()) {
     cout << "StKFVerticesCollection::UpdateWeights\t" << *this << endl;
   }
+#endif
   std::multimap<const KFParticle*,Map_t> Particle2Track;
   std::pair< std::multimap<const KFParticle*,Map_t>::iterator, std::multimap<const KFParticle*,Map_t>::iterator> ret;
   std::multimap<const KFParticle*,Map_t>::iterator it;
@@ -429,6 +431,14 @@ Int_t StKFVerticesCollection::NoVertices() const {
     N++;
   }
   return N;
+}
+//________________________________________________________________________________
+void StKFVerticesCollection::SaveVxyz()  {
+  TIter next(&fVertices);
+  StKFVertex *V;
+  while ((V = (StKFVertex *)  next())) {
+    V->SaveVxyz();
+  }
 }
 //________________________________________________________________________________
 // $Log: StKFVerticesCollection.cxx,v $

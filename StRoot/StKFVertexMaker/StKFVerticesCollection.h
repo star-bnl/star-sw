@@ -33,6 +33,7 @@ public:
   void      SetParents(Int_t *parents) const;
   virtual void Print(const Option_t*  opt = "") const  {if (opt) {};  std::cout << *this;}
   static  void SetVxPenaltyFactor(Double_t chi2 = 1000) {fgVxPenaltyFactor = chi2;}
+  void    SaveVxyz();
  private:
   TList fVertices;
   static Double_t fgVxPenaltyFactor;

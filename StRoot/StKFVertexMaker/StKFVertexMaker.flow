@@ -14,7 +14,7 @@ StKFVertexMaker::Make
 	Fit()
 		  PrimaryVertices(); 
 			For 2 passes {
-				PrimaryVertexSeeds();
+				PrimaryVertexSeeds(parents);
 				fgcVertices->DoTrack2VertexAssociation
                                                                     for each vtx {
                                                                          for each track k {
@@ -27,6 +27,7 @@ StKFVertexMaker::Make
                                                                       UpdateWeights
 				AnnelingFcn(TMath::Exp(-TempLog))
 					 fgcVertices->Fit();
+
                                                                                                 MergeDuplicatedVertices
 						for each vertex vtx
 							vtx->CheckBeamConstraint();

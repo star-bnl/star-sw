@@ -49,6 +49,9 @@ ostream&  operator<<(ostream& os,  const StKFVertex& v) {
 	       v.NoDaughtersMc(),(v.GetPDG()) ? TDatabasePDG::Instance()->GetParticle(v.GetPDG())->GetName() : 
 	       StKFVertex::StKFVertex::GeNames[v.gePidMc()]);
   }
+  if (v.Vxyz().Mag() > 1e-4) {
+    os << Form(" Dif %6.4f", v.GetDiff().Mag());
+  }
   return os;
 }
 //________________________________________________________________________________
@@ -114,12 +117,12 @@ Bool_t StKFVertex::Fit() {
   temp.SetVtxGuess(X(),Y(),Z());
   //  PrPP(Fit before,temp);
   temp.ConstructPrimaryVertex((const KFParticle **) particles, N, 
-				  (Bool_t*) Flag.GetArray(),TMath::Sqrt(StAnneling::Chi2Cut()/2));
+				  (Bool_t*) Flag.GetArray(),StAnneling::Chi2Cut());
   //  PrPP(Fit after Fit,temp);
   SetVtxGuess(temp.X(),temp.Y(),temp.Z());
 #endif
   ConstructPrimaryVertex((const KFParticle **) particles, N, 
-				  (Bool_t*) Flag.GetArray(),TMath::Sqrt(StAnneling::Chi2Cut()/2));
+				  (Bool_t*) Flag.GetArray(),StAnneling::Chi2Cut());
 
   PrPP(Fit after,Vertex());
   //Check Covariance Matrix
@@ -335,10 +338,10 @@ Double_t StKFVertex::Chi2AtVx() {
       T*TMath::Log( 1.                     + TMath::Exp(chi2C/(2*T)));
 #else
     //    Double_t dChi2 =  chi2/2 + TMath::Log(track.Weight() + StAnneling::Weight());
-    Double_t dChi2 = chi2/2  - T*TMath::Log(
-					    (TMath::Exp(-chi2/(2)) + TMath::Exp(-chi2C/(2*T)))/
-					    (                   1. + TMath::Exp(-chi2C/(2*T)))
-					    );
+    Double_t dChi2 = 2*T*(chi2/2  - TMath::Log(
+					       (TMath::Exp(-chi2/(2)) + TMath::Exp(-chi2C/(2*T)))/
+					       (                   1. + TMath::Exp(-chi2C/(2*T)))
+					       ));
 #endif
     chi2Vx += dChi2;
   }
