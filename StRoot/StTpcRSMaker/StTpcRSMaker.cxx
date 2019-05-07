@@ -719,7 +719,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
       Int_t ID = 0;
       Int_t TrackDirection = 0; // 0 - increase no of row, 1 - decrease no of. row.
       for (nSegHits = 0, sIndex = sortedIndex;  
-	   sIndex < no_tpc_hits && nSegHits < NoMaxTrackSegmentHits - 1; sIndex++) {
+	   sIndex < no_tpc_hits && nSegHits < NoMaxTrackSegmentHits; sIndex++) {
 	indx = sorter.GetIndex(sIndex);
 	g2t_tpc_hit_st *tpc_hitC = tpc_hit_begin + indx;
 	if ((tpc_hitC->volume_id%10000)/100 != sector) break;
@@ -746,6 +746,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
  	if (TrackSegmentHits[nSegHits].Pad.timeBucket() < 0 || TrackSegmentHits[nSegHits].Pad.timeBucket() > NoOfTimeBins) continue;
 	nSegHits++;
       }
+      if (nSegHits == NoMaxTrackSegmentHits) sIndex--; // Irakli 05/06/19, reduce extra step in for loop
       if (! nSegHits) continue;
       if (Debug() >= 10) {
 	PrPP(Make,nSegHits);
