@@ -12,6 +12,9 @@ class StvKonst_st;
 class StvHitCounter
 { 
 public:
+enum {kContNitsTooBig=1,kTotlNitsTooBig=2
+     ,kGoodHitsTooSml=3,kTotlHitsTooSml=4};
+public:
 StvHitCounter();
 void Clear()		{memset(mBeg,0,mMed-mBeg+1);}
 void SetCons(const StvKonst_st*);

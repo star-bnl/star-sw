@@ -60,23 +60,19 @@ int StvHitCounter::AddNit()
 int StvHitCounter::Reject() const
 {
 /// Do we need to drop the track?
-  int rej = 0;
   int nG = (nContHits>=mMinContHits)? nGoodHits+nContHits : nGoodHits;
-  if (nG       <mMinGoodHits) rej+=1;
-  if (nTotHits <mMinTotHits ) rej+=2;
-//if (nTotNits+nContNits> mMaxTotNits) rej+=4;
-
-  return rej;
+  if (nG       <mMinGoodHits) return kGoodHitsTooSml;
+  if (nTotHits <mMinTotHits ) return kTotlHitsTooSml;
+  return 0;
 }
 //_____________________________________________________________________________
 int StvHitCounter::Skip() const
 {
 /// Do we need to skip the rest of track, it is allready too bad?
 
-  int rej = 0;
-  if (nContNits>mMaxContNits) rej+= 1;
-  if (nTotNits > mMaxTotNits) rej+= 2;
-  return rej ;
+  if (nContNits>mMaxContNits) return kContNitsTooBig;
+  if (nTotNits > mMaxTotNits) return kTotlNitsTooBig;;
+  return 0 ;
 }
 //_____________________________________________________________________________
 double StvHitCounter::Eff() const

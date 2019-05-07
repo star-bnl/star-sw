@@ -119,6 +119,8 @@ enum {kRepeatSeedFinder = 2};
         }
         nHits = mCurrTrak->GetNHits();
         fail = 6; if (nHits<mKons->mMinHits) 	break;
+if (mCurrTrak->GetXi2()<33) StvDebug::Count("Xi2Trk",mCurrTrak->GetXi2());
+
       } while((fail=0));		
       
       if (fail) 	{//Track is failed, release hits & continue
@@ -163,7 +165,7 @@ static StvFitter  *fitt= StvFitter::Inst();
 const StvHit *prevHit = 0;
 StvNodePars par[2];
 StvFitErrs  err[2];
-int mySkip=0,idive = 0,nNode=0,nHits=0,nTotHits=0;
+int skip=0,idive = 0,nNode=0,nHits=0,nTotHits=0;
 double totLen=0;
 StvNode *curNode=0,*preNode=0,*innNode=0,*outNode=0;
 const StHitPlane *prevHitPlane=0;
@@ -212,19 +214,19 @@ const StHitPlane *prevHitPlane=0;
     nTally++;
     idive = mDive->Dive();
 //+++++++++++++++++++++++++++++++++++++
-
+    skip = 0;
     double deltaL = mDive->GetLength();
     totLen+=deltaL;
     par[0]=par[1]; err[0]=err[1];			//pars again in par[0]
-    if (idive & StvDiver::kDiveBreak) 		break;
-    if (idive & StvDiver::kDiveDca  ) 		break;
+    if (idive & StvDiver::kDiveBreak) 		{skip = 11;	break;}
+    if (idive & StvDiver::kDiveDca  ) 		{skip = 12;	break;}
 		// Stop tracking when too big Z or Rxy
-    if (fabs(par[0].getZ()) > mKons->mZMax  ) 	break;
-    if (par[0].getRxy()     > mKons->mRxyMax) 	break;
-    if (fabs(par[0].getCurv())>mKons->mMaxCurv)	break;	
-    if (fabs(par[0].getPtin())>mKons->mMaxPti)	break;	
+    if (fabs(par[0].getZ()) > mKons->mZMax  ) 	{skip = 13;	break;}
+    if (par[0].getRxy()     > mKons->mRxyMax) 	{skip = 13;	break;}
+    if (fabs(par[0].getCurv())>mKons->mMaxCurv)	{skip = 14;	break;}	
+    if (fabs(par[0].getPtin())>mKons->mMaxPti)	{skip = 15;	break;}	
 double s=0;
-assert((s=TCLx::sign(err[0],5))>0);
+//??assert((s=TCLx::sign(err[0],5))>0);
     		
     const StvHits *localHits = 0; 
     if (idive & StvDiver::kDiveHits) {
@@ -269,8 +271,8 @@ assert((s=TCLx::sign(err[0],5))>0);
     
     if (!localHits)	 continue;	//Never hits in curNode 
     if (!localHits->size()) {//No hits in curNode
-      mySkip = mHitCounter->AddNit();
-      if (mySkip) break;
+      skip = mHitCounter->AddNit();
+      if (skip) break;
       continue;
     } 
     if (prevHitPlane == mHitter->GetHitPlane()) continue;
@@ -289,7 +291,7 @@ assert((s=TCLx::sign(err[0],5))>0);
 
 
       if (nTotHits > mKons->mMinHits && fitt->IsFailed() == -99) { // Too big track errs
-         mySkip = 4; break;	//Track Errors too big, stop tracking
+         skip = 16; break;	//Track Errors too big, stop tracking
       }
       if (myXi2 > minXi2[1]) continue;
       if (myXi2 < minXi2[0]) {
@@ -301,7 +303,6 @@ assert((s=TCLx::sign(err[0],5))>0);
     }
     if (minIdx){};
 
-    if (mySkip) break; 		//Track Errors too big
     curNode->SetMem(minHit ,minXi2);
     if (minHit[0] ) 		{	// Fit succesful
       assert(minHit[0] != prevHit); 
@@ -333,23 +334,22 @@ static int myDebug = 0;
       } else { minHit[0]=0;}
     } else 		{//No Hit or ignored
       myXi2 = 1e11;
-      mySkip = mHitCounter->AddNit(); 
+      skip = mHitCounter->AddNit(); 
     }
     curNode->SetHit(minHit[0]); 
     curNode->SetXi2(myXi2,0);
 assert(vsuma(curNode->GetFE(0).TkDir()[0],3*3)>0.1);
 
-    if (mySkip) break;
   } while((idive & StvDiver::kDiveHits) || idive==0); // End Dive&Fitter loop 
 
-  mCurrTrak->SetTypeEnd(mySkip);
+  mCurrTrak->SetTypeEnd(skip);
   if (!idir) {
     double eff = mHitCounter->Eff(); if (eff){}
     int myReject = mHitCounter->Reject();
-    if (myReject) {
-
-     mCurrTrak->CutTail(); return 0; }
+if(myReject) StvDebug::Count("EndTrk",myReject);
+    if (myReject) { mCurrTrak->CutTail(); return 0; }
   }
+if (skip && !idir) StvDebug::Count("EndTrk",skip);
 
 
   if (nHits>3) {
