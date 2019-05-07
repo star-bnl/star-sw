@@ -25,12 +25,13 @@ const StvNodePars *myOutPars = 0;//?????????????????????????????
 const StvFitErrs  *myOutErrs = 0;//?????????????????????????????
 const StvFitDers  *myOutDeri = 0;//?????????????????????????????
 const TRungeKutta *myHelix   = 0;//?????????????????????????????
+const StvMCStepping *mySteps = 0;//?????????????????????????????
 
 
 enum DiverCons { kNearBeam=1 };
 int gCharge=0;
 
-
+int EditTGeo();
 //_____________________________________________________________________________
 class MyRandom : public TRandom 
 {
@@ -102,6 +103,7 @@ int StvDiver::Init()
 	                             ,"pType", 0., 0, 1, 0, 1, 1, 1, 0, 1, 1);
   TVirtualMC::GetMC()->DefineParticle(-gMyPiPdg,"MyPi-",kPTHadron,gMyPiMass,-1,1e+10
 	                             ,"pType", 0., 0, 1, 0, 1, 1, 1, 0, 1, 1);
+  
   return 0;
 }
 //_____________________________________________________________________________
@@ -209,7 +211,7 @@ void StvDiver::Set(const StvNodePars *inpar,const StvFitErrs *inerr,int idir)
 
 myInpPars = mInpPars;//?????????????????????????????
 myInpErrs = mInpErrs;//?????????????????????????????
-
+mySteps   = mSteps;
 }
 //_____________________________________________________________________________
 void StvDiver::Set(StvNodePars *otpar,StvFitErrs *oterr,StvFitDers *deriv)
@@ -283,13 +285,15 @@ int  StvMCInitApp::Fun()
   app->SetDebug(0);
   myMC->SetStack(new StMCStack(1));
   myMC->Init();
-  myMC->BuildPhysics(); 
+//  myMC->BuildPhysics(); 
   ((TGeant3*)myMC)->SetDEBU(0,0,0); 
   ((TGeant3*)myMC)->SetMaxNStep(-1000);
 
-  Gcphys_t* gcphys = ((TGeant3*)myMC)->Gcphys(); if (gcphys){}
-
+//Gcphys_t* gcphys = ((TGeant3*)myMC)->Gcphys(); if (gcphys){}
+  float &cuthad  = ((TGeant3*)myMC)->Gccuts()->cuthad; 
   Info("Init","switch off physics");
+  printf("CUTHAD0 = %g\n",cuthad );
+
   myMC->SetProcess("DCAY", 0);
   myMC->SetProcess("ANNI", 0);
   myMC->SetProcess("BREM", 0);
@@ -307,7 +311,7 @@ int  StvMCInitApp::Fun()
   myMC->SetProcess("STRA", 0);
   myMC->SetCut("CUTGAM",	1e-3  );
   myMC->SetCut("CUTELE", 	1e-3  );
-  myMC->SetCut("CUTHAD", 	.050  );
+  myMC->SetCut("CUTHAD", 	.001  );
   myMC->SetCut("CUTNEU", 	.001  );
   myMC->SetCut("CUTMUO", 	.001  );
   myMC->SetCut("BCUTE", 	.001  );
@@ -316,6 +320,12 @@ int  StvMCInitApp::Fun()
   myMC->SetCut("DCUTM", 	.001  );
   myMC->SetCut("PPCUTM", 	.001  );
   myMC->SetCut("TOFMAX", 	50.e-6);
+  printf("CUTHAD1 = %g\n",cuthad );
+
+  EditTGeo();
+
+  myMC->BuildPhysics(); 
+  printf("CUTHAD2 = %g\n",cuthad );
 
   return 0;
 }
@@ -677,6 +687,32 @@ const double *StvMCField::GetMag(const double *x,double *b)
    FunDD(x,b);
    return mH;   
 }
+#include "TList.h"
+#include "TGeant3.h"
+//_____________________________________________________________________________
+int EditTGeo()
+{
+  auto *tMC = (TGeant3*)TVirtualMC::GetMC();
+
+  auto *myList = gGeoManager->GetListOfMedia();
+  auto *iter = myList->MakeIterator(); 
+  int n = 0;
+  while (TGeoMedium *med=(TGeoMedium*)iter->Next()) 
+  {
+    n++;
+//    int imed = tMC->MediumId(med->GetName());
+    int itmed = med->GetId();
+    printf("@@@@ %d %d - %s\n",n,itmed,med->GetName());
+    tMC->Gstpar(itmed,"CUTHAD", 0.01);
+
+  } 
+
+
+  return 0;
+}
+//    virtual  void  Gstpar(Int_t itmed, const char *param, Double_t parval);
+//   Int_t MediumId(const Text_t *name) const;
+
 #if 0
 //_____________________________________________________________________________
 double StvMCField::GetHz(const double *x) 
