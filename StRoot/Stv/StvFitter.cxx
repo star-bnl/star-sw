@@ -429,7 +429,7 @@ double TCLx::sign(const double *a,int n)
    int ipiv, kpiv, i__, j;
    double r__, dc;
    int id, kd;
-   double sum;
+   long double sum;
 
 
    /* CERN PROGLIB# F112    TRCHLU          .VERSION KERNFOR  4.16  870601 */
@@ -533,8 +533,8 @@ double JoinTwo(int nP1,const double *P1,const double *E1
 {
 static int nCall = 0;  nCall++;
 double s=0;
-assert((s=TCLx::sign(E1,nP1))>0);
-assert((s=TCLx::sign(E2,nP2))>0);
+//??assert((s=TCLx::sign(E1,nP1))>0);
+//??assert((s=TCLx::sign(E2,nP2))>0);
   assert(nP1<=nP2);
   int nE1 = nP1*(nP1+1)/2;
   int nE2 = nP2*(nP2+1)/2;
@@ -572,7 +572,7 @@ SWITCHa:  switch(kase) {
 //		Evaluate output error matrix
   TCL::trqsq(E2,E1aE2i,EJ,nP2);		// E2*(E1+E2)**(-1)*E2
   TCL::vsub (E2    ,EJ,EJ,nE2);         // E2 - E2*(E1+E2)**(-1)*E2
-assert((s=TCLx::sign(EJ,nP2))>0);
+//??assert((s=TCLx::sign(EJ,nP2))>0);
   return Xi2;
 }
 //______________________________________________________________________________
@@ -728,6 +728,7 @@ double StvFitter::Xi2(const StvHit *hit)
   double *tD = mTkPars._d;
 //		Distance to DCA along track in xy
   mDeltaL = DDOT(hP,tP,tD);  
+StvDebug::Count("DeltaL",mDeltaL);
 #endif  
 
 
@@ -767,6 +768,8 @@ double StvFitter::Xi2(const StvHit *hit)
   mDcaT=VDOT(mDcaFrame[0],dca);
   mDcaP=VDOT(mDcaFrame[1],dca);
   mDcaL=VDOT(mDcaFrame[2],dca);
+StvDebug::Count("DcaT",mDcaT);
+
 //		small account non zero distance to hit along track
 
 #if 1
@@ -851,6 +854,13 @@ int StvFitter::Hpdate()
   double myXi2 = JoinTwo(2,myHitPars, myHitErrs
                         ,5,myTrkPars, mTkErrs
 		        ,  mQQPars  ,*mOtErrs);
+
+  double dFita = mQQPars.mFita;
+  double dLama = mQQPars.mLama;
+StvDebug::Count("dFita",dFita);
+StvDebug::Count("dLama",dLama);
+
+
 
 //////  assert(mXi2>myXi2);
   assert(myXi2<kXtraBigXi2); 
