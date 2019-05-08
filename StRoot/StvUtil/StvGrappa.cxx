@@ -259,7 +259,8 @@ double StvGrappa::Dist2(const StvTrack *tk,const float *xhit) const
   
   THelix3d helx(iq,pos,mom,mag);
   double s = helx.Path(hit,xyz);
-  if (fabs(s)>1e3) return 1e11;
+  if (fabs(s)>1e3) return 0;
+//  if (fabs(s)>1e3) return 1e11;
   double dist2 = (TVector3(xyz)-TVector3(hit)).Mag2();
   return dist2;
 }
@@ -319,12 +320,31 @@ enum { kKEEP = 3};
 //______________________________________________________________________________
 void StvGrappa::MakeLims(const StvTrack *tk,double xMiMax[2][3]) const
 {
-  enum {k60 = 50};
+  enum {k60 = 50,kCorrida=40};
   double Rmax=9,Rmin=1e11;
   for (int i=0;i<3;i++) {
     xMiMax[0][i] = 1e11;    
     xMiMax[1][i] =-1e11;
   }
+
+  auto* node = tk->GetNode(StvTrack::kFirstPoint);
+  assert(node);
+  auto &par = node->GetFP(0);
+  int iq = par.getCharge();
+  const double *pos = par.pos();
+  double mom[3];
+  par.getMom(mom);
+  const double *mag = par.mag();
+  
+  THelix3d helx(iq,pos,mom,mag);
+  double len00 = helx.Path(0.,0.);
+  double x00[3];
+  helx.Eval(len00,x00);
+  for (int i=0;i<3;i++) {
+    if (xMiMax[0][i]>x00[i]-kCorrida)  xMiMax[0][i]=x00[i]-kCorrida;  
+    if (xMiMax[1][i]<x00[i]+kCorrida)  xMiMax[1][i]=x00[i]+kCorrida;
+  }
+
   for (StvNodeConstIter it=tk->begin();it!=tk->end();++it) {
     const StvNode *node = (*it);
     const double *x = node->GetFP().pos();
@@ -336,11 +356,7 @@ void StvGrappa::MakeLims(const StvTrack *tk,double xMiMax[2][3]) const
       if (xMiMax[1][i]<x[i])  xMiMax[1][i]=x[i];
     }
   }
-  for (int i=0;i<3;i++) {
-    double range = xMiMax[1][i]-xMiMax[0][i];
-    xMiMax[0][i] -= range*0.8;
-    xMiMax[1][i] += range*0.8;
-  }
+
   Rmin = sqrt(Rmin); Rmax = sqrt(Rmax);
   
 
@@ -368,7 +384,7 @@ void StvGrappa::MakeLims(const StvHits *tk,double xMiMax[2][3]) const
 //______________________________________________________________________________
 void StvGrappa::Zhow(const StvTrack *tk)
 {
-enum {kCorrida=20};
+enum {kCorrida=40};
   Clear();
   mState = 1;
   int qua=0;
