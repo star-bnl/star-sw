@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.60.2.2 2018/05/11 17:37:48 perev Exp $
+// $Id: StvMaker.cxx,v 1.60.2.3 2019/05/08 01:18:23 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -276,8 +276,6 @@ static int initialized = 0;
 // 		Geometry via DBMaker
   TDataSet *myGeo = GetDataBase("VmcGeometry"); if (myGeo){};
   assert (gGeoManager);
-
-
   StTGeoProxy *tgh = StTGeoProxy::Inst();
   if (*SAttr("HitLoadOpt")) tgh->SetOpt(IAttr("HitLoadOpt"));
 
@@ -394,9 +392,6 @@ static int initialized = 0;
     mVertexFinder[reg]= 0;
   } while(0);
 
-//tgh->ls();///????????????????????????????????????/
-//tgh->Print();///?????????????????????????????
-  
   InitPulls();
 
   new StvFitter();

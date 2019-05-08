@@ -43,7 +43,7 @@ class StvMaker : public StMaker
             int TestGlobalTracks() const;
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StvMaker.h,v 1.8.2.1 2017/12/02 00:40:36 perev Exp $ built " __DATE__ " " __TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StvMaker.h,v 1.8.2.2 2019/05/08 01:18:07 perev Exp $ built " __DATE__ " " __TIME__; return cvs;}	
 
 
 
