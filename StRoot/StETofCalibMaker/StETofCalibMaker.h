@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StETofCalibMaker.h,v 1.3 2019/03/25 01:09:17 fseck Exp $
+ * $Id: StETofCalibMaker.h,v 1.4 2019/05/08 23:57:09 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofCalibMaker.h,v $
+ * Revision 1.4  2019/05/08 23:57:09  fseck
+ * added function to set the reference pulser
+ *
  * Revision 1.3  2019/03/25 01:09:17  fseck
  * added first version of pulser correction procedure
  *
@@ -74,6 +77,7 @@ public:
     void setFileNameResetTimeCorr(   const char* fileName );
 
     void setDebug( const bool debug );
+    void setReferencePulserIndex( const int index );
 
 
 private:
@@ -129,6 +133,7 @@ private:
     Double_t      mResetTime;               // reset time in ns 
 
     Float_t       mPulserPeakTime;          // pulser peak time relative to the trigger time in ns
+    Int_t         mReferencePulserIndex;
 
     std::map< UInt_t, std::pair< Float_t, Float_t > >  mTimingWindow;    // timing window for each AFCK
     std::map< UInt_t, std::pair< Float_t, Float_t > >  mPulserWindow;    // pulser window for each AFCK
@@ -160,5 +165,6 @@ inline void StETofCalibMaker::setFileNameCalibHistograms( const char* fileName )
 inline double StETofCalibMaker::resetTimeCorr() const { return mResetTimeCorr; }
 
 inline void StETofCalibMaker::setDebug( const bool debug ) { mDebug = debug; }
+inline void StETofCalibMaker::setReferencePulserIndex( const int index ) { mReferencePulserIndex = index; }
 
 #endif // STETOFCALIBMAKER_H
