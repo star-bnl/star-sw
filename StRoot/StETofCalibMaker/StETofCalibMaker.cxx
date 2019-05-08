@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StETofCalibMaker.cxx,v 1.3 2019/03/25 01:09:46 fseck Exp $
+ * $Id: StETofCalibMaker.cxx,v 1.4 2019/05/08 23:56:44 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofCalibMaker.cxx,v $
+ * Revision 1.4  2019/05/08 23:56:44  fseck
+ * change of default value for reference pulser
+ *
  * Revision 1.3  2019/03/25 01:09:46  fseck
  * added first version of pulser correction procedure + fix in reading parameters from db
  *
@@ -85,6 +88,7 @@ StETofCalibMaker::StETofCalibMaker( const char* name )
   mTriggerTime( 0. ),
   mResetTime( 0. ),
   mPulserPeakTime( 0. ),
+  mReferencePulserIndex( 13212 ),
   mDebug( false )
 {
     /// default constructor
@@ -560,14 +564,13 @@ StETofCalibMaker::InitRun( Int_t runnumber )
 
         if( !isFileExisting( mFileNameCalibHistograms ) ) {
             LOG_ERROR << "unable to get the 'etofDigiTotCorr', 'etofDigiTimeCorr', 'etofDigiSlewCorr' parameters from file --> file does not exist" << endm;
-            return kStFatal;
         }
 
         TFile* histFile = new TFile( mFileNameCalibHistograms.c_str(), "READ" );
 
         if( !histFile || histFile->IsZombie() ) {
             LOG_ERROR << "unable to open file: " << mFileNameCalibHistograms.c_str() << endm;
-            return kStFatal;
+            LOG_INFO  << "setting all parameters to default" << endm;
         }
 
         for( unsigned int sector = eTofConst::sectorStart; sector <= eTofConst::sectorStop; sector++ ) {
@@ -605,7 +608,13 @@ StETofCalibMaker::InitRun( Int_t runnumber )
                         }
                     }
                     else{
-                        LOG_WARN << "unable to find histogram: " << hname << endm;
+                        if( isFileExisting( mFileNameCalibHistograms ) ) {
+                            LOG_WARN << "unable to find histogram: " << hname << endm;
+                        }
+
+                        for( size_t i=1; i<=2 * eTofConst::nStrips; i++ ) {
+                            mDigiTotCorr.at( key )->SetBinContent( i , 1. );
+                        }
                     }
 
                     LOG_DEBUG << "histogram " << mDigiTotCorr.at( key )->GetName() << " filled" << endm;
@@ -630,7 +639,9 @@ StETofCalibMaker::InitRun( Int_t runnumber )
                         }
                     }
                     else{
-                        LOG_WARN << "unable to find histogram: " << hname << endm;
+                        if( isFileExisting( mFileNameCalibHistograms ) ) {
+                            LOG_WARN << "unable to find histogram: " << hname << endm;
+                        }
                     }
 
                     // (2) T0 offset
@@ -643,7 +654,9 @@ StETofCalibMaker::InitRun( Int_t runnumber )
                         }
                     }
                     else{
-                        LOG_WARN << "unable to find histogram: " << hname << endm;                        
+                        if( isFileExisting( mFileNameCalibHistograms ) ) {
+                            LOG_WARN << "unable to find histogram: " << hname << endm;
+                        }                        
                     }
 
                     LOG_DEBUG << "histogram " << mDigiTimeCorr.at( key )->GetName() << " filled" << endm;
@@ -769,21 +782,11 @@ StETofCalibMaker::InitRun( Int_t runnumber )
     // temporary initialization for pulser peak TOT values.... TODO: move to database
     for( size_t i=0; i<216; i++ ) {
         unsigned int key = sideToKey( i );
-        
-        if( key / 1000 == 13 || key / 1000 == 14 || key / 1000 == 17 ||
-            key / 1000 == 18 || key / 1000 == 19 || key / 1000 == 20 ||
-            key / 1000 == 23 || key / 1000 == 24 ) {
-            mPulserPeakTot[ key ] = 49.5;
-        }
-        else {
-            mPulserPeakTot[ key ] = 98.5;
-        }
-    }
 
-    mPulserPeakTot[ 24211 ] = 15.5;
-    mPulserPeakTot[ 24221 ] = 15.5;
-    mPulserPeakTot[ 24231 ] = 15.5;
-    
+        mPulserPeakTot[ key ] = 100;
+    }
+    mReferencePulserIndex = 0;
+
     // --------------------------------------------------------------------------------------------
 
     return kStOk;
@@ -1133,6 +1136,8 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
         }
     }
 
+    LOG_INFO << "reference pulser index: " << mReferencePulserIndex << endm;
+
     double referenceTime = 0.;
 
     for( auto it=pulserDigiMap.begin(); it!=pulserDigiMap.end(); it++ ) {
@@ -1140,6 +1145,13 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
             continue;
         }
         int sideIndex = it->first;
+        
+        // set the reference channel for this run with the first event
+        // --> should however be defined in the database for offline production
+        if( mReferencePulserIndex == 0 ) {
+            mReferencePulserIndex = sideIndex;
+            LOG_INFO << "reference pulser index set to: " << mReferencePulserIndex << endm;
+        }
 
         double bestDiff  = 100000;
         int candIndex = -1;
@@ -1189,8 +1201,9 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
             mMuDst->etofDigi( it->second.at( candIndex ) )->setCalibTot( -999. );
         }
 
-        if( sideIndex == 13111 ) {
+        if( sideIndex == mReferencePulserIndex ) {
             referenceTime = pulserTime;
+            LOG_INFO << "time of reference pulser updated" << endm;
         }
 
         // due to ordering of entries in a map the reference pulser should always come first (if it is there)
@@ -1374,7 +1387,7 @@ StETofCalibMaker::slewingTimeOffset( StETofDigi* aDigi )
     if( mDigiSlewCorr.count( key ) ) {
 
         unsigned int totBin = mDigiSlewCorr.at( key )->FindBin( aDigi->calibTot() );
-        if( mDigiSlewCorr.at( key )->GetBinEntries( totBin ) <= mMinDigisPerSlewBin && totBin < etofSlewing::nTotBins ) {
+        if( /*mDigiSlewCorr.at( key )->GetBinEntries( totBin ) <= mMinDigisPerSlewBin &&*/ totBin < etofSlewing::nTotBins ) {
             if( mDebug ) {
                 LOG_DEBUG << "slewingTimeOffset: insufficient statistics for slewing calibration in channel " << key << " at tot bin " << totBin << "  --> return 0" << endm;
             }
