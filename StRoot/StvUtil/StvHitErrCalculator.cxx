@@ -94,9 +94,12 @@ static const double c45 = cos(3.14/180*45);
     return 0;
   }
 //	fill mTL - local track direction
+  double nTL=0;
   for (int j=0;j<3;j++) {
-    mTL[j] = (hiDir[j][0]*mTG[0][0]+hiDir[j][1]*mTG[0][1]+hiDir[j][2]*mTG[0][2]);}
-
+    mTL[j] = (hiDir[j][0]*mTG[0][0]+hiDir[j][1]*mTG[0][1]+hiDir[j][2]*mTG[0][2]);
+    nTL+=mTL[j]*mTL[j];
+    }
+  assert( fabs(nTL-1)<1e-5);
 
 //		mTL = (cos(Lam)*cos(Phi),cos(Lam)*sin(Phi),sin(Lam))
   mSl = mTL[2],mCl2 = ((1-mSl)*(1+mSl));
