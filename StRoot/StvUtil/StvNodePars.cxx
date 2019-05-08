@@ -21,8 +21,8 @@ enum {kHh,kAh,kCh,kZh,kLh};
   static const int idx66[6][6] =
   {{ 0, 1, 3, 6,10,15},{ 1, 2, 4, 7,11,16},{ 3, 4, 5, 8,12,17}
   ,{ 6, 7, 8, 9,13,18},{10,11,12,13,14,19},{15,16,17,18,19,20}};
-static const double recvCORRMAX  = 0.9999;
-static const double chekCORRMAX  = 0.9999;
+static const double recvCORRMAX  = 0.99999;
+static const double chekCORRMAX  = 0.99999;
 
 //                               X   Y   Z Dx Dy Dz Pinv
 static double MAXNODPARS[]   ={555,555,555, 1, 1, 1, 100};
@@ -185,6 +185,7 @@ void StvNodePars::get(TRungeKutta *th) const
 
   double mom[3]= { _d[0]*P, _d[1]*P, _d[2]*P };
   th->Set(iQ,_x,mom);
+  th->ZetMag(_h);
 }
 //______________________________________________________________________________
 void StvNodePars::get(THelix3d *th) const
@@ -490,17 +491,25 @@ int StvFitErrs::Recov()
       for (int j=0;j<=i;j++) {
         e[li+j]*=fak[i]*fak[j];
   } } }
-
+static int jkl=0;
+if (jkl) return nerr;
   int jerr=0;
 //		Check correlations & Recovery
   for (int i=0,li=0;i< 5;li+=++i) {
+    fak[i]=1;
     dia[i]=e[li+i];
     for (int j=0;j<i;j++) {
-       if (e[li+j]*e[li+j]<=dia[i]*dia[j]*chekCORRMAX) continue ;
-       double qwe = sqrt(dia[i]*dia[j]*recvCORRMAX);
-       if (e[li+j]<0) qwe = -qwe;
-       e[li+j] = qwe;
+       if (fabs(e[li+j]*e[li+j])<=dia[i]*dia[j]*chekCORRMAX) continue ;
+       double qwe = sqrt(fabs(e[li+j]*e[li+j])/(dia[i]*dia[j]*chekCORRMAX));
+       jerr++;
+       if (fak[i]<qwe)fak[i]=qwe;
+       if (fak[j]<qwe)fak[j]=qwe;
   } }
+  if (!jerr) return nerr;
+  for (int i=0,li=0;i< 5;li+=++i) {
+    if (fak[i]<=1) continue;
+    e[li+i]*=fak[i];
+  }
   
   return nerr+jerr;
 }     
