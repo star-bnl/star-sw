@@ -54,6 +54,7 @@ void StvDefaultSeedFinder::Clear(const char*)
 //_____________________________________________________________________________
 void StvDefaultSeedFinder::Reset()
 {
+static const double kZFactor=1e-6; 
   memset(mBeg,0,mMed-mBeg+1);
   const StVoidArr *hitArr =  StTGeoProxy::Inst()->GetSeedHits();
   int nHits =  hitArr->size();
@@ -61,7 +62,7 @@ void StvDefaultSeedFinder::Reset()
     StvHit *stiHit = (StvHit*)(*hitArr)[iHit];
     if (stiHit->timesUsed()) continue;
     const float *x = stiHit->x();
-    float r2 = x[0]*x[0] + x[1]*x[1] + x[2]*x[2];
+    float r2 = x[0]*x[0] + x[1]*x[1] + kZFactor*x[2]*x[2];
     f1stHitMap->insert(std::pair<float,StvHit*>(-fSgn*r2, stiHit));
 
     fMultiHits->Add(stiHit,x);
