@@ -97,6 +97,7 @@ public:
 	u_char trg_cmd ;
 
 	u_char trgd_event ;
+	u_char has_ascii ;
 
 	// temprorary storage for the current board, event and for a single channel
 	int ch ;			// channel [0..32]
@@ -169,6 +170,13 @@ public:
 	static int ped_from_cache(const char *fname) ;
 	static int gain_from_cache(const char *fname=0) ;
 	static int load_rdo_map(const char *fname=0) ;
+
+	// mutex for pedestals but also for statistics
+	static struct statistics_t {
+		float temperature ;
+		float deadtime ;
+		int ht_rate ;
+	} statistics[8] ;
 
 	static pthread_mutex_t ped_mutex ;
 	static void ped_lock() {

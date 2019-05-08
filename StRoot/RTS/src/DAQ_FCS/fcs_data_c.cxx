@@ -47,6 +47,7 @@ u_short fcs_data_c::tb_all ;
 
 pthread_mutex_t fcs_data_c::ped_mutex ;
 	
+fcs_data_c::statistics_t fcs_data_c::statistics[8] ;
 	
 int fcs_data_c::zs_start(u_short *buff)
 {
@@ -366,6 +367,8 @@ int fcs_data_c::hdr_event()
 	// skip to first datum
 	dta_p += 8 ;
 
+	has_ascii = 0 ;
+
 	if(dta_p[0]==0xEEEE && dta_p[1]==0xEEEE) {	// start of ASCII
 		char ctmp[64] ;
 
@@ -374,6 +377,7 @@ int fcs_data_c::hdr_event()
 
 		int words = (dta_shorts - 8 - 2)/2 ;	// adjust
 
+		has_ascii = 1 ;
 		LOG(TERR,"ASCII contribution - words %d[%d]: sector %d, rdo %d, hdr_trg_word 0x%X, hdr_board 0x%X",words,dta_shorts,sector,rdo,hdr_trg_word,hdr_board_id) ;
 
 		int end_marker = 0 ;
@@ -387,9 +391,41 @@ int fcs_data_c::hdr_event()
 				if(cou>sizeof(ctmp)) ;
 				else {
 					if(c=='\n') {
+						float f_val = 0.0 ;
+						char *c ;
+
 						ctmp[cou] = 0 ;
 						LOG(TERR,"S%d:%d:%d: \"%s\"",sector,rdo,events,ctmp) ;
 						cou = 0 ;
+
+					
+						if((c=strstr(ctmp,"r0 7"))) {
+							sscanf(c,"r0 7 %f",&f_val) ;
+							//LOG(TERR,"%d: rate %f",rdo,f_val) ;
+
+							ped_lock() ;
+							statistics[rdo-1].ht_rate = (int) f_val ;
+							ped_unlock() ;
+						}
+						else if((c=strstr(ctmp,"t W "))) {
+							sscanf(c,"t W %f",&f_val) ;
+							//LOG(TERR,"%d: temperature %f",rdo,f_val) ;
+
+							ped_lock() ;
+							statistics[rdo-1].temperature = f_val ;
+							ped_unlock() ;
+						}
+
+						else if((c=strstr(ctmp,"b "))) {
+							sscanf(c,"b %f",&f_val) ;
+							//LOG(TERR,"%d: deadtime %f",rdo,f_val) ;
+
+							ped_lock() ;
+							statistics[rdo-1].deadtime = f_val ;
+							ped_unlock() ;
+						}
+						   
+
 					}
 					else {
 						ctmp[cou] = c ;
@@ -727,6 +763,8 @@ void fcs_data_c::run_start(u_int run, int type)
 	}
 
 	if(id==0) {
+		memset(&statistics,0,sizeof(statistics)) ;
+
 		run_number = run ;
 		run_type = type ;
 
