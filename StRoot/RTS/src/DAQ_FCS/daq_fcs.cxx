@@ -478,6 +478,7 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 			switch(trg_cmd) {
 			case 4 :
 			case 5 :
+			case 6 :	// local trigger
 				break ;
 			default :
 				LOG(WARN,"Unusual trg_cmd=0x%X in event 0x%04X",trg_cmd,hdr) ;
