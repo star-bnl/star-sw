@@ -172,6 +172,7 @@ static int nCall=0; nCall++;
 //_____________________________________________________________________________
 void StvSeedFinder::Init( StvTrack *tk) const
 {
+enum {kKalmanFactor = 4};//Tested 4 is the best
 static StTGeoProxy *prx = StTGeoProxy::Inst();
 static StvToolkit  *kit = StvToolkit::Inst();
 
@@ -200,7 +201,7 @@ static StvToolkit  *kit = StvToolkit::Inst();
     StvFitErrs  &errs = node->GetFE(0);
     pars.set(&circ);
     errs.Set(&circ);
-    for (int i=0,li=0;i< 5;li+=++i) {assert(errs[li+i]>0);}
+    for (int i=0,li=0;i< 5;li+=++i) {errs[li+i]*=double(kKalmanFactor);}
     node->SetXDive(pars.pos());	
     for (int i=0;i<2;i++) {
       node->SetFit(pars,errs,i);
