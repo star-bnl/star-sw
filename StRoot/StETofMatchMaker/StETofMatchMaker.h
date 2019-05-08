@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofMatchMaker.h,v 1.2 2019/04/24 01:02:02 fseck Exp $
+ * $Id: StETofMatchMaker.h,v 1.3 2019/05/08 23:59:10 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StETofMatchMaker.h,v $
+ * Revision 1.3  2019/05/08 23:59:10  fseck
+ * changed match distances to become member variables
+ *
  * Revision 1.2  2019/04/24 01:02:02  fseck
  * fix to start time for simulation and more histograms added to doQA mode
  *
@@ -71,6 +74,7 @@ private:
         Int_t           plane;
         Int_t           counter;
         Int_t           strip;
+        Double_t        hitTime;
         Double_t        localX;
         Double_t        localY;
         Double_t        tot;
@@ -109,6 +113,7 @@ public:
     void setIsSim( const bool isSim );
     void setDoQA(  const bool doQA  );  
     void setDebug( const bool debug );
+    void setMatchDistXYT( double x, double y, double t ); 
 
 
 
@@ -161,6 +166,11 @@ private:
     Bool_t            mIsSim;
     Bool_t            mDoQA;
     Bool_t            mDebug;
+    
+    // maximum distance for track intersection to etof detector hit in cm (nanoseconds) to be counted as match candidate
+    Double_t mMatchDistX;
+    Double_t mMatchDistY;
+    Double_t mMatchDistT;
 
 
     std::map< Int_t, Int_t >  mIndex2Primary;
