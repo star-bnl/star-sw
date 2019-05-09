@@ -16,7 +16,9 @@
 #include "StPicoDst.h"
 #include "TObject.h"
 #include "TVector3.h"
-
+#ifdef __TFG__VERSION__
+#include "TEnv.h"
+#endif /* __TFG__VERSION__ */
 //_________________
 class StPicoEvent : public TObject {
 
@@ -330,7 +332,7 @@ class StPicoEvent : public TObject {
   void setBunchId(Int_t id);
 
 protected:
-
+  TString mProductionVersion;
   /// Run number (or runId)
   Int_t    mRunId;
   /// Event ID
@@ -482,7 +484,7 @@ protected:
   UChar_t  mBunchCrossId;
 
 #ifdef __TFG__VERSION__
-  ClassDef(StPicoEvent, 5)
+  ClassDef(StPicoEvent, 6)
 #else /* ! __TFG__VERSION__ */
   ClassDef(StPicoEvent, 3)
 #endif /* __TFG__VERSION__ */

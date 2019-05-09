@@ -14,6 +14,7 @@
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 #include "StEventUtilities/StGoodTrigger.h"
+#include "TEnv.h"
 #endif /* __TFG__VERSION__ */
 // PicoDst headers
 #include "StPicoMessMgr.h"
@@ -23,6 +24,9 @@ ClassImp(StPicoEvent)
 
 //_________________
 StPicoEvent::StPicoEvent(): TObject(),
+#ifdef __TFG__VERSION__
+  mProductionVersion(gEnv->GetValue("STAR_GIT_VERSION","Unknown")),
+#endif /* __TFG__VERSION__ */
   mRunId(0), mEventId(0), mFillId(0), mBField(0), mTime(0),
   mPrimaryVertexX(0), mPrimaryVertexY(0), mPrimaryVertexZ(0),
   mPrimaryVertexErrorX(0), mPrimaryVertexErrorY(0), mPrimaryVertexErrorZ(0),
