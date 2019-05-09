@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofMatchMaker.cxx,v 1.5 2019/04/24 02:33:48 fseck Exp $
+ * $Id: StETofMatchMaker.cxx,v 1.6 2019/05/09 00:02:46 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StETofMatchMaker.cxx,v $
+ * Revision 1.6  2019/05/09 00:02:46  fseck
+ * match distances as member variables and updated handling for many-tracks-to-one-hit matches
+ *
  * Revision 1.5  2019/04/24 02:33:48  fseck
  * start time fix to previous commit
  *
@@ -81,11 +84,6 @@
 // safety margins in cm in local x and y direction for track extrapolation to etof modules
 const double safetyMargins[ 2 ] = { 2., 2. };
 
-// max distance for track intersection to etof detector hit in cm
-// to be counted as match candidate -> later on one can check which track gives the "best" match
-const double matchDistX = 5.;
-const double matchDistY = 5.;
-
 // track quality cuts / acceptance
 //const int flagMinCut = 0;
 //const int flagMaxCut = 1000;
@@ -97,6 +95,7 @@ const float maxEtaProjCut = -1.8;
 
 // cuts when plotting pid trait histograms like 1/beta vs. momentum
 // --> TODO: move to database once alignment procedure is in place
+/*
 // 2018 data
 const double deltaXoffset[ 108 ] = {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 13
                                       0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 14
@@ -126,8 +125,6 @@ const double deltaYoffset[ 108 ] = {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  
                                       0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00 };  // 24
 
 
-
-/*
 // 2019 data
 const double deltaXoffset[ 108 ] = {  1.70,  2.09,  2.55,  1.78,  2.33,  2.91,  1.85,  2.55,  3.05,    // 13
                                       1.60,  2.03,  2.43,  1.93,  2.45,  3.01,  1.95,  2.51,  3.17,    // 14
@@ -156,6 +153,37 @@ const double deltaYoffset[ 108 ] = {  0.53,  0.76,  1.15,  0.59,  0.45, -0.12, -
                                       1.22,  0.81,  0.75,  0.00,  0.00,  0.00, -0.21, -0.26, -0.22 };  // 24
 */
 
+// 2019: day 118 
+const double deltaXoffset[ 108 ] = { 
+ 0.00,  0.00,  0.00,  2.10,  2.55,  3.18,  2.01,  2.70,  3.29,
+ 1.71,  2.19,  2.62,  2.12,  2.75,  3.27,  2.01,  2.69,  3.24,
+ 1.71,  2.11,  2.59,  2.10,  2.63,  3.25,  2.03,  2.66,  3.28,
+ 1.51,  2.02,  2.56,  1.93,  2.54,  3.09,  2.09,  2.72,  3.41,
+ 1.17,  1.66,  2.25,  1.60,  2.32,  2.88,  1.83,  2.44,  3.23,
+ 1.22,  1.83,  2.29,  1.85,  2.31,  3.06,  1.83,  2.48,  3.18,
+ 0.98,  1.70,  2.23,  1.61,  2.32,  3.10,  0.00,  0.00,  0.00,
+ 1.30,  1.83,  2.20,  2.21,  2.42,  3.11,  0.00,  2.49,  3.04,
+ 1.60,  2.10,  2.35,  2.12,  0.00,  3.18,  0.00,  0.00,  0.00,
+ 1.78,  2.28,  2.76,  0.00,  0.00,  0.00,  2.16,  2.79,  3.40,
+ 1.84,  2.28,  2.71,  1.95,  2.53,  3.15,  2.01,  2.70,  0.00,
+ 1.79,  2.27,  2.80,  1.90,  2.52,  3.12,  2.01,  2.67,  3.25
+};
+
+const double deltaYoffset[ 108 ] = { 
+ 0.00,  0.00,  0.00,  2.50,  0.64,  0.71, -0.16, -0.13, -0.01,
+ 0.91,  0.75, -1.17,  2.31,  2.64,  1.18,  0.12, -0.17,  0.14,
+ 0.46,  0.61,  0.72,  0.22,  0.33,  1.04, -0.39, -0.25, -0.12,
+ 0.22,  0.07,  0.28, -0.20,  0.12,  0.56, -0.45, -0.41, -0.44,
+ 0.50,  0.60,  0.69,  0.15,  0.44,  0.79, -0.28, -0.03, -0.23,
+ 3.05,  1.02,  1.08,  0.36,  0.60,  0.90, -0.12, -0.31, -0.01,
+ 0.87,  1.05,  1.24, -0.02,  0.89,  1.30,  0.00,  0.00,  0.00,
+ 1.45,  1.30,  1.26,  2.38,  0.88,  0.94,  0.00, -0.17, -0.15,
+ 1.28,  1.32,  1.29, -0.19,  0.00,  0.29,  0.00,  0.00,  0.00,
+ 1.53,  1.37,  1.27,  0.00,  0.00,  0.00, -0.03, -0.08, -0.16,
+ 3.37,  1.22,  1.25,  0.47,  0.94,  0.77, -0.03, -0.15,  0.00,
+ 1.31,  1.27,  1.33,  2.56,  1.00,  1.26, -0.08,  0.08,  0.13
+};
+
 
 const double deltaRcut = 2.;
 
@@ -175,6 +203,9 @@ StETofMatchMaker::StETofMatchMaker( const char* name )
   mIsSim( false ),
   mDoQA( false ),
   mDebug( false ),
+  mMatchDistX( 5. ),
+  mMatchDistY( 5. ),
+  mMatchDistT( 99999. ),
   mMatchRadius( 0. ),
   mHistFileName( "" )
 {
@@ -739,6 +770,7 @@ StETofMatchMaker::readETofDetectorHits( eTofHitVec& detectorHitVec )
             detectorHit.sector         = aHit->sector();
             detectorHit.plane          = aHit->zPlane();
             detectorHit.counter        = aHit->counter();
+            detectorHit.hitTime        = aHit->time();
             detectorHit.localX         = aHit->localX();
             detectorHit.localY         = aHit->localY();
             detectorHit.tot            = aHit->totalTot();
@@ -761,6 +793,7 @@ StETofMatchMaker::readETofDetectorHits( eTofHitVec& detectorHitVec )
             detectorHit.sector         = aHit->sector();
             detectorHit.plane          = aHit->zPlane();
             detectorHit.counter        = aHit->counter();
+            detectorHit.hitTime        = aHit->time();
             detectorHit.localX         = aHit->localX();
             detectorHit.localY         = aHit->localY();
             detectorHit.tot            = aHit->totalTot();
@@ -1170,20 +1203,21 @@ StETofMatchMaker::matchETofHits( eTofHitVec& detectorHitVec, eTofHitVec& interse
             bool isMatch = false;
 
             // deltaX, deltaY (subtract offset until alignment is done properly)
-            float deltaX = detHitIter->localX - interIter->localX;
-            float deltaY = detHitIter->localY - interIter->localY;
+            float deltaX = detHitIter->localX  - interIter->localX;
+            float deltaY = detHitIter->localY  - interIter->localY;
 
-            // TODO: generalize for all sectors --> alignment database table
-            int counterIndex = ( detHitIter->sector - 13 ) * 9 + ( detHitIter->plane - 1 ) * 3 + ( detHitIter->counter - 1 );
+            int counterIndex = ( detHitIter->sector  - eTofConst::sectorStart  ) * eTofConst::nPlanes * eTofConst::nCounters
+                             + ( detHitIter->plane   - eTofConst::zPlaneStart  ) * eTofConst::nCounters
+                             + ( detHitIter->counter - eTofConst::counterStart );
+
             deltaX -= deltaXoffset[ counterIndex ];
             deltaY -= deltaYoffset[ counterIndex ];
-            
-            
+
             if( detHitIter->sector == interIter->sector ) {
                 if( detHitIter->plane == interIter->plane ) {
                     if( detHitIter->counter == interIter->counter ) {
-                        if( fabs( deltaX ) < matchDistX ) {
-                            if( fabs( deltaY ) < matchDistY ) {
+                        if( fabs( deltaX ) < mMatchDistX ) {
+                            if( fabs( deltaY ) < mMatchDistY ) {
                                 isMatch = true;
                             }
                         }
@@ -1281,7 +1315,7 @@ void
 StETofMatchMaker::sortSingleMultipleHits( eTofHitVec& matchCandVec, eTofHitVec& singleTrackMatchVec, std::vector< eTofHitVec >& multiTrackMatchVec )
 {
     int nSingleTrackMatch = 0;
-    int nMutliTrackMatch  = 0;
+    int nMultiTrackMatch  = 0;
 
 
     // define temporary vectors for iterating through matchCandVec
@@ -1328,10 +1362,29 @@ StETofMatchMaker::sortSingleMultipleHits( eTofHitVec& matchCandVec, eTofHitVec& 
         }   
         else if( nTracks > 1 ) {
             // for multiple tracks pointing to the same detector hit: either discard or take "most likely" / "best" match candidate
-            // for now: discard
-            nMutliTrackMatch++;
+            // for now: take match with smallest deltaR
+            nMultiTrackMatch++;
 
             multiTrackMatchVec.push_back( candVec );
+
+            float bestResidual = 999.;
+            int   bestIndex    = -1;
+
+            for( size_t i=0; i<candVec.size(); i++ ) {
+                LOG_INFO << "track id: " << candVec.at( i ).trackId << " and matching distance " << candVec.at( i ).deltaX << "  " << candVec.at( i ).deltaY << endm;
+
+                float residual = pow( candVec.at( i ).deltaX, 2 ) + pow( candVec.at( i ).deltaY, 2 );
+
+                if( residual < bestResidual ) {
+                    bestResidual = residual;
+                    bestIndex    = i;
+                }
+            }
+
+            if( bestIndex > -1 ) {
+                singleTrackMatchVec.push_back( candVec.at( bestIndex ) );
+                LOG_INFO << "best candidate has track id: " << candVec.at( bestIndex ).trackId << endm;
+            }
 
             if( mDebug ) {
                 for( const auto& c: candVec ) {
@@ -1344,6 +1397,8 @@ StETofMatchMaker::sortSingleMultipleHits( eTofHitVec& matchCandVec, eTofHitVec& 
             mHistograms.at( "trackMatchMultPerDetectorHit" )->Fill( nTracks );
         }
     }
+
+    LOG_INFO << "nSingleTrackMatch: " << nSingleTrackMatch << " ... nMultiTrackMatch: " << nMultiTrackMatch << endm;
 
     if( mDoQA ) {
         mHistograms.at( "singleTrackMatchMult" )->Fill( singleTrackMatchVec.size() );
@@ -1652,21 +1707,15 @@ StETofMatchMaker::fillPidTraits( eTofHitVec& finalMatchVec )
 void
 StETofMatchMaker::calculatePidVariables( eTofHitVec& finalMatchVec, int& nPrimaryWithPid )
 {
-    double tstart = 0.;
-
     //TODO: introduce proper methods to decide which start-time will be used ( VPD/bTOF or eTOF ) in the future
-    if( !mIsSim ) {
-        tstart = startTime();
+    // for now get whatever is available in the bTOF header (for simulation tstart == 0)
+    double tstart = startTime();
         
-        if( fabs( tstart ) < 0.01 || fabs( tstart + 9999. ) < 0.01 ) {
-            if( mDebug ) {
-                LOG_INFO << "calculatePidVariables() -- no valid start time avaiable ... skip filling pidTraits with more information" << endm;
-            }
-            return;
-        }
+    if( fabs( tstart ) < 0.01 || fabs( tstart + 9999. ) < 0.01 ) {
+        LOG_WARN << "calculatePidVariables() -- no valid start time available ... skip filling pidTraits with more information" << endm;
+        return;
     }
 
-    
     if( mIsStEventIn ) { // StEvent processing ...
         // assign pathlength, time-of-flight, beta ... to the match candidates
         for( auto& matchCand : finalMatchVec ) {
@@ -1678,7 +1727,7 @@ StETofMatchMaker::calculatePidVariables( eTofHitVec& finalMatchVec, int& nPrimar
             }
 
             // global track
-            StTrack* gTrack =  aHit->associatedTrack();
+            StTrack* gTrack = aHit->associatedTrack();
             if( !gTrack ) {
                 LOG_ERROR << "calculatePidVariables() - no associated track" << endm;
                 continue;
@@ -1917,6 +1966,10 @@ StETofMatchMaker::calculatePidVariables( eTofHitVec& finalMatchVec, int& nPrimar
 double
 StETofMatchMaker::startTime()
 {
+    if( mIsSim ) {
+        return 0.;
+    }
+
     if( mDebug ) {
         LOG_INFO << "getTstart(): -- loading start time from bTOF header" << endm;
     }
@@ -1948,7 +2001,7 @@ StETofMatchMaker::startTime()
     if( tstart > eTofConst::bTofClockCycle ) {
         tstart -= eTofConst::bTofClockCycle;
     }
-    else if( tstart < 0. && fabs( tstart + 9999.) > 0.001 ) {
+    else if( tstart < 0. && fabs( tstart + 9999. ) > 0.001 ) {
         tstart += eTofConst::bTofClockCycle;
     }
 
@@ -1959,16 +2012,15 @@ StETofMatchMaker::startTime()
 }
 
 
-
 //---------------------------------------------------------------------------
 // calculate pathlength of a helix between two points 
 double
 StETofMatchMaker::etofPathLength( const StThreeVectorD& beginPoint, const StThreeVectorD& endPoint, const double& curvature )
 {
-  double xdif =  endPoint.x() - beginPoint.x();
-  double ydif =  endPoint.y() - beginPoint.y();
+  double xdiff = endPoint.x() - beginPoint.x();
+  double ydiff = endPoint.y() - beginPoint.y();
   
-  double C = sqrt( xdif * xdif + ydif * ydif );
+  double C = sqrt( xdiff * xdiff + ydiff * ydiff );
   double s_perp = C;
   if( curvature ) {
     double R = 1 / curvature;
@@ -1989,7 +2041,6 @@ StETofMatchMaker::expectedTimeOfFlight( const double& pathLength, const double& 
 
     return pathLength * centimeter * ( 1. / c_light ) * inverseBeta / nanosecond;
 }
-
 
 
 //.........................................................................
@@ -2045,7 +2096,12 @@ StETofMatchMaker::fillQaHistograms( eTofHitVec& finalMatchVec )
         float beta = matchCand.beta;
 
         // skip events with no valid start time
-        if( beta == 0 ) continue;
+        if( fabs( beta + 999.) < 0.001  ) {
+            if( mDoQA ) {
+                LOG_WARN << "beta not set --> no start time available???" << endm;
+            }
+            continue;
+        }
 
         mHistograms.at( "matchCand_beta_signmom" )->Fill( sign * mom, 1. / beta );
 
@@ -2409,17 +2465,26 @@ StETofMatchMaker::writeHistograms()
 }
 
 
-//___________________________________________________
+//---------------------------------------------------------------------------
+void 
+StETofMatchMaker::setMatchDistXYT( double x, double y, double t = 99999. )
+{
+    mMatchDistX = fabs( x );
+    mMatchDistY = fabs( y );
+    mMatchDistT = fabs( t );
+}
 
+
+//---------------------------------------------------------------------------
 ETofTrack::ETofTrack( const StTrack* sttrack )
 {
-    pt        = -999.;
-    eta       = -999.;
-    phi       = -999.;
-    nFtPts    = 0;
-    nDedxPts  = 0;
-    flag      = 0;
-    nHitsPoss = 999;
+    pt         = -999.;
+    eta        = -999.;
+    phi        = -999.;
+    nFtPts     =    0;
+    nDedxPts   =    0;
+    flag       =    0;
+    nHitsPoss  =  999;
     dEdx       = -999.;
     nSigmaPion = -999.;
 
@@ -2445,16 +2510,17 @@ ETofTrack::ETofTrack( const StTrack* sttrack )
         if ( phi < 0. ) phi += 2. * M_PI;
     }
 }
-//------------------------------------------------
+
+//---------------------------------------------------------------------------
 ETofTrack::ETofTrack( const StMuTrack* mutrack )
 {
     pt         = -999.;
     eta        = -999.;
     phi        = -999.;
-    nFtPts     = 0;
-    nDedxPts   = 0;
-    flag       = 0;
-    nHitsPoss  = 999;
+    nFtPts     =    0;
+    nDedxPts   =    0;
+    flag       =    0;
+    nHitsPoss  =  999;
     dEdx       = -999.;
     nSigmaPion = -999.;
 
@@ -2462,10 +2528,10 @@ ETofTrack::ETofTrack( const StMuTrack* mutrack )
         pt          = mutrack->momentum().perp();
         eta         = mutrack->momentum().pseudoRapidity();
         phi         = mutrack->momentum().phi(); 
-        nFtPts      = mutrack->nHitsFit(kTpcId);
+        nFtPts      = mutrack->nHitsFit( kTpcId );
         nDedxPts    = mutrack->nHitsDedx();
         flag        = mutrack->flag();
-        nHitsPoss   = mutrack->nHitsPoss(kTpcId);
+        nHitsPoss   = mutrack->nHitsPoss( kTpcId );
         dEdx        = mutrack->dEdx() * 1.e6;
         nSigmaPion  = mutrack->nSigmaPion();
 
