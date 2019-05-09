@@ -58,6 +58,7 @@
 #define StMessMgr Int_t
 #include "StPicoDstMaker/StPicoDstMaker.h"
 #include "StPicoEvent/StPicoDst.h"
+#include "StPicoEvent/StPicoBTofPidTraits.h"
 #if 0
 #include "StProbPidTraits.h"
 #endif
@@ -247,15 +248,17 @@ void Pico(const Char_t *files ="./*.picoDst.root",
   TH2F *dcaXYInvpT = new TH2F("dcaXYInvpT","dca_{XY} versus 1/pT", 100,0,10, 500, -2.5, 2.5);
   TH2F *dcaZInvpT = new TH2F("dcaZInvpT","dca_{Z} versus 1/pT", 100,0,10, 500, -2.5, 2.5);
   TH2F *zZ       = new TH2F("zZ","zTpc - zVpd versus zTpc for highest rank vertex", 200, -200, 200, 100, -50, 50);
+  TH2F *dEdxP  = new TH2F("dEdxP","dEdx vesus regidity",100,-2.5,2.5,500,0,100);
+  TH2F *betaToF  = new TH2F("beta","1/beta -1 versus regity",100,-3.5,3.5,500,-0.6,4.4);
 #ifdef     __Use_dNdx__
   enum  {kTotalMethods = 6};
 #else
-  enum  {kTotalMethods = 2};
+  enum  {kTotalMethods = 1};
 #endif
   static StDedxMethod kTPoints[kTotalMethods] = {// {"F","70","FU","70U","N", "NU"};
     kLikelihoodFitId         // F
-    ,kTruncatedMeanId         // 70
 #ifdef     __Use_dNdx__
+    ,kTruncatedMeanId         // 70
     ,kWeightedTruncatedMeanId // FU
     ,kEnsembleTruncatedMeanId  // 70U
     ,kOtherMethodId           // N
@@ -435,6 +438,7 @@ void Pico(const Char_t *files ="./*.picoDst.root",
       //      
       //      Double_t cpT = gTrack->charge()*pOut.perp();
       Double_t cpT = charge*pTrack->pPt();
+      Double_t rigity = charge*p;
       Var.cpT = cpT;
       Var.eta = pTrack->pMom().Eta();
       if (charge > 0) EtaP->Fill(Var.eta);
@@ -460,6 +464,7 @@ void Pico(const Char_t *files ="./*.picoDst.root",
 	  //	  TPs[m]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[m]);
 	  //	  Pulls[m]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[m]/sigmas[m]);
 	  fTdEdx[k][0]->Fill(TMath::Log10(p), dEdxL10[k]+6);
+	  dEdxP->Fill(rigity, 1e6*PiD.fFit.I());
 	  if (pMom >= 0.4 && pMom <= 0.5) {
 	    Eta[k]->Fill(pTrack->pMom().Eta(),Zs[k]);
 	  }
@@ -469,6 +474,7 @@ void Pico(const Char_t *files ="./*.picoDst.root",
       for (Int_t l = kPidElectron; l < KPidParticles; l++) {
 	Int_t k = PiD.PiDkeyU3;
 	if (PiD.fI70.fPiD) {
+	  
 	  I70.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.fI70.dev[l]);
 	  I70.dev[l][      2]->Fill(PiD.bghyp[l],PiD.fI70.dev[l]);
 	  if (Debug()) cout << "I70.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.fI70.dev[l] << endl;
@@ -500,6 +506,16 @@ void Pico(const Char_t *files ="./*.picoDst.root",
 	}
       }
 #endif
+      // ToF
+      if (gTrack->isTofTrack()) {
+	Int_t iTofTrait = gTrack->bTofPidTraitsIndex();
+	if (iTofTrait , 0) continue;
+	StPicoBTofPidTraits *btofT = pico->btofPidTraits(iTofTrait);
+	if (btofT->btofMatchFlag() != 1) continue;
+	Float_t beta = btofT->btofBeta();
+	if (beta < 0.1) continue;
+	betaToF->Fill(rigity, 1./beta - 1); 
+      }
     } // track loop
   } // event loop
   if (fOut) fOut->Write();
