@@ -132,9 +132,9 @@ Int_t StTpcMcAnalysisMaker::MultiCluster() {
   UInt_t NoTracks = 0;
   if (primVtx) NoTracks = primVtx->numberOfDaughters();
   StTrackNode *node=0;
-  
   for (UInt_t sector = 1; sector <= 24; sector++) {
-    for (UInt_t row = 1; row <= 45; row++) {
+    UInt_t NoRows = St_tpcPadConfigC::instance()->numberOfRows(sector);
+    for (UInt_t row = 1; row <= NoRows; row++) {
       fCluster->Clear();
       fCluster->SetEventNo(GetEventNumber());
       fCluster->SetDriftVelocities(gStTpcDb->DriftVelocity(1,0),gStTpcDb->DriftVelocity(13,0));
