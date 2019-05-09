@@ -160,12 +160,13 @@
   {
     TString STAR_GIT("$STAR/.git");            gSystem->ExpandPathName(STAR_GIT);
     TString STAR_LEVEL("$STAR_LEVEL");         gSystem->ExpandPathName(STAR_LEVEL);
-    TString GIT_VERSION; 
+    TString STAR_GIT_VERSION; 
     if (! gSystem->AccessPathName(STAR_GIT,kReadPermission)) {
-      GIT_VERSION = ", git = ";
-      GIT_VERSION += gSystem->GetFromPipe("git --git-dir=$STAR/.git describe --all"); 
-      GIT_VERSION += ",tag:";
-      GIT_VERSION += gSystem->GetFromPipe("git --git-dir=$STAR/.git describe --always"); 
+      STAR_GIT_VERSION = ", git = ";
+      STAR_GIT_VERSION += gSystem->GetFromPipe("git --git-dir=$STAR/.git describe --all"); 
+      STAR_GIT_VERSION += ",tag:";
+      STAR_GIT_VERSION += gSystem->GetFromPipe("git --git-dir=$STAR/.git describe --always"); 
+      gEnv->SetValue("STAR_GIT_VERSION", STAR_GIT_VERSION.Data());
     }
     TString ROOT_LEVEL("$ROOT_LEVEL");         gSystem->ExpandPathName(ROOT_LEVEL);
     TString GARFIELD_HOME("$GARFIELD_HOME");   gSystem->ExpandPathName(GARFIELD_HOME);
@@ -173,7 +174,7 @@
     TString XOPTSTAR("$XOPTSTAR");             gSystem->ExpandPathName(XOPTSTAR);
     TString QTDIR("$QTDIR");                   gSystem->ExpandPathName(QTDIR);
     cout <<  Form("QAInfo:You are using STAR_LEVEL : %s%s, ROOT_LEVEL : %s and node : %s ",  
-		  STAR_LEVEL.Data(),GIT_VERSION.Data(),ROOT_LEVEL.Data(),gSystem->HostName());
+		  STAR_LEVEL.Data(),STAR_GIT_VERSION.Data(),ROOT_LEVEL.Data(),gSystem->HostName());
 #ifndef __CLING__
     // ROOT and XROOTD
     // some rootd default dummy stuff
