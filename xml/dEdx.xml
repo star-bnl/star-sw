@@ -6,11 +6,11 @@
 <command> 
    cd ${SUBMITTINGDIRECTORY}  
    setenv STARFPE NO
-   source $STAR/unsetupDEV2.csh
-   setup debug
-   setup gcc
-   setup 32b
-   starver dev
+#   source $STAR/unsetupDEV2.csh
+#   setup debug
+#   setup gcc
+#   setup 32b
+#   starver dev
 #   setenv NODEBUG yess
 #   setup 64b
 #   starver TFG18m

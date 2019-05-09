@@ -2,7 +2,7 @@
 <job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false" copyInputLocally="false">
         <command>
   cd ${SUBMITTINGDIRECTORY}
-  starver TFG19d
+  starver TFG19f
 #  setenv NODEBUG yes
   FPE_OFF
 #  setup 64b
@@ -12,7 +12,6 @@
   set logFile  = ${run}B.log
 #  if ( -r $logFile || -r ${output}) exit 0;
   if ( -r ${output}) exit 0;
-#  root.exe -q -b -x 'LoopOverLaserTrees.C+("st_laser_*'$run'*.laser.root","'$output'")' &gt;&amp; ${logFile}
   root.exe -q -b -x 'bfc.C(-1,"lana,nodefault")' 'LanaTrees.C+("'${dir}'/*'${run}'*.laser.root","'${output}'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./sched$JOBID.log" />

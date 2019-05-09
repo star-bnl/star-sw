@@ -4,7 +4,8 @@
 <command> 
 #  source ~/.tcshrc
   cd ${SUBMITTINGDIRECTORY}  
-  starver TFG19d
+#  starver TFG19d
+  starver TFG19f
 #  setenv NODEBUG yes
 #  setup 64b
 #  setup gcc
