@@ -742,11 +742,10 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	if (tpc_hitC->length == 0 && nSegHits > 0) {
 	  TrackSegmentHits[nSegHits].s = TrackSegmentHits[nSegHits-1].s + TrackSegmentHits[nSegHits].tpc_hitC->ds;
 	}
-	if (!TrackSegment2Propagate(tpc_hitC, &gver[id3-1],TrackSegmentHits[nSegHits])) break;
+	TrackSegment2Propagate(tpc_hitC, &gver[id3-1],TrackSegmentHits[nSegHits]);
  	if (TrackSegmentHits[nSegHits].Pad.timeBucket() < 0 || TrackSegmentHits[nSegHits].Pad.timeBucket() > NoOfTimeBins) continue;
 	nSegHits++;
       }
-      if (nSegHits == NoMaxTrackSegmentHits) sIndex--; // Irakli 05/06/19, reduce extra step in for loop
       if (! nSegHits) continue;
       if (Debug() >= 10) {
 	PrPP(Make,nSegHits);
@@ -758,7 +757,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	       << endl;
 	}
       }
-      sortedIndex = sIndex;
+      sortedIndex = sIndex-1; // Irakli 05/06/19, reduce extra step in for loop
       Double_t s = msMin;
       memset (rowsdE, 0, sizeof(rowsdE));
       for (Int_t iSegHits = 0; iSegHits < nSegHits && s < msMax; iSegHits++) {
