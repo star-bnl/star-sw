@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.77 2019/03/22 18:08:46 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.78 2019/05/11 02:20:34 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.78  2019/05/11 02:20:34  genevb
+ * Add TPC-dead status handling
+ *
  * Revision 1.77  2019/03/22 18:08:46  fisyak
  * recover skip of legacy if exists Tpx or iTpc. Checked by Irakli
  *
@@ -253,6 +256,7 @@
 #include "StDetectorDbMaker/St_tpcMaxHitsC.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
+#include "StDetectorDbMaker/St_tpcStatusC.h"
 #include "TFile.h"
 #include "TNtuple.h"
 #include "TH2.h"
@@ -420,6 +424,11 @@ Int_t StTpcHitMaker::InitRun(Int_t runnumber) {
 }
 //_____________________________________________________________
 Int_t StTpcHitMaker::Make() {
+  if (St_tpcStatusC::instance()->isDead()) {
+    LOG_WARN << "TPC status indicates it is unusable for this event. Ignoring hits." << endm;
+    return kStOK;
+  }
+
   static Int_t minSector = IAttr("minSector");
   static Int_t maxSector = IAttr("maxSector");
   static Int_t minRow    = IAttr("minRow");
