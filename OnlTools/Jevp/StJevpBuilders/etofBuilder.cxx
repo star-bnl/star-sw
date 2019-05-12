@@ -14,6 +14,8 @@
 #include <TStyle.h>
 #include <TH1D.h>
 #include <TH2D.h>
+#include <TProfile.h>
+#include <TF1.h>
 
 #include <cmath>
 #include <algorithm>
@@ -161,21 +163,23 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
     }
 
 
-    pulserPeakTot[ 13 ] = 49;
-    pulserPeakTot[ 14 ] = 49;
+    pulserPeakTot[ 13 ] = 98;
+    pulserPeakTot[ 14 ] = 98;
     pulserPeakTot[ 15 ] = 98;
     pulserPeakTot[ 16 ] = 98;
-    pulserPeakTot[ 17 ] = 49;
-    pulserPeakTot[ 18 ] = 49;
-    pulserPeakTot[ 19 ] = 49;
-    pulserPeakTot[ 20 ] = 49;
+    pulserPeakTot[ 17 ] = 98;
+    pulserPeakTot[ 18 ] = 98;
+    pulserPeakTot[ 19 ] = 98;
+    pulserPeakTot[ 20 ] = 98;
     pulserPeakTot[ 21 ] = 98;
     pulserPeakTot[ 22 ] = 98;
-    pulserPeakTot[ 23 ] = 49;
-    pulserPeakTot[ 24 ] = 49;
+    pulserPeakTot[ 23 ] = 98;
+    pulserPeakTot[ 24 ] = 98;
 
-    pulserPeakTot[ 2421 ] = 15;
 
+
+    resetTimeLabel1Text = "";
+    resetTimeLabel2Text = "";
 
 
     // Build Root Histograms...
@@ -183,7 +187,7 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
 
     contents.nDigisVsTofTrgMult = new TH2D( "nDigisVsTofTrgMult", "# digis vs bTOF multiplicity;# digis in timing window;bTof mult in trigger data;# events", 200, 0, 800, 200, 0, 800 ); 
 
-    contents.digiTot            = new TH1D( "digiTot",           "digi tot;tot (bins);#digis", 256, 0, 256 );
+    contents.digiTot            = new TH1D( "digiTot",           "digi tot;TOT (bins);#digis", 256, 0, 256 );
     contents.digiTimeToTrigger  = new TH1D( "digiTimeToTrigger", "digi time to trigger;time to trigger (#mus);# digis", 500, -4., 1. );
 
     contents.digiCoarseTs       = new TH1D( "digiCoarseTs", "digi coarse Ts;coarse Ts (bins);# digis",  300, 0, 4800 );
@@ -192,8 +196,8 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
 
     for( size_t i=0; i<nrOfGdpbInSys; i++ ) {
         contents.nDigisPerGdpb[ i ]                  = new TH1D( Form( "nDigisPerGdpb_%d", i ),  Form( "# digis on Gdpb %#06x (sector %d);# digis;# events",  gdpbRevMap[ i ], sector[ i ] ), 150, 0, 150 );
-        contents.digiTotPerGdpb[ i ]                 = new TH1D( Form( "digiTotPerGdpb_%d", i ), Form( "digi tot on Gdpb %#06x (sector %d);# digis;# events", gdpbRevMap[ i ], sector[ i ] ), 256, 0, 256 );
-        contents.digiTotPerGdpbInTimingWindow[ i ]   = new TH1D( Form( "digiTotPerGdpbInTimingWindow_%d", i ), Form( "digi tot on Gdpb %#06x (sector %d) in timing window;# digis;# events", gdpbRevMap[ i ], sector[ i ] ), 50, 0, 50 ); 
+        contents.digiTotPerGdpb[ i ]                 = new TH1D( Form( "digiTotPerGdpb_%d", i ), Form( "digi tot on Gdpb %#06x (sector %d);TOT (bins);# digis", gdpbRevMap[ i ], sector[ i ] ), 256, 0, 256 );
+        contents.digiTotPerGdpbInTimingWindow[ i ]   = new TH1D( Form( "digiTotPerGdpbInTimingWindow_%d", i ), Form( "digi tot on Gdpb %#06x (sector %d) in timing window;TOT (bins);# digis", gdpbRevMap[ i ], sector[ i ] ), 50, 0, 50 ); 
         contents.digiMappedChannelNumberPerGdpb[ i ] = new TH1D( Form( "digiMappedChannelNumberPerGdpb_%d", i), Form( "mapped channel number on Gdpb %#06x (sector %d);mapped channel;# digis", gdpbRevMap[ i ], sector[ i ] ), 965, -5, 960 );
         contents.nPulsersPerSide[ i ]                = new TH1D( Form( "nPulsersPerSide_%d", i ),  Form( "# pulsers on Gdpb %#06x (sector %d);# digis;# events",  gdpbRevMap[ i ], sector[ i ] ), 18, 0, 18 );
 
@@ -228,7 +232,7 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
 
 
 
-    contents.digiDensityInTimingWindow = new TH2D( "digiDensityInTimingWindow", "digi density in timing window;;(counter-1) * 3 + strip;# digis", 72, 0.5, 72.5, 96, 0.5, 96.5 );
+    contents.digiDensityInTimingWindow = new TH2D( "digiDensityInTimingWindow", "digi density in timing window;;(counter-1) * 32 + strip;# digis", 72, 0.5, 72.5, 96, 0.5, 96.5 );
     for( size_t i=0; i<12; i++ ) {
         contents.digiDensityInTimingWindow->GetXaxis()->SetBinLabel( i * 6 + 1, Form( "%d-1-1", i + 13 ) );
         contents.digiDensityInTimingWindow->GetXaxis()->SetBinLabel( i * 6 + 2, Form( "%d-1-2", i + 13 ) );
@@ -255,10 +259,10 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
     contents.digiDensityInTimingWindow->SetMinimum( 1. );
 
     contents.digiDensityAllChannels = (TH2D* ) contents.digiDensityInTimingWindow->Clone( "digiDensityAllChannels" );
-    contents.digiDensityAllChannels->SetTitle( "digi density all;sector;(counter-1) * 3 + strip;# digis" );
+    contents.digiDensityAllChannels->SetTitle( "digi density all;sector;(counter-1) * 32 + strip;# digis" );
 
 
-    contents.digiDensityAllStrips = new TH2D( "digiDensityAllStrips", "digi density per strip;sector (module);(counter-1) * 3 + strip;# digis", 36, 0.5, 36.5, 96, 0.5, 96.5 );
+    contents.digiDensityAllStrips = new TH2D( "digiDensityAllStrips", "digi density per strip;sector (module);(counter-1) * 32 + strip;# digis", 36, 0.5, 36.5, 96, 0.5, 96.5 );
     contents.digiDensityAllStrips->SetMinimum( 1. ); 
     for( size_t i=0; i<12; i++ ) {
         contents.digiDensityAllStrips->GetXaxis()->SetBinLabel( i * 3 + 2, Form( "%d", i + 13 ) );
@@ -337,10 +341,22 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
         jp->setOptStat( 10 );
 
 
-        if( contents.array[ i ] == contents.nDigisVsTofTrgMult ||
-            contents.array[ i ] == contents.digiCoarseTs       ||
-            contents.array[ i ] == contents.digiFineTs          ) {
+        if( contents.array[ i ] == contents.digiCoarseTs ||
+            contents.array[ i ] == contents.digiFineTs   ) {
             jp->logy = 0;
+        }
+
+        if( contents.array[ i ] == contents.nDigisVsTofTrgMult ) {
+            jp->logy = 0;
+
+            multCorrLabel1 = new TLatex();
+            multCorrLabel2 = new TLatex();
+            multCorrLabel1->SetNDC();
+            multCorrLabel2->SetNDC();
+            multCorrLabel1->SetTextSize( 0.035 );
+            multCorrLabel2->SetTextSize( 0.035 );
+            jp->addElement( multCorrLabel1 );
+            jp->addElement( multCorrLabel2 );
         }
 
         for( size_t j=0; j<12; j++ ) {
@@ -355,6 +371,15 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
             jp->logy = 0;
             jp->optlogz = 1;
             jp->setOptStat( 0 );
+
+            digiDensityLabel1 = new TLatex();
+            digiDensityLabel2 = new TLatex();
+            digiDensityLabel1->SetNDC();
+            digiDensityLabel2->SetNDC();
+            digiDensityLabel1->SetTextSize( 0.035 );
+            digiDensityLabel2->SetTextSize( 0.035 );
+            jp->addElement( digiDensityLabel1 );
+            jp->addElement( digiDensityLabel2 );
         }
 
         if( contents.array[ i ] == contents.digiDensityAllStrips ) {
@@ -417,6 +442,8 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
             resetTimeLabel2->SetNDC();
             resetTimeLabel1->SetTextSize( 0.04 );
             resetTimeLabel2->SetTextSize( 0.04 );
+            resetTimeLabel1->SetTextColor( kGreen+1 );
+            resetTimeLabel2->SetTextColor( kGreen+1 );
             jp->addElement( resetTimeLabel1 );
             jp->addElement( resetTimeLabel2 );
         }
@@ -533,7 +560,84 @@ void etofBuilder::startrun( daqReader *rdr ) {
 
 
 void etofBuilder::stoprun( daqReader *rdr ) {
-  
+    //add label to multiplicity correlation plot
+    char t1[ 256 ];
+    char t2[ 256 ];
+
+    int   nEvents = 0;
+    float avDigis = 0.;
+
+    int ybin = contents.nDigisVsTofTrgMult->GetYaxis()->FindBin( 300 );
+
+    for( int i=0; i<contents.nDigisVsTofTrgMult->GetNbinsX(); i++ ) {
+        
+        for( int j=-2; j<2; j++ ) {
+            int binCont = contents.nDigisVsTofTrgMult->GetBinContent( i+1, ybin + j );
+
+            if( binCont > 0 ) {
+                avDigis += binCont * contents.nDigisVsTofTrgMult->GetXaxis()->GetBinCenter( i+1 );
+                nEvents += binCont;
+            }
+        }
+    }
+    if( nEvents > 0 ) {
+        avDigis /= nEvents;
+    }
+
+    sprintf( t1, "av. # digis at 300 bTOF hits: %4.1f", avDigis );
+    multCorrLabel1->SetText( 0.25, 0.80, t1 );
+
+    TProfile* hprof = ( (TH2D*) contents.nDigisVsTofTrgMult )->ProfileX();
+    TF1* f = new TF1( "f", "[ 0 ] * x + [ 1 ]", 25., 80. );
+    hprof->Fit( "f", "RQN" );
+
+    double par[ 2 ];
+    f->GetParameters( par );
+
+    sprintf( t2, "fitted slope: %3.2f", par[ 0 ] );
+    multCorrLabel2->SetText( 0.25, 0.75, t2 );
+
+    delete f;
+
+
+    int nBinsXdigiDensity = contents.digiDensityInTimingWindow->GetNbinsX();
+    int nBinsYdigiDensity = contents.digiDensityInTimingWindow->GetNbinsY();
+
+    int threshold = 1;
+
+    int nEmptyChannels = 0;
+    std::vector< int > nEmptyChannelsCounter( 3 );
+
+    for( int i=0; i<nBinsXdigiDensity; i++ ) {
+        for( int j=0; j<nBinsYdigiDensity; j++ ) {
+            if( contents.digiDensityInTimingWindow->GetBinContent( i+1, j+1 ) < threshold ) {
+                nEmptyChannels++;
+                nEmptyChannelsCounter.at( j / 32 )++;
+            }
+        }
+    }
+
+    int nEmptyStrips = 0;
+    std::vector< int > nEmptyStripsCounter( 3 );
+
+    for( int i=0; i<nBinsXdigiDensity-1; i=i+2 ) {
+        for( int j=0; j<nBinsYdigiDensity; j++ ) {
+            if( contents.digiDensityInTimingWindow->GetBinContent( i+1, j+1 ) < threshold || contents.digiDensityInTimingWindow->GetBinContent( i+2, j+1 ) < threshold ) {
+                nEmptyStrips++;
+                nEmptyStripsCounter.at( j / 32 )++;
+            }
+        }
+    }
+
+    //add label to digi density plot
+    char t3[ 256 ];
+    char t4[ 256 ];
+
+    sprintf( t3, "empty channels: %d (%d - %d - %d)", nEmptyChannels, nEmptyChannelsCounter.at( 0 ), nEmptyChannelsCounter.at( 1 ), nEmptyChannelsCounter.at( 2 ) );
+    sprintf( t4, "empty strips: %d (%d - %d - %d)",   nEmptyStrips,   nEmptyStripsCounter.at( 0 ),   nEmptyStripsCounter.at( 1 ),   nEmptyStripsCounter.at( 2 )   );
+    
+    digiDensityLabel1->SetText( 0.52, 0.96, t3 );
+    digiDensityLabel2->SetText( 0.52, 0.92, t4 );
 }
 
 
@@ -674,22 +778,25 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
     contents.triggerTimeToResetTime->Fill( triggerToReset );
 
 
-    //add label
     char t1[ 256 ];
     char t2[ 256 ];
 
     sprintf( t1, "reset time stamp: %lld", ( long long int ) mostFrequentResetTs );
     sprintf( t2, "reported by %d sectors", nCorrectResetSignals );
-    
-    if( mostFrequentResetTs == 0 || triggerToReset > 5000 ) {
-        resetTimeLabel1->SetTextColor( kRed+1 );
-        resetTimeLabel2->SetTextColor( kRed+1 );
-    } else {
-        resetTimeLabel1->SetTextColor( kGreen+1 );
-        resetTimeLabel2->SetTextColor( kGreen+1 );
+
+    if( resetTimeLabel1Text != t1 ) {
+        resetTimeLabel1Text = t1;
+        resetTimeLabel2Text = t2;
+
+        //turn label red if reset time is wrong
+        if( mostFrequentResetTs == 0 || triggerToReset > 5000 ) {
+            resetTimeLabel1->SetTextColor( kRed+1 );
+            resetTimeLabel2->SetTextColor( kRed+1 );
+        }
+        resetTimeLabel1->SetText( 0.12, 0.90, resetTimeLabel1Text.c_str() );
+        resetTimeLabel2->SetText( 0.12, 0.86, resetTimeLabel2Text.c_str() );
     }
-    resetTimeLabel1->SetText( 0.12, 0.90, t1 );
-    resetTimeLabel2->SetText( 0.12, 0.86, t2 );
+
 
 
     size_t nDigisInTimingWindow = 0;
@@ -723,9 +830,9 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
 
                 LOG( DBG, "--> hit message from AFCK %#06x with mappedChannelNr %d", gdpb, mappedChannelNumber );
 
-                //if( gdpbMap.count( gdpb ) ) {
-                //    contents.digiMappedChannelNumberPerGdpb[ gdpbMap.at( gdpb ) ]->Fill( mappedChannelNumber );
-                //}
+                if( gdpbMap.count( gdpb ) ) {
+                    contents.digiMappedChannelNumberPerGdpb[ gdpbMap.at( gdpb ) ]->Fill( mappedChannelNumber );
+                }
                 nDigisPerGdpb.at( gdpb ) += 1;
 
                 unsigned int sector  = hardwareMapSector( gdpb );
@@ -754,15 +861,11 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
 
                 bool isPulser = false;
                 if( mappedChannelNumber % 32 == 0 ) {
-                    if( timeToTrigger > 40. && timeToTrigger < 100. ) {
+                    if( timeToTrigger > -50. && timeToTrigger < 150. ) {
                         isPulser = true;
                     }
 
-                    if( fabs( tot - pulserPeakTot.at( sector ) ) < 10 ) {
-                        isPulser = true;
-                    }
-
-                    if( sector == 24 && module == 2 && side == 1 && fabs( tot - pulserPeakTot.at( 2421 ) ) < 10 ) {
+                    if( fabs( tot - pulserPeakTot.at( sector ) ) < 15 ) {
                         isPulser = true;
                     }
                 }
@@ -839,9 +942,7 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
             for( size_t j=0; j<pulser.at( i ).size(); j++ ) {
                 double timeToTrigger = pulser.at( i ).at( j ).GetFullTimeNs() - triggerTime;
 
-                int k = sector;
-                if( sector == 24 && module == 2 && side == 1 ) k = 2421;
-                double totToPeak = pulser.at( i ).at( j ).getGdpbHit32Tot() - pulserPeakTot.at( k );
+                double totToPeak = pulser.at( i ).at( j ).getGdpbHit32Tot() - pulserPeakTot.at( sector );
 
                 if( pulser.at( i ).size() > 1 ) LOG( DBG, "%d pulsers @ %d-%d-%d %d: time to trigger: %5.2f  tot: %d", pulser.at( i ).size(), sector, module, counter, side, timeToTrigger, pulser.at( i ).at( j ).getGdpbHit32Tot() );
 
@@ -867,9 +968,11 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
     float  min = contents.pulserDigiTimeDiff[ 0 ]->GetXaxis()->GetXmin();
     float  max = contents.pulserDigiTimeDiff[ 0 ]->GetXaxis()->GetXmax();
 
+    int referencePulser = 7;
+
     for( size_t i=0; i<216; i++ ) {
-        if( pulserTimestamp.count( 0 ) && pulserTimestamp.count( i ) ) {
-            float diff = pulserTimestamp.at( i ) - pulserTimestamp.at( 0 );
+        if( pulserTimestamp.count( referencePulser ) && pulserTimestamp.count( i ) ) {
+            float diff = pulserTimestamp.at( i ) - pulserTimestamp.at( referencePulser );
             contents.pulserDigiTimeDiff[ i ]->Fill( diff );
 
             if( diff > max ) {

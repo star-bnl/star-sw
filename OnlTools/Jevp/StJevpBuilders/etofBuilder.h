@@ -10,6 +10,7 @@
 #include <math.h>
 #include <map>
 #include <vector>
+#include <string>
 
 namespace gdpbv100 { class FullMessage; };
 
@@ -114,6 +115,13 @@ class etofBuilder : public JevpBuilder {
 
     TLatex* resetTimeLabel1;
     TLatex* resetTimeLabel2;
+    TLatex* multCorrLabel1;
+    TLatex* multCorrLabel2;
+    TLatex* digiDensityLabel1;
+    TLatex* digiDensityLabel2;
+
+    string resetTimeLabel1Text;
+    string resetTimeLabel2Text;
 
     unsigned int nrOfGdpbInSys;
     unsigned int nrOfGbtxPerGdpb;
