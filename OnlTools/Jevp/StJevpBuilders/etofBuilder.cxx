@@ -587,17 +587,20 @@ void etofBuilder::stoprun( daqReader *rdr ) {
     sprintf( t1, "av. # digis at 300 bTOF hits: %4.1f", avDigis );
     multCorrLabel1->SetText( 0.25, 0.80, t1 );
 
-    TProfile* hprof = ( (TH2D*) contents.nDigisVsTofTrgMult )->ProfileX();
-    TF1* f = new TF1( "f", "[ 0 ] * x + [ 1 ]", 25., 80. );
+    TProfile* hprof = ( (TH2D*) contents.nDigisVsTofTrgMult )->ProfileY();
+    TF1* f = new TF1( "f", "[ 0 ] * x", 0., 600. );
     hprof->Fit( "f", "RQN" );
 
-    double par[ 2 ];
-    f->GetParameters( par );
-
-    sprintf( t2, "fitted slope: %3.2f", par[ 0 ] );
-    multCorrLabel2->SetText( 0.25, 0.75, t2 );
-
+    double par = 0.;
+    f->GetParameters( &par );
     delete f;
+
+    if( fabs( par ) > 1.e-5 ) {
+        sprintf( t2, "fitted slope: %3.2f", 1. / par );
+        multCorrLabel2->SetText( 0.25, 0.75, t2 );
+    }
+
+
 
 
     int nBinsXdigiDensity = contents.digiDensityInTimingWindow->GetNbinsX();
