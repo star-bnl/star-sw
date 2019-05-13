@@ -555,6 +555,9 @@ void etofBuilder::startrun( daqReader *rdr ) {
         gdpbRevMap = gdpbRevMap2019;
     }
 
+    resetTimeLabel1->SetTextColor( kGreen+1 );
+    resetTimeLabel2->SetTextColor( kGreen+1 ); 
+
     resetAllPlots();
 }
 
@@ -791,11 +794,15 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
         resetTimeLabel1Text = t1;
         resetTimeLabel2Text = t2;
 
+        resetTimeLabel1->SetTextColor( kGreen+1 );
+        resetTimeLabel2->SetTextColor( kGreen+1 );
+
         //turn label red if reset time is wrong
         if( mostFrequentResetTs == 0 || triggerToReset > 5000 ) {
             resetTimeLabel1->SetTextColor( kRed+1 );
             resetTimeLabel2->SetTextColor( kRed+1 );
         }
+
         resetTimeLabel1->SetText( 0.12, 0.90, resetTimeLabel1Text.c_str() );
         resetTimeLabel2->SetText( 0.12, 0.86, resetTimeLabel2Text.c_str() );
     }
