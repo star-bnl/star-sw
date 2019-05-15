@@ -1,7 +1,10 @@
 //
-// $Id: dominatrackInfo.cc,v 1.3 2007/02/23 17:07:41 fisyak Exp $
+// $Id: dominatrackInfo.cc,v 1.4 2018/01/03 18:18:10 genevb Exp $
 //
 // $Log: dominatrackInfo.cc,v $
+// Revision 1.4  2018/01/03 18:18:10  genevb
+// idTruths and keys moved from short to int
+//
 // Revision 1.3  2007/02/23 17:07:41  fisyak
 // Resolve bug #682
 //
@@ -23,7 +26,7 @@
 #include "StEnumerations.h"
 #include "StHit.h"
 
-void dominatrackInfo(const StTrack* recTrack,short&dominatrackKey ,short& dominatrackHits,float& avgQuality) {
+void dominatrackInfo(const StTrack* recTrack,int& dominatrackKey ,short& dominatrackHits,float& avgQuality) {
     // initialize return values.
     // dominatrack key initialized to nonsense, quality initialized to 0.
     // Note, I'm using shorts, which should be ok up to 32768, but if we
@@ -32,19 +35,19 @@ void dominatrackInfo(const StTrack* recTrack,short&dominatrackKey ,short& domina
     dominatrackKey = -999;
     dominatrackHits = 0; 
     avgQuality = 0;
-    multimap<short,float> idTruths;
-    set<short> uniqueIdTruths;
+    multimap<int,float> idTruths;
+    set<int> uniqueIdTruths;
     if (!recTrack) return;
     StPtrVecHit recHits = recTrack->detectorInfo()->hits();//(kTpcId);
     // loop to store all the mc track keys and quality of every reco hit on the track.
     for (StHitIterator hi=recHits.begin();
 	 hi!=recHits.end(); hi++) {
 	StHit* rHit = *hi; 
-	idTruths.insert( multimap<short,float>::value_type(rHit->idTruth(),rHit->qaTruth()));
+	idTruths.insert( multimap<int,float>::value_type(rHit->idTruth(),rHit->qaTruth()));
 	uniqueIdTruths.insert(static_cast<int>(rHit->idTruth()));
     }
     // find the dominatrix track!
-    for (set<short>::iterator si=uniqueIdTruths.begin(); si!=uniqueIdTruths.end(); ++si) {
+    for (set<int>::iterator si=uniqueIdTruths.begin(); si!=uniqueIdTruths.end(); ++si) {
 	int currentNHitsIdTruth = idTruths.count(*si);
 	if (currentNHitsIdTruth>dominatrackHits) {
 	    dominatrackKey = *si; 
@@ -52,8 +55,8 @@ void dominatrackInfo(const StTrack* recTrack,short&dominatrackKey ,short& domina
 	}
     }
     //calculate average track quality for the dominatrix track
-    pair<multimap<short,float>::iterator,multimap<short,float>::iterator> dominatrackRange = idTruths.equal_range(dominatrackKey);
-    for (multimap<short,float>::iterator mi=dominatrackRange.first; mi!=dominatrackRange.second; ++mi) {
+    pair<multimap<int,float>::iterator,multimap<int,float>::iterator> dominatrackRange = idTruths.equal_range(dominatrackKey);
+    for (multimap<int,float>::iterator mi=dominatrackRange.first; mi!=dominatrackRange.second; ++mi) {
 	avgQuality+=mi->second;
     }
     avgQuality/=dominatrackHits;

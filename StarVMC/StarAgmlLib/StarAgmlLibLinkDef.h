@@ -10,7 +10,7 @@
 #pragma link C++ class AgMaterial+;
 #pragma link C++ class AgMedium+;
 #pragma link C++ class AgModule+;
-#pragma link C++ class AgPlacement+;
+#pragma link C++ class AgPosition+;
 #pragma link C++ class AgShape+;
 #pragma link C++ class AgStructure+;
 #pragma link C++ class AgVolume+;

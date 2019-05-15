@@ -1,0 +1,571 @@
+<Document file="StarVMC/Geometry/IdsmGeo/IdsmGeo2a.xml">
+
+<Module name="IDSMGEO2a" comment=" simplified  beam support cone for 2013 "  >
+
+   <Created date="  10/04/2011 "  />
+   <Author name="Jan Balewski MIT, Willie Leight MIT (material mixes),Flemming Videbaek"  />
+   <CDE>AGECOM,GCUNIT,GCONST</CDE>
+
+
+<!--
+     May 20,2013  (FV)
+     The end plate of the IDS is different for y2013 and forward when the MSC (defined in pxst
+     is inserted.
+     Mother volume changed to include the inner part of the beampies for yy2013 and forward. This
+     is also set by the version flag IDSC_version.
+     June 2013 (FV)
+      The FGT rails ashould be  moved inside the WSC shell. I am concerned about overlap with the way
+      the FGT is put together (many/only...)  so I believe there is a problem,  I did not move
+      Also the FGT cables are placed outside the IDS, where they are NOT.
+      but will leave it as is expect for configuration where the FGT is no there (for y2014 at least).
+      The correct radius for the rails are 38.6 cm.
+      Added the selectrostatis shrouds. (EFSA)
+      Updated the transitions Cone to reflect SW model more accurately.(SUCC)
+
+     09/13/13 JCW Integration issues
+      o Support rails are placed outside of the WSC.  Placing them inside would
+        end up either shadowing the rails to particles w/in the FGT, or force
+        us to make several FGT volumes 'MANY', which will slow down simulation
+        quite a bit.
+      o Same issue for FGT cables
+      o We will leave these alone for now and revisit if/when the FGT comes
+        back.
+
+-->
+
+<!-- User defined Geant volumes -->
+<Content  >
+      IDSM,   <!-- Mother volume (many) -->
+      TPRR,
+      TPRT,
+      OSCA,   <!--   OSC shell -->  
+      SUCB, 
+      SUCC, 
+      SUCD, 
+      SUCE,   <!--   WSC/ESC shell  --> 
+      SUCF, 
+      SUCG, <!--  cone volumes -->
+      FGRL,FGHV,
+      EFSA     <!--  EFSA Electrostatic shroud  -->
+</Content>
+
+
+<Export language="Mortran">
+      REAL INCH/2.54/;
+</Export>
+
+<!-- ===============================================================================
+     
+  new Support Cone (mother volume=IDSG) is place at an offset and tilt defined by IDSA
+  IDSG consits of
+  * 3 carbon fiber (CF)  cylinders, 2 CF cones,  and 6 Alu rings, volumes: SUCA-SUCF
+ tpc resistor chain volumes: TPRR,TPRT 
+                       (simplified implementation, East= -West)
+
+  *additionally, part of the FGT is also placed here: 2 support rails (FGRL)  and FGT cables (FGHV) 
+
+
+ ==============================================================================
+-->
+
+        
+<!-- mmmmmmmmmm  local work-variables  mmmmmmmmmmmmmmm -->
+<varlist type="REAL"  >
+      inR, outR,lengthZ, eastZ, westZ, eastB, westB,
+     k,sinA, cosA, resR, angRes,m,pm, j,angRail, rRail, dPhiHV, angFgtCbl,
+     theta, dzc
+</varlist>
+
+
+<!-- mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm 
+    Create and initialize structures defining detector parameters
+  mmmmmmmmmmmmmmmmmmmmmmmmmmmmmm     -->
+
+<Structure name="IDSC">
+    <var name="version" />
+</Structure>
+
+<Structure name="IDSG" >
+   <var name="version" type="float" />
+   <var name="rF" />
+   <var name="angFlat" />
+   <var name="r1Res" />
+   <var name="r2Res" />
+   <var name="rrRes" />
+   <var name="dangRes" />
+   <var name="dxRes" />
+   <var name="dyRes" />
+   <var name="fgtStartZ"    type="float" />
+   <var name="fgtDiskStepZ" type="float"  />  
+   <var name="fgtNdisk"      type="int" />
+   <var name="ewcsInnerRad" type="float" />
+   <var name="ewcsOuterRad" type="float" />
+
+
+</Structure>
+
+
+<!-- Alignment of the IDSM geometry within the CAVE -->
+<Structure name="IDSA">
+
+   <var name="version" type="float" />
+   <var name="x"       type="float" />
+   <var name="y"       type="float" />
+   <var name="z"       type="float" />
+
+   <var name="thetax"  type="float" />
+   <var name="thetay"  type="float" />
+   <var name="thetaz"  type="float" />
+
+   <var name="phix"    type="float" />
+   <var name="phiy"    type="float" />
+   <var name="phiz"    type="float" />
+
+</Structure>
+
+<Fill name="IDSC" comment="IDS control structure">
+    <var name="version" value="2.0" comment="Versioning of the IDSM geometry Default y2013 version." />
+</Fill>
+<!-- NOTE: for y2012 geometry, select version=1.0 -->
+
+
+<Fill name="IDSG" comment="IDS Geometry data,46.1cm=inner radii of IFC"  >
+   <var name="version" value="1.0"    comment="2012 Version of the IDS geometry " />
+   <var name="rF"      value="2.25"   comment=" radii of inner volume boundary"  />
+   <var name="angFlat" value="106."   comment=" angle (deg) for center of flat"  />
+   <var name="rrRes"   value="43."    comment=" radial distance of  for TPC resistor tubes"  />
+   <var name="r1Res"   value="1.17"   comment=" inner radii for TPC resistor tubes"  />
+   <var name="r2Res"   value="1.27"   comment=" outer radii for TPC resistor tubes"  />
+
+   <var name="dangRes" value="11.3"   comment=" opening angle (deg) for TPC resistor tubes"  />
+   <var name="dxRes"   value="0.13"   comment=" thicknessfor TPC resistor"  />
+   <var name="dyRes"   value="2."     comment=" dy for TPC resistor"  />
+
+   <var name="fgtStartZ"    value="70." comment=" position of sensitive volume of the 1st disk"  />
+   <var name="fgtDiskStepZ" value="10." comment=" disk separation along Z"  />
+   <var name="fgtNdisk"     value="6"   comment="number of disks" />
+   <var name="ewcsInnerRad" value="39.91" comment="Inner radius of ESC OSC " />
+   <var name="ewcsOuterRad" value="40.005" comment="Inner radius of ESC OSC " />
+
+</Fill>
+
+<!--  ====================================================================================
+      Change the inner radius to 0 since we want to place (parts) of beam pipe inside IDSM
+      There may have to be some appropriate switches for backward compatibility 
+      (FV April/5/2013> 
+      ====================================================================================
+-->
+
+<Fill name="IDSG" comment="IDS Geometry data,46.1cm=inner radii of IFC"  >
+   <var name="version" value="2.0"    comment="2013 versioning of the IDS geometry " />
+   <var name="rF"      value="0.0"    comment=" radii of inner volume boundary"  />
+   <var name="angFlat" value="106."   comment=" angle (deg) for center of flat"  />
+   <var name="rrRes"   value="43."    comment=" radial distance of  for TPC resistor tubes"  />
+   <var name="r1Res"   value="1.17"   comment=" inner radii for TPC resistor tubes"  />
+   <var name="r2Res"   value="1.27"   comment=" outer radii for TPC resistor tubes"  />
+
+   <var name="dangRes" value="11.3"   comment=" opening angle (deg) for TPC resistor tubes"  />
+   <var name="dxRes"   value="0.13"   comment=" thicknessfor TPC resistor"  />
+   <var name="dyRes"   value="2."     comment=" dy for TPC resistor"  />
+
+   <var name="fgtStartZ"    value="70." comment=" position of sensitive volume of the 1st disk"  />
+   <var name="fgtDiskStepZ" value="10." comment=" disk separation along Z"  />
+   <var name="fgtNdisk"     value="6"   comment="number of disks" />
+   <var name="ewcsInnerRad" value="39.91" comment="Inner radius of ESC OSC " />
+   <var name="ewcsOuterRad" value="40.005" comment="Inner radius of ESC OSC " />
+</Fill>
+<Fill name="IDSG" comment="IDS Geometry data, 46.1cm inner radii of IFC">
+   <var name="version" value="14" comment="Year 14, strip out the FGT cables" />
+</Fill>
+
+
+<Fill name="IDSA" comment="Alignment of the IDSM geometry within the CAVE no FGT cables">
+
+   <var name="version" value="1.0"    comment="Default alignment of IDSM at (0,0,0) with no rotation" />   
+
+   <var name="x"       value="0.0"    comment="x-alignment" />
+   <var name="y"       value="0.0"    comment="y-alignment" />
+   <var name="z"       value="0.0"    comment="z-alignment" />
+
+   <var name="thetax"  value="90.0"   comment="align x`-axis 90 degrees in theta wrt cave" />
+   <var name="phix"    value=" 0.0"   comment="align x`-axis  0 degrees in phi   wrt cave" />
+   <var name="thetay"  value="90.0"   comment="align y`-axis 90 degrees in theta wrt cave" />
+   <var name="phiy"    value="90.0"   comment="align y`-axis  0 degrees in phi   wrt cave" />
+   <var name="thetaz"  value=" 0.0"   comment="align z`-axis  0 degrees in theta wrt cave" />
+   <var name="phiz"    value=" 0.0"   comment="align z`-axis  0 degrees in phi   wrt cave" />
+
+</Fill>
+
+
+
+        
+<!--  mmmmmmmmmmmmm  MATERIALS mmmmmmmmmmmmmmmmm    -->   
+
+<Mixture name="CFRPMix" dens="1.78"  >
+    <Component name="O"  a="16"   z="8"  w="0.062"  />
+    <Component name="C"  a="12"   z="6"  w="0.892"  />
+    <Component name="H"  a="1"    z="1"  w="0.019"  />
+    <Component name="Cl" a="35.5" z="17" w="0.027"  />
+</Mixture>
+        
+<Mixture name="AlPure" dens="2.80"  >
+    <Component name="AL" a="27" z="13" w="1."  />
+</Mixture>
+
+<Mixture name="SUCBMix" dens="2.46"  >
+    <Component name="O"  a="16"   z="8"  w="0.043"  />
+    <Component name="C"  a="12"   z="6"  w="0.635"  />
+    <Component name="H"  a="1"    z="1"  w="0.014"  />
+    <Component name="Cl" a="35.5" z="17" w="0.019"  />
+    <Component name="AL" a="27"   z="13" w="0.017"  />
+    <Component name="Ti" a="47.9" z="22" w="0.260"  />
+    <Component name="V"  a="50.9" z="23" w="0.012"  />
+</Mixture>
+
+
+<Mixture name="SUCDMix" dens="2.37"  >
+    <Component name="O"  a="16"   z="8"  w="0.048"  />
+    <Component name="C"  a="12"   z="6"  w="0.694"  />
+    <Component name="H"  a="1"    z="1"  w="0.015"  />
+    <Component name="Cl" a="35.5" z="17" w="0.021"  />
+    <Component name="AL" a="27"   z="13" w="0.013"  />
+    <Component name="Ti" a="47.9" z="22" w="0.200"  />
+    <Component name="V"  a="50.9" z="23" w="0.009"  />
+</Mixture>
+
+
+<Mixture name="RailMix" dens="3.384"  > <!-- computed by Willie -->
+    <Component name="O"  a="16"   z="8"  w="0.032"  />
+    <Component name="C"  a="12"   z="6"  w="0.471"  />
+    <Component name="H"  a="1"    z="1"  w="0.011"  />
+    <Component name="Cl" a="35.5" z="17" w="0.014"  />
+    <Component name="AL" a="27"   z="13" w="0.472"  />
+</Mixture> 
+       
+
+
+<Mixture name="CableMix" dens="1.755"  > <!-- computed by Willie -->
+   <Component name="Si" a="28.08" z="14" w="0.131"  />
+    <Component name="O"  a="16"   z="8"  w="0.117"  />
+    <Component name="C"  a="12"   z="6"  w="0.193"  />
+    <Component name="H"  a="1"    z="1"  w="0.024"  />
+    <Component name="AL" a="27"   z="13" w="0.143"  />
+    <Component name="Cu" a="63.5" z="29" w="0.106"  />
+    <Component name="F"  a="19."  z="9"  w="0.254"  />
+    <Component name="Na" a="23."  z="11" w="0.015"  />
+    <Component name="Ca" a="40.1" z="20" w="0.017"  />
+</Mixture> 
+       
+
+<Mixture name="Alumina" dens="3.90"  >
+    <Component name="AL" a="27" z="13" w="2."  />
+    <Component name="O" a="16" z="8" w="3."  />
+ </Mixture>
+
+
+<Mixture name="FR4" dens="1.80"  >
+    <Component name="Si" a="28.08" z="14" w="0.281"  />
+    <Component name="O"  a="16"    z="8"  w="0.467"  />
+    <Component name="C"  a="12"    z="6"  w="0.220"  />
+    <Component name="H"  a="1"     z="1"  w="0.032" />
+</Mixture>
+
+
+
+<!--  mmmmmmmmmmmm initial  COMPUTATION mmmmmmmmmmmmmmmmmmmmmmmmmmm -->
+
+
+<Use struct="IDSC" />
+<Use struct="IDSG" select="version" value="IDSC_version" />
+<Use struct="IDSA" select="version" value="1.0" />
+
+<Info format="Inner Detector Support Module with IDSC_version = {5.2f}">IDSC_version</Info>
+
+
+      inR     = IDSG_rF                   <!-- Inner radius of envelope -->
+      outR    = IDSG_rrRes + IDSG_r2Res   <!-- Outer raidus of envelope -->
+      lengthZ = 470.
+<!--
+      For the y2013 geometry and on this eastZ value 189" (-480.06 cm) must match the
+      PIPE in the PipeGeo3 end of the z, since that is placed inside the IDSM
+-->
+      eastZ = -189*inch
+      westZ = 403.8
+      eastB = -360.0
+      westB =  360.0
+      sinA = sin( IDSG_angflat * degrad )
+      cosA = cos( IDSG_angflat * degrad )
+
+      rRail=41.5
+      dPhiHV=0.03
+
+<!-- dzc in halfwth of transition cones theta the angle of the tilt.
+-->
+      dzc=7.4/2.0
+      
+
+<!--  ASSEMBLE GEOMETRY, start with placing main volume in cave -->
+
+<Create    block="IDSM"  />
+<Placement block="IDSM" in="CAVE" group="TpcRefSys" konly="MANY">	   
+
+  <Misalign table="Geometry/pxl/idsOnTpc"                opts="left" />
+  <Misalign table="Geometry/tpc/TpcPosition" opts="left" />
+
+</Placement>
+
+<!--	   
+
+
+   thetax="89.9991989" phix="359.9625854"       
+   thetay="90.1522369" phiy="89.9625778"
+   thetaz="0.1522359"  phiz="90.2649689" -->
+
+<!-- 
+
+<Placement block="IDSM"   konly="MANY" group="TpcRefSys" 
+	   in="CAVE" 
+	   x="IDSA_x"  
+	   y="IDSA_y"  
+	   z="IDSA_z"   >
+    
+    <Rotation thetax="IDSA_thetax" phix="IDSA_phix"
+              thetay="IDSA_thetay" phiy="IDSA_phiy"
+              thetaz="IDSA_thetaz" phiz="IDSA_phiz" />
+
+</Placement>
+
+-->
+
+<!-- mmmmmmmmmmm   below no executable code outside Volumes mmmmmmmm  -->
+
+<Volume       name="IDSM" comment="mother volume for beam support cone" >
+
+    <Attribute for="IDSM" seen="0" colo="4"  />
+    <Material name="Air"  />
+
+
+<If expr="IDSC_version.eq.1"><Shape type="TUBE" rmin="inR"    rmax="outR"   dz="lengthZ/2."   /></If>
+<If expr="IDSC_version&gt;1"><Shape type="PCON"                                            
+           nz="10" phi1="0" dphi="360"
+           zi = "{eastZ, -398, -398, eastB, eastB, westB, westB, 398, 398, westZ}"
+           rmn ="{0,0,0,0,0,0,0,0,0,0}"
+           rmx ="{1.5*inch+0.8125*inch,
+	          1.5*inch+0.8125*inch,
+		  5.36, 
+		  5.36, 
+		  outR, 
+		  outR, 
+		  5.36, 
+		  5.36,
+		  1.5*inch+0.8125*inch, 
+		  1.5*inch+0.8125*inch}"   /></If>
+
+
+
+    <!--  place the middle cone  volumes -->  
+    <Create    block="OSCA" />
+    <Placement block="OSCA"  z="0"  />
+ 
+
+    <!--  place east+west cone  volumes -->  
+    <Do var="k" from="0" to="1" >
+        pm=1.-2*k
+
+        <Create    block="SUCB" />
+        <Placement block="SUCB"  z="pm*55.75"  /> 
+
+	<Create block="SUCC" />
+	<Placement block="SUCC"  z="-59.75" if="k==0" /> 
+	<Placement block="SUCC"  z="+59.75" if="k==1"  ><Rotation alphax="180."  /></Placement>
+ 
+	<Create    block="SUCD" />
+	<Placement block="SUCD"  z="pm*63.81"  /> 
+
+	<Create    block="SUCE" />
+	<Placement block="SUCE"  z="pm*144.52"  /> 
+
+	<Create    block="SUCF" />
+	<Placement block="SUCF"  z="pm*224.52"  /> 
+
+	<Create    block="SUCG" />
+	<Placement block="SUCG"  z="pm*225.4"  />
+
+	<Create    block="EFSA" />
+	<Placement block="EFSA"  z="-63.41-0.8" if="k==0" /> 
+	<Placement block="EFSA"  z="63.41+0.8"  if="k==1"  > 
+	  <Rotation alphax="180."  />
+	</Placement>
+
+    </Do>
+  
+
+     <!--  place TPC  2 resistor  volumes -->
+      <Do var="m" from="0" to="1" >
+
+         angRes = IDSG_angFlat - IDSG_dangRes/2.
+
+         <If expr="m.eq.1"  >
+             angRes = IDSG_angFlat+IDSG_dangRes/2.
+         </If>
+
+         <Create    block="TPRT"/>
+         <Placement block="TPRT" z="0" y="IDSG_rrRes*sin(angRes/180.*PI)" x="IDSG_rrRes*cos(angRes/180.*PI)"  />
+
+     </Do>
+
+    <Create    block="TPRR"/>
+    <Placement block="TPRR"  z="0"  y="IDSG_rrRes*sinA" x="IDSG_rrRes*cosA">
+          <Rotation alphaz="IDSG_angFlat"  />
+    </Placement>
+
+<!-- FGT rails are alwasy there regard less whether or not FGT is installed -->
+
+     <!--  place FGT rails  -->
+     <Do var="m" from="0" to="1" >
+
+       angRail= 16./180. * PI + m * PI
+     
+       <Create    block="FGRL"/>
+       <Placement block="FGRL"  z="146.57"  y="rRail*sin(angRail)" x="rRail*cos(angRail)"  />
+
+     </Do>
+ 
+     <!--  place FGT  cables , m  counts quadrants 
+     The FGT cables should be in the FGT geometry module, not in the IDSM (FV)
+     -->
+
+     <!--
+	 End of IDSM proper.  Now place FGT HV cables, for version 1 and 2 
+     -->
+     <Check expr="(IDSG_version &lt;= 2)" />
+
+     <Do var="m" from="1" to="4" >
+
+       angFgtCbl=-90./180. * PI
+       <!--  place FGT cables per disk  -->  
+
+       <Do var="k" from="1" to="IDSG_fgtnDisk">
+
+	 <Check expr="(k.eq.1).or.(m.le.3)" />
+	 pm=1; 
+	 <If expr="(k.eq.1).or.(k.eq.3).or.(k.eq.5)">pm=-1</If>
+
+	 <Create    block="FGHV"/>		
+	 <!--  place FGT cable segments  -->  
+	 <Do var="j" from="k" to="16"> 
+
+	   <Placement block="FGHV" in="IDSM"
+		      x="(rRail+0.5*pm)*cos(angFgtCbl+(dPhiHV*(m+2.2*k-pm*.8)))"  
+		      y="(rRail+0.5*pm)*sin(angFgtCbl+(dPhiHV*(m+2.2*k-pm*.8)))" 
+		      z="IDSG_fgtStartZ+IDSG_fgtDiskStepZ*(j-0.5)"  
+		      />
+
+              
+	 </Do>
+       </Do>
+
+     </Do>
+
+
+</Volume> <!-- end of mother volume eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee  -->
+      
+<Volume       name="OSCA" comment="central CFiber tube  (OSC) "  >
+    <Attribute for="OSCA" seen="1" colo="6"  />
+    <Material name="CFRPMix"  />
+    <Shape type="TUBE"  rmin="21.5"  rmax="21.6" dz="112./2."  />
+</Volume>
+
+<Volume       name="SUCB" comment="small Alu ring at central tube"  >
+    <Attribute for="SUCB" seen="1" colo="1"  />
+    <Material name="SUCBMix"  />
+    <Shape type="TUBE"  rmin="21.6"  rmax="22.4" dz="0.47/2.0"  />
+</Volume>
+
+<Volume       name="SUCC" comment="CFiber cone section"  >
+    <Attribute for="SUCC" seen="1" colo="6"  />
+    <Material name="CFRPMix"  />
+    <Shape type="PCON" nz="6" phi1="0.0" dphi="360"
+            zi="{-dzc, -dzc+0.6, -dzc+0.6, dzc-0.6, dzc-0.6, dzc}"
+            rmn="{37.61, 36.30, 36.30    , 22.76, 21.6, 21.6}"
+            rmx="{ 39.9, 39.9,  37.6, 24.06, 24.06, 22.75}" />
+
+</Volume>
+
+<Volume       name="SUCD" comment="large Al ring at cone"  >
+    <Attribute for="SUCD" seen="1" colo="1"  />
+    <Material name="SUCDMix"  />
+    <Shape type="TUBE"  rmin="38.6"  rmax="IDSG_ewcsInnerRad" dz="0.62/2."  />
+</Volume>
+
+
+<Volume       name="SUCE" comment="East or West CFiber tube"  >
+    <Attribute for="SUCE" seen="1" colo="6"  />
+    <Material name="CFRPMix"  />
+    <Shape type="TUBE"  rmin="IDSG_ewcsInnerRad"  rmax="IDSG_ewcsOuterRad" dz="161.6/2."  />
+</Volume>
+
+
+<Volume       name="SUCF" comment="large Alu ring at the end of west cylinder"  >
+    <Attribute for="SUCF" seen="1" colo="1"  />
+    <Material name="AlPure"  />
+    <Shape type="TUBE"  rmin="IDSG_ewcsOuterRad"  rmax="40.5" dz="1.6/2."  />
+</Volume>
+
+<Volume       name="SUCG" comment="large Alu end disk"  >
+    <Attribute for="SUCG" seen="1" colo="1"  />
+    <Material name="AlPure"  />
+    <If expr="IDSC_version .eq. 1" >
+       <Shape type="TUBE"  rmin="10.3"  rmax="40.5" dz="0.16/2."  />
+<Else>
+       <Shape type="TUBE"  rmin="21.62"  rmax="40.5" dz="0.16/2."  />
+</Else>
+</If>
+</Volume>
+
+
+<Volume  name="EFSA" comment="Electrostatic shroud at near end of ESC and WSC" >
+    <Attribute for="EFSA" seen="1" colo="1"  />
+    <Material name="CFRPMix"  />
+    <Shape type="PCON" nz="10" phi1="0" dphi="360"
+           zi="{0.6,   0.7,  0.7,  2.04,    4,    6,    8,  8.6, 15.75, 16.55}"
+           rmx="{40.0, 40.0, 40.0, 40.0, 39.7, 38.9, 37.7, 37.3,  29.4,  29.4}"
+           rmn="{39.9, 39.9, 39.9, 39.9, 39.6, 38.8, 37.6, 37.2,  29.3,  29.3}" />
+</Volume>
+
+
+
+
+
+ 
+ <Volume       name="TPRR" comment=" TPC resistor" >
+    <Attribute for="TPRR" seen="1" colo="2"  />
+    <Material name="Alumina"  />
+    <Shape type="BOX" dz="lengthZ/2." dx="IDSG_dxRes/2" dy="IDSG_dyRes/2." />
+</Volume>
+
+
+<Volume       name="TPRT" comment="resistor protection,  carbon fiber"  >
+    <Attribute for="TPRT" seen="1" colo="3"  />
+    <Material name="FR4"  />
+    <Shape type="TUBE"  rmin="IDSG_r1Res"  rmax="IDSG_r2Res" dz="lengthZ/2."  />
+</Volume>
+
+ 
+ <Volume       name="FGRL" comment="FGT rail ">
+    <Attribute for="FGRL" seen="1" colo="2"  />
+    <Material name="RailMix"  />
+    <Shape type="TUBE"  rmin="0.9" rmax="1.0"     dz="165.6/2." />
+</Volume>
+
+ 
+<Volume       name="FGHV" comment="FGT cables mixture ">
+    <Attribute for="FGHV" seen="1" colo="1"  />
+    <Material name="CableMix"  />
+   <Shape type="TUBE"  rmin="0." rmax="0.43"     dz="IDSG_fgtDiskStepZ/2." />
+</Volume>
+
+
+
+</Module>
+</Document>

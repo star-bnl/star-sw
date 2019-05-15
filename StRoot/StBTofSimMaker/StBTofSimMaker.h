@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.h,v 1.7 2017/03/02 18:25:46 jeromel Exp $
+ * $Id: StBTofSimMaker.h,v 1.9 2018/03/28 02:01:50 jdb Exp $
  *
  * Author:  Frank Geurts
  ***************************************************************************
@@ -10,6 +10,20 @@
  ***************************************************************************
  *
  * $Log: StBTofSimMaker.h,v $
+ * Revision 1.9  2018/03/28 02:01:50  jdb
+ * update to StBTofSimMaker to use cell-by-cell time resolution for FastSim
+ *
+ * Revision 1.8  2017/10/20 17:50:33  smirnovd
+ * Squashed commit of the following:
+ *
+ *     StBTof: Remove outdated ClassImp macro
+ *
+ *     Prefer explicit namespace for std:: names in header files
+ *
+ *     Removed unnecessary specification of default std::allocator
+ *
+ * Frank signed-off
+ *
  * Revision 1.7  2017/03/02 18:25:46  jeromel
  * Updates to StBTofSimMaker after review
  *
@@ -63,15 +77,16 @@ class StBTofHeader;
 #include "StMcEvent/StMcBTofHit.hh"
 #include "StThreeVectorF.hh"
 #include <vector>
-#ifndef ST_NO_NAMESPACES
-using std::vector;
-#endif
 
+
+
+class StBTofSimResParams;
 class StBTofSimMaker : public StMaker{
 protected:
 
 
     StTofSimParam*      mSimDb;          //!<
+    StBTofSimResParams* mSimResDb;
     StBTofDaqMap*       mDaqMap;         //!< Tof Daq map
     StMcBTofHitCollection *mMcBTofHitCollection; //!< barrel tof hit
 
@@ -123,8 +138,8 @@ protected:
     };
 
 
-    typedef vector<TrackHit, allocator<TrackHit> > TrackVec;
-    typedef vector<int> IntVec;
+    typedef std::vector<TrackHit> TrackVec;
+    typedef std::vector<int> IntVec;
 
 
     string mHistoFile;  //!< for QA histograms
@@ -250,10 +265,11 @@ public:
     void   setCellXtalk(bool val) { mCellXtalk = val; }
     string   setHistFileName();
     void   setBookHist(bool val) { mBookHisto = val; }
+    Int_t writeHistograms();
     void   writeStEvent(bool val = kTRUE) {mWriteStEvent = val;}
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StBTofSimMaker.h,v 1.7 2017/03/02 18:25:46 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StBTofSimMaker.h,v 1.9 2018/03/28 02:01:50 jdb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
     ClassDef(StBTofSimMaker,2)
 };

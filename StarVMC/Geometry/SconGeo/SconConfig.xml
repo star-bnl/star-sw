@@ -4,9 +4,9 @@
  
     <Modules>SconGeo</Modules>
 
-    <Setup  name   = "SCONof" comment="FGT off" module="SconGeo" onoff="off" />
+    <Setup  name   = "SCONof" comment="FGT off" module="SconGeo" onoff="off"  simu="2"/>
 
-    <Setup  name   = "SCONon"
+    <Setup  name   = "SCONon"  simu="2"
 	    comment= "Default configuration for the SVT support cone"
 	    module = "SconGeo"
 	    onoff  = "on" >
@@ -39,13 +39,13 @@
     </Setup>
     -->
 
-    <Setup  name   = "SCON02"
+    <Setup  name   = "SCON02"  simu="2"
 	    comment= "SVT support cone dummy.  SVT geo creates cone"
 	    module = "SconGeo"
 	    onoff  = "off" />
 
 
-    <Setup  name   = "SCON12"
+    <Setup  name   = "SCON12"  simu="2"
 	    comment= "Default configuration for the SVT support cone"
 	    module = "SconGeo"
 	    onoff  = "on" > 
@@ -54,7 +54,7 @@
 
     </Setup>
 
-    <Setup  name   = "SCON13"
+    <Setup  name   = "SCON13"  simu="2"
 	    comment= "Default configuration for the SVT support cone"
 	    module = "SconGeo"
 	    onoff  = "on" > 
@@ -63,7 +63,7 @@
 
     </Setup>
 
-    <Setup  name   = "SCON14"
+    <Setup  name   = "SCON14"  simu="2"
 	    comment= "Default configuration for the SVT support cone"
 	    module = "SconGeo"
 	    onoff  = "on" > 

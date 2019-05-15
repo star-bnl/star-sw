@@ -17,9 +17,6 @@ class StBTofCollection;
 class StBTofHit;
 
 #include <vector>
-#ifndef ST_NO_NAMESPACES
-using std::vector;
-#endif
 
 class StBTofMixerMaker : public StMaker{
     
@@ -35,7 +32,7 @@ public:
     virtual int  Finish();
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StBTofMixerMaker.h,v 1.1 2017/03/02 18:40:57 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StBTofMixerMaker.h,v 1.3 2018/06/21 03:38:46 jdb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StBTofMixerMaker,2)
     
@@ -50,7 +47,7 @@ protected:
     bool mIsEmbedding = kFALSE;                     //!< Embedding flag
     
     //! Find duplicate hits between the BTofCollections
-    void findDuplicates(std::vector<StBTofHit*> eventHits, StBTofCollection *simHits);
+    void findDuplicates(std::vector<StBTofHit*> &eventHits, StBTofCollection *simHits);
     
 };
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StIstSlowSimMaker.cxx,v 1.1 2016/02/17 14:39:00 jeromel Exp $
+ * $Id: StIstSlowSimMaker.cxx,v 1.6 2018/04/18 18:10:19 jwebb Exp $
  *
  * Author: Leszek Kosarzewski, March 2014
  ****************************************************************************
@@ -41,12 +41,14 @@ using namespace std;
 //#include "TDataSet.h"
 #include "TF1.h"
 
-#include "StRoot/StIstDbMaker/StIstDb.h"
-#include "StRoot/StIstUtil/StIstCollection.h"
-#include "StRoot/StIstUtil/StIstRawHitCollection.h"
-#include "StRoot/StIstUtil/StIstRawHit.h"
-#include "StRoot/StIstUtil/StIstConsts.h"
+#include "StIstDbMaker/StIstDb.h"
+#include "StIstUtil/StIstCollection.h"
+#include "StIstUtil/StIstRawHitCollection.h"
+#include "StIstUtil/StIstRawHit.h"
+#include "StIstUtil/StIstConsts.h"
 #include "StIstSlowSimMaker.h"
+#include "TRandom3.h"
+#include "tables/St_istSimPar_Table.h"
 
 #include "tables/St_istMapping_Table.h"
 #include "tables/St_istControl_Table.h"
@@ -55,7 +57,7 @@ using namespace std;
 
 ClassImp(StIstSlowSimMaker)
 
-StIstSlowSimMaker::StIstSlowSimMaker(const char* name): StMaker(name), mIstDb(NULL), mBuildIdealGeom(kFALSE), mIstCollectionPtr(NULL) 
+StIstSlowSimMaker::StIstSlowSimMaker(const char* name): StMaker(name), mIstDb(NULL), mBuildIdealGeom(kFALSE), mIstCollectionPtr(NULL), mHitEffMode(0), mMomCut(0.),  mHitEff(1.0), mRndGen(nullptr)
 {
 	mMappingGeomVec.resize( kIstNumElecIds ); //! initialize to number of channels in StIstUtil/StIstConsts.h
    mDefaultTimeBin = 9; //! default ADC timebins, load from control table
@@ -122,6 +124,17 @@ Int_t StIstSlowSimMaker::InitRun(Int_t runnumber)
 		}
 	}
 
+        //! tunable parameter
+        mRndGen = (TRandom3 *)gRandom;
+        // MC->RC hit efficiency (momentum dependence - default)
+        istSimPar_st const* const istSimParTable = mIstDb->istSimPar();
+        mHitEffMode = istSimParTable[0].mode;
+        mMomCut = istSimParTable[0].pCut;
+        mHitEff = istSimParTable[0].effIst; // best knowledge from ZF cosmic ray study - tunable
+            
+        LOG_INFO << " IST MC hit efficiency mode used for IST slow simulator: " << mHitEffMode << endm;
+        LOG_INFO << "     +++ Hit Efficiency at p > " << mMomCut << " GeV/c = " << mHitEff << endm;
+            
 	return ierr;
 }
 
@@ -154,6 +167,26 @@ Int_t StIstSlowSimMaker::Make()
 				for(std::vector<StMcIstHit*>::iterator mcHitIt = mcHitVec.begin();mcHitIt!=mcHitVec.end(); ++mcHitIt){
 					LOG_DEBUG << "IST MC hit found ...... " << endm;
 					StMcIstHit* mcIstHit = (*mcHitIt);
+					if(!mcIstHit) continue;
+                                        float hitEff = 1.0;
+                                        switch (mHitEffMode) {
+                                          case 0:   // ideal case 100% efficiency
+                                                  break;
+                                          case 1:
+                                            if(mcIstHit->parentTrack()) {
+                                              float const ptot = mcIstHit->parentTrack()->momentum().mag();
+                                              hitEff = 1.0 - (1. - mHitEff)*ptot/mMomCut;
+                                              if(hitEff<mHitEff) hitEff = mHitEff;
+                                            }
+                                                  break;
+                                          case 2:
+                                              hitEff = mHitEff;
+                                                  break;
+                                          default:
+                                                  break;
+                                        }
+                                        
+                                        if( mRndGen->Rndm()>hitEff ) continue;
 
 					//mcIstHits stored local position
 					Double_t localIstHitPos[3]={mcIstHit->position().x(),mcIstHit->position().y(),mcIstHit->position().z()};
@@ -261,6 +294,10 @@ void StIstSlowSimMaker::generateRawHits(const StMcIstHit *istMChit) const
 
 	checkPadCrossing(inPos, outPos, mcLocalDir, dS, crossVec);
 	LOG_DEBUG<<"StIstSlowSimMaker::generateRawHits crossVec.size() = "<<crossVec.size()<<endm;
+	if(crossVec.size()==1) {
+		LOG_WARN<<"StIstSlowSimMaker: McHit is outside of active area -> skip!"<<endm;
+		return;
+	}
 
 	StThreeVectorD totalPath = crossVec[crossVec.size()-1]-crossVec[0];		
 	Double_t pathLengthTotal = totalPath.mag();
@@ -297,7 +334,7 @@ void StIstSlowSimMaker::generateRawHits(const StMcIstHit *istMChit) const
 			findPad(meanPos, meanColumn, meanRow, rPhiPos_mean, zPos_mean);
 
          //Nrow = 64 = kIstNumApvChannels/2, Ncolumn = 12 = kIstNumApvsPerArm/2
-         //One APV reads 64 rows x 2 columns
+         //One APV reads 64 rows x 12 columns
 			Int_t geoId = (ladderId-1)*kIstNumApvChannels*kIstApvsPerLadder+ (sensorId-1)*(kIstNumApvsPerArm/2)*(kIstNumApvChannels/2) + (meanColumn-1)*kIstNumApvChannels/2 + meanRow;
 			Int_t elecId = mMappingGeomVec[geoId-1];
 			LOG_DEBUG << "elecID = " << elecId << "\tgeoId = " << geoId << endm;
@@ -317,8 +354,9 @@ void StIstSlowSimMaker::generateRawHits(const StMcIstHit *istMChit) const
 					adcSum += rawHit->getCharge(t);
 				}
 
-				LOG_INFO<<"dE = "<<1e6*istMChit->dE()<<" keV \tpathLength = "<<pathLength<<"\tpathLengthTotal = "<<pathLengthTotal<<endm;
-				Float_t charge = istMChit->dE() * pathLength / pathLengthTotal;
+				LOG_DEBUG<<"dE = "<<1e6*istMChit->dE()<<" keV \tpathLength = "<<pathLength<<"\tpathLengthTotal = "<<pathLengthTotal<<endm;
+				Float_t charge = 0;
+				if(pathLengthTotal>1e-6) charge = istMChit->dE() * pathLength / pathLengthTotal;
 				if(kIstTimeBinFrac[maxTB]>0) charge *= kIstTimeBinFrac[t]*kIstMPV/kIstTimeBinFrac[maxTB]; //translate energy Int_to ADC with GeV-to-ADC factor
 				if ( charge > adcSum ) {
 					rawHit->setIdTruth(idTruth);
@@ -326,7 +364,7 @@ void StIstSlowSimMaker::generateRawHits(const StMcIstHit *istMChit) const
 				adcSum += charge; 
 
 				rawHit->setCharge(adcSum, t);
-				LOG_INFO<<"charge = "<<adcSum<<"\tat TB"<<(Int_t)t<<endm;
+				LOG_DEBUG<<"charge = "<<adcSum<<"\tat TB"<<(Int_t)t<<endm;
 			}
 			rawHit->setChannelId( elecId );
 			rawHit->setGeoId( geoId );
@@ -366,6 +404,8 @@ void StIstSlowSimMaker::checkPadCrossing(const StThreeVectorD inPos, const StThr
 	LOG_DEBUG<<"\tcolumn_out = "<<column_out<<"\trow_out = "<<row_out<<endm;
 	LOG_DEBUG<<"\tcolumn_in = "<<column<<"\trow_in = "<<row<<endm;
 
+	if(column==65535||column_out==65535) return;
+
 	mcLocalDir.setX(-mcLocalDir.x());
 
 	Short_t row_dist = abs(row-row_out);
@@ -374,6 +414,9 @@ void StIstSlowSimMaker::checkPadCrossing(const StThreeVectorD inPos, const StThr
 	LOG_DEBUG<<"StIstSlowSimMaker::checkPadCrossing column_dist = "<<column_dist<<"\trow_dist = "<<row_dist<<endm;
 
 	StThreeVectorD mean(rPhiPosMean, 0.0, zPosMean);
+
+        unsigned short row_next = row;
+        unsigned short column_next = column;
 
 	while(row_dist>=1 || column_dist>=1)
 	{
@@ -392,8 +435,18 @@ void StIstSlowSimMaker::checkPadCrossing(const StThreeVectorD inPos, const StThr
 		StThreeVectorD current_next = current+distance/100.0;
 		LOG_DEBUG<<"current_next x = "<<current_next.x()<<"\ty = "<<current_next.y()<<"\tz = "<<current_next.z()<<endm;
 
-		cross_vec.push_back(current);
-		findPad(current_next, column, row, rPhiPosMean, zPosMean);
+//		findPad(current_next, column, row, rPhiPosMean, zPosMean);
+                findPad(current_next, column_next, row_next, rPhiPosMean, zPosMean);
+                
+                if(row_next==row && column_next==column) {
+                   LOG_WARN << " distance calculating not yielding to the next row/column! Break! " << endm;
+                   break;
+                }
+                
+                row = row_next;
+                column = column_next;
+		
+                cross_vec.push_back(current);
 		mean = StThreeVectorD(rPhiPosMean, 0.0, zPosMean);
 		row_dist = abs(row-row_out);
 		column_dist = abs(column-column_out);
@@ -410,11 +463,18 @@ void StIstSlowSimMaker::findPad(const StThreeVectorD hitPos, UShort_t &column, U
 {
 	Double_t rPhiPos   = hitPos.x();
 	Double_t zPos      = hitPos.z();
-   if(rPhiPos<0||zPos<0){
-      LOG_WARN<<"StIstSlowSimMaker::findPad Wrong local position rPhiPos = "<<rPhiPos<<" zPos = "<<zPos<<endm;
+   //allow +/- 0.5 pad at edge
+   if(rPhiPos<-kIstPadPitchRow/2.||rPhiPos>kIstSensorActiveSizeRPhi+kIstPadPitchRow/2.||zPos<-kIstPadPitchColumn/2.||zPos>kIstSensorActiveSizeZ+kIstPadPitchColumn/2.){
+      LOG_ERROR<<"StIstSlowSimMaker::findPad Wrong local position rPhiPos = "<<rPhiPos<<" zPos = "<<zPos<<endm;
+      column = row = rPhiPos_mean = zPos_mean = 65535;
+      return;
    }
 	row     = (UShort_t)floor( rPhiPos/kIstPadPitchRow ) + 1;
+   if(row<1) row = 1;
+   if(row>kIstNumRowsPerSensor) row = kIstNumRowsPerSensor;
 	column  = (UShort_t)floor( zPos/kIstPadPitchColumn ) + 1;
+   if(column<1) column = 1;
+   if(column>kIstNumRowsPerSensor) column = kIstNumColumnsPerSensor;
 	rPhiPos_mean = (row-1) * kIstPadPitchRow + 0.5 * kIstPadPitchRow; //unit: cm
 	zPos_mean    = (column-1) * kIstPadPitchColumn + 0.5 * kIstPadPitchColumn; //unit: cm
 }
