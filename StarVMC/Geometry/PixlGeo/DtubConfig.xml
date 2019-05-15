@@ -3,6 +3,6 @@
 <Modules>DtubGeo1</Modules>
 <!-- D Tube, pixel support tube and pixel support services -->
 <Setup name="DTUBof" module="DtubGeo1" onoff="off" comment="OFF" />
-<Setup name="DTUB01" onoff="on" module="DtubGeo1" comment="Pixel D-tube" />
+<Setup name="DTUB01" onoff="on" simu="2" module="DtubGeo1" comment="Pixel D-tube" />
 </Detector>
 </Document>

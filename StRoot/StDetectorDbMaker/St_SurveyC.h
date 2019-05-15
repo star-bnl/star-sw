@@ -37,6 +37,7 @@ class St_SurveyC : public TChair {
   const TGeoHMatrix  &GetMatrixR(Int_t i); // ignoring rotation alpha and beta
   const Double_t *r(Int_t i = 0)        const {return &Struct(i)->r00;}
   const Double_t *t(Int_t i = 0)        const {return &Struct(i)->t0;}
+  static void Normalize(TGeoHMatrix &rot);
  protected:
   St_SurveyC(St_Survey *table=0) : TChair(table) {}
  private:
