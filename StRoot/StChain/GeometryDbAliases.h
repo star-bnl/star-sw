@@ -114,64 +114,73 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"20130509.000000", 20130509, 0, "y2013_1",  "y2013 with pixel, real data,AgML,xgeometry"},
   {"20130509.000000", 20130509, 1, "y2013_1c", "y2013 with pixel, real data,AgML,xgeometry"},
 
+  {"y2014x",      20131215,     0, "y2014x",   "y2014x 2014 asymptocit geometry,IST overlap correction,AgML,xgeometry"},
   {"y2014",       20131215,     0, "y2014",    "y2014 first cut geometry,AgML,xgeometry"},
   {"y2014a",      20131215,     1, "y2014a",   "y2014a 2014 production geometry,AgML,xgeometry"},
   {"y2014b",      20131215,     2, "y2014b",   "y2014b 2014 production geometry,AgML,xgeometry"},
   {"y2014c",      20131215,     3, "y2014c",   "y2014c 2014 production geometry,IST overlap correction,AgML,xgeometry"},
 
+
+  {"y2015x",      20141215,     0, "y2015x",   "y2015x asymptotic geometry with IST overlap correction, AgML,xgeometry"},
   {"y2015",       20141215,     0, "y2015",    "y2015 first cut geometry, AgML,xgeometry"},
   {"y2015a",      20141215,     1, "y2015a",   "y2015a production geometry, AgML,xgeometry"},
   {"y2015b",      20141215,     2, "y2015b",   "y2015b production geometry with MTD radii corrections, AgML,xgeometry"},
   {"y2015c",      20141215,     3, "y2015c",   "y2015c production geometry with MTD revised radii corrections, AgML,xgeometry"},
   {"y2015d",      20141215,     4, "y2015d",   "y2015d production geometry with IST overlap correction, AgML,xgeometry"},
 
+
+  {"y2016x",      20151215,     0, "y2016x",   "y2016 asymptotic geometry, AgML,xgeometry"},   // dev2016 is deprecated for reco
   {"y2016",       20151215,     0, "y2016",    "y2016 development geometry, AgML,xgeometry"},   // dev2016 is deprecated for reco
   {"y2016a",      20151215,     1, "y2016a",   "y2016 production geometry, AgML,xgeometry"},   // dev2016 is deprecated for reco
 
-  {"y2017",       20161215,     0, "y2017",    "y2017 development geometry, AgML,xgeometry"},   
- 
-  // development tags
-  //  {"dev2005",     20190101,     0, "dev2005",  "non-production"},
-  //  {"complete",    20190101,     1, "complete", "non-production"},
-  //  {"ist1",        20190101,     2, "ist1",     "non-production"},
-  //  {"pix1",        20190101,     3, "pix1",     "non-production, old is not in present starsim tags"},
-  {"devT",        20170101,     0, "devT",      "dev geo for Inner Tpc Sector Upgrade, Variant 1,AgML,xgeometry"}, // 
-  {"devTA",       20170101,     1, "devTA",     "dev geo for Inner Tpc Sector Upgrade, Variant 1"}, // 
-  {"devTB",       20170101,     2, "devTB",     "dev geo for Inner Tpc Sector Upgrade, Variant 2"}, // 
-  {"devTC",       20170101,     3, "devTC",     "dev geo for Inner Tpc Sector Upgrade, Variant 3"}, // 
-  {"devTD",       20170101,     4, "devTD",     "dev geo for Inner Tpc Sector Upgrade, Variant 4"}, // 
-  {"devTE",       20170101,     5, "devTE",     "dev geo for Inner Tpc Sector Upgrade, Variant 5"}, // 
-  {"devTF",       20170101,     6, "devTF",     "dev geo for Inner Tpc Sector Upgrade, Variant 5"}, // 
 
-  {"upgr01",      20190101,     4, "upgr01",   ""},
-  {"upgr02",      20190101,     5, "upgr02",   ""},
-  {"upgr03",      20190101,     6, "upgr03",   ""},
-  {"upgr04",      20190101,     7, "upgr04",   ""},
-  {"upgr05",      20190101,     8, "upgr05",   ""},
-  {"upgr06",      20190101,     9, "upgr06",   ""},  // what happened to 6? Historical not re-used
-  {"upgr07",      20190101,    10, "upgr07",   ""},
-  {"upgr08",      20190101,    11, "upgr08",   ""},
-  {"upgr09",      20190101,    12, "upgr09",   ""},
-  {"upgr10",      20190101,    13, "upgr10",   ""},
-  {"upgr11",      20190101,    14, "upgr11",   ""},
-  {"upgr12",      20190101,    15, "upgr12",   ""},
-  {"upgr13",      20190101,    16, "upgr13",   ""},
-  {"upgr14",      20190101,    17, "upgr14",   ""},
-  {"upgr15",      20190101,    18, "upgr15",   ""},
-  {"upgr16",      20190101,    19, "upgr16",   ""},
-  {"upgr17",      20190101,    20, "upgr17",   ""},
-  {"upgr16a",     20190101,    21, "upgr16a",  ""},
+  {"y2017",       20161215,     0, "y2017",    "y2017 development geometry, AgML,xgeometry"},   
+  {"y2017a",      20161215,     1, "y2017a",   "y2017 production  geometry, AgML,xgeometry"},   
+
+ 
+  {"y2018x",      20171215,     0, "y2018x",   "y2018x experimental TPC geometry, AgML,xgeometry"},   
+  {"y2018",       20171215,     1, "y2018",    "y2018 development geometry, AgML,xgeometry"},   
+  
+  //
+  // Move DEVT and upgrade series +100 years along timeline else they interfere with y2018+ runs
+  //
+  {"devT",        21170101,     0, "devT",      "dev geo for Inner Tpc Sector Upgrade, Variant 1,AgML,xgeometry"}, // 
+  {"devTA",       21170101,     1, "devTA",     "dev geo for Inner Tpc Sector Upgrade, Variant 1"}, // 
+  {"devTB",       21170101,     2, "devTB",     "dev geo for Inner Tpc Sector Upgrade, Variant 2"}, // 
+  {"devTC",       21170101,     3, "devTC",     "dev geo for Inner Tpc Sector Upgrade, Variant 3"}, // 
+  {"devTD",       21170101,     4, "devTD",     "dev geo for Inner Tpc Sector Upgrade, Variant 4"}, // 
+  {"devTE",       21170101,     5, "devTE",     "dev geo for Inner Tpc Sector Upgrade, Variant 5"}, // 
+  {"devTF",       21170101,     6, "devTF",     "dev geo for Inner Tpc Sector Upgrade, Variant 5"}, // 
+
+  {"upgr01",      21190101,     4, "upgr01",   ""},
+  {"upgr02",      21190101,     5, "upgr02",   ""},
+  {"upgr03",      21190101,     6, "upgr03",   ""},
+  {"upgr04",      21190101,     7, "upgr04",   ""},
+  {"upgr05",      21190101,     8, "upgr05",   ""},
+  {"upgr06",      21190101,     9, "upgr06",   ""},  // what happened to 6? Historical not re-used
+  {"upgr07",      21190101,    10, "upgr07",   ""},
+  {"upgr08",      21190101,    11, "upgr08",   ""},
+  {"upgr09",      21190101,    12, "upgr09",   ""},
+  {"upgr10",      21190101,    13, "upgr10",   ""},
+  {"upgr11",      21190101,    14, "upgr11",   ""},
+  {"upgr12",      21190101,    15, "upgr12",   ""},
+  {"upgr13",      21190101,    16, "upgr13",   ""},
+  {"upgr14",      21190101,    17, "upgr14",   ""},
+  {"upgr15",      21190101,    18, "upgr15",   ""},
+  {"upgr16",      21190101,    19, "upgr16",   ""},
+  {"upgr17",      21190101,    20, "upgr17",   ""},
+  {"upgr16a",     21190101,    21, "upgr16a",  ""},
   // Future development:
   //  {"simpletpc",   20200102,    16, "simpletpc",""},
   //  {"upgr20",      20200102,    17, "upgr20",   "y2007 +  one TOF"}, // advertized simu 20061101
   //  {"upgr21",      20200102,    18, "upgr21",   "y2007 + full TOF"}, // advertized simu 20061101
   //  {"dev13",       20200102,    19, "dev13",    "dev geo for 2013"}, // 
   //  {"devE",        20200102,    20, "devE",     "dev geo for Erick"}, // 
-  {"dev14",       20200102,    21, "dev14",    "dev geo for 2014,AgML,xgeometry"},  
+  {"dev14",       21200102,    21, "dev14",    "dev geo for 2014,AgML,xgeometry"},  
   //  {"eStar2",      20200102,    22, "eStar2",   "dev geometry for eStar"},
   // eStar simulations starting w/ timestamp 12/10/2020
-  {"eStar2",      20201210,     0, "eStar2",   "dev geometry for eStar,AgML,xgeometry"},
-  {"dev2020",     20201210,     1, "dev2020",  "development geometry for 2020+,AgML,xgeometry"},
+  {"eStar2",      21201210,     0, "eStar2",   "dev geometry for eStar,AgML,xgeometry"},
+  {"dev2020",     21201210,     1, "dev2020",  "development geometry for 2020+,AgML,xgeometry"},
 
   {0,                    0,     0,        0,    0}
 };

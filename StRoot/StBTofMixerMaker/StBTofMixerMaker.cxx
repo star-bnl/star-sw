@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofMixerMaker.cxx,v 1.1 2017/03/02 18:40:57 jeromel Exp $
+ * $Id: StBTofMixerMaker.cxx,v 1.3 2018/06/21 03:38:46 jdb Exp $
  *
  * Author: Nickolas Luttrell (Rice University), November 2016
  ***************************************************************************
@@ -14,6 +14,20 @@
  ***************************************************************************
  *
  * $Log: StBTofMixerMaker.cxx,v $
+ * Revision 1.3  2018/06/21 03:38:46  jdb
+ * Fixed the MixerMakers technique for updating the BTofCollection-previously was not storing MC hits in some embedding cases
+ *
+ * Revision 1.2  2017/10/20 17:50:33  smirnovd
+ * Squashed commit of the following:
+ *
+ *     StBTof: Remove outdated ClassImp macro
+ *
+ *     Prefer explicit namespace for std:: names in header files
+ *
+ *     Removed unnecessary specification of default std::allocator
+ *
+ * Frank signed-off
+ *
  * Revision 1.1  2017/03/02 18:40:57  jeromel
  * First version of BTofMixer jdb / nl
  *
@@ -27,7 +41,6 @@
 
 #include "StBTofSimMaker/StBTofSimMaker.h"
 
-ClassImp(StBTofMixerMaker)
 
 //_____________________________________________________________________________
 StBTofMixerMaker::StBTofMixerMaker(const char *name):StMaker(name)
@@ -99,6 +112,7 @@ int StBTofMixerMaker::Make()
         return kStFatal;
     }
     LOG_DEBUG << "The original size of the collection was " << mEventCollection->tofHits().size() << endm;
+    LOG_DEBUG << "There are " << mBTofSimCollection->tofHits().size() << " hits in the BTofSimMakers Collection" << endm;
     
     std::vector<StBTofHit*> sortedEventHitsVec(23447,0);    //! Size of vector determined by number of channels in BTof AND Vpd
     
@@ -110,7 +124,7 @@ int StBTofMixerMaker::Make()
     
     findDuplicates(sortedEventHitsVec, mBTofSimCollection);
     mNewCollection = new StBTofCollection();
-    
+    LOG_DEBUG << "size of sortedEventHitsVec=" << sortedEventHitsVec.size() << endm;
     for (int k=0; k < (int)sortedEventHitsVec.size(); k++) {
         if (sortedEventHitsVec[k]) {
             StBTofHit aBTofHit = *sortedEventHitsVec[k];
@@ -118,17 +132,17 @@ int StBTofMixerMaker::Make()
         }
     }
     
-    mEventCollection = mNewCollection;  //! Link StEvent to the new mixer collection.
+    // mEventCollection = mNewCollection;  //! Link StEvent to the new mixer collection.
+    mNewCollection->setHeader( new StBTofHeader( *(mEventCollection->tofHeader()) ) );
+    LOG_DEBUG << "mEventCollection=" << mEventCollection << endm;
+    LOG_DEBUG << "mEvent->btofCollection()=" << mEvent->btofCollection() << endm;
+    mEvent->setBTofCollection( mNewCollection );
+    LOG_DEBUG << "mEvent->btofCollection()=" << mEvent->btofCollection() << endm;
 
     //! Fill StBTofHeader --
-
-    StBTofHeader *tofHeader = 0;
-
-    tofHeader = (StBTofHeader *) mEventCollection->tofHeader();
-
     LOG_DEBUG << "... Modified StBTofCollection Stored in StEvent! " << endm;
 
-    LOG_DEBUG << "The size of the collection is now " << mEventCollection->tofHits().size() << endm;
+    LOG_DEBUG << "The size of the collection is now " << mEvent->btofCollection()->tofHits().size() << endm;
 
     return kStOK;
 }
@@ -137,7 +151,7 @@ int StBTofMixerMaker::Make()
 //_____________________________________________________________________________
 // Takes BTofCollections from StEvent and one of the SimMakers, finds duplicate hits and chooses earlier time.
 // This function performs the task of embedding
-void StBTofMixerMaker::findDuplicates (std::vector<StBTofHit*> eventHits, StBTofCollection *simHits) {
+void StBTofMixerMaker::findDuplicates (std::vector<StBTofHit*> &eventHits, StBTofCollection *simHits) {
     for (int i=0; i<(int)simHits->tofHits().size(); i++) {
         if (simHits->tofHits()[i]) {
             int simKeyId = simHits->tofHits()[i]->ID()*simHits->tofHits()[i]->kNCell + simHits->tofHits()[i]->cell()-1;
