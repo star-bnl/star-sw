@@ -85,7 +85,7 @@ void stgcPed::smooth()
 		double rms = 0.0 ;
 
 		
-
+#if 0		
 		for(int t=0;t<512;t++) {
 			double ped = peds[a][c].ped[t] ;
 			double p_rms = peds[a][c].rms[t] ;
@@ -99,6 +99,23 @@ void stgcPed::smooth()
 			rms += ped*ped ;
 			cou++ ;
 		}
+#endif
+		// use only the first 16ish timebins; before the ripple starts
+
+		for(int t=0;t<16;t++) {
+			double ped = peds[a][c].ped[t] ;
+			double p_rms = peds[a][c].rms[t] ;
+
+			//if(a==2 && c==0) LOG(TERR,"tb %d = %f %f",t,ped,p_rms) ;
+
+			if(ped==0.0 && p_rms==0.0) break ;
+			if(ped>1022 && p_rms>9) break ;
+
+			sum += ped ;
+			rms += ped*ped ;
+			cou++ ;
+		}
+
 
 		if(cou==0) continue ;
 
@@ -108,17 +125,11 @@ void stgcPed::smooth()
 		rms = sqrt(rms-sum*sum) ;
 
 		for(int t=0;t<512;t++) {
-//			if(t<(int)cou) {
-				peds[a][c].ped[t] = sum ;
-				peds[a][c].rms[t] = rms ;
-//			}
-//			else {
-//				peds[a][c].ped[t] = 1023.0 ;
-//				peds[a][c].rms[t] = 9 ;
-//			}
+			peds[a][c].ped[t] = sum ;
+			peds[a][c].rms[t] = rms ;
 		}
 
-		LOG(TERR,"A%d:%d - %d %d",a,c,(int)cou,(int)peds[a][c].ped[15]) ;
+		LOG(TERR,"A%d:%d - %d %d",a,c,(int)cou,(int)peds[a][c].ped[0]) ;
 	}
 	}
 
@@ -297,7 +308,7 @@ int stgcPed::to_altro(char *buff, int rb, int timebins)
 		for(t=15;t<timebins+15;t++) {
 			*ptr++ = (u_short) ped->ped[t] ;
 
-			if(ch==0 && t<40) LOG(TERR,"A%d:%d: %d: tb %d = %d",a,ch,tcou,t,(u_short)ped->ped[t]) ;
+			//if(ch==0 && t<40) LOG(TERR,"A%d:%d: %d: tb %d = %d",a,ch,tcou,t,(u_short)ped->ped[t]) ;
 
 			if((row==42)&&(pad==140)) {
 				//LOG(TERR,"%d,%d = %d",t,tcou,(u_short)ped->ped[t]) ;
