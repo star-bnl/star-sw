@@ -59,6 +59,7 @@
 #include "StPicoDstMaker/StPicoDstMaker.h"
 #include "StPicoEvent/StPicoDst.h"
 #include "StPicoEvent/StPicoBTofPidTraits.h"
+#include "StPicoEvent/StPicoETofPidTraits.h"
 #if 0
 #include "StProbPidTraits.h"
 #endif
@@ -248,8 +249,9 @@ void Pico(const Char_t *files ="./*.picoDst.root",
   TH2F *dcaXYInvpT = new TH2F("dcaXYInvpT","dca_{XY} versus 1/pT", 100,0,10, 500, -2.5, 2.5);
   TH2F *dcaZInvpT = new TH2F("dcaZInvpT","dca_{Z} versus 1/pT", 100,0,10, 500, -2.5, 2.5);
   TH2F *zZ       = new TH2F("zZ","zTpc - zVpd versus zTpc for highest rank vertex", 200, -200, 200, 100, -50, 50);
-  TH2F *dEdxP  = new TH2F("dEdxP","dEdx vesus regidity",100,-2.5,2.5,500,0,100);
-  TH2F *betaToF  = new TH2F("beta","1/beta -1 versus regity",100,-3.5,3.5,500,-0.6,4.4);
+  TH2F *dEdxP  = new TH2F("dEdxP","dEdx vesus regidity",250,-2.5,2.5,500,0,100);
+  TH2F *betaToF  = new TH2F("beta","BToF 1/beta -1 versus regity",350,-3.5,3.5,500,-0.6,4.4);
+  TH2F *betaEToF  = new TH2F("Ebeta","EToF 1/beta -1 versus regity",350,-3.5,3.5,500,-0.6,4.4);
 #ifdef     __Use_dNdx__
   enum  {kTotalMethods = 6};
 #else
@@ -515,6 +517,16 @@ void Pico(const Char_t *files ="./*.picoDst.root",
 	Float_t beta = btofT->btofBeta();
 	if (beta < 0.1) continue;
 	betaToF->Fill(rigity, 1./beta - 1); 
+      }
+      // Etof
+      if (gTrack->isETofTrack()) {
+	Int_t iEtofTrait = gTrack->eTofPidTraitsIndex();
+	if (iEtofTrait , 0) continue;
+	StPicoETofPidTraits *etofT = pico->etofPidTraits(iEtofTrait);
+	if (etofT->matchFlag() != 1) continue;
+	Float_t beta = etofT->beta();
+	if (beta < 0.1) continue;
+	betaEToF->Fill(rigity, 1./beta - 1); 
       }
     } // track loop
   } // event loop

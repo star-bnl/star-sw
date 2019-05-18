@@ -86,7 +86,9 @@ void  TpcHit::Fill(Long64_t entry) {
   static TH3F *hist3DMZ = 0, *hist3DMT = 0, *hist3DMZL = 0;
   if (! hist3DZ) {
     TDirectory *old = gDirectory;
-    fOut = new TFile("TpcHitZTMfl0.root","recreate");
+    TString newF(gSystem->BaseName(old->GetName()));
+    newF.ReplaceAll(".root","TpcHitZTMfl0.root");
+    fOut = new TFile(newF,"recreate");
     hist3DZ  = new TH3F("Z","|z| versus sector and row",24,0.5,24.5,72,0.5,72.5,260,200,213);
     hist3DZL = new TH3F("ZL","Drift distance sector local versus sector and row",24,0.5,24.5,72,0.5,72.5,500,-10,10);
     hist3DT  = new TH3F("T","time bucket versus sector and row",24,0.5,24.5,72,0.5,72.5,500,0,20);
@@ -456,7 +458,9 @@ void T0Fit(TH3F *D = 0, Int_t iX = 0, Int_t iY = 0) {
   fOut->Write();
 }
 //________________________________________________________________________________
-void TpcPrompt(TChain *chain) {
+void TpcPrompt(const Char_t *chainN = "TpcHit") {
+  TChain *chain = (TChain *) gDirectory->Get(chainN);
+  if (! chain) return;
   Draw(chain);
 }
 #else /* __CINT__ */
@@ -470,9 +474,12 @@ void TpcPrompt(Int_t Nevents = 1000000,
   //  TString Chain("in,StEvent,tpcDb,analysis,magF,NoDefault,tpcHitMover,OSpaceZ2,OGridLeakFull,Corr4,mysql");
   //  TString Chain("in,StEvent,trgD,tpcDb,analysis,magF,NoDefault,mysql");
   //  TString Chain("in,TpcHitMover,StEvent,tpcDb,detDb,CorrX,OSpaceZ2,OGridLeakFull,quiet,analysis,mysql,NoDefault");
-  TString Chain("in,tpx,TpcHitMover,StEvent,tpcDb,detDb,CorrX,OSpaceZ2,OGridLeakFull,quiet,analysis,mysql,NoDefault");
+  TString Chain("in");
+  if (TString(daqfile).Contains("daq")) {
+    Chain += ",tpx";
+  }
+  Chain += ",TpcHitMover,StEvent,tpcDb,detDb,CorrY,OSpaceZ2,OGridLeakFull,quiet,analysis,mysql,NoDefault";
   //  TString Chain("in,StEvent,tpcDb,analysis,magF,NoDefault,tpcHitMover,OSpaceZ2,OGridLeakFull,CorrX");
-  if (TString(daqfile).EndsWith(".daq")) Chain += ",tpx,TpcHitMover,CorrX";
   TString TreeFile(treefile);
   if (TreeFile == "") {
     TreeFile = gSystem->BaseName(daqfile);

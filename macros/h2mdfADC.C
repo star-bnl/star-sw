@@ -16,20 +16,27 @@
 #include "TLeafI.h"
 #include "TH1.h"
 #include "TH2.h"
+#include "TF2.h"
 #include "TProfile.h"
 #include "TGraph.h"
 #include "TMath.h"
 #include "TMultiDimFit.h"
+#include "TCanvas.h"
 #else
 class TMultiDimFit;
+enum EMDFPolyType {
+  kMonomials,
+  kChebyshev,
+  kLegendre
+};
 #endif
 //using namespace std;
 TMultiDimFit* fit = 0;
-//   enum EMDFPolyType {
-//       kMonomials,
-//       kChebyshev,
-//       kLegendre
-//    };
+//________________________________________________________________________________
+Double_t funcMDF(Double_t *x, Double_t *p=0) {
+  if (! fit ) return 0;
+  return fit->Eval(x, p);
+}
 //________________________________________________________________________________
 void h2mdfADC(const Char_t  *total = "mu", Int_t max=5, TMultiDimFit::EMDFPolyType type = TMultiDimFit::kMonomials, Int_t maxTerm = 10, Double_t ymin = 0.2, Double_t ymax = 1){
   TH2D *total2D = (TH2D *) gDirectory->Get(total);
@@ -93,6 +100,9 @@ void h2mdfADC(const Char_t  *total = "mu", Int_t max=5, TMultiDimFit::EMDFPolyTy
   //
   // Now for the data
   //
+  TF2 *mdfP = new TF2("mdfP", funcMDF,xa->GetXmin(), xa->GetXmax(),ya->GetXmin(), ya->GetXmax());
+  new TCanvas("mdfPar","mdfPar");
+  mdfP->Draw();
   Int_t i, j;
   // Assignment to coefficients vector.
   cout << "  row.PolyType = \t"      << fit->GetPolyType() << ";" << endl;

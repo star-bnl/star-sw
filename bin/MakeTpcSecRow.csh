@@ -254,4 +254,6 @@
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20190201.000003.root /net/l404/data/fisyak/reco/2019/TFG19eStiCA/dEdx601/Fit/SecRow3CGFdEdx601.root  'MakeTpcSecRowB.C(20190201,601)' >& MakeTpcSecRowB.20190201,601.log
 #root.exe -q -b  /net/l404/data/fisyak/Histograms/RunXIX/dEdx703/Fit/SecRow3CGFdEdx703.root 'MakeTpcSecRowB.C(20190201,703)' >& MakeTpcSecRowB.20190201,703.log
 #root.exe -q -b  /net/l404/data/fisyak/Histograms/RunXIX/dEdx705/Fit/SecRow3CGFdEdx705.root 'MakeTpcSecRowB.C(20190201,705)' >& MakeTpcSecRowB.20190201,705.log
-root.exe -q -b  /net/l404/data/fisyak/Histograms/RunXIX/dEdx707/Fit/SecRow3CGFdEdx707.root 'MakeTpcSecRowB.C(20190201,707)' >& MakeTpcSecRowB.20190201,707.log
+#root.exe -q -b  /net/l404/data/fisyak/Histograms/RunXIX/dEdx707/Fit/SecRow3CGFdEdx707.root 'MakeTpcSecRowB.C(20190201,707)' >& MakeTpcSecRowB.20190201,707.log
+#root.exe -q -b  /net/l402/data/fisyak/STAR/packages/.DEV2/hold/StarDb/Calibrations/tpc/TpcSecRowB.20190201.000707.root /net/l403/data/fisyak/reco/2019/Pass801/dEdx804/Fit/SecRow3CGFdEdx804.root 'MakeTpcSecRowB.C(20190201,804)' >& MakeTpcSecRowB.20190201,804.log
+root.exe -q -b  /net/l402/data/fisyak/STAR/packages/.DEV2/StarDb/Calibrations/tpc/TpcSecRowB.20190201.000804.root  /net/l403/data/fisyak/reco/2019/Pass801/dEdx806/Fit/SecRow3CGFdEdx806.root 'MakeTpcSecRowB.C(20190201,806)' >& MakeTpcSecRowB.20190201,806.log
