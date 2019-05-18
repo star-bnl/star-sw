@@ -147,6 +147,7 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
     if (X > cor->max) X = cor->max;
   }
   static TF1 *f1000 = 0, *f1100 = 0, *f1200 = 0, *f1300 = 0;
+  static TF1 *f2000 = 0, *f2100 = 0, *f2200 = 0, *f2300 = 0;
   TF1 *f = 0;
   switch (cor->type) {
   case 1: // Tchebyshev [-1,1]
@@ -195,7 +196,7 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
   case 1200:
   case 1300:
     if (cor->type == 1000) {
-      if (! f1000) f1000 = new TF1("f1000","gaus(9)+pol0(3)");
+      if (! f1000) f1000 = new TF1("f1000","gaus+pol0(3)");
       f = f1000;
     } else if (cor->type == 1100) {
       if (! f1100) f1100 = new TF1("f1100","gaus+pol1(3)");
@@ -206,6 +207,27 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
     } else if (cor->type == 1300) {
       if (! f1300) f1300 = new TF1("f1300","gaus+pol3(3)");
       f = f1300;
+    }
+    assert(f);
+    f->SetParameters(cor->a);
+    Sum = f->Eval(X);
+    break;
+  case 2000:
+  case 2100:
+  case 2200:
+  case 2300:
+    if (cor->type == 2000) {
+      if (! f2000) f2000 = new TF1("f2000","expo+pol0(2)");
+      f = f2000;
+    } else if (cor->type == 2100) {
+      if (! f2100) f2100 = new TF1("f2100","expo+pol1(2)");
+      f = f2100;
+    } else if (cor->type == 2200) {
+      if (! f2200) f2200 = new TF1("f2200","expo+pol2(2)");
+      f = f2200;
+    } else if (cor->type == 2300) {
+      if (! f2300) f2300 = new TF1("f2300","expo+pol3(2)");
+      f = f2300;
     }
     assert(f);
     f->SetParameters(cor->a);
@@ -234,6 +256,8 @@ MakeChairInstance2(tpcCorrection,St_tpcPressureBC,Calibrations/tpc/tpcPressureB)
 MakeChairInstance2(tpcCorrection,St_TpcEdgeC,Calibrations/tpc/TpcEdge);
 #include "St_TpcAdcCorrectionBC.h"
 MakeChairInstance2(tpcCorrection,St_TpcAdcCorrectionBC,Calibrations/tpc/TpcAdcCorrectionB);
+#include "St_TpcAdcCorrectionMDF.h"
+MakeChairInstance2(MDFCorrection,St_TpcAdcCorrectionMDF,Calibrations/tpc/TpcAdcCorrectionMDF);
 #include "St_tpcMethaneInC.h"
 MakeChairInstance2(tpcCorrection,St_tpcMethaneInC,Calibrations/tpc/tpcMethaneIn);
 #include "St_tpcTimeBucketCorC.h"
