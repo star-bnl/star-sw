@@ -11,6 +11,7 @@ class St_tpcStatusC : public TChair {
   UInt_t     	getNumRows()                	const {return GetNRows();}
   UChar_t* 	status(Int_t i = 0) 	const {return Struct(i)->status;}
   UChar_t       status(Int_t sector, Int_t row) const {return status()[St_tpcPadPlanesC::instance()->padRows()*(sector-1)+(row-1)];}
+  Bool_t        isDead() {return ((status()) && (status()[0]==0xff));}
  protected:
   St_tpcStatusC(St_tpcStatus *table=0) : TChair(table) {}
   virtual ~St_tpcStatusC() {fgInstance = 0;}

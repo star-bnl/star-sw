@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofMatchMaker.cxx,v 1.5 2019/04/24 02:33:48 fseck Exp $
+ * $Id: StETofMatchMaker.cxx,v 1.3 2019/03/25 01:05:48 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -15,12 +15,6 @@
  ***************************************************************************
  *
  * $Log: StETofMatchMaker.cxx,v $
- * Revision 1.5  2019/04/24 02:33:48  fseck
- * start time fix to previous commit
- *
- * Revision 1.4  2019/04/24 01:02:11  fseck
- * fix to start time for simulation and more histograms added to doQA mode
- *
  * Revision 1.3  2019/03/25 01:05:48  fseck
  * added more histograms for offline QA
  *
@@ -83,81 +77,23 @@ const double safetyMargins[ 2 ] = { 2., 2. };
 
 // max distance for track intersection to etof detector hit in cm
 // to be counted as match candidate -> later on one can check which track gives the "best" match
-const double matchDistX = 5.;
-const double matchDistY = 5.;
+const double matchDistX =  3.;
+const double matchDistY = 15.;
 
 // track quality cuts / acceptance
-//const int flagMinCut = 0;
-//const int flagMaxCut = 1000;
+const int flagMinCut = 0;
+const int flagMaxCut = 1000;
 
-const float minEtaCut     = 0.0;
+const float minEtaCut     = -0.5;
 
 const float minEtaProjCut = -1.0;
-const float maxEtaProjCut = -1.8;
+const float maxEtaProjCut = -1.7;
 
-// cuts when plotting pid trait histograms like 1/beta vs. momentum
-// --> TODO: move to database once alignment procedure is in place
-// 2018 data
-const double deltaXoffset[ 108 ] = {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 13
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 14
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 15
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 16
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 17
-                                      1.09,  1.67,  1.95,  1.72,  2.11,  2.63,  1.87,  2.53,  3.12,    // 18
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 19
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 20
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 21
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 22
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 23
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00 };  // 24
+// cuts when plotting pid trait histograms like 1/beta vs. momentum --> TODO: move to database once alignment procedure is in place
+const double deltaXoffset[ 9 ] = {  0.90,  1.56,  1.95,  1.58,  2.03,  2.58,  1.83,  2.38,  3.04 };
+const double deltaYoffset[ 9 ] = { -1.34, -1.26, -1.44, -0.51,  0.08, -0.34, -0.38, -0.66, -0.71 };
 
-
-const double deltaYoffset[ 108 ] = {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 13
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 14
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 15
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 16
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 17
-                                     -0.34, -0.50, -1.04, -0.29, -0.18, -0.31, -0.59, -0.69, -0.61,    // 18
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 19
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 20
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 21
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 22
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 23
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00 };  // 24
-
-
-
-/*
-// 2019 data
-const double deltaXoffset[ 108 ] = {  1.70,  2.09,  2.55,  1.78,  2.33,  2.91,  1.85,  2.55,  3.05,    // 13
-                                      1.60,  2.03,  2.43,  1.93,  2.45,  3.01,  1.95,  2.51,  3.17,    // 14
-                                      0.00,  0.00,  0.00,  1.76,  2.39,  2.98,  1.89,  2.51,  3.10,    // 15
-                                      1.34,  1.82,  2.32,  1.76,  2.27,  2.87,  2.01,  2.64,  3.31,    // 16
-                                      0.98,  1.53,  2.02,  1.40,  2.01,  2.63,  1.70,  2.37,  3.07,    // 17
-                                      1.12,  1.68,  2.03,  1.67,  2.13,  2.82,  1.76,  2.39,  3.07,    // 18
-                                      0.83,  1.38,  1.87,  1.49,  2.09,  2.77,  1.64,  2.35,  2.95,    // 19
-                                      1.12,  1.60,  1.98,  1.78,  2.27,  2.69,  0.00,  2.30,  2.84,    // 20
-                                      1.29,  1.83,  2.10,  1.75,  2.32,  2.86,  1.80,  2.48,  3.00,    // 21
-                                      1.62,  2.16,  2.51,  0.00,  0.00,  0.00,  2.01,  2.61,  3.22,    // 22
-                                      1.72,  2.21,  2.54,  1.79,  2.38,  2.91,  1.88,  2.52,  0.00,    // 23
-                                      1.75,  2.13,  2.55,  1.65,  2.25,  2.91,  1.84,  2.46,  3.02 };  // 24
-
-const double deltaYoffset[ 108 ] = {  0.53,  0.76,  1.15,  0.59,  0.45, -0.12, -0.50, -0.34, -0.57,    // 13
-                                      0.52,  0.43,  0.37,  0.32,  0.04,  0.62, -0.34, -0.65, -0.48,    // 14
-                                      0.00,  0.00,  0.00, -0.03,  0.31,  0.84, -0.30, -0.35, -0.30,    // 15
-                                      0.29, -0.03,  0.10, -0.38, -0.15,  0.27, -0.67, -0.54, -0.42,    // 16
-                                      0.43,  0.19,  0.38, -0.21,  0.21,  0.32, -0.51, -0.17, -0.40,    // 17
-                                      0.43,  0.48,  0.67,  0.05,  0.45,  0.37, -0.35, -0.70, -0.52,    // 18
-                                      1.04,  1.04,  1.06,  0.12,  0.37,  0.83,  0.00, -0.50, -0.35,    // 19
-                                      1.27,  1.08,  0.74,  0.19,  0.49,  0.63,  0.00, -0.26, -0.43,    // 20
-                                      1.12,  1.07,  1.15,  0.16,  0.27,  0.33, -0.42, -0.73, -0.61,    // 21
-                                      1.38,  1.26,  1.05,  0.00,  0.00,  0.00, -0.06, -0.48, -0.41,    // 22
-                                      1.20,  1.11,  0.85,  0.34,  0.96,  0.62, -0.36, -0.45,  0.00,    // 23
-                                      1.22,  0.81,  0.75,  0.00,  0.00,  0.00, -0.21, -0.26, -0.22 };  // 24
-*/
-
-
-const double deltaRcut = 2.;
+const double deltaRcut = 1.;
 
 // *******************************************************************************************************
 
@@ -429,9 +365,8 @@ StETofMatchMaker::Make()
     // B. loop over global tracks & determine all track intersections with active eTof volumes
     //
     eTofHitVec intersectionVec;
-    int nPrimaryWithIntersection = 0;
 
-    findTrackIntersections( intersectionVec, nPrimaryWithIntersection );
+    findTrackIntersections( intersectionVec );
 
     if( intersectionVec.size() == 0 ) {
         LOG_INFO << "Make() -- event done ... bye-bye" << endm;
@@ -493,13 +428,8 @@ StETofMatchMaker::Make()
     //.........................................................................
     // G. calculate pid variables for primary tracks and update PidTraits
     //
-    int nPrimaryWithPid = 0;
+    calculatePidVariables( finalMatchVec );
 
-    calculatePidVariables( finalMatchVec, nPrimaryWithPid );
-
-    if( mDoQA ) {
-      mHistograms.at( "primaryIntersect_Pid" )->Fill( nPrimaryWithIntersection, nPrimaryWithPid );
-    }
 
     //.........................................................................
     // H. fill QA histograms
@@ -838,10 +768,11 @@ StETofMatchMaker::readETofDetectorHits( eTofHitVec& detectorHitVec )
 //
 //---------------------------------------------------------------------------
 void
-StETofMatchMaker::findTrackIntersections( eTofHitVec& intersectionVec, int& nPrimaryWithIntersection )
+StETofMatchMaker::findTrackIntersections( eTofHitVec& intersectionVec )
 {
     size_t nNodes = 0;
-    size_t nPrimaryCrossings = 0;
+
+    int  nPrimaryIntersect = 0;
 
     // StEvent processing
     if( mIsStEventIn ) {
@@ -877,27 +808,7 @@ StETofMatchMaker::findTrackIntersections( eTofHitVec& intersectionVec, int& nPri
 
             extrapolateTrackToETof( intersectionVec, theHelix, iNode, nCrossings );
 
-            if( isPrimary ) {
-                nPrimaryCrossings += nCrossings;
-                if( nCrossings > 0 ) {
-                    nPrimaryWithIntersection++;
-                 
-                    if( mDoQA ) {
-                        mHistograms.at( "intersection_primaryTrack_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
-
-                        float mom = pTrack->geometry()->momentum().mag();
-                        if( mom > 1 ) {
-                            mHistograms.at( "intersection_primaryTrackMom0_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
-                        }
-                        else if( mom > 0.5 ) {
-                            mHistograms.at( "intersection_primaryTrackMom1_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
-                        }
-                        else {
-                            mHistograms.at( "intersection_primaryTrackMom2_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
-                        }
-                    }
-                }
-            }
+            if( isPrimary ) nPrimaryIntersect += nCrossings;
 
             if( mDoQA && nCrossings > 0 ) {
                 ETofTrack eTrack( theTrack );
@@ -949,29 +860,7 @@ StETofMatchMaker::findTrackIntersections( eTofHitVec& intersectionVec, int& nPri
 
             extrapolateTrackToETof( intersectionVec, theHelix, iNode, nCrossings );
 
-            if( isPrimary ) {
-                nPrimaryCrossings += nCrossings;
-                if( nCrossings > 0 ) {
-                    nPrimaryWithIntersection++;
-
-                    if( mDoQA ) {
-                        mHistograms.at( "intersection_primaryTrack_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
-                        
-                        float mom = theTrack->primaryTrack()->momentum().mag();
-                        if( mom > 1 ) {
-                            mHistograms.at( "intersection_primaryTrackMom0_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
-                        }
-                        else if( mom > 0.5 ) {
-                            mHistograms.at( "intersection_primaryTrackMom1_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
-                        }
-                        else {
-                            mHistograms.at( "intersection_primaryTrackMom2_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
-                        }
-
-
-                    }
-                }
-            }
+            if( isPrimary ) nPrimaryIntersect += nCrossings;
 
             if( mDoQA && nCrossings > 0 ) {
                 ETofTrack eTrack( theTrack );
@@ -992,7 +881,7 @@ StETofMatchMaker::findTrackIntersections( eTofHitVec& intersectionVec, int& nPri
 
     if( mDoQA ) {
         mHistograms.at( "intersectionMult" )->Fill( intersectionVec.size() );
-        mHistograms.at( "intersectionMult_primary" )->Fill( nPrimaryCrossings );
+        mHistograms.at( "intersectionMult_primary" )->Fill( nPrimaryIntersect );
 
         if( intersectionVec.size() > 0 ) {
             mHistograms.at( "eventCounter" )->Fill( 4 );
@@ -1048,8 +937,8 @@ StETofMatchMaker::validTrack( const ETofTrack& track )
     }
 
     // kick out low quality tracks
-    //if( track.flag <= flagMinCut )                  return false;
-    //if( track.flag >= flagMaxCut )                  return false;
+    if( track.flag <= flagMinCut )                  return false;
+    if( track.flag >= flagMaxCut )                  return false;
     if( track.nFtPts   < mTrackCuts.at( 0 ) )       return false;
     if( ratioFitToPoss < mTrackCuts.at( 1 ) )       return false;
     if( track.pt       < mTrackCuts.at( 2 ) )       return false;
@@ -1082,8 +971,8 @@ StETofMatchMaker::extrapolateTrackToETof( eTofHitVec& intersectionVec, const StP
 
 
     // get rid of tracks that do not project to the rough eta region of the eTof
-    if( projEta < maxEtaProjCut ) return;
-    if( projEta > minEtaProjCut ) return;
+    // TODO: move to database ... needs to be different for fixed target
+    if( projEta < maxEtaProjCut || projEta > minEtaProjCut ) return;
 
     vector< int > idVec;
     vector< StThreeVectorD > globalVec;
@@ -1149,10 +1038,10 @@ StETofMatchMaker::matchETofHits( eTofHitVec& detectorHitVec, eTofHitVec& interse
 
             int moduleId = ( sector - eTofConst::sectorStart ) * eTofConst::nPlanes + plane - eTofConst::zPlaneStart; 
 
-            if( mDoQA ) {
-                int detHitIndex   = ( detHitIter->counter - eTofConst::counterStart ) * eTofConst::nStrips + detHitIter->strip - eTofConst::stripStart;
-                int intersecIndex = ( interIter->counter  - eTofConst::counterStart ) * eTofConst::nStrips + interIter->strip  - eTofConst::stripStart;
+            int detHitIndex   = ( detHitIter->counter - eTofConst::counterStart ) * eTofConst::nCounters + detHitIter->strip - eTofConst::stripStart;
+            int intersecIndex = ( interIter->counter  - eTofConst::counterStart ) * eTofConst::nCounters + interIter->strip  - eTofConst::stripStart;
 
+            if( mDoQA ) {
                 mHistograms.at( "detHitvsInter_strip_s"   + std::to_string( sector ) + "m" + std::to_string( plane ) )->Fill( detHitIndex, intersecIndex );
 
                 mHistograms.at( "detHitvsInter_X" )->Fill( detHitIter->globalPos.x(), interIter->globalPos.x() );
@@ -1174,7 +1063,7 @@ StETofMatchMaker::matchETofHits( eTofHitVec& detectorHitVec, eTofHitVec& interse
             float deltaY = detHitIter->localY - interIter->localY;
 
             // TODO: generalize for all sectors --> alignment database table
-            int counterIndex = ( detHitIter->sector - 13 ) * 9 + ( detHitIter->plane - 1 ) * 3 + ( detHitIter->counter - 1 );
+            int counterIndex = ( detHitIter->plane - eTofConst::zPlaneStart ) * eTofConst::nCounters + detHitIter->counter - eTofConst::counterStart;
             deltaX -= deltaXoffset[ counterIndex ];
             deltaY -= deltaYoffset[ counterIndex ];
             
@@ -1409,8 +1298,6 @@ StETofMatchMaker::finalizeMatching( eTofHitVec& singleTrackMatchVec, eTofHitVec&
             double bestMatchDist = pow( candVec.front().deltaX, 2 ) + pow( candVec.front().deltaY, 2 );
             StructETofHit bestCand = candVec.front();
 
-            bool isOverlapHit = false;
-            
             for( const auto& c: candVec ) {
                 double candMatchDist = pow( c.deltaX, 2 ) + pow( c.deltaY, 2 );
                 
@@ -1426,22 +1313,8 @@ StETofMatchMaker::finalizeMatching( eTofHitVec& singleTrackMatchVec, eTofHitVec&
                         LOG_INFO << " --> new best match candidate" << endm;
                     }
                 }
-
-                if( ( bestCand.sector * 100 + bestCand.plane * 10 + bestCand.counter ) != ( c.sector * 100 + c.plane * 10 + c.counter ) ) {
-                    isOverlapHit = true;
-                }
             }
-            
-            if ( isOverlapHit ) {
-                bestCand.matchFlag = 3;
-
-                if( mDoQA ) {
-                    mHistograms.at( "overlapHit_globalXY" )->Fill( bestCand.globalPos.x(), bestCand.globalPos.y() );
-                }
-            }
-            else {
-                bestCand.matchFlag = 2;
-            }
+            bestCand.matchFlag = 2;
 
             finalMatchVec.push_back( bestCand );
 
@@ -1533,21 +1406,6 @@ StETofMatchMaker::fillPidTraits( eTofHitVec& finalMatchVec )
             if( pTrack ) {
                 nFinalMatchesPrimary++;
 
-                if( mDoQA ) {
-                    mHistograms.at( "finalMatchPrimary_globalXY" )->Fill( match.globalPos.x(), match.globalPos.y() );
-
-                    float mom = pTrack->geometry()->momentum().mag();
-                    if( mom > 1 ) {
-                        mHistograms.at( "finalMatchPrimaryMom0_globalXY" )->Fill( match.globalPos.x() , match.globalPos.y() );
-                    }
-                    else if( mom > 0.5 ) {
-                        mHistograms.at( "finalMatchPrimaryMom1_globalXY" )->Fill( match.globalPos.x() , match.globalPos.y() );
-                    }
-                    else {
-                        mHistograms.at( "finalMatchPrimaryMom2_globalXY" )->Fill( match.globalPos.x() , match.globalPos.y() );
-                    }
-                }
-
                 StETofPidTraits* ppidTraits = new StETofPidTraits();
 
                 ppidTraits->setETofHit( hit );
@@ -1606,22 +1464,6 @@ StETofMatchMaker::fillPidTraits( eTofHitVec& finalMatchVec )
             if( pTrack ) {
                 nFinalMatchesPrimary++;
 
-                if( mDoQA ) {
-                    mHistograms.at( "finalMatchPrimary_globalXY" )->Fill( match.globalPos.x(), match.globalPos.y() );
-
-                    float mom = pTrack->momentum().mag();
-                    if( mom > 1 ) {
-                        mHistograms.at( "finalMatchPrimaryMom0_globalXY" )->Fill( match.globalPos.x() , match.globalPos.y() );
-                    }
-                    else if( mom > 0.5 ) {
-                        mHistograms.at( "finalMatchPrimaryMom1_globalXY" )->Fill( match.globalPos.x() , match.globalPos.y() );
-                    }
-                    else {
-                        mHistograms.at( "finalMatchPrimaryMom2_globalXY" )->Fill( match.globalPos.x() , match.globalPos.y() );
-                    }
-                }
-
-
                 hit->setIndex2Primary( pIndex );
                 pTrack->setIndex2ETofHit( match.index2ETofHit );
 
@@ -1650,22 +1492,17 @@ StETofMatchMaker::fillPidTraits( eTofHitVec& finalMatchVec )
 //
 //---------------------------------------------------------------------------
 void
-StETofMatchMaker::calculatePidVariables( eTofHitVec& finalMatchVec, int& nPrimaryWithPid )
+StETofMatchMaker::calculatePidVariables( eTofHitVec& finalMatchVec )
 {
-    double tstart = 0.;
-
+    double tstart = startTime();
     //TODO: introduce proper methods to decide which start-time will be used ( VPD/bTOF or eTOF ) in the future
-    if( !mIsSim ) {
-        tstart = startTime();
-        
-        if( fabs( tstart ) < 0.01 || fabs( tstart + 9999. ) < 0.01 ) {
-            if( mDebug ) {
-                LOG_INFO << "calculatePidVariables() -- no valid start time avaiable ... skip filling pidTraits with more information" << endm;
-            }
-            return;
-        }
-    }
 
+    if( !mIsSim && ( fabs( tstart ) < 0.01 || fabs( tstart + 9999. ) < 0.01 ) ) {
+        if( mDebug ) {
+            LOG_INFO << "calculatePidVariables() -- no valid start time avaiable ... skip filling pidTraits with more information" << endm;
+        }
+        return;
+    }
     
     if( mIsStEventIn ) { // StEvent processing ...
         // assign pathlength, time-of-flight, beta ... to the match candidates
@@ -1786,8 +1623,6 @@ StETofMatchMaker::calculatePidVariables( eTofHitVec& finalMatchVec, int& nPrimar
             if( ppidTraits ) {
                 ppidTraits->setPathLength( pathLength );
                 ppidTraits->setBeta( beta );
-
-                nPrimaryWithPid++;
             }
 
             if( mDebug ) {
@@ -1900,8 +1735,6 @@ StETofMatchMaker::calculatePidVariables( eTofHitVec& finalMatchVec, int& nPrimar
                 ppidTraits.setPathLength( pathLength );
                 ppidTraits.setBeta( beta ); 
                 pTrack->setETofPidTraits( ppidTraits );
-
-                nPrimaryWithPid++;
             }
 
             if( mDebug ) {
@@ -1999,8 +1832,6 @@ StETofMatchMaker::expectedTimeOfFlight( const double& pathLength, const double& 
 void
 StETofMatchMaker::fillQaHistograms( eTofHitVec& finalMatchVec )
 {
-    vector< int > nPidMatches( 36 );
-
     for( auto& matchCand : finalMatchVec ) {
 
         int charge;
@@ -2075,7 +1906,8 @@ StETofMatchMaker::fillQaHistograms( eTofHitVec& finalMatchVec )
             std::string histName_t0corr_mom_zoom = "matchCand_t0corr_mom_zoom_s" + std::to_string( matchCand.sector ) + "m" + std::to_string( matchCand.plane ) + "c" + std::to_string( matchCand.counter );
             mHistograms.at( histName_t0corr_mom_zoom )->Fill( mom, tof - tofpi );
             
-            if( sqrt( pow( matchCand.deltaX, 2 ) + pow( matchCand.deltaY, 2 ) ) < deltaRcut ) {
+            if( sqrt( pow( matchCand.deltaX, 2 ) )// + pow( matchCand.deltaY, 2 ) )
+                < deltaRcut ) {
 
                 mHistograms.at( "matchCand_beta_mom_matchDistCut" )->Fill( mom, 1. / beta );
                 mHistograms.at( "matchCand_m2_mom_matchDistCut"   )->Fill( mom, m2        );
@@ -2083,18 +1915,10 @@ StETofMatchMaker::fillQaHistograms( eTofHitVec& finalMatchVec )
                 std::string histName_t0corr_mom_zoom_cut  = "matchCand_t0corr_mom_zoom_cut_s" + std::to_string( matchCand.sector ) + "m" + std::to_string( matchCand.plane ) + "c" + std::to_string( matchCand.counter );
 
                 mHistograms.at( histName_t0corr_mom_zoom_cut )->Fill( mom, tof - tofpi );
-
-                nPidMatches.at( ( matchCand.sector - 13 ) * 3 + matchCand.plane - 1 ) += 1;
             }
 
             if( fabs(mom - 1) < 0.1 && dEdx > 0 ) mHistograms.at( "matchCand_dEdx_beta_mom1gev" )->Fill( 1. / beta, dEdx );
             if( fabs(mom - 2) < 0.1 && dEdx > 0 ) mHistograms.at( "matchCand_dEdx_beta_mom2gev" )->Fill( 1. / beta, dEdx );
-        }
-    }
-
-    if( mDoQA ) {
-        for( size_t i=0; i<36; i++ ) {
-            mHistograms.at( "matchCandMultPerSector_matchDistCut" )->Fill( i, nPidMatches.at( i ) );
         }
     }
 }
@@ -2184,7 +2008,7 @@ StETofMatchMaker::bookHistograms()
         // ----------
         // step - A -
         // ----------
-        mHistograms[ "eTofHits_phi_eta"  ] = new TH2F( "A_eTofHits_phi_eta",  "eta vs. phi; #phi; #eta", 400, 0., 2 * M_PI, 400,  -1.7, -0.9 );
+        mHistograms[ "eTofHits_phi_eta"  ] = new TH2F( "A_eTofHits_phi_eta",  "eta vs. phi; #phi; #eta", 400,    0., 2 * M_PI, 400,  -1.7, -0.9 );
 
         mHistograms[ "eTofHits_globalYZ" ] = new TH2F( "A_eTofHits_globalYZ", "global YZ for sector 18 & 24;y (cm);z (cm)", 400, -300., 300., 100, -310., -270. );
 
@@ -2207,19 +2031,19 @@ StETofMatchMaker::bookHistograms()
             }
         }
 
-        mHistograms[ "detectorHitMult" ]  = new TH1F( "A_detectorHitMult",  "detectorHitMult;multiplicity;# events",  200, 0., 200. );
+        mHistograms[ "detectorHitMult" ]  = new TH1F( "A_detectorHitMult",  "detectorHitMult;multiplicity;# events",  100, 0., 100. );
 
 
         // --------------
         // track-level QA
         // --------------
         mHistograms[ "track_phi_eta" ] = new TH2F( "QA_track_phi_eta", "eta vs. phi; #phi; #eta", 400, 0., 2 * M_PI, 800, -1.7, 1.7 );
-        mHistograms[ "track_phi_pt"  ] = new TH2F( "QA_track_phi_pt",  "pt vs. phi; #phi; p_{T}", 400, 0., 2 * M_PI, 400,  0.,  5.  );
+        mHistograms[ "track_phi_pt"  ] = new TH2F( "QA_track_phi_pt",  "pt vs. phi; #phi; #pt",   400, 0., 2 * M_PI, 400,   0.,  5. );
 
-        mHistograms[ "nHits" ]            = new TH1F( "QA_nHits",            "nHitsTpc;nHitsFit;# tracks",                75, 0., 75. );
-        mHistograms[ "nHits_etofregion" ] = new TH1F( "QA_nHits_etofregion", "nHitsTpc in etof region;nHitsFit;# tracks", 75, 0., 75. );
+        mHistograms[ "nHits" ]            = new TH1F( "QA_nHits",            "nHitsTpc;nHitsFit;# tracks",                50, 0., 50. );
+        mHistograms[ "nHits_etofregion" ] = new TH1F( "QA_nHits_etofregion", "nHitsTpc in etof region;nHitsFit;# tracks", 50, 0., 50. );
 
-        mHistograms[ "track_pt_nHits" ] = new TH2F( "QA_track_pt_nHits", "track nHitsTpc vs. p_{T};p_{T} (GeV/c);nHitsFit", 400, 0., 2., 75, 0., 75. );
+        mHistograms[ "track_pt_nHits" ] = new TH2F( "QA_track_pt_nHits", "track nHitsTpc vs. p_{T};p_{T} (GeV/c);nHitsFit", 400, 0., 2., 50, 0., 50. );
 
         mHistograms[ "trackProj_globalXY" ] = new TH2F( "QA_trackProj_globalXY", "global XY;x (cm);y (cm)", 400, -300.,     300., 400, -300., 300. );
         mHistograms[ "trackProj_phi_eta"  ] = new TH2F( "QA_trackProj_phi_eta",  "eta vs. phi; #phi; #eta", 400,    0., 2 * M_PI, 400,  -1.7, -0.9 );
@@ -2232,25 +2056,18 @@ StETofMatchMaker::bookHistograms()
         mHistograms[ "intersection_globalXY" ] = new TH2F( "B_intersection_globalXY", "global XY;x (cm);y (cm)", 400, -300.,     300., 400, -300., 300. );
         mHistograms[ "intersection_phi_eta"  ] = new TH2F( "B_intersection_phi_eta",  "eta vs. phi; #phi; #eta", 400,    0., 2 * M_PI, 400,  -1.7, -0.9 );
 
-        mHistograms[ "intersectionMult" ]         = new TH1F( "B_intersectionMult",         "intersectionMult;multiplicity;# events",                    200, 0., 200. );
-        mHistograms[ "intersectionMult_primary" ] = new TH1F( "B_intersectionMult_primary", "intersectionMult for primary tracks;multiplicity;# events", 200, 0., 200. );
+        mHistograms[ "intersectionMult" ]         = new TH1F( "B_intersectionMult",         "intersectionMult;multiplicity;# events",                    100, 0., 100. );
+        mHistograms[ "intersectionMult_primary" ] = new TH1F( "B_intersectionMult_primary", "intersectionMult for primary tracks;multiplicity;# events", 100, 0., 100. );
 
         mHistograms[ "intersection_perTrack" ] = new TH1F( "B_intersection_perTrack", "intersections per track;# intersections;# tracks", 50, 0., 50. );  
 
 
         // track-level QA plots for tracks that have an intersection with eTof volume(s)
-        mHistograms[ "intersection_primaryTrack_globalXY" ] = new TH2F( "B_intersection_primaryTrack_globalXY", "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
-        mHistograms[ "intersection_primaryTrackMom0_globalXY" ] = new TH2F( "B_intersection_primaryTrackMom0_globalXY", "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
-        mHistograms[ "intersection_primaryTrackMom1_globalXY" ] = new TH2F( "B_intersection_primaryTrackMom1_globalXY", "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
-        mHistograms[ "intersection_primaryTrackMom2_globalXY" ] = new TH2F( "B_intersection_primaryTrackMom2_globalXY", "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
-
-
-
         mHistograms[ "intersection_track_pt_eta"  ] = new TH2F( "B_intersection_track_pt_eta",  "eta vs. pt;p_{T} (GeV/c);#eta", 400, 0.,       5., 400, -2.,     -0.7 );
         mHistograms[ "intersection_track_pt_phi"  ] = new TH2F( "B_intersection_track_pt_phi",  "phi vs. pt;p_{T} (GeV/c);#phi", 400, 0.,       5., 400,  0., 2 * M_PI );
         mHistograms[ "intersection_track_phi_eta" ] = new TH2F( "B_intersection_track_phi_eta", "eta vs. phi;#phi;#eta",         400, 0., 2 * M_PI, 400, -2.,     -0.9 );
 
-        mHistograms[ "intersection_track_nHitsTpc" ] = new TH1F( "B_intersection_track_nHitsTpc", "nHitsTpc;nHitsFit;# tracks", 75, 0., 75. );
+        mHistograms[ "intersection_track_nHitsTpc" ] = new TH1F( "B_intersection_track_nHitsTpc", "nHitsTpc;nHitsFit;# tracks", 50, 0., 50. );
 
         mHistograms[ "intersection_track_mom_dEdx"     ] = new TH2F( "B_intersection_track_mom_dEdx",     "dE/dx vs. mom;mom (GeV/c);dE/dx (keV/cm)",     100, 0., 5., 100,   0., 10. );
         mHistograms[ "intersection_track_mom_nsigmaPi" ] = new TH2F( "B_intersection_track_mom_nsigmaPi", "n#sigma_{#pi} vs. mom; mom (GeV/c);n#sigma_{#pi}", 100, 0., 5., 100, -10., 10. );  
@@ -2298,7 +2115,7 @@ StETofMatchMaker::bookHistograms()
         mHistograms[ "matchCand_deltaX_nHitsTpc" ] = new TH2F( "C_matchCand_deltaX_nHitsTpc" , "match candidate delta X vs. nHitsFit in TPC;nHitsFit in TPC;match candidate #DeltaX (cm)", 50, 0., 50., 400, -15., 15. );
         mHistograms[ "matchCand_deltaY_nHitsTpc" ] = new TH2F( "C_matchCand_deltaY_nHitsTpc" , "match candidate delta Y vs. nHitsFit in TPC;nHitsFit in TPC;match candidate #DeltaY (cm)", 50, 0., 50., 400, -15., 15. );
 
-        mHistograms[ "matchCandMult" ] = new TH1F( "C_matchCandMult", "matchCandMult;multiplicity;# events", 200, 0., 200. );
+        mHistograms[ "matchCandMult" ] = new TH1F( "C_matchCandMult", "matchCandMult;multiplicity;# events", 100, 0., 100. );
 
 
         // ----------
@@ -2306,7 +2123,7 @@ StETofMatchMaker::bookHistograms()
         // ----------
         mHistograms[ "trackMatchMultPerDetectorHit" ] = new TH1F( "D_trackMatchMultPerDetectorHit", "multiplicity of tracks pointing to the same detector hit;#tracks;#detector hits", 15, 0., 15. );
 
-        mHistograms[ "singleTrackMatchMult" ] = new TH1F( "D_singleTrackMatchMult", "singleTrackMatchMult;multiplicity;# events", 200, 0., 200. );
+        mHistograms[ "singleTrackMatchMult" ] = new TH1F( "D_singleTrackMatchMult", "singleTrackMatchMult;multiplicity;# events", 100, 0., 100. );
 
 
         // ----------
@@ -2316,27 +2133,20 @@ StETofMatchMaker::bookHistograms()
 
         mHistograms[ "finalMatch_pt" ] = new TH1F( "E_finalMatch_pt", "p_{T} distribution of matched tracks", 200, 0., 2. );
 
-        mHistograms[ "finalMatchMult" ] = new TH1F( "E_finalMatchMult", "finalMatchMult;multiplicity;# events", 200, 0., 200. );
+        mHistograms[ "finalMatchMult" ] = new TH1F( "E_finalMatchMult", "finalMatchMult;multiplicity;# events", 100, 0., 100. );
 
-        mHistograms[ "overlapHit_globalXY" ] = new TH2F( "E_overlapHit_globalXY", "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
-        
 
         // ----------
         // step - F -
         // ----------
 
-        mHistograms[ "finalMatchMultGlobal"  ] = new TH1F( "F_finalMatchMultGlobal",  "finalMatchMultGlobal;multiplicity;# events",  200, 0., 200. );
-        mHistograms[ "finalMatchMultPrimary" ] = new TH1F( "F_finalMatchMultPrimary", "finalMatchMultPrimary;multiplicity;# events", 200, 0., 200. );
+        mHistograms[ "finalMatchMultGlobal"  ] = new TH1F( "F_finalMatchMultGlobal",  "finalMatchMultGlobal;multiplicity;# events",  100, 0., 100. );
+        mHistograms[ "finalMatchMultPrimary" ] = new TH1F( "F_finalMatchMultPrimary", "finalMatchMultPrimary;multiplicity;# events", 100, 0., 100. );
 
-        mHistograms[ "finalMatchPrimary_globalXY" ] = new TH2F( "F_finalMatchPrimary_globalXY", "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
-        mHistograms[ "finalMatchPrimaryMom0_globalXY" ] = new TH2F( "F_finalMatchPrimaryMom0_globalXY", "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
-        mHistograms[ "finalMatchPrimaryMom1_globalXY" ] = new TH2F( "F_finalMatchPrimaryMom1_globalXY", "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
-        mHistograms[ "finalMatchPrimaryMom2_globalXY" ] = new TH2F( "F_finalMatchPrimaryMom2_globalXY", "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
 
         // ----------
         // step - G -
         // ----------
-        mHistograms[ "primaryIntersect_Pid" ] = new TH2F( "G_primaryIntersection_Pid", "primary tracks at eTOF;# tracks with intersection;# tracks with PID", 200, 0., 200., 100, 0., 100. );
 
         mHistograms[ "matchCand_timeOfFlight" ] = new TH1F( "G_matchCand_timeOfFlight", "match candidate time of flight;ToF (ns);# match candidates", 2000, -400., 600. );
 
@@ -2346,8 +2156,6 @@ StETofMatchMaker::bookHistograms()
         mHistograms[ "matchCand_beta_mom"     ] = new TH2F( "G_matchCand_beta_mom"     , "match candidate 1/beta vs. momentum;p (GeV/c);1/#beta",         400,   0., 10., 1000, 0.8, 2. );
 
         mHistograms[ "matchCand_beta_mom_matchDistCut" ] = new TH2F( "G_matchCand_beta_mom_matchDistCut" , "match candidate 1/beta vs. momentum;p (GeV/c);1/#beta", 400, 0., 10., 1000, 0.8, 2. );
-
-        mHistograms[ "matchCandMultPerSector_matchDistCut" ] = new TH2F( "G_matchCandMultPerSector_matchDistCut" , "matchCandMultPerSector_matchDistCut;module;# matches per event", 36, 0, 36, 25, 0, 25 );
 
 
         mHistograms[ "matchCand_m2_signmom" ] = new TH2F( "G_matchCand_m2_signmom" , "match candidate m^{2} vs. momentum;q/|q| * p (GeV/c);m^{2} (GeV^{2}/c^{4})", 400, -10., 10., 1000, -0.2, 1.3 );
