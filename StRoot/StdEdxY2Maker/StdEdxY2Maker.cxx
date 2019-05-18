@@ -574,6 +574,8 @@ Int_t StdEdxY2Maker::Make(){
 	Int_t p2 = tpcHit->maxPad();
 	Int_t t1 = tpcHit->minTmbk();
 	Int_t t2 = tpcHit->maxTmbk();
+	CdEdx[NdEdx].npads = p2 - p1 + 1;
+	CdEdx[NdEdx].ntmbks = t2 - t1 + 1;
 	CdEdx[NdEdx].rCharge=  0.5*m_TpcdEdxCorrection->Adc2GeV()*TMath::Pi()/4.*(p2-p1+1)*(t2-t1+1);
 	if (TESTBIT(m_Mode, kEmbeddingShortCut) && 
 	    (tpcHit->idTruth() && tpcHit->qaTruth() > 95)) CdEdx[NdEdx].lSimulated = tpcHit->idTruth();
@@ -1601,13 +1603,13 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
       for (Int_t k = 0; k < kTotalMethods/2; k++) {
 	const Char_t *parN[5] = {"","pi","e","K","P"};
 	const Char_t *parT[5] = {"All","|nSigmaPion| < 1","|nSigmaElectron| < 1","|nSigmaKaon| < 1","|nSigmaProton| < 1"};
-	Double_t ymin = 0, ymax = 2.5;
+	Double_t ymin = -1, ymax = 2.5;
 	if (k == 2) {ymin = 0.75; ymax = 3.25;}
 	for (Int_t t = 0; t < 5; t++) {
 	  TString Title(Form("log10(dE/dx(%s)(keV/cm)) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm %s",FitName[k],parT[t]));
 	  if (k == 2) Title = Form("log10(dN/dx) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm %s",parT[t]);
 	  fTdEdx[k][t] = new TH2F(Form("TdEdx%s%s",FitName[k],parN[t]),Title,
-				  300,-1.,2., 500, ymin, ymax);
+				  300,-1.,2., 700, ymin, ymax);
 	  fTdEdx[k][t]->SetMarkerStyle(1);
 	  fTdEdx[k][t]->SetMarkerColor(t+1);
 	}
