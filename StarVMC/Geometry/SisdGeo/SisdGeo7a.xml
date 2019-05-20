@@ -527,15 +527,17 @@
     <!-- Create the SSD mother volume and place it w/in the IDSM, flagging it as overlapping -->
      <Create    block="SFMO" />
 
-     <Placement block="SFMO" in="IDSM" konly="ONLY" if="SSDP_placement==1" >
-       <!-- 
-       <Misalign table="Geometry/sst/sstOnOsc" opts="left" />
-       -->
+     <Placement block="SFMO" in="IDSM" konly="ONLY" if="SSDP_placement==1" >       
+
+	 <Misalign table="Geometry/sst/sstOnOsc" opts="left" />
+
      </Placement>
-     <Placement block="SFMO" in="CAVE" konly="MANY" if="SSDP_placement==0" >
-       <!--
-       <Misalign table="Geometry/sst/sstOnOsc" opts="left" />
-       -->
+
+     <Placement block="SFMO" in="CAVE" konly="MANY" if="SSDP_placement==0" >       
+
+	 <Misalign table="Geometry/sst/sstOnOsc" opts="left" />       
+	 <Misalign table="Geometry/sst/oscOnTpc" opts="left" />
+
      </Placement>
 
 
