@@ -545,7 +545,7 @@ void StBemcTriggerSimu::Make(){
   }
 
   //pp
-  if ((year>=2009)&&(yyyymmdd>20090101)) {
+  if ((year>=2009)&&(yyyymmdd>20090101) && (year!=2013)) {
     get2009_DSMLayer0();
     get2009_DSMLayer1();
   }
@@ -553,7 +553,7 @@ void StBemcTriggerSimu::Make(){
   // mod by Danny to grab 2013 DSM layers
   Int_t runnumber = StMaker::GetChain()->GetRunNumber();
   //pp
-  if ((year>=2013)&&(yyyymmdd>20130101)) {
+  if ((year==2013)&&(yyyymmdd>20130101)) {
     get2013_DSMLayer0(runnumber);
     get2013_DSMLayer1(runnumber);
   }
