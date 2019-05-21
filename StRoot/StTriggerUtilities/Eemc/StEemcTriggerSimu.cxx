@@ -417,7 +417,7 @@ StEemcTriggerSimu::Make(){
   //if(mDumpEve) printf("\nzzzzz===================================================\n\n");
   }// #### modified line by Liaoyuan 
   // #### modified by Liaoyuan ####
-  else if( mYear >= 2009 ){
+  else if( mYear >= 2009 && mYear != 2013){
     get2009_DSMLayer0();
     get2009_DSMLayer1();
   }
@@ -425,7 +425,7 @@ StEemcTriggerSimu::Make(){
 
   // #### modified by Danny ####
   Int_t runnumber = StMaker::GetChain()->GetRunNumber();
-  if( mYear >= 2013 ){
+  if( mYear == 2013 ){
     get2013_DSMLayer0(runnumber);
     get2013_DSMLayer1(runnumber);
   }
@@ -837,6 +837,9 @@ void StEemcTriggerSimu::fillStEmcTriggerDetector()
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.51  2019/05/21 19:27:14  zchang
+// make changes for the trigger simulator to only use 2013 algorithms for that year, not for later years, later years still use 2009 algorithms
+//
 // Revision 1.50  2017/01/02 15:31:56  rfatemi
 // Updated by Danny OLVITT for 2013 dijet analysiss
 //
