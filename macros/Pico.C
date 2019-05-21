@@ -271,7 +271,7 @@ void Pico(const Char_t *files ="./*.picoDst.root",
   for (Int_t k = 0; k < kTotalMethods; k++) {
     const Char_t *parN[5] = {"","pi","e","K","P"};
     const Char_t *parT[5] = {"All","|nSigmaPion| < 1","|nSigmaElectron| < 1","|nSigmaKaon| < 1","|nSigmaProton| < 1"};
-    const Char_t *FitName[3] = {"I70","F","N"};
+    const Char_t *FitName[3] = {"F","I70","N"};
     Double_t ymin = 0, ymax = 2.5;
     if (k == 2) {ymin = 0.75; ymax = 3.25;}
     for (Int_t t = 0; t < 1; t++) {//5; t++) {

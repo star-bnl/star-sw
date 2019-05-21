@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<job maxFilesPerProcess="10" fileListSyntax="paths" simulateSubmission ="false" copyInputLocally="false"> 
+<job maxFilesPerProcess="1" fileListSyntax="paths" simulateSubmission ="false" copyInputLocally="false"> 
 <!-- <job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="paths" copyInputLocally="false"> -->
 	<command>
          cd ${SUBMITTINGDIRECTORY}
@@ -24,7 +24,7 @@
 	</command>
 	<stdout URL="file:./sched$JOBID.log" />
 	<stderr URL="file:./sched$JOBID.err" />
-<input URL="command:lsdir.pl" />
+<input URL="command:Pico.pl"/>
 <!-- <input URL="command:CosmicsAnalysis.pl" /> -->
 <!-- <input URL="command:EandBSample.pl" /> -->
 <!-- <input URL="file:/gpfs01/star/pwg/iraklic/iTPC/Cosmics/Cosmics2018/*event.root" /> -->
