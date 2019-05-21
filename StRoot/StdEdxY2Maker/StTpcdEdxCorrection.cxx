@@ -124,6 +124,7 @@ void StTpcdEdxCorrection::ReSetCorrections() {
       if (! cor || ! N) {
 	goto EMPTY;
       }
+      N = cor->nrows;
       for (Int_t i = 0; i < N; i++, cor++) {
 	if (cor->nrows == 0 && cor->idx == 0) continue;
 	if (TMath::Abs(cor->npar) > 0       ||
