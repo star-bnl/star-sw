@@ -77,7 +77,7 @@ struct HitPoint_t {
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.88 2019/04/29 20:11:21 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.89 2019/05/22 21:30:58 fisyak Exp $";
 #define __ClusterProfile__
 static Bool_t ClusterProfile = kFALSE;
 #define Laserino 170
@@ -202,6 +202,7 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     LOG_INFO << "StTpcRSMaker:: use Tpc dE/dx correction from calibaration" << endm;
     Int_t Mask = -1; // 22 bits
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection);
+    CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrectionMDF);
     CLRBIT(Mask,StTpcdEdxCorrection::kdXCorrection);
     //    CLRBIT(Mask,StTpcdEdxCorrection::kEdge);
     //    CLRBIT(Mask,StTpcdEdxCorrection::kTanL);
@@ -719,7 +720,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
       Int_t ID = 0;
       Int_t TrackDirection = 0; // 0 - increase no of row, 1 - decrease no of. row.
       for (nSegHits = 0, sIndex = sortedIndex;  
-	   sIndex < no_tpc_hits && nSegHits < NoMaxTrackSegmentHits - 1; sIndex++) {
+	   sIndex < no_tpc_hits && nSegHits < NoMaxTrackSegmentHits; sIndex++) {
 	indx = sorter.GetIndex(sIndex);
 	g2t_tpc_hit_st *tpc_hitC = tpc_hit_begin + indx;
 	if ((tpc_hitC->volume_id%10000)/100 != sector) break;
@@ -742,7 +743,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	if (tpc_hitC->length == 0 && nSegHits > 0) {
 	  TrackSegmentHits[nSegHits].s = TrackSegmentHits[nSegHits-1].s + TrackSegmentHits[nSegHits].tpc_hitC->ds;
 	}
-	if (!TrackSegment2Propagate(tpc_hitC, &gver[id3-1],TrackSegmentHits[nSegHits])) break;
+	TrackSegment2Propagate(tpc_hitC, &gver[id3-1],TrackSegmentHits[nSegHits]);
  	if (TrackSegmentHits[nSegHits].Pad.timeBucket() < 0 || TrackSegmentHits[nSegHits].Pad.timeBucket() > NoOfTimeBins) continue;
 	nSegHits++;
       }
@@ -757,7 +758,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	       << endl;
 	}
       }
-      sortedIndex = sIndex;
+      sortedIndex = sIndex-1; // Irakli 05/06/19, reduce extra step in for loop
       Double_t s = msMin;
       memset (rowsdE, 0, sizeof(rowsdE));
       for (Int_t iSegHits = 0; iSegHits < nSegHits && s < msMax; iSegHits++) {
@@ -929,7 +930,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    NoElPerAdc = St_TpcResponseSimulatorC::instance()->NoElPerAdcO(); // outer TPX
 	  }
 	}
+#ifndef __NO_1STROWCORRECTION__
 	if (row == 1) dEdxCor *= TMath::Exp(St_TpcResponseSimulatorC::instance()->FirstRowC());
+#endif /* __NO_1STROWCORRECTION__ */
 	mGainLocal = Gain/dEdxCor/NoElPerAdc; // Account dE/dx calibration
 	// end of dE/dx correction
 	// generate electrons: No. of primary clusters per cm
@@ -1066,11 +1069,15 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    // Transport to wire
 	    if (y <= lastInnerSectorAnodeWire) {
 	      WireIndex = TMath::Nint((y - firstInnerSectorAnodeWire)/anodeWirePitch) + 1;
+#ifndef __NO_1STROWCORRECTION__
 	      if (St_tpcPadConfigC::instance()->iTPC(sector)) {// two first and two last wires are removed, and 3rd wire is fat wiere
 		if (WireIndex <= 3 || WireIndex >= numberOfInnerSectorAnodeWires - 3) continue;
 	      } else { // old TPC the first and last wires are fat ones
 		if (WireIndex <= 1 || WireIndex >= numberOfInnerSectorAnodeWires) continue;
 	      }
+#else /* __NO_1STROWCORRECTION__ */
+	      if (WireIndex <= 1 || WireIndex >= numberOfInnerSectorAnodeWires) continue; // to check the 1-st pad row effect
+#endif /* ! __NO_1STROWCORRECTION__ */
 	      yOnWire = firstInnerSectorAnodeWire + (WireIndex-1)*anodeWirePitch;
 	    } else { // the first and last wires are fat ones
 	      WireIndex = TMath::Nint((y - firstOuterSectorAnodeWire)/anodeWirePitch) + 1;
@@ -2103,8 +2110,11 @@ Double_t StTpcRSMaker::dEdxCorrection(HitPoint_t &TrackSegmentHits) {
 //________________________________________________________________________________
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.88 2019/04/29 20:11:21 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.89 2019/05/22 21:30:58 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.89  2019/05/22 21:30:58  fisyak
+// Fix bug3390 (thanks to Irakli), add St_TpcAdcCorrectionMDF
+//
 // Revision 1.88  2019/04/29 20:11:21  fisyak
 // Fix for TrackDirection, add extra correction for the 1st pad row
 //
