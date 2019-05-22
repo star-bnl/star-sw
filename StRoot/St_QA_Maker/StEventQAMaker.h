@@ -38,6 +38,8 @@ class StEventQAMaker : public StQAMakerBase {
   Float_t vertExists;   // prim vertex : none/questionable/good
   Bool_t printTpcHits;  // mode to output TPC hit positions
   Int_t qaEvents;       // number of events looked at
+  Float_t runFreq;      // clock frequency for current run
+  Float_t evtTime;      // time since the start of the run [sec]
   
   static const Int_t mNVPD = 19;
   static const Int_t mEastVpdTrayId = 121;
@@ -85,15 +87,18 @@ class StEventQAMaker : public StQAMakerBase {
 
   /// the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.25 2019/03/14 02:31:53 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.26 2019/05/22 21:24:31 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
   ClassDef(StEventQAMaker,0)   //StAF chain virtual base class for Makers
 };
     
 #endif
 
-// $Id: StEventQAMaker.h,v 2.25 2019/03/14 02:31:53 genevb Exp $
+// $Id: StEventQAMaker.h,v 2.26 2019/05/22 21:24:31 genevb Exp $
 // $Log: StEventQAMaker.h,v $
+// Revision 2.26  2019/05/22 21:24:31  genevb
+// Add sDCA vs. time-in-run
+//
 // Revision 2.25  2019/03/14 02:31:53  genevb
 // Introduce iTPC plots
 //
