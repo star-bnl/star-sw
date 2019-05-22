@@ -98,6 +98,7 @@ StQAMakerBase(name,title,"StE"), event(0), primVtx(0), mHitHist(0), mPmdGeom(0),
   n_glob_good = 0;
   multiplicity = 0;
   qaEvents = 0;
+  evtTime = -1;
 }
 
 //_____________________________________________________________________________
@@ -183,6 +184,10 @@ Int_t StEventQAMaker::Make() {
   Int_t evClasses[32];
   memset(evClasses,0,32*sizeof(Int_t));
   Int_t nEvClasses = 1;
+  StTriggerData* trg = event->triggerData();
+  evtTime = (trg ?
+    ((double) (trg->bunchCounter())) / ((double) (St_starClockOnlC::instance()->Frequency())) :
+    -1);
   Int_t run_num = event->runId();
   // Determine run year from run # (Oct. 1 goes to next year)
   // e.g run 8350999 is run year 9, as is run 9071999 
@@ -600,6 +605,7 @@ void StEventQAMaker::MakeHistGlob() {
 
       hists->m_glb_impactT->Fill(logImpact,2.);
       hists->m_glb_simpactT->Fill(sImpact,2.);
+      m_glb_simpactTime->Fill(evtTime,sImpact);
       if ((firstPoint.z() < 0) && (lastPoint.z() < 0)) { // east-only
         hists->m_glb_impactT->Fill(logImpact,0.);
         hists->m_glb_simpactT->Fill(sImpact,0.);
@@ -2930,8 +2936,11 @@ void StEventQAMaker::MakeHistiTPC() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.137 2019/03/14 02:31:52 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.138 2019/05/22 21:24:31 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.138  2019/05/22 21:24:31  genevb
+// Add sDCA vs. time-in-run
+//
 // Revision 2.137  2019/03/14 02:31:52  genevb
 // Introduce iTPC plots
 //

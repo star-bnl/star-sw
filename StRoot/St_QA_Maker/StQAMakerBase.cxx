@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.53 2019/03/26 15:29:38 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.54 2019/05/22 21:24:31 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.54  2019/05/22 21:24:31  genevb
+// Add sDCA vs. time-in-run
+//
 // Revision 2.53  2019/03/26 15:29:38  genevb
 // Introduce ETOF
 //
@@ -216,6 +219,9 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
 
 // TPC dE/dx over time
   m_dedx_Z3A=0; // dE/dx vs. drift distance
+
+// signed DCA (impact parameter) over time
+  m_glb_simpactTime=0; 
 
 // Roman-Pot histograms
 //  m_RP_ClusterLength=0; // testing
@@ -453,6 +459,10 @@ void StQAMakerBase::BookHistGeneral(){
   }
   m_pnt_rpTQW    = QAH::H2F("QaPointRPTpcQW","point: r-phi distribution of charge, tpcW",20,58.75,196.75,72,0,TMath::TwoPi());
   m_pnt_rpTQE    = QAH::H2F("QaPointRPTpcQE","point: r-phi distribution of charge, tpcE",20,58.75,196.75,72,0,TMath::TwoPi());
+
+  m_glb_simpactTime = QAH::H2F("QaGtrkSImpactTime","globtrk: signed impact param from prim vtx vs. time",
+     18000,0.,3600.,120,-3.0,3.0);
+
 }
 //_____________________________________________________________________________
 void StQAMakerBase::BookHistTrigger(){  
