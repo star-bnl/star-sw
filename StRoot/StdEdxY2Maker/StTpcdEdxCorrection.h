@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.13 2018/10/17 20:45:26 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.14 2019/05/22 21:30:58 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -39,34 +39,35 @@ class StTpcdEdxCorrection : public TObject {
     kUncorrected           =  0,//U   				           
     kEdge                  =  1,//E   correction near edge of chamber	     
     kAdcCorrection         =  2,//R  					     
-    kTpcdCharge            =  3,//D  					     
-    kTpcrCharge            =  4,//D  					     
-    kTpcCurrentCorrection  =  5,//      					     
-    kTpcRowQ               =  6,//   	 					       	   
-    kTpcSecRowB            =  7,//S  					     
-    kTpcSecRowC            =  8,//S  					     
-    ktpcPressure           =  9,//P  					     
-    ktpcTime               = 10,//t  					     
-    kDrift                 = 11,//O  					     
-    kMultiplicity          = 12,//M  					     
-    kzCorrection           = 13,//Z  					     
-    ktpcMethaneIn          = 14,//m  					     
-    ktpcGasTemperature     = 15,//T  					     
-    ktpcWaterOut           = 16,//W   				7       	   
-    kSpaceCharge           = 17,//C   space charge near the wire	       	   
-    kPhiDirection          = 18,//p   correction wrt local interception angle  
-    kTanL                  = 19,//p   correction wrt local tan(lambda)  
-    kdXCorrection          = 20,//X  					     
-    kTpcEffectivedX        = 21,//X   Effective pad row height
-    kTpcPadTBins           = 22,//d  					     
-    kTpcZDC                = 23,//   					     
-    kTpcPadMDF             = 24, 
-    kTpcLast               = 25,//                                             
-    kTpcNoAnodeVGainC      = 26,//   					     
-    kTpcLengthCorrection   = 27,//                                             
-    kTpcLengthCorrectionMDF= 28,//   					   
-    kTpcdEdxCor            = 29,//   					   
-    kTpcAllCorrections     = 30 //                                             
+    kAdcCorrectionMDF      =  3,//RMDF  					     
+    kTpcdCharge            =  4,//D  					     
+    kTpcrCharge            =  5,//D  					     
+    kTpcCurrentCorrection  =  6,//      					     
+    kTpcRowQ               =  7,//   	 					       	   
+    kTpcSecRowB            =  8,//S  					     
+    kTpcSecRowC            =  9,//S  					     
+    ktpcPressure           = 10,//P  					     
+    ktpcTime               = 11,//t  					     
+    kDrift                 = 12,//O  					     
+    kMultiplicity          = 13,//M  					     
+    kzCorrection           = 14,//Z  					     
+    ktpcMethaneIn          = 15,//m  					     
+    ktpcGasTemperature     = 16,//T  					     
+    ktpcWaterOut           = 17,//W   				7       	   
+    kSpaceCharge           = 18,//C   space charge near the wire	       	   
+    kPhiDirection          = 19,//p   correction wrt local interception angle  
+    kTanL                  = 20,//p   correction wrt local tan(lambda)  
+    kdXCorrection          = 21,//X  					     
+    kTpcEffectivedX        = 22,//X   Effective pad row height
+    kTpcPadTBins           = 23,//d  					     
+    kTpcZDC                = 24,//   					     
+    kTpcPadMDF             = 25, 
+    kTpcLast               = 26,//                                             
+    kTpcNoAnodeVGainC      = 27,//   					     
+    kTpcLengthCorrection   = 28,//                                             
+    kTpcLengthCorrectionMDF= 29,//   					   
+    kTpcdEdxCor            = 30,//   					   
+    kTpcAllCorrections     = 31 //                                             
   };
   StTpcdEdxCorrection(Int_t Option=0, Int_t debug=0);
   ~StTpcdEdxCorrection();
@@ -105,10 +106,6 @@ class StTpcdEdxCorrection : public TObject {
   Float_t              mAdc2GeV;                //! Outer/Inner conversion factors from ADC -> GeV
   dEdxCorrection_t     m_Corrections[kTpcAllCorrections];//!
   Int_t                m_Debug;                 //!
-  TF1                 *f1000;
-  TF1                 *f1100;
-  TF1                 *f1200;
-  TF1                 *f1300;
 };
 //________________________________________________________________________________
 class dEdxY2_t {
@@ -159,6 +156,8 @@ class dEdxY2_t {
   Float_t  tpcTime;
   dE_t     C[StTpcdEdxCorrection::kTpcAllCorrections+1];
   dE_t     F;     //! 
+  Int_t    npads; // cluster size in pads
+  Int_t    ntmbks;// clustre size in time buckets
   Char_t   last[1];
   void Reset() {memset(first, 0, last - first);}
 }; 

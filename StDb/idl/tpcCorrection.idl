@@ -22,6 +22,10 @@ struct tpcCorrection {
                 // type = 1000 + 100; gaus(0)+pol1(3)
                 // type = 1000 + 200; gaus(0)+pol2(3)
                 // type = 1000 + 300; gaus(0)+pol3(3)
+                // type = 2000      ; expo(0)+pol0(2);
+                // type = 2000 + 100; expo(0)+pol1(2)
+                // type = 2000 + 200; expo(0)+pol2(2)
+                // type = 2000 + 300; expo(0)+pol3(2)
   long   idx; // row index
   long   nrows; // total no. of real rows in the table; For Db interface (where nrows = 50)
   long   npar;  // npar < 0, X = exp(x) paramterization; abs(npar) >= 100 cut on range [min.max]
