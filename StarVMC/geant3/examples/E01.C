@@ -1,4 +1,4 @@
-// $Id: E01.C,v 1.2 2009/02/25 00:08:12 fisyak Exp $
+// $Id$
 //
 // Macro for running Example01 with Geant3 
 // Before running this macro, the libexampl01.so library
@@ -6,10 +6,8 @@
 // and run make.
 // Note that this macro is a simplified version of the equivalent macro
 // in the geant4_vmc/examples/E01 directory
-class   Ex01MCApplication;
-Ex01MCApplication* appl = 0;
 
-void E01(){
+{
   // Load basic libraries
   gSystem->Load("libGeom");
   gSystem->Load("libVMC");
@@ -24,12 +22,12 @@ void E01(){
   gSystem->Load("../lib/tgt_linux/libgeant321");
   
   // Load this example library
-  gSystem->Load("../../geant4_vmc/lib/tgt_linux/libexample01");
+  gSystem->Load("~/geant4_vmc/lib/tgt_linux/libexample01");
 
   // MC application
-  appl 
+  Ex01MCApplication* appl 
     = new Ex01MCApplication("Example01", "The example01 VMC application");
 
   appl->InitMC("E01_g3Config.C");
-  //  appl->RunMC(1);
+  appl->RunMC(1);
 }  

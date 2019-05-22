@@ -15,9 +15,6 @@
 
 /*
 $Log: gcadd.cxx,v $
-Revision 1.1.1.3  2009/02/18 20:31:44  fisyak
-*** empty log message ***
-
 Revision 1.1.1.1  2002/07/24 15:56:24  rdm
 initial import into CVS
 

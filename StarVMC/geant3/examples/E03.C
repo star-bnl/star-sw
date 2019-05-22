@@ -1,4 +1,4 @@
-// $Id: E03.C,v 1.2 2009/02/25 00:08:12 fisyak Exp $
+// $Id$
 //
 // Macro for running Example03 with Geant3 
 // Before running this macro, the libexampl03.so library
@@ -22,7 +22,7 @@
   gSystem->Load("../lib/tgt_linux/libgeant321.so");
   
   // Load this example library
-  gSystem->Load("../../geant4_vmc/lib/tgt_linux/libexample03");
+  gSystem->Load("~/geant4_vmc/lib/tgt_linux/libexample03");
 
   // MC application
   Ex03MCApplication* appl 

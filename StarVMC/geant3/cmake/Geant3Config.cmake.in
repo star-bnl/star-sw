@@ -9,9 +9,9 @@
 
 # Configuration file for CMake build for Geant4 VMC packages.
 # It defines the following variables
-#  Geant3_INCLUDE_DIRS      - include directories for Geant4VMC
-#  Geant3_LIBRARIES         - libraries to link against
-#  CMAKE_INSTALL_LIBDIR        - library installation directory
+#  Geant3_INCLUDE_DIRS         - include directories for Geant4VMC
+#  Geant3_LIBRARIES            - libraries to link against
+#  Geant3_CMAKE_INSTALL_LIBDIR - library installation directory
 #
 # I. Hrivnacova, 13/06/2014
 
@@ -23,7 +23,7 @@ get_filename_component(_prefix "${_dir}/../.." ABSOLUTE)
 include("${_prefix}/@CMAKE_INSTALL_LIBDIR@/Geant3-@Geant3_VERSION@/Geant3Targets.cmake")
  
 # Import options
-set(CMAKE_INSTALL_LIBDIR @CMAKE_INSTALL_LIBDIR@)
+set(Geant3_CMAKE_INSTALL_LIBDIR @CMAKE_INSTALL_LIBDIR@)
 
 # These are IMPORTED targets created by Geant4VMCTargets.cmake
 set(Geant3_LIBRARIES geant321)

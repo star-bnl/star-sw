@@ -1,10 +1,7 @@
 /*
- * $Id: ishftr.c,v 1.2 2018/06/28 16:14:57 fisyak Exp $
+ * $Id$
  *
  * $Log: ishftr.c,v $
- * Revision 1.2  2018/06/28 16:14:57  fisyak
- * Merge with geant3
- *
  * Revision 1.1.1.1  2002/06/16 15:18:47  hristov
  * Separate distribution  of Geant3
  *

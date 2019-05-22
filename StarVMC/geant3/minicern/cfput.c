@@ -1,10 +1,7 @@
 /*
- * $Id: cfput.c,v 1.2 2018/06/28 19:26:56 fisyak Exp $
+ * $Id$
  *
  * $Log: cfput.c,v $
- * Revision 1.2  2018/06/28 19:26:56  fisyak
- * Merge with geant3
- *
  * Revision 1.1.1.1  2002/07/24 15:56:28  rdm
  * initial import into CVS
  *

@@ -16,7 +16,7 @@ cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
 #-- ROOT (required) ------------------------------------------------------------
 if(NOT ROOT_FOUND)
   find_package(ROOT REQUIRED)
-endif(NOT ROOT_FOUND)  
+endif(NOT ROOT_FOUND)
 include_directories(${ROOT_INCLUDE_DIRS})
 
 #-------------------------------------------------------------------------------
@@ -25,7 +25,7 @@ include_directories(${ROOT_INCLUDE_DIRS})
 include_directories(
   ${PROJECT_SOURCE_DIR}
   ${PROJECT_SOURCE_DIR}/minicern
-  ${PROJECT_SOURCE_DIR}/TGeant3 
+  ${PROJECT_SOURCE_DIR}/TGeant3
   ${CMAKE_CURRENT_BINARY_DIR})
 
 #-------------------------------------------------------------------------------
@@ -58,7 +58,7 @@ set(directories
 # Fortran sources
 set(fortran_sources gcinit.F)
 foreach(_directory ${directories})
-  file(GLOB add_f_sources 
+  file(GLOB add_f_sources
        ${PROJECT_SOURCE_DIR}/${_directory}/*.F)
   list(APPEND fortran_sources ${add_f_sources})
 endforeach()
@@ -69,11 +69,11 @@ list(REMOVE_ITEM fortran_sources ${PROJECT_SOURCE_DIR}/gtrak/grndm.F)
 list(REMOVE_ITEM fortran_sources ${PROJECT_SOURCE_DIR}/gtrak/grndmq.F)
 list(REMOVE_ITEM fortran_sources ${PROJECT_SOURCE_DIR}/erdecks/eustep.F)
 #message(STATUS "fortran_sources ${fortran_sources}")
-       
+
 # C sources
 set(c_sources)
 foreach(_directory ${directories})
-  file(GLOB add_c_sources 
+  file(GLOB add_c_sources
        ${PROJECT_SOURCE_DIR}/${_directory}/*.c)
   list(APPEND c_sources ${add_c_sources})
 endforeach()
@@ -81,13 +81,13 @@ list(APPEND c_sources ${PROJECT_SOURCE_DIR}/minicern/lnxgs/ishftr.c)
 # Linux specific, the file is kept on macosx, macosx64)
 list(REMOVE_ITEM c_sources ${PROJECT_SOURCE_DIR}/minicern/lnblnk.c)
 #message(STATUS "c_sources ${c_sources}")
-       
+
 # C++ sources
-file(GLOB cxx_sources 
+file(GLOB cxx_sources
      ${PROJECT_SOURCE_DIR}/comad/gcadd.cxx
      ${PROJECT_SOURCE_DIR}/TGeant3/*.cxx)
 #message(STATUS "cxx_sources ${cxx_sources}")
-       
+
 #-------------------------------------------------------------------------------
 # Locate headers for this project
 #
@@ -119,8 +119,8 @@ endif()
 if (${CMAKE_Fortran_COMPILER} MATCHES g95+)
   add_definitions(-DCERNLIB_G95)
 endif()
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  # using Clang
+# using Clang on Mac OSX
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND APPLE)
   set(CMAKE_SHARED_LINKER_FLAGS
       "${CMAKE_SHARED_LINKER_FLAGS} -undefined dynamic_lookup -Wl,-no_compact_unwind")
 endif()

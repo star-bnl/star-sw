@@ -1,13 +1,7 @@
 *
-* $Id: gbirk.F,v 1.2 2018/06/28 19:29:22 fisyak Exp $
+* $Id$
 *
 * $Log: gbirk.F,v $
-* Revision 1.2  2018/06/28 19:29:22  fisyak
-* Merge with geant3
-*
-* Revision 1.1.1.3  2009/02/18 20:31:46  fisyak
-* *** empty log message ***
-*
 * Revision 1.1.1.1  2002/07/24 15:56:25  rdm
 * initial import into CVS
 *
@@ -71,7 +65,7 @@ C --- get the values for the BIRK coefficients stored via GSTPAR ---
       JTMN=LQ(JTM)
       IF (JTMN .LE. 0)GO TO 99
       MODEL=Q(JTMN+27)
-      IF(MODEL.ne.1)GO TO 99
+      IF(MODEL.GT.2)GO TO 99
       RKB=Q(JTMN+28)/DENS
       C=Q(JTMN+29)/DENS**2
 C

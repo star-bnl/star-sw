@@ -14,7 +14,7 @@
 
 #---  Enforce an out-of-source builds before anything else ---------------------
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
-    message(STATUS "Geant4 VMC requires an out-of-source build.")
+    message(STATUS "Geant3 requires an out-of-source build.")
     message(STATUS "Please remove these files from ${CMAKE_BINARY_DIR} first:")
     message(STATUS "CMakeCache.txt")
     message(STATUS "CMakeFiles")
@@ -27,14 +27,14 @@ endif()
 cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
 
 #--- Prepend our own CMake Modules to the search path --------------------------
-set(CMAKE_MODULE_PATH 
+set(CMAKE_MODULE_PATH
     ${CMAKE_SOURCE_DIR}/cmake
-    ${CMAKE_MODULE_PATH}) 
+    ${CMAKE_MODULE_PATH})
 
 #--- Project definitions -------------------------------------------------------
 project(Geant3)
 set(${PROJECT_NAME}_VERSION_MAJOR "2")
-set(${PROJECT_NAME}_VERSION_MINOR "4")
+set(${PROJECT_NAME}_VERSION_MINOR "7")
 set(${PROJECT_NAME}_VERSION_PATCH "0")
 set(${PROJECT_NAME}_VERSION
     ${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH})

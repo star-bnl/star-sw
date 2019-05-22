@@ -63,7 +63,7 @@ C.    ------------------------------------------------------------------
          IKCUT = GEKA*LOG10(CUTPRO) + GEKB
          GKR   = (CUTPRO - ELOW(IKCUT))/(ELOW(IKCUT+1) - ELOW(IKCUT))
          STOPC = (1.-GKR)*Q(JRANG+IKCUT) + GKR*Q(JRANG+IKCUT+1)
-         IF (FIELDM.NE.0.) THEN
+         IF ( (FIELDM.NE.0.) .AND. (CHARGE.NE.0) )  THEN
             CFLD = 3333.*DEGRAD*TMAXFD/ABS(FIELDM*CHARGE)
          ELSE
             CFLD = BIG
