@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.y2019.C,v 1.2 2019/04/16 19:29:34 fisyak Exp $
+// $Id: TpcResponseSimulator.y2019.C,v 1.3 2019/05/23 11:50:01 fisyak Exp $
 // $Log: TpcResponseSimulator.y2019.C,v $
+// Revision 1.3  2019/05/23 11:50:01  fisyak
+// Add default TpcAdcCorrectionMDF, 2019 version of TpcResponseSimulator
+//
 // Revision 1.2  2019/04/16 19:29:34  fisyak
 // Run XIX preliminary dE/dx calibration
 //
