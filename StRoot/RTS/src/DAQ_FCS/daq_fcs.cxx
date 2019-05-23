@@ -195,6 +195,8 @@ daq_dta *daq_fcs::handle_zs()
 
 	if(full_name) {
 		char *st, *m_st ;
+		u_short *zs_start ;
+
 		int sec, rdo ;
 		int bytes ;
 
@@ -211,6 +213,11 @@ daq_dta *daq_fcs::handle_zs()
 
 		LOG(NOTE,"zs first 0x%X, bytes data %d",zs_int[0],bytes_data) ;
 
+		zs_start = (u_short *)st ;
+		for(int j=0;j<16;j++) LOG(DBG,"%d = 0x%04X",j,zs_start[j]) ;
+
+
+
 		zs_int++ ;
 
 		bytes_data -= 4 ;
@@ -219,11 +226,14 @@ daq_dta *daq_fcs::handle_zs()
 		while(bytes_data) {
 
 
-		u_short *zs_start = (u_short *)st ;
+		zs_start = (u_short *)st ;
 		u_short *zs_dta = zs_start ;
 		u_int *zs_int = (u_int *)st ;
 
 		LOG(NOTE,"... board_id 0x%08X, shorts %d, bytes_data %d",zs_int[0],zs_int[1],bytes_data) ;
+
+
+
 
 //		if(zs_int[0] != r) {
 //			LOG(ERR,"Expect %d, read %d",r,zs_int[0]) ;
@@ -254,7 +264,7 @@ daq_dta *daq_fcs::handle_zs()
 		st += zs_int[1]*2 ;
 		bytes_data -= zs_int[1]*2 ;
 
-		LOG(DBG,"bytes_data %d",bytes_data) ;
+		LOG(DBG,"S%d:%d - bytes_data %d",(sec>>11)+1,((sec>>8)&0x7)+1,bytes_data) ;
 
 //		LOG(TERR,"... 0x%X : 0x%X %d",zs_int[0],sec,rdo) ;
 
@@ -607,6 +617,7 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 			case 4 :
 			case 5 :
 			case 6 :	// local trigger
+			case 10 :	// pulser
 				break ;
 			default :
 				LOG(WARN,"Unusual trg_cmd=0x%X in event 0x%04X",trg_cmd,hdr) ;
