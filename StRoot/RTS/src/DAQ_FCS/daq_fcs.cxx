@@ -180,11 +180,139 @@ daq_dta *daq_fcs::handle_zs()
 	u_int max_rdo = 8 ;
 	char *full_name ;
 	int got_any = 0 ;
+//	int bytes = 0 ;
+//	char *st ;
 
 	// bring in the bacon from the SFS file....
 	assert(caller) ;
 
-	zs->create(8*1024,"fcs_zs",rts_id,DAQ_DTA_STRUCT(daq_adc_tb)) ;
+
+
+	// first check the global zs (new in May 2019)
+	sprintf(str,"%s/sec01/zs",sfs_name) ;
+	full_name = caller->get_sfs_name(str) ;
+
+
+	if(full_name) {
+		char *st, *m_st ;
+		int sec, rdo ;
+		int bytes ;
+
+		zs->create(8*1024,"fcs_zs",rts_id,DAQ_DTA_STRUCT(daq_adc_tb)) ;
+
+		bytes = caller->sfs->fileSize(full_name) ;	// this is bytes
+		
+		m_st = st = (char *)malloc(bytes) ;
+		caller->sfs->read(full_name,st,bytes) ;
+
+		u_int *zs_int = (u_int *)st ;
+
+		int bytes_data = zs_int[0] & 0x0FFFFFFF ;
+
+		LOG(NOTE,"zs first 0x%X, bytes data %d",zs_int[0],bytes_data) ;
+
+		zs_int++ ;
+
+		bytes_data -= 4 ;
+		st += 4 ;
+
+		while(bytes_data) {
+
+
+		u_short *zs_start = (u_short *)st ;
+		u_short *zs_dta = zs_start ;
+		u_int *zs_int = (u_int *)st ;
+
+		LOG(NOTE,"... board_id 0x%08X, shorts %d, bytes_data %d",zs_int[0],zs_int[1],bytes_data) ;
+
+//		if(zs_int[0] != r) {
+//			LOG(ERR,"Expect %d, read %d",r,zs_int[0]) ;
+//			free(st) ;
+//			continue ;
+//		}
+
+
+		//sec is the full board_id
+		//rdo is just the dep board
+		if(zs_int[0] & 0xF0000000) {
+			sec = zs_int[0] & 0xFFFF ;
+			rdo = zs_int[0] & 0x1F ;
+		}
+		else {
+			sec = 0 ;
+			rdo = 0 ;
+		}
+
+		//bytes_data -= 2*4 ;
+		//st += 2*4 ;
+
+		if(zs_int[1] == 0) {	// number of shorts
+			LOG(WARN,"0 shorts??") ;
+			continue ;
+		}
+		
+		st += zs_int[1]*2 ;
+		bytes_data -= zs_int[1]*2 ;
+
+		LOG(DBG,"bytes_data %d",bytes_data) ;
+
+//		LOG(TERR,"... 0x%X : 0x%X %d",zs_int[0],sec,rdo) ;
+
+		u_short *zs_end = zs_dta + zs_int[1] ;
+
+		zs_dta += 2*2 ;	// to skip the 2 ints
+
+		int ch_cou = 0 ;
+
+		while(zs_dta < zs_end) {
+			int ch = *zs_dta++ ;
+			int seq_cou = *zs_dta++ ;
+			int a_cou = 0 ;
+
+			LOG(DBG,"Ch %d(%d), seq %d: %d",ch,ch_cou,seq_cou,zs_end-zs_dta) ;
+			ch_cou++ ;
+
+			if(seq_cou==0) continue ;
+
+			got_any = 1 ;
+			
+			daq_adc_tb *a_t = (daq_adc_tb *) zs->request(8*1024) ;
+
+			for(int i=0;i<seq_cou;i++) {
+				int t_start = *zs_dta++ ;
+				int t_cou = *zs_dta++ ;
+				int t_end = t_start + t_cou ;
+
+				LOG(DBG,"..... t_start %d, t_cou %d",t_start,t_cou) ;
+
+				for(int t=t_start;t<t_end;t++) {
+					u_short d = *zs_dta++ ;
+
+					a_t[a_cou].adc = d ;
+					a_t[a_cou].tb = t ;
+					a_cou++ ;
+				}
+
+			}
+			
+			zs->finalize(a_cou,sec,rdo,ch) ;
+		}
+
+		//st += zs_int[1]*2 ;
+		//bytes_data -= zs_int[1]*2 ;
+
+		}
+
+		if(m_st) free(m_st) ;
+
+		zs->rewind() ;
+
+		if(got_any) {
+			return zs ;
+		}
+		else return 0 ;
+
+	}
 
 	for(u_int r=min_rdo;r<=max_rdo;r++) {
 		int sec, rdo ;

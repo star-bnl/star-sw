@@ -27,7 +27,7 @@ static inline u_int sw16(u_int d)
 struct fcs_data_c::fcs_ped_t fcs_data_c::ped[16][8] ;	// 8 RDO
 
 struct fcs_data_c::rdo_map_t fcs_data_c::rdo_map[16][8] ;	// 16 sectors, 8 RDOs each --> det,ns,dep
-struct fcs_data_c::det_map_t fcs_data_c::det_map[3][2][20] ;	// det,ns,dep --> sector RDO
+struct fcs_data_c::det_map_t fcs_data_c::det_map[4][2][20] ;	// det,ns,dep --> sector RDO
 u_char fcs_data_c::rdo_map_loaded ;
 
 
@@ -54,8 +54,13 @@ int fcs_data_c::zs_start(u_short *buff)
 	int thr ;
 	int l_cou ;
 	int l_pre, l_post ;
+	int is_trg = 0 ;
 
-	if(ch==32) {	// this is the trigger data channel, no need to go pre/post
+	// trigger channels are special so figure this out
+	if(ch >= 32) is_trg = 1 ;
+	if(hdr_det >= 3) is_trg = 1;
+
+	if(is_trg) {	// this is the trigger data channel, no need to go pre/post
 		thr = 0 ;
 		l_cou = 1 ;
 		l_pre = 0 ;
@@ -144,7 +149,7 @@ int fcs_data_c::zs_start(u_short *buff)
 	
 	int i_ped ;
 
-	if(ch==32) i_ped = 0 ;
+	if(is_trg) i_ped = 0 ;
 	else i_ped = (int)(ped[sector-1][rdo-1].mean[ch]+0.5) ;
 
 	int seq_cou = 0 ;
@@ -201,6 +206,9 @@ int fcs_data_c::zs_start(u_short *buff)
 	dstart[1] = seq_cou ;
 
 //	printf("... ZS is now %d shorts\n",(int)(dp-dstart)) ;
+
+	// I probably want to return 0 if nothing is founf
+	if(seq_cou == 0) return 0 ;
 
 	return dp-dstart ;	// shorts
 

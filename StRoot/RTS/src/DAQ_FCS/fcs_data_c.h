@@ -164,7 +164,7 @@ public:
 
 	static struct fcs_ped_t ped[16][8] ;	// sector,rdo
 	static struct rdo_map_t rdo_map[16][8] ;	// sector,rdo
-	static struct det_map_t det_map[3][2][20] ;	// reverse map
+	static struct det_map_t det_map[4][2][20] ;	// reverse map: det,ns,dep
 	static u_char rdo_map_loaded ;			// boolean
 
 	static int ped_from_cache(const char *fname) ;
