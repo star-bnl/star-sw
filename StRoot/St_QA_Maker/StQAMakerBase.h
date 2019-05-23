@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.32 2019/03/26 15:29:38 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.33 2019/05/22 21:24:31 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.33  2019/05/22 21:24:31  genevb
+// Add sDCA vs. time-in-run
+//
 // Revision 2.32  2019/03/26 15:29:38  genevb
 // Introduce ETOF
 //
@@ -163,7 +166,7 @@ class StQAMakerBase : public StMaker {
   virtual void   UseHistSet(Int_t s) { histsSet=s; }
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.32 2019/03/26 15:29:38 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.33 2019/05/22 21:24:31 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -196,6 +199,9 @@ class StQAMakerBase : public StMaker {
 
   // TPC dE/dx over time
   TH3F     *m_dedx_Z3A; // dE/dx vs. drift distance
+
+  // signed DCA (impact parameter) over time
+  TH2F     *m_glb_simpactTime; //! signed impact parameter from primary vertex vs. time
 
   // FMS histograms
   // ADC vs. channel histograms keyed by QT crate number.

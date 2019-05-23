@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.107 2019/03/26 15:29:35 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.108 2019/05/22 21:24:30 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.108  2019/05/22 21:24:30  genevb
+// Add sDCA vs. time-in-run
+//
 // Revision 2.107  2019/03/26 15:29:35  genevb
 // Introduce ETOF
 //
@@ -998,6 +1001,7 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
               oName.EndsWith("QaXiVtxTot") ||
               oName.Contains("QaPmdTotal") ||
               oName.Contains("QaCpvTotal") ||
+              oName.EndsWith("SImpactTime") ||
               oName.EndsWith("trkGoodTTS")) {
             Float_t mean = hobj->GetMean(1);
             Float_t window = hobj->GetRMS(1);
@@ -1096,6 +1100,10 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
               // https://sft.its.cern.ch/jira/browse/ROOT-2845
               FlipAxes(hobj)->Draw("Pol ZCol Same");
             }
+          } else if ((chkdim == 2) &&
+                     (oName.EndsWith("SImpactTime"))) {
+            hobj->SetMarkerStyle(7);
+            ((TH2F*) hobj)->ProfileX()->Draw();
           } else if ((chkdim == 2) &&
                      (oName.EndsWith("SvtLoc") ||
                       oName.EndsWith("PVsDedx") ||
