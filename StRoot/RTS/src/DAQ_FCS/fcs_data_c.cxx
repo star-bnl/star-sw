@@ -67,6 +67,12 @@ int fcs_data_c::zs_start(u_short *buff)
 		l_post = 0 ;
 	}
 	else {
+		LOG(DBG,"S%d:%d:%d mean %f, n_sigma %f, rms %f",
+		    sector,rdo,ch,
+		    (float)ped[sector-1][rdo-1].mean[ch],
+		    (float)n_sigma,
+		    (float)ped[sector-1][rdo-1].rms[ch]) ;
+
 		thr = (int)(ped[sector-1][rdo-1].mean[ch] + n_sigma * ped[sector-1][rdo-1].rms[ch] + 0.5) ;
 		l_cou = n_cou ;
 		l_pre = n_pre ;
@@ -139,6 +145,8 @@ int fcs_data_c::zs_start(u_short *buff)
 	}
 
 
+	LOG(DBG,"RDO %d, ch %d: thr %d: got %d",rdo,ch,thr,got_one) ;
+
 	if(got_one==0) return 0 ;	// nothing found
 
 	u_short *dp ;
@@ -170,6 +178,7 @@ int fcs_data_c::zs_start(u_short *buff)
 //			printf("Mark at %d\n",i) ;
 
 			if(t_cou==0) {
+//				printf("t_start %d\n",i) ;
 				*dp++ = i ;
 				t_cou_p = dp++ ;
 				t_start = i ;
@@ -183,12 +192,13 @@ int fcs_data_c::zs_start(u_short *buff)
 
 			i_adc |= (fla<<12) ;
 
+//			printf("adc[%d] = %d\n",i,i_adc&0xFFF) ;
 			*dp++ = i_adc ;
 
 			t_cou++ ;
 		}
 		else {
-			if(t_cou) {
+			if(t_cou) {				
 				*t_cou_p = t_cou ;
 				seq_cou++ ;
 //				printf("ZS: Ch %d:%d: seq %d: t_start %d, t_cou %d\n",rdo,ch,seq_cou,t_start,t_cou) ;
@@ -205,7 +215,7 @@ int fcs_data_c::zs_start(u_short *buff)
 
 	dstart[1] = seq_cou ;
 
-//	printf("... ZS is now %d shorts\n",(int)(dp-dstart)) ;
+//	printf("... ZS is now %d shorts (seq_cou %d)\n",(int)(dp-dstart),seq_cou) ;
 
 	// I probably want to return 0 if nothing is founf
 	if(seq_cou == 0) return 0 ;
@@ -667,7 +677,7 @@ int fcs_data_c::ana_ch()
 
 	switch(run_type) {
 	case 1 :
-	case 5 :
+//	case 5 :
 		break ;
 	default:
 		return 0 ;
@@ -726,7 +736,7 @@ int fcs_data_c::accum_pre_fy19(u_int ch, u_int tb, u_short sadc)
 
 	switch(run_type) {
 	case 1 :
-	case 5 :
+//	case 5 :
 		ped[sector-1][rdo-1].mean[ch] += (double)sadc ;
 		ped[sector-1][rdo-1].rms[ch] += (double)sadc * (double)sadc ;
 		ped[sector-1][rdo-1].cou[ch]++ ;
@@ -765,7 +775,7 @@ void fcs_data_c::run_start(u_int run, int type)
 
 	switch(run_type) {
 	case 1 :
-	case 5 :
+//	case 5 :
 		ped_start() ;
 		break ;
 	}
@@ -785,7 +795,7 @@ void fcs_data_c::run_stop(int bad_ped)
 {
 	switch(run_type) {
 	case 1 :
-	case 5 :
+//	case 5 :
 		ped_stop(bad_ped) ;
 		break ;
 	}
