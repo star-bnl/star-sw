@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.y2019.C,v 1.2 2019/04/16 19:29:34 fisyak Exp $
+// $Id: TpcResponseSimulator.y2019.C,v 1.3 2019/05/23 11:50:01 fisyak Exp $
 // $Log: TpcResponseSimulator.y2019.C,v $
+// Revision 1.3  2019/05/23 11:50:01  fisyak
+// Add default TpcAdcCorrectionMDF, 2019 version of TpcResponseSimulator
+//
 // Revision 1.2  2019/04/16 19:29:34  fisyak
 // Run XIX preliminary dE/dx calibration
 //
@@ -94,8 +97,8 @@ TDataSet *CreateTable() {
   row.OmegaTauScaleO        = 1.8  *1.201;  //HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
   // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
   // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
-  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 6.99114715017355337e-01 +1.14433e-01;//- TMath::Log(0.533*0.843485) -5.84129e-01 + 4.52885e-01 + 3.09117e-02;
-  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 9.79357470004933006e-01 -6.15827e-02;//- TMath::Log(0.512*0.725267) -5.47141e-01 + 5.23937e-01 + 1.19154e-02;
+  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 6.99114715017355337e-01 +1.14433e-01 -3.57593e-01 -3.95075e-02 -2.12902e-02 -2.43764e-03 +1.92592e-01; // hijingAuAu200.DEV2X5.StiCA.Minuit
+  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 9.79357470004933006e-01 -6.15827e-02 +1.99821e-01              +6.06971e-03 -6.98644e-04 -1.37937e-01;
   // SecRow3CGFdaq_2011_pp500LowLum => Inner: 3.26428e-01 - -5.01720e-04*y; Outer: 2.68883e-01 + 1.23403e-04*y
   //                                          3.22907e-01                          2.72715e-01
   // SecRow3CGFTpcRS_2011_pp500LowLum_f     : 3.09711e-01                          2.65342e-01
@@ -116,6 +119,14 @@ TDataSet *CreateTable() {
   // The corection has to be added                                                                    M             P
   //row.T0offset   = 0.50 + 1.65431e-01 -  3.45247e-01 -1.54583e+00 -2.90686e-03+ 1.54353e+00 + 0.0191135  -1.20938e-03 ; //E
   row.T0offset   = 0.50 -1.43663e-01 -0.00932877;//g // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
+  /* 
+     0.05  => -0.154  
+    -0.05  => -0.054
+    -0.104 => -0.006  but very big sigma 0.298 => 0.303 
+    row.FirstRowC  = -0.104;  // extra correction for pad row 1 due to disabled firth 3 anode wires, check with X7
+    No. cut on 3 first wires => -9.21881e-02 ; X9
+    row.FirstRowC  = -0.104;  // extra correction for pad row 1 due to disabled firth 3 anode wires
+   */
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
