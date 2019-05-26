@@ -180,11 +180,149 @@ daq_dta *daq_fcs::handle_zs()
 	u_int max_rdo = 8 ;
 	char *full_name ;
 	int got_any = 0 ;
+//	int bytes = 0 ;
+//	char *st ;
 
 	// bring in the bacon from the SFS file....
 	assert(caller) ;
 
-	zs->create(8*1024,"fcs_zs",rts_id,DAQ_DTA_STRUCT(daq_adc_tb)) ;
+
+
+	// first check the global zs (new in May 2019)
+	sprintf(str,"%s/sec01/zs",sfs_name) ;
+	full_name = caller->get_sfs_name(str) ;
+
+
+	if(full_name) {
+		char *st, *m_st ;
+		u_short *zs_start ;
+
+		int sec, rdo ;
+		int bytes ;
+
+		zs->create(8*1024,"fcs_zs",rts_id,DAQ_DTA_STRUCT(daq_adc_tb)) ;
+
+		bytes = caller->sfs->fileSize(full_name) ;	// this is bytes
+		
+		m_st = st = (char *)malloc(bytes) ;
+		caller->sfs->read(full_name,st,bytes) ;
+
+		u_int *zs_int = (u_int *)st ;
+
+		int bytes_data = zs_int[0] & 0x0FFFFFFF ;
+
+		LOG(NOTE,"zs first 0x%X, bytes data %d",zs_int[0],bytes_data) ;
+
+		zs_start = (u_short *)st ;
+		for(int j=0;j<16;j++) LOG(DBG,"%d = 0x%04X",j,zs_start[j]) ;
+
+
+
+		zs_int++ ;
+
+		bytes_data -= 4 ;
+		st += 4 ;
+
+		while(bytes_data) {
+
+
+		zs_start = (u_short *)st ;
+		u_short *zs_dta = zs_start ;
+		u_int *zs_int = (u_int *)st ;
+
+		LOG(NOTE,"... board_id 0x%08X, shorts %d, bytes_data %d",zs_int[0],zs_int[1],bytes_data) ;
+
+
+
+
+//		if(zs_int[0] != r) {
+//			LOG(ERR,"Expect %d, read %d",r,zs_int[0]) ;
+//			free(st) ;
+//			continue ;
+//		}
+
+
+		//sec is the full board_id
+		//rdo is just the dep board
+		if(zs_int[0] & 0xF0000000) {
+			sec = zs_int[0] & 0xFFFF ;
+			rdo = zs_int[0] & 0x1F ;
+		}
+		else {
+			sec = 0 ;
+			rdo = 0 ;
+		}
+
+		//bytes_data -= 2*4 ;
+		//st += 2*4 ;
+
+		if(zs_int[1] == 0) {	// number of shorts
+			LOG(WARN,"0 shorts??") ;
+			continue ;
+		}
+		
+		st += zs_int[1]*2 ;
+		bytes_data -= zs_int[1]*2 ;
+
+		LOG(DBG,"S%d:%d - bytes_data %d",(sec>>11)+1,((sec>>8)&0x7)+1,bytes_data) ;
+
+//		LOG(TERR,"... 0x%X : 0x%X %d",zs_int[0],sec,rdo) ;
+
+		u_short *zs_end = zs_dta + zs_int[1] ;
+
+		zs_dta += 2*2 ;	// to skip the 2 ints
+
+		int ch_cou = 0 ;
+
+		while(zs_dta < zs_end) {
+			int ch = *zs_dta++ ;
+			int seq_cou = *zs_dta++ ;
+			int a_cou = 0 ;
+
+			LOG(DBG,"Ch %d(%d), seq %d: %d",ch,ch_cou,seq_cou,zs_end-zs_dta) ;
+			ch_cou++ ;
+
+			if(seq_cou==0) continue ;
+
+			got_any = 1 ;
+			
+			daq_adc_tb *a_t = (daq_adc_tb *) zs->request(8*1024) ;
+
+			for(int i=0;i<seq_cou;i++) {
+				int t_start = *zs_dta++ ;
+				int t_cou = *zs_dta++ ;
+				int t_end = t_start + t_cou ;
+
+				LOG(DBG,"..... t_start %d, t_cou %d",t_start,t_cou) ;
+
+				for(int t=t_start;t<t_end;t++) {
+					u_short d = *zs_dta++ ;
+
+					a_t[a_cou].adc = d ;
+					a_t[a_cou].tb = t ;
+					a_cou++ ;
+				}
+
+			}
+			
+			zs->finalize(a_cou,sec,rdo,ch) ;
+		}
+
+		//st += zs_int[1]*2 ;
+		//bytes_data -= zs_int[1]*2 ;
+
+		}
+
+		if(m_st) free(m_st) ;
+
+		zs->rewind() ;
+
+		if(got_any) {
+			return zs ;
+		}
+		else return 0 ;
+
+	}
 
 	for(u_int r=min_rdo;r<=max_rdo;r++) {
 		int sec, rdo ;
@@ -479,6 +617,7 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 			case 4 :
 			case 5 :
 			case 6 :	// local trigger
+			case 10 :	// pulser
 				break ;
 			default :
 				LOG(WARN,"Unusual trg_cmd=0x%X in event 0x%04X",trg_cmd,hdr) ;

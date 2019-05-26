@@ -27,7 +27,7 @@ static inline u_int sw16(u_int d)
 struct fcs_data_c::fcs_ped_t fcs_data_c::ped[16][8] ;	// 8 RDO
 
 struct fcs_data_c::rdo_map_t fcs_data_c::rdo_map[16][8] ;	// 16 sectors, 8 RDOs each --> det,ns,dep
-struct fcs_data_c::det_map_t fcs_data_c::det_map[3][2][20] ;	// det,ns,dep --> sector RDO
+struct fcs_data_c::det_map_t fcs_data_c::det_map[4][2][20] ;	// det,ns,dep --> sector RDO
 u_char fcs_data_c::rdo_map_loaded ;
 
 
@@ -54,14 +54,25 @@ int fcs_data_c::zs_start(u_short *buff)
 	int thr ;
 	int l_cou ;
 	int l_pre, l_post ;
+	int is_trg = 0 ;
 
-	if(ch==32) {	// this is the trigger data channel, no need to go pre/post
+	// trigger channels are special so figure this out
+	if(ch >= 32) is_trg = 1 ;
+	if(hdr_det >= 3) is_trg = 1;
+
+	if(is_trg) {	// this is the trigger data channel, no need to go pre/post
 		thr = 0 ;
 		l_cou = 1 ;
 		l_pre = 0 ;
 		l_post = 0 ;
 	}
 	else {
+		LOG(DBG,"S%d:%d:%d mean %f, n_sigma %f, rms %f",
+		    sector,rdo,ch,
+		    (float)ped[sector-1][rdo-1].mean[ch],
+		    (float)n_sigma,
+		    (float)ped[sector-1][rdo-1].rms[ch]) ;
+
 		thr = (int)(ped[sector-1][rdo-1].mean[ch] + n_sigma * ped[sector-1][rdo-1].rms[ch] + 0.5) ;
 		l_cou = n_cou ;
 		l_pre = n_pre ;
@@ -134,6 +145,8 @@ int fcs_data_c::zs_start(u_short *buff)
 	}
 
 
+	LOG(DBG,"RDO %d, ch %d: thr %d: got %d",rdo,ch,thr,got_one) ;
+
 	if(got_one==0) return 0 ;	// nothing found
 
 	u_short *dp ;
@@ -144,7 +157,7 @@ int fcs_data_c::zs_start(u_short *buff)
 	
 	int i_ped ;
 
-	if(ch==32) i_ped = 0 ;
+	if(is_trg) i_ped = 0 ;
 	else i_ped = (int)(ped[sector-1][rdo-1].mean[ch]+0.5) ;
 
 	int seq_cou = 0 ;
@@ -165,6 +178,7 @@ int fcs_data_c::zs_start(u_short *buff)
 //			printf("Mark at %d\n",i) ;
 
 			if(t_cou==0) {
+//				printf("t_start %d\n",i) ;
 				*dp++ = i ;
 				t_cou_p = dp++ ;
 				t_start = i ;
@@ -178,12 +192,13 @@ int fcs_data_c::zs_start(u_short *buff)
 
 			i_adc |= (fla<<12) ;
 
+//			printf("adc[%d] = %d\n",i,i_adc&0xFFF) ;
 			*dp++ = i_adc ;
 
 			t_cou++ ;
 		}
 		else {
-			if(t_cou) {
+			if(t_cou) {				
 				*t_cou_p = t_cou ;
 				seq_cou++ ;
 //				printf("ZS: Ch %d:%d: seq %d: t_start %d, t_cou %d\n",rdo,ch,seq_cou,t_start,t_cou) ;
@@ -200,7 +215,10 @@ int fcs_data_c::zs_start(u_short *buff)
 
 	dstart[1] = seq_cou ;
 
-//	printf("... ZS is now %d shorts\n",(int)(dp-dstart)) ;
+//	printf("... ZS is now %d shorts (seq_cou %d)\n",(int)(dp-dstart),seq_cou) ;
+
+	// I probably want to return 0 if nothing is founf
+	if(seq_cou == 0) return 0 ;
 
 	return dp-dstart ;	// shorts
 
@@ -659,7 +677,7 @@ int fcs_data_c::ana_ch()
 
 	switch(run_type) {
 	case 1 :
-	case 5 :
+//	case 5 :
 		break ;
 	default:
 		return 0 ;
@@ -718,7 +736,7 @@ int fcs_data_c::accum_pre_fy19(u_int ch, u_int tb, u_short sadc)
 
 	switch(run_type) {
 	case 1 :
-	case 5 :
+//	case 5 :
 		ped[sector-1][rdo-1].mean[ch] += (double)sadc ;
 		ped[sector-1][rdo-1].rms[ch] += (double)sadc * (double)sadc ;
 		ped[sector-1][rdo-1].cou[ch]++ ;
@@ -757,7 +775,7 @@ void fcs_data_c::run_start(u_int run, int type)
 
 	switch(run_type) {
 	case 1 :
-	case 5 :
+//	case 5 :
 		ped_start() ;
 		break ;
 	}
@@ -777,7 +795,7 @@ void fcs_data_c::run_stop(int bad_ped)
 {
 	switch(run_type) {
 	case 1 :
-	case 5 :
+//	case 5 :
 		ped_stop(bad_ped) ;
 		break ;
 	}
