@@ -1,6 +1,13 @@
-(custom-set-variables 
- '(font-lock-support-mode (quote fast-lock-mode))
- '(font-lock-verbose 0)
+(setq inhibit-startup-message t)        ; Disable startup message 
+(setq inhibit-splash-screen t)          ; disable spalsh screen
+
+(custom-set-variables
+ '(auto-compression-mode t nil (jka-compr))
+ '(case-fold-search t)
+ '(current-language-environment "UTF-8")
+ '(default-input-method "rfc1345")
+ '(font-use-system-font t)
  '(global-font-lock-mode t nil (font-lock))
- '(font-lock-global-modes t))
-(custom-set-faces)
+ '(load-home-init-file t t))
+(custom-set-faces
+ '(default ((t (:family "fixed" :foundry "misc" :slant normal :weight normal :height 125 :width normal))) t))

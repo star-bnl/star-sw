@@ -1737,7 +1737,6 @@ my @badruns = (19116020); # Altro3
 #$hist = "RunXVIII49"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_isobar_2018/ReversedFullField";  $Production = "/P18ie_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/28/18 mv tsspar.y2001.C.HOLD.112718 tsspar.y2018.C
 
 
-
 #$hist = "RunXVIII118"; $NEvents = 2000; $disk = "data100/"; $RECO = "reco/27GeV_production_2018/*FullField";  $Production = "/P18if_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/16/18 check dE/dx calibration produced on HLT (with aligned geometry) wrt RCF
 #$hist = "RunXVIII119"; $NEvents = 2000; $disk = "data100/"; $RECO = "reco/27GeV_production_2018/*FullField";  $Production = "/P18if_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = "TFG18m"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/18/18 check TFG18m
 #$hist = "RunXVIII120"; $NEvents = 2000; $disk = "data100/"; $RECO = "reco/27GeV_production_2018/*FullField";  $Production = "/P18if_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/20/18 back to  TpcAdcCorrectionB.y2018.C.Altro4 as TpcAdcCorrectionB.20180518.000119.C to undestadn difference in sigma for Inner Rows
@@ -1747,8 +1746,17 @@ my @badruns = (19116020); # Altro3
 #$hist = "RunXVIII135"; $NEvents = 2000; $disk = "data100/"; $RECO = "reco/27GeV_production_2018/*FullField";  $Production = "/P18if_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = "DEV"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/19/18 recheck in dev
 #$hist = "RunXVIII136"; $NEvents = 2000; $disk = "data100/"; $RECO = "reco/27GeV_production_2018/*FullField";  $Production = "/P18if_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = "DEV"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/19/18 recheck in dev , add TpcLengthMDF
 #$hist = "RunXVIII137"; $NEvents = 2000; $disk = "data100/"; $RECO = "reco/27GeV_production_2018/*FullField";  $Production = "/P18if_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = "DEV"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/22/18 check MySQL
-$hist = "RunXVIII201"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/27GeV_production_2018/ReversedFullField";  $Production = "/P19ib_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 04/24/19 check new production
+my @badruns = (
+19132037_2000002
+19132039_2000002
+19133010_5500003
+19134028_2500002
+19134029_3500002
+19135012_2500002
+19135013_1500002
+);
 
+$hist = "RunXVIII201"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/27GeV_production_2018/ReversedFullField";  $Production = "/P19ib_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 04/24/19 check new production
 my $prod = $hist; #$Production;
 $prod =~ s/\*//g;
 $prod =~ s/\//_/g;
