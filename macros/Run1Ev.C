@@ -5,8 +5,8 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
 	    Double_t Philow=-TMath::DegToRad()*30, Double_t Phihigh=-TMath::DegToRad()*30,
 	    Double_t Zlow=-10, Double_t Zhigh=-10, Int_t Npart = 1, const Char_t *opt = "G") 
 #else
-void Run1Ev(Int_t NEvents=1, Int_t iD = 5, 
-	    Double_t pTlow=10,Double_t pThigh=10,
+void Run1Ev(Int_t NEvents=1, Int_t iD = 2, 
+	    Double_t pTlow=1,Double_t pThigh=1,
 	    Double_t Ylow=.0, Double_t Yhigh=.0,
 	    Double_t Philow=0, Double_t Phihigh=0,
 	    Double_t Zlow=10, Double_t Zhigh=10, Int_t Npart = 1, const Char_t *opt = "G") 
@@ -37,7 +37,6 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
     //                          Do("CUTS     1e-5   1e-5   1e-3  1e-14   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3     10");
     //                          Do("CUTS     1e-5   1e-5   1e-3  1e-14   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3     1e-3");
     St_geant_Maker::instance()->Do("CUTS     1e-5   1e-5   1e-3  1e-14   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3     1e3");
-#endif
     St_geant_Maker::instance()->Do("DCAY 0");
     St_geant_Maker::instance()->Do("ANNI 0");
     St_geant_Maker::instance()->Do("BREM 0");
@@ -55,6 +54,7 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
     St_geant_Maker::instance()->Do("STRA 0");
 
     St_geant_Maker::instance()->Do("physi");
+#endif
 
     /*
      * AGUSER/MODE Detector [ Flag Value ]
@@ -103,6 +103,7 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
       StarVMCApplication::Instance()->SetPrimaryGenerator(gener);
       cout << "Set StarMCSimplePrimaryGenerator" << endl;
       }
+#if 0
       //      gener->SetGun();
       //      StarVMCApplication::Instance()->DoMisAlignment(kFALSE);
       //      geant->SetSetAttr("phys_off",kTRUE); // physics off
@@ -120,6 +121,7 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
       gMC->SetProcess("DRAY", 0);
       gMC->SetProcess("MULS", 0);
       gMC->SetProcess("STRA", 0);
+#endif
       gMC->SetCut("CUTGAM",	1e-5  );
       gMC->SetCut("CUTELE", 	1e-5  );
       gMC->SetCut("CUTHAD", 	1e-3  );

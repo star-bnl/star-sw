@@ -38,9 +38,18 @@ Double_t funcMDF(Double_t *x, Double_t *p=0) {
   return fit->Eval(x, p);
 }
 //________________________________________________________________________________
-void h2mdfADC(const Char_t  *total = "mu", Int_t max=5, TMultiDimFit::EMDFPolyType type = TMultiDimFit::kMonomials, Int_t maxTerm = 10, Double_t ymin = 0.2, Double_t ymax = 1){
-  TH2D *total2D = (TH2D *) gDirectory->Get(total);
-  if (! total2D) {
+#ifndef __CINT__
+void h2mdfADC(Int_t max=5, Int_t t = 0, Int_t maxTerm = 10, Double_t ymin = 0.2, Double_t ymax = 1)
+#else
+void h2mdfADC(Int_t max=5, TMultiDimFit::EMDFPolyType type = TMultiDimFit::kMonomials, Int_t maxTerm = 10, Double_t ymin = 0.2, Double_t ymax = 1)
+#endif
+  {
+  TH2D *mu = (TH2D *) gDirectory->Get("mu");
+  TH2D *sigma = (TH2D *) gDirectory->Get("sigma");
+  TH2D *entries = (TH2D *) gDirectory->Get("entries");
+  TH2D *mu = (TH2D *) gDirectory->Get("mu");
+  TH2D *mu = (TH2D *) gDirectory->Get("mu");
+  if (! mu) {
     cout << "Histogram  has not been found " << endl;
     return;
   }
@@ -49,6 +58,9 @@ void h2mdfADC(const Char_t  *total = "mu", Int_t max=5, TMultiDimFit::EMDFPolyTy
   
   // make fit object and set parameters on it. 
   //  fit = new TMultiDimFit(nVars, TMultiDimFit::kMonomials,"vk");
+#ifndef __CINT__
+  EMDFPolyType type = (EMDFPolyType) t;
+#endif
   fit = new TMultiDimFit(nVars, type,"vk");
 
   Int_t mPowers[]   = {max , max};
@@ -67,17 +79,17 @@ void h2mdfADC(const Char_t  *total = "mu", Int_t max=5, TMultiDimFit::EMDFPolyTy
   // Print out the start parameters
   fit->Print("p");
 
-  TAxis *xa = total2D->GetXaxis();
-  TAxis *ya = total2D->GetYaxis();
+  TAxis *xa = mu->GetXaxis();
+  TAxis *ya = mu->GetYaxis();
   Int_t nx = xa->GetNbins();
   Int_t ny = ya->GetNbins();
   Int_t iy, ix;
   for (iy = 1; iy <= ny; iy++) {
     for (ix = 1; ix <= nx; ix++) {
-      Double_t error = total2D->GetBinError(ix,iy);
+      Double_t error = mu->GetBinError(ix,iy);
       if (error <= 0.0) continue;
       if (error >  0.1) continue;
-      Double_t value = total2D->GetBinContent(ix,iy);
+      Double_t value = mu->GetBinContent(ix,iy);
       if (value < ymin || value > ymax) continue;
       x[0]           = xa->GetBinCenter(ix);
       x[1]           = ya->GetBinCenter(iy);

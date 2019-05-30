@@ -5,6 +5,7 @@
   starver TFG19f
 #  setenv NODEBUG yes
   FPE_OFF
+  setenv MALLOC_CHECK_ 2
 #  setup 64b
   set run = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
   set dir = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
