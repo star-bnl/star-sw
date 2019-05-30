@@ -2,6 +2,8 @@
 #include "StarMCSimplePrimaryGenerator.h"
 #include "TF1.h"
 #include "TGeant3.h"
+#include "TEnv.h"
+#include "TRandom.h"
 #include "StDetectorDbMaker/St_vertexSeedC.h"
 ClassImp(StarMCSimplePrimaryGenerator);
 Double_t StarMCSimplePrimaryGenerator::fTemperature = 1; // GeV/c
@@ -133,7 +135,11 @@ void StarMCSimplePrimaryGenerator::GeneratePrimary() {
 void StarMCSimplePrimaryGenerator::GeneratePrimaries(const TVector3& origin) {    
   // Fill the user stack (derived from TVirtualMCStack) with primary particles.
   // ---
-  fOrigin = origin;
+  Double_t sigmaX = gEnv->GetValue("FixedSigmaX", 0.00176);
+  Double_t sigmaY = gEnv->GetValue("FixedSigmaY", 0.00176);
+  Double_t sigmaZ = gEnv->GetValue("FixedSigmaZ", 0.00176);
+  TVector3 dR(gRandom->Gaus(0, sigmaX), gRandom->Gaus(0, sigmaY), gRandom->Gaus(0, sigmaZ));
+  fOrigin = origin + dR;
   for (Int_t i=0; i<fNofPrimaries; i++) GeneratePrimary();  
   fStarStack->SetNprimaries(fNofPrimaries);
 }
