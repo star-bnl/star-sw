@@ -1225,7 +1225,7 @@ sub  updateJSTable {
 
 #---------------------------------------------------------
 
-# print $fl_log, "\n";
+ print $fl_log, "\n";
 
  $nevent_vtx = 0;
 
@@ -1433,7 +1433,9 @@ $jrun = "Run not completed";
               $tot_prtracks_1vtx += $no_prtracks_1vtx;
               $tot_prtrck_nfit15_1vtx += $no_prtrck_nfit15_1vtx;
 
-           }elsif($embflag == 1 and $vrank[0] == -5 ) {
+           }elsif($embflag == 1 and $vrank[0] <= -5.0 ) {
+
+#		 print "Rank for embedding is  ",$vrank[0],"   ",$no_prtracks[0],"   ",$no_prtrck_nfit15[0], "\n";
 
               $numevt_vtx++;
               $no_prtracks_1vtx = $no_prtracks[0];
@@ -1477,7 +1479,13 @@ $jrun = "Run not completed";
              $Err_messg = "Killed";
 
    }elsif ($line =~ /Abort/)  {
+       if($line =~ /AbortGap/)  {
+           $Err_messg = "none";
+       }else{
              $Err_messg = "Abort";
+       }
+   }elsif ($line =~ /StFATAL/)  {
+             $Err_messg = "StFATAL";
 
    }elsif ($line =~ /FATAL/ and $line =~ /floating point exception/) {
          $Err_messg = "Floating point exception";
