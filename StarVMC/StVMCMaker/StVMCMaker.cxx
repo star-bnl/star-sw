@@ -315,8 +315,21 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
   //  fgStarVMCApplication->SetStepping(new StMCSteppingHist("tgeom"));
   //  fgStarVMCApplication->SetStepping(new StMCStepping);
   // The "Init" method in the gMC object causes the geometry to be cosntructed
+  //  TVirtualMC::GetMC()->SetProcess("LOSS", 1);
+  TVirtualMC::GetMC()->SetCut("CUTGAM",	1e-3  );
+  TVirtualMC::GetMC()->SetCut("CUTELE", 1e-3  );
+  TVirtualMC::GetMC()->SetCut("CUTHAD", 1e-3  );
+  TVirtualMC::GetMC()->SetCut("CUTNEU", 1e-3  );
+  TVirtualMC::GetMC()->SetCut("CUTMUO", 1e-3  );
+  TVirtualMC::GetMC()->SetCut("BCUTE", 	1e-3  );
+  TVirtualMC::GetMC()->SetCut("BCUTM", 	1e-3  );
+  TVirtualMC::GetMC()->SetCut("DCUTE", 	1e-3  );
+  TVirtualMC::GetMC()->SetCut("DCUTM", 	1e-3  );
+  TVirtualMC::GetMC()->SetCut("PPCUTM", 1e-3  );
+  TVirtualMC::GetMC()->SetCut("TOFMAX", 50.e-6);
   if (IAttr("phys_off") || IAttr("hadr_off")) {// switch off hadr physics 
     LOG_INFO << "StVMCMaker::InitRun switch off hadron" << endm;
+    TVirtualMC::GetMC()->SetProcess("LOSS", 4);
     if (IAttr("phys_off")) {
       LOG_INFO << "StVMCMaker::InitRun switch off decays" << endm;
       TVirtualMC::GetMC()->SetProcess("DCAY", 0);
@@ -335,17 +348,6 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
     TVirtualMC::GetMC()->SetProcess("DRAY", 1);
     TVirtualMC::GetMC()->SetProcess("MULS", 1);
     TVirtualMC::GetMC()->SetProcess("STRA", 0);
-    TVirtualMC::GetMC()->SetCut("CUTGAM",	1e-3  );
-    TVirtualMC::GetMC()->SetCut("CUTELE", 	1e-3  );
-    TVirtualMC::GetMC()->SetCut("CUTHAD", 	.001  );
-    TVirtualMC::GetMC()->SetCut("CUTNEU", 	.001  );
-    TVirtualMC::GetMC()->SetCut("CUTMUO", 	.001  );
-    TVirtualMC::GetMC()->SetCut("BCUTE", 	.001  );
-    TVirtualMC::GetMC()->SetCut("BCUTM", 	.001  );
-    TVirtualMC::GetMC()->SetCut("DCUTE", 	1e-3  );
-    TVirtualMC::GetMC()->SetCut("DCUTM", 	.001  );
-    TVirtualMC::GetMC()->SetCut("PPCUTM", 	.001  );
-    TVirtualMC::GetMC()->SetCut("TOFMAX", 	50.e-6);
   }
   fgStarVMCApplication->InitMC(SAttr("VMCConfig"));
   Double_t scaleX0 = DAttr("ScaleX04TpcGas");
