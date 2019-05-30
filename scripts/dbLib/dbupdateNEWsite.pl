@@ -1124,7 +1124,7 @@ $jrun = "Run not completed";
              $Err_messg = "Killed";
 
    }elsif ($line =~ /Abort/)  {
-       if($line =~ /UndoAbortGap/)  {
+       if($line =~ /AbortGap/)  {
 	   $Err_messg = "none";
        }else{
              $Err_messg = "Abort";
