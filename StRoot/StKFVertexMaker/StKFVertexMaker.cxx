@@ -7,6 +7,7 @@
 #endif
 #include "TMath.h"
 #include "TH1.h"
+#include "TEnv.h"
 #include "TCanvas.h"
 #include "StDcaGeometry.h"
 #include "KFParticle/KFVertex.h"
@@ -36,6 +37,7 @@
 #include "StTMVARank/StTMVARanking.h"
 #include "StarMagField/StarMagField.h"
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
+#include "StGenericVertexMaker/StFixedVertexFinder.h"
 #include "StGenericVertexMaker/StGenericVertexMaker.h"
 using namespace TMVA;
 ClassImp(StKFVertexMaker);
@@ -268,6 +270,9 @@ Int_t StKFVertexMaker::Make() {
     StGenericVertexMaker* gvm = (StGenericVertexMaker*)StMaker::GetChain()->GetMaker("GenericVertex");
     if (gvm) mGVF = gvm->GetGenericFinder();
     if (mGVF) {
+      ((StFixedVertexFinder *)mGVF)->SetVertexError(gEnv->GetValue("FixedSigmaX", 0.00176),
+						    gEnv->GetValue("FixedSigmaY", 0.00176),
+						    gEnv->GetValue("FixedSigmaZ", 0.00176));
       mGVF->fit(pEvent);
       StKFVertex::ResetTotalNoVertices(0);
       fgcVertices = new StKFVerticesCollection();

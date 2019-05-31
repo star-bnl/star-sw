@@ -293,7 +293,7 @@ void MakeTpcAvgPowerSupply(Int_t year = 2019) {
   };
   TDatime now;
   
-  TFile *fSumF = new TFile(Form("MakeTpcAvgPowerSupply.%02i%02i%02i_%02i.root",now.GetDay(),now.GetMonth(),now.GetYear()%100,now.GetHour()),"pdate");
+  TFile *fSumF = new TFile(Form("MakeTpcAvgPowerSupply.%02i%02i%02i_%02i.root",now.GetDay(),now.GetMonth(),now.GetYear()%100,now.GetHour()),"update");
   TNtuple *FitP = 0;
   if (fSumF) FitP = (TNtuple *) fSumF->Get("FitP");
   if (!FitP) {

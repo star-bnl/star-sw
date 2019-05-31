@@ -4,8 +4,8 @@
 TDataSet *CreateTable() {
   Double_t pTlow  =    0;
   Double_t pThigh =   20;
-  Double_t Ylow   =  -1; 
-  Double_t Yhigh  =   1;
+  Double_t Ylow   =  -2; 
+  Double_t Yhigh  =   2;
   Double_t Philow =   0;
   Double_t Phihigh= 2*TMath::Pi();
   Double_t Zlow   =  -70; 
@@ -34,14 +34,15 @@ TDataSet *CreateTable() {
     cflag->iswit[1] = 2;
     cflag->iswit[2] = 2; 
 #endif
-    const Char_t *nameP = "HyperTriton";
+    const Char_t *nameP = "Xi-";
     TGeant3TGeo *g3 = (TGeant3TGeo *)TVirtualMC::GetMC();
     TParticlePDG *p = TDatabasePDG::Instance()->GetParticle(nameP);
     if (! p) return;
     Int_t pdg = p->PdgCode();
     if (!pdg) return 0;
     Int_t iD  = g3->IdFromPDG(pdg);
-    // StarVMCApplication::Instance()->ForceDecay(nameP, "K+", "K-", "", 100);
+    StarVMCApplication::Instance()->ForceDecay(nameP, "Lambda0", "pi-", 0, 100);
+    StarVMCApplication::Instance()->ForceDecay("Lambda0", "proton", "pi-", 0, 100);
     StarMCSimplePrimaryGenerator *gener = (StarMCSimplePrimaryGenerator *) StarVMCApplication::Instance()->GetPrimaryGenerator();
     if ( gener && ! gener->IsA()->InheritsFrom( "StarMCSimplePrimaryGenerator" ) ) {
       delete gener; gener = 0;

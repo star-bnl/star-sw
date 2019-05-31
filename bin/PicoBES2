@@ -1,0 +1,20 @@
+setenv NODEBUG yes
+setup 64b
+xtitl
+set TRIG = 19GeV_2019
+set PicoDIR  =  /gpfs01/star/pwg/fisyak/Pico/${TRIG}
+cd ${PicoDIR}
+@ count = 0
+foreach d (`ls -1d ???`)
+  cd ${d}; pwd;
+  if (! -r Chain.log) then	
+    rm -rf .sl*
+    ln -s ~/macros/.sl73_* .	
+    root.exe -q -b 'Chain.C+("./*/*picoDst.root","PicoDst")' >&  Chain.log  &
+    @ count++;  echo "count $count";
+    if ($count > 20) break;
+  endif
+  cd -;
+end
+
+grep total ???/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fM\n", n/1.e6)}'

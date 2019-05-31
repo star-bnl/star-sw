@@ -158,6 +158,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
       mk->SetMode(1); 
     }
   }
+
 #if 0 /* not enough memory for dE/dx plots */
   StMaker *dEdxY2 = chain->GetMaker("dEdxY2"); 
   if (dEdxY2) {
@@ -213,6 +214,82 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     cout << "Chain initiation has failed" << endl;
     chain->Fatal(initStat, "during Init()");
   }
+  const Char_t  *Names[15] = {
+    "muon+",     
+    "muon-",     
+    "electron",  
+    "positron",  
+    "pion+",     
+    "pion-",     
+    "kaon+",     
+    "kaon-",     
+    "proton",    
+    "pbar",      
+    "deuteron",  
+    "triton",    
+    "He3",	 
+    "alpha",     
+    "pionMIP"        
+  };
+  Int_t Ids[15] = {
+      5,
+      6,
+      3,
+      2,
+      8,
+      9,
+     11,
+     12,
+     14,
+     15,
+     45,
+     46,
+     49,
+     47,
+      8
+  };
+  Double_t Masses[15] = {
+    0.1056584,
+    0.1056584,
+    0.51099907e-3,
+    0.51099907e-3,
+    0.13956995,
+    0.13956995,
+    0.493677,
+    0.493677,
+    0.93827231,
+    0.93827231, 
+    1.875613,
+    2.80925,
+    2.80923,
+    3.727417,
+    0.13956995
+  };
+  Int_t    NTRACK = 100;
+  Int_t    ID = 5;
+  Double_t Ylow   =  -1; 
+  Double_t Yhigh  =   1;
+  Double_t Philow =   0;
+  Double_t Phihigh= 2*TMath::Pi();
+  Double_t Zlow   =  -50; 
+  Double_t Zhigh  =   50; 
+  Double_t bgMinL10  = -2; // 3.5;// 1e2; // 1e-2;
+  Double_t bgMaxL10  =  6;  // 1e2;// 1e5;
+  Double_t mass   = -1;
+  for (Int_t i = 0; i < 15; i++) {
+    if (Opt.Contains(Names[i],TString::kIgnoreCase)) {
+      ID =Ids[i];
+      if (i == 14) {bgMinL10 = 0.544; bgMaxL10 = 0.653;}
+      mass = Masses[i];;
+      break;
+    }
+  }
+  if (mass < 0) {
+    cout << Opt.Data() << " is not identified. Abort" << endl;
+    return;
+  }
+  Double_t pTmin = mass*TMath::Power(10.,bgMinL10);
+  Double_t pTmax = mass*TMath::Power(10.,bgMaxL10);
   if (gClassTable->GetID("TGiant3") >= 0) {
     St_geant_Maker *geant = (St_geant_Maker *) chain->GetMakerInheritsFrom("St_geant_Maker");
     //                   NTRACK  ID PTLOW PTHIGH YLOW YHIGH PHILOW PHIHIGH ZLOW ZHIGH
@@ -231,50 +308,9 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
 	geant->Do("gvert 0  54   0");
 	geant->Do("mode TRAC prin 15");
       } else if (TString(geant->SAttr("GeneratorFile")) == "") {
-	Int_t    NTRACK = 100;
-	Int_t    ID = 5;
-	Double_t Ylow   =  -1; 
-	Double_t Yhigh  =   1;
-	Double_t Philow =   0;
-	Double_t Phihigh= 2*TMath::Pi();
-	Double_t Zlow   =  -50; 
-	Double_t Zhigh  =   50; 
-	Double_t mass = 0.1057;
-	Double_t bgMin  = 1e-1; // 3.5;// 1e2; // 1e-2;
-	Double_t bgMax  = 1e6;  // 1e2;// 1e5;
-	Double_t pTmin = -1;
-	Double_t pTmax = -1;
-	if      (Opt.Contains("muon",TString::kIgnoreCase))     {ID =  5;                 
-	  if    (Opt.Contains("muon-",TString::kIgnoreCase))     ID =  6;}
-	else if (Opt.Contains("electron",TString::kIgnoreCase)) {ID =  3; mass = 0.5110E-03;}
-	else if (Opt.Contains("positron",TString::kIgnoreCase)) {ID =  2; mass = 0.5110E-03;}
-	else if (Opt.Contains("pion",TString::kIgnoreCase))     {ID =  8; mass = 0.1396; 
-	  if    (Opt.Contains("pion-",TString::kIgnoreCase))     ID =  9;}
-	else if (Opt.Contains("kaon",TString::kIgnoreCase))     {ID = 11; mass = 0.4937; 
-	  if    (Opt.Contains("kaon-",TString::kIgnoreCase))     ID = 12;}
-	else if (Opt.Contains("proton",TString::kIgnoreCase))   {ID = 14; mass = 0.9383; 
-	  if    (Opt.Contains("antiproton",TString::kIgnoreCase) ||
-		 Opt.Contains("pbar",TString::kIgnoreCase)) ID = 15;}
-	else if (Opt.Contains("deuteron",TString::kIgnoreCase)) {ID = 45; mass = 1.876;}
-	else if (Opt.Contains("triton",TString::kIgnoreCase))   {ID = 46; mass = 2.80925;}
-	else if (Opt.Contains("He3",TString::kIgnoreCase))      {ID = 49; mass = 2.80925;}
-	else if (Opt.Contains("alpha",TString::kIgnoreCase))    {ID = 47; mass = 3.727;}
-	else if (Opt.Contains("phi",TString::kIgnoreCase))      {ID = 10151; mass = 1.0194; NTRACK = 1; pTmin = 0.010, pTmax = 2.000;}
-	if (Opt.Contains("MIP",TString::kIgnoreCase))           { pTmin = 0.2; pTmax = 0.5; bgMin = 3; bgMax = 5;}
-	if (Opt.Contains("MIP1",TString::kIgnoreCase))          {NTRACK = 5;pTmin = 0.2; pTmax = 0.5; bgMin = 3; bgMax = 5;}
-	if (Opt.Contains("1GeV",TString::kIgnoreCase))          {pTmin = pTmax = 1.0;}
-	if (Opt.Contains("0.5GeV",TString::kIgnoreCase))        {pTmin = pTmax = 0.5;}
-	if (Opt.Contains("50",TString::kIgnoreCase))            {NTRACK =   50;}
-	if (Opt.Contains("1000",TString::kIgnoreCase))          {NTRACK = 1000;}
-	if (Opt.Contains("1muon",TString::kIgnoreCase))          NTRACK = 1;
-	if (Opt.Contains("Single",TString::kIgnoreCase))         NTRACK = 1;
-	if (Opt.Contains("LamXi2430",TString::kIgnoreCase))     {NTRACK = 50;   ID = 60002;  pTmin = 0.1; pTmax = 10.0;}
 	if (RunOpt.Contains("gstarLib",TString::kIgnoreCase)) {geant->Do("call gstar");}
 	if (pTmin < 0) pTmin = mass*bgMin; if (pTmin <    0.01) pTmin =    0.01;
 	if (pTmax < 0) pTmax = mass*bgMax; if (pTmax > 1000.00) pTmax = 1000.00;
-	TRandom3 R(0);
-	Double_t bgMin10 = TMath::Log10(bgMin);
-	Double_t bgMax10 = TMath::Log10(bgMax);
 	TString Kine(Form("gkine %i %i %f %f -2  2 0 %f -50 50;",NTRACK,ID,pTmin,pTmax,TMath::TwoPi()));
 	cout << "Set kinematics: " << Kine.Data() << endl;
 	geant->Do(Kine.Data());
@@ -286,25 +322,6 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     StarMCSimplePrimaryGenerator *gener = (StarMCSimplePrimaryGenerator *) StarVMCApplication::Instance()->GetPrimaryGenerator();
     if ( gener && ! gener->IsA()->InheritsFrom( "StarMCSimplePrimaryGenerator" ) ) {
       delete gener; gener = 0;
-    }
-    const Char_t *names[15] = {"muon+", "muon-", "electron", "positron", "pion+", "pion-", "kaon+", "kaon-", "proton", "pbar", "deuteron", "triton", "He3", "alpha", "pionMIP"};
-    Int_t         Ids[15]   = {      5,       6,          3,          2,       8,       9,      11,      12,       14,     15,         45,       46,    49,      47,         8};
-    Int_t    NTRACK = 100;
-    Int_t    ID = 5;
-    Double_t Ylow   =  -1; 
-    Double_t Yhigh  =   1;
-    Double_t Philow =   0;
-    Double_t Phihigh= 2*TMath::Pi();
-    Double_t Zlow   =  -50; 
-    Double_t Zhigh  =   50; 
-    Double_t bgMinL10  = -1; // 3.5;// 1e2; // 1e-2;
-    Double_t bgMaxL10  =  6;  // 1e2;// 1e5;
-    for (Int_t i = 0; i < 15; i++) {
-      if (Opt.Contains(names[i])) {
-	ID = Ids[i];
-	if (i == 14) {bgMinL10 = 0.544; bgMaxL10 = 0.653;}
-	break;
-      }
     }
     if (! gener) gener =  new 
       StarMCSimplePrimaryGenerator( NTRACK, ID, bgMinL10, bgMaxL10,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, "GBL");

@@ -263,21 +263,20 @@ Bfc_st BFC[] = { // standard chains
   {"MC2018",      "","","MC2018.Ideal,vmc,VMCAlignment,sdt20180426.122000"                ,"","","",kFALSE},
   {"MC.2019","","","y2019,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
-   ,                                                                                      "","","/",kFALSE},
+   ,                                                                                       "","","",kFALSE},
   {"MC.2019","","","y2019,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
   {"MC.y2019","","","MC2019",                                                              "","","",kFALSE},
   {"MC2019.Ideal","","","MC.2019,MC.StiCA,vmc,NewTpcAlignment"                            ,"","","",kFALSE},
   {"MC2019",      "","","MC.2019,sdt20190401,MC.StiCA,vmc,NewTpcAlignment"                ,"","","",kFALSE},
-  {"MC.y2019a","","","MC.2019a",                                                           "","","",kFALSE},
   {"MC2019a"  ,"","","MC.2019a",                                                           "","","",kFALSE},
   {"MC.2019a","","","y2019a,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna,MC.StiCA,NewTpcAlignment,vmc"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,ETofSim,etofa,tags,emcY2,evout,IdTruth"
    ",geantout,big,MiniMcMk,StiCA,NewTpcAlignment,AgML",                                   "","","/",kFALSE},
   {"MC.y2019a","","","MC2019a",                                                            "","","",kFALSE},
-  {"MC.StiCA",   "","","StiCA,StiKFVertex,geantOut,noRunco,noHistos,20Muons,OSpaceZ2,"
-   "OGridLeak3D,CorrX,StiPulls,picoWrite,PicoVtxVpd,RunG.1,McTpcAna,tags"                  ,"","","",kFALSE},
+  {"MC.StiCA",   "","","StiCA,StiKFVertex,geantOut,noRunco,noHistos,"
+   "picoWrite,PicoVtxVpd,McTpcAna,tags"                                                  ,"","","",kFALSE},
   {"XC",          "","","TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,"
    "OSpaceZ2,OGridLeak3D,CorrX,tpcDB,TpcHitMover"
    ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,Stx,KFVertex,Idst,BAna"       
