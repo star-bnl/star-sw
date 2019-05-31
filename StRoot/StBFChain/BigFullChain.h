@@ -1613,7 +1613,9 @@ Bfc_st BFC[] = { // standard chains
   {"Vertex"      ,"","","ITTF",          "","","WARNING *** Option is OBSOLETE use ITTF instead***",kFALSE},
   {"Primary"     ,"","","ITTF",          "","","WARNING *** Option is OBSOLETE use ITTF instead***",kFALSE},
   {"V0"          ,"","","V02",            "","","WARNING *** Option is OBSOLETE use V02 instead***",kFALSE},
+#if 0
   {"Xi"          ,"","","Xi2",            "","","WARNING *** Option is OBSOLETE use Xi2 instead***",kFALSE},
+#endif
   {"Kink"        ,"","","Kink2",        "","","WARNING *** Option is OBSOLETE use Kink2 instead***",kFALSE},
   {"dst"         ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"Fglobal"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
@@ -1917,7 +1919,7 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                      "Find Kinks from StEvent",kFALSE},
   {"V02"         ,"v02","","db,MuDST,-V0","StV0FinderMaker","StSecondaryVertexMaker"
    ,                                                                        "Find V0s from StEvent",kFALSE},
-  {"Xi2"         ,"xi2","","db,MuDST,-V02,-Xi","StXiFinderMaker","StSecondaryVertexMaker"
+  {"Xi2"         ,"xi2","","db,MuDST,-V02","StXiFinderMaker","StSecondaryVertexMaker"
    ,                                                                     "Xis AND V0s from StEvent",kFALSE},
 #else /* ! __NoStrangeMuDst__ */
   {"Kink2"       ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
