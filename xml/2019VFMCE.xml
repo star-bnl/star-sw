@@ -19,7 +19,7 @@
     exit 1;
   endif
   set name = ""
-  foreach name (K_S0 Lambda0 Lambda0_bar Xi Xi_bar Omega Omega_bar HyperTriton)
+  foreach name (K_S0  Lambda0_bar Lambda0 Xi_bar Xi  Omega_bar Omega HyperTriton)
     echo $Name | grep $name
     if (! $?) break;
 #    if ($name == $Name) break;
