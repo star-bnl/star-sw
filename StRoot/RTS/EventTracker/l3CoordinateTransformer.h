@@ -9,7 +9,7 @@
 #include <math.h>
 
 class l3CoordinateTransformer{
- private:
+ public:
   // basic geometry fixed here ... this could be also taken from db
   static int    numberOfPadsAtRow[45];
   static double radialDistanceAtRow[45]; 
@@ -24,7 +24,7 @@ class l3CoordinateTransformer{
   double drift_length_outer ;
   double lengthPerTb;
   
- private:
+ public:
   
   // max tb
   double max_tb_inner;
