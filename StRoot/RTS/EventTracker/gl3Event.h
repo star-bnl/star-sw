@@ -11,7 +11,6 @@
 #ifndef GL3EVENT 
 #define GL3EVENT 
 
-
 #ifndef TRG_VERSION
 #define TRG_VERSION 0x32
 #endif
@@ -82,7 +81,8 @@ class gl3Event {
 			  int what=GL3_READ_ALL);
 
     void readClustersFromEvpReader(int sector);
-
+			  int readITPCClustersFromEvpReader(daqReader *rdr, int sector);
+			  
     short       getBusy   ( ) { return busy; };
     gl3Track*   getTrack  ( int n );
     gl3Hit*     getHit    ( int n );

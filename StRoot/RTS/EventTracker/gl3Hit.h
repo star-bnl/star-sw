@@ -46,6 +46,8 @@ public:
                int sector, l3_cluster* cluster ) ;
    int setFlags(unsigned short in) { flags = in; return 0; };
 
+   void setITPCHit(l3CoordinateTransformer* tranformer, int sector, int row, double pad, double tb, unsigned short charge, unsigned short flags);
+
    void  print ( ) ;
 };
 #endif

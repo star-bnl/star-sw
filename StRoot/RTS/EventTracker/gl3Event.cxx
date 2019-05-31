@@ -92,11 +92,11 @@ int gl3Event::readFromEvpReader(daqReader *rdr,
   setBField(bField);
 
   // need a tracker...
-  coordinateTransformer->Set_parameters_by_hand(0.581, 200.668, 201.138 );   // AuAu200
+  coordinateTransformer->Set_parameters_by_hand(0.581, 217.039, 201.138 );   // AuAu200
   //coordinateTransformer->Set_parameters_by_hand(0.6176, 200.668, 201.138 );    // 3.85GeV
   coordinateTransformer->LoadTPCLookupTable("/RTS/conf/L3/map.bin");
 
-  FtfSl3 *tracker = new FtfSl3(coordinateTransformer);
+  FtfSl3 *tracker = new FtfSl3(coordinateTransformer, rdr);
 
   tracker->setup();
   tracker->para.bField = fabs(bField); 
@@ -204,7 +204,10 @@ int gl3Event::readFromEvpReader(daqReader *rdr,
     if(what & GL3_READ_TPC_CLUSTERS) {
 
       LOG(DBG, "Reading clusters");
-      readClustersFromEvpReader(i+1);
+      if(i != 100000) {
+	  readITPCClustersFromEvpReader(rdr, i+1);
+	  readClustersFromEvpReader(i+1);
+      }
 
       int nnn=0;
       for(int i=0;i<45;i++) {
@@ -276,7 +279,7 @@ void gl3Event::readClustersFromEvpReader(int sector)
 
   for(int r=0;r<45;r++) {
 #ifdef OLD_DAQ_READER
-    for(int j=0;j<tpc.cl_counts[r];j++) {
+    for(int j=0;j<tpc.cl_counts[r];j++)
       tpc_cl *c = &tpc.cl[r][j];
 #else /* OLD_DAQ_READER */
     for(int j=0;j<pTPC->cl_counts[r];j++) {
@@ -285,7 +288,7 @@ void gl3Event::readClustersFromEvpReader(int sector)
 	
       gl3Hit *gl3c = &hit[nHits];
       nHits++;
-
+      
       l3_cluster sl3c;
       sl3c.pad = (int)((c->p - 0.5) * 64);
       sl3c.time = (int)((c->t - 0.5) * 64);
@@ -297,18 +300,50 @@ void gl3Event::readClustersFromEvpReader(int sector)
       //c->p2;
       //c->t1;
       //c->t2;
-	
+      
       gl3c->set(coordinateTransformer, sector, &sl3c);
-
+      
       //printf("i=%d nHits=%d (%f %f %f) %f %f %f\n",i,nHits,
       //       sl3c.pad / 64.0,
       //       sl3c.time / 64.0,
       //       sl3c.charge,
       //       gl3c->getX(),gl3c->getY(),gl3c->getZ());
-	
+      
     }
   }
 }
+  
+ int gl3Event::readITPCClustersFromEvpReader(daqReader *rdr, int sector) {
+   
+   int ncld = 0;
+   daq_dta *dd;
+   dd = rdr->det("itpc")->get("cld", sector);
+   if(dd) {
+     while(dd->iterate()) {
+       ncld++;
+       
+       int padrow = dd->row;
+       int sec = dd->sec;
+       
+       for(u_int i=0;i<dd->ncontent;i++) {
+	 float pad = dd->cld[i].pad;
+	 float tb = dd->cld[i].tb;
+	 int charge = dd->cld[i].charge;
+	 int flags = dd->cld[i].flags;
+	 int padrow = dd->row;
+
+	 gl3Hit *gl3c = &hit[nHits];
+	 nHits++;
+
+	 gl3c->setITPCHit(coordinateTransformer, sec, padrow, pad, tb, charge, flags);
+       }
+     }
+   }
+
+   return ncld;
+ }
+
+    
 //####################################################################
 // Constructor and Destructor 
 //####################################################################

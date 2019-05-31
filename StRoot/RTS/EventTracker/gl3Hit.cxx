@@ -47,5 +47,41 @@ int gl3Hit::set ( l3CoordinateTransformer* transformer,
 
    charge          = cluster->charge ;
 
+   // printf("tpx: %lf\n", z);
+
+   //printf("tpx: %d\n", rowSector);
    return 0 ;
+}
+
+void gl3Hit::setITPCHit(l3CoordinateTransformer *trans, int sec, int row, double pad, double tb, unsigned short charge, unsigned short flags) {
+
+    int pads = 2 * (row + 25 - (int)((double)row/7.0));
+    int padpos = pad - pads/2;
+
+    l3ptrsCoordinate raw;
+    l3xyzCoordinate local;
+    l3xyzCoordinate global;
+
+    raw.Sets(sec);
+    local.Setx(padpos * .5);
+    local.Sety(55.80 + 1.6 * (row - 1));
+    local.Setz(trans->drift_length_inner - tb * trans->lengthPerTb);
+ 
+    trans->local_to_global(raw, local, global);
+    
+    x = global.Getx();
+    y = global.Gety();
+    z = global.Getz();
+
+
+
+    //printf("drift_length_inner = %lf  length_per_tb = %lf  drift_length_outer = %lf\n",
+    //	   trans->drift_length_inner, trans->lengthPerTb, trans->drift_length_outer);
+    //printf("itpc: %lf\n", z);
+
+    rowSector  = sec * 100 + row ;
+    //printf("itpc: %d\n", rowSector);
+
+    this->flags = flags;
+    this->charge = charge;
 }
