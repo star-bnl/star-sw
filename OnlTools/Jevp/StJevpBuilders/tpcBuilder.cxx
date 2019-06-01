@@ -1,4 +1,4 @@
-// $Id: tpcBuilder.cxx,v 1.7 2019/06/01 14:47:45 videbaks Exp $
+// $Id: tpcBuilder.cxx,v 1.8 2019/06/01 15:02:34 videbaks Exp $
 //
 #include <stdio.h>
 #include <stdlib.h>
@@ -229,11 +229,11 @@ void tpcBuilder::initialize(int argc, char *argv[]) {
   
 
   contents.no_clust_tpx = new TH2F("no_clust_tpx","TPX #clusters vs sector",
-				   24,0.5,24.5,100,0,10);
+				   24,0.5,24.5,80,0,8);
   contents.no_clust_tpx->GetXaxis()->SetTitle("sector");
   contents.no_clust_tpx->GetYaxis()->SetTitle("log10(no clusters)");
   contents.no_clust_itpc = new TH2F("no_clust_itpc","iTPC #clusters vs sector",
-				   24,0.5,24.5,100,0,10);
+				   24,0.5,24.5,80,0,8);
   contents.no_clust_itpc->GetXaxis()->SetTitle("sector");
   contents.no_clust_itpc->GetYaxis()->SetTitle("log10(no clusters)");
 
