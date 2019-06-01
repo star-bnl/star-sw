@@ -1,4 +1,4 @@
-// $Id: tpcBuilder.cxx,v 1.6 2019/04/18 15:21:14 videbaks Exp $
+// $Id: tpcBuilder.cxx,v 1.7 2019/06/01 14:47:45 videbaks Exp $
 //
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,7 +29,7 @@
 // Compared to old plots:
 //      added cluster widtsh for both TPX and iTPC
 //      have seperate plots for itpc and tpx
-//      Some summary plots do have thesums for itpc and tpx
+//      Some summary plots do have the sums for itpc and tpx
 //      Legends updated
 //
 //
@@ -38,6 +38,8 @@
 #define checklaser 1
 #define fv 0
 #define fvd 0
+
+#define safelog(x) ((x > 0) ? log10(x) : 0)
 
 ClassImp(tpcBuilder);
   
@@ -225,6 +227,16 @@ void tpcBuilder::initialize(int argc, char *argv[]) {
 					30,0.5,30.5);
   contents.cl_width_tpx_pad->GetXaxis()->SetTitle("sector");
   
+
+  contents.no_clust_tpx = new TH2F("no_clust_tpx","TPX #clusters vs sector",
+				   24,0.5,24.5,100,0,10);
+  contents.no_clust_tpx->GetXaxis()->SetTitle("sector");
+  contents.no_clust_tpx->GetYaxis()->SetTitle("log10(no clusters)");
+  contents.no_clust_itpc = new TH2F("no_clust_itpc","iTPC #clusters vs sector",
+				   24,0.5,24.5,100,0,10);
+  contents.no_clust_itpc->GetXaxis()->SetTitle("sector");
+  contents.no_clust_itpc->GetYaxis()->SetTitle("log10(no clusters)");
+
   // cluster based vesions...
   //
   extras.itpc_clpix_occ_physics = new TH1D("itpc_clpix_occ_physics","iTPC Pixel Occupancy (in %) Physics",100,0,2.5);
@@ -580,12 +592,18 @@ void tpcBuilder::initialize(int argc, char *argv[]) {
   plots[n]->setOptStat(0);
   plots[++n] = new JevpPlot(contents.cl_width_tpx_pad);
   plots[n]->setOptStat(0);
+  plots[++n] = new JevpPlot(contents.no_clust_tpx);
+  plots[n]->setOptStat(0);
+  plots[++n] = new JevpPlot(contents.no_clust_itpc);
+  plots[n]->setOptStat(0);
+
+
   //
   // indices for blocks into the plots[] list
   //
-  long q_idx = ((long)&contents.h_tpc_sec1 - (long)contents.array) / (sizeof(TH1 *));
+  //  long q_idx = ((long)&contents.h_tpc_sec1 - (long)contents.array) / (sizeof(TH1 *));
   long qs_idx = ((long)&contents.h_itpc_chargeStep_s1 - (long)contents.array) / (sizeof(TH1 *));
-  long qe_idx = ((long)&contents.e_tpc_sec1 - (long)contents.array) / (sizeof(TH1 *));
+  //long qe_idx = ((long)&contents.e_tpc_sec1 - (long)contents.array) / (sizeof(TH1 *));
   long cl_qs_idx  = ((long)&extras.cl_itpc_chargeStep_s1 - (long)extras.array) / (sizeof(TH1 *));
   long qs_idx_tpx = ((long)&contents.h_tpx_chargeStep_s1 - (long)contents.array) / (sizeof(TH1 *)); 
   long cl_qs_idx_tpx  = ((long)&extras.cl_tpx_chargeStep_s1 - (long)extras.array) / (sizeof(TH1 *));
@@ -919,17 +937,19 @@ void tpcBuilder::event(daqReader *rdr)
     // Itpc data
     //
 
+
     dd = rdr->det("itpc")->get("cld",s) ;
     if(dd) {
       if(tpcDataInThisRun==0) addServerTags("tpc");
       tpcDataInThisRun = 1;
-
+      int noClustiTPC=0;
       has_cld = 1;
       cl_max_channels += tpc_max_channels_inner_sector;
       itpc_cl_max_channels += tpc_max_channels_inner_sector;
 
       while(dd->iterate()) {
 	for(u_int i=0;i<dd->ncontent;i++) {
+	  noClustiTPC++;
 	  if((dd->cld[i].flags==0)) {
 	    pix_count_cl += (dd->cld[i].t2 - dd->cld[i].t1)*(dd->cld[i].p2 - dd->cld[i].p1);
 	    itpc_pix_count_cl += (dd->cld[i].t2 - dd->cld[i].t1)*(dd->cld[i].p2 - dd->cld[i].p1);
@@ -941,9 +961,9 @@ void tpcBuilder::event(daqReader *rdr)
 	    ((TH2D*)contents.cl_width_itpc_pad)->Fill(s,dd->cld[i].p2 - dd->cld[i].p1);
 	  }
 	}
-      }
-    
 
+      }
+         contents.no_clust_itpc->Fill(s+1, safelog(noClustiTPC));
     } // dd itpc
 
     if(has_cld) {
@@ -970,6 +990,7 @@ void tpcBuilder::event(daqReader *rdr)
     if(dd) {
       if(tpcDataInThisRun==0) addServerTags("tpc");
       tpcDataInThisRun = 1;
+      int noClustTPX=0;
 
       has_cld = 1;
       cl_max_channels += tpc_max_channels_outer_sector;  // This will not work properly for run18 and earlier data
@@ -977,6 +998,7 @@ void tpcBuilder::event(daqReader *rdr)
       while(dd->iterate()) {
 	if(dd->row<14) continue; // fix for reading pre run 19 files
 	for(u_int i=0;i<dd->ncontent;i++) {
+	  noClustTPX++;
 	  if((dd->cld[i].flags==0)) {
 	    pix_count_cl += (dd->cld[i].t2 - dd->cld[i].t1)*(dd->cld[i].p2 - dd->cld[i].p1);
 	    charge_counts_cl[(int)dd->cld[i].pad][dd->row+27] += dd->cld[i].charge;
@@ -987,6 +1009,7 @@ void tpcBuilder::event(daqReader *rdr)
 	  }
 	}
       }
+      contents.no_clust_tpx->Fill(s+1, safelog(noClustTPX));
     }
     if(has_cld) {
       for(int i=0;i<512;i++) {

@@ -44,6 +44,7 @@ class tpcBuilder : public JevpBuilder {
       TH1 *itpc_pix_occ_physics;
       TH1 *itpc_pix_occ_laser;
       TH1 *itpc_pix_occ_pulser;
+ 
       TH1 *tpc_pix_occ_physics;
       TH1 *tpc_pix_occ_laser;
       TH1 *tpc_pix_occ_pulser;
@@ -160,6 +161,9 @@ class tpcBuilder : public JevpBuilder {
       TH1 *cl_width_itpc_pad;
       TH1 *cl_width_tpx_tb;
       TH1 *cl_width_tpx_pad;
+
+      TH1 *no_clust_tpx;
+      TH1 *no_clust_itpc;
 
     };
   } contents;
