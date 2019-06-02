@@ -218,6 +218,7 @@ Int_t StVMCMaker::Init() {
       assert(!ee);
       TDataSet *d = (TDataSet *) gInterpreter->Calc("CreateTable()",&ee);
       assert(!ee);
+      assert(d);
       AddConst(d);
 #if  ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0)
       /* Don' do this beacuse root will try to unload shared libraries in the macro */
