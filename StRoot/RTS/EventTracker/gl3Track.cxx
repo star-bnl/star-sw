@@ -62,6 +62,8 @@ int gl3Track::addTrack ( gl3Track* piece ){
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void gl3Track::dropHits ( int rest, int rowMin, int rowMax ) {
 
+    printf("dropHits\n");
+
    gl3Hit* previousHit = 0  ;
    gl3Hit* cHit = (gl3Hit *)firstHit ;
    gl3Hit* deleteHit ;

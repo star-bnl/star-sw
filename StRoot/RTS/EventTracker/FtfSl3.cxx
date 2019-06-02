@@ -63,6 +63,7 @@
 #include <evpReader.hh>
 #else /* OLD_DAQ_READER */
 #include <DAQ_READER/daqReader.h>
+#include <DAQ_READER/daq_dta.h>
 #endif /* OLD_DAQ_READER */
 #include <rtsSystems.h>
 #include <daqFormats.h>
@@ -886,19 +887,90 @@ int FtfSl3::setTrackingAngles(int sector)
 //
 int FtfSl3::readSectorFromEvpReader(int sector) {
 
+    embedded = 0;
 
-  embedded = 0;
-
-  l3xyzCoordinate XYZ(0,0,0);
-  l3ptrsCoordinate PTRS(0,0,0,0);
-
-  sectorNr = sector;
-  if ( sectorNr < 1 || sectorNr > 24 ) {
-    LOG(ERR, "Error - FtfSl3::readSector: Wrong sector %d!\n",sectorNr);
-    return -1 ;
-  }
+    l3xyzCoordinate XYZ(0,0,0);
+    l3ptrsCoordinate PTRS(0,0,0,0);
     
-  // read data...
+    sectorNr = sector;
+    if ( sectorNr < 1 || sectorNr > 24 ) {
+	LOG(ERR, "Error - FtfSl3::readSector: Wrong sector %d!\n",sectorNr);
+	return -1 ;
+    }
+    
+    // read data...
+    
+    FtfHit *hitP;
+
+    // Read TPC clusters in (doesn't use gl3 event, reads it again!
+    // First do iTPC
+
+    if(rdr != NULL) {
+	daq_dta *dd;
+	dd = rdr->det("itpc")->get("cld", sector);
+	if(dd) {
+	    while(dd->iterate()) {
+		int padrow = dd->row;
+		int sec = dd->sec;
+		
+		for(u_int i=0;i<dd->ncontent;i++) {
+		    float pad = dd->cld[i].pad;
+		    float tb = dd->cld[i].tb;
+		    int charge = dd->cld[i].charge;
+		    int flags = dd->cld[i].flags;
+		    int padrow = dd->row;
+		    
+		    
+		    //printf("nHits = %d\n", nHits);
+		    hitP = &hit[nHits];
+		    
+		    l3ptrsCoordinate raw;
+		    l3xyzCoordinate local;
+		    l3xyzCoordinate global;
+		    
+		    int pads = 2 * (padrow + 25 - (int)((double)padrow/7.0));
+		    int padpos = pad - pads/2;
+		    
+		    raw.Sets(sector);
+		    local.Setx(padpos * .5);
+		    local.Sety(55.80 + 1.6 * (padrow - 1));
+		    local.Setz(getCoordinateTransformer()->drift_length_inner - tb * getCoordinateTransformer()->lengthPerTb);
+		    getCoordinateTransformer()->local_to_global(raw, local, global);
+		    
+		    hitP->id = nHits;
+		    hitP->row = padrow;
+		    hitP->sector = sector;
+		    hitP->x = (float)global.Getx();
+		    hitP->y = (float)global.Gety();
+		    hitP->z = (float)global.Getz();
+		    hitP->dx = xyError;
+		    hitP->dy = xyError;
+		    hitP->dz = zError;
+		    hitP->buffer1 = (int)(pad * 64);
+		    hitP->buffer2 = (int)(tb * 64);
+		    
+		    if(embedded) 
+			hitP->flags = (flags | (1<<7));
+		    else 
+			hitP->flags = flags;
+		    
+		    hitP->q = charge;
+		    hitP->hardwareId = 0;
+		    
+		    nHits++;
+		}
+	    }
+	    
+	    
+	    
+	    
+	    //gl3c->setITPCHit(coordinateTransformer, sec, padrow, pad, tb, charge, flags);
+	}
+    }
+
+
+
+  // Now do TPC!
   for(int r=0;r<45;r++) {
 #ifdef OLD_DAQ_READER
     for(int j=0;j<tpc.cl_counts[r];j++) {
@@ -908,7 +980,7 @@ int FtfSl3::readSectorFromEvpReader(int sector) {
       tpc_cl *c = &pTPC->cl[r][j];
 #endif /* OLD_DAQ_READER */
       
-      FtfHit *hitP = &hit[nHits];
+      hitP = &hit[nHits];
    
       // Some cuts...
       if(c->t < minTimeBin) continue;

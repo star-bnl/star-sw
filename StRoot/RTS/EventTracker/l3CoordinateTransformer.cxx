@@ -124,6 +124,17 @@ int l3CoordinateTransformer::LoadTPCLookupTable(char *)
   return 0;
 }
 
+void l3CoordinateTransformer::raw_to_global(const l3ptrsCoordinate &raw,
+					    l3xyzCoordinate &global) 
+{
+    l3xyzCoordinate local;
+
+    raw_to_local(raw, local);
+    local_to_global(raw, local, global);
+}
+
+
+/*
 //______________________________
 void l3CoordinateTransformer::raw_to_global(const l3ptrsCoordinate &raw ,
 					    l3xyzCoordinate &global)
@@ -169,6 +180,11 @@ void l3CoordinateTransformer::raw_to_global(const l3ptrsCoordinate &raw ,
     global.Setxyz(x,y,z);
 
 }
+
+*/
+
+
+
 //______________________________
 void l3CoordinateTransformer::raw_to_local(const l3ptrsCoordinate &raw ,
 					   l3xyzCoordinate &local )

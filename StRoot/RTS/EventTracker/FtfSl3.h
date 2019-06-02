@@ -34,6 +34,7 @@
 #include "FtfDedx.h"
 #include "daqFormats.h"
 #include "sizes.h"
+#include "DAQ_READER/daqReader.h"
 
 
 class sectorGeometry {
@@ -57,6 +58,9 @@ class FtfSl3: public FtfFinder
    sectorGeometry*  sectorGeo ;
 
  public:
+   daqReader *rdr;
+
+ public:
    int       minTimeBin ;
    int       maxTimeBin ;
    int       minClusterCharge ;
@@ -66,7 +70,7 @@ class FtfSl3: public FtfFinder
 //
 //     Constructor
 //
-   FtfSl3 ( l3CoordinateTransformer* inTrans ) { 
+   FtfSl3 ( l3CoordinateTransformer* inTrans, daqReader *rdr ) { 
        debugLevel = 0 ;
        xyError    = 0.3 ;
        zError     = 1.0 ;
@@ -77,6 +81,7 @@ class FtfSl3: public FtfFinder
        coordinateTransformer = inTrans ; 
        sectorGeo = new sectorGeometry[24];
        fDedx = new FtfDedx(inTrans);
+       this->rdr = rdr;
    };
    ~FtfSl3 ( ) {
        if ( track != 0 ) delete []track ;
