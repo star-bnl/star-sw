@@ -853,7 +853,6 @@ void l4Builder::event(daqReader *rdr)
 	    hVzvpd->Fill(VzVpd);
 	    hVzDiff->Fill(VzVpd - vertZ);
             hVertexRZ->Fill(vertZ, vertR);
-            hBunchId->Fill(hlt_eve->bunch_id);
 
             if(daqID & upc) {
 	      hVertexX_UPC->Fill(vertX);
@@ -876,7 +875,8 @@ void l4Builder::event(daqReader *rdr)
 	      hBesGoodVertexZ->Fill(vertZ);
 	      hBesGoodVr->Fill(vertR);
 	      hBesGoodVrVsVz->Fill(vertZ,vertR);
-	    }
+              hBunchId->Fill(hlt_eve->bunch_id);
+            }
 	    
 	    //HLTGood2
 	    
@@ -2589,7 +2589,7 @@ void l4Builder::defineHltPlots()
 	HltPlots[index]->addHisto(ph);
 
         index++; // 47
-        hBunchId = new TH1D("BunchId", "Bunch ID;Bunch ID", 120, 0, 120);
+        hBunchId = new TH1D("BunchId", "HLTGood Bunch ID;Bunch ID", 120, 0, 120);
         ph = new PlotHisto();
         ph->histo = hBunchId;
         HltPlots[index]->addHisto(ph);
