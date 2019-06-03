@@ -12,7 +12,8 @@
 // #define HLT_GL3_VERSION 0x20140522 // add MTD data structure
 // #define HLT_GL3_VERSION 0x20160120 // add MTDQuarkonium
 // #define HLT_GL3_VERSION 0x20160210 // add isTrigger to hlt_MtdHit
-#define HLT_GL3_VERSION 0x20180607    // add bField in HLT_EVE
+// #define HLT_GL3_VERSION 0x20180607    // add bField in HLT_EVE
+#define HLT_GL3_VERSION 0x20190602    // add blue_bunch_id in HLT_EVE
 
 struct hlt_track {
     int            id ;         //primary key
@@ -157,6 +158,7 @@ struct HLT_EVE {
     float        beamlineX;
     float        beamlineY;
     float        bField;
+    unsigned short bunch_id;
 };
 
 struct hlt_diElectronPair {

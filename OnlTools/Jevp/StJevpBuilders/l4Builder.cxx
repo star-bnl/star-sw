@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <assert.h>
 #include <sys/time.h>
 #include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
@@ -160,7 +161,7 @@ void l4Builder::initialize(int argc, char *argv[])
 	gStyle->SetPadGridX(0);
 	gStyle->SetPadGridY(0);
 
-	for(int i = 0; i < 47; i++) {
+	for(int i = 0; i < 48; i++) {
 	        HltPlots[i] = new JevpPlot();
 		HltPlots[i]->gridx = 0;
 		HltPlots[i]->gridy = 0;
@@ -261,7 +262,7 @@ void l4Builder::initialize(int argc, char *argv[])
 	defineHltPlots_UPC();
 	defineDiElectron2TwrPlots();
 	setAllPlots();
-	for(int i = 0; i < 47; i++) {
+	for(int i = 0; i < 48; i++) {
 		LOG(DBG, "Adding plot %d", i);
 		addPlot(HltPlots[i]);
 	}
@@ -308,7 +309,7 @@ void l4Builder::startrun(daqReader *rdr)
     //printf("hello there. This is startrun\n");
 	runnumber = rdr->run;
 
-	int initialno = 47;
+	int initialno = 48;
 	for(int i = 0; i < initialno; i++) {
 		getPlotByIndex(i)->getHisto(0)->histo->Reset();
 	}
@@ -586,7 +587,7 @@ void l4Builder::writeHistogram()
 	char histfile[256];
 	sprintf(histfile, "%s/run14_hlt_%d_current_hist.root", Destindir, runnumber);
 	TFile file(histfile, "RECREATE");
-	int initialno = 47;
+	int initialno = 48;
 
 	for(int i = 0; i < initialno; i++) {
 	    HltPlots[i]->getHisto(0)->histo->Write();
@@ -852,8 +853,9 @@ void l4Builder::event(daqReader *rdr)
 	    hVzvpd->Fill(VzVpd);
 	    hVzDiff->Fill(VzVpd - vertZ);
             hVertexRZ->Fill(vertZ, vertR);
-            
-	    if(daqID & upc) {
+            hBunchId->Fill(hlt_eve->bunch_id);
+
+            if(daqID & upc) {
 	      hVertexX_UPC->Fill(vertX);
 	      hVertexY_UPC->Fill(vertY);
 	      hVertexZ_UPC->Fill(vertZ);
@@ -2586,6 +2588,12 @@ void l4Builder::defineHltPlots()
 	ph->histo = hVertexRZ;
 	HltPlots[index]->addHisto(ph);
 
+        index++; // 47
+        hBunchId = new TH1D("BunchId", "Bunch ID;Bunch ID", 120, 0, 120);
+        ph = new PlotHisto();
+        ph->histo = hBunchId;
+        HltPlots[index]->addHisto(ph);
+        
 	// index++; //45
 	// hFixed_VertexZ = new TH1D("Fixed_VertexZ", "Fixed_VertexZ", 200, 190., 210.);
 	// ph = new PlotHisto();
