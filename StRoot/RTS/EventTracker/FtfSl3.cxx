@@ -69,7 +69,7 @@
 #include <daqFormats.h>
 #ifndef OLD_DAQ_READER
 #include <DAQ_TPC/daq_tpc.h>
-#include <gl3Event.h>
+#include "gl3Event.h"
 
 extern tpc_t *pTPC;
 #endif /* OLD_DAQ_READER */
