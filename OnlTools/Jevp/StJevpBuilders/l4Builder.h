@@ -43,7 +43,7 @@ class l4Builder : public JevpBuilder {
 		 * @see 
 		 * @author 
 		 */  
-		JevpPlot *HltPlots[47];
+		JevpPlot *HltPlots[48];
 		JevpPlot *BeamPlots[3];
 		JevpPlot *BesGoodPlots[5];
 		JevpPlot *HLTGood2Plots[4];
@@ -360,7 +360,8 @@ class l4Builder : public JevpBuilder {
 		TH1D *hVzvpd;
 		TH1D *hVzDiff;
 
-                TH2D *hVertexRZ;    
+                TH2D *hVertexRZ;
+                TH1D *hBunchId;
 
                 /*   TH3D *hMatchannel3D ; */
 
