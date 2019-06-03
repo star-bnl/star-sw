@@ -69,6 +69,7 @@
 #include <daqFormats.h>
 #ifndef OLD_DAQ_READER
 #include <DAQ_TPC/daq_tpc.h>
+#include <gl3Event.h>
 
 extern tpc_t *pTPC;
 #endif /* OLD_DAQ_READER */
@@ -885,6 +886,47 @@ int FtfSl3::setTrackingAngles(int sector)
 // Assumes that tpcReader(mem,sector) has already been called
 // so that tpc structure contains data for sector already
 //
+
+
+void FtfSl3::setClustersFromGl3Event(gl3Event *event, int sector) {
+    int filtered_out = 0;
+
+    for(int i=event->sectorFirstHit[sector]; i < event->nHits; i++) {
+	gl3Hit *gl3 = &event->hit[i];
+	if((gl3->rowSector / 100) != sector) return;
+	
+	FtfHit *hitP = &hit[nHits];
+
+	hitP->id = nHits;
+	hitP->row = gl3->rowSector % 100;
+	hitP->sector = sector;
+	hitP->x = gl3->getX();
+	hitP->y = gl3->getY();
+	hitP->z = gl3->getZ();
+	hitP->dx = xyError;
+	hitP->dy = xyError;
+	hitP->dz = zError;
+	hitP->buffer1 = 0; //(int)(pad * 64);
+	hitP->buffer2 = 0; //(int)(tb * 64);
+		    
+	hitP->flags = gl3->flags;
+		    
+	hitP->q = gl3->charge;
+	hitP->hardwareId = 0;
+		    
+
+	//if(c->t < minTimeBin) continue;
+	//if(c->t > maxTimeBin) continue;
+	if(hitP->q < minClusterCharge) { filtered_out++; continue; }
+	if(hitP->q > maxClusterCharge) { filtered_out++; continue; }
+
+	nHits++;
+    }
+
+    LOG("JEFF", "sect = %d (%d) nhits = %d   (%d)", sector, event->sectorFirstHit[sector], nHits, filtered_out);
+}
+
+/*
 int FtfSl3::readSectorFromEvpReader(int sector) {
 
     embedded = 0;
@@ -968,66 +1010,72 @@ int FtfSl3::readSectorFromEvpReader(int sector) {
 	}
     }
 
+    //LOG("JEFF","itpc nHits=%d", nHits);
+    int filtered_out = 0;
 
+    // Now do TPC!
+    if(pTPC) {
+	for(int r=0;r<45;r++) {
+	    
+	    for(int j=0;j<pTPC->cl_counts[r];j++) {
+		tpc_cl *c = &pTPC->cl[r][j];
 
-  // Now do TPC!
-  for(int r=0;r<45;r++) {
-#ifdef OLD_DAQ_READER
-    for(int j=0;j<tpc.cl_counts[r];j++) {
-      tpc_cl *c = &tpc.cl[r][j];
-#else /* OLD_DAQ_READER */
-    for(int j=0;j<pTPC->cl_counts[r];j++) {
-      tpc_cl *c = &pTPC->cl[r][j];
-#endif /* OLD_DAQ_READER */
-      
-      hitP = &hit[nHits];
-   
-      // Some cuts...
-      if(c->t < minTimeBin) continue;
-      if(c->t > maxTimeBin) continue;
-      if(c->charge < minClusterCharge) continue;
-      if(c->charge > maxClusterCharge) continue;
-
-      //if((sector == 1)) {
-      //printf("cl new: %4.2f %4.2f %f %f\n",c->p - .5, c->t - .5, (float)r+1, (float)sector);
-      //}
-
-      // The subtractions are to handle the pad offsets
-      // My choice at the momement is to make L3 tracking identical to 
-      // old versions.   The difference is because Tonko includes the pad centroid
-      // shifts in the calculation of c->t & c->p.   It may be that in the old
-      // L3 code this shift was included, but in the transform code instead.
-      // Untill I know, I leave it as it was before...
-      //
-      PTRS.Setptrs(c->p - .5 , c->t - .5, r+1, sector);
-      getCoordinateTransformer()->raw_to_global(PTRS, XYZ);
-
-      hitP->id = nHits;
-      hitP->row = r+1;
-      hitP->sector = sector;
-      hitP->x = (float)XYZ.Getx();
-      hitP->y = (float)XYZ.Gety();
-      hitP->z = (float)XYZ.Getz();
-      hitP->dx = xyError;
-      hitP->dy = xyError;
-      hitP->dz = zError;
-      hitP->buffer1 = (int)((c->p - 0.5) * 64);
-      hitP->buffer2 = (int)((c->t - 0.5) * 64);
-      
-      if(embedded) 
-	hitP->flags = (c->flags | (1<<7));
-      else 
-	hitP->flags = c->flags;
-      
-      hitP->q = c->charge;
-      hitP->hardwareId = 0;
-
-      nHits++;
+		
+		hitP = &hit[nHits];
+		
+		
+		// Some cuts...
+		if(c->t < minTimeBin) { filtered_out++; continue; }
+		if(c->t > maxTimeBin) { filtered_out++; continue; }
+		if(c->charge < minClusterCharge) { filtered_out++; continue; }
+		if(c->charge > maxClusterCharge) { filtered_out++; continue; }
+		
+		//if((sector == 1)) {
+		//printf("cl new: %4.2f %4.2f %f %f\n",c->p - .5, c->t - .5, (float)r+1, (float)sector);
+		//}
+		
+		// The subtractions are to handle the pad offsets
+		// My choice at the momement is to make L3 tracking identical to 
+		// old versions.   The difference is because Tonko includes the pad centroid
+		// shifts in the calculation of c->t & c->p.   It may be that in the old
+		// L3 code this shift was included, but in the transform code instead.
+		// Untill I know, I leave it as it was before...
+		//
+		PTRS.Setptrs(c->p - .5 , c->t - .5, r+1, sector);
+		getCoordinateTransformer()->raw_to_global(PTRS, XYZ);
+		
+		hitP->id = nHits;
+		hitP->row = r+1;
+		hitP->sector = sector;
+		hitP->x = (float)XYZ.Getx();
+		hitP->y = (float)XYZ.Gety();
+		hitP->z = (float)XYZ.Getz();
+		hitP->dx = xyError;
+		hitP->dy = xyError;
+		hitP->dz = zError;
+		hitP->buffer1 = (int)((c->p - 0.5) * 64);
+		hitP->buffer2 = (int)((c->t - 0.5) * 64);
+		
+		if(embedded) 
+		    hitP->flags = (c->flags | (1<<7));
+		else 
+		    hitP->flags = c->flags;
+		
+		hitP->q = c->charge;
+		hitP->hardwareId = 0;
+		
+		nHits++;
+	    }
+	}
     }
-  }
-	  
-  return 0;
+
+    LOG("JEFF", "sector = %d nHits = %d  (%d)", sector, nHits, filtered_out);
+
+    return 0;
 } 
+*/
+
+
 
 // Done with read sector from evpReader
 ///////////////////////////////////////

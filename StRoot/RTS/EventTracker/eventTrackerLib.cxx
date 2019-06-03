@@ -82,7 +82,7 @@ int EventTracker::trackTPC(daqReader *rdr, char *mem, L3_GTD *gtd, int max_size)
 #endif /* OLD_DAQ_READER */
 {
   // bField != 1000 means use it, 1000 means take from file...
-  gl3->readFromEvpReader(rdr, mem, defaultBField, bField, GL3_READ_TPC_TRACKS);
+  gl3->readFromEvpReader(rdr, 1000);
 
   return gl3Event_to_GTD(gtd, max_size);
 }

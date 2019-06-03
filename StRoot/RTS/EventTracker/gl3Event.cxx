@@ -13,13 +13,8 @@
 #include "gl3Event.h"
 #include <rtsLog.h>
 #include "gl3Histo.h"
-#ifdef OLD_DAQ_READER
-#include <evpReader.hh>
-#else /* OLD_DAQ_READER */
 #include <DAQ_READER/daqReader.h>
-#endif /* OLD_DAQ_READER */
 #include "FtfSl3.h"
-#ifndef OLD_DAQ_READER
 
 #include <DAQ_READER/daq_dta.h>
 #include <DAQ_TPC/daq_tpc.h>
@@ -28,289 +23,176 @@
 
 tpc_t *pTPC=NULL;
 
-#endif /* OLD_DAQ_READER */
 //
 // evp should already contain the event that we want to read
 // 
 //
-#ifdef OLD_DAQ_READER
-int gl3Event::readFromEvpReader(evpReader *evp, 
-#else /* OLD_DAQ_READER */
-int gl3Event::readFromEvpReader(daqReader *rdr, 
-#endif /* OLD_DAQ_READER */
-				char *mem, 
-				float defaultbField,
-				float bField,
-				int what)
+
+int gl3Event::readFromEvpReader(daqReader *rdr, float bField)
 {
-#ifndef OLD_DAQ_READER
-  daq_dta *dd;
+    daq_dta *dd;
 
-#endif /* OLD_DAQ_READER */
-//   // Read the file...
-//   char *mem;
-//   for(;;) {
-//     mem = evp->get(which,type);
+    LOG(DBG, "Reader from EVP Reader: evt=%d token=%d",rdr->seq,rdr->token);
     
-//     if(!mem) {
-//       return evp->status;
-//     }
-    
-//     if(evp->seq == 235) break;
-//   }
-    
-  LOG(DBG, "Reader from EVP Reader: evt=%d token=%d",rdr->seq,rdr->token);
-  // Clear this event...
-  resetEvent();
-  nHits = 0;
+    // Clear this event...
+    resetEvent();
+    nHits = 0;
 
-  LOG(DBG, "Check magnetic field");
+    // Setupt the magnetic field
+    if(bField == 1000) {       // try to read from file
+	bField = -.5;           // if all else fails, set to reverse full field!
 
+	dd = rdr->det("sc")->get("legacy");
+	if(dd) {
+	    dd->iterate();
+	    sc_t *sc = (sc_t *)dd->Void;
+	    if(sc->valid) bField = sc->mag_field;
+	}
+    }       
+    if(fabs(bField) < .1) bField = .1;
+    setBField(bField);
+    LOG("JEFF", "bField set to %f",bField);
 
-  if(bField == 1000) {  // try to read from file
-    bField = defaultbField;       // use default
+    // need a tracker...
+    coordinateTransformer->Set_parameters_by_hand(0.581, 217.039, 201.138 );   // AuAu200
+    //coordinateTransformer->Set_parameters_by_hand(0.6176, 200.668, 201.138 );    // 3.85GeV
+    //coordinateTransformer->LoadTPCLookupTable("/RTS/conf/L3/map.bin");
 
-#ifdef OLD_DAQ_READER
-    int ret = scReader(mem);
-    if(ret >= 0) {                // but try file first!
-      if(sc.valid) bField = sc.mag_field;
-#else /* OLD_DAQ_READER */
-    dd = rdr->det("sc")->get("legacy");
+    FtfSl3 *tracker = new FtfSl3(coordinateTransformer, rdr);
 
-    if(dd) {
-      dd->iterate();
-      sc_t *sc = (sc_t *)dd->Void;
-      if(sc->valid) bField = sc->mag_field;
-#endif /* OLD_DAQ_READER */
-    }
-  }       
+    tracker->setup();
+    tracker->para.bField = fabs(bField); 
 
-  if(fabs(bField) < .1) bField = .1;
-
-  LOG(NOTE, "bField set to %f",bField,0,0,0,0);
-
-  setBField(bField);
-
-  // need a tracker...
-  coordinateTransformer->Set_parameters_by_hand(0.581, 217.039, 201.138 );   // AuAu200
-  //coordinateTransformer->Set_parameters_by_hand(0.6176, 200.668, 201.138 );    // 3.85GeV
-  coordinateTransformer->LoadTPCLookupTable("/RTS/conf/L3/map.bin");
-
-  FtfSl3 *tracker = new FtfSl3(coordinateTransformer, rdr);
-
-  tracker->setup();
-  tracker->para.bField = fabs(bField); 
-
-  // +1 , -1 or 0 if zero field...
-  tracker->para.bFieldPolarity = (bField>0) ? 1 : -1;
+    // +1 , -1 or 0 if zero field...
+    tracker->para.bFieldPolarity = (bField>0) ? 1 : -1;
 
   
-  ////// check parms  ///////////////
-  tracker->setXyError(.12) ; 
-  tracker->setZError(.24) ;
-  
-  tracker->para.ptMinHelixFit = 0.;
-  tracker->para.maxChi2Primary = 0.;  
-  
-  tracker->para.trackChi2Cut = 10 ; 
-  tracker->para.hitChi2Cut   = 50 ;
-  tracker->para.goodHitChi2  = 20 ; 
-  ///////////////////////////////////
+    ////// check parms  ///////////////
+    tracker->setXyError(.12) ; 
+    tracker->setZError(.24) ;
+    tracker->para.ptMinHelixFit = 0.;
+    tracker->para.maxChi2Primary = 0.;  
+    tracker->para.trackChi2Cut = 10 ; 
+    tracker->para.hitChi2Cut   = 50 ;
+    tracker->para.goodHitChi2  = 20 ; 
+    ///////////////////////////////////
  
-
-  tracker->reset();
+    tracker->reset();
  
-  // need temporary track memory...
-  L3_SECTP *sectp = NULL;
-
-  if(what & GL3_READ_TPC_TRACKS) {
+    // need temporary track memory...
+    L3_SECTP *sectp = NULL;
     sectp = (L3_SECTP *)malloc(szSECP_max);
-  }
 
-  int i;
-  for(i=0;i<24;i++) {
-    if(what & GL3_READ_TPC_TRACKS) {
-      if((i%2) == 0) {
-	tracker->nHits = 0;
-	tracker->setTrackingAngles(i+1);    // only set angles by hypersector...
-      }
-    }
-
-    LOG(DBG, "READ TPC data for sector %d  (0x%x)",i+1,rdr);
-
-    // Read the data....
-#ifdef OLD_DAQ_READER
-    int ret = tpcReader(mem, i);
-    if(ret < 0) { 
-      LOG(NOTE, "No data for sector %d",i+1,0,0,0,0);
-#else /* OLD_DAQ_READER */
-    dd = rdr->det("tpx")->get("legacy",i+1);
-    if(dd) {
-      LOG(NOTE, "There is tpx data...");
-      dd->iterate();
-      pTPC = (tpc_t *)dd->Void;
-    }
-    else {
-      LOG(NOTE, "No tpx data for sector %d check for TPC",i);
-  
-      dd = rdr->det("tpc")->get("legacy",i+1);
-      if(dd) {
-	dd->iterate();
-	pTPC = (tpc_t *)dd->Void;
-	//LOG("JEFF", "EEE: i=%d 0x%x",i,pTPC);
-	// afterburner...
-	// daq_tpc *tpc_class = (daq_tpc *)rdr->det("tpc");
-	///LOG("JEFF", "EFEF 0x%x",tpc_class);
-
-
-	//int cl_found = 0;
-	//cl_found = tpc_class->fcfReader(i+1,NULL,NULL,pTPC);
-
-	int cl_found = 0;
-	for(int pr=0;pr<45;pr++) {
-	  cl_found += pTPC->cl_counts[pr];
+    int i;
+    for(i=0;i<24;i++) {
+	if((i%2) == 0) {
+	    tracker->nHits = 0;
+	    tracker->setTrackingAngles(i+1);    // only set angles by hypersector...
 	}
+	LOG(DBG, "READ TPC data for sector %d  (0x%x)",i+1,rdr);
 
-	LOG(NOTE, "Found tpc data for sector %d... %d clusters found",i,cl_found);
-      }
-      else {
-	pTPC = NULL;
-      }
-    }
-
-    if(!pTPC) {
-      LOG(NOTE, "No data for TPC sector %d",i+1,0,0,0,0);
-#endif /* OLD_DAQ_READER */
-      continue;
-    }
-    
-    //LOG(NOTE, "Tpc reader done");
-#ifdef OLD_DAQ_READER
-    if(!tpc.has_clusters) {
-      // Construct the clusters...
-      // no calibration info, so pretty junky...
-      int ncl_recount = fcfReader(i);
-      if (ncl_recount) {
-      //LOG("JEFF", "fcf[%d] has %d clusters", i, ncl_recount);
-      }
-#else /* OLD_DAQ_READER */
-    if(!pTPC->has_clusters) {
-      LOG(DBG, "TPC sector %d has no clusters",i);
-      continue;
-#endif /* OLD_DAQ_READER */
-    }
-
-    // read in clusters...
-    if(what & GL3_READ_TPC_CLUSTERS) {
-
-      LOG(DBG, "Reading clusters");
-      if(i != 100000) {
-	  readITPCClustersFromEvpReader(rdr, i+1);
-	  readClustersFromEvpReader(i+1);
-      }
-
-      int nnn=0;
-      for(int i=0;i<45;i++) {
-#ifdef OLD_DAQ_READER
-	nnn += tpc.cl_counts[i];
-#else /* OLD_DAQ_READER */
-	nnn += pTPC->cl_counts[i];
-#endif /* OLD_DAQ_READER */
-      }
-      LOG(DBG, "clusters done %d",nnn);
-    }
-
-    // Do tracking...
-    if(what & GL3_READ_TPC_TRACKS) {
-      LOG(DBG, "Tracking...");
-      tracker->readSectorFromEvpReader(i+1);
-      
-      // only do tracking on full hypersectors...
-      if((i%2) == 1) {
-	tracker->processSector();
-	tracker->fillTracks(szSECP_max, (char *)sectp, 0);
-
-	LOG(DBG, "SECP size = %d",sectp->bh.length*4 + sectp->banks[0].len*4);
-
-	int n = readSectorTracks((char *)sectp);
-	//printf("Got %d tracks\n",n);
+	// read in clusters...
+	LOG(DBG, "Reading clusters");
+	if(i != 100000) {
+	    sectorFirstHit[i+1] = nHits;
+	    readITPCClustersFromEvpReader(rdr, i+1);
+	    readClustersFromEvpReader(rdr, i+1);
+	}
 	
-	if(n < 0) {
-	  LOG(WARN, "Error reading tracker: sector %d\n",i,0,0,0,0);
-	  continue;
+	// Do tracking...
+	LOG(DBG, "Tracking...");
+	tracker->setClustersFromGl3Event(this, i+1);
+	//tracker->readSectorFromEvpReader(i+1);
+
+	// only do tracking on full hypersectors...
+	if((i%2) == 1) {
+	    tracker->processSector();
+	    tracker->fillTracks(szSECP_max, (char *)sectp, 0);
+	    
+	    LOG(DBG, "SECP size = %d",sectp->bh.length*4 + sectp->banks[0].len*4);
+	    
+	    int n = readSectorTracks((char *)sectp);
+	    //printf("Got %d tracks\n",n);
+	    
+	    if(n < 0) {
+		LOG(WARN, "Error reading tracker: sector %d\n",i,0,0,0,0);
+		continue;
+	    }
 	}
-      }
     }
-  }
   
-  // LOG(NOTE, "FINAL");
-  if(what & GL3_READ_TPC_TRACKS) {
+    // LOG(NOTE, "FINAL");
     //LOG(INFO, "Finalizing...\n");y
     finalizeReconstruction();
     free(sectp);
-  }
-  // LOG(NOTE, "FINAL2");
+    // LOG(NOTE, "FINAL2");
   
 #ifdef EMC_LEGACY 
-  // If calibrations not loaded nothing should happen here...
-#ifdef OLD_DAQ_READER
-  emc.readFromEvpReader(evp, mem);
-#else /* OLD_DAQ_READER */
-  emc.readFromEvpReader(rdr, mem);
-#endif /* OLD_DAQ_READER */
+    // If calibrations not loaded nothing should happen here...
+    emc.readFromEvpReader(rdr, mem);
 #endif
 
-  delete tracker;
-  return 0;
+    delete tracker;
+    return 0;
 }
 
 // Assume global tpc structure already filled....
 // s = sector from 1
 //
-void gl3Event::readClustersFromEvpReader(int sector)
+void gl3Event::readClustersFromEvpReader(daqReader *rdr, int sector)
 {
-#ifdef OLD_DAQ_READER
-  if(!tpc.has_clusters) return;
-#else /* OLD_DAQ_READER */
+    daq_dta *dd;
+    
+    pTPC = NULL;
 
-  LOG(DBG, "have clusters?  %d",pTPC->has_clusters);
-  if(!pTPC->has_clusters) return;
-#endif /* OLD_DAQ_READER */
-
-  for(int r=0;r<45;r++) {
-#ifdef OLD_DAQ_READER
-    for(int j=0;j<tpc.cl_counts[r];j++)
-      tpc_cl *c = &tpc.cl[r][j];
-#else /* OLD_DAQ_READER */
-    for(int j=0;j<pTPC->cl_counts[r];j++) {
-      tpc_cl *c = &pTPC->cl[r][j];
-#endif /* OLD_DAQ_READER */
-	
-      gl3Hit *gl3c = &hit[nHits];
-      nHits++;
-      
-      l3_cluster sl3c;
-      sl3c.pad = (int)((c->p - 0.5) * 64);
-      sl3c.time = (int)((c->t - 0.5) * 64);
-      sl3c.charge = c->charge;
-      sl3c.flags = c->flags;
-      sl3c.padrow = r;
-      sl3c.RB_MZ = 0;    // need to fake rb=0 so "set" doesn't change my sector
-      //c->p1;
-      //c->p2;
-      //c->t1;
-      //c->t2;
-      
-      gl3c->set(coordinateTransformer, sector, &sl3c);
-      
-      //printf("i=%d nHits=%d (%f %f %f) %f %f %f\n",i,nHits,
-      //       sl3c.pad / 64.0,
-      //       sl3c.time / 64.0,
-      //       sl3c.charge,
-      //       gl3c->getX(),gl3c->getY(),gl3c->getZ());
-      
+    // Read the data....
+    dd = rdr->det("tpx")->get("legacy",sector);
+    if(!dd) {
+	dd = rdr->det("tpc")->get("legacy", sector);
     }
-  }
+
+    if(dd) {
+	dd->iterate();
+	pTPC = (tpc_t *)dd->Void;
+    }
+    else {
+	LOG(DBG, "No data for sector %d check for TPC",sector);
+	return;
+    }
+    
+    LOG(DBG, "have clusters?  %p %d",pTPC, pTPC->has_clusters);
+    if(!pTPC->has_clusters) return;
+
+    for(int r=0;r<45;r++) {
+
+	for(int j=0;j<pTPC->cl_counts[r];j++) {
+	    tpc_cl *c = &pTPC->cl[r][j];
+	
+	    gl3Hit *gl3c = &hit[nHits];
+	    nHits++;
+      
+	    l3_cluster sl3c;
+	    sl3c.pad = (int)((c->p - 0.5) * 64);
+	    sl3c.time = (int)((c->t - 0.5) * 64);
+	    sl3c.charge = c->charge;
+	    sl3c.flags = c->flags;
+	    sl3c.padrow = r;
+	    sl3c.RB_MZ = 0;    // need to fake rb=0 so "set" doesn't change my sector
+	    //c->p1;
+	    //c->p2;
+	    //c->t1;
+	    //c->t2;
+      
+	    gl3c->set(coordinateTransformer, sector, &sl3c);
+      
+	    //printf("i=%d nHits=%d (%f %f %f) %f %f %f\n",i,nHits,
+	    //       sl3c.pad / 64.0,
+	    //       sl3c.time / 64.0,
+	    //       sl3c.charge,
+	    //       gl3c->getX(),gl3c->getY(),gl3c->getZ());
+      
+	}
+    }
 }
   
  int gl3Event::readITPCClustersFromEvpReader(daqReader *rdr, int sector) {
@@ -958,6 +840,8 @@ int gl3Event::resetEvent  (  ){
     nMergableTracks = 0 ;
     nBadTracks    = 0 ;
     busy          = 0 ;
+
+    memset(sectorFirstHit, 0, sizeof(sectorFirstHit));
 
     // Reset tracks
     memset(trackContainer, 0, 
