@@ -70,19 +70,14 @@ class gl3Event {
     // if bField is set != 1000 
     // then it overrides the value in the datafile
     //
-#ifdef OLD_DAQ_READER
-    int readFromEvpReader(evpReader *evp, 
-#else /* OLD_DAQ_READER */
     int readFromEvpReader(daqReader *rdr, 
-#endif /* OLD_DAQ_READER */
-			  char *mem, 
-			  float defaultbField=.5,
-			  float bField=1000,
-			  int what=GL3_READ_ALL);
+			  float bField=1000);
 
-    void readClustersFromEvpReader(int sector);
-			  int readITPCClustersFromEvpReader(daqReader *rdr, int sector);
-			  
+    void readClustersFromEvpReader(daqReader *rdr, int sector);
+    int readITPCClustersFromEvpReader(daqReader *rdr, int sector);
+	
+    int sectorFirstHit[25];
+
     short       getBusy   ( ) { return busy; };
     gl3Track*   getTrack  ( int n );
     gl3Hit*     getHit    ( int n );
@@ -158,7 +153,7 @@ class gl3Event {
 
     gl3EMC emc;
     
- private:
+ public:
 
     // ############################################################
     // # Control parameters 

@@ -35,7 +35,7 @@
 #include "daqFormats.h"
 #include "sizes.h"
 #include "DAQ_READER/daqReader.h"
-
+#include "gl3Event.h"
 
 class sectorGeometry {
 public:
@@ -125,7 +125,8 @@ class FtfSl3: public FtfFinder
    int   readSector      ( struct TPCSECLP *seclp1, struct TPCSECLP *seclp2 ); 
 
    int setTrackingAngles(int hypersector);
-   int readSectorFromEvpReader(int sector);
+   // int readSectorFromEvpReader(int sector);
+   void setClustersFromGl3Event(gl3Event *event, int sector);
 
    int   setParameters   ( ) ;
    void  setCoordinateTransformer ( l3CoordinateTransformer* in )
