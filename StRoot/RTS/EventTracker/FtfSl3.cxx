@@ -257,6 +257,7 @@ int FtfSl3::fillTracks ( int maxBytes, char* buff, unsigned int token ) {
 	return 0;
     }
 
+    LOG(DBG, "fill nTracks = %d", nTracks);
     int counter = nTracks ;
 
     unsigned int headSize;
@@ -289,6 +290,7 @@ int FtfSl3::fillTracks ( int maxBytes, char* buff, unsigned int token ) {
     memcpy(head->bh.bank_type,CHAR_L3_SECTP,8);
     head->bh.length     = sizeof(struct L3_SECTP) / 4 ;
     head->bh.bank_id    = sectorNr;
+    LOG(DBG, "set bank_id to %d", sectorNr);
     head->bh.format_ver = DAQ_RAW_FORMAT_VERSION ;
     head->bh.byte_order = DAQ_RAW_FORMAT_ORDER ;
     head->bh.format_number = 1; // 1 means only pointing to local_tracks
@@ -607,6 +609,8 @@ int FtfSl3::readMezzanine (int sector,        int readOutBoard,
       fp = (double)pad / 64. ;
       ft = (double)time/ 64. ;
 	 
+
+      LOG(DBG, "**************************************MZ*********************************");
       // Cut on timebins and clustercharge added by cle 02/21/00
       if ( ft < minTimeBin ) continue ;
       if ( ft > maxTimeBin ) continue ;
@@ -739,6 +743,7 @@ int FtfSl3::readSector ( struct bankHeader *bank ) {
   if ( swapByte ) sector = swap32(sector) ;
     
   sectorNr = sector;
+  LOG(DBG, "Set sectorNr to %d", sectorNr);
   if ( sectorNr < 1 || sectorNr > 24 ) {
     LOG(ERR, "Error - FtfSl3::readSector: Wrong sector %d!\n",sectorNr);
     return -1 ;
@@ -891,6 +896,9 @@ int FtfSl3::setTrackingAngles(int sector)
 void FtfSl3::setClustersFromGl3Event(gl3Event *event, int sector) {
     int filtered_out = 0;
 
+    sectorNr = sector;
+    LOG(DBG, "set sectorNr to %d", sector);
+    
     for(int i=event->sectorFirstHit[sector]; i < event->nHits; i++) {
 	gl3Hit *gl3 = &event->hit[i];
 	if((gl3->rowSector / 100) != sector) return;
@@ -921,9 +929,11 @@ void FtfSl3::setClustersFromGl3Event(gl3Event *event, int sector) {
 	if(hitP->q > maxClusterCharge) { filtered_out++; continue; }
 
 	nHits++;
+
+	//printf("z: %f\n", hitP->z);
     }
 
-    LOG("JEFF", "sect = %d (%d) nhits = %d   (%d)", sector, event->sectorFirstHit[sector], nHits, filtered_out);
+    LOG(DBG, "sect = %d (%d) nhits = %d   (%d)", sector, event->sectorFirstHit[sector], nHits, filtered_out);
 }
 
 /*
@@ -935,6 +945,7 @@ int FtfSl3::readSectorFromEvpReader(int sector) {
     l3ptrsCoordinate PTRS(0,0,0,0);
     
     sectorNr = sector;
+    LOG("JEFF", "set sectorNr to %d", sector);
     if ( sectorNr < 1 || sectorNr > 24 ) {
 	LOG(ERR, "Error - FtfSl3::readSector: Wrong sector %d!\n",sectorNr);
 	return -1 ;
@@ -1069,7 +1080,7 @@ int FtfSl3::readSectorFromEvpReader(int sector) {
 	}
     }
 
-    LOG("JEFF", "sector = %d nHits = %d  (%d)", sector, nHits, filtered_out);
+    LOG(DBG, "sector = %d nHits = %d  (%d)", sector, nHits, filtered_out);
 
     return 0;
 } 

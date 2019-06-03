@@ -51,10 +51,11 @@ int gl3Event::readFromEvpReader(daqReader *rdr, float bField)
     }       
     if(fabs(bField) < .1) bField = .1;
     setBField(bField);
-    LOG("JEFF", "bField set to %f",bField);
+    LOG(DBG, "bField set to %f",bField);
 
     // need a tracker...
-    coordinateTransformer->Set_parameters_by_hand(0.581, 217.039, 201.138 );   // AuAu200
+    //coordinateTransformer->Set_parameters_by_hand(0.581, 217.039, 201.138 );   // AuAu200
+    coordinateTransformer->Set_parameters_by_hand(0.581, 217.039 - 12.8, 201.138 - 12.8 );
     //coordinateTransformer->Set_parameters_by_hand(0.6176, 200.668, 201.138 );    // 3.85GeV
     //coordinateTransformer->LoadTPCLookupTable("/RTS/conf/L3/map.bin");
 
@@ -104,15 +105,18 @@ int gl3Event::readFromEvpReader(daqReader *rdr, float bField)
 	tracker->setClustersFromGl3Event(this, i+1);
 	//tracker->readSectorFromEvpReader(i+1);
 
+	int ret=0;
 	// only do tracking on full hypersectors...
 	if((i%2) == 1) {
-	    tracker->processSector();
-	    tracker->fillTracks(szSECP_max, (char *)sectp, 0);
+	    ret = tracker->processSector();
+	    LOG(DBG, "processSector returns %d", ret);
+	    ret = tracker->fillTracks(szSECP_max, (char *)sectp, 0);
+	    LOG(DBG, "fillTracks returns %d", ret);
 	    
 	    LOG(DBG, "SECP size = %d",sectp->bh.length*4 + sectp->banks[0].len*4);
 	    
 	    int n = readSectorTracks((char *)sectp);
-	    //printf("Got %d tracks\n",n);
+	    LOG(DBG, "Got %d tracks",n);
 	    
 	    if(n < 0) {
 		LOG(WARN, "Error reading tracker: sector %d\n",i,0,0,0,0);
