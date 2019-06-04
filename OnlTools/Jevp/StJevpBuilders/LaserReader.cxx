@@ -65,8 +65,9 @@ float LaserReader::Make(daqReader *rdr)
   // Now calculate the drift velocities...
   //const double TPC_DELTAT = 0.106574;
   //const double TPC_DELTAT = 0.108508;
-  const double TPC_DELTAT = 0.106576; //200GeV d+Au
+  //const double TPC_DELTAT = 0.106576; //200GeV d+Au
   //const double TPC_DELTAT = .10982996;   // 3.875 GeV fixed:   f=9.104984
+  const double TPC_DELTAT = .10983584;     // 7.7 GeV
 
   static double LaserPosition[12][7] =
     { {-179.353, -151.665, -120.698, -90.8549, -59.3999, -32.1487, 0.0},
