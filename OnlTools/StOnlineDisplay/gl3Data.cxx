@@ -1,4 +1,4 @@
-// $Id: gl3Data.cxx,v 1.4 2015/07/29 16:53:27 smirnovd Exp $
+// $Id: gl3Data.cxx,v 1.5 2019/06/04 12:37:28 jml Exp $
 
 #include "gl3Data.h"
 
@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
+#include <qmessagebox.h>
 #include "RTS/EventTracker/gl3LMVertexFinder.h"
 
 Gl3Data::Gl3Data(QObject* parent, const char* name)
@@ -59,29 +60,12 @@ void Gl3Data::Init() {
   } 
 }
 
-void Gl3Data::ReadNextEvent(daqReader *evp, char *mem) {
+void Gl3Data::ReadNextEvent(daqReader *rdr, char *mem) {
 
   LOG(NOTE, "gl3Data: ReadNextEvent");
-
-//   printf("reading file %s\n",newfilename);
-//   setFileName(newfilename);
-
-//   evpReader *evp = new evpReader(newfilename);
-//   if(!evp) {
-//     emit OpenFileFailed(-1, filename);
-//   }
-
- 
-//   char *mem;
-
-//   for(;;) {
-//     mem = evp->get(0,EVP_TYPE_ANY);
-
-//     if(evp->seq == 235) break;
-//   }
   
-  LOG(NOTE, "Read from evpReader");
-  int ret = event->readFromEvpReader(evp, mem);
+  LOG(NOTE, "Read from evpReader: seq=%d token=%d",rdr->seq, rdr->token);
+  int ret = event->readFromEvpReader(rdr);
   LOG(NOTE, "Done with evpReader");
 
   // delete evp;
@@ -92,7 +76,7 @@ void Gl3Data::ReadNextEvent(daqReader *evp, char *mem) {
   cout << "nHits: " << dec << event->getNHits() << endl;
   cout << "nTracks: " << event->getNTracks() << endl;
   currentTrack = -1;
-/*
+
   emit(BuildNewTpcClusterList(this));
   emit(BuildNewTpcTrackList(this));
   emit(BuildNewBEmcTowerList(this));
@@ -102,8 +86,6 @@ void Gl3Data::ReadNextEvent(daqReader *evp, char *mem) {
   // dummy L3 decision...
   emit(NewL3Decision(TRUE));
   // end emits...
-*/
-
 
   if(ret < 0) {
     printf("Bad read..\n");
@@ -111,21 +93,6 @@ void Gl3Data::ReadNextEvent(daqReader *evp, char *mem) {
   }
 
   else emit OpenFileSuccess();
-
-  //printf("Read file event #%d\n",evp->seq);
-    
-//   printf("Opening file %s\n",newfilename);
-//   setFileName(newfilename);
-//   if (!openFile()) {
-//     emit OpenFileFailed(-1,filename);
-//     return;
-//   }
-//   if(!readEvent()) {
-//     emit OpenFileFailed(-2,filename);
-//     return;
-//   }
-//   // signal success to parent...
-//  emit OpenFileSuccess();
 }
 
 void Gl3Data::CloseFile() {
@@ -146,8 +113,9 @@ int Gl3Data::init() {
     cout << "oops" << endl;
   }
   transformer = new l3CoordinateTransformer();
-  transformer->Set_parameters_by_hand(0.581, 200.668, 201.138);
-  transformer->LoadTPCLookupTable((char*)"/RTS/conf/L3/map.bin");
+  //transformer->Set_parameters_by_hand(0.581, 200.668, 201.138);
+  transformer->Set_parameters_by_hand(0.581, 200.668-12.8, 201.138-12.8);
+  transformer->LoadTPCLookupTable("/RTS/conf/L3/map.bin");
   // transformer->Print_parameters();
   
   gl3LMVertexFinder *lmv = new gl3LMVertexFinder();
@@ -159,7 +127,8 @@ int Gl3Data::init() {
   eemcCalibration = new l3EmcCalibration(720);
   eemcCalibration->loadTextMap("/RTS/conf/L3/eemcmap.txt");
 
-  tracker = new FtfSl3(transformer);
+  LOG("JEFF", "gl3Data...");
+  tracker = new FtfSl3(transformer, NULL);
   tracker->setup();
   tracker->para.bField = fabs(bfield);
   tracker->para.bFieldPolarity = (int)(bfield/fabs(bfield));
@@ -192,47 +161,6 @@ bool Gl3Data::openFile() {
 
 }
 
-bool Gl3Data::readEvent() {
-  if (!isFileOpen) {
-    return false;
-  }
-  // let's try to read in the gl3 event
-  int nBytes = fread(evbuff, 1, maxEventBuffer, datafile);
-  if (nBytes < 10) {
-    return false;
-  }
-
-
-  struct L3_P *l3p = (struct L3_P *) evbuff;
-  //
-  //    Check bank header type
-  //
-  if (strncmp(l3p->bh.bank_type, CHAR_L3_P, 8)) {
-    return false;
-  }
-  
-  if (retrack) {
-    retrackEvent();
-    l3p = (struct L3_P *) evbuff;
-  }
-
-  cout << "event.readL3Data: " << event->readL3Data(l3p) << endl;
-  cout << "TrgWord: 0x" << hex << event->getTrgWord() << endl;
-  cout << "nHits: " << dec << event->getNHits() << endl;
-  cout << "nTracks: " << event->getNTracks() << endl;
-  currentTrack = -1;
-
-  emit(BuildNewTpcClusterList(this));
-  emit(BuildNewTpcTrackList(this));
-  emit(BuildNewBEmcTowerList(this));
-  emit(BuildNewEEmcTowerList(this));
-  emit(NewNumberOfTracks(event->getNTracks()));
-  emit(NewNumberOfHits(event->getNHits()));
-  // dummy L3 decision...
-  emit(NewL3Decision(TRUE));
-  return true;
-}
-
 bool Gl3Data::closeFile() {
   if (isFileOpen) {
     fclose(datafile);
@@ -248,6 +176,11 @@ void Gl3Data::resetTpcHits() {
 int Gl3Data::getNextTpcHit() {
   currentHit++;
   gl3Hit *hit = getCurrentHit();
+
+  //if(hit) {
+  //hit->print();
+  // }
+
   if (!hit) {
     return -1;
   }
@@ -469,7 +402,7 @@ void Gl3Data::resetTpcTrackPos() {
     mCurrentRadius = innerRadius - mTPCTrackStepSize;
     char outerRow = track->outerMostRow;
     float outerRadius = transformer->GetRadialDistanceAtRow((int)outerRow);
-    mTPCTrackStopRadius = std::min<float>(outerRadius,198);
+    mTPCTrackStopRadius = min(outerRadius,(float)198.0);
   }
 }
 
@@ -572,7 +505,23 @@ void Gl3Data::val2col(float val, float min, float max,
    // if val>max chose RED
    R=1.0;
   }
+ 
   //printf("cv:%f  R:%f G:%f B:%f \n",colval, R,G,B);
+  
+  /*
+  use only with RGB
+  //printf("M:%f Y:%f C:%f \n",R+G,G+B,R+B);
+  // M,Y,C
+  //glColor3f(R+G, G+B, R+B);
+  //
+  */
+  
+  //RGB
+  //glColor3f(R, G, B);
+  (*newR) = R;
+  (*newG) = G;
+  (*newB) = B;
+
 }
 
 void Gl3Data::retrackEvent() {

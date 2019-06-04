@@ -4,8 +4,6 @@
 #include <qobject.h>
 #include <stdio.h>
 
-#include "StEvpReader.h"
-
 // everything from L3
 #include "daqFormats.h"
 #include "RTS/EventTracker/l3CoordinateTransformer.h"
@@ -13,10 +11,11 @@
 #include "RTS/EventTracker/FtfSl3.h"
 #include "RTS/EventTracker/gl3Event.h"
 #include "RTS/EventTracker/gl3EMC.h"
-
-class daqReader;
-
 //#include "St_l3_Coordinate_Transformer.h"
+
+// include GL stuff
+#include <GL/gl.h>
+//#include <GL/glut.h>
 
 class Gl3Data : public QObject
 {
@@ -34,8 +33,6 @@ public slots:
  public: 
   float getBField() { return bfield; }
   float getEmcTowerAdcCut() { return emcTowerAdcCut;}
-  int  GetNTracks() const { return event ? event->getNTracks(): 0; }
-  int  GetNHits()  const { return event ? event->getNHits() : 0; }
 signals:
   void InitFailed(int);
   void InitSuccess();
@@ -49,12 +46,16 @@ signals:
   void NewNumberOfHits(int);
   void NewL3Decision(bool);
 
+
  public:
   // are called by viewer to display hits...
   void resetTpcHits();
   int getNextTpcHit();
   int getTpcHitPos(float *x, float *y, float *z);
   int getTpcHitColor(float *r, float *g, float *b);
+
+   int GetNTracks() const { return event ? event->getNTracks(): 0; }
+   int GetNHits() const { return event ? event->getNHits() : 0; }
 
   // are called by viewer to display tracks...
   void resetTpcTracks();
@@ -82,7 +83,6 @@ private:
   int init();
   void setFileName(char *name);
   bool openFile();
-  bool readEvent();
   bool closeFile();
 
   // L3 stuff...
@@ -121,7 +121,7 @@ private:
   
   bool accept(gl3Track *track) { if (track->nHits < 10) {return false;} return true; }
 
-  void val2col(float val,float mn,float mx,float *newR,float *newG,float *B);
+  void val2col(float val,float min,float max,float *newR,float *newG,float *B);
 
 private slots:
 
