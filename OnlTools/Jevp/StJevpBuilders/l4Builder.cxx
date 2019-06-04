@@ -2446,14 +2446,14 @@ void l4Builder::defineHltPlots()
 
 	index++; //27
 	HltPlots[index]->logy = 1;
-	hglobalMult = new TH1I("globalMult", "globalMult", 5000, 0, 5000);
+	hglobalMult = new TH1I("globalMult", "globalMult", 100, 0, 3000);
 	ph = new PlotHisto();
 	ph->histo = hglobalMult;
 	HltPlots[index]->addHisto(ph);
 
 	index++; //28
 	HltPlots[index]->logy = 1;
-	hprimaryMult = new TH1I("primaryMult", "primaryMult", 1000, 0, 1000);
+	hprimaryMult = new TH1I("primaryMult", "primaryMult", 100, 0, 1000);
 	ph = new PlotHisto();
 	ph->histo = hprimaryMult;
 	HltPlots[index]->addHisto(ph);
@@ -2604,27 +2604,27 @@ void l4Builder::defineHltPlots()
         HltPlots[index]->addHisto(ph);
 
         index++; // 48
-        hBbceTAC = new TH1D("BbceTAC", "Earliest BBCE TAC;Earliest BBCE TAC", 300, 500, 3500);
+        hBbceTAC = new TH1D("BbceTAC", "Earliest BBCE TAC;Earliest BBCE TAC", 200, 0, 3500);
         HltPlots[index]->addHisto(new PlotHisto( hBbceTAC ));
 
         index++; // 49
-        hBbcwTAC = new TH1D("BbcwTAC", "Earliest BBCW TAC;Earliest BBCW TAC", 300, 500, 3500);
+        hBbcwTAC = new TH1D("BbcwTAC", "Earliest BBCW TAC;Earliest BBCW TAC", 200, 0, 3500);
         HltPlots[index]->addHisto(new PlotHisto( hBbcwTAC ));
 
         index++; // 50
-        hVpdeTAC = new TH1D("VpdeTAC", "Earliest VPDE TAC;Earliest VPDE TAC", 300, 500, 3500);
+        hVpdeTAC = new TH1D("VpdeTAC", "Earliest VPDE TAC;Earliest VPDE TAC", 200, 0, 3500);
         HltPlots[index]->addHisto(new PlotHisto( hVpdeTAC ));
 
         index++; // 51
-        hVpdwTAC = new TH1D("VpdwTAC", "Earliest VPDW TAC;Earliest VPDW TAC", 300, 500, 3500);
+        hVpdwTAC = new TH1D("VpdwTAC", "Earliest VPDW TAC;Earliest VPDW TAC", 200, 0, 3500);
         HltPlots[index]->addHisto(new PlotHisto( hVpdwTAC ));
 
         index++; // 52
-        hEpdeTAC = new TH1D("EpdeTAC", "Earliest EPDE TAC;Earliest EPDE TAC", 300, 500, 3500);
+        hEpdeTAC = new TH1D("EpdeTAC", "Earliest EPDE TAC;Earliest EPDE TAC", 200, 0, 3500);
         HltPlots[index]->addHisto(new PlotHisto( hEpdeTAC ));
 
         index++; // 53
-        hEpdwTAC = new TH1D("EpdwTAC", "Earliest EPDW TAC;Earliest EPDW TAC", 300, 500, 3500);
+        hEpdwTAC = new TH1D("EpdwTAC", "Earliest EPDW TAC;Earliest EPDW TAC", 200, 0, 3500);
         HltPlots[index]->addHisto(new PlotHisto( hEpdwTAC )); // 53
 }
 
