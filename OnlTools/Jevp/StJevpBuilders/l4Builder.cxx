@@ -161,7 +161,7 @@ void l4Builder::initialize(int argc, char *argv[])
 	gStyle->SetPadGridX(0);
 	gStyle->SetPadGridY(0);
 
-	for(int i = 0; i < 48; i++) {
+	for(int i = 0; i < 54; i++) {
 	        HltPlots[i] = new JevpPlot();
 		HltPlots[i]->gridx = 0;
 		HltPlots[i]->gridy = 0;
@@ -173,7 +173,7 @@ void l4Builder::initialize(int argc, char *argv[])
 		BeamPlots[i]->gridy = 0;                                                                       
 		BeamPlots[i]->setPalette(1);                                                                   
 	}    
-	for(int i = 0; i < 5; i++) {
+	for(int i = 0; i < 6; i++) {
 		BesGoodPlots[i] = new JevpPlot();
 		BesGoodPlots[i]->gridx = 0;
 		BesGoodPlots[i]->gridy = 0;
@@ -262,7 +262,7 @@ void l4Builder::initialize(int argc, char *argv[])
 	defineHltPlots_UPC();
 	defineDiElectron2TwrPlots();
 	setAllPlots();
-	for(int i = 0; i < 48; i++) {
+	for(int i = 0; i < 54; i++) {
 		LOG(DBG, "Adding plot %d", i);
 		addPlot(HltPlots[i]);
 	}
@@ -270,7 +270,7 @@ void l4Builder::initialize(int argc, char *argv[])
 		LOG(DBG, "Adding plot %d", i);
 		addPlot(HLTGood2Plots[i]);
 	}
-	for(int i = 0; i < 5; i++) {
+	for(int i = 0; i < 6; i++) {
        	        LOG(DBG, "Adding plot %d", i);
 	        addPlot(BesGoodPlots[i]);
 	}
@@ -309,11 +309,11 @@ void l4Builder::startrun(daqReader *rdr)
     //printf("hello there. This is startrun\n");
 	runnumber = rdr->run;
 
-	int initialno = 48;
+	int initialno = 54;
 	for(int i = 0; i < initialno; i++) {
 		getPlotByIndex(i)->getHisto(0)->histo->Reset();
 	}
-	for(int i = 0; i < 5; i++)BesGoodPlots[i]->getHisto(0)->histo->Reset();
+	for(int i = 0; i < 6; i++)BesGoodPlots[i]->getHisto(0)->histo->Reset();
 	for(int i = 0; i < 4; i++)HLTGood2Plots[i]->getHisto(0)->histo->Reset();
 	for(int i = 0; i < 4; i++)BesMonitorPlots[i]->getHisto(0)->histo->Reset();
 	for(int i = 0; i < 6; i++)FixedTargetPlots[i]->getHisto(0)->histo->Reset();
@@ -587,7 +587,7 @@ void l4Builder::writeHistogram()
 	char histfile[256];
 	sprintf(histfile, "%s/run14_hlt_%d_current_hist.root", Destindir, runnumber);
 	TFile file(histfile, "RECREATE");
-	int initialno = 48;
+	int initialno = 54;
 
 	for(int i = 0; i < initialno; i++) {
 	    HltPlots[i]->getHisto(0)->histo->Write();
@@ -595,7 +595,7 @@ void l4Builder::writeHistogram()
 	}
 
 	if(BESGoodFilled){
-		for(int i = 0; i < 5; i++)BesGoodPlots[i]->getHisto(0)->histo->Write();
+		for(int i = 0; i < 6; i++)BesGoodPlots[i]->getHisto(0)->histo->Write();
 	}
 	if(HLTGood2Filled){
 		for(int i = 0; i < 4; i++)HLTGood2Plots[i]->getHisto(0)->histo->Write();
@@ -853,6 +853,7 @@ void l4Builder::event(daqReader *rdr)
 	    hVzvpd->Fill(VzVpd);
 	    hVzDiff->Fill(VzVpd - vertZ);
             hVertexRZ->Fill(vertZ, vertR);
+            hBunchId->Fill(hlt_eve->bunch_id);
 
             if(daqID & upc) {
 	      hVertexX_UPC->Fill(vertX);
@@ -875,7 +876,15 @@ void l4Builder::event(daqReader *rdr)
 	      hBesGoodVertexZ->Fill(vertZ);
 	      hBesGoodVr->Fill(vertR);
 	      hBesGoodVrVsVz->Fill(vertZ,vertR);
-              hBunchId->Fill(hlt_eve->bunch_id);
+              hBesGoodBunchId->Fill(hlt_eve->bunch_id);
+
+              // Operations only interested in hltgood events
+              hBbceTAC->Fill(hlt_eve->bbce);
+              hBbcwTAC->Fill(hlt_eve->bbcw);
+              hVpdeTAC->Fill(hlt_eve->vpde);
+              hVpdwTAC->Fill(hlt_eve->vpdw);
+              hEpdeTAC->Fill(hlt_eve->epde);
+              hEpdwTAC->Fill(hlt_eve->epdw);
             }
 	    
 	    //HLTGood2
@@ -2589,22 +2598,34 @@ void l4Builder::defineHltPlots()
 	HltPlots[index]->addHisto(ph);
 
         index++; // 47
-        hBunchId = new TH1D("BunchId", "HLTGood Bunch ID;Bunch ID", 120, 0, 120);
+        hBunchId = new TH1D("BunchId", "Bunch ID;Bunch ID", 130, -5, 125);
         ph = new PlotHisto();
         ph->histo = hBunchId;
         HltPlots[index]->addHisto(ph);
-        
-	// index++; //45
-	// hFixed_VertexZ = new TH1D("Fixed_VertexZ", "Fixed_VertexZ", 200, 190., 210.);
-	// ph = new PlotHisto();
-	// ph->histo = hFixed_VertexZ;
-	// HltPlots[index]->addHisto(ph);
 
-	// index++; //46
-	// hFixed_VertexXY = new TH2D("Fixed_VertexXY", "Fixed_VertexXY", 100, -5., 5., 100, -5., 5.);
-	// ph = new PlotHisto();
-	// ph->histo = hFixed_VertexXY;
-	// HltPlots[index]->addHisto(ph);
+        index++; // 48
+        hBbceTAC = new TH1D("BbceTAC", "Earliest BBCE TAC;Earliest BBCE TAC", 300, 500, 3500);
+        HltPlots[index]->addHisto(new PlotHisto( hBbceTAC ));
+
+        index++; // 49
+        hBbcwTAC = new TH1D("BbcwTAC", "Earliest BBCW TAC;Earliest BBCW TAC", 300, 500, 3500);
+        HltPlots[index]->addHisto(new PlotHisto( hBbcwTAC ));
+
+        index++; // 50
+        hVpdeTAC = new TH1D("VpdeTAC", "Earliest VPDE TAC;Earliest VPDE TAC", 300, 500, 3500);
+        HltPlots[index]->addHisto(new PlotHisto( hVpdeTAC ));
+
+        index++; // 51
+        hVpdwTAC = new TH1D("VpdwTAC", "Earliest VPDW TAC;Earliest VPDW TAC", 300, 500, 3500);
+        HltPlots[index]->addHisto(new PlotHisto( hVpdwTAC ));
+
+        index++; // 52
+        hEpdeTAC = new TH1D("EpdeTAC", "Earliest EPDE TAC;Earliest EPDE TAC", 300, 500, 3500);
+        HltPlots[index]->addHisto(new PlotHisto( hEpdeTAC ));
+
+        index++; // 53
+        hEpdwTAC = new TH1D("EpdwTAC", "Earliest EPDW TAC;Earliest EPDW TAC", 300, 500, 3500);
+        HltPlots[index]->addHisto(new PlotHisto( hEpdwTAC )); // 53
 }
 
 void l4Builder::defineBeamPlots()
@@ -2672,6 +2693,10 @@ void l4Builder::defineBesGoodPlots()
         ph = new PlotHisto();
         ph->histo = hBesGoodVrVsVz;
         BesGoodPlots[index]->addHisto(ph);
+
+        index++; // 5
+        hBesGoodBunchId = new TH1D("BesGoodBunchId", "HLTGood Bunch ID;Bunch ID", 130, -5, 125);
+        BesGoodPlots[index]->addHisto(new PlotHisto(hBesGoodBunchId));
 }
 
 void l4Builder::defineHLTGood2Plots()
