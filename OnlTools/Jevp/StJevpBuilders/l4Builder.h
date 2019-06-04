@@ -43,9 +43,9 @@ class l4Builder : public JevpBuilder {
 		 * @see 
 		 * @author 
 		 */  
-		JevpPlot *HltPlots[48];
+		JevpPlot *HltPlots[54];
 		JevpPlot *BeamPlots[3];
-		JevpPlot *BesGoodPlots[5];
+		JevpPlot *BesGoodPlots[6];
 		JevpPlot *HLTGood2Plots[4];
 		JevpPlot *BesMonitorPlots[4];
 		JevpPlot *FixedTargetPlots[6];
@@ -362,6 +362,12 @@ class l4Builder : public JevpBuilder {
 
                 TH2D *hVertexRZ;
                 TH1D *hBunchId;
+                TH1D *hBbceTAC;
+                TH1D *hBbcwTAC;
+                TH1D *hVpdeTAC;
+                TH1D *hVpdwTAC;
+                TH1D *hEpdeTAC;
+                TH1D *hEpdwTAC;
 
                 /*   TH3D *hMatchannel3D ; */
 
@@ -398,6 +404,7 @@ class l4Builder : public JevpBuilder {
 		TH1D *hBesGoodVr;
 		TH1D *hBesGoodVertexZ;
 		TH1I *hBesGoodprimaryMult;
+                TH1D *hBesGoodBunchId;
 
 		//HLTGood2
 		TH2D *hHLTGood2VertexXY;
