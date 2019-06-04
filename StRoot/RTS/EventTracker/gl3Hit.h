@@ -22,7 +22,7 @@
 
 
 class gl3Hit {
-private:
+public:
    short rowSector ;
    char  mezzanninneCard ;
    char  readoutBoard ;
