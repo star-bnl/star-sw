@@ -920,7 +920,7 @@ Int_t St_geant_Maker::Init(){
     // Default cuts
     //  CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
     Do("CUTS     1e-3   1e-3   1e-3   1e-3   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3 50.e-6");
-    Do("LOSS 1"); // restricted energy loss fluctuations, instead of 2 => Full fluctuations without delta electrons
+    //    Do("LOSS 1"); // restricted energy loss fluctuations, instead of 2 => Full fluctuations without delta electrons
     if (IAttr("phys_off")) 	{
       LOG_INFO << "St_geant_Maker::Init switch off physics" << endm;
       Do("DCAY 0");
@@ -950,8 +950,8 @@ Int_t St_geant_Maker::Init(){
       Do("PFIS 0");
       Do("PHOT 0");
       Do("RAYL 0");
-      Do("LOSS 2"); 
-      Do("DRAY 0");
+      //      Do("LOSS 2"); 
+      Do("DRAY 1");
       Do("MULS 1");
       Do("STRA 0");
     } else if (IAttr("flux")) {

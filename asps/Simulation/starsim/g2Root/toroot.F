@@ -63,7 +63,7 @@ C
       character*20 astring,astring2,ptrname
       dimension pmixt(3)
       logical map_found
-
+      real z
       DATA KSHAP/'BRIK','TRD1','TRD2','TRAP','TUBE','TUBS','CONE',
      +           'CONS','SPHE','PARA','PGON','PCON','ELTU','HYPE',
      + 13*'    ','GTRA','CTUB','    '/
@@ -214,6 +214,7 @@ C
          imat=q(jtm+6)
          jma=lq(jmate-imat)
          if(jma.eq.0)go to 350
+         z = q(jma+7)
 *yf         call toint(imat,astring2,ncm)
          call uhtoc(iq(jma+1),4,astring2,20)
          ncmk=lenocc(astring2)
@@ -227,28 +228,42 @@ C
 *     +     astring2(1:ncmk),creals(1:ncr)
 * 3050    format('TGeoMedium *med',a,' = new TGeoMedium("',a,'",',a,
 *yf     +     ',mat',a,'->GetUniqueID()',a,');')
+*         write(*,*) itmed
+*         write(*,3050)    medname(1:ncm),astring2(1:ncmk),creals(1:ncr)
          write(line,3050) medname(1:ncm),astring2(1:ncmk),creals(1:ncr)
  3050    format('med = new TGeoMedium("',a,'",0',
      +',GetMat("',a,'")->GetUniqueID()',a,
      +'); med->SetUniqueID(++imed);')
          nch = lenocc(line)
+*         write(*,'(a)')line(1:nch)
          write(51,'(a)')line(1:nch)
          jtmn = lq(jtm)
-         if (jtmn .ne. 0) then
+         if (jtmn .ne. 0 .and. z .ge. 1.0) then
+*            write(*,*) medname(1:ncm),astring2(1:ncmk),creals(1:ncr)
             do  349 itpar = 1, 33
+               if (itpar .ge. 24 .and. itpar .le. 25 .or. itpar .eq. 30)  
+     +              go to 349
                par = q(jtmn+itpar)
-               if (itpar .le. 10 .and. par .eq. cuts(itpar)) go to  349
-               ipar = par
-               if (itpar .gt. 10 .and. itpar .le. 23 .and. 
-     +              ipar .eq. meca(1,itpar-10)) go to  349
-               if (par .ne. 0) then
-                  line=' '
-                  nch = lenocc(Kpar(itpar));
-                  write (line,3052) Kpar(itpar)(1:nch), par 
- 3052             format('med->SetParam("',a,'",',g14.6,');') 
-                  nch = lenocc(line)
-                  write(51,'(a)')line(1:nch)
+               if (itpar .le. 10 .or. itpar .gt. 23 .and. 
+     +             itpar .ne. 27 .and. itpar .lt. 31) then 
+                  if (abs(par) .lt. 1e-7) go to 349
+                  if (abs(par - cuts(itpar)) .lt. 1e-7) go to 349
+               else 
+                  ipar = par
+                  if (ipar .eq. 0) go to 349
+                  if ((itpar .gt. 10 .and. itpar .le. 23) 
+     +                 .and. (ipar .eq. meca(1,itpar-10))) go to  349
+                  if (itpar .eq. 31 .and. ipar .eq. ILABS) go to 349
+                  if (itpar .eq. 32 .and. ipar .eq. ISYNC) go to 349
+                  if (itpar .eq. 33 .and. ipar .eq. ISTRA) go to 349
                endif
+               line=' '
+               nch = lenocc(Kpar(itpar));
+               write (line,3052) Kpar(itpar)(1:nch), par 
+ 3052          format('med->SetParam("',a,'",',g14.6,');') 
+               nch = lenocc(line)
+*               write(*,*)itpar,line(1:nch)
+               write(51,'(a)')line(1:nch)
  349        continue
          endif
 *yf ================================================================================           
