@@ -22,6 +22,59 @@ float LaserReader::Make(daqReader *rdr)
 
   resetAll();
 
+  // We need to update RHIC frequency automatically, but can cause problems with rebuilding from DBs. 
+  // To rebuild with a different frequency than normal, create a file /tmp/l0Freq containing the freq and run number ala:
+  //      9300000 20111001
+  // Then delete this file after rebuilding...
+
+
+  // 1. if there is a temp file /tmp/l0Freq, use it!
+  // 2. if there is a /RTS/conf/handler/.l0Freq, use it!
+  // otherwise, use the already loaded default!
+
+  if(run != rdr->run) {
+    run = rdr->run;
+
+    double freq = 0;
+    FILE *f = fopen("/tmp/l0Freq", "r");
+    if(f) {
+      int frun;
+      fscanf(f, "%lf %d", &freq, &frun);
+      fclose(f);
+      
+      if(run != frun) {
+	LOG("OPER", "Got RHIC clock frequency %lf from /tmp/l0Freq but runs don't match (%d vs %d)", freq, frun, run);
+      }
+    }
+    else {    
+      FILE *f = fopen("/RTS/conf/handler/.l0Freq", "r");
+      if(f) {
+	int frun;
+	fscanf(f, "%lf %d", &freq, &frun);
+	fclose(f);
+	
+	if(run != frun) {
+	  LOG("OPER", "Got RHIC clock frequency %lf from /tmp/l0Freq but runs don't match (%d vs %d)", freq, frun, run);
+	}
+      }
+    }
+
+    if(freq > 0) {
+      TPC_DELTAT = 1e6/freq;
+    }
+    else {
+      freq = 1e6 / TPC_DELTAT;
+      LOG("OPER", "Can't find /tmp/l0Freq or /RTS/conf/handler/.l0Freq, so using default frequency %lf", freq);
+    }
+  }
+
+
+      
+    
+  
+    
+
+
   // First store the appropriate hits...
   for(int s=2;s<=24;s += 2) {
     if(s == 10) continue;   // no lasers here...?
@@ -62,12 +115,7 @@ float LaserReader::Make(daqReader *rdr)
   }
 
 
-  // Now calculate the drift velocities...
-  //const double TPC_DELTAT = 0.106574;
-  //const double TPC_DELTAT = 0.108508;
-  //const double TPC_DELTAT = 0.106576; //200GeV d+Au
-  //const double TPC_DELTAT = .10982996;   // 3.875 GeV fixed:   f=9.104984
-  const double TPC_DELTAT = .10983584;     // 7.7 GeV
+
 
   static double LaserPosition[12][7] =
     { {-179.353, -151.665, -120.698, -90.8549, -59.3999, -32.1487, 0.0},
@@ -114,6 +162,15 @@ LaserReader::LaserReader()
 {
   crossingHitsHist = new TH1D("hitStorage", "hitStorage", 84, 0, 84);
   driftVelocityHist = new TH1D("driftVelocityHist","driftVelocityHist",200,4.0,8.0);
+
+  run = -1;
+  // Default RHIC (1/frequency)
+
+  //const double TPC_DELTAT = 0.106574;
+  //const double TPC_DELTAT = 0.108508;
+  //const double TPC_DELTAT = 0.106576; //200GeV d+Au
+  //const double TPC_DELTAT = .10982996;   // 3.875 GeV fixed:   f=9.104984
+  TPC_DELTAT = .10983584;     // 7.7 GeV
 }
 
 
