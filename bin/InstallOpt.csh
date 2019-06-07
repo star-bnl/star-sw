@@ -59,7 +59,8 @@ endsw
 #set list = "libtool cmake-3.10.0-rc1 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8230 eigen3 mercurial-4.4-rc coin soqt Coin3D-simage-cf953eacd849 Coin3D-soqt-483ecb26b30c boost_1_66_0";   Python-2.7.12 
 #set list = "cmake-3.11.4 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl-2.1 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8230 eigen3 mercurial-4.4-rc coin soqt Coin3D-simage-cf953eacd849 Coin3D-soqt-483ecb26b30c boost_1_66_0";
 #set list = "cmake-3.11.4 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl-2.1 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8235 eigen3 mercurial-4.4-rc coin soqt Coin3D-simage-cf953eacd849 Coin3D-soqt-483ecb26b30c boost_1_66_0";
-set list = "cmake-3.13.4 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl-2.1 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8235 eigen3 mercurial-4.4-rc coin soqt Coin3D-simage-cf953eacd849 Coin3D-soqt-483ecb26b30c boost_1_66_0";
+#set list = "cmake-3.13.4 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl-2.1 Python-2.7.12 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8235 eigen3 mercurial-4.4-rc coin soqt Coin3D-simage-cf953eacd849 Coin3D-soqt-483ecb26b30c boost_1_66_0";
+set list = "cmake-3.14.5 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl-2.1 Python-2.7.12 pyparsing-1.5.7 xrootd-4.9.0-rc3 Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8235 eigen3 mercurial-4.4-rc coin soqt Coin3D-simage-cf953eacd849 Coin3D-soqt-483ecb26b30c boost_1_66_0 VecGeom";
 #set list = "gsl-2.1";
 #set list = "boost_1_66_0";
 #set list = "Coin3D-simage-cf953eacd849";
@@ -78,6 +79,8 @@ foreach pkg ($list)
     setenv CFLAGS   "${cflags}"
     cd $DIR
     rehash 
+setenv CXXFLAGSd "$cxxflags"
+setenv CFLAGSd   "$cflags"
 #    source ${GROUP_DIR}/.starver ${STAR_LEVEL}
     if ( -r ${pkg}.Done || -r ${pkg}.Failed) continue
     if (! -r ${pkg}) then
@@ -113,6 +116,7 @@ foreach pkg ($list)
        if ( $?) break;
         touch ../${pkg}.Done
 	breaksw
+      case "VecGeom*":
       case "eigen*":
 	cmake -DCMAKE_INSTALL_PREFIX=${XOPTSTAR} ../../${pkg}
 	if ( $?) break;
@@ -200,6 +204,8 @@ foreach pkg ($list)
            touch ../${pkg}.Done
            breaksw
       case "Python*":
+	setenv CXXFLAGS "${CXXFLAGSD}"
+	setenv CFLAGS   "${CFLAGSD}"
           ./configure --prefix=$XOPTSTAR --with-libs='-lpthread'
 # --with-pth  --enable-shared
 	  make -j 4
