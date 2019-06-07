@@ -159,37 +159,39 @@ Int_t StFcsRawDaqReader::Make() {
       int ns  = (dd->sec >> 5) & 1;
       int dep = dd->row ;
       int ch = dd->pad ;
-      u_int n=dd->ncontent;
-      if(mDebug) printf("FCS %3s : S%d:%d [det %d, ns %d, dep %d] ch %d, size=%d\n",
-			 mode[mReadMode],sec,rdo,ehp,ns,dep,ch,n) ;
+      u_int n=dd->ncontent;      
+      int detid,id,crt,sub;
+      mFcsDbMkr->getIdfromDep(ehp,ns,dep,ch,detid,id,crt,sub);
+      //if(ch>=32) continue;
       u_short *d16 = (u_short *)dd->Void;
-      for(u_int i=0; i<n; i++) {
-	if(mDebug && i%20 == 0) printf("%3d : ",i);
-	u_int data = d16[i];
-	u_int flags = data >> 12 ;
-	u_int adc  = data & 0xFFF ;
-	if(mDebug){
-	  printf("%4u(%1x) ",adc,flags) ;
-	  if(mDebug && i%20 ==  9) printf("  ");
-	  if(mDebug && i%20 == 19) printf("\n");
-	}
-	int detid,id,crt,sub;
-	mFcsDbMkr->getIdfromDep(ehp,ns,dep,ch,detid,id,crt,sub);
-	if(id>=0){	  
-	  StFcsHit* hit = new StFcsHit();	
-	  hit->setDetectorId(detid);	
-	  hit->setId(id);
-	  hit->setDep(dep);
-	  hit->setChannel(ch);
-	  hit->setTimebin(i);
-	  hit->setData(data);
-	  hit->setEnergy(0.0);
-	  mFcsCollectionPtr->addHit(detid,hit);
-	  nvaliddata++;
-	}
-	ndata++;
+      StFcsHit* hit=0;
+      //unsigned short tmp[512];
+      if(mReadMode==0){
+	hit = new StFcsHit(0,detid,id,ns,ehp,dep,ch,n,d16);
+      }else{
+	/*
+	for(u_int i=0; i<n; i++) {
+	  u_int tb   = dd->adc[i].tb;
+	  u_int data = dd->adc[i].adc;
+	  tmp[i*2  ]=data;
+	  tmp[i*2+1]=tb;
+	  printf("AAA %4d : %4d %4d : %4d %4d\n",i,data&0xfff,d16[i*2]&0xfff,tb,d16[i*2+1]);
+	}	
+	hit = new StFcsHit(1,detid,id,ns,ehp,dep,ch,2*n,tmp);
+	*/
+	hit = new StFcsHit(1,detid,id,ns,ehp,dep,ch,2*n,d16);
       }
-      if(mDebug) printf("\n");
+      mFcsCollectionPtr->addHit(detid,hit);
+      ndata++;      
+      if(detid<6) nvaliddata++;      
+      
+      if(mDebug){
+	printf("FCS %3s : S%d:%d [det %d, ns %d, dep %d ch %d] det=%d id=%3d : size=%d : adc=",
+	       mode[mReadMode],sec,rdo,ehp,ns,dep,ch,detid,id,n) ;
+	for(int tb=0; tb<hit->nTimeBin(); tb++) printf("%4d ", hit->adc(tb));
+	//for(int tb=0; tb<3; tb++) printf("%4d ", hit->adc(tb));
+	printf("\n");
+      }
     }
   }   
   LOG_INFO <<Form("FCS found %d data lines, and %d valid data lines",
@@ -200,18 +202,18 @@ Int_t StFcsRawDaqReader::Make() {
   dd = mRdr->det("stgc")->get("raw");
   if(dd){
     while(dd->iterate()){
-      printf("STGC RAW: stgc%02d(sec) RDO=%1d size=%d(bytes)\n",dd->sec,dd->rdo,dd->ncontent);
+      if(mDebug) printf("STGC RAW: stgc%02d(sec) RDO=%1d size=%d(bytes)\n",dd->sec,dd->rdo,dd->ncontent);
     }
   }
   for(int r=1; r<=6; r++) {
     dd = mRdr->det("stgc")->get("altro",r) ;
     while(dd && dd->iterate()) {    //per xing and per RDO    
-      printf("STGC ALTRO: stgc%02d(sec) RDO=%1d ALTRO=%03d(row) Ch=%02d(pad)\n",dd->sec,r,dd->row,dd->pad);
+      if(mDebug) printf("STGC ALTRO: stgc%02d(sec) RDO=%1d ALTRO=%03d(row) Ch=%02d(pad)\n",dd->sec,r,dd->row,dd->pad);
       for(u_int i=0; i<dd->ncontent; i++) {
-	printf(" TB=%3d ADC=%4d",dd->adc[i].tb,dd->adc[i].adc) ;
+	if(mDebug) printf(" TB=%3d ADC=%4d",dd->adc[i].tb,dd->adc[i].adc) ;
 	ndata++;
       }
-      printf("\n");
+      if(mDebug) printf("\n");
     }
   }
   LOG_INFO <<Form("STGC found %d data lines",ndata)<<endm;
@@ -223,15 +225,18 @@ void StFcsRawDaqReader::Clear( Option_t *opts ){
   StTriggerData2019* d=(StTriggerData2019*)mTrg;
   if(d) delete d;
   if(mFcsCollectionPtr){
-    for(int d=0; d<kFcsNDet; d++) { mFcsCollectionPtr->hits(d).clear(); }
+    for(int d=0; d<kFcsNDet+1; d++) { mFcsCollectionPtr->hits(d).clear(); }
   }
 };
 
 ClassImp(StFcsRawDaqReader);
 
 /*
- * $Id: StFcsRawDaqReader.cxx,v 1.1 2019/03/14 14:45:35 akio Exp $
+ * $Id: StFcsRawDaqReader.cxx,v 1.2 2019/06/07 18:22:33 akio Exp $
  * $Log: StFcsRawDaqReader.cxx,v $
+ * Revision 1.2  2019/06/07 18:22:33  akio
+ * *** empty log message ***
+ *
  * Revision 1.1  2019/03/14 14:45:35  akio
  * FCS raw daq reader for online monitoring
  *
