@@ -24,7 +24,6 @@
 #include <stdlib.h>
 
 #include "TSystem.h"
-#include "TClass.h"
 #include "TROOT.h"
 #include "TError.h"
 #if 0
