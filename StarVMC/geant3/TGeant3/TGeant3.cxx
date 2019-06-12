@@ -6986,7 +6986,7 @@ void ggperp(Float_t *x, Float_t *norm, Int_t &ierr){
 //______________________________________________________________________
 Bool_t TGeant3::GetTransformation(const TString &volumePath,TGeoHMatrix &mat){
     // Returns the Transformation matrix between the volume specified
-    // by the path volumePath and the Top or mater volume. The format
+    // by the path volumePath and the Top or master volume. The format
     // of the path volumePath is as follows (assuming ALIC is the Top volume)
     // "/ALIC_1/DDIP_1/S05I_2/S05H_1/S05G_3". Here ALIC is the top most
     // or master volume which has only 1 instance of. Of all of the daughter
