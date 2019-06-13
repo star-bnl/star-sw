@@ -243,6 +243,19 @@ StEpdEpInfo StEpdEpFinder::Results(TClonesArray* EpdHits, TVector3 primVertex, i
   }  // loop over hits
   //--------------------------------- end loop over hits ---------------------------------------
 
+  // Xiaoyu needs the weights used for each ring, so she can "un-normalize" the ring-by-ring Q-vectors.  Okay...
+  for (int iew=0; iew<2; iew++){
+    for (int iring=1; iring<17; iring++){
+      result.RingSumWeightsRaw[iew][iring-1]         = TotalWeight4Ring[iew][iring-1][0];
+      result.RingSumWeightsPhiWeighted[iew][iring-1] = TotalWeight4Ring[iew][iring-1][1];
+    }
+    for (int order=1; order<_EpOrderMax+1; order++){
+      result.WheelSumWeightsRaw[iew][order-1]         = TotalWeight4Side[iew][order-1][0];
+      result.WheelSumWeightsPhiWeighted[iew][order-1] = TotalWeight4Side[iew][order-1][1];
+    }
+  }
+
+
   // at this point, we are finished with the detector hits, and deal only with the Q-vectors,
 
   // first, normalize the Q's...

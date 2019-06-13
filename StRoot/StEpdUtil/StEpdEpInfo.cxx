@@ -81,6 +81,38 @@ TVector2 StEpdEpInfo::WestRingPhiWeightedQ(int order, int ring){return RingPhiWe
 //-----------------------------------------------------------------------
 
 
+// ===================== Access to sum-of-weights =======================
+// --------------------- Ring sum-of-weights, raw ----------------------
+double StEpdEpInfo::RingSW_Raw(int ew, int ring){
+  if (ArgumentOutOfBounds(0,ring)) return -999;
+  return RingSumWeightsRaw[ew][ring-1];
+}
+double StEpdEpInfo::EastRingSumWeightsRaw(int ring){return RingSW_Raw(0,ring);}   // public method
+double StEpdEpInfo::WestRingSumWeightsRaw(int ring){return RingSW_Raw(1,ring);}   // public method
+// --------------------- Ring sum-of-weights, phi-weighted -------------
+double StEpdEpInfo::RingSW_PhiWeighted(int ew, int ring){
+  if (ArgumentOutOfBounds(0,ring)) return -999;
+  return RingSumWeightsPhiWeighted[ew][ring-1];
+}
+double StEpdEpInfo::EastRingSumWeightsPhiWeighted(int ring){return RingSW_PhiWeighted(0,ring);}   // public method
+double StEpdEpInfo::WestRingSumWeightsPhiWeighted(int ring){return RingSW_PhiWeighted(1,ring);}   // public method
+// --------------------- Wheel sum-of-weights, raw ----------------------
+double StEpdEpInfo::WheelSW_Raw(int ew, int order){
+  if (ArgumentOutOfBounds(order)) return -999;
+  return WheelSumWeightsRaw[ew][order-1];
+}
+double StEpdEpInfo::EastSumWeightsRaw(int order){return WheelSW_Raw(0,order);}   // public method
+double StEpdEpInfo::WestSumWeightsRaw(int order){return WheelSW_Raw(1,order);}   // public method
+// --------------------- Wheel sum-of-weights, phi-weighted ---------------
+double StEpdEpInfo::WheelSW_PhiWeighted(int ew, int order){
+  if (ArgumentOutOfBounds(order)) return -999;
+  return WheelSumWeightsPhiWeighted[ew][order-1];
+}
+double StEpdEpInfo::EastSumWeightsPhiWeighted(int order){return WheelSW_PhiWeighted(0,order);}   // public method
+double StEpdEpInfo::WestSumWeightsPhiWeighted(int order){return WheelSW_PhiWeighted(1,order);}   // public method
+
+
+
 // ===================== Access to Event-plane angles ====================
 
 //------------------------- raw EP angles --------------------------------
