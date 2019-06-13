@@ -124,6 +124,55 @@ class StEpdEpInfo{
   /// \parameter ring      a.k.a. "row".  The ring number of the wheel.  ring 1 is innermost, ring 16 is outermost
   double WestRingPhiWeightedPsi(int order, int ring);
 
+  //-----------------------------------------------------------------------------------------
+  /// The sum of tile weights, ring-by-ring for East EPD.  This is RAW truncated nMIP, no phi-weights.
+  /// This is useful if one wants to un-normalize the Q-vectors
+  /// \parameter ring      a.k.a. "row".  The ring number of the wheel.  ring 1 is innermost, ring 16 is outermost
+  double EastRingSumWeightsRaw(int ring);
+  /// The sum of tile weights, ring-by-ring for West EPD.  This is RAW truncated nMIP, no phi-weights.
+  /// This is useful if one wants to un-normalize the Q-vectors
+  /// \parameter ring      a.k.a. "row".  The ring number of the wheel.  ring 1 is innermost, ring 16 is outermost
+  double WestRingSumWeightsRaw(int ring);
+
+  //-----------------------------------------------------------------------------------------
+  /// The sum of tile weights, ring-by-ring for East EPD.  These weights are phi-weights corrected.
+  /// This is useful if one wants to un-normalize the Q-vectors
+  /// \parameter ring      a.k.a. "row".  The ring number of the wheel.  ring 1 is innermost, ring 16 is outermost
+  double EastRingSumWeightsPhiWeighted(int ring);
+  /// The sum of tile weights, ring-by-ring for West EPD.  These weights are phi-weights corrected.
+  /// This is useful if one wants to un-normalize the Q-vectors
+  /// \parameter ring      a.k.a. "row".  The ring number of the wheel.  ring 1 is innermost, ring 16 is outermost
+  double WestRingSumWeightsPhiWeighted(int ring);
+
+  //-----------------------------------------------------------------------------------------
+  /// The sum of weights used to calculate Q-vector, for entire East EPD.  This is RAW, not phi-weighted
+  /// This is useful if one wants to un-normalize the Q-vector
+  /// ** note that this depends on "order," because the eta-weighting or ring-weighting can depend on order (user sets it)
+  /// ** this stands in contrast to the ring-by-ring Qvectors, which do not depend on order.
+  /// \parameter order     order of the EP.  Begins at unity (order=1 means first-order EP)
+  double EastSumWeightsRaw(int order);
+  /// The sum of weights used to calculate Q-vector, for entire West EPD.  This is RAW, not phi-weighted
+  /// This is useful if one wants to un-normalize the Q-vector
+  /// ** note that this depends on "order," because the eta-weighting or ring-weighting can depend on order (user sets it)
+  /// ** this stands in contrast to the ring-by-ring Qvectors, which do not depend on order.
+  /// \parameter order     order of the EP.  Begins at unity (order=1 means first-order EP)
+  double WestSumWeightsRaw(int order);
+
+  //-----------------------------------------------------------------------------------------
+  /// The sum of weights used to calculate Q-vector, for entire East EPD.  This is phi-weighted
+  /// This is useful if one wants to un-normalize the Q-vector
+  /// ** note that this depends on "order," because the eta-weighting or ring-weighting can depend on order (user sets it)
+  /// ** this stands in contrast to the ring-by-ring Qvectors, which do not depend on order.
+  /// \parameter order     order of the EP.  Begins at unity (order=1 means first-order EP)
+  double EastSumWeightsPhiWeighted(int order);
+  /// The sum of weights used to calculate Q-vector, for entire West EPD.  This is phi-weighted
+  /// This is useful if one wants to un-normalize the Q-vector
+  /// ** note that this depends on "order," because the eta-weighting or ring-weighting can depend on order (user sets it)
+  /// ** this stands in contrast to the ring-by-ring Qvectors, which do not depend on order.
+  /// \parameter order     order of the EP.  Begins at unity (order=1 means first-order EP)
+  double WestSumWeightsPhiWeighted(int order);
+
+
 
  private:
 
@@ -141,6 +190,11 @@ class StEpdEpInfo{
   double RingRawPsi(int ew, int order, int ring);          /// called internally
   double RingPhiWeightedPsi(int ew, int order, int ring);  /// called internally
 
+  double RingSW_Raw(int ew, int ring);              /// called internally
+  double RingSW_PhiWeighted(int ew, int ring);      /// called internally
+  double WheelSW_Raw(int ew, int order);            /// called internally
+  double WheelSW_PhiWeighted(int ew, int order);    /// called internally
+
   double Range(double psi, int order);                     /// puts angle psi into range (0,2pi/n)
 
 
@@ -155,6 +209,12 @@ class StEpdEpInfo{
   double QringPhiWeighted[2][_EpOrderMax][2][16];  /// indices: [east,west][order][x,y][ring]
   double PsiRingRaw[2][_EpOrderMax][16];           /// indices: [east,west][order][ring]
   double PsiRingPhiWeighted[2][_EpOrderMax][16];   /// indices: [east,west][order][ring]
+  // following are sums of weights so that Xiaoyu can "unnormalize" the Q-vectors
+  double RingSumWeightsRaw[2][16];                 /// indices: [east,west][ring]
+  double RingSumWeightsPhiWeighted[2][16];         /// indices: [east,west][ring]
+  double WheelSumWeightsRaw[2][_EpOrderMax];       /// indices: [east,west][order]
+  double WheelSumWeightsPhiWeighted[2][_EpOrderMax]; /// indices: [east,west][order]
+
 };
 
 #endif
