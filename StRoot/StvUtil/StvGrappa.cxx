@@ -12,6 +12,22 @@
 ClassImp(StvGrappa)
 enum StvGrappa2_e {kX,kY,kZ,kR};
 
+class gemini 
+{
+public:
+  gemini(){}
+  void clear() { mHitsOn.clear();mHitsOff.clear();}
+  void add( const float *xyz,int onTrak);
+   int pri();
+public:
+std::vector<double> mHitsOn;
+std::vector<double> mHitsOff;
+};
+
+static gemini gem;
+
+
+
 //______________________________________________________________________________
 StvGrappa::StvGrappa(const char* name) 
 {
@@ -174,7 +190,7 @@ void StvGrappa::MySort()
 static const double kMicron = 1e-4;
 std::vector<int> Idx;
 std::vector<float> Buf;
-#if 1
+#if 0
 //		cleanup same hits
   for (int jObj:{kHIT,kTHIT}) {
     int nj = mPts[jObj][0].size();
@@ -220,16 +236,21 @@ void StvGrappa::Show(const StvTrack *tk)
   mState = 2;
   int qua = 0;
   mTkTruth = tk->GetIdTru(&qua);
+  int nSelHits=0;
   for (StvNodeConstIter it=tk->begin();it!=tk->end();++it) {
     const StvNode *node = (*it);
     const StvHit *hit = node->GetHit();
     const double *Xd  = node->GetFP().pos();
     Add(Xd[0],Xd[1],Xd[2],kNode);
     if (!hit) continue;
+    if (node->GetXi2()>33) continue;
+    nSelHits++;
     const float *Xf  = hit->x();
     StvGrappa_e ee = (mTkTruth && hit->idTru()==mTkTruth)? kTHIT:kHIT;
     Add(Xf[0],Xf[1],Xf[2],ee);
+    gem.add(Xf,1);
   }
+  printf("Show:nTrkHits=%d\n",nSelHits);
   Show();
 }
 //______________________________________________________________________________
@@ -259,7 +280,7 @@ double StvGrappa::Dist2(const StvTrack *tk,const float *xhit) const
   
   THelix3d helx(iq,pos,mom,mag);
   double s = helx.Path(hit,xyz);
-  if (fabs(s)>1e3) return 0;
+  if (fabs(s)>400) return 400;
 //  if (fabs(s)>1e3) return 1e11;
   double dist2 = (TVector3(xyz)-TVector3(hit)).Mag2();
   return dist2;
@@ -320,13 +341,13 @@ enum { kKEEP = 3};
 //______________________________________________________________________________
 void StvGrappa::MakeLims(const StvTrack *tk,double xMiMax[2][3]) const
 {
-  enum {k60 = 50,kCorrida=40};
+  enum {kCorrida=20};
   double Rmax=9,Rmin=1e11;
   for (int i=0;i<3;i++) {
-    xMiMax[0][i] = 1e11;    
-    xMiMax[1][i] =-1e11;
+    xMiMax[0][i] =  1e11;    
+    xMiMax[1][i] = -1e11;
   }
-
+  
   auto* node = tk->GetNode(StvTrack::kFirstPoint);
   assert(node);
   auto &par = node->GetFP(0);
@@ -339,29 +360,15 @@ void StvGrappa::MakeLims(const StvTrack *tk,double xMiMax[2][3]) const
   THelix3d helx(iq,pos,mom,mag);
   double len00 = helx.Path(0.,0.);
   double x00[3];
-  helx.Eval(len00,x00);
-  for (int i=0;i<3;i++) {
-    if (xMiMax[0][i]>x00[i]-kCorrida)  xMiMax[0][i]=x00[i]-kCorrida;  
-    if (xMiMax[1][i]<x00[i]+kCorrida)  xMiMax[1][i]=x00[i]+kCorrida;
-  }
-
-  for (StvNodeConstIter it=tk->begin();it!=tk->end();++it) {
-    const StvNode *node = (*it);
-    const double *x = node->GetFP().pos();
-    double r = x[0]*x[0]+x[0]*x[0];
-    if (Rmin>r)Rmin=r; 
-    if (Rmax<r)Rmax=r; 
-    for (int i=0;i<3;i++) {
-      if (xMiMax[0][i]>x[i])  xMiMax[0][i]=x[i];  
-      if (xMiMax[1][i]<x[i])  xMiMax[1][i]=x[i];
+  for (double s=len00; 1; s++) {
+    helx.Eval(s,x00);
+    if (fabs(x00[2]) > 210) 			break;
+    if (x00[0]*x00[0]+x00[1]*x00[1]>200*200) 	break;
+      for (int i=0;i<3;i++) {
+      if (xMiMax[0][i]>x00[i]-kCorrida)  xMiMax[0][i]=x00[i]-kCorrida;  
+      if (xMiMax[1][i]<x00[i]+kCorrida)  xMiMax[1][i]=x00[i]+kCorrida;
     }
   }
-
-  Rmin = sqrt(Rmin); Rmax = sqrt(Rmax);
-  
-
-  if (xMiMax[0][0]>k60) xMiMax[0][0]=k60;
-  if (xMiMax[0][1]>k60) xMiMax[0][1]=k60;
 }
 //______________________________________________________________________________
 void StvGrappa::MakeLims(const StvHits *tk,double xMiMax[2][3]) const
@@ -384,17 +391,20 @@ void StvGrappa::MakeLims(const StvHits *tk,double xMiMax[2][3]) const
 //______________________________________________________________________________
 void StvGrappa::Zhow(const StvTrack *tk)
 {
-enum {kCorrida=40};
+enum {kCorrida=20};
   Clear();
+  gem.clear();
   mState = 1;
   int qua=0;
   mTkTruth = tk->GetIdTru(&qua);
   const StVoidArr *hitArr =  StTGeoProxy::Inst()->GetAllHits();
   double lims[2][3];
   MakeLims(tk,lims);
+  int nTotHits=0,nAccHits=0,nDi2Hits=0;;
 
   for (int ihit=0;ihit<(int)hitArr->size(); ihit++) {
     const StvHit *hit = (StvHit*)(*hitArr)[ihit];
+    nTotHits++;
     TestHit(hit);
     const float *f = hit->x();
     int rej = 0;
@@ -403,12 +413,18 @@ enum {kCorrida=40};
       if (f[i] >lims[1][i]) {rej = 13; break;};     
     }
     if (rej) continue;
+    nAccHits++;
     double dist2 = Dist2(tk,f);
     if (dist2 > kCorrida*kCorrida) continue;
+    nDi2Hits++;
     StvGrappa_e ee = (mTkTruth && hit->idTru()==mTkTruth)? kThit:kHit;
     Add(f[0],f[1],f[2],ee);
+    gem.add(f,0);
   }
+  printf("ZHOW: nTotHits,nAccHit,nDi2Hits=%d %d %d\n",nTotHits,nAccHits,nDi2Hits);
   Show(tk);
+  gem.pri();
+//      Show();
 }
 //______________________________________________________________________________
 void StvGrappa::Zhow(const StvHits *tk, int objType)
@@ -424,8 +440,8 @@ enum {kCorrida=20};
     const float *f = hit->x();
     int rej = 0;
     for (int i=0;i<3;i++) {
-      if (f[i] <lims[0][i]-kCorrida) {rej = 13; break;};    
-      if (f[i] >lims[1][i]+kCorrida) {rej = 13; break;};     
+      if (f[i] <lims[0][i]) {rej = 13; break;};    
+      if (f[i] >lims[1][i]) {rej = 13; break;};     
     }
     if (rej) continue;
     double dist2 = Dist2(tk,f);
@@ -445,4 +461,30 @@ void StvGrappa::TestHit(const StvHit *hit) const
       
     const StThreeVectorF& pos = stHit->position();
     assert(fabs(f[2]-pos[2])<=0);
+}
+//______________________________________________________________________________
+void gemini::add(const float *xyz,int onTrak) 
+{
+  auto * v = (onTrak)? &mHitsOn:&mHitsOff;
+  for (int i=0;i<3;i++) v->push_back(xyz[i]);
+}
+//______________________________________________________________________________
+int gemini::pri() 
+{
+static const double delta = 1.;
+  std::vector<double> sel;
+  int num=0;
+  for (int i=0; i<(int)mHitsOff.size();i+=3) {
+    const double *a = &mHitsOff[i];
+    for (int j=0; j<(int)mHitsOn.size();j+=3) {
+      const double *b = &mHitsOn[j];
+      double s = 0;
+      for (int k=0;k<3;k++) { s+=pow(a[k]-b[k],2); }
+      if (s<=0.) continue;
+      if (s>delta*delta) continue;
+
+      printf("%d - (%g %g %g) (%g %g %g)\n",num++
+            ,a[0],a[1],a[2] ,b[0],b[1],b[2]);
+  } }
+  return num;
 }
