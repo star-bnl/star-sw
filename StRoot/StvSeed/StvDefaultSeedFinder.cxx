@@ -330,10 +330,12 @@ StvDebug::Break(nCall);
       mDir[0] = coe[0]*mX[mJst-2][0]+coe[1]*mX[mJst-1][0]+coe[2]*mHit[0];
       mDir[1] = coe[0]*mX[mJst-2][1]+coe[1]*mX[mJst-1][1]+coe[2]*mHit[1];
       mDir[2] = coe[0]*mX[mJst-2][2]+coe[1]*mX[mJst-1][2]+coe[2]*mHit[2];
+      mDirErr = sqrt(coe[0]*coe[0]+coe[1]*coe[1]+coe[2]*coe[2])*mErr;
       stp=0;
       for (int i=0;i<3;i++) {stp+=mDir[i]*mDir[i];}
       stp = sqrt(stp );
       for (int i=0;i<3;i++) {mDir[i]/=stp;}
+      mDirErr/=stp; 	//very rough estimate of error
     }; break;
 
     default: assert(0 && "Wrong case");
@@ -509,7 +511,7 @@ int  StvConeSelector::Reject(const float x[3],const void* hp)
    if (mHitPrj  < 1e-8) 		REJECT_HIT( "min hit length", 4); 
    if (mHitPrj>mLen) 			REJECT_HIT( "outside cone along length",  6); //Outside of cone along
    float imp =mHitLen-mHitPrj*mHitPrj; if (imp<=0) imp = 0;
-   float lim = (mErr)*2 + mHitPrj*mTan;
+   float lim = (mErr)*2 + mHitPrj*(mTan+mDirErr);
    if (imp > lim*lim)          		REJECT_HIT( Form("outside of cone radius %f %f",imp,lim*lim), 7); // return 7;	//Outside of cone aside
    int ans = 99;
    if (mHp != hp) { 					//different layers, only prj is important

@@ -49,7 +49,8 @@ float mRxy2;		//Rxy**2 of previous hit
 float mRxy;		//Rxy    of previous hit
 float mDelta;
 float mMaxStep;
-float mDir[3]; 		// track direction
+float mDir[3]; 		// track direction 
+float mDirErr; 		// track direction error(same for each x,y,z)
 float mLayer;
 const float *mHitDir; 	// hit plane direction
 float mLen;		// cone length (height)
