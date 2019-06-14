@@ -84,14 +84,14 @@ TVector2 StEpdEpInfo::WestRingPhiWeightedQ(int order, int ring){return RingPhiWe
 // ===================== Access to sum-of-weights =======================
 // --------------------- Ring sum-of-weights, raw ----------------------
 double StEpdEpInfo::RingSW_Raw(int ew, int ring){
-  if (ArgumentOutOfBounds(0,ring)) return -999;
+  if (ArgumentOutOfBounds(1,ring)) return -999;    // note.  the dummy "1" as the first argument is just so we are only checking whether "ring" is out of bounds
   return RingSumWeightsRaw[ew][ring-1];
 }
 double StEpdEpInfo::EastRingSumWeightsRaw(int ring){return RingSW_Raw(0,ring);}   // public method
 double StEpdEpInfo::WestRingSumWeightsRaw(int ring){return RingSW_Raw(1,ring);}   // public method
 // --------------------- Ring sum-of-weights, phi-weighted -------------
 double StEpdEpInfo::RingSW_PhiWeighted(int ew, int ring){
-  if (ArgumentOutOfBounds(0,ring)) return -999;
+  if (ArgumentOutOfBounds(1,ring)) return -999;    // note.  the dummy "1" as the first argument is just so we are only checking whether "ring" is out of bounds
   return RingSumWeightsPhiWeighted[ew][ring-1];
 }
 double StEpdEpInfo::EastRingSumWeightsPhiWeighted(int ring){return RingSW_PhiWeighted(0,ring);}   // public method
