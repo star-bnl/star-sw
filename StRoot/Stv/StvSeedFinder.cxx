@@ -244,20 +244,6 @@ void StvSeedFinder::FeedBack(const StvTrack *tk)
     auto *hit = fSeedHits[ih];
     idu.Add(hit->idTru());
   }
-  double qua = idu.GetQua()*100;
-  if (!idu.GetIdTru()) qua=0;
-  StvDebug::Count("SeedAllQua",qua);
-  if (!tk) { //
-    StvDebug::Count("SeedBadXi2:Xi2E",fXi2[1],fXi2[0]);
-    StvDebug::Count("SeedBadQua",qua);
-
-  } else {
-    StvDebug::Count("GooXi2:Xi2E",fXi2[1],fXi2[0]);
-
-    StvDebug::Count("SeedGooQua",qua);
-    double tqua = tk->GetQua()*100;
-    StvDebug::Count("GlobGooQua",tqua);
-    StvDebug::Count("GlobGooQua::SeedGooQua",qua,tqua);
     const StvNode *node = tk->GetNode(StvTrack::kFirstPoint);
     double P[3];
     node->GetFP().getMom(P);
@@ -266,8 +252,6 @@ void StvSeedFinder::FeedBack(const StvTrack *tk)
     int nHits = tk->GetNHits(kPxlId);
     nHits    += tk->GetNHits(kIstId);
     nHits    += tk->GetNHits(kSstId);
-    StvDebug::Count("GoodEta",eta);
-    if (nHits>=2) StvDebug::Count("HftEta",eta);
   }
 }
 #endif //0
@@ -275,12 +259,6 @@ void StvSeedFinder::FeedBack(const StvTrack *tk)
 //_____________________________________________________________________________
 void StvSeedFinder::FeedBack(const StvTrack *tk)
 {
-  if (StvDebug::Debug()<2) return;
-  if (tk) {
-    StvDebug::Count("GoodXi2",fXi2[1]);
-  } else {
-    StvDebug::Count("BaddXi2",fXi2[1]);
-  }
 }
 
 #endif //1

@@ -120,6 +120,7 @@ enum {kRepeatSeedFinder = 2};
         nHits = mCurrTrak->GetNHits();
         fail = 6; if (nHits<mKons->mMinHits) 	break;
 if (mCurrTrak->GetXi2()<33) StvDebug::Count("Xi2Trk",mCurrTrak->GetXi2());
+        if (BOTOHO&16) StvDebug::Zhow(mCurrTrak);
 
       } while((fail=0));		
       
@@ -479,7 +480,6 @@ static     StvToolkit *kit     = StvToolkit::Inst();
 int StvKalmanTrackFinder::Refit(int idir)
 {
   int ians = mTrackFitter->Refit(mCurrTrak,idir);
-  if ((idir==0 && BOTOHO&16) 
-    ||(idir==1 && BOTOHO&32)) StvDebug::Zhow(mCurrTrak);
+  if (BOTOHO&32) StvDebug::Zhow(mCurrTrak);
   return ians;
 }

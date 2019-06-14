@@ -728,7 +728,6 @@ double StvFitter::Xi2(const StvHit *hit)
   double *tD = mTkPars._d;
 //		Distance to DCA along track in xy
   mDeltaL = DDOT(hP,tP,tD);  
-StvDebug::Count("DeltaL",mDeltaL);
 #endif  
 
 
@@ -768,7 +767,6 @@ StvDebug::Count("DeltaL",mDeltaL);
   mDcaT=VDOT(mDcaFrame[0],dca);
   mDcaP=VDOT(mDcaFrame[1],dca);
   mDcaL=VDOT(mDcaFrame[2],dca);
-StvDebug::Count("DcaT",mDcaT);
 
 //		small account non zero distance to hit along track
 
@@ -855,17 +853,12 @@ int StvFitter::Hpdate()
                         ,5,myTrkPars, mTkErrs
 		        ,  mQQPars  ,*mOtErrs);
 
-  double dFita = mQQPars.mFita;
-  double dLama = mQQPars.mLama;
-StvDebug::Count("dFita",dFita);
-StvDebug::Count("dLama",dLama);
-
 
 
 //////  assert(mXi2>myXi2);
   assert(myXi2<kXtraBigXi2); 
   *mOtPars = mTkPars;
-#if 1
+#if 0
   if (!mFailed) {
     do {
       double old =   mTkErrs[0] +  mTkErrs[2];

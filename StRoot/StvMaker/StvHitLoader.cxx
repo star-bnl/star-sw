@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.33.2.2 2019/04/19 23:53:26 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.33.2.3 2019/06/14 18:55:39 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -26,6 +26,7 @@ Main tasks:
 #include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 #include "StEvent.h"
 #include "StHit.h"
+#include "StTpcHit.h"
 #include "StEventUtilities/StEventHelper.h"
 #include "StEventUtilities/StEventHitIter.h"
 #include "StvUtil/StvDebug.h"
@@ -96,11 +97,9 @@ int StvHitLoader::LoadHits(const StEvent *stev)
 enum {kFCF_CHOPPED=256		// 0x100 cluster is chopped from its neighbour: OFFLINE use only
      ,kFCF_SANITY =512};	// 0x200 cluster extents not sane
 static int nCall=0; nCall++;
-static int myGraph=0;
 static StTGeoProxy* tgp = StTGeoProxy::Inst();
        tgp->SetHitLoadActor(mHitLoadActor);
 
-StvHits *myHits=0;
   mHitIter->Reset(stev);
   int nSel = (mHitSelector)? mHitSelector->Edit(stev):-1;
   if (!nSel) return 0;
@@ -111,13 +110,6 @@ StvHits *myHits=0;
 
   for (; ; ++(*mHitIter)) {
     stHit=*(*mHitIter);
-#if 1
-if (stHit) {
-StThreeVectorF v3f = stHit->position();
-StvDebug::Count("XYHits.sthit",v3f[0],v3f[1]    ,-220,220,-220,220);
-StvDebug::Count("ZRHits.sthit",v3f[2],v3f.perp(),-220,220,   0,220);
-}
-#endif
 //		If hit selector is ON and hit is not marked, ignore it
     StDetectorId did = mHitIter->DetectorId();
     
@@ -134,14 +126,14 @@ StvDebug::Count("ZRHits.sthit",v3f[2],v3f.perp(),-220,220,   0,220);
       nHits=0; nHitz=0,nGits=0,nTrue=0;
     }
     if (nSel> 0 && (!stHit->TestBit(StvStEventHitSelector::kMarked))) 	continue; // ignore not selected hit
-    if (stHit->flag() & kFCF_CHOPPED || stHit->flag() & kFCF_SANITY)	continue; // ignore hits marked by AfterBurner as chopped o
+    if (stHit->flag() & (kFCF_CHOPPED|kFCF_SANITY))			continue; // ignore hits marked by AfterBurner as chopped o
+    if (did==kTpcId) {
+      auto *tpcHit = (StTpcHit*)stHit;
+      if ( tpcHit->pad()>182 || tpcHit->timeBucket()>511) 		continue; // some garbadge  for y2001 daq
+    }
     mDetId = did;
     int sure=0;
     int nStvHits = MakeStvHit(stHit,mHitIter->UPath(),sure);
-//     if (!sure && mStvHit) { //Non reliable hit
-//       double rxy = sqrt(pow(mStvHit->x()[0],2)+pow(mStvHit->x()[1],2));
-//       StvDebug::Count("OrphanHits",mStvHit->x()[2],rxy);
-//     }
 
     if (nStvHits) {
       nHits+=nStvHits;nTotHits+=nStvHits;nGits+=sure;nTotGits+=sure;
@@ -249,13 +241,6 @@ static int knt=0;knt++;
    }
    mStvHit->set(hp);
    
-#if 1
-static int nnn=0;nnn++;
-//printf("%d  *** StvHitLoader::MakeStvHit %g %g %g  ***\n",nnn
-//      ,mStvHit->x()[0],mStvHit->x()[1],mStvHit->x()[2]);
-StvDebug::Count("XYHits",mStvHit->x()[0],mStvHit->x()[1]  ,-220,220,-220,220);
-StvDebug::Count("ZRHits",mStvHit->x()[2],mStvHit->getRxy(),-220,220,   0,220);
-#endif
    return 1;
 }
 
