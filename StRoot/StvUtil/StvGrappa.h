@@ -17,11 +17,11 @@ class StvGrappa: public TNamed
 public:
 // kNode: 	Node green line
 // kHit: 	Unused Not TRUE hit Blue point
-// kHIT: 	Used hit Not TRUE,Blue  Star
+// kHIT: 	Used hit Not TRUE,  Blue  Star
 // kThit	Unused BUT TRUE hit Red point
-// kTHIT	Used AND TRUE hit Red Star
+// kTHIT	Used AND TRUE hit   Red Star
 // kHelx:	Yellow line
-// kPont:	Seed hit, Black Mult
+// kPont:	Seed hit,           Black Mult
 StvGrappa(const char* name="");
 ~StvGrappa(){ Clear();}
 void Add(double x,double y,double z,int iObj);
