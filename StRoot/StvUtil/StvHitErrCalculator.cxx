@@ -147,11 +147,11 @@ static const double kMicron2 = 1.5e-8;
    double dudz = DOT(mTG[1],hiDir[2]);
    double dvdy = DOT(mTG[2],hiDir[1]);
    double dvdz = DOT(mTG[2],hiDir[2]);
+   double myCos = DOT(mTG[0],hiDir[0]);
    double T[2][2] = {{dudy,dudz}
                     ,{dvdy,dvdz}};
    TCL::trasat(T[0],detRr,hRr,2,2);
 
-   double myCos = DOT(mTG[0],hiDir[0]);
    double qwe = (detRr[0]*detRr[2]-detRr[1]*detRr[1])*myCos*myCos;
    qwe -= hRr[0]*hRr[2]-hRr[1]*hRr[1];
    assert(fabs(qwe)<1e-6);
