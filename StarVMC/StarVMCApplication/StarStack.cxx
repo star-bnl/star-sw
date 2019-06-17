@@ -227,7 +227,9 @@ void StarStack::PushTrack(Int_t done, Int_t parent, Int_t pdg,
       Double_t R = particle->R();
       Double_t Z = particle->Vz();
       Double_t Ekin = particle->Ek(); 
-      if (R > 180 || TMath::Abs(Z) > 180 || Ekin < 0.010) { // 10 MeV Cut
+      if (! (mech == kPDecay || mech == kPDeltaRay || mech == kPHadronic) && 
+	  ((R > 200 || TMath::Abs(Z) > 210) && Ekin < 0.100) // TPC and   100 MeV cut
+	  ) {
 	fStack.push(*particle);
 	fParticles.RemoveAt(index);
 	index--;
@@ -235,15 +237,15 @@ void StarStack::PushTrack(Int_t done, Int_t parent, Int_t pdg,
 	if (Debug() > 1) {
 	  cout << "Push to stack:   ";
 	}
-      }
-    } else {
-      fNtrack++;
-      if (Debug() > 1) {
-	cout << "Push to Paticles:";
+      } else {
+	fNtrack++;
+	if (Debug() > 1) {
+	  cout << "Push to Paticles:";
+	}
       }
     }
     if (Debug() > 1) {
-      cout << Form("%4i:%4i",index,fStack.size());
+      cout << Form("%4d:%4d",index,(Int_t) fStack.size());
       cout << Form("%30s:",TMCProcessName[mech]);
       particle->Print();
     }
