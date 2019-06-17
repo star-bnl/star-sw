@@ -287,7 +287,7 @@ int FtfBaseTrack::fitCircle (  )
   double h24   = yrrav ;
   double h34   = 1.0   + 2.0*lamda ;
   if ( h11 == 0.0 || h22 == 0.0 ){
-	  LOG(ERR, " Problems fitting a circle " ) ;
+    //LOG(ERR, " Problems fitting a circle " ) ;
 	  return 1 ;
   }
   double rootsq = (h14*h14)/(h11*h11) + 4.0*h34 ;
