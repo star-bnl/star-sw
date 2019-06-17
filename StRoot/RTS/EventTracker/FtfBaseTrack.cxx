@@ -44,18 +44,18 @@ FtfBaseTrack::FtfBaseTrack ( ){
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 int FtfBaseTrack::fitHelix (  ) 
 {
-   if ( fitCircle ( ) ){
-      LOG(ERR, " Problem in Fit_Circle " ) ;
-      return 1 ;
-   }
-//
-//     Fit line in s-z plane now
-//
-   if ( fitLine ( )) {
-      LOG(ERR, " Problem fitting a line " ) ;
-      return 1 ;
-   }
-   return 0 ;
+    if ( fitCircle ( ) ){
+	//LOG(ERR, " Problem in Fit_Circle " ) ;
+	return 1 ;
+    }
+    //
+    //     Fit line in s-z plane now
+    //
+    if ( fitLine ( )) {
+	//LOG(ERR, " Problem fitting a line " ) ;
+	return 1 ;
+    }
+    return 0 ;
 }
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //       End of Fit Helix
