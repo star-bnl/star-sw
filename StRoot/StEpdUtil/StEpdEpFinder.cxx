@@ -219,8 +219,8 @@ StEpdEpInfo StEpdEpFinder::Results(TClonesArray* EpdHits, TVector3 primVertex, i
 
     double PhiWeightedTileWeight = TileWeight;
     if (mPhiWeightInput[EW]) PhiWeightedTileWeight /= mPhiWeightInput[EW]->GetBinContent(PP,TT);
-    TotalWeight4Ring[EW][ring][0] += TileWeight;
-    TotalWeight4Ring[EW][ring][1] += PhiWeightedTileWeight;
+    TotalWeight4Ring[EW][ring-1][0] += TileWeight;
+    TotalWeight4Ring[EW][ring-1][1] += PhiWeightedTileWeight;
 
     for (int order=1; order<_EpOrderMax+1; order++){
       double etaWeight = RingOrEtaWeight(ring,eta,order,EventTypeId);
