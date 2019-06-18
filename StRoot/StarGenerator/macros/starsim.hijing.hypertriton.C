@@ -50,10 +50,14 @@ void command( TString cmd )
 // ----------------------------------------------------------------------------
 void trig( Int_t n=0 )
 {
+
+  TString hyperTs = "HyperT_2body,HyperT_3body,HyperT_bar_2body,HyperT_bar_3body";
+
+
   for ( Int_t i=0; i<n+1; i++ ) {
     chain->Clear();
     // Throw one hypertriton flat in -1 to 1 w/ momentum btwn 0.1 and 1 GeV
-    if (kinematics) kinematics->Kine( 1, "HyperTriton", minPt, maxPt, minEta, maxEta );
+    if (kinematics) kinematics->Kine( 1, hyperTs, minPt, maxPt, minEta, maxEta );
     chain->Make();
     command("gprint kine");
   }
@@ -98,7 +102,7 @@ void Hijing()
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-void starsim( Int_t nevents=5, Int_t rngSeed=4321 )
+void starsim( Int_t nevents=200, Int_t rngSeed=4321 )
 { 
 
   gROOT->ProcessLine(".L bfc.C");
@@ -126,10 +130,13 @@ void starsim( Int_t nevents=5, Int_t rngSeed=4321 )
   StarRandom::seed( rngSeed );
   StarRandom::capture();
 
-  // Load STAR Particle DataBase and add the hypertriton definitions (as defined in gstar_part.g)
+  // Load STAR Particle DataBase and add the hypertriton definitions.  Map to the
+  // decay modes as defined in gstar_part.g 
   StarParticleData &pdb = StarParticleData::instance();
-  pdb.AddParticle("HyperTriton",     new TParticlePDG( "HyperTriton",     "HyperTriton     --> He3    pi-", 2.99131, false, 0.0, +3.0, "hypernucleus", +hid(1,1,1), 0, 61054 ));	      
-  pdb.AddParticle("AntiHyperTriton", new TParticlePDG( "AntiHyperTriton", "AntiHyperTriton --> He3bar pi+", 2.99131, false, 0.0, -3.0, "hypernucleus", -hid(1,1,1), 0, 61055 ));
+  pdb.AddParticle("HyperT_2body",     new TParticlePDG( "HyperpT_2body",     "HyperTriton     --> He3    pi-", 2.99131, false, 0.0, +3.0, "hypernucleus", +hid(1,1,1), 0, 61053 ));	      
+  pdb.AddParticle("HyperT_bar_2body", new TParticlePDG( "HyperT_bar_2body",  "AntiHyperTriton --> He3bar pi+", 2.99131, false, 0.0, -3.0, "hypernucleus", -hid(1,1,1), 0, 61054 ));
+  pdb.AddParticle("HyperT_3body",     new TParticlePDG( "HyperT_3body",      "HyperTriton     --> d p pi-",    2.99131, false, 0.0, +3.0, "hypernucleus", +hid(1,1,1), 0, 62053 ));	      
+  pdb.AddParticle("HyperT_bar_3body", new TParticlePDG( "HyperT_bar_3body",  "AntiHyperTriton --> dbar pbar pi+", 2.99131, false, 0.0, -3.0, "hypernucleus", -hid(1,1,1), 0, 62054 ));
 
 // Hypertriton will be phase-space decayed by geant 
 
