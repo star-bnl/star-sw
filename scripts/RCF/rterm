@@ -592,10 +592,10 @@ else
     else
 	if ($inter) then
 	    echo "Opening a connection to [$node] for $user $extra"
-	    $SLOGIN $port $user@$node
+	    $SLOGIN -A $port $user@$node
 	else
 	    echo "Opening a $col terminal on $node for $user $extra"
-	    $TERM_PRGM -sl 500 -sb +si -sk -T "$user@$node" -n "Xterm_$node" -bg $TERM_BKG_COLOR $TERM_OPTIONS -e $SLOGIN $X11Opt $port $user@$node &
+	    $TERM_PRGM -sl 500 -sb +si -sk -T "$user@$node" -n "Xterm_$node" -bg $TERM_BKG_COLOR $TERM_OPTIONS -e $SLOGIN -A $X11Opt $port $user@$node &
 	endif
     endif
 endif
