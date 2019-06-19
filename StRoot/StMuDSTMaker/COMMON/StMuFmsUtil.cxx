@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuFmsUtil.cxx,v 1.7 2017/08/14 16:22:36 smirnovd Exp $
+ * $Id: StMuFmsUtil.cxx,v 1.8 2019/06/18 20:22:53 jdb Exp $
  *
  * Author: Jingguo Ma, Jan 2010
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMuFmsUtil.cxx,v $
+ * Revision 1.8  2019/06/18 20:22:53  jdb
+ * Update StMuFmsUtil::recoverMuFmsCollection to solve issue with run16 AuAu data, FmsCollection not cleared
+ *
  * Revision 1.7  2017/08/14 16:22:36  smirnovd
  * Recover FMS hits using StTriggerData
  *
@@ -257,12 +260,15 @@ void StMuFmsUtil::fillMuFmsHits(StMuFmsCollection& muFmsCollection,
 void StMuFmsUtil::recoverMuFmsCollection(StMuDst& muDst, const StFmsDbMaker* fmsDbMaker)
 {
   StTriggerData* triggerData = (StTriggerData*) muDst.event()->triggerData();
+  TClonesArray* muFmsHits = muDst.muFmsCollection() ? muDst.muFmsCollection()->getHitArray() : nullptr;
 
-  const TClonesArray* muFmsHits = muDst.muFmsCollection() ? muDst.muFmsCollection()->getHitArray() : nullptr;
+  const Int_t runNumber = muDst.event()->runId();
 
-  if (triggerData && muFmsHits && muFmsHits->GetEntriesFast() == 0)
-  {
-     fillMuFmsHits(*muDst.muFmsCollection(), *triggerData, fmsDbMaker);
+  if ( triggerData && muFmsHits && runNumber < 18000000 ){ // recover for run16 AuAu data
+    if ( muFmsHits->GetEntriesFast()>0 ) {
+      muFmsHits->Clear();
+    }
+    fillMuFmsHits(*muDst.muFmsCollection(), *triggerData, fmsDbMaker);
   }
 }
 
