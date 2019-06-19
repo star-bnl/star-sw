@@ -10,7 +10,8 @@
 #   starver TFG19a
 #  starver .DEV2 
 #  starver TFG17u 
-#  starver TFG17v 
+#  starver TFG17v
+#  starver TFG19e
   set file = $INPUTFILE0;
 #  set rung = `echo $file | awk -F\: '{print $1}'`
 #  set f    = `echo $file | awk -F\: '{print $2}'`
@@ -35,6 +36,7 @@
 #    root.exe -q -b -x 'bfc.C(100,"genIn,MC.2019,McTpcAna,-bbcSim,StiCA'${KFVertex}',-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco'${sdt}',ZCut5cm,RunG.1,NoiTPCLu","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
 #    root.exe -q -b -x 'bfc.C(100,"genIn,MC.2019,McTpcAna,-bbcSim,StiCA,StiKFVertex,-hitfilt,geantOut,evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco'${sdt}',ZCut5cm,RunG.1","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
 #    root.exe -q -b -x 'bfc.C(100,"genIn,MC.2019,sdt20190311,McTpcAna,-bbcSim,StiCA,StiKFVertex,-hitfilt,geantOut,evout,vmc,VMCAlignment,CorrX,-Opr13,OPr40,useCD,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco'${sdt}',RunG.1","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
+#    root.exe -q -b -x 'bfc.C(100,"genIn,MC.2019,sdt20190311,McTpcAna,-bbcSim,StiCA,-hitfilt,geantOut,evout,vmc,VMCAlignment,CorrY,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco'${sdt}',RunG.1","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
     root.exe -q -b -x 'bfc.C(100,"genIn,MC.2019,sdt20190311,McTpcAna,-bbcSim,StiCA,-hitfilt,geantOut,evout,vmc,VMCAlignment,CorrY,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco'${sdt}',RunG.1","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
   endif
 </command>
