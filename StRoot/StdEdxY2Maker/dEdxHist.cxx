@@ -69,7 +69,7 @@ Hists2D::Hists2D(const Char_t *Name) {
       nameP += StProbPidTraits::mPidParticleDefinitions[hyp]->name().data();
       nameP += Charge[sCharge];
       nameP.ReplaceAll("-","");
-      title = Name; title += " - Pred. for ";
+      title = Name; title += " Log(dE/dx_{Meas}/dE/dx_{Pred}) for ";
       title += StProbPidTraits::mPidParticleDefinitions[hyp]->name().data();
       title.ReplaceAll("-","");
       title += " "; title += ChargeT[sCharge];
