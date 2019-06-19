@@ -6,6 +6,8 @@
 // t0 Offset:
 // TpcT->Draw("fRcHit.mMcl_t/64-3.0*0.055*Frequency-fMcHit.mMcl_t:fMcHit.mPosition.mX3>>T(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz")
 // TpcT->Draw("fMcHit.mMcl_t+(0.165+fMcHit.mTof)*Frequency-fRcHit.mMcl_t/64:fMcHit.mPosition.mX3>>T(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz",1e7)
+// tChain->Draw("fRcHit.mMcl_x/64-fMcHit.mMcl_x:fMcHit.mPosition.mX3>>XI(210,-210,210,100,-2,3)","fMcHit.mVolumeId%100<=40&&fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz",1000000)
+// tChain->Draw("fRcHit.mMcl_x/64-fMcHit.mMcl_x:fMcHit.mPosition.mX3>>XO(210,-210,210,100,-2,3)","fMcHit.mVolumeId%100>40&&fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz",1000000)
 // pads :  root.exe -q -b PadsTpcT.C
 //#define __iTpx__
 #define PRINT

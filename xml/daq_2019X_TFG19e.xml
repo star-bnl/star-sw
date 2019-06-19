@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false" copyInputLocally="false">
+        <command>
+   cd $SCRATCH; pwd;
+#         cd ${SUBMITTINGDIRECTORY}
+#  setenv StarEndMakerShell
+   setenv STARFPE NO
+   setenv NODEBUG yes
+#   setup  gcc631
+   setup 64b
+   starver TFG19e
+   echo $INPUTFILE0 | grep ':'
+   if (! $?) then
+     set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+     set f        = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+     set l        = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+     set chain    = `echo $INPUTFILE0 | awk -F\: '{print $4}'`
+   else
+     exit 1;
+   endif
+  echo "${evtsFile}"
+  set filel    =  `basename $evtsFile .daq`_${f}_${l}
+  set output  = ${filel}.event.root
+  if (! -r ${evtsFile}) exit 1;
+  set logFile  = ${filel}B.log
+  if ( -r ${SUBMITTINGDIRECTORY}/$logFile) exit 0;
+  set muFile = ${filel}.MuDst.root
+  if (-r ${SUBMITTINGDIRECTORY}/$muFile) exit 0;
+  set piFile = ${filel}.picoDst.root
+  if (-r ${SUBMITTINGDIRECTORY}/$piFile) exit 0;
+  set bla = ${SUBMITTINGDIRECTORY}/${filel}.bla.root
+  if (-r ${bla}) exit 0;
+  touch ${bla}
+# TFG
+#   root.exe -q -b 'bfc.C(100,"P2019a,-hitfilt,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,Stx,-StiCA,-Sti,KFVertex,evout,picoWrite,PicoVtxDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+#   root.exe -q -b 'bfc.C(10000,"P2019,-hitfilt,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,Stx,-StiCA,-Sti,KFVertex,evout,picoWrite,PicoVtxDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+# TFG19e chain +evout
+#    root.exe -q -b 'bfc.C(99999,"P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+#    root.exe -q -b 'bfc.C(99999,"P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+# dev
+#  root.exe -q -b 'bfc.C('${f},${l}',"'{$chain}'","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
+#   root4star -b -q 'bfc.C(1000,"P2019a,StiCA,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeakFull,-OPr13,OPr40,-hitfilt,evout,-beamline3D ","${evtsFile}'")' &gt;&amp; ${logFile}
+#    root.exe -q -b 'bfc.C('${f},${l}',"P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+#   root.exe -q -b 'bfc.C('${f},${l}',"P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
+    root.exe -q -b 'bfc.C('${f},${l}',"P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
+   cp  ${filel}* ${SUBMITTINGDIRECTORY}
+   rm ${bla}
+        </command>
+        <stdout URL="file:./sched$JOBID.log" />
+        <stderr URL="file:./sched$JOBID.err" />
+<!-- <input URL="file:/hlt/cephfs/daq/2019/054/20054064/hlt*.daq" /> -->
+<!-- <input URL="command:daq_2019byRun.pl" /> -->
+ <input URL="command:daq_2019Prod.pl" />
+</job>

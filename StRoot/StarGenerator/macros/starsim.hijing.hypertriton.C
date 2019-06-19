@@ -50,17 +50,22 @@ void command( TString cmd )
 // ----------------------------------------------------------------------------
 void trig( Int_t n=0 )
 {
+
+  TString hyperTs = "HyperT_2body,HyperT_3body,HyperT_bar_2body,HyperT_bar_3body";
+
+
   for ( Int_t i=0; i<n+1; i++ ) {
     chain->Clear();
     // Throw one hypertriton flat in -1 to 1 w/ momentum btwn 0.1 and 1 GeV
-    if (kinematics) kinematics->Kine( 1, "HyperTriton", minPt, maxPt, minEta, maxEta );
+    if (kinematics) kinematics->Kine( 1, hyperTs, minPt, maxPt, minEta, maxEta );
     chain->Make();
-    //    command("gprint kine");
+    command("gprint kine");
   }
 }
 // ----------------------------------------------------------------------------
 void HyperTritons()
 { 
+  gSystem->Load( "libKinematics.so");
   kinematics = new StarKinematics("hyperTritons");  
   _primary -> AddGenerator(kinematics);
 }
@@ -74,7 +79,7 @@ void Hijing()
   hijing->SetFrame("CMS",200.0);
   hijing->SetBlue("Au");
   hijing->SetYell("Au");  
-  hijing->SetImpact(0.0, 30.0);       // Impact parameter min/max (fm)    0.   30.
+  hijing->SetImpact(25.0, 26.0);       // Impact parameter min/max (fm)    0.   30.
   HiParnt_t &hiparnt = hijing->hiparnt();
   {
     hiparnt.ihpr2(4) = 0;     // Jet quenching (1=yes/0=no)       0
@@ -97,12 +102,14 @@ void Hijing()
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-void starsim( Int_t nevents=1, Int_t rngSeed=4321 )
+void starsim( Int_t nevents=200, Int_t rngSeed=4321 )
 { 
 
   gROOT->ProcessLine(".L bfc.C");
   {
     TString simple = "y2012 geant gstar usexgeom agml ";
+    //TString full   = "tpcrs TpxRaw y2010a MakeEvent ITTF NoSvtIt NoSsdIt Idst IAna l0 ftpc Sti Tree logger genvtx tpcDB TpcHitMover TpxClu pmd bbcSim tofsim tags emcY2 EEfs evout IdTruth geantout -dstout big fzin MiniMcMk clearmem";
+    //  TString full = "y2012 geant gstar tpcrs genvtx tpcDb tpxclu dedx event sdt20120224 ";
     bfc(0, simple );
   }
 
@@ -114,10 +121,9 @@ void starsim( Int_t nevents=1, Int_t rngSeed=4321 )
   gSystem->Load( "StarGeneratorBase.so" );
   gSystem->Load( "libMathMore.so"   );  
   gSystem->Load( "libHijing1_383.so");
-  gSystem->Load( "libKinematics.so");
   gSystem->Load( "xgeometry.so"     );
 
-  // force gstar load/call
+  // force gstar load/call... 
   gSystem->Load( "gstar.so" );
   command("call gstar");
 
@@ -125,10 +131,15 @@ void starsim( Int_t nevents=1, Int_t rngSeed=4321 )
   StarRandom::seed( rngSeed );
   StarRandom::capture();
 
-  // Load STAR Particle DataBase and add the hypertriton definitions (as defined in gstar_part.g)
+  // Load STAR Particle DataBase and add the hypertriton definitions.  Map to the
+  // decay modes as defined in gstar_part.g 
   StarParticleData &pdb = StarParticleData::instance();
-  pdb.AddParticle("HyperTriton",     new TParticlePDG( "HyperTriton",     "HyperTriton     --> He3    pi-", 2.99131, false, 0.0, +3.0, "hypernucleus", +hid(1,1,1), 0, 61054 ));	      
-  pdb.AddParticle("AntiHyperTriton", new TParticlePDG( "AntiHyperTriton", "AntiHyperTriton --> He3bar pi+", 2.99131, false, 0.0, -3.0, "hypernucleus", -hid(1,1,1), 0, 61055 ));
+  pdb.AddParticle("HyperT_2body",     new TParticlePDG( "HyperpT_2body",     "HyperTriton     --> He3    pi-", 2.99131, false, 0.0, +3.0, "hypernucleus", +hid(1,1,1), 0, 61053 ));	      
+  pdb.AddParticle("HyperT_bar_2body", new TParticlePDG( "HyperT_bar_2body",  "AntiHyperTriton --> He3bar pi+", 2.99131, false, 0.0, -3.0, "hypernucleus", -hid(1,1,1), 0, 61054 ));
+  pdb.AddParticle("HyperT_3body",     new TParticlePDG( "HyperT_3body",      "HyperTriton     --> d p pi-",    2.99131, false, 0.0, +3.0, "hypernucleus", +hid(1,1,1), 0, 62053 ));	      
+  pdb.AddParticle("HyperT_bar_3body", new TParticlePDG( "HyperT_bar_3body",  "AntiHyperTriton --> dbar pbar pi+", 2.99131, false, 0.0, -3.0, "hypernucleus", -hid(1,1,1), 0, 62054 ));
+
+// Hypertriton will be phase-space decayed by geant 
 
   //
   // Create the primary event generator and insert it
@@ -141,15 +152,14 @@ void starsim( Int_t nevents=1, Int_t rngSeed=4321 )
   }
 
 
-
-
+ 
   // Setup an event generator
   //
   Hijing();
-  //
-  // Setup single hypertritons
+ //
+  // Setup single hypertritons to be merrged on top 
   //  
-  HyperTritons(); 
+  HyperTritons();
  
 
   //
@@ -168,9 +178,6 @@ void starsim( Int_t nevents=1, Int_t rngSeed=4321 )
   // Trigger on nevents
   //
   trig( nevents );
-
-  _primary->event()->Print();
-
   //  command("gprint kine");
 
   command("call agexit");  // Make sure that STARSIM exits properly

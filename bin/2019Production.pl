@@ -1,42 +1,26 @@
-setenv NODEBUG yes
-setup 64b
-xtitl
-set TRIG = 19GeV_2019_TFG19e
-set PicoDIR  = /gpfs01/star/pwg_tasks/tfg02/${TRIG}
-cd ${PicoDIR}
-@ count = 0
-foreach d (`ls -1d ???`)
-  cd ${d}; pwd;
-  if (! -r Chain.log) then	
-    rm -rf .sl*
-    ln -s x[~/macros/.sl73_* .	
-    root.exe -q -b 'Chain.C+("./*/*picoDst.root","PicoDst")' >&  Chain.log  &
-    @ count++;  echo "count $count";
-    if ($count > 20) break;
-  endif
-  cd -;
-end
-
-grep total ???/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fM\n", n/1.e6)}'
+#!/usr/bin/env perl
+my @www = qw(
 ============================================= Summurizing =========================
 # find 0?? -name "*B.log" -cmin +10 | tee Terminated.log
- egrep -l '(This is the end of ROOT -- Goodbye|StCloseFileOnTerminate::Notify : Terminating|memory corruption)' ???/*/*B.log  | tee Terminated.log
- ls -1d  */*/*B.log | tee Terminated.log
+ egrep -l '(This is the end of ROOT -- Goodbye|StCloseFileOnTerminate::Notify : Terminating)' 1*/*/*B.log  | tee Terminated.log
  sed -e 's/B\.log/\.MuDst\.root/' Terminated.log | tee Terminated.MuDst.list
  root.exe -q -b 'Recover.C("@Terminated.MuDst.list")' | tee Recover.Terminated.MuDst.list
 
  grep Zombie Recover.Terminated.MuDst.list 
  foreach f (`grep Zombie Recover.Terminated.MuDst.list | awk '{print $3}'`)
-   set b = `basename ${f} .MuDst.root`; set d = `dirname ${f}`; mv ${d}/${b}* Zombie/
+   set b = `basename ${f} B.log`; set d = `dirname ${f}`; mv ${d}/${b}* Zombie/
  end
-================================================================================
+ grep Zombie Recover.Terminated.MuDst.list 
+ foreach f (`grep Zombie Recover.Terminated.MuDst.list | awk '{print $3}'`)
+   set b = `basename ${f} B.log`; set d = `dirname ${f}`; mv ${d}/${b}* Zombie/
+ end
  foreach b ( `grep is\ Zombie *Chain | sed -e 's/:/ /' | awk '{print $2}' | sed -e 's/.MuDst.root//'` )
    mv ${b}* Zombie
  end
  foreach b (`grep has\ no\ key *Chain | awk '{print $5}' | sed -e 's/.MuDst.root//'`)
    mv ${b}* Zombie
  end
-cat Terminated.log | xargs 2019Production.pl | tee 2019Production.log
+cat Terminated.log | xargs 2013pp510WProduction.pl | tee 2013pp510WProduction.log
 renameF.pl
 ===================== Clean Up ===========================================================
 foreach q (`ls -1d ???`) 
@@ -83,7 +67,7 @@ end
 
 ls -1d *Chain* | awk -F\. 'BEGIN{n=0}{n+=$3}END{print n/1e6}'
 ============================= SubmitJobs.csh  ===================================================
- touchdaq_2019byRun.log
+touch daq_2013pp510W.log
 foreach q (`ls -1d /gpfs01/star/daq/2013/???/14* `)
   set r = `basename $q`
   set dd = `dirname $q`
@@ -91,7 +75,7 @@ foreach q (`ls -1d /gpfs01/star/daq/2013/???/14* `)
   set d = $day/$r
   if (! -d $d) mkdir -p $d
   cd $d; echo $d; 
- daq_2019byRun.pl 1 >>&daq_2019byRun.log
+  daq_2013pp510W.pl 1 >>& daq_2013pp510W.log
   cd -
 end
 foreach q (`ls -1d /gpfs01/star/daq/2013/???/14* `)
@@ -101,9 +85,9 @@ foreach q (`ls -1d /gpfs01/star/daq/2013/???/14* `)
   set d = $day/$r
   if (! -d $d) mkdir -p $d
   cd $d; echo $d; 
- daq_2019byRun.pl 1 ?
+  daq_2013pp510W.pl 1 ?
   if ($? && $? != 255) then
-    lsf ~/xml/daq_2019X_TFG19e.xml; 
+    lsf ~/xml/daq_2013pp510W.xml; 
   endif
   cd -
 end
@@ -161,15 +145,15 @@ end
 ================================================================================
 Resubmit: clean */sched* */*xml */*bla.root */paw*
 foreach d (`ls -1d 1*`)
- cd $d; echo $d;daq_2019byRun.pl ; cd -
+ cd $d; echo $d; daq_2013pp510W.pl ; cd -
 end
 dir */*bla.root | awk '{print $9}' | awk -F\/ '{print $1}' | sort -u | xargs
 rm */*bla.root
 foreach d (`ls -1d ???/14*`)
   cd $d; echo $d; 
- daq_2019byRun.pl 1
+  daq_2013pp510W.pl 1
   if ($?) then
-    lsf ~/xml/daq_2019X_TFG19e.xml; 
+    lsf ~/xml/daq_2013pp510W.xml; 
   endif
   cd -
 end
@@ -218,9 +202,9 @@ foreach my $file (@ARGV) {
   #print "firstF = $firstF, lastF = $lastF\n";
   my $Total = -1;
   #Total events processed :164 and not completed: 0
-  my $firstEv = 999999999;
+  my $firstEv = $firstF+1; #  999999999;
   my $EoF = 0;
-  my $lastEv  = -1;
+  my $lastEv  =$firstF;#  -1;
   my $line;
   while ($line = <IN>) {
     if ($line =~ /StEOF/) {$EoF = 1;}
@@ -262,9 +246,11 @@ foreach my $file (@ARGV) {
     $Cpu2 = sqrt ($Cpu2 - $Cpu*$Cpu);
     print "$file => F = $firstEv; L = $lastEv; N = $N; Ast = $Ast +/- $Ast2; Cpu = $Cpu +/- $Cpu2\n";
   } else {
-    if ($Total == 0) {
-      print "$file => F = $firstF; L = $lastF;\n";
-    }
+    if ($lastEv < $firstEv) {$lastEv = $firstEv;}
+#    if ($Total == 0) {
+#      print "$file => F = $firstF; L = $lastF;\n";
+      print "$file => F = $firstEv; L = $lastEv;\n";
+#    }
   }
 }
 

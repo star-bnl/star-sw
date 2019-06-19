@@ -5,7 +5,7 @@ my $pwd = cwd();
 #my $day = File::Basename::basename(File::Basename::dirname($pwd));
 #my $run =  File::Basename::basename($pwd);
 #my @globs = ("/hlt/cephfs/daq/2019/" . $day . "/" . $run . "*/hlt*.daq");#  print "globs = @globs\n";
-my $debug = 0;
+my $debug = 1;
 my $fNo = 0;
 # foreach my $glob (@globs) {
 #   my @files = glob $glob;
@@ -18,9 +18,12 @@ my $fNo = 0;
 #     $fNo++;
 #   }
 # }
-my  @runs  = glob "/hlt/cephfs/daq/2019/???/* /net/l401/data/scratch1/daq/2019/???/*";  print "runs = @runs\n" if ($debug);
+#my  @runs  = glob "/hlt/cephfs/daq/2019/???/* /net/l401/data/scratch1/daq/2019/???/*";  print "runs = @runs\n" if ($debug);
+#my  @runs  = glob "/hlt/cephfs/daq/2019/???/*";  print "runs = @runs\n" if ($debug);
+my  @runs  = glob "/gpfs01/star/daq/2019/???/*";  print "runs = @runs\n" if ($debug);
 foreach my $run (@runs) {
-  my @files = glob $run . "/hlt*.daq";#
+#  my @files = glob $run . "/hlt*.daq";#
+  my @files = glob $run . "st_physics_20*.daq";#
   my $r = File::Basename::basename($run);
 #  if ($r >= 20100000) {next;}
   if ($#files < 0) {next;}
