@@ -18,7 +18,7 @@ my $fNo = 0;
 #     $fNo++;
 #   }
 # }
-my  @runs  = glob "/hlt/cephfs/daq/2019/???/*";  print "runs = @runs\n" if ($debug);
+my  @runs  = glob "/hlt/cephfs/daq/2019/???/* /net/l401/data/scratch1/daq/2019/???/*";  print "runs = @runs\n" if ($debug);
 foreach my $run (@runs) {
   my @files = glob $run . "/hlt*.daq";#
   my $r = File::Basename::basename($run);

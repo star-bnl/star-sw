@@ -12,15 +12,15 @@ switch ($domain)
     breaksw
 endsw
 foreach gcc (${list})
-  foreach opt (debug opt)
+  set opts = "debug opt"
+  if ($gcc == "gcc8") set opts = "debug opt opt3"
+  foreach opt ($opts)
     set bits = "64b";
     if ($gcc == "gcc") set bits = "32b 64b";
     foreach bit (${bits})
-      if ($opt == "debug") then 
-        unsetenv NODEBUG
-      else      
-        setenv NODEBUG yes
-      endif
+      unsetenv NODEBUG
+      if ($opt == "opt")  setenv NODEBUG YES 
+      if ($opt == "opt3") setenv NODEBUG -O3 
       setup ${gcc}
       setup ${bit}
       starver ${STAR_LEVEL}
