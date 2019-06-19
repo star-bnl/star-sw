@@ -34,19 +34,18 @@
  **********************************************/
 #ifndef StMcHitComparisons_HH
 #define StMcHitComparisons_HH
-class StHit;
-class StTpcHit;
-class StSvtHit;
-class StSsdHit;
-class StFtpcHit;
-class StRichHit;
+#include "StTpcHit.h"
+#include "StSvtHit.h"
+#include "StSsdHit.h"
+#include "StFtpcHit.h"
+#include "StRichHit.h"
 
-class StMcHit;
-class StMcTpcHit;
-class StMcSvtHit;
-class StMcSsdHit;
-class StMcFtpcHit;
-class StMcRichHit;
+#include "StMcTpcHit.hh"
+#include "StMcSvtHit.hh"
+#include "StMcSsdHit.hh"
+#include "StMcFtpcHit.hh"
+#include "StMcRichHit.hh"
+
 #include "StThreeVectorF.hh"
 
 #if (defined __SUNPRO_CC && (__SUNPRO_CC < 0x500))

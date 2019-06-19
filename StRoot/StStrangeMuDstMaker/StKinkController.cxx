@@ -36,7 +36,6 @@
 // StKinkController strangeness micro DST controller for Kinks          //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#include "TTree.h"
 #include "StEvent/StEvent.h"
 #include "StMcEventMaker/StMcEventMaker.h"
 #include "StAssociationMaker/StAssociationMaker.h"

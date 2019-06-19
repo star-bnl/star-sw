@@ -479,9 +479,10 @@ else if ($?GPROF) then
 
 else if ($?NODEBUG) then
     setenv OVersion ""
-    if ($NODEBUG == "-O3" || $NODEBUG == "-o3") then 
+    echo $NODEBUG | grep -i o3 
+    if (! $?) then 
       setenv OVersion "3"
-      setenv DEBUG_OPTIONS "-O3"
+      setenv DEBUG_OPTIONS "-O3 -g"
     endif
   setenv STAR_lib  $STAR/.${STAR_HOST_SYS}/LIB${OVersion} ;  if ($ECHO) echo   "Setting up STAR_lib  = ${STAR_lib}"
   setenv MINE_lib        .${STAR_HOST_SYS}/LIB${OVersion} 

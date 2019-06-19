@@ -28,17 +28,6 @@
  * 
  * 
  **********************************************/
-#include "StTpcHit.h"
-#include "StSvtHit.h"
-#include "StSsdHit.h"
-#include "StFtpcHit.h"
-#include "StRichHit.h"
-
-#include "StMcTpcHit.hh"
-#include "StMcSvtHit.hh"
-#include "StMcSsdHit.hh"
-#include "StMcFtpcHit.hh"
-#include "StMcRichHit.hh"
 #include "StMcHitComparisons.hh"
 bool compHit::operator()(const StHit* h1, const StHit* h2) const {
     if        (h1->position().z() != h2->position().z()) {
