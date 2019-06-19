@@ -1496,6 +1496,8 @@ void TGeant3::AddParticlesToPdgDataBase() const
   if ( !pdgDB->GetParticle(-1010010030))
     pdgDB->AddParticle("AntiHyperTriton","AntiHyperTriton",2.99131,kFALSE,0,-3,"Hypernucleus",-1010010030);
 
+  // {LN}  -> d pi-, m = 2.050, pdg = 3003 HyperDeuteron
+  // {LNN} -> t pi-, m = 2.993, pdg = 3103 Hyper2Neutron
 
 // Special particles
 //
