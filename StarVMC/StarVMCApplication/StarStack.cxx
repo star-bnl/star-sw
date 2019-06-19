@@ -37,6 +37,9 @@
 #include "TDirectory.h"
 #include "TError.h"
 #include "StarStack.h"
+#include "TGeoManager.h"
+#include "TGeoNode.h"
+#include "TGeoVolume.h"
 Int_t StarStack::fgDebug = 0;
 ClassImp(StarStack);
 using namespace std;  
@@ -223,27 +226,35 @@ void StarStack::PushTrack(Int_t done, Int_t parent, Int_t pdg,
     particle->SetBit(kDoneBit);
   } else {
     particle->SetBit(kTransportBit);
-    if (mech != kPPrimary) { // primaries always go to particle list
-      Double_t R = particle->R();
-      Double_t Z = particle->Vz();
-      Double_t Ekin = particle->Ek(); 
-      if (! (mech == kPDecay || mech == kPDeltaRay || mech == kPHadronic) && 
-	  ((R > 200 || TMath::Abs(Z) > 210) && Ekin < 0.100) // TPC and   100 MeV cut
-	  ) {
-	fStack.push(*particle);
-	fParticles.RemoveAt(index);
-	index--;
-	particle = &fStack.top();
-	if (Debug() > 1) {
-	  cout << "Push to stack:   ";
-	}
-      } else {
-	fNtrack++;
-	if (Debug() > 1) {
-	  cout << "Push to Paticles:";
-	}
-      }
+    static Int_t    IsVol = 0;
+    static Double_t R = 0;
+    static Double_t Z = 0;
+    static Double_t Ekin = 0;
+    static TString path;
+    if (mech == kPPrimary || mech == kPDecay) goto Add2Particles; // primaries always go to particle list
+    IsVol = gGeoManager->GetCurrentNode()->GetVolume()->GetMedium()->GetParam(0);
+    if (mech == kPDecay) goto Add2Particles; 
+    path = TString(gGeoManager->GetPath());
+    if (path.Contains("TPGV")) goto Add2Particles;
+    R = particle->R();
+    Z = particle->Vz();
+    Ekin = particle->Ek(); 
+    if (IsVol && Ekin > 0.100 && R < 200 && TMath::Abs(Z) < 210)  goto Add2Particles;
+    //  Add2Stack:
+    fStack.push(*particle);
+    fParticles.RemoveAt(index);
+    index--;
+    particle = &fStack.top();
+    if (Debug() > 1) {
+      cout << "Push to stack:   ";
     }
+    goto EndLoop;
+  Add2Particles:
+    fNtrack++;
+    if (Debug() > 1) {
+      cout << "Push to Paticles:";
+    }
+  EndLoop:
     if (Debug() > 1) {
       cout << Form("%4d:%4d",index,(Int_t) fStack.size());
       cout << Form("%30s:",TMCProcessName[mech]);
