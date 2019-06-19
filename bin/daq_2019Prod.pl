@@ -29,7 +29,7 @@ my $count = 0;
 sub SPrint ($$$$) {
   my ($line,$file,$f,$l) = @_;
   if ($l - $f >= 1) {# Allow to have error in no. of events in FileCatalog
-    my $rootf = $file . "_" . $f . "_" . $l . ".MuDst.root"; 
+    my $rootf = $file . "_" . $f . "_" . $l . ".picoDst.root"; 
     if (-r $rootf) {print "rootf = $rootf\n" if (debug); next;}
 #    my $blaf  = $file . "_" . $f . "_" . $l . ".bla.root";
 #    if (-r $blaf) {
@@ -61,7 +61,7 @@ foreach my $glob (@globs) {
     my $l = $last;
     my $lC = $f;
     my $fC = $l;
-    my @files = glob $file . "*.MuDst.root"; 
+    my @files = glob $file . "*.picoDst.root"; print "files  = @files\n" if ($debug);
     if ($debug) {
       foreach my $file (@files) {print "$file\n";}
     }
@@ -71,7 +71,7 @@ foreach my $glob (@globs) {
     my @F = ();
     my @L = ();# print "initialization : $#F\n";
     foreach my $mu (@files) {
-      my $b = File::Basename::basename($mu,".MuDst.root");
+      my $b = File::Basename::basename($mu,".picoDst.root");
       $b =~ s/_adc//;
 #      print "$b\n" if ($debug);
       my ($dummy,$dummy,$dummy,$dummy,$dummy,$f1,$l1) = split('_',$b); 
