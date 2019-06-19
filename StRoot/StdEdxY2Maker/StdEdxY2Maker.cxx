@@ -863,9 +863,9 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
     ,kOtherMethodId2          // NU
 #endif
   };
-#if 0
   static Hists2D I70("I70");
   static Hists2D fitZ("fitZ");
+#ifdef __Use_dNdx__
   static Hists2D fitN("fitN");
 #endif
   const static Int_t Nlog2dx = 80;
@@ -1019,7 +1019,6 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   Double_t pMomentum = g3.mag();
   StPidStatus PiD(gTrack); 
   if (PiD.PiDStatus < 0) return;
-#if 0
   //  Double_t bg = TMath::Log10(pMomentum/StProbPidTraits::mPidParticleDefinitions[kPidPion]->mass());
   Int_t sCharge = 0;
   if (gTrack->geometry()->charge() < 0) sCharge = 1;
@@ -1027,31 +1026,32 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   for (l = kPidElectron; l < KPidParticles; l++) {
     Int_t k = PiD.PiDkeyU3;
     if (PiD.fI70.fPiD) {
-      I70.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.devZ[l]);
-      I70.dev[l][      2]->Fill(PiD.bghyp[l],PiD.devZ[l]);
+      I70.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.fI70.dev[l]);
+      I70.dev[l][      2]->Fill(PiD.bghyp[l],PiD.fI70.dev[l]);
       if (k >= 0) {
-	I70.devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.devZ[l]);
-	I70.devT[l][      2]->Fill(PiD.bghyp[l],PiD.devZ[l]);
+	I70.devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.fI70.dev[l]);
+	I70.devT[l][      2]->Fill(PiD.bghyp[l],PiD.fI70.dev[l]);
       }
     }
     if (PiD.fFit.fPiD) {
-      fitZ.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.devF[l]);
-      fitZ.dev[l][      2]->Fill(PiD.bghyp[l],PiD.devF[l]);
+      fitZ.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.fFit.dev[l]);
+      fitZ.dev[l][      2]->Fill(PiD.bghyp[l],PiD.fFit.dev[l]);
       if (k >= 0) {
-	fitZ.devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.devF[l]);
-	fitZ.devT[l][      2]->Fill(PiD.bghyp[l],PiD.devF[l]);
+	fitZ.devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.fFit.dev[l]);
+	fitZ.devT[l][      2]->Fill(PiD.bghyp[l],PiD.fFit.dev[l]);
       }
     }
+#ifdef __Use_dNdx__
     if (PiD.fdNdx.fPiD) {
-      fitN.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.devN[l]);
-      fitN.dev[l][      2]->Fill(PiD.bghyp[l],PiD.devN[l]);
+      fitN.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.fdNdx.dev[l]);
+      fitN.dev[l][      2]->Fill(PiD.bghyp[l],PiD.fdNdx.dev[l]);
       if (k >= 0) {
-	fitN.devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.devN[l]);
-	fitN.devT[l][      2]->Fill(PiD.bghyp[l],PiD.devN[l]);
+	fitN.devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.fdNdx.dev[l]);
+	fitN.devT[l][      2]->Fill(PiD.bghyp[l],PiD.fdNdx.dev[l]);
       }
     }
+#endif /* __Use_dNdx__ */
   }
-#endif
 #if 0
   // Bad dE/dx
   Double_t L10Mult = -1;
