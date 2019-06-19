@@ -226,7 +226,7 @@ Int_t StTpcRTSHitMaker::Make() {
       if (! St_tpcPadGainT0BC::instance()->livePadrow(sec,row)) continue;
       Int_t Npads = digitalSector->numberOfPadsInRow(row);
       dtaX = dtas[0];
-      if (dtas[1] && St_tpcPadConfigC::instance()->IsRowInner(sec,row)) dtaX = dtas[1];
+      if (St_tpcPadConfigC::instance()->iTPC(sec) && St_tpcPadConfigC::instance()->IsRowInner(sec,row)) dtaX = dtas[1];
       if (! dtaX) continue;
       dta = dtaX;
       for(Int_t pad = 1; pad <= Npads; pad++) {
