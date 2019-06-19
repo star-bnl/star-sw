@@ -228,6 +228,7 @@
  $NOOPT        = "";
  if ( defined( $ARG{NODEBUG} ) || $NODEBUG ) {
    $DEBUG = $ENV{DEBUG_OPTIONS}||"-O2 -g";
+   if ($DEBUG !~ /-g/) {$DEBUG = $$DEBUG . " -g";}
    $FDEBUG= $DEBUG;
    print "Base DEBUG options = $DEBUG\n" unless ($param::quiet);
  }
