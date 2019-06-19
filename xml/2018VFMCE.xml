@@ -8,7 +8,7 @@
   setenv NODEBUG yes
   setenv STARFPE NO
   setup 64b
-  starver TFG19e
+#  starver TFG19e
   echo $INPUTFILE0 | grep ':'
   if (! $?) then
     set rung  = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
@@ -26,9 +26,15 @@
   end
   echo "name = $name";
   if ($name == "") exit 1;
+  set noiTPClu = ""
+  echo $Name | grep 'noITPClu' 
+  set noiTPClu = ""
+  echo $Name | grep 'noITPClu' 
+  if (! $?) set noiTPClu = ",noiTPClu";
+  if (! $?) set noiTPClu = ",noiTPClu";
 #  setenv StarEndMakerShell
 # set chain = "MC.2019a,P2019a,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name};
-  set chain = "MC.2018,vmc,VMCAlignment,NoiTPCLu,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name};
+  set chain = "MC.2018,vmc,VMCAlignment,NoiTPCLu,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name}${noiTPClu};
   set sdt = ",sdt20180426.135000"
   set VFMCE = ",VFMCE";
   set Chain = ${chain}${VFMCE}${sdt}",Rung."${rung}
