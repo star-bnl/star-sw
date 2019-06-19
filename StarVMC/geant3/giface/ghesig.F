@@ -308,7 +308,8 @@ C --- Inelastic cross section ---
                   IF (AIEL(K) .GE. 0.001) CREL=XSECEL/(0.36*AIEL(K)*
      +            CSA(I)**1.17)
                   AITOT=AIEL(K)+AIIN(K)
-                  IF (AITOT .GE. 0.001) then
+                  crin = 0
+                  IF (AITOT .GE. 0.001 .and. xsecin > 0.0) then
        crinL = log(xsecin) - log(aitot) - alph*log(csa(i))
        crin  = exp(crinL)              
 *yf       CRIN=XSECIN/(AITOT*CSA(I)**
@@ -344,7 +345,8 @@ C
                      AITOT=AIEL(K)+AIIN(K)
 *yf               IF (AITOT .GE. 0.001) CRIN=XSPIIN/(AITOT*CSA(I)
 *yf     +               **ALPH)
-                  IF (AITOT .GE. 0.001) then
+                  crin = 0
+                  IF (AITOT .GE. 0.001 .and. xspiin .gt. 0.0) then
        crinL = log(xspiin) - log(aitot) - alph*log(csa(i))
        crin  = exp(crinL)              
                    endif
