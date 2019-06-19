@@ -54,6 +54,7 @@ Root
 Repository
 .svn
 .sl*
+.rh*
 .amd64*
 .misc
 *.BAK
