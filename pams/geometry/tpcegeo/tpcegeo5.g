@@ -1735,6 +1735,12 @@ Block TPGV is the Gas Volume placed in TPC
       Attribute TPGV      seen=1  colo=kRed
       Material P10
       SHAPE     TUBE  rmin=tpgvIR  rmax=tpcg_SenGasOR  dz=tpgvLeng/2
+      Call     GSTPAR(ag_imed,'CUTGAM',1e-5)
+      Call     GSTPAR(ag_imed,'CUTELE',1e-5)
+      Call     GSTPAR(ag_imed,'DCUTE',1e-5)
+      Call     GSTPAR(ag_imed,'DCUTM',1e-5)
+*     Call     GSTPAR(ag_imed,'STRA',1.)
+      Call     GSTPAR(ag_imed,'LOSS',1.)
 !//VP      Create    TPSS
      sector = 12*(half-1)
      if (half == 2 & TPCG_TpadConfig == 9) {
@@ -1836,6 +1842,12 @@ block TDEA is a dead region in pad row
       attribute TDEA seen=1 colo=4
       material p10
       SHAPE    BOX dx=0 dy=0 dz=0 
+      Call     GSTPAR(ag_imed,'CUTGAM',1e-5)
+      Call     GSTPAR(ag_imed,'CUTELE',1e-5)
+      Call     GSTPAR(ag_imed,'DCUTE',1e-5)
+      Call     GSTPAR(ag_imed,'DCUTM',1e-5)
+*     Call     GSTPAR(ag_imed,'STRA',1.)
+      Call     GSTPAR(ag_imed,'LOSS',1.)
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #endif
