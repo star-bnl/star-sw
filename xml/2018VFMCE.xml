@@ -27,10 +27,7 @@
   echo "name = $name";
   if ($name == "") exit 1;
   set noiTPClu = ""
-  echo $Name | grep 'noITPClu' 
-  set noiTPClu = ""
-  echo $Name | grep 'noITPClu' 
-  if (! $?) set noiTPClu = ",noiTPClu";
+  echo $Name | grep 'noiTPClu' 
   if (! $?) set noiTPClu = ",noiTPClu";
 #  setenv StarEndMakerShell
 # set chain = "MC.2019a,P2019a,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name};
