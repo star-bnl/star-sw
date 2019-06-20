@@ -5,7 +5,6 @@
 #pragma link C++ global gMC;
 #pragma link C++ class StarMC;
 #pragma link C++ class TGiant3;
-#pragma link C++ class TPaveTree;
 #pragma link C++ class Quest_t;
 #pragma link C++ class Gcbank_t;
 #pragma link C++ class Gclink_t;
