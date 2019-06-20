@@ -121,7 +121,7 @@ foreach $file (("system.rootrc","root.mimes")){
 		system("/bin/ln -s $ofile etc/$file");
 		print "  Linked etc/$file to $ofile\n";
 	    } else {
-		system("/bin/cp -p etc/$file.new etc/$file");
+		system("/bin/cp -fp etc/$file.new etc/$file");
 		print "  WARNING created a local etc/$file from etc/$file.new (no link found)\n";
 	    }
 
@@ -164,14 +164,14 @@ foreach $file (("system.rootrc","root.mimes")){
 	if ( -l "etc/$file" ){
 	    $ofile = readlink("etc/$file");
 	    unlink("etc/$file");
-	    system("/bin/cp -p $ofile etc/$file");
+	    system("/bin/cp -fp $ofile etc/$file");
 	    print "  Creating a local etc/$file\n";
 	} elsif ( -e "etc/$file" ){
 	    print "  There is already a local etc/$file\n";
 	} else {
 	    # Nothing exists?? Search for a .new and create
 	    if ( -e "etc/$file.new"){
-		system("/bin/cp -p etc/$file.new etc/$file");
+		system("/bin/cp -fp etc/$file.new etc/$file");
 		print "  Created etc/$file from etc/$file.new\n";
 	    } else {
 		die "  ERROR Cannot find nor generate etc/$file\n";
@@ -245,7 +245,7 @@ if ($done){
 if ( -l  "config.status" ){
     my($f)=readlink("config.status");
     unlink("config.status");
-    system("/bin/cp -p $f ./config.status");
+    system("/bin/cp -fp $f ./config.status");
     if ( ! -e "config.status"){
 	die "We failed to copy $f to ./config.status - Please fix manually\n";
     }
