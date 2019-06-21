@@ -9,7 +9,7 @@
  */
 /***************************************************************************
  *
- * $Id: StMemStat.h,v 1.1 2009/01/26 14:31:48 fisyak Exp $
+ * $Id: StMemStat.h,v 1.2 2019/06/21 21:13:28 smirnovd Exp $
  *
  * Author: Victor Perev, Jul 2000
  **************************************************************************/
@@ -33,6 +33,10 @@ public:
    static  Double_t Free();			/*!< Free heap memory in MB    */
    static  Double_t ProgSize();			/*!< Program size     in MB    */
    static  void     PrintMem(const char *tit);	/*!< Prints current memory     */
+
+   /// Returns a string with memory utilization estimates for the current process
+   static  std::string AsString();
+
    static  void     PM();	                /*!< Prints fast current heap  */
    static  void     Summary();			/*!< Prints usage summary      */
 
