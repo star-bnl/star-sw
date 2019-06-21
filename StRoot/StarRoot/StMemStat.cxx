@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMemStat.cxx,v 1.2 2009/08/28 16:38:55 fine Exp $
+ * $Id: StMemStat.cxx,v 1.3 2019/06/21 21:13:20 smirnovd Exp $
  *
  ***************************************************************************
  *
@@ -126,14 +126,14 @@ Double_t StMemStat::Used()
 {
   struct mallinfo info;
   info = mallinfo();
-  return double(info.uordblks + info.usmblks)/1000000;
+  return double(info.uordblks + info.usmblks)/1024/1024;
 }
 //______________________________________________________________________________
 Double_t StMemStat::Free()
 {
   struct mallinfo info;
   info = mallinfo();
-  return double(info.fordblks + info.fsmblks)/1000000;
+  return double(info.fordblks + info.fsmblks)/1024/1024;
 }
 
 //______________________________________________________________________________
