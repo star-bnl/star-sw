@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMemStat.cxx,v 1.3 2019/06/21 21:13:20 smirnovd Exp $
+ * $Id: StMemStat.cxx,v 1.4 2019/06/21 21:13:28 smirnovd Exp $
  *
  ***************************************************************************
  *
@@ -191,18 +191,27 @@ FILE *proc = fopen(line,"r");
 
   return res;
 }
-
 //______________________________________________________________________________
 void StMemStat::PrintMem(const char *tit)
 {
-  Double_t used = Used();
-  Double_t free = Free();
-  Double_t exec = ProgSize();
-
   if (tit) printf("\nStMemStat::%s",tit);
-  printf("\t total =%10.6f heap =%10.6f and %10.6f(%+10.6f)\n",exec,used,free,used-fgUsed);
-  fgUsed = used;
+  printf("%s\n", AsString().c_str());
 }
+
+
+std::string StMemStat::AsString()
+{
+  double alloc_used = Used();
+  double alloc_free = Free();
+  double total = ProgSize();
+
+  char strbuff[65];
+  snprintf(strbuff, sizeof(strbuff), "\t total =%10.6f heap =%10.6f and %10.6f(%+10.6f)", total, alloc_used, alloc_free, alloc_used-fgUsed);
+  fgUsed = alloc_used;
+
+  return std::string(strbuff);
+}
+
 //______________________________________________________________________________
 void StMemStat::PM()
 {
