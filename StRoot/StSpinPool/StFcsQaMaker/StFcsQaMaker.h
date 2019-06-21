@@ -60,7 +60,10 @@ class StFcsQaMaker : public StMaker {
 
    TH1F* mNClu[kFcsNDet];
    TH1F* mNTowClu[kFcsNDet];
+   TH1F* mNNeiClu[kFcsNDet];
    TH2F* mNTowEClu[kFcsNDet][kFcsEcalMaxId];
+   TH2F* mNTowECluIso[kFcsNDet][kFcsEcalMaxId];
+   TH2F* mNTowECluIsoH[kFcsNDet][kFcsEcalMaxId];
 
    ClassDef(StFcsQaMaker,1);
 };
@@ -68,8 +71,11 @@ class StFcsQaMaker : public StMaker {
 #endif
 
 /*
- * $Id: StFcsQaMaker.h,v 1.1 2019/06/07 19:06:44 akio Exp $
+ * $Id: StFcsQaMaker.h,v 1.2 2019/06/21 17:44:47 akio Exp $
  * $Log: StFcsQaMaker.h,v $
+ * Revision 1.2  2019/06/21 17:44:47  akio
+ * added cluster plots
+ *
  * Revision 1.1  2019/06/07 19:06:44  akio
  * *** empty log message ***
  *
