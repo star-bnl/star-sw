@@ -86,16 +86,27 @@ Int_t StFcsQaMaker::Init(){
     
     if(ehp<2){ //clusters for Ecasl/Hcal
       sprintf(t,"%4s_%1s_NCluster",nameEHP[ehp],nameNS[ns]);
-      mNClu[det] = new TH1F(t,t,10,0.0,float(10));
+      mNClu[det] = new TH1F(t,t,10,0.0,10.0);
 
       sprintf(t,"%4s_%1s_NTowClu",nameEHP[ehp],nameNS[ns]);
-      mNTowClu[det] = new TH1F(t,t,10,0.0,float(10));
+      mNTowClu[det] = new TH1F(t,t,10,0.0,10.0);
+
+      sprintf(t,"%4s_%1s_NNeiClu",nameEHP[ehp],nameNS[ns]);
+      mNNeiClu[det] = new TH1F(t,t,10,0.0,10.0);
 
       for(int id=0; id<maxid; id++){      
 	mFcsDbMkr->getName(det,id,t2);	
 	sprintf(t ,"%1s%1s%03d_NTowClu_E",nameEHP[ehp],nameNS[ns],id);
-	sprintf(t2 ,"%22s_NTowClu_E",t2,id);
+	sprintf(t2 ,"%22s_NTowClu_E",t2);
 	mNTowEClu[det][id] =  new TH2F(t,t2,10,1.0,11.0,100,0.0,10.0);
+
+	sprintf(t ,"%1s%1s%03d_NTowCluIso_E",nameEHP[ehp],nameNS[ns],id);
+	sprintf(t2 ,"%22s_NTowCluIso_E",t2);
+	mNTowECluIso[det][id] =  new TH2F(t,t2,10,1.0,11.0,100,0.0,10.0);
+
+	sprintf(t ,"%1s%1s%03d_NTowCluIsoH_E",nameEHP[ehp],nameNS[ns],id);
+	sprintf(t2 ,"%22s_NTowCluIsoH_E",t2);
+	mNTowECluIsoH[det][id] =  new TH2F(t,t2,10,1.0,11.0,100,0.0,10.0);
       }      
     }
   }  
@@ -142,6 +153,8 @@ Int_t StFcsQaMaker::Make() {
   int nfcsdata=0;
   int nh[kFcsNDet]; memset(nh,0,sizeof(nh));
   int sum[kFcsNDet][kFcsEcalMaxId]; memset(sum,0,sizeof(sum));
+  float etot[kFcsNDet]; memset(etot,0,sizeof(etot));
+
   for(int det=0; det<kFcsNDet+1; det++){  //det==kFcsDet is for empty channel
     int nhit=mFcsCollection->numberOfHits(det);
     printf("StFcsQaMaker found %d hits for det=%d in event#=%d\n",nhit,det,nevt);
@@ -183,6 +196,7 @@ Int_t StFcsQaMaker::Make() {
 	if(sum[det][id]>0){
 	  mAdcSumId[det]->Fill((float)id, float(sum[det][id]));
 	  nh[det]++;
+	  etot[det]+=sum[det][id];
 	}
       }
       mNHit[det]->Fill(float(nh[det]));
@@ -203,7 +217,8 @@ Int_t StFcsQaMaker::Make() {
 	    printf("\nFCSDump %5d %22s %5.1f %5d ",nevt,name,ped,sum[det][id]);
 	    for(int j=0; j<ntb; j++) printf("%4d ",hits[i]->adc(j));
 	    //	  }else if(mDump==2 && det==1 && id==50){
-	  }else if(mDump==2 && det==1 && (id==32 || id==18)){
+	    //	  }else if(mDump==2 && det==1 && (id==32 || id==18)){
+	  }else if(mDump==2 && det==1 && id==12){
 	    printf("\nFCSDump %5d %22s %5.1f %5d ",nevt,name,ped,sum[det][id]);
 	    int max=0, min=4000;
 	    for(int j=0; j<ntb; j++){
@@ -219,8 +234,10 @@ Int_t StFcsQaMaker::Make() {
 	printf("\n");
       }
     }
-    
-    //for Ecal/Hcal only for clusters
+  }
+
+  //for Ecal/Hcal only for clusters
+  for(int det=0; det<kFcsNDet; det++){        
     if(det<=kFcsHcalSouthDetId){ 
       int nclu=mFcsCollection->numberOfClusters(det);
       printf("StFcsQaMaker found %d cluster for det=%d in event#=%d\n",nclu,det,nevt);
@@ -230,13 +247,22 @@ Int_t StFcsQaMaker::Make() {
       for (int i=0; i<nclu; i++){
 	StFcsCluster* cluster=clusters[i];
 	int ntow=cluster->nTowers();
+	int nnei=cluster->nNeighbor();
 	mNTowClu[det]->Fill(ntow);
+	mNNeiClu[det]->Fill(nnei);
 	StPtrVecFcsHit& hits = cluster->hits();	
 	int htid = hits[0]->id();
 	mNTowEClu[det][htid]->Fill(ntow,cluster->energy());
+	if(nnei==0) {
+	  mNTowECluIso[det][htid]->Fill(ntow,cluster->energy());
+	  if(etot[3]>100){
+	    mNTowECluIsoH[det][htid]->Fill(ntow,cluster->energy());
+	  }
+	}
       }
     }    
   }
+
   mDataSize->Fill(log10(nfcsdata));
   nevt++;
   return kStOK;
@@ -252,8 +278,11 @@ Int_t StFcsQaMaker::Finish(){
 ClassImp(StFcsQaMaker);
 
 /*
- * $Id: StFcsQaMaker.cxx,v 1.1 2019/06/07 19:06:44 akio Exp $
+ * $Id: StFcsQaMaker.cxx,v 1.2 2019/06/21 17:44:46 akio Exp $
  * $Log: StFcsQaMaker.cxx,v $
+ * Revision 1.2  2019/06/21 17:44:46  akio
+ * added cluster plots
+ *
  * Revision 1.1  2019/06/07 19:06:44  akio
  * *** empty log message ***
  *
