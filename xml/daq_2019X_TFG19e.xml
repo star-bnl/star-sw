@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false" copyInputLocally="false">
         <command>
-   cd $SCRATCH; pwd;
-#         cd ${SUBMITTINGDIRECTORY}
+#   cd $SCRATCH; pwd;
+   cd ${SUBMITTINGDIRECTORY}
 #  setenv StarEndMakerShell
    setenv STARFPE NO
    setenv NODEBUG yes
@@ -43,7 +43,7 @@
 #    root.exe -q -b 'bfc.C('${f},${l}',"P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 #   root.exe -q -b 'bfc.C('${f},${l}',"P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
     root.exe -q -b 'bfc.C('${f},${l}',"P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
-   cp  ${filel}* ${SUBMITTINGDIRECTORY}
+#   cp  ${filel}* ${SUBMITTINGDIRECTORY}
    rm ${bla}
         </command>
         <stdout URL="file:./sched$JOBID.log" />

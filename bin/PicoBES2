@@ -7,9 +7,10 @@ cd ${PicoDIR}
 @ count = 0
 foreach d (`ls -1d ???`)
   cd ${d}; pwd;
-  if (! -r Chain.log) then	
+  ls -ltr | tail -1 | grep Chain	
+  if ($?) then	
     rm -rf .sl*
-    ln -s x[~/macros/.sl73_* .	
+    ln -s ~/macros/.sl73_* .	
     root.exe -q -b 'Chain.C+("./*/*picoDst.root","PicoDst")' >&  Chain.log  &
     @ count++;  echo "count $count";
     if ($count > 20) break;
@@ -20,24 +21,30 @@ end
 grep total ???/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fM\n", n/1.e6)}'
 ============================================= Summurizing =========================
 # find 0?? -name "*B.log" -cmin +10 | tee Terminated.log
- egrep -l '(This is the end of ROOT -- Goodbye|StCloseFileOnTerminate::Notify : Terminating|memory corruption)' ???/*/*B.log  | tee Terminated.log
+ egrep -l '(This is the end of ROOT -- Goodbye|StCloseFileOnTerminate::Notify : Terminating|memory corruption|with fatal flag 0)' ???/*/*B.log  | tee Terminated.log
  ls -1d  */*/*B.log | tee Terminated.log
- sed -e 's/B\.log/\.MuDst\.root/' Terminated.log | tee Terminated.MuDst.list
- root.exe -q -b 'Recover.C("@Terminated.MuDst.list")' | tee Recover.Terminated.MuDst.list
+ sed -e 's/B\.log/\.picoDst\.root/' Terminated.log | tee Terminated.picoDst.list
+ root.exe -q -b 'Recover.C("@Terminated.picoDst.list")' | tee Recover.Terminated.picoDst.list
 
- grep Zombie Recover.Terminated.MuDst.list 
- foreach f (`grep Zombie Recover.Terminated.MuDst.list | awk '{print $3}'`)
-   set b = `basename ${f} .MuDst.root`; set d = `dirname ${f}`; mv ${d}/${b}* Zombie/
+ grep Zombie Recover.Terminated.picoDst.list 
+ foreach f (`grep Zombie Recover.Terminated.picoDst.list | awk '{print $3}'`)
+   set b = `basename ${f} .picoDst.root`; set d = `dirname ${f}`; mv ${d}/${b}* Zombie/
  end
 ================================================================================
- foreach b ( `grep is\ Zombie *Chain | sed -e 's/:/ /' | awk '{print $2}' | sed -e 's/.MuDst.root//'` )
+ foreach b ( `grep is\ Zombie *Chain | sed -e 's/:/ /' | awk '{print $2}' | sed -e 's/.picoDst.root//'` )
    mv ${b}* Zombie
  end
- foreach b (`grep has\ no\ key *Chain | awk '{print $5}' | sed -e 's/.MuDst.root//'`)
+ foreach b (`grep has\ no\ key *Chain | awk '{print $5}' | sed -e 's/.picoDst.root//'`)
    mv ${b}* Zombie
  end
 cat Terminated.log | xargs 2019Production.pl | tee 2019Production.log
 renameF.pl
+===================== Submit ===========================================================
+foreach d (`ls -1d 093/20*`)
+  cd $d;  pwd;
+  lsf ~/xml/daq_2019X_TFG19e.xml
+  cd -
+end
 ===================== Clean Up ===========================================================
 foreach q (`ls -1d ???`) 
   echo ${q}
