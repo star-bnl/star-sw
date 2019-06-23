@@ -10,7 +10,7 @@
 #<prem_part>SBATCH  --partition regular -t <wallHour>:30:00 --qos=premium   -J starFarm-prem
 
 # pick the image you need
-#SBATCH --image=custom:<shifter>
+#SBATCH --image=<shifter>
 
 #SBATCH -L SCRATCH   #note: specify license need for the file systems your job needs, such as SCRATCH,project
 

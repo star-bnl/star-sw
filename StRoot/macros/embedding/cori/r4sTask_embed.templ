@@ -90,10 +90,19 @@ endif
     whoami    
 
     echo  load STAR enviroment 
-    set NCHOS = sl64
-    set SCHOS = 64
-    set DECHO = 1
-    setenv GROUP_DIR /common/star/star${SCHOS}/group/
+    set cvmfs=<cvmfs>
+    if ( "$cvmfs" == "1" ) then
+	 set NCHOS = sl74
+	 set SCHOS = 74
+	 set DECHO = 1
+	 setenv GROUP_DIR /cvmfs/star.sdcc.bnl.gov/group
+	 setenv USE_CVMFS 1
+    else
+	 set NCHOS = sl64
+	 set SCHOS = 64
+	 set DECHO = 1
+	 setenv GROUP_DIR /common/star/star${SCHOS}/group/
+    endif
     source $GROUP_DIR/star_cshrc.csh    
      
     echo testing STAR setup $STAR_VER in `pwd`
@@ -146,8 +155,8 @@ endif
     cd $sandBox
     pwd
     cons
-    ls -la  . StRoot/ .sl64* 
-    ls -la  .sl64*/lib/  
+    ls -la  . StRoot/ .sl${SCHOS}* 
+    ls -la  .sl${SCHOS}*/lib/  
     echo "===FIRE  $EXEC_NAME for coreN=$coreN fSet=$fSet "`date`
 
     # make sure local .cxx was copied to wrk-dir and compiled correctly in advance 
@@ -212,8 +221,8 @@ EOF
     if ( ! -d $FSET_PATH/$REQUEST_PATH ) then
 	 mkdir -p $FSET_PATH/$REQUEST_PATH
     endif
-    chmod 664 st*root
-    cp -p st*root $FSET_PATH/$REQUEST_PATH/
+    chmod 664 st_*root
+    cp -p st_*root $FSET_PATH/$REQUEST_PATH/
     if ( ! -z "`ls st*.fzd`" ) then
 	 chmod 664 st*.fzd
 	 cp -p st*.fzd $FSET_PATH/$REQUEST_PATH/
