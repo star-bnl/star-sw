@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml_rcf.pl,v 1.28 2018/10/20 08:46:02 starembd Exp $
+# $Id: get_embedding_xml_rcf.pl,v 1.29 2019/06/23 09:48:14 starembd Exp $
 # $Log: get_embedding_xml_rcf.pl,v $
+# Revision 1.29  2019/06/23 09:48:14  starembd
+# added runnumber in all outpatch
+#
 # Revision 1.28  2018/10/20 08:46:02  starembd
 # code cleanup for HFT embedding
 #
@@ -1080,7 +1083,7 @@ sub getOutputDirectoryPt {
   my $library       = shift @_ ;
   my $ptmin 	      = shift @_ ;
   my $ptmax 	      = shift @_ ;
-  return "$stardisk/embed/$trgsetupname/$particleName\_&FSET;_$requestNumber/$production.$library/\$EMYEAR/\$EMDAY/Pt\_$ptmin\_$ptmax";
+  return "$stardisk/embed/$trgsetupname/$particleName\_&FSET;_$requestNumber/$production.$library/\$EMYEAR/\$EMDAY/\$EMRUN/Pt\_$ptmin\_$ptmax";
 }
 #----------------------------------------------------------------------------------------------------
 # Get list directory
