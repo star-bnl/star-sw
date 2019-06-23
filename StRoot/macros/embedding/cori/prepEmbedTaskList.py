@@ -64,10 +64,12 @@ def setup_parser():
    parser.add_argument("-wallHour", dest="wallHour",help="max running time for one task (in hours)",default='35')
    parser.add_argument("-nThreads", dest="nThreads",help="max number of threads on one node",default='50')
 
-   parser.add_argument("-shifter", dest="shifter",help="shifter image",default='pdsf-sl64-star:v9')
+   parser.add_argument("-shifter", dest="shifter",help="shifter image",default='custom:pdsf-sl64-star:v9')
    parser.add_argument("-partition", dest="partition",help="partition selection",default='1')
 
    parser.add_argument("-localDB", dest="localDB",help="local STAR DB on master node",default='1')
+
+   parser.add_argument("-cvmfs", dest="cvmfs",help="use CVMFS",default='0')
 
    parser.add_argument("-nevents", dest="nevents",help="num. eve per r4s task",default='1000')
 
@@ -92,6 +94,10 @@ def  supplementArgs(argD):
    if argD['partition']=='0': argD['debg_part']=''
    if argD['partition']=='1': argD['regu_part']=''
    if argD['partition']=='2': argD['prem_part']=''
+
+   if argD['cvmfs']=='1': argD['shifter']='mpoat/star_rpm:v9'
+   argD['usecvmfstag']=''
+   if argD['cvmfs']=='1': argD['usecvmfstag']='--module=cvmfs'
 
 #----------------------------------------------------------
 def makeTaskScript(argD,inpF):
@@ -191,7 +197,7 @@ def   makeTaskList(argD,taskLF):
       for fset in range(fs1,fs2+1):
          if nr<5:
             print('---make daq=',x,' fset=',fset,' nevents=',nevents)
-         text='shifter  /bin/tcsh  ${WRK_DIR}/'+argD['r4s_csh']+' '+x+' '+str(fset)+' '+str(nevents)+'  >&   ${WRK_DIR}/logs/'+x+'_fset'+str(fset)+'.taskLog\n'
+         text='shifter '+argD['usecvmfstag']+' /bin/tcsh  ${WRK_DIR}/'+argD['r4s_csh']+' '+x+' '+str(fset)+' '+str(nevents)+'  >&   ${WRK_DIR}/logs/'+x+'_fset'+str(fset)+'.taskLog\n'
          fout.write(text)
          nFtot=nFtot+1
       nr=nr+1

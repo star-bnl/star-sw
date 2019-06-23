@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.39 2018/10/20 09:12:40 starembd Exp $
+# $Id: get_embedding_xml.pl,v 1.40 2019/06/23 09:46:47 starembd Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.40  2019/06/23 09:46:47  starembd
+# added run number in outpath
+#
 # Revision 1.39  2018/10/20 09:12:40  starembd
 # code cleanup for HFT embedding
 #
@@ -390,6 +393,7 @@ printDebug("Set year and day ...");
 print OUT "<!-- Set year and day from filename -->\n";
 print OUT "setenv EMYEAR `perl $getYearDayFromFile -y $fileBaseNameXml` &gt;&gt;&amp; \${LOGFILE}\n";
 print OUT "setenv EMDAY `perl $getYearDayFromFile -d $fileBaseNameXml` &gt;&gt;&amp; \${LOGFILE}\n";
+print OUT "setenv EMRUN `perl $getYearDayFromFile -r $fileBaseNameXml` &gt;&gt;&amp; \${LOGFILE}\n";
 print OUT "\n";
 
 printDebug("Set log files area ...");
@@ -422,6 +426,7 @@ print OUT "\n";
 print OUT "<!-- Print out EMYEAR and EMDAY and EMLOGS -->\n";
 print OUT "echo EMYEAR   : \$EMYEAR &gt;&gt;&amp; \${LOGFILE}\n";
 print OUT "echo EMDAY    : \$EMDAY &gt;&gt;&amp; \${LOGFILE}\n";
+print OUT "echo EMRUN    : \$EMRUN &gt;&gt;&amp; \${LOGFILE}\n";
 print OUT "echo EMLOGS   : \$EMLOGS &gt;&gt;&amp; \${LOGFILE}\n";
 print OUT "echo EMOUTPUT : \$EMOUTPUT &gt;&gt;&amp; \${LOGFILE}\n";
 print OUT "echo EMLIST   : \$EMLIST &gt;&gt;&amp; \${LOGFILE}\n";
@@ -988,7 +993,7 @@ sub getOutputDirectory {
   my $requestNumber = shift @_ ;
   my $production    = shift @_ ;
   my $library       = shift @_ ;
-  return "$elizadisk/starprod/embedding/$trgsetupname/$particleName\_&FSET;_$requestNumber/$production.$library/\$EMYEAR/\$EMDAY";
+  return "$elizadisk/starprod/embedding/$trgsetupname/$particleName\_&FSET;_$requestNumber/$production.$library/\$EMYEAR/\$EMDAY/\$EMRUN";
 }
 
 #----------------------------------------------------------------------------------------------------
@@ -1003,7 +1008,7 @@ sub getOutputDirectoryPt {
   my $library       = shift @_ ;
   my $ptmin 	      = shift @_ ;
   my $ptmax 	      = shift @_ ;
-  return "$elizadisk/starprod/embedding/$trgsetupname/$particleName\_&FSET;_$requestNumber/$production.$library/\$EMYEAR/\$EMDAY/Pt\_$ptmin\_$ptmax";
+  return "$elizadisk/starprod/embedding/$trgsetupname/$particleName\_&FSET;_$requestNumber/$production.$library/\$EMYEAR/\$EMDAY/\$EMRUN/Pt\_$ptmin\_$ptmax";
 }
 #----------------------------------------------------------------------------------------------------
 # Get list directory

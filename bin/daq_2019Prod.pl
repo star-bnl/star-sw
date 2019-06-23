@@ -30,7 +30,10 @@ sub SPrint ($$$$) {
   my ($line,$file,$f,$l) = @_;
   if ($l - $f >= 1) {# Allow to have error in no. of events in FileCatalog
     my $rootf = $file . "_" . $f . "_" . $l . ".picoDst.root"; 
-    if (-r $rootf) {print "rootf = $rootf\n" if (debug); next;}
+    if (-r $rootf) {
+#      print "rootf = $rootf\n" if (debug);
+      next;
+    }
 #    my $blaf  = $file . "_" . $f . "_" . $l . ".bla.root";
 #    if (-r $blaf) {
 #      print "$blaf\n" if (debug); 
