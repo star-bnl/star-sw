@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.239 2018/06/21 01:48:42 perev Exp $
+// $Id: StiMaker.cxx,v 1.242 2019/06/20 16:04:55 genevb Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -336,7 +336,7 @@ Int_t StiMaker::InitRun(int run)
       _tracker=0;
       mMaxTimes = IAttr("setMaxTimes");
 
-
+      
       if (IAttr("useTracker")) {
 
         _tracker = (StiKalmanTrackFinder *)(_toolkit->getTrackFinder());
@@ -373,42 +373,20 @@ Int_t StiMaker::InitRun(int run)
 	_tracker->addSeedFinder(_toolkit->getTrackSeedFinder());
 
         }while(0);
- 
+	
 
-     }//end tracker
-
-
-
-
-
-
-
-//		useTreeSearch flag means
-//		useTreeSearch == tpcFlag *4 + hftFlag
-//		flag == treeSearchOn + 2*treeSearchFull
-// 		treeSearchOn==1 means tree search is ON
-// 		treeSearchFull==1 means tree search includes case that existing hit
-//                                on this level could be omitted
-//  		Typical case chain->SetAttr("useTreeSearch",(1+2) +4*(1),"Sti");
-//		means HFT full tree searh, TPC tree search only with existing hits, no hits is not considered
-
-        if (*SAttr("useTreeSearch")) _tracker->setComb(IAttr("useTreeSearch"));
-        if ( IAttr("useTiming"    )) _tracker->setTiming();
+      }//end tracker
 #if 1
-	if ( IAttr("Alignment"    )) {
-	  _tracker->SetDoAlignment(kTRUE);
-	  gEnv->SetValue("DO_NOT_MERGE",1);
-	}
-#endif
-        _fitter  = dynamic_cast<StiKalmanTrackFitter *>(_toolkit->getTrackFitter());
-
-//        if (*SAttr("useMCS")) StiKalmanTrackNode::setMCS(IAttr("useMCS"));
+      if ( IAttr("Alignment"    )) {
+	_tracker->SetDoAlignment(kTRUE);
+	gEnv->SetValue("DO_NOT_MERGE",1);
       }
+#endif
       _eventFiller=0;
       if (IAttr("useEventFiller")) {
-        _eventFiller =  new StiStEventFiller();
-        _eventFiller->setUseAux(IAttr("useAux"));
-        InitPulls();
+	_eventFiller =  new StiStEventFiller();
+	_eventFiller->setUseAux(IAttr("useAux"));
+	InitPulls();
       }
       _trackContainer = _toolkit->getTrackContainer();
       _vertexFinder   = 0;
@@ -416,12 +394,13 @@ Int_t StiMaker::InitRun(int run)
 	_vertexFinder   = _toolkit->getVertexFinder();
       }
       if (_tracker) {
-        _tracker->initialize();
-        _tracker->clear();
+	_tracker->initialize();
+	_tracker->clear();
       }
       _initialized=true;
       LOG_INFO << "InitRun(): Initialization Segment Completed"<<endm;
-
+  }
+  
   return StMaker::InitRun(run);
 }
 
@@ -788,10 +767,16 @@ void CountHits()
 }
 
 
-// $Id: StiMaker.cxx,v 1.239 2018/06/21 01:48:42 perev Exp $
+// $Id: StiMaker.cxx,v 1.242 2019/06/20 16:04:55 genevb Exp $
 // $Log: StiMaker.cxx,v $
-// Revision 1.239  2018/06/21 01:48:42  perev
-// iTPCheckIn
+// Revision 1.242  2019/06/20 16:04:55  genevb
+// Update from B4SL18h branch
+//
+// Revision 1.241.4.1  2019/02/27 21:32:53  genevb
+// Avoid unnecessary re-initializations in InitRun()
+//
+// Revision 1.241  2018/07/06 22:13:05  smirnovd
+// [Cosmetic] Changes in white space
 //
 // Revision 1.235.4.2  2018/05/28 23:16:58  perev
 // Cleanup

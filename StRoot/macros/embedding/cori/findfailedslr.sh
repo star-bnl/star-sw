@@ -85,8 +85,14 @@ find $srcdirs -name "*.minimc.root" > tmpminimc$$.list
 nfailed=0
 while read line
 do
-   fn=`echo $line | awk '{print $4}'`
-   fset=`echo $line | awk '{print $5}'`
+   cvmfs=`echo $line | grep cvmfs`
+   if [ -z "$cvmfs" ] ; then
+	fn=`echo $line | awk '{print $4}'`
+	fset=`echo $line | awk '{print $5}'`
+   else
+	fn=`echo $line | awk '{print $5}'`
+	fset=`echo $line | awk '{print $6}'`
+   fi
    logfile=`grep "${fn}.r4s_${fset}.log.gz" tmplog$$.list`
    if [ -z "$logfile" ] ; then
 	echo "found one possible failed task with no log file"

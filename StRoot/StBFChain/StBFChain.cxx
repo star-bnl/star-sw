@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.663 2019/04/23 15:30:07 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.664 2019/06/21 21:13:36 smirnovd Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -189,8 +189,11 @@ Int_t StBFChain::Load()
 	      assert(libraryload!=kStErr); // this is obvious and will display an explicit
 	      break;
 	    } else {
-	      if (Debug() > 1) {  TString ts("load "); ts += libL; StMemStat::PrintMem(ts.Data());}
-	      LOG_QA  << Form("Library %-22s [%15s] (%s)\tis loaded",libL.Data(),fBFC[i].Key,path) << endm;
+	      LOG_QA << Form("Library %-22s [%15s] (%s)\tis loaded",libL.Data(),fBFC[i].Key,path) << endm;
+
+	      if (gSystem->Getenv("StarEndMakerShell"))
+	        LOG_QA << Form("QAInfo: doPs for %20s:%12s:%22s \t", "StBFChain", "Load", libL.Data()) << StMemStat::AsString() << endm;
+
 	      LoadedLibs.Add(new TObjString(libN));
 	    }
 	  } else {
