@@ -58,6 +58,7 @@ endif
 
     set EMYEAR = `perl StRoot/macros/embedding/getYearDayFromFile.pl -y ${coreN}`
     set EMDAY = `perl StRoot/macros/embedding/getYearDayFromFile.pl -d ${coreN}`
+    set EMRUN = `perl StRoot/macros/embedding/getYearDayFromFile.pl -r ${coreN}`
 
 
     # Prepare final storage dir, aka sandbox
@@ -72,7 +73,7 @@ endif
     # st_mtd_adc_16114049_raw_5500008.geant.root
 
     set FSET_PATH = <outPath>/<triggerSetName>/<particleName>_${fSet}_<embedRequestID>
-    set REQUEST_PATH = <starProdID>.<starLib>/${EMYEAR}/${EMDAY}
+    set REQUEST_PATH = <starProdID>.<starLib>/${EMYEAR}/${EMDAY}/${EMRUN}
     echo my FSET_PATH=$FSET_PATH
     echo my REQUEST_PATH=$REQUEST_PATH
     
