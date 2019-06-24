@@ -462,9 +462,6 @@ void StarMagField::BField( const Float_t x[], Float_t B[] )
   B[0] = B[1] = B[2] = 0;
   z  = x[2] ;
   r  = sqrt( x[0]*x[0] + x[1]*x[1] ) ;
-  phi = atan2( x[1], x[0] ) ;
-  if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
-
 
 
   if ( mConstBz ) 
@@ -504,6 +501,9 @@ void StarMagField::BField( const Float_t x[], Float_t B[] )
 
   if (za <=342.20  && r>=303.29 && r <= 364.25) { // within Map
   
+    phi = atan2( x[1], x[0] ) ;
+    if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
+
     phi1=phi*TMath::RadToDeg();
     if(phi1>12) phi1=phi1-int(phi1/12)*12;
     
