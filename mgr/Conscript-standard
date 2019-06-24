@@ -779,6 +779,7 @@ if ( $pkg =~ m/^StEventDisplay/ || $#uiQT >= 0 || $OnlinePackage ) {
   $CPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{CPPFLAGS};
   $FCPATH = "#StarVMC/geant3" . $main::PATH_SEPARATOR . $INCLUDE .
     $main::PATH_SEPARATOR . $env1->{Packages}->{CERNLIB}->{INCDIR};
+  $FDEBUG  =~ s/O3/O2/; print "FDEBUG = $FDEBUG\n";
 #  if ($FC eq 'ifort') {
 #    $FCPATH .= $main::PATH_SEPARATOR . "#StarVMC/geant3/minicern/kerngen"; # bug in ifort with include path
 #  }
