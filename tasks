@@ -6,3 +6,15 @@
 4. Memory leak in new CA (?)
 5. Fix vpd timing for simulation
 6. To understand difference between new and old CA.
+================================================================================
+06/20/19
+1. dN/dx 
+2. Check new cuts in TGeant3 and TpcRS ; in progress waiting for jobs in /star/u/fisyak/work/Tpc/TpcRS/TpcRS2019newCut &  /star/u/fisyak/work/reco/2019/Hijing
+3. Add hyper nuclears in TGeant3
+4. Compare cpu for different gcc versions and options
+5. Try GBL for TPC alignment
+6. Check V0 efficiency for Run 2018
+7. Check eta versus pT for Fixed target
+8. use beamInfo to correct TPC t0 for fixed target 
+9. Check g2_table for epd (possible overlap) and add gem 
+10. Add fast detectors to Stx tracking

@@ -1,4 +1,5 @@
 #! /usr/bin/env tcsh 
+FPE_OFF
 set list = "";
 set domain = `hostname -d`
 switch ($domain) 
@@ -11,25 +12,27 @@ switch ($domain)
     set list = "gcc"
     breaksw
 endsw
-foreach gcc (${list})
-  foreach opt (debug opt)
+foreach gcc (${list}) 
+  set opts = "debug opt"
+  if ($gcc == "gcc8" || gcc == "gcc631") set opts = "debug opt opt3"
+  foreach opt ($opts)
     set bits = "64b";
     if ($gcc == "gcc") set bits = "32b 64b";
     foreach bit (${bits})
-      if ($opt == "debug") then 
-        unsetenv NODEBUG
-      else      
-        setenv NODEBUG yes
-      endif
-      setup ${gcc}
-      setup ${bit}
-      starver ${STAR_LEVEL}
       foreach proc (RC MC)
         set dir = "${proc}_${gcc}_${bit}_${opt}"
         if (! -d ${dir}) mkdir ${dir}
-        cd ${dir}
-	ls -1d *B.log
+	ls -1d ${dir}/*B.log
 	if (! $?) continue
+        if ($opt == "debug") then 
+          unsetenv NODEBUG
+        else      
+          setenv NODEBUG yes
+        endif
+        setup ${gcc}
+        setup ${bit}
+        starver ${STAR_LEVEL}
+        cd ${dir}
 	if (${proc} == "RC") then
           root.exe -q -b -x 'bfc.C(1000,"P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,picoWrite,PicoVtxVpdOrDefault","/net/l401/data/scratch1/daq/2019/083/20083024/hlt_20083024_12_02_000.daq")' >& hlt_20083024_12_02_000B.log &
 	else 
