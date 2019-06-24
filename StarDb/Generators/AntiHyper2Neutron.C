@@ -4,8 +4,8 @@
 TDataSet *CreateTable() {
   Double_t pTlow  =    0;
   Double_t pThigh =   20;
-  Double_t Ylow   =  -1; 
-  Double_t Yhigh  =   1;
+  Double_t Ylow   =  -2; 
+  Double_t Yhigh  =   2;
   Double_t Philow =   0;
   Double_t Phihigh= 2*TMath::Pi();
   Double_t Zlow   =  -70; 
