@@ -1495,10 +1495,40 @@ void TGeant3::AddParticlesToPdgDataBase() const
 
   if ( !pdgDB->GetParticle(-1010010030))
     pdgDB->AddParticle("AntiHyperTriton","AntiHyperTriton",2.99131,kFALSE,0,-3,"Hypernucleus",-1010010030);
+  /* Maksym naming convention for Hypernuclei
+     He4L -> He3 p pi-
+     LLn -> H3L pi-
+     He4L_bar -> He3_bar p- pi+
+     He5L -> He4 p pi-
+     He5L_bar -> He4_bar p- pi+
+     H4LL -> He4L pi-
+     H5LL -> He5L pi-
+     H4LL -> H3L p pi-
+     He6LL -> He5L p pi-
 
-  // {LN}  -> d pi-, m = 2.050, pdg = 3003 HyperDeuteron
-  // {LNN} -> t pi-, m = 2.993, pdg = 3103 Hyper2Neutron
+     H3L: M = 2.99131 -> He3+ pi-,          HyperTriton          
+     LN : M - 2,050   -> d pi-,  pdg = 3003 HyperNeutron 
+     LNN: M = 2.9925   -> t pi-,  pdg = 3103 Hyper2Neutron
+     H4L: M = 3.924   -> He4+ pi-,          HyperH4
+  */
 
+ if ( !pdgDB->GetParticle(1010000020))
+    pdgDB->AddParticle("HyperNeutron","HyperNeutron",2.050,kFALSE,0,3,"Hypernucleus",1010000020);
+
+  if ( !pdgDB->GetParticle(-1010000020))
+    pdgDB->AddParticle("AntiHyperNeutron","AntiHyperNeutron",2.050,kFALSE,0,-3,"Hypernucleus",-1010000020);
+
+  if ( !pdgDB->GetParticle(1010000030))
+    pdgDB->AddParticle("Hyper2Neutron","Hyper2Neutron",2.9925,kFALSE,0,3,"Hypernucleus",1010000030);
+
+  if ( !pdgDB->GetParticle(-1010000030))
+    pdgDB->AddParticle("AntiHyper2Neutron","AntiHyper2Neutron",2.9925,kFALSE,0,-3,"Hypernucleus",-1010000030);
+
+  if ( !pdgDB->GetParticle(1010010040))
+    pdgDB->AddParticle("HyperH4","HyperH4",3.924,kFALSE,0,3,"Hypernucleus",1010010040);
+
+  if ( !pdgDB->GetParticle(-1010010040))
+    pdgDB->AddParticle("AntiHyperH4","AntiHyperH4",3.924,kFALSE,0,-3,"Hypernucleus",-1010010040);
 // Special particles
 //
   if ( !pdgDB->GetParticle(GetSpecialPdg(50)) )
@@ -1835,6 +1865,24 @@ void TGeant3::DefineParticles()
   Gspart(fNG3Particles++, "AntiHyperTriton",4,2.99131 ,-1.,2.632e-10);
   fPDGCode[fNPDGCodes++]=-1010010030;  // 81 = Anti-Hypertriton
 
+  Gspart(fNG3Particles++, "HyperNeutron",3,2.050 ,+1.,2.632e-10);
+  fPDGCode[fNPDGCodes++]=1010000020;    //82 = hyperneutron
+  
+  Gspart(fNG3Particles++, "AntiHyperNeutron",3,2.050 ,-1.,2.632e-10);
+  fPDGCode[fNPDGCodes++]=-1010000020;  // 83 = Anti-Hyperneutron
+
+  Gspart(fNG3Particles++, "Hyper2Neutron",3,2.9925 ,+1.,2.632e-10);
+  fPDGCode[fNPDGCodes++]=1010000030;    //84 = hyper2neutron
+  
+  Gspart(fNG3Particles++, "AntiHyper2Neutron",3,2.9925 ,-1.,2.632e-10);
+  fPDGCode[fNPDGCodes++]=-1010000030;  // 85 = Anti-Hype2rneutron
+
+  Gspart(fNG3Particles++, "HyperH4",4,3.924 ,+1.,2.632e-10);
+  fPDGCode[fNPDGCodes++]=1010010040;    //86 = HyperH4
+  
+  Gspart(fNG3Particles++, "AntiHyperH4",4,3.924 ,-1.,2.632e-10);
+  fPDGCode[fNPDGCodes++]=-1010010040;  // 87 = Anti-HyperH4
+
 
 
 
@@ -1990,7 +2038,7 @@ void TGeant3::DefineParticles()
     }
     ipa = 80;
     bratio[0] = 100.;
-    mode[0] = 949;
+    mode[0] = 949; // pi- He3
     Gsdk(ipa, bratio, mode);
 
     // Anti-Hypertrion 2-Body decay
@@ -2001,9 +2049,50 @@ void TGeant3::DefineParticles()
     }
     ipa = 81;
     bratio[0] = 100.;
-    mode[0] = 878;
-    //    mode[0] = 949;
+    mode[0] = 878; // pi+ antiHe3
     Gsdk(ipa, bratio, mode);
+
+    // HyperNeutron
+
+    ipa = 82;
+    bratio[0] = 100.;
+    mode[0] = 945;  // Deuteron pi-
+    Gsdk(ipa, bratio, mode);
+
+    // Anti-HyperNeutron 2-Body decay
+
+    ipa = 83;
+    bratio[0] = 100.;
+    mode[0] = 876; // pi+ antiDeuteron
+    Gsdk(ipa, bratio, mode);
+
+    // Hyper2Neutron
+
+    ipa = 84;
+    bratio[0] = 100.;
+    mode[0] = 946;  // pi- Triton
+    Gsdk(ipa, bratio, mode);
+
+    // Anti-Hyper2Neutron 2-Body decay
+
+    ipa = 85;
+    bratio[0] = 100.;
+    mode[0] = 877; // pi+  antiTriton
+    Gsdk(ipa, bratio, mode);
+
+    // HyperH4
+    ipa = 86;
+    bratio[0] = 100.;
+    mode[0] = 947; // pi- He4
+    Gsdk(ipa, bratio, mode);
+
+    // Anti-HyperH4 2-Body decay
+
+    ipa = 87;
+    bratio[0] = 100.;
+    mode[0] = 879; // pi+ antiHe4
+    Gsdk(ipa, bratio, mode);
+
     // extra particles
     const Char_t *extraPartName[] = {"Sigma*+","Sigma*-"};
     Int_t Nextra = sizeof(extraPartName)/sizeof(Char_t *);
