@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2019.h,v 2.1 2019/01/07 15:49:06 ullrich Exp $
+ * $Id: StTriggerData2019.h,v 2.2 2019/06/25 15:50:16 ullrich Exp $
  *
  * Author: Akio Ogawa, October 13, 2017
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2019.h,v $
+ * Revision 2.2  2019/06/25 15:50:16  ullrich
+ * Improved QT board error reports/handling. Added EPD access functions. (Akio)
+ *
  * Revision 2.1  2019/01/07 15:49:06  ullrich
  * Initial Revision.
  *
@@ -121,6 +124,7 @@ public:
     unsigned short fmsTDC(int crt, int adr, int ch, int prepost=0) const;
 
     //EPD
+    unsigned short epdEarliestTDC(StBeamDirection eastwest, int prepost) const;
     unsigned short epdTimeDifference() const;
     bool           epdHitLayer2(StBeamDirection eastwest) const;
     unsigned short epdLayer1(int ch, int prepost=0) const;
@@ -132,6 +136,12 @@ public:
     unsigned short epdADC(int crt, int adr, int ch, int prepost=0) const;
     unsigned short epdTDC(int crt, int adr, int ch, int prepost=0) const;
     unsigned short epdNHits(StBeamDirection eastwest, int prepost=0) const;
+    unsigned short epdNHitsQT(int crate, int qt, int mult12, int prepost=0) const;
+    unsigned short epdLayer0aMult(int ch, int prepost=0) const;
+    unsigned short epdLayer0hMult(int ch, int mult12, int prepost=0) const;    
+    unsigned short epdLayer1bMult(StBeamDirection eastwest, int ring, int prepost=0) const;
+    unsigned short epdMultTotal(int prepost=0) const;
+    unsigned short epdMultDiff(int prepost=0) const;
 
     //ZDC
     bool zdcPresent(int prepost=0) const;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.54 2019/01/07 15:50:12 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.55 2019/06/25 15:50:15 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.55  2019/06/25 15:50:15  ullrich
+ * Improved QT board error reports/handling. Added EPD access functions. (Akio)
+ *
  * Revision 2.54  2019/01/07 15:50:12  ullrich
  * Added StTriggerData2019.
  *
@@ -331,6 +334,7 @@ public:
     virtual unsigned short fmsTDC(int crt, int adr, int ch, int prepost=0) const;
 
     //EPD
+    virtual unsigned short epdEarliestTDC(StBeamDirection eastwest, int prepost=0) const;
     virtual unsigned short epdTimeDifference() const;
     virtual bool           epdHitLayer2(StBeamDirection eastwest) const;
     virtual unsigned short epdLayer1(int ch, int prepost=0) const;
@@ -340,8 +344,14 @@ public:
     virtual unsigned short epdLayer0a(int ch, int prepost=0) const;
     virtual unsigned char  epdLayer0h(int ch, int prepost=0) const;
     virtual unsigned short epdADC(int crt, int adr, int ch, int prepost=0) const;
-    virtual unsigned short epdTDC(int crt, int adr, int ch, int prepost=0) const;
-    virtual unsigned short epdNHits(StBeamDirection eastwest, int prepost=0) const;
+    virtual unsigned short epdTDC(int crt, int adr, int ch, int prepost=0) const;    
+    virtual unsigned short epdNHits(StBeamDirection eastwest, int prepost=0) const;    
+    virtual unsigned short epdNHitsQT(int crate, int qt, int mult12, int prepost=0) const;
+    virtual unsigned short epdLayer0aMult(int ch, int prepost=0) const;
+    virtual unsigned short epdLayer0hMult(int ch, int mult12, int prepost=0) const;
+    virtual unsigned short epdLayer1bMult(StBeamDirection eastwest, int ring, int prepost=0) const;
+    virtual unsigned short epdMultTotal(int prepost=0) const;
+    virtual unsigned short epdMultDiff(int prepost=0) const;
 
     // VPD
     virtual unsigned short vpdADC(StBeamDirection eastwest, int pmt, int prepost=0) const;
