@@ -1,6 +1,9 @@
-// $Id: StFmsEventClusterer.cxx,v 1.15 2018/03/23 18:43:01 smirnovd Exp $
+// $Id: StFmsEventClusterer.cxx,v 1.16 2019/06/26 16:49:53 akio Exp $
 //
 // $Log: StFmsEventClusterer.cxx,v $
+// Revision 1.16  2019/06/26 16:49:53  akio
+// shower shape scaling for all shapes
+//
 // Revision 1.15  2018/03/23 18:43:01  smirnovd
 // Turn off excessive output from StFmsEventClusterer
 //
@@ -318,11 +321,13 @@ namespace FMSCluster {
 					   StFmsDbMaker* db, Int_t detectorId, 
 					   Int_t globalrefit, Int_t mergeSmallToLarge, 
 					   Int_t try1PhotonFit, Int_t categorizationAlgo,
-					   Int_t scaleShowerShape , Int_t showerShapeWithAngle ,double vertexZ)
+					   Float_t scaleShowerShapeLarge , Float_t scaleShowerShapeSmall,
+					   Int_t showerShapeWithAngle ,double vertexZ)
       : mClusterFinder(0.5), /*mGeometry(geometry),*/ mDetectorId(detectorId), mTowers(0), 
 	mFmsDbMaker(db), mGlobalRefit(globalrefit), mMergeSmallToLarge(mergeSmallToLarge), 
 	mTry1PhotonFitWhen2PhotonFitFailed(try1PhotonFit), mCategorizationAlgo(categorizationAlgo),
-        mScaleShowerShape(scaleShowerShape), mShowerShapeWithAngle(showerShapeWithAngle), vertexz(vertexZ) { }
+        mScaleShowerShapeLarge(scaleShowerShapeLarge), mScaleShowerShapeSmall(scaleShowerShapeSmall),
+        mShowerShapeWithAngle(showerShapeWithAngle), vertexz(vertexZ) { }
     
 StFmsEventClusterer::~StFmsEventClusterer() {}
 
@@ -343,7 +348,9 @@ Bool_t StFmsEventClusterer::cluster(std::vector<StFmsTower>* towerList) {
     LOG_ERROR << "Too many towers for Fit" << endm;
     return false;
   }  // if
-  mFitter.reset(new StFmsClusterFitter(/*mGeometry,*/ mDetectorId,xw,yw,mScaleShowerShape, mShowerShapeWithAngle,mMergeSmallToLarge,vertexz) );
+  mFitter.reset(new StFmsClusterFitter(/*mGeometry,*/ mDetectorId,xw,yw,
+				       mScaleShowerShapeLarge,mScaleShowerShapeSmall,
+				       mShowerShapeWithAngle,mMergeSmallToLarge,vertexz) );
   return fitEvent();  // Return true for success
 }
 

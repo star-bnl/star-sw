@@ -1,6 +1,9 @@
-// $Id: StFmsPointMaker.cxx,v 1.13 2018/03/02 20:26:44 akio Exp $
+// $Id: StFmsPointMaker.cxx,v 1.14 2019/06/26 16:49:43 akio Exp $
 //
 // $Log: StFmsPointMaker.cxx,v $
+// Revision 1.14  2019/06/26 16:49:43  akio
+// shower shape scaling for all shapes
+//
 // Revision 1.13  2018/03/02 20:26:44  akio
 // Big update from Zhanwen Zhu with new shower shape and six z slices
 //
@@ -178,7 +181,8 @@ int StFmsPointMaker::clusterEvent() {
   mFmsCollection->setGlobalRefit(mGlobalRefit);
   mFmsCollection->setTry1PhotonFit(mTry1PhotonFitWhen2PhotonFitFailed);
   mFmsCollection->setNewClusterCategorization(mCategorizationAlgo);
-  mFmsCollection->setScaleShowerShape(mScaleShowerShape);
+  mFmsCollection->setScaleShowerShape(1);
+  mFmsCollection->setScaleShowerShape(mScaleShowerShapeLarge,mScaleShowerShapeSmall);
   mFmsCollection->sortPointsByEnergy();    
   LOG_INFO << Form("Found %d Clusters and %d Points",mFmsCollection->numberOfClusters(),mFmsCollection->numberOfPoints()) << endm;
   return kStOk;
@@ -189,7 +193,8 @@ int StFmsPointMaker::clusterDetector(TowerList* towers, const int detectorId) {
   //  FMSCluster::StFmsEventClusterer clustering(&mGeometry,detectorId);
   FMSCluster::StFmsEventClusterer clustering(mFmsDbMaker,detectorId,mGlobalRefit,mMergeSmallToLarge,
 					     mTry1PhotonFitWhen2PhotonFitFailed,mCategorizationAlgo,
-					     mScaleShowerShape,mShowerShapeWithAngle,vertexz);
+					     mScaleShowerShapeLarge,mScaleShowerShapeSmall,
+					     mShowerShapeWithAngle,vertexz);
   // Perform tower clustering, skip this subdetector if an error occurs
   if (!clustering.cluster(towers)) {  // Cluster tower list      
       //LOG_INFO << Form("clusterDetector found no cluster for det=%d ",detectorId)<<endm;

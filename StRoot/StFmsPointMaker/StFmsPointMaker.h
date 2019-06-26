@@ -1,6 +1,9 @@
-// $Id: StFmsPointMaker.h,v 1.9 2018/03/08 20:07:27 akio Exp $
+// $Id: StFmsPointMaker.h,v 1.10 2019/06/26 16:49:43 akio Exp $
 //
 // $Log: StFmsPointMaker.h,v $
+// Revision 1.10  2019/06/26 16:49:43  akio
+// shower shape scaling for all shapes
+//
 // Revision 1.9  2018/03/08 20:07:27  akio
 // initialization of mObjectCount and mMaxEnergySum was missing
 //
@@ -97,8 +100,12 @@ class StFmsPointMaker : public StMaker {
   /* set cluster categorization algo */
   void setCategorizationAlgo(int v=1) {mCategorizationAlgo=v;}
 
-  /* set to scale shower shape for large cell  - only take effect if mShowerShapeWithAngle=0 */
-  void setScaleShowerShape(int v=1) {mScaleShowerShape=v;} 
+  /* set to scale shower shape for large cell, recomended values are*/
+  //              large    small
+  //old(1slice)    1.6      1.0
+  //Zhanwen's      0.8      0.6
+  //Yuxi's         1.2      0.8
+  void setScaleShowerShape(float large=0.8, float small=0.6) {mScaleShowerShapeLarge=large; mScaleShowerShapeSmall=small;} 
 
   /* 0=original shower shape, 1=new shower shape with 6 z slices, 2=Yuxi's 6 slices */
   void setShowerShapeWithAngle(int v=1) {mShowerShapeWithAngle=v;} 
@@ -190,7 +197,8 @@ class StFmsPointMaker : public StMaker {
   Int_t mMergeSmallToLarge=1; //! if this is none-zero, merge small cells to large cells
   Int_t mTry1PhotonFitWhen2PhotonFitFailed=1; //! if this is none-zero, try 1 photon fit if 2 photon fit failed
   Int_t mCategorizationAlgo=1;    //! choose cluster categorization algo
-  Int_t mScaleShowerShape=0;      //! scale shower shape for large cell (only for mShowerShapeWithAngle=0)
+  Float_t mScaleShowerShapeLarge=0.8;  //! scale shower shape for large cell 
+  Float_t mScaleShowerShapeSmall=0.6;  //! scale shower shape for small cell
   Int_t mShowerShapeWithAngle=1;  //! incident angle with 6 slices or not
   Int_t mVertexZ=0;               //! use BBC vertex or not
   Double_t vertexz=0.0;           //! vertex position[cm]

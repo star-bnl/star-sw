@@ -1,6 +1,9 @@
-// $Id: StFmsClusterFitter.cxx,v 1.9 2018/03/26 15:55:37 akio Exp $
+// $Id: StFmsClusterFitter.cxx,v 1.10 2019/06/26 16:49:53 akio Exp $
 //
 // $Log: StFmsClusterFitter.cxx,v $
+// Revision 1.10  2019/06/26 16:49:53  akio
+// shower shape scaling for all shapes
+//
 // Revision 1.9  2018/03/26 15:55:37  akio
 // removing some print outs
 //
@@ -115,30 +118,30 @@ void clear_fitParameters(){
   for (int  i=0 ; i<60 ; i++) {  fitParameters[i]=0 ;  }
 }
 
-void choose_fitParameters(int detID){
+void choose_fitParameters(int detID, float scl=1.0){
     if (detID<=9) {unused=5;} //large cell
     else          {unused=3;} //small cell
     if ( mshowershapewithangle==2 ) {
-	fitParameters= {unused, a11, a12, a13, b11, b12, b13, w1 ,unused, unused,
-			unused, a21, a22, a23, b21, b22, b23, w2 ,unused, unused,
-			unused, a31, a32, a33, b31, b32, b33, w3 ,unused, unused,
-			unused, a41, a42, a43, b41, b42, b43, w4 ,unused, unused,
-			unused, a51, a52, a53, b51, b52, b53, w5 ,unused, unused,
-			unused, a61, a62, a63, b61, b62, b63, w6 ,unused, unused          };
+	fitParameters= {unused, a11, a12, a13, b11*scl, b12*scl, b13*scl, w1 ,unused, unused,
+			unused, a21, a22, a23, b21*scl, b22*scl, b23*scl, w2 ,unused, unused,
+			unused, a31, a32, a33, b31*scl, b32*scl, b33*scl, w3 ,unused, unused,
+			unused, a41, a42, a43, b41*scl, b42*scl, b43*scl, w4 ,unused, unused,
+			unused, a51, a52, a53, b51*scl, b52*scl, b53*scl, w5 ,unused, unused,
+			unused, a61, a62, a63, b61*scl, b62*scl, b63*scl, w6 ,unused, unused          };
     } else if ( mshowershapewithangle==1 ) {
         if (detID>9) {//small cell
 	    for (int i=0 ; i<6 ; i++) {
                 a1[i]=a1S[i];
                 a2[i]=a2S[i];
-                b1[i]=b1S[i];
-                b2[i]=b2S[i];
+                b1[i]=b1S[i]*scl;
+                b2[i]=b2S[i]*scl;
 	    }	    
         }else{//large cell
 	    for (int i=0 ; i<6 ; i++) {
                 a1[i]=a1L[i];
                 a2[i]=a2L[i];
-                b1[i]=b1L[i];
-                b2[i]=b2L[i];
+                b1[i]=b1L[i]*scl;
+                b2[i]=b2L[i]*scl;
 	    }
 	}	
 	fitParameters= {  unused, a1[0], a2[0], a3[0], b1[0], b2[0], b3[0], w[0] ,unused, unused,
@@ -151,9 +154,9 @@ void choose_fitParameters(int detID){
 	fitParameters[1] =  SS_A1;
 	fitParameters[2] =  SS_A2;
 	fitParameters[3] =  SS_A3;
-	fitParameters[4] =  SS_B1;
-	fitParameters[5] =  SS_B2;
-	fitParameters[6] =  SS_B3;	
+	fitParameters[4] =  SS_B1 * scl;
+	fitParameters[5] =  SS_B2 * scl;
+	fitParameters[6] =  SS_B3 * scl;	
     }
 }
 
@@ -189,8 +192,12 @@ StFmsTowerCluster::Towers* StFmsClusterFitter::mTowers(nullptr);
 Double_t StFmsClusterFitter::mEnergySum(0.0);
 
 StFmsClusterFitter::StFmsClusterFitter( //const StFmsGeometry* geometry,
-         Int_t detectorId, Float_t xw, Float_t yw, Int_t scaleShowerShape , Int_t ShowerShapeWithAngle, Int_t MergeSmallToLarge, double vertexZ)
-    : mMinuit(3 * kMaxNPhotons + 1), mScaleShowerShape(scaleShowerShape), mShowerShapeWithAngle( ShowerShapeWithAngle) , mMergeSmallToLarge(MergeSmallToLarge)          {
+         Int_t detectorId, Float_t xw, Float_t yw, 
+	 Float_t scaleShowerShapeLarge , Float_t scaleShowerShapeSmall,
+	 Int_t ShowerShapeWithAngle, Int_t MergeSmallToLarge, double vertexZ)
+    : mMinuit(3 * kMaxNPhotons + 1), 
+      mScaleShowerShapeLarge(scaleShowerShapeLarge), mScaleShowerShapeSmall(scaleShowerShapeSmall),
+      mShowerShapeWithAngle(ShowerShapeWithAngle) , mMergeSmallToLarge(MergeSmallToLarge){
   // Set tower (x, y) widths for this detector
   towerWidths.clear();
   towerWidths.push_back(xw);
@@ -542,19 +549,15 @@ int StFmsClusterFitter::readMinuitParameters(std::vector<double>& parameters,
 void StFmsClusterFitter::setTowers(StFmsTowerCluster::Towers* towers) { 
     mTowers = towers; 
     mEnergySum = std::accumulate(mTowers->begin(), mTowers->end(), 0., addTowerEnergy);
-    //if mScaleShowerShape is on, and if top cell is in large cell, scale shower shape up
-    if(mScaleShowerShape ==1 && mShowerShapeWithAngle==0){
-	if(mTowers->front()->hit()->detectorId() <= 9){ 
-	    fitParameters.at(4) = SS_B1*1.3;
-	    fitParameters.at(5) = SS_B2*1.3;
-	    fitParameters.at(6) = SS_B3*1.3;
-	}else{
-	    fitParameters.at(4) = SS_B1;
-	    fitParameters.at(5) = SS_B2;
-	    fitParameters.at(6) = SS_B3;
-	}
-	showerShapeFitFunction.SetParameters(fitParameters.data());
+    //if mScaleShowerShape is on, and if top cell is in large cell, scale shower shape up    
+    //if(mScaleShowerShape ==1 && mShowerShapeWithAngle==0){
+    int d=mTowers->front()->hit()->detectorId();
+    if(d <= 9){ 
+	choose_fitParameters(d,mScaleShowerShapeLarge);
+    }else{
+	choose_fitParameters(d,mScaleShowerShapeSmall);
     }
+    showerShapeFitFunction.SetParameters(fitParameters.data());
 }
     
 }  // namespace FMSCluster
