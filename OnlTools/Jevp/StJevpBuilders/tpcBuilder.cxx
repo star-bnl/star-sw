@@ -1,4 +1,4 @@
-// $Id: tpcBuilder.cxx,v 1.8 2019/06/01 15:02:34 videbaks Exp $
+// $Id: tpcBuilder.cxx,v 1.9 2019/06/26 14:45:07 videbaks Exp $
 //
 #include <stdio.h>
 #include <stdlib.h>
@@ -963,7 +963,7 @@ void tpcBuilder::event(daqReader *rdr)
 	}
 
       }
-         contents.no_clust_itpc->Fill(s+1, safelog(noClustiTPC));
+         contents.no_clust_itpc->Fill(s, safelog(noClustiTPC));
     } // dd itpc
 
     if(has_cld) {
@@ -1009,7 +1009,7 @@ void tpcBuilder::event(daqReader *rdr)
 	  }
 	}
       }
-      contents.no_clust_tpx->Fill(s+1, safelog(noClustTPX));
+      contents.no_clust_tpx->Fill(s, safelog(noClustTPX));
     }
     if(has_cld) {
       for(int i=0;i<512;i++) {
