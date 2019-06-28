@@ -1,6 +1,9 @@
-// $Id: StFmsEventClusterer.h,v 1.7 2018/03/02 20:27:29 akio Exp $
+// $Id: StFmsEventClusterer.h,v 1.8 2019/06/26 16:49:53 akio Exp $
 //
 // $Log: StFmsEventClusterer.h,v $
+// Revision 1.8  2019/06/26 16:49:53  akio
+// shower shape scaling for all shapes
+//
 // Revision 1.7  2018/03/02 20:27:29  akio
 // Big update from	Zhanwen Zhu with new shower shape and six z slices
 //
@@ -75,7 +78,8 @@ class StFmsEventClusterer: public TObject {
   StFmsEventClusterer(StFmsDbMaker* db, Int_t detectorId, 
 		      Int_t globalrefit, Int_t mergeSmallToLarge, 
 		      Int_t try1Photon, Int_t categorizationAlgo,
-		      Int_t scaleShowerShape , Int_t showerShapeWithAngle , double vertexz);
+		      Float_t scaleShowerShapeLarge , Float_t scaleShowerShapeSmall,
+		      Int_t showerShapeWithAngle , double vertexz);
   /** Destructor. */
   ~StFmsEventClusterer();
   /**
@@ -225,10 +229,10 @@ class StFmsEventClusterer: public TObject {
   Int_t mMergeSmallToLarge;  //!
   Int_t mTry1PhotonFitWhen2PhotonFitFailed;//!
   Int_t mCategorizationAlgo; //!
-  Int_t mScaleShowerShape; //!
-  Int_t mShowerShapeWithAngle;
+  Float_t mScaleShowerShapeLarge; //!
+  Float_t mScaleShowerShapeSmall; //!
+  Int_t mShowerShapeWithAngle; //!
   double vertexz;
-
 
   ClassDef(StFmsEventClusterer, 0)
 };

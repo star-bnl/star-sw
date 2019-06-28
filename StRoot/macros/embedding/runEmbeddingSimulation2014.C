@@ -2,6 +2,20 @@
 // STAR  C++  framework and get the starsim prompt
 // To use it do
 //  root4star starsim.C
+
+/// Helper function to define PDG ids for heavy ions
+/// @param z Charge of the heavy ion
+/// @param a Atomic number of the heavy ion
+/// @param l Number of lambdas in a hypernucleus
+Int_t hid( Int_t z, Int_t a, Int_t l=0 )
+{
+  //         10LZZZAAAI
+  return (   1000000000
+       +     10000000*l
+       +        10000*z
+       +           10*a );
+}
+
 class St_geant_Maker;
 St_geant_Maker *geant_maker = 0;
 
@@ -31,8 +45,8 @@ double _magfield  = -5.005;
 
 int     _npart = 10;  // floor number of tracks per event
 float   _fpart = 0.05;  // fraction of track multiplicity to embed
-int     _pid[50]={1,2,3,8,9,11,12,14,15,10017,10007,45,50045,49,50049,37}; //geant3 particle ID
-TString _pnm[50]={"gamma","positron","electron","pi+","pi-","K+","K-","proton","antiproton","eta","pi0","deuteron","antideuteron","he3","antihe3","D0"}; // particle names
+int     _pid[50]={1,2,3,8,9,11,12,14,15,10017,10007,45,50045,49,50049,37,61053,61054,62053,62054}; //geant3 particle ID
+TString _pnm[50]={"gamma","positron","electron","pi+","pi-","K+","K-","proton","antiproton","eta","pi0","deuteron","antideuteron","he3","antihe3","D0","HyperT_2body","HyperT_bar_2body","HyperT_3body","HyperT_bar_3body"}; // particle names
 TString _part  = "pi+"; // particle to simulate, default pi+
 TString _part_save;
 float   _ptmn  = 0.100; // min pT to simulate [GeV]
@@ -264,8 +278,9 @@ void runEmbeddingSimulation2014(
   gSystem->Load( "libPythia8_1_62.so");
   gSystem->Load( "libMathMore.so"   );  
 
-
-
+  // force gstar load/call... 
+  gSystem->Load( "gstar.so" );
+  command("call gstar");
 
   //________________________________________________________
   //
@@ -290,6 +305,23 @@ void runEmbeddingSimulation2014(
 
   Kinematics();
 
+#if 1 
+  // Load STAR Particle DataBase and add the hypertriton definitions.  Map to the
+  // decay modes as defined in gstar_part.g 
+  StarParticleData &pdb = StarParticleData::instance();
+  pdb.AddParticle("HyperT_2body",     new TParticlePDG( "HyperpT_2body",     "HyperTriton     --> He3    pi-", 2.99131, false, 0.0, +3.0, "hypernucleus", +hid(1,3,1), 0, 61053 ));
+  pdb.AddParticle("HyperT_bar_2body", new TParticlePDG( "HyperT_bar_2body",  "AntiHyperTriton --> He3bar pi+", 2.99131, false, 0.0, -3.0, "hypernucleus", -hid(1,3,1), 0, 61054 ));
+  pdb.AddParticle("HyperT_3body",     new TParticlePDG( "HyperT_3body",      "HyperTriton     --> d p pi-",    2.99131, false, 0.0, +3.0, "hypernucleus", +hid(1,3,1), 0, 62053 ));
+  pdb.AddParticle("HyperT_bar_3body", new TParticlePDG( "HyperT_bar_3body",  "AntiHyperTriton --> dbar pbar pi+", 2.99131, false, 0.0, -3.0, "hypernucleus", -hid(1,3,1), 0, 62054 ));
+  // Hypertriton will be phase-space decayed by geant 
+  pdb.AddParticle("deuteron", new TParticlePDG( "deuteron",  "Deuteron", 1.876, true, 0.0, 3.0, "hion", hid(1,2,0), 0, 45 ));
+  pdb.AddParticle("antideuteron", new TParticlePDG( "antideuteron",  "anti Deuteron", 1.876, true, 0.0, -3.0, "hion", -hid(1,2,0), 0, 50045 ));
+  pdb.AddParticle("he3", new TParticlePDG( "he3",  "Helium-3", 2.809, true, 0.0, 6.0, "hion", hid(2,3,0), 0, 49 ));
+  pdb.AddParticle("antihe3", new TParticlePDG( "antihe3",  "anti Helium-3", 2.809, true, 0.0, -6.0, "hion", -hid(2,3,0), 0, 50049 ));
+
+#endif
+
+#if 0 
   //
   // Setup decay manager
   //
@@ -299,14 +331,6 @@ void runEmbeddingSimulation2014(
   decayPy8->SetDebug(1);
   //  decayPy8->Set("WeakSingleBoson:all = on");
 
-
-
-
-  TString name;
-  double mass, lifetime, charge;
-  int tracktype, pdgcode, g3code;
-
-#if 1
   // Particle data
   StarParticleData& data = StarParticleData::instance();
 
@@ -341,7 +365,7 @@ void runEmbeddingSimulation2014(
      decayPy8->Set("111:onMode = off");
      decayPy8->Set("111:onIfMatch = 22 11 -11");
   }
-  if(_part == "deuteron" || _part == "antideuteron" || _part == "he3" || _part == "antihe3"){
+  if(_part == "deuteron" || _part == "antideuteron"){
      data.AddParticleToG3( "deuteron", 0.1876E+01, 0.10000E+16, 1., 8, 1000010020, 45, 0, 0 );
      TParticlePDG* deuteron     = data.GetParticle("deuteron");    
      deuteron->Print();
@@ -350,16 +374,6 @@ void runEmbeddingSimulation2014(
      data.AddParticleToG3( "antideuteron", 0.1876E+01, 0.10000E+16, -1., 8, -1000010020, 50045, 0, 0 );
      TParticlePDG* antideuteron     = data.GetParticle("antideuteron");    
      antideuteron->Print();
-  }
-  if(_part == "he3"){
-     data.AddParticleToG3( "he3", 0.2809E+01, 0.10000E+16, 2., 8, 1000020030, 49, 0, 0 );
-     TParticlePDG* he3     = data.GetParticle("he3");    
-     he3->Print();
-  }
-  if(_part == "antihe3"){
-     data.AddParticleToG3( "antihe3", 0.2809E+01, 0.10000E+16, -2., 8, -1000020030, 50049, 0, 0 );
-     TParticlePDG* antihe3     = data.GetParticle("antihe3");    
-     antihe3->Print();
   }
 
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.33 2019/01/07 15:50:12 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.34 2019/06/25 15:50:15 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.34  2019/06/25 15:50:15  ullrich
+ * Improved QT board error reports/handling. Added EPD access functions. (Akio)
+ *
  * Revision 2.33  2019/01/07 15:50:12  ullrich
  * Added StTriggerData2019.
  *
@@ -112,7 +115,7 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.33 2019/01/07 15:50:12 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.34 2019/06/25 15:50:15 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
@@ -159,26 +162,39 @@ void StTriggerData::decodeQT(unsigned int ndata, unsigned int* data, unsigned sh
     if (ndata>MaxQTData)         { printf("QT data length %d is too long (max is %d)\n",ndata,MaxQTData); return;}
     if (data[ndata-1] != 0xac10) { printf("Wrong QT data last word %x (should be 0xAC10)\n",data[ndata-1]); return;}
     int header=1;
-    //unsigned int crate,oldch;
+    int oldch;
+    unsigned int crate;
     unsigned int addr,ch,nline;
     for (unsigned int i=0; i<ndata-1; i++){
         unsigned int d = data[i];
         if (header==1){
-            //crate =  (d & 0xff000000) >> 24;
+            crate =  (d & 0xff000000) >> 24;
             addr  = ((d & 0x00ff0000) >> 16) - 0x10;
             nline =  (d & 0x000000ff);
-            //oldch = 0;
+            oldch = -1;
             if(nline>0) header=0;
             //printf("i=%3d  crate=%3d  addr=%3d  nline=%3d\n",i,crate,addr,nline);
-        }
-        else {
+        }else{
             ch = (d & 0xf8000000) >> 27;
-            adc[addr][ch] = (unsigned short)  (d & 0x00000fff);
-            tdc[addr][ch] = (unsigned char)  ((d & 0x001f0000) >> 16);
-            //printf("i=%3d  crate=%3d  addr=%3d  nline=%3d  ch=%3d  adc=%5d  tdc=%5d\n",i,crate,addr,nline,ch,adc[addr][ch],tdc[addr][ch]);
-            //if(adc[addr][ch]==0) printf("ADC = 0  problem : i=%3d  crate=%3d  addr=%3d  nline=%3d  ch=%3d  adc=%5d  tdc=%5d\n",i,crate,addr,nline,ch,adc[addr][ch],tdc[addr][ch]);
-            //if(ch<=oldch)      printf("Ch Order problem : i=%3d  crate=%3d  addr=%3d  nline=%3d  ch=%3d  adc=%5d  tdc=%5d\n",i,crate,addr,nline,ch,adc[addr][ch],tdc[addr][ch]);
-            //oldch=ch;
+	    unsigned short a = (unsigned short)  (d & 0x00000fff);
+	    unsigned short t = (unsigned char)  ((d & 0x001f0000) >> 16);
+	    //printf("i=%3d crt=%2d adr=%2d ch=%3d adc=%4d tdc=%4d\n",i,crate,addr,ch,a,t);
+	    unsigned int flag=0;
+            if(a==0) flag+=1; 
+	    if((int)ch<=oldch) flag+=2;  
+	    if(ch==31 && a==4095 && t==31) flag+=4;
+	    if(flag>0){
+	      printf("i=%3d crt=%2d adr=%2d ch=%3d oldch=%3d adc=%4d tdc=%4d",
+		     i,crate,addr,ch,oldch,a,t);
+	      if((flag & 0x1)>0) printf(" ADC=0!");
+	      if((flag & 0x2)>0) printf(" OrderWrong!");
+	      if((flag & 0x4)>0) printf(" FFFF!");
+	      printf("\n");
+	    }else{
+	      adc[addr][ch] = a;
+	      tdc[addr][ch] = t;
+	      oldch=ch;
+	    }
             nline--;
             if (nline==0) header=1;
         }
@@ -314,6 +330,7 @@ unsigned short StTriggerData::pp2ppTAC(StBeamDirection eastwest, int vh, int udi
 unsigned long  StTriggerData::pp2ppDSM(int prepost) const {return 0;}
 unsigned short StTriggerData::fmsADC(int crt, int adr, int ch, int prepost) const {return 0;}
 unsigned short StTriggerData::fmsTDC(int crt, int adr, int ch, int prepost) const {return 0;}
+unsigned short StTriggerData::epdEarliestTDC(StBeamDirection eastwest, int prepost) const {return 0;}
 unsigned short StTriggerData::epdTimeDifference() const {return 0;}
 bool           StTriggerData::epdHitLayer2(StBeamDirection eastwest) const {return false;}
 unsigned short StTriggerData::epdLayer1(int ch, int prepost) const {return 0;}
@@ -325,6 +342,13 @@ unsigned char  StTriggerData::epdLayer0h(int ch, int prepost) const {return 0;}
 unsigned short StTriggerData::epdADC(int crt, int adr, int ch, int prepost) const {return 0;}
 unsigned short StTriggerData::epdTDC(int crt, int adr, int ch, int prepost) const {return 0;}
 unsigned short StTriggerData::epdNHits(StBeamDirection eastwest, int prepost) const {return 0;}
+unsigned short StTriggerData::epdNHitsQT(int crate, int qt, int mult12, int prepost) const {return 0;}
+unsigned short StTriggerData::epdLayer0aMult(int ch, int prepost) const {return 0;}
+unsigned short StTriggerData::epdLayer0hMult(int ch, int mult12, int prepost) const {return 0;}
+unsigned short StTriggerData::epdLayer1bMult(StBeamDirection eastwest, int ring, int prepost) const {return 0;}
+unsigned short StTriggerData::epdMultTotal(int prepost) const {return 0;}
+unsigned short StTriggerData::epdMultDiff(int prepost) const {return 0;}
+
 unsigned char* StTriggerData::getDsm_FMS(int prepost) const {return 0;}
 unsigned char* StTriggerData::getDsm01_FMS(int prepost) const {return 0;}
 unsigned char* StTriggerData::getDsm02_FMS(int prepost) const {return 0;}

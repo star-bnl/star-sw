@@ -1,6 +1,9 @@
-// $Id: StFmsClusterFitter.h,v 1.9 2018/03/02 20:27:29 akio Exp $
+// $Id: StFmsClusterFitter.h,v 1.10 2019/06/26 16:49:53 akio Exp $
 //
 // $Log: StFmsClusterFitter.h,v $
+// Revision 1.10  2019/06/26 16:49:53  akio
+// shower shape scaling for all shapes
+//
 // Revision 1.9  2018/03/02 20:27:29  akio
 // Big update from	Zhanwen Zhu with new shower shape and six z slices
 //
@@ -90,13 +93,14 @@ class StFmsClusterFitter : public TObject {
  public:
   /** Constructor using detector geometry for a single sub-detector */
   StFmsClusterFitter(/*const StFmsGeometry* geometry,*/ Int_t detectorId, Float_t xw, Float_t yw, 
-           Int_t scaleShowerShape , Int_t ShowerShapeWithAngle , Int_t MergeSmallToLarge, double vertexZ);
+		     Float_t scaleShowerShapeLarge , Float_t scaleShowerShapeSmall,
+		     Int_t ShowerShapeWithAngle , Int_t MergeSmallToLarge, double vertexZ);
   /**
    Default constructor.
 
    \todo Actually initialize things!
    */
-  StFmsClusterFitter() : mScaleShowerShape(0) { }
+  StFmsClusterFitter() { }
   /** Destructor */
   virtual ~StFmsClusterFitter();
   /**
@@ -258,7 +262,8 @@ class StFmsClusterFitter : public TObject {
   TMinuit mMinuit;  ///< Minuit fitting interface
   static StFmsTowerCluster::Towers* mTowers;  ///< List of towers to fit
   static Double_t mEnergySum;
-  Int_t mScaleShowerShape;
+  Float_t mScaleShowerShapeLarge=1.0;
+  Float_t mScaleShowerShapeSmall=1.0;
   Int_t mShowerShapeWithAngle;
   Int_t mMergeSmallToLarge;
 

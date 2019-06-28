@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2019.cxx,v 2.1 2019/01/07 15:49:06 ullrich Exp $
+ * $Id: StTriggerData2019.cxx,v 2.2 2019/06/25 15:50:16 ullrich Exp $
  *
  * Author: Akio Ogawa, October 13, 2017
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2019.cxx,v $
+ * Revision 2.2  2019/06/25 15:50:16  ullrich
+ * Improved QT board error reports/handling. Added EPD access functions. (Akio)
+ *
  * Revision 2.1  2019/01/07 15:49:06  ullrich
  * Initial Revision.
  *
@@ -404,14 +407,14 @@ unsigned int StTriggerData2019::spinBitBlueUnpol() const
 
 unsigned short StTriggerData2019::bbcADC(StBeamDirection eastwest, int pmt, int prepost) const
 {
-    const int addrmap[2][24] = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        4, 4, 4, 4, 4, 4, 4, 4},
-        { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-            4, 4, 4, 4, 4, 4, 4, 4} };
-    const int chmap[2][24]   = { { 0, 3, 8,16,19,24, 1, 2, 9,10,11,17,18,25,26,27,
-        0, 1, 2, 3, 8, 9,10,11},
-        { 0, 3, 8,16,19,24, 1, 2, 9,10,11,17,18,25,26,27,
-            16,17,18,19,24,25,26,27} };
+  const int addrmap[2][24] = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				 4, 4, 4, 4, 4, 4, 4, 4},
+			       { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+				 4, 4, 4, 4, 4, 4, 4, 4} };
+  const int chmap[2][24]   = { { 0, 3, 8,16,19,24, 1, 2, 9,10,11,17,18,25,26,27,
+				 0, 1, 2, 3, 8, 9,10,11},
+			       { 0, 3, 8,16,19,24, 1, 2, 9,10,11,17,18,25,26,27,
+				 16,17,18,19,24,25,26,27} };
     int buffer = prepostAddress(prepost);
     if (buffer >= 0 && pmt>=1 && pmt<=16) return bbq[buffer][addrmap[eastwest][pmt-1]][chmap[eastwest][pmt-1]];
     return 0;
@@ -613,23 +616,128 @@ unsigned short StTriggerData2019::epdLayer1b(int ch, int prepost) const
     return 0;
 }
 
+unsigned short StTriggerData2019::epdEarliestTDC(StBeamDirection eastwest, int prepost) const 
+{
+  int buffer = prepostAddress(prepost);
+  if (buffer>=0){
+    if(eastwest==east){
+      unsigned short dsmEP001OutR = epdLayer1(0, prepost);
+      unsigned short dsmEP001OutL = epdLayer1(1, prepost);
+      unsigned int dsmEP001Out = (dsmEP001OutL<<16) + dsmEP001OutR;
+      int maxTac03 = (dsmEP001Out >> 12) & 0xfff; // max tac from channels 0:3                                            
+      int maxTac47 = (dsmEP001Out >> 0 ) & 0xfff; // max tac from channels 4:7                                            
+      return (maxTac03>maxTac47)?maxTac03:maxTac47;
+    }else{
+      unsigned short dsmEP002OutR = epdLayer1(2, prepost);
+      unsigned short dsmEP002OutL = epdLayer1(3, prepost);
+      unsigned int dsmEP002Out = (dsmEP002OutL<<16) + dsmEP002OutR;
+      int maxTac03 = (dsmEP002Out >> 12) & 0xfff; // max tac from channels 0:3                                                
+      int maxTac47 = (dsmEP002Out >> 0 ) & 0xfff; // max tac from channels 4:7                                                
+      return (maxTac03>maxTac47)?maxTac03:maxTac47;
+    }
+  }
+  return 0;
+}
+
 unsigned short StTriggerData2019::epdNHits(StBeamDirection eastwest, int prepost) const
 {
-    int buffer = prepostAddress(prepost);
-    if (buffer>=0){
-	if(eastwest==east){
-	    unsigned short dsmEP001OutR = epdLayer1(0, 0);
-	    unsigned short dsmEP001OutL = epdLayer1(1, 0);
-	    unsigned int dsmEP001Out = (dsmEP001OutL<<16) + dsmEP001OutR;
-	    return (dsmEP001Out >> 24) & 0xff;
-	}else{
-	    unsigned short dsmEP002OutR = epdLayer1(2, 0);
-	    unsigned short dsmEP002OutL = epdLayer1(3, 0);
-	    unsigned int dsmEP002Out = (dsmEP002OutL<<16) + dsmEP002OutR;
-	    return (dsmEP002Out >> 24) & 0xff;
-        }
+  int buffer = prepostAddress(prepost);
+  if (buffer>=0){
+    if(eastwest==east){
+      unsigned short dsmEP001OutR = epdLayer1(0, prepost);
+      unsigned short dsmEP001OutL = epdLayer1(1, prepost);
+      unsigned int dsmEP001Out = (dsmEP001OutL<<16) + dsmEP001OutR;
+      return (dsmEP001Out >> 24) & 0xff;
+    }else{
+      unsigned short dsmEP002OutR = epdLayer1(2, prepost);
+      unsigned short dsmEP002OutL = epdLayer1(3, prepost);
+      unsigned int dsmEP002Out = (dsmEP002OutL<<16) + dsmEP002OutR;
+      return (dsmEP002Out >> 24) & 0xff;
     }
-    return 0;
+  }
+  return 0;
+}
+
+unsigned short StTriggerData2019::epdLayer0aMult(int ch, int prepost) const{
+  //ch=0-7 (EP003) and ch8-15 (EP004)
+  return epdLayer0a(ch,prepost) & 0x001f;
+}
+
+unsigned short StTriggerData2019::epdLayer0hMult(int ch, int mult12, int prepost) const{
+  if(ch>20) return 0;     //ch=0-9 (EP005) and ch10-19(EP006), 12bit each
+  unsigned short dsm=0, c=ch, out=0; 
+  if(ch>=10) {dsm=1; c=ch-10;}
+  unsigned short chdiv=c/2;
+  unsigned short chmod=c%2;
+  unsigned short base=dsm*16 + chdiv*3;
+  unsigned short o0=epdLayer0h(base  , prepost);
+  unsigned short o1=epdLayer0h(base+1, prepost);
+  unsigned short o2=epdLayer0h(base+2, prepost);
+  if(chmod==0){
+    out = o0 + ((o1 & 0x0f)<<8);
+  }else{
+    out = ((o1 & 0xf0)>>4) + (o2<<4);
+  }
+  if(mult12==0) return out;
+  if(mult12==1) return (out & 0x003f);
+  if(mult12==2) return (out & 0x0fc0) >> 6;
+  return 0;
+}
+
+unsigned short StTriggerData2019::epdNHitsQT(int crate, int qt, int mult12, int prepost) const {
+  //crate=1 for EQ1, crate=2 for EQ2, crate=3 for EQ3
+  //qt=1 for EQ0?1, qt=2 for EQ0?2, ... qt=10 for EQ0?A, qt=11 for EQ0?B
+  //mult12=1 for 1st multiplicity, and mult12=2 for 2nd
+  const unsigned short dsmmap[3][11]={
+    {6,6,6,6,6,6,4,4,4,4,4},
+    {5,5,5,5,5,5,3,3,3,3,3},
+    {5,5,5,3,3,6,6,6,4,4,0}
+  };
+  const unsigned short chmap[3][11]={
+    {0,1,2,3,4,5,0,1,2,3,4},
+    {0,1,2,3,4,5,0,1,2,3,4},
+    {6,7,8,5,7,6,7,8,5,7,0}
+  };
+  if(crate<1 || crate>3) return 0;
+  if(qt<1 || qt>11) return 0;
+  unsigned short dsm=dsmmap[crate-1][qt-1];
+  unsigned short ch=chmap[crate-1][qt-1];
+  if(dsm==3 || dsm==4) return epdLayer0aMult(ch + (dsm-3)*8, prepost);
+  if(dsm==5 || dsm==6) return epdLayer0hMult(ch + (dsm-5)*10, mult12, prepost);
+  return 0;
+}
+
+unsigned short StTriggerData2019::epdLayer1bMult(StBeamDirection eastwest, int ring, int prepost) const
+{
+  if(eastwest==east){
+    switch(ring){
+    case 1: return (epdLayer1b(0,prepost) & 0x007f);
+    case 2: return (epdLayer1b(0,prepost) & 0x7f00) >> 8;
+    case 5: return (epdLayer1b(1,prepost) & 0x00ff);
+    case 4: return (epdLayer1b(1,prepost) & 0xff00) >> 8;
+    case 3: return (epdLayer1b(2,prepost) & 0x00ff);
+    default: return 0;
+    }
+  }else{
+    switch(ring){
+    case 1: return (epdLayer1b(3,prepost) & 0x007f);
+    case 2: return (epdLayer1b(3,prepost) & 0x7f00) >> 8;
+    case 5: return (epdLayer1b(4,prepost) & 0x00ff);
+    case 4: return (epdLayer1b(4,prepost) & 0xff00) >> 8;
+    case 3: return (epdLayer1b(5,prepost) & 0x00ff);
+    default: return 0;
+    }
+  }
+}
+
+unsigned short StTriggerData2019::epdMultTotal(int prepost) const
+{
+  return L1_DSM->VTX[6] & 0x00ff;
+}
+
+unsigned short StTriggerData2019::epdMultDiff(int prepost) const
+{
+  return (L1_DSM->VTX[6] & 0xff00) >> 8;
 }
 
 unsigned short StTriggerData2019::fpd(StBeamDirection eastwest, int module, int pmt, int prepost) const
@@ -1619,10 +1727,10 @@ void StTriggerData2019::dump() const
     printf(" Spin Bits=%d  : ",spinBit());
     for (int i=0; i<8; i++) {printf(" %d",(spinBit()>>(7-i))%2);}; printf("\n");
     //    printf(" CTB ADC : ");       for (int i=0; i<240;i++){ printf("%d ",ctb(i,0));      }; printf("\n");
-    printf(" BBC East ADC : ");  for (int i=1; i<=24;i++){ printf("%d ",bbcADC(east,i,0)); }; printf("\n");
-    printf(" BBC West ADC : ");  for (int i=1; i<=24;i++){ printf("%d ",bbcADC(west,i,0)); }; printf("\n");
-    printf(" BBC East TAC : ");  for (int i=1; i<=16;i++){ printf("%d ",bbcTDC(east,i,0)); }; printf("\n");
-    printf(" BBC West TAC : ");  for (int i=1; i<=16;i++){ printf("%d ",bbcTDC(west,i,0)); }; printf("\n");
+    printf(" BBC East ADC : ");  for (int i=1; i<=16;i++){ printf("%2d ",bbcADC(east,i,0)); }; printf("\n");
+    printf(" BBC East TAC : ");  for (int i=1; i<=16;i++){ printf("%2d ",bbcTDC(east,i,0)); }; printf("\n");
+    printf(" BBC West ADC : ");  for (int i=1; i<=16;i++){ printf("%2d ",bbcADC(west,i,0)); }; printf("\n");
+    printf(" BBC West TAC : ");  for (int i=1; i<=16;i++){ printf("%2d ",bbcTDC(west,i,0)); }; printf("\n");
     for (int i=-numberOfPreXing(); i<=static_cast<int>(numberOfPostXing()); i++){
         printf(" BBC Sums %d xing : ",i);
         printf("East=%d  West=%d   Large tile East=%d  West=%d\n",
@@ -1633,17 +1741,6 @@ void StTriggerData2019::dump() const
                                         bbcEarliestTDC(east,0),bbcEarliestTDC(west,0),bbcTimeDifference());
     printf(" ZDC Earilest : ");  printf("East=%d  West=%d  Difference=%d\n",
                                         zdcEarliestTDC(east,0),zdcEarliestTDC(west,0),zdcTimeDifference());
-    //printf(" FPD East North   : ");for (int i=1; i<=49;i++){ printf("%d ",fpd(east,0,i,0));  }; printf("\n");
-    //printf(" FPD East South   : ");for (int i=1; i<=49;i++){ printf("%d ",fpd(east,1,i,0));  }; printf("\n");
-    //printf(" FPD East Top     : ");for (int i=1; i<=25;i++){ printf("%d ",fpd(east,2,i,0));  }; printf("\n");
-    //printf(" FPD East Bottom  : ");for (int i=1; i<=25;i++){ printf("%d ",fpd(east,3,i,0));  }; printf("\n");
-    //printf(" FPD East North PS: ");for (int i=1; i<= 7;i++){ printf("%d ",fpd(east,4,i,0));  }; printf("\n");
-    //printf(" FPD East South PS: ");for (int i=1; i<= 7;i++){ printf("%d ",fpd(east,5,i,0));  }; printf("\n");
-    //printf(" FPD West South   : ");for (int i=1; i<=49;i++){ printf("%d ",fpd(west,1,i,0));  }; printf("\n");
-    //printf(" FPD West Bottom  : ");for (int i=1; i<=25;i++){ printf("%d ",fpd(west,3,i,0));  }; printf("\n");
-    //printf(" FPD West South PS: ");for (int i=1; i<= 7;i++){ printf("%d ",fpd(west,5,i,0));  }; printf("\n");
-    //printf(" FPD Sums East    : ");for (int j=0; j<4 ;j++) printf("%d ",fpdSum(east,j));        printf("\n");
-    //printf(" FPD Sums West    : ");for (int j=0; j<4 ;j++) printf("%d ",fpdSum(west,j));        printf("\n");
     printf(" ZDC Sum(A) East  : ");printf("%d ",zdcAttenuated(east));        printf("\n");
     printf(" ZDC Sum(A) West  : ");printf("%d ",zdcAttenuated(west));        printf("\n");
     printf(" ZDC Sum(UA) East : ");printf("%d ",zdcUnAttenuated(east));      printf("\n");
@@ -1674,7 +1771,55 @@ void StTriggerData2019::dump() const
             for (int i = 0;i < 8;i++) printf(" %1x %04X", i, mBBC[buffer]->VPD[i]);
         }
     }
+    printf("TOFMult=%d\n",tofMultiplicity());
     printf("\n");
+
+    //EPD
+    int map[3][16]={ {0x01,0x02,0xff, 0x03,0x04,0xff, 0x05,0x06,0xff, 0x07,0x08,0xff, 0x09,0x0a,0x0b, 0xff},
+		     {0x11,0x12,0xff, 0x13,0x14,0xff, 0x15,0x16,0xff, 0x17,0x18,0xff, 0x19,0x1a,0x1b, 0xff},
+		     {0x21,0x22,0xff, 0x23,0x24,0xff, 0x25,0x26,0xff, 0x27,0x28,0xff, 0x29,0x2a,0xff, 0xff}};
+    int mbc[3][16]={ {0x0b,0x0b,0xff, 0x0b,0x0b,0xff, 0x0b,0x0b,0xff, 0x0c,0x0c,0xff, 0x0c,0x0c,0x0c, 0xff},
+		     {0x0b,0x0b,0xff, 0x0b,0x0b,0xff, 0x0b,0x0b,0xff, 0x0c,0x0c,0xff, 0x0c,0x0c,0x0c, 0xff},
+		     {0x0b,0x0b,0xff, 0x0b,0x0c,0xff, 0x0c,0x0b,0xff, 0x0b,0x0b,0xff, 0x0c,0x0c,0xff, 0xff}};
+    int epdm[3][16]; memset(epdm,0,sizeof(epdm));
+    for(int c=1; c<=3; c++){
+      for(int s=0; s<16; s++){
+	int bd=map[c][s] & 0x0f;
+	printf("EQ%1d S=%2d EQ0%02x bd=%1x 1/2 : ",c,s,map[c-1][s],bd); 	
+	for (int ch=0; ch<32; ch++){
+	  if(ch==16) printf("\nEQ%1d S=%2d EQ0%02x bd=%1x 2/2 : ",c,s,map[c-1][s],bd); 	
+	  printf("%4d ",epdADC(c,s,ch));	  
+	  if(map[c-1][s]<0xff){
+	    if(mbc[c-1][s]==0xb){
+	      if(epdADC(c,s,ch)>16) epdm[c-1][bd]++;
+	    }else if(mbc[c-1][s]==0xc && (ch/4)%2==0){
+	      if(epdADC(c,s,ch)>16 && epdADC(c,s,ch+4)>300 && epdADC(c,s,ch+4)<2900) epdm[c-1][bd]++;
+	    }
+	  }
+	}
+	printf(" mult=%d\n",epdm[c-1][bd]);
+      }
+    }    
+    printf("EP001 TAC+hit: "); for(int c=0;  c<8;  c++){ printf("%4x ",epdLayer0t(c));} printf("\n");
+    printf("EP002 TAC+hit: "); for(int c=8;  c<16; c++){ printf("%4x ",epdLayer0t(c));} printf("\n");
+    printf("EP003 Nhit:    "); for(int c=0;  c<8;  c++){ printf("%2d ",epdLayer0aMult(c));} printf("\n");
+    printf("EP004 Nhit:    "); for(int c=8;  c<16; c++){ printf("%2d ",epdLayer0aMult(c));} printf("\n");
+    printf("EP005 Nhit1:   "); for(int c=0;  c<10; c++){ printf("%2d ",epdLayer0hMult(c,1));} printf("\n");
+    printf("EP005 Nhit2:   "); for(int c=0;  c<10; c++){ printf("%2d ",epdLayer0hMult(c,2));} printf("\n");
+    printf("EP006 Nhit1:   "); for(int c=10; c<20; c++){ printf("%2d ",epdLayer0hMult(c,1));} printf("\n");
+    printf("EP006 Nhit2:   "); for(int c=10; c<20; c++){ printf("%2d ",epdLayer0hMult(c,2));} printf("\n");
+    for(int c=1; c<=3; c++){
+      for(int q=1; q<=11; q++){
+	int eq=(c-1)*0x10 + q;
+	printf("mult-EQ%03x %02x %02x  | %02x : %02x\n",eq,epdNHitsQT(c,q,1),epdNHitsQT(c,q,2),epdm[c-1][q],epdNHitsQT(c,q,1)^epdm[c-1][q]);
+      }
+      printf("\n");
+    }
+    printf("EP102 : "); for(int c=0;  c<8;   c++){  printf("%04x ", epdLayer1b(c));} printf("\n");
+    printf("EP102 east Mult : "); for(int r=1;  r<=5;  r++){  printf("%3d ", epdLayer1bMult(east, r));} printf("\n");
+    printf("EP102 west Mult : "); for(int r=1;  r<=5;  r++){  printf("%3d ", epdLayer1bMult(west, r));} printf("\n");
+    printf("EPD(VP201) mult total = %3d  diff= %3d\n",epdMultTotal(),epdMultDiff());
+
     printf("VTX:");
     if (L1_DSM){
         for (int i = 0;i < 8;i++) printf(" %1x %04X", i, L1_DSM->VTX[i]);

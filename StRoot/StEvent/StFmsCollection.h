@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsCollection.h,v 2.8 2015/11/05 19:00:39 ullrich Exp $
+ * $Id: StFmsCollection.h,v 2.9 2019/06/25 15:56:33 ullrich Exp $
  *
  * Author: Jingguo Ma, Dec 2009
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StFmsCollection.h,v $
+ * Revision 2.9  2019/06/25 15:56:33  ullrich
+ * FMS shower shape scaling in StFmsCollection (Akio)
+ *
  * Revision 2.8  2015/11/05 19:00:39  ullrich
  * Added 4 new inline functions.
  *
@@ -82,12 +85,15 @@ public:
     int isTry1PhotonFit()            const;
     int isNewClusterCategorization() const;
     int isScaleShowerShape()         const;
+    float scaleShowerShapeLarge()    const;
+    float scaleShowerShapeSmall()    const;
     void setFmsReconstructionFlag(int v);
     void setMergeSmallToLarge(int v);
     void setGlobalRefit(int v);
     void setTry1PhotonFit(int v);
     void setNewClusterCategorization(int v);
     void setScaleShowerShape(int v);
+    void setScaleShowerShape(float l, float s);
 
     void fillFpsSlat();            //update FPS slat info based on FMS hits
     void fillFpsAssociation();     //update FPS-FMS association info based on FMS points
@@ -120,12 +126,15 @@ private:
     Int_t mFmsReconstructionFlag;   // LSB=(0=small/large separately, 1=merge small cell to large)
                                     // 2nd LSB=(0=No global refit, 1=performe global refit)
                                     // 3rd LSB=(0=No 1photon fit retry, 1=performe 1 photon fit if 2 photon fit is bad)
+    Float_t mScaleShowerShapeLarge=1.0; 
+    Float_t mScaleShowerShapeSmall=1.0; 
+
 
     bool mFpsSlatFilled;            //!
     bool mFpsAssociationFilled;     //!
     bool mFmsPointPairFilled;       //!
 
-    ClassDef(StFmsCollection, 3)
+    ClassDef(StFmsCollection, 4)
 };
 
 inline int StFmsCollection::fmsReconstructionFlag()      const {return mFmsReconstructionFlag;}
@@ -134,11 +143,13 @@ inline int StFmsCollection::isGlobalRefit()              const {return ((mFmsRec
 inline int StFmsCollection::isTry1PhotonFit()            const {return ((mFmsReconstructionFlag &  0x4)>>2);}
 inline int StFmsCollection::isNewClusterCategorization() const {return ((mFmsReconstructionFlag &  0x8)>>3);}
 inline int StFmsCollection::isScaleShowerShape()         const {return ((mFmsReconstructionFlag & 0x10)>>4);}
+inline float StFmsCollection::scaleShowerShapeLarge()    const {return mScaleShowerShapeLarge;}
+inline float StFmsCollection::scaleShowerShapeSmall()    const {return mScaleShowerShapeSmall;}
 inline void StFmsCollection::setFmsReconstructionFlag(int v)    {mFmsReconstructionFlag=v;}
 inline void StFmsCollection::setMergeSmallToLarge(int v)        {mFmsReconstructionFlag=(mFmsReconstructionFlag & 0xfffffe) | (v & 0x1);   }
 inline void StFmsCollection::setGlobalRefit(int v)              {mFmsReconstructionFlag=(mFmsReconstructionFlag & 0xfffffd) | (v & 0x1)<<1;}
 inline void StFmsCollection::setTry1PhotonFit(int v)            {mFmsReconstructionFlag=(mFmsReconstructionFlag & 0xfffffb) | (v & 0x1)<<2;}
 inline void StFmsCollection::setNewClusterCategorization(int v) {mFmsReconstructionFlag=(mFmsReconstructionFlag & 0xfffff7) | (v & 0x1)<<3;}
 inline void StFmsCollection::setScaleShowerShape(int v)         {mFmsReconstructionFlag=(mFmsReconstructionFlag & 0xffffef) | (v & 0x1)<<4;}
-
+inline void StFmsCollection::setScaleShowerShape(float l, float s) {mScaleShowerShapeLarge=l; mScaleShowerShapeSmall=s;};
 #endif
