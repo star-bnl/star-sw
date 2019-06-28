@@ -7,8 +7,9 @@
   cd ${SUBMITTINGDIRECTORY}  
   setenv NODEBUG yes
   setup 64b
-  starver .DEV2 
-#  starver TFG17j 
+#  starver .DEV2 
+#  starver TFG17j
+#   starver TFG19e
   set file = $INPUTFILE0;
   set rung = `echo $file | awk -F\_ '{print $2}'`
   echo "${file}"
@@ -26,7 +27,9 @@
 #    root4star -q -b 'TpcRS.C(1000,"MC.2016,sdt20160419.051230,TpcRS,StiCA,KFVertex,rung.'${rung}'",0,"heed,PhysicsOff,'${file}'")' &gt;&amp; ${logFile}
 #root.exe -x  -q -b 'TpcRS.C(100,"MC.2019,-bbcSim,StiCA'${KFVertex}',-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco'${sdt}',RunG.1,McTpcAna",0,"heed,PhysicsOff,'${file}'")' &gt;&amp; ${logFile}
 #root.exe -x  -q -b 'TpcRS.C(100,"MC.2019,-bbcSim,StiCA'${KFVertex}',-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco'${sdt}',RunG.1,McTpcAna",0,"heed,'${file}'")' &gt;&amp; ${logFile}
-root4star -x  -q -b 'TpcRS.C(100,"MC.2019,-bbcSim,StiCA'${KFVertex}',-geantOut,evout,CorrY,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco'${sdt}',RunG.1,McTpcAna",0,"heed,'${file}'")' &gt;&amp; ${logFile}
+#root4star -x  -q -b 'TpcRS.C(100,"MC.2019,-bbcSim,StiCA'${KFVertex}',-geantOut,evout,CorrY,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco'${sdt}',RunG.1,McTpcAna",0,"heed,'${file}'")' &gt;&amp; ${logFile}
+#root4star -x  -q -b 'TpcRS.C(100,"MC.2019,-bbcSim,StiCA'${KFVertex}',-geantOut,evout,CorrY,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco'${sdt}',RunG.1,McTpcAna",0,"heed,hadr_of,'${file}'")' &gt;&amp; ${logFile}
+root.exe -x  -q -b 'TpcRS.C(100,"MC.2019,-bbcSim,StiCA'${KFVertex}',-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco'${sdt}',RunG.1,McTpcAna",0,"heed,hadr_of,'${file}'")' &gt;&amp; ${logFile}
   endif
 </command>
 <input URL="command:TpcRS_Part.pl" />

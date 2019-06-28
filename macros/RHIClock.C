@@ -30,16 +30,50 @@ CuCu62  cu62productionMinBias|  6081022| 31.064|9381640|9.382 | 9.379588 |-0.02%
 CuCu22  cu20Test             |  6083002| 11.216|9351770|9.352 | 9.355936 |-0.34% 
 AuAu200 productionMid        |  5084015| 99.908|9383149|9.383 | 9.383165 | 
 AuAu62  production62GeV      |  5091003| 31.151|9379360|9.379 | 9.379609 |-0.04%
+
+2019         
+glbSetup                            frequncy Ekin   Frequncy calc. Calc./Declared                                         
+production_19GeV_2019                9341082 9.796  9348122        1.00075366001497468   9341045 9.99996039002762238e-01 9341035 9.99994968462968203e-01
+production_14p5GeV_2019              9307122 7.309  9323422        1.00175134697922741   9307048 9.99992049099603486e-01 9307038 9.99990974653603981e-01
+production_lzr_14p5GeV_2019          9307122 7.309
+production_7.3GeV_fixedTarget_2019   9307129 7.309
+production_lzr_7p7GeV_2019           9104511 7.309
+production_7p7GeV_2019               9104506 3.847  9203553        1.01087889886612192   9104334 9.99981108255626361e-01 9104323 9.99979900062672233e-01
+production_3p85GeV_fixedTarget_2019  9104506 3.947
+
+   root.exe -q -b lBichsel.C pionMIP.root 'dEdxFit.C+("SecRow3C","GF")'
 */
-Double_t RHIClock(Double_t e, Double_t m) {
-  Double_t l = 3833.845*9.99998896969437556e-01;  // RHIC perimetr
+#if !defined(__CINT__) && !defined(__CLING__) && ! defined(__MAKECINT__)
+// code that should be seen ONLY by the compiler
+#else
+#if !defined(__CINT__) && !defined(__CLING__) || defined(__MAKECINT__)
+// code that should be seen by the compiler AND rootcint
+#else
+// code that should always be seen
+#endif
+#endif
+//#if ROOT_VERSION_CODE >= ROOT_VERSION(5,34,18)
+//#define __USE_ROOFIT__
+//#endif
+//________________________________________________________________________________
+#if !defined(__CINT__) && !defined(__CLING__) || defined(__MAKECINT__)
+#include "Riostream.h"
+#include <stdio.h>
+#include "TROOT.h"
+#include "TSystem.h"
+#include "TMath.h"
+#endif
+//________________________________________________________________________________
+Int_t RHIClock(Double_t e, Double_t m) {
+  Double_t l = 3833.845*9.99988614393081399e-01;// *9.99998896969437556e-01;  // RHIC perimetr
   Double_t NB = 120;      // no. of buches
-  Double_t beta = TMath::Sqrt((e+m)*(e+m) - m*m)/(e+m);
-  Double_t f = NB*beta*TMath::C()/l;
+  Double_t beta = TMath::Sqrt(e*e - m*m)/(e);
+  Int_t f = NB*beta*TMath::C()/l;
   cout << "Freqency = " << f << " for kinetic energy = " << e << " mass = " << m <<endl;
   return f;
 }
-Double_t RHIClock(const Char_t *name="p", Double_t e = 250) {
+//________________________________________________________________________________
+Int_t RHIClock(const Char_t *name="p", Double_t e = 250) {
   TString Name(name);
   Double_t M = 1;
   Int_t    Z = 1;
@@ -106,9 +140,13 @@ Double_t RHIClock(const Char_t *name="p", Double_t e = 250) {
     Z = 29;
     M = A*u;
   }
-
-  cout << Name.Data() << "\tA\t" << A << "\tZ\t" << Z << "\tM\t" << M << "\tE\t" << e << endl; 
-  return RHIClock(e*A,M);
+  Double_t E = e*A;
+  //  e = TMath::Sqrt(p*p + M*M) - M;
+  //  Double_t gamma = (e + M)/M;
+  Double_t gamma = E/M;
+  Double_t beta  = TMath::Sqrt(1 - 1./(gamma*gamma));
+  cout << Name.Data() << "\tA\t" << A << "\tZ\t" << Z << "\tM\t" << M << "\tE\t" << e << "\tgamma = " << gamma << "\tbeta = " << beta  << endl; 
+  return RHIClock(E,M);
 }
 
 
