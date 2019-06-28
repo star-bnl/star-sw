@@ -26,9 +26,10 @@ my $first =  1;
 my $last  =  $first + $step - 1;
 #print "first = $first, last = $last\n" if ($debug);
 my $count = 0;
+#________________________________________________________________________________
 sub SPrint ($$$$) {
   my ($line,$file,$f,$l) = @_;
-  if ($l - $f >= 1) {# Allow to have error in no. of events in FileCatalog
+  if ($l - $f >= 2) {# Allow to have error in no. of events in FileCatalog
     my $rootf = $file . "_" . $f . "_" . $l . ".picoDst.root"; 
     if (-r $rootf) {
 #      print "rootf = $rootf\n" if (debug);
@@ -47,6 +48,26 @@ sub SPrint ($$$$) {
     $count++;
   }
 }
+# sort
+#________________________________________________________________________________
+sub FirstEvent($){
+  my $file = @_[0];# print "@_[0] => file = $file\n";
+  $file =~ s/adc_//;
+  my @words = split('_',$file);# print "file = $file; words = @words\n";
+  my $fa = $words[5];
+  #      my ($dummy,$dummy,$dummy,$dummy,$dummy,$fa,$dummy) = split('_',$_);
+#  print "FirstEvent: $file = $fa\n";
+  return $fa;
+}
+#________________________________________________________________________________
+
+sub sortByFirstEvent {
+  #      my ($dummy,$dummy,$dummy,$dummy,$dummy,$fa,$dummy) = split('_',$a);
+  #      my ($dummy,$dummy,$dummy,$dummy,$dummy,$fb,$dummy) = split('_',$b);
+  #      print "sortByFirstEvent: $a, $b => $fa => $fb\n";
+  FirstEvent($a) <=> FirstEvent($b);
+}
+#________________________________________________________________________________
 foreach my $glob (@globs) {
   my @list = glob $glob;
   my $fNo = 0;
@@ -54,19 +75,47 @@ foreach my $glob (@globs) {
     $fNo++;
 #    chop($line);
     my $file = File::Basename::basename($line,".daq");
-    my $cmd = "get_file_list.pl -keys 'events' -cond 'filetype=online_daq,filename=" . $file . ".daq' -limit 1"; print "$cmd\n" if ($debug);
+    print "----------------------------------------\n" if ($debug);
+    my $cmd = "get_file_list.pl -keys 'events' -cond 'filetype=online_daq,filename=" . $file . ".daq' -limit 1";# print "$cmd\n" if ($debug);
     my $N = `$cmd`; chomp($N); 
     print "$file N = $N" if ($debug);
-    if (! $N) {$N = `strings $line | grep EventSummary | wc -l`; chomp($N); print "\tfrom strings N = $N" if ($debug);}
+#    if (! $N) {$N = `strings $line | grep EventSummary | wc -l`; chomp($N); print "\tfrom strings N = $N" if ($debug);}
     print "\n"  if ($debug);
+    $first = 1;
     $last = $N;
     my $f = $first;
     my $l = $last;
     my $lC = $f;
     my $fC = $l;
-    my @files = glob $file . "*.picoDst.root"; print "files  = @files\n" if ($debug);
+    my @filesU = glob $file . "*.picoDst.root";# print "filesU  = @filesU\n" if ($debug);
+    my $NF = $#filesU + 1; #print "NF = $NF\n";
+    my @files = @filesU;# print "files = @files\n" if (debug);
+    for (my $i = 0; $i < $NF; $i++) {
+      for (my $j; $j < $i; $j++) {
+	my $fj = FirstEvent($files[$j]);# print "fj = $fj\n" if (debug);
+	my $fi = FirstEvent($files[$i]);# print "fi = $fi\n" if (debug);
+	if ($fi < $fj) {
+#	  print "before swap j = $j $files[$j] i = $i $files[$i]\n";
+	  my $temp = $files[$i];
+	  $files[$i] = $files[$j];
+	  $files[$j] = $temp;
+#	  print "after swap j = $j $files[$j] i = $i $files[$i]\n";
+	} 
+      }
+    }
+#    my $files = sort sortByFirstEvent @filesU; 
+#    print "files  = @files\n" if ($debug);
     if ($debug) {
-      foreach my $file (@files) {print "$file\n";}
+#       print "Unsorted\n";
+#       foreach my $file (@filesU) {
+# 	my $fa = FirstEvent($file);
+# 	print "$file => fa = $fa\n";
+#       }
+#       print "Sorted\n";
+       foreach my $file (@files) {
+# 	my $fa = FirstEvent($file);
+ 	print "$file\n"; # => fa = $fa\n";
+       }
     }
 #    die;
     # check repeats
@@ -74,10 +123,10 @@ foreach my $glob (@globs) {
     my @F = ();
     my @L = ();# print "initialization : $#F\n";
     foreach my $mu (@files) {
-      my $b = File::Basename::basename($mu,".picoDst.root");
-      $b =~ s/_adc//;
-#      print "$b\n" if ($debug);
-      my ($dummy,$dummy,$dummy,$dummy,$dummy,$f1,$l1) = split('_',$b); 
+      my $base = File::Basename::basename($mu,".picoDst.root");
+      $base =~ s/_adc//;
+#      print "$base\n" if ($debug);
+      my ($dummy,$dummy,$dummy,$dummy,$dummy,$f1,$l1) = split('_',$base); #print "f1 = $f1, l1 = $l1\n" if ($debug);
       push @F, $f1;
       push @L, $l1;
     }
@@ -105,13 +154,13 @@ foreach my $glob (@globs) {
 	$l = $N;
 	SPrint($line,$file,$f,$l); $count++;
       } 
-      if ($F[0] > $f) {
+      if ($F[0] > 2) {
 	$f = 1;
-	$l = $F[0] - 1;
+	$l = $F[0] - 2; # reject last event
 	SPrint($line,$file,$f,$l); $count++;
       } 
       for (my $i = 1; $i < $No; $i++) {
-#	print "$i  : $F[$i]  $L[$i]\n" if ($debug);
+	#	print "$i  : $F[$i]  $L[$i]\n" if ($debug);
 	my $f = $L[$i-1]+1;
 	my $l = $F[$i]-1;
 	# print "f = $f l = $l\n" if ($debug);
