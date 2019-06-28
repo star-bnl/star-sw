@@ -125,7 +125,7 @@ endif
     #
     setenv STAR_HOST_SYS $STAR_SYS
     set redhat = ""
-
+    if (! $?AVX) setenv AVX "";#    setenv AVX  "AVX"; # now for HLT machines only
     if (-f /etc/redhat-release) then
 	set rhflavor = `$AWK '{print $1 $2}' /etc/redhat-release | sed "s/[a-z]//g" | $AWK '{print tolower($1)}'`
 	set redhat   = `$AWK '{for (i=1;i<=NF;i++) if ($i == "release" || $i == "Release") print $(i+1)}' /etc/redhat-release`
@@ -213,15 +213,15 @@ endif
 		    breaksw
 		case "x86*":
 		case "amd64*":
-#		echo "${rhflavor}${redhat}_x8664_${STARCMPLC}${vers}"
+#		echo "${rhflavor}${redhat}_x8664_${STARCMPLC}${vers}${AVX}"
 		    if ( $USE_64BITS == 1 ) then
-			setenv STAR_HOST_SYS ${rhflavor}${redhat}_x8664_${STARCMPLC}${vers}
+			setenv STAR_HOST_SYS ${rhflavor}${redhat}_x8664_${STARCMPLC}${vers}${AVX}
 		    else
-			setenv STAR_HOST_SYS ${rhflavor}${redhat}_${STARCMPLC}${vers}
+			setenv STAR_HOST_SYS ${rhflavor}${redhat}_${STARCMPLC}${vers}${AVX}
 		    endif
 		    breaksw
 		default:
-		    setenv STAR_HOST_SYS ${rhflavor}${redhat}_${STARCMPLC}${vers}
+		    setenv STAR_HOST_SYS ${rhflavor}${redhat}_${STARCMPLC}${vers}${AVX}
 	    endsw
 	endif
 #	echo "STAR_HOST_SYS => $STAR_HOST_SYS"

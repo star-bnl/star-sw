@@ -779,7 +779,7 @@ if ( $pkg =~ m/^StEventDisplay/ || $#uiQT >= 0 || $OnlinePackage ) {
   $CPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{CPPFLAGS};
   $FCPATH = "#StarVMC/geant3" . $main::PATH_SEPARATOR . $INCLUDE .
     $main::PATH_SEPARATOR . $env1->{Packages}->{CERNLIB}->{INCDIR};
-  $FDEBUG  =~ s/O3/O2/; print "FDEBUG = $FDEBUG\n";
+  $FDEBUG  =~ s/O3/O2/;# print "FDEBUG = $FDEBUG\n";
 #  if ($FC eq 'ifort') {
 #    $FCPATH .= $main::PATH_SEPARATOR . "#StarVMC/geant3/minicern/kerngen"; # bug in ifort with include path
 #  }
@@ -848,6 +848,7 @@ if ( $pkg =~ m/^St.*Db/             ||
   $CPPPATH .= $main::PATH_SEPARATOR . "#StRoot/StPxlSimMaker/DIGMAPS"; 
 } elsif ($pkg =~ m/^StHLTCAMaker$/ || $pkg =~ m/^StvMaker$/ || $pkg =~ m/^StvSeed$/){ #  
   $CXXFLAGS .= " -DNVALGRIND -DDO_TPCCATRACKER -DNODEBUG -DENABLE_VECTORIZATION";# . $SSE_FLAGS; #" -msse -msse2";
+  $CXXFLAGS =~ s/mavx/msse4\.2/;
   if ($CC ne 'icc') {
     $CXXFLAGS .= " -Wno-pragmas -Wunused-function";
   }
@@ -862,6 +863,7 @@ if ( $pkg =~ m/^St.*Db/             ||
   $extraCXXFLAGS .= "  -Wno-parentheses -Wno-unused-function"; # new flags
   $CXXFLAGS .= $extraCXXFLAGS;
   $CXXFLAGS .= $env->{Packages}->{Vc}->{CPP};
+  $CXXFLAGS =~ s/mavx/msse4\.2/;
   $LIBS = "-lVc";
   $LIBPATH .=  $main::PATH_SEPARATOR . $env->{ENV}->{OPTSTAR} . "/lib";
   if ($extraCXXFLAGS =~ /USE_TBB/) {$LIBS .= " -lTBB";}
@@ -886,7 +888,7 @@ if ( $pkg =~ m/^St.*Db/             ||
 #       Install $envTPCCA $BIN, $prog;
 #     }
 #   }
-}  elsif ( $pkg =~ m/KFParticle/) {
+}  elsif ( $pkg =~ m/KFParticle/ || $pkg =~ m/StMuMcAnalysisMaker/) {
   $CPPFLAGS .= " -DDO_TPCCATRACKER_EFF_PERFORMANCE";
   $CPPPATH .=
     $main::PATH_SEPARATOR . "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/../TPCCATracker" . $main::PATH_SEPARATOR . "#" .
@@ -896,6 +898,7 @@ if ( $pkg =~ m/^St.*Db/             ||
   $extraCXXFLAGS .= " -DNODEBUG";
   $CXXFLAGS .= $extraCXXFLAGS;
   $CXXFLAGS .= $env->{Packages}->{Vc}->{CPP};
+  $CXXFLAGS =~ s/mavx/msse4\.2/;
   $LIBPATH .=  $main::PATH_SEPARATOR . $env->{ENV}->{OPTSTAR} . "/lib";
   $LIBS = "-lVc";
 }
