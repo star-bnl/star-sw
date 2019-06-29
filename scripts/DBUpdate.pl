@@ -198,8 +198,8 @@ for ($i=0 ; $i <= $#ARGV ; $i++){
 		$CACHOFF = 0;
 	    }
 	    $SPDR->SetCacheOffset($CACHOFF);
-	    print "$SELF :: Cache offset is $CACHOFF\n";
 	}
+	print "$SELF :: Cache offset is $CACHOFF\n";
 
     } else {
 	# ... as well as previous syntax
@@ -364,6 +364,9 @@ foreach  $file (@ALL){
     chop($path);
     $hpath= $path;
 
+    # honestly, does not matter to use -k for /home/starlib/home/starreco
+    # because of the substitution below if eq "" (besides, does not matter
+    # if it is the start of the path as well)
     if ($SUBPATH eq ""){
 	$hpath=~ s/$SCAND/$HPSSD/;
     } else {
@@ -554,8 +557,9 @@ FINAL_EXIT:
 		if ($DOCACHE){
 		    if ( open(FO,">$FLNM.tmp") ){
 			print FO 
+			    "$SELF :: ".localtime().
 			    "Caching used - Pass done on ".localtime()." found no changes\n".
-			    " - cache will expire in ".$SPDR->ToFromCache(-2)." passes\n";
+			    "\t- cache will expire in ".$SPDR->ToFromCache(-2)." passes\n";
 			open(FI,"$FLNM");
 			while ( defined($line = <FI>) ){  print FO "$line";}
 			close(FI);
@@ -593,7 +597,7 @@ sub Stream
     foreach $line (@lines){
 	$LOUT++;
 	chomp($line);
-	print $FO "$SELF :: $line\n";
+	print $FO "$SELF :: ".localtime()." : $line\n";
     }
 }
 

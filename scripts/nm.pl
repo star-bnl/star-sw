@@ -13,10 +13,11 @@ $STAR       = $ENV{STAR};
 $ROOTSYS    = $ENV{ROOTSYS};
 $OS         = $ENV{STAR_HOST_SYS};
 $CERN       = $ENV{CERN};
-$CERN_LEVEL = $ENV{CERN_LEVEL};
-$OPTSTAR    = $ENV{OPTSTAR};
-$OSG        = $ENV{OSG};
-$DEBUG      = $ENV{NMPL_DEBUG};
+$CERN_LEVEL = $ENV{CERN_LEVEL};  
+$OPTSTAR    = $ENV{OPTSTAR};      # search OPTSTAR compiled libs
+$OSG        = $ENV{OSG};          # search for OSG libs
+$DEBUG      = $ENV{NMPL_DEBUG};   # debug libraries
+$DEEPS      = $ENV{NMPL_DEEPS};   # deep search
 
 $SELF       = "nm.pl";
 
@@ -120,6 +121,14 @@ if ( defined($OSG) ){
     print "\tAdding Globus libraries from $OSG/globus/lib/*.so\n";
     push(@all,glob("$OSG/globus/lib/*.so"));
 }
+
+
+# deep debug
+#if ( defined($DEEPS) ){
+#    print "\tAdding /usr/lib/*.so for deep searh analysis\n";
+#    push(@all,glob("/usr/lib/*.so.*"));
+#    push(@all,glob("/usr/lib/*/*.so.*"));
+#}
 
 
 # Make a common cache for this script 
