@@ -35,11 +35,11 @@ sub SPrint ($$$$) {
 #      print "rootf = $rootf\n" if (debug);
       next;
     }
-#    my $blaf  = $file . "_" . $f . "_" . $l . ".bla.root";
-#    if (-r $blaf) {
+    my $blaf  = $file . "_" . $f . "_" . $l . ".bla.root";
+    if (-r $blaf) {
 #      print "$blaf\n" if (debug); 
-#      next;
-#    }
+      next;
+    }
 #    if (! $debug) {`touch $blaf`;}
     my                       $chain = "P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault";
     if ($run == "20093001") {$chain = "P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault";}
@@ -110,7 +110,7 @@ foreach my $glob (@globs) {
 #       foreach my $file (@filesU) {
 # 	my $fa = FirstEvent($file);
 # 	print "$file => fa = $fa\n";
-#       }
+#       }x[
 #       print "Sorted\n";
        foreach my $file (@files) {
 # 	my $fa = FirstEvent($file);
@@ -144,20 +144,21 @@ foreach my $glob (@globs) {
 	}
       }
     }
+    my $fcount = $count;
     if ($No <= 0) {
       $f = $first;
       $l = $last;
-      SPrint($line,$file,$f,$l); $count++;
+      SPrint($line,$file,$f,$l); 
     } else {
       if ($L[$No-1] < $N) {
 	$f = $L[$No-1] + 1;
 	$l = $N;
-	SPrint($line,$file,$f,$l); $count++;
+	SPrint($line,$file,$f,$l); 
       } 
       if ($F[0] > 2) {
 	$f = 1;
 	$l = $F[0] - 2; # reject last event
-	SPrint($line,$file,$f,$l); $count++;
+	SPrint($line,$file,$f,$l); 
       } 
       for (my $i = 1; $i < $No; $i++) {
 	#	print "$i  : $F[$i]  $L[$i]\n" if ($debug);
@@ -165,10 +166,18 @@ foreach my $glob (@globs) {
 	my $l = $F[$i]-1;
 	# print "f = $f l = $l\n" if ($debug);
 	if ($f <= $l) {
-	  SPrint($line,$file,$f,$l); $count++;
+	  SPrint($line,$file,$f,$l); 
 	}
       }
     }
+#    print "count = $count, fcount = $fcount\n";
+   $fcount = $count - $fcount;
+    if (! $count) {
+#      print "$file is Done\n";
+      my $touchf = $file . ".Done";
+#      `touch $touchf`;
+    }
   }
 }
+#if (! $count) {`touch Done`;}
 exit $count;

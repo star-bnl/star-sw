@@ -31,6 +31,17 @@ grep total ???/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fM\n", n/1.e
    set b = `basename ${f} .picoDst.root`; set d = `dirname ${f}`; mv ${d}/${b}* Zombie/
  end
 ================================================================================
+ foreach f (`grep Zombie Recover.Terminated.picoDst.list | awk '{print $3}'`)
+   set b = `basename ${f} .picoDst.root`; set d = `dirname ${f}`; 
+   if (! -r Zombie/${b}B.log) then 
+	mv  ${d}/${b}* Zombie/
+   else
+	mv  ${d}/${b}*.root Zombie/
+        set N = `dir  Zombie/${b}B.log* | wc -l`;
+        mv ${d}/${b}B.log Zombie/${b}B.log${N} 
+   endif
+ end
+================================================================================
  foreach b ( `grep is\ Zombie *Chain | sed -e 's/:/ /' | awk '{print $2}' | sed -e 's/.picoDst.root//'` )
    mv ${b}* Zombie
  end
@@ -40,7 +51,7 @@ grep total ???/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fM\n", n/1.e
 cat Terminated.log | xargs 2019Production.pl | tee 2019Production.log
 renameF.pl
 ===================== Submit ===========================================================
-foreach d (`ls -1d 093/20*`)
+foreach d (`ls -1d 092/20*`)
   cd $d;  pwd;
   lsf ~/xml/daq_2019X_TFG19e.xml
   cd -
