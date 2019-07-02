@@ -193,6 +193,7 @@ HitPars_t operator+(const HitPars_t &a,const TVectorD &add);
 //______________________________________________________________________________
 class Poli2 {
 public:
+enum {kXMAX=200};
 Poli2(int npw=1);
 Poli2(int npw,int n,const double *X,const double *Y,const double *W);
 void Init();
@@ -214,9 +215,9 @@ private:
 int fPw;
 char   fBeg[1];
 int    fN;
-double fX[100];
-double fY[100];
-double fW[100];
+double fX[kXMAX];
+double fY[kXMAX];
+double fW[kXMAX];
 double fXi2;
 double fX0,fY0;
 char   fEnd[1];
@@ -396,6 +397,7 @@ int fiterr(const char *opt)
 //______________________________________________________________________________
 Poli2::Poli2(int npw):fP(npw+1),fB(npw+1),fA(npw+1,npw+1),fAi(npw+1,npw+1)
 {
+assert(0);
   fPw = npw;
   Clear();  
   
@@ -409,6 +411,7 @@ void Poli2::Clear()
 Poli2::Poli2(int npw,int N,const double *X,const double *Y,const double *W)
 :fP(npw+1),fB(npw+1),fA(npw+1,npw+1),fAi(npw+1,npw+1)
 {
+assert(0);
   fPw = npw;
   Clear();  
   fN = N;
@@ -421,7 +424,7 @@ Poli2::Poli2(int npw,int N,const double *X,const double *Y,const double *W)
 void Poli2::Add(double x, double y, double w)
 { 
   fX[fN]=x; fY[fN]=y, fW[fN]=w; fN++;
-  assert(fN<=100);
+  assert(fN<=kXMAX);
 }
 //______________________________________________________________________________
 void Poli2::Init()
@@ -745,6 +748,8 @@ void FitState_t::Deriv(const std::vector<MyPull> &MyVect)
 int FitState_t::operator<(const FitState_t &old) const
 {
 //if (Pos()<old.Pos()) return 1;
+  double delta = (Fcn()-old.Fcn())/Fcn();
+
   if (Der()<0        ) 				return 0;
   if (Fcn()<old.Fcn()) 				return 1;
   if (Der()<old.Der() 
@@ -1896,9 +1901,12 @@ void myTCL::eigen2(const double err[3], double lam[2], double eig[2][2])
 }
 //______________________________________________________________________________
 /*
-* $Id: fiterr.C,v 1.7 2010/01/27 21:38:06 perev Exp $
+* $Id: fiterr.C,v 1.8 2019/07/02 20:48:18 perev Exp $
 *
 * $Log: fiterr.C,v $
+* Revision 1.8  2019/07/02 20:48:18  perev
+* Increaese array of hits
+*
 * Revision 1.7  2010/01/27 21:38:06  perev
 * bugFix + remove not used code
 *
