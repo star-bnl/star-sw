@@ -30,22 +30,33 @@ my $count = 0;
 sub SPrint ($$$$) {
   my ($line,$file,$f,$l) = @_;
   if ($l - $f >= 2) {# Allow to have error in no. of events in FileCatalog
-    my $rootf = $file . "_" . $f . "_" . $l . ".picoDst.root"; 
-    if (-r $rootf) {
-#      print "rootf = $rootf\n" if (debug);
-      next;
+    my $step = 1000;
+    for (my $f1 = $f; $f1 <= $l; $f1 += $step) {
+      my $l1 = $f1 + $step - 1;
+      if ($l1 > $l) {$l1 = $l;}
+      my $rootf = $file . "_" . $f1 . "_" . $l1 . ".picoDst.root"; 
+      if (-r $rootf) {
+	#      print "rootf = $rootf\n" if (debug);
+	next;
+      }
+      my $blaf  = $file . "_" . $f1 . "_" . $l1 . ".bla.root";
+      if (-r $blaf) {
+	#      print "$blaf\n" if (debug); 
+	next;
+      }
+      #    if (! $debug) {`touch $blaf`;}
+      my                       $chain = "P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault";
+      if ($run == "20093001") {$chain = "P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault";}
+      # Check failed 
+      my $log   = "../../Zombie/" . $file . "_" . $f1 . "_" . $l1 . "*.log*";
+      my @logs = glob $log;# print "$log => logs = @logs\n"; 
+      if ($#logs > 0) {
+	print "@logs => failed $#logs times\n" if ($debug);
+      } else {
+	print "string:$line:$f1:$l1:$chain\n";
+      }
+      $count++;
     }
-    my $blaf  = $file . "_" . $f . "_" . $l . ".bla.root";
-    if (-r $blaf) {
-#      print "$blaf\n" if (debug); 
-      next;
-    }
-#    if (! $debug) {`touch $blaf`;}
-    my                       $chain = "P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault";
-    if ($run == "20093001") {$chain = "P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault";}
-    print "string:$line:$f:$l:$chain\n";
-    #  }
-    $count++;
   }
 }
 # sort
@@ -76,8 +87,19 @@ foreach my $glob (@globs) {
 #    chop($line);
     my $file = File::Basename::basename($line,".daq");
     print "----------------------------------------\n" if ($debug);
-    my $cmd = "get_file_list.pl -keys 'events' -cond 'filetype=online_daq,filename=" . $file . ".daq' -limit 1";# print "$cmd\n" if ($debug);
-    my $N = `$cmd`; chomp($N); 
+    my $globN = "*:" . $file;;
+    my @NFiles = glob $globN;
+    my $N = 0;
+    if ($#NFiles < 0) {
+      my $cmd = "get_file_list.pl -keys 'events' -cond 'filetype=online_daq,filename=" . $file . ".daq' -limit 1";# print "$cmd\n" if ($debug);
+      $N = `$cmd`; chomp($N); 
+      my $NFile = $N . ":" . $file;
+      `touch $NFile`;
+    } else {
+      my($n1,$n2) = split(":",$NFiles[0]);
+      $N = $n1;
+      print "Found $N from $NFiles[0]\n" if ($debug);
+    }
     print "$file N = $N" if ($debug);
 #    if (! $N) {$N = `strings $line | grep EventSummary | wc -l`; chomp($N); print "\tfrom strings N = $N" if ($debug);}
     print "\n"  if ($debug);
@@ -179,5 +201,5 @@ foreach my $glob (@globs) {
     }
   }
 }
-#if (! $count) {`touch Done`;}
+if (! $count) {`touch Done`;}
 exit $count;
