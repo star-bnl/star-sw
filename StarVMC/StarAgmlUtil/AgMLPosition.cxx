@@ -86,10 +86,20 @@ extern "C"
     _position->Invert(); 
     if(verbose) _position -> Print("Invert");
   }
-  void agml_rotation( const double rotm[3][3] ){ 
-    _position->Rotation(rotm); 
-    if(verbose) _position -> Print("Rot matrix");
-  }
+  // void agml_rotation_( const double rotm[3][3] ){ 
+  //   _position->Rotation(rotm); 
+  //   if(verbose) _position -> Print("Rot matrix");
+  // }
+  void agml_rotation_( const float* rotm, const int len ) {
+    double R[4][4] = {  
+      {1,0,0,0}, 
+      {0,1,0,0}, 
+      {0,0,1,0}, 
+      {0,0,0,1}  
+    };
+    int k = 0;   for ( int i=0; i<3; i++ ) for ( int j=0; j<3; j++ ) R[i][j] = rotm[k++];
+    _position->Matrix(R);
+  };
 
   void agml_get_angles_( float& tx, float& px, float& ty, float& py, float& tz, float& pz ) {
     _position->GetAngles(tx,px,ty,py,tz,pz);

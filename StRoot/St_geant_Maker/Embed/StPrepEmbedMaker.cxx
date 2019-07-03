@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.14 2016/10/14 07:12:26 zhux Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.15 2018/03/30 23:36:32 smirnovd Exp $
  *
  */
 
@@ -292,7 +292,7 @@ Int_t StPrepEmbedMaker::Make()
   }
 
   // Extract info for mult for this event
-  const Int_t numberOfPrimaryTracks = (Int_t) mMoreTree ? mMoreTree->GetV1()[0] : mTree->GetV1()[0];
+  const Int_t numberOfPrimaryTracks = static_cast<int>(mMoreTree ? mMoreTree->GetV1()[0] : mTree->GetV1()[0]);
   const Int_t npart = getMultiplicity( *EvtHddr, numberOfPrimaryTracks ) ;
 
   nFound = (Int_t) mTree->Draw("primaryVertexX:primaryVertexY:primaryVertexZ:TriggerId",
@@ -890,6 +890,9 @@ void StPrepEmbedMaker::gkine(const Int_t mult, const Double_t vzmin, const Doubl
 
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.15  2018/03/30 23:36:32  smirnovd
+ * Fix improper cast revealed in 64-bit build
+ *
  * Revision 1.14  2016/10/14 07:12:26  zhux
  * "refmult" and "vx,vy,vz" will be read from moretags.root file if it exists.
  * The minimum number of embedded particles are now set to 5 instead of 1, when the number of embeded particles is set to be proportional to refmult.

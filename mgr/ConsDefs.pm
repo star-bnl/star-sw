@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.144 2016/04/26 17:58:26 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.145 2018/04/11 19:03:11 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -22,8 +22,14 @@
         chop($STAR_SYS);
         $STAR_HOST_SYS = $STAR_SYS;
     }
-    if ( !$OPTSTAR ) { $OPTSTAR = "/opt/star"; } # print "OPTSTAR = $OPTSTAR\n"; die;
-    if ( !$XOPTSTAR ) { $XOPTSTAR = $OPTSTAR;} # print "OPTSTAR = $OPTSTAR\n"; die;
+    if ( !$OPTSTAR )  { $OPTSTAR  = "/opt/star"; } # print "OPTSTAR = $OPTSTAR\n"; die;
+    if ( !$XOPTSTAR ) { $XOPTSTAR = $OPTSTAR;}     # print "OPTSTAR = $OPTSTAR\n"; die;
+    my $MYSTAR;
+    if ( -e "$OPTSTAR/lib"){        $MYSTAR = $OPTSTAR;
+    } elsif ( -e "$XOPTSTAR/lib"){  $MYSTAR = $XOPTSTAR;
+    } else {   die "Neitehr OPTSTAR nor XOPTSTAR have the proper structure\n";}
+
+
     $BUILD   = "#." . $STAR_HOST_SYS; print "build for $BUILD\n" unless ($param::quiet);
     $INCLUDE = $BUILD  . "/include";
 
@@ -915,12 +921,12 @@
     # my $os_name = `uname`;
     # chomp($os_name);
     #
-    # *** Standard package first, then XOPTSTAR ***
+    # *** Standard package first, then MYSTAR ***
     #	
     my ($MYSQLINCDIR,$mysqlheader);
     if ( defined($ENV{USE_LOCAL_MYSQL}) ){
 	($MYSQLINCDIR,$mysqlheader) =
-	    script::find_lib( $XOPTSTAR . "/include " .  $XOPTSTAR . "/include/mysql ".
+	    script::find_lib( $MYSTAR . "/include " .  $MYSTAR . "/include/mysql ".
 			      $MYSQL . " " .
 			      "/sw/include/mysql ".
 			      "/include /usr/include ".
@@ -936,19 +942,19 @@
 			      "/usr/include/mysql  ".
 			      "/usr/mysql/include  ".
 			      "/usr/mysql  ".
-			      $XOPTSTAR . "/include " .  $XOPTSTAR . "/include/mysql " ,
+			      $MYSTAR . "/include " .  $MYSTAR . "/include/mysql " ,
 			      "mysql.h");
     }
 
     if (! $MYSQLINCDIR) {
-	die "Can't find mysql.h in standard path and $XOPTSTAR/include  $XOPTSTAR/include/mysql\n";
+	die "Can't find mysql.h in standard path and $MYSTAR/include  $MYSTAR/include/mysql\n";
     }
 
     # search for the config    
     my ($MYSQLCONFIG,$mysqlconf);
     # if ( defined($ENV{USE_LOCAL_MYSQL}) ){
 	($MYSQLCONFIG,$mysqlconf) =
-	    script::find_lib($XOPTSTAR . "/bin " .  $XOPTSTAR . "/bin/mysql ".
+	    script::find_lib($MYSTAR . "/bin " .  $MYSTAR . "/bin/mysql ".
 			     $MYSQL . " ".
 			     "/usr/$LLIB/mysql /usr/bin/mysql /usr/bin ",
 			     "mysql_config");
@@ -956,7 +962,7 @@
     #	($MYSQLCONFIG,$mysqlconf) =
     #	    script::find_lib($MYSQL . " ".
     #			     "/usr/$LLIB/mysql /usr/bin/mysql /usr/bin ".
-    #			     $XOPTSTAR . "/bin " .  $XOPTSTAR . "/bin/mysql ",
+    #			     $MYSTAR . "/bin " .  $MYSTAR . "/bin/mysql ",
     #			     "mysql_config");
     # } 
 
@@ -971,7 +977,7 @@
     #        USE_LOCAL_MYSQL switch. This may not have been obvious.
     # my ($MYSQLLIBDIR,$MYSQLLIB) =
     #	script::find_lib($mysqllibdir . " /usr/$LLIB/mysql ".
-    #			 $XOPTSTAR . "/lib " .  $XOPTSTAR . "/lib/mysql ",
+    #			 $MYSTAR . "/lib " .  $MYSTAR . "/lib/mysql ",
     #			 "libmysqlclient");
     #			 # "libmysqlclient_r libmysqlclient");
     # # die "*** $MYSQLLIBDIR,$MYSQLLIB\n";
@@ -1077,7 +1083,7 @@
 	#    }
 	#    print "*** ATTENTION *** IVROOT $IVROOT\n";
 	# }
-	if ( ! defined($IVROOT) ){  $IVROOT = $XOPTSTAR;}
+	if ( ! defined($IVROOT) ){  $IVROOT = $MYSTAR;}
 	if ( defined($IVROOT) &&  -d $IVROOT) {
 	    # This is an initial logic relying on IVROOT to be defined
 	    if (-e $IVROOT . "/bin/coin-config") {
@@ -1092,10 +1098,10 @@
 	    }
 
 	} else {
-	    # try finding it in $XOPTSTAR
+	    # try finding it in $MYSTAR
 	    my($coin);
-	    if ( -e "$XOPTSTAR/bin/coin-config"){
-		$coin = "$XOPTSTAR/bin/coin-config";
+	    if ( -e "$MYSTAR/bin/coin-config"){
+		$coin = "$MYSTAR/bin/coin-config";
 	    }
 	    if ( defined($coin) ){
 		chomp($COIN3DINCDIR = `$coin --includedir`);
@@ -1115,11 +1121,11 @@
     }
 
     # Logger
-    $LoggerDir = $XOPTSTAR . "/include/log4cxx";
+    $LoggerDir = $MYSTAR . "/include/log4cxx";
 
     if (-d $LoggerDir) {
-	$LoggerINCDIR = $XOPTSTAR . "/include";
-	$LoggerLIBDIR = $XOPTSTAR . "/lib";
+	$LoggerINCDIR = $MYSTAR . "/include";
+	$LoggerLIBDIR = $MYSTAR . "/lib";
 	$LoggerLIBS   = "-llog4cxx";
 	print
 	    "Use Logger  ",
@@ -1128,7 +1134,7 @@
     }
     # xml2
     my  ($XMLINCDIR,$XMLLIBDIR,$XMLLIBS) = ("","","");
-    my ($xml) =  script::find_lib($XOPTSTAR . "/bin /usr/bin",
+    my ($xml) =  script::find_lib($MYSTAR . "/bin /usr/bin",
 				  "xml2-config");
     if ($xml) {
 	$xml .= "/xml2-config";
@@ -1308,7 +1314,7 @@
 		      'STAR_HOST_SYS'   => $STAR_HOST_SYS,
 		      'STAR_VERSION'    => $STAR_VERSION,
 		      'PERL5LIB'        => $PERL5LIB,
-		      'OPTSTAR'         => $XOPTSTAR,
+		      'OPTSTAR'         => $MYSTAR,
 		      'QTDIR'           => $QTDIR,
 		      'COIN3DIR'        => $COIN3DIR,
 		      'IVROOT'          => $IVROOT,

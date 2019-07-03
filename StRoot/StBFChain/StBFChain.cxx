@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.643 2017/09/13 15:33:51 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.644 2017/10/01 22:54:40 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -568,18 +568,20 @@ Int_t StBFChain::Instantiate()
         gSystem->Load("StBTofUtil.so"); //Not used but loaded to avoid fail
         mk->SetAttr("VFPPVEvNoBtof", kTRUE);
       }
-      if (GetOption("VFPPVnoCTB" ) ) mk->SetAttr("VFPPVnoCTB" 	, kTRUE);
-      if (GetOption("VFFV"       ) ) mk->SetAttr("VFFV"       	, kTRUE);
-      if (GetOption("VFMCE"      ) ) mk->SetAttr("VFMCE"      	, kTRUE);
-      if (GetOption("VFMinuit2"  ) ) mk->SetAttr("VFMinuit2"  	, kTRUE);
-      if (GetOption("VFMinuit3"  ) ) mk->SetAttr("VFMinuit3"  	, kTRUE);
-      if (GetOption("beamLine"   ) ) mk->SetAttr("BeamLine"   	, kTRUE);
-      if (GetOption("beamLine3D" ) ) mk->SetAttr("BeamLine3D"  	, kTRUE);
-      if (GetOption("CtbMatchVtx") ) mk->SetAttr("CTB"        	, kTRUE);
-      if (GetOption("min2trkVtx" ) ) mk->SetAttr("minTracks" 	, 2);
-      if (GetOption("VtxSeedCalG") ) mk->SetAttr("calibBeamline", kTRUE);
-      if (GetOption("usePct4Vtx" ) ) mk->SetAttr("PCT"          , kTRUE);
-      if (GetOption("useBTOF4Vtx") ) mk->SetAttr("BTOF"         , kTRUE);
+      if (GetOption("VFPPVnoCTB" ) )      mk->SetAttr("VFPPVnoCTB" 	, kTRUE);
+      if (GetOption("VFFV"       ) )      mk->SetAttr("VFFV"       	, kTRUE);
+      if (GetOption("VFMCE"      ) )      mk->SetAttr("VFMCE"      	, kTRUE);
+      if (GetOption("VFMinuit2"  ) )      mk->SetAttr("VFMinuit2"  	, kTRUE);
+      if (GetOption("VFMinuit3"  ) )      mk->SetAttr("VFMinuit3"  	, kTRUE);
+      if (GetOption("beamLine"   ) )      mk->SetAttr("BeamLine"   	, kTRUE);
+      if (GetOption("beamLine3D" ) )      mk->SetAttr("BeamLine3D"  	, kTRUE);
+      if (GetOption("CtbMatchVtx") )      mk->SetAttr("CTB"        	, kTRUE);
+      if (GetOption("min2trkVtx" ) )      mk->SetAttr("minTracks" 	, 2);
+      if (GetOption("VtxSeedCalG") )      mk->SetAttr("calibBeamline" 	, kTRUE);
+      if (GetOption("usePct4Vtx" ) )      mk->SetAttr("PCT"           	, kTRUE);
+      if (GetOption("useBTOF4Vtx") )      mk->SetAttr("BTOF"          	, kTRUE);
+      if (GetOption("useBTOFmatchOnly") ) mk->SetAttr("useBTOFmatchOnly", kTRUE);
+
       // X-tended works only for VFPPV, VFPPVnoCTB, VFPPVev for now but could be re-used
       // However, we will change this to a more flexible arbitrarry setting later
       if (GetOption("VFStoreX")    ) mk->SetAttr("VFStore"      , 100); 

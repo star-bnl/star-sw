@@ -150,6 +150,25 @@
     <Construct sys="fgtd" config="FGTDof" simu="2" />
     <Construct sys="phmd" config="PHMDof" simu="1" />
 </Geometry>
+<!-- y2018 series geometry tags -->
+  <Geometry tag="y2018"  check="false" comment="Y2018 rough cut geometry">
+
+    <Construct sys="cave" config="CAVE05" simu="1" />
+    <Construct sys="scon" config="SCON14" simu="2" />
+    <Construct sys="pipe" config="PIPE12" simu="1" />
+    <Construct sys="upst" config="UPSTon" simu="1" />
+    <Construct sys="tpce" config="TPCE31" simu="2" />
+    <Construct sys="btof" config="BTOFv8" simu="2" />
+    <Construct sys="vpdd" config="VPDD08" simu="1" />
+    <Construct sys="calb" config="CALB02" simu="1" />
+    <Construct sys="ecal" config="ECALv6" simu="1" />
+    <Construct sys="bbcm" config="BBCMon" simu="1" />
+    <Construct sys="fpdm" config="FPDM04" simu="1" />
+    <Construct sys="zcal" config="ZCALon" simu="1" />
+    <Construct sys="magp" config="MAGPon" simu="1" />
+    <Construct sys="mutd" config="MUTD15" simu="2" />
+    <Construct sys="etof" config="ETOFv14s" simu="2" />
+  </Geometry>
 
 <!-- y2017 series geometry tags -->
   <Geometry tag="y2017"  check="false" comment="Y2017 rough cut geometry">
@@ -170,7 +189,8 @@
     <Construct sys="mutd" config="MUTD15" simu="2" />
   </Geometry>
 
-  <Geometry tag="y2017a"  check="false" comment="Y2017 rough cut geometry">
+
+  <Geometry tag="y2017a"  check="false" comment="Y2017a production geometry">
 
     <Construct sys="cave" config="CAVE05" simu="1" />
     <Construct sys="scon" config="SCON14" simu="2" />
@@ -185,8 +205,9 @@
     <Construct sys="fpdm" config="FPDM04" simu="1" />
     <Construct sys="zcal" config="ZCALon" simu="1" />
     <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="mutd" config="MUTD15" simu="2" />
+    <Construct sys="mutd" config="MUTD16" simu="2" />
   </Geometry>
+
 
 
   <!-- y2016 series geometry tags -->

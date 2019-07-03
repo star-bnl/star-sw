@@ -2,6 +2,7 @@
 
 #include "TString.h"
 #include "TGeoMatrix.h"
+#include "StMessMgr.h"
 
 //________________________________________________________________________________________________
 AgPosition::AgPosition() :
@@ -10,7 +11,9 @@ AgPosition::AgPosition() :
   mOrderOps(kRotTran),
   mX(0),
   mY(0),
-  mZ(0)
+  mZ(0),
+  mRotationMatrix{1,0,0, 0,1,0, 0,0,1},
+  mHasRotm(false)
 {
 
 };
@@ -38,6 +41,10 @@ TGeoMatrix *AgPosition::rotation()
   TString title = _Table;
   rot->SetName(name);
   rot->SetTitle(title);
+  if ( mHasRotm )  {
+    rot->SetMatrix( mRotationMatrix );      // use this instead
+    return rot;
+  }
   double rotm[3][3];
   for ( int row=0;row<3;row++ )
   for ( int col=0;col<3;col++ )
@@ -90,5 +97,6 @@ void AgPosition::Translate( double x, double y, double z ) {
     mZ+=z;
   }
     
-
 };
+//________________________________________________________________________________________________
+
