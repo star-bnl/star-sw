@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2019.cxx,v 2.2 2019/06/25 15:50:16 ullrich Exp $
+ * $Id: StTriggerData2019.cxx,v 2.3 2019/07/03 08:30:25 ullrich Exp $
  *
  * Author: Akio Ogawa, October 13, 2017
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2019.cxx,v $
+ * Revision 2.3  2019/07/03 08:30:25  ullrich
+ * correct blue filled bunch bit, and cleaning up unused spin bits (Akio)
+ *
  * Revision 2.2  2019/06/25 15:50:16  ullrich
  * Improved QT board error reports/handling. Added EPD access functions. (Akio)
  *
@@ -350,11 +353,7 @@ unsigned int StTriggerData2019::bunchId7Bit() const
 
 unsigned int StTriggerData2019::spinBit() const
 {
-    if(mRun<12000000){
-        return (L1_DSM->lastDSM[7]/16)%256;
-    }else{
-        return (L1_DSM->lastDSM[4]/16)%256;
-    }
+    return (L1_DSM->lastDSM[4]/16)%256;
 }
 
 unsigned int StTriggerData2019::spinBitYellowFilled() const
@@ -365,44 +364,38 @@ unsigned int StTriggerData2019::spinBitYellowFilled() const
 
 unsigned int StTriggerData2019::spinBitYellowUp() const
 {
-    unsigned int sb = spinBit();
-    return (sb/2)%2;
+    return 0;
 }
 
 unsigned int StTriggerData2019::spinBitYellowDown() const
 {
-    unsigned int sb = spinBit();
-    return (sb/4)%2;
+    return 0;
 }
 
 unsigned int StTriggerData2019::spinBitYellowUnpol() const
 {
-    unsigned int sb = spinBit();
-    return (sb/8)%2;
+    return 0;
 }
 
 unsigned int StTriggerData2019::spinBitBlueFilled() const
 {
     unsigned int sb = spinBit();
-    return (sb/16)%2;
+    return (sb/4)%2;
 }
 
 unsigned int StTriggerData2019::spinBitBlueUp() const
 {
-    unsigned int sb = spinBit();
-    return (sb/32)%2;
+    return 0;
 }
 
 unsigned int StTriggerData2019::spinBitBlueDown() const
 {
-    unsigned int sb = spinBit();
-    return (sb/64)%2;
+    return 0;
 }
 
 unsigned int StTriggerData2019::spinBitBlueUnpol() const
 {
-    unsigned int sb = spinBit();
-    return (sb/128)%2;
+    return 0;
 }
 
 unsigned short StTriggerData2019::bbcADC(StBeamDirection eastwest, int pmt, int prepost) const
