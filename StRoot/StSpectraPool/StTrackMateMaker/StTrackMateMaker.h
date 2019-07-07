@@ -46,7 +46,7 @@ public:
     Float_t evOutput[1]; // 1 element
     TTree* trackTree;
     TBranch* trackBr;
-    TBranch* eventBr;
+    //    TBranch* eventBr;
     void Fill(StGlobalTrack* trk1, StPrimaryTrack* ptrk1,StGlobalTrack* trk2, StPrimaryTrack* ptrk2,Int_t maxPing);
     ClassDef(StTrackMateMaker, 1)   //StAF chain virtual base class for Makers
     

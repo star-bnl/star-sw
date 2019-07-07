@@ -124,7 +124,7 @@ Int_t StTrackMateMaker::Init() {
   TString evNames = "refMult/F";
   trackTree = new TTree("trackMateComp","trackMateComp");
   trackBr = trackTree->Branch("data_array",&myData.oldPtGl,names.Data());
-  eventBr = trackTree->Branch("ev_array",evOutput,evNames.Data());
+  //  eventBr = trackTree->Branch("ev_array",evOutput,evNames.Data());
   LOG_INFO << "StTrackMateMaker::Init() - successful" << endm;
   
   return StMaker::Init();
@@ -146,8 +146,20 @@ Bool_t StTrackMateMaker::GoodMatch(StTrack* trk1, StTrack* trk2, UInt_t NPings) 
   if (NPings < 5) return kFALSE;
   if (! trk1)    return kFALSE;
   if (! trk2)    return kFALSE;
-  UInt_t minFit = 0.9*TMath::Min(trk1->fitTraits().numberOfFitPoints(kTpcId),trk2->fitTraits().numberOfFitPoints(kTpcId));
-  if (NPings < minFit) return kFALSE;
+  UInt_t minFit = 0.5*TMath::Min(trk1->fitTraits().numberOfFitPoints(kTpcId),trk2->fitTraits().numberOfFitPoints(kTpcId));
+  if (NPings < minFit){
+    if (Debug() >= 10) {
+      StTrack *tracks[2] = {trk1, trk2};
+      for (Int_t i = 0; i < 2; i++) {
+        StPtrVecHit hits = tracks[i]->detectorInfo()->hits(kTpcId);
+	UInt_t Nhits = hits.size(); 
+	for (UInt_t j = 0; j < Nhits; j++) {
+	  cout << "track" << i+1 << " hit" << j+1 << *hits[j] << endl;
+	}
+      }
+    }
+    return kFALSE;
+  }
   return kTRUE;
 }
 //________________________________________________________________________________
@@ -193,7 +205,7 @@ Int_t StTrackMateMaker::Make(){
   LOG_INFO << "Event2: Track Nodes " << trackNodes2.size() << endm;
   if (! trackNodes1.size() || ! trackNodes2.size()) return kStWarn;
   //eventwise info
-  evOutput[0] = uncorrectedNumberOfPrimaries(*rEvent2);
+  //  evOutput[0] = uncorrectedNumberOfPrimaries(*rEvent2);
   //eventBr->Fill();
   LOG_INFO << "Tpc Hits" << endm;
   // Note:
@@ -212,6 +224,7 @@ Int_t StTrackMateMaker::Make(){
       for (size_t iPadR=0; iPadR<sectorcoll1->numberOfPadrows(); ++iPadR) { //[0,71]
 	const StTpcPadrowHitCollection* padrowcoll1 = sectorcoll1->padrow(iPadR);
 	const StTpcPadrowHitCollection* padrowcoll2 = sectorcoll2->padrow(iPadR);
+	if (! padrowcoll1->hits().size() && ! padrowcoll2->hits().size()) continue;
 	LOG_INFO << "Sector(+1) " << iSec+1 << ", Padrow(+1) " << iPadR+1 << endm;
 	LOG_INFO << "hits1 " << padrowcoll1->hits().size() << endm;
 	LOG_INFO << "hits2 " << padrowcoll2->hits().size() << endm;
@@ -413,6 +426,8 @@ size_t StTrackMateMaker::buildRecHitTrackMap(const StSPtrVecTrackNode& nodes,map
       if (trackO && track != trackO) {
 	LOG_INFO << "Double track associated with hit \n" << *hit
 		 << "\nOld Track : " << *trackO << " and \nNew Track : " << *track << endm;
+	if (track->fitTraits().numberOfFitPoints() > trackO->fitTraits().numberOfFitPoints()) htMap[hit] = track;
+	failedInserts++;
       } else {
 	htMap[hit] = track;
       }
@@ -585,8 +600,8 @@ void StTrackMateMaker::checkConsistency(map<StGlobalTrack*,StGlobalTrack*> &Trac
       StGlobalTrack *tracks[3] = {track1, track2, track};
       for (Int_t i = 0; i < 3; i++) {
 	StGlobalTrack *t = tracks[i];
-	PrPP(Form("Track %i",i+1),*t);
 	if (! t) continue;
+	PrPP(Form("Track %i",i+1),*t);
 	StTrackDetectorInfo *det = t->detectorInfo();
 	StPtrVecHit hits = det->hits(kTpcId);
 	UInt_t Nhits = hits.size(); 
