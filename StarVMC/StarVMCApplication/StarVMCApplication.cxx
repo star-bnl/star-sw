@@ -306,17 +306,13 @@ Bool_t StarVMCApplication::MisalignGeometry() {
       TString path(StarVMCDetector::FormPath(listOfDet2Align[i].path,listOfDet2Align[i].Ndim,indx));
       TString pathA(gSystem->BaseName(path));
       if (! gGeoManager->CheckPath(path)) continue;
-      TObjArray *objs = gGeoManager->GetListOfPhysicalNodes();
-      TGeoPhysicalNode *nodeP = 0;
-      TGeoPhysicalNode *nodeU = 0;
-      if (objs) nodeP = (TGeoPhysicalNode *) objs->FindObject(path);
-      if (nodeP) {
-	if (nodeP->IsAligned()) {
-	  cout << nodeP->GetName() << " has been aligned (?)" << endl;
-	  continue;
-	}
-      } else {
+      TGeoPNEntry *pnEntry = gGeoManager->GetAlignableEntry(path);
+      if (pnEntry) continue; 
+      pnEntry = gGeoManager->SetAlignableEntry(path, path); // use pash as name
+      TGeoPhysicalNode *nodeP = pnEntry->GetPhysicalNode();
+      if (! nodeP) {
 	nodeP = gGeoManager->MakePhysicalNode(path);
+	pnEntry->SetPhysicalNode(nodeP);
       }
       TGeoHMatrix rotL(*(nodeP->GetNode()->GetMatrix())); // ideal matrix before alignment
       TGeoHMatrix rotA = rotL; // After alignment
@@ -338,6 +334,7 @@ Bool_t StarVMCApplication::MisalignGeometry() {
       //      TGeoVolume *motherVV = mother->GetMotherVolume();
       Id = Ntot;
       St_SurveyC *chair = 0;
+      TGeoPhysicalNode *nodeU = 0;
       switch (kDetector) {
       case kTpcRefSys:
 	Tpc2Global = StTpcPosition::instance()->GetMatrix();

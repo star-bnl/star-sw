@@ -47,16 +47,23 @@ StTpcPlanarMeasurement::StTpcPlanarMeasurement(const StTpcHit *hit,TrackPoint* t
   }
   Int_t planeId = 100*sector + rowRC;
   TGeoHMatrix *DT = Plane(sector,rowRC);
+  TGeoPhysicalNode *nodeP = 0;
   if (! DT) {
     TString path = hit->GetPath(); // 
+#if 0
     if (! gGeoManager->CheckPath(path)) {
       cout << "Illegal path " << path.Data() << endl;
       assert(0);
     }
-    TObjArray *nodes = gGeoManager->GetListOfPhysicalNodes();
-    TGeoPhysicalNode *nodeP = 0;
-    if (nodes) nodeP = (TGeoPhysicalNode *) nodes->FindObject(path);
-    if (! nodeP) nodeP =gGeoManager->MakePhysicalNode(path);
+#endif
+    TGeoPNEntry* pnEntry = gGeoManager->GetAlignableEntry(path);
+    if (pnEntry) {
+      nodeP = pnEntry->GetPhysicalNode();
+    } else {
+      cout << "TGeoPNEntry: " << path << " does not exist\n";
+      pnEntry = gGeoManager->SetAlignableEntry(path, path);
+      nodeP = gGeoManager->MakeAlignablePN(pnEntry);
+    }
     if (! nodeP) {
       cout << "TGeoPhysicalNode with path " << path.Data() << " does not exists" << endl;
       assert(0);
