@@ -46,7 +46,9 @@ ostream&  operator<<(ostream& os,  const StKFVertex& v) {
   if (kv > 0) {
     os << Form(" Mc/QA/t:%4i/%3i/%6.0f xyz: %8.3f%8.3f%8.3f m:%4i %6s",kv, v.QaTruth(),
 	       v.TimeMc(), v.XyzMc().X(), v.XyzMc().Y(), v.XyzMc().Z(), 
-	       v.NoDaughtersMc(),(v.GetPDG()) ? TDatabasePDG::Instance()->GetParticle(v.GetPDG())->GetName() : 
+	       v.NoDaughtersMc(),
+	       (v.GetPDG()) && TDatabasePDG::Instance()->GetParticle(v.GetPDG()) ? 
+	       TDatabasePDG::Instance()->GetParticle(v.GetPDG())->GetName() : 
 	       StKFVertex::StKFVertex::GeNames[v.gePidMc()]);
   }
   if (v.Vxyz().Mag() > 1e-4) {
