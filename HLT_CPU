@@ -1,6 +1,6 @@
 Requirements   = CpuModelNumber == 45 # l402 - l403,  48 slots, oldest cpu, have AFS
                               request_afs = 1
-Requirements   = CpuModelNumber == 62 # l405 - l408, 144 slots
+Requirements   = CpuModelNumber == 62 # l405 - l408, 144 slots       l409 
 Requirements   = CpuModelNumber == 63 # l410 - l427, 792 slots, newest cpu
 
 star-submit -p bnl_condor_online_CpuModelNumber45 myJobs.xml

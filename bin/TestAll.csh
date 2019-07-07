@@ -16,30 +16,27 @@ foreach gcc (${list})
   set opts = "debug opt"
   if ($gcc == "gcc8" || gcc == "gcc631") set opts = "debug opt opt3"
   foreach opt ($opts)
+    switch ($opt) 
+    case "opt3":
+      setup -O3
+      echo "debug: $opt => $NODEBUG"
+      breaksw
+    case "opt":
+      setup nodebug
+      echo "debug: $opt => $NODEBUG"
+      breaksw
+    default:
+      setup debug
+      breaksw
+    endsw
     set bits = "64b";
     if ($gcc == "gcc") set bits = "32b 64b";
     foreach bit (${bits})
-      foreach proc (XC RC) # MC)
-	switch ($opt) 
-	case "debug";
-          setup nodebug
-          breaksw
-        case "opt3":
-	   setup -O3
-           breaksw
-        default:
-	   setup nodebug
-           breaksw
-        endsw
-        if ($opt == "debug") then 
-          unsetenv NODEBUG
-        else if ($opt == "opt3") 
-          setenv NODEBUG yes
-        endif
+      foreach proc (RC) # XC  RC MC)
         setup ${gcc}
         setup ${bit}
         starver ${STAR_LEVEL}
-        set dir = ${proc}_${STAR_HOST_SYS}_${STAR_LEVEL}; echo "dir = $dir"
+        set dir = ${proc}_${opt}_${STAR_HOST_SYS}_${STAR_LEVEL}; echo "dir = $dir"
         if (! -d ${dir}) mkdir ${dir}
 	ls -1d ${dir}/*B.log
 	if (! $?) continue
@@ -58,9 +55,6 @@ foreach gcc (${list})
 	case default:
 	  breaksw
         endsw
-	if (${proc} == "RC") then
-	else 
-        endif
         cd -;
       end 
     end

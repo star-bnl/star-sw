@@ -10,7 +10,7 @@
 06/20/19
 1. dN/dx 
 2. Check new cuts in TGeant3 and TpcRS ; in progress waiting for jobs in /star/u/fisyak/work/Tpc/TpcRS/TpcRS2019newCut &  /star/u/fisyak/work/reco/2019/Hijing
-3. Add hyper nuclears in TGeant3
+3. Add hyper nuclears in TGeant3. Done 06/23/19. Under testing
 4. Compare cpu for different gcc versions and options
 5. Try GBL for TPC alignment
 6. Check V0 efficiency for Run 2018

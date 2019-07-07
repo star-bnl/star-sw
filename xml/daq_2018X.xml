@@ -35,7 +35,7 @@
 #  root.exe -q -b 'bfc.C(100,"B2018,UseXgeom,BAna,mtd,btof,BEmcChkStat,emcDY2,fpd,trgd,ZDCvtx,CorrX,OPr40,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,Stx,KFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  root.exe -q -b 'bfc.C(200,"P2018,Stx,KFVertex,-StiCA,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,Stx,KFVertex,evout,TObjTable","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  root.exe -q -b 'bfc.C(200,"P2018,StxCA,KFVertex,-StiCA,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,Stx,KFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
-  root.exe -q -b 'bfc.C(200,"P2018,Stx,KFVertex,-StiCA,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeakFull,evout,NoHistos,noRunco,Stx,KFVertex,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+  root.exe -q -b 'bfc.C(200,"P2018,Stx,KFVertex,-StiCA,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OPr40,OSpaceZ2,OGridLeakFull,evout,NoHistos,noRunco,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
