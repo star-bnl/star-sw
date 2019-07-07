@@ -148,49 +148,25 @@ being 'movedIn' from.  Therefore, a call to moveIn() usually need not be
 followed by a call to movePlusPhi() or moveMinusPhi(), except in cases of
 extreme assymetry, such as navigation through the Silicon Vertex Tracker.
 */
-bool StiDetectorContainer::moveIn(double phiCut, double zCut, double rMin)
+bool StiDetectorContainer::moveIn()
 {
-  if (! *mphi_it || ! (*mphi_it)->getChildCount()) return false;
+
   //remember where we started:
-  StiDetectorNodeVector::const_iterator oldPhiNodeP = mphi_it;
   const StiDetectorNode* oldPhiNode = *mphi_it;
-  bool foundIt = false;
 
   --mradial_it;
-  if (rMin >=0 && (*(*mradial_it)->begin())->getData()->getPlacement()->getNormalRadius() < rMin)
-    return false;
-
-  mphi_it = (*mradial_it)->begin();
+//  mphi_it = (*mradial_it)->begin();
 
   if ( (*mradial_it)->getChildCount() == oldPhiNode->getParent()->getChildCount()) {
     // cout <<"Index into array"<<endl;
     mphi_it = (*mradial_it)->begin()+oldPhiNode->getOrderKey().index;
-
-    foundIt = true;
+    return true;
   }
   else {
     // cout <<"Do linear search"<<endl;
-    foundIt = setPhi( oldPhiNode->getOrderKey() );
+    mphi_it = (*mradial_it)->begin();
+    return setPhi( oldPhiNode->getOrderKey() );
   }
-  if (foundIt) {
-    if (phiCut >= 0) {
-      double phiDiff = TMath::Abs((*mphi_it)->getData()->getPlacement()->getNormalRefAngle() -
-                                  oldPhiNode->getData()->getPlacement()->getNormalRefAngle());
-      if (phiDiff > TMath::Pi()) phiDiff = TMath::TwoPi() - phiDiff;
-      foundIt = (phiDiff <= phiCut);
-    }
-    if (foundIt && zCut >= 0) {
-      double zDiff = TMath::Abs((*mphi_it)->getData()->getPlacement()->getZcenter() -
-                                oldPhiNode->getData()->getPlacement()->getZcenter());
-      foundIt = (zDiff <= zCut);
-    }
-    if (!foundIt) {
-      // keep moving in with the new mradial_it
-      mphi_it = oldPhiNodeP;
-      return moveIn(phiCut,zCut);
-    }
-  }
-  return foundIt;
 }
 
 //______________________________________________________________________________
