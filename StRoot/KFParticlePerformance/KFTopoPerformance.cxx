@@ -2109,7 +2109,7 @@ void KFTopoPerformance::FillMCHistos()
     if(IsCollectZRHistogram(iPDG))
       if(hPartParam2D[6][iPDG][1]) hPartParam2D[6][iPDG][1]->Fill(Z,R,1);
     
-    if( part.IsReconstructable(2) && IsCollectArmenteros(iPDG))
+    if( part.IsReconstructable(2) && IsCollectArmenteros(iPDG) && part.GetDaughterIds().size() > 1)
     {
       int index1 = part.GetDaughterIds()[0];
       int index2 = part.GetDaughterIds()[1];
