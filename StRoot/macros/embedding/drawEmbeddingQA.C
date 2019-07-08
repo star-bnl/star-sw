@@ -13,9 +13,15 @@ void drawEmbeddingQA(
     const TString embeddingFile = "qa_embedding_2005_P07ie.root",
     const TString realDataFile  = "qa_real_2005_P07ie.root",
     const Int_t geantid = 8,
-    const Double_t ptmax = 5.0, // default is 5 GeV/c
+    const Float_t ptMaxCut = 10.0, 
     const Bool_t isEmbeddingOnly = kFALSE,
-    const Int_t parentGeantId = 0
+    const Int_t parentGeantId = 0,
+    const Float_t vzCut = 30.0, 
+    const Int_t refMultMinCut = 0,
+    const Int_t refMultMaxCut = 1000,
+    const Float_t ptMinCut = 0.1,
+    const Float_t etaMaxCut = 1.5,
+    const Float_t yMaxCut = 10.0
 ){
   gROOT->Macro("${STAR}/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   gSystem->Load("StMiniMcEvent");
@@ -29,20 +35,22 @@ void drawEmbeddingQA(
   //
   // NOTE: These are just used to print them out in the pdf, not really affect the real QA process
   const StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
-//  utility->setPtMinCut(0.1);
-//  utility->setPtMaxCut(10.0);
-//  utility->setEtaCut(1.5);
-//  utility->setNHitCut(10);
-//  utility->setNHitToNPossCut(0.51);
-//  utility->setDcaCut(3.0);
-//  utility->setNSigmaCut(2.0);
-//  utility->setRapidityCut(10.0);
-//  utility->setZVertexCut(30.0);
-//  //
-//  //  Default is no trigger cut, you can add multiple trigger id's like
-//  utility->addTriggerIdCut(290001);
-//  utility->addTriggerIdCut(290004);
+  utility->setPtMinCut(ptMinCut);
+  utility->setPtMaxCut(ptMaxCut);
+  utility->setEtaCut(etaMaxCut);
+  //  utility->setNHitCut(10);
+  //  utility->setNHitToNPossCut(0.51);
+  //  utility->setDcaCut(3.0);
+  //  utility->setNSigmaCut(2.0);
+  utility->setRapidityCut(yMaxCut);
+  utility->setRefMultMinCut(refMultMinCut);
+  utility->setRefMultMaxCut(refMultMaxCut);
+  utility->setZVertexCut(vzCut);
 
+  // FIXME: the trigger ID selections has to be hard-coded below!!!
+  // Default is no trigger cut, you can add multiple trigger id's like
+  //  utility->addTriggerIdCut(290001);
+  //  utility->addTriggerIdCut(290004);
 
   StEmbeddingQADraw* maker = new StEmbeddingQADraw(embeddingFile, realDataFile, geantid, isEmbeddingOnly);
   maker->setParentGeantId(parentGeantId) ;
@@ -58,7 +66,7 @@ void drawEmbeddingQA(
 //  maker->setPSOn() ;  // Print ps file
 
   // Set maximum pt to be drawn
-  maker->setPtMax(ptmax) ;
+  maker->setPtMax(ptMaxCut+0.5) ;
 
   // Draw all QA plots
   maker->draw();
