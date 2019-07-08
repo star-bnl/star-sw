@@ -9,7 +9,10 @@ void doEmbeddingQAMaker(
     const Float_t vzCut = 30.0, 
     const Int_t refMultMinCut = 0,
     const Int_t refMultMaxCut = 1000,
-    const Float_t ptMaxCut = 10.
+    const Float_t ptMaxCut = 10.0,
+    const Float_t ptMinCut = 0.1,
+    const Float_t etaMaxCut = 1.5,
+    const Float_t yMaxCut = 10.0
 ){
   const TString data = (isSimulation) ? "minimc tree" : "real data" ;
   const TString title = "Embedding QA from " + data ;
@@ -33,39 +36,24 @@ void doEmbeddingQAMaker(
   // were not removed. These functions can be still used instead of those from StEmbeddingQAUtilities.
   //
   const StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
-//  utility->setPtMinCut(0.1);
+  utility->setPtMinCut(ptMinCut);
   utility->setPtMaxCut(ptMaxCut);
-//  utility->setEtaCut(1.5);
-//  utility->setNHitCut(10);
-//  utility->setNHitToNPossCut(0.51);
-//  utility->setDcaCut(3.0);
-//  utility->setNSigmaCut(2.0);
-//  utility->setRapidityCut(10.0);
-//  utility->setZVertexCut(30.0);
-//  //
-//  //  Default is no trigger cut, you can add multiple trigger id's like
-//  utility->addTriggerIdCut(290001);
-//  utility->addTriggerIdCut(290004);
+  utility->setEtaCut(etaMaxCut);
+  //  utility->setNHitCut(10);
+  //  utility->setNHitToNPossCut(0.51);
+  //  utility->setDcaCut(3.0);
+  //  utility->setNSigmaCut(2.0);
+  utility->setRapidityCut(yMaxCut);
+  utility->setRefMultMinCut(refMultMinCut);
+  utility->setRefMultMaxCut(refMultMaxCut);
+  utility->setZVertexCut(vzCut);
+
+  // FIXME: the trigger ID selections has to be hard-coded below!!!
+  // Default is no trigger cut, you can add multiple trigger id's like
+  //  utility->addTriggerIdCut(290001);
+  //  utility->addTriggerIdCut(290004);
 
   StEmbeddingQA* maker = new StEmbeddingQA(year, production, isSimulation);
-
-  /// Set z-vertex cut (default is 30cm unless otherwise specified)
-  maker->setZVertexCut(vzCut);
-	maker->setRefMultMinCut(refMultMinCut);
-	maker->setRefMultMaxCut(refMultMaxCut);
-	maker->setPtMax(ptMaxCut);
-
-  /// Set rapidity cut (default is 10). 
-  // Uncomment next line and put the rapidity cut if you want to make the rapidity cut
-//  maker->setRapidityCut(1.0);
-
-  /// Set trigger id cut (default is no trigger id selection)
-  //    NOTE: you can put multiple trigger id's like
-  //     maker->addTriggerIdCut(290001);
-  //     maker->addTriggerIdCut(290004);
-  //
-  // Uncomment next line and put the trigger id if you want to make the trigger id cut
-//  maker->addTriggerIdCut(210020);
 
   maker->book(outputFileName);
   maker->run(inputFileList);
