@@ -32,6 +32,7 @@ void displayHelp()
     LOG(ERR,"Usage:  daqFileChopper filename <filterlist>");
     LOG(ERR,"        filterlist -->  -trg xxx yyy zzz...  // list of offline trigger bits");
     LOG(ERR,"                        -dtrg xxx yyy zzz... // list of daq trigger bits");
+    LOG(ERR,"                        -ndtrg xxx yyy zzz   // not list of daq trigger bits");
     LOG(ERR,"                        -eventnum xxx yyy... // list of event numbers");
     LOG(ERR,"                        -chop xxx            // chop into files of xxx events");
 }
@@ -59,12 +60,21 @@ int FilterEvent(daqReader *rdr, int nargs, char *argv[])
     }
   }
   else if(strcmp(argv[0], "-dtrg")==0) {
-    unsigned int bits = rdr->daqbits;
-    for(int i=1;i<nargs;i++) {
-      int trg = atoi(argv[i]);
-      if(bits & (1<<trg)) return 1;
-    } 
+      UINT64 bits = rdr->daqbits64;
+      for(int i=1;i<nargs;i++) {
+	  int trg = atoi(argv[i]);
+	  if(bits & (1ll<<trg)) return 1;
+      } 
   }
+
+  else if (strcmp(argv[0], "-ndtrg")==0) {
+      UINT64 bits = rdr->daqbits64;
+      for(int i=1;i<nargs;i++) {
+	  int trg = atoi(argv[i]);
+	  if((bits & (1ll<<trg)) == 0) return 1;
+      } 
+  }
+
   else if(strcmp(argv[0], "-eventnum")==0) {
     for(int i=1;i<nargs;i++) {
       if(eventNumber == atoi(argv[i])) {

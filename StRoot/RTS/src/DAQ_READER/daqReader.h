@@ -225,6 +225,10 @@ class daqReader {
   u_int detectors ;	// detectors present bit mask according to DAQ!
   UINT64 detectors64;
 
+  int streaming_seq;        // -1 if not streaming
+  int streaming_evb;        // evb + seq is the key here, there are multiple seq per run
+  char streaming_node[12];
+  
   u_int detector_bugs ;	// for per-detector bug tracing i.e. FY12 UU future protection TPX bug
   UINT64 detector_bugs64;
 
