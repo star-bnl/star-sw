@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.70 2018/06/29 13:56:53 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.71 2019/07/08 15:21:30 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -347,6 +347,10 @@ char *daqReader::get(int num, int type)
     evb_cou = 0 ;
     run = 0 ;
 
+    memset(streaming_node, 0, sizeof(streaming_node));
+    streaming_evb = -1;
+    streaming_seq = -1;
+
     // check status of constructor or previous get()
 	
     int delay = getStatusBasedEventDelay();
@@ -557,6 +561,42 @@ char *daqReader::get(int num, int type)
 	    break;
 	}
 
+	if(memcmp(ent->full_name, "/%", 2) == 0) {
+	    char _node[10];
+	    char _evb[10];
+	    char _idx[10];
+	    memset(_node, 0, sizeof(_node));
+	    memset(_evb, 0, sizeof(_evb));
+	    memset(_idx, 0, sizeof(_idx));
+
+	    char *s = &ent->full_name[2];
+	    char *d = _node;
+	    while(*s != '-') {
+		*d++ = *s++;
+	    }
+	    *s++;
+	    d = &_evb[0];
+	    while(*s != '-') {
+		*d++ = *s++;
+	    }
+	    *s++;
+	    d = &_idx[0];
+	    while(*s != '\0') {
+		*d++ = *s++;
+	    }
+
+	    strcpy(streaming_node, _node);
+	    streaming_evb = atoi(_evb);
+	    streaming_seq = atoi(_idx);
+
+	    LOG(DBG, "change sfs dir to %s (%s) (%s) (%s)",
+		ent->full_name, _node, _evb, _idx);
+
+	    sfs->cd(ent->full_name);
+	    sfs->closedir(fsdir);
+	    break;
+	}
+	    
 	if(allnumeric(&ent->full_name[1])) {
 	    seq = atoi(&ent->full_name[1]);
 	    sfs->cd(ent->full_name);
@@ -969,6 +1009,11 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
       
 	if(memcmp(ent->full_name, "/#", 2) == 0) {
 	  satisfy = 1;
+	}
+
+	// streaming...
+	if(memcmp(ent->full_name, "/%", 2) == 0) {
+	    satisfy = 1;
 	}
 	
 	if(allnumeric(&ent->full_name[1])) {

@@ -33,7 +33,7 @@ JML_DAQ_OBJS := TokenManagerChooser.o JmlHisto.o EthernetServer.o  ThreadedEther
 # these are obsolete now....
 #EVPREADER_OBJS := cfgutil.o emcReader.o evpReader.o evpSupport.o fpdReader.o ftpReader.o l3Reader.o msgNQLib.o pmdReader.o pp2ppReader.o ricReader.o sanityCheckers.o scReader.o ssdReader.o svtReader.o tofReader.o tpcFCFReader.o tpcReader.o trgReader10.o trgReader12.o trgReader20.o trgReader21.o trgReader22.o trgReader30.o trgReader32.o trgReader.o rts_reader.o daq_dta.o daq_det.o 
 
-#EVPREADER_OBJS += daq_tpx.o tpxCore.o tpxFCF.o tpxGain.o tpx_ped.o tpxPed.o tpxStat.o tpxFCF_2D.o
+#EVPREADER_OBJS += daq_tpx.o daq_itpc.o itpcCore.o itpcFCF.o itpcInterpreter.o itpcPed.o tpxCore.o tpxFCF.o tpxGain.o tpx_ped.o tpxPed.o tpxStat.o tpxFCF_2D.o
 #EVPREADER_OBJS += daq_pp2pp.o
 #EVPREADER_OBJS += fcfAfterburner.o fcfClass.o
 #EVPREADER_OBJS += daq_tof.o 
@@ -42,7 +42,8 @@ JML_DAQ_OBJS := TokenManagerChooser.o JmlHisto.o EthernetServer.o  ThreadedEther
 
 #the preferred reader
 DAQREADER_OBJS := msgNQLib.o daqReader.o cfgutil.o daq_det.o daq_dta.o
-DAQREADER_OBJS += daq_tpx.o tpxCore.o tpxFCF.o tpxGain.o tpxPed.o tpxStat.o tpxFCF_2D.o
+DAQREADER_OBJS += tpxCore.o daq_tpx.o  tpxFCF.o tpxGain.o tpxPed.o tpxStat.o tpxFCF_2D.o
+DAQREADER_OBJS += itpcCore.o daq_itpc.o  itpcFCF.o itpcInterpreter.o itpcPed.o 
 DAQREADER_OBJS += daq_tpc.o tpc_FCFReader.o tpc_reader.o
 DAQREADER_OBJS += fcfAfterburner.o fcfClass.o
 DAQREADER_OBJS += daq_l3.o l3_reader.o 
@@ -64,7 +65,7 @@ L2ALGOPATH = $(RTS_DIR_PATH)/../../StRoot/StTriggerUtilities/L2Emulator
 
 
 
-MY_VPATH := $(ONLSRC)/L2_SUPPORT:$(ONLSRC)/RTSCOM_STUB:$(OFFSRC)/LOG:$(ONLSRC)/MYRI:$(ONLSRC)/MISC_LIBS:$(ONLSRC)/SUNRT:$(ONLSRC)/RTSCFG:$(OFFSRC)/LOG:$(OFFSRC)/SFS:$(OFFSRC)/DAQ_READER:$(OFFRTS)/EventTracker:$(OFFSRC)/RTS_READER:$(OFFSRC)/DAQ_TPX:$(OFFSRC)/DAQ_TRG:$(OFFSRC)/DAQ_PP2PP:$(OFFSRC)/FCF:$(OFFSRC)/DAQ_TOF:$(ONLSRC)/ETHLIB_NEW:$(OFFSRC)/DAQ_TPX:$(OFFSRC)/DAQ_TPC:$(OFFSRC)/FCF:$(OFFSRC)/DAQ_L3:$(ONLSRC)/L3_SUPPORT:$(L2ALGOPATH)/L2algoUtil:$(L2ALGOPATH)/L2gammaAlgo:$(L2ALGOPATH)/L2hienAlgo:$(L2ALGOPATH)/L2jetAlgo:$(L2ALGOPATH)/L2pedAlgo:$(L2ALGOPATH)/L2upsilon:$(L2ALGOPATH)/L2wAlgo:$(ONLSRC)/XMLCFG:$(ONLSRC)/L4_SUPPORT:$(ONLSRC)/MON:$(ONLSRC)/MISC_LIBS:$(ONLSRC)/LIBJML
+MY_VPATH := $(ONLSRC)/L2_SUPPORT:$(ONLSRC)/RTSCOM_STUB:$(OFFSRC)/LOG:$(ONLSRC)/MYRI:$(ONLSRC)/MISC_LIBS:$(ONLSRC)/SUNRT:$(ONLSRC)/RTSCFG:$(OFFSRC)/LOG:$(OFFSRC)/SFS:$(OFFSRC)/DAQ_READER:$(OFFRTS)/EventTracker:$(OFFSRC)/RTS_READER:$(OFFSRC)/DAQ_TPX:$(OFFSRC)/DAQ_ITPC:$(OFFSRC)/DAQ_TRG:$(OFFSRC)/DAQ_PP2PP:$(OFFSRC)/FCF:$(OFFSRC)/DAQ_TOF:$(ONLSRC)/ETHLIB_NEW:$(OFFSRC)/DAQ_TPX:$(OFFSRC)/DAQ_TPC:$(OFFSRC)/FCF:$(OFFSRC)/DAQ_L3:$(ONLSRC)/L3_SUPPORT:$(L2ALGOPATH)/L2algoUtil:$(L2ALGOPATH)/L2gammaAlgo:$(L2ALGOPATH)/L2hienAlgo:$(L2ALGOPATH)/L2jetAlgo:$(L2ALGOPATH)/L2pedAlgo:$(L2ALGOPATH)/L2upsilon:$(L2ALGOPATH)/L2wAlgo:$(ONLSRC)/XMLCFG:$(ONLSRC)/L4_SUPPORT:$(ONLSRC)/MON:$(ONLSRC)/MISC_LIBS:$(ONLSRC)/LIBJML
 
 MY_DEPVPATH1 := $(subst :,/*.C ,$(MY_VPATH))
 MY_DEPVPATH2 := $(subst :,/*.cxx ,$(MY_VPATH))
