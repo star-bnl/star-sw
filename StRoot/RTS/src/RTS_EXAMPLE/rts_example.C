@@ -1828,8 +1828,11 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 {
     int found = 0;
     
-    printf("tinfo: seq = #%d  token = %d detectors = 0x%x triggers = 0x%llx/0x%llx/0x%llx  evpgroups=0x%x flags=0x%x\n",
+    printf("tinfo: seq = #%d (%s %d %d)  token = %d detectors = 0x%x triggers = 0x%llx/0x%llx/0x%llx  evpgroups=0x%x flags=0x%x\n",
 	   rdr->seq,
+	   rdr->streaming_node,
+	   rdr->streaming_evb,
+	   rdr->streaming_seq,
 	   rdr->token,
 	   rdr->detectors,
 	   rdr->daqbits64_l1,

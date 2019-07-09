@@ -29,203 +29,153 @@
 #include <DAQ_READER/daq_det.h>
 #include <DAQ_READER/daq_dta.h>
 #include <DAQ_BTOW/daq_btow.h>
-#define BTOW_CALC
-#ifdef BTOW_CALC
 
-#define BTOW_ADC_MAX 4096
-#define BTOW_CHAN_MAX 9600
 
-UINT64 bht3 = 0x800;
-UINT64 bht1vpd = 0x8000;
 
-int btow_histo_bht3[BTOW_ADC_MAX];
-int btow_histo_bht1vpd[BTOW_ADC_MAX];
-int cou_bht3 = 0;
-int cou_bht1 = 0;
-int max_adc = 0;
-int bht3_towers = 0;
-int bht1_towers = 0;
+
+struct JmlSz {
+    int cld_pix;
+    int cld_cl;
+    UINT64 cld_adc;
+    int adc_pix;
+    UINT64 adc_adc;
+
+    int invalid_count;
+};
+
+
+
 
 void initHack() {
-    memset(btow_histo_bht1vpd, 0, sizeof(btow_histo_bht1vpd));
-    memset(btow_histo_bht3, 0, sizeof(btow_histo_bht3));
 }
 
 void doHack(daqReader *rdr) {
-    int isbht3 = 0;
-    int isbht1 = 0;
+    struct JmlSz tpxSz;
+    struct JmlSz itpcSz;
+    int sz = 0;
+    UINT64 bx64 = 0;
+    int bx7 = 0;
     
-    if(bht3 & rdr->daqbits64) {
-	isbht3 = 1;
-	cou_bht3++;
-    }
-    if(bht1vpd & rdr->daqbits64) {
-	isbht1 = 1;
-	cou_bht1++;
-    }
+    
+    
+    memset(&tpxSz, 0, sizeof(tpxSz));
+    memset(&itpcSz, 0, sizeof(itpcSz));
+    sz = rdr->event_size;
+    
+    // Only minbias events!
+    if((rdr->daqbits64 & (1ll << 1)) == 0) return;
 
-    daq_dta *dd = rdr->det("btow")->get("adc") ;
+    // get bx64
+    daq_dta *dd = rdr->det("trg")->get("raw");
     if(dd) {
-	while(dd->iterate()) {
-	    btow_t *d = (btow_t *)dd->Void;
+	if(dd->iterate()) {
+	    TriggerDataBlk *trg = (TriggerDataBlk *)dd->Byte;
 
-	    for(int i=0;i<BTOW_MAXFEE;i++) {
-		for(int j=0;j<BTOW_DATSIZE;j++) {
-		    int adc = d->adc[i][j];
-		    if(adc > max_adc) {
-			max_adc = adc;
-		    }
-		    
-		    assert(adc < BTOW_ADC_MAX);
+	    EvtDescData *evtDesc = (EvtDescData *)(((char *)trg) + swap32(trg->EventDesc_ofl.offset));
+	    UINT32 bx_high = swap32(evtDesc->bunchXing_hi);
+	    UINT32 bx_low = swap32(evtDesc->bunchXing_lo);
+	    bx64 = bx_high;
+	    bx64 = (bx64 << 32) + bx_low;
+	    bx7 = bx64 % 120;
+	    //printf("%llu %d\n", bx64, bx7);
+	}
+    }
 
-		    if(isbht1) {
-          		btow_histo_bht1vpd[adc]++;
-			bht1_towers++;
+   
+    for(int s=1;s<=24;s++) {
+
+	// Get itpc ADC data
+	dd = rdr->det("itpc")->get("adc", s);
+	if(dd) {
+	    while(dd->iterate()) {
+		for(int i=0;i<dd->ncontent;i++) {
+		    itpcSz.adc_pix++;
+		    itpcSz.adc_adc += dd->adc[i].adc;
+		}
+	    }
+	}
+    
+	// Get itpc CLD data
+	dd = rdr->det("itpc")->get("cld", s);
+	if(dd) {
+	    while(dd->iterate()) {
+		for(int i=0;i<dd->ncontent;i++) {
+		    itpcSz.cld_cl++;
+		    itpcSz.cld_adc += dd->cld[i].charge;
+	
+		    if(dd->cld[i].t2 <= dd->cld[i].t1) {
+			itpcSz.invalid_count++;
+			
+			// printf("jjj itpc: sec=%d row=%d pad=%lf tb=%lf charge=%d  (%d = %d)\n", 
+			//        s, 
+			//        dd->row, 
+			//        dd->cld[i].pad, 
+			//        dd->cld[i].tb, 
+			//        dd->cld[i].charge, 
+			//        dd->cld[i].t1, 
+			//        dd->cld[i].t2);
 		    }
-		    if(isbht3) {
-			btow_histo_bht3[adc]++;
-			bht3_towers++;
+		    else {
+			itpcSz.cld_pix += dd->cld[i].t2 - dd->cld[i].t1 + 1;
+		    }
+		}
+	    }
+	}
+
+	
+    	// Get tpx ADC data
+	dd = rdr->det("tpx")->get("adc", s);
+	if(dd) {
+	    while(dd->iterate()) {
+		for(int i=0;i<dd->ncontent;i++) {
+		    tpxSz.adc_pix++;
+		    tpxSz.adc_adc += dd->adc[i].adc;
+		}
+	    }
+	}
+    
+	// Get tpx CLD data
+	dd = rdr->det("tpx")->get("cld", s);
+	if(dd) {
+	    while(dd->iterate()) {
+		for(int i=0;i<dd->ncontent;i++) {
+		    tpxSz.cld_cl++;
+		    tpxSz.cld_adc += dd->cld[i].charge;
+		    if(dd->cld[i].t2 <= dd->cld[i].t1) {
+			tpxSz.invalid_count++;
+			//printf("jjj tpx: sec=%d row=%d pad=%lf tb=%lf charge=%d  (%d = %d)\n", s, dd->row, dd->cld[i].pad, dd->cld[i].tb, dd->cld[i].charge, dd->cld[i].t1, dd->cld[i].t2);
+		    }
+		    else {
+			tpxSz.cld_pix += dd->cld[i].t2 - dd->cld[i].t1 + 1;
 		    }
 		}
 	    }
 	}
     }
-}
 
-void finishHack() {
-    printf("# bht3=%d evts,  bht1=%d evts,   maxadc=%d\n", cou_bht3, cou_bht1, max_adc);
-    printf("# bht3=%d towers.  bht1=%d towers.\n", bht3_towers, bht1_towers);
-
-    for(int i=0;i<BTOW_ADC_MAX;i++) {
-	printf("%d %d %d\n", i, btow_histo_bht3[i], btow_histo_bht1vpd[i]);
-    }	
-}
-
-#endif
-
-//#define EXTRACT_L4
-#ifdef EXTRACT_L4
-
-void initHack() {
-}
-
-void doHack(daqReader *rdr) {
-    char *buff = rdr->memmap->mem;
-    int sz = rdr->event_size;
-
-    daq_dta *dd = rdr->det("l4")->get("gl3") ;
-    if(dd) {
-	write(STDOUT_FILENO, buff, sz);
-    }
+    printf("%d %llu %d %d %llu %d %d %llu %d %d %llu %d %d %llu %d\n",
+	   rdr->seq,          //1
+	   bx64,              //2
+	   bx7,               //3
+	   itpcSz.adc_pix,    //4
+	   itpcSz.adc_adc,    //5
+	   itpcSz.cld_cl,     //6
+	   itpcSz.cld_pix,    //7
+	   itpcSz.cld_adc,    //8
+	   itpcSz.invalid_count, // 9
+	   tpxSz.adc_pix,     //10
+	   tpxSz.adc_adc,     //11
+	   tpxSz.cld_cl,      //12
+	   tpxSz.cld_pix,     //13
+	   tpxSz.cld_adc,    //14
+	   tpxSz.invalid_count); // 15
+         
 }
 
 void finishHack() {
 }
 
-#endif
 
-//#define COUNT_TRIGGERS
-#ifdef COUNT_TRIGGERS
-
-int evts[64];
-int totalEvts;
-
-void initHack() {
-    memset(evts, 0, sizeof(evts));
-    totalEvts = 0;
-}
-
-void doHack(daqReader *rdr) {
-    if((totalEvts % 100) == 0) {
-	printf(".");
-	fflush(stdout);
-    }
-
-    if((totalEvts % 1000) == 0) {
-	printf("\n");
-    }
-
-    for(int i=0;i<64;i++) {
-	if(rdr->daqbits64 & (1ll << i)) {
-	    evts[i]++;
-	}
-    }
-    totalEvts++;
-}
-
-void finishHack() {
-    printf("\n\nTotal events: %d\n", totalEvts);
-    for(int i=0;i<64;i++) {
-	if(evts[i] > 0) {
-	    printf("trigger[%d] : %d events\n",i,evts[i]);
-	}
-    }
-}
-
-#endif
-
-//#define FIX_L4_EVP_DATA
-#ifdef FIX_L4_EVP_DATA
-void doHack(daqReader *evp) {
-    long long int pos = 0;
-    SFS_File *sfs = (SFS_File *)evp->memmap->mem;
-    LOGREC *log = (LOGREC *)evp->memmap->mem;
-    char *buff = evp->memmap->mem;
-
-    int inserted=0;
-    while(pos < evp->event_size) {
-       	
-	int sz = 0;
-	if(memcmp(log->lh.bank_type, "LRHD", 4) == 0) {
-	    sz = sizeof(LOGREC);
-	    //log->length += 512;
-
-	    LOGREC newrec;
-	    memcpy(&newrec, buff, sizeof(LOGREC));
-	    //newrec.length = swap32(newrec.length);
-	    newrec.length += 512/4;
-	    //newrec.length = swap32(newrec.length);
-	    write(STDOUT_FILENO, &newrec, sz);
-		
-	    buff += sz;
-	    pos += sz;
-	    log = (LOGREC *)buff;
-	    sfs = (SFS_File *)buff;
-	    continue;
-	}
-	else if(memcmp(sfs->type, "FILE", 4) == 0) {
-	    sz = seeksize(sfs->sz) + sfs->head_sz;
-
-		
-	    if(!inserted) {
-		if(memcmp(sfs->name, "gl3", 3) == 0) {
-		    char l4dirbuff[512];
-		    SFS_File *l4f = (SFS_File *)l4dirbuff;
-		    memcpy(l4f->type, "FILE", 4);
-		    l4f->byte_order = 0x04030201;		
-		    sprintf(l4f->name, "l4/");
-		    l4f->attr = SFS_ATTR_CD;
-		    l4f->head_sz = get_sfsFileSize("l4/");
-		    l4f->sz = 512 - l4f->head_sz;
-
-		    write(STDOUT_FILENO, l4dirbuff, 512);
-		    inserted = 1;
-		}
-	    }
-	}
-
-	write(STDOUT_FILENO, buff, sz);
-	//printf("[%c%c%c%c] pos =%lld sz=%d\n",buff[0],buff[1],buff[2],buff[3],pos,sz);
-
-	buff += sz;
-	pos += sz;
-	log = (LOGREC *)buff;
-	sfs = (SFS_File *)buff;
-
-	  
-    }
-}
-#endif
 
 void displayHelp()
 {
@@ -237,58 +187,58 @@ int main(int argc, char *argv[])
     rtsLogOutput(RTS_LOG_STDERR) ;
     rtsLogLevel(WARN) ;
 
-    if(argc != 2) {
+    if(argc < 2) {
 	displayHelp();
-
 	exit(0);
     }
 
-    daqReader *evp;
-    evp = new daqReader(argv[1]) ;	// create it with the filename argument..
-
-    int good=0;
-    int bad=0;
-
     initHack();
 
-    for(;;) {
-	char *ret = evp->get(0,EVP_TYPE_ANY);
-    
-	if(ret) {
-	    if(evp->status) {
-		LOG(ERR,"evp status is non-null [0x08X, %d dec]",evp->status,evp->status) ;
-		continue ;
-	    }
-	    good++;
-	}
-	else {    // something other than an event, check what.
-	    switch(evp->status) {
-	    case EVP_STAT_OK:   // just a burp!
-		continue;
-	    case EVP_STAT_EOR:
-		LOG(OPER, "Done after scanning %d events (%d bad)",good,bad);
-		break;        // file, we're done...
-	    case EVP_STAT_EVT:
-		bad++;
-		LOG(WARN, "Problem getting event - skipping [good %d, bad %d]",good,bad);
-		continue;
-	    case EVP_STAT_CRIT:
-		LOG(CRIT,"evp->status CRITICAL (?)") ;
-		return -1;
-	    }
-	}
-    		
-	if(evp->status == EVP_STAT_EOR) {
-	    LOG(INFO,"Done after scanning %d events (%d bad)",good,bad) ;
-	    break; 
-	}
+    for(int file=1;file<argc;file++) {
+	daqReader *evp;
+	evp = new daqReader(argv[file]) ;	// create it with the filename argument..
 
-	doHack(evp);
+	int good=0;
+	int bad=0;
+	
+	for(;;) {
+	    char *ret = evp->get(0,EVP_TYPE_ANY);
+	    
+	    if(ret) {
+		if(evp->status) {
+		    LOG(ERR,"evp status is non-null [0x08X, %d dec]",evp->status,evp->status) ;
+		    continue ;
+		}
+		good++;
+	    }
+	    else {    // something other than an event, check what.
+		switch(evp->status) {
+		case EVP_STAT_OK:   // just a burp!
+		    continue;
+		case EVP_STAT_EOR:
+		    LOG(OPER, "Done after scanning %d events (%d bad)",good,bad);
+		    break;        // file, we're done...
+		case EVP_STAT_EVT:
+		    bad++;
+		    LOG(WARN, "Problem getting event - skipping [good %d, bad %d]",good,bad);
+		    continue;
+		case EVP_STAT_CRIT:
+		    LOG(CRIT,"evp->status CRITICAL (?)") ;
+		    return -1;
+		}
+	    }
+	    
+	    if(evp->status == EVP_STAT_EOR) {
+		LOG(INFO,"Done after scanning %d events (%d bad)",good,bad) ;
+		break; 
+	    }
+	    
+	    doHack(evp);
+	}
+	
+	delete evp;
     }
-  
 
     finishHack();
-
-    delete evp ; 
     return 0 ;
 }
