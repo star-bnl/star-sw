@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job name="NewTest" fileListSyntax="paths" nProcesses="117"  filesPerHour="25" simulateSubmission="false">
+
+<command>
+
+#source /star/u/starreco/.cshrc
+#source  /afs/rhic.bnl.gov/rhstar/group/.stardev
+#unsetenv NODEBUG
+setup 32b
+setup debug
+
+#set controlFile = /star/u/starreco/newtest/sampleList_nonopt.txt 
+set controlFile = $STAR/StRoot/StBFChain/sampleList.txt
+set nevents = `grep -A5 job${JOBINDEX} ${controlFile}  | grep -e " *nevents" | head -1 | sed 's| *nevents *= *\([0-9]*\) *$|\1|'`
+set chain = `grep -A5 job${JOBINDEX} ${controlFile}  | grep -e " *chain" | head -1 | sed 's| *chain *= *\(.*\) *$|\1|'`
+set out_dir = `grep -A5 job${JOBINDEX} ${controlFile}  | grep -e " *out_dir" | head -1 | sed 's| *out_dir *= *\(.*\) *$|\1|'`
+
+set inputfile = `grep -A5 job${JOBINDEX} ${controlFile} | grep -e " *inputfile" | head -1 | sed 's| *inputfile *= *\(.*\) *$|\1|'`
+set logFile = `echo $inputfile | sed 's|.*/\([A-Za-z_0-9.]*\).[df][az][qd]|\1.log|'` 
+
+set infile0 = `echo $inputfile | sed 's|.*/\([A-Za-z_0-9.]*\)|\1|'` 
+
+echo "chain --> "${chain}
+echo "out_dir --> "${out_dir}
+echo "inputfile --> "${inputfile}
+echo "logFile --> "${logFile}
+echo "nevents --> "${nevents}
+echo "infile0 --> "${infile0}
+
+
+#rm ${out_dir}/*.root
+#rm ${out_dir}/*.log
+if ( -r ${out_dir}/${logFile}) exit 0;
+if (! -d ${out_dir} mkdir -p ${out_dir}
+cd $SCRATCH
+
+#starver SL19c
+
+echo $STAR
+
+#setenv DB_SERVER_LOCAL_CONFIG /afs/rhic.bnl.gov/star/packages/conf/dbLoadBalancerLocalConfig_nightly.xml
+
+setenv StarEndMakerShell
+
+cp ${inputfile} $SCRATCH
+
+echo $SCRATCH/${infile0}
+
+root4star -b -q bfc.C\($nevents,\&quot;${chain}\&quot;,\&quot;${infile0}\&quot;\) &gt;&amp; ${logFile}
+
+cp ${logFile} ${out_dir}
+
+foreach OUTPUT_FILE (*.root)
+
+echo ${OUTPUT_FILE}
+
+cp $SCRATCH/${OUTPUT_FILE} ${out_dir}
+
+end
+
+</command>
+
+<ResourceUsage>
+               <Priority>75</Priority>
+</ResourceUsage>
+
+
+<stdout URL="file:./sched$JOBID.log" />
+<stderr URL="file:./sched$JOBID.err" />
+
+<!--<stderr URL="file:./shed$JOBID.err.out"/>-->
+
+</job>
+
