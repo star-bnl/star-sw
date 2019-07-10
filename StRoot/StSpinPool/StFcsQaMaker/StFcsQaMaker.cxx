@@ -127,18 +127,21 @@ Int_t StFcsQaMaker::Make() {
   //Getting trigger data (if daq file)
   StTriggerData* trg = fcsraw->trgdata();
   if(!trg){
-    //LOG_INFO << "Canot find Trigger Data" << endm;
+    LOG_INFO << "Canot find Trigger Data" << endm;
     //return 0;  //not quitting for local .sfs file reading
   }
 
   //check if FCS was readout for this event
   if(trg){
     unsigned int detmask=trg->getTrgDetMask();
-    //printf("TrgDetMask = %4x\n",detmask);
-    if(! ((detmask >> 10) & 0x1)){   //NEED UPDATE with detmask for FCS
-      //printf("No FCS readout for this event\n");
-      return kStOK;
+    printf("TrgDetMask = %4x\n",detmask);
+    if(! ((detmask >> 19) & 0x1)){   //FCS=0x1D
+      printf("No FCS readout for this event\n");
+      //return kStOK;
     }
+    unsigned short lastdsm4 = trg->lastDSM(4);
+    unsigned short fcs2019 = (lastdsm4 >> 10) & 0x1;
+    printf("fcs2019=%1d\n",fcs2019);
   }
 
   event= (StEvent*)GetInputDS("StEvent");  
@@ -185,7 +188,8 @@ Int_t StFcsQaMaker::Make() {
 	    int ns2 = hits[i]->ns();
 	    int ehp2= hits[i]->ehp();
 	    int det2=mFcsDbMkr->detectorId(ehp2,ns2);
-	    mAdcId[det2]->Fill(float(depch),float(adc));
+	    if(det2>=0 && det2<kFcsNDet)
+	      mAdcId[det2]->Fill(float(depch),float(adc));
 	  }
 	}
       }
@@ -278,8 +282,11 @@ Int_t StFcsQaMaker::Finish(){
 ClassImp(StFcsQaMaker);
 
 /*
- * $Id: StFcsQaMaker.cxx,v 1.2 2019/06/21 17:44:46 akio Exp $
+ * $Id: StFcsQaMaker.cxx,v 1.3 2019/07/10 03:10:21 akio Exp $
  * $Log: StFcsQaMaker.cxx,v $
+ * Revision 1.3  2019/07/10 03:10:21  akio
+ * added run19 fcs trigger bit
+ *
  * Revision 1.2  2019/06/21 17:44:46  akio
  * added cluster plots
  *
