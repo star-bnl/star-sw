@@ -144,13 +144,14 @@ Int_t StFcsRawDaqReader::Make() {
   }
 
   int ndata=0, nvaliddata=0;
-  char* mode[2]={"adc","zs"};
+  //  char* mode[2]={"adc","zs"};
+  string mode[2]={"adc","zs"};
   if(mReadMode==1){
     /**/
   }else{
     mReadMode=0;
   }
-  dd = mRdr->det("fcs")->get(mode[mReadMode]);  
+  dd = mRdr->det("fcs")->get(mode[mReadMode].c_str());  
   if(dd){
     while(dd->iterate()) {
       int sec = ((dd->sec >> 11) & 0x1F) + 1;
@@ -187,8 +188,8 @@ Int_t StFcsRawDaqReader::Make() {
       
       if(mDebug){
 	printf("FCS %3s : S%d:%d [det %d, ns %d, dep %d ch %d] det=%d id=%3d : size=%d : adc=",
-	       mode[mReadMode],sec,rdo,ehp,ns,dep,ch,detid,id,n) ;
-	for(int tb=0; tb<hit->nTimeBin(); tb++) printf("%4d ", hit->adc(tb));
+	       mode[mReadMode].c_str(),sec,rdo,ehp,ns,dep,ch,detid,id,n) ;
+	for(unsigned int tb=0; tb<hit->nTimeBin(); tb++) printf("%4d ", hit->adc(tb));
 	//for(int tb=0; tb<3; tb++) printf("%4d ", hit->adc(tb));
 	printf("\n");
       }
@@ -232,8 +233,11 @@ void StFcsRawDaqReader::Clear( Option_t *opts ){
 ClassImp(StFcsRawDaqReader);
 
 /*
- * $Id: StFcsRawDaqReader.cxx,v 1.3 2019/07/10 03:09:57 akio Exp $
+ * $Id: StFcsRawDaqReader.cxx,v 1.4 2019/07/10 07:47:37 akio Exp $
  * $Log: StFcsRawDaqReader.cxx,v $
+ * Revision 1.4  2019/07/10 07:47:37  akio
+ * minor fix for compilation warnings
+ *
  * Revision 1.3  2019/07/10 03:09:57  akio
  * fix trigger data version for run19
  *
