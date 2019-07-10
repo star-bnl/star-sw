@@ -131,7 +131,7 @@ Int_t StFcsRawDaqReader::Make() {
       } *desc ;
       desc = (simple_desc *) trg_raw ;
       //printf("Trigger: raw bank has %d bytes: ver 0x%02X, desc %d, len %d\n",dd->ncontent,desc->ver,desc->evt_desc,desc->len);                 
-      if(desc->ver==0x44){
+      if(desc->ver==0x46){
         TriggerDataBlk2019* trgdata2019 = (TriggerDataBlk2019*)dd->Byte;  
 	mTrg = (StTriggerData*) new StTriggerData2019(trgdata2019,mRun,1,mDebug);
         if(mDebug) printf("Creating StTriggerData for ver=0x46 (2019) with run=%d\n",mRun);
@@ -232,8 +232,11 @@ void StFcsRawDaqReader::Clear( Option_t *opts ){
 ClassImp(StFcsRawDaqReader);
 
 /*
- * $Id: StFcsRawDaqReader.cxx,v 1.2 2019/06/07 18:22:33 akio Exp $
+ * $Id: StFcsRawDaqReader.cxx,v 1.3 2019/07/10 03:09:57 akio Exp $
  * $Log: StFcsRawDaqReader.cxx,v $
+ * Revision 1.3  2019/07/10 03:09:57  akio
+ * fix trigger data version for run19
+ *
  * Revision 1.2  2019/06/07 18:22:33  akio
  * *** empty log message ***
  *
