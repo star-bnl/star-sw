@@ -3,8 +3,11 @@
 //    - Provide category id, such as 'MC' track in the minimc tree
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQAUtilities.h,v 1.12 2012/03/05 10:32:50 cpowell Exp $
+ * $Id: StEmbeddingQAUtilities.h,v 1.13 2019/07/10 05:46:53 zhux Exp $
  * $Log: StEmbeddingQAUtilities.h,v $
+ * Revision 1.13  2019/07/10 05:46:53  zhux
+ * added option for btof pid for primary real tracks
+ *
  * Revision 1.12  2012/03/05 10:32:50  cpowell
  * Functions added to cut on refMult
  *
@@ -131,6 +134,7 @@ class StEmbeddingQAUtilities {
     Float_t getNHitToNPossCut() const ;
     Float_t getDcaCut() const ;
     Double_t getNSigmaCut() const ;
+    Bool_t getBTofPid() const ;
     Float_t getRapidityCut() const ;
     Float_t getZVertexCut() const ;
     Int_t 	getRefMultMinCut() const ;
@@ -145,6 +149,7 @@ class StEmbeddingQAUtilities {
     Float_t setNHitToNPossCut(const Float_t val) ;
     Float_t setDcaCut(const Float_t val) ;
     Double_t setNSigmaCut(const Double_t val) ;
+    Bool_t setBTofPid(const Bool_t val) ;
     Float_t setRapidityCut(const Float_t val) ;
     Float_t setZVertexCut(const Float_t val) ;
     Int_t 	setRefMultMinCut(const Int_t val) ;
@@ -193,6 +198,7 @@ class StEmbeddingQAUtilities {
     Float_t mNHitToNPossCut           ;  /// Minimum Nfit cut (default NHitFit/NHitPoss > 0.51)
     Float_t mDcaCut                   ;  /// Global dca cut (default |dca_{gl}| < 3 cm)
     Double_t mNSigmaCut               ;  /// Nsigma cut (default |Nsigma| < 2)
+    Bool_t mBTofPid                   ;  /// Nsigma cut (default |Nsigma| < 2) using BTof Pid
     Float_t mRapidityCut              ;  /// Rapidity cut (default |y| < 10, i.e. basically no cut)
     Float_t mZVertexCut               ;  /// z-vertex cut (default is |vz| < 30cm)
     Int_t 	mRefMultMinCut            ;  /// refMult minimum cut (default is refMult >= 0)

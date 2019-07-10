@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQAUtilities.cxx,v 1.17 2012/06/11 14:35:55 fisyak Exp $
+ * $Id: StEmbeddingQAUtilities.cxx,v 1.18 2019/07/10 05:46:43 zhux Exp $
  * $Log: StEmbeddingQAUtilities.cxx,v $
+ * Revision 1.18  2019/07/10 05:46:43  zhux
+ * added option for btof pid for primary real tracks
+ *
  * Revision 1.17  2012/06/11 14:35:55  fisyak
  * std namespace
  *
@@ -94,6 +97,7 @@ StEmbeddingQAUtilities::StEmbeddingQAUtilities()
   mNHitToNPossCut = 0.51 ;  /// Minimum Nfit cut, NHitFit/NHitPoss > 0.51
   mDcaCut         = 3.0 ;   /// Global dca cut, |dca_{gl}| < 3 cm
   mNSigmaCut      = 2.0 ;   /// Nsigma cut, |Nsigma| < 2
+  mBTofPid        = kFALSE ;/// Nsigma cut, |Nsigma| < 2, on TPC dE/dx Pid by default 
   mRapidityCut    = 10.0 ;  /// Rapidity cut, |y| < 10
   mZVertexCut     = 30.0 ;  /// z-vertex cut, |vz| < 30 cm
   mRefMultMinCut  = 0 ;  		/// refMult cut, refMult >= 0
@@ -483,6 +487,9 @@ Float_t StEmbeddingQAUtilities::getDcaCut() const { return mDcaCut ; }
 Double_t StEmbeddingQAUtilities::getNSigmaCut() const { return mNSigmaCut ; }
 
 //__________________________________________________________________________________________
+Bool_t StEmbeddingQAUtilities::getBTofPid() const { return mBTofPid ; }
+
+//__________________________________________________________________________________________
 Float_t StEmbeddingQAUtilities::getRapidityCut() const { return mRapidityCut ; }
 
 //__________________________________________________________________________________________
@@ -558,6 +565,15 @@ Double_t  StEmbeddingQAUtilities::setNSigmaCut(const Double_t val)
   LOG_INFO << "StEmbeddingQAUtilities::setNSigmaCut  NSigma cut = " << mNSigmaCut
     << endm;
   return getNSigmaCut() ;
+}
+
+//__________________________________________________________________________________________
+Bool_t  StEmbeddingQAUtilities::setBTofPid(const Bool_t val)
+{
+  mBTofPid = val ;
+  LOG_INFO << "StEmbeddingQAUtilities::setBTofPid  NSigma cut using BTof Pid = " << (mBTofPid?"true":"false")
+    << endm;
+  return getBTofPid() ;
 }
 
 //__________________________________________________________________________________________
@@ -681,6 +697,7 @@ void StEmbeddingQAUtilities::PrintCuts() const
   LOG_INFO << Form("    nHits/nHitsMax cut : ratio > %1.2f", getNHitToNPossCut()) << endm;
   LOG_INFO << Form("    dca cut            : dca < %1.1f cm", getDcaCut()) << endm;
   LOG_INFO << Form("    nsigma cut         : nsigma < %1.1f", getNSigmaCut()) << endm;
+  LOG_INFO << Form("      using BTofPid    : %s", getBTofPid()?"true":"false") << endm;
   LOG_INFO << Form("    rapidity cut       : |y| < %1.1f", getRapidityCut()) << endm;
   LOG_INFO << "  Event-wise selections ==================================================" << endm;
   LOG_INFO << Form("    z-vertex cut       : |vz| < %1.1f cm", getZVertexCut()) << endm;
