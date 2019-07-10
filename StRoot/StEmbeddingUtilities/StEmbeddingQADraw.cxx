@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.35 2015/04/19 01:46:59 zhux Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.36 2019/07/10 05:45:34 zhux Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.36  2019/07/10 05:45:34  zhux
+ * added option for btof pid for primary real tracks
+ *
  * Revision 1.35  2015/04/19 01:46:59  zhux
  * Wrong particle name (under sl64) is fixed in ::getParticleName().
  *
@@ -408,7 +411,7 @@ void StEmbeddingQADraw::init()
   trackSelections->AddText(Form("  nHitsFit > %3d", utility->getNHitCut()));
   trackSelections->AddText(Form("  nHitsFit/nHitsPoss > %1.2f", utility->getNHitToNPossCut()));
   trackSelections->AddText(Form("  global Dca < %1.1f cm", utility->getDcaCut()));
-  trackSelections->AddText(Form("  |n#sigma| < %1.1f", utility->getNSigmaCut()));
+  trackSelections->AddText(Form("  |n#sigma| < %1.1f, using %s", utility->getNSigmaCut(),utility->getBTofPid()?"BTOF":"TPC dE/dx"));
   trackSelections->AddText("NOTE1: Rapidity cut for real data has to be made manually in doEmbeddingQAMaker.C");
   trackSelections->AddText("NOTE2: Cut on its own variable is currently disabled, e.x. no dca cut for dca histogram");
   trackSelections->SetAllWith("***", "color", kRed);
@@ -999,6 +1002,7 @@ const Char_t* StEmbeddingQADraw::getEmbeddingParticleName(const UInt_t id, const
 const Char_t* StEmbeddingQADraw::getRealParticleName(const UInt_t id, const Bool_t doSplit) const
 {
   // nsigma < 2 is hard-coded (2 sigma cut is implemented in StEmbeddingQATrack.cxx).
+  const StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
 
   if(id>=mDaughterGeantId.size()){
     Error("StEmbeddingQADraw::getRealParticleName", "Unknown daughter particle index, id=%3d", id);
@@ -1006,10 +1010,10 @@ const Char_t* StEmbeddingQADraw::getRealParticleName(const UInt_t id, const Bool
   }
 
   const Int_t geantid = getGeantIdReal(id) ;
-  return (doSplit) ?  Form("#splitline{%s}{(%s, |n #sigma_{%s}|<2)}", getParticleName(geantid), 
-      StEmbeddingQAUtilities::instance()->getCategoryName(getCategoryId(kFALSE)).Data(), getParticleName(geantid))
-    : Form("%s (%s, |n #sigma_{%s}|<2)", getParticleName(geantid),
-      StEmbeddingQAUtilities::instance()->getCategoryName(getCategoryId(kFALSE)).Data(), getParticleName(geantid));
+  return (doSplit) ?  Form("#splitline{%s}{(%s, |n #sigma_{%s}|<2 %s)}", getParticleName(geantid), 
+      StEmbeddingQAUtilities::instance()->getCategoryName(getCategoryId(kFALSE)).Data(), getParticleName(geantid), utility->getBTofPid()?"BTOF":"TPC")
+    : Form("%s (%s, |n #sigma_{%s}|<2 %s)", getParticleName(geantid),
+      StEmbeddingQAUtilities::instance()->getCategoryName(getCategoryId(kFALSE)).Data(), getParticleName(geantid), utility->getBTofPid()?"BTOF":"TPC");
 }
 
 //____________________________________________________________________________________________________
@@ -1996,12 +2000,13 @@ Bool_t StEmbeddingQADraw::drawdEdxVsMomentum(const Bool_t isMcMomentum) const
 
     mMainPad->cd(2);
 
+    const StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
     TLegend* leg = new TLegend(0.1, 0.25, 0.9, 0.9);
     leg->SetFillColor(10);
     leg->SetTextSize(0.05);
     leg->AddEntry( hdEdxVsMomEmbed, getEmbeddingParticleName(id), "L");
     if( hdEdxVsMomReal )    leg->AddEntry( hdEdxVsMomReal, "Real data", "L");
-    if( hdEdxVsMomPidReal ) leg->AddEntry( hdEdxVsMomPidReal, "Real data with PID cut (#sigma<2)", "L");
+    if( hdEdxVsMomPidReal ) leg->AddEntry( hdEdxVsMomPidReal, Form("Real data with PID cut (#sigma<2) %s",utility->getBTofPid()?"BTOF":"TPC"), "L");
     leg->Draw();
 
     mCanvas->cd();

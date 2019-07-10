@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQATrack.cxx,v 1.18 2011/04/01 05:00:20 hmasui Exp $
+ * $Id: StEmbeddingQATrack.cxx,v 1.19 2019/07/10 05:45:56 zhux Exp $
  * $Log: StEmbeddingQATrack.cxx,v $
+ * Revision 1.19  2019/07/10 05:45:56  zhux
+ * added option for btof pid for primary real tracks
+ *
  * Revision 1.18  2011/04/01 05:00:20  hmasui
  * Move track cuts into StEmbeddingQAUtilities, added global momentum for embedding
  *
@@ -131,7 +134,7 @@ StEmbeddingQATrack::StEmbeddingQATrack(const TString name, StContamPair* track)
 }
 
 //____________________________________________________________________________________________________
-StEmbeddingQATrack::StEmbeddingQATrack(const TString name, const StMuTrack& track, const Int_t geantid)
+StEmbeddingQATrack::StEmbeddingQATrack(const TString name, const StMuTrack& track, const Int_t geantid, const Bool_t btof)
   : mNCommonHit(0), mParentParentGeantId(0), mParentGeantId(0), mGeantId(geantid), mGeantProcess(0),
   mNHit(track.nHitsFit(kTpcId)), mNHitPoss(track.nHitsPoss(kTpcId)), mCharge(track.charge()),
   mVectorMc(-9999., -9999., -9999., -9999.), // No MC momentum for real tracks
@@ -139,7 +142,7 @@ StEmbeddingQATrack::StEmbeddingQATrack(const TString name, const StMuTrack& trac
       TMath::Sqrt(track.p().mag2() + TMath::Power(StEmbeddingQAUtilities::instance()->getParticleDefinition(geantid)->mass(),2.0))),
   mVectorGl(-9999., -9999., -9999., -9999.), // Global momentum will be filled in the mVectorRc for global tracks
   mPhi(track.phi()), mdEdx(track.dEdx()), mDcaGl(track.dcaGlobal().mag()), 
-  mNSigmaElectron(track.nSigmaElectron()), mNSigmaPion(track.nSigmaPion()), mNSigmaKaon(track.nSigmaKaon()), mNSigmaProton(track.nSigmaProton()),
+  mNSigmaElectron(btof?track.btofPidTraits().sigmaElectron():track.nSigmaElectron()), mNSigmaPion(btof?track.btofPidTraits().sigmaPion():track.nSigmaPion()), mNSigmaKaon(btof?track.btofPidTraits().sigmaKaon():track.nSigmaKaon()), mNSigmaProton(btof?track.btofPidTraits().sigmaProton():track.nSigmaProton()),
   mName(name)
 {
   /// Constructor for real data track (StMuTrack)

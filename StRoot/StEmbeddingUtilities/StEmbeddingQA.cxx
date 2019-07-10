@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQA.cxx,v 1.23 2016/10/27 15:50:20 zhux Exp $
+ * $Id: StEmbeddingQA.cxx,v 1.24 2019/07/10 05:44:17 zhux Exp $
  * $Log: StEmbeddingQA.cxx,v $
+ * Revision 1.24  2019/07/10 05:44:17  zhux
+ * added option for btof pid for primary real tracks
+ *
  * Revision 1.23  2016/10/27 15:50:20  zhux
  * added an option to set the maximum pT cut, by Zachariah Miller
  *
@@ -773,10 +776,13 @@ StEmbeddingQATrack* StEmbeddingQA::getEmbeddingQATrack(const StMiniMcEvent& mcev
 //__________________________________________________________________________________________
 void StEmbeddingQA::fillRealTracks(const StMuTrack& track, const Int_t categoryid, const Int_t itrk)
 {
+  StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
   /// Loop over all registered particles (real tracks)
   for(vector<Int_t>::iterator iter = mGeantId[categoryid].begin(); iter != mGeantId[categoryid].end(); iter++){
     const Int_t geantid = (*iter) ;
-    StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::instance()->getCategoryName(categoryid), track, geantid);
+    Bool_t btofflag = kFALSE;
+    if( (categoryid - StEmbeddingQAConst::mNEmbedding) == 0 && utility->getBTofPid() ) btofflag = kTRUE; //use btof nsigma for primary tracks
+    StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::instance()->getCategoryName(categoryid), track, geantid, btofflag);
  
     fillHistograms(miniTrack, categoryid);
   }
