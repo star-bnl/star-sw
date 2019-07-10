@@ -135,7 +135,7 @@ Int_t StFcsQaMaker::Make() {
   if(trg){
     unsigned int detmask=trg->getTrgDetMask();
     printf("TrgDetMask = %4x\n",detmask);
-    if(! ((detmask >> 19) & 0x1)){   //FCS=0x1D
+    if(! ((detmask >> 30) & 0x1)){   //FCS_ID=30
       printf("No FCS readout for this event\n");
       //return kStOK;
     }
@@ -282,8 +282,11 @@ Int_t StFcsQaMaker::Finish(){
 ClassImp(StFcsQaMaker);
 
 /*
- * $Id: StFcsQaMaker.cxx,v 1.3 2019/07/10 03:10:21 akio Exp $
+ * $Id: StFcsQaMaker.cxx,v 1.4 2019/07/10 03:18:36 akio Exp $
  * $Log: StFcsQaMaker.cxx,v $
+ * Revision 1.4  2019/07/10 03:18:36  akio
+ * fix fcs_id to 30
+ *
  * Revision 1.3  2019/07/10 03:10:21  akio
  * added run19 fcs trigger bit
  *
