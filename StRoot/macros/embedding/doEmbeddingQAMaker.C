@@ -52,6 +52,8 @@ void doEmbeddingQAMaker(
   // Default is no trigger cut, you can add multiple trigger id's like
   //  utility->addTriggerIdCut(290001);
   //  utility->addTriggerIdCut(290004);
+  // FIXME: using BTof PID in selecting real data primary tracks (turn this on ONLY for checking the dE/dx match between data and MC)
+  //  utility->setBTofPid(kTRUE);
 
   StEmbeddingQA* maker = new StEmbeddingQA(year, production, isSimulation);
 
