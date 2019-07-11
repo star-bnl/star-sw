@@ -1,6 +1,9 @@
 //----------------------------------------------------------------------------------------------------
-// $Id: CentralityMaker.cxx,v 1.5 2015/05/22 06:51:56 hmasui Exp $
+// $Id: CentralityMaker.cxx,v 1.2 2019/07/11 03:28:49 tnonaka Exp $
 // $Log: CentralityMaker.cxx,v $
+// Revision 1.2  2019/07/11 03:28:49  tnonaka
+// Toftray commented out
+//
 // Revision 1.5  2015/05/22 06:51:56  hmasui
 // Add grefmult for Run14 Au+Au 200 GeV
 //
@@ -37,7 +40,7 @@ CentralityMaker::CentralityMaker()
   fRefMultCorr  = new StRefMultCorr("refmult") ;
   fRefMult2Corr = new StRefMultCorr("refmult2") ;
   fRefMult3Corr = new StRefMultCorr("refmult3") ;
-  fTofTrayMultCorr = new StRefMultCorr("toftray") ;
+ // fTofTrayMultCorr = new StRefMultCorr("toftray") ;
   fgRefMultCorr  = new StRefMultCorr("grefmult") ;
   fgRefMultCorr_P16id  = new StRefMultCorr("grefmult_P16id") ;
   fgRefMultCorr_VpdMB30 = new StRefMultCorr("grefmult_VpdMB30") ;
@@ -77,11 +80,13 @@ StRefMultCorr* CentralityMaker::getRefMult3Corr()
   return fRefMult3Corr ;
 }
 
+/*
 //____________________________________________________________________________________________________
 StRefMultCorr* CentralityMaker::getTofTrayMultCorr()
 {
   return fTofTrayMultCorr ;
 }
+*/
 
 //____________________________________________________________________________________________________
 StRefMultCorr* CentralityMaker::getgRefMultCorr()
