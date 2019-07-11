@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------------------------------------
-// $Id: CentralityMaker.h,v 1.1 2019/01/28 20:26:08 gnigmat Exp $
+// $Id: CentralityMaker.h,v 1.2 2019/07/11 03:28:45 tnonaka Exp $
 // $Log: CentralityMaker.h,v $
-// Revision 1.1  2019/01/28 20:26:08  gnigmat
-// The first commit of the StRefMultCorr
+// Revision 1.2  2019/07/11 03:28:45  tnonaka
+// Toftray commented out
 //
 // Revision 1.5  2015/05/22 06:51:58  hmasui
 // Add grefmult for Run14 Au+Au 200 GeV
@@ -50,7 +50,7 @@ class CentralityMaker {
     StRefMultCorr* getRefMultCorr()  ; // For refmult
     StRefMultCorr* getRefMult2Corr() ; // For refmult2
     StRefMultCorr* getRefMult3Corr() ; // For refmult3
-    StRefMultCorr* getTofTrayMultCorr() ; // For TOF tray multiplicity
+   // StRefMultCorr* getTofTrayMultCorr() ; // For TOF tray multiplicity
     StRefMultCorr* getgRefMultCorr()  ; // For grefmult //Run14 AuAu200GeV
 
     // Print help messages
@@ -64,7 +64,7 @@ class CentralityMaker {
     StRefMultCorr* fRefMultCorr  ; // refmult based centrality
     StRefMultCorr* fRefMult2Corr ; // refmult2 based centrality
     StRefMultCorr* fRefMult3Corr ; // refmult3 based centrality
-    StRefMultCorr* fTofTrayMultCorr ; // tofTrayMult based centrality
+   // StRefMultCorr* fTofTrayMultCorr ; // tofTrayMult based centrality
     StRefMultCorr* fgRefMultCorr  ; // grefmult based centrality
 
     ClassDef(CentralityMaker, 0)
