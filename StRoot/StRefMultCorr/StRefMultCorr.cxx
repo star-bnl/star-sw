@@ -1,8 +1,13 @@
 //------------------------------------------------------------------------------
-// $Id: StRefMultCorr.cxx,v 1.2 2019/01/28 20:33:05 gnigmat Exp $
+// $Id: StRefMultCorr.cxx,v 1.3 2019/07/11 03:31:45 tnonaka Exp $
 // $Log: StRefMultCorr.cxx,v $
-// Revision 1.2  2019/01/28 20:33:05  gnigmat
-// Update of the StRefMultCorr.h
+// Revision 1.3  2019/07/11 03:31:45  tnonaka
+// Some functions are added/replaced to read header files and to implement Vz dependent centrality definitions for 54.4 GeV RefMult.
+//
+//
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+// StRefMultCor package has been moved to StRoot/StRefMultCorr 2019/02
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 //
 // Revision 1.14  2015/05/22 06:52:05  hmasui
 // Add grefmult for Run14 Au+Au 200 GeV
@@ -53,10 +58,14 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <sstream>
+
 #include "StRefMultCorr.h"
 #include "TError.h"
 #include "TRandom.h"
 #include "TMath.h"
+
+#include "Param.h"
 
 ClassImp(StRefMultCorr)
 
@@ -78,9 +87,8 @@ StRefMultCorr::StRefMultCorr(const TString name)
   // Clear all data members
   clear() ;
 
-  // Read parameters
-  read() ;
-  readBadRuns() ;
+  readHeaderFile() ;
+  readBadRunsFromHeaderFile() ;
 }
 
 //______________________________________________________________________________
@@ -162,6 +170,7 @@ void StRefMultCorr::clear()
   mVzEdgeForWeight.clear();
   mgRefMultTriggerCorrDiffVzScaleRatio.clear() ;
 }
+
 
 //______________________________________________________________________________
 Bool_t StRefMultCorr::isBadRun(const Int_t RunId)
@@ -267,6 +276,7 @@ void StRefMultCorr::init(const Int_t RunId)
 
   // call setParameterIndex
   setParameterIndex(RunId) ;
+
 }
 
 //______________________________________________________________________________
@@ -282,6 +292,7 @@ Int_t StRefMultCorr::setParameterIndex(const Int_t RunId)
       break ;
     }
   }
+
 
   if(mParameterIndex == -1){
     Error("StRefMultCorr::setParameterIndex", "Parameter set does not exist for RUN %d", RunId);
@@ -497,6 +508,15 @@ Int_t StRefMultCorr::getCentralityBin16() const
     CentBin16++;
   }
 
+  // Vz dependent centrality definition for Vz<-27 and Vz>25
+  // Run17 54.4 GeV, trigid = 580001
+  if(mParameterIndex==28&&(mVz<-27||mVz>25)){
+	  CentBin16 = getCentralityBin16VzDep();
+	 // if(CentBin16==-1) cout <<"Vz="<< mVz <<" RefMult="<< mRefMult <<" RefMultCorr="<< mRefMult_corr << endl;
+	 // if(CentBin16==9999) cout << "Invalide number"<< endl; 
+	 // cout <<"Vz dependent centrality definition for Vz<-27 and Vz>25 ... Vz="<< mVz <<" RefMult="<< mRefMult <<" RefMultCorr="<< mRefMult_corr <<" iCent="<< CentBin16 << endl;
+  }
+
   // return -1 if CentBin16 = 16 (very large refmult, refmult>5000)
   return (CentBin16==16) ? -1 : CentBin16;
 }
@@ -529,136 +549,182 @@ Int_t StRefMultCorr::getCentralityBin9() const
     CentBin9 = (Int_t)(0.5*CentBin16);
   }
 
+  // Vz dependent centrality definition for Vz<-27 and Vz>25
+  // Run17 54.4 GeV, trigid = 580001
+  // cout << mParameterIndex << endl;
+  if(mParameterIndex==28&&(mVz<-27||mVz>25)){
+	  CentBin9 = getCentralityBin9VzDep();
+  }
+
+
   return CentBin9;
 }
 
 //______________________________________________________________________________
-const Char_t* StRefMultCorr::getTable() const
-{
-  if ( mName.CompareTo("refmult", TString::kIgnoreCase) == 0 ) {
-    return "StRoot/StRefMultCorr/Centrality_def_refmult.txt";
-  }
-  else if ( mName.CompareTo("refmult2", TString::kIgnoreCase) == 0 ) {
-    return "StRoot/StRefMultCorr/Centrality_def_refmult2.txt";
-  }
-  else if ( mName.CompareTo("refmult3", TString::kIgnoreCase) == 0 ) {
-    return "StRoot/StRefMultCorr/Centrality_def_refmult3.txt";
-  }
-  else if ( mName.CompareTo("toftray", TString::kIgnoreCase) == 0 ) {
-    return "StRoot/StRefMultCorr/Centrality_def_toftray.txt";
-  }
-  else if ( mName.CompareTo("grefmult", TString::kIgnoreCase) == 0 ) {
-    return "StRoot/StRefMultCorr/Centrality_def_grefmult.txt";
-  }
-  else{
-    Error("StRefMultCorr::getTable", "No implementation for %s", mName.Data());
-    cout << "Current available option is refmult or refmult2 or refmult3 or toftray" << endl;
-    return "";
-  }
-}
-//______________________________________________________________________________
-void StRefMultCorr::read()
-{
-  // Open the parameter file and read the data
-  const Char_t* inputFileName(getTable());
-  ifstream ParamFile(inputFileName);
-  if(!ParamFile){
-    Error("StRefMultCorr::read", "cannot open %s", inputFileName);
-    return;
-  }
-  cout << "StRefMultCorr::read  Open " << inputFileName << flush ;
-
-  string line ;
-  getline(ParamFile,line);
-
-  if(line.find("Start_runId")!=string::npos)
-  {
-    while(ParamFile.good())
-    {
-      Int_t year;
-      Double_t energy;
-      ParamFile >> year >> energy ;
-
-      Int_t startRunId=0, stopRunId=0 ;
-      Double_t startZvertex=-9999., stopZvertex=-9999. ;
-      ParamFile >> startRunId >> stopRunId >> startZvertex >> stopZvertex ;
-
-      // Error check
-      if(ParamFile.eof()) break;
-
-      mYear.push_back(year) ;
-      mBeginRun.insert(std::make_pair(std::make_pair(energy, year), startRunId));
-      mEndRun.insert(std::make_pair(std::make_pair(energy, year), stopRunId));
-
-      mStart_runId.push_back( startRunId ) ;
-      mStop_runId.push_back( stopRunId ) ;
-      mStart_zvertex.push_back( startZvertex ) ;
-      mStop_zvertex.push_back( stopZvertex ) ;
-      for(Int_t i=0;i<mNCentrality;i++) {
-	Int_t centralitybins=-1;
-	ParamFile >> centralitybins;
-	mCentrality_bins[i].push_back( centralitybins );
-      }
-      Double_t normalize_stop=-1.0 ;
-      ParamFile >> normalize_stop ;
-      mNormalize_stop.push_back( normalize_stop );
-
-      for(Int_t i=0;i<mNPar_z_vertex;i++) {
-	Double_t param=-9999.;
-	ParamFile >> param;
-	mPar_z_vertex[i].push_back( param );
-      }
-
-      for(Int_t i=0;i<mNPar_weight;i++) {
-	Double_t param=-9999.;
-	ParamFile >> param;
-	mPar_weight[i].push_back( param );
-      }
-
-      for(Int_t i=0;i<mNPar_luminosity;i++) {
-	Double_t param=-9999.;
-	ParamFile >> param;
-	mPar_luminosity[i].push_back( param );
-      }
-      mCentrality_bins[mNCentrality].push_back( 5000 );
-    }
-  }
-  else
-  {
-    cout << endl;
-    Error("StRefMultCorr::read", "Input file is not correct! Wrong structure.");
-    return;
-  }
-  ParamFile.close();
-
-  cout << " [OK]" << endl;
+Int_t StRefMultCorr::getVzWindowForVzDepCentDef() const {
+	Int_t index = 9999;
+	//  54.4 GeV, RefMult, 580001
+	if(mParameterIndex==28){
+		if(mVz>-30&&mVz<-29) index = 0;
+		if(mVz>-29&&mVz<-27) index = 1;
+		if(mVz>25&&mVz<27)   index = 2;
+		if(mVz>27&&mVz<29)   index = 3;
+		if(mVz>29&&mVz<30)   index = 4;
+	}
+	return index;
 }
 
 //______________________________________________________________________________
-void StRefMultCorr::readBadRuns()
-{
-  // Read bad run numbers
-  //   - From year 2010 - 2014
-  //   - If input file doesn't exist, skip to the next year without warning
-  for(Int_t i=0; i<5; i++) {
-    cout << "StRefMultCorr::readBadRuns  For " << mName << ": open " << flush ;
-    const Int_t year = 2010 + i ;
-    const Char_t* inputFileName(Form("StRoot/StRefMultCorr/bad_runs_refmult_year%d.txt", year));
-    ifstream fin(inputFileName);
-    if(!fin){
-      //      Error("StRefMultCorr::readBadRuns", "can't open %s", inputFileName);
-      cout << endl;
-      continue;
-    }
-    cout << "  " << inputFileName << flush;
-
-    Int_t runId = 0 ;
-    while( fin >> runId ) {
-      mBadRun.push_back(runId);
-    }
-    cout << " [OK]" << endl;
-  }
+Int_t StRefMultCorr::getCentralityBin9VzDep() const {
+	const Int_t vzid = getVzWindowForVzDepCentDef();
+	Int_t iCent = 9999;
+	for(Int_t i=0; i<9; i++){
+		if(i==8){
+			if(mRefMult_corr>CentBin9_vzdep[vzid][i]&&mRefMult_corr<50000) iCent = i; 
+		}
+		else if(mRefMult_corr>CentBin9_vzdep[vzid][i]&&mRefMult_corr<CentBin9_vzdep[vzid][i+1]) iCent = i; 
+	}
+	// 80-100% for icent=-1
+	if(mRefMult_corr>0&&mRefMult_corr<CentBin9_vzdep[vzid][0]) iCent = -1; 
+	return (iCent==9999) ? -1 : iCent;
 }
+
+//______________________________________________________________________________
+Int_t StRefMultCorr::getCentralityBin16VzDep() const {
+	const Int_t vzid = getVzWindowForVzDepCentDef();
+	Int_t iCent = 9999;
+	for(Int_t i=0; i<16; i++){
+		if(i==15){
+			if(mRefMult_corr>CentBin16_vzdep[vzid][i]&&mRefMult_corr<50000) iCent = i; 
+		}
+		else if(mRefMult_corr>CentBin16_vzdep[vzid][i]&&mRefMult_corr<CentBin16_vzdep[vzid][i+1]) iCent = i; 
+	}
+	// 80-100% for icent=-1
+	if(mRefMult_corr>0&&mRefMult_corr<CentBin16_vzdep[vzid][0]) iCent = -1; 
+	return (iCent==9999) ? -1 : iCent;
+}
+
+
+//______________________________________________________________________________
+const Int_t StRefMultCorr::getRefX() const
+{
+  if ( mName.CompareTo("grefmult", TString::kIgnoreCase) == 0 )      return 0; 
+  else if ( mName.CompareTo("refmult", TString::kIgnoreCase) == 0 )  return 1; 
+  else if ( mName.CompareTo("refmult2", TString::kIgnoreCase) == 0 ) return 2; 
+  else if ( mName.CompareTo("refmult3", TString::kIgnoreCase) == 0 ) return 3; 
+  else if ( mName.CompareTo("refmult4", TString::kIgnoreCase) == 0 ) return 4; 
+  else return 9999;
+}
+
+//______________________________________________________________________________
+const Int_t StRefMultCorr::getNumberOfDatasets() const
+{
+  if ( mName.CompareTo("grefmult", TString::kIgnoreCase) == 0 )      return nID_gref; 
+  else if ( mName.CompareTo("refmult", TString::kIgnoreCase) == 0 )  return nID_ref1; 
+  else if ( mName.CompareTo("refmult2", TString::kIgnoreCase) == 0 ) return nID_ref2; 
+  else if ( mName.CompareTo("refmult3", TString::kIgnoreCase) == 0 ) return nID_ref3; 
+  else if ( mName.CompareTo("refmult4", TString::kIgnoreCase) == 0 ) return nID_ref4; 
+  else return 9999;
+}
+
+//______________________________________________________________________________
+void StRefMultCorr::readHeaderFile()
+{
+
+	const Int_t refX = getRefX();
+	const Int_t nID =  getNumberOfDatasets();
+
+
+	for(int iID=0; iID<nID; iID++){
+		//// Year, energy, run numbers, Vz cut
+		Int_t year; Double_t energy;
+		vector<string> sParam = StringSplit(getParamX(refX,iID,0),':'); 
+		year = stoi(sParam[0]); 
+		energy = stoi(sParam[1]); 
+		vector<string> sRuns = StringSplit(sParam[2],',');
+	        Int_t startRunId=0, stopRunId=0;
+		startRunId = stoi(sRuns[0]); 
+		stopRunId = stoi(sRuns[1]); 
+	        Double_t startZvertex=-9999., stopZvertex=-9999. ;
+		vector<string> sVz = StringSplit(sParam[3],',');
+		startZvertex = stod(sVz[0]);
+		stopZvertex = stod(sVz[1]);
+
+		mYear.push_back(year);
+		mBeginRun.insert(std::make_pair(std::make_pair(energy, year), startRunId));
+		mEndRun.insert(std::make_pair(std::make_pair(energy, year), stopRunId));
+	        mStart_runId.push_back( startRunId ) ;
+	        mStop_runId.push_back( stopRunId ) ;
+	        mStart_zvertex.push_back( startZvertex ) ;
+	        mStop_zvertex.push_back( stopZvertex ) ;
+
+		//// Centrality definition
+		vector<string> sParamCent = StringSplit(getParamX(refX,iID,1),','); 
+		for(UInt_t i=0; i<sParamCent.size(); i++){
+	        	mCentrality_bins[i].push_back( stoi(sParamCent[i]) );
+		}
+	        mCentrality_bins[mNCentrality].push_back( 5000 );
+
+		//// Normalization range
+	        Double_t normalize_stop=-1.0 ;
+	        normalize_stop = stod(getParamX(refX,iID,2)) ;
+	        mNormalize_stop.push_back( normalize_stop );
+
+		//// Acceptance correction
+		vector<string> sParamVz = StringSplit(getParamX(refX,iID,3),','); 
+	        for(UInt_t i=0;i<mNPar_z_vertex;i++) {
+			Double_t val = -9999.; 
+			if(i<sParamVz.size()) val = stod(sParamVz[i]);
+			else                  val = 0.0;
+			mPar_z_vertex[i].push_back( val );
+		}
+
+		//// Trigger inefficiency correction
+		vector<string> sParamTrig = StringSplit(getParamX(refX,iID,4),','); 
+	        for(UInt_t i=0; i<mNPar_weight; i++) {
+			Double_t val = -9999.;
+			if(i<sParamTrig.size()) val = stod(sParamTrig[i]);
+			else                    val = 0.0;
+			mPar_weight[i].push_back( val );
+		}
+
+		//// Luminosity correction
+		vector<string> sParamLumi = StringSplit(getParamX(refX,iID,5),','); 
+	        for(UInt_t i=0; i<mNPar_luminosity; i++) {
+			Double_t val = -9999.;
+			if(i<sParamLumi.size()) val = stod(sParamLumi[i]);
+			else                    val = 0.0;
+			mPar_luminosity[i].push_back( val );
+		}
+
+	//	cout << refX <<"  "<< iID <<"/"<< nID << endl;
+
+	}
+
+	cout <<"StRefMultCorr::readHeaderFile  [" << mName <<"] Correction parameters and centrality definitions have been successfully read."<< endl;
+
+}
+
+
+//______________________________________________________________________________
+void StRefMultCorr::readBadRunsFromHeaderFile()
+{
+	for(Int_t i=0; i<nBadRun_refmult_2010; i++){
+		mBadRun.push_back(badrun_refmult_2010[i]);
+	}
+	for(Int_t i=0; i<nBadRun_refmult_2011; i++){
+		mBadRun.push_back(badrun_refmult_2011[i]);
+	}
+	for(Int_t i=0; i<nBadRun_refmult_2017; i++){
+		mBadRun.push_back(badrun_refmult_2017[i]);
+	}
+	//// notification only one
+	if ( mName.CompareTo("grefmult", TString::kIgnoreCase) == 0 ){
+	cout << "StRefMultCorr::readBadRunsFromHeaderFile  Bad runs for year 2010, 2011 and 2017 have been read." << endl;
+	}
+}
+
+
 
 //______________________________________________________________________________
 void StRefMultCorr::print(const Option_t* option) const
@@ -711,5 +777,16 @@ void StRefMultCorr::print(const Option_t* option) const
     cout << endl << endl;
   }
   cout << "=====================================================================================" << endl;
+}
+
+//______________________________________________________________________________
+vector<string> StRefMultCorr::StringSplit( const string str, const char sep ){
+	vector<string> vstr;
+	stringstream ss(str);
+	string buffer;
+	while( getline(ss,buffer,sep) ){
+		vstr.push_back(buffer);
+	}
+	return vstr;
 }
 

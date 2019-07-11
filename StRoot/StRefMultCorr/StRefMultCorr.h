@@ -1,8 +1,13 @@
 //------------------------------------------------------------------------------
-// $Id: StRefMultCorr.h,v 1.2 2019/01/28 20:33:06 gnigmat Exp $
+// $Id: StRefMultCorr.h,v 1.3 2019/07/11 03:31:49 tnonaka Exp $
 // $Log: StRefMultCorr.h,v $
-// Revision 1.2  2019/01/28 20:33:06  gnigmat
-// Update of the StRefMultCorr.h
+// Revision 1.3  2019/07/11 03:31:49  tnonaka
+// Some functions are added/replaced to read header files and to implement Vz dependent centrality definitions for 54.4 GeV RefMult.
+//
+//
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+// StRefMultCor package has been moved to StRoot/StRefMultCorr 2019/02
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 //
 // Revision 1.9  2015/05/22 06:52:07  hmasui
 // Add grefmult for Run14 Au+Au 200 GeV
@@ -70,6 +75,8 @@
 #include <map>
 #include "TString.h"
 
+#include "BadRun.h"
+
 //______________________________________________________________________________
 // Class to correct z-vertex dependence, luminosity dependence of multiplicity
 class StRefMultCorr {
@@ -129,8 +136,6 @@ class StRefMultCorr {
     const TString mName ; // refmult, refmult2, refmult3 or toftray (case insensitive)
 
     // Functions
-    void read() ; /// Read input parameters from text file StRoot/StRefMultCorr/Centrality_def.txt
-    void readBadRuns() ; /// Read bad run numbers
     void clear() ; /// Clear all arrays
     Bool_t isIndexOk() const ; /// 0 <= mParameterIndex < maxArraySize
     Bool_t isZvertexOk() const ; /// mStart_zvertex < z < mStop_zvertex
@@ -142,9 +147,6 @@ class StRefMultCorr {
     // between different triggers
     //  - return 1 for all the other runs
     Double_t getScaleForWeight() const ;
-
-    // Get table name based on the input multiplicity definition
-    const Char_t* getTable() const ;
 
     // Data members
     enum {
@@ -181,6 +183,17 @@ class StRefMultCorr {
     Int_t mnVzBinForWeight ; /// vz bin size for scale factor
     std::vector<Double_t> mVzEdgeForWeight ; /// vz edge value
     std::vector<Double_t> mgRefMultTriggerCorrDiffVzScaleRatio ; /// Scale factor for global refmult
+
+    /////// Added from official package in StRoot/StRefMultCorr 
+    const Int_t getRefX() const;  /// X= 1 (normal RefMult), 2, 3, 4
+    const Int_t getNumberOfDatasets() const; /// Number of definitions for each X
+    void readHeaderFile();   //// alternative of read() in rev<=1.9 
+    void readBadRunsFromHeaderFile();  /// alternative of readBadRuns() in rev<=1.9 
+    //// Multiplicity dependent centrality definitions
+    Int_t getVzWindowForVzDepCentDef() const;
+    Int_t getCentralityBin9VzDep() const;
+    Int_t getCentralityBin16VzDep() const;
+    std::vector<std::string> StringSplit( const std::string str, const char sep );
 
     ClassDef(StRefMultCorr, 0)
 };
