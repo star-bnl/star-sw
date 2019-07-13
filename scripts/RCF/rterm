@@ -595,7 +595,8 @@ else
 	    $SLOGIN -A $port $user@$node
 	else
 	    echo "Opening a $col terminal on $node for $user $extra"
-	    $TERM_PRGM -sl 500 -sb +si -sk -T "$user@$node" -n "Xterm_$node" -bg $TERM_BKG_COLOR $TERM_OPTIONS -e $SLOGIN -A $X11Opt $port $user@$node &
+#	    $TERM_PRGM -sl 10000 -sb +si -sk -T "$user@$node" -n "Xterm_$node" -bg $TERM_BKG_COLOR $TERM_OPTIONS -e $SLOGIN -A $X11Opt $port $user@$node &
+	    $TERM_PRGM -sl 10000 -sb +si -sk -T "$user@$node" -n "Xterm_$node" -bg $TERM_BKG_COLOR -fn fixed -fg white   -sl 10000 -sb +si -sk -geometry 132x60 -bd red -bw 2 $TERM_OPTIONS -e $SLOGIN -A $X11Opt $port $user@$node &
 	endif
     endif
 endif
