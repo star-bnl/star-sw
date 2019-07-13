@@ -57,7 +57,7 @@ grep total ???/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fM\n", n/1.e
 cat Terminated.log | xargs 2019Production.pl | tee 2019Production.log
 renameF.pl
 ===================== Submit ===========================================================
-foreach d (`ls -1d 093/20*`)
+foreach d (`ls -1d 091/20*`)
   cd $d;  pwd;
   if (! -r Done) then
     lsf ~/xml/daq_2019X_TFG19e.xml

@@ -31,7 +31,7 @@ echo "infile0 --> "${infile0}
 #rm ${out_dir}/*.root
 #rm ${out_dir}/*.log
 if ( -r ${out_dir}/${logFile}) exit 0;
-if (! -d ${out_dir} mkdir -p ${out_dir}
+if (! -d ${out_dir}) mkdir -p ${out_dir}
 cd $SCRATCH
 
 #starver SL19c

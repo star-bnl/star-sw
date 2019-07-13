@@ -3,8 +3,11 @@
 //    Store relevant track informations for the embedding/real data QA
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQATrack.h,v 1.12 2011/04/01 05:00:18 hmasui Exp $
+ * $Id: StEmbeddingQATrack.h,v 1.13 2019/07/10 05:46:22 zhux Exp $
  * $Log: StEmbeddingQATrack.h,v $
+ * Revision 1.13  2019/07/10 05:46:22  zhux
+ * added option for btof pid for primary real tracks
+ *
  * Revision 1.12  2011/04/01 05:00:18  hmasui
  * Move track cuts into StEmbeddingQAUtilities, added global momentum for embedding
  *
@@ -60,7 +63,7 @@ class StEmbeddingQATrack {
     //  Need to put the geantid by hand 
     //  in order to calculate rapidity (and maybe invariant mass if you like)
     //  since the real tracks don't have geantid
-    StEmbeddingQATrack(const TString name, const StMuTrack& track, const Int_t geantid);
+    StEmbeddingQATrack(const TString name, const StMuTrack& track, const Int_t geantid, const Bool_t btof);
 
     /// Destructor
     virtual ~StEmbeddingQATrack();
