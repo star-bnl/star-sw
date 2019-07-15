@@ -267,6 +267,8 @@ void StarMCHits::BeginEvent() {
   // event
   fg2t_event = new St_g2t_event("g2t_event",1);  
   m_DataSet->Add(fg2t_event);
+  Int_t NTracks = TVirtualMC::GetMC()->GetStack()->GetNtrack();
+  ((StarStack *) TVirtualMC::GetMC()->GetStack())->SetNprimaries(NTracks);
   feventCurrent = fg2t_event->GetTable();
   memset (feventCurrent, 0, sizeof(g2t_event_st));
   fEventNumber++;
@@ -284,7 +286,6 @@ void StarMCHits::BeginEvent() {
   fg2t_vertex  = new St_g2t_vertex("g2t_vertex",NoVertex);
   m_DataSet->Add(fg2t_vertex); 
   fvertexCurrent = fg2t_vertex->GetTable();
-  Int_t NTracks = TVirtualMC::GetMC()->GetStack()->GetNtrack();
   fg2t_track   = new St_g2t_track ("g2t_track",NTracks);
   m_DataSet->Add(fg2t_track);
   ftrackCurrent = fg2t_track->GetTable();
@@ -375,8 +376,8 @@ void StarMCHits::PreTrack() {
     fvertexCurrent      = fg2t_vertex->GetTable() + nv;
     nv++;
   }
-  Int_t nt = fg2t_track->GetNRows();
-  g2t_track_st track;
+  static g2t_track_st track;
+  static const Double_t pEMax = 1 - 1.e-10;
   memset(&track, 0, sizeof(g2t_track_st));
   track.id             = Id;
   //    track.eg_label       = particle->GetIdGen();
@@ -395,10 +396,11 @@ void StarMCHits::PreTrack() {
   track.rapidity       = TMath::ATanH(ratio);
   track.pt             = part->Pt();
   ratio                = part->Pz()/part->P();
-  static const Double_t pEMax = 1 - 1.e-10;
   ratio                = TMath::Min(pEMax,TMath::Max(-pEMax, ratio));
   track.eta            = TMath::ATanH(ratio);
   fvertexCurrent->n_daughter++;
   fg2t_track->AddAt(&track);
-  ftrackCurrent = fg2t_track->GetTable() + nt;
+  Int_t nt = fg2t_track->GetNRows();
+  ftrackCurrent = fg2t_track->GetTable() + nt - 1;
+  assert(ftrackCurrent->id == Id);
 }

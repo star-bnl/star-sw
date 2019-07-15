@@ -73,6 +73,7 @@ class StarStack : public TVirtualMCStack
     Int_t          fNprimary;           //  Number of primaries
     Int_t          fTrackNo;            //! Last track returned from the stack
     Int_t          fCurrentID;          //! Index of track in fParticles
+    Bool_t         fFromStack;          //! true is particle is taken from fStack
     static Int_t   fgDebug;             //!
     std::stack<TParticle>   fStack;//!
     ClassDef(StarStack,1) //Particles stack

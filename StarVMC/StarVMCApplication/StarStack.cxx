@@ -50,7 +50,8 @@ using namespace std;
     fNtrack(0),
     fNprimary(0),
     fTrackNo(0),
-    fCurrentID(-1)
+    fCurrentID(-1),
+    fFromStack(kFALSE)
 {
   //
   // Default constructor
@@ -64,7 +65,8 @@ StarStack::StarStack(Int_t size, const char* /*evfoldname*/):
   fNtrack(0),
   fNprimary(0),
   fTrackNo(0),
-  fCurrentID(-1)
+  fCurrentID(-1),
+  fFromStack(kFALSE)
 {
   //
   //  Constructor
@@ -79,7 +81,8 @@ StarStack::StarStack(const StarStack& st):
   fNtrack(st.GetNtrack()),
   fNprimary(st.GetNprimary()),
   fTrackNo(0),
-  fCurrentID(-1)
+  fCurrentID(-1),
+  fFromStack(kFALSE)
 {
   // Copy constructor
 }
@@ -212,8 +215,9 @@ void StarStack::PushTrack(Int_t done, Int_t parent, Int_t pdg,
   //  Declare that the daughter information is valid
   particle->SetBit(kDaughtersBit);
   //  Add the particle to the stack
-  if(parent>=0) {
-    TParticle *parentTrack = Particle(parent);
+  TParticle *parentTrack = 0;
+  if(parent >= 0) {
+    parentTrack = Particle(parent);
     if (parentTrack) {
       parentTrack->SetLastDaughter(index);
       if (parentTrack->GetFirstDaughter()<0) parentTrack->SetFirstDaughter(index);
@@ -222,25 +226,40 @@ void StarStack::PushTrack(Int_t done, Int_t parent, Int_t pdg,
       Error("StarStack::PushTrack",Form("Parent %d does not exist",parent));
     }
   }
+#if 0
+  static Int_t    IsVol = 0;
+#endif
+#if 1
+  static Double_t R = 0;
+  static Double_t Z = 0;
+#endif
+  static Double_t Ekin = 0;
+  static Double_t pTotP = 0;
+  static TString path;
   if(!done) {
     particle->SetBit(kDoneBit);
   } else {
     particle->SetBit(kTransportBit);
-    static Int_t    IsVol = 0;
-    static Double_t R = 0;
-    static Double_t Z = 0;
-    static Double_t Ekin = 0;
-    static TString path;
-    if (mech == kPPrimary || mech == kPDecay) goto Add2Particles; // primaries always go to particle list
+    if (! parentTrack) goto Add2Particles;
+    if (fFromStack) goto Add2Stack;
+    if (fNtrack+1 >= __UINT_LEAST16_MAX__) goto Add2Stack; // Don't generate particle with no. > 65516
+    pTotP = parentTrack->P();
+    if (pTotP < 0.050) goto Add2Stack;
+    if (mech == kPPrimary) goto Add2Particles; // primaries always go to particle list
+#if 0
     IsVol = gGeoManager->GetCurrentNode()->GetVolume()->GetMedium()->GetParam(0);
-    if (mech == kPDecay) goto Add2Particles; 
     path = TString(gGeoManager->GetPath());
     if (path.Contains("TPGV")) goto Add2Particles;
+#endif
+    Ekin = particle->Ek(); 
+    if (Ekin < 0.001) goto Add2Stack;
+#if 1
+    //    if (mech => kPDecay) goto Add2Particles; 
     R = particle->R();
     Z = particle->Vz();
-    Ekin = particle->Ek(); 
-    if (IsVol && Ekin > 0.100 && R < 200 && TMath::Abs(Z) < 210)  goto Add2Particles;
-    //  Add2Stack:
+    if (R < 200 && TMath::Abs(Z) < 210)  goto Add2Particles;
+#endif
+  Add2Stack:
     fStack.push(*particle);
     fParticles.RemoveAt(index);
     index--;
@@ -332,6 +351,7 @@ TParticle* StarStack::GetNextParticle()
   //
   static TParticle particleFromStack;
   TParticle* particle = 0;
+  fFromStack = kFALSE;
   if (fStack.empty()) {
     Int_t fNtrack = GetNtrack();
     for (Int_t i = 0; i < fNtrack; i++) {
@@ -342,6 +362,7 @@ TParticle* StarStack::GetNextParticle()
     particleFromStack = fStack.top();
     fStack.pop();
     particle = &particleFromStack;
+    fFromStack = kTRUE;
   }
   return particle;  
 }

@@ -126,13 +126,13 @@ void StarVMCApplication::GeneratePrimaries() {
   } 
   Int_t NPrimary = fStarStack->GetNtrack();
   if (! NPrimary) TVirtualMC::GetMC()->StopRun();
+  if (fMcHits) {
+    fMcHits->BeginEvent();
+  }
 }
 //_____________________________________________________________________________
 void StarVMCApplication::BeginEvent() {    // User actions at beginning of event
   fStarStack->Reset();
-  if (fMcHits) {
-    fMcHits->BeginEvent();
-  }
 }
 //_____________________________________________________________________________
 void StarVMCApplication::BeginPrimary() {    // User actions at beginning of a primary track
