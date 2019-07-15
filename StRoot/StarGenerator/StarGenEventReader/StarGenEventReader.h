@@ -17,7 +17,7 @@ public:
 
   Int_t Init();
   Int_t Generate();
-
+  Int_t Skip(Int_t Nskip) {mEntry += Nskip; return kStOK;}
 private:
 protected:
   Int_t mEntry;
