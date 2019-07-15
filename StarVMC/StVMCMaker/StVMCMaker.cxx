@@ -129,42 +129,53 @@ StVMCMaker::Make
    ->                  StarVMCApplication::BeginEvent();
    ->                    StarStack::Reset
    ->                      StarStack::Clear
+   ->                    StarMCHits::BeginEvent
+   ->                      StarMCHits::Clear
+   ->                        StarVMCDetectorSet::GetDetectorHash => Clear
    ->                  TGeant3::ProcessEvent();
    ->                    TGeant3::Gtrigi();
    ->                    TGeant3::Gtrigc();
    ->                    TGeant3::Gtrig();
-   ->                     g3trig
-   ->                       TGeant3gu::gukine_()
+   ->                      g3trig
+   ->                       TGeant3gu::gukine()
    ->                          StarVMCApplication::GeneratePrimaries();  
    ->                            StarMCSimplePrimaryGenerator::GeneratePrimaries(origin)
    ->                              StarMCSimplePrimaryGenerator::GeneratePrimary()
    ->                                StarStack::PushTrack
+   ->                            Fill g2t_event
+   ->                            Create g2t_vertex and g2t_track  <<<<<<<<<<<<<<<<<<<<
    ->                       TGeant3gu::gutrev()
    ->                         gtreveroot();
    ->                           TGeant3::rxgtrak();
+   ->                             StarVMCApplication::BeginPrimary
+   ->                               StarMCHits::BeginPrimary
+
    ->                             TVirtualMC::GetMC()->GetStack()->PopNextTrack(mtrack) => StarMCStack::PopNextTrack
    ->                               StarStack::GetNextParticle()
    ->                                 StarStack::PopPrimaryForTracking
-   ->                        TGeant3gu::gutrack_()
+   ->                             TGeant3gu::gutrack_()
    ->                               StarVMCApplication::Field(xdouble,bdouble); // gufld
    ->                               StarVMCApplication::PreTrack();
-   ->                          g3track();
-   ->                            g3hadr()
-   ->                              gdecay();
-   ->                        
-   ->                            TGeant3gu::gustep();
-   ->                                   StarStack::PushTrack
-   ->                                   StarVMCApplication::Stepping();         // gustep
-   ->                                       StarMCHits::Step();
-   ->                                         StarMCHits::FillG2Table();
-   ->                                           StarVMCDetector::GetVolumeId();
-   ->                                              StarVMCDetector::GetNumbv  
-   ->                                            fCurrentDetector->GetChair()->Fill(fHit);
-   ->                                                   G2TBook[Track]Hit();
-   ->                                                   G2TFill[Track]Hit();
-   ->                               StarVMCApplication::PostTrack();
+   ->                               g3track();
+   ->                                 g3hadr()
+   ->                                 gdecay();
+   ->                                 TGeant3gu::gustep();					   
+   ->                                        StarStack::PushTrack				   
+   ->                                        StarVMCApplication::Stepping();         // gustep  
+   ->                                            StarMCHits::Step();				   
+   ->                                              StarMCHits::FillG2Table();		   
+   ->                                                StarVMCDetector::GetVolumeId();		   
+   ->                                                   StarVMCDetector::GetNumbv  		   
+   ->                                                 fCurrentDetector->GetChair()->Fill(fHit); 
+   ->                                                        G2TBook[Track]Hit();		   
+   ->                                                        G2TFill[Track]Hit();		   
+   ->                                    StarVMCApplication::PostTrack();                       
+   ->                           rxouth
+   ->                             StarVMCApplication::FinishPrimary                                                                           
+   ->                          	           StarMCHits::PostTrack                                
+   ->                            
    ->                  StarVMCApplication::FinishEvent();
-   ->                      hits->FinishEvent(); // fill run,event,track tables
+   ->                    StarMCHits::FinishEvent(); // fill run,event,track tables
 */
 
 #include <assert.h>
