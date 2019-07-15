@@ -85,7 +85,7 @@ float mPsiErr;			//track Psi error
 float mDipErr;			//track Dip error
 float mRxyErr;			//Rxy error 
 float mZErr;			//z error
-short int mIdTruTk;
+int mIdTruTk;
 short int mQaTruTk;
 char mEnd[1];			//|NoIO
   ClassDef(StiPullTrk,3);
@@ -170,7 +170,7 @@ float gPulEmx[3];			//  hit error mtx:PhiRPhiR,PhiRZ,ZZ
 
 float gPsi;			//  track Psi in global  Sti frame
 float gDip;			//  track Dip in global  Sti frame
-short int mIdTruth;
+int   mIdTruth;
 short int mQaTruth;
 char mEnd[1];
   ClassDef(StiPullHit,3);

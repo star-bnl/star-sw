@@ -33,7 +33,7 @@ class StTpcCoordinateTransform;
 struct SignalSum_t {
   Float_t      Sum;
   Short_t      Adc;
-  Short_t  TrackId;
+  Int_t        TrackId;
 };
 class StTpcRSMaker : public StMaker {
  public:

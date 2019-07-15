@@ -173,7 +173,7 @@ class StMuTrack : public TObject {
     Int_t            qaTruth() const { return mQuality; }
     Int_t           idParentVx() const {return mIdParentVx;}
     void            setType(short type) { mType = type;}
-    void            setIdTruth(Int_t idtru,Int_t qatru=0) {mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
+    void            setIdTruth(Int_t idtru,Int_t qatru=0) {mIdTruth = idtru; mQuality = (UShort_t) qatru;}
     void         setIdParentVx(Int_t Id) {mIdParentVx = Id;}
 #ifdef  __kfpAtFirstHit__
     KFPTrack       &kfpTrackAtFirstHit()       {return mkfpTrackAtFirstHit;}
@@ -228,7 +228,7 @@ protected:
   Int_t mIndex2ETofHit;
   StMuETofPidTraits mETofPidTraits;
   // IdTruth
-  UShort_t         mIdTruth; // MC track id if any 
+  Int_t            mIdTruth; // MC track id if any 
   UShort_t         mQuality; // quality of this information (percentage of hits coming the above MC track)
   Int_t         mIdParentVx;
   Float_t mLengthInTracking;
@@ -251,9 +251,9 @@ protected:
   friend class StMuDstFilterMaker;
   friend class StMuMomentumShiftMaker;
 #ifdef  __kfpAtFirstHit__
-  ClassDef(StMuTrack,21)
+  ClassDef(StMuTrack,23)
 #else
-  ClassDef(StMuTrack,20)
+  ClassDef(StMuTrack,22)
 #endif
 };
 ostream&              operator<<(ostream& os, StMuTrack const & v);

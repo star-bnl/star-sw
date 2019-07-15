@@ -83,7 +83,7 @@ class StMuPrimaryVertex : public TObject {
    void             setType(StVertexId val) { mType = val; }							  
    void             setId(Int_t val) { mId = val; }								  
    void             setFlag(Int_t val) { mFlag = val; }								  
-   void             setIdTruth(Int_t idtru,Int_t qatru=0) {mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
+   void             setIdTruth(Int_t idtru,Int_t qatru=0) {mIdTruth = idtru; mQuality = (UShort_t) qatru;}
    void             setIdParent(Int_t id) {mIdParent = id;}                                                          
    virtual void     Print(Option_t *option="") const; ///< Print essential vertex info
 
@@ -122,7 +122,7 @@ class StMuPrimaryVertex : public TObject {
   UShort_t         mRefMultFtpcWest;
   UShort_t         mRefMultFtpcEast;
   // IdTruth
-  UShort_t         mIdTruth; // MC vertex id if any 
+  Int_t            mIdTruth; // MC vertex id if any 
   UShort_t         mQuality; // quality of this information (percentage of tracks coming the above MC Vertex)
   Int_t            mIdParent;
 };

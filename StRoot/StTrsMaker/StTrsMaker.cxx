@@ -1129,7 +1129,7 @@ Int_t StTrsMaker::Make(){
 	      
 	      StSequence* listOfSequences;
 	      //Sequence* listOfSequences;
-	      UShort_t      ** listOfIds = 0;
+	      Int_t      ** listOfIds = 0;
 	      zsr->getSequences(irow,
 				static_cast<int>(padList[ipad]),
 				&nseq,
@@ -1230,7 +1230,7 @@ void StTrsMaker::setNormalFactor(double FudgeFactor) {
 void StTrsMaker::CheckTruth(int no_tpc_hits, g2t_tpc_hit_st *tpc_hit)
 {
    StSequence *seq; int nSeq;
-   UShort_t **ids;
+   Int_t **ids;
    int sector, row,pad,tim;
    TObjectSet *trsEvent=(TObjectSet*)GetDataSet("Event"); 			if(!trsEvent)  	return;
    StTrsZeroSuppressedReader *mZsr=0;

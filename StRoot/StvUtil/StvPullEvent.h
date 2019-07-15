@@ -186,7 +186,7 @@ float gZPulErr;			//  dZ   Pul err in global Stv frame
 
 float gPsi;			//  track Psi in global  Stv frame
 float gDip;			//  track Dip in global  Stv frame
-short int mIdTruth;
+int   mIdTruth;
 short int mQaTruth;
 char mEnd[1];			//!No IO
   ClassDef(StvPullHit,2);

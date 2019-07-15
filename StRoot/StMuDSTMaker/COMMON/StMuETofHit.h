@@ -123,7 +123,7 @@ public:
     /**
     ** @brief mc-true associated track id in simulation
     **/
-    unsigned int idTruth()     const;
+    int idTruth()     const;
     /**
     ** @brief quality of this information (percentage of charge produced by mIdTruth)
     **/
@@ -158,7 +158,7 @@ public:
     void setIndex2Primary(     const int& id );
     void setIndex2Global(      const int& id );
 
-    void setIdTruth( unsigned short idtruth, unsigned short qatruth=0 );
+    void setIdTruth(int idtruth, unsigned short qatruth=0 );
 
 
 private:
@@ -178,14 +178,14 @@ private:
     Int_t       mIndex2Primary;
     Int_t       mIndex2Global;
 
-    UShort_t     mIdTruth;
+    Int_t        mIdTruth;
     UShort_t     mQuality;
 
     friend class StMuDst;
 
 
 
-    ClassDef( StMuETofHit, 1 );
+    ClassDef( StMuETofHit, 2 );
 };
 
 
@@ -209,7 +209,7 @@ inline int  StMuETofHit::index2Global()        const { return mIndex2Global;    
 inline StMuTrack* StMuETofHit::primaryTrack() const { return ( mIndex2Primary>=0 ) ? ( StMuTrack* ) StMuDst::array( muPrimary )->UncheckedAt( mIndex2Primary ) : 0; }
 inline StMuTrack* StMuETofHit::globalTrack()  const { return ( mIndex2Global >=0 ) ? ( StMuTrack* ) StMuDst::array( muGlobal  )->UncheckedAt( mIndex2Global  ) : 0; }
 
-inline unsigned int StMuETofHit::idTruth()    const { return mIdTruth; }
+inline          int StMuETofHit::idTruth()    const { return mIdTruth; }
 inline unsigned int StMuETofHit::qaTruth()    const { return mQuality; }
 
 

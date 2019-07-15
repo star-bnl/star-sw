@@ -12,11 +12,11 @@ class StPxlDigiHit: public StPxlHit
 public:
 
    StPxlDigiHit();
-   StPxlDigiHit(const double (&localPos)[3], unsigned sector, unsigned ladder, unsigned sensor, unsigned short idTruth);
+   StPxlDigiHit(const double (&localPos)[3], unsigned sector, unsigned ladder, unsigned sensor, int idTruth);
    StPxlDigiHit(const StPxlCluster &cluster, unsigned sector, unsigned ladder, unsigned sensor);
    StPxlDigiHit(const double (&localPos)[3], unsigned sector, unsigned ladder, unsigned sensor,
       const StThreeVectorF& position, const StThreeVectorF& error, unsigned int hwPosition,
-      float charge, unsigned char trachRefCount, unsigned short idTruth, unsigned short quality, unsigned short id);
+      float charge, unsigned char trachRefCount, int idTruth, unsigned short quality, unsigned short id);
 
    void setMeanRow(double val);
    void setMeanColumn(double val);

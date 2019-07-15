@@ -72,10 +72,10 @@ public:
   ~StTrsZeroSuppressedReader() {}
 
   Int_t getPadList(Int_t padRow, unsigned char **padList) {return mTheSector->getPadList(padRow,padList);}
-  Int_t getSequences(Int_t padRow, Int_t Pad, Int_t *nSeq, StSequence** SeqData, UShort_t ***Ids=0) {
+  Int_t getSequences(Int_t padRow, Int_t Pad, Int_t *nSeq, StSequence** SeqData, Int_t ***Ids=0) {
     return mTheSector->getSequences(padRow,Pad,nSeq, SeqData, Ids);
   }
-  Int_t getSequences(Int_t padRow, Int_t Pad, Int_t *nSeq, Sequence**   SeqData, UShort_t ***Ids=0) {
+  Int_t getSequences(Int_t padRow, Int_t Pad, Int_t *nSeq, Sequence**   SeqData, Int_t ***Ids=0) {
     return getSequences(padRow, Pad, nSeq, (StSequence**) SeqData, Ids);
   }
   Int_t setSector(Int_t);

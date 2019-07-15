@@ -76,7 +76,7 @@ public:
     Short_t mAssociatedTrackId;
     Int_t mIndex2Primary;
     Int_t mIndex2Global;
-    UShort_t mIdTruth;
+    Int_t mIdTruth;
     UShort_t mQuality;
     Float_t   mPathLength; // MC
     Float_t   mTime;       // MC

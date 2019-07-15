@@ -181,8 +181,8 @@ Int_t StTpcRTSHitMaker::Make() {
     LOG_WARN << "TPC status indicates it is unusable for this event. Ignoring hits." << endm;
     return kStOK;
   }
-  static  Short_t ADCs[__MaxNumberOfTimeBins__];
-  static UShort_t IDTs[__MaxNumberOfTimeBins__];
+  static Short_t ADCs[__MaxNumberOfTimeBins__];
+  static Int_t IDTs[__MaxNumberOfTimeBins__];
   StEvent*   rEvent      = (StEvent*)    GetInputDS("StEvent");
   if (! rEvent) {
     LOG_WARN << "There is no StEvent" << endm;

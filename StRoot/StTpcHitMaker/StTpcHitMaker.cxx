@@ -636,7 +636,7 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t
 
   StTpcHit *hit = StTpcHitFlag(global.position(),hard_coded_errors,hw,q
 			       , (UChar_t ) 0  // c
-			       , (UShort_t) 0  // idTruth=0
+			       , (Int_t)    0  // idTruth=0
 			       , (UShort_t) 0  // quality=0,
 			       , ++fId         // id
 			       , cluster.p1 //  mnpad
@@ -683,7 +683,7 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
 
   StTpcHit *hit = StTpcHitFlag(global.position(),hard_coded_errors,hw,q
 			       , (UChar_t ) 0  // c
-			       , (UShort_t) 0  // idTruth=0
+			       , (Int_t)    0  // idTruth=0
 			       , (UShort_t) 0  // quality=0,
 			       , ++fId         // id =0
 			       , cluster.p1 //  mnpad
@@ -997,7 +997,7 @@ StTpcDigitalSector *StTpcHitMaker::GetDigitalSector(Int_t sector) {
 Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
   static Int_t TonkoAnn  = IAttr("UseTonkoClusterAnnotation");
   Short_t  ADCs2[512];
-  UShort_t IDTs2[512];
+  Int_t IDTs2[512];
   memset(ADCs, 0, sizeof(ADCs));
   memset(IDTs, 0, sizeof(IDTs));
   StTpcDigitalSector *digitalSector = 0;
@@ -1278,7 +1278,7 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
 StTpcHit* StTpcHitMaker::StTpcHitFlag(const StThreeVectorF& p,
              const StThreeVectorF& e,
              UInt_t hw, float q, UChar_t c,
-             UShort_t idTruth, UShort_t quality,
+             Int_t idTruth, UShort_t quality,
              UShort_t id,
              UShort_t mnpad, UShort_t mxpad, UShort_t mntmbk,
              UShort_t mxtmbk, Float_t cl_x, Float_t cl_t, UShort_t adc,

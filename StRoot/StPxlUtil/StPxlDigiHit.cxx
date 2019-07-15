@@ -14,7 +14,7 @@ StPxlDigiHit::StPxlDigiHit() : StPxlHit()
 
 /** Suitable for constructing a PXL hit in a fast simulation. */
 StPxlDigiHit::StPxlDigiHit(const double (&localPos)[3], unsigned sector, unsigned ladder, unsigned sensor,
-   unsigned short idTruth) :
+   int idTruth) :
    StPxlHit(localPos, sector, ladder, sensor, idTruth)
 {
    // Update parents mMeanRow/mMeanColumn using the provided hit coordinates
@@ -38,7 +38,7 @@ StPxlDigiHit::StPxlDigiHit(const StPxlCluster &cluster, unsigned sector, unsigne
 
 StPxlDigiHit::StPxlDigiHit(const double (&localPos)[3], unsigned sector, unsigned ladder, unsigned sensor,
    const StThreeVectorF& position, const StThreeVectorF& error, unsigned int hwPosition,
-   float charge, unsigned char trackRefCount, unsigned short idTruth, unsigned short quality, unsigned short id) :
+   float charge, unsigned char trackRefCount, int idTruth, unsigned short quality, unsigned short id) :
    StPxlHit(localPos, sector, ladder, sensor, position, error,
       hwPosition, charge, trackRefCount, idTruth, quality, id)
 {

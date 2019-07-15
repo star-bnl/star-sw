@@ -152,10 +152,8 @@ StMuETofHit::setHwAddress( const unsigned int sector, const unsigned int zPlane,
 }
 
 void
-StMuETofHit::setIdTruth( unsigned short idtruth, unsigned short qatruth )
+StMuETofHit::setIdTruth( int idtruth, unsigned short qatruth )
 {
-    if( qatruth==0 ) qatruth = ( idtruth>>16 );
-    idtruth  = idtruth&((1<<16)-1);
-    mIdTruth = static_cast< UShort_t >( idtruth );
-    mQuality = static_cast< UShort_t >( qatruth );
+  mIdTruth = idtruth;
+  mQuality = qatruth;
 }

@@ -41,7 +41,7 @@ public:
   pair<Double_t,Double_t>  mLeadingEdgeTime;
   pair<Double_t,Double_t>  mTrailingEdgeTime;
 	
-  UShort_t  mIdTruth;  // simulation associated track id
+  Int_t     mIdTruth;  // simulation associated track id
   UShort_t  mQuality;  // quality of this information (percentage of charge produced by mIdTruth)
   UShort_t  mTrackKey;
   Int_t     mIndex2Primary;

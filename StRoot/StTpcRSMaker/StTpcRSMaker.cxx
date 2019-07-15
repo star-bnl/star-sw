@@ -1193,8 +1193,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
         for(Int_t pad = 1; pad <= Npads; pad++) {
 	  UInt_t ntimebins = digitalSector->numberOfTimeBins(row,pad);
 	  if (! ntimebins) continue;
-	  static  Short_t ADCs[__MaxNumberOfTimeBins__];
-	  static UShort_t IDTs[__MaxNumberOfTimeBins__];
+	  static Short_t ADCs[__MaxNumberOfTimeBins__];
+	  static Int_t   IDTs[__MaxNumberOfTimeBins__];
 	  digitalSector->getTimeAdc(row,pad,ADCs,IDTs);
 	  for (UInt_t t = 0; t < __MaxNumberOfTimeBins__; t++) {
 	    if (ADCs[t] > 0 && IDTs[t]) {
@@ -1407,8 +1407,8 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
       gain = St_tpcPadGainT0BC::instance()->Gain(Sector,row,pad);
       if (gain <= 0.0) continue;
       ped    = St_TpcResponseSimulatorC::instance()->AveragePedestal();
-      static  Short_t ADCs[__MaxNumberOfTimeBins__];
-      static UShort_t IDTs[__MaxNumberOfTimeBins__];
+      static Short_t ADCs[__MaxNumberOfTimeBins__];
+      static Int_t   IDTs[__MaxNumberOfTimeBins__];
       memset(ADCs, 0, sizeof(ADCs));
       memset(IDTs, 0, sizeof(IDTs));
       Int_t NoTB = 0;

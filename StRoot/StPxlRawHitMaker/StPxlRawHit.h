@@ -65,7 +65,7 @@ protected:
    Char_t mSensor; ///< sensor 1-10
    Short_t mRow; ///< row 0-927
    Short_t mColumn; ///< column 0-959
-   UShort_t mIdTruth; ///< for embedding, 0 as background
+   Int_t   mIdTruth; ///< for embedding, 0 as background
 
    ClassDef(StPxlRawHit, 1)
 };

@@ -199,7 +199,7 @@ Int_t StPxlFastSim::addPxlHits(const StMcPxlHitCollection& mcPxlHitCol,
 
                UInt_t hw = sector * 10 + ladder; // needs to be updated later after clustering alogrithms are finalized
 
-               unsigned short idTruth = mcPix->parentTrack() ? mcPix->parentTrack()->key() : -999;
+               int idTruth = mcPix->parentTrack() ? mcPix->parentTrack()->key() : -999;
                unsigned short quality = mcPix->parentTrack() ? 100 : 0;
 
                StPxlDigiHit* tempHit = new StPxlDigiHit(localPixHitPos, iSec+1, mcPix->ladder(), mcPix->sensor(),

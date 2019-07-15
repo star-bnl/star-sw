@@ -133,7 +133,7 @@ class StTpcHitMaker : public StRTSBaseMaker {
   TString mQuery;
   tpc_t   *fTpc;
   Short_t  ADCs[512];
-  UShort_t IDTs[512];
+  Int_t    IDTs[512];
   UShort_t fId; // current cluster Id
   Int_t    maxHits[24];
   Int_t    maxBin0Hits;
@@ -154,7 +154,7 @@ class StTpcHitMaker : public StRTSBaseMaker {
   static StTpcHit* StTpcHitFlag(const StThreeVectorF& p,
              const StThreeVectorF& e,
              UInt_t hw, float q, UChar_t c,
-             UShort_t idTruth, UShort_t quality,
+             Int_t idTruth, UShort_t quality,
              UShort_t id,
              UShort_t mnpad, UShort_t mxpad, UShort_t mntmbk,
              UShort_t mxtmbk, Float_t cl_x, Float_t cl_t, UShort_t adc,
