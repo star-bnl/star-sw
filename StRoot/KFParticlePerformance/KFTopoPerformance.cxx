@@ -1066,10 +1066,11 @@ void KFTopoPerformance::CalculateEfficiency()
           
           Double_t massMC = fParteff.partMass[iPart];
           Double_t E = sqrt(mcTrack.P()*mcTrack.P() + massMC*massMC);
-          Double_t Y = 0.5*log((E + mcTrack.Pz())/(E - mcTrack.Pz()));
+	  Double_t mT = sqrt(massMC*massMC + mcTrack.Pt()*mcTrack.Pt());
+          Double_t Y = log((E + mcTrack.Pz())/mT);
           Double_t Z = mcTrack.Z();
           Double_t R = -1, L=-1;
-          Double_t Mt_mc = sqrt(mcTrack.Pt()*mcTrack.Pt()+massMC*massMC)-massMC;
+          Double_t Mt_mc = mT-massMC;
           Double_t cT = -1.e10;
           Double_t decayLength = -1.e10;
           
