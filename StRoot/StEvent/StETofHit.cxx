@@ -23,7 +23,8 @@
 #include "StETofHit.h"
 
 StETofHit::StETofHit()
-: mSector(0),
+  : StHit(),
+  mSector(0),
   mZPlane(0),
   mCounter(0),
   mTime(0), 
@@ -31,9 +32,7 @@ StETofHit::StETofHit()
   mClusterSize(0),
   mLocalX(0),
   mLocalY(0),
-  mAssociatedTrack(0),
-  mIdTruth(0),
-  mQuality(0)
+  mAssociatedTrack(0)
 {
     /* no op */
 }
@@ -42,7 +41,8 @@ StETofHit::StETofHit()
 StETofHit::StETofHit( const unsigned int sector, const unsigned int zPlane,  const unsigned int counter,
                       const double& time, const double& tot, const unsigned int clusterSize,
                       const double& localX, const double& localY )
-: mSector(sector),
+  : StHit(),
+  mSector(sector),
   mZPlane(zPlane),
   mCounter(counter),
   mTime(time),
@@ -50,16 +50,15 @@ StETofHit::StETofHit( const unsigned int sector, const unsigned int zPlane,  con
   mClusterSize(clusterSize),
   mLocalX(localX),
   mLocalY(localY),
-  mAssociatedTrack(0),
-  mIdTruth(0),
-  mQuality(0)
+  mAssociatedTrack(0)
 {
     /* no op */
 }
 
 
 StETofHit::StETofHit( const StETofHit& hitIn )
-: mSector(hitIn.mSector),
+  : StHit(hitIn),
+  mSector(hitIn.mSector),
   mZPlane(hitIn.mZPlane),
   mCounter(hitIn.mCounter),
   mTime(hitIn.mTime),
@@ -67,9 +66,7 @@ StETofHit::StETofHit( const StETofHit& hitIn )
   mClusterSize(hitIn.mClusterSize),
   mLocalX(hitIn.mLocalX),
   mLocalY(hitIn.mLocalY),
-  mAssociatedTrack(hitIn.mAssociatedTrack),
-  mIdTruth(hitIn.mIdTruth),
-  mQuality(hitIn.mQuality)
+  mAssociatedTrack(hitIn.mAssociatedTrack)
 {
     /* no op */
 }
@@ -121,16 +118,6 @@ StETofHit::setHwAddress( const unsigned int sector, const unsigned int zPlane, c
     mZPlane  = zPlane;
     mCounter = counter;
 }
-
-void
-StETofHit::setIdTruth( unsigned short idtruth, unsigned short qatruth )
-{
-    if (qatruth==0) qatruth = (idtruth>>16);
-    idtruth    = idtruth&((1<<16)-1);
-    mIdTruth = static_cast<UShort_t>(idtruth);
-    mQuality = static_cast<UShort_t>(qatruth);
-}
-
 
 ostream&
 operator<<( ostream &os, const StETofHit& hit )

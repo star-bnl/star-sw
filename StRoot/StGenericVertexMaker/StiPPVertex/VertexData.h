@@ -10,7 +10,7 @@ class VertexData {
  public:
   int id; // vertex ID assigned by PPV
   bool isTriggered; ///< Indicates whether the vertex potentially belongs to triggered event
-  short mIdTruth;
+  int mIdTruth;
   TVector3 r,er; // vertex position and its error
   int nUsedTrack; // # of tracks used to identify the vertex
   float Lmax; // maximum of the likelhood function.

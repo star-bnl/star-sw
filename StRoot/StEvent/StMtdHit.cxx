@@ -36,8 +36,6 @@ StMtdHit::StMtdHit()
     mTrailingEdgeTime.second = 0.;
 
     mAssociatedTrack  = 0;
-    mIdTruth          = 0;
-    mQuality          = 0;
 }
 
 StMtdHit::~StMtdHit() {/* noop */}
@@ -68,12 +66,6 @@ StMtdHit::associatedTrack() { return mAssociatedTrack; }
 const StTrack*
 StMtdHit::associatedTrack() const { return mAssociatedTrack; }
 
-int
-StMtdHit::idTruth() const { return mIdTruth; }
-
-int
-StMtdHit::qaTruth() const { return mQuality; }
-
 void
 StMtdHit::setBackleg(unsigned char backlegId) { mBackLeg = backlegId; }
 
@@ -91,14 +83,6 @@ StMtdHit::setTrailingEdgeTime(pair<double,double> time) { mTrailingEdgeTime = ti
 
 void
 StMtdHit::setAssociatedTrack(StTrack* val) { mAssociatedTrack = val; }
-
-void
-StMtdHit::setIdTruth(int idtru,int qatru)
-{
-    if (qatru==0) qatru = (idtru>>16);
-    mIdTruth =                      (idtru);
-    mQuality = static_cast<UShort_t>(qatru);
-}
 
 ostream&
 operator<<(ostream &os, const StMtdHit& hit)

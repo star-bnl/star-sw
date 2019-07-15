@@ -39,7 +39,7 @@ public:
    unsigned char        getNRawHits()       	const;
    unsigned char        getNRawHitsRPhi()   	const;
    unsigned char        getNRawHitsZ()      	const;
-   unsigned short       getIdTruth()        	const;
+   Int_t                getIdTruth()        	const;
 
    void        setLadder(int ladder);
    void        setSensor(int sensor);
@@ -52,7 +52,7 @@ public:
    void        setNRawHits(int nRawHits);
    void        setNRawHitsRPhi(int nRawHitsRPhi);
    void        setNRawHitsZ(int nRawHitsZ);
-   void        setIdTruth(unsigned short idTruth);
+   void        setIdTruth(Int_t idTruth);
 
    virtual void Print(Option_t *opt = "") const;
 
@@ -62,7 +62,7 @@ protected:
    Float_t     mMeanColumn;             	///< Cluster's mean column
    Float_t     mTotCharge;              	///< Charge sum of the cluster
    Float_t     mTotChargeErr;           	///< rMS noise of the cluster
-   UShort_t    mIdTruth;                        //!< For embedding, 0 as background
+   Int_t       mIdTruth;                        //!< For embedding, 0 as background
    UChar_t     mLadderId;                       ///< Ladder id the cluster belongs to
    UChar_t     mSensorId;                       ///< Sensor id the cluster belongs to
    UChar_t     mClusteringType;         	///< Clustering algorithm type

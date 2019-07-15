@@ -27,12 +27,12 @@
 #define StMtdHit_hh
 
 #include <Stiostream.h>
-#include "StObject.h"
+#include "StHit.h"
 #include "StContainers.h"
 
 class StTrack;
 
-class StMtdHit : public StObject {
+class StMtdHit : public StHit {
 public:
     StMtdHit();
     ~StMtdHit();
@@ -48,17 +48,13 @@ public:
     StTrack*        associatedTrack();
     const StTrack*  associatedTrack() const;
     
-    int             idTruth() const;
-    int             qaTruth() const;
-    Int_t volumeID() const {return 0;}
-
     void setBackleg(unsigned char);
     void setModule(unsigned char);
     void setCell(unsigned char);
     void setLeadingEdgeTime(pair<double,double>);
     void setTrailingEdgeTime(pair<double,double>);
     void setAssociatedTrack(StTrack*);
-    void setIdTruth(int idtru, int qatru=0);
+    StDetectorId          detector() const {return kMtdId;}
 
  protected:
     UChar_t   mBackLeg;
@@ -72,10 +68,8 @@ public:
 #else
     StLink<StTrack>  mAssociatedTrack;		
 #endif //__CINT__
-    Int_t  mIdTruth;  // simulation associated track id
-    UShort_t  mQuality;  // quality of this information (percentage of charge produced by mIdTruth)
 
-    ClassDef(StMtdHit,2)
+    ClassDef(StMtdHit,3)
 };
 
 ostream& operator<<(ostream&, const StMtdHit&); // Printing operator

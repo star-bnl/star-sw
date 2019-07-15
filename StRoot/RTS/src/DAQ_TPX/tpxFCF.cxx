@@ -279,14 +279,14 @@ int tpxFCF::fcf_decode(u_int *p_buff, daq_sim_cld *sdc, u_short version)
 	p_buff += skip ;
 
 
-	sdc->quality = (*p_buff) >> 16 ;
-	sdc->track_id = (*p_buff) & 0xFFFF ;
+	sdc->quality =  *(p_buff+1) & 0xFFFF ; 
+	sdc->track_id = (*p_buff) ;
 
 
 	//LOG(TERR,"Q %d, T %d",sdc->quality, sdc->track_id) ;
 
-	// took one int so...
-	skip++ ;
+	// took two int so...
+	skip += 2;
 
 
 	return skip ;
@@ -1032,7 +1032,7 @@ int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 					cl->sim_length++ ;
 
 					// in case of non-geant data, overwrite the track ids with the current marker...
-					if(sim_adc[i].track_id == 0xFFFF) {
+					if(sim_adc[i].track_id == -1) { // 0xFFFF) {
 						modes |= 2 ;		// heuristic to set the correct mode
 						sim_adc[i].track_id = cl_marker ;
 					}
@@ -1683,7 +1683,8 @@ void tpxFCF::dump(tpxFCF_cl *cl, int row)
 
 
 	if(modes) {	// FCF Annotation
-		*loc_buff++ = (cl->quality << 16) | cl->track_id ;
+	  *loc_buff++ = cl->track_id ;
+	  *loc_buff++ = cl->quality  & 0xFFFF ; 
 	}
 
 

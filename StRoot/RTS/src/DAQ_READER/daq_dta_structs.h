@@ -28,8 +28,8 @@ struct daq_sim_adc_tb {
 	unsigned short tb ;
 
 	// embeding info:
-	unsigned short track_id ;
-	short reserved ;
+	int   track_id ;
+  //yf	short reserved ;
 } ;
 
 
@@ -51,8 +51,9 @@ struct daq_sim_cld {
 	struct daq_cld cld ;
 
 	// embedding info
-	unsigned short track_id ;
+	int   track_id ;
 	short quality ;
+  short reserved;
 } ;
 
 struct daq_sim_cld_x {
@@ -60,14 +61,14 @@ struct daq_sim_cld_x {
 	struct daq_cld cld ;
 
 	// embedding info
-	unsigned short track_id ;
+	int   track_id ;
 	short quality ;
 
 	// other data
 	unsigned short pixels ;
 	unsigned short max_adc ;
 
-	unsigned int reserved[4] ;
+	unsigned int reserved[3] ;
 } ;
 
 

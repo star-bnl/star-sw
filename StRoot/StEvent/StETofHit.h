@@ -27,12 +27,12 @@
 #define STETOFHIT_H
 
 #include <Stiostream.h>
-#include "StObject.h"
+#include "StHit.h"
 
 class StTrack;
 
 
-class StETofHit : public StObject {
+class StETofHit : public StHit {
 public:
     /**
     ** @brief Default constructor.
@@ -120,15 +120,6 @@ public:
     StTrack* associatedTrack() const;
 
 
-    /**
-    ** @brief mc-true associated track id in simulation
-    **/
-    unsigned int idTruth()     const;
-    /**
-    ** @brief quality of this information (percentage of charge produced by mIdTruth)
-    **/
-    unsigned int qaTruth()     const;
-
 
     /**
     ** @brief Sorting using the time, assumes Digis are in same reference frame (e.g. same epoch).
@@ -157,8 +148,7 @@ public:
 
     void setAssociatedTrack( StTrack* trk );
 
-    void setIdTruth( unsigned short idtruth, unsigned short qatruth=0 );
-
+    StDetectorId          detector() const {return kETofId;}
 
 private:
     UInt_t      mSector;
@@ -175,12 +165,8 @@ private:
 
     StTrack*    mAssociatedTrack;  //$LINK
 
-    UShort_t     mIdTruth;
-    UShort_t     mQuality;
 
-
-
-    ClassDef( StETofHit, 1 );
+    ClassDef( StETofHit, 2 );
 };
 
 ostream& operator << ( ostream&, const StETofHit& hit ); // Printing operator
@@ -200,9 +186,6 @@ inline double StETofHit::localY()   const { return mLocalY; };
 
 inline StTrack* StETofHit::associatedTrack()       { return mAssociatedTrack; };
 inline StTrack* StETofHit::associatedTrack() const { return mAssociatedTrack; };
-
-inline unsigned int StETofHit::idTruth()     const { return mIdTruth; }
-inline unsigned int StETofHit::qaTruth()     const { return mQuality; }
 
 inline void StETofHit::setSector(  const unsigned int sector  )  { mSector   = sector;  }
 inline void StETofHit::setZPlane(  const unsigned int zPlane  )  { mZPlane   = zPlane;  }

@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 		for(u_int i=0;i<dd->ncontent;i++) {
 			sim_d[i].adc = dd->adc[i].adc ;
 			sim_d[i].tb = dd->adc[i].tb ;
-			sim_d[i].track_id = 0xFFFF ;	// should be 0xFFFF if you don;t have tracking...
+			sim_d[i].track_id = -1; //0xFFFF ;	// should be 0xFFFF if you don;t have tracking...
 		}
 
 		// wrap up this pad with the correct length & coordinates
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
 			if(dd->sim_cld[i].cld.flags != 0) continue ;
 			if((dd->sim_cld[i].cld.p2 - dd->sim_cld[i].cld.p1) != 2) continue ;
 
-			u_short tid = dd->sim_cld[i].track_id ;
+			int tid = dd->sim_cld[i].track_id ;
 
 			daq_dta *dta = dr->det("tpx")->get("adc_sim") ;
 			while(dta && dta->iterate()) {

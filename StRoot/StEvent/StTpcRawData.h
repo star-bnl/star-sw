@@ -61,7 +61,7 @@
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #define __MaxNumberOfTimeBins__ 512
 typedef std::vector<Short_t>  StVectorADC;
-typedef std::vector<UShort_t> StVectorIDT;
+typedef std::vector<Int_t> StVectorIDT;
 
 class StDigitalPair {
 public:
@@ -72,7 +72,7 @@ public:
     
     Short_t* adc()   const {return (Short_t*)&mAdc[0];}			
     Bool_t   isIdt() const {return mAdc.size() == mIdt.size();}
-    UShort_t*idt()   const {return (UShort_t*) (isIdt() ? &mIdt[0] : 0);}			
+    Int_t   *idt()   const {return (Int_t*)(isIdt() ? &mIdt[0] : 0);}			
     Int_t    size()  const {return mAdc.size();}
     UShort_t time()  const {return mTime;}
 
@@ -92,10 +92,10 @@ typedef StDigitalPadRow::iterator            StDigitalPadRowIterator;
 typedef StDigitalSector::iterator            StDigitalRowIterator;
 
 typedef std::vector<StSequence>              StVecSequence;
-typedef std::vector<UShort_t*>               StVecIds;
+typedef std::vector<Int_t*>                  StVecIds;
 typedef std::vector<UChar_t>                 StVecPads;
-typedef std::vector<UChar_t> 	               StVecUChar;
-typedef std::vector<Int_t> 	               StVecInt;
+typedef std::vector<UChar_t> 	             StVecUChar;
+typedef std::vector<Int_t> 	             StVecInt;
 typedef std::vector<StTpcPixel>              StVectPixel;
 
 class StTpcDigitalSector : public StObject {
@@ -114,14 +114,14 @@ public:
     
     // Adding
     void   assignTimeBins(Int_t row , Int_t pad, StDigitalTimeBins*);
-    Int_t  getSequences(Int_t row, Int_t pad, Int_t *nSeq, StSequence** seq, UShort_t ***Id);
+    Int_t  getSequences(Int_t row, Int_t pad, Int_t *nSeq, StSequence** seq, Int_t ***Ids);
     Int_t  getPadList(Int_t row, UChar_t **padList);
     Int_t  getTimeAdc(Int_t row, Int_t pad, Short_t ADCs[__MaxNumberOfTimeBins__], 
-		      UShort_t IDTs[__MaxNumberOfTimeBins__]); // with  8 => 10 conversion
+		      Int_t IDTs[__MaxNumberOfTimeBins__]); // with  8 => 10 conversion
     Int_t  getTimeAdc(Int_t row, Int_t pad, UChar_t  ADCs[__MaxNumberOfTimeBins__], 
-		      UShort_t IDTs[__MaxNumberOfTimeBins__]);
-    Int_t  putTimeAdc(Int_t row, Int_t pad, Short_t *ADCs, UShort_t *IDTs = 0);     // with 10 =>  8 conversion
-    Int_t  putTimeAdc(Int_t row, Int_t pad, UChar_t  *ADCs, UShort_t *IDTs = 0);
+		      Int_t IDTs[__MaxNumberOfTimeBins__]);
+    Int_t  putTimeAdc(Int_t row, Int_t pad, Short_t *ADCs, Int_t *IDTs = 0);     // with 10 =>  8 conversion
+    Int_t  putTimeAdc(Int_t row, Int_t pad, UChar_t  *ADCs, Int_t *IDTs = 0);
     void   setSector(Int_t sector) {mSector = sector;} 
     void   clear();
     Int_t  cleanup();

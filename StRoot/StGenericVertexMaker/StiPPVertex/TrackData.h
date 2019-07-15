@@ -46,7 +46,7 @@ public:
 
   const StDcaGeometry* dca;
 
-  short mIdTruth;
+  int mIdTruth;
   short mQuality;
   int   mIdParentVx;
   DcaTrack dcaTrack; // for 3D vertex reco

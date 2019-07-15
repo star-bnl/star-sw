@@ -859,7 +859,7 @@ int tpxFCF_2D::stage_2d(u_int *buff, int max_bytes)
 			for(;tb_hi>=tb_lo;tb_hi--) {
 				short adc = *s++ ;
 #ifdef DO_SIMULATION
-				u_short track_id = *s++ ;
+				int track_id = *s++ ;
 
 				*(tdd + tb) = track_id ;
 #endif
@@ -1280,7 +1280,7 @@ int tpxFCF_2D::do_pad_2d(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 		// every pixel has an associated track_id
 		int track_id ;
 		if(sim_adc && modes) track_id = sim_adc[i].track_id ;
-		else track_id = 0xFFFF ;
+		else track_id = -1; // 0xFFFF ;
 #endif
 
 		if(tb >= tb_last) {
@@ -1608,13 +1608,13 @@ void tpxFCF_2D::do_track_id(int peaks_cou)
 
 		struct {
 			int cou ;
-			u_int track_id ;
+			int track_id ;
 		} t_id[MAX_TRACK_IDS] ;
 
 		memset(t_id,0,sizeof(t_id)) ;
 
 
-		u_short track_id = 123;
+		int track_id = 123;
 		u_int blob_adc = 0 ;
 
 		for(int i=1;i<=dp;i++) {

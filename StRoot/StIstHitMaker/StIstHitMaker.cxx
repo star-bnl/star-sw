@@ -101,7 +101,7 @@ Int_t StIstHitMaker::Make()
 	unsigned int numClusters = clusterCollectionPtr->getNumClusters();
          LOG_DEBUG << "Make() - Number of clusters found in ladder " << (int)(ladderIdx + 1) << ": " << numClusters << endm;
 
-         unsigned short idTruth = 0;
+         int idTruth = 0;
          unsigned char  nRawHits = -1, nRawHitsZ = -1, nRawHitsRPhi = -1;
          unsigned char  ladder = -1, sensor = -1;
          float  meanRow = 0., meanColumn = 0., charge = 0., chargeErr = 0.;

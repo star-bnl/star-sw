@@ -29,7 +29,7 @@ StIstRawHit::StIstRawHit() : StObject(), mChannelId(-1), mGeoId(-1), mCharge(), 
 template<typename Container>
 StIstRawHit::StIstRawHit(int channelId, int geoId,
    const Container &charges, const Container &chargeErrs,
-   UChar_t maxTimeBin, UShort_t idTruth) :
+   UChar_t maxTimeBin, Int_t idTruth) :
    StObject(),
    mChannelId(channelId), mGeoId(geoId), mCharge(), mChargeErr(),
    mMaxTimeBin(maxTimeBin), mIdTruth(idTruth)
@@ -47,7 +47,7 @@ int StIstRawHit::getChannelId() const              { return mChannelId;     };
 int StIstRawHit::getGeoId() const                  { return mGeoId;      };
 unsigned char StIstRawHit::getMaxTimeBin() const   { return mMaxTimeBin;    };
 unsigned char StIstRawHit::getDefaultTimeBin()     { return mDefaultTimeBin;};
-unsigned short StIstRawHit::getIdTruth() const     { return mIdTruth;    };
+Int_t         StIstRawHit::getIdTruth() const     { return mIdTruth;    };
 
 unsigned char StIstRawHit::getLadder() const
 {
@@ -117,7 +117,7 @@ void StIstRawHit::setDefaultTimeBin( int tb )
    mDefaultTimeBin = tb;
 };
 
-void StIstRawHit::setIdTruth(unsigned short idTruth)
+void StIstRawHit::setIdTruth(Int_t idTruth)
 {
    mIdTruth = idTruth;
 };

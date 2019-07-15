@@ -117,7 +117,7 @@ public:
 #ifdef DO_SIMULATION
 		u_short cluster_id ;
 		short quality ;
-		u_short track_id ;
+		int   track_id ;
 #endif
 		
 	} peaks[MAX_PEAKS_PER_BLOB] ;

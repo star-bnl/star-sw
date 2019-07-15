@@ -41,7 +41,7 @@ private:
     Short_t      mNCommonHit; 		/// Common Hits is now encoded, tpc + svt * 100 + ssd * 1000
     Bool_t       mIsBestContam;
     Int_t        mDominatrack;
-    Short_t      mDominCommonHit;	///            with IdTruth             -"-           
+    Int_t        mDominCommonHit;	///            with IdTruth             -"-           
     Float_t      mAvgQuality;
 
   ClassDef(StMiniMcPair,3)

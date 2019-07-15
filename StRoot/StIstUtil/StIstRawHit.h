@@ -23,7 +23,7 @@ public:
    template<typename Container>
    StIstRawHit(int channelId, int geoId,
       const Container &charges, const Container &chargeErrs = Container{},
-      UChar_t maxTimeBin = 3, UShort_t idTruth = 0);
+      UChar_t maxTimeBin = 3, Int_t idTruth = 0);
 
    //accessors
    int               getChannelId()  const; //!< 0-110591
@@ -40,7 +40,7 @@ public:
    unsigned char     getApv()        const; //!< 0-23
    unsigned char     getChannel()    const; //!< 0-127
    static unsigned char  getDefaultTimeBin();
-   unsigned short    getIdTruth()    const; //!< for embedding, 0 as background
+   Int_t             getIdTruth()    const; //!< for embedding, 0 as background
 
    //modifiers
    void setChannelId(int rChannelId);
@@ -57,7 +57,7 @@ public:
    void setChargeErr(float chargeErr, int tb = -1);
    void        setMaxTimeBin(int tb) ;
    static void setDefaultTimeBin( int tb );
-   void        setIdTruth(unsigned short idTruth);
+   void        setIdTruth(Int_t idTruth);
 
    using StObject::Print;
    void Print(int nTimeBins) const;
@@ -70,7 +70,7 @@ private:
                                            ///< pedestal subtracted and/or CMN correction in physics mode
    Float_t     mChargeErr[kIstNumTimeBins];///< charge error in all time bins
    UChar_t     mMaxTimeBin;                ///< the max ADC time bin index of the raw hit
-   UShort_t    mIdTruth;                   ///< for embedding, 0 as background
+   Int_t       mIdTruth;                   ///< for embedding, 0 as background
 
    static UChar_t mDefaultTimeBin;
  public:

@@ -52,7 +52,7 @@ unsigned char    StIstCluster::getClusteringType() const 	{    return mClusterin
 unsigned char    StIstCluster::getNRawHits() const      	{    return mNRawHits;      };
 unsigned char    StIstCluster::getNRawHitsRPhi() const  	{    return mNRawHitsRPhi;  };
 unsigned char    StIstCluster::getNRawHitsZ() const     	{    return mNRawHitsZ;     };
-unsigned short   StIstCluster::getIdTruth() const       	{    return mIdTruth;       };
+Int_t            StIstCluster::getIdTruth() const       	{    return mIdTruth;       };
 
 //modifiers
 void StIstCluster::setLadder(int ladder)
@@ -110,7 +110,7 @@ void StIstCluster::setNRawHitsZ(int nRawHitsZ)
    mNRawHitsZ = nRawHitsZ;
 };
 
-void StIstCluster::setIdTruth(unsigned short idTruth)
+void StIstCluster::setIdTruth(Int_t idTruth)
 {
    mIdTruth = idTruth;
 };

@@ -73,7 +73,7 @@ struct tpxFCF_cl {
 	fcf_short p2 ;
 
 	fcf_short flags ;
-	unsigned short track_id ;
+	int       track_id ;
 
 	short quality ;	
 	short sim_length ;	// length of the corresponding sim data in *sim

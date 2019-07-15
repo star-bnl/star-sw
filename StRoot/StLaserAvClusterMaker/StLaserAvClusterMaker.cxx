@@ -144,7 +144,7 @@ StTpcHit *StLaserAvClusterMaker::CreateTpcHit(StTpcPadCoordinate *padcoord, Doub
 
   StTpcHit * hit = new StTpcHit(global.position(),hard_coded_errors,hw,q
 				, (UChar_t ) 0  // c
-				, (UShort_t) 0  // idTruth=0
+				, (Int_t)    0  // idTruth=0
 				, (UShort_t) 0  // quality=0,
 				, ++fId         // id
 				, 0//cluster->p1 //  mnpad

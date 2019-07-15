@@ -1598,7 +1598,7 @@ daq_dta *daq_tpx::handle_cld_2d_sim(int sec, int row)
 			fcf_2d_algo[sim->sec]->start_evt_2d(sim->sec,0) ;
 		}
 
-		//u_short track_id[512] ;
+		//int track_id[512] ;
 		tpx_altro_struct a ;
 
 		a.row = sim->row ;
@@ -1755,7 +1755,7 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 			}
 		}
 
-		//u_short track_id[512] ;
+		//int track_id[512] ;
 		tpx_altro_struct a ;
 
 		a.row = sim->row ;
