@@ -191,7 +191,7 @@ void l4Builder::initialize(int argc, char *argv[])
 		HLTGood2Plots[i]->gridy = 0;
 		HLTGood2Plots[i]->setPalette(1);
 	}
-	for(int i = 0; i < 6; i++) {
+	for(int i = 0; i < 12; i++) {
 		FixedTargetPlots[i] = new JevpPlot();
 		FixedTargetPlots[i]->gridx = 0;
 		FixedTargetPlots[i]->gridy = 0;
@@ -277,7 +277,7 @@ void l4Builder::initialize(int argc, char *argv[])
 	for(int i = 0; i < 4; i++) {
             addPlot(BesMonitorPlots[i]);
 	}
-	for(int i = 0; i < 6; i++) {
+	for(int i = 0; i < 12; i++) {
 	    addPlot(FixedTargetPlots[i]);
 	}
 	for(int i=0;i<6;i++) {
@@ -316,7 +316,7 @@ void l4Builder::startrun(daqReader *rdr)
 	for(int i = 0; i < 6; i++)BesGoodPlots[i]->getHisto(0)->histo->Reset();
 	for(int i = 0; i < 4; i++)HLTGood2Plots[i]->getHisto(0)->histo->Reset();
 	for(int i = 0; i < 4; i++)BesMonitorPlots[i]->getHisto(0)->histo->Reset();
-	for(int i = 0; i < 6; i++)FixedTargetPlots[i]->getHisto(0)->histo->Reset();
+	for(int i = 0; i < 12; i++)FixedTargetPlots[i]->getHisto(0)->histo->Reset();
 	for(int i = 0; i < 6; i++)FixedTargetMonitorPlots[i]->getHisto(0)->histo->Reset();
 	for(int i = 0; i < 1; i++){
 		for(int i = 3; i < 10; i++)DiElectronPlots[i]->getHisto(0)->histo->Reset();
@@ -604,7 +604,7 @@ void l4Builder::writeHistogram()
 		for(int i = 0; i < 4; i++)BesMonitorPlots[i]->getHisto(0)->histo->Write();
 	}
 	if(FixedTargetFilled){
-		for(int i = 0; i < 6; i++)FixedTargetPlots[i]->getHisto(0)->histo->Write();
+		for(int i = 0; i < 12; i++)FixedTargetPlots[i]->getHisto(0)->histo->Write();
 	}
 	if(FixedTargetMonitorFilled){
 		for(int i = 0; i < 6; i++)FixedTargetMonitorPlots[i]->getHisto(0)->histo->Write();
@@ -729,23 +729,28 @@ void l4Builder::event(daqReader *rdr)
 	}
 	eventCounter++;
 
-	HLT_EVE			*hlt_eve;
-	HLT_TOF			*hlt_tof;
-	HLT_PVPD		*hlt_pvpd;
-	HLT_EMC			*hlt_emc;
-	HLT_GT			*hlt_gt;
-	HLT_RHO			*hlt_dipi;
-	HLT_DIEP		*hlt_upcdiep;
-	HLT_PT			*hlt_pt;
-	HLT_NODE		*hlt_node;
-	HLT_HIPT		*hlt_hipt;
-	HLT_DIEP		*hlt_diep;
-	HLT_DIEP		*hlt_Twrdiep;
-	HLT_HF			*hlt_hf;
-	HLT_MTD			*hlt_mtd;
-	HLT_MTDQuarkonium	*hlt_mtdqm;
+
+
+	HLT_EVE			*hlt_eve     = NULL;
+	HLT_TOF			*hlt_tof     = NULL;
+	HLT_PVPD		*hlt_pvpd    = NULL;
+	HLT_EMC			*hlt_emc     = NULL;
+	HLT_GT			*hlt_gt      = NULL;
+	HLT_RHO			*hlt_dipi    = NULL;
+	HLT_DIEP		*hlt_upcdiep = NULL;
+	HLT_PT			*hlt_pt      = NULL;
+	HLT_NODE		*hlt_node    = NULL;
+	HLT_HIPT		*hlt_hipt    = NULL;
+	HLT_DIEP		*hlt_diep    = NULL;
+	HLT_DIEP		*hlt_Twrdiep = NULL;
+	HLT_HF			*hlt_hf      = NULL;
+	HLT_MTD			*hlt_mtd     = NULL;
+	HLT_MTDQuarkonium	*hlt_mtdqm   = NULL;
+
 	while(dd && dd->iterate()) {
 		hlt_gl3_t *hlt = (hlt_gl3_t *) dd->Void;
+
+		//LOG("JEFF", "(evt: %d) %p %d", rdr->event_number, hlt->buff, hlt->bytes);
 
 		if(strcmp(hlt->name, "HLT_EVE") == 0) hlt_eve = (HLT_EVE *)hlt->data;
 		else if(strcmp(hlt->name, "HLT_TOF") == 0) hlt_tof = (HLT_TOF *)hlt->data;
@@ -763,6 +768,25 @@ void l4Builder::event(daqReader *rdr)
 		else if(strcmp(hlt->name, "HLT_MTDQuarkonium") == 0) hlt_mtdqm = (HLT_MTDQuarkonium *)hlt->data;
 		else if(strcmp(hlt->name, "HLT_DIEP2Twr") == 0) hlt_Twrdiep = (HLT_DIEP *)hlt->data;
 	}
+
+	
+	if(hlt_eve     == NULL) { LOG(ERR, "BAD event %d: EVE.  Discard", rdr->event_number); return; }
+	if(hlt_tof     == NULL) { LOG(ERR, "BAD event %d: TOF.  Discard", rdr->event_number); return; }
+	if(hlt_pvpd    == NULL) { LOG(ERR, "BAD event %d: PVPD.  Discard", rdr->event_number); return; }
+	if(hlt_emc     == NULL) { LOG(ERR, "BAD event %d: EMC.  Discard", rdr->event_number); return; }
+	if(hlt_gt      == NULL) { LOG(ERR, "BAD event %d: GT.  Discard", rdr->event_number); return; }
+	if(hlt_dipi    == NULL) { LOG(ERR, "BAD event %d: DIPI.  Discard", rdr->event_number); return; }
+	if(hlt_upcdiep == NULL) { LOG(ERR, "BAD event %d: UPCDIEP.  Discard", rdr->event_number); return; }
+	if(hlt_pt      == NULL) { LOG(ERR, "BAD event %d: PT.  Discard", rdr->event_number); return; }
+	if(hlt_node    == NULL) { LOG(ERR, "BAD event %d: NODE.  Discard", rdr->event_number); return; }
+	if(hlt_hipt    == NULL) { LOG(ERR, "BAD event %d: HIPT.  Discard", rdr->event_number); return; }
+	if(hlt_diep    == NULL) { LOG(ERR, "BAD event %d: DIEP.  Discard", rdr->event_number); return; }
+	if(hlt_Twrdiep == NULL) { LOG(ERR, "BAD event %d: TWRDIEP.  Discard", rdr->event_number); return; }
+	if(hlt_hf      == NULL) { LOG(ERR, "BAD event %d: HF.  Discard", rdr->event_number); return; }
+	if(hlt_mtd     == NULL) { LOG(ERR, "BAD event %d: MTD.  Discard", rdr->event_number); return; }
+	if(hlt_mtdqm   == NULL) { LOG(ERR, "BAD event %d: MTDQM.  Discard", rdr->event_number); return; }
+
+
 	// Check Version
 	if(hlt_eve->version != HLT_GL3_VERSION) {
 		LOG(ERR, "ERROR: HLTFormats version doesn't match DAQ file version!");
@@ -923,6 +947,12 @@ void l4Builder::event(daqReader *rdr)
 	      hFixedTargetVertexYZ->Fill(vertZ, vertY);
 	      hFixedTargetVr->Fill(vertR);
 	      hFixedTarget_VertexZ->Fill(vertZ);
+              hFixedTargetBbceTAC->Fill(hlt_eve->bbce);
+              hFixedTargetBbcwTAC->Fill(hlt_eve->bbcw);
+              hFixedTargetVpdeTAC->Fill(hlt_eve->vpde);
+              hFixedTargetVpdwTAC->Fill(hlt_eve->vpdw);
+              hFixedTargetEpdeTAC->Fill(hlt_eve->epde);
+              hFixedTargetEpdwTAC->Fill(hlt_eve->epdw);
 	    }
 	    
 	    //FixedTargetMonitor
@@ -2286,6 +2316,7 @@ void l4Builder::defineHltPlots()
 	ph = new PlotHisto();
 	ph->histo = hnDedx;
 	HltPlots[index]->addHisto(ph);
+	HltPlots[index]->setDrawOpts("colz");
 
 	index++; //3
 	hDcaXy = new TH1D("DcaXy", "DcaXy", 120, -6., 6.);
@@ -2329,17 +2360,19 @@ void l4Builder::defineHltPlots()
 	ph = new PlotHisto();
 	ph->histo = hdEdx;
 	HltPlots[index]->addHisto(ph);
+	HltPlots[index]->setDrawOpts("colz");
 
 	index++; //10
 	hLn_dEdx = new TH1D("Ln_dEdx", "Ln_dEdx", 500, -14, -11.5);
 	ph = new PlotHisto();
 	ph->histo = hLn_dEdx;
 	HltPlots[index]->addHisto(ph);
+	HltPlots[index]->setDrawOpts("colz");
 
 	// Glob Tracks
 	index++;//11
 	HltPlots[index]->logy = 1;
-	hGlob_Pt = new TH1D("Glob_Pt", "Glob_Pt", 150, 0., 15.);
+	hGlob_Pt = new TH1D("Glob_Pt", "Glob_Pt", 150, 0., 35.);
 	ph = new PlotHisto();
 	ph->histo = hGlob_Pt;
 	HltPlots[index]->addHisto(ph);
@@ -2364,6 +2397,7 @@ void l4Builder::defineHltPlots()
 	ph = new PlotHisto();
 	ph->histo = hGlob_dEdx;
 	HltPlots[index]->addHisto(ph);
+	HltPlots[index]->setDrawOpts("colz");
 
 	// Prim Tracks
 	index++; //15
@@ -2393,6 +2427,7 @@ void l4Builder::defineHltPlots()
 	ph = new PlotHisto();
 	ph->histo = hPrim_dEdx;
 	HltPlots[index]->addHisto(ph);
+	HltPlots[index]->setDrawOpts("colz");
 
 	// Event
 	index++; //19
@@ -2446,14 +2481,14 @@ void l4Builder::defineHltPlots()
 
 	index++; //27
 	HltPlots[index]->logy = 1;
-	hglobalMult = new TH1I("globalMult", "globalMult", 100, 0, 3000);
+	hglobalMult = new TH1I("globalMult", "globalMult", 100, 0, 7000);
 	ph = new PlotHisto();
 	ph->histo = hglobalMult;
 	HltPlots[index]->addHisto(ph);
 
 	index++; //28
 	HltPlots[index]->logy = 1;
-	hprimaryMult = new TH1I("primaryMult", "primaryMult", 100, 0, 1000);
+	hprimaryMult = new TH1I("primaryMult", "primaryMult", 100, 0, 1600);
 	ph = new PlotHisto();
 	ph->histo = hprimaryMult;
 	HltPlots[index]->addHisto(ph);
@@ -2604,28 +2639,34 @@ void l4Builder::defineHltPlots()
         HltPlots[index]->addHisto(ph);
 
         index++; // 48
-        hBbceTAC = new TH1D("BbceTAC", "Earliest BBCE TAC;Earliest BBCE TAC", 200, 0, 3500);
+        hBbceTAC = new TH1D("BbceTAC", "Earliest BBCE TAC;Earliest BBCE TAC", 200, 100, 4100);
         HltPlots[index]->addHisto(new PlotHisto( hBbceTAC ));
+	HltPlots[index]->logy = 0;
 
         index++; // 49
-        hBbcwTAC = new TH1D("BbcwTAC", "Earliest BBCW TAC;Earliest BBCW TAC", 200, 0, 3500);
+        hBbcwTAC = new TH1D("BbcwTAC", "Earliest BBCW TAC;Earliest BBCW TAC", 200, 100, 4100);
         HltPlots[index]->addHisto(new PlotHisto( hBbcwTAC ));
+	HltPlots[index]->logy = 0;
 
         index++; // 50
-        hVpdeTAC = new TH1D("VpdeTAC", "Earliest VPDE TAC;Earliest VPDE TAC", 200, 0, 3500);
+        hVpdeTAC = new TH1D("VpdeTAC", "Earliest VPDE TAC;Earliest VPDE TAC", 200, 100, 4100);
         HltPlots[index]->addHisto(new PlotHisto( hVpdeTAC ));
+	HltPlots[index]->logy = 0;
 
         index++; // 51
-        hVpdwTAC = new TH1D("VpdwTAC", "Earliest VPDW TAC;Earliest VPDW TAC", 200, 0, 3500);
+        hVpdwTAC = new TH1D("VpdwTAC", "Earliest VPDW TAC;Earliest VPDW TAC", 200, 100, 4100);
         HltPlots[index]->addHisto(new PlotHisto( hVpdwTAC ));
+	HltPlots[index]->logy = 0;
 
         index++; // 52
-        hEpdeTAC = new TH1D("EpdeTAC", "Earliest EPDE TAC;Earliest EPDE TAC", 200, 0, 3500);
+        hEpdeTAC = new TH1D("EpdeTAC", "Earliest EPDE TAC;Earliest EPDE TAC", 200, 100, 4100);
         HltPlots[index]->addHisto(new PlotHisto( hEpdeTAC ));
+	HltPlots[index]->logy = 0;
 
         index++; // 53
-        hEpdwTAC = new TH1D("EpdwTAC", "Earliest EPDW TAC;Earliest EPDW TAC", 200, 0, 3500);
-        HltPlots[index]->addHisto(new PlotHisto( hEpdwTAC )); // 53
+        hEpdwTAC = new TH1D("EpdwTAC", "Earliest EPDW TAC;Earliest EPDW TAC", 200, 100, 4100);
+        HltPlots[index]->addHisto(new PlotHisto( hEpdwTAC ));
+	HltPlots[index]->logy = 0;
 }
 
 void l4Builder::defineBeamPlots()
@@ -2794,6 +2835,37 @@ void l4Builder::defineFixedTargetPlots()
 	ph = new PlotHisto();
 	ph->histo = hFixedTargetVertexYZ;
 	FixedTargetPlots[index]->addHisto(ph);
+
+        index++; // 6
+        hFixedTargetBbceTAC = new TH1D("FixedTargetBbceTAC", "Earliest BBCE TAC;Earliest BBCE TAC", 200, 100, 4100);
+        FixedTargetPlots[index]->addHisto(new PlotHisto( hFixedTargetBbceTAC ));
+	FixedTargetPlots[index]->logy = 0;
+
+        index++; // 7
+        hFixedTargetBbcwTAC = new TH1D("FixedTargetBbcwTAC", "Earliest BBCW TAC;Earliest BBCW TAC", 200, 100, 4100);
+        FixedTargetPlots[index]->addHisto(new PlotHisto( hFixedTargetBbcwTAC ));
+	FixedTargetPlots[index]->logy = 0;
+
+        index++; // 8
+        hFixedTargetVpdeTAC = new TH1D("FixedTargetVpdeTAC", "Earliest VPDE TAC;Earliest VPDE TAC", 200, 100, 4100);
+        FixedTargetPlots[index]->addHisto(new PlotHisto( hFixedTargetVpdeTAC ));
+	FixedTargetPlots[index]->logy = 0;
+
+        index++; // 9
+        hFixedTargetVpdwTAC = new TH1D("FixedTargetVpdwTAC", "Earliest VPDW TAC;Earliest VPDW TAC", 200, 100, 4100);
+        FixedTargetPlots[index]->addHisto(new PlotHisto( hFixedTargetVpdwTAC ));
+	FixedTargetPlots[index]->logy = 0;
+
+        index++; // 10
+        hFixedTargetEpdeTAC = new TH1D("FixedTargetEpdeTAC", "Earliest EPDE TAC;Earliest EPDE TAC", 200, 100, 4100);
+        FixedTargetPlots[index]->addHisto(new PlotHisto( hFixedTargetEpdeTAC ));
+	FixedTargetPlots[index]->logy = 0;
+
+        index++; // 11
+        hFixedTargetEpdwTAC = new TH1D("FixedTargetEpdwTAC", "Earliest EPDW TAC;Earliest EPDW TAC", 200, 100, 4100);
+        FixedTargetPlots[index]->addHisto(new PlotHisto( hFixedTargetEpdwTAC ));
+	FixedTargetPlots[index]->logy = 0;
+
 }
 
 void l4Builder::defineFixedTargetMonitorPlots()
@@ -2852,9 +2924,11 @@ void l4Builder::defineHeavyFragmentPlots()
 	ph = new PlotHisto();
 	ph->histo = hHFM_dEdx;
 	HeavyFragmentPlots[index]->addHisto(ph);
+	HeavyFragmentPlots[index]->setDrawOpts("colz");
 	ph = new PlotHisto();
 	ph->histo = hdEdx;
 	HeavyFragmentPlots[index]->addHisto(ph);
+	HeavyFragmentPlots[index]->setDrawOpts("colz");
 }
 void l4Builder::defineDiElectronPlots() // not only J/Psi, but di-pion, di-muon
 {

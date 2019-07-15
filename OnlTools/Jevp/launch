@@ -143,8 +143,7 @@ cat >${shellname}<<ROOTMACRO
   gSystem->Load("StEEmcPoolmuEztPanitkin");
   gSystem->Load("StBEMCPlots");
   gSystem->Load("StMcEvent");
-
-
+  
 ${evplibs}
 
 ${argstring}

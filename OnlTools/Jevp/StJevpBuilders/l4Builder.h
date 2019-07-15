@@ -48,7 +48,7 @@ class l4Builder : public JevpBuilder {
 		JevpPlot *BesGoodPlots[6];
 		JevpPlot *HLTGood2Plots[4];
 		JevpPlot *BesMonitorPlots[4];
-		JevpPlot *FixedTargetPlots[6];
+		JevpPlot *FixedTargetPlots[12];
 		JevpPlot *FixedTargetMonitorPlots[6];
 		JevpPlot *HeavyFragmentPlots[1];
 		JevpPlot *DiElectronPlots[10];
@@ -425,6 +425,13 @@ class l4Builder : public JevpBuilder {
 		TH1D *hFixedTarget_VertexZ;
 		TH1D *hFixedTarget_Prim_Eta;
 		TH1D *hFixedTarget_Glob_Eta;
+		TH1D *hFixedTargetBbceTAC;
+                TH1D *hFixedTargetBbcwTAC;
+                TH1D *hFixedTargetVpdeTAC;
+                TH1D *hFixedTargetVpdwTAC;
+                TH1D *hFixedTargetEpdeTAC;
+                TH1D *hFixedTargetEpdwTAC;
+
 		TH2D *hFixedTargetMonitorVertexXY;
 		TH2D *hFixedTargetMonitorVertexYZ;
 		TH1D *hFixedTargetMonitorVr;

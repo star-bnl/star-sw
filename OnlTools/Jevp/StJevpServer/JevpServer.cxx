@@ -805,6 +805,8 @@ void JevpServer::handleNewEvent(EvpMessage *m)
     
 	if((eventsThisRun % 100) == 0) LOG(WARN, "Processed %d events this run so far", eventsThisRun);
 
+	LOG(DBG, "Sending event #%d(%d)",rdr->seq, rdr->event_number);
+
 	// Now we have an event!
 	//
 	// fill histograms!
