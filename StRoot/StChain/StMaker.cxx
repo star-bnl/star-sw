@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.266 2019/07/16 21:32:43 smirnovd Exp $
+// $Id: StMaker.cxx,v 1.267 2019/07/16 21:33:03 smirnovd Exp $
 //
 //
 /*!
@@ -1407,13 +1407,9 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
 //_____________________________________________________________________________
 static void doPs(const Char_t *who, const Char_t *where)
 {
-  static const Char_t *ps =0;
-  if (!ps) {
-//		execute shell      
-    ps = gSystem->Getenv("StarEndMakerShell"); 
-    ps = (ps) ? "yes" : "";
-  }
-  if (!ps[0]) return;
+  if (!gSystem->Getenv("StarEndMakerShell"))
+    return;
+
   printf("QAInfo: doPs for %20s:%12s \t",who,where);
   StMemStat::PrintMem(0);
 }
@@ -1821,6 +1817,16 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.267  2019/07/16 21:33:03  smirnovd
+// Use simple test to check whether environment variable is defined
+//
+// From std::getenv documentation:
+//
+// Return value:
+//
+//    Character string identifying the value of the environmental variable or null
+//    pointer if such variable is not found.
+//
 // Revision 1.266  2019/07/16 21:32:43  smirnovd
 // Remove seemingly outdated macro-based branching
 //
