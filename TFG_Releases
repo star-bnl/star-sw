@@ -40,6 +40,6 @@
  TFG19c Freeze library for eXpress production (+64bits)              2019-03-05 11:27:28 -0500  (HEAD -> master, tag: TFG19c_3)
  TFG19d Freeze library for eXpress production with intermediate cal. 2019-04-14 16:44:16 -0400  (tag: TFG19e_3)
  TFG19e Update geometry for ETOF and EPD                             2019-05-30 20:23:14 -0400  (HEAD -> master, tag: TFG19e_4)
- TFG19f TRS fixes                                                    2019-06-28 14:38:55 -0400  (tag: TFG19f_4)
+ TFG19f IdTrtuh short -> int, g2t vertex and track fixes             2019-07-16 14:31:48 -0400  (HEAD -> master, tag: TFG19f_5)
  .DEV2  head of TFG git repository
   DEV2  head of TFG git repository build with ROOT6
