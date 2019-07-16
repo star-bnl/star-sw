@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMemStat.cxx,v 1.4 2019/06/21 21:13:28 smirnovd Exp $
+ * $Id: StMemStat.cxx,v 1.5 2019/07/16 21:32:55 smirnovd Exp $
  *
  ***************************************************************************
  *
@@ -82,7 +82,7 @@ void StMemStat::Summary()
 {
 #define NUMTICKS (40+4*12+5)
 
-  Double_t dmin=1.e+33,daver=0,dmax=-1.e+33,drms=0,dtally=0,dmp;
+  Double_t dmin=1.e+33, daver=0, dmax=-1.e+33, drms=0, dtally=0, dmp;
   int i;
 
   if(!fgList) return;
@@ -114,7 +114,7 @@ void StMemStat::Summary()
   //VP daver /= dtally;
   drms   = ::sqrt(fabs(drms));
   printf("%40.40s(%d)%12.6f%12.6f%12.6f%12.6f\n",
-	  "Total",(int)dtally,dmin,daver,dmax,drms);
+	  "Total", (int)dtally, dmin, daver, dmax, drms);
 
   for( i=0 ; i < NUMTICKS ; i++) printf("=");
   printf("\n");
