@@ -54,7 +54,11 @@ class StarMCHits : public TDataSet {
   virtual Int_t            Debug()        { return fDebug;}
   virtual Agcdigi_t*       Agcdigi()  const {return fAgcdigi;}
   virtual Agchitv_t*       Agchitv()  const {return fAgchitv;}
-  virtual g2t_track_st*    Current_g2t_track() {return ftrackCurrent;}
+  virtual void             SetCurrent_g2t_track (g2t_track_st*  trk) {ftrackCurrent  = trk;}
+  virtual void             SetCurrent_g2t_vertex(g2t_vertex_st* vtx) {fvertexCurrent = vtx;}
+  virtual g2t_track_st*    Current_g2t_track () {return ftrackCurrent;}
+  virtual g2t_vertex_st*   Current_g2t_vertex() {return fvertexCurrent;}
+  
  private:
   StarMCHits(const Char_t *name="StarMCHits",const Char_t *title="");
   static StarMCHits *fgInstance;

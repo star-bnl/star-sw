@@ -35,6 +35,7 @@
 #include "StEnumerations.h"
 #include "TGeoExtension.h"
 #include "TCallf77.h"
+#include "StarMCHits.h"
 StarMCHits *StarMCHits::fgInstance = 0;
 ClassImp(StarMCHits);
 //______________________________________________________________________
@@ -265,8 +266,11 @@ void StarMCHits::BeginEvent() {
   if (! m_DataSet) return;
   // particle
   // event
-  fg2t_event = new St_g2t_event("g2t_event",1);  
-  m_DataSet->Add(fg2t_event);
+  fg2t_event = (St_g2t_event*) m_DataSet->Find("g2t_event");
+  if (! fg2t_event) {
+    fg2t_event = new St_g2t_event("g2t_event",1);  
+    m_DataSet->Add(fg2t_event);
+  }
   Int_t NTracks = TVirtualMC::GetMC()->GetStack()->GetNtrack();
   ((StarStack *) TVirtualMC::GetMC()->GetStack())->SetNprimaries(NTracks);
   feventCurrent = fg2t_event->GetTable();
@@ -282,12 +286,18 @@ void StarMCHits::BeginEvent() {
   feventCurrent->b_impact           =           99;
   feventCurrent->phi_impact         =          0.5;
   fg2t_event->AddAt(feventCurrent);
-  Int_t NoVertex = 1;
-  fg2t_vertex  = new St_g2t_vertex("g2t_vertex",NoVertex);
-  m_DataSet->Add(fg2t_vertex); 
+  fg2t_vertex = (St_g2t_vertex*) m_DataSet->Find("g2t_vertex");
+  if (! fg2t_vertex ) {
+    Int_t NoVertex = 1;
+    fg2t_vertex  = new St_g2t_vertex("g2t_vertex",NoVertex);
+    m_DataSet->Add(fg2t_vertex); 
+  }
   fvertexCurrent = fg2t_vertex->GetTable();
-  fg2t_track   = new St_g2t_track ("g2t_track",NTracks);
-  m_DataSet->Add(fg2t_track);
+  fg2t_track = (St_g2t_track*) m_DataSet->Find("g2t_track");
+  if (! fg2t_track ) {
+    fg2t_track  = new St_g2t_track("g2t_track",NTracks);
+    m_DataSet->Add(fg2t_track); 
+  }
   ftrackCurrent = fg2t_track->GetTable();
 }
 //________________________________________________________________________________
@@ -321,86 +331,11 @@ void StarMCHits::SetDebug(Int_t m) {
 }
 //________________________________________________________________________________
 void StarMCHits::PreTrack() {
-#if 0
-  TGeant3TGeo *geant3 = (TGeant3TGeo *)TVirtualMC::GetMC();
-  Sckine_t *sckine = geant3->Sckine();
-  Int_t mtrack = sckine->mtrack;
-#endif
-  TParticle* part = TVirtualMC::GetMC()->GetStack()->GetCurrentTrack();
   Int_t Id = TVirtualMC::GetMC()->GetStack()->GetCurrentTrackNumber() + 1;
-  // Track from stack ?
-  if (ftrackCurrent && ftrackCurrent->id == Id) return;
-  //  TParticle  *particle = 0;   
-  TLorentzVector newV(0,0,0,0);
-  TLorentzVector devV(0,0,0,0);
-  part->ProductionVertex(newV);
-  Int_t parent = part->GetFirstMother();
+  ftrackCurrent = fg2t_track->GetTable() + Id - 1;
+  assert (ftrackCurrent && ftrackCurrent->id == Id);
+  Int_t IdV = ftrackCurrent->start_vertex_p;
   Int_t nv = fg2t_vertex->GetNRows();
-  Int_t IdV = -1;
-  fvertexCurrent = 0;
-  for (Int_t jv = 0; jv < nv; jv++) {
-    g2t_vertex_st &vertexOld = *(fg2t_vertex->GetTable() + jv);
-    if (parent != vertexOld.parent_p-1) continue;
-    TLorentzVector oldV(vertexOld.ge_x[0], vertexOld.ge_x[1], vertexOld.ge_x[2], vertexOld.ge_tof);
-    devV = newV - oldV;
-    if (devV.P() > 10e-4 || TMath::Abs(newV.T() - oldV.T()) > 1e-9) continue;
-    IdV = vertexOld.id;
-    fvertexCurrent = &vertexOld;
-  }
-  if (IdV < 0) {
-    g2t_vertex_st vertex;
-    memset (&vertex, 0, sizeof(g2t_vertex_st));
-    IdV = nv + 1;
-    vertex.id           = IdV            ;// primary key 
-    vertex.event_p      = 0              ;// pointer to event
-    vertex.eg_label     = 0              ;// generator label (0 if GEANT)
-    vertex.eg_tof       = newV.T()       ;// vertex production time
-    vertex.eg_proc      = 0              ;// event generator mechanism
-    memcpy(vertex.ge_volume,"_eg_",4);   ;// GEANT volume name
-    vertex.ge_medium    = 0              ;// GEANT Medium
-    vertex.ge_proc      = part->GetUniqueID();// GEANT mechanism (0 if eg)
-    vertex.ge_x[0]      = newV.X()       ;// GEANT vertex coordinate
-    vertex.ge_x[1]      = newV.Y()       ;
-    vertex.ge_x[2]      = newV.Z()       ;
-    vertex.ge_tof       = newV.T()       ;// GEANT vertex production time
-    vertex.n_parent     = 0              ;// number of parent tracks
-    vertex.parent_p     = 0              ;// first parent track
-    if (parent > -1) {
-      vertex.n_parent     = 1            ;
-      vertex.parent_p     = parent+1     ;
-    }
-    vertex.is_itrmd     = 0              ;// flags intermediate vertex
-    vertex.next_itrmd_p = 0              ;// next intermedate vertex 
-    vertex.next_prim_v_p= 0              ;// next primary vertex
-    fg2t_vertex->AddAt(&vertex);
-    fvertexCurrent      = fg2t_vertex->GetTable() + nv;
-    nv++;
-  }
-  static g2t_track_st track;
-  static const Double_t pEMax = 1 - 1.e-10;
-  memset(&track, 0, sizeof(g2t_track_st));
-  track.id             = Id;
-  //    track.eg_label       = particle->GetIdGen();
-  track.eg_pid         = part->GetPdgCode();
-  track.ge_pid         = TVirtualMC::GetMC()->IdFromPDG(track.eg_pid);
-  assert( fvertexCurrent->id > 0 &&  fvertexCurrent->id <= nv);
-  track.start_vertex_p = fvertexCurrent->id;
-  track.p[0]           = part->Px();
-  track.p[1]           = part->Py();
-  track.p[2]           = part->Pz();
-  track.ptot           = part->P();
-  track.e              = part->Energy();
-  track.charge         = part->GetPDG()->Charge()/3;
-  Double_t   ratio     = part->Pz()/part->Energy();
-  ratio                = TMath::Min(1.-1e-10,TMath::Max(-1.+1e-10, ratio));
-  track.rapidity       = TMath::ATanH(ratio);
-  track.pt             = part->Pt();
-  ratio                = part->Pz()/part->P();
-  ratio                = TMath::Min(pEMax,TMath::Max(-pEMax, ratio));
-  track.eta            = TMath::ATanH(ratio);
-  fvertexCurrent->n_daughter++;
-  fg2t_track->AddAt(&track);
-  Int_t nt = fg2t_track->GetNRows();
-  ftrackCurrent = fg2t_track->GetTable() + nt - 1;
-  assert(ftrackCurrent->id == Id);
+  assert(IdV || IdV <= nv);
+  fvertexCurrent = fg2t_vertex->GetTable() + IdV - 1;
 }

@@ -264,6 +264,7 @@ Int_t StVMCMaker::Init() {
     if (IAttr("beamLine"))  generator->SetBeamLine();
     StarMCHits *hits = StarMCHits::instance();
     hits->SetHitHolder(m_DataSet);
+    fgStarVMCApplication->GetStack()->SetHitHolder(m_DataSet);
     fgStarVMCApplication->SetStepping(hits);
   }
   SafeDelete(gRandom);

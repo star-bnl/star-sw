@@ -40,6 +40,9 @@
 #include "TGeoManager.h"
 #include "TGeoNode.h"
 #include "TGeoVolume.h"
+#include "TVirtualMC.h"
+#include "tables/St_g2t_track_Table.h"
+#include "tables/St_g2t_vertex_Table.h"
 Int_t StarStack::fgDebug = 0;
 ClassImp(StarStack);
 using namespace std;  
@@ -272,6 +275,90 @@ void StarStack::PushTrack(Int_t done, Int_t parent, Int_t pdg,
     fNtrack++;
     if (Debug() > 1) {
       cout << "Push to Paticles:";
+    }
+    if (fHitHolder) {
+      Int_t Id = fNtrack;
+      St_g2t_vertex* g2t_vertex = (St_g2t_vertex*) fHitHolder->Find("g2t_vertex");
+      if (! g2t_vertex ) {
+	Int_t NoVertex = 1;
+	g2t_vertex  = new St_g2t_vertex("g2t_vertex",NoVertex);
+	fHitHolder->Add(g2t_vertex); 
+      }
+      St_g2t_track* g2t_track = (St_g2t_track*) fHitHolder->Find("g2t_track");
+      if (! g2t_track ) {
+	g2t_track  = new St_g2t_track("g2t_track",fNtrack);
+	fHitHolder->Add(g2t_track); 
+      }
+      //  TParticle  *particle = 0;   
+      TLorentzVector newV(0,0,0,0);
+      TLorentzVector devV(0,0,0,0);
+      particle->ProductionVertex(newV);
+      Int_t parent = particle->GetFirstMother();
+      Int_t nv = g2t_vertex->GetNRows();
+      Int_t IdV = -1;
+      g2t_vertex_st *vertexCurrent = 0;
+      for (Int_t jv = 0; jv < nv; jv++) {
+	g2t_vertex_st &vertexOld = *(g2t_vertex->GetTable() + jv);
+	if (parent != vertexOld.parent_p-1) continue;
+	TLorentzVector oldV(vertexOld.ge_x[0], vertexOld.ge_x[1], vertexOld.ge_x[2], vertexOld.ge_tof);
+	devV = newV - oldV;
+	if (devV.P() > 10e-4 || TMath::Abs(newV.T() - oldV.T()) > 1e-9) continue;
+	IdV = vertexOld.id;
+	vertexCurrent = &vertexOld;
+      }
+      if (IdV < 0) {
+	g2t_vertex_st vertex;
+	memset (&vertex, 0, sizeof(g2t_vertex_st));
+	IdV = nv + 1;
+	vertex.id           = IdV            ;// primary key 
+	vertex.event_p      = 0              ;// pointer to event
+	vertex.eg_label     = 0              ;// generator label (0 if GEANT)
+	vertex.eg_tof       = newV.T()       ;// vertex production time
+	vertex.eg_proc      = 0              ;// event generator mechanism
+	memcpy(vertex.ge_volume,"_eg_",4);   ;// GEANT volume name
+	vertex.ge_medium    = 0              ;// GEANT Medium
+	vertex.ge_proc      = particle->GetUniqueID();// GEANT mechanism (0 if eg)
+	vertex.ge_x[0]      = newV.X()       ;// GEANT vertex coordinate
+	vertex.ge_x[1]      = newV.Y()       ;
+	vertex.ge_x[2]      = newV.Z()       ;
+	vertex.ge_tof       = newV.T()       ;// GEANT vertex production time
+	vertex.n_parent     = 0              ;// number of parent tracks
+	vertex.parent_p     = 0              ;// first parent track
+	if (parent > -1) {
+	  vertex.n_parent     = 1            ;
+	  vertex.parent_p     = parent+1     ;
+	}
+	vertex.is_itrmd     = 0              ;// flags intermediate vertex
+	vertex.next_itrmd_p = 0              ;// next intermedate vertex 
+	vertex.next_prim_v_p= 0              ;// next primary vertex
+	g2t_vertex->AddAt(&vertex);
+	vertexCurrent      = g2t_vertex->GetTable() + nv;
+	nv++;
+      }
+      static g2t_track_st track;
+      static const Double_t pEMax = 1 - 1.e-10;
+      memset(&track, 0, sizeof(g2t_track_st));
+      track.id             = Id;
+      //    track.eg_label       = particle->GetIdGen();
+      track.eg_pid         = particle->GetPdgCode();
+      track.ge_pid         = TVirtualMC::GetMC()->IdFromPDG(track.eg_pid);
+      assert( vertexCurrent->id > 0 &&  vertexCurrent->id <= nv);
+      track.start_vertex_p = vertexCurrent->id;
+      track.p[0]           = particle->Px();
+      track.p[1]           = particle->Py();
+      track.p[2]           = particle->Pz();
+      track.ptot           = particle->P();
+      track.e              = particle->Energy();
+      track.charge         = particle->GetPDG()->Charge()/3;
+      Double_t   ratio     = particle->Pz()/particle->Energy();
+      ratio                = TMath::Min(1.-1e-10,TMath::Max(-1.+1e-10, ratio));
+      track.rapidity       = TMath::ATanH(ratio);
+      track.pt             = particle->Pt();
+      ratio                = particle->Pz()/particle->P();
+      ratio                = TMath::Min(pEMax,TMath::Max(-pEMax, ratio));
+      track.eta            = TMath::ATanH(ratio);
+      vertexCurrent->n_daughter++;
+      g2t_track->AddAt(&track);
     }
   EndLoop:
     if (Debug() > 1) {

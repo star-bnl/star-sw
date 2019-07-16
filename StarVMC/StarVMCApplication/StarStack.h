@@ -14,6 +14,7 @@
 #include "TVirtualMCStack.h"
 #include "TString.h"
 #include "TParticle.h"
+#include "TDataSet.h"
 #include <stack>
 enum {kKeepBit=1, kDaughtersBit=2, kDoneBit=4, kTransportBit=BIT(14)};
 
@@ -63,6 +64,8 @@ class StarStack : public TVirtualMCStack
     void  Clean(Int_t size = 0);    
     void  Reset(Int_t size = 0);
     Int_t Debug() {return fgDebug;}
+    virtual void      	   SetHitHolder(TDataSet  *m) {fHitHolder = m;}	      	       
+    virtual TDataSet  	  *GetHitHolder() {return fHitHolder;}                  				       
   protected:
   private:
     void Copy(TObject &st) const;
@@ -75,6 +78,7 @@ class StarStack : public TVirtualMCStack
     Int_t          fCurrentID;          //! Index of track in fParticles
     Bool_t         fFromStack;          //! true is particle is taken from fStack
     static Int_t   fgDebug;             //!
+    TDataSet          *fHitHolder;
     std::stack<TParticle>   fStack;//!
     ClassDef(StarStack,1) //Particles stack
 };
