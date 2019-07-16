@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.265 2016/05/17 16:00:23 jeromel Exp $
+// $Id: StMaker.cxx,v 1.266 2019/07/16 21:32:43 smirnovd Exp $
 //
 //
 /*!
@@ -42,11 +42,7 @@
 #include "TObjectSet.h"
 #include "StChain.h"
 #include "TTable.h"
-#ifdef TMEMSTATinSTAR
-#include "TMemStat.h"
-#else
 #include "StMemStat.h"
-#endif
 #include "TAttr.h"
 #include "StMkDeb.h"
 #include "StMessMgr.h"
@@ -1418,19 +1414,8 @@ static void doPs(const Char_t *who, const Char_t *where)
     ps = (ps) ? "yes" : "";
   }
   if (!ps[0]) return;
-#ifdef STAR_LOGGER_BUG  
-  LOG_QA << Form("QAInfo: doPs for %20s:%12s \t",who,where);
-#else
   printf("QAInfo: doPs for %20s:%12s \t",who,where);
-#endif    
   StMemStat::PrintMem(0);
-#if 0
-#ifdef STAR_LOGGER_BUG  
-  LOG_QA << endm;
-#else  
-  printf("\n");
-#endif  
-#endif
 }
 
 //_____________________________________________________________________________
@@ -1836,6 +1821,11 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.266  2019/07/16 21:32:43  smirnovd
+// Remove seemingly outdated macro-based branching
+//
+// The use of TMEMSTATinSTAR and STAR_LOGGER_BUG macros looks obsolete
+//
 // Revision 1.265  2016/05/17 16:00:23  jeromel
 // Dinension check protection
 //
