@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMemStat.cxx,v 1.5 2019/07/16 21:32:55 smirnovd Exp $
+ * $Id: StMemStat.cxx,v 1.6 2019/07/19 21:26:15 smirnovd Exp $
  *
  ***************************************************************************
  *
@@ -13,6 +13,10 @@
 #include <math.h>
 #include <malloc.h>
 #include <unistd.h>
+#include <fstream>
+#include <sstream>
+#include <string>
+
 #include "StMemStat.h"
 #include "TList.h"
 #include "TError.h"
@@ -226,3 +230,38 @@ void StMemStat::Streamer(TBuffer&)
 //______________________________________________________________________________
 // void StMemStat::ShowMembers(TMemberInspector& insp, char* parent){}
              
+
+StMemStat::ProcStatusMap_t StMemStat::ReadProcStatus()
+{
+  ProcStatusMap_t tokens{
+    {"VmPeak",   0},
+    {"VmSize",   0},
+    {"VmHWM",    0},
+    {"VmRSS",    0},
+    {"RssAnon",  0},
+    {"RssFile",  0},
+    {"RssShmem", 0}
+  };
+
+  std::ifstream procfile("/proc/self/status");
+  std::string line;
+
+  while (std::getline(procfile, line))
+  {
+    std::istringstream iss(line);
+    // First read the label
+    std::string label;
+    iss >> label;
+
+    for (ProcStatus_t& token : tokens)
+    {
+      if (label.find(token.first) != std::string::npos) {
+        // Then read the value
+        iss >> token.second;
+        token.second /= 1024;
+      }
+    }
+  }
+
+  return tokens;
+}
