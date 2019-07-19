@@ -9,7 +9,7 @@
  */
 /***************************************************************************
  *
- * $Id: StMemStat.h,v 1.3 2019/07/19 21:26:15 smirnovd Exp $
+ * $Id: StMemStat.h,v 1.4 2019/07/19 21:26:24 smirnovd Exp $
  *
  * Author: Victor Perev, Jul 2000
  **************************************************************************/
@@ -42,6 +42,10 @@ public:
 
    static  void     PM();	                /*!< Prints fast current heap  */
    static  void     Summary();			/*!< Prints usage summary      */
+
+   /// Saves the values read from /proc/self/status at the time of a call in a text file.
+   /// See StMemStat::ReadProcStatus() for parsed values
+   static void SaveProcStatus(std::string callerId);
 
  private:
    Double_t fLast;
