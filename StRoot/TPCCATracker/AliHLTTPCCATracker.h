@@ -106,14 +106,14 @@ class AliHLTTPCCATracker
     const AliHLTTPCCASliceOutput * Output() const { return fOutput; }
     AliHLTTPCCASliceOutput * Output() { return fOutput; }
 
-#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
+//#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
     int fNOutTracks1; // number of tracks in fOutTracks array
     AliHLTTPCCAOutTrack *fOutTracks1; // output array of the reconstructed tracks
 
     int NOutTracks1() const { return fNOutTracks1; }
     AliHLTTPCCAOutTrack *OutTracks1() const { return  fOutTracks1; }
     const AliHLTTPCCAOutTrack &OutTrack1( int index ) const { return fOutTracks1[index]; }
-#endif //DO_TPCCATRACKER_EFF_PERFORMANCE
+//#endif //DO_TPCCATRACKER_EFF_PERFORMANCE
     void StoreToFile( FILE *f ) const;
     void RestoreFromFile( FILE *f );
 

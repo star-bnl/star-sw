@@ -264,9 +264,13 @@ Int_t StxMaker::Make(){
     Int_t NoTpcHitsUsed = 0;
     Int_t NoNonTpcHitsUsed = 0;
     Int_t NHits = tr.NHits();
+//std::cout<<"> iTrack: "<<ITr<<";   nHits: "<<NHits<<"\n";
     for ( Int_t iHit = 0; iHit < NHits; iHit++ ){ 
+//std::cout<<" --- iHit: "<<iHit<<"\n";
       const Int_t index = StxCAInterface::Instance().GetTracker()->TrackHit( tr.FirstHitRef() + iHit );
+//std::cout<<"     index: "<<index<<"\n";
       const Int_t hId   = StxCAInterface::Instance().GetTracker()->Hit( index ).ID();
+//std::cout<<"     hId: "<<hId<<"\n";
       const StHit    *hit    = fSeedHits[hId].hit;
       const StTpcHit *tpcHit = dynamic_cast<const StTpcHit *>(hit);
 #if 0      

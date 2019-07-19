@@ -70,10 +70,13 @@ class AliHLTTPCCAGBTrack
     float QPt1() const { return tQPt1; }
     void SetDzDs1( float dzds ) { tDzDs1 = dzds; }
     float DzDs1() const { return tDzDs1; }
-    void SetClone() { tIsClone = true; }
+    void SetClone( bool c = true ) { tIsClone = c; }
     bool IsClone() const { return tIsClone; }
     void SetFirstMC( int mc ) { tFirstMC = mc; }
-    int GetFirstMC() { return tFirstMC; }
+    int GetFirstMC() const { return tFirstMC; }
+
+    void SetReco( bool r ) { tReco = r; }
+    bool IsReco() const { return tReco; }
     // ---
 
   protected:
@@ -94,6 +97,8 @@ class AliHLTTPCCAGBTrack
     float tDzDs1;
     bool tIsClone;
     int tFirstMC;
+
+    bool tReco;
     // ---
 };
 

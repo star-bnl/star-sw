@@ -302,13 +302,13 @@ void AliHLTTPCCAGBTracker::FindTracks()
   for ( int iSlice = 0; iSlice < fSlices.Size(); ++iSlice ) {
 //  for ( int iSlice = 0; iSlice < 1; ++iSlice ) {
 //	  std::cout<<"run on slice: "<<iSlice<<"\n\n\n";
+//      if( iSlice != 7 ) continue;
 //      if( iSlice != 23 ) continue;
-//      if( iSlice != 15 ) continue;
-//      if( iSlice != 15 && iSlice != 16 ) continue;
+//      if( iSlice != 6 && iSlice != 7 ) continue;
 //        if( iSlice != 16 && iSlice != 6 ) continue;
-//      if( iSlice != 11 && iSlice != 23 ) continue;
-//      if( iSlice != 7 && iSlice != 8 ) continue;
-//      if( iSlice != 7 && iSlice != 8 && iSlice != 14 && iSlice != 15 ) continue;
+//      if( iSlice != 11 && iSlice != 0 ) continue;
+//      if( iSlice != 10 && iSlice != 11 ) continue;
+//      if( iSlice != 10 && iSlice != 11 && iSlice != 12 && iSlice != 23 ) continue;
 //      if( iSlice != 7 && iSlice != 8 && iSlice != 14 && iSlice != 15 && iSlice != 6 && iSlice != 16 ) continue;
     Stopwatch timer;
     AliHLTTPCCATracker &slice = fSlices[iSlice];

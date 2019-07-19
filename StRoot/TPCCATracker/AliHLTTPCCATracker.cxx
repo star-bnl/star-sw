@@ -243,6 +243,7 @@ void AliHLTTPCCATracker::WriteOutput()
     const Track &track = *fTracks[trackIndex];
     const int numberOfHits = track.NumberOfHits();
 //    std::cout<<" - - - > trackIndex: "<<trackIndex<<";   numberOfHits: "<<numberOfHits<<"\n";
+//    if( numberOfHits == 70 ) continue;
 
     {
       AliHLTTPCCASliceTrack out;
@@ -283,6 +284,7 @@ void AliHLTTPCCATracker::WriteOutput()
 #endif
     ++iTr;
     nStoredHits += numberOfHits;
+//    if( numberOfHits == 70 ) std::cout<<" >>>>>>> Track is stored\n";
 
     for ( int hitIdIndex = 0; hitIdIndex < numberOfHits; ++hitIdIndex ) {
       const HitId &hitId = track.HitId( hitIdIndex );

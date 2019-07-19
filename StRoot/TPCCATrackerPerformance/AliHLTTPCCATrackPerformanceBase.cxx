@@ -55,7 +55,8 @@ AliHLTTPCCATrackPerformanceBase::AliHLTTPCCATrackPerformanceBase()
   const int NHisto_tmp = NTracksPulls + NHitsPulls + NHits2DPulls
     + NAllHisto + NAllProfiles + NAll2DHisto
     + NGhostsHisto + NGhostsProfiles + NGhosts2DHisto
-    + NRecoTracksHisto + NRecoTracksProfiles + NRecoTracks2DHisto;
+    + NRecoTracksHisto + NRecoTracksProfiles + NRecoTracks2DHisto
+    + NRecoMCToHits2D;
 
   NHisto = NHisto_tmp;
   fHistosInfo = new THistoInfo[NHisto];
@@ -64,7 +65,7 @@ AliHLTTPCCATrackPerformanceBase::AliHLTTPCCATrackPerformanceBase()
   const double MaxMomentum = 5.;
   const double MaxPt = 5.;
   const double MaxPhi = 180.;
-  const int MaxNHits    = 50.;
+  const int MaxNHits    = 75.;//50.;
   const double MaxChi2 = 10.;
   const THistoInfo tmp[NHisto_tmp]=
   {
@@ -73,11 +74,13 @@ AliHLTTPCCATrackPerformanceBase::AliHLTTPCCATrackPerformanceBase()
     THistoInfo( "resSinPhi",  "track sin#phi residual ", 30, -0.03, 0.03, 0,0,0, "Residual (sin#phi^{reco} - sin#phi^{mc}) [rad]","Entries" ),
     THistoInfo( "resDzDs",    "track dz/ds residual ",   30, -0.02, 0.02, 0,0,0, "Residual (dz/ds^{reco} - dz/ds^{mc})","Entries" ),
     THistoInfo( "resPt",      "track p_{t} resolution",  30, -0.3,   0.3, 0,0,0, "Resolution (p_{t}^{reco} - p_{t}^{mc})/p_{t}^{mc} [%]","Entries"  ),
+//    THistoInfo( "resPt",      "track p_{t} resolution",  30, -1.0,   1.0, 0,0,0, "Resolution (p_{t}^{reco} - p_{t}^{mc})/p_{t}^{mc} [%]","Entries"  ),
     THistoInfo( "pullY",      "track y pull",            30, -7.,   7.,   0,0,0, "Pull y" ),
     THistoInfo( "pullZ",      "track z pull",            30, -7.,   7.,   0,0,0, "Pull z" ),
     THistoInfo( "pullSinPhi", "track sin#phi pull",      30, -7.,   7.,   0,0,0, "Pull sin#phi" ),
     THistoInfo( "pullDzDs",   "track dz/ds pull",        30, -7.,   7.,   0,0,0, "Pull dz/ds" ),
     THistoInfo( "pullQPt",    "track q/p_{t} pull",      30, -7.,   7.,   0,0,0, "Pull q/p_{t}" ),
+//    THistoInfo( "pullQPt",    "track q/p_{t} pull",      30, -21.,   21.,   0,0,0, "Pull q/p_{t}" ),
 
     THistoInfo( "resXHit",       "hits X resolution [cm]",  100, -1.25, 1.25, 0,0,0, "Residual (x^{reco} - x^{mc}) [cm]","Entries" ),
     THistoInfo( "resYHit",       "hits Y resolution [cm]",  100, -0.5, 0.5, 0,0,0, "Residual (y^{reco} - y^{mc}) [cm]","Entries" ),
@@ -179,7 +182,10 @@ AliHLTTPCCATrackPerformanceBase::AliHLTTPCCATrackPerformanceBase()
     THistoInfo( "recosLengthAndMCMom",    "N Reco Tracks vs N Hits and Momentum",       MaxNHits+1, 0.,   MaxNHits, 50, 0.,           MaxMomentum,
                 "Number of hits", "p^{MC} [GeV/c]" ),
     THistoInfo( "recosLengthAndChi2",     "N Reco Tracks vs N Hits and Chi2",           MaxNHits+1, 0.,   MaxNHits, 50, 0.,           MaxChi2,
-                "Number of hits", "p^{reco} [GeV/c]" )
+                "Number of hits", "p^{reco} [GeV/c]" ),
+
+    THistoInfo( "krecoMCToHits2D",     "MC to Reco hits 2D",           MaxNHits+1, 0.,   MaxNHits, 50, 0.,           MaxNHits+1,
+		"N_{hits} per MC track", "N_{hits} per Reco track" )
   };
   for (int iHisto = 0; iHisto < NHisto; iHisto++){
     fHistosInfo[iHisto] = tmp[iHisto];
@@ -286,6 +292,11 @@ void AliHLTTPCCATrackPerformanceBase::CreateHistos(string histoDir, TFile* outFi
       fHistos[ih]->GetYaxis()->SetTitle(fHistosInfo[ih].YAxisName.Data());
         //      fHistos[ih]->SetDrawOption("colz"); doesn't help
     }
+    // ---
+    fHistos[ih] = new TH2D(fHistosInfo[ih].name, fHistosInfo[ih].title, fHistosInfo[ih].nx, fHistosInfo[ih].left, fHistosInfo[ih].right, fHistosInfo[ih].ny, fHistosInfo[ih].low, fHistosInfo[ih].up);
+    fHistos[ih]->GetXaxis()->SetTitle(fHistosInfo[ih].XAxisName.Data());
+    fHistos[ih]->GetYaxis()->SetTitle(fHistosInfo[ih].YAxisName.Data());
+    // ---
     
     gDirectory->cd( ".." );
     curdir->cd();    
@@ -353,6 +364,13 @@ void AliHLTTPCCATrackPerformanceBase::CreateHistos(string histoDir, TFile* outFi
       fHistos[ih]->GetYaxis()->SetTitle(fHistosInfo[ih].YAxisName.Data());
     }
     
+    // ---
+    fHistos[ih] = new TH2D(fHistosInfo[ih].name, fHistosInfo[ih].title, fHistosInfo[ih].nx, fHistosInfo[ih].left, fHistosInfo[ih].right, fHistosInfo[ih].ny, fHistosInfo[ih].low, fHistosInfo[ih].up);
+//    fHistos[ih] = new TH2D("a", "aa", 100, 0, 100, 100, 0, 100);
+    fHistos[ih]->GetXaxis()->SetTitle(fHistosInfo[ih].XAxisName.Data());
+    fHistos[ih]->GetYaxis()->SetTitle(fHistosInfo[ih].YAxisName.Data());
+    // ---
+
     for( int i = 0; i < NHisto; i++ ){
       fHistos[i]->SetDirectory(0);
     }

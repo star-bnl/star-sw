@@ -442,17 +442,11 @@ int AliHLTTPCCATracker::Reconstructor::execute()
 
   unsigned int tracksSaved = 0;
 #ifdef V5
-#ifndef __YF__
-  int st_rows[27] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 18, 19, 21, 25, 27, 30, 35, 37, 39, 41, 43};
-  for( int i = 0; i < 27; i++ ) {
-    int j = st_rows[i];
-      AliHLTTPCCATrackletConstructor( *d, d->fData, d->fTrackletVectors ).run(j, tracksSaved);
+  for( int it = 0; it < 2; it++ ) {
+    for( int i = 0; i < d->Param().NRows()-4; i++ ) {
+      AliHLTTPCCATrackletConstructor( *d, d->fData, d->fTrackletVectors ).run(i, tracksSaved, it);
+    }
   }
-#else /* __YF__ */
-  for( int i = 0; i < d->Param().NRows(); i++ ) {
-      AliHLTTPCCATrackletConstructor( *d, d->fData, d->fTrackletVectors ).run(i, tracksSaved);
-  }
-#endif /* !__YF__ */
 #else /* ! V5 */
   AliHLTTPCCATrackletConstructor( *d, d->fData, d->fTrackletVectors ).run(0, tracksSaved);
 #endif /* V5 */

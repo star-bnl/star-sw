@@ -22,7 +22,7 @@ class AliHLTTPCCATrackletConstructor {
   AliHLTArray<TrackletVector> trackletVectors )
     : fTracker( tracker ), fTrackletVectors( trackletVectors ), fData( data ) {}
 
-  void run( unsigned int firstRow, unsigned int &tracksSaved );
+  void run( unsigned int firstRow, unsigned int &tracksSaved, unsigned int i_it );
 
   struct TrackMemory;
  private:

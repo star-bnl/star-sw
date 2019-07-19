@@ -247,12 +247,12 @@ void AliHLTTPCCAMerger::Reconstruct()
 //  Merging(0);
 
 #ifdef MAIN_DRAW
-  std::cout<<" - Draw detector\n";
+//  std::cout<<" - Draw detector\n";
 //  if ( AliHLTTPCCADisplay::Instance().DrawType() == 3 ) {
 //    AliHLTTPCCADisplay &disp = AliHLTTPCCADisplay::Instance();
 //    disp.Ask();
 //  }
-  std::cout<<" - Draw - ok\n";
+//  std::cout<<" - Draw - ok\n";
 #endif
 
 #ifndef TETA
@@ -280,7 +280,7 @@ void AliHLTTPCCAMerger::Reconstruct()
 #endif // DO_NOT_MERGE
 
 #endif
-  std::cout<<" - Finish merging\n";
+//  std::cout<<" - Finish merging\n";
 }
 
 void AliHLTTPCCAMerger::UnpackSlicesPT()
@@ -511,10 +511,10 @@ void AliHLTTPCCAMerger::MergeUpPT( int s )
     int endTrack = fkSlices[iSlice]->NTracks() + trackOffset;
 //    std::cout<<"\n fkSlices[iSlice]->NTracks(): "<<fkSlices[iSlice]->NTracks()<<";   trackOffset: "<<trackOffset<<"\n\n";
     int startTrack = trackOffset%float_v::Size == 0 ? trackOffset : trackOffset - trackOffset%float_v::Size;
-    std::cout<<"iSlice: "<<iSlice<<"\n";
-    std::cout<<"startTrack: "<<startTrack<<";   endTrack: "<<endTrack<<";   nTracks: "<<endTrack - startTrack<<"\n";
+//    std::cout<<"iSlice: "<<iSlice<<"\n";
+//    std::cout<<"startTrack: "<<startTrack<<";   endTrack: "<<endTrack<<";   nTracks: "<<endTrack - startTrack<<"\n";
     for( int iTr = startTrack; iTr < endTrack; iTr += float_v::Size ) {
-	std::cout<<" ___ startTrack: "<<startTrack<<";   endTrack: "<<endTrack<<";   iTr: "<<iTr<<"\n";
+//	std::cout<<" ___ startTrack: "<<startTrack<<";   endTrack: "<<endTrack<<";   iTr: "<<iTr<<"\n";
 //	if( iTr >= 32 ) continue;
 //if( !(iSlice == 22 && pSlice == 21)) continue;
 //if( !( (iSlice == 9 && pSlice == 8) || (iSlice == 8 && pSlice == 7) ) ) continue;
@@ -536,11 +536,11 @@ void AliHLTTPCCAMerger::MergeUpPT( int s )
 //	int_v &thisRow = reinterpret_cast<int_v&>(vLastRow[iTr]);
       float_v &thisTeta = reinterpret_cast<float_v&>(vTeta[iTr]);
       float_v firstTrackV(-1.f), lastTrackV(-1.f);
-	std::cout<<" - thisXOut: "<<thisXOut<<";   active: "<<active<<"\n";
-	std::cout<<" - thisRow: ";
+//	std::cout<<" - thisXOut: "<<thisXOut<<";   active: "<<active<<"\n";
+//	std::cout<<" - thisRow: ";
       for( int iV = 0; iV < int_v::Size; iV++ ) {			//TODO: try to vectorize
 	int thisRow = vLastRow[iTr+iV];
-	    std::cout<<thisRow<<" - ";
+//	    std::cout<<thisRow<<" - ";
 	if( !active[iV] /*|| thisRow > 41*/ ) continue;
 	int fstn = 0;
 	if( s == 0 || s == 1 ) fstn = 1;
@@ -565,7 +565,7 @@ void AliHLTTPCCAMerger::MergeUpPT( int s )
       //...
 //      firstTrackV = firstTrackV - float_v(3.f);
       //...
-	std::cout<<"\n - firstTrackV: "<<firstTrackV<<";   lastTrackV: "<<lastTrackV<<"\n";
+//	std::cout<<"\n - firstTrackV: "<<firstTrackV<<";   lastTrackV: "<<lastTrackV<<"\n";
       float_m nmask(firstTrackV >= float_v(0));
 //	std::cout<<" - nmask: "<<nmask<<"\n";
       if( nmask.isEmpty() ) {
@@ -667,8 +667,8 @@ void AliHLTTPCCAMerger::MergeUpPT( int s )
 	  if( sTrackV1.Used()[iMergeVi] || sTrackV2.Used()[jMergeVi] ) fMaxMerged[1]++;
 	  sTrackV1.SetUsed( iMergeVi, 1 );
 	  sTrackV2.SetUsed( jMergeVi, 2 );
-                std::cout<<" ----- merge cand:   iMerge: "<<iMerge<<";   jMerge: "<<jMerge<<"\n";
-                std::cout<<" ----- used1: "<<sTrackV1.Used()<<";   used2: "<<sTrackV2.Used()<<"\n";
+//                std::cout<<" ----- merge cand:   iMerge: "<<iMerge<<";   jMerge: "<<jMerge<<"\n";
+//                std::cout<<" ----- used1: "<<sTrackV1.Used()<<";   used2: "<<sTrackV2.Used()<<"\n";
 
 #ifdef DZDSPTDRAW
   fTrackInfos[iMerge].DzDs1 = fTrackInfos[jMerge].DzDs0;
@@ -776,7 +776,7 @@ void AliHLTTPCCAMerger::UnpackSlices()
       for(int iV=0; iV < nTracksVector; iV++)
       {
         const AliHLTTPCCASliceTrack &sTrack = slice.Track( itr + iV );
-//        std::cout<<"                     iTrack: "<<itr<<";   nHits: "<<sTrack.NClusters()<<"\n";
+//        std::cout<<"                     iTrack: "<<itr<<";   iV: "<<iV<<";   nHits: "<<sTrack.NClusters()<<"\n";
 
         nHits[iV] = 0;
         for ( int iTrClu = 0; iTrClu < sTrack.NClusters(); iTrClu++ ) {
@@ -818,6 +818,7 @@ void AliHLTTPCCAMerger::UnpackSlices()
       fitted &= FitTrack( endPoint, endAlpha, startPoint, startAlpha, hits, nHits, nHits, nTracksVector, 0 );
 #else
       fitted &= static_cast<float_m>( uint_v( Vc::IndexesFromZero ) < nTracksVector );
+//      std::cout<<"                 fitted1: "<<fitted<<"\n";
 // refit the track
 
         // start from startPoint
@@ -827,19 +828,27 @@ void AliHLTTPCCAMerger::UnpackSlices()
       vEndAlpha = startAlpha;
 
       uint_v firstHits(Vc::Zero);
+//vEndPoint.SetSinPhi( float_v(0) );
+//vEndPoint.restest();
         // refit in the forward direction: going from the first hit to the last, mask "fitted" marks with 0 tracks, which are not fitted correctly
 //      fitted &= FitTrack( vEndPoint,   vEndAlpha,   hits, firstHits, nHits, nHits, nTracksVector, fitted, 0 );
       fitted &= FitTrack( vEndPoint,   vEndAlpha,   hits, firstHits, nHits, nTracksVector, fitted, 0 );
+//      std::cout<<"                 fitted2: "<<fitted<<"\n";
         // if chi2 per degree of freedom > 3. sigma - mark track with 0
       fitted &= vEndPoint.Chi2()  < 9.f*static_cast<float_v>(vEndPoint.NDF());
+//      std::cout<<"                 fitted3: "<<fitted<<"\n";
 
       AliHLTTPCCATrackParamVector vStartPoint(vEndPoint);
       float_v vStartAlpha(vEndAlpha);
+//vStartPoint.restest();
         // refit in the backward direction: going from the last hit to the first
 //      fitted &= FitTrack( vStartPoint, vStartAlpha, hits, firstHits, nHits, nHits, nTracksVector, fitted, 1 );
       fitted &= FitTrack( vStartPoint, vStartAlpha, hits, firstHits, nHits, nTracksVector, fitted, 1 );
         // if chi2 per degree of freedom > 3. sigma - mark track with 0
+//      std::cout<<"                 fitted4: "<<fitted<<"\n";
       fitted &= vStartPoint.Chi2() < 9.f*static_cast<float_v>(vStartPoint.NDF());
+//      std::cout<<"                 fitted5: "<<fitted<<"\n";
+//if( itr == 0 ) fitted[0] = 1;
 #endif
       for(int iV=0; iV<float_v::Size; iV++)
       {
@@ -958,6 +967,8 @@ float_m AliHLTTPCCAMerger::FitTrack( AliHLTTPCCATrackParamVector &t, float_v &Al
     active &= static_cast<float_m>( ihit < nHits );
 //    if(nHitsMin>15&&(ihit==3||ihit==5||ihit==2)) continue;
 //    if(nHitsMin>25&&(ihit==3||ihit==5||ihit==2||ihit==4||ihit==6||ihit==7||ihit==8||ihit==9)) continue;
+//std::cout<<"ihit: "<<ihit<<"\n";
+//std::cout<<" ... active0: "<<active<<"\n";
 
     if(active.isEmpty()) continue;
     // ---
@@ -983,13 +994,16 @@ float_m AliHLTTPCCAMerger::FitTrack( AliHLTTPCCATrackParamVector &t, float_v &Al
     if( ISUNLIKELY( !(!CAMath::IsZero(rotateA) && active).isEmpty() ) ) { // track crosses a sector border very rarely
       rotated = t.Rotate( rotateA, linearization, .999f, active);
       active &= rotated;
+//std::cout<<" ...!!!... rotate1\n";
     }
+//std::cout<<" ... active1: "<<active<<"\n";
     const float_v xLast = t.X();
 
     Alpha0V(active) = sliceAlphaV;
 
     const float_m &transported = t.TransportToXWithMaterial( xV, linearization, fitPar, fSliceParam.cBz( ), 0.999f, active);
     active &= transported;
+//std::cout<<" ... active2: "<<active<<"\n";
 
     if ( first ) {
       t.InitCovMatrixAndChi2AndNDF( active );
@@ -999,15 +1013,20 @@ float_m AliHLTTPCCAMerger::FitTrack( AliHLTTPCCATrackParamVector &t, float_v &Al
 
     float_v err2Y, err2Z;
     fSliceParam.GetClusterErrors2( RowV, t, &err2Y, &err2Z );
+//std::cout<<"       yV: "<<yV<<";   zV: "<<zV<<";   err2Y: "<<err2Y<<";   err2Z: "<<err2Z<<"\n";
     const float_m &filtered = t.FilterWithMaterial(yV, zV, err2Y, err2Z, 0.999f, active);
 
-    const float_m broken = savedActive && (!rotated || !transported || !filtered);
+    const float_m broken = savedActive && (!rotated || !transported /*|| !filtered*/);
+//std::cout<<" ... active2.5: "<<active<<";   filtered: "<<filtered<<";   broken: "<<broken
+//    <<";   rotated: "<<rotated<<";   transported: "<<transported<<";   filtered: "<<filtered<<"\n";
     if ( !broken.isEmpty() ) {
       t.TransportToXWithMaterial( xLast, linearization, fitPar, fSliceParam.cBz( ), 0.999f, transported && !filtered ); // transport back if hit can't be added. TODO with out material
       t.Rotate( -rotateA, linearization, .999f, rotated && (!transported || !filtered) );
+//std::cout<<" ...!!!... rotate2;   rotateA: "<<rotateA<<"\n";
     }
 
-    active &= filtered;
+//    active &= filtered;
+//std::cout<<" ... active3: "<<active<<"\n";
 //active = savedActive;
 
     for(int iV=0; iV < nTracksV; iV++) {
@@ -1034,6 +1053,7 @@ float_m AliHLTTPCCAMerger::FitTrack( AliHLTTPCCATrackParamVector &t, float_v &Al
       hits[jhit][iV] = hitsNew[i][iV];
     }
   }
+//std::cout<<" ...> return ok: "<<ok<<"\n";
 
 //  std::cout<<" - return "<<ok<<";   merged: "<<merged<<"\n";
 //  float_m copyback(!ok && merged);
@@ -1431,6 +1451,7 @@ const AliHLTTPCCATrackParamVector &InParT2, const AliHLTTPCCATrackParamVector &O
 const float_v dxArr[4], const float_v dyArr[4], const float_v &sinS1_E2v, const float_v &sinS2_E1v,
 float_v &minL2v, const float &bestChi2, float_v& min_chi2, float_m& active )
 {
+//std::cout<<">>> CheckTracksMatch >>> active: "<<active<<"\n";
   const float_v k1   = InParT1.QPt() * fSliceParam.cBz();
   const float_v dx_1 = -dxArr[2];
   const float_v t_sin1 = k1 * dx_1 + sinS1_E2v;
@@ -1439,6 +1460,7 @@ float_v &minL2v, const float &bestChi2, float_v& min_chi2, float_m& active )
   const float_v dx_2 = -dxArr[3];
   const float_v t_sin2 = k2 * dx_2 + sinS2_E1v;
   active &= CAMath::Abs(t_sin1) <= 0.999f && CAMath::Abs(t_sin2) <= 0.999f;
+//std::cout<<">>> CheckTracksMatch >>> active1: "<<active<<"\n";
   if(active.isEmpty()) return;
 
   const float_v dzArr[4] = { OutParT1.Z() - OutParT2.Z(),
@@ -1468,12 +1490,15 @@ float_v &minL2v, const float &bestChi2, float_v& min_chi2, float_m& active )
     idMin(mask01lt23) = idMin01;
     dr2(float_m(mask01lt23)) = min01;
   }
+//  std::cout<<"          > CheckTracksMatch - active0: "<<active<<"\n";
 
   active &= float_m(idMin != 2) || float_m(number != 1); // distanse in rows between inner1 and outer2 is maximum, it can't beminimum in dr unless tracks have completely different slopes
+//  std::cout<<">>> CheckTracksMatch >>> active2: "<<active<<"\n";
 
     // check distance between tracks
   minL2v = dr2;
   active &= (minL2v < bestChi2) || float_m(number != 1); // chi2 cut == dr2 only for number == 1
+//  std::cout<<">>> CheckTracksMatch >>> active3: "<<active<<"\n";
 
     // check dx
   float_v dx(Vc::Zero);
@@ -1493,6 +1518,7 @@ float_v &minL2v, const float &bestChi2, float_v& min_chi2, float_m& active )
     // active &=
     //   ( (dx >= -0.1f) && float_m(number == 1) ||
     //     (dx <  -0.1f) && float_m(number == 0)    );
+//  std::cout<<">>> CheckTracksMatch >>> active4: "<<active<<"\n";
 
   if(active.isEmpty()) return;
 
@@ -1532,16 +1558,28 @@ float_v &minL2v, const float &bestChi2, float_v& min_chi2, float_m& active )
   if ( !( CAMath::Abs( a2 - a1 ) > 1e-7f && active ).isEmpty() )
     active &= Thelp.Rotate( a2 - a1 , 0.999f, active);
 
+//  std::cout<<">>> CheckTracksMatch >>> active5: "<<active<<"\n";
+
     // transport tracks to the middle point by X coordinate
   const float_v &ToX = 0.5f * (Thelp.X() + Thelp1.X());
   active &= Thelp.TransportToX( ToX, float_v(fSliceParam.cBz()), 0.999f, active);
   if(active.isEmpty()) return;
   active &= Thelp1.TransportToX( ToX, float_v(fSliceParam.cBz()), 0.999f, active);
+//  std::cout<<">>> CheckTracksMatch >>> active6: "<<active<<"\n";
 
     // if tracks are too far one from each other after propagation - they could not be neighbours
   active &= CAMath::Abs(Thelp1.Y() - Thelp.Y()) <= 10.f;
+//  std::cout<<">>> CheckTracksMatch >>> active7: "<<active<<"\n";
   active &= CAMath::Abs(Thelp1.Z() - Thelp.Z()) <= 10.f;
+//  std::cout<<">>> CheckTracksMatch >>> active8: "<<active<<"\n";
+//  std::cout<<"          > CheckTracksMatch - active4.3: "<<active<<";   sinPhi1: "<<Thelp1.SinPhi()<<";   sinPhi: "<<Thelp.SinPhi()<<";   dSinPhi: "<<CAMath::Abs(Thelp1.SinPhi() - Thelp.SinPhi())<<"\n";
+#define M_TEMP
+#ifndef M_TEMP
   active &= CAMath::Abs(Thelp1.SinPhi() - Thelp.SinPhi()) <= 0.15f;
+#else
+  active &= CAMath::Abs(Thelp1.SinPhi() - Thelp.SinPhi()) <= 0.25f;
+#endif
+//  std::cout<<">>> CheckTracksMatch >>> active9: "<<active<<"\n";
   if(active.isEmpty()) return;
 
     // merge parameters and calculate chi2
@@ -1552,10 +1590,15 @@ float_v &minL2v, const float &bestChi2, float_v& min_chi2, float_m& active )
   for ( int i = 0; i < 15; i++ ) active &= CAMath::Finite( C[i] );
   for ( int i = 0; i < 5; i++ ) active &= CAMath::Finite( r[i] );
   active &= ( C[0] > 0 ) && ( C[2] > 0 ) && ( C[5] > 0 ) && ( C[9] > 0 ) && ( C[14] > 0 );
+//  std::cout<<">>> CheckTracksMatch >>> active10: "<<active<<"\n";
+//  std::cout<<"     chi2: "<<chi2<<";   number: "<<number<<"\n";
 
     // if obtained chi2 value is too high - tracks could not be neighbours
-  active &= (chi2 <= 100.f) && float_m(number == 1) || (chi2 <= 300.f) && float_m(number == 0);
+//  active &= (chi2 <= 100.f) && float_m(number == 1) || (chi2 <= 300.f) && float_m(number == 0);
+  active &= (chi2 <= 150.f) && float_m(number == 1) || (chi2 <= 300.f) && float_m(number == 0);
+//  std::cout<<">>> CheckTracksMatch >>> active10.1: "<<active<<"\n";
   active &= (chi2 < bestChi2) || float_m(number != 0); // for number == 0
+//  std::cout<<">>> CheckTracksMatch >>> active11: "<<active<<"\n";
 
   min_chi2(active) = minL2v; // use minL2v with number == 1
   min_chi2(active && float_m(number == 0) ) = chi2;
@@ -1566,10 +1609,10 @@ void AliHLTTPCCAMerger::FindMinMaxIndex( int N2, const unsigned int FirstTrIR[],
     // find min index
   min = -1;
   for(; minIRow < fSliceParam.NRows(); minIRow++){
-//    std::cout<<" ----- minIRow: "<<minIRow<<";   LastTrIR[minIRow]: "<<LastTrIR[minIRow]<<"\n";
+//    std::cout<<" ----------> minIRow: "<<minIRow<<";   LastTrIR[minIRow]: "<<LastTrIR[minIRow]<<"\n";
     if (LastTrIR[minIRow] != 50000) {
       min = LastTrIR[minIRow];
-//      std::cout<<" ------- new min: "<<min<<"\n";
+//      std::cout<<" -----------> new min: "<<min<<"\n";
       break;
     }
   }
@@ -1586,16 +1629,21 @@ void AliHLTTPCCAMerger::FindMinMaxIndex( int N2, const unsigned int FirstTrIR[],
 void AliHLTTPCCAMerger::MergeBorderTracks( AliHLTTPCCABorderTrack B1[], int N1, unsigned int iSlice1, AliHLTTPCCABorderTrack B2[], int N2, unsigned int iSlice2, int number, const unsigned int FirstTrIR[], const unsigned int LastTrIR[] )
 {
 // The function creates links to the inner and outer neighbours
-
+// ---
+//if( iSlice1 != 0 || iSlice2 != 11 ) return;
+//if( iSlice1 != 18 ) return;
+//std::cout<<" ---| MergeBorderTracks - run |--- N1: "<<N1<<";   N2: "<<N2<<";   number: "<<number<<"\n";
+// ---
   const float factor2k = 64.f;
   for ( int i1 = 0; i1 < N1; i1++ ) {
-
+//std::cout<<" - i1: "<<i1<<"\n";
     AliHLTTPCCABorderTrack &b1 = B1[i1];
+//std::cout<<" ----- Border track id: "<<b1.TrackID()<<";   inRow: "<<b1.InnerRow()<<";   outRow: "<<b1.OuterRow()<<"\n";
 
       // Find firts and last row for the nighbours finding. All tracks are sorted by the inner row.
 
     int lastIRow = fSliceParam.NRows()-1; // row to end finding of a clone
-//    std::cout<<" - lastIRow: "<<lastIRow<<"\n";
+//std::cout<<" - lastIRow: "<<lastIRow<<"\n";
     int firstIRow = 0;
     int dir = -1; // how track2 index is changed from a start to an end row.
     int ifirst2 = -1;
@@ -1607,11 +1655,11 @@ void AliHLTTPCCAMerger::MergeBorderTracks( AliHLTTPCCABorderTrack B1[], int N1, 
       firstIRow = b1.OuterRow() + 0; // row to begin finding of clone
       lastIRow = b1.OuterRow() + AliHLTTPCCAParameters::MaximumRowGapBetweenClones;
       lastIRow = (lastIRow < fSliceParam.NRows()) ? lastIRow : fSliceParam.NRows()-1;
-//      std::cout<<" - i1: "<<i1<<";   firstIRow: "<<firstIRow<<";   lastIRow: "<<lastIRow<<"\n";
+//std::cout<<" - i1: "<<i1<<";   firstIRow: "<<firstIRow<<";   lastIRow: "<<lastIRow<<";   maxGap: "<<AliHLTTPCCAParameters::MaximumRowGapBetweenClones<<"\n";
 //      if(firstIRow>5)continue;
 
       FindMinMaxIndex( N2, FirstTrIR, LastTrIR, firstIRow, lastIRow, ifirst2, ilast2 );
-//      std::cout<<" --- ifirst2: "<<ifirst2<<";   ifirst2: "<<ifirst2<<"\n";
+//      std::cout<<" --- ifirst2: "<<ifirst2<<";   ilast2: "<<ilast2<<"\n";
     }
     else if(number == 0) { // find tracks with >= 2 common rows.
 #ifdef BACK_ORDER_FOR_0
@@ -1645,6 +1693,7 @@ void AliHLTTPCCAMerger::MergeBorderTracks( AliHLTTPCCABorderTrack B1[], int N1, 
 #endif // BACK_ORDER_FOR_0
     }
 
+//std::cout<<" ----- dir: "<<dir<<";   ifirst2: "<<ifirst2<<";   ilast2: "<<ilast2<<"\n";
     if (dir*ifirst2 > dir*ilast2) continue;
 
       // rarely changed parameters
@@ -1701,7 +1750,7 @@ void AliHLTTPCCAMerger::MergeBorderTracks( AliHLTTPCCABorderTrack B1[], int N1, 
       for( ; nVecElements < uint_v::Size && dir*i2 <= dir*ilast2; i2 += dir ) {
 
         const AliHLTTPCCABorderTrack &b2 = B2[i2];
-//        std::cout<<" --- i2: "<<i2<<"\n";
+//        std::cout<<" --- i2: "<<i2<<";   b2 id: "<<b2.TrackID()<<"\n";
 
           // if dz/ds or q/pt of the tracks differs more, than by several sigmas (now 8 is used) - they are not neighbours
         float db2 = b1.b() - b2.b();
@@ -1710,16 +1759,22 @@ void AliHLTTPCCAMerger::MergeBorderTracks( AliHLTTPCCABorderTrack B1[], int N1, 
         float dp2 = b1.p() - b2.p();
         dp2 *= dp2;
         const float ddp2 = b1.pErr2() + b2.pErr2();
+//        std::cout<<" ----- b1.p(): "<<b1.p()<<";   b2.p(): "<<b2.p()<<"\n";
 //        std::cout<<" ----- db2: "<<db2<<";   ddb2: "<<ddb2<<";   dp2: "<<dp2<<";   ddp2: "<<ddp2<<"\n";
+//        std::cout<<" ------- iSlice1: "<<iSlice1<<";   iSlice2: "<<iSlice2<<"\n";
         if( db2 > factor2k * ddb2 || dp2 > factor2k * ddp2 ||
             ( iSlice1 == iSlice2 && b1.TrackID() == b2.TrackID() ) )  // the track could not be itselfs neighbour
           continue;
+
+//        std::cout<<"          ok0.\n";
 
         const AliHLTTPCCASliceTrackInfo *Tt2 = &fTrackInfos[ fSliceTrackInfoStart[iSlice2] + b2.TrackID() ];
 
         if( (Tt1->NextNeighbour() == b2.TrackID() && Tt1->SliceNextNeighbour() == iSlice2) ||
             (Tt1->PrevNeighbour() == b2.TrackID() && Tt1->SlicePrevNeighbour() == iSlice2) )
           continue;  // the tracks are already matched
+
+//        std::cout<<"          ok1. number: "<<number<<";   nVecElements: "<<nVecElements<<"\n";
 
         if ( number == 0 ) { // reconstruct only parallel tracks, created because of clusters spliting
           const float &z1I = Tt1->InnerParam().Z();
@@ -1764,6 +1819,8 @@ void AliHLTTPCCAMerger::MergeBorderTracks( AliHLTTPCCABorderTrack B1[], int N1, 
       }
       if (nVecElements == 0) break;
 
+//      std::cout<<"          ok. go to rotation. nVecElements: "<<nVecElements<<"\n";
+
         // convert parameters to SIMD vectors for the array of second tracks
       ConvertPTrackParamToVector(T2InnerParamMemory,InParT2,nVecElements);
       ConvertPTrackParamToVector(T2OuterParamMemory,OutParT2,nVecElements);
@@ -1785,6 +1842,8 @@ void AliHLTTPCCAMerger::MergeBorderTracks( AliHLTTPCCABorderTrack B1[], int N1, 
       float_v xS2_E1v(Vc::Zero);
       float_v yS2_E1v(Vc::Zero);
       float_v sinS2_E1v(Vc::Zero);
+
+//      std::cout<<"          active0: "<<active<<"\n";
 
       if( !((number == 1) && (iSlice1 == iSlice2)) ) {
         InParT2.RotateXY(OutAlphaT1 - InAlphaT2,xS2_E1v,yS2_E1v,sinS2_E1v,active);
@@ -1818,6 +1877,7 @@ void AliHLTTPCCAMerger::MergeBorderTracks( AliHLTTPCCABorderTrack B1[], int N1, 
                                  (yS2_E1v - yE1v) };
 
       float_v min_chi2(1e10f);
+//      std::cout<<"          active1: "<<active<<"\n";
       CheckTracksMatch( number,
       InParT1, OutParT1, InAlphaT1, OutAlphaT1,
       InParT2, OutParT2, InAlphaT2, OutAlphaT2,
@@ -2023,36 +2083,60 @@ void AliHLTTPCCAMerger::FindNeighbourTracks(int number)
       }
       LastTrIR[iSl][curRow] = nCurr[iSl] - 1;
     }
-
+//std::cout<<":::MergeBorderTracks::: "<<(int)iSl<<" -> "<<(int)iSl<<"\n";
       // create links to neighbour tracks clones in the same sector
     MergeBorderTracks( bCurrSliceOR, nCurr[iSl], iSl,
                        bCurrSliceIR, nCurr[iSl], iSl,
                        number, FirstTrIR[iSl], LastTrIR[iSl] );
   }
 
-  if (number == 1) // with number == 0 only parallel tracks are merged, they should be at the same sector
-  if (! fgDoNotMergeBorders )
+  if (number == 1) { // with number == 0 only parallel tracks are merged, they should be at the same sector
+  if (! fgDoNotMergeBorders ) {
     for(int iSl=0; iSl<fgkNSlices; iSl++)
     {
+//std::cout<<".iSl: "<<iSl<<";   fgkNSlices: "<<fgkNSlices<<";   nextSl: "<<(int)nextSlice[iSl]<<";   oppSl: "<<(int)oppSlice[iSl]<<"\n";
+//std::cout<<":::MergeBorderTracks::: "<<(int)iSl<<" -> nx "<<(int)nextSlice[iSl]<<"\n";
         //  create links to neighbour tracks in the next sector in the same xy-plane
       MergeBorderTracks( bCurrOR+maxNSliceTracks*iSl,            nCurr[iSl],            iSl,
                          bCurrIR+maxNSliceTracks*nextSlice[iSl], nCurr[nextSlice[iSl]], nextSlice[iSl],
                          number, FirstTrIR[nextSlice[iSl]], LastTrIR[nextSlice[iSl]] ); // merge upper edges
+//std::cout<<":::MergeBorderTracks::: nx "<<(int)nextSlice[iSl]<<" -> "<<(int)iSl<<"\n";
       MergeBorderTracks( bCurrOR+maxNSliceTracks*nextSlice[iSl], nCurr[nextSlice[iSl]], nextSlice[iSl],
                          bCurrIR+maxNSliceTracks*iSl,            nCurr[iSl],            iSl,
                          number, FirstTrIR[iSl],            LastTrIR[iSl] );            // merge lower edges
 
       if(iSl < fgkNSlices / 2)
       {
+#define DO_OP_CROSS_MERDE
+#ifdef DO_OP_CROSS_MERDE
+        for( int ii = -1; ii < 2; ii++ ) {
           //  create links to neighbour tracks with the oposit sector (in z direction)
-        MergeBorderTracks( bCurrOR+maxNSliceTracks*iSl, nCurr[iSl], iSl,
-                           bCurrIR+maxNSliceTracks*oppSlice[iSl], nCurr[oppSlice[iSl]], oppSlice[iSl],
-                           number, FirstTrIR[oppSlice[iSl]], LastTrIR[oppSlice[iSl]] );
-        MergeBorderTracks( bCurrOR+maxNSliceTracks*oppSlice[iSl], nCurr[oppSlice[iSl]], oppSlice[iSl],
+          if( oppSlice[iSl] + ii >= 0 && oppSlice[iSl] + ii < 24 ) {
+//std::cout<<":::MergeBorderTracks::: "<<(int)iSl<<" -> op "<<(int)oppSlice[iSl]+ii<<"\n";
+            MergeBorderTracks( bCurrOR+maxNSliceTracks*iSl, nCurr[iSl], iSl,
+                           bCurrIR+maxNSliceTracks*(oppSlice[iSl]+ii), nCurr[oppSlice[iSl]+ii], oppSlice[iSl]+ii,
+                           number, FirstTrIR[oppSlice[iSl]+ii], LastTrIR[oppSlice[iSl]+ii] );
+//std::cout<<":::MergeBorderTracks::: op "<<(int)oppSlice[iSl]+ii<<" -> "<<(int)iSl<<"\n";
+            MergeBorderTracks( bCurrOR+maxNSliceTracks*(oppSlice[iSl]+ii), nCurr[oppSlice[iSl]+ii], oppSlice[iSl]+ii,
                            bCurrIR+maxNSliceTracks*iSl, nCurr[iSl], iSl,
                            number, FirstTrIR[iSl],           LastTrIR[iSl] );
+          }
+        }
+#else
+          //  create links to neighbour tracks with the oposit sector (in z direction)
+//std::cout<<":::MergeBorderTracks::: "<<(int)iSl<<" -> op "<<(int)oppSlice[iSl]+ii<<"\n";
+        MergeBorderTracks( bCurrOR+maxNSliceTracks*iSl, nCurr[iSl], iSl,
+                           bCurrIR+maxNSliceTracks*(oppSlice[iSl]), nCurr[oppSlice[iSl]], oppSlice[iSl],
+                           number, FirstTrIR[oppSlice[iSl]], LastTrIR[oppSlice[iSl]] );
+//std::cout<<":::MergeBorderTracks::: op "<<(int)oppSlice[iSl]+ii<<" -> "<<(int)iSl<<"\n";
+        MergeBorderTracks( bCurrOR+maxNSliceTracks*(oppSlice[iSl]), nCurr[oppSlice[iSl]], oppSlice[iSl],
+                           bCurrIR+maxNSliceTracks*iSl, nCurr[iSl], iSl,
+                           number, FirstTrIR[iSl],           LastTrIR[iSl] );
+#endif
       }
     }
+  }
+  }
 
   if ( bCurrIR ) delete[] bCurrIR;
   if ( bCurrOR ) delete[] bCurrOR;
@@ -2152,7 +2236,7 @@ void AliHLTTPCCAMerger::MergingPTmultimap()
 //  std::cout<<" - mem allocated\n";
 
   for( int iTr = 0; iTr < nMerged; iTr++ ) {
-      std::cout<<" --- iTr: "<<iTr<<";   nHits: "<<merge_sort_helper[iTr].nHits<<"\n";
+//      std::cout<<" --- iTr: "<<iTr<<";   nHits: "<<merge_sort_helper[iTr].nHits<<"\n";
     TrMerge &m_cand = merge_candidates[merge_sort_helper[iTr].trId];
     if ( !fkSlices[m_cand.iSlice[0]] ) continue;
     const AliHLTTPCCASliceOutput &slice = *( fkSlices[m_cand.iSlice[0]] );
@@ -2165,12 +2249,12 @@ void AliHLTTPCCAMerger::MergingPTmultimap()
     vv[0] = ( m_cand.iTrack[0] - fptSliceFirstTrack[m_cand.iSlice[0]] ) / float_v::Size;
     ve[0] = ( m_cand.iTrack[0] - fptSliceFirstTrack[m_cand.iSlice[0]] ) % float_v::Size;
     sTrackV[0] = &slice.TrackV( vv[0] );
-    std::cout<<" --- used0: "<<sTrackV[0]->Used()<<"\n";
+//    std::cout<<" --- used0: "<<sTrackV[0]->Used()<<"\n";
     vv[1] = ( m_cand.iTrack[1] - fptSliceFirstTrack[m_cand.iSlice[1]] ) / float_v::Size;
     ve[1] = ( m_cand.iTrack[1] - fptSliceFirstTrack[m_cand.iSlice[1]] ) % float_v::Size;
     const AliHLTTPCCASliceOutput &slice1 = *( fkSlices[m_cand.iSlice[1]] );
     sTrackV[1] = &slice1.TrackV( vv[1] );
-    std::cout<<" --- used1: "<<sTrackV[1]->Used()<<"\n";
+//    std::cout<<" --- used1: "<<sTrackV[1]->Used()<<"\n";
     nnext[nTracksVector]++;
     fstclnext[0][nTracksVector] = sTrackV[1]->FirstClusterRef()[ve[1]];
     nclnext[0][nTracksVector] = sTrackV[1]->NClusters()[ve[1]];
@@ -2184,12 +2268,12 @@ void AliHLTTPCCAMerger::MergingPTmultimap()
       startAlphaS[nTracksVector] = slices[m_cand.iSlice[0]]->Param().Alpha();
       endAlphaS[nTracksVector]   = startAlphaS[nTracksVector];
       if( m_cand.nTracks > 2 ) {
-	  std::cout<<" -----\n";
+//	  std::cout<<" -----\n";
 	vv[2] = ( m_cand.iTrack[2] - fptSliceFirstTrack[m_cand.iSlice[2]] ) / float_v::Size;
 	ve[2] = ( m_cand.iTrack[2] - fptSliceFirstTrack[m_cand.iSlice[2]] ) % float_v::Size;
 	const AliHLTTPCCASliceOutput &slice2 = *( fkSlices[m_cand.iSlice[2]] );
 	sTrackV[2] = &slice2.TrackV( vv[2] );
-	std::cout<<" --- used2: "<<sTrackV[2]->Used()<<"\n";
+//	std::cout<<" --- used2: "<<sTrackV[2]->Used()<<"\n";
 	nnext[nTracksVector]++;
 	fstclnext[1][nTracksVector] = sTrackV[2]->FirstClusterRef()[ve[2]];
 	nclnext[1][nTracksVector] = sTrackV[2]->NClusters()[ve[2]];
@@ -2197,7 +2281,7 @@ void AliHLTTPCCAMerger::MergingPTmultimap()
 	trnext[1][nTracksVector] = m_cand.iTrack[2] - fptSliceFirstTrack[m_cand.iSlice[2]];
       }
       for( int jTr = 0; jTr < m_cand.nTracks; jTr++ ) {
-	  std::cout<<" ----- jTr: "<<jTr<<";   nTracks: "<<sTrackV[jTr]->NClusters()[ve[jTr]]<<"\n";
+//	  std::cout<<" ----- jTr: "<<jTr<<";   nTracks: "<<sTrackV[jTr]->NClusters()[ve[jTr]]<<"\n";
 	int fst_h = sTrackV[jTr]->FirstClusterRef()[ve[jTr]] + fptSliceFirstHit[m_cand.iSlice[jTr]];
         for( int iH = 0; iH < sTrackV[jTr]->NClusters()[ve[jTr]]; iH++ ) {
           hits[nHitCurrent][nTracksVector] = fst_h + iH;
@@ -2206,20 +2290,20 @@ void AliHLTTPCCAMerger::MergingPTmultimap()
         }
       }
       nTracksVector++;
-      std::cout<<" --- nTracksVector: "<<nTracksVector<<"\n";
+//      std::cout<<" --- nTracksVector: "<<nTracksVector<<"\n";
     }
 
     if( nTracksVector == float_v::Size || iTr >= nMerged - 1 ) {
-	std::cout<<" >>> go fit\n";
+//	std::cout<<" >>> go fit\n";
       float_v &nHitsF = reinterpret_cast<float_v&>(nHitsS[0]);
       uint_v nHits(nHitsF);
-      std::cout<<" >>> nHits: "<<nHits<<"\n";
+//      std::cout<<" >>> nHits: "<<nHits<<"\n";
       float_v &startAlpha = reinterpret_cast<float_v&>(startAlphaS[0]);
       float_v &endAlpha = reinterpret_cast<float_v&>(endAlphaS[0]);
       float_m fitted = float_m(true);
       fitted &= static_cast<float_m>(static_cast<uint_v>(nHits) >= 4);
       fitted &= static_cast<float_m>( uint_v( Vc::IndexesFromZero ) < nTracksVector );
-      std::cout<<" >>> fitted: "<<fitted<<"\n";
+//      std::cout<<" >>> fitted: "<<fitted<<"\n";
       AliHLTTPCCATrackParamVector vEndPoint;
 
       const AliHLTTPCCATrackParam *pStartPointC[uint_v::Size] = {0};
@@ -2234,7 +2318,7 @@ void AliHLTTPCCAMerger::MergingPTmultimap()
         uint_m skip(!fitted);
         nHits(skip) = uint_v(0);
       }
-      std::cout<<" >>> start fitting\n";
+//      std::cout<<" >>> start fitting\n";
 #ifdef WRITE_TEST
 int nHitsMax = nHits.max();
   // pack hits
@@ -2274,20 +2358,20 @@ for ( int ihit = 0; ihit < nHitsMax; ihit++ ) {
 //std::cout<<"nHits: "<<nHits<<";   lstHit: "<<lstHit<<"\n";
 #endif
       fitted &= FitTrackMerged( vEndPoint,   vEndAlpha,   hits, firstHits, nHits, nTracksVector, fitted, 0 );
-      std::cout<<" - fitted1: "<<fitted<<"\n";
+//      std::cout<<" - fitted1: "<<fitted<<"\n";
 float_m fitted_tmp = fitted;
       // if chi2 per degree of freedom > 3. sigma - mark track with 0
       fitted &= vEndPoint.Chi2()  < 18.f*static_cast<float_v>(vEndPoint.NDF());
 //      fitted &= vEndPoint.Chi2()  < 9.f*static_cast<float_v>(vEndPoint.NDF());
-      std::cout<<" - fitted2: "<<fitted<<";   chi2: "<<vEndPoint.Chi2()<<";   ndf: "<<vEndPoint.NDF()<<";   cut: "<<9.f*static_cast<float_v>(vEndPoint.NDF())<<"\n";
+//      std::cout<<" - fitted2: "<<fitted<<";   chi2: "<<vEndPoint.Chi2()<<";   ndf: "<<vEndPoint.NDF()<<";   cut: "<<9.f*static_cast<float_v>(vEndPoint.NDF())<<"\n";
       AliHLTTPCCATrackParamVector vStartPoint(vEndPoint);
       float_v vStartAlpha(vEndAlpha);
       // refit in the backward direction: going from the last hit to the first
       fitted &= FitTrackMerged( vStartPoint, vStartAlpha, hits, firstHits, nHits, nTracksVector, fitted, 1 );
-      std::cout<<" - fitted3: "<<fitted<<"\n";
+//      std::cout<<" - fitted3: "<<fitted<<"\n";
       // if chi2 per degree of freedom > 3. sigma - mark track with 0
       fitted &= vStartPoint.Chi2() < 9.f*static_cast<float_v>(vStartPoint.NDF());	//TODO: improve this cut
-      std::cout<<" - fitted: "<<fitted<<";   nTracksVector: "<<nTracksVector<<"\n";
+//      std::cout<<" - fitted: "<<fitted<<";   nTracksVector: "<<nTracksVector<<"\n";
 fitted = fitted_tmp;
       for(int iV=0; iV<float_v::Size; iV++) {
         if(!fitted[iV]) continue;
@@ -2383,17 +2467,17 @@ void AliHLTTPCCAMerger::MergingPT(int number)
   int nTrNew[fgkNSlices] = {0};
   int nH = 0;
   // --- test multimap ---
-  std::cout<<">Double merged: "<<fMaxMerged[0]<<";   Triple merged: "<<fMaxMerged[1]<<"\n";
-  int nIt(0);
-  for( auto it = fTrackLinks.begin(); it != fTrackLinks.end(); ++it ) {
-    std::cout<<" - "<<nIt<<" - first track: "<<it->first.id<<";   second track: "<<it->second.id<<"\n";
-    auto it1 = fTrackLinks.find( it->second );
-    if( it1 != fTrackLinks.end() ) {
-      std::cout<<" -> next link: first track: "<<it1->first.id<<";   second track: "<<it1->second.id<<"\n";
-    }
-    nIt++;
-  }
-  std::cout<<" --- nMapLinks: "<<nIt<<"\n";
+//  std::cout<<">Double merged: "<<fMaxMerged[0]<<";   Triple merged: "<<fMaxMerged[1]<<"\n";
+//  int nIt(0);
+//  for( auto it = fTrackLinks.begin(); it != fTrackLinks.end(); ++it ) {
+//    std::cout<<" - "<<nIt<<" - first track: "<<it->first.id<<";   second track: "<<it->second.id<<"\n";
+//    auto it1 = fTrackLinks.find( it->second );
+//    if( it1 != fTrackLinks.end() ) {
+//      std::cout<<" -> next link: first track: "<<it1->first.id<<";   second track: "<<it1->second.id<<"\n";
+//    }
+//    nIt++;
+//  }
+//  std::cout<<" --- nMapLinks: "<<nIt<<"\n";
   // ---
 //  // --- test ---
 //  nIt = 0;
@@ -2421,7 +2505,7 @@ void AliHLTTPCCAMerger::MergingPT(int number)
 //	  }
 //      }
 //  }
-  std::cout<<" --- nNormLinks: "<<nIt<<"\n";
+//  std::cout<<" --- nNormLinks: "<<nIt<<"\n";
 //  // ---
 
   //---
@@ -2937,8 +3021,8 @@ trIds[nTracksVector] = unmergedTrList[iTr].trId;
     } // if no merged
   }
 
-  std::cout<<" ----- Normal and merged tracks are stored in outTracks\n";
-  std::cout<<" ----- nOutTrackClusters: "<<nOutTrackClusters<<";   nOutTracks: "<<nOutTracks<<"\n";
+//  std::cout<<" ----- Normal and merged tracks are stored in outTracks\n";
+//  std::cout<<" ----- nOutTrackClusters: "<<nOutTrackClusters<<";   nOutTracks: "<<nOutTracks<<"\n";
   for( int iTr = firstUnmerged; iTr < firstUnmerged + nUnmerged; iTr++ ) {
       const AliHLTTPCCASliceTrackInfo& tr = fTrackInfos[iTr];
       const unsigned int NHits = tr.NClusters();
@@ -3185,11 +3269,11 @@ vector<int> mergedSermentsOldIndexes;
      // -- Resort tracks to proceed faster
     vector<unsigned int> firstInChainIndex(fSliceNTrackInfos[iSlice]);
     int nChains = 0;
-//for(int iT=0; iT< fSliceNTrackInfos[iSlice]; iT++) {
-//    const int index = fSliceTrackInfoStart[iSlice] + iT;
-//    const AliHLTTPCCASliceTrackInfo& tr = fTrackInfos[index];
+for(int iT=0; iT< fSliceNTrackInfos[iSlice]; iT++) {
+    const int index = fSliceTrackInfoStart[iSlice] + iT;
+    const AliHLTTPCCASliceTrackInfo& tr = fTrackInfos[index];
 //    std::cout<<"> iTrack: "<<iT<<";   index: "<<index<<";   used: "<<tr.Used()<<"\n";
-//}
+}
 
       // store tracks, which are not merged. And save indexes of the most previous(inner) merged tracks
     for(int iT=0; iT< fSliceNTrackInfos[iSlice]; iT++) {
@@ -3805,28 +3889,32 @@ int hits[2000][uint_v::Size], uint_v& firstHit, AliHLTTPCCATrackParamVector& vSt
 
   const float_m &case1 = mask &&
     (d00 <= d01 && d00 <= d10 && d00 <= d11) &&
-    (dz11 >= dz00 && dz11 >= dz01 && dz11 >= dz10 );
+    ( (dz11 >= dz00 && dz11 >= dz01 && dz11 >= dz10 ) ||
+    ( CAMath::Abs( dz00 - dz11 ) < float_v(1.) && CAMath::Abs( dz11 - dz10 ) < float_v(1.) &&CAMath::Abs( dz01 - dz11 ) < float_v(1.) ) );
     /*                  0----1
      * connection like : \
      *                    0------1
      */
   const float_m &case2 = mask &&
     (d01 < d00 && d01 <= d10 && d01 <= d11) &&
-    (dz10 > dz00 && dz10 >= dz01 && dz10 >= dz11 );
+    ( (dz10 > dz00 && dz10 >= dz01 && dz10 >= dz11 ) ||
+    ( CAMath::Abs( dz10 - dz00 ) < float_v(1.) && CAMath::Abs( dz01 - dz10 ) < float_v(1.) &&CAMath::Abs( dz10 - dz11 ) < float_v(1.) ) );
     /*                       0----1
      * connection like :      \
      *                    0----1
      */
   const float_m &case3 = mask &&
     (d10 < d00 && d10 <= d01 && d10 <= d11) &&
-    (dz01 > dz00 && dz01 >= dz10 && dz01 >= dz11 );
+    ( ( dz01 > dz00 && dz01 >= dz10 && dz01 >= dz11 ) ||
+    ( CAMath::Abs( dz01 - dz00 ) < float_v(1.) && CAMath::Abs( dz01 - dz10 ) < float_v(1.) &&CAMath::Abs( dz01 - dz11 ) < float_v(1.) ) );
     /*                   0---1
      * connection like :    /
      *                     0-------1
      */
   const float_m &case4 = mask &&
     (d11 < d00 && d11 <= d10 && d10 <= d01) &&
-    (dz00 > dz01 && dz00 >= dz10 && dz00 > dz11);
+    ( (dz00 > dz01 && dz00 >= dz10 && dz00 > dz11) ||
+    ( CAMath::Abs( dz01 - dz00 ) < float_v(1.) && CAMath::Abs( dz00 - dz10 ) < float_v(1.) &&CAMath::Abs( dz00 - dz11 ) < float_v(1.) ) );
     /*                      0--1
      * connection like :        \
      *                    0------1
