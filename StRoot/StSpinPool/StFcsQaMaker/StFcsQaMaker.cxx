@@ -114,39 +114,46 @@ Int_t StFcsQaMaker::Init(){
 };
 
 Int_t StFcsQaMaker::Make() {
-  StEvent* event=0;
   mFcsCollection=0;
+  StTriggerData* trg=0;
 
   //Getting StFcsRawDaqReader and TriggerData
   StFcsRawDaqReader* fcsraw=(StFcsRawDaqReader*)GetMaker("daqReader");
-  if(!fcsraw){
-    LOG_ERROR << "Canot find fcsRawDaqReader" << endm;
-    return 0;
+  StEvent* event= (StEvent*)GetInputDS("StEvent");  
+  if(fcsraw){
+      //Getting trigger data (if daq file)
+      trg = fcsraw->trgdata();
+      if(!trg){
+	  LOG_INFO << "Canot find Trigger Data from StFcsRawDaqReader" << endm;
+      }
+  }else if(event){
+      trg=event->triggerData();
+      if(!trg){
+	  LOG_INFO << "Canot find Trigger Data from StEvent" << endm;
+      }
   }
 
-  //Getting trigger data (if daq file)
-  StTriggerData* trg = fcsraw->trgdata();
-  if(!trg){
-    LOG_INFO << "Canot find Trigger Data" << endm;
-    //return 0;  //not quitting for local .sfs file reading
-  }
+  //tof multiplicity from trigger data
+  int tofmult = trg->tofMultiplicity();
 
   //check if FCS was readout for this event
   if(trg){
-    unsigned int detmask=trg->getTrgDetMask();
-    printf("TrgDetMask = %4x\n",detmask);
-    if(! ((detmask >> 30) & 0x1)){   //FCS_ID=30
-      printf("No FCS readout for this event\n");
-      //return kStOK;
-    }
-    unsigned short lastdsm4 = trg->lastDSM(4);
-    unsigned short fcs2019 = (lastdsm4 >> 10) & 0x1;
-    printf("fcs2019=%1d\n",fcs2019);
+      unsigned short detmask=trg->getTrgDetMask();
+      printf("TrgDetMask = %4x\n",detmask);
+      if(! ((detmask >> 30) & 0x1)){   //FCS_ID=30 but detmask is 16bit:O
+	  printf("No FCS readout for this event detmask=%x\n",detmask);
+	  //return kStOK;
+      }
+      unsigned short lastdsm4 = trg->lastDSM(4);
+      unsigned short fcs2019 = (lastdsm4 >> 10) & 0x1;
+      printf("fcs2019=%1d\n",fcs2019);
   }
-
-  event= (StEvent*)GetInputDS("StEvent");  
-  if(!event) { LOG_INFO << "No StEvent found" << endm;}
-  else{ mFcsCollection=event->fcsCollection();} 
+  
+  if(!event) { 
+      LOG_INFO << "No StEvent found" << endm;
+  }else{ 
+      mFcsCollection=event->fcsCollection();
+  } 
   if(!mFcsCollection){
     LOG_INFO << "No StFcsCollection found" << endm;
     return kStErr;
@@ -282,8 +289,11 @@ Int_t StFcsQaMaker::Finish(){
 ClassImp(StFcsQaMaker);
 
 /*
- * $Id: StFcsQaMaker.cxx,v 1.4 2019/07/10 03:18:36 akio Exp $
+ * $Id: StFcsQaMaker.cxx,v 1.5 2019/07/19 15:16:29 akio Exp $
  * $Log: StFcsQaMaker.cxx,v $
+ * Revision 1.5  2019/07/19 15:16:29  akio
+ * add tofmult
+ *
  * Revision 1.4  2019/07/10 03:18:36  akio
  * fix fcs_id to 30
  *
