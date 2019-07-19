@@ -8,7 +8,7 @@
   set Name = `basename $PWD`
   setenv NODEBUG yes
 #  setup 64b
-  starver TFG19a
+#   starver TFG19f
 #  starver .DEV2 
 #  starver TFG17u 
 #  starver TFG17v 
@@ -22,7 +22,7 @@
   set generF   = ${name}.MuDst.root
   set tagf     = ${name}.root
 #  setenv StarEndMakerShell
-  set sdt = "";
+  set sdt = ",sdt20190311";
 #  echo $Name | grep -i Ideal
 #  if ($?) set sdt = ",sdt20160301";
   set KFVertex = "";
@@ -35,11 +35,12 @@
 #    root.exe -q -b -x 'bfc.C(100,"genIn,MC.2019,McTpcAna,-bbcSim,StiCA'${KFVertex}',-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco'${sdt}',ZCut5cm,RunG.1","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
 #    root.exe -q -b -x 'bfc.C(100,"genIn,MC.2019,McTpcAna,-bbcSim,StiCA'${KFVertex}',-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco'${sdt}',ZCut5cm,RunG.1,NoiTPCLu","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
 #    root.exe -q -b -x 'bfc.C(100,"genIn,MC.2019,McTpcAna,-bbcSim,StiCA,StiKFVertex,-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco'${sdt}',ZCut5cm,RunG.1","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
-    root.exe -q -b -x 'bfc.C(100,"genIn,MC.2019,McTpcAna,-bbcSim,Stx,KFVertex,-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco'${sdt}',ZCut5cm,RunG.1","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
+#    root.exe -q -b -x 'bfc.C(100,"genIn,MC.2019,McTpcAna,-bbcSim,Stx,KFVertex,-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco'${sdt}',ZCut5cm,RunG.1","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
+    root.exe -q -b -x 'bfc.C(100,"genIn,MC.2019,McTpcAna,-bbcSim,Stx,KFVertex,VFMinuitX,-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrY,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco'${sdt}',RunG.1","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
   endif
 </command>
-<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/Hijing/AuAu200/hijingAuAu200_*gener.root" />  -->
-<input URL="file:/net/l401/data/scratch2/fisyak/simu/Hijing/AuAu200//hijingAuAu200_*gener.root" /> 
+<input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/Hijing/AuAu200/hijingAuAu200_*gener.root" />
+<!-- <input URL="file:/net/l401/data/scratch2/fisyak/simu/Hijing/AuAu200//hijingAuAu200_*gener.root" /> -->
 <!-- <input URL="file:/net/l401/data/scratch2/fisyak/simu/Hijing/AuAu200//hijingAuAu200_*gener.root" /> -->
 <!-- <input URL="file:/net/l404/data/fisyak/simu/Hijing/AuAu200/hijingAuAu200_*gener.root" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/Hijing/AuAu200/hijingAuAu200_1_1000.gener.root" /> -->
