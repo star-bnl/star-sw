@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMemStat.cxx,v 1.6 2019/07/19 21:26:15 smirnovd Exp $
+ * $Id: StMemStat.cxx,v 1.7 2019/07/19 21:26:24 smirnovd Exp $
  *
  ***************************************************************************
  *
@@ -264,4 +264,27 @@ StMemStat::ProcStatusMap_t StMemStat::ReadProcStatus()
   }
 
   return tokens;
+}
+
+
+void StMemStat::SaveProcStatus(std::string callerId)
+{
+  static std::ofstream outfile("proc_status.csv");
+  static bool firstCall = true;
+
+  const ProcStatusMap_t& tokens = ReadProcStatus();
+
+  if (firstCall) {
+    outfile << "callerId";
+    for (const ProcStatus_t& token : tokens)
+      outfile << ", " << token.first;
+    outfile << '\n';
+  }
+
+  outfile << callerId;
+  for (const ProcStatus_t& token : tokens)
+    outfile << ", " << token.second;
+  outfile << '\n';
+
+  firstCall = false;
 }
