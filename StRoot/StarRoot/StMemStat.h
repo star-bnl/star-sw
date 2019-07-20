@@ -9,12 +9,15 @@
  */
 /***************************************************************************
  *
- * $Id: StMemStat.h,v 1.2 2019/06/21 21:13:28 smirnovd Exp $
+ * $Id: StMemStat.h,v 1.4 2019/07/19 21:26:24 smirnovd Exp $
  *
  * Author: Victor Perev, Jul 2000
  **************************************************************************/
 #ifndef StMemStat_h
 #define StMemStat_h
+
+#include <map>
+
 #include "TNamed.h"
 
 class TList;
@@ -40,6 +43,10 @@ public:
    static  void     PM();	                /*!< Prints fast current heap  */
    static  void     Summary();			/*!< Prints usage summary      */
 
+   /// Saves the values read from /proc/self/status at the time of a call in a text file.
+   /// See StMemStat::ReadProcStatus() for parsed values
+   static void SaveProcStatus(std::string callerId);
+
  private:
    Double_t fLast;
    Double_t fMin;
@@ -50,6 +57,13 @@ public:
 
    static Double_t fgUsed;
    static TList    *fgList;
+
+   /// This type should be `std::unordered_map` but `rootcint` cannot deal with c++11
+   typedef std::map<std::string, double> ProcStatusMap_t;
+   typedef ProcStatusMap_t::value_type   ProcStatus_t;
+
+   /// Maps values to the corresponding tokens read from /proc/pid/status
+   static ProcStatusMap_t ReadProcStatus();
 
    ClassDef(StMemStat,0)
 };
