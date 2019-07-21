@@ -2,7 +2,7 @@
 
 if ( $#argv != 13 ) then
   echo ""
-  echo " Usage : $0 [starlib] [year] [production] [input file list] [output filename] [is embedding] [vzmax] [refmin] [refmax] [ptmax] [ptmin] [etamax] [ymax]"
+  echo " Usage : $0 [starlib] [year] [production] [input file list] [output prefix incl. dir.] [is embedding] [vzmax] [refmin] [refmax] [ptmax] [ptmin] [etamax] [ymax]"
   echo ""
   echo ""
   echo ""
@@ -14,8 +14,13 @@ starver $1
 set year       = "$2"
 set production = "$3"
 set input      = "$4"
-set output     = "$5"
+set output_prefix  = "$5"
 set isembedding = "$6"
+if ( "$isembedding" == "kTRUE" ) then
+   set output = "${output_prefix}.embedding.root"
+else
+   set output = "${output_prefix}.real.root"
+endif
 
 set vzmax = "$7"
 set refmin = "$8"
