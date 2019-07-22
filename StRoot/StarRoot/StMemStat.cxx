@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMemStat.cxx,v 1.8 2019/07/22 18:26:52 smirnovd Exp $
+ * $Id: StMemStat.cxx,v 1.9 2019/07/22 18:27:04 smirnovd Exp $
  *
  ***************************************************************************
  *
@@ -197,14 +197,13 @@ FILE *proc = fopen(line,"r");
   return res;
 }
 //______________________________________________________________________________
-void StMemStat::PrintMem(const char *tit)
+void StMemStat::PrintMem(std::string prefix)
 {
-  if (tit) printf("\nStMemStat::%s",tit);
-  printf("%s\n", AsString().c_str());
+  printf("%s\n", AsString(prefix).c_str());
 }
 
 
-std::string StMemStat::AsString()
+std::string StMemStat::AsString(std::string prefix)
 {
   double alloc_used = Used();
   double alloc_used_prev = fgUsed;
@@ -212,7 +211,8 @@ std::string StMemStat::AsString()
   double total = ProgSize();
   fgUsed = alloc_used;
 
-  return FormString("\t total =%10.6f heap =%10.6f and %10.6f(%+10.6f)", total, alloc_used, alloc_free, alloc_used - alloc_used_prev);
+  return FormString("%s\t total =%10.6f heap =%10.6f and %10.6f(%+10.6f)",
+                    prefix.c_str(), total, alloc_used, alloc_free, alloc_used - alloc_used_prev);
 }
 
 //______________________________________________________________________________
