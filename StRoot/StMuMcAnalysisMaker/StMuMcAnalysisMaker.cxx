@@ -696,7 +696,7 @@ void StMuMcAnalysisMaker::BookVertexPlots(){
   dirs[1] = dirs[0]->GetDirectory(TracksVertices[1]); assert(dirs[1]);
   dirs[1]->cd();
   PrintMem(dirs[1]->GetPath());
-#if 1  
+#if 0  
   mStKFParticleInterface = new StKFParticleInterface;
   mStKFParticlePerformanceInterface = new StKFParticlePerformanceInterface(mStKFParticleInterface->GetTopoReconstructor());
 #endif
@@ -958,6 +958,10 @@ void StMuMcAnalysisMaker::FillTrackPlots()
 #if 1
 //_____________________________________________________________________________
 void StMuMcAnalysisMaker::FillVertexPlots(){
+  if (mStKFParticleInterface) FillKFVertexPlots();
+}
+//_____________________________________________________________________________
+void StMuMcAnalysisMaker::FillKFVertexPlots(){
   //   StMuDst::instance()->printKFVertices();
   //   StMuDst::instance()->printKFTracks();
   //  return;

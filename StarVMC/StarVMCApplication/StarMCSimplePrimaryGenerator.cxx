@@ -1,7 +1,8 @@
 // $Id: StarMCSimplePrimaryGenerator.cxx,v 1.1.1.1 2008/12/10 20:45:52 fisyak Exp $
 #include "StarMCSimplePrimaryGenerator.h"
-#include "TF1.h"
+#include "TFile.h"
 #include "TGeant3.h"
+#include "TF1.h"
 #include "TEnv.h"
 #include "TRandom.h"
 #include "StDetectorDbMaker/St_vertexSeedC.h"
@@ -29,6 +30,7 @@ void StarMCSimplePrimaryGenerator::PreSet() {
   fGun = kFALSE;
   fGunpX = fGunpY = fGunpZ = fGunX = fGunY = fGunZ = 0;
   fGunId = 0;
+  fPVX = fPVY = fPVZ = 0;
 }
 //_____________________________________________________________________________
 void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id, 
@@ -67,6 +69,14 @@ void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id,
   cout << fEta_min  << " < eta < " << fEta_max  << endl;
   cout << fPhi_min<< " < phi < " << fPhi_max<< endl;
   cout << fZ_min  << " < zVer< " << fZ_max  << endl;
+  TFile *PVfile = TFile::Open("PVxyz.root");
+  if (PVfile) {
+    fPVX = (TH1 *) PVfile->Get("x"); assert(fPVX); fPVX->SetDirectory(0);
+    fPVY = (TH1 *) PVfile->Get("y"); assert(fPVY); fPVY->SetDirectory(0);
+    fPVZ = (TH1 *) PVfile->Get("z"); assert(fPVZ); fPVZ->SetDirectory(0);
+    delete PVfile;
+    cout << "Pxyz.root with x, y and z histograms has been found. These histogram will be use to generate primary vertex" << endl;
+  }
   fgInstance = this;
 }
 //_____________________________________________________________________________
@@ -146,21 +156,27 @@ void StarMCSimplePrimaryGenerator::GeneratePrimaries(const TVector3& origin) {
 //_____________________________________________________________________________
 void StarMCSimplePrimaryGenerator::GeneratePrimaries() {
   if (! fSetVertex) {
-    if (fUseBeamLine) {
-      St_vertexSeedC* vSeed = St_vertexSeedC::instance();
-      if (vSeed) {
-	Double_t x0   = vSeed->x0()  ;// Double_t err_x0   = vSeed->err_x0();
-	Double_t y0   = vSeed->y0()  ;// Double_t err_y0   = vSeed->err_y0();
-	//	Double_t z0   = 0            ;// Double_t err_z0   = 60; 
-	Double_t dxdz = vSeed->dxdz();
-	Double_t dydz = vSeed->dydz(); 
-	Double_t z    = fZ_min + (fZ_max-fZ_min)*gRandom->Rndm();
-	SetOrigin(x0 + dxdz*z, y0 + dydz*z, z);
-      } else {
-	cout << "Warning : Requested Beam Line, but there is no beam line" << endl;
-      }
+    if (fPVX && fPVY && fPVZ) {
+      fOrigin.SetX(fPVX->GetRandom());
+      fOrigin.SetY(fPVY->GetRandom());
+      fOrigin.SetZ(fPVZ->GetRandom());
     } else {
-      fOrigin.SetZ(fZ_min + (fZ_max-fZ_min)*gRandom->Rndm());
+      if (fUseBeamLine) {
+	St_vertexSeedC* vSeed = St_vertexSeedC::instance();
+	if (vSeed) {
+	  Double_t x0   = vSeed->x0()  ;// Double_t err_x0   = vSeed->err_x0();
+	  Double_t y0   = vSeed->y0()  ;// Double_t err_y0   = vSeed->err_y0();
+	  //	Double_t z0   = 0            ;// Double_t err_z0   = 60; 
+	  Double_t dxdz = vSeed->dxdz();
+	  Double_t dydz = vSeed->dydz(); 
+	  Double_t z    = fZ_min + (fZ_max-fZ_min)*gRandom->Rndm();
+	  SetOrigin(x0 + dxdz*z, y0 + dydz*z, z);
+	} else {
+	  cout << "Warning : Requested Beam Line, but there is no beam line" << endl;
+	}
+      } else {
+	fOrigin.SetZ(fZ_min + (fZ_max-fZ_min)*gRandom->Rndm());
+      }
     }
   }
   GeneratePrimaries(fOrigin);

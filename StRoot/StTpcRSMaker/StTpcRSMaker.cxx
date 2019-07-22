@@ -1227,7 +1227,12 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
     tpc_track = g2t_track->GetTable();
     for (Int_t i = 0; i < NoTpcTracks; i++, tpc_track++) {
       Int_t Id = tpc_track->id;
-      tpc_track->n_tpc_hit = (mNoTpcHitsReal[Id-1] << 8) + (0xff & mNoTpcHitsAll[Id-1]);
+      Int_t NoTpcHitsAll  = TMath::Min(255, mNoTpcHitsAll[Id-1]);
+      Int_t NoTpcHitsReal = TMath::Min(255, mNoTpcHitsReal[Id-1]);
+      if (NoTpcHitsAll > 76 || NoTpcHitsReal > 72) {
+	iBreak++;
+      }
+      tpc_track->n_tpc_hit = (NoTpcHitsReal << 8) + (0xff & NoTpcHitsAll);
     }
   }
   return kStOK;

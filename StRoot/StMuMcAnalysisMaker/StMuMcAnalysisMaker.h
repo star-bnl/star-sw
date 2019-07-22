@@ -154,6 +154,7 @@ class StMuMcAnalysisMaker : public StMaker {
   void           FillQAPr(TrackMatchType type,const StMuTrack *pTrack, const StMuMcTrack *mcTrack, const KFParticle *particle);
   void           ForceAnimate(unsigned int times=0, int msecDelay=0); 
   void           FillVertexPlots();
+  void           FillKFVertexPlots();
   Bool_t         Check();
   void           Draw(Option_t *option="");
   void           DrawQA(Int_t gp = -1, Int_t pp = -1, Int_t xx = -1, Int_t ii = -1);
