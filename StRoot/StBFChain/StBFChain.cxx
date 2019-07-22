@@ -1,4 +1,4 @@
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.665 2019/07/16 21:32:49 smirnovd Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.666 2019/07/22 18:27:11 smirnovd Exp $
 
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -177,10 +177,7 @@ Int_t StBFChain::Load()
 	      break;
 	    } else {
 	      LOG_QA << Form("Library %-22s [%15s] (%s)\tis loaded",libL.Data(),fBFC[i].Key,path) << endm;
-
-	      if (gSystem->Getenv("StarEndMakerShell"))
-	        LOG_QA << Form("QAInfo: doPs for %20s:%12s:%22s \t", "StBFChain", "Load", libL.Data()) << StMemStat::AsString() << endm;
-
+	      StMemStat::doPs(libL.Data(), "Load");
 	      LoadedLibs.Add(new TObjString(libN));
 	    }
 	  } else {
