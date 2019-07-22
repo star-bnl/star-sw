@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.32 2019/01/03 23:14:04 jwebb Exp $
+* $Id: xgeometry.age,v 1.33 2019/07/22 22:34:07 jwebb Exp $
 
 
 
@@ -1688,6 +1688,8 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               DUMM,SCON,IDSM,FSCE,EIDD,ISTD,
               PXST,PSUP,HCAL,FTSD
 
+
+  Logical :: goodnight = .false.
 
   Integer :: cave_addr=0,   SETUP_CAVEon, SETUP_CAVE03, SETUP_CAVE04,
                             SETUP_CAVE05, SETUP_CAVE06
@@ -3817,6 +3819,10 @@ If LL>0
   Case NO_BREM    { No bremmstrahlung;
                   IBREM=0;}
 
+  Case nightly    { better reproducability for nightly tests; 
+                  goodnight = .true.
+  }
+
   Case LOW_EM     { Low cuts on ElectroMagnetic processes;
                   CUTGAM=0.00001;
                   CUTELE=0.00001;
@@ -4606,6 +4612,15 @@ c  endif
    }
    IDEBUG = IPRIN
    ITEST  = min(IPRIN,1)
+
+   if ( goodnight ) then
+   write (*,*) 'WARNING: some physics switched off for nightly test suite'
+                  IBREM=1; IANNI=1; ICOMP=1; IMUNU=1; IPHOT=1; IPAIR=1;
+                  IMULS=0; ILOSS=0; IDCAY=0; IDRAY=0; IHADR=0;          
+   endif
+
+
+
    Call agphysi
 *                      automatic subevent size selection
    If NtrSubev > 0
@@ -4643,9 +4658,13 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.32 2019/01/03 23:14:04 jwebb Exp $
+* $Id: xgeometry.age,v 1.33 2019/07/22 22:34:07 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.33  2019/07/22 22:34:07  jwebb
+* Reduced physics set for 32 v 64 bit nightly tests.
+*
 * Revision 1.32  2019/01/03 23:14:04  jwebb
+*
 * y2019a geometry first production release.
 *
 * Revision 1.31  2018/07/23 19:09:21  jwebb
