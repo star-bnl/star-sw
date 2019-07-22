@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMemStat.cxx,v 1.9 2019/07/22 18:27:04 smirnovd Exp $
+ * $Id: StMemStat.cxx,v 1.10 2019/07/22 18:27:12 smirnovd Exp $
  *
  ***************************************************************************
  *
@@ -22,6 +22,7 @@
 #include "TList.h"
 #include "TError.h"
 #include <cassert>
+#include "TSystem.h"
 
 Double_t  StMemStat::fgUsed=0;
 TList    *StMemStat::fgList=0;
@@ -125,6 +126,17 @@ void StMemStat::Summary()
   printf("\n");
 
 }
+
+
+void StMemStat::doPs(std::string who, std::string where)
+{
+  if (!gSystem->Getenv("StarEndMakerShell"))
+    return;
+
+  PrintMem(FormString("QAInfo: doPs for %20s:%12s \t", who.c_str(), where.c_str()));
+  SaveProcStatus(where + ':' + who);
+}
+
 
 //______________________________________________________________________________
 Double_t StMemStat::Used()

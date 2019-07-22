@@ -9,7 +9,7 @@
  */
 /***************************************************************************
  *
- * $Id: StMemStat.h,v 1.5 2019/07/22 18:27:04 smirnovd Exp $
+ * $Id: StMemStat.h,v 1.6 2019/07/22 18:27:12 smirnovd Exp $
  *
  * Author: Victor Perev, Jul 2000
  **************************************************************************/
@@ -42,6 +42,7 @@ public:
 
    static  void     PM();	                /*!< Prints fast current heap  */
    static  void     Summary();			/*!< Prints usage summary      */
+   static  void     doPs(std::string who, std::string where);
 
    /// Saves the values read from /proc/self/status at the time of a call in a text file.
    /// See StMemStat::ReadProcStatus() for parsed values
