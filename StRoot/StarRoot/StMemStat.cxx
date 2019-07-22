@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMemStat.cxx,v 1.7 2019/07/19 21:26:24 smirnovd Exp $
+ * $Id: StMemStat.cxx,v 1.8 2019/07/22 18:26:52 smirnovd Exp $
  *
  ***************************************************************************
  *
@@ -18,6 +18,7 @@
 #include <string>
 
 #include "StMemStat.h"
+#include "St_base/Stsstream.h"
 #include "TList.h"
 #include "TError.h"
 #include <cassert>
@@ -206,14 +207,12 @@ void StMemStat::PrintMem(const char *tit)
 std::string StMemStat::AsString()
 {
   double alloc_used = Used();
+  double alloc_used_prev = fgUsed;
   double alloc_free = Free();
   double total = ProgSize();
-
-  char strbuff[65];
-  snprintf(strbuff, sizeof(strbuff), "\t total =%10.6f heap =%10.6f and %10.6f(%+10.6f)", total, alloc_used, alloc_free, alloc_used-fgUsed);
   fgUsed = alloc_used;
 
-  return std::string(strbuff);
+  return FormString("\t total =%10.6f heap =%10.6f and %10.6f(%+10.6f)", total, alloc_used, alloc_free, alloc_used - alloc_used_prev);
 }
 
 //______________________________________________________________________________
