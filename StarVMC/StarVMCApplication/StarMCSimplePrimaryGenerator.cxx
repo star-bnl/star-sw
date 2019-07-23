@@ -75,7 +75,7 @@ void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id,
     fPVY = (TH1 *) PVfile->Get("y"); assert(fPVY); fPVY->SetDirectory(0);
     fPVZ = (TH1 *) PVfile->Get("z"); assert(fPVZ); fPVZ->SetDirectory(0);
     delete PVfile;
-    cout << "Pxyz.root with x, y and z histograms has been found. These histogram will be use to generate primary vertex" << endl;
+    cout << "PVxyz.root with x, y and z histograms has been found. These histogram will be use to generate primary vertex" << endl;
   }
   fgInstance = this;
 }
