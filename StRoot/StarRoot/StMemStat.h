@@ -9,7 +9,7 @@
  */
 /***************************************************************************
  *
- * $Id: StMemStat.h,v 1.4 2019/07/19 21:26:24 smirnovd Exp $
+ * $Id: StMemStat.h,v 1.6 2019/07/22 18:27:12 smirnovd Exp $
  *
  * Author: Victor Perev, Jul 2000
  **************************************************************************/
@@ -35,13 +35,14 @@ public:
    static  Double_t Used();			/*!< Used heap memory in MB    */
    static  Double_t Free();			/*!< Free heap memory in MB    */
    static  Double_t ProgSize();			/*!< Program size     in MB    */
-   static  void     PrintMem(const char *tit);	/*!< Prints current memory     */
+   static  void     PrintMem(std::string prefix="");	/*!< Prints current memory     */
 
    /// Returns a string with memory utilization estimates for the current process
-   static  std::string AsString();
+   static  std::string AsString(std::string prefix="");
 
    static  void     PM();	                /*!< Prints fast current heap  */
    static  void     Summary();			/*!< Prints usage summary      */
+   static  void     doPs(std::string who, std::string where);
 
    /// Saves the values read from /proc/self/status at the time of a call in a text file.
    /// See StMemStat::ReadProcStatus() for parsed values

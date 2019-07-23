@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.267 2019/07/16 21:33:03 smirnovd Exp $
+// $Id: StMaker.cxx,v 1.268 2019/07/22 18:27:11 smirnovd Exp $
 //
 //
 /*!
@@ -23,7 +23,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "TSystem.h"
 #include "TROOT.h"
 #include "TError.h"
 #if 0
@@ -183,7 +182,6 @@ old version of db tags
         
 ClassImp(StMaker)
 
-static void doPs(const Char_t *who,const Char_t *where);
 
 //_____________________________________________________________________________
 StMaker::StMaker(const Char_t *name,const Char_t *):TDataSet(name,".maker"),
@@ -206,7 +204,7 @@ StMaker::StMaker(const Char_t *name,const Char_t *):TDataSet(name,".maker"),
    m_Inputs   = new TObjectSet(".aliases" );Add(m_Inputs);
    m_Runco  = new TObjectSet(".runco" );Add(m_Runco);
    AddHist(0); m_Histograms = GetHistList();
-   ::doPs(GetName(),"constructor");
+   StMemStat::doPs(GetName(), "Construct");
    m_Timer.Stop();
    fMemStatMake  = 0;
    fMemStatClear = 0;
@@ -656,7 +654,7 @@ void StMaker::Clear(Option_t *option)
       StMkDeb::SetCurrent(curr);
    }
    TCollection::EmptyGarbageCollection();
-   doPs(GetName(),"Clear");
+   StMemStat::doPs(GetName(), "Clear");
    // Maker=StChain or whatever is called "Eread" would
    // reach this with a NULL pointer when executed from a macro
    // such as doEvent(). Same reason for the patch below ...
@@ -727,7 +725,7 @@ Int_t StMaker::Init()
         ((TH1*)objHist)->SetDirectory(0);
         maker->AddHist((TH1*)objHist);
       }
-      ::doPs(maker->GetName(),"Init");
+      StMemStat::doPs(maker->GetName(), "Init");
       maker->ResetBIT(kInitBeg);
       maker->SetBIT  (kInitEnd);
       StMkDeb::SetCurrent(curr);
@@ -763,7 +761,7 @@ void StMaker::EndMaker(Int_t ierr)
   }
   if (m_DataSet) m_DataSet->Pass(ClearDS,0);
   if (m_GarbSet) m_GarbSet->Delete();
-  ::doPs(GetName(),"EndMaker");
+  StMemStat::doPs(GetName(), "EndMaker");
   
   /* if (GetNumber()>3)*/ 
   if (fMemStatMake && GetNumber()>20) fMemStatMake->Stop();
@@ -1417,15 +1415,6 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
    }
 }
 #endif
-//_____________________________________________________________________________
-static void doPs(const Char_t *who, const Char_t *where)
-{
-  if (!gSystem->Getenv("StarEndMakerShell"))
-    return;
-
-  printf("QAInfo: doPs for %20s:%12s \t",who,where);
-  StMemStat::PrintMem(0);
-}
 
 //_____________________________________________________________________________
 void StMaker::Streamer(TBuffer &)
@@ -1873,6 +1862,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.268  2019/07/22 18:27:11  smirnovd
+// Move doPs function from StMaker to StMemStat
+//
 // Revision 1.267  2019/07/16 21:33:03  smirnovd
 // Use simple test to check whether environment variable is defined
 //

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMemStat.cxx,v 1.7 2019/07/19 21:26:24 smirnovd Exp $
+ * $Id: StMemStat.cxx,v 1.10 2019/07/22 18:27:12 smirnovd Exp $
  *
  ***************************************************************************
  *
@@ -21,8 +21,11 @@
 #include <string>
 
 #include "StMemStat.h"
+#include "St_base/Stsstream.h"
 #include "TList.h"
 #include "TError.h"
+#include <cassert>
+#include "TSystem.h"
 
 Double_t  StMemStat::fgUsed=0;
 TList    *StMemStat::fgList=0;
@@ -127,6 +130,17 @@ void StMemStat::Summary()
 
 }
 
+
+void StMemStat::doPs(std::string who, std::string where)
+{
+  if (!gSystem->Getenv("StarEndMakerShell"))
+    return;
+
+  PrintMem(FormString("QAInfo: doPs for %20s:%12s \t", who.c_str(), where.c_str()));
+  SaveProcStatus(where + ':' + who);
+}
+
+
 //______________________________________________________________________________
 Double_t StMemStat::Used()
 {
@@ -206,24 +220,22 @@ FILE *proc = fopen(line,"r");
   return res;
 }
 //______________________________________________________________________________
-void StMemStat::PrintMem(const char *tit)
+void StMemStat::PrintMem(std::string prefix)
 {
-  if (tit) printf("\nStMemStat::%s",tit);
-  printf("%s\n", AsString().c_str());
+  printf("%s\n", AsString(prefix).c_str());
 }
 
 
-std::string StMemStat::AsString()
+std::string StMemStat::AsString(std::string prefix)
 {
   double alloc_used = Used();
+  double alloc_used_prev = fgUsed;
   double alloc_free = Free();
   double total = ProgSize();
-
-  char strbuff[65];
-  snprintf(strbuff, sizeof(strbuff), "\t total =%10.6f heap =%10.6f and %10.6f(%+10.6f)", total, alloc_used, alloc_free, alloc_used-fgUsed);
   fgUsed = alloc_used;
 
-  return std::string(strbuff);
+  return FormString("%s\t total =%10.6f heap =%10.6f and %10.6f(%+10.6f)",
+                    prefix.c_str(), total, alloc_used, alloc_free, alloc_used - alloc_used_prev);
 }
 
 //______________________________________________________________________________
