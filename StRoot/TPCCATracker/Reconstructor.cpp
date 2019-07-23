@@ -33,10 +33,6 @@
 #include "Stopwatch.h"
 #include "tsc.h"
 
-// ---
-#define __YF__
-// ---
-
 #ifdef MAIN_DRAW
 #include "AliHLTTPCCADisplay.h"
 #include "TApplication.h"
@@ -441,12 +437,40 @@ int AliHLTTPCCATracker::Reconstructor::execute()
 #endif // USE_TIMERS
 
   unsigned int tracksSaved = 0;
-#ifdef V5
-  for( int it = 0; it < 2; it++ ) {
-    for( int i = 0; i < d->Param().NRows()-4; i++ ) {
-      AliHLTTPCCATrackletConstructor( *d, d->fData, d->fTrackletVectors ).run(i, tracksSaved, it);
+#ifdef __CA_DEBUG__
+  std::cout<<" - Reco. NRows: "<<d->Param().NRows()<<"\n";
+  // ---
+  for( int rowIndex = 0; rowIndex < d->Param().NRows(); rowIndex++ ) {
+    const AliHLTTPCCARow &row = d->fData.Row( rowIndex );
+    int nOfHits = row.NHits();
+//    std::cout<<"> row: "<<rowIndex<<";   nOfHits: "<<nOfHits<<"\n";
+    for( int iH = 0; iH < nOfHits; iH++ ) {
+      float x = d->fData.HitDataXS( row, iH );
+      float y = d->fData.HitPDataYS( row, iH ) * 1e-2;
+      float z = d->fData.HitPDataZS( row, iH ) * 1e-2;
+//      std::cout<<"-> hit: "<<iH<<";   x: "<<x<<";   y: "<<y<<";   z: "<<z<<"\n";
+      std::cout<<"    disp.DrawPoint( "<<x<<", "<<y<<", "<<fabs(z)<<", 0, 1);\n";
     }
   }
+#endif /* __CA_DEBUG__ */
+#ifdef V5
+#ifndef __YF__
+  int st_rows[27] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 18, 19, 21, 25, 27, 30, 35, 37, 39, 41, 43};
+  for( int i = 0; i < 27; i++ ) {
+    int j = st_rows[i];
+#ifdef __CA_DEBUG_  
+    std::cout<<" --- iRow: "<<j<<";   nHits: "<<d->fData.Row(j).NHits()<<";   nUnusedHits: "<<d->fData.Row(j).NUnusedHits()<<"\n";
+#endif /* __CA_DEBUG__ */
+      AliHLTTPCCATrackletConstructor( *d, d->fData, d->fTrackletVectors ).run(j, tracksSaved);
+  }
+#else /* __YF__ */
+  for( int i = 0; i < d->Param().NRows(); i++ ) {
+#ifdef __CA_DEBUG_
+    std::cout<<" --- iRow: "<<i<<";   nHits: "<<d->fData.Row(i).NHits()<<";   nUnusedHits: "<<d->fData.Row(i).NUnusedHits()<<"\n";
+#endif /* __CA_DEBUG__ */
+      AliHLTTPCCATrackletConstructor( *d, d->fData, d->fTrackletVectors ).run(i, tracksSaved);
+  }  
+#endif /* !__YF__ */
 #else /* ! V5 */
   AliHLTTPCCATrackletConstructor( *d, d->fData, d->fTrackletVectors ).run(0, tracksSaved);
 #endif /* V5 */
@@ -509,14 +533,13 @@ int AliHLTTPCCATracker::Reconstructor::execute()
   
 //#ifdef V5
   d->fNumberOfTracks = tracksSaved;
-//  std::cout<<" >>> tracksSaved: "<<tracksSaved<<"\n";
 //#endif
 #ifdef __CA_DEBUG__
-//  std::cout<<" --- nTracklets: "<<d->fNTracklets<<";   nTrackHits: "<<d->fNTrackHits<<"\n";
+  std::cout<<" --- nTracklets: "<<d->fNTracklets<<";   nTrackHits: "<<d->fNTrackHits<<"\n";
 #endif /* __CA_DEBUG__ */
   AliHLTTPCCATrackletSelector( *d, &d->fTracks, &d->fNTrackHits, &d->fNumberOfTracks, d->fData, d->fTrackletVectors ).run();
 #ifdef __CA_DEBUG__
-//  std::cout<<" --- nTracklets: "<<d->fNTracklets<<";   nTrackHits: "<<d->fNTrackHits<<"\n";
+  std::cout<<" --- nTracklets: "<<d->fNTracklets<<";   nTrackHits: "<<d->fNTrackHits<<"\n";
 #endif /* __CA_DEBUG__ */
   
 #ifdef USE_TIMERS

@@ -62,21 +62,6 @@ class AliHLTTPCCAGBTrack
     // ---
     void SetMerged() { tIsMerged = true; }
     bool IsMerged() const { return tIsMerged; }
-    void SetQPt0( float qpt ) { tQPt0 = qpt; }
-    float QPt0() const { return tQPt0; }
-    void SetDzDs0( float dzds ) { tDzDs0 = dzds; }
-    float DzDs0() const { return tDzDs0; }
-    void SetQPt1( float qpt ) { tQPt1 = qpt; }
-    float QPt1() const { return tQPt1; }
-    void SetDzDs1( float dzds ) { tDzDs1 = dzds; }
-    float DzDs1() const { return tDzDs1; }
-    void SetClone( bool c = true ) { tIsClone = c; }
-    bool IsClone() const { return tIsClone; }
-    void SetFirstMC( int mc ) { tFirstMC = mc; }
-    int GetFirstMC() const { return tFirstMC; }
-
-    void SetReco( bool r ) { tReco = r; }
-    bool IsReco() const { return tReco; }
     // ---
 
   protected:
@@ -91,14 +76,6 @@ class AliHLTTPCCAGBTrack
 
     // ---
     bool tIsMerged;
-    float tQPt0;
-    float tDzDs0;
-    float tQPt1;
-    float tDzDs1;
-    bool tIsClone;
-    int tFirstMC;
-
-    bool tReco;
     // ---
 };
 

@@ -218,6 +218,7 @@ void AliHLTTPCCAGBTracker::FindTracks()
 // //   AliHLTTPCCADisplay::Instance().SaveCanvasToFile( "Hits_b.pdf");
 // //   AliHLTTPCCADisplay::Instance().Ask();
 #endif //MAIN_DRAW
+
  if ( fNHits <= 0 ) return; // TODO rid of it. Can be problems with performance
 
 #ifdef USE_TBB
@@ -302,14 +303,6 @@ void AliHLTTPCCAGBTracker::FindTracks()
   for ( int iSlice = 0; iSlice < fSlices.Size(); ++iSlice ) {
 //  for ( int iSlice = 0; iSlice < 1; ++iSlice ) {
 //	  std::cout<<"run on slice: "<<iSlice<<"\n\n\n";
-//      if( iSlice != 7 ) continue;
-//      if( iSlice != 23 ) continue;
-//      if( iSlice != 6 && iSlice != 7 ) continue;
-//        if( iSlice != 16 && iSlice != 6 ) continue;
-//      if( iSlice != 11 && iSlice != 0 ) continue;
-//      if( iSlice != 10 && iSlice != 11 ) continue;
-//      if( iSlice != 10 && iSlice != 11 && iSlice != 12 && iSlice != 23 ) continue;
-//      if( iSlice != 7 && iSlice != 8 && iSlice != 14 && iSlice != 15 && iSlice != 6 && iSlice != 16 ) continue;
     Stopwatch timer;
     AliHLTTPCCATracker &slice = fSlices[iSlice];
     slice.Reconstruct();
@@ -435,7 +428,6 @@ void AliHLTTPCCAGBTracker::Merge()
     merger.SetSlices(i, &fSlices[i]);
   }
 
-//  std::cout<<" --- Merger - set data - ok\n";
 ///mvz start
 /**
 #ifdef MAIN_DRAW
@@ -446,12 +438,10 @@ void AliHLTTPCCAGBTracker::Merge()
   AliHLTTPCCADisplay::Instance().DrawGBHits( *this );
 #endif*/
   merger.Reconstruct();
-//  std::cout<<" --- Merger - Reconstruct - ok\n";
   assert( fNTimers >= merger.NTimers()+13-1 );
   for (int i = 0; i < merger.NTimers(); i++) {
     fStatTime[13+i] = merger.Timer(i);
   }
-//  std::cout<<" --- Merger - Reconstruct - timers - ok\n";
 
 /**
 #ifdef MAIN_DRAW
@@ -461,40 +451,20 @@ void AliHLTTPCCAGBTracker::Merge()
 ///mvz end
 
   const AliHLTTPCCAMergerOutput &out = *( merger.Output() );
-//  std::cout<<" --- Merger - output - ok\n";
-  // ---
-  int newNTr(0), newNHits(0);
-  for ( int itr = 0; itr < out.NTracks(); itr++ ) {
-    const AliHLTTPCCAMergedTrack &track = out.Track( itr );
-    if( track.Used() ) continue;
-    newNTr++;
-    newNHits += track.NClusters();
-  }
-  // ---
 
   if ( fTrackHits ) delete[] fTrackHits;
   fTrackHits = 0;
   if ( fTracks ) delete[] fTracks;
   fTracks = 0;
-//  fTrackHits = new int [out.NTrackClusters()];
-//  fTracks = new AliHLTTPCCAGBTrack[out.NTracks()];
-  fTrackHits = new int [newNHits];
-  fTracks = new AliHLTTPCCAGBTrack[newNTr];
+  fTrackHits = new int [out.NTrackClusters()];
+  fTracks = new AliHLTTPCCAGBTrack[out.NTracks()];
   fNTracks = 0;
-//  std::cout<<" --- out.NTrackClusters(): "<<out.NTrackClusters()<<";   newNHits: "<<newNHits<<" - ok\n";
-//  std::cout<<" --- out.NTracks(): "<<out.NTracks()<<";   newNTr: "<<newNTr<<"\n";
 
   int nTrackHits = 0;
 
-#ifndef TETA
   for ( int itr = 0; itr < out.NTracks(); itr++ ) {
     const AliHLTTPCCAMergedTrack &track = out.Track( itr );
-    if( track.Used() ) {
-//      std::cout<<" ----- !!! used track !!! -----   nHits: "<<track.NClusters()<<"\n";
-      continue;
-    }
 
-//    std::cout<<" --- Write track "<<itr<<" ---   nHits: "<<track.NClusters()<<"\n";
     AliHLTTPCCAGBTrack &trackGB = fTracks[fNTracks];
     trackGB.SetFirstHitRef( nTrackHits );
     trackGB.SetNHits( track.NClusters() );
@@ -520,99 +490,6 @@ void AliHLTTPCCAGBTracker::Merge()
     nTrackHits += track.NClusters();
     fNTracks++;
   }
-//  std::cout<<" --- Copy to global tracks - ok\n";
-//  std::cout<<" ----- fNTracks: "<<fNTracks<<";   nTrackHits: "<<nTrackHits<<"\n";
-//  out.SetNTracks( fNTracks );
-//  out.SetNTrackClusters( nTrackHits );
-#else
-  for ( int jSlice = 0; jSlice < fNSlices; jSlice++ ) {
-    AliHLTTPCCATracker &slice = fSlices[jSlice];
-//    std::cout<<" > iSlice: "<<jSlice<<";   nTracks: "<<slice.NTracks()<<"\n";
-    int nTracksV = (int)( slice.NTracks() / float_v::Size );
-    if( slice.NTracks() % float_v::Size ) nTracksV++;
-//    std::cout<<"   nTracksV: "<<nTracksV<<"\n";
-//    for( int iTr = 0; iTr < (int)((float_v::Size/2 + slice.NTracks())/float_v::Size); iTr++ ) {
-    for( int iTr = 0; iTr < nTracksV; iTr++ ) {
-//if( fNTracks >= 100 ) continue;
-      const AliHLTTPCCASliceTrackVector &sTrackV = slice.Output()->TrackV(iTr);
-//      std::cout<<" --- iTr: "<<iTr<<" - FirstClusterRef(): "<<sTrackV.FirstClusterRef()<<" - NClusters(): "<<sTrackV.NClusters()<<" - active - "<<sTrackV.Active()<<"\n";
-      for( int iV = 0; iV < float_v::Size; iV++ ) {
-	if( !(sTrackV.Active()[iV]) ) continue;
-	int ncl = (int)(sTrackV.NClusters()[iV]);
-//	std::cout<<" >>> Write track. Slice: "<<jSlice<<";   iTr: "<<iTr<<" - FirstClusterRef(): "<<sTrackV.FirstClusterRef()[iV]<<" - NClusters(): "<<sTrackV.NClusters()[iV]<<" - active - "<<sTrackV.Active()[iV]<<"\n";
-//	std::cout<<" --- NSegments: "<<sTrackV.NSegments( iV )<<"\n";
-        AliHLTTPCCAGBTrack &trackGB = fTracks[fNTracks];
-        trackGB.SetFirstHitRef( nTrackHits );
-        trackGB.SetNHits( ncl );
-        trackGB.SetInnerParam( AliHLTTPCCATrackParam( sTrackV.InnerParam(), iV ) );
-        trackGB.SetOuterParam( AliHLTTPCCATrackParam( sTrackV.OuterParam(), iV ) );
-        trackGB.SetAlpha( (float)(sTrackV.InnerAlpha()[iV]) );
-        trackGB.SetDeDx( 0 );
-        // ---
-//        if( sTrackV.IsMerged()[iV] ) trackGB.SetMerged();
-        for ( int icl = 0; icl < ncl; icl++ ) {
-	  unsigned int iSlice = jSlice;
-	  const DataCompressor::RowCluster &iDsrcs = slice.Output()->ClusterIDrc( (int)(sTrackV.FirstClusterRef()[iV]) + icl );
-	  unsigned int iRow   = iDsrcs.Row();
-	  unsigned int iClu   = iDsrcs.Cluster();
-	  fTrackHits[nTrackHits + icl] = fFirstSliceHit[iSlice] + fSlices[iSlice].ClusterData().RowOffset( iRow ) + iClu;
-        }
-        nTrackHits += ncl;
-        // ---
-//#ifdef V6
-//        if( sTrackV.NSegments( iV ) > 0 ) {
-        for( int i = 0; i < sTrackV.NSegments( iV ); i++ ) {
-            int ncl1 = sTrackV.NClustersSeg( i, iV );
-            trackGB.SetNHits( trackGB.NHits() + ncl1 );
-            trackGB.SetMerged();
-//            std::cout<<" - merged - ncl1: "<<ncl1<<"\n";
-            for ( int icl = 0; icl < ncl1; icl++ ) {
-        	unsigned int iSlice = sTrackV.SliceSeg( i, iV );
-        	AliHLTTPCCATracker &slice1 = fSlices[iSlice];
-        	const DataCompressor::RowCluster &iDsrcs = slice1.Output()->ClusterIDrc( sTrackV.FirstClusterRefSeg( i, iV ) + icl );
-        	unsigned int iRow   = iDsrcs.Row();
-        	unsigned int iClu   = iDsrcs.Cluster();
-        	fTrackHits[nTrackHits + icl] = fFirstSliceHit[iSlice] + fSlices[iSlice].ClusterData().RowOffset( iRow ) + iClu;
-//        	if((fFirstSliceHit[iSlice] + fSlices[iSlice].ClusterData().RowOffset( iRow ) + iClu)>1000000) {
-//        	    std::cout<<"Ops...\n";
-//        	    std::cout<<"    > nTrackHits: "<<nTrackHits<<";   "<<icl<<"\n";
-//        	    std::cout<<"    > sTrackV.FirstClusterRefSeg( 0, iV ): "<<sTrackV.FirstClusterRefSeg( 0, iV )<<"\n";
-//        	    std::cout<<"    >"<<i+2<<"> Add hit "<<sTrackV.FirstClusterRefSeg( 0, iV ) + icl<<";   iSlice: "<<iSlice<<";   iRow: "<<iRow<<";   iClu: "<<iClu<<";   fTrackHits: "<<fTrackHits[nTrackHits + icl]<<"\n";
-//        	    int aaa;
-//        	    std::cin>>aaa;
-//        	}
-//        	std::cout<<"    >"<<i+2<<"> Add hit "<<sTrackV.FirstClusterRefSeg( 0, iV ) + icl<<";   iSlice: "<<iSlice<<";   iRow: "<<iRow<<";   iClu: "<<iClu<<";   fTrackHits: "<<fTrackHits[nTrackHits + icl]<<"\n";
-            }
-            nTrackHits += ncl1;
-        }
-        // ---
-//#endif
-        fNTracks++;
-      }
-    }
-  }
-//  std::cout<<" <><><> fNTracks: "<<fNTracks<<";   nTrackHits: "<<nTrackHits<<"\n";
-#endif
-//  fSlices[0].fNOutTracks1 = 2;
-//  for ( int iSlice = 0; iSlice < fNSlices; iSlice++ ) {
-//      AliHLTTPCCATracker &slice = fSlices[iSlice];
-//      std::cout<<".iSlice: "<<iSlice<<";   nOutTracks1: "<<slice.NOutTracks1()<<"\n";
-//    for(int i=0; i<slice.NOutTracks1(); i++)
-//    {
-//      int slice_tr_id = slice.OutTrack1(i).OrigTrackID();
-//      std::cout<<"._> i: "<<i<<";   slice_tr_id: "<<slice_tr_id<<"\n";
-////      slice.fOutTracks1[i].SetFirstHitRef(-1);
-////      slice.fOutTracks1[i].SetNHits(-1);
-////      for(int j=0; j<slice.NOutTracks(); j++)
-////      {
-////        if(slice_tr_id == slice.OutTrack(j).OrigTrackID())
-////        {
-////          slice.fOutTracks1[i].SetFirstHitRef(slice.OutTrack(j).FirstHitRef());
-////          slice.fOutTracks1[i].SetNHits(slice.OutTrack(j).NHits());
-////        }
-////      }
-//    }
-//  }
 /*
 #ifdef MAIN_DRAW
 ///mvz start

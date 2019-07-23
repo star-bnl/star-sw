@@ -48,17 +48,10 @@
 #include "TApplication.h"
 #include "TLatex.h"
 
-//#define DRAWDZDSQPT
-#define ROWS5
-
 #ifdef DRAW_3D
   #include "TVector3.h"
 #endif // DRAW_3D
-
-
-
-#define RZ
-
+using namespace std;
 class AliHLTTPCCADisplay::AliHLTTPCCADisplayTmpHit
 {
 
@@ -116,7 +109,6 @@ AliHLTTPCCADisplay::~AliHLTTPCCADisplay()
 //  if (fZX) delete fZX;
 }
 
-//#define CANVASPT
 void AliHLTTPCCADisplay::Init()
 {
   static bool firstCall = 1;
@@ -127,8 +119,7 @@ void AliHLTTPCCADisplay::Init()
     gStyle->SetCanvasBorderMode( 0 );
     gStyle->SetCanvasBorderSize( 1 );
     gStyle->SetCanvasColor( 0 );
-//    fCanvas = new TCanvas( "CA", "CA Display", 2000, 1000 );
-    fCanvas = new TCanvas( "CA", "CA Display", 1500, 750 );
+    fCanvas = new TCanvas( "CA", "CA Display", 2000, 1000 );
     fCanvas->Divide( 2, 1 );
     fYX = static_cast<TPad *>( fCanvas->GetPrimitive( "CA_1" ) ); // ("YX", "YX window", -1, 0, 600, 600);
     fZX = static_cast<TPad *>( fCanvas->GetPrimitive( "CA_2" ) ); // ("ZX", "ZX window", -610, 0, 590, 600);
@@ -138,42 +129,29 @@ void AliHLTTPCCADisplay::Init()
     fZX->SetTitle( "ZX" );
     fMarker = TMarker( 0.0, 0.0, 20 );//6);
     fDrawOnlyRef = 0;
-#ifdef CANVASPT
-    // --- PT ---
-    fCanvasPT = new TCanvas( "CA PT", "CA PT test Display", 1500, 750 );
-    fCanvasPT->Divide( 1, 1 );
-    fPT = static_cast<TPad *>( fCanvasPT->GetPrimitive( "CA PT_1" ) );
-    fPT->SetCanvas( fCanvasPT );
-    fPT->SetTitle( "PhiTeta" );
-    fPT->cd();
-//    fPT->Range( -1.5, -0.7, 1.5, 1.2 );
-//    fPT->Range( -1.5, -1.5, 1.5, 1.5 );
-//    fPT->Range( -1.5, 0, 1.5, 1.5 );
-    fPT->Range( -1.7, 0, 1.7, 25 );
-//    fPT->Range( -1.5, 0, 1.5, 3 );
-//    fPT->Range( -1.5, -0.15, 1.5, 0.15 );
-//    fPT->Range( -1.5, -1, 1.5, 46 );
-//    fPT->Range( -1.5, 50, 1.5, 190 );
-//    fPT->Range( -2.5, 50, 2.5, 190 );
-//    fPT->Range( 0, 50, 2.5, 190 );
-//    fPT->Range( -0.5, 50, 0.5, 190 );
-//    fPT->Range( 0, 50, 10, 190 );
-//    fPT->Range( 0, 50, 3, 190 );
-//    fPT->Range( -0.15, 50, 0.15, 190 );
-//    fPT->Range( -1, -0.7, 46, 1.2 );
-#ifdef DRAWDZDSQPT
-    fPT->Range( -3.2, -3, 3.3, 33 );
-#endif
-#ifdef ROWS5
-//    fPT->Range( -0.5, -55, 2.5, 55 );	// X - Teta
-//    fPT->Range( -5, -55, 250, 55 );	// Z - Z
-//    fPT->Range( -0, -0.35, 2, 0.35 );	// Phi - Teta
-//    fPT->Range( -0.005, 0, 0.005, 0.02 );	// U - V
-    fPT->Range( 0, -0.005, 0.02, 0.005 );	// U - V
-#endif
-    // ---
-#endif
 
+//    // --- PT ---
+//    fCanvasPT = new TCanvas( "CA PT", "CA PT test Display", 1500, 750 );
+//    fCanvasPT->Divide( 1, 1 );
+//    fPT = static_cast<TPad *>( fCanvasPT->GetPrimitive( "CA PT_1" ) );
+//    fPT->SetCanvas( fCanvasPT );
+//    fPT->SetTitle( "PhiTeta" );
+//    fPT->cd();
+////    fPT->Range( -1.5, -0.7, 1.5, 1.2 );
+////    fPT->Range( -1.5, -1.5, 1.5, 1.5 );
+////    fPT->Range( -1.5, 0, 1.5, 3 );
+////    fPT->Range( -1.5, -0.15, 1.5, 0.15 );
+////    fPT->Range( -1.5, -1, 1.5, 46 );
+//    fPT->Range( -1.5, 50, 1.5, 190 );
+////    fPT->Range( -2.5, 50, 2.5, 190 );
+////    fPT->Range( 0, 50, 2.5, 190 );
+////    fPT->Range( -0.5, 50, 0.5, 190 );
+////    fPT->Range( 0, 50, 10, 190 );
+////    fPT->Range( 0, 50, 3, 190 );
+////    fPT->Range( -0.15, 50, 0.15, 190 );
+////    fPT->Range( -1, -0.7, 46, 1.2 );
+//    // ---
+  
     firstCall = 0;
   }
 }
@@ -184,9 +162,7 @@ void AliHLTTPCCADisplay::Update()
   if ( !fAsk ) return;
   fYX->Update();
   fZX->Update();
-#ifdef CANVASPT
   fPT->Update();
-#endif
 //  fCanvasPT->Update();
 //X   fYX->Print( "YX.pdf" );
 //X   fZX->Print( "ZX.pdf" );
@@ -204,9 +180,7 @@ void AliHLTTPCCADisplay::ClearViewPT()
 {
   // clear windows
 //  fCanvasPT->Clear();
-#ifdef CANVASPT
   fPT->Clear();
-#endif
 }
 
 void AliHLTTPCCADisplay::Ask()
@@ -268,17 +242,8 @@ void AliHLTTPCCADisplay::SetCurrentSlice( AliHLTTPCCATracker *slice )
     double cy = r0;
     double cz = .5 * ( slice->Param().ZMax() + slice->Param().ZMin() );
     double dz = .5 * ( slice->Param().ZMax() - slice->Param().ZMin() ) * 1.2;
-//    fYX->Range( cx - dr, cy - dr*1.05, cx + dr, cy + dr );
-//    fYX->Range( cx - dr, -3, cx + dr, cy + dr );
-    // --- norm ---
-    fYX->Range( cx - dr, -25, cx + dr, cy + dr );
-    fZX->Range( -10, -25, cz + dz, cy + dr );
-    // ---
-    // --- for tof test ---
-    fYX->Range( cx - dr, -5, cx + dr, cy + dr +20 );
-    fZX->Range( -10, -5, cz + dz, cy + dr +20 );
-    // ---
-//    fZX->Range( -0.005, -0.001, 0.005, 0.02 );
+    fYX->Range( cx - dr, cy - dr*1.05, cx + dr, cy + dr );
+    fZX->Range( cz - dz, cy - dr*1.05, cz + dz, cy + dr );
     //fYX->Range(cx-dr*.3, cy-dr*1.05, cx+dr*.3, cy-dr*.35);
     //fZX->Range(cz-dz, cy-dr*1.05, cz+dz, cy-dr*.3);
 
@@ -322,11 +287,11 @@ void AliHLTTPCCADisplay::DrawTPC()
     fArc.SetLineColor( kBlack );
     fArc.SetFillStyle( 0 );
     fYX->cd();
-
+    
     TLatex Tl;
     Tl.SetTextSize(0.02);
     Tl.SetTextAlign(22);
-
+    
     const int halfNumberOfSlices = AliHLTTPCCAParameters::NumberOfSlices/2;
     for ( int iSlice = 0; iSlice < 2*halfNumberOfSlices; iSlice++ ) {
       const AliHLTTPCCAParam &slicePar = fGB->Slice(iSlice).Param();
@@ -342,13 +307,9 @@ void AliHLTTPCCADisplay::DrawTPC()
       float kText = (iSliceReal >= 12) ? 0.5 : 0.8;
       TString sISlice = "";
       sISlice += iSliceReal;
-//      std::cout<<" --- slicePar.Alpha(): "<<slicePar.Alpha()<<";   slicePar.DAlpha(): "<<slicePar.DAlpha()<<"\n";
-//      std::cout<<" --- fiBegin: "<<fiBegin<<";   fiEnd: "<<fiEnd<<";   iSlice: "<<iSlice<<";   iSliceReal: "<<iSliceReal<<"\n";
-      std::cout<<" ----- fRInnerMin: "<<fRInnerMin<<";   fRInnerMax: "<<fRInnerMax<<";   kText: "<<kText<<";   sISlice: "<<sISlice<<"\n";
-      std::cout<<" ------- fROuterMin: "<<fROuterMin<<";   fROuterMax: "<<fROuterMax<<"\n";
       if (iSlice%1 == 0)
         Tl.DrawLatex(cos(fiCenter)*fRInnerMin*kText, sin(fiCenter)*fRInnerMin*kText, sISlice);
-
+      
       fiBegin *= 180./TMath::Pi();
       fiEnd *= 180./TMath::Pi();
 //       float fiBegin = 360. / halfNumberOfSlices*iSlice;
@@ -358,9 +319,6 @@ void AliHLTTPCCADisplay::DrawTPC()
 //       std::cout << fiBegin << " " << fiEnd << std::endl;
     }
   }
-  fMarker.SetMarkerSize( 1.5 );
-  fMarker.SetMarkerColor( kRed );
-  fMarker.DrawMarker( 0, 0 );
   fZX->cd();
   fZX->Range( fZMin*1.01, -fROuterMax*1.01, fZMax*1.01, fROuterMax*1.01 );
   //std::cout << fTPCZMin<<"  "<<fTPCZMax<<std::endl;
@@ -371,7 +329,6 @@ void AliHLTTPCCADisplay::DrawTPC()
   ZX.SetFillColor(0);
   ZX.SetLineWidth(0.1);
   ZX.DrawBox(fZMin,-fROuterMax,fZMax,fROuterMax);
-  ZX.DrawBox(fZMin,-fROuterMax,0,fROuterMax);
 }
 
 void AliHLTTPCCADisplay::DrawSlice( AliHLTTPCCATracker *slice, bool DrawRows, bool DrawGrid )
@@ -434,7 +391,6 @@ void AliHLTTPCCADisplay::DrawSlice( AliHLTTPCCATracker *slice, bool DrawRows, bo
 //         std::cout << "row = " << iRow << " nHits = " << row.NHits() << " nBinsY = " << grid.Ny() << " nBinsZ = " << grid.Nz() << std::endl;
         for (int iBin = 0; iBin < nBins; iBin++){
           grid.GetBinBounds( iBin, Ymin, Ymax, Zmin, Zmax);
-//          std::cout<<" --- iBin: "<<iBin<<";   x: "<<x<<";   Ymin: "<<Ymin<<";   Ymax: "<<Ymax<<";   Zmin: "<<Zmin<<";   Zmax: "<<Zmax<<"\n";
 
           Slice2View( x-1, Ymin, &vx0, &vy0 );
           Slice2View( x+1, Ymin, &vx1, &vy1 );
@@ -455,320 +411,8 @@ void AliHLTTPCCADisplay::DrawSlice( AliHLTTPCCATracker *slice, bool DrawRows, bo
   }
 
 }
-
-void AliHLTTPCCADisplay::DrawSlicePixel( AliHLTTPCCATracker *slice, float step, bool DrawRows, bool DrawGrid )
-{
-  // draw current the TPC slice
-  const AliHLTTPCCARow &row_min = fSlice->Data().Row( 1 );
-  const AliHLTTPCCARow &row_max = fSlice->Data().Row( 44 );
-  double r01 = .5 * ( slice->Param().RMax() + slice->Param().RMin() );
-  double dr1 = .5 * ( slice->Param().RMax() - slice->Param().RMin() );
-  fYMin = -dr1;
-  fYMax = dr1;
-  double cx1 = 0;
-  double cy1 = r01;
-  double cz1 = .5 * ( slice->Param().ZMax() + slice->Param().ZMin() );
-  double dz1 = .5 * ( slice->Param().ZMax() - slice->Param().ZMin() ) * 1.2;
-//  fYX->Range( cx1 - dr1, -25, cx1 + dr1, cy1 + dr1 );
-//  fYX->Range( -1, -100, 45*step, 100 );
-  std::cout<<":   cx1: "<<cx1<<";   dr1: "<<dr1<<"\n";
-  fYX->Range( (cx1 - dr1)*step, -25*step, (cx1 + dr1)*step, 45*step );
-  fZX->Range( 0, -25*step, (cz1 + dz1)*step, 45*step );
-  fYX->cd();
-  double r0 = .5 * ( slice->Param().RMax() + slice->Param().RMin() );
-  double dr = .5 * ( slice->Param().RMax() - slice->Param().RMin() );
-  double cx = r0 * slice->Param().CosAlpha();
-  double cy = r0 * slice->Param().SinAlpha();
-  double raddeg = 180. / 3.1415;
-  double a0 = raddeg * .5 * ( slice->Param().AngleMax() + slice->Param().AngleMin() );
-  double da = raddeg * .5 * ( slice->Param().AngleMax() - slice->Param().AngleMin() );
-  //
-  for( int i = 0; i < 45; i++ ) {
-    fLine.SetLineColor( kGray );
-    fLine.DrawLine( (cx1 - dr1)*step, i*step, (cx1 + dr1)*step, i*step );
-  }
-//  if ( fSliceView ) {
-//    cx = 0; cy = r0;
-//    a0 = 90.;
-//    fLatex.DrawLatex( cx - dr + dr*.05, cy - dr + dr*.05, Form( "YX, Slice %2i", slice->Param().ISlice() ) );
-//  } else {
-//    a0 += raddeg * TMath::ATan2( fSin, fCos );
-//  }
-//  fArc.SetLineColor( kBlack );
-//  fArc.SetFillStyle( 0 );
-//  fCrown.SetLineColor( kBlack );
-//  fCrown.SetFillStyle( 0 );
-//  fCrown.DrawCrown( 0, 0, fRInnerMin, fRInnerMax, a0 - da, a0 + da );
-//  fCrown.DrawCrown( 0, 0, fROuterMin, fROuterMax, a0 - da, a0 + da );
-  //fCrown.DrawCrown(0,0, slice->Param().RMin(),slice->Param().RMax(), a0-da, a0+da );
-
-  fLine.SetLineColor( kBlack );
-
-  fZX->cd();
-
-  double cz = .5 * ( slice->Param().ZMax() + slice->Param().ZMin() );
-  double dz = .5 * ( slice->Param().ZMax() - slice->Param().ZMin() ) * 1.2;
-  //fLine.DrawLine(cz+dz, cy-dr, cz+dz, cy+dr );
-//  if ( fSliceView ) fLatex.DrawLatex( cz - dz + dz*.05, cy - dr + dr*.05, Form( "ZX, Slice %2i", slice->Param().ISlice() ) );
-
-//  if ( DrawRows ) {
-//    fLine.SetLineWidth( 1 );
-//    fLine.SetLineColor( 17/*kBlack*/ );
-//    SetSliceTransform( fSlice );
-//    for ( int iRow = 0; iRow < fSlice->Param().NRows(); iRow++ ) {
-//      double x = fSlice->Data().RowX( iRow );
-//      const AliHLTTPCCARow &row = fSlice->Data().Row( iRow );
-//      double y = row.MaxY();
-//      double vx0, vy0, vx1, vy1;
-//      Slice2View( x, y, &vx0, &vy0 );
-//      Slice2View( x, -y, &vx1, &vy1 );
-//      fYX->cd();
-//      fLine.DrawLine( vx0, vy0, vx1, vy1 );
-//      fZX->cd();
-//      fLine.DrawLine( fTPCZMin, vy0, fTPCZMax, vy1 );
-//      if (DrawGrid) {
-//        const AliHLTTPCCAGrid &grid = row.Grid();
-//        int nBins =  grid.N();
-//        float Ymin;
-//        float Ymax;
-//        float Zmin;
-//        float Zmax;
-////         std::cout << "row = " << iRow << " nHits = " << row.NHits() << " nBinsY = " << grid.Ny() << " nBinsZ = " << grid.Nz() << std::endl;
-//        for (int iBin = 0; iBin < nBins; iBin++){
-//          grid.GetBinBounds( iBin, Ymin, Ymax, Zmin, Zmax);
-////          std::cout<<" --- iBin: "<<iBin<<";   x: "<<x<<";   Ymin: "<<Ymin<<";   Ymax: "<<Ymax<<";   Zmin: "<<Zmin<<";   Zmax: "<<Zmax<<"\n";
-//
-//          Slice2View( x-1, Ymin, &vx0, &vy0 );
-//          Slice2View( x+1, Ymin, &vx1, &vy1 );
-//          fYX->cd();
-//          fLine.DrawLine( vx0, vy0, vx1, vy1 );
-//          fZX->cd();
-//          fLine.DrawLine( fabs(Zmin), vy0, fabs(Zmin), vy1 );
-//
-//          Slice2View( x-1, Ymax, &vx0, &vy0 );
-//          Slice2View( x+1, Ymax, &vx1, &vy1 );
-//          fYX->cd();
-//          fLine.DrawLine( vx0, vy0, vx1, vy1 );
-//          fZX->cd();
-//          fLine.DrawLine( fabs(Zmax), vy0, fabs(Zmax), vy1 );
-//        }
-//      }
-//    }
-//  }
-
-}
-
-// ---
-void AliHLTTPCCADisplay::DrawSliceGridPT( AliHLTTPCCATracker *slice, int np, int nt )
-{
-  // ---
-  fLine.SetLineWidth( 1. );
-  fLine.SetLineColor( 7 );
-  double vx0, vy0, vx1, vy1;
-//  Slice2View( 0, 100, &vx0, &vy0 );
-//  Slice2View( /*fSlice->Data().RowX( 45 )*/100, 0, &vx1, &vy1 );
-  fYX->cd();
-//    fLine.DrawLine( vx0, vy0, vx1, vy1 );
-//  fLine.DrawLine( 0, 0, 0, 190 );
-  fZX->cd();
-  //fLine.DrawLine( 0, 0, 0, 190 );
-  //fLine.DrawLine( 0, 0, 200, 190 );
-//  for( int i = 0; i < 300; i += 10 ) {
-//      fLine.DrawLine( 0, 0, i, 190 );
-//  }
-  // ---
-}
-
-void AliHLTTPCCADisplay::DrawRow5()
-{
-  ClearViewPT();
-  fLine.SetLineWidth( 1.5 );
-  fLine.SetLineColor( kBlack );
-  fPT->cd();
-//  fLine.DrawLine( 0, -50, 0, 50 );
-//  fLine.DrawLine( 0, -50, 200, -50 );
-//  fLine.DrawLine( 0, 50, 200, 50 );
-//  fLine.DrawLine( 200, -50, 200, 50 );
-}
-
-void AliHLTTPCCADisplay::SetSliceUV()
-{
-//  fYX->Clear();
-//  fCos = slice->Param().SinAlpha();
-//  fSin = slice->Param().CosAlpha();
-//  fZMin = slice->Param().ZMin();
-//  fZMax = slice->Param().ZMax();
-//  double r0 = .5 * ( slice->Param().RMax() + slice->Param().RMin() );
-//  double dr = .5 * ( slice->Param().RMax() - slice->Param().RMin() );
-//  fYMin = -dr;
-//  fYMax = dr;
-//  double cx = 0;
-//  double cy = r0;
-//  double cz = .5 * ( slice->Param().ZMax() + slice->Param().ZMin() );
-//  double dz = .5 * ( slice->Param().ZMax() - slice->Param().ZMin() ) * 1.2;
-////    fYX->Range( cx - dr, cy - dr*1.05, cx + dr, cy + dr );
-//  fYX->Range( cx - dr, -3, cx + dr, cy + dr );
-//  fYX->Range( 0, -0.005, 0.02, 0.005 );
-  fYX->Range( -0.005, /*0.005*/-0.0001, 0.005, 0.017 );
-  fYX->Range( -0.05, /*0.005*/-0.06, 0.05, 0.06 );
-  fYX->Range( -0.05, /*0.005*/-0.00003, 0.05, 0.00005 );
-//  fYX->Range( -0.0021, /*0.005*/0., -0.0015, 0.0015 );
-  fYX->Range( -0.01, -1, 0.01, 200 );
-}
-
-void AliHLTTPCCADisplay::DrawPointYX( float x, float y, int color, float width )
-{
-  fYX->cd();
-  fMarker.SetMarkerSize( width );
-  fMarker.SetMarkerColor( color );
-  fMarker.DrawMarker( y, x );
-  if( color == 0 || color == 10 ) {
-    fMarker.SetMarkerSize( width/2 );
-    fMarker.SetMarkerColor( kBlack );
-    fMarker.DrawMarker( y, x );
-  }
-}
-
-void AliHLTTPCCADisplay::DrawHitsRow5( AliHLTTPCCATracker *slice, int r, int color, Size_t width )
-{
-
-  // draw hits
-
-//  for ( int iRow = 0; iRow < fSlice->Param().NRows(); iRow++ ) {
-//    const AliHLTTPCCARow &row = fSlice->Data().Row( iRow );
-//    for ( int ih = 0; ih < row.NHits(); ih++ ) {
-//      DrawSliceHit( iRow, ih, color, width );
-//    }
-//  }
-//  fZX->Clear();
-  fYX->Clear();
-//  for( int iRow = r*5+1; iRow < r*5+6; iRow++ ) {
-  for( int iRow = 0; iRow < 45; iRow++ ) {
-      std::cout<<" - iRow: "<<iRow<<"\n";
-      const AliHLTTPCCARow &row = fSlice->Data().Row( iRow );
-      for ( int ih = 0; ih < row.NHits(); ih++ ) {
-	  const AliHLTTPCCARow &row = fSlice->Data().Row( iRow );
-	  float x = fSlice->Data().HitDataXS( row, ih );
-	  float y = fSlice->Data().HitPDataYS( row, ih );
-	  float z = fSlice->Data().HitPDataZS( row, ih );
-	  if ( fGB ) { // it looks like we have problem in HitDataXS functions above, so read coordinates from the other place
-	      int id = fGB->FirstSliceHit()[slice->Param().ISlice()] + slice->Data().ClusterDataIndex( row, ih );
-	      const AliHLTTPCCAGBHit &h = fGB->Hits()[id];
-	      x = h.X();
-	      y = h.Y();
-	      z = h.Z();
-	  }
-	  float teta = atan(fabs(x)/fabs(z));
-	  float phi = atan(y/fabs(x));
-	  float u = x / ( x*x + y*y);
-	  float v = y / ( x*x + y*y);
-	  std::cout<<" ---  ih: "<<ih<<";   x: "<<x<<";   y: "<<y<<";   z: "<<z<<";   teta: "<<teta<<"\n";
-	  std::cout<<" ----- u: "<<u<<";   v: "<<v<<"\n";
-//	  fPT->cd();
-//	  fZX->cd();
-	  fYX->cd();
-	  fMarker.SetMarkerSize( .5 );
-//	  fMarker.SetMarkerColor( iRow%5 + 1 );
-	  fMarker.SetMarkerColor( kBlue );
-//	  fMarker.DrawMarker( fabs(z), y );
-//	  fMarker.DrawMarker( teta, y );
-//	  fMarker.DrawMarker( teta, phi );
-	  fMarker.DrawMarker( v, u );
-      }
-  }
-  fMarker.SetMarkerSize( 2.5 );
-  fMarker.SetMarkerColor( kRed );
-  fMarker.DrawMarker( 0, 0 );
-
-  fLine.SetLineWidth( .3 );
-  fLine.SetLineColor( kBlack );
-  fLine.DrawLine( -0.0025, 0, 0.0025, 0 );
-  fLine.DrawLine( 0, -15, 0, 15 );
-  //
-  TLatex Tl;
-  Tl.SetTextSize(0.02);
-  Tl.SetTextAlign(22);
-  TString l = "U";
-  Tl.DrawLatex(0.0007, 0.00017, l);
-  l = "V";
-  Tl.DrawLatex(0.0001, 0.001, l);
-
-//  fYX->cd();
-//  fMarker.SetMarkerSize( 2.5 );
-//  fMarker.SetMarkerColor( kRed );
-//  fMarker.DrawMarker( 0, 0 );
-//  fLine.SetLineWidth( .3 );
-//  fLine.SetLineColor( kBlack );
-//  fLine.DrawLine( -25, 0, 25, 0 );
-//  fLine.DrawLine( 0, -15, 0, 55 );
-//  l = "X";
-//  Tl.DrawLatex(10, 2.5, l);
-//  l = "Y";
-//  Tl.DrawLatex(2.5, 10, l);
-
-  fZX->cd();
-  fMarker.SetMarkerSize( 2.5 );
-  fMarker.SetMarkerColor( kRed );
-  fMarker.DrawMarker( 0, 0 );
-  fLine.SetLineWidth( .3 );
-  fLine.SetLineColor( kBlack );
-  fLine.DrawLine( -25, 0, 150, 0 );
-  fLine.DrawLine( 0, -15, 0, 55 );
-  l = "Z";
-  Tl.DrawLatex(10, 2.5, l);
-  l = "R";
-  Tl.DrawLatex(2.5, 10, l);
-}
-
-//void AliHLTTPCCADisplay::DrawHitRow5( AliHLTTPCCATracker *slice, int iRow, int iHit, int color, Size_t width )
-//{
-//  // draw hit
-//  if ( !fSlice ) return;
-//  const AliHLTTPCCARow &row = fSlice->Data().Row( iRow );
-//  // float x = fSlice->Data().RowX( iRow );
-//  float x = fSlice->Data().HitDataXS( row, iHit );
-//  float y = fSlice->Data().HitPDataYS( row, iHit );
-//  float z = fSlice->Data().HitPDataZS( row, iHit );
-//
-//  if ( fGB ) { // it looks like we have problem in HitDataXS functions above, so read coordinates from the other place
-//    int id = fGB->FirstSliceHit()[fSlice->Param().ISlice()] + fSlice->Data().ClusterDataIndex( row, iHit );
-//    const AliHLTTPCCAGBHit &h = fGB->Hits()[id];
-//    x = h.X();
-//    y = h.Y();
-//    z = h.Z();
-//  }
-//
-//  SetSliceTransform( fSlice );
-//
-//  if ( color < 0 ) {
-//    if ( fPerf && fGB ) {
-//      int id = fGB->FirstSliceHit()[fSlice->Param().ISlice()] + fSlice->Data().ClusterDataIndex( row, iHit );
-//      const AliHLTTPCCAGBHit &h = fGB->Hits()[id];
-//      int lab = -1;
-//      if ( fPerf->HitLabelSize() > 0 ) lab = fPerf->HitLabel( h.ID() ).fLab[0];
-//      color = GetColor( lab + 1 );
-//      if ( lab >= 0 ) {
-//        const AliHLTTPCCAMCTrack &mc = fPerf->MCTrack( lab );
-//        if ( mc.P() >= 1. ) color = kRed;
-//        else if ( fDrawOnlyRef ) return;
-//      }
-//    } else color = GetColorZ( z );
-//  }
-//  if ( width > 0 )fMarker.SetMarkerSize( width );
-//  else fMarker.SetMarkerSize( .3 );
-//  fMarker.SetMarkerColor( color );
-//  double vx, vy;
-//  Slice2View( x, y, &vx, &vy );
-//  fYX->cd();
-//  fMarker.DrawMarker( vx, vy );
-//  fZX->cd();
-//  fMarker.DrawMarker( fabs(z), vy );
-////  fMarker.DrawMarker( z, vy );
-//}
-// ---
-
 ///mvz start 20.01.2010
-void  AliHLTTPCCADisplay::DrawPoint(float x, float y, float z, int Start, float width )
+void  AliHLTTPCCADisplay::DrawPoint(float x, float y, float z, int Start, Size_t width )
 {
   fMarker.SetMarkerSize( width );
   fMarker.SetMarkerColor( 2 +  Start);
@@ -783,46 +427,6 @@ void  AliHLTTPCCADisplay::DrawPoint(float x, float y, float z, int Start, float 
   fMarker.DrawMarker( vx, vy );
   fZX->cd();
   fMarker.DrawMarker( z, vy );
-}
-
-void  AliHLTTPCCADisplay::DrawPointXYZ(float x, float y, float z, int color, Size_t width )
-{
-  fMarker.SetMarkerSize( width );
-  fMarker.SetMarkerColor( color );
-
-  SetSliceTransform( fSlice );
-
-  double vx, vy;
-
-  Slice2View( x, y, &vx, &vy );
-
-  fYX->cd();
-  fMarker.DrawMarker( vx, vy );
-  fZX->cd();
-  fMarker.DrawMarker( z, vy );
-  if( color == 0 || color == 10 ) {
-    fMarker.SetMarkerSize( width/2 );
-    fMarker.SetMarkerColor( kBlack );
-    fYX->cd();
-    fMarker.DrawMarker( vx, vy );
-    fZX->cd();
-    fMarker.DrawMarker( z, vy );
-  }
-}
-
-void  AliHLTTPCCADisplay::DrawPointXZfromXY(float x, float z, int color, Size_t width )
-{
-  fMarker.SetMarkerSize( width );
-  fMarker.SetMarkerColor( color );
-
-  SetSliceTransform( fSlice );
-
-  double vx, vy;
-
-  Slice2View( x, z, &vx, &vy );
-
-  fZX->cd();
-  fMarker.DrawMarker( vx, vy );
 }
 ///mvz end 20.01.2010
 
@@ -1042,12 +646,12 @@ void AliHLTTPCCADisplay::DrawGBHits( const AliHLTTPCCAGBTracker &tracker, int co
 
   if ( !fPerf ) return;
   if ( width < 0 ) width = .3;
-
+  
   for ( int iHit = 0; iHit < tracker.NHits(); iHit++ ) {
     const AliHLTTPCCAGBHit &h = tracker.Hits()[iHit];
 //     if ((hitsType == 1) && (h.ISlice() >= 12)) continue;
 //     if ((hitsType == 2) && (h.ISlice() < 12) ) continue;
-
+ 
     int col = color;
     if ( fPerf->GetHitLabels()->Size() > 0 ) {
       int imc = fPerf->HitLabel( h.ID() ).fLab[0];
@@ -1089,7 +693,7 @@ void AliHLTTPCCADisplay::DrawSliceHit( int iRow, int iHit, int color, Size_t wid
   float x = fSlice->Data().HitDataXS( row, iHit );
   float y = fSlice->Data().HitPDataYS( row, iHit );
   float z = fSlice->Data().HitPDataZS( row, iHit );
-
+  
   if ( fGB ) { // it looks like we have problem in HitDataXS functions above, so read coordinates from the other place
     int id = fGB->FirstSliceHit()[fSlice->Param().ISlice()] + fSlice->Data().ClusterDataIndex( row, iHit );
     const AliHLTTPCCAGBHit &h = fGB->Hits()[id];
@@ -1097,7 +701,7 @@ void AliHLTTPCCADisplay::DrawSliceHit( int iRow, int iHit, int color, Size_t wid
     y = h.Y();
     z = h.Z();
   }
-
+  
   SetSliceTransform( fSlice );
 
   if ( color < 0 ) {
@@ -1185,404 +789,6 @@ void AliHLTTPCCADisplay::DrawSliceHits( int color, Size_t width )
       DrawSliceHit( iRow, ih, color, width );
     }
   }
-}
-
-void AliHLTTPCCADisplay::DrawSliceHitsTest( int color, Size_t width )
-{
-
-  // draw hits
-
-//  for ( int iRow = 0; iRow < fSlice->Param().NRows(); iRow++ ) {
-//    const AliHLTTPCCARow &row = fSlice->Data().Row( iRow );
-//    for ( int ih = 0; ih < row.NHits(); ih++ ) {
-//      DrawSliceHit( iRow, ih, color, width );
-//    }
-//  }
-  fLine.SetLineColor( kRed );
-  fLine.SetLineWidth( 2. );
-  for ( int iRow = fSlice->Param().NRows() - 1; iRow < fSlice->Param().NRows(); iRow++ ) {
-//    std::cout<<" - iRow: "<<iRow<<"\n";
-    const AliHLTTPCCARow &row = fSlice->Data().Row( iRow );
-    const AliHLTTPCCARow &prow = fSlice->Data().Row( iRow - 1 );
-    for ( int ih = 0; ih < row.NHits(); ih++ ) {
-//	  std::cout<<" - ih: "<<ih<<"\n";
-	  float dist = 1000;
-	  int neighbour = -1;
-	  int id = fGB->FirstSliceHit()[fSlice->Param().ISlice()] + fSlice->Data().ClusterDataIndex( row, ih );
-	  const AliHLTTPCCAGBHit &h = fGB->Hits()[id];
-	  float x = h.X();
-	  float y = h.Y();
-	  float z = h.Z();
-	  float xx, yy, zz;
-	  for ( int ih0 = 0; ih0 < prow.NHits(); ih0++ ) {
-//	      std::cout<<" - ih0: "<<ih0<<"\n";
-	      int id0 = fGB->FirstSliceHit()[fSlice->Param().ISlice()] + fSlice->Data().ClusterDataIndex( prow, ih0 );
-	      const AliHLTTPCCAGBHit &h0 = fGB->Hits()[id0];
-	      float x0 = h0.X();
-	      float y0 = h0.Y();
-	      float z0 = h0.Z();
-	      float d0 = sqrt((y0-y)*(y0-y) + (z0-z)*(z0-z));
-//	      float d0 = fabs(y0-y);
-//	      std::cout<<" > d0: "<<d0<<"\n";
-	      if( d0 < dist ) {
-		  dist = d0;
-		  neighbour = ih0;
-		  xx = x0; yy = y0; zz = z0;
-	      }
-	      // ---
-//	      double vx, vy, vx1, vy1;
-//	      Slice2View( h.X(), h.Y(), &vx, &vy );
-//	      Slice2View( h0.X(), h0.Y(), &vx1, &vy1 );
-////	      std::cout<<" - Draw vx: "<<vx<<";   vy: "<<vy<<";   vx1: "<<vx1<<";   vy1: "<<vy1<<"\n";
-//	      fYX->cd();
-//	      fLine.DrawLine( vx, vy, vx1, vy1 );
-//	      fZX->cd();
-//	      fLine.DrawLine( fabs(h.Z()), vy, fabs(h0.Z()), vy1 );
-	      // ---
-	  }
-//	  std::cout<<" - neighbour: "<<neighbour<<";   dist: "<<dist<<"\n";
-	  if( neighbour >= 0 ) {
-	      double vx, vy, vx1, vy1;
-	      Slice2View( h.X(), h.Y(), &vx, &vy );
-	      Slice2View( xx, yy, &vx1, &vy1 );
-//	      std::cout<<" - Draw vx: "<<vx<<";   vy: "<<vy<<";   vx1: "<<vx1<<";   vy1: "<<vy1<<"\n";
-	      fYX->cd();
-	      fLine.DrawLine( vx, vy, vx1, vy1 );
-	      fZX->cd();
-	      fLine.DrawLine( fabs(h.Z()), vy, fabs(zz), vy1 );
-	  }
-    }
-  }
-}
-
-void AliHLTTPCCADisplay::DrawSliceLineUVXYtest( float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, int color, float width )
-{
-  fLine.SetLineColor( color );
-  fLine.SetLineWidth( width );
-  double vx, vy, vx1, vy1;
-  Slice2View( x1, y1, &vx, &vy );
-  Slice2View( x2, y2, &vx1, &vy1 );
-  fZX->cd();
-  fLine.DrawLine( vx, vy, vx1, vy1 );
-  fYX->cd();
-  fLine.DrawLine( v1, u1, v2, u2 );
-}
-
-void AliHLTTPCCADisplay::DrawSliceLine( float x1, float y1, float z1, float x2, float y2, float z2, int color, float width )
-{
-  fLine.SetLineColor( color );
-  fLine.SetLineWidth( width );
-  double vx, vy, vx1, vy1;
-  Slice2View( x1, y1, &vx, &vy );
-  Slice2View( x2, y2, &vx1, &vy1 );
-  fYX->cd();
-  fLine.DrawLine( vx, vy, vx1, vy1 );
-//  std::cout<<"--- draw: vx: "<<vx<<";   vx1: "<<vx1<<";   vy: "<<vy<<";   vy1: "<<vy1<<"\n";
-  fZX->cd();
-  fLine.DrawLine( fabs(z1), vy, fabs(z2), vy1 );
-}
-
-void AliHLTTPCCADisplay::DrawSliceLine1( float x1, float y1, float z1, float x2, float y2, float z2, int color, float width )
-{
-  fLine.SetLineColor( color );
-  fLine.SetLineWidth( width );
-//  double vx, vy, vx1, vy1;
-//  Slice2View( x1, y1, &vx, &vy );
-//  Slice2View( x2, y2, &vx1, &vy1 );
-  fYX->cd();
-  fLine.DrawLine( y1, x1, y2, x2 );
-//  std::cout<<"--- draw: vx: "<<vx<<";   vx1: "<<vx1<<";   vy: "<<vy<<";   vy1: "<<vy1<<"\n";
-  fZX->cd();
-  fLine.DrawLine( fabs(z1), x1, fabs(z2), x2 );
-}
-
-void  AliHLTTPCCADisplay::DrawCircle( float x, float y, float r, int color, float width )
-{
-  fYX->cd();
-  double vx, vy;
-  Slice2View( x, y, &vx, &vy );
-  TEllipse *el1 = new TEllipse( vx, vy, r );
-  el1->SetLineColor( color );
-  el1->SetLineWidth( width );
-  el1->SetFillStyle(0000);
-  el1->Draw();
-}
-
-void  AliHLTTPCCADisplay::DrawCircleXZfromXY( float x, float y, float r, int color, float width )
-{
-  fZX->cd();
-  double vx, vy;
-  Slice2View( x, y, &vx, &vy );
-  TEllipse *el1 = new TEllipse( vx, vy, r );
-  el1->SetLineColor( color );
-  el1->SetLineWidth( width );
-  el1->SetFillStyle(0000);
-  el1->Draw();
-}
-
-void AliHLTTPCCADisplay::InitUVXYtest( AliHLTTPCCATracker *slice, float y0, float x0, float y1, float x1 )
-{
-//  fYX->Clear();
-//  fZX->Clear();
-
-  fYX->Range( y0*35, x0, y1*35, x1 );
-//  fYX->Range( y0/100., x0, y1/100., x1 );
-//  fYX->Range( -0.005, /*0.005*/-0.0001, 0.005, 0.017 );
-//  fYX->Range( -0.01, -1, 0.01, 200 );
-//  fYX->Range( -5000000, -1, 5000000, 200 );
-//  fYX->Range( -15000, -1, 15000, 200 );
-//  fZX->Range( -fROuterMax-2, -fROuterMax-2, fROuterMax+2, fROuterMax+2 );
-//  fZX->Range( -fROuterMax-2, -50, fROuterMax+2, 50 );
-  double r01 = .5 * ( slice->Param().RMax() + slice->Param().RMin() );
-  double dr1 = .5 * ( slice->Param().RMax() - slice->Param().RMin() );
-  fYMin = -dr1;
-  fYMax = dr1;
-  double cx1 = 0;
-  double cy1 = r01;
-  double cz1 = .5 * ( slice->Param().ZMax() + slice->Param().ZMin() );
-  double dz1 = .5 * ( slice->Param().ZMax() - slice->Param().ZMin() ) * 1.2;
-  fZX->Range( cx1 - dr1, -25, cx1 + dr1, cy1 + dr1 );
-
-  fZX->cd();
-  double r0 = .5 * ( slice->Param().RMax() + slice->Param().RMin() );
-  double dr = .5 * ( slice->Param().RMax() - slice->Param().RMin() );
-  double cx = r0 * slice->Param().CosAlpha();
-  double cy = r0 * slice->Param().SinAlpha();
-  double raddeg = 180. / 3.1415;
-  double a0 = raddeg * .5 * ( slice->Param().AngleMax() + slice->Param().AngleMin() );
-  double da = raddeg * .5 * ( slice->Param().AngleMax() - slice->Param().AngleMin() );
-  if ( fSliceView ) {
-    cx = 0; cy = r0;
-    a0 = 90.;
-    fLatex.DrawLatex( cx - dr + dr*.05, cy - dr + dr*.05, Form( "YX, Slice %2i", slice->Param().ISlice() ) );
-  } else {
-    a0 += raddeg * TMath::ATan2( fSin, fCos );
-  }
-  fArc.SetLineColor( kBlack );
-  fArc.SetFillStyle( 0 );
-  fCrown.SetLineColor( kBlack );
-  fCrown.SetFillStyle( 0 );
-//  fCrown.DrawCrown( 0, 0, fRInnerMin, fRInnerMax, a0 - da, a0 + da );
-//  fCrown.DrawCrown( 0, 0, fROuterMin, fROuterMax, a0 - da, a0 + da );
-  fLine.SetLineColor( kBlack );
-  //
-//  fMarker.SetMarkerColor( kBlue );
-//  fMarker.SetMarkerSize( 1. );
-  fLine.SetLineColor( kBlue );
-  fYX->cd();
-  for( int i = 0; i < 44; i++ ) {
-    const AliHLTTPCCARow &row1 = slice->Data().Row( i );
-    const AliHLTTPCCARow &row2 = slice->Data().Row( i + 1 );
-    float x1 = slice->Data().RowX( i );
-    float x2 = slice->Data().RowX( i + 1 );
-    float y11 = row1.MaxY();
-    float y12 = - y11;
-    float y21 = row2.MaxY();
-    float y22 = - y21;
-    const float dXY11 = ( x1*x1 + y11*y11 );
-    float u11 = x1 / dXY11;
-    float v11 = - y11 / dXY11;
-    const float dXY12 = ( x1*x1 + y12*y12 );
-    float u12 = x1 / dXY12;
-    float v12 = - y12 / dXY12;
-    const float dXY21 = ( x2*x2 + y21*y21 );
-    float u21 = x2 / dXY21;
-    float v21 = - y21 / dXY21;
-    const float dXY22 = ( x2*x2 + y22*y22 );
-    float u22 = x2 / dXY22;
-    float v22 = - y22 / dXY22;
-    fLine.DrawLine( v11*x1, 1./u11, v21*x2, 1./u21 );
-    fLine.DrawLine( v12*x1, 1./u12, v22*x2, 1./u22 );
-//    fLine.DrawLine( v11/x1, 1./u11, v21/x2, 1./u21 );
-//    fLine.DrawLine( v12/x1, 1./u12, v22/x2, 1./u22 );
-  }
-}
-
-void  AliHLTTPCCADisplay::DrawCircleUVXYtest( float x, float y, float r, int color, float width )
-{
-  fZX->cd();
-  double vx, vy;
-  Slice2View( x, y, &vx, &vy );
-  TEllipse *el1 = new TEllipse( vx, vy, r );
-  el1->SetLineColor( color );
-  el1->SetLineWidth( width );
-  el1->SetFillStyle(0000);
-  el1->Draw();
-}
-
-void AliHLTTPCCADisplay::DrawRectangleXYZ( float x, float y, float z, float lx, float ly, float lz, int color, int border )
-{
-//  double vx, vy, vx1, vy1;
-  float x1 = x + lx;
-  float y1 = y + ly;
-  float z1 = fabs(z) + lz;
-//  Slice2View( x, y, &vx, &vy );
-//  Slice2View( x1, y1, &vx1, &vy1 );
-  fYX->cd();
-//  TBox *sq1 = new TBox();
-//  sq1->SetFillColor( color );
-//  sq1->DrawBox( y, x, y1, x1 );
-  TWbox *sqb1 = new TWbox();
-//  sqb1->SetFillColor( color );
-  sqb1->DrawWbox( y, x, y1, x1, color, 1, border );
-  fZX->cd();
-//  std::cout<<" > draw z: z: "<<z<<";   x: "<<x<<";   z1: "<<z1<<";   x1: "<<x1<<"\n";
-//  sq1->DrawBox( fabs(z), x, z1, x1 );
-  sqb1->DrawWbox( fabs(z), x, z1, x1, color, 1, border );
-}
-
-void  AliHLTTPCCADisplay::DrawPointXZ(float x, float z, int color, Size_t width )
-{
-  fMarker.SetMarkerSize( width );
-  fMarker.SetMarkerColor( color );
-
-  fZX->cd();
-  fMarker.DrawMarker( z, x );
-}
-
-void  AliHLTTPCCADisplay::DrawPointXYZl( float x, float y, float z, int color, Size_t width )
-{
-  fMarker.SetMarkerSize( width );
-  fMarker.SetMarkerColor( color );
-
-  fYX->cd();
-  fMarker.DrawMarker( y, x );
-
-  fZX->cd();
-  fMarker.DrawMarker( z, x );
-}
-
-void AliHLTTPCCADisplay::DrawSliceLineUV( float x1, float y1, float z1, float x2, float y2, float z2, int color, float width )
-{
-  fLine.SetLineColor( color );
-  fLine.SetLineWidth( width );
-  double vx, vy, vx1, vy1;
-  Slice2View( x1, y1, &vx, &vy );
-  Slice2View( x2, y2, &vx1, &vy1 );
-  fYX->cd();
-  fLine.DrawLine( vx, vy, vx1, vy1 );
-//  fZX->cd();
-//  fLine.DrawLine( fabs(z1), vy, fabs(z2), vy1 );
-}
-
-void AliHLTTPCCADisplay::DrawSliceLineUVXZ( float x1, float u1, float v1, float z1, float x2, float u2, float v2, float z2, int color, float width )
-{
-  fLine.SetLineColor( color );
-  fLine.SetLineWidth( width );
-//  TLatex Tl;
-  double vu, vv, vu1, vv1;
-  Slice2View( u1, v1, &vu, &vv );
-  Slice2View( u2, v2, &vu1, &vv1 );
-  fYX->cd();
-  fLine.DrawLine( vu, vv, vu1, vv1 );
-//  TString l = "N";
-//  Tl.DrawLatex(vu, vv, l);
-  fZX->cd();
-//  Slice2View( u1, v1, &vu, &vv );
-//  Slice2View( u2, v2, &vu1, &vv1 );
-  fLine.DrawLine( fabs(z1), x1, fabs(z2), x2 );
-}
-
-void AliHLTTPCCADisplay::DrawSliceLineUVXZnoFabs( float x1, float u1, float v1, float z1, float x2, float u2, float v2, float z2, int color, float width )
-{
-  fLine.SetLineColor( color );
-  fLine.SetLineWidth( width );
-//  TLatex Tl;
-  double vu, vv, vu1, vv1;
-  Slice2View( u1, v1, &vu, &vv );
-  Slice2View( u2, v2, &vu1, &vv1 );
-  fYX->cd();
-  fLine.DrawLine( vu, vv, vu1, vv1 );
-//  TString l = "N";
-//  Tl.DrawLatex(vu, vv, l);
-  fZX->cd();
-//  Slice2View( u1, v1, &vu, &vv );
-//  Slice2View( u2, v2, &vu1, &vv1 );
-//  float z1Draw = z1;
-//  float z2Draw = z2;
-//  if( z1 < 0 && z2 < 0 ) {
-//    z1Draw = fabs(z1);
-//    z2Draw = fabs(z2);
-//  }
-//  fLine.DrawLine( z1Draw, x1, z2Draw, x2 );
-  fLine.DrawLine( z1, x1, z2, x2 );
-}
-
-void AliHLTTPCCADisplay::DrawPV( float x, float y, float z )
-{
-  fLine.SetLineColor( kRed );
-  fLine.SetLineWidth( 3. );
-  double vx, vy;
-  Slice2View( x, y, &vx, &vy );
-  TLatex Tl;
-  Tl.SetTextSize( 0.02 );
-  Tl.SetTextColor( kRed );
-  TString l = "( ";
-  l += y;
-  l += "; ";
-  l += x;
-  l += " )";
-  fYX->cd();
-  fLine.DrawLine( vx-1, vy-1, vx+1, vy+1 );
-  fLine.DrawLine( vx-1, vy+1, vx+1, vy-1 );
-  Tl.DrawLatex(vx+3, vy, l);
-}
-
-void AliHLTTPCCADisplay::DrawPVUVXY( float x, float y, float u, float v )
-{
-  fMarker.SetMarkerColor( kRed );
-  fMarker.SetMarkerSize( 3. );
-  fYX->cd();
-  fMarker.DrawMarker( x, y );
-  fZX->cd();
-  fMarker.DrawMarker( u, v );
-}
-
-void AliHLTTPCCADisplay::DrawNumber( float x, float y, float z, int num, int color )
-{
-//  fLine.SetLineColor( color );
-//  fLine.SetLineWidth( 3. );
-  double vx, vy;
-  Slice2View( x, y, &vx, &vy );
-  TLatex Tl;
-  Tl.SetTextSize( 0.01 );
-  Tl.SetTextColor( color );
-  TString l = "";//"( ";
-  l += num;
-//  l += " )";
-  fYX->cd();
-//  fLine.DrawLine( vx-1, vy-1, vx+1, vy+1 );
-//  fLine.DrawLine( vx-1, vy+1, vx+1, vy-1 );
-  Tl.DrawLatex(vx+1, vy-0.5, l);
-  fZX->cd();
-  Tl.DrawLatex(z+1, x-0.5, l);
-}
-
-void AliHLTTPCCADisplay::DrawUVZero( float x, float y, float z )
-{
-  fLine.SetLineColor( kRed );
-  fLine.SetLineWidth( 3. );
-  double vx, vy;
-  Slice2View( x, y, &vx, &vy );
-  fYX->cd();
-  fLine.DrawLine( vx-0.0001, vy, vx+0.0001, vy );
-  fLine.DrawLine( vx, vy+0.0001, vx, vy-0.0001 );
-}
-
-void AliHLTTPCCADisplay::DrawNumber( float x, float u, float v, float z, int N, float width )
-{
-  TLatex Tl;
-  Tl.SetTextSize(0.015);
-  double vu, vv;
-  Slice2View( u, v, &vu, &vv );
-  fYX->cd();
-  TString l = "";
-  l += N;
-  Tl.DrawLatex(vu, vv, l);
-  fZX->cd();
-  Tl.DrawLatex(fabs(z), x, l);
-//  TString sISlice = "";
-//  sISlice += iSliceReal;
 }
 
 void AliHLTTPCCADisplay::DrawSliceHitsPT( int color, Size_t width )
@@ -1846,7 +1052,7 @@ bool AliHLTTPCCADisplay::DrawTrack( AliHLTTPCCATrackParam t, double Alpha, const
 #else
   bool drawEndPoints = 0;
 #endif // DRAW_3D
-
+  
   if ( NHits < 2 ) return 0;
 
   const AliHLTTPCCAGBTracker &tracker = *fGB;
@@ -1913,7 +1119,7 @@ bool AliHLTTPCCADisplay::DrawTrack( AliHLTTPCCATrackParam t, double Alpha, const
     bool ok;
     //t.GetDCAPoint( x1, y1, z1, x1, y1, z1 );
 //     ok = tt.TransportToX( x1, .999 );  // iklm. !!! commented because of Just link hits, no fit.
-//     if ( 1 || ok ) {
+//     if ( 1 || ok ) {  
 //       x1 = tt.X();
 //       y1 = tt.Y();
 //       z1 = tt.Z();
@@ -1974,7 +1180,7 @@ bool AliHLTTPCCADisplay::DrawTrack( AliHLTTPCCATrackParam t, double Alpha, const
       mHits++;
     }
   }
-
+  
 #ifdef DRAW_3D
   const float zoom = 0.6;
   const float z_zoom = 1.2;
@@ -1982,14 +1188,14 @@ bool AliHLTTPCCADisplay::DrawTrack( AliHLTTPCCATrackParam t, double Alpha, const
   for ( int i = mHits - 1; i >= 0; i-- ) {
     TVector3 v(vx[i], -vz[i], vy[i]);
 
-    v.RotateX(TMath::Pi()/70);
+    v.RotateX(TMath::Pi()/70); 
     v.RotateZ(TMath::Pi()/12);
     vx[i] = v.X()*zoom;
     vy[i] = v.Z()*zoom;
     vz[i] = -v.Y()*zoom;
 
     vx[i] *= (z0_zoom-vz[i])/z0_zoom * z_zoom;
-    vy[i] *= (z0_zoom-vz[i])/z0_zoom * z_zoom;
+    vy[i] *= (z0_zoom-vz[i])/z0_zoom * z_zoom; 
   }
 #endif // DRAW_3D
 
@@ -2289,7 +1495,7 @@ void AliHLTTPCCADisplay::DrawSliceOutTrack1( int itr, int color, Size_t width )
 void AliHLTTPCCADisplay::DrawHelix(float p0, float c, float z, float zStart, float z0, float xc, float yc, float r, float b, int color, Size_t width)
 {
   fLine.SetLineColor(color);
-  fLine.SetLineWidth(width);
+  fLine.SetLineWidth(width);  
   // draw slice track
   float x,y,p;
   p = p0 + c*(zStart-z0)/b;
@@ -2323,7 +1529,7 @@ void AliHLTTPCCADisplay::DrawHelix(float p0, float c, float z, float zStart, flo
 void AliHLTTPCCADisplay::DrawParticleGlobal(float *param, float q, float tStart, float tEnd, float b, int color, Size_t width)
 {
   fLine.SetLineColor(color);
-  fLine.SetLineWidth(width);
+  fLine.SetLineWidth(width);  
   fArrow.SetFillColor( color );
   fArrow.SetLineColor( color );
   fArrow.SetLineWidth( width );
@@ -2350,7 +1556,7 @@ void AliHLTTPCCADisplay::DrawParticleGlobal(float *param, float q, float tStart,
 
     sB = (1.e-8 < fabs(bs)) ? (s/b) : ((1-bs*kOvSqr6)*(1+bs*kOvSqr6)*t) ;
     cB = (1.e-8 < fabs(bs)) ? ((1-c)/b) : (.5*sB*bs) ;
-
+  
     float px = param[3];
     float py = param[4];
     float pz = param[5];
@@ -2897,11 +2103,11 @@ void AliHLTTPCCADisplay::SetTPC( const AliHLTTPCCAParam& tpcParam){ // iklm
   fRInnerMin = tpcParam.RMin();
   fRInnerMax = 123.; // approximate TODO: from file!
   fROuterMin = 123.;
-  fROuterMax = 194;//tpcParam.RMax();
+  fROuterMax = tpcParam.RMax();
 }
 
 // void AliHLTTPCCADisplay::DrawGBLinks( const AliHLTTPCCAGBTracker &tracker, int color = -1, Size_t width = -1 ){
-//
+//   
 // }; // DrawGBLinks
 
 
@@ -2961,7 +2167,7 @@ AliHLTTPCCADisplay::TDrawHit::TDrawHit()
 
 bool AliHLTTPCCADisplay::TDrawHit::CheckGlobal()
 {
-  return (gx != NON) && (gy != NON) && (gz != NON);
+  return (gx != NON) && (gy != NON) && (gz != NON);  
 }
 
 bool AliHLTTPCCADisplay::TDrawHit::CheckLocal()
@@ -3003,7 +2209,7 @@ void AliHLTTPCCADisplay::TDrawHit::DrawLocal(int iSlice)
   Slice2View( x, y, &vx, &vy, iSlice );
 
   TMarker& m = GetMarker();
-
+  
   fDisplay.CanvasYX()->cd();
   m.DrawMarker( vx, vy );
 
@@ -3013,26 +2219,18 @@ void AliHLTTPCCADisplay::TDrawHit::DrawLocal(int iSlice)
 
 void AliHLTTPCCADisplay::TDrawHit::DrawGlobal()
 {
-  FillGBCoor();
   double vx, vy;
   Global2View( gx, gy, &vx, &vy );
-//  Global2View( x, y, &vx, &vy );
 
   TMarker& m = GetMarker();
-
+  
   fDisplay.CanvasYX()->cd();
   m.DrawMarker( vx, vy );
-//  m.DrawMarker( x, y );
 
   fDisplay.CanvasZX()->cd();
-#ifndef RZ
   m.DrawMarker( gz, vy );
-#else
-  /*if( vx > 0 )*/ m.DrawMarker( z, x );
-//  else m.DrawMarker( z, -x );
-#endif
 
-} //
+} // 
 
 
 // ----------- TDrawTrack ----------
@@ -3095,9 +2293,8 @@ void AliHLTTPCCADisplay::TDrawTrack::DrawHitsLocal(int iSlice)
 
 void AliHLTTPCCADisplay::TDrawTrack::DrawHitsGlobal()
 {
-  for (unsigned i = 0; i < hits.size(); i++) {
+  for (unsigned i = 0; i < hits.size(); i++)
     hits[i].DrawGlobal();
-  }
 }
 
 
@@ -3115,11 +2312,11 @@ void AliHLTTPCCADisplay::TDrawTrack::DrawLocal(int iSlice)
   double *x = &(vx[0]),  *y = &(vy[0]),  *z = &(vz[0]);
   for (int ih = 0; ih < NHits; ih++, x++, y++, z++) {
     TDrawHit &hit = hits[ih];
-
+    
     Slice2View( hit.x, hit.y, x, y, iSlice );
     *z = fabs(hit.z);
   } // for ih
-
+  
   TPolyLine &pl = GetPolyLine();
 
   fDisplay.CanvasYX()->cd();
@@ -3135,39 +2332,26 @@ void AliHLTTPCCADisplay::TDrawTrack::DrawGlobal()
   if ( NHits < 2 ) return;
   if ( ! hits[0].CheckGlobal() ) FillGBHitsCoor();
 
-  vector<double> vx, vy, vz, vr;
+  vector<double> vx, vy, vz;
   vx.resize(NHits);
   vy.resize(NHits);
   vz.resize(NHits);
-  vr.resize(NHits);
-  double *vxa = &(vx[0]),  *vya = &(vy[0]),  *vza = &(vz[0]), *vra = &(vr[0]);
-  double *x = &(vx[0]),  *y = &(vy[0]),  *z = &(vz[0]), *r = &(vr[0]);
+  double *vxa = &(vx[0]),  *vya = &(vy[0]),  *vza = &(vz[0]);
+  double *x = &(vx[0]),  *y = &(vy[0]),  *z = &(vz[0]);
   for (int ih = 0; ih < NHits; ih++, x++, y++, z++) {
     TDrawHit &hit = hits[ih];
-
+    
     Global2View( hit.gx, hit.gy, x, y );
     *z = hit.z;
-#ifdef RZ
-//    *r = hit.x;
-//    if( *y < 0 ) *r = -*r;
-    vra[ih] = hit.x;
-    vza[ih] = hit.z;
-//    if( y[0] < 0 ) vra[ih] = -vra[ih];
-//    if( (ih>0) && (fabs(vra[ih] + vra[ih-1])<10) ) vra[ih] = -vra[ih];
-#endif
   } // for ih
-
+  
   TPolyLine &pl = GetPolyLine();
 
   fDisplay.CanvasYX()->cd();
   pl.DrawPolyLine( NHits, vxa, vya );
 
   fDisplay.CanvasZX()->cd();
-#ifndef RZ
   pl.DrawPolyLine( NHits, vza, vya );
-#else
-  pl.DrawPolyLine( NHits, vza, vra );
-#endif
 } // void AliHLTTPCCADisplay::SpecDrawTrackGlobal
 
 
@@ -3177,7 +2361,7 @@ void AliHLTTPCCADisplay::SpecDrawMCTrackPointsGlobal(AliHLTTPCCAMCTrack& mcTrack
 {
   const int NPoints =  mcTrack.NMCPoints();
   if ( NPoints < 2 ) return;
-
+  
   AliHLTTPCCALocalMCPoint *points = &((*mcPointsArray).Data()[mcTrack.FirstMCPointID()]);
 
   TDrawTrack drawTrack;
@@ -3202,132 +2386,53 @@ void AliHLTTPCCADisplay::SpecDrawMCTrackPointsGlobal(AliHLTTPCCAMCTrack& mcTrack
   }
 
   drawTrack.SetStatColor(color);
-
+  
   drawTrack.SetStatWidth(0.5);
   drawTrack.DrawGlobal();
   drawTrack.DrawHitsGlobal();
 } // void AliHLTTPCCADisplay::SpecDrawMCTrack
 
-void AliHLTTPCCADisplay::DrawBadMCHits( AliHLTResizableArray<AliHLTTPCCAHitLabel>* hitLabels )
-{
-  TDrawTrack badTrack;
-  int nHits = fGB->NHits();
-  for ( int ih = 0; ih < nHits; ih++ ) {
-      const AliHLTTPCCAGBHit &hit = fGB->Hit( ih );
-      const AliHLTTPCCAHitLabel &l = (*hitLabels)[hit.ID()];
-      if( l.fLab[0] == -1 ) {
-      //  std::cout<<" bad lable for hit: "<<ih<<"\n";
-        TDrawHit bhit;
-        bhit.x = hit.X();
-        bhit.y = hit.Y();
-        bhit.z = hit.Z();
-        bhit.alpha = TDrawHit::GetAlpha( fGB, hit.ISlice() );
-        bhit.SetColor(kOrange);
-        bhit.SetWidth(1.);
-        badTrack.hits.push_back(bhit);
-      }
-  }
-  badTrack.SetStatColor(kBlack);
-    badTrack.SetStatWidth(0.5);
-    badTrack.DrawHitsGlobal();
-}
-
 void AliHLTTPCCADisplay::SpecDrawMCTrackHitsGlobal(AliHLTTPCCAMCTrack& mcTrack, AliHLTResizableArray<AliHLTTPCCALocalMCPoint>* mcPointsArray, AliHLTResizableArray<AliHLTTPCCAHitLabel>* hitLabels, int color, float width )
 {
   const int NPoints =  mcTrack.NMCPoints();
-//  std::cout<<" --->>> NPoints: "<<NPoints<<";   FirstMCPointID: "<<mcTrack.FirstMCPointID()<<"\n";
   if ( NPoints < 2 ) return;
-
-//  int fstSlice = -1;
 
   TDrawTrack drawTrack;
 
-//  TDrawTrack badTrack;
-
     int nHits = fGB->NHits();
-//    std::cout<<" ------- NPoints: "<<NPoints<<";   nHits: "<<nHits<<"\n";
-    int nTrHits = 0;
     for ( int ih = 0; ih < nHits; ih++ ) {
       const AliHLTTPCCAGBHit &hit = fGB->Hit( ih );
-//if( hit.ISlice() != 7 ) continue;
-//if( hit.ISlice() != 10 && hit.ISlice() != 12 ) continue;
       const AliHLTTPCCAHitLabel &l = (*hitLabels)[hit.ID()];
 
       const int iMC = (*mcPointsArray)[mcTrack.FirstMCPointID()].TrackI();
-//if( l.fLab[0] == -1 ) {
-////  std::cout<<" bad lable for hit: "<<ih<<"\n";
-//  TDrawHit bhit;
-//  bhit.x = hit.X();
-//  bhit.y = hit.Y();
-//  bhit.z = hit.Z();
-//  bhit.alpha = TDrawHit::GetAlpha( fGB, hit.ISlice() );
-//  bhit.SetColor(kOrange);
-//  bhit.SetWidth(0.5);
-//  badTrack.hits.push_back(bhit);
-//}
       if ( l.fLab[0] != iMC && l.fLab[1] != iMC && l.fLab[2] != iMC )
         continue;
-
-      nTrHits++;
-//      if( fstSlice < 0 ) fstSlice = hit.ISlice();
-
-//      std::cout<<hit.X()<<" "<<hit.Y()<<" "<<hit.Z()<<"\n";
-//      std::cout<<"0 0 0 0\n";
-//      std::cout<<hit.ISlice()<<" "<<hit.IRow()<<" 0 0\n";
-
-//      std::cout<<"nHit: "<<nTrHits-1<<";   iHit: "<<ih/*<<";   iMCPoint: "<<iMC+ih*/<<"\n hit.x: "<<hit.X()<<";   hit.y: "<<hit.Y()<<";   hit.z: "<<hit.Z()<<"\n";
-//      std::cout<<" hit.iSlice: "<<hit.ISlice()<<";   hit.IRow: "<<hit.IRow()<<"\n\n";
-//      std::cout<<" ISlice: "<<(*mcPointsArray)[mcTrack.FirstMCPointID()+ih].ISlice()<<";   IRow: "<<(*mcPointsArray)[mcTrack.FirstMCPointID()+ih].IRow()<<"\n\n";
-//      std::cout<<"..... hit.z: "<<hit.Z()<<";   mc.z: "<<(*mcPointsArray)[mcTrack.FirstMCPointID()+ih].Z()<<"\n";
+      
       TDrawHit dhit;
-//      std::cout<<"... dhit: x: "<<dhit.x<<";   y: "<<dhit.y<<";   z: "<<dhit.z<<";   gx: "<<dhit.gx<<";   gy: "<<dhit.gy<<";   gz: "<<dhit.gz<<"\n";
       dhit.x = hit.X();
       dhit.y = hit.Y();
       dhit.z = hit.Z();
       dhit.alpha = TDrawHit::GetAlpha( fGB, hit.ISlice() );
       dhit.SetColor(color);
       dhit.SetWidth(width);
-//      std::cout<<"..... dhit: x: "<<dhit.x<<";   y: "<<dhit.y<<";   z: "<<dhit.z<<";   gx: "<<dhit.gx<<";   gy: "<<dhit.gy<<";   gz: "<<dhit.gz<<"\n";
       drawTrack.hits.push_back(dhit);
     }
     drawTrack.SetStatColor(color);
-//    std::cout<<"         draw hits: "<<nTrHits<<"\n";
-
+  
   drawTrack.SetStatWidth(0.5);
   drawTrack.DrawGlobal();
   drawTrack.DrawHitsGlobal();
-  // ---
-//  badTrack.SetStatColor(kBlack);
-//  badTrack.SetStatWidth(0.5);
-//  badTrack.DrawHitsGlobal();
-//  if( fstSlice < 0 ) fstSlice = 0;
-//  TDrawTrack drawTrack1;
-//  drawTrack1.SetColor(kBlue);
-//  TDrawHit dhit1;
-//  dhit1.x = 0;
-//  dhit1.y = 0;
-//  dhit1.z = 0;
-//  dhit1.alpha = TDrawHit::GetAlpha( fGB, fstSlice );
-//  dhit1.SetColor(kBlue);
-//  dhit1.SetWidth(width);
-//  drawTrack1.hits.push_back(dhit1);
-//  dhit1.x = fabs( mcTrack.Px() )*100;
-//  dhit1.y = mcTrack.Py()*100;
-//  dhit1.z = mcTrack.Pz()*100;
-//  drawTrack1.hits.push_back(dhit1);
-//  drawTrack1.DrawGlobal();
-  // ---
 } // void AliHLTTPCCADisplay::SpecDrawMCTrack
 
 void AliHLTTPCCADisplay::SpecDrawMCTrackLocal(AliHLTTPCCAMCTrack& mcTrack, AliHLTResizableArray<AliHLTTPCCALocalMCPoint>* mcPointsArray, int iSlice)
 {
   const int NPoints =  mcTrack.NMCPoints();
   if ( NPoints < 2 ) return;
-
+  
   AliHLTTPCCALocalMCPoint *points = &((*mcPointsArray).Data()[mcTrack.FirstMCPointID()]);
 
   TDrawTrack drawTrack;
-
+  
   for ( int ih = 0; ih < NPoints; ih++ ) {
     TDrawHit hit;
     hit.x = points[ih].X();
@@ -3338,7 +2443,7 @@ void AliHLTTPCCADisplay::SpecDrawMCTrackLocal(AliHLTTPCCAMCTrack& mcTrack, AliHL
     hit.SetWidth(0.05);
     drawTrack.hits.push_back(hit);
   }
-
+  
   drawTrack.SetStatColor(2);
   drawTrack.SetStatWidth(0.5);
   drawTrack.DrawLocal(iSlice);
@@ -3366,17 +2471,7 @@ void AliHLTTPCCADisplay::SpecDrawHitsFromMCTrackLocal(int iMC, const AliHLTResiz
 void AliHLTTPCCADisplay::SpecDrawRecoTrackGlobal( int iTr, int color, float width )
 {
   const AliHLTTPCCAGBTrack &track = fGB->Tracks()[iTr];
-//  if( track.IsMerged() ) {
-//      color = kGreen;
-//      width = 0.5;
-//  }
-//
-//  if( track.IsClone() ) {
-//      color = kRed;
-//      width = 0.3;
-//  }
-//  std::cout<<"> Track "<<iTr<<";   p: "<<track.Param().QPt()<<"\n";
-
+  
   const int NHits =  track.NHits();
 
   TDrawTrack drawTrack;
@@ -3389,12 +2484,6 @@ void AliHLTTPCCADisplay::SpecDrawRecoTrackGlobal( int iTr, int color, float widt
     dhit.x = hit.X();
     dhit.y = hit.Y();
     dhit.z = hit.Z();
-//if( /*hit.ISlice() != 10 && hit.ISlice() != 11 &&*/ hit.ISlice() != 12 && hit.ISlice() != 23 ) return;
-//if( hit.ISlice() != 2 && hit.ISlice() != 3 && hit.ISlice() != 4 /*&& hit.ISlice() != 18 && hit.ISlice() != 19 && hit.ISlice() != 20*/ ) return;
-//if( hit.ISlice() != 6 && hit.ISlice() != 7 && hit.ISlice() != 15 && hit.ISlice() != 16 ) return;
-//if( hit.ISlice() != 14 && hit.ISlice() != 13 ) continue;
-//if( hit.ISlice() != 7 && hit.ISlice() != 8 && hit.ISlice() != 9 ) continue;
-//if( hit.ISlice() != 22 && hit.ISlice() != 21 ) continue;
     dhit.alpha = TDrawHit::GetAlpha( fGB, hit.ISlice() );
     dhit.SetColor(color);
     dhit.SetWidth(width);
@@ -3499,170 +2588,6 @@ void AliHLTTPCCADisplay::SpecDrawMCTrackGlobalPT( AliHLTTPCCAMCTrack& mcTrack, A
     drawTrack.DrawGlobalPT();
 //    drawTrack.DrawGlobalTpad();
 //    drawTrack.DrawGlobalPpad();
-}
-
-void AliHLTTPCCADisplay::SpecDrawMCTrackGlobalPT1( AliHLTTPCCAMCTrack& mcTrack, AliHLTResizableArray<AliHLTTPCCALocalMCPoint>* mcPointsArray, int color, float width )
-{
-  const int NPoints =  mcTrack.NMCPoints();
-    if ( NPoints < 2 ) return;
-
-    AliHLTTPCCALocalMCPoint *points = &((*mcPointsArray).Data()[mcTrack.FirstMCPointID()]);
-    int iSlice(points[0].ISlice()), pSlice(points[0].ISlice()), nSlice(points[0].ISlice());
-    float iTeta, nTeta;
-    int pHit(0);
-
-    TDrawTrack drawTrack;
-
-    TDrawHit hit;
-    int st(iSlice), stn(iSlice), nn(0);
-    for ( int ih = 0; ih < NPoints; ih++ ) {
-	stn = points[ih].ISlice();
-	if( stn != st ) {
-	    st = stn;
-	    nn++;
-	}
-	if( nn > 10 ) return;
-    }
-
-    int pih(0), ppSlice(pSlice);
-    vector<float> tetas;
-    vector<int> fstsl, lstsl;
-
-    for ( int ih = 0; ih < NPoints; ih++ ) {
-      hit.x = points[ih].X();
-      hit.y = points[ih].Y();
-      hit.z = points[ih].Z();
-      hit.alpha = TDrawHit::GetAlpha( fGB, points[ih].ISlice() );
-      // ---
-      hit.slice = points[ih].ISlice();
-      hit.row = points[ih].IRow();
-      // ---
-      drawTrack.hits.push_back(hit);
-      if( points[ih].ISlice() != iSlice ) nSlice = points[ih].ISlice();
-
-      if( ih > 1 && points[ih].ISlice() != pSlice ){
-        float x = drawTrack.hits[ih-1].x - drawTrack.hits[pHit].x;
-        float z = drawTrack.hits[ih-1].z - drawTrack.hits[pHit].z;
-        iTeta = atan( x / z );
-        if( ih-1 == pHit ) return;
-        tetas.push_back(iTeta);
-        fstsl.push_back(pSlice);
-        lstsl.push_back(points[ih].ISlice());
-        pSlice = points[ih].ISlice();
-        pHit = ih;
-      }
-    }
-    float x = drawTrack.hits[NPoints-1].x - drawTrack.hits[pHit].x;
-    float z = drawTrack.hits[NPoints-1].z - drawTrack.hits[pHit].z;
-    iTeta = atan( x / z );
-    tetas.push_back(iTeta);
-    fstsl.push_back(ppSlice);
-    lstsl.push_back(pSlice);
-    if( tetas.size() == 1 ) {
-	drawTrack.DrawDrawTetaTrackInt( tetas[0], iSlice, pSlice, nSlice, true, kBlack );
-    }
-    else {
-	for( int i = 0; i < tetas.size()-1; i++ ) {
-	    drawTrack.DrawDrawTetaTrackIntMerged( tetas[i], tetas[i+1], fstsl[i], lstsl[i], false, kBlack );
-	}
-    }
-}
-
-void AliHLTTPCCADisplay::SpecDrawMCTrackGlobalDzDsQPt( AliHLTTPCCAMCTrack& mcTrack, AliHLTResizableArray<AliHLTTPCCALocalMCPoint>* mcPointsArray, int color, float width )
-{
-  const int NPoints =  mcTrack.NMCPoints();
-    if ( NPoints < 2 ) return;
-
-    AliHLTTPCCALocalMCPoint *points = &((*mcPointsArray).Data()[mcTrack.FirstMCPointID()]);
-    int iSlice(points[0].ISlice()), pSlice(points[0].ISlice()), nSlice(points[0].ISlice());
-    float iTeta, nTeta;
-    int pHit(0);
-
-    TDrawTrack drawTrack;
-
-    TDrawHit hit;
-    int st(iSlice), stn(iSlice), nn(0);
-    for ( int ih = 0; ih < NPoints; ih++ ) {
-	stn = points[ih].ISlice();
-	if( stn != st ) {
-	    st = stn;
-	    nn++;
-	}
-	if( nn > 10 ) return;
-    }
-
-    int pih(0), ppSlice(pSlice);
-    vector<float> tetas;
-    vector<int> fstsl, lstsl;
-    float qp0 = fabs(points[0].QP());
-    float qp1 = fabs(points[NPoints-1].QP());
-    if( fabs(mcTrack.Pt()) < 100 ) {
-//	std::cout<<">>> QP0: "<<qp0<<";   Pt: "<<mcTrack.Pt()<<";   Q/Pt: "<<1/mcTrack.Pt()<<"\n";
-	qp0 = 1/mcTrack.Pt();
-	qp1 = qp0;
-    }
-
-//    std::cout<<"\n\n\nStart MCTrack\n";
-    for ( int ih = 0; ih < NPoints; ih++ ) {
-      hit.x = points[ih].X();
-      hit.y = points[ih].Y();
-      hit.z = points[ih].Z();
-      hit.alpha = TDrawHit::GetAlpha( fGB, points[ih].ISlice() );
-//      std::cout<<"ih: "<<ih<<";   QP: "<<points[ih].QP()<<"\n";
-      // ---
-      hit.slice = points[ih].ISlice();
-      hit.row = points[ih].IRow();
-      // ---
-      drawTrack.hits.push_back(hit);
-      if( points[ih].ISlice() != iSlice ) nSlice = points[ih].ISlice();
-
-      if( ih > 1 && points[ih].ISlice() != pSlice ){
-//	  std::cout<<" ----- net slice -----\n";
-        float x = drawTrack.hits[ih-1].x - drawTrack.hits[pHit].x;
-        float z = drawTrack.hits[ih-1].z - drawTrack.hits[pHit].z;
-        iTeta = atan( x / z );
-        if( ih-1 == pHit ) return;
-        tetas.push_back(iTeta);
-        fstsl.push_back(pSlice);
-        lstsl.push_back(points[ih].ISlice());
-        pSlice = points[ih].ISlice();
-        pHit = ih;
-      }
-    }
-    float x = drawTrack.hits[NPoints-1].x - drawTrack.hits[pHit].x;
-    float z = drawTrack.hits[NPoints-1].z - drawTrack.hits[pHit].z;
-    iTeta = atan( x / z );
-    tetas.push_back(iTeta);
-    fstsl.push_back(ppSlice);
-    lstsl.push_back(pSlice);
-//    std::cout<<"draw MC teta0: "<<tetas[0]<<";   qp0: "<<qp0<<";   qp1: "<<qp1<<"\n";
-    if( tetas.size() == 1 ) {
-//	drawTrack.DrawDrawTetaTrackInt( tetas[0], iSlice, pSlice, nSlice, true, kBlack );
-	drawTrack.DrawDrawTetaTrackIntMerged( tetas[0], tetas[0], qp0, qp1, false, kBlack );
-	TDrawHit dhit;
-	dhit.x = tetas[0];
-	dhit.y = qp0;
-	dhit.SetColor(kBlack);
-	dhit.SetWidth(0.5);
-	dhit.DrawHitPT();
-    }
-    else {
-	for( int i = 0; i < tetas.size()-1; i++ ) {
-	    drawTrack.DrawDrawTetaTrackIntMerged( tetas[i], tetas[i+1], qp0, qp1, false, kBlack );
-	    TDrawHit dhit;
-	    dhit.x = tetas[i];
-	    dhit.y = qp0;
-	    dhit.SetColor(kBlack);
-	    dhit.SetWidth(0.5);
-	    dhit.DrawHitPT();
-	}
-    }
-//    TDrawHit dhit;
-//      dhit.x = dzds;
-//      dhit.y = pt;
-//      dhit.SetColor(kGreen);
-//      dhit.SetWidth(1);
-//      dhit.DrawHitPT();
 }
 
 void AliHLTTPCCADisplay::TDrawTrack::DrawGlobalPT()
@@ -3900,480 +2825,4 @@ void AliHLTTPCCADisplay::TDrawTrack::DrawGlobalPpad()
   fDisplay.CanvasPT()->cd();
 //  pl.DrawPolyLine( NHits-1, vteta, vphi );
   pl.DrawPolyLine( NHits-2, vphi, vteta );
-}
-
-void AliHLTTPCCADisplay::DrawTrackFromMerger( std::vector<double> x, std::vector<double> y, std::vector<double> z, int iSlice, std::vector<int> row, int color, Size_t width )
-{
-//  double *xv = &(x[0]), *yv = &(y[0]), *zv = &(z[0]);
-//  TPolyLine &pl = GetPolyLine();
-//  fYX->cd();
-//  pl.DrawPolyLine( x.size(), vy, vx );
-
-  TDrawTrack drawTrack;
-
-//  int ih = track.FirstHitRef();
-  for ( int i = 0; i < x.size(); i++ ) {
-//      const int iH = fGB->TrackHit(ih);
-//      const AliHLTTPCCAGBHit &hit = fGB->Hit(iH);
-      TDrawHit dhit;
-      dhit.x = x[i];
-      dhit.y = y[i];
-//      double *xv, *yv;
-//      Global2View( (double)x[i], (double)y[i], xv, yv );
-//      dhit.x = *xv;
-//      dhit.y = *yv;
-      dhit.z = z[i];
-      dhit.alpha = TDrawHit::GetAlpha( fGB, iSlice );
-      dhit.row = row[i];
-      dhit.SetColor(color);
-      dhit.SetWidth(width);
-      drawTrack.hits.push_back(dhit);
-      std::cout<<" - hit "<<i<<";   slice: "<<dhit.slice<<";   x: "<<dhit.x<<";   y: "<<dhit.y<<";   z: "<<dhit.z<<"\n";
-  }
-    drawTrack.SetStatColor(color);
-//
-    drawTrack.SetStatWidth(0.5);
-    drawTrack.DrawGlobal();
-    drawTrack.DrawHitsGlobal();
-//    drawTrack.DrawGlobalPT();
-//    drawTrack.DrawGlobalTpad();
-}
-
-void AliHLTTPCCADisplay::TDrawTrack::DrawGlobalTpad2hit( int nhits0 )
-{
-  const int NHits = hits.size();
-  const int NHits1 = NHits - nhits0;
-//  if ( NHits < 2 ) return;
-//  if ( ! hits[0].CheckGlobal() ) FillGBHitsCoor();
-
-  vector<double> nn, teta;
-//  phi.resize(NHits-1);
-  teta.resize(2);
-  nn.resize(2);
-  double *vnn = &(nn[0]), *vteta = &(teta[0]);
-
-  TDrawHit &hit_start = hits[0];
-  TDrawHit &hit_end = hits[nhits0-1];
-  double x = hit_end.x - hit_start.x;
-  double y = hit_end.y - hit_start.y;
-  double z = hit_end.z - hit_start.z;
-//  teta[0] = acos(x / sqrt(x*x + z*z));
-//  teta[0] = asin(z / sqrt(x*x + z*z));
-//  teta[0] = asin(x / sqrt(x*x + z*z));
-  teta[0] = atan(x / z);
-//  if( hit_start.z < 0 ) teta[0] = -teta[0];
-  nn[0] = 0.25 + hit_start.slice;
-  std::cout<<"-hits.size(): "<<hits.size()<<"\n";
-  std::cout<<">last x 0: "<<hit_end.x<<";   last z 0: "<<hit_end.z<<"\n";
-  std::cout<<">last x 0: "<<hits[nhits0-1].x<<";   last z 0: "<<hits[nhits0-1].z<<"\n";
-  std::cout<<" 1. start z: "<<hit_start.z<<";   slice: "<<hit_start.slice<<"\n";
-  std::cout<<" 1.   end z: "<<hit_end.z<<";   slice: "<<hit_end.slice<<"\n";
-
-  TDrawHit &hit_start1 = hits[nhits0];
-  TDrawHit &hit_end1 = hits[NHits-1];
-  x = hit_end1.x - hit_start1.x;
-  y = hit_end1.y - hit_start1.y;
-  z = hit_end1.z - hit_start1.z;
-//  teta[1] = acos(x / sqrt(x*x + z*z));
-//  teta[1] = asin(x / sqrt(x*x + z*z));
-  teta[1] = atan(x / z);
-//  if( hit_start1.z < 0 ) teta[1] = -teta[1];
-  if( teta[0] < 0 && teta[1] > 0 ) teta[1] = -teta[1];
-  if( teta[0] > 0 && teta[1] < 0 ) teta[1] = -teta[1];
-  nn[1] = 0.75 + hit_start1.slice;
-  std::cout<<">first x 1: "<<hit_start1.x<<";   first z 1: "<<hit_start1.z<<"\n";
-  std::cout<<" 2. start z: "<<hit_start1.z<<";   slice: "<<hit_start1.slice<<"\n";
-  std::cout<<" 2.   end z: "<<hit_end1.z<<";   slice: "<<hit_end1.slice<<"\n";
-  std::cout<<" - teta0: "<<teta[0]<<";   teta1: "<<teta[1]<<"\n";
-  std::cout<<">last row 0: "<<hits[nhits0-1].row<<";   first row 1: "<<hit_start1.row<<"\n";
-  std::cout<<">last x 0: "<<hits[nhits0-1].x<<";   first x 1: "<<hit_start1.x<<"\n";
-  std::cout<<">last z 0: "<<hits[nhits0-1].z<<";   first z 1: "<<hit_start1.z<<"\n";
-  std::cout<<"-hits.size(): "<<hits.size()<<"\n";
-  std::cout<<">>>last x 0: "<<hits[nhits0-1].x<<";   last z 0: "<<hits[nhits0-1].z<<"\n";
-//  if( fabs( fabs(hits[nhits0-1].z) - fabs(hit_start.z) ) > 15 ) {
-  if( fabs( hits[nhits0-1].row - hit_start1.row ) > 5 ) {
-    std::cout<<" --- Bad merging!\n";
-    return;
-  }
-  SetColor(kBlue);
-  SetStatWidth(0.75);
-
-  TPolyLine &pl = GetPolyLine();
-
-  fDisplay.CanvasPT()->cd();
-  pl.DrawPolyLine( 2, vteta, vnn );
-}
-
-void AliHLTTPCCADisplay::DrawTrackFromMergerPT_test( double x0, double x1, double y0, double y1, double z0, double z1, int row0, int row1, int slice0, int slice1, int color, Size_t width )
-{
-  TDrawTrack drawTrack;
-  TDrawHit dhit;
-  dhit.x = x0;
-  dhit.y = y0;
-  dhit.z = z0;
-  dhit.alpha = TDrawHit::GetAlpha( fGB, slice0 );
-  dhit.slice = slice0;
-  dhit.row = row0;
-  dhit.SetColor(kGreen);
-  dhit.SetWidth(width);
-  drawTrack.hits.push_back(dhit);
-  dhit.x = x1;
-  dhit.y = y1;
-  dhit.z = z1;
-  dhit.alpha = TDrawHit::GetAlpha( fGB, slice1 );
-  dhit.slice = slice1;
-  dhit.row = row1;
-  dhit.SetColor(kRed);
-  dhit.SetWidth(width);
-  drawTrack.hits.push_back(dhit);
-  drawTrack.SetStatColor(color);
-//  drawTrack.DrawGlobalTpad2hit();
-  drawTrack.DrawHitsGlobal();
-}
-
-void AliHLTTPCCADisplay::TDrawTrack::DrawDrawTetaTrackInt( float iTeta, int iSlice, int pSlice, int nSlice, bool ok, int color )
-{
-  vector<double> nn, teta;
-  //  phi.resize(NHits-1);
-  teta.resize(2);
-  nn.resize(2);
-  double *vnn = &(nn[0]), *vteta = &(teta[0]);
-  teta[0] = teta[1] = iTeta;
-  nn[0] = 0.25 + iSlice;
-  nn[1] = 0.75 + iSlice;
-  SetColor(color);
-  SetStatWidth(3);
-  if( ok ) SetStatWidth(1);
-
-  TPolyLine &pl = GetPolyLine();
-
-  fDisplay.CanvasPT()->cd();
-  pl.DrawPolyLine( 2, vteta, vnn );
-
-//  nn[0] = 0.25 + pSlice;
-//    nn[1] = 0.75 + nSlice;
-//    SetColor(kBlue);
-//    SetStatWidth(0.5);
-//    TPolyLine &pl1 = GetPolyLine();
-//    pl1.DrawPolyLine( 2, vteta, vnn );
-}
-
-void AliHLTTPCCADisplay::TDrawTrack::DrawDrawTetaTrackIntMerged( float iTeta, float nTeta, float iSlice, float nSlice, bool ok, int color )
-{
-  vector<double> nn, teta;
-  //  phi.resize(NHits-1);
-  teta.resize(2);
-  nn.resize(2);
-  double *vnn = &(nn[0]), *vteta = &(teta[0]);
-  teta[0] = iTeta;
-  teta[1] = nTeta;
-  nn[0] = 0.5 + iSlice;
-  nn[1] = 0.5 + nSlice;
-#ifdef DRAWDZDSQPT
-  nn[0] = iSlice;
-  nn[1] = nSlice;
-#endif
-  SetColor(color);
-  SetStatWidth(1);
-  if( ok ) {
-      SetColor(kRed);
-      SetStatWidth(2);
-  }
-  if( color == kOrange ) {
-    SetColor(kOrange);
-    SetStatWidth(0.1);
-  }
-//  std::cout<<"-----dzds0: "<<teta[0]<<";   dzds1: "<<teta[1]<<";   qp0: "<<nn[0]<<";   qp1: "<<nn[1]<<"\n";
-
-  TPolyLine &pl = GetPolyLine();
-
-  fDisplay.CanvasPT()->cd();
-  pl.DrawPolyLine( 2, vteta, vnn );
-}
-
-void AliHLTTPCCADisplay::DrawTetaTrack( float iTeta, int iSlice, int pSlice, int nSlice )
-{
-  TDrawTrack drawTrack;
-  drawTrack.DrawDrawTetaTrackInt( iTeta, iSlice, pSlice, nSlice );
-}
-
-
-
-void AliHLTTPCCADisplay::DrawTetaTrackMerged( float iTeta, float nTeta, float iSlice, float nSlice, bool ok, bool okmc )
-{
-  TDrawTrack drawTrack;
-  if( !okmc ) {
-    drawTrack.DrawDrawTetaTrackIntMerged( iTeta, nTeta, iSlice, nSlice, ok );
-  }
-  else {
-    drawTrack.DrawDrawTetaTrackIntMerged( iTeta, nTeta, iSlice, nSlice, ok, kOrange );
-  }
-}
-
-void AliHLTTPCCADisplay::DrawCorrectMerge( float x0, float x1, float y0, float y1, bool ok )
-{
-  TDrawTrack drawTrack;
-  drawTrack.DrawCorrectMerge( x0, x1, y0, y1, ok );
-}
-
-void AliHLTTPCCADisplay::TDrawTrack::DrawCorrectMerge( float x0, float x1, float y0, float y1, bool ok )
-{
-  vector<double> xx, yy;
-  xx.resize(2);
-  yy.resize(2);
-  double *vxx = &(xx[0]), *vyy = &(yy[0]);
-  static TPolyLine pl;
-  int color = kOrange;
-  if( ok ) color = kBlack;
-  pl.SetLineColor( color );
-  pl.SetLineWidth( 1 );
-#ifdef CANVAS_PT
-  fDisplay.CanvasPT()->cd();
-  xx[0] = x0; xx[1] = x1;
-  yy[0] = y0; yy[1] = y1;
-  pl.DrawPolyLine( 2, vxx, vyy );
-#endif
-
-//  xx[0] = x0 - 0.03; xx[1] = x0 + 0.03;
-//  yy[0] = y0 + 0.3; yy[1] = y0 - 0.3;
-//  pl.DrawPolyLine( 2, vxx, vyy );
-//
-//  xx[0] = x1 - 0.03; xx[1] = x1 + 0.03;
-//  yy[0] = y1 - 0.3; yy[1] = y1 + 0.3;
-//  pl.DrawPolyLine( 2, vxx, vyy );
-//
-//  xx[0] = x1 - 0.03; xx[1] = x1 + 0.03;
-//  yy[0] = y1 + 0.3; yy[1] = y1 - 0.3;
-//  pl.DrawPolyLine( 2, vxx, vyy );
-}
-
-void AliHLTTPCCADisplay::DrawWrongMerge( float x0, float x1, float y0, float y1 )
-{
-  TDrawTrack drawTrack;
-  drawTrack.DrawWrongMerge( x0, x1, y0, y1 );
-}
-
-void AliHLTTPCCADisplay::TDrawTrack::DrawWrongMerge( float x0, float x1, float y0, float y1 )
-{
-  vector<double> xx, yy;
-  xx.resize(2);
-  yy.resize(2);
-  double *vxx = &(xx[0]), *vyy = &(yy[0]);
-  static TPolyLine pl;
-  int color = kBlack;
-  pl.SetLineColor( kBlack );
-  pl.SetLineWidth( 2 );
-#ifdef CANVAS_PT
-  fDisplay.CanvasPT()->cd();
-  xx[0] = x0 - 0.03; xx[1] = x0 + 0.03;
-  yy[0] = y0 - 0.3; yy[1] = y0 + 0.3;
-  pl.DrawPolyLine( 2, vxx, vyy );
-
-  xx[0] = x0 - 0.03; xx[1] = x0 + 0.03;
-  yy[0] = y0 + 0.3; yy[1] = y0 - 0.3;
-  pl.DrawPolyLine( 2, vxx, vyy );
-
-  xx[0] = x1 - 0.03; xx[1] = x1 + 0.03;
-  yy[0] = y1 - 0.3; yy[1] = y1 + 0.3;
-  pl.DrawPolyLine( 2, vxx, vyy );
-
-  xx[0] = x1 - 0.03; xx[1] = x1 + 0.03;
-  yy[0] = y1 + 0.3; yy[1] = y1 - 0.3;
-  pl.DrawPolyLine( 2, vxx, vyy );
-#endif
-}
-
-void AliHLTTPCCADisplay::DrawDzDsPtTrack( float dzds, float pt, bool ok, bool ok1 )
-{
-  TDrawHit dhit;
-  dhit.x = dzds;
-  dhit.y = pt;
-  dhit.SetColor(kGreen);
-  dhit.SetWidth(1);
-  if( ok ) {
-      dhit.SetColor(kRed);
-      dhit.SetWidth(0.5);
-  }
-  if( ok1 ) {
-      dhit.SetColor(kBlue);
-      dhit.SetWidth(0.7);
-  }
-  if( ok && ok1 ) {
-      dhit.SetColor(kBlack);
-      dhit.SetWidth(0.7);
-  }
-//  std::cout<<"---dzds: "<<dhit.x<<";   qp: "<<dhit.y<<"\n";
-  dhit.DrawHitPT();
-}
-
-void AliHLTTPCCADisplay::TDrawHit::DrawHitPT()
-{
-  TMarker& m = GetMarker();
-  fDisplay.CanvasPT()->cd();
-  m.DrawMarker( x, y );
-}
-
-void AliHLTTPCCADisplay::DrawTrackFromMergerPT( std::vector<double> x0, std::vector<double> y0, std::vector<double> z0, int iSlice0, std::vector<int> row0, std::vector<double> x1, std::vector<double> y1, std::vector<double> z1, int iSlice1, std::vector<int> row1, int color, Size_t width )
-{
-  TDrawTrack drawTrack;
-  int NHits0;
-//  if(iSlice0 == iSlice1) return;
-
-  for ( int i = 0; i < x0.size(); i++ ) {
-    TDrawHit dhit;
-    dhit.x = x0[i];
-    dhit.y = y0[i];
-    dhit.z = z0[i];
-    dhit.alpha = TDrawHit::GetAlpha( fGB, iSlice0 );
-    dhit.row = row0[i];
-    dhit.slice = iSlice0;
-    dhit.SetColor(kGreen);
-    dhit.SetWidth(width);
-    drawTrack.hits.push_back(dhit);
-    std::cout<<" - add hit 0; i: "<<i<<";   z0: "<<z0[i]<<";   slice0: "<<iSlice0<<"\n";
-  }
-  NHits0 = drawTrack.hits.size();
-  for ( int i = 0; i < x1.size(); i++ ) {
-    TDrawHit dhit;
-    dhit.x = x1[i];
-    dhit.y = y1[i];
-    dhit.z = z1[i];
-    dhit.alpha = TDrawHit::GetAlpha( fGB, iSlice1 );
-    dhit.row = row1[i];
-    dhit.slice = iSlice1;
-    dhit.SetColor(kRed);
-    dhit.SetWidth(width);
-    drawTrack.hits.push_back(dhit);
-    std::cout<<" - add hit 1; i: "<<i<<";   z1: "<<z1[i]<<";   slice1: "<<iSlice1<<"\n";
-  }
-  drawTrack.SetStatColor(color);
-  drawTrack.SetStatWidth(0.5);
-  drawTrack.DrawGlobalTpad2hit( NHits0 );
-//      drawTrack.DrawGlobal();
-//      drawTrack.DrawHitsGlobal();
-  //    drawTrack.DrawGlobalPT();
-//      drawTrack.DrawGlobalTpad();
-}
-
-void AliHLTTPCCADisplay::TDrawTrack::DrawSlicesForTeta()
-{
-  for( int i = 0; i < 50; i++ ) {
-    vector<double> nn, teta;
-    teta.resize(2);
-    nn.resize(2);
-    double *vnn = &(nn[0]), *vteta = &(teta[0]);
-    teta[0] = -1.5;
-    teta[1] = 1.5;
-    nn[0] = nn[1] = 0.25 + i*0.5;
-    if( i%2 == 0 ) SetColor(kGreen);
-    else SetColor(kRed);
-    TPolyLine &pl = GetPolyLine();
-    fDisplay.CanvasPT()->cd();
-    pl.DrawPolyLine( 2, vteta, vnn );
-  }
-}
-
-void AliHLTTPCCADisplay::DrawSlicesForTeta()
-{
-  TDrawTrack drawTrack;
-  drawTrack.SetStatColor(kGreen);
-  drawTrack.SetStatWidth(0.25);
-  drawTrack.DrawSlicesForTeta();
-}
-
-void AliHLTTPCCADisplay::DrawFieldDzDsP()
-{
-  TDrawTrack drawTrack;
-  drawTrack.DrawFieldDzDsP();
-}
-
-void AliHLTTPCCADisplay::TDrawTrack::DrawFieldDzDsP()
-{
-  vector<double> xA, yA;
-  xA.resize(2);
-  yA.resize(2);
-  double *vxA = &(xA[0]), *vyA = &(yA[0]);
-  TPolyLine &pl = GetPolyLine();
-  // ---
-  TLatex Tl;
-  Tl.SetTextSize(0.02);
-  Tl.SetTextAlign(22);
-//  Tl.DrawLatex(cos(fiCenter)*fRInnerMin*kText, sin(fiCenter)*fRInnerMin*kText, sISlice);
-//  TString sISlice = "";
-//  sISlice += iSliceReal;
-  // ---
-  fDisplay.CanvasPT()->cd();
-  // X
-  xA[0] = -3; xA[1] = 3;
-  yA[0] = 0; yA[1] = 0;
-  pl.DrawPolyLine( 2, vxA, vyA );
-  xA[0] = 2.9; xA[1] = 3;
-  yA[0] = 0.5; yA[1] = 0;
-  pl.DrawPolyLine( 2, vxA, vyA );
-  xA[0] = 2.9; xA[1] = 3;
-  yA[0] = -0.5; yA[1] = 0;
-  pl.DrawPolyLine( 2, vxA, vyA );
-  TString nameX = "DzDs";
-  Tl.DrawLatex(3, -1, nameX);
-  for( float xit = -3; xit < 3; xit+=0.5 ) {
-      xA[0] = xit; xA[1] = xit;
-      yA[0] = -0.5; yA[1] = 0.5;
-      pl.DrawPolyLine( 2, vxA, vyA );
-      TString nA = "";
-      nA += xit;
-      Tl.DrawLatex(xit, -0.7, nA);
-  }
-  for( float xit = -3; xit < 3; xit+=0.1 ) {
-      xA[0] = xit; xA[1] = xit;
-      yA[0] = -0.1; yA[1] = 0.1;
-      pl.DrawPolyLine( 2, vxA, vyA );
-  }
-  // Y
-  xA[0] = -3; xA[1] = -3;
-  yA[0] = 0; yA[1] = 31;
-  pl.DrawPolyLine( 2, vxA, vyA );
-  xA[0] = -3.05; xA[1] = -3;
-  yA[0] = 30.5; yA[1] = 31;
-  pl.DrawPolyLine( 2, vxA, vyA );
-  xA[0] = -2.95; xA[1] = -3;
-  yA[0] = 30.5; yA[1] = 31;
-  pl.DrawPolyLine( 2, vxA, vyA );
-  TString nameY = "QPt";
-  Tl.DrawLatex(-3.1, 31.5, nameY);
-  for( float yit = 0; yit <= 30; yit+=5 ) {
-      xA[0] = -3.03; xA[1] = -2.97;
-      yA[0] = yit; yA[1] = yit;
-      pl.DrawPolyLine( 2, vxA, vyA );
-      TString nA = "";
-      nA += yit;
-      Tl.DrawLatex(-3.1, yit, nA);
-  }
-  for( float yit = 0; yit <= 30; yit++ ) {
-      xA[0] = -3.01; xA[1] = -2.99;
-      yA[0] = yit; yA[1] = yit;
-      pl.DrawPolyLine( 2, vxA, vyA );
-  }
-  // Legend
-//  TMarker& m = GetMarker();
-  static TMarker m;
-  m.SetMarkerStyle(20);
-//  m.SetColor(kGreen);
-//  m.SetWidth(3);
-  m.SetMarkerColor( kGreen );
-  m.SetMarkerSize ( 1.5 );
-  m.DrawMarker( -2.9, 29 );
-  TString l = "Reco tracklets";
-  Tl.DrawLatex(-2.6, 29, l);
-  m.SetMarkerColor( kBlue );
-  m.DrawMarker( -2.9, 28 );
-  l = "Merging candidates";
-  Tl.DrawLatex(-2.5, 28, l);
-  m.SetMarkerColor( kRed );
-  m.DrawMarker( -2.9, 27 );
-  l = "Merged tracklets";
-  Tl.DrawLatex(-2.55, 27, l);
-  m.SetMarkerColor( kBlack );
-  m.DrawMarker( -2.9, 26 );
-  l = "MC tracks";
-  Tl.DrawLatex(-2.65, 26, l);
 }

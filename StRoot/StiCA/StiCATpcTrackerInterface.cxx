@@ -7,13 +7,6 @@
 #include "StTpcDb/StTpcDb.h"
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StDbUtilities/StTpcLocalSectorCoordinate.hh"
-
-#include "StMaker.h"
-#include "StEvent/StEvent.h"
-#include "StTpcHitCollection.h"
-#include "StTpcSectorHitCollection.h"
-#include "StTpcPadrowHitCollection.h"
-#include "StBTofCollection.h"
   // for MCdata
 #include "tables/St_g2t_track_Table.h" 
 #include "tables/St_g2t_tpc_hit_Table.h"
@@ -38,7 +31,6 @@ StiCATpcTrackerInterface &StiCATpcTrackerInterface::Instance() {
 StiCATpcTrackerInterface::StiCATpcTrackerInterface() : StTPCCAInterface() {
 }
 //________________________________________________________________________________
-#if 0
 void StiCATpcTrackerInterface::MakeHits()
 {
   StTpcCoordinateTransform tran(gStTpcDb);
@@ -99,75 +91,6 @@ void StiCATpcTrackerInterface::MakeHits()
   }
 
 } // void StiCATpcTrackerInterface::MakeHits()
-#else
-void StiCATpcTrackerInterface::MakeHits() {
-  StEvent   *pEvent = dynamic_cast<StEvent*>( StMaker::GetTopChain()->GetInputDS("StEvent") );
-  if (! pEvent) return;
-  StTpcHitCollection* TpcHitCollection = pEvent->tpcHitCollection();
-  if (! TpcHitCollection) { LOG_ERROR << "StxCAInterface::MakeHits: No TPC Hit Collection" << endm; return;}
-  // BToF hits
-  Int_t nBToFHit = 0;
-  StBTofCollection *bToFcol = pEvent->btofCollection();
-  if (!bToFcol) {
-    LOG_ERROR << "StxCAInterface::MakeHits:\tNo StBTofCollection" << endm;
-  }
-  UInt_t numberOfSectors = TpcHitCollection->numberOfSectors();
-  for (UInt_t i = 0; i< numberOfSectors; i++) {
-    StTpcSectorHitCollection* sectorCollection = TpcHitCollection->sector(i);
-    Int_t numberOfPadrows = sectorCollection->numberOfPadrows();
-    Int_t sector = i + 1;
-    Double_t beta = (sector <= 12) ? (60 - 30*(sector - 1)) : (120 + 30 *(sector - 13));
-    Double_t cb   = TMath::Cos(TMath::DegToRad()*beta);
-    Double_t sb   = TMath::Sin(TMath::DegToRad()*beta);
-    if (sectorCollection) {
-      for (int j = 0; j< numberOfPadrows; j++) {
-	StTpcPadrowHitCollection *rowCollection = sectorCollection->padrow(j);
-	if (rowCollection) {
-	  StSPtrVecTpcHit &hits = rowCollection->hits();
-	  Long64_t NoHits = hits.size();
-	  for (Long64_t k = 0; k < NoHits; k++) {
-	    const StTpcHit *tpcHit = static_cast<const StTpcHit *> (hits[k]);
-	    if ( ! tpcHit) continue;
-//	    if (tpcHit->flag() & FCF_CHOPPED || tpcHit->flag() & FCF_SANITY)     continue; // ignore hits marked by AfterBurner as chopped or bad sanity
-	    if (tpcHit->pad() > 182 || tpcHit->timeBucket() > 511) continue; // some garbadge  for y2001 daq
-	    Int_t Id = fSeedHits.size();
-	    StThreeVectorD glob(tpcHit->position());
-	    // obtain seed Hit
-	    SeedHit_t hitc;
-	    hitc.padrow = tpcHit->padrow();
-	    hitc.status=0;
-	    hitc.taken=0;
-	    hitc.track_key=tpcHit->idTruth();
-//	    hitc.hit  = tpcHit;
-//	    hitc.Id = Id;
-	    fSeedHits.push_back(hitc);
-	    //yf      if (  hit->timesUsed()) 	continue;//VP
-	    // convert to CA Hit
-	    AliHLTTPCCAGBHit caHit;
-	    Double_t xL =  cb*glob.x() + sb*glob.y();
-	    Double_t yL = -sb*glob.x() + cb*glob.y();
-	    Double_t zL =                  glob.z();
-            caHit.SetX(   xL);
-	    caHit.SetY( - yL);
-	    caHit.SetZ( - zL);
-	    // caHit.SetErrX(   );
-	    caHit.SetErrY( 0.12 );// TODO: read parameters from somewhere
-	    caHit.SetErrZ( 0.16 );
-	    caHit.SetISlice( tpcHit->sector() - 1 );
-	    caHit.SetIRow( tpcHit->padrow()-1 );
-	    caHit.SetID( Id );
-	    //	    caHit.SetID( tpcHit->id() );
-	    fIdTruth.push_back( tpcHit->idTruth() );
-	    fCaHits.push_back(caHit);
-
-	  }
-	}
-      }
-    }
-  }
-  LOG_INFO << "StxCAInterface::MakeHits:  Loaded " << fCaHits.size() << " TPC hits." << endm;
-}
-#endif
 //________________________________________________________________________________
 void StiCATpcTrackerInterface::ConvertPars(const AliHLTTPCCATrackParam& caPar, double _alpha, StiNodePars& nodePars, StiNodeErrs& nodeErrs)
 {

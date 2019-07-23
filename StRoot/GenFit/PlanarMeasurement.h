@@ -47,7 +47,7 @@ class PlanarMeasurement : public AbsMeasurement {
   PlanarMeasurement(int nDim = 1);
   PlanarMeasurement(const TVectorD& rawHitCoords, const TMatrixDSym& rawHitCov, int detId, int hitId, TrackPoint* trackPoint);
 
-  virtual ~PlanarMeasurement() {physicalPlane_.reset();}
+  virtual ~PlanarMeasurement() {;}
 
   virtual AbsMeasurement* clone() const {return new PlanarMeasurement(*this);}
 

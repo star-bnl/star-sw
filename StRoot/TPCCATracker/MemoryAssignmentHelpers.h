@@ -49,11 +49,6 @@ template<typename T, unsigned int Alignment> static T *_assignMemory( char *&mem
   return r;
 }
 
-template<typename T> static inline void AssignMemoryV( T *&dst, char *&mem, int count )
-{
-  dst = _assignMemory<T, ( sizeof( T ) & ( sizeof( T ) - 1 ) ) == 0 && sizeof( T ) <= 16 ? sizeof( T ) : sizeof( float_v )>( mem, count );
-}
-
 template<typename T> static inline void AssignMemory( T *&dst, char *&mem, int count )
 {
   dst = _assignMemory<T, ( sizeof( T ) & ( sizeof( T ) - 1 ) ) == 0 && sizeof( T ) <= 16 ? sizeof( T ) : sizeof( void * )>( mem, count );

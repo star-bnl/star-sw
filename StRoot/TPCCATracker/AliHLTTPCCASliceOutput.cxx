@@ -35,22 +35,11 @@ int AliHLTTPCCASliceOutput::EstimateSize( int nOfTracks, int nOfTrackClusters )
     + sizeof( UChar_t );
 
   const int aligmentMaxSize = 
-    kClusterDataSize; // aligment during AssignMemory
-#ifndef TETA
-    + sizeof( AliHLTTPCCASliceTrack )
-#else
-    + sizeof( AliHLTTPCCASliceTrackVector )
-#endif
-    ;
+    sizeof( AliHLTTPCCASliceTrack ) + kClusterDataSize; // aligment during AssignMemory
   return
-    kClusterDataSize * nOfTrackClusters
-    + aligmentMaxSize
-#ifndef TETA
-    + sizeof( AliHLTTPCCASliceTrack ) * nOfTracks
-#else
-    + sizeof( AliHLTTPCCASliceTrackVector ) * (int)( 1 + nOfTracks/float_v::Size )
-#endif
-    ;
+    sizeof( AliHLTTPCCASliceTrack ) * nOfTracks
+    + kClusterDataSize * nOfTrackClusters
+    + aligmentMaxSize;
 
   // return
   //   RequiredMemory(fTracks, fNTracks) +
@@ -67,11 +56,7 @@ void AliHLTTPCCASliceOutput::SetPointers()
   // set all pointers
 
   char *mem = &fMemory[0];
-#ifndef TETA
   AssignMemory( fTracks,            mem, fNTracks );
-#else
-  AssignMemoryV( fTracksV,           mem, (int)(1 + fNTracks/float_v::Size) );
-#endif
   AssignMemory( fClusterUnpackedYZ, mem, fNTrackClusters );
   AssignMemory( fClusterUnpackedX,  mem, fNTrackClusters );
   AssignMemory( fClusterIDrc,       mem, fNTrackClusters );

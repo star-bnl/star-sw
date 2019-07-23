@@ -676,8 +676,6 @@ void AliHLTTPCCATrackletConstructor::CreateStartSegmentV( const int rowIndex, co
   static const float kAreaSizeZ = AliHLTTPCCAParameters::NeighbourAreaSizeTgZ[iter];
   static const int kMaxN = 20; // TODO minimaze
   const float chi2Cut = AliHLTTPCCAParameters::NeighbourChiCut[iter]*AliHLTTPCCAParameters::NeighbourChiCut[iter] * 4.f * ( UpDx * UpDx + DnDx * DnDx );
-//std::cout<<"> rowIndex: "<<rowIndex<<";   UpDx: "<<UpDx<<";   DnDx: "<<DnDx<<";   chi2Cut: "<<chi2Cut<<"\n";
-//std::cout<<"      iter: "<<iter<<";   NeighbourChiCut: "<<AliHLTTPCCAParameters::NeighbourChiCut[iter]<<"\n";
 
   typedef HitArea::NeighbourData NeighbourData;
   for ( unsigned int hitIndex = 0; hitIndex < numberOfHits; hitIndex += int_v::Size ) {
@@ -831,7 +829,7 @@ void AliHLTTPCCATrackletConstructor::CreateStartSegmentV( const int rowIndex, co
 #include "AliHLTTPCCADisplay.h"
 #include "TApplication.h"
 #endif //DRAW
-void AliHLTTPCCATrackletConstructor::run( unsigned int firstRow, unsigned int &tracksSaved, unsigned int i_it )
+void AliHLTTPCCATrackletConstructor::run( unsigned int firstRow, unsigned int &tracksSaved )
 {
   
 #ifndef NVALGRIND
@@ -846,10 +844,12 @@ void AliHLTTPCCATrackletConstructor::run( unsigned int firstRow, unsigned int &t
 #endif
 
 #ifdef V5
+  for( unsigned int it = 0; it < 2; it++ ) {
+
     fData.CleanUsedHits( 1+firstRow, false );
     fData.CleanUsedHits( 2+firstRow, false );
     fData.CleanUsedHits( 3+firstRow, false );
-    CreateStartSegmentV( 2+firstRow, i_it );
+    CreateStartSegmentV( 2+firstRow, it );
 #ifdef MAIN_DRAW
     if ( AliHLTTPCCADisplay::Instance().DrawType() == 1 )
     {
@@ -861,10 +861,10 @@ void AliHLTTPCCATrackletConstructor::run( unsigned int firstRow, unsigned int &t
       disp.DrawSliceHits(1, 0.5);
       disp.DrawSliceLinks(-1,-1,1);
       AliHLTTPCCADisplay::Instance().SaveCanvasToFile("NFinderTestXYZ.pdf");
-//      disp.ClearViewPT();
-////      disp.ClearView();
-//      disp.DrawSliceHitsPT(1, 0.5);
-//      disp.DrawSliceLinksPT(-1,-1,1);
+      disp.ClearViewPT();
+//      disp.ClearView();
+      disp.DrawSliceHitsPT(1, 0.5);
+      disp.DrawSliceLinksPT(-1,-1,1);
       disp.Ask();
     }
 //    if ( AliHLTTPCCADisplay::Instance().DrawType() == 1 )
@@ -1063,7 +1063,7 @@ void AliHLTTPCCATrackletConstructor::run( unsigned int firstRow, unsigned int &t
         ++r.fStage( !transported ); // all those where transportation failed go to DoneStage
       }
 #ifdef MAIN_DRAW
-      if ( AliHLTTPCCADisplay::Instance().DrawType() == 1 ) {
+      if ( AliHLTTPCCADisplay::Instance().DrawType() == 10 ) {
         for(int ii=0; ii<int_v::Size; ii++)
         {
           if(!(r.fStage[ii] < DoneStage)) continue;
@@ -1138,7 +1138,7 @@ void AliHLTTPCCATrackletConstructor::run( unsigned int firstRow, unsigned int &t
       // 80 is row 0; if X is that small this track is garbage.
       // XXX does this happen at all? If yes, under what conditions?
     assert( ( r.fParam.X() > 50.f && trackletOkF ) == trackletOkF );
-    trackletOkF &= r.fParam.X() > 50.f // TODO: read from file!!!
+    trackletOkF &= r.fParam.X() > 50.f // TODO: read from file!!! 
 
 
         // there must be errors and they must be positive or this track is garbage
@@ -1201,6 +1201,9 @@ fData.SetHitAsUsed( fData.Row( rowIndex ), hitIndex, int_m(hitIndex<fData.Row( r
     }
   }
   tracksSaved += (nTracks - tracksSaved);
+#ifdef V5
+}
+#endif
 }
 
 void InitTracklets::operator()( int rowIndex )

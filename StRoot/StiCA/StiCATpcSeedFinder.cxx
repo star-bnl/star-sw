@@ -77,7 +77,7 @@ StiTrack *StiCATpcSeedFinder::findTrack(double rMin)
 
     for (int iHit=0;iHit<nHits-1;iHit++) 
     {
-      if (! (aSeed.vhit[iHit]->hit && aSeed.vhit[iHit+1]->hit)) continue;
+
 #ifdef StiCATpcSeedFinderBLOG
        StiHit *hit = aSeed.vhit[iHit+1]->hit;
        StHit  *sthit = (StHit*)hit->stHit();
@@ -174,6 +174,7 @@ StiDebug::Count("UnsRxy_Pct",unsRxy, pct);
 StiDebug::Count("Reused_Pct",reUsed, pct);   
     }
 #endif //StiCATpcSeedFinderBLOG
+
     StiKalmanTrack* track = 0;
     if (_seedHits.size() >=4)  {
 
