@@ -96,7 +96,7 @@ StEEmcDb::~StEEmcDb(){
 //------------------
 void StEEmcDb::setThreshold(float x){
  KsigOverPed=x;
-LOG_INFO <<"::setThres KsigOverPed="<<KsigOverPed<<", threshold=ped+sig*KsigOverPed"<< endm;
+LOG_INFO <<"StEEmcDb::setThreshold::setThres KsigOverPed="<<KsigOverPed<<", threshold=ped+sig*KsigOverPed"<< endm;
 }
 
 
@@ -105,7 +105,7 @@ LOG_INFO <<"::setThres KsigOverPed="<<KsigOverPed<<", threshold=ped+sig*KsigOver
 void StEEmcDb::setPreferredFlavor(const char *flavor, const char *nameMask){
   strncpy(dbFlavor.flavor,flavor,DbFlavor::mx);
   strncpy(dbFlavor.nameMask,nameMask,DbFlavor::mx);
- LOG_INFO <<  "::setPreferredFlavor(flav='"<<dbFlavor.flavor <<"', mask='"<< dbFlavor.nameMask<<"')" <<endm;
+ LOG_INFO <<  "StEEmcDb::setPreferredFlavor::setPreferredFlavor(flav='"<<dbFlavor.flavor <<"', mask='"<< dbFlavor.nameMask<<"')" <<endm;
 }
 
 //________________________________________________________
@@ -118,7 +118,7 @@ void StEEmcDb::setSectors(int sec1,int sec2)
     mlastSecID=sec2;
     mNSector=mlastSecID - mfirstSecID+1;
     if ( mNSector==0 ) {
-	LOG_ERROR <<  ":: Problem mNSector==0" <<endm;
+	LOG_ERROR <<  "StEEmcDb::setSectors:: Problem mNSector==0" <<endm;
     } else {
 	mDbADCconf=(eemcDbADCconf_st **) new void *[mNSector];
 	mDbPMTcal= (eemcDbPMTcal_st  **) new void *[mNSector];
@@ -130,7 +130,7 @@ void StEEmcDb::setSectors(int sec1,int sec2)
 
 	clearItemArray();
 
-	LOG_INFO <<  ":: Use sectors from "<< mfirstSecID<<" to "<< mlastSecID<<endm;
+	LOG_INFO <<  "StEEmcDb::setSectors:: Use sectors from "<< mfirstSecID<<" to "<< mlastSecID<<endm;
     }
 }
 
@@ -150,7 +150,7 @@ const EEmcDbCrate* StEEmcDb::getFiber(int icr) const {
 
 void  StEEmcDb::setFiberOff(int icr) {
   if(icr<0 || icr>=nFiber ) {
-    LOG_WARN << "::setFiberOff(icr="<<icr<< ") out of range, ignorred" << endm;
+    LOG_WARN << "StEEmcDb::setFiberOff::setFiberOff(icr="<<icr<< ") out of range, ignorred" << endm;
     return;
   }
   mDbFiber[icr].useIt=false;
@@ -187,7 +187,7 @@ void StEEmcDb::clearItemArray(){
   nFound=0;
 
   if ( ! mDbADCconf ){
-    LOG_FATAL << ":: Cannot initialize arrays in clearItemArray()" << endm;
+    LOG_FATAL << " StEEmcDb::clearItemArray:: Cannot initialize arrays in clearItemArray()" << endm;
   } else {
     mDbADCconf[0]=0;
     for(i=0; i<mNSector; i++) {// clear pointers old DB tables
@@ -214,16 +214,16 @@ void StEEmcDb::loadTables(StMaker *anyMaker) {
     // If an ascii file has been loaded, via setAsciiDatabase(),
     // issue a warning and return.
     if ( mAsciiDbase.Length() > 0 ) {
-	LOG_WARN << "loadTables: Database not reloaded, values taken from " << mAsciiDbase.Data() << endm;
+	LOG_WARN << "StEEmcDb::loadTables: Database not reloaded, values taken from " << mAsciiDbase.Data() << endm;
     } else {
-	LOG_INFO <<  "loadTables: use(flav='"<<dbFlavor.flavor <<"', mask='"<< dbFlavor.nameMask<<"')" <<endm;
+	LOG_INFO <<  "StEEmcDb::loadTables: use(flav='"<<dbFlavor.flavor <<"', mask='"<< dbFlavor.nameMask<<"')" <<endm;
 	clearItemArray();
 	requestDataBase(anyMaker);
 	 //............  reload all lookup tables ...............
 	Bool_t ok = true;
 	for(int is = 0;(is < mNSector) && ok;is++) {
 	    if (optimizeMapping(is)) {
-		LOG_FATAL<<  "::loadTables  Total failure, no DB info for Endcap was retrived, all ETOW channels will be cleared for every event. Fix the problem! JB"<<endm;
+		LOG_FATAL<<  "StEEmcDb::loadTables  Total failure, no DB info for Endcap was retrived, all ETOW channels will be cleared for every event. Fix the problem! JB"<<endm;
 		ok = false;
 	    } else {
 		optimizeOthers(is); 
@@ -241,7 +241,7 @@ void StEEmcDb::loadTables(StMaker *anyMaker) {
 		//fiber->print();
 		LOG_INFO<<(*fiber)<<endm; //JCW 01/26
 	    }
-	    LOG_INFO <<  "::loadTables  Found "<< nFound<<" EEMC related tables "<<endm;
+	    LOG_INFO <<  "StEEmcDb::loadTables  Found "<< nFound<<" EEMC related tables "<<endm;
 	}
     }
 }  
@@ -257,7 +257,7 @@ void  StEEmcDb::requestDataBase(StMaker *anyMaker){
   for(ifl=0;ifl<2;ifl++) { // loop over flavors
     if(ifl==1) {
       if( dbFlavor.flavor[0]==0) continue; // drop flavor change
-      LOG_INFO <<  "::RequestDataBase()-->ifl="<<ifl<<" try flavor='"<<dbFlavor.flavor <<"' for  mask='"<< dbFlavor.nameMask<<"')" <<endm;
+      LOG_INFO <<  "StEEmcDb::RequestDataBase()-->ifl="<<ifl<<" try flavor='"<<dbFlavor.flavor <<"' for  mask='"<< dbFlavor.nameMask<<"')" <<endm;
       
       anyMaker->SetFlavor(dbFlavor.flavor,dbFlavor.nameMask);
       mask=dbFlavor.nameMask;
@@ -265,7 +265,7 @@ void  StEEmcDb::requestDataBase(StMaker *anyMaker){
     
     TDataSet *eedb = anyMaker ? anyMaker->GetDataBase(dbName) : 0;
     if(!eedb) {
-      LOG_FATAL <<  "::RequestDataBase()  Could not find dbName ="<<dbName <<endm;
+      LOG_FATAL <<  "StEEmcDb::RequestDataBase()  Could not find dbName ="<<dbName <<endm;
       return ;
       // down-stream makers should check for presence of dataset
     }
@@ -294,7 +294,7 @@ void  StEEmcDb::requestDataBase(StMaker *anyMaker){
     
     getTable<St_kretDbBlobS,kretDbBlobS_st>(eedb,13,"eemcCrateConf",mask,&mDbFiberConfBlob);
     if(mDbFiberConfBlob) {
-     LOG_DEBUG<<  "::RequestDataBase()  eemcCrateConf dump "<<endm;
+     LOG_DEBUG<<  "StEEmcDb::RequestDataBase()  eemcCrateConf dump "<<endm;
     }
 
   }// end of loop over flavors
@@ -305,7 +305,7 @@ void  StEEmcDb::requestDataBase(StMaker *anyMaker){
 //--------------------------------------------------
 int  StEEmcDb::optimizeMapping(int is){
 
-  LOG_INFO <<"  conf ADC map for sector="<< mDbsectorID[is] <<endm;
+  LOG_INFO <<" StEEmcDb::optimizeMapping  conf ADC map for sector="<< mDbsectorID[is] <<endm;
   assert(mDbsectorID[is]>0);
   
   eemcDbADCconf_st *t= mDbADCconf[is];
@@ -341,7 +341,7 @@ int  StEEmcDb::optimizeMapping(int is){
     assert(x->chan>=0 && x->chan<MaxAnyCh);
     assert(byCrate[x->crate]);// ERROR: duplicated crate ID from DB
     if(byCrate[x->crate][x->chan]) {
-      LOG_FATAL <<  "::Fatal Error of eemc DB records: the same crate="<<x->crate<<", ch="<<x->chan<<" entered twice. Whole EEMC DB is erased from memory, all data will be ignored,  FIX IT !, JB"<<endm;
+      LOG_FATAL <<  " StEEmcDb::optimizeMapping::Fatal Error of eemc DB records: the same crate="<<x->crate<<", ch="<<x->chan<<" entered twice. Whole EEMC DB is erased from memory, all data will be ignored,  FIX IT !, JB"<<endm;
       //      byCrate[x->crate][x->chan]->print(); // first time
       //      x->print(); // second time
       LOG_FATAL<<(*byCrate[x->crate][x->chan])<<endm;// JCW 1/26
@@ -367,25 +367,25 @@ void StEEmcDb::optimizeOthers(int is){
   int ix1,ix2;
   EEindexRange(secID,ix1,ix2);
   
- LOG_DEBUG<<"   EEindexRange("<<secID<<","<<ix1<<","<<ix2<<")"<<endm;
+ LOG_DEBUG<<"StEEmcDb::optimizeOthers   EEindexRange("<<secID<<","<<ix1<<","<<ix2<<")"<<endm;
   
   //  if(dbg)printf(" Size: ped=%d cal=%d name=%d stat=%d \n",sizeof(ped->name)/EEMCDbMaxName,sizeof(cal->name)/EEMCDbMaxName,sizeof(tubeTw->name)/EEMCDbMaxName,sizeof(stat->name)/EEMCDbMaxName);
   
   assert(secID>0);
 
   eemcDbPMTcal_st  *calT=mDbPMTcal[is];  
-  if(calT)  LOG_INFO <<"tower calib="<<calT->comment<<endm;
+  if(calT)  LOG_INFO <<"StEEmcDb::optimizeOthers tower calib="<<calT->comment<<endm;
   eemcDbPMTname_st *tubeTw=mDbPMTname[is];
-  if(tubeTw) LOG_INFO <<"PMT names="<<tubeTw->comment<<endm;
+  if(tubeTw) LOG_INFO <<"StEEmcDb::optimizeOthers PMT names="<<tubeTw->comment<<endm;
 
   eemcDbPIXcal_st  *calM= mDbPIXcal[is];
-  if(calM) LOG_INFO <<"MAPMT calib="<<calM->comment<<endm;
+  if(calM) LOG_INFO <<"StEEmcDb::optimizeOthers MAPMT calib="<<calM->comment<<endm;
 
   eemcDbPMTped_st  *ped=mDbPMTped[is];
-  if(ped) LOG_INFO <<"ped tower & MAPMT="<<ped->comment<<endm;
+  if(ped) LOG_INFO <<"StEEmcDb::optimizeOthers ped tower & MAPMT="<<ped->comment<<endm;
 
   eemcDbPMTstat_st *stat=mDbPMTstat[is];
-  if(stat) LOG_INFO <<"status tower & MAPMT="<<stat->comment<<endm;
+  if(stat) LOG_INFO <<"StEEmcDb::optimizeOthers status tower & MAPMT="<<stat->comment<<endm;
   
   int key; 
   for(key=ix1;key<ix2; key++) { // loop  in this sector
@@ -469,7 +469,7 @@ void StEEmcDb::optimizeOthers(int is){
 //--------------------------------------------------
 //--------------------------------------------------
 void StEEmcDb::exportAscii(const char *fname) const{
-  LOG_INFO << "::exportAscii(\'" << fname << "') ..." << endm;
+  LOG_INFO << "StEEmcDb::exportAscii(\'" << fname << "') ..." << endm;
 
   FILE * fd=fopen(fname,"w");
   assert(fd);
@@ -496,7 +496,7 @@ void StEEmcDb::exportAscii(const char *fname) const{
     x->exportAscii(fd);
     nTot++;
   }
-  LOG_INFO << "::exportAscii()     nTot=" << nTot << ", done" << endm;
+  LOG_INFO << "StEEmcDb::exportAscii()     nTot=" << nTot << ", done" << endm;
   fclose(fd);
 }
 
@@ -564,17 +564,17 @@ void  StEEmcDb::optimizeFibers  (){
 
   }
   
-  LOG_FATAL <<"  mOptimizeFibers() map missing/wrong terminating key "<<endm;
+  LOG_FATAL <<" StEEmcDb::optimizeFibers  mOptimizeFibers() map missing/wrong terminating key "<<endm;
   
  fatal:
-    LOG_FATAL <<"     EEMC  FiberConf  error, without it decoding of the _raw_ EEMC data from StEvent is not working (all data are dropped). However, this missing table is irreleveant for muDst analysis, JB"<<endm;
+    LOG_FATAL <<" StEEmcDb::optimizeFibers     EEMC  FiberConf  error, without it decoding of the _raw_ EEMC data from StEvent is not working (all data are dropped). However, this missing table is irreleveant for muDst analysis, JB"<<endm;
     return;
 
  done:
-    LOG_INFO <<"   mOptimizeFibers() map found for nFiber="<<nFiber<<endm; 
+    LOG_INFO <<" StEEmcDb::optimizeFibers   mOptimizeFibers() map found for nFiber="<<nFiber<<endm; 
    if(icr==nFiber)  return;
 
-    LOG_FATAL <<"   mOptimizeFibers() map nFiber missmatch is="<<icr<<" should be="<<nFiber<<endm;
+    LOG_FATAL <<" StEEmcDb::optimizeFibers   mOptimizeFibers() map nFiber missmatch is="<<icr<<" should be="<<nFiber<<endm;
 goto fatal;
 } 
 
