@@ -3,8 +3,8 @@
 <stdout URL="file:./sched$JOBID.log" />
 <stderr URL="file:./sched$JOBID.err" />
 <command> 
-  cd ${SUBMITTINGDIRECTORY}  
-  set Name = `basename $PWD`
+# cd ${SUBMITTINGDIRECTORY}  
+  set Name = `basename ${SUBMITTINGDIRECTORY}`
   setenv NODEBUG yes
   setenv STARFPE NO
   setup 64b
@@ -38,10 +38,15 @@
   set tag  = ${base}.tags.root
   set logFile  = ${base}B.log
   echo "${file}"
-  if (-r ../xyz.root) ln -s ../xyz.root PVxyz.root 
-  if ( ! -r ${file}) then
+  if (-r ${SUBMITTINGDIRECTORY}/../xyz.root) ln -s ${SUBMITTINGDIRECTORY}/../xyz.root PVxyz.root 
+  if ( ! -r ${SUBMITTINGDIRECTORY}/${file}) then 
+    if (! -r ${SUBMITTINGDIRECTORY}/${base}.bla.root) then
+    touch  ${SUBMITTINGDIRECTORY}/${base}.bla.root
     root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'","'${tag}'")' &gt;&amp; ${logFile}
+    cp ${base}*  ${SUBMITTINGDIRECTORY}
+    rm  ${SUBMITTINGDIRECTORY}/${base}.bla.root
+    endif
   endif
 </command>
-<input URL="command:RunId.pl 1 10 1000 K_S0" />
+<input URL="command:RunId.pl 1 100 100 K_S0" />
 </job>
