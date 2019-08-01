@@ -1,4 +1,5 @@
 #include "GtHash.h"
+#include "TMath.h"
 
 class GtCradle : public TObject 
 {
