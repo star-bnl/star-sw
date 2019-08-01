@@ -9,8 +9,11 @@
 #ifndef StPicoBEmcPidTraits_h
 #define StPicoBEmcPidTraits_h
 
+#include <limits>
+
 // ROOT headers
 #include "TObject.h"
+
 
 //_________________
 class StPicoBEmcPidTraits: public TObject {
