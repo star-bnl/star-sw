@@ -10,10 +10,10 @@
  * keep only one, the vertex selection criteria have been proposed.
  * Currently, next options are available:
  *   a) Default - select the first primary vertex (with index = 0)
- *   b) VpdOrDefault - uses the  Default option at first, and then 
+ *   b) VpdOrDefault - uses the  Default option at first, and then
  *      if BTOF info is available checks for the Vpd option.
  *   c) Vpd - checks if BTof info is available then loops over primary
- *      vertices and checks if |Vz - VpdVz|<mTpcVpdVzDiffCut. The first 
+ *      vertices and checks if |Vz - VpdVz|<mTpcVpdVzDiffCut. The first
  *      vertex that satisfies the cut is selected.
  * Default is NotSet. In this case the program execution will be terminated.
  * Has to be explicitly set.
@@ -28,7 +28,7 @@
  * In order to store covariance matrix for each track one should specify
  * PicoCovMtxMode with one of two words:
  *   a) PicoCovMtxSkip - skip and not write covariance matrix
- *   b) PicoCovMtxWrite - store covariance matrices. If covariance matrix 
+ *   b) PicoCovMtxWrite - store covariance matrices. If covariance matrix
  *      does not exist, then it is filled with zeros
  * Default is PicoCovMtxSkip.
  *
@@ -106,11 +106,11 @@ class StPicoDstMaker : public StMaker {
   void SetStatus(char const* branchNameRegex, int enable);
 
   /// Returns null pointer if no StPicoDst
-  StPicoDst* picoDst();
+  StPicoDst* picoDst()      { return mPicoDst; }
   /// In read mode, returns pointer to the chain of .picoDst.root files
-  TChain* chain();
+  TChain* chain()           { return mChain; }
   /// Returns pointer to the current TTree, the top level io structure
-  TTree* tree();
+  TTree* tree()             { return mTTree; }
 
   /// Sets the split level for the file and all branches.
   /// Please refer to the ROOT manual (http://root.cern.ch) for more info
@@ -122,22 +122,28 @@ class StPicoDstMaker : public StMaker {
   void setCompression(int comp = 9);
 
   /// Set vertex selection mode
-  void setVtxMode(const PicoVtxMode vtxMode);
+  void setVtxMode(const PicoVtxMode vtxMode)              { mVtxMode = vtxMode; }
   /// Set to write or not to write covariant matrix
-  void setCovMtxMode(const PicoCovMtxMode covMtxMode);
+  void setCovMtxMode(const PicoCovMtxMode covMtxMode)     { mCovMtxMode = covMtxMode; }
   /// Set to write or not write BEmc Smd hits
-  void setBEmcSmdMode(const PicoBEmcSmdMode bemcSmdMode);
+  void setBEmcSmdMode(const PicoBEmcSmdMode bemcSmdMode)  { mBEmcSmdMode = bemcSmdMode; }
 
  private:
 
   /// Turn-off ROOT streamers
   void streamerOff();
 
+  /// Open file for writing
   void openWrite();
+  /// Write information
   void write();
+  /// Close file where the information has been written
   void closeWrite();
+  /// Open file to read
   Int_t openRead();
+  /// Read information
   void  read();
+  /// Close file which was read
   void closeRead();
   /// Set branch addresses
   void setBranchAddresses(TChain*);
@@ -181,6 +187,8 @@ class StPicoDstMaker : public StMaker {
   void fillEpdHits();
   /// Fill BBC hit information
   void fillBbcHits();
+  /// Fill ETOF information
+  void fillETofHits();
 
  /**
   * Returns various measurements by the BEMC and BSMD detectors corresponding to
@@ -285,21 +293,15 @@ class StPicoDstMaker : public StMaker {
 
   /// Get CVS status
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPicoDstMaker.h,v 1.24 2019/02/28 14:15:15 gnigmat Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPicoDstMaker.h,v 1.25 2019/08/06 21:40:19 gnigmat Exp $ built " __DATE__ " " __TIME__ ;
     return cvs;
   }
 
   ClassDef(StPicoDstMaker, 0)
 };
 
-inline StPicoDst* StPicoDstMaker::picoDst() { return mPicoDst; }
-inline TChain* StPicoDstMaker::chain() { return mChain; }
-inline TTree* StPicoDstMaker::tree() { return mTTree; }
 inline void StPicoDstMaker::setSplit(int split) { mSplit = split; }
 inline void StPicoDstMaker::setCompression(int comp) { mCompression = comp; }
 inline void StPicoDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
-inline void StPicoDstMaker::setVtxMode(const PicoVtxMode vtxMode) { mVtxMode = vtxMode; }
-inline void StPicoDstMaker::setCovMtxMode(const PicoCovMtxMode covMtxMode) { mCovMtxMode = covMtxMode; }
-inline void StPicoDstMaker::setBEmcSmdMode(const PicoBEmcSmdMode bemcSmdMode) { mBEmcSmdMode = bemcSmdMode; }
 
 #endif
