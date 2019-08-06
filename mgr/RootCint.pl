@@ -248,8 +248,8 @@ for my $h  (split /\s/,$sources) {
     
     if ($coll) {			# Collection Definition
 	my $macro = "./StRoot/St_base/StArray.h";
-	if (-f $macro) {}
-	else {$macro = `echo \$STAR/StRoot/St_base/StArray.h`;}
+	if ( -f $macro) { }
+	else { $macro = `echo \$STAR/StRoot/St_base/StArray.h`;}
 	my $tmp = "temp.h";
 	open (INPUT, $h) or die "Can't open $h\n";
 	my $new_h = $DirName . "/" . basename($h);
@@ -259,15 +259,24 @@ for my $h  (split /\s/,$sources) {
 		my @Class = split /([\(\)])/, $line;
 		my $class = $Class[2];
 		if ($class) {
-		    (my $core = $class) =~ s/^St//g; 		#print "core $core\n";
+		    my($core);
+		    # instead of s///g, replace by if match then sub ele noop
+		    if ( $class =~ /(^St)(.*)/){
+			$core = $2; 		
+		    } else {
+			$core = $class;
+		    }
+
 		    my $cl = "";
 		    foreach my $stem ("Iterator","PtrVec","SPtrVec") {
 			if ($stem eq "Iterator") {$cl = "St" . $core . $stem      ;}
 			else                     {$cl = "St" . $stem . $core . "-";}
 			#print "DEBUG pushing $cl\n";
 			push @classes, $cl;
-			$class_hfile{$cl} = $new_h; $class_hfile_depens_on{$cl} = $includes;
-			#print "class: $stem $core $cl includes  $includes\n";
+			$class_hfile{$cl} = $new_h; 
+			$class_hfile_depens_on{$cl} = $includes;
+
+			#print "DEBUG class: $stem $core $cl includes [$includes]\n";
 		    }
 		    open(DEF, $macro) || die "Can't open Macros $macro \n";
 		    my $def = 0;
@@ -290,7 +299,7 @@ for my $h  (split /\s/,$sources) {
 	}
 	close (OUTPUT);
 	rename $tmp, $new_h or 
-	    `mv $tmp $new_h`;# or die "Can't rename or move $tmp to $new_h;\n";
+	    `/bin/mv $tmp $new_h`;# or die "Can't rename or move $tmp to $new_h;\n";
 	
     } #end Collection Definition
 }
