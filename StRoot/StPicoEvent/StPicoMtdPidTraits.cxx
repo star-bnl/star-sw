@@ -40,7 +40,7 @@ StPicoMtdPidTraits::~StPicoMtdPidTraits() {
 }
 
 //_________________
-void StPicoMtdPidTraits::Print(const Char_t* option) const {
+void StPicoMtdPidTraits::Print(const Char_t* option __attribute__((unused)) ) const {
 
   LOG_INFO << "Matched hit: backleg =  " << backleg()
            << ", module  = " << module()

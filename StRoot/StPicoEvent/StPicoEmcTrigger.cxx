@@ -48,7 +48,7 @@ StPicoEmcTrigger::StPicoEmcTrigger(Int_t flag, Int_t id, Int_t adc,
 }
 
 //_________________
-StPicoEmcTrigger::StPicoEmcTrigger(const StPicoEmcTrigger &trigger) {
+StPicoEmcTrigger::StPicoEmcTrigger(const StPicoEmcTrigger &trigger) : TObject() {
   mFlag = trigger.mFlag;
   mId = trigger.mId;
   mAdc = trigger.mAdc;
@@ -63,7 +63,7 @@ StPicoEmcTrigger::~StPicoEmcTrigger() {
 }
 
 //_________________
-void StPicoEmcTrigger::Print(const Char_t* option) const {
+void StPicoEmcTrigger::Print(const Char_t* option __attribute__((unused)) ) const {
   LOG_INFO << "flag: " << mFlag << " id: " << mId << " ADC: " << mAdc
            << " SMDE hits num: " << mSmdE.size()
            << " SMDP hits num: " << mSmdP.size() << endm;

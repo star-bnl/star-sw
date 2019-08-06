@@ -24,7 +24,7 @@ StPicoFmsHit::StPicoFmsHit(Int_t detectorId, Int_t channelId, Int_t adc) : TObje
 }
 
 //_________________
-StPicoFmsHit::StPicoFmsHit(const StPicoFmsHit &hit) {
+StPicoFmsHit::StPicoFmsHit(const StPicoFmsHit &hit) : TObject() {
   mChannelDetectorId = hit.mChannelDetectorId;
   mAdc = hit.mAdc;
 }
@@ -35,12 +35,11 @@ StPicoFmsHit::~StPicoFmsHit() {
 }
 
 //_________________
-void StPicoFmsHit::Print(const Char_t *option) const {
+void StPicoFmsHit::Print(const Char_t *option __attribute__((unused)) ) const {
   LOG_INFO << " FMS hit -"
            << " detectorId: " << detectorId()
            << " channel: " << channel()
-           << " ADC: " << adc()
-           << "\n";
+           << " ADC: " << adc() << endm;
 }
 
 //_________________

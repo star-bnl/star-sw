@@ -31,22 +31,24 @@ class StPicoBEmcSmdEHit: public TObject {
   //
 
   /// SMD Eta hit id
-  Int_t id() const;
+  Int_t id() const          { return (Int_t)mId; }
   /// SMD Eta hit ADC
-  Int_t adc() const;
+  Int_t adc() const         { return (Int_t)mAdc; }
   /// SMD Eta hit energy
-  Float_t energy() const;
+  Float_t energy() const    { return mEnergy; }
 
   //
   // Setters
   //
 
   /// Set hit id
-  void setId(Int_t id);
+  void setId(Int_t id)      { mId = (id > std::numeric_limits<short>::max()) ? -1 : (Short_t)id; }
   /// Set hit ADC
-  void setAdc(Int_t adc);
+  void setAdc(Int_t adc)
+  { mAdc = ( adc > std::numeric_limits<unsigned short>::max() ) ?
+      std::numeric_limits<unsigned short>::max() : (UShort_t)adc; }
   /// Set energy corresponding to the hit
-  void setEnergy(Float_t energy);
+  void setEnergy(Float_t energy) { mEnergy = energy; }
 
  private:
 
@@ -60,20 +62,4 @@ class StPicoBEmcSmdEHit: public TObject {
   ClassDef(StPicoBEmcSmdEHit, 1);
 };
 
-//
-// Getters
-//
-inline Int_t   StPicoBEmcSmdEHit::id() const { return (Int_t)mId; }
-inline Int_t   StPicoBEmcSmdEHit::adc() const { return (Int_t)mAdc; }
-inline Float_t StPicoBEmcSmdEHit::energy() const { return mEnergy; }
-
-//
-// Setters
-//
-inline void StPicoBEmcSmdEHit::setId(Int_t id)
-{ mId = (id > std::numeric_limits<short>::max()) ? -1 : (Short_t)id; }
-inline void StPicoBEmcSmdEHit::setAdc(Int_t adc)
-{ mAdc = (adc > std::numeric_limits<unsigned short>::max()) ?
-  std::numeric_limits<unsigned short>::max() : (UShort_t)adc; }
-inline void StPicoBEmcSmdEHit::setEnergy(Float_t energy) { mEnergy = energy; }
 #endif

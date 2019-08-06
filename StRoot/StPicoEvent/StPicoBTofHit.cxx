@@ -20,7 +20,7 @@ StPicoBTofHit::StPicoBTofHit(int id) : TObject() {
 }
 
 //_________________
-StPicoBTofHit::StPicoBTofHit(const StPicoBTofHit &hit) {
+StPicoBTofHit::StPicoBTofHit(const StPicoBTofHit &hit) : TObject() {
   mId = hit.mId;
 }
 
@@ -30,6 +30,6 @@ StPicoBTofHit::~StPicoBTofHit() {
 }
 
 //_________________
-void StPicoBTofHit::Print(const Char_t* option) const {
+void StPicoBTofHit::Print(const Char_t* option __attribute__((unused)) ) const {
   LOG_INFO << " Id = " << id() << endm;
 }

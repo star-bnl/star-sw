@@ -128,7 +128,7 @@ void StPicoMtdTrigger::setTF201TriggerBit(Int_t year, UInt_t dsmBit1, UInt_t dsm
 }
 
 //_________________
-StPicoMtdTrigger::StPicoMtdTrigger(const StPicoMtdTrigger &trigger) {
+StPicoMtdTrigger::StPicoMtdTrigger(const StPicoMtdTrigger &trigger) : TObject() {
   mVpdTacSum = trigger.mVpdTacSum;
   for(Int_t iIter=0; iIter<2; iIter++) {
     mTHUBtime[iIter] = trigger.mTHUBtime[iIter];
@@ -179,4 +179,13 @@ void StPicoMtdTrigger::getMaximumQTtac(const Int_t qt, Int_t& pos1, Int_t& pos2)
       pos2 = i + 1;
     }
   } //for (Int_t i = 0; i < 8; i++)
+}
+
+//_________________
+void StPicoMtdTrigger::Print(const Char_t *option __attribute__((unused)) ) const {
+  LOG_INFO << " VPD TAC sum: " << mVpdTacSum
+	   << " THUB time ( " << mTHUBtime[0] << " , " << mTHUBtime[1] << " )" << endm;
+  LOG_INFO << "TCU trigger bit: " << mTF201TriggerBit
+	   << " Should have reject event: " << mShouldHaveRejectEvent
+	   << endm;
 }

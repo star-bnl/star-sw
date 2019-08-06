@@ -104,7 +104,7 @@ void StPicoBTofPidTraits::setHitPositionXYZ(Float_t x, Float_t y, Float_t z) {
 }
 
 //_________________
-void StPicoBTofPidTraits::Print(const Char_t* option) const {
+void StPicoBTofPidTraits::Print(const Char_t* option __attribute__((unused)) ) const {
   LOG_INFO << " Matched track index = " << mTrackIndex << endm;
   LOG_INFO << " BTOF cellId = " << btofCellId() << " tof = " << btof()
 	   << " beta = " << btofBeta() << endm;

@@ -28,6 +28,8 @@
 #include "StPicoTrackCovMatrix.h"
 #include "StPicoBEmcSmdEHit.h"
 #include "StPicoBEmcSmdPHit.h"
+#include "StPicoETofHit.h"
+#include "StPicoETofPidTraits.h"
 #include "StPicoArrays.h"
 #include "StPicoDst.h"
 
@@ -125,6 +127,8 @@ void StPicoDstReader::streamerOff() {
   StPicoTrackCovMatrix::Class()->IgnoreTObjectStreamer();
   StPicoBEmcSmdEHit::Class()->IgnoreTObjectStreamer();
   StPicoBEmcSmdPHit::Class()->IgnoreTObjectStreamer();
+  StPicoETofHit::Class()->IgnoreTObjectStreamer();
+  StPicoETofPidTraits::Class()->IgnoreTObjectStreamer();
 }
 
 //_________________
@@ -165,7 +169,15 @@ void StPicoDstReader::Init() {
 
     Int_t nFile = 0;
     std::string file;
+    size_t pos;
     while(getline(inputStream, file)) {
+      // NOTE: our external formatters may pass "file NumEvents"
+      //       Take only the first part
+      //cout << "DEBUG found " <<  file << endl;
+      pos = file.find_first_of(" ");
+      if (pos != std::string::npos ) file.erase(pos,file.length()-pos);
+      //cout << "DEBUG found [" <<  file << "]" << endl;
+
       if(file.find(".picoDst.root") != std::string::npos) {
         TFile* ftmp = TFile::Open(file.c_str());
         if(ftmp && !ftmp->IsZombie() && ftmp->GetNkeys()) {
@@ -198,7 +210,7 @@ void StPicoDstReader::Init() {
 }
 
 //_________________
-Bool_t StPicoDstReader::readPicoEvent(Long64_t iEvent) {
+Bool_t StPicoDstReader::readPicoEvent(Long64_t iEvent __attribute__((unused)) ) {
 
   Int_t mStatusRead = true; // true - okay, false - nothing to read
 

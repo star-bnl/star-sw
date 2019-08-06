@@ -18,60 +18,60 @@ class StPicoTrackCovMatrix : public TObject {
   /// Print option
   virtual void Print(Char_t const* option = "") const;
 
-  /**
-   * Getters
-   */
+  //
+  // Getters
+  //
 
   /// Return address to the first parameter
-  Float_t* params();
+  Float_t* params()                   { return &mImp; }
   /// Return address to the first parameter
-  const Float_t* params() const;
+  const Float_t* params() const       { return &mImp; }
   /// Return pointer to the sigma array
-  const Float_t* sigmas() const;
+  const Float_t* sigmas() const       { return mSigma; }
   /// Return pointer to the correlation array
-  const Float_t* correlations() const;
-
+  const Float_t* correlations() const { return mCorr; }
   /// Return impact
-  Float_t imp() const;
+  Float_t imp() const                 { return mImp; }
   /// Return z
-  Float_t z() const;
+  Float_t z() const                   { return mZ; }
   /// Return psi
-  Float_t psi() const;
+  Float_t psi() const                 { return mPsi; }
   /// Return pti
-  Float_t pti() const;
+  Float_t pti() const                 { return mPti; }
   /// Return tangent
-  Float_t tan() const;
+  Float_t tan() const                 { return mTan; }
   /// Return curvature
-  Float_t curv() const;
+  Float_t curv() const                { return mCurv; }
 
   /// Return true, if all values 0. It corresponds to
   /// the case when track did not have a covariance
   /// matrix in MuDst
   Bool_t isBadCovMatrix();
 
-  /**
-   * Setters
-   */
+  //
+  // Setters
+  //
 
   /// Set 6 values (main values)
-  void setParams(Float_t params[6]);
+  void setParams(Float_t params[6])
+  { mImp = params[0]; mZ = params[1]; mPsi = params[2]; mPti = params[3]; mTan = params[4]; mCurv = params[5]; }
   /// Set 5 sigma parameters
-  void setSigmas(Float_t sigmas[5]);
+  void setSigmas(Float_t sigmas[5]) { for(Int_t iIter=0; iIter<5; iIter++) { mSigma[iIter] = sigmas[iIter]; } }
   /// Set 10 correlation parameters
-  void setCorrelations(Float_t corr[10]);
+  void setCorrelations(Float_t corr[10]) { for(Int_t iIter=0; iIter<10; iIter++) { mCorr[iIter] = corr[iIter]; } }
 
   /// Set impact
-  void setImp(Float_t imp);
+  void setImp(Float_t imp)       { mImp = (Float16_t)imp; }
   /// Set z
-  void setZ(Float_t z);
+  void setZ(Float_t z)           { mZ = (Float16_t)z; }
   /// Set psi
-  void setPsi(Float_t psi);
+  void setPsi(Float_t psi)       { mPsi = (Float16_t)psi; }
   /// Set pti
-  void setPti(Float_t pti);
+  void setPti(Float_t pti)       { mPti = (Float16_t)pti; }
   /// Set tangent
-  void setTan(Float_t tan);
+  void setTan(Float_t tan)       { mTan = (Float16_t)tan; }
   /// Set curvature
-  void setCurv(Float_t curv);
+  void setCurv(Float_t curv)     { mCurv = (Float16_t)curv; }
   
  private:
 
@@ -103,39 +103,5 @@ class StPicoTrackCovMatrix : public TObject {
 
   ClassDef(StPicoTrackCovMatrix, 1)
 };
-
-/**
- * Getters
- */
-inline Float_t* StPicoTrackCovMatrix::params() { return &mImp; }
-inline const Float_t* StPicoTrackCovMatrix::params() const { return &mImp; }
-inline const Float_t* StPicoTrackCovMatrix::sigmas() const { return mSigma; }
-inline const Float_t* StPicoTrackCovMatrix::correlations() const { return mCorr; }
-inline Float_t StPicoTrackCovMatrix::imp() const { return mImp; }
-inline Float_t StPicoTrackCovMatrix::z() const { return mZ; }
-inline Float_t StPicoTrackCovMatrix::psi() const { return mPsi; }
-inline Float_t StPicoTrackCovMatrix::pti() const { return mPti; }
-inline Float_t StPicoTrackCovMatrix::tan() const { return mTan; }
-inline Float_t StPicoTrackCovMatrix::curv() const { return mCurv; }
-
-/**
- * Setters
- */
-inline void StPicoTrackCovMatrix::setImp(Float_t imp) { mImp = (Float16_t)imp; }
-inline void StPicoTrackCovMatrix::setZ(Float_t z) { mZ = (Float16_t)z; }
-inline void StPicoTrackCovMatrix::setPsi(Float_t psi) { mPsi = (Float16_t)psi; }
-inline void StPicoTrackCovMatrix::setPti(Float_t pti) { mPti = (Float16_t)pti; }
-inline void StPicoTrackCovMatrix::setTan(Float_t tan) { mTan = (Float16_t)tan; }
-inline void StPicoTrackCovMatrix::setCurv(Float_t curv) { mCurv = (Float16_t)curv; }
-inline void StPicoTrackCovMatrix::setParams(Float_t params[6]) {
-  mImp = params[0]; mZ = params[1]; mPsi = params[2]; mPti = params[3];
-  mTan = params[4]; mCurv = params[5];
-}
-inline void StPicoTrackCovMatrix::setSigmas(Float_t sigmas[5]) {
-  for(Int_t iIter=0; iIter<5; iIter++) { mSigma[iIter] = sigmas[iIter]; }
-}
-inline void StPicoTrackCovMatrix::setCorrelations(Float_t corr[10]) {
-  for(Int_t iIter=0; iIter<10; iIter++) { mCorr[iIter] = corr[iIter]; }
-}
 
 #endif

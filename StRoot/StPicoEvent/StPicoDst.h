@@ -31,6 +31,8 @@ class StPicoMtdPidTraits;
 class StPicoTrackCovMatrix;
 class StPicoBEmcSmdEHit;
 class StPicoBEmcSmdPHit;
+class StPicoETofHit;
+class StPicoETofPidTraits;
 
 //_________________
 class StPicoDst {
@@ -81,6 +83,10 @@ class StPicoDst {
   static StPicoBEmcSmdEHit* bemcSmdEHit(Int_t i) { return (StPicoBEmcSmdEHit*)picoArrays[StPicoArrays::BEmcSmdEHit]->UncheckedAt(i); }
   /// Return pointer to i-th BEMC SMD phi hit
   static StPicoBEmcSmdPHit* bemcSmdPHit(Int_t i) { return (StPicoBEmcSmdPHit*)picoArrays[StPicoArrays::BEmcSmdPHit]->UncheckedAt(i); }
+  /// Return pointer to i-th etof hit
+  static StPicoETofHit* etofHit(Int_t i) { return (StPicoETofHit*)picoArrays[StPicoArrays::ETofHit]->UncheckedAt(i); }
+  /// Return pointer to i-th etof pidTraits
+  static StPicoETofPidTraits* etofPidTraits(Int_t i) { return (StPicoETofPidTraits*)picoArrays[StPicoArrays::ETofPidTraits]->UncheckedAt(i); }
 
   /// Return number of tracks
   static UInt_t numberOfTracks() { return picoArrays[StPicoArrays::Track]->GetEntries(); }
@@ -90,7 +96,7 @@ class StPicoDst {
   static UInt_t numberOfMtdTriggers() { return picoArrays[StPicoArrays::MtdTrigger]->GetEntries(); }
   /// Return number of BTow hits
   static UInt_t numberOfBTowHits() { return picoArrays[StPicoArrays::BTowHit]->GetEntries(); }
-  /// Return number of BTOF hits
+  /// Return number of BTof hits
   static UInt_t numberOfBTofHits() { return picoArrays[StPicoArrays::BTofHit]->GetEntries(); }
   /// Return number of MTD hits
   static UInt_t numberOfMtdHits() { return picoArrays[StPicoArrays::MtdHit]->GetEntries(); }
@@ -102,7 +108,7 @@ class StPicoDst {
   static UInt_t numberOfFmsHits() { return picoArrays[StPicoArrays::FmsHit]->GetEntries(); }
   /// Return number of BEMC PID traits
   static UInt_t numberOfBEmcPidTraits() { return picoArrays[StPicoArrays::BEmcPidTraits] ->GetEntries(); }
-  /// Return number of BTOF PID traits
+  /// Return number of BTof PID traits
   static UInt_t numberOfBTofPidTraits() { return picoArrays[StPicoArrays::BTofPidTraits]->GetEntries(); }
   /// Return number of MTD traits
   static UInt_t numberOfMtdPidTraits() { return picoArrays[StPicoArrays::MtdPidTraits]->GetEntries(); }
@@ -112,6 +118,10 @@ class StPicoDst {
   static UInt_t numberOfBEmcSmdEHits() { return picoArrays[StPicoArrays::BEmcSmdEHit]->GetEntries(); }
   /// Return number of BEMC SMD phi hits
   static UInt_t numberOfBEmcSmdPHits() { return picoArrays[StPicoArrays::BEmcSmdPHit]->GetEntries(); }
+  /// Return number of ETof hits
+  static UInt_t numberOfETofHits() { return picoArrays[StPicoArrays::ETofHit]->GetEntries(); }
+  /// Return number of ETOF PID traits
+  static UInt_t numberOfETofPidTraits() { return picoArrays[StPicoArrays::ETofPidTraits]->GetEntries(); }
 
 
   /// Print information
@@ -140,6 +150,10 @@ class StPicoDst {
   static void printBEmcSmdEHits();
   /// Print BEMC SMD phi info
   static void printBEmcSmdPHits();
+    /// Print ETOF hit info
+  static void printETofHits();
+    /// Print ETOF PID trait info
+  static void printETofPidTraits();
 
  private:
 

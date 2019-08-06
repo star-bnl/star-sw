@@ -2,7 +2,7 @@
  * \class StPicoBTofHit
  * \brief Stores BTOF hit information
  *
- * The StPicoBTofHit holds inofmation about hits in BTOF
+ * The StPicoBTofHit holds inofmation about hits in Barrel Time-Of-Flight
  */
 
 #ifndef StPicoBTofHit_h
@@ -34,20 +34,22 @@ class StPicoBTofHit : public TObject {
   //
 
   /// Return ID of the hit
-  Int_t   id() const;
+  Int_t   id() const      { return mId; }
   /// Return tray number
-  Int_t   tray() const;
+  Int_t   tray() const    { return mId / 192 + 1; }
   /// Return module number
-  Int_t   module() const;
+  Int_t   module() const  { return (mId % 192) / 6 + 1; }
   /// Return cell number
-  Int_t   cell() const;
+  Int_t   cell() const    { return mId / 6 + 1; }
 
   //
   // Setters
   //
 
   /// Set ID of the hit
-  void setId(Int_t id);
+  void setId(Int_t id)
+  { if (id<0) { mId = -1; }
+    else { mId = (id > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)id; } }
   /// Set ID of the track using track, module and cell
   void setId(Int_t tray, Int_t module, Int_t cell);
 
@@ -59,23 +61,4 @@ class StPicoBTofHit : public TObject {
   ClassDef(StPicoBTofHit, 2)
 };
 
-//
-// Getters
-//
-inline Int_t StPicoBTofHit::id() const { return mId; }
-inline Int_t StPicoBTofHit::tray() const { return mId / 192 + 1; }
-inline Int_t StPicoBTofHit::module() const { return (mId % 192) / 6 + 1; }
-inline Int_t StPicoBTofHit::cell() const { return mId / 6 + 1; }
-
-//
-// Setters
-//
-inline void StPicoBTofHit::setId(Int_t id) {
-  if (id<0) {
-    mId = -1;
-  }
-  else {
-    mId = (id > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)id;
-  }
-}
 #endif

@@ -75,7 +75,7 @@ StPicoBEmcPidTraits::StPicoBEmcPidTraits(Int_t index, Int_t id, Int_t adc0, cons
 }
 
 //_________________
-StPicoBEmcPidTraits::StPicoBEmcPidTraits(const StPicoBEmcPidTraits &traits) {
+StPicoBEmcPidTraits::StPicoBEmcPidTraits(const StPicoBEmcPidTraits &traits) : TObject() {
   mTrackIndex = traits.mTrackIndex;
   mBemcId = traits.mBemcId;
   mBemcAdc0 = traits.mBemcAdc0;
@@ -101,7 +101,7 @@ StPicoBEmcPidTraits::~StPicoBEmcPidTraits() {
 }
 
 //_________________
-void StPicoBEmcPidTraits::Print(const Char_t* option) const {
+void StPicoBEmcPidTraits::Print(const Char_t* option __attribute__((unused)) ) const {
   LOG_INFO << "Matched track index = " << mTrackIndex << endm;
   LOG_INFO << " BEMC Id = " << bemcId() << " BTOW Adc0 = " << bemcAdc0()
 	   << " bemc E0 = " << bemcE0() << " e = " << bemcE() << endm;
