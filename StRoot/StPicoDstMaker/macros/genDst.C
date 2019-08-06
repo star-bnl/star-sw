@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: genDst.C,v 1.1 2018/09/17 05:02:32 gnigmat Exp $
+// $Id: genDst.C,v 1.2 2019/08/06 21:44:02 gnigmat Exp $
 // Author: G. Van Buren (BNL)
 //
 // Description:
@@ -67,6 +67,7 @@ void loadLibsVF() {
 //_________________
 void loadLibsPico() {
 
+  // EMC libs
   gSystem->Load("StEmcRawMaker");
   gSystem->Load("StEmcADCtoEMaker");
   gSystem->Load("StPreEclMaker");
@@ -74,6 +75,11 @@ void loadLibsPico() {
   gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StTriggerUtilities");
 
+  // FMS
+  gSystem->Load("libStFmsUtil");
+  gSystem->Load("libStFmsDbMaker");
+
+  // PicoDstMaker and PicoEvent
   gSystem->Load("libStPicoEvent");
   gSystem->Load("libStPicoDstMaker");
 }
@@ -167,6 +173,9 @@ void genDst(unsigned int First,
     muDstMaker.SetStatus("BTof*", 1);
     muDstMaker.SetStatus("Emc*", 1);
     muDstMaker.SetStatus("MTD*", 1);
+    muDstMaker.SetStatus("ETof*", 1);
+    muDstMaker.SetStatus("Epd*", 1);
+    muDstMaker.SetStatus("Fms*", 1);
 
     // EMCs
     StEEmcDbMaker* eemcDb = new StEEmcDbMaker;
@@ -174,6 +183,9 @@ void genDst(unsigned int First,
     adc2e->saveAllStEvent(true);
     StPreEclMaker* pre_ecl = new StPreEclMaker();
     StEpcMaker* epc = new StEpcMaker();
+
+    // FMS
+    StFmsDbMaker* fmsdb = new StFmsDbMaker("fmsDb");
 
 #ifdef 1
     // Trigger simulator
@@ -321,6 +333,12 @@ void genDst(unsigned int Last,
 /////////////////////////////////////////////////////////////////////////////
 //
 // $Log: genDst.C,v $
+// Revision 1.2  2019/08/06 21:44:02  gnigmat
+// Update of the files for MuDst->picoDst conversion:
+// - The FMS information has been added to genDst.C
+// - Active the most important branches via SetStatus("BranchName*",1) method by default in genDst.C
+// - producePicoDst.xml is modified according to the recent STAR scheduler updates
+//
 // Revision 1.1  2018/09/17 05:02:32  gnigmat
 // Macroses for manual picoDst generation have been added.
 //
