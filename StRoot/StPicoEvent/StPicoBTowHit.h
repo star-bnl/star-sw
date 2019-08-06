@@ -35,13 +35,13 @@ class StPicoBTowHit : public TObject {
   //
   
   /// Return ADC of the tower
-  Int_t   adc() const;
+  Int_t   adc() const     { return (Int_t)mAdc; }
   /// Return energy of the tower
-  Float_t energy() const;
+  Float_t energy() const  { return (Float_t)mE / 1000.f; }
   /// Return if the tower is bad
   Bool_t  isBad() const;
   /// Return softId
-  Int_t   numericIndex2SoftId(Int_t idx) const;
+  Int_t   numericIndex2SoftId(Int_t idx) const { return (idx+1); }
 
   //
   // Setters
@@ -61,12 +61,5 @@ class StPicoBTowHit : public TObject {
 
   ClassDef(StPicoBTowHit, 4)
 };
-
-//
-// Getters
-//
-inline Int_t   StPicoBTowHit::adc() const { return (Int_t)mAdc; }
-inline Float_t StPicoBTowHit::energy() const { return (Float_t)mE / 1000.f; }
-inline Int_t StPicoBTowHit::numericIndex2SoftId(Int_t idx) const { return (idx+1); }
 
 #endif

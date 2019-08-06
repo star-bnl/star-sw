@@ -12,7 +12,7 @@ StPicoTrackCovMatrix::StPicoTrackCovMatrix() : TObject(),
 }
 
 //_________________
-StPicoTrackCovMatrix::StPicoTrackCovMatrix(const StPicoTrackCovMatrix &mtx) {
+StPicoTrackCovMatrix::StPicoTrackCovMatrix(const StPicoTrackCovMatrix &mtx) : TObject() {
   mImp = mtx.mImp;
   mZ = mtx.mZ;
   mPsi = mtx.mPsi;
@@ -33,7 +33,7 @@ StPicoTrackCovMatrix::~StPicoTrackCovMatrix() {
 }
 
 //_________________
-void StPicoTrackCovMatrix::Print(Char_t const* option) const {
+void StPicoTrackCovMatrix::Print(Char_t const* option __attribute__((unused)) ) const {
   const Float_t *lSigma = sigmas();
   const Float_t *lCorr = correlations();
   LOG_INFO << "imp: " << imp()
@@ -51,8 +51,7 @@ void StPicoTrackCovMatrix::Print(Char_t const* option) const {
 	   << lCorr[2] << "/" << lCorr[3] << "/"
 	   << lCorr[4] << "/" << lCorr[5] << "/"
 	   << lCorr[6] << "/" << lCorr[7] << "/"
-	   << lCorr[8] << "/" << lCorr[9]    
-	   << endm;
+	   << lCorr[8] << "/" << lCorr[9] << endm;
 }
 
 //_________________

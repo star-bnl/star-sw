@@ -28,7 +28,7 @@ StPicoTrack::StPicoTrack() : TObject(),
   mNSigmaProton( std::numeric_limits<short>::min() ),
   mNSigmaElectron( std::numeric_limits<short>::min() ),
   mTopologyMap{}, mBEmcPidTraitsIndex(-1), mBTofPidTraitsIndex(-1),
-  mMtdPidTraitsIndex(-1) {
+  mMtdPidTraitsIndex(-1), mETofPidTraitsIndex(-1) {
   /* empty */
 }
 
@@ -63,6 +63,7 @@ StPicoTrack::StPicoTrack(const StPicoTrack &track) : TObject() {
   mBEmcPidTraitsIndex = track.mBEmcPidTraitsIndex;
   mBTofPidTraitsIndex = track.mBTofPidTraitsIndex;
   mMtdPidTraitsIndex = track.mMtdPidTraitsIndex;
+  mETofPidTraitsIndex = track.mETofPidTraitsIndex;
 }
 
 //_________________
@@ -71,16 +72,17 @@ StPicoTrack::~StPicoTrack() {
 }
 
 //_________________
-void StPicoTrack::Print(Char_t const* option) const {
-  LOG_INFO << "id: " << id()
-           << " chi2: " << chi2() << "\n"
-           << "pMom: " << pMom().X() << " " << pMom().Y() << " " << pMom().Z()
-	   << "gMom: " << gMom().X() << " " << gMom().Y() << " " << gMom().Z()
-	   << "origin: " << origin().X() << " " << origin().Y() << " " << origin().Z()
-           << " nHitsFit: " << nHitsFit()
+void StPicoTrack::Print(const Char_t* option __attribute__((unused)) ) const {
+  LOG_INFO << "id: " << id() << " chi2: " << chi2() << "\n"
+           << "pMom: " << pMom().X() << " " << pMom().Y() << " " << pMom().Z() << "\n"
+	   << "gMom: " << gMom().X() << " " << gMom().Y() << " " << gMom().Z() << "\n"
+	   << "origin: " << origin().X() << " " << origin().Y() << " " << origin().Z() << "\n"
+           << "nHitsFit: " << nHitsFit()
            << " nHitsdEdx: " << nHitsDedx() << "\n"
            << "nSigma pi/K/p/e: " << nSigmaPion()   << "/" << nSigmaKaon() << "/"
            << nSigmaProton() << "/" << nSigmaElectron() << "\n"
+	   << "Hit index in BEMC/BTof/MTD/ETof: " << mBEmcPidTraitsIndex << "/"
+	   << mBTofPidTraitsIndex << "/" << mMtdPidTraitsIndex << "/" << mETofPidTraitsIndex << "\n"
            << endm;
 }
 

@@ -55,28 +55,30 @@ class StPicoBbcHit : public TObject {
   StPicoBbcHit(const StPicoBbcHit &hit);
   /// Destructor
   virtual ~StPicoBbcHit();
+  // Print BBC hit information
+  virtual void Print(const Char_t *option = "") const;
 
   /// True if this channel has a valid TAC value
-  Bool_t hasTac() const;
+  Bool_t hasTac() const              { return (mQTdata >> 29) & 0x1; }
   /// ADC value [0,4095]
-  Int_t  adc() const;
+  Int_t  adc() const                 { return mQTdata & 0x0FFF; }
   /// TAC value [0,4095]
-  Int_t  tac() const;
+  Int_t  tac() const                 { return (mQTdata >> 12) & 0x0FFF; }
   /// TDC value [0,31]
-  Int_t  tdc() const;
+  Int_t  tdc() const                 { return (mQTdata >> 24) & 0x001F; }
   /// +1 if tile is on West side; -1 if on East side
-  Short_t side() const;
+  Short_t side() const               { return mId < 0 ? -1 : +1;}
 
   /// unique PMT identifier
   ///   absolute value is phototube number, between 1 and 16, inclusive
   ///   sign is +1/-1 for West/East
-  Short_t id() const;
+  Short_t id() const                 { return mId; }
   /// The packed data from the QT board: ADC=bits 0-11; TAC=bits 12-23; TDC=bits 24-28;
   ///                    bit 29=0/1 for has/does not have TAC;
   ///                    bit 30=0/1 if tile is marked bad/good in database
-  Int_t qtData() const;
+  Int_t qtData() const               { return mQTdata; }
   /// false if tile is bad or missing, according to (time-dependent) database
-  Bool_t isGood() const;
+  Bool_t isGood() const              { return (mQTdata >> 30) & 0x1; }
 
 
   /// If you use the setQTdata method, you need to pack the data yourself.
@@ -84,10 +86,10 @@ class StPicoBbcHit : public TObject {
   /// \param packedData: ADC=bits 0-11; TAC=bits 12-23; TDC=bits 24-28;
   ///                    bit 29=0/1 for has/does not have TAC;
   ///                    bit 30=0/1 if tile is marked bad/good in database
-  void setQTdata(Int_t packedData);
+  void setQTdata(Int_t packedData)   { mQTdata=packedData; }
   /// It is expected that this will not be invoked, but rather the constructor used
   /// \param id = sign*(100*position+tile) where sign=+/- for West/East wheel
-  void setId(Short_t id);
+  void setId(Short_t id)             { mId = id; }
 
  protected:
 
@@ -104,14 +106,4 @@ class StPicoBbcHit : public TObject {
   ClassDef(StPicoBbcHit, 1)
 };
 
-inline void    StPicoBbcHit::setId(Short_t id) { mId = id; }
-inline void    StPicoBbcHit::setQTdata(Int_t packedData) { mQTdata=packedData; }
-inline Int_t   StPicoBbcHit::qtData()   const { return mQTdata; }
-inline Short_t StPicoBbcHit::side()     const { return mId < 0 ? -1 : +1;}
-inline Short_t StPicoBbcHit::id()       const { return mId; }
-inline Int_t   StPicoBbcHit::adc() const { return mQTdata & 0x0FFF; }
-inline Int_t   StPicoBbcHit::tac() const { return (mQTdata >> 12) & 0x0FFF; }
-inline Int_t   StPicoBbcHit::tdc() const { return (mQTdata >> 24) & 0x001F; }
-inline Bool_t  StPicoBbcHit::hasTac() const { return (mQTdata >> 29) & 0x1; }
-inline Bool_t  StPicoBbcHit::isGood() const { return (mQTdata >> 30) & 0x1; }
 #endif

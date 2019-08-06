@@ -2,6 +2,7 @@
 #include <cstdlib>
 
 // PicoDst headers
+#include "StPicoMessMgr.h"
 #include "StPicoBbcHit.h"
 
 // \class StPicoBbcHit
@@ -44,13 +45,13 @@ StPicoBbcHit::StPicoBbcHit() : StPicoBbcHit(0, 0, 0, 0, 0, false, false) {
 StPicoBbcHit::StPicoBbcHit(Int_t PMTnumber,
 			   Int_t EW, Int_t ADC, Int_t TAC,
 			   Int_t TDC, Bool_t hasTAC,
-			   Bool_t statusIsGood) :
+			   Bool_t statusIsGood) : TObject(),
   mQTdata( (ADC & 0x0FFF) | (TAC & 0x0FFF) << 12 | (TDC & 0x001F) << 24 | hasTAC << 29 | statusIsGood << 30 ) {
   mId = std::abs(PMTnumber) * EW;
 }
 
 //_________________
-StPicoBbcHit::StPicoBbcHit(const StPicoBbcHit &hit) {
+StPicoBbcHit::StPicoBbcHit(const StPicoBbcHit &hit) : TObject() {
   mId = hit.mId;
   mQTdata = hit.mQTdata;
 }
@@ -58,4 +59,10 @@ StPicoBbcHit::StPicoBbcHit(const StPicoBbcHit &hit) {
 //_________________
 StPicoBbcHit::~StPicoBbcHit() {
   /* no-op */
+}
+
+//_________________
+void StPicoBbcHit::Print(const Char_t* option __attribute__((unused)) ) const {
+  LOG_INFO << "BBC hit index: " << mId << " QT data: " << mQTdata << endm;
+
 }

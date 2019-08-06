@@ -31,44 +31,44 @@ class StPicoMtdPidTraits : public TObject {
   //
 
   /// Return assiciated track index
-  Int_t    trackIndex()        const;
+  Int_t    trackIndex()        const { return mTrackIndex; }
   /// Return hit index
-  Int_t    mtdHitIndex()       const;
+  Int_t    mtdHitIndex()       const { return mMtdHitIndex; }
   /// Return hit channel
-  Int_t    gChannel()          const;
+  Int_t    gChannel()          const { return mMtdHitChan; }
   /// Return backleg number
-  Int_t    backleg()           const;
+  Int_t    backleg()           const { return mMtdHitChan / 60 + 1; }
   /// Return module number
-  Int_t    module()            const;
+  Int_t    module()            const { return (mMtdHitChan % 60) / 12 + 1; }
   /// Return cell number
-  Int_t    cell()              const;
+  Int_t    cell()              const { return mMtdHitChan % 12; }
   /// Return match flag
-  Int_t    matchFlag()         const;
+  Int_t    matchFlag()         const { return mMatchFlag; }
   /// Return delta Y
-  Float_t  deltaY()            const;
+  Float_t  deltaY()            const { return (Float_t)mDeltaY / 200.; }
   /// Return delta Z
-  Float_t  deltaZ()            const;
+  Float_t  deltaZ()            const { return (Float_t)mDeltaZ / 200.; }
   /// Return difference between measured and expected time of flight
-  Float_t  deltaTimeOfFlight() const;
+  Float_t  deltaTimeOfFlight() const { return mDeltaTimeOfFlight; }
   /// Return beta
-  Float_t  beta()              const;
+  Float_t  beta()              const { return (Float_t)mBeta / 20000.; }
 
   //
   // Setters
   //
 
   /// Set track index of the associated track
-  void setTrackIndex(Int_t index);
+  void setTrackIndex(Int_t index)   { mTrackIndex = (Short_t) index; }
   /// Set MTD hit index
-  void setMtdHitIndex(Int_t index);
+  void setMtdHitIndex(Int_t index)  { mMtdHitIndex = (Short_t) index; }
   /// Set match flag
-  void setMatchFlag(Char_t flag);
+  void setMatchFlag(Char_t flag)    { mMatchFlag = (Char_t)flag; }
   /// Set delta Y
   void setDeltaY(Float_t dy);
   /// Set delta Z
   void setDeltaZ(Float_t dz);
   /// Set difference between measured and expected time of flight
-  void setDeltaTimeOfFlight(Float_t t);
+  void setDeltaTimeOfFlight(Float_t t) { mDeltaTimeOfFlight = t; }
   /// Set beta
   void setBeta(Float_t beta);
   /// Set hit channel: (backleg-1) * 60 + (module-1) * 12 + cell
@@ -95,28 +95,5 @@ class StPicoMtdPidTraits : public TObject {
 
   ClassDef(StPicoMtdPidTraits, 3)
 };
-
-//
-// Getters
-//
-inline Int_t    StPicoMtdPidTraits::trackIndex()        const { return mTrackIndex; }
-inline Int_t    StPicoMtdPidTraits::mtdHitIndex()       const { return mMtdHitIndex; }
-inline Int_t    StPicoMtdPidTraits::gChannel()          const { return mMtdHitChan; }
-inline Int_t    StPicoMtdPidTraits::backleg()           const { return mMtdHitChan / 60 + 1; }
-inline Int_t    StPicoMtdPidTraits::module()            const { return (mMtdHitChan % 60) / 12 + 1; }
-inline Int_t    StPicoMtdPidTraits::cell()              const { return mMtdHitChan % 12; }
-inline Int_t    StPicoMtdPidTraits::matchFlag()         const { return mMatchFlag; }
-inline Float_t  StPicoMtdPidTraits::deltaY()            const { return (Float_t)mDeltaY / 200.; }
-inline Float_t  StPicoMtdPidTraits::deltaZ()            const { return (Float_t)mDeltaZ / 200.; }
-inline Float_t  StPicoMtdPidTraits::deltaTimeOfFlight() const { return mDeltaTimeOfFlight; }
-inline Float_t  StPicoMtdPidTraits::beta()              const { return (Float_t)mBeta / 20000.; }
-
-//
-// Setters
-//
-inline void    StPicoMtdPidTraits::setTrackIndex(Int_t index) { mTrackIndex = (Short_t) index; }
-inline void    StPicoMtdPidTraits::setMtdHitIndex(Int_t index) { mMtdHitIndex = (Short_t) index; }
-inline void    StPicoMtdPidTraits::setMatchFlag(Char_t flag) { mMatchFlag = (Char_t)flag; }
-inline void    StPicoMtdPidTraits::setDeltaTimeOfFlight(Float_t t) { mDeltaTimeOfFlight = t; }
 
 #endif

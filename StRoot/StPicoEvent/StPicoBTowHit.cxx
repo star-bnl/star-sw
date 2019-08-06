@@ -33,7 +33,7 @@ StPicoBTowHit::StPicoBTowHit(Int_t adc, Float_t e) : TObject() {
 }
 
 //_________________
-StPicoBTowHit::StPicoBTowHit(const StPicoBTowHit &hit) {
+StPicoBTowHit::StPicoBTowHit(const StPicoBTowHit &hit) : TObject() {
   mAdc = hit.mAdc;
   mE = hit.mE;
 }
@@ -44,7 +44,7 @@ StPicoBTowHit::~StPicoBTowHit() {
 }
 
 //_________________
-void StPicoBTowHit::Print(const Char_t* option) const {
+void StPicoBTowHit::Print(const Char_t* option __attribute__((unused)) ) const {
   LOG_INFO << " Adc = " << adc() << " Energy = " << energy() << endm;
 }
 

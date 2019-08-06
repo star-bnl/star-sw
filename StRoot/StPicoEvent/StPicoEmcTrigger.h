@@ -23,7 +23,8 @@ class StPicoEmcTrigger : public TObject {
   /// Constructor that takes values
   StPicoEmcTrigger(Int_t flag, Int_t id, Int_t adc);
   /// Constructor that takes values with SMD
-  StPicoEmcTrigger(Int_t flag, Int_t id, Int_t adc, std::vector<unsigned short> smdE, std::vector<unsigned short> smdP);
+  StPicoEmcTrigger(Int_t flag, Int_t id, Int_t adc, std::vector<unsigned short> smdE,
+		   std::vector<unsigned short> smdP);
   /// Copy constructor
   StPicoEmcTrigger(const StPicoEmcTrigger &trigger);
   /// Destructor
@@ -37,35 +38,35 @@ class StPicoEmcTrigger : public TObject {
 
   /// Return flag:  0x1: ht0, 0x2: ht1, 0x4: ht2; 0x8: ht3
   ///               0x10: jp0, 0x20: jp1, 0x40: jp2
-  UInt_t  flag() const;
+  UInt_t  flag() const              { return (UInt_t)mFlag; }
   /// Return ID: bjp: 1-18, ht: 1-4800
-  Int_t   id() const;
+  Int_t   id() const                { return (Int_t)mId; }
   /// Return ADC
-  Int_t   adc() const;
+  Int_t   adc() const               { return (Int_t)mAdc; }
   /// Return number of associated BEmc SMD Eta hits
-  Int_t numberOfSmdEHits() const;
+  Int_t numberOfSmdEHits() const    { return (Int_t)mSmdE.size(); }
   /// Return number of associated BEmc SMD Phi hits
-  Int_t numberOfSmdPHits() const;
+  Int_t numberOfSmdPHits() const    { return (Int_t)mSmdP.size(); }
   /// Return i-th BEmc SMDE hit index. -1 = no entries, -2 = out of range
   Int_t smdEIndex(Int_t i) const;
   /// Return i-th BEmc SMDP hit index. -1 = no entries, -2 = out of range
   Int_t smdPIndex(Int_t i) const;
 
   /// Check if the trigger is HT0
-  bool isHT0() const;
+  bool isHT0() const                { return mFlag & 0x1; }
   /// Check if the trigger is HT1
-  bool isHT1() const;
+  bool isHT1() const                { return mFlag & 0x2; }
   /// Check if the trigger is HT2
-  bool isHT2() const;
+  bool isHT2() const                { return mFlag & 0x4; }
   /// Check if the trigger is HT3
-  bool isHT3() const;
+  bool isHT3() const                { return mFlag & 0x8; }
 
   /// Check if the trigger is JP0
-  bool isJP0() const;
+  bool isJP0() const                { return mFlag & 0x10; }
   /// Check if the trigger is JP1
-  bool isJP1() const;
+  bool isJP1() const                { return mFlag & 0x20; }
   /// Check if the trigger is JP2
-  bool isJP2() const;
+  bool isJP2() const                { return mFlag & 0x40; }
 
   //
   // Setters
@@ -94,23 +95,5 @@ class StPicoEmcTrigger : public TObject {
 
   ClassDef(StPicoEmcTrigger, 2)
 };
-
-//
-// Getters
-//
-inline UInt_t StPicoEmcTrigger::flag() const { return (UInt_t)mFlag; }
-inline Int_t StPicoEmcTrigger::id() const { return (Int_t)mId; }
-inline Int_t StPicoEmcTrigger::adc() const { return (Int_t)mAdc; }
-inline Int_t StPicoEmcTrigger::numberOfSmdEHits() const { return (Int_t)mSmdE.size(); }
-inline Int_t StPicoEmcTrigger::numberOfSmdPHits() const { return (Int_t)mSmdP.size(); }
-
-inline bool StPicoEmcTrigger::isHT0() const { return mFlag & 0x1; }
-inline bool StPicoEmcTrigger::isHT1() const { return mFlag & 0x2; }
-inline bool StPicoEmcTrigger::isHT2() const { return mFlag & 0x4; }
-inline bool StPicoEmcTrigger::isHT3() const { return mFlag & 0x8; }
-
-inline bool StPicoEmcTrigger::isJP0() const { return mFlag & 0x10; }
-inline bool StPicoEmcTrigger::isJP1() const { return mFlag & 0x20; }
-inline bool StPicoEmcTrigger::isJP2() const { return mFlag & 0x40; }
 
 #endif
