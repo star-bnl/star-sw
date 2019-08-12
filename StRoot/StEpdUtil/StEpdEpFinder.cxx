@@ -58,7 +58,7 @@ StEpdEpFinder::StEpdEpFinder(int nEventTypeBins, char const* OutFileName, char c
 	mEpdShiftInput_sin[ew][order-1] = (TProfile2D*)mCorrectionInputFile->Get(Form("EpdShiftEW%dPsi%d_sin",ew,order));
 	mEpdShiftInput_cos[ew][order-1] = (TProfile2D*)mCorrectionInputFile->Get(Form("EpdShiftEW%dPsi%d_cos",ew,order));
       }
-      mPhiWeightInput[ew] = (TH2D*)mCorrectionInputFile->Get(Form("PhiWeightEW%d",ew));
+      mPhiWeightInput[ew] = (TH3D*)mCorrectionInputFile->Get(Form("PhiWeightEW%d",ew));
     }
     for (int order=1; order<_EpOrderMax+1; order++){
       mEpdShiftInput_sin[2][order-1] = (TProfile2D*)mCorrectionInputFile->Get(Form("EpdShiftFullEventPsi%d_sin",order));
@@ -75,8 +75,8 @@ StEpdEpFinder::StEpdEpFinder(int nEventTypeBins, char const* OutFileName, char c
       mEpdShiftOutput_cos[ew][order-1] = new TProfile2D(Form("EpdShiftEW%dPsi%d_cos",ew,order),Form("EpdShiftEW%dPsi%d_cos",ew,order),
 							_EpTermsMax,0.5,1.0*_EpTermsMax+.5,nEventTypeBins,-0.5,(double)nEventTypeBins-0.5,-1.0,1.0);
     }
-    mPhiWeightOutput[ew]   = new TH2D(Form("PhiWeightEW%d",ew),Form("Tile Weight divided by Averaged EW=%d",ew),12,0.5,12.5,31,0.5,31.5); // bins are PP,TT 
-    mPhiAveraged[ew]       = new TH2D(Form("PhiAveraged%d",ew),Form("Average for this phi EW=%d",ew),12,0.5,12.5,31,0.5,31.5); // just for normalization. discard after use
+    mPhiWeightOutput[ew]   = new TH3D(Form("PhiWeightEW%d",ew),Form("Tile Weight divided by Averaged EW=%d",ew),12,0.5,12.5,31,0.5,31.5,nEventTypeBins,-0.5,(double)nEventTypeBins-0.5); // bins are PP,TT,EventType
+    mPhiAveraged[ew]       = new TH3D(Form("PhiAveraged%d",ew),Form("Average for this phi EW=%d",ew),12,0.5,12.5,31,0.5,31.5,nEventTypeBins,-0.5,(double)nEventTypeBins-0.5); // just for normalization. discard after use
   }
   for (int order=1; order<_EpOrderMax+1; order++){
     mEpdShiftOutput_sin[2][order-1] = new TProfile2D(Form("EpdShiftFullEventPsi%d_sin",order),
@@ -206,11 +206,11 @@ StEpdEpInfo StEpdEpFinder::Results(TClonesArray* EpdHits, TVector3 primVertex, i
     // fill Phi Weight histograms to be used in next iteration (if desired)
     // Obviously, do this BEFORE phi weighting!
     //---------------------------------
-    mPhiWeightOutput[EW]->Fill(PP,TT,TileWeight);
-    if (TT==1){ for (int pp=1; pp<13; pp++) mPhiAveraged[EW]->Fill(pp,1,TileWeight/12.0);}
+    mPhiWeightOutput[EW]->Fill(PP,TT,EventTypeId,TileWeight);
+    if (TT==1){ for (int pp=1; pp<13; pp++) mPhiAveraged[EW]->Fill(pp,1,EventTypeId,TileWeight/12.0);}
     else{
       for (int pp=1; pp<13; pp++){
-	for (int tt=2*(ring-1); tt<2*ring; tt++) mPhiAveraged[EW]->Fill(pp,tt,TileWeight/24.0);
+	for (int tt=2*(ring-1); tt<2*ring; tt++) mPhiAveraged[EW]->Fill(pp,tt,EventTypeId,TileWeight/24.0);
       }
     }
     //--------------------------------
@@ -218,7 +218,7 @@ StEpdEpInfo StEpdEpFinder::Results(TClonesArray* EpdHits, TVector3 primVertex, i
     //--------------------------------
 
     double PhiWeightedTileWeight = TileWeight;
-    if (mPhiWeightInput[EW]) PhiWeightedTileWeight /= mPhiWeightInput[EW]->GetBinContent(PP,TT);
+    if (mPhiWeightInput[EW]) PhiWeightedTileWeight /= mPhiWeightInput[EW]->GetBinContent(PP,TT,EventTypeId);
     TotalWeight4Ring[EW][ring-1][0] += TileWeight;
     TotalWeight4Ring[EW][ring-1][1] += PhiWeightedTileWeight;
 

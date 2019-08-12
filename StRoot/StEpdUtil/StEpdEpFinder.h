@@ -9,6 +9,7 @@ class TProfile2D;
 class StEpdGeom;
 class TClonesArray;
 
+#include "TH3D.h"
 #include "TH2D.h"
 
 /*************************************
@@ -182,9 +183,9 @@ class StEpdEpFinder{
   TProfile2D* mEpdShiftInput_sin[3][_EpOrderMax];     // [ewFull][order-1]
   TProfile2D* mEpdShiftInput_cos[3][_EpOrderMax];     // [ewFull][order-1]
   //   these are the phi weights
-  TH2D* mPhiWeightInput[2];
-  TH2D* mPhiWeightOutput[2];
-  TH2D* mPhiAveraged[2];
+  TH3D* mPhiWeightInput[2];      // 12aug2019 - MAL has changed these from TH2D* to TH3D* to include EventType.
+  TH3D* mPhiWeightOutput[2];     // the array index is 0/1 for East/West as usual
+  TH3D* mPhiAveraged[2];         // the bins are (PP,TT,EventType)
 
   
 
