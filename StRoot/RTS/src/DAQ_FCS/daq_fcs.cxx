@@ -566,6 +566,8 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		LOG(ERR,"Unexpected event 0x%04X",hdr) ;
 		goto err_end ;
 	}
+	
+//	LOG(TERR,"%d: hdr 0x%X: 0x%X 0x%X 0x%X",rdo,hdr,d[3],d[4],d[5]) ;
 
 	switch(hdr) {
 	case 0x9801 :

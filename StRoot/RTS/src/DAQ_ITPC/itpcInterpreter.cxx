@@ -1327,12 +1327,14 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 	    h[0],h[1],h[2],h[3],h[4],h[5]) ;
 	LOG(ERR,"   0x%08X 0x%08X",hdr[0],hdr[1]) ;
 
+#if 0
 	u_int *n_data = sampa_ch_hunt(data,end) ;
 	if(n_data) {
 		err = 0 ;
 		data = n_data ;
 		goto new_ch ;
 	}
+#endif
 
 	return data ;
 }
@@ -1647,6 +1649,7 @@ int itpcInterpreter::ana_send_config(u_int *data, u_int *data_end)
 	return 0 ;
 }
 
+
 int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 {
 	u_int trg ;
@@ -1680,6 +1683,30 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 	fee_port = 0 ;	// claim unknown
 	fee_id = 0 ;	// claim unknown
 	fee_cou++ ;	// so it starts from 1
+
+
+	// at FEE start; FEE header
+	//for(int i=0;i<12;i++) {
+	//	LOG(TERR,"%d: FEE header %d: 0x%08X",rdo_id,i,data[i]) ;
+	//}
+
+#if 0
+	// new on Feb 7, 2019 -- added dummy at the very start of run
+	// nah, didn't work
+	if(data[0]==0x0FEEC0DE) {
+		data++ ;
+	}
+	else if((data[0]&0xFF00FFFF)==0x80000010) {	// normal...
+
+	}
+	else {
+		// the dummy can get corrupted
+		LOG(ERR,"%d: bad first FEE datum 0x%08X",rdo_id,data[0]) ;
+		if((data[0]&0x0000FFFF)==0xC0DE) {	// good enough
+			data++ ;
+		}
+	}
+#endif
 
 	if((data[0] & 0xFFC0FFFF)==0x80000001) {
 		fee_version = 0 ;
@@ -1715,6 +1742,18 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 			if(f_id[0]==f_id[1]) f_ok |= 8 ;
 			if(f_id[1]==f_id[2]) f_ok |= 0x10 ;
 			if(f_id[0]==f_id[2]) f_ok |= 0x20 ;
+		}
+
+		u_int w = data[0]>>28 ;
+
+		switch(w) {
+		case 0 :
+		case 8 :
+			break ;
+		default :
+			LOG(ERR,"%d: 0x%08X 0x%08X 0x%08X [0x%02X] (not an error)",rdo_id,data[0],data[1],data[2],f_ok) ;
+			LOG(ERR,"%d: 0x%08X 0x%08X 0x%08X [0x%02X] (not an error)",rdo_id,data[-3],data[-2],data[-1],f_ok) ;
+			break ;
 		}
 
 		if(f_ok!=0x3F) {	// all was NOT OK; hm, this happens ALL the time
@@ -1917,9 +1956,14 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		}
 
 
+		// at end of FEE data; FEE trailer
+		//for(int i=0;i<12;i++) {
+		//	LOG(TERR,"%d: FEE trailer: %d: 0x%08X",rdo_id,i,data[i]) ;
+		//}
+
 		if(data[0] != ((fee_id<<16)|0xA0000010)) {
 			err |= 0x10 ;
-			LOG(ERR,"%d:#02d: hdr FEE word 0x%08X",rdo_id,fee_port,data[0]) ;
+			LOG(ERR,"%d:#%02d: hdr FEE word 0x%08X",rdo_id,fee_port,data[0]) ;
 		}
 
 //		if(data[7] != ((fee_id<<16)|0x40000010)) {
@@ -1929,7 +1973,7 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 //		}
 		
 		if(data[7] != ((fee_id<<16)|0x40000010)) {
-			LOG(ERR,"%d:#02d: last FEE word 0x%08X",rdo_id,fee_port,data[7]) ;
+			LOG(ERR,"%d:#%02d: last FEE word 0x%08X not 0x40..",rdo_id,fee_port,data[7]) ;
 			err |= 0x20 ;	// this is the last guy and can misfire
 		}
 
@@ -1949,12 +1993,13 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 
 	data += 8 ;	// start of new FEE
 
+
 	if(data > data_end) goto done ;
 
 	if(data[0]==0x98001000) goto done ;	// end of FEE section marker!!!
 
-	if(data[1]==0x98001000) {
-		//LOG(WARN,"%d:#%d, fee_count %d -- delayed end-event marker?",rdo_id,fee_port,fee_cou) ;
+	if(data[1]==0x98001000) {	// still happens!
+		//LOG(ERR,"%d:#%d, fee_count %d -- delayed end-event marker [0x%08X]?",rdo_id,fee_port,fee_cou,data[0]) ;
 		data++ ;	// advance so not to confuse further checks
 		goto done ;	// occassionally a "delayed FEE" is the last one
 	}
@@ -1968,6 +2013,7 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 
 	// a bug which causes the 1st FEE datum 0x80xx0010 to seep in
 	if((data[0]&0xFF00FFFF)==0x80000010 && fee_cou==expect_fee_cou) {
+//		LOG(ERR,"%d: what? 0x%08X",rdo_id,data[0]) ;
 		if(data[1]==0x980000FC) {
 			data++ ;
 			goto done ;
@@ -1979,7 +2025,13 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 
 	done:;
 
-	// end of FEE
+	// End of FEE section; at RDO trailer
+
+	//for(int i=0;i<8;i++) {
+	//	LOG(TERR,"%d: RDO trailer check %d: 0x%08X",rdo_id,i,data[i]) ;
+	//}
+
+
 	
 
 	if(err || soft_err) {
@@ -1997,9 +2049,10 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 
 	// this only works online
 	if(realtime) {
-		if(fee_cou != expect_fee_cou) {
-			LOG(ERR,"%d: fees found %d, expect %d",rdo_id,fee_cou,expect_fee_cou) ;
-		}
+		// needs more work in case of a masked fee
+//		if(fee_cou != expect_fee_cou) {
+//			LOG(ERR,"%d: fees found %d, expect %d",rdo_id,fee_cou,expect_fee_cou) ;
+//		}
 	}
 
 	after_fee:;

@@ -953,9 +953,9 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		LOG(ERR,"%d: evt_status 0x%08X:0x%08X, trg_fired 0x%08X, trg_cou %d, errs %d",rdo,evt_status,fee_status,trg_fired,trg_cou,b_cou) ;
 
 		// We'll let it pass for now with just the error message
-//		trg[0].t = -ETIMEDOUT ;
-//		trg[0].daq = trg[0].trg = 0 ;
-//		return 1 ;
+		trg[0].t = -ETIMEDOUT ;
+		trg[0].daq = trg[0].trg = 0 ;
+		return 1 ;
 	}
 
 	//LOG(TERR,"trg_cou %d, fired %d",trg_cou,trg_fired) ;
