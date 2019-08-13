@@ -374,7 +374,7 @@ int fcs_data_c::hdr_event()
 	hdr_rhic_counter = (dta_p[7]<<16)|dta_p[6] ;
 
 
-	LOG(DBG,"HDR: trg_word 0x%05X, %d",hdr_trg_word,hdr_rhic_counter) ;
+//	LOG(TERR,"HDR: trg_word 0x%05X, %d",hdr_trg_word,hdr_rhic_counter) ;
 
 	trg_cmd = hdr_trg_word & 0xF ;
 	daq_cmd = (hdr_trg_word>>4) & 0xF ;
@@ -576,6 +576,9 @@ int fcs_data_c::event()
 
 		trg_word = ((h[2]&0xFF)<<12)|(h[1]) ;
 		rhic_cou = h[2]>>8 ;
+
+//		LOG(TERR,"ch %d: trg_word 0x%X, rhic_cou %d",ch,trg_word,rhic_cou) ;
+//		LOG(TERR,"ch %d: 0x%X 0x%X 0x%X",ch,h[0],h[1],h[2]) ;
 
 		//complain = 1 ;
 		if(realtime && (board_id_xpect != board)) complain = 1 ;
@@ -930,7 +933,8 @@ void fcs_data_c::ped_stop(int bad_ped)
 	fprintf(pedf,"# TIME %u\n",(unsigned int)now) ;
 	char *ctm = ctime(&now) ;
 	fprintf(pedf,"# DATE %s",ctm) ;
-	
+	fprintf(pedf,"# RHIC %u, FEE state %d\n",rhic_freq,fee_state) ;
+
 	fprintf(pedf,"\n") ;
 
 	for(int c=0;c<32;c++) {
