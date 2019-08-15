@@ -81,7 +81,7 @@ class StPicoMtdTrigger : public TObject {
   /// \param pos1 position of the largest TACsum. Runs from 1-8
   /// \pram  pos2 position of the second-largest TACsum. Runs from 1-8
   void getMaximumQTtac(const Int_t qt, Int_t& pos1, Int_t& pos2);
-  Char_t shouldHaveRejectEvent();
+  Char_t shouldHaveRejectEvent()                            { return mShouldHaveRejectEvent; }
 
   //
   // Getters
