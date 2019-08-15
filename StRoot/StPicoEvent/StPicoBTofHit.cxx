@@ -1,4 +1,4 @@
-//
+g//
 // StPicoBTofHit holds information about BTOF hits
 //
 
@@ -36,7 +36,7 @@ void StPicoBTofHit::setId(Int_t tray, Int_t module, Int_t cell) {
     return;
   }
   else {
-    mId = (id > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)id; }
+    mId = (id > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)id;
   }
 }
 
