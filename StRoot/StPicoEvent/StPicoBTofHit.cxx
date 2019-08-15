@@ -14,7 +14,7 @@ StPicoBTofHit::StPicoBTofHit() : TObject(), mId(-1) {
 }
 
 //_________________
-StPicoBTofHit::StPicoBTofHit(int id) : TObject() {
+StPicoBTofHit::StPicoBTofHit(Int_t id) : TObject() {
   if (id  < 0) return;
   mId = (id > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)id; 
 }
@@ -27,6 +27,17 @@ StPicoBTofHit::StPicoBTofHit(const StPicoBTofHit &hit) : TObject() {
 //_________________
 StPicoBTofHit::~StPicoBTofHit() {
   /* empty */
+}
+
+//_________________
+void StPicoBTofHit::setId(Int_t tray, Int_t module, Int_t cell) {
+  Int_t id = (tray - 1) * 192 + (module - 1) * 6 + (cell - 1);
+  if (id<0) {
+    return;
+  }
+  else {
+    mId = (id > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)id; }
+  }
 }
 
 //_________________

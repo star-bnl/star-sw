@@ -21,7 +21,7 @@ class StPicoBTofHit : public TObject {
   /// Default consturctor
   StPicoBTofHit();
   /// Constructor that takes id
-  StPicoBTofHit(int id);
+  StPicoBTofHit(Int_t id);
   /// Copy constructor
   StPicoBTofHit(const StPicoBTofHit &hit);
   /// Destructor
