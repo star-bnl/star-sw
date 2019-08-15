@@ -1,4 +1,4 @@
-g//
+//
 // StPicoBTofHit holds information about BTOF hits
 //
 
