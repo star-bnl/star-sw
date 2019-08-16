@@ -73,8 +73,8 @@
 #define TCD_ESMD        6	//0x10,
 #define TCD_BBC         7	//0x11, trigger-only; unused
 #define TCD_ETOW        8	//0x12,
-#define TCD_MTD_QT      9	//0x13, trigger-only; unused
-//#define TCD_STGC        10	//0x14, was RHICF; Sep 16: was IST, Jun 2013: was FGT before; Aug 26, 2009: was FPD's before
+#define TCD_STGC	9	//0x13, was trigger-only; unused
+#define TCD_FST         10	//0x14, was RHICF; Sep 16: was IST, Jun 2013: was FGT before; Aug 26, 2009: was FPD's before
 #define TCD_TOF         11      //0x15,
 #define TCD_PP          12      //0x16
 #define TCD_MTD         13      //0x17
@@ -99,8 +99,8 @@
 #define ESMD_GRP	6
 #define TPX_GRP		7
 #define FCS_GRP		8
-//#define STGC_GRP        9	// was RHICF; still not used in FY19
-//#define xxx_GRP		10	// unused
+#define FST_GRP         9	// was RHICF; still not used in FY19
+//#define xxx_GRP		10	// was unused
 //#define xxx_GRP		11	// but still unused
 //#define xxx_GRP		12	// unused
 //#define xxx_GRP		13	// unused
@@ -289,7 +289,11 @@ so we keep it here for source compatibility
 #define STGC_SYSTEM		32
 #define STGC_ID			STGC_SYSTEM
 
-#define RTS_NUM_SYSTEMS	33	/* current maximum. NOTE: above 32 from 2018/19! */
+// forward silicon
+#define FST_SYSTEM		33
+#define FST_ID			FST_SYSTEM
+
+#define RTS_NUM_SYSTEMS	34	/* current maximum. NOTE: above 32 from 2018/19! */
 
 #define PP_SEQE_INSTANCE  1
 #define PP_SEQW_INSTANCE  2
@@ -659,6 +663,8 @@ extern inline const char *getTrgDetBitName(int x) {
 // NOTE: new scheme for detectors above 32!
 #define STGC_NODES(x)  ((FPD_SYSTEM<<12) | (STGC_SYSTEM<<6) | (x))
 
+#define FST_NODES(x)  ((FPD_SYSTEM<<12) | (FST_SYSTEM<<6) | (x))
+
 extern inline const char *rts2name(int rts_id)
 {
 	switch(rts_id) {
@@ -724,6 +730,8 @@ extern inline const char *rts2name(int rts_id)
 		return "RHICF" ;
 	case STGC_SYSTEM :
 		return "STGC" ;
+	case FST_SYSTEM :
+		return "FST" ;
 	default :
 	  return (const char *)NULL ;	// unknown!
 	}
@@ -794,6 +802,8 @@ extern inline const char *rts2sfs_name(int rts_id)
 		return "itpc";
 	case STGC_SYSTEM :
 		return "stgc" ;
+	case FST_SYSTEM :
+		return "fst" ;
 	default :
 	  return (const char *)NULL ;	// unknown!
 	}
@@ -843,6 +853,7 @@ extern inline int rts2det(int ix)
 	case FCS_ID:
 	case ITPC_ID:
 	case STGC_ID :
+	case FST_ID :
 		return ix ;
 	default :
 		return -1 ;
@@ -856,6 +867,7 @@ extern inline int rts2det(int ix)
 extern inline int rts2_32(int rts)
 {
 	switch(rts) {
+	case FST_ID :
 	case STGC_ID :
 		return FPD_ID ;
 	default :
@@ -889,8 +901,8 @@ extern inline int rts2tcd(int rts)
 		return TCD_ETOF ;
 	case GMT_ID :
 		return TCD_GMT ;
-//	case STGC_ID :
-//		return TCD_STGC ;
+	case FST_ID :
+		return TCD_FST ;
 	case FCS_ID :
 	case STGC_ID :	// for FY19
 		return TCD_FCS ;
@@ -924,8 +936,8 @@ extern inline int tcd2rts(int tcd)
 		return ETOF_ID ;
 	case TCD_GMT :
 		return GMT_ID ;
-//	case TCD_STGC :
-//		return STGC_ID ;
+	case TCD_FST :
+		return FST_ID ;
 	case TCD_FCS :
 		return FCS_ID ;
 	default :
@@ -940,7 +952,7 @@ extern inline int tcd2rts(int tcd)
 // NOTE that this is now 64 bits!!! Also note that there are a bunch (but not all) of unused systems here...
 #define DAQ1000_DETS ((1<<TPX_ID) | (1<<TOF_ID) | (1<<PMD_ID) | (1<<ESMD_ID) | (1<<PP_ID) | (1<<FGT_ID) | \
 		      (1<<L3_ID) | (1 << BSMD_ID) | (1 << MTD_ID) | (1<<ETOF_ID) | (1<<GMT_ID) | (1<<BTOW_ID) | (1<<ETOW_ID)) | (1<<FPS_ID) |\
-			(1<<FCS_ID) | (1<<ITPC_ID) | (1<<RHICF_ID) | (1LL<<STGC_ID)
+			(1<<FCS_ID) | (1<<ITPC_ID) | (1<<RHICF_ID) | (1LL<<STGC_ID) | (1LL<<FST_ID)
 
 // 2009... unused dets:  SSD/SVT/TPC/PMD/HFT --->  FTPGROUP
 // 2018/19 NOTE return of a 64 bit quantity!!!
@@ -985,6 +997,9 @@ extern inline unsigned long long grp2rts_mask(int grp)
 	if(grp & (1ll << MTD_GRP)) {
 	  ret |= (1ll << MTD_SYSTEM);
 	}
+	if(grp & (1ll << FST_GRP)) {
+	  ret |= (1ll << FST_SYSTEM);
+	}
 	if(grp & (1ll << GMT_GRP)) {
 	  ret |= (1ll << GMT_SYSTEM);
 	}
@@ -1020,6 +1035,8 @@ extern inline int rts2grp(int rts)
 		return ETOF_GRP;
 //	case STGC_ID :
 //		return STGC_GRP;
+	case FST_ID :
+		return FST_GRP ;
 	case FCS_ID :
 	case STGC_ID :			// for FY19
 		return FCS_GRP ;
