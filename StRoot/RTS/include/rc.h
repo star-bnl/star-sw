@@ -11,6 +11,7 @@
 #define RC_RUNNING 3
 #define RC_PAUSED 4
 #define RC_ERROR 5
+#define RC_CONFIGURING 6	/* new state as of Feb 2019 */
 
 #define RC_WAITING 128  /* Used as a flag on top of other status's */
 #define RC_READY_WAIT (RC_WAITING + RC_READY)    
