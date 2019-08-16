@@ -38,6 +38,7 @@ fgtPed::fgtPed(int rts)
 
 	switch(rts_id) {
 	case IST_ID :
+	case FST_ID :
 		for(int r=0;r<6;r++) {
 		for(int ar=0;ar<6;ar++) {
 		for(int ap=0;ap<24;ap++) {
@@ -97,6 +98,7 @@ static int fgt_bad_heuristics(int rts_id, double ped, double rms)
 {
 	switch(rts_id) {
 	case IST_ID :
+	case FST_ID :
 		if((rms < 5.0)||(rms>50.0)||(ped>2000.0)||(ped<5.0)) return -1 ;
 		break ;
 	default :
@@ -252,6 +254,7 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 		*d32++ = META_ZS_VERSION ;		// version
 		break ;
 	case IST_ID :
+	case FST_ID :
 		do_ped_sub = 1 ;
 		*d32++ = META_PED_ZS_VERSION ;	// zs _AND_ ped subtracted
 		break ;		
@@ -810,7 +813,7 @@ void fgtPed::clear_from_cache()
 int fgtPed::from_cache(char *fname) 
 {
 	FILE *f ;
-	char *fn ;
+	const char *fn ;
 	
 
 	tb_cou_ped = - 1;
@@ -1069,7 +1072,7 @@ int fgtPed::to_cache(char *fname, u_int run, int dont_cache)
 int fgtPed::bad_from_cache(char *fname) 
 {
 	FILE *f ;
-	char *fn ;
+	const char *fn ;
 	
 	int b_cou = 0 ;
 	
@@ -1086,6 +1089,9 @@ int fgtPed::bad_from_cache(char *fname)
 			break ;
 		case IST_ID :
 			fn = "/RTS/conf/ist/ist_bad_channels.txt" ;
+			break ;
+		case FST_ID :
+			fn = "/RTS/conf/fst/fst_bad_channels.txt" ;
 			break ;
 		case FGT_ID :
 		default:

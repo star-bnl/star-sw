@@ -55,6 +55,25 @@ public:
 
 static daq_det_ist_factory ist_factory ;
 
+// for FST
+class daq_det_fst_factory : public daq_det_factory
+{
+public:
+	daq_det_fst_factory() {
+		daq_det_factory::det_factories[FST_ID] = this ;
+	}
+
+	daq_det *create() {
+		daq_det *dd = new daq_fgt ;
+
+		((daq_fgt *)dd)->set_flavor(FST_ID) ;
+
+		return dd ;
+	}
+} ;
+
+static daq_det_fst_factory fst_factory ;
+
 // for GMT
 class daq_det_gmt_factory : public daq_det_factory
 {
@@ -83,6 +102,11 @@ void daq_fgt::set_flavor(int id)
 		rts_id = id ;
 		name = rts2name(rts_id) ;
 		sfs_name = "ist" ;
+		break ;
+	case FST_ID :
+		rts_id = id ;
+		name = rts2name(rts_id) ;
+		sfs_name = "fst" ;
 		break ;
 	case GMT_ID :
 		rts_id = id ;
