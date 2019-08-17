@@ -89,6 +89,7 @@ endif
     
     whoami    
 
+    set localDBconfig = $DB_SERVER_LOCAL_CONFIG
     echo  load STAR enviroment 
     set cvmfs=<cvmfs>
     if ( "$cvmfs" == "1" ) then
@@ -142,6 +143,7 @@ endif
     set localDB=<localDB>
     if ( "$localDB" == "1" ) then
     echo "  DB  DB  DB  DB    DB  DB  DB  DB    DB  DB  DB  DB  --- check start"
+    setenv DB_SERVER_LOCAL_CONFIG $localDBconfig
     echo get IP of local DB to verify it is accessible
     cat $DB_SERVER_LOCAL_CONFIG
     set dbIP = `grep "Host name=" $DB_SERVER_LOCAL_CONFIG | cut -f2 -d\"`
