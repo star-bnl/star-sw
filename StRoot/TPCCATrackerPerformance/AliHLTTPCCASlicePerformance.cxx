@@ -20,7 +20,7 @@
 //                                                                          *
 //***************************************************************************
 
-//#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE // use ALIHLTTPCCATRACKER::outTrack1, which is filled only for performance
+#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE // use ALIHLTTPCCATRACKER::outTrack1, which is filled only for performance
 #include <algorithm>
 using std::sort;
 
@@ -175,18 +175,17 @@ void AliHLTTPCCASlicePerformance::CheckMCTracks()
 void AliHLTTPCCASlicePerformance::MatchTracks()
 {
   const AliHLTTPCCASliceOutput *sliceData = sliceTracker->Output();
-//std::cout<<" >>> nSliceOutTracks1: "<<sliceTracker->NOutTracks1()<<"\n";
+
   for(int i=0; i<sliceTracker->NOutTracks1(); i++)
   {
     int sliceTracker_tr_id = sliceTracker->OutTrack1(i).OrigTrackID();
-//    std::cout<<" ---> iTr: "<<i<<";   sliceTracker_tr_id: "<<sliceTracker_tr_id<<"\n";
     sliceTracker->fOutTracks1[i].SetFirstHitRef(-1);
     sliceTracker->fOutTracks1[i].SetNHits(-1);
 
     sliceTracker->fOutTracks1[i].SetFirstHitRef(sliceData->Track(sliceTracker_tr_id).FirstClusterRef());
     sliceTracker->fOutTracks1[i].SetNHits(sliceData->Track(sliceTracker_tr_id).NClusters());
   }
-//std::cout<<" >>> nRecoTracks: "<<nRecoTracks<<"\n";
+
   recoData.resize(nRecoTracks);
   for ( int itr = 0; itr < nRecoTracks; itr++ ) {
 
@@ -205,7 +204,6 @@ void AliHLTTPCCASlicePerformance::MatchTracks()
     int nla = 0;
       //cout<<"\nHit labels:"<<endl;
         // collect all labels
-//    std::cout<<" -----> iTrack: "<<itr<<";   nHits: "<<nhits<<"\n";
 
     if ( fHitLabels->Size() > 0 )
     for ( int ihit = 0; ihit < nhits; ihit++ ) {
@@ -350,18 +348,11 @@ void AliHLTTPCCASlicePerformance::FillHistos()
     AliHLTTPCCAMCTrack &mcTr = (*fMCTracks)[ recoD.GetMCTrackId() ];
     
     AliHLTTPCCATrackParam param = recoTr.EndPoint();
-    // ---
-//    if( param.GetQPt() >= 1. ) continue;
-    if ( recoData[iRTr].IsGhost() ) continue;
-//    if( mcData[recoD.GetMCTrackId()].GetSet() != 2 ) continue;
-//    if( mcData[recoD.GetMCTrackId()].GetSet() != 1 ) continue;
-    // ---
 
     const int nHits = recoTr.NHits();
     const double p = 1. / param.QPt() * sqrt(1. + param.DzDs()*param.DzDs());
     const double chi2 = param.Chi2() / nHits;
-//    if (  recoD.IsGhost(SPParameters::MinTrackPurity) ) {
-    if (  recoD.IsGhost(/*SPParameters::MinTrackPurity*/0) ) {
+    if (  recoD.IsGhost(SPParameters::MinTrackPurity) ) {
       GetHisto(kghostsLength)->Fill( nHits );
       GetHisto(kghostsRMom)->Fill( p );
       GetHisto(kghostsLengthAndRMom)->Fill( nHits , p ); // TODO add same for other perfs
@@ -377,9 +368,6 @@ void AliHLTTPCCASlicePerformance::FillHistos()
       GetHisto(krecosLengthAndRMom)->Fill( nHits , p );
       GetHisto(krecosLengthAndMCMom)->Fill( nHits , pMC );
       GetHisto(krecosLengthAndChi2)->Fill( nHits , chi2 );
-      // ---
-      GetHisto(krecosProb)->Fill( TMath::Prob(param.GetChi2(),param.GetNDF()));
-      // ---
       
       GetHisto(krecosChi2)->Fill( chi2 );
     }
@@ -401,15 +389,10 @@ void AliHLTTPCCASlicePerformance::FillHistos()
     const int iMC = recoData[itr].GetMCTrackId();
     AliHLTTPCCAMCTrack &mc = (*fMCTracks)[iMC];
 
-    // ---
-//    if( mcData[iMC].GetSet() != 2 ) continue;
-//    if( mcData[iMC].GetSet() != 1 ) continue;
-    // ---
-
     ///  mvz begin
 //      while ( mc.Set() == 2 && TMath::Abs( mc.TPCPar()[0] ) + TMath::Abs( mc.TPCPar()[1] ) > 1 ) {
     while ( 1 ) {
-//      if ( recoData[itr].GetPurity() < .90 ) break;
+      if ( recoData[itr].GetPurity() < .90 ) break;
 #ifdef IsOutTrack1
       const AliHLTTPCCAOutTrack &t = sliceTracker->OutTrack1( itr );
 #else
@@ -436,15 +419,6 @@ void AliHLTTPCCASlicePerformance::FillHistos()
 
       AliHLTTPCCAGBHit hit = fTracker->Hits()[iTrHit];
 
-      // ---
-//      const AliHLTTPCCAGBTrack &t1 = fTracker->Tracks()[itr];
-      double alpha = sliceTracker->Param().Alpha();
-      double cosA = TMath::Cos( alpha );
-      double sinA = TMath::Sin( alpha );
-//      std::cout<<" . itr: "<<itr<<";   alpha: "<<alpha<<";   slice: "<<fISlice<<"\n";
-//      std::cout<<" . param: x: "<<p.GetX()<<";   y: "<<p.GetY()<<";   z: "<<p.GetZ()<<"\n";
-      // ---
-
       int MCindex=-1;
       for(int iMCPoint=0; iMCPoint<nMCPoints; iMCPoint++)
       {
@@ -454,18 +428,9 @@ void AliHLTTPCCASlicePerformance::FillHistos()
         iRowMin = points[iMCPoint].IRow();
         MCindex = iMCPoint;
       }*/
-        // ---
-        double mcY =  points[iMCPoint].X() * cosA + points[iMCPoint].Y() * sinA;
-        double mcX = -(-points[iMCPoint].X() * sinA + points[iMCPoint].Y() * cosA);
-//        std::cout<<"     p.x: "<<p.GetX()<<";   mcX: "<<mcX<<";   p.y: "<<p.GetY()<<";   mcY: "<<mcY<<";   p.z: "<<p.GetZ()<<";   mcZ: "<<points[iMCPoint].Z()<<"\n";
-        // ---
         if(points[iMCPoint].IRow() == hit.IRow())
         {
-//            std::cout<<" --- iRow: "<<hit.IRow()<<";   h.y: "<<hit.Y()<<";   p.y: "<<points[iMCPoint].Y()
-//        	<<";   h.z: "<<hit.Z()<<";   p.z: "<<points[iMCPoint].Z()
-//		<<" ||| mcY: "<<mcY<<"\n";
-//          if(fabs(hit.Y() - points[iMCPoint].Y())<2 && fabs(hit.Z() - points[iMCPoint].Z())<2)
-          if(fabs(hit.Y() - mcY)<2 && fabs(hit.Z() - points[iMCPoint].Z())<2)
+          if(fabs(hit.Y() - points[iMCPoint].Y())<2 && fabs(hit.Z() - points[iMCPoint].Z())<2)
             MCindex = iMCPoint;
         }
       }
@@ -474,26 +439,13 @@ void AliHLTTPCCASlicePerformance::FillHistos()
         break;
       }
 //        if(iRowMin == 10000) continue;
-      // ---
-//      const AliHLTTPCCAGBTrack &t1 = fTracker->Tracks()[itr];
-//      double cosA = TMath::Cos( t1.Alpha() );
-//      double sinA = TMath::Sin( t1.Alpha() );
-      double mcY =  points[MCindex].X() * cosA + points[MCindex].Y() * sinA;
-      double mcX = -(-points[MCindex].X() * sinA + points[MCindex].Y() * cosA);
-      // ---
 
-//      double mcX =  points[MCindex].X();
-//      double mcY =  points[MCindex].Y();
+      double mcX =  points[MCindex].X();
+      double mcY =  points[MCindex].Y();
       double mcZ =  points[MCindex].Z();
       double mcQP = points[MCindex].QP();
-//      double mcEx = points[MCindex].Px()*mcQP;
-//      double mcEy = points[MCindex].Py()*mcQP;
-      // ---
-      double px0 = -(-points[MCindex].Px() * sinA + points[MCindex].Py() * cosA);
-      double py0 = points[MCindex].Px() * cosA + points[MCindex].Py() * sinA;
-      double mcEx = px0*mcQP;
-      double mcEy = py0*mcQP;
-      // ---
+      double mcEx = points[MCindex].Px()*mcQP;
+      double mcEy = points[MCindex].Py()*mcQP;
       double mcEz = points[MCindex].Pz()*mcQP;
       double mcEt = TMath::Sqrt( mcEx * mcEx + mcEy * mcEy );
 //cout << fISlice <<" "<<mc.FirstMCPointID() << endl;
@@ -541,29 +493,10 @@ void AliHLTTPCCASlicePerformance::FillHistos()
         mcDzDs = -mcDzDs;
         mcQPt = -mcQPt;
       }
-
-//      if ( mcQPt * p.GetQPt() < 0) {
-//	mcQPt = -mcQPt;
-//      }
-
       double qPt = p.GetQPt();
-      // ---
-//      if( qPt >= 1.0 ) break;
-//      if( mc.GetSet() != 2 ) break;
-      // ---
       double pt = 1. / TMath::Abs( qPt );
 //        std::cout << "op!"<<std::endl;
       if ( mcPt < 0.010 ) break;
-
-      if ( mcQPt * p.GetQPt() < 0) {
-//	  std::cout<<" -.-.- mcQPt: "<<mcQPt<<";   p.GetQPt(): "<<p.GetQPt()<<";   pt: "<<pt<<";   mcPt: "<<mcPt<<";   res: "<<(pt - mcPt)/mcPt<<"\n";
-//	  std::cout<<"       fISlice: "<<fISlice<<"\n";
-      	mcQPt = -mcQPt;
-      }
-//      else {
-//	  std::cout<<" -.- pt: "<<pt<<";   mcPt: "<<mcPt<<";   res: "<<(pt - mcPt)/mcPt<<"\n";
-//	  std::cout<<"     fISlice: "<<fISlice<<"\n";
-//      }
 
 //       AliHLTTPCCATrackParam p1 = t.EndPoint();
 
@@ -614,7 +547,7 @@ void AliHLTTPCCASlicePerformance::FillHistos()
         if(points[iMCPoint].ISlice() != fISlice) continue;
         if(points[iMCPoint].IRow() == hit.IRow())
         {
-          if(fabs(hit.Y() - points[iMCPoint].Y())<5 && fabs(hit.Z() - points[iMCPoint].Z())<5)
+          if(fabs(hit.Y() - points[iMCPoint].Y())<20 && fabs(hit.Z() - points[iMCPoint].Z())<20)
             MCindex = iMCPoint;
         }
       }
@@ -626,7 +559,6 @@ void AliHLTTPCCASlicePerformance::FillHistos()
 
 
       const AliHLTTPCCALocalMCPoint& point = points[MCindex];
-//      std::cout<<"> h.x: "<<hit.X()<<";   p.x: "<<point.X()<<";   h.y: "<<hit.Y()<<";   p.y: "<<point.Y()<<";   h.z: "<<hit.Z()<<";   p.z: "<<point.Z()<<"\n";
       
       GetHisto(kresXHit)->Fill( hit.X() - point.X() );
       GetHisto(kresYHit)->Fill( hit.Y() - point.Y() );
@@ -673,4 +605,4 @@ void AliHLTTPCCASlicePerformance::FillHistos()
 
 } // void AliHLTTPCCASlicePerformance::FillHistos()
 #endif // HLTCA_STANDALONE
-//#endif //DO_TPCCATRACKER_EFF_PERFORMANCE
+#endif //DO_TPCCATRACKER_EFF_PERFORMANCE

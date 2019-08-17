@@ -219,72 +219,21 @@ void AliHLTTPCCATracker::WriteOutput()
   int nStoredHits = 0;
   int iTr = 0;
   const int tracksSize = fTracks.size();
-#ifdef TETA
-  float *sFirstClusterRef = (float*) _mm_malloc(sizeof(float_v), float_v::Size*4);
-  float *sNClusters = (float*) _mm_malloc(sizeof(float_v), float_v::Size*4);
-  float *sInnerRow = (float*) _mm_malloc(sizeof(float_v), float_v::Size*4);
-  float *sOuterRow = (float*) _mm_malloc(sizeof(float_v), float_v::Size*4);
-  const AliHLTTPCCATrackParam *sStartPoint[float_v::Size] = {0};
-  int nTrackV(0), iTrV(0);
-  fOutput->SetNTracksV( 0 );
-  TrSort* tr_sort_helper = new TrSort[fNumberOfTracks];
-  for ( int trackIndex = 0; trackIndex < tracksSize; ++trackIndex ) {
-    if( trackIndex >= fNumberOfTracks ) continue;
-    const Track &track = *fTracks[trackIndex];
-    tr_sort_helper[trackIndex].nHits = track.NumberOfHits();
-    tr_sort_helper[trackIndex].trId = trackIndex;
-  }
-  std::sort(&(tr_sort_helper[0]), &(tr_sort_helper[fNumberOfTracks]), TrSort::trComp);
-#endif
-//  std::cout<<" > > > Tracker - write output. fNumberOfTracks: "<<fNumberOfTracks<<";   fNTrackHits: "<<fNTrackHits<<"\n";
   for ( int trackIndex = 0; trackIndex < tracksSize; ++trackIndex ) {
     // if (!fTracks[trackIndex]) continue;
-#ifndef TETA
     const Track &track = *fTracks[trackIndex];
     const int numberOfHits = track.NumberOfHits();
-//    std::cout<<" - - - > trackIndex: "<<trackIndex<<";   numberOfHits: "<<numberOfHits<<"\n";
-//    if( numberOfHits == 70 ) continue;
 
     {
       AliHLTTPCCASliceTrack out;
       hitStoreIndex = nStoredHits;
       out.SetFirstClusterRef( nStoredHits );
-//      nStoredHits += numberOfHits;
+      nStoredHits += numberOfHits;
       out.SetNClusters( numberOfHits );
       out.SetParam( track.Param() );
       fOutput->SetTrack( iTr, out );
     }
-#else
-    const Track &track = *fTracks[tr_sort_helper[trackIndex].trId];
-    const int numberOfHits = track.NumberOfHits();
-    sFirstClusterRef[nTrackV] = nStoredHits;
-    sNClusters[nTrackV] = numberOfHits;
-    sInnerRow[nTrackV] = track.HitId( 0 ).RowIndex();
-    sOuterRow[nTrackV] = track.HitId( numberOfHits - 1 ).RowIndex();
-    sStartPoint[nTrackV] = &track.Param();
-    nTrackV++;
-    if( nTrackV == float_v::Size || trackIndex >= tracksSize - 1 ) {
-      float_v &tFirstClusterRef = reinterpret_cast<float_v&>(sFirstClusterRef[0]);
-      int_v vFirstClusterRef(tFirstClusterRef);
-      float_v &tNClusters = reinterpret_cast<float_v&>(sNClusters[0]);
-      int_v vNClusters(tNClusters);
-      float_v &tInnerRow = reinterpret_cast<float_v&>(sInnerRow[0]);
-      int_v vInnerRow(tInnerRow);
-      float_v &tOuterRow = reinterpret_cast<float_v&>(sOuterRow[0]);
-      int_v vOuterRow(tOuterRow);
-      AliHLTTPCCATrackParamVector vStartPoint;
-      ConvertPTrackParamToVector(sStartPoint,vStartPoint,nTrackV);
-      int_m vActive( int_v( Vc::IndexesFromZero ) < nTrackV );
-      AliHLTTPCCASliceTrackVector vOut( vFirstClusterRef, vNClusters, vInnerRow, vOuterRow, int_v(0), vActive, vStartPoint );
-      fOutput->SetTrackV( iTrV, vOut );
-      iTrV++;
-      nTrackV = 0;
-      fOutput->AddNTracksV();
-    }
-#endif
     ++iTr;
-    nStoredHits += numberOfHits;
-//    if( numberOfHits == 70 ) std::cout<<" >>>>>>> Track is stored\n";
 
     for ( int hitIdIndex = 0; hitIdIndex < numberOfHits; ++hitIdIndex ) {
       const HitId &hitId = track.HitId( hitIdIndex );
@@ -295,7 +244,6 @@ void AliHLTTPCCATracker::WriteOutput()
       const int inpIdOffset = fClusterData->RowOffset( rowIndex );
       const int inpIdtot = fData.ClusterDataIndex( row, hitIndex );
       const int inpId = inpIdtot - inpIdOffset;
-//      std::cout<<" - - - - - > hitIdIndex: "<<hitIdIndex<<";   rowIndex: "<<rowIndex<<";   hitIndex: "<<hitIndex<<"\n";
       VALGRIND_CHECK_VALUE_IS_DEFINED( rowIndex );
       VALGRIND_CHECK_VALUE_IS_DEFINED( hitIndex );
       VALGRIND_CHECK_VALUE_IS_DEFINED( inpIdOffset );
@@ -321,19 +269,10 @@ void AliHLTTPCCATracker::WriteOutput()
       fOutput->SetClusterUnpackedX( hitStoreIndex, hUnpackedX );
       ++hitStoreIndex;
     }
-#ifndef TETA
     if (fTracks[trackIndex]) delete fTracks[trackIndex];
-#endif
   }
-#ifdef TETA
-  _mm_free(sFirstClusterRef);
-  _mm_free(sNClusters);
-  _mm_free(sInnerRow);
-  _mm_free(sOuterRow);
-#else
-  fOutput->SortTracks();
-#endif
 
+  fOutput->SortTracks();
 #ifdef USE_TIMERS
   timer.Stop();
   fTimers[5] += timer.RealTime();

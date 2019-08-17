@@ -743,7 +743,7 @@ void StiMaker::FinishTracks (int gloPri)
  StiTrackContainer* tkV  = StiToolkit::instance()->getTrackContainer();
  if (!tkV) return;
 
- int nTk=0,nNodes=0,nHits=0;
+ int nTk=0,nNodes=0,nInside=0,nHits=0;
  
    for (int itk=0; itk<(int)tkV->size(); itk++)
    {
@@ -752,7 +752,7 @@ void StiMaker::FinishTracks (int gloPri)
      nTk++;
      StiKTNIterator tNode = track->begin();
      StiKTNIterator eNode = track->end();
-     nNodes=0;nHits=0;
+     nNodes=0;nInside=0;nHits=0;
      for (;tNode!=eNode;++tNode) 
      {
 	StiKalmanTrackNode *node = &(*tNode);

@@ -14,7 +14,6 @@
 
 #include "AliHLTTPCCASliceTrack.h"
 #include "AliHLTTPCCADataCompressor.h"
-#include "AliHLTTPCCASliceTrackVector.h"
 
 /**
  * @class AliHLTTPCCASliceOutput
@@ -60,29 +59,16 @@ class AliHLTTPCCASliceOutput
     static bool CompareTrackLength (const AliHLTTPCCASliceTrack &st1, const AliHLTTPCCASliceTrack &st2) {
       return (st1.NClusters() > st2.NClusters());
     }
-
-    // ---
-    void SetNTracksV       ( int v )  { fNTracksV = v;        }
-    void AddNTracksV       ()  { fNTracksV++;        }
-    int NTracksV()                    const { return fNTracksV;              }
-    AliHLTTPCCASliceTrackVector &TrackV( int i ) const { return fTracksV[i]; }
-    void SetTrackV( int i, const AliHLTTPCCASliceTrackVector &v ) {  fTracksV[i] = v; }
-    // ---
-
   private:
 
     AliHLTTPCCASliceOutput( const AliHLTTPCCASliceOutput& )
-        : fNTracks( 0 ), fNTrackClusters( 0 ), fTracks( 0 ), fTracksV( 0 ), fClusterIDrc( 0 ), fClusterPackedYZ( 0 ), fClusterUnpackedYZ( 0 ), fClusterUnpackedX( 0 ), fClusterPackedAmp( 0 ) {}
+        : fNTracks( 0 ), fNTrackClusters( 0 ), fTracks( 0 ), fClusterIDrc( 0 ), fClusterPackedYZ( 0 ), fClusterUnpackedYZ( 0 ), fClusterUnpackedX( 0 ), fClusterPackedAmp( 0 ) {}
 
     const AliHLTTPCCASliceOutput& operator=( const AliHLTTPCCASliceOutput& ) const { return *this; }
 
     int fNTracks;                 // number of reconstructed tracks
     int fNTrackClusters;          // total number of track clusters
     AliHLTTPCCASliceTrack *fTracks; // pointer to reconstructed tracks
-    // ---
-    int fNTracksV;                 // number of reconstructed tracks
-    AliHLTTPCCASliceTrackVector *fTracksV; // pointer to reconstructed tracks
-    // ---
     DataCompressor::RowCluster *fClusterIDrc;  // pointer to cluster IDs ( packed IRow and ICluster)
     unsigned short *fClusterPackedYZ;     // pointer to packed cluster YZ coordinates
     float2   *fClusterUnpackedYZ;   // pointer to cluster coordinates (temporary data, for debug proposes)

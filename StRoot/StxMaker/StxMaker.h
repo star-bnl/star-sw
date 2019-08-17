@@ -39,21 +39,22 @@ class CA2GenState_t  {
 class StxMaker : public StMaker {
  public: 
   StxMaker(const char *name="Stx") : StMaker(name) {}
-  virtual      ~StxMaker() {}
-  virtual Int_t InitRun(Int_t runumber);
+  virtual       ~StxMaker() {}
   virtual Int_t Make();
   virtual Int_t FitTrack(const AliHLTTPCCAGBTrack &tr);
 #ifndef __CINT__
   static Double_t ConvertCA2Gen(const Double_t alpha, const StxCApar& stxPar, CA2GenState_t& ca2Gen );
+#else
+  //  static Double_t ConvertCA2Gen(const Double_t alpha, const StxCApar* stxPar, CA2GenState_t* ca2Gen );
 #endif
   Bool_t Accept(genfit::Track *kTrack);
-  void   FillGlobalTrack(genfit::Track *kTrack);
-  void   FillPrimaryTracks();
-  void   FillPrimaryTrack(StPrimaryTrack *pTrack);
-  Int_t  FillDetectorInfo(StTrack *gTrack, genfit::Track * track, Bool_t refCountIncr) ;
-  void   FillGeometry(StTrack* gTrack, genfit::Track * track, Bool_t outer);
-  Int_t  FillTrack(StTrack* gTrack, genfit::Track * track);
-  void   FillDca(StTrack* stTrack, genfit::Track * track);
+  void FillGlobalTrack(genfit::Track *kTrack);
+  void FillPrimaryTracks();
+  void FillPrimaryTrack(StPrimaryTrack *pTrack);
+  Int_t FillDetectorInfo(StTrack *gTrack, genfit::Track * track, Bool_t refCountIncr) ;
+  void FillGeometry(StTrack* gTrack, genfit::Track * track, Bool_t outer);
+  Int_t FillTrack(StTrack* gTrack, genfit::Track * track);
+  void FillDca(StTrack* stTrack, genfit::Track * track);
   CA2GenState_t fCA2Gen[2];// 0 -> Inner, 1 -> Outer
   
   virtual const char *GetCVS() const {

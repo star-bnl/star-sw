@@ -42,7 +42,7 @@ class AliHLTTPCCASlicePerformance: public AliHLTTPCCATrackPerformanceBase
 
     AliHLTTPCCASlicePerformance(int iSlice):fISlice(iSlice),firstSliceHit(0),endSliceHit(0){};
     virtual ~AliHLTTPCCASlicePerformance(){};
-//#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
+#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
     virtual void SetNewEvent(const AliHLTTPCCAGBTracker * const Tracker,
                              AliHLTResizableArray<AliHLTTPCCAHitLabel> *hitLabels,
                              AliHLTResizableArray<AliHLTTPCCAMCTrack> *mcTracks,
@@ -56,11 +56,11 @@ class AliHLTTPCCASlicePerformance: public AliHLTTPCCATrackPerformanceBase
       // Calculate efficiencies
     virtual void EfficiencyPerformance();
 
-//#ifndef HLTCA_STANDALONE
+#ifndef HLTCA_STANDALONE
       /// Histograms
     virtual void FillHistos();
-//#endif
-//#endif // DO_TPCCATRACKER_EFF_PERFORMANCE
+#endif
+#endif // DO_TPCCATRACKER_EFF_PERFORMANCE
 
     friend class AliHLTTPCCASlicesPerformance;
     friend class AliHLTTPCCAMergerPerformance;

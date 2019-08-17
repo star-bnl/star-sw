@@ -186,48 +186,16 @@ bool AliHLTTPCCAPerformance::CreateHistos(string name)
 }
 
 
-//void AliHLTTPCCAPerformance::WriteDir2Current( TObject *obj )
-//{
-//  //* recursive function to write down all created in the file histos
-//  if ( !obj->IsFolder() ) obj->Write();
-//  else {
-//    TDirectory *cur = gDirectory;
-//    ((TDirectory*)obj)->cd();
-//    TList *listSub = ( ( TDirectory* )obj )->GetList();
-//    TIter it( listSub );
-//    while ( TObject *obj1 = it() ) WriteDir2Current( obj1 );
-//    cur->cd();
-//  }
-//}
 void AliHLTTPCCAPerformance::WriteDir2Current( TObject *obj )
 {
   //* recursive function to write down all created in the file histos
-  // ---
-  TString dname = gDirectory->GetName();
-//  printf( " ___ ___ ___ > dir name: %s\n", dname.Data() );
-  TString oname = obj->GetName();
-//  printf( " ... ... ... | obj name: %s\n", oname.Data() );
-  // ---
-  if ( !obj->IsFolder() ) {
-//      std::cout<<" ___ ___ ___ --- ( !obj->IsFolder() ) => obj->Write()\n";
-      obj->Write();
-  }
+  if ( !obj->IsFolder() ) obj->Write();
   else {
     TDirectory *cur = gDirectory;
-    // ---
-    TString dname1 = cur->GetName();
-//    printf( "             > cur name: %s\n", dname1.Data() );
-    // ---
     ((TDirectory*)obj)->cd();
-//    std::cout<<"             > ((TDirectory*)obj)->cd() - ok\n";
     TList *listSub = ( ( TDirectory* )obj )->GetList();
-//    std::cout<<"             > TList *listSub = ( ( TDirectory* )obj )->GetList() - ok\n";
     TIter it( listSub );
-//    std::cout<<"             > TIter it( listSub ) - ok\n";
-    while ( TObject *obj1 = it() ) {
-//	std::cout<<"             >>> Do recursive\n";
-	WriteDir2Current( obj1 );
-    }
+    while ( TObject *obj1 = it() ) WriteDir2Current( obj1 );
     cur->cd();
   }
 }
