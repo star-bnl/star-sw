@@ -31,11 +31,10 @@ StPicoMtdHit::~StPicoMtdHit() {
 }
 
 //_________________
-void StPicoMtdHit::Print(const Char_t* option) const {
+void StPicoMtdHit::Print(const Char_t* option __attribute__((unused)) ) const {
   LOG_INFO << " Backleg = " << backleg()
            << " Module  = " << module()
-           << " Cell    = " << cell()
-           << endm;
+           << " Cell    = " << cell() << endm;
 }
 
 //_________________

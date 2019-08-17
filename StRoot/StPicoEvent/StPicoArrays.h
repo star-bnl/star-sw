@@ -30,9 +30,9 @@ class StPicoArrays {
 
   /// Array names
   enum TypeIndex { Event=0, Track, EmcTrigger, MtdTrigger,
-		   BTowHit, BTofHit, ETofHit, MtdHit, BbcHit, EpdHit, FmsHit,
-		   BEmcPidTraits, BTofPidTraits, ETofPidTraits, MtdPidTraits, TrackCovMatrix,
-                   BEmcSmdEHit, BEmcSmdPHit };
+		   BTowHit, BTofHit, MtdHit, BbcHit, EpdHit, FmsHit,
+		   BEmcPidTraits, BTofPidTraits, MtdPidTraits, TrackCovMatrix,
+                   BEmcSmdEHit, BEmcSmdPHit, ETofHit, ETofPidTraits };
 };
 
 #endif

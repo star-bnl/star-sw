@@ -33,11 +33,11 @@ class StPicoFmsHit: public TObject {
   //
   
   /// Return detector ID [0,31]
-  Int_t detectorId() const;
+  Int_t detectorId() const   { return (Int_t)( mChannelDetectorId % 32 ); }
   /// Return channel [0,2047]
-  Int_t channel() const;
+  Int_t channel() const      { return (Int_t) (mChannelDetectorId / 32); }
   /// Return ADC
-  Int_t adc() const;
+  Int_t adc() const          { return (Int_t)mAdc; }
 
   //
   // Setters
@@ -59,9 +59,5 @@ class StPicoFmsHit: public TObject {
 
   ClassDef(StPicoFmsHit, 1)
 };
-
-inline Int_t StPicoFmsHit::detectorId() const { return (Int_t)( mChannelDetectorId % 32 ); }
-inline Int_t StPicoFmsHit::channel() const { return (Int_t) (mChannelDetectorId / 32); }
-inline Int_t StPicoFmsHit::adc() const { return (Int_t)mAdc; }
 
 #endif

@@ -1,4 +1,5 @@
 // PicoDst headers
+#include "StPicoMessMgr.h"
 #include "StPicoEpdHit.h"
 
 //
@@ -33,7 +34,7 @@
 ClassImp(StPicoEpdHit)
 
 //_________________
-StPicoEpdHit::StPicoEpdHit() : mId(0), mQTdata(0), mnMIP(0) {
+StPicoEpdHit::StPicoEpdHit() : TObject(), mId(0), mQTdata(0), mnMIP(0) {
   /* no-op */
 }
 
@@ -42,6 +43,7 @@ StPicoEpdHit::StPicoEpdHit(Int_t position, Int_t tile,
 			   Int_t EW, Int_t ADC, Int_t TAC,
 			   Int_t TDC, Bool_t hasTAC, Float_t nMIP,
 			   Bool_t statusIsGood) :
+  TObject(),
   mId( (100*position + tile)*EW ),
   mQTdata( (ADC & 0x0FFF) | (TAC & 0x0FFF) << 12 | (TDC & 0x001F) << 24 | hasTAC << 29 | statusIsGood << 30 ),
   mnMIP(nMIP) {
@@ -50,12 +52,12 @@ StPicoEpdHit::StPicoEpdHit(Int_t position, Int_t tile,
 
 //_________________
 StPicoEpdHit::StPicoEpdHit(Short_t id, Int_t QTdata, Float_t nMIP) :
-  mId(id), mQTdata(QTdata), mnMIP(nMIP) {
+  TObject(), mId(id), mQTdata(QTdata), mnMIP(nMIP) {
   /* no-op */
 }
 
 //_________________
-StPicoEpdHit::StPicoEpdHit(const StPicoEpdHit &hit) {
+StPicoEpdHit::StPicoEpdHit(const StPicoEpdHit &hit) : TObject() {
   mId = hit.mId;
   mQTdata = hit.mQTdata;
   mnMIP = hit.mnMIP;
@@ -64,4 +66,9 @@ StPicoEpdHit::StPicoEpdHit(const StPicoEpdHit &hit) {
 //_________________
 StPicoEpdHit::~StPicoEpdHit() {
   /* no-op */
+}
+
+//_________________
+void StPicoEpdHit::Print(const Char_t *option __attribute__((unused)) ) const {
+  LOG_INFO << "EPD hit id: " << mId << " QT data: " << mQTdata << " nMIP: " << mnMIP << endm;
 }

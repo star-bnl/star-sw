@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!-- Task description -->
-<job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="xrootd">
+<job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="xrootd" simulateSumission="false"
+     copyInputLocally="false" >
 
   <!-- Decription of the task -->
   <command>
@@ -18,8 +19,9 @@
     end
   </command>
 
-  <SandBox>
+  <SandBox installer="ZIP">
     <Package>
+      <File>file:./sl74_gcc485</File>
       <File>file:./genDst.C</File>
     </Package>
   </SandBox>

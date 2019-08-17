@@ -19,6 +19,8 @@
 #include "StPicoTrackCovMatrix.h"
 #include "StPicoBEmcSmdEHit.h"
 #include "StPicoBEmcSmdPHit.h"
+#include "StPicoETofHit.h"
+#include "StPicoETofPidTraits.h"
 #include "StPicoDst.h"          //MUST be the last one
 
 #ifdef __TFG__VERSION__
@@ -117,24 +119,6 @@ void StPicoDst::printBTofHits() {
 }
 
 //_________________
-void StPicoDst::printETofHits() {
-
-  if(numberOfETofHits() == 0) {
-    LOG_INFO << "No ETofHit found!" << endm;
-    return;
-  }
-
-  LOG_INFO << "\n+++++++++ ETof list ( " << numberOfETofHits() << " entries )\n\n";
-  for(UInt_t iEntry=0; iEntry<numberOfETofHits(); iEntry++) {
-    LOG_INFO << "+++ etofHit " << iEntry << "\n";
-    etofHit(iEntry)->Print();
-    LOG_INFO << "\n";
-  }
-
-  LOG_INFO << endm;
-}
-
-//_________________
 void StPicoDst::printMtdHits() {
 
   if(numberOfMtdHits() == 0) {
@@ -200,24 +184,6 @@ void StPicoDst::printBTofPidTraits() {
   for(UInt_t iEntry=0; iEntry<numberOfBTofPidTraits(); iEntry++) {
     LOG_INFO << "+++ BTofPidTraits " << iEntry << "\n";
     btofPidTraits(iEntry)->Print();
-    LOG_INFO << "\n";
-  }
-
-  LOG_INFO << endm;
-}
-
-//_________________
-void StPicoDst::printETofPidTraits() {
-
-  if(numberOfETofPidTraits() == 0) {
-    LOG_INFO << "No ETof pidTraits found!" << endm;
-    return;
-  }
-
-  LOG_INFO << "\n+++++++++ ETof pidTraits list ( " << numberOfETofPidTraits() << " entries )\n\n";
-  for(UInt_t iEntry=0; iEntry<numberOfETofPidTraits(); iEntry++) {
-    LOG_INFO << "+++ ETofPidTraits " << iEntry << "\n";
-    etofPidTraits(iEntry)->Print();
     LOG_INFO << "\n";
   }
 
@@ -294,6 +260,42 @@ void StPicoDst::printBEmcSmdPHits() {
   for( UInt_t iEntry=0; iEntry<numberOfBEmcSmdPHits(); iEntry++ ) {
     LOG_INFO << "+++ BEmcSmdPHit " << iEntry << "\n";
     bemcSmdPHit(iEntry)->Print();
+    LOG_INFO << "\n";
+  }
+
+  LOG_INFO << endm;
+}
+
+//_________________
+void StPicoDst::printETofHits() {
+
+  if(numberOfETofHits() == 0) {
+    LOG_INFO << "No ETofHit found!" << endm;
+    return;
+  }
+
+  LOG_INFO << "\n+++++++++ ETof list ( " << numberOfETofHits() << " entries )\n\n";
+  for(UInt_t iEntry=0; iEntry<numberOfETofHits(); iEntry++) {
+    LOG_INFO << "+++ etofHit " << iEntry << "\n";
+    etofHit(iEntry)->Print();
+    LOG_INFO << "\n";
+  }
+
+  LOG_INFO << endm;
+}
+
+//_________________
+void StPicoDst::printETofPidTraits() {
+
+  if(numberOfETofPidTraits() == 0) {
+    LOG_INFO << "No ETof pidTraits found!" << endm;
+    return;
+  }
+
+  LOG_INFO << "\n+++++++++ ETof pidTraits list ( " << numberOfETofPidTraits() << " entries )\n\n";
+  for(UInt_t iEntry=0; iEntry<numberOfETofPidTraits(); iEntry++) {
+    LOG_INFO << "+++ ETofPidTraits " << iEntry << "\n";
+    etofPidTraits(iEntry)->Print();
     LOG_INFO << "\n";
   }
 

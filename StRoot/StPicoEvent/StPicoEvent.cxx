@@ -31,7 +31,7 @@ StPicoEvent::StPicoEvent(): TObject(),
   mPrimaryVertexX(0), mPrimaryVertexY(0), mPrimaryVertexZ(0),
   mPrimaryVertexErrorX(0), mPrimaryVertexErrorY(0), mPrimaryVertexErrorZ(0),
 #ifdef __TFG__VERSION__
-	mPrimaryVertexCorr{0,0,0},	
+  mPrimaryVertexCorr{0,0,0},	
 #endif /* __TFG__VERSION__ */
   mRanking(-999), mNBEMCMatch(0), mNBTOFMatch(0),
   mTriggerIds(),
@@ -41,16 +41,16 @@ StPicoEvent::StPicoEvent(): TObject(),
   mRefMult3NegEast(0), mRefMult3PosEast(0), mRefMult3NegWest(0), mRefMult3PosWest(0),
   mRefMult4NegEast(0), mRefMult4PosEast(0), mRefMult4NegWest(0), mRefMult4PosWest(0),
   mRefMultHalfNegEast(0), mRefMultHalfPosEast(0), mRefMultHalfNegWest(0), mRefMultHalfPosWest(0),
-  mGRefMult(0), mNumberOfGlobalTracks(0), mbTofTrayMultiplicity(0), mETofHitMultiplicity(0),
-  mETofDigiMultiplicity(0), mNHitsHFT{}, mNVpdHitsEast(0), mNVpdHitsWest(0), mNTofT0(0), mVzVpd(-999.),
+  mGRefMult(0), mNumberOfGlobalTracks(0), mbTofTrayMultiplicity(0), mNHitsHFT{},
+  mNVpdHitsEast(0), mNVpdHitsWest(0), mNTofT0(0), mVzVpd(-999.),
   mZDCx(0), mBBCx(0), mBackgroundRate(0), mBbcBlueBackgroundRate(0), mBbcYellowBackgroundRate(0),
   mBbcEastRate(0), mBbcWestRate(0), mZdcEastRate(0), mZdcWestRate(0),
   mZdcSumAdcEast(0), mZdcSumAdcWest(0),
   mZdcSmdEastHorizontal{}, mZdcSmdEastVertical{}, mZdcSmdWestHorizontal{}, mZdcSmdWestVertical{},
-  mBbcAdcEast{}, mBbcAdcWest{},
-  mHighTowerThreshold{},
-  mJetPatchThreshold{} {
+  mBbcAdcEast{}, mBbcAdcWest{}, mHighTowerThreshold{}, mJetPatchThreshold{},
+  mETofHitMultiplicity(0), mETofDigiMultiplicity(0) {
 
+  // Default constructor
   if( !mTriggerIds.empty() ) {
     mTriggerIds.clear();
   }
@@ -59,11 +59,16 @@ StPicoEvent::StPicoEvent(): TObject(),
 //_________________
 StPicoEvent::StPicoEvent(const StPicoEvent &event) : TObject() {
 
+  // Copy constructor
+
+  // Global info
   mRunId = event.mRunId;
   mEventId = event.mEventId;
   mFillId = event.mFillId;
   mBField = event.mBField;
   mTime = event.mTime;
+
+  // Primary vertex info
   mPrimaryVertexX = event.mPrimaryVertexX;
   mPrimaryVertexY = event.mPrimaryVertexY;
   mPrimaryVertexZ = event.mPrimaryVertexZ;
@@ -71,11 +76,15 @@ StPicoEvent::StPicoEvent(const StPicoEvent &event) : TObject() {
   mPrimaryVertexErrorY = event.mPrimaryVertexErrorY;
   mPrimaryVertexErrorZ = event.mPrimaryVertexErrorZ;
   mRanking = event.mRanking;
+
+  // Number of matched tracks to fast detectors
   mNBEMCMatch = event.mNBEMCMatch;
   mNBTOFMatch = event.mNBTOFMatch;
 
+  // Trigger ID collection
   mTriggerIds = event.mTriggerIds;
 
+  // Reference multiplicities
   mRefMultFtpcEast = event.mRefMultFtpcEast;
   mRefMultFtpcWest = event.mRefMultFtpcWest;
   mRefMultNeg = event.mRefMultNeg;
@@ -99,6 +108,8 @@ StPicoEvent::StPicoEvent(const StPicoEvent &event) : TObject() {
 
   mGRefMult = event.mGRefMult;
   mNumberOfGlobalTracks = event.mNumberOfGlobalTracks;
+
+  // Hit mulitplicities
   mbTofTrayMultiplicity = event.mbTofTrayMultiplicity;
   mETofHitMultiplicity  = event.mETofHitMultiplicity;
   mETofDigiMultiplicity = event.mETofDigiMultiplicity;
@@ -106,11 +117,13 @@ StPicoEvent::StPicoEvent(const StPicoEvent &event) : TObject() {
     mNHitsHFT[iIter] = event.mNHitsHFT[iIter];
   }
 
+  // VPD info
   mNVpdHitsEast = event.mNVpdHitsEast;
   mNVpdHitsWest = event.mNVpdHitsWest;
   mNTofT0 = event.mNTofT0;
   mVzVpd = event.mVzVpd;
 
+  // Forward detector info
   mZDCx = event.mZDCx;
   mBBCx = event.mBBCx;
   mBackgroundRate = event.mBackgroundRate;
@@ -135,6 +148,7 @@ StPicoEvent::StPicoEvent(const StPicoEvent &event) : TObject() {
     mBbcAdcWest[iIter] = event.mBbcAdcWest[iIter];
   }
 
+  // Tower and patch info
   for(int iIter=0; iIter<4; iIter++) {
     mHighTowerThreshold[iIter] = event.mHighTowerThreshold[iIter];
     mJetPatchThreshold[iIter] = event.mJetPatchThreshold[iIter];
@@ -143,11 +157,12 @@ StPicoEvent::StPicoEvent(const StPicoEvent &event) : TObject() {
 
 //_________________
 StPicoEvent::~StPicoEvent() {
+  // Destructor
   /* empty */
 }
 
 //_________________
-void StPicoEvent::Print(const Char_t *option) const {
+void StPicoEvent::Print(const Char_t *option __attribute__((unused)) ) const {
   LOG_INFO << " year = " << year()
 	   << " day = " << day() << "\n"
 	   << " fill/run/event Id = " << fillId() << "/" << runId() << "/" << eventId() << "\n"

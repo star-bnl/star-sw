@@ -54,6 +54,7 @@
 #include "StMuDSTMaker/COMMON/StMuEmcPoint.h"
 #include "StMuDSTMaker/COMMON/StMuFmsUtil.h"
 #include "StMuDSTMaker/COMMON/StMuEpdHit.h"
+#include "StMuDSTMaker/COMMON/StMuETofHit.h"
 
 #include "StTriggerUtilities/StTriggerSimuMaker.h"
 #include "StTriggerUtilities/Bemc/StBemcTriggerSimu.h"
@@ -89,6 +90,8 @@
 #include "StPicoEvent/StPicoTrackCovMatrix.h"
 #include "StPicoEvent/StPicoBEmcSmdEHit.h"
 #include "StPicoEvent/StPicoBEmcSmdPHit.h"
+#include "StPicoEvent/StPicoETofHit.h"
+#include "StPicoEvent/StPicoETofPidTraits.h"
 #include "StPicoEvent/StPicoArrays.h"
 //#include "StPicoEvent/StPicoDst.h"
 #include "StPicoDstMaker/StPicoDstMaker.h"
@@ -236,6 +239,8 @@ void StPicoDstMaker::streamerOff() {
   StPicoBEmcPidTraits::Class()->IgnoreTObjectStreamer();
   StPicoMtdPidTraits::Class()->IgnoreTObjectStreamer();
   StPicoTrackCovMatrix::Class()->IgnoreTObjectStreamer();
+  StPicoETofHit::Class()->IgnoreTObjectStreamer();
+  StPicoETofPidTraits::Class()->IgnoreTObjectStreamer();
 }
 
 //_________________
@@ -841,6 +846,7 @@ Int_t StPicoDstMaker::MakeWrite() {
   fillMtdHits();
   fillEpdHits();
   fillBbcHits();
+  fillETofHits();
 
   // Could be a good idea to move this call to Init() or InitRun()
   StFmsDbMaker* fmsDbMaker = static_cast<StFmsDbMaker*>(GetMaker("fmsDb"));
@@ -1173,7 +1179,8 @@ void StPicoDstMaker::fillTracks() {
       //new((*(mPicoArrays[StPicoArrays::BTofPidTraits]))[btof_index]) StPicoBTofPidTraits(gTrk, pTrk, counter);
 
       // Return pointer to the current trait
-      StPicoBTofPidTraits *btofPidTraits = (StPicoBTofPidTraits*)mPicoArrays[StPicoArrays::BTofPidTraits]->At(btof_index);
+      StPicoBTofPidTraits *btofPidTraits =
+	(StPicoBTofPidTraits*)mPicoArrays[StPicoArrays::BTofPidTraits]->At(btof_index);
 
       // Fill traits information
 
@@ -1236,7 +1243,7 @@ void StPicoDstMaker::fillTracks() {
       
     } //if (gTrk->tofHit())
 
-    // ETOF information
+        // ETOF information
     if (gTrk->etofHit()) {
 
       // Retrieve index in the PicoETofPidTraits pico array
@@ -1245,8 +1252,9 @@ void StPicoDstMaker::fillTracks() {
       new((*(mPicoArrays[StPicoArrays::ETofPidTraits]))[etof_index]) StPicoETofPidTraits();
 
       // Return pointer to the current trait
-      StPicoETofPidTraits *etofPidTraits = (StPicoETofPidTraits*)mPicoArrays[StPicoArrays::ETofPidTraits]->At( etof_index );
-     
+      StPicoETofPidTraits *etofPidTraits =
+	(StPicoETofPidTraits*)mPicoArrays[StPicoArrays::ETofPidTraits]->At( etof_index );
+
       // Fill traits information:
 
       // Fill index of the corresponding pico track
@@ -1266,7 +1274,7 @@ void StPicoDstMaker::fillTracks() {
                << endm;
       */
 
-      // Retrive and store etof pid traits information:      
+      // Retrive and store etof pid traits information:
       // Matching information
       etofPidTraits->setMatchFlag( (UChar_t)(gTrk->etofPidTraits().matchFlag()) );
 
@@ -1294,7 +1302,9 @@ void StPicoDstMaker::fillTracks() {
       new((*(mPicoArrays[StPicoArrays::MtdPidTraits]))[mtd_index]) StPicoMtdPidTraits();
       //new((*(mPicoArrays[StPicoArrays::MtdPidTraits]))[mtd_index]) StPicoMtdPidTraits(gTrk->mtdHit(), &(gTrk->mtdPidTraits()), counter);
 
-      StPicoMtdPidTraits *mtdPidTraits = (StPicoMtdPidTraits*)mPicoArrays[StPicoArrays::MtdPidTraits]->At(mtd_index);
+      StPicoMtdPidTraits *mtdPidTraits =
+	(StPicoMtdPidTraits*)mPicoArrays[StPicoArrays::MtdPidTraits]->At(mtd_index);
+
       // Store index of the corresponding pico track
       mtdPidTraits->setTrackIndex(counter);
       // Store mtdPidTraits related information
@@ -1815,11 +1825,10 @@ void StPicoDstMaker::fillMtdTrigger() {
   }
 
   StTriggerData* trigger = const_cast<StTriggerData*>(mMuDst->event()->triggerData());
-  if(!trigger)
-    {
-      LOG_WARN << "No trigger data bank available!" << endm;
-      return;
-    }
+  if(!trigger) {
+    LOG_WARN << "No trigger data bank available!" << endm;
+    return;
+  }
 
   // VPD TacSum
   mtdTrigger->setVpdTacSum(trigger->vpdEarliestTDCHighThr(east) + trigger->vpdEarliestTDCHighThr(west) );
@@ -1898,8 +1907,10 @@ void StPicoDstMaker::fillBTowHits() {
 
     StEmcRawHit* aHit = mEmcIndex[iTower];
 
-    // Set up default values for towers
-    // that do not exist ( see StPicoBTowHit::isBad() )
+    // Do not skip torwers for which information does not exist.
+    // Set up default values for all towers and if some do not exist
+    // then will them with aka default (see StPicoBTowHit::isBad() ) info
+
     Int_t adc = 0;
     Float_t energy = -2.;
     if (aHit) {
@@ -1916,8 +1927,13 @@ void StPicoDstMaker::fillBTowHits() {
 //_________________
 void StPicoDstMaker::fillBTofHits() {
 
+  // Loop over BTOF hits
   for (unsigned int i = 0; i < mMuDst->numberOfBTofHit(); ++i) {
+
+    // Retrieve i-th hit
     StMuBTofHit* aHit = (StMuBTofHit*)mMuDst->btofHit(i);
+    if (!aHit) continue;
+
     if (aHit->tray() > 120) continue;
     int cellId = (aHit->tray() - 1) * 192 + (aHit->module() - 1) * 6 + (aHit->cell() - 1);
 
@@ -1929,14 +1945,23 @@ void StPicoDstMaker::fillBTofHits() {
 //_________________
 void StPicoDstMaker::fillETofHits() {
 
+  // Retrieve and fill both ETOF hit and pidTraits
+
+
   std::map< Int_t, Int_t > muTrackId2picoHitIndex;
 
+  // Loop over ETOF hits
   for ( size_t i = 0; i < mMuDst->numberOfETofHit(); ++i) {
+
+    // Retrieve i-th hit
     StMuETofHit* aHit = (StMuETofHit*)mMuDst->etofHit(i);
-    if (! aHit) continue;
+    if (!aHit) continue;
+
     unsigned int geomId = (aHit->sector() - 13) * 9 + (aHit->zPlane() - 1) * 3 + aHit->counter();
 
+    // Create an instance of ETOF hit
     StPicoETofHit picoHit = StPicoETofHit();
+    // Fill the current hit information
     picoHit.setGeomId(geomId);
     picoHit.setLocalX(aHit->localX());
     picoHit.setLocalY(aHit->localY());
@@ -1944,17 +1969,16 @@ void StPicoDstMaker::fillETofHits() {
     picoHit.setTime(aHit->time());
     picoHit.setTot(aHit->totalTot());
     /*
-    LOG_INFO << "muHit sector  = "     << aHit->sector()
-           << " zPlane  = "     << aHit->zPlane()
-           << " counter = "     << aHit->counter()
-           << " localX = "      << aHit->localX()
-           << " localY = "      << aHit->localY()
-           << " clusterSize = " << aHit->clusterSize()
-           << " time = "        << aHit->time()
-           << " tot  = "        << aHit->totalTot()
-           << endm;
-
-    picoHit.Print();
+      LOG_INFO << "muHit sector  = "     << aHit->sector()
+      << " zPlane  = "     << aHit->zPlane()
+      << " counter = "     << aHit->counter()
+      << " localX = "      << aHit->localX()
+      << " localY = "      << aHit->localY()
+      << " clusterSize = " << aHit->clusterSize()
+      << " time = "        << aHit->time()
+      << " tot  = "        << aHit->totalTot()
+      << endm;
+	   picoHit.Print();
     */
     int counter = mPicoArrays[StPicoArrays::ETofHit]->GetEntries();
     new((*(mPicoArrays[StPicoArrays::ETofHit]))[counter]) StPicoETofHit(picoHit);
@@ -1964,10 +1988,10 @@ void StPicoDstMaker::fillETofHits() {
 
   //LOG_INFO << "size of muTrackId2picoHitIndex map: " << muTrackId2picoHitIndex.size() << endm;
 
-  // set the eTOF hit index of the eTOF PID traits to their proper values
+  // Set the eTOF hit index of the eTOF PID traits to their proper values
   for( size_t i = 0; i < (size_t)mPicoArrays[StPicoArrays::ETofPidTraits]->GetEntriesFast(); ++i ) {
     StPicoETofPidTraits* etofPidTraits = (StPicoETofPidTraits*)mPicoArrays[StPicoArrays::ETofPidTraits]->At( i );
-    
+
     int trackId = etofPidTraits->hitIndex();
 
     if( muTrackId2picoHitIndex.count( trackId ) ) {
@@ -1977,13 +2001,14 @@ void StPicoDstMaker::fillETofHits() {
       etofPidTraits->setHitIndex( -1 );
     }
     /*
-    LOG_INFO << "muPidTrait (" << i << "): trackId = " << trackId << "  hit index: " << etofPidTraits->hitIndex() << endm;
+    LOG_INFO << "muPidTrait (" << i << "): trackId = " << trackId
+    << "  hit index: " << etofPidTraits->hitIndex() << endm;
     if(etofPidTraits->hitIndex() > -1 ) {
-      StPicoETofHit* picoHit = (StPicoETofHit*)mPicoArrays[StPicoArrays::ETofHit]->At( etofPidTraits->hitIndex() );
+    StPicoETofHit* picoHit = (StPicoETofHit*)mPicoArrays[StPicoArrays::ETofHit]->At( etofPidTraits->hitIndex() );
 
-      if( picoHit ) {
-        picoHit->Print();
-      }
+    if( picoHit ) {
+      picoHit->Print();
+    }
     }
     */
   }
@@ -1995,22 +2020,23 @@ void StPicoDstMaker::fillBbcHits() {
   StMuEvent* muEvent = mMuDst->event();
   // Retrieve trigger data
   const StTriggerData* trg = muEvent->triggerData();
-  if (trg) {
-  // Loop over two directions (east, west)
-  for (int ew=-1; ew<2; ew+=2) { // note loop -1,+1
-    StBeamDirection dir = (ew<0) ? east : west;
-    // Loop over PMT boxes
-    for (int pmt=1; pmt<17; pmt++) {
-      int adc = trg->bbcADC(dir,pmt);
-      if (adc>0) {
-	int tdc = trg->bbcTDC5bit(dir,pmt);
-	int tac = trg->bbcTDC(dir,pmt);
-	bool trueval = kTRUE;
-	int counter = mPicoArrays[StPicoArrays::BbcHit]->GetEntries();
-	new((*(mPicoArrays[StPicoArrays::BbcHit]))[counter]) StPicoBbcHit(pmt,ew,adc,tac,tdc,trueval,trueval);
-      } //if (adc>0)
-    } //for (int pmt=1; pmt<17; pmt++)
-  } //for (int ew=-1; ew<2; ew+=2)
+  // Trigger data must exist
+  if( trg ) {
+    // Loop over two directions (east, west)
+    for (int ew=-1; ew<2; ew+=2) { // note loop -1,+1
+      StBeamDirection dir = (ew<0) ? east : west;
+      // Loop over PMT boxes
+      for (int pmt=1; pmt<17; pmt++) {
+	int adc = trg->bbcADC(dir,pmt);
+	if (adc>0) {
+	  int tdc = trg->bbcTDC5bit(dir,pmt);
+	  int tac = trg->bbcTDC(dir,pmt);
+	  bool trueval = kTRUE;
+	  int counter = mPicoArrays[StPicoArrays::BbcHit]->GetEntries();
+	  new((*(mPicoArrays[StPicoArrays::BbcHit]))[counter]) StPicoBbcHit(pmt,ew,adc,tac,tdc,trueval,trueval);
+	} //if (adc>0)
+      } //for (int pmt=1; pmt<17; pmt++)
+    } //for (int ew=-1; ew<2; ew+=2)
   }
 }
 //_________________
@@ -2018,10 +2044,12 @@ void StPicoDstMaker::fillEpdHits() {
   // Loop over EPD hits
   for (unsigned int i=0; i < mMuDst->numberOfEpdHit(); i++) {
     StMuEpdHit* aHit = mMuDst->epdHit(i);
+    if (!aHit) continue;
     int counter = mPicoArrays[StPicoArrays::EpdHit]->GetEntries();
     new((*(mPicoArrays[StPicoArrays::EpdHit]))[counter]) StPicoEpdHit(aHit->id(), aHit->qtData(), aHit->nMIP());
   } //for (unsigned int i=0; i < mMuDst->numberOfEpdHit(); i++)
 }
+
 //_________________
 void StPicoDstMaker::fillMtdHits() {
 

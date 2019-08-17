@@ -2,7 +2,8 @@
 CXX = g++
 
 # Define flags. -D_VANILLA_ROOT_ is needed to avoid StMessMgr confusion
-CFLAGS = $(shell root-config --cflags) -O2 -fPIC -Wall -pipe -std=c++11 -D_VANILLA_ROOT_ -I.
+CFLAGS = $(shell root-config --cflags) -O2 -fPIC -Wall -W -Woverloaded-virtual -Wno-deprecated-declarations
+CFLAGS += -pipe -std=c++11 -D_VANILLA_ROOT_ -I.
 LIBS = $(shell root-config --libs)
 INCS = $(shell root-config --incdir)
 

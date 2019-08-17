@@ -34,30 +34,26 @@ class StPicoMtdHit : public TObject {
 
   /// Return global channel number of the MTD hit
   /// Its defition is (backleg-1) * 60 + (module-1) * 12 + cell
-  Int_t  gChannel()    const;
-
+  Int_t  gChannel()    const { return (Int_t)mgChannel; }
   /// Return backleg number (1-30) of the MTD hit
-  Int_t  backleg()     const;
-
+  Int_t  backleg()     const { return (Int_t)mgChannel / 60 + 1; }
   /// Return module number (1-5) of the MTD hit
-  Int_t  module()      const;
-
+  Int_t  module()      const { return ((Int_t)mgChannel % 60) / 12 + 1; }
   /// Return cell number (0-11) of the MTD hit
-  Int_t  cell()        const;
-
+  Int_t  cell()        const { return (Int_t)mgChannel % 12; }
   /// Return trigger flag of the MTD hit. The returned value 
   /// indicates the number of MTD hits matched to the same 
   /// trigger unit that fired the MTD trigger.
-  Int_t  triggerFlag() const;
-
+  Int_t  triggerFlag() const { return (Int_t) mTriggerFlag; }
   /// Return leading edge time
-  std::pair<Float_t, Float_t> leadingEdgeTime()  const;
-
+  std::pair<Float_t, Float_t> leadingEdgeTime()  const { return mLeadingEdgeTime; }
   /// Return trailing edge time
-  std::pair<Float_t, Float_t> trailingEdgeTime() const;
-
+  std::pair<Float_t, Float_t> trailingEdgeTime() const { return mTrailingEdgeTime; }
   /// Return time-over-threshold of the MTD hit
-  std::pair<Float_t, Float_t> tot() const;
+  std::pair<Float_t, Float_t> tot() const
+  { return std::pair<Float_t, Float_t>(mTrailingEdgeTime.first - mLeadingEdgeTime.first,
+				       mTrailingEdgeTime.second - mLeadingEdgeTime.second); }
+  std::pair<Float_t, Float_t> timeOverThreshold() const { return tot(); }
 
   //
   // Setters
@@ -66,7 +62,7 @@ class StPicoMtdHit : public TObject {
   /// Set trigger flag of the MTD hit (corresponds to the number)
   /// of MTD hits matchedd to the same trigger unit that fired
   /// MTD trigger
-  void  setTriggerFlag(Int_t const flag);
+  void  setTriggerFlag(Int_t const flag) { mTriggerFlag = (UChar_t)flag; }
 
   /// Set leading edge time
   void  setLeadingEdgeTime(std::pair<Float_t, Float_t> leadingEdgeTime);
@@ -90,17 +86,5 @@ class StPicoMtdHit : public TObject {
 
   ClassDef(StPicoMtdHit, 1)
 };
-
-inline void StPicoMtdHit::setTriggerFlag(Int_t const flag) { mTriggerFlag = (UChar_t)flag; }
-inline Int_t StPicoMtdHit::gChannel()    const { return (Int_t)mgChannel; }
-inline Int_t StPicoMtdHit::backleg()     const { return (Int_t)mgChannel / 60 + 1; }
-inline Int_t StPicoMtdHit::module()      const { return ((Int_t)mgChannel % 60) / 12 + 1; }
-inline Int_t StPicoMtdHit::cell()        const { return (Int_t)mgChannel % 12; }
-inline Int_t StPicoMtdHit::triggerFlag() const { return (Int_t) mTriggerFlag; }
-inline std::pair<Float_t, Float_t> StPicoMtdHit::leadingEdgeTime()  const { return mLeadingEdgeTime; }
-inline std::pair<Float_t, Float_t> StPicoMtdHit::trailingEdgeTime() const { return mTrailingEdgeTime; }
-inline std::pair<Float_t, Float_t> StPicoMtdHit::tot() const {
-  return std::pair<Float_t, Float_t>(mTrailingEdgeTime.first - mLeadingEdgeTime.first, mTrailingEdgeTime.second - mLeadingEdgeTime.second);
-}
 
 #endif

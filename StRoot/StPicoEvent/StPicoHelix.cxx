@@ -440,7 +440,7 @@ Double_t StPicoHelix::pathLength(const TVector3& r,
     
     Double_t a, f, fp;
     Double_t sOld = s = 0;  
-    Double_t shiftOld = 0;
+    //Double_t shiftOld = 0;
     Double_t shift;
     //  (cos(angMax)-1)/angMax = 0.1
     const Double_t angMax = 0.21;
@@ -467,7 +467,7 @@ Double_t StPicoHelix::pathLength(const TVector3& r,
 	shift = f/fp;
       }
       s -= shift;
-      shiftOld = shift;
+      //shiftOld = shift;
       if ( ::fabs(sOld-s) < MaxPrecisionNeeded ) {
 	break;
       }

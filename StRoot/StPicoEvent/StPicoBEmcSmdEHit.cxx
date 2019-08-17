@@ -31,7 +31,7 @@ StPicoBEmcSmdEHit::StPicoBEmcSmdEHit(Int_t id, Int_t adc, Float_t energy) : TObj
 }
 
 //_________________
-StPicoBEmcSmdEHit::StPicoBEmcSmdEHit(const StPicoBEmcSmdEHit &hit) {
+StPicoBEmcSmdEHit::StPicoBEmcSmdEHit(const StPicoBEmcSmdEHit &hit) : TObject() {
   mId = hit.mId;
   mAdc = hit.mAdc;
   mEnergy = hit.mEnergy;
@@ -43,6 +43,6 @@ StPicoBEmcSmdEHit::~StPicoBEmcSmdEHit() {
 }
 
 //_________________
-void StPicoBEmcSmdEHit::Print(const Char_t* option) const {
+void StPicoBEmcSmdEHit::Print(const Char_t* option __attribute__((unused)) ) const {
   LOG_INFO << "id: " << id() << " ADC: " << adc() << " energy: " << energy() << endm;
 }

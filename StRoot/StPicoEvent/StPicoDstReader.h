@@ -39,11 +39,11 @@ class StPicoDstReader : public TObject {
   ~StPicoDstReader();
 
   /// Return a pointer to picoDst (return NULL if no dst is found)
-  StPicoDst *picoDst();
+  StPicoDst *picoDst()    { return mPicoDst; }
   /// Return pointer to the chain of .picoDst.root files
-  TChain *chain();
+  TChain *chain()         { return mChain; }
   /// Return pointer to the current TTree
-  TTree *tree();
+  TTree *tree()           { return mTree; }
 
   /// Set enable/disable branch matching when reading picoDst
   void SetStatus(const Char_t* branchNameRegex, Int_t enable);
@@ -88,7 +88,4 @@ class StPicoDstReader : public TObject {
   ClassDef(StPicoDstReader, 0)
 };
 
-inline StPicoDst* StPicoDstReader::picoDst() { return mPicoDst; }
-inline TChain* StPicoDstReader::chain() { return mChain; }
-inline TTree* StPicoDstReader::tree() { return mTree; }
 #endif
