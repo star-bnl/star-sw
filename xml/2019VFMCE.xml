@@ -48,5 +48,5 @@
     endif
   endif
 </command>
-<input URL="command:RunId.pl 1 100 100 K_S0" />
+<input URL="command:RunId.pl 201 500 200 K_S0" />
 </job>

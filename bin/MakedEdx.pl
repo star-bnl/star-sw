@@ -1746,17 +1746,20 @@ my @badruns = (19116020); # Altro3
 #$hist = "RunXVIII135"; $NEvents = 2000; $disk = "data100/"; $RECO = "reco/27GeV_production_2018/*FullField";  $Production = "/P18if_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = "DEV"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/19/18 recheck in dev
 #$hist = "RunXVIII136"; $NEvents = 2000; $disk = "data100/"; $RECO = "reco/27GeV_production_2018/*FullField";  $Production = "/P18if_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = "DEV"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/19/18 recheck in dev , add TpcLengthMDF
 #$hist = "RunXVIII137"; $NEvents = 2000; $disk = "data100/"; $RECO = "reco/27GeV_production_2018/*FullField";  $Production = "/P18if_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = "DEV"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/22/18 check MySQL
-my @badruns = (
-19132037_2000002
-19132039_2000002
-19133010_5500003
-19134028_2500002
-19134029_3500002
-19135012_2500002
-19135013_1500002
-);
+#my @badruns = (
+# 19132037_2000002
+# 19132039_2000002
+# 19133010_5500003
+# 19134028_2500002
+# 19134029_3500002
+# 19135012_2500002
+# 19135013_1500002
+# );
+#$hist = "RunXVIII137"; $NEvents = 2000; $disk = "data100/"; $RECO = "reco/27GeV_production_2018/*FullField";  $Production = "/P18if_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = "DEV"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/22/18 check MySQL
 
-$hist = "RunXVIII201"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/27GeV_production_2018/ReversedFullField";  $Production = "/P19ib_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 04/24/19 check new production
+my @badruns = ();
+# Run V, rerurn
+$hist = "RunV201"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = "TFG19g"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 04/24/19 check new production
 my $prod = $hist; #$Production;
 $prod =~ s/\*//g;
 $prod =~ s/\//_/g;
