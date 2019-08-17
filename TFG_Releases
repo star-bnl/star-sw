@@ -41,6 +41,6 @@
 -TFG19d Freeze library for eXpress production with intermediate cal. 2019-04-14 16:44:16 -0400  (tag: TFG19e_3)
  TFG19e HLT express production 2019                                  2019-05-30 20:23:14 -0400  (HEAD -> master, tag: TFG19e_4)
  TFG19f freeze before moving to new Grigory's CA                     2019-07-16 14:31:48 -0400  (HEAD, tag: TFG19f_5)
- TFG19g old CA, add to StarMCSimplePrimaryGenerator real PV position 2019-07-23 17:49:39 -0400  (HEAD, tag: TFG19g_3)
+ TFG19g old CA, add to StarMCSimplePrimaryGenerator real PV position 2019-07-26 10:26:59 -0400  (HEAD -> master, tag: v07-26-19RCF, tag: TFG19g_4)
  .DEV2  head of TFG git repository
   DEV2  head of TFG git repository build with ROOT6
