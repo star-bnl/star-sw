@@ -11,7 +11,7 @@
 #8. submit the SLURM job for the full production
 
 if [[ $HOST =~ "cori" ]] ; then
- module load python/3.5-anaconda
+ module load python/3.6-anaconda-5.2
  ln -s StRoot/macros/embedding/cori/farmerQAmonitor.ipynb
  ln -s -f StRoot/macros/embedding/fsetstat.sh
  ln -s StRoot/macros/embedding/cori/findfailedslr.sh
