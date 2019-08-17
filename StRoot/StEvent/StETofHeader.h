@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHeader.h,v 2.1 2018/07/09 14:53:48 ullrich Exp $
+ * $Id: StETofHeader.h,v 2.2 2019/08/01 22:52:19 smirnovd Exp $
  *
  * Author: Pengfei Lyu, April 2018
  ***************************************************************************
@@ -12,6 +12,12 @@
  ***************************************************************************
  *
  * $Log: StETofHeader.h,v $
+ * Revision 2.2  2019/08/01 22:52:19  smirnovd
+ * Add non-c++ include defining uint64_t for rootcint
+ *
+ * rootcint is not c++11 aware and therefore cannot deal with the standard c++
+ * header <cstdint>
+ *
  * Revision 2.1  2018/07/09 14:53:48  ullrich
  * Initial Revision.
  *
@@ -20,6 +26,7 @@
 #ifndef STETOFHEADER_H
 #define STETOFHEADER_H
 
+#include <stdint.h>
 #include <map>
 
 
