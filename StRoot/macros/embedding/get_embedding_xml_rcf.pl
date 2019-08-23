@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml_rcf.pl,v 1.29 2019/06/23 09:48:14 starembd Exp $
+# $Id: get_embedding_xml_rcf.pl,v 1.30 2019/08/23 06:18:08 starembd Exp $
 # $Log: get_embedding_xml_rcf.pl,v $
+# Revision 1.30  2019/08/23 06:18:08  starembd
+# now daq files can be simlink
+#
 # Revision 1.29  2019/06/23 09:48:14  starembd
 # added runnumber in all outpatch
 #
@@ -694,7 +697,7 @@ if($local){
   }
 
   # Find one daq file from the path, and also find the corredponding tags file
-  my $daqOneFile  = `find $daqsDirectory -type f -iname "*daq" | head -n1`;
+  my $daqOneFile  = `find $daqsDirectory -xtype f -iname "*daq" | head -n1`;
   chomp($daqOneFile);
   my $daqOneFileBaseName  = `basename $daqOneFile`;
   chomp($daqOneFileBaseName);
@@ -1156,7 +1159,7 @@ sub getProdName {
     exit(0);
   }
 
-  my $oneFile  = `find $dir -type f -iname "*$ext" | head -n1`;
+  my $oneFile  = `find $dir -xtype f -iname "*$ext" | head -n1`;
   chomp($oneFile);
   my $oneFileBaseName  = `basename $oneFile`;
   chomp($oneFileBaseName);
