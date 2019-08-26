@@ -58,6 +58,7 @@ class StvRKuttaMag: public TRKuttaMag
 static const Double_t EC          = 2.99792458e-4;
 static       StarMagField *myFild =  StarMagField::Instance();
        myFild->BField(X,B); 
+       assert(B[2]);//??????????????????????????????????????
        B[0]*= EC; B[1]*= EC;B[2]*=EC;
     };
   protected:
@@ -498,23 +499,30 @@ int StvMCStepping::EndVolume()
   double deltaL = fCurrentLength-fPrevLength,dL = deltaL, dS=0;
   
   int kase = 0,ans = 0;
-  if (!fDir && ((fStartSign<0) && (fCurrentSign>0))) 	kase+=1;
+  if (fDir==0 && ((fStartSign<0) && (fCurrentSign>0))) 	kase+=1;
   if (fHitted) 						kase+=2;
+//if (fDir==1 && ((fStartSign>0) && (fCurrentSign<0))) 	kase+=4;
   switch(kase) {
 
-    case 1: case 3:{
+    case 1: case 3:
+    case 4: case 6:{
             assert(fPrevSign*fStartSign>0);
             dL = -fPrevSign*dL/(fCurrentSign-fPrevSign);	//First estim
             fHelix->Move(dL);
             (*fDeriv)*=*fHelix->Der();
-            dS = fHelix->Path(fTarget[0],fTarget[1],0);
-            dL +=dS;
-            if (!(dL>=0 && dL <= deltaL)) {
-              Error("EndVolume","%g>0 && %g < %g is WRONG",dL,dL, deltaL);          
-              return StvDiver::kDiveBreak;
-	    }
-            fHelix->Move();
-            (*fDeriv)*=*fHelix->Der();
+            dS = 0;
+            if (fDir==0) {
+              dS = fHelix->Path(fTarget[0],fTarget[1],0);
+              dL +=dS;
+#if 0
+              if (!(dL>=0 && dL <= deltaL)) {
+        	ErrfDiror("EndVolume","%g>0 && %g < %g is WRONG",dL,dL, deltaL);          
+        	return StvDiver::kDiveBreak;
+	      }
+#endif
+              fHelix->Move();
+              (*fDeriv)*=*fHelix->Der();
+            }
             ans |= StvDiver::kDiveDca ; break;
             }
 

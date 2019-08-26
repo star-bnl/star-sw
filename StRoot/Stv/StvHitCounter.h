@@ -17,6 +17,7 @@ enum {kContNitsTooBig=1,kTotlNitsTooBig=2
 public:
 StvHitCounter();
 void Clear()		{memset(mBeg,0,mMed-mBeg+1);}
+void Reset()		{nContNits = 0;nContHits =0;}
 void SetCons(const StvKonst_st*);
 
 void AddHit();

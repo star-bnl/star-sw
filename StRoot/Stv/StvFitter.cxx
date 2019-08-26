@@ -22,7 +22,6 @@ StvFitter *StvFitter::mgFitter=0;
 
 static const double kXtraBigXi2 = 9e9;
 static const double kDeltaFactor = 1.5;
-static int dbMask = 0;///???????
 static inline double MyXi2(const double G[3],double dA,double dB)  
 {
   double Gdet = G[0]*G[2]-G[1]*G[1];
@@ -532,9 +531,6 @@ double JoinTwo(int nP1,const double *P1,const double *E1
 	               ,     double *PJ,      double *EJ)
 {
 static int nCall = 0;  nCall++;
-double s=0;
-//??assert((s=TCLx::sign(E1,nP1))>0);
-//??assert((s=TCLx::sign(E2,nP2))>0);
   assert(nP1<=nP2);
   int nE1 = nP1*(nP1+1)/2;
   int nE2 = nP2*(nP2+1)/2;
@@ -832,7 +828,7 @@ int StvFitter::Hpdate()
   mTkErrs = *mInErrs;
 //??  mTkPars.move(mDeltaL,&mTkErrs);
   auto tP = mTkPars._x;
-  auto tD = mTkPars._d;
+//auto tD = mTkPars._d;
 //		Hit position
   const float *hP = mHit->x();
   TCL::ucopy(mTkPars.getTkDir()[0],mDcaFrame[0],9);
@@ -858,29 +854,6 @@ int StvFitter::Hpdate()
 //////  assert(mXi2>myXi2);
   assert(myXi2<kXtraBigXi2); 
   *mOtPars = mTkPars;
-#if 0
-  if (!mFailed) {
-    do {
-      double old =   mTkErrs[0] +  mTkErrs[2];
-      double now = (*mOtErrs)[0]+(*mOtErrs)[2];
-      if (now>old) {
-      printf ("####WRONG old-now =%g old=%g @@@@@@@@@@@@@@@@@@@@@@\n",old-now,old);
-      }
-      old = pow(myHitPars.mU,2)+pow(myHitPars.mV,2);
-      now = pow(myHitPars.mU-mQQPars.mU,2)+pow(myHitPars.mV-mQQPars.mV,2);
-      old = sqrt(old); now = sqrt(now);
-if (dbMask&1) printf("Old = %g New = %g dif = %g\n",old,now,old-now);
-
-      if (now<old) break;
-      double dir = (myHitPars.mU*mQQPars.mFita +myHitPars.mV*mQQPars.mLama);
-      double nor = sqrt((pow(mQQPars.mU  ,2)+pow(mQQPars.mV  ,2))
-               *      (pow(myHitPars.mU,2)+pow(myHitPars.mV,2)));
-     dir/=nor;
-     if (dir > 0) break;
-     printf ("####WRONG old-now =%g dir=%g @@@@@@@@@@@@@@@@@@@@@@\n",old-now,dir);
-    } while(0);
-  }
-#endif
   return 0;
 }  
 //______________________________________________________________________________

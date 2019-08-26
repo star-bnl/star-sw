@@ -69,6 +69,8 @@ int StvHitCounter::Reject() const
 int StvHitCounter::Skip() const
 {
 /// Do we need to skip the rest of track, it is allready too bad?
+assert(nContNits<=mMaxContNits+1);
+assert(nTotNits <=mMaxTotNits +1);
 
   if (nContNits>mMaxContNits) return kContNitsTooBig;
   if (nTotNits > mMaxTotNits) return kTotlNitsTooBig;;
