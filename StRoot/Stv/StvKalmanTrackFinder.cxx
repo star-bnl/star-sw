@@ -60,6 +60,10 @@ void StvKalmanTrackFinder::SetCons(const StvKonst_st* k)
   double rMax,zMin,zMax;
   StTGeoProxy::Inst()->GetHitShape()->Get(zMin,zMax,rMax);
   if (zMax < -zMin) zMax = -zMin;
+//???????????????????????????????????????????????????????
+  rMax = 210; zMax = 220;
+//???????????????????????????????????????????????????????
+
   mDive->SetRZmax(rMax,zMax);
   mHitCounter->SetCons(mKons);
   mDive->SetRZmax(mKons->mRxyMax,mKons->mZMax);
@@ -119,8 +123,8 @@ enum {kRepeatSeedFinder = 2};
         }
         nHits = mCurrTrak->GetNHits();
         fail = 6; if (nHits<mKons->mMinHits) 	break;
-if (mCurrTrak->GetXi2()<33) StvDebug::Count("Xi2Trk",mCurrTrak->GetXi2());
         if (BOTOHO&16) StvDebug::Zhow(mCurrTrak);
+
 
       } while((fail=0));		
       
@@ -132,7 +136,10 @@ if (mCurrTrak->GetXi2()<33) StvDebug::Count("Xi2Trk",mCurrTrak->GetXi2());
       StvNode *node = MakeDcaNode(mCurrTrak); if(node){};
 
       mSeedFinder->FeedBack(mCurrTrak);
-
+if (node) {
+  double pt = node->GetFP().getPt();
+  if (pt<3) StvDebug::Count("Pt",pt);
+}
       mCurrTrak->AddId(10*seedFinder+repeat);
       mCurrTrak->SetUsed();
       kit->GetTracks().push_back(mCurrTrak);
@@ -259,7 +266,7 @@ double s=0;
 		// Set prediction
 
     StvELossTrak *eld = mDive->TakeELoss();
-    if (eld->TotLen()>0) {
+    if (eld->Len()>0) {
       innNode->SetELoss(eld,idir);
     } else {
       kit->FreeELossTrak(eld); eld = 0;
@@ -336,6 +343,7 @@ static int myDebug = 0;
     } else 		{//No Hit or ignored
       myXi2 = 1e11;
       skip = mHitCounter->AddNit(); 
+      if (skip) break;
     }
     curNode->SetHit(minHit[0]); 
     curNode->SetXi2(myXi2,0);
@@ -358,7 +366,7 @@ if (skip && !idir) StvDebug::Count("EndTrk",skip);
     assert(tlen >0.0 && tlen<1500);
   }
 
-
+  mHitCounter->Reset();
   return nHits;
 
 }
@@ -418,7 +426,7 @@ static StvToolkit *kit = StvToolkit::Inst();
   dcaNode->mLen =  start->mLen + diveLen;
 	       // Set prediction
   StvELossTrak *eld = mDive->TakeELoss();
-  if (eld->TotLen()>0) {
+  if (eld->Len()>0) {
     dcaNode->SetELoss(eld,0);
     dcaPars.add(eld,-diveLen);
     dcaErrs.Add(eld,-diveLen);
