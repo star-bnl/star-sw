@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.h,v 1.11.4.1 2017/12/02 00:37:10 perev Exp $
+// $Id: StvELossTrak.h,v 1.11.4.2 2019/08/26 20:31:20 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -24,30 +24,22 @@ public:
     void Set(const TGeoMaterial *mate,double p);
     void Add(double len);
 //		Last step data
-  double Theta2() 	const 		{return fTheta2;	}
-  double Ort2()   	const		{return fOrth2;		}
-  double dEdX ()  	const		{return fdEdX;		}
-  double ELoss()  	const 		{return fELoss;		}
-  double PinvLoss()  	const 		{return fPinvLoss;	}
-  double ELossErr2() 	const		{return fELossErr2;	}
-  double PinvErr2() 	const 		{return fPinvErr2;	}
-  double Len() 		const		{return fLen;		}	
-//		Total data
-  double TotTheta2() 	const 		{return fTotTheta2;	}
-  double TotOrt2()   	const		{return fTotOrth2;	}
-  double TotdEdX () 	const		{return fTotELoss/(fTotLen+1e-9);}
-  double TotELoss() 	const 		{return fTotELoss;	}
-  double TotPinvLoss() 	const 		{return fTotPinvLoss;	}
-  double TotELossErr2() const		{return fTotELossErr2;	}
-  double TotPinvErr2() 	const		{return fTotPinvErr2;	}
-  double TotLen() 	const		{return fTotLen;	}	
+  double Theta2() 	const 	;//	{return fTotTheta2;	}
+  double Ort2()   	const		{return fTotOrth2;	}
+  double ELoss()  	const 		{return fTotELoss;	}
+  double PinvLoss()  	const 		{return fTotPinvLoss;	}
+  double ELossErr2() 	const		{return fTotELossErr2;	}
+  double PinvErr2() 	const 		{return fTotPinvErr2;	}
+  double Len() 		const		{return fTotLen;	}	
 
   double P() 		        const	{return fP;	}	
   double M() 		        const	{return fM;	}	
      int GetNMats() 		const	{return fNMats;	}	
 const TGeoMaterial *GetMate()   const	{return fMate ;	}
+  static void Test();
 private:
 char   fBeg[1];
+char   fState;
 double fdEdX,fdEdXErr2;
 double fP;		//momentum 
 double fM;		//mass 

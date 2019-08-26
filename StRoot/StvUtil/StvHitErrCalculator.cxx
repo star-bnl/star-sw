@@ -93,16 +93,38 @@ static const double c45 = cos(3.14/180*45);
     mCpCl = mCp*mCl;
     return 0;
   }
+
+
+// Test  Y
+{
+  assert(fabs(hiDir[2][2]-1)<1e-4);
+  double ang = atan2(hiDir[1][1],hiDir[0][0])/M_PI*180;
+  assert(fabs(fmod(ang+15,30.)<1e-4));
+
+}
+
 //	fill mTL - local track direction
+  double myTL[3][3],hdDir[3][3];
+  TCL::ucopy(hiDir[0],hdDir[0],3*3);
+  TCL::mxmpy1(hdDir[0],mTG[0], myTL[0],3,3,3);
+
+  assert(fabs(TCL::vdot(myTL[0],myTL[0],3)-1)<1e-4);
+
+
   double nTL=0;
   for (int j=0;j<3;j++) {
-    mTL[j] = (hiDir[j][0]*mTG[0][0]+hiDir[j][1]*mTG[0][1]+hiDir[j][2]*mTG[0][2]);
-    nTL+=mTL[j]*mTL[j];
+//    mTL[j] = (hiDir[j][0]*mTG[0][0]+hiDir[j][1]*mTG[0][1]+hiDir[j][2]*mTG[0][2]);
+   mTL[j] = (hiDir[j][0]*mTG[0][0]+hiDir[j][1]*mTG[0][1]+hiDir[j][2]*mTG[0][2]);
+   nTL+=mTL[j]*mTL[j];
     }
+  TCL::ucopy(myTL[0],mTL,3);
   assert( fabs(nTL-1)<1e-5);
 
 //		mTL = (cos(Lam)*cos(Phi),cos(Lam)*sin(Phi),sin(Lam))
   mSl = mTL[2],mCl2 = ((1-mSl)*(1+mSl));
+
+assert(fabs(mSl-myTL[0][2])<1e-4);
+
   if (mCl2<k2MinCosLam) mCl2 = k2MinCosLam; 		//Lambda too big
   mCl=sqrt(mCl2); mSp = mTL[1]/mCl; mCp = mTL[0]/mCl; 
 
@@ -322,6 +344,10 @@ int StvTpcHitErrCalculator::CalcDetErrs(const float hiPos[3]
   hRr[kXX] = mDRr[kYY];
   hRr[kYY] = mDRr[kZZ];
   hRr[kYX] = mDRr[kZY];
+
+
+StvDebug::Count("TpcYZrr",hRr[kXX], hRr[kYY]);
+
 
   return 0;
 

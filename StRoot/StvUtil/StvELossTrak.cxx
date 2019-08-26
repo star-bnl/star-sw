@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.17.4.2 2019/04/19 21:24:10 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.17.4.3 2019/08/26 20:32:17 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -9,14 +9,23 @@
 #include <assert.h>
 #include "TGeoMaterial.h"
 #include "StvELossTrak.h"
+
+#include "StvUtil/StvDebug.h"
+
 static double gsigma2(double ZoverA,double DENS,double CHARGE2
                      ,double AMASS ,double BET2,double STEP  );
 static double gdrelx (double A     ,double Z   ,double DENS ,double T,double HMASS);
 
 static const double kPiMass=0.13956995;
+//static const double kMinP = 0.1,kMinE = sqrt(kMinP*kMinP+kPiMass*kPiMass);
 static const double kMinP = 0.01,kMinE = sqrt(kMinP*kMinP+kPiMass*kPiMass);
 static const double kMaxP = 1000,kMaxE = sqrt(kMaxP*kMaxP+kPiMass*kPiMass);
 ClassImp(StvELossTrak)
+
+  double StvELossTrak::StvELossTrak::Theta2() 	const 
+  {
+  StvDebug::Count("THETA",sqrt(fTotTheta2)*57);
+  return fTotTheta2;	}
 
 //_____________________________________________________________________________
 void StvELossTrak::Reset(double mass, double charge)
@@ -25,6 +34,7 @@ void StvELossTrak::Reset(double mass, double charge)
   if(mass) 	fM=mass; 
   if(charge) 	fCharge2=charge*charge;
   assert(fM); assert(fCharge2);
+  fState = 1;
 }
 //_____________________________________________________________________________
 void StvELossTrak::Clear(const char*)
@@ -34,6 +44,18 @@ void StvELossTrak::Clear(const char*)
 //_____________________________________________________________________________
 void StvELossTrak::Set(double A, double Z, double dens, double x0,double p)
 {
+assert(fM>0); assert(fCharge2>=1);
+  int jk=(A>0)*2 + (p>0)*4;
+  switch(fState) {
+    case 0: assert(0);
+    case 1: break;
+    case 2: assert(p>0); break;
+    case 4: assert(jk&4);   break;
+    case 6: assert(p);   break;
+    default: assert(0);
+  }
+  fState = (A>0)*2 + (p>0)*4;
+
   if (A>0) {
     fdEdX=0;
     fA=A; fZ=Z; fDens=dens,fX0=x0; 
@@ -45,7 +67,8 @@ void StvELossTrak::Set(double A, double Z, double dens, double x0,double p)
 
   fP = p; 
   if (fP>kMaxP) fP=kMaxP;
-  if (fP<kMinP) fP=kMinP;
+  if (fP<kMinP) { fP = kMinP*(1+0.5*pow(fP/kMinP-1,2)); /*fP = kMinP;*/}
+    
   fdEdX=0;fdEdXErr2=0;
   double p2 = fP*fP,m2 = fM*fM;
   fE = sqrt(p2+m2);
@@ -89,6 +112,8 @@ void StvELossTrak::Set(const TGeoMaterial *mate,double p)
 //_____________________________________________________________________________
 void StvELossTrak::Add(double len)
 {
+//  assert(fState==2);
+  fState = 1;
   assert(fX0>0);
   fLen = fabs(len);
   fTheta2 = fLen/fX0*fFak;
@@ -454,3 +479,22 @@ static const double DGEV=0.153536E-3,EMASS=0.0005109990615;
    return sigma2;
 }
 
+//______________________________________________________________________________
+void StvELossTrak::Test()
+{
+  StvELossTrak el; 
+  double A,Z,Dens,X0,P,Len,Theta2,Ort2,ELoss,ELossErr2;
+//		Hydrogen
+  A = 1.010,Z=1,Dens=0.071,X0=865,P=0.1,Len=10.;
+  el.Set(A,Z,Dens,X0,P);
+  el.Add(Len);
+
+  Theta2 	= el.Theta2();
+  Ort2 		= el.Ort2();
+  ELoss 	= el.ELoss();
+  ELossErr2 	= el.ELossErr2();  
+
+  const char* name = "***Hydrogen:*** ";
+  printf ("%s Theta2=%g Ort2=%g ELoss=%g ELossErr2=%g\n"
+         ,name ,Theta2,Ort2,ELoss,ELossErr2);
+}  

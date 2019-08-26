@@ -187,7 +187,7 @@ void StvGrappa::MyShow(int iPad,int iObj, int iX,int iY)
 //______________________________________________________________________________
 void StvGrappa::MySort()
 {
-static const double kMicron = 1e-4;
+//static const double kMicron = 1e-4;
 std::vector<int> Idx;
 std::vector<float> Buf;
 #if 0
@@ -342,7 +342,7 @@ enum { kKEEP = 3};
 void StvGrappa::MakeLims(const StvTrack *tk,double xMiMax[2][3]) const
 {
   enum {kCorrida=20};
-  double Rmax=9,Rmin=1e11;
+//  double Rmax=9,Rmin=1e11;
   for (int i=0;i<3;i++) {
     xMiMax[0][i] =  1e11;    
     xMiMax[1][i] = -1e11;
