@@ -31,7 +31,8 @@ class  StvFitErrs  : public THEmx3d_t
 {
 public:
  StvFitErrs(){};
- StvFitErrs(double errs[15]){ THEmx3d_t::Set(errs);};
+ StvFitErrs(double errs[15],TkDir_t *tkd=0)
+           { THEmx3d_t::Set(errs);if (tkd) *this = *tkd; };
  StvFitErrs(double UU,double UV,double VV) {THEmx3d_t::Set(UU,UV,VV);};
  void Add(const StvELossTrak *el,double len=0);
  double Sign() const;
@@ -48,6 +49,8 @@ const StvFitErrs& operator*(const StvFitDers &der) const;
   int Check(const char  *tit) const;
   int Recov();
  void Print(const char  *tit) const;
+ 
+ double PtErr(const StvNodePars &pars) const;
 
 static double EmxSign(int n,const float  *e);
 static double EmxSign(int n,const double *e);
@@ -234,6 +237,61 @@ public:
      int mTally;		//Counter for debug only, remove later
 std::vector<Aux> mMats;
 };
+
+//------------------------------------------------------------------------------
+class StvFitParsCentral
+{
+public:	
+  StvFitParsCentral(){;}
+operator const double *() const	{return &mH;}
+operator       double *() 	{return &mH;}
+public:	
+// Let (Dx,Dy,Dz) vector track direction
+// It could be also represented:
+// (cos(L)*cos(A),cos(L)*sin(A),sin(L))
+
+// mH: movement along (-Dy    ,Dx     ,           0) vector
+// mZ: movement along (-Dx*Dz , -Dz*Dy, Dy*Dy+Dx*Dx)
+// Or mH: along (-cos(A),sin(A),0)
+//    mZ: along (-sin(L)*cos(A),-sin(L)*sin(A), cos(L))
+void Set(TkDir_t &tkd,StvFitPars &fitPars);
+
+
+double mH;	// direction perpendicular movement and Z
+double mZ;	// Pseudo Z, direction perpendicular movement & H
+double mA;	// Angle in XY. cos(A),sin(A),T moving direction
+double mL;	// Angle lambda in Rxy/Z
+double mP;	// 1/pt with curvature sign
+};
+
+//------------------------------------------------------------------------------
+class StvFitErrsCentral
+{
+public:	
+  enum eFitErrs {kNErrs=15};
+  StvFitErrsCentral(){;}
+operator const double *() const { return &mHH;}
+operator       double *()       { return &mHH;}
+void Set(const StvNodePars &p,const StvFitErrs &e);
+public:	
+//  dH: along ort to dir and in Track/Z plane
+//  dZ: ort to dH and in plane dH,Zaxis;When lamda=0 it is Zaxis 
+//  dA: delta azimuth angle; 
+//  dP: == d(1./Pt) where Pt is signed as curvature;  
+//  dL = dLambda, angle between track and X,Y plane
+
+
+public:
+double 
+mHH,
+mHZ, mZZ,
+mHA, mZA, mAA,
+mHL, mZL, mAL, mLL,
+mHP, mZP, mAP, mLP, mPP;
+};  
+
+
+
 //------------------------------------------------------------------------------
 class StvNodeParsTest
 {
@@ -245,6 +303,7 @@ static void TestGetRadial(int nEv=10000);
 static void TestErrProp  (int nEv=10000);
 static void TestDerImpact();
 static void TestGetImpact(int nEv=10000) ;
+static void TestCentral(int nEv=1000);
 ClassDef(StvNodeParsTest,0)
 };
 

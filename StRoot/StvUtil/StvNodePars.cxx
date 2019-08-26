@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "TVector3.h"
 #include "TCernLib.h"
 #include "TMath.h"
 #include "TMath.h"
@@ -11,10 +12,9 @@
 #include "StvUtil/StvELossTrak.h"
 #include "StvUtil/StvDebug.h"
 #include "Stv/StvToolkit.h"
-
 static const double kMaxPti=200,kMaxCurv=(0.000299792458 * 4.98478)*kMaxPti,kMaxEta = 6;
-static const double kMaxLamda = 3.14159265358/2-atan(exp(-kMaxEta))*2;
-static const double kMaxTanL  = tan(kMaxLamda);
+//static const double kMaxLamda = 3.14159265358/2-atan(exp(-kMaxEta))*2;
+//static const double kMaxTanL  = tan(kMaxLamda);
 
 enum {kHf,kZf,kAf,kLf,kPf};
 enum {kHh,kAh,kCh,kZh,kLh};
@@ -104,7 +104,6 @@ int StvNodePars::check(const char *pri) const
   assert(_h[2]);
   int ierr=0;
   for (int i=0;i<7;i++){if (fabs(_x[i]) > MAXNODPARS[i]){ierr = i+ 1;	goto FAILED;}} 
-///???  if (getRxy()<100 && getSign()<0)			{ierr = 10;	goto FAILED;}
   return 0;
 FAILED: 
   assert(ierr<1000);
@@ -125,7 +124,7 @@ void StvNodePars::set(const double h[3]) //set mag field
 
   _h[0] = h[0]; _h[1] = h[1];_h[2] = h[2];
   _h[3] = sqrt(h[0]*h[0]+h[1]*h[1]+h[2]*h[2]);
-assert(_h[3]>1e-4);
+assert(_h[3]);
   THelix3d::MakeTkDir(_d,_h,_tkdir);
 }
 //______________________________________________________________________________
@@ -140,6 +139,7 @@ void StvNodePars::set(const double x[3],const double d[3],double pinv,const doub
      _d[0]/=nor;_d[1]/=nor;_d[2]/=nor;
   } }
  if (pinv) _pinv = pinv;
+ 
  if (h)set(h);
 }
 //______________________________________________________________________________
@@ -253,9 +253,9 @@ static StvToolkit *kit = StvToolkit::Inst();
 void StvNodePars::add(const StvELossTrak *el,double len)
 {    
   if (!el) return;;
-  double fakLen = fabs(len/el->TotLen());
+  double fakLen = fabs(len/el->Len());
   double pinv = fabs(_pinv);
-  double dpin = el->TotPinvLoss()*fakLen;
+  double dpin = el->PinvLoss()*fakLen;
   if (len>0) dpin = -dpin;
   pinv += dpin;
   _pinv = (_pinv>0) ? pinv:-pinv;
@@ -324,12 +324,12 @@ void StvNodePars::merge(const StvNodePars &other,double wt)
 void StvFitErrs::Add(const StvELossTrak *el,double len)
 {    
   if (!el) return;
-  double fakLen = (len)? fabs(len/el->TotLen()):1.;
-  mFF+= el->TotTheta2() 		*fakLen;
-  mLL+= el->TotTheta2()  		*fakLen;
-  mUU+= el->TotOrt2() 			*fakLen;
-  mVV+= el->TotOrt2() 			*fakLen;
-  mPP+= el->TotPinvErr2()		*fakLen;
+  double fakLen = (len)? fabs(len/el->Len()):1.;
+  mFF+= el->Theta2() 		*fakLen;
+  mLL+= el->Theta2()  		*fakLen;
+  mUU+= el->Ort2() 		*fakLen;
+  mVV+= el->Ort2() 		*fakLen;
+  mPP+= el->PinvErr2()		*fakLen;
 }
 //_____________________________________________________________________________
 double StvNodePars::diff(const StvNodePars &other,const StvFitErrs &otherr) const 
@@ -411,7 +411,6 @@ static StvFitErrs myFitErrs;
 void StvFitErrs::Set(const THelixTrack *he)
 {
   static StvToolkit *kit = StvToolkit::Inst();
-  double cosL = he->GetCos();
   double h[3];
   kit->GetMag(he->Pos(),h);
   THelix3d::MakeTkDir(he->Dir(),h,mTkDir);
@@ -866,6 +865,107 @@ RETN: if (B!=buf) delete B;
 } /* trchlu_ */
 #endif //0
 
+#if 1
+//_____________________________________________________________________________
+void StvFitErrsCentral::Set(const StvNodePars &p,const StvFitErrs &e)
+{ 
+  enum {kkH,kkZ, kkA  ,kkL  ,  kkPti};	//
+  
+const TkDir_t tkd = p.getTkDir();
+
+
+  TVector3 T(tkd[kKT]);
+  TVector3 U(tkd[kKU]);
+  TVector3 V(tkd[kKV]);
+
+  TVector3 Z(0,0,1);
+  TVector3 H(T[1],-T[0],0); H.SetMag(1.);
+
+// U*u + V*v = H*h + Z*z
+// 
+// H = (Hx,Hy,0)= (Ty,-Tx,0)*k = (Ty,-Tx,0)/sqrt(1-Tz*Tz)
+// (H*T) ==0
+// t = Tz*z 
+// U*u + V*v = H*h + (Z-T*Tz)*z
+// U*u + V*v + T*Tz*z = H*h + Z*z
+
+// (H*U)*u + (H*V)*v  = h
+// (Z*U)*u + (Z*V)*v  = z 
+//
+// h = (H*U)*u + (H*V)*v
+// z = (Z*U)*u + (Z*V)*v
+
+  double HxU = (H*U);
+  double HxV = (H*V);
+  double ZxU = (Z*U);
+  double ZxV = (Z*V);
+  double D[5][5] = {{0}};
+  TCL::vzero(D[0],25); 
+  D[kkH][kU] = HxU;
+  D[kkH][kV] = HxV;
+  D[kkZ][kU] = ZxU;
+  D[kkZ][kV] = ZxV;
+
+// U*fita + V*lama = 
+  double sinL = T[2];
+  double cos2L = (1-sinL)*(1+sinL),cosL = sqrt(cos2L);
+  double cosF = T[0]/cosL;
+  double sinF = T[1]/cosL;
+assert(fabs(sinF*sinF+cosF*cosF-1)<1e-4);
+  TVector3 PH(-cosL*sinF, cosL*cosF,   0);
+  TVector3 DL(-sinL*cosF,-sinL*sinF,cosL);
+
+// U*fita+V*lama = PH*dPhi + DL*dLam
+// (PH*U)*fita +(PH*V)*lama = cosL**2*dPhi
+// (DL*U)*fita +(DL*V)*lama =         dLam
+
+  double PHxU = (PH*U),PHxV = (PH*V);
+  double DLxU = (DL*U),DLxV = (DL*V);
+
+  D[kkA][kFita] = PHxU/cos2L;
+  D[kkA][kLama] = PHxV/cos2L;;
+  D[kkL][kFita] = DLxU;
+  D[kkL][kLama] = DLxV;
+
+
+  D[kkPti][kPinv] = 1./cosL;
+  double qwe = p._pinv/cos2L*sinL;
+  D[kkPti][kFita]  = qwe*DLxU;
+  D[kkPti][kLama]  = qwe*DLxV;
+
+  TCL::trasat(D[0],e,*this,5,5);
+
+}
+
+//_____________________________________________________________________________
+void StvFitParsCentral::Set(TkDir_t &tkd,StvFitPars &fitPars)
+{
+
+  TVector3 T(tkd[kKT]);
+  TVector3 U(tkd[kKU]);
+  TVector3 V(tkd[kKV]);
+  double sinL = T[2];
+  double cos2L = (1-sinL)*(1+sinL),cosL = sqrt(cos2L);
+
+  TVector3 Z(0,0,1);
+  TVector3 H(T[1],-T[0],0); H.SetMag(1.);
+  mH = (U*fitPars.mU+ V*fitPars.mV).Dot(H); 
+  mZ = (U*fitPars.mU+ V*fitPars.mV).Dot(Z); 
+
+  double cosF = T[0]/cosL;
+  double sinF = T[1]/cosL;
+assert(fabs(sinF*sinF+cosF*cosF-1)<1e-4);
+  TVector3 PH(-cosL*sinF, cosL*cosF,   0);
+  TVector3 DL(-sinL*cosF,-sinL*sinF,cosL);
+
+// PH*dPhi + DL*dLam = U*u + V*v
+  mA = (U*fitPars.mFita + V*fitPars.mLama).Dot(PH)/cos2L;
+  mL = (U*fitPars.mFita + V*fitPars.mLama).Dot(DL);
+  mP = fitPars.mPinv/cosL;
+}
+  
+#endif
+//_____________________________________________________________________________
 //_____________________________________________________________________________
 //_____________________________________________________________________________
 #include "TSystem.h"
@@ -1455,6 +1555,40 @@ static const double kMaxStp=1e-4, kRefStp = 1e-2;
   TCL::ucopy(qwe,&imp->mImpImp,15); 
 }
 //_____________________________________________________________________________
+#include "TMatrixT.h"
+#include "TMatrixTSym.h"
+#include "TVectorT.h"
+//_____________________________________________________________________________
+double StvFitErrs::EmxSign(int n,const float *e)
+{
+  enum {maxN =10,maxE = (maxN*maxN-maxN)/2+maxN};
+  double d[maxE];
+  assert(n>0 && n<=maxN);
+  TCL::ucopy(e,d,(n*(n+1))/2);
+  return EmxSign(n,d);
+}
+//_____________________________________________________________________________
+double StvFitErrs::EmxSign(int n,const double *e)
+{
+  TMatrixDSym S(n);  
+  TVectorD coe(n);
+  for (int i=0,li=0;i< n;li+=++i) {
+    double qwe = e[li+i];
+    if(qwe<=0) return qwe;
+    qwe = pow(2.,-int(log(qwe)/(2*log(2))));
+    coe[i]=qwe;
+    for (int j=0;j<=i;j++    ) {
+       S[i][j]=e[li+j]*coe[i]*coe[j]; S[j][i]=S[i][j];
+  } }
+  TMatrixD EigMtx(n,n);
+  TVectorD EigVal(n);  
+  EigMtx = S.EigenVectors(EigVal);
+
+  double ans = 3e33;
+  for (int i=0;i<n;i++) {if (EigVal[i]<ans) ans = EigVal[i];}
+  return ans;
+} 
+//_____________________________________________________________________________
 //_____________________________________________________________________________
 void StvNodeParsTest::TestDerImpact()
 {
@@ -1698,36 +1832,105 @@ static TH1F * hcr[10]={0};
   while(!gSystem->ProcessEvents()){gSystem->Sleep(200);}; 
 }
 //_____________________________________________________________________________
-#include "TMatrixT.h"
-#include "TMatrixTSym.h"
-#include "TVectorT.h"
-//_____________________________________________________________________________
-double StvFitErrs::EmxSign(int n,const float *e)
+void StvNodeParsTest::TestCentral(int nEv)
 {
-  enum {maxN =10,maxE = (maxN*maxN-maxN)/2+maxN};
-  double d[maxE];
-  assert(n>0 && n<=maxN);
-  TCL::ucopy(e,d,(n*(n+1))/2);
-  return EmxSign(n,d);
-}
-//_____________________________________________________________________________
-double StvFitErrs::EmxSign(int n,const double *e)
-{
-  TMatrixDSym S(n);  
-  TVectorD coe(n);
-  for (int i=0,li=0;i< n;li+=++i) {
-    double qwe = e[li+i];
-    if(qwe<=0) return qwe;
-    qwe = pow(2.,-int(log(qwe)/(2*log(2))));
-    coe[i]=qwe;
-    for (int j=0;j<=i;j++    ) {
-       S[i][j]=e[li+j]*coe[i]*coe[j]; S[j][i]=S[i][j];
-  } }
-  TMatrixD EigMtx(n,n);
-  TVectorD EigVal(n);  
-  EigMtx = S.EigenVectors(EigVal);
 
-  double ans = 3e33;
-  for (int i=0;i<n;i++) {if (EigVal[i]<ans) ans = EigVal[i];}
-  return ans;
-} 
+//		Canvas + Histograms
+enum {kNCanvs=10};
+static TCanvas *myCanvas[kNCanvs] = {0};
+
+
+//		Now pulls
+  static const char *tit[]={"H","Z","Phi","Lam","Pti"};
+  static TH1F * cntPull[15]={0};
+  int ih = -1,kanv=-1; 
+    for (int i=0,li=0;i<5;li+=++i) {
+      for (int j=0;j<=i;j++)         {
+        ih++;
+        if ((ih%5)==0) {
+          kanv++;
+          TString ts("C_Kan"); ts+=kanv;
+          myCanvas[kanv] = new TCanvas(ts,ts,600,800);
+          myCanvas[kanv]->Divide(1,5); 
+        }
+	TString ts("Corr_"); ts+=tit[i];ts+=tit[j];
+	delete cntPull[ih];
+	cntPull[ih] = new TH1F(ts,ts,100,0,0);
+	myCanvas[kanv]->cd((ih%5)+1); 
+	cntPull[ih]->Draw();
+  }}
+
+  TRandom grnd;//????
+  double PtGev = 1.,Curv = 1./100, Hz = PtGev*Curv;
+  double HZ[3] = {0,0,Hz};
+  double Pbeg[3],Xbeg[3]={0,0,0};
+
+    
+  TVector3 PbegV(PtGev,0,PtGev*3);
+  double Ptot = PbegV.Mag();
+  PbegV.RotateZ(gRandom->Rndm()*3.1415*2); PbegV.GetXYZ(Pbeg);
+  TVector3 XbegV(Xbeg);
+
+  double Mag[3]={HZ[0],HZ[1],HZ[2]};
+#if 1
+  TVector3 magV(HZ); 
+  double r1 = gRandom->Rndm(),r2 = gRandom->Rndm(); 
+   magV.RotateX(r1);  magV.RotateY(r2);  magV.GetXYZ(Mag);
+  PbegV.RotateX(r1); PbegV.RotateY(r2); PbegV.GetXYZ(Pbeg);
+#endif
+  TVectorD dia(5);
+  dia[0]= 0.1; dia[1]= 0.2; dia[2]= 1./360; dia[3]= 2./360,dia[4]= 0.1/Ptot;
+  
+  TRandomVector RV(dia);
+  auto &EMX = RV.GetMtx();
+  auto &val = RV.GetLam();
+  dia.Print("DIA");
+  val.Print("VAL");
+
+
+  double Gbeg[15];
+  for (int i=0,li=0;i< 5;li+=++i) {
+    for (int j=0;j<=i;j++) {
+      Gbeg[li+j] = EMX[i][j];
+      Gbeg[li+j]=0; //?????
+      if (i==j) Gbeg[li+j] = dia[i]*dia[i]; //?????
+  } }
+
+//	Define Stv objects
+  StvNodePars stvPars;
+  int iQ = 1;
+  stvPars.set(Xbeg, Pbeg,iQ/Ptot,Mag);
+  TkDir_t tkd = stvPars.getTkDir(); 
+  StvFitErrs stvFitErrs(Gbeg,&tkd);  
+//	Define central objects
+  StvFitErrsCentral cntFitErrs;
+  cntFitErrs.Set(stvPars,stvFitErrs);
+  StvFitParsCentral cntFitPars;
+//		Event loop
+  for (int iev=0;iev<nEv;iev++) {
+    TVectorD delta  = RV.Gaus();
+    for(int jk=0;jk<5; jk++){delta[jk]= grnd.Gaus(0,dia[jk]);}//??????
+
+    StvFitPars  stvFitPars(delta.GetMatrixArray());
+    cntFitPars.Set(tkd,stvFitPars);
+    ih = -1;
+    double diia[5];
+    for (int i=0,li=0;i< 5;li+=++i) {
+      diia[i] = cntFitErrs[li+i];
+      double cntI = cntFitPars[i];
+      for (int j=0;j<=i;j++)         {
+        ih++;
+        double cntJ = cntFitPars[j];
+        double cntIJ = cntFitErrs[li+j];
+        double pul = (cntI*cntJ-cntIJ)/sqrt(dia[i]*dia[j]);
+        if (i==j) pul = cntI/sqrt(diia[i]);
+        cntPull[ih]->Fill(pul);
+      }
+    }
+  }
+  for (int i=0;myCanvas[i];i++) {
+    if (!myCanvas[i]) continue;
+    myCanvas[i]->Modified();myCanvas[i]->Update();}
+
+  while(!gSystem->ProcessEvents()){gSystem->Sleep(200);}; 
+}
