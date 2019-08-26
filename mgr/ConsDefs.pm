@@ -245,8 +245,8 @@
    }
    # JL patch for gcc 4.1 -> 4.3.x (report that it is broken in 4.4 as well)
    if ( $STAR_HOST_SYS =~ m/(_gcc4)(\d+)/ ){
-     print "Notice: Enabling gcc patch for V4.x series\n";
      if ( $2 <= 49 ){
+       print "Notice: Enabling gcc patch for V4.x series\n";
        # Note: all inlining failed with gcc 4.4.7 with no indication
        # of a resolve up to 4.4.9 . Symbols would be removed and
        # linking would fail.
