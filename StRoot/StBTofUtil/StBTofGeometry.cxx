@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.cxx,v 1.14 2017/10/20 17:50:33 smirnovd Exp $
+ * $Id: StBTofGeometry.cxx,v 1.32 2019/08/07 15:56:52 geurts Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -8,64 +8,10 @@
  * Description: Collection of geometry classes for the TOF-MRPC
  *              initializes from GEANT geometry
  *
- *******************************************************************
- * $Log: StBTofGeometry.cxx,v $
- * Revision 1.14  2017/10/20 17:50:33  smirnovd
- * Squashed commit of the following:
- *
- *     StBTof: Remove outdated ClassImp macro
- *
- *     Prefer explicit namespace for std:: names in header files
- *
- *     Removed unnecessary specification of default std::allocator
- *
- * Frank signed-off
- *
- * Revision 1.13  2014/02/06 21:21:13  geurts
- * Fix Index() of modules in GEMTOF trays, only applies to Run 13+ geometries [Joey Butterworth]
- *
- * Revision 1.12  2011/07/27 16:15:12  geurts
- * Alignment calibration modifications [Patrick Huck]:
- *  - added mAlignFile and SetAlignFile for use in StBTofMatchMaker
- *  - phi0, x0, z0 made mNTrays dependent
- *
- * Revision 1.11  2010/09/17 20:40:09  geurts
- * Protect Init() and InitFromStar() against non-initialized database/geant.
- * No immediate crash, but a LOG_ERROR instead.
- *
- * Revision 1.10  2010/08/09 18:45:36  geurts
- * Include methods in StBTofNode and StBTofGeometry that calculate local theta [Masa]
- *
- * Revision 1.9  2010/07/14 20:35:28  geurts
- * introduce switch to enable ideal MC geometry, without alignment updates. Default: disabled
- *
- * Revision 1.8  2010/05/25 22:09:44  geurts
- * improved database handling and reduced log output
- *
- * Revision 1.7  2010/04/03 02:00:53  dongx
- * X0 (radial offset) included in the tray alignment
- *
- * Revision 1.6  2009/09/15 00:17:27  dongx
- * Corrected the calculation for tray alignment parameters in X-Y
- *
- * Revision 1.5  2009/08/25 15:41:29  fine
- * fix the compilation issues under SL5_64_bits  gcc 4.3.2
- *
- * Revision 1.4  2009/03/18 14:18:18  dongx
- * - Optimized the geometry initialization function, reduced the CPU time use
- * - Optimized the HelixCrossCellIds() function, now doing the tray fast projection to reduce the loop
- *
- * Revision 1.3  2009/02/13 00:00:56  dongx
- * Tray geometry alignment implemented.
- *
- * Revision 1.2  2009/02/12 01:45:57  dongx
- * Clean up
- *
- * Revision 1.1  2009/02/02 21:56:54  dongx
- * first release - Barrel geometry
- *
  *******************************************************************/
 #include "Stiostream.h"
+#include <algorithm>
+#include <array>
 #include <math.h>
 #include <vector>
 #include <string>
@@ -77,7 +23,11 @@
 #include "TFile.h"
 #include "TDataSet.h"
 #include "TDataSetIter.h"
+#include "TGeoBBox.h"
 #include "TGeoManager.h"
+#include "TGeoMatrix.h"
+#include "TGeoPhysicalNode.h"
+
 #include "StMaker.h"
 //#include "TMemStat.h"
 #include "StMessMgr.h"
@@ -111,27 +61,57 @@ const char* StBTofGeometry::trayPref   = "BTRA";
 const char* StBTofGeometry::senPref    = "BRMD";
 
 //_____________________________________________________________________________
-StBTofNode::StBTofNode(TVolumeView *element, TVolumeView *top, StThreeVectorD *align, TVolumePosition *pos)
-  : fView(element), pView(new TVolumePosition(*pos)), mMasterNode(top), mTransFlag(kFALSE)
+StBTofNode::StBTofNode(TVolumeView *element, TVolumeView *top, const StThreeVectorD& align, TVolumePosition *pos)
+  : fView(element), pView(new TVolumePosition(*pos)), mMasterNode(top), mTransFlag(kFALSE),
+    mAlign{align.x(), align.y(), align.z()}
 {
-   if(align) {
-     mAlign[0] = align->x();  mAlign[1] = align->y();  mAlign[2] = align->z();
-   } else {
-     mAlign[0] = 0.0;   mAlign[1] = 0.0;   mAlign[2] = 0.0;
-   }
+   SetBit(kIsOwner, false);
 
    UpdateMatrix();
    BuildMembers();
 }
 
-//_____________________________________________________________________________
-StBTofNode::~StBTofNode()
-{ 
-  fView = 0;
-  pView = 0;
-  mMasterNode = 0;
-  mTransFlag = kFALSE;
+
+StBTofNode::StBTofNode(const TGeoPhysicalNode& gpNode, const StThreeVectorD& align) :
+  fView(nullptr), pView(nullptr), mMasterNode(nullptr), mTransFlag(false),
+  mAlign{align.x(), align.y(), align.z()}
+{
+  SetBit(kIsOwner, true);
+
+  TGeoBBox* bbox = static_cast<TGeoBBox*>( gpNode.GetShape() );
+
+  mTShape = new TBRIK( gpNode.GetVolume()->GetName(), "BTOF shape", "unknown", bbox->GetDX(), bbox->GetDY(), bbox->GetDZ() );
+  mTVolume = new TVolume( gpNode.GetVolume()->GetName(), "BTOF volume", mTShape );
+
+  TGeoHMatrix* ghMatrix = static_cast<TGeoHMatrix*>( gpNode.GetMatrix() );
+
+  double* rotationM = ghMatrix->GetRotationMatrix();
+
+  double  rotationF[9] = {
+    rotationM[0], rotationM[3], rotationM[6],
+    rotationM[1], rotationM[4], rotationM[7],
+    rotationM[2], rotationM[5], rotationM[8]
+  };
+
+  // The rotation matrix is owned by pView
+  TRotMatrix* rotMatrix = new TRotMatrix("rotMatrix", "BTOF rotation matrix", rotationF);
+
+  double* trans = ghMatrix->GetTranslation();
+
+  pView = new TVolumePosition(mTVolume, trans[0], trans[1], trans[2], rotMatrix);
+  pView->SetMatrixOwner(true);
+
+  fView = new TVolumeView( static_cast<TVolume*>(nullptr), pView);
+
+  TVolumePosition* masterPosition = new TVolumePosition(nullptr, 0, 0, 0, TVolume::GetIdentity());
+
+  // By default masterPosition is owned by mMasterNode
+  mMasterNode = new TVolumeView( static_cast<TVolume*>(nullptr), masterPosition);
+
+   UpdateMatrix();
+   BuildMembers();
 }
+
 
 //_____________________________________________________________________________
 void  StBTofNode::UpdateMatrix()
@@ -146,10 +126,7 @@ void  StBTofNode::UpdateMatrix()
    mTransFlag = kFALSE;
    CalcMatrix(this, mAlign, mTransMRS, mRotMRS);
    mTransFlag = kTRUE;
-   static Int_t iBreak = 0;
-   if (TMath::Abs(mTransMRS[2]) > 500) {
-     iBreak++;
-   }
+
 }
 
 //_____________________________________________________________________________
@@ -271,10 +248,6 @@ void  StBTofNode::BuildMembers()
    // -dz
    xl[0] = 0;  xl[1] = 0;  xl[2] = -dz;
    Local2Master(xl, xg);
-   static Int_t ibreak = 0;
-   if (TMath::Abs(xg[2]) > 1000) {
-     ibreak++;
-   }
    mEtaMin = StThreeVectorD(xg[0],xg[1],xg[2]).pseudoRapidity();
 
    // +dz
@@ -535,7 +508,7 @@ void StBTofNode::Print(Option_t *opt) const
 Bool_t StBTofGeomTray::mDebug = kFALSE;
 
 //_____________________________________________________________________________
-StBTofGeomTray::StBTofGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeView *top, StThreeVectorD *align, TVolumePosition *pos)
+StBTofGeomTray::StBTofGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeView *top, const StThreeVectorD& align, TVolumePosition *pos)
   : StBTofNode((TVolumeView *)sector->First(), top, align, pos)
 {
   mSectorsInBTOH = top->GetListSize()/2;
@@ -543,12 +516,19 @@ StBTofGeomTray::StBTofGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeVi
   mTrayIndex = ibtoh * mSectorsInBTOH + sector->GetPosition()->GetId();
 }
 
-//_____________________________________________________________________________
-StBTofGeomTray::~StBTofGeomTray()
+
+StBTofGeomTray::StBTofGeomTray(const int trayId, const TGeoPhysicalNode& node, const StThreeVectorD& align)
+  : StBTofNode(node, align)
 {
-  mBTOHIndex = 0;
-  mTrayIndex = 0;
+  int mBTOHId  = ( trayId <= 60 ? 1 : 2 );
+  int sectorId = ( trayId <= 60 ? trayId : trayId - 60 );
+
+  mSectorsInBTOH = StBTofGeometry::mNTrays/2;
+  mBTOHIndex = mBTOHId;
+  mTrayIndex = (mBTOHId - 1) * mSectorsInBTOH + sectorId;
 }
+
+
 //_____________________________________________________________________________
 void StBTofGeomTray::Print(const Option_t *opt) const
 {
@@ -568,18 +548,22 @@ void StBTofGeomTray::Print(const Option_t *opt) const
 Bool_t StBTofGeomSensor::mDebug = kFALSE;
 
 //_____________________________________________________________________________
-StBTofGeomSensor::StBTofGeomSensor(TVolumeView *element, TVolumeView *top, StThreeVectorD *align, TVolumePosition *pos) 
+StBTofGeomSensor::StBTofGeomSensor(TVolumeView *element, TVolumeView *top, const StThreeVectorD& align, TVolumePosition *pos) 
   : StBTofNode(element, top, align, pos)
 {
    mModuleIndex = element->GetPosition()->GetId();
    CreateGeomCells();
 }
 
-//_____________________________________________________________________________
-StBTofGeomSensor::~StBTofGeomSensor()
+
+StBTofGeomSensor::StBTofGeomSensor(const int moduleId, const TGeoPhysicalNode& node, const StThreeVectorD& align)
+  : StBTofNode(node, align)
 {
-  mModuleIndex = 0;
+   mModuleIndex = moduleId;
+   CreateGeomCells();
 }
+
+
 //_____________________________________________________________________________
 void StBTofGeomSensor::CreateGeomCells()
 {
@@ -715,16 +699,11 @@ StBTofGeometry::StBTofGeometry(const char* name, const char* title)
    mRootFile       = 0;
    mInitFlag       = kFALSE;
    mTopNode        = 0;
-   mStarHall       = 0;
    mIsMC           = kFALSE;
    SetAlignFile("");
 
-   for(int i=0;i<mNTrays;i++) {
-     mBTofTray[i] = 0;
-     for(int j=0;j<mNModules;j++) {
-       mBTofSensor[i][j] = 0;
-     }
-   }
+   std::fill( mBTofTray, mBTofTray + mNTrays, nullptr );
+   std::fill( &mBTofSensor[0][0], &mBTofSensor[mNTrays][0], nullptr );
 
    //
    //We only need one instance of StBTofGeometry
@@ -746,35 +725,32 @@ StBTofGeometry::~StBTofGeometry()
    gBTofGeometry = 0;
 
    for(int i=0;i<mNTrays;i++) {
-     SafeDelete(mBTofTray[i]);
+     if(mBTofTray[i]) delete mBTofTray[i];
+     mBTofTray[i] = 0;
      for(int j=0;j<mNModules;j++) {
-       SafeDelete(mBTofSensor[i][j]);
+       if(mBTofSensor[i][j]) delete mBTofSensor[i][j];
+       mBTofSensor[i][j] = 0;
      }
    }
    
 }
 
 //_____________________________________________________________________________
-void StBTofGeometry::Init(StMaker *maker, TVolume *starHall)
+void StBTofGeometry::Init(StMaker *maker, TVolume *starHall, TGeoManager* geoManager )
 {
-  static Bool_t InitDone = kFALSE;
-  if ( InitDone ) return;
    //
    //Define geometry parameters and establish the geometry
    //  
    if(maker->Debug()) DebugOn();
 
-   // retrieve align parameters  -- need to use db
-   for(int i=0;i<mNTrays;i++) {
-     mTrayX0[i] = 0.0;
-     mTrayY0[i] = 0.0;
-     mTrayZ0[i] = 0.0;
-   }
+   // Zero out internal alignment arrays
+   std::fill_n(mTrayX0, mNTrays, 0);
+   std::fill_n(mTrayY0, mNTrays, 0);
+   std::fill_n(mTrayZ0, mNTrays, 0);
 
-   double phi0[mNTrays], x0[mNTrays], z0[mNTrays];
-   for(int i=0;i<mNTrays;i++) {
-     phi0[i] = 0.0, x0[i] = 0.0; z0[i] = 0.0;
-   }
+   // retrieve align parameters  -- need to use db
+
+   std::array<double, mNTrays> phi0{}, x0{}, z0{};
 
    // If not MC input, load the alignment parameters from the database; otherwise ignore.
    if (mIsMC) {
@@ -820,22 +796,27 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall)
        double ss = TMath::Sin(phi*TMath::Pi()/180.);
        mTrayX0[i] = phi0[i]*ss + x0[i]*cs;
        mTrayY0[i] = -phi0[i]*cs + x0[i]*ss;
+       mTrayZ0[i] = z0[i];
      } else {
        phi = 108 + (i-60)*6;   // phi angle of tray Id = i+1, east
        double cs = TMath::Cos(phi*TMath::Pi()/180.);
        double ss = TMath::Sin(phi*TMath::Pi()/180.);
        mTrayX0[i] = -phi0[i]*ss + x0[i]*cs;
        mTrayY0[i] = phi0[i]*cs + x0[i]*ss;
+       mTrayZ0[i] = -z0[i];  // thus z0 will be the distance between the tray end to the TPC central membrane
      }
-     mTrayZ0[i] = z0[i];
 
      if(maker->Debug()) {
-       LOG_INFO << " Tray # = " << i+1 << " Align parameters " << mTrayX0[i] << " " << mTrayY0[i] << " " << mTrayZ0[i] << endm;
+       LOG_DEBUG << " Tray # = " << i+1 << " Align parameters " << mTrayX0[i] << " " << mTrayY0[i] << " " << mTrayZ0[i] << endm;
      }
    }
 
-   InitFromStar(starHall);
-   mStarHall = starHall;
+   if ( geoManager )
+     InitFrom( *geoManager );
+   else if ( starHall )
+     InitFrom( *starHall );
+   else
+     LOG_ERROR << "StBTofGeometry::Init - Cannot build BTOF geometry without Geant or TGeo input\n";
 
 
 /* Starting with geometry tags in Y2013, GMT units were installed into tof trays 8,23,93, & 108.
@@ -867,22 +848,17 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall)
      }//for j
    }//if Year
 
-   InitDone = kTRUE;
+   mInitFlag = true;
 }
 //_____________________________________________________________________________
-void StBTofGeometry::InitFromStar(TVolume *starHall)
+void StBTofGeometry::InitFrom(TVolume &starHall)
 {
   // Initialize TOFr geometry from STAR geometry
   //     BTofConf   --     0     tray_BTof   (default)
   //                       1     full_BTof
 
-  if (!starHall) {
-    LOG_ERROR << "[StBTofGeometry] No STAR Hall volume defined" << endm;
-    return;
-  }
-
   // Loop over the STAR geometry and mark the volume needed
-  TDataSetIter volume(starHall,0);
+  TDataSetIter volume(&starHall,0);
 
   TVolume *starDetectorElement = 0;
   while ( (starDetectorElement = ( TVolume *)volume()) )
@@ -891,6 +867,7 @@ void StBTofGeometry::InitFromStar(TVolume *starHall)
       //      Bool_t found = ! ( strcmp(elementName,tofElements[0]) && strcmp(elementName,tofElements[1]) && strcmp(elementName,tofElements[2]) );
       Bool_t found = ( IsBSEC(starDetectorElement) || IsBTRA(starDetectorElement) || IsBRMD(starDetectorElement) );
       if (found) {
+
 	starDetectorElement->SetVisibility(TVolume::kBothVisible);
 	starDetectorElement->Mark();
 	if (starDetectorElement->GetLineColor()==1 || starDetectorElement->GetLineColor()==7) 
@@ -904,8 +881,8 @@ void StBTofGeometry::InitFromStar(TVolume *starHall)
       }
     }
 
-  starHall->SetVisibility(TVolume::kBothVisible);
-  mTopNode = new TVolumeView(*starHall,10); 
+  starHall.SetVisibility(TVolume::kBothVisible);
+  mTopNode = new TVolumeView(starHall,10);
 
   mSectorsInBTOH = mTopNode->GetListSize()/2;    // # of sectors in one half
 
@@ -929,7 +906,7 @@ void StBTofGeometry::InitFromStar(TVolume *starHall)
   Int_t isensor = 0;
   mNValidTrays = 0;
   mModulesInTray = 0;
-  StThreeVectorD *align = 0;
+  StThreeVectorD align{};
   while ( (detVolume = (TVolumeView *)nextDet()) ) {
 
     if(strcmp(detVolume->GetName(), sectorPref)==0) {  // sector volume
@@ -941,28 +918,23 @@ void StBTofGeometry::InitFromStar(TVolume *starHall)
       if ( isec>60 ) ibtoh = 1;
       int sectorsInBTOH = mTopNode->GetListSize()/2;
       int trayIndex = ibtoh * sectorsInBTOH + secVolume->GetPosition()->GetId(); // secVolume
-      if (mDebug) {
-	LOG_INFO << " Tray # " << trayIndex << " has # of modules = " << detVolume->GetListSize() << endm;
-      }
+      LOG_DEBUG << " Tray # " << trayIndex << " has # of modules = " << detVolume->GetListSize() << endm;
       isensor = 0;   // clear for this tray
       if(detVolume->GetListSize()) {   // valid tray
 
         int itray = trayIndex - 1;
 
-        if(align) delete align;    align = 0;
-        if(trayIndex<=60) align = new StThreeVectorD(mTrayX0[itray], mTrayY0[itray], mTrayZ0[itray]);
-        else align = new StThreeVectorD(mTrayX0[itray], mTrayY0[itray], -mTrayZ0[itray]);  // thus z0 will be the distance between the tray end to the TPC central membrane
-
+        align.set(mTrayX0[itray], mTrayY0[itray], mTrayZ0[itray]);
         transPos = nextDet[0];
 
         mNValidTrays++;
 
         mBTofTray[mNValidTrays-1] = new StBTofGeomTray(ibtoh, secVolume, mTopNode, align, transPos);
-	SafeDelete(transPos);
+        delete transPos;  transPos = 0;
 
         if(mDebug) {
-          LOG_INFO << "   Initialize and save tray # " << mBTofTray[mNValidTrays-1]->Index() << " with " << detVolume->GetListSize() << " modules" << endm;
-          LOG_INFO << "   alignment parameters \t" << mTrayX0[itray] << " " <<  mTrayY0[itray] << " " <<  mTrayZ0[itray] << endm;
+          LOG_DEBUG << "   Initialize and save tray # " << mBTofTray[mNValidTrays-1]->Index() << " with " << detVolume->GetListSize() << " modules" << endm;
+          LOG_DEBUG << "   alignment parameters \t" << mTrayX0[itray] << " " <<  mTrayY0[itray] << " " <<  mTrayZ0[itray] << endm;
           mBTofTray[mNValidTrays-1]->Print();
         }
 
@@ -973,7 +945,7 @@ void StBTofGeometry::InitFromStar(TVolume *starHall)
       transPos = nextDet[0];
 
       mBTofSensor[mNValidTrays-1][isensor] = new StBTofGeomSensor(detVolume, mTopNode, align, transPos);
-      SafeDelete(transPos);
+      delete transPos;   transPos = 0;
 
       if(mDebug) mBTofSensor[mNValidTrays-1][isensor]->Print();
 
@@ -981,7 +953,7 @@ void StBTofGeometry::InitFromStar(TVolume *starHall)
       if(isensor>mModulesInTray) mModulesInTray = isensor;
     }
   }
-  SafeDelete(align);
+
   mBTofConf = 0;
   if (mNValidTrays==120) mBTofConf = 1;
 
@@ -992,6 +964,99 @@ void StBTofGeometry::InitFromStar(TVolume *starHall)
   return;
 
 }
+
+/**
+ * Creates BTof volumes for mBTofTray and mBTofSensor arrays using the
+ * corresponding volume parameters in TGeoManager.
+ */
+void StBTofGeometry::InitFrom(TGeoManager &geoManager)
+{
+  mNValidTrays = 0;
+
+  for (int trayId = 1; trayId <= mNTrays; trayId++)
+  {
+    bool hasGmt = StBTofGeometry::TrayHasGmtModules(trayId);
+
+    std::string geoPath( FormTGeoPath(geoManager, trayId, hasGmt) );
+
+    if ( geoPath.empty() ) {
+      LOG_WARN << "StBTofGeometry::InitFrom(...) - Cannot find path to BTOF tray "
+                  "(id " << trayId << "). Skipping...\n";
+      continue;
+    }
+
+    mNValidTrays++;
+
+    const TGeoPhysicalNode* gpNode = geoManager.MakePhysicalNode( geoPath.c_str() );
+
+    StThreeVectorD align(mTrayX0[trayId-1], mTrayY0[trayId-1], mTrayZ0[trayId-1]);
+
+    mBTofTray[trayId-1] = new StBTofGeomTray(trayId, *gpNode, align);
+
+    // Loop over the max number of modules (mNModules) that can be present in a tray
+    int maxModuleId = hasGmt ? 24 : mNModules;
+
+    for(int moduleId = 1; moduleId <= maxModuleId; moduleId++)
+    {
+      std::string geoPath( FormTGeoPath(geoManager, trayId, hasGmt, moduleId) );
+
+      if ( geoPath.empty() ) {
+         LOG_WARN << "StBTofGeometry::InitFrom(...) - Cannot find path to BTOF module "
+                     "(id " << moduleId << "). Skipping...\n";
+         continue;
+      }
+
+      const TGeoPhysicalNode* gpNode = geoManager.MakePhysicalNode( geoPath.c_str() );
+
+      mBTofSensor[trayId-1][moduleId-1] = new StBTofGeomSensor(moduleId, *gpNode, align);
+    }
+  }
+
+  mBTofConf = ( mNValidTrays == 120 ? 1 : 0 );
+
+  mModulesInTray = mNModules;
+
+  LOG_INFO << "[StBTofGeometry] Done. NValidTrays = " << mNValidTrays << "  NModulesInTray = " << mModulesInTray << endm;
+}
+
+
+/**
+ * Returns a full path to the BTOF module placed in a predifined location in
+ * the detector's ROOT geometry. An empty string is returned if the module not
+ * found in the geometry hierarchy (via TGeoManager).
+ */
+std::string StBTofGeometry::FormTGeoPath(TGeoManager &geoManager,
+  int trayId, bool hasGmt, int moduleId)
+{
+  // BTOH_1/BTO1_2 - east/west
+  // TOF trayId map: west=1-60, east=61-120
+  int halfId   = ( trayId <= 60 ? 1 : 2 );
+  int sectorId = ( trayId <= 60 ? trayId : trayId - 60 );
+
+  std::ostringstream geoPath;
+
+  // Node paths depend on using TpcRefSys
+  bool trs = geoManager.FindVolumeFast("TpcRefSys");
+  geoPath << "/HALL_1/CAVE_1/" << ((trs) ? "TpcRefSys_1/" : "") << "BTOF_1"
+          << (halfId == 1 ? "/BTOH_" : "/BTO1_") << halfId;
+
+  // Node names depend on whether this sector contains GMT modules
+  geoPath << ( hasGmt ? "/BSE1_"  : "/BSEC_" ) << sectorId
+          << ( hasGmt ? "/BTR1_1" : "/BTRA_1");
+
+  // Go deeper only when module is requested
+  if ( moduleId >= 1 )
+  {
+    geoPath << ( hasGmt ? "/BXT1_1/BRT1_1/BGM1_1/BRM1_" :
+                          "/BXTR_1/BRTC_1/BGMT_1/BRMD_" )
+            << moduleId;
+  }
+
+  bool found = geoManager.CheckPath( geoPath.str().c_str() );
+
+  return found ? geoPath.str() : "";
+}
+
 
 //_____________________________________________________________________________
 Bool_t StBTofGeometry::ContainOthers(TVolume *element)
@@ -1303,6 +1368,10 @@ const
 Int_t StBTofGeometry::GetTrayIndexAt(const Int_t idx)
 const
 {
+   if (!mTopNode) {
+     return idx + 1;
+   }
+
    //
    //Get the tray index at index of the list
    //
@@ -1346,6 +1415,10 @@ const
 Int_t  StBTofGeometry::GetAtOfTray(const Int_t itray)
 const
 {
+   if (!mTopNode) {
+     return itray - 1;
+   }
+
    //
    //Find out the list-index of StBTofGeomTray with TrayIndex=itray
    // itray is dummy if itray==0 and it is the current single tray
@@ -1734,3 +1807,125 @@ Bool_t StBTofGeometry::projTrayVector(const StHelixD &helix, IntVec &trayVec) co
   if(trayVec.size()>0) return kTRUE;
   else return kFALSE;
 }
+
+/*******************************************************************
+ * $Log: StBTofGeometry.cxx,v $
+ * Revision 1.32  2019/08/07 15:56:52  geurts
+ * Fix node paths when using TpcRefSys (affects runs before 2013)
+ *
+ * Revision 1.31  2018/02/26 23:29:12  smirnovd
+ * StBTofGeometry: Missing flag set to initialize geometry once
+ *
+ * I believe this flag should be set but have been overlooked.
+ * Otherwise why call IsInitDone() in StBTofMatchMaker?
+ *
+ * Revision 1.30  2018/02/26 23:29:05  smirnovd
+ * StBTofGeometry: Simple relation between tray index and id
+ *
+ * Revision 1.29  2018/02/26 23:29:00  smirnovd
+ * StBTofGeometry: Introduced alternative initialization using TGeo geometry
+ *
+ * Revision 1.28  2018/02/26 23:28:53  smirnovd
+ * StBTofGeometry: Added private InitFrom(TGeoManager)
+ *
+ * Revision 1.27  2018/02/26 23:28:45  smirnovd
+ * StBTofGeometry: InitFrom(TVolume*) to InitFrom(TVolume&)
+ *
+ * Revision 1.26  2018/02/26 23:28:38  smirnovd
+ * StBTofGeometry: s/InitFromStar/InitFrom/ and make it private
+ *
+ * Revision 1.25  2018/02/26 23:28:22  smirnovd
+ * StBTofGeometry: New method to form TGeo paths for trays and modules
+ *
+ * Revision 1.24  2018/02/26 23:28:14  smirnovd
+ * StBTofGeomSensor: New constructor accepting TGeo
+ *
+ * Revision 1.23  2018/02/26 23:28:07  smirnovd
+ * StBTofGeoTray: New constructor accepting TGeo
+ *
+ * Revision 1.22  2018/02/26 23:28:00  smirnovd
+ * StBTofNode: New constructor accepting TGeo volume
+ *
+ * The new TGeo constructor creates transient TVolume objects to provide
+ * functionality compatible with the existing TVolume-base geometry
+ * transformations. Unlike previously, the TVolume objects are owned by this class
+ * and so have to be deleted.
+ *
+ * Revision 1.21  2018/02/26 23:27:53  smirnovd
+ * Accept reference instead of pointer to xyz alignment
+ *
+ * Revision 1.20  2018/02/26 23:27:45  smirnovd
+ * StBTofGeometry: Senseless assignments in destructors
+ *
+ * Revision 1.19  2018/02/26 23:27:38  smirnovd
+ * StBTofGeometry: Set correct z component for tray alignment
+ *
+ * It makes more sense to set the right sign for the z component depending on the
+ * BTOF half instead of accounting for that sign later.
+ *
+ * Revision 1.18  2018/02/26 23:27:30  smirnovd
+ * StBTofGeometry: C++ style to zero out arrays
+ *
+ * Revision 1.17  2018/02/26 23:27:23  smirnovd
+ * StBTofGeometry: Use std::array in place of plain C arrays
+ *
+ * Revision 1.16  2018/02/26 23:27:15  smirnovd
+ * StBTofGeometry: Removed unused member pointer to non-TGeo ROOT geometry
+ *
+ * Revision 1.15  2018/02/26 23:13:19  smirnovd
+ * Move embedded CVS log messages to the end of file
+ *
+ * Revision 1.14  2017/10/20 17:50:33  smirnovd
+ * Squashed commit of the following:
+ *
+ *     StBTof: Remove outdated ClassImp macro
+ *
+ *     Prefer explicit namespace for std:: names in header files
+ *
+ *     Removed unnecessary specification of default std::allocator
+ *
+ * Frank signed-off
+ *
+ * Revision 1.13  2014/02/06 21:21:13  geurts
+ * Fix Index() of modules in GEMTOF trays, only applies to Run 13+ geometries [Joey Butterworth]
+ *
+ * Revision 1.12  2011/07/27 16:15:12  geurts
+ * Alignment calibration modifications [Patrick Huck]:
+ *  - added mAlignFile and SetAlignFile for use in StBTofMatchMaker
+ *  - phi0, x0, z0 made mNTrays dependent
+ *
+ * Revision 1.11  2010/09/17 20:40:09  geurts
+ * Protect Init() and InitFromStar() against non-initialized database/geant.
+ * No immediate crash, but a LOG_ERROR instead.
+ *
+ * Revision 1.10  2010/08/09 18:45:36  geurts
+ * Include methods in StBTofNode and StBTofGeometry that calculate local theta [Masa]
+ *
+ * Revision 1.9  2010/07/14 20:35:28  geurts
+ * introduce switch to enable ideal MC geometry, without alignment updates. Default: disabled
+ *
+ * Revision 1.8  2010/05/25 22:09:44  geurts
+ * improved database handling and reduced log output
+ *
+ * Revision 1.7  2010/04/03 02:00:53  dongx
+ * X0 (radial offset) included in the tray alignment
+ *
+ * Revision 1.6  2009/09/15 00:17:27  dongx
+ * Corrected the calculation for tray alignment parameters in X-Y
+ *
+ * Revision 1.5  2009/08/25 15:41:29  fine
+ * fix the compilation issues under SL5_64_bits  gcc 4.3.2
+ *
+ * Revision 1.4  2009/03/18 14:18:18  dongx
+ * - Optimized the geometry initialization function, reduced the CPU time use
+ * - Optimized the HelixCrossCellIds() function, now doing the tray fast projection to reduce the loop
+ *
+ * Revision 1.3  2009/02/13 00:00:56  dongx
+ * Tray geometry alignment implemented.
+ *
+ * Revision 1.2  2009/02/12 01:45:57  dongx
+ * Clean up
+ *
+ * Revision 1.1  2009/02/02 21:56:54  dongx
+ * first release - Barrel geometry
+ */

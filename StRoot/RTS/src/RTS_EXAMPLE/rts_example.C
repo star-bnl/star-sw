@@ -45,7 +45,7 @@
 #include <DAQ_TRG/daq_trg.h>
 #include <DAQ_HLT/daq_hlt.h>
 #include <DAQ_L4/daq_l4.h>
-#include <DAQ_FGT/daq_fgt.h>	//includes GMT & IST
+#include <DAQ_FGT/daq_fgt.h>	//includes GMT & IST & FST
 #include <DAQ_MTD/daq_mtd.h>
 #include <DAQ_PXL/daq_pxl.h>
 #include <DAQ_SST/daq_sst.h>
@@ -105,7 +105,7 @@ static int bad ;
 static int nfs_loops ;
 
 static int run_number ;
-
+static int print_mode ;
 
 //trigger related globals
 u_int rcc_timestamp ;
@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
 
 	run_number = -1 ;
 
-	while((c = getopt(argc, argv, "D:d:m:h")) != EOF) {
+	while((c = getopt(argc, argv, "D:d:m:f:")) != EOF) {
 		switch(c) {
 		case 'd' :
 			rtsLogLevel(optarg) ;
@@ -155,7 +155,9 @@ int main(int argc, char *argv[])
 			mountpoint = _mountpoint;
 			strncpy(_mountpoint, (char *)optarg,sizeof(_mountpoint)-1);
 			break;
-		  
+		case 'f' :	// to tweak bank outputs
+			print_mode = atoi(optarg) ;
+			break ;
 		default :
 			break ;
 		}
@@ -417,7 +419,8 @@ int main(int argc, char *argv[])
 		/*************************** STGC **************************/
 		stgc_doer(evp,print_det) ;
 		
-
+		/*************************** FST **************************/
+		fgt_doer(evp,print_det,FST_ID) ;
 
 
 		/************  PSEUDO: SHOULD ONLY BE USED FOR BACKWARD COMPATIBILITY! ************/
@@ -1462,6 +1465,9 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 	case IST_ID :
 		d_name = "IST" ;
 		break ;
+	case FST_ID :
+		d_name = "FST" ;
+		break ;
 	case FGT_ID :
 	default :
 		d_name = "FGT" ;
@@ -1820,6 +1826,8 @@ int tinfo_fps(daqReader *rdr, UINT64 bx64) {
 	printf("%d %u %u %u %d %d 0x%llx #FPS seq bx fpre fpost fpresz fpostsz trg\n",
 	       rdr->seq,
 	       (UINT32)bx64, fpre_bx, fpost_bx, fpre_sz, fpost_sz, rdr->daqbits64_l1);
+
+    return 0 ;
 }
 
 
@@ -1889,6 +1897,25 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	    
 	    //printf("EvtDescData %d %d %d\n",evtDesc->tcuCtrBunch_hi,evtDesc->DSMAddress,0) ;
 
+
+	    //TrgSumData *trgSum = (TrgSumData *)(((char *)trg) + swap32(trg->Summary_ofl.offset));
+	    L1_DSM_Data *l1Dsm = (L1_DSM_Data *)(((char *)trg) + swap32(trg->L1_DSM_ofl.offset));
+
+
+	    u_int bc2 = swap16(l1Dsm->BCdata[2]) ;
+            u_int bc7bit = bc2  & 0x7F ;
+
+	    u_int lastdsm[8] ;
+
+	    for(int i=0;i<8;i++) {
+
+		lastdsm[i] = swap16(l1Dsm->lastDSM[i]) ;
+		printf(".... %d: 0x%04X\n",i,lastdsm[i]) ;
+	    }
+            u_int fcs2019 = (lastdsm[4] >> 10) & 1 ;
+
+            printf("bc7bit %d, fcs2019 %d : 0x%04X 0x%04X 0x%04X 0x%04X\n",bc7bit,fcs2019,
+		   lastdsm[0],lastdsm[1],lastdsm[2],lastdsm[3]) ;
 
 	    printf("ids: ");
 	    for(int i=0;i<64;i++) {
@@ -2577,12 +2604,26 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 {
 	int raw_found = 0 ;
 	int zs_found = 0 ;
+	char want_adc = 0 ;
+	char want_zs = 0 ;
 
 	daq_dta *dd ;
 
 	if(strcasestr(do_print,"fcs")) ;	// leave as is...
 	else do_print = 0 ;
 	
+	if(print_mode==0) {	// default 
+		want_adc = 1 ;
+		want_zs = 1 ;
+	}
+
+	if(print_mode & 1) {
+		want_adc = 1 ;
+	}
+	if(print_mode & 2) {
+		want_zs = 1 ;
+	}
+
 
 #if 0
 
@@ -2611,7 +2652,7 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 		while(dd->iterate()) {	//per xing and per RDO
 			raw_found = 1 ;
 
-			if(do_print) {
+			if(do_print && want_adc) {
 				int sector = ((dd->sec >> 11) & 0x1F)+1 ;
 				int rdo = ((dd->sec >> 8) & 0x7)+1 ;
 				int det = (dd->sec >> 6) & 0x3;
@@ -2620,7 +2661,7 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 				int ch = dd->pad ;
 
 				// prints out Sector, RDO, channel
-				printf("FCS ADC: S%d:%d [det %d, ns %d, dep %d] ch %d, %d words\n",sector,rdo,det,ns,dep,ch,dd->ncontent) ;
+				printf("FCS ADC %d: S%d:%d [det %d, ns %d, dep %d] ch %d, %d words\n",good,sector,rdo,det,ns,dep,ch,dd->ncontent) ;
 				u_short *d16 = (u_short *)dd->Void ;
 
 				for(u_int i=0;i<dd->ncontent;i++) {
@@ -2640,7 +2681,7 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 		while(dd->iterate()) {
 			zs_found = 1  ;
 
-			if(do_print) {
+			if(do_print && want_zs) {
 				int sector = ((dd->sec >> 11) & 0x1F)+1 ;
 				int rdo = ((dd->sec >> 8) & 0x7)+1 ;
 				int det = (dd->sec >> 6) & 0x3;
@@ -2649,7 +2690,7 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 				int ch = dd->pad ;
 
 
-				printf("FCS ZS: S%d:%d [det %d, ns %d, dep %d] ch %d, %d ADCs\n",sector,rdo,det,ns,dep,ch,dd->ncontent) ;
+				printf("FCS ZS %d: S%d:%d [det %d, ns %d, dep %d] ch %d, %d ADCs\n",good,sector,rdo,det,ns,dep,ch,dd->ncontent) ;
 
 				for(u_int i=0;i<dd->ncontent;i++) {
 					printf(" TB %5d, flags %d, ADC %4u\n",dd->adc[i].tb,dd->adc[i].adc>>12,dd->adc[i].adc&0xFFF) ;
@@ -2690,7 +2731,7 @@ static int stgc_doer(daqReader *rdr, const char *do_print)
 
 
 	
-#if 1
+#if 0
 	dd = rdr->det("stgc")->get("raw") ;
 	
 
@@ -2717,7 +2758,7 @@ static int stgc_doer(daqReader *rdr, const char *do_print)
 		dd = rdr->det("stgc")->get("altro",r) ;	
 
 		while(dd && dd->iterate()) {	//per xing and per RDO
-			if(raw_found==0 && do_print) printf("STGC event\n") ;
+//			if(raw_found==0 && do_print) printf("STGC event\n") ;
 			raw_found = 1 ;
 
 			if(do_print) {

@@ -224,8 +224,7 @@ void makeMuDstQA(TString InputFileList, Int_t nFiles, Int_t nEvents, TString Out
      mProdTime= ProdTime.GetDate() +  ProdTime.GetTime()/1000000. ;
      //cout<<EventTime.GetDate() + EventTime.GetTime()/1000000.<<" "<<ProdTime.GetDate() +  ProdTime.GetTime()/1000000. <<endl;
 
-     //mmagField = mMuEvent->runInfo().magneticField();
-     mmagField = mMuEvent->magneticField();
+     mmagField = mMuEvent->runInfo().magneticField();
 
      mnRefMult = mMuEvent->refMult();
 

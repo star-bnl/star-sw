@@ -167,7 +167,7 @@ StBTofMatchMaker::StBTofMatchMaker(const Char_t *name): StMaker(name){
   setMaxDCA(9999.);
 
   setCreateHistoFlag(kFALSE);
-  setHistoFileName(""); //"tofana.root");
+  setHistoFileName("");//   setHistoFileName("tofana.root");
   setCreateTreeFlag(kFALSE);
   setSaveGeometry(kFALSE);
   mInitFromOther = kFALSE;
@@ -239,8 +239,8 @@ Int_t StBTofMatchMaker::InitRun(Int_t runnumber){
   StTimer geomTimer;
   geomTimer.start();
   mBTofGeom = 0;
-  if(TObjectSet *geom = (TObjectSet *) GetDataSet("btofGeometry")) {
-    mBTofGeom = (StBTofGeometry *) geom->GetObject();
+  if(TDataSet *geom = GetDataSet("btofGeometry")) {
+    mBTofGeom = (StBTofGeometry *)geom->GetObject();
     LOG_INFO << " Found btofGeometry ... " << endm; 
     mInitFromOther = kTRUE;
   } else {
@@ -255,14 +255,8 @@ Int_t StBTofMatchMaker::InitRun(Int_t runnumber){
     else                   mBTofGeom->SetMCOff();
     LOG_INFO << " Alignment file: " << mAlignFileName.c_str() << endm;
     mBTofGeom->SetAlignFile(mAlignFileName.c_str());
-    TVolume *starHall = (TVolume *)GetDataSet("HALL");
-    if (starHall) {
-      mBTofGeom->Init(this, starHall);
-    } else if (gGeoManager) {
-      mBTofGeom->Init();
-    } else {
-      assert(0);
-    }
+      TVolume *starHall = gGeoManager ? nullptr : (TVolume *) GetDataSet("HALL");
+      mBTofGeom->Init(this, starHall, gGeoManager);
   }
 
   geomTimer.stop();

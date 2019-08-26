@@ -55,6 +55,7 @@ public:
 	int init(daq_dta *gain) ;
 
 	static int get_bad(int sec1, int row1, int pad1) ;
+	static float get_gain(int sec1, int row1, int pad1) ;
 	static int fcf_decode(unsigned int *p_buff, daq_cld *dc, unsigned int version) ;
 	static int fcf_decode(unsigned int *p_buff, daq_sim_cld_x *dc, unsigned int version) ;
 

@@ -27,6 +27,8 @@ public:
 		n_post = 8 ;
 		n_cou = 4 ;
 
+		rhic_freq = 0 ;
+		fee_state = 0 ;
 
 	} ;
 
@@ -80,7 +82,8 @@ public:
 	u_char rdo ;
 	u_short board_id ;
 
-
+	u_int rhic_freq ;
+	u_char fee_state ;
 
 	// temporary storage for the current board and event
 	u_int version ;

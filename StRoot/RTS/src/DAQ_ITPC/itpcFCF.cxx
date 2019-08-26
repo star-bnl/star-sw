@@ -202,6 +202,22 @@ int itpc_fcf_c::get_bad(int sec1, int row1, int pad1)
 	return 0 ;
 }
 
+float itpc_fcf_c::get_gain(int sec1, int row1, int pad1)
+{
+	if(row1==0 || pad1==0) return 0.0 ;
+
+	gain_rp_t (*gain_p)[MAX_PHYS_PAD+1] ;
+	
+	if(sec_gains[sec1]==0) return 0.0 ;	// bad
+
+	gain_p = (gain_rp_t (*)[MAX_PHYS_PAD+1]) sec_gains[sec1] ;
+
+	return gain_p[row1][pad1].gain ;
+
+}
+
+
+
 struct itpc_fcf_c::rp_t *itpc_fcf_c::get_row_pad(int row, int pad)
 {
 	int max_pad_all = max_x + 1 ;

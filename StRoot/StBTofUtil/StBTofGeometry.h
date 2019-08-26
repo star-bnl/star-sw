@@ -8,49 +8,6 @@
  * Description: Collection of geometry classes for the TOF-MRPC
  *              initializes from GEANT geometry
  *
- *******************************************************************
- * $Log: StBTofGeometry.h,v $
- * Revision 1.10  2017/10/20 17:50:33  smirnovd
- * Squashed commit of the following:
- *
- *     StBTof: Remove outdated ClassImp macro
- *
- *     Prefer explicit namespace for std:: names in header files
- *
- *     Removed unnecessary specification of default std::allocator
- *
- * Frank signed-off
- *
- * Revision 1.9  2014/02/06 21:21:13  geurts
- * Fix Index() of modules in GEMTOF trays, only applies to Run 13+ geometries [Joey Butterworth]
- *
- * Revision 1.8  2011/07/27 16:15:12  geurts
- * Alignment calibration modifications [Patrick Huck]:
- *  - added mAlignFile and SetAlignFile for use in StBTofMatchMaker
- *  - phi0, x0, z0 made mNTrays dependent
- *
- * Revision 1.7  2010/08/09 18:45:36  geurts
- * Include methods in StBTofNode and StBTofGeometry that calculate local theta [Masa]
- *
- * Revision 1.6  2010/07/14 20:35:28  geurts
- * introduce switch to enable ideal MC geometry, without alignment updates. Default: disabled
- *
- * Revision 1.5  2009/08/25 15:41:29  fine
- * fix the compilation issues under SL5_64_bits  gcc 4.3.2
- *
- * Revision 1.4  2009/03/18 14:18:18  dongx
- * - Optimized the geometry initialization function, reduced the CPU time use
- * - Optimized the HelixCrossCellIds() function, now doing the tray fast projection to reduce the loop
- *
- * Revision 1.3  2009/02/13 00:00:56  dongx
- * Tray geometry alignment implemented.
- *
- * Revision 1.2  2009/02/12 01:45:57  dongx
- * Clean up
- *
- * Revision 1.1  2009/02/02 21:56:54  dongx
- * first release - Barrel geometry
- *
  *
  *******************************************************************/
 #ifndef STBTOFGEOMETRY_H
@@ -80,6 +37,7 @@
 #include "TVolumeView.h"
 #include "TVolumeViewIter.h"
 #include "StMaker.h"
+
 #include <vector>
 #include <string>
 typedef std::vector<Int_t>  IntVec;
@@ -92,12 +50,13 @@ class StBTofGeomSensor;
 class StBTofGeometry;
 
 class TVolumeView;
+class TGeoPhysicalNode;
+class TGeoManager;
 
 /**
    \class StBTofNode
    Basic TOF geometry class
  */ 
-R__EXTERN  StBTofGeometry* gBTofGeometry;
 class StBTofNode : public TObject {
  protected:
   TVolumeView *fView;
@@ -121,7 +80,9 @@ class StBTofNode : public TObject {
 
  protected:
 //    StBTofNode(TVolumeView *element, TVolumeView *top);
-    StBTofNode(TVolumeView *element, TVolumeView *top, StThreeVectorD *align=0, TVolumePosition *pos=0);
+    StBTofNode(TVolumeView *element, TVolumeView *top, const StThreeVectorD& align, TVolumePosition *pos=0);
+
+    StBTofNode(const TGeoPhysicalNode& gpNode, const StThreeVectorD& align);
     
 
     void      UpdateMatrix();
@@ -129,7 +90,15 @@ class StBTofNode : public TObject {
 
  public:
     StBTofNode() {}
-   ~StBTofNode();
+   ~StBTofNode() {
+     if ( TestBit(kIsOwner) ) {
+       delete fView;
+       delete pView;
+       delete mMasterNode;
+       delete mTVolume;
+       delete mTShape;
+     }
+   }
 
    TVolumeView*    GetfView() const { return fView; }
    TVolumePosition* GetpView() const { return pView; }
@@ -163,9 +132,22 @@ class StBTofNode : public TObject {
    StThreeVectorD* Align() const {return new StThreeVectorD(mAlign[0], mAlign[1], mAlign[2]); }
    virtual void    Print(const Option_t *opt="") const;
 
-#ifdef __ROOT__
+ private:
+
+   enum EBTofNodeBits {
+      /// True when this node creates TVolume objects that needs to be deleted and
+      /// pointed to by fView, pView, and mMasterNode
+      kIsOwner = BIT(23)
+   };
+
+   /// A transient TVolume and TShape objects may need to be created for this
+   /// StBTofNode when the input geometry is not given by a TVolume hierarchy
+   /// @{
+   TVolume *mTVolume;  //!
+   TShape  *mTShape;   //!
+   /// @}
+
   ClassDef(StBTofNode,2)  //Virutal TNode for TOF geometry
-#endif
 };
 
 
@@ -189,9 +171,13 @@ class StBTofGeomTray : public StBTofNode {
 
  public:
 //   StBTofGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeView *top);
-   StBTofGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeView *top, StThreeVectorD *align=0, TVolumePosition *pos=0);
+
+   StBTofGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeView *top, const StThreeVectorD& align, TVolumePosition *pos=0);
+
+   StBTofGeomTray(const int trayId, const TGeoPhysicalNode& gpNode, const StThreeVectorD& align);
+
    StBTofGeomTray() {}
-   ~StBTofGeomTray();
+   ~StBTofGeomTray() {};
 
    static void       DebugOn()   { mDebug = kTRUE; }     
    static void       DebugOff()  { mDebug = kFALSE; }
@@ -201,9 +187,7 @@ class StBTofGeomTray : public StBTofNode {
    Int_t             Index() const { return mTrayIndex; }
    virtual void      Print(const Option_t *opt="") const;
 
-#ifdef __ROOT__      
   ClassDef(StBTofGeomTray,1)  //Tray node in TOF geometry
-#endif
 };
 
 
@@ -231,10 +215,12 @@ class StBTofGeomSensor : public StBTofNode {
 
  public:
 //   StBTofGeomSensor(TVolumeView *element, TVolumeView *top);
-   StBTofGeomSensor(TVolumeView *element, TVolumeView *top, StThreeVectorD *align=0, TVolumePosition *pos=0);
+   StBTofGeomSensor(TVolumeView *element, TVolumeView *top, const StThreeVectorD& align, TVolumePosition *pos=0);
+
+   StBTofGeomSensor(const int moduleId, const TGeoPhysicalNode& gpNode, const StThreeVectorD& align);
 
    StBTofGeomSensor() {}
-   ~StBTofGeomSensor();
+   ~StBTofGeomSensor() {}
 
    static void       DebugOn()   { mDebug = kTRUE; }     
    static void       DebugOff()  { mDebug = kFALSE; }
@@ -251,9 +237,7 @@ class StBTofGeomSensor : public StBTofNode {
    StThreeVectorD    GetCellPosition(const Int_t icell);
    virtual void      Print(Option_t *opt="") const ;
 
-#ifdef __ROOT__      
    ClassDef(StBTofGeomSensor,1)  //Module node in TOF geometry
-#endif
 };
 //____________________________________________________________________________
 inline void StBTofGeomSensor::SetIndex(Int_t imod){ mModuleIndex = imod;}
@@ -286,10 +270,25 @@ const
 //////////////////////////////////////////////////////////////////////////////
 
 class StBTofGeometry : public TNamed {
+
+   friend class StBTofGeomTray;
+
  private:
    TNamed*    mGeoNamed;   //!Geometry to copy from
    static Int_t const mNTrays = 120;
    static Int_t const mNModules = 32;
+
+   std::string FormTGeoPath(TGeoManager &geoManager, int trayId, bool hasGmt = false, int moduleId = -1);
+
+   static bool TrayHasGmtModules(int trayId)
+   {
+      return trayId == 8 || trayId == 23 || trayId == 93 || trayId == 108;
+   }
+
+   void InitFrom(TVolume &starHall);
+
+   /// Initializes mBTofTray and mBTofSensor arrays
+   void InitFrom(TGeoManager &geoManager);
 
  protected:
    TVolumeView*      mTopNode;       //top TNode as MRS
@@ -299,7 +298,6 @@ class StBTofGeometry : public TNamed {
    Int_t       mModulesInTray; //number of modules in a tray
    Int_t       mCellsInModule; //number of cell in a module
    Bool_t      mInitFlag;      //flag of initialization, kTRUE if done
-   TVolume*    mStarHall;
    Int_t       mBTofConf;      //configuration for tray/full (0/1) tof
 
    StBTofGeomTray* mBTofTray[mNTrays];
@@ -320,10 +318,11 @@ class StBTofGeometry : public TNamed {
    Double_t    mTrayZ0[mNTrays];
 
  public:
+   void InitFromStar(TVolume *starHall) {InitFrom(*starHall);}
    StBTofGeometry(const char* name="btofGeo",
                   const char* title="Simplified BTof Geometry");
    ~StBTofGeometry();
-   StBTofGeometry *instance() {return gBTofGeometry;}
+
    Bool_t IsBSEC(const TVolume* element) const
      { return !(strcmp(element->GetName(), sectorPref)); }
    Bool_t IsBTRA(const TVolume* element) const
@@ -343,9 +342,7 @@ class StBTofGeometry : public TNamed {
 
    void          SetAlignFile(const Char_t *infile="") { mAlignFile = infile; }
 
-   void          Init(StMaker *maker, TVolume *starHall);
-   void          Init() {}
-   void          InitFromStar(TVolume *starHall);
+   void          Init(StMaker *maker, TVolume *starHall, TGeoManager* geoManager = nullptr);
 
    Bool_t  IsInitDone() const { return mInitFlag; }
    Bool_t  IsCellValid(const Int_t icell)     const;
@@ -386,7 +383,7 @@ class StBTofGeometry : public TNamed {
    Int_t             GetAtOfTray(const Int_t itray=0)   const;
 
    Int_t             CellIdPointIn(const StThreeVectorD& point) const;
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
    Bool_t            HelixCrossCellIds(const StHelixD &helix, IntVec &idVec, DoubleVec &pathVec, PointVec &crossVec) const;
    Bool_t            HelixCrossCellIds(const StHelixD &helix, IntVec &idVec, DoubleVec &pathVec, PointVec &crossVec, DoubleVec &thetaVec) const;
    Bool_t            HelixCrossCellIds(const StHelixD &helix, IntVec validModuleVec, IntVec projTrayVec, IntVec &idVec, DoubleVec &pathVec, PointVec &crossVec) const;
@@ -394,11 +391,10 @@ class StBTofGeometry : public TNamed {
    Bool_t            HelixCross(const StHelixD &helix, IntVec validModuleVec, IntVec projTrayVec) const;
    Bool_t            projTrayVector(const StHelixD &helix, IntVec &trayVec) const;
 #endif
-#ifdef __ROOT__      
-  ClassDef(StBTofGeometry,1)  //Simplified TOF Geometry
-#endif
+  ClassDef(StBTofGeometry,2)  //Simplified TOF Geometry
 };
 
+R__EXTERN  StBTofGeometry* gBTofGeometry;
 
 #endif  //end of STBTOFGEOMETRY_H
 
