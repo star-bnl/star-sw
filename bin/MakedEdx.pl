@@ -1759,7 +1759,9 @@ my @badruns = (19116020); # Altro3
 
 my @badruns = ();
 # Run V, rerurn
-$hist = "RunV201"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = "TFG19g"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 04/24/19 check new production
+#$hist = "RunV201"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = "TFG19g"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 04/24/19 check new production
+#$hist = "RunV202"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/26/19 add ZDC3 histograms
+$hist = "RunV203"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/27/19 new TpcSecRowB and TpcRowQ
 my $prod = $hist; #$Production;
 $prod =~ s/\*//g;
 $prod =~ s/\//_/g;

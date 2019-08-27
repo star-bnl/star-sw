@@ -256,4 +256,10 @@
 #root.exe -q -b  /net/l404/data/fisyak/Histograms/RunXIX/dEdx705/Fit/SecRow3CGFdEdx705.root 'MakeTpcSecRowB.C(20190201,705)' >& MakeTpcSecRowB.20190201,705.log
 #root.exe -q -b  /net/l404/data/fisyak/Histograms/RunXIX/dEdx707/Fit/SecRow3CGFdEdx707.root 'MakeTpcSecRowB.C(20190201,707)' >& MakeTpcSecRowB.20190201,707.log
 #root.exe -q -b  /net/l402/data/fisyak/STAR/packages/.DEV2/hold/StarDb/Calibrations/tpc/TpcSecRowB.20190201.000707.root /net/l403/data/fisyak/reco/2019/Pass801/dEdx804/Fit/SecRow3CGFdEdx804.root 'MakeTpcSecRowB.C(20190201,804)' >& MakeTpcSecRowB.20190201,804.log
-root.exe -q -b  /net/l402/data/fisyak/STAR/packages/.DEV2/StarDb/Calibrations/tpc/TpcSecRowB.20190201.000804.root  /net/l403/data/fisyak/reco/2019/Pass801/dEdx806/Fit/SecRow3CGFdEdx806.root 'MakeTpcSecRowB.C(20190201,806)' >& MakeTpcSecRowB.20190201,806.log
+#root.exe -q -b  /net/l402/data/fisyak/STAR/packages/.DEV2/StarDb/Calibrations/tpc/TpcSecRowB.20190201.000804.root  /net/l403/data/fisyak/reco/2019/Pass801/dEdx806/Fit/SecRow3CGFdEdx806.root 'MakeTpcSecRowB.C(20190201,806)' >& MakeTpcSecRowB.20190201,806.log
+# 2005 cu work/Histograms/RunV202
+#root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20050111.220000.root  SecRow3CGFcuProduction_ReversedFullField.root  'MakeTpcSecRowB.C(20050102,0,"TpcSecRowB","$STAR/StarDb/Calibrations/tpc/TpcRowQ.20050101.000000.C")' >& MakeTpcSecRowB.20050102,0.log
+root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20050111.220000.root  SecRow3CGFcuProduction_FullField.root  'MakeTpcSecRowB.C(20050216,0,"TpcSecRowB","$STAR/StarDb/Calibrations/tpc/TpcRowQ.20050101.000000.C")' >& MakeTpcSecRowB.20050216,0.log
+#root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20050111.220000.root  SecRow3CGFcu62productionMinBias_FullField.root  'MakeTpcSecRowB.C(20050310,0,"TpcSecRowB","$STAR/StarDb/Calibrations/tpc/TpcRowQ.20050101.000000.C")' >& MakeTpcSecRowB.20050310,0.log
+root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20050111.220000.root  SecRow3CGFcu22ProductionMinBias_FullField.root  'MakeTpcSecRowB.C(20050322,220000,"TpcSecRowB","$STAR/StarDb/Calibrations/tpc/TpcRowQ.20050101.000000.C")' >& MakeTpcSecRowB.20050322,220000.log
+                                                                               
