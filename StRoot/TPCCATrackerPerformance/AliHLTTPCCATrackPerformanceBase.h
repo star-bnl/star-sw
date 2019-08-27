@@ -75,7 +75,9 @@ class AliHLTTPCCATrackPerformanceBase: public AliHLTTPCPerformanceBase
         
     NRecoTracksHisto = 8,
     NRecoTracksProfiles = 14,
-    NRecoTracks2DHisto = 3
+    NRecoTracks2DHisto = 3,
+
+    NRecoMCToHits2D = 1
   };
   
   //Histos names. Should be consistent with the list in constructor
@@ -102,7 +104,9 @@ class AliHLTTPCCATrackPerformanceBase: public AliHLTTPCPerformanceBase
     krecosEffVsMCMomSec, krecosEffVsMCPtAll, krecosEffVsMCPtPrim,  
     krecosEffVsMCPtRefPrim, krecosEffVsMCPtSec, krecosEffVsMCPhiAll, krecosEffVsMCPhiPrim, 
     krecosEffVsMCPhiRefPrim, krecosEffVsMCPhiSec, krecosEffVsNMCTracks, 
-    krecosLengthAndRMom, krecosLengthAndMCMom, krecosLengthAndChi2
+    krecosLengthAndRMom, krecosLengthAndMCMom, krecosLengthAndChi2,
+
+    krecoMCToHits2D
   };
 
 #endif

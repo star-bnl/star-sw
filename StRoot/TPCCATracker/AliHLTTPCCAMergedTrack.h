@@ -52,11 +52,39 @@ class AliHLTTPCCAMergedTrack
       fNClusters = t.NClusters();
       // ---
       tIsMerged = false;
+      fUsed = t.Used();
+
+      fIsLooper = false;
+      fIsGrow = false;
+      fPrevSegment = -5;
+      fNextSegment = -5;
       // ---
     }
     // ---
     void SetMerged() { tIsMerged = true; }
     bool IsMerged() const { return tIsMerged; }
+
+    void SetUsed() { fUsed = true; }
+    void SetNoUsed() { fUsed = false; }
+    bool Used() const { return fUsed; }
+
+    void SetLooper( int prev, int next ) {
+      fIsLooper = true;
+      fPrevSegment = prev;
+      fNextSegment = next;
+    }
+    void SetNoLooper() {
+      fIsLooper = false;
+      fIsGrow = false;
+      fPrevSegment = -5;
+      fNextSegment = -5;
+    }
+    bool IsLooper() { return fIsLooper; }
+    bool IsLooper() const { return fIsLooper; }
+    int LpPrevNb() const { return fPrevSegment; }
+    int LpNextNb() const { return fNextSegment; }
+    void SetGrow() { fIsGrow = true; }
+    bool IsGrow() const { return fIsGrow; }
     // ---
   
   private:
@@ -69,6 +97,12 @@ class AliHLTTPCCAMergedTrack
     int fNClusters;                  //* number of track clusters
     // ---
     bool tIsMerged;
+    bool fUsed;
+
+    bool fIsLooper;
+    bool fIsGrow;
+    int fPrevSegment;
+    int fNextSegment;
     // ---
 };
 

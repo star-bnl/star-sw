@@ -34,7 +34,7 @@ class AliHLTTPCCAGBTrack
     friend std::ostream &operator<<( std::ostream &, const AliHLTTPCCAGBTrack & );
   public:
 
-    AliHLTTPCCAGBTrack(): fFirstHitRef( 0 ), fNHits( 0 ), fInnerParam(), fOuterParam(), fAlpha( 0 ), fNDeDx(0), fDeDx( 0 ), tIsMerged(false) { ; }
+    AliHLTTPCCAGBTrack(): fFirstHitRef( 0 ), fNHits( 0 ), fInnerParam(), fOuterParam(), fAlpha( 0 ), fNDeDx(0), fDeDx( 0 ), tIsMerged(false), tIsLooper(0) { ; }
 
     int NHits()               const { return fNHits; }
     int FirstHitRef()         const { return fFirstHitRef; }
@@ -62,6 +62,25 @@ class AliHLTTPCCAGBTrack
     // ---
     void SetMerged() { tIsMerged = true; }
     bool IsMerged() const { return tIsMerged; }
+    void SetQPt0( float qpt ) { tQPt0 = qpt; }
+    float QPt0() const { return tQPt0; }
+    void SetDzDs0( float dzds ) { tDzDs0 = dzds; }
+    float DzDs0() const { return tDzDs0; }
+    void SetQPt1( float qpt ) { tQPt1 = qpt; }
+    float QPt1() const { return tQPt1; }
+    void SetDzDs1( float dzds ) { tDzDs1 = dzds; }
+    float DzDs1() const { return tDzDs1; }
+    void SetClone( bool c = true ) { tIsClone = c; }
+    bool IsClone() const { return tIsClone; }
+    void SetFirstMC( int mc ) { tFirstMC = mc; }
+    int GetFirstMC() const { return tFirstMC; }
+
+    void SetReco( bool r ) { tReco = r; }
+    bool IsReco() const { return tReco; }
+
+    void SetLooper() { tIsLooper++; }
+    int IsLooper() { return tIsLooper; }
+    int IsLooper() const { return tIsLooper; }
     // ---
 
   protected:
@@ -75,6 +94,16 @@ class AliHLTTPCCAGBTrack
     float fDeDx;              //* DE/DX
 
     // ---
+    float tQPt0;
+    float tDzDs0;
+    float tQPt1;
+    float tDzDs1;
+    int tFirstMC;
+
+    int tIsLooper;
+
+    bool tReco;
+    bool tIsClone;
     bool tIsMerged;
     // ---
 };

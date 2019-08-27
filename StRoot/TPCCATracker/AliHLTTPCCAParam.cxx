@@ -309,7 +309,9 @@ std::istream &operator>>( std::istream &in, AliHLTTPCCAParam &p )
 
   in >> p.fISlice;
   in >> p.fNRows;
-  p.SetNInnerRows( 13 ); // TODO move to input file
+//  p.SetNInnerRows( 13 ); // TODO move to input file
+  p.SetNInnerRows( 30 ); // TODO move to input file
+  p.SetNTpcRows( p.fNRows );
   in >> p.fAlpha;
   in >> p.fDAlpha;
   in >> p.fCosAlpha;

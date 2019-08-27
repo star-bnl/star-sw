@@ -25,10 +25,12 @@
 #include "AliHLTTPCCASliceDataVector.h"
 #include <vector>
 
+#include "AliHLTTPCCASliceOutput.h"
+
 class AliHLTTPCCATrack;
 class AliHLTTPCCATrackParam;
 class AliHLTTPCCAClusterData;
-class AliHLTTPCCASliceOutput;
+//class AliHLTTPCCASliceOutput;
 
 //X using Vc::int_v;
 //X using Vc::uint_v;
@@ -102,20 +104,25 @@ class AliHLTTPCCATracker
     const std::vector<AliHLTTPCCATrack *> &Tracks() const { return fTracks; }
 
     const AliHLTTPCCASliceOutput * Output() const { return fOutput; }
+    AliHLTTPCCASliceOutput * Output() { return fOutput; }
 
-#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
+//#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
     int fNOutTracks1; // number of tracks in fOutTracks array
     AliHLTTPCCAOutTrack *fOutTracks1; // output array of the reconstructed tracks
 
     int NOutTracks1() const { return fNOutTracks1; }
     AliHLTTPCCAOutTrack *OutTracks1() const { return  fOutTracks1; }
     const AliHLTTPCCAOutTrack &OutTrack1( int index ) const { return fOutTracks1[index]; }
-#endif //DO_TPCCATRACKER_EFF_PERFORMANCE
+//#endif //DO_TPCCATRACKER_EFF_PERFORMANCE
     void StoreToFile( FILE *f ) const;
     void RestoreFromFile( FILE *f );
 
   private:
     void SetupCommonMemory();
+
+#ifdef TETA
+    void ConvertPTrackParamToVector( const AliHLTTPCCATrackParam *t0[uint_v::Size], AliHLTTPCCATrackParamVector &t, const int &nTracksV);
+#endif
 
     AliHLTTPCCAParam fParam; // parameters
     double fTimers[11]; // running CPU time for different parts of the algorithm
@@ -153,6 +160,40 @@ class AliHLTTPCCATracker
     AliHLTTPCCATracker( const AliHLTTPCCATracker& );
     AliHLTTPCCATracker &operator=( const AliHLTTPCCATracker& );
 };
+
+#ifdef TETA
+struct TrSort {
+  int nHits, trId;
+  bool operator() ( const TrSort& a, const TrSort& b ) { return (a.nHits > b.nHits);}
+  static bool trComp( const TrSort& a, const TrSort& b ) { return (a.nHits > b.nHits); }
+};
+
+inline void AliHLTTPCCATracker::ConvertPTrackParamToVector( const AliHLTTPCCATrackParam *t0[uint_v::Size], AliHLTTPCCATrackParamVector &t, const int &nTracksV)
+{
+  float_v tmpFloat;
+  int_v tmpShort;
+
+  for(int iV=0; iV < nTracksV; iV++) if(t0[iV]) tmpFloat[iV] = t0[iV]->X();
+  t.SetX(tmpFloat);
+  for(int iV=0; iV < nTracksV; iV++) if(t0[iV]) tmpFloat[iV] = t0[iV]->SignCosPhi();
+  t.SetSignCosPhi(tmpFloat);
+
+  for(int iP=0; iP<5; iP++)
+  {
+    for(int iV=0; iV < nTracksV; iV++) if(t0[iV]) tmpFloat[iV] = t0[iV]->Par()[iP];
+    t.SetPar(iP,tmpFloat);
+  }
+  for(int iC=0; iC<15; iC++)
+  {
+    for(int iV=0; iV < nTracksV; iV++) if(t0[iV]) tmpFloat[iV] = t0[iV]->Cov()[iC];
+    t.SetCov(iC,tmpFloat);
+  }
+  for(int iV=0; iV < nTracksV; iV++) if(t0[iV]) tmpFloat[iV] = t0[iV]->Chi2();
+  t.SetChi2(tmpFloat);
+  for(int iV=0; iV < nTracksV; iV++) if(t0[iV]) tmpShort[iV] = t0[iV]->NDF();
+  t.SetNDF(tmpShort);
+}
+#endif
 
 inline void AliHLTTPCCATracker::GetErrors2( int iRow, const AliHLTTPCCATrackParamVector &t, float_v *Err2Y, float_v *Err2Z ) const
 {

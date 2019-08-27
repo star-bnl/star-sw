@@ -46,6 +46,7 @@ class AliHLTTPCCAMergerOutput
     int NTrackClusters()             const { return fNTrackClusters;       }
 
     const AliHLTTPCCAMergedTrack &Track( int i ) const { return fTracks[i]; }
+    AliHLTTPCCAMergedTrack &Track( int i ) { return fTracks[i]; }
     const DataCompressor::SliceRowCluster &ClusterIDsrc     ( int i )  const { return fClusterIDsrc[i]; }
     UChar_t  ClusterPackedAmp( int i )  const { return fClusterPackedAmp[i]; }
 

@@ -14,6 +14,7 @@
  */
 #define V5
 //#define AVX1V
+//#define TETA
 
 
 

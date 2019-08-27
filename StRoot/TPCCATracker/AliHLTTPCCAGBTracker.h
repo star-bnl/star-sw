@@ -73,6 +73,10 @@ class AliHLTTPCCAGBTracker
     int *TrackHits() { return fTrackHits; }
     int TrackHit( int i ) const { return fTrackHits[i]; }
 
+    short *TrackHitsSegmentsId() const { return fTrackHitsSegmentsId; }
+    short *TrackHitsSegmentsId() { return fTrackHitsSegmentsId; }
+    short TrackHitSegmentId( short i ) const { return fTrackHitsSegmentsId[i]; }
+
     bool FitTrack( AliHLTTPCCATrackParam &T, AliHLTTPCCATrackParam t0,
                      float &Alpha, int hits[], int &NTrackHits,
                      bool dir );
@@ -113,6 +117,7 @@ class AliHLTTPCCAGBTracker
     int *fExt2IntHitID;        //* array of internal hit indices
     int fNHits;                //* N hits in event
     int *fTrackHits;           //* track->hits reference array
+    short *fTrackHitsSegmentsId;           //* track->hit's segment id reference array
     AliHLTTPCCAGBTrack *fTracks; //* array of tracks
     int fNTracks;              //* N tracks
     AliHLTTPCCAMerger *fMerger;  //* global merger

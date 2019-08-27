@@ -90,7 +90,8 @@ namespace AliHLTTPCCAParameters
      * When non-overlaped tracks are merged allow gaps of
      * this size
      */
-    MaximumRowGapBetweenClones = 11,
+//    MaximumRowGapBetweenClones = 11,
+    MaximumRowGapBetweenClones = 70,
 
     /**
      * When overlaped tracks are merged allow gaps of

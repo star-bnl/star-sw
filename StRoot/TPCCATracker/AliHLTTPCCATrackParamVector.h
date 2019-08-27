@@ -107,6 +107,24 @@ class AliHLTTPCCATrackParamVector
     float_v Chi2()  const { return fChi2; }
     int_v   NDF()   const { return fNDF; }
 
+    // ---
+    void restest()
+    {
+      for( int i = 0; i < 15; i++ ) fC[i] = 0;
+    }
+
+    void print( int iv )
+    {
+      int ii = 0;
+      for( int i = 1; i < 6; i++ ) {
+	for( int j = 0; j < i; j++ ) {
+	  std::cout<<fC[ii++][iv]<<"   ";
+	}
+	std::cout<<"\n";
+      }
+    }
+    // ---
+
     float_v Err2Y()      const { return fC[0]; }
     float_v Err2Z()      const { return fC[2]; }
     float_v Err2SinPhi() const { return fC[5]; }

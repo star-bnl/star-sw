@@ -72,6 +72,13 @@ class AliHLTTPCCAMCTrack
 
   void SetNMCRows( int v )        { fNMCRows = v; }
 
+  // ---
+  void SetSet1( int v )           { tSet1 = v; }
+  int     Set1()            const { return tSet1; }
+  void SetSet30( int v )           { tSet30 = v; }
+  int     Set30()            const { return tSet30; }
+  // ---
+
   friend ostream& operator<<(ostream& out, const AliHLTTPCCAMCTrack &a);
   friend istream& operator>>(istream& in, AliHLTTPCCAMCTrack &a);
 
@@ -90,6 +97,9 @@ class AliHLTTPCCAMCTrack
   int    fNTurns;         //* N of turns in the current sector
 
   int    fNMCRows; // N rows with MC Points. Calculated after reading all MC info.
+
+  int tSet1;
+  int tSet30;
 };
 
 #endif

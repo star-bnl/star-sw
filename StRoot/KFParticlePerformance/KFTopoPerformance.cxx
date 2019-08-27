@@ -741,7 +741,7 @@ void KFTopoPerformance::MatchParticles()
       int mmId = -2; // MC id for rPart
       {
         const int rdId = rPart.DaughterIds()[iD];
-	if (RtoMCParticleId.size() <= rdId) continue;
+	if ((int)RtoMCParticleId.size() <= rdId) continue;
         if ( !RtoMCParticleId[rdId].IsMatched() ) continue;
         const int mdId = RtoMCParticleId[rdId].GetBestMatch();
         mcDaughterIds.push_back(mdId);
@@ -751,7 +751,7 @@ void KFTopoPerformance::MatchParticles()
       iD++;
       for ( ; iD < NRDaughters; iD++ ) {
         const int rdId = rPart.DaughterIds()[iD];
-	if (RtoMCParticleId.size() <= rdId) continue;
+	if ((int)RtoMCParticleId.size() <= rdId) continue;
         if ( !RtoMCParticleId[rdId].IsMatched() ) break;
         const int mdId = RtoMCParticleId[rdId].GetBestMatch();
         mcDaughterIds.push_back(mdId);
