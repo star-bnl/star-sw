@@ -4,6 +4,7 @@
 //#define __CHECK_LargedEdx__
 //#define __Use_dNdx__
 //#define __TEST_DX__
+#define __ZDC3__
 #define __BEST_VERTEX__
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
@@ -823,7 +824,9 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   static Hists3D TanL3DiTPC("TanL3DiTPC","log(dEdx/Pion)","row","Tan(#lambda)",NoRows,200,-2.,2.); // ? mix of inner and outer
 #endif
 #endif
-  //  static Hists3D Zdc3("Zdc3","<log(dEdx/Pion)>","row","log10(ZdcCoincidenceRate)",St_tpcPadConfigC::instance()->numberOfRows(sector),100,0.,10.);
+#ifdef __ZDC3__
+  static Hists3D Zdc3("Zdc3","<log(dEdx/Pion)>","row","log10(ZdcCoincidenceRate)",St_tpcPadConfigC::instance()->numberOfRows(20),100,0.,10.);
+#endif /* __ZDC3__ */
   static Hists3D Z3("Z3","<log(dEdx/Pion)>","row","Drift Distance",NoRows,220,-5,215);
 #ifdef __iTPCOnly__
   static Hists3D Z3iTPC("Z3iTPC","<log(dEdx/Pion)>","row","Drift Distance",NoRows,220,-5,215);
@@ -1263,7 +1266,9 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	    ADC3.Fill(FdEdx[k].sector,FdEdx[k].row,&ADCL);
 	  }
 	}
-	//	if (FdEdx[k].Zdc > 0) Zdc3.Fill(FdEdx[k].row,TMath::Log10(FdEdx[k].Zdc),Vars);
+#ifdef __ZDC3__
+	if (FdEdx[k].Zdc > 0) Zdc3.Fill(FdEdx[k].row,TMath::Log10(FdEdx[k].Zdc),Vars);
+#endif /* __ZDC3__ */
 	//Double_t xyz[3]  = {FdEdx[k].xyz[0],FdEdx[k].xyz[1],FdEdx[k].xyz[2]};
 	//Double_t xyzD[3] = {FdEdx[k].xyzD[0],FdEdx[k].xyzD[1],FdEdx[k].xyzD[2]};
 	//Double_t Phi  = 180./TMath::Pi()*TMath::ATan2(xyz[0],xyz[1]);
