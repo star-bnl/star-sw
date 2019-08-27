@@ -65,19 +65,19 @@ void Db(const Char_t *tabNam  =
       cout << name.Data() << "\tInner <T0> = " << t0Inner << "\tOuter <T0> = " << t0Outer << endl;
     }
     if (Nrows > 10) Nrows = 10;
-    if (table->GetRowSize() < 256) table->Print(0,Nrows);
-    cout << "==============================================" << endl;
-#if 0
-    name += Form(".%06i.%06i.root",t[0].GetDate(),t[0].GetTime());
-    TFile *f = new TFile(name.Data(),"RECREATE");
-    table->Write();
-    delete f;
-#else
-    name += Form(".%06i.%06i.C",t[0].GetDate(),t[0].GetTime());
-    ofstream out;
-    out.open(name, ios::out);
-    table->SavePrimitive(out,"");
-#endif
+    if (table->GetRowSize() < 256) {
+      table->Print(0,Nrows);
+      cout << "==============================================" << endl;
+      name += Form(".%06i.%06i.C",t[0].GetDate(),t[0].GetTime());
+      ofstream out;
+      out.open(name, ios::out);
+      table->SavePrimitive(out,"");
+    } else {
+      name += Form(".%06i.%06i.root",t[0].GetDate(),t[0].GetTime());
+      TFile *f = new TFile(name.Data(),"RECREATE");
+      table->Write();
+      delete f;
+    }
   }
   else cout << "Table:" << tabNam << " has not been found" << endl;
 }
