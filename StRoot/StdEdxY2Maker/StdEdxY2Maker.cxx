@@ -4,7 +4,7 @@
 //#define __CHECK_LargedEdx__
 //#define __Use_dNdx__
 //#define __TEST_DX__
-#define __ZDC3__
+//#define __ZDC3__
 #define __BEST_VERTEX__
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
@@ -66,7 +66,7 @@ using namespace units;
 #include "tables/St_g2t_track_Table.h" 
 #endif
 const static Int_t tZero= 19950101;
-const static Int_t tMin = 20090301;
+const static Int_t tMin = 20000101;
 const static Int_t tMax = 20200101;
 const static TDatime t0(tZero,0);
 const static Int_t timeOffSet = t0.Convert();
