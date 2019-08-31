@@ -99,7 +99,7 @@ srun -N 1 -n 1 shifter --image=balewski/mysql51-balewski:c --volume=$myDbVault:/
 # wait for DBserver start
 nSleep=5
 dbOK=0
-for i in `seq 1 20`; do
+for i in `seq 1 40`; do
     sleep $nSleep
     echo  -n M-$NN  after-srun-db i=$i  sleep $nSleep "sec "
     date
