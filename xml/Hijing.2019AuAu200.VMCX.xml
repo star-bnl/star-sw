@@ -11,7 +11,8 @@
 #   starver TFG19f
 #  starver .DEV2 
 #  starver TFG17u 
-#  starver TFG17v 
+#  starver TFG17v
+  starver TFG19g
   set file = $INPUTFILE0;
 #  set rung = `echo $file | awk -F\: '{print $1}'`
 #  set f    = `echo $file | awk -F\: '{print $2}'`
@@ -39,8 +40,8 @@
     root.exe -q -b -x 'bfc.C(100,"genIn,MC.2019,McTpcAna,-bbcSim,Stx,KFVertex,VFMinuitX,-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrY,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco'${sdt}',RunG.1","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
   endif
 </command>
-<input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/Hijing/AuAu200/hijingAuAu200_*gener.root" />
-<!-- <input URL="file:/net/l401/data/scratch2/fisyak/simu/Hijing/AuAu200//hijingAuAu200_*gener.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/Hijing/AuAu200/hijingAuAu200_*gener.root" /> -->
+<input URL="file:/net/l401/data/scratch2/fisyak/simu/Hijing/AuAu200//hijingAuAu200_*gener.root" />
 <!-- <input URL="file:/net/l401/data/scratch2/fisyak/simu/Hijing/AuAu200//hijingAuAu200_*gener.root" /> -->
 <!-- <input URL="file:/net/l404/data/fisyak/simu/Hijing/AuAu200/hijingAuAu200_*gener.root" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/Hijing/AuAu200/hijingAuAu200_1_1000.gener.root" /> -->
