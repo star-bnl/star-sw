@@ -259,7 +259,7 @@ for my $h  (split /\s/,$sources) {
 	my $macro = "./StRoot/St_base/StArray.h";
 	if ( -f $macro) { }
 	else { $macro = `echo \$STAR/StRoot/St_base/StArray.h`;}
-	my $tmp = "temp.h";
+	my $tmp = $$ . "temp.h";# print "tmp = $tmp =========================\n";
 	open (INPUT, $h) or die "Can't open $h\n";
 	my $new_h = $DirName . "/" . basename($h);
 	open (OUTPUT, ">$tmp") or die "Can't open $tmp\n";
