@@ -1,5 +1,5 @@
 //#define __RECOVER__
-//#define __NO_TpcRowQ__
+#define __NO_TpcRowQ__
 //________________________________________________________________________________
 void MakeTpcSecRowB(TH1 *hist, TH1 *histSigma = 0,
 		    Int_t d = 20070321, Int_t t = 58, 

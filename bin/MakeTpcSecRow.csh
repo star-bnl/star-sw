@@ -259,7 +259,27 @@
 #root.exe -q -b  /net/l402/data/fisyak/STAR/packages/.DEV2/StarDb/Calibrations/tpc/TpcSecRowB.20190201.000804.root  /net/l403/data/fisyak/reco/2019/Pass801/dEdx806/Fit/SecRow3CGFdEdx806.root 'MakeTpcSecRowB.C(20190201,806)' >& MakeTpcSecRowB.20190201,806.log
 # 2005 cu work/Histograms/RunV202
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20050111.220000.root  SecRow3CGFcuProduction_ReversedFullField.root  'MakeTpcSecRowB.C(20050102,0,"TpcSecRowB","$STAR/StarDb/Calibrations/tpc/TpcRowQ.20050101.000000.C")' >& MakeTpcSecRowB.20050102,0.log
-root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20050111.220000.root  SecRow3CGFcuProduction_FullField.root  'MakeTpcSecRowB.C(20050216,0,"TpcSecRowB","$STAR/StarDb/Calibrations/tpc/TpcRowQ.20050101.000000.C")' >& MakeTpcSecRowB.20050216,0.log
+#root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20050111.220000.root  SecRow3CGFcuProduction_FullField.root  'MakeTpcSecRowB.C(20050216,0,"TpcSecRowB","$STAR/StarDb/Calibrations/tpc/TpcRowQ.20050101.000000.C")' >& MakeTpcSecRowB.20050216,0.log
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20050111.220000.root  SecRow3CGFcu62productionMinBias_FullField.root  'MakeTpcSecRowB.C(20050310,0,"TpcSecRowB","$STAR/StarDb/Calibrations/tpc/TpcRowQ.20050101.000000.C")' >& MakeTpcSecRowB.20050310,0.log
-root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20050111.220000.root  SecRow3CGFcu22ProductionMinBias_FullField.root  'MakeTpcSecRowB.C(20050322,220000,"TpcSecRowB","$STAR/StarDb/Calibrations/tpc/TpcRowQ.20050101.000000.C")' >& MakeTpcSecRowB.20050322,220000.log
-                                                                               
+#root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20050111.220000.root  SecRow3CGFcu22ProductionMinBias_FullField.root  'MakeTpcSecRowB.C(20050322,220000,"TpcSecRowB","$STAR/StarDb/Calibrations/tpc/TpcRowQ.20050101.000000.C")' >& MakeTpcSecRowB.20050322,220000.log
+# 2005 work/Hitogram/RunV204                                                                              
+#  6014088_1010001.root cuProductionMinBias_ReversedFullField   - 6046038_3040001.root cuProductionHighTower_ReversedFullField
+#                     20050115.000204                         
+#  Run	6014088 start 2005-01-15 02:59:50 stop 2005-01-15 03:03:30
+#  Run	6046038 start 2005-02-15 12:47:41 stop 2005-02-15 12:51:41
+#  6047017_2020001.root cuProductionHighTower_FullField         - 6065058_3040009.root cuProductionHighTower_FullField
+#                     20050216.000204                         
+#  Run	6047017 start 2005-02-16 07:24:31 stop 2005-02-16 07:28:51
+#  Run  6065058 start 2005-03-07 00:46:51 stop 2005-03-07 01:01:36
+# 6069003_2030001.root cu62productionMinBias_FullField          - 6081062_3040002.root cu62productionMinBias_FullField
+#                     20050310.000204                         
+#  Run	6069003 start 2005-03-10 07:17:44 stop 2005-03-10 07:35:13
+#  Run	6081062 start 2005-03-22 18:16:16 stop 2005-03-22 18:18:35
+#  6081109_2030001.root cu22ProductionMinBias_FullField         - 6083034_3010001.root cu22ProductionMinBias_FullField
+#                     20050323.000204                         
+#  Run	6081109 start 2005-03-23 00:08:42 stop 2005-03-23 00:23:27
+#  Run	6083034 start 2005-03-24 12:42:37 stop 2005-03-24 12:49:57
+# root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20050111.220000.root SecRow3CGFcuProduction_ReversedFullField.root 'MakeTpcSecRowB.C(20050115,204,"TpcSecRowB",0)' >& MakeTpcSecRowB.20050115,204.log
+# root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20050111.220000.root SecRow3CGFcuProduction_FullField.root  'MakeTpcSecRowB.C(20050216,204,"TpcSecRowB",0)' >& MakeTpcSecRowB.20050216,204.log
+# root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20050111.220000.root SecRow3CGFcu62productionMinBias_FullField.root 'MakeTpcSecRowB.C(20050310,204,"TpcSecRowB",0)' >& MakeTpcSecRowB.20050310,204.log
+ root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20050111.220000.root SecRow3CGFcu22ProductionMinBias_FullField.root 'MakeTpcSecRowB.C(20050323,204,"TpcSecRowB",0)' >& MakeTpcSecRowB.20050323,204.log

@@ -60,7 +60,9 @@ void dEdx(Int_t nevents=1000,
   //  TString Chain("in,TpcHitMover,CorrX,OSpaceZ2,OGridLeakFull,dEdxY2,magF,StEvent,mysql,CMuDst,noHistos,noRunco,NoDefault"); // ,analysis
   //  TString Chain("in,TpcHitMover,simu,CorrX,OSpaceZ2,OGridLeakFull,dEdxY2,magF,StEvent,mysql,NoDefault"); // ,analysis
   //  TString Chain("in,TpcHitMover,simu,CorrY,OSpaceZ2,OGridLeakFull,dEdxY2,magF,StEvent,mysql,NoDefault"); // ,analysis to add OPr40 for y2019
-  TString Chain("in,TpcHitMover,,OSpaceZ2,CorrX,OSpaceZ2,OGridLeakFull,-Opr13,OPr40,dEdxY2,magF,StEvent,mysql,NoDefault"); // ,analysis to add OPr40 for y2019
+  //  TString Chain("in,TpcHitMover,OSpaceZ2,CorrX,OSpaceZ2,OGridLeakFull,-Opr13,OPr40,dEdxY2,magF,StEvent,mysql,NoDefault"); // ,analysis to add OPr40 for y2019
+  // 2005 cu
+  TString Chain("in,TpcHitMover,SCEbyE,OGridLeak,OShortR,OSpaceZ2,dEdxY2,RMuDST,magF,StEvent,mysql,NoDefault"); // ,analysis to add OPr40 for y2019
   TString STAR_VERSION(gSystem->Getenv("STAR_VERSION"));
   if (STAR_VERSION.BeginsWith("TFG") || STAR_VERSION.Contains("DEV2")) {
     Chain += ",quiet";
