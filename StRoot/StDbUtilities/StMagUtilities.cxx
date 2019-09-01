@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.119 2019/05/18 04:39:24 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.120 2019/08/30 20:16:54 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.120  2019/08/30 20:16:54  genevb
+ * Be sure to restore SpaceCharge settings in PredictSpaceCharge()
+ *
  * Revision 1.119  2019/05/18 04:39:24  genevb
  * Properly include ion pile-up of Abort Gap Cleaning, plus a little clean-up
  *
@@ -4999,8 +5002,20 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t NHits, Int_t Charge, F
        
      }
    
-   if ( InnerTPCHits < MinInnerTPCHits )                     return(6) ; // No action if too few hits in the TPC   
-   if ( OuterTPCHits < MinOuterTPCHits )                     return(7) ; // No action if too few hits in the TPC   
+   if ( InnerTPCHits < MinInnerTPCHits ) {
+     // Restore settings for spacechargeR2
+     fSpaceChargeR2  =  tempfSpaceChargeR2 ;
+     SpaceChargeR2   =  tempSpaceChargeR2  ;
+     mDistortionMode =  tempDistortionMode ;
+     return(6) ; // No action if too few hits in the TPC   
+   }
+   if ( OuterTPCHits < MinOuterTPCHits ) {
+     // Restore settings for spacechargeR2
+     fSpaceChargeR2  =  tempfSpaceChargeR2 ;
+     SpaceChargeR2   =  tempSpaceChargeR2  ;
+     mDistortionMode =  tempDistortionMode ;
+     return(7) ; // No action if too few hits in the TPC   
+   }
 
    TGraphErrors gre(NHits,Xtrack,Ytrack,ErrorR,ErrorRPhi) ;  
 

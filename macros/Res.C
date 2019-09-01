@@ -258,3 +258,55 @@ void Res(const Char_t *select="x", const Char_t *name="sigma") {
 void Mu() {
   Res("x","mu");
 }
+//________________________________________________________________________________
+void DrawFitP(const Char_t *hitN = "SecRow3C", const Char_t *plot="mu:y", const Char_t *select = "i&&j", const Char_t *opt = "prof") {
+  Int_t NF = 0;
+  TSeqCollection *files = gROOT->GetListOfFiles();
+  if (! files) return;
+  Int_t nn = files->GetSize();
+  if (! nn) return;
+  TFile **FitFiles = new TFile *[nn];
+  TIter next(files);
+  TFile *f = 0;
+  TString Select(select);
+  while ( (f = (TFile *) next()) ) { 
+    TString F(f->GetName());
+    if (! F.Contains(hitN,TString::kIgnoreCase)) continue;
+    FitFiles[NF] = f; NF++;
+  }
+  TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
+  if (! c1 ) c1 = new TCanvas("c1","c1");
+  c1->Clear();
+  //  c1->SetTitle("Resolution versus Track Length");
+  c1->SetGrid(); //x(9);
+  //  c1->SetGridy(30);
+  TH1F *frame = 0;
+  frame = c1->DrawFrame(0.5,-0.1,45.5,0.1);
+  //    frame->SetTitle("Shift versus Track Length");
+  //    frame->SetYTitle("Sift");
+  //  frame->SetXTitle("Track Length (cm)                   ");
+  TLegend *leg = new TLegend(0.25,0.6,0.9,0.9,"");
+  Int_t c = 0;
+  for (int i = 0; i<NF; i++) {
+    c = i + 1;
+    if (c == 10) c = 11;
+    if (FitFiles[i]) { 
+      FitFiles[i]->cd();
+      TNtuple *FitP = (TNtuple *) gDirectory->Get("FitP");
+      if (! FitP) continue;
+      TString Opt(opt);
+      Opt += "same";
+      TString Plot(plot);
+      Plot += " >> Hist";
+      FitP->Draw(Plot,select,Opt);
+      TH1 *Hist = (TH1 *) gDirectory->Get("Hist");
+      Hist->SetMarkerColor(c); Hist->SetMarkerStyle(20); Hist->SetLineColor(c);
+      TString Title(gSystem->BaseName(FitFiles[i]->GetName()));
+      Title.ReplaceAll(".root","");
+      Title.ReplaceAll(hitN,"");
+      Title.ReplaceAll("GF","");
+      leg->AddEntry(Hist,Title);
+    }
+  }
+  leg->Draw();
+}
