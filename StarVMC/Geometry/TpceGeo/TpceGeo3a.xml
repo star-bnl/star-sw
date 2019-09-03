@@ -508,6 +508,9 @@
 	  <var name="deadzone" value="14"      comment="Extend deadzone before gating grid" />
 	  <var name="tofmax"   value="32.0E-6" comment="Increase maximum TOF for particles" />
 	</Fill>
+	<Fill name="TPCG" comment="Subversion 2 -- flags mixed iTPC / TPC year">
+	  <var name="version"  value="3.2"     comment="selector" />
+	</Fill>
         
 	<Use struct="TPCC"                                             />
         <Use struct="TPCG"    select="version"    value="TPCC_version" />
