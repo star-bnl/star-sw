@@ -51,6 +51,14 @@ TpceGeo2,  TpceGeo3a,  TpceGeo4, TpceGeo1, TpceGeo5, TpceGeo6
   <Init struct="tpcg" var="rmax"       value="207.77" />
 
 </Setup>
+<Setup name="TPCE32" onoff="on" comment="TPCE31 w/ sector 20 iTPC outer padrow numbering" module="TpceGeo3a"  simu="2">
+
+  <Init struct="tpcc" var="version"    value="3.2" />
+  <Init struct="tpcg" var="rmax"       value="207.77" />
+
+</Setup>
+
+
 <Setup name="TPCEv5" module="TpceGeo5" onoff="on" simu="2" comment="Version 5: implements full sensitivity for TPC gas volume">
   <Init struct="tpcc" var="misalign"   value="0" />
 </Setup>
