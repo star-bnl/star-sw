@@ -94,9 +94,10 @@ void doChopInstead(int argc, char *argv[]);
 
 int main(int argc, char *argv[])
 {
+#ifndef RTS_DISABLE_LOG
   rtsLogOutput(RTS_LOG_STDERR) ;
   rtsLogLevel((char *)WARN) ;
-
+#endif
   if(argc < 3) {
     displayHelp();
 
