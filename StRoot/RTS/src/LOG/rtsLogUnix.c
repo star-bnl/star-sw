@@ -59,19 +59,19 @@ static char cmd[1024] ;
 	Additionally, the destination  node:port as well as the log severity
 	level are COMMON (by design) to all threads.
 */
-
+#ifndef RTS_DISABLE_LOG
 int rtsLogOutput(int flag)
 {
 	output_flag = flag ;
 	return flag ;
 }
-
+#endif
 void rtsLogAddCmd(const char *cmd_in)
 {
 	strncpy(cmd,cmd_in,sizeof(cmd)-1) ;
 	return ;
 }
-
+#ifndef RTS_DISABLE_LOG
 int rtsLogAddDest(const char *host, int newport)
 {
 	/* mark as changed by hand */
@@ -88,7 +88,7 @@ int rtsLogAddDest(const char *host, int newport)
 
 	return 0 ;
 }
-
+#endif
 int rtsLogAddFile(char *fname)
 {
 	if(fdesc) fclose(fdesc) ;
