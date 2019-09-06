@@ -2104,7 +2104,7 @@ TString PCA(int Nmax, int debug) {
   Double_t p[nsca];
   TString delim=":";
   TString scas = (scastr.Length() ? scastr :
-                  "zdcx:zdcw:zdce:bbcx:bbcw:bbce:bbcyb:bbcbb:vpdx:vpde:vpdw");
+                  "zdcx:zdcw:zdce:bbcx:bbcw:bbce:bbcyb:bbcbb:vpdx:vpde:vpdw:zdcxnk:zdcwnk:zdcenk");
   scas += ":sc";
   TObjArray* scaA = scas.Tokenize(delim);
   int i,n,N1 = scaA->GetEntries();
@@ -2300,8 +2300,11 @@ void PrintResult(double scp, double escp, double sop, double esop,
 }
 
 /////////////////////////////////////////////////////////////////
-// $Id: Calib_SC_GL.C,v 2.7 2016/06/22 20:51:55 genevb Exp $
+// $Id: Calib_SC_GL.C,v 2.8 2019/09/06 15:29:12 genevb Exp $
 // $Log: Calib_SC_GL.C,v $
+// Revision 2.8  2019/09/06 15:29:12  genevb
+// Include no-killer ZDC scalers in PCA
+//
 // Revision 2.7  2016/06/22 20:51:55  genevb
 // PCA: delete classes for debug=0, create x hists for debug>1 only
 //
