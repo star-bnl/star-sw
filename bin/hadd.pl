@@ -20,13 +20,38 @@ my %ARG = (files => '*.root',
 	   option => ''
 	  );
 my @periods = ();
-my $all = 1;
+my $all = 0;
 if ($all) {
   @periods = ('All'   => {first => '0', second => '99999999', list => ''});
 } else {
-  @periods = ('RFF'   => {first => '12148026', second => '12149054', list => ''},
-	      'FF'    => {first => '12154050', second => '12159034', list => ''},
-	      'ZeroF' => {first => '12166021', second => '12166045', list => ''}
+#   @periods = ('RFF'   => {first => '12148026', second => '12149054', list => ''},
+# 	      'FF'    => {first => '12154050', second => '12159034', list => ''},
+# 	      'ZeroF' => {first => '12166021', second => '12166045', list => ''}
+# 	     );
+# Run XIX
+  @periods = (
+	      'production_19GeV_2019'                            => {first => '20056032', second => '20093036', list => ''}, #        2019-02-25      20:23:20        2019-04-03      11:16:40
+	      'production_14p5GeV_2019'                          => {first => '20094048', second => '20107026', list => ''}, #         2019-04-04      09:44:05        2019-04-17      12:45:56
+	      'production_7.3GeV_fixedTarget_2019'               => {first => '20107029', second => '20107029', list => ''}, #         2019-04-17      13:34:01        2019-04-17      13:34:01
+	      'production_14p5GeV_2019'                          => {first => '20107030', second => '20113041', list => ''}, #        2019-04-17      14:12:46        2019-04-23      14:26:57
+	      'production_7.3GeV_fixedTarget_2019'               => {first => '20113042', second => '20113048', list => ''}, #        2019-04-23      15:54:18        2019-04-23      17:22:27
+	      'production_14p5GeV_2019'                          => {first => '20113051', second => '20154013', list => ''}, #        2019-04-23      18:11:58        2019-06-03      11:37:46
+	      'production_7p7GeV_2019'                           => {first => '20154047', second => '20158026', list => ''}, #        2019-06-03      22:36:55        2019-06-07      14:51:00
+	      'production_3p85GeV_fixedTarget_2019'              => {first => '20158028', second => '20158028', list => ''}, #        2019-06-07      16:03:57        2019-06-07      16:03:57
+	      'production_7p7GeV_2019'                           => {first => '20158036', second => '20158036', list => ''}, #        2019-06-07      17:03:52        2019-06-07      17:03:52
+	      'production_3p85GeV_fixedTarget_2019'              => {first => '20158040', second => '20158042', list => ''}, #        2019-06-07      17:41:23        2019-06-07      17:48:34
+	      'production_7p7GeV_2019'                           => {first => '20158047', second => '20160022', list => ''}, #        2019-06-07      20:14:27        2019-06-09      11:41:14
+	      'production_3p85GeV_fixedTarget_2019'              => {first => '20160023', second => '20160027', list => ''}, #        2019-06-09      12:45:28        2019-06-09      13:44:07
+	      'production_7p7GeV_2019'                           => {first => '20160035', second => '20169025', list => ''}, #        2019-06-10      02:31:52        2019-06-18      12:30:19
+	      'production_7.3GeV_fixedTarget_2019'               => {first => '20169028', second => '20169055', list => ''}, #        2019-06-18      14:36:58        2019-06-19      01:36:03
+	      'production_7p7GeV_2019'                           => {first => '20169058', second => '20178014', list => ''}, #        2019-06-19      02:51:26        2019-06-27      10:23:40
+	      'production_9p2GeV_2019'                           => {first => '20179015', second => '20179028', list => ''}, #        2019-06-28      08:19:31        2019-06-28      14:32:40
+	      'production_4p59GeV_fixedTarget_2019'              => {first => '20179039', second => '20183005', list => ''}, #        2019-06-29      03:28:34        2019-07-02      05:39:51
+	      'production_9p2GeV_2019'                           => {first => '20183006', second => '20183007', list => ''}, #        2019-07-02      06:10:59        2019-07-02      06:17:04
+	      'production_4p59GeV_fixedTarget_2019'              => {first => '20183008', second => '20183025', list => ''}, #        2019-07-02      06:22:10        2019-07-02      13:16:09
+	      'production_9p2GeV_2019'                           => {first => '20183026', second => '20189017', list => ''}, #        2019-07-02      14:41:51        2019-07-08      10:37:18
+	      'production_31GeV_fixedTarget_2019'                => {first => '20189035', second => '20190024', list => ''}, #         2019-07-09      03:23:12        2019-07-09      14:35:52
+	      'production_AuAu200_2019'                          => {first => '20190042', second => '20193026', list => ''}  #         2019-07-09      19:15:24        2019-07-12      19:56:37
 	     );
 }
 while (@ARGV) {
@@ -51,7 +76,7 @@ foreach my $key (sort keys %$def) {
   push @tags, $t;
 }
 my $tags = join '|', @tags;
-print "found tags = $#tags : @tags   ==> $tags\n";
+print "found tags = $#tags : tags   ==> $tags\n";
 #if ($#tags < 0) {die "No tags found";}
 my $glob = $ARG{files}; print "glob = $glob\n"; 
 my $outn =$glob; $outn =~ s#\*##g; $outn =~ s#\.root##;
@@ -77,6 +102,8 @@ foreach my $file (@Files) {
   $f =~ s/st_//;
   $f =~ s/W_//;
   $f =~ s/tofcosmic_//;
+  $f =~ s/hlt_//;
+  $f =~ s/physics_//;
   my @ss = split /_/, $f; 
   $f = $ss[0]; # print " $file ==> $f\n";
   foreach my $r (@runXIbadList) {
