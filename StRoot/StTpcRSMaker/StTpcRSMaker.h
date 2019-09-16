@@ -19,14 +19,17 @@ using namespace units;
 #include "TF1F.h"
 #include "TH1.h"
 #include "TTree.h"
-#include "StTpcDb/StTpcDb.h"
+#include "StDbUtilities/StCoordinates.hh"
+#include "StDbUtilities/StTpcPadCoordinate.hh"
 #include "StMagF.h"
 #include "TArrayF.h"
 #include "TArrayI.h"
+// SCL
+#include "StPhysicalHelixD.hh"
+#include "StTpcDb/StTpcDb.h"
 class Altro;
 class StTpcdEdxCorrection;
 class StTpcDigitalSector;
-class HitPoint_t;
 class g2t_tpc_hit_st;
 class g2t_vertex_st;
 class StTpcCoordinateTransform;
@@ -34,6 +37,31 @@ struct SignalSum_t {
   Float_t      Sum;
   Short_t      Adc;
   Int_t        TrackId;
+};
+class StTpcRSSegment : public TObject {
+public:
+  StTpcRSSegment() {}
+  virtual ~StTpcRSSegment() {}
+  void Set(g2t_tpc_hit_st *tpc_hitC = 0, g2t_vertex_st *gver = 0, Int_t mode = 0);
+  Int_t indx;
+  Int_t TrackId;
+  Double_t s; // track length to current point
+  Double_t sMin, sMax;
+  g2t_tpc_hit_st *tpc_hitC;
+  StGlobalCoordinate   xyzG;
+  StTpcLocalSectorCoordinate coorLS;
+  StTpcLocalSectorDirection dirLS, BLS;
+  StTpcPadCoordinate Pad;	
+  StTpcLocalSectorCoordinate coorLSU; // upper row position
+  StTpcLocalSectorCoordinate coorLSL; // lower row position
+  StPhysicalHelixD track;
+  Int_t m_Mode;
+  Int_t charge;
+  static Int_t _debug; 
+  static void SetDebug(Int_t i) {_debug = i;};
+  static Int_t Debug() {return _debug;}
+  void Print(const Char_t *opt = "") const;
+  ClassDef(StTpcRSSegment,1)
 };
 class StTpcRSMaker : public StMaker {
  public:
@@ -85,13 +113,13 @@ class StTpcRSMaker : public StMaker {
   static Double_t InducedCharge(Double_t s, Double_t h, Double_t ra, Double_t Va, Double_t &t0);
   static Float_t  GetCutEle();
 #if defined(__CINT__) 
-  Bool_t TrackSegment2Propagate(g2t_tpc_hit_st *tpc_hitC, g2t_vertex_st *gver, HitPoint_t *TrackSegmentHits);
-  void   GenerateSignal(HitPoint_t *TrackSegmentHits,Int_t sector, Int_t rowMin, Int_t rowMax, Double_t sigmaJitterT, Double_t sigmaJitterX);
-  Double_t dEdxCorrection(HitPoint_t *TrackSegmentHits);
+  Bool_t TrackSegment2Propagate(g2t_tpc_hit_st *tpc_hitC, g2t_vertex_st *gver, StTpcRSSegment *TrackSegmentHits);
+  void   GenerateSignal(StTpcRSSegment *TrackSegmentHits,Int_t sector, Int_t rowMin, Int_t rowMax, Double_t sigmaJitterT, Double_t sigmaJitterX);
+  Double_t dEdxCorrection(StTpcRSSegment *TrackSegmentHits);
 #else
-  Bool_t TrackSegment2Propagate(g2t_tpc_hit_st *tpc_hitC, g2t_vertex_st *gver, HitPoint_t &TrackSegmentHits);
-  void   GenerateSignal(HitPoint_t &TrackSegmentHits, Int_t sector, Int_t rowMin, Int_t rowMax, Double_t sigmaJitterT, Double_t sigmaJitterX);
-  Double_t dEdxCorrection(HitPoint_t &TrackSegmentHits);
+  Bool_t TrackSegment2Propagate(g2t_tpc_hit_st *tpc_hitC, g2t_vertex_st *gver, StTpcRSSegment &TrackSegmentHits);
+  void   GenerateSignal(StTpcRSSegment &TrackSegmentHits, Int_t sector, Int_t rowMin, Int_t rowMax, Double_t sigmaJitterT, Double_t sigmaJitterX);
+  Double_t dEdxCorrection(StTpcRSSegment &TrackSegmentHits);
 #endif
   static TF1F     *fgTimeShape3[2];  //!
   static TF1F     *fgTimeShape0[2];   //!
@@ -130,7 +158,6 @@ class StTpcRSMaker : public StMaker {
   Double_t      mtauIntegrationX[2];  //! for TPX inner=0/outer=1
   Double_t      mtauCX[2];            //! -"- 
   Double_t    mLocalYDirectionCoupling[2][24][7]; //!
-  Double_t   msMin, msMax;            //!
   TArrayI    mNoTpcHitsAll;           //!
   TArrayI    mNoTpcHitsReal;          //!
   Int_t      mNSplittedHits;          //!
