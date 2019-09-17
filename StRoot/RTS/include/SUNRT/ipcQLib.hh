@@ -5,6 +5,8 @@
 
 #include <SUNRT/clock.h>
 
+struct msgbuf ;
+
 class ipcQClass {
 public:
 	ipcQClass(int id, int create=1, u_short node_id=0) ;
@@ -14,6 +16,8 @@ public:
 
 	int send(void *ptr, int bytes, int tmout) ;
 	int receive(void *ptr, int bytes, int tmout) ;
+	int send(struct msgbuf *msg, int bytes, int tmout) ;
+	int receive(struct msgbuf *msg, int bytes, int tmout) ;
 	int peek(void) ;
 
 	static int remove(int id, u_short node_id=0) ;
