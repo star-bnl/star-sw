@@ -2,7 +2,7 @@
 #define StPicoTrackCovMatrix_h
 
 // ROOT headers
-#include <TObject.h>
+#include "TObject.h"
 #include "StPicoDst.h"
 #ifdef  __TFG__VERSION__
 #include "StEvent/StDcaGeometry.h"
