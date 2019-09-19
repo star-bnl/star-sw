@@ -8,6 +8,8 @@
 #ifndef StPicoBEmcSmdPHit_h
 #define StPicoBEmcSmdPHit_h
 
+#include <limits>
+
 // ROOT headers
 #include "TObject.h"
 
