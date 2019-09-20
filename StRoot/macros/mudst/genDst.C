@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: genDst.C,v 1.5 2019/03/21 18:53:34 jeromel Exp $
+// $Id: genDst.C,v 1.6 2019/09/18 17:54:48 genevb Exp $
 // Author: G. Van Buren (BNL)
 //
 // Description:
@@ -198,6 +198,9 @@ void genDst(unsigned int First,
     muDstMaker.SetStatus("BTof*", 1);
     muDstMaker.SetStatus("Emc*", 1);
     muDstMaker.SetStatus("MTD*", 1);
+    muDstMaker.SetStatus("ETof*", 1);
+    muDstMaker.SetStatus("Epd*", 1);
+    muDstMaker.SetStatus("Fms*", 1);
 
     // EMCs
     StEEmcDbMaker* eemcDb = new StEEmcDbMaker;
@@ -368,6 +371,9 @@ void genDst(unsigned int Last,
 /////////////////////////////////////////////////////////////////////////////
 //
 // $Log: genDst.C,v $
+// Revision 1.6  2019/09/18 17:54:48  genevb
+// Acivate additional branches by default
+//
 // Revision 1.5  2019/03/21 18:53:34  jeromel
 // Added ATTENTION message
 //
