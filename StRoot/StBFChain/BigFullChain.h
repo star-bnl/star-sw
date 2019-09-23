@@ -268,15 +268,14 @@ Bfc_st BFC[] = { // standard chains
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
   {"MC.y2019","","","MC2019",                                                              "","","",kFALSE},
-  {"MC2019.Ideal","","","MC.2019,MC.Sti,vmc,NewTpcAlignment"                              ,"","","",kFALSE},
-  {"MC2019",      "","","MC.2019,sdt20190401,MC.Sti,vmc,NewTpcAlignment"                  ,"","","",kFALSE},
+  {"MC2019.Ideal","","","MC.2019,MC.Sti,vmc,NewTpcAlignment,ExB"                          ,"","","",kFALSE},
+  {"MC2019",      "","","MC.2019,sdt20190401,MC.Sti,vmc,NewTpcAlignment,ExB"              ,"","","",kFALSE},
   {"MC2019a"  ,"","","MC.2019a",                                                           "","","",kFALSE},
   {"MC.2019a","","","y2019a,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna,MC.Sti,NewTpcAlignment,vmc"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,ETofSim,etofa,tags,emcY2,evout,IdTruth"
    ",geantout,big,MiniMcMk,Sti,NewTpcAlignment,AgML",                                     "","","/",kFALSE},
   {"MC.y2019a","","","MC2019a",                                                            "","","",kFALSE},
-  {"MC.Sti",   "","","Sti,StiKFVertex,geantOut,noRunco,noHistos,"
-   "picoWrite,PicoVtxVpd,McTpcAna,tags"                                                   ,"","","",kFALSE},
+  {"MC.Sti",   "","","Sti,geantOut,noRunco,noHistos,picoWrite,PicoVtxVpd,McTpcAna,tags"   ,"","","",kFALSE},
   {"MC.StiCA",   "","","MC.Sti,StiCA"                                                     ,"","","",kFALSE},
   {"XC",          "","","TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,"
    "OSpaceZ2,OGridLeak3D,CorrX,tpcDB,TpcHitMover"
@@ -287,14 +286,6 @@ Bfc_st BFC[] = { // standard chains
   {"XC2018",      "","","y2018,XC,sdt20180426.122000",                                     "","","",kFALSE},
   {"XC2019",      "","","y2019,XC,sdt20190301",                                            "","","",kFALSE},
   {"XC2019I",     "","","y2019,XC",                                                        "","","",kFALSE},
-  {"HLT2017",     "","","y2017,TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,"
-   "OSpaceZ2,OGridLeak3D,CorrX,tpcDB,TpcHitMover"
-   ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,sdt20170426,StiCA,HLTCA,Idst,BAna"
-   ,                                                                                       "","","",kFALSE},
-  {"HLT2018",      "","","y2018,TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,"
-   "OSpaceZ2,OGridLeak3D,CorrX,tpcDB,TpcHitMover"
-   ",bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,sdt20180426.122000,StiCALib,HLTCA,Idst,BAna"       
-   ,                                                                                       "","","",kFALSE},
   {"RC----------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"RC.y2000"        ,"","","p2000,VFMinuit,CMuDst,NosvtIT,NossdIT,NosstIT"               ,"","","",kFALSE},
   {"RC.y2001"        ,"","","P2001a,VFMinuit,ZDCvtx,CMuDst,NosvtIT,NossdIT,NosstIT"       ,"","","",kFALSE},
@@ -1820,8 +1811,6 @@ Bfc_st BFC[] = { // standard chains
   {"StiCA"    ,"","","Sti,StiCALib",                                    "","libEG","Sti+CA tracker",kFALSE},
   {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,Stu,StEvent,StDbT,TpcIT,compend,sim_T,tbutil,TMVARank"
    ,"StiMaker",                               "StiUtilities,StKFVertexMaker,StiMaker","Sti tracker",kFALSE},
-  {"HLTCA","","Sti","Sti,-Stv,StiLib,StiLibs,TPCCA,TMVARank","StHLTCAMaker","StiMaker,StHLTCAMaker"
-   ,                                                                           "HLT reconstruction",kFALSE},
   {"Stx","","","VMCAppl,TPCCA" ,"StxMaker",       "libEve,GenFit,StxMaker","eXpress Reconstruction",kFALSE},
   {"StxCA","","","Stx"                                 ,"","","eXpress Reconstruction with CA only",kFALSE},
   {"KFVertex",""  ,"Stx","-VFMinuit,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2,TMVARank"
