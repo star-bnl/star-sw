@@ -36,7 +36,7 @@ class l3CoordinateTransformer{
   l3CoordinateTransformer() ;  // Init parameters and variables
   virtual ~l3CoordinateTransformer() ; // Delete variables
 
-  int LoadTPCLookupTable(char * filename = "/L3/etc/map.bin");
+  int LoadTPCLookupTable(const char * filename = "/L3/etc/map.bin");
   
   // Memberfunctions
   // raw -> global

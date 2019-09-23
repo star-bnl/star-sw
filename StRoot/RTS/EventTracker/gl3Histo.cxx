@@ -15,7 +15,7 @@
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //
 //####################################################################################
-gl3Histo::gl3Histo ( char iId[10], char iTitle[100], 
+gl3Histo::gl3Histo (const char iId[10],const char iTitle[100], 
       int iNBins,  double iXMin, double iXMax ) {
    info = 0 ;
    if ( iNBins < 0 ) {

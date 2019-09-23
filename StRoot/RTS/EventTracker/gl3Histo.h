@@ -29,7 +29,7 @@ public:
    double*   info ;
 
 public:
-   gl3Histo ( char iId[10]="id", char iTitle[100]="name", 
+   gl3Histo (const char iId[10]="id",const char iTitle[100]="name", 
                    int iNBins=100,  double iXMin=0., double iXMax=100. ) ;
    ~gl3Histo ( ) ;
    int   Fill   (double x, double weight=1) ;

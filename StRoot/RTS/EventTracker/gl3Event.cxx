@@ -208,7 +208,7 @@ void gl3Event::readClustersFromEvpReader(daqReader *rdr, int sector)
      while(dd->iterate()) {
        ncld++;
        
-       int padrow = dd->row;
+       //yf       int padrow = dd->row;
        int sec = dd->sec;
        
        for(u_int i=0;i<dd->ncontent;i++) {
