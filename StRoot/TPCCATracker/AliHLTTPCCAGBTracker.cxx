@@ -319,6 +319,15 @@ void AliHLTTPCCAGBTracker::FindTracks()
     Stopwatch timer;
     AliHLTTPCCATracker &slice = fSlices[iSlice];
     slice.Reconstruct();
+//std::cout<<" . iSlice: "<<iSlice<<";   nTracks: "<<slice.NTracks()<<"\n";
+//const AliHLTTPCCAParam &param = slice.Param();
+//std::cout<<" ... Param: NInnerRows: "<<param.NInnerRows()<<";   NTpcRows: "<<param.NTpcRows()<<";   Alpha: "<<param.Alpha()<<"\n";
+//std::cout<<" ...        DAlpha: "<<param.DAlpha()<<";   CosAlpha: "<<param.CosAlpha()<<"\n";
+//std::cout<<" ...        AngleMin: "<<param.AngleMin()<<";   AngleMax: "<<param.AngleMax()<<"\n";
+//std::cout<<" ...        RMin: "<<param.RMin()<<";   RMax: "<<param.RMax()<<";   ZMin: "<<param.ZMin()<<";   ZMax: "<<param.ZMax()<<"\n";
+//std::cout<<" ...        ErrZ: "<<param.ErrZ()<<";   ErrX: "<<param.ErrX()<<";   ErrY: "<<param.ErrY()<<"\n";
+//std::cout<<" ...        Bz: "<<param.Bz()<<";   TrackConnectionFactor: "<<param.TrackConnectionFactor()<<";   TrackChiCut: "<<param.TrackChiCut()<<";   TrackChi2Cut: "<<param.TrackChi2Cut()<<"\n";
+//std::cout<<" ...        MaxTrackMatchDRow: "<<param.MaxTrackMatchDRow()<<";   HitPickUpFactor: "<<param.HitPickUpFactor()<<"\n";
     timer.Stop();
     fStatTime[0] += timer.RealTime();
     fStatTime[1] += slice.Timer( 0 );
@@ -483,11 +492,14 @@ void AliHLTTPCCAGBTracker::Merge()
 //  int aaa;
 //  std::cin>>aaa;
   // ---
+//  SaveHitsInFile("testHits.dat");
+  // ---
   int newNTr(0), newNHits(0);
   for ( int itr = 0; itr < out.NTracks(); itr++ ) {
     const AliHLTTPCCAMergedTrack &track = out.Track( itr );
     if( track.Used() ) continue;
     newNTr++;
+    if( track.IsLooper() && track.LpPrevNb() == -1 ) newNTr++;
     newNHits += track.NClusters();
   }
   // ---
@@ -505,7 +517,7 @@ void AliHLTTPCCAGBTracker::Merge()
   fTracks = new AliHLTTPCCAGBTrack[newNTr];
   fNTracks = 0;
 //  std::cout<<" --- out.NTrackClusters(): "<<out.NTrackClusters()<<";   newNHits: "<<newNHits<<" - ok\n";
-//  std::cout<<" --- out.NTracks(): "<<out.NTracks()<<";   newNTr: "<<newNTr<<"\n";
+//  std::cout<<" --- out.NTracks(): "<<out.NTracks()<<";   newNTr: "<<newNTr<<";   newNHits: "<<newNHits<<"\n";
 
   int nTrackHits = 0;
 
@@ -517,6 +529,7 @@ void AliHLTTPCCAGBTracker::Merge()
       continue;
     }
 //    if( !track.IsLooper() ) continue;
+//std::cout<<" - itr: "<<itr<<";   nHits: "<<track.NClusters()<<"\n";
     if( track.IsLooper() ) {
       if( track.LpPrevNb() == -1 ) {
 	int iSegment = 0;
@@ -528,7 +541,7 @@ void AliHLTTPCCAGBTracker::Merge()
 	trackGB.SetAlpha( track.InnerAlpha() );
 	trackGB.SetDeDx( 0 );
 	if( track.IsMerged() ) trackGB.SetMerged();
-//	if( track.LpNextNb() != -1 ) trackGB.SetLooper( true );
+	if( track.LpNextNb() != -1 ) trackGB.SetLooper();
 	int icl_start = 0;
 	int icl_end = track.NClusters();
 	int iter = 1;
@@ -540,10 +553,21 @@ void AliHLTTPCCAGBTracker::Merge()
 	  unsigned int iRow   = iDsrc.Row();
 	  unsigned int iClu   = iDsrc.Cluster();
 	  fTrackHits[nTrackHits + icl0] = fFirstSliceHit[iSlice] + fSlices[iSlice].ClusterData().RowOffset( iRow ) + iClu;
-	  fTrackHitsSegmentsId[nTrackHits + icl0] = iSegment;
+//	  fTrackHitsSegmentsId[nTrackHits + icl0] = iSegment;
+	  fTrackHitsSegmentsId[nTrackHits + icl0] = fNTracks + iSegment + 1;
 	}
 	int nTrackHitsTmp = track.NClusters();
 	int nextTr = track.LpNextNb();
+	// ---
+	AliHLTTPCCAGBTrack &trackGBseg = fTracks[fNTracks + iSegment + 1];
+	trackGBseg.SetFirstHitRef( nTrackHits );
+	trackGBseg.SetInnerParam( track.InnerParam() );
+	trackGBseg.SetOuterParam( track.OuterParam() );
+	trackGBseg.SetAlpha( track.InnerAlpha() );
+	trackGBseg.SetDeDx( 0 );
+	trackGBseg.SetNHits( nTrackHitsTmp );
+	trackGBseg.SetLooperClone();
+	// ---
 
 	while( nextTr != -1 ) {
 	  const AliHLTTPCCAMergedTrack &trackNext = out.Track( nextTr );
@@ -560,8 +584,19 @@ void AliHLTTPCCAGBTracker::Merge()
 	    unsigned int iRow   = iDsrc.Row();
 	    unsigned int iClu   = iDsrc.Cluster();
 	    fTrackHits[nTrackHits + nTrackHitsTmp + icl0] = fFirstSliceHit[iSlice] + fSlices[iSlice].ClusterData().RowOffset( iRow ) + iClu;
-	    fTrackHitsSegmentsId[nTrackHits + nTrackHitsTmp + icl0] = iSegment;
+//	    fTrackHitsSegmentsId[nTrackHits + nTrackHitsTmp + icl0] = iSegment;
+	    fTrackHitsSegmentsId[nTrackHits + nTrackHitsTmp + icl0] = fNTracks + iSegment + 1;
 	  }
+	  // ---
+	  AliHLTTPCCAGBTrack &trackGBseg1 = fTracks[fNTracks + iSegment + 1];
+	  trackGBseg1.SetFirstHitRef( nTrackHits + nTrackHitsTmp );
+	  trackGBseg1.SetInnerParam( trackNext.InnerParam() );
+	  trackGBseg1.SetOuterParam( trackNext.OuterParam() );
+	  trackGBseg1.SetAlpha( trackNext.InnerAlpha() );
+	  trackGBseg1.SetDeDx( 0 );
+	  trackGBseg1.SetNHits( trackNext.NClusters() );
+	  trackGBseg1.SetLooperClone();
+	  // ---
 	  nTrackHitsTmp += trackNext.NClusters();
 	  nextTr = trackNext.LpNextNb();
 	};
@@ -569,6 +604,8 @@ void AliHLTTPCCAGBTracker::Merge()
 	trackGB.SetNHits( nTrackHitsTmp );
 	nTrackHits += nTrackHitsTmp;
 	fNTracks++;
+iSegment++;
+	fNTracks += iSegment;
       }
       continue;
     }

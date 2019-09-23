@@ -79,6 +79,7 @@ class AliHLTTPCCAGBTrack
     bool IsReco() const { return tReco; }
 
     void SetLooper() { tIsLooper++; }
+    void SetLooperClone() { tIsLooper = -1; }
     int IsLooper() { return tIsLooper; }
     int IsLooper() const { return tIsLooper; }
     // ---
