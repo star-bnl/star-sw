@@ -135,7 +135,7 @@ More detailed: 				<br>
 /// But zero errors could to unpredicted problems
 /// Now minimal possible error is 1 micron
 static const float MIN_VTX_ERR2 = 1e-4*1e-4;
-enum { kHitTimg,kGloTimg,kVtxTimg,kPriTimg,kFilTimg,kHLTCATimg};
+enum { kHitTimg,kGloTimg,kVtxTimg,kPriTimg,kFilTimg};
 
 void CountHits();
 ClassImp(StiMaker)
@@ -213,7 +213,7 @@ Int_t StiMaker::Finish()
   StiTimer::Clear();
 
   if (mTimg[0]) {
-    static const char *timg[] = {"HitLoa","GlobFnd","VtxFnd","PriFnd","FilFnd","HLTCA",0};
+    static const char *timg[] = {"HitLoa","GlobFnd","VtxFnd","PriFnd","FilFnd",0};
     for (int i=0;timg[i];i++) {
       Info("Timing","%s(%d) \tCpuTime = %6.2f seconds,\tPerEvent = %g seconds"
       ,timg[i],mTimg[i]->Counter(),mTimg[i]->CpuTime()
@@ -464,14 +464,6 @@ Int_t StiMaker::Make()
   if (mMaxTimes) _hitLoader->setMaxTimes(mMaxTimes);
   if (mTimg[kHitTimg]) mTimg[kHitTimg]->Stop();
   _seedFinder->reset();
-  StMaker *HLT = GetMaker("HLTCA");
-  if (HLT) {
-    //
-    if (mTimg[kHLTCATimg]) mTimg[kHLTCATimg]->Start(0);
-    HLT->Make();
-    if (mTimg[kHLTCATimg]) mTimg[kHLTCATimg]->Stop();
-  }
-  
   iAnz = MakeGlobalTracks(event);
   if (iAnz) {MyClear(); return iAnz;}
   CountHits();
@@ -743,7 +735,7 @@ void StiMaker::FinishTracks (int gloPri)
  StiTrackContainer* tkV  = StiToolkit::instance()->getTrackContainer();
  if (!tkV) return;
 
- int nTk=0,nNodes=0,nInside=0,nHits=0;
+ int nTk=0,nNodes=0,nHits=0;
  
    for (int itk=0; itk<(int)tkV->size(); itk++)
    {
@@ -752,7 +744,7 @@ void StiMaker::FinishTracks (int gloPri)
      nTk++;
      StiKTNIterator tNode = track->begin();
      StiKTNIterator eNode = track->end();
-     nNodes=0;nInside=0;nHits=0;
+     nNodes=0;nHits=0;
      for (;tNode!=eNode;++tNode) 
      {
 	StiKalmanTrackNode *node = &(*tNode);
