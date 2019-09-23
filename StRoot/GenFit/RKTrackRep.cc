@@ -2384,7 +2384,7 @@ double RKTrackRep::Extrap(const DetPlane& startPlane,
       isAtBoundary = true;
 
 
-    if (debugLvl_ > 0) {
+    if (debugLvl_ > 2) {
       debugOut<<"RKSteps \n";
       for (std::vector<RKStep>::iterator it = RKSteps_.begin(); it != RKSteps_.end(); ++it){
         debugOut << "stepSize = " << it->matStep_.stepSize_ << "\t";
