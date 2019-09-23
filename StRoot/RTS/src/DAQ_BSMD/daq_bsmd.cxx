@@ -317,9 +317,9 @@ daq_dta *daq_bsmd::handle_ped_rms(int rdo, int is_ped)
 
 	for(int r=start_r;r<=stop_r;r++) {	
 
-		int s_new, r_new ;
+	  int s_new; // yf , r_new ;
 		s_new = bsmd_old_to_new_map[r].new_sec ;
-		r_new = bsmd_old_to_new_map[r].new_rdo ;
+		//yf		r_new = bsmd_old_to_new_map[r].new_rdo ;
 
 		want_sec[s_new] = 1 ;
 	}

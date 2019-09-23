@@ -136,7 +136,7 @@ daq_dta *daq_btow::handle_raw()
 	char *from, *st ;
 	int bytes ;
 	char str[256] ;	
-	char *full_name = "?" ;	// just a dummy...
+	char *full_name; //yf = "?" ;	// just a dummy...
 
 	from = 0 ;
 	full_name = "?" ;

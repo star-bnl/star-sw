@@ -8,10 +8,10 @@
 #include <DAQ_READER/daq_det.h>
 
 const struct hdrs {
-	char *emcp ;
-	char *secp ;
-	char *rbp ;
-	char *adc ;
+	const char *emcp ;
+	const char *secp ;
+	const char *rbp ;
+	const char *adc ;
 } hdrs[2] = {
 	{ CHAR_EMCP, CHAR_EMCSECP, CHAR_EMCRBP, CHAR_EMCADCR },
 	{ CHAR_EECP, CHAR_EECSECP, CHAR_EECRBP, CHAR_EECADCR }

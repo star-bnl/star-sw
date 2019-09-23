@@ -313,7 +313,7 @@ daq_dta  *daq_det::put(const char *bank,int c1, int c2, int c3, void *p1, void *
 
 
 // helpers
-int checkBank(char *in, char *expect) 
+int checkBank(const char *in,const  char *expect) 
 { 
 	char buff[12] ;
 

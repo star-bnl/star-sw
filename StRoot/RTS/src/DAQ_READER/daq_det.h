@@ -33,7 +33,7 @@ class daqReader ;
 class daq_det ;
 
 // helpers
-extern int checkBank(char *in, char *expect) ;
+extern int checkBank(const char *in,const  char *expect) ;
 extern int *legacyDetp(int rts_id, char *datap) ;
 
 
