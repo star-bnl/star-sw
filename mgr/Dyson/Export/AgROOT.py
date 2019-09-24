@@ -876,11 +876,17 @@ class Detector( Handler ):
         self.setups.add( setup )
 
     def startElement(self, tag, attr ):
+        global document
         self.name    = attr.get('name', None)
         self.comment = attr.get('comment', None)
- 
-        document.head( '#ifndef __%s_CONFIG__' % self.name )
-        document.head( '#define __%s_CONFIG__' % self.name )
+
+        mymod   = document.GetModule()
+        myguard = '__%s_%s__'% (mymod, self.name)
+         
+        #document.head( '#ifndef __%s_CONFIG__' % self.name )
+        #document.head( '#define __%s_CONFIG__' % self.name )
+        document.head( '#ifndef %s' % myguard )
+        document.head( '#define %s' % myguard )        
 
         document.impl( '#include "StarVMC/StarGeometry/%s.h"\n\n' % document.agmodule )
         document.impl( '#include "StMessMgr.h"\n' )
