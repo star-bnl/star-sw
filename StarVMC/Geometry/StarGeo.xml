@@ -2,6 +2,47 @@
 
   <StarGeometry default="y2016" >
 
+    <!-- 
+      This one can stay the same
+	 F forward
+	 S silicon
+	 T tracking
+	 M module
+
+      sTGC geometry needs to be updated
+         S small
+	 T thin
+	 G gap
+	 C chamber
+    -->
+ 
+  <Geometry tag="dev2021" comment="development tag for the forward star upgrade">
+    <Construct sys="cave" config="CAVE06"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDon"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="scon" config="SCON14"  />
+    <!--Construct sys="pipe" config="PIPE12"-->
+    <Construct sys="pipe" config="PIPE12ft" />
+    <Construct sys="targ" config="TARGv1"  /> <!-- fixed target geometry -->
+    <Construct sys="tpce" config="TPCEv6"  />
+    <Construct sys="btof" config="BTOFv8"  />
+    <Construct sys="vpdd" config="VPDD08"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMin"  />
+    <Construct sys="epdm" config="EPDMv1"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD16"  />
+    <Construct sys="fstm" config="FSTMv1" />
+    <Construct sys="stgm" config="STGCv1" />
+    <!-- Construct sys="etof" config="ETOFv14f"  -->
+    <Construct sys="wcal" config="WCALv1" simu="1" />
+    <Construct sys="hcal" config="HCALv1" simu="1" />
+    <Construct sys="plat" config="PLATon" simu="2" />
+  </Geometry>
+
+
 <!-- y2018 series geometry tags -->
   <Geometry tag="y2019"   check="false" comment="Y2019 rough cut geometry">
 
