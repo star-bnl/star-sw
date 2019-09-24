@@ -1,6 +1,6 @@
 <Document file="StarVMC/Geometry/HcalGeo/HcalGeoF.xml">
 
-  <Module name="HcalGeoF" comment="HCAL at FermiTBF"  >
+  <Module name="HcalGeo0b" comment="HCAL at FermiTBF"  >
     <Author name="Prashanth S (KSU)" />
     <Created date="12/30/2013" />
 
