@@ -19,7 +19,7 @@
   Call GsTPar( ag_imed, 'BCUTM', #1_BCUTM );  
 </Replace>
 
-<Module name="WCALGEO0" comment=" is the Forward Calorimeter System WALL EM Calorimeter "  >
+<Module name="WCALGEO1" comment=" is the Forward Calorimeter System WALL EM Calorimeter "  >
 
   <Created date="   10 Aug 2018 "  />
   <Author name="Akio Ogawa"  />
