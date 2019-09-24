@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.34 2019/08/28 16:57:59 jwebb Exp $
+* $Id: xgeometry.age,v 1.35 2019/09/24 21:38:43 jwebb Exp $
 
 
 
@@ -137,9 +137,9 @@ replace [exe FPDM03;] with [; "forward pion detector "; FPDM=on; FpdmConfig  = 3
 replace [exe FPDM04;] with [; "forward pion detector "; FPDM=on; FpdmConfig  = 4; fpdm_addr=SETUP_FPDM04(); ]
 
 replace [exe HCALof;] with [; "HCAL off"; HCAL=off; HcalConfig=0; ]
-replace [exe HCALv0;] with [; "HCAL on "; HCAL=on;  HcalConfig=0; hcal_addr = SETUP_HCALv0();]
-replace [exe HCALv1;] with [; "HCAL on "; HCAL=on;  HcalConfig=1; hcal_addr = SETUP_HCALv1();]
-replace [exe HCALvF;] with [; "HCAL on "; HCAL=on;  HcalConfig=15; hcal_addr = SETUP_HCALvF();]
+replace [exe HCAL00;] with [; "HCAL on "; HCAL=on;  HcalConfig=0; hcal_addr = SETUP_HCAL00();]
+replace [exe HCAL01;] with [; "HCAL on "; HCAL=on;  HcalConfig=1; hcal_addr = SETUP_HCAL01();]
+replace [exe HCAL0F;] with [; "HCAL on "; HCAL=on;  HcalConfig=15; hcal_addr = SETUP_HCAL0F();]
 
 replace [exe FTSDof;] with [; "FTSD off"; FTSD=off; FtsdConfig=0; ]
 replace [exe FTSDv0;] with [; "FTSD on" ; FTSD=on ; FtsdConfig=0; ftsd_addr = SETUP_FTSDv0();]
@@ -1431,7 +1431,7 @@ REPLACE [exe dev2016;] with ["Y2016 development tag";
     exe DTUB01;      "DTUB";
     exe PSUP01;      "1st version of pixl supports";
     exe FGTDv56;     "12 disk FGT";
-    exe HCALv1;      "HCAL prototype";
+    exe HCAL01;      "HCAL prototype";
 
 ];
 
@@ -1444,7 +1444,7 @@ REPLACE [exe dev15a;] with ["Y2014 first cut geometry";
 REPLACE [exe dev15b;] with ["Y2014 first cut geometry";
    exe MAPGon;
     exe y2014a;      "Baseline is y2014a";
-    exe HCALv1;      "Naked HCAL";
+    exe HCAL01;      "Naked HCAL";
 ]
 
 REPLACE [exe dev2020;] with ["DEV 2020 first cut";
@@ -1712,7 +1712,10 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
   Integer :: fpdm_addr=0,   SETUP_FPDM00, SETUP_FPDM01, SETUP_FPDM02,
                             SETUP_FPDM03, SETUP_FPDM04
 
-  Integer :: hcal_addr=0,   SETUP_HCALv0, SETUP_HCALv1, SETUP_HCALv2, SETUP_HCALvF
+  Integer :: hcal_addr=0,   SETUP_HCAL00, SETUP_HCAL01, SETUP_HCAL0F
+  Integer ::                SETUP_HCALxx, SETUP_HCALv1
+
+
 
   Integer :: ftsd_addr=0,   SETUP_FTSDv0 "TODO"
 
@@ -2519,6 +2522,8 @@ If LL>0
   case y2019 { y2019: y2019 first cut geometry; Geom =        'y2019     '; call geom_y2019;} 
   case y2019a { y2019: y2019a production release; Geom =        'y2019a    '; call geom_y2019a;} 
 
+  case dev2021 { dev2021:  First cut forward upgrades; Geom =        'dev2021   '; call geom_dev2021;} 
+
   Case ftsver1  { y2017 : y2017 baseline w/ ids and fts v1;     Geom = 'ftsver1   '; call geom_ftsver1;}
   Case ftsver2  { y2017 : y2017 baseline w/ ids and fts v2;     Geom = 'ftsver2   '; call geom_ftsver2;}
   Case ftsver3  { y2017 : y2017 baseline w/ ids and fts v3;     Geom = 'ftsver3   '; call geom_ftsver3;}
@@ -2570,7 +2575,7 @@ If LL>0
 
    MFLD = on;
    exe CAVE04
-   exe HCALvF
+   exe HCAL0F
 
 
 
@@ -4062,46 +4067,6 @@ c  }
       call csjcal(scon_addr,0, 0,0,0,0,0, 0,0,0,0,0)
    ENDIF
 
-c  If (SVTT) {
-c    call AgDETP new ('SVTT')
-c    if (nSvtLayer < 7)     call AgDETP add ('svtg.nlayer=',   nSvtLayer,1)
-c    if (nSvt1stLayer > 1)  call AgDETP add ('svtg.nmin=',     nSvt1stLayer,1)
-c    if (PipeConfig >= 4)   call AgDETP add ('svtg.ifMany=',     1,1)
-c    if (nSvtVafer > 0)     call AgDETP add ('svtl(3).nwafer=',nSvtVafer,1)
-c    if (svtWaferDim > 0)           call AgDETP add ('swca.WaferWid=', svtWaferDim,1)
-c    if (svtWaferDim > 0)           call AgDETP add ('swca.WaferLen=', svtWaferDim,1)
-c    if (.not.svtWater)     call AgDETP add ('swam.Len=',       0, 1)
-
-c Take care of the correction level and call the appropriate constructor:
-c
-c   This applies to the newer versions of the svt code:
-c   we can now switch to a better description of the cone
-c   material (copper cables) thanks to a new measurement by
-c   Dave Lynnc
-c
-c   call AgDETP add ('svtg.ConeVer=',ConeConfig ,1) ! could have more copper on the cone
-c
-c Optionally, switch to a larger inner shield, AND smaller beampipe support
-c Or, pick a shield that is slighly bigger outside according to Lilian observation
-c   if(SvshConfig>0) call AgDETP add ('svtg.SupportVer=',SvshConfig ,1)
-c   call AgDETP add ('svtg.Config=',SvttConfig ,1)
-c
-c Ugly, but I Do not want to hash function pointers in Fortran:
-c
-c   IF SvttConfig== 0 {  CONSTRUCT svttgeo;   }
-c   IF SvttConfig== 1 {  CONSTRUCT svttgeo1;  }
-c   IF SvttConfig== 2 {  CONSTRUCT svttgeo2;  }
-c   IF SvttConfig== 3 {  CONSTRUCT svttgeo3;  }
-c   IF SvttConfig== 4 {  CONSTRUCT svttgeo4;  }
-cc  IF SvttConfig== 5 {  CONSTRUCT svttgeo5;  }
-cc  IF SvttConfig== 6 {  CONSTRUCT svttgeo6;  }
-c   IF SvttConfig== 7 {  CONSTRUCT svttgeo7;  }
-c   IF SvttConfig== 9 {  CONSTRUCT svttgeo9;  }
-c   IF SvttConfig==10 {  CONSTRUCT svttgeo10; }
-c   IF SvttConfig>=11 {  CONSTRUCT svttgeo11; }
-c
-c }!!end SVTT
-
    IF (svtt_addr.gt.0) THEN
       call csjcal(svtt_addr,0, 0,0,0,0,0, 0,0,0,0,0)
    ENDIF
@@ -4114,43 +4079,11 @@ c }!!end SVTT
 * in the gas density. The patch for this is activated here: (was: if(CorrNum>=3) )
 
 
-
-c  if (TPCE)  {
-* Back in July 2003 Yuri has discovered the discrepancy
-* in the gas density. The patch for this is activated here: (was: if(CorrNum>=3) )
-c
-c    call AgDETP new('TPCE');
-c
-cc   if (DensConfig >0) {        Call AgDETP add ('tpcg.gasCorr=',2 ,1);     }
-c
-c    if (TpceConfig==1) {        CONSTRUCT tpcegeo;}
-c
-c    if (TpceConfig==2) {        CONSTRUCT tpcegeo1; }
-c    if (TpceConfig==3) {        CONSTRUCT tpcegeo2; }
-c    if (TpceConfig==4) {
-c    if ( RmaxConfig>0) {        Call AgDetp add ('tpcg.rmax=',207.77,1); }
-c                                CONSTRUCT tpcegeo3
-c                       }
-c
-c
-cc   IF TpcxConfig==1   {                                                    CONSTRUCT TpcxGeo1;  }
-c    IF TpcxConfig==2   {                                                    CONSTRUCT TpcxGeo2;  }
-c    IF TpceConfig==31 {         Call AgDETP add('tpcc.version=', 3.1, 1 );  CONSTRUCT TpceGeo3a; }
-c
-c  }
-
    IF (tpce_addr.gt.0) THEN
       CALL csjcal(tpce_addr,0, 0,0,0,0,0, 0,0,0,0,0)
    ENDIF
 
 
-c  if (ftpc) then
-c       if(FtpcConfig==0) {CONSTRUCT ftpcgeo;}
-c       if(FtpcConfig==1) {CONSTRUCT ftpcgeo1;}
-c       and look at the support pieces, was: if(CorrNum==0)
-c       if(SupoConfig==0)  {CONSTRUCT supogeo;}
-c       if(SupoConfig==1)  {CONSTRUCT supogeo1;}
-c  endif
    IF (ftpc_addr.gt.0) THEN
       Call CsJcal(ftpc_addr,0, 0,0,0,0,0, 0,0,0,0,0);
    ENDIF
@@ -4161,31 +4094,10 @@ c  endif
 
 
 * FTPC readout electronics barrel
-c  if (FTRO) {CONSTRUCT ftrogeo;}
    IF (ftro_addr.gt.0) THEN
       Call CsJcal(ftro_addr,0, 0,0,0,0,0, 0,0,0,0,0);
    ENDIF
 
-
-* - tof system should be on (for year 2):      DETP BTOF BTOG.choice=2
-c  If (BTOF) {
-c    write(*,*) 'BTOF'
-c    call AgDETP new ('BTOF')
-c    call AgDETP add ('btog.choice=',BtofConfig,1)
-c X.Dong
-c    if(Itof>5) {
-c        call AgDETP add ('btog.X0=',tofX0,1)
-c        call AgDETP add ('btog.Z0=',tofZ0,1)
-c    }
-c X.Dong.end
-c     IF (Itof=1)  write(*,*) '*****  ATTENTION : OLD VERSION OF BTOF NOT IMPLEMENTED - NO TOF CREATED *****'
-c     IF Itof=2 {  CONSTRUCT btofgeo2; }
-c     IF Itof=4 {  CONSTRUCT btofgeo4; }
-c     IF Itof=5 {  CONSTRUCT btofgeo5; }
-c     IF Itof=6 {  CONSTRUCT btofgeo6; }     !X.Dong + F.Geurts
-c     IF Itof=7 {  CONSTRUCT btofgeo7; }     !F.Geurts fixes to sensitive volumes
-c     IF Itof=8 {  CONSTRUCT btofgeo8; }
-c  }
 
    IF (btof_addr.gt.0) THEN
       CALL CsJcal(btof_addr,0, 0,0,0,0,0, 0,0,0,0,0)
@@ -4199,45 +4111,9 @@ c  }
 
 
 ********************* Vertex Position Detector *******************
-c   If (LL>0 & VPDD) then
-c     call AgDETP new ('VPDD')
-c     call AgDETP add ('vpdv.vpdConfig=',VpddConfig,1);
-!    if(VpddConfig <7) { CONSTRUCT vpddgeo; }
-!    if(VpddConfig==7) { CONSTRUCT vpddgeo2;}
-!    if(VpddConfig==8) { CONSTRUCT vpddgeo3;}
-c     if VpddModule==0  { CONSTRUCT vpddgeo; }
-c     if VpddModule==2  { CONSTRUCT vpddgeo2;}
-c     if VpddModule==3  { CONSTRUCT vpddgeo3;}
-c   endif
     IF ( vpdd_addr.gt.0 ) THEN
        Call CsJcal(vpdd_addr,0, 0,0,0,0,0, 0,0,0,0,0)
     ENDIF
-
-********************** BARREL CALORIMETER ************************
-*  - Set up the parameters for the barrel calorimeter
-c   If (CALB) {
-c     call AgDETP new ('CALB')
-c     if (emsEdit)  call AgDETP add ('calg.nmodule=',Nmod, 2)
-c     if (emsEdit)  call AgDETP add ('calg.shift=',  shift,2)
-c
-c       if(CalbConfig==0) then
-cc          write(*,*) '************** Creating the 1996-2003 version of the Barrel Calorimeter'
-c           CONSTRUCT calbgeo
-c       endif
-c
-c       if(CalbConfig==1) then
-cc          write(*,*) '************** Creating the 2004-2006 version of the Barrel Calorimeter'
-c           CONSTRUCT calbgeo1
-c       endif
-c
-c       if(CalbConfig==2) then
-cc          write(*,*) '************** Creating the 2007-     version of the Barrel Calorimeter'
-c           Call AgDetp add ('ccut.absorber=',  BEmcCutConfig, 1)
-c           Call AgDetp add ('ccut.sensitive=', BEmcCutConfig, 1)
-c           CONSTRUCT calbgeo2
-c       endif
-c
-c   }
 
     IF (calb_addr.gt.0) THEN
        Call CsJcal(calb_addr,0, 0,0,0,0,0, 0,0,0,0,0)
@@ -4245,13 +4121,6 @@ c   }
 
 ******************************************************************
 *  - Set up the parameters for the RICH counter
-c   if (LL>0 & RICH) then
-c      call AgDETP new ('Rich')
-c      if (richConfig>0) call AgDETP add ('Rich.Version=', richConfig,1)
-c      if (richPos>0) call AgDETP add ('Rich.Position=',richPos,1)
-c      if (richPos>0) call AgDETP add ('Rich.Cversion=',richPos,1)
-c   endif
-c   if (RICH) {CONSTRUCT richgeo;}
    IF (rich_addr.gt.0) THEN
       Call CsJcal(rich_addr,0, 0,0,0,0,0, 0,0,0,0,0)
    ENDIF
@@ -4262,73 +4131,29 @@ c   if (RICH) {CONSTRUCT richgeo;}
 *  - Set up the parameters for the endcap calorimeter
    If (ecal_addr.gt.0) then
       CALL CsJcal( ecal_addr,0, 0,0,0,0,0, 0,0,0,0,0 )
-   Else IF( ECAL ) then
-
-c      call AgDETP new ('ECAL')
-c      call AgDETP add ('emcg.OnOff='   ,EcalConfig,1)
-c      call AgDETP add ('emcg.FillMode=',ecalFill,1)
-c      IF ( EcalGeometry .lt. 6 ) { CONSTRUCT ecalgeo; }           ! version 5
-c      IF ( EcalGeometry .eq. 6 ) THEN
-c                                 Call AgDetp add ('ecut.absorber=',  EEmcCutConfig, 1)
-c                                 Call AgDetp add ('ecut.sensitive=', EEmcCutConfig, 1)
-c                                 CONSTRUCT ecalgeo6;           ! version 6
-c      ENDIF
    endif
 
 ******************************************************************
 * The rest of steering:
 
-c   if (BBCM)                    {
-c      CONSTRUCT bbcmgeo
-c   }
     IF (bbcm_addr.gt.0) THEN
        CALL CsJcal(bbcm_addr,0, 0,0,0,0,0, 0,0,0,0,0)
     ENDIF
 
-c
-c   if (FPDM){
-c
-c     IF FpdmPosition > 0 {
-c        """Move the FMS N/S modules to an outward position"""
-c        Call AgDetp NEW ( 'FPDM' );
-c        Call AgDetp ADD ( 'FPOS(imod=3).x=', -50.3, 1 );
-c        Call AgDetp ADD ( 'FPOS(imod=4).x=', +50.3, 1 );
-c     }
-c
-c     if (FpdmConfig==0) {CONSTRUCT fpdmgeo; }
-c     if (FpdmConfig==1) {CONSTRUCT fpdmgeo1;}
-c     if (FpdmConfig==2) {CONSTRUCT fpdmgeo2;}
-c     if (FpdmConfig==3) {CONSTRUCT fpdmgeo3;}
-c     if (FpdmConfig==4) {CONSTRUCT fpdmgeo4;}
-c
-c   }
     IF (FPDM_addr.gt.0) THEN
        Call CsJcal(fpdm_addr,0, 0,0,0,0,0, 0,0,0,0,0)
     ENDIF
-
-
-c   IF (HCAL)   {
-c      IF HcalConfig==0  { CONSTRUCT HcalGeo; }
-c      IF HcalConfig==1  { CONSTRUCT HcalGeo1; }
-c      IF HcalConfig==15 { CONSTRUCT HcalGeoF; }
-c   }
 
    IF (hcal_addr.gt.0) THEN
       Call CsJcal(hcal_addr,0, 0,0,0,0,0, 0,0,0,0,0)
    ENDIF
 
 
-c  if (ZCAL)   { CONSTRUCT zcalgeo;}
    IF (zcal_addr.gt.0) THEN
       Call CsJcal(zcal_addr,0, 0,0,0,0,0, 0,0,0,0,0)
    ENDIF 
 
 
-c  if (MAGP)   {
-c       call AgDetp NEW ('MAGP')
-c       call AgDetp ADD ('magg.version=', magpConfig, 1 );
-c       CONSTRUCT MagpGeo
-c  }
    IF (magp_addr.gt.0) THEN
        call CsJcal(magp_addr,0, 0,0,0,0,0, 0,0,0,0,0)
    ENDIF
@@ -4665,8 +4490,12 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.34 2019/08/28 16:57:59 jwebb Exp $
+* $Id: xgeometry.age,v 1.35 2019/09/24 21:38:43 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.35  2019/09/24 21:38:43  jwebb
+* And fix xgeometry, implementing the new dev2021 tag and resolving all
+* dependencies
+*
 * Revision 1.34  2019/08/28 16:57:59  jwebb
 * Allow for detailed control over geant physics flags
 *
