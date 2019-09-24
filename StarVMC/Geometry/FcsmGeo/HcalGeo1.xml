@@ -15,7 +15,7 @@
   Call GsTPar( ag_imed, 'BCUTM', #1_BCUTM );  
 </Replace>
 
-<Module name="HCALGEO0" comment=" is the Forward Calorimeter System HCal GEOmetry "  >
+<Module name="HCALGEO1" comment=" is the Forward Calorimeter System HCal GEOmetry "  >
 
   <Created date="   10 Aug 2018 "  />
   <Author name="Akio Ogawa"  />

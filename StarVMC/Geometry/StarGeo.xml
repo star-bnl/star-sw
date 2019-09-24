@@ -449,7 +449,7 @@
     <Construct sys="calb" config="CALB02" />
     <Construct sys="ecal" config="ECALv6" />
     <Construct sys="bbcm" config="BBCMon" />
-    <Construct sys="hcal" config="HCALv0" />
+    <Construct sys="hcal" config="HCAL00" />
     <Construct sys="zcal" config="ZCALon" />
     <Construct sys="magp" config="MAGPon" />
     <Construct sys="sisd" config="SISD85" />
