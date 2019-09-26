@@ -22,14 +22,15 @@
             FTRW,   <!-- Trapizoid for FST mechanical strucutre (wedge) -->
             FSBW,   <!-- Box for the ribs in FST wedges -->
             FTUH,   <!-- Tube segment for FST hybrid -->
-            FTUS,   <!-- Tube segment for FST silicon -->
+            FTOS,   <!-- Tube segment for outer FST silicon -->
+            FTIS,   <!-- Tube segment for inner FST silicon -->
             FTUW,   <!-- Tube segment for FST mechanical strucutre (wedge) -->
             FTRB,   <!-- Tube segment for the ribs in FST wedges -->
             FSBH    <!-- Box for FST hybrid -->
         </Content>
 
         <varlist type="int">
-            iwedge/0/, irib/0/
+            iwedge/0/, irib/0/, inout/1/
         </varlist>
 
         <!-- Declare structures -->
@@ -436,9 +437,9 @@
 
             <!-- Put volumes in the container -->
             <Create    block="FSOW" />  <!-- outer wedge -->
-            <Placement block="FSOW" in="FSTW" konly="MANY" x="0" y="0" z="0" />
+            <Placement block="FSOW" in="FSTW" x="0" y="0" z="0" />
             <Create    block="FSIW" />  <!-- inner wedge -->
-            <Placement block="FSIW" in="FSTW" konly="MANY" x="0" y="0" z="0" />
+            <Placement block="FSIW" in="FSTW" x="0" y="0" z="0" />
 
         </Volume>
 
@@ -468,9 +469,9 @@
             <Placement block="FTUH" in="FSOW" konly="MANY" x="0" y="0" z="-(0.3175+0.15+0.1)/2-0.1/2" rmin="outerhybrid_rmin" phi1="outerhybrid_phi1" rmax="outerhybrid_rmax" phi2="outerhybrid_phi2" dz="outerhybrid_dz" />
 
             <!-- silicon -->
-            <Create    block="FTUS" />
-            <Placement block="FTUS" in="FSOW" konly="MANY" x="0" y="0" z="(-0.15-2*0.1+0.03)/2" rmin="outersilicon_rmin" phi1="outersilicon_phi1(1)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(1)" dz="outersilicon_dz" />
-            <Placement block="FTUS" in="FSOW" konly="MANY" x="0" y="0" z="(-0.15-2*0.1+0.03)/2" rmin="outersilicon_rmin" phi1="outersilicon_phi1(2)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(2)" dz="outersilicon_dz" />
+            <Create    block="FTOS" />
+            <Placement block="FTOS" in="FSOW"  ncopy="2" x="0" y="0" z="(-0.15-2*0.1+0.03)/2" rmin="outersilicon_rmin" phi1="outersilicon_phi1(1)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(1)" dz="outersilicon_dz" />
+            <Placement block="FTOS" in="FSOW"  ncopy="3" x="0" y="0" z="(-0.15-2*0.1+0.03)/2" rmin="outersilicon_rmin" phi1="outersilicon_phi1(2)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(2)" dz="outersilicon_dz" />
 
         </Volume>
 
@@ -503,8 +504,8 @@
             <Placement block="FSBH" in="FSIW" konly="MANY" x="18.5*cos(16*pi/180)+(32-18.5)*cos(16*pi/180)/2" y="0" z="(0.15+0.1)/2" dx="innerhybridb_dx" dy="innerhybridb_dy" dz="innerhybridb_dz" />
 
             <!-- silicon -->
-            <Create    block="FTUS" />
-            <Placement block="FTUS" in="FSIW" konly="MANY" x="0" y="0" z="0.15/2+0.1-0.03/2" rmin="innersilicon_rmin" phi1="innersilicon_phi1" rmax="innersilicon_rmax" phi2="innersilicon_phi2" dz="innersilicon_dz" />
+            <Create    block="FTIS" />
+            <Placement block="FTIS" in="FSIW"  ncopy="1" x="0" y="0" z="0.15/2+0.1-0.03/2" rmin="innersilicon_rmin" phi1="innersilicon_phi1" rmax="innersilicon_rmax" phi2="innersilicon_phi2" dz="innersilicon_dz" />
 
         </Volume>
 
@@ -515,41 +516,36 @@
             <Material name="ABS" />
             <Shape type="TUBE" rmin="0" rmax="0" dz="0" />
         </Volume>
-
         <Volume name="FTUR" comment="Tube segment for FST half ring">
             <Attribute for="FTUR" seen="1" colo="3" />
             <Material name="aluminium" />
             <Material name="aluminium" isvol="0" />
             <Shape type="TUBS" rmin="30" phi1="-15" rmax="33.5" phi2="15" dz="0.8/2" />
         </Volume>
-
         <Volume name="FSBR" comment="Box for FST half ring">
             <Attribute for="FSBR" seen="1" colo="1" />
             <Material name="air" />
             <Material name="air" isvol="1" />
             <Shape type="BBOX" dx="0" dy="0" dz="0" />
         </Volume>
-
         <Volume name="FTRW" comment="Trapizoid for FST wedge">
             <Attribute for="FTRW" seen="1" colo="14" />
             <Material name="PEEK" />
             <Shape type="TRD1" dx1="0" dx2="0" dy="0" dz="0" />
         </Volume>
-
         <Volume name="FSBW" comment="Box for the ribs in FST wedges">
             <Attribute for="FSBW" seen="1" colo="14" />
             <Material name="PEEK" />
             <Shape type="BBOX" dx="0" dy="0" dz="0" />
         </Volume>
-
         <Volume name="FTUH" comment="Tube segment for FST hybrid">
             <Attribute for="FTUH" seen="1" colo="797" />
             <Material name="Kapton" />
             <Shape type="TUBS" rmin="0" phi1="0" rmax="0" phi2="0" dz="0" />
         </Volume>
 
-        <Volume name="FTUS" comment="Tube segment for FST silicon (active area)">
-            <Attribute for="FTUS" seen="1" colo="4" />
+        <Volume name="FTOS" comment="Tube segment for outer FST silicon (active area)">
+            <Attribute for="FTOS" seen="1" colo="4" />
             <Material name="silicon" />
             <Material name="silicon" isvol="1" />
             <Shape type="TUBS" rmin="0" phi1="0" rmax="0" phi2="0" dz="0" />
@@ -564,7 +560,40 @@
             <Par name="DCUTM"  value="10000 GeV" />
             <Par name="PPCUTM" value="10 keV" />
 
-            <Instrument block="FTUS"  >
+            <Instrument block="FTOS"  >
+                <Hit meas="zz" opts="S" bins="0.00001"  />
+                <Hit meas="yy" opts="S" bins="0.00001"  />
+                <Hit meas="xx" opts="S" bins="0.00001"  />
+                <Hit meas="z"  opts="S" bins="0.00001"  />
+                <Hit meas="y"  opts="S" bins="0.00001"  />
+                <Hit meas="x"  opts="S" bins="0.00001"  />
+                <Hit meas="ptot" nbits="16" min="0" max="100"  /> 
+                <Hit meas="cx" nbits="10"  />
+                <Hit meas="cy" nbits="10"  />
+                <Hit meas="cz" nbits="10"  />
+                <Hit meas="sleng" nbits="16" min="0" max="500"  />
+                <Hit meas="tof" nbits="16"  />
+                <Hit meas="step" bins=".0001"  />
+                <Hit meas="eloss" nbits="16"  />
+            </Instrument>   
+        </Volume>
+        <Volume name="FTIS" comment="Tube segment for outer FST silicon (active area)">
+            <Attribute for="FTIS" seen="1" colo="4" />
+            <Material name="silicon" />
+            <Material name="silicon" isvol="1" />
+            <Shape type="TUBS" rmin="0" phi1="0" rmax="0" phi2="0" dz="0" />
+
+            <Par name="CUTGAM" value="1 MeV" />
+            <Par name="CUTELE" value="1 MeV" />
+            <Par name="CUTNEU" value="10 keV" />
+            <Par name="CUTHAD" value="10 keV" />
+            <Par name="CUTMUO" value="10 keV" />
+            <Par name="BCUTE"  value="1 MeV" />
+            <Par name="DCUTE"  value="10000 GeV" />
+            <Par name="DCUTM"  value="10000 GeV" />
+            <Par name="PPCUTM" value="10 keV" />
+
+            <Instrument block="FTIS"  >
                 <Hit meas="zz" opts="S" bins="0.00001"  />
                 <Hit meas="yy" opts="S" bins="0.00001"  />
                 <Hit meas="xx" opts="S" bins="0.00001"  />
