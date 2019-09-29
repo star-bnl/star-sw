@@ -1883,6 +1883,7 @@ Bool_t StTpcRSMaker::TrackSegment2Propagate(g2t_tpc_hit_st *tpc_hitC, g2t_vertex
   transform(coorG, coorLT,sector,row); PrPP(Make,coorLT);
   Int_t io = (row <= St_tpcPadConfigC::instance()->numberOfInnerRows(sector)) ? 0 : 1;
   TrackSegmentHits.TrackId    = Id;
+  //  TrackSegmentHits.TrackId    = 999999; // to check idTruth in itpcFCF
   TrackSegmentHits.tpc_hitC = tpc_hitC;
   
   if (ClusterProfile) {
