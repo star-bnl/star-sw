@@ -87,7 +87,7 @@ class StRefMultCorr {
     // "refmult3"  - reference multiplicity defined in |eta|<0.5 without protons
     // "toftray"   - TOF tray multiplicity
     // "grefmult"  - global reference multiplicity defined in |eta|<0.5,dca<3,nHitsFit>10
-    StRefMultCorr(const TString name="refmult");
+    StRefMultCorr(const Char_t *name="refmult");
     virtual ~StRefMultCorr(); /// Default destructor
 
     // Bad run rejection

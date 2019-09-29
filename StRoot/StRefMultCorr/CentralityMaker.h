@@ -36,12 +36,11 @@
 
 #ifndef __CentralityMaker_h__
 #define __CentralityMaker_h__
-
+#include "TObject.h"
 class StRefMultCorr ;
-#include "Rtypes.h"
 
 //____________________________________________________________________________________________________
-class CentralityMaker {
+class CentralityMaker : public TObject  {
   public:
     static CentralityMaker* instance(); // Use this function to access StRefMultCorr
     virtual ~CentralityMaker(); /// Default destructor
