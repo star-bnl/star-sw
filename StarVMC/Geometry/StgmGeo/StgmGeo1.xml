@@ -798,8 +798,10 @@
       <Par name="CUTHAD" value="10 keV" />
       <Par name="CUTMUO" value="10 keV" />
       <Par name="BCUTE"  value="1 MeV" />
+<!--
       <Par name="DCUTE"  value="10000 GeV" />
       <Par name="DCUTM"  value="10000 GeV" />
+-->
       <Par name="PPCUTM" value="10 keV" />
       
       <Instrument block="FTSA"  >
