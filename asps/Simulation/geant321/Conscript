@@ -19,7 +19,7 @@ my $FPPFLAGS = $env->{FPPFLAGS};
 my $CPPFLAGS = $env->{CPPFLAGS};
 my $CPPPATH  = $env->{CPPPATH};
 my $DEBUG   = $env->{DEBUG};# print "DEBUG = $DEBUG\n";
-my $FDEBUG  = $env->{FDEBUG}; print  "FDEBUG = $FDEBUG\n";
+my $FDEBUG  = $env->{FDEBUG};# print  "FDEBUG = $FDEBUG\n";
 my $NOOPTIMIZED = $FDEBUG; $NOOPTIMIZED =~ s/-O2//g; $NOOPTIMIZED =~ s/-O3//g; $NOOPTIMIZED =~ s/-O//g;# print "FDEBUG = $FDEBUG, NOOPTIMIZED = $NOOPTIMIZED\n";
 my $pkg  = geant321; 
 my $PKG = $pkg;     print "Run cons in $Dir for $PKG\n";
