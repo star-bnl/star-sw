@@ -1,0 +1,12 @@
+#get_file_list.pl -keys      filename,size -cond production=P16ij,trgsetupname=AuAu_200_production_2016,filetype=daq_reco_picoDst,filename~st_physics,storage=nfs-limit 10 -delim : -distinct
+#!  mysql --host fc2.star.bnl.gov --port=3336 -u"FC_user" -p"FCatalog" FileCatalog_BNL -e 'select triggerSetupName,triggerSetupIDate  from TriggerSetups where triggerSetupName like "%auau%" and triggerSetupName like "%production%" and triggerSetupIDate >= "2010";'
+#| AuAu7_production                         | 2010-04-26 15:22:58 |
+#| AuAu11_production                        | 2010-06-03 18:01:04 |
+#| AuAu18_production                        | 2011-04-25 13:42:40 |
+#| AuAu19_production                        | 2011-04-25 13:43:41 |
+#| AuAu27_production_2011                   | 2011-06-21 13:51:41 |
+foreach p (AuAu7_production AuAu11_production AuAu18_production AuAu19_production  AuAu27_production_2011)
+#  get_file_list.pl -keys path,filename,events -cond trgsetupname=${p},filetype=daq_reco_picoDst,filename~st_physics,storage!=hpss -limit 10 -delim : -distinct | tee ${p}.list
+#  get_file_list.pl -keys path,filename,events -cond trgsetupname=${p},filetype=daq_reco_MuDst,filename~st_physics,storage!=hpss -limit 10 -delim : -distinct | tee Mu${p}.list
+  get_file_list.pl -keys path,filename,events -cond trgsetupname=${p},filetype=daq_reco_MuDst,filename~st_physics,storage=nfs -limit 10 -delim : -distinct | tee Mu${p}.list
+end
