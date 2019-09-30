@@ -1,5 +1,10 @@
-* $Id: g2t_volume_id.g,v 1.91 2019/09/03 20:12:55 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.92 2019/09/30 14:13:49 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.92  2019/09/30 14:13:49  jwebb
+* Integrate HITS for forward tracking and forward calorimeter.
+*
+* n.b. deprecates the legacy HcalGeo RnD detector.
+*
 * Revision 1.91  2019/09/03 20:12:55  jwebb
 * Proposed fix for ticket 3399--
 * https://www.star.bnl.gov/rt3/Ticket/Display.html?id=3399&results=8b3b60b210def723798e28371b984406
@@ -239,8 +244,11 @@
 *              CALB_Nmodule(1) and (2), not on RICH presence !     *
 ********************************************************************
       implicit none
+
       integer :: g2t_volume_id
-      integer :: g2t_tpc_volume_id
+      integer :: g2t_tpc_volume_id, g2t_fst_volume_id, g2t_stg_volume_id
+      integer :: g2t_wca_volume_id, g2t_hca_volume_id
+
 +CDE,gcunit.
 * 
       Character*3      Csys
@@ -977,8 +985,9 @@ c$$$    write (*,*) numbv
             volume_id = istLayer*1000000 + numbv(1)*10000 + 100*numbv(2)  + numbv(3)
         endif
 *19*                                 Kai Schweda
-      else if (Csys=='fst') then
-        volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
+***   else if (Csys=='fst') then
+***   09/24/2019 JCW Drop support for forward silicon rnd circa 2005
+***     volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
 *20*                                 Kai Schweda
       else if (Csys=='fgt') then
         volume_id = numbv(1)*100 + numbv(2)
@@ -1163,10 +1172,19 @@ c$$$    write (*,*) numbv
 
 *******************************************************************************************
 ** 27                                                                            Jason Webb
-      ELSE IF (CSYS=='fts') THEN
-         
+      ELSE IF (CSYS=='fts') THEN         
            "Disk number is 1st entry in numbv"
            volume_id = numbv(1)
+
+      ELSE IF (CSYS=='fst') THEN "Forward silicon tracker" 
+           volume_id = g2t_fst_volume_id( numbv )
+      ELSE IF (CSYS=='stg') THEN "Small thin gap chambers"
+           volume_id = g2t_stg_volume_id( numbv )
+      ELSE IF (CSYS=='wca') THEN "FCS EM calorimeter"
+           volume_id = g2t_wca_volume_id( numbv )
+      ELSE IF (CSYS=='hca') THEN "FCS Hadronic calorimeter"
+           volume_id = g2t_hca_volume_id( numbv )
+
 *******************************************************************************************
 ** 28                                                                           Prashanth S 
       ELSE IF (CSYS=='epd') THEN
@@ -1224,7 +1242,7 @@ c$$$    write (*,*) numbv
 
     end
 
-      
+!//______________________________________________________________________________________      
     Integer function g2t_tpc_volume_id ( numbv )
       Integer, intent(in) :: numbv(15)
 
@@ -1383,3 +1401,65 @@ c$$$    write (*,*) numbv
 
       RETURN
     end
+!//______________________________________________________________________________________      
+    Integer function g2t_fst_volume_id ( numbv )
+      Integer, intent(in) :: numbv(15)
+      Integer             :: disk, wedge, sensor
+
+      Integer          Iprin,Nvb
+      Character(len=4)              cs,cd
+      COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
+
+      "Inner wedge assembly"
+      IF (cd=='FTIS') then
+
+      disk  = numbv(1) "There are 3 silicon disks"
+      wedge = numbv(2) "There are 12 wedges"
+      sensor= 1        "There are 2+1 sensors" 
+                       "1=inner wedge, 2,3=outer wedge"
+
+      ENDIF
+      "Outer wedge assembly"
+      IF (cd=='FTOS') then
+
+      disk  = numbv(1) "There are 3 silicon disks"
+      wedge = numbv(2) "There are 12 wedges"
+      sensor= numbv(3) "There are 2+1 sensors" 
+                       "1=inner wedge, 2,3=outer wedge"
+
+      ENDIF
+
+      g2t_fst_volume_id = 1000*disk + 10*wedge + sensor
+      
+    End Function g2t_fst_volume_id
+
+!//______________________________________________________________________________________      
+    Integer function g2t_stg_volume_id ( numbv )
+      Integer, intent(in) :: numbv(15)
+      
+      g2t_stg_volume_id = numbv(1)
+
+    End Function g2t_stg_volume_id
+!//______________________________________________________________________________________      
+     Integer function g2t_wca_volume_id( numbv ) 
+       Integer, intent(in) :: numbv(15)
+       Integer             :: mod, tow
+
+       mod = numbv(1)
+       tow = numbv(2) "nx = 22 ny = 34, nx*ny = 748"
+
+       g2t_wca_volume_id = mod*1000 + tow
+
+     End Function g2t_wca_volume_id
+!//______________________________________________________________________________________      
+     Integer function g2t_hca_volume_id( numbv ) 
+       Integer, intent(in) :: numbv(15)
+       Integer             :: mod, tow
+
+       mod = numbv(1)
+       tow = numbv(2) "nx = 13 ny = 20, nx*ny = 260"
+
+       g2t_hca_volume_id = mod*1000 + tow
+
+     End Function g2t_hca_volume_id
+!//______________________________________________________________________________________      
