@@ -104,6 +104,12 @@ class AliHLTTPCCATrackParam
     float GetErr2DzDs()   const { return fC[9]; }
     float GetErr2QPt()    const { return fC[14]; }
 
+  float GetErrY()      const { return fC[0] > 0 ? CAMath::Sqrt(fC[0]) : 0; }
+  float GetErrZ()      const { return fC[2] > 0 ? CAMath::Sqrt(fC[2]) : 0; }
+  float GetErrSinPhi() const { return fC[5] > 0 ? CAMath::Sqrt(fC[5]) : 0; }
+  float GetErrDzDs()   const { return fC[9] > 0 ? CAMath::Sqrt(fC[9]) : 0; }
+  float GetErrQPt()    const { return fC[14] > 0 ? CAMath::Sqrt(fC[14]) : 0; }
+
     const float *Par() const { return fP; }
     const float *Cov() const { return fC; }
 

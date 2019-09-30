@@ -34,7 +34,7 @@ class AliHLTTPCCAGBTrack
     friend std::ostream &operator<<( std::ostream &, const AliHLTTPCCAGBTrack & );
   public:
 
-    AliHLTTPCCAGBTrack(): fFirstHitRef( 0 ), fNHits( 0 ), fInnerParam(), fOuterParam(), fAlpha( 0 ), fNDeDx(0), fDeDx( 0 ), tIsMerged(false), tIsLooper(0) { ; }
+  AliHLTTPCCAGBTrack(): fFirstHitRef( 0 ), fNHits( 0 ), fInnerParam(), fOuterParam(), fAlpha( 0 ), fNDeDx(0), fDeDx( 0 ), tIsLooper(0), tIsMerged(false) { }
 
     int NHits()               const { return fNHits; }
     int FirstHitRef()         const { return fFirstHitRef; }
