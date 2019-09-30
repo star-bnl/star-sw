@@ -1,6 +1,6 @@
 <Document file="StarVMC/Geometry/HcalGeo/HcalGeo.xml">
 
-  <Module name="HcalGeo" comment=" forward hadronic calorimeter, test run, 2014"  >
+  <Module name="HcalGeo0" comment=" forward hadronic calorimeter, test run, 2014"  >
     <Author name="Prashanth S (KSU)" />
     <Created date="12/30/2013" />
 

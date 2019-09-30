@@ -1531,6 +1531,7 @@ Bfc_st BFC[] = { // standard chains
   {"gmtClu"   ,"","","gmtutil","StGmtClusterMaker","Spectrum,StGmtClusterMaker","GMT cluster maker",kFALSE},
   {"gmtCosmics" ,"","","Cosmics,gmt","","",  "Save only events with GMT clusters and Cosmic tracks",kFALSE},
   {"gmtClusTree","","","","","",                               "WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"epdHit",    "", "", "epdDb,event",            "StEpdHitMaker", "StEpdHitMaker","EPD hit maker", kFALSE},
   {"tpc" ,"","","TpxRaw,TpxClu,tpcI" ,"","","WARNING *** Option is OBSOLETE *** use TpxClu instead",kFALSE},
   {"tpcI" ,"tpcChain","","db,tpcDB,TpcHitMover",                "StMaker","StChain","tpc with ITTF",kFALSE},
   {"tpcX" ,"tpcChain","","-tpcI,tpx,MakeEvent"            ,"StMaker","StChain","tpc+tpcx with ITTF",kFALSE},
@@ -1652,7 +1653,6 @@ Bfc_st BFC[] = { // standard chains
   {"ssdpre"      ,"","","ssdEmbed,spa"                    ,"","","SSD full chain for pre-embedding",kFALSE},
   {"ssdAdd"     ,"","","ssd_daq","StSsdAddMaker","StSsdAddMaker",             "... SSD merge maker",kFALSE},
   {"ssdE"        ,"","","ssdpre,ssdAdd"                       ,"","","SSD full chain for embedding",kFALSE},
-  {"epdHit",    "", "", "epdDb,event",            "StEpdHitMaker", "StEpdHitMaker","EPD hit maker", kFALSE},
   {"ZDCVtx"      ,"","","db"                              ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"emcRaw"   ,"emcRaw","","daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent"
    ,"StEmcRawMaker","StEmcRawMaker",                                    "B/E EMC data common maker",kFALSE},
@@ -2002,8 +2002,8 @@ Bfc_st BFC[] = { // standard chains
   {"LAna"        ,"","","in,detDb,StEvent,tpcDb,TpcHitMover","StLaserAnalysisMaker"
    ,                                                   "StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"MuD0Anal"    ,"","","","StMuD0AnalysisMaker",         "StMuD0AnalysisMaker","MuDst D0 Analysis",kFALSE},
-  {"KFPInter"    ,"","","KFParticle,picoDeps", "","KFParticlePerformance,StKFParticleAnalysisMaker" 
-   ,                                                                    "STAR KFParticle interface",kFALSE},
+  {"KFPInter"    ,"","","KFParticle,picoDeps", ""
+   ,"StRefMultCorr,KFParticlePerformance,StKFParticleAnalysisMaker",    "STAR KFParticle interface",kFALSE},
   {"KFPAna"      ,"","","KFPInter","StKFParticleAnalysisMaker",      "", "STAR KFParticle analysis",kFALSE},
   {"MuMc"        ,"","","","StMuMcAnalysisMaker",             "StMuMcAnalysisMaker","MuMc Analysis",kFALSE},
   {"PicoAnalysis","","","KFPInter","StPicoAnalysisMaker"

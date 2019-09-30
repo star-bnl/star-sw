@@ -77,7 +77,7 @@ using namespace std ;
 
 //______________________________________________________________________________
 // Default constructor
-StRefMultCorr::StRefMultCorr(const TString name)
+StRefMultCorr::StRefMultCorr(const Char_t *name)
  : mName(name)
 {
   mRefMult = 0 ;
@@ -218,7 +218,7 @@ Bool_t StRefMultCorr::isIndexOk() const
   if ( mParameterIndex >= (Int_t)mStart_runId.size() ) {
     Error("StRefMultCorr::isIndexOk",
         Form("mParameterIndex = %d > max number of parameter set = %d. Make sure you put correct index for this energy",
-          mParameterIndex, mStart_runId.size()));
+	     mParameterIndex, (Int_t) mStart_runId.size()));
     return kFALSE ;
   }
 
@@ -644,9 +644,11 @@ void StRefMultCorr::readHeaderFile()
 {
 
 	const Int_t refX = getRefX();
+	if (refX > 10) {
+	  cout <<"StRefMultCorr::readHeaderFile  [" << mName <<"] Correction parameters and centrality definitions have not been found."<< endl;
+	  return;
+	}
 	const Int_t nID =  getNumberOfDatasets();
-
-
 	for(int iID=0; iID<nID; iID++){
 		//// Year, energy, run numbers, Vz cut
 		Int_t year; Double_t energy;
