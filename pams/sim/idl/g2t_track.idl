@@ -1,6 +1,11 @@
 struct g2t_track {
-  /* $Id: g2t_track.idl,v 1.21 2017/10/02 15:29:39 jwebb Exp $
+  /* $Id: g2t_track.idl,v 1.22 2019/09/30 14:13:56 jwebb Exp $
      $Log: g2t_track.idl,v $
+     Revision 1.22  2019/09/30 14:13:56  jwebb
+     Integrate HITS for forward tracking and forward calorimeter.
+
+     n.b. deprecates the legacy HcalGeo RnD detector.
+
      Revision 1.21  2017/10/02 15:29:39  jwebb
      Integration of ETOF into simulation
 
@@ -78,7 +83,7 @@ struct g2t_track {
        long      hit_vpd_p;  /* Id of first vpd hit on track linked list */
        long      hit_etr_p;  /* Id of first etr hit on track linked list */
        long      hit_hca_p;  /* Id of first hca hit on track linked list */
-       long      hit_fts_p;  /* Id of first hca hit on track linked list */
+       long      hit_fts_p;  /* Id of first fts hit on track linked list */
        long      hit_eto_p;  /* Id of first etof hit on track linked list */ 
        long      id;         /* primary key */
        long      is_shower;  /* 1 if shower track, 0 if not */
@@ -92,7 +97,7 @@ struct g2t_track {
        long      n_hpd_hit;  /* Nhits in hpd */
        long      n_ist_hit;  /* Nhits in ist */
        long      n_igt_hit;  /* Nhits in igt */
-       long      n_fst_hit;  /* Nhits in fst */
+       long      n_fst_hit;  /* Nhits in fst [new Forward Silicon Tracker] */
        long      n_fgt_hit;  /* Nhits in fgt */
        long      n_fpd_hit;  /* Nhits in fpd */
        long      n_fsc_hit;  /* Nhits in fsc */
@@ -108,13 +113,16 @@ struct g2t_track {
        long      n_tpc_hit;  /* Nhits in tpc + (no. of real hits after TpcRS) << 8 */
        long      n_vpd_hit;  /* Nhits in vpd */
        long      n_etr_hit;  /* Nhits on etr */
-       long      n_hca_hit;  /* Nhits on hca */
+       long      n_hca_hit;  /* Nhits on hca [hadronic calorimeter]*/
        long      n_fts_hit;  /* Nhits on fts */
        long      n_eto_hit;  /* Nhits on etof */
+       long      n_stg_hit; /* Nhits on sTGC [new Forward small thin gap chambers]*/  
+       long      n_wca_hit;  /* Nhits on wca [West EM calorimeter]*/
        long      next_parent_p; /* Id of next parent track */
        long      next_vtx_trk_p; /* Next daughter track of start vertex */
        long      start_vertex_p; /* Id of start vertex of track */
        long      stop_vertex_p; /* Id of stop vertex of this track */
+
        float     charge;     /* Charge */
        float     e;          /* Energy */
        float     eta;        /* Pseudorapidity */
@@ -122,4 +130,5 @@ struct g2t_track {
        float     pt;         /* Transverse momentum */
        float     ptot;       /* Total momentum */
        float     rapidity;   /* Rapidity */
+
    } ;

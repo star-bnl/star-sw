@@ -1,6 +1,12 @@
-// $Id: St_geant_Maker.h,v 1.57 2018/10/30 13:54:04 jwebb Exp $
+// $Id: St_geant_Maker.h,v 1.58 2019/09/30 14:13:27 jwebb Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.58  2019/09/30 14:13:27  jwebb
+// Integrate HITS for forward tracking and forward calorimeter.
+//
+// n.b. deprecates the legacy HcalGeo RnD detector.
+//
 // Revision 1.57  2018/10/30 13:54:04  jwebb
+//
 // Implemented a templated method for creating and filling the g2t hit tables.
 //
 // This reduces the boilerplate code required when integrating a new detector
@@ -268,6 +274,7 @@ protected:
        for ( auto v : volumes ) { 
 	 geant3->Gfnhit( container.c_str(), v.c_str(), nhits ); 
 	 std::string key = container + ":" + v;
+	 LOG_DEBUG << key << " found nhits=" << nhits << endm;
 	 if (nhits) { mHitCounts[key] += nhits; mHitCounts["ALL"] += nhits; } 
 	 ntotal += nhits; 
        } 
@@ -282,7 +289,7 @@ protected:
   std::map<std::string, int> mHitCounts;
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.57 2018/10/30 13:54:04 jwebb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.58 2019/09/30 14:13:27 jwebb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 
