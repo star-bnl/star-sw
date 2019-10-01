@@ -1,5 +1,8 @@
-* $Id: gzebra.F,v 1.3 2018/11/26 19:47:47 perev Exp $
+* $Id: gzebra.F,v 1.4 2019/10/01 20:32:46 jwebb Exp $
 * $Log: gzebra.F,v $
+* Revision 1.4  2019/10/01 20:32:46  jwebb
+* Increase memory footprint of starsim, to mitigate #3395/3396.
+*
 * Revision 1.3  2018/11/26 19:47:47  perev
 * Increase Zebra to 20M words
 *
@@ -30,7 +33,7 @@ C.    ******************************************************************
 C.
 #include "geant321/gcbank.inc"
 #include "geant321/gcflag.inc"
-       common/GCBANK/IGC(20000000),IGCZ
+       common/GCBANK/IGC(100 000 000),IGCZ
 
        INTEGER Itry,KWW,MEMGETF,LOCF,NZEB
 C.
