@@ -187,19 +187,16 @@ const StHitPlane *prevHitPlane=0;
     par[0] = curNode->GetFP(0);
     err[0] = curNode->GetFE(0);
     nHits = mCurrTrak->GetNHits();
-    mDive->SetPrev(curNode->GetHitPlane()->GetName());	//define previous volume name to avoid doubling
- #if 0
-    par[0].set(mSeedHelx); 		//Set seed pars into par[0] and err[0]
-    err[0].Set(mSeedHelx); err[0]*= kKalmanErrFact; 
-    par[0].reverse();			//Seed direction OutIn but track direction is allways InOut	
-    err[0].Backward();
-#endif
   } else 	{//Forward or backward tracking
  
     curNode = mCurrTrak->back();
     par[0] = curNode->GetFP(); err[0] = curNode->GetFE(); 	//Set outer node pars into par[0]
     nTotHits = mCurrTrak->GetNHits();
-    mDive->SetPrev(curNode->GetHitPlane()->GetName());	//define previous volume name to avoid doubling
+  }
+  prevHitPlane = curNode->GetHitPlane();
+  if (prevHitPlane) {
+    mDive->SetPrev(prevHitPlane->GetName());	//define previous volume name to avoid doubling
+    prevHit = curNode->GetHit();
   }
 
 //  	Skip too big curvature or pti
@@ -230,9 +227,9 @@ const StHitPlane *prevHitPlane=0;
     if (idive & StvDiver::kDiveDca  ) 		{skip = 12;	break;}
 		// Stop tracking when too big Z or Rxy
     if (fabs(par[0].getZ()) > mKons->mZMax  ) 	{skip = 13;	break;}
-    if (par[0].getRxy()     > mKons->mRxyMax) 	{skip = 13;	break;}
-    if (fabs(par[0].getCurv())>mKons->mMaxCurv)	{skip = 14;	break;}	
-    if (fabs(par[0].getPtin())>mKons->mMaxPti)	{skip = 15;	break;}	
+    if (par[0].getRxy()     > mKons->mRxyMax) 	{skip = 14;	break;}
+    if (fabs(par[0].getCurv())>mKons->mMaxCurv)	{skip = 15;	break;}	
+    if (fabs(par[0].getPtin())>mKons->mMaxPti)	{skip = 16;	break;}	
 double s=0;
 //??assert((s=TCLx::sign(err[0],5))>0);
     		
@@ -242,15 +239,13 @@ double s=0;
                      ,mKons->mMaxWindow,mKons->mMaxWindow};   
 
       localHits = mHitter->GetHits(par,err,gate); 
+      if (localHits && prevHitPlane == mHitter->GetHitPlane()) continue;
     }
 
 
 //	Create and add node to myTrak
     preNode = curNode;
     curNode = kit->GetNode();      
-    assert(preNode != curNode);
-    assert(curNode != mCurrTrak->front());
-    assert(curNode != mCurrTrak->back ());
 
     if (!idir)  {mCurrTrak->push_front(curNode);innNode=curNode;outNode=preNode;}
     else        {mCurrTrak->push_back(curNode) ;innNode=preNode;outNode=curNode;}
@@ -283,7 +278,6 @@ double s=0;
       if (skip) break;
       continue;
     } 
-    if (prevHitPlane == mHitter->GetHitPlane()) continue;
     prevHitPlane = mHitter->GetHitPlane();
 
     fitt->Prep();
@@ -299,7 +293,7 @@ double s=0;
 
 
       if (nTotHits > mKons->mMinHits && fitt->IsFailed() == -99) { // Too big track errs
-         skip = 16; break;	//Track Errors too big, stop tracking
+         skip = 17; break;	//Track Errors too big, stop tracking
       }
       if (myXi2 > minXi2[1]) continue;
       if (myXi2 < minXi2[0]) {
