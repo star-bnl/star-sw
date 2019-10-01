@@ -155,16 +155,24 @@ static StvToolkit* kit = StvToolkit::Inst();
   mELoss = kit->GetELossTrak(); mSteps->Set(mELoss);
   mELoss->Reset();
   int myExit = 0;
+//		Convert Stv params into helix
+  mHelix->Clear();
   mInpPars->get(mHelix);
 myHelix = mHelix;
+//		Stv input errors must be +ve
   for (int i=0,li=0;i< 5;li+=++i) {assert((*mInpErrs)[li+i]>0);}
+//		Convert Stv errors into helix
   mInpErrs->Get(mHelix);
+//		Change helix direction towards the beam
   if (!mDir) mHelix->Backward();
-  mOutDeri->Clear();		//Unit matrix
+
+  mOutDeri->Clear();		//Unit matrix for out derivatves
   StvNodePars tmpPars;
   for (int iMany=0; iMany <kNMany;iMany++) {
+//		Process one track
     TVirtualMC::GetMC()->ProcessEvent();
     myExit = mSteps->GetExit();
+//		Error happened
     if (myExit & StvDiver::kDiveBreak) break;
 
     double pos[4],p[4];
@@ -172,9 +180,12 @@ myHelix = mHelix;
     auto &mom = mSteps->CurrentMomentum();
     double pinv = -mSteps->Charge()/mom.P();
     mom.GetXYZT(p);;
+//		Convert helix pars&errs back into Stv pars/errs
     mOutPars->set(pos,p,pinv,kit->GetMag(pos));
     mOutErrs->Set(mHelix);
+//		Test errors again
     for (int i=0,li=0;i< 5;li+=++i) {assert((*mOutErrs)[li+i]>0);}
+//		Change sign back
     if (!mDir) {
       mOutPars->reverse();
       mOutDeri->Backward();
@@ -198,6 +209,14 @@ myHelix = mHelix;
   }
   assert (myExit >1 || mInpPars->_pinv * mOutPars->_pinv >=0);
   gRandom = myRandom;
+
+
+//   assert(mHelix->Emx()->Len());
+//   assert(mHelix->Emx()->Times(0));
+//   assert(mHelix->Emx()->Times(1));
+// //assert(mHelix->Emx()->Times(0)==mHelix->Emx()->Times(1));
+//   StvDebug::Count("EmxLen", mHelix->Emx()->Len());
+//   StvDebug::Count("EmxTime",mHelix->Emx()->Times(0));
 
   return mSteps->GetExit();
 }
@@ -443,6 +462,7 @@ StvDebug::AddGra(fCurrentPosition[0],fCurrentPosition[1],fCurrentPosition[2],0);
          fELossTrak->Set(fMaterial,fEnterMomentum.Vect().Mag());
          fCurrentPosition.GetXYZT(pos);
          fCurrentMomentum.GetXYZT(mom);
+//		Reset helix
          fHelix->Set(fCharge,pos,mom);
          fHitted =  ((!meAgain) 
 	         &&  (fOpt & StvDiver::kTargHit)
@@ -493,6 +513,80 @@ printf("EXIT=%d Pos(%g %g %g) Rxy = %g Phi=%d Lam=%d P=%g In %s\n",fExit
   virtualMC->StopTrack();
   return 0;
 }		
+#if 1
+//_____________________________________________________________________________
+int StvMCStepping::EndVolume()
+{
+enum { kEndVolu=0,kPerigee=1,kHitted=2,kApogee=4 };
+
+  double deltaL = fCurrentLength-fPrevLength,dL = deltaL, dS=0;
+  
+  int kase = 0,ans = 0;
+  if (fDir==0 && ((fStartSign<0) && (fCurrentSign>0))) 	kase+=kPerigee;
+  if (fHitted) 						kase+=kHitted;
+//if (fDir==1 && ((fStartSign>0) && (fCurrentSign<0))) 	kApogee=4;
+  switch(kase) {
+
+    case kPerigee: 
+    case kPerigee|kHitted:
+          {
+            assert(fPrevSign*fStartSign>0);
+            dL = -fPrevSign*dL/(fCurrentSign-fPrevSign);	//First estim
+            if (fabs(dL)>kMicron) {
+              fHelix->Move(dL);
+              (*fDeriv)*=*fHelix->Der();
+            }
+            dS = 0;
+            if (fDir==0) {
+              dS = fHelix->Path(fTarget[0],fTarget[1],0);
+              dL +=dS;
+              if (fabs(dS)>kMicron) {
+                fHelix->Move(dS);
+                (*fDeriv)*=*fHelix->Der();
+              }
+            }
+            ans |= StvDiver::kDiveDca ; break;
+            }
+
+    case kApogee |kHitted:
+    case kHitted: dL = (fCurrentLength-fEnterLength)/2 -(fPrevLength-fEnterLength);
+            ans |= StvDiver::kDiveHits; 
+
+    case kApogee: 
+    case kEndVolu:;
+            fHelix->Move(dL);
+            (*fDeriv)*=*fHelix->Der();
+            break;
+
+    default: assert(0 && kase);
+  }          
+  fELossTrak->Add(dL);
+  fHelix->Emx()->Add(fELossTrak->Theta2(),fELossTrak->Ort2(),fELossTrak->PinvErr2());
+  if (kase) {
+    double Ppre = fPrevMomentum.P();
+    double Pend = fCurrentMomentum.P();
+    double dPdL = (Pend-Ppre)/(fCurrentLength-fPrevLength);
+    double Pnow = Ppre + dPdL*dL;
+    double Pinv = (fHelix->Pinv()>0)? 1./Pnow:-1./Pnow;
+    fHelix->SetPinv(Pinv);
+    fCurrentLength=fPrevLength+dL;
+    fCurrentPosition.SetVect(TVector3(fHelix->Pos()));
+    fCurrentMomentum.SetVect(TVector3(fHelix->Mom()));
+  }
+else {///?????????????????????????????????????????????????????????????
+    double dEgea = fCurrentMomentum.E()-fPrevMomentum.E();
+    double dElos = fELossTrak->ELoss();
+    if (fabs(dEgea)>1e-3) StvDebug::Count("ELos_of_Egea",dElos,dEgea);
+}
+
+
+
+
+StvDebug::AddGra(fCurrentPosition[0],fCurrentPosition[1],fCurrentPosition[2],0);
+  return ans;
+}
+#endif
+#if 0
 //_____________________________________________________________________________
 int StvMCStepping::EndVolume()
 {
@@ -561,6 +655,7 @@ else {///?????????????????????????????????????????????????????????????
 StvDebug::AddGra(fCurrentPosition[0],fCurrentPosition[1],fCurrentPosition[2],0);
   return ans;
 }
+#endif
 //_____________________________________________________________________________
 int StvMCStepping::TooMany()
 {
