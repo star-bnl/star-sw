@@ -331,6 +331,7 @@ static const double kEps = 1.e-2,kEPS=1e-1;
   nHits = tk->GetNHits();
   int nBegHits = nHits;
   int nRepair =(nHits-11);
+  nRepair=1;///?????
   int state = 0;
   StvNode *tstNode = (idir)? tk->front(): tk->back();
   int nIters = 0,nDrops=0;
@@ -394,6 +395,7 @@ static int nCall=0; nCall++;
   else      {outNode = node; innNode=preNode;}
 
   TRungeKutta myHlx;
+  myHlx.SetDerOn();
   const StvNodePars &prePars =  preNode->mFP[lane];
 //??assert((s=TCLx::sign(preNode->mFE[lane],5))>0);
   const StvFitErrs  &preErrs =  preNode->mFE[lane];
@@ -410,7 +412,7 @@ static int nCall=0; nCall++;
   double dS = myHlx.Path(Xnode);		
 //  if (fabs(dS)>1e3)				return 2;				
   assert(fabs(dS)<1e3);
-  myHlx.Move();
+  myHlx.Move(dS);
 //??assert((s=TCLx::sign(*(myHlx.Emx()),5))>0);
   node->mPP[lane].set(&myHlx);
   int ifail = node->mPP[lane].check();  
@@ -454,7 +456,7 @@ enum {kDeltaZ = 100};//??????
   double x[3];
   th.Eval(len,x);
   mDca3 = DIST2(d,x);
-  th.Move();
+  th.Move(len);
   StvNodePars par[2]; par[0].set(&th);
   StvFitErrs  err[2]; err[0].Set(&th);
   fitt->Set(par+0,err+0,par+1,err+1);
