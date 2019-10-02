@@ -395,6 +395,20 @@ static StvFitErrs myFitErrs;
   myFitErrs.Recov();
   return myFitErrs;
 }  
+//______________________________________________________________________________
+ double StvFitErrs::PtErr(const StvNodePars &pars) const
+{
+  double pinv = pars._pinv;
+  double cosL = pars.getCosL();
+  double sinL = pars.getSinL();
+  double dir[5]={0};
+  dir[3] = sinL/pinv;
+  dir[4] =-cosL/(pinv*pinv);
+  double ptrr=0;
+  TCL::trasat(dir,*this,&ptrr,1,5);
+  return ptrr;
+}
+
 // //______________________________________________________________________________
 // void StvFitErrs::Reset(double hz)
 // {
@@ -758,12 +772,6 @@ void StvNodePars::make2nd()
 
 }
 
-
-
-
-
-
-
 //______________________________________________________________________________
 const StvFitPars &StvFitPars::operator*(const StvFitDers &t) const  
 {
@@ -881,7 +889,7 @@ const TkDir_t tkd = p.getTkDir();
   TVector3 Z(0,0,1);
   TVector3 H(T[1],-T[0],0); H.SetMag(1.);
 
-// U*u + V*v = H*h + Z*z
+// U*u + V*v + T*t= H*h + Z*z
 // 
 // H = (Hx,Hy,0)= (Ty,-Tx,0)*k = (Ty,-Tx,0)/sqrt(1-Tz*Tz)
 // (H*T) ==0
@@ -890,15 +898,15 @@ const TkDir_t tkd = p.getTkDir();
 // U*u + V*v + T*Tz*z = H*h + Z*z
 
 // (H*U)*u + (H*V)*v  = h
-// (Z*U)*u + (Z*V)*v  = z 
+// (Z*U)*u + (Z*V)*v  = z * (1-Tz*Tz)
 //
-// h = (H*U)*u + (H*V)*v
-// z = (Z*U)*u + (Z*V)*v
+// h =  (H*U)*u + (H*V)*v
+// z = ((Z*U)*u + (Z*V)*v)/(1-Tz*Tz)
 
   double HxU = (H*U);
   double HxV = (H*V);
-  double ZxU = (Z*U);
-  double ZxV = (Z*V);
+  double ZxU = (Z*U)/(T[0]*T[0]+T[1]*T[1]);
+  double ZxV = (Z*V)/(T[0]*T[0]+T[1]*T[1]);
   double D[5][5] = {{0}};
   TCL::vzero(D[0],25); 
   D[kkH][kU] = HxU;
@@ -950,7 +958,7 @@ void StvFitParsCentral::Set(TkDir_t &tkd,StvFitPars &fitPars)
   TVector3 Z(0,0,1);
   TVector3 H(T[1],-T[0],0); H.SetMag(1.);
   mH = (U*fitPars.mU+ V*fitPars.mV).Dot(H); 
-  mZ = (U*fitPars.mU+ V*fitPars.mV).Dot(Z); 
+  mZ = (U*fitPars.mU+ V*fitPars.mV).Dot(Z)/(T[0]*T[0]+T[1]*T[1]); 
 
   double cosF = T[0]/cosL;
   double sinF = T[1]/cosL;
