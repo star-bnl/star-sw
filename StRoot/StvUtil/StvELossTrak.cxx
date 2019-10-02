@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.17.4.3 2019/08/26 20:32:17 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.17.4.4 2019/10/02 00:01:28 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -25,7 +25,8 @@ ClassImp(StvELossTrak)
   double StvELossTrak::StvELossTrak::Theta2() 	const 
   {
   StvDebug::Count("THETA",sqrt(fTotTheta2)*57);
-  return fTotTheta2;	}
+  return fTotTheta2;
+  }
 
 //_____________________________________________________________________________
 void StvELossTrak::Reset(double mass, double charge)
