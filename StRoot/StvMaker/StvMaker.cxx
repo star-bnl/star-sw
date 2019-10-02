@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.60.2.3 2019/05/08 01:18:23 perev Exp $
+// $Id: StvMaker.cxx,v 1.60.2.4 2019/10/02 00:08:52 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -85,6 +85,7 @@ More detailed: 				<br>
 #include "Stv/StvTrack.h"
 #include "Stv/StvNode.h"
 #include "StvStEventMaker.h"
+#include "StvUtil/StvELossTrak.h"
 /// Definion of minimal primary vertex errors.
 /// Typical case,vertex got from simulations with zero errors.
 /// But zero errors could to unpredicted problems
@@ -108,7 +109,6 @@ StvMaker::StvMaker(const char *name) : StMaker(name)
 //SetAttr("makePulls"           ,kTRUE);
   SetAttr("refit"           	,kTRUE);
   SetAttr("HitLoadOpt"          ,0);
-
 }
 
 //_____________________________________________________________________________
@@ -137,6 +137,7 @@ Int_t StvMaker::Init()
 //		Add maker immediately after Input maker to cleanup StEvent
   StvStEventMaker *mk =StvStEventMaker::Inst();
   if (mk) mk->Init();
+  StvELossTrak::Test();
   return StMaker::Init();
 }
 
