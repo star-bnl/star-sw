@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.33.2.3 2019/06/14 18:55:39 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.33.2.4 2019/10/02 00:07:48 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -143,7 +143,8 @@ static StTGeoProxy* tgp = StTGeoProxy::Inst();
     else          {nHitz++;nTotHitz++;}
   }
   int nIniHits = tgp->InitHits();
-  assert(nTotHits==nIniHits);
+  assert(nTotHits<=nIniHits);
+  Info("LoadHits","Placed nTotHits/nPlacedHits = %d / %d\n",nTotHits,nIniHits);
   Info("LoadHits","Loaded %d good, recovered %d true %d and failed %d of all hits"
       ,nTotHits,nTotHits-nTotGits,nTotTrue,nTotHitz);
   return nTotHits;
@@ -225,6 +226,9 @@ static int knt=0;knt++;
    const StHitPlane *hp = tgh->AddHit(mStvHit,mDetId,xyz,hard,seed);
    sure =  tgh->IsGoodHit();
    if (!hp) { StvToolkit::Inst()->FreeHit(mStvHit); mStvHit = 0; return 0;}
+
+   printf(" hit=%p in %s\n",(void*)mStvHit,hp->GetName()); //???????????????????????????
+
 
    if (did == kTpcId && fabs(xyz[2])<200) {// TPC hit check for being in sector
      const float* org = hp->GetOrg(xyz);
