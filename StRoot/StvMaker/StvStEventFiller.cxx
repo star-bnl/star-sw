@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.43.2.1 2017/12/02 00:40:36 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.43.2.2 2019/10/02 00:11:15 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.43.2.2  2019/10/02 00:11:15  perev
+ * Pull++
+ *
  * Revision 1.43.2.1  2017/12/02 00:40:36  perev
  * Make StvKutta branch
  *
@@ -1429,12 +1432,15 @@ static int nCall=0; nCall++;
   aux.mRxy     = v3.perp();
   aux.mPhi     = v3.phi();
   aux.mZ       = v3.z();
+  StvFitErrsCentral feCnt;
+  feCnt.Set(fp,fe);
 
-  aux.mPtErr   = sqrt(fe.mPP)*aux.mPt*aux.mPt;
-  aux.mPsiErr  = sqrt(fe.mFF);
-  aux.mDipErr  = sqrt(fe.mLL);
-  aux.mRxyErr  = sqrt(fe[0]);
-  aux.mZErr    = sqrt(fe[2]);
+//  aux.mPtErr   = sqrt(feCnt.mPP)*aux.mPt*aux.mPt;
+  aux.mPtErr   = sqrt(fe.PtErr(fp));
+  aux.mPsiErr  = sqrt(feCnt.mAA);
+  aux.mDipErr  = sqrt(feCnt.mLL);
+  aux.mRxyErr  = sqrt(feCnt[0]);
+  aux.mZErr    = sqrt(feCnt[2]);
 
   aux.mIdTruTk = stTrack->idTruth();
   aux.mQaTruTk = stTrack->qaTruth();
@@ -1494,7 +1500,6 @@ static int nCall=0; nCall++;
   double x,y,z,r;
 
 
-//const StvFitErrs  &fe = node->GetFE();
   const StvNodePars &fp = node->GetFP(); 
   float yz[2],yzErr[2];
   getDcaLocal(node,yz,yzErr);
