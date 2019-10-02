@@ -322,6 +322,12 @@ if (!tit) tit = "";
 //_____________________________________________________________________________
 void StvTrack::Print(const char *opt) const
 {
+static const char* TypeEnd[]={"Null"
+        ,"ContNitsTooBig",	"TotlNitsTooBig",	"GoodHitsTooSml",	"TotlHitsTooSml"
+        , 0,0,0,0, 0,0
+	,"DiveBreak",		"DiveDca",		"ZMax",    		"RxyMax"
+        ,"CurvMax"  ,		"PtiMax" ,		"FitFailed"				};
+
   if (!opt) opt = "";
   printf("Track %p\n",(void*)this);
 
@@ -333,6 +339,7 @@ void StvTrack::Print(const char *opt) const
     n++;printf("%3d - ",n);
     node->Print(opt);
   }
+  printf("---TypeEnd = %d (%s)\n",mTypeEnd,TypeEnd[mTypeEnd]);
 }
 //_____________________________________________________________________________
 double StvTrack::ToBeam() const
