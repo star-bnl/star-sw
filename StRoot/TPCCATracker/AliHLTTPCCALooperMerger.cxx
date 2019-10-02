@@ -131,6 +131,7 @@ void AliHLTTPCCALooperMerger::FillSegments()
     fSegments.push_back( *segment );
   }
 //  std::sort( fSegments.begin(), fSegments.end(), LooperSegment::CompareL );
+  std::cout<<" ----- fSegments.size(): "<<fSegments.size()<<"\n";
 }
 
 void AliHLTTPCCALooperMerger::CheckSegments()
@@ -215,7 +216,7 @@ disp.DrawTPC();
       float x_seg_1_g = -(y_seg_1 * cos11 - x_seg_1 * sin11);
       float y_seg_1_g = x_seg_1 * cos11 + y_seg_1 * sin11;
 //      disp.DrawHitGlobal( x_seg_1_g, y_seg_1_g, z_seg_1, kGreen, 0.25 );
-      if( ih > 0 ) disp.SpecDrawLineG( x_seg_1_g, y_seg_1_g, z_seg_1, x0, y0, z0, 45, 0.15 );
+      if( ih > 0 ) disp.SpecDrawLineG( x_seg_1_g, y_seg_1_g, z_seg_1, x0, y0, z0, 26, 0.15 );
       x0 = x_seg_1_g;
       y0 = y_seg_1_g;
       z0 = z_seg_1;
@@ -240,8 +241,9 @@ for( int ih = 0; ih < track.NClusters(); ih++ ) {
   float sin11(slices[hit1r.ISlice()]->Param().CosAlpha());
   float x_seg_1_g = -(y_seg_1 * cos11 - x_seg_1 * sin11);
   float y_seg_1_g = x_seg_1 * cos11 + y_seg_1 * sin11;
-//  disp.DrawHitGlobal( x_seg_1_g, y_seg_1_g, z_seg_1, kGreen, 0.25 );
-  if( ih > 0 ) disp.SpecDrawLineG( x_seg_1_g, y_seg_1_g, z_seg_1, x0, y0, z0, 45, 0.15 );
+  disp.DrawHitGlobal( x_seg_1_g, y_seg_1_g, z_seg_1, kGreen, 0.25 );
+//  if( ih > 0 ) disp.SpecDrawLineG( x_seg_1_g, y_seg_1_g, z_seg_1, x0, y0, z0, 45, 0.15 );
+  if( ih > 0 ) disp.SpecDrawLineG( x_seg_1_g, y_seg_1_g, z_seg_1, x0, y0, z0, kGreen, 0.15 );
 //  if( ih == 0 && counter > 0 ) disp.SpecDrawLineG( x_seg_1_g, y_seg_1_g, z_seg_1, x0s, y0s, z0s, kRed, 0.15 );
   x0 = x_seg_1_g;
   y0 = y_seg_1_g;
@@ -286,6 +288,8 @@ for( int ih = 0; ih < track.NClusters(); ih++ ) {
   float y_seg_1_g = x_seg_1 * cos11 + y_seg_1 * sin11;
   disp.DrawHitGlobal( x_seg_1_g, y_seg_1_g, z_seg_1, kBlue, 0.25 );
   if( ih > 0 ) disp.SpecDrawLineG( x_seg_1_g, y_seg_1_g, z_seg_1, x0, y0, z0, kBlue, 0.15 );
+//  disp.DrawHitGlobal( x_seg_1_g, y_seg_1_g, z_seg_1, kGreen, 0.25 );
+//  if( ih > 0 ) disp.SpecDrawLineG( x_seg_1_g, y_seg_1_g, z_seg_1, x0, y0, z0, kGreen, 0.15 );
 //  if( ih == 0 && counter > 0 ) disp.SpecDrawLineG( x_seg_1_g, y_seg_1_g, z_seg_1, x0s, y0s, z0s, kRed, 0.15 );
   x0 = x_seg_1_g;
   y0 = y_seg_1_g;
@@ -314,14 +318,17 @@ void AliHLTTPCCALooperMerger::SaveSegments()
 //      iTrack = seg->iTr;
 //      z_h_dn = seg->z_h_dn;
 //    }
+    int iOrigSeg;
     int iLooper;
     int iTrack;
     float z_h_dn;
     bool grow;
+    bool revers;
 
     static bool comp( const SortSegments &a, const SortSegments &b ) {
       if ( a.iLooper < b.iLooper ) return 1;
       if ( a.iLooper > b.iLooper ) return 0;
+      if ( a.revers ) return ( a.z_h_dn > b.z_h_dn );
       return ( a.z_h_dn < b.z_h_dn );
     }
   };
@@ -330,11 +337,27 @@ void AliHLTTPCCALooperMerger::SaveSegments()
     segments[iSeg].iLooper = fSegments[iSeg].iLooper;
     segments[iSeg].iTrack = fSegments[iSeg].iTr;
     segments[iSeg].z_h_dn = fSegments[iSeg].z_h_dn;
+    segments[iSeg].iOrigSeg = iSeg;
     if( fSegments[iSeg].z_h_dn < fSegments[iSeg].z_h_up ) segments[iSeg].grow = true;
     else segments[iSeg].grow = false;
+    segments[iSeg].revers = false;
   }
   std::sort( &(segments[0]), &(segments[fSegments.size()-1]), SortSegments::comp );
-
+  int tLooper = segments[0].iLooper;
+  float tQPt = fSegments[segments[0].iOrigSeg].QPt_abs;
+  int tNSeg = 1;
+  for( int iSeg = 0; iSeg < fSegments.size()-1; iSeg++ ) {
+    if( segments[iSeg].iLooper != tLooper ) {
+      if( tQPt > fSegments[segments[iSeg-1].iOrigSeg].QPt_abs ) {
+	for( int i = iSeg - tNSeg; i < iSeg; i++ ) segments[i].revers = true;
+      }
+      tLooper = segments[iSeg].iLooper;
+      tQPt = fSegments[segments[iSeg].iOrigSeg].QPt_abs;
+      tNSeg = 0;
+    }
+    tNSeg++;
+  }
+  std::sort( &(segments[0]), &(segments[fSegments.size()-1]), SortSegments::comp );
   int iLooper = 0;
   for( int iSeg = 1; iSeg < fSegments.size()-1; iSeg++ ) {
     int prevTr = -1;
@@ -346,6 +369,7 @@ void AliHLTTPCCALooperMerger::SaveSegments()
       if( prevTr != nextTr ) {
 	track.SetLooper( prevTr, nextTr );
 	if( segments[iSeg].grow ) track.SetGrow();
+	if( segments[iSeg].revers ) track.SetRevers();
       }
       prevTr = segments[iSeg].iTrack;
       iSeg++;

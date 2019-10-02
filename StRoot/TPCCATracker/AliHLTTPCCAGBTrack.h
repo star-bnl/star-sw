@@ -34,7 +34,7 @@ class AliHLTTPCCAGBTrack
     friend std::ostream &operator<<( std::ostream &, const AliHLTTPCCAGBTrack & );
   public:
 
-  AliHLTTPCCAGBTrack(): fFirstHitRef( 0 ), fNHits( 0 ), fInnerParam(), fOuterParam(), fAlpha( 0 ), fNDeDx(0), fDeDx( 0 ), tIsLooper(0), tIsMerged(false) { }
+    AliHLTTPCCAGBTrack(): fFirstHitRef( 0 ), fNHits( 0 ), fInnerParam(), fOuterParam(), fAlpha( 0 ), fNDeDx(0), fDeDx( 0 ), tIsLooper(0), tIsMerged(false), tReverse(false) { ; }
 
     int NHits()               const { return fNHits; }
     int FirstHitRef()         const { return fFirstHitRef; }
@@ -82,6 +82,12 @@ class AliHLTTPCCAGBTrack
     void SetLooperClone() { tIsLooper = -1; }
     int IsLooper() { return tIsLooper; }
     int IsLooper() const { return tIsLooper; }
+
+    void SetReverse( bool r = true ) { tReverse = r; }
+    bool IsReverse() const { return tReverse; }
+
+    void ReverseInnerPar() { fInnerParam.ReversePar(); }
+    void ReverseOuterPar() { fOuterParam.ReversePar(); }
     // ---
 
   protected:
@@ -106,6 +112,8 @@ class AliHLTTPCCAGBTrack
     bool tReco;
     bool tIsClone;
     bool tIsMerged;
+
+    bool tReverse;
     // ---
 };
 

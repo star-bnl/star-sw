@@ -58,6 +58,8 @@ class AliHLTTPCCAMergedTrack
       fIsGrow = false;
       fPrevSegment = -5;
       fNextSegment = -5;
+
+      tRevers = false;
       // ---
     }
     // ---
@@ -85,6 +87,8 @@ class AliHLTTPCCAMergedTrack
     int LpNextNb() const { return fNextSegment; }
     void SetGrow() { fIsGrow = true; }
     bool IsGrow() const { return fIsGrow; }
+    void SetRevers( bool r = true ) { tRevers = r; }
+    bool IsRevers() const { return tRevers; }
     // ---
   
   private:
@@ -96,13 +100,15 @@ class AliHLTTPCCAMergedTrack
     int fFirstClusterRef;            //* index of the first track cluster in corresponding cluster arrays
     int fNClusters;                  //* number of track clusters
     // ---
+    int fPrevSegment;
+    int fNextSegment;
     bool tIsMerged;
     bool fUsed;
 
     bool fIsLooper;
     bool fIsGrow;
-    int fPrevSegment;
-    int fNextSegment;
+
+    bool tRevers;
     // ---
 };
 

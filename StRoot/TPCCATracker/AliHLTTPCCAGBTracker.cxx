@@ -536,18 +536,26 @@ void AliHLTTPCCAGBTracker::Merge()
 	int nLooperHits = track.NClusters();
 	AliHLTTPCCAGBTrack &trackGB = fTracks[fNTracks];
 	trackGB.SetFirstHitRef( nTrackHits );
-	trackGB.SetInnerParam( track.InnerParam() );
-	trackGB.SetOuterParam( track.OuterParam() );
+//	trackGB.SetInnerParam( track.InnerParam() );
+//	trackGB.SetOuterParam( track.OuterParam() );
+	if( (!track.IsRevers() && track.IsGrow()) || (track.IsRevers() && !track.IsGrow()) ) {
+	  trackGB.SetInnerParam( track.InnerParam() );
+	}
+	if( (track.IsRevers() && track.IsGrow()) || (!track.IsRevers() && !track.IsGrow()) ) {
+	  trackGB.SetInnerParam( track.OuterParam() );
+	  trackGB.ReverseInnerPar();
+	}
 	trackGB.SetAlpha( track.InnerAlpha() );
 	trackGB.SetDeDx( 0 );
 	if( track.IsMerged() ) trackGB.SetMerged();
 	if( track.LpNextNb() != -1 ) trackGB.SetLooper();
+if( track.IsRevers() ) trackGB.SetReverse();
 	int icl_start = 0;
 	int icl_end = track.NClusters();
 	int iter = 1;
 	for ( int icl0 = 0; icl0 < track.NClusters(); icl0++ ) {
 	  int icl = icl0;
-	  if( !track.IsGrow() ) icl = track.NClusters() - icl0 - 1;
+	  if( (!track.IsGrow() && !track.IsRevers()) || (track.IsGrow() && track.IsRevers()) ) icl = track.NClusters() - icl0 - 1;
 	  const DataCompressor::SliceRowCluster &iDsrc = out.ClusterIDsrc( track.FirstClusterRef() + icl );
 	  unsigned int iSlice = iDsrc.Slice();
 	  unsigned int iRow   = iDsrc.Row();
@@ -567,6 +575,7 @@ void AliHLTTPCCAGBTracker::Merge()
 	trackGBseg.SetDeDx( 0 );
 	trackGBseg.SetNHits( nTrackHitsTmp );
 	trackGBseg.SetLooperClone();
+	if( (track.IsRevers() && track.IsGrow()) || (!track.IsRevers() && !track.IsGrow()) ) trackGBseg.SetReverse();
 	// ---
 
 	while( nextTr != -1 ) {
@@ -578,7 +587,7 @@ void AliHLTTPCCAGBTracker::Merge()
 	  iSegment++;
 	  for ( int icl0 = 0; icl0 < trackNext.NClusters(); icl0++ ) {
 	    int icl = icl0;
-	    if( !trackNext.IsGrow() ) icl = trackNext.NClusters() - icl0 - 1;
+	    if( (!trackNext.IsGrow() && !trackNext.IsRevers()) || (trackNext.IsGrow() && trackNext.IsRevers()) ) icl = trackNext.NClusters() - icl0 - 1;
 	    const DataCompressor::SliceRowCluster &iDsrc = out.ClusterIDsrc( trackNext.FirstClusterRef() + icl );
 	    unsigned int iSlice = iDsrc.Slice();
 	    unsigned int iRow   = iDsrc.Row();
@@ -596,9 +605,19 @@ void AliHLTTPCCAGBTracker::Merge()
 	  trackGBseg1.SetDeDx( 0 );
 	  trackGBseg1.SetNHits( trackNext.NClusters() );
 	  trackGBseg1.SetLooperClone();
+	  if( (trackNext.IsRevers() && trackNext.IsGrow()) || (!trackNext.IsRevers() && !trackNext.IsGrow()) ) trackGBseg1.SetReverse();
 	  // ---
 	  nTrackHitsTmp += trackNext.NClusters();
 	  nextTr = trackNext.LpNextNb();
+	  if( nextTr == -1 ) {
+	    if( (!track.IsRevers() && track.IsGrow()) || (track.IsRevers() && !track.IsGrow()) ) {
+	      trackGB.SetOuterParam( track.OuterParam() );
+	    }
+	    if( (track.IsRevers() && track.IsGrow()) || (!track.IsRevers() && !track.IsGrow()) ) {
+	      trackGB.SetOuterParam( track.InnerParam() );
+	      trackGB.ReverseOuterPar();
+	    }
+	  }
 	};
 
 	trackGB.SetNHits( nTrackHitsTmp );

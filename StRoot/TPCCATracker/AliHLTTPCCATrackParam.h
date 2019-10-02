@@ -199,6 +199,12 @@ class AliHLTTPCCATrackParam
       fChi2 = 0; fNDF = 0;
     }
 
+    void ReversePar() {
+      fP[2] = -fP[2];
+      fP[4] = -fP[4];
+      fSignCosPhi = -fSignCosPhi;
+    }
+
   private:
     float fX;      // x position
     float fSignCosPhi; // sign of cosPhi   // phi = arctg (Dy/Dx)
