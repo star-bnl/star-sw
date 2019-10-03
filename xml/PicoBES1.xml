@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!-- <job maxFilesPerProcess="10" filesPerHour="10.0" fileListSyntax="paths" simulateSubmission ="false" copyInputLocally="false"> -->
-<job maxFilesPerProcess="1" filesPerHour="10.0" fileListSyntax="paths" simulateSubmission ="false" copyInputLocally="false">
+<job maxFilesPerProcess="10" filesPerHour="10.0" fileListSyntax="paths" simulateSubmission ="false" copyInputLocally="false">
+<!-- <job maxFilesPerProcess="1" filesPerHour="10.0" fileListSyntax="paths" simulateSubmission ="false" copyInputLocally="false"> -->
         <command>
          cd ${SUBMITTINGDIRECTORY}
   setenv STARFPE NO
 #  setenv NODEBUG yes
 #  starver TFG18m
-  starver TFG18n
+  starver TFG19h
 #  setup 64b
   set filelist = `cat $FILELIST | awk '{print $1}'`
   echo "file list = ${filelist}"
@@ -17,15 +17,16 @@
     echo ${input} | grep ';'
     if (! $?) then
       set dir      = `echo ${input} | awk -F\; '{print $1}'`
-      set tag      = `echo ${input} | awk -F\; '{print $2}'`
+      set tagg     = `echo ${input} | awk -F\; '{print $2}'`
+      set tag      = `basename ${tagg} .MuDst.root`; 
     else
       set dir = `dirname ${input}`;
       set tag = `basename ${input} .MuDst.root`;
     endif
     set log = ${tag}C.log
     if (! -r "${tag}.picoDst.root") then
-      root.exe -q -b -x 'lMuDst.C(-1,"root://xrdstar.rcf.bnl.gov:1095/'${dir}'/'${tag}'.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,PicoVtxDefault,quiet")'  'makePicoDst.C("y2010")'  &gt;&amp; ${log}
-#      root.exe -q -b -x 'lMuDst.C(-1,"root://xrdstar.rcf.bnl.gov:1095/'${dir}'/'${tag}'.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,PicoVtxDefault,quiet")'  'makePicoDst.C("y2011")'  &gt;&amp; ${log}
+#      root.exe -q -b -x 'lMuDst.C(-1,"root://xrdstar.rcf.bnl.gov:1095/'${dir}'/'${tag}'.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,PicoVtxDefault,quiet")'  'makePicoDst.C("y2010")'  &gt;&amp; ${log}
+      root.exe -q -b -x 'lMuDst.C(-1,"root://xrdstar.rcf.bnl.gov:1095/'${dir}'/'${tag}'.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,PicoVtxDefault,quiet")'  'makePicoDst.C("y2011")'  &gt;&amp; ${log}
     endif
   end
         </command>
