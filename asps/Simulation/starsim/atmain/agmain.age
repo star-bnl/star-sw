@@ -1,6 +1,10 @@
-* $Id: agmain.age,v 1.4 2019/10/01 20:32:52 jwebb Exp $
+* $Id: agmain.age,v 1.5 2019/10/03 22:11:16 jwebb Exp $
 * $Log: agmain.age,v $
+* Revision 1.5  2019/10/03 22:11:16  jwebb
+* Revert back to 20MW.
+*
 * Revision 1.4  2019/10/01 20:32:52  jwebb
+*
 * Increase memory footprint of starsim, to mitigate #3395/3396.
 *
 * Revision 1.3  2004/03/12 22:29:45  potekhin
@@ -58,7 +62,7 @@
 #include "geant321/gcflag.inc"
 #include "geant321/gctime.inc"
 *
-      INTEGER           NWGEAN /100 000 000/,    NWPAW/2 000 000/
+      INTEGER           NWGEAN /20 000 000/,    NWPAW/2 000 000/
       CHARACTER*240     BATCHF,PAWLOGF,PROG,COMD,ARG,VERSION,FATCAT,DOCFILE
       INTEGER           AgIPAW,IwTYP
       COMMON /AgCIPAW/  AgIPAW,IwTYP
