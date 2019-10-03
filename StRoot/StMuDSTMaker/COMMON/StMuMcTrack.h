@@ -8,7 +8,7 @@ class StMuMcTrack : public TObject {
  public:
   enum EHIT {ktpc, ksvt, kssd,
 	     kctb, keem, kemc, kesm, kftp, kgem, khpd, kist, kigt, kfst, 
-	     kfgt, kfpd, kmwc, kpgc, kpmd, ksmd, kpix, ktof, kvpd, ketr, khca, kfts, keto, kepd, ktpcR, ktot};
+	     kfgt, kfpd, kmwc, kpgc, kpmd, ksmd, kpix, ktof, kvpd, ketr, khca, kfts, keto, kepd, kstg, kwca, ktpcR, ktot};
   StMuMcTrack(const g2t_track_st &t);
   StMuMcTrack();
   virtual ~StMuMcTrack() {}
@@ -46,6 +46,8 @@ class StMuMcTrack : public TObject {
   UChar_t     		No_fts_hit()   const {return NoHits(kfts);}   /* Nhits in fts */                     
   UChar_t     		No_eto_hit()   const {return NoHits(keto);}   /* Nhits in eto */                     
   UChar_t     		No_epd_hit()   const {return NoHits(kepd);}   /* Nhits in epd */                     
+  UChar_t     		No_stg_hit()   const {return NoHits(kstg);}   /* Nhits in stg */                     
+  UChar_t     		No_wca_hit()   const {return NoHits(kwca);}   /* Nhits in wca */                     
   Int_t                 ItrmdVertex()  const {return mItrmdVertex;} /* First intermediate vertex */	   
   Int_t          	IdVx       ()  const {return mIdVx;       } /* Id of start vertex of track */	   
   Int_t          	IdVxEnd    ()  const {return mIdVxEnd;    } /* Id of stop vertex of this track */ 

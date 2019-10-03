@@ -1,5 +1,17 @@
-// $Id: St_geant_Maker.cxx,v 1.173 2018/10/30 13:54:03 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.176 2019/09/30 14:13:27 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.176  2019/09/30 14:13:27  jwebb
+//
+// Integrate HITS for forward tracking and forward calorimeter.
+//
+// n.b. deprecates the legacy HcalGeo RnD detector.
+//
+// Revision 1.175  2018/12/03 00:56:32  perev
+// Use uint64_t + cleanup
+//
+// Revision 1.174  2018/11/21 23:05:27  perev
+// 64bits
+//
 // Revision 1.173  2018/10/30 13:54:03  jwebb
 //
 // Implemented a templated method for creating and filling the g2t hit tables.
@@ -657,7 +669,9 @@
 #include "g2t/St_g2t_mtd_Module.h"
 #include "g2t/St_g2t_etr_Module.h"
 #include "g2t/St_g2t_hca_Module.h"
+#include "g2t/St_g2t_wca_Module.h"
 #include "g2t/St_g2t_fts_Module.h"
+#include "g2t/St_g2t_stg_Module.h"
 #include "g2t/St_g2t_epd_Module.h"
 
 #include "St_db_Maker/St_db_Maker.h"
@@ -1308,11 +1322,16 @@ Int_t St_geant_Maker::Make() {
   // Endcap trd
   AddHits<St_g2t_etr_hit>( "EIDH", {"TABD"}              , "g2t_etr_hit", g2t_etr ); 
   
-  // Legacy RnD Forward Hadron calorimeter 
-  AddHits<St_g2t_emc_hit>( "HCAH", {"HCEL","HCES","FPSC","BBCF","BBCB","LEDG","HSTP"} , "g2t_hca_hit", g2t_hca ); 
+  // Legacy RnD Forward Hadron calorimeter [deprecated]
+//AddHits<St_g2t_emc_hit>( "HCAH", {"HCEL","HCES","FPSC","BBCF","BBCB","LEDG","HSTP"} , "g2t_hca_hit", g2t_hca ); 
   
   // Forward tracker 
   AddHits<St_g2t_fts_hit>( "FTSH",{"FTSA","FSIA", "FSIB", "FSIC"}, "g2t_fts_hit", g2t_fts ); 
+
+  AddHits<St_g2t_fts_hit>( "FSTH",{"FTOS","FTIS"},                 "g2t_fsi_hit", g2t_fts ); 
+  AddHits<St_g2t_fts_hit>( "STGH",{"TGCG"},                        "g2t_stg_hit", g2t_stg );
+  AddHits<St_g2t_emc_hit>( "WCAH",{"WSCI"},                        "g2t_wca_hit", g2t_wca );
+  AddHits<St_g2t_hca_hit>( "HCAH",{"HSCI"},                        "g2t_hca_hit", g2t_hca );
 
   // Event plane detector 
   AddHits<St_g2t_ctf_hit>( "EPDH", {"EPDT"}              , "g2t_epd_hit", g2t_epd ); 
