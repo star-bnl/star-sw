@@ -64,7 +64,7 @@ endsw
 #set list = "cmake-3.14.5 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl-2.1 Python-2.7.12 pyparsing-1.5.7 xrootd-4.9.0-rc3 Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8235 eigen3 mercurial-4.4-rc coin soqt Coin3D-simage-cf953eacd849 Coin3D-soqt-483ecb26b30c boost_1_66_0 VecGeom";
 #set list = "cmake-3.14.5 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl-2.1 pyparsing-1.5.7 xrootd-4.9.0-rc3 Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8235 eigen3 mercurial-4.4-rc coin soqt Coin3D-simage-cf953eacd849 Coin3D-soqt-483ecb26b30c boost_1_66_0 VecGeom";
 #set list = "cmake-3.14.5 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl-2.1 pyparsing-1.5.7 xrootd-4.9.0-rc3 Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-4.4-rc coin soqt Coin3D-simage-cf953eacd849 Coin3D-soqt-483ecb26b30c boost_1_66_0 VecGeom node-v10.16.0";
-set list = "cmake-3.14.5 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl pyparsing-1.5.7 xrootd-4.9.0-rc3 Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-4.4-rc coin soqt Coin3D-simage-cf953eacd849 Coin3D-soqt-483ecb26b30c boost_1_66_0 VecGeom node-v10.16.0";
+set list = "cmake-3.14.5 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl pyparsing-1.5.7 xrootd-4.10.0-rc5  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-4.4-rc coin soqt Coin3D-simage-cf953eacd849 Coin3D-soqt-483ecb26b30c boost_1_66_0 VecGeom node-v10.16.0";
 #set list = "gsl-2.1";
 #set list = "boost_1_66_0";
 #set list = "Coin3D-simage-cf953eacd849";
@@ -95,12 +95,15 @@ setenv CFLAGSd   "$cflags"
           if (-r ~/sources/${pkg}.tar.gz) then
             gunzip ~/sources/${pkg}.tar.gz
             tar xf ~/sources/${pkg}.tar
+	    mv ${pkg} ../
           else
             if (-r ~/sources/${pkg}.tar) then
               tar xf ~/sources/${pkg}.tar
+	      mv ${pkg} ../
             else
               if (-r ~/sources/${pkg}.tz) then
                 tar xfz ~/sources/${pkg}.tz
+         	mv ${pkg} ../
               else
                 break;
               endif
@@ -126,10 +129,10 @@ setenv CFLAGSd   "$cflags"
 	if ( $?) break;
 	make install
         if ( $?) break;
-	make blas
-        if ( $?) break;
-	make check
-        if ( $?) break;
+#	make blas
+#        if ( $?) break;
+#	make check
+#        if ( $?) break;
         touch ../${pkg}.Done
 	breaksw
       case "xrootd*":
