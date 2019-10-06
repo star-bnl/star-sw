@@ -50,7 +50,7 @@ else
    echo "Done!"
 fi
 
-logp=/star/embed/log/${particle}_${ifset}_${reqid}/log
+logp=/star/embed/log/${particle}_${ifset}_${reqid}
 if [ ! -d "$logp" ] ; then
    echo "Fset# $ifset directory can not be found in /star/embed/log"
 else
