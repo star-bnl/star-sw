@@ -113,7 +113,7 @@ for my $h  (split /\s/,$sources) {
     #print "DEBUG SRC:", $h, "\n";
     next if !$h;
     next if $h =~ /LinkDef/;
-
+    next if $h =~ /Ttypes/;
     
     if ($h =~ /Stypes/)  {
 	$h_files .= " " . basename($h); 
