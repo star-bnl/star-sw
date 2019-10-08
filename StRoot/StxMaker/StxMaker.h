@@ -14,12 +14,15 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+#include <vector>
 #include "TVector3.h"
 #include "TMatrixDSym.h"
 #include "GenFit/Track.h"
 #include "StThreeVectorD.hh"
 #include "GenFit/MeasuredStateOnPlane.h"
 class AliHLTTPCCAGBTrack;
+class AliHLTTPCCATrackParam;
+class StHit;
 class StEvent;
 class StTrack;
 class StPrimaryTrack;
@@ -42,10 +45,11 @@ class StxMaker : public StMaker {
   virtual      ~StxMaker() {}
   virtual Int_t InitRun(Int_t runumber);
   virtual Int_t Make();
-  virtual Int_t FitTrack(const AliHLTTPCCAGBTrack &tr);
-#ifndef __CINT__
-  static Double_t ConvertCA2Gen(const Double_t alpha, const StxCApar& stxPar, CA2GenState_t& ca2Gen );
-#endif
+  static vector<const StHit *> *GetHitVector(const AliHLTTPCCAGBTrack *tr, Bool_t reverse = kFALSE);
+  virtual Int_t FitTrack(const AliHLTTPCCAGBTrack *tr);
+  virtual Int_t FitTrack(Double_t alpha, const AliHLTTPCCATrackParam *InnerParam, const AliHLTTPCCATrackParam *OuterParam, vector<const StHit*> *HitVect);
+  static Double_t ConvertCA2Gen(const Double_t alpha, const StxCApar* stxPar, CA2GenState_t* ca2Gen );
+  virtual void   SetDebug(Int_t l=1);          // *MENU*
   Bool_t Accept(genfit::Track *kTrack);
   void   FillGlobalTrack(genfit::Track *kTrack);
   void   FillPrimaryTracks();

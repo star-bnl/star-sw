@@ -540,12 +540,14 @@ void AliHLTTPCCAGBTracker::Merge()
 //	trackGB.SetOuterParam( track.OuterParam() );
 	if( (!track.IsRevers() && track.IsGrow()) || (track.IsRevers() && !track.IsGrow()) ) {
 	  trackGB.SetInnerParam( track.InnerParam() );
+	  trackGB.SetAlpha( track.InnerAlpha() );
 	}
 	if( (track.IsRevers() && track.IsGrow()) || (!track.IsRevers() && !track.IsGrow()) ) {
 	  trackGB.SetInnerParam( track.OuterParam() );
 	  trackGB.ReverseInnerPar();
+	  trackGB.SetAlpha( track.OuterAlpha() );
 	}
-	trackGB.SetAlpha( track.InnerAlpha() );
+//	trackGB.SetAlpha( track.InnerAlpha() );
 	trackGB.SetDeDx( 0 );
 	if( track.IsMerged() ) trackGB.SetMerged();
 	if( track.LpNextNb() != -1 ) trackGB.SetLooper();
@@ -610,11 +612,13 @@ if( track.IsRevers() ) trackGB.SetReverse();
 	  nTrackHitsTmp += trackNext.NClusters();
 	  nextTr = trackNext.LpNextNb();
 	  if( nextTr == -1 ) {
-	    if( (!track.IsRevers() && track.IsGrow()) || (track.IsRevers() && !track.IsGrow()) ) {
-	      trackGB.SetOuterParam( track.OuterParam() );
+	    if( (!trackNext.IsRevers() && trackNext.IsGrow()) || (trackNext.IsRevers() && !trackNext.IsGrow()) ) {
+	      trackGB.SetOuterParam( trackNext.OuterParam() );
+	      trackGB.SetOuterAlpha( trackNext.OuterAlpha() );
 	    }
-	    if( (track.IsRevers() && track.IsGrow()) || (!track.IsRevers() && !track.IsGrow()) ) {
-	      trackGB.SetOuterParam( track.InnerParam() );
+	    if( (trackNext.IsRevers() && trackNext.IsGrow()) || (!trackNext.IsRevers() && !trackNext.IsGrow()) ) {
+	      trackGB.SetOuterParam( trackNext.InnerParam() );
+	      trackGB.SetOuterAlpha( trackNext.InnerAlpha() );
 	      trackGB.ReverseOuterPar();
 	    }
 	  }

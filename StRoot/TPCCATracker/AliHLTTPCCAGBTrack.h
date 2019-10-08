@@ -42,6 +42,7 @@ class AliHLTTPCCAGBTrack
     const AliHLTTPCCATrackParam &InnerParam() const { return fInnerParam; }
     const AliHLTTPCCATrackParam &OuterParam() const { return fOuterParam; }
     float Alpha()            const { return fAlpha; }
+    float OuterAlpha()       const { return fOuterAlpha; }
     int   NDeDx()            const { return fNDeDx; }
     float DeDx()             const { return fDeDx; }
 
@@ -51,6 +52,7 @@ class AliHLTTPCCAGBTrack
     void SetInnerParam( const AliHLTTPCCATrackParam &v ) {  fInnerParam = v; }
     void SetOuterParam( const AliHLTTPCCATrackParam &v ) {  fOuterParam = v; }
     void SetAlpha( float v )               {  fAlpha = v; }
+    void SetOuterAlpha( float v )          {  fOuterAlpha = v; }
     void SetNDeDx( int n)                  {  fNDeDx = n; }
     void SetDeDx( float v )                {  fDeDx = v; }
 
@@ -97,6 +99,7 @@ class AliHLTTPCCAGBTrack
     AliHLTTPCCATrackParam fInnerParam; // fitted track parameters
     AliHLTTPCCATrackParam fOuterParam;
     float fAlpha;             //* Alpha angle of the parametrerisation
+    float fOuterAlpha;
     int   fNDeDx;
     float fDeDx;              //* DE/DX
 

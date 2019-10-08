@@ -201,6 +201,7 @@ class AliHLTTPCCATrackParam
 
     void ReversePar() {
       fP[2] = -fP[2];
+      fP[3] = -fP[3];
       fP[4] = -fP[4];
       fSignCosPhi = -fSignCosPhi;
     }

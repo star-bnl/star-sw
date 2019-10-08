@@ -66,7 +66,7 @@
       StxCAInterface::Run
 	StTPCCAInterface::Run
            StTPCCAInterface::MakeSettings
-           MakeHits
+           StTPCCAInterface::MakeHits
              StxCAInterface::MakeHits()
 		Id = fCaHits.size();
           	hitc.track_key=tpcHit->idTruth();
@@ -83,8 +83,23 @@
                  AliHLTTPCCATracker::SetupCommonMemory	    
                AliHLTTPCCASliceData::InitFromClusterData	    
                AliHLTTPCCASliceData::NumberOfHits 		    
-             AliHLTTPCCATracker::Reconstruct		    
+             AliHLTTPCCATracker::Reconstruct		    // slices
                AliHLTTPCCATracker::Reconstructor::Reconstructor
+             AliHLTTPCCAGBTracker::Merge
+	       AliHLTTPCCAMerger::Clear()
+	       AliHLTTPCCAMerger::SetSliceParam
+               AliHLTTPCCAMerger::Reconstruct
+		 AliHLTTPCCAMerger::Merging
+		   
+	       AliHLTTPCCALooperMerger::SetSliceParam
+               for each slice SetSliceData, SetSlices, SetFirstSliceHits
+	       AliHLTTPCCALooperMerger::StartLooperTest
+	       AliHLTTPCCALooperMerger::FillSegments
+	       AliHLTTPCCALooperMerger::CheckSegments
+	       AliHLTTPCCALooperMerger::SaveSegments
+     
+
+
            MakeSeeds();
              StxCAInterface::MakeSeeds
 	       seed.vhit.push_back(fSeedHits[hId].hit);
@@ -574,3 +589,11 @@ Vector (5)  is as follows
  defined in plane DetPlane: O(-32.2905, -113.675, 136.096) u(0, 0.780684, 0.624927) v(-0.974638, 0.139852, -0.174709) n(-0.223789, -0.609077, 0.760884) 
  3D position: TVector3 A 3D physics vector (x,y,z)=(-32.290499,-113.675114,136.096222) (rho,theta,phi)=(180.241198,40.967786,-105.857702)
  3D momentum: TVector3 A 3D physics vector (x,y,z)=(-0.286149,-0.778798,0.972906) (rho,theta,phi)=(1.278653,40.457852,-110.174529)
+================================================================================
+10/03/19
+pT 0.1 GeV/c
+genfit::Exception thrown with excString:
+KalmanFitterRefTrack::processTrackPoint: ill-conditioned covariance matrix.
+in line: 952 in file: .sl73_x8664_gcc631/obj/StRoot/GenFit/KalmanFitterRefTrack.cc
+with fatal flag 0
+
