@@ -631,8 +631,7 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t
 
   Double_t gain = (row<=St_tpcPadConfigC::instance()->innerPadRows(sector)) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
   Double_t wire_coupling = (row<=St_tpcPadConfigC::instance()->innerPadRows(sector)) ? St_tss_tssparC::instance()->wire_coupling_in() : St_tss_tssparC::instance()->wire_coupling_out();
-  Double_t q = cluster.charge * ((Double_t)St_tss_tssparC::instance()->ave_ion_pot() * 
-				 (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
+  Double_t q = 0; //cluster.charge * ((Double_t)St_tss_tssparC::instance()->ave_ion_pot() * (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
 
   StTpcHit *hit = StTpcHitFlag(global.position(),hard_coded_errors,hw,q
 			       , (UChar_t ) 0  // c
@@ -662,8 +661,7 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
 
   Double_t gain = (row<=St_tpcPadConfigC::instance()->innerPadRows(sector)) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
   Double_t wire_coupling = (row<=St_tpcPadConfigC::instance()->innerPadRows(sector)) ? St_tss_tssparC::instance()->wire_coupling_in() : St_tss_tssparC::instance()->wire_coupling_out();
-  Double_t q = cluster.charge * ((Double_t)St_tss_tssparC::instance()->ave_ion_pot() * 
-				 (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
+  Double_t q = 0; // cluster.charge * ((Double_t)St_tss_tssparC::instance()->ave_ion_pot() * (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
 
   // Correct for slewing (needs corrected q, and time in microsec)
   Double_t freq = gStTpcDb->Electronics()->samplingFrequency();
@@ -1219,19 +1217,19 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
 	      }
 	      Float_t q          =  lHit->charge()                    + kHit->charge();	
 	      Float_t adc        =  lHit->adc()                       + kHit->adc();
-	      Float_t pad        = (lHit->charge()*lHit->pad()        + kHit->charge()*kHit->pad()       )/q;
-	      Float_t timeBucket = (lHit->charge()*lHit->timeBucket() + kHit->charge()*kHit->timeBucket())/q;
+	      Float_t pad        = (lHit->adc()*lHit->pad()        + kHit->adc()*kHit->pad()       )/adc;
+	      Float_t timeBucket = (lHit->adc()*lHit->timeBucket() + kHit->adc()*kHit->timeBucket())/adc;
 	      Short_t minPad  = TMath::Min(lHit->minPad(),  kHit->minPad());
 	      Short_t maxPad  = TMath::Max(lHit->maxPad(),  kHit->maxPad());
 	      Short_t minTmbk = TMath::Min(lHit->minTmbk(), kHit->minTmbk());
 	      Short_t maxTmbk = TMath::Max(lHit->maxTmbk(), kHit->maxTmbk());
 	      Int_t IdT = lHit->idTruth();
-	      Double_t QA = lHit->charge()*lHit->qaTruth();
+	      Double_t QA = lHit->adc()*lHit->qaTruth();
 	      if (IdT == kHit->idTruth()) {
-		QA += kHit->charge()*kHit->qaTruth();
+		QA += kHit->adc()*kHit->qaTruth();
 	      } else {
-		if (lHit->charge()*lHit->qaTruth() < kHit->charge()*kHit->qaTruth()) {
-		  QA = kHit->charge()*kHit->qaTruth();
+		if (lHit->adc()*lHit->qaTruth() < kHit->adc()*kHit->qaTruth()) {
+		  QA = kHit->adc()*kHit->qaTruth();
 		  IdT = kHit->idTruth();
 		}
 	      }

@@ -372,7 +372,7 @@ Int_t StTpcRTSHitMaker::Make() {
 	  //yf        if (isiTpcSector) hw += 1U << 1;
 	  hw += dd->sec << 4;     // (row/100 << 4);   // sector
 	  hw += dd->row << 9;     // (row%100 << 9);   // row
-	  Double_t q = ADC2GeV*cld.charge;
+	  Double_t q = 0; // ADC2GeV*cld.charge;
 	  Id++;
 	  StTpcHit *hit = StTpcHitMaker::StTpcHitFlag(L.position(),hard_coded_errors,hw,q
 						      , (UChar_t ) 0  // counter 
