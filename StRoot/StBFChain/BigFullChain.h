@@ -264,9 +264,6 @@ Bfc_st BFC[] = { // standard chains
   {"MC.2019","","","y2019,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                       "","","",kFALSE},
-  {"MC.2019","","","y2019,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
-   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
-   ,                                                                                      "","","/",kFALSE},
   {"MC.y2019","","","MC2019",                                                              "","","",kFALSE},
   {"MC2019.Ideal","","","MC.2019,MC.Sti,vmc,NewTpcAlignment,ExB"                          ,"","","",kFALSE},
   {"MC2019",      "","","MC.2019,sdt20190401,MC.Sti,vmc,NewTpcAlignment,ExB"              ,"","","",kFALSE},
