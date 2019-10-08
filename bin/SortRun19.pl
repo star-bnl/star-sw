@@ -1,6 +1,7 @@
 #!/usr/bin/env perl 
-my $input = "/star/u/fisyak/DB/Run19.list";
-open(In,$input) or die "Can't open $input";
+
+#my $input = "/star/u/fisyak/DB/Run19.list";
+#open(In,$input) or die "Can't open $input";
 my $line;
 my $runOld = 0;
 my $trigOld = "";
@@ -9,7 +10,8 @@ my $timeOld = 0;
 my $runMin = 0;
 my $runMax = 0;
 my $N = 0;
-while ($line = <In>) {
+#while ($line = <In>) {
+while ($line = <>) {
   my ($run,$trig,$date,$time) = split ' ', $line;
   if ($run eq 'cmd' or $run eq 'runNumber') {next;}
   if ($trig !~  /^prod/) {next;}
@@ -54,4 +56,4 @@ if ($trigOld != 0) {
       printf("%-40s",$trigOld);
   print "\t$runMin\t$runMax\t$dateMin\t$timeMin\t$dateMax\t$timeMax\n";
 }
-close(In);
+#close(In);

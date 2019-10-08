@@ -56,7 +56,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     //  ChainOpt += ",CMuDst,MiniMcMk,IdTruth,useInTracker,tree,";
     //    ChainOpt += ",CMuDst,McAna,IdTruth,useInTracker,tree,KFVertex,xgeometry,";
     //    ChainOpt += ",CMuDst,IdTruth,useInTracker,tree,StiKFVertex,xgeometry,";
-    ChainOpt += ",CMuDst,IdTruth,useInTracker,treexgeometry,";
+    ChainOpt += ",CMuDst,IdTruth,useInTracker,tree,xgeometry,";
     ChainOpt += "bbcSim,btofsim,btofMatch,btofCalib,";
     ChainOpt += "EvOut,-hitfilt,";
     ChainOpt += "McTpcAna,";
@@ -78,6 +78,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   //  Bool_t needAlias = kFALSE;
   TString FileIn(fileIn);
   if (FileIn == "" && fileOut == 0) {
+#if 0
     if (RunOpt.Contains("pythia",TString::kIgnoreCase)) {
       RootFile += "pythia";
     } else if (RunOpt.Contains("hijing",TString::kIgnoreCase)) {
@@ -85,6 +86,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     } else {
       ChainOpt += "gstar,"; RootFile += "gstar";
     }
+#endif
     if (RunOpt.Contains("hadr_of",TString::kIgnoreCase) ||
 	   Opt.Contains("hadr_of",TString::kIgnoreCase)) ChainOpt += "hadr_off,";
     if (RunOpt.Contains("phys_of",TString::kIgnoreCase) ||
@@ -277,7 +279,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   Double_t bgMaxL10  =  6;  // 1e2;// 1e5;
   Double_t mass   = -1;
   for (Int_t i = 0; i < 15; i++) {
-    if (Opt.Contains(Names[i],TString::kIgnoreCase)) {
+    if (RootFile.Contains(Names[i],TString::kIgnoreCase)) {
       ID =Ids[i];
       if (i == 14) {bgMinL10 = 0.544; bgMaxL10 = 0.653;}
       mass = Masses[i];;

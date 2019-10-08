@@ -1770,6 +1770,8 @@ my @badruns = ();
 #$hist = "RunV209"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/02/19 new tpcPressureB
 $hist = "RunV210"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/02/19 fix bug  tpcPressureB
 ######### Run XIX ################################################################################################################
+# onl Run19 | SortRun19.pl  
+#                                                 First run       Last run        begin Time for 1-st run         beginTime for last run
 # production_19GeV_2019                           20056032        20093036        2019-02-25      20:23:20        2019-04-03      11:16:40
 # production_14p5GeV_2019                         20094048        20107026        2019-04-04      09:44:05        2019-04-17      12:45:56
 # production_7.3GeV_fixedTarget_2019              20107029        20107029        2019-04-17      13:34:01        2019-04-17      13:34:01

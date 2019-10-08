@@ -1,57 +1,45 @@
-08/27/18 -08/29/18
+09/02/2019
 Filesystem                   Size  Used Avail Use% Mounted on
-l401:/data/scratch1           17T   15T  2.5T  86% /net/l401/data/scratch1
-     7.8T    daq    
-     6.5T    fisyak/
-             reco/2018
-                  1.9T    27GeV_production_2018		    
-		  244G    27GeV_production_2018.DEV2	    
-		  243G    27GeV_production_2018.DEV2.noAlig   
-		  3.8T    27GeV_production_2018NewAlignment   
-		  6.8G    27GeV_production_2018testAlignment  
-		  249G    27GeV_production_2018.TFG18m	    
-		  512     dump.080418			    
-		  48G     TbyT				    
-  		  3.8G    TbyT.DEV2_TFG18m                    
-     7.7G    kehw/  
-     512     mzyzak/
-     468M    pkisel/
-l401:/data/scratch2           17T   13T  3.9T  78% /net/l401/data/scratch2
+l401:/data/scratch1           17T   15T  2.1T  88% /net/l401/data/scratch1
+     967G    aihong
+     11T     daq    
+	7.0G    2018
+        11T     2019
+     29G     kehw
+     468M    pkisel
+     3.1T    reco
+                 2019
+     857G            FF
+     2.3T            RF
+                    
+l401:/data/scratch2   17T   17T  456G  98% /net/l401/data/scratch2
+     49G     fisyak 
+           43G    reco
+          6.2G    simu
+           17T    kehw
+          1.4G    reco
 
-l402:/data                    11T  2.5T  7.3T  25% /net/l402/data
+l402:/data       11T  3.6T  6.1T  38% /net/l402/data
      117G    daq	    
              88G     2014
 	     15G     2016
 	     16G     2017
-     911G    fisyak	  Whole software  
+     1.5T    fisyak   => STAR Software
      1.5G    iraklic	    
-     320G    kehw	    
-     533G    kocmic	    
-     174G    pfederic    
-     0       scratch1    
-     0       scratch2    
-     422G    tb	    
-     1.1M    xanthus     
-l403:/data                    11T  9.2T  508G  95% /net/l403/data
+     347G    kehw
+     533G    kocmic	 Mar  8  2018   
+     174G    pfederic    Feb 12  2018
+     422G    tb	         May 22  2017
+     1.1M    xanthus     Dec  2  2016
+l403:/data       11T  8.9T  845G  92% /net/l403/data
   2.4G    clone 
-  9.2T    fisyak
-          3.3T    Femto   Clean ?
-                  1.3T    2016 
-		  1.3T    2016A
-		  722G    2016B
-                  293M    2016picoDST
-	  6.0T    reco    Clean ?
-                  3.0T    2016
-                          697G    AuAu200_adcKFVCA 
-			  2.3T    Embedding         
-                  3.0T    2018D
-                          37G     16x		     
-	                  3.0T    27GeV_production_2018
-
+  8.9T    fisyak
+       8.6T    reco   => Alignment
+       320G    Tpc
   6.9G    kehw  
   29M     mysql 
   9.3G    mzyzak
-l404:/data                    11T  9.1T  700G  93% /net/l404/data
+l404:/data       11T  8.0T  1.8T  83% /net/l404/data => work
      l3.7G    clone	   
       8.9T    fisyak	   
               56M     abelouso	
@@ -78,3 +66,193 @@ l404:/data                    11T  9.1T  700G  93% /net/l404/data
   	      1.1T    Tpc               ?        
       83G     kehw	   
       96G     pfederic   
+172.17.27.2:6789:/   66T   50T   17T  76% /hlt/cephfs
+hlt/cephfs/daq/2019 $ du -sh * | tee dump.090219
+512     038
+2.2T    148
+21G     149
+1.2T    150
+21G     151
+22G     152
+2.7T    153
+7.7G    154
+1.2G    155
+1.4G    156
+6.4G    157
+13G     158
+1.1G    159
+1.1G    160
+7.9G    161
+7.3G    162
+880M    163
+6.5G    164
+631M    165
+612M    166
+8.2G    167
+14G     168
+6.0G    169
+39G     170
+31G     171
+22G     172
+32G     173
+56G     174
+39G     175
+30G     176
+50G     177
+36G     178
+28G     179
+146G    180
+414G    181
+103G    182
+1.7T    183
+46G     184
+31G     185
+37G     186
+439M    187
+1.4G    188
+39G     189
+2.8T    190
+1.1T    191
+4.2T    192
+3.4T    193
+130G    196
+l401:/data/scratch1   17T   15T  2.1T  88% /net/l401/data/scratch1
+4.5K    007
+3.0K    008
+3.0K    009
+22M     010
+1.2G    011
+4.4G    012
+6.1G    013
+3.1G    014
+5.3G    015
+11G     016
+16G     017
+11G     018
+11G     019
+12G     020
+13G     021
+11G     022
+12G     023
+7.9G    024
+3.7G    026
+20G     027
+16G     028
+12G     029
+12G     030
+17G     031
+13G     032
+14G     033
+14G     034
+9.6G    035
+13G     036
+20G     037
+26G     038
+17G     039
+14G     040
+12G     041
+5.0G    042
+14G     043
+6.4G    044
+18G     045
+17G     046
+24G     047
+3.6G    048
+10G     050
+2.9G    051
+8.7G    052
+14G     053
+4.3G    054
+5.1G    055
+6.6G    056
+1.1G    057
+3.4G    058
+6.6G    059
+15G     060
+21G     061
+22G     062
+5.6G    063
+1.8G    064
+18G     065
+38G     066
+32G     067
+68G     068
+73G     069
+74G     070
+59G     071
+54G     072
+17G     073
+50G     074
+73G     075
+45G     076
+22G     077
+15G     078
+8.1G    079
+17G     080
+3.7G    081
+12G     082
+9.1G    083
+3.9G    084
+17G     085
+967M    086
+1.5G    087
+6.1G    088
+4.5G    089
+19G     090
+19G     091
+32G     092
+39G     093
+6.2G    094
+8.8G    095
+18G     096
+19G     097
+18G     098
+19G     099
+25G     100
+24G     101
+27G     102
+24G     103
+21G     104
+12G     105
+28G     106
+20G     107
+19G     108
+3.1G    109
+20G     110
+21G     111
+15G     112
+512     113
+798M    114
+12G     115
+13G     117
+20G     118
+12G     119
+24G     120
+12G     121
+13G     122
+24G     123
+14G     124
+21G     125
+23G     126
+21G     127
+23G     128
+20G     129
+22G     130
+21G     131
+21G     132
+20G     133
+20G     134
+20G     135
+20G     136
+22G     137
+21G     138
+20G     139
+23G     140
+20G     141
+1.6T    142
+20G     143
+966G    144
+1.9T    145
+1.5T    146
+2.8T    147
+13K     148

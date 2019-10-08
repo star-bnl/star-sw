@@ -1033,7 +1033,12 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
   const Float_t*&    fMcHit_mdS                               = iter("fMcHit.mdS");
   const Long_t*&     fMcHit_mKey                              = iter("fMcHit.mKey");
   const Long_t*&     fMcHit_mVolumeId                         = iter("fMcHit.mVolumeId");
+  const Int_t*&      fMcHit_mnP                               = iter("fMcHit.mnP");
   const Float_t*&    fMcHit_mAdc                              = iter("fMcHit.mAdc");
+  const Float_t*&    fMcHit_mLgamma                           = iter("fMcHit.mLgamma");
+  const Float_t*&    fMcHit_mAdc0                             = iter("fMcHit.mAdc0");
+  const Float_t*&    fMcHit_mAdc1                             = iter("fMcHit.mAdc1");
+  const Float_t*&    fMcHit_mAdc2                             = iter("fMcHit.mAdc2");
   const Float_t*&    fMcHit_mLocalMomentum_mX1                = iter("fMcHit.mLocalMomentum.mX1");
   const Float_t*&    fMcHit_mLocalMomentum_mX2                = iter("fMcHit.mLocalMomentum.mX2");
   const Float_t*&    fMcHit_mLocalMomentum_mX3                = iter("fMcHit.mLocalMomentum.mX3");
@@ -1041,6 +1046,7 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
   const Int_t*&      fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
   const UShort_t*&   fRcHit_mQuality                          = iter("fRcHit.mQuality");
   const Float_t*&    fRcHit_mdX                               = iter("fRcHit.mdX");
+  const Float_t*&    fRcHit_mCharge                               = iter("fRcHit.mCharge");
   const UShort_t*&   fRcHit_mAdc                              = iter("fRcHit.mAdc");
   const UShort_t*&    fRcHit_mFlag                             = iter("fRcHit.mFlag");
   const UChar_t*&    fRcHit_mFitFlag                          = iter("fRcHit.mFitFlag");
@@ -1054,6 +1060,7 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
 #if 0
   TF1* off = new TF1("off","exp(log(1.+[0]/exp(x)))",3,10);
 #endif
+  // ADC block
   enum {kTPC = 4, kVar = 6, kOpt = 2};
   const Char_t *tpcName[kTPC] = {"I","O","IC","OC"};
   struct Plot_t {
@@ -1091,7 +1098,26 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
 				 Plots[j].nx,Plots[j].xmin,Plots[j].xmax,Plots[j].ny,Plots[j].ymin,Plots[j].ymax,400,-2,2);
 	}
       }
-  Double_t dsCut[2] = {1., 2.};
+  //  Double_t dsCut[2] = {1., 2.};
+  // dE block for dN/dx fit
+  enum {kdNdxLogGamma, kdELognP, kdETot};
+  TH2F     *histdE[3][kdETot] = {0};
+  const Char_t *VarY[4] = {"dN/dx", "dE/nP"};
+  const Char_t *tpcNameN[3] = {"I","O",""};
+  for (Int_t io = 0; io < 3; io++) {
+    for (Int_t k = 0; k < kdETot; k++) {
+      switch (k) {
+      case kdNdxLogGamma:
+	histdE[io][k] = new TH2F(Form("dNdxLogGamma%s",tpcNameN[io]),Form("dN/dx versus log10(gamma) for %sTpc",tpcNameN[io]),60,0,6.0,100,0,200);
+	break;
+      case kdELognP:
+	histdE[io][k] = new TH2F(Form("dEdN%s",tpcNameN[io]),Form("dE (eV) per primary interaction versus log(nP) for %sTpc",tpcNameN[io]),160,3,11,500,0,500);
+	break;
+      default:
+	break;
+      }
+    }
+  }
   TString  currentFileName;
   TChain *chain = iter.Chain();
   while (iter.Next()) {
@@ -1105,9 +1131,14 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
     if (! fRcHit_mFitFlag[0]) continue;
     //    if (fNoMcHit != 1 && fNoMcHit != 3) continue;
     if (fRcHit_mAdc[0] <= 0) continue;
+    if (fMcHit_mnP[0] <= 0) continue;
     for (Int_t k = 0; k < fNoMcHit; k++) {
       if (fMcHit_mKey[k] != fRcHit_mIdTruth[k]) continue;
       if (fRcHit_mQuality[k] < 95) continue;
+      if (fMcHit_mdE[k] <= 0 || fMcHit_mdE[k] > 1e-3) continue;
+      if (fMcHit_mAdc[k] <= 0) continue;
+      if (fRcHit_mAdc[k] <= 0) continue;
+      if (fRcHit_mCharge[k] <= 0) continue;
       Int_t sector = (fMcHit_mVolumeId[k]/100)%100;
       Int_t row    =  fMcHit_mVolumeId[k]%100;
       Int_t io = 0;
@@ -1118,17 +1149,19 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
 	else           io = 1;
       }
 #endif
-      if (fMcHit_mdS[k] < dsCut[io]) continue;
-      if (fMcHit_mdE[k] <= 0 || fMcHit_mdE[k] > 1e-3) continue;
-      if (fMcHit_mAdc[k] <= 0) continue;
+      //      if (fMcHit_mdS[k] < dsCut[io]) continue;
+      if (fMcHit_mdS[k] < 0.1) continue;
       Double_t ratio = fMcHit_mAdc[k]/fRcHit_mAdc[0];
       if (ratio < 0.1 || ratio > 10) continue;
+      Double_t r0 =  fMcHit_mAdc0[k]/fMcHit_mAdc[k];
+      Double_t r1 =  fMcHit_mAdc1[k]/fMcHit_mAdc[k];
+      Double_t r2 =  fMcHit_mAdc2[k]/fMcHit_mAdc[k];
       TVector3 pxyzL(fMcHit_mLocalMomentum_mX1[k],fMcHit_mLocalMomentum_mX2[k],fMcHit_mLocalMomentum_mX3[k]);
       Double_t TanL = pxyzL.z()/pxyzL.Perp();
       Double_t y[kVar] = { fMcHit_mPosition_mX3[k], TanL, TMath::Log(fRcHit_mdX[0]),
-			   fRcHit_mMinpad[0]+fRcHit_mMaxpad[0]+1,
-			   fRcHit_mMintmbk[0]+fRcHit_mMaxtmbk[0]+1,
-			   fRcHit_mMinpad[0]+fRcHit_mMaxpad[0]+1+fRcHit_mMintmbk[0]+fRcHit_mMaxtmbk[0]+1
+			   (Double_t) fRcHit_mMinpad[0]+fRcHit_mMaxpad[0]+1,
+			   (Double_t) fRcHit_mMintmbk[0]+fRcHit_mMaxtmbk[0]+1,
+			   (Double_t) fRcHit_mMinpad[0]+fRcHit_mMaxpad[0]+1+fRcHit_mMintmbk[0]+fRcHit_mMaxtmbk[0]+1
       };
       Double_t lADCr = TMath::Log(fRcHit_mAdc[0]);
       Double_t lADCs = TMath::Log(fMcHit_mAdc[k]);
@@ -1149,9 +1182,116 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
 	profs[io+2][j]->Fill(lADCr, y[j], z[2]);
 	hists[io+2][j]->Fill(lADCr, y[j], z[3]);
       }
+      histdE[io][0]->Fill(fMcHit_mLgamma[k],fMcHit_mnP[k]/fRcHit_mdX[k]); 
+      histdE[io][1]->Fill(TMath::Log(fMcHit_mnP[k]),1e9*fRcHit_mCharge[k]/fMcHit_mnP[k]);
+      histdE[2][0]->Fill(fMcHit_mLgamma[k],fMcHit_mnP[k]/fRcHit_mdX[k]); 
+      histdE[2][1]->Fill(TMath::Log(fMcHit_mnP[k]),1e9*fRcHit_mCharge[k]/fMcHit_mnP[k]);
     }
   }
   fOut->Write();
+}
+//________________________________________________________________________________
+Double_t Derivatives5(Double_t y[5], Double_t h) {
+  return (- y[4] + 8*y[3] - 8*y[1] + y[0])/(12*h); 
+}
+//________________________________________________________________________________
+Double_t Derivatives5E(Double_t e[5], Double_t h) { // statistical error on derivatives
+  return TMath::Sqrt(e[4]*e[4] + 64*e[3]*e[3] + 64*e[1]*e[1] + e[0]*e[0])/(12*h); 
+}
+//________________________________________________________________________________
+void PrintDer(Int_t ix, Int_t iy, Double_t y[5], Double_t der) {
+  cout << ix << "\t" << iy;
+  for (Int_t i = 0; i < 5; i++) cout << "\t" << y[i];
+  cout << "\tder = " << der << endl;
+}
+//________________________________________________________________________________
+void NormdEdN() {
+  TH2F *histdE[3] = {
+    (TH2F *) gDirectory->Get("dEdNI"),
+    (TH2F *) gDirectory->Get("dEdNO"),
+    (TH2F *) gDirectory->Get("dEdN")
+  };
+  if (! histdE[2]) {
+    cout << "Cleare dEdN from dEdNI and dEdNO" << endl;
+    histdE[2] = new TH2F(*histdE[0]);
+    histdE[2]->SetName("dEdN");
+    histdE[2]->Reset(0);
+  }
+  if (histdE[2]->GetEntries() < 1) {
+    histdE[2]->Add(histdE[0]);
+    histdE[2]->Add(histdE[1]);
+  }
+  TFile *fOut = new TFile("dEdN.root","recreate");
+  for (Int_t io = 0; io < 3; io++) {
+    TH2F *hist = histdE[io];
+    if (! hist) continue;
+    Int_t nx = hist->GetNbinsX();
+    Int_t ny = hist->GetNbinsY();
+    TH1D *proj = hist->ProjectionX();
+    Int_t ix1 = nx, ix2 = 0;
+    for (Int_t ix = 1; ix <= nx; ix++) {
+      if (proj->GetBinContent(ix) > 100) {
+	if (ix < ix1) ix1 = ix;
+	if (ix > ix2) ix2 = ix;
+      }
+    }
+    TH2F *h = new TH2F(Form("%sNorm",hist->GetName()),hist->GetTitle(),
+		       ix2-ix1+1,hist->GetXaxis()->GetBinLowEdge(ix1), hist->GetXaxis()->GetBinUpEdge(ix2),
+		       ny,hist->GetYaxis()->GetBinLowEdge(1), hist->GetYaxis()->GetBinUpEdge(ny));
+    for (Int_t ix = ix1, ixx = 1; ix <= ix2; ix++, ixx++) {
+      Double_t t = proj->GetBinContent(ix);
+      for (Int_t iy = 1; iy <= ny; iy++) {
+	Double_t v = hist->GetBinContent(ix,iy);
+	Double_t r = v/t;
+	Double_t e = TMath::Sqrt(r*(1-r)/t);
+	h->SetBinContent(ixx,iy,r);
+	h->SetBinError(ixx,iy,e);
+      }
+    }
+    h->Smooth(1,"k5b");
+    // Five points derivatives
+    TH2F *hX = new TH2F(*h); hX->Reset(); hX->SetName(Form("%sX",h->GetName()));
+    TH2F *hY = new TH2F(*h); hY->Reset(); hY->SetName(Form("%sY",h->GetName()));
+    nx = h->GetNbinsX();
+    ny = h->GetNbinsY();
+    Double_t dX = (h->GetXaxis()->GetXmax() - h->GetXaxis()->GetXmin())/nx;
+    Double_t dY = (h->GetYaxis()->GetXmax() - h->GetYaxis()->GetXmin())/ny;
+    for (Int_t ix = 1; ix <= nx; ix++) {
+      for (Int_t iy = 1; iy <= ny; iy++) {
+	// X
+	Double_t x[5] = {0};
+	Double_t ex[5] = {0};
+	for (Int_t i = -2; i <= 2; i++) {
+	  if (ix + i > 0 && ix + i <= nx) {
+	    x[i+2] = h->GetBinContent(ix+i,iy);
+	    ex[i+2] = h->GetBinError(ix+i,iy);
+	  }
+	}
+	Double_t ddX = Derivatives5(x,dX);
+	hX->SetBinContent(ix,iy,ddX);
+	Double_t eddX = Derivatives5(ex,dX);
+	hX->SetBinError(ix,iy,eddX);
+	//	PrintDer(ix,iy,x,ddX);
+	// Y
+	Double_t y[5] = {0};
+	Double_t ey[5] = {0};
+	for (Int_t i = -2; i <= 2; i++) {
+	  if (iy + i > 0 && iy + i <= ny) {
+	    y[i+2] = h->GetBinContent(ix,iy+i);
+	    ey[i+2] = h->GetBinError(ix,iy+i);
+	  }
+	}
+	Double_t ddY = Derivatives5(y,dY);
+	hY->SetBinContent(ix,iy,ddY);
+	Double_t eddY = Derivatives5(ey,dY);
+	hY->SetBinError(ix,iy,eddY);
+	//	PrintDer(ix,iy,y,ddY);
+      }
+    }
+    hX->Smooth(1,"k5b");
+    hY->Smooth(1,"k5b");
+    fOut->Write();
+  }
 }
 //________________________________________________________________________________
 void TpcTdENP(const Char_t *files="*.root", const Char_t *Out = "") {

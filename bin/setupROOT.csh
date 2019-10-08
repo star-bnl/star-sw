@@ -149,10 +149,11 @@ switch ( $STAR_HOST_SYS )
         breaksw
 endsw
 switch ( $STAR_HOST_SYS )  
-[    case *gcc8*:
+    case *gcc9*:
+    case *gcc8*:
     case *gcc7*:
      setenv ENABLE_CXX11 "--enable-cxx17"
-     setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=--std=c++17"
+     setenv EXTRA_FLAGS " $EXTRA_FLAGS" # --cflags=--std=c++17"
      breaksw
     case *_x8664_gcc6*:
      setenv ENABLE_CXX11 "--enable-cxx11"
