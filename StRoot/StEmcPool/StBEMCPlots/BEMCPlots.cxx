@@ -1079,10 +1079,12 @@ void BEMCPlots::processEvent( char *datap
 		int fiberSum = 0;
 		int det = -1, m = -1, e = -1, s = -1;
 		int softId = -1, box = -1, wire = -1, Avalue = -1;
+#if 0
 #ifdef NEW_DAQ_READER
     		int cap = d->cap;
 #else
     		int cap = emc.bsmd_cap[bsmd_fiber];
+#endif
 #endif
 		for (int fiber_channel = 0;fiber_channel < BSMD_DATSIZE;fiber_channel++) {
 #ifdef NEW_DAQ_READER
