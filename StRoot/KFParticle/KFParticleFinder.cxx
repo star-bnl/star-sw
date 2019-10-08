@@ -1678,6 +1678,12 @@ void KFParticleFinder::ConstructTrackV0Cand(KFPTrackVector& vTracks,
   }
 
   saveParticle &= ( (float_m(!isPrimary) && ldlMin > cuts[0]) || float_m(isPrimary) );
+  
+  float_v p1p2 = track.Px()*V0.Px() + track.Py()*V0.Py() + track.Pz()*V0.Pz();
+  float_v p12  = track.Px()*track.Px() + track.Py()*track.Py() + track.Pz()*track.Pz();
+  float_v p22  = V0.Px()*V0.Px() + V0.Py()*V0.Py() + V0.Pz()*V0.Pz();
+  saveParticle &= p1p2 > -p12;
+  saveParticle &= p1p2 > -p22;
 
   int_m setLCut = abs(mother.PDG()) == 3312 || abs(mother.PDG()) == 3334 || abs(mother.PDG()) == 3001;
   saveParticle &= ( (float_m(setLCut) && lMin > float_v(fLCut)) || float_m(!setLCut) );

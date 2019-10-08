@@ -79,6 +79,8 @@ class StKFParticleAnalysisMaker : public StMaker {
   void SetTMVAPtBins(int iReader, TString bins);
   void SetTMVABins(int iReader, TString centralityBins="-1:1000", TString ptBins="-1.:1000.");
   
+  void GetParticles(std::vector<KFParticle>* particles, const int pdg) const;
+  
  public: 
   StKFParticleAnalysisMaker(const char *name="KFParticleAnalysis");
   virtual       ~StKFParticleAnalysisMaker();

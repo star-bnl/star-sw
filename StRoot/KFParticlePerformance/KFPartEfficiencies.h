@@ -224,9 +224,9 @@ class KFPartEfficiencies :public TObject
       KFEfficiencyParticleInfo("nu_{K-}",          "nu_{K-} b     ",   -8000014,-1.0f, 1.0f, 0.         , 1.0e20,     0, 0.0030), //136
       KFEfficiencyParticleInfo("K+_{mu,nu}",       "K+_{mnu}      ",    7000321,-1.0f, 1.0f, 0.493677   , 1.238e-8,   1, 0.0030), //137
       KFEfficiencyParticleInfo("nu_{K+}",          "nu_{K+}       ",    8000014,-1.0f, 1.0f, 0.         , 1.0e20,     0, 0.0030), //138
-      KFEfficiencyParticleInfo("Sigma-_{pi-,n}",   "Sigma-_{pi-n} ",    7003112, 0.0f, 3.0f, 1.192642   , 1.479e-10, -1, 0.0100), //139
+      KFEfficiencyParticleInfo("Sigma-_{pi-,n}",   "Sigma-_{pi-n} ",    7003112, 0.0f, 3.0f, 1.197449   , 1.479e-10, -1, 0.0100), //139
       KFEfficiencyParticleInfo("n_{Sigma-}",       "n_{Sigma-}    ",    7002112, 0.0f, 1.5f, 0.9395654  , 880,        0, 0.0030), //140
-      KFEfficiencyParticleInfo("Sigma+_{pi+n}b",   "Sigma+{pi+n} b",   -7003112, 0.0f, 3.0f, 1.192642   , 1.479e-10, -1, 0.0030), //141
+      KFEfficiencyParticleInfo("Sigma+_{pi+n}b",   "Sigma+{pi+n} b",   -7003112, 0.0f, 3.0f, 1.197449   , 1.479e-10, -1, 0.0030), //141
       KFEfficiencyParticleInfo("n_{Sigma+} b",     "n_{Sigma+b} b ",   -7002112, 0.0f, 1.5f, 0.9395654  , 880,        0, 0.0030), //142
       KFEfficiencyParticleInfo("Sigma-_{pi-n}b",   "Sigma+{pi-n} b",   -7003222, 0.0f, 3.0f, 1.18937    , 0.8018e-10, 1, 0.0030), //143
       KFEfficiencyParticleInfo("n_{Sigma-} b",     "n_{Sigma-_b} b",   -8002112, 0.0f, 1.5f, 0.9395654  , 0.93956541, 0, 0.0030), //144
