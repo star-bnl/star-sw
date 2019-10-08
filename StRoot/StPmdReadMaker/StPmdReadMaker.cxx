@@ -385,7 +385,7 @@ Int_t StPmdReadMaker::Make() {
 	  for(Int_t c=0;c<12;c++) {
 	    for(Int_t s=0;s<2;s++) {
 	      Int_t chmax = 0;
-	      Int_t chain = 0;
+	      //yf	      Int_t chain = 0;
 	      for(Int_t ch=0;ch<1728;ch++) {
 		if(s==0){ nChain=c+12*crate;}
 		if(s==1){ nChain=(c+24)+12*crate;}
@@ -393,7 +393,7 @@ Int_t StPmdReadMaker::Make() {
 		Double_t ped_rms= (double)fpmd->rms[crate][c][s][ch]/16.0;
 		//Double_t ped_thr= (double)fpmd->thr[crate][c][s][ch]/16.0;
 		Int_t adc_ch = fpmd->adc[crate][c][s][ch];
-		if(adc_ch>0 && chmax<ch) {chmax = ch; chain = nChain;}
+		if(adc_ch>0 && chmax<ch) {chmax = ch; /* chain = nChain; */}
 		adc[adcChCount]=adc_ch;
 		adcChCount++;
 	//	if(s==1 && ch>0 && adc_ch>0){
@@ -951,12 +951,12 @@ Bool_t StPmdReadMaker::ReadCalibrationsConst(){
     }
   }
   //getting tables ////////////////////////////////////////////////////
-  
+#if 0  
   // Cell_GNF Tables
   pmdCalSummary_st* pmdcalsum = NULL;
   St_pmdCalSummary* summ = (St_pmdCalSummary*) mDb->Find("pmdCalSummary");
   if(summ) pmdcalsum = summ->GetTable();
-  
+#endif  
   pmdSMCalib_st* pmdcalibst = NULL;
   TString TableName;
   St_pmdSMCalib* a = (St_pmdSMCalib*) mDb->Find("pmdSMCalib");
