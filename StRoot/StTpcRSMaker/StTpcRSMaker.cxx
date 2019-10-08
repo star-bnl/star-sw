@@ -1930,10 +1930,7 @@ void StTpcRSSegment::Set(g2t_tpc_hit_st *tpc_hit, g2t_vertex_st *gver, Int_t mod
   Int_t row = coorS.fromRow();
   transform(xyzG, coorLT,sector,row); PrPP(Set,coorLT);
   Int_t io = (row <= St_tpcPadConfigC::instance()->numberOfInnerRows(sector)) ? 0 : 1;
-  TrackSegmentHits.TrackId    = TrackId;
   //  TrackSegmentHits.TrackId    = 999999; // to check idTruth in itpcFCF
-  TrackSegmentHits.tpc_hitC = tpc_hitC;
-  
   if (ClusterProfile) {
     checkList[io][0]->Fill(tpc_hitC->x[2],TMath::Abs(tpc_hitC->de));
     checkList[io][1]->Fill(tpc_hitC->x[2],           tpc_hitC->ds );	

@@ -61,8 +61,8 @@ void StTpcdEdxCorrection::ReSetCorrections() {
   }
   SettpcGas(tpcGas);
   m_Corrections[kUncorrected           ] = dEdxCorrection_t("UnCorrected"         ,""                                                                    ,0); 					       
-  m_Corrections[kEdge                  ] = dEdxCorrection_t("TpcEdge"             ,"Gain on distance from Chamber edge"                                 ,St_TpcEdgeC::instance());		     
   m_Corrections[kAdcCorrection         ] = dEdxCorrection_t("TpcAdcCorrectionB"   ,"ADC/Clustering nonlinearity correction"				,St_TpcAdcCorrectionBC::instance());	     
+  m_Corrections[kEdge                  ] = dEdxCorrection_t("TpcEdge"             ,"Gain on distance from Chamber edge"                                 ,St_TpcEdgeC::instance());		     
   m_Corrections[kAdcCorrectionMDF      ] = dEdxCorrection_t("TpcAdcCorrectionMDF" ,"ADC/Clustering nonlinearity correction MDF"				,St_TpcAdcCorrectionMDF::instance());	     
   m_Corrections[kTpcdCharge            ] = dEdxCorrection_t("TpcdCharge"          ,"ADC/Clustering undershoot correction"				,St_TpcdChargeC::instance());		     
   m_Corrections[kTpcrCharge            ] = dEdxCorrection_t("TpcrCharge"          ,"ADC/Clustering rounding correction"					,St_TpcrChargeC::instance());		     
@@ -188,7 +188,8 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   Int_t sector            = CdEdx.sector; 
   Int_t row       	  = CdEdx.row;   
   Double_t dx     	  = CdEdx.F.dx;    
-  if (dE <= 0 || dx <= 0) return 3;
+  Double_t adcCF = CdEdx.adc;
+  if (dx <= 0 || (dEU <= 0 && adcCF <= 0)) return 3;
   Int_t channel = St_TpcAvgPowerSupplyC::instance()->ChannelFromRow(sector,row); 
   CdEdx.channel = channel;
   
@@ -253,7 +254,6 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   CdEdx.ZdriftDistanceO2 = ZdriftDistanceO2;
   CdEdx.ZdriftDistanceO2W = ZdriftDistanceO2W;
   Double_t gc, ADC, xL2, dXCorr;
-  Double_t adcCF = CdEdx.adc;
   Double_t iCut = 0;
   Double_t slope = 0;
   Int_t nrows = 0;

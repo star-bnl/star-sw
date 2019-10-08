@@ -254,9 +254,11 @@ const StMcEvent& StMcEvent::operator=(const StMcEvent&) { return *this;} // priv
 //______________________________________________________________________________
 StMcEvent::~StMcEvent()
 {
+#if 0
   for (int jk=1; mBegColl+jk<mEndColl;jk++) { 
     delete mBegColl[jk]; mBegColl[jk]=0;
   }
+#endif
   for(int jk=0;jk<(int)mTracks.size()  ;jk++) {delete mTracks[jk]  ;}    
   mTracks.clear();
   
@@ -665,10 +667,12 @@ void StMcEvent::Print(Option_t *option) const {
 void StMcEvent::Browse(TBrowser *b)
 {
   // Browse this event (called by TBrowser).
+#if 0
    for (int jk=1; mBegColl+jk<mEndColl;jk++) { 
      TObject *obj = mBegColl[jk]; if (!obj) continue;
      b->Add(obj,obj->GetName());
    }
+#endif
    TDataSet::Browse(b);
 }
 //______________________________________________________________________________

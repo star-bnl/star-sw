@@ -2,7 +2,7 @@
        long      id;         /* primary key */
        long      next_tr_hit_p;/* Id of next hit on same track */
        long      track_p;    /* Id of parent track */
-       long      volume_id;  /* STAR volume identification */
+       long      volume_id;  /* 100000*isdet+100*sector+row, isdet = 1 or 2 for before or after */
        float     de;         /* energy deposition at hit */
        float     ds;         /* path length within padrow */
        float     p[3];       /* global momentum */
@@ -13,5 +13,7 @@
        float     adc;        /* signal in ADC  after digitization */
        float     pad;        /* hit pad position used in digitization */
        float     timebucket; /* hit time position -"- */
-       long      np;         /* no. of primary electrons */
+       long      np;         /* no. of primary interactions per hit */
+       long      ne;         /* no. of conducting electrons per hit */
+       float     adcs[3];    /* adc signal in 0 => row - 1, 1 => row, 2 => row+1 */
 };

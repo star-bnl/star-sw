@@ -537,8 +537,8 @@ Int_t StdEdxY2Maker::Make(){
 	} // end of dx calculation
 	TrackLengthTotal += dx;
 	//________________________________________________________________________________      
-	if (tpcHit->charge() <= 0) {
-	  LOG_WARN << "StdEdxY2Maker:: deposited charge : " <<  tpcHit->charge() 
+	if (tpcHit->adc() <= 0) {
+	  LOG_WARN << "StdEdxY2Maker:: adc : " <<  tpcHit->adc() 
 		   << " <= 0" << endm;
 	  iokCheck++;
 	}
