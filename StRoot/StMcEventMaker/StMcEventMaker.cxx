@@ -621,7 +621,7 @@ Int_t StMcEventMaker::Make()
 	    mtdHitTable = g2t_mtd_hitTablePointer->GetTable();
 	else
 	    if (Debug()) cerr << "Table g2t_mtd_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
-
+#if 0
 	//
 	// BEMC and BPRS Hit Table
 	//
@@ -675,7 +675,7 @@ Int_t StMcEventMaker::Make()
 	  fscHitTable = g2t_fsc_hitTablePointer->GetTable();
 	else
 	  if (Debug()) cout << "Table g2t_fsc_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
-
+#endif
 	//	
 	// Pxl Hit Table
 	//
