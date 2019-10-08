@@ -100,13 +100,14 @@ const Double_t Masses[NMasses] = {0.93827231,
 				  3.727417, //GEANT3
 				  0.13956995
 #if 0
-				  ,0.93827231*6.94/1.008,
+				  6.5354,
+				  5.6031,
 				  0.93827231
 #endif
 };
-const Int_t   PiD[NMasses]   = { 1,    2,   3,   0,   5,    4,  6,    7,       8,     3}; //, 9, 1}; 
-const Int_t   Index[NMasses] = { 4,    3,   2,   0,   5,    1,  6,    7,       8,    -2}; //, 9, 0};
-const Char_t *Names[NMasses] = {"p", "K","#pi","e", "d","#mu","t","He3","#alpha","2#pi"}; //, "Li", "2p"};
+const Int_t   PiD[NMasses]   = { 1,    2,   3,   0,   5,    4,  6,    7,       8,     3}; //, 9, 10, 1}; 
+const Int_t   Index[NMasses] = { 4,    3,   2,   0,   5,    1,  6,    7,       8,    -2}; //, 9, 10, 0};
+const Char_t *Names[NMasses] = {"p", "K","#pi","e", "d","#mu","t","He3","#alpha","2#pi"}; //, "Li7", "Li6", "2p"};
 const Int_t NF = 10;  //          0       1    2     3     4      5      6     7        8        9
 const Char_t *FNames[NF] = {"Girrf","Sirrf","z","70","60","70M","dNdx","zM","70Trs","zTrs"};
 const Int_t Nlog2dx = 3;
@@ -285,7 +286,7 @@ Double_t aleph70(Double_t *x,Double_t *par) {
   Double_t poverm = pove/mass; 
   Double_t charge = 1.;
   if (h > 6 && h > 9) charge = 2;
-  else if (h == 10)   charge = 3;
+  else if (h == 10 || h == 11)   charge = 3;
   poverm *= charge;
   Double_t bg = poverm;
   /* 
@@ -353,7 +354,7 @@ void bichselG10(const Char_t *type="z") {
     func->SetParameter(1,1.);
     func->SetParameter(2, PiD[h]); 
     if (h >= 7 && h < 9) func->SetParameter(1,2.);
-    if (h == 10) func->SetParameter(1,3.);
+    if (h == 10 || h == 11) func->SetParameter(1,3.);
     Int_t color = h+1;
     if (color > 8) color -= 8;
     //    if (color > 7) color++;
