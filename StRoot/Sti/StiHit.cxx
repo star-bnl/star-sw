@@ -247,7 +247,9 @@ static int nCall =0; nCall++;
 {
     mTimesUsed++;
     //    assert(mTimesUsed <=mMaxTimes);
-    if (mTimesUsed > mMaxTimes) {
+    static Int_t iwarm = 0;
+    if (iwarn <= 13 && mTimesUsed > mMaxTimes) {
+      iwarn++;
       LOG_ERROR << "StiHit::addTimesUsed : mTimesUsed = " << mTimesUsed << " > mMaxTimes " << mMaxTimes <<endm;
     }
 }
