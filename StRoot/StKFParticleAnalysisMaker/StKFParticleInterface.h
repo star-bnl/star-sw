@@ -120,6 +120,7 @@ class StKFParticleInterface: public TObject
   void SetLdLCutCharm2D(float cut);
   void SetChi2TopoCutCharm2D(float cut);
   void SetChi2CutCharm2D(float cut);
+  void SetSecondaryCuts(const float sigmaMass, const float chi2Topo, const float ldl);
   static StKFParticleInterface *instance() {return fgStKFParticleInterface;}
  private:
   
@@ -140,10 +141,11 @@ class StKFParticleInterface: public TObject
   //histograms
   bool fCollectTrackHistograms;
   bool fCollectPIDHistograms;
-  //0 - N HFT hits in track, 1 - PV error distribution
-  TH1F* fTrackHistograms[2];
-  // 0 - dEdX, 1 - dEdX positive tracks, 2 - dEdX negative tracks, 3 - dEdX tracks with ToF, 4 - ToF PID, 5 - PV errors vs N tracks, 6 - PV errors vs N PV tracks
-  TH2F* fTrackHistograms2D[7];
+  //0 - N HFT hits in track, 1 - PV error distribution, 2 - pv tracks ratio
+  TH1F* fTrackHistograms[3];
+  // 0 - dEdX, 1 - dEdX positive tracks, 2 - dEdX negative tracks, 3 - dEdX tracks with ToF,
+  // 4 - ToF PID, 5 - PV errors vs N tracks, 6 - PV errors vs N PV tracks, 7 - N Global vs N Primary
+  TH2F* fTrackHistograms2D[8];
   //PID histograms
   static const int NTrackHistoFolders = 18;
   TH2F* fHistodEdXTracks[NTrackHistoFolders];

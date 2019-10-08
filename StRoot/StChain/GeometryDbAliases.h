@@ -147,7 +147,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2014a",      20131215,     1, "y2014a",   "y2014a 2014 preview geometry,AgML,xgeometry"},
 //{"y2014b",      20131215,     2, "y2014b",   "y2014b production plus hcal prototype,AgML,xgeometry"},
   {"y2014",       20131215,     3, "y2014a",   "y2014c 2014 production geometry,IST overlap correction,AgML,xgeometry"},
-  {"y2014c",      20131215,     3, "y2014a",   "y2014c 2014 production geometry,IST overlap correction,AgML,xgeometry"},
+  {"y2014c",      20131215,     3, "y2014c",   "y2014c 2014 production geometry,IST overlap correction,AgML,xgeometry"},
   {"r2014",       20131220,     0, "y2014a",   "y2014c new TPC rows,xgeometry"},
 
 //{"y2015x",      20141215,     0, "y2015x",   "y2015x asymptotic geometry with IST overlap correction, AgML,xgeometry"},

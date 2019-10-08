@@ -238,9 +238,10 @@ if ($STAR_HOST_SYS =~ /gcc447/) {# no c++11
   push @items, "FmsPointMaker";
   push @items, "FmsUtil";
 }
-# if ($ROOT_LEVEL =~ /^6/ ){
+ if ($ROOT_LEVEL =~ /^5/ ){
 #   push @items, "StStrangeMuDstMaker";
-# }
+    push @items, "Table";
+ }
 #push @items, "StiCA";
 #push @items, "StarVMC/xgeometry";
 #push @items, "GenFit";
