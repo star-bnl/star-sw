@@ -80,7 +80,6 @@ utility function to get the data from the daq file and fill the StEvent structur
 */
 Int_t StGmtRawMaker::fillHits() {
   
-  Char_t layer=0;
   Int_t rdo=0;
   Int_t arm=0;
   Int_t apv=0;
@@ -145,7 +144,9 @@ Int_t StGmtRawMaker::fillHits() {
       StGmtStripCollection *stripCollectionPtr = mGmtCollectionPtr->getStripCollection( moduleIdx );
       if( stripCollectionPtr )	    {
 	geoId =  StGmtGeom::encodeGeoId( rdo, arm, apv, channel );
+#if 0
 	Int_t elecId =  StGmtGeom::getElectIdFromElecCoord( rdo, arm, apv, channel );
+#endif
 	StGmtStrip* stripPtr = stripCollectionPtr->getStrip( geoId );
 	if( coordNum == 999 ) { // these are not connected
 	  stripPtr->setAdc( 0, timebin );
