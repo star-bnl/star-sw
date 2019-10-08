@@ -57,6 +57,7 @@ StiTrack *StiCATpcSeedFinder::findTrack(double rMin)
     Seed_t &aSeed = mSeeds->back();
     vector<StiHit*>        _seedHits;
     int nHits = aSeed.vhit.size();
+#ifdef __YF__
 //	Workaround for bug in CA.  Sometimes:
 //	1. hits badRxyed
 //	2. same hit is used twice in one track
@@ -88,7 +89,8 @@ StiTrack *StiCATpcSeedFinder::findTrack(double rMin)
        int padrow1 = ((StTpcHit*)(aSeed.vhit[iHit+1]->hit->stHit()))->padrow();
 StiDebug::Count("XlocOfPad",padrow0, hit->x());   
 StiDebug::Count("RxyOfPad",padrow0, rXYste);   
-StiDebug::Count("AngLoc",atan2(hit->y(),hit->x())/3.1415*180);   
+StiDebug::Count
+("AngLoc",atan2(hit->y(),hit->x())/3.1415*180);   
        if (padrow0<=padrow1) {
          unsPad++;
          double rxy = sqrt(pow(hit->x_g(),2)+pow(hit->y_g(),2));
@@ -128,9 +130,11 @@ static int printIt = 0;
       if (endHit != aSeed.vhit[nHits-1]->hit) begEndFail+=2;
     }
     preHit = 0;
+#endif /* __YF__ */
     for (int iHit=0;iHit<nHits;iHit++) 
     {
       StiHit *hit = aSeed.vhit[iHit]->hit;if (!hit) continue;
+#ifdef __YF__
       if (hit->timesUsed() || hit == preHit) {
 
 #ifdef StiCATpcSeedFinderBLOG
@@ -154,6 +158,7 @@ static int printIt = 0;
       }
       preHit = hit;
 assert(!hit->timesUsed());
+#endif /* __YF__ */
       _seedHits.push_back(hit);
     }
 
