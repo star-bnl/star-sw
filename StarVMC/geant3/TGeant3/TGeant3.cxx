@@ -1451,8 +1451,9 @@ void TGeant3::AddParticlesToPdgDataBase() const
 // Done by default now from Pythia6 table!
 //
 //
-// Ions
-//
+// Ions:  u = 931.49410242e-3 GeV/c^2
+//        Li^6 = 6.0151228874 u
+//        Li^7 = 7.016003437 u
 
   if ( !pdgDB->GetParticle(GetIonPdg(1,2)) )
     pdgDB->AddParticle("Deuteron","Deuteron",2*kAu2Gev+8.071e-3,kTRUE,
@@ -1469,6 +1470,14 @@ void TGeant3::AddParticlesToPdgDataBase() const
   if ( !pdgDB->GetParticle(GetIonPdg(2,3)) )
     pdgDB->AddParticle("HE3","HE3",3*kAu2Gev+14.931e-3,kFALSE,
                        0,6,"Ion",GetIonPdg(2,3));
+
+  if ( !pdgDB->GetParticle(GetIonPdg(3,6)) )
+    pdgDB->AddParticle("Li6","Li6",6.0151228874*kAu2Gev,kFALSE,
+                       0,9,"Ion",GetIonPdg(3,6));
+
+  if ( !pdgDB->GetParticle(GetIonPdg(3,7)) )
+    pdgDB->AddParticle("Li7","Li7",7.016003437*kAu2Gev,kFALSE,
+                       0,9,"Ion",GetIonPdg(3,7));
 
   //Anti Ions
 
@@ -1488,6 +1497,13 @@ void TGeant3::AddParticlesToPdgDataBase() const
     pdgDB->AddParticle("ANTIHE3","ANTIHE3",3*kAu2Gev+14.931e-3,kFALSE,
 		       0,-6,"Ion",(-1)*GetIonPdg(2,3));
   
+  if ( !pdgDB->GetParticle((-1)*GetIonPdg(3,6)) )
+    pdgDB->AddParticle("AntiLi6","AntiLi6",6.0151228874*kAu2Gev,kFALSE,
+                       0,-9,"Ion",(-1)*GetIonPdg(3,6));
+
+  if ( !pdgDB->GetParticle((-1)*GetIonPdg(3,7)) )
+    pdgDB->AddParticle("AntiLi7","AntiLi7",7.016003437*kAu2Gev,kFALSE,
+                       0,-9,"Ion",(-1)*GetIonPdg(3,7));
   //Hypernuclei
   
   if ( !pdgDB->GetParticle(1010010030))
@@ -7474,7 +7490,7 @@ Int_t TGeant3::GetIonPdg(Int_t z, Int_t a, Int_t i) const
 //__________________________________________________________________
 Int_t TGeant3::GetSpecialPdg(Int_t number) const
 {
-// Numbering for special particles
+// Numbering for special particlesx[
 
   return 50000000 + number;
 }                
