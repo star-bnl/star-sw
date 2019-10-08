@@ -387,6 +387,7 @@ void StTpcDb::SetTpcRotations() {
   } else {
     LOG_INFO << "StTpcDb::SetTpcRotations use old schema for Rotation matrices" << endm;
   }
+  St_SurveyC *chair = 0;
   for (Int_t sector = 0; sector <= 24; sector++) {// loop over Tpc as whole, sectors, inner and outer subsectors
     Int_t k;
     Int_t k1 = kSupS2Tpc;
@@ -395,6 +396,7 @@ void StTpcDb::SetTpcRotations() {
     for (k = k1; k < k2; k++) {
       Int_t Id     = 0;
       TGeoHMatrix rotA; // After alignment
+      chair = 0;
       if (!sector ) { // TPC Reference System
 	if (mOldScheme) { // old scheme
 	  St_tpcGlobalPositionC *tpcGlobalPosition = St_tpcGlobalPositionC::instance();
@@ -442,32 +444,17 @@ void StTpcDb::SetTpcRotations() {
 	  rotA = Tpc2GlobalMatrix() * SupS2Tpc(sector); 
 	  break; 
 	case kSubSInner2SupS: 
-	  if (mOldScheme) 	  rotA = Flip(); 
-#if 0
-	  else                    rotA = Flip() * StTpcInnerSectorPosition::instance()->GetMatrix(sector-1); 
-#else
-	  else           {
-	    rotA = Flip() * StTpcInnerSectorPosition::instance()->GetMatrix(sector-1); 
-	    if (StTpcInnerSectorPosition::instance()->GetNRows() > 24) {
-	      if (gFactor > 0.2) {
-		rotA *= StTpcInnerSectorPosition::instance()->GetMatrix(sector-1+24);
-	      } else if (gFactor < -0.2) {
-		rotA *= StTpcInnerSectorPosition::instance()->GetMatrix(sector-1+24).Inverse();
-	      }
-	    }
-	  }
-#endif
-	  break;
+	  if (mOldScheme) 	  {rotA = Flip(); break;}
+	  chair = StTpcInnerSectorPosition::instance();
 	case kSubSOuter2SupS: 
-	  if (mOldScheme) rotA = Flip() * StTpcOuterSectorPosition::instance()->GetMatrix(sector-1); 
-	  else           {
-	    rotA = Flip() * StTpcOuterSectorPosition::instance()->GetMatrix(sector-1); 
-	    if (StTpcOuterSectorPosition::instance()->GetNRows() > 24) {
-	      if (gFactor > 0.2) {
-		rotA *= StTpcOuterSectorPosition::instance()->GetMatrix(sector-1+24);
-	      } else if (gFactor < -0.2) {
-		rotA *= StTpcOuterSectorPosition::instance()->GetMatrix(sector-1+24).Inverse();
-	      }
+	  if (mOldScheme) {rotA = Flip() * StTpcOuterSectorPosition::instance()->GetMatrix(sector-1); break;}
+	  if (! chair) chair = StTpcOuterSectorPosition::instance();
+	  rotA = Flip() * chair->GetMatrix(sector-1); 
+	  if (chair->GetNRows() > 24) {
+	    if (gFactor > 0.2) {
+	      rotA *= chair->GetMatrix(sector-1+24);
+	    } else if (gFactor < -0.2) {
+	      rotA *= chair->GetMatrix(sector-1+24).Inverse();
 	    }
 	  }
 	  break;
