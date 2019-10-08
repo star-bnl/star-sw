@@ -8,5 +8,5 @@
 foreach p (AuAu7_production AuAu11_production AuAu18_production AuAu19_production  AuAu27_production_2011)
 #  get_file_list.pl -keys path,filename,events -cond trgsetupname=${p},filetype=daq_reco_picoDst,filename~st_physics,storage!=hpss -limit 10 -delim : -distinct | tee ${p}.list
 #  get_file_list.pl -keys path,filename,events -cond trgsetupname=${p},filetype=daq_reco_MuDst,filename~st_physics,storage!=hpss -limit 10 -delim : -distinct | tee Mu${p}.list
-  get_file_list.pl -keys path,filename,events -cond trgsetupname=${p},filetype=daq_reco_MuDst,filename~st_physics,storage=nfs -limit 10 -delim : -distinct | tee Mu${p}.list
+  get_file_list.pl -keys path,filename,events -cond trgsetupname=${p},filetype=daq_reco_MuDst,filename~st_physics,storage!=hpss -limit 0 -delim : -distinct | tee Mu${p}.list
 end
