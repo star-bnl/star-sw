@@ -1,0 +1,30 @@
+* 1/26/99 K. Turner
+* 9/24/98 K. Turner (for 98i)
+* Run BFC in following manner:
+* - read in simulated data file that has ONLY dst tables on it 
+* - exec strangeness dst kumacs
+* - write out ntuple
+* - write out event directory
+ 
+
+ exec $STAR/kumacs/chain/bfc _
+   TOP=$STAR _
+   calib_dir=$STAR_CALIB/ebye _
+   tpc_sector_first=1 _
+   tpc_sector_last=24 _
+   ebye_prior_switch=0 _
+   ebye_ensemble_switch=0 _
+   ebye_analysis_switch=1 _
+   gstar_settings=' field_only' _
+   domain=' strange  ' _
+   chain=' dstin sdst ntup evout ' _
+   skip=0 _
+   no_events=1 _
+   input_data_file=/disk00000/data/test_data/set100_01_2ev_dst_dst.xdf _
+   output_file=set100_01_2ev _
+   log=bfc_read_dst_smdst.log _
+   nunit=21 _
+   nfile=smdst.ntup _
+   nid=111 _
+   ntable=event/data/strange/smdst/smdst_v0
+

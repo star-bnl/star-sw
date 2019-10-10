@@ -1,1 +1,0 @@
-0-59/2 * * * * /ldaphome/akio/fgt/makepage.pl 0 submit noprint
