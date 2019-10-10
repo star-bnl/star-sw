@@ -1,0 +1,1167 @@
+* 2Jul98 K. Turner - tpc code now requires geometry so make it default
+*                    in domain
+* 3Jul98 K. Turner - changed tpc kumacs so that pam kumacs are called directly
+* 7Jul98 K. Turner - changed to use gstar stuff
+* 9Jul98 K. Turner - changed to use new tpc cluster and track eval for slow sim
+* 9Jul98 K. Turner - changed to use tfc_run#run_newtab - can set adcxyzon=1
+* 10Jul98 K. Turner - changed to use new version of global pam kumacs
+* 11Jul98 K. Turner - changed to used tfc for adcxyz table
+* 11Jul98 K. Turner - changed to load gstar more standard way 
+*                   - changed inputs to bfc_start!
+* 13Jul98 K. Turner - change to separate out parts of setup 
+* 21Jul98 K. Turner - removed gethij & gst - not needed
+* 21Jul98 K. Turner - changed to separate out the gstar & g2t parts
+* 22Jul98 K. Turner - fixed to pick up correct gstar files
+* 27Jul98 K. Turner - fixed to include all domains in bfc_defaults 
+* 27Jul98 K. Turner - allow to run gstar from input txt file
+* 28Jul98 K. Turner - separate bfc_defaults and bfc_load to 
+*                      kumacs/util/setup_defaults and load_libraries
+* 1Aug98  K. Turner - tid now separated out of tpt
+* 3Aug98  K. Turner - use new detp geometry command instead of bfc_gstar_setup
+* 7Aug98  K. Turner - removed unneeded user/input under evgin in bfc_process 
+* 11Aug98 K. Turner - now make split_off default for running gstar 
+* editted 8/12/98 K. Turner - more comments; combine geomtype+phystype into
+*                             gstar_settings; use gstar_settings=field_only
+*                             if not running gstar
+* editted 8/12/98 K. Turner - added new modules to chain:
+*                               ==> chain name/module
+*                                    evr       evr
+*                                    ddedx     dst_dedx_filler
+*                                    dmsft     dst_monitor_soft_filler
+*                                    dmhrd     not available yet
+*                                    desum     fill_dst_event_summary
+*                                    drsum     fill_dst_run_summary
+*                                    emc       ems_interface2
+*                                    jet       emc_egrid,emc_erj
+*                                    ctf       cts,ctu
+*                                    mwc       mws,mwu
+*                                    trg       l3cl,ftf_tpc - won't work yet
+* 
+* editted 8/12/98 K. Turner - added new module to chain: 
+*                               ==> chain name/module
+*                                     ffs - ftpc fast sim
+*                                     fss - ftpc slow sim
+*                                     fcl - ftpc clustering
+*                                     fpt - ftpc tracking
+*                                     fte - ftpc track evaluator
+*                                    
+* editted 8/24/98 K. Turner - put in changes from Lanny:
+*                               ==> chain name/module
+*                                   dpnt  - dst point filler
+*                                   desum - dst event summary - now works
+* 
+* editted 8/24/98 K. Turner - new/changed modules in chain
+*                               ==> chain name/module
+*                                     fpt_s - ftpc tracking - slow sim
+*                                     fte_s - ftpc track evaluator - slow sim
+*                                     fpt_f - ftpc tracking - fast sim
+*                                     fte_f - ftpc track evaluator - fast sim
+*                           - evr MUST be called before ev0
+*
+* editted 8/25/98 K. Turner - in (evin), right after reading in tables,
+*                             rmdir event/dst - mismatch between old & new 
+*                             directory structure
+* 
+* editted 8/26/98 K. Turner - in (evin), rm run/params/svt tables that
+*                             are in wrong place and not needed
+* editted 8/26/98 K. Turner - fixed (fzin) so it would work 
+* editted 8/26/98 K. Turner - now use par2mem to read in svt & tpc run/params
+*                             tables so had to change init kumacs for svt,tpc
+*                           - remove rm and rmdir (see few days ago);  just 
+*                             leave old unused tables in
+*                           - write out information to log file from (rg2t)
+* editted 8/27/98 K. Turner - now get global tables in run/params/global
+*                             from par2mem, so have to change calls to
+*                              global init kumacs
+*                             
+* editted 8/28/98 K. Turner - changed names of macros in init_dst
+* editted 8/31/98 K. Turner - changes:
+*                           ==> chain name/module
+*                           - added new module into chain:
+*                                     dehd - dst event header table 
+*                           - got module working:
+*                                     drsum - fill_dst_run_summary
+*                           - modified recently:
+*                                     dmsft - dst_monitor_soft_filler
+*                                     desum - fill_dst_event_summary
+* editted 8/31/98 K. Turner - write out run directories at finish
+* editted 8/31/98 K. Turner - broke up event and run summary and header kumacs
+*                             and now add new module to chain:
+*                                 drhd - dst run header table
+* 
+* editted 9/1/98 K. Turner - increment counters nevdsttot,nevdstgood 
+*                            defined in setup.kumac
+* editted 9/1/98 K. Turner - implemented drsum in bfc_finish
+* editted 9/9/98 K. Turner - now writes out run tables in bfc_finish
+*                              ONLY if drhd or drsum is in chain
+* editted 9/10/98 K. Turner - added new chain variable: dout
+*                             which writes out run/dst and 
+*                             event/data/global/dst directories to a file
+* editted 9/11/98 K. Turner - now write out run tables in bfc_finish
+*                             only if DRSUM is in chain
+*                           - in evin: check  error if from 
+*                             read_table_from_file
+*                             and skip out if vector is set 
+*                           - change emc to ems in chain 
+* editted 9/14/98 K. Turner - new chain variable dstin to read in dst
+*                             file and put tables in correct directories
+* editted 9/15/98 Y. Fisyak - fixed "fzin" so it gets to EOF properly
+* editted 9/16/98 K. Turner - new chain variable "ntup" to write ntuple
+* editted 9/18/98 K. Turner - added create_tables for "spr" init
+*                           - create chain variable "insvt" to initialize
+*                             svt tables that are needed even when svt
+*                             packages aren't being called
+*                           - put in (ebye1) chain
+* editted 9/21/98 K. Turner - new chain variable (user)
+*                           - fix (dehd) chain
+* editted 9/23/98 K. Turner - fixing event counters
+*                              nev_total = total # events read in, including skipped events
+*                              nev_proc = total # events processed (not incl. skipped)
+*                              nev_pass = total # events passed the processing
+*                           - put in error checking in rg2t (Pavel) 
+* 
+* editted 9/24/98 K. Turner - implement following chain variables:
+*                               chain:  module:   
+*                                ev0j   pams/global - joins ev0out & vertex tables
+*                                emc    pams/emc - Akio's em calib adc to energy
+*                                calin    - Akio's read correct calibration constants in
+*                                smdst  pams/strange - Ken Wilson's strange stuff
+*                           - changed chain for "ems" - Akio's changes
+* 
+* 9/25/98 K. Turner - fixed how we handle error conditions
+*                   - fixed nev_total, nev_proc so they don't count EOF or end
+*                     run records
+*                   - in "rg2t" created table hepe_gent with large # rows
+*                     to take care of problem that cp doesn't expand # rows
+* 
+* 9/29/98 K. Turner - new chain variables:
+*                      dchkt - executes pams/global/kumac/dst_chk_tabl.kumac 
+*                              used to write out info from dst
+*                      dwntp - executes pams/global/kumac/dst_wr_ntup.kumac
+*                             used to write out ntuples from dst tables
+* 10/8/98 K. Turner - update ftpc kumacs
+* 10/8/98 K. Turner - change "dout" so that it writes out a separate
+*                     run/params file also
+* 10/9/98 K. Turner - take back out the "dout" feature that writes a
+*                     separate run/params file
+*                   - fix dchkt so that it checks if run_summary table
+*                     exists before executing finish stuff
+* 10/13/98 K. Turner - change "dout" so that it writes out full run
+*                      directory during bfc_init, not just run/params
+* 10/14/98 K. Turner - remove "dwntp" - not needed
+*                    - fix dout so it writes out whole run dir during init
+*                    - fix dstin for backwards compatibility
+*                    - default params read with read_default_params 
+*                      instead of load_libraries 
+*                    - following changes to pams/ftpc/ code & kumacs now can:
+*                       - change fpt_s,fpt_f chains to both be fpt
+*                       - change fte_s,fte_f chains to both be fte
+* 
+* 10/21/98 K. Turner - implement "tpt_r" chain
+* 10/28/98 K. Turner - implement "ev02" chain 
+* 10/29/98 K. Turner - implement "ev0d" chain - creates dst_v0_vertex table 
+*                      from ev0out table - then deletes ev0out table
+*                      - should be called AFTER ev02! and b4 smdst!
+* 
+* 11/4/98  K. Turner - create "obin" and "obout" chain for reading and
+*                      writing objectivity database - Torre will implement
+*                    - create "ntup2" chain so can write a 2nd ntuple to
+*                      the ntuple file
+* 
+* 11/6/98 K.Turner - implement  tfc_r chain for Iwona & Li Qun
+*  
+* 11/8/98 (approx) I. Sakrejda - implement "mdin" chain for reading in
+*                                MiniDaq data & corrections to "tfc_r"
+* 
+* 11/10/98 K. Turner - fixes to ems,emc, jet chains for Akio
+* 11/12/98 K. Turner - fixes to dstin for rerunning desum & drsum
+* 11/18/98 K. Turner - add "rhij" chain to run hijing
+* 11/24/98 K. Turner - change to smdst chain (macro names) and rename sdst 
+*                    - add sdst2 chain
+* 11/25/98 K. Turner - change ev0d chain to use ev0_dst code & kumacs
+*                      instead of just kumacs
+*                    - add tcc code to "tcl" chain
+* 12/3/98 K. Turner  - for "ev0d" chain, after running ev0d,
+*                      set rowcount ev0out table to 0 instead of deleting it 
+* 12/8/98 K. Turner - remove tcc from tcl chain - doesn't work ?!
+* 12/9/98 K. Turner - fix sgr chain to check if sgr ran okay before running stk
+*                   - after reading in fz file in fzin (init) do make gstar
+*                     again so that hepe_* tables get created
+*                   - fix tfc_r chain so that it uses tpc sector #'s
+* 
+* 12/10/98 K. Turner - remove "ev0j" chain - not needed anymore (use ev02 ev0d)
+* 12/14/98 K. Turner - check that input file exists when using "fzin"
+*                    - new chain "egout" to write out event generator files
+*                      with proper directory structure - so that gstar can
+*                      be run subsequently
+* 12/23/98 T. Wenaus - add content to obin, obout
+* 12/30/98 K. Turner - put fix in "tss" init section:
+*                      problem: tsspars table in 98l has changed so the version
+*                       you read in from $STAR/params/tpc/tss_pars.xdf is 
+*                       different than that on xdf file (made previous to 98l) 
+*                       - get error and table is deleted
+*                      solution: read in tss_pars.xdf file again when 
+*                       running tss - so now we always have 98l version
+* 01/25/99 J.Seyboth -  ==> chain name/module
+*                           - added new modules into chain:
+*                                     fde  - FTPC dedx module      
+*                                    dftpc - module to store FTPC dst data
+* 
+* ************************************************************
+*                     BFC_UTIL.KUMAC
+*************************************************************
+******************************************************************
+ 
+ macro bfc_start _ 
+   domain='geometry tpc svt global' _
+   chain=' ' _
+   gstar_settings=' ' 
+
+* import global macros
+   macro/global/import *
+
+*  THESE NEXT 4 MUST BE DONE IN THIS ORDER!!!!
+   message ' *** SET GEOMETRY in gstar:  -->   ' [gstar_settings]
+   message '        !!! split_off is hardwired into this kumac !!! '
+   detp geometry [gstar_settings] split_off
+   exec bfc_util#bfc_g2t_b4_load    [chain]
+   if (STAF_STATUS(1).ne. STAFCV_OK) goto ERROR
+   exec load_libraries#run          [domain]   
+   if (STAF_STATUS(1).ne. STAFCV_OK) goto ERROR
+   exec read_default_params#init     
+   if (STAF_STATUS(1).ne. STAFCV_OK) goto ERROR
+   exec bfc_util#bfc_g2t_after_load [chain]
+   if (STAF_STATUS(1).ne. STAFCV_OK) goto ERROR
+   
+  
+ vec/input staf_status(1) stafcv_ok
+ goto END
+   
+ ERROR:
+   message ' ERROR IN BFC_START - JUMP OUT'
+   vec/input staf_status(1) stafcv_bad
+ 
+END:
+ 
+return
+ 
+*********************************************************************
+*********************************************************************
+**********************************************************************
+ 
+macro bfc_init _
+    chain=' g2tin svg tpg srs tfs sgr spr tpt tte_e svm egr ev02 ev0d evout' 
+  
+  macro/global/import *
+    
+ test = [chain]
+ nw = $words([test])
+ message ' !!! bfc_util#init ==> Number of words in chain = ' [nw]
+ 
+*  check if we're running desum or drsum again
+ do i = 1, [nw]
+   mod = $word([test],[i],1)
+   CASE [mod] in
+     (desum) vec/create chain_desum
+     (drsum) vec/create chain_drsum
+   ENDCASE
+ enddo
+* 
+ 
+ do i = 1, [nw]
+   mod = $word([test],[i],1)
+   message ' !!! bfc_util#init ==>  chain init for ' [mod] 
+   vec/create v[mod]
+   vec/create t[mod]
+   CASE [mod] in
+     (rhij) exec create_tables_gen#hijing
+            exec init_hij#init
+    (oldin) user/input dummy [input_file]
+    (evgin) newfile hij_in [input_file] r; 
+            user/input u [evgen]/particle.staf	    
+   (gtxin) user/input dummy [input_file]
+    (fzin)  
+            gfile p [input_file]      | PN: p is a generic format
+            tables ' ' [geant_Run]
+            detp g2tm dete(cdet=SFSD).onoff=0 gttc.rdir=0
+	    make gstar
+    (g2tin) 
+	    exec input_g2t_file#init [input_file]
+            if (STAF_STATUS(1).ne. STAFCV_OK) then
+              message 'problem opening input file '
+              goto EOF 
+            endif
+   (evin)
+	  exec read_table_from_file#init inev [input_file]
+           if ($vexist(readprob).ne.0) then 
+            message ' BFC_UTIL,init: ERROR - cannot open input file - quit '
+            goto EOF
+           endif
+          exec read_table_from_file#read inev
+           if ($vexist(readprob).ne.0) then 
+            message ' BFC_UTIL,init: ERROR - cannot read input file - quit '
+            goto EOF
+	  endif
+    (mdin)
+          exec read_table_from_file#init inev [input_file]
+           if ($vexist(readprob).ne.0) then 
+            message ' BFC_UTIL,init: ERROR - cannot open input file - quit '
+            goto EOF
+           endif
+ANR:       exec read_table_from_file#read inev /dui/run/params/tpc
+           if ($vexist(readprob).ne.0) then 
+            message ' BFC_UTIL,init: ERROR - cannot read input file - quit '
+            goto EOF
+	   endif 
+           ls [params]/tpc/ROSIE_RESET
+           if (staf_status(2).eq.STAFCV_OK) then
+              rmdir [params]/tpc/ROSIE_RESET
+              goto ANR
+           endif
+
+   (dstin) 
+	  exec read_table_from_file#init ind [input_file]
+	  if ($vexist(readprob).ne.0) then 
+            message ' BFC_UTIL,init: ERROR - cannot open dstin file - quit '
+            goto EOF
+	  endif
+* must take care of old type of dsts (before 98i) that only had
+* dst tables in first event -- if we get dst directory here, copy
+* tables to run/dst and then delete from dst
+	  exec read_table_from_file#read ind  
+           if ($vexist(readprob).ne.0) then 
+            message ' BFC_UTIL,init: ERROR - cannot read dstin file - quit '
+            goto EOF
+	  endif  
+* now check if we have dst directory here:
+	  ls dst
+	  if (staf_status(2).eq.stafcv_ok) then
+	    message ' have dst directory in run directory! '
+	    cp dst/run_header  [run_dst]
+	    cp dst/run_summary [run_dst]
+	    rm dst/run_header
+	    rm dst/run_summary
+	    rmdir dst
+	  endif
+* now if we're rerunning drsum, need to delete run_summary table
+	  if ($vexist(chain_drsum).ne.0) then 
+            message ' BFC_UTIL,init:  delete existing run_summary table'
+	    rm [run_dst]/run_summary
+	  endif
+    (obin)	  
+      exec read_dst_from_db#init [input_file]
+      if ( staf_status(1) .ne. STAFCV_OK) then
+        message ' BFC_UTIL,init: ERROR - cannot open dst DB input - quit '
+        goto EOF
+      endif
+      exec read_dst_from_db#read ind [run]
+        if ( staf_status(1) .ne. STAFCV_OK) then
+          message ' BFC_UTIL,init: ERROR - cannot read dst DB - quit '
+          goto EOF
+      endif  
+    (esin)
+          dio/newfilestream inev [input_file] r
+          cd [run]
+          dio/stream/getevent inev
+    (insvt)
+         exec init_svg#init
+         exec create_tables_svt#srs
+	 exec init_srs#init
+	 exec create_tables_svt#sgr
+         exec create_tables_svt#stk
+         exec init_vertices#init
+         exec init_sgr#init
+	 exec init_stk#init   
+         exec create_tables_global#svm
+         exec init_svm#init
+      (svg) 	  
+           exec init_svg#init
+      (tpg) 
+           exec tpg_init#init
+           exec tpg_init#tpg_main
+      (sss)
+ 	   exec init_sss#read
+           exec init_ssf#read
+	   exec init_sss#init
+	   exec init_ssf#init
+      (srs) 
+           exec create_tables_svt#srs
+	   exec init_srs#init
+      (tfs) 
+         exec create_tables_tpc#tcl_fast
+         exec tcl_init#init_tcl
+	 exec tfs_init#init
+      (tss) 
+         exec create_tables_tpc#tss [tpc_sector_first] [tpc_sector_last]
+         message ' !!! FIX on 12/30/98 !!! '
+	 message '   98l param file has new tsspar table '
+	 message '    but input xdf files (< 98l) have old type '
+	 message '    --> NOW: read in tss_pars.xdf & overwrite input xdf file'
+	 exec read_table_from_file#init k1 $STAR/params/tpc/tss_pars.xdf
+	 exec read_table_from_file#read k1 [params]/tpc
+	 exec read_table_from_file#close k1
+         exec tss_init#init [tpc_sector_first] [tpc_sector_last]
+      (tfc) 
+        exec create_tables_tpc#tfc
+      (tfc_r)
+         exec create_tables_tpc#tfc_r
+         exec tfc_init#init
+      (tcl)
+         exec create_tables_tpc#tcl_slow
+* exec create_tables_tpc#tcc
+	 exec tcl_init#init_tcl
+* exec tcl_init#init_tcc
+      (tpt)
+	 exec create_tables_tpc#tpt
+	 exec tpt_init#init
+    (tpt_r)
+	 exec create_tables_tpc#tpt_residuals
+    (tte_t) 
+	 exec create_tables_tpc#tpt
+	 exec tpt_init#init
+    (tte_e)
+         exec create_tables_tpc#tte
+	 exec tte_init#init
+      (tid) 
+         exec tid_init#init
+      (stk)
+	 exec create_tables_svt#sgr
+         exec create_tables_svt#stk
+         exec init_vertices#init
+	 exec init_sgr#init
+	 exec init_stk#init
+      (sgr) 
+	 exec create_tables_svt#sgr
+         exec create_tables_svt#stk
+         exec init_vertices#init
+         exec init_sgr#init
+	 exec init_stk#init 
+      (spr)
+         exec create_tables_svt#spr 
+         exec init_spr#init
+      (ffs) 
+	    exec create_tables_ftpc#ffs_tables
+	    exec init_ffs#init
+      (fss) 
+	    exec create_tables_ftpc#fss_tables
+	    exec init_fss#init
+      (fcl) 
+            exec create_tables_ftpc#fcl_tables
+	    exec init_fcl#init
+    (fpt)
+            exec create_tables_ftpc#fpt_tables
+            exec init_fpt#init
+    (fte)
+            exec create_tables_ftpc#fte_tables
+            exec init_fte#init	    
+    (fde)
+            exec create_tables_ftpc#fde_tables
+            exec init_fde#init	    
+      (svm) 
+            exec create_tables_global#svm
+            exec init_svm#init
+      (evr) exec create_tables_global#evr
+            exec init_evr#init
+      (egr) 
+	    exec create_tables_global#egr
+	    exec init_egr#init
+      (ev0) 
+	    exec create_tables_global#ev0 
+            exec init_ev0#init
+            exec init_magf#init
+     (ev02) 
+	    exec create_tables_global#ev0
+            exec create_tables_global#ev02
+	    exec init_ev0#init_ev02
+   (ev0_e)  exec create_tables_global#ev0_eval2
+   (ev0d)   exec create_tables_global#ev0d
+            exec init_ev0#init_ev0d
+    (ctf)   exec create_tables_ctf#init
+            exec ctg_init#init
+            exec ctg_init#ctg
+            exec cts_init#init
+     (mwc)  exec create_tables_mwc#init
+	    exec mwg_init#init
+	    exec mwg_init#mwg
+	    exec mws_init#init
+      (trg) exec l3cl_init
+	    exec l3t_init
+	    exec create_tables_l3
+      (ems) exec create_tables_emc#ems
+	    exec init_ems#init
+      (emc) exec create_tables_emc#cal
+	    exec init_cal#init
+      (jet) exec create_tables_emc#jet
+	    exec init_jet#init
+    (ddedx) exec create_tables_global#dst_dedx_filler
+     (dpnt) exec create_tables_global#dst_point_filler
+    (dmsft) exec create_tables_global#dst_monitor_soft_filler
+            exec create_tables_ctf#init
+    (dmhrd) 
+    (desum) exec create_tables_global#fill_dst_event_summary
+            exec init_dst#init_esum
+    (drsum) exec create_tables_global#fill_dst_run_summary
+            exec init_dst#init_rsum
+     (dehd) exec create_tables_global#fill_dst_event_header
+            exec init_dst#init_ehead
+     (drhd) exec create_tables_global#fill_dst_run_header
+	    exec init_dst#init_rhead
+    (ebye1)
+            exec create_tables_ebye#sca_io
+            exec create_tables_ebye#sca_prior
+            exec create_tables_ebye#sca_ensemble_ave
+            exec init_sca#init_params [calib_dir] [output_file] _
+             [ebye_prior_switch] [ebye_ensemble_switch]  [ebye_analysis_switch]
+            exec init_sca#init_analysis [calib_dir] [output_file] _
+	      [ebye_prior_switch] [ebye_ensemble_switch]  [ebye_analysis_switch]
+    (sdst)  exec create_tables_strange#smdst
+            exec init_smdst#init_smdst
+   (sdst2)  exec create_tables_strange#smdst2
+	    exec init_smdst#init_smdst2
+   (dchkt)
+	    exec dst_chk_tabl#init
+	    exec dst_chk_tabl#run_header
+    (user)  exec init_user
+    (ntup)  exec write_table_to_ntuple#init_disk [nunit] [nfile]
+    (fzout) user/output o [output_fzd_file]
+    (evout)
+            if output_xdf_file="" then
+              message "empty output file"
+            else
+	      exec write_table_to_file#init outfile [output_xdf_file]
+              if (STAF_STATUS(1).ne. STAFCV_OK) then
+                message "Cannot open output file"
+                goto EOF
+              endif
+              exec write_table_to_file#write outfile [run]         
+            endif
+   (egout)
+            if output_gen_file="" then
+              message "empty output file"
+            else
+	      exec write_table_to_file#init genfile [output_gen_file]
+              if (STAF_STATUS(1).ne. STAFCV_OK) then
+                message "Cannot open output file"
+                goto EOF
+              endif
+            endif
+    (dout)  
+            if output_dst_file="" then
+              message "empty dst output file"
+            else
+	      exec write_table_to_file#init dstout [output_dst_file]
+              if (STAF_STATUS(1).ne. STAFCV_OK) then
+                message "Cannot open dst output file"
+                goto EOF
+              endif
+              exec write_table_to_file#write dstout [run]         
+            endif
+    (esout)
+            if output_xdf_file="" then
+              message "empty output file"
+            else
+              dio/newfilestream outfile [output_xdf_file] w
+              if (STAF_STATUS(1).ne. STAFCV_OK) then
+                message "Cannot open output file"
+                goto EOF
+              endif
+              cd [run]
+              dio/stream/puteven outfile
+            endif
+    (obout)
+            exec write_dst_to_db#init [input_file]
+            if ( staf_status(1) .ne. STAFCV_OK) then
+              message <<< ERROR >>> Cannot open DST DB for write
+              goto EOF
+            endif
+      (*)   message " !!! bfc_util: No initialization for package " [mod]
+    ENDCASE
+    if (STAF_STATUS(1).ne. STAFCV_OK) goto EOF
+    
+  enddo
+  
+
+ vec/input staf_status(1) stafcv_ok
+ goto END
+   
+ EOF:
+   message ' ERROR IN BFC_INIT - JUMP OUT'
+   vec/input staf_status(1) stafcv_bad
+   
+END:
+ 
+return
+
+**********************************************************************
+**********************************************************************
+**********************************************************************
+
+ macro bfc_process _
+   chain=' g2tin svg tpg srs tfs sgr spr tpt tte_e svm egr ev02 ev0d evout'_
+   
+  macro/global/import *
+
+  test = [chain]
+  nw = $words([test])
+  message ' !!! bfc_util#process ==> Number of words in chain = ' [nw]
+
+  do i = 1, [nw]
+   mod = $word([test],[i],1)
+   message ' !!! bfc_util#process ==> chain process for ' [mod] 
+   CASE [mod] in
+     (rhij) exec run_hij#run
+    (oldin) nextl 1
+    (evgin) cd [event]; 
+            getev hij_in
+            cd /dui
+     (g2tin) exec input_g2t_file#read
+             if (staf_status(1).ne.STAFCV_OK) then
+	       nev_proc = [nev_proc] - 1 
+	       nev_total = [nev_total] - 1 
+               goto EOF
+             endif
+     (gtxin) nextl 1
+     (evin) exec read_table_from_file#read inev
+           if ($vexist(readprob).ne.0) then 
+            message ' BFC_UTIL,process: ERROR - cannot read input file - quit '
+	    nev_proc = [nev_proc] - 1
+	    nev_total = [nev_total] - 1
+            goto EOF
+           endif
+            ls [run_dst]/run_summary
+            if (staf_status(2).eq.STAFCV_OK) then
+*              message ' *** BFC_PROCESS: run summary table exists! '
+              rowcount [run_dst]/run_summary	    
+	      if (staf_result(1).ne.0) then
+*                message ' *** BFC_PROCESS: run summary table has entries! '
+                tdm/table/cell/getvalue 'run/dst/run_summary[0].n_events_tot' 
+                if (staf_result(1).ne.0) then 
+	            vec/create havedstrunsum
+	            message ' *** BFC_PROCESS: have final run_summary table!'
+		    nev_proc = [nev_proc] - 1
+		    nev_total = [nev_total] - 1
+	            goto EOF
+	        endif
+              endif
+            endif
+     (mdin) ls [params]/tpc/TPC_DATA
+            if (staf_status(2).eq.STAFCV_OK) then
+               mv [params]/tpc/TPC_DATA  [raw_data]/tpc
+            else
+               exec read_table_from_file#read inev /dui/event/raw_data/tpc
+               if ($vexist(readprob).ne.0) then 
+                 message ' BFC_UTIL,process: ERROR - cannot read input file - quit '
+	         nev_proc = [nev_proc] - 1
+	         nev_total = [nev_total] - 1
+                 goto EOF
+               endif
+	     endif
+   (dstin) 
+* Kathy ==>
+* now if we're rerunning desum, need to delete event_summary table
+* 
+* DSW Nov. 18, 1998
+* When running 'desum', bfc_util#bfc_init call 
+* create_table_global#fill_dst_event_summary which creates event_summary table.
+* So we will have two event_summary tables when rerunning 'dstin desum'
+* To avoid confusing STAF, delete event_summary table created by 
+* create_table_global#fill_dst_event_summary just once per job [in the very
+* first event] before reading in the data from [event]/data/global.
+* DSW   Nov. 18, 1998
+   
+	  if ($vexist(chain_desum).ne.0) then 
+            message ' BFC_UTIL,init:  delete existing event_summary table'
+            rm [dst]/event_summary
+	    vec/del chain_desum
+	  endif
+* read in dst
+	  exec read_table_from_file#read ind [event]/data/global
+           if ($vexist(readprob).ne.0) then 
+	    message ' BFC_UTIL,process: ERROR - cannot read dstin file - quit '
+	    nev_proc = [nev_proc] - 1
+	    nev_total = [nev_total] - 1
+            goto EOF
+           endif
+	   ls [dst]/run_summary
+            if (staf_status(2).eq.STAFCV_OK) then
+* Kathy 9/14
+* - have run_summary & run_header tables in wrong directory at this
+*   point and now must delete initial ones,  move theses and then
+*   go to bfc_finish	       
+	      vec/create havedstrunsum
+	      rm [run_dst]/run_header
+	      rm [run_dst]/run_summary
+	      mv [dst]/run_header [run_dst]
+	      mv [dst]/run_summary [run_dst]
+	      nev_proc = [nev_proc] - 1
+	      nev_total = [nev_total] - 1
+	      goto EOF	
+            endif
+     (esin) for dir in [evgen] [geantE] [raw_data] [data] [dst]
+            cd [dir]
+            dio/stream/getevent inev 
+	    if (staf_status(1).ne.STAFCV_OK) then
+	      nev_proc = [nev_proc] - 1
+	      nev_total = [nev_total] - 1
+	      goto EOF
+	    endif
+            endfor
+     (fzin) trig 1 
+           if ($iquest(1) <>0) then
+             nev_proc = [nev_proc] - 1 
+	     nev_total = [nev_total] - 1
+	     goto EOF
+	   endif
+     (obin) exec read_dst_from_db#read
+           if ( staf_status(1) .ne. STAFCV_OK) then
+             message ' BFC_UTIL,process: ERROR - cannot read dst DB - quit '
+             nev_proc = [nev_proc] - 1
+             nev_total = [nev_total] - 1
+             goto EOF
+           endif
+    (calin) call cal2mem(946702800) 
+     (rgst) trig 1
+            if ($iquest(1) <>0) then
+              nev_proc = [nev_proc] - 1
+	      nev_total = [nev_total] - 1
+              goto EOF
+	    endif
+     (rg2t) cd [geantE]
+          for/call g2t
+* try this - error check
+          if ($iquest(100) <1 .or. $iquest(100) > 100000) then
+            message ..... g2t bad .....
+	    nev_proc = [nev_proc] - 1
+	    nev_total = [nev_total] - 1
+	    goto NEXT_EVENT
+	  endif
+            cd /dui
+            tdm/table/rowcount event/geant/Event/g2t_vertex
+            no_vert=$format(staf_result(1),i10)
+            tdm/table/rowcount event/geant/Event/g2t_track
+            no_track=$format(staf_result(1),i10)
+            string = '---<bfc>---rg2t: Event '//[nev_proc]//' No.vertices ='//[no_vert]//' No.Tracks = '//[no_track]
+            fmessage $quote([string])    [log_file]
+            message $quote([string])
+* copy event generator table to dst directory
+* first must allocate a large table because copy doesn't take care of 
+*   extending row count if needed
+	    if ([nev_proc].eq.1) then
+	      tdm/newtable [dst]/hepe_gent hepe_gent 30000
+	    endif
+          cp event/geant/Event/hepe_gent [dst]
+      (svg)    nextl 1
+      (tpg)    nextl 1
+      (sss)    exec run_sss
+               exec run_ssf
+      (srs)    exec run_srs
+               if (staf_status(1) .ne. stafcv_ok) then 
+		 message ' problem with run_srs'
+		 goto NEXT_EVENT
+		endif
+      (tfs)    
+               exec tfs_run#run
+               if (staf_status(1) .ne. stafcv_ok) then 
+		 message ' problem with tfs_run'
+		 goto NEXT_EVENT
+	       endif
+      (tss)    
+               exec tss_run#run [tpc_sector_first] [tpc_sector_last]
+               if (staf_status(1) .ne. stafcv_ok) then 
+                 message ' problem with tss_run'
+		 goto NEXT_EVENT
+               endif
+      (tfc)    exec tfc_run#run_newtab [tpc_sector_first] [tpc_sector_last]
+      (tfc_r)  exec tfc_run#run_reformat_newtab [tpc_sector_first] [tpc_sector_last]
+      (tcl)    
+               exec tcl_run#run_tcl [tpc_sector_first] [tpc_sector_last] 
+* exec tcl_run#run_tcc [tpc_sector_first] [tpc_sector_last] 
+               exec tcl_run#run_tph [tpc_sector_first] [tpc_sector_last]
+               if (staf_status(1) .ne. stafcv_ok) then 
+                 message ' problem with tpc_clustering_process_event'
+		 goto NEXT_EVENT
+               endif
+    (tcl_e)    exec tte_run#run_tte_hit_match
+       
+      (stk)    exec run_stk#run
+               if (staf_status(1) .ne. stafcv_ok) then
+		 nextl 1;
+	         goto NEXT_EVENT
+               endif
+      (sgr)    exec run_sgr#run
+	       if (staf_status(1) .ne. stafcv_ok) then
+                 nextl 1;
+		 goto NEXT_EVENT 
+               endif
+	       exec run_stk#run
+               if (staf_status(1) .ne. stafcv_ok) then
+                 nextl 1;
+		 goto NEXT_EVENT 
+               endif
+      (spr)    exec run_spr#run
+      (tpt)    exec tpt_run#run
+	       if (staf_status(1) .ne. stafcv_ok) then 
+                 message ' problem with tpc_tracker_tpt'
+		 goto NEXT_EVENT
+               endif 
+      (tpt_r)  exec tpt_run#run_tpt_residuals
+	       if (staf_status(1) .ne. stafcv_ok) then 
+                 message ' problem with tpt_residuals'
+		 goto NEXT_EVENT
+               endif 
+    (tte_t)    exec tte_run#run_tte_track
+                 if (staf_status(1) .ne. stafcv_ok) then 
+                   message ' problem with tpc_tracker_tte'
+		   goto NEXT_EVENT
+                 endif
+      (tid)    exec tid_run#run_tde_new 
+               if (staf_status(1) .ne. stafcv_ok) then 
+                 message ' problem with tpc_tracker_tpt'
+		 goto NEXT_EVENT
+               endif
+    (tte_e)    exec tte_run#run_tte
+      (ffs)    exec run_ffs#run 
+      (fss)    exec run_fss#run
+      (fcl)    exec run_fcl#run
+      (fpt)    exec run_fpt#run
+      (fte)    exec run_fte#run
+      (fde)    exec run_fde#run
+      (svm)    exec run_svm#run_svm
+      (evr)    exec run_evr#run
+      (egr)    exec run_egr#egr	
+      (ev0)    exec run_ev0#ev0_am 
+     (ev02)    exec run_ev0#ev0_am2
+    (ev0_e)    exec run_ev0#ev0_eval2
+    (ev0d)     exec run_ev0#ev0d  
+               rowcount [dst]/ev0out 0
+      (ctf)    exec cts_run
+               exec ctu_run 
+      (mwc)    exec mws_run
+	       exec mwu_run
+      (trg)    exec l3cl_run
+	       exec ftf_run
+      (ems)    exec run_ems#ems_interface2
+	       exec run_ems#dep_e_toadc
+	       exec run_cal#emc_adc_sim
+      (emc)    exec run_cal#adc_to_energy
+      (jet)    exec run_jet#egrid
+               exec run_jet#erj
+     (dehd)    exec run_dst#dst_ehead
+    (ddedx)    exec run_dst#dst_dedx_filler
+     (dpnt)    exec run_dst#point_filler
+    (dftpc)    exec run_dst#fill_ftpc_dst
+    (dmsft)    exec run_dst#dst_mon_soft
+    (dmhrd)    nextl 1
+    (desum)    exec run_dst#dst_event_summary
+    (drsum)    exec run_dst#dst_run_summary
+    (ebye1)    
+               exec run_sca#filter 
+               if ( staf_status(1) .ne. STAFCV_OK) then
+                 message <<< WARNING >>>  Problem with sca_filter in event [i]
+		 goto NEXT_EVENT
+	       endif
+               exec run_sca#runsca
+               if ( staf_status(1) .ne. STAFCV_OK) then
+                 message <<< WARNING >>>  Problem with sca_runsca in event [i]
+		 goto NEXT_EVENT
+               endif
+    (sdst)     exec run_smdst#run_smdst
+   (sdst2)     exec run_smdst#run_smdst2
+   (dchkt)    
+               exec dst_chk_tabl#event_header
+               exec dst_chk_tabl#dst_tables
+*              exec dst_chk_tabl#event_summary    
+     (user)    exec run_user
+     (ntup)    exec write_table_to_ntuple#write_event_disk [nid] [ntable]
+    (ntup2)    exec write_table_to_ntuple#write_event_disk [nid2] [ntable2]   
+    (evout)    if [output_xdf_file]="" then
+                 message "Empty output file"
+               else
+		 exec write_table_to_file#write outfile [event]
+	       endif
+   (egout)
+	       if [output_gen_file]="" then
+                 message "Empty generator output file"
+               else
+		 exec write_table_to_file#write genfile [event]/evgen
+	       endif
+    (dout)    if [output_dst_file]="" then
+                 message "Empty dst output file"
+              else
+		 exec write_table_to_file#write dstout [dst]
+              endif
+    (esout)    if [output_xdf_file]="" then
+                 message "Empty output file"
+               else
+                 for dir in [evgen] [geantE] [raw_data] [data] [dst]
+                   cd [dir];  dio/stream/putevent outfile
+                 endfor
+	       endif
+     (obout)  exec write_dst_to_db#write
+           if ( staf_status(1) .ne. STAFCV_OK) then
+             message <<< ERROR >>> Cannot write DST DB in event [i]
+             goto NEXT_EVENT
+           endif
+      (*)      message " !!! bfc_util: No process stage for package " [mod]
+   ENDCASE
+
+   if (STAF_STATUS(1).ne. STAFCV_OK) then
+      message BFC_UTIL#proc - staf status BAD in [mod] go to next event
+      goto NEXT_EVENT
+   endif
+    
+   sigma v[mod] = v[mod] + abs($cptime)
+   sigma t[mod] = t[mod] + v[mod]
+   string = '---<bfc>---'//[mod]//': Event  '//$format([nev_proc],i6)//$format(v[mod],f12.5)//$format(t[mod],f12.5)
+   fmessage $quote([string])    [log_file]
+    message $quote([string]) 
+   vec/inp v[mod] 0.0
+   
+  enddo
+
+ asu/malloc/stats 
+ 
+ 
+ NEXT_EVENT:
+ 
+ vec/input staf_status(1) stafcv_ok
+ goto END
+   
+ EOF:
+   message ' SKIP OUT OF BFC_PROCESS  - GO TO BFC_FINISH'
+   vec/input staf_status(1) stafcv_bad
+ 
+ END:
+ 
+return
+ 
+**********************************************************************
+**********************************************************************
+**********************************************************************
+
+macro bfc_finish _
+   chain=' g2tin svg tpg srs tfs sgr spr tpt tte_e svm egr ev02 ev0d evout'
+  
+  macro/global/import *
+
+  test = [chain]
+  nw = $words([test])
+  message ' !!! bfc_util#finish  ==> Number of words in chain = ' [nw]
+
+  vec/cre totime r 0  
+
+  do i = 1, [nw]
+    mod = $word([test],[i],1)
+    message ' !!! bfc_util ==> finish for chain value: ' [mod]
+    CASE [mod] in 
+     (g2tin)  exec input_g2t_file#close
+     (evin)  exec read_table_from_file#close inev 
+     (dstin) exec read_table_from_file#close ind
+     (obin) exec read_dst_from_db#close
+     (rgst)  ge/rz/cd //PAWC; hi/list; | show histograms
+     (drsum) exec  finish_dst#dst_run_summary
+             exec  run_dst#dst_run_summary
+             vec/create randst
+     (ebye1) 
+             exec finish_sca#finish
+             exec run_sca#close [calib_dir] [ebye_prior_switch] _
+	       [ebye_ensemble_switch] [ebye_analysis_switch]
+     (dchkt) 
+	  ls [run_dst]/run_summary
+            if (staf_status(2).eq.STAFCV_OK) then
+*              message ' *** BFC_FINISH: run summary table exists! '
+              rowcount [run_dst]/run_summary	    
+	      if (staf_result(1).ne.0) then
+*               message ' *** BFC_FINISH: run summary table has entries! '
+		exec dst_chk_tabl#run_summary
+	      endif
+            endif
+     (user) exec finish_user
+     (ntup) 
+            exec write_table_to_ntuple#close_disk_ntup
+            exec write_table_to_ntuple#close_file_ntup [nunit]
+            exec write_table_to_ntuple#delete_soc_ntup [nid]
+     (ntup2) 
+            exec write_table_to_ntuple#delete_soc_ntup [nid2]
+     (evout,esout) 
+            if [output_xdf_file]="" then
+                 message "Empty output file"
+            else
+              if ($vexist(randst).ne.0 .or. $vexist(havedstrunsum).ne.0) then
+	        exec write_table_to_file#write outfile [run]
+              endif
+              exec write_table_to_file#close outfile;
+            endif
+   (egout)	    
+	    if [output_gen_file]="" then
+              message "Empty generator output file"
+            else
+              exec write_table_to_file#close genfile;
+            endif    
+     (dout) 
+            if [output_dst_file]="" then
+                 message "Empty dst output file"
+            else
+              if ($vexist(randst).ne.0 .or. $vexist(havedstrunsum).ne.0) then
+	        exec write_table_to_file#write dstout [run_dst]
+              endif
+              exec write_table_to_file#close dstout;
+            endif
+     (obout) exec write_dst_to_db#close
+      (*) message " !!! bfc_util#bfc_finish No final stage for package " [mod]
+    ENDCASE
+
+    sigma totime = totime + t[mod]
+    if [nev_proc]>0 then
+      sigma cpupev = t[mod]/[nev_proc]
+      string = '---<bfc>---'//[mod]//': CPU/event = '//$format(cpupev,f12.5)
+     fmessage $quote([string])    [log_file]
+      message $quote([string]) 
+    endif
+
+   if (STAF_STATUS(1).ne. STAFCV_OK) goto ERROR
+
+  enddo
+
+
+  string = '---<bfc>--- total CPU to process  '//$format([nev_proc],i6)//' events = '//$format(totime,f12.5)
+  fmessage $quote([string])    [log_file]
+  message $quote([string]) 
+
+  if [nev_proc]>0 then
+      sigma cpupev = totime/[nev_proc]
+      string = '---<bfc>--- total CPU/event = '//$format(cpupev,f12.5)
+      fmessage $quote([string])    [log_file]
+      message $quote([string]) 
+  endif
+  
+
+ vec/input staf_status(1) stafcv_ok
+ goto END
+   
+ ERROR:
+   message ' ERROR IN BFC_FINISH - JUMP OUT'
+   vec/input staf_status(1) stafcv_bad
+ 
+ END:
+ 
+ return
+ 
+ 
+**********************************************************************
+**********************************************************************
+**********************************************************************
+ 
+ macro bfc_print chain='evout'
+   
+  macro/global/import *
+  test = [chain]
+  nw = $words([test])
+  do i = 1, [nw]
+    mod = $word([test],[i],1)
+   string = '---<bfc>---'//[mod]//': Event  '//$format([nev_proc],i6)//$format(v[mod],f12.5)//$format(t[mod],f12.5)
+   fmessage $quote([string])    [log_file]
+    message $quote([string]) 
+  enddo
+  
+
+ vec/input staf_status(1) stafcv_ok
+ goto END
+   
+ ERROR:
+   message ' ERROR IN BFC_PRINT - JUMP OUT'
+   vec/input staf_status(1) stafcv_bad
+ 
+ END:
+ 
+ return
+  
+*********************************************************************
+**********************************************************************
+************************************************************
+ 
+macro bfc_g2t_b4_load chain
+   
+   macro/global/import *
+           
+ test1 = [chain]
+ nw1=$words([test1])
+ message ' bfc_util#bfc_g2t_b4_load ==> Number of words in chain = ',[nw1]
+ do i=1,[nw1]
+   mod1 = $word([test1],[i],1)
+   CASE [mod1] in
+     (rg2t)
+         message ' !!! bfc_g2t_b4_load ==> set params for chain:' [mod1]
+* initialize for g2t: tell g2t where to put tables
+         detp g2tmain gttc.rdir=0		  
+   ENDCASE
+ enddo
+ 
+ vec/input staf_status(1) stafcv_ok
+ goto END
+   
+ ERROR:
+   message ' ERROR IN BFC_G2T_B4_LOAD - JUMP OUT'
+   vec/input staf_status(1) stafcv_bad
+ 
+END:
+ 
+return
+
+**********************************************************************
+**********************************************************************
+***********************************************************************
+******************************************************************
+ 
+ macro bfc_g2t_after_load chain
+   
+   macro/global/import *
+     
+*  must fill Run tables if running g2t (rg2t in chain)
+*  has to be done after loading
+ test2 = [chain]
+ nw2=$words([test2])
+ message ' bfc_util#bfc_g2t_after_load ==> Number of words in chain = ',[nw2]
+ do i=1,[nw2]
+   mod2 = $word([test2],[i],1)
+   CASE [mod2] in
+     (rg2t) 
+       message ' !!! bfc_g2t_after_load ==> setup for chain:' [mod2]
+* this command fills geant Run tables
+        tables ' ' [geant_Run]
+   ENDCASE
+ enddo
+ 
+ vec/input staf_status(1) stafcv_ok
+ goto END
+   
+ ERROR:
+   message ' ERROR IN BFC_G2T_AFTER_LOAD - JUMP OUT'
+   vec/input staf_status(1) stafcv_bad
+ 
+END:
+ 
+return
+
+
+
+**********************************************************************
+**********************************************************************
+**********************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
