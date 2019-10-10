@@ -1049,6 +1049,10 @@ Float_t St_tpcRDOT0offsetC::T0(Int_t sector, Int_t padrow, Int_t pad) const {
   t0 = Struct()->t0[sector-1][rdo-1];
   return t0;
 }
+
+#include "St_tpcBXT0CorrEPDC.h"
+MakeChairInstance2(tpcBXT0Corr,StTpcBXT0CorrEPDC,Calibrations/tpc/tpcBXT0CorrEPD);
+
 //__________________Calibrations/trg______________________________________________________________
 #include "St_defaultTrgLvlC.h"
 MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
