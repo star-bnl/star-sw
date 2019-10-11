@@ -1,6 +1,6 @@
 #include "StPidStatus.h"
 #include "StBichsel/Bichsel.h"
-#include "StBichsel/StdEdxModel.h"
+#include "StBichsel/StdEdNModel.h"
 #include "StGlobalTrack.h"
 #include "StTrackGeometry.h"
 #include "TMath.h"
@@ -130,7 +130,7 @@ void StPidStatus::Set() {
 	break;
       case kOtherMethodId: 
       case kOtherMethodId2: 
-	fStatus[m]->Pred[l]  = StdEdxModel::instance()->dNdx(bgs[l], charge);
+	fStatus[m]->Pred[l]  = charge*charge*StdEdNModel::instance()->GetdNdxL10()->Interpolate(bgs[l]);
 	break;
       default: continue;
       }

@@ -1,3 +1,4 @@
+
 // To build profile histograms: root.exe -q -b TpcT.C+
 // To fit them                : root.exe -q *H.root FitTpcT.C
 // To draw all of them        : root.exe */*Fit.root
@@ -60,6 +61,11 @@
 #ifdef __TEST__
 #include "TMDFParameters.h"
 #endif
+#include "TMatrixD.h"
+#include "TVectorD.h"
+#include "TGraphErrors.h"
+#include "TDecompChol.h"
+#include "TDecompSVD.h"
 #endif
 static Int_t NoInnerRows = 40; //-1; // Tpx
 static Int_t NoOfRows    = 72;; //-1;
@@ -1022,7 +1028,7 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
   TString output(Out);
   if (output == "") {
     output = file1;
-    output.ReplaceAll(".root",".ADC.root");
+    output.ReplaceAll(".root",".ADC2L.root");
   }
   cout << "Output for " << output << endl;
   const Int_t&       fNoRcHit                                 = iter("fNoRcHit");
@@ -1100,7 +1106,7 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
       }
   //  Double_t dsCut[2] = {1., 2.};
   // dE block for dN/dx fit
-  enum {kdNdxLogGamma, kdELognP, kdETot};
+  enum {kdNdxLogGamma, kdELognP, kLogdELognP, kdETot};
   TH2F     *histdE[3][kdETot] = {0};
   const Char_t *VarY[4] = {"dN/dx", "dE/nP"};
   const Char_t *tpcNameN[3] = {"I","O",""};
@@ -1112,6 +1118,9 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
 	break;
       case kdELognP:
 	histdE[io][k] = new TH2F(Form("dEdN%s",tpcNameN[io]),Form("dE (eV) per primary interaction versus log(nP) for %sTpc",tpcNameN[io]),160,3,11,500,0,500);
+	break;
+      case kLogdELognP:
+	histdE[io][k] = new TH2F(Form("LogdEdN%s",tpcNameN[io]),Form("Log(dE (eV) per primary interaction (nP)) versus log(nP) for %sTpc",tpcNameN[io]),160,3,11,500,2.5,7.5);
 	break;
       default:
 	break;
@@ -1183,9 +1192,11 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
 	hists[io+2][j]->Fill(lADCr, y[j], z[3]);
       }
       histdE[io][0]->Fill(fMcHit_mLgamma[k],fMcHit_mnP[k]/fRcHit_mdX[k]); 
-      histdE[io][1]->Fill(TMath::Log(fMcHit_mnP[k]),1e9*fRcHit_mCharge[k]/fMcHit_mnP[k]);
+      histdE[io][1]->Fill(TMath::Log(fMcHit_mnP[k]),           1e9*fRcHit_mCharge[k]/fMcHit_mnP[k]);
+      histdE[io][2]->Fill(TMath::Log(fMcHit_mnP[k]),TMath::Log(1e9*fRcHit_mCharge[k]/fMcHit_mnP[k]));
       histdE[2][0]->Fill(fMcHit_mLgamma[k],fMcHit_mnP[k]/fRcHit_mdX[k]); 
-      histdE[2][1]->Fill(TMath::Log(fMcHit_mnP[k]),1e9*fRcHit_mCharge[k]/fMcHit_mnP[k]);
+      histdE[2][1]->Fill(TMath::Log(fMcHit_mnP[k]),           1e9*fRcHit_mCharge[k]/fMcHit_mnP[k]);
+      histdE[2][2]->Fill(TMath::Log(fMcHit_mnP[k]),TMath::Log(1e9*fRcHit_mCharge[k]/fMcHit_mnP[k]));
     }
   }
   fOut->Write();
@@ -1206,10 +1217,13 @@ void PrintDer(Int_t ix, Int_t iy, Double_t y[5], Double_t der) {
 }
 //________________________________________________________________________________
 void NormdEdN() {
-  TH2F *histdE[3] = {
+  TH2F *histdE[6] = {
     (TH2F *) gDirectory->Get("dEdNI"),
     (TH2F *) gDirectory->Get("dEdNO"),
-    (TH2F *) gDirectory->Get("dEdN")
+    (TH2F *) gDirectory->Get("dEdN"),
+    (TH2F *) gDirectory->Get("LogdEdNI"),
+    (TH2F *) gDirectory->Get("LogdEdNO"),
+    (TH2F *) gDirectory->Get("LogdEdN")
   };
   if (! histdE[2]) {
     cout << "Cleare dEdN from dEdNI and dEdNO" << endl;
@@ -1221,10 +1235,11 @@ void NormdEdN() {
     histdE[2]->Add(histdE[0]);
     histdE[2]->Add(histdE[1]);
   }
-  TFile *fOut = new TFile("dEdN.root","recreate");
-  for (Int_t io = 0; io < 3; io++) {
+  TFile *fOut = new TFile("dEdNModel.root","recreate");
+  for (Int_t io = 0; io < 6; io++) {
     TH2F *hist = histdE[io];
     if (! hist) continue;
+    if (hist->GetEntries() <= 0) continue;
     Int_t nx = hist->GetNbinsX();
     Int_t ny = hist->GetNbinsY();
     TH1D *proj = hist->ProjectionX();
@@ -1249,11 +1264,55 @@ void NormdEdN() {
       }
     }
     h->Smooth(1,"k5b");
+    // The most probable value
+    nx = h->GetNbinsX();
+    ny = h->GetNbinsY();
+    TAxis *xa = h->GetXaxis();
+    TAxis *ya = h->GetYaxis();
+    TH1F *mpv = new TH1F(Form("%sMPV",hist->GetName()),Form("%s Most Probable Value",hist->GetTitle()),nx, xa->GetXmin(), xa->GetXmax());
+    for (Int_t ix = 1; ix <= nx; ix++) {
+      xa->SetRange(ix,ix);
+      Int_t binMax = h->GetMaximumBin();
+      xa->SetRange(1,nx);
+      Int_t binx, biny, binz;
+      h->GetBinXYZ(binMax, binx, biny, binz);
+      const Int_t nrVar  = 3;
+      const Int_t nrPnts = 3;
+     
+      Double_t ax[3] = {ya->GetBinCenter(biny-1),ya->GetBinCenter(biny),ya->GetBinCenter(biny+1)};
+      Double_t ax2[3] ={ax[0]*ax[0], ax[1]*ax[1], ax[2]*ax[2]};
+      Double_t ay[3] = {h->GetBinContent(binx,biny-1),h->GetBinContent(binx,biny),h->GetBinContent(binx,biny+1)};
+      if (ay[1] <= 0) continue;
+      Double_t ae[3] = {h->GetBinError(binx,biny-1),h->GetBinError(binx,biny),h->GetBinError(binx,biny+1)};
+      
+      TVectorD x; x.Use(nrPnts,ax);
+      TVectorD x2; x2.Use(nrPnts,ax2);
+      TVectorD y; y.Use(nrPnts,ay);
+      TVectorD e; e.Use(nrPnts,ae);
+      TMatrixD A(nrPnts,nrVar);
+      TMatrixDColumn(A,0) = 1.0;
+      TMatrixDColumn(A,1) = x;
+      TMatrixDColumn(A,2) = x2;
+      // first bring the weights in place
+      TMatrixD Aw = A;
+      TVectorD yw = y;
+      for (Int_t irow = 0; irow < A.GetNrows(); irow++) {
+	TMatrixDRow(Aw,irow) *= 1/e(irow);
+	yw(irow) /= e(irow);
+      }
+      
+      TDecompSVD svd(Aw);
+      Bool_t ok;
+      const TVectorD c_svd = svd.Solve(yw,ok);
+      
+      //      cout << " - 3. solve with pseudo inverse" ; c_svd.Print();
+      Double_t yy = - c_svd[1]/(2*c_svd[2]);
+      mpv->SetBinContent(ix,yy);
+    }
+    mpv->Smooth(5);
     // Five points derivatives
     TH2F *hX = new TH2F(*h); hX->Reset(); hX->SetName(Form("%sX",h->GetName()));
     TH2F *hY = new TH2F(*h); hY->Reset(); hY->SetName(Form("%sY",h->GetName()));
-    nx = h->GetNbinsX();
-    ny = h->GetNbinsY();
     Double_t dX = (h->GetXaxis()->GetXmax() - h->GetXaxis()->GetXmin())/nx;
     Double_t dY = (h->GetYaxis()->GetXmax() - h->GetYaxis()->GetXmin())/ny;
     for (Int_t ix = 1; ix <= nx; ix++) {
@@ -1290,8 +1349,9 @@ void NormdEdN() {
     }
     hX->Smooth(1,"k5b");
     hY->Smooth(1,"k5b");
-    fOut->Write();
+    delete proj;
   }
+  fOut->Write();
 }
 //________________________________________________________________________________
 void TpcTdENP(const Char_t *files="*.root", const Char_t *Out = "") {
