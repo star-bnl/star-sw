@@ -8,7 +8,9 @@
 
 
       G2T_STG=STAFCV_OK
+      write (*,*) 'g2t_fts_hit_h check...' 
       if (g2t_fts_hit_h.maxlen.le.0) return
+      write (*,*) 'success!'
 *
       i=0
       g2t_fts_hit_h.nok = 0
@@ -17,7 +19,9 @@
       "The geometry contains deprecated sensitive volume FSTA."
       "Only setup readout for volume TGCG"
 
-      CALL g2r_get_sys('STGH','TGCG',Iprin,Idigi)      
+      CALL g2r_get_sys('STGM','TGCG',Iprin,Idigi)      
+      write (*,*) 'g2r_get_sys returns Iprin=', Iprin, ' Idigi=',Idigi
+
       IF (Iprin.lt.0) go to 99
 
        Do While (G2R_GET_HIT('stg') .eq. 0)
