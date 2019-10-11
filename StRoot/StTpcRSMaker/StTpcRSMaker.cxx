@@ -481,6 +481,27 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
   }
 #endif /* __ClusterProfile__ */
   mHeed = fEc(St_TpcResponseSimulatorC::instance()->W());
+  SetAttr("minSector",1);
+  SetAttr("maxSector",24);
+  SetAttr("minRow",1);
+  SetAttr("maxRow",St_tpcPadConfigC::instance()->numberOfRows(20));
+#ifdef __SECROW_PLOTS__
+  SecRow[0] = new TProfile2D("SecRowdE","Simu <dE> versus sector row",24,0.5,24.5,72,0.5,72.5);
+  SecRow[1] = new TProfile2D("SecRowdS","Simu <dS> versus sector row",24,0.5,24.5,72,0.5,72.5);
+  SecRow[2] = new TProfile2D("SecRowGain","<Gain> versus sector row",24,0.5,24.5,72,0.5,72.5);
+  SecRow[3] = new TProfile2D("SecRowGainC","<GainCorrected> versus sector row",24,0.5,24.5,72,0.5,72.5);
+  SecRow[4] = new TProfile2D("SecRowdEdxC","<dEdxC> versus sector row",24,0.5,24.5,72,0.5,72.5);
+  SecRow[5] = new TProfile2D("SecRowNP","<NP> versus sector row",24,0.5,24.5,72,0.5,72.5);
+  SecRow[6] = new TProfile2D("SecRowNt","<Nt> versus sector row",24,0.5,24.5,72,0.5,72.5);
+  SecRow[7] = new TProfile2D("SecRowQAv","<QAv> versus sector row",24,0.5,24.5,72,0.5,72.5);
+  SecRow[8] = new TProfile2D("SecRowgain","<gain> versus sector row",24,0.5,24.5,72,0.5,72.5);
+  SecRow[9] = new TProfile2D("SecRowTotSigCl","<TotalSignalInCluster> versus sector row",24,0.5,24.5,72,0.5,72.5);
+  SecRow[10] = new TProfile2D("SecRowADC","<ADC> versus sector row",24,0.5,24.5,72,0.5,72.5);
+  SecRow[11] = new TProfile2D("SecRowADCAltro","<ADCAltro> versus sector row",24,0.5,24.5,72,0.5,72.5);
+  SecRow[12] = new TProfile2D("SecRowRange","<row range> versus sector row",24,0.5,24.5,72,0.5,72.5);
+  SecRow[13] = new TProfile2D("SecRowdY","<dY> versus sector row",24,0.5,24.5,72,0.5,72.5);
+  SecRow[14] = new TProfile2D("SecRowChargeFraction","<ChargeFraction> versus sector row",24,0.5,24.5,72,0.5,72.5);
+#endif /* __SECROW_PLOTS__ */
   if ( ! ClusterProfile) {
     return kStOK;
   }
@@ -576,28 +597,8 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
       else              checkList[io][i] = new TProfile(Name,Title,nz,zmin,zmax,"");  
     }
   }
-#ifdef __SECROW_PLOTS__
-  SecRow[0] = new TProfile2D("SecRowdE","Simu <dE> versus sector row",24,0.5,24.5,72,0.5,72.5);
-  SecRow[1] = new TProfile2D("SecRowdS","Simu <dS> versus sector row",24,0.5,24.5,72,0.5,72.5);
-  SecRow[2] = new TProfile2D("SecRowGain","<Gain> versus sector row",24,0.5,24.5,72,0.5,72.5);
-  SecRow[3] = new TProfile2D("SecRowGainC","<GainCorrected> versus sector row",24,0.5,24.5,72,0.5,72.5);
-  SecRow[4] = new TProfile2D("SecRowdEdxC","<dEdxC> versus sector row",24,0.5,24.5,72,0.5,72.5);
-  SecRow[5] = new TProfile2D("SecRowNP","<NP> versus sector row",24,0.5,24.5,72,0.5,72.5);
-  SecRow[6] = new TProfile2D("SecRowNt","<Nt> versus sector row",24,0.5,24.5,72,0.5,72.5);
-  SecRow[7] = new TProfile2D("SecRowQAv","<QAv> versus sector row",24,0.5,24.5,72,0.5,72.5);
-  SecRow[8] = new TProfile2D("SecRowgain","<gain> versus sector row",24,0.5,24.5,72,0.5,72.5);
-  SecRow[9] = new TProfile2D("SecRowTotSigCl","<TotalSignalInCluster> versus sector row",24,0.5,24.5,72,0.5,72.5);
-  SecRow[10] = new TProfile2D("SecRowADC","<ADC> versus sector row",24,0.5,24.5,72,0.5,72.5);
-  SecRow[11] = new TProfile2D("SecRowADCAltro","<ADCAltro> versus sector row",24,0.5,24.5,72,0.5,72.5);
-  SecRow[12] = new TProfile2D("SecRowRange","<row range> versus sector row",24,0.5,24.5,72,0.5,72.5);
-  SecRow[13] = new TProfile2D("SecRowdY","<dY> versus sector row",24,0.5,24.5,72,0.5,72.5);
-  SecRow[14] = new TProfile2D("SecRowChargeFraction","<ChargeFraction> versus sector row",24,0.5,24.5,72,0.5,72.5);
-  SecRow[15] = new TProfile2D("SecRowdely","dely versus sector row",24,0.5,24.5,72,0.5,72.5);
-#endif /* __SECROW_PLOTS__ */
   delete [] pbins;
   delete [] pbinsL;
-  SetAttr("minSector",1);
-  SetAttr("maxSector",24);
   return kStOK;
 }
 //________________________________________________________________________________
