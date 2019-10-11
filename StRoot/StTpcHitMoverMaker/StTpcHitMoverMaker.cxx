@@ -12,6 +12,7 @@
 #include "StDetectorDbMaker/St_tpcTimeBucketCorC.h"
 #include "StDetectorDbMaker/St_spaceChargeCorC.h"
 #include "StDetectorDbMaker/St_tpcChargeEventC.h"
+#include "StDetectorDbMaker/St_tpcBXT0CorrEPDC.h"
 #include "TMath.h"
 ClassImp(StTpcHitMover)
 #define __DEBUG__
@@ -57,6 +58,32 @@ Int_t StTpcHitMover::Make() {
     LOG_WARN << "StTpcHitMover::Make there is no StEvent " << endm;
     return kStWarn;
   }
+  //     EPD based event-by-event correction for the hit timing
+  int ew = 0;
+  int TAC = 0;
+  int maxTAC = -1;
+  
+  int doEPDT0Correction = StTpcBXT0CorrEPDC::instance()->nrows();
+  
+  if (doEPDT0Correction) {
+    StEpdCollection * epdCol = pEvent->epdCollection();
+    if (epdCol) {
+      StSPtrVecEpdHit &epdHits = epdCol->epdHits();
+      int nEpdHits = epdHits.size();
+      
+      for(int i = 0; i < nEpdHits; i++) {
+	StEpdHit * epdHit = dynamic_cast<StEpdHit*>(epdHits[i]);
+	TAC = 0;
+	if (epdHit->tile() > 9)  continue; // only tiles 1 - 9 have timing info
+	if (epdHit->id() < 0) ew = -1; // tile is on the east
+	else ew = 1;
+	if (epdHit->adc() < 100) continue;
+	TAC = epdHit->tac(); // this is the timing
+	if (TAC > maxTAC) maxTAC = TAC;
+      }
+    }
+  }
+  //     ======================================================
   //  gMessMgr->Info() << "StTpcHitMover::Make use StEvent " << endm;
   if (! gStTpcDb) {
     gMessMgr->Error() << "StTpcHitMover::Make TpcDb has not been instantiated " << endm;
@@ -122,6 +149,12 @@ Int_t StTpcHitMover::Make() {
 		      time += St_tpcTimeBucketCorC::instance()->CalcCorrection(io, noTmbks);
 		    }
 		  }
+		  //                                                                     THIS IS A BLOCK TO CORRECT TIMING IN FXT MODE FOR DATA
+		  //                                                                     double timeBucketShiftScale = 0.826;
+		  //                                                                     time += timeBucketShiftScale*(0.00021*maxTAC + 0.13); // FXT2019 7.3 GeV
+		  //                                                                     time += timeBucketShiftScale*(0.0001*maxTAC + 0.60781); // FXT2018 27 GeV
+		  if (doEPDT0Correction) time += StTpcBXT0CorrEPDC::instance()->getCorrection(maxTAC);
+		  //                                                                     ======================================================
 		  StTpcPadCoordinate padcoord(sector, row, pad, time);
 		  StTpcLocalSectorCoordinate  coorS;
 		  transform(padcoord,coorS,kFALSE);
@@ -170,8 +203,11 @@ void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StGlobalCoordinate &
   moveTpcHit(coorL,coorLTD);
   transform(coorLTD,coorG); PrPP(moveTpcHit,coorLTD); PrPP(moveTpcHit,coorG); 
 }
-// $Id: StTpcHitMoverMaker.cxx,v 1.30 2019/04/22 20:47:16 genevb Exp $
+// $Id: StTpcHitMoverMaker.cxx,v 1.31 2019/10/10 00:15:11 iraklic Exp $
 // $Log: StTpcHitMoverMaker.cxx,v $
+// Revision 1.31  2019/10/10 00:15:11  iraklic
+// Adding epd-based T0 correction to account for timing shift when collision is displaced from center
+//
 // Revision 1.30  2019/04/22 20:47:16  genevb
 // Introducing codes for AbortGapCleaning distortion corrections
 //
