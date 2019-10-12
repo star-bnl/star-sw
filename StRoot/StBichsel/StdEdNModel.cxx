@@ -11,6 +11,9 @@ StdEdNModel  *StdEdNModel::fgStdEdNModel = 0;
 TH1D         *StdEdNModel::mdNdxL10 = 0;  
 TH2F         *StdEdNModel::mdEdNModel[3][3] = {0};
 TH1F         *StdEdNModel::mdEdNMPV[3] = {0};
+TH2F         *StdEdNModel::mLogdEdNModel[3][3] = {0};
+TH1F         *StdEdNModel::mLogdEdNMPV[3] = {0};
+Double_t      StdEdNModel::fScale = 1.0;
 Int_t         StdEdNModel::_debug   = 1;
 //________________________________________________________________________________
 StdEdNModel* StdEdNModel::instance() {
@@ -39,10 +42,16 @@ StdEdNModel::StdEdNModel() {
 	    TString name(Form("dEdN%sNorm%s",TpcName[l],DerName[j]));
 	    mdEdNModel[l][j] = (TH2F *) pFile->Get(name);
 	    assert(mdEdNModel[l][j]);    mdEdNModel[l][j]->SetDirectory(0);
+	    name = Form("LogdEdN%sNorm%s",TpcName[l],DerName[j]);
+	    mLogdEdNModel[l][j] = (TH2F *) pFile->Get(name);
+	    assert(mLogdEdNModel[l][j]);    mLogdEdNModel[l][j]->SetDirectory(0);
 	  }
 	  TString name(Form("dEdN%sMPV",TpcName[l]));
 	  mdEdNMPV[l] = (TH1F *) pFile->Get(name);
-	    assert(mdEdNMPV[l]);    mdEdNMPV[l]->SetDirectory(0);
+	  assert(mdEdNMPV[l]);    mdEdNMPV[l]->SetDirectory(0);
+	  name = Form("LogdEdN%sMPV",TpcName[l]);
+	  mLogdEdNMPV[l] = (TH1F *) pFile->Get(name);
+	  assert(mLogdEdNMPV[l]);    mLogdEdNMPV[l]->SetDirectory(0);
 	}
       } else if (i == 1) {
 	mdNdxL10 = (TH1D *)         pFile->Get("dNdxL10");           assert(mdNdxL10);    mdNdxL10->SetDirectory(0);
@@ -60,6 +69,10 @@ StdEdNModel::~StdEdNModel() {
   for (Int_t i = 0; i <= kTpcAll; i++) 
     for (Int_t j = 0; j <= kdProbdY; j++) 
       SafeDelete(mdEdNModel[i][j]);
+}
+//________________________________________________________________________________
+Double_t StdEdNModel::dNdx(Double_t poverm, Double_t charge) {
+  return fScale*charge*charge*instance()->GetdNdxL10()->Interpolate(TMath::Log10(poverm));
 }
 // $Id: StdEdNModel.cxx,v 1.5 2018/10/17 20:45:23 fisyak Exp $
 // $Log: StdEdNModel.cxx,v $

@@ -81,7 +81,7 @@
 #include "TCanvas.h"
 #include "TClassTable.h"
 #include "StBichsel/Bichsel.h"
-#include "StBichsel/StdEdxModel.h"
+#include "StBichsel/StdEdNModel.h"
 #include "TLegend.h"
 #include "TROOT.h"
 #else
@@ -232,7 +232,7 @@ Double_t dNdx(Double_t *x,Double_t *par) {
   if (par[1] > 1.0) charge = par[1];
   poverm *= charge;
   scale *= charge*charge;
-  return  TMath::Log10(scale*StdEdxModssel::instance()->dNdx(poverm,charge));//TMath::Exp(7.81779499999999961e-01));
+  return  TMath::Log10(scale*StdEdNModel::instance()->dNdx(poverm,charge));//TMath::Exp(7.81779499999999961e-01));
 }
 #if !defined(__CINT__) && !defined(__CLING__)
 //________________________________________________________________________________

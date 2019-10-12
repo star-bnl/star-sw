@@ -28,12 +28,18 @@ class StdEdNModel {
   static TH1D         *GetdNdxL10()    {return    mdNdxL10;}    // dN/dx versus beta*gamma
   static TH2F         *GetdEdN(EValType val = kProb, ETpcType tpcType = kTpcAll) {return mdEdNModel[tpcType][val];}
   static TH1F         *GetdEdNMPV( ETpcType tpcType = kTpcAll) {return mdEdNMPV[tpcType];}
+  static TH2F         *GetLogdEdN(EValType val = kProb, ETpcType tpcType = kTpcAll) {return mLogdEdNModel[tpcType][val];}
+  static TH1F         *GetLogdEdNMPV( ETpcType tpcType = kTpcAll) {return mLogdEdNMPV[tpcType];}
+  static Double_t      dNdx(Double_t poverm, Double_t charge = 1.0); 
  private:
   static StdEdNModel       *fgStdEdNModel; //! last instance          
   StdEdNModel();
   static TH1D         *mdNdxL10;    // dN/dx versus beta*gamma
   static TH2F         *mdEdNModel[3][3]; // Tpc [I,O,All] [Prob, dProb/dX, dProb/dY] versus dE/Np,log(Np)
   static TH1F         *mdEdNMPV[3];
+  static TH2F         *mLogdEdNModel[3][3]; // Tpc [I,O,All] [Prob, dProb/dX, dProb/dY] versus Log(dE/Np),log(Np)
+  static TH1F         *mLogdEdNMPV[3];
+  static Double_t      fScale;
   static Int_t        _debug;
   ClassDef(StdEdNModel,0)
 };
