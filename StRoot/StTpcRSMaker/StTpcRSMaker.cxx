@@ -501,6 +501,7 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
   SecRow[12] = new TProfile2D("SecRowRange","<row range> versus sector row",24,0.5,24.5,72,0.5,72.5);
   SecRow[13] = new TProfile2D("SecRowdY","<dY> versus sector row",24,0.5,24.5,72,0.5,72.5);
   SecRow[14] = new TProfile2D("SecRowChargeFraction","<ChargeFraction> versus sector row",24,0.5,24.5,72,0.5,72.5);
+  SecRow[15] = new TProfile2D("SecRowChargedel","<delY> versus sector row",24,0.5,24.5,72,0.5,72.5);
 #endif /* __SECROW_PLOTS__ */
   if ( ! ClusterProfile) {
     return kStOK;
