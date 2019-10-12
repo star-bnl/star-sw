@@ -43,5 +43,6 @@
  TFG19f freeze before moving to new Grigory's CA                     2019-07-16 14:31:48 -0400  (HEAD, tag: TFG19f_5)
  TFG19g old CA, add to StarMCSimplePrimaryGenerator real PV position 2019-07-26 10:26:59 -0400  (HEAD -> master, tag: v07-26-19RCF, tag: TFG19g_4)
  TFG19h freeze to reproces BES-I pico Dst                            2019-09-29 11:48:48 -0400  (HEAD -> master, tag: TFG19h)
+ TFG19i freeze to proces dE/dx calibration sample for  BES-II        2019-10-12 11:48:48 -0400  (HEAD -> master, tag: TFG19i)
  .DEV2  head of TFG git repository
   DEV2  head of TFG git repository build with ROOT6
