@@ -5,6 +5,7 @@
 #define __Use_dNdx__
 //#define __TEST_DX__
 //#define __ZDC3__
+//#define __LogProb__
 #define __BEST_VERTEX__
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
@@ -1214,7 +1215,11 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 #ifdef __Use_dNdx__
 	Double_t n_P = FdEdx[k].dxC*PiD.fdNdx.Pred[kPidPion];
 	Double_t dEN = TMath::Log(1e6*FdEdx[k].F.dE); // scale to <dE/dx>_MIP = 2.4 keV/cm
+#ifdef __LogProb__
 	Double_t zdEMVP = TMath::Log(1.e-3*n_P) + StdEdNModel::instance()->GetLogdEdNMPV(StdEdNModel::kTpcAll)->Interpolate(TMath::Log(n_P)); // log(dE[keV])
+#else /* ! __LogProb__ */
+	Double_t zdEMVP = TMath::Log(1.e-3*n_P*StdEdNModel::instance()->GetdEdNMPV(StdEdNModel::kTpcAll)->Interpolate(TMath::Log(n_P))); // log(dE[keV])
+#endif /* __LogProb__ */
 #else
 	Double_t zdEMVP = 0;
 	Double_t dEN = 0;
@@ -1850,16 +1855,19 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
   static TH2F *ProbV = 0, *ProbdX = 0, *ProbdY = 0;
   static Double_t xMin, xMax, yMin, yMax;
   if (! ProbV) {
-    //    ProbV  = StdEdNModel::instance()->GetdEdN(StdEdNModel::kProb,    StdEdNModel::kTpcAll);
+#ifdef __LogProb__
     ProbV  = StdEdNModel::instance()->GetLogdEdN(StdEdNModel::kProb,    StdEdNModel::kTpcAll);
+    ProbdX = StdEdNModel::instance()->GetLogdEdN(StdEdNModel::kdProbdX, StdEdNModel::kTpcAll);
+    ProbdY = StdEdNModel::instance()->GetLogdEdN(StdEdNModel::kdProbdY, StdEdNModel::kTpcAll);
+#else /* ! __LogProb__ */
+    ProbV  = StdEdNModel::instance()->GetdEdN(StdEdNModel::kProb,    StdEdNModel::kTpcAll);
+    ProbdX = StdEdNModel::instance()->GetdEdN(StdEdNModel::kdProbdX, StdEdNModel::kTpcAll);
+    ProbdY = StdEdNModel::instance()->GetdEdN(StdEdNModel::kdProbdY, StdEdNModel::kTpcAll);
+#endif /* __LogProb__ */
     xMin = ProbV->GetXaxis()->GetXmin();
     xMax = ProbV->GetXaxis()->GetXmax();
     yMin = ProbV->GetYaxis()->GetXmin();
     yMax = ProbV->GetYaxis()->GetXmax();
-    //    ProbdX = StdEdNModel::instance()->GetdEdN(StdEdNModel::kdProbdX, StdEdNModel::kTpcAll);
-    //    ProbdY = StdEdNModel::instance()->GetdEdN(StdEdNModel::kdProbdY, StdEdNModel::kTpcAll);
-    ProbdX = StdEdNModel::instance()->GetLogdEdN(StdEdNModel::kdProbdX, StdEdNModel::kTpcAll);
-    ProbdY = StdEdNModel::instance()->GetLogdEdN(StdEdNModel::kdProbdY, StdEdNModel::kTpcAll);
   }
   f = 0;
   gin[0] = 0.;
@@ -1869,8 +1877,11 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
     Double_t dX = FdEdx[i].dxC;
     Double_t Np = dNdx*dX;
     Double_t X = TMath::Log(Np);
-    //    Double_t Y = dE/Np;
+#ifdef __LogProb__
     Double_t Y = TMath::Log(dE/Np);
+#else /* ! __LogProb__ */
+    Double_t Y = dE/Np;
+#endif /* __LogProb__ */
     FdEdx[i].Prob = 0;
     if (X < xMin || X > xMax ||
 	Y < yMin || Y > yMax) {
@@ -1888,8 +1899,11 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
     Double_t dProbOverdY = ProbdY->Interpolate(X,Y);
     Double_t dNpOverdMu = dX;
     Double_t dXOverdNp =  1./Np;
-    //    Double_t dYOverdNp = - Y/Np;
+#ifdef __LogProb__
     Double_t dYOverdNp = - 1./Np;
+#else /* ! __LogProb__ */
+    Double_t dYOverdNp = - Y/Np;
+#endif /* __LogProb__ */
     Double_t dProbOverNp  = dProbOverdX * dXOverdNp + dProbOverdY * dYOverdNp;
     Double_t dProbOverdMu = dProbOverNp * dNpOverdMu;
     Double_t dfOverdMu = -2*dProbOverdMu/Prob;

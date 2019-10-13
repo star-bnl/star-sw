@@ -130,7 +130,7 @@ void StPidStatus::Set() {
 	break;
       case kOtherMethodId: 
       case kOtherMethodId2: 
-	fStatus[m]->Pred[l]  = charge*charge*StdEdNModel::instance()->GetdNdxL10()->Interpolate(bgs[l]);
+	fStatus[m]->Pred[l]  = StdEdNModel::instance()->dNdx(bgs[l], charge);
 	break;
       default: continue;
       }
