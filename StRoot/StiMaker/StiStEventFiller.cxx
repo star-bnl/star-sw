@@ -1156,7 +1156,7 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track,StTrackD
 
   gTrack->setEncodedMethod(mStiEncoded);
   double tlen = track->getTrackLength();
-  assert(tlen >0.0 && tlen<1000.);
+  assert(tlen >0.0 && tlen<100000.);
   gTrack->setLength(tlen);// someone removed this, grrrr!!!!
   gTrack->setSeedQuality(track->getSeedHitCount());
   // Follow the StDetectorId.h enumerations...
