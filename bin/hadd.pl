@@ -20,7 +20,7 @@ my %ARG = (files => '*.root',
 	   option => ''
 	  );
 my @periods = ();
-my $all = 1;
+my $all = 0;
 if ($all) {
   @periods = ('All'   => {first => '0', second => '99999999', list => ''});
 } else {

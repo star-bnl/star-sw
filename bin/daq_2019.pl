@@ -30,7 +30,7 @@ foreach my $tag (qw(st_physics_20 hlt)) {
     #  if ($r >= 20100000) {next;}
     #  print "run = $run. files = $#files\n" if ($debug);
     my $NF = $#files;
-    my $step = $NF/2;
+    my $step = 1; # $NF/8;
     if ($step < 1) {$step = 1;}
     for (my $i = 0; $i < $NF; $i+= $step) {
       my $file = $files[$i];

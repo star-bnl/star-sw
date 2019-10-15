@@ -470,9 +470,9 @@ switch ($pkg)
           setenv X_SCLS  `basename $devtools`
 	endif
 	breaksw
-	case "gcc82*":
+	case "gcc83*":
 	setenv USE_64BITS 1
-	setenv devtools /opt/rh/devtoolset-8
+	setenv devtools /net/l409/software/fisyak/STAR/sources/spack/opt/spack/linux-rhel7-x86_64/gcc-4.8.5/gcc-8.3.0-opnwtdjumg2hxo4ljvnx77ugb6afmvj3
 	if (-r ${devtools}) then
 	  setenv PATH  ${devtools}/root/usr/bin:${PATH}
 	  setenv LD_LIBRARY_PATH  ${devtools}/root/usr/lib64:${devtools}/root/usr/lib:${LD_LIBRARY_PATH}
@@ -486,9 +486,9 @@ switch ($pkg)
           setenv X_SCLS  `basename $devtools`
 	endif
 	breaksw
-	case "gcc83*":
+	case "gcc8*":
 	setenv USE_64BITS 1
-	setenv devtools /net/l409/software/fisyak/STAR/sources/spack/opt/spack/linux-rhel7-x86_64/gcc-4.8.5/gcc-8.3.0-opnwtdjumg2hxo4ljvnx77ugb6afmvj3
+	setenv devtools /opt/rh/devtoolset-8
 	if (-r ${devtools}) then
 	  setenv PATH  ${devtools}/root/usr/bin:${PATH}
 	  setenv LD_LIBRARY_PATH  ${devtools}/root/usr/lib64:${devtools}/root/usr/lib:${LD_LIBRARY_PATH}
