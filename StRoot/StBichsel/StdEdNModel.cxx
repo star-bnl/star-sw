@@ -1,6 +1,10 @@
 #include "Riostream.h"
 #include <stdio.h>
 #include "TROOT.h"
+#include "TAxis.h"
+#include "TF1.h"
+#include "TH1.h"
+#include "TH2.h"
 #include "TSystem.h"
 #include "TMath.h"
 #include "StdEdNModel.h"
@@ -35,7 +39,7 @@ StdEdNModel::StdEdNModel() {
       else        Warning("StdEdNModel","File %s has been found as %s",Files[i],file);
       TFile       *pFile = new TFile(file);
       if (i == 0) {
-	const Char_t *TpcName[3] = {"I","O",""};
+	const Char_t *TpcName[3] = {"O","I",""};
 	const Char_t *DerName[3] = {"","X","Y"};
 	for (Int_t l = 0; l <=  kTpcAll; l++) {
 	  for (Int_t j = kProb; j <= kdProbdY; j++) {
@@ -73,6 +77,61 @@ StdEdNModel::~StdEdNModel() {
 //________________________________________________________________________________
 Double_t StdEdNModel::dNdx(Double_t poverm, Double_t charge) {
   return fScale*charge*charge*instance()->GetdNdxL10()->Interpolate(TMath::Log10(poverm));
+}
+//________________________________________________________________________________
+Double_t StdEdNModel::zMPVFunc(Double_t *x, Double_t *p) {
+  Double_t n_PL = x[0]; // log(n_P);
+  Int_t kTpc = (Int_t) p[0];
+  if (kTpc != kTpcOuter && kTpc != kTpcInner) kTpc = kTpcAll;
+  return TMath::Log(instance()->GetdEdNMPV((ETpcType) kTpc)->Interpolate(x[0])) + n_PL;
+}
+//________________________________________________________________________________
+TF1 *StdEdNModel::zMPV() {
+  static TF1* f = 0;
+  if (! f) {
+    f = new TF1("zMPV",StdEdNModel::zMPVFunc, 3., 11., 1);
+    f->SetParNames( "IO");
+    f->FixParameter(0, 2);
+  }
+  return f;
+}
+//________________________________________________________________________________
+Double_t StdEdNModel::zdEFunc(Double_t *x, Double_t *p) {
+  Int_t kTpc = (Int_t) p[0];
+  if (kTpc != kTpcOuter && kTpc != kTpcInner) kTpc = kTpcAll;
+  Double_t n_PL = p[1]; // log(n_P);
+  Double_t zMPVpion =  p[2];
+  Double_t logdE = x[0] + zMPVpion;
+  Double_t dEovern_P = TMath::Exp(logdE - n_PL);
+  static Double_t xmin, xmax, ymin, ymax;
+  static TH2 *histOld = 0;
+  TH2 *hist = instance()->GetdEdN(kProb,(ETpcType) kTpc);
+  if (hist != histOld) {
+    histOld = hist;
+    xmin = hist->GetXaxis()->GetXmin();
+    xmax = hist->GetXaxis()->GetXmax();
+    ymin = hist->GetYaxis()->GetXmin();
+    ymax = hist->GetYaxis()->GetXmax();
+  }
+  Double_t val = 0;
+  if (xmin < n_PL      && n_PL      < xmax &&
+      ymin < dEovern_P && dEovern_P < ymax) {
+    val = instance()->GetdEdN(kProb,(ETpcType) kTpc)->Interpolate(n_PL, dEovern_P);
+  }
+  return val;
+}
+//________________________________________________________________________________
+TF1 *StdEdNModel::zdE() {
+  static TF1* f = 0;
+  if (! f) {
+    f = new TF1("zMPV",StdEdNModel::zdEFunc, -5., 5., 3);
+    f->SetParNames("kTpc", "n_PL", "zMPVpion"); 
+    f->FixParameter(0, kTpcAll);
+    f->SetParameter(1,TMath::Log(10)*2.17548); // n_PL_proton
+    Double_t z = zMPV()->Eval(TMath::Log(10)*1.7231);
+    f->SetParameter(2,z); // zMPVpion
+  }
+  return f;
 }
 // $Id: StdEdNModel.cxx,v 1.5 2018/10/17 20:45:23 fisyak Exp $
 // $Log: StdEdNModel.cxx,v $

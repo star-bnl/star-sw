@@ -3220,8 +3220,8 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
 	Int_t kTpc = StdEdNModel::kTpcAll;
 	if (j >= 1 && j <= 40)       kTpc = StdEdNModel::kTpcInner;
 	else  if (j > 40 && j <= 72) kTpc = StdEdNModel::kTpcOuter;
-	//	g = FitNF(proj,Opt, kTpc);
-	g = FitNF(proj,Opt);
+	g = FitNF(proj,Opt, kTpc);
+	//	g = FitNF(proj,Opt);
       }
       else if (TString(FitName) == "GF") g = FitGF(proj,opt);
       else if (TString(FitName) == "L5") g = FitL5(proj,opt,5);

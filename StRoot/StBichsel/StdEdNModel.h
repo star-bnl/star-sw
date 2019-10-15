@@ -26,13 +26,17 @@ class StdEdNModel {
   virtual ~StdEdNModel();
   static  StdEdNModel* instance();
   static TH1D         *GetdNdxL10()    {return    mdNdxL10;}    // dN/dx versus beta*gamma
-  static TH2F         *GetdEdN(EValType val = kProb, ETpcType tpcType = kTpcAll) {return mdEdNModel[tpcType][val];}
-  static TH1F         *GetdEdNMPV( ETpcType tpcType = kTpcAll) {return mdEdNMPV[tpcType];}
-  static TH2F         *GetLogdEdN(EValType val = kProb, ETpcType tpcType = kTpcAll) {return mLogdEdNModel[tpcType][val];}
-  static TH1F         *GetLogdEdNMPV( ETpcType tpcType = kTpcAll) {return mLogdEdNMPV[tpcType];}
+  static TH2F         *GetdEdN(EValType val = kProb, ETpcType tpcType = kTpcAll) {return instance()->mdEdNModel[tpcType][val];}
+  static TH1F         *GetdEdNMPV( ETpcType tpcType = kTpcAll) {return instance()->mdEdNMPV[tpcType];}
+  static TH2F         *GetLogdEdN(EValType val = kProb, ETpcType tpcType = kTpcAll) {return instance()->mLogdEdNModel[tpcType][val];}
+  static TH1F         *GetLogdEdNMPV( ETpcType tpcType = kTpcAll) {return instance()->mLogdEdNMPV[tpcType];}
   static Double_t      dNdx(Double_t poverm, Double_t charge = 1.0); 
+  static Double_t      zMPVFunc(Double_t *x, Double_t *p=0); // most probable dE versus x[0] = log(N_p) and sector p[0]
+  static TF1          *zMPV();                               // -"-
+  static Double_t      zdEFunc(Double_t *x, Double_t *p);    // Distributon Log(dE) - log(most probable dE) versus sector p[0]  and  p[1] = log(N_p)
+  static TF1          *zdE();                                // -"-
  private:
-  static StdEdNModel       *fgStdEdNModel; //! last instance          
+  static StdEdNModel *fgStdEdNModel; //! last instance          
   StdEdNModel();
   static TH1D         *mdNdxL10;    // dN/dx versus beta*gamma
   static TH2F         *mdEdNModel[3][3]; // Tpc [I,O,All] [Prob, dProb/dX, dProb/dY] versus dE/Np,log(Np)

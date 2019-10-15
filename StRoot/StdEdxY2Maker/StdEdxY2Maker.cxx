@@ -1215,10 +1215,12 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 #ifdef __Use_dNdx__
 	Double_t n_P = FdEdx[k].dxC*PiD.fdNdx.Pred[kPidPion];
 	Double_t dEN = TMath::Log(1e6*FdEdx[k].F.dE); // scale to <dE/dx>_MIP = 2.4 keV/cm
+	StdEdNModel::ETpcType kTpc = StdEdNModel::kTpcOuter;
+	if (St_tpcPadConfigC::instance()->IsRowInner(FdEdx[k].sector,FdEdx[k].row)) kTpc = StdEdNModel::kTpcInner;
 #ifdef __LogProb__
-	Double_t zdEMVP = TMath::Log(1.e-3*n_P) + StdEdNModel::instance()->GetLogdEdNMPV(StdEdNModel::kTpcAll)->Interpolate(TMath::Log(n_P)); // log(dE[keV])
+	Double_t zdEMVP = TMath::Log(1.e-3*n_P) + StdEdNModel::instance()->GetLogdEdNMPV(kTpc)->Interpolate(TMath::Log(n_P)); // log(dE[keV])
 #else /* ! __LogProb__ */
-	Double_t zdEMVP = TMath::Log(1.e-3*n_P*StdEdNModel::instance()->GetdEdNMPV(StdEdNModel::kTpcAll)->Interpolate(TMath::Log(n_P))); // log(dE[keV])
+	Double_t zdEMVP = TMath::Log(1.e-3*n_P*StdEdNModel::instance()->GetdEdNMPV(kTpc)->Interpolate(TMath::Log(n_P))); // log(dE[keV])
 #endif /* __LogProb__ */
 #else
 	Double_t zdEMVP = 0;
@@ -1852,27 +1854,34 @@ void StdEdxY2Maker::V0CrossCheck() {
 void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag) {
   static Int_t _debug = 0; 
   //  Double_t Val[2];
-  static TH2F *ProbV = 0, *ProbdX = 0, *ProbdY = 0;
+  static TH2F *ProbV[3] = {0}, *ProbdX[3] = {0}, *ProbdY[3] = {0};
   static Double_t xMin, xMax, yMin, yMax;
-  if (! ProbV) {
+  if (! ProbV[2]) {
+    for (Int_t k = 0; k < 3; k++) {
+      StdEdNModel::ETpcType kTpc = (StdEdNModel::ETpcType) k;
 #ifdef __LogProb__
-    ProbV  = StdEdNModel::instance()->GetLogdEdN(StdEdNModel::kProb,    StdEdNModel::kTpcAll);
-    ProbdX = StdEdNModel::instance()->GetLogdEdN(StdEdNModel::kdProbdX, StdEdNModel::kTpcAll);
-    ProbdY = StdEdNModel::instance()->GetLogdEdN(StdEdNModel::kdProbdY, StdEdNModel::kTpcAll);
+      ProbV[kTpc]  = StdEdNModel::instance()->GetLogdEdN(StdEdNModel::kProb,    kTpc);
+      ProbdX[kTpc] = StdEdNModel::instance()->GetLogdEdN(StdEdNModel::kdProbdX, kTpc);
+      ProbdY[kTpc] = StdEdNModel::instance()->GetLogdEdN(StdEdNModel::kdProbdY, kTpc);
 #else /* ! __LogProb__ */
-    ProbV  = StdEdNModel::instance()->GetdEdN(StdEdNModel::kProb,    StdEdNModel::kTpcAll);
-    ProbdX = StdEdNModel::instance()->GetdEdN(StdEdNModel::kdProbdX, StdEdNModel::kTpcAll);
-    ProbdY = StdEdNModel::instance()->GetdEdN(StdEdNModel::kdProbdY, StdEdNModel::kTpcAll);
+      ProbV[kTpc]  = StdEdNModel::instance()->GetdEdN(StdEdNModel::kProb,    kTpc);
+      ProbdX[kTpc] = StdEdNModel::instance()->GetdEdN(StdEdNModel::kdProbdX, kTpc);
+      ProbdY[kTpc] = StdEdNModel::instance()->GetdEdN(StdEdNModel::kdProbdY, kTpc);
 #endif /* __LogProb__ */
-    xMin = ProbV->GetXaxis()->GetXmin();
-    xMax = ProbV->GetXaxis()->GetXmax();
-    yMin = ProbV->GetYaxis()->GetXmin();
-    yMax = ProbV->GetYaxis()->GetXmax();
+      if (kTpc == 2) {
+	xMin = ProbV[kTpc]->GetXaxis()->GetXmin();
+	xMax = ProbV[kTpc]->GetXaxis()->GetXmax();
+	yMin = ProbV[kTpc]->GetYaxis()->GetXmin();
+	yMax = ProbV[kTpc]->GetYaxis()->GetXmax();
+      }
+    }
   }
   f = 0;
   gin[0] = 0.;
   Double_t dNdx = par[0]; // Mu
   for (Int_t i = 0; i < NdEdx; i++) {
+    StdEdNModel::ETpcType kTpc = StdEdNModel::kTpcOuter;
+    if (St_tpcPadConfigC::instance()->IsRowInner(FdEdx[i].sector,FdEdx[i].row)) kTpc = StdEdNModel::kTpcInner;
     Double_t dE = 1e9*FdEdx[i].F.dE; // GeV => eV
     Double_t dX = FdEdx[i].dxC;
     Double_t Np = dNdx*dX;
@@ -1888,15 +1897,15 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
       f += 100;
       continue;
     }
-    Double_t Prob = ProbV->Interpolate(X,Y);
+    Double_t Prob = ProbV[kTpc]->Interpolate(X,Y);
     if (Prob <= 0.0) {
       f += 100;
       continue;
     }
     f -= 2*TMath::Log(Prob);
     FdEdx[i].Prob = Prob;
-    Double_t dProbOverdX = ProbdX->Interpolate(X,Y);
-    Double_t dProbOverdY = ProbdY->Interpolate(X,Y);
+    Double_t dProbOverdX = ProbdX[kTpc]->Interpolate(X,Y);
+    Double_t dProbOverdY = ProbdY[kTpc]->Interpolate(X,Y);
     Double_t dNpOverdMu = dX;
     Double_t dXOverdNp =  1./Np;
 #ifdef __LogProb__

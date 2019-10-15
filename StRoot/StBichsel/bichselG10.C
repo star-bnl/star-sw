@@ -231,7 +231,7 @@ Double_t dNdx(Double_t *x,Double_t *par) {
   Double_t dx2 = 1;
   if (par[1] > 1.0) charge = par[1];
   poverm *= charge;
-  scale *= charge*charge;
+  //  scale *= charge*charge;
   return  TMath::Log10(scale*StdEdNModel::instance()->dNdx(poverm,charge));//TMath::Exp(7.81779499999999961e-01));
 }
 #if !defined(__CINT__) && !defined(__CLING__)

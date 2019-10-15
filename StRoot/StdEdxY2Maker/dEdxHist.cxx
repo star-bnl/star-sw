@@ -27,15 +27,9 @@ Hists3D::Hists3D(const Char_t *Name, const Char_t *Title,
       Double_t zmin = ZdEdxMin;
       Double_t zmax = ZdEdxMax;
       if (j > 2) {
-#ifndef __HEED_MODEL__
 	nz   =  40;
 	zmin = 1.4;
 	zmax = 3.4;
-#else /* __HEED_MODEL__ */
-	nz   =  50;
-	zmin = 3.0;
-	zmax = 8.0;
-#endif /* __HEED_MODEL__ */
       }
       hists[j] = (TH1 *) new TH3F(name,title,
 				  nXBins,xmin, xmax, nYBins,ymin, ymax,nz, zmin, zmax);
