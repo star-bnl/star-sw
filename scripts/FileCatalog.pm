@@ -4973,6 +4973,13 @@ sub run_query {
 	}
     }
 
+    # by now limit should be defined - if not, then undef was
+    # passed
+    if ( ! defined($limit) ){
+	&print_debug("run_query","Invalid (undef) limit specified");
+	return;
+    }
+
     #+
     # WILL DO A SQL QUERY
     #-
