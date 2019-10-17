@@ -264,7 +264,7 @@ if ("$node" == "") then
             set rhost="rcas"
             set rdomain="rcf.bnl.gov"
             set rstart=6005
-            set rrange=6
+            set rrange=12
         endif
 	breaksw;
 
@@ -279,7 +279,16 @@ if ("$node" == "") then
         set rhost="rcas"
         set rdomain="rcf.bnl.gov"
         set rstart=2061
-        set rrange=19
+        set rrange=16
+	breaksw;
+       
+       case "eic":
+	set node="eic+"
+        set pool="RANDOM"
+        set rhost="eic"
+        set rdomain="rcf.bnl.gov"
+        set rstart=101
+        set rrange=12
 	breaksw;
 
        case "rhbrahms":
@@ -294,7 +303,7 @@ if ("$node" == "") then
         set rhost="spar"
         set rdomain="usatlas.bnl.gov"
         set rstart=101
-        set rrange=4
+        set rrange=8
 	breaksw;
 
        default:
@@ -323,7 +332,7 @@ else
         set rhost="rcas"
         set rdomain="rcf.bnl.gov"
         set rstart=6005
-        set rrange=6
+        set rrange=12
         breaksw;
 
        case "rcas4*":
@@ -335,8 +344,16 @@ else
         set rhost="rcas"
         set rdomain="rcf.bnl.gov"
         set rstart=2061
-        set rrange=19
+        set rrange=16
         breaksw;
+       
+       case "eic*":
+        set pool="RANDOM"
+        set rhost="eic"
+        set rdomain="rcf.bnl.gov"
+        set rstart=101
+        set rrange=12
+	breaksw;
 
        case "rcas0*":
         set pool="-pool condor02.rcf.bnl.gov:9661"
@@ -349,7 +366,7 @@ else
         set rhost="spar"
         set rdomain="usatlas.bnl.gov"
         set rstart=101
-        set rrange=4
+        set rrange=8
         breaksw;
 
        default:

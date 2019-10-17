@@ -582,6 +582,18 @@ my $NEvents = 100000;
 #$hist = "Hist031"; $Production = "P05if_test"; $disk = "data09"; $STAR_LEVEL = "dev";# 08/17/2005 - check new production
 #$hist = "Hist032"; $Production = "P05if_dedx"; $disk = "data43"; $STAR_LEVEL = "SL05f"; $select = "*2";# 01/11/2006 - check CuCu22 run V
 # ========================== 2006 Run VI  =================================
+# Run V, rerurn
+#$hist = "RunV201"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = "TFG19g"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 04/24/19 check new production
+#$hist = "RunV202"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/26/19 add ZDC3 histograms
+#$hist = "RunV203"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/27/19 new TpcSecRowB and TpcRowQ
+#$hist = "RunV204"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/28/19 reset TpcSecRowB and TpcRowQ to default, 2005 Distrotions option in dE.dx.C
+#$hist = "RunV205"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/29/19 update TpcSecRowB
+#$hist = "RunV206"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/29/19 update TpcLengthCorrrectionMDF bug in time stamp for TpcLengthCorrectionMDF
+#$hist = "RunV207"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/29/19 update TpcLengthCorrrectionMDF
+#$hist = "RunV208"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/30/19 check in dev
+#$hist = "RunV209"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/02/19 new tpcPressureB
+#$hist = "RunV210"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/02/19 fix bug  tpcPressureB
+# ========================== 2006 Run VI  =================================
 ### run VI (2006)
 #$hist = "Hist101"; $disk = "data09"; $Production = "dev"; $year = "2006/*"; $STAR_LEVEL = ".DEV2"; $select = "*";# 01/11/2006 - check CuCu22 run V
 #              /star/data09/reco/ppProduction/FullField/dev/2006/096/7096012/st_physics_7096012_raw_1030006.event.root
@@ -1691,6 +1703,7 @@ my $NEvents = 100000;
 # dEdx42: add correction to TpcAdcCorrection, 06/01/18
 #2018/AltroThresh5/dEdx43 : add ADC histogram 06/02/18
 # dEdx46 reset TcpSecRowB to 1, 06/03/18
+################################################################################
 # Run XVIII
 # A.Lebedev, 07/24/18: May 3, 2010, about 19:45 TPC gas system failed and in ~ hour I restored. 
 # production_isobar_2018               2018-03-12 16:24:39 GMT - 2018-05-09 11:41:42 GMT days  71 - 129
@@ -1756,6 +1769,10 @@ my @badruns = (19116020); # Altro3
 # 19135013_1500002
 # );
 #$hist = "RunXVIII137"; $NEvents = 2000; $disk = "data100/"; $RECO = "reco/27GeV_production_2018/*FullField";  $Production = "/P18if_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = "DEV"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/22/18 check MySQL
+################################################################################
+# Run XVIII FixedTarget 
+# /star/data4X/reco/production_3p85GeV_fixedTarget_2018/ReversedFullField/P19id_calib/2018/*/*
+$hist = "RunXVIII300"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/15/2019 check wrp DB
 
 my @badruns = ();
 # Run V, rerurn
