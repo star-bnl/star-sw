@@ -722,11 +722,11 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, con
   }
   double eplus,eminus,eparab,gcc;
   for (k=0;k<npar;k++) {
-    if (ffix[k]) continue;
+    if (ffix[k]) { fitPars[k] = fstart[k]; fitParErrs[k] = 0; continue; }
     minuit->GetParameter(k,parName[k],fitPars[k],fitParErrs[k],temp1,temp2);
   }
   for (k=0;k<npar;k++) {
-    if (ffix[k]) continue;
+    if (ffix[k]) { fitPars[k] = fstart[k]; fitParErrs[k] = 0; continue; }
     for (i=0;i<npar;i++) if (i!=k && !ffix[i]) minuit->FixParameter(i);
     status = minuit->ExecuteCommand("MINIMIZE", arglist, 1);
     if (status) {
@@ -855,11 +855,11 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, con
       return;
     }
     for (k=0;k<npar;k++) {
-      if (bfix[k]) continue;
+      if (bfix[k]) { fitPars[k] = bstart[k]; fitParErrs[k] = 0; continue; }
       minuit->GetParameter(k,parName[k],fitPars[k],fitParErrs[k],temp1,temp2);
     }
     for (k=0;k<npar;k++) {
-      if (bfix[k]) continue;
+      if (bfix[k]) { fitPars[k] = bstart[k]; fitParErrs[k] = 0; continue; }
       for (i=0;i<npar;i++) if (i!=k && !bfix[i]) minuit->FixParameter(i);
       status = minuit->ExecuteCommand("MINIMIZE", arglist, 1);
       if (status) {
@@ -1888,7 +1888,7 @@ int SetMinuitPars(const int n, TString* names, Double_t* starts, Double_t* steps
   for (i=0; i<n; i++) {
     names[i].Append(' ',maxlen-names[i].Length());
     if (fixing && fixing[i]) {
-      minuit->SetParameter(i, names[i].Data(),         0,        0,     0,     0);
+      minuit->SetParameter(i, names[i].Data(), starts[i],        0,     0,     0);
       minuit->FixParameter(i);
     } else {
       // Rules for limits (default is no limits):
@@ -2300,8 +2300,11 @@ void PrintResult(double scp, double escp, double sop, double esop,
 }
 
 /////////////////////////////////////////////////////////////////
-// $Id: Calib_SC_GL.C,v 2.8 2019/09/06 15:29:12 genevb Exp $
+// $Id: Calib_SC_GL.C,v 2.9 2019/10/16 15:41:01 genevb Exp $
 // $Log: Calib_SC_GL.C,v $
+// Revision 2.9  2019/10/16 15:41:01  genevb
+// Fix issues with constant (fixed) parameter values
+//
 // Revision 2.8  2019/09/06 15:29:12  genevb
 // Include no-killer ZDC scalers in PCA
 //

@@ -785,7 +785,7 @@ sub MyConnect
     }
 
     # Load is managed globally - remove limit if -nl
-    if ( !$limit && $as eq "Admin"){
+    if (( !$limit && $as eq "Admin") || defined($ENV{FC_BP_THRESHOLD})){
 	$fileC->set_thresholds(0,0,0);
     }
     

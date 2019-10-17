@@ -4815,6 +4815,7 @@ sub run_query {
     if (defined $valuset{"limit"}){
 	$limit = $valuset{"limit"};
 	if($limit <= 0){
+	    # under will be tested later
 	    $limit    = undef;
 	}
     } else {
@@ -4975,10 +4976,10 @@ sub run_query {
 
     # by now limit should be defined - if not, then undef was
     # passed
-    if ( ! defined($limit) ){
-	&print_debug("run_query","Invalid (undef) limit specified");
-	return;
-    }
+    #if ( ! defined($limit) ){
+    #	&print_debug("run_query","Invalid (undef) limit specified");
+    #	return;
+    #}
 
     #+
     # WILL DO A SQL QUERY
@@ -5024,7 +5025,7 @@ sub run_query {
 
 	    $idcnt = 0;
 
-	    &print_debug("run_query","rlimit=$rlimit limit=$limit - fetching");
+	    &print_debug("run_query","rlimit=$rlimit limit=".(defined($limit)?$limit:"undef")." - fetching");
 
 	    while ( @cols = $sth->fetchrow_array() ) {
 		# if field is empty, fetchrow_array() returns undef()
