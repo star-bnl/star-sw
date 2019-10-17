@@ -376,7 +376,7 @@
   <Info format="rmax = {6.2f}">rmax</Info>
 
   <Create    block="STGM" />
-  <Placement block="STGM" in="CAVE" konly="MANY"  
+  <Placement block="STGM" in="CAVE" konly="ONLY"  
     x="xcenter"
     y="ycenter"
     z="zcenter" />
