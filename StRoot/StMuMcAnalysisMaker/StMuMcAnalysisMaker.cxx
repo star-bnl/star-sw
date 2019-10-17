@@ -5,7 +5,7 @@
 #include "TMath.h"
 #include "TNtuple.h"
 #include "StBichsel/Bichsel.h"
-#include "StBichsel/StdEdxModel.h"
+#include "StBichsel/StdEdNModel.h"
 #include "StProbPidTraits.h"
 #include "StMuDSTMaker/COMMON/StMuBTofHit.h"
 #if 1
@@ -904,7 +904,7 @@ void StMuMcAnalysisMaker::FillTrackPlots()
       if (TrackLength > 0) {
         Double_t Pred[3]  = {1.e-6*Bichsel::Instance()->GetI70(bghyp,1.0),
            1.e-6*TMath::Exp(Bichsel::Instance()->GetMostProbableZ(bghyp,1.0)),
-           StdEdxModel::instance()->dNdx(bg)
+           StdEdNModel::instance()->dNdx(bg)
         };
         for (Int_t mm = 0; mm < 3; mm++) {
     if (I[mm] <= 0 || Pred[mm] <= 0) continue;

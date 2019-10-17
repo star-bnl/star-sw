@@ -1,6 +1,7 @@
 #include "Riostream.h"
 #include <stdio.h>
 #include "TROOT.h"
+#include "TSystem.h"
 #include "TAxis.h"
 #include "TF1.h"
 #include "TH1.h"
@@ -13,11 +14,13 @@ using namespace std;
 ClassImp(StdEdNModel)
 StdEdNModel  *StdEdNModel::fgStdEdNModel = 0;
 TH1D         *StdEdNModel::mdNdxL10 = 0;  
+TH1D         *StdEdNModel::mdNdx = 0;  
 TH2F         *StdEdNModel::mdEdNModel[3][3] = {0};
 TH1F         *StdEdNModel::mdEdNMPV[3] = {0};
 TH2F         *StdEdNModel::mLogdEdNModel[3][3] = {0};
 TH1F         *StdEdNModel::mLogdEdNMPV[3] = {0};
-Double_t      StdEdNModel::fScale = 1.0;
+//Double_t      StdEdNModel::fScale = TMath::Exp(2.06656e-01+3.01711e-02); // Heed
+Double_t      StdEdNModel::fScale = TMath::Exp(9.12015e-02); // Bichsel
 Int_t         StdEdNModel::_debug   = 1;
 //________________________________________________________________________________
 StdEdNModel* StdEdNModel::instance() {
@@ -32,7 +35,8 @@ StdEdNModel::StdEdNModel() {
     TDirectory *dir = gDirectory;
     fgStdEdNModel = this;
     const Char_t *path  = ".:./StarDb/dEdxModel:$STAR/StarDb/dEdxModel";
-    const Char_t *Files[2] = {"dEdNModel.root","dNdx_Heed.root"};
+    //    const Char_t *Files[2] = {"dEdNModel.root","dNdx_Heed.root"};
+    const Char_t *Files[2] = {"dEdNModel.root","dNdx_Bichsel.root"};
     for (Int_t i = 0; i < 2; i++) { // files
       Char_t *file = gSystem->Which(path,Files[i],kReadPermission);
       if (! file) Fatal("StdEdNModel","File %s has not been found in path %s",Files[i],path);
@@ -58,7 +62,9 @@ StdEdNModel::StdEdNModel() {
 	  assert(mLogdEdNMPV[l]);    mLogdEdNMPV[l]->SetDirectory(0);
 	}
       } else if (i == 1) {
-	mdNdxL10 = (TH1D *)         pFile->Get("dNdxL10");           assert(mdNdxL10);    mdNdxL10->SetDirectory(0);
+	mdNdx    = (TH1D *)         pFile->Get("dNdx");     if (mdNdx)    mdNdx->SetDirectory(0);
+	mdNdxL10 = (TH1D *)         pFile->Get("dNdxL10");  if (mdNdxL10) mdNdxL10->SetDirectory(0);
+	assert(mdNdx || mdNdxL10);
       }
       delete pFile;
       delete [] file;
@@ -76,7 +82,10 @@ StdEdNModel::~StdEdNModel() {
 }
 //________________________________________________________________________________
 Double_t StdEdNModel::dNdx(Double_t poverm, Double_t charge) {
-  return fScale*charge*charge*instance()->GetdNdxL10()->Interpolate(TMath::Log10(poverm));
+  if (!fgStdEdNModel) instance();
+  if (mdNdx)    return fScale*charge*charge*mdNdx->Interpolate(poverm);
+  if (mdNdxL10) return fScale*charge*charge*mdNdxL10->Interpolate(TMath::Log10(poverm));
+  return 0;
 }
 //________________________________________________________________________________
 Double_t StdEdNModel::zMPVFunc(Double_t *x, Double_t *p) {

@@ -87,10 +87,10 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
       ChainOpt += "gstar,"; RootFile += "gstar";
     }
 #endif
-    if (RunOpt.Contains("hadr_of",TString::kIgnoreCase) ||
-	   Opt.Contains("hadr_of",TString::kIgnoreCase)) ChainOpt += "hadr_off,";
-    if (RunOpt.Contains("phys_of",TString::kIgnoreCase) ||
-	   Opt.Contains("phys_of",TString::kIgnoreCase)) ChainOpt += "phys_off,";
+    if (!( RunOpt.Contains("hadr_on",TString::kIgnoreCase) ||
+	   Opt.Contains("hadr_on",TString::kIgnoreCase))) ChainOpt += "hadr_off,";
+    if (! (RunOpt.Contains("phys_on",TString::kIgnoreCase) ||
+	   Opt.Contains("phys_of",TString::kIgnoreCase))) ChainOpt += "phys_off,";
     if (RunOpt.Contains("PhysicsOff",TString::kIgnoreCase) ||
 	   Opt.Contains("PhysicsOff",TString::kIgnoreCase)) ChainOpt += "phys_off,";
     if      (Opt.Contains("FieldOff" ,TString::kIgnoreCase)) ChainOpt += "FieldOff,";
@@ -141,24 +141,25 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   output.ReplaceAll("*","");
   if (RunOpt.Contains("devT,",TString::kIgnoreCase)) ChainOpt += ",useXgeom";
   bfc(-1,ChainOpt.Data(),fileIn,output.Data(),RootFile.Data());
-  if (ChainOpt.Contains("TpcRS",TString::kIgnoreCase)) {
-    StTpcRSMaker *tpcRS = (StTpcRSMaker *) chain->Maker("TpcRS");
-    if (tpcRS) {
-      //      if (needAlias) tpcRS->SetInput("geant","bfc/.make/inputStream/.make/inputStream_Root/.data/bfcTree/geantBranch");
-      Int_t m_Mode = tpcRS->GetMode();
-      if (Opt.Contains("heed",TString::kIgnoreCase))        {SETBIT(m_Mode,StTpcRSMaker::kHEED); CLRBIT(m_Mode,StTpcRSMaker::kBICHSEL);}
-      if (Opt.Contains("bichsel",TString::kIgnoreCase))     {SETBIT(m_Mode,StTpcRSMaker::kBICHSEL); CLRBIT(m_Mode,StTpcRSMaker::kHEED);}
-      if (! ChainOpt.Contains("Corr",TString::kIgnoreCase)) {CLRBIT(m_Mode,StTpcRSMaker::kDistortion);}  // Check that distorton are IN chain
+  StTpcRSMaker *tpcRS = (StTpcRSMaker *) chain->Maker("TpcRS");
+  if (tpcRS) {
+    //      if (needAlias) tpcRS->SetInput("geant","bfc/.make/inputStream/.make/inputStream_Root/.data/bfcTree/geantBranch");
+    Int_t m_Mode = tpcRS->GetMode();
+    cout << "========== Opt " << Opt.Data() << endl;
+    if (Opt.Contains("heed",TString::kIgnoreCase))        {
+      SETBIT(m_Mode,StTpcRSMaker::kHEED); CLRBIT(m_Mode,StTpcRSMaker::kBICHSEL);
+      cout << "========== set HEED" << endl;
+    }
+    if (Opt.Contains("bichsel",TString::kIgnoreCase))     {
+      SETBIT(m_Mode,StTpcRSMaker::kBICHSEL); CLRBIT(m_Mode,StTpcRSMaker::kHEED);
+      cout << "========== set Bichsel" << endl;
+      }
+    if (! ChainOpt.Contains("Corr",TString::kIgnoreCase)) {
+      CLRBIT(m_Mode,StTpcRSMaker::kDistortion);  // Check that distorton are IN chain
+      cout << "========== set Distortion" << endl;
+    }
       tpcRS->SetMode(m_Mode);
       //      tpcRS->SetDebug(13);
-    }
-  }
-  else {
-    if (ChainOpt.Contains("trs",TString::kIgnoreCase)) {
-      StMaker *mk = chain->Maker("tpcDB"); // simulation mode
-      if (! mk) return;
-      mk->SetMode(1); 
-    }
   }
 
 #if 0 /* not enough memory for dE/dx plots */

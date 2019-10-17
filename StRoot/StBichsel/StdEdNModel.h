@@ -38,7 +38,8 @@ class StdEdNModel {
  private:
   static StdEdNModel *fgStdEdNModel; //! last instance          
   StdEdNModel();
-  static TH1D         *mdNdxL10;    // dN/dx versus beta*gamma
+  static TH1D         *mdNdxL10;    // dN/dx versus log10(beta*gamma)
+  static TH1D         *mdNdx;       // dN/dx versus beta*gamma
   static TH2F         *mdEdNModel[3][3]; // Tpc [I,O,All] [Prob, dProb/dX, dProb/dY] versus dE/Np,log(Np)
   static TH1F         *mdEdNMPV[3];
   static TH2F         *mLogdEdNModel[3][3]; // Tpc [I,O,All] [Prob, dProb/dX, dProb/dY] versus Log(dE/Np),log(Np)

@@ -18,7 +18,6 @@
 #include "StPicoEvent/StPicoBTofPidTraits.h"
 
 #include "StBichsel/Bichsel.h"
-#include "StBichsel/StdEdxModel.h"
 #include "StProbPidTraits.h"
 #include "StMuDSTMaker/COMMON/StMuBTofHit.h"
 #include "StMuDSTMaker/COMMON/StMuMcVertex.h"
