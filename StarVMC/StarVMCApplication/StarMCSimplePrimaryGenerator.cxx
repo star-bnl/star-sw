@@ -5,6 +5,7 @@
 #include "TF1.h"
 #include "TEnv.h"
 #include "TRandom.h"
+#include "TSystem.h"
 #include "StDetectorDbMaker/St_vertexSeedC.h"
 ClassImp(StarMCSimplePrimaryGenerator);
 Double_t StarMCSimplePrimaryGenerator::fTemperature = 1; // GeV/c
@@ -69,13 +70,20 @@ void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id,
   cout << fEta_min  << " < eta < " << fEta_max  << endl;
   cout << fPhi_min<< " < phi < " << fPhi_max<< endl;
   cout << fZ_min  << " < zVer< " << fZ_max  << endl;
-  TFile *PVfile = TFile::Open("PVxyz.root");
-  if (PVfile) {
-    fPVX = (TH1 *) PVfile->Get("x"); assert(fPVX); fPVX->SetDirectory(0);
-    fPVY = (TH1 *) PVfile->Get("y"); assert(fPVY); fPVY->SetDirectory(0);
-    fPVZ = (TH1 *) PVfile->Get("z"); assert(fPVZ); fPVZ->SetDirectory(0);
-    delete PVfile;
-    cout << "PVxyz.root with x, y and z histograms has been found. These histogram will be use to generate primary vertex" << endl;
+  
+  TString path(".");
+  TString File("PVxyz.root");
+  Char_t *file = gSystem->Which(path,File,kReadPermission);
+  if (file) {
+    TFile *PVfile = TFile::Open(file);
+    if (PVfile) {
+      fPVX = (TH1 *) PVfile->Get("x"); assert(fPVX); fPVX->SetDirectory(0);
+      fPVY = (TH1 *) PVfile->Get("y"); assert(fPVY); fPVY->SetDirectory(0);
+      fPVZ = (TH1 *) PVfile->Get("z"); assert(fPVZ); fPVZ->SetDirectory(0);
+      delete PVfile;
+      cout << "PVxyz.root with x, y and z histograms has been found. These histogram will be use to generate primary vertex" << endl;
+    }
+    delete [] file;
   }
   fgInstance = this;
 }
