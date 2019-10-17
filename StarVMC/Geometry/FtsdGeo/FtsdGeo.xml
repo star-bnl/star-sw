@@ -613,12 +613,12 @@
   zcenter = zmin + (zmax-zmin) / 2.0
 
   <Create    block="FTSM" />
-  <Placement block="FTSM" in="IDSM" konly="MANY"      if="MAIN_useids.eq.1.0"
+  <Placement block="FTSM" in="IDSM" konly="ONLY"      if="MAIN_useids.eq.1.0"
 	     x="xcenter"
 	     y="ycenter"
 	     z="zcenter" />
 
-  <Placement block="FTSM" in="CAVE" konly="MANY"      
+  <Placement block="FTSM" in="CAVE" konly="ONLY"      
 	     x="xcenter"
 	     y="ycenter"
 	     z="zcenter" />
