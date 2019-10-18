@@ -18,7 +18,7 @@
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StPicoEvent/StPicoTrack.h"
 #include "StBichsel/Bichsel.h"
-#include "StBichsel/StdEdxModel.h"
+#include "StBichsel/StdEdNModel.h"
 #include "StBichsel/StdEdxPull.h"
 #endif /* __TFG__VERSION__ */
 
@@ -336,7 +336,7 @@ p8                        =      5.20165   +/-   0.161309
 #if 0 /* not yet implemented */
     dedx_measured = dNdx();
     dedx_resolution = dNdxError();
-    dedx_predicted = StdEdxModel::instance()->dNdx(betagamma,charge);
+    dedx_predicted = StdEdNModel::instance()->dNdx(betagamma,charge);
     if (hyp >= 0 && bgL10 > ToFCor[0][hyp]->GetXmin() &&  bgL10 < ToFCor[0][hyp]->GetXmax())
     dedx_predicted *= TMath::Exp(ToFCor[1][hyp]->Eval(bgL10));
 #endif
