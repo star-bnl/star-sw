@@ -70,7 +70,7 @@ class StFmsCalibMaker : public StMaker
 		TH2F* mH2_mass[4];     //Mass vs. Channel, default
 		TH2F* mH2_massFine[4]; //Mass vs. Channel, x5 bins
 
-        ClassDef(StFmsCalibMaker, 1.0);
+        ClassDef(StFmsCalibMaker, 1);
 };
 
 #endif
