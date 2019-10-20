@@ -50,7 +50,7 @@ class StFmsCalibMakerQa : public StMaker
 		float mZgg;
 		int   mTrigBit;
 
-		ClassDef(StFmsCalibMakerQa, 1.0);
+		ClassDef(StFmsCalibMakerQa, 1);
 };
 
 #endif

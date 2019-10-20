@@ -1703,7 +1703,6 @@ my $NEvents = 100000;
 # dEdx42: add correction to TpcAdcCorrection, 06/01/18
 #2018/AltroThresh5/dEdx43 : add ADC histogram 06/02/18
 # dEdx46 reset TcpSecRowB to 1, 06/03/18
-################################################################################
 # Run XVIII
 # A.Lebedev, 07/24/18: May 3, 2010, about 19:45 TPC gas system failed and in ~ hour I restored. 
 # production_isobar_2018               2018-03-12 16:24:39 GMT - 2018-05-09 11:41:42 GMT days  71 - 129
@@ -1772,46 +1771,11 @@ my @badruns = (19116020); # Altro3
 ################################################################################
 # Run XVIII FixedTarget 
 # /star/data4X/reco/production_3p85GeV_fixedTarget_2018/ReversedFullField/P19id_calib/2018/*/*
-$hist = "RunXVIII300"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/15/2019 check wrp DB
+#$hist = "RunXVIII300"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/15/2019 check wrp DB
+#$hist = "RunXVIII301"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/17/2019  add West East separation
+$hist = "Run302"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/18/2019  add West East separation
 
 my @badruns = ();
-# Run V, rerurn
-#$hist = "RunV201"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = "TFG19g"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 04/24/19 check new production
-#$hist = "RunV202"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/26/19 add ZDC3 histograms
-#$hist = "RunV203"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/27/19 new TpcSecRowB and TpcRowQ
-#$hist = "RunV204"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/28/19 reset TpcSecRowB and TpcRowQ to default, 2005 Distrotions option in dE.dx.C
-#$hist = "RunV205"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/29/19 update TpcSecRowB
-#$hist = "RunV206"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/29/19 update TpcLengthCorrrectionMDF bug in time stamp for TpcLengthCorrectionMDF
-#$hist = "RunV207"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/29/19 update TpcLengthCorrrectionMDF
-#$hist = "RunV208"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/30/19 check in dev
-#$hist = "RunV209"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/02/19 new tpcPressureB
-$hist = "RunV210"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/02/19 fix bug  tpcPressureB
-######### Run XIX ################################################################################################################
-# onl Run19 | SortRun19.pl  
-#                                                 First run       Last run        begin Time for 1-st run         beginTime for last run
-# production_19GeV_2019                           20056032        20093036        2019-02-25      20:23:20        2019-04-03      11:16:40
-# production_14p5GeV_2019                         20094048        20107026        2019-04-04      09:44:05        2019-04-17      12:45:56
-# production_7.3GeV_fixedTarget_2019              20107029        20107029        2019-04-17      13:34:01        2019-04-17      13:34:01
-# production_14p5GeV_2019                         20107030        20113041        2019-04-17      14:12:46        2019-04-23      14:26:57
-# production_7.3GeV_fixedTarget_2019              20113042        20113048        2019-04-23      15:54:18        2019-04-23      17:22:27
-# production_14p5GeV_2019                         20113051        20154013        2019-04-23      18:11:58        2019-06-03      11:37:46
-# production_7p7GeV_2019                          20154047        20158026        2019-06-03      22:36:55        2019-06-07      14:51:00
-# production_3p85GeV_fixedTarget_2019             20158028        20158028        2019-06-07      16:03:57        2019-06-07      16:03:57
-# production_7p7GeV_2019                          20158036        20158036        2019-06-07      17:03:52        2019-06-07      17:03:52
-# production_3p85GeV_fixedTarget_2019             20158040        20158042        2019-06-07      17:41:23        2019-06-07      17:48:34
-# production_7p7GeV_2019                          20158047        20160022        2019-06-07      20:14:27        2019-06-09      11:41:14
-# production_3p85GeV_fixedTarget_2019             20160023        20160027        2019-06-09      12:45:28        2019-06-09      13:44:07
-# production_7p7GeV_2019                          20160035        20169025        2019-06-10      02:31:52        2019-06-18      12:30:19
-# production_7.3GeV_fixedTarget_2019              20169028        20169055        2019-06-18      14:36:58        2019-06-19      01:36:03
-# production_7p7GeV_2019                          20169058        20178014        2019-06-19      02:51:26        2019-06-27      10:23:40
-# production_9p2GeV_2019                          20179015        20179028        2019-06-28      08:19:31        2019-06-28      14:32:40
-# production_4p59GeV_fixedTarget_2019             20179039        20183005        2019-06-29      03:28:34        2019-07-02      05:39:51
-# production_9p2GeV_2019                          20183006        20183007        2019-07-02      06:10:59        2019-07-02      06:17:04
-# production_4p59GeV_fixedTarget_2019             20183008        20183025        2019-07-02      06:22:10        2019-07-02      13:16:09
-# production_9p2GeV_2019                          20183026        20189017        2019-07-02      14:41:51        2019-07-08      10:37:18
-# production_31GeV_fixedTarget_2019               20189035        20190024        2019-07-09      03:23:12        2019-07-09      14:35:52
-# production_AuAu200_2019                         20190042        20193026        2019-07-09      19:15:24        2019-07-12      19:56:37
-#########################################################################################################################
 my $prod = $hist; #$Production;
 $prod =~ s/\*//g;
 $prod =~ s/\//_/g;
