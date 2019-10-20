@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<job name="NewTest" fileListSyntax="paths" nProcesses="117"  filesPerHour="25" simulateSubmission="false">
+<job name="NewTest" fileListSyntax="paths" nProcesses="119"  filesPerHour="25" simulateSubmission="false">
 
 <command>
 
@@ -46,7 +46,8 @@ cp ${inputfile} $SCRATCH
 
 echo $SCRATCH/${infile0}
 
-root4star -b -q bfc.C\($nevents,\&quot;${chain}\&quot;,\&quot;${infile0}\&quot;\) &gt;&amp; ${logFile}
+#root4star -b -q bfc.C\($nevents,\&quot;${chain}\&quot;,\&quot;${infile0}\&quot;\) &gt;&amp; ${logFile}
+root.exe -b -q bfc.C\($nevents,\&quot;${chain}\&quot;,\&quot;${infile0}\&quot;\) &gt;&amp; ${logFile}
 
 cp ${logFile} ${out_dir}
 
