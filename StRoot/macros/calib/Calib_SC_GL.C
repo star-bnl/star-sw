@@ -712,9 +712,11 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, con
   }
   // covarAdjust is a fudge factor for how the covariance (which is negative)
   // between pars 2 and 4 modifies the variance on the product of their exponentials
-  Double_t covarAdjust = 1 + (minuit->GetCovarianceMatrixElement(2,4) / 
-                              (minuit->GetCovarianceMatrixElement(2,2) +
-                               minuit->GetCovarianceMatrixElement(4,4)));
+  Double_t covarAdjust = 1;
+  if (!(ffix[2] || ffix[4]))
+    covarAdjust += (minuit->GetCovarianceMatrixElement(2,4) /
+                    (minuit->GetCovarianceMatrixElement(2,2) +
+                     minuit->GetCovarianceMatrixElement(4,4)));
   status = minuit->ExecuteCommand("SET LIM", 0, 0); // Remove limits before MINOS
   if (status) {
     printf("SetLimit failed for sc+gl, err = %d\n",status);
@@ -2300,8 +2302,11 @@ void PrintResult(double scp, double escp, double sop, double esop,
 }
 
 /////////////////////////////////////////////////////////////////
-// $Id: Calib_SC_GL.C,v 2.9 2019/10/16 15:41:01 genevb Exp $
+// $Id: Calib_SC_GL.C,v 2.10 2019/10/21 15:20:57 genevb Exp $
 // $Log: Calib_SC_GL.C,v $
+// Revision 2.10  2019/10/21 15:20:57  genevb
+// Avoid Minuit complaint when asking about a fixed parameter
+//
 // Revision 2.9  2019/10/16 15:41:01  genevb
 // Fix issues with constant (fixed) parameter values
 //
