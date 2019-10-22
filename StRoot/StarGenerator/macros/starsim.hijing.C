@@ -15,7 +15,7 @@ StarPrimaryMaker *_primary = 0;
 class StarHijing;
 StarHijing *hijing = 0; 
 // ----------------------------------------------------------------------------
-void geometry( TString tag, Bool_t agml=true )
+void geometry( TString tag, bool agml=true )
 {
   TString cmd = "DETP GEOM "; cmd += tag;
   if ( !geant_maker ) geant_maker = (St_geant_Maker *)chain->GetMaker("geant");
@@ -30,9 +30,9 @@ void command( TString cmd )
   geant_maker -> Do( cmd );
 }
 // ----------------------------------------------------------------------------
-void trig( Int_t n=0 )
+void trig( int n=0 )
 {
-  for ( Int_t i=0; i<n+1; i++ ) {
+  for ( int i=0; i<n+1; i++ ) {
     chain->Clear();
     chain->Make();
     _primary -> event() -> Print();
@@ -59,14 +59,12 @@ void Hijing()
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-void starsim( Int_t nevents=10,Int_t rngSeed=1234 )
+void starsim( int nevents=10,int rngSeed=1234, const char* tag="y2018" )
 { 
 
   gROOT->ProcessLine(".L bfc.C");
   {
-    TString simple = "y2012 geant gstar usexgeom agml ";
-    //TString full   = "tpcrs TpxRaw y2010a MakeEvent ITTF NoSvtIt NoSsdIt Idst IAna l0 ftpc Sti Tree logger genvtx tpcDB TpcHitMover TpxClu pmd bbcSim tofsim tags emcY2 EEfs evout IdTruth geantout -dstout big fzin MiniMcMk clearmem";
-    //  TString full = "y2012 geant gstar tpcrs genvtx tpcDb tpxclu dedx event sdt20120224 ";
+    TString simple = Form("%s geant gstar usexgeom agml ",tag);
     bfc(0, simple );
   }
 
