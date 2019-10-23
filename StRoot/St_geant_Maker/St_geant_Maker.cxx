@@ -678,7 +678,6 @@
 #include "TUnixTime.h"
 #include "StarCallf77.h" 
 #include "StMagF.h"
-#include "StMessMgr.h"
 #ifdef DetectorIndex
 #include "StarDetectorMap.h"
 #endif

@@ -138,6 +138,7 @@
 #include "TArrayI.h"
 #endif
 #include "TGiant3.h"
+#include "StMessMgr.h"
 class TVolume;
 class TRotMatrix;
 class TShape;
@@ -272,6 +273,7 @@ protected:
    /// @param volumes is the list of sensitive volumes managed by the container
    /// @param tablename is the name of the table to be created
    /// @param g2t is the functor of class F passed
+#ifndef __CLING__
    template<typename T, typename F>
    int AddHits( std::string container, std::vector<std::string> volumes, std::string tablename, F g2t ){
        int ntotal = 0, nhits = 0;
@@ -291,7 +293,10 @@ protected:
        return ntotal;  
    } 
   std::map<std::string, int> mHitCounts;
-
+#else
+   template<typename T, typename F>
+     int AddHits( std::string container, std::vector<std::string> volumes, std::string tablename, F g2t );
+#endif
    virtual const char *GetCVS() const
    {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.58 2019/09/30 14:13:27 jwebb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
