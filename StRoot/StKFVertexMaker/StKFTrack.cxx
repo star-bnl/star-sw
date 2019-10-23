@@ -1,6 +1,7 @@
 // $Id: StKFTrack.cxx,v 2.3 2015/12/20 01:06:39 fisyak Exp $
 #include "Riostream.h"
 #include "StKFTrack.h"
+using namespace std;
 Int_t StKFTrack::fDebug = 0;
 //________________________________________________________________________________
 StKFTrack::StKFTrack(const KFParticle *particle, Double_t chi2, Int_t iWE) : 

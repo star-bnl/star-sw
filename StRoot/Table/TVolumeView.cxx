@@ -29,7 +29,7 @@
 #include "TObjArray.h"
 #include "TVirtualViewer3D.h"
 #include "TBuffer3D.h"
-
+using namespace std;
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // TVolumeView                                                          //

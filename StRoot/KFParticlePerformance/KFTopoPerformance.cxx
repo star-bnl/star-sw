@@ -1150,7 +1150,7 @@ void KFTopoPerformance::CalculateEfficiency()
     std::cout << "ACCUMULATED STAT    : " << fNEvents << " EVENTS "               << std::endl << std::endl;
     fParteff.PrintEff();
 
-    std::cout<<endl;
+    std::cout<<std::endl;
       // std::cout<<"CA Track Finder: " << L1_CATIME/L1_fNEvents << " s/ev" << std::endl << std::endl;
   }
 }
@@ -1264,7 +1264,7 @@ void KFTopoPerformance::CalculatePVEfficiency()
     std::cout << "PV with at least 2 MC tracks with 15 MC points is reconstructable:" << std::endl;
     fPVeffMCReconstructable.PrintEff();
 
-    std::cout<<endl;
+    std::cout<<std::endl;
       // std::cout<<"CA Track Finder: " << L1_CATIME/L1_fNEvents << " s/ev" << std::endl << std::endl;
   }
 }

@@ -34,7 +34,7 @@
 #pragma link C++ class TTableDescriptor-;
 #pragma link C++ class tableDescriptor_st+;
 #pragma link C++ class TColumnView;
-#pragma link C++ class TTableMap-;
+#pragma link C++ class TTableMap+;
 #pragma link C++ class TTablePadView3D;
 
 

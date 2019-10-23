@@ -36,23 +36,29 @@ void TColumnView::Browse(TBrowser *)
    // Create a column histogram for the simple column
    if (!IsFolder()) 
    {
+#if 0
       Draw(GetName(),"");
       if (gPad) {
          gPad->Modified();
          gPad->Update();
       }
+#endif
    }
 }
 //______________________________________________________________________________
 TH1 *TColumnView::Histogram(const char *selection)
 {
    // Create a histogram from the context menu
+#if 0
    TH1 *h = Draw(GetName(),selection);
    if (gPad) {
       gPad->Modified();
       gPad->Update();
    }
    return h;
+#else
+   return 0;
+#endif
 }
 
 //______________________________________________________________________________

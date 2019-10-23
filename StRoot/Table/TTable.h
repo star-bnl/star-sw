@@ -65,7 +65,9 @@ protected:
    Char_t    *Create();
    virtual    void       Clear(Option_t *opt="");
    virtual    void       Delete(Option_t *opt="");
+#if 0
    virtual Bool_t  EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *obj, Int_t nentries=1000000000, Int_t firstentry=0, Option_t *option="");
+#endif
    Int_t      SetfN(Long_t len);
    void       SetTablePointer(void *table);
    void       SetUsedRows(Int_t n);
@@ -107,11 +109,13 @@ public:
    virtual     void       CopySet(TTable &array);
                Int_t      CopyRows(const TTable *srcTable,Long_t srcRow=0, Long_t dstRow=0, Long_t nRows=0, Bool_t expand=kFALSE);
    virtual     void       DeleteRows(Long_t indx,UInt_t nRows=1);
+#if 0
    virtual     void       Draw(Option_t *opt);
    virtual     TH1       *Draw(TCut varexp, TCut selection, Option_t *option=""
                          ,Int_t nentries=1000000000, Int_t firstentry=0);
    virtual     TH1       *Draw(const char *varexp, const char *selection, Option_t *option=""
                               ,Int_t nentries=1000000000, Int_t firstentry=0); // *MENU*
+#endif
                void      *GetArray()     const ;
    virtual     TClass    *GetRowClass()  const ;
                Int_t      GetSize() const { return fN; }
@@ -121,9 +125,10 @@ public:
    virtual     TTableDescriptor *GetTableDescriptors() const;
    virtual     TTableDescriptor *GetRowDescriptors()   const;
    virtual     const Char_t *GetType()   const;
+#if 0
    virtual     void       Fit(const char *formula ,const char *varexp, const char *selection="",Option_t *option="" ,Option_t *goption=""
                               ,Int_t nentries=1000000000, Int_t firstentry=0); // *MENU*
-
+#endif
    virtual     Long_t     HasData() const { return 1; }
    virtual     Long_t     InsertRows(const void *rows, Long_t indx, UInt_t nRows=1);
    virtual     Bool_t     IsFolder() const;
@@ -304,11 +309,11 @@ inline const void *TTable::operator[](Int_t i) const
       i = 0;
     return (const void *)(fTable+i*fSize);
 }
-
+#if 0
 //________________________________________________________________________
 inline void TTable::Draw(Option_t *opt)
 { Draw(opt, "", "", 1000000000, 0); }
-
+#endif
 #ifndef __CINT__
     //________________________________________________________________________________________________________________
     inline TTable::piterator::piterator(const piterator& iter) :

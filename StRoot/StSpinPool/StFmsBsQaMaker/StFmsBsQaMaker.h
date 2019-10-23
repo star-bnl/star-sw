@@ -43,7 +43,7 @@ class StFmsBsQaMaker : public StMaker
 		TH2F* mH2_bs_data[nDet];
 		TH2F* mH2_chMap[nDet];
 
-		ClassDef(StFmsBsQaMaker, 1.0);
+		ClassDef(StFmsBsQaMaker, 1)
 };
 
 #endif

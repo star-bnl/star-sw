@@ -50,6 +50,7 @@ public:
    virtual     void       CopySet(TChair &chair){GetThisTable()->CopySet(*chair.GetThisTable());}
                Int_t      CopyRows(const TChair *srcChair, Int_t srcRow=0, Int_t dstRow=0, Int_t nRows=0, Bool_t expand=kFALSE)
                           {return GetThisTable()->CopyRows(srcChair->GetThisTable(),srcRow,dstRow,nRows,expand);}
+#if 0
    virtual     void       Draw(Option_t *opt){GetThisTable()->Draw(opt);}
    virtual     TH1       *Draw(TCut varexp, TCut selection, Option_t *option="",
                           Int_t nentries=1000000000, Int_t firstentry=0)
@@ -57,6 +58,7 @@ public:
    virtual     TH1       *Draw(const char *varexp, const char *selection, Option_t *option="",
                                Int_t nentries=1000000000, Int_t firstentry=0) {
                            return GetThisTable()->Draw(varexp,selection,option,nentries,firstentry);}
+#endif
    virtual     Char_t    *GetArray() const    {return (Char_t *)GetThisTable()->GetArray();}
    virtual     TClass    *GetRowClass() const {return GetThisTable()->GetRowClass();}
    virtual     Long_t     GetNRows() const    {return GetThisTable()->GetNRows();}
@@ -65,9 +67,11 @@ public:
                const TTable  *Table() const {return fTable; }
    virtual     TTableDescriptor *GetRowDescriptors()   const {return GetThisTable()->GetRowDescriptors();}
    virtual     const Char_t       *GetType()             const {return GetThisTable()->GetType();}
+#if 0
    virtual     void       Fit(const char *formula ,const char *varexp, const char *selection="",Option_t *option="",Option_t *goption="",
                               Int_t nentries=1000000000, Int_t firstentry=0) {
                            GetThisTable()->Fit(formula,varexp,selection,option,goption,nentries,firstentry);}
+#endif
    virtual     Long_t     HasData() const  { return GetThisTable()->HasData();}
    virtual     Bool_t     IsFolder() const { return GetThisTable()->IsFolder();}
    virtual     void       ls(Option_t *option="") const {GetThisTable()->ls(option);}

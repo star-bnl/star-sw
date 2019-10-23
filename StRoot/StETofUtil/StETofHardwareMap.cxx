@@ -29,7 +29,7 @@
 #include "StMessMgr.h"
 
 #include "tables/St_etofElectronicsMap_Table.h"
-
+using namespace std;
 
 StETofHardwareMap::StETofHardwareMap( St_etofElectronicsMap* etofElectronicsMap, unsigned int year )
 {

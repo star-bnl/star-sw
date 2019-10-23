@@ -1,6 +1,6 @@
 #ifndef STETOFSIMMAKER_COMBINEDGEANTHIT_H
 #define STETOFSIMMAKER_COMBINEDGEANTHIT_H
-
+#include <vector>
 #include "StThreeVectorD.hh"
 
 struct g2t_ctf_hit_st;
@@ -13,7 +13,7 @@ public:
     CombinedGeantHit();
     ~CombinedGeantHit();
 
-    void addRawHit( const g2t_ctf_hit_st* hitIn, vector<int>& volumeIds );
+    void addRawHit( const g2t_ctf_hit_st* hitIn, std::vector<int>& volumeIds );
 
     void averageRawHits();
 
@@ -38,7 +38,7 @@ public:
 
     int             clusterSize()   const;
 
-    vector< int >   volumeVec()     const;
+    std::vector< int >   volumeVec()     const;
 
 
     void            setMom( const double&, const double&, const double& );

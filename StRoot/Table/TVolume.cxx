@@ -30,7 +30,7 @@
 #include "TVolumePosition.h"
 #include "TVirtualViewer3D.h"
 #include "TBuffer3D.h"
-
+using namespace std;
 #if 0
 const Int_t kVectorSize = 3;
 const Int_t kMatrixSize = kVectorSize*kVectorSize;

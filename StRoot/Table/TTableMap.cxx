@@ -56,7 +56,7 @@ TTableMap::TTableMap(const TTable *table)
 {
    //to be documented
 }
-
+#if 0
 //___________________________________________________________________
 void TTableMap::Streamer(TBuffer &R__b)
 {
@@ -86,3 +86,4 @@ void TTableMap::Streamer(TBuffer &R__b)
       vecIO.fArray=0;  // we should not destroy the real array
    }
 }
+#endif

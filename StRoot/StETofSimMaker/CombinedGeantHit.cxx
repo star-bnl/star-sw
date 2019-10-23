@@ -7,7 +7,7 @@
 #include "StETofUtil/StETofGeometry.h"
 #include "StETofUtil/StETofConstants.h"
 #include "CombinedGeantHit.h"
-
+using namespace std;
 
 
 CombinedGeantHit::CombinedGeantHit()

@@ -58,7 +58,7 @@
 
 
 #define RZ
-
+using namespace std;
 class AliHLTTPCCADisplay::AliHLTTPCCADisplayTmpHit
 {
 

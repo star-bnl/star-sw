@@ -41,7 +41,6 @@
 #include "CombinedGeantHit.h"
 
 
-
 //TODO: move parameters to database
 
 const double signalVec = 17.0; //[cm/ns]
