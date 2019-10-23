@@ -384,7 +384,8 @@ if ($h_files) {
       $cmd .= " -m " . $m;
     }
   }
-  $cmd .= " -c -p -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
+#  $cmd .= " -c -p -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
+  $cmd .= " -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
   print "cmd (normal)= ",$cmd,"\n";
   my $flag = `$cmd`; if ($?) {exit 2;}
 }

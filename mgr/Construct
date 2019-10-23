@@ -335,12 +335,12 @@ if (-r "StarDb/AgiGeometry" ) {push @sysdirlist, "StarDb/AgiGeometry";}
 if ($STAR_HOST_SYS !~ /darwin/) {
   push @sysdirlist, "asps/DAQBrowser";
 }
-if ($STAR_HOST_SYS !~ /darwin/ && $ROOT_LEVEL !~ /^6/ ){
-  push @sysdirlist, "asps/Simulation/geant321";
-  push @sysdirlist, "asps/Simulation/gcalor";
-  push @sysdirlist, "asps/rexe";
-  push @sysdirlist, "asps/Simulation/starsim";
-}
+ if ($STAR_HOST_SYS !~ /darwin/){# && $ROOT_LEVEL !~ /^6/ ){
+   push @sysdirlist, "asps/Simulation/geant321";
+   push @sysdirlist, "asps/Simulation/gcalor";
+   push @sysdirlist, "asps/rexe";
+   push @sysdirlist, "asps/Simulation/starsim";
+ }
 
 #print "sysdirlist = @sysdirlist \n subdirs = @subdirs\n";
 
