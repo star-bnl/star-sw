@@ -87,7 +87,10 @@ void etofBuilder::initialize( int argc, char* argv[] ) {
     gdpbMap2019[ 0x1898 ] = 3;
     gdpbMap2019[ 0x5bb0 ] = 4;
     gdpbMap2019[ 0x18e6 ] = 5;
-    gdpbMap2019[ 0x6141 ] = 6;
+
+    //    gdpbMap2019[ 0x6141 ] = 6;       
+    gdpbMap2019[ 0x1949 ] = 6;       // Temporary change by Jeff Landgraf on 10/23/19 at Norberts request...
+
     gdpbMap2019[ 0x0b5c ] = 7;
     gdpbMap2019[ 0x1861 ] = 8;
     gdpbMap2019[ 0x0b39 ] = 9;
