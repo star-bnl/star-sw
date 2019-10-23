@@ -1,7 +1,6 @@
 #! /usr/bin/env tcsh
 setenv flags "-dM -m32"
 if ($USE_64BITS) setenv flags "-dM -m64"
-cpp $flags -o - << EOF
-EOF
+cpp $flags -o - < /dev/null 
 unsetenv flags
 

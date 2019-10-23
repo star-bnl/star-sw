@@ -7,11 +7,11 @@ use Cwd;
 #my @particles = qw(pion He3 alpha);
 #my @particles = qw(electron positron);
 #my @particles = qw(muon+ muon- electron positron pion+ pion- kaon+ kaon- proton pbar deuteron triton He3 alpha pionMIP);
-my @particles = qw(muon+ muon- electron positron pion+ pion- kaon+ kaon- proton pbar deuteron triton He3 alpha);
+#my @particles = qw(muon+ muon- electron positron pion+ pion- kaon+ kaon- proton pbar deuteron triton He3 alpha);
 #my @particles = qw(proton pionMIP);
 #my @particles = qw(pion+ pion-);
-#my @particles = (pionMIP);
-##my @particles = (pionMIP1);
+my @particles = (pionMIP);
+#my @particles = (pionMIP1);
 #my @particles = (phi);
 foreach my $part (@particles) {
   my $i1 =  1;
