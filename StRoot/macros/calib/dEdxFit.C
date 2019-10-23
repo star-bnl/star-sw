@@ -41,7 +41,7 @@
 #include "TMinuit.h"
 #include "TSpectrum.h"
 #include "StBichsel/Bichsel.h"
-#include "StBichsel/StdEdNModel.h"
+#include "StBichsel/StdEdxModel.h"
 #include "TString.h"
 #include "TLine.h"
 #include "TText.h"
@@ -104,26 +104,52 @@ static TFile *newf = 0;
 static TFile *fOut = 0;
 static TNtuple *FitP = 0;
 static TH1 *projNs[5];
+// BDiif.C 
 // peak postion at p = 0.475 GeV/c wrt pion
 //                        Z     pion
 /// <peak postion> at p = [0.45,0.50] GeV/c wrt pion
-struct peak_t {Double_t peak, sigma, mass; const Char_t *Name;};
+struct peak_t {Double_t peak, sigma, mass; const Char_t *Name; Int_t N; Float_t X[8], Y[8];};
 //                                mean         RMS
+#ifndef __CINT__
 static const  peak_t Peaks[6] = {
-//   {0.      ,       0., 0.13956995, "pion"}, // pion
-//   {1.425822, 0.101693, 0.93827231, "proton"}, // proton - pion
-//   {0.565455, 0.061626, 0.493677,   "kaon"  }, // Kaon   - pi
-//   {0.424916, 0.004081, 0.51099907e-3,"e"}, // e      - pi
-//   {2.655586, 0.123754, 1.875613,   "d"}, // d      - pi
-//   {0.004178, 0.002484, 0.105658,   "mu"}};// mu     - pi
   // 06/25/10
-  {       0.      ,       0.,           0.13956995,       "pion"}, // pion
-  {       1.42574,        0.101741,       0.938272,       "proton"},
-  {       0.565411,       0.0616611,      0.493677,       "kaon"},
-  {       0.424919,       0.00408318,     0.000510999,    "e"},
-  {       2.65548,        0.123809,       1.87561,        "deuteron"},
-  {       0.000717144,    0.00490783,     0.105658,       "mu"}};
-
+  //   {0.      ,       0., 0.13956995, "pion"}, // pion
+  //   {1.425822, 0.101693, 0.93827231, "proton"}, // proton - pion
+  //   {0.565455, 0.061626, 0.493677,   "kaon"  }, // Kaon   - pi
+  //   {0.424916, 0.004081, 0.51099907e-3,"e"}, // e      - pi
+  //   {2.655586, 0.123754, 1.875613,   "d"}, // d      - pi
+  //   {0.004178, 0.002484, 0.105658,   "mu"}};// mu     - pi
+  // 10/20/19 <peak postion> at p = [0.35,0.75] GeV/c wrt pion
+  // <peak position> at p = [0.35,0.75] GeV/c wrt pion : dN/dP = gaus(mean = 1.75843e-01; sigma = 2.21705e-01)
+  {            0.      ,                   0., 0.13956995,         "pion", 
+	       0, {0}, {0}},
+  {       1.39305,        0.284445,       0.938272,       "proton",
+	  7,// protonNzB
+	  { 0.7000, 0.9000, 1.1000, 1.3000, 1.5000, 1.7000, 1.9000}, // X
+	  { 0.0251, 0.0902, 0.1477, 0.2007, 0.2416, 0.2669, 0.0278}  // Y
+  },
+  {       0.557112,       0.174024,       0.493677,       "kaon",
+	  5,// kaonNzB
+	  { 0.1000, 0.3000, 0.5000, 0.7000, 0.9000}, // X
+	  { 0.0177, 0.1928, 0.3611, 0.3618, 0.0666}  // Y
+  },
+  {       0.421061,       0.0096963,      0.000510999,    "e",
+	  3,// eNzB
+	  { 0.3900, 0.4100, 0.4300}, // X
+	  { 0.0262, 0.3455, 0.6283}  // Y
+  },
+  {       2.60851,        0.347455,       1.87561,        "deuteron",
+      8,// deuteronNzB
+	{ 1.7000, 1.9000, 2.1000, 2.3000, 2.5000, 2.7000, 2.9000, 3.1000}, // X
+	  { 0.0142, 0.0499, 0.0854, 0.1259, 0.1671, 0.1893, 0.2353, 0.1330}  // Y
+  },
+  {       0.000482817,    0.0128277,      0.105658,       "mu",
+	  4,// muNzB
+	  {-0.0300,-0.0100, 0.0100, 0.0300}, // X
+	  { 0.0452, 0.4258, 0.4626, 0.0663}  // Y
+  }
+};
+#endif
 Bichsel *gBichsel = 0;
 //#define PRINT 1
 TF1 *func = 0;
@@ -1409,25 +1435,71 @@ Double_t gfFunc(Double_t *x, Double_t *par) {
     frac[i] *= frac[i];
     frac[0] -= frac[i];
   }
-  if (frac[0] < 0.4) return 0;
+  if (frac[0] < 0.4 && frac[1] < 0.4) return 0;
   Double_t Value = 0;
   Int_t icase = (Int_t) par[8];
   Int_t i1 = 0;
   Int_t i2 = 4;
   if (icase >= 0) {i1 = i2 = icase;}
   for (i = i1; i <= i2; i++) { 
-    Double_t Sigma = TMath::Sqrt(sigma*sigma + Peaks[i].sigma*Peaks[i].sigma);
-    Value += frac[i]*TMath::Gaus(x[0],par[1]+Peaks[i].peak,Sigma,1);
+    Double_t Sigma = sigma;
+    if (Peaks[i].N == 0) {
+      Value += frac[i]*TMath::Gaus(x[0],par[1]+Peaks[i].peak,Sigma,1);
+    } else {
+      for (Int_t ix = 0; ix < Peaks[i].N; ix++) {
+	Value += frac[i]*TMath::Gaus(x[0],par[1]+Peaks[i].X[ix],Sigma,1)*Peaks[i].Y[ix];
+      }
+    }
     //    cout << "i\t" << i << "\tx = " << x[0] << " frac " << frac[i] << "\t" << Value << endl;
   }
   return par[7]*TMath::Exp(par[0])*Value;
 }
 //________________________________________________________________________________
-TF1 *FitGF(TH1 *proj, Option_t *opt="") {
+void PreSetParameters(TH1 *proj, TF1 *g2) {
+  if (! proj || ! g2) return;
   static TSpectrum *fSpectrum = 0;
   if (! fSpectrum) {
     fSpectrum = new TSpectrum(6);
   }
+  // Find pion peak
+  Int_t nfound = fSpectrum->Search(proj);
+  if (nfound < 1) return;
+  Int_t npeaks = 0;
+  Float_t *xpeaks = fSpectrum->GetPositionX();
+  Float_t xp = 0;
+  if (nfound > 2) nfound = 2;
+  Double_t xpi = 9999;
+  Double_t significance = 0;
+  for (Int_t p = 0; p < nfound; p++) {
+    xp = xpeaks[p];
+    Int_t bin = proj->GetXaxis()->FindBin(xp);
+    Double_t yp = proj->GetBinContent(bin);
+    Double_t ep = proj->GetBinError(bin);
+    if (yp-5*ep < 0) continue;
+    Double_t sig = yp/ep;
+    if (sig < significance) continue;
+    significance = sig;
+    xpi = xp;
+  }
+  Double_t total = proj->Integral()*proj->GetBinWidth(5);
+  //  g2->SetParameters(0, proj->GetMean(), proj->GetRMS(), 0.1, 0.1, 0.1, 0.1,0.1,-1.);
+  //   Int_t binmax = proj->GetMaximumBin();
+  //   Double_t xmax = proj->GetXaxis()->GetBinCenter(binmax);
+  if (TMath::Abs(Peaks[0].peak - xpi) > TMath::Abs(Peaks[1].peak - xpi)) {
+    // proton
+    g2->ReleaseParameter(3); g2->SetParLimits(3,0.0,TMath::Pi()/2);
+    g2->SetParameters(0, 0, 0.35, 0.9*TMath::Pi()/2, 0.0, 0.0, 0.0,0.0,-1.,-1);
+  } else {
+    g2->SetParameters(0, xpi, 0.35, 0.6, 0.1, 0.1, 0.1,0.1,-1.,-1);
+  }
+  g2->FixParameter(4,1e-6);
+  g2->FixParameter(5,1e-6);
+  g2->FixParameter(6,1e-6);
+  g2->FixParameter(7,total);
+  g2->FixParameter(8,-1);
+}
+//________________________________________________________________________________
+TF1 *FitGF(TH1 *proj, Option_t *opt="") {
   // fit in momentum range p = 0.45 - 0.50 GeV/c
   if (! proj) return 0;
   TString Opt(opt);
@@ -1446,38 +1518,12 @@ TF1 *FitGF(TH1 *proj, Option_t *opt="") {
     g2->SetParName(8,"Case");
     //    g2->SetParName(7,"factor"); g2->SetParLimits(7,-.1,0.1);
   }
-  // Find pion peak
-  Int_t nfound = fSpectrum->Search(proj);
-  if (nfound < 1) return 0;
-  Int_t npeaks = 0;
-  Float_t *xpeaks = fSpectrum->GetPositionX();
-  Float_t xp = 0;
-  if (nfound > 2) nfound = 2;
-  Double_t xpi = 9999;
-  for (Int_t p = 0; p < nfound; p++) {
-    xp = xpeaks[p];
-    Int_t bin = proj->GetXaxis()->FindBin(xp);
-    Double_t yp = proj->GetBinContent(bin);
-    Double_t ep = proj->GetBinError(bin);
-    if (yp-5*ep < 0) continue;
-    if (xp < xpi) xpi = xp;
-  }
-  Double_t total = proj->Integral()*proj->GetBinWidth(5);
-  //  g2->SetParameters(0, proj->GetMean(), proj->GetRMS(), 0.1, 0.1, 0.1, 0.1,0.1,-1.);
-//   Int_t binmax = proj->GetMaximumBin();
-//   Double_t xmax = proj->GetXaxis()->GetBinCenter(binmax);
-  g2->SetParameters(0, xpi, 0.35, 0.6, 0.1, 0.1, 0.1,0.1,-1.);
-  //  g2->FixParameter(3,2.86731e-01);
-  g2->FixParameter(4,1e-6);
-  g2->FixParameter(5,1e-6);
-  g2->FixParameter(6,1e-6);
-  g2->FixParameter(7,total);
-  g2->FixParameter(8,-1);
+  PreSetParameters(proj, g2);
   proj->Fit(g2,Opt.Data());
   g2->ReleaseParameter(3); g2->SetParLimits(3,0.0,TMath::Pi()/2);
-  g2->ReleaseParameter(4); g2->SetParLimits(4,0.0,TMath::Pi()/2);
-  g2->ReleaseParameter(5); g2->SetParLimits(5,0.0,TMath::Pi()/2);
-  g2->ReleaseParameter(6); g2->SetParLimits(6,0.0,TMath::Pi()/2);
+  g2->ReleaseParameter(4); g2->SetParLimits(4,0.0,0.3);
+  g2->ReleaseParameter(5); g2->SetParLimits(5,0.0,0.3);
+  g2->ReleaseParameter(6); g2->SetParLimits(6,0.0,0.3);
   Int_t iok = proj->Fit(g2,Opt.Data());
   if ( iok < 0) {
     cout << g2->GetName() << " fit has failed with " << iok << " for " 
@@ -1634,9 +1680,9 @@ TF1 *FitL5(TH1 *proj, Option_t *opt="", Int_t nhyps = 5) { // fit by 5 landau co
   Int_t iok = proj->Fit(g2,Opt.Data());
   if (nhyps == 5) {
     g2->ReleaseParameter(3); g2->SetParLimits(3,0.0,TMath::Pi()/2);
-    g2->ReleaseParameter(4); g2->SetParLimits(4,0.0,TMath::Pi()/2);
-    g2->ReleaseParameter(5); g2->SetParLimits(5,0.0,TMath::Pi()/2);
-    g2->ReleaseParameter(6); g2->SetParLimits(6,0.0,TMath::Pi()/2);
+    g2->ReleaseParameter(4); g2->SetParLimits(4,0.0,0.3);
+    g2->ReleaseParameter(5); g2->SetParLimits(5,0.0,0.3);
+    g2->ReleaseParameter(6); g2->SetParLimits(6,0.0,0.3);
     iok = proj->Fit(g2,Opt.Data());
   }
   if ( iok < 0) {
@@ -2813,7 +2859,6 @@ Double_t gNFunc(Double_t *x=0, Double_t *par=0) {
   // par[8] - kTpc = {kTpcOuter = 0, kTpcInner = 1, kTpcAll}
   // par[9] - case -1, 5 -> All, 0- pion, 1 - proton, 2 - kaon, 3 -electron, 4 - deuteron 
   // ratio dN/dx_h / dN/dx_pi:      P        K        e        d
-  static Double_t dNdxR[4] = {1.97273, 1.32040, 1.16313, 3.42753};
   static Int_t _debug = 0;
   static TCanvas *c1 = 0;
   if (_debug) {
@@ -2831,10 +2876,9 @@ Double_t gNFunc(Double_t *x=0, Double_t *par=0) {
   if (iTpc < 0 || iTpc > 2) iTpc = 2;
   Double_t sigma = par[2];
   if (iTpc != iTpcOld) {
-    iTpcOld = iTpc;
-    TF1 *zdE = StdEdNModel::instance()->zdE();  
+    TF1 *zdE = StdEdxModel::instance()->zdE();  
     zdE->FixParameter(0, iTpc);
-    TF1 *zMPV = StdEdNModel::instance()->zMPV();
+    TF1 *zMPV = StdEdxModel::instance()->zMPV();
     zMPV->FixParameter(0, iTpc);
     fracpiOld = -1;
     static const Char_t *names[6] = {"pi","P","K","e","d","all"};
@@ -2847,7 +2891,7 @@ Double_t gNFunc(Double_t *x=0, Double_t *par=0) {
       }
       Double_t entries = projNs[i]->GetEntries();
       Double_t mean    = ln10*projNs[i]->GetMean(); // 
-      Double_t mpv     = StdEdNModel::instance()->zMPV()->Eval(mean);
+      Double_t mpv     = StdEdxModel::instance()->zMPV()->Eval(mean);
       if (i == 0) {
 	meanPion = mean;
 	mpvPion  = mpv;
@@ -2857,7 +2901,7 @@ Double_t gNFunc(Double_t *x=0, Double_t *par=0) {
 	Double_t v =  projNs[i]->GetBinContent(ix);
 	if (v > 0.0) {
 	  Double_t n_PL10 = projNs[i]->GetBinCenter(ix);
-	  Double_t n_P = TMath::Exp(n_PL10*ln10);
+	  //	  Double_t n_P = TMath::Exp(n_PL10*ln10);
 	  zdE->SetParameter(1, ln10*n_PL10);
 	  zdE->SetParameter(2, mpvPion);
 	  hists[i]->Add(zdE,v/entries);
@@ -2869,6 +2913,7 @@ Double_t gNFunc(Double_t *x=0, Double_t *par=0) {
       }
     }
     if (! hists[NFIT_HYP]) hists[NFIT_HYP] = new TH1D("dEAll","Expected dE for All",100,-5,5);
+    iTpcOld = iTpc;
   }
   Double_t frac[NFIT_HYP] = {0};
   static Double_t fracOld[6] = {-1};
@@ -2937,35 +2982,10 @@ TF1 *FitNF(TH1 *proj, Option_t *opt, Int_t kTpc = 2) {// fit with no. of primary
     g2->SetParName(8,"kTpc"); 
     g2->SetParName(9,"case"); 
   }
-  if (kTpc < StdEdNModel::kTpcOuter || kTpc > StdEdNModel::kTpcAll) kTpc = StdEdNModel::kTpcAll;
+  if (kTpc < StdEdxModel::kTpcOuter || kTpc > StdEdxModel::kTpcAll) kTpc = StdEdxModel::kTpcAll;
   g2->FixParameter(8, kTpc);
   g2->FixParameter(9,-1);
-  //    g2->SetParName(7,"factor"); g2->SetParLimits(7,-.1,0.1);
-  // Find pion peak
-  Int_t nfound = fSpectrum->Search(proj);
-  if (nfound < 1) return 0;
-  Int_t npeaks = 0;
-  Float_t *xpeaks = fSpectrum->GetPositionX();
-  Float_t xp = 0;
-  if (nfound > 2) nfound = 2;
-  Double_t xpi = 9999;
-  for (Int_t p = 0; p < nfound; p++) {
-    xp = xpeaks[p];
-    Int_t bin = proj->GetXaxis()->FindBin(xp);
-    Double_t yp = proj->GetBinContent(bin);
-    Double_t ep = proj->GetBinError(bin);
-    if (yp-5*ep < 0) continue;
-    if (xp < xpi) xpi = xp;
-  }
-  Double_t total = proj->Integral()*proj->GetBinWidth(5);
-  g2->SetParameter(0, 0);
-  g2->SetParameter(1, xpi);
-  g2->FixParameter(2, 0); 
-  g2->FixParameter(3, 0); 
-  g2->FixParameter(4, 0); 
-  g2->FixParameter(5,0);
-  g2->FixParameter(6,0);
-  g2->SetParameter(7,total);
+  PreSetParameters(proj,g2);
   gNFunc();
   TFitResultPtr res =  proj->Fit(g2,Opt.Data());
   Int_t iok = res->Status();
@@ -2975,9 +2995,9 @@ TF1 *FitNF(TH1 *proj, Option_t *opt, Int_t kTpc = 2) {// fit with no. of primary
     proj->Fit(g2,Opt.Data());
   }
   g2->ReleaseParameter(3); g2->SetParameter(3,1e-5); g2->SetParLimits(3,0.0,TMath::Pi()/2);
-  g2->ReleaseParameter(4); g2->SetParameter(4,1e-5); g2->SetParLimits(4,0.0,0.30);
-  g2->ReleaseParameter(5); g2->SetParameter(5,1e-5); g2->SetParLimits(5,0.0,0.30);
-  g2->ReleaseParameter(6); g2->SetParameter(6,1e-5); g2->SetParLimits(6,0.0,0.30);
+  g2->ReleaseParameter(4); g2->SetParameter(4,1e-5); g2->SetParLimits(4,0.0,0.3);
+  g2->ReleaseParameter(5); g2->SetParameter(5,1e-5); g2->SetParLimits(5,0.0,0.3);
+  g2->ReleaseParameter(6); g2->SetParameter(6,1e-5); g2->SetParLimits(6,0.0,0.3);
   //  g2->ReleaseParameter(7);
   Opt += "m";
   gNFunc();
@@ -3180,7 +3200,6 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
 		      xax->GetBinLowEdge(ir0), xax->GetBinUpEdge(ir1));
 	proj->SetTitle(title.Data());
       }
-      cout << "i/j\t" << i << "/" << j << "\t" <<  proj->GetName() << "\t" << proj->GetTitle() << "\t" <<  proj->Integral() << endl;
       //      continue;
       memset (&Fit, 0, sizeof(Fit_t));
       Fit.i = (2.*i+mergeX-1.)/2;
@@ -3192,6 +3211,7 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
       Fit.chisq = -100;
       Fit.prob  = 0;
       Fit.entries = proj->Integral();
+      cout << "i/j\t" << i << "/" << j << "\t" <<  proj->GetName() << "\t" << proj->GetTitle() << "\tentries = " <<  Fit.entries<< endl;
       if (Fit.entries < 100) {delete proj; continue;}
       if (TString(FitName) == "GP") g = FitGP(proj,opt,nSigma,pow,zmin,zmax);
       else if (TString(FitName) == "ADC") g = FitADC(proj,opt,nSigma,pow);
@@ -3217,9 +3237,9 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
 	}
 	Opt = opt;
 	Opt += "S";
-	Int_t kTpc = StdEdNModel::kTpcAll;
-	if (j >= 1 && j <= 40)       kTpc = StdEdNModel::kTpcInner;
-	else  if (j > 40 && j <= 72) kTpc = StdEdNModel::kTpcOuter;
+	Int_t kTpc = StdEdxModel::kTpcAll;
+	if (j >= 1 && j <= 40)       kTpc = StdEdxModel::kTpcInner;
+	else  if (j > 40 && j <= 72) kTpc = StdEdxModel::kTpcOuter;
 	g = FitNF(proj,Opt, kTpc);
 	//	g = FitNF(proj,Opt);
       }
@@ -3265,11 +3285,11 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
 	Fit.dmu    = g->GetParError(1);
 	Fit.dsigma = g->GetParError(2);
 	Fit.da0    = g->GetParError(3);
-	Fit.da1  	 = g->GetParError(4);
-	Fit.da2  	 = g->GetParError(5);
-	Fit.da3  	 = g->GetParError(6);
-	Fit.da4  	 = g->GetParError(7);
-	Fit.da5  	 = g->GetParError(8);
+	Fit.da1    = g->GetParError(4);
+	Fit.da2	   = g->GetParError(5);
+	Fit.da3	   = g->GetParError(6);
+	Fit.da4	   = g->GetParError(7);
+	Fit.da5	   = g->GetParError(8);
       } else {
 	delete proj; continue;
       }

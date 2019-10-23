@@ -56,7 +56,9 @@
   // Settings for statistics information
   gStyle->SetOptFit(1);
   gStyle->SetOptStat(1);
-   
+#ifdef __CLING__1
+  printf("line 60\n"); 
+#endif
   // SetPaperSize wants width & height in cm: A4 is 20,26 & US is 20,24
   gStyle->SetPaperSize(20,24); 
    
@@ -79,12 +81,15 @@
   TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
   gStyle->SetNumberContours(NCont);
   gStyle->SetMarkerStyle(20);
+#ifdef __CLING__1
+  printf("line 85\n"); 
+#endif
   
   // Redefine prompt
   TString gPrompt =  gSystem->BaseName(gROOT->GetApplication()->Argv(0));
   gPrompt += " [%d] ";
   ((TRint*)gROOT->GetApplication())->SetPrompt( gPrompt.Data()); 
-#ifndef __CLING__1    
+#ifndef __CLING__    
   //  if (gSystem->DynamicPathName("libNet",kTRUE))
   //    gSystem->Load("libNet");
   

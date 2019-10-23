@@ -1239,7 +1239,7 @@ void NormdEdN() {
     histdE[2]->Add(histdE[0]);
     histdE[2]->Add(histdE[1]);
   }
-  TFile *fOut = new TFile("dEdNModel.root","recreate");
+  TFile *fOut = new TFile("dEdxModel.root","recreate");
   for (Int_t io = 0; io < 6; io++) {
     TH2F *hist = histdE[io];
     if (! hist) continue;

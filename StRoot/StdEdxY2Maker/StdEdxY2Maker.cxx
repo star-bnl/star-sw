@@ -35,7 +35,7 @@
 #include "StDbUtilities/StMagUtilities.h"
 #include "StMessMgr.h" 
 #include "StBichsel/Bichsel.h"
-#include "StBichsel/StdEdNModel.h"
+#include "StBichsel/StdEdxModel.h"
 #include "StDetectorId.h"
 #include "StDedxMethod.h"
 // StarClassLibrary
@@ -1219,21 +1219,21 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 #ifdef __Use_dNdx__
 	Double_t n_P = FdEdx[k].dxC*PiD.fdNdx.Pred[kPidPion];
 	Double_t dEN = TMath::Log(1e6*FdEdx[k].F.dE); // scale to <dE/dx>_MIP = 2.4 keV/cm
-	StdEdNModel::ETpcType kTpc = StdEdNModel::kTpcOuter;
-	if (St_tpcPadConfigC::instance()->IsRowInner(sector,row)) kTpc = StdEdNModel::kTpcInner;
+	StdEdxModel::ETpcType kTpc = StdEdxModel::kTpcOuter;
+	if (St_tpcPadConfigC::instance()->IsRowInner(sector,row)) kTpc = StdEdxModel::kTpcInner;
 #ifdef __LogProb__
-	Double_t zdEMVP = TMath::Log(1.e-3*n_P) + StdEdNModel::instance()->GetLogdEdNMPV(kTpc)->Interpolate(TMath::Log(n_P)); // log(dE[keV])
+	Double_t zdEMPV = TMath::Log(1.e-3*n_P) + StdEdxModel::instance()->GetLogdEdNMPV(kTpc)->Interpolate(TMath::Log(n_P)); // log(dE[keV])
 #else /* ! __LogProb__ */
-	Double_t zdEMVP = TMath::Log(1.e-3*n_P*StdEdNModel::instance()->GetdEdNMPV(kTpc)->Interpolate(TMath::Log(n_P))); // log(dE[keV])
+	Double_t zdEMPV = TMath::Log(1.e-3*n_P*StdEdxModel::instance()->GetdEdNMPV(kTpc)->Interpolate(TMath::Log(n_P))); // log(dE[keV])
 #endif /* __LogProb__ */
 #else
-	Double_t zdEMVP = 0;
+	Double_t zdEMPV = 0;
 	Double_t dEN = 0;
 #endif /* __Use_dNdx__ */
 	Double_t Vars[9] = {
 	  FdEdx[k].C[StTpcdEdxCorrection::kTpcSecRowB-1].dEdxN,
 	  FdEdx[k].F.dEdxN,
-	  dEN - zdEMVP,
+	  dEN - zdEMPV,
 #ifdef __Use_dNdx__
 	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx.Pred[kPidElectron]),
 	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx.Pred[kPidPion]),
@@ -1862,15 +1862,15 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
   static Double_t xMin[3], xMax[3], yMin[3], yMax[3];
   if (! ProbV[2]) {
     for (Int_t k = 0; k < 3; k++) {
-      StdEdNModel::ETpcType kTpc = (StdEdNModel::ETpcType) k;
+      StdEdxModel::ETpcType kTpc = (StdEdxModel::ETpcType) k;
 #ifdef __LogProb__
-      ProbV[kTpc]  = StdEdNModel::instance()->GetLogdEdN(StdEdNModel::kProb,    kTpc);
-      ProbdX[kTpc] = StdEdNModel::instance()->GetLogdEdN(StdEdNModel::kdProbdX, kTpc);
-      ProbdY[kTpc] = StdEdNModel::instance()->GetLogdEdN(StdEdNModel::kdProbdY, kTpc);
+      ProbV[kTpc]  = StdEdxModel::instance()->GetLogdEdN(StdEdxModel::kProb,    kTpc);
+      ProbdX[kTpc] = StdEdxModel::instance()->GetLogdEdN(StdEdxModel::kdProbdX, kTpc);
+      ProbdY[kTpc] = StdEdxModel::instance()->GetLogdEdN(StdEdxModel::kdProbdY, kTpc);
 #else /* ! __LogProb__ */
-      ProbV[kTpc]  = StdEdNModel::instance()->GetdEdN(StdEdNModel::kProb,    kTpc);
-      ProbdX[kTpc] = StdEdNModel::instance()->GetdEdN(StdEdNModel::kdProbdX, kTpc);
-      ProbdY[kTpc] = StdEdNModel::instance()->GetdEdN(StdEdNModel::kdProbdY, kTpc);
+      ProbV[kTpc]  = StdEdxModel::instance()->GetdEdN(StdEdxModel::kProb,    kTpc);
+      ProbdX[kTpc] = StdEdxModel::instance()->GetdEdN(StdEdxModel::kdProbdX, kTpc);
+      ProbdY[kTpc] = StdEdxModel::instance()->GetdEdN(StdEdxModel::kdProbdY, kTpc);
 #endif /* __LogProb__ */
       xMin[kTpc] = ProbV[kTpc]->GetXaxis()->GetXmin();
       xMax[kTpc] = ProbV[kTpc]->GetXaxis()->GetXmax();
@@ -1882,8 +1882,8 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
   gin[0] = 0.;
   Double_t dNdx = par[0]; // Mu
   for (Int_t i = 0; i < NdEdx; i++) {
-    StdEdNModel::ETpcType kTpc = StdEdNModel::kTpcOuter;
-    if (St_tpcPadConfigC::instance()->IsRowInner(FdEdx[i].sector,FdEdx[i].row)) kTpc = StdEdNModel::kTpcInner;
+    StdEdxModel::ETpcType kTpc = StdEdxModel::kTpcOuter;
+    if (St_tpcPadConfigC::instance()->IsRowInner(FdEdx[i].sector,FdEdx[i].row)) kTpc = StdEdxModel::kTpcInner;
     Double_t dE = 1e9*FdEdx[i].F.dE; // GeV => eV
     Double_t dX = FdEdx[i].dxC;
     Double_t Np = dNdx*dX;

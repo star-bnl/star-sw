@@ -129,7 +129,7 @@
 #include "BetheBloch.h"
 #endif
 #include "StBichsel/Bichsel.h"
-#include "StBichsel/StdEdNModel.h"
+#include "StBichsel/StdEdxModel.h"
 #include "TMath.h"
 static Bichsel *m_Bichsel = 0;
 static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.31 2016/09/18 23:02:11 fisyak Exp $";
@@ -216,7 +216,7 @@ StTpcDedxPidAlgorithm::numberOfSigma(const StParticleDefinition* particle) const
 	  if (dedx_resolution > 0)
 	    z = TMath::Log(mTraits->mean()/dedx_expected)/dedx_resolution;
 	} else if (mDedxMethod == kOtherMethodId) {
-	  dedx_expected = StdEdNModel::instance()->dNdx(bg);
+	  dedx_expected = StdEdxModel::instance()->dNdx(bg);
 	  dedx_resolution = mTraits->errorOnMean();
 	  if (dedx_resolution > 0)
 	    z = TMath::Log(mTraits->mean()/dedx_expected)/dedx_resolution;
