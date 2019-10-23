@@ -1233,7 +1233,7 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
 		  IdT = kHit->idTruth();
 		}
 	      }
-	      QA = QA/q;
+	      QA = QA/adc;
 	      kHit->setIdTruth(IdT, TMath::Nint(QA));
 	      kHit->setCharge(q);
 	      kHit->setExtends(pad,timeBucket,minPad,maxPad,minTmbk,maxTmbk);
