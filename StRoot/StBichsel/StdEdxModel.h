@@ -26,10 +26,10 @@ class StdEdxModel {
   virtual ~StdEdxModel();
   static  StdEdxModel* instance();
   static TH1D         *GetdNdxL10()    {return    mdNdxL10;}    // dN/dx versus beta*gamma
-  static TH2F         *GetdEdx(EValType val = kProb, ETpcType tpcType = kTpcAll) {return instance()->mdEdxModel[tpcType][val];}
-  static TH1F         *GetdEdxMPV( ETpcType tpcType = kTpcAll) {return instance()->mdEdxMPV[tpcType];}
-  static TH2F         *GetLogdEdx(EValType val = kProb, ETpcType tpcType = kTpcAll) {return instance()->mLogdEdxModel[tpcType][val];}
-  static TH1F         *GetLogdEdxMPV( ETpcType tpcType = kTpcAll) {return instance()->mLogdEdxMPV[tpcType];}
+  static TH2F         *GetdEdN(EValType val = kProb, ETpcType tpcType = kTpcAll) {return instance()->mdEdxModel[tpcType][val];}
+  static TH1F         *GetdEdNMPV( ETpcType tpcType = kTpcAll) {return instance()->mdEdNMPV[tpcType];}
+  static TH2F         *GetLogdEdN(EValType val = kProb, ETpcType tpcType = kTpcAll) {return instance()->mLogdEdxModel[tpcType][val];}
+  static TH1F         *GetLogdEdNMPV( ETpcType tpcType = kTpcAll) {return instance()->mLogdEdNMPV[tpcType];}
   static Double_t      dNdx(Double_t poverm, Double_t charge = 1.0); 
   static Double_t      zMPVFunc(Double_t *x, Double_t *p=0); // most probable dE versus x[0] = log(N_p) and sector p[0]
   static TF1          *zMPV();                               // -"-
@@ -41,9 +41,9 @@ class StdEdxModel {
   static TH1D         *mdNdxL10;    // dN/dx versus log10(beta*gamma)
   static TH1D         *mdNdx;       // dN/dx versus beta*gamma
   static TH2F         *mdEdxModel[3][3]; // Tpc [I,O,All] [Prob, dProb/dX, dProb/dY] versus dE/Np,log(Np)
-  static TH1F         *mdEdxMPV[3];
+  static TH1F         *mdEdNMPV[3];
   static TH2F         *mLogdEdxModel[3][3]; // Tpc [I,O,All] [Prob, dProb/dX, dProb/dY] versus Log(dE/Np),log(Np)
-  static TH1F         *mLogdEdxMPV[3];
+  static TH1F         *mLogdEdNMPV[3];
   static Double_t      fScale;
   static Int_t        _debug;
   ClassDef(StdEdxModel,0)
