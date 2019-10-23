@@ -1,0 +1,54 @@
+//////////////////////////////////////////////////////////
+//   This class has been automatically generated 
+//     (Thu Nov 29 16:25:03 2001 by ROOT version3.02/01)
+//   from TTree StdEdxModel/H.Bichel Calculation Summary
+//   found on file: dEdx2T.root
+//////////////////////////////////////////////////////////
+
+
+#ifndef StdEdxModel_h
+#define StdEdxModel_h
+// Converted from dEdxModel.C 
+#include <assert.h>
+#include "Riostream.h"
+#include "TROOT.h"
+#include "TSystem.h"
+#include "TMath.h"
+#include "TH1.h"
+#include "TH2.h"
+#include "TFile.h"
+#include "TString.h"
+
+class StdEdxModel {
+ public: 
+  enum ETpcType  {kTpcOuter = 0, kTpcInner = 1, kTpcAll};
+  enum EValType  {kProb, kdProbdX, kdProbdY};
+  virtual ~StdEdxModel();
+  static  StdEdxModel* instance();
+  static TH1D         *GetdNdxL10()    {return    mdNdxL10;}    // dN/dx versus beta*gamma
+  static TH2F         *GetdEdx(EValType val = kProb, ETpcType tpcType = kTpcAll) {return instance()->mdEdxModel[tpcType][val];}
+  static TH1F         *GetdEdxMPV( ETpcType tpcType = kTpcAll) {return instance()->mdEdxMPV[tpcType];}
+  static TH2F         *GetLogdEdx(EValType val = kProb, ETpcType tpcType = kTpcAll) {return instance()->mLogdEdxModel[tpcType][val];}
+  static TH1F         *GetLogdEdxMPV( ETpcType tpcType = kTpcAll) {return instance()->mLogdEdxMPV[tpcType];}
+  static Double_t      dNdx(Double_t poverm, Double_t charge = 1.0); 
+  static Double_t      zMPVFunc(Double_t *x, Double_t *p=0); // most probable dE versus x[0] = log(N_p) and sector p[0]
+  static TF1          *zMPV();                               // -"-
+  static Double_t      zdEFunc(Double_t *x, Double_t *p);    // Distributon Log(dE) - log(most probable dE) versus sector p[0]  and  p[1] = log(N_p)
+  static TF1          *zdE();                                // -"-
+ private:
+  static StdEdxModel *fgStdEdxModel; //! last instance          
+  StdEdxModel();
+  static TH1D         *mdNdxL10;    // dN/dx versus log10(beta*gamma)
+  static TH1D         *mdNdx;       // dN/dx versus beta*gamma
+  static TH2F         *mdEdxModel[3][3]; // Tpc [I,O,All] [Prob, dProb/dX, dProb/dY] versus dE/Np,log(Np)
+  static TH1F         *mdEdxMPV[3];
+  static TH2F         *mLogdEdxModel[3][3]; // Tpc [I,O,All] [Prob, dProb/dX, dProb/dY] versus Log(dE/Np),log(Np)
+  static TH1F         *mLogdEdxMPV[3];
+  static Double_t      fScale;
+  static Int_t        _debug;
+  ClassDef(StdEdxModel,0)
+};
+// $Id: StdEdxModel.h,v 1.5 2018/10/17 20:45:23 fisyak Exp $
+// $Log: StdEdxModel.h,v $
+#endif
+
