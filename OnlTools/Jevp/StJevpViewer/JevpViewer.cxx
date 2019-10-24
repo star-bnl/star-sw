@@ -1,5 +1,7 @@
 #include "Jevp/StJevpViewer/JevpViewer.h"
 
+
+
 #include <stdio.h>
 
 #include <TROOT.h>
@@ -17,6 +19,7 @@
 
 //#include <assert.h>
 
+EthClient *gshifteth;
 
 ClassImp(JevpViewer);
 ClassImp(CanvasFrame);
@@ -48,7 +51,8 @@ void MenuHelper::buildMenu(TGMainFrame *frame) {
 
     input->AddEntry("Update", ++mid);
     input->AddEntry("Auto Update", ++mid);
-    input->CheckEntry(mid);
+    
+    if(parent->initauto) input->CheckEntry(mid);
    
     //option->AddEntry("View Toolbar", ++mid);
     //help->AddEntry("About", ++mid);
@@ -88,27 +92,84 @@ void MenuHelper::buildMenu(TGMainFrame *frame) {
 
 TabHelper::TabHelper(JevpViewer *p) {
     mainTabs = NULL;
-
     parent = p;
 }
 
-void TabHelper::buildTabs(TGMainFrame *frame, DisplayFile *displayFile) {
-    this->displayFile = displayFile;
+void TabHelper::buildTabs(TGTab2 *mainT) {
 
-    mainTabs = new TGTab2(frame, 1200, 900);
-    fillTab(mainTabs, 1);
+  // We don't care if we are connecting or disconnected, 
+  // just what the present state actually is!
+  mainTabs = mainT;
+
+  //LOG("JEFF", "start building tabs");
+ 
+  shiftTabs = new TGTab2(mainTabs, 1200, 900);
+  mainTabs->AddTab("shift", shiftTabs);
+  if(parent->eth.shift.connected()) {
+    fillTab(shiftTabs, &parent->eth.shift, 1);
+    parent->eth.shift.tabs_valid = 1;
+  }
+  else {
+    //if(parent->eth.shift.tabs_valid != 1) {
+      parent->eth.shift.tabs_valid = 1;
+      
+      DummyFrame *f = new DummyFrame(shiftTabs, 1200, 900);
+      LOG("JEFF", "Dummy shift: %p", f);
+      TCanvas *c = f->canvas->GetCanvas();
+      
+      TText *t = new TText(0.5, 0.5, "Shift JevpServer not connected!");
+      t->SetBit(kNoContextMenu | kCannotPick);
+      //addPlotItem(t);
+      t->SetTextColor(3);
+      t->SetTextAlign(22);
+      t->Draw();
     
-    mainTabs->Connect("Selected(Int_t)", "TabHelper", this, "tabSelected(Int_t)");
+      shiftTabs->AddTab("No connection", f);
+      // }
+  }
 
-    frame->AddFrame(mainTabs, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY, 0,0,0,0));
+  l4Tabs = new TGTab2(mainTabs, 1200, 900);
+  mainTabs->AddTab("l4", l4Tabs);
+  if(parent->eth.l4.connected()) {
+    fillTab(l4Tabs, &parent->eth.l4, 1);
+    parent->eth.shift.tabs_valid = 1;
+  }
+  else {
+    //if(parent->eth.l4.tabs_valid != 1) {
+      parent->eth.l4.tabs_valid = 1;
+      DummyFrame *f = new DummyFrame(l4Tabs, 1200, 900);
+      //LOG("JEFF", "Dummy l4 = %p", f);
+      TCanvas *c = f->canvas->GetCanvas();
+      
+      TText *t = new TText(0.5, 0.5, "L4 JevpServer not connected");
+      t->SetBit(kNoContextMenu | kCannotPick);
+      //addPlotItem(t);
+      t->SetTextColor(3);
+      t->SetTextAlign(22);
+      t->Draw();
+      
+      l4Tabs->AddTab("No connection", f);
+      // Add invalid tab
+      //}
+  }
+
+  //  LOG("JEFF", "done filling tabs");
+
+  // end of building tabs...
+
 }
 
 void TabHelper::rebuildTabs() {
-    deleteTab(mainTabs, 0);    // Delete subtabs, but not this tab...
-    
-    fillTab(mainTabs, 1);
-    mainTabs->SetTab(0);
-    parent->update();
+  //LOG("JEFF", "rebuildtabs()");
+ 
+  deleteTab(mainTabs, 0);    // Delete subtabs, but not this tab...
+  buildTabs(mainTabs);
+  mainTabs->SetTab(0);
+
+  //LOG("JEFF", "Set tab %p", parent);
+  //parent->update();
+  //LOG("JEFF", "updated");
+ 
 }
 
 
@@ -134,100 +195,175 @@ void TabHelper::deleteTab(TGTab2 *tab, int doDelete) {
     }
 }
 
-void TabHelper::fillTab(TGTab2 *tab, UInt_t idx)
+void TabHelper::fillTab(TGTab2 *tab, EthClient *ethclient, UInt_t idx)
 {
-    DisplayNode *mynode = displayFile->getTab(idx);
-    if(!mynode) return;
+  
+  //  LOG("JEFF", "idx=%d ", idx);
+  DisplayNode *mynode = ethclient->getTabDisplayBranch(idx);
+  //LOG("JEFF", "getTabDisplayBranch: %s", mynode ? mynode->name : "none");
+  if(!mynode) return;
         
-    // First get my child and my tabname
-    u_int child_idx = displayFile->getTabChildIdx(idx);
-    DisplayNode *childnode = displayFile->getTab(child_idx);
-    if(!childnode) {
-	return;        // no children!   This is a bug right?
-    }
+  // First get my child and my tabname
+  u_int child_idx = ethclient->display()->getTabChildIdx(idx);
+  DisplayNode *childnode = ethclient->display()->getTab(child_idx);
+  if(!childnode) {
+    LOG("JEFF", "NULL in filltab?");
+    return;        // no children!   This is a bug right?
+  }
  
-    if(!childnode->leaf) {   // It's another tab!
-	TGTab2 *childtab = new TGTab2(tab, 1200, 900);
-	tab->AddTab(mynode->name, childtab);
-	fillTab(childtab, child_idx);
-	childtab->Connect("Selected(Int_t)", "TabHelper", this, "tabSelected(Int_t)");
-    }
-    else {                   // It's a histo!
-	CanvasFrame *frame = new CanvasFrame(tab, child_idx);
-	tab->AddTab(mynode->name, frame);
-    }
+  if(!childnode->leaf) {   // It's another tab!
+    TGTab2 *childtab = new TGTab2(tab, 1200, 900);
+    //LOG("JEFF", "adding tab=%s", mynode->name);
+    tab->AddTab(mynode->name, childtab);
+    fillTab(childtab, ethclient, child_idx);
+    childtab->Connect("Selected(Int_t)", "TabHelper", this, "tabSelected(Int_t)");
+  }
+  else {                   // It's a histo!
+    //LOG("JEFF", "adding name=%s", mynode->name);
+    CanvasFrame *frame = new CanvasFrame(tab, ethclient, child_idx);
+    tab->AddTab(mynode->name, frame);
+  }
 
-    u_int next_idx = displayFile->getTabNextIdx(idx);
-    fillTab(tab, next_idx);
+  u_int next_idx = ethclient->display()->getTabNextIdx(idx);
+  fillTab(tab, ethclient, next_idx);
 }
 
-CanvasFrame *TabHelper::getCurrentContainer() {
-    TGTab2 *tab = mainTabs;
-
-    while(tab) {
-	TObject *ptr = (TObject *)tab->GetCurrentContainer();
-
-	CanvasFrame *frame = dynamic_cast<CanvasFrame *>(ptr);
-	if(frame) {
-	    return frame;
-	}
-	tab = dynamic_cast<TGTab2 *>(ptr);
-    }
+TGCompositeFrame *TabHelper::getCurrentContainer() {
+  TGTab2 *tab = mainTabs;
+  
+  while(tab) {
+    TObject *ptr = (TObject *)tab->GetCurrentContainer();
+      
+    TGCompositeFrame *frame = dynamic_cast<TGCompositeFrame *>(ptr);
+    DummyFrame *df = dynamic_cast<DummyFrame *>(ptr);
+    CanvasFrame *cf = dynamic_cast<CanvasFrame *>(ptr);
     
-    return NULL;
+    if(df || cf) {
+      return frame;
+    }
+    tab = dynamic_cast<TGTab2 *>(ptr);
+  }
+    
+  return NULL;
 }
 
 void TabHelper::tabSelected(Int_t id) {
-    parent->update();
+  //  LOG("JEFF", "Selected tab %d\n", id);
+  parent->update();
+  //LOG("JEFF", "Selected tab %d done", id);
 }
 
-JevpViewer::JevpViewer(const TGWindow *p,UInt_t w,UInt_t h) {
-    // Create a main frame
+void JevpViewer::parseArgs(char *args) {
+  SERVERPORT = 8499;
+  initauto = 1;
+  char myargs[512];
+  strcpy(myargs, args);
+  
+  char *tok = strtok(myargs, " ");
+  while(tok) {
+    if(strcmp(tok, "-padd") == 0) {
+      tok = strtok(NULL, " ");
+      SERVERPORT += atoi(tok);
+    }
+    if(strcmp(tok, "-noupdate") == 0) {
+      initauto = 0;
+    }
+    tok = strtok(NULL, " ");
+  }
 
-    gROOT->SetEditHistograms(kFALSE);
-    gROOT->SetBit(kNoContextMenu | kCannotPick);
-    gStyle->SetBit(kNoContextMenu | kCannotPick);
+  LOG("JEFF", "serverport = %d", SERVERPORT);
+}
 
-    serverTags = NULL;
-    server.connectToServer("evp.starp.bnl.gov", 8499);
-    server.readDisplayFromServer();
-    
-    server.display()->setServerTags("");
-    server.display()->setDisplay(server.display()->getDisplayNodeFromName("shift"));
-    server.display()->updateDisplayRoot();
+JevpViewer::JevpViewer(const TGWindow *p,UInt_t w,UInt_t h, char *args) {
+  // Create a main frame
+  parseArgs(args);
+  
+  
+  gROOT->SetEditHistograms(kFALSE);
+  gROOT->SetBit(kNoContextMenu | kCannotPick);
+  gStyle->SetBit(kNoContextMenu | kCannotPick);
 
-    //server.display()->ignoreServerTags = 0;
-    //server.display()->dump();
-    //printf("\n\n\n---------------------\n");
+  eth.shift.serverTags = NULL;
+  //eth.shift.connectToServer("evp.starp.bnl.gov", SERVERPORT);
+  eth.shift.connectToServer("evp.starp.bnl.gov", SERVERPORT);
+  if(eth.shift.connected()) {
+    LOG("JEFF", "Shift server connected!");
+  }
+  else {
+    LOG("JEFF", "Shift server not connected");
+  }
+
+  eth.l4.connectToServer("l4evp.starp.bnl.gov", SERVERPORT);
+  if(eth.l4.connected()) {
+    LOG("JEFF", "l4 server connected!");
+  }
+  else {
+    LOG("JEFF", "l4 server not connected");
+  }
+
+  eth.shift.tabs_valid = 0;
+  if(eth.shift.connected()) {
+    eth.shift.readDisplayFromServer("shift");
+    eth.shift.display()->setServerTags("");
+    eth.shift.display()->updateDisplayRoot();
+    eth.shift.display()->ignoreServerTags = 0;
+    //LOG("JEFF", "shift updated");
+  }
+
+  eth.l4.tabs_valid = 0;
+  if(eth.l4.connected()) {
+    //    LOG("JEFF", "abab");
+    eth.l4.readDisplayFromServer("l4");
+    eth.l4.display()->setServerTags("");
+    eth.l4.display()->updateDisplayRoot();
+    eth.l4.display()->ignoreServerTags = 0;
+  }
+
+  //server.display()->ignoreServerTags = 0;
+  //server.display()->dump();
+  //printf("\n\n\n---------------------\n");
    
-    fMain = new TGMainFrame(p,w,h);
-    fMain->Connect("CloseWindow()", "JevpViewer", this, "ExitViewer()");
-    fMain->SetBit(kNoContextMenu | kCannotPick);
+  fMain = new TGMainFrame(p,w,h);
+  fMain->Connect("CloseWindow()", "JevpViewer", this, "ExitViewer()");
+  fMain->SetBit(kNoContextMenu | kCannotPick);
 
-    menu = new MenuHelper(this);
-    menu->buildMenu(fMain);
+  menu = new MenuHelper(this);
+  menu->buildMenu(fMain);
    
-    tabs = new TabHelper(this);
-    tabs->buildTabs(fMain, server.display());
+  //LOG("JEFF", "Done with menu");
 
-       // Set a name to the main frame
-    fMain->SetWindowName("Simple Example");
+ 
+  tabs = new TabHelper(this);
 
-    // Map all subwindows of main frame
-    fMain->MapSubwindows();
+  //LOG("JEFF", "did tabs");
+  TGTab2 *mainTabs = new TGTab2(fMain, 1200, 900);
+   
+  tabs->buildTabs(mainTabs);
+  //LOG("JEFF", "built tabs");
+  mainTabs->Connect("Selected(Int_t)", "TabHelper", tabs, "tabSelected(Int_t)");
+  fMain->AddFrame(mainTabs, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY, 0,0,0,0));
 
-    // Initialize the layout algorithm
-    fMain->Resize(fMain->GetDefaultSize());
+  //LOG("JEFF", "added tabs");
 
-    // Map main frame
-    fMain->MapWindow();
+  // Set a name to the main frame
+  fMain->SetWindowName("Simple Example");
     
-    update();
+  // Map all subwindows of main frame
+  fMain->MapSubwindows();
+    
+  // Initialize the layout algorithm
+  fMain->Resize(fMain->GetDefaultSize());
+    
+  // Map main frame
+  fMain->MapWindow();
+    
+  //update();
+  //return;
 
-    // This is how our loop runs!
-    timer = new TTimer();
-    timer->Connect("Timeout()", "JevpViewer", this, "refreshTimerFired()");
-    timer->Start(5000, kFALSE);                   // false repeats forever!
+  // This is how our loop runs!
+  timer = new TTimer();
+  timer->Connect("Timeout()", "JevpViewer", this, "refreshTimerFired()");
+  timer->Start(5000, kFALSE);                   // false repeats forever!
 }
 
 JevpViewer::~JevpViewer() {
@@ -236,13 +372,15 @@ JevpViewer::~JevpViewer() {
    delete fMain;
 }
 
-void JevpViewer::entryPoint() {
+void JevpViewer::entryPoint(char *args) {
     // Popup the GUI...
     
     rtsLogLevel((char *)WARN);
     rtsLogOutput(RTS_LOG_STDERR);
 
-    new JevpViewer(gClient->GetRoot(),1200,900);
+    //LOG("JEFF", "args: %s", args ? args : "none");
+
+    new JevpViewer(gClient->GetRoot(),1200,900, args);
 }
 
 void JevpViewer::ExitViewer() {
@@ -260,16 +398,36 @@ void JevpViewer::doMenu(Int_t x) {
     if(strcmp(menu, "Ignore Server Tags") == 0) {
 	toggle = 1;
 	if(p->IsEntryChecked(x)) {    // Going to NOT checked
-	    server.display()->ignoreServerTags = 0;
+	  LOG("JEFF", "obey server tags");
+	  if(eth.shift.connected()) {
+	    eth.shift.display()->ignoreServerTags = 0;
+	    eth.shift.display()->updateDisplayRoot();
+	  }
+	  if(eth.l4.connected()) {
+	    eth.l4.display()->ignoreServerTags = 0;
+	    eth.l4.display()->updateDisplayRoot();
+	  }
 	}
 	else {
-	    server.display()->ignoreServerTags = 1;
+	  LOG("JEFF", "ignore server tags now");
+	  if(eth.shift.connected()) {
+	    eth.shift.display()->ignoreServerTags = 1;
+	    eth.shift.display()->updateDisplayRoot();
+	  }
+	  if(eth.l4.connected()) {
+	    eth.l4.display()->ignoreServerTags = 1;
+	    eth.l4.display()->updateDisplayRoot();
+	  }
 	}
+
+	LOG("JEFF", "rebuild tabs");
 	tabs->rebuildTabs();
 	fMain->MapSubwindows();
 	
 	// Map main frame
 	fMain->MapWindow();
+
+    
     }
     else if(strcmp(menu, "Print") == 0) {
 	printf("print()\n");
@@ -291,76 +449,125 @@ void JevpViewer::doMenu(Int_t x) {
 
 void JevpViewer::refreshTimerFired()
 {
-    LOG(NOTE, "timerFired");
+  //LOG("JEFF", "timerFired");
 
-    Int_t id = menu->input->GetEntry("Auto Update")->GetEntryId();
-    if(menu->input->IsEntryChecked(id)) {
-	update();
-    }
+  Int_t id = menu->input->GetEntry("Auto Update")->GetEntryId();
+  if(menu->input->IsEntryChecked(id)) {
+    update();
+  }
 }
 
 void JevpViewer::update() {
-    
-    updateRunStatus();
-    updateServerTags();
-    updateCurrentPlot();
+  static int updating = 0;
 
- 
+  if(updating) {
+    LOG("JEFF", "Shouldn't update during update()");
+    return;
+  }
+  updating = 1;
+
+  //LOG("JEFF", "update():   %d %d    %d %d", eth.shift.connected(), eth.shift.tabs_valid, eth.l4.connected(), eth.l4.tabs_valid);
+  updateRunStatus();
+  //LOG("JEFF", "updated status  %d %d    %d %d", eth.shift.connected(), eth.shift.tabs_valid, eth.l4.connected(), eth.l4.tabs_valid);
+  
+  updateServerTags();
+
+  //LOG("JEFF", "update tags  %d %d    %d %d", eth.shift.connected(), eth.shift.tabs_valid, eth.l4.connected(), eth.l4.tabs_valid);
+  updateCurrentPlot();
+  //LOG("JEFF", "update plot  %d %d    %d %d", eth.shift.connected(), eth.shift.tabs_valid, eth.l4.connected(), eth.l4.tabs_valid);
+
+  updating = 0;
 }
 
 void JevpViewer::updateRunStatus() {
-    RunStatus *rs = server.getRunStatus();
-    
-    int secs = time(NULL) - rs->timeOfLastChange;
-    
-    char winlab[120];
-    sprintf(winlab, "%s:  Run #%d  (%s for %d seconds)","Live",rs->run, rs->status, secs);
-    fMain->SetWindowName(winlab);
-    
-    delete rs;
+  //LOG("JEFF", "updateing run status");
+
+  if(!eth.shift.connected()) {
+    eth.shift.connectToServer("evp.starp.bnl.gov", SERVERPORT);
+    if(eth.shift.connected()) {
+      LOG("JEFF", "shift server just connected!");
+      eth.shift.readDisplayFromServer("shift");
+      eth.shift.display()->setServerTags("");
+      eth.shift.display()->updateDisplayRoot();
+    }
+  }
+
+  if(!eth.l4.connected()) {
+    eth.l4.connectToServer("l4evp.starp.bnl.gov", SERVERPORT);
+    if(eth.l4.connected()) {
+      LOG("JEFF", "l4 server just connected!");
+      eth.l4.readDisplayFromServer("l4");
+      eth.l4.display()->setServerTags("");
+      eth.l4.display()->updateDisplayRoot();
+    }
+  }
+
+
+  RunStatus *shift_rs = eth.shift.getRunStatus();
+  RunStatus *l4_rs = eth.l4.getRunStatus();
+
+  //  LOG("JEFF", "shift (conn = %d stat = %d %s)   l4 (conn = %d stat = %d %s)",
+  //  eth.shift.connected(), eth.shift.tabs_valid, shift_rs->status, eth.l4.connected(), eth.l4.tabs_valid, l4_rs->status);
+  
+  
+
+  int secs = time(NULL) - shift_rs->timeOfLastChange;
+  
+  char winlab[120];
+  sprintf(winlab, "%s:  Run #%d  (%s for %d seconds)","Live",shift_rs->run, shift_rs->status, secs);
+  fMain->SetWindowName(winlab);
+
+  //LOG("JEFF", "a %p", shift_rs);
+  delete shift_rs;
+  //LOG("JEFF", "b");
+  delete l4_rs;
+  //LOG("JEFF", "c");
 }
 
 void JevpViewer::updateServerTags() {
-    server.send("getServerTags","");
-    EvpMessage *msg = dynamic_cast<EvpMessage *>(server.receive());
-    if(!msg) {
-	LOG(CRIT, "Can't get server tags\n");
-	exit(0);
-    }
+  // updateServerTags automatically handles unconnected/disconnecting/connecting nodes...
+  int update=0;
 
-    const char *args = msg->getArgs();
-    if(!serverTags || (strcmp(serverTags, args) != 0)) {
-
-	LOG(NOTE, "Changing serverTags from %p to %p",  serverTags, args);
-	
-	if(serverTags) {
-	    free(serverTags);
-	}
-
-	serverTags = (char *)malloc(strlen(args) + 1);
-	strcpy(serverTags, args);
-
-	server.display()->setServerTags(serverTags);
-	server.display()->updateDisplayRoot();
-	tabs->rebuildTabs();
-    }
-
-    delete msg;
+  update += eth.shift.updateServerTags();
+  update += eth.l4.updateServerTags();
+  
+  if(update) {
+    //LOG("JEFF", "rebuildTabs()");
+    tabs->rebuildTabs();
+  }
 } 
 
 void JevpViewer::updateCurrentPlot() {
-    CanvasFrame *frame = tabs->getCurrentContainer();
-    if(!frame) {
-	LOG(NOTE,"update: don't have a current frame");
-	return;
-    }
-    frame->canvas->GetCanvas()->SetEditable(kTRUE);
-    frame->plotInfo->DrawOnScreen(frame->canvas->GetCanvas(), server.getSocket(), server.display());
+  //LOG("JEFF", "a");
+  TGCompositeFrame *container = tabs->getCurrentContainer();
+  
+  //  LOG("JEFF", "container = %p", container);
+  
+  DummyFrame *df = dynamic_cast<DummyFrame *>(container);
+  if(df) {
+    LOG("JEFF", "updating dummy frame, nothing to do!");
+    return;
+  }
+
+  CanvasFrame *frame = dynamic_cast<CanvasFrame *>(container);
+  if(!frame) {
+    LOG("JEFF","updateCurrentPlot(): don't have a current frame");
+    return;
+  }
+  
+  frame->canvas->GetCanvas()->SetEditable(kTRUE);
+  //  LOG("JEFF", "a frame->id=%d c=%d s=%d pi=%p", frame->plotInfo->combo_index, eth.shift.connected(), eth.shift.tabs_valid, frame->plotInfo);
+
+  if(frame->plotInfo->ethclient->connected()) {
+    frame->plotInfo->DrawOnScreen();
     frame->canvas->GetCanvas()->SetEditable(kFALSE);
+  }
+  else {
+    LOG("JEFF", "updateCurrentPlot but current plot not connected");
+  }
 }
 
-
-CanvasFrame::CanvasFrame(const TGWindow *p, int id) : TGCompositeFrame(p, 50, 50) {
+CanvasFrame::CanvasFrame(const TGWindow *p, EthClient *ethclient, int id) : TGCompositeFrame(p, 50, 50) {
     SetBit(kNoContextMenu | kCannotPick);
     
     this->id = id;
@@ -372,101 +579,111 @@ CanvasFrame::CanvasFrame(const TGWindow *p, int id) : TGCompositeFrame(p, 50, 50
     c->SetBit(kNoContextMenu | kCannotPick);
     c->Connect("ProcessedEvent(Int_t,Int_t,Int_t,TObject*)", "CanvasFrame", this, "DoEvent(Int_t,Int_t,Int_t,TObject*");
     
-    plotInfo = new JevpPlotInfo(id);
+    plotInfo = new JevpPlotInfo(this, ethclient, id);
     
     AddFrame(canvas, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY, 10,10,10,1) );
 }
 
 CanvasFrame::~CanvasFrame() {
+  //LOG("JEFF", "Deleting canvas frame");
     if(canvas) delete canvas;
 }
 
 void CanvasFrame::DoEvent(Int_t cmd, Int_t x, Int_t y, TObject *o) {
-    TObject *p = (TObject *)gTQSender;
+  
+  if(cmd == kButton3Down) 
+    LOG("JEFF", "CanvasFrame: Doing event cmd=%d x=%d y=%d", cmd, x, y);
 
-    static TGPopupMenu *menu = NULL;
-    static int plotx;
-    static int ploty;
+  TObject *p = (TObject *)gTQSender;
+  
+  static TGPopupMenu *menu = NULL;
+  static int plotx;
+  static int ploty;
 
-    TCanvas *source_canvas = dynamic_cast<TCanvas *>(p);
-    if(source_canvas) {
+  TCanvas *source_canvas = dynamic_cast<TCanvas *>(p);
+  if(source_canvas) {
 	
-	switch(cmd) {
-	case kButton3Down:
-	    plotx = x;
-	    ploty = y;
-	    break;
-	case kButton3Up:
-	    break;
-	default:
-	    return;
-	}
-
-	int n = plotInfo->npads;
-	int w = source_canvas->GetWw();
-	int h = source_canvas->GetWh();
-	
-	int wide = plotInfo->getDisplay()->getIntParentProperty("wide");
-	int deep = plotInfo->getDisplay()->getIntParentProperty("deep");
-	
-	int wk = plotx / (w/wide);
-	int hk = ploty / (h/deep);
-	
-	int pn = wk + hk * wide + 1;
-	
-	if(pn < 1) pn = 1;
-	if(pn > plotInfo->npads) pn = plotInfo->npads;
-	JevpPlot *p = plotInfo->getPlotAtIdx(pn);
-	if(!p) {
-	    LOG(DBG,"plot is null");
-	    return;
-	}
-	
-	switch(cmd) {
-	case kButton3Down:
-	    {
-		menu = new TGPopupMenu(canvas);
-		
-		char *name = p->GetPlotName();
-		menu->AddEntry(name, 1);
-		menu->AddSeparator();
-		menu->AddEntry("Magnify", 2);
-		
-		menu->PlaceMenu(x,y,kFALSE,kFALSE);
-	    }
-	    break;
-
-	case kButton3Up: 
-	    {
-		if(!menu) return;
-
-		void *xx;
-		void *&yy = xx;
-		int id = menu->EndMenu(yy);
-		delete menu;
-		menu = NULL;
-	
-		if(id == 2) {
-		    ZoomFrame *zf = new ZoomFrame(NULL, p);
-		}
-	    }
-	    break;  
-	}
+    switch(cmd) {
+    case kButton3Down:
+      plotx = x;
+      ploty = y;
+      break;
+    case kButton3Up:
+      break;
+    default:
+      return;
     }
+
+    //int n = plotInfo->npads;
+    int w = source_canvas->GetWw();
+    int h = source_canvas->GetWh();
+
+    
+    int wide = plotInfo->getDisplay()->getIntParentProperty("wide");
+    int deep = plotInfo->getDisplay()->getIntParentProperty("deep");
+	
+    int wk = plotx / (w/wide);
+    int hk = ploty / (h/deep);
+	
+    int pn = wk + hk * wide + 1;
+	
+    LOG("JEFF", "pn %d %d [id =%d  pi id = %d", pn, plotInfo->npads, id, plotInfo->combo_index);
+
+    if(pn < 1) pn = 1;
+    if(pn > plotInfo->npads) pn = plotInfo->npads;
+    JevpPlot *p = plotInfo->getPlotAtIdx(pn);
+    if(!p) {
+      LOG("JEFF","plot is null");
+      return;
+    }
+	
+    switch(cmd) {
+    case kButton3Down:
+      {
+	menu = new TGPopupMenu(canvas);
+		
+	char *name = p->GetPlotName();
+	menu->AddEntry(name, 1);
+	menu->AddSeparator();
+	menu->AddEntry("Magnify", 2);
+		
+	menu->PlaceMenu(x,y,kFALSE,kFALSE);
+      }
+      break;
+
+    case kButton3Up: 
+      {
+	if(!menu) return;
+
+	void *xx;
+	void *&yy = xx;
+	int id = menu->EndMenu(yy);
+	delete menu;
+	menu = NULL;
+	
+	if(id == 2) {
+	  ZoomFrame *zf = new ZoomFrame(NULL, p);
+	}
+      }
+      break;  
+    }
+  }
 }
 
 
 
-JevpPlotInfo::JevpPlotInfo(int combo_index) {
-    this->combo_index = combo_index;
-    jevpPlots = new THashTable();
-    plotItems = new TList();
-    npads = 0;
-    cleanTime = 0;
-    
-    displayTab = NULL;
-    server = NULL;
-    canvas = NULL;
+JevpPlotInfo::JevpPlotInfo(CanvasFrame *p, EthClient *ethclient, int combo_index) {
+  this->myCanvasFrame = p;
+  this->ethclient = ethclient;
+  this->combo_index = combo_index;
+  jevpPlots = new THashTable();
+  plotItems = new TList();
+  npads = 0;
+  cleanTime = 0;
+  
+  //displayTab = NULL;
+  //server = NULL;
+  //canvas = NULL;
 }
 
 JevpPlotInfo::~JevpPlotInfo() {
@@ -519,11 +736,12 @@ void JevpPlotInfo::downloadPlot(const char *name) {
     msg.setArgs(name);
     TMessage mess(kMESS_OBJECT);
     mess.WriteObject(&msg);
-    server->Send(mess);
+    TSocket *sock = ethclient->getSocket();
+    sock->Send(mess);
     
 
     TMessage *rmsg;
-    int ret = server->Recv(rmsg);
+    int ret = sock->Recv(rmsg);
     
     double t1 = clock.record_time();
     
@@ -572,9 +790,9 @@ void JevpPlotInfo::downloadAllPlots() {
 
     RtsTimer_root clock;   
     clock.record_time();
-  
-    DisplayNode *ctab = displayTab;
-    
+    DisplayNode *ctab = ethclient->getTabDisplayLeaf(combo_index);
+    //LOG("JEFF", "getTabDisplayLeaf: %s", ctab ? ctab->name : "none");
+
     while(ctab) {
 	nplots++;
        	downloadPlot(ctab->name);
@@ -582,7 +800,7 @@ void JevpPlotInfo::downloadAllPlots() {
     }
 
     double t = clock.record_time();
-    LOG("JEFF", "Downloaded all plots[%d].  %d plots in %lf seconds", combo_index, nplots, t);
+    //LOG("JEFF", "Downloaded all plots[%d].  %d plots in %lf seconds", combo_index, nplots, t);
 }
 
 
@@ -623,135 +841,143 @@ void JevpPlotInfo::drawCrossOfDeath(const char *name) {
     t->Draw();
 }
 
-void JevpPlotInfo::DrawOnScreen(TCanvas *c, TSocket *s, DisplayFile *display) {
-    canvas = c;
-    server = s;
-    displayTab = display->getTab(combo_index);
-
-    downloadAllPlots();
-
-    //LOG("JEFF", "DrawOnScreen[%d] winid = %lu",combo_index, winId());
-    //tcanvas->setUpdatesEnabled(false);
-    //assert(displayTab->leaf);
+void JevpPlotInfo::DrawOnScreen() {
+  TCanvas *canvas = myCanvasFrame->canvas->GetCanvas();
+  //LOG("JEFF", "dap");
+  downloadAllPlots();
+  //LOG("JEFF", "dap done");
+  //LOG("JEFF", "DrawOnScreen[%d] winid = %lu",combo_index, winId());
+  //tcanvas->setUpdatesEnabled(false);
+  //assert(displayTab->leaf);
     
   
-    DisplayNode *ctab = displayTab;
+  DisplayNode *ctab = ethclient->getTabDisplayLeaf(combo_index);
+  //LOG("JEFF", "getTabDisplayLeaf:  %s : %d (%p - %s)", ctab ? ctab->name : "none", combo_index, ethclient, ethclient == gshifteth ? "shift" : "l4");
 
-    RtsTimer_root clock2;
-    RtsTimer_root clock;   
-    clock.record_time();
+  RtsTimer_root clock2;
+  RtsTimer_root clock;   
+  clock.record_time();
     
-    int nplots = ctab->nSiblings() + 1;  
-    int wide = ctab->getIntParentProperty("wide");
-    int deep = ctab->getIntParentProperty("deep");
-    int scaley = ctab->getIntParentProperty("scaley");
-    double maxY = 0;
+  int nplots = ctab->nSiblings() + 1;  
+  int wide = ctab->getIntParentProperty("wide");
+  int deep = ctab->getIntParentProperty("deep");
+  int scaley = ctab->getIntParentProperty("scaley");
+  double maxY = 0;
 
-    // If scaling all plots the same, calculate the maxy
-    //LOG("JEFF", "Scaley=%d",scaley);
-    if(scaley>0) {
-	while(ctab) {
+  // If scaling all plots the same, calculate the maxy
+  //LOG("JEFF", "Scaley=%d",scaley);
+  if(scaley>0) {
+    while(ctab) {
 	    
-	    JevpPlot *plot = getJevpPlot(ctab->name);
+      JevpPlot *plot = getJevpPlot(ctab->name);
 	    
-	    if(!plot) {
-		continue;
-	    }
+      if(!plot) {
+	continue;
+      }
 
 	    
-	    double my = plot->getMaxY();
+      double my = plot->getMaxY();
 	    
-	    if(my > maxY) maxY = my;
+      if(my > maxY) maxY = my;
 	    
-	    ctab = ctab->next;
+      ctab = ctab->next;
 	    
-	}
     }
+  }
     
-    //LOG("JEFF", "wide = %d deep = %d scaley = %d (%lf) nplots=%d", wide, deep, scaley, maxY, nplots);
-    if(npads == 0) {
-	canvas->Clear();
-	canvas->Divide(wide, deep);
-	npads = wide*deep;
-    }
+  //LOG("JEFF", "wide = %d deep = %d scaley = %d (%lf) nplots=%d", wide, deep, scaley, maxY, nplots);
+  if(npads == 0) {
+    canvas->Clear();
+    canvas->Divide(wide, deep);
+    npads = wide*deep;
+  }
 
     
 
-    ctab = displayTab;
-    LOG(NOTE, "screenwidget prep: %lf", clock.record_time());
+  ctab =  ethclient->getTabDisplayLeaf(combo_index);
+  //    LOG("JEFF", "getTabDisplayLeaf: %s", ctab ? ctab->name : "none");
 
-    for(int pad=1;pad <= wide*deep; pad++) {
-	canvas->cd(pad);
-	canvas->SetBit(kNoContextMenu);
+  LOG(NOTE, "screenwidget prep: %lf", clock.record_time());
 
-	if(!ctab) {
-	    drawEmptySpace();
-	    continue;          // don't try to go to the next one!
-	}
-	
-       	JevpPlot *plot = getJevpPlot(ctab->name);
+  for(int pad=1;pad <= wide*deep; pad++) {
+    canvas->cd(pad);
+    canvas->SetBit(kNoContextMenu);
 
-	if(!plot) {
-	    LOG(NOTE, "Didn't get plot %s", ctab->name);
-	}
-	else {
-	    //LOG(NOTE, "%s: %p %d %d", ctab->name, plot, plot->needsdata, plot->isDataPresent());
-	}
-	if(plot && (!plot->needsdata || plot->isDataPresent())) {
-	    
-	    plot->draw();
-	}
-	else {
-	    
-	    char tmp[256];
-	    sprintf(tmp, "No data for plot: %s", ctab->name);
-	    drawNoDataPresent(tmp);
-	}
-	
-	ctab = ctab->next;
+    if(!ctab) {
+      drawEmptySpace();
+      continue;          // don't try to go to the next one!
     }
 	
-    LOG(NOTE, "screenwidget draw: %lf", clock.record_time());
+    JevpPlot *plot = getJevpPlot(ctab->name);
+
+    if(!plot) {
+      LOG(NOTE, "Didn't get plot %s", ctab->name);
+    }
+    else {
+      //LOG(NOTE, "%s: %p %d %d", ctab->name, plot, plot->needsdata, plot->isDataPresent());
+    }
+    if(plot && (!plot->needsdata || plot->isDataPresent())) {
+	    
+      plot->draw();
+    }
+    else {
+	    
+      char tmp[256];
+      sprintf(tmp, "No data for plot: %s", ctab->name);
+      drawNoDataPresent(tmp);
+    }
+	
+    ctab = ctab->next;
+  }
+	
+  LOG(NOTE, "screenwidget draw: %lf", clock.record_time());
     
     
 
-    //canvas->setUpdatesEnabled(true);
-    clock2.record_time();
-    canvas->Resize();
-    LOG(NOTE, "resize: %lf", clock2.record_time());
-    canvas->Modified();
-    LOG(NOTE, "mod: %lf", clock2.record_time());
-    canvas->Update();
-    LOG(NOTE, "upd: %lf", clock2.record_time());
+  //canvas->setUpdatesEnabled(true);
+  clock2.record_time();
+  canvas->Resize();
+  LOG(NOTE, "resize: %lf", clock2.record_time());
+  canvas->Modified();
+  LOG(NOTE, "mod: %lf", clock2.record_time());
+  canvas->Update();
+  LOG(NOTE, "upd: %lf", clock2.record_time());
     
-    LOG(NOTE, "screenwidget update: %lf", clock.record_time());
+  LOG(NOTE, "screenwidget update: %lf", clock.record_time());
     
 
-    double t = clock.record_time();
-    cleanTime = time(NULL);
+  double t = clock.record_time();
+  cleanTime = time(NULL);
     
-    //LOG(NOTE, "Draw idx=%d. %d plots in %lf seconds\n", combo_index, nplots, t);
+  //LOG(NOTE, "Draw idx=%d. %d plots in %lf seconds\n", combo_index, nplots, t);
 }
 
 JevpPlot *JevpPlotInfo::getPlotAtIdx(int idx)
 {  
-    if(!displayTab) {
-	return NULL;
+  DisplayNode *n = ethclient->getTabDisplayBranchOrLeaf(combo_index);
+  
+  //LOG("JEFF", "getTagDisplayLeaf %d %s leaf=%d", idx, n ? n->name : "none", n ? n->leaf : -1);
+  
+  DisplayNode *ctab = ethclient->getTabDisplayLeaf(combo_index);
+  //LOG("JEFF", "getTabDisplayLeaf: %s", ctab ? ctab->name : "none");
+  
+  int i=1;
+  while(ctab) {
+    if(i == idx) {
+      return getJevpPlot(ctab->name);
     }
+    
+    ctab = ctab->next;
+    i++;
+  }
+  
+  return NULL;
+}
 
-    DisplayNode *ctab = displayTab;
-       
-    int i=1;
-    while(ctab) {
-	if(i == idx) {
-	    return getJevpPlot(ctab->name);
-	}
-	
-	ctab = ctab->next;
-	i++;
-    }
 
-    return NULL;
+DummyFrame::DummyFrame(const TGWindow *p, UInt_t w, UInt_t h) : TGCompositeFrame(p, w, h) {
+  canvas = new TRootEmbeddedCanvas("DummyCanvas", this, w, h);
+  AddFrame(canvas, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY, 10, 10, 10, 1));
 }
 
 

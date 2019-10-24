@@ -1,6 +1,6 @@
 #include <string.h>;
 
-void runViewer()
+void runViewer(char *args)
 {
   static int firsttime=1;
 
@@ -25,5 +25,5 @@ void runViewer()
     gSystem->Load("Jevp");    
   }
   //printf("Run application...\n");
-  JevpViewer::entryPoint();
+  JevpViewer::entryPoint(args);
 }
