@@ -1014,8 +1014,10 @@ void StPicoDstMaker::fillTracks() {
     }
     else {
       picoTrk->setDedx( gTrk->probPidTraits().dEdxFit() );
-      picoTrk->setDedxError( gTrk->probPidTraits().dEdxErrorFit() );
+      picoTrk->setDedxError( gTrk->probPidTraits().dNdxErrorFit() );
     }
+    picoTrk->setDndx( gTrk->probPidTraits().dNdxFit() );
+    picoTrk->setDndxError( gTrk->probPidTraits().dNdxErrorFit() );
 
     // Fill track's hit information
     picoTrk->setNHitsDedx( gTrk->nHitsDedx() );

@@ -115,8 +115,8 @@ class StPicoTrack : public TObject {
   Float_t dEdxPullKaon()      const {return dEdxPull(0.493677,1);}
   Float_t dEdxPullProton()    const {return dEdxPull(0.93827231,1);}
   Float_t dEdxPullElectron()  const {return dEdxPull(0.51099907e-3,1);}
-  //Float_t dNdx() const                   { return mDnDx;}
-  //Float_t dNdxError() const              { return mDnDxError;}
+  Float_t dNdx() const                   { return mDnDx;}
+  Float_t dNdxError() const              { return mDnDxError;}
 
   /// Return nSigma(pion)
   Float_t nSigmaPion() const             { return (Float_t)mNSigmaPion / 1000.f; }
@@ -205,6 +205,10 @@ class StPicoTrack : public TObject {
   void setDedx(Float_t dEdx);
   /// Set dE/dx error of the track
   void setDedxError(Float_t dEdxError)     { mDedxError = dEdxError; }
+  /// Set dN/dx of the track
+    void setDndx(Float_t dNdx)             { mDnDx = dNdx;}
+  /// Set dN/dx error of the track
+  void setDndxError(Float_t dNdxError)     { mDnDxError = dNdxError; }
   /// Set nHitsFit ( charge * nHitsFit )
   void setNHitsFit(Int_t nhits)            { mNHitsFit = (Char_t)nhits; }
   /// Set nHitsPoss
@@ -262,8 +266,8 @@ class StPicoTrack : public TObject {
   Float16_t  mDedx;
   /// dE/dx error (in GeV/cm)
   Float16_t  mDedxError;
-  //Float_t  mDnDx;             // fitted dN/dx
-  //Float_t  mDnDxError;        // fitted dN/dx error
+  Float_t  mDnDx;             // fitted dN/dx
+  Float_t  mDnDxError;        // fitted dN/dx error
   
   /// Charge * nHitsFit
   Char_t   mNHitsFit;

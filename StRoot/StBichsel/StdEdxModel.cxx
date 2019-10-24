@@ -15,7 +15,7 @@ ClassImp(StdEdxModel)
 StdEdxModel  *StdEdxModel::fgStdEdxModel = 0;
 TH1D         *StdEdxModel::mdNdxL10 = 0;  
 TH1D         *StdEdxModel::mdNdx = 0;  
-TH2F         *StdEdxModel::mdEdxModel[3][3] = {0};
+TH2F         *StdEdxModel::mdEdNModel[3][3] = {0};
 TH1F         *StdEdxModel::mdEdNMPV[3] = {0};
 TH2F         *StdEdxModel::mLogdEdxModel[3][3] = {0};
 TH1F         *StdEdxModel::mLogdEdNMPV[3] = {0};
@@ -48,8 +48,8 @@ StdEdxModel::StdEdxModel() {
 	for (Int_t l = 0; l <=  kTpcAll; l++) {
 	  for (Int_t j = kProb; j <= kdProbdY; j++) {
 	    TString name(Form("dEdN%sNorm%s",TpcName[l],DerName[j]));
-	    mdEdxModel[l][j] = (TH2F *) pFile->Get(name);
-	    assert(mdEdxModel[l][j]);    mdEdxModel[l][j]->SetDirectory(0);
+	    mdEdNModel[l][j] = (TH2F *) pFile->Get(name);
+	    assert(mdEdNModel[l][j]);    mdEdNModel[l][j]->SetDirectory(0);
 	    name = Form("LogdEdN%sNorm%s",TpcName[l],DerName[j]);
 	    mLogdEdxModel[l][j] = (TH2F *) pFile->Get(name);
 	    assert(mLogdEdxModel[l][j]);    mLogdEdxModel[l][j]->SetDirectory(0);
@@ -78,7 +78,7 @@ StdEdxModel::~StdEdxModel() {
   SafeDelete(mdNdxL10);
   for (Int_t i = 0; i <= kTpcAll; i++) 
     for (Int_t j = 0; j <= kdProbdY; j++) 
-      SafeDelete(mdEdxModel[i][j]);
+      SafeDelete(mdEdNModel[i][j]);
 }
 //________________________________________________________________________________
 Double_t StdEdxModel::dNdx(Double_t poverm, Double_t charge) {

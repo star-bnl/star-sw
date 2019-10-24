@@ -26,7 +26,7 @@ class StdEdxModel {
   virtual ~StdEdxModel();
   static  StdEdxModel* instance();
   static TH1D         *GetdNdxL10()    {return    mdNdxL10;}    // dN/dx versus beta*gamma
-  static TH2F         *GetdEdN(EValType val = kProb, ETpcType tpcType = kTpcAll) {return instance()->mdEdxModel[tpcType][val];}
+  static TH2F         *GetdEdN(EValType val = kProb, ETpcType tpcType = kTpcAll) {return instance()->mdEdNModel[tpcType][val];}
   static TH1F         *GetdEdNMPV( ETpcType tpcType = kTpcAll) {return instance()->mdEdNMPV[tpcType];}
   static TH2F         *GetLogdEdN(EValType val = kProb, ETpcType tpcType = kTpcAll) {return instance()->mLogdEdxModel[tpcType][val];}
   static TH1F         *GetLogdEdNMPV( ETpcType tpcType = kTpcAll) {return instance()->mLogdEdNMPV[tpcType];}
@@ -40,7 +40,7 @@ class StdEdxModel {
   StdEdxModel();
   static TH1D         *mdNdxL10;    // dN/dx versus log10(beta*gamma)
   static TH1D         *mdNdx;       // dN/dx versus beta*gamma
-  static TH2F         *mdEdxModel[3][3]; // Tpc [I,O,All] [Prob, dProb/dX, dProb/dY] versus dE/Np,log(Np)
+  static TH2F         *mdEdNModel[3][3]; // Tpc [I,O,All] [Prob, dProb/dX, dProb/dY] versus dE/Np,log(Np)
   static TH1F         *mdEdNMPV[3];
   static TH2F         *mLogdEdxModel[3][3]; // Tpc [I,O,All] [Prob, dProb/dX, dProb/dY] versus Log(dE/Np),log(Np)
   static TH1F         *mLogdEdNMPV[3];
