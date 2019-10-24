@@ -835,6 +835,7 @@ void StRefMultCorr::readHeaderFile()
 		//// Year, energy, run numbers, Vz cut
 		Int_t year; Double_t energy;
 		vector<string> sParam = StringSplit(getParamX(refX,iID,0),':'); 
+		if (sParam.size() < 3) continue;
 		year = stoi(sParam[0]); 
 		energy = stoi(sParam[1]); 
 		vector<string> sRuns = StringSplit(sParam[2],',');
