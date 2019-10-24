@@ -20,33 +20,49 @@
 
 class EthClient {
  private:
-    TSocket *socket;
-    DisplayFile *displayFile;
-
+  TSocket *socket;
+  DisplayFile *displayFile;
+  
  public:
-    EthClient();
-    void connectToServer(const char *server, int port);
-    void send(const char *cmd, const char *args);
-    void send(TObject *msg);
-    TObject *receive();
-    TSocket *getSocket() { return socket; }
+  int tabs_valid;  // note:
+                   //        tabsvalid=1, connected==NULL   -->  No connection
+                   //        tabsvalid=0, connected!=NULL   -->  In process of connecting...
+                   //        tabsvalid=1, connected!=NULL   -->  normal operation
+                   //        tabsvalid=0, connected==NULL   -->  Disconnecting...
+  time_t statusChangeTime;
+  RunStatus lastRunStatus;
+  char *serverTags;
+  char myDisplayName[64];
 
-    // Display functions...
-    void readDisplayFromServer(const char *displayName="shift");
-    // These are all the same
-    //void getCanvasDescriptor(u_int combo_idx);
-    //void getTab(u_int combo_idx);
-    DisplayNode *getTabDisplayNode(u_int combo_idx);
-    char *getTabName(u_int combo_idx);
-    DisplayFile *display() { return displayFile; }
+  EthClient();
 
-    int getRun();
-    RunStatus *getRunStatus();
-    JevpPlot *getPlotFromServer(char *name);
+  bool connected();
+  bool connectToServer(const char *server, int port);
+  void send(const char *cmd, const char *args);
+  void send(TObject *msg);
+  TObject *receive();
+  TSocket *getSocket() { return socket; }
 
-    // Reference Plots...
-    void swapRefsOnServer(char *name, int idx1, int idx2);
-    void saveExistingPlot(JevpPlot *plot);
-    void deletePlot(JevpPlot *plot);
-    void writePlotToServer(JevpPlot *plot);
+  // Display functions...
+  void readDisplayFromServer(const char *displayName="shift");
+  // These are all the same
+  //void getCanvasDescriptor(u_int combo_idx);
+  //void getTab(u_int combo_idx);
+  DisplayNode *getTabDisplayLeaf(u_int combo_idx);
+  DisplayNode *getTabDisplayBranch(u_int combo_idx);
+  DisplayNode *getTabDisplayBranchOrLeaf(u_int combo_idx);
+
+  char *getTabName(u_int combo_idx);
+  DisplayFile *display() { return displayFile; }
+
+  int getRun();
+  RunStatus *getRunStatus();
+  JevpPlot *getPlotFromServer(char *name);
+  int updateServerTags();   // returns zero if no change...
+  
+  // Reference Plots...
+  void swapRefsOnServer(char *name, int idx1, int idx2);
+  void saveExistingPlot(JevpPlot *plot);
+  void deletePlot(JevpPlot *plot);
+  void writePlotToServer(JevpPlot *plot);
 };

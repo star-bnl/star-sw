@@ -28,42 +28,46 @@
 class JevpViewer;
 class CanvasFrame;
 
+class EthServers {
+ public:
+  EthClient shift;
+  EthClient l4;
+};
+  
 class MenuHelper {
  public:
     JevpViewer *parent;
 
     TGPopupMenu *file;
     TGPopupMenu *input;
-    //TGPopupMenu *option;
-    //TGPopupMenu *help;
-
+  
     MenuHelper(JevpViewer *p);
     void buildMenu(TGMainFrame *frame);
 };
-
-//class ToolbarHelper {
-//    buildToolbar();
-//};
-
-
 
 class TabHelper : public TObject {
     RQ_OBJECT("TabHelper");
 
  public:
     JevpViewer *parent;
-    DisplayFile *displayFile;
+    
+    //DisplayFile *displayFile;
 
     TGTab2 *mainTabs;
+    TGTab2 *shiftTabs;
+    TGTab2 *l4Tabs;
     
     TabHelper(JevpViewer *p);
-    void buildTabs(TGMainFrame *frame, DisplayFile *displayFile);
+    void buildTabs(TGTab2 *main);
     void rebuildTabs();
     
-    CanvasFrame *getCurrentContainer();
-    
+    //CanvasFrame *getCurrentContainer();
+    TGCompositeFrame *getCurrentContainer();
+
     void deleteTab(TGTab2 *tab, int doDelete=1);
-    void fillTab(TGTab2 *tab, u_int combo_index);
+
+    // Add all below combo_index to tab
+    void fillTab(TGTab2 *tab, EthClient *client, u_int combo_index);
 
     // Slots...  
     void tabSelected(Int_t id);
@@ -74,21 +78,26 @@ class TabHelper : public TObject {
 
 class JevpViewer : public TObject {
     RQ_OBJECT("JevpViewer");
-	
+ public:
+    EthServers eth;	
+    int SERVERPORT;
+    int initauto;
  private:
     TGMainFrame         *fMain;
-    EthClient           server;
+    
+ 
+    //EthClient           shiftServer;
+    //EthClient           l4Server;
 
     MenuHelper *menu;
     TabHelper *tabs;
 
     TTimer *timer;
 
-    char *serverTags=NULL;
-
 public:
-    JevpViewer(const TGWindow *p,UInt_t w,UInt_t h);
+    JevpViewer(const TGWindow *p,UInt_t w,UInt_t h, char *args);
     virtual ~JevpViewer();
+    void parseArgs(char *args);
 
     // Worker functions...
     void update();
@@ -101,7 +110,7 @@ public:
     void ExitViewer();
     void refreshTimerFired();
 
-    static void entryPoint();
+    static void entryPoint(char *args);
     ClassDef(JevpViewer, 0);
 };
 
@@ -111,7 +120,9 @@ public:
 //
 class JevpPlotInfo : public TObject {
     RQ_OBJECT("JevpPlotInfo");
-
+ public:
+   int combo_index;
+   EthClient *ethclient;
  private:  
     // These are owned and stored
     // needed for screen to stay valid despite never being touched again...
@@ -119,14 +130,15 @@ class JevpPlotInfo : public TObject {
     TList *plotItems;
 
     //int npads;
-    int combo_index;
+ 
     time_t cleanTime;
     
     // These are needed during the draw routines..
-    DisplayNode *displayTab;
-    TSocket *server;
-    TCanvas *canvas;
-    
+    //DisplayNode *displayTab;
+    //EthClient *ethclient;
+    //TSocket *server;
+    //TCanvas *canvas;
+    CanvasFrame *myCanvasFrame;
 
     // Helpers...
     void deleteItems();
@@ -144,13 +156,21 @@ class JevpPlotInfo : public TObject {
  public:
     int npads;
 
-    JevpPlotInfo(int combo_index);
+    JevpPlotInfo(CanvasFrame *parent, EthClient *ethclient, int combo_index);
     virtual ~JevpPlotInfo();
 
-    void DrawOnScreen(TCanvas *c, TSocket *s, DisplayFile *f);
+    void DrawOnScreen();
     JevpPlot *getPlotAtIdx(int idx);
 
-    DisplayNode *getDisplay() { return displayTab; };
+    
+    DisplayNode *getDisplay() { 
+      LOG("JEFF", "getTabDisplayNode from getDisplay()");
+      DisplayNode *dnode = ethclient->getTabDisplayLeaf(combo_index); 
+      if(dnode == NULL) LOG("JEFF", "returning null");
+      
+      return dnode;
+    };
+    
 
     ClassDef(JevpPlotInfo, 0);
 };
@@ -163,7 +183,7 @@ class CanvasFrame : public TGCompositeFrame {
     int id;
     JevpPlotInfo *plotInfo;
     
-    CanvasFrame(const TGWindow *p, int id);
+    CanvasFrame(const TGWindow *p, EthClient *server, int id);
     virtual ~CanvasFrame();
 
     void DoEvent(Int_t cmd, Int_t x, Int_t y, TObject *o);
@@ -173,3 +193,14 @@ class CanvasFrame : public TGCompositeFrame {
 };
 
 
+
+class DummyFrame : public TGCompositeFrame {
+  RQ_OBJECT("DummyFrame")
+
+public:
+  TRootEmbeddedCanvas *canvas;
+
+  // void DoDraw();
+  DummyFrame(const TGWindow *p, UInt_t w, UInt_t h);
+  ClassDef(DummyFrame, 0);
+};

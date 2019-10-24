@@ -518,7 +518,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	else if (strcmp(argv[i], "-test")==0) {
 	    nodb = 1;
 	    log_output = RTS_LOG_STDERR;
-	    basedir = (char *)"/RTScache/conf/jevp_test";
+	    basedir = (char *)"/RTScache/conf/jevp";
 	    pdfdir = (char *)"/a/jevp_test/pdf";
 	    refplotdir = (char *)"/a/jevp_test/refplots";
 	    rootfiledir = (char *)"/a/jevp_test/rootfiles";
@@ -744,7 +744,7 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 // returns delay in milliseconds
 void JevpServer::handleNewEvent(EvpMessage *m)
 {
-    //LOG("JEFF", "Maxevts = %d evtsInRun = %d", maxevts, evtsInRun);
+  // LOG("JEFF", "Maxevts = %d evtsInRun = %d", maxevts, evtsInRun);
 
     if(((maxevts > 0) && (evtsInRun > maxevts)) ||
        strcmp(m->cmd,"stoprun") == 0) {

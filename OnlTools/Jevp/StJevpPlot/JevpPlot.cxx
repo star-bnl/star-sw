@@ -434,6 +434,7 @@ int JevpPlot::isDataPresent()
   while((curr = (PlotHisto *)next())) {
     nhist++;
     if(curr->histo) {
+      //LOG("JEFF", "histo %s: entries %d", myname, curr->histo->GetEntries());
       if(curr->histo->GetEntries() > 0) {
 	data_present = 1;
       }

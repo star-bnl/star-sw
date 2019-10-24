@@ -1,4 +1,4 @@
-// $Id: tpcBuilder.cxx,v 1.9 2019/06/26 14:45:07 videbaks Exp $
+// $Id: tpcBuilder.cxx,v 1.10 2019/10/24 19:04:55 evpdaq Exp $
 //
 #include <stdio.h>
 #include <stdlib.h>
@@ -906,6 +906,7 @@ void tpcBuilder::event(daqReader *rdr)
       //
       
       for(int i=0;i<512;i++) {
+	//LOG("JEFF", "filling tpx qs");
 	contents.array[s + qs_idx_tpx - 1]->Fill(i,tb_charge_counts[i]);
       }
 
