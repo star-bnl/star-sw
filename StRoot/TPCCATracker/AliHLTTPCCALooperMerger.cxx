@@ -35,6 +35,7 @@ void AliHLTTPCCALooperMerger::FillSegments()
     int iHit1 = fFirstSliceHit[iDsrc1.Slice()] + slices[iDsrc1.Slice()]->ClusterData().RowOffset( iDsrc1.Row() ) + iDsrc1.Cluster();
     int iHit2 = fFirstSliceHit[iDsrc2.Slice()] + slices[iDsrc2.Slice()]->ClusterData().RowOffset( iDsrc2.Row() ) + iDsrc2.Cluster();
     int iHit3 = fFirstSliceHit[iDsrc3.Slice()] + slices[iDsrc3.Slice()]->ClusterData().RowOffset( iDsrc3.Row() ) + iDsrc3.Cluster();
+    if (iHit1 == iHit3) continue;
     const AliHLTTPCCAGBHit &hit1r = fGBHits[iHit1];
     const AliHLTTPCCAGBHit &hit2r = fGBHits[iHit2];
     const AliHLTTPCCAGBHit &hit3r = fGBHits[iHit3];
