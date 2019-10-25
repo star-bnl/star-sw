@@ -1,6 +1,10 @@
-* $Id: g2t_volume_id.g,v 1.92 2019/09/30 14:13:49 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.93 2019/10/25 17:13:09 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.93  2019/10/25 17:13:09  jwebb
+* Deprecate old numbering scheme for hcal
+*
 * Revision 1.92  2019/09/30 14:13:49  jwebb
+*
 * Integrate HITS for forward tracking and forward calorimeter.
 *
 * n.b. deprecates the legacy HcalGeo RnD detector.
@@ -1115,7 +1119,7 @@ c$$$    write (*,*) numbv
 
 *******************************************************************************************
 *26* 				Prashanth Shanmuganathan(HCAL)
-      elseif (Csys=='hca') then
+      elseif (Csys=='@@@'  ) then """ Used to be HCA, but we have deprecated this version """
       """  Volume_Id """
       """ HCAL             1 000  """
       """ FPSC           100 000  """
