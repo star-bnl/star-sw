@@ -743,6 +743,7 @@ Int_t StdEdxY2Maker::Make(){
 	  AddEdxTraits(tracks, dedx);
 	}
 #endif /* __Use_dNdx__ */
+#if 0
 	if (! TESTBIT(m_Mode, kDoNotCorrectdEdx)) { 
 	  StThreeVectorD g3 = gTrack->geometry()->momentum(); // p of global track
 	  Double_t pMomentum = g3.mag();
@@ -753,6 +754,7 @@ Int_t StdEdxY2Maker::Make(){
 	  }
 	  for (Int_t l = 0; l < 2; l++) {if (tracks[l]) tracks[l]->addPidTraits(new StProbPidTraits(NdEdx,kTpcId,KPidParticles,Chisq));}
 	}
+#endif
       }
     } // (hvec.size() && ! TESTBIT(m_Mode, kDoNotCorrectdEdx))
     if (pTrack) QAPlots(gTrack);
