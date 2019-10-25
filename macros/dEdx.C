@@ -37,32 +37,21 @@ class StIOMaker;
 //#define OLDdEdx
 //________________________________________________________________________________
 void dEdx(Int_t nevents=1000,
-	  const char *MainFile=
-	  "/star/data08/reco/dAuMinBias/FullField/P03ih/2003/040/st_physics_4040004_raw_0010010.event.root",
-	  //	  "/star/data05/reco/FPDtbEMCproduction/FullField/P02gc/2002/023/st_physics_3023073_raw_0010.event.root",
-	  //	  const char *MainFile="st_physics_2313002_raw_0010.event.root",
-	  // "/star/data08/reco/central/DEV01a/2000/08/st_physics_1243014_raw_0001.dst.root",
-	  const char* rootFile="", Int_t mode = 2)
-{
+	  const char *MainFile=	"/star/data08/reco/dAuMinBias/FullField/P03ih/2003/040/st_physics_4040004_raw_0010010.event.root",
+	  const char* rootFile="", Int_t mode = 2, const Char_t *year = "y2019") {
+  TString Year(year);
   if (gClassTable->GetID("TTable") < 0) {
     gSystem->Load("libTable");
-//     gSystem->Load("St_base");
-//     gSystem->Load("StChain");
   }
   if (gClassTable->GetID("StTerminateNotified") < 0) {
     gSystem->Load("libStarRoot");
   }
   gROOT->LoadMacro("bfc.C");
-  //  TString Chain("in dEdxY2 StEvent debug");
-  //  TString Chain("in,dEdxY2,StEvent,St_geom,tofrMatch,tofpMatch,tofCalib,AlignSectors");
-  //  TString Chain("in,dEdxY2,magF,StEvent,AlignSectors,Corr4,OSpaceZ2");
-  //  TString Chain("in,dEdxY2,magF,StEvent,St_geom,tofrMatch,tofpMatch,tofCalib,Corr4,OSpaceZ2");
-  //  TString Chain("in,TpcHitMover,CorrX,OSpaceZ2,OGridLeakFull,dEdxY2,magF,StEvent,mysql,CMuDst,noHistos,noRunco,NoDefault"); // ,analysis
-  //  TString Chain("in,TpcHitMover,simu,CorrX,OSpaceZ2,OGridLeakFull,dEdxY2,magF,StEvent,mysql,NoDefault"); // ,analysis
-  //  TString Chain("in,TpcHitMover,simu,CorrY,OSpaceZ2,OGridLeakFull,dEdxY2,magF,StEvent,mysql,NoDefault"); // ,analysis to add OPr40 for y2019
-  TString Chain("in,TpcHitMover,OSpaceZ2,CorrX,OSpaceZ2,OGridLeakFull,-Opr13,OPr40,dEdxY2,magF,StEvent,mysql,NoDefault"); // ,analysis to add OPr40 for y2019
-  // 2005 cu
-  //  TString Chain("in,TpcHitMover,SCEbyE,OGridLeak,OShortR,OSpaceZ2,dEdxY2,RMuDST,magF,StEvent,mysql,NoDefault"); // ,analysis to add OPr40 for y2019
+  TString Chain("in,TpcHitMover,OSpaceZ2,OGridLeakFull,dEdxY2,magF,StEvent,mysql,NoDefault");
+  if        (Year.Contains("2019")) { Chain += ",CorrY"; // ,analysis to add OPr40 for y2019
+  } else if (Year.Contains("2005")) { Chain += ",SCEbyE,OGridLeak,OShortR,OSpaceZ2,";
+  } else                            { Chain += ",CorrX"; // ,analysis to add OPr40 for <= 2018
+  }
   TString STAR_VERSION(gSystem->Getenv("STAR_VERSION"));
   if (STAR_VERSION.BeginsWith("TFG") || STAR_VERSION.Contains("DEV2")) {
     Chain += ",quiet";
@@ -76,7 +65,7 @@ void dEdx(Int_t nevents=1000,
   //  if (RootFile.Contains("gstar",TString::IgnoreCase) ||
   //      RootFile.Contains("hijing",TString::IgnoreCase)) Chain += ",Simu";
   chain = bfc(-1,Chain.Data(),MainFile,0,RootFile.Data());
-  StdEdxY2Maker *dEdxY2 = (StdEdxY2Maker *) chain->GetMaker("dEdxY2"); 
+  StdEdxY2Maker *dEdxY2 = (StdEdxY2Maker *) chain->Maker("dEdxY2"); 
   StMaker *tofCalib = chain->Maker("tofCalib");
   if (tofCalib) chain->AddAfter("tofCalib",dEdxY2);
   Int_t Mode = 0;
