@@ -12,7 +12,7 @@ class StGoodTrigger;
 void kfpAnalysis(Int_t N = 1000, 
 		 const Char_t *input = "/star/rcf/test/dev/daq_sl302.stica/Wed/year_2014/AuAu200_production_low_2014/st_physics_15164004_raw_2000022.MuDst.root",
 		 //		 const Char_t *input = "root://xrdstar.rcf.bnl.gov:1095//home/starlib/home/starreco/reco/AuAu27_production_2011/FullField/P11id/2011/172/12172024:st_physics_12172024_raw_4010001.MuDst.root",
-		 const Char_t *output = "picoAna2011AuAu27.root", const Char_t *triggerSet = "y2011") {
+		 const Char_t *output = "picoAna2011AuAu27.root", const Char_t *triggerSet = "y2014") {
 #if !defined(__CINT__)
   std::cout << "This code cannot be compiled" << std::endl;
 #else
