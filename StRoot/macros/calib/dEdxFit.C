@@ -1426,7 +1426,10 @@ Double_t gfFunc(Double_t *x, Double_t *par) {
   // par[5] - electorn -"-
   // par[6] - deuteron -"-
   // par[7] - Total
+  // par[8] - case (-1 all, >-0 hyp no.)
+  // par[9] - scale 
   Double_t sigma = par[2];
+  Double_t scale = par[9];
   Double_t frac[5];
   Int_t i;
   frac[0] = 1;
@@ -1444,10 +1447,10 @@ Double_t gfFunc(Double_t *x, Double_t *par) {
   for (i = i1; i <= i2; i++) { 
     Double_t Sigma = sigma;
     if (Peaks[i].N == 0) {
-      Value += frac[i]*TMath::Gaus(x[0],par[1]+Peaks[i].peak,Sigma,1);
+      Value += frac[i]*TMath::Gaus(x[0],scale*(par[1]+Peaks[i].peak),Sigma,1);
     } else {
       for (Int_t ix = 0; ix < Peaks[i].N; ix++) {
-	Value += frac[i]*TMath::Gaus(x[0],par[1]+Peaks[i].X[ix],Sigma,1)*Peaks[i].Y[ix];
+	Value += frac[i]*TMath::Gaus(x[0],scale*(par[1]+Peaks[i].X[ix]),Sigma,1)*Peaks[i].Y[ix];
       }
     }
     //    cout << "i\t" << i << "\tx = " << x[0] << " frac " << frac[i] << "\t" << Value << endl;
@@ -1488,9 +1491,9 @@ void PreSetParameters(TH1 *proj, TF1 *g2) {
   if (TMath::Abs(Peaks[0].peak - xpi) > TMath::Abs(Peaks[1].peak - xpi)) {
     // proton
     g2->ReleaseParameter(3); g2->SetParLimits(3,0.0,TMath::Pi()/2);
-    g2->SetParameters(0, 0, 0.35, 0.9*TMath::Pi()/2, 0.0, 0.0, 0.0,0.0,-1.,-1);
+    g2->SetParameters(0, 0, 0.35, 0.9*TMath::Pi()/2, 0.0, 0.0, 0.0,0.0,-1.,1);
   } else {
-    g2->SetParameters(0, xpi, 0.35, 0.6, 0.1, 0.1, 0.1,0.1,-1.,-1);
+    g2->SetParameters(0, xpi, 0.35, 0.6, 0.1, 0.1, 0.1,0.1,-1.,1);
   }
   g2->FixParameter(4,1e-6);
   g2->FixParameter(5,1e-6);
@@ -1506,7 +1509,7 @@ TF1 *FitGF(TH1 *proj, Option_t *opt="") {
   //  Bool_t quet = Opt.Contains("Q",TString::kIgnoreCase);
   TF1 *g2 = (TF1*) gROOT->GetFunction("GF");
   if (! g2) {
-    g2 = new TF1("GF",gfFunc, -5, 5, 9);
+    g2 = new TF1("GF",gfFunc, -5, 5, 10);
     g2->SetParName(0,"norm"); g2->SetParLimits(0,-80,80);
     g2->SetParName(1,"mu");     g2->SetParLimits(1,-2.5,2.5);
     g2->SetParName(2,"Sigma");  g2->SetParLimits(2,0.05,0.8);
@@ -1516,14 +1519,16 @@ TF1 *FitGF(TH1 *proj, Option_t *opt="") {
     g2->SetParName(6,"d");      g2->SetParLimits(6,0.0,0.5);
     g2->SetParName(7,"Total");
     g2->SetParName(8,"Case");
+    g2->SetParName(9,"scale");  g2->FixParameter(9,1.);
     //    g2->SetParName(7,"factor"); g2->SetParLimits(7,-.1,0.1);
   }
   PreSetParameters(proj, g2);
   proj->Fit(g2,Opt.Data());
   g2->ReleaseParameter(3); g2->SetParLimits(3,0.0,TMath::Pi()/2);
-  g2->ReleaseParameter(4); g2->SetParLimits(4,0.0,0.3);
-  g2->ReleaseParameter(5); g2->SetParLimits(5,0.0,0.3);
-  g2->ReleaseParameter(6); g2->SetParLimits(6,0.0,0.3);
+  g2->ReleaseParameter(4); g2->SetParLimits(4,0.0,1.0);
+  g2->ReleaseParameter(5); g2->SetParLimits(5,0.0,1.0);
+  g2->ReleaseParameter(6); g2->SetParLimits(6,0.0,1.0);
+  g2->ReleaseParameter(9); g2->SetParLimits(9,0.5,2.0);
   Int_t iok = proj->Fit(g2,Opt.Data());
   if ( iok < 0) {
     cout << g2->GetName() << " fit has failed with " << iok << " for " 
