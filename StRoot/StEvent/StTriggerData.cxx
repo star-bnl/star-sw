@@ -184,12 +184,16 @@ void StTriggerData::decodeQT(unsigned int ndata, unsigned int* data, unsigned sh
 	    if((int)ch<=oldch) flag+=2;  
 	    if(ch==31 && a==4095 && t==31) flag+=4;
 	    if(flag>0){
+	      static Int_t ii = 0;
+	      if (ii < 13) {
 	      printf("i=%3d crt=%2d adr=%2d ch=%3d oldch=%3d adc=%4d tdc=%4d",
 		     i,crate,addr,ch,oldch,a,t);
 	      if((flag & 0x1)>0) printf(" ADC=0!");
 	      if((flag & 0x2)>0) printf(" OrderWrong!");
 	      if((flag & 0x4)>0) printf(" FFFF!");
 	      printf("\n");
+	      ii++;
+	      }
 	    }else{
 	      adc[addr][ch] = a;
 	      tdc[addr][ch] = t;
