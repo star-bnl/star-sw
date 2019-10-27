@@ -1,5 +1,48 @@
-* $Id: g2t_volume_id.g,v 1.89 2018/07/24 18:46:14 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.93 2019/10/25 17:13:09 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.93  2019/10/25 17:13:09  jwebb
+* Deprecate old numbering scheme for hcal
+*
+* Revision 1.92  2019/09/30 14:13:49  jwebb
+*
+* Integrate HITS for forward tracking and forward calorimeter.
+*
+* n.b. deprecates the legacy HcalGeo RnD detector.
+*
+* Revision 1.91  2019/09/03 20:12:55  jwebb
+* Proposed fix for ticket 3399--
+* https://www.star.bnl.gov/rt3/Ticket/Display.html?id=3399&results=8b3b60b210def723798e28371b984406
+*
+* Relies on changes to the geometry which flag the mixed iTPC/TPC mode.
+* -- StarGeo.xml v1.29 / TpceConfig.xml v1.7 / TpceGeo3a.xml v1.20
+*
+* When the mixed iTPC/TPC mode is detected, the outer padrows in sector
+* 20 are renumbered to match the iTPC numbering scheme (41 through 72).
+*
+* The inner padrows keep the old TPC numbering scheme (1 through 13) with 3
+* pseudopadrows per real padrow.  To hopefully avoid confusion, we place these
+* in a fake sector 99.  TpcRS should skip these in the hit processing loop.
+* We place them in a fake sector 99.  TpcRS should skip these in the hit processing
+* loop.
+*
+* Code has been minimally tested as per the recipe in the trouble ticket.
+* Sector 20 shows reasonable (as many as 32) matched hits in the small sample
+* generated.
+*
+* Revision 1.90  2018/12/03 21:08:53  jwebb
+* g2t_volume_id for TPC is split out into a separate subroutine.
+*
+* Code is added to recognize iTPC era geometry, and setup the appropriate
+* TPAD volume mappings.
+*
+* (Support for iTPC R&D models retired).
+*
+* Code was tested on simulations from y2003 to 2018.  Output of fz2root is
+* identical on a hit-by-hit basis on the first production quality geometry
+* from each year.  y2019 simulations of single muons show the expected
+* number of hits on tracks.  note-- prompt hit region has not been
+* vetted, but no issues expected as we do not change the prompt-hit logic.
+*
 * Revision 1.89  2018/07/24 18:46:14  jwebb
 * Updates to EPD geometry and numbering from Prashanth.
 *
@@ -1204,7 +1247,7 @@ c$$$    write (*,*) numbv
 
 *******************************************************************************************
 *26* 				Prashanth Shanmuganathan(HCAL)
-      elseif (Csys=='hca') then
+      elseif (Csys=='@@@'  ) then """ Used to be HCA, but we have deprecated this version """
       """  Volume_Id """
       """ HCAL             1 000  """
       """ FPSC           100 000  """
