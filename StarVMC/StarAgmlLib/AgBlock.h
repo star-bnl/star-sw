@@ -153,6 +153,9 @@ public:
   void   SetAssembly() { mMakeAssembly=true; }
   Bool_t GetAssembly() { return mMakeAssembly; }
 
+  int numberBranches() const { return mNumberBranches; }
+  void branch(){ mNumberBranches++; }
+
  private:
  protected:
 
@@ -181,6 +184,9 @@ public:
   std::vector< TString > mGroups;
 
   Bool_t mMakeAssembly;
+
+  /// Counts the number of volume branchings
+  int mNumberBranches;
 
   friend class _AgBlockDummy;
 

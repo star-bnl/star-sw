@@ -50,7 +50,8 @@ AgBlock::AgBlock(const Char_t *name, const Char_t *title)
     _volume(0),
     mNicknames(),
     mGroups(),
-    mMakeAssembly(0)
+    mMakeAssembly(0),
+    mNumberBranches(0)
 {
   addNickname(name); // ensure that the vector is populated
   _valid = true;
