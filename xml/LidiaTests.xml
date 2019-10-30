@@ -6,7 +6,7 @@
 #source /star/u/starreco/.cshrc
 #source  /afs/rhic.bnl.gov/rhstar/group/.stardev
 #unsetenv NODEBUG
-setup 32b
+#setup 32b
 setup debug
 
 #set controlFile = /star/u/starreco/newtest/sampleList_nonopt.txt 

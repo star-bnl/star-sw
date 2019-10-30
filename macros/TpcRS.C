@@ -211,63 +211,9 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     }
   }
 #endif    
-  if (Last < 0) return;
-  Int_t initStat = chain->Init(); // This should call the Init() method in ALL makers
-  if (initStat) {
-    cout << "Chain initiation has failed" << endl;
-    chain->Fatal(initStat, "during Init()");
-  }
-  const Char_t  *Names[15] = {
-    "muon+",     
-    "muon-",     
-    "electron",  
-    "positron",  
-    "pion+",     
-    "pion-",     
-    "kaon+",     
-    "kaon-",     
-    "proton",    
-    "pbar",      
-    "deuteron",  
-    "triton",    
-    "He3",	 
-    "alpha",     
-    "pionMIP"        
-  };
-  Int_t Ids[15] = {
-      5,
-      6,
-      3,
-      2,
-      8,
-      9,
-     11,
-     12,
-     14,
-     15,
-     45,
-     46,
-     49,
-     47,
-      8
-  };
-  Double_t Masses[15] = {
-    0.1056584,
-    0.1056584,
-    0.51099907e-3,
-    0.51099907e-3,
-    0.13956995,
-    0.13956995,
-    0.493677,
-    0.493677,
-    0.93827231,
-    0.93827231, 
-    1.875613,
-    2.80925,
-    2.80923,
-    3.727417,
-    0.13956995
-  };
+  const Char_t  *Names[15] = {"muon+", "muon-", "electron", "positron", "pion+", "pion-", "kaon+", "kaon-", "proton", "pbar", "deuteron", "triton", "He3", "alpha", "pionMIP"};
+  Int_t Ids[15] =            {      5,      6,           3,          2,       8,       9,      11,      12,       14,     15,         45,       46,    49,      47,         8};
+  Double_t Masses[15] = {    0.1056584,0.1056584,0.51099907e-3,0.51099907e-3,0.13956995,0.13956995,0.493677,0.493677,0.93827231,0.93827231,1.875613,2.80925,2.80923,3.727417,0.13956995  };
   Int_t    NTRACK = 100;
   Int_t    ID = 5;
   Double_t Ylow   =  -1; 
@@ -293,6 +239,11 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   }
   Double_t pTmin = mass*TMath::Power(10.,bgMinL10);
   Double_t pTmax = mass*TMath::Power(10.,bgMaxL10);
+  if (pTmax > 10) {
+    pTmax = 10;
+    bgMaxL10 = TMath::Log10(pTmax/mass);
+    cout << "Reduce bgMax10 = " << bgMaxL10 << endl;
+  }
   if (gClassTable->GetID("TGiant3") >= 0) {
     St_geant_Maker *geant = (St_geant_Maker *) chain->GetMakerInheritsFrom("St_geant_Maker");
     //                   NTRACK  ID PTLOW PTHIGH YLOW YHIGH PHILOW PHIHIGH ZLOW ZHIGH
@@ -313,7 +264,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
       } else if (TString(geant->SAttr("GeneratorFile")) == "") {
 	if (RunOpt.Contains("gstarLib",TString::kIgnoreCase)) {geant->Do("call gstar");}
 	if (pTmin < 0) pTmin = mass*bgMin; if (pTmin <    0.01) pTmin =    0.01;
-	if (pTmax < 0) pTmax = mass*bgMax; if (pTmax > 1000.00) pTmax = 1000.00;
+	if (pTmax < 0) pTmax = mass*bgMax; if (pTmax >   10.00) pTmax =   10.00;
 	TString Kine(Form("gkine %i %i %f %f -2  2 0 %f -50 50;",NTRACK,ID,pTmin,pTmax,TMath::TwoPi()));
 	cout << "Set kinematics: " << Kine.Data() << endl;
 	geant->Do(Kine.Data());
@@ -332,6 +283,12 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
       gener->SetGenerator( NTRACK, ID, bgMinL10, bgMaxL10,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, "GBL");
     StarVMCApplication::Instance()->SetPrimaryGenerator(gener);
     cout << "Set StarMCSimplePrimaryGenerator" << endl;
+  }
+  if (Last < 0) return;
+  Int_t initStat = chain->Init(); // This should call the Init() method in ALL makers
+  if (initStat) {
+    cout << "Chain initiation has failed" << endl;
+    chain->Fatal(initStat, "during Init()");
   }
   if (Last > 0)  chain->EventLoop(First,Last);
 }
