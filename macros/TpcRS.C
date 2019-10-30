@@ -290,6 +290,12 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     StarVMCApplication::Instance()->SetPrimaryGenerator(gener);
     cout << "Set StarMCSimplePrimaryGenerator" << endl;
   }
+  if (Last < 0) return;
+  Int_t initStat = chain->Init(); // This should call the Init() method in ALL makers
+  if (initStat) {
+    cout << "Chain initiation has failed" << endl;
+    chain->Fatal(initStat, "during Init()");
+  }
   if (Last > 0)  chain->EventLoop(First,Last);
 }
 //________________________________________________________________________________

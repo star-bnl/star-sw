@@ -1213,6 +1213,11 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPosition position )
 	target -> AddNodeOverlap( daughter, copy, matrix );
     }
 
+
+  // Increment the number of branches on the block
+  block->branch();
+  
+
 //   //
 //   // In the case of parameterized blocks, restore the previous state of the shape
 //   //
@@ -1622,6 +1627,10 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
       if ( sanityCheck(daughter) )
 	target -> AddNodeOverlap( daughter, copy, matrix );
     }
+
+
+  // Increment the number of branches on the block
+  block->branch();
 
 //   //
 //   // In the case of parameterized blocks, restore the previous state of the shape
