@@ -1,5 +1,5 @@
  /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.38 2019/01/04 18:19:56 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.39 2019/10/30 18:49:33 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.39  2019/10/30 18:49:33  akio
+ * Adding FmsGainCorrection flavor control
+ *
  * Revision 1.38  2019/01/04 18:19:56  akio
  * A bug fix which caused crash when fmsBitShiftGain/B was empty.
  *
@@ -175,6 +178,15 @@ Int_t StFmsDbMaker::Finish(){LOG_DEBUG<<"StFmsDbMaker Finish"<<endm; return kStO
 Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   LOG_DEBUG << "StFmsDbMaker::InitRun - run = " << runNumber << endm;
   deleteArrays();
+  
+  if(IAttr("fmsGainCorr-PSU-S")) {
+      LOG_INFO << "FmsGainCorrection Flavor = fmsGainCorr-PSU-S" << endm;
+      SetFlavor("ofl",              "fmsGainCorrectionB");
+  }
+  if(IAttr("fmsGainCorr-BNL-C")) {
+      LOG_INFO << "FmsGainCorrection Flavor = fmsGainCorr-BNL-C" << endm;
+      SetFlavor("fmsGainCorr-BNL-C","fmsGainCorrectionB");
+  }
 
   //! Accessing DBs
   if(mDebug>0) {
