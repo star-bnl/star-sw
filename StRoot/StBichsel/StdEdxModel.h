@@ -25,7 +25,8 @@ class StdEdxModel {
   enum EValType  {kProb, kdProbdX, kdProbdY};
   virtual ~StdEdxModel();
   static  StdEdxModel* instance();
-  static TH1D         *GetdNdxL10()    {return    mdNdxL10;}    // dN/dx versus beta*gamma
+  static TH1D         *GetdNdxL10()    {return    mdNdxL10;}    // dN/dx log10(versus beta*gamma)
+  static TH1D         *GetdNdx()       {return    mdNdx;}       // dN/dx versus beta*gamma
   static TH2F         *GetdEdN(EValType val = kProb, ETpcType tpcType = kTpcAll) {return instance()->mdEdNModel[tpcType][val];}
   static TH1F         *GetdEdNMPV( ETpcType tpcType = kTpcAll) {return instance()->mdEdNMPV[tpcType];}
   static TH2F         *GetLogdEdN(EValType val = kProb, ETpcType tpcType = kTpcAll) {return instance()->mLogdEdxModel[tpcType][val];}
