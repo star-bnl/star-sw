@@ -238,10 +238,10 @@ if ($STAR_HOST_SYS =~ /gcc447/) {# no c++11
   push @items, "FmsPointMaker";
   push @items, "FmsUtil";
 }
- if ($ROOT_LEVEL =~ /^5/ ){
+# if ($ROOT_LEVEL =~ /^5/ ){
 #   push @items, "StStrangeMuDstMaker";
-    push @items, "Table";
- }
+#    push @items, "St_Table";
+# }
 #push @items, "StiCA";
 #push @items, "StarVMC/xgeometry";
 #push @items, "GenFit";
@@ -262,8 +262,9 @@ foreach my $dir( "pams", "StRoot", "StPiD", "StarVMC" ) {
   my @subdirS = readdir DIR;  print "subdirS = @subdirS\n" if ($param::debug);
   closedir DIR;
   foreach my $sub_dir (@subdirS) { 
-    next if $sub_dir eq '.' || $sub_dir eq '..';
-    next if ( $sub_dir =~ $excludeDirList);
+    next if ($sub_dir eq '.' || $sub_dir eq '..');
+    next if ($sub_dir =~ $excludeDirList);
+    next if ($sub_dir eq 'Table' and $ROOT_LEVEL =~ /^5/ );
     my $sub_Dir = $dir . "/" . $sub_dir; 
     next if !-d $sub_Dir and !-l $sub_Dir;
     print "dir = $dir \t sub_dir = $sub_dir sub_Dir = $sub_Dir\n" if ($param::debug);
