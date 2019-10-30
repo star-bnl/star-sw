@@ -112,6 +112,7 @@ struct peak_t {Double_t peak, sigma, mass; const Char_t *Name; Int_t N; Float_t 
 //                                mean         RMS
 #ifndef __CINT__
 static const  peak_t Peaks[6] = {
+#if 0
   // 06/25/10
   //   {0.      ,       0., 0.13956995, "pion"}, // pion
   //   {1.425822, 0.101693, 0.93827231, "proton"}, // proton - pion
@@ -148,6 +149,31 @@ static const  peak_t Peaks[6] = {
 	  {-0.0300,-0.0100, 0.0100, 0.0300}, // X
 	  { 0.0452, 0.4258, 0.4626, 0.0663}  // Y
   }
+#else
+  // 06/27/10
+  //   // MIP from Heed bg = 3.77 => p_pion = 0.526
+  //   Double_t pMIP = 0.526;
+  //   Double_t pmin = pMIP - 0.05; // 0.45;
+  //   Double_t pmax = pMIP + 0.05; // 0.55;
+  {            0.      ,                   0., 0.13956995,         "pion",   0, {0}, {0}},
+  {       1.2806, 0.0798256,      0.938272,       "proton",
+	  6,// protonNzB
+	  { 1.1250, 1.1750, 1.2250, 1.2750, 1.3250, 1.3750}, // X
+	  { 0.0787, 0.1227, 0.1469, 0.1846, 0.2178, 0.2493}  // Y
+  },
+  {       0.435379,       0.0452135,      0.493677,       "kaon",
+	  4,// kaonNzB
+	  { 0.3750, 0.4250, 0.4750, 0.5250}, // X
+	  { 0.2536, 0.3698, 0.2734, 0.1032}  // Y
+  },
+  {       0.313036,       0.000501486,    0.000510999,    "e",   0, {0}, {0}},
+  {       2.40653,        0.0859432,      1.87561,        "deuteron",
+	  7,// deuteronNzB
+	  { 2.2250, 2.2750, 2.3250, 2.3750, 2.4250, 2.4750, 2.5250}, // X
+	  { 0.0520, 0.1026, 0.1192, 0.1522, 0.1892, 0.2273, 0.1575}  // Y
+  },
+  {       0.00820447,     0.00328347,     0.105658,       "mu",   0, {0}, {0}}
+#endif
 };
 #endif
 Bichsel *gBichsel = 0;
@@ -3096,6 +3122,7 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
     Float_t a3;
     Float_t a4;
     Float_t a5;
+    Float_t a6;
     Float_t Npar;
     Float_t dpeak;
     Float_t dmu;
@@ -3106,6 +3133,7 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
     Float_t da3;
     Float_t da4;
     Float_t da5;
+    Float_t da6;
   };
   Fit_t Fit;
   //  TString NewRootFile(gSystem->DirName(fRootFile->GetName()));
@@ -3129,7 +3157,7 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
   }
   if (! FitP) {
     FitP = new TNtuple("FitP","Fit results",
-		       "i:j:x:y:mean:rms:peak:mu:sigma:entries:chisq:prob:a0:a1:a2:a3:a4:a5:Npar:dpeak:dmu:dsigma:da0:da1:da2:da3:da4:da5");
+		       "i:j:x:y:mean:rms:peak:mu:sigma:entries:chisq:prob:a0:a1:a2:a3:a4:a5:a6:Npar:dpeak:dmu:dsigma:da0:da1:da2:da3:da4:da5:da6");
     FitP->SetMarkerStyle(20);
     FitP->SetLineWidth(2);
   }
@@ -3286,6 +3314,7 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
 	Fit.a3  = params[6]; //       "d"
 	Fit.a4  = params[7]; //       "Total"
 	Fit.a5  = params[8]; //       "Case", sigma of Landau for L5
+	Fit.a6  = params[9]; //       "scale"
 	Fit.dpeak  = g->GetParError(kpeak);
 	Fit.dmu    = g->GetParError(1);
 	Fit.dsigma = g->GetParError(2);
@@ -3295,6 +3324,7 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
 	Fit.da3	   = g->GetParError(6);
 	Fit.da4	   = g->GetParError(7);
 	Fit.da5	   = g->GetParError(8);
+	Fit.da6	   = g->GetParError(9);
       } else {
 	delete proj; continue;
       }
