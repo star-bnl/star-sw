@@ -2,6 +2,7 @@
 //#define CompareWithToF 
 //#define __USEZ3A__
 //#define __CHECK_LargedEdx__
+#define __NEGATIVE_ONLY__
 #define __Use_dNdx__
 //#define __TEST_DX__
 //#define __ZDC3__
@@ -80,8 +81,12 @@ static Int_t numberOfSectors = 0;
 static Int_t numberOfTimeBins = 0;
 static Int_t NumberOfChannels = 8;
 
-const static Double_t pMomin = 0.35; // range for dE/dx calibration
-const static Double_t pMomax = 0.75;
+//const static Double_t pMomin = 0.35; // range for dE/dx calibration
+//const static Double_t pMomax = 0.75;
+const  Double_t pMoMIP = 0.526; // MIP from Heed bg = 3.77 => p_pion = 0.526
+const  Double_t pMomin = pMoMIP - 0.05; // 0.45;
+const  Double_t pMomax = pMoMIP + 0.05; // 0.55;
+
 Double_t StdEdxY2Maker::bField = 0;
 
 //______________________________________________________________________________
@@ -804,9 +809,7 @@ void StdEdxY2Maker::SortdEdx() {
 void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   // Histograms
   static THnSparseF *Time = 0, *TimeC = 0; // , *TimeP = 0
-#ifndef __Use_dNdx__
   Hists3D::NtotHist = 2;
-#endif
   Int_t NoRows = St_tpcPadConfigC::instance()->numberOfRows(20);
   static Hists3D Pressure("Pressure","log(dE/dx)","row","Log(Pressure)",-NoRows,150, 6.84, 6.99); // ? mix of inner and outer
   //  static Hists3D PressureT("PressureT","log(dE/dx)","row","Log(Pressure*298.2/inputGasTemperature)",-NoRows,150, 6.84, 6.99);
@@ -816,7 +819,11 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 
   static Hists3D AvCurrent("AvCurrent","log(dEdx/Pion)","Sector*Channels","Average Current [#{mu}A]",numberOfSectors*NumberOfChannels,200,0.,1.0);
   static Hists3D Qcm("Qcm","log(dEdx/Pion)","Sector*Channels","Accumulated Charge [uC/cm]",numberOfSectors*NumberOfChannels,200,0.,1000);
+#ifdef __Use_dNdx__
+  Hists3D::NtotHist = 9;
+#endif
   static Hists3D SecRow3("SecRow3","<log(dEdx/Pion)>","sector","row",numberOfSectors,NoRows);
+  Hists3D::NtotHist = 2;
   static Hists3D ADC3("ADC3","<logADC)>","sector","row",numberOfSectors,
 		      NoRows,0,-1, 
 		      100,0.,10.,
@@ -828,13 +835,19 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 #endif
 #endif
 #ifdef __ZDC3__
+  Hists3D::NtotHist = 2;
   static Hists3D Zdc3("Zdc3","<log(dEdx/Pion)>","row","log10(ZdcCoincidenceRate)",-NoRows,100,0.,10.);
 #endif /* __ZDC3__ */
+#ifdef __Use_dNdx__
+  Hists3D::NtotHist = 9;
+#endif
   static Hists3D Z3("Z3","<log(dEdx/Pion)>","row","Drift Distance",-NoRows,220,-5,215);
+  Hists3D::NtotHist = 2;
 #ifdef __iTPCOnly__
   static Hists3D Z3iTPC("Z3iTPC","<log(dEdx/Pion)>","row","Drift Distance",-NoRows,220,-5,215);
 #endif
   //  static Hists3D Z3O("Z3O","<log(dEdx/Pion)>","row","(Drift)*ppmO2In",St_tpcPadConfigC::instance()->numberOfRows(sector),100,0,1e4);
+  Hists3D::NtotHist = 2;
   static Hists3D Edge3("Edge3","log(dEdx/Pion)","sector*row"," Edge",numberOfSectors*NoRows, 201,-100.5,100.5);
   static Hists3D xyPad3("xyPad3","log(dEdx/Pion)","sector+yrow[-0.5,0.5] and xpad [-1,1]"," xpad",numberOfSectors*20, 32,-1,1, 200, -5., 5., 0.5, 24.5);
   static Hists3D dX3("dX3","log(dEdx/Pion)","row"," dX(cm)",-NoRows, 100,0,10.);
@@ -1178,7 +1191,10 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	hdEZO->Fill(TMath::Log10(FdEdx[k].C[StTpcdEdxCorrection::kzCorrection].dE));
 	hdEMO->Fill(TMath::Log10(FdEdx[k].C[StTpcdEdxCorrection::kMultiplicity].dE));
       }
-      if (pMomentum > pMomin && pMomentum < pMomax &&PiD.fFit.TrackLength() > 40 ) { // Momentum cut
+      if (pMomentum > pMomin && pMomentum < pMomax &&PiD.fFit.TrackLength() > 40 ) continue; // { // Momentum cut
+#ifdef     __NEGATIVE_ONLY__
+      if (sCharge != 1)  continue;
+#endif /*  __NEGATIVE_ONLY__ */
 #if 0
 	if (tpcGas) {
 	  if (inputTPCGasPressureP) inputTPCGasPressureP->Fill(tpcGas->inputTPCGasPressure,FdEdx[k].F.dEdxN);
@@ -1320,7 +1336,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	//	Z3O.Fill(rowS,FdEdx[k].ZdriftDistanceO2,Vars);
 	Edge3.Fill(St_tpcPadConfigC::instance()->numberOfRows(20)*(sector-1)+row,FdEdx[k].edge, Vars);
 	xyPad3.Fill(FdEdx[k].yrow,FdEdx[k].xpad, Vars);
-      }
+	//      } end loop of dE/dx samples
     }
   }
   return;
