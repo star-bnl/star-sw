@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.93 2019/10/25 17:13:09 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.94 2019/10/30 20:29:21 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.94  2019/10/30 20:29:21  jwebb
+* Final (?) fix for zfatal bug.  Missing volume id in fast simulator because the fpdmgeo4 module was not properly detected / configured in g2t_volume_id.
+*
 * Revision 1.93  2019/10/25 17:13:09  jwebb
 * Deprecate old numbering scheme for hcal
 *
@@ -449,6 +452,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
              if (ifms=6) ifpdmgeo=1      !! fpdmgeo1.g
              if (ifms=7) ifpdmgeo=2      !! fpdmgeo2.g
              if (ifms=8) ifpdmgeo=3      !! fpdmgeo3.g                                       
+             if (ifms=9) ifpdmgeo=4      !! fpdmgeo4.g "!!!! missed this when FpdmGeo4 was integrated!!!!"
           }
 		  if (ifsc>=0) print *,' g2t_volume_id: FSC version =',fscg_version
 
