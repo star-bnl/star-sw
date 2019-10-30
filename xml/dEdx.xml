@@ -33,4 +33,9 @@
 <input URL="command:dEdxSample.pl" />
 <!-- <input URL="file:/net/l403/data/fisyak/reco/2019/DEV2StiCA.Minuit/*event.root" /> -->
 <!-- <input URL="file:/net/l403/data/fisyak/reco/2019/DEV2StiCA.Minuit2/*event.root" /> -->
+ <ResourceUsage>
+    <Memory>
+      <MinMemory>3500</MinMemory>
+    </Memory>
+  </ResourceUsage>
 </job>

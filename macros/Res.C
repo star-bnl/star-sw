@@ -281,7 +281,7 @@ void DrawFitP(const Char_t *hitN = "SecRow3C", const Char_t *plot="mu:y", const 
   c1->SetGrid(); //x(9);
   //  c1->SetGridy(30);
   TH1F *frame = 0;
-  frame = c1->DrawFrame(0.5,-0.1,45.5,0.1);
+  frame = c1->DrawFrame(0.5,-0.5,72.5,0.5);
   //    frame->SetTitle("Shift versus Track Length");
   //    frame->SetYTitle("Sift");
   //  frame->SetXTitle("Track Length (cm)                   ");

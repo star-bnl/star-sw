@@ -282,4 +282,7 @@
 # root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20050111.220000.root SecRow3CGFcuProduction_ReversedFullField.root 'MakeTpcSecRowB.C(20050115,204,"TpcSecRowB",0)' >& MakeTpcSecRowB.20050115,204.log
 # root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20050111.220000.root SecRow3CGFcuProduction_FullField.root  'MakeTpcSecRowB.C(20050216,204,"TpcSecRowB",0)' >& MakeTpcSecRowB.20050216,204.log
 # root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20050111.220000.root SecRow3CGFcu62productionMinBias_FullField.root 'MakeTpcSecRowB.C(20050310,204,"TpcSecRowB",0)' >& MakeTpcSecRowB.20050310,204.log
- root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20050111.220000.root SecRow3CGFcu22ProductionMinBias_FullField.root 'MakeTpcSecRowB.C(20050323,204,"TpcSecRowB",0)' >& MakeTpcSecRowB.20050323,204.log
+# root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20050111.220000.root SecRow3CGFcu22ProductionMinBias_FullField.root 'MakeTpcSecRowB.C(20050323,204,"TpcSecRowB",0)' >& MakeTpcSecRowB.20050323,204.log
+
+# Run XIX recaiibraion
+ root.exe -q -b /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/dEdx900/Fit/SecRow3CGFall.root 'MakeTpcSecRowB.C(20190201,901)' >& MakeTpcSecRowB.20190201,901.log

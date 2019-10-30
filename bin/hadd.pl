@@ -9,6 +9,7 @@ my $dir = File::Basename::basename($DIR);
 #  exit 0;
 #} 
 my %ARG = (files => '*.root',
+	   all => '1', 
            FilesPerJob => '40',
 	   Out => 'hadd',
 	   version => '.DEV2',
@@ -19,9 +20,16 @@ my %ARG = (files => '*.root',
 	   prefix => '',
 	   option => ''
 	  );
+while (@ARGV) {
+  $_ = shift @ARGV;
+  if ($_ =~ /=/) { my($key, $val) = /([^=]*)=(.*)/; $ARG{$key} = $val;}
+}
+
+while (my ($key,$value) = each %ARG) {
+  print  "$key=$value\n";
+}
 my @periods = ();
-my $all = 0;
-if ($all) {
+if ($ARG{all}) {
   @periods = ('All'   => {first => '0', second => '99999999', list => ''});
 } else {
 #   @periods = ('RFF'   => {first => '12148026', second => '12149054', list => ''},
@@ -53,14 +61,6 @@ if ($all) {
 	      'production_31GeV_fixedTarget_2019'                => {first => '20189035', second => '20190024', list => ''}, #         2019-07-09      03:23:12        2019-07-09      14:35:52
 	      'production_AuAu200_2019'                          => {first => '20190042', second => '20193026', list => ''}  #         2019-07-09      19:15:24        2019-07-12      19:56:37
 	     );
-}
-while (@ARGV) {
-  $_ = shift @ARGV;
-  if ($_ =~ /=/) { my($key, $val) = /([^=]*)=(.*)/; $ARG{$key} = $val;}
-}
-
-while (my ($key,$value) = each %ARG) {
-  print  "$key=$value\n";
 }
 my @tags = ();
 my $def = {@periods};
