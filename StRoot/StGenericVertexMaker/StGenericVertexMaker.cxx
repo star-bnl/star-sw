@@ -210,7 +210,7 @@ Int_t StGenericVertexMaker::Init()
 //_____________________________________________________________________________
 void StGenericVertexMaker::Clear(const char* opt){
   LOG_INFO <<" StGenericVertexMaker::Clear()"<<endm; 
-  theFinder->Clear();
+  if (theFinder)  theFinder->Clear();
 }
 
 
