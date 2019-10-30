@@ -145,7 +145,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   if (tpcRS) {
     //      if (needAlias) tpcRS->SetInput("geant","bfc/.make/inputStream/.make/inputStream_Root/.data/bfcTree/geantBranch");
     Int_t m_Mode = tpcRS->GetMode();
-    cout << "========== Opt " << Opt.Data() << endl;
+    //    cout << "========== Opt " << Opt.Data() << endl;
     if (Opt.Contains("heed",TString::kIgnoreCase))        {
       SETBIT(m_Mode,StTpcRSMaker::kHEED); CLRBIT(m_Mode,StTpcRSMaker::kBICHSEL);
       cout << "========== set HEED" << endl;
@@ -217,57 +217,9 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     cout << "Chain initiation has failed" << endl;
     chain->Fatal(initStat, "during Init()");
   }
-  const Char_t  *Names[15] = {
-    "muon+",     
-    "muon-",     
-    "electron",  
-    "positron",  
-    "pion+",     
-    "pion-",     
-    "kaon+",     
-    "kaon-",     
-    "proton",    
-    "pbar",      
-    "deuteron",  
-    "triton",    
-    "He3",	 
-    "alpha",     
-    "pionMIP"        
-  };
-  Int_t Ids[15] = {
-      5,
-      6,
-      3,
-      2,
-      8,
-      9,
-     11,
-     12,
-     14,
-     15,
-     45,
-     46,
-     49,
-     47,
-      8
-  };
-  Double_t Masses[15] = {
-    0.1056584,
-    0.1056584,
-    0.51099907e-3,
-    0.51099907e-3,
-    0.13956995,
-    0.13956995,
-    0.493677,
-    0.493677,
-    0.93827231,
-    0.93827231, 
-    1.875613,
-    2.80925,
-    2.80923,
-    3.727417,
-    0.13956995
-  };
+  const Char_t  *Names[15] = {"muon+", "muon-", "electron", "positron", "pion+", "pion-", "kaon+", "kaon-", "proton", "pbar", "deuteron", "triton", "He3", "alpha", "pionMIP"};
+  Int_t Ids[15] =            {      5,      6,           3,          2,       8,       9,      11,      12,       14,     15,         45,       46,    49,      47,         8};
+  Double_t Masses[15] = {    0.1056584,0.1056584,0.51099907e-3,0.51099907e-3,0.13956995,0.13956995,0.493677,0.493677,0.93827231,0.93827231,1.875613,2.80925,2.80923,3.727417,0.13956995  };
   Int_t    NTRACK = 100;
   Int_t    ID = 5;
   Double_t Ylow   =  -1; 
@@ -293,6 +245,11 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   }
   Double_t pTmin = mass*TMath::Power(10.,bgMinL10);
   Double_t pTmax = mass*TMath::Power(10.,bgMaxL10);
+  if (pTmax > 10) {
+    pTmax = 10;
+    bgMaxL10 = TMath::Log10(pTmax/mass);
+    //    cout << "Reduce bgMax10 = " << bgMaxL10 << endl;
+  }
   if (gClassTable->GetID("TGiant3") >= 0) {
     St_geant_Maker *geant = (St_geant_Maker *) chain->GetMakerInheritsFrom("St_geant_Maker");
     //                   NTRACK  ID PTLOW PTHIGH YLOW YHIGH PHILOW PHIHIGH ZLOW ZHIGH
@@ -313,7 +270,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
       } else if (TString(geant->SAttr("GeneratorFile")) == "") {
 	if (RunOpt.Contains("gstarLib",TString::kIgnoreCase)) {geant->Do("call gstar");}
 	if (pTmin < 0) pTmin = mass*bgMin; if (pTmin <    0.01) pTmin =    0.01;
-	if (pTmax < 0) pTmax = mass*bgMax; if (pTmax > 1000.00) pTmax = 1000.00;
+	if (pTmax < 0) pTmax = mass*bgMax; if (pTmax >   10.00) pTmax =   10.00;
 	TString Kine(Form("gkine %i %i %f %f -2  2 0 %f -50 50;",NTRACK,ID,pTmin,pTmax,TMath::TwoPi()));
 	cout << "Set kinematics: " << Kine.Data() << endl;
 	geant->Do(Kine.Data());
