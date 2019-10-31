@@ -170,7 +170,9 @@ Float_t PadRowRadius(Float_t x) {
   else                     return Rpads[row-1];
 }
 //________________________________________________________________________________
-
+Float_t rowSigned(Int_t row, Int_t sector) {
+  return (sector <= 12) ? row : -row;
+}
 //________________________________________________________________________________
 void HardWarePosition() {}
 #endif
