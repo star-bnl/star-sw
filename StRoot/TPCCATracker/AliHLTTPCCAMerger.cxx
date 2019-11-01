@@ -251,15 +251,6 @@ void AliHLTTPCCAMerger::Reconstruct()
 #endif
 //  Merging(0);
 
-#ifdef MAIN_DRAW
-//  std::cout<<" - Draw detector\n";
-//  if ( AliHLTTPCCADisplay::Instance().DrawType() == 3 ) {
-//    AliHLTTPCCADisplay &disp = AliHLTTPCCADisplay::Instance();
-//    disp.Ask();
-//  }
-//  std::cout<<" - Draw - ok\n";
-#endif
-
 #ifndef TETA
 
 #ifdef USE_TIMERS
@@ -285,12 +276,10 @@ void AliHLTTPCCAMerger::Reconstruct()
 #endif // DO_NOT_MERGE
 
 #endif
-//  std::cout<<" - Finish merging\n";
 }
 
 void AliHLTTPCCAMerger::UnpackSlicesPT()
 {
-//  std::cout<<"     AliHLTTPCCAMerger::UnpackSlicesPT()\n";
   int nTracksTotal = 0;
   int nTrackClustersTotal = 0;
   unsigned int trArraySize = 0;
@@ -480,7 +469,6 @@ void AliHLTTPCCAMerger::ClearMemoryPT()
 
 void AliHLTTPCCAMerger::MergeUpPT( int s )
 {
-//  std::cout<<"     AliHLTTPCCAMerger::MergeUpPT( int "<<s<<" )\n";
   int trackOffset(0);
   int dir(1);
   int gape(8);
@@ -514,15 +502,8 @@ void AliHLTTPCCAMerger::MergeUpPT( int s )
     }
     if ( !fkSlices[pSlice] ) continue;
     int endTrack = fkSlices[iSlice]->NTracks() + trackOffset;
-//    std::cout<<"\n fkSlices[iSlice]->NTracks(): "<<fkSlices[iSlice]->NTracks()<<";   trackOffset: "<<trackOffset<<"\n\n";
     int startTrack = trackOffset%float_v::Size == 0 ? trackOffset : trackOffset - trackOffset%float_v::Size;
-//    std::cout<<"iSlice: "<<iSlice<<"\n";
-//    std::cout<<"startTrack: "<<startTrack<<";   endTrack: "<<endTrack<<";   nTracks: "<<endTrack - startTrack<<"\n";
     for( int iTr = startTrack; iTr < endTrack; iTr += float_v::Size ) {
-//	std::cout<<" ___ startTrack: "<<startTrack<<";   endTrack: "<<endTrack<<";   iTr: "<<iTr<<"\n";
-//	if( iTr >= 32 ) continue;
-//if( !(iSlice == 22 && pSlice == 21)) continue;
-//if( !( (iSlice == 9 && pSlice == 8) || (iSlice == 8 && pSlice == 7) ) ) continue;
 #ifdef TETASLICEDRAW
 #ifdef MAIN_DRAW
   if ( AliHLTTPCCADisplay::Instance().DrawType() != 3 ) return;
@@ -541,11 +522,8 @@ void AliHLTTPCCAMerger::MergeUpPT( int s )
 //	int_v &thisRow = reinterpret_cast<int_v&>(vLastRow[iTr]);
       float_v &thisTeta = reinterpret_cast<float_v&>(vTeta[iTr]);
       float_v firstTrackV(-1.f), lastTrackV(-1.f);
-//	std::cout<<" - thisXOut: "<<thisXOut<<";   active: "<<active<<"\n";
-//	std::cout<<" - thisRow: ";
       for( int iV = 0; iV < int_v::Size; iV++ ) {			//TODO: try to vectorize
 	int thisRow = vLastRow[iTr+iV];
-//	    std::cout<<thisRow<<" - ";
 	if( !active[iV] /*|| thisRow > 41*/ ) continue;
 	int fstn = 0;
 	if( s == 0 || s == 1 ) fstn = 1;
@@ -753,62 +731,7 @@ void AliHLTTPCCAMerger::UnpackSlices()
 
   int nTracksCurrent = 0;
   int nClustersCurrent = 0;
-// ---
-/*#ifdef MAIN_DRAW
-if ( AliHLTTPCCADisplay::Instance().DrawType() != 3 ) return;
-AliHLTTPCCAPerformance& gbPerfo = AliHLTTPCCAPerformance::Instance();
-AliHLTTPCCADisplay &disp = AliHLTTPCCADisplay::Instance();
-  //        disp.Set2Slices( slices[iSlice] );
-disp.SetGB( gbPerfo.GetTracker() );
-disp.SetTPC( slices[0]->Param() );
-for ( int iSlice = 0; iSlice < fgkNSlices; iSlice++ ) {
-  if ( !fkSlices[iSlice] ) continue;
-  disp.SetTPCView();
-  disp.DrawTPC();
 
-  const AliHLTTPCCASliceOutput &slice = *( fkSlices[iSlice] );
-  std::cout<<"<UnpackSlices> - iSlice: "<<iSlice<<";   NTracks: "<<slice.NTracks()<<"\n";
-
-  for ( int itr = 0; itr < slice.NTracks(); itr += uint_v::Size ) {
-
-    int nTracksVector = uint_v::Size;
-    if(slice.NTracks() - itr < uint_v::Size )
-    nTracksVector = slice.NTracks() - itr;
-    for(int iV=0; iV < nTracksVector; iV++) {
-      const AliHLTTPCCASliceTrack &sTrack = slice.Track( itr + iV );
-      std::cout<<"   iTrack: "<<itr<<";   iV: "<<iV<<";   nHits: "<<sTrack.NClusters()<<"\n";
-
-      if( sTrack.NClusters() > 5 ) {
-//        if ( AliHLTTPCCADisplay::Instance().DrawType() != 3 ) return;
-//        AliHLTTPCCAPerformance& gbPerfo = AliHLTTPCCAPerformance::Instance();
-//        AliHLTTPCCADisplay &disp = AliHLTTPCCADisplay::Instance();
-////        disp.Set2Slices( slices[iSlice] );
-//        disp.SetGB( gbPerfo.GetTracker() );
-//        disp.SetTPC( slices[0]->Param() );
-//        disp.SetTPCView();
-//        disp.DrawTPC();
-//        disp.SetSliceGlobal( slices[iSlice] );
-
-        for ( int iTrClu = 0; iTrClu < sTrack.NClusters(); iTrClu++ ) {
-          int ic = sTrack.FirstClusterRef() + iTrClu;
-          float2 yz = slice.ClusterUnpackedYZ( ic );
-//          disp.DrawPointGlobal( slice.ClusterUnpackedX( ic ), yz.x, yz.y, kRed, 0.5 );
-          disp.SpecDrawHitGlobal( slice.ClusterUnpackedX( ic ), yz.x, yz.y, iSlice, kRed, 0.5 );
-//          float locX = slice.ClusterUnpackedX( ic );
-//          float locY = yz.x;
-//          float Z = yz.y;
-//          std::cout<<" --- iTrClu: "<<iTrClu<<";   locX: "<<locX<<";   locY: "<<locY<<";   Z: "<<Z<<"\n";
-
-        }
-
-//        disp.Ask();
-      }
-    }
-  }
-  disp.Ask();
-}
-#endif*/
-// --
   for ( int iSlice = 0; iSlice < fgkNSlices; iSlice++ ) {
 
     fSliceTrackInfoStart[ iSlice ] = nTracksCurrent;
@@ -837,6 +760,7 @@ for ( int iSlice = 0; iSlice < fgkNSlices; iSlice++ ) {
       for(int iV=0; iV < nTracksVector; iV++)
       {
         const AliHLTTPCCASliceTrack &sTrack = slice.Track( itr + iV );
+//        if( slice.ClusterIDrc( sTrack.FirstClusterRef() ).Cluster() != 40 ) continue;
 //        std::cout<<"   iTrack: "<<itr<<";   iV: "<<iV<<";   nHits: "<<sTrack.NClusters()<<"\n";
 
         nHits[iV] = 0;
@@ -844,6 +768,7 @@ for ( int iSlice = 0; iSlice < fgkNSlices; iSlice++ ) {
 // unpack cluster information
           AliHLTTPCCAClusterInfo &clu = fClusterInfos[nClustersCurrent + nCluNew + (unsigned int)nHits[iV]];
           int ic = sTrack.FirstClusterRef() + iTrClu;
+//          std::cout<<" ----- iCl: "<<iTrClu<<";   iRow: "<<slice.ClusterIDrc( ic ).Row()<<";   iCluster: "<<slice.ClusterIDrc( ic ).Cluster()<<"\n";
 
           clu.SetISlice( iSlice );
           clu.SetIRow( slice.ClusterIDrc( ic ).Row() );
@@ -930,7 +855,6 @@ for ( int iSlice = 0; iSlice < fgkNSlices; iSlice++ ) {
 #endif // DO_TPCCATRACKER_EFF_PERFORMANCE
         track.fInnerRow = (fClusterInfos[hits[0][iV]]).IRow();
         track.fOuterRow = (fClusterInfos[hits[(unsigned int)nHits[iV]-1][iV]]).IRow();
-//std::cout<<"<<<<<<<<<<<<<<< track.Used: "<<track.Used()<<"\n";
 
         for ( unsigned int i = 0; i < nHits[iV]; i++ )
           fClusterInfos[nClustersCurrent + i] = fClusterInfos[hits[i][iV]];
@@ -943,13 +867,11 @@ for ( int iSlice = 0; iSlice < fgkNSlices; iSlice++ ) {
 #ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
     if (slices[iSlice]->fOutTracks1) delete[] slices[iSlice]->fOutTracks1;
     slices[iSlice]->fOutTracks1 = new AliHLTTPCCAOutTrack [nTracksCurrent-NTracksPrev];
-//    std::cout<<"===> iSlice: "<<iSlice<<";   nOutTracks1: "<<nTracksCurrent-NTracksPrev<<"\n";
     for (int i=0; i<nTracksCurrent-NTracksPrev; i++)
     {
       slices[iSlice]->fOutTracks1[i].SetStartPoint(fTrackInfos[i+NTracksPrev].InnerParam());
       slices[iSlice]->fOutTracks1[i].SetEndPoint(fTrackInfos[i+NTracksPrev].OuterParam());
       slices[iSlice]->fOutTracks1[i].SetOrigTrackID(fTrackInfos[i+NTracksPrev].orig_track_id);
-//      std::cout<<"---===> i: "<<i<<";   orig_track_id: "<<fTrackInfos[i+NTracksPrev].orig_track_id<<"\n";
       slices[iSlice]->fNOutTracks1++;
     }
     NTracksPrev = nTracksCurrent;
@@ -1026,10 +948,6 @@ float_m AliHLTTPCCAMerger::FitTrack( AliHLTTPCCATrackParamVector &t, float_v &Al
   float_m active = active0; // stop on a hit if this hit can't be added
   for ( int ihit = 0; ihit < nHitsMax; ihit++ ) {
     active &= static_cast<float_m>( ihit < nHits );
-//    if(nHitsMin>15&&(ihit==3||ihit==5||ihit==2)) continue;
-//    if(nHitsMin>25&&(ihit==3||ihit==5||ihit==2||ihit==4||ihit==6||ihit==7||ihit==8||ihit==9)) continue;
-//std::cout<<"ihit: "<<ihit<<"\n";
-//std::cout<<" ... active0: "<<active<<"\n";
 
     if(active.isEmpty()) continue;
     // ---
@@ -1114,15 +1032,6 @@ float_m AliHLTTPCCAMerger::FitTrack( AliHLTTPCCATrackParamVector &t, float_v &Al
       hits[jhit][iV] = hitsNew[i][iV];
     }
   }
-//std::cout<<" ...> return ok: "<<ok<<"\n";
-
-//  std::cout<<" - return "<<ok<<";   merged: "<<merged<<"\n";
-//  float_m copyback(!ok && merged);
-//    std::cout<<" --- copyback: "<<copyback<<"\n";
-//    if( !copyback.isEmpty() ) ConvertPTrackParamToVectorAdd( &copy, t, float_v::Size, copyback);
-  // ---
-//  delete [] copy;
-  // ---
 
   return ok;
 }
@@ -1297,12 +1206,9 @@ float_m AliHLTTPCCAMerger::FitTrackMerged( AliHLTTPCCATrackParamVector &t, float
   float slVs[MaxNHits*float_v::Size] __attribute__ ((aligned(float_v::Size*4)));
   // ---
 
-  std::cout<<".FitTrackMerged. get hits. nHits: "<<nHits<<"\n";
   for ( int ihit = 0; ihit < nHitsMax; ihit++ ) {
 //      if( ihit%2 == 0 && ihit != nHitsMax - 1 && ihit > 5 ) continue;
-      std::cout<<".ihit: "<<ihit<<"\n";
     const float_m &active = static_cast<float_m>( ihit < nHits ) && active0;
-    std::cout<<".active0: "<<active0<<";   active: "<<active<<"\n";
 
     uint_v jhitV;
 //    std::cout<<"|jhitV: "<<jhitV<<"\n";
@@ -1383,9 +1289,6 @@ float_m AliHLTTPCCAMerger::FitTrackMerged( AliHLTTPCCATrackParamVector &t, float
     const float_v &slV = reinterpret_cast<float_v&>(slVs[ihit*float_v::Size]);
     // ---
 #endif
-    std::cout<<" >>> ihit "<<ihit<<";   xV: "<<xV<<";   yV: "<<yV<<";   zV: "<<zV<<"\n";
-    std::cout<<" >>> rotateA: "<<(sliceAlphaV - Alpha0V)<<"\n";
-    std::cout<<" _____ active1: "<<active<<";   t.X(): "<<t.X()<<";   slV: "<<slV<<"\n";
 
     const float_m savedActive = active;
     const float_v rotateA = sliceAlphaV - Alpha0V;
@@ -1395,19 +1298,15 @@ float_m AliHLTTPCCAMerger::FitTrackMerged( AliHLTTPCCATrackParamVector &t, float
     if( ISUNLIKELY( !(!CAMath::IsZero(rotateA) && active).isEmpty() ) ) { // track crosses a sector border very rarely
       rotated = t.Rotate( rotateA, linearization, .999f, active);
       active &= rotated;
-      std::cout<<" __!__ active2: "<<active<<";   t.X(): "<<t.X()<<"\n";
     }
     const float_v xLast = t.X();
 #endif
 
     Alpha0V(active) = sliceAlphaV;
 //    std::cout<<" ___ rotated: "<<rotated<<"\n";
-std::cout<<" ....... transport. t.x: "<<t.X()<<" to xV: "<<xV<<"\n";
     const float_m &transported = t.TransportToXWithMaterial( xV, linearization, fitPar, fSliceParam.cBz( ), 0.999f, active);
 #ifndef SKIP_CALC
     active &= transported;
-//    std::cout<<" ___ transported: "<<transported<<"\n";
-    std::cout<<" _____ active3: "<<active<<";   t.X(): "<<t.X()<<"\n";
 
     if ( first ) {
       t.InitCovMatrixAndChi2AndNDF( active );
@@ -1418,16 +1317,12 @@ std::cout<<" ....... transport. t.x: "<<t.X()<<" to xV: "<<xV<<"\n";
     float_v err2Y, err2Z;
     fSliceParam.GetClusterErrors2( RowV, t, &err2Y, &err2Z );
     const float_m &filtered = t.FilterWithMaterial(yV, zV, err2Y, err2Z, 0.999f, active);
-    std::cout<<" _____ active4: "<<active<<";   t.X(): "<<t.X()<<"\n";
 
     const float_m broken = savedActive && (!rotated || !transported || !filtered);
     if ( !broken.isEmpty() ) {
       t.TransportToXWithMaterial( xLast, linearization, fitPar, fSliceParam.cBz( ), 0.999f, transported && !filtered ); // transport back if hit can't be added. TODO with out material
       t.Rotate( -rotateA, linearization, .999f, rotated && (!transported || !filtered) );
     }
-    std::cout<<" _____ active5: "<<active<<";   t.X(): "<<t.X()<<"\n";
-    std::cout<<" _______ active: "<<active<<";   transported: "<<transported<<";   filtered: "<<filtered<<"\n";
-//std::cout<<" + ihit: "<<ihit<<" ---------- chi2: "<<t.Chi2()<<";   active: "<<active<<";   filtered: "<<filtered<<"\n";
 
     active &= filtered;
 #endif
@@ -1811,7 +1706,8 @@ void AliHLTTPCCAMerger::MergeBorderTracks( AliHLTTPCCABorderTrack B1[], int N1, 
       for( ; nVecElements < uint_v::Size && dir*i2 <= dir*ilast2; i2 += dir ) {
 
         const AliHLTTPCCABorderTrack &b2 = B2[i2];
-//        std::cout<<" --- i2: "<<i2<<";   b2 id: "<<b2.TrackID()<<"\n";
+//        std::cout<<" --- i2: "<<i2<<";   b2 id: "<<b2.TrackID()<<";   innRow: "<<b2.InnerRow()<<";   outRow: "<<b2.OuterRow()<<"\n";
+//        std::cout<<"     i1: "<<i1<<";   b1 id: "<<b1.TrackID()<<";   innRow: "<<b1.InnerRow()<<";   outRow: "<<b1.OuterRow()<<"\n\n";
 
           // if dz/ds or q/pt of the tracks differs more, than by several sigmas (now 8 is used) - they are not neighbours
         float db2 = b1.b() - b2.b();
@@ -1953,6 +1849,9 @@ void AliHLTTPCCAMerger::MergeBorderTracks( AliHLTTPCCABorderTrack B1[], int N1, 
           // determine, whether neighbour is inner or outer
 
         const AliHLTTPCCABorderTrack &b2iV = B2[(unsigned int)b2index[iV]];
+
+        if( ISUNLIKELY( b1.InnerRow() <= b2iV.InnerRow()+1 && b1.OuterRow() >= b2iV.OuterRow()-1 ) ) continue;
+        if( ISUNLIKELY( b2iV.InnerRow() <= b1.InnerRow()+1 && b2iV.OuterRow() >= b1.OuterRow()-1 ) ) continue;
 
         bool IsNext =
           ( b1.InnerRow() < b2iV.InnerRow()     ) ||
@@ -2144,7 +2043,7 @@ void AliHLTTPCCAMerger::FindNeighbourTracks(int number)
       }
       LastTrIR[iSl][curRow] = nCurr[iSl] - 1;
     }
-//std::cout<<":::MergeBorderTracks::: "<<(int)iSl<<" -> "<<(int)iSl<<"\n";
+//std::cout<<":::MergeBorderTracks:::in the same sector "<<(int)iSl<<" -> "<<(int)iSl<<"\n";
       // create links to neighbour tracks clones in the same sector
     MergeBorderTracks( bCurrSliceOR, nCurr[iSl], iSl,
                        bCurrSliceIR, nCurr[iSl], iSl,
@@ -2156,12 +2055,12 @@ void AliHLTTPCCAMerger::FindNeighbourTracks(int number)
     for(int iSl=0; iSl<fgkNSlices; iSl++)
     {
 //std::cout<<".iSl: "<<iSl<<";   fgkNSlices: "<<fgkNSlices<<";   nextSl: "<<(int)nextSlice[iSl]<<";   oppSl: "<<(int)oppSlice[iSl]<<"\n";
-//std::cout<<":::MergeBorderTracks::: "<<(int)iSl<<" -> nx "<<(int)nextSlice[iSl]<<"\n";
+//std::cout<<":::MergeBorderTracks:::in the next sector in the same xy-plane::merge upper edges "<<(int)iSl<<" -> nx "<<(int)nextSlice[iSl]<<"\n";
         //  create links to neighbour tracks in the next sector in the same xy-plane
       MergeBorderTracks( bCurrOR+maxNSliceTracks*iSl,            nCurr[iSl],            iSl,
                          bCurrIR+maxNSliceTracks*nextSlice[iSl], nCurr[nextSlice[iSl]], nextSlice[iSl],
                          number, FirstTrIR[nextSlice[iSl]], LastTrIR[nextSlice[iSl]] ); // merge upper edges
-//std::cout<<":::MergeBorderTracks::: nx "<<(int)nextSlice[iSl]<<" -> "<<(int)iSl<<"\n";
+//std::cout<<":::MergeBorderTracks:::in the next sector in the same xy-plane::merge lower edges nx "<<(int)nextSlice[iSl]<<" -> "<<(int)iSl<<"\n";
       MergeBorderTracks( bCurrOR+maxNSliceTracks*nextSlice[iSl], nCurr[nextSlice[iSl]], nextSlice[iSl],
                          bCurrIR+maxNSliceTracks*iSl,            nCurr[iSl],            iSl,
                          number, FirstTrIR[iSl],            LastTrIR[iSl] );            // merge lower edges
@@ -3008,11 +2907,6 @@ trIds[nTracksVector] = unmergedTrList[iTr].trId;
   outTracks = new AliHLTTPCCAMergedTrack[nTracksCurrent];
   outClusterIDsrc = new DataCompressor::SliceRowCluster[nClustersCurrent];
   outClusterPackedAmp = new UChar_t [nClustersCurrent];
-//  std::cout<<" >>> Nonmerged fit is done. nTracksCurrent: "<<nTracksCurrent<<";   nClustersCurrent: "<<nClustersCurrent<<"\n";
-  //---
-//  std::cout<<" ----- All tracks fitted\n";
-//  std::cout<<" ----- fMaxClusterInfos: "<<fMaxClusterInfos<<";   fMaxTrackInfos: "<<fMaxTrackInfos<<"\n";
-//  std::cout<<" ----- nClustersCurrent: "<<nClustersCurrent<<";   nTracksCurrent: "<<nTracksCurrent<<"\n";
 
 #ifdef FULLFIT
   for( int iTr = 0; iTr < nTracksCurrent; iTr++ ) {
@@ -3082,8 +2976,6 @@ trIds[nTracksVector] = unmergedTrList[iTr].trId;
     } // if no merged
   }
 
-//  std::cout<<" ----- Normal and merged tracks are stored in outTracks\n";
-//  std::cout<<" ----- nOutTrackClusters: "<<nOutTrackClusters<<";   nOutTracks: "<<nOutTracks<<"\n";
   for( int iTr = firstUnmerged; iTr < firstUnmerged + nUnmerged; iTr++ ) {
       const AliHLTTPCCASliceTrackInfo& tr = fTrackInfos[iTr];
       const unsigned int NHits = tr.NClusters();
@@ -3249,16 +3141,6 @@ void AliHLTTPCCAMerger::Merging(int number)
 #endif // USE_TIMERS
 
 #define MERGEFIX
-//std::cout<<"___ Rum merging. number: "<<number<<"\n";
-//std::cout<<"_____ fNMergedSegments: "<<fNMergedSegments<<";   fNMergedSegmentClusters: "<<fNMergedSegmentClusters<<"\n";
-//std::cout<<"\n_______ OutTracks1.\n";
-//for( int is = 0; is < 1; is++ ) {
-//  std::cout<<"________>iSlice: "<<is<<";   nOutTracks1: "<<slices[is]->NOutTracks1()<<"\n";
-//  for(int i=0; i<slices[is]->NOutTracks1(); i++){
-//    int slice_tr_id = slices[is]->OutTrack1(i).OrigTrackID();
-//    std::cout<<"__________> i: "<<i<<";   slice_tr_id: "<<slice_tr_id<<"\n";
-//  }
-//}
   int nOutTracks = 0;
   int nOutTrackClusters = 0;
 
@@ -3505,12 +3387,6 @@ if( tr.IsMerged() ) outTracks[nOutTracks].SetMerged();
       for ( ; nVecElements < uint_v::Size && itr < nChains; itr++ ) {
         const unsigned int sI = firstInChainIndex[itr];
         AliHLTTPCCASliceTrackInfo& trackOld = fTrackInfos[sI];
-//        std::cout<<".....trackOld: "<<sI<<"\n";
-//        std::cout<<".....Old Track Params: \n";
-//        std::cout<<"....... InX: "<<trackOld.InnerParam().GetX()<<"\n";
-//        std::cout<<".......OutX: "<<trackOld.OuterParam().GetX()<<"\n";
-//        std::cout<<"....... InA: "<<trackOld.InnerAlpha()<<"\n";
-//        std::cout<<".......OutA: "<<trackOld.OuterAlpha()<<"\n";
 
           // If track is already used or has previous neighbours - do not use it
         if ( trackOld.Used() ) continue;
@@ -3590,7 +3466,6 @@ if( tr.IsMerged() ) outTracks[nOutTracks].SetMerged();
       }
 
       uint_v jIndexes = iIndexes;
-//      std::cout<<">>>jIndexes0: "<<jIndexes<<"\n";
 #ifdef MERGEFIX
       segmentNumbers.push_back( iIndexes );
       segmentCounter( int_m( active ) )++;
@@ -3630,7 +3505,6 @@ if( tr.IsMerged() ) outTracks[nOutTracks].SetMerged();
 //#else
 //        jIndexes = vNextNeighbour;
 //#endif
-//        std::cout<<">>>jIndexes1: "<<jIndexes<<";   vNextNeighbour: "<<vNextNeighbour<<"\n";
 //         const int_v vUsed( fTrackInfos, &AliHLTTPCCASliceTrackInfo::fUsed, jIndexes, isNeighbourI0 );
         int_v vUsed(Vc::Zero);
 //        vUsed(isNeighbourI0) = fTrackInfos[jIndexes][&AliHLTTPCCASliceTrackInfo::fUsed];
@@ -3643,11 +3517,8 @@ if( tr.IsMerged() ) outTracks[nOutTracks].SetMerged();
 
         if ( isNeighbour.isEmpty() ) break;
 
-//        std::cout<<"---iIndexes: "<<iIndexes<<";   jIndexes: "<<jIndexes<<"\n";
-//        std::cout<<"---vNHits: "<<vNHits<<"\n";
         isNeighbour &= AddNeighbour( jIndexes, nVecElements, isNeighbour,
                                      hits, firstHit, vStartPoint, vEndPoint, vStartAlpha, vEndAlpha, vNHits );
-//        std::cout<<"---isNeighbour: "<<isNeighbour<<"\n";
 #ifdef MERGEFIX
         segmentNumbers.push_back( jIndexes );
         segmentCounter( int_m( isNeighbour ) )++;
@@ -3673,24 +3544,16 @@ if( tr.IsMerged() ) outTracks[nOutTracks].SetMerged();
       }
 
         // Refit tracks, which have been merged.
-//      std::cout<<"---refit merged tracks start\n";
       uint_v nHits = vNHits;
-//      std::cout<<"---vNHits: "<<vNHits<<"\n";
       AliHLTTPCCATrackParamVector vHelpEndPoint = vStartPoint;
       float_v vHelpEndAlpha = vStartAlpha;
-//      std::cout<<"---active0: "<<active<<"\n";
-//      std::cout<<"-----vHelpEndPoint.GetX(): "<<vHelpEndPoint.GetX()<<";   vHelpEndAlpha: "<<vHelpEndAlpha<<"\n";
-//float_m act1(active);
-//std::cout<<" - nHits before: "<<nHits<<"\n";
 //      active &= FitTrack( vHelpEndPoint, vHelpEndAlpha, hits, firstHit, nHits, nHits, nVecElements,active, 0 );
       active &= FitTrack( vHelpEndPoint, vHelpEndAlpha, hits, firstHit, nHits, nVecElements,active, 0 );
-//      std::cout<<"---active1: "<<active<<"\n";
       AliHLTTPCCATrackParamVector vHelpStartPoint = vHelpEndPoint;
       float_v vHelpStartAlpha = vHelpEndAlpha;
 //      active &= FitTrack( vHelpStartPoint, vHelpStartAlpha, hits, firstHit, nHits, nHits, nVecElements,active, 1 );
       active &= FitTrack( vHelpStartPoint, vHelpStartAlpha, hits, firstHit, nHits, nVecElements,active, 1 );
 active &= float_m( vNHits == nHits );
-//      std::cout<<"<> vNHits: "<<vNHits<<";   nHits: "<<nHits<<";   active: "<<active<<"\n";
       vNHits = nHits;
 //active = act1;
 //std::cout<<" - nHits after: "<<nHits<<"\n";
@@ -3710,27 +3573,25 @@ active &= float_m( vNHits == nHits );
 
         int *usedHits = h; // get begin of array
           // If track has been merged, resort hits, rid of double hits.
-          //std::sort( usedHits, usedHits + vNHits[iV], TrackHitsCompare(fClusterInfos) ); // sort hits by X (iRow) // TODO normal sort
+          std::sort( usedHits, usedHits + vNHits[iV], TrackHitsCompare(fClusterInfos) ); // sort hits by X (iRow) // TODO normal sort
 
           // rid of double hits
         unsigned int ihit2 = 0; // ihit in the output array
+        char irow = (unsigned int)fClusterInfos[usedHits[0]].IRow();
         for( unsigned int ihit = 1; ihit < vNHits[iV]; ihit++)
         {
           if( ISUNLIKELY(usedHits[ihit2] == usedHits[ihit]) ) continue;
+          if( ISUNLIKELY( irow == fClusterInfos[usedHits[ihit]].IRow() ) ) continue;
           ++ihit2;
+          irow = fClusterInfos[usedHits[ihit]].IRow();
           if( ISUNLIKELY(     ihit2  != ihit      ) )
             usedHits[ihit2] = usedHits[ihit];
         }
         nHits[iV] = ihit2+1;
-//if(nHits[iV]<3) {
-//    std::cout<<"...not enough hits: nHits["<<iV<<"]: "<<nHits[iV]<<"\n---\n";
-//    continue;
-//}
 
           // on the final stage stor data to the global tracker
         if(number == 0)
         {
-//            std::cout<<" === WRITE MERGED TRACK "<<nOutTracks<<"; nHits: "<<nHits[iV]<<"\n";
           AliHLTTPCCAMergedTrack &mergedTrack = outTracks[nOutTracks];
           mergedTrack.SetNClusters( nHits[iV] );
           mergedTrack.SetFirstClusterRef( nOutTrackClusters );
@@ -3742,7 +3603,6 @@ active &= float_m( vNHits == nHits );
 //mergedTrack.SetUsed();	//TODO: DELETE!!! IT IS FOR TESTS!!!
           mergedTrack.SetNoUsed();
           mergedTrack.SetNoLooper();
-//std::cout<<":::itr: "<<itr<<";   nOutTracks: "<<nOutTracks<<"\n";
 #ifdef MERGEFIX
 //for( int ii = 0; ii < segmentCounter[iV]; ii++ ) {
 //    std::cout<<"-----ii: "<<ii<<";   trackId: "<<segmentNumbers[ii][iV]<<"\n";
@@ -3781,11 +3641,8 @@ active &= float_m( vNHits == nHits );
 track.SetUsed( 0 );
 track.SetMerged();
 #ifdef MERGEFIX
-//std::cout<<"\n---!!!---\n";
 for( int ii = 0; ii < segmentCounter[iV]; ii++ ) {
-//    std::cout<<"-----ii: "<<ii<<";   trackId: "<<segmentNumbers[ii][iV]<<"\n";
     mergedSermentsOldIndexes.push_back( segmentNumbers[ii][iV] );
-//    fTrackInfos[int(segmentNumbers[ii][iV])].SetUsed(1);
 }
 #endif
 //track.SetUsed( fTrackInfos[int(iIndexes[iV])].Used() );
@@ -3803,38 +3660,27 @@ for( int ii = 0; ii < segmentCounter[iV]; ii++ ) {
 
           nH += nHits[iV];
         }
-//        std::cout<<"-Set nonoverlap track "<<nEndTracks<<"\n";
-//        tMergedTracks.push_back(nEndTracks);
-//        std::cout<<"-> mergwd track - new track index: "<<nEndTracks<<"\n";
         nTrNew[iSlice]++;
         nEndTracks++;
       } // for iV
 
     } // for itr
-//    std::cout<<" - nTrNew_m[iSlice]: "<<nTrNew_m[iSlice]<<"\n";
   } // for iSlice
-//  std::cout<<"1. nOutTracks: "<<nOutTracks<<";   nEndTracks: "<<nEndTracks<<"\n";
-//  std::cout<<"   nEndTracks_m: "<<nEndTracks_m<<"\n";
 #ifdef MERGEFIX
   for( int i = 0; i < mergedSermentsOldIndexes.size(); i++ ) {
-//    std::cout<<" <><><><><> i: "<<i<<";   oldIndex: "<<mergedSermentsOldIndexes[i]<<";   oldToNewIndex: "<<oldToNewTrackIndexes[mergedSermentsOldIndexes[i]]<<"\n";
     tmpT[oldToNewTrackIndexes[mergedSermentsOldIndexes[i]]].SetUsed(1);
   }
 #endif
 
   if (fClusterInfos) delete[] fClusterInfos;
   fClusterInfos = tmpH;
-//  std::cout<<"  - fClusterInfos = tmpH - ok\n";
 
   fTrackInfos = tmpT;
-//  std::cout<<"  - fTrackInfos = tmpT - ok\n";
   for(int iSlice=0; iSlice < fgkNSlices; iSlice++ )
   {
     fSliceNTrackInfos[iSlice] = nTrNew[iSlice];
     fSliceTrackInfoStart[iSlice] = tmpSliceTrackInfoStart[iSlice];
   }
-//  std::cout<<"  - fSliceNTrackInfos & fSliceTrackInfoStart - ok\n";
-//  std::cout<<"---merged tracks: "<<tMergedTracks.size()<<"\n";
 
   if(number == 0)
   {
@@ -3851,13 +3697,6 @@ for( int ii = 0; ii < segmentCounter[iV]; ii++ ) {
 
     for ( int itr = 0; itr < nOutTracks; itr++ ) fOutput->SetTrack( itr, outTracks[itr] );
 
-    // ---
-//    for( int i = 0; i < tMergedTracks.size(); i++ ) {
-//	std::cout<<" i: "<<i<<";   merged track: "<<tMergedTracks[i]<<"\n";
-//	fOutput->SetMerged(tMergedTracks[i]);
-//    }
-//    // ---
-
     for ( int ic = 0; ic < nOutTrackClusters; ic++ ) {
       fOutput->SetClusterIDsrc( ic, outClusterIDsrc[ic] );
       fOutput->SetClusterPackedAmp( ic, outClusterPackedAmp[ic] );
@@ -3867,14 +3706,6 @@ for( int ii = 0; ii < segmentCounter[iV]; ii++ ) {
     if (outClusterIDsrc) delete[] outClusterIDsrc;
     if (outClusterPackedAmp) delete[] outClusterPackedAmp;
   }
-//  std::cout<<" - Merging - ok - number: "<<number<<"\n";
-//  for( int is = 0; is < 1; is++ ) {
-//    std::cout<<"________>iSlice: "<<is<<";   nOutTracks1: "<<slices[is]->NOutTracks1()<<"\n";
-//    for(int i=0; i<slices[is]->NOutTracks1(); i++){
-//      int slice_tr_id = slices[is]->OutTrack1(i).OrigTrackID();
-//      std::cout<<"__________> i: "<<i<<";   slice_tr_id: "<<slice_tr_id<<"\n";
-//    }
-//  }
 
 #ifdef USE_TIMERS
   timer.Stop();
@@ -3886,8 +3717,6 @@ float_m AliHLTTPCCAMerger::AddNeighbour( const uint_v& jIndexes, const int& nVec
 int hits[2000][uint_v::Size], uint_v& firstHit, AliHLTTPCCATrackParamVector& vStartPoint, AliHLTTPCCATrackParamVector& vEndPoint, float_v& vStartAlpha, float_v& vEndAlpha, uint_v& vNHits )
 {
   float_m mask = isNeighbour;
-//  std::cout<<"---mask start: "<<mask<<"\n";
-//  std::cout<<"---jIndexes: "<<jIndexes<<";   vNHits: "<<vNHits<<"\n";
 
   const int_m &maskI = static_cast<int_m>(mask);
   const uint_m &maskU = static_cast<uint_m>(mask);

@@ -238,9 +238,6 @@ void AliHLTTPCCATrackletConstructor::FitTracklet( TrackMemory &r, const int rowI
 void AliHLTTPCCATrackletConstructor::FindNextHit( TrackMemory &r, const AliHLTTPCCARow &row,
                                                   float_v &dy_best, float_v &dz_best, int_m &active)
 { 
-#ifdef __CA_DEBUG__
-  std::cout<<" ----- FindNextHit\n";
-#endif /* __CA_DEBUG__ */
   const float_v fY = r.fParam.Y();
   const float_v fZ = r.fParam.Z();
   const uint_v fIndYmin = row.Grid().GetBinBounded( fY - AliHLTTPCCAParameters::MinCellSize*.5f, fZ - AliHLTTPCCAParameters::MinCellSize*.5f );
@@ -260,25 +257,13 @@ void AliHLTTPCCATrackletConstructor::FindNextHit( TrackMemory &r, const AliHLTTP
     { // look at iY = 0,1; iZ = 0
       const int end = fData.FirstHitInBin( row, indYmin + 2 );
       for ( int hitIndex = fData.FirstHitInBin( row, indYmin ); hitIndex < end; hitIndex += float_v::Size ) {
-#ifdef __CA_DEBUG__
-std::cout<<" ----1> trackletIndex: "<<trackletIndex<<";   hitIndex: "<<hitIndex<<"\n";
-#endif /* __CA_DEBUG__ */
         float_v yz;
 	yz = fData.HitPDataY( row, hitIndex );
         const float_v dy = yz - y;
-#ifdef __CA_DEBUG__
-std::cout<<" ----1> y: "<<y<<";   yz: "<<yz[0]<<";   dy: "<<dy[0]<<"\n";
-#endif /* __CA_DEBUG__ */
 	yz = fData.HitPDataZ( row, hitIndex );
         const float_v dz = yz - z;
-#ifdef __CA_DEBUG__
-std::cout<<" ----1> z: "<<z<<";   yz: "<<yz[0]<<";   dz: "<<dz[0]<<"\n";
-#endif /* __CA_DEBUG__ */
         float_v radius2 = std::numeric_limits<float_v>::max();
         radius2( float_m(uint_v( Vc::IndexesFromZero ) + uint_v(hitIndex) < uint_v(end)) ) = dy * dy + dz * dz; // XXX Manhattan distance
-#ifdef __CA_DEBUG__
-std::cout<<" ----1> radius2: "<<radius2[0]<<"\n";
-#endif /* __CA_DEBUG__ */
         const float min = radius2.min();
         if ( min < minRadius2 ) {
           minRadius2 = min;
@@ -294,25 +279,13 @@ std::cout<<" ----1> radius2: "<<radius2[0]<<"\n";
       const int nY = row.Grid().Ny();
       const int end = fData.FirstHitInBin( row, indYmin + nY + 2 );
       for ( int hitIndex = fData.FirstHitInBin( row, indYmin + nY ); hitIndex < end; hitIndex += float_v::Size ) {
-#ifdef __CA_DEBUG__
-std::cout<<" ----1> trackletIndex: "<<trackletIndex<<";   hitIndex: "<<hitIndex<<"\n";
-#endif /* __CA_DEBUG__ */
         float_v yz;
         yz = fData.HitPDataY( row, hitIndex );
         const float_v dy = yz - y;
-#ifdef __CA_DEBUG__
-std::cout<<" ----1> y: "<<y<<";   yz: "<<yz[0]<<";   dy: "<<dy[0]<<"\n";
-#endif /* __CA_DEBUG__ */
 	yz = fData.HitPDataZ( row, hitIndex );
         const float_v dz = yz - z;
-#ifdef __CA_DEBUG__
-std::cout<<" ----1> z: "<<z<<";   yz: "<<yz[0]<<";   dz: "<<dz[0]<<"\n";
-#endif /* __CA_DEBUG__ */
         float_v radius2 = std::numeric_limits<float_v>::max();
         radius2( float_m(uint_v( Vc::IndexesFromZero ) + uint_v(hitIndex) < uint_v(end)) ) = dy * dy + dz * dz; // XXX Manhattan distance
-#ifdef __CA_DEBUG__
-std::cout<<" ----1> radius2: "<<radius2[0]<<"\n";
-#endif /* __CA_DEBUG__ */
         const float min = radius2.min();
         if ( min < minRadius2 ) {
           minRadius2 = min;
@@ -428,9 +401,6 @@ int_m AliHLTTPCCATrackletConstructor::ExtrapolateTracklet( TrackMemory &r, const
 int_m AliHLTTPCCATrackletConstructor::ExtendTracklet( TrackMemory &r, const int rowIndex, const uint_v trackIndex,
    TrackletVector &trackletVector, const bool dir, const int_m &mask )
 {
-#ifdef __CA_DEBUG__
-std::cout<<" --- ExtendTracklet. rowIndex: "<<rowIndex<<"\n";
-#endif /* __CA_DEBUG__ */
   //assert( activeExtraMask == ( activeExtraMask && ( r.fStage == ExtrapolateUp || r.fStage == ExtrapolateDown ) ) );
   // reconstruction of tracklets, tracklets update step
   assert( AliHLTTPCCAParameters::RowStep == 1 );
@@ -485,9 +455,6 @@ std::cout<<" --- ExtendTracklet. rowIndex: "<<rowIndex<<"\n";
   const float_m fragile = activeFitMaskF &&
       ( static_cast<float_m>( r.fNHits < uint_v(AliHLTTPCCAParameters::MinimumHitsForFragileTracklet) ) || CAMath::Abs( r.fParam.SinPhi() ) >= .99f );
   sinPhi( fragile ) = dy * CAMath::RSqrt( dx * dx + dy * dy );
-#ifdef __CA_DEBUG__
-std::cout<<" ---> transport to x: "<<x[0]<<";   dx: "<<dx[0]<<";   dy: "<<dy[0]<<";   dz: "<<dz[0]<<";   sinPhi: "<<sinPhi[0]<<";   lastY: "<<y[0]<<";   lastZ: "<<z[0]<<"\n";
-#endif /* __CA_DEBUG__ */
   
   float_v maxSinPhi = .99f;
   maxSinPhi( activeFitMaskF ) = -1.f;
@@ -539,9 +506,6 @@ std::cout<<" ---> transport to x: "<<x[0]<<";   dx: "<<dx[0]<<";   dy: "<<dy[0]<
   if ( !findMask.isEmpty() ) {
     FindNextHit(r, row, dy_tmp, dz_tmp, findMask);
   }
-#ifdef __CA_DEBUG__
-std::cout<<" ---> activeExtraMask: "<<activeExtraMask<<";   linkMask: "<<linkMask<<";   findMask: "<<findMask<<"\n";
-#endif /* __CA_DEBUG__ */
   activeExtraMask = linkMask || findMask;
   activeExtraMaskF = static_cast<float_m>( activeExtraMask );
   
@@ -551,9 +515,6 @@ std::cout<<" ---> activeExtraMask: "<<activeExtraMask<<";   linkMask: "<<linkMas
     // check if found hit is acceptable
   float_v err2Y, err2Z;
   fTracker.GetErrors2( rowIndex, r.fParam, &err2Y, &err2Z );
-#ifdef __CA_DEBUG__
-std::cout<<" ---> err2Y: "<<err2Y[0]<<";   err2Z: "<<err2Z[0]<<"\n";
-#endif /* __CA_DEBUG__ */
 
   const float_v kFactor = AliHLTTPCCAParameters::HitPickUpFactor * AliHLTTPCCAParameters::HitPickUpFactor * 3.5f * 3.5f;
   const float_v two( 2.f );
@@ -567,20 +528,12 @@ std::cout<<" ---> err2Y: "<<err2Y[0]<<";   err2Z: "<<err2Z[0]<<"\n";
 #else /* !__noYF__ */
   const float_v sy2 = CAMath::Min( two, kFactor * ( r.fParam.GetErr2Y() + err2Y ) );
   const float_v sz2 = CAMath::Min( two, kFactor * ( r.fParam.GetErr2Z() + err2Z ) );
-std::cout<<" ---> kFactor: "<<kFactor[0]<<";   sy2: "<<sy2[0]<<";   sz2: "<<sz2[0]<<"\n";
 #endif /* _noYF__ */
 
 
   activeExtraMaskF &= dy * dy <= sy2 && dz * dz <= sz2;
-#ifdef __CA_DEBUG__
-std::cout<<" ---> dy: "<<dy[0]<<";   dz: "<<dz[0]<<"\n";
-std::cout<<" ---> activeExtraMaskF. (dy * dy): "<<(dy[0]*dy[0])<<" <= sy2: "<<sy2[0]<<" && (dz * dz): "<<(dz[0]*dz[0])<<" <= sz2: "<<sz2[0]<<"\n";
-#endif /* __CA_DEBUG__ */
 
   activeFitMaskF &= (dy * dy <= sy2 && dz * dz <= sz2) || float_m(r.fNHits < uint_v(3)); // very strong cut for ghosts.
-#ifdef __CA_DEBUG__
-std::cout<<" ---> activeExtraMaskF: "<<activeExtraMaskF<<";   activeFitMaskF: "<<activeFitMaskF<<"\n";
-#endif /* __CA_DEBUG__ */
  
     // -- FILTER THE NEXT HIT --
   const float_m filtred = r.fParam.FilterDelta( activeExtraMaskF || activeFitMaskF, dy, dz, err2Y, err2Z, .99f );
@@ -632,7 +585,7 @@ std::cout<<" ---> activeExtraMaskF: "<<activeExtraMaskF<<";   activeFitMaskF: "<
 void AliHLTTPCCATrackletConstructor::CreateStartSegmentV( const int rowIndex, const int iter )
 {
   const AliHLTTPCCARow &row = fData.Row( rowIndex );
-
+//std::cout<<"\n <<<<< rowIndex: "<<rowIndex<<" >>>>>\n";
   // references to the rows above and below
   const int rowStep = AliHLTTPCCAParameters::RowStep;
 
@@ -676,8 +629,6 @@ void AliHLTTPCCATrackletConstructor::CreateStartSegmentV( const int rowIndex, co
   static const float kAreaSizeZ = AliHLTTPCCAParameters::NeighbourAreaSizeTgZ[iter];
   static const int kMaxN = 20; // TODO minimaze
   const float chi2Cut = AliHLTTPCCAParameters::NeighbourChiCut[iter]*AliHLTTPCCAParameters::NeighbourChiCut[iter] * 4.f * ( UpDx * UpDx + DnDx * DnDx );
-//std::cout<<"> rowIndex: "<<rowIndex<<";   UpDx: "<<UpDx<<";   DnDx: "<<DnDx<<";   chi2Cut: "<<chi2Cut<<"\n";
-//std::cout<<"      iter: "<<iter<<";   NeighbourChiCut: "<<AliHLTTPCCAParameters::NeighbourChiCut[iter]<<"\n";
 
   typedef HitArea::NeighbourData NeighbourData;
   for ( unsigned int hitIndex = 0; hitIndex < numberOfHits; hitIndex += int_v::Size ) {
@@ -816,6 +767,11 @@ void AliHLTTPCCATrackletConstructor::CreateStartSegmentV( const int rowIndex, co
       if( !setSegment[iV] ) continue;
       unsigned int hit0 = rowDn.HitIndex()[(unsigned int)bestDn[iV]];
       fData.SetHitLinkUpData( rowDn, hit0, row.HitIndex()[(unsigned int)hitIndexes[iV]] );
+      if( ISUNLIKELY( startHitsCount > 0 && startHits[hitsStartOffset + startHitsCount - 1].HitIndex() == hit0 ) ) continue;
+      if( ISUNLIKELY( startHitsCount > 1 && startHits[hitsStartOffset + startHitsCount - 2].HitIndex() == hit0 ) ) continue;
+      if( ISUNLIKELY( startHitsCount > 2 && startHits[hitsStartOffset + startHitsCount - 3].HitIndex() == hit0 ) ) continue;
+      if( ISUNLIKELY( startHitsCount > 3 && startHits[hitsStartOffset + startHitsCount - 4].HitIndex() == hit0 ) ) continue;
+
       startHits[hitsStartOffset + startHitsCount++].Set( rowIndex - rowStep, hit0, 4 );
     }
   } // for hitIndex
@@ -861,23 +817,8 @@ void AliHLTTPCCATrackletConstructor::run( unsigned int firstRow, unsigned int &t
       disp.DrawSliceHits(1, 0.5);
       disp.DrawSliceLinks(-1,-1,1);
       AliHLTTPCCADisplay::Instance().SaveCanvasToFile("NFinderTestXYZ.pdf");
-//      disp.ClearViewPT();
-////      disp.ClearView();
-//      disp.DrawSliceHitsPT(1, 0.5);
-//      disp.DrawSliceLinksPT(-1,-1,1);
       disp.Ask();
     }
-//    if ( AliHLTTPCCADisplay::Instance().DrawType() == 1 )
-//    {
-//      AliHLTTPCCADisplay &disp = AliHLTTPCCADisplay::Instance();
-//      disp.ClearViewPT();
-////      disp.SetSliceView();
-//      disp.SetCurrentSlice( &fTracker );
-////      disp.DrawSliceHitsPT(1, 0.5);
-////      disp.DrawSliceLinksPT(-1,-1,1);
-////      AliHLTTPCCADisplay::Instance().SaveCanvasToFile("NFinderTestPT.pdf");
-//      disp.Ask();
-//    }
 #endif
 
 #endif
@@ -1209,6 +1150,7 @@ void InitTracklets::operator()( int rowIndex )
     return;
   }
   debugF() << "InitTracklets(" << rowIndex << ")" << endl;
+//std::cout << "InitTracklets(" << rowIndex << ")" << endl;
   const int rowStep = AliHLTTPCCAParameters::RowStep;
   assert( rowIndex < fTracker.Param().NRows() - rowStep );
     // the first hit is a special case (easy)
@@ -1278,7 +1220,6 @@ void InitTracklets::operator()( int rowIndex )
     const int_m hitAdded( r.fParam.Filter( maskF, y, z, err2Y, err2Z, .99f ) );
     // assert( hitAdded == mask );
     UNUSED_PARAM2( transported, hitAdded );
-//    std::cout<<"<SetRowHits - op()>\n";
     fTrackletVector.SetRowHits( rowIndex, trackIndex, hitIndex, mask );
 
     r.fLastY( maskF ) = y;
