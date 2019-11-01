@@ -60,6 +60,7 @@ void StTpcdEdxCorrection::ReSetCorrections() {
     assert(tpcGas);
   }
   SettpcGas(tpcGas);
+  memset (m_Corrections, 0, sizeof(m_Corrections));
   m_Corrections[kUncorrected           ] = dEdxCorrection_t("UnCorrected"         ,""                                                                    ,0); 					       
   m_Corrections[kAdcCorrection         ] = dEdxCorrection_t("TpcAdcCorrectionB"   ,"ADC/Clustering nonlinearity correction"				,St_TpcAdcCorrectionBC::instance());	     
   m_Corrections[kEdge                  ] = dEdxCorrection_t("TpcEdge"             ,"Gain on distance from Chamber edge"                                 ,St_TpcEdgeC::instance());		     

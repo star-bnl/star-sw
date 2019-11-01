@@ -846,13 +846,17 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 #ifdef __iTPCOnly__
   static Hists3D Z3iTPC("Z3iTPC","<log(dEdx/Pion)>","row","Drift Distance",-NoRows,220,-5,215);
 #endif
+#if 0
   //  static Hists3D Z3O("Z3O","<log(dEdx/Pion)>","row","(Drift)*ppmO2In",St_tpcPadConfigC::instance()->numberOfRows(sector),100,0,1e4);
   Hists3D::NtotHist = 2;
   static Hists3D Edge3("Edge3","log(dEdx/Pion)","sector*row"," Edge",numberOfSectors*NoRows, 201,-100.5,100.5);
+#endif
   static Hists3D xyPad3("xyPad3","log(dEdx/Pion)","sector+yrow[-0.5,0.5] and xpad [-1,1]"," xpad",numberOfSectors*20, 32,-1,1, 200, -5., 5., 0.5, 24.5);
+#if 0
   static Hists3D dX3("dX3","log(dEdx/Pion)","row"," dX(cm)",-NoRows, 100,0,10.);
 #ifdef __iTPCOnly__
   static Hists3D dX3iTPC("dX3iTPC","log(dEdx/Pion)","row"," dX(cm)",-NoRows, 100,0,10.);
+#endif
 #endif
   static TH2F *ZdcCP = 0, *BBCP = 0;
   //  static TH2F *ctbWest = 0, *ctbEast = 0, *ctbTOFp = 0, *zdcWest = 0, *zdcEast = 0;
@@ -1326,15 +1330,21 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	if (! St_tpcPadConfigC::instance()->iTPC(sector)) {
 #endif
 	  Z3.Fill(rowS,FdEdx[k].ZdriftDistance,Vars);
+#if 0
 	  dX3.Fill(rowS,FdEdx[k].F.dx, Vars);
+#endif
 #ifdef __iTPCOnly__
 	} else {
 	  Z3iTPC.Fill(rowS,FdEdx[k].ZdriftDistance,Vars);
+#if 0
 	  dX3iTPC.Fill(rowS,FdEdx[k].F.dx, Vars);
+#endif
 	}
 #endif
 	//	Z3O.Fill(rowS,FdEdx[k].ZdriftDistanceO2,Vars);
+#if 0
 	Edge3.Fill(St_tpcPadConfigC::instance()->numberOfRows(20)*(sector-1)+row,FdEdx[k].edge, Vars);
+#endif
 	xyPad3.Fill(FdEdx[k].yrow,FdEdx[k].xpad, Vars);
 	//      } end loop of dE/dx samples
     }
