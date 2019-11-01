@@ -1821,6 +1821,11 @@ $hist = "Run303"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_
 # Run XIX
 # 10/31/19 dEdx905 new TcpSecRowB
 # 11/01/19 dEdx906 new TpcRowQ, account aging
+=======
+#$hist = "Run303"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/30/2019  reduce pMom interal, do only Negative particles
+#$hist = "Run304"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/31/2019  reset TpcdXCorrection, TpcZCorrectionB, TpcSecRowB
+#$hist = "Run305"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/01/2019  new TpcSecRowB
+$hist = "Run306"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/01/2019  new new TpcSecRowB
 
 my @badruns = ();
 my $prod = $hist; #$Production;
