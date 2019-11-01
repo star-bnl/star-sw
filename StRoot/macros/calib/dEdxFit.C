@@ -1516,8 +1516,9 @@ void PreSetParameters(TH1 *proj, TF1 *g2) {
   //   Double_t xmax = proj->GetXaxis()->GetBinCenter(binmax);
   if (TMath::Abs(Peaks[0].peak - xpi) > TMath::Abs(Peaks[1].peak - xpi)) {
     // proton
-    g2->ReleaseParameter(3); g2->SetParLimits(3,0.0,TMath::Pi()/2);
-    g2->SetParameters(0, 0, 0.35, 0.9*TMath::Pi()/2, 0.0, 0.0, 0.0,0.0,-1.,1);
+    //    g2->ReleaseParameter(3); g2->SetParLimits(3,0.0,TMath::Pi()/2);
+    //    g2->SetParameters(0, 0, 0.35, 0.9*TMath::Pi()/2, 0.0, 0.0, 0.0,0.0,-1.,1);
+    g2->SetParameters(0, 0, 0.35, 0.0, 0.0, 0.0, 0.0,0.0,-1.,1);
   } else {
     g2->SetParameters(0, xpi, 0.35, 0.6, 0.1, 0.1, 0.1,0.1,-1.,1);
   }
@@ -1550,11 +1551,11 @@ TF1 *FitGF(TH1 *proj, Option_t *opt="") {
   }
   PreSetParameters(proj, g2);
   proj->Fit(g2,Opt.Data());
-  g2->ReleaseParameter(3); g2->SetParLimits(3,0.0,TMath::Pi()/2);
-  g2->ReleaseParameter(4); g2->SetParLimits(4,0.0,1.0);
-  g2->ReleaseParameter(5); g2->SetParLimits(5,0.0,1.0);
-  g2->ReleaseParameter(6); g2->SetParLimits(6,0.0,1.0);
-  g2->ReleaseParameter(9); g2->SetParLimits(9,0.5,2.0);
+  g2->ReleaseParameter(3); g2->SetParLimits(3,0.0,0.5);
+  g2->ReleaseParameter(4); g2->SetParLimits(4,0.0,0.5);
+  g2->ReleaseParameter(5); g2->SetParLimits(5,0.0,0.5);
+  g2->ReleaseParameter(6); g2->SetParLimits(6,0.0,0.5);
+  //  g2->ReleaseParameter(9); g2->SetParLimits(9,0.5,2.0);
   Int_t iok = proj->Fit(g2,Opt.Data());
   if ( iok < 0) {
     cout << g2->GetName() << " fit has failed with " << iok << " for " 
