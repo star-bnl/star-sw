@@ -11,15 +11,20 @@ my $runMin = 0;
 my $runMax = 0;
 my $N = 0;
 #while ($line = <In>) {
+sub SPrint ($$$$$$$) {
+  my ($trigOld,$runMin,$runMax,$dateMin,$timeMin,$dateMax,$timeMax) =  @_;
+  print "\t\'$N\' => {tag =>\'$trigOld',\tfirst => \'$runMin\',\t second => \'$runMax\',\t list => \'\'\}, \#  \t$dateMin\t$timeMin\t$dateMax\t$timeMax\n";
+  $N++;
+}
 while ($line = <>) {
   my ($run,$trig,$date,$time) = split ' ', $line;
   if ($run eq 'cmd' or $run eq 'runNumber') {next;}
-  if ($trig !~  /^prod/) {next;}
+  if ($trig !~  /^prod/ and $trig !~  /^tune/ ) {next;}
   if ($trig =~ /^ped/) {next;}
   if ($trig =~ /^las/) {next;}
   if ($trig =~ /^jml/) {next;}
   if ($trig =~ /^chris/) {next;}
-  if ($trig =~ /^tune/) {next;}
+#  if ($trig =~ /^tune/) {next;}
   if ($trig =~ /^cal/) {next;}
   if ($trig =~ /^Jack/) {next;}
   if ($trig =~ /^Cos/) {next;}
@@ -39,8 +44,7 @@ while ($line = <>) {
   } else {
 #    print "trigOld2 = $trigOld\n";
     if ($trigOld ne '') {
-      printf("%-40s",$trigOld);
-      print "\t$runMin\t$runMax\t$dateMin\t$timeMin\t$dateMax\t$timeMax\n";
+      SPrint($trigOld,$runMin,$runMax,$dateMin,$timeMin,$dateMax,$timeMax);
 #    die;
     }
     $trigOld = $trig;# print "trig = $trig. trigOld = $trigOld\n";
@@ -49,11 +53,9 @@ while ($line = <>) {
     $timeMin = $time; $timeMax = $time;
 #    print "$trigOld\t$runMin\t$runMax\t$dateMin\t$timeMin\t$dateMax\t$timeMax\n";
   }
-  $N++;
 #  if ($N > 20) {last;}
 }
-if ($trigOld != 0) {
-      printf("%-40s",$trigOld);
-  print "\t$runMin\t$runMax\t$dateMin\t$timeMin\t$dateMax\t$timeMax\n";
+if ($trigOld ne '') {
+  SPrint($trigOld,$runMin,$runMax,$dateMin,$timeMin,$dateMax,$timeMax);
 }
 #close(In);

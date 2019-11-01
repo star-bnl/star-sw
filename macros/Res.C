@@ -259,7 +259,8 @@ void Mu() {
   Res("x","mu");
 }
 //________________________________________________________________________________
-void DrawFitP(const Char_t *hitN = "SecRow3C", const Char_t *plot="mu:y", const Char_t *select = "i&&j", const Char_t *opt = "prof") {
+void DrawFitP(const Char_t *hitN = "SecRow3C", const Char_t *plot="mu:rowSigned(y,x)", const Char_t *select = "i&&j", const Char_t *opt = "prof",
+	      Double_t xmin = -72.5, Double_t xmax = 72.5, Double_t ymin = -0.5, Double_t ymax = 0.5) {
   Int_t NF = 0;
   TSeqCollection *files = gROOT->GetListOfFiles();
   if (! files) return;
@@ -281,7 +282,7 @@ void DrawFitP(const Char_t *hitN = "SecRow3C", const Char_t *plot="mu:y", const 
   c1->SetGrid(); //x(9);
   //  c1->SetGridy(30);
   TH1F *frame = 0;
-  frame = c1->DrawFrame(0.5,-0.5,72.5,0.5);
+  frame = c1->DrawFrame(xmin,ymin,xmax,ymax);
   //    frame->SetTitle("Shift versus Track Length");
   //    frame->SetYTitle("Sift");
   //  frame->SetXTitle("Track Length (cm)                   ");
