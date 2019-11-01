@@ -1818,6 +1818,9 @@ my @badruns = (19116020); # Altro3
 #$hist = "RunXVIII301"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/17/2019  add West East separation
 #$hist = "Run302"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/18/2019  add West East separation
 $hist = "Run303"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/30/2019  reduce pMom interal, do only Negative particles
+# Run XIX
+# 10/31/19 dEdx905 new TcpSecRowB
+# 11/01/19 dEdx906 new TpcRowQ, account aging
 
 my @badruns = ();
 my $prod = $hist; #$Production;

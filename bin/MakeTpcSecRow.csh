@@ -285,4 +285,6 @@
 # root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20050111.220000.root SecRow3CGFcu22ProductionMinBias_FullField.root 'MakeTpcSecRowB.C(20050323,204,"TpcSecRowB",0)' >& MakeTpcSecRowB.20050323,204.log
 
 # Run XIX recaiibraion
- root.exe -q -b /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/dEdx900/Fit/SecRow3CGFall.root 'MakeTpcSecRowB.C(20190201,901)' >& MakeTpcSecRowB.20190201,901.log
+# root.exe -q -b /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/dEdx900/Fit/SecRow3CGFall.root 'MakeTpcSecRowB.C(20190201,901)' >& MakeTpcSecRowB.20190201,901.log
+# root.exe -q -b /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/dEdx903/Fit/SecRow3CGFdEdx903.root 'MakeTpcSecRowB.C(20190201,903)' >& MakeTpcSecRowB.20190201,903.log
+ root.exe -q -b $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20190201.000903.root  /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/dEdx904/Fit/SecRow3CGFdedx904.root 'MakeTpcSecRowB.C(20190201,904)' >& MakeTpcSecRowB.20190201,904.log
