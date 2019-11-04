@@ -290,4 +290,5 @@
 # Run XIX recaiibraion
 # root.exe -q -b /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/dEdx900/Fit/SecRow3CGFall.root 'MakeTpcSecRowB.C(20190201,901)' >& MakeTpcSecRowB.20190201,901.log
 # root.exe -q -b /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/dEdx903/Fit/SecRow3CGFdEdx903.root 'MakeTpcSecRowB.C(20190201,903)' >& MakeTpcSecRowB.20190201,903.log
- root.exe -q -b $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20190201.000903.root  /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/dEdx904/Fit/SecRow3CGFdedx904.root 'MakeTpcSecRowB.C(20190201,904)' >& MakeTpcSecRowB.20190201,904.log
+# root.exe -q -b $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20190201.000903.root  /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/dEdx904/Fit/SecRow3CGFdedx904.root 'MakeTpcSecRowB.C(20190201,904)' >& MakeTpcSecRowB.20190201,904.log
+ root.exe -q -b $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20190201.000904.root  /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/dEdx906/Fit/SecRow3CGFdEdx906.root 'MakeTpcSecRowB.C(20190201,906)' >& MakeTpcSecRowB.20190201,906.log

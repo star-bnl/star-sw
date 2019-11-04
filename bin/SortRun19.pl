@@ -13,7 +13,12 @@ my $N = 0;
 #while ($line = <In>) {
 sub SPrint ($$$$$$$) {
   my ($trigOld,$runMin,$runMax,$dateMin,$timeMin,$dateMax,$timeMax) =  @_;
-  print "\t\'$N\' => {tag =>\'$trigOld',\tfirst => \'$runMin\',\t second => \'$runMax\',\t list => \'\'\}, \#  \t$dateMin\t$timeMin\t$dateMax\t$timeMax\n";
+#  print "\t\'$N\' => {tag =>";
+  my $t = "'" . $trigOld . "'";
+  printf("\'%i\' \t= > %-50s \t=> ",$N,$t);
+  my $dd = $dateMin; $dd =~ s/\-//g;
+  my $tt = $timeMin; $tt =~ s/://g;
+  print "\'$runMin\',\t second => \'$runMax\',\t list => \'\'\}, \# $dd.$tt \t$dateMin\t$timeMin\t$dateMax\t$timeMax\n";
   $N++;
 }
 while ($line = <>) {
@@ -24,7 +29,7 @@ while ($line = <>) {
   if ($trig =~ /^las/) {next;}
   if ($trig =~ /^jml/) {next;}
   if ($trig =~ /^chris/) {next;}
-#  if ($trig =~ /^tune/) {next;}
+  if ($trig =~ /^tune/) {next;}
   if ($trig =~ /^cal/) {next;}
   if ($trig =~ /^Jack/) {next;}
   if ($trig =~ /^Cos/) {next;}
@@ -37,10 +42,10 @@ while ($line = <>) {
   $trig =~ s/_opentac//;
 #  print "run = $run, trig = $trig, date = $date, time = $time\n";
 #  print "trigOld = $trigOld\n";
+  $timeMax = $time;
+  $dateMax = $date;
   if ($trig eq $trigOld) {
     $runMax = $run;
-    $dateMax = $date;
-    $timeMax = $time;
   } else {
 #    print "trigOld2 = $trigOld\n";
     if ($trigOld ne '') {
@@ -49,8 +54,8 @@ while ($line = <>) {
     }
     $trigOld = $trig;# print "trig = $trig. trigOld = $trigOld\n";
     $runMin = $run; $runMax = $run;
-    $dateMin = $date; $dateMax = $date;
-    $timeMin = $time; $timeMax = $time;
+    $dateMin = $date; 
+    $timeMin = $time; 
 #    print "$trigOld\t$runMin\t$runMax\t$dateMin\t$timeMin\t$dateMax\t$timeMax\n";
   }
 #  if ($N > 20) {last;}

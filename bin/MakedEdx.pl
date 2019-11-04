@@ -1821,11 +1821,16 @@ $hist = "Run303"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_
 # Run XIX
 # 10/31/19 dEdx905 new TcpSecRowB
 # 11/01/19 dEdx906 new TpcRowQ, account aging
-=======
+# 11/01/19 dEdx907 new TcpSecRowB
+# 11/01/19 dEdx908 new TcpZCorrection
+# 11/02/19 dEdx909 new TcpZCorrection
+# 11/03/19 dEdx910 no TcpZCorrection
+# 11/04/19 dEdx911 no TcpZCorrection, TcpSecRowB, TcpSecRowB
 #$hist = "Run303"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/30/2019  reduce pMom interal, do only Negative particles
 #$hist = "Run304"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/31/2019  reset TpcdXCorrection, TpcZCorrectionB, TpcSecRowB
 #$hist = "Run305"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/01/2019  new TpcSecRowB
-$hist = "Run306"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/01/2019  new new TpcSecRowB
+#$hist = "Run306"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/01/2019  new new TpcSecRowB
+$hist = "Run307"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/01/2019  add year to dEdx.C parameters
 
 my @badruns = ();
 my $prod = $hist; #$Production;
@@ -2027,7 +2032,7 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
     my $cmd = "test ! -r " . $root . " && root.exe -q -b  '" . $macro;
 #    if ($Production =~ /P02gi2/ || $Production =~ /P02gi3/) {$cmd .= "N";}
 #    if ($Production =~ /^dAu/ or $Production =~ /^AuAu/) {$cmd .= "S";}
-    $cmd .= ".C(" . $NEvents . ",\"" . $ffile . "\",\"" . $root . "\"," . $Mode . ")\' >& $log";
+    $cmd .= ".C(" . $NEvents . ",\"" . $ffile . "\",\"" . $root . "\"," . $Mode . ",\"$year\")\' >& $log";
 #    $cmd .= ".C(" . $NEvents . ",\"" . $ffile . "\",\"" . $root . "\"," . $Mode . ")\' >& $logL";
 #    $cmd .= "; cp -p $logL $log;";
 #    $cmd .= ".C(10000,\"" . $ffile . "\",\"" . $root . "\"," . $Mode . ")\'";

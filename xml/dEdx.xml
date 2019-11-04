@@ -24,7 +24,7 @@
   set f=`find . -maxdepth 1 -type f -name "*${file}*.root"`
   if ("${f}" == "") then
 #    root.exe -x -q -b 'dEdx.C(1000000,"'${INPUTFILE0}'","'${file}'.root",2)' &gt;&amp; ${logFile}
-    root.exe -x -q -b 'dEdx.C(1000,"'${INPUTFILE0}'","'${file}'.root",2)' &gt;&amp; ${logFile}
+    root.exe -x -q -b 'dEdx.C(10000,"'${INPUTFILE0}'","'${file}'.root",2)' &gt;&amp; ${logFile}
 #    root.exe -x -q -b 'dEdx.C(1000000,"'${fileB}'","'${file}'.root",2)' &gt;&amp; ${logFile}
 #   rm ${fileB}
 #   cp *.root ${SUBMITTINGDIRECTORY} 
