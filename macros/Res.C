@@ -260,7 +260,7 @@ void Mu() {
 }
 //________________________________________________________________________________
 void DrawFitP(const Char_t *hitN = "SecRow3C", const Char_t *plot="mu:rowSigned(y,x)", const Char_t *select = "i&&j", const Char_t *opt = "prof",
-	      Double_t xmin = -72.5, Double_t xmax = 72.5, Double_t ymin = -0.5, Double_t ymax = 0.5) {
+	      Int_t nx = 145, Double_t xmin = -72.5, Double_t xmax = 72.5, Double_t ymin = -0.5, Double_t ymax = 0.5) {
   Int_t NF = 0;
   TSeqCollection *files = gROOT->GetListOfFiles();
   if (! files) return;
@@ -298,7 +298,7 @@ void DrawFitP(const Char_t *hitN = "SecRow3C", const Char_t *plot="mu:rowSigned(
       TString Opt(opt);
       Opt += "same";
       TString Plot(plot);
-      Plot += " >> Hist";
+      Plot += Form(" >> Hist(%i,%f,%f)",nx,xmin,xmax);
       FitP->Draw(Plot,select,Opt);
       TH1 *Hist = (TH1 *) gDirectory->Get("Hist");
       Hist->SetMarkerColor(c); Hist->SetMarkerStyle(20); Hist->SetLineColor(c);
