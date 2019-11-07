@@ -8,6 +8,7 @@
 //#define __ZDC3__
 //#define __LogProb__
 #define __BEST_VERTEX__
+//#define __iTPCOnly__
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
 #include "StTpcdEdxCorrection.h" 
@@ -870,11 +871,11 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 #else
   enum  {kTotalMethods = 4};
 #endif
-  static TH3F *TPoints[kTotalMethods] = {0}; // *N[6] = {"B","70B","BU","70BU","N", "NU"};
-  static TH2F *Pulls[kTotalMethods] = {0};
+  static TH3F *TPoints[2][kTotalMethods] = {0}; // *N[6] = {"B","70B","BU","70BU","N", "NU"}; 0 => "+", 1 => "-";
+  static TH2F *Pulls[2][kTotalMethods] = {0};
 #ifdef __iTPCOnly__
-  static TH3F *TPointsiTPC[kTotalMethods] = {0}; // *N[6] = {"B","70B","BU","70BU","N", "NU"};
-  static TH2F *PullsiTPC[kTotalMethods] = {0};
+  static TH3F *TPointsiTPC[2][kTotalMethods] = {0}; // *N[6] = {"B","70B","BU","70BU","N", "NU"};
+  static TH2F *PullsiTPC[2][kTotalMethods] = {0};
 #endif
   static StDedxMethod kTPoints[kTotalMethods] = {// {"F","70","FU","70U","N", "NU"};
     kLikelihoodFitId,         // F
@@ -936,37 +937,41 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 			    100,0,10,nZBins,ZdEdxMin,ZdEdxMax);
 #endif
     // TPoints block
-    for (Int_t t = 0; t < kTotalMethods; t++) {
-      const Char_t *N[6] = {"F","70","FU","70U","N", "NU"};
-      const Char_t *T[6] = {"dEdx(fit)/Pion",
-			    "dEdx(I70)/Pion",
-			    "dEdx(fit_uncorrected)/Pion ",
-			    "dEdx(I70_uncorrected)/Pion",
-			    "dNdx/Pion",
-			    "dNdx(uncorrected)/Pion"};
-      TPoints[t]   = new TH3F(Form("TPoints%s",N[t]),
-			      Form("%s versus Length in Tpc and <log_{2}(dX)> in TPC - iTPC",T[t]),
-			      190,10,200., Nlog2dx, log2dxLow, log2dxHigh, 500,-1.,4.);
-      Pulls[t] = new TH2F(Form("Pull%s",N[t]),
-			  Form("Pull %s versus Length in TPC - iTPC",T[t]),
-			  190,10.,200,nZBins,ZdEdxMin,ZdEdxMax);
+    const Char_t *NS[2] = {"P",""};
+    const Char_t *TS[2] = {"Positive","Negative"};
+    for (Int_t s = 0; s < 2; s++) {// charge 0 => "+", 1 => "-"
+      for (Int_t t = 0; t < kTotalMethods; t++) {
+	const Char_t *N[6] = {"F","70","FU","70U","N", "NU"};
+	const Char_t *T[6] = {"dEdx(fit)/Pion",
+			      "dEdx(I70)/Pion",
+			      "dEdx(fit_uncorrected)/Pion ",
+			      "dEdx(I70_uncorrected)/Pion",
+			      "dNdx/Pion",
+			      "dNdx(uncorrected)/Pion"};
+	TPoints[s][t]   = new TH3F(Form("TPoints%s%s",N[t],NS[s]),
+				   Form("%s versus Length in Tpc and <log_{2}(dX)> in TPC - iTPC %s",T[t],TS[s]),
+				   190,10,200., Nlog2dx, log2dxLow, log2dxHigh, 500,-1.,4.);
+	Pulls[s][t] = new TH2F(Form("Pull%s%s",N[t],NS[s]),
+			       Form("Pull %s versus Length in TPC - iTPC %s",T[t],TS[s]),
+			       190,10.,200,nZBins,ZdEdxMin,ZdEdxMax);
 #ifdef __iTPCOnly__
-      TPointsiTPC[t]   = new TH3F(Form("TPoints%siTPC",N[t]),
-			      Form("%s versus Length in Tpc and <log_{2}(dX)> in iTPC",T[t]),
-			      190,10,200., Nlog2dx, log2dxLow, log2dxHigh, 500,-1.,4.);
-      PullsiTPC[t] = new TH2F(Form("Pull%siTPC",N[t]),
-			  Form("Pull %s versus Length in iTPC",T[t]),
-			  190,10.,200,nZBins,ZdEdxMin,ZdEdxMax);
+	TPointsiTPC[s][t]   = new TH3F(Form("TPoints%siTPC%s",N[t],NS[s]),
+				       Form("%s versus Length in Tpc and <log_{2}(dX)> in iTPC %s",T[t],TS[s]),
+				       190,10,200., Nlog2dx, log2dxLow, log2dxHigh, 500,-1.,4.);
+	PullsiTPC[s][t] = new TH2F(Form("Pull%siTPC%s",N[t],NS[s]),
+				   Form("Pull %s versus Length in iTPC %s",T[t],TS[s]),
+				   190,10.,200,nZBins,ZdEdxMin,ZdEdxMax);
 #endif
-      if (t < 2) {
-	Eta[t] = new TH2F(Form("Eta%s",N[t]),
-			  Form("%s for primary tracks versus Eta for |zPV| < 10cm and TpcLength > 40cm, TPC - iTPC",T[t]),
-			  100,-2.5,2.5,500,-1.,4.);
+	if (s == 0 && t < 2) {
+	  Eta[t] = new TH2F(Form("Eta%s",N[t]),
+			    Form("%s for primary tracks versus Eta for |zPV| < 10cm and TpcLength > 40cm, TPC - iTPC",T[t]),
+			    100,-2.5,2.5,500,-1.,4.);
 #ifdef __iTPCOnly__
-	EtaiTPC[t] = new TH2F(Form("EtaiTPC%s",N[t]),
-			  Form("%s for primary tracks versus Eta for |zPV| < 10cm and TpcLength > 40cm, iTPC only",T[t]),
-			      100,-2.5,2.5,500,-1.,4.);
+	  EtaiTPC[t] = new TH2F(Form("EtaiTPC%s",N[t]),
+				Form("%s for primary tracks versus Eta for |zPV| < 10cm and TpcLength > 40cm, iTPC only",T[t]),
+				100,-2.5,2.5,500,-1.,4.);
 #endif
+	}
       }
     }
     TDatime t1(tMin,0); // min Time and
@@ -1123,12 +1128,12 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
     if (PiD.Status(kTPoints[j])) {
 #ifdef __iTPCOnly__
       if (iTPCOnly) {
-	TPointsiTPC[j]->Fill(PiD.fFit.TrackLength(),PiD.fFit.log2dX(),PiD.Status(kTPoints[j])->dev[kPidPion]);
-	PullsiTPC[j]->Fill(PiD.fFit.TrackLength(),PiD.Status(kTPoints[j])->devS[kPidPion]);
+	TPointsiTPC[sCharge][j]->Fill(PiD.fFit.TrackLength(),PiD.fFit.log2dX(),PiD.Status(kTPoints[j])->dev[kPidPion]);
+	PullsiTPC[sCharge][j]->Fill(PiD.fFit.TrackLength(),PiD.Status(kTPoints[j])->devS[kPidPion]);
       } else {
 #endif
-	TPoints[j]->Fill(PiD.fFit.TrackLength(),PiD.fFit.log2dX(),PiD.Status(kTPoints[j])->dev[kPidPion]);
-	Pulls[j]->Fill(PiD.fFit.TrackLength(),PiD.Status(kTPoints[j])->devS[kPidPion]);
+	TPoints[sCharge][j]->Fill(PiD.fFit.TrackLength(),PiD.fFit.log2dX(),PiD.Status(kTPoints[j])->dev[kPidPion]);
+	Pulls[sCharge][j]->Fill(PiD.fFit.TrackLength(),PiD.Status(kTPoints[j])->devS[kPidPion]);
 #ifdef __iTPCOnly__
       }
 #endif
@@ -1298,7 +1303,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	if (! St_tpcPadConfigC::instance()->iTPC(sector)) 
 #endif
 	  TanL3D.Fill(rowS,FdEdx[k].TanL,Vars);
-#ifdef __iTPCOnly__
+#ifdef __iTPCOnly__xs
 	else 
 	  TanL3DiTPC.Fill(rowS,FdEdx[k].TanL,Vars);
 #endif
@@ -1753,6 +1758,12 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
 }
 //________________________________________________________________________________
 void StdEdxY2Maker::BadHit(Int_t iFlag, const StThreeVectorF &xyz) {
+#if 0
+  static Int_t ibreak = 0;
+  if (iFlag == 6 && TMath::Abs(xyz.z()) < 40) {
+    ibreak++;
+  }
+#endif
   if (iFlag >= 0 && iFlag < fNZOfBadHits && fZOfBadHits[iFlag]) fZOfBadHits[iFlag]->Fill(xyz.z());
   if (fZOfBadHits[fNZOfBadHits-1]) fZOfBadHits[fNZOfBadHits-1]->Fill(xyz.z());
   if (fPhiOfBadHits!= 0) fPhiOfBadHits->Fill(TMath::ATan2(xyz.y(),xyz.x()));

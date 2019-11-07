@@ -387,7 +387,9 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	  iok = 0;
 	}
       }
-      if (iok) return iok;
+      if (iok) {
+	return iok;
+      }
     }
     if (corl->npar%100) {
       Double_t dECor = TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[k]));
