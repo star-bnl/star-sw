@@ -1826,6 +1826,7 @@ $hist = "Run303"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_
 # 11/02/19 dEdx909 new TcpZCorrection
 # 11/03/19 dEdx910 no TcpZCorrection
 # 11/04/19 dEdx911 no TcpZCorrection, TcpSecRowB, TcpSecRowB
+# 11/05/19 dEdx912 add TcpSecRowB
 #$hist = "Run303"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/30/2019  reduce pMom interal, do only Negative particles
 #$hist = "Run304"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/31/2019  reset TpcdXCorrection, TpcZCorrectionB, TpcSecRowB
 #$hist = "Run305"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/01/2019  new TpcSecRowB
