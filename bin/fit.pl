@@ -27,8 +27,8 @@ if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0)
 		Voltage VoltageC Qcm QcmC AvCurrentC
 		Z3C 
 		xyPad3C
-		Z3OC Zdc3
-	      ); # PressureTC Volt VoltCC  xyPad3C Edge3C TanL3DC TanL3DiTPCC  Z3iTPCC dX3iTPCC dX3C  
+		Z3OC Zdc3 Z3iTPCC
+	      ); # PressureTC Volt VoltCC  xyPad3C Edge3C TanL3DC TanL3DiTPCC   dX3iTPCC dX3C  
 #		flowRateExhaustP flowRateRecirculationP
 #		ppmOxygenInP  inputGasTemperatureP 
 #		percentMethaneInP percentMethaneInPA percentMethaneInPC
