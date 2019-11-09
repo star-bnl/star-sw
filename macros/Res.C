@@ -293,6 +293,7 @@ void DrawFitP(const Char_t *hitN = "SecRow3C", const Char_t *plot="mu:rowSigned(
     if (c == 10) c = 11;
     if (FitFiles[i]) { 
       FitFiles[i]->cd();
+      cout << "File " << gDirectory->GetName() << endl;
       TNtuple *FitP = (TNtuple *) gDirectory->Get("FitP");
       if (! FitP) continue;
       TString Opt(opt);
