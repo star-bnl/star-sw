@@ -88,27 +88,27 @@
 class Bichsel;
 #endif
 Bichsel *m_Bichsel = 0;
-const Int_t NMasses = 10;
-const Double_t Masses[NMasses] = {0.93827231,
-				  0.493677,
-				  0.13956995,
-				  0.51099907e-3,
-				  1.87561339,
-				  0.1056584,
-				  2.80925,
-				  2.80923, //GEANT3
-				  3.727417, //GEANT3
-				  0.13956995
-#if 0
-				  6.5354,
-				  5.6031,
-				  0.93827231
+const Int_t NMasses = 13;
+const Double_t Masses[NMasses] = {0.93827231,       // 0 p
+				  0.493677,         // 1 K
+				  0.13956995,       // 2 pi
+				  0.51099907e-3,    // 3 e  
+				  1.87561339,       // 4 d
+				  0.1056584,        // 5 mu
+				  2.80925,          // 6 t
+				  2.80923, //GEANT3 // 7 He3
+				  3.727417, //GEANT3// 8 He4
+				  -0.13956995,      // 9 2*pi
+#if 1
+				  6.5354,           //10 Li7
+				  5.6031,           //11 Li6
+				 -0.93827231        //12 2*p
 #endif
 };
-const Int_t   PiD[NMasses]   = { 1,    2,   3,   0,   5,    4,  6,    7,       8,     3}; //, 9, 10, 1}; 
-const Int_t   Index[NMasses] = { 4,    3,   2,   0,   5,    1,  6,    7,       8,    -2}; //, 9, 10, 0};
-const Char_t *Names[NMasses] = {"p", "K","#pi","e", "d","#mu","t","He3","#alpha","2#pi"}; //, "Li7", "Li6", "2p"};
-const Int_t NF = 10;  //          0       1    2     3     4      5      6     7        8        9
+const Int_t   PiD[NMasses]   = {  1,   2,    3,  0,   5,    4,  6,    7,       8,    3,    9, 10, 1}; 
+const Int_t   Index[NMasses] = {  4,   3,    2,  0,   5,    1,  6,    7,       8,   -2,    9, 10, 0};
+const Char_t *Names[NMasses] = {"p", "K","#pi","e", "d","#mu","t","He3","#alpha","2#pi", "Li7", "Li6", "2p"};
+const Int_t NF = 10;  //          0,  1,     2,  3,   4,    5.  6,    7,       8,     9,
 const Char_t *FNames[NF] = {"Girrf","Sirrf","z","70","60","70M","dNdx","zM","70Trs","zTrs"};
 const Int_t Nlog2dx = 3;
 const Double_t log2dx[Nlog2dx] = {0,1,2};
@@ -329,7 +329,7 @@ void bichselG10(const Char_t *type="z") {
       break;
     }
   }
-  for (int h = 0; h < NMasses-1; h++) { // Masses
+  for (int h = 0; h < NMasses; h++) { // Masses
   //  for (int h = 0; h < 7; h++) { // Masses
     Int_t dx = 1;
     Char_t *FunName = Form("%s%s%i",FNames[f],Names[h],(int)log2dx[dx]);
@@ -349,8 +349,7 @@ void bichselG10(const Char_t *type="z") {
     else {
       return;
     }
-    if (h == 9 || h == 11) func->SetParameter(0,-Masses[h]);
-    else                   func->SetParameter(0,Masses[h]);
+    func->SetParameter(0,Masses[h]);
     func->SetParameter(1,1.);
     func->SetParameter(2, PiD[h]); 
     if (h >= 7 && h < 9) func->SetParameter(1,2.);
