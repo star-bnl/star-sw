@@ -2888,8 +2888,9 @@ Double_t gNFunc(Double_t *x=0, Double_t *par=0) {
   // par[5] - electorn -"-
   // par[6] - deuteron -"-
   // par[7] - Total
-  // par[8] - kTpc = {kTpcOuter = 0, kTpcInner = 1, kTpcAll}
-  // par[9] - case -1, 5 -> All, 0- pion, 1 - proton, 2 - kaon, 3 -electron, 4 - deuteron 
+  // par[8] - case -1, 5 -> All, 0- pion, 1 - proton, 2 - kaon, 3 -electron, 4 - deuteron 
+  // par[9] - scale
+  // par[10] - kTpc = {kTpcOuter = 0, kTpcInner = 1, kTpcAll}
   // ratio dN/dx_h / dN/dx_pi:      P        K        e        d
   static Int_t _debug = 0;
   static TCanvas *c1 = 0;
@@ -2904,9 +2905,10 @@ Double_t gNFunc(Double_t *x=0, Double_t *par=0) {
   static Int_t    icaseOLD = -1;
   static Double_t meanPion = -1, RMSPion = -1, mpvPion = -1;
   static Double_t ln10 = TMath::Log(10.);
-  Int_t iTpc = par[8];
-  if (iTpc < 0 || iTpc > 2) iTpc = 2;
   Double_t sigma = par[2];
+  Double_t scale = par[9];
+  Int_t iTpc = par[10];
+  if (iTpc < 0 || iTpc > 2) iTpc = 2;
   if (iTpc != iTpcOld) {
     TF1 *zdE = StdEdxModel::instance()->zdE();  
     zdE->FixParameter(0, iTpc);
@@ -2962,7 +2964,7 @@ Double_t gNFunc(Double_t *x=0, Double_t *par=0) {
     frac[0] -= frac[i];
   }
   if (fracOld[0] != frac[0]) updatedFractions = kTRUE;
-  Int_t icase = (Int_t) par[9];
+  Int_t icase = (Int_t) par[8];
   Int_t i1 = 0;
   Int_t i2 = NFIT_HYP - 1;
   if (icase >= 0) {i1 = i2 = icase;}
@@ -2979,7 +2981,7 @@ Double_t gNFunc(Double_t *x=0, Double_t *par=0) {
       c1->Update();
     }
   }  
-  Double_t Value = par[7]*TMath::Exp(par[0])*hists[NFIT_HYP]->Interpolate(x[0]-par[1]);
+  Double_t Value = par[7]*TMath::Exp(par[0])*hists[NFIT_HYP]->Interpolate(scale*(x[0]-par[1]));
   return Value;
 }
 //________________________________________________________________________________
@@ -3001,7 +3003,7 @@ TF1 *FitNF(TH1 *proj, Option_t *opt, Int_t kTpc = 2) {// fit with no. of primary
   TF1 *g2 = (TF1*) gROOT->GetFunction("GN");
   enum {NFIT_HYP = 5}; // ignore e and d
   if (! g2) {
-    g2 = new TF1("GN",gNFunc, -5, 5, 10);
+    g2 = new TF1("GN",gNFunc, -5, 5, 11);
     g2->SetParName(0,"norm"); g2->SetParLimits(0,-80,80);
     g2->SetParName(1,"mu");     g2->SetParLimits(1,-2.5,2.5);
     g2->SetParName(2,"Sigma");  g2->FixParameter(2, 0); // g2->SetParLimits(2,0.,0.5);
@@ -3011,12 +3013,14 @@ TF1 *FitNF(TH1 *proj, Option_t *opt, Int_t kTpc = 2) {// fit with no. of primary
     g2->SetParName(6,"d");      g2->SetParLimits(6,0.0,0.30); g2->FixParameter(6,0);
     //    g2->SetParName(6,"ScaleL"); g2->SetParLimits(6,-2.5,2.5);
     g2->SetParName(7,"Total");
-    g2->SetParName(8,"kTpc"); 
-    g2->SetParName(9,"case"); 
+    g2->SetParName(8,"case"); 
+    g2->SetParName(9,"scale"); g2->SetParLimits(9,0.5,2.0);
+    g2->SetParName(10,"kTpc"); 
   }
   if (kTpc < StdEdxModel::kTpcOuter || kTpc > StdEdxModel::kTpcAll) kTpc = StdEdxModel::kTpcAll;
-  g2->FixParameter(8, kTpc);
-  g2->FixParameter(9,-1);
+  g2->FixParameter(8,-1);
+  g2->FixParameter(9, 1);
+  g2->FixParameter(10, kTpc);
   PreSetParameters(proj,g2);
   gNFunc();
   TFitResultPtr res =  proj->Fit(g2,Opt.Data());
@@ -3027,9 +3031,10 @@ TF1 *FitNF(TH1 *proj, Option_t *opt, Int_t kTpc = 2) {// fit with no. of primary
     proj->Fit(g2,Opt.Data());
   }
   g2->ReleaseParameter(3); g2->SetParameter(3,1e-5); g2->SetParLimits(3,0.0,TMath::Pi()/2);
-  g2->ReleaseParameter(4); g2->SetParameter(4,1e-5); g2->SetParLimits(4,0.0,0.3);
-  g2->ReleaseParameter(5); g2->SetParameter(5,1e-5); g2->SetParLimits(5,0.0,0.3);
-  g2->ReleaseParameter(6); g2->SetParameter(6,1e-5); g2->SetParLimits(6,0.0,0.3);
+  g2->ReleaseParameter(4); g2->SetParameter(4,1e-5); g2->SetParLimits(4,0.0,1.0);
+  g2->ReleaseParameter(5); g2->SetParameter(5,1e-5); g2->SetParLimits(5,0.0,1.0);
+  g2->ReleaseParameter(6); g2->SetParameter(6,1e-5); g2->SetParLimits(6,0.0,1.0);
+  g2->ReleaseParameter(9); g2->SetParameter(9,1.0);  g2->SetParLimits(9,0.5,2.0);
   //  g2->ReleaseParameter(7);
   Opt += "m";
   gNFunc();
@@ -3051,7 +3056,7 @@ TF1 *FitNF(TH1 *proj, Option_t *opt, Int_t kTpc = 2) {// fit with no. of primary
     for (int i = 0; i < NFIT_HYP; i++) {
       TF1 *f = new TF1(*g2);
       f->SetName(Peaks[i].Name);
-      f->FixParameter(9,i);
+      f->FixParameter(8,i);
       f->SetLineColor(i+2);
       gNFunc();
       f->Draw("same");
