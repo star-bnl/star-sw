@@ -1640,12 +1640,12 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
 	const Char_t *parN[5] = {"","pi","e","K","P"};
 	const Char_t *parT[5] = {"All","|nSigmaPion| < 1","|nSigmaElectron| < 1","|nSigmaKaon| < 1","|nSigmaProton| < 1"};
 	Double_t ymin = 0, ymax = 2.5;
-	if (k == 2) {ymin = 1.25; ymax = 3.75;}
+	if (k == 2) {ymin = 1.2; ymax = 3.7;}
 	for (Int_t t = 0; t < 5; t++) {
 	  TString Title(Form("log10(dE/dx(%s)(keV/cm)) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm %s",FitName[k],parT[t]));
 	  if (k == 2) Title = Form("log10(dN/dx) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm %s",parT[t]);
 	  fTdEdx[k][t] = new TH2F(Form("TdEdx%s%s",FitName[k],parN[t]),Title,
-				  300,-1.,2., 700, ymin, ymax);
+				  330,-1.3,2., 500, ymin, ymax);
 	  fTdEdx[k][t]->SetMarkerStyle(1);
 	  fTdEdx[k][t]->SetMarkerColor(t+1);
 	}

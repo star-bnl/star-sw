@@ -41,6 +41,8 @@
 #include "StDetectorDbMaker/St_TpcAvgPowerSupplyC.h"
 #include "StDetectorDbMaker/St_tpcTimeDependenceC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
+#include "StDetectorDbMaker/St_beamInfoC.h"
+#include "St_db_Maker/St_db_Maker.h"
 #include "TUnixTime.h"
 //________________________________________________________________________________
 StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) : 
@@ -49,6 +51,20 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
 {
   assert(gStTpcDb);
   if (!m_Mask) m_Mask = -1;
+  static const Char_t *FXTtables[] = {"TpcdXCorrectionB",
+				      "tpcGainCorrection",
+				      "TpcLengthCorrectionMDF",
+				      "TpcPadCorrectionMDF",
+				      "TpcSecRowB",
+				      "TpcZCorrectionB"};
+  static Int_t NT = sizeof(FXTtables)/sizeof(const Char_t *);
+  Bool_t isFixedTarget = St_beamInfoC::instance()->IsFixedTarget();
+  TString flavor("sim+ofl");
+  if (isFixedTarget) flavor = "sim+ofl+FXT";
+  St_db_Maker *dbMk = (St_db_Maker *) StMaker::GetTopChain()->Maker("db");
+  for (Int_t i = 0; i < NT; i++) {
+    dbMk->SetFlavor(flavor, FXTtables[i]);
+  }
   ReSetCorrections();
 }
 //________________________________________________________________________________
