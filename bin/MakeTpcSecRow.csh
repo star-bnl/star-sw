@@ -1,4 +1,4 @@
-]#! /bin/tcsh -f
+#! /bin/tcsh -f
 #root.exe -q -b /afs/rhic.bnl.gov/star/packages/.DEV2/StarDb/Calibrations/tpc/TpcSecRowB.20100101.000032.root \
 #SecRow3CGFRunX35P10ij.root \
 #'MakeTpcSecRowB.C(20100101,35,"TpcSecRowB","/afs/rhic.bnl.gov/star/packages/.DEV2/StarDb/Calibrations/tpc/TpcRowQ.20100101.000032.C")'
@@ -256,12 +256,12 @@
 #    mv TpcSecRowB.20180518.000309.root  TpcSecRowB.${b}.root; mv  MakeTpcSecRowB.20180518,309.log MakeTpcSecRowB.${b}.log
 #end
 # Run313
-foreach f (`ls -1d SecRow3CGFproduction_*.root`) 
-    set b = `echo ${f} | sed -e 's/SecRow3CGFproduction_//' -e 's/_ReversedFullField\.root//'`;
-    echo "${f} => ${b}"
-    root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.${b}.root /star/u/fisyak/work/Histograms/RunXVIII/Run313/${f} 'MakeTpcSecRowB.C(20180518,309,"TpcSecRowB",0)' >& MakeTpcSecRowB.20180518,309.log
-    mv TpcSecRowB.20180518.000309.root  TpcSecRowB.${b}.root; mv  MakeTpcSecRowB.20180518,309.log MakeTpcSecRowB.${b}.log
-end
+#foreach f (`ls -1d SecRow3CGFproduction_*.root`) 
+#    set b = `echo ${f} | sed -e 's/SecRow3CGFproduction_//' -e 's/_ReversedFullField\.root//'`;
+#    echo "${f} => ${b}"
+#    root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.${b}.root /star/u/fisyak/work/Histograms/RunXVIII/Run313/${f} 'MakeTpcSecRowB.C(20180518,309,"TpcSecRowB",0)' >& MakeTpcSecRowB.20180518,309.log
+#    mv TpcSecRowB.20180518.000309.root  TpcSecRowB.${b}.root; mv  MakeTpcSecRowB.20180518,309.log MakeTpcSecRowB.${b}.log
+#end
 
 # 2019 
 #root.exe -q -b  SecRow3CGFdEdx.root  'MakeTpcSecRowB.C(20190201,1)' >& MakeTpcSecRowB.20190201,1.log
@@ -275,7 +275,7 @@ end
 #root.exe -q -b  /net/l402/data/fisyak/STAR/packages/.DEV2/StarDb/Calibrations/tpc/TpcSecRowB.20190201.000804.root  /net/l403/data/fisyak/reco/2019/Pass801/dEdx806/Fit/SecRow3CGFdEdx806.root 'MakeTpcSecRowB.C(20190201,806)' >& MakeTpcSecRowB.20190201,806.log
 # 2005 cu work/Histograms/RunV202
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20050111.220000.root  SecRow3CGFcuProduction_ReversedFullField.root  'MakeTpcSecRowB.C(20050102,0,"TpcSecRowB","$STAR/StarDb/Calibrations/tpc/TpcRowQ.20050101.000000.C")' >& MakeTpcSecRowB.20050102,0.log
-#root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20050111.220000.root  SecRow3CGFcuProduction_FullField.root  'MakeTpcSecRowB.C(20050216,0,"TpcSecRowB","$STAR/StarDb/Calibrations/tpc/TpcRowQ.20050101.000000.C")' >& MakeTpcSecRowB.20050216,0.log
+#root.exe -q -b  $STAR/StarDb/Calibrationsxf/tpc/TpcSecRowB.20050111.220000.root  SecRow3CGFcuProduction_FullField.root  'MakeTpcSecRowB.C(20050216,0,"TpcSecRowB","$STAR/StarDb/Calibrations/tpc/TpcRowQ.20050101.000000.C")' >& MakeTpcSecRowB.20050216,0.log
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20050111.220000.root  SecRow3CGFcu62productionMinBias_FullField.root  'MakeTpcSecRowB.C(20050310,0,"TpcSecRowB","$STAR/StarDb/Calibrations/tpc/TpcRowQ.20050101.000000.C")' >& MakeTpcSecRowB.20050310,0.log
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20050111.220000.root  SecRow3CGFcu22ProductionMinBias_FullField.root  'MakeTpcSecRowB.C(20050322,220000,"TpcSecRowB","$STAR/StarDb/Calibrations/tpc/TpcRowQ.20050101.000000.C")' >& MakeTpcSecRowB.20050322,220000.log
 # 2005 work/Hitogram/RunV204                                                                              
@@ -304,3 +304,13 @@ end
 # root.exe -q -b /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/dEdx903/Fit/SecRow3CGFdEdx903.root 'MakeTpcSecRowB.C(20190201,903)' >& MakeTpcSecRowB.20190201,903.log
 # root.exe -q -b $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20190201.000903.root  /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/dEdx904/Fit/SecRow3CGFdedx904.root 'MakeTpcSecRowB.C(20190201,904)' >& MakeTpcSecRowB.20190201,904.log
 # root.exe -q -b $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20190201.000904.root  /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/dEdx906/Fit/SecRow3CGFdEdx906.root 'MakeTpcSecRowB.C(20190201,906)' >& MakeTpcSecRowB.20190201,906.log
+# root.exe -q -b $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20190201.000906.root  /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/dEdx914/Fit/SecRow3CGFdEdx914.root 'MakeTpcSecRowB.C(20190201,914)' >& MakeTpcSecRowB.20190201,914.log
+# dEdx912
+set run = dEdx912
+foreach f (`ls -1d SecRow3CGF*.root`) 
+    set b = `echo ${f} | sed -e 's/SecRow3CGF//'`;
+    echo "${f} => ${b}"
+#    root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.${b}.root /star/u/fisyak/work/Histograms/RunXVIII/Run313/${f} 'MakeTpcSecRowB.C(20180518,309,"TpcSecRowB",0)' >& MakeTpcSecRowB.20180518,309.log
+    root.exe -q -b  /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/dEdx912/Fit/${f} 'MakeTpcSecRowB.C(20190201,312,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190201,312.log
+    mv TpcSecRowB.20190201.000312.root  TpcSecRowB.${b}; mv  MakeTpcSecRowB.20190201,312.log MakeTpcSecRowB.${b}.log
+end
