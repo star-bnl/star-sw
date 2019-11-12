@@ -14,7 +14,7 @@
 //#define __USE_ROOFIT__
 //#endif
 //________________________________________________________________________________
-#if !defined(__CINT__) && !defined(__CLING__) || defined(__MAKECINT__)
+#if !defined(__CINT__) || defined(__MAKECINT__)
 #include "Riostream.h"
 #include <stdio.h>
 #include "TROOT.h"
@@ -1494,7 +1494,11 @@ void PreSetParameters(TH1 *proj, TF1 *g2) {
   Int_t nfound = fSpectrum->Search(proj);
   if (nfound < 1) return;
   Int_t npeaks = 0;
+#if  ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
   Float_t *xpeaks = fSpectrum->GetPositionX();
+#else
+  Double_t *xpeaks = fSpectrum->GetPositionX();
+#endif
   Float_t xp = 0;
   if (nfound > 2) nfound = 2;
   Double_t xpi = 9999;
