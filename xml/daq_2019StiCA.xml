@@ -27,7 +27,8 @@
 #   root.exe -q -b 'bfc.C(200,"P2019,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 #   root.exe -q -b 'bfc.C(200,"P2019,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,","'${evtsFile}'")' &gt;&amp; ${logFile}
 #   root.exe -q -b 'bfc.C(20000,"P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
-   root.exe -q -b 'bfc.C(2000,"P2019a,-hitfilt,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+#   root.exe -q -b 'bfc.C(2000,"P2019a,-hitfilt,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+   root.exe -q -b 'bfc.C(1000,"P2019a,-hitfilt,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
    cp  ${filel}* ${SUBMITTINGDIRECTORY}
    rm ${bla}
         </command>

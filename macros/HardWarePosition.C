@@ -174,5 +174,9 @@ Float_t rowSigned(Int_t row, Int_t sector) {
   return (sector <= 12) ? row : -row;
 }
 //________________________________________________________________________________
+Float_t SignedY(Double_t x, Double_t y) {
+  return (x > 0) ? y : -y;
+}
+//________________________________________________________________________________
 void HardWarePosition() {}
 #endif

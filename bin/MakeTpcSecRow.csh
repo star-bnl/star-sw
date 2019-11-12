@@ -306,11 +306,20 @@
 # root.exe -q -b $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20190201.000904.root  /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/dEdx906/Fit/SecRow3CGFdEdx906.root 'MakeTpcSecRowB.C(20190201,906)' >& MakeTpcSecRowB.20190201,906.log
 # root.exe -q -b $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20190201.000906.root  /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/dEdx914/Fit/SecRow3CGFdEdx914.root 'MakeTpcSecRowB.C(20190201,914)' >& MakeTpcSecRowB.20190201,914.log
 # dEdx912
-set run = dEdx912
-foreach f (`ls -1d SecRow3CGF*.root`) 
+#set run = dEdx912
+#foreach f (`ls -1d SecRow3CGF*.root`) 
+#    set b = `echo ${f} | sed -e 's/SecRow3CGF//'`;
+#    echo "${f} => ${b}"
+#    root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.${b}.root /star/u/fisyak/work/Histograms/RunXVIII/Run313/${f} 'MakeTpcSecRowB.C(20180518,309,"TpcSecRowB",0)' >& MakeTpcSecRowB.20180518,309.log
+#    root.exe -q -b  /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/dEdx912/Fit/${f} 'MakeTpcSecRowB.C(20190201,312,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190201,312.log
+#    mv TpcSecRowB.20190201.000312.root  TpcSecRowB.${b}; mv  MakeTpcSecRowB.20190201,312.log MakeTpcSecRowB.${b}.log
+#end
+set run = dEdx916
+foreach p (`ls -1d SecRow3CGF*.root`) 
+    set f = `basename ${p} .root`;
     set b = `echo ${f} | sed -e 's/SecRow3CGF//'`;
     echo "${f} => ${b}"
-#    root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.${b}.root /star/u/fisyak/work/Histograms/RunXVIII/Run313/${f} 'MakeTpcSecRowB.C(20180518,309,"TpcSecRowB",0)' >& MakeTpcSecRowB.20180518,309.log
-    root.exe -q -b  /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/dEdx912/Fit/${f} 'MakeTpcSecRowB.C(20190201,312,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190201,312.log
-    mv TpcSecRowB.20190201.000312.root  TpcSecRowB.${b}; mv  MakeTpcSecRowB.20190201,312.log MakeTpcSecRowB.${b}.log
+    root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.${b}.root /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/${run}/Fit/${p}   'MakeTpcSecRowB.C(20190201,916,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190201,916.log
+#   root.exe -q -b  /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/dEdx912/Fit/${f} 'MakeTpcSecRowB.C(20190201,916,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190201,916.log
+    mv TpcSecRowB.20190201.000916.root  TpcSecRowB.${b}.root; mv  MakeTpcSecRowB.20190201,916.log MakeTpcSecRowB.${b}.log
 end

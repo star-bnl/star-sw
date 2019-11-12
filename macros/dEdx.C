@@ -35,6 +35,10 @@ class StIOMaker;
 #endif
 #endif
 //#define OLDdEdx
+StBFChain * bfc(Int_t First, Int_t Last,const Char_t *Chain = "", // + ",Display",
+	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0, const Char_t *chainName=0);
+StBFChain *bfc(Int_t First, const Char_t *Chain = "MC2016,20Muons,vmc,Rung.1",
+ 	       const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0, const Char_t *chainName = "");
 //________________________________________________________________________________
 void dEdx(Int_t nevents=1000,
 	  const char *MainFile=	"/star/data08/reco/dAuMinBias/FullField/P03ih/2003/040/st_physics_4040004_raw_0010010.event.root",
