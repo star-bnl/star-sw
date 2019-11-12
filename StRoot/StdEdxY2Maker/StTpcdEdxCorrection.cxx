@@ -317,7 +317,8 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       goto ENDL;
     } else if (k == kTpcEffectivedX) {
       if      (kTpcOutIn == kTpcOuter) dx *= ((const St_TpcEffectivedXC* ) m_Corrections[k].Chair)->scaleOuter();
-      else if (kTpcOutIn == kTpcInner) dx *= ((const St_TpcEffectivedXC* ) m_Corrections[k].Chair)->scaleInner();
+      else if (kTpcOutIn == kTpcInner ||
+	       kTpcOutIn == kiTpc )    dx *= ((const St_TpcEffectivedXC* ) m_Corrections[k].Chair)->scaleInner();
       goto ENDL;
     }
     if (k == kTpcPadMDF) {
@@ -345,6 +346,8 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       if (nrows == St_tpcPadConfigC::instance()->numberOfRows(sector)) l = row - 1;
       else if (nrows == 192) {l = 8*(sector-1) + channel - 1; assert(l == (cor+l)->idx-1);}
       else if (nrows ==  48) {l = 2*(sector-1) + kTpcOutIn;}
+      else if (nrows ==   6) {l =            kTpcOutIn;     if (sector > 12) l+= 3;}
+      else if (nrows ==   4) {l = TMath::Min(kTpcOutIn, 1); if (sector > 12) l+= 2;} 
     }
     corl = cor + l;
     iCut = 0;
