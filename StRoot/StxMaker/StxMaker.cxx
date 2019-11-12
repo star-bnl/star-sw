@@ -81,7 +81,7 @@
 #include "TCanvas.h"
 #include "TDatabasePDG.h"
 #include "TEveManager.h"
-#include "TGeoManager.h"
+//#include "TGeoManager.h"
 #include "TGeoMatrix.h"
 #include "TH1D.h"
 #include "TRandom.h"
@@ -97,7 +97,7 @@
 #include "TDatabasePDG.h"
 #include "TMath.h"
 #include "TString.h"
-
+#include "StxVMCToolKit.h"
 #include <memory>
 //#define VALGRIND
 
@@ -139,6 +139,8 @@ static const Bool_t onlyDisplayFailed = kFALSE; // only load non-converged track
 static genfit::AbsKalmanFitter* fitter = 0;
 //  static genfit::GFGbl*           gbl    = 0;
 static Bool_t Initialized = kFALSE;
+TGeoManager *StxMaker::gGeoManagerOrig = 0;
+TGeoManager *StxMaker::gGeoManagerAver = 0;
 //_____________________________________________________________________________
 Int_t StxMaker::InitRun(Int_t runumber) {
   if (! Initialized) {
@@ -206,6 +208,8 @@ Int_t StxMaker::InitRun(Int_t runumber) {
     if (!matFX) genfit::MaterialEffects::getInstance()->setNoEffects();
     Initialized = kTRUE;
   } // end of initialization
+  gGeoManagerOrig = gGeoManager;
+  if (! gGeoManagerAver) MakeAvergedGeometry();
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -507,6 +511,7 @@ Int_t StxMaker::FitTrack(Double_t alpha, const AliHLTTPCCATrackParam *InnerParam
   static TStopwatch *watch = new  TStopwatch;
   watch->Start(kTRUE);
 #endif
+  UseOriginalGeometry();
   const Int_t pdg = 211; // -13;               // particle pdg code mu+
   //  const Double_t charge = TDatabasePDG::Instance()->GetParticle(pdg)->Charge()/(3.);
   //========== Reference  track ======================================================================
@@ -568,6 +573,7 @@ Int_t StxMaker::FitTrack(Double_t alpha, const AliHLTTPCCATrackParam *InnerParam
       fitTrack.insertPoint(new genfit::TrackPoint(measurement, &fitTrack));
     }
   }
+  UseAvergadGeometry();
 #ifdef __DEBUG__
   if (Debug()) {
     St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) GetDataSet("geant/g2t_tpc_hit");
@@ -672,6 +678,7 @@ Int_t StxMaker::FitTrack(Double_t alpha, const AliHLTTPCCATrackParam *InnerParam
 #if 0
   watch->Print("");
 #endif
+  UseOriginalGeometry();
   return ok;
 }
 // $Log: StxMaker.cxx,v $
@@ -1128,4 +1135,21 @@ void StxMaker::FillDca(StTrack* stTrack, genfit::Track * track) {
     gTrack->setDcaGeometry(dca);
     dca->set(setp,sete);
   }
+}
+//________________________________________________________________________________
+void StxMaker::MakeAvergedGeometry() {
+  if (! gGeoManager) StxVMCToolKit::GetVMC();
+  assert(gGeoManager);
+  gGeoManagerOrig = gGeoManager;
+  gGeoManager = 0;
+  //#define __Physics_Node_Clear__
+  if ( gGeoManagerOrig ){
+    LOG_INFO << "Create a clone of VmcGeometry for reconstruction" << endm;
+    gGeoManagerAver = (TGeoManager *) gGeoManagerOrig->Clone("AveragedGeometry");
+  } else {
+    LOG_INFO << "Could not get a pointer to gGeoManager " << endm;
+  }
+  StxVMCToolKit::GetVMC4Reconstruction(0,0);
+  gGeoManagerAver = gGeoManager;
+  gGeoManager = gGeoManagerOrig;
 }

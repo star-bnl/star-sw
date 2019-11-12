@@ -20,6 +20,7 @@
 #include "GenFit/Track.h"
 #include "StThreeVectorD.hh"
 #include "GenFit/MeasuredStateOnPlane.h"
+#include "TGeoManager.h"
 class AliHLTTPCCAGBTrack;
 class AliHLTTPCCATrackParam;
 class StHit;
@@ -59,13 +60,17 @@ class StxMaker : public StMaker {
   Int_t  FillTrack(StTrack* gTrack, genfit::Track * track);
   void   FillDca(StTrack* stTrack, genfit::Track * track);
   CA2GenState_t fCA2Gen[2];// 0 -> Inner, 1 -> Outer
-  
+  void UseOriginalGeometry() {if (gGeoManagerOrig) gGeoManager = gGeoManagerOrig;}
+  void UseAvergadGeometry()  {if (gGeoManagerAver) gGeoManager = gGeoManagerAver;}
+  static void MakeAvergedGeometry();
   virtual const char *GetCVS() const {
     static const char cvs[]="Tag $Name:  $ $Id: StxMaker.h,v 1.2 2013/09/16 19:54:04 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
  private:
   StEvent *mEvent;
+  static TGeoManager *gGeoManagerOrig;
+  static TGeoManager *gGeoManagerAver;
   ClassDef(StxMaker,0)   //StAF chain virtual base class for Makers
 };
 
