@@ -40,7 +40,11 @@ void put2DB(const char* files=
     Int_t d=20000101;
     Int_t t =      0;
     //  sscanf(Time.Data(),"%d",&d);
+#if 1
     TString flavor("ofl");
+#else
+    TString flavor("FXT");
+#endif
     Int_t n = sscanf(Time.Data(),"%d.%d",&d,&t);
     if (n != 2) {
       Char_t tag[10];
