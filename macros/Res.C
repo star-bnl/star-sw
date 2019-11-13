@@ -34,6 +34,7 @@
 #include "TList.h"
 #include "TPolyMarker.h"
 #include "TLegend.h"
+#include "TPRegexp.h"
 #else
 class TMinuit;
 class TF1;
@@ -46,6 +47,7 @@ class TCanvas;
 class TSpectrum;
 class TSystem;
 class Bichsel;
+class TPRegexp;
 #endif
 using namespace std;
 //________________________________________________________________________________
@@ -87,13 +89,14 @@ void Set(Int_t color=1) {
   } else {cout << "Sigma is not found" << endl;}
 }
 //________________________________________________________________________________
-void Res(const Char_t *select="x", const Char_t *name="sigma") {
+void Res(const Char_t *select="x", const Char_t *name="sigma", const Char_t *pattern = "") {
   //  const Char_t *FitNames[3] = {"Fit","I70","I60"};
+  TPRegexp Pattern(pattern);
   TString plot(name);
   TString Plot;
   if (plot == "sigma") Plot = "Sigma";
   if (plot == "mu")    Plot = "Mu";
-  cout << "plot = " << plot.Data() << "\tPlot = " << Plot.Data() << endl;
+  cout << "plot = " << plot.Data() << "\tPlot = " << Plot.Data() << " pattern " << Pattern.GetPattern().Data() << endl;
   Int_t NF = 0;
   TSeqCollection *files = gROOT->GetListOfFiles();
   if (! files) return;
@@ -108,6 +111,7 @@ void Res(const Char_t *select="x", const Char_t *name="sigma") {
   while ( (f = (TFile *) next()) ) { 
     TString F(f->GetName());
     if (! F.Contains("TPoints") && ! F.Contains("MPoints")) continue;
+    if (Pattern.GetPattern() != ""  && ! F.Contains(Pattern)) continue;
     if (! all && (F.Contains("MPoints") || F.Contains("BUGP") || F.Contains("BAGP"))) continue;
     Int_t indx = 0;
     if ( F.Contains("70")) indx = 1;
@@ -188,6 +192,9 @@ void Res(const Char_t *select="x", const Char_t *name="sigma") {
       Title.ReplaceAll("TPointsU"  , "Ufit ");
       Title.ReplaceAll("TPointsF"  , "Ifit ");
       Title.ReplaceAll("TPoints"   , "Ifit ");
+      Title.ReplaceAll("production_","");
+      Title.ReplaceAll("_ReversedFullField","");
+      Title.ReplaceAll("_FullField","");
       Title.ReplaceAll("GP","");
       Title.ReplaceAll("P11ic_dedx_AuAu19_production_ReversedFullField","");
       Title.ReplaceAll("dev_calib_pp500_production_2011_ReversedFullField","");
