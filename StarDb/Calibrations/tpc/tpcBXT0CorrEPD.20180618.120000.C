@@ -11,14 +11,14 @@ TDataSet *CreateTable() {
 memset(&row,0,tableSet->GetRowSize());
     row.type	 =          0; // ;
     row.idx	 =          1; // ;
-    row.nrows	 =          1; // ;
-    row.npar	 =          3; // ;
+    row.nrows	 =          0; // ;
+    row.npar	 =          0; // ;
     row.OffSet	 =          0; // ;
     row.min	 =          0; // ;
     row.max	 =          0; // ;
-    row.a[0]	 = 0.38249; // Mean : This is the general offset for every event set to the mean of the deltaZ distribution;
-    row.a[1]	 = -0.25250; // Offset : This is the offset of the linear corelation of the deltaZ vs. epdMacTac;
-    row.a[2]	 = 0.00021; // Slope : This is the slope of the linear corelation of the deltaZ vs. epdMacTac;
+    row.a[0]	 = 0; // This is the general offset for every event set to the mean of the deltaZ distribution;
+    row.a[1]	 = 0; // This is the offset of the linear corelation of the deltaZ vs. epdMacTac;
+    row.a[2]	 = 0; // This is the slope of the linear corelation of the deltaZ vs. epdMacTac;
     row.a[3]	 =          0;
     row.a[4]	 =          0;
     row.a[5]	 =          0;
@@ -26,7 +26,7 @@ memset(&row,0,tableSet->GetRowSize());
     row.a[7]	 =          0;
     row.a[8]	 =          0;
     row.a[9]	 =          0;
-    strcpy(row.comment,"FXT2019_7.3b");
+    strcpy(row.comment,"FXT2018_26.5e");
 tableSet->AddAt(&row);
 // ----------------- end of code ---------------
  return (TDataSet *)tableSet;

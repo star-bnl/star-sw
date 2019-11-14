@@ -47,18 +47,21 @@ void StTpcHitMover::FlushDB() {
 }
 //________________________________________________________________________________
 Int_t StTpcHitMover::Make() {
-	if (StMagUtilities::Instance() && StMagUtilities::Instance()->GetSpaceChargeMode() && St_spaceChargeCorR2C::instance()->IsMarked()) {
-		gMessMgr->Error() << "StTpcHitMover::Make questionable hit corrections" << endm;
-		return kStSkip;
-	}
-	static StGlobalCoordinate    coorG;
-	Bool_t EmbeddingShortCut = IAttr("EmbeddingShortCut");
-	StEvent* pEvent = dynamic_cast<StEvent*> (GetInputDS("StEvent"));
-	if (! pEvent) {
-		LOG_WARN << "StTpcHitMover::Make there is no StEvent " << endm;
-		return kStWarn;
-	}
+  if (StMagUtilities::Instance() && StMagUtilities::Instance()->GetSpaceChargeMode() &&
+      St_spaceChargeCorR2C::instance()->IsMarked()) {
+    gMessMgr->Error() << "StTpcHitMover::Make questionable hit corrections" << endm;
+    return kStSkip;
+  }
+  static StGlobalCoordinate    coorG;
+  Bool_t EmbeddingShortCut = IAttr("EmbeddingShortCut");
+  StEvent* pEvent = dynamic_cast<StEvent*> (GetInputDS("StEvent"));
+  if (! pEvent) {
+    LOG_WARN << "StTpcHitMover::Make there is no StEvent " << endm;
+    return kStWarn;
+  }
 //	EPD based event-by-event correction for the hit timing
+	double mTimeBinWidth = 1./StTpcDb::instance()->Electronics()->samplingFrequency();
+
 	int ew = 0;
         int TAC = 0;
 	int maxTAC = -1;
@@ -85,107 +88,108 @@ Int_t StTpcHitMover::Make() {
 	}
 //	======================================================
 
-	gMessMgr->Info() << "StTpcHitMover::Make use StEvent " << endm;
-	if (! gStTpcDb) {
-		gMessMgr->Error() << "StTpcHitMover::Make TpcDb has not been instantiated " << endm;
-		return kStErr;
-	}
-	if (pEvent && StMagUtilities::Instance() && StMagUtilities::Instance()->UsingDistortion(kAbortGap)) {
-		StTriggerData* trg = pEvent->triggerData();
-		if (trg) St_tpcChargeEventC::instance()->findChargeTimes(trg->bunchCounter());
-	}
-	if (! mTpcTransForm) mTpcTransForm = new StTpcCoordinateTransform(gStTpcDb);
-	StTpcCoordinateTransform &transform = *mTpcTransForm;
-	StTpcHitCollection* TpcHitCollection = pEvent->tpcHitCollection();
+  gMessMgr->Info() << "StTpcHitMover::Make use StEvent " << endm;
+  if (! gStTpcDb) {
+    gMessMgr->Error() << "StTpcHitMover::Make TpcDb has not been instantiated " << endm;
+    return kStErr;
+  }
+  if (pEvent && StMagUtilities::Instance() && StMagUtilities::Instance()->UsingDistortion(kAbortGap)) {
+    StTriggerData* trg = pEvent->triggerData();
+    if (trg) St_tpcChargeEventC::instance()->findChargeTimes(trg->bunchCounter());
+  }
+  if (! mTpcTransForm) mTpcTransForm = new StTpcCoordinateTransform(gStTpcDb);
+  StTpcCoordinateTransform &transform = *mTpcTransForm;
+  StTpcHitCollection* TpcHitCollection = pEvent->tpcHitCollection();
 #ifdef __CORRECT_CHARGE__
-	St_tss_tssparC *tsspar = St_tss_tssparC::instance();
-	Double_t gains[2] = {
-		tsspar->gain_in() / tsspar->wire_coupling_in() *tsspar->ave_ion_pot() *tsspar->scale(),
-		tsspar->gain_out()/ tsspar->wire_coupling_out()*tsspar->ave_ion_pot() *tsspar->scale()
-	};
+  St_tss_tssparC *tsspar = St_tss_tssparC::instance();
+  Double_t gains[2] = {
+    tsspar->gain_in() / tsspar->wire_coupling_in() *tsspar->ave_ion_pot() *tsspar->scale(),
+    tsspar->gain_out()/ tsspar->wire_coupling_out()*tsspar->ave_ion_pot() *tsspar->scale()
+  };
 #endif /* __CORRECT_CHARGE__ */
-	if (TpcHitCollection) {
-		UInt_t numberOfSectors = TpcHitCollection->numberOfSectors();
-		for (UInt_t i = 0; i< numberOfSectors; i++) {
-			StTpcSectorHitCollection* sectorCollection = TpcHitCollection->sector(i);
-			if (sectorCollection) {
-				Int_t sector = i + 1;
-				Int_t numberOfPadrows = sectorCollection->numberOfPadrows();
-				for (int j = 0; j< numberOfPadrows; j++) {
-					Int_t row = j + 1;
-					Int_t io = 0;
-					if (row > St_tpcPadConfigC::instance()->innerPadRows(sector)) io = 1;
-					Double_t padlength = (io == 0) ? St_tpcPadConfigC::instance()->innerSectorPadLength(sector) : St_tpcPadConfigC::instance()->outerSectorPadLength(sector);
-					StTpcPadrowHitCollection *rowCollection = sectorCollection->padrow(j);
-					if (rowCollection) {
-						StSPtrVecTpcHit &hits = rowCollection->hits();
-						UInt_t NoHits = hits.size();
-						if (NoHits) {
-							for (UInt_t k = 0; k < NoHits; k++) {
-								StTpcHit *tpcHit = static_cast<StTpcHit *> (hits[k]);
+  if (TpcHitCollection) {
+    UInt_t numberOfSectors = TpcHitCollection->numberOfSectors();
+    for (UInt_t i = 0; i< numberOfSectors; i++) {
+      StTpcSectorHitCollection* sectorCollection = TpcHitCollection->sector(i);
+      if (sectorCollection) {
+	Int_t sector = i + 1;
+
+	double driftVelocity = StTpcDb::instance()->DriftVelocity(sector);
+
+	Int_t numberOfPadrows = sectorCollection->numberOfPadrows();
+	for (int j = 0; j< numberOfPadrows; j++) {
+	  Int_t row = j + 1;
+	  Int_t io = 0;
+	  if (row > St_tpcPadConfigC::instance()->innerPadRows(sector)) io = 1;
+	  Double_t padlength = (io == 0) ? 
+	    St_tpcPadConfigC::instance()->innerSectorPadLength(sector) : 
+	    St_tpcPadConfigC::instance()->outerSectorPadLength(sector);
+	  StTpcPadrowHitCollection *rowCollection = sectorCollection->padrow(j);
+	  if (rowCollection) {
+	    StSPtrVecTpcHit &hits = rowCollection->hits();
+	    UInt_t NoHits = hits.size();
+	    if (NoHits) {
+	      for (UInt_t k = 0; k < NoHits; k++) {
+		StTpcHit *tpcHit = static_cast<StTpcHit *> (hits[k]);
 #ifdef __CORRECT_CHARGE__
-								Double_t q = tpcHit->charge();
-								PrPP(Make,*tpcHit);
-								if (tpcHit->adc()) { // correct charge
-									q = gains[io] * ((Double_t) tpcHit->adc());
-								}
+		Double_t q = tpcHit->charge();
+		PrPP(Make,*tpcHit);
+		if (tpcHit->adc()) { // correct charge
+		  q = gains[io] * ((Double_t) tpcHit->adc());
+		}
 #endif /* __CORRECT_CHARGE__ */
-								if (EmbeddingShortCut && tpcHit->idTruth() && tpcHit->idTruth() < 10000 && tpcHit->qaTruth() > 95) {
-									continue; // don't move embedded hits
-								}
-								if (! tpcHit->pad() && ! tpcHit->timeBucket()) {// old style, no pad and timeBucket set
-									StTpcLocalCoordinate  coorL(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z(),i+1,j+1);
-									moveTpcHit(coorL,coorG);
-									StThreeVectorF xyzF(coorG.position().x(),coorG.position().y(),coorG.position().z());
-									tpcHit->setPosition(xyzF);
-								}
-								else { //  transoform from original pad and time bucket measurements
-									Float_t pad  = tpcHit->pad();
-									Float_t time = tpcHit->timeBucket();
-									if (! StTpcDb::IsOldScheme()) {
-										if (St_tpcTimeBucketCorC::instance()->getNumRows()) {
-											Int_t io = 0;
-											if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) io = 1;
-											Double_t noTmbks = tpcHit->maxTmbk() - tpcHit->minTmbk() + 1;
-											time += St_tpcTimeBucketCorC::instance()->CalcCorrection(io, noTmbks);
-										}
-									}
+		if (EmbeddingShortCut && tpcHit->idTruth() && tpcHit->idTruth() < 10000 && 
+		    tpcHit->qaTruth() > 95) {
+		  continue; // don't move embedded hits
+		}
+		if (! tpcHit->pad() && ! tpcHit->timeBucket()) {// old style, no pad and timeBucket set
+		  StTpcLocalCoordinate  coorL(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z(),i+1,j+1);
+		  moveTpcHit(coorL,coorG);
+		  StThreeVectorF xyzF(coorG.position().x(),coorG.position().y(),coorG.position().z());
+		  tpcHit->setPosition(xyzF);
+		} else { //  transoform from original pad and time bucket measurements
+		  Float_t pad  = tpcHit->pad();
+		  Float_t time = tpcHit->timeBucket();
+		  if (! StTpcDb::IsOldScheme()) {
+		    if (St_tpcTimeBucketCorC::instance()->getNumRows()) {
+		      Int_t io = 0;
+		      if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) io = 1;
+		      Double_t noTmbks = tpcHit->maxTmbk() - tpcHit->minTmbk() + 1;
+		      time += St_tpcTimeBucketCorC::instance()->CalcCorrection(io, noTmbks);
+		    }
+		  }
+//		THIS IS A BLOCK TO CORRECT TIMING IN FXT MODE FOR DATA
+		if (doEPDT0Correction) time += StTpcBXT0CorrEPDC::instance()->getCorrection(maxTAC, driftVelocity, mTimeBinWidth);
+//		======================================================
 
-//									THIS IS A BLOCK TO CORRECT TIMING IN FXT MODE FOR DATA
-//									double timeBucketShiftScale = 0.826;
-//									time += timeBucketShiftScale*(0.00021*maxTAC + 0.13); // FXT2019 7.3 GeV
-//									time += timeBucketShiftScale*(0.0001*maxTAC + 0.60781); // FXT2018 27 GeV
-									if (doEPDT0Correction) time += StTpcBXT0CorrEPDC::instance()->getCorrection(maxTAC);
-//									======================================================
-
-									StTpcPadCoordinate padcoord(sector, row, pad, time);
-									StTpcLocalSectorCoordinate  coorS;
-									transform(padcoord,coorS,kFALSE);
-									StTpcLocalCoordinate  coorL;
-									Double_t y = coorS.position().y();
-									for (Int_t l = 0; l < 3; l++) {// center, upper and lower
-										if      (l == 1) coorS.position().setY(y + padlength/2);
-										else if (l == 2) coorS.position().setY(y - padlength/2);
-										transform(coorS,coorL);
-										moveTpcHit(coorL,coorG);
-										StThreeVectorF xyzF(coorG.position().x(),coorG.position().y(),coorG.position().z());
-										if      (l == 1) tpcHit->setPositionU(xyzF);
-										else if (l == 2) tpcHit->setPositionL(xyzF);
-										else             tpcHit->setPosition (xyzF);
-									}
-								}
-							} // loop over hits
-						}
-					}
-				} // loop over padrows
-			}
-		} // loop over sectors
+		  StTpcPadCoordinate padcoord(sector, row, pad, time);
+		  StTpcLocalSectorCoordinate  coorS;
+		  transform(padcoord,coorS,kFALSE);
+		  StTpcLocalCoordinate  coorL;
+		  Double_t y = coorS.position().y();
+		  for (Int_t l = 0; l < 3; l++) {// center, upper and lower
+		    if      (l == 1) coorS.position().setY(y + padlength/2);
+		    else if (l == 2) coorS.position().setY(y - padlength/2);
+		    transform(coorS,coorL);
+		    moveTpcHit(coorL,coorG);
+		    StThreeVectorF xyzF(coorG.position().x(),coorG.position().y(),coorG.position().z());
+		    if      (l == 1) tpcHit->setPositionU(xyzF);
+		    else if (l == 2) tpcHit->setPositionL(xyzF);
+		    else             tpcHit->setPosition (xyzF);
+		  }
+		}
+	      }
+	    }
+	  }
 	}
-	if (StMagUtilities::Instance()) {
-		pEvent->runInfo()->setSpaceCharge(StMagUtilities::Instance()->CurrentSpaceChargeR2());
-		pEvent->runInfo()->setSpaceChargeCorrectionMode(StMagUtilities::Instance()->GetSpaceChargeMode());
-	}
-	return kStOK;
+      }
+    }
+  }
+  if (StMagUtilities::Instance()) {
+    pEvent->runInfo()->setSpaceCharge(StMagUtilities::Instance()->CurrentSpaceChargeR2());
+    pEvent->runInfo()->setSpaceChargeCorrectionMode(StMagUtilities::Instance()->GetSpaceChargeMode());
+  }
+  return kStOK;
 }
 //________________________________________________________________________________
 void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StTpcLocalCoordinate &coorLTD) {
@@ -206,10 +210,10 @@ void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StGlobalCoordinate &
   moveTpcHit(coorL,coorLTD);
   transform(coorLTD,coorG); PrPP(moveTpcHit,coorLTD); PrPP(moveTpcHit,coorG); 
 }
-// $Id: StTpcHitMoverMaker.cxx,v 1.31 2019/10/10 00:15:11 iraklic Exp $
+// $Id: StTpcHitMoverMaker.cxx,v 1.32 2019/11/14 23:07:48 iraklic Exp $
 // $Log: StTpcHitMoverMaker.cxx,v $
-// Revision 1.31  2019/10/10 00:15:11  iraklic
-// Adding epd-based T0 correction to account for timing shift when collision is displaced from center
+// Revision 1.32  2019/11/14 23:07:48  iraklic
+// added timebucket and drift velocity into epd-based T0 correction calculation
 //
 // Revision 1.30  2019/04/22 20:47:16  genevb
 // Introducing codes for AbortGapCleaning distortion corrections
