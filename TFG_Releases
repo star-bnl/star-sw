@@ -45,6 +45,6 @@
  TFG19h freeze to reproces BES-I pico Dst                            2019-09-29 11:48:48 -0400  (HEAD -> master, tag: TFG19h)
  TFG19i freeze to process dE/dx calibration sample for BES-II        2019-10-15 15:07:29 -0400  (HEAD -> master, tag: TFG19i_1)
  TFG19j add dN/dx, latest updates from maksym                        2019-10-31 11:26:42 -0400  (HEAD -> master, tag: TFG19j_1)
- TFG19k Freeze Run XVIII and Run XIX dE/dx                           2019-11-14 11:26:42 -0400  (HEAD -> master, tag: TFG19k)
+ TFG19k Freeze Run XVIII and Run XIX dE/dx                           2019-11-14 09:38:28 -0500  (HEAD -> master, tag: TFG19k)
  .DEV2  head of TFG git repository
   DEV2  head of TFG git repository build with ROOT6
