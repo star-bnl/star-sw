@@ -28,7 +28,8 @@ foreach my $tag (qw(st_physics_20 hlt)) {
     #  print "files = @files\n";
     my $r = File::Basename::basename($run);
     my $day = int ($r/1000 - 20000); #print "ru = $r => day = $day\n";
-    if ($day != 107 and $day != 113 and $day != 169) {next;}
+#    if ($day != / 107 and $day != 113 and $day != 169) {next;}
+    if ($day !~ m/158|160|179|180|181|182|183/) {next;}
     #  if ($r >= 20100000) {next;}
     #  print "run = $run. files = $#files\n" if ($debug);
     my $NF = $#files;

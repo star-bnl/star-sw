@@ -13,7 +13,8 @@
      set f        = 1
      set l        = 5000000
   echo "${evtsFile}"
-  set filel    = `basename $evtsFile .daq`
+  set levtsFile = `basename $evtsFile`;
+  set filel    = `basename $levtsFile .daq`
   set output  = ${filel}.event.root
   if (! -r ${evtsFile}) exit 1;
   set logFile  = ${filel}B.log
@@ -23,12 +24,14 @@
   set bla = ${SUBMITTINGDIRECTORY}/${filel}.bla.root
   if (-r ${bla}) exit 0;
   touch ${bla}
+  cp ${evtsFile} ${levtsFile}
 # TFG
 #   root.exe -q -b 'bfc.C(200,"P2019,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 #   root.exe -q -b 'bfc.C(200,"P2019,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,","'${evtsFile}'")' &gt;&amp; ${logFile}
 #   root.exe -q -b 'bfc.C(20000,"P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 #   root.exe -q -b 'bfc.C(2000,"P2019a,-hitfilt,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
-   root.exe -q -b 'bfc.C(1000,"P2019a,-hitfilt,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+#   root.exe -q -b 'bfc.C(1000,"P2019a,-hitfilt,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+   root.exe -q -b 'bfc.C(1000,"P2019a,-hitfilt,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,picoWrite,PicoVtxVpdOrDefault","'${levtsFile}'")' &gt;&amp; ${logFile}
    cp  ${filel}* ${SUBMITTINGDIRECTORY}
    rm ${bla}
         </command>

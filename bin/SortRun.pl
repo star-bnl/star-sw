@@ -15,7 +15,8 @@ sub SPrint ($$$$$$$) {
   my ($trigOld,$runMin,$runMax,$dateMin,$timeMin,$dateMax,$timeMax) =  @_;
 #  print "\t\'$N\' => {tag =>";
   my $t = "'" . $trigOld . "'";
-  printf("\'%i\' \t=> %-50s \t=> ",$N,$t);
+#  printf("\'%i\' \t=> %-50s \t=> ",$N,$t);
+  printf("%-50s \t=> ",$t);
   my $dd = $dateMin; $dd =~ s/\-//g;
   my $tt = $timeMin; $tt =~ s/://g;
   print "\{ first=> \'$runMin\',\t second => \'$runMax\',\t list => \'\',  beginTime => \'$dd.$tt\'}, \# \t$dateMin\t$timeMin\t$dateMax\t$timeMax\n";
