@@ -1273,7 +1273,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	  FdEdx[k].F.dx
 	};
 	Double_t VarsV[9] = {
-	  FdEdx[k].C[StTpcdEdxCorrection::kTpcNoAnodeVGainC].dEdxN,
+	  FdEdx[k].C[StTpcdEdxCorrection::kTpcRowQ-1].dEdxN,
 	  Vars[1],
 	  Vars[2],
 	  Vars[3],
