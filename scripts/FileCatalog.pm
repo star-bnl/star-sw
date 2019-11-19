@@ -136,7 +136,7 @@ require  Exporter;
 
 
 use vars qw($VERSION);
-$VERSION   =   "V01.401";
+$VERSION   =   "V01.402";
 
 # The hashes that hold a current context
 my %optoperset;
@@ -362,7 +362,7 @@ my @DETECTORS=("tpc","svt","tof","emc","eemc","fpd","ftpc",
 	       "pmd","rich","ssd","bbc","bsmd","esmd","zdc",
 	       "ctb","tpx","fgt","mtd","pxl","ist","sst",
 	       "gmt","l4", "fps", "pp2pp", "etof", "fcs",
-               "rhicf", "itpc", "stgc");
+               "rhicf", "itpc", "stgc", "fst");
 
 
 
