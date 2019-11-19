@@ -9,9 +9,14 @@ Hists3D::Hists3D(const Char_t *Name, const Char_t *Title,
   const Char_t *Names[9] = {"","C","N","Ne","Npi","NK","NP","Nd","dX"};
   const Char_t *Titles[9] = {"uncorrected", "correctred","nP measured","nP for e","nP for pi","nP for K","nP for P","nP for d","dX"};
   memset(hists, 0, 9*sizeof(TH1*));
+  Int_t nx = nXBins;
   if (xmin >= xmax) {
     xmin = 0.5;
-    xmax = nXBins+0.5;
+    xmax = TMath::Abs(nXBins)+0.5;
+  }
+  if (nx < 0) {
+    xmin = - xmax;
+    nx = 2*TMath::Abs(nXBins) + 1;
   }
   if (ymin >= ymax) {
     ymin = 0.5;
@@ -27,21 +32,15 @@ Hists3D::Hists3D(const Char_t *Name, const Char_t *Title,
       Double_t zmin = ZdEdxMin;
       Double_t zmax = ZdEdxMax;
       if (j > 2) {
-#ifndef __HEED_MODEL__
 	nz   =  40;
 	zmin = 1.4;
 	zmax = 3.4;
-#else /* __HEED_MODEL__ */
-	nz   =  50;
-	zmin = 3.0;
-	zmax = 8.0;
-#endif /* __HEED_MODEL__ */
       }
       hists[j] = (TH1 *) new TH3F(name,title,
-				  nXBins,xmin, xmax, nYBins,ymin, ymax,nz, zmin, zmax);
+				  nx,xmin, xmax, nYBins,ymin, ymax,nz, zmin, zmax);
     } else {
       hists[j] = (TH1 *) new TProfile2D(name,title,
-					nXBins,xmin, xmax, nYBins,ymin, ymax, "S");
+					nx,xmin, xmax, nYBins,ymin, ymax, "S");
     }
     hists[j]->SetXTitle(TitleX);
     hists[j]->SetYTitle(TitleY);
@@ -69,7 +68,7 @@ Hists2D::Hists2D(const Char_t *Name) {
       nameP += StProbPidTraits::mPidParticleDefinitions[hyp]->name().data();
       nameP += Charge[sCharge];
       nameP.ReplaceAll("-","");
-      title = Name; title += " - Pred. for ";
+      title = Name; title += " Log(dE/dx_{Meas}/dE/dx_{Pred}) for ";
       title += StProbPidTraits::mPidParticleDefinitions[hyp]->name().data();
       title.ReplaceAll("-","");
       title += " "; title += ChargeT[sCharge];

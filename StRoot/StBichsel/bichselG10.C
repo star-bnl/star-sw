@@ -1,16 +1,16 @@
 /*
   root.exe lBichsel.C bichselG10.C+
   bichselG10("N");  // dN/dx
-  bichselG10("I70"; // I70
-  bichselG10("Bz"); // Ifit
-  TH1D *pB70  = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("B70p1"))->GetHistogram();
-  TH1D *piB70 = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("B70#pi1"))->GetHistogram();
+  bichselG10("70"; // I70
+  bichselG10("z"); // Ifit
+  TH1D *pB70  = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("70p1"))->GetHistogram();
+  TH1D *piB70 = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("70#pi1"))->GetHistogram();
   TH1D *diffB70 = new TH1D(*pB70);
   diffB70->SetName("diffB70");
   diffB70->Add(pB70,piB70,1,-1);
   diffB70->SetLineColor(1);
-  TH1D *pBz  = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("Bzp1"))->GetHistogram();
-  TH1D *piBz = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("Bz#pi1"))->GetHistogram();
+  TH1D *pBz  = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("zp1"))->GetHistogram();
+  TH1D *piBz = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("z#pi1"))->GetHistogram();
   TH1D *diffBz = new TH1D(*pBz);
   diffBz->SetName("diffBz");
   diffBz->Add(pBz,piBz,1,-1);
@@ -32,14 +32,14 @@
   l->AddEntry(diffBz,"Ifit");
   l->AddEntry(diffdNdx,"dNdx");
 
-  TH1D *eB70  = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("B70e1"))->GetHistogram();
-  TH1D *piB70 = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("B70#pi1"))->GetHistogram();
+  TH1D *eB70  = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("70e1"))->GetHistogram();
+  TH1D *piB70 = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("70#pi1"))->GetHistogram();
   TH1D *diffB70 = new TH1D(*eB70);
   diffB70->SetName("diffB70");
   diffB70->Add(eB70,piB70,1,-1);
   diffB70->SetLineColor(1);
-  TH1D *eBz  = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("Bze1"))->GetHistogram();
-  TH1D *piBz = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("Bz#pi1"))->GetHistogram();
+  TH1D *eBz  = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("ze1"))->GetHistogram();
+  TH1D *piBz = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("z#pi1"))->GetHistogram();
   TH1D *diffBz = new TH1D(*eBz);
   diffBz->SetName("diffBz");
   diffBz->Add(eBz,piBz,1,-1);
@@ -88,24 +88,28 @@
 class Bichsel;
 #endif
 Bichsel *m_Bichsel = 0;
-const Int_t NMasses = 12;
-const Double_t Masses[NMasses] = {0.93827231,
-				  0.493677,
-				  0.13956995,
-				  0.51099907e-3,
-				  1.87561339,
-				  0.1056584,
-				  2.80925,
-				  2.80923, //GEANT3
-				  3.727417, //GEANT3
-				  0.13956995,
-				  0.93827231*6.94/1.008,
-				  0.93827231
+const Int_t NMasses = 13;
+const Double_t Masses[NMasses] = {0.93827231,       // 0 p
+				  0.493677,         // 1 K
+				  0.13956995,       // 2 pi
+				  0.51099907e-3,    // 3 e  
+				  1.87561339,       // 4 d
+				  0.1056584,        // 5 mu
+				  2.80925,          // 6 t
+				  2.80923, //GEANT3 // 7 He3
+				  3.727417, //GEANT3// 8 He4
+				  -0.13956995,      // 9 2*pi
+#if 1
+				  6.5354,           //10 Li7
+				  5.6031,           //11 Li6
+				 -0.93827231        //12 2*p
+#endif
 };
-const Int_t   Index[NMasses] = { 4,    3,   2,   0,   5,    1,  6,    7,       8,    -2, 9, 0};
-const Char_t *Names[NMasses] = {"p", "K","#pi","e", "d","#mu","t","He3","#alpha","2#pi", "Li", "2p"};
-const Int_t NF = 4;  //          0    1     2   3    4     5   6     7        8      -2        9
-const Char_t *FNames[8] = {"Girrf","Sirrf","Bz","B70","B60","B70M","dNdx","BzM"};
+const Int_t   PiD[NMasses]   = {  1,   2,    3,  0,   5,    4,  6,    7,       8,    3,    9, 10, 1}; 
+const Int_t   Index[NMasses] = {  4,   3,    2,  0,   5,    1,  6,    7,       8,   -2,    9, 10, 0};
+const Char_t *Names[NMasses] = {"p", "K","#pi","e", "d","#mu","t","He3","#alpha","2#pi", "Li7", "Li6", "2p"};
+const Int_t NF = 10;  //          0,  1,     2,  3,   4,    5.  6,    7,       8,     9,
+const Char_t *FNames[NF] = {"Girrf","Sirrf","z","70","60","70M","dNdx","zM","70Trs","zTrs"};
 const Int_t Nlog2dx = 3;
 const Double_t log2dx[Nlog2dx] = {0,1,2};
 //________________________________________________________________________________
@@ -122,8 +126,8 @@ Double_t bichselZ(Double_t *x,Double_t *par) {
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
-  return  TMath::Log10(scale*charge*charge*TMath::Exp(m_Bichsel->GetMostProbableZ(TMath::Log10(poverm),dx2)));//TMath::Exp(7.81779499999999961e-01));
-  //return charge*charge*TMath::Log10(m_Bichsel->GetI70(TMath::Log10(poverm),1.));
+  scale *= charge*charge;
+  return  TMath::Log10(scale*TMath::Exp(m_Bichsel->GetMostProbableZ(TMath::Log10(poverm),dx2)));//TMath::Exp(7.81779499999999961e-01));
 }
 //________________________________________________________________________________
 Double_t bichselZM(Double_t *x,Double_t *par) {
@@ -139,7 +143,8 @@ Double_t bichselZM(Double_t *x,Double_t *par) {
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
-  return  TMath::Log10(scale*charge*charge*TMath::Exp(m_Bichsel->GetMostProbableZM(TMath::Log10(poverm),dx2)));//TMath::Exp(7.81779499999999961e-01));
+  scale *= charge*charge;
+  return  TMath::Log10(scale*TMath::Exp(m_Bichsel->GetMostProbableZM(TMath::Log10(poverm),dx2)));//TMath::Exp(7.81779499999999961e-01));
   //return charge*charge*TMath::Log10(m_Bichsel->GetI70(TMath::Log10(poverm),1.));
 }
 //________________________________________________________________________________
@@ -156,8 +161,9 @@ Double_t bichsel70(Double_t *x,Double_t *par) {
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
+  scale *= charge*charge;
   // return  TMath::Log10(scale*charge*charge*m_Bichsel->GetI70M(TMath::Log10(poverm),dx2));//TMath::Exp(7.81779499999999961e-01));
-  return charge*charge*TMath::Log10(m_Bichsel->GetI70(TMath::Log10(poverm),1.));
+  return TMath::Log10(scale*m_Bichsel->GetI70(TMath::Log10(poverm),1.));
 }
 //________________________________________________________________________________
 Double_t bichsel70M(Double_t *x,Double_t *par) {
@@ -173,7 +179,46 @@ Double_t bichsel70M(Double_t *x,Double_t *par) {
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
-  return  TMath::Log10(scale*charge*charge*m_Bichsel->GetI70M(TMath::Log10(poverm),dx2));//TMath::Exp(7.81779499999999961e-01));
+  scale *= charge*charge;
+  return  TMath::Log10(scale*m_Bichsel->GetI70M(TMath::Log10(poverm),dx2));//TMath::Exp(7.81779499999999961e-01));
+}
+//________________________________________________________________________________
+Double_t bichsel70Trs(Double_t *x,Double_t *par) {
+  Double_t pove   = TMath::Power(10.,x[0]);
+  Double_t scale = 1;
+  Double_t mass = par[0];
+  Int_t    part = par[2];
+  if (part < 0 || part > 9) part = 0;
+  if (mass < 0) {mass = - mass; scale = 2;}
+  Double_t poverm = pove/mass; 
+  Double_t charge = 1.;
+  Double_t dx2 = 1;
+  if (par[1] > 1.0) {
+    charge = par[1];
+    poverm *= charge;
+    dx2 = TMath::Log2(5.);
+  }
+  scale *= charge*charge;
+  return TMath::Log10(scale*TMath::Exp(m_Bichsel->I70Trs(part,TMath::Log10(poverm))));
+}
+//________________________________________________________________________________
+Double_t bichselZTrs(Double_t *x,Double_t *par) {
+  Double_t pove   = TMath::Power(10.,x[0]);
+  Double_t scale = 1;
+  Double_t mass = par[0];
+  Int_t    part = par[2];
+  if (part < 0 || part > 9) part = 0;
+  if (mass < 0) {mass = - mass; scale = 2;}
+  Double_t poverm = pove/mass; 
+  Double_t charge = 1.;
+  Double_t dx2 = 1;
+  if (par[1] > 1.0) {
+    charge = par[1];
+    poverm *= charge;
+    dx2 = TMath::Log2(5.);
+  }
+  scale *= charge*charge;
+  return  TMath::Log10(scale*TMath::Exp(m_Bichsel->IfitTrs(part,TMath::Log10(poverm))));//TMath::Exp(7.81779499999999961e-01));
 }
 //________________________________________________________________________________
 Double_t dNdx(Double_t *x,Double_t *par) {
@@ -186,6 +231,7 @@ Double_t dNdx(Double_t *x,Double_t *par) {
   Double_t dx2 = 1;
   if (par[1] > 1.0) charge = par[1];
   poverm *= charge;
+  //  scale *= charge*charge;
   return  TMath::Log10(scale*StdEdxModel::instance()->dNdx(poverm,charge));//TMath::Exp(7.81779499999999961e-01));
 }
 #if !defined(__CINT__) && !defined(__CLING__)
@@ -240,7 +286,7 @@ Double_t aleph70(Double_t *x,Double_t *par) {
   Double_t poverm = pove/mass; 
   Double_t charge = 1.;
   if (h > 6 && h > 9) charge = 2;
-  else if (h == 10)   charge = 3;
+  else if (h == 10 || h == 11)   charge = 3;
   poverm *= charge;
   Double_t bg = poverm;
   /* 
@@ -265,7 +311,7 @@ Double_t aleph70(Double_t *x,Double_t *par) {
 }
 #endif /* __CINT__ */
 //________________________________________________________________________________
-void bichselG10(const Char_t *type="Bz") {
+void bichselG10(const Char_t *type="z") {
   if (gClassTable->GetID("StBichsel") < 0 || !m_Bichsel) {
     gSystem->Load("libTable");
     gSystem->Load("St_base");
@@ -276,36 +322,38 @@ void bichselG10(const Char_t *type="Bz") {
   TString Type(type);
   TLegend *leg = new TLegend(0.65,0.45,0.75,0.9,"");
   Double_t xmax = 4;
-  for (int h = 0; h < NMasses-1; h++) { // Masses
+  Int_t f = 3;
+  for (Int_t i = NF-1; i >=0; i--) {
+    if (Type.Contains(FNames[i],TString::kIgnoreCase)) {
+      f = i;
+      break;
+    }
+  }
+  for (int h = 0; h < NMasses; h++) { // Masses
   //  for (int h = 0; h < 7; h++) { // Masses
-    Int_t f = 3;
-    if      (Type.Contains("BzM",TString::kIgnoreCase))  f = 7;
-    else if (Type.Contains("Bz",TString::kIgnoreCase))   f = 2;
-    else if (Type.Contains("I70M",TString::kIgnoreCase)) f = 5;
-    else if (Type.Contains("I70",TString::kIgnoreCase))  f = 3;
-    else if (Type.Contains("I60",TString::kIgnoreCase))  f = 4;
-    else if (Type.Contains("N",TString::kIgnoreCase))    f = 6;
     Int_t dx = 1;
     Char_t *FunName = Form("%s%s%i",FNames[f],Names[h],(int)log2dx[dx]);
     cout << "Make " << h << "\t" << FunName << endl;
-    Double_t xmin = -1;
+    Double_t xmin = -1.5;
     //    if (h == 0 || h >= 5) xmin = -0.75;
     if (h == 4) xmin = -0.70;
     if (h == 6) xmin = -0.50;
     TF1 *func = 0;
-    if      (f == 3) func = new TF1(FunName,bichsel70,xmin, xmax,2);
-    else if (f == 2) func = new TF1(FunName,bichselZ ,xmin, xmax,2);
-    else if (f == 5) func = new TF1(FunName,bichsel70M ,xmin, xmax,2);
-    else if (f == 6) func = new TF1(FunName,dNdx ,xmin, xmax,2);
-    else if (f == 7) func = new TF1(FunName,bichselZM,xmin, xmax,2);
+    if      (f == 3) func = new TF1(FunName,bichsel70,xmin, xmax,3);
+    else if (f == 2) func = new TF1(FunName,bichselZ ,xmin, xmax,3);
+    else if (f == 5) func = new TF1(FunName,bichsel70M ,xmin, xmax,3);
+    else if (f == 6) func = new TF1(FunName,dNdx ,xmin, xmax,3);
+    else if (f == 7) func = new TF1(FunName,bichselZM,xmin, xmax,3);
+    else if (f == 8) func = new TF1(FunName,bichsel70Trs,xmin, xmax,3);
+    else if (f == 9) func = new TF1(FunName,bichselZTrs,xmin, xmax,3);
     else {
       return;
     }
-    if (h == 9 || h == 11) func->SetParameter(0,-Masses[h]);
-    else                   func->SetParameter(0,Masses[h]);
+    func->SetParameter(0,Masses[h]);
     func->SetParameter(1,1.);
+    func->SetParameter(2, PiD[h]); 
     if (h >= 7 && h < 9) func->SetParameter(1,2.);
-    if (h == 10) func->SetParameter(1,3.);
+    if (h == 10 || h == 11) func->SetParameter(1,3.);
     Int_t color = h+1;
     if (color > 8) color -= 8;
     //    if (color > 7) color++;
