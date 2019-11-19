@@ -49,7 +49,10 @@ class StdEdxModel {
   static Int_t        _debug;
   ClassDef(StdEdxModel,0)
 };
-// $Id: StdEdxModel.h,v 1.5 2018/10/17 20:45:23 fisyak Exp $
+// $Id: StdEdxModel.h,v 1.6 2019/11/19 14:44:41 fisyak Exp $
 // $Log: StdEdxModel.h,v $
+// Revision 1.6  2019/11/19 14:44:41  fisyak
+// new dEdxModel for dN/dx, calibration for Run XVIII fixed Target
+//
 #endif
 

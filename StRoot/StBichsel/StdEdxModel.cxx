@@ -142,5 +142,8 @@ TF1 *StdEdxModel::zdE() {
   }
   return f;
 }
-// $Id: StdEdxModel.cxx,v 1.5 2018/10/17 20:45:23 fisyak Exp $
+// $Id: StdEdxModel.cxx,v 1.6 2019/11/19 14:44:41 fisyak Exp $
 // $Log: StdEdxModel.cxx,v $
+// Revision 1.6  2019/11/19 14:44:41  fisyak
+// new dEdxModel for dN/dx, calibration for Run XVIII fixed Target
+//
