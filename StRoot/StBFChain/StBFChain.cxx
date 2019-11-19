@@ -1,4 +1,4 @@
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.666 2019/07/22 18:27:11 smirnovd Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.667 2019/11/19 17:26:17 jeromel Exp $
 
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -98,6 +98,7 @@ void StBFChain::Setup(Int_t mode) {
   FDateS = FTimeS = 0;
   fFiltTrg   = "";
   fRunG  = -1;
+  fFmsGainCorrTag="";
   Gproperty.clear();
   Gvalue.clear();
   Gpattern.clear();
@@ -818,7 +819,10 @@ Int_t StBFChain::Instantiate()
       if (GetOption("pxlSlowSim")) mk->SetAttr("useDIGMAPSSim",kTRUE);
     }
 
-
+    //FMS GainCorrection flavors
+    if (maker == "StFmsDbMaker"){
+	if(fFmsGainCorrTag!="") mk->SetAttr("FmsGainCorr",fFmsGainCorrTag.Data());
+    }
 
     // Hit filtering will be made from a single maker in
     // future with flexible filtering method
@@ -1141,6 +1145,12 @@ Int_t StBFChain::kOpt (const TString *tag, Bool_t Check) const {
     return 0;
   }
 
+  //FMS gaincorr
+  if(Tag.BeginsWith("fmsGainCorr")){
+      Check = kTRUE;
+      return 0;
+  }
+
   // GoptXXXvvvvvv -> Gopt 4 / XXX 3 / vvvvvv 6 = 13
   if ( Tag.BeginsWith("gopt") && Tag.Length() == 13 ) return 0;
 
@@ -1341,6 +1351,9 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
             // not a match, disable
             fFiltTrg = "";
           }
+
+	} else if (Tag.BeginsWith("fmsGainCorr",TString::kIgnoreCase)) {
+	    fFmsGainCorrTag = Tag;
 
 	} else { // Check for predefined db time stamps ?
 	  kgo = kOpt(Tag.Data(),kFALSE);

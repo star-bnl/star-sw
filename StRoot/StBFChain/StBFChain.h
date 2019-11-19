@@ -7,7 +7,7 @@
  \class  StBFChain
  \author Yuri Fisyak, Jerome LAURET
  \date   1999/07/29 , 2001-2011
- @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.58 2018/09/04 20:16:06 jeromel Exp $
+ @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.59 2019/11/19 17:26:17 jeromel Exp $
 
  Class to control "BFC" chain
 
@@ -42,6 +42,7 @@ class StBFChain : public StChain {
   Int_t               FTimeS;     // floating timestamp time (DateTime)
   TString             fFiltTrg;   // trigger filtering properties (flavor, inc/exc)
   Int_t               fRunG;      // on fly simulation run no. & set for RDNM
+  TString             fFmsGainCorrTag; // FMS GainCorrection Flavor Tag
   Int_t               fNoChainOptions;
   vector<TString>     Gproperty;  // a global property name
   vector<TString>     Gpattern;   // a global pattern
@@ -104,7 +105,7 @@ class StBFChain : public StChain {
                TString GetGeometry() const;
    virtual Long_t      ProcessLine(const char *line);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.58 2018/09/04 20:16:06 jeromel Exp $ built " __DATE__ " " __TIME__ ;
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.59 2019/11/19 17:26:17 jeromel Exp $ built " __DATE__ " " __TIME__ ;
        return cvs;
    }
    /// StBFChain control class
