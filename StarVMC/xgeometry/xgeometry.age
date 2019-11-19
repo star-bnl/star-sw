@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.35 2019/09/24 21:38:43 jwebb Exp $
+* $Id: xgeometry.age,v 1.36 2019/11/19 17:05:16 jwebb Exp $
 
 
 
@@ -2522,6 +2522,8 @@ If LL>0
   case y2019 { y2019: y2019 first cut geometry; Geom =        'y2019     '; call geom_y2019;} 
   case y2019a { y2019: y2019a production release; Geom =        'y2019a    '; call geom_y2019a;} 
 
+  case y2020 { y2020: y2020 first cut geometry; Geom =        'y2020     '; call geom_y2020;} 
+
   case dev2021 { dev2021:  First cut forward upgrades; Geom =        'dev2021   '; call geom_dev2021;} 
 
   Case ftsver1  { y2017 : y2017 baseline w/ ids and fts v1;     Geom = 'ftsver1   '; call geom_ftsver1;}
@@ -4490,9 +4492,13 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.35 2019/09/24 21:38:43 jwebb Exp $
+* $Id: xgeometry.age,v 1.36 2019/11/19 17:05:16 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.36  2019/11/19 17:05:16  jwebb
+* y2020 rough cut release / missing forward prototypes
+*
 * Revision 1.35  2019/09/24 21:38:43  jwebb
+*
 * And fix xgeometry, implementing the new dev2021 tag and resolving all
 * dependencies
 *
