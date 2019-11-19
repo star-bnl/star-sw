@@ -41,6 +41,8 @@
 #include "StDetectorDbMaker/St_TpcAvgPowerSupplyC.h"
 #include "StDetectorDbMaker/St_tpcTimeDependenceC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
+#include "StDetectorDbMaker/St_beamInfoC.h"
+#include "St_db_Maker/St_db_Maker.h"
 #include "TUnixTime.h"
 //________________________________________________________________________________
 StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) : 
@@ -49,6 +51,20 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
 {
   assert(gStTpcDb);
   if (!m_Mask) m_Mask = -1;
+  static const Char_t *FXTtables[] = {"TpcdXCorrectionB",
+				      "tpcGainCorrection",
+				      "TpcLengthCorrectionMDF",
+				      "TpcPadCorrectionMDF",
+				      "TpcSecRowB",
+				      "TpcZCorrectionB"};
+  static Int_t NT = sizeof(FXTtables)/sizeof(const Char_t *);
+  Bool_t isFixedTarget = St_beamInfoC::instance()->IsFixedTarget();
+  TString flavor("sim+ofl");
+  if (isFixedTarget) flavor = "sim+ofl+FXT";
+  St_db_Maker *dbMk = (St_db_Maker *) StMaker::GetTopChain()->Maker("db");
+  for (Int_t i = 0; i < NT; i++) {
+    dbMk->SetFlavor(flavor, FXTtables[i]);
+  }
   ReSetCorrections();
 }
 //________________________________________________________________________________
@@ -60,9 +76,10 @@ void StTpcdEdxCorrection::ReSetCorrections() {
     assert(tpcGas);
   }
   SettpcGas(tpcGas);
+  memset (m_Corrections, 0, sizeof(m_Corrections));
   m_Corrections[kUncorrected           ] = dEdxCorrection_t("UnCorrected"         ,""                                                                    ,0); 					       
-  m_Corrections[kEdge                  ] = dEdxCorrection_t("TpcEdge"             ,"Gain on distance from Chamber edge"                                 ,St_TpcEdgeC::instance());		     
   m_Corrections[kAdcCorrection         ] = dEdxCorrection_t("TpcAdcCorrectionB"   ,"ADC/Clustering nonlinearity correction"				,St_TpcAdcCorrectionBC::instance());	     
+  m_Corrections[kEdge                  ] = dEdxCorrection_t("TpcEdge"             ,"Gain on distance from Chamber edge"                                 ,St_TpcEdgeC::instance());		     
   m_Corrections[kAdcCorrectionMDF      ] = dEdxCorrection_t("TpcAdcCorrectionMDF" ,"ADC/Clustering nonlinearity correction MDF"				,St_TpcAdcCorrectionMDF::instance());	     
   m_Corrections[kTpcdCharge            ] = dEdxCorrection_t("TpcdCharge"          ,"ADC/Clustering undershoot correction"				,St_TpcdChargeC::instance());		     
   m_Corrections[kTpcrCharge            ] = dEdxCorrection_t("TpcrCharge"          ,"ADC/Clustering rounding correction"					,St_TpcrChargeC::instance());		     
@@ -183,12 +200,14 @@ StTpcdEdxCorrection::~StTpcdEdxCorrection() {
 Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) { 
   //  static const Double_t Degree2Rad = TMath::Pi()/180.;
   mdEdx = &CdEdx;
+  if (CdEdx.F.dE <= 0.) CdEdx.F.dE = 1;
   Double_t dEU = CdEdx.F.dE;
   Double_t dE  = dEU;
   Int_t sector            = CdEdx.sector; 
   Int_t row       	  = CdEdx.row;   
   Double_t dx     	  = CdEdx.F.dx;    
-  if (dE <= 0 || dx <= 0) return 3;
+  Double_t adcCF = CdEdx.adc;
+  if (dx <= 0 || (dEU <= 0 && adcCF <= 0)) return 3;
   Int_t channel = St_TpcAvgPowerSupplyC::instance()->ChannelFromRow(sector,row); 
   CdEdx.channel = channel;
   
@@ -253,7 +272,6 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   CdEdx.ZdriftDistanceO2 = ZdriftDistanceO2;
   CdEdx.ZdriftDistanceO2W = ZdriftDistanceO2W;
   Double_t gc, ADC, xL2, dXCorr;
-  Double_t adcCF = CdEdx.adc;
   Double_t iCut = 0;
   Double_t slope = 0;
   Int_t nrows = 0;
@@ -299,7 +317,8 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       goto ENDL;
     } else if (k == kTpcEffectivedX) {
       if      (kTpcOutIn == kTpcOuter) dx *= ((const St_TpcEffectivedXC* ) m_Corrections[k].Chair)->scaleOuter();
-      else if (kTpcOutIn == kTpcInner) dx *= ((const St_TpcEffectivedXC* ) m_Corrections[k].Chair)->scaleInner();
+      else if (kTpcOutIn == kTpcInner ||
+	       kTpcOutIn == kiTpc )    dx *= ((const St_TpcEffectivedXC* ) m_Corrections[k].Chair)->scaleInner();
       goto ENDL;
     }
     if (k == kTpcPadMDF) {
@@ -327,6 +346,8 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       if (nrows == St_tpcPadConfigC::instance()->numberOfRows(sector)) l = row - 1;
       else if (nrows == 192) {l = 8*(sector-1) + channel - 1; assert(l == (cor+l)->idx-1);}
       else if (nrows ==  48) {l = 2*(sector-1) + kTpcOutIn;}
+      else if (nrows ==   6) {l =            kTpcOutIn;     if (sector > 12) l+= 3;}
+      else if (nrows ==   4) {l = TMath::Min(kTpcOutIn, 1); if (sector > 12) l+= 2;} 
     }
     corl = cor + l;
     iCut = 0;
@@ -385,7 +406,9 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	  iok = 0;
 	}
       }
-      if (iok) return iok;
+      if (iok) {
+	return iok;
+      }
     }
     if (corl->npar%100) {
       Double_t dECor = TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[k]));

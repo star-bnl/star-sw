@@ -41,6 +41,7 @@ class St_beamInfoC : public TChair {
   Float_t       getYellowLifeTime(Int_t i=0)      {return yellowLifeTime(i);}
   Float_t       getYellowBunchIntensity(Int_t i=0){return yellowBunchIntensity(i);}
   Float_t       getYellowFillNumber(Int_t i=0)    {return yellowFillNumber(i);}
+  Bool_t        IsFixedTarget();
  protected:
   St_beamInfoC(St_beamInfo *table=0) : TChair(table) {}
   virtual ~St_beamInfoC() {fgInstance = 0;}

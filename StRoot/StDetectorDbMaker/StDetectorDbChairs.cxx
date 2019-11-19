@@ -1133,6 +1133,15 @@ starClockOnl_st *St_starClockOnlC::Struct(Int_t i) {
 MakeChairInstance(starMagOnl,RunLog/onl/starMagOnl);
 #include "St_beamInfoC.h"
 MakeChairInstance(beamInfo,RunLog/onl/beamInfo);
+//________________________________________________________________________________
+Bool_t        St_beamInfoC::IsFixedTarget() {
+  Bool_t isFixTag = kFALSE;
+  Float_t MaxIntensity = TMath::Max(blueIntensity(), yellowIntensity());
+  Float_t MinIntensity = TMath::Min(blueIntensity(), yellowIntensity());
+  if (MaxIntensity > 1.0 && MaxIntensity > 10*MinIntensity) isFixTag = kTRUE;
+  return isFixTag;
+}
+//________________________________________________________________________________
 #include "St_tpcRDOMasksC.h"
 MakeChairInstance(tpcRDOMasks,RunLog/onl/tpcRDOMasks);
 //________________________________________________________________________________

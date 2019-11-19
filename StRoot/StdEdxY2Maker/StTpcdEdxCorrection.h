@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.14 2019/05/22 21:30:58 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.15 2019/11/19 14:44:41 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -37,15 +37,15 @@ class StTpcdEdxCorrection : public TObject {
   enum ESector : int {kTpcOuter = 0, kTpcInner = 1, kiTpc = 2};
   enum EOptions : int {
     kUncorrected           =  0,//U   				           
-    kEdge                  =  1,//E   correction near edge of chamber	     
-    kAdcCorrection         =  2,//R  					     
+    kAdcCorrection         =  1,//R  					     
+    kEdge                  =  2,//E   correction near edge of chamber	     
     kAdcCorrectionMDF      =  3,//RMDF  					     
     kTpcdCharge            =  4,//D  					     
     kTpcrCharge            =  5,//D  					     
     kTpcCurrentCorrection  =  6,//      					     
-    kTpcRowQ               =  7,//   	 					       	   
-    kTpcSecRowB            =  8,//S  					     
-    kTpcSecRowC            =  9,//S  					     
+    kTpcSecRowB            =  7,//S  					     
+    kTpcSecRowC            =  8,//S  					     
+    kTpcRowQ               =  9,//   	 					       	   
     ktpcPressure           = 10,//P  					     
     ktpcTime               = 11,//t  					     
     kDrift                 = 12,//O  					     
