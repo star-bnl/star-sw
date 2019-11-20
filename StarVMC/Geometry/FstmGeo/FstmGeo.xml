@@ -354,17 +354,18 @@
         </Mixture>
 
         <Create    block="FSTM" />
-        <Placement block="FSTM" in="CAVE" konly="MANY" x="0.0" y="0.0" z="0.0" />
+        <Placement block="FSTM" in="CAVE" konly="MANY" x="0.0" y="0.0" z="supporttube_z(1)+supporttube_dz(2)"/>
 
         <!-- FST mother container -->
         <Volume name="FSTM" comment="FST mother">
+
             <Material  name="air" />               <!-- access material   -->
             <Material  name="air" isvol="0" />     <!-- hack to create local copy -->
             <Medium    name="standard"      />     <!-- can change medium paramters here -->
             <Attribute for="FSTM" seen="0" colo="1" />
 
-            <!-- Shape will be dynamically sized to include all disks placed -->
-            <Shape     type="TUBE" rmin="0" rmax="50" dz="300" />
+	    <!-- Sized to contain the FSTS support volume with inner radius given by outer radius of beam pipe -->
+            <Shape     type="TUBE" rmin="4.03073" rmax="supporttube_rmax(2)" dz="supporttube_dz(1)+supporttube_dz(2)" />
 
             <Create    block="FSTD" />
             <Placement block="FSTD" in="FSTM" konly="MANY" x="0.0" y="0.0" z="140.0" ncopy="4" />
@@ -375,6 +376,7 @@
             <Create    block="FSTS" />
             <Placement block="FSTS" in="FSTM" konly="MANY" x="supporttube_x" y="supporttube_y" z="supporttube_z(1)" rmin="supporttube_rmin(1)" rmax="supporttube_rmax(1)" dz="supporttube_dz(1)" />
             <Placement block="FSTS" in="FSTM" konly="MANY" x="supporttube_x" y="supporttube_y" z="supporttube_z(2)" rmin="supporttube_rmin(2)" rmax="supporttube_rmax(2)" dz="supporttube_dz(2)" />
+
         </Volume>
 
 
