@@ -33,6 +33,10 @@
             iwedge/0/, irib/0/, inout/1/
         </varlist>
 
+	<varlist type="float">
+	  zcenter/0/
+	</varlist>
+
         <!-- Declare structures -->
         <Structure name="supporttube" comment="tubes for the supporting structure">
             <var name="version"   type="float" />
@@ -353,8 +357,10 @@
             <Component name="N" a="14.00643"  z="7"  w="0.06629"  />
         </Mixture>
 
+	zcenter = supporttube_z(1)+supporttube_dz(2)
+
         <Create    block="FSTM" />
-        <Placement block="FSTM" in="CAVE" konly="MANY" x="0.0" y="0.0" z="supporttube_z(1)+supporttube_dz(2)"/>
+        <Placement block="FSTM" in="CAVE" konly="ONLY" x="0.0" y="0.0" z="zcenter"/>
 
         <!-- FST mother container -->
         <Volume name="FSTM" comment="FST mother">
@@ -368,14 +374,18 @@
             <Shape     type="TUBE" rmin="4.03073" rmax="supporttube_rmax(2)" dz="supporttube_dz(1)+supporttube_dz(2)" />
 
             <Create    block="FSTD" />
-            <Placement block="FSTD" in="FSTM" konly="MANY" x="0.0" y="0.0" z="140.0" ncopy="4" />
-            <Placement block="FSTD" in="FSTM" konly="MANY" x="0.0" y="0.0" z="154.0" ncopy="5" />
-            <Placement block="FSTD" in="FSTM" konly="MANY" x="0.0" y="0.0" z="168.0" ncopy="6" />
+            <Placement block="FSTD" in="FSTM" konly="MANY" x="0.0" y="0.0" z="140.0-zcenter" ncopy="4" />
+            <Placement block="FSTD" in="FSTM" konly="MANY" x="0.0" y="0.0" z="154.0-zcenter" ncopy="5" />
+            <Placement block="FSTD" in="FSTM" konly="MANY" x="0.0" y="0.0" z="168.0-zcenter" ncopy="6" />
 
             <!-- Create and place the volumes -->
             <Create    block="FSTS" />
+	    <!--
             <Placement block="FSTS" in="FSTM" konly="MANY" x="supporttube_x" y="supporttube_y" z="supporttube_z(1)" rmin="supporttube_rmin(1)" rmax="supporttube_rmax(1)" dz="supporttube_dz(1)" />
             <Placement block="FSTS" in="FSTM" konly="MANY" x="supporttube_x" y="supporttube_y" z="supporttube_z(2)" rmin="supporttube_rmin(2)" rmax="supporttube_rmax(2)" dz="supporttube_dz(2)" />
+            -->
+            <Placement block="FSTS" in="FSTM" konly="MANY" x="supporttube_x" y="supporttube_y" z="supporttube_z(1)-zcenter" rmin="supporttube_rmin(1)" rmax="supporttube_rmax(1)" dz="supporttube_dz(1)" />
+            <Placement block="FSTS" in="FSTM" konly="MANY" x="supporttube_x" y="supporttube_y" z="supporttube_z(2)-zcenter" rmin="supporttube_rmin(2)" rmax="supporttube_rmax(2)" dz="supporttube_dz(2)" />
 
         </Volume>
 
