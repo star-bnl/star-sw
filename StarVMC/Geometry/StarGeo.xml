@@ -64,7 +64,7 @@
     <Construct sys="etof" config="ETOFv14f"  />
   </Geometry>
 
-<!-- y2018 series geometry tags -->
+<!-- y2019 series geometry tags -->
   <Geometry tag="y2019"   check="false" comment="Y2019 rough cut geometry">
 
     <Construct sys="cave" config="CAVE06"  />
@@ -193,7 +193,6 @@
 
 <!-- y2017 series geometry tags -->
   <Geometry tag="y2017"  check="false" comment="Y2017 rough cut geometry">
-
     <Construct sys="cave" config="CAVE05"  />
     <Construct sys="scon" config="SCON14"  />
     <Construct sys="pipe" config="PIPE12"  />
@@ -212,7 +211,6 @@
 
 
   <Geometry tag="y2017a"  check="false" comment="Y2017a production geometry">
-
     <Construct sys="cave" config="CAVE05"  />
     <Construct sys="scon" config="SCON14"  />
     <Construct sys="pipe" config="PIPE12"  />
@@ -224,6 +222,23 @@
     <Construct sys="ecal" config="ECALv6"  />
     <Construct sys="bbcm" config="BBCMon"  />
     <Construct sys="fpdm" config="FPDMv4"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD16"  />
+  </Geometry>
+
+  <Geometry tag="y2017x"  check="false" comment="Y2017a production geometry with FMS attenuation">
+    <Construct sys="cave" config="CAVE05"  />
+    <Construct sys="scon" config="SCON14"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="tpce" config="TPCE31"  />
+    <Construct sys="btof" config="BTOFv8"  />
+    <Construct sys="vpdd" config="VPDD08"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDMv4at"  />
     <Construct sys="zcal" config="ZCALon"  />
     <Construct sys="magp" config="MAGPon"  />
     <Construct sys="mutd" config="MUTD16"  />
@@ -429,7 +444,7 @@
 
   </Geometry>
 
-  <Geometry tag="y2015x" check="false" comment="Y2015 production correct mtd radii">
+  <Geometry tag="y2015x" check="false" comment="Y2015 production with HFT misalignments">
 
     <Construct sys="cave" config="CAVE05" />
     <Construct sys="idsm" config="IDSM14a" />
@@ -442,6 +457,31 @@
     <Construct sys="ecal" config="ECALv6" />
     <Construct sys="bbcm" config="BBCMon" />
     <Construct sys="fpdm" config="FPDM04" />
+    <Construct sys="zcal" config="ZCALon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="sisd" config="SISD85a" />
+    <Construct sys="istd" config="ISTD02a" />
+    <Construct sys="pxst" config="PXST01" />
+    <Construct sys="mutd" config="MUTD16" />
+    <Construct sys="pixl" config="PIXL62b" />
+    <Construct sys="dtub" config="DTUB01" />
+    <Construct sys="psup" config="PSUP01" />
+
+  </Geometry>
+
+  <Geometry tag="y2015y" check="false" comment="Y2015 production with HFT misalignments / FMS attenuation">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="idsm" config="IDSM14a" />
+    <Construct sys="pipe" config="PIPEv3" />
+    <Construct sys="upst" config="UPSTon" />
+    <Construct sys="tpce" config="TPCE31a" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="vpdd" config="VPDD08" />
+    <Construct sys="calb" config="CALB02" />
+    <Construct sys="ecal" config="ECALv6" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="fpdm" config="FPDM04at" />
     <Construct sys="zcal" config="ZCALon" />
     <Construct sys="magp" config="MAGPon" />
     <Construct sys="sisd" config="SISD85a" />
