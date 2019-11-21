@@ -1888,15 +1888,15 @@
   Equivalence (box(2),dy)
   Equivalence (box(3),dz)
   
-  Integer :: npar, natt, istat, isys 
+  Integer :: npar, natt, istat, isys, iii 
   Real depth
   LOGICAL isSet /.false./
   LOGICAL doAttenuation /.false./
   LOGICAL isFirst /.true./
   character*4 name
 
-  Real zcenter_cache(2)
-  Real dz_cache(2)
+  Real zcenter_cache(2) / -1.0, -1.0 /
+  Real dz_cache(2) / 45.0, 60.0 /
 
   STRUCTURE FMCG { Version,ChkvSim,PbPlate,FmsNorthX,FmsSouthX,Atten,int postshower}
 
@@ -1928,21 +1928,14 @@
 
     IF (fmcg_atten=1.0) {
 
-      ! Obtain / cache center of this detector
+      ! Obtain / cache center of this detector, but we use a hardcoded
+      ! depth. 
       if ( zcenter_cache(isys) .lt. 0 ) then
-           zcenter = gtran(3,NLEVEL)
-           zcenter_cache(isys) = zcenter
-           ! Obtain dimensions of the detector (assumes a box)
-           ! dz is the half width of the box
-           call gfpara(names(nlevel),number(nlevel),1,npar,natt,box,foo)
-           dz_cache(isys) = dz
-      else 
-           zcenter = zcenter_cache(isys)
-           dz = dz_cache(isys)            
+           zcenter_cache(isys) = gtran(3,NLEVEL)
       endif
 
-
-
+      zcenter = zcenter_cache(isys)
+      dz      = dz_cache(isys) / 2        
 
       ! Compute the front of the detector
       zback = zcenter + dz
@@ -1967,7 +1960,8 @@
 
   z = vect(3)
   call uhtoc(NAMES(NLEVEL),4,name,4)
-  !write (*,*) name, 'z=',z, 'dz=',dzhit,'step=',step,'dE=',deStep, 'alpha=',att
+
+  write (*,*) name, 'z=',z, zback, 'dz=',dzhit,'step=',step,'dE=',deStep, 'alpha=',att
 
   return
   end 
