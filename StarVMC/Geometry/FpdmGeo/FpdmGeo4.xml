@@ -1961,7 +1961,7 @@
   z = vect(3)
   call uhtoc(NAMES(NLEVEL),4,name,4)
 
-  write (*,*) name, 'z=',z, zback, 'dz=',dzhit,'step=',step,'dE=',deStep, 'alpha=',att
+! write (*,*) name, 'z=',z, zback, 'dz=',dzhit,'step=',step,'dE=',deStep, 'alpha=',att
 
   return
   end 
