@@ -1839,13 +1839,19 @@ $hist = "Run316"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_
 # 11/01/19 dEdx908 new TcpZCorrection
 # 11/02/19 dEdx909 new TcpZCorrection
 # 11/03/19 dEdx910 no TcpZCorrection
-# 11/04/19 dEdx911 no TcpZCorrection, TcpSecRowB, TcpSecRowB
+# 11/04/19 dEdx911 no TcpZCorrection, TpcSecRowB
 # 11/05/19 dEdx912 add TcpSecRowB
 # 11/07/19 dEdx913 add TcpZCorrection
 # 11/08/19 dEdx914 fix bug in TcpZCorrection
 # 11/10/19 dEdx917 new update for TpcSecRowB
 # 11/11/19 dEdx918 reiterte 19GeV
-
+# 11/13/19 dEdx921 no TcpZCorrection, TpcSecRowB
+# 11/14/19 dEdx922 add TpcSecRowB per trigger setup
+# 11/15/19 dEdx923 update TpcSecRowB per trigger setup
+# 11/17/19 dEdx924 add TpcZCorrecion
+# 11/18/19 dEdx925 update TpcSecRowB per trigger setup
+# 11/19/19 dEdx926 add TpcPadCorrectionMDF
+# 11/20/19 dEdx927 add TpcLengthCorrectionMDF (problems with production_3p85GeV_fixedTarget_2019 and production_7.3GeV_fixedTarget_2019)
 #$hist = "Run303"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/30/2019  reduce pMom interal, do only Negative particles
 #$hist = "Run304"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/31/2019  reset TpcdXCorrection, TpcZCorrectionB, TpcSecRowB
 #$hist = "Run305"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/01/2019  new TpcSecRowB
