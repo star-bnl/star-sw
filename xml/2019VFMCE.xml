@@ -42,7 +42,8 @@
   if ( ! -r ${SUBMITTINGDIRECTORY}/${file}) then 
     if (! -r ${SUBMITTINGDIRECTORY}/${base}.bla.root) then
     touch  ${SUBMITTINGDIRECTORY}/${base}.bla.root
-    root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'","'${tag}'")' &gt;&amp; ${logFile}
+#    root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'","'${tag}'")' &gt;&amp; ${logFile}
+    root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'")' &gt;&amp; ${logFile}
     cp ${base}*  ${SUBMITTINGDIRECTORY}
     rm  ${SUBMITTINGDIRECTORY}/${base}.bla.root
     endif
