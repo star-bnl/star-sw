@@ -280,7 +280,8 @@
             <Attribute for="Pipc" seen="1" colo="2"  />
             <Shape type="TUBE" rmax="pipg_BeOutR" rmin="0" dz="pipg_BeLeng/2"  />
             <Create block="PVAC"  />
-            <Placement block="PVAC" konly="MANY" />            
+            <Placement block="PVAC" konly="MANY" if="PIPV_targflag==1"/>            
+            <Placement block="PVAC" konly="ONLY" if="PIPV_targflag==0"/>            
   </Block>        
   <Block name="PVAC" comment="is the Vacuum Volume of Be section of pipe"  >
             <Material name="Air"  />
@@ -292,7 +293,8 @@
             <Attribute for="Pipo" seen="1" colo="3"  />
             <Shape  type="TUBE" rmax="pipg_S1OutR" rmin="0" dz="pipg_S1Leng"  />
             <Create    block="PVAO" />
-            <Placement block="PVAO" konly="MANY" />           
+            <Placement block="PVAO" konly="MANY" if="PIPV_targflag==1"/>           
+            <Placement block="PVAO" konly="ONLY" if="PIPV_targflag==0"/>           
         </Block>        
   <Block name="PVAO" comment="is its cavity"  >
             <Material name="Pvacuum"  />
@@ -303,7 +305,8 @@
           <Attribute for="Pipi" seen="1" colo="3"  />
           <Shape type="TUBE" rmax="pipg_S2OutR" rmin="0" dz="pipg_S2Leng"  />
           <Create block="PVAI"  />
-          <Placement block="PVAI" konly="MANY" />           
+          <Placement block="PVAI" konly="MANY" if="PIPV_targflag==1"/>           
+          <Placement block="PVAI" konly="ONLY" if="PIPV_targflag==0"/>           
         </Block>        
   <Block name="PVAI" comment="is its cavity"  >
             <Material name="Pvacuum"  />

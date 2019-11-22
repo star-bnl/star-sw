@@ -250,7 +250,7 @@
     ndisk = ndisk + 1
     Rin  = 6.0
     Rout = (Rin + 30.0) / cos(pi/8.0)
-    <Fill name="FDSK" comment="First disk">
+    <Fill name="FDSK" comment="wheel 1">
         <var name="version"   value="1.0"    comment="disk version" />
         <var name="diskid"    value="ndisk"  comment="disk number" />
         <var name="x"         value="0.0"    comment="x center of disk [cm]" />
@@ -362,6 +362,23 @@
   rmax = FDSK_rmax                  <!-- set mother volume rmax (Assumes last disk is largest) -->
 
 
+<!-- 
+
+  sTGC envelope should be calculated as follows
+
+  zmin, zmax should encompass the full detector with minimal (if any) additional space
+
+  rmin should be the radius of the beam pipe (about 6 cm at this point)
+
+  -->
+
+  zmin = MAIN_zsi(4) - (dzstgcgas*2+dzstgcpcb*2)*10 - 20.0
+  zmax = MAIN_zsi(7) + (dzstgcgas*2+dzstgcpcb*2)*10 + 5.0
+  rmin = 5.90
+  rmax = 85.0
+
+
+
   <!--                                                                Create and place the FSTM mother volume in the CAVE -->
 
   xcenter = 0
@@ -384,11 +401,11 @@
   <Volume name="STGM" comment="FTS mother volume"  >
     <Material name="Air" />
     <Shape type="tube"
-    rmin="rmin"
-    rmax="rmax"
-    dz="(zmax-zmin)/2.0" />
+	   rmin="rmin"
+	   rmax="rmax"
+	   dz="(zmax-zmin)/2.0" />
 
-  <!-- loop over and place all disks -->
+  <!-- loop over and place all disks (deprecated disks) -->
   <For var="idisk" from="1" to="ndisk">
     
     <!-- Load disk "idisk" into data structure -->
