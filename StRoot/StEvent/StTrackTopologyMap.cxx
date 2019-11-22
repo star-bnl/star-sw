@@ -226,7 +226,7 @@ StTrackTopologyMap::hftFormat() const
 UInt_t
 StTrackTopologyMap::data(UInt_t i) const
 {
-    return static_cast<UInt_t>(i<2 ? (i<1 ? mMap0 : mMap1) : 0);
+  return static_cast<UInt_t>((&mMap0)[i]);
 }
 
 bool

@@ -374,18 +374,18 @@
             <Shape     type="TUBE" rmin="4.03073" rmax="supporttube_rmax(2)" dz="supporttube_dz(1)+supporttube_dz(2)" />
 
             <Create    block="FSTD" />
-            <Placement block="FSTD" in="FSTM" konly="MANY" x="0.0" y="0.0" z="140.0-zcenter" ncopy="4" />
-            <Placement block="FSTD" in="FSTM" konly="MANY" x="0.0" y="0.0" z="154.0-zcenter" ncopy="5" />
-            <Placement block="FSTD" in="FSTM" konly="MANY" x="0.0" y="0.0" z="168.0-zcenter" ncopy="6" />
+            <Placement block="FSTD" in="FSTM" konly="ONLY" x="0.0" y="0.0" z="140.0-zcenter" ncopy="4" />
+            <Placement block="FSTD" in="FSTM" konly="ONLY" x="0.0" y="0.0" z="154.0-zcenter" ncopy="5" />
+            <Placement block="FSTD" in="FSTM" konly="ONLY" x="0.0" y="0.0" z="168.0-zcenter" ncopy="6" />
 
             <!-- Create and place the volumes -->
             <Create    block="FSTS" />
 	    <!--
-            <Placement block="FSTS" in="FSTM" konly="MANY" x="supporttube_x" y="supporttube_y" z="supporttube_z(1)" rmin="supporttube_rmin(1)" rmax="supporttube_rmax(1)" dz="supporttube_dz(1)" />
-            <Placement block="FSTS" in="FSTM" konly="MANY" x="supporttube_x" y="supporttube_y" z="supporttube_z(2)" rmin="supporttube_rmin(2)" rmax="supporttube_rmax(2)" dz="supporttube_dz(2)" />
+            <Placement block="FSTS" in="FSTM" konly="ONLY" x="supporttube_x" y="supporttube_y" z="supporttube_z(1)" rmin="supporttube_rmin(1)" rmax="supporttube_rmax(1)" dz="supporttube_dz(1)" />
+            <Placement block="FSTS" in="FSTM" konly="ONLY" x="supporttube_x" y="supporttube_y" z="supporttube_z(2)" rmin="supporttube_rmin(2)" rmax="supporttube_rmax(2)" dz="supporttube_dz(2)" />
             -->
-            <Placement block="FSTS" in="FSTM" konly="MANY" x="supporttube_x" y="supporttube_y" z="supporttube_z(1)-zcenter" rmin="supporttube_rmin(1)" rmax="supporttube_rmax(1)" dz="supporttube_dz(1)" />
-            <Placement block="FSTS" in="FSTM" konly="MANY" x="supporttube_x" y="supporttube_y" z="supporttube_z(2)-zcenter" rmin="supporttube_rmin(2)" rmax="supporttube_rmax(2)" dz="supporttube_dz(2)" />
+            <Placement block="FSTS" in="FSTM" konly="ONLY" x="supporttube_x" y="supporttube_y" z="supporttube_z(1)-zcenter" rmin="supporttube_rmin(1)" rmax="supporttube_rmax(1)" dz="supporttube_dz(1)" />
+            <Placement block="FSTS" in="FSTM" konly="ONLY" x="supporttube_x" y="supporttube_y" z="supporttube_z(2)-zcenter" rmin="supporttube_rmin(2)" rmax="supporttube_rmax(2)" dz="supporttube_dz(2)" />
 
         </Volume>
 
@@ -403,7 +403,7 @@
             <!-- Creating 12 sectors of ring -->
             <For var="iwedge" from="1" to="12">
                 <Create    block="FSHR" />
-                <Placement block="FSHR" in="FSTD" konly="MANY" x="0" y="0" z="0" >
+                <Placement block="FSHR" in="FSTD" konly="ONLY" x="0" y="0" z="0" >
                     <Rotation alphaz="15+30*iwedge"/>
                 </Placement>
             </For>
@@ -411,14 +411,14 @@
             <!-- 12 wedges -->
             <For var="iwedge" from="0" to="5">  <!-- even wedges -->
                 <Create block="FSTW" />
-                <Placement block="FSTW" in="FSTD" konly="MANY" x="0" y="0" z="-(ringbox_dz+wholewedge_dz)" >
+                <Placement block="FSTW" in="FSTD" konly="ONLY" x="0" y="0" z="-(ringbox_dz+wholewedge_dz)" >
                     <Rotation alphax="180"/>
                     <Rotation alphaz="15+30*2*iwedge"/>
                 </Placement>
             </For>
             <For var="iwedge" from="0" to="5">  <!-- odd wedges -->
                 <Create block="FSTW" />
-                <Placement block="FSTW" in="FSTD" konly="MANY" x="0" y="0" z="ringbox_dz+wholewedge_dz" >
+                <Placement block="FSTW" in="FSTD" konly="ONLY" x="0" y="0" z="ringbox_dz+wholewedge_dz" >
                     <Rotation alphaz="15+30*(2*iwedge+1)"/>
                 </Placement>
             </For>
@@ -433,11 +433,11 @@
 
             <!-- Ring -->
             <Create    block="FTUR" />
-            <Placement block="FTUR" in="FSHR" konly="MANY" x="0" y="0" z="0" />
+            <Placement block="FTUR" in="FSHR" konly="ONLY" x="0" y="0" z="0" />
 
             <!-- Vacuum part -->
             <Create    block="FSBR" />
-            <Placement block="FSBR" in="FSHR" konly="MANY" x="ringbox_x" y="ringbox_y" z="ringbox_z" dx="ringbox_dx" dy="ringbox_dy" dz="ringbox_dz" />
+            <Placement block="FSBR" in="FSHR" konly="ONLY" x="ringbox_x" y="ringbox_y" z="ringbox_z" dx="ringbox_dx" dy="ringbox_dy" dz="ringbox_dz" />
 
         </Volume>
 
@@ -449,21 +449,21 @@
 
             <!-- Put volumes in the container -->
             <Create    block="FSOW" />  <!-- outer wedge -->
-            <Placement block="FSOW" in="FSTW" x="0" y="0" z="0" />
+            <Placement block="FSOW" konly="MANY" in="FSTW" x="0" y="0" z="0" />
             <Create    block="FSIW" />  <!-- inner wedge -->
-            <Placement block="FSIW" in="FSTW" x="0" y="0" z="0" />
+            <Placement block="FSIW" konly="MANY" in="FSTW" x="0" y="0" z="0" />
 
         </Volume>
 
         <!-- Outer wedge container -->
-        <Volume name="FSOW" comment="Outer wedge container">
+        <Volume name="FSOW" comment="Outer wedge container" assembly="true" >
             <Attribute for="FSOW" seen="0" colo="2" />
 
             <Shape type="TUBS" rmin="outerwedge_rmin" phi1="outerwedge_phi1" rmax="outerwedge_rmax" phi2="outerwedge_phi2" dz="outerwedge_dz" />
 
             <!-- mechanical base -->
             <Create    block="FTRW" />
-            <Placement block="FTRW" in="FSOW" konly="MANY" x="outerbase_x" y="outerbase_y" z="outerbase_z" dx1="outerbase_dx1" dx2="outerbase_dx2" dy="outerbase_dy" dz="outerbase_dz" >
+            <Placement block="FTRW" in="FSOW" konly="ONLY" x="outerbase_x" y="outerbase_y" z="outerbase_z" dx1="outerbase_dx1" dx2="outerbase_dx2" dy="outerbase_dy" dz="outerbase_dz" >
                 <Rotation alphay="90"/>
                 <Rotation alphax="90"/>
             </Placement>
@@ -471,49 +471,49 @@
             <!-- mechanical ribs -->
             <For var="irib" from="1" to="9">
                 <Create block="FSBW" />
-                <Placement block="FSBW" in="FSOW" konly="MANY" x="outerrib_x(irib)" y="outerrib_y(irib)" z="outerrib_z" dx="outerrib_dx(irib)" dy="outerrib_dy(irib)" dz="outerrib_dz" >
+                <Placement block="FSBW" in="FSOW" konly="ONLY" x="outerrib_x(irib)" y="outerrib_y(irib)" z="outerrib_z" dx="outerrib_dx(irib)" dy="outerrib_dy(irib)" dz="outerrib_dz" >
                     <Rotation alphaz="outerrib_rotz(irib)"/>
                 </Placement>
             </For>
 
             <!-- hybrid -->
             <Create    block="FTUH" />
-            <Placement block="FTUH" in="FSOW" konly="MANY" x="0" y="0" z="-(0.3175+0.15+0.1)/2-0.1/2" rmin="outerhybrid_rmin" phi1="outerhybrid_phi1" rmax="outerhybrid_rmax" phi2="outerhybrid_phi2" dz="outerhybrid_dz" />
+            <Placement block="FTUH" in="FSOW" konly="ONLY" x="0" y="0" z="-(0.3175+0.15+0.1)/2-0.1/2" rmin="outerhybrid_rmin" phi1="outerhybrid_phi1" rmax="outerhybrid_rmax" phi2="outerhybrid_phi2" dz="outerhybrid_dz" />
 
-            <!-- silicon -->
+            <!-- silicon sensitive volume -->
             <Create    block="FTOS" />
-            <Placement block="FTOS" in="FSOW"  ncopy="2" x="0" y="0" z="(-0.15-2*0.1+0.03)/2" rmin="outersilicon_rmin" phi1="outersilicon_phi1(1)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(1)" dz="outersilicon_dz" />
-            <Placement block="FTOS" in="FSOW"  ncopy="3" x="0" y="0" z="(-0.15-2*0.1+0.03)/2" rmin="outersilicon_rmin" phi1="outersilicon_phi1(2)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(2)" dz="outersilicon_dz" />
+            <Placement block="FTOS" in="FSOW"  konly="ONLY" ncopy="2" x="0" y="0" z="(-0.15-2*0.1+0.03)/2" rmin="outersilicon_rmin" phi1="outersilicon_phi1(1)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(1)" dz="outersilicon_dz" />
+            <Placement block="FTOS" in="FSOW"  konly="ONLY" ncopy="3" x="0" y="0" z="(-0.15-2*0.1+0.03)/2" rmin="outersilicon_rmin" phi1="outersilicon_phi1(2)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(2)" dz="outersilicon_dz" />
 
         </Volume>
 
         <!-- Inner wedge container -->
-        <Volume name="FSIW" comment="Inner wedge container">
+        <Volume name="FSIW" comment="Inner wedge container" assembly="true">
             <Attribute for="FSIW" seen="0" colo="4" />
 
             <Shape type="TUBS" rmin="innerwedge_rmin" phi1="innerwedge_phi1" rmax="innerwedge_rmax" phi2="innerwedge_phi2" dz="innerwedge_dz" />
 
             <!-- mechanical base -->
             <Create    block="FTUW" />
-            <Placement block="FTUW" in="FSIW" konly="MANY" x="0" y="0" z="0" rmin="innerbase_rmin" phi1="innerbase_phi1" rmax="innerbase_rmax" phi2="innerbase_phi2" dz="innerbase_dz" />
+            <Placement block="FTUW" in="FSIW" konly="ONLY" x="0" y="0" z="0" rmin="innerbase_rmin" phi1="innerbase_phi1" rmax="innerbase_rmax" phi2="innerbase_phi2" dz="innerbase_dz" />
 
             <!-- mechanical ribs -->
             <For var="irib" from="1" to="6">
                 <Create block="FSBW" />
-                <Placement block="FSBW" in="FSIW" konly="MANY" x="innerriba_x(irib)" y="innerriba_y(irib)" z="innerriba_z" dx="innerriba_dx(irib)" dy="innerriba_dy(irib)" dz="innerriba_dz" >
+                <Placement block="FSBW" in="FSIW" konly="ONLY" x="innerriba_x(irib)" y="innerriba_y(irib)" z="innerriba_z" dx="innerriba_dx(irib)" dy="innerriba_dy(irib)" dz="innerriba_dz" >
                     <Rotation alphaz="innerriba_rotz(irib)"/>
                 </Placement>
             </For>
             <For var="irib" from="1" to="2">
                 <Create block="FTRB" />
-                <Placement block="FTRB" in="FSIW" konly="MANY" x="0" y="0" z="innerriba_z" rmin="innerribb_rmin(irib)" phi1="innerribb_phi1" rmax="innerribb_rmax(irib)" phi2="innerribb_phi2" dz="innerribb_dz" />
+                <Placement block="FTRB" in="FSIW" konly="ONLY" x="0" y="0" z="innerriba_z" rmin="innerribb_rmin(irib)" phi1="innerribb_phi1" rmax="innerribb_rmax(irib)" phi2="innerribb_phi2" dz="innerribb_dz" />
             </For>
 
             <!-- hybrid -->
             <Create    block="FTUH" />
-            <Placement block="FTUH" in="FSIW" konly="MANY" x="0" y="0" z="(0.15+0.1)/2" rmin="innerhybrida_rmin" phi1="innerhybrida_phi1" rmax="innerhybrida_rmax" phi2="innerhybrida_phi2" dz="innerhybrida_dz" />
+            <Placement block="FTUH" in="FSIW" konly="ONLY" x="0" y="0" z="(0.15+0.1)/2" rmin="innerhybrida_rmin" phi1="innerhybrida_phi1" rmax="innerhybrida_rmax" phi2="innerhybrida_phi2" dz="innerhybrida_dz" />
             <Create    block="FSBH" />
-            <Placement block="FSBH" in="FSIW" konly="MANY" x="18.5*cos(16*pi/180)+(32-18.5)*cos(16*pi/180)/2" y="0" z="(0.15+0.1)/2" dx="innerhybridb_dx" dy="innerhybridb_dy" dz="innerhybridb_dz" />
+            <Placement block="FSBH" in="FSIW" konly="ONLY" x="18.5*cos(16*pi/180)+(32-18.5)*cos(16*pi/180)/2" y="0" z="(0.15+0.1)/2" dx="innerhybridb_dx" dy="innerhybridb_dy" dz="innerhybridb_dz" />
 
             <!-- silicon -->
             <Create    block="FTIS" />
@@ -540,7 +540,7 @@
             <Material name="air" isvol="1" />
             <Shape type="BBOX" dx="0" dy="0" dz="0" />
         </Volume>
-        <Volume name="FTRW" comment="Trapizoid for FST wedge">
+        <Volume name="FTRW" comment="Trapizoid for FST wedge" >
             <Attribute for="FTRW" seen="1" colo="14" />
             <Material name="PEEK" />
             <Shape type="TRD1" dx1="0" dx2="0" dy="0" dz="0" />
@@ -556,7 +556,7 @@
             <Shape type="TUBS" rmin="0" phi1="0" rmax="0" phi2="0" dz="0" />
         </Volume>
 
-        <Volume name="FTOS" comment="Tube segment for outer FST silicon (active area)">
+        <Volume name="FTOS" comment="Tube segment for outer FST silicon (active area)" >
             <Attribute for="FTOS" seen="1" colo="4" />
             <Material name="silicon" />
             <Material name="silicon" isvol="1" />
