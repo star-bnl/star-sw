@@ -4,8 +4,8 @@ TDataSet *CreateTable() {
   Int_t nrows = 12;
   St_tpcRDOMasks *tableSet = new St_tpcRDOMasks("tpcRDOMasks",nrows);
   memset(&row,0,tableSet->GetRowSize());
-  row.runNumber	 =    8178047; // run number  ;
-  row.mask	 =       4095; // enable mask  ;
+  row.runNumber	 =   20196018; // run number  ;
+  row.mask	 =      65535; // enable mask  ;
   for (Int_t i = 0; i < nrows; i++) {
     row.sector	 =          2*i+1; // sector  ;
     tableSet->AddAt(&row);
