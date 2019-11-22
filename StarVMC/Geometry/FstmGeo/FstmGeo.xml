@@ -34,7 +34,8 @@
         </varlist>
 
 	<varlist type="float">
-	  zcenter/0/
+	  zcenter/0/, 
+	  fudgeDZ/0.9/ <!-- decrease (increase) DZ (density) for Si supports, to prevent overlap with sensitive volumes -->
 	</varlist>
 
         <!-- Declare structures -->
@@ -371,7 +372,7 @@
             <Attribute for="FSTM" seen="0" colo="1" />
 
 	    <!-- Sized to contain the FSTS support volume with inner radius given by outer radius of beam pipe -->
-            <Shape     type="TUBE" rmin="4.03073" rmax="supporttube_rmax(2)" dz="supporttube_dz(1)+supporttube_dz(2)" />
+            <Shape     type="TUBE" rmin="4.03073" rmax="supporttube_rmax(2)" dz="supporttube_dz(1)+supporttube_dz(2)+2" />
 
             <Create    block="FSTD" />
             <Placement block="FSTD" in="FSTM" konly="ONLY" x="0.0" y="0.0" z="140.0-zcenter" ncopy="4" />
@@ -397,8 +398,8 @@
             <Medium    name="standard"      />     <!-- can change medium paramters here -->
             <Attribute for="FSTD" seen="0" colo="1" />
 
-            <!-- Shape will be dynamically sized to include all disks placed -->
-            <Shape     type="TUBE" rmin="4.8" rmax="33.7" dz="1" />
+
+            <Shape     type="TUBE" rmin="4.8" rmax="33.7" dz="3" />
 
             <!-- Creating 12 sectors of ring -->
             <For var="iwedge" from="1" to="12">
@@ -444,26 +445,32 @@
         <!-- Whole wedge container -->
         <Volume name="FSTW" comment="Whole wedge container">
             <Attribute for="FSTW" seen="0" colo="1" />
-
+	    <Material name="AIR" />
             <Shape type="TUBS" rmin="wholewedge_rmin" phi1="wholewedge_phi1" rmax="wholewedge_rmax" phi2="wholewedge_phi2" dz="wholewedge_dz" />
 
             <!-- Put volumes in the container -->
             <Create    block="FSOW" />  <!-- outer wedge -->
-            <Placement block="FSOW" konly="MANY" in="FSTW" x="0" y="0" z="0" />
+            <Placement block="FSOW" konly="ONLY" in="FSTW" x="0" y="0" z="0" />
             <Create    block="FSIW" />  <!-- inner wedge -->
-            <Placement block="FSIW" konly="MANY" in="FSTW" x="0" y="0" z="0" />
+            <Placement block="FSIW" konly="ONLY" in="FSTW" x="0" y="0" z="0" />
 
         </Volume>
 
         <!-- Outer wedge container -->
-        <Volume name="FSOW" comment="Outer wedge container" assembly="true" >
+        <Volume name="FSOW" comment="Outer wedge container" assembly="false" >
             <Attribute for="FSOW" seen="0" colo="2" />
-
+	    <Material name="AIR" stemax="outersilicon_dz/2" />
             <Shape type="TUBS" rmin="outerwedge_rmin" phi1="outerwedge_phi1" rmax="outerwedge_rmax" phi2="outerwedge_phi2" dz="outerwedge_dz" />
+
+            <!-- silicon sensitive volume -->
+            <Create    block="FTOS" />
+            <Placement block="FTOS" in="FSOW"  konly="ONLY" ncopy="2" x="0" y="0" z="(-0.15-2*0.1+0.03)/2" rmin="outersilicon_rmin" phi1="outersilicon_phi1(1)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(1)" dz="outersilicon_dz" />
+            <Placement block="FTOS" in="FSOW"  konly="ONLY" ncopy="3" x="0" y="0" z="(-0.15-2*0.1+0.03)/2" rmin="outersilicon_rmin" phi1="outersilicon_phi1(2)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(2)" dz="outersilicon_dz" />
+
 
             <!-- mechanical base -->
             <Create    block="FTRW" />
-            <Placement block="FTRW" in="FSOW" konly="ONLY" x="outerbase_x" y="outerbase_y" z="outerbase_z" dx1="outerbase_dx1" dx2="outerbase_dx2" dy="outerbase_dy" dz="outerbase_dz" >
+            <Placement block="FTRW" in="FSOW" konly="ONLY" x="outerbase_x" y="outerbase_y" z="outerbase_z" dx1="outerbase_dx1" dx2="outerbase_dx2" dy="outerbase_dy" dz="outerbase_dz*fudgeDZ" >
                 <Rotation alphay="90"/>
                 <Rotation alphax="90"/>
             </Placement>
@@ -478,24 +485,23 @@
 
             <!-- hybrid -->
             <Create    block="FTUH" />
-            <Placement block="FTUH" in="FSOW" konly="ONLY" x="0" y="0" z="-(0.3175+0.15+0.1)/2-0.1/2" rmin="outerhybrid_rmin" phi1="outerhybrid_phi1" rmax="outerhybrid_rmax" phi2="outerhybrid_phi2" dz="outerhybrid_dz" />
-
-            <!-- silicon sensitive volume -->
-            <Create    block="FTOS" />
-            <Placement block="FTOS" in="FSOW"  konly="ONLY" ncopy="2" x="0" y="0" z="(-0.15-2*0.1+0.03)/2" rmin="outersilicon_rmin" phi1="outersilicon_phi1(1)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(1)" dz="outersilicon_dz" />
-            <Placement block="FTOS" in="FSOW"  konly="ONLY" ncopy="3" x="0" y="0" z="(-0.15-2*0.1+0.03)/2" rmin="outersilicon_rmin" phi1="outersilicon_phi1(2)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(2)" dz="outersilicon_dz" />
+            <Placement block="FTUH" in="FSOW" konly="ONLY" x="0" y="0" z="-(0.3175+0.15+0.1)/2-0.1/2" rmin="outerhybrid_rmin" phi1="outerhybrid_phi1" rmax="outerhybrid_rmax" phi2="outerhybrid_phi2" dz="outerhybrid_dz*fudgeDZ" />
 
         </Volume>
 
         <!-- Inner wedge container -->
-        <Volume name="FSIW" comment="Inner wedge container" assembly="true">
+        <Volume name="FSIW" comment="Inner wedge container" assembly="false">
             <Attribute for="FSIW" seen="0" colo="4" />
-
+	    <Material name="AIR" stemax="innersilicon_dz/2" />
             <Shape type="TUBS" rmin="innerwedge_rmin" phi1="innerwedge_phi1" rmax="innerwedge_rmax" phi2="innerwedge_phi2" dz="innerwedge_dz" />
+
+            <!-- silicon -->
+            <Create    block="FTIS" />
+            <Placement block="FTIS" in="FSIW"  ncopy="1" x="0" y="0" z="0.15/2+0.1-0.03/2" rmin="innersilicon_rmin" phi1="innersilicon_phi1" rmax="innersilicon_rmax" phi2="innersilicon_phi2" dz="innersilicon_dz" />
 
             <!-- mechanical base -->
             <Create    block="FTUW" />
-            <Placement block="FTUW" in="FSIW" konly="ONLY" x="0" y="0" z="0" rmin="innerbase_rmin" phi1="innerbase_phi1" rmax="innerbase_rmax" phi2="innerbase_phi2" dz="innerbase_dz" />
+            <Placement block="FTUW" in="FSIW" konly="ONLY" x="0" y="0" z="0" rmin="innerbase_rmin" phi1="innerbase_phi1" rmax="innerbase_rmax" phi2="innerbase_phi2" dz="innerbase_dz*fudgeDZ" />
 
             <!-- mechanical ribs -->
             <For var="irib" from="1" to="6">
@@ -511,13 +517,11 @@
 
             <!-- hybrid -->
             <Create    block="FTUH" />
-            <Placement block="FTUH" in="FSIW" konly="ONLY" x="0" y="0" z="(0.15+0.1)/2" rmin="innerhybrida_rmin" phi1="innerhybrida_phi1" rmax="innerhybrida_rmax" phi2="innerhybrida_phi2" dz="innerhybrida_dz" />
-            <Create    block="FSBH" />
-            <Placement block="FSBH" in="FSIW" konly="ONLY" x="18.5*cos(16*pi/180)+(32-18.5)*cos(16*pi/180)/2" y="0" z="(0.15+0.1)/2" dx="innerhybridb_dx" dy="innerhybridb_dy" dz="innerhybridb_dz" />
+            <Placement block="FTUH" in="FSIW" konly="ONLY" x="0" y="0" z="(0.15+0.1)/2" rmin="innerhybrida_rmin" phi1="innerhybrida_phi1" rmax="innerhybrida_rmax" phi2="innerhybrida_phi2" dz="innerhybrida_dz*fudgeDZ" />
 
-            <!-- silicon -->
-            <Create    block="FTIS" />
-            <Placement block="FTIS" in="FSIW"  ncopy="1" x="0" y="0" z="0.15/2+0.1-0.03/2" rmin="innersilicon_rmin" phi1="innersilicon_phi1" rmax="innersilicon_rmax" phi2="innersilicon_phi2" dz="innersilicon_dz" />
+            <Create    block="FSBH" />
+            <Placement block="FSBH" in="FSIW" konly="ONLY" x="18.5*cos(16*pi/180)+(32-18.5)*cos(16*pi/180)/2" y="0" z="(0.15+0.1)/2" dx="innerhybridb_dx" dy="innerhybridb_dy" dz="innerhybridb_dz*fudgeDZ" />
+
 
         </Volume>
 
@@ -543,6 +547,7 @@
         <Volume name="FTRW" comment="Trapizoid for FST wedge" >
             <Attribute for="FTRW" seen="1" colo="14" />
             <Material name="PEEK" />
+	    <Material name="peak" dens="material::dens/fudgeDZ" />
             <Shape type="TRD1" dx1="0" dx2="0" dy="0" dz="0" />
         </Volume>
         <Volume name="FSBW" comment="Box for the ribs in FST wedges">
@@ -553,6 +558,7 @@
         <Volume name="FTUH" comment="Tube segment for FST hybrid">
             <Attribute for="FTUH" seen="1" colo="797" />
             <Material name="Kapton" />
+            <Material name="Kapt0n" dens="material::dens/fudgeDZ"/>
             <Shape type="TUBS" rmin="0" phi1="0" rmax="0" phi2="0" dz="0" />
         </Volume>
 
@@ -626,6 +632,7 @@
         <Volume name="FTUW" comment="Tube segment for FST wedge">
             <Attribute for="FTUW" seen="1" colo="14" />
             <Material name="PEEK" />
+	    <Material name="peak" dens="material::dens/fudgeDZ" />
             <Shape type="TUBS" rmin="0" phi1="0" rmax="0" phi2="0" dz="0" />
         </Volume>
 
@@ -638,6 +645,7 @@
         <Volume name="FSBH" comment="Box for FST hybrid">
             <Attribute for="FSBH" seen="1" colo="797" />
             <Material name="Kapton" />
+            <Material name="Kapt0n"  dens="material::dens/fudgeDZ" />
             <Shape type="BBOX" dx="0" dy="0" dz="0" />
         </Volume>
 
