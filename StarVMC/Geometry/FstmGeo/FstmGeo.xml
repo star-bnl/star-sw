@@ -459,13 +459,14 @@
         <!-- Outer wedge container -->
         <Volume name="FSOW" comment="Outer wedge container" assembly="false" >
             <Attribute for="FSOW" seen="0" colo="2" />
-	    <Material name="AIR" stemax="outersilicon_dz/2" />
+	    <Material name="AIR" />
+<!--	    <Material name="AIR" stemax="outersilicon_dz/2" isvol="0" /> -->
             <Shape type="TUBS" rmin="outerwedge_rmin" phi1="outerwedge_phi1" rmax="outerwedge_rmax" phi2="outerwedge_phi2" dz="outerwedge_dz" />
 
             <!-- silicon sensitive volume -->
             <Create    block="FTOS" />
-            <Placement block="FTOS" in="FSOW"  konly="ONLY" ncopy="2" x="0" y="0" z="(-0.15-2*0.1+0.03)/2" rmin="outersilicon_rmin" phi1="outersilicon_phi1(1)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(1)" dz="outersilicon_dz" />
-            <Placement block="FTOS" in="FSOW"  konly="ONLY" ncopy="3" x="0" y="0" z="(-0.15-2*0.1+0.03)/2" rmin="outersilicon_rmin" phi1="outersilicon_phi1(2)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(2)" dz="outersilicon_dz" />
+            <Placement block="FTOS" in="FSOW"  ncopy="2" x="0" y="0" z="(-0.15-2*0.1+0.03)/2" rmin="outersilicon_rmin" phi1="outersilicon_phi1(1)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(1)" dz="outersilicon_dz" />
+            <Placement block="FTOS" in="FSOW"  ncopy="3" x="0" y="0" z="(-0.15-2*0.1+0.03)/2" rmin="outersilicon_rmin" phi1="outersilicon_phi1(2)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(2)" dz="outersilicon_dz" />
 
 
             <!-- mechanical base -->
@@ -492,7 +493,8 @@
         <!-- Inner wedge container -->
         <Volume name="FSIW" comment="Inner wedge container" assembly="false">
             <Attribute for="FSIW" seen="0" colo="4" />
-	    <Material name="AIR" stemax="innersilicon_dz/2" />
+	    <Material name="AIR" />
+<!--	    <Material name="AIR" stemax="innersilicon_dz/2" isvol="0" /> -->
             <Shape type="TUBS" rmin="innerwedge_rmin" phi1="innerwedge_phi1" rmax="innerwedge_rmax" phi2="innerwedge_phi2" dz="innerwedge_dz" />
 
             <!-- silicon -->
@@ -585,14 +587,14 @@
                 <Hit meas="z"  opts="S" bins="0.00001"  />
                 <Hit meas="y"  opts="S" bins="0.00001"  />
                 <Hit meas="x"  opts="S" bins="0.00001"  />
-                <Hit meas="ptot" nbits="16" min="0" max="100"  /> 
-                <Hit meas="cx" nbits="10"  />
-                <Hit meas="cy" nbits="10"  />
-                <Hit meas="cz" nbits="10"  />
-                <Hit meas="sleng" nbits="16" min="0" max="500"  />
-                <Hit meas="tof" nbits="16"  />
-                <Hit meas="step" bins=".0001"  />
-                <Hit meas="eloss" nbits="16"  />
+                <Hit meas="ptot" opts="S" nbits="16" min="0" max="100"  /> 
+                <Hit meas="cx" opts="S"  nbits="10"  />
+                <Hit meas="cy" opts="S"  nbits="10"  />
+                <Hit meas="cz" opts="S"  nbits="10"  />
+                <Hit meas="sleng" opts="S"  nbits="16" min="0" max="500"  />
+                <Hit meas="tof" opts="S"  nbits="16"  />
+                <Hit meas="step" opts="S"  bins=".0001"  />
+                <Hit meas="eloss" opts="S"  nbits="16"  />
             </Instrument>   
         </Volume>
         <Volume name="FTIS" comment="Tube segment for outer FST silicon (active area)">
@@ -618,14 +620,14 @@
                 <Hit meas="z"  opts="S" bins="0.00001"  />
                 <Hit meas="y"  opts="S" bins="0.00001"  />
                 <Hit meas="x"  opts="S" bins="0.00001"  />
-                <Hit meas="ptot" nbits="16" min="0" max="100"  /> 
-                <Hit meas="cx" nbits="10"  />
-                <Hit meas="cy" nbits="10"  />
-                <Hit meas="cz" nbits="10"  />
-                <Hit meas="sleng" nbits="16" min="0" max="500"  />
-                <Hit meas="tof" nbits="16"  />
-                <Hit meas="step" bins=".0001"  />
-                <Hit meas="eloss" nbits="16"  />
+                <Hit meas="ptot" opts="S" nbits="16" min="0" max="100"  /> 
+                <Hit meas="cx" opts="S" nbits="10"  />
+                <Hit meas="cy" opts="S" nbits="10"  />
+                <Hit meas="cz" opts="S" nbits="10"  />
+                <Hit meas="sleng" opts="S" nbits="16" min="0" max="500"  />
+                <Hit meas="tof" opts="S" nbits="16"  />
+                <Hit meas="step" opts="S" bins=".0001"  />
+                <Hit meas="eloss" opts="S" nbits="16"  />
             </Instrument>   
         </Volume>
 
