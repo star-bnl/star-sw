@@ -65,6 +65,28 @@
     <Construct sys="etof" config="ETOFv14f"  />
   </Geometry>
 
+  <Geometry tag="y2020a"  check="false" comment="Y2020a fast offline geometry">
+
+    <Construct sys="cave" config="CAVE06"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDon"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="scon" config="SCON14"  />
+    <!--Construct sys="pipe" config="PIPE12"-->
+    <Construct sys="pipe" config="PIPE12ft" />
+    <Construct sys="targ" config="TARGv1"  /> <!-- fixed target geometry -->
+    <Construct sys="tpce" config="TPCEv6"  />
+    <Construct sys="btof" config="BTOFv8"  />
+    <Construct sys="vpdd" config="VPDD08"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMin"  />
+    <Construct sys="epdm" config="EPDMv1"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD16"  />
+    <Construct sys="etof" config="ETOFv14f"  />
+  </Geometry>
+
 <!-- y2019 series geometry tags -->
   <Geometry tag="y2019"   check="false" comment="Y2019 rough cut geometry">
 
