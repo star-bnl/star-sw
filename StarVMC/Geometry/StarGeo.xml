@@ -22,9 +22,10 @@
     <Construct sys="shld" config="SHLDon"  />
     <Construct sys="zcal" config="ZCALon"  />
     <Construct sys="scon" config="SCON14"  />
-    <!--Construct sys="pipe" config="PIPE12"-->
-    <Construct sys="pipe" config="PIPE12ft" />
-    <Construct sys="targ" config="TARGv1"  /> <!-- fixed target geometry -->
+    <Construct sys="pipe" config="PIPE12"/>
+<!-- Temporarily removed so that we do not need to introduce overlapping volumes -->
+<!--    <Construct sys="pipe" config="PIPE12ft" -->
+<!--    <Construct sys="targ" config="TARGv1"  /> --><!-- fixed target geometry -->
     <Construct sys="tpce" config="TPCEv6"  />
     <Construct sys="btof" config="BTOFv8"  />
     <Construct sys="vpdd" config="VPDD08"  />
