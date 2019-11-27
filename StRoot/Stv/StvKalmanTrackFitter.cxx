@@ -410,7 +410,7 @@ static int nCall=0; nCall++;
 //   if (!dir) dis = -dis;
 //   myHlx.Move(dis);
   double dS = myHlx.Path(Xnode);		
-//  if (fabs(dS)>1e3)				return 2;				
+  if (fabs(dS)>1e3)				return 2;  //??????				
   assert(fabs(dS)<1e3);
   myHlx.Move(dS);
 //??assert((s=TCLx::sign(*(myHlx.Emx()),5))>0);
@@ -429,7 +429,7 @@ static int nCall=0; nCall++;
   node->mPE[lane].Recov();
 //assert((s=TCLx::sign(node->mPE[lane],5))>0);
   
-  innNode->SetDer(*myHlx.Der(),lane);
+//??   innNode->SetDer(*myHlx.Der(),lane);
 
   return 0;
   
@@ -472,8 +472,11 @@ enum {kDeltaZ = 100};//??????
   mXi2 = fitt->GetXi2();
   node->SetPre(par[0],err[0],0);
   node->SetFit(par[1],err[1],0);
-  StvFitDers fiDers(*th.Der());
-  node->SetDer(fiDers,0);
+//  assert(th.Der());///???
+  if (th.Der()) {
+    StvFitDers fiDers(*th.Der());
+    node->SetDer(fiDers,0);
+  }
   return 0;
 }   
 //_____________________________________________________________________________
