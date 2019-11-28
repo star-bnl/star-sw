@@ -295,7 +295,7 @@ class StPicoTrack : public TObject {
   /// Index of the ETOF pidTratis in the event
   Short_t  mETofPidTraitsIndex;
 
-  ClassDef(StPicoTrack, 5)
+  ClassDef(StPicoTrack, 6)
 };
 
 #endif
