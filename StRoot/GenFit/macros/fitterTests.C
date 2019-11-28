@@ -1,3 +1,10 @@
+/*
+  gSystem->Load("libEve")
+  gSystem->Load("libGenFit")
+  gSystem->AddIncludePath(" -IStRoot/GenFit")
+  .x fitterTests.C+
+*/
+#define __DISPLAY__
 #include <iostream>
 #include <execinfo.h>
 #include <signal.h>
