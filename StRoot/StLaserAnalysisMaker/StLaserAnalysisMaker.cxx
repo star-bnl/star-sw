@@ -42,7 +42,7 @@
 //
 //#define CORRECT_LASER_POSITIONS
 #define CORRECT_RAFT_DIRECTION
-//#define __TRACKHITS__
+#define __TRACKHITS__
 #ifndef __TRACKHITS__
 #define ADDPRIMTRACKHITS
 #endif
