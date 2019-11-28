@@ -79,6 +79,7 @@ class StdEdxY2Maker : public StMaker {
   static dEdxY2_t *CdEdx; // corrected
   static dEdxY2_t *FdEdx; // fit
   static dEdxY2_t *dEdxS; // dEdx sorted
+  static void      UsedNdx() {fUsedNdx = kTRUE;}
   Int_t                m_Mask; //!
   Char_t               beg[1];
   TMinuit             *m_Minuit;        //!
