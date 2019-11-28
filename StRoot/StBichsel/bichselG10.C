@@ -88,26 +88,37 @@
 class Bichsel;
 #endif
 Bichsel *m_Bichsel = 0;
-const Int_t NMasses = 13;
-const Double_t Masses[NMasses] = {0.93827231,       // 0 p
-				  0.493677,         // 1 K
-				  0.13956995,       // 2 pi
-				  0.51099907e-3,    // 3 e  
-				  1.87561339,       // 4 d
-				  0.1056584,        // 5 mu
-				  2.80925,          // 6 t
-				  2.80923, //GEANT3 // 7 He3
-				  3.727417, //GEANT3// 8 He4
-				  -0.13956995,      // 9 2*pi
-#if 1
-				  6.5354,           //10 Li7
-				  5.6031,           //11 Li6
-				 -0.93827231        //12 2*p
-#endif
+const Int_t NMasses = 19;
+const Double_t kAu2Gev=0.9314943228;
+struct Part_t {
+  const Char_t *Name;
+  Int_t         PiD; 
+  Int_t         Charge;
+  Int_t         Index;
+  Double_t      Mass;
 };
-const Int_t   PiD[NMasses]   = {  1,   2,    3,  0,   5,    4,  6,    7,       8,    3,    9, 10, 1}; 
-const Int_t   Index[NMasses] = {  4,   3,    2,  0,   5,    1,  6,    7,       8,   -2,    9, 10, 0};
-const Char_t *Names[NMasses] = {"p", "K","#pi","e", "d","#mu","t","He3","#alpha","2#pi", "Li7", "Li6", "2p"};
+Part_t Part[NMasses] = {
+  //name,   PiD, Charge,  Index, Mass 
+  {"p",       1,      1,      4, 0.93827231},                 // 0 p        
+  {"K",	      2,      1,      3, 0.493677},          	      // 1 K   
+  {"#pi",     3,      1,      2, 0.13956995},        	      // 2 pi  
+  {"e",       0,      1,      0, 0.51099907e-3},     	      // 3 e   
+  {"d",	      5,      1,      5, 1.87561339},        	      // 4 d   
+  {"#mu",     4,      1,      1, 0.1056584},         	      // 5 mu  
+  {"t",	      6,      1,      6, 2.80925},           	      // 6 t   
+  {"He3",     7,      2,      7, 2.80923}, //GEANT3  	      // 7 He3 
+  {"#alpha",  8,      2,      8, 3.727417}, //GEANT3 	      // 8 He4 
+  {"He6",    -1,      2,     12, 3*kAu2Gev+14.931e-3},        // 9
+  {"Li6",    10,      3,     10, 5.6031},            	      //10 Li6 
+  {"Li7",     9,      3,      9, 6.5354},            	      //11 Li7 
+  {"Be7",    -1,      4,      0, 7.016003437*kAu2Gev},        //12
+  {"Be9",    -1,      4,      0, 9.01218307*kAu2Gev},        //13
+  {"Be10",   -1,      4,      0, 10.01353470*kAu2Gev},        //14
+  {"B10",    -1,      5,      0, 10.01353470*kAu2Gev},        //15
+  {"B11",    -1,      5,      0, 11.009305167*kAu2Gev},       //16
+  {"2#pi",    3,     -1,     -2, -0.13956995},       	      //17 2*pi
+  {"2p",      1,     -1,      0, -0.93827231}        	      //18 2*p 
+};
 const Int_t NF = 10;  //          0,  1,     2,  3,   4,    5.  6,    7,       8,     9,
 const Char_t *FNames[NF] = {"Girrf","Sirrf","z","70","60","70M","dNdx","zM","70Trs","zTrs"};
 const Int_t Nlog2dx = 3;
@@ -182,25 +193,24 @@ Double_t bichsel70M(Double_t *x,Double_t *par) {
   scale *= charge*charge;
   return  TMath::Log10(scale*m_Bichsel->GetI70M(TMath::Log10(poverm),dx2));//TMath::Exp(7.81779499999999961e-01));
 }
+#if 0
 //________________________________________________________________________________
 Double_t bichsel70Trs(Double_t *x,Double_t *par) {
   Double_t pove   = TMath::Power(10.,x[0]);
-  Double_t scale = 1;
-  Double_t mass = par[0];
-  Int_t    part = par[2];
-  if (part < 0 || part > 9) part = 0;
+  Double_t scale  = 1;
+  Double_t mass   = par[0];
+  Int_t    charge = par[1];
   if (mass < 0) {mass = - mass; scale = 2;}
   Double_t poverm = pove/mass; 
-  Double_t charge = 1.;
   Double_t dx2 = 1;
-  if (par[1] > 1.0) {
-    charge = par[1];
+  if (charge > 1) {
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
   scale *= charge*charge;
   return TMath::Log10(scale*TMath::Exp(m_Bichsel->I70Trs(part,TMath::Log10(poverm))));
 }
+#endif
 //________________________________________________________________________________
 Double_t bichselZTrs(Double_t *x,Double_t *par) {
   Double_t pove   = TMath::Power(10.,x[0]);
@@ -275,14 +285,14 @@ Double_t aleph70(Double_t *x,Double_t *par) {
 #endif
   static Double_t Norm = dEdxMIP/aleph70P(&MIPBetaGamma,ppar);
   Int_t hyp = (Int_t ) par[0];
-  Int_t h = Index[hyp];
+  Int_t h = Part[hyp].Index;
   Double_t ScaleL10 = 0;
   if (h < 0) {
     h = -h;
     ScaleL10 = TMath::Log10(2.);
   }
   Double_t pove   = TMath::Power(10.,x[0]);
-  Double_t mass = Masses[hyp];
+  Double_t mass = Part[hyp].Mass;
   Double_t poverm = pove/mass; 
   Double_t charge = 1.;
   if (h > 6 && h > 9) charge = 2;
@@ -311,7 +321,7 @@ Double_t aleph70(Double_t *x,Double_t *par) {
 }
 #endif /* __CINT__ */
 //________________________________________________________________________________
-void bichselG10(const Char_t *type="z") {
+void bichselG10(const Char_t *type="z", Int_t Nhyps = 9) {
   if (gClassTable->GetID("StBichsel") < 0 || !m_Bichsel) {
     gSystem->Load("libTable");
     gSystem->Load("St_base");
@@ -329,10 +339,12 @@ void bichselG10(const Char_t *type="z") {
       break;
     }
   }
-  for (int h = 0; h < NMasses; h++) { // Masses
+  if (Nhyps < 9) Nhyps = 9;
+  if (Nhyps > NMasses)  Nhyps = NMasses;
+  for (int h = 0; h < Nhyps; h++) { // Masses
   //  for (int h = 0; h < 7; h++) { // Masses
     Int_t dx = 1;
-    Char_t *FunName = Form("%s%s%i",FNames[f],Names[h],(int)log2dx[dx]);
+    Char_t *FunName = Form("%s%s%i",FNames[f],Part[h].Name,(int)log2dx[dx]);
     cout << "Make " << h << "\t" << FunName << endl;
     Double_t xmin = -1.5;
     //    if (h == 0 || h >= 5) xmin = -0.75;
@@ -344,16 +356,15 @@ void bichselG10(const Char_t *type="z") {
     else if (f == 5) func = new TF1(FunName,bichsel70M ,xmin, xmax,3);
     else if (f == 6) func = new TF1(FunName,dNdx ,xmin, xmax,3);
     else if (f == 7) func = new TF1(FunName,bichselZM,xmin, xmax,3);
+#if 0
     else if (f == 8) func = new TF1(FunName,bichsel70Trs,xmin, xmax,3);
     else if (f == 9) func = new TF1(FunName,bichselZTrs,xmin, xmax,3);
+#endif
     else {
       return;
     }
-    func->SetParameter(0,Masses[h]);
-    func->SetParameter(1,1.);
-    func->SetParameter(2, PiD[h]); 
-    if (h >= 7 && h < 9) func->SetParameter(1,2.);
-    if (h == 10 || h == 11) func->SetParameter(1,3.);
+    func->SetParameter(0,Part[h].Mass);
+    func->SetParameter(1,Part[h].Charge);
     Int_t color = h+1;
     if (color > 8) color -= 8;
     //    if (color > 7) color++;
@@ -362,15 +373,15 @@ void bichselG10(const Char_t *type="z") {
     func->SetMarkerColor(color);
 #endif
     func->Draw("same");
-    leg->AddEntry(func,Names[h]);
+    leg->AddEntry(func,Part[h].Name);
 #if !defined( __CINT__) && defined(__Aleph__)
-    TF1 *fA = new TF1(Form("Aleph%s",Names[h]),aleph70,xmin,xmax, 1);
+    TF1 *fA = new TF1(Form("Aleph%s",Part[h].Name),aleph70,xmin,xmax, 1);
     fA->SetParameter(0,h);
     fA->SetLineColor(color);
     fA->SetMarkerColor(color);
     fA->SetLineStyle(2);
     fA->Draw("same");
-    leg->AddEntry(fA,Names[h]);
+    leg->AddEntry(fA,Part[h].Name);
 #endif
   }
   leg->Draw();
