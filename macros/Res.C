@@ -266,8 +266,9 @@ void Mu() {
   Res("x","mu");
 }
 //________________________________________________________________________________
-void DrawFitP(const Char_t *hitN = "SecRow3C", const Char_t *plot="mu:rowSigned(y,x)", const Char_t *select = "i&&j", const Char_t *opt = "prof",
+void DrawFitP(const Char_t *pattern = "SecRow3C", const Char_t *plot="mu:rowSigned(y,x)", const Char_t *select = "i&&j", const Char_t *opt = "prof",
 	      Int_t nx = 145, Double_t xmin = -72.5, Double_t xmax = 72.5, Double_t ymin = -0.5, Double_t ymax = 0.5) {
+  TPRegexp Pattern(pattern);
   Int_t NF = 0;
   TSeqCollection *files = gROOT->GetListOfFiles();
   if (! files) return;
@@ -279,7 +280,8 @@ void DrawFitP(const Char_t *hitN = "SecRow3C", const Char_t *plot="mu:rowSigned(
   TString Select(select);
   while ( (f = (TFile *) next()) ) { 
     TString F(f->GetName());
-    if (! F.Contains(hitN,TString::kIgnoreCase)) continue;
+    if (! F.Contains(Pattern)) continue;
+
     FitFiles[NF] = f; NF++;
   }
   TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
@@ -303,6 +305,7 @@ void DrawFitP(const Char_t *hitN = "SecRow3C", const Char_t *plot="mu:rowSigned(
       cout << "File " << gDirectory->GetName() << endl;
       TNtuple *FitP = (TNtuple *) gDirectory->Get("FitP");
       if (! FitP) continue;
+      if (FitP->GetEntriesFast() < 10) continue;
       TString Opt(opt);
       Opt += "same";
       TString Plot(plot);
@@ -312,7 +315,7 @@ void DrawFitP(const Char_t *hitN = "SecRow3C", const Char_t *plot="mu:rowSigned(
       Hist->SetMarkerColor(c); Hist->SetMarkerStyle(20); Hist->SetLineColor(c);
       TString Title(gSystem->BaseName(FitFiles[i]->GetName()));
       Title.ReplaceAll(".root","");
-      Title.ReplaceAll(hitN,"");
+      Title.ReplaceAll(pattern,"");
       Title.ReplaceAll("GF","");
       leg->AddEntry(Hist,Title);
     }

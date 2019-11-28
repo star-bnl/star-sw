@@ -7,7 +7,7 @@ my $DIR = Cwd::cwd();
 # list of all histogram to be fitted
 `ln -s ~/macros/.sl* .`;
 $ENV{STARFPE} = "NO";
-my @histGF = ();
+my @histGF = (); #SecRow3C);
 my @histGP = ();
 my @histRL5 = ();
 my @histNF = ();

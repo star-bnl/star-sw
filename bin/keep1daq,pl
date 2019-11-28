@@ -1,0 +1,27 @@
+#! /usr/bin/env perl
+use File::Basename;
+use Cwd;
+my $debug = 1;
+my $pwd = cwd();
+my  @runs  = glob "/hlt/cephfs/daq/2019/???/* /net/l401/data/scratch1/daq/2019/???/*";#  print "runs = @runs\n" if ($debug);
+#my  @runs  = glob "/hlt/cephfs/daq/2019/???/*";  print "runs = @runs\n" if ($debug);
+#my  @runs  = glob "/gpfs01/star/daq/2019/???/*";  print "runs = @runs\n" if ($debug);
+foreach my $tag (qw(st_physics_20 hlt)) {
+  foreach my $run (@runs) {
+    my @files = glob $run . "/" . $tag . "*.daq";# print "files = @files\n";
+    if ($#files < 0) {next;}
+    #  print "files = @files\n";
+    my $NF = $#files;
+    my $step = 1; # $NF/8;
+    if ($step < 1) {$step = 1;}
+    for (my $i = 0; $i <=$NF; $i+= $step) {
+      my $file = $files[$i];
+      print "$i\t $file\n";
+      if ($i == 0) {next;}
+      unlink($file);
+      print "remove $file\n";
+    }
+  }
+}
+
+

@@ -28,10 +28,12 @@ StBFChain *chain;
 class St_db_Maker;
 St_db_Maker *dbMk = 0;
 #endif
+Bool_t Root4Star = kFALSE;
 //________________________________________________________________________________
 void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",  
 	   const Char_t *fileIn = 0, const Char_t *opt = "Bichsel", const Char_t *kuip = 0,
 	   const Char_t *fileOut = 0) {
+  if (gClassTable->GetID("TGiant3") >= 0) Root4Star = kTRUE;
   gROOT->LoadMacro("bfc.C"); 
   TString ChainOpt("");
   TString RootFile(fileOut);
@@ -101,18 +103,18 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     if        (FileIn.Contains(".daq",TString::kIgnoreCase)) {
       ChainOpt += "in,TpxRaw,";
       RootFile.ReplaceAll(".daq","");
-    } else if (FileIn.Contains(".fz",TString::kIgnoreCase)) {
+    } else if (Root4Star && FileIn.Contains(".fz",TString::kIgnoreCase)) {
       ChainOpt += "fzin,";
       RootFile.ReplaceAll(".fzd","");
       RootFile.ReplaceAll(".fz","");
-    } else if (FileIn.Contains(".nt",TString::kIgnoreCase)) {
+    } else if (Root4Star && FileIn.Contains(".nt",TString::kIgnoreCase)) {
       ChainOpt += "ntin,";
       RootFile.ReplaceAll(".nt","");
       RootFile.ReplaceAll(".","_");
     } else if (FileIn.Contains(".geant.root",TString::kIgnoreCase)) {
       ChainOpt += "in,";
       RootFile.ReplaceAll(".geant.root","");
-    } else if (FileIn.Contains(".MuDst",TString::kIgnoreCase)) {
+    } else if (Root4Star && FileIn.Contains(".MuDst",TString::kIgnoreCase)) {
       ChainOpt += "mtin,";
       RootFile.ReplaceAll(".MuDst.root","");
     } else {
@@ -134,13 +136,15 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     bfc(-1,ChainOpt.Data(),0,0,0);
     return;
   }
-
+  
   TString output = RootFile;
   output = RootFile;
   output.ReplaceAll(".root","O.root");
   output.ReplaceAll("*","");
   if (RunOpt.Contains("devT,",TString::kIgnoreCase)) ChainOpt += ",useXgeom";
   bfc(-1,ChainOpt.Data(),fileIn,output.Data(),RootFile.Data());
+  if (! Root4Star && FileIn.Contains(".MuDst",TString::kIgnoreCase)) {
+  }
   StTpcRSMaker *tpcRS = (StTpcRSMaker *) chain->Maker("TpcRS");
   if (tpcRS) {
     //      if (needAlias) tpcRS->SetInput("geant","bfc/.make/inputStream/.make/inputStream_Root/.data/bfcTree/geantBranch");
@@ -250,7 +254,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     bgMaxL10 = TMath::Log10(pTmax/mass);
     //    cout << "Reduce bgMax10 = " << bgMaxL10 << endl;
   }
-  if (gClassTable->GetID("TGiant3") >= 0) {
+  if (Root4Star) {
     St_geant_Maker *geant = (St_geant_Maker *) chain->GetMakerInheritsFrom("St_geant_Maker");
     //                   NTRACK  ID PTLOW PTHIGH YLOW YHIGH PHILOW PHIHIGH ZLOW ZHIGH
     //    geant->Do("gkine 100  14   0.1    10.  -1     1      0    6.28    0.    0.;");

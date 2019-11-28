@@ -1852,6 +1852,7 @@ $hist = "Run316"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_
 # 11/18/19 dEdx925 update TpcSecRowB per trigger setup
 # 11/19/19 dEdx926 add TpcPadCorrectionMDF
 # 11/20/19 dEdx927 add TpcLengthCorrectionMDF (problems with production_3p85GeV_fixedTarget_2019 and production_7.3GeV_fixedTarget_2019)
+# 11/23/19 dEdx928 check constants pt in MySQL
 #$hist = "Run303"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/30/2019  reduce pMom interal, do only Negative particles
 #$hist = "Run304"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/31/2019  reset TpcdXCorrection, TpcZCorrectionB, TpcSecRowB
 #$hist = "Run305"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/01/2019  new TpcSecRowB

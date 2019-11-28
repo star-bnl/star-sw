@@ -5,7 +5,7 @@
 #  source ~/.tcshrc
   cd ${SUBMITTINGDIRECTORY}  
 #  starver TFG19d
-  starver TFG19k
+#  starver TFG19k
 #  setenv NODEBUG yes
 #  setup 64b
 #  setup gcc
@@ -44,11 +44,13 @@
 #      root.exe -q -b -x 'bfc.C(99999,"lana,B2018,trgd,Tpx,LaserIT,StiCA,KFVertex,CorrX,OPr40,OGridLeakFull,OSpaceZ2,analysis,NoHistos,NoRunco,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
 # 2019
 #      root.exe -q -b -x 'bfc.C(99999,"lana,B2019,trgd,Tpx,LaserIT,StiCA,KFVertex,CorrX,OPr40,OGridLeakFull,OSpaceZ2,analysis,NoHistos,NoRunco,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
-      root.exe -q -b -x 'bfc.C(99999,"lana,B2019,trgd,Tpx,LaserIT,StiCA,KFVertex,CorrY,OGridLeakFull,OSpaceZ2,analysis,NoHistos,NoRunco,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+#      root.exe -q -b -x 'bfc.C(99999,"lana,B2019,trgd,Tpx,LaserIT,StiCA,KFVertex,CorrY,OGridLeakFull,OSpaceZ2,analysis,NoHistos,NoRunco,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+# 2020
+      root.exe -q -b -x 'bfc.C(99999,"lana,B2020,trgd,Tpx,LaserIT,StiCA,StiKFVertex,CorrY,OGridLeakFull,OSpaceZ2,analysis,NoHistos,NoRunco,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
   endif
 </command>
 <!-- <input URL="file:/star/data03/daq/2018/*/*/st_laser_adc*.daq"/>  -->
-<input URL="command:Lana2019.pl"/>
+<input URL="command:Lana2020.pl"/>
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2018/088/19088006/st_laser_19088006_raw_0000007.daq" /> -->
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2018/169/*/st_laser_adc_19169021*.daq" /> -->
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2018/*/*/st_laser_*.daq" /> -->

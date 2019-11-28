@@ -22,8 +22,13 @@ TString OnDb(Int_t year = 2014, const Char_t *dataset="Conditions_daq") {
   else if (year == 2001)     database = "dbbak.starp.bnl.gov:3400";
   else {// current Db
 #if 1
+#if 1
     if (dataset[0] == 'R') database = "onldb2.starp.bnl.gov:3501";
     else                   database = "onldb2.starp.bnl.gov:3502";
+#else
+    if (dataset[0] == 'R') database = "onldb.starp.bnl.gov:3501";
+    else                   database = "onldb.starp.bnl.gov:3502";
+#endif
 #else
     if (dataset[0] == 'R') database = "heston.star.bnl.gov:3501";
     else                   database = "heston.star.bnl.gov:3502";

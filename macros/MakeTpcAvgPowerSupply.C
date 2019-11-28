@@ -283,8 +283,11 @@ Int_t LastProcessedRun(TpcAvgPowerSupply_st *avgI, Double_t AcCharge[2]) {
   return LastRun;
 }
 //________________________________________________________________________________
-void MakeTpcAvgPowerSupply(Int_t year = 2019) {
+void MakeTpcAvgPowerSupply(Int_t year = 2020) {
   TDatime d(10000*(year-1) + 1201,0);
+  if (year == 2020) {
+    d = TDatime(10000*(year-1) + 1101,0);
+  }
   Int_t u95 = d.Convert();
   TDatime nextyear(10000*(year+1) + 101, 0);
   Int_t uNext = nextyear.Convert();

@@ -1,4 +1,4 @@
-]#! /bin/tcsh -f
+#! /bin/tcsh -f
 #root.exe -q -b /afs/rhic.bnl.gov/star/packages/.DEV2/StarDb/Calibrations/tpc/TpcSecRowB.20100101.000032.root \
 #SecRow3CGFRunX35P10ij.root \
 #'MakeTpcSecRowB.C(20100101,35,"TpcSecRowB","/afs/rhic.bnl.gov/star/packages/.DEV2/StarDb/Calibrations/tpc/TpcRowQ.20100101.000032.C")'
@@ -256,12 +256,12 @@
 #    mv TpcSecRowB.20180518.000309.root  TpcSecRowB.${b}.root; mv  MakeTpcSecRowB.20180518,309.log MakeTpcSecRowB.${b}.log
 #end
 # Run313
-foreach f (`ls -1d SecRow3CGFproduction_*.root`) 
-    set b = `echo ${f} | sed -e 's/SecRow3CGFproduction_//' -e 's/_ReversedFullField\.root//'`;
-    echo "${f} => ${b}"
-    root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.${b}.root /star/u/fisyak/work/Histograms/RunXVIII/Run313/${f} 'MakeTpcSecRowB.C(20180518,309,"TpcSecRowB",0)' >& MakeTpcSecRowB.20180518,309.log
-    mv TpcSecRowB.20180518.000309.root  TpcSecRowB.${b}.root; mv  MakeTpcSecRowB.20180518,309.log MakeTpcSecRowB.${b}.log
-end
+#foreach f (`ls -1d SecRow3CGFproduction_*.root`) 
+#    set b = `echo ${f} | sed -e 's/SecRow3CGFproduction_//' -e 's/_ReversedFullField\.root//'`;
+#    echo "${f} => ${b}"
+#    root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.${b}.root /star/u/fisyak/work/Histograms/RunXVIII/Run313/${f} 'MakeTpcSecRowB.C(20180518,309,"TpcSecRowB",0)' >& MakeTpcSecRowB.20180518,309.log
+#    mv TpcSecRowB.20180518.000309.root  TpcSecRowB.${b}.root; mv  MakeTpcSecRowB.20180518,309.log MakeTpcSecRowB.${b}.log
+#end
 
 # 2019 
 #root.exe -q -b  SecRow3CGFdEdx.root  'MakeTpcSecRowB.C(20190201,1)' >& MakeTpcSecRowB.20190201,1.log
@@ -314,12 +314,21 @@ end
 #    root.exe -q -b  /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/dEdx912/Fit/${f} 'MakeTpcSecRowB.C(20190201,312,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190201,312.log
 #    mv TpcSecRowB.20190201.000312.root  TpcSecRowB.${b}; mv  MakeTpcSecRowB.20190201,312.log MakeTpcSecRowB.${b}.log
 #end
-set run = dEdx916
+#set run = dEdx916
+# set run = dEdx921
+#  SecRow3CGF14p5GeV_AuAu_1 && SecRow3CGF14p5GeV_AuAu_2 => SecRow3CGF14p5GeV_AuAu_12
+#  SecRow3CGF4p59GeV_fixedTarget_1 SecRow3CGF4p59GeV_fixedTarget_2 => SecRow3CGF4p59GeV_fixedTarget
+#  3p85GeV_fixedTarget_2 and 9p2GeV_AuAu_2 are empty
+#set run = dEdx922
+set run = dEdx924
 foreach p (`ls -1d SecRow3CGF*.root`) 
     set f = `basename ${p} .root`;
     set b = `echo ${f} | sed -e 's/SecRow3CGF//'`;
+    echo "check $f"
+    if (! -r $STAR/StarDb/Calibrations/tpc/TpcSecRowB.${b}.root) continue;
     echo "${f} => ${b}"
     root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.${b}.root /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/${run}/Fit/${p}   'MakeTpcSecRowB.C(20190201,916,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190201,916.log
+#    root.exe -q -b  /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/${run}/Fit/${p}   'MakeTpcSecRowB.C(20190201,916,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190201,916.log
 #   root.exe -q -b  /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/dEdx912/Fit/${f} 'MakeTpcSecRowB.C(20190201,916,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190201,916.log
     mv TpcSecRowB.20190201.000916.root  TpcSecRowB.${b}.root; mv  MakeTpcSecRowB.20190201,916.log MakeTpcSecRowB.${b}.log
 end
