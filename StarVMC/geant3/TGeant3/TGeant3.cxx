@@ -1471,6 +1471,10 @@ void TGeant3::AddParticlesToPdgDataBase() const
     pdgDB->AddParticle("HE3","HE3",3*kAu2Gev+14.931e-3,kFALSE,
                        0,6,"Ion",GetIonPdg(2,3));
 
+  if ( !pdgDB->GetParticle(GetIonPdg(2,6)) )
+    pdgDB->AddParticle("HE6","HE6",3*kAu2Gev*6.01888589,kFALSE,
+                       0,6,"Ion",GetIonPdg(2,6));
+
   if ( !pdgDB->GetParticle(GetIonPdg(3,6)) )
     pdgDB->AddParticle("Li6","Li6",6.0151228874*kAu2Gev,kFALSE,
                        0,9,"Ion",GetIonPdg(3,6));
@@ -1479,6 +1483,23 @@ void TGeant3::AddParticlesToPdgDataBase() const
     pdgDB->AddParticle("Li7","Li7",7.016003437*kAu2Gev,kFALSE,
                        0,9,"Ion",GetIonPdg(3,7));
 
+  if ( !pdgDB->GetParticle(GetIonPdg(4,7)) )
+    pdgDB->AddParticle("Be7","Be7",7.016003437*kAu2Gev,kFALSE,
+                       0,9,"Ion",GetIonPdg(4,7));
+  if ( !pdgDB->GetParticle(GetIonPdg(4,9)) )
+    pdgDB->AddParticle("Be9","Be9",9.01218307*kAu2Gev,kFALSE,
+                       0,9,"Ion",GetIonPdg(4,9));
+  if ( !pdgDB->GetParticle(GetIonPdg(4,10)) )
+    pdgDB->AddParticle("Be10","Be10",10.01353470*kAu2Gev,kFALSE,
+                       0,9,"Ion",GetIonPdg(4,10));
+
+  if ( !pdgDB->GetParticle(GetIonPdg(5,10)) )
+    pdgDB->AddParticle("B10","B10",10.01353470*kAu2Gev,kFALSE,
+                       0,9,"Ion",GetIonPdg(5,10));
+
+  if ( !pdgDB->GetParticle(GetIonPdg(5,11)) )
+    pdgDB->AddParticle("B11","B11",11.009305167*kAu2Gev,kFALSE,
+                       0,9,"Ion",GetIonPdg(5,11));
   //Anti Ions
 
   if ( !pdgDB->GetParticle((-1)*GetIonPdg(1,2)) )
@@ -1680,10 +1701,15 @@ Int_t TGeant3::PDGFromId(Int_t id) const
 //______________________________________________________________________
 void TGeant3::DefineParticles()
 {
+  TDatabasePDG *pdgDB = TDatabasePDG::Instance();
+  char *name;
+  Int_t itrtyp;
+  Float_t amass, charge, tlife;
   //
   // Define standard Geant 3 particles
   Gpart();
   //
+  static Double_t GeV2Time = 3.291086E-25; // width in GeV to life time in seconds
   // Load standard numbers for GEANT particles and PDG conversion
   fPDGCode[fNPDGCodes++]=-99;   //  0 = unused location
   fPDGCode[fNPDGCodes++]=22;    //  1 = photon
@@ -1809,10 +1835,10 @@ void TGeant3::DefineParticles()
   Gspart(fNG3Particles++, "Tau-", 5, 1.77699, -1., 290.6e-15);      // G4TauMinus *
   fPDGCode[fNPDGCodes++]= 15;          //57 = Tau-
 
-  Gspart(fNG3Particles++, "B0",     3, 5.2794, +0., 1.532e-12);     // G4BMesonZero
+  Gspart(fNG3Particles++, "B0",     4, 5.2794, +0., 1.532e-12);     // G4BMesonZero
   fPDGCode[fNPDGCodes++]=511;          //58 = B0
 
-  Gspart(fNG3Particles++, "B0 bar", 3, 5.2794, -0., 1.532e-12);     // G4AntiBMesonZero
+  Gspart(fNG3Particles++, "B0 bar", 4, 5.2794, -0., 1.532e-12);     // G4AntiBMesonZero
   fPDGCode[fNPDGCodes++]=-511;         //58 = B0bar
 
   Gspart(fNG3Particles++, "B+",     4, 5.2790, +1., 1.638e-12);     // G4BMesonPlus *
@@ -1821,32 +1847,46 @@ void TGeant3::DefineParticles()
   Gspart(fNG3Particles++, "B-",     4, 5.2790, -1., 1.638e-12);     // G4BMesonMinus *
   fPDGCode[fNPDGCodes++]=-521;         //61 = B-
 
-  Gspart(fNG3Particles++, "Bs",     3, 5.3675, +0., 1.466e-12);     // G4BsMesonZero
+  Gspart(fNG3Particles++, "Bs",     4, 5.3675, +0., 1.466e-12);     // G4BsMesonZero
   fPDGCode[fNPDGCodes++]=531;          //62 = B_s
 
-  Gspart(fNG3Particles++, "Bs bar", 3, 5.3675, -0., 1.466e-12);     // G4AntiBsMesonZero
+  Gspart(fNG3Particles++, "Bs bar", 4, 5.3675, -0., 1.466e-12);     // G4AntiBsMesonZero
   fPDGCode[fNPDGCodes++]=-531;         //63 = B_s bar
 
-  Gspart(fNG3Particles++, "Lambda_b",     3, 5.624, +0., 1.24e-12);
+  Gspart(fNG3Particles++, "Lambda_b",     4, 5.624, +0., 1.24e-12);
   fPDGCode[fNPDGCodes++]=5122;         //64 = Lambda_b
 
-  Gspart(fNG3Particles++, "Lambda_b bar", 3, 5.624, -0., 1.24e-12);
+  Gspart(fNG3Particles++, "Lambda_b bar", 4, 5.624, -0., 1.24e-12);
   fPDGCode[fNPDGCodes++]=-5122;        //65 = Lambda_b bar
 
-  Gspart(fNG3Particles++, "J/Psi",       3, 3.096916, 0., 7.6e-21);   // G4JPsi
+  Gspart(fNG3Particles++, "J/Psi",       4, 3.096916, 0., 7.6e-21);   // G4JPsi
   fPDGCode[fNPDGCodes++]=443;          // 66 = J/Psi
 
-  Gspart(fNG3Particles++, "Psi Prime",   3, 3.686,   0., 0.);
+  Gspart(fNG3Particles++, "Psi Prime",   4, 3.686,   0., 0.);
   fPDGCode[fNPDGCodes++]=20443;        // 67 = Psi prime
 
-  Gspart(fNG3Particles++, "Upsilon(1S)", 3, 9.46037, 0., 0.);
+  Gspart(fNG3Particles++, "Upsilon(1S)", 4, 9.46037, 0., GeV2Time / 54.02e-6);
   fPDGCode[fNPDGCodes++]=553;          // 68 = Upsilon(1S)
+  if ( !pdgDB->GetParticle(fPDGCode[fNPDGCodes-1])) {
+    Gfpart(fPDGCode[fNPDGCodes-1], *name, itrtyp, amass, charge, tlife);
+    //                 Name Title   Mass  Stable  DecayWidth      Charge   ParticleClass  PdgCode                   Anti TrackingCode
+    pdgDB->AddParticle(name, name, amass, kFALSE, GeV2Time/tlife, 3*charge,           "", fPDGCode[fNPDGCodes-1], -1, itrtyp);
+  }
+  Gspart(fNG3Particles++, "Upsilon(2S)", 4, 10.0233, 0., GeV2Time / 31.98);
+  fPDGCode[fNPDGCodes++]=100553;        // 69 = Upsilon(2S)
+  if ( !pdgDB->GetParticle(fPDGCode[fNPDGCodes-1])) {
+    Gfpart(fPDGCode[fNPDGCodes-1], *name, itrtyp, amass, charge, tlife);
+    //                 Name Title   Mass  Stable  DecayWidth      Charge   ParticleClass  PdgCode                   Anti TrackingCode
+    pdgDB->AddParticle(name, name, amass, kFALSE, GeV2Time/tlife, 3*charge,           "", fPDGCode[fNPDGCodes-1], -1, itrtyp);
+  }
 
-  Gspart(fNG3Particles++, "Upsilon(2S)", 3, 10.0233, 0., 0.);
-  fPDGCode[fNPDGCodes++]=20553;        // 69 = Upsilon(2S)
-
-  Gspart(fNG3Particles++, "Upsilon(3S)", 3, 10.3553, 0., 0.);
-  fPDGCode[fNPDGCodes++]=30553;        // 70 = Upsilon(3S)
+  Gspart(fNG3Particles++, "Upsilon(3S)", 4, 10.3553, 0., GeV2Time / 20.32);
+  fPDGCode[fNPDGCodes++]=20553;        // 70 = Upsilon(3S)
+  if ( !pdgDB->GetParticle(fPDGCode[fNPDGCodes-1])) {
+    Gfpart(fPDGCode[fNPDGCodes-1], *name, itrtyp, amass, charge, tlife);
+    //                 Name Title   Mass  Stable  DecayWidth      Charge   ParticleClass  PdgCode                   Anti TrackingCode
+    pdgDB->AddParticle(name, name, amass, kFALSE, GeV2Time/tlife, 3*charge,           "", fPDGCode[fNPDGCodes-1], -1, itrtyp);
+  }
 
   Gspart(fNG3Particles++, "Anti Neutrino (e)",       3, 0., 0., 1.e20);
   fPDGCode[fNPDGCodes++]=-12;          // 71 = anti electron neutrino
