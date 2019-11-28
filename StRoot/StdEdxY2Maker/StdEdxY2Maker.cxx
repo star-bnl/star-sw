@@ -930,15 +930,16 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
     // TPoints block
     const Char_t *NS[2] = {"P",""};
     const Char_t *TS[2] = {"Positive","Negative"};
-    for (Int_t s = 0; s < 2; s++) {// charge 0 => "+", 1 => "-"
-      for (Int_t t = 0; t < kTotalMethods; t++) {
-	const Char_t *N[6] = {"F","70","FU","70U","N", "NU"};
-	const Char_t *T[6] = {"dEdx(fit)/Pion",
-			      "dEdx(I70)/Pion",
-			      "dEdx(fit_uncorrected)/Pion ",
-			      "dEdx(I70_uncorrected)/Pion",
-			      "dNdx/Pion",
-			      "dNdx(uncorrected)/Pion"};
+    const Char_t *N[kTotalMethods] = {"F","70","FU","70U","N", "NU"};
+    const Char_t *T[kTotalMethods] = {"dEdx(fit)/Pion",
+				      "dEdx(I70)/Pion",
+				      "dEdx(fit_uncorrected)/Pion ",
+				      "dEdx(I70_uncorrected)/Pion",
+				      "dNdx/Pion",
+				      "dNdx(uncorrected)/Pion"};
+    for (Int_t t = 0; t < kTotalMethods; t++) {
+      if (! fUsedNdx && t > 4) continue;
+      for (Int_t s = 0; s < 2; s++) {// charge 0 => "+", 1 => "-"
 	TPoints[s][t]   = new TH3F(Form("TPoints%s%s",N[t],NS[s]),
 				   Form("%s versus Length in Tpc and <log_{2}(dX)> in TPC - iTPC %s",T[t],TS[s]),
 				   190,10,200., Nlog2dx, log2dxLow, log2dxHigh, 500,-1.,4.);
