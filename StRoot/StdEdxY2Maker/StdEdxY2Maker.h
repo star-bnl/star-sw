@@ -90,8 +90,9 @@ class StdEdxY2Maker : public StMaker {
   StThreeVectorD      *mPromptPosition[2][2][3]; 
 #endif /* __OLD_dX_Calculation__ */
   TH2F                *mHitsUsage;//!
+  Char_t               end[1];
   static Double_t      bField;
-  Char_t              end[1];
+  static Bool_t        fUsedNdx;
  public:
   virtual const char *GetCVS() const {
     static const char cvs[]=
