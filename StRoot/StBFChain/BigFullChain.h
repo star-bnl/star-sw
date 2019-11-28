@@ -1193,13 +1193,20 @@ Bfc_st BFC[] = { // standard chains
 #endif
 
   // 2020 initial chains
+  {"B2020" ,"","",
+   "ry2020,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree",
+   "","",                                                      "Base chain for run 2020 data (tpc)",kFALSE},
+
+  {"P2020","" ,"",
+   "B2020,ITTF,VFMinuit,etofa,btof,mtd,emcDY2,epdHit,trgd,ZDCvtx,BAna,picoWrite,picoVtxDefault,picoCovMtxWrite"
+   ,            "","", "Base chain for year 2020 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
   {"B2020a" ,"","",
-   "ry2020a,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
+   "ry2020a,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree",
    "","",                                                      "Base chain for run 2020 data (tpc)",kFALSE},
 
   {"P2020a","" ,"",
-   "B2020a,ITTF,BAna,iTpcIT,hitfilt,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
-   ,    "","",        "Base chain for year 2020 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
+   "B2020a,ITTF,VFMinuit,etofa,btof,mtd,emcDY2,epdHit,trgd,ZDCvtx,BAna,picoWrite,picoVtxDefault,picoCovMtxWrite"
+   ,            "","", "Base chain for year 2020 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
 
 
   // Other chains/Calibration
