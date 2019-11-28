@@ -82,7 +82,7 @@ class DriftLineRKF {
 
   bool m_usePlotting;
   ViewDrift* m_view;
-
+public:
   struct step {
     // Position
     double x;
@@ -95,6 +95,7 @@ class DriftLineRKF {
   };
   std::vector<step> m_path;
   int m_status;
+private:
   unsigned int m_nPoints;
 
   double m_scaleElectronSignal;
