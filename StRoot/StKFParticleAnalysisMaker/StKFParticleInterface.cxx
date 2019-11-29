@@ -888,9 +888,10 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
   fNHftHits.resize(nPartSaved);
   
   if(nUsedTracks==0) return 0;
-  fTrackHistograms[2]->Fill( double(primaryTrackList.size())/double(nUsedTracks) );
-  fTrackHistograms2D[7]->Fill( primaryTrackList.size(), (nUsedTracks - primaryTrackList.size()) );
-  
+  if (fCollectTrackHistograms) {
+    fTrackHistograms[2]->Fill( double(primaryTrackList.size())/double(nUsedTracks) );
+    fTrackHistograms2D[7]->Fill( primaryTrackList.size(), (nUsedTracks - primaryTrackList.size()) );
+  }
   if( fCleanLowPVTrackEvents && ( 10*primaryTrackList.size() < (nUsedTracks - primaryTrackList.size()) ) ) return 0;
   if( fCleanLowPVTrackEvents && sqrt(dx*dx + dy*dy) > 0.45 ) return 0;
 
