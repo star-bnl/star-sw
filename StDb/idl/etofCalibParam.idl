@@ -12,4 +12,5 @@
 struct etofCalibParam {
 	float   get4TotBinWidthNs;  /* tot bin width to ns conversion */
 	octet   minDigisInSlewBin;  /* min number of digis per slewing bin */
+	unsigned short referencePulserIndex;  /* index of the pulser channel used as reference */
 };
