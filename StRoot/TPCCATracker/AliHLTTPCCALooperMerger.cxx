@@ -132,7 +132,6 @@ void AliHLTTPCCALooperMerger::FillSegments()
     fSegments.push_back( *segment );
   }
 //  std::sort( fSegments.begin(), fSegments.end(), LooperSegment::CompareL );
-  std::cout<<" ----- fSegments.size(): "<<fSegments.size()<<"\n";
 }
 
 void AliHLTTPCCALooperMerger::CheckSegments()
@@ -363,9 +362,9 @@ void AliHLTTPCCALooperMerger::SaveSegments()
   for( int iSeg = 1; iSeg < fSegments.size()-1; iSeg++ ) {
     int prevTr = -1;
     iLooper = segments[iSeg].iLooper;
-    while( segments[iSeg].iLooper == iLooper ) {
+    while( segments[iSeg].iLooper == iLooper && iSeg < fSegments.size() ) {
       int nextTr = -1;
-      if( segments[iSeg+1].iLooper == iLooper ) nextTr = segments[iSeg+1].iTrack;
+      if( iSeg < fSegments.size()-1 ) if( segments[iSeg+1].iLooper == iLooper ) nextTr = segments[iSeg+1].iTrack;
       AliHLTTPCCAMergedTrack &track = fOutput.Track( segments[iSeg].iTrack );
       if( prevTr != nextTr ) {
 	track.SetLooper( prevTr, nextTr );
