@@ -43,7 +43,8 @@ class l4Builder : public JevpBuilder {
 		 * @see 
 		 * @author 
 		 */  
-		JevpPlot *HltPlots[54];
+                static const int nHltPlots = 60;
+                JevpPlot *HltPlots[nHltPlots];
 		JevpPlot *BeamPlots[3];
 		JevpPlot *BesGoodPlots[6];
 		JevpPlot *HLTGood2Plots[4];
@@ -361,6 +362,8 @@ class l4Builder : public JevpBuilder {
 		TH1D *hVzDiff;
 
                 TH2D *hVertexRZ;
+                TH2D *hVertexXZ;
+                TH2D *hVertexYZ;
                 TH1D *hBunchId;
                 TH1D *hBbceTAC;
                 TH1D *hBbcwTAC;
@@ -369,6 +372,13 @@ class l4Builder : public JevpBuilder {
                 TH1D *hEpdeTAC;
                 TH1D *hEpdwTAC;
 
+
+                // ETOF
+                TH2D *hEtofHitsXY;
+                TH2D *hEtofInvBeta;
+                TH2D *hEtofLocalYMrpc;
+                TProfile *pEtofNhitsPerEvent;
+    
                 /*   TH3D *hMatchannel3D ; */
 
 		TH2F *hVzvpd_Vz_UPC ;
@@ -439,5 +449,7 @@ class l4Builder : public JevpBuilder {
 		TH1D *hFixedTargetMonitor_Prim_Eta;
 		TH1D *hFixedTargetMonitor_Glob_Eta;
 		
-		ClassDef(l4Builder, 1);
+                unsigned int first_evt_time = 0;
+                
+                ClassDef(l4Builder, 1);
 };

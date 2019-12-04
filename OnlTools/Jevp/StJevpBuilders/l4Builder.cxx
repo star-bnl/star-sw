@@ -161,7 +161,7 @@ void l4Builder::initialize(int argc, char *argv[])
 	gStyle->SetPadGridX(0);
 	gStyle->SetPadGridY(0);
 
-	for(int i = 0; i < 54; i++) {
+	for(int i = 0; i < nHltPlots; i++) {
 	        HltPlots[i] = new JevpPlot();
 		HltPlots[i]->gridx = 0;
 		HltPlots[i]->gridy = 0;
@@ -262,7 +262,7 @@ void l4Builder::initialize(int argc, char *argv[])
 	defineHltPlots_UPC();
 	defineDiElectron2TwrPlots();
 	setAllPlots();
-	for(int i = 0; i < 54; i++) {
+	for(int i = 0; i < nHltPlots; i++) {
 		LOG(DBG, "Adding plot %d", i);
 		addPlot(HltPlots[i]);
 	}
@@ -309,8 +309,7 @@ void l4Builder::startrun(daqReader *rdr)
     //printf("hello there. This is startrun\n");
 	runnumber = rdr->run;
 
-	int initialno = 54;
-	for(int i = 0; i < initialno; i++) {
+        for(int i = 0; i < nHltPlots; i++) {
 		getPlotByIndex(i)->getHisto(0)->histo->Reset();
 	}
 	for(int i = 0; i < 6; i++)BesGoodPlots[i]->getHisto(0)->histo->Reset();
@@ -715,6 +714,8 @@ void l4Builder::event(daqReader *rdr)
 	unsigned int triggerBitHLTGood2           = 0x80000000;
 	unsigned int triggerBitDiElectron2Twr     = 0x00000001; // start to up lower 16 bit.
 	unsigned int triggerBitMTDQuarkonium	  = 0x00400000;
+        unsigned int triggerBitETOFTrackOnly      = 0x00000002;
+        unsigned int triggerBitETOFTrackMatching  = 0x00000004;
 
 	//EXTRACT L4 TRACK INFO FROM DAQ FILE
 	//daq_dta *dd  = rdr->det("l3")->get("legacy");
@@ -727,8 +728,14 @@ void l4Builder::event(daqReader *rdr)
 		LOG(DBG, "No HLT in this event");
 		return;
 	}
-	eventCounter++;
 
+        if (!eventCounter) {
+            first_evt_time = rdr->evt_time;
+        }
+
+        unsigned int evt_time = rdr->evt_time;
+        
+        eventCounter++;
 
 
 	HLT_EVE			*hlt_eve     = NULL;
@@ -746,6 +753,7 @@ void l4Builder::event(daqReader *rdr)
 	HLT_HF			*hlt_hf      = NULL;
 	HLT_MTD			*hlt_mtd     = NULL;
 	HLT_MTDQuarkonium	*hlt_mtdqm   = NULL;
+        HLT_ETOF                *hlt_etof    = NULL;
 
 	while(dd && dd->iterate()) {
 		hlt_gl3_t *hlt = (hlt_gl3_t *) dd->Void;
@@ -767,6 +775,7 @@ void l4Builder::event(daqReader *rdr)
 		else if(strcmp(hlt->name, "HLT_MTDDIMU") == 0) hlt_mtd = (HLT_MTD *)hlt->data;
 		else if(strcmp(hlt->name, "HLT_MTDQuarkonium") == 0) hlt_mtdqm = (HLT_MTDQuarkonium *)hlt->data;
 		else if(strcmp(hlt->name, "HLT_DIEP2Twr") == 0) hlt_Twrdiep = (HLT_DIEP *)hlt->data;
+		else if(strcmp(hlt->name, "HLT_ETOF") == 0) hlt_etof = (HLT_ETOF *)hlt->data;
 	}
 
 	
@@ -785,7 +794,7 @@ void l4Builder::event(daqReader *rdr)
 	if(hlt_hf      == NULL) { LOG(ERR, "BAD event %d: HF.  Discard", rdr->event_number); return; }
 	if(hlt_mtd     == NULL) { LOG(ERR, "BAD event %d: MTD.  Discard", rdr->event_number); return; }
 	if(hlt_mtdqm   == NULL) { LOG(ERR, "BAD event %d: MTDQM.  Discard", rdr->event_number); return; }
-
+        if(hlt_etof    == NULL) { LOG(ERR, "BAD event %d: ETOF. Discard", rdr->event_number); return; }
 
 	// Check Version
 	if(hlt_eve->version != HLT_GL3_VERSION) {
@@ -799,7 +808,7 @@ void l4Builder::event(daqReader *rdr)
 
 	omp_set_nested(1);
 	omp_set_dynamic(0);
-#pragma omp parallel sections num_threads(21)
+#pragma omp parallel sections num_threads(1)
 	{
 
 #pragma omp section
@@ -877,6 +886,8 @@ void l4Builder::event(daqReader *rdr)
 	    hVzvpd->Fill(VzVpd);
 	    hVzDiff->Fill(VzVpd - vertZ);
             hVertexRZ->Fill(vertZ, vertR);
+            hVertexXZ->Fill(vertZ, vertX);
+            hVertexYZ->Fill(vertZ, vertY);
             hBunchId->Fill(hlt_eve->bunch_id);
 
             if(daqID & upc) {
@@ -1053,7 +1064,32 @@ void l4Builder::event(daqReader *rdr)
 	    }
 	  }
 
-	    
+#pragma omp section
+          {
+              for (int i = 0; i < hlt_etof->nETofHits; ++i) {
+                  const hlt_ETofHit& hit = hlt_etof->etofHit[i];
+                  hEtofHitsXY->Fill(hit.globalX, hit.globalY);
+
+                  int mrpcidx = (hit.sector - 13) * 9 + (hit.module - 1 ) * 3 + hit.counter;
+                  hEtofLocalYMrpc->Fill(mrpcidx, hit.localY);
+              }
+
+              pEtofNhitsPerEvent->Fill(evt_time - first_evt_time, hlt_etof->nETofHits);
+              
+              for(u_int i = 0; i < hlt_node->nNodes; i++) {
+                  if (hlt_node->node[i].etofBeta <= 0) continue;
+                  int globalTrackSN = hlt_node->node[i].globalTrackSN;
+                  hlt_track gTrack = hlt_gt->globalTrack[globalTrackSN];
+
+                  int   q  = gTrack.q;
+                  float pt = gTrack.pt;
+                  float pz = gTrack.tanl * gTrack.pt;
+                  float p  = sqrt(pt*pt + pz*pz);
+
+                  hEtofInvBeta->Fill(q*p, 1.0/hlt_node->node[i].etofBeta);
+              }
+          }
+          
 #pragma omp section
 	  {
 	    // fill EMC
@@ -1082,7 +1118,7 @@ void l4Builder::event(daqReader *rdr)
 #pragma omp section
 	  {
 	    // global track
-	    for(u_int i = 0; i < (u_int)hlt_gt->nGlobalTracks; i++) {
+            for(u_int i = 0; i < (u_int)hlt_gt->nGlobalTracks; i++) {
 	      int nHits = hlt_gt->globalTrack[i].nHits;
 	     	      
 	      if(hlt_gt->globalTrack[i].flag < 0.) continue;
@@ -1420,6 +1456,7 @@ void l4Builder::event(daqReader *rdr)
 
 	    for(u_int i = 0; i < hlt_node->nNodes; i++) {
 	      int     primaryTrackSN = hlt_node->node[i].primaryTrackSN;
+              if (primaryTrackSN < 0) continue;
 	      int     tofHitSN       = hlt_node->node[i].tofHitSN;
 	      int     emcTowerSN     = hlt_node->node[i].emcTowerSN;
 	      hlt_track   NTrack         = hlt_pt->primaryTrack[primaryTrackSN];
@@ -2317,6 +2354,7 @@ void l4Builder::defineHltPlots()
 	ph->histo = hnDedx;
 	HltPlots[index]->addHisto(ph);
 	HltPlots[index]->setDrawOpts("colz");
+        HltPlots[index]->optlogz =  1;
 
 	index++; //3
 	hDcaXy = new TH1D("DcaXy", "DcaXy", 120, -6., 6.);
@@ -2633,40 +2671,69 @@ void l4Builder::defineHltPlots()
 	HltPlots[index]->addHisto(ph);
 
         index++; // 47
-        hBunchId = new TH1D("BunchId", "Bunch ID;Bunch ID", 130, -5, 125);
-        ph = new PlotHisto();
-        ph->histo = hBunchId;
-        HltPlots[index]->addHisto(ph);
+	hVertexXZ = new TH2D("VertexXZ", "Vertex X vs Z;Vertex Z (cm);Vertex X (cm) ", 420, -210, 210, 100, -5, 5);
+	HltPlots[index]->addHisto(new PlotHisto(hVertexXZ));
 
         index++; // 48
+	hVertexYZ = new TH2D("VertexYZ", "Vertex Y vs Z;Vertex Z (cm);Vertex Y (cm) ", 420, -210, 210, 100, -5, 5);
+	HltPlots[index]->addHisto(new PlotHisto(hVertexYZ));
+
+        index++; // 49
+        hBunchId = new TH1D("BunchId", "Bunch ID;Bunch ID", 130, -5, 125);
+        HltPlots[index]->addHisto(new PlotHisto(hBunchId));
+
+        index++; // 50
         hBbceTAC = new TH1D("BbceTAC", "Earliest BBCE TAC;Earliest BBCE TAC", 200, 100, 4100);
         HltPlots[index]->addHisto(new PlotHisto( hBbceTAC ));
 	HltPlots[index]->logy = 0;
 
-        index++; // 49
+        index++; // 51
         hBbcwTAC = new TH1D("BbcwTAC", "Earliest BBCW TAC;Earliest BBCW TAC", 200, 100, 4100);
         HltPlots[index]->addHisto(new PlotHisto( hBbcwTAC ));
 	HltPlots[index]->logy = 0;
 
-        index++; // 50
+        index++; // 52
         hVpdeTAC = new TH1D("VpdeTAC", "Earliest VPDE TAC;Earliest VPDE TAC", 200, 100, 4100);
         HltPlots[index]->addHisto(new PlotHisto( hVpdeTAC ));
 	HltPlots[index]->logy = 0;
 
-        index++; // 51
+        index++; // 53
         hVpdwTAC = new TH1D("VpdwTAC", "Earliest VPDW TAC;Earliest VPDW TAC", 200, 100, 4100);
         HltPlots[index]->addHisto(new PlotHisto( hVpdwTAC ));
 	HltPlots[index]->logy = 0;
 
-        index++; // 52
+        index++; // 54
         hEpdeTAC = new TH1D("EpdeTAC", "Earliest EPDE TAC;Earliest EPDE TAC", 200, 100, 4100);
         HltPlots[index]->addHisto(new PlotHisto( hEpdeTAC ));
 	HltPlots[index]->logy = 0;
 
-        index++; // 53
+        index++; // 55
         hEpdwTAC = new TH1D("EpdwTAC", "Earliest EPDW TAC;Earliest EPDW TAC", 200, 100, 4100);
         HltPlots[index]->addHisto(new PlotHisto( hEpdwTAC ));
 	HltPlots[index]->logy = 0;
+
+        index++; // 56
+        hEtofHitsXY = new TH2D("EtofHitsXY", "ETOF Hit Position;X [cm];Y[cm]",
+                               500, -250, 250, 500, -250, 250);
+        HltPlots[index]->addHisto(new PlotHisto(hEtofHitsXY));
+        HltPlots[index]->optlogz = 1;
+
+        index++; // 57
+        hEtofInvBeta = new TH2D("EtofInvBeta", "ETOF 1/#beta;Momentum [GeV];1/#beta",
+                                600, -3, 3, 400, 0.5, 2.5);
+        HltPlots[index]->addHisto(new PlotHisto(hEtofInvBeta));
+	HltPlots[index]->setDrawOpts("colz");
+        HltPlots[index]->optlogz = 1;
+
+        index++; // 58
+        hEtofLocalYMrpc = new TH2D("EtofLocalYMrpc", "ETOF Hit Local Y; MRPC Index; Local Y [cm]",
+                                   108, 0.5, 108.5, 200, -100, 100);
+        HltPlots[index]->addHisto(new PlotHisto(hEtofLocalYMrpc));
+
+        index++; // 59
+        pEtofNhitsPerEvent = new TProfile("EtofNhitsPerEvent", "ETOF <nhits> per event; Second in the run; <nhits>",
+                                          360, 0, 3600);
+        HltPlots[index]->addHisto(new PlotHisto(pEtofNhitsPerEvent));
 }
 
 void l4Builder::defineBeamPlots()
