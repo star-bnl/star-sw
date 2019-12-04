@@ -50,6 +50,7 @@ class Bichsel;
 class TPRegexp;
 #endif
 using namespace std;
+void DrawdEdx();
 //________________________________________________________________________________
 void Set(Int_t color=1) {
   cout << "Set color = " << color << endl;
@@ -260,6 +261,7 @@ void Res(const Char_t *select="x", const Char_t *name="sigma", const Char_t *pat
   }
   leg->Draw();
   delete [] FitFiles;
+  //  DrawdEdx();
 }
 //________________________________________________________________________________
 void Mu() {
@@ -322,3 +324,42 @@ void DrawFitP(const Char_t *pattern = "SecRow3C", const Char_t *plot="mu:rowSign
   }
   leg->Draw();
 }
+//________________________________________________________________________________
+void DrawdEdx() {
+  _file0->cd();
+  TString Name(gSystem->BaseName(_file0->GetName()));
+  Name.ReplaceAll(".root","");
+  TString Res("Res_");
+  Res += Name;
+  Res += ".png";
+  //  TVirtualX::Instance()->WritePixmap(c1->GetCanvasID(),-1,-1,(Char_t *)Res.Data());
+  c1->SaveAs(Res);
+  cout << "Draw #\t" << Res << endl;
+
+  Double_t w = 800;
+  Double_t h = 3*500;
+  TCanvas *c2 = new TCanvas(Name,Name,w,h);
+  c2->Divide(1,3);
+  c2->cd(1)->SetLogz(1);
+  TdEdxI70->Draw("colz");
+  gROOT->LoadMacro("bichselG10.C");
+  bichselG10("I70",17);
+  c2->cd(2)->SetLogz(1);
+  TdEdxF->Draw("colz");
+  bichselG10("z",17);
+  c2->cd(3)->SetLogz(1);
+  TdEdxN->Draw("colz");
+  bichselG10("dNdx",17);
+  //  TVirtualX::Instance()->WritePixmap(c2->GetCanvasID(),-1,-1,(Char_t *)pngName.Data());
+  TString pngName(Name);
+  pngName += ".png";
+  c2->SaveAs(pngName);
+  cout << "Draw #\t" << pngName << endl;
+}
+/* ________________________________________________________________________________
+   cd  ~/work/Histograms/RunXIX/dEdx928
+   foreach p (` ls -qd  [0-9]*GeV*.root dEdx*.root`)
+     echo ${p};
+     root.exe ${p} TPoints70GP${p} TPointsFGP${p} TPointsNGP${p} Res.C
+   end
+ */
