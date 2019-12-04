@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.36 2019/11/19 17:05:16 jwebb Exp $
+* $Id: xgeometry.age,v 1.37 2019/12/04 16:22:34 jwebb Exp $
 
 
 
@@ -2505,8 +2505,14 @@ If LL>0
 
   Case y2015c   { y2015c : y2015c production baseline, is y2015 with mtd radii corrections; 
                   Geom = 'y2015c    '; call geom_y2015c; }
+
+  Case y2015d   { y2015d : y2015d production baseline, is y2015 with mtd radii corrections; 
+                  Geom = 'y2015d    '; call geom_y2015d; }
+
   Case y2015x   { y2015x : y2015c production baseline, is y2015 with mtd radii corrections; 
                   Geom = 'y2015x    '; call geom_y2015x; }
+  Case y2015y   { y2015y : y2015c production baseline, is y2015 with mtd radii corrections; 
+                  Geom = 'y2015y    '; call geom_y2015y; }
 
   Case y2016   { y2016  : y2016 baseline;     Geom = 'y2016     '; call geom_y2016;  }
   Case y2016a  { y2016a : y2016 production;  Geom = 'y2016a    ' ; call geom_y2016a; }
@@ -4492,9 +4498,13 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.36 2019/11/19 17:05:16 jwebb Exp $
+* $Id: xgeometry.age,v 1.37 2019/12/04 16:22:34 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.37  2019/12/04 16:22:34  jwebb
+* Enable missing y2015d model (and y2015y for FMS attenuation).
+*
 * Revision 1.36  2019/11/19 17:05:16  jwebb
+*
 * y2020 rough cut release / missing forward prototypes
 *
 * Revision 1.35  2019/09/24 21:38:43  jwebb
