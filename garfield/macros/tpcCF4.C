@@ -108,11 +108,11 @@ void tpcCF4(Int_t nEvents = 0, const Char_t *OutName = "GL.root") {
   const Double_t temperature = 297.839; //273.15 + 24.7; // inputGasTemperature (degree K)
   Double_t BField = 0.5; // Tesla
   Double_t Angle  = 0.0; // rad
-  TString gasFile("P10.");
   Int_t b = 10*BField;
   Int_t t = temperature;
   Int_t p = pressure;
-  gasFile += Form("B%ikGT%iP%i0.8Ar0.1CH40.1CF4",b,t,p);
+  //  gasFile += Form("B%ikGT%iP%i0.87Ar0.1CH40.03CF4",b,t,p);
+  TString gasFile(Form("B%ikGT%iP%i_0.89Ar_0.1CH4_0.01CF4.gas",b,t,p));
   //Switch between Inner and Outer sector
   // Voltage settings
   Double_t vAnodeI  =   1100.;
@@ -131,10 +131,11 @@ void tpcCF4(Int_t nEvents = 0, const Char_t *OutName = "GL.root") {
   gas->SetPressure(pressure);
   gas->SetMaxElectronEnergy(300.);
   // Specify the gas mixture.
-  Double_t Fracs[3] = {0.8, 0.1, 0.1};
+  //  Double_t Fracs[3] = {0.8, 0.1, 0.1};
+  //  Double_t Fracs[3] = {0.87, 0.10, 0.03};
+  Double_t Fracs[3] = {0.89, 0.10, 0.01};
   gas->SetComposition("ar", 100*Fracs[0], "ch4", 100*Fracs[1], "cf4", 100*Fracs[2]);
   gas->SetFieldGrid(100.,100e3, 20, true, BField, BField, 1, Angle, Angle, 1);
-  gasFile += ".gas";
   const Double_t rPenning = 0.57;
   const Double_t lambdaPenning = 0.e-4;
   gas->EnablePenningTransfer(rPenning, lambdaPenning, "ch4");
