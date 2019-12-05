@@ -172,7 +172,8 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
   }
   SafeDelete(m_TpcdEdxCorrection);
   m_TpcdEdxCorrection = new StTpcdEdxCorrection(m_Mask, Debug());
-  if (GetDate() > 20181201) fUsedNdx = kTRUE; // use dN/dx for year > 2018
+  if ((GetDate() > 20171201 && m_TpcdEdxCorrection->IsFixedTarget()) ||
+      (GetDate() > 20181201)) fUsedNdx = kTRUE; // use dN/dx for fixed target for Run XVIII and year >= XIX
   return kStOK;
 }
 //________________________________________________________________________________
