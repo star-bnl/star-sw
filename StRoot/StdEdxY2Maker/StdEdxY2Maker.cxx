@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.99 2019/11/29 19:00:08 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.99.2.1 2019/12/05 07:47:16 genevb Exp $
 //#define CompareWithToF 
 //#define __USEZ3A__
 //#define __CHECK_LargedEdx__
@@ -172,7 +172,8 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
   }
   SafeDelete(m_TpcdEdxCorrection);
   m_TpcdEdxCorrection = new StTpcdEdxCorrection(m_Mask, Debug());
-  if (GetDate() > 20181201) fUsedNdx = kTRUE; // use dN/dx for year > 2018
+  //dNdx slows chains by ~10-15% ... deactivating on branch pending demonstration of physics value
+  //if (GetDate() > 20181201) fUsedNdx = kTRUE; // use dN/dx for year > 2018
   return kStOK;
 }
 //________________________________________________________________________________
