@@ -25,22 +25,24 @@ sub SPrint ($$$$$$$) {
 while ($line = <>) {
   my ($run,$trig,$date,$time) = split ' ', $line;
   if ($run eq 'cmd' or $run eq 'runNumber') {next;}
-  if ($trig !~  /production/ and $trig !~  /^tune/ ) {next;}
-  if ($trig =~ /^ped/) {next;}
-  if ($trig =~ /^las/) {next;}
-  if ($trig =~ /^jml/) {next;}
-  if ($trig =~ /^chris/) {next;}
-  if ($trig =~ /^tune/) {next;}
-  if ($trig =~ /^cal/) {next;}
-  if ($trig =~ /^Jack/) {next;}
-  if ($trig =~ /^Cos/) {next;}
-  if ($trig =~ /^straw/) {next;}
-  if ($trig =~ /^Vern/) {next;}
-  if ($trig =~ /^test/) {next;}
-  if ($trig =~ /^straw/) {next;}
+  if ($trig !~  /production/ and $trig !~  /^tune/ and $trig !~ /^Cosmic/) {next;}
+   if ($trig =~ /^ped/) {next;}
+   if ($trig =~ /^las/) {next;}
+   if ($trig =~ /^jml/) {next;}
+   if ($trig =~ /^chris/) {next;}
+   if ($trig =~ /^tune/) {next;}
+   if ($trig =~ /^cal/) {next;}
+   if ($trig =~ /^Jack/) {next;}
+ # if ($trig =~ /^Cos/) {next;}
+   if ($trig =~ /^straw/) {next;}
+   if ($trig =~ /^Vern/) {next;}
+   if ($trig =~ /^test/) {next;}
+   if ($trig =~ /^straw/) {next;}
   $trig =~ s/_bbcveto//;
   $trig =~ s/_lzr//;
   $trig =~ s/_opentac//;
+  $trig =~ s/_EPDtest//;
+  $trig =~ s/_GMT//;
 #  print "run = $run, trig = $trig, date = $date, time = $time\n";
 #  print "trigOld = $trigOld\n";
   $timeMax = $time;

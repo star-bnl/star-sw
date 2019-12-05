@@ -531,29 +531,30 @@ Int_t StBFChain::Instantiate()
     if (maker == "StVMCMaker") {
       if (GetOption("VMCPassive")) {// don't use mk->SetActive(kFALSE) because we want to have InitRun
 	mk->SetAttr("VMCPassive",1);
-      }
-      else {
+      }  else {
 	if (GetOption("beamLine")) mk->SetAttr("beamLine",1);
 	if (GetOption("phys_off")) mk->SetAttr("phys_off",1);
 	if (GetOption("hadr_off")) mk->SetAttr("hadr_off",1);
-	if (fInFile != "")  {
-	  if (ProcessLine(Form("((StVMCMaker *) %p)->SetInputFile(\"%s\")",mk,fInFile.Data())))
-	    goto Error;
-	}
 	if (GetOption("VMCAlignment")) {
 	  mk->SetAttr("VMCAlignment",1);
 	} else if (GetOption("NoVMCAlignment")) {
 	  mk->SetAttr("NoVMCAlignment",1);
 	}
+	if (GetOption("Embedding")) mk->SetAttr("Embedding",1);
 	if (fRunG > 0) {
 	  mk->SetAttr("RunG",fRunG);
 	}
+	if (fInFile != "")  {
+	  if (ProcessLine(Form("((StVMCMaker *) %p)->SetInputFile(\"%s\")",mk,fInFile.Data())))
+	    goto Error;
+	} else {
+	  TString CintF(SAttr("GeneratorFile"));
+	  if (CintF != "") {
+	    mk->SetAttr("GeneratorFile",CintF.Data());
+	  }
+	}
       }
-      if (GetOption("Embedding")) mk->SetAttr("Embedding",1);
-      TString CintF(SAttr("GeneratorFile"));
-      if (CintF != "") mk->SetAttr("GeneratorFile",CintF.Data());
     }
-
     // ---
     //		Sti(ITTF) start
     // ---

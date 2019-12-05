@@ -3,10 +3,11 @@ use File::Basename;
 use Cwd;
 my $debug = 0;
 my $pwd = cwd(); #print "pwd = $pwd\n";
-my @files = glob "./*Aligner.root";
+my @files = glob "../*event.root";
 my @runs = ();
 my $oldrun = -1;
-foreach my $f (@files) {
+foreach my $file (@files) {
+  my $f = File::Basename::basename($file,".event.root");
   my $run = $f;  print "$run\n" if $debug;
   $run =~ s/.\/st_//;# print "$run\n";grep
   $run =~ s/adc_//; #print "$run\n";
@@ -24,7 +25,7 @@ foreach my $f (@files) {
 }
 #print "runs = @runs\n";
 foreach my $r (@runs) {
-  my $file = "*" . $r . "Aligner_IO.root";
+  my $file =  $r . ".Aligner.root";
   if (-r $file) {next;}
 #  my ($dev,$ino,$mode,$nlink,$uid,$gid,$dev, $size, $atime, $mtim, $ctime, $blksize,$blocks) = stat($file);
 #  my $now = time(); #print "now = $now\n";

@@ -53,6 +53,7 @@ class StarMCPrimaryGenerator : public TObject {
   void  SetSigmasOrigin(const TVector3 &xyz)  { fSigmasOrigin = xyz;}
   void  SetBeamLine(Bool_t k = kTRUE) {fUseBeamLine = k;}
   Int_t GetNofPrimaries()                     { return fNofPrimaries;}
+  Int_t Skip(Int_t nskip);
   const Option_t* GetOption() const           { return fOption.Data();}
   StarStack *GetStack()                       { return fStarStack;}
   Int_t Debug()                               { return fDebug;}

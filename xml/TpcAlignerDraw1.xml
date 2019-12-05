@@ -13,7 +13,7 @@
   set file = `echo $evtsFile | awk -F\: '{print $2}'`  
   set logFile  = ${file}C.log
   if ( -r $logFile) continue;
-  root.exe -q -b 'TpcAlignerDraw.C+(1,"st*'${run}'*Aligner.root")' &gt;&amp;  ${logFile}
+  root.exe -q -b 'TpcAlignerDraw.C+(1,"*'${run}'*Aligner.root")' &gt;&amp;  ${logFile}
   end
 	</command>
 	<stdout URL="file:./sched$JOBID.log" />

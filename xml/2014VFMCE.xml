@@ -9,7 +9,7 @@
   setenv STARFPE NO
 #  setup 64b
 #  setup gcc
-  starver TFG19a
+#  starver TFG19a
   echo $INPUTFILE0 | grep ':'
   if (! $?) then
     set rung  = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
@@ -19,12 +19,20 @@
   else
     exit 1;
   endif
-  set name = "HyperTriton"
+#  set name = "HyperTriton"
 #  foreach name (D02KmTsq D0K0s2KmTsq D0K0s2pimTsq D0KpimTsq DK2pimTsq DK0spimTsq DsK0sK0spimTsq DsK0sKmTsq DsKKpimTsq Lc3pimTsq LcKppimTsq 20Muons D0K3pimTsq DK0s3pimTsq DsK0sK2pimTsq DK2pi  DsKKpi  LcKppi HyperTriton) 
 #    echo $Name | grep $name
 #    if (! $?) break;
 #    if ($name == $Name) break;
 #  end
+  set name = ""
+  foreach name (K_S0Fixed  Lambda0_barFixed Lambda0Fixed XiM_barFixed XiMFixed  Omega_barFixed OmegaFixed AntiHyper2NeutronFixed AntiHyperH4Fixed AntiHyperNeutronFixed AntiHyperTritonFixed Hyper2NeutronFixed HyperH4Fixed HyperNeutronFixed HyperTritonFixed \
+                K_S0       Lambda0_bar      Lambda0      XiM_bar      XiM       Omega_bar      Omega      AntiHyper2Neutron      AntiHyperH4      AntiHyperNeutron      AntiHyperTriton      Hyper2Neutron      HyperH4      HyperNeutron      HyperTriton \
+                Upsilon1SmTsq Upsilon2SmTsq)
+    echo $Name | grep $name
+    if (! $?) break;
+#    if ($name == $Name) break;
+  end
   echo "name = $name";
   if ($name == "") exit 1;
   setenv StarEndMakerShell
@@ -35,9 +43,10 @@
 #  set chain = "MC.2016a,istSlowSim"${Sti}",StiPulls,-hitfilt,StiHftC,beamLine,-geantOut,-evout,noRunco,noHistos,noTags,vmc,CorrX,OSpaceZ2,OGridLeakFull,-useXgeom,"${name};
 #  set chain = "MC.2016a,istSlowSim"${Sti}",StiPulls,-hitfilt,KFVertex,StiHftC,beamLine,geantOut,evout,picoWrite,PicoVtxVpd,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeakFull,-useXgeom,"${name};
 #  set chain = "MC.2016a,istSlowSim"${Sti}",StiPulls,-hitfilt,KFVertex,StiHftC,beamLine,-geantOut,-evout,picoWrite,PicoVtxVpd,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeakFull,-useXgeom,"${name};
- # set chain = "MC.y2011"${Sti}",-hitfilt,KFVertex,-geantOut,-evout,picoWrite,PicoVtxVpd,noRunco,noHistos,noTags,vmc,VMCAlignment,Corr4,OSpaceZ2,OGridLeakFull,-useXgeom,"${name};
- set chain = "MC.2014VMC"${Sti}",KFVertex,-geantOut,-evout,picoWrite,PicoVtxVpd,noRunco,noHistos,noTags,CorrX,OSpaceZ2,OGridLeakFull,"${name};
- set sdt = ",sdt20140330";
+# set chain = "MC.y2011"${Sti}",-hitfilt,KFVertex,-geantOut,-evout,picoWrite,PicoVtxVpd,noRunco,noHistos,noTags,vmc,VMCAlignment,Corr4,OSpaceZ2,OGridLeakFull,-useXgeom,"${name};
+# set chain = "MC.2014VMC,StiCA,StiKFVertex,-geantOut,-evout,picoWrite,PicoVtxVpd,noRunco,noHistos,noTags,CorrX,OSpaceZ2,OGridLeakFull,"${name};
+ set chain = "MC.2014VMC,StiCA,StiKFVertex,-geantOut,-evout,picoWrite,PicoVtxVpd,noRunco,noHistos,noTags,CorrX,OSpaceZ2,OGridLeakFull,"${name};
+ set sdt = ",sdt20140330,ODistoSmear";
 #  echo $Name | grep -i Ideal
 #  echo $Name | grep -i 20Muons
 #  if ( $? ) set VFMCE = ",VFMCE";
@@ -52,5 +61,5 @@
     root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'","'${tag}'")' &gt;&amp; ${logFile}
   endif
 </command>
-<input URL="command:RunId.pl 101 200 100" />
+<input URL="command:RunId.pl 1 100 200" />
 </job>

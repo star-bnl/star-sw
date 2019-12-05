@@ -68,7 +68,7 @@ public:
     const float*     errMatrix() const {return &mImpImp;} 
     void GetXYZ(Double_t xyzp[6], Double_t CovXyzp[21]) const;
     virtual void     Print(Option_t *option = "") const;
-    KFParticle&      Particle(Int_t kg = 0)  const;
+    KFParticle&      Particle(Int_t kg = 0, Int_t pdg = 0)  const;
     //
     // Experts only set function
     //

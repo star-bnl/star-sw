@@ -30,6 +30,82 @@ St_db_Maker *dbMk = 0;
 #endif
 Bool_t Root4Star = kFALSE;
 //________________________________________________________________________________
+void SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
+  Int_t Ids[15] =            {      5,      6,           3,          2,       8,       9,      11,      12,       14,     15,         45,       46,    49,      47,         8};
+  Double_t Masses[15] = {    0.1056584,0.1056584,0.51099907e-3,0.51099907e-3,0.13956995,0.13956995,0.493677,0.493677,0.93827231,0.93827231,1.875613,2.80925,2.80923,3.727417,0.13956995  };
+  const Char_t  *Names[15] = {"muon+", "muon-", "electron", "positron", "pion+", "pion-", "kaon+", "kaon-", "proton", "pbar", "deuteron", "triton", "He3", "alpha", "pionMIP"};
+  Int_t    NTRACK = 100;
+  Int_t    ID = 5;
+  Double_t Ylow   =  -1; 
+  Double_t Yhigh  =   1;
+  Double_t Philow =   0;
+  Double_t Phihigh= 2*TMath::Pi();
+  Double_t Zlow   =  -50; 
+  Double_t Zhigh  =   50; 
+  Double_t bgMinL10  = -2; // 3.5;// 1e2; // 1e-2;
+  Double_t bgMaxL10  =  6;  // 1e2;// 1e5;
+  Double_t mass   = -1;
+  for (Int_t i = 0; i < 15; i++) {
+    if (RootFile.Contains(Names[i],TString::kIgnoreCase)) {
+      ID =Ids[i];
+      if (i == 14) {bgMinL10 = 0.544; bgMaxL10 = 0.653;}
+      mass = Masses[i];;
+      break;
+    }
+  }
+  if (mass < 0) {
+    cout << Opt.Data() << " is not identified. Abort" << endl;
+    return;
+  }
+  Double_t pTmin = mass*TMath::Power(10.,bgMinL10);
+  Double_t pTmax = mass*TMath::Power(10.,bgMaxL10);
+  if (pTmax > 10) {
+    pTmax = 10;
+    bgMaxL10 = TMath::Log10(pTmax/mass);
+    //    cout << "Reduce bgMax10 = " << bgMaxL10 << endl;
+  }
+  if (Root4Star) {
+    St_geant_Maker *geant = (St_geant_Maker *) chain->GetMakerInheritsFrom("St_geant_Maker");
+    //                   NTRACK  ID PTLOW PTHIGH YLOW YHIGH PHILOW PHIHIGH ZLOW ZHIGH
+    //    geant->Do("gkine 100  14   0.1    10.  -1     1      0    6.28    0.    0.;");
+    cout << "Options: " << Opt.Data() << "=========================================================" << endl;
+    if (FileIn == "") {
+      if (kuip) {
+	TString Kuip(kuip);
+	geant->Do(kuip);
+      } else if ( RunOpt.Contains("Mickey",TString::kIgnoreCase)) {
+      } else if ( Opt.Contains("laser",TString::kIgnoreCase)) {
+	gSystem->Load("gstar.so");
+	geant->Do("call gstar");
+	geant->Do("gkine 1 170   1   1  0   0   0  0    180.00    180.00;");
+	geant->Do("gprint kine");
+	geant->Do("gvert 0  54   0");
+	geant->Do("mode TRAC prin 15");
+      } else if (TString(geant->SAttr("GeneratorFile")) == "") {
+	if (RunOpt.Contains("gstarLib",TString::kIgnoreCase)) {geant->Do("call gstar");}
+	if (pTmin < 0) pTmin = mass*bgMin; if (pTmin <    0.01) pTmin =    0.01;
+	if (pTmax < 0) pTmax = mass*bgMax; if (pTmax >   10.00) pTmax =   10.00;
+	TString Kine(Form("gkine %i %i %f %f -2  2 0 %f -50 50;",NTRACK,ID,pTmin,pTmax,TMath::TwoPi()));
+	cout << "Set kinematics: " << Kine.Data() << endl;
+	geant->Do(Kine.Data());
+      }
+    }
+  } else { // VMC
+    if (! StVMCMaker::instance()) return 0;
+    if (! StarVMCApplication::Instance()) return 0;
+    StarMCSimplePrimaryGenerator *gener = (StarMCSimplePrimaryGenerator *) StarVMCApplication::Instance()->GetPrimaryGenerator();
+    if ( gener && ! gener->IsA()->InheritsFrom( "StarMCSimplePrimaryGenerator" ) ) {
+      delete gener; gener = 0;
+    }
+    if (! gener) gener =  new 
+      StarMCSimplePrimaryGenerator( NTRACK, ID, bgMinL10, bgMaxL10,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, "GBL");
+    else
+      gener->SetGenerator( NTRACK, ID, bgMinL10, bgMaxL10,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, "GBL");
+    StarVMCApplication::Instance()->SetPrimaryGenerator(gener);
+    cout << "Set StarMCSimplePrimaryGenerator" << endl;
+  }
+}
+//________________________________________________________________________________
 void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",  
 	   const Char_t *fileIn = 0, const Char_t *opt = "Bichsel", const Char_t *kuip = 0,
 	   const Char_t *fileOut = 0) {
@@ -138,13 +214,10 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   }
   
   TString output = RootFile;
-  output = RootFile;
   output.ReplaceAll(".root","O.root");
   output.ReplaceAll("*","");
   if (RunOpt.Contains("devT,",TString::kIgnoreCase)) ChainOpt += ",useXgeom";
   bfc(-1,ChainOpt.Data(),fileIn,output.Data(),RootFile.Data());
-  if (! Root4Star && FileIn.Contains(".MuDst",TString::kIgnoreCase)) {
-  }
   StTpcRSMaker *tpcRS = (StTpcRSMaker *) chain->Maker("TpcRS");
   if (tpcRS) {
     //      if (needAlias) tpcRS->SetInput("geant","bfc/.make/inputStream/.make/inputStream_Root/.data/bfcTree/geantBranch");
@@ -221,87 +294,12 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     cout << "Chain initiation has failed" << endl;
     chain->Fatal(initStat, "during Init()");
   }
-  const Char_t  *Names[15] = {"muon+", "muon-", "electron", "positron", "pion+", "pion-", "kaon+", "kaon-", "proton", "pbar", "deuteron", "triton", "He3", "alpha", "pionMIP"};
-  Int_t Ids[15] =            {      5,      6,           3,          2,       8,       9,      11,      12,       14,     15,         45,       46,    49,      47,         8};
-  Double_t Masses[15] = {    0.1056584,0.1056584,0.51099907e-3,0.51099907e-3,0.13956995,0.13956995,0.493677,0.493677,0.93827231,0.93827231,1.875613,2.80925,2.80923,3.727417,0.13956995  };
-  Int_t    NTRACK = 100;
-  Int_t    ID = 5;
-  Double_t Ylow   =  -1; 
-  Double_t Yhigh  =   1;
-  Double_t Philow =   0;
-  Double_t Phihigh= 2*TMath::Pi();
-  Double_t Zlow   =  -50; 
-  Double_t Zhigh  =   50; 
-  Double_t bgMinL10  = -2; // 3.5;// 1e2; // 1e-2;
-  Double_t bgMaxL10  =  6;  // 1e2;// 1e5;
-  Double_t mass   = -1;
-  for (Int_t i = 0; i < 15; i++) {
-    if (RootFile.Contains(Names[i],TString::kIgnoreCase)) {
-      ID =Ids[i];
-      if (i == 14) {bgMinL10 = 0.544; bgMaxL10 = 0.653;}
-      mass = Masses[i];;
-      break;
-    }
-  }
-  if (mass < 0) {
-    cout << Opt.Data() << " is not identified. Abort" << endl;
-    return;
-  }
-  Double_t pTmin = mass*TMath::Power(10.,bgMinL10);
-  Double_t pTmax = mass*TMath::Power(10.,bgMaxL10);
-  if (pTmax > 10) {
-    pTmax = 10;
-    bgMaxL10 = TMath::Log10(pTmax/mass);
-    //    cout << "Reduce bgMax10 = " << bgMaxL10 << endl;
-  }
-  if (Root4Star) {
-    St_geant_Maker *geant = (St_geant_Maker *) chain->GetMakerInheritsFrom("St_geant_Maker");
-    //                   NTRACK  ID PTLOW PTHIGH YLOW YHIGH PHILOW PHIHIGH ZLOW ZHIGH
-    //    geant->Do("gkine 100  14   0.1    10.  -1     1      0    6.28    0.    0.;");
-    cout << "Options: " << Opt.Data() << "=========================================================" << endl;
-    if (FileIn == "") {
-      if (kuip) {
-	TString Kuip(kuip);
-	geant->Do(kuip);
-      } else if ( RunOpt.Contains("Mickey",TString::kIgnoreCase)) {
-      } else if ( Opt.Contains("laser",TString::kIgnoreCase)) {
-	gSystem->Load("gstar.so");
-	geant->Do("call gstar");
-	geant->Do("gkine 1 170   1   1  0   0   0  0    180.00    180.00;");
-	geant->Do("gprint kine");
-	geant->Do("gvert 0  54   0");
-	geant->Do("mode TRAC prin 15");
-      } else if (TString(geant->SAttr("GeneratorFile")) == "") {
-	if (RunOpt.Contains("gstarLib",TString::kIgnoreCase)) {geant->Do("call gstar");}
-	if (pTmin < 0) pTmin = mass*bgMin; if (pTmin <    0.01) pTmin =    0.01;
-	if (pTmax < 0) pTmax = mass*bgMax; if (pTmax >   10.00) pTmax =   10.00;
-	TString Kine(Form("gkine %i %i %f %f -2  2 0 %f -50 50;",NTRACK,ID,pTmin,pTmax,TMath::TwoPi()));
-	cout << "Set kinematics: " << Kine.Data() << endl;
-	geant->Do(Kine.Data());
-      }
-    }
-  } else { // VMC
-    if (! StVMCMaker::instance()) return 0;
-    if (! StarVMCApplication::Instance()) return 0;
-    StarMCSimplePrimaryGenerator *gener = (StarMCSimplePrimaryGenerator *) StarVMCApplication::Instance()->GetPrimaryGenerator();
-    if ( gener && ! gener->IsA()->InheritsFrom( "StarMCSimplePrimaryGenerator" ) ) {
-      delete gener; gener = 0;
-    }
-    if (! gener) gener =  new 
-      StarMCSimplePrimaryGenerator( NTRACK, ID, bgMinL10, bgMaxL10,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, "GBL");
-    else
-      gener->SetGenerator( NTRACK, ID, bgMinL10, bgMaxL10,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, "GBL");
-    StarVMCApplication::Instance()->SetPrimaryGenerator(gener);
-    cout << "Set StarMCSimplePrimaryGenerator" << endl;
-  }
-  if (Last < 0) return;
-  Int_t initStat = chain->Init(); // This should call the Init() method in ALL makers
-  if (initStat) {
-    cout << "Chain initiation has failed" << endl;
-    chain->Fatal(initStat, "during Init()");
+  if (FileIn == "") {
+    SetParGan(RootFile, RunOpt, Opt);
   }
   if (Last > 0)  chain->EventLoop(First,Last);
 }
+#if 0
 //________________________________________________________________________________
 void TpcRS(Int_t Last=100,
 	   const Char_t *Run = "y2009,TpcRS",//trs,fcf", // "TpcRS,fcf",
@@ -314,3 +312,17 @@ void TpcRS(Int_t Last=100,
   //                                   st_physics_adc_5076061_raw_4050001.daq
   TpcRS(1,Last,Run,fileIn,opt,kuip,fileOut);
 }
+#else
+//________________________________________________________________________________
+void TpcRS(Int_t Last=1,
+	   const Char_t *Run = "mc2019",
+	   const Char_t *fileIn = "./st_cosmic_adc_19151081_raw_0000005.MuDst.root",
+	   const Char_t *opt = "Bichsel", const Char_t *kuip = 0,
+	   const Char_t *fileOut = 0) {
+  //  /star/data03/daq/2004/093/st_physics_adc_5093007_raw_2050001.daq
+  //  /star/data03/daq/2004/fisyak/st_physics_adc_5114043_raw_2080001.daq
+  // nofield /star/data03/daq/2004/076/st_physics_adc_5076061_raw_2060001.daq
+  //                                   st_physics_adc_5076061_raw_4050001.daq
+  TpcRS(1,Last,Run,fileIn,opt,kuip,fileOut);
+}
+#endif

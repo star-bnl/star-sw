@@ -5,9 +5,9 @@
 <command> 
 # cd ${SUBMITTINGDIRECTORY}  
   set Name = `basename ${SUBMITTINGDIRECTORY}`
-  setenv NODEBUG yes
+#  setenv NODEBUG yes
   setenv STARFPE NO
-  setup 64b
+#  setup 64b
 #  starver TFG19g
   echo $INPUTFILE0 | grep ':'
   if (! $?) then
@@ -32,7 +32,8 @@
 # set chain = "MC.2019a,P2019a,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name};
 #Stx  set chain = "MC.2019a,P2019a,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name};
 #StiCA
-  set chain = "MC.2019a,P2019a,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name};
+#  set chain = "MC.2019a,P2019a,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name};
+  set chain = "MC.2019a,P2019a,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,ODistoSmear,-evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name};
   set sdt = ",sdt20190311"
   set VFMCE = ",VFMCE";
   set Chain = ${chain}${VFMCE}${sdt}",Rung."${rung}
@@ -45,6 +46,7 @@
   if ( ! -r ${SUBMITTINGDIRECTORY}/${file}) then 
     if (! -r ${SUBMITTINGDIRECTORY}/${base}.bla.root) then
     touch  ${SUBMITTINGDIRECTORY}/${base}.bla.root
+    if (-r ${SUBMITTINGDIRECTORY}/StarDb) ln -s ${SUBMITTINGDIRECTORY}/StarDb .
 #    root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'","'${tag}'")' &gt;&amp; ${logFile}
     root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'")' &gt;&amp; ${logFile}
     cp ${base}*  ${SUBMITTINGDIRECTORY}
@@ -52,5 +54,5 @@
     endif
   endif
 </command>
-<input URL="command:RunId.pl 1 500 200 K_S0" />
+<input URL="command:RunId.pl 1 100 200 K_S0" />
 </job>

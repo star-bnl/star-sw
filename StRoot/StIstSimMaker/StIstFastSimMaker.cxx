@@ -116,7 +116,7 @@ Int_t StIstFastSimMaker::Make()
          TGeoHMatrix *combI = NULL;
 
          //Access VMC geometry once no IST geometry Db tables available or using ideal geoemtry is set
-            combI = (TGeoHMatrix *)mIstRot->FindObject(Form("R%04i", matIst));
+            combI = (TGeoHMatrix *) mIstDb->getRotations()->FindObject(Form("R%04i", matIst));
 
          //YPWANG: McIstHit stored local position
          Double_t globalIstHitPos[3] = {mcI->position().x(), mcI->position().y(), mcI->position().z()};

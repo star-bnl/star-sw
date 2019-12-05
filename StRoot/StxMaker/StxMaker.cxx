@@ -137,6 +137,7 @@ static const Bool_t onlyDisplayFailed = kFALSE; // only load non-converged track
 #endif
 //
 static genfit::AbsKalmanFitter* fitter = 0;
+static genfit::TGeoMaterialInterface *geoMat = 0;
 //  static genfit::GFGbl*           gbl    = 0;
 static Bool_t Initialized = kFALSE;
 TGeoManager *StxMaker::gGeoManagerOrig = 0;
@@ -203,17 +204,57 @@ Int_t StxMaker::InitRun(Int_t runumber) {
     genfit::FieldManager::getInstance()->init(new genfit::StarField());
     if (IAttr("useCache")) genfit::FieldManager::getInstance()->useCache(kTRUE, 8);
     else                   genfit::FieldManager::getInstance()->useCache(kFALSE, 0);
-    genfit::TGeoMaterialInterface *geoMat = new genfit::TGeoMaterialInterface();
+    if (! geoMat) geoMat = new genfit::TGeoMaterialInterface();
     genfit::MaterialEffects::getInstance()->init(geoMat);
     if (!matFX) genfit::MaterialEffects::getInstance()->setNoEffects();
     Initialized = kTRUE;
   } // end of initialization
   gGeoManagerOrig = gGeoManager;
   if (! gGeoManagerAver) MakeAvergedGeometry();
+  SetDebugX();
   return kStOK;
 }
 //_____________________________________________________________________________
+void StxMaker::PrintGBTrack(const AliHLTTPCCAGBTrack *t, Int_t iTr) {
+  if (! t) return;
+  const AliHLTTPCCAGBTrack &tr = *t;
+  Int_t NHits = tr.NHits();
+  Int_t NLoopers = tr.IsLooper();
+  Bool_t isReverse = tr.IsReverse();
+  LOG_INFO << "================================================================================" << endm;
+  LOG_INFO << "StxMaker Segment " << iTr << " NHits = " << NHits << "\talpha = " << tr.Alpha()
+	   << " Inner pT/q = " <<  1./tr.InnerParam().GetQPt() << " z = " << -tr.InnerParam().GetZ()
+	   << " Outer pT/q = " <<  1./tr.OuterParam().GetQPt() << " z = " << -tr.OuterParam().GetZ()
+	   << " IsLooper = " << NLoopers << " Merged " << tr.IsMerged() << " isReverse " << isReverse
+	   << endm;
+  cout << "Inner\t"; tr.InnerParam().Print();
+  cout << "Outer\t"; tr.OuterParam().Print();
+  if (Debug() > 3) {
+    Short_t  *segments = StxCAInterface::Instance().GetTracker()->TrackHitsSegmentsId();
+    vector<SeedHit_t>        &fSeedHits = StxCAInterface::Instance().GetSeedHits();
+    for ( Int_t iHit = 0; iHit < NHits; iHit++ ){ 
+      const Int_t index = StxCAInterface::Instance().GetTracker()->TrackHit( tr.FirstHitRef() + iHit );
+      const Int_t hId   = StxCAInterface::Instance().GetTracker()->Hit( index ).ID();
+      const StHit *hit  = fSeedHits[hId].hit;
+      const StTpcHit *tpcHit = dynamic_cast<const StTpcHit *>(hit);
+      Int_t iSegm = segments[tr.FirstHitRef()+iHit];
+      Int_t iSegmNext = -2;
+      Int_t iSegmLast = -2;
+      if (iHit < NHits - 1) iSegmNext = segments[tr.FirstHitRef()+iHit+1];
+      if (iHit >         0) iSegmLast = segments[tr.FirstHitRef()+iHit-1];
+      if (! tpcHit) {
+	LOG_WARN << "StxMaker::Make pointer to StTpcHit is zero" << endm;
+      } else {
+	if (iSegm != iSegmNext || iSegm != iSegmLast) {
+	  LOG_INFO << "StxMaker::Make StTpcHit:Segm. = " << Form("%3i",iSegm) << Form("\tiHit:%3i",iHit) << "\t" << *tpcHit <<  endm;
+	}
+      }
+    }
+  }
+}
+//_____________________________________________________________________________
 Int_t StxMaker::Make(){
+  UseOriginalGeometry();
   Int_t ok = kStOK;
   // Set Debug flags
   mEvent = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
@@ -242,72 +283,32 @@ Int_t StxMaker::Make(){
   TArrayI Index(NRecoTracks); Int_t *index = Index.GetArray();
   TMath::Sort(NRecoTracks,noHits,index,kTRUE);
 
-  vector<SeedHit_t>        &fSeedHits = StxCAInterface::Instance().GetSeedHits();
   // 
-  Short_t  *segments = StxCAInterface::Instance().GetTracker()->TrackHitsSegmentsId();
   if (Debug() > 2) {
     for ( Int_t ITr = 0; ITr < NRecoTracks; ITr++ ) {
       Int_t iTr = ITr;
       const AliHLTTPCCAGBTrack &tr = StxCAInterface::Instance().GetTracker()->Track( iTr );
-      Int_t NHits = tr.NHits();
-      Int_t NLoopers = tr.IsLooper();
-      Bool_t isReverse = tr.IsReverse();
-      LOG_INFO << "================================================================================" << endm;
-      LOG_INFO << "StxMaker::Make Segnet " << iTr << " NHits = " << NHits << "\talpha = " << tr.Alpha()
-	       << " Inner q/pT = " <<  tr.InnerParam().GetQPt() << " z = " << -tr.InnerParam().GetZ()
-	       << " Outer q/pT = " <<  tr.OuterParam().GetQPt() << " z = " << -tr.OuterParam().GetZ()
-	       << " IsLooper = " << NLoopers << " Merged " << tr.IsMerged() << " isReverse " << isReverse
-	       << endm;
-      cout << "Inner\t"; tr.InnerParam().Print();
-      cout << "Outer\t"; tr.OuterParam().Print();
-      if (Debug() > 3) {
-	for ( Int_t iHit = 0; iHit < NHits; iHit += NHits - 1 ){ 
-	  const Int_t index = StxCAInterface::Instance().GetTracker()->TrackHit( tr.FirstHitRef() + iHit );
-	  const Int_t hId   = StxCAInterface::Instance().GetTracker()->Hit( index ).ID();
-	  const StHit *hit  = fSeedHits[hId].hit;
-	  const StTpcHit *tpcHit = dynamic_cast<const StTpcHit *>(hit);
-	  if (! tpcHit) {LOG_WARN << "StxMaker::Make pointer to StTpcHit is zero" << endm;
-	  } else {
-	    LOG_INFO << "StxMaker::Make StTpcHit:Segm. = " << Form("%3i",segments[tr.FirstHitRef()+iHit]) << Form("\tiHit:%3i",iHit) << "\t" << *tpcHit <<  endm;
-	  }
-	}
-      }
+      PrintGBTrack(&tr, iTr);
     }
   }
   for ( Int_t ITr = 0; ITr < NRecoTracks; ITr++ ) {
     Int_t iTr = index[ITr];
     const AliHLTTPCCAGBTrack &tr = StxCAInterface::Instance().GetTracker()->Track( iTr );
-    Int_t NHits = tr.NHits();
-    Int_t NLoopers = tr.IsLooper();
-    Bool_t isReverse = tr.IsReverse();
     if (Debug() > 2) {
-      LOG_INFO << "================================================================================" << endm;
-      LOG_INFO << "StxMaker::Make Segnet " << iTr << " NHits = " << NHits << "\talpha = " << tr.Alpha()
-	       << " Inner q/pT = " <<  tr.InnerParam().GetQPt() << " z = " << -tr.InnerParam().GetZ()
-	       << " Outer q/pT = " <<  tr.OuterParam().GetQPt() << " z = " << -tr.OuterParam().GetZ()
-	       << " IsLooper = " << NLoopers << " Merged " << tr.IsMerged() << " isReverse " << isReverse
-	       << endm;
-      cout << "Inner\t"; tr.InnerParam().Print();
-      cout << "Outer\t"; tr.OuterParam().Print();
-      if (Debug() > 3) {
-	for ( Int_t iHit = 0; iHit < NHits; iHit += NHits - 1){ 
-	  const Int_t index = StxCAInterface::Instance().GetTracker()->TrackHit( tr.FirstHitRef() + iHit );
-	  const Int_t hId   = StxCAInterface::Instance().GetTracker()->Hit( index ).ID();
-	  const StHit *hit  = fSeedHits[hId].hit;
-	  const StTpcHit *tpcHit = dynamic_cast<const StTpcHit *>(hit);
-	  if (! tpcHit) {LOG_WARN << "StxMaker::Make pointer to StTpcHit is zero" << endm;
-	  } else {
-	    LOG_INFO << "StxMaker::Make StTpcHit:Segm. = " << Form("%3i",segments[tr.FirstHitRef()+iHit]) << Form("\tiHit:%3i",iHit) << "\t" << *tpcHit <<  endm;
-	  }
-	}
-      }
+      PrintGBTrack(&tr, iTr);
     }
     // Check order of segments: First and Last
     AliHLTTPCCATrackParam InnerParam = tr.InnerParam();
     //    if (isReverse) InnerParam.SetDzDs(-InnerParam.DzDs());
     AliHLTTPCCATrackParam OuterParam = tr.OuterParam();
     vector<const StHit*> *hitVec = 0;
+#if 0
+    Int_t NHits = tr.NHits();
+    Int_t NLoopers = tr.IsLooper();
+    Bool_t isReverse = tr.IsReverse();
+    Short_t  *segments = StxCAInterface::Instance().GetTracker()->TrackHitsSegmentsId();
     if (NLoopers > 0) {
+      vector<SeedHit_t>        &fSeedHits = StxCAInterface::Instance().GetSeedHits();
       Int_t FLsegmets[2] = {-1};
       for (Int_t i = 0; i < 2; i++) {
 	Int_t iHit = 0;
@@ -329,38 +330,27 @@ Int_t StxMaker::Make(){
 	  cout << "reverse Outer\t"; OuterParam.Print();
 	}
       }
+      hitVec = GetHitVector(&tr);
     } else {
       hitVec = GetHitVector(&tr);
     }
+#else
+    hitVec = GetHitVector(&tr);
+#endif
     Int_t NoHitsTotal = 0;
     Int_t NoHitsUsed = 0;
     Int_t NoTpcHitsUsed = 0;
     Int_t NoNonTpcHitsUsed = 0;
-    Double_t alphas[2] = {0};
     for ( auto hit : *hitVec) {
       const StTpcHit *tpcHit = dynamic_cast<const StTpcHit *>(hit);
       if (tpcHit) NoTpcHitsUsed++;
       else        NoNonTpcHitsUsed++;
-      if (! tpcHit) {
-	if (Debug()) {LOG_WARN << "StxMaker::Make pointer to StTpcHit is zero" << endm;}
-	continue;
-      } else {
-	if (Debug() > 2) {LOG_INFO << "StxMaker::Make StTpcHit:"<< Form("%3i",NoHitsTotal) << "\t" << *tpcHit <<  endm;}
-      }
       NoHitsTotal++;
-      Int_t sector = tpcHit->sector();
-      Double_t beta = 0;
-      if (sector > 12) beta = (24-sector)*2.*TMath::Pi()/12.;
-      else             beta =     sector *2.*TMath::Pi()/12.;
-      if (NoHitsTotal == 1) alphas[0] = beta;
-      else                  alphas[1] = beta;
       if (! hit->usedInFit()) continue;
       NoHitsUsed++;
     }
-    Double_t alpha = tr.Alpha();
     if (Debug()) {
       LOG_INFO << "Track #" << iTr << "\tNoTpcHitsUsed = " << NoTpcHitsUsed << "\tNoNonTpcHitsUsed = " << NoNonTpcHitsUsed << endm;
-      LOG_INFO << "Track Segment alpha = " << tr.Alpha() << " isReverse " << isReverse << " alpha[0] = " << alphas[0]  << " alpha[1] = " << alphas[1] << endm; 
     }
     if (NoHitsTotal < 10) {
       if (Debug()) {LOG_WARN << "StxMaker::Make no. of hits for the track candidate " << NoHitsTotal << " is too low. Reject it." << endm;}
@@ -373,7 +363,8 @@ Int_t StxMaker::Make(){
     }
     
     // Create StTrack
-    FitTrack(alpha, &InnerParam, &OuterParam, hitVec);
+    FitTrack(tr.Alpha(), &InnerParam, &OuterParam, hitVec);
+    UseOriginalGeometry();
     break; // <<<<<<<<<
     //      continue;
     //    if (! FitTrack(&tr)) continue;
@@ -384,6 +375,8 @@ Int_t StxMaker::Make(){
     ok = KFV->Make();
   }
   //  StTrackUtilities::instance()->FillPrimaryTracks();
+  UseOriginalGeometry();
+
   return ok;
 }
 //________________________________________________________________________________
@@ -451,6 +444,9 @@ Double_t StxMaker::ConvertCA2Gen(const Double_t alpha, const StxCApar* stxPar, C
 vector<const StHit*> *StxMaker::GetHitVector(const AliHLTTPCCAGBTrack *tr, Bool_t reverse) {
   static vector<const StHit*> HitVec;
   HitVec.clear();
+  if (Debug()) {
+    PrintGBTrack(tr);
+  }
   const Int_t NHits = tr->NHits();
   vector<SeedHit_t>        &fSeedHits = StxCAInterface::Instance().GetSeedHits();
   if (! reverse) {
@@ -470,14 +466,19 @@ vector<const StHit*> *StxMaker::GetHitVector(const AliHLTTPCCAGBTrack *tr, Bool_
       HitVec.push_back(hit);
     }  
   }
+  if (Debug() > 2) {
+    for (auto tpcHit : HitVec) {
+      tpcHit->Print();
+    }
+  }
   return &HitVec;
 }
 //________________________________________________________________________________
-void StxMaker::SetDebug(Int_t l) {
-  StMaker::SetDebug(l);
+void StxMaker::SetDebugX() {
   if (Debug()) {
     if (fitter) fitter->setDebugLvl(10);
-    //    gGeoManager->SetVerboseLevel(5);
+    if (gGeoManagerAver) gGeoManagerAver->SetVerboseLevel(5);
+    else                 gGeoManager->SetVerboseLevel(5);
 #ifndef __TPC3D__ /* ! __TPC3D__ */
     StTpcPlanarMeasurement::SetDebug(1);
 #endif /* ! __TPC3D__ */    
@@ -486,7 +487,8 @@ void StxMaker::SetDebug(Int_t l) {
     //    genfit::MaterialEffects::getInstance()->setDebugLvT(2);
   } else {
     if (fitter) fitter->setDebugLvl(0);
-    gGeoManager->SetVerboseLevel(0);
+    if (gGeoManagerAver) gGeoManagerAver->SetVerboseLevel(0);
+    else                 gGeoManager->SetVerboseLevel(0);
 #ifndef __TPC3D__ /* ! __TPC3D__ */
     StTpcPlanarMeasurement::SetDebug(0);
 #endif /* ! __TPC3D__ */ 
@@ -494,10 +496,11 @@ void StxMaker::SetDebug(Int_t l) {
     genfit::MaterialEffects::getInstance()->setDebugLvl(0);
     //    genfit::MaterialEffects::getInstance()->setDebugLvT(0);
   }
-#if 0
-  geoMat->setDebugLvl(Debug());
-  geoMat->setDebugLvT(Debug());
-  genfit::MaterialEffects::getInstance()->init(geoMat);
+#if 1
+  if (geoMat) {
+    geoMat->setDebugLvl(Debug());
+    geoMat->setDebugLvT(Debug());
+  }
 #endif  
 }
 //________________________________________________________________________________
@@ -573,7 +576,7 @@ Int_t StxMaker::FitTrack(Double_t alpha, const AliHLTTPCCATrackParam *InnerParam
       fitTrack.insertPoint(new genfit::TrackPoint(measurement, &fitTrack));
     }
   }
-  UseAvergadGeometry();
+  UseOriginalGeometry();
 #ifdef __DEBUG__
   if (Debug()) {
     St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) GetDataSet("geant/g2t_tpc_hit");
@@ -610,6 +613,7 @@ Int_t StxMaker::FitTrack(Double_t alpha, const AliHLTTPCCATrackParam *InnerParam
   }
 #endif
   Int_t ok = kStOK;
+  UseAvergadGeometry();
   try{
     //check
     fitTrack.checkConsistency();
@@ -632,7 +636,9 @@ Int_t StxMaker::FitTrack(Double_t alpha, const AliHLTTPCCATrackParam *InnerParam
     std::cout<<"Unknown Exception, next track"<<std::endl;
     ok = kStErr;
   }
-  if (ok != kStOK) return ok;
+  if (ok != kStOK) {
+    return ok;
+  }
   if (fitter) {
     KalmanFitStatus *fitStatus = fitTrack.getKalmanFitStatus();
     if (! fitStatus || !(fitStatus->isFitConvergedFully())) {// || fitStatus->isFitConvergedPartially())) {
@@ -1141,6 +1147,7 @@ void StxMaker::MakeAvergedGeometry() {
   if (! gGeoManager) StxVMCToolKit::GetVMC();
   assert(gGeoManager);
   gGeoManagerOrig = gGeoManager;
+#if 1
   gGeoManager = 0;
   //#define __Physics_Node_Clear__
   if ( gGeoManagerOrig ){
@@ -1151,5 +1158,6 @@ void StxMaker::MakeAvergedGeometry() {
   }
   StxVMCToolKit::GetVMC4Reconstruction(0,0);
   gGeoManagerAver = gGeoManager;
+#endif
   gGeoManager = gGeoManagerOrig;
 }

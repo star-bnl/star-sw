@@ -58,9 +58,9 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
 				      "TpcSecRowB",
 				      "TpcZCorrectionB"};
   static Int_t NT = sizeof(FXTtables)/sizeof(const Char_t *);
-  Bool_t isFixedTarget = St_beamInfoC::instance()->IsFixedTarget();
+  m_isFixedTarget = St_beamInfoC::instance()->IsFixedTarget();
   TString flavor("sim+ofl");
-  if (isFixedTarget) flavor = "sim+ofl+FXT";
+  if (m_isFixedTarget) flavor = "sim+ofl+FXT";
   St_db_Maker *dbMk = (St_db_Maker *) StMaker::GetTopChain()->Maker("db");
   for (Int_t i = 0; i < NT; i++) {
     dbMk->SetFlavor(flavor, FXTtables[i]);

@@ -193,6 +193,7 @@ StVMCMaker::Make
 #include "StarMCHits.h"
 #include "StarMCSimplePrimaryGenerator.h"
 #include "StarMCHBPrimaryGenerator.h"
+#include "StarMCMuPrimaryGenerator.h"
 #include "StarVMCApplication.h"
 #include "TGeoDrawHelper.h"
 #include "StMessMgr.h"
@@ -238,27 +239,12 @@ Int_t StVMCMaker::Init() {
       assert(!ee);
 #endif
     } 
-    TString MuDstF(SAttr("MuDstFile"));
-    if (MuDstF != "") {
-      TFile *f = TFile::Open(MuDstF);
-      if (! f) {
-	LOG_ERROR << MuDstF.Data() << " file has not been found" << endm;
-      }
-      TTree *tree = (TTree *) f->Get("MuDst");
-      if (! tree) {
-	LOG_ERROR << "MuDst is not found in " << MuDstF.Data() << endm;
-      } else {
-	fMuDstIter = new TTreeIter();
-	fMuDstIter->AddFile(MuDstF);
-      }
-      SafeDelete(f);
-    }
     StarMCPrimaryGenerator *generator = StarMCPrimaryGenerator::Instance();
     if (! generator) {
-      if (fInputFile != "") generator = new StarMCHBPrimaryGenerator(fInputFile,m_DataSet);
-      //                                                             Ntrack Id Ptmin Ptmax Ymin Ymax Phimin Phimax Zmin Zmax
-      //  else              generator = new StarMCSimplePrimaryGenerator( 1, 5,    1.,   1.,0.1, 0.1, 0.57,  0.57,  0.,   0., "G");
-      else                  generator = new StarMCSimplePrimaryGenerator(80, 6,    1.,   1.,-4.,  4.,    0,  6.28,  0.,   0., "G");
+      if (fInputFile != "") {
+	if (fInputFile.Contains(".MuDst.root")) generator = new StarMCMuPrimaryGenerator(fInputFile,m_DataSet);
+	else                                    generator = new StarMCHBPrimaryGenerator(fInputFile,m_DataSet);
+      }
     }
     assert(generator);
     if (IAttr("beamLine"))  generator->SetBeamLine();
@@ -428,7 +414,9 @@ void StVMCMaker::SetDateTime(Int_t id, Int_t it) {
  }
 //_____________________________________________________________________________
 Int_t StVMCMaker::Skip(Int_t nskip) {
-  return kStOk;
+  StarMCPrimaryGenerator *generator = StarMCPrimaryGenerator::Instance();
+  if (! generator) return kStOk;
+  return generator->Skip(nskip);
 }
 //_____________________________________________________________________________
 TDataSet  *StVMCMaker::FindDataSet (const char* logInput,const StMaker *uppMk,

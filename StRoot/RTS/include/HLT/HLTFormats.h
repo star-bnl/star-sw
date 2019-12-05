@@ -13,8 +13,9 @@
 // #define HLT_GL3_VERSION 0x20160120 // add MTDQuarkonium
 // #define HLT_GL3_VERSION 0x20160210 // add isTrigger to hlt_MtdHit
 // #define HLT_GL3_VERSION 0x20180607 // add bField in HLT_EVE
-// #define HLT_GL3_VERSION 0x20190602    // add bunch_id in HLT_EVE
-#define HLT_GL3_VERSION 0x20190603    // add earliest TACs for BBC/VPD/EPD to HLT_EVE
+// #define HLT_GL3_VERSION 0x20190602 // add bunch_id in HLT_EVE
+// #define HLT_GL3_VERSION 0x20190603 // add earliest TACs for BBC/VPD/EPD to HLT_EVE
+#define HLT_GL3_VERSION 0x20191201 // add ETOF hits
 
 struct hlt_track {
     int            id ;         //primary key
@@ -68,6 +69,31 @@ struct HLT_TOF {
     struct hlt_TofHit tofHit[10000];
 };
 
+struct hlt_ETofHit{
+    float  time;
+
+    float  localX;
+    float  localY;
+
+    float  globalX;
+    float  globalY;
+    float  globalZ;
+
+    float  tot;
+
+    short  sector;
+    short  module;
+    short  counter;
+    short  clustersize;
+
+    short trackId;
+};
+
+struct HLT_ETOF{
+    unsigned int nETofHits;
+    struct hlt_ETofHit etofHit[10000];
+};
+    
 struct hlt_MtdHit {
   float   leadingEdgeTime[2];
   float   trailingEdgeTime[2];
@@ -136,10 +162,13 @@ struct hlt_node {
     float  beta;
     float  tof;
     float  pathlength;
+
+    float  etofBeta;
+    float  padding;             // keep alignment 8 bytes
 };
 
 struct HLT_NODE {
-    unsigned long long int nNodes; 
+    unsigned long long int nNodes; // keep alignment 8 bytes
     struct hlt_node        node[10000];
 };
  

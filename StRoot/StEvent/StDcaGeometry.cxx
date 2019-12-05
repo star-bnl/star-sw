@@ -53,6 +53,7 @@
 #include "TRMatrix.h"
 #include "TRSymMatrix.h"
 #include "TMath.h"
+#include "TDatabasePDG.h"
 #include "KFParticle/KFPTrack.h"
 ClassImp(StDcaGeometry)
     
@@ -179,7 +180,7 @@ void   StDcaGeometry::GetXYZ(Double_t xyzp[6], Double_t CovXyzp[21]) const {
   TCL::ucopy(Cov.GetArray(),CovXyzp,21);
 }
 //________________________________________________________________________________
-KFParticle& StDcaGeometry::Particle(Int_t kg)  const {
+KFParticle& StDcaGeometry::Particle(Int_t kg, Int_t pdg)  const {
   static KFParticle fParticle;
   static KFPTrack track;
   Double_t xyzp[6], CovXyzp[21];
@@ -193,10 +194,10 @@ KFParticle& StDcaGeometry::Particle(Int_t kg)  const {
   //    track.SetChi2(GlobalTracks_mChiSqXY[k]);
   //  track.SetId(kg);
   Int_t q   = 1;
-  Int_t pdg = 211;
+  if (! pdg) pdg = 211;
   if (charge() < 0) {
     q = -1;
-    pdg = -211;
+    pdg = -pdg;
   } 
   track.SetCharge(q);
   fParticle = KFParticle(track, pdg);

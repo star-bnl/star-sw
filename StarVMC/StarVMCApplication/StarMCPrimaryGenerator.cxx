@@ -11,8 +11,13 @@
 #include "TRandom.h"
 #include "Stiostream.h"
 #include "StarMCPrimaryGenerator.h"
+#include "Stypes.h"
 StarMCPrimaryGenerator *StarMCPrimaryGenerator::fgInstance = 0;
 ClassImp(StarMCPrimaryGenerator);
+//________________________________________________________________________________
+Int_t StarMCPrimaryGenerator::Skip(Int_t nskip) {
+  return kStOK;
+}
 //________________________________________________________________________________
 void StarMCPrimaryGenerator::Print(Option_t *option) const {
   if (fStarStack) fStarStack->Print();

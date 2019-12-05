@@ -46,11 +46,12 @@ class StxMaker : public StMaker {
   virtual      ~StxMaker() {}
   virtual Int_t InitRun(Int_t runumber);
   virtual Int_t Make();
-  static vector<const StHit *> *GetHitVector(const AliHLTTPCCAGBTrack *tr, Bool_t reverse = kFALSE);
+  vector<const StHit *> *GetHitVector(const AliHLTTPCCAGBTrack *tr, Bool_t reverse = kFALSE);
+  void          PrintGBTrack(const AliHLTTPCCAGBTrack *tr, Int_t iTr = 0);
   virtual Int_t FitTrack(const AliHLTTPCCAGBTrack *tr);
   virtual Int_t FitTrack(Double_t alpha, const AliHLTTPCCATrackParam *InnerParam, const AliHLTTPCCATrackParam *OuterParam, vector<const StHit*> *HitVect);
   static Double_t ConvertCA2Gen(const Double_t alpha, const StxCApar* stxPar, CA2GenState_t* ca2Gen );
-  virtual void   SetDebug(Int_t l=1);          // *MENU*
+  virtual void   SetDebugX();          // *MENU*
   Bool_t Accept(genfit::Track *kTrack);
   void   FillGlobalTrack(genfit::Track *kTrack);
   void   FillPrimaryTracks();
@@ -62,6 +63,8 @@ class StxMaker : public StMaker {
   CA2GenState_t fCA2Gen[2];// 0 -> Inner, 1 -> Outer
   void UseOriginalGeometry() {if (gGeoManagerOrig) gGeoManager = gGeoManagerOrig;}
   void UseAvergadGeometry()  {if (gGeoManagerAver) gGeoManager = gGeoManagerAver;}
+  static TGeoManager *OriginalGeometry() {return gGeoManagerOrig;}
+  static TGeoManager *AverageGeometry() {return gGeoManagerAver;}
   static void MakeAvergedGeometry();
   virtual const char *GetCVS() const {
     static const char cvs[]="Tag $Name:  $ $Id: StxMaker.h,v 1.2 2013/09/16 19:54:04 fisyak Exp $ built " __DATE__ " " __TIME__ ; 

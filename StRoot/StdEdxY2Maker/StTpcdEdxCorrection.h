@@ -99,6 +99,7 @@ class StTpcdEdxCorrection : public TObject {
   Int_t Mask()                             {return m_Mask;}
   Float_t           Adc2GeV()              {return mAdc2GeV;}
   void Print(Option_t *opt = "") const;
+  Bool_t            IsFixedTarget()        {return m_isFixedTarget;}
  private:
   Int_t                m_Mask;                  //!
   St_tpcGas           *m_tpcGas;                //!
@@ -106,6 +107,7 @@ class StTpcdEdxCorrection : public TObject {
   Float_t              mAdc2GeV;                //! Outer/Inner conversion factors from ADC -> GeV
   dEdxCorrection_t     m_Corrections[kTpcAllCorrections];//!
   Int_t                m_Debug;                 //!
+  Bool_t               m_isFixedTarget;
 };
 //________________________________________________________________________________
 class dEdxY2_t {

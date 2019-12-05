@@ -1872,7 +1872,7 @@ void TGeant3::DefineParticles()
     //                 Name Title   Mass  Stable  DecayWidth      Charge   ParticleClass  PdgCode                   Anti TrackingCode
     pdgDB->AddParticle(name, name, amass, kFALSE, GeV2Time/tlife, 3*charge,           "", fPDGCode[fNPDGCodes-1], -1, itrtyp);
   }
-  Gspart(fNG3Particles++, "Upsilon(2S)", 4, 10.0233, 0., GeV2Time / 31.98);
+  Gspart(fNG3Particles++, "Upsilon(2S)", 4, 10.0233, 0., GeV2Time / 31.98e-6);
   fPDGCode[fNPDGCodes++]=100553;        // 69 = Upsilon(2S)
   if ( !pdgDB->GetParticle(fPDGCode[fNPDGCodes-1])) {
     Gfpart(fPDGCode[fNPDGCodes-1], *name, itrtyp, amass, charge, tlife);
@@ -1880,7 +1880,7 @@ void TGeant3::DefineParticles()
     pdgDB->AddParticle(name, name, amass, kFALSE, GeV2Time/tlife, 3*charge,           "", fPDGCode[fNPDGCodes-1], -1, itrtyp);
   }
 
-  Gspart(fNG3Particles++, "Upsilon(3S)", 4, 10.3553, 0., GeV2Time / 20.32);
+  Gspart(fNG3Particles++, "Upsilon(3S)", 4, 10.3553, 0., GeV2Time / 20.32e-6);
   fPDGCode[fNPDGCodes++]=20553;        // 70 = Upsilon(3S)
   if ( !pdgDB->GetParticle(fPDGCode[fNPDGCodes-1])) {
     Gfpart(fPDGCode[fNPDGCodes-1], *name, itrtyp, amass, charge, tlife);
