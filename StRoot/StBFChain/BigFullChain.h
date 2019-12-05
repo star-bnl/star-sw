@@ -1174,13 +1174,13 @@ Bfc_st BFC[] = { // standard chains
   {"P2018a", "" ,"",
    "B2018a,ITTF,UseXgeom,BAna,VFMinuit,beamline3D,emcDY2,epdHit,fpd,trgd,ZDCvtx,analysis"
    ,                    "","","Base chain for year 2018 AA data - no Corr (+     bcc/fpd, e/b-emc)",kFALSE},
-  {"B2019"  ,"","","r2019,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout,CorrX","",""
+  {"B2019"  ,"","","r2019,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout,CorrY","",""
    ,                                                     "Production chain for run 2019 data (tpc)",kFALSE},
   {"P2019","" ,"",
    "B2019,StiCA,UseXgeom,BAna,VFMinuit,btof,mtd,emcDY2,btof,mtd,epdHit,,trgd,ZDCvtx,analysis"
    ,                 "","","Production chain for year 2019 data - no Corr (+     bcc/fpd, e/b-emc)",kFALSE},
   // 
-  {"B2019a" ,"","","ry2019a,in,tpcX,UseXgeom,iTpcIT,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite",
+  {"B2019a" ,"","","ry2019a,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite",
    "","",                                                      "Base chain for run 2019 data (tpc)",kFALSE},
 #if 1
   {"P2019a","" ,"",
@@ -1305,8 +1305,8 @@ Bfc_st BFC[] = { // standard chains
   {"OSpaceZ2"    ,""  ,"","",""                                   ,"","Space Charge corrections R2",kFALSE},
   {"OShortR"     ,""  ,"","",""                                       ,"","Shorted Ring correction",kFALSE},
   {"OGridLeak"   ,""  ,"","",""                                          ,"","Grid Leak correction",kFALSE},
-  {"OGridLeak3D" ,""  ,"","",""                                       ,"","3D Grid Leak correction",kFALSE},
-  {"OGridLeakFull","" ,"","",""                                     ,"","Full Grid Leak correction",kFALSE},
+  {"OGridLeak3D" ,""  ,"","-OGridLeak",""                             ,"","3D Grid Leak correction",kFALSE},
+  {"OGridLeakFull","" ,"","-OGridLeak,-OGridLeak3D",""              ,"","Full Grid Leak correction",kFALSE},
   {"OGGVoltErr"  ,""  ,"","",""                                   ,"","GG voltage error correction",kFALSE},
   {"OSectorAlign",""  ,"","",""                        ,"","Sector alignment distortion correction",kFALSE},
   {"ODistoSmear" ,""  ,"","",""    ,"","Distortion smearing accounting for calibration resolutions",kFALSE},
