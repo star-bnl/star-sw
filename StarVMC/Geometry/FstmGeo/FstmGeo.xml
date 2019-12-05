@@ -35,7 +35,8 @@
 
 	<varlist type="float">
 	  zcenter/0/, 
-	  fudgeDZ/0.9/ <!-- decrease (increase) DZ (density) for Si supports, to prevent overlap with sensitive volumes -->
+	  fudgeDZ /0.9/, <!-- decrease (increase) DZ (density) for Si supports, to prevent overlap with sensitive volumes -->
+	  fudgeDZo/0.1/ <!-- decrease (increase) DZ (density) for Si supports, to prevent overlap with sensitive volumes -->
 	</varlist>
 
         <!-- Declare structures -->
@@ -471,7 +472,7 @@
 
             <!-- mechanical base -->
             <Create    block="FTRW" />
-            <Placement block="FTRW" in="FSOW" konly="ONLY" x="outerbase_x" y="outerbase_y" z="outerbase_z" dx1="outerbase_dx1" dx2="outerbase_dx2" dy="outerbase_dy" dz="outerbase_dz*fudgeDZ" >
+            <Placement block="FTRW" in="FSOW" konly="ONLY" x="outerbase_x" y="outerbase_y" z="outerbase_z" dx1="outerbase_dx1" dx2="outerbase_dx2" dy="outerbase_dy*fudgeDZo" dz="outerbase_dz" >
                 <Rotation alphay="90"/>
                 <Rotation alphax="90"/>
             </Placement>
@@ -549,7 +550,7 @@
         <Volume name="FTRW" comment="Trapizoid for FST wedge" >
             <Attribute for="FTRW" seen="1" colo="14" />
             <Material name="PEEK" />
-	    <Material name="peak" dens="material::dens/fudgeDZ" />
+	    <Material name="peak" dens="material::dens/fudgeDZo" />
             <Shape type="TRD1" dx1="0" dx2="0" dy="0" dz="0" />
         </Volume>
         <Volume name="FSBW" comment="Box for the ribs in FST wedges">
