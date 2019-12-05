@@ -2525,8 +2525,6 @@ class Filling( Handler ):
 
         output += "%s.fill();\n"%name.upper()
 
-        print output
-
         document.impl( output, unit=current )
 class Fill( Handler ):
 
