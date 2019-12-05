@@ -374,7 +374,7 @@ Int_t StxMaker::Make(){
     
     // Create StTrack
     FitTrack(alpha, &InnerParam, &OuterParam, hitVec);
-    break; // <<<<<<<<<
+    ///    break; // <<<<<<<<<
     //      continue;
     //    if (! FitTrack(&tr)) continue;
   }
