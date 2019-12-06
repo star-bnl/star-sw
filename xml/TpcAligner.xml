@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<job maxFilesPerProcess="10" fileListSyntax="paths" copyInputLocally="false"> 
+<job maxFilesPerProcess="1" fileListSyntax="paths" copyInputLocally="false"> 
 <!-- <job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="paths" copyInputLocally="false"> -->
 	<command>
-#         cd ${SUBMITTINGDIRECTORY}
+         cd ${SUBMITTINGDIRECTORY}
   setenv STARFPE NO
 #  setenv NODEBUG yes
 #  setup 64b
-  starver TFG19d
+#  starver TFG19d
 #  ln -s ${SUBMITTINGDIRECTORY}/StarDb .
   foreach  evtsFile(`cat $FILELIST`) 
 #  set evtsFile = $INPUTFILE0;
@@ -17,13 +17,14 @@
   set logFile  = ${file}B.log
   if ( -r ${SUBMITTINGDIRECTORY}/$logFile) continue;
   root.exe -q -b 'TpcAligner.C(9999999,"'${evtsFile}'")' &gt;&amp;  ${logFile}
-  mv ${file}* ${SUBMITTINGDIRECTORY}/
+#  mv ${file}* ${SUBMITTINGDIRECTORY}/
   end
 
 	</command>
 	<stdout URL="file:./sched$JOBID.log" />
 	<stderr URL="file:./sched$JOBID.err" />
-<input URL="command:TpcAlignerSample.pl" />
+<!-- <input URL="command:TpcAlignerSample.pl" /> -->
+<input URL="command:dEdxSample.pl" />
 <!-- <input URL="command:CosmicsAnalysis.pl" /> -->
 <!-- <input URL="command:EandBSample.pl" /> -->
 <!-- <input URL="file:/gpfs01/star/pwg/iraklic/iTPC/Cosmics/Cosmics2018/*event.root" /> -->

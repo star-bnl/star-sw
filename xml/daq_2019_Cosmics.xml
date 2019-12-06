@@ -5,7 +5,7 @@
    setenv STARFPE NO
 #   setenv NODEBUG yes
 #   setup 64b
-   starver TFG19a
+#   starver TFG19a
 #  echo $INPUTFILE0 | grep ':'
 #  if (! $?) then
 #    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
@@ -34,7 +34,7 @@
 #   set input = ${SCRATCH}/${bf}.daq
     set bla = ${SUBMITTINGDIRECTORY}/${bf}.bla.root
     if (-r ${bla}) continue;
-    touch ${SUBMITTINGDIRECTORY}/{bla}
+    touch ${SUBMITTINGDIRECTORY}/${bla}
     set input = ${evtsFile};
 #root.exe -q -b 'bfc.C(1000,"P2014,TpxRaw,TpxClu2D,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,CorrX,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${input}'","'$output'","'${bf}.root'")' &gt;&amp; ${logFile}
 #root.exe -q -b 'bfc.C(1000,"P2018,TpxRaw,TpxClu,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,CorrX,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${input}'","'$output'","'${bf}.root'")' &gt;&amp; ${logFile}
@@ -58,7 +58,8 @@ root.exe -q -b 'bfc.C(100000,"P2019,gmt,-l3onl,-fpd,-hitfilt,mtd,btof,OGridLeakF
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2019/*/*/st_cosmic_*.daq" /> -->
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2019/019/*/st_cosmic_*.daq" /> -->
 <!-- <input URL="file:/hlt/cephfs/daq/2019/*/*/st_cosmic_*.daq" /> -->
-<input URL="command:2019Cosmic.pl" />
+<!-- <input URL="command:2019Cosmic.pl" /> -->
+<input URL="file:/gpfs01/star/daq/2019/116/20116019/*.daq" />
 <!-- <output fromScratch="*.root" toURL="file./"/> -->
 <!-- <output fromScratch="*B.log" toURL="file:./"/> -->
 </job>
