@@ -6,7 +6,7 @@
   setenv STARFPE NO
 #  setenv NODEBUG yes
 #  setup 64b
-  starver TFG19d
+#  starver TFG19d
 #  ln -s ${SUBMITTINGDIRECTORY}/StarDb .
 #  foreach  evtsFile(`cat $FILELIST`) 
   set evtsFile = $INPUTFILE0;

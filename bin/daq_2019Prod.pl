@@ -20,7 +20,7 @@ my @globs = ("/gpfs01/star/daq/2019/" . $day . "/" . $run . "*/st_physics*.daq")
 #	     ); 
 #my @globs = qw(/gpfs01/star/daq/2019/089/15089024/st_physics_15089024_raw_1000025.daq);
 my $t = 2000000;
-my $step  =  5000;
+my $step  =  500000;
 #for (my $first =  1; $first < 200; $first += $step) {
 my $first =  1;
 my $last  =  $first + $step - 1;
@@ -30,7 +30,7 @@ my $count = 0;
 sub SPrint ($$$$) {
   my ($line,$file,$f,$l) = @_;
   if ($l - $f >= 2) {# Allow to have error in no. of events in FileCatalog
-    my $step = 1000;
+#    my $step = 1000;
     for (my $f1 = $f; $f1 <= $l; $f1 += $step) {
       my $l1 = $f1 + $step - 1;
       if ($l1 > $l) {$l1 = $l;}
@@ -87,13 +87,13 @@ foreach my $glob (@globs) {
 #    chop($line);
     my $file = File::Basename::basename($line,".daq");
     print "----------------------------------------\n" if ($debug);
-    my $globN = "*:" . $file;;
+    my $globN = "*:" . $file . ".count";
     my @NFiles = glob $globN;
     my $N = 0;
     if ($#NFiles < 0) {
       my $cmd = "get_file_list.pl -keys 'events' -cond 'filetype=online_daq,filename=" . $file . ".daq' -limit 1";# print "$cmd\n" if ($debug);
       $N = `$cmd`; chomp($N); 
-      my $NFile = $N . ":" . $file;
+      my $NFile = $N . ":" . $file . ".count";
       `touch $NFile`;
     } else {
       my($n1,$n2) = split(":",$NFiles[0]);

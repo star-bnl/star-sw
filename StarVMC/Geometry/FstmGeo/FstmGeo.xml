@@ -35,7 +35,8 @@
 
 	<varlist type="float">
 	  zcenter/0/, 
-	  fudgeDZ/0.9/ <!-- decrease (increase) DZ (density) for Si supports, to prevent overlap with sensitive volumes -->
+	  fudgeDZ /0.9/, <!-- decrease (increase) DZ (density) for Si supports, to prevent overlap with sensitive volumes -->
+	  fudgeDZo/0.1/ <!-- decrease (increase) DZ (density) for Si supports, to prevent overlap with sensitive volumes -->
 	</varlist>
 
         <!-- Declare structures -->
@@ -190,6 +191,7 @@
             <var name="rmax"     value="{36.83, 40.64}" />
             <var name="dz"       value="{45.4025, 0.9525}" />
         </Fill>
+	<!-- Use  struct="supporttube" / -->
 
         <Fill name="ringbox" comment=" boxes in a half ring" >
             <var name="version"  value="1.0" />
@@ -200,6 +202,7 @@
             <var name="dy"       value="7.4/2" />
             <var name="dz"       value="0.8/2" />
         </Fill>
+	<!-- Use  struct="ringbox" / -->
 
         <Fill name="wholewedge" comment="whole wedge shape" >
             <var name="version"  value="1.0" />
@@ -209,6 +212,7 @@
             <var name="phi2"     value="16" />
             <var name="dz"       value="(0.3175+0.15+0.1)" />  <!-- thickness of mechanical base + mechanical ribs + hybrid -->
         </Fill>
+	<!-- Use  struct="wholewedge" / -->
 
         <Fill name="outerwedge" comment="outer wedge shape" >
             <var name="version"  value="1.0" />
@@ -218,6 +222,7 @@
             <var name="phi2"     value="16" />
             <var name="dz"       value="(0.3175+0.15+0.1)/2" />  <!-- thickness of mechanical base + mechanical ribs + hybrid -->
         </Fill>
+	<!-- Use  struct="outerwedge" / -->
 
         <Fill name="innerwedge" comment="inner wedge shape" >
             <var name="version"  value="1.0" />
@@ -227,6 +232,7 @@
             <var name="phi2"     value="16" />
             <var name="dz"       value="(0.3175+0.15+0.1)/2" />  <!-- thickness of mechanical base + mechanical ribs + hybrid -->
         </Fill>
+	<!-- Use  struct="innerwedge" / --> 
 
         <Fill name="outerbase" comment="outer mechanical base" >
             <var name="version"  value="1.0" />
@@ -238,6 +244,7 @@
             <var name="dy"       value="0.15/2" />
             <var name="dz"       value="(32-15.774)*cos(16*pi/180)/2" />
         </Fill>
+	<!-- Use  struct="outerbase" / -->
 
         <Fill name="outerrib" comment="outer mechanical ribx" >
             <var name="version"  value="1.0" />
@@ -254,6 +261,7 @@
             <var name="rotz"  value="{0.0, 0.0, 0.0, 0.0, 0.0,
                                       16.0, 0.0, 0.0, -16.0}" />
         </Fill>
+	<!-- Use  struct="outerrib" / -->
 
         <Fill name="outerhybrid" comment="outer hybrid" >
             <var name="version"  value="1.0" />
@@ -263,6 +271,7 @@
             <var name="phi2"     value="16" />
             <var name="dz"       value="0.1/2" />
         </Fill>
+	<!-- Use  struct="outerhybrid" / -->
 
         <Fill name="outersilicon" comment="outer silicon" >
             <var name="version"  value="1.0" />
@@ -274,6 +283,7 @@
             <var name="phi2"     value="{0, 15}" />
             <var name="dz"       value="0.03/2" />
         </Fill>
+	<!-- Use  struct="outersilicon" / -->
 
         <Fill name="innerbase" comment="inner mechanical base" >
             <var name="version"  value="1.0" />
@@ -283,6 +293,7 @@
             <var name="phi2"     value="16" />
             <var name="dz"       value="0.15/2" />
         </Fill>
+	<!-- Use  struct="innerbase" / -->
 
         <Fill name="innerriba" comment="inner mechanical ribs a" >
             <var name="version"  value="1.0" />
@@ -299,6 +310,7 @@
             <var name="rotz"  value="{0.0, 0.0, 0.0,
                                       16.0, 0.0, -16.0}" />
         </Fill>
+	<!-- Use  struct="innerriba" / -->
 
         <Fill name="innerribb" comment="inner mechanical ribs b" >
             <var name="version"  value="1.0" />
@@ -308,6 +320,7 @@
             <var name="phi2"     value="16" />
             <var name="dz"       value="0.3175/2" />
         </Fill>
+	<!-- Use  struct="innerribb" / -->
 
         <Fill name="innerhybrida" comment="inner hybrid a" >
             <var name="version"  value="1.0" />
@@ -317,6 +330,7 @@
             <var name="phi2"     value="16" />
             <var name="dz"       value="0.1/2" />
         </Fill>
+	<!-- Use  struct="innerhybrida" / -->
 
         <Fill name="innerhybridb" comment="inner hybrid b" >
             <var name="version"  value="1.0" />
@@ -324,6 +338,7 @@
             <var name="dy"       value="3.283/2" />
             <var name="dz"       value="0.1/2" />
         </Fill>
+	<!-- Use  struct="innerhybridb" / -->
 
         <Fill name="innersilicon" comment="inner silicon" >
             <var name="version"  value="1.0" />
@@ -334,6 +349,7 @@
             <var name="phi2"     value="15" />
             <var name="dz"       value="0.03/2" />
         </Fill>
+	<!-- Use  struct="innersilicon" / -->
 
         <!-- Material mixture -->
         <!-- Kapton: H10 C22 N2 O5 -->
@@ -450,14 +466,14 @@
 
             <!-- Put volumes in the container -->
             <Create    block="FSOW" />  <!-- outer wedge -->
-            <Placement block="FSOW" konly="ONLY" in="FSTW" x="0" y="0" z="0" />
+            <Placement block="FSOW" konly="MANY" in="FSTW" x="0" y="0" z="0" />
             <Create    block="FSIW" />  <!-- inner wedge -->
-            <Placement block="FSIW" konly="ONLY" in="FSTW" x="0" y="0" z="0" />
+            <Placement block="FSIW" konly="MANY" in="FSTW" x="0" y="0" z="0" />
 
         </Volume>
 
         <!-- Outer wedge container -->
-        <Volume name="FSOW" comment="Outer wedge container" assembly="false" >
+        <Volume name="FSOW" comment="Outer wedge container" assembly="true" >
             <Attribute for="FSOW" seen="0" colo="2" />
 	    <Material name="AIR" />
 <!--	    <Material name="AIR" stemax="outersilicon_dz/2" isvol="0" /> -->
@@ -471,7 +487,7 @@
 
             <!-- mechanical base -->
             <Create    block="FTRW" />
-            <Placement block="FTRW" in="FSOW" konly="ONLY" x="outerbase_x" y="outerbase_y" z="outerbase_z" dx1="outerbase_dx1" dx2="outerbase_dx2" dy="outerbase_dy" dz="outerbase_dz*fudgeDZ" >
+            <Placement block="FTRW" in="FSOW" konly="ONLY" x="outerbase_x" y="outerbase_y" z="outerbase_z" dx1="outerbase_dx1" dx2="outerbase_dx2" dy="outerbase_dy*fudgeDZo" dz="outerbase_dz" >
                 <Rotation alphay="90"/>
                 <Rotation alphax="90"/>
             </Placement>
@@ -491,7 +507,7 @@
         </Volume>
 
         <!-- Inner wedge container -->
-        <Volume name="FSIW" comment="Inner wedge container" assembly="false">
+        <Volume name="FSIW" comment="Inner wedge container" assembly="true">
             <Attribute for="FSIW" seen="0" colo="4" />
 	    <Material name="AIR" />
 <!--	    <Material name="AIR" stemax="innersilicon_dz/2" isvol="0" /> -->
@@ -549,7 +565,7 @@
         <Volume name="FTRW" comment="Trapizoid for FST wedge" >
             <Attribute for="FTRW" seen="1" colo="14" />
             <Material name="PEEK" />
-	    <Material name="peak" dens="material::dens/fudgeDZ" />
+	    <Material name="peak" dens="material::dens/fudgeDZo" />
             <Shape type="TRD1" dx1="0" dx2="0" dy="0" dz="0" />
         </Volume>
         <Volume name="FSBW" comment="Box for the ribs in FST wedges">
