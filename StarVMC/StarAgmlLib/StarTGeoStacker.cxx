@@ -1202,7 +1202,7 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPosition position )
     { 
       assert(daughter);
       assert(daughter->IsValid());
-      if ( sanityCheck(daughter) )
+      if ( sanityCheck(daughter) || daughter->IsAssembly() )
 	target -> AddNode( daughter, copy, matrix );
     }
   else
@@ -1211,6 +1211,8 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPosition position )
       assert(daughter->IsValid());
       if ( sanityCheck(daughter) )
 	target -> AddNodeOverlap( daughter, copy, matrix );
+      else if ( daughter->IsAssembly() ) 
+	target -> AddNode( daughter, copy, matrix );
     }
 
 

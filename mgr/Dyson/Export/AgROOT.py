@@ -2151,20 +2151,21 @@ class Struct( Handler ): # new style structures
             # FIX THIS PLEASE.  We output the dimension of the array, but we need
             # to know how many indicies it has.  i.e. is this array hx[10] or hx[2][5]?
             #
+
+            # Base type is the type of the variable w/out array indicies
+            membid += "  typedef %s BaseType;\n" %mytype
+            
             if mydim == None:
                 membid += "  typedef %s Type;\n" %mytype
                 membid += "  static const int rank = 0;"
             else:
-
-
                 #mydim = mydim.replace(',','][')
                 mydim = mydim.strip('()')
                 length = mydim.split(',')
                 mydim = ""
                 for i in reversed(length):
                     mydim += '[%s]'%i
-                    
-                
+                                    
                 membid += "  typedef %s Type%s;\n" % (mytype,mydim)
                 #membid += "  static const int rank = %s;"%mydim
 
@@ -2497,7 +2498,7 @@ class Filling( Handler ):
             com = self.com_list[i]
 
             # TODO: support strings
-
+            # TODO: fix narrowing
             # Detect and handle multidim arrays
             if ';' in val:
 
@@ -2512,8 +2513,19 @@ class Filling( Handler ):
                 
             elif '{' in val:
 
+                # Convert all elements of array to floating point
+                val = val.strip('{')
+                val = val.strip('}')
+                newval = []
+                for v in val.split(','):
+                    #newval.append('float(%s)'%v)
+                    convert = '%s_info::%s::BaseType(%s)'%(name,var,v)
+                    newval.append( convert )
+                    
+                val = '{\n' + ',\n'.join(newval) + '\n}\n'
+                    
                 output += '{\n'
-                output += '%s_info::%s::Type temp = %s;\n'%(name,var,val)
+                output += '%s_info::%s::Type temp = %s;\n'%(name,var,val)                
                 output += 'memcpy(&%s.%s, &temp, sizeof(temp));;\n'%(name,var)                
                 output += '}\n'
                 
@@ -2523,6 +2535,7 @@ class Filling( Handler ):
             output += '// %s_docum.%s = "%s";\n'%(name,var,com)
 
         output += "%s.fill();\n"%name.upper()
+        #print output
 
         document.impl( output, unit=current )
 class Fill( Handler ):
