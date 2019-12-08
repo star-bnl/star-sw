@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<job  name="TpcPrompt" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false">
+<stdout URL="file:./sched$JOBID.log" />
+<stderr URL="file:./sched$JOBID.err" />
+<command> 
+   cd ${SUBMITTINGDIRECTORY}  
+   setenv STARFPE NO
+#   setenv NODEBUG yes
+#   setup 64b
+#   starver TFG19d
+#   staver .DEV2 
+  set base = `basename ${INPUTFILE0} .root`
+  set output = ${base}TpcHitZTMfl0.root
+  if (! -r ${output}) then
+    root.exe -q -b ${INPUTFILE0} 'TpcPrompt.C+("TpcHit")' &gt;&amp;  ${base}TpcHitZTMfl0.log 
+  endif
+ root.exe -q -b lBichsel.C ${base}TpcHitZTMfl0.root  'dEdxFit.C+("Z","GP","R",-1,-1,1,1,10,1,206,212)' &gt;&amp;  ${base}Z.log
+ root.exe -q -b lBichsel.C ${base}TpcHitZTMfl0.root  'dEdxFit.C+("ZL","GP","R",-1,-1,1,1,10,1,0,3.0)' &gt;&amp;  ${base}ZL.log
+ root.exe -q -b lBichsel.C ${base}TpcHitZTMfl0.root  'dEdxFit.C+("T","GP","R",-1,-1,1,1,10,1,0,12.0)' &gt;&amp;  ${base}T.log
+ root.exe -q -b lBichsel.C ${base}TpcHitZTMfl0.root  'dEdxFit.C+("ZLM","Freq","R",-1,-1,1,1,10,1,200,220.0)' &gt;&amp;  ${base}TFreq.log
+</command>
+<input URL="file:/net/l404/data/fisyak/Tpc/Alignment/2019/Prompt/20*.root" />
+<!-- <input URL="file:./20193014.root" /> -->
+</job>
