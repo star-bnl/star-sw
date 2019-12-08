@@ -53,7 +53,7 @@ TChain *Chain(const Char_t *files = "./*.MuDst.root",const Char_t *TreeName = "M
     if (tree) {
       NFiles++;
       nEvents = tree->GetEntries();
-      cout << "\t" << nEvents << endl;
+      cout << "\tNo,Events = " << nEvents << endl;
       nEvTot += nEvents;
       tChain->Add(f->GetName());
     } else {
