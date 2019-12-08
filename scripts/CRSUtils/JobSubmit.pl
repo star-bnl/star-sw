@@ -135,7 +135,7 @@ $SKIPMC = "abcde";                # a fake MC tag - if stream match any, skip MC
 # Removed 2002->2004 on 2009/02 J.Lauret (see cvs revisions for history)
 #
 
-my $MAXSLOTS = 200;
+my $MAXSLOTS = 250;
 my $NSLOT = 0;
 my $njobs = 0;
 $TOT = 0;
@@ -485,12 +485,18 @@ if ( $ThisYear == 2005 ){
           $ThisYear == 2016 ||  
           $ThisYear == 2017 ||
           $ThisYear == 2018 ||
-          $ThisYear == 2019 ) {
+          $ThisYear == 2019 ||
+          $ThisYear == 2020 ) {
     $TREEMODE= 1;
     $LIB     = "dev";
 
-    $MAXEVT  = 1000;
-    $NUMEVT  = 1000;
+    #$MAXEVT  = 1000;
+    #$NUMEVT  = 1000;
+    #$MAXEVT  = 3000;
+    #$NUMEVT  = 3000;
+    $MAXEVT  = 5000;
+    $NUMEVT  = 5000;
+
     $MINEVT  = 200;
     $FRACTT  =  33;
     $SKIPMC  = "st_we";                   # keep lowercase
@@ -615,7 +621,13 @@ if ( $ThisYear == 2005 ){
 
    } elsif ($ThisYear == 2019) {
        # can eventualy move btof/mtd to the base chain later
-       $DCHAIN{"AuAu"} = "P2019a,StiCA,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeakFull,-OPr13,OPr40,-hitfilt,QAalltrigs";
+       $DCHAIN{"AuAu"} = "P2019a,StiCA,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeakFull,-OPr13,OPr40,-hitfilt,-beamline3D";
+
+
+   } elsif ($ThisYear == 2019) {
+       # can eventualy move btof/mtd to the base chain later
+       $DCHAIN{"AuAu"} = "P2020a,StiCA,btof,mtd,BEmcChkStat,QAallTrigs,-hitfilt";
+
 
    #} else {
    #     $DCHAIN{"PPPP"} =
@@ -1918,7 +1930,8 @@ sub Submit
 
 #    } elsif ( ($trgrs =~ m/test/ || $trgsn =~ m/test/ ||
 #	       $trgrs =~ m/tune/ || $trgsn =~ m/tune/   ) && $mode == 0){
-    } elsif ( ($trgsn =~ m/test/ || $trgsn =~ m/tune/   ) && $mode == 0){
+    #} elsif ( ($trgsn =~ m/test/ || $trgsn =~ m/tune/   ) && $mode == 0){
+    } elsif ( ($trgsn =~ m/test/   ) && $mode == 0){
 	if ( $ThisYear == 2002 || $ThisYear >= 2010 ){
 	    # start with a warning
 	    print "$SELF : Info : Skipping tune,test in $file, has 'triggers'=$items[11]=$trgrs\n";
@@ -2059,7 +2072,10 @@ sub Submit
     if( open(FO,">$jfile") ){
 	if($calib ne ""){ 
 
-	    $chain = "LanaDVtpx,AgML,ITTF,StiCA,CorrX,OSpaceZ2,OGridLeak3D";
+	    #$chain = "LanaDVtpx,AgML,ITTF,StiCA,iTpcIT,CorrX,OSpaceZ2,OGridLeakFull,-OPr13,OPr40";
+	    # 2020 and beyond
+	    $chain = "LanaDVtpx,AgML,ITTF,StiCA,iTpcIT,CorrY";
+
 	    # ------------------------------------------------------------------
 	    # THIS IS A CALIBRATION PRE-PASS -- IT REQUIRES AN ADDITIONAL INPUT
 	    print FO <<__EOF__;
