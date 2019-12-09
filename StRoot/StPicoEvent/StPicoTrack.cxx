@@ -31,7 +31,7 @@ StPicoTrack::StPicoTrack() : TObject(),
   mPMomentumX(0), mPMomentumY(0), mPMomentumZ(0),
   mGMomentumX(0), mGMomentumY(0), mGMomentumZ(0),
   mOriginX(0),mOriginY(0), mOriginZ(0),
-  mDedx(0), mDedxError(0), /*mDnDx(0),mDnDxError(0)*/
+  mDedx(0), mDedxError(0), mDnDx(0),mDnDxError(0),
   mNHitsFit(0), mNHitsMax(0), mNHitsDedx(0),
   mNSigmaPion( std::numeric_limits<short>::min() ),
   mNSigmaKaon( std::numeric_limits<short>::min() ),
@@ -58,8 +58,8 @@ StPicoTrack::StPicoTrack(const StPicoTrack &track) : TObject() {
   mOriginZ = track.mOriginZ;
   mDedx = track.mDedx;
   mDedxError = track.mDedxError;
-  //mDnDx = track.mDnDx;
-  //mDnDxError = track.mDnDxError;
+  mDnDx = track.mDnDx;
+  mDnDxError = track.mDnDxError;
   mNHitsFit = track.mNHitsFit;
   mNHitsMax = track.mNHitsMax;
   mNHitsDedx = track.mNHitsDedx;
@@ -210,11 +210,9 @@ Float_t StPicoTrack::dEdxPull(Float_t mass, UChar_t fit, Int_t charge) const {
   } else if ( fit == 1) {     // Ifit
     dedx_measured = 1e-6*dEdx();
     dedx_resolution = dEdxError();
-#if 0 /* not yet implemented */
   } else {     // dNdx
     dedx_measured = dNdx();
     dedx_resolution = dNdxError();
-#endif
   }
   if (dedx_resolution <= 0) return z;
   z = StdEdxPull::Eval(dedx_measured,dedx_resolution,betagamma,fit,charge);
@@ -228,6 +226,7 @@ Float_t StPicoTrack::dEdxPullToF(Float_t mass, UChar_t fit, Int_t charge) const 
   Float_t dedx_measured, dedx_resolution = -1;
   Float_t dedx_predicted = -1;
   static TF1 *ToFCor[2][3] = {0};
+#if 1
   if (! ToFCor[0][0]) {
     /* Maksym, 11/22/17
 dE/dx correction Pion:
@@ -320,6 +319,7 @@ p8                        =      5.20165   +/-   0.161309
 //    ToFCor[1][2] = new TF1("dNdxCorProt","pol8",-0.65,0.9); ToFCor[1][2]->SetParameters(-0.0216107,  0.095628,  0.221496, -0.281845,  -1.81734,   3.55535,   1.78527,   -8.3076,  5.20165);
     ToFCor[1][2] = new TF1("dNdxCorProt","pol8",-0.5,0.75); ToFCor[1][2]->SetParameters(-0.0254615, 0.0610245,  0.364898, 0.0783227,  -2.27553,  0.317491,   4.55173,  -1.44629,  -1.70712);
   }
+#endif
   Int_t hyp = -1; 
   if (mass < 1.0) hyp = 2; 
   if (mass < 0.5) hyp = 1;
@@ -330,16 +330,14 @@ p8                        =      5.20165   +/-   0.161309
     dedx_measured = 1e-6*dEdx();
     dedx_resolution = dEdxError();
     dedx_predicted = 1.e-6*charge*charge*TMath::Exp(Bichsel::Instance()->GetMostProbableZ(bgL10));
-    if (hyp >= 0 && bgL10 > ToFCor[0][hyp]->GetXmin() &&  bgL10 < ToFCor[0][hyp]->GetXmax())
+    if (ToFCor[0][hyp] &&hyp >= 0 && bgL10 > ToFCor[0][hyp]->GetXmin() &&  bgL10 < ToFCor[0][hyp]->GetXmax())
     dedx_predicted *= TMath::Exp(ToFCor[0][hyp]->Eval(bgL10));
   } else {     // dNdx
-#if 0 /* not yet implemented */
     dedx_measured = dNdx();
     dedx_resolution = dNdxError();
     dedx_predicted = StdEdxModel::instance()->dNdx(betagamma,charge);
-    if (hyp >= 0 && bgL10 > ToFCor[0][hyp]->GetXmin() &&  bgL10 < ToFCor[0][hyp]->GetXmax())
+    if (ToFCor[0][hyp] && hyp >= 0 && bgL10 > ToFCor[0][hyp]->GetXmin() &&  bgL10 < ToFCor[0][hyp]->GetXmax())
     dedx_predicted *= TMath::Exp(ToFCor[1][hyp]->Eval(bgL10));
-#endif
   }
   if (dedx_resolution <= 0) return z;
   z = TMath::Log(dedx_measured/dedx_predicted)/dedx_resolution;
