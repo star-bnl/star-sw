@@ -1,5 +1,6 @@
 #! /usr/bin/env perl
-my $cmd = "get_file_list.pl -delim '/' -keys 'path,filename' -cond 'filetype=online_daq,filename~st,trgsetupname=production_31GeV_fixedTarget_2019,tpx=1,itpc=1,sanity=1,runnumber>20000000' -limit 0";  
+#my $cmd = "get_file_list.pl -delim '/' -keys 'path,filename' -cond 'filetype=online_daq,filename~st,trgsetupname=production_31GeV_fixedTarget_2019,tpx=1,itpc=1,sanity=1,runnumber>20000000' -limit 0";  
+my $cmd = "get_file_list.pl -delim '/' -keys 'path,filename' -cond 'filetype=online_daq,filename~st_physics_20,trgsetupname=production_31GeV_fixedTarget_2019,tpx=1,itpc=1,sanity=1,runnumber>201890000,runnumber<20191000' -limit 0";  
 
 print "$cmd\n";
 my @list = `$cmd`;
