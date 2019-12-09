@@ -1,3 +1,26 @@
+/*
+ * This file is part of KF Particle package
+ * Copyright (C) 2007-2019 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2019 University of Frankfurt
+ *               2007-2019 University of Heidelberg
+ *               2007-2019 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2007-2019 Maksym Zyzak
+ *               2007-2019 Sergey Gorbunov
+ *
+ * KF Particle is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * KF Particle is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "KFParticle.h"
 #include "KFPTrack.h"
 #include "KFPVertex.h"
@@ -8,7 +31,7 @@
 #include <iomanip>
 #include <cmath>
 
-#ifdef KFParticleInRoot
+#ifndef KFParticleStandalone
 ClassImp(KFParticleTest)
 #endif
 
@@ -76,7 +99,9 @@ void KFParticleTest::RunTestSingle()
 
   ///  *****************************************************************************************
   
+#ifdef HomogeneousField  
   KFParticle::SetField(4.9797992706298828);
+#endif
   float point[3]={0.f};
   float b[3] = {0.f};
   p1.GetFieldValue(point,b);
@@ -192,5 +217,9 @@ void KFParticleTest::RunTestSIMD()
 }
 
 void KFParticleTest::CompareSingleAndSIMDResults()
+{
+}
+
+void KFParticleTest::PrintTutorial()
 {
 }

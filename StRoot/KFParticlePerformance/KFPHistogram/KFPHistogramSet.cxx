@@ -1,19 +1,35 @@
-//----------------------------------------------------------------------------
-// Implementation of the KFParticle class
-// .
-// @author  M.Zyzak
-// @version 1.0
-// @since   06.01.16
-// 
-// 
-//  -= Copyright &copy ALICE HLT and CBM L1 Groups =-
-//____________________________________________________________________________
+/*
+ * This file is part of KF Particle package
+ * Copyright (C) 2007-2019 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2019 University of Frankfurt
+ *               2007-2019 University of Heidelberg
+ *               2007-2019 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2007-2019 Maksym Zyzak
+ *               2007-2019 Sergey Gorbunov
+ *
+ * KF Particle is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * KF Particle is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #include "KFPHistogramSet.h"
 #include "KFPartEfficiencies.h"
 
 KFPHistogramSet::KFPHistogramSet(int iPart)
 {
+  /** Creates a set of histograms for the given particle specie. 
+   ** \param[in] iPart - number of the particle specie in the KF Particle Finder scheme
+   ** \see KFPartEfficiencies for the definition of "iPart". 
+   **/
   KFPartEfficiencies fParteff;
   std::string parName[NHisto1D] = {"M","p","p_{t}","y","DecayL","c#tau","chi2ndf","prob","#theta","phi","X","Y","Z","R", "L", "l/dl","Multiplicity"};
 #ifdef CBM
@@ -127,6 +143,9 @@ KFPHistogramSet::KFPHistogramSet(int iPart)
 
 void KFPHistogramSet::SetHistogramMemory(int* pointer)
 {
+  /** Sets a pointer to the memory allocated externally for the current set of histograms.
+   ** \param[in] pointer - pointer to the memory
+   **/
   for(int i=0; i<NHisto1D; i++)
   {
     fKFPHistogram1D[i].SetHistogramMemory(pointer);
@@ -135,7 +154,10 @@ void KFPHistogramSet::SetHistogramMemory(int* pointer)
 }
 
 void KFPHistogramSet::Fill(const KFParticle& particle)
-{  
+{
+  /** Fill all possible histograms using parameters of the provided KFParticle object.
+   ** \param[in] particle - KFParticle object
+   **/  
   float mass = 0, p=0, pt=0, err = 0;
   particle.GetMass(mass, err);
   particle.GetMomentum(p, err);

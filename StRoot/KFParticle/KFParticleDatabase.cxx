@@ -1,13 +1,25 @@
-//----------------------------------------------------------------------------
-// Implementation of the KFParticle class
-// .
-// @author  I.Kisel, I.Kulakov, M.Zyzak
-// @version 1.0
-// @since   20.08.13
-// 
-// 
-//  -= Copyright &copy ALICE HLT and CBM L1 Groups =-
-//____________________________________________________________________________
+/*
+ * This file is part of KF Particle package
+ * Copyright (C) 2007-2019 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2019 University of Frankfurt
+ *               2007-2019 University of Heidelberg
+ *               2007-2019 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2007-2019 Maksym Zyzak
+ *               2007-2019 Sergey Gorbunov
+ *
+ * KF Particle is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * KF Particle is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #include "KFParticleDatabase.h"
 
@@ -39,6 +51,9 @@ KFParticleDatabase::KFParticleDatabase():
   fMassDPlusPDGSigma(0.0115)
 #endif
 {
+  /** The default constructor. Initialises masses and widths of the peaks. 
+   ** Be aware, that widths of the peaks are experiment specific.
+   **/
   fMass[0] = 0.000510999;
   fMass[1] = 0.105658;
   fMass[2] = 0.13957;
@@ -78,10 +93,10 @@ KFParticleDatabase::KFParticleDatabase():
   fMassSecPDGSigma[0]=3.7e-3; //2.2e-3;
   fMassSecPDGSigma[1]=1.5e-3; //1.2e-3;
   fMassSecPDGSigma[2]=2.0e-3;  
-#else 
-  fMassSecPDGSigma[0]=4.9e-3; //TODO tune
+#else //STAR
+  fMassSecPDGSigma[0]=4.9e-3;
   fMassSecPDGSigma[1]=2.1e-3;
-  fMassSecPDGSigma[2]=2.1e-3; //TODO tune
+  fMassSecPDGSigma[2]=2.1e-3;
 #endif
   fMassSecPDGSigma[3]=6.0e-3; //TODO tune //Gamma
   fMassSecPDGSigma[4]=2.1e-3; //Omega

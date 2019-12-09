@@ -1,13 +1,25 @@
-//----------------------------------------------------------------------------
-// Implementation of the KFParticle class
-// .
-// @author  I.Kisel, I.Kulakov, M.Zyzak
-// @version 1.0
-// @since   20.08.13
-// 
-// 
-//  -= Copyright &copy ALICE HLT and CBM L1 Groups =-
-//____________________________________________________________________________
+/*
+ * This file is part of KF Particle package
+ * Copyright (C) 2007-2019 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2019 University of Frankfurt
+ *               2007-2019 University of Heidelberg
+ *               2007-2019 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2007-2019 Maksym Zyzak
+ *               2007-2019 Sergey Gorbunov
+ *
+ * KF Particle is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * KF Particle is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 
 
@@ -24,6 +36,11 @@ KFParticleSIMD::KFParticleSIMD( const KFParticleSIMD &d1, const KFParticleSIMD &
 , fField()
 #endif
 {
+  /** Constructs a particle from two input daughter particles
+   ** \param[in] d1 - the first daughter particle
+   ** \param[in] d2 - the second daughter particle
+   **/
+    
   KFParticleSIMD mother;
   mother+= d1;
   mother+= d2;
@@ -32,22 +49,24 @@ KFParticleSIMD::KFParticleSIMD( const KFParticleSIMD &d1, const KFParticleSIMD &
 
 void KFParticleSIMD::Create( const float_v Param[], const float_v Cov[], int_v Charge, float_v mass /*Int_t PID*/ )
 {
-  // Constructor from "cartesian" track, PID hypothesis should be provided
-  //
-  // Param[6] = { X, Y, Z, Px, Py, Pz } - position and momentum
-  // Cov [21] = lower-triangular part of the covariance matrix:
-  //
-  //                (  0  .  .  .  .  . )
-  //                (  1  2  .  .  .  . )
-  //  Cov. matrix = (  3  4  5  .  .  . ) - numbering of covariance elements in Cov[]
-  //                (  6  7  8  9  .  . )
-  //                ( 10 11 12 13 14  . )
-  //                ( 15 16 17 18 19 20 )
+  /** Constructor from a "cartesian" track, mass hypothesis should be provided
+   **
+   ** \param[in] Param[6] = { X, Y, Z, Px, Py, Pz } - position and momentum
+   ** \param[in] Cov[21]  - lower-triangular part of the covariance matrix:@n
+   ** \verbatim
+             (  0  .  .  .  .  . )
+             (  1  2  .  .  .  . )
+   Cov[21] = (  3  4  5  .  .  . )
+             (  6  7  8  9  .  . )
+             ( 10 11 12 13 14  . )
+             ( 15 16 17 18 19 20 )
+   \endverbatim
+   ** \param[in] Charge - charge of the particle in elementary charge units
+   ** \param[in] mass - the mass hypothesis
+   **/
+  
   float_v C[21];
   for( int i=0; i<21; i++ ) C[i] = Cov[i];
-  
-//  TParticlePDG* particlePDG = TDatabasePDG::Instance()->GetParticle(PID);
-//  float_v mass = (particlePDG) ? particlePDG->Mass() :0.13957;
   
   KFParticleBaseSIMD::Initialize( Param, C, Charge, mass );
 }
@@ -57,6 +76,11 @@ KFParticleSIMD::KFParticleSIMD( const KFPTrack *track, Int_t PID ): KFParticleBa
 , fField()
 #endif
 {
+  /** Constructor of the particle from an array of tracks.
+   ** \param[in] track - pointer to the array of n=float_vLen tracks
+   ** \param[in] PID - the PID hypothesis common for all elements of the SIMD vector
+   **/
+  
   Double_t r[3];
   Double_t C[21];
 
@@ -89,6 +113,11 @@ KFParticleSIMD::KFParticleSIMD(KFPTrack &Track, const Int_t *pdg): KFParticleBas
 , fField()
 #endif
 {
+  /** Constructor of the particle from a single track. The same track is put to each element of the SIMD vector.
+   ** \param[in] Track - track in the KFPTrack format
+   ** \param[in] PID - the PID hypothesis common for all elements of the SIMD vector
+   **/
+  
   Double_t r[3];
   Double_t C[21];
 
@@ -115,6 +144,13 @@ KFParticleSIMD::KFParticleSIMD(KFPTrackVector &track, int n, const Int_t *pdg): 
 , fField()
 #endif
 {
+  /** Constructor of the particle from a single track with index "n" stored in the KFPTrackVector format. 
+   ** The same track is put to each element of the SIMD vector.
+   ** \param[in] track - an array with tracks in the KFPTrackVector format
+   ** \param[in] n - index of the track to be used
+   ** \param[in] pdg - pointer to the pdg hypothesis
+   **/
+  
   for(int i=0; i<6; i++)
     fP[i] = track.Parameter(i)[n];
   for(int i=0; i<21; i++)
@@ -135,11 +171,22 @@ KFParticleSIMD::KFParticleSIMD(KFPTrack* Track[], int NTracks, const Int_t *pdg)
 , fField()
 #endif
 {
+  /** Constructor of the particle from an array tracks.
+   ** \param[in] Track - an array of pointers to tracks in the KFPTrack format
+   ** \param[in] NTracks - number of tracks in the arry
+   ** \param[in] pdg - pointer to the pdg hypothesis common for all elements of the SIMD vector
+   **/
   Create(Track, NTracks, pdg);
 }
 
 void KFParticleSIMD::Create(KFPTrack* Track[], int NTracks, const Int_t *pdg)
 {
+  /** Create a particle from from an array tracks.
+   ** \param[in] Track - an array of pointers to tracks in the KFPTrack format
+   ** \param[in] NTracks - number of tracks in the arry
+   ** \param[in] pdg - pointer to the pdg hypothesis common for all elements of the SIMD vector
+   **/
+  
   Double_t r[3];
   Double_t C[21];
 
@@ -174,11 +221,25 @@ KFParticleSIMD::KFParticleSIMD(KFPTrackVector &track, uint_v& index, const int_v
 , fField()
 #endif
 {
+  /** Constructor of the particle from a set of tracks with random indices "index" stored in the KFPTrackVector format.
+   ** \param[in] track - an array with tracks in the KFPTrackVector format
+   ** \param[in] index - indices of the tracks to be converted to the KFParticleSIMD object
+   ** \param[in] pdg - a SIMD vector with an individual pdg hypothesis for each element
+   **/
+  
   Create(track, index, pdg);
 }
 
 void KFParticleSIMD::Create(KFPTrackVector &track, uint_v& index, const int_v& pdg)
 {
+  /** Create a particle from a set of tracks with indices "index" stored in the KFPTrackVector format.
+   ** The function should be used in case if indices are random. If they are aligned please use function Load()
+   ** that will benefit of the aligned memory reading and result in a faster code.
+   ** \param[in] track - an array with tracks in the KFPTrackVector format
+   ** \param[in] index - indices of the tracks to be converted to the KFParticleSIMD object
+   ** \param[in] pdg - a SIMD vector with an individual pdg hypothesis for each element
+   **/
+  
   for(int i=0; i<6; i++)
     fP[i].gather(&(track.Parameter(i)[0]), index);
   for(int i=0; i<21; i++)
@@ -197,6 +258,13 @@ void KFParticleSIMD::Create(KFPTrackVector &track, uint_v& index, const int_v& p
 
 void KFParticleSIMD::Load(KFPTrackVector &track, int index, const int_v& pdg)
 {
+  /** Create a particle from a set of consequetive tracks stored in the KFPTrackVector format
+   ** starting from the index "index".
+   ** \param[in] track - an array with tracks in the KFPTrackVector format
+   ** \param[in] index - index of the first track
+   ** \param[in] pdg - a SIMD vector with an individual pdg hypothesis for each element
+   **/
+  
   for(int i=0; i<6; i++)
     fP[i] = reinterpret_cast<const float_v&>(track.Parameter(i)[index]);
   for(int i=0; i<21; i++)
@@ -215,6 +283,8 @@ void KFParticleSIMD::Load(KFPTrackVector &track, int index, const int_v& pdg)
 
 void KFParticleSIMD::Rotate()
 {
+  /** Rotates the entries of each SIMD vector of the data members. */
+  
   for(int i=0; i<7; i++)
     fP[i] = fP[i].rotated(1);
   for(int i=0; i<27; i++)
@@ -232,11 +302,25 @@ KFParticleSIMD::KFParticleSIMD(KFPEmcCluster &track, uint_v& index, const KFPart
 , fField()
 #endif
 {
+  /** Constructor of gamma particles from a set of clusters of the electromagnetic calorimeter (EMC) 
+   ** with random indices "index". The vertex hypothesis should be provided for the estimation of the momentum.
+   ** \param[in] track - an array of EMC clusters
+   ** \param[in] index - indices of the clusters to be converted to the KFParticleSIMD object
+   ** \param[in] vertexGuess - vertex guess for estimation of the momentum of created gamma particles
+   **/
+  
   Create(track, index, vertexGuess);
 }
 
 void KFParticleSIMD::Create(KFPEmcCluster &track, uint_v& index, const KFParticleSIMD& vertexGuess)
 {
+  /** Creates gamma particles from a set of clusters of the electromagnetic calorimeter (EMC) 
+   ** with random indices "index". The vertex hypothesis should be provided for the estimation of the momentum.
+   ** \param[in] track - an array of EMC clusters
+   ** \param[in] index - indices of the clusters to be converted to the KFParticleSIMD object
+   ** \param[in] vertexGuess - vertex guess for estimation of the momentum of created gamma particles
+   **/
+  
   for(int i=0; i<3; i++)
     fP[i].gather(&(track.Parameter(i)[0]), index);
   fP[6].gather(&(track.Parameter(3)[0]), index);
@@ -300,11 +384,25 @@ KFParticleSIMD::KFParticleSIMD(KFPEmcCluster &track, int index, const KFParticle
 , fField()
 #endif
 {
+  /** Constructr gamma particles from a set of consequetive clusters of the electromagnetic calorimeter (EMC) 
+   ** starting from the index "index". The vertex hypothesis should be provided for the estimation of the momentum.
+   ** \param[in] track - an array with tracks in the KFPTrackVector format
+   ** \param[in] index - index of the first EMC cluster
+   ** \param[in] vertexGuess - vertex guess for estimation of the momentum of created gamma particles
+   **/
+  
   Load(track, index, vertexGuess);
 }
 
 void KFParticleSIMD::Load(KFPEmcCluster &track, int index, const KFParticleSIMD& vertexGuess)
 {
+  /** Create gamma particles from a set of consequetive clusters of the electromagnetic calorimeter (EMC) 
+   ** starting from the index "index". The vertex hypothesis should be provided for the estimation of the momentum.
+   ** \param[in] track - an array with tracks in the KFPTrackVector format
+   ** \param[in] index - index of the first EMC cluster
+   ** \param[in] vertexGuess - vertex guess for estimation of the momentum of created gamma particles
+   **/
+  
   for(int i=0; i<3; i++)
     fP[i] = reinterpret_cast<const float_v&>(track.Parameter(i)[index]);
   fP[6] = reinterpret_cast<const float_v&>(track.Parameter(3)[index]);
@@ -367,8 +465,10 @@ KFParticleSIMD::KFParticleSIMD( const KFPVertex &vertex ): KFParticleBaseSIMD()
 , fField()
 #endif
 {
-  // Constructor from ALICE vertex
-
+  /** Copies a vertex in KFPVertex into each element of the vectorised KFParticle
+   ** \param[in] vertex - vertex to b converted
+   **/
+  
   Double_t r[3];
   Double_t C[21];
 
@@ -387,6 +487,12 @@ KFParticleSIMD::KFParticleSIMD( const KFPVertex &vertex ): KFParticleBaseSIMD()
 
 void KFParticleSIMD::SetOneEntry(int iEntry, KFParticleSIMD& part, int iEntryPart)
 {
+  /** Copies one element of the KFParticleSIMD to one element of another KFParticleSIMD.
+   ** \param[in] iEntry - index of the element of the current track, where the data will be copied
+   ** \param[in] part - particle, element of which should be copied to the current particle
+   ** \param[in] iEntryPart - index of the element of particle part, which should be copied to the current particle
+   **/
+  
   for( int i = 0; i < 7; ++i )
     fP[i][iEntry] = part.Parameters()[i][iEntryPart];
   for( int i = 0; i < 36; ++i )
@@ -420,6 +526,11 @@ KFParticleSIMD::KFParticleSIMD(KFParticle* parts[], const int nPart): KFParticle
 , fField()
 #endif
 {
+  /** Constructs a vectoriesd particle from an array of scalar KFParticle objects.
+   ** \param[in] parts - array of scalar KFParticle objects
+   ** \param[in] nPart - number of particles in the array
+   **/
+  
   { // check
     bool ok = 1;
 
@@ -428,7 +539,6 @@ KFParticleSIMD::KFParticleSIMD(KFParticle* parts[], const int nPart): KFParticle
       const KFParticle &part = *(parts[ie]);
       ok &= part.NDaughters() == nD;
     }
-//    assert(ok);
     if (!ok) {
       std::cout << " void CbmKFParticle_simd::Create(CbmKFParticle *parts[], int N) " << std::endl;
       exit(1);
@@ -466,7 +576,10 @@ KFParticleSIMD::KFParticleSIMD( KFParticle &part): KFParticleBaseSIMD()
 , fField()
 #endif
 {
-
+  /** Constructs a vectoriesd particle from a single scalar KFParticle object. The same particle is copied to each element.
+   ** \param[in] part - a scalar particle which should be copied to the current vectorised particle
+   **/
+  
  fId = part.Id();
  fNDF = part.GetNDF();
  fChi2 = part.GetChi2();
@@ -491,8 +604,14 @@ KFParticleSIMD::KFParticleSIMD( KFParticle &part): KFParticleBaseSIMD()
 
 float_m KFParticleSIMD::GetDistanceFromVertexXY( const float_v vtx[], const float_v Cv[], float_v &val, float_v &err ) const
 {
-  //* Calculate DCA distance from vertex (transverse impact parameter) in XY
-  //* v = [xy], Cv=[Cxx,Cxy,Cyy ]-covariance matrix
+  /** Calculates the DCA distance from a vertex together with the error in the XY plane.
+   ** Returns "true" if calculation is failed, "false" if both value and the error are well defined.
+   **
+   ** \param[in] vtx[2] - { X, Y } coordinates of the vertex
+   ** \param[in] Cv[3] - lower-triangular part of the covariance matrix of the vertex
+   ** \param[out] val - the distance in the XY plane to the vertex
+   ** \param[out] err - the error of the calculated distance, takes into account errors of the particle and vertex
+   **/
   
   float_v mP[8];
   float_v mC[36];
@@ -537,29 +656,48 @@ float_m KFParticleSIMD::GetDistanceFromVertexXY( const float_v vtx[], const floa
 
 float_m KFParticleSIMD::GetDistanceFromVertexXY( const float_v vtx[], float_v &val, float_v &err ) const
 {
+  /** Calculates the DCA distance from a vertex together with the error in the XY plane.
+   ** Returns "true" if calculation is failed, "false" if both value and the error are well defined.
+   ** \param[in] vtx[2] - { X, Y } coordinates of the vertex
+   ** \param[out] val - the distance in the XY plane to the vertex
+   ** \param[out] err - the error of the calculated distance, takes into account errors of the particle only
+   **/
   return GetDistanceFromVertexXY( vtx, 0, val, err );
 }
 
 
 float_m KFParticleSIMD::GetDistanceFromVertexXY( const KFParticleSIMD &Vtx, float_v &val, float_v &err ) const 
 {
-  //* Calculate distance from vertex [cm] in XY-plane
-
+  /** Calculates the DCA distance from a vertex in the KFParticle format together with the error in the XY plane.
+   ** Returns "true" if calculation is failed, "false" if both value and the error are well defined.
+   ** \param[in] Vtx - the vertex in the KFParticle format
+   ** \param[out] val - the distance in the XY plane to the vertex
+   ** \param[out] err - the error of the calculated distance, takes into account errors of the particle and vertex
+   **/
+  
   return GetDistanceFromVertexXY( Vtx.fP, Vtx.fC, val, err );
 }
 
 #ifdef HomogeneousField
 float_m KFParticleSIMD::GetDistanceFromVertexXY( const KFPVertex &Vtx, float_v &val, float_v &err ) const 
 {
-  //* Calculate distance from vertex [cm] in XY-plane
-
+  /** Calculates the DCA distance from a vertex in the KFPVertex format together with the error in the XY plane.
+   ** Returns "true" if calculation is failed, "false" if both value and the error are well defined.
+   ** \param[in] Vtx - the vertex in the KFPVertex format
+   ** \param[out] val - the distance in the XY plane to the vertex
+   ** \param[out] err - the error of the calculated distance, takes into account errors of the particle and vertex
+   **/
+  
   return GetDistanceFromVertexXY( KFParticleSIMD(Vtx), val, err );
 }
 #endif
 
 float_v KFParticleSIMD::GetDistanceFromVertexXY( const float_v vtx[] ) const
 {
-  //* Calculate distance from vertex [cm] in XY-plane
+  /** Returns the DCA distance from a vertex in the XY plane.
+   ** \param[in] vtx[2] - { X, Y } coordinates of the vertex
+   **/
+
   float_v val, err;
   GetDistanceFromVertexXY( vtx, 0, val, err );
   return val;
@@ -567,24 +705,30 @@ float_v KFParticleSIMD::GetDistanceFromVertexXY( const float_v vtx[] ) const
 
 float_v KFParticleSIMD::GetDistanceFromVertexXY( const KFParticleSIMD &Vtx ) const 
 {
-  //* Calculate distance from vertex [cm] in XY-plane
-
+  /** Returns the DCA distance from a vertex in the KFParticle format in the XY plane.
+   ** \param[in] Vtx - the vertex in the KFParticle format
+   **/
+  
   return GetDistanceFromVertexXY( Vtx.fP );
 }
 
 #ifdef HomogeneousField
 float_v KFParticleSIMD::GetDistanceFromVertexXY( const KFPVertex &Vtx ) const 
 {
-  //* Calculate distance from vertex [cm] in XY-plane
-
+  /** Returns the DCA distance from a vertex in the KFParticle format in the XY plane.
+   ** \param[in] Vtx - the vertex in the KFPVertex format
+   **/
+  
   return GetDistanceFromVertexXY( KFParticleSIMD(Vtx).fP );
 }
 #endif
 
 float_v KFParticleSIMD::GetDistanceFromParticleXY( const KFParticleSIMD &p ) const 
 {
-  //* Calculate distance to other particle [cm]
-
+  /** Returns the DCA distance between the current and the second particles in the XY plane.
+   ** \param[in] p - the second particle
+   **/
+  
   float_v dS[2];
   float_v dsdr[4][6];
   GetDStoParticle( p, dS, dsdr );   
@@ -598,8 +742,10 @@ float_v KFParticleSIMD::GetDistanceFromParticleXY( const KFParticleSIMD &p ) con
 
 float_v KFParticleSIMD::GetDeviationFromParticleXY( const KFParticleSIMD &p ) const 
 {
-  //* Calculate sqrt(Chi2/ndf) deviation from other particle
-
+  /** Returns sqrt(Chi2/ndf) deviation from other particle in the XY plane.
+   ** \param[in] p - the second particle
+   **/
+  
   float_v ds[2] = {0.f,0.f};
   float_v dsdr[4][6];
   float_v F1[36], F2[36], F3[36], F4[36];
@@ -637,9 +783,11 @@ float_v KFParticleSIMD::GetDeviationFromParticleXY( const KFParticleSIMD &p ) co
 
 float_v KFParticleSIMD::GetDeviationFromVertexXY( const float_v vtx[], const float_v Cv[] ) const 
 {
-  //* Calculate sqrt(Chi2/ndf) deviation from vertex
-  //* v = [xyz], Cv=[Cxx,Cxy,Cyy,Cxz,Cyz,Czz]-covariance matrix
-
+  /** Returns sqrt(Chi2/ndf) deviation from the vertex in the XY plane.
+   ** \param[in] vtx[2] - { X, Y } coordinates of the vertex
+   ** \param[in] Cv[3] - lower-triangular part of the covariance matrix of the vertex
+   **/
+  
   float_v mP[8];
   float_v mC[36];
   float_v dsdr[6] = {0.f,0.f,0.f,0.f,0.f,0.f};
@@ -695,18 +843,20 @@ float_v KFParticleSIMD::GetDeviationFromVertexXY( const float_v vtx[], const flo
 
 float_v KFParticleSIMD::GetDeviationFromVertexXY( const KFParticleSIMD &Vtx ) const  
 {
-  //* Calculate sqrt(Chi2/ndf) deviation from vertex
-  //* v = [xyz], Cv=[Cxx,Cxy,Cyy,Cxz,Cyz,Czz]-covariance matrix
-
+  /** Returns sqrt(Chi2/ndf) deviation from the vertex in the KFParticle format in the XY plane.
+   ** \param[in] Vtx - the vertex in the KFParticle format
+   **/
+  
   return GetDeviationFromVertexXY( Vtx.fP, Vtx.fC );
 }
 
 #ifdef HomogeneousField
 float_v KFParticleSIMD::GetDeviationFromVertexXY( const KFPVertex &Vtx ) const 
 {
-  //* Calculate sqrt(Chi2/ndf) deviation from vertex
-  //* v = [xyz], Cv=[Cxx,Cxy,Cyy,Cxz,Cyz,Czz]-covariance matrix
-
+  /** Returns sqrt(Chi2/ndf) deviation from the vertex in the KFPVertex format in the XY plane.
+   ** \param[in] Vtx - the vertex in the KFPVertex format
+   **/
+  
   KFParticleSIMD v(Vtx);
   return GetDeviationFromVertexXY( v.fP, v.fC );
 }
@@ -714,8 +864,10 @@ float_v KFParticleSIMD::GetDeviationFromVertexXY( const KFPVertex &Vtx ) const
 
 float_v KFParticleSIMD::GetAngle  ( const KFParticleSIMD &p ) const 
 {
-  //* Calculate the opening angle between two particles
-
+  /** Returns the opening angle between the current and the second particle in 3D.
+   ** \param[in] p - the second particle
+   **/
+  
   float_v ds[2] = {0.f,0.f};
   float_v dsdr[4][6];
   GetDStoParticle( p, ds, dsdr );   
@@ -738,8 +890,10 @@ float_v KFParticleSIMD::GetAngle  ( const KFParticleSIMD &p ) const
 
 float_v KFParticleSIMD::GetAngleXY( const KFParticleSIMD &p ) const 
 {
-  //* Calculate the opening angle between two particles in XY plane
-
+  /** Returns the opening angle between the current and the second particle in the XY plane.
+   ** \param[in] p - the second particle
+   **/
+  
   float_v ds[2] = {0.f,0.f};
   float_v dsdr[4][6];
   GetDStoParticle( p, ds, dsdr );   
@@ -763,8 +917,10 @@ float_v KFParticleSIMD::GetAngleXY( const KFParticleSIMD &p ) const
 
 float_v KFParticleSIMD::GetAngleRZ( const KFParticleSIMD &p ) const 
 {
-  //* Calculate the opening angle between two particles in RZ plane
-
+  /** Returns the opening angle between the current and the second particle in the RZ plane, R = sqrt(X*X+Y*Y).
+   ** \param[in] p - the second particle
+   **/
+  
   float_v ds[2] = {0.f,0.f};
   float_v dsdr[4][6];
   GetDStoParticle( p, ds, dsdr );   
@@ -787,9 +943,15 @@ float_v KFParticleSIMD::GetAngleRZ( const KFParticleSIMD &p ) const
   return a;
 }
 
-  // * Pseudo Proper Time of decay = (r*pt) / |pt| * M/|pt|
 float_v KFParticleSIMD::GetPseudoProperDecayTime( const KFParticleSIMD &pV, const float_v& mass, float_v* timeErr2 ) const
-{ // TODO optimize with respect to time and stability
+{ 
+  /** Returns the Pseudo Proper Time of the decay = (r*pt) / |pt| * M/|pt|
+   **
+   ** \param[in] pV - the creation point of the particle
+   ** \param[in] mass - the mass of the particle
+   ** \param[out] timeErr2 - error of the returned value, if null pointer is provided - is not calculated
+   **/
+  
   const float_v ipt2 = 1/( Px()*Px() + Py()*Py() );
   const float_v mipt2 = mass*ipt2;
   const float_v dx = X() - pV.X();
@@ -846,6 +1008,11 @@ float_v KFParticleSIMD::GetPseudoProperDecayTime( const KFParticleSIMD &pV, cons
 
 void KFParticleSIMD::GetKFParticle(KFParticle &Part, int iPart)
 {
+  /** Copies an entry "iPart" of the current vectorised particle to the scalar KFParticle object.
+   ** \param[out] Part - an output scalar particle, where element "iPart" will be copied
+   ** \param[in] iPart - index of the element to be copied to the scalar particle
+   **/
+  
   Part.SetId(static_cast<int>(Id()[iPart]));
 
   Part.CleanDaughtersId();
@@ -871,6 +1038,11 @@ void KFParticleSIMD::GetKFParticle(KFParticle &Part, int iPart)
 
 void KFParticleSIMD::GetKFParticle(KFParticle* Part, int nPart)
 {
+  /** Copies "nPart" elements of the current vectorised particle to the array of scalar KFParticle objects.
+   ** \param[out] Part - an output array of scalar particles
+   ** \param[in] nPart - number of elements to be copied to the array of scalar objects
+   **/
+  
   for(int i=0; i<nPart; i++)
     GetKFParticle(Part[i],i);
 }

@@ -1,19 +1,25 @@
-//---------------------------------------------------------------------------------
-// The KFParticleBaseSIMD class
-// .
-// @author  I.Kisel, I.Kulakov, M.Zyzak
-// @version 1.0
-// @since   13.05.07
-// 
-// Class to reconstruct and store the decayed particle parameters.
-// The method is described in CBM-SOFT note 2007-003, 
-// ``Reconstruction of decayed particles based on the Kalman filter'', 
-// http://www.gsi.de/documents/DOC-2007-May-14-1.pdf
-//
-// This class describes general mathematics which is used by KFParticle class
-// 
-//  -= Copyright &copy ALICE HLT and CBM L1 Groups =-
-//_________________________________________________________________________________
+/*
+ * This file is part of KF Particle package
+ * Copyright (C) 2007-2019 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2019 University of Frankfurt
+ *               2007-2019 University of Heidelberg
+ *               2007-2019 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2007-2019 Maksym Zyzak
+ *               2007-2019 Sergey Gorbunov
+ *
+ * KF Particle is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * KF Particle is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 
 #ifndef KFParticleDef_H
@@ -49,6 +55,16 @@ using ::Vc::asin;
 using ::Vc::round;
 using ::Vc::isfinite;
 
+#ifdef VC_VERSION_NUMBER
+#if VC_VERSION_NUMBER < VC_VERSION_CHECK(1,0,0)
+template <typename To, typename From> To simd_cast(From &&x) { return static_cast<To>(x); }
+#endif
+#elif defined(Vc_VERSION_NUMBER)
+#if Vc_VERSION_NUMBER < Vc_VERSION_CHECK(1,0,0)
+template <typename To, typename From> To simd_cast(From &&x) { return static_cast<To>(x); }
+#endif
+#endif
+
 const int float_vLen = float_v::Size;
 
 #if defined(HLTCA_STANDALONE)
@@ -66,10 +82,6 @@ typedef std::vector<float_v, KFPSimdAllocator<float_v> > kfvector_floatv;
 typedef std::vector<float, KFPSimdAllocator<float> > kfvector_float;
 typedef std::vector<int, KFPSimdAllocator<int> > kfvector_int;
 typedef std::vector<unsigned int, KFPSimdAllocator<unsigned int> > kfvector_uint;
-// #include "KFPVector.h"
-// typedef KFPVector<float> kfvector_float;
-// typedef KFPVector<int> kfvector_int;
-// typedef KFPVector<unsigned int> kfvector_uint;
 
 namespace KFPMath
 {
@@ -77,27 +89,24 @@ namespace KFPMath
   {
     const float_v pi(3.1415926535897932f);
     const float_v nTurnsF = (phi + pi) / (float_v(2.f)*pi);
-    int_v nTurns = int_v( nTurnsF );
-    nTurns( (nTurns<=int_v(Vc::Zero)) && int_m(phi<-pi)) -= 1;
+    int_v nTurns = simd_cast<int_v>( nTurnsF );
+    nTurns( (nTurns<=int_v(Vc::Zero)) && simd_cast<int_m>(phi<-pi)) -= 1;
     
-    const float_v& x = phi - float_v(nTurns)*(float_v(2.f)*pi);
+    const float_v& x = phi - simd_cast<float_v>(nTurns)*(float_v(2.f)*pi);
     
     const float_v& B = 4.f/pi;
     const float_v& C = -B/pi;
 
-    float_v y = (B + C * abs(x)) * x;
+    float_v y = (B + C * Vc::abs(x)) * x;
 
     const float_v& P = 0.218f;
-    y = P * (y * abs(y) - y) + y;
+    y = P * (y * Vc::abs(y) - y) + y;
     
-    return y;
-    
-//     return sin(phi);
+    return y;    
   }
   static inline __attribute__((always_inline)) float_v Cos  ( const float_v &phi )
   {     
     return Sin( phi + 1.570796326795f ); //x + pi/2
-//     return cos(phi);
   }
   static inline __attribute__((always_inline)) float_v ATan2( const float_v &y, const float_v &x )
   { 
@@ -109,8 +118,8 @@ namespace KFPMath
     const float_m &xNeg  = (x < zero);
     const float_m &yNeg  = (y < zero);
 
-    const float_v &absX = abs(x);
-    const float_v &absY = abs(y);
+    const float_v &absX = Vc::abs(x);
+    const float_v &absY = Vc::abs(y);
 
     float_v a = absY / absX;
     const float_m &gt_tan_3pi_8 = (a > float_v(2.414213562373095f));
