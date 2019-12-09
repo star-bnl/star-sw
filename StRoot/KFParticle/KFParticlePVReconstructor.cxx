@@ -1,43 +1,77 @@
-//----------------------------------------------------------------------------
-// Implementation of the KFParticle class
-// .
-// @author  I.Kisel, I.Kulakov, M.Zyzak
-// @version 1.0
-// @since   20.08.13
-// 
-// 
-//  -= Copyright &copy ALICE HLT and CBM L1 Groups =-
-//____________________________________________________________________________
+/*
+ * This file is part of KF Particle package
+ * Copyright (C) 2007-2019 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2019 University of Frankfurt
+ *               2007-2019 University of Heidelberg
+ *               2007-2019 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2007-2019 Maksym Zyzak
+ *               2007-2019 Sergey Gorbunov
+ *
+ * KF Particle is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * KF Particle is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #include "KFParticlePVReconstructor.h"
 #include "KFPTrackVector.h"
 #include "KFParticle.h"
 
-#include <iostream>
+using std::vector;
 
 void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
 {
-    // copy tracks in particles.
+  /** The function initialises an input for the search of primary vertices:\n
+   ** 1) it receives as an input an array with tracks;\n
+   ** 2) tracks are converted to KFParticle objects assuming pion mass;\n
+   ** 3) the position of the primary vertex is estimated with simplified
+   ** Kalman filter equations using all tracks; \n
+   ** 4) tracks are checked to deviate from the obtained estimation within
+   ** KFParticlePVReconstructor::fChi2CutPreparation; \n
+   ** 5) from the selected tracks a more precise estimation is obtained
+   ** using KFVertex::ConstructPrimaryVertex() with soft cut 
+   ** KFParticlePVReconstructor::fChi2CutPreparation; \n
+   ** 6) input particles are transported to the DCA point with the obtained
+   ** estimation;\n
+   ** 7) the weight for each particle is calculated according to its errors,
+   ** if errors are not defined after extrapolation or if particle 10 cm
+   ** away from the {0,0,0} point the weight of -100 is assigned.
+   ** \param[in] tracks - a pointer to the KFPTrackVector with input tracks
+   ** \param[in] nParticles - number of the input tracks
+   **/
+  
   fNParticles = nParticles;
   fParticles.resize(fNParticles);
   fWeight.resize(fNParticles);
   
+  float C[3] = {0,0,0};
+  int nC[3] = {0,0,0};
+  
   KFPTrack track;
   for ( int iTr = 0; iTr < fNParticles; iTr++ ) {
-    // {   // check cov matrix TODO
-    //   bool ok = true;  
-    //   int k = 0;
-    //   for (int i = 0; i < 6; i++) {
-    //     for (int j = 0; j <= i; j++, k++) {
-    //       ok &= finite( KFPCov[k] );
-    //     }
-    //     ok &= ( KFPCov[k-1] > 0 );
-    //   }
-    //   if (!ok) continue;
-    // }
     tracks->GetTrack(track,iTr);
-    fParticles[iTr] = KFParticle( track, 211 ); // pi+ // TODO include PDG in KFPTrack?
+    fParticles[iTr] = KFParticle( track, 211 );
     fParticles[iTr].AddDaughterId(track.Id());
+    float zeroPoint[3]{0,0,0};
+    fParticles[iTr].TransportToPoint(zeroPoint);
+    
+    for(int iC=0; iC<3; iC++)
+    {
+      if(!(fParticles[0].Covariance(iC,iC)==fParticles[0].Covariance(iC,iC))) continue; 
+      if(fParticles[0].Covariance(iC,iC) < 10.f && fParticles[0].Covariance(iC,iC) > 0.f )
+      {
+        C[iC] += fParticles[0].Covariance(iC,iC);
+        nC[iC]++;
+      }
+    }
   }
   
   fPrimVertices.clear();
@@ -49,11 +83,18 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
   float parTmp[8] = {0.};
   float covTmp[36] = {0.};
   
+  for(int iC=0; iC<3; iC++)
+  {
+    if(nC[iC] >0)
+      C[iC] /= nC[iC];
+    else
+      C[iC] = 1.e-2;
+  }
+  
   for(int iIter=0; iIter<3; iIter++)
   {
-    float C[3] = {100.,100.,100.};
+    C[0]*=100.f; C[1]*=100.f; C[2]*=100.f;
     for ( int iTr = 0; iTr < fNParticles; iTr++ ) {
-      
       float ds = 0.f;
       float dsdr[6] = {0.f};
       if(iIter>0)
@@ -61,10 +102,11 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
       fParticles[iTr].Transport( ds, dsdr, parTmp, covTmp);
 
       float r2 = parTmp[0]*parTmp[0] + parTmp[1]*parTmp[1];
-      if(r2!=r2) continue;
-      if(r2 > 100 ) continue;  
+      if(!(r2==r2)) continue;
+      if(r2 > 25 ) continue;  
       
       const float V[3] = {covTmp[0], covTmp[2], covTmp[5]}; 
+      
       for(int iComp=0; iComp<3; iComp++)
       {
         float K = C[iComp]/(C[iComp]+V[iComp]);
@@ -72,6 +114,8 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
         if(C[iComp] > 16*V[iComp])
           K = 1.f - V[iComp]/C[iComp];
         const float dzeta = parTmp[iComp]-pvEstimation[iComp];
+        if(K!=K) continue;
+        if(K<0. || K>0.999) continue;
         pvEstimation[iComp] += K*dzeta;
         C[iComp] -= K*C[iComp];
       }
@@ -81,51 +125,9 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
     pvEstimationTr[2] = pvEstimation[2];
   }
 
-  {
-    int nPrimCand = fParticles.size();
-
-    const KFParticle **pParticles = new const KFParticle*[nPrimCand+1]; // tmp array
-    bool *vFlags = new bool[nPrimCand];  // flags returned by the vertex finder
-
-    KFVertex primVtx;
-//     primVtx.SetVtxGuess(pvEstimation[0], pvEstimation[1], pvEstimation[2]);
-    primVtx.X() = pvEstimation[0];
-    primVtx.Y() = pvEstimation[1];
-    primVtx.Z() = pvEstimation[2];
-    
-    nPrimCand = 0;
-    for ( unsigned int iP = 0; iP < fParticles.size(); iP++ )
-    {
-      const KFParticle &p = fParticles[iP];
-      float chi = p.GetDeviationFromVertex( primVtx );      
-       
-      bool isBadDaughter=0;
-      for(int iParam=0; iParam<8; iParam++)
-        isBadDaughter|= p.GetParameter(iParam) != p.GetParameter(iParam);
-      for(int iC=0; iC<36; iC++)
-        isBadDaughter|= p.GetCovariance(iC) != p.GetCovariance(iC);
-
-      if( chi >= fChi2CutPreparation || isBadDaughter)
-         continue;
-      
-      pParticles[nPrimCand] = &fParticles[iP];
-      vFlags[nPrimCand] = 1;
-      nPrimCand++;
-    }
-  
-    primVtx.SetConstructMethod(0);
-    primVtx.ConstructPrimaryVertex( pParticles, nPrimCand, vFlags, fChi2CutPreparation );
-      
-    delete [] pParticles;
-    delete [] vFlags;
-    pvEstimation[0] = primVtx.GetX();
-    pvEstimation[1] = primVtx.GetY();
-    pvEstimation[2] = primVtx.GetZ();
-  }
-
   for(int iP=0; iP<fNParticles; iP++)
   {
-//     fParticles[iP].TransportToPoint(pvEstimation);
+    fParticles[iP].TransportToPoint(pvEstimation);
 
     fWeight[iP] = fParticles[iP].CovarianceMatrix()[0]
       + fParticles[iP].CovarianceMatrix()[2] + fParticles[iP].CovarianceMatrix()[5];
@@ -141,9 +143,24 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
 
 void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
 {
-  // The function finds a set of clusters of tracks.
-  // Tracks are assumed to be transported to the beam line.
-  // If a beam line is set - it will be used for a reconstruction but will not be added to a daughter cluster
+  /** The functions searches for a set of clusters of particles - candidates for the primary
+   ** vertex:\n
+   ** 1) input particles are assumed to be transported to the beam line or target position;\n
+   ** 2) at first, the best particle with the highest weight is selected;\n
+   ** 3) then a cluster is formed around this particle;\n
+   ** 4) if a beam line is set it is used for the reconstruction as an additional track,
+   ** but will not be added to the resulting cluster of daughter particles;\n
+   ** 5) the primary vertex candidate is fitted with KFVertex::ConstructPrimaryVertex()
+   ** using KFParticlePVReconstructor::fChi2Cut;\n
+   ** 6) cluster is cleaned from particles deviating more then the fChi2Cut from the fitted
+   ** candidate;\n
+   ** 7) the cluster and the vertex candidate are stored if they satisfy the provided cutNDF;\n
+   ** 8) the procedure is repeated until not used tracks with well-defined weight are left.
+   ** 
+   ** \param[in] cutNDF - cut on the number of degrees of freedom (effectively - number of
+   ** particles used for the reconstruction), if resulting NDF is smaller then this cut - 
+   ** the PV-candidate is rejected
+   **/
 
   if( IsBeamLine() )
     cutNDF += 2;
@@ -190,8 +207,8 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
     for(unsigned short int iTr = 0; iTr < nNotUsedTracks; iTr++)
     {
       unsigned short int &curTrack = (*notUsedTracksPtr)[iTr];
-
-      if( ( fParticles[curTrack].GetDeviationFromVertex(rBest, covBest) < fChi2CutPreparation && fWeight[curTrack] > -1.f) || curTrack == bestTrack)
+      float chi2deviation = fParticles[curTrack].GetDeviationFromVertex(rBest, covBest);
+      if( ( chi2deviation < fChi2CutPreparation && chi2deviation >= 0 && fWeight[curTrack] > -1.f) || curTrack == bestTrack)
       {
         for(int iP=0; iP<3; iP++)
           rVertex[iP] += fWeight[curTrack] * fParticles[curTrack].Parameters()[iP];
@@ -287,7 +304,7 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
         }
       }      
       cluster.fTracks = clearClusterInd;
-      
+
       notUsedTracksPtrSave = notUsedTracksPtr;
       notUsedTracksPtr = notUsedTracksNewPtr;
       notUsedTracksNewPtr = notUsedTracksPtrSave;
@@ -296,13 +313,12 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
       nNotUsedTracksNew = 0;
     
       // save PV
-// #ifdef CBM
+#ifdef CBM
       if( primVtx.GetNDF() >= cutNDF && ((cluster.fTracks.size()>0.1f*fNParticles && fNParticles > 30) || fNParticles<=30 ) ) //at least 2 particles
-// #else
-//       if( primVtx.GetNDF() >= cutNDF)
-// #endif
+#else
+      if( primVtx.GetNDF() >= cutNDF)
+#endif
       {
-//         std::cout << primVtx.X() << " " << primVtx.Y() << " " << primVtx.Z() << " " << cluster.fTracks.size() << std::endl;
         fPrimVertices.push_back(primVtx);
         fClusters.push_back(cluster);
       }
@@ -311,57 +327,19 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
     }
     if(pParticles) delete [] pParticles;
   }
-//   if(fClusters.size()>1)
-//   {
-//     for(int i=1; i<fClusters.size(); i++)
-//     {
-//       float dx = fClusters[0].fP[0] - fClusters[i].fP[0];
-//       float dy = fClusters[0].fP[1] - fClusters[i].fP[1];
-//       float dz = fClusters[0].fP[2] - fClusters[i].fP[2];
-// 
-//       float dr[3] = {dx, dy, dz};
-//       float cov[6] = {fClusters[0].fC[0] + fClusters[i].fC[0],
-//                       fClusters[0].fC[1] + fClusters[i].fC[1],
-//                       fClusters[0].fC[2] + fClusters[i].fC[2],
-//                       fClusters[0].fC[3] + fClusters[i].fC[3],
-//                       fClusters[0].fC[4] + fClusters[i].fC[4],
-//                       fClusters[0].fC[5] + fClusters[i].fC[5] };
-//       float dr2 = dr[0]*dr[0] + dr[1]*dr[1] + dr[2]*dr[2];
-//       float drError2 = dr[0]* (cov[0]* dr[0] + cov[1]* dr[1] + cov[3]* dr[2]) +
-//                        dr[1]* (cov[1]* dr[0] + cov[2]* dr[1] + cov[4]* dr[2]) + 
-//                        dr[2]* (cov[3]* dr[0] + cov[4]* dr[1] + cov[5]* dr[2]);
-//       drError2 /= dr2;
-//     
-//       std::cout << "Ntr 1 " << fClusters[0].fTracks.size() << " ntr2  " << fClusters[i].fTracks.size() << std::endl;
-//       std::cout << "dr2 " << dr2 << " err " << drError2 << " chi " << sqrt(dr2/drError2) << std::endl;
-//     }
-//     int ui;
-//     std::cin >> ui;
-//   }
-//   static int nVert[10]={0.};
-//   if(fClusters.size()<10)
-//     nVert[fClusters.size()]++;
-//   std::cout << "N Vert     ";
-//   for(int i=0; i<10; i++)
-//     std::cout << i << ": " << nVert[i] << "     ";
-//   std::cout << std::endl;
-// 
-//   static int nPart[10]={0.};
-//   if(fNParticles<10)
-//     nPart[fNParticles]++;
-//   std::cout << "N Part     ";
-//   for(int i=0; i<10; i++)
-//     std::cout << i << ": " << nPart[i] << "     ";
-//   std::cout << std::endl;
 }
 
 void KFParticlePVReconstructor::ReconstructPrimVertex()
 {
-
+  /** Reconstructs primary vertices and corresponding clusters of tracks.
+   ** For this it calls KFParticlePVReconstructor::FindPrimaryClusters(),
+   ** if no vertex is found empty primary vertex is used.
+   **/
+  
   FindPrimaryClusters();
 
-  if ( fPrimVertices.size() == 0 ) { // fill prim vertex by dummy values
-
+  if ( fPrimVertices.size() == 0 )
+  {
     float X=0,Y=0,Z=0;
 
     KFPVertex primVtx_tmp;
@@ -375,10 +353,10 @@ void KFParticlePVReconstructor::ReconstructPrimVertex()
     KFParticleCluster cluster;
     fClusters.push_back(cluster);
   }
-} // void KFParticlePVReconstructor::Run()
+}
 
 void KFParticlePVReconstructor::AddPV(const KFVertex &pv, const vector<int> &tracks)
-{
+{ 
   fPrimVertices.push_back(pv);
   KFParticleCluster cluster;
   cluster.fTracks = tracks;

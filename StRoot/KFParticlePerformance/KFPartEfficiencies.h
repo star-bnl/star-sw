@@ -1,13 +1,25 @@
-//----------------------------------------------------------------------------
-// Implementation of the KFParticle class
-// .
-// @author  I.Kisel, I.Kulakov, M.Zyzak
-// @version 1.0
-// @since   20.08.13
-// 
-// 
-//  -= Copyright &copy ALICE HLT and CBM L1 Groups =-
-//____________________________________________________________________________
+/*
+ * This file is part of KF Particle package
+ * Copyright (C) 2007-2019 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2019 University of Frankfurt
+ *               2007-2019 University of Heidelberg
+ *               2007-2019 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2007-2019 Maksym Zyzak
+ *               2007-2019 Sergey Gorbunov
+ *
+ * KF Particle is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * KF Particle is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #ifndef KFPartEfficiencies_H
 #define KFPartEfficiencies_H
@@ -22,41 +34,69 @@
 #include "TObject.h"
 #endif
 
+/** @class KFEfficiencyParticleInfo
+ ** @brief A helper class to define parameters of the decay list in KFPartEfficiencies.
+ ** @author  M.Zyzak, I.Kisel
+ ** @date 05.02.2019
+ ** @version 1.0
+ **/
+
 class KFEfficiencyParticleInfo
 {
  public:
   KFEfficiencyParticleInfo():fName("null"),fTitle("null"),fPDG(0),fHistoMin(0.f),fHistoMax(0.f),fMass(0.f),fLifeTime(0.f),fCharge(0), fMassSigma(0.001) {};
+  /** \brief Constructor with all parameters set in. There is no other way to define the parameters other then use this constructor.*/
   KFEfficiencyParticleInfo(std::string name, std::string title, int pdg, float histoMin, float histoMax, float mass, float lifeTime, int charge, float massSigma ):
     fName(name), fTitle(title), fPDG(pdg), fHistoMin(histoMin), fHistoMax(histoMax), fMass(mass), fLifeTime(lifeTime), fCharge(charge), fMassSigma(massSigma) {};
   ~KFEfficiencyParticleInfo() {};
   
   //accessors
-  std::string Name()      const { return fName; }
-  std::string Title()     const { return fTitle; }
-  int         PDG()       const { return fPDG; }
-  float       HistoMin()  const { return fHistoMin; }
-  float       HistoMax()  const { return fHistoMax; }
-  float       Mass()      const { return fMass; }
-  float       LifeTime()  const { return fLifeTime; }
-  int         Charge()    const { return fCharge; } 
-  float       MassSigma() const { return fMassSigma; }
+  std::string Name()      const { return fName; }      ///< Returns name of the decay in the file with histograms.
+  std::string Title()     const { return fTitle; }     ///< Returns name of the decay in the output table with efficiency.
+  int         PDG()       const { return fPDG; }       ///< Returns the assigned PDG code.
+  float       HistoMin()  const { return fHistoMin; }  ///< Returns lower boundary in the mass histogram for the current decay.
+  float       HistoMax()  const { return fHistoMax; }  ///< Returns upper boundary in the mass histogram for the current decay.
+  float       Mass()      const { return fMass; }      ///< Returns table mass of the particle.
+  float       LifeTime()  const { return fLifeTime; }  ///< Returns lifetime of the particle.
+  int         Charge()    const { return fCharge; }    ///< Returns charge of the particle in units of the elementary charge.
+  float       MassSigma() const { return fMassSigma; } ///< Returns expected width of the mass peak, used in the side bands method.
   
  private:
-  std::string fName;
-  std::string fTitle;
-  int fPDG;
-  float fHistoMin;
-  float fHistoMax;
-  float fMass;
-  float fLifeTime;
-  int fCharge; 
-  float fMassSigma;
+  std::string fName;  ///< Name of the decay in the file with histograms.
+  std::string fTitle; ///< Name of the decay in the output table with efficiency.
+  int fPDG;           ///< PDG code assigned to the current decay in the scheme of KF Particle Finder.
+  float fHistoMin;    ///< Lower boundary in the mass histogram for the current decay.
+  float fHistoMax;    ///< Upper boundary in the mass histogram for the current decay.
+  float fMass;        ///< Table mass of the particle.
+  float fLifeTime;    ///< Lifetime of the particle in seconds.
+  int fCharge;        ///< Charge in units of the elementary charge.
+  float fMassSigma;   ///< Expected width of the decay, determines peak sigma for the side bands method.
 };
+
+/** @class KFPartEfficiencies
+ ** @brief Class to calculate efficiency of KF Particle Finder.
+ ** @author  M.Zyzak, I.Kisel
+ ** @date 05.02.2019
+ ** @version 1.0
+ **
+ ** The class has two main purposes:\n
+ ** 1) Defines the list of decays to be analysed: a unique code of the decay, its mass, lifetime,
+ ** a list of daughter particles, etc. See KFPartEfficiencies::KFPartEfficiencies() for more details.\n
+ ** 2) It calculates reconstruction efficiency of the decays from the KF Particle Finder scheme.\n
+ ** Definitions:\n
+ ** background - physics background, when daughter particle come from the real particle, but the pdg
+ ** hypothesis is incorrect, for example, Lambda->p pi will create a physics background for
+ ** K0s if the proton is misidentified;\n
+ ** ghost - combinatorial background, tracks do not form a real vertex;\n
+ ** clone - a particle is reconstructed several times, for example, particle track is split into 
+ ** to parts due to the multiple scattering.
+ **/
 
 class KFPartEfficiencies :public TObject
 {
  public:
 
+  /** \brief The default constructor. Defines the list of decays to be analysed and their properties. Please, see the code for indexing scheme. */
   KFPartEfficiencies():
     partDaughterPdg(0),
     names(),
@@ -79,49 +119,53 @@ class KFPartEfficiencies :public TObject
     KFEfficiencyParticleInfo particleInfo[nParticles] = 
     {
       //                       name                title               PDG code   min   max    mass       lifetime    Q
+#ifdef CBM
+      KFEfficiencyParticleInfo("Ks",               "KShort        ",        310, 0.3f, 1.3f, 0.497614   , 8.954e-11,  0, 0.0045), //0
+#else
       KFEfficiencyParticleInfo("Ks",               "KShort        ",        310, 0.3f, 1.3f, 0.497614   , 8.954e-11,  0, 0.0057), //0
+#endif
       KFEfficiencyParticleInfo("Lambda",           "Lambda        ",       3122, 1.0f, 2.0f, 1.115683   , 2.632e-10,  0, 0.0020), //1
       KFEfficiencyParticleInfo("Lambdab",          "Lambda b      ",      -3122, 1.0f, 2.0f, 1.115683   , 2.632e-10,  0, 0.0020), //2
-      KFEfficiencyParticleInfo("Xi-",              "Xi-           ",       3312, 1.0f, 3.0f, 1.32171    , 1.639e-10, -1, 0.0026), //3
-      KFEfficiencyParticleInfo("Xi+",              "Xi+           ",      -3312, 1.0f, 3.0f, 1.32171    , 1.639e-10,  1, 0.0026), //4
+      KFEfficiencyParticleInfo("Xi-",              "Xi-           ",       3312, 1.0f, 3.0f, 1.32171    , 1.639e-10, -1, 0.0022), //3
+      KFEfficiencyParticleInfo("Xi+",              "Xi+           ",      -3312, 1.0f, 3.0f, 1.32171    , 1.639e-10,  1, 0.0022), //4
       KFEfficiencyParticleInfo("Xi0",              "Xi0           ",       3322, 1.0f, 3.0f, 1.31486    , 2.9e-10,    0, 0.0030), //5
       KFEfficiencyParticleInfo("Xi0b",             "Xi0 b         ",      -3322, 1.0f, 3.0f, 1.31486    , 2.9e-10,    0, 0.0030), //6
-      KFEfficiencyParticleInfo("Omega-",           "Omega-        ",       3334, 1.0f, 3.0f, 1.67245    , 0.821e-10, -1, 0.0030), //7
-      KFEfficiencyParticleInfo("Omega+",           "Omega+        ",      -3334, 1.0f, 3.0f, 1.67245    , 0.821e-10,  1, 0.0030), //8
-      KFEfficiencyParticleInfo("#Sigma^0",         "Sigma0        ",       3212, 1.0f, 3.0f, 1.192642   , 7.4e-20,    0, 0.0030), //9
-      KFEfficiencyParticleInfo("#Sigma^0b",        "Sigma0 b      ",      -3212, 1.0f, 3.0f, 1.192642   , 7.4e-20,    0, 0.0030), //10
-      KFEfficiencyParticleInfo("#Sigma^+",         "Sigma+        ",       3222, 1.0f, 3.0f, 1.18937    , 0.8018e-10, 1, 0.0030), //11
-      KFEfficiencyParticleInfo("#Sigma^-b",        "Sigma- b      ",      -3222, 1.0f, 3.0f, 1.18937    , 0.8018e-10,-1, 0.0030), //12
-      KFEfficiencyParticleInfo("K*0",              "K*0           ",        313, 0.6f, 3.6f, 0.8958     , 1.38e-23,   0, 0.0300), //13
-      KFEfficiencyParticleInfo("K*0b",             "K*0 b         ",       -313, 0.6f, 3.6f, 0.8958     , 1.38e-23,   0, 0.0300), //14
-      KFEfficiencyParticleInfo("K*+",              "K*+           ",        323, 0.6f, 3.6f, 0.89166    , 1.30e-23,   1, 0.0300), //15
-      KFEfficiencyParticleInfo("K*-",              "K*-           ",       -323, 0.6f, 3.6f, 0.89166    , 1.30e-23,  -1, 0.0300), //16
-      KFEfficiencyParticleInfo("K*0_{K0,#pi0}",    "K*0_K0pi0     ",     100313, 0.6f, 3.6f, 0.8958     , 1.38e-23,   0, 0.0030), //17
-      KFEfficiencyParticleInfo("K*+_{K+,#pi0}",    "K*+_K+pi0     ",     100323, 0.6f, 3.6f, 0.89166    , 1.30e-23,   1, 0.0030), //18
-      KFEfficiencyParticleInfo("K*-_{K-,#pi0}",    "K*-_K-pi0     ",    -100323, 0.6f, 3.6f, 0.89166    , 1.30e-23,  -1, 0.0030), //19
+      KFEfficiencyParticleInfo("Omega-",           "Omega-        ",       3334, 1.0f, 3.0f, 1.67245    , 0.821e-10, -1, 0.0022), //7
+      KFEfficiencyParticleInfo("Omega+",           "Omega+        ",      -3334, 1.0f, 3.0f, 1.67245    , 0.821e-10,  1, 0.0022), //8
+      KFEfficiencyParticleInfo("Sigma^0",          "Sigma0        ",       3212, 1.0f, 3.0f, 1.192642   , 7.4e-20,    0, 0.0030), //9
+      KFEfficiencyParticleInfo("Sigma^0b",         "Sigma0 b      ",      -3212, 1.0f, 3.0f, 1.192642   , 7.4e-20,    0, 0.0030), //10
+      KFEfficiencyParticleInfo("Sigma^+",          "Sigma+        ",       3222, 1.0f, 3.0f, 1.18937    , 0.8018e-10, 1, 0.0030), //11
+      KFEfficiencyParticleInfo("Sigma^-b",         "Sigma- b      ",      -3222, 1.0f, 3.0f, 1.18937    , 0.8018e-10,-1, 0.0030), //12
+      KFEfficiencyParticleInfo("K*0",              "K*0           ",        313, 0.6f, 2.6f, 0.8958     , 1.38e-23,   0, 0.0300), //13
+      KFEfficiencyParticleInfo("K*0b",             "K*0 b         ",       -313, 0.6f, 2.6f, 0.8958     , 1.38e-23,   0, 0.0300), //14
+      KFEfficiencyParticleInfo("K*+",              "K*+           ",        323, 0.6f, 2.6f, 0.89166    , 1.30e-23,   1, 0.0300), //15
+      KFEfficiencyParticleInfo("K*-",              "K*-           ",       -323, 0.6f, 2.6f, 0.89166    , 1.30e-23,  -1, 0.0300), //16
+      KFEfficiencyParticleInfo("K*0_K0,pi0",       "K*0_K0pi0     ",     100313, 0.6f, 2.6f, 0.8958     , 1.38e-23,   0, 0.0030), //17
+      KFEfficiencyParticleInfo("K*+_K+,pi0",       "K*+_K+pi0     ",     100323, 0.6f, 2.6f, 0.89166    , 1.30e-23,   1, 0.0030), //18
+      KFEfficiencyParticleInfo("K*-_K-,pi0",       "K*-_K-pi0     ",    -100323, 0.6f, 2.6f, 0.89166    , 1.30e-23,  -1, 0.0030), //19
       KFEfficiencyParticleInfo("Sigma*+",          "Sigma*+       ",       3224, 1.0f, 3.0f, 1.3828     , 1.83e-23,   1, 0.0100), //20
       KFEfficiencyParticleInfo("Sigma*-",          "Sigma*-       ",       3114, 1.0f, 3.0f, 1.3872     , 1.67e-23,  -1, 0.0100), //21
       KFEfficiencyParticleInfo("Sigma*+b",         "Sigma*+ b     ",      -3114, 1.0f, 3.0f, 1.3828     , 1.83e-23,  -1, 0.0100), //22
       KFEfficiencyParticleInfo("Sigma*-b",         "Sigma*- b     ",      -3224, 1.0f, 3.0f, 1.3872     , 1.67e-23,   1, 0.0100), //23
       KFEfficiencyParticleInfo("Sigma*0",          "Sigma*0       ",       3214, 1.0f, 3.0f, 1.3837     , 1.83e-23,   0, 0.0030), //24
       KFEfficiencyParticleInfo("Sigma*0b",         "Sigma*0 b     ",      -3214, 1.0f, 3.0f, 1.3837     , 1.83e-23,   0, 0.0030), //25
-      KFEfficiencyParticleInfo("Lambda*",          "Lambda*       ",       3124, 1.4f, 4.4f, 1.5195     , 4.22e-23,   0, 0.0100), //26
-      KFEfficiencyParticleInfo("Lambda*b",         "Lambda* b     ",      -3124, 1.4f, 4.4f, 1.5195     , 4.22e-23,   0, 0.0100), //27
+      KFEfficiencyParticleInfo("Lambda*",          "Lambda*       ",       3124, 1.4f, 3.4f, 1.5195     , 4.22e-23,   0, 0.0100), //26
+      KFEfficiencyParticleInfo("Lambda*b",         "Lambda* b     ",      -3124, 1.4f, 3.4f, 1.5195     , 4.22e-23,   0, 0.0100), //27
       KFEfficiencyParticleInfo("Xi*0",             "Xi*0          ",       3324, 1.4f, 3.4f, 1.53180    , 7.23e-23,   0, 0.0100), //28
       KFEfficiencyParticleInfo("Xi*0b",            "Xi*0 b        ",      -3324, 1.4f, 3.4f, 1.53180    , 7.23e-23,   0, 0.0100), //29
-      KFEfficiencyParticleInfo("Xi*-_{LK}",        "Xi*-_lk       ",    1003314, 1.4f, 3.4f, 1.823      , 2.74e-23,  -1, 0.0030), //30
-      KFEfficiencyParticleInfo("Xi*+_{LK}",        "Xi*+_lk       ",   -1003314, 1.4f, 3.4f, 1.823      , 2.74e-23,   1, 0.0030), //31
-      KFEfficiencyParticleInfo("Xi*-_{xi-,pi0}",   "Xi*-_XiPi     ",       3314, 1.4f, 3.4f, 1.535      , 6.65e-23,  -1, 0.0030), //32
-      KFEfficiencyParticleInfo("Xi*+_{xi+,pi0}",   "Xi*+_XiPi     ",      -3314, 1.4f, 3.4f, 1.535      , 6.65e-23,   1, 0.0030), //33
+      KFEfficiencyParticleInfo("Xi*-_LK",          "Xi*-_lk       ",    1003314, 1.4f, 3.4f, 1.823      , 2.74e-23,  -1, 0.0030), //30
+      KFEfficiencyParticleInfo("Xi*+_LK",          "Xi*+_lk       ",   -1003314, 1.4f, 3.4f, 1.823      , 2.74e-23,   1, 0.0030), //31
+      KFEfficiencyParticleInfo("Xi*-_xi-,pi0",     "Xi*-_XiPi     ",       3314, 1.4f, 3.4f, 1.535      , 6.65e-23,  -1, 0.0030), //32
+      KFEfficiencyParticleInfo("Xi*+_xi+,pi0",     "Xi*+_XiPi     ",      -3314, 1.4f, 3.4f, 1.535      , 6.65e-23,   1, 0.0030), //33
       KFEfficiencyParticleInfo("Omega*-",          "Omega*-       ",    1003334, 1.8f, 3.8f, 2.252      , 1.2e-23,   -1, 0.0030), //34
       KFEfficiencyParticleInfo("Omega*+",          "Omega*+       ",   -1003334, 1.8f, 3.8f, 2.252      , 1.2e-23,    1, 0.0030), //35
-      KFEfficiencyParticleInfo("H0_{LL}",          "H0_LL         ",       3000, 1.5f, 3.5f, 2.21       , 1.32e-10,   0, 0.0030), //36
-      KFEfficiencyParticleInfo("phi_{KK}",         "phi_KK        ",        333, 0.8f, 2.8f, 1.019455   , 1.55e-22,   0, 0.0030), //37
-      KFEfficiencyParticleInfo("rho_{#pi#pi}",     "rho_pipi      ",        113, 0.0f, 2.0f, 0.77526    , 4.45e-24,   0, 0.0030), //38
-      KFEfficiencyParticleInfo("rho_{ee}",         "rho_ee        ",     100113, 0.0f, 2.0f, 0.77526    , 4.45e-24,   0, 0.0030), //39
-      KFEfficiencyParticleInfo("rho_{#mu#mu}",     "rho_mm        ",     200113, 0.0f, 2.0f, 0.77526    , 4.45e-24,   0, 0.0030), //40
+      KFEfficiencyParticleInfo("H0_LL",            "H0_LL         ",       3000, 1.5f, 3.5f, 2.21       , 1.32e-10,   0, 0.0030), //36
+      KFEfficiencyParticleInfo("phi_KK",           "phi_KK        ",        333, 0.8f, 2.8f, 1.019455   , 1.55e-22,   0, 0.0030), //37
+      KFEfficiencyParticleInfo("rho_pipi",         "rho_pipi      ",        113, 0.0f, 2.0f, 0.77526    , 4.45e-24,   0, 0.0030), //38
+      KFEfficiencyParticleInfo("rho_ee",           "rho_ee        ",     100113, 0.0f, 2.0f, 0.77526    , 4.45e-24,   0, 0.0030), //39
+      KFEfficiencyParticleInfo("rho_mm",           "rho_mm        ",     200113, 0.0f, 2.0f, 0.77526    , 4.45e-24,   0, 0.0030), //40
       KFEfficiencyParticleInfo("gamma",            "gamma         ",         22, 0.0f, 3.0f, 0.         , 1.e20,      0, 0.0030), //41
-      KFEfficiencyParticleInfo("#pi^{0}",          "pi0           ",        111, 0.0f, 3.0f, 0.1349766  , 8.52e-17,   0, 0.0030), //42
+      KFEfficiencyParticleInfo("pi0",              "pi0           ",        111, 0.0f, 3.0f, 0.1349766  , 8.52e-17,   0, 0.0030), //42
       KFEfficiencyParticleInfo("eta",              "eta           ",        221, 0.0f, 3.0f, 0.547862   , 5.0e-19,    0, 0.0030), //43
 //Delta and N resonances
       KFEfficiencyParticleInfo("Delta0",           "Delta0        ",       2114, 1.0f, 3.0f, 1.232      , 5.63e-24,   0, 0.0030), //44
@@ -129,11 +173,11 @@ class KFPartEfficiencies :public TObject
       KFEfficiencyParticleInfo("Delta++",          "Delta++       ",       2224, 1.0f, 3.0f, 1.232      , 5.63e-24,   2, 0.0030), //46
       KFEfficiencyParticleInfo("Delta-- b",        "Delta-- b     ",      -2224, 1.0f, 3.0f, 1.232      , 5.63e-24,  -2, 0.0030), //47
 //charmonium
-      KFEfficiencyParticleInfo("J#Psi_ee",         "JPsi_ee       ",        443, 1.0f, 4.0f, 3.096916   , 7.1e-21,    0, 0.0030), //48
-      KFEfficiencyParticleInfo("J#Psi_mumu",       "JPsi_mm       ",     100443, 1.0f, 4.0f, 3.096916   , 7.1e-21,    0, 0.0030), //49
-      KFEfficiencyParticleInfo("J#Psi_pp",         "JPsi_pp       ",     200443, 1.0f, 4.0f, 3.096916   , 7.1e-21,    0, 0.0030), //50
-      KFEfficiencyParticleInfo("J#Psi_LL",         "JPsi_LL       ",     300443, 2.0f, 5.0f, 3.096916   , 7.1e-21,    0, 0.0030), //51
-      KFEfficiencyParticleInfo("J#Psi_XiXi",       "JPsi_XiXi     ",     400443, 2.0f, 5.0f, 3.096916   , 7.1e-21,    0, 0.0030), //52
+      KFEfficiencyParticleInfo("JPsi_ee",          "JPsi_ee       ",        443, 1.0f, 4.0f, 3.096916   , 7.1e-21,    0, 0.0030), //48
+      KFEfficiencyParticleInfo("JPsi_mumu",        "JPsi_mm       ",     100443, 1.0f, 4.0f, 3.096916   , 7.1e-21,    0, 0.0030), //49
+      KFEfficiencyParticleInfo("JPsi_pp",          "JPsi_pp       ",     200443, 1.0f, 4.0f, 3.096916   , 7.1e-21,    0, 0.0030), //50
+      KFEfficiencyParticleInfo("JPsi_LL",          "JPsi_LL       ",     300443, 2.0f, 5.0f, 3.096916   , 7.1e-21,    0, 0.0030), //51
+      KFEfficiencyParticleInfo("JPsi_XiXi",        "JPsi_XiXi     ",     400443, 2.0f, 5.0f, 3.096916   , 7.1e-21,    0, 0.0030), //52
       KFEfficiencyParticleInfo("Psi_OO",           "Psi_OO        ",     500443, 3.0f, 6.0f, 3.686109   , 2.1e-22,    0, 0.0030), //53
 //open charm
       KFEfficiencyParticleInfo("D0",               "D0            ",        421, 0.6f, 3.6f, 1.86486    , 4.1e-13,    0, 0.0154), //54
@@ -145,7 +189,7 @@ class KFPartEfficiencies :public TObject
       KFEfficiencyParticleInfo("D0_K0pipi",        "D0_K0pipi     ",        425, 0.6f, 3.6f, 1.86486    , 4.1e-13,    0, 0.0150), //60
       KFEfficiencyParticleInfo("D0_KK",            "D0_KK         ",        426, 0.6f, 3.6f, 1.86486    , 4.1e-13,    0, 0.0130), //61
       KFEfficiencyParticleInfo("D0_KKK0",          "D0_KKK0       ",        427, 0.6f, 3.6f, 1.86486    , 4.1e-13,    0, 0.0154), //62
-      KFEfficiencyParticleInfo("D0_{pi0}",         "D0_#pi0       ",        428, 1.0f, 3.0f, 1.86486    , 4.1e-13,    0, 0.0030), //63
+      KFEfficiencyParticleInfo("D0_pi0",           "D0_#pi0       ",        428, 1.0f, 3.0f, 1.86486    , 4.1e-13,    0, 0.0030), //63
       KFEfficiencyParticleInfo("D+",               "D+            ",        411, 1.0f, 3.0f, 1.86962    , 1.04e-13,   1, 0.0114), //64
       KFEfficiencyParticleInfo("D-",               "D-            ",       -411, 1.0f, 3.0f, 1.86962    , 1.04e-13,  -1, 0.0114), //65
       KFEfficiencyParticleInfo("D+_K0pi+",         "D+_K0pi+      ",     100411, 0.6f, 4.6f, 1.86962    , 1.04e-13,   1, 0.0030), //66
@@ -184,7 +228,7 @@ class KFPartEfficiencies :public TObject
       KFEfficiencyParticleInfo("D*-",              "D*-           ",     -10411, 1.8f, 3.8f, 2.01029    , 6.86e-21,  -1, 0.0030), //99
       KFEfficiencyParticleInfo("D*+_4",            "D*+_4         ",      20411, 1.8f, 3.8f, 2.01029    , 6.86e-21,   1, 0.0030), //100
       KFEfficiencyParticleInfo("D*-_4",            "D*-_4         ",     -20411, 1.8f, 3.8f, 2.01029    , 6.86e-21,  -1, 0.0030), //101
-      KFEfficiencyParticleInfo("D0*_{#pi0}",       "D0*_#pi0      ",      10428, 1.8f, 3.8f, 2.00699    , 6.86e-21,   0, 0.0030), //102
+      KFEfficiencyParticleInfo("D0*_pi0",          "D0*_#pi0      ",      10428, 1.8f, 3.8f, 2.00699    , 6.86e-21,   0, 0.0030), //102
 //B mesons
       KFEfficiencyParticleInfo("B_Jpsi_ee",        "B_Jpsi_ee     ",        500, 1.0f, 4.0f, 3.096916   , 7.1e-21,    0, 0.0030), //103
       KFEfficiencyParticleInfo("B_Jpsi_mm",        "B_Jpsi_mm     ",        501, 1.0f, 4.0f, 3.096916   , 7.1e-21,    0, 0.0030), //104
@@ -224,9 +268,9 @@ class KFPartEfficiencies :public TObject
       KFEfficiencyParticleInfo("nu_{K-}",          "nu_{K-} b     ",   -8000014,-1.0f, 1.0f, 0.         , 1.0e20,     0, 0.0030), //136
       KFEfficiencyParticleInfo("K+_{mu,nu}",       "K+_{mnu}      ",    7000321,-1.0f, 1.0f, 0.493677   , 1.238e-8,   1, 0.0030), //137
       KFEfficiencyParticleInfo("nu_{K+}",          "nu_{K+}       ",    8000014,-1.0f, 1.0f, 0.         , 1.0e20,     0, 0.0030), //138
-      KFEfficiencyParticleInfo("Sigma-_{pi-,n}",   "Sigma-_{pi-n} ",    7003112, 0.0f, 3.0f, 1.197449   , 1.479e-10, -1, 0.0100), //139
+      KFEfficiencyParticleInfo("Sigma-_{pi-,n}",   "Sigma-_{pi-n} ",    7003112, 0.0f, 3.0f, 1.192642   , 1.479e-10, -1, 0.0100), //139
       KFEfficiencyParticleInfo("n_{Sigma-}",       "n_{Sigma-}    ",    7002112, 0.0f, 1.5f, 0.9395654  , 880,        0, 0.0030), //140
-      KFEfficiencyParticleInfo("Sigma+_{pi+n}b",   "Sigma+{pi+n} b",   -7003112, 0.0f, 3.0f, 1.197449   , 1.479e-10, -1, 0.0030), //141
+      KFEfficiencyParticleInfo("Sigma+_{pi+n}b",   "Sigma+{pi+n} b",   -7003112, 0.0f, 3.0f, 1.192642   , 1.479e-10, -1, 0.0030), //141
       KFEfficiencyParticleInfo("n_{Sigma+} b",     "n_{Sigma+b} b ",   -7002112, 0.0f, 1.5f, 0.9395654  , 880,        0, 0.0030), //142
       KFEfficiencyParticleInfo("Sigma-_{pi-n}b",   "Sigma+{pi-n} b",   -7003222, 0.0f, 3.0f, 1.18937    , 0.8018e-10, 1, 0.0030), //143
       KFEfficiencyParticleInfo("n_{Sigma-} b",     "n_{Sigma-_b} b",   -8002112, 0.0f, 1.5f, 0.9395654  , 0.93956541, 0, 0.0030), //144
@@ -273,13 +317,13 @@ class KFPartEfficiencies :public TObject
       KFEfficiencyParticleInfo("He4-",             "He4-          ",-1000020040, 0.0f, 4.5f, 3.728400   , 1.0e20,    -2, 0.0030), //184
 //background for subtraction
       KFEfficiencyParticleInfo("pi+pi+",           "pi+pi+        ",       9001, 0.0f, 2.0f, 0          , 1.0e20,     0, 0.0030), //185
-      KFEfficiencyParticleInfo("pi+K+",            "pi+K+         ",       9002, 0.6f, 3.6f, 0          , 1.0e20,     0, 0.0030), //186
+      KFEfficiencyParticleInfo("pi+K+",            "pi+K+         ",       9002, 0.6f, 2.6f, 0          , 1.0e20,     0, 0.0030), //186
       KFEfficiencyParticleInfo("K+K+",             "K+K+          ",       9003, 0.8f, 2.8f, 0          , 1.0e20,     0, 0.0030), //187
-      KFEfficiencyParticleInfo("K+p+",             "K+p+          ",       9004, 1.4f, 4.4f, 0          , 1.0e20,     0, 0.0030), //188
+      KFEfficiencyParticleInfo("K+p+",             "K+p+          ",       9004, 1.4f, 3.4f, 0          , 1.0e20,     0, 0.0030), //188
       KFEfficiencyParticleInfo("pi-pi-",           "pi-pi-        ",      -9001, 0.0f, 2.0f, 0          , 1.0e20,     0, 0.0030), //189
-      KFEfficiencyParticleInfo("pi-K-",            "pi-K-         ",      -9002, 0.6f, 3.6f, 0          , 1.0e20,     0, 0.0030), //190
+      KFEfficiencyParticleInfo("pi-K-",            "pi-K-         ",      -9002, 0.6f, 2.6f, 0          , 1.0e20,     0, 0.0030), //190
       KFEfficiencyParticleInfo("K-K-",             "K-K-          ",      -9003, 0.8f, 2.8f, 0          , 1.0e20,     0, 0.0030), //191
-      KFEfficiencyParticleInfo("K-p-",             "K-p-          ",      -9004, 1.4f, 4.4f, 0          , 1.0e20,     0, 0.0030), //192
+      KFEfficiencyParticleInfo("K-p-",             "K-p-          ",      -9004, 1.4f, 3.4f, 0          , 1.0e20,     0, 0.0030), //192
 //V0
       KFEfficiencyParticleInfo("V0",               "V0            ",  123456789, 0.3f, 1.3f, 0          , 0,          0, 0.0030)  //193
     };
@@ -1049,6 +1093,7 @@ class KFPartEfficiencies :public TObject
 
   virtual ~KFPartEfficiencies(){};
 
+  /** \brief Returns index of the decay with a given PDG code in the scheme of the KF Particle Finder. If it is not present there - returns "-1". */
   int GetParticleIndex(int pdg)
   {
     std::map<int, int>::iterator it;
@@ -1057,9 +1102,17 @@ class KFPartEfficiencies :public TObject
     else return -1;
   }
 
-  std::map<int,int> GetPdgToIndexMap() const { return fPdgToIndex; }
+  /** \brief Returns the map between PDG codes and index of the decay in the scheme of the KF Particle Finder. */
+  std::map<int,int> GetPdgToIndexMap() const { return fPdgToIndex; } 
   
-  virtual void AddCounter(std::string shortname, std::string name){
+  virtual void AddCounter(std::string shortname, std::string name)
+  {
+    /** Adds a counter with the name defined by "name" to all counter
+     ** objects. For easiness of operation with counters, a shortname is assigned
+     ** to each of them and the corresponding entry in the map indices is done.
+     ** \param[in] shortname - a short name of the counter for fast and easy access to its index
+     ** \param[in] name - name of the counter which is added to each counter object.
+     **/
     indices[shortname] = names.size();
     names.push_back(name);
 
@@ -1081,12 +1134,14 @@ class KFPartEfficiencies :public TObject
     clone.AddCounter();
   };
 
+  /** \brief Operator to add efficiency table from object "a" to the current object. Returns the current object after addition. */
   KFPartEfficiencies& operator+=(KFPartEfficiencies& a){
     mc1 += a.mc1; mc2 += a.mc2; mc3 += a.mc3; reco += a.reco;
     ghost += a.ghost; bg += a.bg; clone += a.clone;
     return *this;
   };
   
+  /** \brief Function to calculate efficiency after all counters are set. If the counters are modified the function should be called again. */
   void CalcEff(){
     ratio_reco1 = reco/mc1;
     ratio_reco2 = reco/mc2;
@@ -1098,9 +1153,17 @@ class KFPartEfficiencies :public TObject
     ratio_clone  = clone/allReco;
   };
   
-
   void Inc(bool isReco, int nClones, bool isMC1, bool isMC2, bool isMC3, std::string name)
   {
+    /** Increases counters by one, if the corresponding boolean variable is "true".
+     ** \param[in] isReco - "true" if particle is reconstructed
+     ** \param[in] nClones - number of double reconstructed particles for the given MC particle,
+     ** will be added to the "clone" counters
+     ** \param[in] isMC1 - "true" if particle is reconstructable in 4pi, mc1 is increased
+     ** \param[in] isMC2 - "true" if all daughters are reconstructable, mc2 is increased
+     ** \param[in] isMC3 - "true" if all daughters are reconstructed, mc3 is increased
+     ** \param[in] name  - "shortname" of the set of counters, which should be increased
+     **/
     const int index = indices[name];
     
     if(isMC1) mc1.counters[index]++;
@@ -1112,13 +1175,20 @@ class KFPartEfficiencies :public TObject
       clone.counters[index] += nClones;
   };
 
-  void IncReco(bool isGhost, bool isBg, std::string name){
+  void IncReco(bool isGhost, bool isBg, std::string name)
+  {
+    /** Increases counters by one, if the corresponding boolean variable is "true".
+     ** \param[in] isGhost - "true" if ghost is added
+     ** \param[in] isBg - "true" if physics background is added
+     ** \param[in] name  - "shortname" of the set of counters, which should be increased
+     **/
     const int index = indices[name];
 
     if (isGhost) ghost.     counters[index]++;
     if (isBg)    bg.counters[index]++;
   };
 
+  /** \brief Prints the efficiency table on the screen. */
   void PrintEff(){
     std::ios_base::fmtflags original_flags = std::cout.flags();
     std::cout.setf(std::ios::fixed);
@@ -1156,10 +1226,17 @@ class KFPartEfficiencies :public TObject
     }
     std::cout.flags(original_flags); 
   };
-
+  
+  float GetTotal4piEfficiency(int iDecay) { return ratio_reco1.counters[3*iDecay]; }  ///< Returns efficiency in 4pi for decay "iDecay".
+  float GetTotalKFPEfficiency(int iDecay) { return ratio_reco3.counters[3*iDecay]; }  ///< Returns efficiency of KF Particle Finder method (cuts) for decay "iDecay".
+  float GetPrimary4piEfficiency(int iDecay) { return ratio_reco1.counters[3*iDecay+1]; } ///< Returns efficiency in 4pi for decay "iDecay" for primary particles.
+  float GetPrimaryKFPEfficiency(int iDecay) { return ratio_reco3.counters[3*iDecay+1]; } ///< Returns efficiency of KF Particle Finder method (cuts) for decay "iDecay" for primary particles.
+  float GetSecondary4piEfficiency(int iDecay) { return ratio_reco1.counters[3*iDecay+2]; } ///< Returns efficiency in 4pi for decay "iDecay" for secondary particles.
+  float GetSecondaryKFPEfficiency(int iDecay) { return ratio_reco3.counters[3*iDecay+2]; } ///< Returns efficiency of KF Particle Finder method (cuts) for decay "iDecay" for secondary particles.
+  
+  /** \brief Operator to write efficiencies to file. */
   friend std::fstream & operator<<(std::fstream &strm, KFPartEfficiencies &a) 
   {
-
     strm << a.ratio_reco1;
     strm << a.ratio_reco2;
     strm << a.ratio_reco3;
@@ -1176,10 +1253,9 @@ class KFPartEfficiencies :public TObject
 
     return strm;
   }
-
+  /** \brief Operator to read efficiencies from file. */
   friend std::fstream & operator>>(std::fstream &strm, KFPartEfficiencies &a)
   {
-
     strm >> a.ratio_reco1;
     strm >> a.ratio_reco2;
     strm >> a.ratio_reco3;
@@ -1196,63 +1272,64 @@ class KFPartEfficiencies :public TObject
 
     return strm;
   }
-
+  /** \brief Adds efficiency from the file with the name defined by "fileName" to the current objects. */
   void AddFromFile(std::string fileName)
   {
     std::fstream file(fileName.data(),std::fstream::in);
     file >> *this;
   }
   
-  int GetNDaughters(int iParticle) const { return partDaughterPdg[iParticle].size(); }
+  int GetNDaughters(int iParticle) const { return partDaughterPdg[iParticle].size(); } ///< Returns number of daughter particles for the decay with index "iParticle".
+  /** \brief Returns the PDG code of the daughter "iDaughter" from the decay with index "iParticle". */
   int GetDaughterPDG(int iParticle, int iDaughter) const { return partDaughterPdg[iParticle][iDaughter]; }
   
-  float GetMass(int iParticle) const { return partMass[iParticle]; }
-  float GetMassSigma(int iParticle) const { return partMassSigma[iParticle]; }
+  float GetMass(int iParticle) const { return partMass[iParticle]; } ///< Returns the table mass of the decay with index "iParticle".
+  float GetMassSigma(int iParticle) const { return partMassSigma[iParticle]; } ///< Returns expected width of the mass peak of the decay with index "iParticle".
   
-  static const int nParticles = 194;
-  static const int fFirstHypernucleusIndex = 114;
-  static const int fLastHypernucleusIndex = 130;  
-  static const int fFirstMissingMassParticleIndex = 131;
-  static const int fLastMissingMassParticleIndex = 166;  
-  static const int fFirstStableParticleIndex = 167;
-  static const int fLastStableParticleIndex = 184;
+  static const int nParticles = 194;                     ///< Number of particles.
+  static const int fFirstHypernucleusIndex = 114;        ///< Index of the first hypernuclei in the list.
+  static const int fLastHypernucleusIndex = 130;         ///< Index of the last hypernuclei in the list.
+  static const int fFirstMissingMassParticleIndex = 131; ///< Index of the first decay reconstructed by the missing mass method.
+  static const int fLastMissingMassParticleIndex = 166;  ///< Index of the last decay reconstructed by the missing mass method.
+  static const int fFirstStableParticleIndex = 167;      ///< Index of the first stable particle in the list.
+  static const int fLastStableParticleIndex = 184;       ///< Index of the last stable particle in the list.
   
-  int partPDG[nParticles];
-  std::string partName[nParticles];
-  std::string partTitle[nParticles];
-  std::vector<std::vector<int> > partDaughterPdg;
-  float partMHistoMin[nParticles];
-  float partMHistoMax[nParticles];
-  int partMaxMult[nParticles];
-  float partMass[nParticles];
-  float partLifeTime[nParticles];
-  int partCharge[nParticles];
-  float partMassSigma[nParticles];
+  int partPDG[nParticles];                        ///< Array of PDG codes assigned to the decays.
+  std::string partName[nParticles];               ///< Array of names of the decay in the file with histograms.
+  std::string partTitle[nParticles];              ///< Array of names of the decay in the output table with efficiency.
+  std::vector<std::vector<int> > partDaughterPdg; ///< Array with vectors of daughter particles for each decay.
+  float partMHistoMin[nParticles];                ///< Array with lower boundary in the mass histograms for each decay.
+  float partMHistoMax[nParticles];                ///< Array with upper boundary in the mass histograms for each decay.
+  int partMaxMult[nParticles];                    ///< Array with upper boundary in the multiplicity histograms of each decay.
+  float partMass[nParticles];                     ///< Array with table masses of each decay.
+  float partLifeTime[nParticles];                 ///< Array with lifetimes in seconds of each decay.
+  int partCharge[nParticles];                     ///< Array with charge of each particle specie in units of the elementary charge.
+  float partMassSigma[nParticles];                ///< Array with expected width of mass peaks used for the side band method.
 
   
  private:
-  std::vector<std::string> names; // names counters indexed by index of counter
-  std::map<std::string, int> indices; // indices of counters indexed by a counter shortname
+  std::vector<std::string> names;     ///< Names of the counters. The same for all counters objects.
+  std::map<std::string, int> indices; ///< Map between the counter index and its short name.
 
-  std::map<int, int> fPdgToIndex;
+  std::map<int, int> fPdgToIndex;     ///< The map between PDG code assigned to the decay and index in the decay list.
 
-  KFMCCounter<double> ratio_reco1;
-  KFMCCounter<double> ratio_reco2;
-  KFMCCounter<double> ratio_reco3;
+  KFMCCounter<double> ratio_reco1;    ///< Efficiency in 4 pi for all decays.
+  KFMCCounter<double> ratio_reco2;    ///< Efficiency normalised on the particles with all daughters reconstructable for all decays.
+  KFMCCounter<double> ratio_reco3;    ///< Efficiency normalised on the particles with all daughters reconstructed for all decays.
 
-  KFMCCounter<int> mc1;
-  KFMCCounter<int> mc2;
-  KFMCCounter<int> mc3;
+  KFMCCounter<int> mc1;               ///< Counters of the Monte Carlo particles of all species.
+  KFMCCounter<int> mc2;               ///< Counters of the Monte Carlo particles with all daughters reconstructable for all species.
+  KFMCCounter<int> mc3;               ///< Counters of the Monte Carlo particles with all daughters found for all species.
 
-  KFMCCounter<int> reco;
+  KFMCCounter<int> reco;              ///< Counters of the reconstructed particles for all species.
 
-  KFMCCounter<double> ratio_ghost;
-  KFMCCounter<double> ratio_bg;
-  KFMCCounter<double> ratio_clone;
+  KFMCCounter<double> ratio_ghost;    ///< Ratio of the ghost candidates to the total number of candidates for all species.
+  KFMCCounter<double> ratio_bg;       ///< Ratio of the physics background candidates to the total number of candidates for all species.
+  KFMCCounter<double> ratio_clone;    ///< Ratio of double reconstructed particles to the total number of signal candidates for all species.
 
-  KFMCCounter<int> ghost;
-  KFMCCounter<int> bg; // background
-  KFMCCounter<int> clone; // background
+  KFMCCounter<int> ghost;             ///< Counters of the ghost candidates for all species.
+  KFMCCounter<int> bg;                ///< Counters of the physics background candidates for all species.
+  KFMCCounter<int> clone;             ///< Counters of the double reconstructed particles for all species.
   
 #ifndef KFParticleStandalone
   ClassDef( KFPartEfficiencies, 1 )

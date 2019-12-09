@@ -1,13 +1,25 @@
-//----------------------------------------------------------------------------
-// Implementation of the KFParticle class
-// .
-// @author  S.Gorbunov, I.Kisel, I.Kulakov, M.Zyzak
-// @version 1.0
-// @since   20.08.13
-// 
-// 
-//  -= Copyright &copy ALICE HLT and CBM L1 Groups =-
-//____________________________________________________________________________
+/*
+ * This file is part of KF Particle package
+ * Copyright (C) 2007-2019 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2019 University of Frankfurt
+ *               2007-2019 University of Heidelberg
+ *               2007-2019 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2007-2019 Maksym Zyzak
+ *               2007-2019 Sergey Gorbunov
+ *
+ * KF Particle is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * KF Particle is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 
 #ifndef KFVERTEX_H
@@ -16,69 +28,42 @@
 #include "KFParticle.h"
 #include "KFPVertex.h"
 
+/** @class KFVertex
+ ** @brief Mathematics for reconstruction of primary vertices based on KFParticle.
+ ** @author  S.Gorbunov, I.Kisel, M.Zyzak
+ ** @date 05.02.2019
+ ** @version 1.0
+ **
+ ** The class is inherited from KFParticle, adds functionality for reconstruction of
+ ** primary vertices.
+ **/
+
 class KFVertex : public KFParticle
 {
-  
  public:
 
-  //*
-  //*  INITIALIZATION
-  //*
-
-  //* Constructor (empty)
-
   KFVertex():KFParticle(),fIsConstrained(0){ } 
-  KFVertex( const KFParticle &particle ): KFParticle(particle), fIsConstrained(0) {}
-  //* Destructor (empty)
-
+  KFVertex( const KFParticle &particle ): KFParticle(particle), fIsConstrained(0) {} ///< Vertex is constructed from the current position of a given particle.
+  KFVertex( const KFPVertex &vertex );
   ~KFVertex(){}
 
-  //* Initialisation from VVertex 
-
-  KFVertex( const KFPVertex &vertex );
+  Int_t GetNContributors() const { return fIsConstrained ?fNDF/2:(fNDF+3)/2; } ///< Returns number of particles used for construction of the vertex.
 
 
-  //*
-  //*  ACCESSORS
-  //*
-
-  //* Number of tracks composing the vertex
-
-  Int_t GetNContributors() const { return fIsConstrained ?fNDF/2:(fNDF+3)/2; }
-
-  //* 
-  //* CONSTRUCTION OF THE VERTEX BY ITS DAUGHTERS 
-  //* USING THE KALMAN FILTER METHOD
-  //*
-
-
-  //* Simple way to construct vertices ex. D0 = Pion + Kaon;   
-
-  void operator +=( const KFParticle &Daughter );  
-
-  //* Subtract particle from vertex
-
-  KFVertex operator -( const KFParticle &Daughter ) const;
-
-  void operator -=( const KFParticle &Daughter );  
-
-  //* Set beam constraint to the primary vertex
+  void operator +=( const KFParticle &Daughter );  ///< Adds particle to a vertex.
+  KFVertex operator -( const KFParticle &Daughter ) const; ///< Subtracts particle from a vertex, returns temporary object. Initial vertex stays untouched.
+  void operator -=( const KFParticle &Daughter );  ///< Subtracts particle from a current vertex.
 
   void SetBeamConstraint( float X, float Y, float Z, 
-			  float ErrX, float ErrY, float ErrZ );
-
-  //* Set beam constraint off
-
+                          float ErrX, float ErrY, float ErrZ );
   void SetBeamConstraintOff();
 
-  //* Construct vertex with selection of tracks (primary vertex)
-
   void ConstructPrimaryVertex( const KFParticle *vDaughters[], int nDaughters,
-			       Bool_t vtxFlag[], float ChiCut=3.5  );
+                               Bool_t vtxFlag[], float ChiCut=3.5  );
 
  protected:
 
-  Bool_t fIsConstrained; // Is the beam constraint set
+  Bool_t fIsConstrained; ///< Flag showing if the the beam constraint is set
   
 #ifndef KFParticleStandalone
   ClassDef( KFVertex, 2 )

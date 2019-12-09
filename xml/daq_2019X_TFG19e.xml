@@ -19,7 +19,8 @@
      exit 1;
    endif
   echo "${evtsFile}"
-  set filel    =  `basename $evtsFile .daq`_${f}_${l}
+  set evtsFileB = `basename $evtsFile`;
+  set filel    =  `basename $evtsFileB .daq`_${f}_${l}
   set output  = ${filel}.event.root
   if (! -r ${evtsFile}) exit 1;
   set logFile  = ${filel}B.log
@@ -31,6 +32,7 @@
   set bla = ${SUBMITTINGDIRECTORY}/${filel}.bla.root
   if (-r ${bla}) exit 0;
   touch ${bla}
+  if (! -r ${evtsFileB}) cp  ${evtsFile}  ${evtsFileB}
 # TFG
 #   root.exe -q -b 'bfc.C(100,"P2019a,-hitfilt,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,Stx,-StiCA,-Sti,KFVertex,evout,picoWrite,PicoVtxDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 #   root.exe -q -b 'bfc.C(10000,"P2019,-hitfilt,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,Stx,-StiCA,-Sti,KFVertex,evout,picoWrite,PicoVtxDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
@@ -42,7 +44,7 @@
 #   root4star -b -q 'bfc.C(1000,"P2019a,StiCA,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeakFull,-OPr13,OPr40,-hitfilt,evout,-beamline3D ","${evtsFile}'")' &gt;&amp; ${logFile}
 #    root.exe -q -b 'bfc.C('${f},${l}',"P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 #   root.exe -q -b 'bfc.C('${f},${l}',"P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
-    root.exe -q -b 'bfc.C('${f},${l}',"P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
+    root.exe -q -b 'bfc.C('${f},${l}',"P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault","'${evtsFileB}'","'${output}'")' &gt;&amp; ${logFile}
    cp  ${filel}*picoDst.root ${logFile} ${SUBMITTINGDIRECTORY}
    rm ${bla}
         </command>

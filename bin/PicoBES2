@@ -1,25 +1,11 @@
 setenv NODEBUG yes
 setup 64b
 xtitl
-set TRIG = 19GeV_2019_TFG19e
+#set TRIG = 19GeV_2019_TFG19e
+set TRIG = 31GeV_fixedTarget_2019_TFG19l
 set PicoDIR  = /gpfs01/star/pwg_tasks/tfg02/${TRIG}
 cd ${PicoDIR}
-@ count = 0
-foreach d (`ls -1d [0-1]??`)
-  cd ${d}; pwd;
-  ls -ltr | tail -1 | grep Chain	
-  if ($?) then	
-    rm -rf .sl*
-    ln -s ~/macros/.sl73_* .	
-    root.exe -q -b 'Chain.C+("./*/*picoDst.root","PicoDst")' >&  Chain.log  &
-    @ count++;  echo "count $count";
-    if ($count > 20) break;
-  endif
-  cd -;
-end
-
-grep total ???/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fM\n", n/1.e6)}'
-============================================= Summurizing =========================
+============================================= Recover/Clean up  =========================
 # find 0?? -name "*B.log" -cmin +10 | tee Terminated.log
  egrep -l '(This is the end of ROOT -- Goodbye|StCloseFileOnTerminate::Notify : Terminating|memory corruption|with fatal flag 0)' ???/*/*B.log  | tee Terminated.log
  ls -1d  */*/*B.log | tee Terminated.log
@@ -36,6 +22,25 @@ grep total ???/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fM\n", n/1.e
         mv ${d}/${b}B.log Zombie/${b}B.log${N} 
    endif
  end
+================================= Summurizing  ===============================================
+@ count = 0
+foreach d (`ls -1d [0-1]??/20*`)
+  cd ${d}; pwd;
+  ls -ltr | tail -1 | grep Chain	
+  if ($?) then	
+    rm -rf .sl*
+    ln -s ~/macros/.sl73_* .	
+    root.exe -q -b 'Chain.C+("./*picoDst.root","PicoDst")' >&  Chain.log  &
+    @ count++;  echo "count $count";
+    if ($count > 20) then 
+        cd -
+	break;
+    endif
+  endif
+  cd -;
+end
+
+grep total ???/20*/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fM\n", n/1.e6)}'
 ================================================================================
  foreach f (`grep missing Chain.log | awk '{print $3}'`)
    set b = `basename ${f} .picoDst.root`; set d = `dirname ${f}`; 
@@ -47,6 +52,17 @@ grep total ???/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fM\n", n/1.e
         mv ${d}/${b}.log ../Zombie/${b}B.log${N} 
    endif
  end
+===================== Clean Up ===========================================================
+#      cd $d; pwd; CheckMuDstRepeation.pl; cd -;
+foreach q (`ls -1d ???`) 
+  echo ${q}
+  ls -1d ${q}*Done*
+  if ($?) then
+    foreach d (`ls -1d ${q}/20*`)
+      cd $d; pwd; CheckpicoDstRepeation.pl; cd -;
+    end
+  endif
+end
 ================================================================================
  foreach b ( `grep is\ Zombie *Chain | sed -e 's/:/ /' | awk '{print $2}' | sed -e 's/.picoDst.root//'` )
    mv ${b}* Zombie
@@ -56,23 +72,29 @@ grep total ???/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fM\n", n/1.e
  end
 cat Terminated.log | xargs 2019Production.pl | tee 2019Production.log
 renameF.pl
-===================== Submit ===========================================================
-foreach d (`ls -1d 091/20*`)
+===================== Submit TFG19l ===========================================================
+foreach d (`ls -1d ???/20*`)
   cd $d;  pwd;
   if (! -r Done) then
-    lsf ~/xml/daq_2019X_TFG19e.xml
+    daq_2019Prod.pl 1
+    if ($?) then
+      lsf ~/xml/daq_2019X_TFG19l.xml
+      if (-r Chain.log) rm Chain.log
+    endif
   endif
   cd -
 end
-===================== Clean Up ===========================================================
-foreach q (`ls -1d ???`) 
-  echo ${q}
-  ls -1d ${q}*Done*
-  if ($?) then
-    foreach d (`ls -1d ${q}/14*`)
-      cd $d; pwd; CheckMuDstRepeation.pl; cd -;
-    end
+===================== Submit TFG19e ===========================================================
+foreach d (`ls -1d ???/20*`)
+  cd $d;  pwd;
+  if (! -r Done) then
+    daq_2019Prod.pl 1
+    if ($?) then
+      lsf ~/xml/daq_2019X_TFG19e.xml
+      if (-r Chain.log) rm Chain.log
+    endif
   endif
+  cd -
 end
 ================================================================================
 cd ~/work/daq/2013W
@@ -109,7 +131,7 @@ end
 
 ls -1d *Chain* | awk -F\. 'BEGIN{n=0}{n+=$3}END{print n/1e6}'
 ============================= SubmitJobs.csh  ===================================================
- touchdaq_2019byRun.log
+ touch daq_2019byRun.log
 foreach q (`ls -1d /gpfs01/star/daq/2013/???/14* `)
   set r = `basename $q`
   set dd = `dirname $q`
@@ -117,7 +139,7 @@ foreach q (`ls -1d /gpfs01/star/daq/2013/???/14* `)
   set d = $day/$r
   if (! -d $d) mkdir -p $d
   cd $d; echo $d; 
- daq_2019byRun.pl 1 >>&daq_2019byRun.log
+   daq_2019byRun.pl 1 >>&daq_2019byRun.log
   cd -
 end
 foreach q (`ls -1d /gpfs01/star/daq/2013/???/14* `)
@@ -127,9 +149,9 @@ foreach q (`ls -1d /gpfs01/star/daq/2013/???/14* `)
   set d = $day/$r
   if (! -d $d) mkdir -p $d
   cd $d; echo $d; 
- daq_2019byRun.pl 1 ?
+  daq_2019byRun.pl
   if ($? && $? != 255) then
-    lsf ~/xml/daq_2019X_TFG19e.xml; 
+    lsf ~/xml/daq_2019X_TFG19l.xml; 
   endif
   cd -
 end
@@ -195,7 +217,7 @@ foreach d (`ls -1d ???/14*`)
   cd $d; echo $d; 
  daq_2019byRun.pl 1
   if ($?) then
-    lsf ~/xml/daq_2019X_TFG19e.xml; 
+    lsf ~/xml/daq_2019X_TFG19l.xml; 
   endif
   cd -
 end

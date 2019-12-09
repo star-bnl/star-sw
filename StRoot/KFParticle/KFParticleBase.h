@@ -1,19 +1,25 @@
-//---------------------------------------------------------------------------------
-// The KFParticleBase class
-// .
-// @author  S.Gorbunov, I.Kisel, I.Kulakov, M.Zyzak
-// @version 1.0
-// @since   13.05.07
-// 
-// Class to reconstruct and store the decayed particle parameters.
-// The method is described in CBM-SOFT note 2007-003, 
-// ``Reconstruction of decayed particles based on the Kalman filter'', 
-// http://www.gsi.de/documents/DOC-2007-May-14-1.pdf
-//
-// This class describes general mathematics which is used by KFParticle class
-// 
-//  -= Copyright &copy ALICE HLT and CBM L1 Groups =-
-//_________________________________________________________________________________
+/*
+ * This file is part of KF Particle package
+ * Copyright (C) 2007-2019 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2019 University of Frankfurt
+ *               2007-2019 University of Heidelberg
+ *               2007-2019 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2007-2019 Maksym Zyzak
+ *               2007-2019 Sergey Gorbunov
+ *
+ * KF Particle is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * KF Particle is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 
 #ifndef KFPARTICLEBASE_H
@@ -31,35 +37,36 @@
 
 #include <vector>
 
+/** @class KFParticleBase
+ ** @brief The base of KFParticle class, describes particle objects.
+ ** @author  S.Gorbunov, I.Kisel, M.Zyzak
+ ** @date 05.02.2019
+ ** @version 1.0
+ **
+ ** Contains the main mathematics of the KF Particle . Will be merged with the KFParticle class.
+ **/
+
 class KFParticleBase :public TObject {
   
  public:
 
-  //*
-  //* ABSTRACT METHODS HAVE TO BE DEFINED IN USER CLASS 
-  //* 
+  /**
+   ** Abstract methods are defined in the KFParticle class
+   **/ 
 
-  //* Virtual method to access the magnetic field
-
+  /** Virtual method to access the magnetic field**/
   virtual void GetFieldValue(const float xyz[], float B[]) const = 0;
   
-  //* Virtual methods needed for particle transportation 
-  //* One can use particular implementations for collider (only Bz component) 
-  //* geometry and for fixed-target (CBM-like) geometry which are provided below 
-  //* in TRANSPORT section
- 
-  //* Get dS to xyz[] space point 
-
+  /** Virtual method to get extrapolation parameter dS=l/p to . Is defined in KFParticle.**/
   virtual float GetDStoPoint( const float xyz[3], float dsdr[6] ) const = 0;
   
   float GetDStoPointLine( const float xyz[3], float dsdr[6] ) const;
   float GetDStoPointBz( float B, const float xyz[3], float dsdr[6], const float* param=0) const;
   float GetDStoPointBy( float By, const float xyz[3], float dsdr[6] ) const;
   float GetDStoPointB( const float* B, const float xyz[3], float dsdr[6] ) const;
-  float GetDStoPointCBM( const float xyz[3], float dsdr[3] ) const;
+  float GetDStoPointCBM( const float xyz[3], float dsdr[6] ) const;
 
-  //* Get dS to other particle p (dSp for particle p also returned) 
-
+  /** Virtual method to get extrapolation parameter dS=l/p to another particle. Is defined in KFParticle.**/
   virtual void GetDStoParticle( const KFParticleBase &p, float dS[2], float dsdr[4][6] ) const = 0;
   
   void GetDStoParticleLine( const KFParticleBase &p, float dS[2], float dsdr[4][6] ) const ;
@@ -67,42 +74,20 @@ class KFParticleBase :public TObject {
   void GetDStoParticleBy( float B,  const KFParticleBase &p, float dS[2], float dsdr[4][6] ) const ;
   void GetDStoParticleCBM( const KFParticleBase &p, float dS[2], float dsdr[4][6] ) const ;
   
-  //* Transport on dS value along trajectory, output to P,C
-
+  /** Virtual method to transport a particle on a certain distance along the trajectory. Is defined in KFParticle.**/
   virtual void Transport( float dS, const float dsdr[6], float P[], float C[], float* dsdr1=0, float* F=0, float* F1=0 ) const = 0;
 
 
-  //*
-  //*  INITIALIZATION
-  //*
-
-  //* Constructor 
-
   KFParticleBase();
-
-  //* Destructor 
-
-  virtual ~KFParticleBase() { ; }
-
- //* Initialisation from "cartesian" coordinates ( X Y Z Px Py Pz )
- //* Parameters, covariance matrix, charge, and mass hypothesis should be provided 
+  virtual ~KFParticleBase() { ; } ///< The default destructor.
 
   void Initialize( const float Param[], const float Cov[], Int_t Charge, float Mass );
-
-  //* Initialise covariance matrix and set current parameters to 0.0 
-
   void Initialize();
 
-  //* Set consruction method
-
-  void SetConstructMethod(Int_t m) {fConstructMethod = m;}
-
-  //* Set and get mass hypothesis of the particle
-  void SetMassHypo(float m) { fMassHypo = m;}
-  const float& GetMassHypo() const { return fMassHypo; }
-
-  //* Returns the sum of masses of the daughters
-  const float& GetSumDaughterMass() const {return SumDaughterMass;}
+  void SetConstructMethod(Int_t m) {fConstructMethod = m;} ///< Defines the construction method for the current particle (see description of fConstructMethod).
+  void SetMassHypo(float m) { fMassHypo = m;} ///< Sets the mass hypothesis to the particle, is used when fConstructMethod = 2.
+  const float& GetMassHypo() const { return fMassHypo; } ///< Returns the mass hypothesis.
+  const float& GetSumDaughterMass() const {return SumDaughterMass;} ///< Returns the sum of masses of the daughters.
 
   //*
   //*  ACCESSORS
@@ -110,66 +95,66 @@ class KFParticleBase :public TObject {
 
   //* Simple accessors 
 
-  float GetX    () const { return fP[0]; }
-  float GetY    () const { return fP[1]; }
-  float GetZ    () const { return fP[2]; }
-  float GetPx   () const { return fP[3]; }
-  float GetPy   () const { return fP[4]; }
-  float GetPz   () const { return fP[5]; }
-  float GetE    () const { return fP[6]; }
-  float GetS    () const { return fP[7]; }
-  char    GetQ    () const { return fQ;    }
-  float GetChi2 () const { return fChi2; }
-  Int_t    GetNDF  () const { return fNDF;  }
+  float GetX    () const { return fP[0]; } ///< Retruns X coordinate of the particle, fP[0].
+  float GetY    () const { return fP[1]; } ///< Retruns Y coordinate of the particle, fP[1].
+  float GetZ    () const { return fP[2]; } ///< Retruns Z coordinate of the particle, fP[2].
+  float GetPx   () const { return fP[3]; } ///< Retruns X component of the momentum, fP[3].
+  float GetPy   () const { return fP[4]; } ///< Retruns Y component of the momentum, fP[4].
+  float GetPz   () const { return fP[5]; } ///< Retruns Z component of the momentum, fP[5].
+  float GetE    () const { return fP[6]; } ///< Returns energy of the particle, fP[6].
+  float GetS    () const { return fP[7]; } ///< Returns dS=l/p, l - decay length, fP[7], defined if production vertex is set.
+  char  GetQ    () const { return fQ;    } ///< Returns charge of the particle.
+  float GetChi2 () const { return fChi2; } ///< Returns Chi2 of the fit.
+  Int_t GetNDF  () const { return fNDF;  } ///< Returns number of decrease of freedom.
 
-  const float& X    () const { return fP[0]; }
-  const float& Y    () const { return fP[1]; }
-  const float& Z    () const { return fP[2]; }
-  const float& Px   () const { return fP[3]; }
-  const float& Py   () const { return fP[4]; }
-  const float& Pz   () const { return fP[5]; }
-  const float& E    () const { return fP[6]; }
-  const float& S    () const { return fP[7]; }
-  const char   & Q    () const { return fQ;    }
-  const float& Chi2 () const { return fChi2; }
-  const Int_t   & NDF  () const { return fNDF;  }
+  const float& X    () const { return fP[0]; } ///< Retruns X coordinate of the particle, fP[0].
+  const float& Y    () const { return fP[1]; } ///< Retruns Y coordinate of the particle, fP[1].
+  const float& Z    () const { return fP[2]; } ///< Retruns Z coordinate of the particle, fP[2].
+  const float& Px   () const { return fP[3]; } ///< Retruns X component of the momentum, fP[3].
+  const float& Py   () const { return fP[4]; } ///< Retruns Y component of the momentum, fP[4].
+  const float& Pz   () const { return fP[5]; } ///< Retruns Z component of the momentum, fP[5].
+  const float& E    () const { return fP[6]; } ///< Returns energy of the particle, fP[6].
+  const float& S    () const { return fP[7]; } ///< Returns dS=l/p, l - decay length, fP[7], defined if production vertex is set.
+  const char& Q     () const { return fQ;    } ///< Returns charge of the particle.
+  const float& Chi2 () const { return fChi2; } ///< Returns Chi2 of the fit.
+  const Int_t& NDF  () const { return fNDF;  } ///< Returns number of decrease of freedom.
   
-  float GetParameter ( Int_t i )        const { return fP[i];       }
-  float GetCovariance( Int_t i )        const { return fC[i];       }
-  float GetCovariance( Int_t i, Int_t j ) const { return fC[IJ(i,j)]; }
+  float GetParameter ( Int_t i )          const { return fP[i];       } ///< Returns P[i] parameter.
+  float GetCovariance( Int_t i )          const { return fC[i];       } ///< Returns C[i] element of the covariance matrix in the lower triangular form.
+  float GetCovariance( Int_t i, Int_t j ) const { return fC[IJ(i,j)]; } ///< Returns C[i,j] element of the covariance matrix.
 
   //* Accessors with calculations( &value, &estimated sigma )
   //* error flag returned (0 means no error during calculations) 
 
-  Int_t GetMomentum    ( float &P, float &SigmaP ) const ;
-  Int_t GetPt          ( float &Pt, float &SigmaPt ) const ;
-  Int_t GetEta         ( float &Eta, float &SigmaEta ) const ;
-  Int_t GetPhi         ( float &Phi, float &SigmaPhi ) const ;
-  Int_t GetMass        ( float &M, float &SigmaM ) const ;
-  Int_t GetDecayLength ( float &L, float &SigmaL ) const ;
-  Int_t GetDecayLengthXY ( float &L, float &SigmaL ) const ;
-  Int_t GetLifeTime    ( float &T, float &SigmaT ) const ;
-  Int_t GetR           ( float &R, float &SigmaR ) const ;
+  Int_t GetMomentum      ( float &p,   float &error ) const ;
+  Int_t GetPt            ( float &pt,  float &error ) const ;
+  Int_t GetEta           ( float &eta, float &error ) const ;
+  Int_t GetPhi           ( float &phi, float &error ) const ;
+  Int_t GetMass          ( float &m,   float &error ) const ;
+  Int_t GetDecayLength   ( float &l,   float &error ) const ;
+  Int_t GetDecayLengthXY ( float &l,   float &error ) const ;
+  Int_t GetLifeTime      ( float &ctau,float &error ) const ;
+  Int_t GetR             ( float &r,   float &error ) const ;
 
   //*
   //*  MODIFIERS
   //*
   
-  float & X    () { return fP[0]; }
-  float & Y    () { return fP[1]; }
-  float & Z    () { return fP[2]; }
-  float & Px   () { return fP[3]; }
-  float & Py   () { return fP[4]; }
-  float & Pz   () { return fP[5]; }
-  float & E    () { return fP[6]; }
-  float & S    () { return fP[7]; }
-  char    & Q    () { return fQ;    }
-  float & Chi2 () { return fChi2; }
-  Int_t    & NDF  () { return fNDF;  }
+  float & X    () { return fP[0]; } ///< Modifier of X coordinate of the particle, fP[0].
+  float & Y    () { return fP[1]; } ///< Modifier of Y coordinate of the particle, fP[1].
+  float & Z    () { return fP[2]; } ///< Modifier of Z coordinate of the particle, fP[2].
+  float & Px   () { return fP[3]; } ///< Modifier of X component of the momentum, fP[3].
+  float & Py   () { return fP[4]; } ///< Modifier of Y component of the momentum, fP[4].
+  float & Pz   () { return fP[5]; } ///< Modifier of Z component of the momentum, fP[5].
+  float & E    () { return fP[6]; } ///< Modifier of energy of the particle, fP[6].
+  float & S    () { return fP[7]; } ///< Modifier of dS=l/p, l - decay length, fP[7], defined if production vertex is set.
+  char  & Q    () { return fQ;    } ///< Modifier of charge of the particle.
+  float & Chi2 () { return fChi2; } ///< Modifier of Chi2 of the fit.
+  Int_t & NDF  () { return fNDF;  } ///< Modifier of number of decrease of freedom.
 
-  float & Parameter ( Int_t i )        { return fP[i];       }
-  float & Covariance( Int_t i )        { return fC[i];       }
-  float & Covariance( Int_t i, Int_t j ) { return fC[IJ(i,j)]; }
+  float & Parameter ( Int_t i )          { return fP[i];       } ///< Modifier of P[i] parameter.
+  float & Covariance( Int_t i )          { return fC[i];       } ///< Modifier of C[i] element of the covariance matrix in the lower triangular form.
+  float & Covariance( Int_t i, Int_t j ) { return fC[IJ(i,j)]; } ///< Modifier of C[i,j] element of the covariance matrix.
 
 
   //* 
@@ -188,7 +173,7 @@ class KFParticleBase :public TObject {
   void SubtractDaughter( const KFParticleBase &Daughter );
 
   void AddDaughterWithEnergyFit( const KFParticleBase &Daughter );
-  void AddDaughterWithEnergyFitMC( const KFParticleBase &Daughter ); //with mass constrained
+  void AddDaughterWithEnergyFitMC( const KFParticleBase &Daughter );
 
   //* Set production vertex 
 
@@ -206,35 +191,14 @@ class KFParticleBase :public TObject {
 
   //* Everything in one go  
 
-  void Construct( const KFParticleBase *vDaughters[], Int_t nDaughters, 
-		  const KFParticleBase *ProdVtx=0,   float Mass=-1 );
+  void Construct( const KFParticleBase *vDaughters[], Int_t nDaughters, const KFParticleBase *ProdVtx=0,   float Mass=-1 );
 
-
-  //*
-  //*                   TRANSPORT
-  //* 
-  //*  ( main transportation parameter is S = SignedPath/Momentum )
-  //*  ( parameters of decay & production vertices are stored locally )
-  //*
-
-
-  //* Transport the particle to its decay vertex 
-
+  //Transport functions
   void TransportToDecayVertex();
-
-  //* Transport the particle to its production vertex 
-
   void TransportToProductionVertex();
-
-  //* Transport the particle on dS parameter (SignedPath/Momentum) 
-
   void TransportToDS( float dS, const float* dsdr );
-
-  //* Particular extrapolators one can use 
-
   void TransportBz( float Bz, float dS, const float* dsdr, float P[], float C[], float* dsdr1=0, float* F=0, float* F1=0 ) const;
   void TransportCBM( float dS, const float* dsdr, float P[], float C[], float* dsdr1=0, float* F=0, float* F1=0 ) const;  
-
 
   //* 
   //* OTHER UTILITIES
@@ -249,32 +213,26 @@ class KFParticleBase :public TObject {
   //* Calculate sqrt(Chi2/ndf) deviation from vertex
   //* v = [xyz], Cv=[Cxx,Cxy,Cyy,Cxz,Cyz,Czz]-covariance matrix
 
-  float GetDeviationFromVertex( const float v[], 
-                                   const float Cv[]=0 ) const;
+  float GetDeviationFromVertex( const float v[], const float Cv[]=0 ) const;
   float GetDeviationFromVertex( const KFParticleBase &Vtx ) const;
   float GetDeviationFromParticle( const KFParticleBase &p ) const;  
-
-  //* Subtract the particle from the vertex  
 
   void SubtractFromVertex( KFParticleBase &Vtx ) const;
   void SubtractFromParticle( KFParticleBase &Vtx ) const;
 
-  //* return parameters for the Armenteros-Podolanski plot
   static void GetArmenterosPodolanski(KFParticleBase& positive, KFParticleBase& negative, float QtAlfa[2] );
-
-  //* Rotates the KFParticle object around OZ axis, OZ axis is set by the vertex position
   void RotateXY(float angle, float Vtx[3]);
 
-  int Id() const { return fId; };
-  int NDaughters() const { return fDaughtersIds.size(); };
-  const std::vector<int>& DaughterIds() const { return fDaughtersIds; };
-  void CleanDaughtersId() { fDaughtersIds.clear(); }
+  int Id() const { return fId; } ///< Returns Id of the particle.
+  int NDaughters() const { return fDaughtersIds.size(); } ///< Returns number of daughter particles.
+  const std::vector<int>& DaughterIds() const { return fDaughtersIds; } ///< Returns the vector with the indices of daughter particles.
+  void CleanDaughtersId() { fDaughtersIds.clear(); } ///< Cleans the vector with the indices of daughter particles.
   
-  void SetId( int id ){ fId = id; }; // should be always used (manualy)
-  void AddDaughterId( int id ){ fDaughtersIds.push_back(id); };
+  void SetId( int id ) { fId = id; } ///< Sets the Id of the particle. After the construction of a particle should be set by user.
+  void AddDaughterId( int id ) { fDaughtersIds.push_back(id); } ///< Adds index of the daughter particle. 
 
-  void SetPDG ( int pdg ) { fPDG = pdg; }
-  int GetPDG () const { return fPDG; }
+  void SetPDG ( int pdg ) { fPDG = pdg; } ///< Sets the PDG hypothesis.
+  int GetPDG () const { return fPDG; } ///< Returns the PDG hypothesis.
 
 #ifdef __ROOT__ //for the STAR experiment
   virtual void Print(Option_t *opt="") const;
@@ -285,7 +243,7 @@ class KFParticleBase :public TObject {
   void         SetParentID(Int_t id=0) {fParentID = id;}
   Int_t        GetParentID() const {return fParentID;}
   void         SetIdParentMcVx(Int_t id) {fIdParentMcVx = id;}
-  void         SetIdTruth(Int_t idtru,Int_t qatru=0) {fIdTruth = idtru; fQuality = (UShort_t) qatru;}
+  void         SetIdTruth(Int_t idtru,Int_t qatru=0) {fIdTruth = (UShort_t) idtru; fQuality = (UShort_t) qatru;}
   virtual void Clear(Option_t * /*option*/ ="");
 #endif
 
@@ -293,53 +251,45 @@ class KFParticleBase :public TObject {
   static void MultQSQt( const float Q[], const float S[], float SOut[], const int kN );
 
  protected:
-
+  /** Converts a pair of indices {i,j} of the covariance matrix to one index corresponding to the triangular form. */
   static Int_t IJ( Int_t i, Int_t j ){ 
     return ( j<=i ) ? i*(i+1)/2+j :j*(j+1)/2+i;
   }
-
+  /** Return an element of the covariance matrix with {i,j} indices. */
   float & Cij( Int_t i, Int_t j ){ return fC[IJ(i,j)]; }
-
   void TransportLine( float S, const float* dsdr, float P[], float C[], float* dsdr1, float* F, float* F1 ) const ;
-
-  static Bool_t InvertSym3( const float A[], float Ainv[] );
-
   bool GetMeasurement( const KFParticleBase& daughter, float m[], float V[], float D[3][3] ) ;
-
-  //* Mass constraint function. is needed for the nonlinear mass constraint and a fit with mass constraint
   void SetMassConstraint( float *mP, float *mC, float mJ[7][7], float mass );
 
-  float fP[8];  //* Main particle parameters {X,Y,Z,Px,Py,Pz,E,S[=DecayLength/P]}
-  float fC[36]; //* Low-triangle covariance matrix of fP
-  float fChi2;  //* Chi^2
-  float fSFromDecay; //* Distance from decay vertex to current position
-  float SumDaughterMass;  //* sum of the daughter particles masses
-  float fMassHypo;  //* sum of the daughter particles masse
-  Int_t fNDF;   //* Number of degrees of freedom 
-  int   fId;                   //* id of particle
-
+  float fP[8];           ///< Particle parameters { X, Y, Z, Px, Py, Pz, E, S[=DecayLength/P]}.
+  float fC[36];          ///< Low-triangle covariance matrix of fP.
+  float fChi2;           ///< Chi^2.
+  float fSFromDecay;     ///< Distance from the decay vertex to the current position.
+  float SumDaughterMass; ///< Sum of the daughter particles masses. Needed to set the constraint on the minimum mass during particle construction.
+  float fMassHypo;       ///< The mass hypothesis, used for the constraints during particle construction.
+  Int_t fNDF;            ///< Number of degrees of freedom.
+  int   fId;             ///< Id of the particle.
 #ifdef __ROOT__ //for the STAR experiment
-  Short_t    fParentID;
-  Int_t      fIdTruth; // MC track id 
-  Short_t    fQuality; // quality of this information (percentage of hits coming from the above MC track)
-  Short_t    fIdParentMcVx; // for track and McTrack for vertex
+  Short_t    fParentID;     ///< Id of the parent particle.
+  Short_t    fIdTruth;      ///< MC track id.
+  Short_t    fQuality;      ///< quality of this information (percentage of hits coming from the above MC track).
+  Short_t    fIdParentMcVx; ///< for track and McTrack for vertex.
 #endif
-
-  Bool_t fAtProductionVertex; //* Flag shows that the particle error along
-                              //* its trajectory is taken from production vertex    
-
-                          //* ( used for linearisation of equations )
-
-  Bool_t fIsLinearized;   //* Flag shows that the guess is present
-
-  char    fQ;     //* Particle charge 
-  char fConstructMethod; //* Determines the method for the particle construction. 
-  //* 0 - Energy considered as an independent veriable, fitted independently from momentum, without any constraints on mass
-  //* 1 - Energy considered as a dependent variable, calculated from the momentum and mass hypothesis
-  //* 2 - Energy considered as an independent variable, fitted independently from momentum, with constraints on mass of daughter particle
-
-  int fPDG; // pdg hypothesis
-  std::vector<int> fDaughtersIds; // id of particles it created from. if size == 1 then this is id of track. TODO use in functions. why unsigned short int doesn't work???
+  Bool_t fAtProductionVertex; ///< Flag shows if particle is at the production point.
+  char fQ; ///< The charge of the particle in the units of the elementary charge.
+  
+  /** \brief Determines the method for the particle construction. \n
+   ** 0 - Energy considered as an independent veriable, fitted independently from momentum, without any constraints on mass \n
+   ** 2 - Energy considered as an independent variable, fitted independently from momentum, with constraints on mass of daughter particle
+   **/
+  char fConstructMethod; 
+  int fPDG; ///< The PDG hypothesis assigned to the particle.
+  
+  /** \brief A vector with ids of the daughter particles: \n
+   ** 1) if particle is created from a track - the index of the track, in this case the size of the vector is always equal to one; \n
+   ** 2) if particle is constructed from other particles - indices of these particles in the same array.
+   **/
+  std::vector<int> fDaughtersIds;
  
 #ifndef KFParticleStandalone
   ClassDef( KFParticleBase, 2 )
