@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofGeometry.cxx,v 1.3 2019/04/23 23:48:58 fseck Exp $
+ * $Id: StETofGeometry.cxx,v 1.4 2019/12/10 16:03:46 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StETofGeometry.cxx,v $
+ * Revision 1.4  2019/12/10 16:03:46  fseck
+ * added handling of StPicoHelix in extrapolation & step-wise extrapolation in changing magnetic field
+ *
  * Revision 1.3  2019/04/23 23:48:58  fseck
  * added support for StPicoHelix and fixed bug in sectorAtPhi() leading to inefficiencies
  *
@@ -37,6 +40,11 @@
 #include "StETofUtil/StETofGeometry.h"
 #include "StMessMgr.h"
 
+#include "StETofHit.h"
+#include "StMuDSTMaker/COMMON/StMuETofHit.h"
+#include "StPicoEvent/StPicoETofHit.h"
+
+#include "StarMagField.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -226,7 +234,7 @@ void
 StETofNode::setSafetyMargins( const double* margins )
 {
     if( margins[ 0 ] < 0 || margins[ 1 ] < 0 ) {
-        LOG_INFO << "StETofNode::setSafetyMargins()  --  WARNING: input values are negative" << endm;
+        LOG_DEBUG << "StETofNode::setSafetyMargins()  --  WARNING: input values are negative" << endm;
     }
     mSafetyMarginX = margins[ 0 ];
     mSafetyMarginY = margins[ 1 ];
@@ -279,14 +287,14 @@ StETofNode::helixCross( const StHelixD& helix, double& pathLength, StThreeVector
     float maxPathLength = 1000;
 
     bool isInside = false;
-    pathLength = 0;
+    pathLength = -1.;
 
     // find intersection between helix & the node's XY-plane
     pathLength = helix.pathLength( mCenter, mNormal );
 
     if( pathLength > 0 && pathLength < maxPathLength ) {
         cross = helix.at( pathLength );
-        theta = mNormal.angle( helix.cat( pathLength ) );
+        theta = mNormal.angle( -helix.cat( pathLength ) );
     }
 
     // check if the intersection point is really inside the node
@@ -304,7 +312,7 @@ StETofNode::helixCross( const StPicoHelix& helix, double& pathLength, TVector3& 
     float maxPathLength = 1000;
 
     bool isInside = false;
-    pathLength = -1;
+    pathLength = -1.;
 
     // find intersection between helix & the node's XY-plane
     TVector3 center( mCenter.x(), mCenter.y(), mCenter.z() );
@@ -313,7 +321,7 @@ StETofNode::helixCross( const StPicoHelix& helix, double& pathLength, TVector3& 
 
     if( pathLength > 0 && pathLength < maxPathLength ) {
         cross = helix.at( pathLength );
-        theta = normal.Angle( helix.cat( pathLength ) );
+        theta = normal.Angle( -helix.cat( pathLength ) );
     }
 
     // check if the intersection point is really inside the node
@@ -553,7 +561,8 @@ StETofGeometry::StETofGeometry( const char* name, const char* title )
 : TNamed( name, title ),
   mNValidModules( 0 ),
   mInitFlag( false ),
-  mDebug( false )
+  mDebug( false ),
+  mStarBField( nullptr )
 {
 
 }
@@ -569,12 +578,18 @@ void
 StETofGeometry::init( TGeoManager* geoManager )
 {
     double safetyMargins[ 2 ] = { 0., 0. };
-    init( geoManager, safetyMargins );
+    init( geoManager, safetyMargins, false );
+}
+
+void
+StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins )
+{
+    init( geoManager, safetyMargins, false );
 }
 
 
 void
-StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins )
+StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins, const bool& useHelixSwimmer )
 {
     if( !geoManager ) {
         LOG_ERROR << " *** StETofGeometry::Init - cannot find TGeoManager *** " << endm;
@@ -647,7 +662,22 @@ StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins )
         } // end of loop over planes
     } // end of loop over sectors
 
-    LOG_INFO << "amount of valid modules: " << mNValidModules << endm;  
+    LOG_INFO << "amount of valid modules: " << mNValidModules << endm;
+
+
+    // ----------------------
+    if( useHelixSwimmer ) {
+        // get magnetic field map
+        if( !StarMagField::Instance() ) {
+            LOG_INFO << " no StMagField available ... " << endl;
+        }
+        else {
+            mStarBField = StarMagField::Instance();
+            LOG_INFO << " ... initializing magnetic field from StarMagField: fScale = " << mStarBField->GetFactor() << endm;
+        }
+    }
+    // ----------------------
+
 
     // finished initializing geometry
     setInitFlag( true );
@@ -669,6 +699,8 @@ StETofGeometry::reset()
 
     mNValidModules = 0;
     mInitFlag = false;
+
+    mStarBField = nullptr;
 }
 
 
@@ -817,23 +849,76 @@ StETofGeometry::hitLocal2Master( const int moduleId, const int counterId, const 
 }
 
 StThreeVectorD
-StETofGeometry::helixCrossETofPlane( const StHelixD& helix )
+StETofGeometry::hitLocal2Master( StETofHit* hit )
 {
-    if( isDebugOn() ) {
-        LOG_INFO << "zplane:" << eTofConst::zplanes[ 1 ] << endm;
+    // local to global coordinate conversion
+    // -------------------------------------
+    double xl[ 3 ] = { hit->localX(), hit->localY(), 0. };
+    double xg[ 3 ] = { 0., 0., 0. };
+
+    int moduleId  = calcModuleIndex( hit->sector(), hit->zPlane() );
+    int counterId = hit->counter() - 1;
+
+    if( !findETofNode( moduleId, counterId ) ) {
+        LOG_ERROR << "ETOF volume of a hit is not loaded in the geometry" << endl;
+        return StThreeVectorD( 0., 0., 0. );
     }
 
-    // center of ETOF plane
-    StThreeVectorD r( 0, 0, eTofConst::zplanes[ 1 ] );
+    findETofNode( moduleId, counterId )->local2Master( xl, xg );
 
-    // Normal to ETOF plane
+    return StThreeVectorD( xg[ 0 ], xg[ 1 ], xg[ 2 ] );
+}
+
+StThreeVectorD
+StETofGeometry::hitLocal2Master( StMuETofHit* hit )
+{
+    return hitLocal2Master( ( StETofHit* ) hit );
+}
+
+
+TVector3
+StETofGeometry::hitLocal2Master( StPicoETofHit* hit )
+{
+    // local to global coordinate conversion
+    // -------------------------------------
+    double xl[ 3 ] = { hit->localX(), hit->localY(), 0. };
+    double xg[ 3 ] = { 0., 0., 0. };
+
+    int moduleId  = calcModuleIndex( hit->sector(), hit->zPlane() );
+    int counterId = hit->counter() - 1;
+
+    if( !findETofNode( moduleId, counterId ) ) {
+        LOG_ERROR << "ETOF volume of a hit is not loaded in the geometry" << endl;
+        return TVector3( 0., 0., 0. );
+    }
+
+    findETofNode( moduleId, counterId )->local2Master( xl, xg );
+
+    return TVector3( xg[ 0 ], xg[ 1 ], xg[ 2 ] );
+}
+
+
+StThreeVectorD
+StETofGeometry::helixCrossPlane( const StHelixD& helix, const double& z )
+{
+    if( isDebugOn() ) {
+        LOG_INFO << "zplane:" << z << endm;
+    }
+
+    // XY plane at z
+    StThreeVectorD r( 0, 0, z );
+
+    // normal to XY plane
     StThreeVectorD n( 0, 0, 1 );
 
     if( isDebugOn() )
       logPoint( "( outer- ) helix origin" , helix.origin() );
 
     double s = helix.pathLength( r, n );
+    if( s<0. || s>4000. ) return StThreeVectorD( -999., -999., 999. );
+
     StThreeVectorD point = helix.at( s );
+    if( point.perp() > 300. ) return StThreeVectorD( -999., -999., 999. );
 
     if( isDebugOn() ) {
       LOG_INFO << "pathLength @ ETOF plane = " << s << endm;
@@ -843,6 +928,77 @@ StETofGeometry::helixCrossETofPlane( const StHelixD& helix )
     return point;
 }
 
+StThreeVectorD
+StETofGeometry::helixCrossETofPlane( const StHelixD& helix )
+{
+    return helixCrossPlane( helix, eTofConst::zplanes[ 1 ] );
+}
+
+
+void
+StETofGeometry::helixSwimmer( const StPhysicalHelixD& helix, StPhysicalHelixD& helixSwimmer, const double& z, double& pathlength )
+{
+    helixSwimmer = helix;
+
+    // normal to XY plane
+    StThreeVectorD n( 0., 0., 1. );
+
+    double zTpcEdge = -220.;
+    if( z > zTpcEdge ) return;
+
+    // --1-- extrapolate helix to TPC edge
+    double s = helix.pathLength( StThreeVectorD( 0., 0., zTpcEdge ), n );
+    if( s<0. || s>4000. ) {
+        return;
+    }
+
+    pathlength = s;
+
+    StThreeVectorD posTpcEdge = helix.at( s );
+    //if( posTpcEdge.perp() > 300. ) false;
+
+    double         bField     = getFieldZ( posTpcEdge ) * kilogauss;
+    StThreeVectorD momTpcEdge = helix.momentumAt( s, bField );
+    int            charge     = helix.charge( bField );
+
+    // --2-- step through the volume between TPC and eTOF
+    const int nSteps = 10;
+    double stepWidth = ( z - zTpcEdge ) / nSteps; //cm
+
+    StThreeVectorD posInStep = posTpcEdge;
+    StThreeVectorD momInStep = momTpcEdge;
+
+    for( int i=0; i<nSteps; i++ ) {
+        double zInStep = zTpcEdge + stepWidth * ( i+1 );
+
+        bField = getFieldZ( posInStep ) * kilogauss;
+        StPhysicalHelixD helixInStep( momInStep, posInStep, bField, charge );
+
+        s = helixInStep.pathLength( StThreeVectorD( 0., 0., zInStep ), n );
+        if( s<0. || s>4000. ) {
+            return;
+        }
+
+        posInStep = helixInStep.at( s );
+        //if( posInStep.perp() > 300. ) return false;
+
+        momInStep = helixInStep.momentumAt( s, bField );
+
+        pathlength += s;
+
+        if( mDebug ) {
+            logPoint( "ideal",   helix.at( pathlength ) );
+            logPoint( "swimmer", helixInStep.at( s )    );
+
+            LOG_INFO << " pt: " << momInStep.perp() << "  helix curvature: " << helixInStep.curvature() << " radius: " << 1./ helixInStep.curvature() << endm;
+            LOG_INFO << "stepWidth: " << stepWidth << " bField: " << bField << " pathLength: " << s << " mom phi:" << momInStep.phi() << endm;
+        }
+    }
+
+    helixSwimmer = StPhysicalHelixD( momInStep, posInStep, bField, charge );
+}
+
+
 
 /**
  * HelixCrossSector
@@ -851,7 +1007,12 @@ StETofGeometry::helixCrossETofPlane( const StHelixD& helix )
 std::vector< int >
 StETofGeometry::helixCrossSector( const StHelixD& helix )
 {
-    StThreeVectorD point = helixCrossETofPlane( helix );
+    StThreeVectorD point = helixCrossPlane( helix, eTofConst::zplanes[ 1 ] );
+
+    if( fabs( point.x() + 999 ) < 1e-5 ) {
+        std::vector< int > r;
+        return r;
+    }
 
     LOG_DEBUG << "track phi @ ETOF= " << point.phi() << endm;
 
@@ -909,10 +1070,12 @@ StETofGeometry::sectorAtPhi( const double& angle )
  * Returns true if a counter is crossed by a helix
 **/
 void
-StETofGeometry::helixCrossCounter( const StHelixD& helix, vector< int >& idVec, vector< StThreeVectorD >& crossVec, vector< StThreeVectorD >& localVec, vector< double >& thetaVec )
+StETofGeometry::helixCrossCounter( const StPhysicalHelixD& helix, vector< int >& idVec, vector< StThreeVectorD >& crossVec, vector< StThreeVectorD >& localVec, vector< double >& thetaVec, vector< double >& pathLenVec )
 {
     // estimate which sector(s) the track crossed
     vector< int > sectorsCrossed = helixCrossSector( helix );
+
+    if( sectorsCrossed.size() == 0 ) return;
 
     if( sectorsCrossed.size() == 1 ) LOG_DEBUG << "sector crossed: "  << sectorsCrossed[ 0 ] << endm;
     if( sectorsCrossed.size() == 2 ) LOG_DEBUG << "sectors crossed: " << sectorsCrossed[ 0 ] << ", " << sectorsCrossed[ 1 ] << endm;
@@ -927,7 +1090,7 @@ StETofGeometry::helixCrossCounter( const StHelixD& helix, vector< int >& idVec, 
 
         if( found == std::end( sectorsCrossed ) ) continue;
 
-        LOG_DEBUG << iSector << "  " << mETofModule[i]->plane() << endm;
+        LOG_DEBUG << iSector << "  " << mETofModule[ i ]->plane() << endm;
 
         double module_pathLen;
         double module_theta;
@@ -935,37 +1098,54 @@ StETofGeometry::helixCrossCounter( const StHelixD& helix, vector< int >& idVec, 
 
         bool helixCrossedModule = mETofModule[ i ]->helixCross( helix, module_pathLen, module_cross, module_theta );
 
-        if( module_theta > 0.5 * M_PI ) module_theta -= M_PI;
-        module_theta = fabs( module_theta * 180. / M_PI );
+        module_theta *= 180. / M_PI;
 
-        /*
-        if( helixCrossedModule ) {
+
+        if( mDebug && helixCrossedModule ) {
             LOG_INFO << " -----------" << "\nmoduleId:"<< mETofModule[ i ]->moduleIndex() << "  helix_crossed: " << helixCrossedModule
                      << "  sector: " << mETofModule[ i ]->sector() << " plane: " << mETofModule[ i ]->plane() << endm;
             LOG_INFO << "pathLength: " << module_pathLen << "   absolute impact angle: " << module_theta << " degree" << endm;
             logPoint( "crossing point" , module_cross );
             LOG_INFO << "cross.eta: " << module_cross.pseudoRapidity() << endm;
         }
-        */
 
 
         // only search for intersections of counters with the helix if the module was crossed
         if( !helixCrossedModule ) continue;
 
-        int nValidCounters = mETofModule[ i ]->numberOfCounters();
+        // get helix swimmer
+        StPhysicalHelixD swimmerHelix;
+        double swimmerPathLen;
+
+        if( mStarBField ) {
+            // get swimmer helix 5 cm in front of the module
+            helixSwimmer( helix, swimmerHelix, mETofModule[ i ]->centerPos().z() + 5., swimmerPathLen );
+        }
 
         // loop over counters
+        int nValidCounters = mETofModule[ i ]->numberOfCounters();
         for( int j=0; j<nValidCounters; j++ ) {
             double pathLen;
             double theta;
             StThreeVectorD cross;
 
-            bool helixCrossedCounter = mETofModule[ i ]->counter( j )->helixCross( helix, pathLen, cross, theta );
+            bool helixCrossedCounter = false;
 
-            if( theta > 0.5 * M_PI ) theta -= M_PI;
-            theta = fabs( theta * 180. / M_PI );
+            if( mStarBField ) {
+                // use helix swimmer
+                helixCrossedCounter = mETofModule[ i ]->counter( j )->helixCross( swimmerHelix, pathLen, cross, theta );
+                pathLen += swimmerPathLen;
+                if( mDebug ) LOG_DEBUG << " using swimmer helix" << endm;
+            }
+            else {
+                // use ideal helix
+                helixCrossedCounter = mETofModule[ i ]->counter( j )->helixCross( helix, pathLen, cross, theta );
+                if( mDebug ) LOG_DEBUG << " using ideal helix" << endm;
+            }
 
             if( helixCrossedCounter ) {
+                theta *= 180. / M_PI;
+
                 double global[ 3 ];
                 double local [ 3 ];
 
@@ -986,15 +1166,16 @@ StETofGeometry::helixCrossCounter( const StHelixD& helix, vector< int >& idVec, 
                 crossVec.push_back( cross );
                 localVec.push_back( StThreeVectorD( local[ 0 ], local[ 1 ], local[ 2 ] ) );
                 thetaVec.push_back( theta );
+                pathLenVec.push_back( pathLen );
 
-                /*
-                LOG_INFO << " -----------" << "\ncounterId: " << mETofModule[ i ]->counter( j )->counterIndex() << endm;
-                LOG_INFO << "pathLength: " << pathLen << "   absolute impact angle: " << theta << " degree" << endm;
-                logPoint( "crossing point" , cross );
-                LOG_INFO << "cross.eta: " << cross.pseudoRapidity() << "\n" << endm;
-                LOG_INFO << "localX: " << local[ 0 ] << "  localY: " << local[ 1 ] << "  localZ: " << local[ 2 ] << endm;
-                LOG_INFO << "Strip: " << strip << " * * * " << endm;
-                */
+                if( mDebug ) {
+                    LOG_INFO << " -----------" << "\ncounterId: " << mETofModule[ i ]->counter( j )->counterIndex() << endm;
+                    LOG_INFO << "pathLength: " << pathLen << "   impact angle: " << theta << " degree" << endm;
+                    logPoint( "crossing point" , cross );
+                    LOG_INFO << "cross.eta: " << cross.pseudoRapidity() << "\n" << endm;
+                    LOG_INFO << "localX: " << local[ 0 ] << "  localY: " << local[ 1 ] << "  localZ: " << local[ 2 ] << endm;
+                    LOG_INFO << "Strip: " << strip << " * * * " << endm;
+                }
             }
 
         } // end loop over counters
@@ -1023,12 +1204,15 @@ StETofGeometry::module( const unsigned int i )
 TVector3
 StETofGeometry::helixCrossETofPlane( const StPicoHelix& helix )
 {
-    if( isDebugOn() ) {
-        LOG_INFO << "zplane:" << eTofConst::zplanes[ 1 ] << endm;
-    }
+    return helixCrossPlane( helix, eTofConst::zplanes[ 1 ] );
+}
 
-    // center of ETOF plane
-    TVector3 r( 0, 0, eTofConst::zplanes[ 1 ] );
+
+
+TVector3
+StETofGeometry::helixCrossPlane( const StPicoHelix& helix, const double& z )
+{
+    TVector3 r( 0, 0, z );
 
     // Normal to ETOF plane
     TVector3 n( 0, 0, 1 );
@@ -1040,12 +1224,78 @@ StETofGeometry::helixCrossETofPlane( const StPicoHelix& helix )
     TVector3 point = helix.at( s );
 
     if( isDebugOn() ) {
-      LOG_INFO << "pathLength @ ETOF plane = " << s << endm;
+      LOG_INFO << "pathLength @ z = " << s << endm;
       logPoint( "intersection", point );
     }
 
     return point;
 }
+
+
+
+void
+StETofGeometry::helixSwimmer( const StPicoPhysicalHelix& helix, StPicoPhysicalHelix& helixSwimmer, const double& z, double& pathlength )
+{
+    helixSwimmer = helix;
+
+    // normal to XY plane
+    TVector3 n( 0., 0., 1. );
+
+    double zTpcEdge = -220.;
+    if( z > zTpcEdge ) return;
+
+    // --1-- extrapolate helix to TPC edge
+    double s = helix.pathLength( TVector3( 0., 0., zTpcEdge ), n );
+    if( s<0. || s>4000. ) {
+        return;
+    }
+
+    pathlength = s;
+
+    TVector3 posTpcEdge = helix.at( s );
+    //if( posTpcEdge.perp() > 300. ) false;
+
+    double   bField     = getFieldZ( posTpcEdge ) * kilogauss;
+    TVector3 momTpcEdge = helix.momentumAt( s, bField );
+    int      charge     = helix.charge( bField );
+
+    // --2-- step through the volume between TPC and eTOF
+    const int nSteps = 10;
+    double stepWidth = ( z - zTpcEdge ) / nSteps; //cm
+
+    TVector3 posInStep = posTpcEdge;
+    TVector3 momInStep = momTpcEdge;
+
+    for( int i=0; i<nSteps; i++ ) {
+        double zInStep = zTpcEdge + stepWidth * ( i+1 );
+
+        bField = getFieldZ( posInStep ) * kilogauss;
+        StPicoPhysicalHelix helixInStep( momInStep, posInStep, bField, charge );
+
+        s = helixInStep.pathLength( TVector3( 0., 0., zInStep ), n );
+        if( s<0. || s>4000. ) {
+            return;
+        }
+
+        posInStep = helixInStep.at( s );
+        //if( posInStep.perp() > 300. ) return false;
+
+        momInStep = helixInStep.momentumAt( s, bField );
+
+        pathlength += s;
+
+        if( mDebug ) {
+            logPoint( "ideal",   helix.at( pathlength ) );
+            logPoint( "swimmer", helixInStep.at( s )    );
+
+            LOG_INFO << " pt: " << momInStep.Perp() << "  helix curvature: " << helixInStep.curvature() << " radius: " << 1./ helixInStep.curvature() << endm;
+            LOG_INFO << "stepWidth: " << stepWidth << " bField: " << bField << " pathLength: " << s << " mom phi:" << momInStep.Phi() << endm;
+        }
+    }
+
+    helixSwimmer = StPicoPhysicalHelix( momInStep, posInStep, bField, charge );
+}
+
 
 
 /**
@@ -1068,7 +1318,7 @@ StETofGeometry::helixCrossSector( const StPicoHelix& helix )
  * Returns true if a counter is crossed by a helix
 **/
 void
-StETofGeometry::helixCrossCounter( const StPicoHelix& helix, vector< int >& idVec, vector< TVector3 >& crossVec, vector< TVector3 >& localVec, vector< double >& thetaVec )
+StETofGeometry::helixCrossCounter( const StPicoPhysicalHelix& helix, vector< int >& idVec, vector< TVector3 >& crossVec, vector< TVector3 >& localVec, vector< double >& thetaVec )
 {
     // estimate which sector(s) the track crossed
     vector< int > sectorsCrossed = helixCrossSector( helix );
@@ -1094,34 +1344,52 @@ StETofGeometry::helixCrossCounter( const StPicoHelix& helix, vector< int >& idVe
 
         bool helixCrossedModule = mETofModule[ i ]->helixCross( helix, module_pathLen, module_cross, module_theta );
 
-        if( module_theta > 0.5 * M_PI ) module_theta -= M_PI;
         module_theta = fabs( module_theta * 180. / M_PI );
 
-        /*
-        if( helixCrossedModule ) {
+
+        if( mDebug && helixCrossedModule ) {
             LOG_INFO << " -----------" << "\nmoduleId:"<< mETofModule[ i ]->moduleIndex() << "  helix_crossed: " << helixCrossedModule
                      << "  sector: " << mETofModule[ i ]->sector() << " plane: " << mETofModule[ i ]->plane() << endm;
             LOG_INFO << "pathLength: " << module_pathLen << "   absolute impact angle: " << module_theta << " degree" << endm;
             logPoint( "crossing point" , module_cross );
-            LOG_INFO << "cross.eta: " << module_cross.pseudoRapidity() << endm;
+            LOG_INFO << "cross.eta: " << module_cross.PseudoRapidity() << endm;
         }
-        */
 
 
         // only search for intersections of counters with the helix if the module was crossed
         if( !helixCrossedModule ) continue;
 
-        int nValidCounters = mETofModule[ i ]->numberOfCounters();
+
+        // get helix swimmer
+        StPicoPhysicalHelix swimmerHelix;
+        double swimmerPathLen;
+
+        if( mStarBField ) {
+            // get swimmer helix 5 cm in front of the module
+            helixSwimmer( helix, swimmerHelix, mETofModule[ i ]->centerPos().z() + 5., swimmerPathLen );
+        }
 
         // loop over counters
+        int nValidCounters = mETofModule[ i ]->numberOfCounters();
         for( int j=0; j<nValidCounters; j++ ) {
             double pathLen;
             double theta;
             TVector3 cross;
 
-            bool helixCrossedCounter = mETofModule[ i ]->counter( j )->helixCross( helix, pathLen, cross, theta );
+            bool helixCrossedCounter = false;
 
-            if( theta > 0.5 * M_PI ) theta -= M_PI;
+            if( mStarBField ) {
+                // use helix swimmer
+                helixCrossedCounter = mETofModule[ i ]->counter( j )->helixCross( swimmerHelix, pathLen, cross, theta );
+                pathLen += swimmerPathLen;
+                if( mDebug ) LOG_DEBUG << " using swimmer helix" << endm;
+            }
+            else {
+                // use ideal helix
+                helixCrossedCounter = mETofModule[ i ]->counter( j )->helixCross( helix, pathLen, cross, theta );
+                if( mDebug ) LOG_DEBUG << " using ideal helix" << endm;
+            }
+
             theta = fabs( theta * 180. / M_PI );
 
             if( helixCrossedCounter ) {
@@ -1146,14 +1414,14 @@ StETofGeometry::helixCrossCounter( const StPicoHelix& helix, vector< int >& idVe
                 localVec.push_back( TVector3( local[ 0 ], local[ 1 ], local[ 2 ] ) );
                 thetaVec.push_back( theta );
 
-                /*
-                LOG_INFO << " -----------" << "\ncounterId: " << mETofModule[ i ]->counter( j )->counterIndex() << endm;
-                LOG_INFO << "pathLength: " << pathLen << "   absolute impact angle: " << theta << " degree" << endm;
-                logPoint( "crossing point" , cross );
-                LOG_INFO << "cross.eta: " << cross.pseudoRapidity() << "\n" << endm;
-                LOG_INFO << "localX: " << local[ 0 ] << "  localY: " << local[ 1 ] << "  localZ: " << local[ 2 ] << endm;
-                LOG_INFO << "Strip: " << strip << " * * * " << endm;
-                */
+                if( mDebug ) {
+                    LOG_INFO << " -----------" << "\ncounterId: " << mETofModule[ i ]->counter( j )->counterIndex() << endm;
+                    LOG_INFO << "pathLength: " << pathLen << "   absolute impact angle: " << theta << " degree" << endm;
+                    logPoint( "crossing point" , cross );
+                    LOG_INFO << "cross.eta: " << cross.PseudoRapidity() << "\n" << endm;
+                    LOG_INFO << "localX: " << local[ 0 ] << "  localY: " << local[ 1 ] << "  localZ: " << local[ 2 ] << endm;
+                    LOG_INFO << "Strip: " << strip << " * * * " << endm;
+                }
             }
 
         } // end loop over counters
@@ -1165,4 +1433,59 @@ void
 StETofGeometry::logPoint( const char* text, const TVector3& point )
 {
     LOG_INFO << text << " at (" << point.x() << ", " << point.y() << ", " << point.z() << ")" << endm;
+}
+
+
+
+StThreeVectorD
+StETofGeometry::getField( const StThreeVectorD& pos ) {
+    if( !mStarBField ) {
+        return StThreeVectorD( -999., -999., -999. );
+    }
+
+    double B[ 3 ] = { 0, 0, 0 };
+    double X[ 3 ] = { pos.x(), pos.y(), pos.z() };
+    mStarBField->BField( X, B );
+
+    return StThreeVectorD( B[ 0 ], B[ 1 ], B[ 2 ] );
+}
+
+TVector3
+StETofGeometry::getField( const TVector3& pos ) {
+    if( !mStarBField ) {
+        return TVector3( -999., -999., -999. );
+    }
+
+    double B[ 3 ] = { 0, 0, 0 };
+    double X[ 3 ] = { pos.X(), pos.Y(), pos.Z() };
+    mStarBField->BField( X, B );
+
+    return TVector3( B[ 0 ], B[ 1 ], B[ 2 ] );
+}
+
+
+double
+StETofGeometry::getFieldZ( const StThreeVectorD& pos ) {
+    StThreeVectorD bField = getField( pos );
+    return bField.z();
+}
+
+double
+StETofGeometry::getFieldZ( const TVector3& pos ) {
+    TVector3 bField = getField( pos );
+    return bField.Z();
+}
+
+double
+StETofGeometry::getFieldZ( const double& x, const double& y, const double& z ) {
+    if( !mStarBField ) {
+        return  -999.;
+    }
+
+    double B[ 3 ] = { 0, 0, 0 };
+    double X[ 3 ] = { x, y, z };
+
+    mStarBField->BField( X, B );
+
+    return B[ 2 ];
 }
