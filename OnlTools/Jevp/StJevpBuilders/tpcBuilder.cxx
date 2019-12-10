@@ -1,4 +1,4 @@
-// $Id: tpcBuilder.cxx,v 1.10 2019/10/24 19:04:55 evpdaq Exp $
+// $Id: tpcBuilder.cxx,v 1.11 2019/12/10 20:07:48 evpops Exp $
 //
 #include <stdio.h>
 #include <stdlib.h>
@@ -305,7 +305,7 @@ void tpcBuilder::initialize(int argc, char *argv[]) {
   extras.cl_tpx_phi_charge = new TH1D("cl_tpx_phi_charge","Azimuthal Distribution of TPX Charge",360,-180,180);
   extras.cl_tpx_sector_charge = new TH1D("cl_tpx_sector_charge","TPX Charge per Sector",24,0.5,24.5);
 
-  extras.clusters_per_bx = new TH1D("clusters_per_bx", "TPC clusters per bunch crossing", 120, -.5, 119.5);
+  extras.clusters_per_bx = new TH1D("clusters_per_bx", "TPC clusters per bunch crossing", 128, -.5, 127.5);
  
   // Add root histograms to Plots
   int np = sizeof(contents) / sizeof(TH1 *);
