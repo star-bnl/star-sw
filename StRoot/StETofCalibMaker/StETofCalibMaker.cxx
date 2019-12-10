@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StETofCalibMaker.cxx,v 1.4 2019/05/08 23:56:44 fseck Exp $
+ * $Id: StETofCalibMaker.cxx,v 1.5 2019/12/10 15:55:01 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofCalibMaker.cxx,v $
+ * Revision 1.5  2019/12/10 15:55:01  fseck
+ * added new database tables for pulsers, updated pulser handling and trigger time calculation
+ *
  * Revision 1.4  2019/05/08 23:56:44  fseck
  * change of default value for reference pulser
  *
@@ -57,7 +60,7 @@
 #include "tables/St_etofDigiTimeCorr_Table.h"
 #include "tables/St_etofDigiSlewCorr_Table.h"
 #include "tables/St_etofResetTimeCorr_Table.h"
-
+#include "tables/St_etofPulserTotPeak_Table.h"
 
 
 namespace etofSlewing {
@@ -81,6 +84,7 @@ StETofCalibMaker::StETofCalibMaker( const char* name )
   mFileNameSignalVelocity( "" ),
   mFileNameCalibHistograms( "" ),
   mFileNameResetTimeCorr( "" ),
+  mFileNamePulserTotPeak( "" ),
   mRunYear( 0 ),
   mGet4TotBinWidthNs( 1. ),
   mMinDigisPerSlewBin( 25 ),
@@ -88,7 +92,7 @@ StETofCalibMaker::StETofCalibMaker( const char* name )
   mTriggerTime( 0. ),
   mResetTime( 0. ),
   mPulserPeakTime( 0. ),
-  mReferencePulserIndex( 13212 ),
+  mReferencePulserIndex( 0 ),
   mDebug( false )
 {
     /// default constructor
@@ -323,8 +327,16 @@ StETofCalibMaker::InitRun( Int_t runnumber )
 
         etofCalibParam_st* calibParamTable = etofCalibParam->GetTable();
         
-        mGet4TotBinWidthNs  = calibParamTable->get4TotBinWidthNs;
-        mMinDigisPerSlewBin = calibParamTable->minDigisInSlewBin;
+        mGet4TotBinWidthNs    = calibParamTable->get4TotBinWidthNs;
+        mMinDigisPerSlewBin   = calibParamTable->minDigisInSlewBin;
+
+        // only set the reference pulser index if it is not alredy set from outside by a steering macro
+        if( mReferencePulserIndex == 0 ) {
+            mReferencePulserIndex = calibParamTable->referencePulserIndex;
+        }
+        else {
+            LOG_INFO << "--- reference pulser index is set manually ---" << endm;
+        }
     }
     else {
         LOG_INFO << "etofCalibParam: filename provided --> use parameter file: " << mFileNameCalibParam.c_str() << endm;
@@ -344,9 +356,9 @@ StETofCalibMaker::InitRun( Int_t runnumber )
         
         paramFile.close();
 
-        if( param.size() != 2 ) {
+        if( param.size() != 3 ) {
             LOG_ERROR << "parameter file for 'etofCalibParam' has not the right amount of entries: ";
-            LOG_ERROR << param.size() << " instead of 2 !!!!" << endm;
+            LOG_ERROR << param.size() << " instead of 3 !!!!" << endm;
             return kStFatal;
         }
 
@@ -356,10 +368,19 @@ StETofCalibMaker::InitRun( Int_t runnumber )
         if( param.at( 1 ) > 0 ) {
             mMinDigisPerSlewBin = param.at( 1 );
         }
+
+        // only set the reference pulser index if it is not alredy set from outside by a steering macro
+        if( param.at( 2 ) > 0 && mReferencePulserIndex == 0 ) {
+            mReferencePulserIndex = param.at( 2 );
+        }
+        else {
+            LOG_INFO << "--- reference pulser index is set manually ---" << endm;
+        }
     }
 
-    LOG_INFO << " Get4 TOT bin width to ns conversion factor: "      << mGet4TotBinWidthNs  << endm;
-    LOG_INFO << " minimal number of digis required in slewing bin: " << mMinDigisPerSlewBin << endm;
+    LOG_INFO << " Get4 TOT bin width to ns conversion factor: "      << mGet4TotBinWidthNs    << endm;
+    LOG_INFO << " minimal number of digis required in slewing bin: " << mMinDigisPerSlewBin   << endm;
+    LOG_INFO << " reference pulser index: "                          << mReferencePulserIndex << endm;
 
     // --------------------------------------------------------------------------------------------
 
@@ -605,6 +626,11 @@ StETofCalibMaker::InitRun( Int_t runnumber )
                             else {
                                 mDigiTotCorr.at( key )->SetBinContent( i , 1. );
                             }
+
+
+                            if( mDigiTotCorr.at( key )->GetBinContent( i ) > 10. ) {
+                                mDigiTotCorr.at( key )->SetBinContent( i , 1. );
+                            }
                         }
                     }
                     else{
@@ -648,9 +674,17 @@ StETofCalibMaker::InitRun( Int_t runnumber )
                     hname = Form( "calib_Sector%02d_ZPlane%d_Det%d_T0corr", sector, zPlane, counter );
                     hProfile = ( TProfile* ) histFile->Get( hname );
 
-                    if( hProfile ) {
+                    if( hProfile && hProfile->GetNbinsX() == 1 ) {
+                        LOG_DEBUG << "T0 histogram with 1 bin: " << key << endm;
                         for( size_t i=1; i<=2 * eTofConst::nStrips; i++ ) {
                             mDigiTimeCorr.at( key )->AddBinContent( i , hProfile->GetBinContent( 1 ) );
+                        }
+                    }
+                    else if( hProfile && hProfile->GetNbinsX() == eTofConst::nStrips ) {
+                        LOG_DEBUG << "T0 histogram with 32 bins: " << key << endm;
+                        for( size_t i=1; i<= eTofConst::nStrips; i++ ) {
+                            mDigiTimeCorr.at( key )->AddBinContent( i ,                      hProfile->GetBinContent( i ) );
+                            mDigiTimeCorr.at( key )->AddBinContent( i + eTofConst::nStrips , hProfile->GetBinContent( i ) );
                         }
                     }
                     else{
@@ -678,7 +712,7 @@ StETofCalibMaker::InitRun( Int_t runnumber )
                         // check if channel-wise slewing parameters are available otherwise (due to low statistics) use detector-wise
                         if( !hProfile ) {
                             LOG_DEBUG << "unable to find histogram: " << hname << "--> check detector-wise" << endm;
-                            hname    = Form( "calib_Sector%02d_ZPlane%d_Det%d_AvCluWalk_pfx", sector, zPlane, counter );
+                            hname    = Form( "calib_Sector%02d_ZPlane%d_Det%d_AvWalk_pfx", sector, zPlane, counter );
                             hProfile = ( TProfile* ) histFile->Get( hname );
                         }
 
@@ -686,7 +720,7 @@ StETofCalibMaker::InitRun( Int_t runnumber )
                             unsigned int nbins = hProfile->GetNbinsX();
 
                             if( mDigiSlewCorr.count( key ) == 0 ) {
-                                // histogram could habe variable bin size --> get vector of bin edges
+                                // histogram could have variable bin size --> get vector of bin edges
                                 std::vector< float > bins( nbins + 1 );
 
                                 for( size_t i=0; i<nbins; i++ ) {
@@ -779,13 +813,62 @@ StETofCalibMaker::InitRun( Int_t runnumber )
 
     // --------------------------------------------------------------------------------------------
 
-    // temporary initialization for pulser peak TOT values.... TODO: move to database
-    for( size_t i=0; i<216; i++ ) {
-        unsigned int key = sideToKey( i );
+    // pulser peak tot
+    mPulserPeakTot.clear();
 
-        mPulserPeakTot[ key ] = 100;
+    if( mFileNamePulserTotPeak.empty() ) {
+        LOG_INFO << "etofPulserPeakTot: no filename provided --> load database table" << endm;
+
+        dbDataSet = GetDataBase( "Calibrations/etof/etofPulserTotPeak" );
+
+        St_etofPulserTotPeak* etofPulserTotPeak = static_cast< St_etofPulserTotPeak* > ( dbDataSet->Find( "etofPulserTotPeak" ) );
+        if( !etofPulserTotPeak ) {
+            LOG_ERROR << "unable to get the signal velocity from the database" << endm;
+            return kStFatal;
+        }
+
+        etofPulserTotPeak_st* pulserTotTable = etofPulserTotPeak->GetTable();
+
+        for( size_t i=0; i<eTofConst::nCountersInSystem * 2; i++ ) {
+            if( pulserTotTable->pulserTot[ i ] > 0 ) {
+                mPulserPeakTot[ sideToKey( i ) ] = ( int ) pulserTotTable->pulserTot[ i ];
+            }
+        }
     }
-    mReferencePulserIndex = 0;
+    else {
+        LOG_INFO << "etofPulserPeakTot: filename provided --> use parameter file: " << mFileNamePulserTotPeak.c_str() << endm;
+
+        paramFile.open( mFileNamePulserTotPeak.c_str() );
+
+        if( !paramFile.is_open() ) {
+            LOG_ERROR << "unable to get the 'etofPulserTotPeak' parameters from file --> file does not exist" << endm;
+            return kStFatal;
+        }
+
+        std::vector< float > param;
+        float temp;
+        while( paramFile >> temp ) {
+            param.push_back( temp );
+        }
+
+        paramFile.close();
+
+        if( param.size() != eTofConst::nCountersInSystem * 2 ) {
+            LOG_ERROR << "parameter file for 'etofPulserTotPeak' has not the right amount of entries: ";
+            LOG_ERROR << param.size() << " instead of " << eTofConst::nCountersInSystem * 2 << " !!!!" << endm;
+            return kStFatal;
+        }
+
+        for( size_t i=0; i<eTofConst::nCountersInSystem * 2; i++ ) {
+            if( param.at( i ) > 0 ) {
+                mPulserPeakTot[ sideToKey( i ) ] = param.at( i );
+            }
+        }
+    }
+
+    for( const auto& kv : mPulserPeakTot ) {
+        LOG_DEBUG << "side key: " << kv.first << " --> pulser peak tot = " << kv.second << " (bin)" << endm;
+    }
 
     // --------------------------------------------------------------------------------------------
 
@@ -897,9 +980,10 @@ StETofCalibMaker::processStEvent()
     StETofHeader*      etofHeader = etofCollection->etofHeader();
     StSPtrVecETofDigi& etofDigis  = etofCollection->etofDigis();
 
- 
     size_t nDigis = etofDigis.size();
-    LOG_INFO << "processStEvent() - # fired eTOF digis : " << nDigis << endm;
+    if( mDebug ) {
+        LOG_INFO << "processStEvent() - # fired eTOF digis : " << nDigis << endm;
+    }
 
     mTriggerTime = triggerTime( etofHeader );
     mResetTime   = resetTime(   etofHeader );
@@ -927,8 +1011,9 @@ StETofCalibMaker::processStEvent()
         }
     }
 
-    LOG_INFO << "size of pulserCandMap: " << pulserCandMap.size() << endm;
-
+    if( mDebug ) {
+        LOG_INFO << "size of pulserCandMap: " << pulserCandMap.size() << endm;
+    }
     calculatePulserOffsets( pulserCandMap );
 
 
@@ -1063,7 +1148,9 @@ StETofCalibMaker::applyMapping( StETofDigi* aDigi )
     mHwMap->mapToGeom( rocId, get4Id, elChan, geomVec );
 
     if( geomVec.size() < 5 ) {
-        LOG_ERROR << "geometry vector has wrong size !!! --> skip digi" << endm;
+        if( mDebug ) {
+            LOG_ERROR << "geometry vector has wrong size !!! --> skip digi" << endm;
+        }
         return;
     }
 
@@ -1073,7 +1160,7 @@ StETofCalibMaker::applyMapping( StETofDigi* aDigi )
     unsigned int strip   = geomVec.at( 3 );
     unsigned int side    = geomVec.at( 4 );
 
-    if( sector == 0 || zplane == 0 || counter == 0 || strip == 0 || side == 0 ) {
+    if( mDebug && ( sector == 0 || zplane == 0 || counter == 0 || strip == 0 || side == 0 ) ) {
         LOG_ERROR << "geometry vector has entries equal to zero !!! --> skip digi" << endm;
     }
 
@@ -1107,11 +1194,9 @@ StETofCalibMaker::flagPulserDigis( StETofDigi* aDigi, unsigned int index, std::m
         float totToPeak     = aDigi->rawTot()  - mPulserPeakTot.at( key );
 
         if( timeToTrigger > mPulserWindow.at( aDigi->rocId() ).first  && timeToTrigger < mPulserWindow.at( aDigi->rocId() ).second  ) {
-            isPulserCand = true;
-        }
-
-        if( fabs( totToPeak ) < 10 ) {
-            isPulserCand = true;
+            if( fabs( totToPeak ) < 10 ) {
+                isPulserCand = true;
+            }
         }
     }
 
@@ -1136,22 +1221,25 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
         }
     }
 
-    LOG_INFO << "reference pulser index: " << mReferencePulserIndex << endm;
+    if( mReferencePulserIndex == 0 ) {
+        if( mDebug ) {
+            LOG_INFO << "reference pulser index is 0 --> pulser correction is turned off" << endm;
+        }
+        return;
+    }
+
+    if( mDebug ) {
+        LOG_INFO << "reference pulser index: " << mReferencePulserIndex << endm;
+    }
 
     double referenceTime = 0.;
+    std::map< int, double > pulserTimes;
 
     for( auto it=pulserDigiMap.begin(); it!=pulserDigiMap.end(); it++ ) {
         if( it->second.size() == 0 ) {
             continue;
         }
         int sideIndex = it->first;
-        
-        // set the reference channel for this run with the first event
-        // --> should however be defined in the database for offline production
-        if( mReferencePulserIndex == 0 ) {
-            mReferencePulserIndex = sideIndex;
-            LOG_INFO << "reference pulser index set to: " << mReferencePulserIndex << endm;
-        }
 
         double bestDiff  = 100000;
         int candIndex = -1;
@@ -1171,7 +1259,7 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
             double timeToTrigger = pulserTime - mTriggerTime;
             double totToPeak     = pulserTot  - mPulserPeakTot.at( sideIndex );
 
-            if( it->second.size() > 1 ) {
+            if( mDebug && it->second.size() > 1 ) {
                 LOG_INFO << it->second.size() <<  " pulsers @ " << sideIndex << " : timeToTrigger: " << timeToTrigger << "  tot: " << pulserTot << endm;
             }
             
@@ -1183,7 +1271,7 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
             }
         }
 
-        if( it->second.size() > 1 ) {
+        if( mDebug && it->second.size() > 1 ) {
             LOG_INFO << " --> selected CAND-INDEX: " << candIndex << endm;
         }
 
@@ -1203,19 +1291,30 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
 
         if( sideIndex == mReferencePulserIndex ) {
             referenceTime = pulserTime;
-            LOG_INFO << "time of reference pulser updated" << endm;
+            if( mDebug ) {
+                LOG_INFO << "time of reference pulser updated" << endm;
+            }
         }
 
-        // due to ordering of entries in a map the reference pulser should always come first (if it is there)
-        // so the reference time should already be set to some non-zero value
+        // if the reference time is already set, fill the pulser difference map, otherwise store pulser time of after the loop
         if( referenceTime != 0 ) {
             mPulserTimeDiff[ sideIndex ] = pulserTime - referenceTime;
+        }
+        else {
+            pulserTimes[ sideIndex ] = pulserTime;
+        }
+    }
+
+    // deal with the rest of the pulser times
+    if( referenceTime != 0 ) {
+        for( auto& kv : pulserTimes ) {
+            mPulserTimeDiff[ kv.first ] = kv.second - referenceTime;
         }
     }
 
     if( mDebug ) {
         for( const auto& kv : mPulserTimeDiff ) {
-            LOG_INFO << "channel: " << kv.first << "   timeDiff: " << kv.second << endm;
+            LOG_DEBUG << "channel: " << kv.first << "   timeDiff: " << kv.second << endm;
         }
     }
 }
@@ -1239,7 +1338,7 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
     // ignore digis flaged as pulsers ( calibTot = -999. )
     if( fabs( aDigi->calibTot() + 999. ) < 1.e-5 ) {
         if( mDebug ) {
-            LOG_INFO << "digi flaged as pulser --> skip" << endm;
+            LOG_DEBUG << "digi flaged as pulser --> skip" << endm;
         }
         return;
     }
@@ -1267,6 +1366,7 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
             LOG_DEBUG << "raw Time, ToT: "        << aDigi->rawTime()   << ", " << aDigi->rawTot()   << endm;
             LOG_DEBUG << "calibrated Time, ToT: " << aDigi->calibTime() << ", " << aDigi->calibTot() << endm;
         }
+
     }
     else{
         if( mDebug ) {
@@ -1387,7 +1487,7 @@ StETofCalibMaker::slewingTimeOffset( StETofDigi* aDigi )
     if( mDigiSlewCorr.count( key ) ) {
 
         unsigned int totBin = mDigiSlewCorr.at( key )->FindBin( aDigi->calibTot() );
-        if( /*mDigiSlewCorr.at( key )->GetBinEntries( totBin ) <= mMinDigisPerSlewBin &&*/ totBin < etofSlewing::nTotBins ) {
+        if( mDigiSlewCorr.at( key )->GetBinEntries( totBin ) <= mMinDigisPerSlewBin && totBin < etofSlewing::nTotBins ) {
             if( mDebug ) {
                 LOG_DEBUG << "slewingTimeOffset: insufficient statistics for slewing calibration in channel " << key << " at tot bin " << totBin << "  --> return 0" << endm;
             }
@@ -1402,7 +1502,7 @@ StETofCalibMaker::slewingTimeOffset( StETofDigi* aDigi )
     }
     else {
         if( mDebug ) {
-            LOG_WARN << "slewingTimeOffset: required histogram with key " << key << " doesn't exist -> return 0" << endm;
+            LOG_DEBUG << "slewingTimeOffset: required histogram with key " << key << " doesn't exist -> return 0" << endm;
         }
         return 0.;
     }
@@ -1446,42 +1546,40 @@ StETofCalibMaker::triggerTime( StETofHeader* header )
     }
 
     // combine adjacent trigger times to get the number of right trigger time stamps without outliers
-    std::map< uint64_t, short > combinedCountsGdpbTs;
-    for( auto it = countsGdpbTs.begin(); it != countsGdpbTs.end(); it++ ) {
-        if( mDebug ) {
-            LOG_INFO << it->first << "  " << it->second << endm;
-        }
-        auto next = std::next( it, 1 );
-
-        if( next != countsGdpbTs.end() &&  abs( next->first - it->first ) == 1 ) {
-            combinedCountsGdpbTs[ it->first ] = it->second + next->second;
-        }
-        else if( next == countsGdpbTs.end() && combinedCountsGdpbTs.size() == 0 ) {
-            combinedCountsGdpbTs[ it->first ] = it->second;
-        }
-    }
-
-    if( mDebug ) {
-        for( const auto& kv : combinedCountsGdpbTs ) {
-            LOG_INFO << "combined counts for adjacent trigger TS: " << kv.first << "  " << kv.second << endm;
-        }
-    }
-    
     // take the trigger Ts that occured most often in the combined counting map
-    if( combinedCountsGdpbTs.size() > 0 ) {
-        auto it = std::max_element( combinedCountsGdpbTs.begin(), combinedCountsGdpbTs.end(),
-                                    []( const pair< uint64_t, short >& p1, const pair< uint64_t, short >& p2 ) {
-                                    return p1.second < p2.second; } );
+    short    maxCount = 0;
+    short    accCount = 0;
+    uint64_t mostProbableTriggerTs = 0;
 
-        triggerTime = it->first * eTofConst::coarseClockCycle;
-        
-        if( mDebug ) {
-            LOG_INFO << "trigger TS: " << it->first << endm;
+    for( auto it = countsGdpbTs.begin(); it != countsGdpbTs.end(); it++ ) {
+        auto next = std::next( it, 1 );
+        auto prev = std::prev( it, 1 );
+
+        short countTs = it->second;
+
+        if( next != countsGdpbTs.end() && ( next->first - it->first ) == 1 ) {
+            countTs += next->second;
+        }
+        if( accCount > 0 && ( it->first - prev->first ) == 1 ) {
+            countTs += prev->second;
+        }
+
+        if( countTs >= accCount ) {
+            accCount = countTs;
+
+            if( it->second > maxCount ) {
+                maxCount = it->second;
+                mostProbableTriggerTs = it->first;
+            }
         }
     }
 
+    if( mostProbableTriggerTs > 0) {
+        triggerTime = mostProbableTriggerTs * eTofConst::coarseClockCycle;
+    }
+
     if( mDebug ) {
-        LOG_INFO << "trigger time (ns): " << triggerTime << endm;
+        LOG_DEBUG << "trigger TS: " << mostProbableTriggerTs << " -->  trigger time (ns): " << triggerTime << endm;
     }
 
     return triggerTime;
