@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHitMaker.h,v 1.3 2019/03/25 01:08:21 fseck Exp $
+ * $Id: StETofHitMaker.h,v 1.4 2019/12/10 15:58:29 fseck Exp $
  *
  * Author: Philipp Weidenkaff & Florian Seck, April 2018
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StETofHitMaker.h,v $
+ * Revision 1.4  2019/12/10 15:58:29  fseck
+ * ignore digis in dead time software-wise + possibility to correct clock jumps based on hit position via setting a flag
+ *
  * Revision 1.3  2019/03/25 01:08:21  fseck
  * added cyclic mean calculation function for average hit time
  *
@@ -66,6 +69,8 @@ public:
     void setFileNameHitParam( const char* fileName );
     void setFileNameSignalVelocity( const char* fileName );
 
+    void setSoftwareDeadTime( const double& deadTime );
+    void setDoClockJumpShift( const bool    doShift  );
 
     void setDoQA( const bool doQA );
     void setDebug( const bool debug );
@@ -92,7 +97,7 @@ private:
 
     double startTime();
 
-    void fillUnclusteredHitQA( const double& tstart );
+    void fillUnclusteredHitQA( const double& tstart, const bool isMuDst );
 
     void fillHitQA( const bool isMuDst, const double& tstart );
     void updateCyclicRunningMean( const double& value, double& mean, int& count, const double& range );
@@ -127,13 +132,17 @@ private:
 
     std::map< UInt_t, Double_t > mSigVel; // signal velocities in each detector
 
+    Double_t mSoftwareDeadTime;      // dead time introduced in software to reject after pulses on the same channel
+    Bool_t   mDoClockJumpShift;      // correct for clock jumps on one side
+
 
     // histograms for QA --------------------------------------------------------
     Bool_t                    mDoQA;
     Bool_t                    mDebug;
-    std::string               mHistFileName;
-    map< std::string, TH1* >  mHistograms;
+    std::string                    mHistFileName;
+    std::map< std::string, TH1* >  mHistograms;
 
+    std::vector< Bool_t >          mCounterActive;
 
     virtual const Char_t *GetCVS() const { static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs; }
 
@@ -143,6 +152,9 @@ private:
 
 inline void StETofHitMaker::setFileNameHitParam(       const char* fileName )     { mFileNameHitParam       = fileName; }
 inline void StETofHitMaker::setFileNameSignalVelocity( const char* fileName )     { mFileNameSignalVelocity = fileName; }
+
+inline void StETofHitMaker::setSoftwareDeadTime( const double& deadTime )         { mSoftwareDeadTime       = deadTime; }
+inline void StETofHitMaker::setDoClockJumpShift( const bool    doShift  )         { mDoClockJumpShift       = doShift;  }
 
 inline void StETofHitMaker::setDoQA(  const bool doQA )  { mDoQA  = doQA;  }
 inline void StETofHitMaker::setDebug( const bool debug ) { mDebug = debug; }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHitMaker.cxx,v 1.3 2019/03/25 01:07:40 fseck Exp $
+ * $Id: StETofHitMaker.cxx,v 1.4 2019/12/10 15:58:33 fseck Exp $
  *
  * Author: Philipp Weidenkaff & Florian Seck, April 2018
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StETofHitMaker.cxx,v $
+ * Revision 1.4  2019/12/10 15:58:33  fseck
+ * ignore digis in dead time software-wise + possibility to correct clock jumps based on hit position via setting a flag
+ *
  * Revision 1.3  2019/03/25 01:07:40  fseck
  * added more correlation & average hit time histograms for offline QA
  *
@@ -50,6 +53,7 @@
 #include "StMuDSTMaker/COMMON/StMuETofHit.h"
 #include "StMuDSTMaker/COMMON/StMuBTofHit.h"
 #include "StMuDSTMaker/COMMON/StMuEpdHit.h"
+#include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 
 #include "StChain/StChainOpt.h" // for renaming the histogram file
 
@@ -68,7 +72,9 @@ StETofHitMaker::StETofHitMaker( const char* name )
   mFileNameHitParam( "" ),
   mFileNameSignalVelocity( "" ),
   mMaxYPos( 15. ),
-  mMergingRadius( 1. ), 
+  mMergingRadius( 1. ),
+  mSoftwareDeadTime( 50. ),
+  mDoClockJumpShift( false ),
   mDoQA( false ),
   mDebug( false ),
   mHistFileName( "" )
@@ -84,6 +90,7 @@ StETofHitMaker::StETofHitMaker( const char* name )
     mSigVel.clear();
 
     mHistograms.clear();
+    mCounterActive.clear();
 }
 
 //_____________________________________________________________
@@ -145,7 +152,8 @@ StETofHitMaker::InitRun( Int_t runnumber )
             return kStFatal;
         }
 
-        float temp1, temp2;
+        float temp1 = 0;
+        float temp2 = 0;
         if( paramFile.good() ) {
             paramFile >> temp1 >> temp2;
         }
@@ -222,6 +230,9 @@ StETofHitMaker::InitRun( Int_t runnumber )
     }
 
     // --------------------------------------------------------------------------------------------
+    for( int i=0; i<108; i++ ) {
+        mCounterActive.push_back( false );
+    }
 
     return kStOk;
 }
@@ -230,6 +241,17 @@ StETofHitMaker::InitRun( Int_t runnumber )
 Int_t
 StETofHitMaker::FinishRun( Int_t runnumber )
 {
+    if( mDoQA ) {
+        for( int iCounter = 0; iCounter < eTofConst::nCountersInSystem; iCounter++ ) {
+            if( mCounterActive.at( iCounter ) ) {
+                int day = ( runnumber % 1000000 ) / 1000;
+                int run = runnumber % 1000;
+
+                mHistograms.at( "counter_active" )->Fill( 100 * day + run, iCounter );
+            }
+        }
+    }
+
     LOG_INFO << "StETofHitMaker::FinishRun()" << endm;
 
     return kStOk;
@@ -262,7 +284,7 @@ StETofHitMaker::Make()
         LOG_DEBUG << "Make() - running on StEvent" << endm;
 
         processStEvent();
-        
+
         return kStOk;
     }
     else {
@@ -272,9 +294,9 @@ StETofHitMaker::Make()
 
         if( mMuDst ) {
             LOG_DEBUG << "Make() - running on MuDsts" << endm;
-            
+
             processMuDst();
-        
+
             return kStOk;
         }
         else {
@@ -335,13 +357,17 @@ StETofHitMaker::processStEvent()
     double tstart = startTime();  
     
     if( mDoQA ) {
-        fillUnclusteredHitQA( tstart );
+        fillUnclusteredHitQA( tstart, isMuDst );
     }
 
     mergeClusters( isMuDst );
 
     assignAssociatedHits( isMuDst );
 
+
+    if( mDoQA ) {
+        mHistograms.at( "multiplicity_etofDigis_etofHits" )->Fill( nDigisInStore, etofCollection->etofHits().size() );
+    }
 
     if( etofCollection->hitsPresent() ) {
         StSPtrVecETofHit& etofHits = etofCollection->etofHits();
@@ -399,12 +425,17 @@ StETofHitMaker::processMuDst()
 
     double tstart = startTime();   
     if( mDoQA ) {
-        fillUnclusteredHitQA( tstart );
+        fillUnclusteredHitQA( tstart, isMuDst );
     }
 
     mergeClusters( isMuDst );
 
     assignAssociatedHits( isMuDst );
+
+
+    if( mDoQA ) {
+        mHistograms.at( "multiplicity_etofDigis_etofHits" )->Fill( nDigisInStore, mMuDst->numberOfETofHit() );
+    }
 
 
     if( mMuDst->numberOfETofHit() ) {
@@ -439,7 +470,7 @@ StETofHitMaker::startTime()
         }
         else {
             LOG_WARN << "no StBTofCollection found by getTstart" << endm;
-            return 0.;
+            return -9999.;
         }
     }
     else if( mMuDst ) {
@@ -448,20 +479,18 @@ StETofHitMaker::startTime()
 
     if( !btofHeader ) {
         LOG_WARN << "getTstart(): -- no bTOF header --> no start time avaiable" << endm;
-        return 0.;
+        return -9999.;
     }
 
     double tstart = btofHeader->tStart();
 
-    if( tstart > eTofConst::bTofClockCycle ) {
-        tstart -= eTofConst::bTofClockCycle;
-    }
-    else if( tstart < 0. ) {
-        tstart += eTofConst::bTofClockCycle;
+    if( !isfinite( tstart ) ) {
+        LOG_WARN << "startTime(): -- from bTOF header is NaN" << endm;
+        return -9999.;
     }
 
     if( mDebug ) {
-        LOG_INFO << "getTstart():  --  start time: " << tstart << endm;
+        LOG_INFO << "startTime():  --  start time: " << tstart << endm;
     }
     return tstart;
 }
@@ -506,6 +535,13 @@ StETofHitMaker::fillStorage( StETofDigi* aDigi, unsigned int index )
 
     mMapDigiIndex[ pDigi ] = index;
 
+
+    if( mDoQA ) {
+        std::string histName_digi_tot = "digi_tot_s" + std::to_string( pDigi->sector() ) + "m" + std::to_string( pDigi->zPlane() ) + "c" + std::to_string( pDigi->counter() );
+
+        mHistograms[ histName_digi_tot ]->Fill( pDigi->strip() - 1 + pDigi->side() * 0.3, pDigi->calibTot() );
+    }
+
     return true;
 }//::fillStorage
 
@@ -527,7 +563,7 @@ StETofHitMaker::clearHits( const bool isMuDst )
         }
 
         LOG_DEBUG << "clearHits() - number of hits present (before clear): " << mEvent->etofCollection()->etofHits().size() << endm;
-        
+
         // clear hits (if there are any when running in afterburner mode)
         StSPtrVecETofHit&  etofHits  = mEvent->etofCollection()->etofHits();
         etofHits.clear();
@@ -537,7 +573,7 @@ StETofHitMaker::clearHits( const bool isMuDst )
         // and remove pointers to associated hit of the digis
         StSPtrVecETofDigi& etofDigis = mEvent->etofCollection()->etofDigis();
         size_t nDigis = etofDigis.size();
-        
+
         for( size_t i=0; i<nDigis; i++ ) {
             StETofDigi* aDigi = etofDigis[ i ];
 
@@ -626,6 +662,8 @@ StETofHitMaker::matchSides()
 {
     std::vector< StETofDigi* >::iterator iterDigi;
 
+    std::string histNameDigisErased;
+
     for( auto kv = mStoreDigi.begin(); kv != mStoreDigi.end(); kv++ ) {
         unsigned int stripIndex             = kv->first;
         std::vector< StETofDigi* > *digiVec = &( kv->second );
@@ -636,10 +674,11 @@ StETofHitMaker::matchSides()
                                                     }
                  );
 
+        int nDigisOnStrip = digiVec->size();
         //--------------------------------------------------------------------------------
         // print out for testing
         if( mDebug ) {
-            LOG_INFO << stripIndex << "  size: " << digiVec->size() << endm;
+            LOG_INFO << stripIndex << "  size: " << nDigisOnStrip << endm;
 
             for( size_t i=0; i<digiVec->size(); i++ ) {
                 LOG_INFO << "matchSides() - DIGI: " << digiVec->at( i ) << "  ";
@@ -650,12 +689,26 @@ StETofHitMaker::matchSides()
         }
         //--------------------------------------------------------------------------------
 
+        int detIndex = stripIndex / 100;
+        int sector   =   detIndex / 100;
+        int plane    = ( detIndex % 100 ) / 10;
+        int counter  =   detIndex % 10;
+        int strip    = stripIndex % 100;
 
+        if( mDoQA ) {
+            std::string histNameDigisPerStrip = "digisPerStrip_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+            mHistograms.at( histNameDigisPerStrip )->Fill( strip, nDigisOnStrip );
+
+            histNameDigisErased = "digisErased_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+        }
+
+
+        //--------------------------------------------------------------------------------
         // remove digis from the vector that fall within the dead time caused by another digi on the same side of a strip
         std::vector< double > deadTime( 2, -60. );
 
         for( auto it = digiVec->begin(); it != digiVec->end(); it++ ) {
-            if( (*it)->rawTime() - deadTime.at( (*it)->side() - 1 ) < 50. ) { //TODO: move to DB. use raw time
+            if( (*it)->calibTime() - deadTime.at( (*it)->side() - 1 ) < mSoftwareDeadTime ) {
 
                 if( mDebug ) {
                     LOG_INFO << "digi within dead time --> ignore ... ( geomId : " << stripIndex * 10 + (*it)->side();
@@ -667,13 +720,15 @@ StETofHitMaker::matchSides()
                 delete *it;
                 digiVec->erase( it );
                 it--;
+                if( mDoQA ) {
+                    mHistograms.at( histNameDigisErased )->Fill( 1 );
+                }
             }
             else {
                 deadTime.at( (*it)->side() - 1 ) = (*it)->rawTime();
             }
         }
-
-
+        //--------------------------------------------------------------------------------
 
 
         double posX     = 0.0;
@@ -682,6 +737,9 @@ StETofHitMaker::matchSides()
         double timeDiff = 0.0;
         double totSum   = 0.0;
 
+        if( mDoQA && digiVec->size() == 1 ) {
+            mHistograms.at( histNameDigisErased )->Fill( 2 );
+        }
 
         // loop over digis on the same strip
         while( digiVec->size() > 1 ) {
@@ -702,6 +760,9 @@ StETofHitMaker::matchSides()
                         iterDigi = digiVec->begin();
                         delete *iterDigi;
                         digiVec->erase( iterDigi );
+                        if( mDoQA ) {
+                            mHistograms.at( histNameDigisErased )->Fill( 3 );
+                        }
                     }
                     else { // --> third digi is on the other side compared to first and second digi
                         if( digiVec->at( 2 )->calibTime() - digiVec->at( 0 )->calibTime() >
@@ -712,6 +773,9 @@ StETofHitMaker::matchSides()
                             iterDigi = digiVec->begin();
                             delete *iterDigi;
                             digiVec->erase( iterDigi );
+                            if( mDoQA ) {
+                                mHistograms.at( histNameDigisErased )->Fill( 4 );
+                            }
                         }
                         else {
                             // third digi is not same side and fits better with first digi
@@ -719,17 +783,28 @@ StETofHitMaker::matchSides()
                             iterDigi = digiVec->begin() + 1;
                             delete *iterDigi;
                             digiVec->erase( iterDigi );
+                            if( mDoQA ) {
+                                mHistograms.at( histNameDigisErased )->Fill( 4 );
+                            }
                         }
                     }
                 }
-                else{ // --> less than 2 digis left on strip
+                else{ // --> 2 or less digis left on the strip (on the same side of the strip)
                       // delete the remaining digi
                     iterDigi = digiVec->begin();
                     delete *iterDigi;
                     digiVec->erase( iterDigi );
+                    if( mDoQA && digiVec->size() == 1 ){
+                        mHistograms.at( histNameDigisErased )->Fill( 5 );
+                    }
                 }
 
-                if( digiVec->size() < 2 ) break;  //only one digi left on strip. break loop.
+                if( digiVec->size() < 2 ) { //only one digi left on strip. break loop.
+                    if(mDoQA &&  digiVec->size() == 1) {
+                        mHistograms.at( histNameDigisErased )->Fill( 5 );
+                    }
+                    break;
+                }
             } // first and second digi in the vector are on different sides
 
             if( mDebug ) {
@@ -741,6 +816,9 @@ StETofHitMaker::matchSides()
 
             if( digiVec->size() < 2 ) {
                 // only one digi left on strip. break loop.
+                if( mDoQA ) {
+                    mHistograms.at( histNameDigisErased )->Fill( 5 );
+                }
                 break;
             }
 
@@ -753,8 +831,6 @@ StETofHitMaker::matchSides()
             if( mDebug ) {
                 LOG_DEBUG << "matchSides() - time difference in ns: " << timeDiff << endm;
             }
-
-            int detIndex = stripIndex / 100;
 
             // side 1 is the top, side 2 is bottom
             if( xDigiA->side() == 2 ) {
@@ -805,6 +881,9 @@ StETofHitMaker::matchSides()
                         iterDigi = digiVec->begin();
                         delete *iterDigi;
                         digiVec->erase( iterDigi );
+                        if( mDoQA ){
+                            mHistograms.at( histNameDigisErased )->Fill( 4 );
+                        }
                     }
                     else {
                         xDigiB = xDigiC;
@@ -812,6 +891,9 @@ StETofHitMaker::matchSides()
                         iterDigi = digiVec->begin() + 1;
                         delete *iterDigi;
                         digiVec->erase( iterDigi );
+                        if( mDoQA ){
+                            mHistograms.at( histNameDigisErased )->Fill( 4 );
+                        }
                     }
                 }
                 else { // --> keeps candidate even if it is outside correlation window
@@ -837,20 +919,31 @@ StETofHitMaker::matchSides()
             // weight of merging of hits (later) is the total charge => sum of both ends ToT
             totSum = xDigiA->calibTot() + xDigiB->calibTot();
 
-
             // use local coordinates... (0,0,0) is in the center of counter
-            int strip = stripIndex % 100;
-            posX = ( -1 * eTofConst::nStrips / 2. + strip - 0.5 ) * eTofConst::stripPitch; 
+            posX = ( -1 * eTofConst::nStrips / 2. + strip - 0.5 ) * eTofConst::stripPitch;
+
+            // correct for single side clock jumps. Sync signal recovers time jumps, so no double jumps should occure.
+            if( mDoClockJumpShift && fabs( timeDiff ) > eTofConst::coarseClockCycle * 0.5 ) {
+                if( mDebug ) {
+                    LOG_INFO << "shifting time on: " << sector << "-" << plane << "-" << counter << endm;
+                }
+                time     += eTofConst::coarseClockCycle * 0.5;
+                timeDiff -= eTofConst::coarseClockCycle * ( ( timeDiff < 0 ) ? -1 : ( timeDiff > 0 ) );
+
+                if( xDigiA->side() == 2 ) { // recalculate Y-Position based on new time.
+                    posY = mSigVel.at( detIndex ) * timeDiff * 0.5;
+                }
+                else {
+                    posY = -1 * mSigVel.at( detIndex ) * timeDiff * 0.5;
+                }
+            }
+
 
             if( mDebug ) {
-                LOG_DEBUG << "posX=" << posX << "  posY=" << posY << "  time= " << time << "  totSum=" << totSum << endm;
+                LOG_DEBUG << "detIndex=" << detIndex << "posX=" << posX << "  posY=" << posY << "  time= " << time << "  totSum=" << totSum << endm;
             }
 
             // build a hit (clustersize is always one strip at this point)
-            int sector  =   detIndex / 100;
-            int plane   = ( detIndex % 100 ) / 10;
-            int counter =   detIndex % 10;
-
             StETofHit* constructedHit = new StETofHit( sector, plane, counter, time, totSum, 1., posX, posY );
 
             // push hit into intermediate collection
@@ -873,7 +966,11 @@ StETofHitMaker::matchSides()
             delete *(iterDigi+1);
             digiVec->erase( iterDigi + 1 );
             digiVec->erase( iterDigi );
-        } // end of loop over digis on the same strip   
+            if( mDoQA ){
+                mHistograms.at( histNameDigisErased )->Fill( 6 );
+                mHistograms.at( histNameDigisErased )->Fill( 6 );
+            }
+        } // end of loop over digis on the same strip
 
     } // end of loop over strips
 
@@ -885,13 +982,21 @@ StETofHitMaker::matchSides()
 
 //_____________________________________________________________
 void
-StETofHitMaker::fillUnclusteredHitQA( const double& tstart )
+StETofHitMaker::fillUnclusteredHitQA( const double& tstart, const bool isMuDst )
 {
     if( !mDoQA ) {
         return;
     }
 
+    // ---------------------------------------
+    if( fabs( tstart + 9999. ) < 0.01 ) {
+        LOG_WARN << "-- no valid start time available ... skip filling histograms with time of flight information" << endm;
+    }
+    // ---------------------------------------
+
     int nHitsPrinted = 0;
+
+    int eventTime = ( this->GetTime() / 10000 ) * 3600 + ( ( this->GetTime() % 10000 ) / 100 ) * 60 + ( this->GetTime() % 100 );
 
     for( const auto& kv : mStoreHit ) {
         unsigned int detIndex  = kv.first;
@@ -912,15 +1017,73 @@ StETofHitMaker::fillUnclusteredHitQA( const double& tstart )
                 LOG_DEBUG << "localX="   << setprecision(  4 ) << hit->localX()   << "  ";
                 LOG_DEBUG << "localY="   << setprecision(  4 ) << hit->localY()   << endm;
             }
+
+            mCounterActive.at( ( sector - 13 ) * 9 + ( plane - 1 ) * 3 + ( counter - 1 ) ) = true;
+
             mHistograms.at( "unclusteredHit_tot" )->Fill( hit->totalTot() );
 
             std::string histNameTot = "unclusteredHit_tot_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
             mHistograms.at( histNameTot )->Fill( hit->totalTot(), hit->localX() );
 
-            string histNamePos = "unclusteredHit_pos_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
-            mHistograms.at( histNamePos )->Fill( hit->localX(), hit->localY() );
+
 
             // ---------------------------------------
+
+            if( mMapHitDigiIndices.at( hit ).size() >= 2 ) {
+                int digiIndexA = mMapHitDigiIndices.at( hit ).at( 0 );
+                int digiIndexB = mMapHitDigiIndices.at( hit ).at( 1 );
+
+                float totA = 0.;
+                float totB = 0.;
+
+                bool sideSwitch = false;
+
+                if( !isMuDst ) {
+                    StSPtrVecETofDigi& etofDigis = mEvent->etofCollection()->etofDigis();
+                    totA = etofDigis[ digiIndexA ]->calibTot();
+                    totB = etofDigis[ digiIndexB ]->calibTot();
+
+                    if( etofDigis[ digiIndexA ]->side() == 2 ) {
+                        sideSwitch = true;
+                    }
+                }
+                else {
+                    totA = mMuDst->etofDigi( digiIndexA )->calibTot();
+                    totB = mMuDst->etofDigi( digiIndexB )->calibTot();
+
+                    if( mMuDst->etofDigi( digiIndexA )->side() == 2 ) {
+                        sideSwitch = true;
+                    }
+                }
+
+                if( mDebug ) {
+                    LOG_DEBUG << "tot of digis in the hit: " << totA << " and " << totB << " sideSwitch: " << sideSwitch << endm;
+                }
+
+                float totDiff = totA - totB;
+                if( sideSwitch ) totDiff *= -1;
+
+                mHistograms.at( "unclusteredHit_tot_difference" )->Fill( totDiff );
+
+                if( fabs( hit->localY() ) > mMaxYPos ) {
+                    mHistograms.at( "unclusteredHit_tail_totAsym" )->Fill( totDiff / ( totA + totB) );
+                }
+            }
+
+            // ---------------------------------------
+
+
+
+            std::string histNamePos = "unclusteredHit_pos_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+            mHistograms.at( histNamePos )->Fill( hit->localX(), hit->localY() );
+
+
+            std::string histNamePosTime = "unclusteredHit_pos_time_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+            //mHistograms.at( histNamePosTime )->Fill( eventTime, hit->localY() );
+
+            // ---------------------------------------
+            if( fabs( tstart + 9999. ) < 0.01 ) continue;
+
             double tof = fmod( hit->time(), eTofConst::bTofClockCycle ) - tstart;
 
             if( mDebug ) {
@@ -928,30 +1091,55 @@ StETofHitMaker::fillUnclusteredHitQA( const double& tstart )
                 LOG_DEBUG << hit->time() << " , " << tof + tstart << " , " << tstart << " , " <<  tof << endm;
                 LOG_DEBUG << "sector, plane, counter: " << hit->sector() << " , " << hit->zPlane() << " , " <<  hit->counter() << endm;
             }
-            mHistograms.at( "unclusteredHit_tof_fullrange_all" )->Fill( tof ); 
+            mHistograms.at( "unclusteredHit_tof_fullrange_all" )->Fill( tof );
 
-            // if tstart exists
-            if( fabs( tstart ) > 0.001 ) {
 
-                if( tof < 0 ) {
-                    tof += eTofConst::bTofClockCycle;
-                }
-
-                mHistograms.at( "unclusteredHit_tof_fullrange" )->Fill( tof ); 
-
-                mHistograms.at( "unclusteredHit_tof" )->Fill( tof ); 
-
-                string histNameTof = "unclusteredHit_tof_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
-                mHistograms[ histNameTof ]->Fill( tof, hit->localX() );  
-
-                if( mDebug ) {
-                    if( fabs( tof ) > 1000.  && nHitsPrinted < 5 ) {
-                        LOG_INFO << "TOF UNNORMALLY LARGE: " << tof << " !!! " << endm;
-                        nHitsPrinted++;
-                    }
-                } 
-
+            while( tof < 0. ) {
+                tof += eTofConst::bTofClockCycle;
             }
+            tof = fmod( tof, eTofConst::bTofClockCycle );
+
+
+            mHistograms.at( "unclusteredHit_tof_fullrange" )->Fill( tof );
+
+            mHistograms.at( "unclusteredHit_tof" )->Fill( tof );
+
+
+            std::string histNameTof = "unclusteredHit_tof_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+            mHistograms[ histNameTof ]->Fill( hit->localX(), tof );
+
+
+            if( isMuDst ) {
+                StMuPrimaryVertex* pVtx = mMuDst->primaryVertex( 0 );
+                if( pVtx ) {
+                    StThreeVectorD vtxPos = pVtx->position();
+
+                    if( fabs( vtxPos.z() ) <= 10. && fabs( vtxPos.perp() < 2.5 ) ) {
+                        histNameTof = "unclusteredHit_pVtx_tof_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+                        mHistograms[ histNameTof ]->Fill( hit->localX(), tof );
+                    }
+                }
+            }
+
+
+
+            if( fabs( hit->localY() ) > 25. ) {
+                histNameTof = "unclusteredHit_tail_tof_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+                mHistograms[ histNameTof ]->Fill( hit->localX(), tof );
+            }
+            else {
+                histNameTof = "unclusteredHit_good_tof_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+                mHistograms[ histNameTof ]->Fill( hit->localX(), tof );
+            }
+
+
+            if( mDebug ) {
+                if( fabs( tof ) > 1000.  && nHitsPrinted < 5 ) {
+                    LOG_INFO << "TOF UNNORMALLY LARGE: " << tof << " !!! " << endm;
+                    nHitsPrinted++;
+                }
+            }
+
             // ---------------------------------------
         } // end of loop over hits in hitVec    
     } // end of loop over mStoreHit
@@ -1114,7 +1302,6 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
             // create combined hit
             StETofHit* combinedHit = new StETofHit( sector, plane, counter, weightedTime, weightsTotSum, clusterSize, weightedPosX, weightedPosY );
 
-
             // fill hit into the eTOF collection or the eTOf hit array depending on StEvent or MuDst input
             if( !isMuDst ) {
                 mEvent->etofCollection()->addHit( combinedHit );
@@ -1214,6 +1401,8 @@ StETofHitMaker::assignAssociatedHits( const bool isMuDst )
 void
 StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
 {
+    int bTofCentral = 700;
+
     if( !isMuDst ) {
         // --------------------------------------------------------
         // analyze hits in eTOF
@@ -1239,7 +1428,12 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
             // fill histogram to be saved in .hist.root file
             string histNamePos = "etofHit_pos_s" + std::to_string( aHit->sector() ) + "m" + std::to_string( aHit->zPlane() ) + "c" + std::to_string( aHit->counter() );
             mHistograms.at( histNamePos )->Fill( aHit->localX(), aHit->localY() );
-            
+
+            if( mDoQA ) {
+                std::string histNameClustersize = "clustersize_s" + std::to_string( aHit->sector() ) + "m" + std::to_string( aHit->zPlane() );
+                mHistograms.at( histNameClustersize )->Fill( aHit->clusterSize() );
+            }
+
             // if tstart exists
             if( fabs( tstart ) > 0.001 && fabs( tstart - ( eTofConst::bTofClockCycle - 9999. ) ) > 0.001 ) {
                 double tof = aHit->time() - tstart;
@@ -1293,6 +1487,22 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
         mHistograms.at( "averageTimeDiff_etofHits_btofHits" )->Fill( diff );
         mHistograms.at( "multiplicity_etofHits_btofHits"    )->Fill( nHitsETof, nHitsBTof );
 
+        if( mDoQA && nHitsBTof > bTofCentral ) {
+            std::vector< int > etofHitsPerModule( eTofConst::nModules );
+            for( size_t i=0; i<etofHits.size(); i++ ) {
+                StETofHit* aHit = etofHits[ i ];
+
+                if( !aHit ) {
+                    continue;
+                }
+                etofHitsPerModule.at( ( aHit->sector() - 13 ) * 3 + aHit->zPlane() - 1 ) += 1;
+            }
+
+            for( size_t i=0; i<eTofConst::nModules; i++ ) {
+                mHistograms.at( "hitMultiplicityPerModuleCentral" )->Fill( i, etofHitsPerModule.at( i ) );
+            }
+        }
+
         // --------------------------------------------------------
         // analyze correlation with EPD East
         // --------------------------------------------------------
@@ -1301,7 +1511,7 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
             LOG_WARN << "fillHitQA - no epd collection or no epd hits present" << endm;
             return;
         }
-        
+
         const StSPtrVecEpdHit& epdHits = epdCollection->epdHits();
 
         float nHitsEpdEast = 0.;
@@ -1344,7 +1554,7 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
             if( !aHit ) {
                 continue;
             }
-        
+
             if( mDebug ) {
                 LOG_DEBUG << "hit (" << i << "): sector,plane,counter=" << aHit->sector() << ",";
                 LOG_DEBUG << aHit->zPlane() << "," << aHit->counter() << " time=" << aHit->time();
@@ -1357,6 +1567,11 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
             // fill histogram to be saved in .hist.root file
             string histNamePos = "etofHit_pos_s" + std::to_string( aHit->sector() ) + "m" + std::to_string( aHit->zPlane() ) + "c" + std::to_string( aHit->counter() );
             mHistograms.at( histNamePos )->Fill( aHit->localX(), aHit->localY() );
+
+            if( mDoQA ) {
+                std::string histNameClustersize = "clustersize_s" + std::to_string( aHit->sector() ) + "m" + std::to_string( aHit->zPlane() );
+                mHistograms.at( histNameClustersize )->Fill( aHit->clusterSize() );
+            }
 
             // if tstart exists
             if( fabs( tstart ) > 0.001 && fabs( tstart - ( eTofConst::bTofClockCycle - 9999. ) ) > 0.001 ) {
@@ -1406,6 +1621,22 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
 
         mHistograms.at( "averageTimeDiff_etofHits_btofHits" )->Fill( diff );
         mHistograms.at( "multiplicity_etofHits_btofHits"    )->Fill( nHitsETof, nHitsBTof );
+
+        if( mDoQA && nHitsBTof > bTofCentral ) {
+            std::vector< int > etofHitsPerModule( eTofConst::nModules );
+            for( size_t i=0; i<mMuDst->numberOfETofHit(); i++ ) {
+                StMuETofHit* aHit = mMuDst->etofHit( i );
+
+                if( !aHit ) {
+                    continue;
+                }
+                etofHitsPerModule.at( ( aHit->sector() - 13 ) * 3 + aHit->zPlane() - 1 ) += 1;
+            }
+
+            for( size_t i=0; i<eTofConst::nModules; i++ ) {
+                mHistograms.at( "hitMultiplicityPerModuleCentral" )->Fill( i, etofHitsPerModule.at( i ) );
+            }
+        }
 
         // --------------------------------------------------------
         // analyze correlation with EPD East
@@ -1485,7 +1716,7 @@ StETofHitMaker::bookHistograms()
 
     mHistograms[ "etofHit_tof"                       ] = new TH1F( "etofHit_tof",           "eTOF hit time of flight;time of flight (ns);# hits", 2000, -100., 150 );
     mHistograms[ "etofHit_tof_fullrange"             ] = new TH1F( "etofHit_tof_fullrange", "eTOF hit time of flight;time of flight (ns);# hits", 5000, -800., eTofConst::bTofClockCycle );
-    mHistograms[ "averageTimeDiff_etofHits_btofHits" ] = new TH1F( "averageTimeDiff_etofHits_btofHits", "difference between average times in bTOF and eTOF hits;#DeltaT (ns);# events", 26000, -800, eTofConst::bTofClockCycle ); 
+    mHistograms[ "averageTimeDiff_etofHits_btofHits" ] = new TH1F( "averageTimeDiff_etofHits_btofHits", "difference between average times in bTOF and eTOF hits;#DeltaT (ns);# events", 26000, -800, eTofConst::bTofClockCycle );
     mHistograms[ "multiplicity_etofHits_btofHits"    ] = new TH2F( "multiplicity_etofHits_btofHits", "multiplicity correlation between bTOF and eTOF;# eTOF hits;# bTOF hits",         200, 0, 200, 500, 0, 1000 );
     mHistograms[ "multiplicity_etofHits_epdEast"     ] = new TH2F( "multiplicity_etofHits_epdEast",  "multiplicity correlation between eTOF and east EPD;# eTOF hits;# hits east EPD", 200, 0, 200, 200, 0, 1000 );
 
@@ -1498,6 +1729,8 @@ StETofHitMaker::bookHistograms()
     if( mDoQA ) {
         mHistograms[ "btofHit_tof_fullrange"         ] = new TH1F( "btofHit_tof_fullrange", "bTOF hit time of flight;time of flight (ns);# hits", 5000, -800., eTofConst::bTofClockCycle );
         mHistograms[ "multiplicity_btofHits_epdEast" ] = new TH2F( "multiplicity_btofHits_epdEast", "multiplicity correlation between bTOF and east EPD;# bTOF hits;# hits east EPD", 200, 0, 1000, 200, 0, 1000 );
+        mHistograms[ "hitMultiplicityPerModuleCentral" ] = new TH2F( "hitMultiplicityPerModuleCentral", "hit multiplicity per module in central bTOF events", 36, 0, 36, 50, 0, 50 );
+        mHistograms[ "multiplicity_etofDigis_etofHits" ] = new TH2F( "multiplicity_etofDigis_etofHits",  "multiplicity correlation between eTOF digis and hits;# eTOF digis;# eTOF hits", 500, 0, 1000, 500, 0, 1000 );
     }
 
     for( int sector = eTofConst::sectorStart; sector <= eTofConst::sectorStop; sector++ ) {
@@ -1505,8 +1738,27 @@ StETofHitMaker::bookHistograms()
             for( int counter = eTofConst::counterStart; counter <= eTofConst::counterStop; counter++ ) {
                 std::string histName_etofHit_pos = "etofHit_pos_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
 
-                mHistograms[ histName_etofHit_pos ] = new TH2F( Form("etofHit_pos_s%d_m%d_c%d", sector, plane, counter ), "eTOF hit localXY;local X (cm);local Y (cm)", 68, -17., 17., 400, -200., 200. );
+                mHistograms[ histName_etofHit_pos ] = new TH2F( Form( "etofHit_pos_s%d_m%d_c%d", sector, plane, counter ), "eTOF hit localXY;local X (cm);local Y (cm)", 68, -17., 17., 400, -500., 500. );
                 AddHist( mHistograms.at( histName_etofHit_pos ) );
+
+                if( mDoQA ) {
+                    std::string histNameDigisPerStrip = "digisPerStrip_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+                    mHistograms[ histNameDigisPerStrip ] = new TH2F( Form( "digisPerStrip_s%d_m%d_c%d", sector, plane, counter ), "digis per strip;strip;# digis per event", 32, 0.5, 32.5, 20, 0., 20. );
+
+                    std::string histNameDigisErased = "digisErased_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+                    mHistograms[ histNameDigisErased ] = new TH1F( Form( "digisErased_s%d_m%d_c%d", sector, plane, counter ), "digis erased;;# digis", 6, 0.5, 6.5 );
+                    mHistograms[ histNameDigisErased ]->GetXaxis()->SetBinLabel( 1, "digi inside dead time"         );
+                    mHistograms[ histNameDigisErased ]->GetXaxis()->SetBinLabel( 2, "single digi on strip"          );
+                    mHistograms[ histNameDigisErased ]->GetXaxis()->SetBinLabel( 3, "3 consecutive same side digis" );
+                    mHistograms[ histNameDigisErased ]->GetXaxis()->SetBinLabel( 4, "better match for partner"      );
+                    mHistograms[ histNameDigisErased ]->GetXaxis()->SetBinLabel( 5, "single remaining digi"         );
+                    mHistograms[ histNameDigisErased ]->GetXaxis()->SetBinLabel( 6, "matched into pair"             );
+                }
+            }
+
+            if( mDoQA ) {
+                std::string histName_clustersize = "clustersize_s" + std::to_string( sector ) + "m" + std::to_string( plane );
+                mHistograms[ histName_clustersize ] = new TH1F( Form( "clustersize_s%d_m%d", sector, plane ), "clustersize;clustersize;# events", 32, 0., 32. );
             }
         }
     }
@@ -1514,6 +1766,9 @@ StETofHitMaker::bookHistograms()
     if( mDoQA ) {
         mHistograms[ "unclusteredHit_tot" ] = new TH1F( "unclusteredHit_tot", "unclustered hit tot; tot (ns);# unclustered hits", 1000, 0., 80. );
         mHistograms[ "unclusteredHit_tof" ] = new TH1F( "unclusteredHit_tof", "unclustered hit time of flight; time of flight (ns);# unclustered hits", 5000, 0., 1000. );
+
+        mHistograms[ "unclusteredHit_tot_difference" ] = new TH1F( "unclusteredHit_tot_difference", "unclustered hit tot difference of digis; #Delta tot (ns);# unclustered hits", 1000, -100., 100. );
+        mHistograms[ "unclusteredHit_tail_totAsym"   ] = new TH1F( "unclusteredHit_tail_totAsym",   "unclustered hit tail tot asymmetry of digis; #Delta tot/ tot sum;# unclustered hits", 200, -1., 1. );
 
         mHistograms[ "unclusteredHit_tof_fullrange"     ] = new TH1F( "unclusteredHit_tof_fullrange",     "unclustered hit time of flight; time of flight (ns);# unclustered hits", 5000, -1. * eTofConst::bTofClockCycle, eTofConst::bTofClockCycle );
         mHistograms[ "unclusteredHit_tof_fullrange_all" ] = new TH1F( "unclusteredHit_tof_fullrange_all", "unclustered hit time of flight; time of flight (ns);# unclustered hits", 5000, -1. * eTofConst::bTofClockCycle, eTofConst::bTofClockCycle );
@@ -1525,12 +1780,30 @@ StETofHitMaker::bookHistograms()
                     std::string histName_unclusteredHit_pos = "unclusteredHit_pos_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
                     std::string histName_unclusteredHit_tof = "unclusteredHit_tof_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
 
-                    mHistograms[ histName_unclusteredHit_tot ] = new TH2F( Form("unclusteredHit_tot_s%d_m%d_c%d", sector, plane, counter ), "unclustered hit tot; tot (ns);local X (cm)", 1000, 0.,   80., 32, -16., 16. );
-                    mHistograms[ histName_unclusteredHit_pos ] = new TH2F( Form("unclusteredHit_pos_s%d_m%d_c%d", sector, plane, counter ), "unclustered hit localXY; local X (cm);local Y (cm)", 50, -25., 25., 400, -200., 200. );
-                    mHistograms[ histName_unclusteredHit_tof ] = new TH2F( Form("unclusteredHit_tof_s%d_m%d_c%d", sector, plane, counter ), "unclustered hit time of flight; time of flight (ns);local X (cm)", 5000, 0., 1000., 32, -16., 16. );
+                    std::string histName_unclusteredHit_tail_tof = "unclusteredHit_tail_tof_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+                    std::string histName_unclusteredHit_good_tof = "unclusteredHit_good_tof_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+                    std::string histName_unclusteredHit_pVtx_tof = "unclusteredHit_pVtx_tof_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+
+                    mHistograms[ histName_unclusteredHit_tot ] = new TH2F( Form( "unclusteredHit_tot_s%d_m%d_c%d", sector, plane, counter ), "unclustered hit tot; tot (ns);local X (cm)", 1000, 0.,   80., 32, -16., 16. );
+                    mHistograms[ histName_unclusteredHit_pos ] = new TH2F( Form( "unclusteredHit_pos_s%d_m%d_c%d", sector, plane, counter ), "unclustered hit localXY; local X (cm);local Y (cm)", 32, -16., 16., 400, -50., 50. );
+
+                    mHistograms[ histName_unclusteredHit_tof      ] = new TH2F( Form( "unclusteredHit_tof_s%d_m%d_c%d",      sector, plane, counter ), "unclustered hit time of flight;local X (cm);time of flight (ns)",         32, -16., 16., 5000, 0., 1000. );
+
+                    mHistograms[ histName_unclusteredHit_tail_tof ] = new TH2F( Form( "unclusteredHit_tof_tail_s%d_m%d_c%d", sector, plane, counter ), "unclustered hit (tail) time of flight;local X (cm);time of flight (ns)",  32, -16., 16., 5000, 0., 1000. );
+                    mHistograms[ histName_unclusteredHit_good_tof ] = new TH2F( Form( "unclusteredHit_tof_good_s%d_m%d_c%d", sector, plane, counter ), "unclustered hit (good) time of flight;local X (cm);time of flight (ns)",  32, -16., 16., 2500, 0., 50.   );
+                    mHistograms[ histName_unclusteredHit_pVtx_tof ] = new TH2F( Form( "unclusteredHit_pVtx_tof_s%d_m%d_c%d", sector, plane, counter ), "unclustered hit time of flight;local X (cm);time of flight (ns)",         32, -16., 16., 2500, 0., 50.   );
+
+                    std::string histName_digi_tot = "digi_tot_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+
+                    mHistograms[ histName_digi_tot ] = new TH2F( Form( "digi_tot_s%d_m%d_c%d", sector, plane, counter ), "digi tot;(strip-1)+0.5*(side-1);tot (arb. units)", 64, 0., 32., 200, 0., 40. );
+
+                    std::string histName_unclusteredHit_pos_time = "unclusteredHit_pos_time_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+                    mHistograms[ histName_unclusteredHit_pos_time ] = new TH2F( Form( "unclusteredHit_pos_time_s%d_m%d_c%d", sector, plane, counter ), "hit position over time;time (s);hit position (cm)", 3600, 19800., 23400., 200, -100., 100. );
                 }
             }
         }
+
+        mHistograms[ "counter_active" ] = new TH2F( "counter_active", "active counters by run;100*day + run number;counter", 15000, 5000., 20000., 108 , 0.5, 108.5 );
     }
 
     for ( auto& kv : mHistograms ) {
