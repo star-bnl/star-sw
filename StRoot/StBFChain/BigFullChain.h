@@ -1673,7 +1673,7 @@ Bfc_st BFC[] = { // standard chains
   {"emcRaw"   ,"emcRaw","","daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent"
    ,"StEmcRawMaker","StEmcRawMaker",                                    "B/E EMC data common maker",kFALSE},
   {"emcDY2"   ,"emcDY2","","emcRaw,PreEcl,Epc"   ,"","",                "B/E EMC data common maker",kFALSE},
-  {"eemcD"       ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"eemcD"       ,"","","",                               "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"emcY2"    ,"","","emc_T,tpc_T,db,emcSim,PreEcl,epc,-emcDY2,-daq","","" //no  emcAtoE in simulation
    ,                        "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
   {"emcSim"   ,"","","emc_T,EmcUtil,McEvent,MuDST","StEmcSimulatorMaker","StEmcSimulatorMaker"
@@ -1683,7 +1683,7 @@ Bfc_st BFC[] = { // standard chains
   {"EEss"     ,"eess","","-eefs,eemcDb,EEmcUtil,MuDst","StEEmcSlowMaker","StEEmcSimulatorMaker"
    ,                                                                          "EEMC slow simulator",kFALSE},
   {"BEmcMixer", "","","",                          "StEmcMixerMaker","StEmcMixerMaker","BEMC mixer",kFALSE},
-  {"emcAtoE"  ,"bemcA2E","" ,"db","StEmcADCtoEMaker","StEmcRawMaker,StEmcADCtoEMaker"
+  {"emcAtoE"  ,"bemcA2E","" ,"db,EEmcUtil","StEmcADCtoEMaker","StEmcRawMaker,StEmcADCtoEMaker"
    ,                                "B-EMC ADC to E converter  OBSOLETE for data in Run 9 or later",kFALSE},
   {"PreEcl"   ,"preecl","","" ,"StPreEclMaker",              "StPreEclMaker","B-EMC Cluster finder",kFALSE},
   {"Epc"      ,"epc","","PreEcl,EmcUtil"             ,"StEpcMaker","StEpcMaker","B-EMC point maker",kFALSE},
@@ -1780,7 +1780,7 @@ Bfc_st BFC[] = { // standard chains
   {"fgtPoint"   ,"","", "event",      "StFgtPointMaker",    "StFgtPointMaker", "Creates FGT points",kFALSE},
   // Some global Sti stuff including vertexing
   {"TMVARank"   ,"","",""     ,"","libTMVA,StTMVARank","Load STAR interface to TMVA for PV ranking",kFALSE},
-  {"genvtx","","","TMVARank,EEmcUtil","StGenericVertexMaker","Minuit,StGenericVertexMakerNoSti"
+  {"genvtx","","","TMVARank,EmcUtil,EEmcUtil","StGenericVertexMaker","Minuit,StGenericVertexMakerNoSti"
    ,                                "Generic Vertex Finder library (default is MinuitVertexFinder)",kFALSE},
   {"VFMinuit"  ,""  ,""  ,"genvtx"                   ,"","","... Generic VF will use Minuit method",kFALSE},
   {"VFMinuitX" ,""  ,""   ,"genvtx,KFVertex","","","... Generic VF will use Minuit method with Stx",kFALSE},
@@ -1825,7 +1825,7 @@ Bfc_st BFC[] = { // standard chains
   // Sti/Stv chains
   {"StiCAPerf","","","TPCCA","",                        "TPCCATrackerPerformance", "CA Performance",kFALSE},
   {"StiCA"    ,"","","Sti,StiCALib",                                    "","libEG","Sti+CA tracker",kFALSE},
-  {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,Stu,StEvent,StDbT,TpcIT,compend,sim_T,tbutil,TMVARank"
+  {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,Stu,StEvent,StDbT,TpcIT,compend,sim_T,tbutil,EmcUtil,TMVARank"
    ,"StiMaker",                               "StiUtilities,StKFVertexMaker,StiMaker","Sti tracker",kFALSE},
   {"Stx","","","VMCAppl,TPCCA" ,"StxMaker",       "libEve,GenFit,StxMaker","eXpress Reconstruction",kFALSE},
   {"StxCA","","","Stx"                                 ,"","","eXpress Reconstruction with CA only",kFALSE},

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofGeometry.h,v 1.3 2019/04/23 23:49:08 fseck Exp $
+ * $Id: StETofGeometry.h,v 1.4 2019/12/10 16:03:43 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StETofGeometry.h,v $
+ * Revision 1.4  2019/12/10 16:03:43  fseck
+ * added handling of StPicoHelix in extrapolation & step-wise extrapolation in changing magnetic field
+ *
  * Revision 1.3  2019/04/23 23:49:08  fseck
  * added support for StPicoHelix
  *
@@ -36,15 +39,22 @@
 
 #include "StThreeVectorD.hh"
 #include "StHelixD.hh"
+#include "StPhysicalHelixD.hh"
 
 #include "TVector3.h"
+#include "StPicoEvent/StPicoPhysicalHelix.h"
 #include "StPicoEvent/StPicoHelix.h"
 
 #include "StETofUtil/StETofConstants.h"
 
 class TNamed;
 
+class StETofHit;
+class StMuETofHit;
+class StPicoETofHit;
+
 class StETofGeomCounter;
+class StarMagField;
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -278,6 +288,7 @@ public:
 
     void init( TGeoManager* geoManager );
     void init( TGeoManager* geoManager, const double* safetyMargins );
+    void init( TGeoManager* geoManager, const double* safetyMargins, const bool& useHelixSwimmer );
 
     void reset();
 
@@ -294,17 +305,26 @@ public:
 
     StETofNode* findETofNode( const int moduleId, const int counter );
 
-    void hitLocal2Master( const int moduleId, const int counter, const double* local,  double* master );
+    void           hitLocal2Master( const int moduleId, const int counter, const double* local,  double* master );
+    StThreeVectorD hitLocal2Master( StETofHit* hit );
+    StThreeVectorD hitLocal2Master( StMuETofHit* hit );
+    TVector3       hitLocal2Master( StPicoETofHit* hit );
+
+
 
     std::vector< int >  sectorAtPhi( const double& angle );
 
     //--------------------------------------------------------------------
     // for the use in the MatchMaker or in running over StEvent/MuDst input
     StThreeVectorD helixCrossETofPlane( const StHelixD& helix );
+    StThreeVectorD helixCrossPlane( const StHelixD& helix, const double& z );
+
+    void    helixSwimmer( const StPhysicalHelixD& helix, StPhysicalHelixD& swimmerHelix, const double& z, double& pathlength );
+
     std::vector< int >  helixCrossSector( const StHelixD& helix );
 
-    void    helixCrossCounter( const StHelixD& helix, std::vector< int >& idVec, std::vector< StThreeVectorD >& crossVec,
-                               std::vector< StThreeVectorD >& localVec, std::vector< double >& thetaVec );
+    void    helixCrossCounter( const StPhysicalHelixD& helix, std::vector< int >& idVec, std::vector< StThreeVectorD >& crossVec,
+                               std::vector< StThreeVectorD >& localVec, std::vector< double >& thetaVec, std::vector< double >& pathLenVec );
 
     void    logPoint( const char* text, const StThreeVectorD& point );
     //--------------------------------------------------------------------
@@ -312,12 +332,27 @@ public:
     //--------------------------------------------------------------------
     // for the use in running over picoDst input
     TVector3 helixCrossETofPlane( const StPicoHelix& helix );
+    TVector3 helixCrossPlane( const StPicoHelix& helix, const double& z );
+
+    void     helixSwimmer( const StPicoPhysicalHelix& helix, StPicoPhysicalHelix& swimmerHelix, const double& z, double& pathlength );
+
     std::vector< int >  helixCrossSector( const StPicoHelix& helix );
 
-    void    helixCrossCounter( const StPicoHelix& helix, std::vector< int >& idVec, std::vector< TVector3 >& crossVec,
+    void    helixCrossCounter( const StPicoPhysicalHelix& helix, std::vector< int >& idVec, std::vector< TVector3 >& crossVec,
                                std::vector< TVector3 >& localVec, std::vector< double >& thetaVec );
 
     void    logPoint( const char* text, const TVector3& point );
+    //--------------------------------------------------------------------
+
+
+    //--------------------------------------------------------------------
+    // magnetic field related functions
+    StThreeVectorD getField( const StThreeVectorD& pos );
+    TVector3       getField( const TVector3& pos );
+
+    double getFieldZ( const StThreeVectorD& pos );
+    double getFieldZ( const TVector3&       pos );
+    double getFieldZ( const double& x, const double& y, const double& z );
     //--------------------------------------------------------------------
 
 
@@ -336,6 +371,7 @@ private:
     bool              mInitFlag;       // flag of initialization, true if done
     bool              mDebug;          // control message printing of this class
 
+    StarMagField*     mStarBField;
 
     ClassDef( StETofGeometry, 1 )
 };
