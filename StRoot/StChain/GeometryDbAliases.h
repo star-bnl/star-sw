@@ -185,9 +185,9 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2019a",      20181215,     1, "y2019",    "y2019a first production release geometry, AgML,xgeometry"},   
   {"r2019",       20181220,     0, "y2019",    "y2019, iTPC, Jim Thomas 05/31/16, no HFT,xgeometry"}, // 
   {"y2020",       20191115,160010, "y2019",    "y2019 development geometry, AgML,xgeometry"},   
-  {"y2020a",      20181115,160011, "y2019",    "y2019a first production release geometry, AgML,xgeometry"},   
-  {"r2020",       20181120,180000, "y2019",    "y2019, iTPC, Jim Thomas 05/31/16, no HFT,xgeometry"}, // 
-  {"r2020a",      20181120,180001, "y2019",    "y2019, iTPC, Jim Thomas 05/31/16, no HFT,xgeometry"}, // 
+  {"y2020a",      20191115,160011, "y2019",    "y2019a first production release geometry, AgML,xgeometry"},   
+  {"r2020",       20191120,180000, "y2019",    "y2019, iTPC, Jim Thomas 05/31/16, no HFT,xgeometry"}, // 
+  {"r2020a",      20191120,180001, "y2019",    "y2019, iTPC, Jim Thomas 05/31/16, no HFT,xgeometry"}, // 
 //{"devTA",       20181210,     0, "y2019",     "dev geo for Inner Tpc Sector Upgrade, Variant 1,xgeometry"}, // 
 //{"devTB",       20181210,     0, "y2019",     "dev geo for Inner Tpc Sector Upgrade, Variant 2,xgeometry"}, // 
 //{"devTC",       20181210,     0, "y2019",     "dev geo for Inner Tpc Sector Upgrade, Variant 3,xgeometry"}, // 
