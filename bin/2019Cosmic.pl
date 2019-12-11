@@ -29,7 +29,8 @@ if (! $FIELD) {die "Field is not defined";}
 # my @list = `$cmd`;
 # #my @list = `get_file_list.pl -delim '/' -keys 'path,filename' -cond 'magscale=ReversedFullField,filetype=online_daq,filename~st_gmt,trgsetupname=CosmicLocalClock,tpx=1,gmt=1,sanity=1,events>10000' -limit 50`;
 #my @list = glob "/net/l401/data/scratch1/daq/2019/*/*/st_cosmic_*.daq";
-my @list = glob "/hlt/cephfs/daq/2019/*/*/st*cosmic_*.daq /hlt/cephfs/daq/2019/*/*/st*gmt*.daq";
+#my @list = glob "/hlt/cephfs/daq/2019/*/*/st*cosmic_*.daq /hlt/cephfs/daq/2019/*/*/st*gmt*.daq";
+my @list = glob "/hlt/cephfs/daq/2019B/*/*/st*cosmic_*.daq /hlt/cephfs/daq/2019B/*/*/st*gmt*.daq";
 # FF = 20028045 - 20035016
 # RF = 20035041
 my $runMin = -1;
