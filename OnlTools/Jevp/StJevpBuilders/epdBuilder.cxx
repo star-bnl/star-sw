@@ -229,9 +229,9 @@ void epdBuilder::initialize(int argc, char *argv[]) {
   contents.hEarliestTacWest->GetYaxis()->CenterTitle(true);
 
   contents.hEarliestTacEvsW = new TH2D("hEarliestTacEvsW", "Earliest TAC (E vs. W)",100,0,4000,100,0,4000);
-  contents.hEarliestTacEvsW->GetXaxis()->SetTitle("Earliest TAC West");
+  contents.hEarliestTacEvsW->GetXaxis()->SetTitle("Earliest TAC East");
   contents.hEarliestTacEvsW->GetXaxis()->CenterTitle(true);
-  contents.hEarliestTacEvsW->GetYaxis()->SetTitle("Earliest TAC East");
+  contents.hEarliestTacEvsW->GetYaxis()->SetTitle("Earliest TAC West");
   contents.hEarliestTacEvsW->GetYaxis()->CenterTitle(true);
   contents.hEarliestTacEvsW->GetYaxis()->SetTitleOffset(1.4);
 
