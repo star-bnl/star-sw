@@ -1,3 +1,11 @@
+12/11/19
+Filesystem           Size  Used Avail Use% Mounted on
+l402:/data            11T  3.8T  5.9T  40% /net/l402/data
+l403:/data            11T  373G  9.4T   4% /net/l403/data
+l404:/data            11T  9.2T  597G  94% /net/l404/data
+l401:/data/scratch1   17T  5.2T   12T  31% /net/l401/data/scratch1
+l401:/data/scratch2   17T   17T  506G  98% /net/l401/data/scratch2
+
 09/02/2019
 Filesystem                   Size  Used Avail Use% Mounted on
 l401:/data/scratch1           17T   15T  2.1T  88% /net/l401/data/scratch1
