@@ -240,7 +240,7 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
 #endif  
   if (! dZ) {
     NPART = new TH1D("npart","no accepted particles",500,0,5000);
-    dZ = new TH2F("dZ","dZ (W - E)/2 versus Z",nZ,Zmin,Zmax,400,-2.,2.);
+    dZ = new TH2F("dZ","dZ (W - E)/2 versus Z",nZ,Zmin,Zmax,400,-4.,4.);
     dT = new TH2F("dT","dT(#musec) (W - E)/2 versus Z",nZ,Zmin,Zmax,500,-0.5,0.5);
     const static Int_t tMin = 20190225;;
     const static Int_t tMax = 20140411;
