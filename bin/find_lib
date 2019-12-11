@@ -82,6 +82,6 @@ foreach p ($dirlist)
 #    set list = `echo $STAR/.sl44_gcc346/lib/*.so` #echo ${p}/lib*.so*`
     foreach lib ($list) 
 	echo "lib = " $lib 
-	nm -p $lib |  grep -i endm
+	nm -p $lib |  grep -i _ZN12StBemcTablesC1Ebb
     end
 end
