@@ -52,6 +52,22 @@ void kfpAnalysis(Int_t N = 1000,
   Long64_t nentries = tree->GetEntries();
   cout << "no. events in tree " <<nentries << endl;
   if (nentries <= 0) return;
+//   StKFParticleInterface::instance()->SetSoftKaonPIDMode();
+//   StKFParticleInterface::instance()->SetSoftTofPidMode();
+//   StKFParticleInterface::instance()->SetChiPrimaryCut(10);
+//   
+//   StKFParticleInterface::instance()->SetPtCutCharm(0.2);
+//   StKFParticleInterface::instance()->SetChiPrimaryCutCharm(8);
+//   StKFParticleInterface::instance()->SetLdLCutCharmManybodyDecays(3);
+//   StKFParticleInterface::instance()->SetChi2TopoCutCharmManybodyDecays(10);
+//   StKFParticleInterface::instance()->SetChi2CutCharmManybodyDecays(3);
+//   StKFParticleInterface::instance()->SetLdLCutCharm2D(3);
+//   StKFParticleInterface::instance()->SetChi2TopoCutCharm2D(10);
+//   StKFParticleInterface::instance()->SetChi2CutCharm2D(3);
+
+//   StKFParticleInterface::instance()->AddDecayToReconstructionList(  310);
+//   StKFParticleInterface::instance()->AddDecayToReconstructionList( 3122);
+//   StKFParticleInterface::instance()->AddDecayToReconstructionList(-3122);
   Long64_t nevent = N;
   nevent = TMath::Min(nevent,nentries);
   cout << nentries << " events in chain " << nevent << " will be read." << endl;
