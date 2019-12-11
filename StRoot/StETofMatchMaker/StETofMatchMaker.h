@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofMatchMaker.h,v 1.3 2019/05/08 23:59:10 fseck Exp $
+ * $Id: StETofMatchMaker.h,v 1.4 2019/12/10 16:00:31 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StETofMatchMaker.h,v $
+ * Revision 1.4  2019/12/10 16:00:31  fseck
+ * possibility to use step-wise track extrapolation in changing magnetic field via setting a flag
+ *
  * Revision 1.3  2019/05/08 23:59:10  fseck
  * changed match distances to become member variables
  *
@@ -45,6 +48,7 @@ class StMuTrack;
 class StTrackGeometry;
 
 class TH1;
+class TH2;
 
 /// ETOF track class
 class ETofTrack{
@@ -109,7 +113,8 @@ public:
     /// read matching parameters from file
     void setFileNameMatchParam( const char* fileName );
 
-    void setOuterGeometry( const bool outerGeom  );
+    void setOuterGeometry(   const bool outerGeom  );
+    void setUseHelixSwimmer( const bool useSwimmer );
     void setIsSim( const bool isSim );
     void setDoQA(  const bool doQA  );  
     void setDebug( const bool debug );
@@ -132,7 +137,7 @@ private:
     bool    validTrack( const ETofTrack& );
 
     void    extrapolateTrackToETof( eTofHitVec& intersectionVec, const StPhysicalHelixD& theHelix, const int& iNode, int& nCrossings );
-    
+
     void    matchETofHits(          eTofHitVec& detectorHitVec,      eTofHitVec& intersectionVec, eTofHitVec& matchCandVec );
     void    sortSingleMultipleHits( eTofHitVec& matchCandVec,        eTofHitVec& singleTrackMatchVec, std::vector< eTofHitVec >& multiTrackMatchVec );
     void    finalizeMatching(       eTofHitVec& singleTrackMatchVec, eTofHitVec& finalMatchVec );
@@ -141,13 +146,16 @@ private:
     void    calculatePidVariables( eTofHitVec& finalMatchVec, int& nPrimaryWithPid );
 
     double  startTime();
-    double  etofPathLength( const StThreeVectorD& beginPoint, const StThreeVectorD& endPoint, const double& curvature );
+    double  timeOfFlight( const double& startTime, const double& stopTime );
     double  expectedTimeOfFlight( const double& pathLength, const double& momentum, const double& mass );
 
-    void    fillQaHistograms( eTofHitVec& finalMatchVec );
+    void    fillQaHistograms(   eTofHitVec& finalMatchVec );
+    void    fillSlewHistograms( eTofHitVec& finalMatchVec );
     void    bookHistograms();
     void    setHistFileName();
     void    writeHistograms();
+
+    int     rotateHit( const int& sector, const int& rot );
 
     StTrackGeometry* trackGeometry( StTrack* ) const; // get track geometry for (outer) helix
 
@@ -163,6 +171,7 @@ private:
     Bool_t            mIsMuDstIn;
 
     Bool_t            mOuterTrackGeometry;  // if true -> use outer track geometry for extrapolation
+    Bool_t            mUseHelixSwimmer;     // if true -> use changing magnetic field in track extrapolation
     Bool_t            mIsSim;
     Bool_t            mDoQA;
     Bool_t            mDebug;
@@ -180,6 +189,7 @@ private:
 
     std::string                    mHistFileName;
     std::map< std::string, TH1* >  mHistograms;
+    std::map< std::string, TH2* >  mHistograms2d;
 
     virtual const Char_t *GetCVS() const { static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs; }
 
@@ -187,8 +197,9 @@ private:
 };
 
 
-inline void StETofMatchMaker::setFileNameMatchParam( const char* fileName )  { mFileNameMatchParam  = fileName;   }
+inline void StETofMatchMaker::setFileNameMatchParam( const char* fileName  ) { mFileNameMatchParam  = fileName;   }
 inline void StETofMatchMaker::setOuterGeometry(      const bool outerGeom  ) { mOuterTrackGeometry  = outerGeom;  }
+inline void StETofMatchMaker::setUseHelixSwimmer(    const bool useSwimmer ) { mUseHelixSwimmer     = useSwimmer; }
 inline void StETofMatchMaker::setIsSim( const bool isSim ) { mIsSim = isSim; }
 inline void StETofMatchMaker::setDoQA(  const bool doQA  ) { mDoQA  = doQA;  }
 inline void StETofMatchMaker::setDebug( const bool debug ) { mDebug = debug; }

@@ -79,7 +79,7 @@ use RunDAQ;
 use CRSQueues;
 
 
-$ThisYear = 2019;                 # Block to consider. Completely artificial
+$ThisYear = 2020;                 # Block to consider. Completely artificial
                                   # and used to preserve older options in if
                                   # block along with current option.
 $HPSS     = 1;                    # turn to 0 for UNIX staging only
@@ -624,9 +624,9 @@ if ( $ThisYear == 2005 ){
        $DCHAIN{"AuAu"} = "P2019a,StiCA,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeakFull,-OPr13,OPr40,-hitfilt,-beamline3D";
 
 
-   } elsif ($ThisYear == 2019) {
+   } elsif ($ThisYear == 2020) {
        # can eventualy move btof/mtd to the base chain later
-       $DCHAIN{"AuAu"} = "P2020a,StiCA,btof,mtd,BEmcChkStat,QAallTrigs,-hitfilt";
+       $DCHAIN{"AuAu"} = "P2020a,StiCA,btof,mtd,BEmcChkStat,QAalltrigs,-hitfilt";
 
 
    #} else {

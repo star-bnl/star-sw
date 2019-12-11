@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofMatchMaker.cxx,v 1.6 2019/05/09 00:02:46 fseck Exp $
+ * $Id: StETofMatchMaker.cxx,v 1.7 2019/12/10 16:00:34 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StETofMatchMaker.cxx,v $
+ * Revision 1.7  2019/12/10 16:00:34  fseck
+ * possibility to use step-wise track extrapolation in changing magnetic field via setting a flag
+ *
  * Revision 1.6  2019/05/09 00:02:46  fseck
  * match distances as member variables and updated handling for many-tracks-to-one-hit matches
  *
@@ -71,6 +74,7 @@
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 #include "StMuDSTMaker/COMMON/StMuETofHit.h"
 #include "StMuDSTMaker/COMMON/StMuETofPidTraits.h"
+#include "StMuDSTMaker/COMMON/StMuETofDigi.h"
 
 #include "StETofMatchMaker.h"
 #include "StETofUtil/StETofGeometry.h"
@@ -91,101 +95,39 @@ const double safetyMargins[ 2 ] = { 2., 2. };
 const float minEtaCut     = 0.0;
 
 const float minEtaProjCut = -1.0;
-const float maxEtaProjCut = -1.8;
+const float maxEtaProjCut = -1.7;
 
-// cuts when plotting pid trait histograms like 1/beta vs. momentum
+
 // --> TODO: move to database once alignment procedure is in place
-/*
-// 2018 data
-const double deltaXoffset[ 108 ] = {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 13
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 14
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 15
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 16
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 17
-                                      1.09,  1.67,  1.95,  1.72,  2.11,  2.63,  1.87,  2.53,  3.12,    // 18
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 19
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 20
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 21
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 22
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 23
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00 };  // 24
+const double deltaXoffset[ 108 ] = {
+    0.00,  0.00,  0.00,  2.04,  2.51,  3.21,  2.05,  2.68,  3.33,
+    1.72,  2.18,  2.59,  2.16,  2.72,  3.35,  2.03,  2.61,  3.37,
+    1.66,  2.12,  2.63,  2.02,  2.63,  3.28,  2.11,  2.66,  3.34,
+    1.52,  2.05,  2.51,  1.94,  2.49,  3.12,  2.06,  2.75,  3.49,
+    1.17,  1.72,  2.23,  1.61,  2.27,  2.88,  1.84,  2.46,  3.31,
+    1.23,  1.85,  2.25,  1.86,  2.29,  3.08,  1.92,  2.45,  3.23,
+    1.05,  1.68,  2.21,  1.80,  2.39,  3.05,  0.00,  0.00,  0.00,
+    1.31,  1.90,  2.24,  2.06,  2.42,  3.04,  0.00,  2.46,  3.07,
+    1.55,  2.09,  2.37,  2.07,  0.00,  3.13,  0.00,  0.00,  0.00,
+    1.82,  2.27,  2.73,  0.00,  0.00,  0.00,  2.14,  2.71,  3.42,
+    1.87,  2.29,  2.73,  1.94,  2.48,  3.16,  2.03,  2.65,  0.00,
+    1.81,  2.25,  2.75,  1.90,  2.42,  3.14,  1.98,  2.59,  3.24 };
 
+const double deltaYoffset[ 108 ] = {
+    0.00,  0.00,  0.00,  0.49,  0.69,  0.92, -0.21, -0.11, -0.16,
+    0.71,  0.79,  1.01,  0.28,  0.72,  1.12,  0.06, -0.16,  0.08,
+    0.50,  0.56,  0.75,  0.11,  0.49,  0.91, -0.20, -0.19, -0.10,
+    0.16,  0.11,  0.15, -0.13,  0.10,  0.53, -0.42, -0.51, -0.57,
+    0.45,  0.62,  0.69,  0.04,  0.48,  0.73, -0.31, -0.14, -0.31,
+    0.81,  0.97,  1.11,  0.20,  0.56,  0.86, -0.24, -0.19, -0.13,
+    1.08,  1.13,  1.21, -0.24,  0.52,  1.06,  0.00,  0.00,  0.00,
+    1.38,  1.25,  1.28,  0.44,  0.76,  0.96,  0.00, -0.23, -0.16,
+    1.37,  1.25,  1.18,  0.45,  0.00,  0.80,  0.00,  0.00,  0.00,
+    1.65,  1.44,  1.30,  0.00,  0.00,  0.00, -0.01, -0.17, -0.17,
+    1.25,  1.23,  1.20,  0.56,  0.85,  0.79,  0.05, -0.14,  0.00,
+    1.26,  1.31,  1.26,  0.50,  0.79,  1.26, -0.03,  0.06,  0.06 };
 
-const double deltaYoffset[ 108 ] = {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 13
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 14
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 15
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 16
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 17
-                                     -0.34, -0.50, -1.04, -0.29, -0.18, -0.31, -0.59, -0.69, -0.61,    // 18
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 19
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 20
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 21
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 22
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,    // 23
-                                      0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00 };  // 24
-
-
-// 2019 data
-const double deltaXoffset[ 108 ] = {  1.70,  2.09,  2.55,  1.78,  2.33,  2.91,  1.85,  2.55,  3.05,    // 13
-                                      1.60,  2.03,  2.43,  1.93,  2.45,  3.01,  1.95,  2.51,  3.17,    // 14
-                                      0.00,  0.00,  0.00,  1.76,  2.39,  2.98,  1.89,  2.51,  3.10,    // 15
-                                      1.34,  1.82,  2.32,  1.76,  2.27,  2.87,  2.01,  2.64,  3.31,    // 16
-                                      0.98,  1.53,  2.02,  1.40,  2.01,  2.63,  1.70,  2.37,  3.07,    // 17
-                                      1.12,  1.68,  2.03,  1.67,  2.13,  2.82,  1.76,  2.39,  3.07,    // 18
-                                      0.83,  1.38,  1.87,  1.49,  2.09,  2.77,  1.64,  2.35,  2.95,    // 19
-                                      1.12,  1.60,  1.98,  1.78,  2.27,  2.69,  0.00,  2.30,  2.84,    // 20
-                                      1.29,  1.83,  2.10,  1.75,  2.32,  2.86,  1.80,  2.48,  3.00,    // 21
-                                      1.62,  2.16,  2.51,  0.00,  0.00,  0.00,  2.01,  2.61,  3.22,    // 22
-                                      1.72,  2.21,  2.54,  1.79,  2.38,  2.91,  1.88,  2.52,  0.00,    // 23
-                                      1.75,  2.13,  2.55,  1.65,  2.25,  2.91,  1.84,  2.46,  3.02 };  // 24
-
-const double deltaYoffset[ 108 ] = {  0.53,  0.76,  1.15,  0.59,  0.45, -0.12, -0.50, -0.34, -0.57,    // 13
-                                      0.52,  0.43,  0.37,  0.32,  0.04,  0.62, -0.34, -0.65, -0.48,    // 14
-                                      0.00,  0.00,  0.00, -0.03,  0.31,  0.84, -0.30, -0.35, -0.30,    // 15
-                                      0.29, -0.03,  0.10, -0.38, -0.15,  0.27, -0.67, -0.54, -0.42,    // 16
-                                      0.43,  0.19,  0.38, -0.21,  0.21,  0.32, -0.51, -0.17, -0.40,    // 17
-                                      0.43,  0.48,  0.67,  0.05,  0.45,  0.37, -0.35, -0.70, -0.52,    // 18
-                                      1.04,  1.04,  1.06,  0.12,  0.37,  0.83,  0.00, -0.50, -0.35,    // 19
-                                      1.27,  1.08,  0.74,  0.19,  0.49,  0.63,  0.00, -0.26, -0.43,    // 20
-                                      1.12,  1.07,  1.15,  0.16,  0.27,  0.33, -0.42, -0.73, -0.61,    // 21
-                                      1.38,  1.26,  1.05,  0.00,  0.00,  0.00, -0.06, -0.48, -0.41,    // 22
-                                      1.20,  1.11,  0.85,  0.34,  0.96,  0.62, -0.36, -0.45,  0.00,    // 23
-                                      1.22,  0.81,  0.75,  0.00,  0.00,  0.00, -0.21, -0.26, -0.22 };  // 24
-*/
-
-// 2019: day 118 
-const double deltaXoffset[ 108 ] = { 
- 0.00,  0.00,  0.00,  2.10,  2.55,  3.18,  2.01,  2.70,  3.29,
- 1.71,  2.19,  2.62,  2.12,  2.75,  3.27,  2.01,  2.69,  3.24,
- 1.71,  2.11,  2.59,  2.10,  2.63,  3.25,  2.03,  2.66,  3.28,
- 1.51,  2.02,  2.56,  1.93,  2.54,  3.09,  2.09,  2.72,  3.41,
- 1.17,  1.66,  2.25,  1.60,  2.32,  2.88,  1.83,  2.44,  3.23,
- 1.22,  1.83,  2.29,  1.85,  2.31,  3.06,  1.83,  2.48,  3.18,
- 0.98,  1.70,  2.23,  1.61,  2.32,  3.10,  0.00,  0.00,  0.00,
- 1.30,  1.83,  2.20,  2.21,  2.42,  3.11,  0.00,  2.49,  3.04,
- 1.60,  2.10,  2.35,  2.12,  0.00,  3.18,  0.00,  0.00,  0.00,
- 1.78,  2.28,  2.76,  0.00,  0.00,  0.00,  2.16,  2.79,  3.40,
- 1.84,  2.28,  2.71,  1.95,  2.53,  3.15,  2.01,  2.70,  0.00,
- 1.79,  2.27,  2.80,  1.90,  2.52,  3.12,  2.01,  2.67,  3.25
-};
-
-const double deltaYoffset[ 108 ] = { 
- 0.00,  0.00,  0.00,  2.50,  0.64,  0.71, -0.16, -0.13, -0.01,
- 0.91,  0.75, -1.17,  2.31,  2.64,  1.18,  0.12, -0.17,  0.14,
- 0.46,  0.61,  0.72,  0.22,  0.33,  1.04, -0.39, -0.25, -0.12,
- 0.22,  0.07,  0.28, -0.20,  0.12,  0.56, -0.45, -0.41, -0.44,
- 0.50,  0.60,  0.69,  0.15,  0.44,  0.79, -0.28, -0.03, -0.23,
- 3.05,  1.02,  1.08,  0.36,  0.60,  0.90, -0.12, -0.31, -0.01,
- 0.87,  1.05,  1.24, -0.02,  0.89,  1.30,  0.00,  0.00,  0.00,
- 1.45,  1.30,  1.26,  2.38,  0.88,  0.94,  0.00, -0.17, -0.15,
- 1.28,  1.32,  1.29, -0.19,  0.00,  0.29,  0.00,  0.00,  0.00,
- 1.53,  1.37,  1.27,  0.00,  0.00,  0.00, -0.03, -0.08, -0.16,
- 3.37,  1.22,  1.25,  0.47,  0.94,  0.77, -0.03, -0.15,  0.00,
- 1.31,  1.27,  1.33,  2.56,  1.00,  1.26, -0.08,  0.08,  0.13
-};
-
-
-const double deltaRcut = 2.;
+const double deltaRcut = 4.;
 
 // *******************************************************************************************************
 
@@ -199,12 +141,13 @@ StETofMatchMaker::StETofMatchMaker( const char* name )
   mFileNameMatchParam( "" ),
   mIsStEventIn( false ),
   mIsMuDstIn( false ),
-  mOuterTrackGeometry( false ),
+  mOuterTrackGeometry( true ),
+  mUseHelixSwimmer( false ),
   mIsSim( false ),
   mDoQA( false ),
   mDebug( false ),
-  mMatchDistX( 5. ),
-  mMatchDistY( 5. ),
+  mMatchDistX(  5. ),
+  mMatchDistY( 10. ),
   mMatchDistT( 99999. ),
   mMatchRadius( 0. ),
   mHistFileName( "" )
@@ -216,6 +159,7 @@ StETofMatchMaker::StETofMatchMaker( const char* name )
     mTrackCuts.push_back( 0. ); // low pt
 
     mHistograms.clear();
+    mHistograms2d.clear();
 }
 
 
@@ -336,7 +280,7 @@ StETofMatchMaker::InitRun( Int_t runnumber )
 
         LOG_DEBUG << " gGeoManager: " << gGeoManager << endm;
 
-        mETofGeom->init( gGeoManager, safetyMargins );
+        mETofGeom->init( gGeoManager, safetyMargins, mUseHelixSwimmer );
     }
 
     if( mDoQA ) {
@@ -353,6 +297,19 @@ StETofMatchMaker::InitRun( Int_t runnumber )
             }
             for( int j=0; j<plane; j++ ) {
                 mHistograms.at( "eTofModules" )->Fill( pos.x(), pos.y() );
+            }
+        }
+
+
+        // for magnetic field debugging
+        int nBinsX = mHistograms2d.at( "bfield_z" )->GetNbinsX();
+        int nBinsY = mHistograms2d.at( "bfield_z" )->GetNbinsY();
+        for( int i=0; i<nBinsX; i++ ) {
+            for( int j=0; j<nBinsY; j++ ) {
+                double z = mHistograms2d.at( "bfield_z" )->GetXaxis()->GetBinCenter( i );
+                double y = mHistograms2d.at( "bfield_z" )->GetYaxis()->GetBinCenter( j );
+
+                mHistograms2d.at( "bfield_z" )->Fill( z, y, mETofGeom->getFieldZ( 0., y, z ) );
             }
         }
     }
@@ -421,7 +378,7 @@ StETofMatchMaker::Make()
 
         if( mMuDst ) {
             LOG_DEBUG << "Make() - running on MuDsts" << endm;
-            
+
             mIsMuDstIn = true;
 
             fillIndexToPrimaryMap();
@@ -461,6 +418,19 @@ StETofMatchMaker::Make()
     //
     eTofHitVec intersectionVec;
     int nPrimaryWithIntersection = 0;
+
+    float bFieldFromGeom = mETofGeom->getFieldZ( 100., 100., 0. );
+    float bField = 0;
+    if( mIsMuDstIn ) {
+        bField = mMuDst->event()->runInfo().magneticField();
+    }
+    else {
+        bField = mEvent->runInfo()->magneticField();
+    }
+
+    if( fabs( bFieldFromGeom - bField ) > 0.2 ) {
+        LOG_WARN << "Wrong magnetc field bField = " << bField << " bFieldFromGeom = " << bFieldFromGeom << " --> check the magF input!" << endm;
+    }
 
     findTrackIntersections( intersectionVec, nPrimaryWithIntersection );
 
@@ -536,6 +506,8 @@ StETofMatchMaker::Make()
     // H. fill QA histograms
     //
     fillQaHistograms( finalMatchVec );
+
+    fillSlewHistograms( finalMatchVec );
 
 
     LOG_INFO << "Make() -- event done ... bye-bye" << endm;
@@ -748,7 +720,7 @@ StETofMatchMaker::readETofDetectorHits( eTofHitVec& detectorHitVec )
         }
 
         nHits = mMuDst->numberOfETofHit();
-        LOG_INFO << "processMuDst() - # fired eTOF hits : " << nHits << endm;
+        LOG_INFO << " number of ETOF hits: " << nHits << endm;
     }
 
     if( mDoQA ) {
@@ -768,6 +740,13 @@ StETofMatchMaker::readETofDetectorHits( eTofHitVec& detectorHitVec )
             StructETofHit detectorHit;
 
             detectorHit.sector         = aHit->sector();
+            /*
+            // ---------------------------------------------------
+            // rotate hits by 60 degree to avaluate random matches
+            int sec = rotateHit( aHit->sector(), 2 );
+            detectorHit.sector = sec;
+            // ---------------------------------------------------
+            */
             detectorHit.plane          = aHit->zPlane();
             detectorHit.counter        = aHit->counter();
             detectorHit.hitTime        = aHit->time();
@@ -791,6 +770,13 @@ StETofMatchMaker::readETofDetectorHits( eTofHitVec& detectorHitVec )
             StructETofHit detectorHit;
 
             detectorHit.sector         = aHit->sector();
+            /*
+            // ---------------------------------------------------
+            // rotate hits by 60 degree to avaluate random matches
+            int sec = rotateHit( aHit->sector(), 2 );
+            detectorHit.sector = sec;
+            // ---------------------------------------------------
+            */
             detectorHit.plane          = aHit->zPlane();
             detectorHit.counter        = aHit->counter();
             detectorHit.hitTime        = aHit->time();
@@ -810,7 +796,7 @@ StETofMatchMaker::readETofDetectorHits( eTofHitVec& detectorHitVec )
     for( auto& hit : detectorHitVec ) {
         double xl[ 3 ] = { hit.localX, hit.localY, 0 };
 
-        int moduleId  = mETofGeom->calcModuleIndex( hit.sector, hit.plane ); 
+        int moduleId  = mETofGeom->calcModuleIndex( hit.sector, hit.plane );
         int counterId = hit.counter - 1;
         double xg[ 3 ];
 
@@ -838,13 +824,17 @@ StETofMatchMaker::readETofDetectorHits( eTofHitVec& detectorHitVec )
 
         LOG_DEBUG << "global (eta, phi): " << hit_eta << ", " << hit_phi << endm;
 
-        mHistograms.at( "eTofHits_globalXY" )->Fill( globalPos.x(), globalPos.y() );
+        if( fabs( hit.localY ) < eTofConst::stripLength / 2. * 1.5 ) {
+            mHistograms.at( "eTofHits_globalXY" )->Fill( globalPos.x(), globalPos.y() );
+        }
 
         if( mDoQA ) {
-            mHistograms.at( "eTofHits_phi_eta"  )->Fill( hit_phi, hit_eta );
+            if( fabs( hit.localY ) < eTofConst::stripLength / 2. * 1.5 ) {
+                mHistograms.at( "eTofHits_phi_eta"  )->Fill( hit_phi, hit_eta );
+            }
 
             if( hit.sector == 18 || hit.sector == 24 ) {
-                    mHistograms.at( "eTofHits_globalYZ" )->Fill( globalPos.y(), globalPos.z() );       
+                mHistograms.at( "eTofHits_globalYZ" )->Fill( globalPos.y(), globalPos.z() );
             }
 
             std::string histName_hit_localXY  = "eTofHits_localXY_s"  + std::to_string( hit.sector ) + "m" + std::to_string( hit.plane ) + "c" + std::to_string( hit.counter );
@@ -903,12 +893,12 @@ StETofMatchMaker::findTrackIntersections( eTofHitVec& intersectionVec, int& nPri
                 }
             }
 
-
-            StPhysicalHelixD theHelix = trackGeometry( theTrack )->helix();
+            StPhysicalHelixD theHelix = mOuterTrackGeometry ? theTrack->outerGeometry()->helix() : theTrack->geometry()->helix();
 
             int nCrossings = 0;
 
             extrapolateTrackToETof( intersectionVec, theHelix, iNode, nCrossings );
+
 
             if( isPrimary ) {
                 nPrimaryCrossings += nCrossings;
@@ -916,17 +906,27 @@ StETofMatchMaker::findTrackIntersections( eTofHitVec& intersectionVec, int& nPri
                     nPrimaryWithIntersection++;
                  
                     if( mDoQA ) {
-                        mHistograms.at( "intersection_primaryTrack_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
+                        int charge = pTrack->geometry()->charge();
+                        float pMom = pTrack->geometry()->momentum().mag();
 
-                        float mom = pTrack->geometry()->momentum().mag();
-                        if( mom > 1 ) {
+                        mHistograms.at( "intersection_primaryTrack_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
+                        if( charge > 0 ) mHistograms.at( "intersection_primaryTrackpos_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
+                        else             mHistograms.at( "intersection_primaryTrackneg_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
+
+                        if( pMom > 1 ) {
                             mHistograms.at( "intersection_primaryTrackMom0_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
+                            if( charge > 0 ) mHistograms.at( "intersection_primaryTrackMom0pos_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
+                            else             mHistograms.at( "intersection_primaryTrackMom0neg_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
                         }
-                        else if( mom > 0.5 ) {
+                        else if( pMom > 0.5 ) {
                             mHistograms.at( "intersection_primaryTrackMom1_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
+                            if( charge > 0 ) mHistograms.at( "intersection_primaryTrackMom1pos_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
+                            else             mHistograms.at( "intersection_primaryTrackMom1neg_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
                         }
                         else {
                             mHistograms.at( "intersection_primaryTrackMom2_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
+                            if( charge > 0 ) mHistograms.at( "intersection_primaryTrackMom2pos_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
+                            else             mHistograms.at( "intersection_primaryTrackMom2neg_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
                         }
                     }
                 }
@@ -988,20 +988,28 @@ StETofMatchMaker::findTrackIntersections( eTofHitVec& intersectionVec, int& nPri
                     nPrimaryWithIntersection++;
 
                     if( mDoQA ) {
+                        int charge = theTrack->primaryTrack()->charge();
+                        float pMom = theTrack->primaryTrack()->momentum().mag();
+
                         mHistograms.at( "intersection_primaryTrack_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
-                        
-                        float mom = theTrack->primaryTrack()->momentum().mag();
-                        if( mom > 1 ) {
+                        if( charge > 0 ) mHistograms.at( "intersection_primaryTrackpos_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
+                        else             mHistograms.at( "intersection_primaryTrackneg_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
+
+                        if( pMom > 1 ) {
                             mHistograms.at( "intersection_primaryTrackMom0_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
+                            if( charge > 0 ) mHistograms.at( "intersection_primaryTrackMom0pos_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
+                            else             mHistograms.at( "intersection_primaryTrackMom0neg_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
                         }
-                        else if( mom > 0.5 ) {
+                        else if( pMom > 0.5 ) {
                             mHistograms.at( "intersection_primaryTrackMom1_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
+                            if( charge > 0 ) mHistograms.at( "intersection_primaryTrackMom1pos_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
+                            else             mHistograms.at( "intersection_primaryTrackMom1neg_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
                         }
                         else {
                             mHistograms.at( "intersection_primaryTrackMom2_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
+                            if( charge > 0 ) mHistograms.at( "intersection_primaryTrackMom2pos_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
+                            else             mHistograms.at( "intersection_primaryTrackMom2neg_globalXY" )->Fill( intersectionVec.back().globalPos.x() , intersectionVec.back().globalPos.y() );
                         }
-
-
                     }
                 }
             }
@@ -1036,7 +1044,8 @@ StETofMatchMaker::findTrackIntersections( eTofHitVec& intersectionVec, int& nPri
 
 //---
 /// StTrack-based Track selection for initial extrapolation to ETOF
-bool StETofMatchMaker::validTrack( const StTrack* track )
+bool
+StETofMatchMaker::validTrack( const StTrack* track )
 {
     if( track ) {
         return validTrack( ETofTrack( track ) );
@@ -1048,7 +1057,8 @@ bool StETofMatchMaker::validTrack( const StTrack* track )
 
 //---
 /// StMuTrack-based Track selection for initial extrapolation to ETOF
-bool StETofMatchMaker::validTrack( const StMuTrack* track )
+bool
+StETofMatchMaker::validTrack( const StMuTrack* track )
 {
     if( track ) {
         return validTrack( ETofTrack( track ) );
@@ -1100,31 +1110,31 @@ void
 StETofMatchMaker::extrapolateTrackToETof( eTofHitVec& intersectionVec, const StPhysicalHelixD& theHelix, const int& iNode, int& nCrossings )
 {
     // first project helix to the middle eTof plane to get the sector(s) of possible intersections
-    StThreeVectorD projection = mETofGeom->helixCrossETofPlane( theHelix );
+    StThreeVectorD projection = mETofGeom->helixCrossPlane( theHelix, eTofConst::zplanes[ 1 ] );
 
+    // get rid of tracks that do not project to the rough eta region of the eTof
+    float projEta = projection.pseudoRapidity();
 
-    float projEta = projection.pseudoRapidity();            
+    if( projEta < maxEtaProjCut ) return;
+    if( projEta > minEtaProjCut ) return;
+
     float projPhi = projection.phi();
     if ( projPhi < 0. ) projPhi += 2. * M_PI;
 
     if( mDoQA ) {
-        // histogramming for QA 
+        // histogramming for QA
         mHistograms.at( "trackProj_globalXY" )->Fill( projection.x(), projection.y() );
         mHistograms.at( "trackProj_phi_eta"  )->Fill( projPhi, projEta ); 
     }
-
-
-    // get rid of tracks that do not project to the rough eta region of the eTof
-    if( projEta < maxEtaProjCut ) return;
-    if( projEta > minEtaProjCut ) return;
 
     vector< int > idVec;
     vector< StThreeVectorD > globalVec;
     vector< StThreeVectorD > localVec;
     vector< double > thetaVec;
+    vector< double > pathLenVec;
 
     // look for intersections of the extrapolated helix with the active eTof volumes
-    mETofGeom->helixCrossCounter( theHelix, idVec, globalVec, localVec, thetaVec );
+    mETofGeom->helixCrossCounter( theHelix, idVec, globalVec, localVec, thetaVec, pathLenVec );
 
     nCrossings = idVec.size();
 
@@ -1141,11 +1151,12 @@ StETofMatchMaker::extrapolateTrackToETof( eTofHitVec& intersectionVec, const StP
 
         mETofGeom->decodeVolumeIndex( idVec.at( i ), intersect.sector, intersect.plane, intersect.counter, intersect.strip );
 
-        intersect.localX    = localVec.at( i ).x();
-        intersect.localY    = localVec.at( i ).y();
-        intersect.globalPos = globalVec.at( i ); 
-        intersect.trackId   = iNode;
-        intersect.theta     = thetaVec.at( i );
+        intersect.localX     = localVec.at( i ).x();
+        intersect.localY     = localVec.at( i ).y();
+        intersect.globalPos  = globalVec.at( i );
+        intersect.trackId    = iNode;
+        intersect.theta      = thetaVec.at( i );
+        intersect.pathLength = pathLenVec.at( i );
 
         // fill intersection into storage vector
         intersectionVec.push_back( intersect );
@@ -1241,10 +1252,15 @@ StETofMatchMaker::matchETofHits( eTofHitVec& detectorHitVec, eTofHitVec& interse
                 matchCand.globalPos     = interIter->globalPos;
                 matchCand.trackId       = interIter->trackId;
                 matchCand.theta         = interIter->theta;
+                matchCand.pathLength    = interIter->pathLength;
 
                 matchCand.matchFlag = 0;
                 matchCand.deltaX    = deltaX;
                 matchCand.deltaY    = deltaY;
+
+                matchCand.tof        = -999.;
+                matchCand.beta       = -999.;
+
 
                 matchCandVec.push_back( matchCand );
 
@@ -1371,8 +1387,9 @@ StETofMatchMaker::sortSingleMultipleHits( eTofHitVec& matchCandVec, eTofHitVec& 
             int   bestIndex    = -1;
 
             for( size_t i=0; i<candVec.size(); i++ ) {
-                LOG_INFO << "track id: " << candVec.at( i ).trackId << " and matching distance " << candVec.at( i ).deltaX << "  " << candVec.at( i ).deltaY << endm;
-
+                if( mDebug ) {
+                    LOG_INFO << "track id: " << candVec.at( i ).trackId << " and matching distance " << candVec.at( i ).deltaX << "  " << candVec.at( i ).deltaY << endm;
+                }
                 float residual = pow( candVec.at( i ).deltaX, 2 ) + pow( candVec.at( i ).deltaY, 2 );
 
                 if( residual < bestResidual ) {
@@ -1383,7 +1400,9 @@ StETofMatchMaker::sortSingleMultipleHits( eTofHitVec& matchCandVec, eTofHitVec& 
 
             if( bestIndex > -1 ) {
                 singleTrackMatchVec.push_back( candVec.at( bestIndex ) );
-                LOG_INFO << "best candidate has track id: " << candVec.at( bestIndex ).trackId << endm;
+                if( mDebug ) {
+                    LOG_INFO << "best candidate has track id: " << candVec.at( bestIndex ).trackId << endm;
+                }
             }
 
             if( mDebug ) {
@@ -1487,7 +1506,7 @@ StETofMatchMaker::finalizeMatching( eTofHitVec& singleTrackMatchVec, eTofHitVec&
                 }
             }
             
-            if ( isOverlapHit ) {
+            if( isOverlapHit ) {
                 bestCand.matchFlag = 3;
 
                 if( mDoQA ) {
@@ -1517,7 +1536,7 @@ StETofMatchMaker::finalizeMatching( eTofHitVec& singleTrackMatchVec, eTofHitVec&
                 StGlobalTrack* track = dynamic_cast< StGlobalTrack* > ( nodes[ v.trackId ]->track( global ) );
 
                 mHistograms.at( "finalMatch_pt" )->Fill( track->geometry()->momentum().perp() );
-            }             
+            }
         }
         else {
             for( const auto& v: finalMatchVec ) {
@@ -1573,13 +1592,18 @@ StETofMatchMaker::fillPidTraits( eTofHitVec& finalMatchVec )
             StETofPidTraits* pidTraits = new StETofPidTraits();
 
             pidTraits->setETofHit( hit );
-            pidTraits->setMatchFlag(  match.matchFlag );
-            pidTraits->setLocalX(     match.localX    );
-            pidTraits->setLocalY(     match.localY    );
-            pidTraits->setThetaLocal( match.theta     );
-            pidTraits->setDeltaX(     match.deltaX    );
-            pidTraits->setDeltaY(     match.deltaY    );
-            pidTraits->setPosition(   match.globalPos );
+            pidTraits->setMatchFlag(  match.matchFlag  );
+            pidTraits->setLocalX(     match.localX     );
+            pidTraits->setLocalY(     match.localY     );
+            pidTraits->setThetaLocal( match.theta      );
+            pidTraits->setDeltaX(     match.deltaX     );
+            pidTraits->setDeltaY(     match.deltaY     );
+            pidTraits->setPosition(   match.globalPos  );
+
+            pidTraits->setPathLength( match.pathLength );
+
+            pidTraits->setTimeOfFlight( -999. );
+            pidTraits->setBeta(         -999. );
 
             globalTrack->addPidTraits( pidTraits );
 
@@ -1606,13 +1630,18 @@ StETofMatchMaker::fillPidTraits( eTofHitVec& finalMatchVec )
                 StETofPidTraits* ppidTraits = new StETofPidTraits();
 
                 ppidTraits->setETofHit( hit );
-                ppidTraits->setMatchFlag(  match.matchFlag );
-                ppidTraits->setLocalX(     match.localX    );
-                ppidTraits->setLocalY(     match.localY    );
-                ppidTraits->setThetaLocal( match.theta     );
-                ppidTraits->setDeltaX(     match.deltaX    );
-                ppidTraits->setDeltaY(     match.deltaY    );
-                ppidTraits->setPosition(   match.globalPos );
+                ppidTraits->setMatchFlag(  match.matchFlag  );
+                ppidTraits->setLocalX(     match.localX     );
+                ppidTraits->setLocalY(     match.localY     );
+                ppidTraits->setThetaLocal( match.theta      );
+                ppidTraits->setDeltaX(     match.deltaX     );
+                ppidTraits->setDeltaY(     match.deltaY     );
+                ppidTraits->setPosition(   match.globalPos  );
+
+                ppidTraits->setPathLength( match.pathLength );
+
+                ppidTraits->setTimeOfFlight( -999. );
+                ppidTraits->setBeta(         -999. );
 
                 pTrack->addPidTraits( ppidTraits );
             }
@@ -1641,13 +1670,19 @@ StETofMatchMaker::fillPidTraits( eTofHitVec& finalMatchVec )
 
             // fill the matching data into StETofPidTraits
             StMuETofPidTraits pidTraits = gTrack->etofPidTraits();
-            pidTraits.setMatchFlag(  match.matchFlag );
-            pidTraits.setLocalX(     match.localX    );
-            pidTraits.setLocalY(     match.localY    );
-            pidTraits.setThetaLocal( match.theta     );
-            pidTraits.setDeltaX(     match.deltaX    );
-            pidTraits.setDeltaY(     match.deltaY    );
-            pidTraits.setPosition(   match.globalPos );
+            pidTraits.setMatchFlag(  match.matchFlag  );
+            pidTraits.setLocalX(     match.localX     );
+            pidTraits.setLocalY(     match.localY     );
+            pidTraits.setThetaLocal( match.theta      );
+            pidTraits.setDeltaX(     match.deltaX     );
+            pidTraits.setDeltaY(     match.deltaY     );
+            pidTraits.setPosition(   match.globalPos  );
+
+            pidTraits.setPathLength( match.pathLength );
+
+            pidTraits.setTimeOfFlight( -999. );
+            pidTraits.setBeta(         -999. );
+
             gTrack->setETofPidTraits ( pidTraits );
 
             int pIndex = -1;
@@ -1681,13 +1716,19 @@ StETofMatchMaker::fillPidTraits( eTofHitVec& finalMatchVec )
                 pTrack->setIndex2ETofHit( match.index2ETofHit );
 
                 StMuETofPidTraits ppidTraits = pTrack->etofPidTraits();
-                ppidTraits.setMatchFlag(  match.matchFlag );
-                ppidTraits.setLocalX(     match.localX    );
-                ppidTraits.setLocalY(     match.localY    );
-                ppidTraits.setThetaLocal( match.theta     );
-                ppidTraits.setDeltaX(     match.deltaX    );
-                ppidTraits.setDeltaY(     match.deltaY    );
-                ppidTraits.setPosition(   match.globalPos );
+                ppidTraits.setMatchFlag(  match.matchFlag  );
+                ppidTraits.setLocalX(     match.localX     );
+                ppidTraits.setLocalY(     match.localY     );
+                ppidTraits.setThetaLocal( match.theta      );
+                ppidTraits.setDeltaX(     match.deltaX     );
+                ppidTraits.setDeltaY(     match.deltaY     );
+                ppidTraits.setPosition(   match.globalPos  );
+
+                ppidTraits.setPathLength( match.pathLength );
+
+                ppidTraits.setTimeOfFlight( -999. );
+                ppidTraits.setBeta(         -999. );
+
                 pTrack->setETofPidTraits ( ppidTraits );
             }
         }
@@ -1711,7 +1752,7 @@ StETofMatchMaker::calculatePidVariables( eTofHitVec& finalMatchVec, int& nPrimar
     // for now get whatever is available in the bTOF header (for simulation tstart == 0)
     double tstart = startTime();
         
-    if( fabs( tstart ) < 0.01 || fabs( tstart + 9999. ) < 0.01 ) {
+    if( fabs( tstart + 9999. ) < 0.01 ) {
         LOG_WARN << "calculatePidVariables() -- no valid start time available ... skip filling pidTraits with more information" << endm;
         return;
     }
@@ -1745,10 +1786,7 @@ StETofMatchMaker::calculatePidVariables( eTofHitVec& finalMatchVec, int& nPrimar
             if( !pidTraits ) continue;
 
 
-            float tof = aHit->time() - tstart;
-            if( mDebug && tof < -50000. ) {
-                LOG_INFO << "calculatePidVariables() - **** TIME OF FLIGHT IS NEGATIVE: smaller than -50000 !!!!! **** " << endm;
-            }
+            double tof = timeOfFlight( tstart, aHit->time() );
 
             // set time-of-flight
             matchCand.tof = tof;
@@ -1773,14 +1811,14 @@ StETofMatchMaker::calculatePidVariables( eTofHitVec& finalMatchVec, int& nPrimar
             }
 
             if( mDebug ) {
-                LOG_INFO << "calculatePidVariables() - time-of-flight assigned to pid traits ..." << endm;
+                LOG_INFO << "calculatePidVariables() - time-of-flight assigned to pid traits: " << tof << " ..." << endm;
             }
 
             // pid calculation if the track is a primary track
             // switch indicating to calculate PID or not
             bool doPID = false;
 
-            double pathLength = -999.;
+            double pathLength = matchCand.pathLength;
 
 
             if( !pTrack ) {
@@ -1789,20 +1827,17 @@ StETofMatchMaker::calculatePidVariables( eTofHitVec& finalMatchVec, int& nPrimar
                 }
             }
             else {
-                StTrackGeometry* theTrackGeometry = pTrack->geometry();
-                
                 const StVertex* pVtx = pTrack->vertex();
-                
                 if( !pVtx ) {
                     if( mDebug ) {
                         LOG_INFO << "calculatePidVariables() - the associated track is not coming from any vertex. Skip PID calculation! " << endm;
                     }
                 }
                 else {
-                    StThreeVectorD vtxPos = pVtx->position();
-                    StThreeVectorD hitPos = matchCand.globalPos;
+                    StThreeVectorD   vtxPos   = pVtx->position();
+                    StPhysicalHelixD theHelix = mOuterTrackGeometry ? gTrack->outerGeometry()->helix() : gTrack->geometry()->helix();
 
-                    pathLength = etofPathLength( vtxPos, hitPos, theTrackGeometry->helix().curvature() );
+                    pathLength -= theHelix.pathLength( vtxPos );
 
                     doPID = true;
                 }
@@ -1814,7 +1849,7 @@ StETofMatchMaker::calculatePidVariables( eTofHitVec& finalMatchVec, int& nPrimar
             matchCand.pathLength = pathLength;
 
 
-            double beta =  pathLength / ( tof * nanosecond * c_light );
+            double beta = pathLength / ( tof * nanosecond * c_light );
             
             // set beta
             matchCand.beta = beta;
@@ -1864,12 +1899,7 @@ StETofMatchMaker::calculatePidVariables( eTofHitVec& finalMatchVec, int& nPrimar
             StMuETofPidTraits pidTraits = gTrack->etofPidTraits();
 
 
-            float tof = aHit->time() - tstart;
-            if( tof < -50000. ) {
-                if( mDebug ) {
-                    LOG_INFO << "calculatePidVariables() - **** TIME OF FLIGHT IS NEGATIVE: smaller than -50000 !!!!! **** " << endm;
-                }
-            }
+            double tof = timeOfFlight( tstart, aHit->time() );
 
             // set time-of-flight
             matchCand.tof = tof;
@@ -1889,14 +1919,14 @@ StETofMatchMaker::calculatePidVariables( eTofHitVec& finalMatchVec, int& nPrimar
             }
 
             if( mDebug ) {
-                LOG_INFO << "calculatePidVariables() - time-of-flight assigned to pid traits ..." << endm;
+                LOG_INFO << "calculatePidVariables() - time-of-flight assigned to pid traits: " << tof << " ..." << endm;
             }
 
             // pid calculation if the track is a primary track
             // switch indicating to calculate PID or not
             bool doPID = false;
 
-            double pathLength = -999.;
+            double pathLength = matchCand.pathLength;
 
             if( !pTrack ) {
                 if( mDebug ) {
@@ -1911,10 +1941,10 @@ StETofMatchMaker::calculatePidVariables( eTofHitVec& finalMatchVec, int& nPrimar
                     }
                 }
                 else {
-                    StThreeVectorD vtxPos = pVtx->position();
-                    StThreeVectorD hitPos = matchCand.globalPos;
+                    StThreeVectorD   vtxPos   = pVtx->position();
+                    StPhysicalHelixD theHelix = mOuterTrackGeometry ? gTrack->outerHelix() : gTrack->helix();
 
-                    pathLength = etofPathLength( vtxPos, hitPos, pTrack->helix().curvature() );
+                    pathLength -= theHelix.pathLength( vtxPos );
 
                     doPID = true;
                 }
@@ -1971,7 +2001,7 @@ StETofMatchMaker::startTime()
     }
 
     if( mDebug ) {
-        LOG_INFO << "getTstart(): -- loading start time from bTOF header" << endm;
+        LOG_INFO << "startTime(): -- loading start time from bTOF header" << endm;
     }
 
     StBTofHeader* btofHeader = nullptr; 
@@ -1984,7 +2014,7 @@ StETofMatchMaker::startTime()
         }
         else {
             LOG_WARN << "no StBTofCollection found by getTstart" << endm;
-            return 0.;
+            return -9999.;
         }
     }
     else if( mIsMuDstIn ) {
@@ -1992,43 +2022,34 @@ StETofMatchMaker::startTime()
     }
 
     if( !btofHeader ) {
-        LOG_WARN << "getTstart(): -- no bTOF header --> no start time avaiable" << endm;
-        return 0.;
+        LOG_WARN << "startTime(): -- no bTOF header --> no start time avaiable" << endm;
+        return -9999.;
     }
 
     double tstart = btofHeader->tStart();
 
-    if( tstart > eTofConst::bTofClockCycle ) {
-        tstart -= eTofConst::bTofClockCycle;
-    }
-    else if( tstart < 0. && fabs( tstart + 9999. ) > 0.001 ) {
-        tstart += eTofConst::bTofClockCycle;
+    if( !isfinite( tstart ) ) {
+        LOG_WARN << "startTime(): -- from bTOF header is NaN" << endm;
+        return -9999.;
     }
 
     if( mDebug ) {
-        LOG_INFO << "getTstart():  --  start time: " << tstart << endm;
+        LOG_DEBUG << "startTime():  --  start time: " << tstart << endm;
     }
     return tstart;
 }
 
-
 //---------------------------------------------------------------------------
-// calculate pathlength of a helix between two points 
+// get the start time -- from bTOF header from bTOF header for now
 double
-StETofMatchMaker::etofPathLength( const StThreeVectorD& beginPoint, const StThreeVectorD& endPoint, const double& curvature )
+StETofMatchMaker::timeOfFlight( const double& startTime, const double& stopTime )
 {
-  double xdiff = endPoint.x() - beginPoint.x();
-  double ydiff = endPoint.y() - beginPoint.y();
-  
-  double C = sqrt( xdiff * xdiff + ydiff * ydiff );
-  double s_perp = C;
-  if( curvature ) {
-    double R = 1 / curvature;
-    s_perp = 2 * R * asin( C / ( 2 * R ) );
-  }
-  double s_z = fabs( endPoint.z() - beginPoint.z() );
+    double tof = stopTime - startTime;
+    while( tof < 0. ) {
+        tof += eTofConst::bTofClockCycle;
+    }
 
-  return sqrt( s_perp * s_perp + s_z * s_z );
+    return fmod( tof, eTofConst::bTofClockCycle );
 }
 
 
@@ -2058,6 +2079,7 @@ StETofMatchMaker::fillQaHistograms( eTofHitVec& finalMatchVec )
         float mom;
 
         float dEdx = -999.;
+        float nSigmaPion = -999;
 
         if( mIsStEventIn ) {
 
@@ -2073,9 +2095,12 @@ StETofMatchMaker::fillQaHistograms( eTofHitVec& finalMatchVec )
             mom    = pTrack->geometry()->momentum().mag();
 
             static StTpcDedxPidAlgorithm PidAlgorithm;
+            static StPionPlus* Pion         = StPionPlus::instance();
             const  StParticleDefinition* pd = pTrack->pidTraits( PidAlgorithm );
+
             if( pd && PidAlgorithm.traits() ) {
-                dEdx = PidAlgorithm.traits()->mean() * 1.e6;
+                dEdx       = PidAlgorithm.traits()->mean() * 1.e6;
+                nSigmaPion = PidAlgorithm.numberOfSigma( Pion );
             }
         }
         else {
@@ -2089,14 +2114,15 @@ StETofMatchMaker::fillQaHistograms( eTofHitVec& finalMatchVec )
             charge = pTrack->charge();
             mom    = pTrack->momentum().mag();
 
-            if( pTrack->dEdx() ) dEdx = pTrack->dEdx() * 1.e6;
+            dEdx       = pTrack->dEdx() * 1.e6;
+            nSigmaPion = pTrack->nSigmaPion();
         }
 
         int sign   = ( charge  < 0 ) ? -1 : ( charge > 0 );
         float beta = matchCand.beta;
 
-        // skip events with no valid start time
-        if( fabs( beta + 999.) < 0.001  ) {
+        // skip events with no valid start time: beta of matchCand structure != -999.
+        if( fabs( beta + 999. ) < 0.001  ) {
             if( mDoQA ) {
                 LOG_WARN << "beta not set --> no start time available???" << endm;
             }
@@ -2111,9 +2137,14 @@ StETofMatchMaker::fillQaHistograms( eTofHitVec& finalMatchVec )
             float m2         = mom * mom * ( -1 + 1 / ( beta * beta ) );
 
             LOG_INFO << "momentum: " << mom << " ... beta: " << beta << " ... m^2: " << m2 << " ... dEdx: " << dEdx << endm;
+            //LOG_DEBUG << "pathlength: " << pathlength << " ... time-of-flight: " << matchCand.tof << " ... mom: " << mom << " ... beta: " << beta << " ...  charge: " << charge << " ... m^2: " << m2 << " ... dEdx: " << dEdx << endm;
 
-            mHistograms.at( "matchCand_beta_mom"     )->Fill(        mom, 1. / beta );
+            if( fabs( tof+999. ) < 1.e-5 || fabs( pathlength+999. ) < 1.e-5 ) {
+              LOG_INFO << "tof==0 or pathlength==0 ..." << endl;
+              continue;
+            }
 
+            mHistograms.at( "matchCand_beta_mom"   )->Fill(        mom, 1. / beta );
             mHistograms.at( "matchCand_m2_mom"     )->Fill(        mom, m2 );
             mHistograms.at( "matchCand_m2_signmom" )->Fill( sign * mom, m2 );
 
@@ -2130,6 +2161,11 @@ StETofMatchMaker::fillQaHistograms( eTofHitVec& finalMatchVec )
 
             std::string histName_t0corr_mom_zoom = "matchCand_t0corr_mom_zoom_s" + std::to_string( matchCand.sector ) + "m" + std::to_string( matchCand.plane ) + "c" + std::to_string( matchCand.counter );
             mHistograms.at( histName_t0corr_mom_zoom )->Fill( mom, tof - tofpi );
+
+            if( nSigmaPion < 1.5 ) {
+                std::string histName_t0corr_strip = "matchCand_t0corr_strip_s" + std::to_string( matchCand.sector ) + "m" + std::to_string( matchCand.plane ) + "c" + std::to_string( matchCand.counter );
+                mHistograms.at( histName_t0corr_strip )->Fill( matchCand.localX, tof - tofpi );
+            }
             
             if( sqrt( pow( matchCand.deltaX, 2 ) + pow( matchCand.deltaY, 2 ) ) < deltaRcut ) {
 
@@ -2143,14 +2179,68 @@ StETofMatchMaker::fillQaHistograms( eTofHitVec& finalMatchVec )
                 nPidMatches.at( ( matchCand.sector - 13 ) * 3 + matchCand.plane - 1 ) += 1;
             }
 
-            if( fabs(mom - 1) < 0.1 && dEdx > 0 ) mHistograms.at( "matchCand_dEdx_beta_mom1gev" )->Fill( 1. / beta, dEdx );
-            if( fabs(mom - 2) < 0.1 && dEdx > 0 ) mHistograms.at( "matchCand_dEdx_beta_mom2gev" )->Fill( 1. / beta, dEdx );
+            if( fabs( mom - 1 ) < 0.1 && dEdx > 0 ) mHistograms.at( "matchCand_dEdx_beta_mom1gev" )->Fill( 1. / beta, dEdx );
+            if( fabs( mom - 2 ) < 0.1 && dEdx > 0 ) mHistograms.at( "matchCand_dEdx_beta_mom2gev" )->Fill( 1. / beta, dEdx );
         }
     }
 
     if( mDoQA ) {
         for( size_t i=0; i<36; i++ ) {
             mHistograms.at( "matchCandMultPerSector_matchDistCut" )->Fill( i, nPidMatches.at( i ) );
+        }
+    }
+}
+
+void
+StETofMatchMaker::fillSlewHistograms( eTofHitVec& finalMatchVec )
+{
+    if( !mDoQA || !mIsMuDstIn ) return;
+
+    map< int, float > hitIndexToDeltaTmap;
+
+    for( auto& matchCand : finalMatchVec ) {
+        StMuETofHit* aHit = mMuDst->etofHit( matchCand.index2ETofHit );
+        if( !aHit ) continue;
+
+        StMuTrack* pTrack = aHit->primaryTrack();
+        if( !pTrack ) continue;
+
+        float mom        = pTrack->momentum().mag();
+        float nSigmaPion = pTrack->nSigmaPion();
+
+        if( fabs( nSigmaPion > 1.5 ) ) continue;
+
+
+        // skip events with no valid start time: beta of matchCand structure != -999.
+        if( fabs(  matchCand.beta + 999. ) < 0.001  ) {
+            LOG_INFO << "beta not set --> no start time available???" << endm;
+            continue;
+        }
+
+        float tof        = matchCand.tof;
+        float pathlength = matchCand.pathLength;
+
+        if( fabs( tof+999. ) < 1.e-5 || fabs( pathlength+999. ) < 1.e-5 ) {
+            LOG_INFO << "tof==0 or pathlength==0 ..." << endl;
+            continue;
+        }
+
+        LOG_DEBUG << "for slewing: momentum: " << mom << " ... nsigmaPi: " << nSigmaPion << " tof:" << tof << endm;
+
+        // expected time of flight for mass hypothesis pion
+        float tofpi = expectedTimeOfFlight( pathlength , mom, pion_plus_mass_c2 );
+        hitIndexToDeltaTmap[ matchCand.index2ETofHit ] = tof - tofpi;
+    }
+
+    //find digis that belong to the matched hits
+    size_t nDigis = mMuDst->numberOfETofDigi();
+    for( size_t i=0; i<nDigis; i++ ) {
+        StMuETofDigi* aDigi = mMuDst->etofDigi( i );
+        if( !aDigi ) continue;
+
+        if( hitIndexToDeltaTmap.count( aDigi->associatedHitId() ) ) {
+            std::string histName_slewing  = "matchCand_slewing_digi_s" + std::to_string( aDigi->sector() ) + "m" + std::to_string( aDigi->zPlane() ) + "c" + std::to_string( aDigi->counter() );
+            mHistograms.at( histName_slewing )->Fill( aDigi->calibTot(), hitIndexToDeltaTmap.at( aDigi->associatedHitId() ) );
         }
     }
 }
@@ -2233,6 +2323,10 @@ StETofMatchMaker::bookHistograms()
         mHistograms[ "eTofSectors" ] = new TH2F( "QA_eTofSectors", "center of modules in global XY;x (cm);y (cm)", 100, -300, 300, 100, -300, 300 );
         mHistograms[ "eTofModules" ] = new TH2F( "QA_eTofModules", "center of modules in global XY;x (cm);y (cm)", 100, -300, 300, 100, -300, 300 );
 
+        // histograms testing the magnetic field
+        mHistograms2d[ "bfield_z" ] = new TH2F( "QA_bField_z", "magnetic field (z);z (cm);y (cm)", 350, -350., 0., 300, 0., 300. );
+
+
         // event-level QA
         mHistograms[ "eventCounter" ] = new TH1F( "QA_eventCounter","eventCounter;;# events", 10, 0.5, 10.5 );
 
@@ -2269,7 +2363,7 @@ StETofMatchMaker::bookHistograms()
         // --------------
         // track-level QA
         // --------------
-        mHistograms[ "track_phi_eta" ] = new TH2F( "QA_track_phi_eta", "eta vs. phi; #phi; #eta", 400, 0., 2 * M_PI, 800, -1.7, 1.7 );
+        mHistograms[ "track_phi_eta" ] = new TH2F( "QA_track_phi_eta", "eta vs. phi; #phi; #eta", 400, 0., 2 * M_PI, 800, -1.9, 1.9 );
         mHistograms[ "track_phi_pt"  ] = new TH2F( "QA_track_phi_pt",  "pt vs. phi; #phi; p_{T}", 400, 0., 2 * M_PI, 400,  0.,  5.  );
 
         mHistograms[ "nHits" ]            = new TH1F( "QA_nHits",            "nHitsTpc;nHitsFit;# tracks",                75, 0., 75. );
@@ -2278,7 +2372,7 @@ StETofMatchMaker::bookHistograms()
         mHistograms[ "track_pt_nHits" ] = new TH2F( "QA_track_pt_nHits", "track nHitsTpc vs. p_{T};p_{T} (GeV/c);nHitsFit", 400, 0., 2., 75, 0., 75. );
 
         mHistograms[ "trackProj_globalXY" ] = new TH2F( "QA_trackProj_globalXY", "global XY;x (cm);y (cm)", 400, -300.,     300., 400, -300., 300. );
-        mHistograms[ "trackProj_phi_eta"  ] = new TH2F( "QA_trackProj_phi_eta",  "eta vs. phi; #phi; #eta", 400,    0., 2 * M_PI, 400,  -1.7, -0.9 );
+        mHistograms[ "trackProj_phi_eta"  ] = new TH2F( "QA_trackProj_phi_eta",  "eta vs. phi; #phi; #eta", 400,    0., 2 * M_PI, 400,  -1.7, -1.0 );
 
 
         // ----------
@@ -2286,7 +2380,7 @@ StETofMatchMaker::bookHistograms()
         // ----------
 
         mHistograms[ "intersection_globalXY" ] = new TH2F( "B_intersection_globalXY", "global XY;x (cm);y (cm)", 400, -300.,     300., 400, -300., 300. );
-        mHistograms[ "intersection_phi_eta"  ] = new TH2F( "B_intersection_phi_eta",  "eta vs. phi; #phi; #eta", 400,    0., 2 * M_PI, 400,  -1.7, -0.9 );
+        mHistograms[ "intersection_phi_eta"  ] = new TH2F( "B_intersection_phi_eta",  "eta vs. phi; #phi; #eta", 400,    0., 2 * M_PI, 400,  -1.7, -1.0 );
 
         mHistograms[ "intersectionMult" ]         = new TH1F( "B_intersectionMult",         "intersectionMult;multiplicity;# events",                    200, 0., 200. );
         mHistograms[ "intersectionMult_primary" ] = new TH1F( "B_intersectionMult_primary", "intersectionMult for primary tracks;multiplicity;# events", 200, 0., 200. );
@@ -2295,10 +2389,20 @@ StETofMatchMaker::bookHistograms()
 
 
         // track-level QA plots for tracks that have an intersection with eTof volume(s)
-        mHistograms[ "intersection_primaryTrack_globalXY" ] = new TH2F( "B_intersection_primaryTrack_globalXY", "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
+        mHistograms[ "intersection_primaryTrack_globalXY" ] = new TH2F( "B_intersection_primaryTrack_globalXY",         "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
         mHistograms[ "intersection_primaryTrackMom0_globalXY" ] = new TH2F( "B_intersection_primaryTrackMom0_globalXY", "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
         mHistograms[ "intersection_primaryTrackMom1_globalXY" ] = new TH2F( "B_intersection_primaryTrackMom1_globalXY", "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
         mHistograms[ "intersection_primaryTrackMom2_globalXY" ] = new TH2F( "B_intersection_primaryTrackMom2_globalXY", "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
+
+        mHistograms[ "intersection_primaryTrackpos_globalXY" ] = new TH2F( "B_intersection_primaryTrackpos_globalXY",         "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
+        mHistograms[ "intersection_primaryTrackMom0pos_globalXY" ] = new TH2F( "B_intersection_primaryTrackMom0pos_globalXY", "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
+        mHistograms[ "intersection_primaryTrackMom1pos_globalXY" ] = new TH2F( "B_intersection_primaryTrackMom1pos_globalXY", "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
+        mHistograms[ "intersection_primaryTrackMom2pos_globalXY" ] = new TH2F( "B_intersection_primaryTrackMom2pos_globalXY", "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
+
+        mHistograms[ "intersection_primaryTrackneg_globalXY" ] = new TH2F( "B_intersection_primaryTrackneg_globalXY",         "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
+        mHistograms[ "intersection_primaryTrackMom0neg_globalXY" ] = new TH2F( "B_intersection_primaryTrackMom0neg_globalXY", "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
+        mHistograms[ "intersection_primaryTrackMom1neg_globalXY" ] = new TH2F( "B_intersection_primaryTrackMom1neg_globalXY", "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
+        mHistograms[ "intersection_primaryTrackMom2neg_globalXY" ] = new TH2F( "B_intersection_primaryTrackMom2neg_globalXY", "global XY;x (cm);y (cm)", 400, -300., 300., 400, -300., 300. );
 
 
 
@@ -2351,8 +2455,8 @@ StETofMatchMaker::bookHistograms()
             }
         }
 
-        mHistograms[ "matchCand_deltaX_nHitsTpc" ] = new TH2F( "C_matchCand_deltaX_nHitsTpc" , "match candidate delta X vs. nHitsFit in TPC;nHitsFit in TPC;match candidate #DeltaX (cm)", 50, 0., 50., 400, -15., 15. );
-        mHistograms[ "matchCand_deltaY_nHitsTpc" ] = new TH2F( "C_matchCand_deltaY_nHitsTpc" , "match candidate delta Y vs. nHitsFit in TPC;nHitsFit in TPC;match candidate #DeltaY (cm)", 50, 0., 50., 400, -15., 15. );
+        mHistograms[ "matchCand_deltaX_nHitsTpc" ] = new TH2F( "C_matchCand_deltaX_nHitsTpc" , "match candidate delta X vs. nHitsFit in TPC;nHitsFit in TPC;match candidate #DeltaX (cm)", 75, 0., 75., 400, -15., 15. );
+        mHistograms[ "matchCand_deltaY_nHitsTpc" ] = new TH2F( "C_matchCand_deltaY_nHitsTpc" , "match candidate delta Y vs. nHitsFit in TPC;nHitsFit in TPC;match candidate #DeltaY (cm)", 75, 0., 75., 400, -15., 15. );
 
         mHistograms[ "matchCandMult" ] = new TH1F( "C_matchCandMult", "matchCandMult;multiplicity;# events", 200, 0., 200. );
 
@@ -2392,24 +2496,28 @@ StETofMatchMaker::bookHistograms()
         // ----------
         // step - G -
         // ----------
-        mHistograms[ "primaryIntersect_Pid" ] = new TH2F( "G_primaryIntersection_Pid", "primary tracks at eTOF;# tracks with intersection;# tracks with PID", 200, 0., 200., 100, 0., 100. );
-
         mHistograms[ "matchCand_timeOfFlight" ] = new TH1F( "G_matchCand_timeOfFlight", "match candidate time of flight;ToF (ns);# match candidates", 2000, -400., 600. );
 
         mHistograms[ "matchCand_timeOfFlight_pathLength" ] = new TH2F( "G_matchCand_timeOfFlight_pathLength", "match candidate pathlength vs. time of flight;ToF (ns);pathlength (cm)", 1000, -400., 600., 800, 200., 600. );
 
 
-        mHistograms[ "matchCand_beta_mom"     ] = new TH2F( "G_matchCand_beta_mom"     , "match candidate 1/beta vs. momentum;p (GeV/c);1/#beta",         400,   0., 10., 1000, 0.8, 2. );
+        // ----------
+        // step - H -
+        // ----------
 
-        mHistograms[ "matchCand_beta_mom_matchDistCut" ] = new TH2F( "G_matchCand_beta_mom_matchDistCut" , "match candidate 1/beta vs. momentum;p (GeV/c);1/#beta", 400, 0., 10., 1000, 0.8, 2. );
+        mHistograms[ "primaryIntersect_Pid" ] = new TH2F( "H_primaryIntersection_Pid", "primary tracks at eTOF;# tracks with intersection;# tracks with PID", 200, 0., 200., 100, 0., 100. );
 
-        mHistograms[ "matchCandMultPerSector_matchDistCut" ] = new TH2F( "G_matchCandMultPerSector_matchDistCut" , "matchCandMultPerSector_matchDistCut;module;# matches per event", 36, 0, 36, 25, 0, 25 );
+        mHistograms[ "matchCand_beta_mom"     ] = new TH2F( "H_matchCand_beta_mom"     , "match candidate 1/beta vs. momentum;p (GeV/c);1/#beta",         400,   0., 10., 1000, 0.8, 2. );
+
+        mHistograms[ "matchCand_beta_mom_matchDistCut" ] = new TH2F( "H_matchCand_beta_mom_matchDistCut" , "match candidate 1/beta vs. momentum;p (GeV/c);1/#beta", 400, 0., 10., 1000, 0.8, 2. );
+
+        mHistograms[ "matchCandMultPerSector_matchDistCut" ] = new TH2F( "H_matchCandMultPerSector_matchDistCut" , "matchCandMultPerSector_matchDistCut;module;# matches per event", 36, 0, 36, 25, 0, 25 );
 
 
-        mHistograms[ "matchCand_m2_signmom" ] = new TH2F( "G_matchCand_m2_signmom" , "match candidate m^{2} vs. momentum;q/|q| * p (GeV/c);m^{2} (GeV^{2}/c^{4})", 400, -10., 10., 1000, -0.2, 1.3 );
-        mHistograms[ "matchCand_m2_mom"     ] = new TH2F( "G_matchCand_m2_mom"     , "match candidate m^{2} vs. momentum;p (GeV/c);m^{2} (GeV^{2}/c^{4})",         400,   0., 10., 1000, -0.2, 1.3 );
+        mHistograms[ "matchCand_m2_signmom" ] = new TH2F( "H_matchCand_m2_signmom" , "match candidate m^{2} vs. momentum;q/|q| * p (GeV/c);m^{2} (GeV^{2}/c^{4})", 400, -10., 10., 1000, -0.2, 1.3 );
+        mHistograms[ "matchCand_m2_mom"     ] = new TH2F( "H_matchCand_m2_mom"     , "match candidate m^{2} vs. momentum;p (GeV/c);m^{2} (GeV^{2}/c^{4})",         400,   0., 10., 1000, -0.2, 1.3 );
 
-        mHistograms[ "matchCand_m2_mom_matchDistCut" ] = new TH2F( "G_matchCand_m2_mom_matchDistCut" , "match candidate m^{2} vs. momentum;p (GeV/c);m^{2} (GeV^{2}/c^{4})", 400, 0., 10., 1000, -0.2, 1.3 );
+        mHistograms[ "matchCand_m2_mom_matchDistCut" ] = new TH2F( "H_matchCand_m2_mom_matchDistCut" , "match candidate m^{2} vs. momentum;p (GeV/c);m^{2} (GeV^{2}/c^{4})", 400, 0., 10., 1000, -0.2, 1.3 );
 
 
         for( int sector = eTofConst::sectorStart; sector <= eTofConst::sectorStop; sector++ ) {
@@ -2417,27 +2525,35 @@ StETofMatchMaker::bookHistograms()
                 for( int counter = eTofConst::counterStart; counter <= eTofConst::counterStop; counter++ ) {
 
                     std::string histName_beta_mom = "matchCand_beta_mom_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
-                    
-                    mHistograms[ histName_beta_mom ] = new TH2F( Form( "G_matchCand_beta_mom_s%dm%dc%d", sector, plane, counter ), Form( "match candidate 1/beta vs. momentum in sector %d module %d counter %d;p (GeV/c);1/#beta", sector, plane, counter), 200, 0., 10., 500, 0.8, 2. );
-                    
-                    std::string histName_t0corr_mom  = "matchCand_t0corr_mom_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+                    mHistograms[ histName_beta_mom ] = new TH2F( Form( "H_matchCand_beta_mom_s%dm%dc%d", sector, plane, counter ), Form( "match candidate 1/beta vs. momentum in sector %d module %d counter %d;p (GeV/c);1/#beta", sector, plane, counter), 200, 0., 10., 500, 0.8, 2. );
 
-                    mHistograms[ histName_t0corr_mom ] = new TH2F( Form( "G_matchCand_t0corr_mom_s%dm%dc%d", sector, plane, counter ),  Form( "measured tof - tof_{#pi} vs. momentum in sector %d module %d counter %d;mom (GeV/c);#Delta time (ns)",  sector, plane, counter ), 400,     0.,  10., 1000, -500., 500. );
+                    std::string histName_t0corr_mom  = "matchCand_t0corr_mom_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+                    mHistograms[ histName_t0corr_mom ] = new TH2F( Form( "H_matchCand_t0corr_mom_s%dm%dc%d", sector, plane, counter ),  Form( "measured tof - tof_{#pi} vs. momentum in sector %d module %d counter %d;mom (GeV/c);#Delta time (ns)",  sector, plane, counter ), 400,     0.,  10., 1000, -500., 500. );
 
                     std::string histName_t0corr_mom_zoom      = "matchCand_t0corr_mom_zoom_s"     + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
                     std::string histName_t0corr_mom_zoom_cut  = "matchCand_t0corr_mom_zoom_cut_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
-             
-                    mHistograms[ histName_t0corr_mom_zoom     ] = new TH2F( Form( "G_matchCand_t0corr_mom_zoom_s%dm%dc%d",     sector, plane, counter ),  Form( "measured tof - tof_{#pi} vs. momentum in sector %d module %d counter %d;mom (GeV/c);#Delta time (ns)", sector, plane, counter ), 200, 0., 3., 1000, -5., 5. );
-                    mHistograms[ histName_t0corr_mom_zoom_cut ] = new TH2F( Form( "G_matchCand_t0corr_mom_zoom_cut_s%dm%dc%d", sector, plane, counter ),  Form( "measured tof - tof_{#pi} vs. momentum in sector %d module %d counter %d;mom (GeV/c);#Delta time (ns)", sector, plane, counter ), 200, 0., 3., 1000, -5., 5. );
+
+                    mHistograms[ histName_t0corr_mom_zoom     ] = new TH2F( Form( "H_matchCand_t0corr_mom_zoom_s%dm%dc%d",     sector, plane, counter ),  Form( "measured tof - tof_{#pi} vs. momentum in sector %d module %d counter %d;mom (GeV/c);#Delta time (ns)", sector, plane, counter ), 200, 0., 3., 1000, -5., 5. );
+                    mHistograms[ histName_t0corr_mom_zoom_cut ] = new TH2F( Form( "H_matchCand_t0corr_mom_zoom_cut_s%dm%dc%d", sector, plane, counter ),  Form( "measured tof - tof_{#pi} vs. momentum in sector %d module %d counter %d;mom (GeV/c);#Delta time (ns)", sector, plane, counter ), 200, 0., 3., 1000, -5., 5. );
+
+                    std::string histName_t0corr_strip = "matchCand_t0corr_strip_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+                    mHistograms[ histName_t0corr_strip ] = new TH2F( Form( "H_matchCand_t0corr_strip_s%dm%dc%d", sector, plane, counter ),  Form( "measured tof - tof_{#pi} vs. momentum in sector %d module %d counter %d;local X (cm);#Delta time (ns)", sector, plane, counter ), 32, -16., 16., 2000, -5., 5. ); // -5., 5.
+
+                    std::string histName_slewing_digi    = "matchCand_slewing_digi_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+                    mHistograms[ histName_slewing_digi ] = new TH2F( Form( "H_matchCand_slewing_digi_s%dm%dc%d", sector, plane, counter ),  Form( "measured tof - tof_{#pi} vs. digi ToT in sector %d module %d counter %d;digi Tot (arb. units);#Delta time (ns)",  sector, plane, counter ), 400, 0., 20., 1000, -2., 2. ); // -10., 10.
                 }
             }
         }
 
-        mHistograms[ "matchCand_dEdx_beta_mom1gev" ] = new TH2F( "G_matchCand_dEdx_beta_mom1gev", "dE/dx vs. 1/#beta at p=1 GeV;1/#beta;dE/dx (keV/cm)", 800, 0.8, 1.8, 800, 0., 15. );
-        mHistograms[ "matchCand_dEdx_beta_mom2gev" ] = new TH2F( "G_matchCand_dEdx_beta_mom2gev", "dE/dx vs. 1/#beta at p=2 GeV;1/#beta;dE/dx (keV/cm)", 800, 0.8, 1.8, 800, 0., 15. );
+        mHistograms[ "matchCand_dEdx_beta_mom1gev" ] = new TH2F( "H_matchCand_dEdx_beta_mom1gev", "dE/dx vs. 1/#beta at p=1 GeV;1/#beta;dE/dx (keV/cm)", 800, 0.8, 1.8, 800, 0., 15. );
+        mHistograms[ "matchCand_dEdx_beta_mom2gev" ] = new TH2F( "H_matchCand_dEdx_beta_mom2gev", "dE/dx vs. 1/#beta at p=2 GeV;1/#beta;dE/dx (keV/cm)", 800, 0.8, 1.8, 800, 0., 15. );
     }
 
+
     for( auto& kv : mHistograms ) {
+        kv.second->SetDirectory( 0 );
+    }
+    for( auto& kv : mHistograms2d ) {
         kv.second->SetDirectory( 0 );
     }
 }
@@ -2456,7 +2572,9 @@ StETofMatchMaker::writeHistograms()
         for ( const auto& kv : mHistograms ) {
             if( kv.second->GetEntries() > 0 ) kv.second->Write();
         }
-
+        for ( const auto& kv : mHistograms2d ) {
+            if( kv.second->GetEntries() > 0 ) kv.second->Write();
+        }
         histFile.Close();
     }
     else {
@@ -2472,6 +2590,15 @@ StETofMatchMaker::setMatchDistXYT( double x, double y, double t = 99999. )
     mMatchDistX = fabs( x );
     mMatchDistY = fabs( y );
     mMatchDistT = fabs( t );
+}
+
+//---------------------------------------------------------------------------
+int
+StETofMatchMaker::rotateHit( const int& sector, const int& rot )
+{
+    int sec = 13 + ( sector - 13 + rot ) % 12;
+    LOG_DEBUG << "hit rotated from: " << sector << " to " << sec << endm;
+    return sec;
 }
 
 

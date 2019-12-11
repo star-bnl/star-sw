@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StETofCalibMaker.h,v 1.4 2019/05/08 23:57:09 fseck Exp $
+ * $Id: StETofCalibMaker.h,v 1.5 2019/12/10 15:54:56 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofCalibMaker.h,v $
+ * Revision 1.5  2019/12/10 15:54:56  fseck
+ * added new database tables for pulsers, updated pulser handling and trigger time calculation
+ *
  * Revision 1.4  2019/05/08 23:57:09  fseck
  * added function to set the reference pulser
  *
@@ -75,6 +78,7 @@ public:
     void setFileNameSignalVelocity(  const char* fileName );
     void setFileNameCalibHistograms( const char* fileName );
     void setFileNameResetTimeCorr(   const char* fileName );
+    void setFileNamePulserTotPeak(   const char* fileName );
 
     void setDebug( const bool debug );
     void setReferencePulserIndex( const int index );
@@ -123,6 +127,7 @@ private:
     std::string   mFileNameSignalVelocity;  // name of parameter file for signal velocity
     std::string   mFileNameCalibHistograms; // name of parameter file for calibration histograms (output of QA maker)
     std::string   mFileNameResetTimeCorr;   // name of parameter file for reset time correction
+    std::string   mFileNamePulserTotPeak;   // name of parameter file for pulser peak tot
 
     Int_t         mRunYear;                 // "year" of operation by using roughly October 1st as reference
     Float_t       mGet4TotBinWidthNs;       // conversion factor for Get4 chip TOT bin to nanoseconds
@@ -161,6 +166,9 @@ inline void StETofCalibMaker::setFileNameStatusMap(       const char* fileName )
 inline void StETofCalibMaker::setFileNameTimingWindow(    const char* fileName )     { mFileNameTimingWindow    = fileName; }
 inline void StETofCalibMaker::setFileNameSignalVelocity(  const char* fileName )     { mFileNameSignalVelocity  = fileName; }
 inline void StETofCalibMaker::setFileNameCalibHistograms( const char* fileName )     { mFileNameCalibHistograms = fileName; }
+inline void StETofCalibMaker::setFileNameResetTimeCorr(   const char* fileName )     { mFileNameResetTimeCorr   = fileName; }
+inline void StETofCalibMaker::setFileNamePulserTotPeak(   const char* fileName )     { mFileNamePulserTotPeak   = fileName; }
+
 
 inline double StETofCalibMaker::resetTimeCorr() const { return mResetTimeCorr; }
 
