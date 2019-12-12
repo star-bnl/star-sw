@@ -456,8 +456,6 @@ MakeChairInstance(tpcHighVoltages,Calibrations/tpc/tpcHighVoltages);
 MakeChairAltInstance(tpcPadrowT0,Calibrations/tpc/tpcPadrowT0,Calibrations/tpc/tpcPadrowT0B,gEnv->GetValue("NewTpcAlignment",0));
 #include "St_tpcSectorT0offsetC.h"
 MakeChairInstance(tpcSectorT0offset,Calibrations/tpc/tpcSectorT0offset);
-#include "St_TpcAltroParametersC.h"
-MakeChairInstance(TpcAltroParameters,Calibrations/tpc/TpcAltroParameters);
 #include "St_tpcAltroParamsC.h"
 MakeChairInstance(tpcAltroParams,Calibrations/tpc/tpcAltroParams);
 #include "St_asic_thresholdsC.h"

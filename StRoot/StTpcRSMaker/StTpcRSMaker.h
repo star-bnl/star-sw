@@ -135,7 +135,7 @@ class StTpcRSMaker : public StMaker {
   static TF1   *mHeed;                       //!
   Double_t InnerAlphaVariation[24];   //!
   Double_t OuterAlphaVariation[24];   //!
-  Altro *mAltro;                      //!
+  Altro *mAltro[48];                  //! 0 - 23 => ALTRO, 24 - 47 => SAMPA chips
   // local variables
   Int_t numberOfSectors;              //!
   Int_t NoPads;                       //!

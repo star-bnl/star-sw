@@ -136,7 +136,8 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
 }
 //________________________________________________________________________________
 StTpcRSMaker::~StTpcRSMaker() {
-  SafeDelete(mAltro);
+  for (Int_t i = 0; i < 48; i++) 
+    SafeDelete(mAltro[i]);
   Finish();
 }
 //________________________________________________________________________________
@@ -1460,12 +1461,18 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
     data->setSector(Sector,digitalSector);
   } else 
     digitalSector->clear();
+  //  Int_t iTPC = 0; // TPX
   for (row = 1;  row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
     Int_t NoOfPadsAtRow = St_tpcPadConfigC::instance()->padsPerRow(sector,row);
     Double_t pedRMS = St_TpcResponseSimulatorC::instance()->AveragePedestalRMS();
+    Int_t secX = sector - 1;
     if (St_tpcAltroParamsC::instance()->N(sector-1) > 0) {
       if (! (St_tpcPadConfigC::instance()->iTPC(sector) && St_tpcPadConfigC::instance()->IsRowInner(sector,row))) {
 	pedRMS = St_TpcResponseSimulatorC::instance()->AveragePedestalRMSX();
+	if (St_tpcAltroParamsC::instance()->Table()->GetNRows() == 48) {
+	  //	  iTPC = 1; // iTPC
+	  secX += 24;
+	}
       }
     }
 #ifdef __DEBUG__
@@ -1512,40 +1519,42 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
 #endif
       }
       if (! NoTB) continue;
-      if (St_tpcAltroParamsC::instance()->N(sector-1) >= 0 && ! mAltro) {
-	mAltro = new Altro(__MaxNumberOfTimeBins__,ADCs);
-	if (St_tpcAltroParamsC::instance()->N(sector-1) > 0) {// Tonko 06/25/08
+      if (St_tpcAltroParamsC::instance()->N(secX) >= 0 && ! mAltro[secX]) {
+	mAltro[secX] = new Altro(__MaxNumberOfTimeBins__,ADCs);
+	if (St_tpcAltroParamsC::instance()->N(secX) > 0) {// Tonko 06/25/08
 	  //      ConfigAltro(ONBaselineCorrection1, ONTailcancellation, ONBaselineCorrection2, ONClipping, ONZerosuppression)
-	  mAltro->ConfigAltro(                    0,                  1,                     0,          1,                 1); 
+	  mAltro[secX]->ConfigAltro(                    0,                  1,                     0,          1,                 1); 
 	  //       ConfigBaselineCorrection_1(int mode, int ValuePeDestal, int *PedestalMem, int polarity)
 	  //altro->ConfigBaselineCorrection_1(4, 0, PedestalMem, 0);  // Tonko 06/25/08
-	  mAltro->ConfigTailCancellationFilter(St_tpcAltroParamsC::instance()->K1(),
-					       St_tpcAltroParamsC::instance()->K2(),
-					       St_tpcAltroParamsC::instance()->K3(), // K1-3
-					       St_tpcAltroParamsC::instance()->L1(),
-					       St_tpcAltroParamsC::instance()->L2(),
-					       St_tpcAltroParamsC::instance()->L3());// L1-3
+	  mAltro[secX]->ConfigTailCancellationFilter(St_tpcAltroParamsC::instance()->K1(secX),
+					       St_tpcAltroParamsC::instance()->K2(secX),
+					       St_tpcAltroParamsC::instance()->K3(secX), // K1-3
+					       St_tpcAltroParamsC::instance()->L1(secX),
+					       St_tpcAltroParamsC::instance()->L2(secX),
+					       St_tpcAltroParamsC::instance()->L3(secX));// L1-3
 	} else {
-	  mAltro->ConfigAltro(0,0,0,1,1); 
+	  mAltro[secX]->ConfigAltro(0,0,0,1,1); 
 	}
-	mAltro->ConfigZerosuppression(St_tpcAltroParamsC::instance()->Threshold(),
-				      St_tpcAltroParamsC::instance()->MinSamplesaboveThreshold(),
+	mAltro[secX]->ConfigZerosuppression(St_tpcAltroParamsC::instance()->Threshold(secX),
+				      St_tpcAltroParamsC::instance()->MinSamplesaboveThreshold(secX),
 				      0,0);
-	mAltro->PrintParameters();
+	static Int_t secsX[2] = {-1, 23};
+	if (secX <  24 && secX > secsX[0] ) {secsX[0] = 24; cout << "ALTRO parameters" << endl; mAltro[secX]->PrintParameters();}
+	if (secX >= 24 && secX > secsX[1])  {secsX[1] = 48; cout << "SAMPA parameters" << endl; mAltro[secX]->PrintParameters();}
       }
-      if (mAltro) {
+      if (mAltro[secX]) {
 	//#define PixelDUMP
 #ifdef PixelDUMP
 	static Short_t ADCsSaved[__MaxNumberOfTimeBins__];
 	memcpy(ADCsSaved, ADCs,sizeof(ADCsSaved));
 #endif
-	mAltro->RunEmulation();
+	mAltro[secX]->RunEmulation();
 #ifdef PixelDUMP
 	ofstream *out = new ofstream("digi.dump",ios_base::app);
 	for (Int_t i = 0; i < __MaxNumberOfTimeBins__; i++) {
 	  if (ADCsSaved[i] > 0 || ADCs[i] > 0) {
-	    LOG_INFO << Form("s %2i r %i p %3i t %3i: %10i => %10i keep %10i",sector,row,pad,i,ADCsSaved[i],ADCs[i],mAltro->ADCkeep[i]) << endm;
-	    *out << Form("s %2i r %i p %3i t %3i: %10i => %10i keep %10i",sector,row,pad,i,ADCsSaved[i],ADCs[i],mAltro->ADCkeep[i]) << endl;
+	    LOG_INFO << Form("s %2i r %i p %3i t %3i: %10i => %10i keep %10i",sector,row,pad,i,ADCsSaved[i],ADCs[i],mAltro[secX]->ADCkeep[i]) << endm;
+	    *out << Form("s %2i r %i p %3i t %3i: %10i => %10i keep %10i",sector,row,pad,i,ADCsSaved[i],ADCs[i],mAltro[secX]->ADCkeep[i]) << endl;
 	  }
 	}
 	delete out;
@@ -1553,7 +1562,7 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
 	NoTB = 0;
 	Int_t ADCsum = 0;
 	for (Int_t i = 0; i < __MaxNumberOfTimeBins__; i++) {
-	  if (ADCs[i] && ! mAltro->ADCkeep[i]) {ADCs[i] = 0;}
+	  if (ADCs[i] && ! mAltro[secX]->ADCkeep[i]) {ADCs[i] = 0;}
 	  if (ADCs[i]) {
 	    NoTB++;
 	    ADCsum += ADCs[i];
@@ -1573,7 +1582,7 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
 #endif	
       }
       else {
-	if (St_tpcAltroParamsC::instance()->N(sector-1) < 0) NoTB = AsicThresholds(ADCs);
+	if (St_tpcAltroParamsC::instance()->N(secX) < 0) NoTB = AsicThresholds(ADCs);
       }
       if (NoTB > 0 && digitalSector) {
 	digitalSector->putTimeAdc(row,pad,ADCs,IDTs);

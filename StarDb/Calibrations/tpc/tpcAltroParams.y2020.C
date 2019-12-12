@@ -1,7 +1,7 @@
 TDataSet *CreateTable()
 	{ 
 	if (!gROOT->GetClass("St_tpcAltroParams")) return 0;
-	St_tpcAltroParams *tableSet = new St_tpcAltroParams("tpcAltroParams",24);
+	St_tpcAltroParams *tableSet = new St_tpcAltroParams("tpcAltroParams",48);
 	tpcAltroParams_st row;
 /*
     Run = CURRENT; node =  onldb2.starp.bnl.gov; port = 3501
@@ -54,6 +54,13 @@ TDataSet *CreateTable()
 	row.Altro_L2  =   37911; //L2 coefficient of the TCF
 	row.Altro_L3  =   58775; //L3 coefficient of the TCF
 
+	cout << "[ALTRO] : Usin local configuration with row.Altro_thr = " << row.Altro_thr << endl; 
+
+	for (Int_t i  = 0; i < 24; i++)
+		{
+		tableSet->AddAt(&row);
+		}
+	row.Altro_thr =       4; // iTPC, Tonko 12/12/2019
 	cout << "[ALTRO] : Usin local configuration with row.Altro_thr = " << row.Altro_thr << endl; 
 
 	for (Int_t i  = 0; i < 24; i++)
