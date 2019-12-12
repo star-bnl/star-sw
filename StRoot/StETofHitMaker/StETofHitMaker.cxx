@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHitMaker.cxx,v 1.4 2019/12/10 15:58:33 fseck Exp $
+ * $Id: StETofHitMaker.cxx,v 1.5 2019/12/12 02:27:09 fseck Exp $
  *
  * Author: Philipp Weidenkaff & Florian Seck, April 2018
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StETofHitMaker.cxx,v $
+ * Revision 1.5  2019/12/12 02:27:09  fseck
+ * enable clock jump correction by default
+ *
  * Revision 1.4  2019/12/10 15:58:33  fseck
  * ignore digis in dead time software-wise + possibility to correct clock jumps based on hit position via setting a flag
  *
@@ -74,7 +77,7 @@ StETofHitMaker::StETofHitMaker( const char* name )
   mMaxYPos( 15. ),
   mMergingRadius( 1. ),
   mSoftwareDeadTime( 50. ),
-  mDoClockJumpShift( false ),
+  mDoClockJumpShift( true ),
   mDoQA( false ),
   mDebug( false ),
   mHistFileName( "" )
@@ -922,9 +925,11 @@ StETofHitMaker::matchSides()
             // use local coordinates... (0,0,0) is in the center of counter
             posX = ( -1 * eTofConst::nStrips / 2. + strip - 0.5 ) * eTofConst::stripPitch;
 
-            // correct for single side clock jumps. Sync signal recovers time jumps, so no double jumps should occure.
-            if( mDoClockJumpShift && fabs( timeDiff ) > eTofConst::coarseClockCycle * 0.5 ) {
-                if( mDebug ) {
+
+
+            // correct for single side clock jumps. Sync signal recovers time jumps, so no double jumps should occur
+            if( mDoClockJumpShift && fabs( posY ) > 0.5 * ( eTofConst::coarseClockCycle * mSigVel.at( detIndex ) - eTofConst::stripLength ) * 0.9 ) {
+                if( mDoQA ) {
                     LOG_INFO << "shifting time on: " << sector << "-" << plane << "-" << counter << endm;
                 }
                 time     += eTofConst::coarseClockCycle * 0.5;
@@ -937,6 +942,7 @@ StETofHitMaker::matchSides()
                     posY = -1 * mSigVel.at( detIndex ) * timeDiff * 0.5;
                 }
             }
+
 
 
             if( mDebug ) {
@@ -1738,7 +1744,7 @@ StETofHitMaker::bookHistograms()
             for( int counter = eTofConst::counterStart; counter <= eTofConst::counterStop; counter++ ) {
                 std::string histName_etofHit_pos = "etofHit_pos_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
 
-                mHistograms[ histName_etofHit_pos ] = new TH2F( Form( "etofHit_pos_s%d_m%d_c%d", sector, plane, counter ), "eTOF hit localXY;local X (cm);local Y (cm)", 68, -17., 17., 400, -500., 500. );
+                mHistograms[ histName_etofHit_pos ] = new TH2F( Form( "etofHit_pos_s%d_m%d_c%d", sector, plane, counter ), "eTOF hit localXY;local X (cm);local Y (cm)", 64, -16., 16., 400, -500., 500. );
                 AddHist( mHistograms.at( histName_etofHit_pos ) );
 
                 if( mDoQA ) {
