@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StETofCalibMaker.cxx,v 1.5 2019/12/10 15:55:01 fseck Exp $
+ * $Id: StETofCalibMaker.cxx,v 1.6 2019/12/12 02:26:37 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofCalibMaker.cxx,v $
+ * Revision 1.6  2019/12/12 02:26:37  fseck
+ * ignore duplicate digis from stuck firmware
+ *
  * Revision 1.5  2019/12/10 15:55:01  fseck
  * added new database tables for pulsers, updated pulser handling and trigger time calculation
  *
@@ -1018,6 +1021,12 @@ StETofCalibMaker::processStEvent()
 
 
     /// second loop to apply calibrations to (non-pulser) digis inside the timing window
+    int    previousGeomId = -1;
+    double previousTot    = -1.;
+    double previousTime   = -1.;
+
+    int nDuplicates = 0;
+
     for( size_t i=0; i<nDigis; i++ ) {
         StETofDigi* aDigi =  etofDigis[ i ];
 
@@ -1025,9 +1034,36 @@ StETofCalibMaker::processStEvent()
             LOG_WARN << "No digi found" << endm;
             continue;
         }
+
+        // ignore digis that were sent in bulk from the same channel with exactly the same tot and time due to stuck firmware
+        int    currentGeomId = aDigi->sector() * 100000 + aDigi->zPlane() * 10000 + aDigi->counter() * 1000 + aDigi->strip() * 10 + aDigi->side();
+        double currentTot    = aDigi->rawTot();
+        double currentTime   = aDigi->rawTime();
+
+        if( currentGeomId == previousGeomId &&
+            fabs( currentTime - previousTime ) < 1.e-5 &&
+            fabs( currentTot - previousTot ) < 1.e-5 )
+        {
+            if( mDebug ) {
+                LOG_INFO << "digi from stuck firmware --> ignore" << endm;
+            }
+            nDuplicates++;
+            continue;
+        }
+        else {
+            previousGeomId = currentGeomId;
+            previousTot    = currentTot;
+            previousTime   = currentTime;
+        }
+
+
         /// calculate calibrated time and tot for the digi
         /// only for digis inside the timing window
         applyCalibration( aDigi, etofHeader );
+    }
+
+    if( mDebug && nDuplicates > 0 ) {
+        LOG_INFO << "*** # duplicate digis from stuck firmware: " << nDuplicates << endm;
     }
 }
 
@@ -1093,6 +1129,11 @@ StETofCalibMaker::processMuDst()
 
 
     /// second loop to apply calibrations to (non-pulser) digis inside the timing window
+    int    previousGeomId = -1;
+    double previousTot    = -1.;
+    double previousTime   = -1.;
+
+    int nDuplicates = 0;
     for( size_t i=0; i<nDigis; i++ ) {
         StMuETofDigi* aDigi = mMuDst->etofDigi( i );
 
@@ -1100,9 +1141,36 @@ StETofCalibMaker::processMuDst()
             LOG_WARN << "No digi found" << endm;
             continue;
         }
+
+        // ignore digis that were sent in bulk from the same channel with exactly the same tot and time due to stuck firmware
+        int    currentGeomId = aDigi->sector() * 100000 + aDigi->zPlane() * 10000 + aDigi->counter() * 1000 + aDigi->strip() * 10 + aDigi->side();
+        double currentTot    = aDigi->rawTot();
+        double currentTime   = aDigi->rawTime();
+
+        if( currentGeomId == previousGeomId &&
+            fabs( currentTime - previousTime ) < 1.e-5 &&
+            fabs( currentTot - previousTot ) < 1.e-5 )
+        {
+            if( mDebug ) {
+                LOG_INFO << "digi from stuck firmware --> ignore" << endm;
+            }
+            nDuplicates++;
+            continue;
+        }
+        else {
+            previousGeomId = currentGeomId;
+            previousTot    = currentTot;
+            previousTime   = currentTime;
+        }
+
+
         /// calculate calibrated time and tot for the digi
         /// only for digis inside the timing window
         applyCalibration( aDigi, etofHeader );
+    }
+
+    if( mDebug && nDuplicates > 0 ) {
+        LOG_INFO << "*** # duplicate digis from stuck firmware: " << nDuplicates << endm;
     }
 }
 //_____________________________________________________________
@@ -1194,7 +1262,7 @@ StETofCalibMaker::flagPulserDigis( StETofDigi* aDigi, unsigned int index, std::m
         float totToPeak     = aDigi->rawTot()  - mPulserPeakTot.at( key );
 
         if( timeToTrigger > mPulserWindow.at( aDigi->rocId() ).first  && timeToTrigger < mPulserWindow.at( aDigi->rocId() ).second  ) {
-            if( fabs( totToPeak ) < 10 ) {
+            if( fabs( totToPeak ) < 25 ) {
                 isPulserCand = true;
             }
         }
