@@ -270,6 +270,8 @@ Int_t StiMaker::InitDetectors()
 	hitLoader->setMinSector(13);
 	hitLoader->setMaxSector(24);
       }
+      if (IAttr("Cosmics")) hitLoader->setMaxZ(150.)
+
       LOG_INFO << "InitDetectors(): use hits in sectors["
 	   << hitLoader->minSector() << "," << hitLoader->maxSector() << "] and rows["
 	   << hitLoader->minRow() << ",*]" << endm;
