@@ -30,6 +30,7 @@ class StiTpcHitLoader : public StiHitLoader<StEvent,StiDetectorBuilder>
   void         setMinRow(UInt_t r= 1) {_minRow = r;}
   void         setMinSector(UInt_t r= 1) {_minSector = r;}
   void         setMaxSector(UInt_t r=24) {_maxSector = r;}
+  void         setMaxZ(Double_t z) {_maxZ = z;}
   UInt_t        minRow() {return _minRow;}
   UInt_t        maxRow() {return _maxRow;}
   UInt_t        minSector() {return _minSector;}
@@ -40,6 +41,7 @@ class StiTpcHitLoader : public StiHitLoader<StEvent,StiDetectorBuilder>
   UInt_t         _maxRow;
   UInt_t         _minSector;
   UInt_t         _maxSector;
+  Float_t        _maxZ;
 };
 
 #endif

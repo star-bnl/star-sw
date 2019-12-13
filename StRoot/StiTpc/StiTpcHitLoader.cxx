@@ -21,14 +21,14 @@
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
 //________________________________________________________________________________
 StiTpcHitLoader::StiTpcHitLoader(): StiHitLoader<StEvent,StiDetectorBuilder>("TpcHitLoader"),
-                                 _minRow(1), _maxRow(72), _minSector(1), _maxSector(24) { }
+  _minRow(1), _maxRow(72), _minSector(1), _maxSector(24), _maxZ(1000)   { }
 
 //________________________________________________________________________________
 StiTpcHitLoader::StiTpcHitLoader(StiHitContainer* hitContainer,
                                  Factory<StiHit>*hitFactory,
                                  StiDetectorBuilder * detector)
 : StiHitLoader<StEvent,StiDetectorBuilder>("TpcHitLoader",hitContainer,hitFactory,detector), 
-				    _minRow(1), _maxRow(72), _minSector(1), _maxSector(24) {}
+  _minRow(1), _maxRow(72), _minSector(1), _maxSector(24), _maxZ(1000) {}
 //________________________________________________________________________________
 void StiTpcHitLoader::loadHits(StEvent* source,
                                Filter<StiTrack> * trackFilter,
@@ -71,11 +71,12 @@ void StiTpcHitLoader::loadHits(StEvent* source,
 	if (StiKalmanTrackNode::IsLaser() && hit->flag()) continue;
 	if (hit->flag() & FCF_CHOPPED || hit->flag() & FCF_SANITY)     continue; // ignore hits marked by AfterBurner as chopped or bad sanity
 	if (hit->pad() > 182 || hit->timeBucket() > 511) continue; // some garbadge  for y2001 daq
+	if (TMath::Abs( hit->position().z() ) > _maxZ) continue;
 #if 0 /*VP*/
 {        
         double x = hit->position().x();
         double y = hit->position().y();
-//      double z = hit->position().y();
+//      double z = hit->position().z();
         double ang = atan2(y,x);
         int sec = StiTpcDetectorBuilder::sector(ang,hit->sector()>12);
         sec -= (int)hit->sector();
