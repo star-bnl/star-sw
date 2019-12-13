@@ -151,7 +151,7 @@ class StTpcHitMaker : public StRTSBaseMaker {
     
  public:
   static void AfterBurner(StTpcHitCollection *hitCollection);
-  static StTpcHit* StTpcHitFlag(const StThreeVectorF& p,
+  static  StTpcHit* StTpcHitFlag(const StThreeVectorF& p,
              const StThreeVectorF& e,
              UInt_t hw, float q, UChar_t c,
              Int_t idTruth, UShort_t quality,
@@ -159,10 +159,11 @@ class StTpcHitMaker : public StRTSBaseMaker {
              UShort_t mnpad, UShort_t mxpad, UShort_t mntmbk,
              UShort_t mxtmbk, Float_t cl_x, Float_t cl_t, UShort_t adc,
              UShort_t flag);
+  static void SetCosmics() {fgCosmics = kTRUE;}
   static Float_t fgDp;             // hardcoded errors
   static Float_t fgDt;
   static Float_t fgDperp;
-
+  static Bool_t  fgCosmics;
   // cvs
   virtual const char *GetCVS() const    {
     static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;

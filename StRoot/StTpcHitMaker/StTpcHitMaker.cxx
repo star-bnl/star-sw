@@ -275,6 +275,7 @@ static TNtuple *pulserP = 0;
 Float_t StTpcHitMaker::fgDp    = .1;             // hardcoded errors
 Float_t StTpcHitMaker::fgDt    = .2;
 Float_t StTpcHitMaker::fgDperp = .1;
+Bool_t  StTpcHitMaker::fgCosmics = kFALSE;
 static Int_t _debug = 0;
 //#define __MAKE_NTUPLE__
 //#define __CORRECT_S_SHAPE__
@@ -368,7 +369,8 @@ void StTpcHitMaker::InitializeHistograms(Int_t token) {
 //________________________________________________________________________________
 Int_t StTpcHitMaker::InitRun(Int_t runnumber) {
   SetAttr("maxRow",St_tpcPadConfigC::instance()->numberOfRows(20));
-  // Prepare scaled hit maxima
+  if (IAttr("Cosmics")) SetCosmics();
+// Prepare scaled hit maxima
 
   // No hit maxima if these DB params are 0
   Int_t maxHitsPerSector = St_tpcMaxHitsC::instance()->maxSectorHits();
@@ -628,9 +630,10 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t
   hw += sector << 4;     // (row/100 << 4);   // sector
   hw += row    << 9;     // (row%100 << 9);   // row
   static StThreeVector<double> hard_coded_errors(fgDp,fgDt,fgDperp);
-
+#if 0
   Double_t gain = (row<=St_tpcPadConfigC::instance()->innerPadRows(sector)) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
   Double_t wire_coupling = (row<=St_tpcPadConfigC::instance()->innerPadRows(sector)) ? St_tss_tssparC::instance()->wire_coupling_in() : St_tss_tssparC::instance()->wire_coupling_out();
+#endif
   Double_t q = 0; //cluster.charge * ((Double_t)St_tss_tssparC::instance()->ave_ion_pot() * (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
 
   StTpcHit *hit = StTpcHitFlag(global.position(),hard_coded_errors,hw,q
@@ -658,9 +661,10 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
 
   Float_t pad  = cluster.pad;
   Float_t time = cluster.tb;
-
+#if 0
   Double_t gain = (row<=St_tpcPadConfigC::instance()->innerPadRows(sector)) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
   Double_t wire_coupling = (row<=St_tpcPadConfigC::instance()->innerPadRows(sector)) ? St_tss_tssparC::instance()->wire_coupling_in() : St_tss_tssparC::instance()->wire_coupling_out();
+#endif
   Double_t q = 0; // cluster.charge * ((Double_t)St_tss_tssparC::instance()->ave_ion_pot() * (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
 
   // Correct for slewing (needs corrected q, and time in microsec)
@@ -1283,7 +1287,7 @@ StTpcHit* StTpcHitMaker::StTpcHitFlag(const StThreeVectorF& p,
              UShort_t flag) {
   // New hit
   StTpcHit* hit = new StTpcHit(p,e,hw,q,c,idTruth,quality,id,mnpad,mxpad,mntmbk,mxtmbk,cl_x,cl_t,adc);
-
+  
   // Check for sanity
   if ( mntmbk<0 || mxtmbk<0 || mntmbk>500 || mxtmbk>500
     || mnpad <0 || mxpad <0 || mnpad >500 || mxpad >500
@@ -1291,6 +1295,9 @@ StTpcHit* StTpcHitMaker::StTpcHitFlag(const StThreeVectorF& p,
     || (Float_t) mntmbk>cl_t || (Float_t) mxtmbk<cl_t
     || (Float_t) mnpad >cl_x || (Float_t) mxpad <cl_x
      ) flag |= FCF_SANITY;
+#if 0
+  if (fgCosmics && TMath::Abs(p.z()) > 150) flag |= FCF_SANITY;
+#endif
   hit->setFlag(flag);
   return hit;
 }

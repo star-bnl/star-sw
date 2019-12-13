@@ -63,6 +63,7 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   SetAttr("minSector",1);
   SetAttr("maxSector",24);
   SetAttr("minRow",1);
+  if (IAttr("Cosmics")) StTpcHitMaker::SetCosmics();
   static Bool_t fNoiTPCLu  = IAttr("NoiTPCLu");
   for (Int_t sec = 0; sec < 24; sec++) {
     Int_t sector = sec + 1;
