@@ -8,7 +8,7 @@
 #ifndef StPicoDst_h
 #define StPicoDst_h
 #if !defined (_VANILLA_ROOT_)
-#define __TFG__VERSION__
+//#define __TFG__VERSION__
 #endif /* ! _VANILLA_ROOT_ */
 
 // ROOT headers
