@@ -1673,7 +1673,7 @@ Bfc_st BFC[] = { // standard chains
   {"emcRaw"   ,"emcRaw","","daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent"
    ,"StEmcRawMaker","StEmcRawMaker",                                    "B/E EMC data common maker",kFALSE},
   {"emcDY2"   ,"emcDY2","","emcRaw,PreEcl,Epc"   ,"","",                "B/E EMC data common maker",kFALSE},
-  {"eemcD"       ,"","","",                               "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"eemcD"       ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"emcY2"    ,"","","emc_T,tpc_T,db,emcSim,PreEcl,epc,-emcDY2,-daq","","" //no  emcAtoE in simulation
    ,                        "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
   {"emcSim"   ,"","","emc_T,EmcUtil,McEvent,MuDST","StEmcSimulatorMaker","StEmcSimulatorMaker"
@@ -1861,7 +1861,7 @@ Bfc_st BFC[] = { // standard chains
   {"skip1row"    ,""  ,"","",""                           ,"","ITTF: skip the first pad row in TPC",kFALSE},
   {"StiRnD"   ,"","","",                                  "","StiRnD", "Load StiRnD shared library",kFALSE},
   {"Alignment"   ,"","","",                   "","", "Sti Tpc Alignment, reconstruction per sector",kFALSE},
-  {"Cosmics"  ,"","","",                         "","", "Ignore events without recostructed tracks",kFALSE},
+  {"Cosmics"  ,"","","","","","Ignore events without recostructed tracks, only hits with |z|<150cm",kFALSE},
   {"StiPulls" ,"","","",                                         "","", "Request to make Sti Pulls",kFALSE},
 #if 0
   {"BeamBack" ,"","","StEvent","StBeamBackMaker","Minuit,StBeamBackMaker"
