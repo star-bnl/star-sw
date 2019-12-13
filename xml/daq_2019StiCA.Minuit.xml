@@ -29,10 +29,10 @@
 #   root.exe -q -b 'bfc.C(200,"P2019,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}5
 #   root.exe -q -b 'bfc.C(200,"P2019,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 #   root.exe -q -b 'bfc.C(1000,"P2019,-hitfilt,mtd,btof,BEmcChkStat,CorrY,useCDV,OSpaceZ2,OGridLeakFull,evout,geantOut,NoHistos,noTags,noRunco,StiCA,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
-   root.exe -q -b 'bfc.C(1000,"P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+#   root.exe -q -b 'bfc.C(1000,"P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 #dev chain : P2019a,StiCA,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeakFull,-OPr13,OPr40,-hitfilt,-beamline3D
-
-   cp  ${filel}* ${SUBMITTINGDIRECTORY}
+   root.exe -q -b 'bfc.C(200,"P2019a,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+   cp -p  ${filel}*.root ${filel}*B.log  ${SUBMITTINGDIRECTORY}
    rm ${bla}
         </command>
         <stdout URL="file:./sched$JOBID.log" />

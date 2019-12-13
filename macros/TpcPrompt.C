@@ -463,6 +463,11 @@ void TpcPrompt(const Char_t *chainN = "TpcHit") {
   if (! chain) return;
   Draw(chain);
 }
+//________________________________________________________________________________
+void TpcPrompt(TChain *chain) {
+  if (! chain) return;
+  Draw(chain);
+}
 #else /* __CINT__ */
 //________________________________________________________________________________
 void TpcPrompt(Int_t Nevents = 1000000, 

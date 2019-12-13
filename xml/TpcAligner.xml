@@ -26,8 +26,8 @@
 	<stderr URL="file:./sched$JOBID.err" />
 <input URL="command:TpcAligner.pl" />
 <!-- <input URL="command:TpcAlignerSample.pl" /> -->
-<!-- <input URL="command:dEdxSample.pl" /> -->
-<input URL="file:/gpfs01/star/daq/2019/189/20189035/*.daq" />
+<input URL="command:dEdxSample.pl" /> 
+<!-- <input URL="file:/gpfs01/star/daq/2019/189/20189035/*.daq" /> -->
 <!-- <input URL="command:CosmicsAnalysis.pl" /> -->
 <!-- <input URL="command:EandBSample.pl" /> -->
 <!-- <input URL="file:/gpfs01/star/pwg/iraklic/iTPC/Cosmics/Cosmics2018/*event.root" /> -->
