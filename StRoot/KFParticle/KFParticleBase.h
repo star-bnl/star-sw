@@ -292,7 +292,7 @@ class KFParticleBase :public TObject {
   std::vector<int> fDaughtersIds;
  
 #ifndef KFParticleStandalone
-  ClassDef( KFParticleBase, 2 )
+  ClassDef( KFParticleBase, 3 )
 #endif
 };
 
