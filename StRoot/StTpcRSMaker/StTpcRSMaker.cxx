@@ -828,11 +828,18 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Float_t  *AdditionalMcCorrection = St_TpcResponseSimulatorC::instance()->SecRowCor();
 	Float_t  *AddSigmaMcCorrection   = St_TpcResponseSimulatorC::instance()->SecRowSig();
 	// Generate signal 
-	Double_t sigmaJitterT     = St_TpcResponseSimulatorC::instance()->SigmaJitterTI();
-	Double_t sigmaJitterX     = St_TpcResponseSimulatorC::instance()->SigmaJitterXI();
+	Double_t sigmaJitterT            = St_TpcResponseSimulatorC::instance()->SigmaJitterTI();
+	Double_t sigmaJitterX            = St_TpcResponseSimulatorC::instance()->SigmaJitterXI();
+	Double_t transverseDiffusion     = St_TpcResponseSimulatorC::instance()->transverseDiffusion();
+	Double_t longitudinalDiffusion   = St_TpcResponseSimulatorC::instance()->longitudinalDiffusion();
 	if(io) { // Outer
 	  sigmaJitterT            = St_TpcResponseSimulatorC::instance()->SigmaJitterTO();
 	  sigmaJitterX            = St_TpcResponseSimulatorC::instance()->SigmaJitterXO();
+	} else { // Inner
+	  if (St_TpcResponseSimulatorC::instance()->transverseDiffusionI() > 0) {
+	    transverseDiffusion     = St_TpcResponseSimulatorC::instance()->transverseDiffusionI();
+	    longitudinalDiffusion   = St_TpcResponseSimulatorC::instance()->longitudinalDiffusionI();
+	  }
 	}
 	// Generate signal 
 	Double_t Gain = St_tss_tssparC::instance()->gain(sector,row); 
@@ -929,10 +936,10 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	}
 	Double_t driftLength = TMath::Abs(TrackSegmentHits.coorLS.position().z());
 	Double_t D = 1. + OmegaTau*OmegaTau;
-	Double_t SigmaT = St_TpcResponseSimulatorC::instance()->transverseDiffusion()*  TMath::Sqrt(   driftLength/D);
-	//	Double_t SigmaL = St_TpcResponseSimulatorC::instance()->longitudinalDiffusion()*TMath::Sqrt(2*driftLength  );
+	Double_t SigmaT = transverseDiffusion*  TMath::Sqrt(   driftLength/D);
 	if (sigmaJitterX > 0) {SigmaT = TMath::Sqrt(SigmaT*SigmaT + sigmaJitterX*sigmaJitterX);}
-	Double_t SigmaL = St_TpcResponseSimulatorC::instance()->longitudinalDiffusion()*TMath::Sqrt(   driftLength  );
+	Double_t SigmaL = longitudinalDiffusion*TMath::Sqrt(   driftLength  );
+	if (sigmaJitterT > 0) {SigmaT = TMath::Sqrt(SigmaT*SigmaT + sigmaJitterT*sigmaJitterT);}
 	Double_t NoElPerAdc = St_TpcResponseSimulatorC::instance()->NoElPerAdc();
 	if (NoElPerAdc <= 0) {
 	  if (St_tpcPadConfigC::instance()->iTPC(sector) && St_tpcPadConfigC::instance()->IsRowInner(sector,row)) {

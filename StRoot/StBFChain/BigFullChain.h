@@ -359,6 +359,10 @@ Bfc_st BFC[] = { // standard chains
   {"RC.y2016","","","RC.y2016.nohft,pxlHit,istHit,sstHit",                                 "","","",kFALSE},
   {"RC.y2017","","","P2017a,btof,mtd,BEmcChkStat,StiCA,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,"
    ,                                                                                       "","","",kFALSE},
+  {"RC.y2018","","","P2018a,btof,mtd,BEmcChkStat,StiCA,CorrY,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,"
+   ,                                                                                       "","","",kFALSE},
+  {"RC.y2019","","","P2019a,btof,mtd,BEmcChkStat,StiCA,CorrY,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,"
+   ,                                                                                       "","","",kFALSE},
 
   {"MC nightlies and Eval","--","-----------","------------------------------------------","","","",kFALSE},
   {"test_MC.stan.y2000","","","MC.y2000,Sti,fzin,MiniMcMk","",""
