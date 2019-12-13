@@ -857,6 +857,8 @@ Int_t StBFChain::Instantiate()
     if (maker == "StTpcHitMaker"  && GetOption("NoAnnotateCL")) {
       mk->SetAttr("UseTonkoClusterAnnotation", 0);
     }
+    if (GetOption("Cosmics") && (maker == "StTpcHitMaker" || maker == "StTpcRTSHitMaker")) mk->SetAttr("Cosmics"    ,1);
+
     if (maker == "StTpcDbMaker"){
       if ( GetOption("Simu") && ! GetOption("NoSimuDb")) mk->SetAttr("Simu",1);
       if ( GetOption("useLDV")    ) mk->SetAttr("useLDV",1) ;// uses laserDV database
