@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<job maxFilesPerProcess="1" fileListSyntax="paths" copyInputLocally="false"> 
+<job maxFilesPerProcess="10" fileListSyntax="paths" copyInputLocally="false"> 
 <!-- <job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="paths" copyInputLocally="false"> -->
 	<command>
          cd ${SUBMITTINGDIRECTORY}
@@ -8,18 +8,21 @@
 #  setup 64b
 #  starver TFG19d
 #  ln -s ${SUBMITTINGDIRECTORY}/StarDb .
-#  foreach  evtsFile(`cat $FILELIST`) 
-  set evtsFile = $INPUTFILE0;
+  foreach  evtsFile(`cat $FILELIST`) 
+#  set evtsFile = $INPUTFILE0;
   echo "${evtsFile}"
-#  if (! -r ${evtsFile}) continue;
-  set run = `echo $evtsFile | awk -F\: '{print $1}'`
-  set file = `echo $evtsFile | awk -F\: '{print $2}'`  
-  if ( -r ${SUBMITTINGDIRECTORY}/${file}) exit 0; #continue;
+  if (! -r ${evtsFile}) continue;
+   set file = `basename ${evtsFile}`
+   set run  = `basename ${file} .event.root`;
+#  set run = `echo $evtsFile | awk -F\: '{print $1}'`
+#  set file = `echo $evtsFile | awk -F\: '{print $2}'`  
+  set output = ${run}Aligner.root
+  if ( -r ${SUBMITTINGDIRECTORY}/${output}) continue;
   set logFile  = ${run}B.log
-  if ( -r ${SUBMITTINGDIRECTORY}/$logFile) exit 0; #continue;
+  if ( -r ${SUBMITTINGDIRECTORY}/$logFile) continue;
   root.exe -q -b 'TpcAligner.C(9999999,"../*'${run}'*.event.root")' &gt;&amp;  ${logFile}
 #  mv ${file}* ${SUBMITTINGDIRECTORY}/
-#  end
+  end
 
 	</command>
 	<stdout URL="file:./sched$JOBID.log" />

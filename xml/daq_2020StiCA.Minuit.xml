@@ -44,5 +44,6 @@
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
-<input URL="command:daq_2020Prod.pl" /> 
+<!-- <input URL="command:daq_2020Prod.pl" /> -->
+<input URL="command:daq_2020.pl" /> 
 </job>

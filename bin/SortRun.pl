@@ -4,26 +4,34 @@
 #open(In,$input) or die "Can't open $input";
 my $line;
 my $runOld = 0;
+my $trigOldF = "";
 my $trigOld = "";
 my $dateOld = 0;
 my $timeOld = 0;
 my $runMin = 0;
 my $runMax = 0;
+my $fieldOld = "";
 my $N = 0;
 #while ($line = <In>) {
-sub SPrint ($$$$$$$) {
-  my ($trigOld,$runMin,$runMax,$dateMin,$timeMin,$dateMax,$timeMax) =  @_;
+sub SPrint ($$$$$$$$) {
+  my ($trigOld,$runMin,$runMax,$dateMin,$timeMin,$dateMax,$timeMax,$field) =  @_;
 #  print "\t\'$N\' => {tag =>";
   my $t = "'" . $trigOld . "'";
-#  printf("\'%i\' \t=> %-50s \t=> ",$N,$t);
-  printf("%-50s \t=> ",$t);
+#  printf("\'%i\' \t=> %s=> ",$N,$t);
+  printf("'%3i' => {trig=>%s, ",$N,$t);
   my $dd = $dateMin; $dd =~ s/\-//g;
   my $tt = $timeMin; $tt =~ s/://g;
-  print "\{ first=> \'$runMin\',\t second => \'$runMax\',\t list => \'\',  beginTime => \'$dd.$tt\'}, \# \t$dateMin\t$timeMin\t$dateMax\t$timeMax\n";
+  print "\tfield => \'$field\',\tfirst=> \'$runMin\',\t last => \'$runMax\',\t list => \'\',  beginTime => \'$dd.$tt\'}, \# \t$dateMin\t$timeMin\t$dateMax\t$timeMax\n";
   $N++;
 }
 while ($line = <>) {
-  my ($run,$trig,$date,$time) = split ' ', $line;
+  my ($run,$trig,$date,$time,$scaleFactor) = split ' ', $line;
+  my $field = "UF";
+  if     ($scaleFactor >-1.2 && $scaleFactor < -0.8) {$field = "RF";}
+  elsif ($scaleFactor > -0.8 && $scaleFactor < -0.2) {$field = "RHF";}
+  elsif ($scaleFactor > -0.2 && $scaleFactor <  0.2) {$field = "ZF";}
+  elsif ($scaleFactor >  0.2 && $scaleFactor <  0.8) {$field = "FHF";}
+  elsif ($scaleFactor >  0.8 && $scaleFactor <  1.2) {$field = "FF";}
   if ($run eq 'cmd' or $run eq 'runNumber') {next;}
   if ($trig !~  /production/ and $trig !~  /^tune/ and $trig !~ /^Cosmic/) {next;}
    if ($trig =~ /^ped/) {next;}
@@ -43,19 +51,25 @@ while ($line = <>) {
   $trig =~ s/_opentac//;
   $trig =~ s/_EPDtest//;
   $trig =~ s/_GMT//;
+  $trig =~ s/LocalClock//;
+  $trig =~ s/production_//;
+  $trig =~ s/_2020//;
 #  print "run = $run, trig = $trig, date = $date, time = $time\n";
 #  print "trigOld = $trigOld\n";
   $timeMax = $time;
   $dateMax = $date;
-  if ($trig eq $trigOld) {
+  my $trigF = $trig . $field;
+  if ($trigF eq $trigOldF) {
     $runMax = $run;
   } else {
 #    print "trigOld2 = $trigOld\n";
     if ($trigOld ne '') {
-      SPrint($trigOld,$runMin,$runMax,$dateMin,$timeMin,$dateMax,$timeMax);
+      SPrint($trigOld,$runMin,$runMax,$dateMin,$timeMin,$dateMax,$timeMax,$fieldOld);
 #    die;
     }
     $trigOld = $trig;# print "trig = $trig. trigOld = $trigOld\n";
+    $trigOldF = $trigF;
+    $fieldOld = $field;
     $runMin = $run; $runMax = $run;
     $dateMin = $date; 
     $timeMin = $time; 
@@ -64,6 +78,6 @@ while ($line = <>) {
 #  if ($N > 20) {last;}
 }
 if ($trigOld ne '') {
-  SPrint($trigOld,$runMin,$runMax,$dateMin,$timeMin,$dateMax,$timeMax);
+  SPrint($trigOld,$runMin,$runMax,$dateMin,$timeMin,$dateMax,$timeMax,$fieldOld);
 }
 #close(In);

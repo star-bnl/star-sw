@@ -1,6 +1,6 @@
 /* 
    root.exe -q -b TpcPrompt.C >& TpcPrompt.log &
-   root.exe -q -b 'Chain.C+("*.root","TpcHit")' 'TpcPrompt.C+(tChain)' >& TpcPrompt.log &
+   root.exe -q -b 'Chain.C+("../*.root","TpcHit")' 'TpcPrompt.C+(tChain)' >& TpcPrompt.log &
 
    Fit
    root.exe -q -b TpcHit.root TpcPrompt.C+
@@ -178,6 +178,7 @@ void Draw(const Char_t *tag = "New") {
     return;
   }
   Draw(tree);
+  
 }
 //________________________________________________________________________________
 void ClusterSize(const Char_t *f0 = "AuAu200AltroDef/st_physics_adc_15152001_raw_1000013.TpcHit.root",

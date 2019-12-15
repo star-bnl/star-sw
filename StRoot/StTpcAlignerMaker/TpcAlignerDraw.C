@@ -140,6 +140,10 @@ void TpcAlignerDrawIO(const Char_t *files = "*.root", Bool_t laser = kFALSE) {
     if (TString(file).Contains("event")) continue;
     iter.AddFile(file); NFiles++;
   }
+  if (! NFiles) {
+    cout << "No input files have been found" << endl;
+    return;
+  }
   const Double_t&    field                                    = iter("field");
   const Double_t&    driftVel                                 = iter("driftVel"); // cm/mkmsec
   const Double_t&    freq                                     = iter("freq");    // MHz
@@ -348,6 +352,10 @@ void TpcAlignerDrawW2S(const Char_t *files = "*.root") {
     if (TString(file).Contains("MuDst")) continue;
     if (TString(file).Contains("event")) continue;
     iter.AddFile(file); NFiles++;
+  }
+  if (! NFiles) {
+    cout << "No input files have been found" << endl;
+    return;
   }
 #if 0
   const Int_t&       TriggerId                                = iter("TriggerId");
