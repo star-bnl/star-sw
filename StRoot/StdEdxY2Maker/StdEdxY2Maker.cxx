@@ -151,9 +151,13 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
   // 		TPG parameters
   numberOfSectors   = gStTpcDb->Dimensions()->numberOfSectors();
   numberOfTimeBins  = gStTpcDb->Electronics()->numberOfTimeBins();
+  SafeDelete(m_TpcdEdxCorrection);
+  m_TpcdEdxCorrection = new StTpcdEdxCorrection(m_Mask, Debug());
 
   if (! DoOnce) {
     DoOnce = 1;
+    if ((GetDate() > 20171201 && m_TpcdEdxCorrection->IsFixedTarget()) ||
+	(GetDate() > 20181201)) fUsedNdx = kTRUE; // use dN/dx for fixed target for Run XVIII and year >= XIX
     if (TESTBIT(m_Mode, kCalibration)) {// calibration mode
       if (Debug()) LOG_WARN << "StdEdxY2Maker::InitRun Calibration Mode is On (make calibration histograms)" << endm;
       TFile *f = GetTFile();
@@ -170,10 +174,6 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
     }
     QAPlots(0);
   }
-  SafeDelete(m_TpcdEdxCorrection);
-  m_TpcdEdxCorrection = new StTpcdEdxCorrection(m_Mask, Debug());
-  if ((GetDate() > 20171201 && m_TpcdEdxCorrection->IsFixedTarget()) ||
-      (GetDate() > 20181201)) fUsedNdx = kTRUE; // use dN/dx for fixed target for Run XVIII and year >= XIX
   return kStOK;
 }
 //________________________________________________________________________________
@@ -939,7 +939,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 				      "dNdx/Pion",
 				      "dNdx(uncorrected)/Pion"};
     for (Int_t t = 0; t < kTotalMethods; t++) {
-      if (! fUsedNdx && t > 4) continue;
+      if (! fUsedNdx && t >= 4) continue;
       for (Int_t s = 0; s < 2; s++) {// charge 0 => "+", 1 => "-"
 	TPoints[s][t]   = new TH3F(Form("TPoints%s%s",N[t],NS[s]),
 				   Form("%s versus Length in Tpc and <log_{2}(dX)> in TPC - iTPC %s",T[t],TS[s]),
