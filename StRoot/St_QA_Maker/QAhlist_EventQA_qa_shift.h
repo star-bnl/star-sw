@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.52 2019/03/26 15:29:37 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.53 2019/12/17 19:08:01 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.53  2019/12/17 19:08:01  genevb
+// Add more ETOF histograms
+//
 // Revision 2.52  2019/03/26 15:29:37  genevb
 // Introduce ETOF
 //
@@ -279,6 +282,10 @@
   ":tpx,svt;tpc,svt:QaPtrkRZf0TS",
   ":itpc:TPC_adc_sec_inner",
   ":itpc:TPC_adc_sec_outer",
+  ":emc:bemcClNum",
+  ":emc:bemcClEnergy",
+  ":emc:bemcEta",
+  ":emc:bemcPhi",
   ":bsmd:bsmdeClNum",
   ":bsmd:bsmdeEta",
   ":bsmd:bsmdpClNum",
@@ -325,6 +332,7 @@
   ":mtd:QaMtdHitMap",
   ":mtd:QaMtdNMatchHits",
   ":mtd:QaMtdMatchHitMap",
+  ":tof:QaTofPID",
   ":etof:etofHit_tof",
   ":etof,tof:averageTimeDiff_etofHits_btofHits",
   ":etof,tof:multiplicity_etofHits_btofHits",
@@ -332,4 +340,6 @@
   ":etof,tpx:A_eTofHits_globalXY",
   ":etof,tpx:B_intersectionMult_etofMult",
   ":etof,tpx:G_matchCand_beta_signmom",
-  ":etof,tpx:G_matchCand_timeOfFlight_pathLength"
+  ":etof,tpx:G_matchCand_timeOfFlight_pathLength",
+  ":etof,tpx:G_primary_Intersection_validMatch",
+  ":etof,tpx:H_matchCand_t0corr_1d"

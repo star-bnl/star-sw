@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.54 2019/05/22 21:24:31 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.55 2019/12/17 19:08:01 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.55  2019/12/17 19:08:01  genevb
+// Add more ETOF histograms
+//
 // Revision 2.54  2019/05/22 21:24:31  genevb
 // Add sDCA vs. time-in-run
 //
@@ -228,7 +231,7 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
   for (i=0; i<kRP_MAXSEQ; i++) m_RP_clusters_xy[i] = 0 ;
 
 // ETOF histograms
-  for (i=0; i<8; i++) m_etofHist[i] = 0;
+  for (i=0; i<10; i++) m_etofHist[i] = 0;
 
 }
 //_____________________________________________________________________________
@@ -630,6 +633,8 @@ void StQAMakerBase::BookHistETOF(){
       m_etofHist[etofCnt++] = (TH1*) (emMaker->GetHist("B_intersectionMult_etofMult"));
       m_etofHist[etofCnt++] = (TH1*) (emMaker->GetHist("G_matchCand_beta_signmom"));
       m_etofHist[etofCnt++] = (TH1*) (emMaker->GetHist("G_matchCand_timeOfFlight_pathLength"));
+      m_etofHist[etofCnt++] = (TH1*) (emMaker->GetHist("G_primary_Intersection_validMatch"));
+      m_etofHist[etofCnt++] = (TH1*) (emMaker->GetHist("H_matchCand_t0corr_1d"));
     }
     for (int i=0; i<etofCnt; i++) AddHist(m_etofHist[i]);
   }
