@@ -86,8 +86,7 @@ void  TpcHit::Fill(Long64_t entry) {
   static TH3F *hist3DMZ = 0, *hist3DMT = 0, *hist3DMZL = 0;
   if (! hist3DZ) {
     TDirectory *old = gDirectory;
-    TString newF(gSystem->BaseName(old->GetName()));
-    newF.ReplaceAll(".root","TpcHitZTMfl0.root");
+    TString newF("TpcHitZTMfl0.root");
     fOut = new TFile(newF,"recreate");
     hist3DZ  = new TH3F("Z","|z| versus sector and row",24,0.5,24.5,72,0.5,72.5,260,200,213);
     hist3DZL = new TH3F("ZL","Drift distance sector local versus sector and row",24,0.5,24.5,72,0.5,72.5,500,-10,10);

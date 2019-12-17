@@ -16,7 +16,10 @@
      set l        = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
      set chain    = `echo $INPUTFILE0 | awk -F\: '{print $4}'`
    else
-     exit 1;
+     set evtsFile = $INPUTFILE0
+     set f        = 1
+     set l        = 5000
+     set chain    = ""
    endif
   echo "${evtsFile}"
   set filel    = `basename $evtsFile .daq`

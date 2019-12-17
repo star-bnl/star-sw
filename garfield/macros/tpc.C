@@ -1,7 +1,7 @@
 /* Heinrich Schindler 04/22/13
   root.exe lGarfield.C tpc.C+
  */
-#define __DONT_AVALANCHE__
+//#define __DONT_AVALANCHE__
 //#define __USE_AvalancheMicroscopic
 #include <iostream>
 #include <fstream>
@@ -31,7 +31,7 @@
 #include "FundamentalConstants.hh"
 #include "Random.hh"
 #include "Plotting.hh"
-#define __DriftVelocity__
+//#define __DriftVelocity__
 using namespace Garfield;
 
 void tpc(Int_t nEvents = 10000, const Char_t *file = "") {
