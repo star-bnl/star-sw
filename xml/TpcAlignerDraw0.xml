@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!-- <job maxFilesPerProcess="10" fileListSyntax="paths" copyInputLocally="false">  -->
+<!-- <job maxFilesPerProcess="1" fileListSyntax="paths" copyInputLocally="false">  -->
 <job maxFilesPerProcess="5" filesPerHour="1" fileListSyntax="paths" copyInputLocally="false">
 	<command>
          cd ${SUBMITTINGDIRECTORY}
@@ -13,7 +13,7 @@
   set file = `echo $evtsFile | awk -F\: '{print $2}'`  
   set logFile  = ${file}B.log
   if ( -r $logFile) continue;
-  root.exe -q -b 'TpcAlignerDraw.C+(0,"*'${run}'*Aligner.root")' &gt;&amp;  ${logFile}
+  root.exe -q -b 'TpcAlignerDraw.C+(0,"st*'${run}'*Aligner.root")' &gt;&amp;  ${logFile}
   end
 	</command>
 	<stdout URL="file:./sched$JOBID.log" />

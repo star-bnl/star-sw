@@ -2,7 +2,6 @@
 use File::Basename;
 use Cwd;
 my $pwd = cwd(); #print "pwd = $pwd\n";
-my $FIELD = "";
 if ($pwd =~ /FF/)    {$FIELD = "FF";}
 elsif ($pwd =~ /RF/) {$FIELD = "RF";}
 else {die "Cannot define field";}
@@ -30,13 +29,9 @@ if (! $FIELD) {die "Field is not defined";}
 # my @list = `$cmd`;
 # #my @list = `get_file_list.pl -delim '/' -keys 'path,filename' -cond 'magscale=ReversedFullField,filetype=online_daq,filename~st_gmt,trgsetupname=CosmicLocalClock,tpx=1,gmt=1,sanity=1,events>10000' -limit 50`;
 #my @list = glob "/net/l401/data/scratch1/daq/2019/*/*/st_cosmic_*.daq";
-#my @list = glob "/hlt/cephfs/daq/2019/*/*/st*cosmic_*.daq /hlt/cephfs/daq/2019/*/*/st*gmt*.daq";
-#my @list = glob "/hlt/cephfs/daq/2019B/*/*/st*cosmic_*.daq /hlt/cephfs/daq/2019B/*/*/st*gmt*.daq";
-my $glob = "/net/l401/data/scratch1/reco/2019/" . $FIELD . "/*event.root";
-my @list = glob $glob; #print "list = @list\n";
+my @list = glob "/hlt/cephfs/daq/2019/*/*/st*cosmic_*.daq /hlt/cephfs/daq/2019/*/*/st*gmt*.daq";
 # FF = 20028045 - 20035016
 # RF = 20035041
-my $debug = 0;
 my $runMin = -1;
 my $runmax = -1;
 if    ($FIELD eq "FF") {$runMin = 20018043; $runMax = 20035016;}
@@ -45,17 +40,14 @@ elsif ($FIELD eq "RF") {$runMin = 20048035; $runMax = 20999999;}
 else  {die "Field has not been defined";}
 foreach my $file (@list) {
   chomp($file);
-  my $bff = File::Basename::basename($file,".daq");
-  my $bf  = File::Basename::basename($bff,".event.root");
+  my $bf = File::Basename::basename($file,".daq");
   my $f = File::Basename::dirname($file);
   my $run = File::Basename::basename($f);
 #  print "runMin = $runMin , run = $run , runMax = $runMax \n";
-#  if ($run < $runMin || $run > $runMax) {next;}
-  my $root = $bf . ".MuDst.root"; print "root = $root\n" if $debug;
-  my $roott = "./MuDst/" . $root; print "root = $root\n" if $debug;
+  if ($run < $runMin || $run > $runMax) {next;}
+  my $root = $bf . ".MuDst.root"; #print "root = $root\n";
+  my $roott = "./MuDst/" . $root; #print "root = $root\n";
   if (-r $root || -r $roott) {next;}
-  my $evroot = $bf . ".event.root"; print "evroot = $evroot\n" if $debug;
-  if (-r $evroot ) {next;}
   print "string:$file\n";
 #  last;
 }

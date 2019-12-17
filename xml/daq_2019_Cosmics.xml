@@ -30,13 +30,11 @@
    if (-r $muFile) continue;
     set mmuFile = ${SUBMITTINGDIRECTORY}/MuDst/${bf}.MuDst.root
    if (-r $mmuFile) continue;
-    set mevFile = ${SUBMITTINGDIRECTORY}/MuDst/${bf}.event.root
-   if (-r $mevFile) continue;
 #   cp ${evtsFile} ${SCRATCH}/
 #   set input = ${SCRATCH}/${bf}.daq
     set bla = ${SUBMITTINGDIRECTORY}/${bf}.bla.root
     if (-r ${bla}) continue;
-    touch ${bla}
+    touch ${SUBMITTINGDIRECTORY}/${bla}
     set input = ${evtsFile};
 #root.exe -q -b 'bfc.C(1000,"P2014,TpxRaw,TpxClu2D,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,CorrX,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${input}'","'$output'","'${bf}.root'")' &gt;&amp; ${logFile}
 #root.exe -q -b 'bfc.C(1000,"P2018,TpxRaw,TpxClu,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,CorrX,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${input}'","'$output'","'${bf}.root'")' &gt;&amp; ${logFile}
@@ -46,11 +44,10 @@
 #root.exe -q -b 'bfc.C(100000,"P2019,gmt,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,OGridLeakFull,CorrX,OPr40,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,-picoWrite,-picoDst,Cosmics","'${input}'")' &gt;&amp; ${logFile}
 # root.exe -q -b 'bfc.C(100000,"P2019,TpxRaw,TpxClu,gmt,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,OGridLeakFull,CorrX,OPr40,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,-picoWrite,-picoDst,Cosmics","'${input}'")' &gt;&amp; ${logFile}
 #root.exe -q -b 'bfc.C(100000,"P2019,gmt,-l3onl,-fpd,-hitfilt,mtd,btof,OGridLeakFull,CorrX,OPr40,evout,NoHistos,noTags,noRunco,StiCA,-picoWrite,-picoDst,Cosmics","'${input}'")' &gt;&amp; ${logFile}
-#root.exe -q -b 'bfc.C(100000,"P2019a,gmt,-l3onl,-fpd,mtd,btof,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,-picoWrite,-picoDst,Cosmics,-CMuDst,-MuDst,-StrngMuDST","'${input}'")' &gt;&amp; ${logFile}
 root.exe -q -b 'bfc.C(100000,"P2019a,gmt,-l3onl,-fpd,mtd,btof,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,-picoWrite,-picoDst,Cosmics","'${input}'")' &gt;&amp; ${logFile}
     cp -p ${logFile} ${SUBMITTINGDIRECTORY}/
     cp -p ${bf}*.root ${SUBMITTINGDIRECTORY}/
-    rm ${bla}
+    rm ${SUBMITTINGDIRECTORY}/${bf}.bla.root
   end
         </command>
         <stdout URL="file:./sched$JOBID.log" />
@@ -62,9 +59,8 @@ root.exe -q -b 'bfc.C(100000,"P2019a,gmt,-l3onl,-fpd,mtd,btof,OGridLeakFull,evou
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2019/*/*/st_cosmic_*.daq" /> -->
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2019/019/*/st_cosmic_*.daq" /> -->
 <!-- <input URL="file:/hlt/cephfs/daq/2019/*/*/st_cosmic_*.daq" /> -->
-<input URL="command:2019Cosmic.pl" />
-<!-- <input URL="file:/gpfs01/star/daq/2019/116/20116019/*.daq" /> -->
-<!-- <input URL="file:/hlt/cephfs/daq/2019B/038/20038001/st_hltcosmic*.daq" /> -->
+<!-- <input URL="command:2019Cosmic.pl" /> -->
+<input URL="file:/gpfs01/star/daq/2019/116/20116019/*.daq" />
 <!-- <output fromScratch="*.root" toURL="file./"/> -->
 <!-- <output fromScratch="*B.log" toURL="file:./"/> -->
 </job>

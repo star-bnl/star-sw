@@ -1,6 +1,6 @@
 /* 
    root.exe -q -b TpcPrompt.C >& TpcPrompt.log &
-   root.exe -q -b 'Chain.C+("../*.root","TpcHit")' 'TpcPrompt.C+(tChain)' >& TpcPrompt.log &
+   root.exe -q -b 'Chain.C+("hlt*.root","TpcHit")' 'TpcPrompt.C+(tChain)' >& TpcPrompt.log &
 
    Fit
    root.exe -q -b TpcHit.root TpcPrompt.C+
@@ -86,7 +86,8 @@ void  TpcHit::Fill(Long64_t entry) {
   static TH3F *hist3DMZ = 0, *hist3DMT = 0, *hist3DMZL = 0;
   if (! hist3DZ) {
     TDirectory *old = gDirectory;
-    TString newF("TpcHitZTMfl0.root");
+    TString newF(gSystem->BaseName(old->GetName()));
+    newF.ReplaceAll(".root","TpcHitZTMfl0.root");
     fOut = new TFile(newF,"recreate");
     hist3DZ  = new TH3F("Z","|z| versus sector and row",24,0.5,24.5,72,0.5,72.5,260,200,213);
     hist3DZL = new TH3F("ZL","Drift distance sector local versus sector and row",24,0.5,24.5,72,0.5,72.5,500,-10,10);
@@ -177,7 +178,6 @@ void Draw(const Char_t *tag = "New") {
     return;
   }
   Draw(tree);
-  
 }
 //________________________________________________________________________________
 void ClusterSize(const Char_t *f0 = "AuAu200AltroDef/st_physics_adc_15152001_raw_1000013.TpcHit.root",
@@ -460,11 +460,6 @@ void T0Fit(TH3F *D = 0, Int_t iX = 0, Int_t iY = 0) {
 //________________________________________________________________________________
 void TpcPrompt(const Char_t *chainN = "TpcHit") {
   TChain *chain = (TChain *) gDirectory->Get(chainN);
-  if (! chain) return;
-  Draw(chain);
-}
-//________________________________________________________________________________
-void TpcPrompt(TChain *chain) {
   if (! chain) return;
   Draw(chain);
 }
