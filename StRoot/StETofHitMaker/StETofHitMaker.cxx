@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHitMaker.cxx,v 1.5 2019/12/12 02:27:09 fseck Exp $
+ * $Id: StETofHitMaker.cxx,v 1.6 2019/12/17 03:27:51 fseck Exp $
  *
  * Author: Philipp Weidenkaff & Florian Seck, April 2018
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StETofHitMaker.cxx,v $
+ * Revision 1.6  2019/12/17 03:27:51  fseck
+ * update to histograms for .hist.root files
+ *
  * Revision 1.5  2019/12/12 02:27:09  fseck
  * enable clock jump correction by default
  *
@@ -1720,11 +1723,11 @@ StETofHitMaker::bookHistograms()
 {
     LOG_INFO << "bookHistograms() ... " << endm;
 
-    mHistograms[ "etofHit_tof"                       ] = new TH1F( "etofHit_tof",           "eTOF hit time of flight;time of flight (ns);# hits", 2000, -100., 150 );
+    mHistograms[ "etofHit_tof"                       ] = new TH1F( "etofHit_tof",           "eTOF hit time of flight;time of flight (ns);# hits", 4000, -100., 150 );
     mHistograms[ "etofHit_tof_fullrange"             ] = new TH1F( "etofHit_tof_fullrange", "eTOF hit time of flight;time of flight (ns);# hits", 5000, -800., eTofConst::bTofClockCycle );
-    mHistograms[ "averageTimeDiff_etofHits_btofHits" ] = new TH1F( "averageTimeDiff_etofHits_btofHits", "difference between average times in bTOF and eTOF hits;#DeltaT (ns);# events", 26000, -800, eTofConst::bTofClockCycle );
-    mHistograms[ "multiplicity_etofHits_btofHits"    ] = new TH2F( "multiplicity_etofHits_btofHits", "multiplicity correlation between bTOF and eTOF;# eTOF hits;# bTOF hits",         200, 0, 200, 500, 0, 1000 );
-    mHistograms[ "multiplicity_etofHits_epdEast"     ] = new TH2F( "multiplicity_etofHits_epdEast",  "multiplicity correlation between eTOF and east EPD;# eTOF hits;# hits east EPD", 200, 0, 200, 200, 0, 1000 );
+    mHistograms[ "averageTimeDiff_etofHits_btofHits" ] = new TH1F( "averageTimeDiff_etofHits_btofHits", "difference between average times in bTOF and eTOF hits;#DeltaT (ns);# events", 20000, -500, 500 );
+    mHistograms[ "multiplicity_etofHits_btofHits"    ] = new TH2F( "multiplicity_etofHits_btofHits", "multiplicity correlation between bTOF and eTOF;# eTOF hits;# bTOF hits",         300, 0, 300, 500, 0, 1000 );
+    mHistograms[ "multiplicity_etofHits_epdEast"     ] = new TH2F( "multiplicity_etofHits_epdEast",  "multiplicity correlation between eTOF and east EPD;# eTOF hits;# hits east EPD", 300, 0, 300, 200, 0, 1000 );
 
     AddHist( mHistograms.at( "etofHit_tof"                       ) );
     AddHist( mHistograms.at( "etofHit_tof_fullrange"             ) );
