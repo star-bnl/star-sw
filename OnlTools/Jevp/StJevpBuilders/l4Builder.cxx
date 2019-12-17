@@ -307,6 +307,7 @@ void l4Builder::initialize(int argc, char *argv[])
 void l4Builder::startrun(daqReader *rdr)
 {
     //printf("hello there. This is startrun\n");
+        eventCounter = 0;
 	runnumber = rdr->run;
 
         for(int i = 0; i < nHltPlots; i++) {
@@ -2399,6 +2400,7 @@ void l4Builder::defineHltPlots()
 	ph->histo = hdEdx;
 	HltPlots[index]->addHisto(ph);
 	HltPlots[index]->setDrawOpts("colz");
+        HltPlots[index]->optlogz = 1;
 
 	index++; //10
 	hLn_dEdx = new TH1D("Ln_dEdx", "Ln_dEdx", 500, -14, -11.5);
@@ -2436,6 +2438,7 @@ void l4Builder::defineHltPlots()
 	ph->histo = hGlob_dEdx;
 	HltPlots[index]->addHisto(ph);
 	HltPlots[index]->setDrawOpts("colz");
+        HltPlots[index]->optlogz = 1;
 
 	// Prim Tracks
 	index++; //15
@@ -2466,6 +2469,7 @@ void l4Builder::defineHltPlots()
 	ph->histo = hPrim_dEdx;
 	HltPlots[index]->addHisto(ph);
 	HltPlots[index]->setDrawOpts("colz");
+        HltPlots[index]->optlogz = 1;
 
 	// Event
 	index++; //19
@@ -2732,7 +2736,7 @@ void l4Builder::defineHltPlots()
 
         index++; // 59
         pEtofNhitsPerEvent = new TProfile("EtofNhitsPerEvent", "ETOF <nhits> per event; Second in the run; <nhits>",
-                                          360, 0, 3600);
+                                          250, 0, 2500);
         HltPlots[index]->addHisto(new PlotHisto(pEtofNhitsPerEvent));
 }
 
@@ -2797,7 +2801,7 @@ void l4Builder::defineBesGoodPlots()
 	BesGoodPlots[index]->addHisto(ph);
 
 	index++; //4
-	hBesGoodVrVsVz = new TH2D("BesGood_VrVsVz","BesGood_VrVsVz",1000,-150,150,400,0,10);
+	hBesGoodVrVsVz = new TH2D("BesGood_VrVsVz","BesGood_VrVsVz",600,-150,150,100,0,2);
         ph = new PlotHisto();
         ph->histo = hBesGoodVrVsVz;
         BesGoodPlots[index]->addHisto(ph);
@@ -2996,6 +3000,7 @@ void l4Builder::defineHeavyFragmentPlots()
 	ph->histo = hdEdx;
 	HeavyFragmentPlots[index]->addHisto(ph);
 	HeavyFragmentPlots[index]->setDrawOpts("colz");
+        HeavyFragmentPlots[index]->optlogz = 1;
 }
 void l4Builder::defineDiElectronPlots() // not only J/Psi, but di-pion, di-muon
 {
