@@ -29,7 +29,7 @@
 #  root.exe -q -b -x 'bfc.C('$f','$l',"pp2017,btof,-beamline,BEmcChkStat,StiCA,stipulls,CorrX,OSpaceZ2,OGridLeakFull,-hitfilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
 #  root.exe -q -b -x 'bfc.C('$f','$l',"pp2017,btof,-beamline,BEmcChkStat,StiCA,CorrX,OSpaceZ2,OGridLeakFull,-hitfilt,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
 #  root.exe -q -b -x 'bfc.C(100,"p2017a,btof,-beamline,BEmcChkStat,StiCA,CorrX,OSpaceZ2,OGridLeakFull,-hitfilt,evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
- root.exe -q -b 'TpcRS.C(500,"rc.y2019","'${evtsFile}'","")' &gt;&amp; ${logFile}
+ root.exe -q -b 'bfc.C(1000,"rc.y2019,tpxRaw,tpxClu,McTpcAna","'${evtsFile}'","")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
