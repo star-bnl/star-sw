@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofMatchMaker.cxx,v 1.7 2019/12/10 16:00:34 fseck Exp $
+ * $Id: StETofMatchMaker.cxx,v 1.8 2019/12/17 03:28:01 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StETofMatchMaker.cxx,v $
+ * Revision 1.8  2019/12/17 03:28:01  fseck
+ * update to histograms for .hist.root files
+ *
  * Revision 1.7  2019/12/10 16:00:34  fseck
  * possibility to use step-wise track extrapolation in changing magnetic field via setting a flag
  *
@@ -100,32 +103,32 @@ const float maxEtaProjCut = -1.7;
 
 // --> TODO: move to database once alignment procedure is in place
 const double deltaXoffset[ 108 ] = {
-    0.00,  0.00,  0.00,  2.04,  2.51,  3.21,  2.05,  2.68,  3.33,
-    1.72,  2.18,  2.59,  2.16,  2.72,  3.35,  2.03,  2.61,  3.37,
-    1.66,  2.12,  2.63,  2.02,  2.63,  3.28,  2.11,  2.66,  3.34,
-    1.52,  2.05,  2.51,  1.94,  2.49,  3.12,  2.06,  2.75,  3.49,
-    1.17,  1.72,  2.23,  1.61,  2.27,  2.88,  1.84,  2.46,  3.31,
-    1.23,  1.85,  2.25,  1.86,  2.29,  3.08,  1.92,  2.45,  3.23,
-    1.05,  1.68,  2.21,  1.80,  2.39,  3.05,  0.00,  0.00,  0.00,
-    1.31,  1.90,  2.24,  2.06,  2.42,  3.04,  0.00,  2.46,  3.07,
-    1.55,  2.09,  2.37,  2.07,  0.00,  3.13,  0.00,  0.00,  0.00,
-    1.82,  2.27,  2.73,  0.00,  0.00,  0.00,  2.14,  2.71,  3.42,
-    1.87,  2.29,  2.73,  1.94,  2.48,  3.16,  2.03,  2.65,  0.00,
-    1.81,  2.25,  2.75,  1.90,  2.42,  3.14,  1.98,  2.59,  3.24 };
+    2.01,  2.46,  2.91,  2.09,  2.68,  3.34,  2.08,  2.82,  3.46,
+    1.68,  2.21,  2.97,  2.03,  2.53,  3.52,  1.99,  2.64,  3.59,
+    1.67,  2.17,  2.68,  1.99,  2.69,  3.33,  2.11,  2.80,  3.43,
+    1.53,  2.10,  2.59,  1.89,  2.47,  3.19,  2.17,  2.86,  3.60,
+    1.35,  1.89,  2.40,  1.75,  2.39,  3.06,  1.97,  2.63,  3.43,
+    1.04,  1.78,  2.18,  1.85,  2.34,  3.09,  1.93,  2.56,  3.27,
+    1.14,  1.76,  2.27,  1.75,  2.39,  3.05,  1.91,  2.68,  3.28,
+    1.34,  1.96,  2.28,  2.02,  2.46,  3.02,  1.88,  2.54,  3.14,
+    1.70,  2.22,  2.51,  2.08,  2.65,  3.24,  2.05,  2.78,  3.32,
+    1.91,  2.41,  2.86,  2.20,  2.79,  3.35,  2.20,  2.91,  3.50,
+    1.97,  2.40,  2.87,  2.08,  2.64,  3.28,  2.06,  2.77,  3.35,
+    2.08,  2.52,  3.07,  2.03,  2.67,  3.31,  2.04,  2.74,  3.39 };
 
 const double deltaYoffset[ 108 ] = {
-    0.00,  0.00,  0.00,  0.49,  0.69,  0.92, -0.21, -0.11, -0.16,
-    0.71,  0.79,  1.01,  0.28,  0.72,  1.12,  0.06, -0.16,  0.08,
-    0.50,  0.56,  0.75,  0.11,  0.49,  0.91, -0.20, -0.19, -0.10,
-    0.16,  0.11,  0.15, -0.13,  0.10,  0.53, -0.42, -0.51, -0.57,
-    0.45,  0.62,  0.69,  0.04,  0.48,  0.73, -0.31, -0.14, -0.31,
-    0.81,  0.97,  1.11,  0.20,  0.56,  0.86, -0.24, -0.19, -0.13,
-    1.08,  1.13,  1.21, -0.24,  0.52,  1.06,  0.00,  0.00,  0.00,
-    1.38,  1.25,  1.28,  0.44,  0.76,  0.96,  0.00, -0.23, -0.16,
-    1.37,  1.25,  1.18,  0.45,  0.00,  0.80,  0.00,  0.00,  0.00,
-    1.65,  1.44,  1.30,  0.00,  0.00,  0.00, -0.01, -0.17, -0.17,
-    1.25,  1.23,  1.20,  0.56,  0.85,  0.79,  0.05, -0.14,  0.00,
-    1.26,  1.31,  1.26,  0.50,  0.79,  1.26, -0.03,  0.06,  0.06 };
+    0.79,  0.83,  0.65,  0.18,  0.62,  1.03, -0.22, -0.10, -0.15,
+    0.50,  0.63,  0.77,  0.11,  0.53,  1.11, -0.10, -0.24,  0.08,
+    0.35,  0.49,  0.36, -0.03,  0.26,  0.84, -0.24, -0.28, -0.15,
+    0.20,  0.05,  0.08, -0.24,  0.04,  0.37, -0.41, -0.62, -0.75,
+    0.50,  0.63,  0.48, -0.08,  0.28,  0.47, -0.36, -0.39, -0.39,
+    0.62,  0.67,  1.03,  0.13,  0.49,  0.75, -0.36, -0.29, -0.30,
+    1.05,  1.12,  1.06,  0.15,  0.50,  0.69, -0.29, -0.05, -0.23,
+    1.39,  1.17,  1.22,  0.39,  0.63,  0.93, -0.17, -0.50, -0.36,
+    1.27,  1.22,  0.89,  0.29,  0.22,  1.06, -0.35, -0.57, -0.54,
+    1.67,  1.51,  1.16,  0.33,  0.70,  1.04,  0.09, -0.11, -0.28,
+    1.38,  1.31,  0.94,  0.22,  0.49,  0.54, -0.21, -0.26, -0.28,
+    1.06,  1.12,  1.29,  0.30,  0.70,  1.34, -0.01,  0.16, -0.03 };
 
 const double deltaRcut = 4.;
 
@@ -498,9 +501,7 @@ StETofMatchMaker::Make()
 
     calculatePidVariables( finalMatchVec, nPrimaryWithPid );
 
-    if( mDoQA ) {
-      mHistograms.at( "primaryIntersect_Pid" )->Fill( nPrimaryWithIntersection, nPrimaryWithPid );
-    }
+    mHistograms.at( "primaryIntersect_validMatch" )->Fill( nPrimaryWithIntersection, nPrimaryWithPid );
 
     //.........................................................................
     // H. fill QA histograms
@@ -1754,6 +1755,7 @@ StETofMatchMaker::calculatePidVariables( eTofHitVec& finalMatchVec, int& nPrimar
         
     if( fabs( tstart + 9999. ) < 0.01 ) {
         LOG_WARN << "calculatePidVariables() -- no valid start time available ... skip filling pidTraits with more information" << endm;
+        nPrimaryWithPid = -1;
         return;
     }
 
@@ -2129,7 +2131,13 @@ StETofMatchMaker::fillQaHistograms( eTofHitVec& finalMatchVec )
             continue;
         }
 
+        // expected time of flight for mass hypothesis pion
+        float tofpi = expectedTimeOfFlight( matchCand.pathLength, mom, pion_plus_mass_c2 );
+
         mHistograms.at( "matchCand_beta_signmom" )->Fill( sign * mom, 1. / beta );
+        if( mom > 0.6 && mom < 1.5 ) {
+            mHistograms.at( "matchCand_t0corr_1d" )->Fill( matchCand.tof - tofpi );
+        }
 
         if( mDoQA ) {
             float tof        = matchCand.tof;
@@ -2152,9 +2160,6 @@ StETofMatchMaker::fillQaHistograms( eTofHitVec& finalMatchVec )
             // plots per counter
             std::string histName_beta_mom = "matchCand_beta_mom_s" + std::to_string( matchCand.sector ) + "m" + std::to_string( matchCand.plane ) + "c" + std::to_string( matchCand.counter );
             mHistograms.at( histName_beta_mom )->Fill( mom, 1. / beta );
-
-            // expected time of flight for mass hypothesis pion
-            float tofpi = expectedTimeOfFlight( pathlength , mom, pion_plus_mass_c2 );
 
             std::string histName_t0corr_mom  = "matchCand_t0corr_mom_s" + std::to_string( matchCand.sector ) + "m" + std::to_string( matchCand.plane ) + "c" + std::to_string( matchCand.counter );
             mHistograms.at( histName_t0corr_mom )->Fill( mom, tof - tofpi );
@@ -2306,17 +2311,21 @@ StETofMatchMaker::bookHistograms()
     LOG_INFO << "bookHistograms" << endm;
 
     mHistograms[ "eTofHits_globalXY" ]         = new TH2F( "A_eTofHits_globalXY",         "global XY;x (cm);y (cm)",                                            400, -300., 300.,  400, -300., 300. );
-    mHistograms[ "intersectionMult_etofMult" ] = new TH2F( "B_intersectionMult_etofMult", "multiplicity correlation;# eTOF hits;#track intersections;# events", 200,    0., 200.,  200,    0., 200. );
+    mHistograms[ "intersectionMult_etofMult" ] = new TH2F( "B_intersectionMult_etofMult", "multiplicity correlation;# eTOF hits;#track intersections;# events", 300,    0., 300.,  200,    0., 200. );
     mHistograms[ "matchCand_globalXY" ]        = new TH2F( "C_matchCand_globalXY",        "global XY;x (cm);y (cm)",                                            400, -300., 300.,  400, -300., 300. );
-    mHistograms[ "matchCand_beta_signmom" ]    = new TH2F( "G_matchCand_beta_signmom" ,   "match candidate 1/beta vs. momentum;q/|q| * p (GeV/c);1/#beta",      400,  -10.,  10., 1000,   0.8,   2. );
-    mHistograms[ "matchCand_timeOfFlight_pathLength_zoom" ] = new TH2F( "G_matchCand_timeOfFlight_pathLength", "match candidate pathlength vs. time of flight;ToF (ns);pathlength (cm)", 800, -25., 75., 800, 200., 600. );
-
+    mHistograms[ "matchCand_beta_signmom" ]    = new TH2F( "G_matchCand_beta_signmom" ,   "match candidate 1/beta vs. momentum;q/|q| * p (GeV/c);1/#beta",      400,   -4.,   6., 1000,   0.8,   2. );
+    mHistograms[ "matchCand_timeOfFlight_pathLength_zoom" ] = new TH2F( "G_matchCand_timeOfFlight_pathLength", "match candidate pathlength vs. time of flight;ToF (ns);pathlength (cm)",  800, -25., 75., 800, 200., 600. );
+    mHistograms[ "primaryIntersect_validMatch" ]            = new TH2F( "G_primary_Intersection_validMatch", "primary tracks at eTOF;# tracks with intersection;# tracks with valid PID", 200,  0., 200., 100,   0., 100. );
+    mHistograms[ "matchCand_t0corr_1d"     ] = new TH1F( "H_matchCand_t0corr_1d", "measured tof - tof_{#pi};#Delta time (ns);counts", 3000, -15., 15. );
+                    
 
     AddHist( mHistograms.at( "eTofHits_globalXY"         ) );
     AddHist( mHistograms.at( "intersectionMult_etofMult" ) );
     AddHist( mHistograms.at( "matchCand_globalXY"        ) );
     AddHist( mHistograms.at( "matchCand_beta_signmom"    ) );
     AddHist( mHistograms.at( "matchCand_timeOfFlight_pathLength_zoom" ) );
+    AddHist( mHistograms.at( "primaryIntersect_validMatch" ) );
+    AddHist( mHistograms.at( "matchCand_t0corr_1d" ) );
 
     if( mDoQA ) {
         // histograms to test sector & module numbering
@@ -2504,9 +2513,6 @@ StETofMatchMaker::bookHistograms()
         // ----------
         // step - H -
         // ----------
-
-        mHistograms[ "primaryIntersect_Pid" ] = new TH2F( "H_primaryIntersection_Pid", "primary tracks at eTOF;# tracks with intersection;# tracks with PID", 200, 0., 200., 100, 0., 100. );
-
         mHistograms[ "matchCand_beta_mom"     ] = new TH2F( "H_matchCand_beta_mom"     , "match candidate 1/beta vs. momentum;p (GeV/c);1/#beta",         400,   0., 10., 1000, 0.8, 2. );
 
         mHistograms[ "matchCand_beta_mom_matchDistCut" ] = new TH2F( "H_matchCand_beta_mom_matchDistCut" , "match candidate 1/beta vs. momentum;p (GeV/c);1/#beta", 400, 0., 10., 1000, 0.8, 2. );
