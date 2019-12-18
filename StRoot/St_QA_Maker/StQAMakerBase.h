@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.33 2019/05/22 21:24:31 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.34 2019/12/17 19:08:01 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.34  2019/12/17 19:08:01  genevb
+// Add more ETOF histograms
+//
 // Revision 2.33  2019/05/22 21:24:31  genevb
 // Add sDCA vs. time-in-run
 //
@@ -166,7 +169,7 @@ class StQAMakerBase : public StMaker {
   virtual void   UseHistSet(Int_t s) { histsSet=s; }
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.33 2019/05/22 21:24:31 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.34 2019/12/17 19:08:01 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -213,7 +216,7 @@ class StQAMakerBase : public StMaker {
   TH2F     *m_RP_clusters_xy[kRP_MAXSEQ] ; // cluster positions
 
   // ETOF histograms
-  TH1      *m_etofHist[8]; //!
+  TH1      *m_etofHist[10]; //!
 
 // **************** Members For Internal Use ***************************
  protected:
