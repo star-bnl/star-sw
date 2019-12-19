@@ -107,7 +107,7 @@ TDataSet *CreateTable() {
   // diff                                   : 9.13675e-02                          6.29849e-02
   // SecRow3CGFTpcRS_2011_pp500LowLum_g     : 3.12857e-01                          2.67379e-01
   const Double_t RowSigmaTrs[4] = {
-    9.13675e-02, 0,  // Inner
+    0.2313675,   0,  // 9.13675e-02, 0,  // Inner // 9.13675e-02+0.14
     6.29849e-02, 0}; // Outer
   Float_t *b = &row.SecRowSigIW[0];
   for (Int_t i = 0; i < 8; i++) {
