@@ -173,7 +173,7 @@ void l4Builder::initialize(int argc, char *argv[])
 		BeamPlots[i]->gridy = 0;                                                                       
 		BeamPlots[i]->setPalette(1);                                                                   
 	}    
-	for(int i = 0; i < 6; i++) {
+	for(int i = 0; i < nBesGoodPlots; i++) {
 		BesGoodPlots[i] = new JevpPlot();
 		BesGoodPlots[i]->gridx = 0;
 		BesGoodPlots[i]->gridy = 0;
@@ -185,7 +185,7 @@ void l4Builder::initialize(int argc, char *argv[])
 		BesMonitorPlots[i]->gridy = 0;
 		BesMonitorPlots[i]->setPalette(1);
 	}
-	for(int i = 0; i < 4; i++) {
+	for(int i = 0; i < nHLTGood2Plots; i++) {
 		HLTGood2Plots[i] = new JevpPlot();
 		HLTGood2Plots[i]->gridx = 0;
 		HLTGood2Plots[i]->gridy = 0;
@@ -266,11 +266,11 @@ void l4Builder::initialize(int argc, char *argv[])
 		LOG(DBG, "Adding plot %d", i);
 		addPlot(HltPlots[i]);
 	}
-	for(int i = 0; i < 4; i++) {
+	for(int i = 0; i < nHLTGood2Plots; i++) {
 		LOG(DBG, "Adding plot %d", i);
 		addPlot(HLTGood2Plots[i]);
 	}
-	for(int i = 0; i < 6; i++) {
+	for(int i = 0; i < nBesGoodPlots; i++) {
        	        LOG(DBG, "Adding plot %d", i);
 	        addPlot(BesGoodPlots[i]);
 	}
@@ -313,8 +313,8 @@ void l4Builder::startrun(daqReader *rdr)
         for(int i = 0; i < nHltPlots; i++) {
 		getPlotByIndex(i)->getHisto(0)->histo->Reset();
 	}
-	for(int i = 0; i < 6; i++)BesGoodPlots[i]->getHisto(0)->histo->Reset();
-	for(int i = 0; i < 4; i++)HLTGood2Plots[i]->getHisto(0)->histo->Reset();
+	for(int i = 0; i < nBesGoodPlots; i++)BesGoodPlots[i]->getHisto(0)->histo->Reset();
+	for(int i = 0; i < nHLTGood2Plots; i++)HLTGood2Plots[i]->getHisto(0)->histo->Reset();
 	for(int i = 0; i < 4; i++)BesMonitorPlots[i]->getHisto(0)->histo->Reset();
 	for(int i = 0; i < 12; i++)FixedTargetPlots[i]->getHisto(0)->histo->Reset();
 	for(int i = 0; i < 6; i++)FixedTargetMonitorPlots[i]->getHisto(0)->histo->Reset();
@@ -426,6 +426,8 @@ void l4Builder::stoprun(daqReader *rdr)
 	hMTDQmUpsilonMassUS->SetMarkerColor(1);
 	hMTDQmUpsilonMassUS->SetLineColor(1);
 	hMTDQmUpsilonMassLS->SetLineColor(4);
+
+	hHLTGood2VertexZ->Fit("gaus", "", "", -100, 100);
 
 	float low = -13.12;
 	float high = -12.8;
@@ -595,10 +597,10 @@ void l4Builder::writeHistogram()
 	}
 
 	if(BESGoodFilled){
-		for(int i = 0; i < 6; i++)BesGoodPlots[i]->getHisto(0)->histo->Write();
+		for(int i = 0; i < nBesGoodPlots; i++)BesGoodPlots[i]->getHisto(0)->histo->Write();
 	}
 	if(HLTGood2Filled){
-		for(int i = 0; i < 4; i++)HLTGood2Plots[i]->getHisto(0)->histo->Write();
+		for(int i = 0; i < nHLTGood2Plots; i++)HLTGood2Plots[i]->getHisto(0)->histo->Write();
 	}
 	if(BESMonitorFilled){
 		for(int i = 0; i < 4; i++)BesMonitorPlots[i]->getHisto(0)->histo->Write();
@@ -914,6 +916,11 @@ void l4Builder::event(daqReader *rdr)
 	      hBesGoodVrVsVz->Fill(vertZ,vertR);
               hBesGoodBunchId->Fill(hlt_eve->bunch_id);
 
+	      if (hlt_pt->nPrimaryTracks > 200) {
+		  pBesGoodVxT->Fill(evt_time - first_evt_time, vertX);
+		  pBesGoodVyT->Fill(evt_time - first_evt_time, vertY);
+	      }
+
               // Operations only interested in hltgood events
               hBbceTAC->Fill(hlt_eve->bbce);
               hBbcwTAC->Fill(hlt_eve->bbcw);
@@ -933,6 +940,10 @@ void l4Builder::event(daqReader *rdr)
 	      hHLTGood2VertexXY->Fill(vertX, vertY);
 	      hHLTGood2VertexZ->Fill(vertZ);
 	      hHLTGood2Vr->Fill(vertR);
+
+	      if (hlt_pt->nPrimaryTracks > 200 && std::abs(vertZ) < 100) {
+		  pHLTGood2VzT->Fill(evt_time - first_evt_time, vertZ);
+	      }
 	    }
 	    
 	    //BESMonitor
@@ -2809,6 +2820,23 @@ void l4Builder::defineBesGoodPlots()
         index++; // 5
         hBesGoodBunchId = new TH1D("BesGoodBunchId", "HLTGood Bunch ID;Bunch ID", 130, -5, 125);
         BesGoodPlots[index]->addHisto(new PlotHisto(hBesGoodBunchId));
+
+	index++; // 6
+	pBesGoodVxT = new TProfile("BesGoodVxT", "<Vx> vs. time (nPTracks > 200);Seconds in the run;<Vx>", 
+				   80, 0, 2400, -1.5, 1.5, "s");
+	//pBesGoodVxT->GetYaxis()->SetLimits(-0.5, 0.1);
+	BesGoodPlots[index]->addHisto(new PlotHisto(pBesGoodVxT));
+	BesGoodPlots[index]->setMaxY(.1);
+	BesGoodPlots[index]->setMinY(-.5);
+	
+
+	index++; // 7
+	pBesGoodVyT = new TProfile("BesGoodVyT", "<Vy> vs. time  (nPTracks > 200);Seconds in the run;<Vy>", 
+				   80, 0, 2400, -1.5, 1.5, "s");
+	pBesGoodVyT->GetYaxis()->SetLimits(-0.5, 0.1);
+	BesGoodPlots[index]->addHisto(new PlotHisto(pBesGoodVyT));	
+	BesGoodPlots[index]->setMaxY(.1);
+	BesGoodPlots[index]->setMinY(-.5);
 }
 
 void l4Builder::defineHLTGood2Plots()
@@ -2837,6 +2865,11 @@ void l4Builder::defineHLTGood2Plots()
 	ph = new PlotHisto();
 	ph->histo = hHLTGood2primaryMult;
 	HLTGood2Plots[index]->addHisto(ph);
+
+	index++; //4
+	pHLTGood2VzT = new TProfile("HLTGood2VzT", "<Vz> vs. time  (nPTracks > 200);Seconds in the run;<Vz>", 
+				   80, 0, 2400, -100, 100, "s");
+	HLTGood2Plots[index]->addHisto(new PlotHisto(pHLTGood2VzT));
 }
 
 void l4Builder::defineBesMonitorPlots()

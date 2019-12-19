@@ -61,6 +61,7 @@ class JevpPlot : public TObject {
     int nevts;
 
     double external_maxy;
+    double external_miny;
 
     double legendx1;
     double legendy1;
@@ -69,6 +70,7 @@ class JevpPlot : public TObject {
 
     double getMaxY();
     void setMaxY(double ymax);
+    void setMinY(double ymin);
     void setRefComment(char *comment);
     void addHisto(PlotHisto *hist); 
     void addHisto(TH1 *roothist);

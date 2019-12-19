@@ -93,6 +93,7 @@ void JevpPlot::setDrawOpts(const char *opts)
 
 JevpPlot::JevpPlot(TH1 *firsthisto) { 
   external_maxy = -9999;
+  external_miny = -9999;
   logx = 0;
   logy = 0;
   optlogz = -1;
@@ -142,8 +143,14 @@ double JevpPlot::getMaxY()   // this gets the max from the bins...
 
 void JevpPlot::setMaxY(double maxY)   // this sets the actual histogram bounds...
 {
-  external_maxy = maxY;
+    external_maxy = maxY;
 }
+
+void JevpPlot::setMinY(double minY)
+{
+    external_miny = minY;
+}
+
 
 void JevpPlot::reset()
 {
@@ -199,6 +206,7 @@ JevpPlot::JevpPlot(JevpPlot &x)
   lastUpdate = x.lastUpdate;
   nevts = x.nevts;
   external_maxy = x.external_maxy;
+  external_miny = x.external_miny;
 
   legendx1 = x.legendx1;
   legendx2 = x.legendx2;
@@ -540,7 +548,7 @@ void JevpPlot::draw()
 
 	    m = curr->histo->GetBinContent(curr->histo->GetMaximumBin());
       
-	    LOG(NOTE, "Histo %s: (%s) m=%f",GetPlotName(), curr->histo->GetName(), m);
+	    LOG("JEFF", "Histo %s: (%s) m=%f",GetPlotName(), curr->histo->GetName(), m);
 	    if(m > max) max = m;
 	}
 
@@ -549,13 +557,17 @@ void JevpPlot::draw()
 	while((curr = (PlotHisto *)next())) {
 
 	    //  printf("plotting b\n\n\n");
-	    if(external_maxy > -9999) {
+	    if(external_maxy != -9999) {
 		LOG(NOTE, "set max to %f", (float)(external_maxy));
 		curr->histo->SetMaximum(external_maxy);
 	    }
 	    else {
 		LOG(NOTE, "set max to %f",(float)(max*1.1));
 		curr->histo->SetMaximum(max * 1.1);
+	    }
+
+	    if(external_miny != -9999) {
+		curr->histo->SetMinimum(external_miny);
 	    }
 	}
     }
