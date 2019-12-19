@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StETofCalibMaker.h,v 1.5 2019/12/10 15:54:56 fseck Exp $
+ * $Id: StETofCalibMaker.h,v 1.6 2019/12/19 02:19:13 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofCalibMaker.h,v $
+ * Revision 1.6  2019/12/19 02:19:13  fseck
+ * use known pulser time differences inside one Gbtx to recover missing pulser signals
+ *
  * Revision 1.5  2019/12/10 15:54:56  fseck
  * added new database tables for pulsers, updated pulser handling and trigger time calculation
  *
@@ -71,15 +74,17 @@ public:
     void processMuDst();
 
     /// read calibration parameters from file
-    void setFileNameCalibParam(      const char* fileName );
-    void setFileNameElectronicsMap(  const char* fileName );
-    void setFileNameStatusMap(       const char* fileName );
-    void setFileNameTimingWindow(    const char* fileName );
-    void setFileNameSignalVelocity(  const char* fileName );
-    void setFileNameCalibHistograms( const char* fileName );
-    void setFileNameResetTimeCorr(   const char* fileName );
-    void setFileNamePulserTotPeak(   const char* fileName );
+    void setFileNameCalibParam(         const char* fileName );
+    void setFileNameElectronicsMap(     const char* fileName );
+    void setFileNameStatusMap(          const char* fileName );
+    void setFileNameTimingWindow(       const char* fileName );
+    void setFileNameSignalVelocity(     const char* fileName );
+    void setFileNameCalibHistograms(    const char* fileName );
+    void setFileNameResetTimeCorr(      const char* fileName );
+    void setFileNamePulserTotPeak(      const char* fileName );
+    void setFileNamePulserTimeDiffGbtx( const char* fileName );
 
+    void setDoQA(  const bool doQA  );
     void setDebug( const bool debug );
     void setReferencePulserIndex( const int index );
 
@@ -116,18 +121,24 @@ private:
     unsigned int sideToKey(     const unsigned int sideId     );
 
 
+    void bookHistograms();
+    void setHistFileName();
+    void writeHistograms();
+
+
     StEvent*             mEvent;
     StMuDst*             mMuDst;
     StETofHardwareMap*   mHwMap;         // electronic channel to hardware/geometry map
 
-    std::string   mFileNameCalibParam;      // name of parameter file for calibration parameters
-    std::string   mFileNameElectronicsMap;  // name of parameter file for electronics-to-hardware map
-    std::string   mFileNameStatusMap;       // name of parameter file for status map
-    std::string   mFileNameTimingWindow;    // name of parameter file for timing window
-    std::string   mFileNameSignalVelocity;  // name of parameter file for signal velocity
-    std::string   mFileNameCalibHistograms; // name of parameter file for calibration histograms (output of QA maker)
-    std::string   mFileNameResetTimeCorr;   // name of parameter file for reset time correction
-    std::string   mFileNamePulserTotPeak;   // name of parameter file for pulser peak tot
+    std::string   mFileNameCalibParam;          // name of parameter file for calibration parameters
+    std::string   mFileNameElectronicsMap;      // name of parameter file for electronics-to-hardware map
+    std::string   mFileNameStatusMap;           // name of parameter file for status map
+    std::string   mFileNameTimingWindow;        // name of parameter file for timing window
+    std::string   mFileNameSignalVelocity;      // name of parameter file for signal velocity
+    std::string   mFileNameCalibHistograms;     // name of parameter file for calibration histograms (output of QA maker)
+    std::string   mFileNameResetTimeCorr;       // name of parameter file for reset time correction
+    std::string   mFileNamePulserTotPeak;       // name of parameter file for pulser peak tot
+    std::string   mFileNamePulserTimeDiffGbtx;  // name of parameter file for pulser time diff
 
     Int_t         mRunYear;                 // "year" of operation by using roughly October 1st as reference
     Float_t       mGet4TotBinWidthNs;       // conversion factor for Get4 chip TOT bin to nanoseconds
@@ -138,7 +149,7 @@ private:
     Double_t      mResetTime;               // reset time in ns 
 
     Float_t       mPulserPeakTime;          // pulser peak time relative to the trigger time in ns
-    Int_t         mReferencePulserIndex;
+    Int_t         mReferencePulserIndex;    // index of reference pulser used in the pulser correction to correct time offset between different Gbtx
 
     std::map< UInt_t, std::pair< Float_t, Float_t > >  mTimingWindow;    // timing window for each AFCK
     std::map< UInt_t, std::pair< Float_t, Float_t > >  mPulserWindow;    // pulser window for each AFCK
@@ -149,10 +160,17 @@ private:
     std::map< UInt_t, TH1F* >     mDigiTimeCorr;    // offset to calibrate time per channel saved in one histogram (64 bins) per counter accessed by detectorId as key
     std::map< UInt_t, TProfile* > mDigiSlewCorr;    // offset to account for slewing corrections per channel saved in a histogram (~30 TOT bins) accessed by channelId as key
 
-    std::map< UInt_t, Float_t >   mPulserPeakTot;   // TOT of pulsers on each side of the RPC counters (as key)
-    std::map< UInt_t, Double_t >  mPulserTimeDiff;  // pulser time difference with respect to the reference pulser for each detector side as key
+    std::map< UInt_t, Float_t >   mPulserPeakTot;       // TOT of pulsers on each side of the RPC counters (as key)
+    std::map< UInt_t, Double_t >  mPulserTimeDiff;      // pulser time difference with respect to the reference pulser for each detector side as key
+    std::map< UInt_t, Double_t >  mPulserTimeDiffGbtx;  // pulser time difference with inside a Gbtx with respect to counter 1
 
+    std::map< UInt_t, UInt_t >    mJumpingPulsers;      // flag jumping pulsers
+
+    Bool_t        mUsePulserGbtxDiff;
+    Bool_t        mDoQA;
     Bool_t        mDebug;
+    std::string                    mHistFileName;
+    std::map< std::string, TH1* >  mHistograms;
 
 
     virtual const Char_t *GetCVS() const { static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs; }
@@ -160,18 +178,20 @@ private:
     ClassDef( StETofCalibMaker, 0 )
 };
 
-inline void StETofCalibMaker::setFileNameCalibParam(      const char* fileName )     { mFileNameCalibParam      = fileName; }
-inline void StETofCalibMaker::setFileNameElectronicsMap(  const char* fileName )     { mFileNameElectronicsMap  = fileName; }
-inline void StETofCalibMaker::setFileNameStatusMap(       const char* fileName )     { mFileNameStatusMap       = fileName; }
-inline void StETofCalibMaker::setFileNameTimingWindow(    const char* fileName )     { mFileNameTimingWindow    = fileName; }
-inline void StETofCalibMaker::setFileNameSignalVelocity(  const char* fileName )     { mFileNameSignalVelocity  = fileName; }
-inline void StETofCalibMaker::setFileNameCalibHistograms( const char* fileName )     { mFileNameCalibHistograms = fileName; }
-inline void StETofCalibMaker::setFileNameResetTimeCorr(   const char* fileName )     { mFileNameResetTimeCorr   = fileName; }
-inline void StETofCalibMaker::setFileNamePulserTotPeak(   const char* fileName )     { mFileNamePulserTotPeak   = fileName; }
+inline void StETofCalibMaker::setFileNameCalibParam(         const char* fileName )     { mFileNameCalibParam         = fileName; }
+inline void StETofCalibMaker::setFileNameElectronicsMap(     const char* fileName )     { mFileNameElectronicsMap     = fileName; }
+inline void StETofCalibMaker::setFileNameStatusMap(          const char* fileName )     { mFileNameStatusMap          = fileName; }
+inline void StETofCalibMaker::setFileNameTimingWindow(       const char* fileName )     { mFileNameTimingWindow       = fileName; }
+inline void StETofCalibMaker::setFileNameSignalVelocity(     const char* fileName )     { mFileNameSignalVelocity     = fileName; }
+inline void StETofCalibMaker::setFileNameCalibHistograms(    const char* fileName )     { mFileNameCalibHistograms    = fileName; }
+inline void StETofCalibMaker::setFileNameResetTimeCorr(      const char* fileName )     { mFileNameResetTimeCorr      = fileName; }
+inline void StETofCalibMaker::setFileNamePulserTotPeak(      const char* fileName )     { mFileNamePulserTotPeak      = fileName; }
+inline void StETofCalibMaker::setFileNamePulserTimeDiffGbtx( const char* fileName )     { mFileNamePulserTimeDiffGbtx = fileName; }
 
 
 inline double StETofCalibMaker::resetTimeCorr() const { return mResetTimeCorr; }
 
+inline void StETofCalibMaker::setDoQA(  const bool doQA  ) { mDoQA  = doQA;  }
 inline void StETofCalibMaker::setDebug( const bool debug ) { mDebug = debug; }
 inline void StETofCalibMaker::setReferencePulserIndex( const int index ) { mReferencePulserIndex = index; }
 

@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StETofCalibMaker.cxx,v 1.6 2019/12/12 02:26:37 fseck Exp $
+ * $Id: StETofCalibMaker.cxx,v 1.7 2019/12/19 02:19:23 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofCalibMaker.cxx,v $
+ * Revision 1.7  2019/12/19 02:19:23  fseck
+ * use known pulser time differences inside one Gbtx to recover missing pulser signals
+ *
  * Revision 1.6  2019/12/12 02:26:37  fseck
  * ignore duplicate digis from stuck firmware
  *
@@ -41,7 +44,10 @@
 #include "TString.h"
 #include "TFile.h"
 #include "TH1F.h"
+#include "TH2F.h"
 #include "TProfile.h"
+
+#include "StChain/StChainOpt.h" // for renaming the histogram file
 
 #include "StEvent.h"
 #include "StETofCollection.h"
@@ -64,7 +70,7 @@
 #include "tables/St_etofDigiSlewCorr_Table.h"
 #include "tables/St_etofResetTimeCorr_Table.h"
 #include "tables/St_etofPulserTotPeak_Table.h"
-
+#include "tables/St_etofPulserTimeDiffGbtx_Table.h"
 
 namespace etofSlewing {
     const unsigned int nTotBins = 30;
@@ -88,6 +94,7 @@ StETofCalibMaker::StETofCalibMaker( const char* name )
   mFileNameCalibHistograms( "" ),
   mFileNameResetTimeCorr( "" ),
   mFileNamePulserTotPeak( "" ),
+  mFileNamePulserTimeDiffGbtx( "" ),
   mRunYear( 0 ),
   mGet4TotBinWidthNs( 1. ),
   mMinDigisPerSlewBin( 25 ),
@@ -96,7 +103,10 @@ StETofCalibMaker::StETofCalibMaker( const char* name )
   mResetTime( 0. ),
   mPulserPeakTime( 0. ),
   mReferencePulserIndex( 0 ),
-  mDebug( false )
+  mUsePulserGbtxDiff( true ),
+  mDoQA( false ),
+  mDebug( false ),
+  mHistFileName( "" )
 {
     /// default constructor
     LOG_DEBUG << "StETofCalibMaker::ctor"  << endm;
@@ -110,6 +120,11 @@ StETofCalibMaker::StETofCalibMaker( const char* name )
 
     mPulserPeakTot.clear();
     mPulserTimeDiff.clear();
+    mPulserTimeDiffGbtx.clear();
+
+    mJumpingPulsers.clear();
+
+    mHistograms.clear();
 }
 
 
@@ -125,6 +140,8 @@ Int_t
 StETofCalibMaker::Init()
 {
     LOG_INFO << "StETofCalibMaker::Init()" << endm;
+
+    bookHistograms();
 
     return kStOk;
 }
@@ -794,11 +811,11 @@ StETofCalibMaker::InitRun( Int_t runnumber )
         }
 
         std::map< unsigned int, float > param;
-        float temp;
-        float temp2 = 0;
+        double temp;
+        double temp2 = 0;
         while( paramFile >> temp ) {
             paramFile >> temp2;
-            param[ temp ] = temp2;
+            param[ ( unsigned int ) temp ] = temp2;
         }
         
         paramFile.close();
@@ -826,7 +843,7 @@ StETofCalibMaker::InitRun( Int_t runnumber )
 
         St_etofPulserTotPeak* etofPulserTotPeak = static_cast< St_etofPulserTotPeak* > ( dbDataSet->Find( "etofPulserTotPeak" ) );
         if( !etofPulserTotPeak ) {
-            LOG_ERROR << "unable to get the signal velocity from the database" << endm;
+            LOG_ERROR << "unable to get the pulser tot peak parameters from the database" << endm;
             return kStFatal;
         }
 
@@ -875,6 +892,87 @@ StETofCalibMaker::InitRun( Int_t runnumber )
 
     // --------------------------------------------------------------------------------------------
 
+    // pulser time difference (initialized to some useful value if pulser is not there for a whole run)
+    mPulserTimeDiffGbtx.clear();
+
+    if( mFileNamePulserTimeDiffGbtx.empty() ) {
+        LOG_INFO << "etofPulserTimeDiffGbtx: no filename provided --> load database table" << endm;
+
+        dbDataSet = GetDataBase( "Calibrations/etof/etofPulserTimeDiffGbtx" );
+
+        St_etofPulserTimeDiffGbtx* etofPulserTimeDiffGbtx = static_cast< St_etofPulserTimeDiffGbtx* > ( dbDataSet->Find( "etofPulserTimeDiffGbtx" ) );
+        if( !etofPulserTimeDiffGbtx ) {
+            LOG_ERROR << "unable to get the pulser time difference parameters from the database" << endm;
+            return kStFatal;
+        }
+
+        etofPulserTimeDiffGbtx_st* pulserTimeTable = etofPulserTimeDiffGbtx->GetTable();
+
+        for( size_t i=0; i<eTofConst::nModules * eTofConst::nSides; i++ ) {
+            unsigned int sector   = eTofConst::sectorStart  +   i / ( eTofConst::nPlanes * eTofConst::nSides );
+            unsigned int zPlane   = eTofConst::zPlaneStart  + ( i % ( eTofConst::nPlanes * eTofConst::nSides ) ) / eTofConst::nSides;
+            unsigned int side     = eTofConst::counterStart +   i %   eTofConst::nSides;
+
+            mPulserTimeDiffGbtx[ sector * 1000 + zPlane * 100 + 1 * 10 + side ] = 0.;
+            mPulserTimeDiffGbtx[ sector * 1000 + zPlane * 100 + 2 * 10 + side ] = pulserTimeTable->pulserTimeDiffGbtx[ i * 2 + 0 ];
+            mPulserTimeDiffGbtx[ sector * 1000 + zPlane * 100 + 3 * 10 + side ] = pulserTimeTable->pulserTimeDiffGbtx[ i * 2 + 1 ];
+        }
+    }
+    else {
+        LOG_INFO << "etofPulserTimeDiff: filename provided --> use parameter file: " << mFileNamePulserTimeDiffGbtx.c_str() << endm;
+
+        paramFile.open( mFileNamePulserTimeDiffGbtx.c_str() );
+
+        if( !paramFile.is_open() ) {
+            LOG_ERROR << "unable to get the 'etotPulserTimeDiffGbtc' parameters from file --> file does not exist" << endm;
+            return kStFatal;
+        }
+
+        std::vector< float > param;
+        float temp;
+        while( paramFile >> temp ) {
+            param.push_back( temp );
+        }
+
+        paramFile.close();
+
+        if( param.size() != eTofConst::nModules * eTofConst::nSides * 2 ) {
+            LOG_ERROR << "parameter file for 'etofPulserTimeDiffGbtx' has not the right amount of entries: ";
+            LOG_ERROR << param.size() << " instead of " << eTofConst::nModules * eTofConst::nSides << " !!!!" << endm;
+            return kStFatal;
+        }
+
+        for( size_t i=0; i<eTofConst::nModules * eTofConst::nSides; i++ ) {
+            unsigned int sector   = eTofConst::sectorStart  +   i / ( eTofConst::nPlanes * eTofConst::nSides );
+            unsigned int zPlane   = eTofConst::zPlaneStart  + ( i % ( eTofConst::nPlanes * eTofConst::nSides ) ) / eTofConst::nSides;
+            unsigned int side     = eTofConst::counterStart +   i %   eTofConst::nSides;
+
+            mPulserTimeDiffGbtx[ sector * 1000 + zPlane * 100 + 1 * 10 + side ] = 0.;
+            mPulserTimeDiffGbtx[ sector * 1000 + zPlane * 100 + 2 * 10 + side ] = param.at( i * 2 + 0 );
+            mPulserTimeDiffGbtx[ sector * 1000 + zPlane * 100 + 3 * 10 + side ] = param.at( i * 2 + 1 );
+        }
+    }
+
+
+    // check if all values in the map are zero --> if yes, disable pulser averaging inside a Gbtx
+    bool allZero = true;
+
+    for( const auto& kv : mPulserTimeDiffGbtx ) {
+        if( fabs( kv.second ) > 1e-4 ) allZero = false;
+
+        if( mDebug ) {
+            LOG_INFO << "side key: " << kv.first << " --> pulser time diff inside Gbtx ( to counter 1 ) = " << kv.second << endm;
+        }
+    }
+
+    if( allZero ) {
+        mUsePulserGbtxDiff = false;
+        LOG_INFO << "the use of pulser relations inside a Gbtx is turned off" << endm;
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+
     return kStOk;
 }
 
@@ -910,6 +1008,8 @@ StETofCalibMaker::FinishRun( Int_t runnumber )
     mPulserPeakTot.clear();
     mPulserTimeDiff.clear();
 
+    mJumpingPulsers.clear();
+
     return kStOk;
 }
 
@@ -918,6 +1018,12 @@ StETofCalibMaker::FinishRun( Int_t runnumber )
 Int_t
 StETofCalibMaker::Finish()
 {
+    if( mDoQA ) {
+        LOG_INFO << "Finish() - writing *.etofCalib.root ..." << endm;
+        setHistFileName();
+        writeHistograms();
+    }
+
     return kStOk;
 }
 
@@ -1300,9 +1406,10 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
         LOG_INFO << "reference pulser index: " << mReferencePulserIndex << endm;
     }
 
-    double referenceTime = 0.;
+
     std::map< int, double > pulserTimes;
 
+    // loop over all candidates to find real pulser, save time in pulserTimes map
     for( auto it=pulserDigiMap.begin(); it!=pulserDigiMap.end(); it++ ) {
         if( it->second.size() == 0 ) {
             continue;
@@ -1357,32 +1464,205 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
             mMuDst->etofDigi( it->second.at( candIndex ) )->setCalibTot( -999. );
         }
 
-        if( sideIndex == mReferencePulserIndex ) {
-            referenceTime = pulserTime;
+        pulserTimes[ sideIndex ] = pulserTime;
+    }
+
+
+
+    double referenceTime = 0.;
+
+    // update reference time (for QA)
+    if( mDoQA ) {
+        if( pulserTimes.count( mReferencePulserIndex ) ) {
+            referenceTime = pulserTimes.at( mReferencePulserIndex );
             if( mDebug ) {
                 LOG_INFO << "time of reference pulser updated" << endm;
             }
         }
+    }
 
-        // if the reference time is already set, fill the pulser difference map, otherwise store pulser time of after the loop
-        if( referenceTime != 0 ) {
-            mPulserTimeDiff[ sideIndex ] = pulserTime - referenceTime;
-        }
-        else {
-            pulserTimes[ sideIndex ] = pulserTime;
+
+    // deal with the pulser times --> tweek pulser times based on time differences inside/outside a Gbtx
+    if( mUsePulserGbtxDiff ) {
+        for( int gbtxId = 0; gbtxId < eTofConst::nModules * eTofConst::nSides; gbtxId++ ) {
+            int sector  = eTofConst::sectorStart +   gbtxId / ( eTofConst::nPlanes * eTofConst::nSides );
+            int zPlane  = eTofConst::zPlaneStart + ( gbtxId % ( eTofConst::nPlanes * eTofConst::nSides ) ) / eTofConst::nSides;
+            int side    = eTofConst::sideStart   +   gbtxId % eTofConst::nSides;
+
+            int partialKey = sector * 1000 + zPlane * 100 + side;
+
+            vector< double > times( eTofConst::nCounters );
+
+            double average = 0.;
+            int    nAv     = 0;
+
+            for( int counter = 1; counter <= eTofConst::nCounters; counter++ ) {
+                int key = partialKey + 10 * counter;
+
+                if( pulserTimes.count( key ) ) {
+                    if( mDoQA ) {
+                        if( pulserTimes.count( partialKey + 10 ) ) {
+                            mHistograms.at( "pulserDigiTimeToCounter1" )->Fill( gbtxId * eTofConst::nCounters + counter - 0.5, pulserTimes.at( partialKey + 10 ) - pulserTimes.at( key ) );
+                        }
+                        if( pulserTimes.count( partialKey + 20 ) ) {
+                            mHistograms.at( "pulserDigiTimeToCounter2" )->Fill( gbtxId * eTofConst::nCounters + counter - 0.5, pulserTimes.at( partialKey + 20 ) - pulserTimes.at( key ) );
+                        }
+                        if( pulserTimes.count( partialKey + 30 ) ) {
+                            mHistograms.at( "pulserDigiTimeToCounter3" )->Fill( gbtxId * eTofConst::nCounters + counter - 0.5, pulserTimes.at( partialKey + 30 ) - pulserTimes.at( key ) );
+                        }
+                    }
+
+                    times.at( counter - 1 ) = pulserTimes.at( key ) + mPulserTimeDiffGbtx.at( key );
+
+                    average += times.at( counter - 1 );
+                    nAv++;
+
+                    if( mDoQA && referenceTime != 0 ) {
+                        mHistograms.at( "pulserDigiTimeDiff"          )->Fill( gbtxId * eTofConst::nCounters + counter - 0.5, pulserTimes.at( key )   - referenceTime );
+                        mHistograms.at( "pulserDigiTimeDiff_GbtxCorr" )->Fill( gbtxId * eTofConst::nCounters + counter - 0.5, times.at( counter - 1 ) - referenceTime );
+                    }
+                }
+            }
+
+
+
+            if( nAv == eTofConst::nCounters ) {
+                double diff12 = fabs( times.at( 0 ) - times.at( 1 ) );
+                double diff13 = fabs( times.at( 0 ) - times.at( 2 ) );
+                double diff23 = fabs( times.at( 1 ) - times.at( 2 ) );
+
+                if( diff12 > 1 && diff13 > 1 && diff23 < 1 ) {
+                    average -= times.at( 0 );
+                    nAv--;
+
+                    if( fabs( times.at( 0 ) - ( average / nAv ) + eTofConst::coarseClockCycle ) < 0.2 ) {
+                        mJumpingPulsers[ partialKey + 10 ] = 1;
+
+                        times.at( 0 ) += eTofConst::coarseClockCycle;
+                        average       += times.at( 0 );
+                        nAv++;
+                    }
+                    else if( fabs( times.at( 0 ) - ( average / nAv ) - eTofConst::coarseClockCycle ) < 0.2 ) {
+                        mJumpingPulsers[ partialKey + 10 ] = -1;
+                    
+                        times.at( 0 ) -= eTofConst::coarseClockCycle;
+                        average       += times.at( 0 );
+                        nAv++;
+                    }
+
+                    if( mDoQA ) {
+                        mHistograms.at( "1_off" )->Fill( gbtxId * eTofConst::nCounters + 1.5, times.at( 0 ) - ( average / nAv ) );
+                    }
+                }
+                else if( diff12 > 1 && diff13 < 1 && diff23 > 1 ) {
+                    average -= times.at( 1 );
+                    nAv--;
+
+                    if( fabs( times.at( 1 ) - ( average / nAv ) + eTofConst::coarseClockCycle ) < 0.2 ) {
+                        mJumpingPulsers[ partialKey + 20 ] = 1;
+
+                        times.at( 1 ) += eTofConst::coarseClockCycle;
+                        average       += times.at( 1 );
+                        nAv++;
+                    }
+                    else if( fabs( times.at( 1 ) - ( average / nAv ) - eTofConst::coarseClockCycle ) < 0.2 ) {
+                        mJumpingPulsers[ partialKey + 20 ] = -1;
+
+                        times.at( 1 ) -= eTofConst::coarseClockCycle;
+                        average       += times.at( 1 );
+                        nAv++;
+                    }
+
+                    if( mDoQA ) {
+                        mHistograms.at( "2_off" )->Fill( gbtxId * eTofConst::nCounters + 1.5, times.at( 1 ) - ( average / nAv ) );
+                    }
+                }
+                else if( diff12 < 1 && diff13 > 1 && diff23 > 1 ) {
+                    average -= times.at( 2 );
+                    nAv--;
+
+                    if( fabs( times.at( 2 ) - ( average / nAv ) + eTofConst::coarseClockCycle ) < 0.2 ) {
+                        mJumpingPulsers[ partialKey + 30 ] = 1;
+
+                        times.at( 2 ) += eTofConst::coarseClockCycle;
+                        average       += times.at( 2 );
+                        nAv++;
+                    }
+                    else if( fabs( times.at( 2 ) - ( average / nAv ) - eTofConst::coarseClockCycle ) < 0.2 ) {
+                        mJumpingPulsers[ partialKey + 30 ] = -1;
+
+                        times.at( 2 ) -= eTofConst::coarseClockCycle;
+                        average       += times.at( 2 );
+                        nAv++;
+                    }
+
+                    if( mDoQA ) {
+                        mHistograms.at( "3_off" )->Fill( gbtxId * eTofConst::nCounters + 1.5, times.at( 2 ) - ( average / nAv ) );
+                    }
+                }
+            }
+            else if( nAv == eTofConst::nCounters - 1 ) {
+                if( times.at( 0 ) > 0 && fabs( fabs( times.at( 0 ) - ( average / nAv ) ) - eTofConst::coarseClockCycle * 0.5 ) < 0.2 ) {
+                    if( mJumpingPulsers.count( partialKey + 10 ) ) {
+                        times.at( 0 ) += mJumpingPulsers.at( partialKey + 10 ) * eTofConst::coarseClockCycle;
+                        average       += mJumpingPulsers.at( partialKey + 10 ) * eTofConst::coarseClockCycle;
+                    }
+                }
+                if( times.at( 1 ) > 0 && fabs( fabs( times.at( 1 ) - ( average / nAv ) ) - eTofConst::coarseClockCycle * 0.5 ) < 0.2 ) {
+                    if( mJumpingPulsers.count( partialKey + 20 ) ) {
+                        times.at( 1 ) += mJumpingPulsers.at( partialKey + 20 ) * eTofConst::coarseClockCycle;
+                        average       += mJumpingPulsers.at( partialKey + 20 ) * eTofConst::coarseClockCycle;
+                    }
+                }
+                if( times.at( 2 ) > 0 && fabs( fabs( times.at( 2 ) - ( average / nAv ) ) - eTofConst::coarseClockCycle * 0.5 ) < 0.2 ) {
+                    if( mJumpingPulsers.count( partialKey + 30 ) ) {
+                        times.at( 2 ) += mJumpingPulsers.at( partialKey + 30 ) * eTofConst::coarseClockCycle;
+                        average       += mJumpingPulsers.at( partialKey + 30 ) * eTofConst::coarseClockCycle;
+                    }
+                }
+            }
+
+            if( nAv > 0 ) average /= nAv;
+
+            if( mDoQA && referenceTime != 0 ) {
+                mHistograms.at( "pulserDigiTimeDiff_perGbtx" )->Fill( gbtxId * eTofConst::nCounters + 1.5, average - referenceTime );
+            }
+
+            for( int counter=1; counter<=3; counter++ ) {
+                if( mDoQA && times.at( counter - 1 ) != 0. ) {
+                    mHistograms.at( "pulserDigiTimeDiff_toAverage" )->Fill( gbtxId * eTofConst::nCounters + counter - 0.5, times.at( counter - 1 ) - average );
+                }
+
+                pulserTimes[ partialKey + 10 * counter ] = average - mPulserTimeDiffGbtx.at( partialKey + 10 * counter );          
+            }
         }
     }
 
-    // deal with the rest of the pulser times
+
+    // calculate difference to the reference
+    if( pulserTimes.count( mReferencePulserIndex ) ) {
+        referenceTime = pulserTimes.at( mReferencePulserIndex );
+        if( mDebug ) {
+            LOG_INFO << "time of reference pulser updated" << endm;
+        }
+    }  
+
     if( referenceTime != 0 ) {
         for( auto& kv : pulserTimes ) {
             mPulserTimeDiff[ kv.first ] = kv.second - referenceTime;
-        }
-    }
 
-    if( mDebug ) {
-        for( const auto& kv : mPulserTimeDiff ) {
-            LOG_DEBUG << "channel: " << kv.first << "   timeDiff: " << kv.second << endm;
+            if( mDoQA ) {
+                int sector  = kv.first / 1000;
+                int zPlane  = ( kv.first % 1000 ) / 100;
+                int counter = ( kv.first % 100 )  / 10;
+                int side    = kv.first % 10;
+
+                int gbtxId = ( sector - eTofConst::sectorStart ) * ( eTofConst::nPlanes * eTofConst::nSides )
+                           + ( zPlane - eTofConst::zPlaneStart ) * eTofConst::nSides
+                           + ( side   - eTofConst::sideStart   );
+
+                mHistograms.at( "pulserDigiTimeDiff_fullCorr" )->Fill( gbtxId * eTofConst::nCounters + counter - 0.5, mPulserTimeDiff.at( kv.first ) );
+            }
         }
     }
 }
@@ -1733,4 +2013,88 @@ StETofCalibMaker::sideToKey( const unsigned int sideId ) {
     unsigned int side     = (   sideId % eTofConst::nSides                                     )    + eTofConst::sideStart;
 
     return sector * 1000 + zPlane * 100 + counter * 10 + side;
+}
+
+
+
+//_____________________________________________________________
+// setHistFileName uses the string argument from the chain being run to set
+// the name of the output histogram file.
+void
+StETofCalibMaker::setHistFileName()
+{
+    string extension = ".etofCalib.root";
+
+    if( GetChainOpt()->GetFileOut() != nullptr ) {
+        TString outFile = GetChainOpt()->GetFileOut();
+
+        mHistFileName = ( string ) outFile;
+
+        // get rid of .root
+        size_t lastindex = mHistFileName.find_last_of( "." );
+        mHistFileName = mHistFileName.substr( 0, lastindex );
+
+        // get rid of .MuDst or .event if necessary
+        lastindex = mHistFileName.find_last_of( "." );
+        mHistFileName = mHistFileName.substr( 0, lastindex );
+
+        // get rid of directories
+        lastindex = mHistFileName.find_last_of( "/" );
+        mHistFileName = mHistFileName.substr( lastindex + 1, mHistFileName.length() );
+
+        mHistFileName = mHistFileName + extension;
+    } else {
+        LOG_ERROR << "Cannot set the output filename for histograms" << endm;
+    }
+}
+
+//_____________________________________________________________
+void
+StETofCalibMaker::bookHistograms()
+{
+    if( !mDoQA ) {
+        return;
+    }
+
+    LOG_INFO << "bookHistograms() ... " << endm;
+
+    mHistograms[ "pulserDigiTimeDiff"           ] = new TH2F( "pulserDigiTimeDiff",           "time difference of pulsers to reference;pulser channel;#Delta T (ns)", 216, 0, 216, 360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+    mHistograms[ "pulserDigiTimeToCounter1"     ] = new TH2F( "pulserDigiTimeToCounter1",     "time difference of pulsers to counter 1;pulser channel;#Delta T (ns)", 216, 0, 216, 2*360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+    mHistograms[ "pulserDigiTimeToCounter2"     ] = new TH2F( "pulserDigiTimeToCounter2",     "time difference of pulsers to counter 2;pulser channel;#Delta T (ns)", 216, 0, 216, 2*360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+    mHistograms[ "pulserDigiTimeToCounter3"     ] = new TH2F( "pulserDigiTimeToCounter3",     "time difference of pulsers to counter 3;pulser channel;#Delta T (ns)", 216, 0, 216, 2*360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+    
+    mHistograms[ "pulserDigiTimeDiff_GbtxCorr"  ] = new TH2F( "pulserDigiTimeDiff_GbtxCorr",  "time difference of pulsers to reference;pulser channel;#Delta T (ns)", 216, 0, 216, 360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+    mHistograms[ "pulserDigiTimeDiff_perGbtx"   ] = new TH2F( "pulserDigiTimeDiff_perGbtx",   "average time difference of pulsers in one Gbtx to reference;pulser channel;#Delta T (ns)", 216/3, 0, 216, 360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+    mHistograms[ "pulserDigiTimeDiff_toAverage" ] = new TH2F( "pulserDigiTimeDiff_toAverage", "time difference of pulsers to reference;pulser channel;#Delta T (ns)", 216, 0, 216, 4*360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+    
+    mHistograms[ "1_off"   ] = new TH2F( "1_off",   "average time difference of pulsers in one Gbtx to reference;pulser channel;#Delta T (ns)", 216/3, 0, 216, 360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+    mHistograms[ "2_off"   ] = new TH2F( "2_off",   "average time difference of pulsers in one Gbtx to reference;pulser channel;#Delta T (ns)", 216/3, 0, 216, 360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+    mHistograms[ "3_off"   ] = new TH2F( "3_off",   "average time difference of pulsers in one Gbtx to reference;pulser channel;#Delta T (ns)", 216/3, 0, 216, 360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+    
+    mHistograms[ "pulserDigiTimeDiff_fullCorr"  ] = new TH2F( "pulserDigiTimeDiff_fullCorr",  "time difference of pulsers to reference;pulser channel;#Delta T (ns)", 216, 0, 216, 360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+
+    for ( auto& kv : mHistograms ) {
+        kv.second->SetDirectory( 0 );
+    }
+}
+
+//_____________________________________________________________
+void
+StETofCalibMaker::writeHistograms()
+{
+    if( mHistFileName != "" ) {
+        LOG_INFO << "writing histograms to: " << mHistFileName.c_str() << endm;
+
+        TFile histFile( mHistFileName.c_str(), "RECREATE", "etofCalib" );
+        histFile.cd();
+        
+        for ( const auto& kv : mHistograms ) {
+            if( kv.second->GetEntries() > 0 ) kv.second->Write();
+        }
+
+        histFile.Close();
+    }
+    else {
+        LOG_INFO << "histogram file name is empty string --> cannot write histograms" << endm;
+    }
 }
