@@ -8,7 +8,7 @@
    setenv STARFPE NO
 #   setenv NODEBUG yes
 #   setup 64b
-#   starver TFG19d
+   starver TFG19d
 #   staver .DEV2 
   foreach  evtsFile(`cat $FILELIST`) 
   set file2 = `basename ${evtsFile} .event.root`;
