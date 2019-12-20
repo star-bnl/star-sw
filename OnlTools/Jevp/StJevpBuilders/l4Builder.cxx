@@ -2867,9 +2867,11 @@ void l4Builder::defineHLTGood2Plots()
 	HLTGood2Plots[index]->addHisto(ph);
 
 	index++; //4
-	pHLTGood2VzT = new TProfile("HLTGood2VzT", "<Vz> vs. time  (nPTracks > 200);Seconds in the run;<Vz>", 
+	pHLTGood2VzT = new TProfile("HLTGood2VzT", "<Vz> vs. time  (nPTracks > 200 && |Vz| < 100cm);Seconds in the run;<Vz>", 
 				   80, 0, 2400, -100, 100, "s");
 	HLTGood2Plots[index]->addHisto(new PlotHisto(pHLTGood2VzT));
+	HLTGood2Plots[index]->setMaxY(100);
+	HLTGood2Plots[index]->setMinY(-100);
 }
 
 void l4Builder::defineBesMonitorPlots()
