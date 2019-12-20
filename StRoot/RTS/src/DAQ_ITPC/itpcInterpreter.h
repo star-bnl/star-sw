@@ -80,6 +80,9 @@ public:
 		u_int ch_errs ;
 	} fee[17] ;	// index is RDO port starting from 1!
 
+	// FPGA versions
+	u_int fpga_fee_v_all ;
+
 	// electronics format versions
 	int rdo_version ;
 	int expected_rdo_version ;
