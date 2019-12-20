@@ -1,5 +1,4 @@
-#!/opt/star/bin/perl
-###!/usr/bin/env perl
+#!/usr/bin/env perl
 use Env;
 use File::Find;
 #if (defined($AFS)) {$File::Find::dont_use_nlink;}
@@ -17,6 +16,6 @@ sub wanted {
   if (-l $_ and not -e $_) {
     $line .= " " . $File::Find::name;
     print "bogus link: $File::Find::name ==> remove it : $line\n"; 
-#    system("rm $File::Find::name") or die "Can't remove $File::Find::name";
+    system("rm $File::Find::name") or die "Can't remove $File::Find::name";
   }
 }
