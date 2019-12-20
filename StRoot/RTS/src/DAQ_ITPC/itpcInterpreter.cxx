@@ -31,7 +31,8 @@ int itpcInterpreter::itpc_fee_map[24][4][16] = {
 	{49,52,46, 0, 0, 54,0,47, 0,50, 0,55,48, 0,51,53}, 
 	{36,32,40,43,37,33, 0,41, 0,44,38,34,42,45,39,35},  
 //usual	{ 7, 1,17,12,24,19,13, 8,28, 2, 0,20,29,25,21, 3}, 
-	{ 7, 1,17,12,24, 0,13, 8,28, 2,19,20,29,25,21, 3}, // moved #6 to #11 
+//	{ 7, 1,17,12,24, 0,13, 8,28, 2,19,20,29,25,21, 3}, // moved #6 to #11 
+	{ 7, 1, 0,12,24,17,13, 8,28, 2,19,20,29,25,21, 3}, // moved #6 to #11; and #3 to #6
 	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}    
 },
 {//S3 checked
@@ -376,6 +377,8 @@ itpcInterpreter::itpcInterpreter()
 	run_number = 0 ;
 
 	fout = 0 ;
+
+	fpga_fee_v_all = 0 ;
 
 	fee_version = 0 ;	// original pre-Mar 2018
 	rdo_version = 0 ;
@@ -1614,6 +1617,12 @@ int itpcInterpreter::ana_send_config(u_int *data, u_int *data_end)
 				else if(strncmp(ascii_dta,"Padplane ",9)==0) {
 					if(sscanf(ascii_dta,"Padplane %d",&id1)==1) {
 						fee[fee_port].padplane_id = id1 ;
+					}
+				}
+				else if(strncmp(ascii_dta,"V: all",6)==0) {
+					if(sscanf(ascii_dta,"V: all 0x%X",&id1)==1) {	
+						fpga_fee_v_all = id1 ;
+						//LOG(WARN,"FEE_asc %d:#%02d: FPGA 0x%08X",rdo_id,fee_port,id1) ;
 					}
 				}
 
