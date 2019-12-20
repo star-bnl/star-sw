@@ -21,5 +21,10 @@
 # root.exe -q -b 'CheckDistortion.C("OBmap",20130329,105728)' >& OBmapRFF.log
 # root.exe -q -b 'CheckDistortion.C("OSectorAlign",20130329,105728)' >& OSectorAlignRFF.log
 
-root.exe -q -b 'CheckDistortion.C("CorrY,OSpaceZ2,OGridLeak3D",20190311,0)' >& CorrY,OSpaceZ2,OGridLeak3DRFF.log 
-root.exe -q -b 'CheckDistortion.C("CorrY,OSpaceZ2,OGridLeakFull",20190311,0)' >& CorrY,OSpaceZ2,OGridLeakFullRFF.log
+#root.exe -q -b 'CheckDistortion.C("CorrY,OSpaceZ2,OGridLeak3D",20190311,0)' >& CorrY,OSpaceZ2,OGridLeak3DRFF.log 
+#root.exe -q -b 'CheckDistortion.C("CorrY,OSpaceZ2,OGridLeakFull",20190311,0)' >& CorrY,OSpaceZ2,OGridLeakFullRFF.log
+
+# 2020 CorrY,OSpaceZ2,OGridLeakFull => NewTpcAlignment : OBmap OPr40 OIFC OSpaceZ2 OShortR OGridLeakFull OSectorAlign : 20191218.114628 
+foreach tag (CorrY,OSpaceZ2,OGridLeakFull  OBmap OPr40 OIFC OSpaceZ2 OShortR OGridLeakFull OSectorAlign)
+  root.exe -q -b 'CheckDistortion.C("NewTpcAlignment,'${tag}'",20191218,114628)' >& ${tag}.log &
+end

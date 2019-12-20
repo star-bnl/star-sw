@@ -28,7 +28,8 @@ my $select = "";
 if ($#ARGV >= 0) {
   $Run = $ARGV[0];
 #  $select = " -e \'select runNumber,glbSetupName, beginTime from runDescriptor order by beginTime\'";
-  $select = " -e \'SELECT t1.runNumber,t1.glbSetupName, t1.beginTime, t2.scaleFactor FROM runDescriptor as t1 INNER JOIN  magField as t2 ON t1.runNumber = t2.runNumber order by t1.beginTime\'";
+#  $select = " -e \'SELECT t1.runNumber,t1.glbSetupName, t1.beginTime, t2.scaleFactor, t3.rtsStatus, t3.shiftLeaderStatus  FROM runDescriptor AS t1 INNER JOIN  magField AS t2  INNER JOIN  runStatus  AS t3 ON t1.runNumber = t2.runNumber and  t1.runNumber = t3.runNumber where  t3.rtsStatus != 0 OR t3.shiftLeaderStatus != 0 order by t1.beginTime\'";
+  $select = " -e \'SELECT t1.runNumber,t1.glbSetupName, t1.beginTime, t2.scaleFactor, t3.rtsStatus, t3.shiftLeaderStatus  FROM runDescriptor AS t1 INNER JOIN  magField AS t2  INNER JOIN  runStatus  AS t3 ON t1.runNumber = t2.runNumber and  t1.runNumber = t3.runNumber where  t3.rtsStatus = 0 AND t3.shiftLeaderStatus = 0 order by t1.beginTime\'";
 }
 my $def = {@Runs};
 print "mysql RunLog -h $def->{$Run}->{node} -P $def->{$Run}->{port}\n";

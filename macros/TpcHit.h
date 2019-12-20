@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Thu May 10 18:32:50 2018 by ROOT version 5.34/39
+// Wed Dec 18 09:15:12 2019 by ROOT version 5.34/39
 // from TTree TpcHit/TpcHit
-// found on file: TpcHit.root
+// found on file: hlt_20349015_10_01_000.root
 //////////////////////////////////////////////////////////
 
 #ifndef TpcHit_h
@@ -37,9 +37,12 @@ public :
    Float_t         xL;
    Float_t         yL;
    Float_t         zL;
+   Float_t         dX;
    Int_t           trigId;
    Int_t           us;
    Int_t           fl;
+   Float_t         time;
+   Float_t         timeb;
 
    // List of branches
    TBranch        *b_sector;   //!
@@ -57,10 +60,12 @@ public :
    TBranch        *b_xL;   //!
    TBranch        *b_yL;   //!
    TBranch        *b_zL;   //!
+   TBranch        *b_dX;   //!
    TBranch        *b_trigId;   //!
    TBranch        *b_us;   //!
    TBranch        *b_fl;   //!
-   TBranch        *b_I;   //!
+   TBranch        *b_time;   //!
+   TBranch        *b_timeb;   //!
 
    TpcHit(TTree *tree=0);
    virtual ~TpcHit();
@@ -82,9 +87,9 @@ TpcHit::TpcHit(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("TpcHit.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("hlt_20349015_10_01_000.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("TpcHit.root");
+         f = new TFile("hlt_20349015_10_01_000.root");
       }
       f->GetObject("TpcHit",tree);
 
@@ -149,9 +154,12 @@ void TpcHit::Init(TTree *tree)
    fChain->SetBranchAddress("xL", &xL, &b_xL);
    fChain->SetBranchAddress("yL", &yL, &b_yL);
    fChain->SetBranchAddress("zL", &zL, &b_zL);
+   fChain->SetBranchAddress("dX", &dX, &b_dX);
    fChain->SetBranchAddress("trigId/I", &trigId, &b_trigId);
    fChain->SetBranchAddress("us/I", &us, &b_us);
    fChain->SetBranchAddress("fl/I", &fl, &b_fl);
+   fChain->SetBranchAddress("time", &time, &b_time);
+   fChain->SetBranchAddress("timeb", &timeb, &b_timeb);
    Notify();
 }
 

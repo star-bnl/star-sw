@@ -24,7 +24,7 @@ foreach my $f (@files) {
 }
 #print "runs = @runs\n";
 foreach my $r (@runs) {
-  my $file = "*" . $r . "Aligner_IO.root";
+  my $file = $r . "Aligner_IO.root";
   if (-r $file) {next;}
 #  my ($dev,$ino,$mode,$nlink,$uid,$gid,$dev, $size, $atime, $mtim, $ctime, $blksize,$blocks) = stat($file);
 #  my $now = time(); #print "now = $now\n";

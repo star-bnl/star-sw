@@ -34,7 +34,7 @@
 #   set input = ${SCRATCH}/${bf}.daq
     set bla = ${SUBMITTINGDIRECTORY}/${bf}.bla.root
     if (-r ${bla}) continue;
-    touch ${SUBMITTINGDIRECTORY}/${bla}
+    touch ${bla}
     set input = ${evtsFile};
 #root.exe -q -b 'bfc.C(1000,"P2014,TpxRaw,TpxClu2D,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,CorrX,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${input}'","'$output'","'${bf}.root'")' &gt;&amp; ${logFile}
 #root.exe -q -b 'bfc.C(1000,"P2018,TpxRaw,TpxClu,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,CorrX,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${input}'","'$output'","'${bf}.root'")' &gt;&amp; ${logFile}
