@@ -1235,7 +1235,7 @@ Double_t funFreq(Double_t *x, Double_t *par) {
 TF1 *FunFreq() {
   TF1 *f = (TF1*) gROOT->GetFunction("FunFreq");
   if (! f) {
-    f = new TF1("FunFreq",funFreq,205,215,4);
+    f = new TF1("FunFreq",funFreq,-1000,1000,4);
     f->SetParNames("Norm","#mu","1/#sigma","grass");
     f->SetParameters(0,208,1.,0);
     f->SetParLimits(0,-10,20);
@@ -1245,14 +1245,15 @@ TF1 *FunFreq() {
   return f;
 }
 //________________________________________________________________________________
-TF1 *FitFreq(TH1 *proj, Option_t *opt="") { // Fit by Freq function
+TF1 *FitFreq(TH1 *proj, Option_t *opt="", Double_t zmin = 205, Double_t zmax = 215) { // Fit by Freq function
   if (! proj) return 0;
   TString Opt(opt);
   //  Bool_t quet = Opt.Contains("Q",TString::kIgnoreCase);
   TF1 *g2 = FunFreq();
   Double_t total = proj->Integral()*proj->GetBinWidth(5);
   if (total < 1) return 0;
-  g2->SetParameters(0,208,1.,0);
+  g2->SetRange(zmin,zmax);
+  g2->SetParameters(0,0.5*(zmin + zmax),1.,0);
   Int_t iok = proj->Fit(g2,Opt.Data());
   if ( iok < 0) {
     cout << g2->GetName() << " fit has failed with " << iok << " for " 
@@ -3259,7 +3260,7 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
       if (TString(FitName) == "GP") g = FitGP(proj,opt,nSigma,pow,zmin,zmax);
       else if (TString(FitName) == "ADC") g = FitADC(proj,opt,nSigma,pow);
       else if (TString(FitName) == "G2") g = FitG2(proj,opt);
-      else if (TString(FitName) == "Freq") g = FitFreq(proj,opt);
+      else if (TString(FitName) == "Freq") g = FitFreq(proj,opt,zmin,zmax);
       else if (TString(FitName) == "GMP") g = FitG(proj,GMP());
       else if (TString(FitName) == "GMN") g = FitG(proj,GMN());
       else if (TString(FitName) == "NF" && dim == 3) {
