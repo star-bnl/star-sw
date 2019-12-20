@@ -314,8 +314,9 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
     Int_t    sector, row;
     Float_t  x,y,z,q,adc,pad,timebucket,IdTruth,npads,ntbks,xL,yL,zL,dX;
     Int_t    trigId, us,fl;
+    Float_t  time, timeb;
   };
-  static const Char_t *vname = "sector/I:row/I:x:y:z:q:adc:pad:timebucket:IdTruth:npads:ntbks:xL:yL:zL:dX:trigId/I:us/I:fl/I";
+  static const Char_t *vname = "sector/I:row/I:x:y:z:q:adc:pad:timebucket:IdTruth:npads:ntbks:xL:yL:zL:dX:trigId/I:us/I:fl/I:time:timeb";
   BPoint_t BPoint;
   static TNtuple *Nt = 0;
   if (plot && Nt == 0) {
@@ -395,10 +396,16 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
 		    BPoint.xL = lTpc.position().x();
 		    BPoint.yL = lTpc.position().y();
 		    BPoint.zL = lTpc.position().z();
+		    Float_t DV = 1e-6*StTpcDb::instance()->DriftVelocity(sector,row);  // cm/musec
+		    Float_t freq = StTpcDb::instance()->Electronics()->samplingFrequency(); // MHz
+		    BPoint.time = BPoint.zL/DV; //musec
+		    BPoint.timeb = BPoint.time*freq; // bucket
 #else
 		    BPoint.xL = 0;
 		    BPoint.yL = 0;
 		    BPoint.zL = 0;
+		    BPoint.time = 0;
+		    BPoint.timeb = 0;
 #endif /* __TPC_LOCAL_COORDINATES__ */
 		    BPoint.dX = tpcHit->dX();
 		    assert(tpcHit->sector() == i+1);
