@@ -2,16 +2,19 @@
 use File::Basename;
 use Cwd;
 my $pwd = cwd(); #print "pwd = $pwd\n";
-my @files = glob "./st_*Aligner.root";
+my @files = glob "../*Aligner.root";
 my @runs = ();
 my $oldrun = -1;
+my $debug = 0;
 foreach my $f (@files) {
-  my $run = $f;  # print "$run\n";
+  my $b = File::Basename::basename($f,".root");
+  my $run = $b; # print "$run\n";
   $run =~ s/.\/st_//;# print "$run\n";
   $run =~ s/adc_//; #print "$run\n";
   $run =~ s/gmt_//; # print "$run\n";
   $run =~ s/hltcosmic_//;
-  my ($r) = split '_', $run; #print "r = $r\n";
+  $run =~ s/hlt_//;
+  my ($r) = split '_', $run; print "r = $r\n" if ($debug);
 #  $run =~ s/hltcosmic_//; print "$run\n";
 #  $run =~ s/_raw*.//; print "$run\n";
   if ($r != $oldrun) {
