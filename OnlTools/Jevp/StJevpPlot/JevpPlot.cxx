@@ -548,7 +548,7 @@ void JevpPlot::draw()
 
 	    m = curr->histo->GetBinContent(curr->histo->GetMaximumBin());
       
-	    LOG("JEFF", "Histo %s: (%s) m=%f",GetPlotName(), curr->histo->GetName(), m);
+	    //LOG("JEFF", "Histo %s: (%s) m=%f",GetPlotName(), curr->histo->GetName(), m);
 	    if(m > max) max = m;
 	}
 
