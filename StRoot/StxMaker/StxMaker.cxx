@@ -365,7 +365,6 @@ Int_t StxMaker::Make(){
     // Create StTrack
     FitTrack(tr.Alpha(), &InnerParam, &OuterParam, hitVec);
     UseOriginalGeometry();
-    FitTrack(tr.Alpha(), &InnerParam, &OuterParam, hitVec);
     ///    break; // <<<<<<<<<
     //      continue;
     //    if (! FitTrack(&tr)) continue;
