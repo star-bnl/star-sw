@@ -73,6 +73,8 @@ class etofBuilder : public JevpBuilder {
         TH1* digiDensityAllChannels;
         TH1* digiDensityAllStrips;
         TH1* digiDensityInTimingWindow;
+        
+        TH1* statusBitDensity;
 
         TH1* triggerTimeDiffSectors[ 11 ];
         TH1* resetTimeDiffSectors[ 12 ];
@@ -80,6 +82,9 @@ class etofBuilder : public JevpBuilder {
         TH1* triggerTimeToResetTime;
 
         TH1* pulserDigiTimeDiff[ 216 ];
+
+        TH1* pulserDigiTimeDiffAll;
+
       };
     } contents;
     
@@ -91,6 +96,7 @@ class etofBuilder : public JevpBuilder {
         TH1* resetTimeDiffSectorsOverflow[ 12 ];
         TH1* pulserDigiTimeDiffOverflow[ 216 ];
 
+        TH1* pulserDigiTimeDiffJump;
       };
     } extras;
 
@@ -101,8 +107,10 @@ class etofBuilder : public JevpBuilder {
     // ifndef block needed to get root to work
     std::map< uint16_t, unsigned int > gdpbMap2018;
     std::map< uint16_t, unsigned int > gdpbMap2019;
+    std::map< uint16_t, unsigned int > gdpbMap2020;
     std::map< unsigned int, uint16_t > gdpbRevMap2018;
     std::map< unsigned int, uint16_t > gdpbRevMap2019;
+    std::map< unsigned int, uint16_t > gdpbRevMap2020;
 
     std::map< uint16_t, unsigned int > gdpbMap;
     std::map< unsigned int, uint16_t > gdpbRevMap;
@@ -111,6 +119,8 @@ class etofBuilder : public JevpBuilder {
     std::vector< unsigned int > eLinkToGet4;
 
     std::map< int, int > pulserPeakTot;
+
+    std::map< int, float > pulserTimeDiffGbtx;
 #endif
 
     TLatex* resetTimeLabel1;
@@ -135,6 +145,8 @@ class etofBuilder : public JevpBuilder {
     unsigned int nrOfChannelsPerGdpb;
 
     unsigned int year;
+
+    unsigned int nEtofEvents;
 
     ClassDef( etofBuilder, 1 );
 };
