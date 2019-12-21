@@ -5,7 +5,6 @@
 #include <iostream>
 
 
-
 //----------------------------------------------------------------------------
 // 
 // ***** format for year 2019 and later: namespace gdpbv100 *****
@@ -13,7 +12,7 @@
 //----------------------------------------------------------------------------
 
 namespace gdpbv100 {
-   // Size of one clock cycle (=1 coarse bin)
+// Size of one clock cycle (=1 coarse bin)
    const double   kdClockCycleSize    = 6250.0; //[ps]
    const double   kdClockCycleSizeNs  = kdClockCycleSize / 1000.0; //[ns]
    // TODO:For now make 100ps default, maybe need later an option for it
@@ -34,20 +33,20 @@ namespace gdpbv100 {
    const double   kdFtBinsNb = 112.;
 
    // Nominal bin size of NL are neglected
-   const double   kdBinSize     = kdClockCycleSize / static_cast<double>(kuFineCounterSize);
+   const double   kdBinSize     = kdClockCycleSize / kdFtBinsNb;
    // Epoch Size in bins
-   const uint32_t kuEpochInBins = kuFineTime + kuCoarseTime + 1;
+   const uint32_t kuEpochInBins = kuCoarseCounterSize * kdFtBinsNb;
    // Epoch Size in ps
    // alternatively: (kiCoarseTime>>kiCtShift + 1)*kdClockCycleSize
-   const double   kdEpochInPs   = static_cast<double>(kuEpochInBins)*kdBinSize;
+   const double   kdEpochInPs   = static_cast<double>(kuCoarseCounterSize)*kdClockCycleSize;
    const double   kdEpochInNs   = kdEpochInPs / 1000.0;
 
    // Epoch counter size in epoch
    const uint32_t kuEpochCounterSz  = 0x7FFFFFFF;
    // Epoch counter size in bin
-   const uint64_t kulEpochCycleBins = static_cast<uint64_t>(kuEpochCounterSz)* kuEpochInBins;
+   const uint64_t kulEpochCycleBins = static_cast<uint64_t>(kuEpochCounterSz + 1)* kuEpochInBins;
    // Epoch counter size in s
-   const double   kdEpochCycleInS   = static_cast<double>(kuEpochCounterSz) * (kdEpochInNs/1e9);
+   const double   kdEpochCycleInS   = static_cast<double>(kuEpochCounterSz + 1) * (kdEpochInNs/1e9);
 
    // Epoch Cycle MS start message size in bits
    const uint64_t kulEpochCycleFieldSz = 0x1FFFFF; // 21 bits
@@ -56,7 +55,6 @@ namespace gdpbv100 {
 
    const uint32_t kuFeePulserChannel     = 3; // Channel where a pulser can be set ON at 20 ns 500 Hz
    const uint32_t kuFeePulserChannelDiam = 0; // Channel where a pulser can be set ON at 20 ns 500 Hz
-
 
    enum MessageTypes {
       MSG_HIT        = 0,
@@ -80,7 +78,8 @@ namespace gdpbv100 {
    enum PattMessageTypes {
       PATT_MISSMATCH = 0,     // Missmatch pattern, 1 bit per ASIC
       PATT_ENABLE    = 1,     // Enable pattern, 1 bit per ASIC
-      PATT_RESYNC    = 2      // Resync request pattern, 1 bit per ASIC
+      PATT_RESYNC    = 2,     // Resync request pattern, 1 bit per ASIC
+      PATT_STATUS    = 3      // Status pattern, 1 bit per ASIC (SW only)
    };
 
    enum MessagePrintMask {
@@ -154,7 +153,7 @@ namespace gdpbv100 {
             { return (data >> shift) & (((static_cast<uint64_t>(1)) << len) - 1); }
 
          inline uint32_t getField(uint32_t shift, uint32_t len) const
-            { return (data >> shift) & (((static_cast<uint32_t>(1)) << len) - 1); }
+            { return (data >> shift) & (((static_cast<uint64_t>(1)) << len) - 1); }
 
          inline void setField(uint32_t shift, uint32_t len, uint32_t value)
             { uint64_t mask = (((static_cast<uint64_t>(1)) << len) - 1);
@@ -239,6 +238,8 @@ namespace gdpbv100 {
          inline uint16_t getGdpbSysErrData()     const { return getField(  4,  7); }
          // ---------- Get4 gDPB unknown msg type access methods -------------------
          inline uint32_t getGdpbSysUnkwData()    const { return getField(  4, 32); }
+         // ---------- FW error msg type access methods ----------------------------
+         inline uint32_t getGdpbSysFwErrResync() const { return getBit(   36    ); }
          // ---------- ASIC Pattern messages access methods ------------------------
          inline uint16_t getGdpbSysPattType()    const { return getField( 46,  2 ); }
          inline uint16_t getGdpbSysPattIndex()   const { return getField( 40,  4 ); }
@@ -263,6 +264,13 @@ namespace gdpbv100 {
 
          // ---------- Get4 gDPB 24b/32b Epoch setter methods ----------------------
          inline void setGdpbEpEpochNb( uint32_t v )   { setField(  8, 31, v ); }
+
+         // ---------- Get4 gDPB System Msg access methods -------------------------
+         inline void setGdpbSysSubType( uint16_t v )     { setField( 38,  2, v); }
+         // ---------- ASIC Pattern messages access methods ------------------------
+         inline void setGdpbSysPattType(    uint16_t v ) { setField( 46,  2, v ); }
+         inline void setGdpbSysPattIndex(   uint16_t v ) { setField( 40,  4, v ); }
+         inline void setGdpbSysPattPattern( uint32_t v ) { setField(  4, 32, v ); }
 
          // ---------- STAR Trigger messages setter methods ------------------------
          inline void setStarTrigMsgIndex( uint8_t v ) { setField(      0,  2, v ); }
@@ -313,6 +321,8 @@ namespace gdpbv100 {
          static double   CalcDistanceD(double start, double stop);
 
          bool operator<(const gdpbv100::Message& other) const;
+         bool operator==(const gdpbv100::Message& other) const;
+         bool operator!=(const gdpbv100::Message& other) const;
    };
 
    class FullMessage : public Message {

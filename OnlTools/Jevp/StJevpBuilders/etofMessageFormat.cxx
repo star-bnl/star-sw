@@ -53,6 +53,18 @@ bool gdpbv100::Message::operator<(const gdpbv100::Message& other) const
    return uThisTs < uOtherTs;
 }
 //----------------------------------------------------------------------------
+//! equality operator, assumes same epoch for both messages
+bool gdpbv100::Message::operator==(const gdpbv100::Message& other) const
+{
+   return this->data == other.data;
+}
+//----------------------------------------------------------------------------
+//! inequality operator, assumes same epoch for both messages
+bool gdpbv100::Message::operator!=(const gdpbv100::Message& other) const
+{
+   return this->data != other.data;
+}
+//----------------------------------------------------------------------------
 //! Returns expanded and adjusted time of message (in ns)
 uint64_t gdpbv100::Message::getMsgFullTime(uint64_t epoch) const
 {
@@ -196,7 +208,7 @@ void gdpbv100::Message::printData(unsigned outType, unsigned kind, uint32_t epoc
 
    if (kind & msg_print_Human) {
       double timeInSec = getMsgFullTimeD(epoch)/1.e9;
-      //int fifoFill = 0;
+//      int fifoFill = 0;
 
       switch (getMessageType()) {
          case MSG_EPOCH:
@@ -264,7 +276,7 @@ void gdpbv100::Message::printData(unsigned outType, unsigned kind, uint32_t epoc
    }
 
    if (kind & msg_print_Data) {
-      //const uint8_t* arr = reinterpret_cast<const uint8_t*> ( &data );
+//      const uint8_t* arr = reinterpret_cast<const uint8_t*> ( &data );
       switch (getMessageType()) {
          case MSG_HIT:
          {
@@ -315,7 +327,9 @@ void gdpbv100::Message::printData(unsigned outType, unsigned kind, uint32_t epoc
                   snprintf(sysbuf, sizeof(sysbuf), "Unknown GET4 message, data: 0x%08x", getGdpbSysUnkwData());
                   break;
                case SYS_GET4_SYNC_MISS:
-                  snprintf(sysbuf, sizeof(sysbuf), "GET4 SYNC synchronization error");
+                  if( getGdpbSysFwErrResync() )
+                     snprintf(sysbuf, sizeof(sysbuf), "GET4 Resynchronization: Get4:0x%04x", getGdpbGenChipId() );
+                     else snprintf(sysbuf, sizeof(sysbuf), "GET4 SYNC synchronization error");
                   break;
                case SYS_PATTERN:
                   snprintf(sysbuf, sizeof(sysbuf), "Pattern message => Type %d, Index %2d, Pattern 0x%08X",
@@ -396,9 +410,6 @@ void gdpbv100::FullMessage::PrintMessage( unsigned outType, unsigned kind) const
    std::cout << "Full epoch = " << std::setw(9) << fulExtendedEpoch << " ";
    printDataCout( outType, kind );
 }
-//----------------------------------------------------------------------------
-
-
 
 
 
