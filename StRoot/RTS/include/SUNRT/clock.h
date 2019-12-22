@@ -58,16 +58,33 @@ class RtsTimer
 
   double currtime() {
 #ifdef linux
+      gettimeofday(&ts_new, NULL);
+#else
+      clock_gettime(CLOCK_REALTIME, &ts_new);
+#endif
+      t = ts_new.tv_sec - ts_old.tv_sec;
+      
+#ifdef linux
+      t += ((double)(ts_new.tv_usec - ts_old.tv_usec))/1000000.0;
+#else
+      t += ((double)(ts_new.tv_nsec - ts_old.tv_nsec))/1000000000.0;
+#endif
+      return t;
+  } 
+
+
+  double actualtime() {
+#ifdef linux
     gettimeofday(&ts_new, NULL);
 #else
     clock_gettime(CLOCK_REALTIME, &ts_new);
 #endif
-    t = ts_new.tv_sec - ts_old.tv_sec;
+    t = ts_new.tv_sec;
     
 #ifdef linux
-    t += ((double)(ts_new.tv_usec - ts_old.tv_usec))/1000000.0;
+    t += ((double)(ts_new.tv_usec))/1000000.0;
 #else
-    t += ((double)(ts_new.tv_nsec - ts_old.tv_nsec))/1000000000.0;
+    t += ((double)(ts_new.tv_nsec))/1000000000.0;
 #endif
     return t;
   }

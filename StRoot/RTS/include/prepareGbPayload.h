@@ -209,18 +209,26 @@ class Lxgbx {
     UINT32 evpAssign(UINT32 trg_lo, UINT32 trg_hi)
     {
 	static double resettime=0;
-
-    
+	static long int seed = 0;
+	
 	double currtime = mygettime();
+
+	if(seed == 0) {
+	    seed = (long int)(currtime * 1e6);
+	    srand48(seed);
+	    LOG("JEFF", "seed48=%llx %d", seed, sizeof(seed));
+	}
+
 	if(currtime > 15 + resettime) {
-	    resettime = currtime;
+	    resettime = currtime + drand48();
+	    
 	    for(int i=0;i<EVP_GROUP_MAX;i++) {
 		evpCtrs.cnt[i] = 0;
 	    }
 	}
 
 	double et = currtime - resettime;
-	if(et < .1) et = 1;
+	if(et < .01) et = .01;
 	LOG(NOTE, "currtime=%d resettime=%d et*1000=%d",(int)currtime,(int)resettime,(int)(et*1000),0,0);
 
 	// get event group mask

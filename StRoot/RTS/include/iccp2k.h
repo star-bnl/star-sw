@@ -20,6 +20,7 @@ typedef unsigned long long int UINT64;
 #define CMD2_FUTURE_RELEASE 0x08
 #define CMD2_EMULATE_EVENT 0x09
 #define CMD2_L4_DATA  0x10
+#define CMD2_STREAMING_TRIGGER 0x11
 
 // set by daq100decision
 #define EVBFLAG_RAW_DATA (1<<0)
