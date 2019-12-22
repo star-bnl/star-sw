@@ -1,6 +1,6 @@
 /* 
    root.exe -q -b TpcPrompt.C >& TpcPrompt.log &
-   root.exe -q -b 'Chain.C+("hlt*.root","TpcHit")' 'TpcPrompt.C+(tChain)' >& TpcPrompt.log &
+   root.exe -q -b 'Chain.C+("../*.root","TpcHit")' 'TpcPrompt.C+(tChain)' >& TpcPrompt.log &
 
    Fit
    root.exe -q -b TpcHit.root TpcPrompt.C+
@@ -10,10 +10,6 @@ Draw();
  root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("ZL","GP","R",-1,-1,1,1,10,1,0,3.0)' >& ZL.log &
  root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("T","GP","R",-1,-1,1,1,10,1,0,12.0)' >& T.log &
  root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("ZLM","Freq","R",-1,-1,1,1,10,1,200,220.0)' >& TFreq.log &
- root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("Time","GP","R",-1,-1,1,1,10,1,-0.2,0.6)' >& Time.log &
- root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("TimeB","GP","R",-1,-1,1,1,10,1,-2,6)' >& TimeB.log &
- root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("TimeM","Freq","R",-1,-1,1,1,10,1,37,39)' >& TimeM.log &
- root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("TimeMB","Freq","R",-1,-1,1,1,10,1,340,370)' >& TimeMB.log &
 */
 #if !defined(__CINT__)
 
@@ -88,12 +84,9 @@ using namespace RooFit ;
 void  TpcHit::Fill(Long64_t entry) {
   static TH3F *hist3DZ = 0, *hist3DT = 0, *hist3DZL = 0;
   static TH3F *hist3DMZ = 0, *hist3DMT = 0, *hist3DMZL = 0;
-  static TH3F *histTime = 0, *histTimeB = 0;
-  static TH3F *histTimeM = 0, *histTimeBM = 0;
   if (! hist3DZ) {
     TDirectory *old = gDirectory;
-    TString newF(gSystem->BaseName(old->GetName()));
-    newF.ReplaceAll(".root","TpcHitZTMfl0.root");
+    TString newF("TpcHitZTMfl0.root");
     fOut = new TFile(newF,"recreate");
     hist3DZ  = new TH3F("Z","|z| versus sector and row",24,0.5,24.5,72,0.5,72.5,260,200,213);
     hist3DZL = new TH3F("ZL","Drift distance sector local versus sector and row",24,0.5,24.5,72,0.5,72.5,500,-10,10);
@@ -101,10 +94,6 @@ void  TpcHit::Fill(Long64_t entry) {
     hist3DMZ  = new TH3F("ZM","Membrane |z| versus sector and row",24,0.5,24.5,72,0.5,72.5,400,-10,10);
     hist3DMZL = new TH3F("ZLM","Membrane Drift distance sector local versus sector and row",24,0.5,24.5,72,0.5,72.5,400,200,220);
     hist3DMT  = new TH3F("TM","Membrane time bucket versus sector and row",24,0.5,24.5,72,0.5,72.5,400,320,360);
-    histTime = new  TH3F("Time","Prompt time (usec) versus sector and row",24,0.5,24.5,72,0.5,72.5,400,-1,1);
-    histTimeB = new  TH3F("TimeB","Prompt time (backets) versus sector and row",24,0.5,24.5,72,0.5,72.5,400,-10,10);
-    histTimeM = new  TH3F("TimeM","Membrane time (usec) versus sector and row",24,0.5,24.5,72,0.5,72.5,400,30,40);
-    histTimeBM = new  TH3F("TimeBM","Membrane time (backets) versus sector and row",24,0.5,24.5,72,0.5,72.5,400,300,400);
     gDirectory = old;
   }
   if (! fl) {
@@ -114,10 +103,6 @@ void  TpcHit::Fill(Long64_t entry) {
     hist3DMZ->Fill(sector,row,z);
     hist3DMZL->Fill(sector,row,zL);
     hist3DMT->Fill(sector,row,timebucket);
-    histTime->Fill(sector,row,time);
-    histTimeB->Fill(sector,row,timeb);
-    histTimeM->Fill(sector,row,time);
-    histTimeBM->Fill(sector,row,timeb);
   }
 }
 //________________________________________________________________________________
@@ -192,6 +177,7 @@ void Draw(const Char_t *tag = "New") {
     return;
   }
   Draw(tree);
+  
 }
 //________________________________________________________________________________
 void ClusterSize(const Char_t *f0 = "AuAu200AltroDef/st_physics_adc_15152001_raw_1000013.TpcHit.root",
@@ -474,6 +460,11 @@ void T0Fit(TH3F *D = 0, Int_t iX = 0, Int_t iY = 0) {
 //________________________________________________________________________________
 void TpcPrompt(const Char_t *chainN = "TpcHit") {
   TChain *chain = (TChain *) gDirectory->Get(chainN);
+  if (! chain) return;
+  Draw(chain);
+}
+//________________________________________________________________________________
+void TpcPrompt(TChain *chain) {
   if (! chain) return;
   Draw(chain);
 }
