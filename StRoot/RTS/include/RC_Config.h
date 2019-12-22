@@ -282,7 +282,7 @@ class EvbChooser
   
   int getEvb4Token(int token) { return evb4token[token]; }
 
- private:
+  // private:
   int evbNodes[MAX_EVBS][5];          // idx to server by evb/server
   int nevbserv[MAX_EVBS];             // nservers by evb
 
