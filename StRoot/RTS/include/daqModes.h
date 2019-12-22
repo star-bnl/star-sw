@@ -48,10 +48,21 @@
 /* special DAQ commands sent out via Trigger */
 /* Note that the daq_cmd is mostly a bit mask! */
 
+// 2019:
+//       This year the only daq command in play through June was "0x1" which meant write raw
+//       This was controlled in the run control by 0x4, as per the labels.
+//       The reason for this was to control issues in the FTPC Trigger cables
+//
+//       As of June 25, we added the streaming feature.  This forces all NORMAL triggers
+//       to have bit 0x8 set.  the bit 0x8 unset means streaming trigger!
+//
+#define DAQCMD_MASK_NOSTREAM                    0x8
+
 #define DAQCMD_HLT_RUN				1	/* is first bit is set, run HLT */
 #define DAQCMD_DAQ10K_DISABLE			2	/* if the 2nd bit is _not_ set, run daq10k TPC sector */
 #define DAQCMD_FMT_ONLY				4	/* force raw (non ZS or non CLD) data */
 #define DAQCMD_FGT_FMT_ONLY			8	/* also raw data but for FGT */
+
 
 // Tonko: marked unused but left for documentation, Jan 2012
 //unused #define DAQCMD_DEFAULT			0	/* Run cluster finder _and_ wait for FORMAT_DATA */
