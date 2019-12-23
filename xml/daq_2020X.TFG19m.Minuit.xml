@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false" copyInputLocally="false">
+        <command>
+#         cd ${SUBMITTINGDIRECTORY}
+#  setenv StarEndMakerShell
+   setenv STARFPE NO
+#   setenv NODEBUG yes
+#   setup  gcc631
+#   setup 64b
+#   starver TFG19c
+   starver TFG19m
+#     set evtsFile = $INPUTFILE0;
+#     set f        = 1
+#     set l        = 5000000
+  foreach  evtsFile(`cat $FILELIST`) 
+    set file = `basename ${evtsFile} .daq`;
+    echo "${file}"
+    echo "${evtsFile}"
+    set filel    = `basename $evtsFile .daq`
+    set output  = ${filel}.event.root
+    if (! -r ${evtsFile})continue;;
+    set logFile  = ${filel}B.log
+#   if ( -r ${SUBMITTINGDIRECTORY}/$logFile) continue;
+     set muFile = ${filel}.MuDst.root
+     if (-r ${SUBMITTINGDIRECTORY}/$muFile) continue;
+     set bla = ${SUBMITTINGDIRECTORY}/${filel}.bla.root
+     if (-r ${bla}) continue;
+     touch ${bla}
+# TFG
+#   root.exe -q -b 'bfc.C(100,"P2019a,-hitfilt,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,Stx,-StiCA,-Sti,KFVertex,evout,picoWrite,PicoVtxDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+#    root.exe -q -b 'bfc.C(200,"P2019,-hitfilt,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,Stx,-StiCA,-Sti,KFVertex,evout,picoWrite,PicoVtxDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+#   root.exe -q -b 'bfc.C(1000,"P2019,-hitfilt,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StxCA,-StiCA,-Sti,KFVertex,evout,picoWrite,PicoVtxDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+#    root.exe -q -b 'bfc.C(200,"P2019,-hitfilt,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,Stx,-StiCA,-Sti,KFVertex,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+#   root.exe -q -b 'bfc.C(200,"P2019,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,Stx,KFVertex,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+#   root.exe -q -b 'bfc.C(200,"P2019,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+# 2020
+   root.exe -q -b 'bfc.C(5000,"P2020a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+    cp  ${filel}* ${SUBMITTINGDIRECTORY}
+    rm ${bla}
+  end
+        </command>
+        <stdout URL="file:./sched$JOBID.log" />
+        <stderr URL="file:./sched$JOBID.err" />
+<!-- <input URL="file:/hlt/cephfs/daq/2019/054/20054068/hlt*.daq" /> -->
+<!-- <input URL="command:daq_2019.pl" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_15_01_000.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_13_03_000.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_13_01_002.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_12_04_001.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_13_02_000.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_11_03_000.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_15_03_002.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_14_01_000.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_14_02_002.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_12_04_000.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_11_04_000.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_14_04_002.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_15_02_002.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_11_02_002.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_13_04_002.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_14_02_000.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_12_03_002.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_10_04_001.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_12_01_000.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_15_01_002.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_15_02_001.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_12_02_002.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_14_02_001.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_10_01_000.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_14_03_001.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_10_04_000.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_10_03_001.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_12_01_001.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_10_02_000.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_11_01_002.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_14_03_000.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_11_02_001.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_10_02_001.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_15_03_001.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_14_04_000.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_12_02_001.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_11_01_000.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_12_04_002.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_10_03_000.daq" /> -->
+<!-- <input URL="file://l405.l4.bnl.local/hlt/cephfs/daq/2019/063/20063010/hlt_20063010_13_01_001.daq" /> -->
+<!-- <input URL="file:/hlt/cephfs/daq/2019/06*/*/hlt*.daq" /> -->
+<!-- <input URL="file:/hlt/cephfs/daq/2019/068/*/hlt*.daq" /> -->
+<input URL="file:/hlt/cephfs/daq/2019/354/20354003/hlt*.daq" />
+
+</job>

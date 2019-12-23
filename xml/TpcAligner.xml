@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<job maxFilesPerProcess="1" fileListSyntax="paths" copyInputLocally="false"> 
+<job maxFilesPerProcess="15" fileListSyntax="paths" copyInputLocally="false"> 
 <!-- <job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="paths" copyInputLocally="false"> -->
 	<command>
          cd ${SUBMITTINGDIRECTORY}

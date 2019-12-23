@@ -80,7 +80,7 @@ foreach my $run (@runs) {
 #    if ($day !~ m/158|160|179|180|181|182|183/) {next;}
     #  if ($r >= 20100000) {next;}
     my $NF = $#files;
-    my $step = (int $NF)/8;
+    my $step = (int $NF);
     print "run = $run. files = $NF, step = $step\n" if ($debug);
     if ($step < 1) {$step = 1;}
     print "run = $run. files = $NF, step = $step\n" if ($debug);
