@@ -145,7 +145,7 @@ Int_t StTpcHitMover::Make() {
 		  moveTpcHit(coorL,coorG);
 		  StThreeVectorF xyzF(coorG.position().x(),coorG.position().y(),coorG.position().z());
 		  tpcHit->setPosition(xyzF);
-		} else { //  transoform from original pad and time bucket measurements
+		} else { //  transform from original pad and time bucket measurements
 		  Float_t pad  = tpcHit->pad();
 		  Float_t time = tpcHit->timeBucket();
 		  if (! StTpcDb::IsOldScheme()) {
