@@ -63,7 +63,7 @@ void MakeInnerOuterSector(const Char_t *opt = 0){
 	    )  {
 	  val = 0.50*(X0[2*i] + X1[2*i]);
 	  dal = 0.50*(X0[2*i] - X1[2*i]);
-#if 0
+#if 1
 	  val /= 2;
 	  dal /= 2;
 	  //	  dal = 0.25*(X0[2*i] - X1[2*i]);
