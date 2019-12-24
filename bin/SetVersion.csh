@@ -31,6 +31,9 @@ switch ($case)
   case "*gcc7*" : 
     setup gcc7 
   breaksw
+  case "*gcc8*" : 
+    setup gcc8 
+  breaksw
   case "*icc*" : 
     setup icc
   breaksw

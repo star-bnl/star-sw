@@ -320,15 +320,18 @@
 #  SecRow3CGF4p59GeV_fixedTarget_1 SecRow3CGF4p59GeV_fixedTarget_2 => SecRow3CGF4p59GeV_fixedTarget
 #  3p85GeV_fixedTarget_2 and 9p2GeV_AuAu_2 are empty
 #set run = dEdx922
-set run = dEdx924
-foreach p (`ls -1d SecRow3CGF*.root`) 
-    set f = `basename ${p} .root`;
-    set b = `echo ${f} | sed -e 's/SecRow3CGF//'`;
-    echo "check $f"
-    if (! -r $STAR/StarDb/Calibrations/tpc/TpcSecRowB.${b}.root) continue;
-    echo "${f} => ${b}"
-    root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.${b}.root /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/${run}/Fit/${p}   'MakeTpcSecRowB.C(20190201,916,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190201,916.log
-#    root.exe -q -b  /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/${run}/Fit/${p}   'MakeTpcSecRowB.C(20190201,916,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190201,916.log
-#   root.exe -q -b  /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/dEdx912/Fit/${f} 'MakeTpcSecRowB.C(20190201,916,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190201,916.log
-    mv TpcSecRowB.20190201.000916.root  TpcSecRowB.${b}.root; mv  MakeTpcSecRowB.20190201,916.log MakeTpcSecRowB.${b}.log
-end
+#set run = dEdx924
+#foreach p (`ls -1d SecRow3CGF*.root`) 
+#    set f = `basename ${p} .root`;
+#    set b = `echo ${f} | sed -e 's/SecRow3CGF//'`;
+#    echo "check $f"
+#    if (! -r $STAR/StarDb/Calibrations/tpc/TpcSecRowB.${b}.root) continue;
+#    echo "${f} => ${b}"
+#    root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.${b}.root /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/${run}/Fit/${p}   'MakeTpcSecRowB.C(20190201,916,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190201,916.log
+##    root.exe -q -b  /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/${run}/Fit/${p}   'MakeTpcSecRowB.C(20190201,916,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190201,916.log
+##   root.exe -q -b  /hlt/cephfs/reco/2019/StiCAMinuit.TFG19i/dEdx912/Fit/${f} 'MakeTpcSecRowB.C(20190201,916,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190201,916.log
+#    mv TpcSecRowB.20190201.000916.root  TpcSecRowB.${b}.root; mv  MakeTpcSecRowB.20190201,916.log MakeTpcSecRowB.${b}.log
+#end
+# Run XX
+#     root.exe -q -b /net/l404/data/fisyak/Tpc/Alignment/2020/RF/11p5GeV.15/dEdx/Fit/SecRow3CGFdEdx.root  'MakeTpcSecRowB.C(20191120,190000,"TpcSecRowB",0)' >& MakeTpcSecRowB.20191120,190000.log
+     root.exe -q -b $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20191120.190000.root /net/l404/data/fisyak/Tpc/Alignment/2020/RF/11p5GeV.16/dEdx2/Fit/SecRow3CGFdEdx2.root  'MakeTpcSecRowB.C(20191120,190002,"TpcSecRowB",0)' >& MakeTpcSecRowB.20191120,190002.log
