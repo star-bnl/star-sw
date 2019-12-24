@@ -787,7 +787,7 @@ daq_dta *daq_tpx::handle_ped(int sec)
 
 		int size = caller->sfs->fileSize(full_name) ;	// this is bytes
 
-		LOG("JEFF","%s: sector %d: ped size %d",name,s,size) ;
+		LOG(NOTE,"%s: sector %d: ped size %d",name,s,size) ;
 
 		if(size <= 0) {
 		    continue;
