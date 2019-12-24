@@ -48,10 +48,10 @@ class l4Builder : public JevpBuilder {
 
 		JevpPlot *BeamPlots[3];
 
-		static const int nBesGoodPlots = 8;
+		static const int nBesGoodPlots = 10;
 		JevpPlot *BesGoodPlots[nBesGoodPlots];
 
-		static const int nHLTGood2Plots = 5;
+		static const int nHLTGood2Plots = 6;
 	    	JevpPlot *HLTGood2Plots[nHLTGood2Plots];
 
 		JevpPlot *BesMonitorPlots[4];
@@ -421,15 +421,21 @@ class l4Builder : public JevpBuilder {
 		TH1D *hBesGoodVertexZ;
 		TH1I *hBesGoodprimaryMult;
                 TH1D *hBesGoodBunchId;
-		TProfile *pBesGoodVxT;
-		TProfile *pBesGoodVyT;
+		/* TProfile *pBesGoodVxT; */
+		/* TProfile *pBesGoodVyT; */
+		TH2D *hBesGoodVxT;
+		TH1D *hBesGoodVxT_2;
+		TH2D *hBesGoodVyT;
+		TH1D *hBesGoodVyT_2;
 
 		//HLTGood2
 		TH2D *hHLTGood2VertexXY;
 		TH1D *hHLTGood2Vr;
 		TH1D *hHLTGood2VertexZ;
 		TH1I *hHLTGood2primaryMult;
-		TProfile *pHLTGood2VzT;
+		/* TProfile *pHLTGood2VzT; */
+		TH2D *hHLTGood2VzT;
+		TH1D *hHLTGood2VzT_2;
 
 		//BesMonitor
 		TH2D *hBesMonitorVertexXY;
