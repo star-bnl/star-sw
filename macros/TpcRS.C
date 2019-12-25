@@ -31,6 +31,7 @@ St_db_Maker *dbMk = 0;
 Bool_t Root4Star = kFALSE;
 //________________________________________________________________________________
 void SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
+  cout << "Call SetPartGen with RootFile = " << RootFile.Data() << "\tRunOpt = " << RunOpt.Data() << "\t Opt = " << Opt.Data() << endl;
   Int_t Ids[15] =            {      5,      6,           3,          2,       8,       9,      11,      12,       14,     15,         45,       46,    49,      47,         8};
   Double_t Masses[15] = {    0.1056584,0.1056584,0.51099907e-3,0.51099907e-3,0.13956995,0.13956995,0.493677,0.493677,0.93827231,0.93827231,1.875613,2.80925,2.80923,3.727417,0.13956995  };
   const Char_t  *Names[15] = {"muon+", "muon-", "electron", "positron", "pion+", "pion-", "kaon+", "kaon-", "proton", "pbar", "deuteron", "triton", "He3", "alpha", "pionMIP"};
@@ -65,6 +66,7 @@ void SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
     //    cout << "Reduce bgMax10 = " << bgMaxL10 << endl;
   }
   if (Root4Star) {
+    cout << "Initialize Root4star starsim " << endl;
     St_geant_Maker *geant = (St_geant_Maker *) chain->GetMakerInheritsFrom("St_geant_Maker");
     //                   NTRACK  ID PTLOW PTHIGH YLOW YHIGH PHILOW PHIHIGH ZLOW ZHIGH
     //    geant->Do("gkine 100  14   0.1    10.  -1     1      0    6.28    0.    0.;");
@@ -91,9 +93,10 @@ void SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
       }
     }
   } else { // VMC
+    cout << "Initialize STAR VMC interface" << endl;
     if (! StVMCMaker::instance()) return 0;
     if (! StarVMCApplication::Instance()) return 0;
-    StarMCSimplePrimaryGenerator *gener = (StarMCSimplePrimaryGenerator *) StarVMCApplication::Instance()->GetPrimaryGenerator();
+    StarMCSimplePrimaryGenerator *gener = (StarMCSimplePrimaryGenerator *) StarMCPrimaryGenerator::Instance();
     if ( gener && ! gener->IsA()->InheritsFrom( "StarMCSimplePrimaryGenerator" ) ) {
       delete gener; gener = 0;
     }
@@ -155,16 +158,19 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   }
   //  Bool_t needAlias = kFALSE;
   TString FileIn(fileIn);
-  if (FileIn == "" && fileOut == 0) {
-#if 0
+  if (FileIn == "") { //  && fileOut == 0) {
     if (RunOpt.Contains("pythia",TString::kIgnoreCase)) {
       RootFile += "pythia";
     } else if (RunOpt.Contains("hijing",TString::kIgnoreCase)) {
       RootFile += "hijing";
     } else {
-      ChainOpt += "gstar,"; RootFile += "gstar";
+      
+      if (Root4Star) {
+	ChainOpt += "gstar,"; // RootFile += "gstar";
+      } else {
+	ChainOpt += "20Muons,";
+      }
     }
-#endif
     if (!( RunOpt.Contains("hadr_on",TString::kIgnoreCase) ||
 	   Opt.Contains("hadr_on",TString::kIgnoreCase))) ChainOpt += "hadr_off,";
     if (! (RunOpt.Contains("phys_on",TString::kIgnoreCase) ||
@@ -197,7 +203,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
       if (gSystem->AccessPathName(FileIn.Data())) FileIn ="";
     }
   }
-  ChainOpt += RunOpt;
+  ChainOpt = RunOpt + ChainOpt;
   RootFile += Form("_%s_%i_%i",Opt.Data(),First,Last);
   RootFile.ReplaceAll(".root","");
   RootFile.ReplaceAll(",","_");
@@ -294,8 +300,9 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     cout << "Chain initiation has failed" << endl;
     chain->Fatal(initStat, "during Init()");
   }
+  cout << "FileIn = " << FileIn.Data() << " ====================" << endl;
   if (FileIn == "") {
-    SetParGan(RootFile, RunOpt, Opt);
+    SetPartGan(RootFile, RunOpt, Opt);
   }
   if (Last > 0)  chain->EventLoop(First,Last);
 }
