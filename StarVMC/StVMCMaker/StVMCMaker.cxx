@@ -219,6 +219,9 @@ Int_t StVMCMaker::Init() {
   if (! IAttr("VMCPassive")) {
     LOG_INFO << "StVMCMaker::Ini => Active mode" << endm; 
     TString CintF(SAttr("GeneratorFile"));
+    if (CintF == "" && fInputFile == "" ) {
+      CintF = "20Muons"; // default
+    }
     if (CintF != "") {
       static const Char_t *path  = ".:./StarDb/Generators:$STAR/StarDb/Generators";
       Char_t *file = gSystem->Which(path,CintF,kReadPermission);

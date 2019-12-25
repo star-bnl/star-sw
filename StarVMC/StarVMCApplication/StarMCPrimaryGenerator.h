@@ -36,7 +36,7 @@ class StarMCPrimaryGenerator : public TObject {
  public:
   StarMCPrimaryGenerator(StarStack* stack = 0) : TObject(), fStarStack(stack), fIsRandom(false), fNofPrimaries(0), 
     fOption(""), fDebug(0), fId(0), fOrigin(), fSigmasOrigin(), fSetVertex(kFALSE), fUseBeamLine(kFALSE)  {fgInstance = this;}
-  virtual ~StarMCPrimaryGenerator() {}
+  virtual ~StarMCPrimaryGenerator() {fgInstance = 0;}
   static StarMCPrimaryGenerator* Instance()   { return fgInstance;}
   void  SetIsRandom(Bool_t isRandomGenerator) { fIsRandom = isRandomGenerator; }
   void  SetNofPrimaries(Int_t nofPrimaries)   { fNofPrimaries = nofPrimaries; }
