@@ -272,6 +272,17 @@ Bfc_st BFC[] = { // standard chains
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,ETofSim,etofa,tags,emcY2,evout,IdTruth"
    ",geantout,big,MiniMcMk,Sti,NewTpcAlignment,AgML",                                     "","","/",kFALSE},
   {"MC.y2019a","","","MC2019a",                                                            "","","",kFALSE},
+  {"MC.2019","","","y2019,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
+   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
+   ,                                                                                       "","","",kFALSE},
+  {"MC.y2020","","","MC2020",                                                              "","","",kFALSE},
+  {"MC2020.Ideal","","","MC.2020,MC.Sti,vmc,NewTpcAlignment,ExB"                          ,"","","",kFALSE},
+  {"MC2020",      "","","MC.2020,sdt20191224,MC.Sti,vmc,NewTpcAlignment,ExB"              ,"","","",kFALSE},
+  {"MC.2020"  ,"","","MC.2020a",                                                           "","","",kFALSE},
+  {"MC2020a"  ,"","","MC.2020a",                                                           "","","",kFALSE},
+  {"MC.2020a","","","y2020a,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna,MC.Sti,CorrY,vmc"
+   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,ETofSim,etofa,tags,emcY2,evout,IdTruth"
+   ",geantout,big,MiniMcMk,Sti,NewTpcAlignment,AgML",                                     "","","/",kFALSE},
   {"MC.Sti",   "","","Sti,geantOut,noRunco,noHistos,picoWrite,PicoVtxVpd,McTpcAna,tags"   ,"","","",kFALSE},
   {"MC.StiCA",   "","","MC.Sti,StiCA"                                                     ,"","","",kFALSE},
   {"XC",          "","","TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,"
@@ -283,6 +294,8 @@ Bfc_st BFC[] = { // standard chains
   {"XC2018",      "","","y2018,XC,sdt20180426.122000",                                     "","","",kFALSE},
   {"XC2019",      "","","y2019,XC,sdt20190301",                                            "","","",kFALSE},
   {"XC2019I",     "","","y2019,XC",                                                        "","","",kFALSE},
+  {"XC2020",      "","","y2020,XC,sdt20191224",                                            "","","",kFALSE},
+  {"XC2020I",     "","","y2020,XC",                                                        "","","",kFALSE},
   {"RC----------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"RC.y2000"        ,"","","p2000,VFMinuit,CMuDst,NosvtIT,NossdIT,NosstIT"               ,"","","",kFALSE},
   {"RC.y2001"        ,"","","P2001a,VFMinuit,ZDCvtx,CMuDst,NosvtIT,NossdIT,NosstIT"       ,"","","",kFALSE},
@@ -361,8 +374,8 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                                       "","","",kFALSE},
   {"RC.y2018","","","P2018a,btof,mtd,BEmcChkStat,StiCA,CorrY,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,"
    ,                                                                                       "","","",kFALSE},
-  {"RC.y2019","","","P2019a,btof,mtd,BEmcChkStat,StiCA,CorrY,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,"
-   ,                                                                                       "","","",kFALSE},
+  {"RC.y2019","","","P2019a,BEmcChkStat,StiCA,evout,NoHistos,noTags,noRunco"               "","","",kFALSE},
+  {"RC.y2020","","","P2020a,BEmcChkStat,StiCA,evout,NoHistos,noTags,noRunco",              "","","",kFALSE},
 
   {"MC nightlies and Eval","--","-----------","------------------------------------------","","","",kFALSE},
   {"test_MC.stan.y2000","","","MC.y2000,Sti,fzin,MiniMcMk","",""
@@ -1186,15 +1199,9 @@ Bfc_st BFC[] = { // standard chains
   // 
   {"B2019a" ,"","","ry2019a,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite",
    "","",                                                      "Base chain for run 2019 data (tpc)",kFALSE},
-#if 1
   {"P2019a","" ,"",
    "B2019a,ITTF,BAna,iTpcIT,VFMinuit,etofa,btof,mtd,emcDY2,epdHit,trgd,ZDCvtx,analysis"
    ,    "","",        "Base chain for year 2019 AA data - no Corr (+     epd, mtd, b/etof, b-emc)",kFALSE},
-#else
-  {"P2019a","" ,"",
-   "B2019a,ITTF,BAna,iTpcIT,VFMinuit,beamline3D,etofa,btof,mtd,emcDY2,epdHit,trgd,ZDCvtx,analysis"
-   ,    "","",        "Base chain for year 2019 AA data - no Corr (+     epd, mtd, b/etof, b-emc)",kFALSE},
-#endif
 
   // 2020 initial chains
   {"B2020" ,"","",
