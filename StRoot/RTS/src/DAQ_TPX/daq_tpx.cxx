@@ -790,7 +790,8 @@ daq_dta *daq_tpx::handle_ped(int sec)
 		LOG(NOTE,"%s: sector %d: ped size %d",name,s,size) ;
 
 		if(size <= 0) {
-			assert(!"can't be 0") ;
+		    continue;
+		    //assert(!"can't be 0") ;
 		}
 
 		// allocate temporary storage
