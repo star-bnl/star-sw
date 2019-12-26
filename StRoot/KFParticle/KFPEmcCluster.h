@@ -1,18 +1,16 @@
 /*
- * This file is part of KF Particle package
+ * This file is part of KFParticle package
  * Copyright (C) 2007-2019 FIAS Frankfurt Institute for Advanced Studies
- *               2007-2019 University of Frankfurt
- *               2007-2019 University of Heidelberg
+ *               2007-2019 Goethe University of Frankfurt
  *               2007-2019 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
  *               2007-2019 Maksym Zyzak
- *               2007-2019 Sergey Gorbunov
  *
- * KF Particle is free software: you can redistribute it and/or modify
+ * KFParticle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * KF Particle is distributed in the hope that it will be useful,
+ * KFParticle is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -45,7 +43,7 @@ class KFPEmcCluster
 {
  public:
   KFPEmcCluster():fP(), fC(), fId() { }
-  ~KFPEmcCluster() { }
+  virtual ~KFPEmcCluster() { }
 
   /**Returns size of the vectors. All data vectors have the same size. */
   int Size() const { return fP[0].size(); }

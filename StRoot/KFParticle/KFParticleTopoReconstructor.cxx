@@ -1,18 +1,16 @@
 /*
- * This file is part of KF Particle package
+ * This file is part of KFParticle package
  * Copyright (C) 2007-2019 FIAS Frankfurt Institute for Advanced Studies
- *               2007-2019 University of Frankfurt
- *               2007-2019 University of Heidelberg
+ *               2007-2019 Goethe University of Frankfurt
  *               2007-2019 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
  *               2007-2019 Maksym Zyzak
- *               2007-2019 Sergey Gorbunov
  *
- * KF Particle is free software: you can redistribute it and/or modify
+ * KFParticle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * KF Particle is distributed in the hope that it will be useful,
+ * KFParticle is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -694,7 +692,7 @@ void KFParticleTopoReconstructor::SelectParticleCandidates()
     {
       KFParticle tmp = fParticles[iParticle];
       tmp.SetProductionVertex(GetPrimVertex(iPV));
-      if(tmp.Chi2()/tmp.NDF()<3)
+      if(tmp.Chi2()/tmp.NDF()<5)
         isSecondary=0;
     }
     if(isSecondary)
@@ -739,7 +737,7 @@ void KFParticleTopoReconstructor::SelectParticleCandidates()
 //     }
 //   }
   
-#if 0
+
   //clean K0 and Lambda
   for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
   {
@@ -972,7 +970,7 @@ void KFParticleTopoReconstructor::SelectParticleCandidates()
         break;
       }
   }
-#endif
+
   for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
     if(deleteCandidate[iParticle])
       fParticles[iParticle].SetPDG(-1);
@@ -1040,11 +1038,11 @@ void KFParticleTopoReconstructor::ReconstructParticles()
 // #pragma omp critical 
 //   std::cout << "NPart " << fParticles.size() << " " << fTracks[0].Size() << " "<< fTracks[1].Size() << " " << fTracks[2].Size() << " " << fTracks[3].Size()<< std::endl;
     
-  for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
-    if(ParticleHasRepeatingDaughters(fParticles[iParticle]))
-      fParticles[iParticle].SetPDG(-1);
-
-  SelectParticleCandidates();
+//   for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
+//     if(ParticleHasRepeatingDaughters(fParticles[iParticle]))
+//       fParticles[iParticle].SetPDG(-1);
+//     
+//   SelectParticleCandidates();
       
 #ifdef USE_TIMERS
   timer.Stop();

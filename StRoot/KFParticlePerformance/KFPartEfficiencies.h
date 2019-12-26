@@ -1,18 +1,16 @@
 /*
- * This file is part of KF Particle package
+ * This file is part of KFParticle package
  * Copyright (C) 2007-2019 FIAS Frankfurt Institute for Advanced Studies
- *               2007-2019 University of Frankfurt
- *               2007-2019 University of Heidelberg
+ *               2007-2019 Goethe University of Frankfurt
  *               2007-2019 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
  *               2007-2019 Maksym Zyzak
- *               2007-2019 Sergey Gorbunov
  *
- * KF Particle is free software: you can redistribute it and/or modify
+ * KFParticle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * KF Particle is distributed in the hope that it will be useful,
+ * KFParticle is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -317,13 +315,13 @@ class KFPartEfficiencies :public TObject
       KFEfficiencyParticleInfo("He4-",             "He4-          ",-1000020040, 0.0f, 4.5f, 3.728400   , 1.0e20,    -2, 0.0030), //184
 //background for subtraction
       KFEfficiencyParticleInfo("pi+pi+",           "pi+pi+        ",       9001, 0.0f, 2.0f, 0          , 1.0e20,     0, 0.0030), //185
-      KFEfficiencyParticleInfo("pi+K+",            "pi+K+         ",       9002, 0.6f, 2.6f, 0          , 1.0e20,     0, 0.0030), //186
-      KFEfficiencyParticleInfo("K+K+",             "K+K+          ",       9003, 0.8f, 2.8f, 0          , 1.0e20,     0, 0.0030), //187
-      KFEfficiencyParticleInfo("K+p+",             "K+p+          ",       9004, 1.4f, 3.4f, 0          , 1.0e20,     0, 0.0030), //188
+      KFEfficiencyParticleInfo("pi+K+",            "pi+K+         ",       9002, 0.6f, 5.6f, 0          , 1.0e20,     0, 0.0030), //186
+      KFEfficiencyParticleInfo("K+K+",             "K+K+          ",       9003, 0.8f, 3.8f, 0          , 1.0e20,     0, 0.0030), //187
+      KFEfficiencyParticleInfo("K+p+",             "K+p+          ",       9004, 1.4f, 5.4f, 0          , 1.0e20,     0, 0.0030), //188
       KFEfficiencyParticleInfo("pi-pi-",           "pi-pi-        ",      -9001, 0.0f, 2.0f, 0          , 1.0e20,     0, 0.0030), //189
-      KFEfficiencyParticleInfo("pi-K-",            "pi-K-         ",      -9002, 0.6f, 2.6f, 0          , 1.0e20,     0, 0.0030), //190
-      KFEfficiencyParticleInfo("K-K-",             "K-K-          ",      -9003, 0.8f, 2.8f, 0          , 1.0e20,     0, 0.0030), //191
-      KFEfficiencyParticleInfo("K-p-",             "K-p-          ",      -9004, 1.4f, 3.4f, 0          , 1.0e20,     0, 0.0030), //192
+      KFEfficiencyParticleInfo("pi-K-",            "pi-K-         ",      -9002, 0.6f, 5.6f, 0          , 1.0e20,     0, 0.0030), //190
+      KFEfficiencyParticleInfo("K-K-",             "K-K-          ",      -9003, 0.8f, 3.8f, 0          , 1.0e20,     0, 0.0030), //191
+      KFEfficiencyParticleInfo("K-p-",             "K-p-          ",      -9004, 1.4f, 5.4f, 0          , 1.0e20,     0, 0.0030), //192
 //V0
       KFEfficiencyParticleInfo("V0",               "V0            ",  123456789, 0.3f, 1.3f, 0          , 0,          0, 0.0030)  //193
     };
