@@ -165,6 +165,8 @@ Bool_t AcceptFile(const TString &File) {
       File.Contains("minimc") || File.Contains("event") || File.Contains("geant") ||
       File.Contains("hist") || File.Contains("runco") || File.Contains("geant") ||
       File.Contains("All") ||
+      File.Contains("etofSim") ||
+      File.Contains("picoDst") ||
       File.Contains("MuDst.root")) ok = kFALSE;
   return ok;
 }
@@ -1014,12 +1016,15 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
     TFile *f = new TFile (File);
     if (f) {
       TTree *tree = (TTree *) f->Get("TpcT");
-      if (! tree ) continue;
+      if (tree ) {
       //    tree->Show(0);
-      iter.AddFile(file); 
-      NFiles++; 
-      file1 = file;
-      SetInnerPadrows();
+	iter.AddFile(file); 
+	NFiles++; 
+	file1 = file;
+	SetInnerPadrows();
+      } else {
+	cout << "TpcT Tree is missing in " << f->GetName() << endl;
+      }
     }
     delete f;
   }
