@@ -3,14 +3,16 @@
   root.exe -q -b -x kfpAnalysis.C
 */
 class StGoodTrigger;
+#if 1
 //void kfpAnalysis(Int_t N = 1000000, const Char_t *input = "/net/l404/data/fisyak/Pico/2016/125/17125034/st_physics_17125034_raw_5500079.picoDst.root", const Char_t *output = "picoAna.root", const Char_t *triggerSet = "y2016") {
 //void kfpAnalysis(Int_t N = 1000000, const Char_t *input = "st_physics_adc_17125034_raw_1000007.femtoDst.root", const Char_t *output = "picoAna.root", const Char_t *triggerSet = "y2016") {
 //void kfpAnalysis(Int_t N = 1000000, const Char_t *input = "/star/data01/pwg_tasks/picoDs/*picoDst.root", const Char_t *output = "picoAna.root", const Char_t *triggerSet = "y2011") {
 //void kfpAnalysis(Int_t N = 1000000, const Char_t *input = "./st_mtd_19110005_raw_3500041.picoDst.root", const Char_t *output = "picoAna.root", const Char_t *triggerSet = "y2018") {
-void kfpAnalysis(Int_t N = 100000, const Char_t *input = "/gpfs01/star/pwg_tasks/tfg02/2010/11GeV/*picoDst.root", const Char_t *output = "picoAna2011AuAu11.root", const Char_t *triggerSet = "y2011") {
+//void kfpAnalysis(Int_t N = 100000, const Char_t *input = "/gpfs01/star/pwg_tasks/tfg02/2010/11GeV/*picoDst.root", const Char_t *output = "picoAna2011AuAu11.root", const Char_t *triggerSet = "y2011") {
+void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "/net/l401/data/scratch1/reco/2020/TFG19m/RF/11p5GeV/*picoDst.root", const Char_t *output = "picoAna2020AuAu11p5GeV.root", const Char_t *triggerSet = "y2020") {
 //void kfpAnalysis(Int_t N = 1000, const Char_t *input = "/gpfs01/star/pwg_tasks/tfg02/2010/11GeV/st_physics_11148001_raw_1010001.picoDst.root", const Char_t *output = "picoAna2011AuAu11.root", const Char_t *triggerSet = "y2011") {
 //void kfpAnalysis(Int_t N = 1000, const Char_t *input = "/gpfs01/star/pwg/fisyak/Pico/2010AuAu11/11148001.picoDst.root", const Char_t *output = "picoAna2011AuAu11.root", const Char_t *triggerSet = "y2011") {
-#if 0
+#else
 void kfpAnalysis(Int_t N = 1000, 
 		 //		 const Char_t *input = "/star/rcf/test/dev/daq_sl302.stica/Wed/year_2014/AuAu200_production_low_2014/st_physics_15164004_raw_2000022.MuDst.root",
 		 //		 const Char_t *input = "/star/data75/reco/27GeV_production_2018/FullField/P18ih/2018/158/19158009/st_physics_19158009_raw_3000013.MuDst.root",
