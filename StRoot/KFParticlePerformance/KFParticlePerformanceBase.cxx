@@ -329,9 +329,9 @@ void KFParticlePerformanceBase::CreateHistos(std::string histoDir, TDirectory* o
                                          "ghostTr", "triggerTr", "pileupTr", "bgTr", "dzSamePV"};
       TString parAxisName[nHistosPVParam] = {"x [cm]","y [cm]","z [cm]","r [cm]","N tracks","Chi2","NDF","Chi2NDF","prob","purity",
                                              "ghost tracks [%]", "trigger tracks [%]", "pileup tracks [%]", "bg tracks [%]", "dz [cm]"};
-      int nBins[nHistosPVParam] = {1000,1000,1000,1000,1001,10000,1001,10000,100,102,102,102,102,102,1000};
-      float xMin[nHistosPVParam] = {-1., -1., -10.,  0,   -0.5,    0.,   -0.5,    0., 0., -0.01, -0.01, -0.01, -0.01, -0.01, 0.};
-      float xMax[nHistosPVParam] = { 1.,  1.,  10., 10, 1000.5, 1000., 1000.5, 1000., 1.,  1.01,  1.01,  1.01,  1.01,  1.01, 100.};
+      int nBins[nHistosPVParam] = {1000,1000,  840,1000,   1001, 10000,   1001, 10000,100,   102,   102,   102,   102,   102, 1000};
+      float xMin[nHistosPVParam] = {-1., -1., -200.,  0,   -0.5,    0.,   -0.5,    0., 0., -0.01, -0.01, -0.01, -0.01, -0.01,   0.};
+      float xMax[nHistosPVParam] = { 1.,  1.,  220., 10, 1000.5, 1000., 1000.5, 1000., 1.,  1.01,  1.01,  1.01,  1.01,  1.01, 100.};
       
       TString parName2D[nHistosPVParam2D] = {"xy"};
       TString parXAxisName2D[nHistosPVParam2D] = {"x [cm]"};
