@@ -10,7 +10,7 @@
 #   setup 64b
 #   setup gcc
 #   setup 32b
-#   starver dev
+    starver TFG19m
      set evtsFile = $INPUTFILE0;
      set f        = 1
      set l        = 5000000
@@ -36,10 +36,17 @@
 #  ln -s ~/.rootrc_noqt .rootrc
 #  root4star -b -q 'bfc.C(5000,"P2020a,StiCA,btof,mtd,BEmcChkStat,-hitfilt,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  .DEV2 12/20/2019
-  root.exe -b -q 'bfc.C(200,"P2020a,StiCA,btof,mtd,BEmcChkStat,-hitfilt,evout,NoHistos,noTags,noRunco","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -b -q 'bfc.C(200,"P2020a,StiCA,btof,mtd,BEmcChkStat,-hitfilt,evout,NoHistos,noTags,noRunco","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  .DEV2 12/24/2019
 #  root.exe -b -q 'bfc.C(500,"P2020a,StiCA,btof,mtd,BEmcChkStat,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco","'${evtsFile}'")' &gt;&amp; ${logFile}
-  cp  ${filel}* ${SUBMITTINGDIRECTORY}
+#  .DEV2 12/20/2019
+#  root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,btof,mtd,BEmcChkStat,-hitfilt,evout,NoHistos,noTags,noRunco","'${evtsFile}'")' &gt;&amp; ${logFile}
+# TFG19m 12/25/2019
+#  root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,-evout,NoHistos,noTags,noRunco","'${evtsFile}'")' &gt;&amp; ${logFile}
+# TFG19m 12/26/2019
+  root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,-evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  cp  ${filel}* ${SUBMITTINGDIRECTORY}
+  cp  ${filel}*.picoDst.root ${logFile} ${SUBMITTINGDIRECTORY}
   rm ${bla}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
@@ -49,5 +56,6 @@
 <!-- <input URL="file:/hlt/cephfs/daq/2019/06*/*/hlt*.daq" /> -->
 <!-- <input URL="file:/gpfs01/star/daq/2019/071/20071001/st_physics_2007100*.daq" /> -->
 <!-- <input URL="file:/hlt/cephfs/daq/2019/354/20354003/hlt*.daq" /> -->
-<input URL="command:daq_2020.pl" />
+<!-- <input URL="command:daq_2020.pl" /> -->
+<input URL="command:daq_2020dR.pl" />
 </job>

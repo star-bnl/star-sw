@@ -4,11 +4,12 @@ use Cwd;
 use Env;
 use lib "/net/l402/data/fisyak/STAR/packages/.DEV2/bin";#$ENV{ConstructLocation}; 
 use RunXXDefs;
-my $pwd = cwd();
-#my $day = File::Basename::basename(File::Basename::dirname($pwd));
-#my $run =  File::Basename::basename($pwd);
-#my @globs = ("/hlt/cephfs/daq/2020/" . $day . "/" . $run . "*/hlt*.daq");#  print "globs = @globs\n";
 my $debug = 0;
+my $pwd = cwd();
+my $Day = File::Basename::basename(File::Basename::dirname($pwd));
+my $Run =  File::Basename::basename($pwd);
+print "Day = $Day, Run = $Run\n" if ($debug);
+#my @globs = ("/hlt/cephfs/daq/2020/" . $Day . "/" . $Run . "*/hlt*.daq");#  print "globs = @globs\n";
 my $fNo = 0;
 # foreach my $glob (@globs) {
 #   my @files = glob $glob;
@@ -48,12 +49,15 @@ sub GoodRun($$) {
 my $def = {@Runs};# print "Runs = @Runs\n";
 PrintHash($def,"Runs") if ($debug);
 #die;
-my  @runs  = glob "/hlt/cephfs/daq/2019/???/* /hlt/cephfs/daq/2020/???/*";  print "runs = @runs\n" if ($debug);
+#my  @runs  = glob "/hlt/cephfs/daq/2019/???/* /hlt/cephfs/daq/2020/???/*";  print "runs = @runs\n" if ($debug);
+my @runs = ("/hlt/cephfs/daq/2019/" . $Day . "/" .  $Run,
+	    "/hlt/cephfs/daq/2020/" . $Day . "/" .  $Run);
+print "runs = @runs\n" if ($debug);
 foreach my $run (@runs) {
   my $r = File::Basename::basename($run);
   if (GoodRun($def,$r) < 0) {next;}
   foreach my $tag (qw(st_physics_20 hlt)) {
-    my @files = glob $run . "/" . $tag . "*.daq"; print "files = @files\n" if ($debug);
+    my @files = glob $run . "/" . $tag . "*.daq";#print "files = @files\n" if ($debug);
     if ($#files < 0) {next;}
     #  print "files = @files\n";
     my $day = int ($r/1000 - 20000); #print "ru = $r => day = $day\n";
@@ -61,7 +65,7 @@ foreach my $run (@runs) {
 #    if ($day !~ m/158|160|179|180|181|182|183/) {next;}
     #  if ($r >= 20100000) {next;}
     my $NF = $#files;
-    my $step = (int $NF);
+    my $step = 1; #(int $NF);
     print "run = $run. files = $NF, step = $step\n" if ($debug);
     if ($step < 1) {$step = 1;}
     print "run = $run. files = $NF, step = $step\n" if ($debug);
@@ -72,6 +76,8 @@ foreach my $run (@runs) {
       #    print "$b\n" if ($debug);
       my $mufile = $b . ".MuDst.root";
       if (-r $mufile) {next;}
+      my $pifile = $b . ".picoDst.root";
+      if (-r $pifile) {next;}
       my $blafile = $b . ".bla.root";
       if (-r $blafile) {next;}
       print "string:$file\n";

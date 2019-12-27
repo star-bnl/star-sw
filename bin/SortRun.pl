@@ -24,8 +24,9 @@ sub SPrint ($$$$$$$$) {
   print "\tfield => \'$field\',\tfirst=> \'$runMin\',\t last => \'$runMax\',\t list => \'\',  beginTime => \'$dd.$tt\'}, \# \t$dateMin\t$timeMin\t$dateMax\t$timeMax\n";
   $N++;
 }
+print "\@Runs = ( # onl CURRENT | SortRun.pl \n";
 while ($line = <>) {
-  my ($run,$trig,$date,$time,$scaleFactor) = split ' ', $line;
+  my ($run,$trig,$date,$time,$scaleFactor,$rtsStatus,$shiftLeaderStatus) = split ' ', $line;
   my $field = "UF";
   if     ($scaleFactor >-1.2 && $scaleFactor < -0.8) {$field = "RF";}
   elsif ($scaleFactor > -0.8 && $scaleFactor < -0.2) {$field = "RHF";}
@@ -33,6 +34,7 @@ while ($line = <>) {
   elsif ($scaleFactor >  0.2 && $scaleFactor <  0.8) {$field = "FHF";}
   elsif ($scaleFactor >  0.8 && $scaleFactor <  1.2) {$field = "FF";}
   if ($run eq 'cmd' or $run eq 'runNumber') {next;}
+  if ($rtsStatus != 0 || $shiftLeaderStatus != 0) {next;}
   if ($trig !~  /production/ and $trig !~  /^tune/ and $trig !~ /^Cosmic/) {next;}
    if ($trig =~ /^ped/) {next;}
    if ($trig =~ /^las/) {next;}
@@ -59,8 +61,8 @@ while ($line = <>) {
   $timeMax = $time;
   $dateMax = $date;
   my $trigF = $trig . $field;
-  if ($trigF eq $trigOldF && $run == $runOld+1) {
-    print "runMax = $runMax, runOld = $runOld, run = $run\n";
+  if ($trigF eq $trigOldF && ($run - $runOld) <= 1) {
+#    print "runMax = $runMax, runOld = $runOld, run = $run\n";
     $runOld = $run;
     $runMax = $run;
   } else {
@@ -84,3 +86,4 @@ if ($trigOld ne '') {
   SPrint($trigOld,$runMin,$runMax,$dateMin,$timeMin,$dateMax,$timeMax,$fieldOld);
 }
 #close(In);
+print ");\n1;\n";

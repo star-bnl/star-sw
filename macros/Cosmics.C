@@ -1,7 +1,7 @@
 /* to Run: root.exe -q -b lMuDst.C Cosmics.C+
 
    to get momentum Resolution:
-//   CosmicT->Draw("(K.mPti+L.mPti)*TMath::Sqrt(2.)/TMath::Abs(K.mPti-L.mPti):-TMath::Log10(TMath::Abs(K.mPti-L.mPti)/2.)>>DpT(60,-1,2,400,-0.2,0.2)","chi2<200","colz");
+   CosmicT->Draw("(K.mPti+L.mPti)*TMath::Sqrt(2.)/TMath::Abs(K.mPti-L.mPti):-TMath::Log10(TMath::Abs(K.mPti-L.mPti)/2.)>>DpT(60,-1,2,400,-0.2,0.2)","chi2<200","colz");
    TLegend *leg = new TLegend(0.4,0.4,0.7,0.7);
    TF1 *f = new TF1("f","TMath::Sqrt([0]*[0]/TMath::Power(10.,2*x)+[1]*[1]*TMath::Power(10.,2*x))",-1,2);
    Int_t color = 2; 

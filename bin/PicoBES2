@@ -151,7 +151,7 @@ foreach q (`ls -1d /gpfs01/star/daq/2013/???/14* `)
   cd $d; echo $d; 
   daq_2019byRun.pl
   if ($? && $? != 255) then
-    lsf ~/xml/daq_2019X_TFG19l.xml; 
+#    lsf ~/xml/daq_2019X_TFG19l.xml; 
   endif
   cd -
 end
@@ -315,4 +315,10 @@ foreach my $file (@ARGV) {
     }
   }
 }
+################# Run XX ###############################################################
 
+foreach d (`ls -1d 20*`)
+  cd $d;
+  lsf ~/xml/daq_2020StiCA.Minuit.TFG19m.xml
+  cd -
+end
