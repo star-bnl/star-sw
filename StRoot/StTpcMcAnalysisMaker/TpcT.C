@@ -2006,7 +2006,6 @@ Outer
       f2->ReleaseParameter(2);
       f2->ReleaseParameter(3);
       f2->ReleaseParameter(4);
-      f2->ReleaseParameter(5);
       cout << "Fit " << histM->GetName() << "\t" << histM->GetTitle() << endl;
       histM->Fit(f2,"er");
       histM->Draw("colz");
