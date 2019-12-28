@@ -1955,7 +1955,7 @@ Outer
   TF2 *f2;
   TF1 *f1;
   TCanvas *c1, *c2;
-  for (Int_t k = 1; k < 2; k++) {
+  for (Int_t k = 0; k < 1; k++) {
     if (k == 0) {
       f2 = new TF2("f2",fun2,3.0,10.0,-190,190, 6);
       c1 = new TCanvas("c1","Adc Corrections");
@@ -2016,7 +2016,7 @@ Outer
       Double_t params[7];
       f2->GetParameters(params);
       Int_t color = 0;
-      for (Int_t j = 1; j <= ny; j += 20) {
+      for (Int_t j = 15; j <= ny; j += 25) {
 	TH1D *h = histM->ProjectionX(Form("%sj%i",histM->GetName(),j),j,j);  
 	params[6] = y->GetBinCenter(j); 
 	h->SetTitle(Form("%s at z = %5.2f",histM->GetTitle(),params[6]));
@@ -2025,8 +2025,8 @@ Outer
 	h->SetMarkerStyle(20);
 	h->SetMarkerColor(color);
 	h->SetStats(0); 
-	if (k == 0)  f1 = new TF1(Form("%s%i_%i",f2->GetName(),i,j),fun1,3,9,7);
-	else         f1 = new TF1(Form("%s%i_%i",f2->GetName(),i,j),fun1r,3,9,7);
+	if (k == 0)  f1 = new TF1(Form("%s%i_%i",f2->GetName(),i,j),fun1,3,10,7);
+	else         f1 = new TF1(Form("%s%i_%i",f2->GetName(),i,j),fun1r,3,10,7);
 	params[6] = histM->GetYaxis()->GetBinCenter(j);
 	cout << "Function " << f1->GetName() << endl;
 	f1->SetParNames(parNames[0],parNames[1],parNames[2],parNames[3],parNames[4],parNames[5],parNames[6]);
