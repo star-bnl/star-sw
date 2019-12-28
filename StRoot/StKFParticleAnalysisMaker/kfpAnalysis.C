@@ -54,6 +54,7 @@ void kfpAnalysis(Int_t N = 1000,
   Long64_t nentries = tree->GetEntries();
   cout << "no. events in tree " <<nentries << endl;
   if (nentries <= 0) return;
+//   StKFParticleInterface::instance()->SetdEdXType(2); // dNdx
 //   StKFParticleInterface::instance()->SetSoftKaonPIDMode();
 //   StKFParticleInterface::instance()->SetSoftTofPidMode();
 //   StKFParticleInterface::instance()->SetChiPrimaryCut(10);

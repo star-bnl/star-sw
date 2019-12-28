@@ -14,16 +14,16 @@
 #  setup  32b
 #  starver DEV2/SL15
 foreach input (`cat $FILELIST`)
-  set picoDir = ${input};
-  set run = `basename ${picoDir}`;
-  set logb = ${run}B.log
+  set pico = ${input};
+  set picoB = `basename ${pico} .picoDst.root`;
+  set logb = ${picoB}B.log
   set log  = ${SUBMITTINGDIRECTORY}/${logb}
   if (-r ${log}) exit 0;
-  set outputb = ${run}.root;
+  set outputb = ${picoB}.root;
   set output  =  ${SUBMITTINGDIRECTORY}/${outputb};
   if (-r ${output}) exit 0;
-  cp -p ${SUBMITTINGDIRECTORY}/${picoDir}/*picoDst.root .
-  root.exe -q -b -x  'kfpAnalysis.C(1000000,"*picoDst.root","'${outputb}'","y2019")' &gt;&amp; ${logb}
+  cp -p ${SUBMITTINGDIRECTORY}/${input} .
+  root.exe -q -b -x  'kfpAnalysis.C(1000000,"'${picoB}'.picoDst.root","'${outputb}'","y2019")' &gt;&amp; ${logb}
   mv ${outputb} ${output}
   mv ${logb} ${log}
 end
