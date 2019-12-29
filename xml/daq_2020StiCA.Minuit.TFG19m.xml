@@ -15,16 +15,20 @@
      set f        = 1
      set l        = 5000000
   echo "${evtsFile}"
-  set filel    = `basename $evtsFile .daq`
+  set $evtsFileB = `basename ${evtsFile}`
+  set filel    = `basename ${evtsFileB} .daq`
   set output  = ${filel}.event.root
   if (! -r ${evtsFile}) exit 1;
   set logFile  = ${filel}B.log
 #  if ( -r ${SUBMITTINGDIRECTORY}/${logFile}) exit 0;
   set muFile = ${filel}.MuDst.root
   if (-r ${SUBMITTINGDIRECTORY}/${muFile}) exit 0;
+  set piFile = ${filel}.picoDst.root
+  if (-r ${SUBMITTINGDIRECTORY}/${piFile}) exit 0;
   set bla = ${SUBMITTINGDIRECTORY}/${filel}.bla.root
   if (-r ${bla}) exit 0;
   touch ${bla}
+  cp ${evtsFile} ${evtsFileB}
 # TFG
 #   root.exe -q -b 'bfc.C(200,"P2019,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 #   root.exe -q -b 'bfc.C(200,"P2019,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,","'${evtsFile}'")' &gt;&amp; ${logFile}
@@ -43,10 +47,11 @@
 #  root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,btof,mtd,BEmcChkStat,-hitfilt,evout,NoHistos,noTags,noRunco","'${evtsFile}'")' &gt;&amp; ${logFile}
 # TFG19m 12/25/2019
 #  root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,-evout,NoHistos,noTags,noRunco","'${evtsFile}'")' &gt;&amp; ${logFile}
-# TFG19m 12/26/2019
-  root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,-evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
-#  cp  ${filel}* ${SUBMITTINGDIRECTORY}
+# TFG19m 12/26/2019 12/29/2019
+#  root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,-evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+  root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFileB}'")' &gt;&amp; ${logFile}
   cp  ${filel}*.picoDst.root ${logFile} ${SUBMITTINGDIRECTORY}
+#  cp  ${filel}* ${SUBMITTINGDIRECTORY}
   rm ${bla}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
