@@ -15,7 +15,7 @@
      set f        = 1
      set l        = 5000000
   echo "${evtsFile}"
-  set $evtsFileB = `basename ${evtsFile}`
+  set evtsFileB = `basename ${evtsFile}`
   set filel    = `basename ${evtsFileB} .daq`
   set output  = ${filel}.event.root
   if (! -r ${evtsFile}) exit 1;
@@ -28,6 +28,7 @@
   set bla = ${SUBMITTINGDIRECTORY}/${filel}.bla.root
   if (-r ${bla}) exit 0;
   touch ${bla}
+  echo "cp ${evtsFile} ${evtsFileB}"
   cp ${evtsFile} ${evtsFileB}
 # TFG
 #   root.exe -q -b 'bfc.C(200,"P2019,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
