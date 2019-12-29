@@ -318,14 +318,14 @@ foreach my $file (@ARGV) {
 ################# Run XX ###############################################################
 
 # BadRuns
-foreach r ( `onlBadRuns.pl | awk '{print $1}'` ) 
+foreach r ( `onlBadRuns.pl | awk '{print $1}' | sort -u` ) 
   ls -1d ???/${r}; if ($?) continue; 
   echo "mv $r to Junk";  
   mv ???/${r} Junk;
 end 
 
 # Submit
-foreach d (`ls -1d 355/20*`)
+foreach d (`ls -1d 35*/20*`)
   cd $d;
   if (-r Done) then
     cd -
