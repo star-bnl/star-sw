@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false" copyInputLocally="false">
         <command>
+  set CURRENT_DIR = `pwd`
+  echo "pwd = ${CURRENT_DIR}"
 #         cd ${SUBMITTINGDIRECTORY}
 #   setenv StarEndMakerShell
    setenv STARFPE NO
@@ -28,32 +30,15 @@
   set bla = ${SUBMITTINGDIRECTORY}/${filel}.bla.root
   if (-r ${bla}) exit 0;
   touch ${bla}
-  echo "cp ${evtsFile} ${evtsFileB}"
-  cp ${evtsFile} ${evtsFileB}
-# TFG
-#   root.exe -q -b 'bfc.C(200,"P2019,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
-#   root.exe -q -b 'bfc.C(200,"P2019,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,","'${evtsFile}'")' &gt;&amp; ${logFile}
-#   root.exe -q -b 'bfc.C(200,"P2019,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,useCDV,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
-#   root4star -b -q 'bfc.C(200,"P2019a,StiCA,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeakFull,-OPr13,OPr40,-hitfilt,-beamline3D,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
-#   root4star -b -q 'bfc.C(200,"P2019a,StiCA,KFVertex,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeakFull,-OPr13,OPr40,-hitfilt,-beamline3D,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
-#  dev 12/20/2019
-#    root4star -b -q 'bfc.C(5000,"P2020a,StiCA,btof,mtd,BEmcChkStat,-hitfilt ","st_physics_20354003_raw_2500001.daq")'
-#  ln -s ~/.rootrc_noqt .rootrc
-#  root4star -b -q 'bfc.C(5000,"P2020a,StiCA,btof,mtd,BEmcChkStat,-hitfilt,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
-#  .DEV2 12/20/2019
-#  root.exe -b -q 'bfc.C(200,"P2020a,StiCA,btof,mtd,BEmcChkStat,-hitfilt,evout,NoHistos,noTags,noRunco","'${evtsFile}'")' &gt;&amp; ${logFile}
-#  .DEV2 12/24/2019
-#  root.exe -b -q 'bfc.C(500,"P2020a,StiCA,btof,mtd,BEmcChkStat,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco","'${evtsFile}'")' &gt;&amp; ${logFile}
-#  .DEV2 12/20/2019
-#  root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,btof,mtd,BEmcChkStat,-hitfilt,evout,NoHistos,noTags,noRunco","'${evtsFile}'")' &gt;&amp; ${logFile}
-# TFG19m 12/25/2019
-#  root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,-evout,NoHistos,noTags,noRunco","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  echo "cp ${evtsFile} ${evtsFileB}"
+#  cp ${evtsFile} ${evtsFileB}
 # TFG19m 12/26/2019 12/29/2019
-#  root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,-evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
-  root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFileB}'")' &gt;&amp; ${logFile}
+  root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,-evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,-evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFileB}'")' &gt;&amp; ${logFile}
   cp  ${filel}*.picoDst.root ${logFile} ${SUBMITTINGDIRECTORY}
 #  cp  ${filel}* ${SUBMITTINGDIRECTORY}
   rm ${bla}
+  rm -rf ${CURRENT_DIR}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
