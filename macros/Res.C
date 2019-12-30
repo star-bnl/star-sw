@@ -112,7 +112,7 @@ void Res(const Char_t *select="x", const Char_t *name="sigma", const Char_t *pat
   while ( (f = (TFile *) next()) ) { 
     TString F(f->GetName());
     if (! F.Contains("TPoints") && ! F.Contains("MPoints")) continue;
-    if (Pattern.GetPattern() != ""  && ! F.Contains(Pattern)) continue;
+    if (Pattern.GetPattern() != ""  &&  F.Contains(Pattern)) continue;
     if (! all && (F.Contains("MPoints") || F.Contains("BUGP") || F.Contains("BAGP"))) continue;
     Int_t indx = 0;
     if ( F.Contains("70")) indx = 1;
@@ -264,8 +264,8 @@ void Res(const Char_t *select="x", const Char_t *name="sigma", const Char_t *pat
   //  DrawdEdx();
 }
 //________________________________________________________________________________
-void Mu() {
-  Res("x","mu");
+void Mu(const Char_t *select="x", const Char_t *name="mu", const Char_t *pattern = "") {
+  Res(select,name,pattern);
 }
 //________________________________________________________________________________
 void DrawFitP(const Char_t *pattern = "SecRow3C", const Char_t *plot="mu:rowSigned(y,x)", const Char_t *select = "i&&j", const Char_t *opt = "prof",
