@@ -324,8 +324,8 @@ foreach r ( `onlBadRuns.pl | awk '{print $1}' | sort -u` )
   mv ???/${r} Junk;
 end 
 
-# Submit
-foreach d (`ls -1d 35*/20*`)
+# Submit ################################################################################
+foreach d (`ls -1d 3*/20*`)
   cd $d;
   if (-r Done) then
     cd -
@@ -344,6 +344,7 @@ foreach d (`ls -1d 35*/20*`)
   lsf63 ~/xml/daq_2020StiCA.Minuit.TFG19m.xml
   cd -
 end
+#  sleep 60
 
 ================================= Summurizing  ===============================================
 @ count = 0
@@ -364,3 +365,10 @@ foreach d (`ls -1d 3??/20*`)
 end
 
 grep total ???/20*/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fM\n", n/1.e6)}'
+################################################################################
+root.exe -q -b 'Chain.C+("3*/*/*picoDst.root","PicoDst")' | tee Chain.log
+foreach f (`grep missing Chain.log | awk '{print $3}'`)
+  set d = `dirname ${f}`; set b = `basename ${f} .picoDst.root`; mv ${d}/${b}* Zombie
+end
+
+ dir -ltdr * | grep -v 'Dec 29 1' | awk '{print $9}' | xargs rm -rf 
