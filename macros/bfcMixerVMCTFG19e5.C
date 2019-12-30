@@ -42,17 +42,17 @@ void bfcMixerVMCTFG19e5(Int_t First, Int_t Last, const Char_t *opt,
   Chain->cd();
   //________________________________________________________________________________
   TString chain2Opt(Form("Vmc,VMCAlignment,%s,gen_T,geomT,sim_T,CorrY,OPr40,OSpaceZ2,OGridLeak3D,nodefault,Rung.%i,TpcRS",Opt.Data(),RunG));
-  chain2Opt += ",bbcSim,btofsim,emcSim"; 
-#ifndef __NO_DAQ_CLUSTERS__
-  chain2Opt += ",TpxRaw,NoAnnotateCL";
   chain2Opt += ",BtofDat,EmcRaw";
-#endif
+#ifndef __NO_DAQ_CLUSTERS__
+  chain2Opt += ",bbcSim,btofsim,emcSim"; 
+  chain2Opt += ",TpxRaw,NoAnnotateCL";
   bool useEndcapSlowSim = true;
   if(useEndcapSlowSim) { // turn Endcap slow simu On/Off 
     chain2Opt += ",EEss";
   } else {
     chain2Opt += ",EEfs";
   }
+#endif
   chain2 = bfc(-1,chain2Opt,0,0,0,"MC");
   StMaker *geant = chain2->Maker("geant");
   if (! geant) return;
@@ -61,9 +61,9 @@ void bfcMixerVMCTFG19e5(Int_t First, Int_t Last, const Char_t *opt,
   Chain->cd();
   TString chain3Opt("noInput,-in,NoInput");
   chain3Opt += ",TpcMixer";
-#ifndef __TrackingOnly__
+#if !defined(__TrackingOnly__) && !defined(__NO_DAQ_CLUSTERS__)
   chain3Opt += ",BEmcMixer,EEmcMixer";
-#if 1
+#if 0
   StBTofSimMaker *tofSim = (StBTofSimMaker *) chain2->Maker("TofSim");
   //  if (tofSim) tofSim->setEmbeddingMode(kTRUE);
   //  chain3Opt += ",btofMixer"; 
@@ -77,7 +77,8 @@ void bfcMixerVMCTFG19e5(Int_t First, Int_t Last, const Char_t *opt,
   OutputFileName.ReplaceAll(".daq","");
   //  OutputFileName.Append("_emb.root");
   OutputFileName.Append(".root");
-  TString chain4Opt("P2019a,tpxraw,tpxclu,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault,DbV20190709");
+  //  TString chain4Opt("P2019a,tpxclu,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault,DbV20190709");
+  TString chain4Opt("P2019a,tpxclu,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault,DbV20190709");
   //                "P2016,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D");
   chain4Opt += ",noInput,-in,useInTracker,-hitfilt,StiCA"; // ,MiniMcMk,McAna,GeantOut
   chain4Opt += ",TpxClu,TpcHitMover,BEmcChkStat,btof,btofMatch,btofCalib,eemcA2E,fmsdat,-evout"; // ,evout
@@ -94,7 +95,7 @@ void bfcMixerVMCTFG19e5(Int_t First, Int_t Last, const Char_t *opt,
   }
 #endif
   Chain->cd();
-#ifndef __TrackingOnly__
+#if !defined(__TrackingOnly__) &&  !defined(__NO_DAQ_CLUSTERS__)
   // Twicks
   StEmcSimulatorMaker *bemcSim = (StEmcSimulatorMaker *) chain2->Maker("EmcSimulator");
   if (! bemcSim) {
@@ -148,7 +149,7 @@ void bfcMixerVMCTFG19e5(Int_t First, Int_t Last, const Char_t *opt,
   }
 }
 //________________________________________________________________________________
-void bfcMixerVMCTFG19e5(Int_t Last=2, const Char_t *opt = "KNmTsq5PerCentZ70cm",
+void bfcMixerVMCTFG19e5(Int_t Last=1000, const Char_t *opt = "KNmTsq5PerCentZ70cm",
 			const Char_t *daqfile="/gpfs01/star/daq/2019/091/20091001/st_physics_adc_20091001_raw_5500002.daq",
 			const Char_t *MuDstfile="/star/u/xgn1992/Strangeness/Phi/AuAu_19.6GeV/hlt/test-production-picoData/data_TFG19e5/st_physics_adc_20091001_raw_5500002_0001_1000.MuDst.root",
 			Int_t RunG=0, const Char_t *triggersC = "") { //520001, 520011, 520021, 520031, 520041, 520051") {
