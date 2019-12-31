@@ -318,7 +318,7 @@ foreach my $file (@ARGV) {
 ################# Run XX ###############################################################
 
 # BadRuns
-foreach r ( `onlBadRuns.pl | awk '{print $1}' | sort -u` ) 
+foreach r ( `onlBadRuns.pl | grep 20 | awk '{print $1}' | sort -u` ) 
   ls -1d ???/${r}; if ($?) continue; 
   echo "mv $r to Junk";  
   mv ???/${r} Junk;

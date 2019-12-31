@@ -36,7 +36,7 @@ my $def = {@Runs};
 #my $cmd = "mysql Conditions_rich -h $def->{$Run}->{node} -P $def->{$Run}->{port}";
 my $cmd = "mysql RunLog -h $def->{$Run}->{node} -P $def->{$Run}->{port}";
 $cmd .= $select;
-print "cmd = $cmd\n";
+#print "cmd = $cmd\n";
 my $flag      = system($cmd);
 exit 0
 
