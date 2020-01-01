@@ -1234,7 +1234,7 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 	  TotalNoOfMcHits++;
 	}
       }
-      PrintHitCounts("Epd",TotalNoOfHits, noBadHits, noHitsUsedInFit,  TotalNoOfMcHits, noMcHitsUsedInFit, " Matched with tracks");
+      PrintHitCounts("Epd ",TotalNoOfHits, noBadHits, noHitsUsedInFit,  TotalNoOfMcHits, noMcHitsUsedInFit, " Matched with tracks");
       //      LOG_QA << Form("# BTof   hits:%5i: Matched with tracks:%5i",n,m) << endm; 
     }
   }
@@ -1249,7 +1249,7 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 	if(!aHit) continue;
 	if (aHit->associatedTrack()) m++;
       }
-      LOG_QA << Form("# Mtd    hits:%5i: Matched with tracks:%5i",n,m) << endm; 
+      LOG_QA << Form("# Mtd  hits:\t%5i: \tMatched with tracks:%5i",n,m) << endm; 
     }
   }
   const StPhmdCollection* pmdcol = event->phmdCollection();

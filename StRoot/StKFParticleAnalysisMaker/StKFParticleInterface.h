@@ -88,7 +88,7 @@ class StKFParticleInterface: public TObject
   void SetStrictTofPidMode() { fStrictTofPID = true;  }
   void SetSoftTofPidMode()   { fStrictTofPID = false; }
   void SetSoftKaonPIDMode()  { fCleanKaonsWitTof = false; }
-  void SetdEdXType(Int_t type = 1)  { fdEdXMode = type; } // type - 0 => I70, 1 => dEdxFit, 2 => dNdx
+  static void SetdEdXType(Int_t type = 1)  { fdEdXMode = type; } // type - 0 => I70, 1 => dEdxFit, 2 => dNdx
   void UseCorrecteddEdX()    { SetdEdXType(2); }
   void SetTriggerMode()      { fTriggerMode = true; }
   //KF Particle Finder cuts
@@ -146,7 +146,10 @@ class StKFParticleInterface: public TObject
   TH1F* fTrackHistograms[3];
   // 0 - dEdX, 1 - dEdX positive tracks, 2 - dEdX negative tracks, 3 - dEdX tracks with ToF,
   // 4 - ToF PID, 5 - PV errors vs N tracks, 6 - PV errors vs N PV tracks, 7 - N Global vs N Primary
-  TH2F* fTrackHistograms2D[8];
+  // 8 - pT^2 versus eta for primary tracks
+  // 9 - dNdX, 10 - dNdX positive tracks, 11 - dNdX negative tracks, 12 - dNdX tracks with ToF,
+  // 13 - pT^2 versus eta for all tracks
+  TH2F* fTrackHistograms2D[14];
   //PID histograms
   static const int NTrackHistoFolders = 18;
   TH2F* fHistodEdXTracks[NTrackHistoFolders];
@@ -155,6 +158,10 @@ class StKFParticleInterface: public TObject
   TH1F* fHistoMomentumTracks[NTrackHistoFolders];
   TH2F* fHistodEdXPull[NTrackHistoFolders];
   TH2F* fHistodEdXZ[NTrackHistoFolders];
+  TH2F* fHistodNdXTracks[NTrackHistoFolders];
+  TH2F* fHistodNdXwithToFTracks[NTrackHistoFolders];
+  TH2F* fHistodNdXPull[NTrackHistoFolders];
+  //  TH2F* fHistodNdXZ[NTrackHistoFolders];
   std::map<int, int> fTrackPdgToHistoIndex;
   
   //PID information with respect to the trackID
@@ -164,7 +171,7 @@ class StKFParticleInterface: public TObject
   //PID cuts
   bool fStrictTofPID;
   bool fCleanKaonsWitTof;
-  int fdEdXMode;
+  static Int_t fdEdXMode;
   //trigger cuts
   bool fTriggerMode;
   //KF Particle Finder cuts

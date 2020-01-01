@@ -183,11 +183,18 @@ Int_t StKFParticleAnalysisMaker::Init()
     gFile = curFile;
     gDirectory = curDirectory;
   }
-  
-  fRefmultCorrUtil = CentralityMaker::instance()->getgRefMultCorr_P16id();
-  fRefmultCorrUtil->setVzForWeight(6, -6.0, 6.0);
-  fRefmultCorrUtil->readScaleForWeight("/gpfs01/star/pwg/pfederic/qVectors/StRoot/StRefMultCorr/macros/weight_grefmult_VpdnoVtx_Vpd5_Run16.txt"); //for new StRefMultCorr, Run16, SL16j
-  
+  const Char_t *path  = "/gpfs01/star/pwg/pfederic/qVectors/StRoot/StRefMultCorr/macros";
+  const Char_t *File  = "weight_grefmult_VpdnoVtx_Vpd5_Run16.txt";
+  Char_t *file = gSystem->Which(path,File,kReadPermission);
+  if (! file) {
+    Warning("StKFParticleAnalysisMaker::Init","File %s has not been found in path %s. Ignore ScaleForWeight",File,path);
+  } else {
+    fRefmultCorrUtil = CentralityMaker::instance()->getgRefMultCorr_P16id();
+    fRefmultCorrUtil->setVzForWeight(6, -6.0, 6.0);
+    
+    fRefmultCorrUtil->readScaleForWeight("/gpfs01/star/pwg/pfederic/qVectors/StRoot/StRefMultCorr/macros/weight_grefmult_VpdnoVtx_Vpd5_Run16.txt"); //for new StRefMultCorr, Run16, SL16j
+  }
+  delete [] file;
   //Initialise the chain with files containing centrality and reaction plane
   if(fFlowAnalysis)
   {
@@ -269,10 +276,11 @@ void StKFParticleAnalysisMaker::BookVertexPlots()
   PrintMem(dirs[1]->GetPath());
   
   fStKFParticleInterface = new StKFParticleInterface;
-  for(int iDecay=0; iDecay<fDecays.size(); iDecay++)
+  for(UInt_t iDecay=0; iDecay<fDecays.size(); iDecay++)
     fStKFParticleInterface->AddDecayToReconstructionList( fDecays[iDecay] );
   bool storeMCHistograms = false;
-  if(!fIsPicoAnalysis && fProcessSignal) storeMCHistograms = true;
+  //  if(!fIsPicoAnalysis && fProcessSignal) storeMCHistograms = true;
+  if(fProcessSignal) storeMCHistograms = true;
   fStKFParticlePerformanceInterface = new StKFParticlePerformanceInterface(fStKFParticleInterface->GetTopoReconstructor(), storeMCHistograms);
   dirs[0]->cd();
   PrintMem(dirs[1]->GetPath());
@@ -438,7 +446,7 @@ Int_t StKFParticleAnalysisMaker::Make()
             fStKFParticleInterface->RemoveParticle(iParticle);
         }
         
-        float l = sqrt(particle.X()*particle.X() + particle.Y()*particle.Y() + particle.Z()*particle.Z());
+	//        float l = sqrt(particle.X()*particle.X() + particle.Y()*particle.Y() + particle.Z()*particle.Z());
         float r = sqrt(particle.X()*particle.X() + particle.Y()*particle.Y());
         if(r > 50)// || (r>2.5 && r<3.6) || (r>7.5&&r<8.8))
           fStKFParticleInterface->RemoveParticle(iParticle);

@@ -22,13 +22,30 @@
 #include "StMuDSTMaker/COMMON/StMuBTofHit.h"
 #include "StMuDSTMaker/COMMON/StMuMcVertex.h"
 #include "StMuDSTMaker/COMMON/StMuMcTrack.h"
+Int_t StKFParticleInterface::fdEdXMode = 1;
+#define dEdxL10min 0.0
+#define dNdxL10min 1.25
+#define __BOOK_hdEdx__(dir,hist,Name,Title)				\
+  hist = (TH2F *)   dir->Get(Name);					\
+  if (! hist) {								\
+    hist = new TH2F(Name,Title, 700, -2, 1.5, 250, dEdxL10min, dEdxL10min+2.5);	\
+    hist->SetXTitle("log_{10}P");					\
+    hist->SetYTitle("log_{10}dE/dx");					\
+  } 
+#define __BOOK_hdNdx__(dir,hist,Name,Title)				\
+  hist = (TH2F *)   dir->Get(Name);					\
+  if (! hist) {								\
+    hist = new TH2F(Name,Title, 700, -2, 1.5, 300, dNdxL10min, dNdxL10min+2.5);	\
+    hist->SetXTitle("log_{10}P");					\
+    hist->SetYTitle("log_{10}dN/dx");					\
+  } 
 
 ClassImp(StKFParticleInterface);
 StKFParticleInterface *StKFParticleInterface::fgStKFParticleInterface = 0;
 StKFParticleInterface::StKFParticleInterface(): 
   fKFParticleTopoReconstructor(0), fParticles(0), fParticlesPdg(0), fNHftHits(0),
   fCollectTrackHistograms(false), fCollectPIDHistograms(false),
-  fStrictTofPID(true), fCleanKaonsWitTof(true), fdEdXMode(1), fTriggerMode(false),
+  fStrictTofPID(true), fCleanKaonsWitTof(true), fTriggerMode(false),
   fChiPrimaryCut(18.6), fChiPrimaryMaxCut(2e4), fCleanLowPVTrackEvents(false), fUseHFTTracksOnly(false)
 {
   fKFParticleTopoReconstructor = new KFParticleTopoReconstructor();
@@ -196,22 +213,16 @@ void StKFParticleInterface::CollectTrackHistograms()
   }
   dirs[1] = dirs[0]->GetDirectory("Tracks"); assert(dirs[1]);
   dirs[1]->cd();
-  
-  fTrackHistograms2D[0] = (TH2F *)   dirs[1]->Get("hdEdX");
-  if (! fTrackHistograms2D[0]) fTrackHistograms2D[0] = new TH2F("hdEdX", "hdEdX", 1000, 0, 10, 200, 0, 200);
-
-  fTrackHistograms2D[1] = (TH2F *)   dirs[1]->Get("hdEdXPos");
-  if (! fTrackHistograms2D[1]) fTrackHistograms2D[1] = new TH2F("hdEdXPos", "hdEdXPos", 1000, 0, 10, 200, 0, 200);
-  
-  fTrackHistograms2D[2] = (TH2F *)   dirs[1]->Get("hdEdXNeg");
-  if (! fTrackHistograms2D[2]) fTrackHistograms2D[2] = new TH2F("hdEdXNeg", "hdEdXNeg", 1000, 0, 10, 200, 0, 200);
-  
-  fTrackHistograms2D[3] = (TH2F *)   dirs[1]->Get("hdEdXwithToF");
-  if (! fTrackHistograms2D[3]) fTrackHistograms2D[3] = new TH2F("hdEdXwithToF", "hdEdXwithToF", 1000, 0, 10, 200, 0, 200);
-  
+  const Char_t *chargeName[4] = {"","Pos","Neg","withToF"};
+  for (Int_t i = 0; i < 4; i++) {
+    __BOOK_hdEdx__(dirs[1],fTrackHistograms2D[i]  , Form("hdEdX%s",chargeName[i]),  Form("hdEdX%s",chargeName[i]));
+    __BOOK_hdNdx__(dirs[1],fTrackHistograms2D[i+9], Form("hdNdX%s",chargeName[i]),  Form("hdNdX%s",chargeName[i]));
+  }
   fTrackHistograms2D[4] = (TH2F *)   dirs[1]->Get("hTofPID");
-  if (! fTrackHistograms2D[4]) fTrackHistograms2D[4] = new TH2F("hTofPID", "hTofPID", 300, 0, 15, 1100, -1, 10);
-
+  if (! fTrackHistograms2D[4]) {
+    fTrackHistograms2D[4] = new TH2F("hTofPID", "hTofPID", 300, -2, 2, 1100, -1, 10);
+    fTrackHistograms2D[4]->SetXTitle("log_{10}P");
+  }
   fTrackHistograms[0] = (TH1F *)   dirs[1]->Get("hNHFTHits");
   if (! fTrackHistograms[0]) fTrackHistograms[0] = new TH1F("hNHFTHits", "hNHFTHits",11, -0.5, 10.5);
   
@@ -220,16 +231,24 @@ void StKFParticleInterface::CollectTrackHistograms()
   
 
   fTrackHistograms2D[5] = (TH2F *)   dirs[1]->Get("hPVErrorVsNTracks");
-  if (! fTrackHistograms2D[5]) fTrackHistograms2D[5] = new TH2F("hPVErrorVsNTracks", "hPVErrorVsNTracks", 5000, 0, 5000, 5000, 0, 0.5);
-
+  if (! fTrackHistograms2D[5]) {
+    fTrackHistograms2D[5] = new TH2F("hPVErrorVsNTracks", "hPVErrorVsNTracks", 3000, 0.5, 3.5, 5000, 0, 0.5);
+    fTrackHistograms2D[5]->SetXTitle("log_{10} No. Global Tracks");
+  }
   fTrackHistograms2D[6] = (TH2F *)   dirs[1]->Get("hPVErrorVsNPVTracks");
-  if (! fTrackHistograms2D[6]) fTrackHistograms2D[6] = new TH2F("hPVErrorVsNPVTracks", "hPVErrorVsNPVTracks", 5000, 0, 5000, 5000, 0, 0.5);
-  
+  if (! fTrackHistograms2D[6]) {
+    fTrackHistograms2D[6] = new TH2F("hPVErrorVsNPVTracks", "hPVErrorVsNPVTracks", 3000, 0.5, 3.5, 5000, 0, 0.5);
+    fTrackHistograms2D[6]->SetXTitle("log_{10} No. Primary Tracks ");
+  }
   fTrackHistograms[2] = (TH1F *)   dirs[1]->Get("hPrimaryRatio");
   if (! fTrackHistograms[2]) fTrackHistograms[2] = new TH1F("hPrimaryRatio", "hPrimaryRatio", 100, 0, 1);
   
   fTrackHistograms2D[7] = (TH2F *)   dirs[1]->Get("hGlobalVsPrimaryTracks");
-  if (! fTrackHistograms2D[7]) fTrackHistograms2D[7] = new TH2F("hGlobalVsPrimaryTracks", "hGlobalVsPrimaryTracks", 1000, 0, 1000, 1000, 0, 1000);
+  if (! fTrackHistograms2D[7]) fTrackHistograms2D[7] = new TH2F("hGlobalVsPrimaryTracks", "Log_{10} No. Global vs Log_{10}) No. Primary Tracks", 350, 0.0, 3.5, 350, 0, 3.5);
+  fTrackHistograms2D[8] = (TH2F *)   dirs[1]->Get("EtaVspT");
+  if (! fTrackHistograms2D[8]) fTrackHistograms2D[8] = new TH2F("EtaVspT", "Eta vs Log_{10}p_{T} for Primary tracks", 350, -2, 1.5, 600, -3.0, 3.0);
+  fTrackHistograms2D[13] = (TH2F *)   dirs[1]->Get("EtaVspTAll");
+  if (! fTrackHistograms2D[13]) fTrackHistograms2D[13] = new TH2F("EtaVspTAll", "Eta vs Log_{10}p_{T} for All tracks", 350, -2, 1.5, 600, -3.0, 3.0);
   
   dirs[0]->cd();
   
@@ -260,24 +279,32 @@ void StKFParticleInterface::CollectPIDHistograms()
     dirs[2]->cd();
     
     fTrackPdgToHistoIndex[ pdgTrackHisto[iTrackHisto] ] = iTrackHisto;
-    
-    fHistodEdXTracks[iTrackHisto] = (TH2F *)   dirs[2]->Get("hdEdX");
-    if (! fHistodEdXTracks[iTrackHisto]) fHistodEdXTracks[iTrackHisto] = new TH2F("hdEdX", "hdEdX", 1000, 0, 10, 200, 0, 200);
-
-    fHistodEdXwithToFTracks[iTrackHisto] = (TH2F *)   dirs[2]->Get("hdEdXwithToF");
-    if (! fHistodEdXwithToFTracks[iTrackHisto]) fHistodEdXwithToFTracks[iTrackHisto] = new TH2F("hdEdXwithToF", "hdEdXwithToF", 1000, 0, 10, 200, 0, 200);
+    __BOOK_hdEdx__(dirs[2],fHistodEdXTracks[iTrackHisto], "hdEdX", "hdEdX");
+    __BOOK_hdEdx__(dirs[2],fHistodEdXwithToFTracks[iTrackHisto], "hdEdXwithToF", "hdEdXwithToF");
+    __BOOK_hdNdx__(dirs[2],fHistodNdXTracks[iTrackHisto], "hdNdX", "hdNdX");
+    __BOOK_hdNdx__(dirs[2],fHistodNdXwithToFTracks[iTrackHisto], "hdNdXwithToF", "hdNdXwithToF");
   
     fHistoTofPIDTracks[iTrackHisto] = (TH2F *)   dirs[2]->Get("hTofPID");
-    if (! fHistoTofPIDTracks[iTrackHisto]) fHistoTofPIDTracks[iTrackHisto] = new TH2F("hTofPID", "hTofPID", 300, 0, 15, 1100, -1, 10);
+    if (! fHistoTofPIDTracks[iTrackHisto]) fHistoTofPIDTracks[iTrackHisto] = new TH2F("hTofPID", "hTofPID", 400, -2, 2, 1100, -1, 10);
   
     fHistoMomentumTracks[iTrackHisto] = (TH1F *)   dirs[2]->Get("hMomentum");
-    if (! fHistoMomentumTracks[iTrackHisto]) fHistoMomentumTracks[iTrackHisto] = new TH1F("hMomentum", "hMomentum", 1000, 0, 10);
+    if (! fHistoMomentumTracks[iTrackHisto]) fHistoMomentumTracks[iTrackHisto] = new TH1F("hMomentum", "log_{10} p", 1000, -2, 2);
     
     fHistodEdXPull[iTrackHisto] = (TH2F *)   dirs[2]->Get("hdEdXPull");
-    if (! fHistodEdXPull[iTrackHisto]) fHistodEdXPull[iTrackHisto] = new TH2F("hdEdXPull", "hdEdXPull", 2000, 0, 10, 600, -30, 30);
+    if (! fHistodEdXPull[iTrackHisto]) fHistodEdXPull[iTrackHisto] = new TH2F("hdEdXPull", "hdEdXPull", 2000, -2, 2, 600, -30, 30);
+    fHistodEdXPull[iTrackHisto] = (TH2F *)   dirs[2]->Get("hdEdXPull");
+    if (! fHistodEdXPull[iTrackHisto]) fHistodEdXPull[iTrackHisto] = new TH2F("hdEdXPull", "hdEdXPull", 2000, -2, 2, 600, -30, 30);
     
     fHistodEdXZ[iTrackHisto] = (TH2F *)   dirs[2]->Get("hdEdXZ");
     if (! fHistodEdXZ[iTrackHisto]) fHistodEdXZ[iTrackHisto] = new TH2F("hdEdXZ", "hdEdXZ", 2000, -5, 5, 280, -1, 6);
+    fHistodEdXPull[iTrackHisto] = (TH2F *)   dirs[2]->Get("hdEdXPull");
+    if (! fHistodEdXPull[iTrackHisto]) fHistodEdXPull[iTrackHisto] = new TH2F("hdEdXPull", "hdEdXPull", 2000, -2, 2, 600, -30, 30);
+
+    fHistodNdXPull[iTrackHisto] = (TH2F *)   dirs[2]->Get("hdNdXPull");
+    if (! fHistodNdXPull[iTrackHisto]) fHistodNdXPull[iTrackHisto] = new TH2F("hdNdXPull", "hdNdXPull", 2000, -2, 2, 600, -30, 30);
+    
+    //    fHistodNdXZ[iTrackHisto] = (TH2F *)   dirs[2]->Get("hdNdXZ");
+    //    if (! fHistodNdXZ[iTrackHisto]) fHistodNdXZ[iTrackHisto] = new TH2F("hdNdXZ", "hdNdXZ", 2000, -5, 5, 280, -1, 6);
     
     dirs[1]->cd();
   }
@@ -633,64 +660,79 @@ void StKFParticleInterface::FillPIDHistograms(StPicoTrack *gTrack, const std::ve
     const int iTrackHisto = fTrackPdgToHistoIndex[pdg];
     if( ! (iTrackHisto < 0 || iTrackHisto >= NTrackHistoFolders) )
     {
-      fHistoMomentumTracks[iTrackHisto] -> Fill(momentum);
-      fHistodEdXTracks[iTrackHisto] -> Fill(momentum, gTrack->dEdx());
+      fHistoMomentumTracks[iTrackHisto] -> Fill(TMath::Log10(momentum));
+      Double_t pL10 = TMath::Log10(momentum);
+      Double_t dEdxL10 = (gTrack->dEdx() > 0) ? TMath::Log10(gTrack->dEdx()) : dEdxL10min;
+      Double_t dNdxL10 = (gTrack->dNdx() > 0) ? TMath::Log10(gTrack->dNdx()) : dNdxL10min;
+      fHistodEdXTracks[iTrackHisto] -> Fill(pL10, dEdxL10);
+      fHistodNdXTracks[iTrackHisto] -> Fill(pL10, dNdxL10);
       if(isTofm2)
       {
-        fHistodEdXwithToFTracks[iTrackHisto] -> Fill(momentum, gTrack->dEdx());
-        fHistoTofPIDTracks[iTrackHisto] -> Fill(momentum, m2tof);
+        fHistodEdXwithToFTracks[iTrackHisto] -> Fill(pL10, dEdxL10);
+        fHistoTofPIDTracks[iTrackHisto] -> Fill(pL10, m2tof);
         
         if(abs(pdg)==211)
         {
-          fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(0.139570, fdEdXMode, 1));
+          fHistodEdXPull[iTrackHisto] -> Fill(pL10, gTrack->dEdxPull(0.139570, 1, 1));
+          fHistodNdXPull[iTrackHisto] -> Fill(pL10, gTrack->dEdxPull(0.139570, 2, 1));
           float betaGamma = TMath::Log10(momentum/0.139570);
-          float z = gTrack->dEdxPull(0.139570, fdEdXMode, 1)*gTrack->dEdxError();
+          float z = gTrack->dEdxPull(0.139570, 1, 1)*gTrack->dEdxError();
           fHistodEdXZ[iTrackHisto]->Fill(betaGamma, z);
+          z = gTrack->dEdxPull(0.139570, 1, 2);
+	  //          fHistodNdXZ[iTrackHisto]->Fill(betaGamma, z);
           
           betaGamma = TMath::Log10(momentum/5.485799e-4);
           z = gTrack->nSigmaElectron()*gTrack->dEdxError();
           fHistodEdXZ[0]->Fill(betaGamma, z);
+
         }
         if(abs(pdg)==321)
         {
-          fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(0.493677, fdEdXMode, 1));
+          fHistodEdXPull[iTrackHisto] -> Fill(pL10, gTrack->dEdxPull(0.493677, 1, 1));
+          fHistodNdXPull[iTrackHisto] -> Fill(pL10, gTrack->dEdxPull(0.493677, 2, 1));
           float betaGamma = TMath::Log10(momentum/0.493677);
-          float z = gTrack->dEdxPull(0.493677, fdEdXMode, 1)*gTrack->dEdxError();
+          float z = gTrack->dEdxPull(0.493677, 1, 1)*gTrack->dEdxError();
           fHistodEdXZ[iTrackHisto]->Fill(betaGamma, z);
+
         }
         if(abs(pdg)==2212)
         {
-          fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(0.938272, fdEdXMode, 1));
+          fHistodEdXPull[iTrackHisto] -> Fill(pL10, gTrack->dEdxPull(0.938272, 1, 1));
+          fHistodNdXPull[iTrackHisto] -> Fill(pL10, gTrack->dEdxPull(0.938272, 2, 1));
           float betaGamma = TMath::Log10(momentum/0.938272);
-          float z = gTrack->dEdxPull(0.938272, fdEdXMode, 1)*gTrack->dEdxError();
+          float z = gTrack->dEdxPull(0.938272, 1, 1)*gTrack->dEdxError();
           fHistodEdXZ[iTrackHisto]->Fill(betaGamma, z);
         }
         if(abs(pdg)==1000010020)
         {
-          fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(1.876124, fdEdXMode, 1));
+          fHistodEdXPull[iTrackHisto] -> Fill(pL10, gTrack->dEdxPull(1.876124, 1, 1));
+          fHistodNdXPull[iTrackHisto] -> Fill(pL10, gTrack->dEdxPull(1.876124, 2, 1));
           float betaGamma = TMath::Log10(momentum/1.876124);
-          float z = gTrack->dEdxPull(1.876124, fdEdXMode, 1)*gTrack->dEdxError();
+          float z = gTrack->dEdxPull(1.876124, 1, 1)*gTrack->dEdxError();
           fHistodEdXZ[iTrackHisto]->Fill(betaGamma, z);
         }
         if(abs(pdg)==1000010030)
         {
-          fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(2.809432, fdEdXMode, 1));
+          fHistodEdXPull[iTrackHisto] -> Fill(pL10, gTrack->dEdxPull(2.809432, 1, 1));
+          fHistodNdXPull[iTrackHisto] -> Fill(pL10, gTrack->dEdxPull(2.809432, 2, 1));
           float betaGamma = TMath::Log10(momentum/2.809432);
-          float z = gTrack->dEdxPull(2.809432, fdEdXMode, 1)*gTrack->dEdxError();
+          float z = gTrack->dEdxPull(2.809432, 1, 1)*gTrack->dEdxError();
           fHistodEdXZ[iTrackHisto]->Fill(betaGamma, z);
         }
         if(abs(pdg)==1000020030)
         {
-          fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(2.809413, fdEdXMode, 2));
+          fHistodEdXPull[iTrackHisto] -> Fill(pL10, gTrack->dEdxPull(2.809413, 1, 2));
+          fHistodNdXPull[iTrackHisto] -> Fill(pL10, gTrack->dEdxPull(2.809413, 2, 2));
           float betaGamma = TMath::Log10(momentum/2.809413);
-          float z = gTrack->dEdxPull(2.809413, fdEdXMode, 2)*gTrack->dEdxError();
+          float z = gTrack->dEdxPull(2.809413, 1, 2)*gTrack->dEdxError();
           fHistodEdXZ[iTrackHisto]->Fill(betaGamma, z);
         }
         if(abs(pdg)==1000020040)
         {
-          fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(3.728400, fdEdXMode, 2));
+          fHistodEdXPull[iTrackHisto] -> Fill(pL10, gTrack->dEdxPull(3.728400, 1, 2));
+          fHistodNdXPull[iTrackHisto] -> Fill(pL10, gTrack->dEdxPull(3.728400, 2, 2));
           float betaGamma = TMath::Log10(momentum/3.728400);
-          float z = gTrack->dEdxPull(3.728400, fdEdXMode, 2)*gTrack->dEdxError();
+          float z = gTrack->dEdxPull(3.728400, 1, 2)*gTrack->dEdxError();
           fHistodEdXZ[iTrackHisto]->Fill(betaGamma, z);
         }
       }
@@ -817,9 +859,19 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
     
     if(fCollectTrackHistograms)
     {
-      fTrackHistograms2D[0]->Fill(track.GetP(), gTrack->dEdx());
-      if(q>0) fTrackHistograms2D[1]->Fill(track.GetP(), gTrack->dEdx());
-      else    fTrackHistograms2D[2]->Fill(track.GetP(), gTrack->dEdx());  
+      Double_t pL10 = (track.GetP() > 0) ? TMath::Log10(track.GetP()) : -2;
+      Double_t dEdxL10 = (gTrack->dEdx() > 0) ? TMath::Log10(gTrack->dEdx()) : dEdxL10min;
+      Double_t dNdxL10 = (gTrack->dEdx() > 0) ? TMath::Log10(gTrack->dNdx()) : dNdxL10min;
+      fTrackHistograms2D[0]->Fill(pL10, dEdxL10);
+      if(q>0) fTrackHistograms2D[1]->Fill(pL10, dEdxL10);
+      else    fTrackHistograms2D[2]->Fill(pL10, dEdxL10);  
+      fTrackHistograms2D[9]->Fill(pL10, dNdxL10);
+      if(q>0) fTrackHistograms2D[10]->Fill(pL10, dNdxL10);
+      else    fTrackHistograms2D[11]->Fill(pL10, dNdxL10);  
+      TVector3 t(track.GetPx(),track.GetPy(),track.GetPz());
+      if (gTrack->isPrimary())
+	fTrackHistograms2D[8]->Fill(TMath::Log10(t.Perp()), t.PseudoRapidity());
+      fTrackHistograms2D[13]->Fill(TMath::Log10(t.Perp()), t.PseudoRapidity());
     }
     
     double m2tof = -1.e6;
@@ -849,8 +901,12 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
       
       if(fCollectTrackHistograms)
       {
-        fTrackHistograms2D[3]->Fill(track.GetP(), gTrack->dEdx());
-        fTrackHistograms2D[4]->Fill(track.GetP(), m2tof);
+	Double_t pL10 = (track.GetP() > 0) ? TMath::Log10(track.GetP()) : -2;
+	Double_t dEdxL10 = (gTrack->dEdx() > 0) ? TMath::Log10(gTrack->dEdx()) : dEdxL10min;
+	Double_t dNdxL10 = (gTrack->dNdx() > 0) ? TMath::Log10(gTrack->dNdx()) : dNdxL10min;
+        fTrackHistograms2D[3]->Fill(pL10, dEdxL10);
+        fTrackHistograms2D[12]->Fill(pL10, dNdxL10);
+        fTrackHistograms2D[4]->Fill(pL10, m2tof);
       }
     }
     
@@ -890,7 +946,9 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
   if(nUsedTracks==0) return 0;
   if (fCollectTrackHistograms) {
     fTrackHistograms[2]->Fill( double(primaryTrackList.size())/double(nUsedTracks) );
-    fTrackHistograms2D[7]->Fill( primaryTrackList.size(), (nUsedTracks - primaryTrackList.size()) );
+    Double_t nPL10 = (primaryTrackList.size() > 0) ? TMath::Log10(primaryTrackList.size()) : -1;
+    Double_t nGL10 = (nUsedTracks > 0) ? TMath::Log10(nUsedTracks) : -1;
+    fTrackHistograms2D[7]->Fill( nGL10, nPL10);
   }
   if( fCleanLowPVTrackEvents && ( 10*primaryTrackList.size() < (nUsedTracks - primaryTrackList.size()) ) ) return 0;
   if( fCleanLowPVTrackEvents && sqrt(dx*dx + dy*dy) > 0.45 ) return 0;
@@ -919,8 +977,10 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
   if(fCollectTrackHistograms)
   {
     fTrackHistograms[1]->Fill(sqrt(dx*dx + dy*dy));
-    fTrackHistograms2D[5]->Fill( nPartSaved, sqrt(dx*dx + dy*dy) );
-    fTrackHistograms2D[6]->Fill( primaryTrackList.size(), sqrt(dx*dx + dy*dy) );
+    Double_t nL10 = (nPartSaved > 0) ? TMath::Log10(nPartSaved) : -1;
+    fTrackHistograms2D[5]->Fill( nL10, sqrt(dx*dx + dy*dy) );
+    Double_t npL10 = (primaryTrackList.size()) ? TMath::Log10(primaryTrackList.size()) : -1;
+    fTrackHistograms2D[6]->Fill( npL10, sqrt(dx*dx + dy*dy) );
   }  
   //reconstruct short-lived particles
   ReconstructParticles();
@@ -1021,9 +1081,15 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
     
     if(fCollectTrackHistograms)
     {
-      fTrackHistograms2D[0]->Fill(track.GetP(), gTrack->dEdx()*1.e6);
-      if(q>0) fTrackHistograms2D[1]->Fill(track.GetP(), gTrack->dEdx()*1.e6);
-      else    fTrackHistograms2D[2]->Fill(track.GetP(), gTrack->dEdx()*1.e6);  
+      Double_t pL10 = (track.GetP() > 0) ? TMath::Log10(track.GetP()) : -2;
+      Double_t dEdxL10 = (gTrack->dEdx() > 0) ? TMath::Log10(gTrack->dEdx()*1e6) : 0.0;
+      Double_t dNdxL10 = (gTrack->probPidTraits().dNdxFit() > 0) ? TMath::Log10(gTrack->probPidTraits().dNdxFit()*1e6) : 0.5;
+      fTrackHistograms2D[0]->Fill(pL10, dEdxL10);
+      if(q>0) fTrackHistograms2D[1]->Fill(pL10, dEdxL10);
+      else    fTrackHistograms2D[2]->Fill(pL10, dEdxL10);
+      fTrackHistograms2D[9]->Fill(pL10, dNdxL10);
+      if(q>0) fTrackHistograms2D[10]->Fill(pL10, dNdxL10);
+      else    fTrackHistograms2D[11]->Fill(pL10, dNdxL10);
     }
     
     const StMuBTofPidTraits &btofPid = gTrack->btofPidTraits();
@@ -1050,8 +1116,13 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
       
       if(fCollectTrackHistograms)
       {
-        fTrackHistograms2D[3]->Fill(track.GetP(), gTrack->dEdx()*1.e6);
-        fTrackHistograms2D[4]->Fill(track.GetP(), m2tof);
+	Double_t pL10 = (track.GetP() > 0) ? TMath::Log10(track.GetP()) : -2;
+	Double_t dEdxL10 = (gTrack->dEdx() > 0) ? TMath::Log10(gTrack->dEdx()*1e6) : -1;
+	Double_t dNdxL10 = (gTrack->probPidTraits().dNdxFit() > 0) ? TMath::Log10(gTrack->probPidTraits().dNdxFit()*1e6) : 0.5;
+	
+        fTrackHistograms2D[3]->Fill(pL10, dEdxL10);
+        fTrackHistograms2D[12]->Fill(pL10, dNdxL10);
+        fTrackHistograms2D[4]->Fill(pL10, m2tof);
       }
     }
 
@@ -1094,8 +1165,10 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
   if(fCollectTrackHistograms)
   {
     fTrackHistograms[1]->Fill(sqrt(dx*dx + dy*dy));
-    fTrackHistograms2D[5]->Fill( nPartSaved, sqrt(dx*dx + dy*dy) );
-    fTrackHistograms2D[6]->Fill( primaryTrackList.size(), sqrt(dx*dx + dy*dy) );
+    Double_t ngL10 = (nPartSaved > 0) ? TMath::Log10(nPartSaved) : -1;
+    fTrackHistograms2D[5]->Fill( ngL10, sqrt(dx*dx + dy*dy) );
+    Double_t npL10 = (nPartSaved > 0) ? TMath::Log10(primaryTrackList.size()) : -1;
+    fTrackHistograms2D[6]->Fill( npL10, sqrt(dx*dx + dy*dy) );
   }  
   //reconstruct short-lived particles
   ReconstructParticles();

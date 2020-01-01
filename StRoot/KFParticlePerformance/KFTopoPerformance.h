@@ -128,9 +128,10 @@ class KFTopoPerformance: public KFParticlePerformanceBase
                               TH2F* histoParameters2D[4][KFPartEfficiencies::nParticles][nHistoPartParam2D],
                               TH3F* histoParameters3D[1][KFPartEfficiencies::nParticles][nHistoPartParam3D],
                               TH1F* histoFit[KFPartEfficiencies::nParticles][nFitQA] = 0,
-                              TH1F* histoFitDaughtersQA[KFPartEfficiencies::nParticles][nFitQA] = 0,
+                              TH1F* histoFitDaughtersQA[KFPartEfficiencies::nParticles][nFitQA] = 0,                             
                               TH1F* histoDSToParticleQA[KFPartEfficiencies::nParticles][nDSToParticleQA] = 0,
-                              std::vector<int>* multiplicities = 0);
+                              std::vector<int>* multiplicities = 0,
+			      TH1F* histoFitDaughtersQAPull[KFPartEfficiencies::nParticles][nFitQA] = 0);
   
   const KFParticleTopoReconstructor *fTopoReconstructor; ///< Pointer to the KFParticleTopoReconstructor object with particles and vertices to be analysed.
 

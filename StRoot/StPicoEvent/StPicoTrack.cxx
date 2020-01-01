@@ -20,6 +20,7 @@
 #include "StBichsel/Bichsel.h"
 #include "StBichsel/StdEdxModel.h"
 #include "StBichsel/StdEdxPull.h"
+Int_t StPicoTrack::fgdEdXMode = 1;
 #endif /* __TFG__VERSION__ */
 
 ClassImp(StPicoTrack)

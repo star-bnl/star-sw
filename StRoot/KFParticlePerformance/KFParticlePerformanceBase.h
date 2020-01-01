@@ -88,7 +88,7 @@ class KFParticlePerformanceBase
   /** Switch off collection of Z-R histograms. Not to allocate memory should be called 
    ** before KFParticlePerformanceBase::CreateHistos(). **/
   void DoNotStoreZRHistograms()      { fStoreZRHistograms = 0; }
-  
+  void DoNotStoreFitPullHistograms()      { fStoreFitPullHistograms = 0; }
   /** Returns residual histogram with "iParameter" parameter for decay with "iDecay" number. */
   const TH1F* GetDecayResidual(const int iDecay, const int iParameter) const { return hFitQA[iDecay][iParameter];          }
   /** Returns pull histogram with "iParameter" parameter for decay with "iDecay" number. */
@@ -107,11 +107,14 @@ class KFParticlePerformanceBase
   bool fStoreMCHistograms; ///< Flag showing if histograms requiring Monte Carlo information should be created and collected. "True" by default.
   bool fStorePrimSecHistograms; ///< Flag showing if histograms for primary and secondary candidates should be created and collected. "True" by default.
   bool fStoreZRHistograms; ///< Flag showing if Z-R histograms should be created and collected. "True" by default.
+  bool fStoreFitPullHistograms; ///< Flag showing if histograms for fit secondary candidates should be created and collected. "True" by default.
 
 //histos
   static const int nFitQA = 16; ///< Number of fit QA histograms: residuals and pulls in X, Y, Z, Px, Py, Pz, E, M.
   TH1F *hFitDaughtersQA[KFPartEfficiencies::nParticles][nFitQA]; ///< Residuals and pulls of daughter particles at production point.
   TH1F *hFitQA[KFPartEfficiencies::nParticles][nFitQA]; ///< Residuals and pulls of the reconstructed particle: X, Y, Z at decay point, P, E, M - at production point
+  TH1F *hFitDaughtersQAPull[KFPartEfficiencies::nParticles][nFitQA]; ///< Residuals and pulls of daughter particles at production point from Fit. "DaughtersFitQA"
+  TH1F *hFitQAPull[KFPartEfficiencies::nParticles][nFitQA]; ///< Residuals and pulls of the reconstructed particle: X, Y, Z at decay point, P, E, M - at production point from Fit "DaughtersFitQA"
   TH1F *hFitQANoConstraint[KFPartEfficiencies::nParticles][nFitQA]; ///< Residuals and pulls of the particle with no constraints set.
   TH1F *hFitQAMassConstraint[KFPartEfficiencies::nParticles][nFitQA]; ///< Residuals and pulls of the particle with the mass constraint. 
   TH1F *hFitQATopoConstraint[KFPartEfficiencies::nParticles][nFitQA]; ///< Residuals and pulls of the particle with the production point constraint.

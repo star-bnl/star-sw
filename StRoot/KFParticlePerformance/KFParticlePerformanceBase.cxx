@@ -33,7 +33,7 @@
 
 KFParticlePerformanceBase::KFParticlePerformanceBase():
   fParteff(), fPVeff(), fPVeffMCReconstructable(), outfileName(), histodir(0), fNEvents(0), fStoreMCHistograms(1), 
-  fStorePrimSecHistograms(1), fStoreZRHistograms(1),fHistoDir(0)
+  fStorePrimSecHistograms(1), fStoreZRHistograms(1),fStoreFitPullHistograms(1),fHistoDir(0)
 {
   /** The default constructor. Initialises all pointers to nullptr.  **/
   for(int iParticle=0; iParticle<KFPartEfficiencies::nParticles; iParticle++)
@@ -214,6 +214,31 @@ void KFParticlePerformanceBase::CreateHistos(std::string histoDir, TDirectory* o
           CreateFitHistograms(hFitQA[iPart], iPart);
           CreateEfficiencyHistograms(hPartEfficiency[iPart],hPartEfficiency2D[iPart]);
         }
+        if(fStoreFitPullHistograms)
+        {
+          TString res = "res";
+          TString pull = "pull";
+
+          gDirectory->mkdir("DaughtersFitQA");
+          gDirectory->cd("DaughtersFitQA");
+          {
+            TString parName[nFitQA/2] = {"X","Y","Z","Px","Py","Pz","E","M"};
+            int nBins = 100;
+            float xMax[nFitQA/2] = {0.15,0.15,0.03,0.01,0.01,0.06,0.06,0.01};
+  //             float xMax[nFitQA/2] = {2.,2.,5.,0.3,0.3,0.3,0.03,0.03};
+
+            for( int iH=0; iH<nFitQA/2; iH++ ){
+              hFitDaughtersQAPull[iPart][iH]   = new TH1F((res+parName[iH]).Data(),
+                                                      (GetDirectoryPath()+res+parName[iH]).Data(), 
+                                                      nBins, -xMax[iH],xMax[iH]);
+              hFitDaughtersQAPull[iPart][iH+8] = new TH1F((pull+parName[iH]).Data(),
+                                                      (GetDirectoryPath()+pull+parName[iH]).Data(), 
+                                                      nBins, -6,6);
+            }
+          }
+          gDirectory->cd(".."); //particle directory
+          CreateFitHistograms(hFitQAPull[iPart], iPart);
+        }
         gDirectory->mkdir("Parameters");
         gDirectory->cd("Parameters");
         {
@@ -329,9 +354,9 @@ void KFParticlePerformanceBase::CreateHistos(std::string histoDir, TDirectory* o
                                          "ghostTr", "triggerTr", "pileupTr", "bgTr", "dzSamePV"};
       TString parAxisName[nHistosPVParam] = {"x [cm]","y [cm]","z [cm]","r [cm]","N tracks","Chi2","NDF","Chi2NDF","prob","purity",
                                              "ghost tracks [%]", "trigger tracks [%]", "pileup tracks [%]", "bg tracks [%]", "dz [cm]"};
-      int nBins[nHistosPVParam] =  {1000,  1000,  840,1000,   1001, 10000,   1001, 10000,100,   102,   102,   102,   102,   102, 1000};
-      float xMin[nHistosPVParam] = {-2.5, -2.5., -200.,  0,   -0.5,    0.,   -0.5,    0., 0., -0.01, -0.01, -0.01, -0.01, -0.01,   0.};
-      float xMax[nHistosPVParam] = { 2.5,  2.5.,  220., 10, 1000.5, 1000., 1000.5, 1000., 1.,  1.01,  1.01,  1.01,  1.01,  1.01, 100.};
+      int nBins[nHistosPVParam] =  {1000, 1000,  840,1000,   1001, 10000,   1001, 10000,100,   102,   102,   102,   102,   102, 1000};
+      float xMin[nHistosPVParam] = {-2.5, -2.5, -200.,  0,   -0.5,    0.,   -0.5,    0., 0., -0.01, -0.01, -0.01, -0.01, -0.01,   0.};
+      float xMax[nHistosPVParam] = { 2.5,  2.5,  220., 10, 1000.5, 1000., 1000.5, 1000., 1.,  1.01,  1.01,  1.01,  1.01,  1.01, 100.};
       
       TString parName2D[nHistosPVParam2D] = {"xy"};
       TString parXAxisName2D[nHistosPVParam2D] = {"x [cm]"};

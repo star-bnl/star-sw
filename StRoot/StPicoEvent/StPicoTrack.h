@@ -294,8 +294,10 @@ class StPicoTrack : public TObject {
   Short_t  mMtdPidTraitsIndex;
   /// Index of the ETOF pidTratis in the event
   Short_t  mETofPidTraitsIndex;
-
-  ClassDef(StPicoTrack, 6)
+#ifdef __TFG__VERSION__ 
+  static Int_t fgdEdXMode; // type - 0 => I70, 1 => dEdxFit, 2 => dNdx
+#endif /* __TFG__VERSION__ */
+  ClassDef(StPicoTrack, 7)
 };
 
 #endif

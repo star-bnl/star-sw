@@ -71,7 +71,8 @@ class KFPHistogram1D
     if(iBin < 1)
       iBin = 0;
     
-    if( !(iBin==iBin) || !(std::isfinite(iBin)) ) iBin = 0;
+    //    if( !(iBin==iBin) || !(std::isfinite(iBin)) ) iBin = 0;
+    if(!(std::isfinite(iBin)) ) iBin = 0;
     
     fHistogram[iBin]++;    
   }
