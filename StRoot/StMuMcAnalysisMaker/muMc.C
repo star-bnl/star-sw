@@ -15,7 +15,7 @@ void muMc(Int_t N = 1000000, const Char_t *input = "*.MuDst.root", const Char_t 
     StMuMcAnalysisMaker *muMc = StMuMcAnalysisMaker::instance();
     if (muMc) {cout << "MuMcAnalysis has been found" << endl;}
     muMc->SetAttr("TrackPlots",1);
-    muMc->SetAttr("VertexPlots",1);
+    //    muMc->SetAttr("VertexPlots",1);
     //    muMc->SetAttr("StoreCutNTuples",1);
     chain->Init();
     chain->EventLoop(N);
