@@ -23,7 +23,7 @@ foreach input (`cat $FILELIST`)
   set output  =  ${SUBMITTINGDIRECTORY}/${outputb};
   if (-r ${output}) exit 0;
   cp -p ${SUBMITTINGDIRECTORY}/${input} .
-  root.exe -q -b -x  'kfpAnalysis.C(1000000,"'${picoB}'.picoDst.root","'${outputb}'","y2019")' &gt;&amp; ${logb}
+  root.exe -q -b -x  'kfpAnalysis.C(1000000,"'${picoB}'.picoDst.root","'${outputb}'","y2020")' &gt;&amp; ${logb}
   mv ${outputb} ${output}
   mv ${logb} ${log}
 end
