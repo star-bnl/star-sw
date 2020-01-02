@@ -1,5 +1,8 @@
-* $Id: agxuser.age,v 1.8 2015/07/01 13:39:41 jwebb Exp $
+* $Id: agxuser.age,v 1.9 2020/01/02 15:58:53 jwebb Exp $
 * $Log: agxuser.age,v $
+* Revision 1.9  2020/01/02 15:58:53  jwebb
+* Added SIMU flag to options for gprint.
+*
 * Revision 1.8  2015/07/01 13:39:41  jwebb
 * make geometry is now disabled.  no geometry will be built via makefile.
 *
@@ -134,6 +137,7 @@
      COMMON/acgckov/ICKOV
      Integer        ICKOV
 *
+     Integer islflag
      Logical Y
 	external gfkine,gfvert
 
@@ -459,6 +463,26 @@
            {  Call UHTOC(IQ(LQ(JVOLUM-I)-4),4,String2,4); Call CLTOU(String2)
               If (String1(1:4)==string2(1:4)) Call GPVOLU(I)
      }  }  }
+     else If cword='SIMU' & JVOLUM>0
+     {  if Npar<=1  { 
+           DO i=1,nvolum
+               Call UHTOC(IQ(LQ(JVOLUM-I)-4),4,String2,4); Call CLTOU(String2)
+               IF ( ISLFLAG(string2,cword).gt.0 ) THEN
+                  <W> string2, cword, ISLFLAG(string2,cword);
+                      (A4,' ',A4,'=',I3);
+               ENDIF
+           ENDDO
+        }
+        else
+        {  Call KuGETC(string2,Len1); 
+               IF ( ISLFLAG(string2,cword).gt.0 ) THEN
+                  <W> string2, cword, ISLFLAG(string2,cword);
+                      (A4,' ',A4,'=',I3);
+               ELSE 
+                  <W> string2, cword; (A4,' ',A4,' is not set');
+               ENDIF
+
+     }  } 
   }
   Else If Command=='GPHITS' | Command=='GPDIGI'
   {  Call KuGETC(string1,len1); Call KuGETC(string2,len2)
