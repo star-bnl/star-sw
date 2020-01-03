@@ -330,7 +330,7 @@ void bichselG10(const Char_t *type="z", Int_t Nhyps = 9) {
     m_Bichsel = Bichsel::Instance();
   }
   TString Type(type);
-  TLegend *leg = new TLegend(0.65,0.45,0.75,0.9,"");
+  TLegend *leg = new TLegend(0.85,0.45,0.95,0.9,"");
   Double_t xmax = 4;
   Int_t f = 3;
   for (Int_t i = NF-1; i >=0; i--) {
@@ -346,10 +346,10 @@ void bichselG10(const Char_t *type="z", Int_t Nhyps = 9) {
     Int_t dx = 1;
     Char_t *FunName = Form("%s%s%i",FNames[f],Part[h].Name,(int)log2dx[dx]);
     cout << "Make " << h << "\t" << FunName << endl;
-    Double_t xmin = -1.5;
+    Double_t xmin = -2.0;
     //    if (h == 0 || h >= 5) xmin = -0.75;
-    if (h == 4) xmin = -0.70;
-    if (h == 6) xmin = -0.50;
+    //    if (h == 4) xmin = -0.70;
+    //    if (h == 6) xmin = -0.50;
     TF1 *func = 0;
     if      (f == 3) func = new TF1(FunName,bichsel70,xmin, xmax,3);
     else if (f == 2) func = new TF1(FunName,bichselZ ,xmin, xmax,3);
