@@ -85,7 +85,7 @@ const char* Skimfile = "st_physics_13109014_raw_1020001.skim.root"
    simuTrig->useOnlineDB();
    simuTrig->setMC(false);
 
-   simuTrig->useBbc();
+   //simuTrig->useBbc();
    simuTrig->useBemc();
    simuTrig->useEemc();
    simuTrig->bemc->setConfig(StBemcTriggerSimu::kOnline);
