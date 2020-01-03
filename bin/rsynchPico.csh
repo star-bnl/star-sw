@@ -1,11 +1,14 @@
 #! /usr/bin/tcsh -f
-cd ~/reco/2020/TFG19m/RF/11p5GeV.B
+set dir = 11p5GeV.B
+#set dir = 5p75GeV_fixedTarget.B
+cd ~/reco/2020/TFG19m/RF/${dir}
+echo "pwd = $PWD"
 foreach d (`ls -1d 3??`)
   cd ${d}
 rsync -avrz -h                        \
     --include='*picoDst.root'                  \
     --exclude='*.*'  --exclude='Done' --exclude='.sl*'  \
-    ./ rftpexp01.rhic.bnl.gov:/gpfs01/star/pwg_tasks/tfg02/2020/TFG19m/RF/11p5GeV.B/${d}
+    ./ rftpexp01.rhic.bnl.gov:/gpfs01/star/pwg_tasks/tfg02/2020/TFG19m/RF/${dir}/${d}
 cd -
 end
 

@@ -103,7 +103,7 @@ grep Done LostAndDone.list | awk '{print $2}' | xargs rm
 ================================================================================
 cd /gpfs01/star/scratch/fisyak/daq/2013
 find . -depth -type d -empty -print
-find . -depth -type d -empty -print -exec rmdir {} \;
+x]]find . -depth -type d -empty -print -exec rmdir {} \;
 ============================== Count events ==================================================
 #  ls -1d ${f}*.Done
 #  if ($?) root.exe -q -b 'Chain.C+("MuDst","'${f}'/*/*.MuDst.root")' >& ${f}.Chain &
@@ -318,7 +318,7 @@ foreach my $file (@ARGV) {
 ################# Run XX ###############################################################
 
 # BadRuns
-foreach r ( `onlBadRuns.pl | grep 20 | awk '{print $1}' | sort -u` ) 
+foreach r ( `onlBadRuns.pl | egrep '(20|21)' | awk '{print $1}' | sort -u` ) 
   ls -1d ???/${r}; if ($?) continue; 
   echo "mv $r to Junk";  
   mv ???/${r} Junk;
@@ -348,7 +348,7 @@ end
 
 ================================= Summurizing  ===============================================
 @ count = 0
-foreach d (`ls -1d 3??/20*`)
+foreach d (`ls -1d 34?/20*  35[0-4]/20*``)
   cd ${d}; pwd;
   ls -ltr | tail -1 | grep Chain	
   if ($?) then	
@@ -357,6 +357,24 @@ foreach d (`ls -1d 3??/20*`)
     root.exe -q -b 'Chain.C+("./*picoDst.root","PicoDst")' >&  Chain.log  &
     @ count++;  echo "count $count";
     if ($count > 20) then 
+        cd -
+	break;
+    endif
+  endif
+  cd -;
+end
+################################################################################
+@ count = 0
+foreach done (`ls -1d */*/Done`)
+  set d = `dirname ${done}`
+  cd ${d}; pwd;
+  ls -ltr | tail -1 | grep Chain	
+  if ($?) then	
+    rm -rf .sl*
+    ln -s ~/macros/.sl73_* .	
+    root.exe -q -b 'Chain.C+("./*picoDst.root","PicoDst")' >&  Chain.log  &
+    @ count++;  echo "count $count";
+    if ($count > 40) then 
         cd -
 	break;
     endif
@@ -372,3 +390,23 @@ foreach f (`grep missing Chain.log | awk '{print $3}'`)
 end
 
  dir -ltdr * | grep -v 'Dec 29 1' | awk '{print $9}' | xargs rm -rf 
+
+########################## Clean up /hlt/cephfs/daq/ ######################################################
+# Cosmics only 331-343 : day 331-333 *event.root files on /net/l401/data/scratch1/fisyak/2020/Cosmics/RF/
+# ~/reco/2020/TFG19m/RF/11p5GeV
+foreach f (`ls -1d 3*/*/*MuDst.root`) 
+  if (-r ../11p5GeV.B/${f}) continue;
+  echo "mv ${f} ../11p5GeV.B/${f}"
+  mv ${f} ../11p5GeV.B/${f}
+end
+########################### Clean Done #####################################################
+foreach d (`ls -1d */*/Done`)
+  set dir = `dirname ${d}`; echo "dir = ${dir}"
+  cd ${dir}
+  @ count = 0
+  ls -1d *.event.root
+  if ($?) then 
+	continue;
+  endif
+  cd -
+end 

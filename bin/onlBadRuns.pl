@@ -29,7 +29,7 @@ if ($#ARGV >= 0) {
   $Run = $ARGV[0];
 }
 #  $select = " -e \'select runNumber,glbSetupName, beginTime from runDescriptor order by beginTime\'";
-  $select = " -e \'SELECT t1.runNumber,t1.glbSetupName, t1.beginTime, t2.scaleFactor, t3.rtsStatus, t3.shiftLeaderStatus  FROM runDescriptor AS t1 INNER JOIN  magField AS t2  INNER JOIN  runStatus  AS t3 ON t1.runNumber = t2.runNumber and  t1.runNumber = t3.runNumber WHERE  (t3.rtsStatus != 0 OR t3.shiftLeaderStatus != 0) AND t1.runNumber >  20365017 order by t1.beginTime\'";
+  $select = " -e \'SELECT t1.runNumber,t1.glbSetupName, t1.beginTime, t2.scaleFactor, t3.rtsStatus, t3.shiftLeaderStatus  FROM runDescriptor AS t1 INNER JOIN  magField AS t2  INNER JOIN  runStatus  AS t3 ON t1.runNumber = t2.runNumber and  t1.runNumber = t3.runNumber WHERE  (t3.rtsStatus != 0 OR t3.shiftLeaderStatus != 0) AND t1.runNumber >  21003002 order by t1.beginTime\'";
 #  $select = " -e \'SELECT t1.runNumber,t1.glbSetupName, t1.beginTime, t2.scaleFactor, t3.rtsStatus, t3.shiftLeaderStatus  FROM runDescriptor AS t1 INNER JOIN  magField AS t2  INNER JOIN  runStatus  AS t3 ON t1.runNumber = t2.runNumber and  t1.runNumber = t3.runNumber where  t3.rtsStatus = 0 AND t3.shiftLeaderStatus = 0 order by t1.beginTime\'";
 my $def = {@Runs};
 #print "$Run => node: $def->{$Run}->{node} port: $def->{$Run}->{port}\n";
