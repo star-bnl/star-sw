@@ -103,7 +103,7 @@ grep Done LostAndDone.list | awk '{print $2}' | xargs rm
 ================================================================================
 cd /gpfs01/star/scratch/fisyak/daq/2013
 find . -depth -type d -empty -print
-x]]find . -depth -type d -empty -print -exec rmdir {} \;
+find . -depth -type d -empty -print -exec rmdir {} \;
 ============================== Count events ==================================================
 #  ls -1d ${f}*.Done
 #  if ($?) root.exe -q -b 'Chain.C+("MuDst","'${f}'/*/*.MuDst.root")' >& ${f}.Chain &
@@ -325,7 +325,7 @@ foreach r ( `onlBadRuns.pl | egrep '(20|21)' | awk '{print $1}' | sort -u` )
 end 
 
 # Submit ################################################################################
-foreach d (`ls -1d 3*/20*`)
+foreach d (`ls -1d 0*/2*`)
   cd $d;
   if (-r Done) then
     cd -
@@ -348,7 +348,7 @@ end
 
 ================================= Summurizing  ===============================================
 @ count = 0
-foreach d (`ls -1d 34?/20*  35[0-4]/20*``)
+foreach d (`ls -1d 3*/20*``)
   cd ${d}; pwd;
   ls -ltr | tail -1 | grep Chain	
   if ($?) then	
