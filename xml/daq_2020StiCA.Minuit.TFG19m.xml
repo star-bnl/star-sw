@@ -20,11 +20,11 @@
   set evtsFileB = `basename ${evtsFile}`
   set filel    = `basename ${evtsFileB} .daq`
   set output  = ${filel}.event.root
-  if (! -r ${evtsFile}) exit 1;
+#  if (! -r ${evtsFile}) exit 1;
   set logFile  = ${filel}B.log
 #  if ( -r ${SUBMITTINGDIRECTORY}/${logFile}) exit 0;
   set muFile = ${filel}.MuDst.root
-  if (-r ${SUBMITTINGDIRECTORY}/${muFile}) exit 0;
+#  if (-r ${SUBMITTINGDIRECTORY}/${muFile}) exit 0;
   set piFile = ${filel}.picoDst.root
   if (-r ${SUBMITTINGDIRECTORY}/${piFile}) exit 0;
   set bla = ${SUBMITTINGDIRECTORY}/${filel}.bla.root
