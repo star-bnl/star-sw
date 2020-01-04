@@ -325,7 +325,7 @@ foreach r ( `onlBadRuns.pl | egrep '(20|21)' | awk '{print $1}' | sort -u` )
 end 
 
 # Submit ################################################################################
-foreach d (`ls -1d 0*/2*`)
+foreach d (`ls -1d */2*`)
   cd $d;
   if (-r Done) then
     cd -
@@ -382,7 +382,7 @@ foreach done (`ls -1d */*/Done`)
   cd -;
 end
 
-grep total ???/20*/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fM\n", n/1.e6)}'
+grep total ???/2*/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fM\n", n/1.e6)}'
 ################################################################################
 root.exe -q -b 'Chain.C+("3*/*/*picoDst.root","PicoDst")' | tee Chain.log
 foreach f (`grep missing Chain.log | awk '{print $3}'`)
