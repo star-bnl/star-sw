@@ -219,25 +219,25 @@ void KFParticlePerformanceBase::CreateHistos(std::string histoDir, TDirectory* o
           TString res = "res";
           TString pull = "pull";
 
-          gDirectory->mkdir("DaughtersFitQA");
-          gDirectory->cd("DaughtersFitQA");
+          gDirectory->mkdir("FitQAPull");
+          gDirectory->cd("FitQAPull");
           {
             TString parName[nFitQA/2] = {"X","Y","Z","Px","Py","Pz","E","M"};
             int nBins = 100;
-            float xMax[nFitQA/2] = {0.15,0.15,0.03,0.01,0.01,0.06,0.06,0.01};
-  //             float xMax[nFitQA/2] = {2.,2.,5.,0.3,0.3,0.3,0.03,0.03};
+	    //            float xMax[nFitQA/2] = {0.15,0.15,0.03,0.01,0.01,0.06,0.06,0.01};
+	    float xMax[nFitQA/2] = {  2.,  2.,  5.,0.01,0.01,0.06,0.06,0.01};
 
             for( int iH=0; iH<nFitQA/2; iH++ ){
-              hFitDaughtersQAPull[iPart][iH]   = new TH1F((res+parName[iH]).Data(),
+              hFitQAPull[iPart][iH]   = new TH1F((res+parName[iH]).Data(),
                                                       (GetDirectoryPath()+res+parName[iH]).Data(), 
                                                       nBins, -xMax[iH],xMax[iH]);
-              hFitDaughtersQAPull[iPart][iH+8] = new TH1F((pull+parName[iH]).Data(),
+              hFitQAPull[iPart][iH+8] = new TH1F((pull+parName[iH]).Data(),
                                                       (GetDirectoryPath()+pull+parName[iH]).Data(), 
                                                       nBins, -6,6);
             }
           }
           gDirectory->cd(".."); //particle directory
-          CreateFitHistograms(hFitQAPull[iPart], iPart);
+	  //          CreateFitHistograms(hFitQAPull[iPart], iPart);
         }
         gDirectory->mkdir("Parameters");
         gDirectory->cd("Parameters");

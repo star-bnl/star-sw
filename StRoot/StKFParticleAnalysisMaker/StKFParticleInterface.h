@@ -132,7 +132,7 @@ class StKFParticleInterface: public TObject
   std::vector<int> GetPID(double m2, double p, int q, double dEdX, double dEdXPull[7], bool isTofm2, const int trackId);
   void AddTrackToParticleList(const KFPTrack& track, int nHftHitsInTrack, int index, const std::vector<int>& totalPDG, KFVertex& pv, std::vector<int>& primaryTrackList,
                               std::vector<int>& nHftHits, std::vector<int>& particlesPdg, std::vector<KFParticle>& particles, int& nPartSaved);
-  void FillPIDHistograms(StPicoTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2, float m2tof);
+  void FillPIDHistograms(StPicoTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2 = kFALSE, float m2tof = -1,  const bool isETofm2 = kFALSE, float m2Etof = -1);
   
   KFParticleTopoReconstructor* fKFParticleTopoReconstructor;
   std::vector<KFParticle> fParticles;
@@ -149,12 +149,14 @@ class StKFParticleInterface: public TObject
   // 8 - pT^2 versus eta for primary tracks
   // 9 - dNdX, 10 - dNdX positive tracks, 11 - dNdX negative tracks, 12 - dNdX tracks with ToF,
   // 13 - pT^2 versus eta for all tracks
-  TH2F* fTrackHistograms2D[14];
+  // 14 - EToF PID
+  TH2F* fTrackHistograms2D[15];
   //PID histograms
   static const int NTrackHistoFolders = 18;
   TH2F* fHistodEdXTracks[NTrackHistoFolders];
   TH2F* fHistodEdXwithToFTracks[NTrackHistoFolders];
   TH2F* fHistoTofPIDTracks[NTrackHistoFolders];
+  TH2F* fHistoETofPIDTracks[NTrackHistoFolders];
   TH1F* fHistoMomentumTracks[NTrackHistoFolders];
   TH2F* fHistodEdXPull[NTrackHistoFolders];
   TH2F* fHistodEdXZ[NTrackHistoFolders];

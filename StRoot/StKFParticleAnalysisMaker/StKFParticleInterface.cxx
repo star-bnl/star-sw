@@ -16,6 +16,7 @@
 #include "StPicoEvent/StPicoEvent.h"
 #include "StPicoEvent/StPicoTrack.h"
 #include "StPicoEvent/StPicoBTofPidTraits.h"
+#include "StPicoEvent/StPicoETofPidTraits.h"
 
 #include "StBichsel/Bichsel.h"
 #include "StProbPidTraits.h"
@@ -223,6 +224,11 @@ void StKFParticleInterface::CollectTrackHistograms()
     fTrackHistograms2D[4] = new TH2F("hTofPID", "hTofPID", 300, -2, 2, 1100, -1, 10);
     fTrackHistograms2D[4]->SetXTitle("log_{10}P");
   }
+  fTrackHistograms2D[14] = (TH2F *)   dirs[1]->Get("hETofPID");
+  if (! fTrackHistograms2D[14]) {
+    fTrackHistograms2D[14] = new TH2F("hETofPID", "hETofPID", 300, -2, 2, 1100, -1, 10);
+    fTrackHistograms2D[14]->SetXTitle("log_{10}P");
+  }
   fTrackHistograms[0] = (TH1F *)   dirs[1]->Get("hNHFTHits");
   if (! fTrackHistograms[0]) fTrackHistograms[0] = new TH1F("hNHFTHits", "hNHFTHits",11, -0.5, 10.5);
   
@@ -286,6 +292,8 @@ void StKFParticleInterface::CollectPIDHistograms()
   
     fHistoTofPIDTracks[iTrackHisto] = (TH2F *)   dirs[2]->Get("hTofPID");
     if (! fHistoTofPIDTracks[iTrackHisto]) fHistoTofPIDTracks[iTrackHisto] = new TH2F("hTofPID", "hTofPID", 400, -2, 2, 1100, -1, 10);
+    fHistoETofPIDTracks[iTrackHisto] = (TH2F *)   dirs[2]->Get("hETofPID");
+    if (! fHistoETofPIDTracks[iTrackHisto]) fHistoETofPIDTracks[iTrackHisto] = new TH2F("hETofPID", "hETofPID", 400, -2, 2, 1100, -1, 10);
   
     fHistoMomentumTracks[iTrackHisto] = (TH1F *)   dirs[2]->Get("hMomentum");
     if (! fHistoMomentumTracks[iTrackHisto]) fHistoMomentumTracks[iTrackHisto] = new TH1F("hMomentum", "log_{10} p", 1000, -2, 2);
@@ -651,7 +659,7 @@ void StKFParticleInterface::AddTrackToParticleList(const KFPTrack& track, int nH
   }
 }
 
-void StKFParticleInterface::FillPIDHistograms(StPicoTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2, float m2tof)
+void StKFParticleInterface::FillPIDHistograms(StPicoTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2, float m2tof,  const bool isETofm2, float m2Etof)
 {
   float momentum = gTrack->gPtot();
   for(unsigned int iPdg = 0; iPdg<pdgVector.size(); iPdg++)
@@ -666,10 +674,11 @@ void StKFParticleInterface::FillPIDHistograms(StPicoTrack *gTrack, const std::ve
       Double_t dNdxL10 = (gTrack->dNdx() > 0) ? TMath::Log10(gTrack->dNdx()) : dNdxL10min;
       fHistodEdXTracks[iTrackHisto] -> Fill(pL10, dEdxL10);
       fHistodNdXTracks[iTrackHisto] -> Fill(pL10, dNdxL10);
-      if(isTofm2)
+      if(isTofm2 || isETofm2)
       {
         fHistodEdXwithToFTracks[iTrackHisto] -> Fill(pL10, dEdxL10);
-        fHistoTofPIDTracks[iTrackHisto] -> Fill(pL10, m2tof);
+        if (isTofm2) fHistoTofPIDTracks[iTrackHisto] -> Fill(pL10, m2tof);
+        if (isETofm2) fHistoETofPIDTracks[iTrackHisto] -> Fill(pL10, m2Etof);
         
         if(abs(pdg)==211)
         {
@@ -898,17 +907,45 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
           isTofm2 = true;
         }
       }
+    }
+    double m2Etof = -1.e6;
+    bool isETofm2 = false;
+    if(gTrack->eTofPidTraitsIndex() > 0)
+    {
+      const StPicoETofPidTraits* etofPid = picoDst->etofPidTraits(gTrack->eTofPidTraitsIndex());
+      double betaTof2 = etofPid->beta() * etofPid->beta();
+      if(fabs(betaTof2) > 1.e-6)
+      {
+        m2tof = track.GetP()*track.GetP()*(1./betaTof2 - 1.);
+        isTofm2 = true;
+      }
+#if 0
+      else
+      {
+        const TVector3 & tofPoint  = etofPid->etofHitPos();
+        StPicoPhysicalHelix innerHelix = gTrack->helix(picoEvent->bField());
+        double lengthTof = fabs( innerHelix.pathLength( tofPoint ));
+        
+        double timeTof = etofPid->etof();
+        if(timeTof > 0. && lengthTof > 0.)
+        {
+          m2Etof = track.GetP()*track.GetP()*(1./((lengthTof/timeTof/29.9792458)*(lengthTof/timeTof/29.9792458))-1.);
+          isETofm2 = true;
+        }
+      }
+#endif
+    }
       
-      if(fCollectTrackHistograms)
+    if(fCollectTrackHistograms && (isTofm2 || isETofm2))
       {
 	Double_t pL10 = (track.GetP() > 0) ? TMath::Log10(track.GetP()) : -2;
 	Double_t dEdxL10 = (gTrack->dEdx() > 0) ? TMath::Log10(gTrack->dEdx()) : dEdxL10min;
 	Double_t dNdxL10 = (gTrack->dNdx() > 0) ? TMath::Log10(gTrack->dNdx()) : dNdxL10min;
         fTrackHistograms2D[3]->Fill(pL10, dEdxL10);
         fTrackHistograms2D[12]->Fill(pL10, dNdxL10);
-        fTrackHistograms2D[4]->Fill(pL10, m2tof);
+        if (isTofm2) fTrackHistograms2D[4]->Fill(pL10, m2tof);
+        if (isETofm2) fTrackHistograms2D[14]->Fill(pL10, m2Etof);
       }
-    }
     
     double dEdXPull[7] = { fabs(gTrack->dEdxPull(0.139570, fdEdXMode, 1)),   //0 - pi
                            fabs(gTrack->dEdxPull(0.493677, fdEdXMode, 1)),   //1 - K
@@ -1114,7 +1151,32 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
       m2tof = track.GetP()*track.GetP()*(1./((lengthTof/timeTof/29.9792458)*(lengthTof/timeTof/29.9792458))-1.);
       isTofm2 = true;
       
-      if(fCollectTrackHistograms)
+    }
+    const StMuETofPidTraits &etofPid = gTrack->etofPidTraits();
+    double timeETof = etofPid.timeOfFlight();
+    double lengthETof = etofPid.pathLength();
+#if 0
+    if(lengthETof < 0.)
+    {
+      const StThreeVectorF & etofPoint  = etofPid.position();
+      const StThreeVectorF & dcaPoint  = gTrack->dca(bestPV);
+      StPhysicalHelixD innerHelix = gTrack->helix();
+      double dlDCA = fabs( innerHelix.pathLength( StThreeVector<double>(dcaPoint.x(), dcaPoint.y(), dcaPoint.z()) ) );
+      StPhysicalHelixD outerHelix = gTrack->outerHelix();
+      double dlTOF = fabs( outerHelix.pathLength( StThreeVector<double>(tofPoint.x(), tofPoint.y(), tofPoint.z()) ) );
+      
+      double l = gTrack->length();
+      lengthTof = l + dlDCA + dlTOF;
+    }
+#endif
+    double m2Etof = -1.e6;
+    bool isETofm2 = false;
+    if(timeETof > 0. && lengthETof > 0.)
+    {
+      m2Etof = track.GetP()*track.GetP()*(1./((lengthETof/timeETof/29.9792458)*(lengthETof/timeETof/29.9792458))-1.);
+      isETofm2 = true;
+    }
+    if(fCollectTrackHistograms && (isTofm2 || isETofm2) )
       {
 	Double_t pL10 = (track.GetP() > 0) ? TMath::Log10(track.GetP()) : -2;
 	Double_t dEdxL10 = (gTrack->dEdx() > 0) ? TMath::Log10(gTrack->dEdx()*1e6) : -1;
@@ -1122,9 +1184,9 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
 	
         fTrackHistograms2D[3]->Fill(pL10, dEdxL10);
         fTrackHistograms2D[12]->Fill(pL10, dNdxL10);
-        fTrackHistograms2D[4]->Fill(pL10, m2tof);
+        if (isTofm2)  fTrackHistograms2D[4]->Fill(pL10, m2tof);
+        if (isETofm2) fTrackHistograms2D[14]->Fill(pL10, m2Etof);
       }
-    }
 
 //     double dEdXPull[7] = { fabs(gTrack->dEdxPull(0.139570, fdEdXMode, 1)),   //0 - pi
 //                            fabs(gTrack->dEdxPull(0.493677, fdEdXMode, 1)),   //1 - K
@@ -1146,7 +1208,7 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
     AddTrackToParticleList(track, nHftHitsInTrack, index, totalPDG, primaryVertex, primaryTrackList, fNHftHits, fParticlesPdg, fParticles, nPartSaved);         
     nUsedTracks++;
   }
-
+  
   fParticles.resize(nPartSaved);
   fParticlesPdg.resize(nPartSaved);
   fNHftHits.resize(nPartSaved);
