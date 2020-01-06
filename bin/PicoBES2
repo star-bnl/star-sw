@@ -325,7 +325,7 @@ foreach r ( `onlBadRuns.pl | egrep '(20|21)' | awk '{print $1}' | sort -u` )
 end 
 
 # Submit ################################################################################
-foreach d (`ls -1d */2*`)
+foreach d (`ls -1d 3*/2*`)
   cd $d;
   if (-r Done) then
     cd -
@@ -348,7 +348,7 @@ end
 
 ================================= Summurizing  ===============================================
 @ count = 0
-foreach d (`ls -1d 3*/20*``)
+foreach d (`ls -1d */2*``)
   cd ${d}; pwd;
   ls -ltr | tail -1 | grep Chain	
   if ($?) then	
