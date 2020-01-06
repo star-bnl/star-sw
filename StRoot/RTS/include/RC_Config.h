@@ -322,8 +322,8 @@ struct PrescaleReturnInfo {
 #define HLT_UDP_PORT 8062
 
 struct HLT_UDP_struct {
-    int tm;
     int hlt_node;
+    int nprimary;
     float xvertex;
     float yvertex;
     float zvertex;
