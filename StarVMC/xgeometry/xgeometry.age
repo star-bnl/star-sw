@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.37 2019/12/04 16:22:34 jwebb Exp $
+* $Id: xgeometry.age,v 1.38 2020/01/06 19:14:11 jwebb Exp $
 
 
 
@@ -3825,7 +3825,9 @@ If LL>0
 
   Case HADR_ON   { all Geant Physics On;                                       }
   Case HADR_OFF  { all Geant Physics on, except hadronic interactions;  IHADR=0}
-  Case GCALOR_ON { setting hadr 6 to activate hadronic showers;          IHADR=6}
+  Case GCALOR_ON { setting hadr 6 to activate GCALOR hadronic showers;        IHADR=6}
+  Case FLUKA_ON  { setting hadr 4 to activate FLUKA hadronic showers;         IHADR=4}
+  Case FLMIK_ON  { setting hadr 5 to activate FLUKA+Mikap hadronic showers;  IHADR=5}
   Case PHYS_OFF  { No Physics: only energy loss;
       {IDCAY,IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,IDRAY,IMULS}=0; Iloss=2}
   Case DECAY_ONLY { Some Physics: decays, mult.scat and energy loss;
@@ -4498,8 +4500,11 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.37 2019/12/04 16:22:34 jwebb Exp $
+* $Id: xgeometry.age,v 1.38 2020/01/06 19:14:11 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.38  2020/01/06 19:14:11  jwebb
+* Add options for fluka and fluka+mikap
+*
 * Revision 1.37  2019/12/04 16:22:34  jwebb
 * Enable missing y2015d model (and y2015y for FMS attenuation).
 *
