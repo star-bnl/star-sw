@@ -129,7 +129,7 @@ void kfpAnalysis(Int_t N = 1000,
 //   StKFParticleInterface::instance()->SetSecondaryCuts(3, 3, 5);
 //________________________________________________________________________________
 
-  StKFParticleInterface::instance()->SetdEdXType(2); // dNdx
+//  StKFParticleInterface::instance()->SetdEdXType(2); // dNdx
 
   TTree *tree = 0;
   if (! isPico) {
