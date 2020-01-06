@@ -319,6 +319,15 @@ struct PrescaleReturnInfo {
     float py_predictedRate[TRIGGERS_MAX];
 };
 
+#define HLT_UDP_PORT 8062
+
+struct HLT_UDP_struct {
+    int tm;
+    int hlt_node;
+    float xvertex;
+    float yvertex;
+    float zvertex;
+};
 #endif
 
 
