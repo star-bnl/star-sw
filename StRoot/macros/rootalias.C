@@ -110,7 +110,7 @@ void rdir(const Char_t *dir="") {
 void rls(const Char_t *dir="") {rdir(dir);}
 //________________________________________________________________________________
 void rpwd() {
-  cout << "dir \t" << gDirectory->GetName()  << endl;
+  cout << "dir \t" << gDirectory->GetPath()  << endl;
   //  cout << "dir \t" << gSystem->BaseName(gDirectory->GetName())  << endl;
 }
 //#endif
