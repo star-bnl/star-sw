@@ -842,7 +842,6 @@ Int_t StPicoDstMaker::MakeWrite() {
   fillEmcTrigger();
   fillMtdTrigger();
   fillBTofHits();
-  fillETofHits();
   fillMtdHits();
   fillEpdHits();
   fillBbcHits();
@@ -1014,7 +1013,7 @@ void StPicoDstMaker::fillTracks() {
     }
     else {
       picoTrk->setDedx( gTrk->probPidTraits().dEdxFit() );
-      picoTrk->setDedxError( gTrk->probPidTraits().dNdxErrorFit() );
+      picoTrk->setDedxError( gTrk->probPidTraits().dEdxErrorFit() );
     }
     picoTrk->setDndx( gTrk->probPidTraits().dNdxFit() );
     picoTrk->setDndxError( gTrk->probPidTraits().dNdxErrorFit() );
