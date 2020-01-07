@@ -527,7 +527,7 @@ enum { kEndVolu=0,kPerigee=1,kHitted=2,kApogee=4 };
   int kase = 0,ans = 0;
   if (fDir==0 && ((fStartSign<0) && (fCurrentSign>0))) 	kase+=kPerigee;
   if (fHitted) 						kase+=kHitted;
-//if (fDir==1 && ((fStartSign>0) && (fCurrentSign<0))) 	kApogee=4;
+//if (fDir==1 && ((fStartSign>0) && (fCurrentSign<0))) 	kase+=kApogee;
   switch(kase) {
 
     case kPerigee: 
