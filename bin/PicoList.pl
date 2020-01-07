@@ -4,7 +4,7 @@ use File::Basename;
 #my $glob =  "/net/l401/data/scratch2/kehw/reco/2019/???/*";
 #my $glob =  "/net/l401/data/scratch2/kehw/reco/2019/TFG19d/???/*";
 #my $glob =  "/net/l401/data/scratch2/kehw/reco/2019/14GeV_2019_StiCA/0??/*";
-my $glob =  "./Pico/???/*/*.picoDst.root";
+my $glob =  "./Pico*/???/*/*.picoDst.root";
 foreach my $file (glob $glob) {
   my $f = File::Basename::basename($file);
   my $pico = $f . ".root";
