@@ -58,6 +58,11 @@ void StvHitErrCalculator::SetTkDir(const double tkDir[3][3])
   TCL::ucopy(tkDir[0],mTG[0],3*3);
 }
 //______________________________________________________________________________
+void StvHitErrCalculator::SetTkDir(const TkDir_t& tkdir)
+{  
+  TCL::ucopy(tkdir[0],mTG[0],3*3);
+}
+//______________________________________________________________________________
 int StvHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRr[3])
 {
 /// Calculate hit error matrix in local detector system. In this system
@@ -174,9 +179,9 @@ static const double kMicron2 = 1.5e-8;
                     ,{dvdy,dvdz}};
    TCL::trasat(T[0],detRr,hRr,2,2);
 
-   double qwe = (detRr[0]*detRr[2]-detRr[1]*detRr[1])*myCos*myCos;
-   qwe -= hRr[0]*hRr[2]-hRr[1]*hRr[1];
-   assert(fabs(qwe)<1e-6);
+   double qwe0 = (detRr[0]*detRr[2]-detRr[1]*detRr[1])*myCos*myCos;
+   double qwe  = qwe0 - (hRr[0]*hRr[2]-hRr[1]*hRr[1]);
+   assert(fabs(qwe)< (fabs(qwe0)+1)*1e-1);
    if (hRr[0]<kMicron2) hRr[0]=kMicron2;
    if (hRr[2]<kMicron2) hRr[2]=kMicron2;
    return 0;
