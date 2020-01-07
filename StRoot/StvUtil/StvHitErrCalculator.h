@@ -2,6 +2,7 @@
 #define __StvHitErrCalculatorulator_h_
 #include "assert.h"
 #include "TNamed.h"
+#include "THelix3d.h"
 class StvHit;
 typedef float Mtx33F_t[3][3];
 
@@ -11,6 +12,7 @@ enum {kMaxPars=10};
 
 StvHitErrCalculator(const char *name,int nPars=2);
         void SetPars(const double *par);
+        void SetTkDir(const TkDir_t& tkdir);
         void SetTkDir(const double tkDir[3][3]);
 virtual  int CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]);
 virtual  int CalcDcaErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]);
