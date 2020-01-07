@@ -21,8 +21,7 @@ enum {kHh,kAh,kCh,kZh,kLh};
   static const int idx66[6][6] =
   {{ 0, 1, 3, 6,10,15},{ 1, 2, 4, 7,11,16},{ 3, 4, 5, 8,12,17}
   ,{ 6, 7, 8, 9,13,18},{10,11,12,13,14,19},{15,16,17,18,19,20}};
-static const double recvCORRMAX  = 0.99999;
-static const double chekCORRMAX  = 0.99999;
+static const double chekCORRMAX  = 1.-1e-5;
 
 //                               X   Y   Z Dx Dy Dz Pinv
 static double MAXNODPARS[]   ={555,555,555, 1, 1, 1, 100};
@@ -124,7 +123,7 @@ void StvNodePars::set(const double h[3]) //set mag field
 
   _h[0] = h[0]; _h[1] = h[1];_h[2] = h[2];
   _h[3] = sqrt(h[0]*h[0]+h[1]*h[1]+h[2]*h[2]);
-assert(_h[3]);
+///??? assert(_h[3]);
   THelix3d::MakeTkDir(_d,_h,_tkdir);
 }
 //______________________________________________________________________________
@@ -134,7 +133,7 @@ void StvNodePars::set(const double x[3],const double d[3],double pinv,const doub
  if (d) {
    _d[0] = d[0]; _d[1] = d[1];_d[2] = d[2];
    double nor = d[0]*d[0]+d[1]*d[1]+d[2]*d[2];
-   if (fabs(nor-1)>1e-6) {
+   if (fabs(nor-1)>1e-4) {
      nor = sqrt(nor);
      _d[0]/=nor;_d[1]/=nor;_d[2]/=nor;
   } }
@@ -242,7 +241,7 @@ static StvToolkit *kit = StvToolkit::Inst();
   }
   _pinv += fp.mPinv;  
   double nor = dot(_d,_d);
-  if (fabs(nor-1)>1e-5) {
+  if (fabs(nor-1)>1e-4) {
     nor = sqrt(nor);
     _d[0]/=nor; _d[1]/=nor; _d[2]/=nor;
   }
@@ -1013,7 +1012,7 @@ void StvNodeParsTest::Test()
   memcpy(thhPars+7,*thh.Emx(),15*sizeof(double));
   int nerr=0;
   for (int i=0;i<7+15;i++) {
-    if (fabs(thhPars[i]-thPars[i]) <1e-6) continue;
+    if (fabs(thhPars[i]-thPars[i]) <1e-4) continue;
     nerr++;printf("%d = %g %g \n",i,thPars[i],thhPars[i]);}
   printf("nmErrs = %d\n",nerr);
 }
@@ -1486,7 +1485,7 @@ static const double kMaxStp=1e-4, kRefStp = 1e-2;
   dZdU+=_d[2]*dTdU;
 
   tst = dXdU*cosP + dYdU*sinP;
-  assert(fabs(tst)<1e-6);
+  assert(fabs(tst)<1e-3);
   
   T[kImp ][kU]= (dXdU *(-sinP) + dYdU*( cosP));
   T[kImpZ][kU]= dZdU;
@@ -1505,7 +1504,7 @@ static const double kMaxStp=1e-4, kRefStp = 1e-2;
   dZdV+=tanL*dTdV;
 
   tst = dXdV*cosP + dYdV*sinP;
-  assert(fabs(tst)<1e-6);
+  assert(fabs(tst)<1e-3);
   
   T[kImp ][kV]= (dXdV *(-sinP) + dYdV*( cosP));
   T[kImpZ][kV]= dZdV;
