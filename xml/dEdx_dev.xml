@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<job  name="TpcRS" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false">
+<stdout URL="file:./sched$JOBID.log" />
+<stderr URL="file:./sched$JOBID.err" />
+<command> 
+   cd ${SUBMITTINGDIRECTORY}  
+   setenv STARFPE NO
+#   source $STAR/unsetupDEV2.csh
+#   setup debug
+#   setup gcc
+#   setup 32b
+#   starver dev
+#   setenv NODEBUG yess
+#   setup 64b
+#   starver TFG18m
+#   starver .DEV2 
+  source $STAR/unsetupDEV2.csh
+  set fileB = `basename ${INPUTFILE0}`;
+  set file = `basename ${fileB} .event.root`;
+  echo "${file}"
+#  cp ${INPUTFILE0} ${fileB}
+#  set logFile  = ${SUBMITTINGDIRECTORY}/${file}B.log
+  set logFile  = ${file}B.log
+  set f=`find . -maxdepth 1 -type f -name "*${file}*.root"`
+  if ("${f}" == "") then
+#    root.exe -x -q -b 'dEdx.C(1000000,"'${INPUTFILE0}'","'${file}'.root",2)' &gt;&amp; ${logFile}
+    root.exe -x -q -b 'dEdx.C(10000,"'${INPUTFILE0}'","'${file}'.root",2)' &gt;&amp; ${logFile}
+#    root.exe -x -q -b 'dEdx.C(1000000,"'${fileB}'","'${file}'.root",2)' &gt;&amp; ${logFile}
+#   rm ${fileB}
+#   cp *.root ${SUBMITTINGDIRECTORY} 
+   endif
+</command>
+<input URL="command:dEdxSample.pl" />
+<!-- <input URL="file:/net/l403/data/fisyak/reco/2019/DEV2StiCA.Minuit/*event.root" /> -->
+<!-- <input URL="file:/net/l403/data/fisyak/reco/2019/DEV2StiCA.Minuit2/*event.root" /> -->
+<!--
+ <ResourceUsage>
+    <Memory>
+      <MinMemory>3500</MinMemory>
+    </Memory>
+  </ResourceUsage>
+-->
+</job>

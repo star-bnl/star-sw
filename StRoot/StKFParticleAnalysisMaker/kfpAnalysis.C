@@ -56,7 +56,7 @@ void kfpAnalysis(Int_t N = 1000,
   kfpAnalysis->AddDecayToReconstructionList(-3334); // Omega+
 //   
 //   kfpAnalysis->AddDecayToReconstructionList( 113);  // rho
-//  kfpAnalysis->AddDecayToReconstructionList( 333);  // phi
+  kfpAnalysis->AddDecayToReconstructionList( 333);  // phi
 //   kfpAnalysis->AddDecayToReconstructionList( 313);  // K*0
 //   kfpAnalysis->AddDecayToReconstructionList(-313);  // K*0_bar
 //   kfpAnalysis->AddDecayToReconstructionList( 323);  // K*+
@@ -69,7 +69,7 @@ void kfpAnalysis(Int_t N = 1000,
 //   kfpAnalysis->AddDecayToReconstructionList( 3324); // Xi*0
 //   kfpAnalysis->AddDecayToReconstructionList(-3324); // Xi*0
   
-//   kfpAnalysis->AddDecayToReconstructionList( 22);   // gamma
+  kfpAnalysis->AddDecayToReconstructionList( 22);   // gamma
 //   kfpAnalysis->AddDecayToReconstructionList( 111);  // pi0
 //   kfpAnalysis->AddDecayToReconstructionList( 3212);  // Sigma0
 //   
