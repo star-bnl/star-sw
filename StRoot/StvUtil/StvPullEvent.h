@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StvPullEvent.h,v 1.9.2.1 2017/12/02 00:37:11 perev Exp $
+ * $Id: StvPullEvent.h,v 1.9.2.2 2020/01/07 21:29:21 perev Exp $
  *
  * Author: Victor Perev, Jan 2006
  ***************************************************************************
@@ -14,7 +14,11 @@
  ***************************************************************************
  *
  * $Log: StvPullEvent.h,v $
+ * Revision 1.9.2.2  2020/01/07 21:29:21  perev
+ * Increase char ==> short
+ *
  * Revision 1.9.2.1  2017/12/02 00:37:11  perev
+ *
  * StvKutta branch creation
  *
  * Revision 1.1  2017/06/27 02:57:51  perev
@@ -99,14 +103,14 @@ public:
 public:
 char mBeg[1];
 short mTrackNumber; 		//track number 
-unsigned char mVertex; 		//vertex number for primary track
-unsigned char nAllHits; 	//number of all hits in track
-unsigned char nTpcHits; 	//number of tpc hits in track
-unsigned char nFtpcHits; 	//number of tpc hits in track
-unsigned char nSsdHits; 	//number of ssd hits in track
-unsigned char nRndHits; 	//number of RND hits in track
-unsigned char mL; 		//Length of track
-unsigned char mTypeEnd; 	//Type of end tracking
+unsigned short mVertex; 		//vertex number for primary track
+unsigned short nAllHits; 	//number of all hits in track
+unsigned short nTpcHits; 	//number of tpc hits in track
+unsigned short nFtpcHits; 	//number of tpc hits in track
+unsigned short nSsdHits; 	//number of ssd hits in track
+unsigned short nRndHits; 	//number of RND hits in track
+unsigned short mL; 		//Length of track
+unsigned short mTypeEnd; 	//Type of end tracking
 
 float mChi2;
 float mChi2P;
@@ -140,13 +144,13 @@ int TestIt();
 public:
 char mBeg[1];			//! No IO
 short mTrackNumber; 		//track number of hit
-unsigned char mVertex; 		//vertex number for primary track
-unsigned char nAllHits; 	//number of all hits in track
-unsigned char nTpcHits; 	//number of tpc hits in track
-unsigned char nFtpcHits; 	//number of ftpc hits in track
-unsigned char nSsdHits; 	//number of ssd hits in track
-unsigned char nRndHits; 	//number of RND hits in track
-unsigned char mDetector;	//see StHit.h
+unsigned short mVertex; 		//vertex number for primary track
+unsigned short nAllHits; 	//number of all hits in track
+unsigned short nTpcHits; 	//number of tpc hits in track
+unsigned short nFtpcHits; 	//number of ftpc hits in track
+unsigned short nSsdHits; 	//number of ssd hits in track
+unsigned short nRndHits; 	//number of RND hits in track
+unsigned short mDetector;	//see StHit.h
 				// 0=smallest Xi2
 
 
