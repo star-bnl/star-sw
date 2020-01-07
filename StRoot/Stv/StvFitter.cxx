@@ -669,6 +669,8 @@ StvFitter::StvFitter(const char *name):TNamed(name,"")
   memset(mBeg,0,mEnd-mBeg+1);
   assert(!mgFitter);
   mgFitter = this;
+  mJnPars = new StvNodePars;
+  mJnErrs = new StvFitErrs;
 }
 //______________________________________________________________________________
 void StvFitter::Set(const StvNodePars *inPars, const StvFitErrs *inErrs
@@ -678,7 +680,6 @@ void StvFitter::Set(const StvNodePars *inPars, const StvFitErrs *inErrs
   mKase = 0;		// track + hit case
   mInPars = inPars; mInErrs = inErrs;
   mOtPars = otPars; mOtErrs = otErrs;
-  mJnPars =      0; mJnErrs =      0;
 }
 //______________________________________________________________________________
 void StvFitter::Set(const StvNodePars *inPars, const StvFitErrs *inErrs
@@ -688,7 +689,11 @@ void StvFitter::Set(const StvNodePars *inPars, const StvFitErrs *inErrs
   mKase = 1;		// join left & rite part of track
   mInPars = inPars; mInErrs = inErrs;
   mOtPars = otPars; mOtErrs = otErrs;
-  mJnPars = jnPars; mJnErrs = jnErrs;
+//mJnPars = jnPars; mJnErrs = jnErrs;
+
+  *mJnPars = *jnPars; *mJnErrs = *jnErrs;
+  mJnErrs->Update(mInPars->getTkDir());
+  mJnPars->getTkDir() = mInPars->getTkDir();
   mDelta  = mInPars->delta();  
 
 }
@@ -697,9 +702,8 @@ void StvFitter::Prep()
 {
   mDelta  = mInPars->delta(); 
   mHit   = 0; mHitPlane = 0;
-  mTkPars = *mInPars;
 //		Track Frame
-  const TkDir_t &tkd = mTkPars.getTkDir();
+  const TkDir_t &tkd = mInPars->getTkDir();
   TCL::ucopy(tkd[0],mDcaFrame[0],9);
 }
 //______________________________________________________________________________
@@ -714,20 +718,17 @@ double StvFitter::Xi2(const StvHit *hit)
   mHitPlane = mHit->detector();
 
 #if 1
-//	restore old parameters for nhits>1  
-  mTkPars = *mInPars;
-  mTkErrs = *mInErrs;
 //		Hit position
   const float *hP = mHit->x();
 //		Start track position
-  double *tP = mTkPars._x;
-  double *tD = mTkPars._d;
+  const double *tP = mInPars->_x;
+  const double *tD = mInPars->_d;
 //		Distance to DCA along track in xy
   mDeltaL = DDOT(hP,tP,tD);  
 #endif  
 
 
-  const TkDir_t &tkd = mTkPars.getTkDir();
+  const TkDir_t &tkd = mInPars->getTkDir();
 
   
 
@@ -764,15 +765,6 @@ double StvFitter::Xi2(const StvHit *hit)
   mDcaP=VDOT(mDcaFrame[1],dca);
   mDcaL=VDOT(mDcaFrame[2],dca);
 
-//		small account non zero distance to hit along track
-
-#if 1
-//		small account non zero distance to hit along track
-//  mDcaP-= 0.5*mTkPars.getCurv()*mDeltaL*mDeltaL;
-    mTkPars.make2nd();
-    mDcaP -= mTkPars._tkdir[kKdDdL][kFita]*mDeltaL*mDeltaL;
-    mDcaL -= mTkPars._tkdir[kKdDdL][kLama]*mDeltaL*mDeltaL;
-#endif
 
   double G[3]; TCL::ucopy(*mInErrs,G,3);
   if (mKase==0) {// Include Hit Errs
@@ -789,12 +781,14 @@ double StvFitter::Xi2()
   mFailed = 0;
   
 
+#if 0
   double inErr = (*mInErrs)[0]+(*mInErrs)[2];
   double jnErr = (*mJnErrs)[0]+(*mJnErrs)[2];
   if (jnErr>inErr) {//Not good order
     const StvNodePars *swp = mInPars; mInPars=mJnPars; mJnPars=swp;
     const StvFitErrs  *swe = mInErrs; mInErrs=mJnErrs; mJnErrs=swe;
   }
+#endif
 
   StvFitPars F   = (*mInPars-*mJnPars);
   double     Zero[5]= {0};
@@ -824,14 +818,11 @@ int StvFitter::Hpdate()
 {
 ///		this is Update for track+hit fit
 		
-  mTkPars = *mInPars;
-  mTkErrs = *mInErrs;
-//??  mTkPars.move(mDeltaL,&mTkErrs);
-  auto tP = mTkPars._x;
-//auto tD = mTkPars._d;
+  auto tP = mInPars->_x;
+//auto tD = mInPars->_d;
 //		Hit position
   const float *hP = mHit->x();
-  TCL::ucopy(mTkPars.getTkDir()[0],mDcaFrame[0],9);
+  TCL::ucopy(mInPars->getTkDir()[0],mDcaFrame[0],9);
 //		Hit position wrt track 
   double dca[3] = {hP[0]-tP[0],hP[1]-tP[1],hP[2]-tP[2]};
 #if 1
@@ -846,14 +837,14 @@ int StvFitter::Hpdate()
   StvFitPars myTrkPars;
 
   double myXi2 = JoinTwo(2,myHitPars, myHitErrs
-                        ,5,myTrkPars, mTkErrs
+                        ,5,myTrkPars,*mInErrs
 		        ,  mQQPars  ,*mOtErrs);
 
 
 
 //////  assert(mXi2>myXi2);
   assert(myXi2<kXtraBigXi2); 
-  *mOtPars = mTkPars;
+  *mOtPars = *mInPars;
   return 0;
 }  
 //______________________________________________________________________________
@@ -861,17 +852,16 @@ int StvFitter::Vpdate()
 {
 ///		this is Update for track+vertex fit
 static int nCall=0; nCall++;
-  mTkErrs = *mInErrs;
 
 //		New Z ortogonal to X (track direction)
   StvFitPars myHitPars(mDcaP, mDcaL );
   StvFitPars myTrkPars;
 
   double myXi2 = JoinVtx(2,myHitPars, mHitErrs
-                        ,5,myTrkPars, mTkErrs
+                        ,5,myTrkPars,*mInErrs
 		          ,mQQPars  ,*mOtErrs);
   assert(fabs(mXi2-myXi2)<1e-2*mXi2);
-  *mOtPars = mTkPars;
+  *mOtPars = *mInPars;
   for (int i=0;i<3;i++) {(*mOtErrs)[i]+=mHitErrs[i];}
   return 0;
 }  

@@ -54,15 +54,11 @@ protected:
       char         mDir;	//Direction of moving (0=Outside==>inside)
 const StvNodePars *mInPars;	//1st input params
 const StvFitErrs  *mInErrs;	//1st input params errors
-const StvNodePars *mJnPars;	//2nd input params
-const StvFitErrs  *mJnErrs;	//2nd input params errors
       StvNodePars *mOtPars;	//Output params
       StvFitErrs  *mOtErrs;	//Output errors
 const StvHit      *mHit;
 const StHitPlane  *mHitPlane;
       StvHitErrCalculator *mHitErrCalc;
-      StvNodePars  mTkPars;
-      StvFitErrs   mTkErrs;
       StvFitPars   mQQPars;
       StvFitErrs   mQQErrs;
       StvFitPars   mDelta;	//typical deltas for parameters in current env
@@ -71,6 +67,8 @@ const StHitPlane  *mHitPlane;
       double       mDcaT,mDcaP,mDcaL;
       double       mDcaFrame[3][3];
       char         mEnd[1];
+      StvNodePars *mJnPars;	//2nd input params
+      StvFitErrs  *mJnErrs;	//2nd input params errors
 static StvFitter *mgFitter;
 };
 #endif //__StvFitter_h_
