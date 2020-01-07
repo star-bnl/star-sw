@@ -916,8 +916,8 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
       double betaTof2 = etofPid->beta() * etofPid->beta();
       if(fabs(betaTof2) > 1.e-6)
       {
-        m2tof = track.GetP()*track.GetP()*(1./betaTof2 - 1.);
-        isTofm2 = true;
+        m2Etof = track.GetP()*track.GetP()*(1./betaTof2 - 1.);
+        isETofm2 = true;
       }
 #if 0
       else
@@ -970,7 +970,7 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
       vector<int> selectedPdg;
       for(int iPdg = nPartSaved0; iPdg<nPartSaved; iPdg++)
         selectedPdg.push_back(fParticlesPdg[iPdg]);
-      FillPIDHistograms(gTrack, selectedPdg, isTofm2, m2tof);
+      FillPIDHistograms(gTrack, selectedPdg, isTofm2, m2tof, isETofm2, m2Etof);
     }
     
     nUsedTracks++;

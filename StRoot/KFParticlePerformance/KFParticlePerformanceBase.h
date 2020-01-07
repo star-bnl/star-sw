@@ -113,7 +113,7 @@ class KFParticlePerformanceBase
   static const int nFitQA = 16; ///< Number of fit QA histograms: residuals and pulls in X, Y, Z, Px, Py, Pz, E, M.
   TH1F *hFitDaughtersQA[KFPartEfficiencies::nParticles][nFitQA]; ///< Residuals and pulls of daughter particles at production point.
   TH1F *hFitQA[KFPartEfficiencies::nParticles][nFitQA]; ///< Residuals and pulls of the reconstructed particle: X, Y, Z at decay point, P, E, M - at production point
-  TH1F *hFitQAPull[KFPartEfficiencies::nParticles][nFitQA]; ///< Residuals and pulls of the reconstructed particle: X, Y, Z at decay point, P, E, M - at production point from Fit "FitQAPull"
+  TH1F *hFitQAPull[KFPartEfficiencies::nParticles][nFitQA][3]; ///< Residuals and pulls of the reconstructed particle: X, Y, Z at decay point, P, E, M - at production point from Fit "FitQAPull", 0 -> mother, 1/2 -> +/- daughter
   TH1F *hFitQANoConstraint[KFPartEfficiencies::nParticles][nFitQA]; ///< Residuals and pulls of the particle with no constraints set.
   TH1F *hFitQAMassConstraint[KFPartEfficiencies::nParticles][nFitQA]; ///< Residuals and pulls of the particle with the mass constraint. 
   TH1F *hFitQATopoConstraint[KFPartEfficiencies::nParticles][nFitQA]; ///< Residuals and pulls of the particle with the production point constraint.

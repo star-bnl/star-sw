@@ -226,15 +226,21 @@ void KFParticlePerformanceBase::CreateHistos(std::string histoDir, TDirectory* o
             int nBins = 100;
 	    //            float xMax[nFitQA/2] = {0.15,0.15,0.03,0.01,0.01,0.06,0.06,0.01};
 	    float xMax[nFitQA/2] = {  2.,  2.,  5.,0.01,0.01,0.06,0.06,0.01};
-
-            for( int iH=0; iH<nFitQA/2; iH++ ){
-              hFitQAPull[iPart][iH]   = new TH1F((res+parName[iH]).Data(),
-                                                      (GetDirectoryPath()+res+parName[iH]).Data(), 
+	    for (Int_t s = 0; s < 3; s++) {// mother, + and - daughters
+	      TString charge;
+	      if (s == 1) charge = "+";
+	      else if (s == 2) charge = "-";
+	      Int_t HMax = nFitQA/2;
+	      if (s) HMax -= 2;
+	      for( int iH=0; iH < HMax; iH++ ){
+		hFitQAPull[iPart][iH][s]   = new TH1F((res+parName[iH]+charge).Data(),
+						      (GetDirectoryPath()+res+parName[iH]+charge).Data(), 
                                                       nBins, -xMax[iH],xMax[iH]);
-              hFitQAPull[iPart][iH+8] = new TH1F((pull+parName[iH]).Data(),
-                                                      (GetDirectoryPath()+pull+parName[iH]).Data(), 
-                                                      nBins, -6,6);
-            }
+		hFitQAPull[iPart][iH+8][s] = new TH1F((pull+parName[iH]+charge).Data(),
+						      (GetDirectoryPath()+pull+parName[iH]+charge).Data(), 
+						      nBins, -6,6);
+	      }
+	    }
           }
           gDirectory->cd(".."); //particle directory
 	  //          CreateFitHistograms(hFitQAPull[iPart], iPart);
