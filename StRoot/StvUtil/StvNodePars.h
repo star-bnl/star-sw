@@ -140,6 +140,7 @@ double getPt()   const { return 1./fabs(getPtin());};
 double getCurv() const ;
    int getDir() const;
 const TkDir_t &getTkDir() const {return _tkdir;}
+      TkDir_t &getTkDir()       {return _tkdir;}
   void reverse(); 
   void make2nd(); 
   void operator+=(const StvFitPars &fp);
