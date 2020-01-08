@@ -83,16 +83,16 @@ void CheckDistortion(const Char_t *opt="Corr4,OSpaceZ2,OGridLeakFull", Int_t dat
   fOut->Write();
 }
 /*
-  c1->Clear();
-  c1->Divide(1,3);
-  c1->cd(1); _file0->cd();
+  c2->Clear();
+  c2->Divide(1,3);
+  c2->cd(1); _file0->cd();
   const Char_t *Name = "ddR";
   TH2F *h0  = (TH2F*) gDirectory->Get(Name);
   h0->Draw("colz");
-  c1->cd(2); _file1->cd();
+  c2->cd(2); _file1->cd();
   TH2F *h1  = (TH2F*) gDirectory->Get(Name);
   h1->Draw("colz");
-  c1->cd(3);
+  c2->cd(3);
   TH2F *d = new TH2F(*h0);
   d->Add(h1,-1);
   d->Draw("colz");
