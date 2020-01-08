@@ -86,16 +86,16 @@ StPicoTrack::~StPicoTrack() {
 
 //_________________
 void StPicoTrack::Print(const Char_t* option __attribute__((unused)) ) const {
-  LOG_INFO << "id: " << id() << " chi2: " << chi2() << "\n"
-           << "pMom: " << pMom().X() << " " << pMom().Y() << " " << pMom().Z() << "\n"
-	   << "gMom: " << gMom().X() << " " << gMom().Y() << " " << gMom().Z() << "\n"
-	   << "origin: " << origin().X() << " " << origin().Y() << " " << origin().Z() << "\n"
+  LOG_INFO << "id: " << id() << " chi2: " << chi2() << "\t"
+           << "pMom: " << pMom().X() << " " << pMom().Y() << " " << pMom().Z() << "\t"
+	   << "gMom: " << gMom().X() << " " << gMom().Y() << " " << gMom().Z() << "\t"
+	   << "origin: " << origin().X() << " " << origin().Y() << " " << origin().Z() << "\t"
            << "nHitsFit: " << nHitsFit()
-           << " nHitsdEdx: " << nHitsDedx() << "\n"
+           << " nHitsdEdx: " << nHitsDedx() << "\t"
            << "nSigma pi/K/p/e: " << nSigmaPion()   << "/" << nSigmaKaon() << "/"
-           << nSigmaProton() << "/" << nSigmaElectron() << "\n"
+           << nSigmaProton() << "/" << nSigmaElectron() << "\t"
 	   << "Hit index in BEMC/BTof/MTD/ETof: " << mBEmcPidTraitsIndex << "/"
-	   << mBTofPidTraitsIndex << "/" << mMtdPidTraitsIndex << "/" << mETofPidTraitsIndex << "\n"
+	   << mBTofPidTraitsIndex << "/" << mMtdPidTraitsIndex << "/" << mETofPidTraitsIndex 
            << endm;
 }
 
