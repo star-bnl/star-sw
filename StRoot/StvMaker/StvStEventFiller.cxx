@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.43.2.2 2019/10/02 00:11:15 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.43.2.3 2020/01/08 00:25:05 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.43.2.3  2020/01/08 00:25:05  perev
+ * Release condidions(asserts)
+ *
  * Revision 1.43.2.2  2019/10/02 00:11:15  perev
  * Pull++
  *
@@ -1050,7 +1053,7 @@ void StvStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, const StvT
   for (int i=1;i<kMaxDetectorId;i++) {
     int np = dets[i][1];
     if (!np) continue;
-    assert(np<256);
+    assert(np<2560);
     detInfo->setNumberOfPoints(np,(StDetectorId)(i));
     assert((int)detInfo->numberOfPoints((StDetectorId)(i)) == np);
   }
@@ -1180,7 +1183,7 @@ static int nCall=0; nCall++;
   for (int i=1;i<kMaxDetectorId;i++) {
     int nf = dets[i][2];
     if (!nf) continue;
-    assert(nf<256);
+    assert(nf<2560);
     fitTraits.setNumberOfFitPoints(nf,(StDetectorId)i);
     assert((int)fitTraits.numberOfFitPoints((StDetectorId)i)==nf);
   }
@@ -1299,7 +1302,7 @@ void StvStEventFiller::fillTrack(StTrack* gTrack, const StvTrack* track,StTrackD
 
   gTrack->setEncodedMethod(mStvEncoded);
   double tlen = track->GetLength();
-  assert(tlen >0.0 && tlen<1500.);
+  assert(tlen >0.0 && tlen<9000.);
   gTrack->setLength(tlen);// someone removed this, grrrr!!!!
  
   // Follow the StDetectorId.h enumerations...
@@ -1310,7 +1313,7 @@ void StvStEventFiller::fillTrack(StTrack* gTrack, const StvTrack* track,StTrackD
   for (int i=1;i<kMaxDetectorId;i++) {
     int np = dets[i][0];
     if(!np) continue;
-    assert(np<256);
+    assert(np<2560);
     gTrack->setNumberOfPossiblePoints(np,(StDetectorId)i);
     assert((int)gTrack->numberOfPossiblePoints((StDetectorId)i)==np);
   }
