@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.60.2.4 2019/10/02 00:08:52 perev Exp $
+// $Id: StvMaker.cxx,v 1.60.2.5 2020/01/08 00:05:49 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -328,6 +328,7 @@ static int initialized = 0;
   assert(gSystem->Load("StvSeed.so")>=0);
   const char *seedAtt[2]={"seedFinders","SeedFinders.fw"};
   mMaxTimes = IAttr("setMaxTimes");
+  int myIdTruth = IAttr("UseIdTruth");
   for (int jreg=0;jreg<2; jreg++) {	//0=midEta,1=forwardEta
     mHitLoader[jreg] = new StvHitLoader;
     if (mMaxTimes>1)mHitLoader[jreg]->SetMaxTimes(mMaxTimes);
@@ -337,6 +338,7 @@ static int initialized = 0;
     if (IAttr("useVertexFinder")) 
       mVertexFinder[jreg] = new StvStarVertexFinder("GenericVertex");
     mTrackFinder[jreg] = new StvKalmanTrackFinder;
+    if (myIdTruth&2) mTrackFinder[jreg]->SetIdTruth();
     mTrackFitter[jreg] = new StvKalmanTrackFitter;
     int iRefit = IAttr("Refit");
     mTrackFinder[jreg]->SetRefit(iRefit);
@@ -359,6 +361,7 @@ static int initialized = 0;
           assert(gSystem->Load("TPCCATracker.so")	>=0);
 	}
 	StvSeedFinder *mySeedFinder = (StvSeedFinder*)gROOT->ProcessLineFast(seedNews[nick],&seedErr);
+        if (myIdTruth &1) mySeedFinder->SetIdTruth();
         if (TString(seedNick[nick])=="Fts") mySeedFinder->SetSgn(-1);
 	assert(mySeedFinder && !seedErr);
         mSeedFinders[jreg]->Add(mySeedFinder);
