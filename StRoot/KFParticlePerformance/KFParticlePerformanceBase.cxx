@@ -226,7 +226,12 @@ void KFParticlePerformanceBase::CreateHistos(std::string histoDir, TDirectory* o
             int nBins = 100;
 	    //            float xMax[nFitQA/2] = {0.15,0.15,0.03,0.01,0.01,0.06,0.06,0.01};
 	    float xMax[nFitQA/2] = {  2.,  2.,  5.,0.01,0.01,0.06,0.06,0.01};
-	    for (Int_t s = 0; s < 3; s++) {// mother, + and - daughters
+#if 0
+	    Int_t NS = 3;
+#else
+	    Int_t NS = 1;
+#endif
+	    for (Int_t s = 0; s < NS; s++) {// mother, + and - daughters
 	      TString charge;
 	      if (s == 1) charge = "+";
 	      else if (s == 2) charge = "-";
