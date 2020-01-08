@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.33.2.4 2019/10/02 00:07:48 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.33.2.5 2020/01/08 00:04:03 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -226,8 +226,6 @@ static int knt=0;knt++;
    const StHitPlane *hp = tgh->AddHit(mStvHit,mDetId,xyz,hard,seed);
    sure =  tgh->IsGoodHit();
    if (!hp) { StvToolkit::Inst()->FreeHit(mStvHit); mStvHit = 0; return 0;}
-
-   printf(" hit=%p in %s\n",(void*)mStvHit,hp->GetName()); //???????????????????????????
 
 
    if (did == kTpcId && fabs(xyz[2])<200) {// TPC hit check for being in sector
