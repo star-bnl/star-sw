@@ -187,6 +187,8 @@ const StHitPlane *prevHitPlane=0;
     par[0] = curNode->GetFP(0);
     err[0] = curNode->GetFE(0);
     nHits = mCurrTrak->GetNHits();
+    mHitIdTruth = 0;
+    if (mIdTruth) { mHitIdTruth = curNode->GetHit()->idTru();}
   } else 	{//Forward or backward tracking
  
     curNode = mCurrTrak->back();
@@ -251,9 +253,10 @@ double s=0;
     else        {mCurrTrak->push_back(curNode) ;innNode=preNode;outNode=curNode;}
     if (outNode){}
     nNode++;		
-    if (nNode>256) { //Something very wrong
-      Error("FindTrack","Too many nodes =200 Skip track");
-      assert (0 && "Too many nodes =256");
+    if (nNode>2560) { //Something very wrong
+      Error("FindTrack","Too many nodes =2560 Skip track");
+      skip = 17;	break; ///???
+      assert (0 && "Too many nodes =2560");
       return 0;
     }
 
@@ -287,7 +290,7 @@ double s=0;
     int minIdx = -1;
     for (int ihit=0;ihit<(int)localHits->size();ihit++) {
       StvHit *hit = (*localHits)[ihit];
-
+      if (mHitIdTruth && mHitIdTruth != hit->idTru()) continue;
       if (hit == prevHit) continue;
       myXi2 = fitt->Xi2(hit);
 
@@ -326,7 +329,7 @@ if (dbMask&1) {
 }
 
         mHitCounter->AddHit();
-	nHits++;nTotHits++;assert(nHits<256);
+	nHits++;nTotHits++;assert(nHits<2560);
         curNode->SetHE(fitt->GetHitErrs());
         curNode->SetFit(par[1],err[1],0);
         par[0]=par[1];
@@ -357,7 +360,7 @@ if (skip && !idir) StvDebug::Count("EndTrk",skip);
 
   if (nHits>3) {
     double tlen = mCurrTrak->GetLength();
-    assert(tlen >0.0 && tlen<1500);
+//????    assert(tlen >0.0 && tlen<1500);
   }
 
   mHitCounter->Reset();

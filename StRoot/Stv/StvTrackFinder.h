@@ -11,13 +11,14 @@ class StvTrackFitter;
 class StvTrackFinder : public TNamed
 {
 public:
-  StvTrackFinder(const char *name):TNamed(name,""){mRefit=1;}
+  StvTrackFinder(const char *name):TNamed(name,""){mRefit=1;mIdTruth=0;}
   virtual ~StvTrackFinder();
   virtual int       FindTracks()			=0;
   virtual int	    FindPrimaries(const StvHits &vtxs)	=0;
   virtual void      Reset()				=0;
   virtual void      Clear(const char *opt="");
   virtual void      SetCons(const StvKonst_st*)=0;
+  virtual void      SetIdTruth(){mIdTruth=1;};
   virtual void      SetFitter(StvTrackFitter *fitter){mTrackFitter = fitter;}
           void      AddPoint(const double pt[3]);
           void      AddHits(const double pt[3]);
@@ -27,6 +28,7 @@ public:
 protected:
 StvTrackFitter *mTrackFitter;
 int  mRefit; 	//refit flag
+int  mIdTruth;
 private:
 
 ClassDef(StvTrackFinder,0);

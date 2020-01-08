@@ -43,6 +43,7 @@ protected:
 
 protected:
 char mBeg[1];
+int mHitIdTruth;
 int mMinHits;		/*Min number of hits allowed MidEta*/
 int mNorHits;		/*Normal number of hits allowed MidEta*/
 int mGoodHits;		/*Min umber of Good hits in track MidEta*/
