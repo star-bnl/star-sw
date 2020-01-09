@@ -30,3 +30,5 @@
 foreach tag (CorrY,OSpaceZ2,OGridLeakFull  OBmap OPr40 OIFC OSpaceZ2 OShortR OGridLeakFull OSectorAlign)
   root.exe -q -b 'CheckDistortion.C("NewTpcAlignment,'${tag}'",20191218,114628)' >& ${tag}.log &
 end
+set tag = "noinput,P2020a,StiCA,-evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault"
+root.exe -q -b 'CheckDistortion.C("NewTpcAlignment,'${tag}'",20191218,114628)' >& ${tag}.log &
