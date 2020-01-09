@@ -3,7 +3,7 @@ set dir = 11p5GeV.B
 #set dir = 5p75GeV_fixedTarget.B
 cd ~/reco/2020/TFG19m/RF/${dir}
 echo "pwd = $PWD"
-foreach d (`ls -1d 3??`)
+foreach d (`ls -1d 0??`)
   cd ${d}
 rsync -avrz -h                        \
     --include='*picoDst.root'                  \
