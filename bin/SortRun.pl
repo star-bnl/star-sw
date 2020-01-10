@@ -26,7 +26,7 @@ sub SPrint ($$$$$$$$) {
 }
 print "\@Runs = ( # onl CURRENT | SortRun.pl \n";
 while ($line = <>) {
-  my ($run,$trig,$date,$time,$scaleFactor,$rtsStatus,$shiftLeaderStatus) = split ' ', $line;
+  my ($run,$trig,$date,$time,$scaleFactor,$rtsStatus,$shiftLeaderStatus,$destinationID) = split ' ', $line;
   my $field = "UF";
   if     ($scaleFactor >-1.2 && $scaleFactor < -0.8) {$field = "RF";}
   elsif ($scaleFactor > -0.8 && $scaleFactor < -0.2) {$field = "RHF";}
@@ -34,7 +34,7 @@ while ($line = <>) {
   elsif ($scaleFactor >  0.2 && $scaleFactor <  0.8) {$field = "FHF";}
   elsif ($scaleFactor >  0.8 && $scaleFactor <  1.2) {$field = "FF";}
   if ($run eq 'cmd' or $run eq 'runNumber') {next;}
-  if ($rtsStatus != 0 || $shiftLeaderStatus != 0) {next;}
+#  if ($rtsStatus != 0 || $shiftLeaderStatus != 0) {next;}
   if ($trig !~  /production/ and $trig !~  /^tune/ and $trig !~ /^Cosmic/) {next;}
    if ($trig =~ /^ped/) {next;}
    if ($trig =~ /^las/) {next;}
