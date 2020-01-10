@@ -123,6 +123,8 @@ class StKFParticleInterface: public TObject
   void SetChi2CutCharm2D(float cut);
   void SetSecondaryCuts(const float sigmaMass, const float chi2Topo, const float ldl);
   static StKFParticleInterface *instance() {return fgStKFParticleInterface;}
+  void              SetFixedTarget(Bool_t k=kTRUE) {fIsFixedTarget = k;}
+  Bool_t            IsFixedTarget()        {return fIsFixedTarget;}
  private:
   
   double InversedChi2Prob(double p, int ndf) const;
@@ -183,6 +185,7 @@ class StKFParticleInterface: public TObject
   //Event cuts
   bool fCleanLowPVTrackEvents;
   bool fUseHFTTracksOnly;
+  Bool_t            fIsFixedTarget;
   ClassDef(StKFParticleInterface,1)
 };
 

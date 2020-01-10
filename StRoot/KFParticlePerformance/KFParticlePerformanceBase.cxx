@@ -226,7 +226,7 @@ void KFParticlePerformanceBase::CreateHistos(std::string histoDir, TDirectory* o
             int nBins = 100;
 	    //            float xMax[nFitQA/2] = {0.15,0.15,0.03,0.01,0.01,0.06,0.06,0.01};
 	    float xMax[nFitQA/2] = {  2.,  2.,  5.,0.01,0.01,0.06,0.06,0.01};
-#if 0
+#if 1
 	    Int_t NS = 3;
 #else
 	    Int_t NS = 1;

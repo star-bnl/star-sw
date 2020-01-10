@@ -31,13 +31,14 @@
 //--- StRefMult class ---
 #include "StRefMultCorr/StRefMultCorr.h"
 #include "StRefMultCorr/CentralityMaker.h"
+#include "StDetectorDbMaker/St_beamInfoC.h"
 ClassImp(StKFParticleAnalysisMaker);
 
 //________________________________________________________________________________
 StKFParticleAnalysisMaker::StKFParticleAnalysisMaker(const char *name) : StMaker(name), fNTrackTMVACuts(0), fIsPicoAnalysis(true), fdEdXMode(1), 
-  fStoreTmvaNTuples(false), fProcessSignal(false), fCollectTrackHistograms(false), fCollectPIDHistograms(false),fTMVAselection(false), 
-  fFlowAnalysis(false), fFlowChain(NULL), fFlowRunId(-1), fFlowEventId(-1), fCentrality(-1), fFlowFiles(), fFlowMap(), 
-  fRunCentralityAnalysis(0), fRefmultCorrUtil(0), fCentralityFile(""), fAnalyseDsPhiPi(false), fDecays(0)
+									 fStoreTmvaNTuples(false), fProcessSignal(false), fCollectTrackHistograms(false), fCollectPIDHistograms(false),fTMVAselection(false), 
+									 fFlowAnalysis(false), fFlowChain(NULL), fFlowRunId(-1), fFlowEventId(-1), fCentrality(-1), fFlowFiles(), fFlowMap(), 
+									 fRunCentralityAnalysis(0), fRefmultCorrUtil(0), fCentralityFile(""), fAnalyseDsPhiPi(false), fDecays(0)
 {
   memset(mBeg,0,mEnd-mBeg+1);
   
@@ -247,6 +248,7 @@ Int_t StKFParticleAnalysisMaker::InitRun(Int_t runumber)
 //     Int_t Nb = sizeof(ActiveBranches)/sizeof(Char_t *);
 //     for (Int_t i = 0; i < Nb; i++) StPicoDstMaker::instance()->SetStatus(ActiveBranches[i],1); // Set Active braches
 //   }
+  StKFParticleInterface::instance()->SetFixedTarget(St_beamInfoC::instance()->IsFixedTarget());
   return StMaker::InitRun(runumber);
 }
 //_____________________________________________________________________________

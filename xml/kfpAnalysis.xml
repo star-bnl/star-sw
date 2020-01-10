@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="xrootd" simulateSubmission ="false" copyInputLocally="false">
         <command>
+ set CURRENT_DIR = `pwd`
 #         cd ${SUBMITTINGDIRECTORY}
   setenv STARFPE NO
 #  setenv NODEBUG yes
@@ -13,26 +14,42 @@
 #  setup  gcc
 #  setup  32b
 #  starver DEV2/SL15
-foreach input (`cat $FILELIST`)
-  set pico = ${input};
-  set picoB = `basename ${pico} .picoDst.root`;
-  set logb = ${picoB}B.log
+#  set split = (${INPUTFILE0}:as|/| |)
+ set input        = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+ set outputb      = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+# set input = ${INPUTFILE0};
+#foreach input (`cat $FILELIST`)
+  set dir = ${input};
+  set dirB = `basename ${dir}`
+  set filel = `basename ${outputb} .root`;
+#  set logb = ${dirB}B.log
+  set logb = ${filel}B.log
   set log  = ${SUBMITTINGDIRECTORY}/${logb}
   if (-r ${log}) exit 0;
-  set outputb = ${picoB}.root;
+#  set outputb = ${dirB}.root;
   set output  =  ${SUBMITTINGDIRECTORY}/${outputb};
   if (-r ${output}) exit 0;
-  cp -p ${SUBMITTINGDIRECTORY}/${input} .
-  root.exe -q -b -x  'kfpAnalysis.C(1000000,"'${picoB}'.picoDst.root","'${outputb}'","y2020")' &gt;&amp; ${logb}
-  mv ${outputb} ${output}
-  mv ${logb} ${log}
-end
+#  set bla = ${SUBMITTINGDIRECTORY}/${filel}.bla.root
+#  if (-r ${bla}) exit 0;
+#  touch ${bla}
+
+#  rsync -c ${SUBMITTINGDIRECTORY}/${input}/*picoDst.root .
+  rsync  ${input}/*.picoDst.root .
+  set idNdx = kFALSE;
+  echo ${SUBMITTINGDIRECTORY} | grep dNdx 
+  if (! $? )  set idNdx = kTRUE;
+  root.exe -q -b -x  'kfpAnalysis.C(1000000,"./*.picoDst.root","'${output}'","y2020",'${idNdx}')' &gt;&amp; ${log}
+#  mv ${outputb} ${output}
+#  mv ${logb} ${log}
+#  rm ${bla}
+#end
+  rm -rf ${CURRENT_DIR}
         </command>
     <ResourceUsage>
       <Priority>99</Priority>
     </ResourceUsage>
     <stdout URL="file:./sched$JOBID.log" />
     <stderr URL="file:./sched$JOBID.err" />
-     <input URL="command:PicoList.pl" /> 
+     <input URL="command:PicoL.pl" /> 
 </job>
 
