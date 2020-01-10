@@ -15,7 +15,8 @@
 // #define HLT_GL3_VERSION 0x20180607 // add bField in HLT_EVE
 // #define HLT_GL3_VERSION 0x20190602 // add bunch_id in HLT_EVE
 // #define HLT_GL3_VERSION 0x20190603 // add earliest TACs for BBC/VPD/EPD to HLT_EVE
-#define HLT_GL3_VERSION 0x20191201 // add ETOF hits
+// #define HLT_GL3_VERSION 0x20191201 // add ETOF hits
+#define HLT_GL3_VERSION 0x20200107 // add ETOF time of flight under pion assumption
 
 struct hlt_track {
     int            id ;         //primary key
@@ -153,7 +154,7 @@ struct hlt_node {
     int    tofHitSN;            // serial number in HLT_TOF
     int    emcTowerSN;          // serial number in HLT_EMC
     
-    double emcMatchPhiDiff;
+    double emcMatchPhiDiff;     // make this struct must be 8-byte aligned
     double emcMatchZEdge;
 
     int    projChannel;
@@ -163,8 +164,8 @@ struct hlt_node {
     float  tof;
     float  pathlength;
 
-    float  etofBeta;
-    float  padding;             // keep alignment 8 bytes
+    float  etofBeta;    // -999: no intercept; -1: intercept, no match; >= 0: match
+    float  etofPi;      // time of flight measured with ETOF assume pi
 };
 
 struct HLT_NODE {
