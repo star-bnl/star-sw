@@ -989,20 +989,20 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
   }
   if( fCleanLowPVTrackEvents && ( 10*primaryTrackList.size() < (nUsedTracks - primaryTrackList.size()) ) ) return 0;
   if( fCleanLowPVTrackEvents && sqrt(dx*dx + dy*dy) > 0.45 ) return 0;
-
-  if( fCleanLowPVTrackEvents && primaryVertex.GetR() > 1.5 ) return 0;
-//   if( fCleanLowPVTrackEvents && fabs(primaryVertex.Z()) > 75. ) return 0;
+  if (! IsFixedTarget()) {
+    if( fCleanLowPVTrackEvents && primaryVertex.GetR() > 1.5 ) return 0;
+    //   if( fCleanLowPVTrackEvents && fabs(primaryVertex.Z()) > 75. ) return 0;
     
-//   14 GeV
-//   double nSecLimit = 15.4905 + 1.01890*primaryTrackList.size();
-//   double nSec = (nUsedTracks - primaryTrackList.size());
-//   if( nSec > nSecLimit ) return 0; 
-  
-// //   fxt
-//   if( fCleanLowPVTrackEvents && !(primaryVertex.Z() > 196. && primaryVertex.Z() < 204.) ) return 0;
-//   if( fCleanLowPVTrackEvents && !(primaryVertex.X() > -2.5 && primaryVertex.X() < 2.  ) ) return 0;
-//   if( fCleanLowPVTrackEvents && !(primaryVertex.Y() > -4.  && primaryVertex.Y() < 0.  ) ) return 0;
-  
+    //   14 GeV
+    //   double nSecLimit = 15.4905 + 1.01890*primaryTrackList.size();
+    //   double nSec = (nUsedTracks - primaryTrackList.size());
+    //   if( nSec > nSecLimit ) return 0; 
+  } else {    
+    // //   fxt
+    //   if( fCleanLowPVTrackEvents && !(primaryVertex.Z() > 196. && primaryVertex.Z() < 204.) ) return 0;
+    if( fCleanLowPVTrackEvents && !(primaryVertex.X() > -2.5 && primaryVertex.X() < 2.  ) ) return 0;
+    if( fCleanLowPVTrackEvents && !(primaryVertex.Y() > -4.  && primaryVertex.Y() < 0.  ) ) return 0;
+  }
   const Double_t field = picoEvent->bField();  
   SetField(field);
 

@@ -1455,21 +1455,17 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
       histoFitQAPull[iParticle][iPar][0]->Fill(res[iPar]);
       histoFitQAPull[iParticle][iPar+8][0]->Fill(pull[iPar]);
     }
-#if 0
+#if 1
     if (index1 >= 0 && index2 >= 0) {
       KFParticle TempPartMF(TempPart);
-      //      TempPartMF.SetMassConstraint(TempPart.GetMass());
-      //      TempPartMF.TransportToDecayVertex();
       float dsdr[6] = {0.f}; 
-      //      TempPartMF.TransportToDS(-TempPart.GetDecayLength(), dsdr);
       TempPartMF.TransportToDS(TempPart.GetS(), dsdr);
       KFParticle *Daughters[2] = {&posDaughter, &negDaughter};
       for (Int_t s = 1; s < 3; s++) {
 	KFParticle D(*Daughters[s-1]);
 	KFParticle DR(*Daughters[s-1]);
-	DR.TransportToPoint(&TempPartMF.X());
-	D.GetParametersAtPoint(&TempPartMF.X(), &TempPartMF.Covariance(0), &D.X(), &D.Covariance(0));
-	//	D.SetProductionVertex(TempPartMF);
+	DR.TransportToPoint(TempPartMF.Parameters());
+	D.SetProductionVertex(TempPartMF);
 	for (Int_t iPar = 0; iPar < 6; iPar++) {
 	  res[iPar] = DR.GetParameter(iPar) - D.GetParameter(iPar);
 	  sigmas[iPar] = TMath::Sqrt(TMath::Max(vmin, DR.Covariance(iPar,iPar) - D.Covariance(iPar,iPar)));
@@ -1477,9 +1473,9 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
 	  histoFitQAPull[iParticle][iPar][s]->Fill(res[iPar]);
 	  histoFitQAPull[iParticle][iPar+8][s]->Fill(pull[iPar]);
 	}
+	static Int_t iBreak = 0;
+	iBreak++;
       }
-      static Int_t iBreak = 0;
-      iBreak++;
     }
 #endif
   }

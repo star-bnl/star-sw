@@ -29,8 +29,8 @@
 #include <DAQ_READER/daq_det.h>
 #include <DAQ_READER/daq_dta.h>
 #include <DAQ_BTOW/daq_btow.h>
-
-
+#include <DAQ_L4/daq_l4.h>
+#include <HLT/HLTFormats.h>
 
 
 struct JmlSz {
@@ -45,10 +45,53 @@ struct JmlSz {
 
 
 
+int firsttm = 0;
 
 void initHack() {
+    firsttm = 0;
+
+    printf("#  tm, x, y, z, n, mb, hlt70, hlt150, hltall\n");
 }
 
+// l4 hack!
+void doHack(daqReader *rdr) {
+    daq_dta *dd = rdr->det("l4")->get("gl3");
+
+    float x = -999;
+    float y = -999;
+    float z = -999;
+    int n = -999;
+
+    while (dd && dd->iterate()) {
+	l4_gl3_t *h = (l4_gl3_t *)dd->Void;
+	//printf("L4: %s\n", h->name);
+	
+	if(strcmp(h->name, "HLT_EVE") == 0) {
+	    HLT_EVE *eve = (HLT_EVE *)h->data;
+	    x = eve->vertexX;
+	    y = eve->vertexY;
+	    z = eve->vertexZ;
+	}
+	if(strcmp(h->name, "HLT_PT") == 0) {
+	    HLT_PT *pt = (HLT_PT *)h->data;
+	    n = pt->nPrimaryTracks;
+	}
+    }
+    
+    if(firsttm == 0) firsttm = rdr->evt_time;
+    
+    int mb=0;
+    int hlt70 = 0;
+    int hlt150 = 0;
+    int hltall = 0;
+    if(rdr->daqbits64 & (1ll << 1)) mb = 1;
+    if(rdr->daqbits64 & (1ll << 12)) hlt70 = 1;
+    if(rdr->daqbits64 & (1ll << 13)) hlt150 = 1;
+    if(rdr->daqbits64 & (1ll << 14)) hltall = 1;
+    
+    printf("%d %f %f %f %d %d %d %d %d\n", rdr->evt_time - firsttm, x, y, z, n, mb, hlt70, hlt150, hltall);
+}
+/*
 void doHack(daqReader *rdr) {
     struct JmlSz tpxSz;
     struct JmlSz itpcSz;
@@ -171,6 +214,8 @@ void doHack(daqReader *rdr) {
 	   tpxSz.invalid_count); // 15
          
 }
+*/
+
 
 void finishHack() {
 }

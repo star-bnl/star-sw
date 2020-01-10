@@ -56,10 +56,19 @@ void kfpPlot(const Char_t *histName = "M", const Char_t *path = "/Particles/KFPa
     h->SetMarkerColor(color);
     h->SetStats(0);
     h->Scale(scale);
-    if (color == 1) h->Draw();
-    else            h->Draw("sames");
-    TString Line( Form("%s, etries = %10.2e, mean = %7.3f, RMS = %7.3f", Fname.Data(), h->GetEntries(),h->GetMean(), h->GetRMS()));
-    if (Norm) Line += ". Scaled";
+#if 0
+    if (Norm) {
+      if (color == 1) h->DrawNormalized("",scale);
+      else            h->DrawNormalized("sames",scale);
+    } else {
+#endif
+      if (color == 1) h->Draw();
+      else            h->Draw("sames");
+#if 0
+    }
+#endif
+    TString Line( Form("%s, N = %10.2e, #mu = %7.3f, #sigma = %7.3f", Fname.Data(), h->GetEntries(),h->GetMean(), h->GetRMS()));
+    if (Norm) Line += Form(",X %7.2f",scale);
     l->AddEntry(h, Line);
     color++;
   }
@@ -107,6 +116,7 @@ void kfpPlot2(const Char_t *histName = "Armenteros", const Char_t *path = "/Part
 
 /* 
    kfpPlot("M","/Particles/KFParticlesFinder/Particles/Ks/Parameters")
+   kfpPlot("M","/Particles/KFParticlesFinder/Particles/phi_KK/Parameters")
    kfpPlot("pullM","/Particles/KFParticlesFinder/Particles/Ks/FitQAPull")
    kfpPlot("z","/Particles/KFParticlesFinder/PrimaryVertexQA")
    kfpPlot2("Armenteros", "/Particles/KFParticlesFinder/Particles/Lambda/Parameters")
