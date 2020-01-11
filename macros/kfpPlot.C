@@ -49,7 +49,7 @@ void kfpPlot(const Char_t *histName = "M", const Char_t *path = "/Particles/KFPa
     TString Path(f->GetName());
     Path += ":";
     Path += path;  
-    Path += "/"; Path += histName; cout << "Path\t" << Path << endl;
+    Path += "/"; Path += histName; // cout << "Path\t" << Path << endl;
     TH1F *h = (TH1F *) GetPlot(gDirectory,Path);
     if (! h) continue;
     h->SetLineColor(color);
@@ -67,8 +67,10 @@ void kfpPlot(const Char_t *histName = "M", const Char_t *path = "/Particles/KFPa
 #if 0
     }
 #endif
-    TString Line( Form("%s, N = %10.2e, #mu = %7.3f, #sigma = %7.3f", Fname.Data(), h->GetEntries(),h->GetMean(), h->GetRMS()));
+    TString Line( Form("%s, \tN = %10.2e,\t#mu = %7.3f,\t#sigma = %7.3f", Fname.Data(), h->GetEntries(),h->GetMean(), h->GetRMS()));
     if (Norm) Line += Form(",X %7.2f",scale);
+    cout << histName << "\t:" << path << "\t" << Line.Data() << endl;
+    Line.ReplaceAll("\t","");
     l->AddEntry(h, Line);
     color++;
   }
@@ -120,6 +122,8 @@ void kfpPlot2(const Char_t *histName = "Armenteros", const Char_t *path = "/Part
    kfpPlot("pullM","/Particles/KFParticlesFinder/Particles/Ks/FitQAPull")
    kfpPlot("z","/Particles/KFParticlesFinder/PrimaryVertexQA")
    kfpPlot2("Armenteros", "/Particles/KFParticlesFinder/Particles/Lambda/Parameters")
+   kfpPlot("Ntracks","/Particles/KFParticlesFinder/PrimaryVertexQA")
    kfpPlot2("hdEdX", "Tracks")
-
+   kfpPlot("hPVError", "Tracks")
+   kfpPlot("hPVErrorVsNTracks_1", "Tracks")
  */

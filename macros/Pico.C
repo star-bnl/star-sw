@@ -16,6 +16,7 @@
   l->AddEntry(N_pfx,"Negative")
 */
 //#define DEBUG
+#define __TFG__VERSION__
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <assert.h>
 #include "Riostream.h"
@@ -60,6 +61,7 @@
 #include "StPicoEvent/StPicoDst.h"
 #include "StPicoEvent/StPicoBTofPidTraits.h"
 #include "StPicoEvent/StPicoETofPidTraits.h"
+#include "StPicoEvent/StPicoTrackCovMatrix.h"
 #if 0
 #include "StProbPidTraits.h"
 #endif
