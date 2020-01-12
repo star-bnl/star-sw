@@ -31,7 +31,7 @@ foreach my $key ( sort keys %runs ) {
      my ($dev,$ino,$mode,$nlink,$uid,$gid,$dev, $size, $atime, $mtim, $ctime, $blksize,$blocks) = stat($file);
      my $dt = $now - $ctime;
 #     print "$file dt = $dt\n";
-     if ($dt < 1200) {$finished = 0; last;}
+     if ($dt < 60) {$finished = 0; last;}
   }
   if (! $finished) {next;}
   print "string:$key:$runs{$key}\n";
