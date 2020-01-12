@@ -41,7 +41,7 @@ void bfcMixerVMCTFG19e5(Int_t First, Int_t Last, const Char_t *opt,
   chain1 = bfc(-1,chain1Opt,daqfile,0,0,"DAQ");
   Chain->cd();
   //________________________________________________________________________________
-  TString chain2Opt(Form("Vmc,VMCAlignment,%s,gen_T,geomT,sim_T,CorrY,OPr40,OSpaceZ2,OGridLeak3D,nodefault,Rung.%i,TpcRS",Opt.Data(),RunG));
+  TString chain2Opt(Form("Vmc,VMCAlignment,%s,gen_T,geomT,sim_T,CorrY,OPr40,OSpaceZ2,OGridLeakFull,nodefault,Rung.%i,TpcRS",Opt.Data(),RunG));
   chain2Opt += ",BtofDat,EmcRaw";
 #ifndef __NO_DAQ_CLUSTERS__
   chain2Opt += ",bbcSim,btofsim,emcSim"; 
@@ -77,9 +77,9 @@ void bfcMixerVMCTFG19e5(Int_t First, Int_t Last, const Char_t *opt,
   OutputFileName.ReplaceAll(".daq","");
   //  OutputFileName.Append("_emb.root");
   OutputFileName.Append(".root");
-  //  TString chain4Opt("P2019a,tpxclu,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault,DbV20190709");
-  TString chain4Opt("P2019a,tpxclu,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault,DbV20190709");
-  //                "P2016,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D");
+  //  TString chain4Opt("P2019a,tpxclu,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault,DbV20190709");
+  TString chain4Opt("P2019a,tpxclu,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault,DbV20190709");
+  //                "P2016,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeakFull");
   chain4Opt += ",noInput,-in,useInTracker,-hitfilt,StiCA"; // ,MiniMcMk,McAna,GeantOut
   chain4Opt += ",TpxClu,TpcHitMover,BEmcChkStat,btof,btofMatch,btofCalib,eemcA2E,fmsdat,-evout"; // ,evout
   chain4Opt += ",NoSsdIt,NoSvtIt,StiHftC,Idst,BAna,-hitfilt";
