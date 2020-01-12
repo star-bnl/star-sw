@@ -326,7 +326,7 @@ foreach r ( `onlBadRuns.pl | egrep '(20|21)' | awk '{print $1}' | sort -u` )
 end 
 
 # Submit ################################################################################
-foreach d (`ls -1d 0*/2*`)
+foreach d (`ls -1d */2*`)
   cd $d;
   if (-r Done) then
     cd -
