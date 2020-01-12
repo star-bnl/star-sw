@@ -242,6 +242,21 @@ Int_t StVMCMaker::Init() {
       assert(!ee);
 #endif
     } 
+    TString MuDstF(SAttr("MuDstFile"));
+    if (MuDstF != "") {
+      TFile *f = TFile::Open(MuDstF);
+      if (! f) {
+       LOG_ERROR << MuDstF.Data() << " file has not been found" << endm;
+      }
+      TTree *tree = (TTree *) f->Get("MuDst");
+      if (! tree) {
+       LOG_ERROR << "MuDst is not found in " << MuDstF.Data() << endm;
+      } else {
+       fMuDstIter = new TTreeIter();
+       fMuDstIter->AddFile(MuDstF);
+      }
+      SafeDelete(f);
+    }
     StarMCPrimaryGenerator *generator = StarMCPrimaryGenerator::Instance();
     if (! generator) {
       if (fInputFile != "") {
