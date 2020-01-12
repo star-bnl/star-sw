@@ -657,7 +657,7 @@ void StMagUtilities::GetE()
     cout << "StMagUtilities ERROR **** Calculations fail with extremely small or zero primary E field:" << endl;
     cout << "StMagUtilities     StarMagE = (CathodeV - GG) / TPC_Z0 = (" << CathodeV
       << " - " << GG << ") / " << TPC_Z0 << " = " << StarMagE << " V/cm" << endl;
-    exit(1);
+    assert(0);
   } 
 }
 
@@ -1298,13 +1298,13 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
   if ((mDistortionMode & kBMap) && (mDistortionMode & kFast2DBMap)) {
       cout << "StMagUtilities ERROR **** Do not use kBMap and kFast2DBMap at the same time" << endl ;
       cout << "StMagUtilities ERROR **** These routines have duplicate functionality so don't do both." << endl ;
-      exit(1) ;
+      assert(0) ;
   }
 
   if ((mDistortionMode & kPadrow13) && (mDistortionMode & kPadrow40)) {
       cout << "StMagUtilities ERROR **** Do not use kPadrow13 and kPadrow40 at the same time" << endl ;
       cout << "StMagUtilities ERROR **** These routines have duplicate functionality so don't do both." << endl ;
-      exit(1) ;
+      assert(0) ;
   }
 
   if (mDistortionMode & kPadrow13) {
@@ -2664,7 +2664,7 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
   if ((mDistortionMode & kSpaceCharge) && (mDistortionMode & kSpaceChargeR2)) {
       cout << "StMagUtilities ERROR **** Do not use kSpaceCharge and kSpaceChargeR2 at the same time" << endl ;
       cout << "StMagUtilities ERROR **** These routines have overlapping functionality." << endl ;
-      exit(1) ;
+      assert(0) ;
   }
 
   if (mDistortionMode & kSpaceCharge) { 
@@ -3538,9 +3538,9 @@ void StMagUtilities::PoissonRelaxation( TMatrix &ArrayVM, TMatrix &ChargeM, TMat
   //Check that number of ROWS and COLUMNS is suitable for a binary expansion
 
   if ( !IsPowerOfTwo(ROWS-1) )
-    { cout << "StMagUtilities::PoissonRelaxation - Error in the number of ROWS.  Must be 2**M - 1" << endl ; exit(1) ; }
+    { cout << "StMagUtilities::PoissonRelaxation - Error in the number of ROWS.  Must be 2**M - 1" << endl ; assert(0) ; }
   if ( !IsPowerOfTwo(COLUMNS-1) )
-    { cout << "StMagUtilities::PoissonRelaxation - Error in the number of COLUMNS.  Must be 2**N - 1" << endl ; exit(1) ; }
+    { cout << "StMagUtilities::PoissonRelaxation - Error in the number of COLUMNS.  Must be 2**N - 1" << endl ; assert(0) ; }
   
   // Because performance of this relaxation is important, we access the arrays directly
   Float_t *ArrayE,*ArrayV,*Charge,*SumCharge,*EroverEz ;
@@ -3760,11 +3760,11 @@ void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **Arr
 
   //Check that the number of ROWS and COLUMNS is suitable for a binary expansion
   if ( !IsPowerOfTwo((ROWS-1))    )
-  { cout << "StMagUtilities::Poisson3DRelaxation - Error in the number of ROWS.  Must be 2**M - 1" << endl ; exit(1) ; }
+  { cout << "StMagUtilities::Poisson3DRelaxation - Error in the number of ROWS.  Must be 2**M - 1" << endl ; assert(0) ; }
   if ( !IsPowerOfTwo((COLUMNS-1)) )
-  { cout << "StMagUtilities::Poisson3DRelaxation - Error in the number of COLUMNS.  Must be 2**N - 1" << endl ; exit(1) ; }
+  { cout << "StMagUtilities::Poisson3DRelaxation - Error in the number of COLUMNS.  Must be 2**N - 1" << endl ; assert(0) ; }
   if ( PHISLICES <= 3   )
-  { cout << "StMagUtilities::Poisson3DRelaxation - Error in the number of PHISLICES.  Must be larger than 3" << endl ; exit(1) ; }
+  { cout << "StMagUtilities::Poisson3DRelaxation - Error in the number of PHISLICES.  Must be larger than 3" << endl ; assert(0) ; }
   
   // Because performance of this relaxation is important, we access the arrays directly
   Float_t *ArrayE,*ArrayV,*ArrayVM,*ArrayVP,*Charge,*SumCharge,*EroverEz,*EPhioverEz ;
@@ -3783,7 +3783,7 @@ void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **Arr
   loops = 1 + (int) ( 0.5 + TMath::Log2((double)loops) ) ;  // Solve for N in 2**N
   
   TMatrix *ArrayofSumCharge[1000] ;    // Create temporary arrays to store low resolution charge arrays
-  if  ( PHISLICES > 1000 ) { cout << "StMagUtilities::Poisson3D  PHISLICES > 1000 is not allowed (nor wise) " << endl ; exit(1) ; }  
+  if  ( PHISLICES > 1000 ) { cout << "StMagUtilities::Poisson3D  PHISLICES > 1000 is not allowed (nor wise) " << endl ; assert(0) ; }  
   for ( Int_t i = 0 ; i < PHISLICES ; i++ ) { ArrayofSumCharge[i] = new TMatrix(ROWS,COLUMNS) ; }
   Float_t OverRelaxers[ITERATIONS] ; 
   for ( Int_t k = 1 ; k <= ITERATIONS; k++ ) {
@@ -5139,7 +5139,7 @@ void StMagUtilities::UndoGridLeakDistortion( const Float_t x[], Float_t Xprime[]
       ((mDistortionMode/kFullGridLeak) & 1) > 1) {
       cout << "StMagUtilities ERROR **** Do not use multiple GridLeak modes at the same time" << endl ;
       cout << "StMagUtilities ERROR **** These routines have overlapping functionality." << endl ;
-      exit(1) ;
+      assert(0) ;
   }
 
   if (mDistortionMode & kGridLeak) { 
