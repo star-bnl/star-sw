@@ -52,7 +52,7 @@ my  @runs  = glob "/hlt/cephfs/daq/2019/???/* /hlt/cephfs/daq/2020/???/*";  prin
 foreach my $run (@runs) {
   my $r = File::Basename::basename($run);
   if (GoodRun($def,$r) < 0) {next;}
-  foreach my $tag (qw(st_physics_20 hlt)) {
+  foreach my $tag (qw(st_physics_2 hlt)) {
     my @files = glob $run . "/" . $tag . "*.daq"; print "files = @files\n" if ($debug);
     if ($#files < 0) {next;}
     #  print "files = @files\n";
