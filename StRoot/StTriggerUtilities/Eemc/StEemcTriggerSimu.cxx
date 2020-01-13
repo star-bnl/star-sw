@@ -74,10 +74,7 @@ StEemcTriggerSimu::StEemcTriggerSimu() {
   dsm2TreeTRG =new EMCdsm2Tree("TRG");
   dsm3TRG     =new EEdsm3();
 
-  // 2009
-  mE001 = new DSMLayer_E001_2009;
-  mE101 = new DSMLayer_E101_2009;
-
+  mTestMode = false;
   LOG_INFO <<"Eemc::constructor"<<endm;
 }
 
@@ -283,6 +280,12 @@ StEemcTriggerSimu::InitRun(int runnumber){
   } // #### modified line by Liaoyuan 
   // #### modified by Liaoyuan ####
   else if (mYear >= 2009) {
+  // 2009
+  mE001 = new DSMLayer_E001_2009;
+  if(mYear == 2013 && runnumber >= 14081067){
+     mE101 = new DSMLayer_E101_2013;
+  }else
+    mE101 = new DSMLayer_E101_2009;
 
 #if 0
     DsmThreshold thresholds;
@@ -323,9 +326,21 @@ StEemcTriggerSimu::Make(){
 #endif
 
   // ************** Emulation of trigger based on ADC ************ 
-  getEemcAdc();   //  processed raw ADC
-  feeTPTreeADC->compute(rawAdc,feePed,feeMask,highTowerMask,patchSumMask);
-
+  //start zchang
+  if(mTestMode && !mMCflag){
+    LOG_DEBUG<<" TEST Mode"<<endm;
+    StEmcTriggerDetector emc = StMuDst::event()->emcTriggerDetector();
+    int ht[90], pa[90];
+    for(int ip = 0; ip < 90; ip++){
+        ht[ip] = emc.highTowerEndcap(ip);
+        pa[ip] = emc.patchEndcap(ip);
+    }
+    feeTPTreeADC->test(pa, ht);
+  }else{
+    getEemcAdc();   //  processed raw ADC
+    feeTPTreeADC->compute(rawAdc,feePed,feeMask,highTowerMask,patchSumMask);
+  }
+  //end zchang
   // LOG_DEBUG messages
   LOG_DEBUG << "EEMC trigger patch format is HT/TPsum" << endm;
   for (int dsm = 0; dsm < 9; ++dsm) {
@@ -417,17 +432,9 @@ StEemcTriggerSimu::Make(){
   //if(mDumpEve) printf("\nzzzzz===================================================\n\n");
   }// #### modified line by Liaoyuan 
   // #### modified by Liaoyuan ####
-  else if( mYear >= 2009 && mYear != 2013){
+  else if( mYear >= 2009){
     get2009_DSMLayer0();
     get2009_DSMLayer1();
-  }
-  // #### modified end ####  
-
-  // #### modified by Danny ####
-  Int_t runnumber = StMaker::GetChain()->GetRunNumber();
-  if( mYear == 2013 ){
-    get2013_DSMLayer0(runnumber);
-    get2013_DSMLayer1(runnumber);
   }
   // #### modified end ####  
 
@@ -646,8 +653,8 @@ StEemcTriggerSimu::getDsm0123inputs(){
 
   //DSM3 (lastDSM)
   StL0Trigger &L0trg=StMuDst::event()->l0Trigger();
-  int L0Num;
-  L0Num=L0trg.lastDsmArraySize();
+  //int L0Num;
+  //L0Num=L0trg.lastDsmArraySize();
   ushort L0word=L0trg.lastDsmArray(0);
   dsm3TRG->setWord(0, L0word);
   //printf("L0word=%d\n", L0word);
@@ -768,39 +775,6 @@ StEemcTriggerSimu::get2009_DSMLayer1(){
 // #### modified end ####
 
 //==================================================
-// #### modified by Danny ####
-
-void
-StEemcTriggerSimu::get2013_DSMLayer0(Int_t runnumber){
-  for( size_t dsm = 0; dsm < mE001->size(); dsm++ ){
-    TString line = (*mE001)[dsm].name + ": ";
-    for( int ch = 0; ch < 10; ch++ ){
-      Int_t tpid = dsm * 10 + ch;
-      (*mE001)[dsm].channels[ch] = feeTPTreeADC->TP(tpid)->getOut12bit();
-      line += Form("%04x ",(*mE001)[dsm].channels[ch]);
-    }
-    LOG_DEBUG << line << endm;
-  }
-  
-  mE001->run(runnumber);
-}
-
-void
-StEemcTriggerSimu::get2013_DSMLayer1(Int_t runnumber){
-  mE001->write(*mE101);
-
-  for (size_t dsm = 0; dsm < mE101->size(); ++dsm) {
-    TString line = (*mE101)[dsm].name + ": ";
-    for (int ch = 0; ch < 8; ++ch) line += Form("%04x ",(*mE101)[dsm].channels[ch]);
-    LOG_DEBUG << line << endm;
-  }
-
-  mE101->run(runnumber);
-}
-
-// #### modified end ####
-
-//==================================================
 
 int StEemcTriggerSimu::endcapJetPatchTh(int i) const { return mE101->getRegister(i); }
 int StEemcTriggerSimu::endcapHighTowerTh(int i) const { return mE001->getRegister(i); }
@@ -837,6 +811,9 @@ void StEemcTriggerSimu::fillStEmcTriggerDetector()
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.52  2020/01/13 20:45:50  zchang
+// removing old run13 dsm algo files
+//
 // Revision 1.51  2019/05/21 19:27:14  zchang
 // make changes for the trigger simulator to only use 2013 algorithms for that year, not for later years, later years still use 2009 algorithms
 //
