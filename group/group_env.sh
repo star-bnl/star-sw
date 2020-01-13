@@ -88,7 +88,7 @@ fi
 if (( ! $?XOPTSTAR )) ; then
     if ((-d ${OPTSTAR}/${STAR_HOST_SYS}) export XOPTSTAR=${OPTSTAR}/${STAR_HOST_SYS}
 #    # keep a reference to the AFS one
-#    # this -e test may fail - don't do it
+#    # this -r test may fail - don't do it
 #    if (( "$READ_AFS" == "" )) ; then
 ##	export XOPTSTAR=${AFS_RHIC}/star/packages/.DEV2/misc/opt/star/${STAR_HOST_SYS}
 #	export XOPTSTAR=$OPTSTAR #${AFS_RHIC}/opt/star
@@ -100,9 +100,9 @@ fi
 #fi
 if (( ! $?OPTSTAR )) ; then
     # local first - BEWARE this may be a link over
-    # AFS as well and as it turns out, -e test locks as well
+    # AFS as well and as it turns out, -r test locks as well
 
-    # there is not even a /opt, -e will be safe
+    # there is not even a /opt, -r will be safe
     # if there is no star in /opt, also safe to do -e
     # note that ALL ls must be escaped to avoid argument aliasing
     # forcing color, fancy display etc ... all doing a form of stat
@@ -119,8 +119,8 @@ if (( ! $?OPTSTAR )) ; then
     fi
 
     if (( "$IS_OPTSTAR_AFS" == "" || "$READ_AFS" == "")) ; then
-	if (( $?DECHO)) ; then echo "$self :: Safe to test -e on /opt/star" fi
-	if (( -e /opt/star )) ; then
+	if (( $?DECHO)) ; then echo "$self :: Safe to test -r on /opt/star" fi
+	if (( -r /opt/star )) ; then
 	    export  OPTSTAR=/opt/star
 	fi
 	#else -> note that eventually, we could set blindly OPTSTAR if TEST!=""
@@ -144,7 +144,7 @@ if (( $?STAR_PATH == 0)) ; then export STAR_PATH=${STAR_ROOT}/packages; fi
 if (( $?DECHO)) ; then echo   "$self :: Value of GROUP_DIR = ${GROUP_DIR}" fi
 
 # make this additional test ahead
-if (( ! -e $STAR_PATH )) ; then
+if (( ! -r $STAR_PATH )) ; then
     FAIL="$FAIL STAR_PATH"
 fi
 
@@ -172,7 +172,7 @@ if (( "$FAIL" != "")) ; then
 	    failafs=1
 	fi
 	if (( `echo $STAR_ROOT | $GREP $AFS_RHIC` != "" &&  `echo $STAR_PATH | $GREP $STAR_ROOT` != "" && `echo $FAIL | $GREP STAR_PATH` != "")) ; then
-	    # ! -e STAR_PATH but defined as AFS resident is the second sign of failure
+	    # ! -r STAR_PATH but defined as AFS resident is the second sign of failure
 	    # it does seem like the above but this second test is necessary due to client
 	    # file caching
 	    failafs=1
@@ -227,10 +227,10 @@ if (( $?DECHO)) ; then  echo "$self :: Setting STAR_VERSION" fi
 export STAR_VERSION=${STAR_LEVEL}
 if (($STAR_LEVEL  == "old" || $STAR_LEVEL  == "pro" || $STAR_LEVEL  == "new" || $STAR_LEVEL  == "dev" || $STAR_LEVEL  == ".dev")) ; then
   # i.e. replace with link value instead
-  if (( $?DECHO )) ; then  echo "$self :: Will test -e $STAR_PATH/${STAR_LEVEL}" fi
+  if (( $?DECHO )) ; then  echo "$self :: Will test -r $STAR_PATH/${STAR_LEVEL}" fi
   # exit
 
-  if( -e $STAR_PATH/${STAR_LEVEL})) ; then
+  if( -r $STAR_PATH/${STAR_LEVEL})) ; then
     # be carefull, it may not be "seen" as a soft link
     # at all ... Some AFS client do not show the link.
     # No even speaking of absolute path ...
@@ -250,7 +250,7 @@ fi
 if (( $?DECHO)) ; then  echo "$self :: Setting STAF_VERSION" fi
 
 if (($?STAF_LEVEL == 0)) ; then
- if (( -e $STAR_PATH/StAF/${STAR_LEVEL})) ; then
+ if (( -r $STAR_PATH/StAF/${STAR_LEVEL})) ; then
     export STAF_LEVEL=$STAR_LEVEL
  else
     export STAF_LEVEL=pro
@@ -259,7 +259,7 @@ fi
 
 export STAF_VERSION=${STAF_LEVEL}
 if (($STAF_LEVEL  == "old" || $STAF_LEVEL  == "pro" || $STAF_LEVEL  == "new" || $STAF_LEVEL  == "dev" || $STAF_LEVEL  == ".dev")) ; then
-  if( -e $STAR_PATH/StAF/${STAF_LEVEL})) ; then
+  if( -r $STAR_PATH/StAF/${STAF_LEVEL})) ; then
     a = `ls -ld $STAR_PATH/StAF/${STAF_LEVEL}`
     b = `ls -ld $STAR_PATH/StAF/${STAF_LEVEL} | cut -f2 -d">"`
     if (( "$a" != "$b")) ; then
@@ -308,9 +308,9 @@ fi
 # There is a second chance to define XOPTSTAR
 if (( $?DECHO)) ; then  echo "$self :: Checking  XOPTSTAR " fi
 if (( ! $?XOPTSTAR )) ; then
-#    if (( -e ${AFS_RHIC}/star/packages/.DEV2/misc/opt/star/${STAR_HOST_SYS} )) ; then
+#    if (( -r ${AFS_RHIC}/star/packages/.DEV2/misc/opt/star/${STAR_HOST_SYS} )) ; then
 #	export XOPTSTAR=${AFS_RHIC}/star/packages/.DEV2/misc/opt/star/${STAR_HOST_SYS}
-    if (( -e ${AFS_RHIC}/${STAR_SYS}/opt/star )) ; then
+    if (( -r ${AFS_RHIC}/${STAR_SYS}/opt/star )) ; then
        export XOPTSTAR=${AFS_RHIC}/${STAR_SYS}/opt/star
     else
 	# well, as good as anything else (we cannot find a
@@ -323,11 +323,11 @@ if (( $?OPTSTAR )) ; then
     if ((!  $?optstar )) ; then export  optstar= ${OPTSTAR} fi
     if ((! $?xoptstar )) ; then  export xoptstar=${XOPTSTAR} fi
 
-    if (( -e ${OPTSTAR}/${STAR_HOST_SYS} )) ; then
+    if (( -r ${OPTSTAR}/${STAR_HOST_SYS} )) ; then
 	# Redhat > 7.3  transition ; adding one level
 	export OPTSTAR=${optstar}/${STAR_HOST_SYS}
     fi
-    if (( -e ${xoptstar}/${STAR_HOST_SYS} )) ; then
+    if (( -r ${xoptstar}/${STAR_HOST_SYS} )) ; then
 	export XOPTSTAR=${xoptstar}/${STAR_HOST_SYS}
     fi
 fi
@@ -371,7 +371,7 @@ if (( $STAR_LEVEL == "cal" )) ; then
 	# make a default
 	export STAR_BIN=$STAR_PATH/dev/.${STAR_HOST_SYS}/bin
     fi
-    if (( -e $STAR_PATH/${STAR_VERSION}/.${STAR_HOST_SYS}/bin )) ; then
+    if (( -r $STAR_PATH/${STAR_VERSION}/.${STAR_HOST_SYS}/bin )) ; then
 	# overwrite if exists
 	export STAR_BIN=$STAR_PATH/${STAR_VERSION}/.${STAR_HOST_SYS}/lib 
     fi
@@ -449,7 +449,7 @@ fi
 # db related
 if (( $?SITE )) ; then
     #if (( ! $?DB_SERVER_LOCAL_CONFIG )) ; then
-	if (( -e ${STAR_PATH}/conf/dbLoadBalancerLocalConfig_${SITE}.xml )) ; then
+	if (( -r ${STAR_PATH}/conf/dbLoadBalancerLocalConfig_${SITE}.xml )) ; then
 	    # 2008/08 new location and unique for all libraries - SL08e or above
 	    export DB_SERVER_LOCAL_CONFIG=${STAR_PATH}/conf/dbLoadBalancerLocalConfig_${SITE}.xml
 	else
@@ -469,7 +469,7 @@ fi
 if (($?INSURE)) ; then
   # Do it conditional because this is a late addition.
   # The directory structure may not exist for all library version.
-  if( -e $STAR/.${STAR_HOST_SYS}/ILIB)) ; then
+  if( -r $STAR/.${STAR_HOST_SYS}/ILIB)) ; then
    if ((-f $GROUP_DIR/parasoftenv.csh)) ; then
      source $GROUP_DIR/parasoftenv.csh
      export STAR_lib= $STAR/.${STAR_HOST_SYS}/ILIB ;  if (($ECHO)) ; then echo   "Setting up STAR_lib  = ${STAR_lib}" fi
@@ -510,10 +510,10 @@ export STAR_CGI= $STAR_PATH/cgi
 export STAR_MGR= $STAR/mgr
 export STAR_PAMS=$STAR/pams;            if (($ECHO)) ; then echo   "Setting up STAR_PAMS = ${STAR_PAMS}" fi
 
-if (( -e ${STAR_ROOT}/data )) ; then
+if (( -r ${STAR_ROOT}/data )) ; then
 export STAR_DATA=${STAR_ROOT}/data;     if (($ECHO)) ; then echo   "Setting up STAR_DATA = ${STAR_DATA}" fi
 fi
-if (( -e $STAR_PATH/repository )) ; then
+if (( -r $STAR_PATH/repository )) ; then
 export CVSROOT=  $STAR_PATH/repository; if (($ECHO)) ; then echo   "Setting up CVSROOT   = ${CVSROOT}" fi
 fi
 
@@ -549,7 +549,7 @@ if (( -f $STAR/mgr/ROOT_LEVEL && -f $STAR/mgr/CERN_LEVEL )) ; then
 
   # now check if CERN exists
   if (( $?CERN )) ; then
-    if (( ! -e $CERN/$CERN_LEVEL )) ; then
+    if (( ! -r $CERN/$CERN_LEVEL )) ; then
 	if (( $?DECHO)) ; tehn  echo "$self :: Caught $CERN_LEVEL from config in $STAR/mgr/ but not found - reverting to pro" fi
 	export CERN_LEVEL=pro
     fi
@@ -617,12 +617,12 @@ fi
 
 # test return value of PTEST from dropit
 if (( $?DECHO && $?DUMPENV )) ; then
-    if (( -e /tmp/dropit.$USER )) ; then
+    if (( -r /tmp/dropit.$USER )) ; then
 	tmp=`cat /tmp/dropit.$USER`
 	echo "$self :: $tmp"
 	unset tmp
 	rm -f /tmp/dropit.$USER
-	if (( -e /tmp/dropit.ENV.$USER )) ; then
+	if (( -r /tmp/dropit.ENV.$USER )) ; then
 	    echo "$self :: ENV dump now --->"
 	    cat /tmp/dropit.ENV.$USER
 	    rm -f /tmp/dropit.ENV.$USER
@@ -855,7 +855,7 @@ fi
 #	export GRAXML_HOME=${STAR_PATH}/GeoM/${STAR_LEVEL}/GraXML
 #    else
 #	# revert to a default if exists
-#	if (( -e ${STAR_PATH}/GeoM/dev/GraXML )) ; then
+#	if (( -r ${STAR_PATH}/GeoM/dev/GraXML )) ; then
 #	    export GRAXML_HOME=${STAR_PATH}/GeoM/dev/GraXML
 #	fi
 #    fi

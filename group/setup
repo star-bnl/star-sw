@@ -54,7 +54,7 @@ source $GROUP_DIR/unix_programs.csh
 switch ($pkg)
     case "cvmfs":
     case "afs":
-      if ( -e $HOME/.login ) then
+      if ( -r $HOME/.login ) then
 	#set saved_home=$HOME
 	#set saved_display=$DISPLAY
 	#unsetenv *
@@ -182,13 +182,13 @@ switch ($pkg)
     case "Grid":
 	# Support for OSG - Try to locate things from OSG including Worker Node
 	if ( ! $?OSG ) then 
-	    if ( -e /opt ) then
+	    if ( -r /opt ) then
 		set LOSG=`ls -d /opt/* | $GREP OSG | tail -1`
 		if ( "$LOSG" != "") setenv OSG $LOSG
 	    endif
 	endif
 	if ( $?OSG ) then
-	    if ( -e $OSG/setup.csh ) then
+	    if ( -r $OSG/setup.csh ) then
 		# there will alos be a java version coming along but
 		# it may be defined prior from /usr/java
 		source $OSG/setup.csh
@@ -198,7 +198,7 @@ switch ($pkg)
 	    # Unfortunately, the WN package loads the whole blabla with
 	    # java, python and even perl all ...
 	    if ( $?WNOSG ) then
-		if ( -e $WNOSG/setup.csh ) then
+		if ( -r $WNOSG/setup.csh ) then
 		    setenv GSAVED_PATH   $PATH
 		    setenv GSAVED_LDPATH $LD_LIBRARY_PATH
 		    # trash the path
@@ -223,9 +223,9 @@ switch ($pkg)
        else
 	    set v = ""
        endif
-       if ( -e ${OPTSTAR}/geant4$v ) then
+       if ( -r  ${OPTSTAR}/geant4$v ) then
 	    setenv G4PATH ${OPTSTAR}/geant4$v
-	    if ( -e $G4PATH/bin/geant4.csh ) then
+	    if ( -r  $G4PATH/bin/geant4.csh ) then
 		setenv G4BIN ${G4PATH}/bin
 		setenv saved_path $cwd
 		cd $G4PATH/bin/ && source geant4.csh
@@ -296,7 +296,7 @@ switch ($pkg)
 	    # But this odditiy is needed to deal with the 64 bits convention
 	    # ${CERN} ${CERN}64
 	    foreach d ($x)
-		if ( -e $d ) then
+		if ( -r  $d ) then
 		    setenv CERN $d
 		    break
 		endif
@@ -311,7 +311,7 @@ switch ($pkg)
 	
 	if ( $version != 0 ) then
 	    # if specified, use specific version
-	    if ( -e $CERN/$version ) then
+	    if ( -r  $CERN/$version ) then
 		setenv CERN_LEVEL $version 
 	    endif
 	else
@@ -323,7 +323,7 @@ switch ($pkg)
 
 	# Finally, check of existence of this path and revert to 
 	# pro if not found
-	if ( ! -e $CERN/$CERN_LEVEL ) then
+	if ( ! -r $CERN/$CERN_LEVEL ) then
 	    if ( $?DECHO ) echo "$self :: $CERN/$CERN_LEVEL not found, switch to pro"
 		setenv CERN_LEVEL pro
 		setenv CERN_ROOT "$CERN/$CERN_LEVEL"
