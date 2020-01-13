@@ -62,7 +62,20 @@ public:
   int JP1dijet() const;  // Bit 11
   int JP0dijet() const;  //Bit 12
   int DAQ10k() const;  // Bit 14
-
+  // 2014 change
+  int BHT4() const {return btest(EM201output(), 4);} // Bit 4
+  int BHTUPC() const {return btest(EM201output(), 5);} //Bit 5
+  int BTP() const {return btest(EM201output(), 6);} //Bit 6
+  int BHTTP() const {return btest(EM201output(), 7);} //Bit 7
+  int BTPtopo() const {return btest(EM201output(), 8);} //Bit 8
+  int BHTTPtopo() const {return btest(EM201output(), 9);} //Bit 9
+  int BHT4topo() const {return btest(EM201output(), 10);} //Bit 10
+  int EHT0_2014() const {return btest(EM201output(), 13);}  //Bit 13
+  int EHT1_2014() const {return btest(EM201output(), 14); } //Bit 14
+  int DAQ10k_2014() const { return btest(EM201output(), 15); }//Bit 15
+  //2015 change
+  int HTTP() const {return btest(EM201output(), 3);} //Bit 3
+  int EB2B() const {return btest(EM201output(), 14);} //Bit 14
   void setHeadMaker(StMaker*) { /* dummy */ }
 
   void InitRun(int runNumber);

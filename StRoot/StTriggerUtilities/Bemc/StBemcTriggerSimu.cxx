@@ -43,8 +43,6 @@ StBemcTriggerSimu::StBemcTriggerSimu()
   mTables   = NULL;
   mHList    = NULL;
   mConfig   = 0;
-  mB001     = new DSMLayer_B001_2009;
-  mB101     = new DSMLayer_B101_2009;
 
 }
 //==================================================
@@ -295,6 +293,24 @@ void StBemcTriggerSimu::InitRun(int runnumber){
     HT_FEE_Offset=mDbThres->GetHtFEEbitOffset(year);
   }
   else {
+    //Initialize DSM layers based on run number
+    //b001
+    if(year == 2015){
+      mB001 = new DSMLayer_B001_2015;
+    }else if(year == 2016){
+      mB001 = new DSMLayer_B001_2014_B;
+    }else
+      mB001     = new DSMLayer_B001_2009;
+    //b101
+    if(year == 2013 && runnumber >= 14081067){
+      mB101 = new DSMLayer_B101_2013;
+    }else if(year == 2015){
+      mB101 = new DSMLayer_B101_2015;
+    }else if(year == 2016){
+      mB101 = new DSMLayer_B101_2014_B;
+    }else
+      mB101 = new DSMLayer_B101_2009;
+
     if (mBemcStatus != "") {
       FEEini2009();
     }
@@ -509,11 +525,22 @@ void StBemcTriggerSimu::Make(){
   
   mEvent = static_cast<StEvent*> ( mHeadMaker->GetDataSet("StEvent") );
 
-  if (year < 2009)
-    FEEout();
-  else {
-    FEEout2009();
-    simulateFEEfailure();
+  //add test mode by zchang
+  if(!mMCflag && mTestMode){
+    StEmcTriggerDetector emc = StMuDst::event()->emcTriggerDetector();
+    for(int ip = 0; ip < 300; ip++){
+      int ht = emc.highTower(ip);
+      int pa = emc.patch(ip);
+      L0_TP_ADC[ip] = pa;
+      L0_HT_ADC[ip] = ht;
+    }
+  }else{
+    if (year < 2009)
+      FEEout();
+    else {
+      FEEout2009();
+      simulateFEEfailure();
+    }
   }
 
   //pp
@@ -545,19 +572,10 @@ void StBemcTriggerSimu::Make(){
   }
 
   //pp
-  if ((year>=2009)&&(yyyymmdd>20090101) && (year!=2013)) {
+  if ((year>=2009)&&(yyyymmdd>20090101)) {
     get2009_DSMLayer0();
     get2009_DSMLayer1();
   }
-
-  // mod by Danny to grab 2013 DSM layers
-  Int_t runnumber = StMaker::GetChain()->GetRunNumber();
-  //pp
-  if ((year==2013)&&(yyyymmdd>20130101)) {
-    get2013_DSMLayer0(runnumber);
-    get2013_DSMLayer1(runnumber);
-  }
-
 
   if (mMCflag) fillStEmcTriggerDetector();
 }
@@ -3021,28 +3039,6 @@ void StBemcTriggerSimu::get2009_DSMLayer0()
 
 //==================================================
 
-void StBemcTriggerSimu::get2013_DSMLayer0(Int_t runnumber)
-{
-  // Loop over 30 modules
-  for (int dsm = 0; dsm < kL0DsmModule; ++dsm) {
-    TString line = (*mB001)[dsm].name + ": ";
-    // Loop over 10 input channels to each module 
-    for (int ch = 0 ; ch < kL0DsmInputs; ++ch) {
-      int tpid = dsm*kL0DsmInputs+ch;
-      (*mB001)[dsm].channels[ch] = L0_HT_ADC[tpid] | L0_TP_ADC[tpid] << 6;
-      line += Form("%04x ",(*mB001)[dsm].channels[ch]);
-    } // End loop over channels
-    LOG_DEBUG << line << endm;
-  } // End loop over modules
-
-  // Emulate BEMC layer 0
-  mB001->run(runnumber);
-}
-
-//==================================================
-
-//==================================================
-
 void StBemcTriggerSimu::get2009_DSMLayer1()
 {
   // Get input from BEMC layer 0
@@ -3057,26 +3053,6 @@ void StBemcTriggerSimu::get2009_DSMLayer1()
 
   // Emulate BEMC layer 1
   mB101->run();
-}
-
-//==================================================
-
-//==================================================
-
-void StBemcTriggerSimu::get2013_DSMLayer1(Int_t runnumber)
-{
-  // Get input from BEMC layer 0
-  mB001->write(*mB101);
-
-  // LOG_DEBUG messages
-  for (size_t dsm = 0; dsm < mB101->size(); ++dsm) {
-    TString line = (*mB101)[dsm].name + ": ";
-    for (int ch = 0; ch < 8; ++ch) line += Form("%04x ",(*mB101)[dsm].channels[ch]);
-    LOG_DEBUG << line << endm;
-  }
-
-  // Emulate BEMC layer 1
-  mB101->run(runnumber);
 }
 
 //==================================================

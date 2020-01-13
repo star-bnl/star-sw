@@ -29,7 +29,7 @@ void DSMAlgo_EE002_2009::operator()(DSM& dsm)
   int highTowerBitsJ0 = 0;
 
   // Args: dsm, chMin, chMax, step, targetPedestal, sum, highTowerBits
-
+  //printf("ee002 r0=%d\n", dsm.registers[0]); 
   sumTriggerPatchChannels(dsm, 0, 4, 1, 1, sumJ0, highTowerBitsJ0);
 
   // J1 (ch5/6/7/8/9) to second output cable (16-31)
@@ -38,7 +38,6 @@ void DSMAlgo_EE002_2009::operator()(DSM& dsm)
   int highTowerBitsJ1 = 0;
 
   // Args: dsm, chMin, chMax, step, targetPedestal, sum, highTowerBits
-
   sumTriggerPatchChannels(dsm, 5, 9, 1, 1, sumJ1, highTowerBitsJ1);
 
   // OUTPUT (32):

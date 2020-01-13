@@ -67,7 +67,8 @@ void DSMAlgo_EE101_2009::operator()(DSM& dsm)
   if ((jpc > dsm.registers[0]) && !(jpc > dsm.registers[1]) && !(jpc > dsm.registers[2])) jpcBits = 1;
   if ((jpc > dsm.registers[0]) &&  (jpc > dsm.registers[1]) && !(jpc > dsm.registers[2])) jpcBits = 2;
   if ((jpc > dsm.registers[0]) &&  (jpc > dsm.registers[1]) &&  (jpc > dsm.registers[2])) jpcBits = 3;
-
+  //printf("ee101 jpa=%d jpb=%d jpc=%d\n", jpa, jpb, jpc);
+  //printf("ee101 r0=%d r1=%d r2=%d\n", dsm.registers[0], dsm.registers[1], dsm.registers[2]);
   // OR HT bits
 
   int highTowerBits = 0;
@@ -76,7 +77,7 @@ void DSMAlgo_EE101_2009::operator()(DSM& dsm)
     highTowerBits |= dsm.channels[ch] >> 12 & 0xf;
 
   // Find largest sum for 1.09 < eta < 1.4 (low eta)
-
+  //printf("ee101 lowEtaSumA=%d lowEtaSumB=%d lowEtaSumC=%d", lowEtaSumA, lowEtaSumB, lowEtaSumC);
   int maxA = (lowEtaSumA > lowEtaSumB) && !(lowEtaSumC > lowEtaSumA);
   int maxB = (lowEtaSumB > lowEtaSumC) && !(lowEtaSumA > lowEtaSumB);
   int maxC = (lowEtaSumC > lowEtaSumA) && !(lowEtaSumB > lowEtaSumC);
@@ -100,7 +101,7 @@ void DSMAlgo_EE101_2009::operator()(DSM& dsm)
     maxId  = 1;
     maxSum = lowEtaSumA;
   }
-
+  //printf("maxId=%d", maxId);
   // If overflow, set to max
 
   if (maxSum > 63) maxSum = 63;

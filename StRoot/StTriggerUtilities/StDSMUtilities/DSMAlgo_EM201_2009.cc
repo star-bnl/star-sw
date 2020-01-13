@@ -105,10 +105,10 @@ void DSMAlgo_EM201_2009::operator()(DSM& dsm)
 
   int jpSum1 = dsm.channels[6] >> 6 & 0x3f; // Partial sum from EE101
   int jpSum2 = dsm.channels[7] >> 6 & 0x3f; // Partial sum from EE102
-
+  //printf("ee: jpSum1 = %d jpSum2 = %d\n", jpSum1, jpSum2);
   int jpId1 = dsm.channels[6] >> 12 & 0x3; // Partial jet patch ID from EE101
   int jpId2 = dsm.channels[7] >> 12 & 0x3; // Partial jet patch ID from EE102
-
+  //printf("ee: jpId1 = %d jpId2 = %d\n", jpId1, jpId2);
   switch (jpId1) {
   case 1: jpSum1 += dsm.channels[3] >> 6 & 0x3f; break; // Add partial sum from BC104 (4')
   case 2: jpSum1 += dsm.channels[4] >> 6 & 0x3f; break; // Add partial sum from BC105 (6')
@@ -120,6 +120,7 @@ void DSMAlgo_EM201_2009::operator()(DSM& dsm)
   case 2: jpSum2 += dsm.channels[1] >> 6 & 0x3f; break; // Add partial sum from BC102 (12')
   case 3: jpSum2 += dsm.channels[2] >> 6 & 0x3f; break; // Add partial sum from BC103 (2')
   }
+  //printf("jpId1=%d jpsum1=%d jpId2=%d jpsum2=%d\n", jpId1, jpSum1, jpId2, jpSum2);
 
   // Combine (OR) the HT bits from the six BEMC layer 1 DSM's
 
@@ -163,7 +164,7 @@ void DSMAlgo_EM201_2009::operator()(DSM& dsm)
     if (jpb > jpBitsEndcap) jpBitsEndcap = jpb;
     if (jpc > jpBitsEndcap) jpBitsEndcap = jpc;
   }
-
+  //printf("jpBitsEndcap=%d\n", jpBitsEndcap);
   int ejp1 = jpBitsEndcap > 1;
   int ejp2 = jpBitsEndcap > 2;
 
@@ -174,7 +175,8 @@ void DSMAlgo_EM201_2009::operator()(DSM& dsm)
 
   for (int reg = 0; reg < 3; ++reg)
     if (jpSum1 > dsm.registers[reg] || jpSum2 > dsm.registers[reg]) ++jpBits;
-
+  //printf("jpSum1 = %d jpSum2 = %d\n", jpSum1, jpSum2);
+  //printf("r0 = %d r1 = %d r2 = %d\n", dsm.registers[0], dsm.registers[1], dsm.registers[2]);
   if (jpBitsBarrel > jpBits) jpBits = jpBitsBarrel;
   if (jpBitsEndcap > jpBits) jpBits = jpBitsEndcap;
 

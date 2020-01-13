@@ -1,17 +1,12 @@
-//
-// Pibero Djawotho <pibero@comp.tamu.edu>
-// Texas A&M University Cyclotron Institute
-// 7 Jan 2009
-//
-
 #include "DSMAlgo_EM201_2009.hh"
 #include "DSMLayer_B101_2009.hh"
 #include "DSMLayer_E101_2009.hh"
 #include "DSMLayer_EM201_2009.hh"
 
-#include "y2013/DSMAlgo_EM201_2013.hh"
-#include "y2013/DSMAlgo_EM201_2013_a.hh"
+#include "DSMAlgo_EM201_2013.hh"
+#include "DSMAlgo_EM201_2013_a.hh"
 
+//DSMLayer_EM201_2009::DSMLayer_EM201_2009() : StDSMLayer(1) //DSMLayer<TriggerDataBlk>(1)
 DSMLayer_EM201_2009::DSMLayer_EM201_2009() : DSMLayer<TriggerDataBlk>(1)
 {
   front().name = "EM201";
@@ -33,6 +28,7 @@ void DSMLayer_EM201_2009::run()
 {
   DSMAlgo_EM201_2009()(front());
 }
+/*
 void DSMLayer_EM201_2009::run(int runnumber)
 {
   int yrs = 2000 + runnumber/1000000 - 1;
@@ -51,3 +47,4 @@ void DSMLayer_EM201_2009::run(int runnumber)
       DSMAlgo_EM201_2013()(front());
    }
 }
+*/

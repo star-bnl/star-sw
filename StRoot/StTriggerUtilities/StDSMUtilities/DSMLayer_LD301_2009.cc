@@ -1,12 +1,7 @@
-//
-// Pibero Djawotho <pibero@comp.tamu.edu>
-// Texas A&M University Cyclotron Institute
-// 7 Jan 2009
-//
-
 #include "DSMAlgo_LD301_2009.hh"
 #include "DSMLayer_LD301_2009.hh"
 
+//DSMLayer_LD301_2009::DSMLayer_LD301_2009() : StDSMLayer(1)//<TriggerDataBlk>(1)
 DSMLayer_LD301_2009::DSMLayer_LD301_2009() : DSMLayer<TriggerDataBlk>(1)
 {
   front().name = "LD301";
