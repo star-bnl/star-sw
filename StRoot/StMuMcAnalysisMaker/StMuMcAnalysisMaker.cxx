@@ -789,15 +789,15 @@ void StMuMcAnalysisMaker::FillTrackPlots()
       Int_t countToF = 0;
       StMuTrack *Track = 0;
       for (auto it = McTk2RcTk.first; it != McTk2RcTk.second; ++it, ++count) {
-  auto track = (*it).second; 
-  if (! track) continue;
-  if (! Track) Track = track;
-  StTrackTopologyMap topologyMap = track->topologyMap();
-  UInt_t noPxlHits = topologyMap.numberOfHits(kPxlId); // 0-3
-  UInt_t noIstHits = topologyMap.numberOfHits(kIstId); // 0-2
-  UInt_t noSsdHits = topologyMap.numberOfHits(kSsdId); // 0-2
-  //  UInt_t noHftHits = noPxlHits + noIstHits + noSsdHits;
-  if (noPxlHits >= 2 && noIstHits + noSsdHits >= 1) {countHft++; Track = track;}
+	auto track = (*it).second; 
+	if (! track) continue;
+	if (! Track) Track = track;
+	StTrackTopologyMap topologyMap = track->topologyMap();
+	UInt_t noPxlHits = topologyMap.numberOfHits(kPxlId); // 0-3
+	UInt_t noIstHits = topologyMap.numberOfHits(kIstId); // 0-2
+	UInt_t noSsdHits = topologyMap.numberOfHits(kSsdId); // 0-2
+	//  UInt_t noHftHits = noPxlHits + noIstHits + noSsdHits;
+	if (noPxlHits >= 2 && noIstHits + noSsdHits >= 1) {countHft++; Track = track;}
       }
       if (Track && Track->btofPidTraits().matchFlag()) {countToF++;}
       // kNotDefined, kLostTk, kRecoTk, kCloneTk
@@ -805,125 +805,125 @@ void StMuMcAnalysisMaker::FillTrackPlots()
       TrackMatchType typeHft = kNotDefined;
       TrackMatchType typeToF = kNotDefined;
       if (! count) { 
-  typeTpc =  kLostTk;
+	typeTpc =  kLostTk;
       } else if (count == 1) {
-  typeTpc = kRecoTk;
-  if (McToF) {
-    if (! countToF) typeToF = kLostToFTk;
-    else            typeToF = kRecoToFTk;
-  } else {
-    typeToF = kGhostToFTk;
-  }
-  if (McHft) {
-    if (! countHft) typeHft = kLostHftTk;
-    else            typeHft = kRecoHftTk;
-  } else {
-    if (countHft)   typeHft = kGhostHftTk;
-  }
+	typeTpc = kRecoTk;
+	if (McToF) {
+	  if (! countToF) typeToF = kLostToFTk;
+	  else            typeToF = kRecoToFTk;
+	} else {
+	  typeToF = kGhostToFTk;
+	}
+	if (McHft) {
+	  if (! countHft) typeHft = kLostHftTk;
+	  else            typeHft = kRecoHftTk;
+	} else {
+	  if (countHft)   typeHft = kGhostHftTk;
+	}
       } else {
-  typeTpc = kCloneTk;
+	typeTpc = kCloneTk;
       }
       for (Int_t particle = 0; particle <= NPart; particle++) {
-  fHistsT[gp][kMcTk][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
-  if (! McTpc) continue; 
-  fHistsT[gp][kMcTpcTk][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
-  if (typeTpc == kNotDefined) continue;
-  if (typeTpc == kGhostTk && particle) continue;
-  fHistsT[gp][typeTpc][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
-  if (! McToF) {
-    fHistsT[gp][kMcToFTk][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
-    if (typeToF != kNotDefined && !( typeToF == kGhostToFTk && particle) )
-      fHistsT[gp][typeToF][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
-  }
-  if (! McHft) {
-    fHistsT[gp][kMcHftTk][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
-    if (typeHft != kNotDefined && !( typeHft == kGhostHftTk && particle) ) 
-    fHistsT[gp][typeHft][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
-  }
+	fHistsT[gp][kMcTk][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
+	if (! McTpc) continue; 
+	fHistsT[gp][kMcTpcTk][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
+	if (typeTpc == kNotDefined) continue;
+	if (typeTpc == kGhostTk && particle) continue;
+	fHistsT[gp][typeTpc][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
+	if (! McToF) {
+	  fHistsT[gp][kMcToFTk][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
+	  if (typeToF != kNotDefined && !( typeToF == kGhostToFTk && particle) )
+	    fHistsT[gp][typeToF][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
+	}
+	if (! McHft) {
+	  fHistsT[gp][kMcHftTk][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
+	  if (typeHft != kNotDefined && !( typeHft == kGhostHftTk && particle) ) 
+	    fHistsT[gp][typeHft][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
+	}
       }
 #define __NoOfPoint__
 #ifdef __NoOfPoint__
       if ((typeTpc == kRecoTk || typeHft == kRecoHftTk) && Track) {
-  assert(count == 1);
-  // Track QA
-  if (gp == kGlobal) {
-    StMuTrack *gTrack = Track;
-    Int_t kgc = gTrack->index2Cov();
-    if (kgc < 0) continue;
-    StDcaGeometry *dcaG = (StDcaGeometry *) muDst->covGlobTrack()->UncheckedAt(kgc);
-    StMuMcVertex *mcVertex = muDst->MCvertex(IdVx-1);
-    if (typeTpc == kRecoTk)    FillQAGl(typeTpc,gTrack, mcTrack, dcaG, mcVertex);
-    if (typeHft == kRecoHftTk) FillQAGl(typeHft,gTrack, mcTrack, dcaG, mcVertex);
-    if (typeToF == kRecoToFTk) FillQAGl(typeToF,gTrack, mcTrack, dcaG, mcVertex);
-  } else { // gp = kPrimary
-    StMuTrack *pTrack = Track;
-    Int_t kpc = pTrack->index2Cov();
-    if (kpc >= 0) {
-      StMuPrimaryTrackCovariance *cov = (StMuPrimaryTrackCovariance *) muDst->covPrimTrack()->UncheckedAt(kpc);
-      if (typeTpc == kRecoTk)    FillQAPr(typeTpc, pTrack, mcTrack, cov);
-      if (typeHft == kRecoHftTk) FillQAPr(typeHft, pTrack, mcTrack, cov);
-      if (typeToF == kRecoToFTk) FillQAPr(typeToF, pTrack, mcTrack, cov);
-    } else {
-      McTk2KFTk = muDst->McTrack2KFParticle().equal_range(mcTrack);
-      KFParticle *kfp = 0;
-      for (auto it = McTk2KFTk.first; it != McTk2KFTk.second; ++it, ++count) {
-        auto *p = (*it).second; 
-        if (! p) continue;
-        if (p->Id() == pTrack->id()) {
-    kfp = p;
-    break;
-        }
-        if (typeTpc == kRecoTk)    FillQAPr(typeTpc,pTrack, mcTrack, kfp);
-        if (typeHft == kRecoHftTk) FillQAPr(typeHft,pTrack, mcTrack, kfp);
-        if (typeToF == kRecoToFTk) FillQAPr(typeToF,pTrack, mcTrack, kfp);
-      }
-    }
-  }
- if (IAttr("PiDPlots")) {
-  // dE/dx && ToF block
-  StThreeVectorD momentum = Track->helix().momentum(field);
-  Double_t pMomentum = momentum.mag();
-  Double_t Eta = momentum.pseudoRapidity();
-  const StMuProbPidTraits &PiD = Track->probPidTraits();
-  Double_t I[3] = {PiD.dEdxTruncated(), PiD.dEdxFit(), PiD.dNdxFit()};
-  Double_t TrackLength = PiD.dEdxTrackLength();
-  Int_t Gid = mcTrack->GePid();
-  // ToF
-  const StMuBTofPidTraits &btofPid = Track->btofPidTraits();
-  Float_t pathLength = btofPid.pathLength();
-  //  Float_t timeOfFlight = btofPid.timeOfFlight();
-  Float_t beta = btofPid.beta();
-  
-  //  const StThreeVectorF &pVx  = Track->momentum();
-  for (Int_t h = 0; h < NHYPS; h++) {
-    if (GEANTiD[h] == Gid) {
-      Int_t hyp = PiDHyp[h];
-      Int_t pm  = PiDpm[h];
-      Double_t bg    = pMomentum/Masses[h];
-      Double_t bghyp = TMath::Log10(bg);
-      if (TrackLength > 0) {
-        Double_t Pred[3]  = {1.e-6*Bichsel::Instance()->GetI70(bghyp,1.0),
-           1.e-6*TMath::Exp(Bichsel::Instance()->GetMostProbableZ(bghyp,1.0)),
-           StdEdxModel::instance()->dNdx(bg)
-        };
-        for (Int_t mm = 0; mm < 3; mm++) {
-    if (I[mm] <= 0 || Pred[mm] <= 0) continue;
-    Double_t z = TMath::Log(I[mm]/Pred[mm]);
-    LdEdx[gp][hyp][pm][mm]->Fill(TrackLength, bghyp, z);
-        }
-      }
-      if (pathLength > 0) {
-        Double_t bg2 = beta*beta/(1. - beta*beta);
-        Double_t dM2 = pMomentum*pMomentum/bg2 - Masses[h]*Masses[h];
-        Double_t b_exp = bg/TMath::Sqrt(1+ bg*bg);
-        Double_t dbInv = 1. - beta/b_exp; // (1./beta - 1./b_exp)/(1./beta)
-        LToF[gp][hyp][pm][0]->Fill(Eta,pMomentum, dM2);
-        LToF[gp][hyp][pm][1]->Fill(Eta,pMomentum, dbInv);
-      }
-      break;
-    }
-  }
- }
+	assert(count == 1);
+	// Track QA
+	if (gp == kGlobal) {
+	  StMuTrack *gTrack = Track;
+	  Int_t kgc = gTrack->index2Cov();
+	  if (kgc < 0) continue;
+	  StDcaGeometry *dcaG = (StDcaGeometry *) muDst->covGlobTrack()->UncheckedAt(kgc);
+	  StMuMcVertex *mcVertex = muDst->MCvertex(IdVx-1);
+	  if (typeTpc == kRecoTk)    FillQAGl(typeTpc,gTrack, mcTrack, dcaG, mcVertex);
+	  if (typeHft == kRecoHftTk) FillQAGl(typeHft,gTrack, mcTrack, dcaG, mcVertex);
+	  if (typeToF == kRecoToFTk) FillQAGl(typeToF,gTrack, mcTrack, dcaG, mcVertex);
+	} else { // gp = kPrimary
+	  StMuTrack *pTrack = Track;
+	  Int_t kpc = pTrack->index2Cov();
+	  if (kpc >= 0) {
+	    StMuPrimaryTrackCovariance *cov = (StMuPrimaryTrackCovariance *) muDst->covPrimTrack()->UncheckedAt(kpc);
+	    if (typeTpc == kRecoTk)    FillQAPr(typeTpc, pTrack, mcTrack, cov);
+	    if (typeHft == kRecoHftTk) FillQAPr(typeHft, pTrack, mcTrack, cov);
+	    if (typeToF == kRecoToFTk) FillQAPr(typeToF, pTrack, mcTrack, cov);
+	  } else {
+	    McTk2KFTk = muDst->McTrack2KFParticle().equal_range(mcTrack);
+	    KFParticle *kfp = 0;
+	    for (auto it = McTk2KFTk.first; it != McTk2KFTk.second; ++it, ++count) {
+	      auto *p = (*it).second; 
+	      if (! p) continue;
+	      if (p->Id() == pTrack->id()) {
+		kfp = p;
+		break;
+	      }
+	      if (typeTpc == kRecoTk)    FillQAPr(typeTpc,pTrack, mcTrack, kfp);
+	      if (typeHft == kRecoHftTk) FillQAPr(typeHft,pTrack, mcTrack, kfp);
+	      if (typeToF == kRecoToFTk) FillQAPr(typeToF,pTrack, mcTrack, kfp);
+	    }
+	  }
+	}
+	if (IAttr("PiDPlots")) {
+	  // dE/dx && ToF block
+	  StThreeVectorD momentum = Track->helix().momentum(field);
+	  Double_t pMomentum = momentum.mag();
+	  Double_t Eta = momentum.pseudoRapidity();
+	  const StMuProbPidTraits &PiD = Track->probPidTraits();
+	  Double_t I[3] = {PiD.dEdxTruncated(), PiD.dEdxFit(), PiD.dNdxFit()};
+	  Double_t TrackLength = PiD.dEdxTrackLength();
+	  Int_t Gid = mcTrack->GePid();
+	  // ToF
+	  const StMuBTofPidTraits &btofPid = Track->btofPidTraits();
+	  Float_t pathLength = btofPid.pathLength();
+	  //  Float_t timeOfFlight = btofPid.timeOfFlight();
+	  Float_t beta = btofPid.beta();
+	  
+	  //  const StThreeVectorF &pVx  = Track->momentum();
+	  for (Int_t h = 0; h < NHYPS; h++) {
+	    if (GEANTiD[h] == Gid) {
+	      Int_t hyp = PiDHyp[h];
+	      Int_t pm  = PiDpm[h];
+	      Double_t bg    = pMomentum/Masses[h];
+	      Double_t bghyp = TMath::Log10(bg);
+	      if (TrackLength > 0) {
+		Double_t Pred[3]  = {1.e-6*Bichsel::Instance()->GetI70(bghyp,1.0),
+				     1.e-6*TMath::Exp(Bichsel::Instance()->GetMostProbableZ(bghyp,1.0)),
+				     StdEdxModel::instance()->dNdx(bg)
+		};
+		for (Int_t mm = 0; mm < 3; mm++) {
+		  if (I[mm] <= 0 || Pred[mm] <= 0) continue;
+		  Double_t z = TMath::Log(I[mm]/Pred[mm]);
+		  LdEdx[gp][hyp][pm][mm]->Fill(TrackLength, bghyp, z);
+		}
+	      }
+	      if (pathLength > 0) {
+		Double_t bg2 = beta*beta/(1. - beta*beta);
+		Double_t dM2 = pMomentum*pMomentum/bg2 - Masses[h]*Masses[h];
+		Double_t b_exp = bg/TMath::Sqrt(1+ bg*bg);
+		Double_t dbInv = 1. - beta/b_exp; // (1./beta - 1./b_exp)/(1./beta)
+		LToF[gp][hyp][pm][0]->Fill(Eta,pMomentum, dM2);
+		LToF[gp][hyp][pm][1]->Fill(Eta,pMomentum, dbInv);
+	      }
+	      break;
+	    }
+	  }
+	}
       }
 #endif /* __NoOfPoint__ */
     }
@@ -2208,7 +2208,7 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
 		   << fHistsT[gp][eff[i].kDivider][particle][pm][1][kTotalQA] << endl;
 	      continue;
 	    }
-	    cout << "Eff " << Dividend->GetName() << "\tentries = " << Dividend->GetEntries() << endl;
+	    cout << "Eff " << Dividend->GetName() << "\t" << Dividend->GetDirectory()->GetPath() << "\tentries = " << Dividend->GetEntries() << endl;
 	    if ( Dividend->GetEntries() < 100) {continue;}
 	    Int_t nbinsX = Dividend->GetNbinsX();
 	    Int_t nbinsY = Dividend->GetNbinsY();
@@ -2256,7 +2256,7 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
 	    if (binY1 >  1)     Title += Form(" at pT > %3.2f",pTmins[l/2]);
 	    heff[l]->SetTitle(Title);   
 	    temp =Divider->Project3D(Form("%smc",proj3[p])); 
-	    cout << heff[l]->GetName() << "\t" << heff[l]->GetEntries() << " sum " << temp->GetEntries() << endl;
+	    cout << heff[l]->GetName() << "\t" << heff[l]->GetDirectory()->GetPath() << "\t" << heff[l]->GetEntries() << " sum " << temp->GetEntries() << endl;
 	    if (c1) {
 	      c1->cd(); 
 	      temp->Draw();
