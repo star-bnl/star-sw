@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.17.4.4 2019/10/02 00:01:28 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.17.4.5 2020/01/14 00:49:07 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -21,12 +21,6 @@ static const double kPiMass=0.13956995;
 static const double kMinP = 0.01,kMinE = sqrt(kMinP*kMinP+kPiMass*kPiMass);
 static const double kMaxP = 1000,kMaxE = sqrt(kMaxP*kMaxP+kPiMass*kPiMass);
 ClassImp(StvELossTrak)
-
-  double StvELossTrak::StvELossTrak::Theta2() 	const 
-  {
-  StvDebug::Count("THETA",sqrt(fTotTheta2)*57);
-  return fTotTheta2;
-  }
 
 //_____________________________________________________________________________
 void StvELossTrak::Reset(double mass, double charge)
