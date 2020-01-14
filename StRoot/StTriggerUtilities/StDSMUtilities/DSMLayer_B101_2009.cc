@@ -1,15 +1,11 @@
-//
-// Pibero Djawotho <pibero@comp.tamu.edu>
-// Texas A&M University Cyclotron Institute
-// 7 Jan 2009
-//
 
 #include "DSMAlgo_BC101_2009.hh"
 #include "DSMLayer_B001_2009.hh"
 #include "DSMLayer_B101_2009.hh"
 
-#include "y2013/DSMAlgo_BC101_2013.hh"
+#include "DSMAlgo_BC101_2013.hh"
 
+//DSMLayer_B101_2009::DSMLayer_B101_2009() : StDSMLayer(6)//: DSMLayer<TriggerDataBlk>(6)
 DSMLayer_B101_2009::DSMLayer_B101_2009() : DSMLayer<TriggerDataBlk>(6)
 {
   for (size_t dsm = 0; dsm < size(); ++dsm)
@@ -39,6 +35,7 @@ void DSMLayer_B101_2009::run()
 {
   for_each(begin(), end(), DSMAlgo_BC101_2009());
 }
+/*
 void DSMLayer_B101_2009::run(int runnumber)
 {
   int yrs = 2000 + runnumber/1000000 - 1;
@@ -53,3 +50,4 @@ void DSMLayer_B101_2009::run(int runnumber)
       for_each(begin(), end(), DSMAlgo_BC101_2013());
     }     
 }
+*/

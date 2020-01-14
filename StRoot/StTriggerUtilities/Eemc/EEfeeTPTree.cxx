@@ -1,5 +1,5 @@
 /**************************************************************
- * $Id: EEfeeTPTree.cxx,v 1.5 2011/10/16 17:41:59 pibero Exp $
+ * $Id: EEfeeTPTree.cxx,v 1.6 2020/01/13 20:45:50 zchang Exp $
  **************************************************************/
 
 #include <iostream>
@@ -72,7 +72,14 @@ EEfeeTPTree::compute(int *rawAdc, int *feePed, int *feeMask, int* highTowerMask,
     feeTP[i]->compute(rawAdc+off, feePed+off, feeMask+off, highTowerMask[i], patchSumMask[i]);
   }  
 }
-
+void
+EEfeeTPTree::test(int *tp, int *ht)
+{
+  int i;
+  for(i=0;i<mxTP;i++) {
+    feeTP[i]->test(tp[i], ht[i]);
+  }  
+}
 #if 0
 //--------------------------------------------------
 //--------------------------------------------------
@@ -133,6 +140,9 @@ EEfeeTPTree::print( int k) {
 #endif 
 /*
  * $Log: EEfeeTPTree.cxx,v $
+ * Revision 1.6  2020/01/13 20:45:50  zchang
+ * removing old run13 dsm algo files
+ *
  * Revision 1.5  2011/10/16 17:41:59  pibero
  * Implement EEMC FEE HT & TP masks
  *

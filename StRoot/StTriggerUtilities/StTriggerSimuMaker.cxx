@@ -11,7 +11,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+<<<<<<< StTriggerSimuMaker.cxx
 // $Id: StTriggerSimuMaker.cxx,v 1.65 2017/12/29 16:54:07 zchang Exp $
+=======
+//<<<<<<< StTriggerSimuMaker.cxx
+// $Id: StTriggerSimuMaker.cxx,v 1.66 2020/01/13 20:45:47 zchang Exp $
+//=======
+// $Id: StTriggerSimuMaker.cxx,v 1.66 2020/01/13 20:45:47 zchang Exp $
+//>>>>>>> 1.61
+
+>>>>>>> 1.66
 // MySQL C API
 //#include "mysql.h"
 #include <mysql/mysql.h>
@@ -172,6 +181,9 @@ Int_t StTriggerSimuMaker::InitRun(int runNumber) {
   mYear = dbTime.GetYear();
   LOG_INFO << "runNumber=" << runNumber << " with DB timestamp " << dbTime.AsSQLString() << endm;
 
+  for (Int_t i = 0; i < numSimulators; ++i)
+    if (mSimulators[i])
+      mSimulators[i]->InitRun(runNumber);
   //Use unified EMC trigger for EEMC/BEMC triggers in year 2009 or later
   if (mYear >= 2009 && (mSimulators[0] || mSimulators[2])) {
     emc->setHeadMaker(this);
@@ -179,6 +191,7 @@ Int_t StTriggerSimuMaker::InitRun(int runNumber) {
     emc->setEemc(eemc);
     emc->setMC(mMCflag);
     emc->setYear(mYear);
+    emc->InitRun(runNumber); //init run for emc
     LOG_INFO<<Form("set year %d for emc trigger definition", mYear)<<endm;
     mSimulators[3] = emc;
     if (!mUseOnlineDB && !mUseOfflineDB) {
@@ -196,10 +209,6 @@ Int_t StTriggerSimuMaker::InitRun(int runNumber) {
       changeJetPatchTh();
     }
   }
-  
-  for (Int_t i = 0; i < numSimulators; ++i)
-    if (mSimulators[i])
-      mSimulators[i]->InitRun(runNumber);
   
   return kStOK;
 }
@@ -818,6 +827,9 @@ void StTriggerSimuMaker::setLastDsmRegister(int reg, int value)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.66  2020/01/13 20:45:47  zchang
+ * removing old run13 dsm algo files
+ *
  * Revision 1.65  2017/12/29 16:54:07  zchang
  * remove direct query to STAR database server in InitRun(int), users need to make sure that the trigger simulator retrives correct run number
  *

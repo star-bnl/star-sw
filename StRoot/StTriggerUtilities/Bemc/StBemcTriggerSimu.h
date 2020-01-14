@@ -172,10 +172,6 @@ private:
   void get2009_DSMLayer0();
   void get2009_DSMLayer1();
   
-  // mod by Danny
-  void get2013_DSMLayer0(Int_t runnumber);
-  void get2013_DSMLayer1(Int_t runnumber);
-
   //#define DEBUG			// Comment out to switch off debugging
 
 #ifdef DEBUG
@@ -296,7 +292,8 @@ public:
 
   // Fill StEmcTriggerDetector in MuDst for MC
   void fillStEmcTriggerDetector();
-
+  // test mode zchang
+  bool mTestMode;
   ClassDef(StBemcTriggerSimu, 1);
 };
 #endif

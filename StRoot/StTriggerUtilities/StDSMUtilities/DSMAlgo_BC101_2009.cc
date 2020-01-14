@@ -78,7 +78,8 @@ void DSMAlgo_BC101_2009::operator()(DSM& dsm)
     if (jpy > dsm.registers[reg]) ++jpyBits;
     if (jpz > dsm.registers[reg]) ++jpzBits;
   }
-
+  //printf("jpx=%d jpy=%d jpz=%d jppartial=%d\n", jpx, jpy, jpz, jpPartial);
+  //printf("r0=%d r1=%d r2=%d\n", dsm.registers[0], dsm.registers[1], dsm.registers[2]);
   // OUTPUT (16):
 
   // (0-1) JPX threshold bits (2)

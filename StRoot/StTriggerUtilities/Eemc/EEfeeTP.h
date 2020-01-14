@@ -1,7 +1,7 @@
 #ifndef EEfeeTP_h
 #define EEfeeTP_h
 /**************************************************************
- * $Id: EEfeeTP.h,v 1.3 2011/10/16 17:41:59 pibero Exp $
+ * $Id: EEfeeTP.h,v 1.4 2020/01/13 20:45:49 zchang Exp $
  * compute Endcap FEE response for a single trigger patch (TP)
  **************************************************************/
 #include <stdlib.h> 
@@ -39,12 +39,16 @@ public:
   int   getOutTPsum() const {return TPsum6b;} 
   int   getOutHT() const {return HT6b;}
   int   getOut12bit() const { return (getOutTPsum()<<6) + getOutHT();}
-  
+  //zchang
+  void test(int tp, int ht) { TPsum6b = tp; HT6b = ht; }  
 }; 
 #endif
 
 /*
  * $Log: EEfeeTP.h,v $
+ * Revision 1.4  2020/01/13 20:45:49  zchang
+ * removing old run13 dsm algo files
+ *
  * Revision 1.3  2011/10/16 17:41:59  pibero
  * Implement EEMC FEE HT & TP masks
  *
