@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job  name="2016Embedding" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false">
+<stdout URL="file:./sched$JOBID.log" />
+<stderr URL="file:./sched$JOBID.err" />
+<command> 
+  cd ${SUBMITTINGDIRECTORY}  
+  set Name = `basename $PWD`
+#  setenv NODEBUG yes
+#  setup 64b
+  setenv STARFPE NO
+  starver TFG19e5
+#  starver .DEV2
+  set muDst = ${INPUTFILE0}
+  set base = `basename ${muDst} _1_1000.MuDst.root`;
+#  set daq  = /star/data03/daq/2016/126/17126033/${base}.daq
+#  set daq  = `ls -1d /star/data03/daq/2016/*/*/${base}.daq`
+#  set daq  = `ls -1d /net/l404/data/fisyak/daq/2016/*/*/${base}.daq`
+  set DAQ = "";
+  if (-d /net/l401/data/scratch1/daq) then
+    set DAQ = /net/l401/data/scratch1/daq
+  else 
+    set DAQ = /gpfs01/star/daq/
+  endif
+  set daq  = ${DAQ}/2019/*/*/${base}.daq
+  if (! -r ${daq}) exit 1;
+#  set name = "Lc3pi";
+  set name = ""
+  foreach name (  antiprotonmTsq5PerCentZ6cm protonmTsq5PerCentZ6cm \
+                  KNmTsq5PerCentZ6cm KPmTsq5PerCentZ6cm \
+                  piNmTsq5PerCentZ6cm piPmTsq5PerCentZ6cm \
+                  D02KmTsq D0K0s2KmTsq D0K0s2pimTsq D0K3pimTsq D0KpimTsq \
+                  DK0s3pimTsq DK0spimTsq DK2pimTsq \
+                  DsK0sK0spimTsq DsK0sK2pimTsq DsK0sKmTsq DsKKpimTsq \
+                  Lc3pi Lc3pimT Lc3pimTsq LcKppi LcKppimT LcKppimTsq \
+                  D0KpiCutpT0_1 D0KpiCutpT3_10 D0KpiCutpT0 DK2pimCutpT0 D0barKpiCutpT0 D02KmCutpT0 \
+                  KNmTsq5PerCentZ70cm KPmTsq5PerCentZ70cm phimTsq5PerCentZ70cm\
+              )
+    echo $Name | grep $name
+    if (! $?) break;
+  end
+  echo "name = $name";
+  if ($name == "") exit 1;
+  set file = ${base}.MuDst.root
+  set logFile  = ${base}B.log
+  echo "${file}"
+#  setenv StarEndMakerShell
+  if ( ! -r ${file}) then
+#    root.exe -q -b -x 'bfcMixerVMC.C(10000,"Vmc,Lc3pi,VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
+#    root.exe -q -b -x 'bfcMixerVMC.C(10000,"Vmc,'${name}',VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
+#    root.exe -q -b -x 'bfcMixerVMC.C(1000,"Vmc,'${name}',VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
+#    root.exe -q -b -x 'bfcMixerVMC.C(1000,"Vmc,'${name}',VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
+    root.exe -q -b -x 'bfcMixerVMCTFG19e5.C(1000,"'${name}'","'${daq}'","'${muDst}'")'  &gt;&amp; ${logFile}
+  endif
+</command>
+    <ResourceUsage>
+      <Priority>9</Priority>
+    </ResourceUsage>
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/daq_2016_AuAu200.DEV2/*.MuDst.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2016/TFG17eAuAu200/*.MuDst.root" /> -->
+<!-- <input URL="file:/net/l404/data/fisyak/reco/2016/AuAu200_adc/*.MuDst.root" /> -->
+<!-- <input URL="file:/net/l404/data/fisyak/reco/2016/AuAu200_adc/st_physics_adc_17125034_raw_1000007.MuDst.root" /> -->
+<!-- <input URL="command:$STAR/bin/MuDstCommand.pl" /> -->
+<input URL="command:MuDstCommand.pl" />
+</job>
+

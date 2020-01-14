@@ -155,3 +155,7 @@ void bfcMixerVMCTFG19e5(Int_t Last=1000, const Char_t *opt = "KNmTsq5PerCentZ70c
 			Int_t RunG=0, const Char_t *triggersC = "") { //520001, 520011, 520021, 520031, 520041, 520051") {
   bfcMixerVMCTFG19e5(1,Last,opt,daqfile,MuDstfile,RunG,triggersC);
 }
+/*
+  TH3F *Mc = ((TH3F *) gDirectory->Get("muMc.root:/Tracks/Primary/Mc/All/(-)/EtapT/Phi"))
+  TH3F *Rc = ((TH3F *) gDirectory->Get("muMc.root:/Tracks/Primary/Rec/All/(-)/EtapT/Phi"))->Project3D("x")
+ */
