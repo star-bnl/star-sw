@@ -4,14 +4,19 @@ use File::Basename;
 #my @list = glob $ARGV[0]; 
 #my @list = @ARGV; 
 my @list = ();
-my $MUDST = "/net/l404/data/fisyak/reco/2016/AuAu200_adc";
+my $debug = 0;
+#my $MUDST = "/net/l404/data/fisyak/reco/2016/AuAu200_adc";
+my $MUDST = "/gpfs01/star/subsys-tpc/fisyak/reco/2019/19GeV_TFG19e5X";
 if (-d $MUDST) {
   @list = glob $MUDST . "/*.MuDst.root";
+  print "list = @list\n" if ($debug);
 } else {
-  $MUDST = "/gpfs02/eic/ayk/STAR/reco/MuDst/AuAu_200_production_2016/ReversedFullField/P16ij/2016";
-  if (-d $MUDST) {
-    @list = glob $MUDST . "/*/*/*.MuDst.root";
-  }
+#  $MUDST = "/gpfs02/eic/ayk/STAR/reco/MuDst/AuAu_200_production_2016/ReversedFullField/P16ij/2016";
+#  if (-d $MUDST) {
+#    @list = glob $MUDST . "/*/*/*.MuDst.root";
+#  }
+  print "MUDST = $MUDST does not exist\n";
+  exit 1;
 }
 my $no = 0;
 foreach my $line (@list) {

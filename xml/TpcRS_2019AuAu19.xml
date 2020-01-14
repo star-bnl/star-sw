@@ -25,7 +25,7 @@
 #    root.exe -x  -q -b 'TpcRS.C(100,"MC.2018,-bbcSim,StiCA'${KFVertex}',-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco'${sdt}',RunG.1,McTpcAna",0,"heed,PhysicsOff,'${file}'")' &gt;&amp; ${logFile}
 #     root4star -q -b 'bfc.C(1000,"mtin,TpcRS,P2018a,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX,McTpcAna,PicoVtxDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 #      root4star -q -b 'TpcRS.C(4000,"y2019a,Tpx1cRS,StiCA,StiKFVertex","'${evtsFile}'","Bichsel,PhysicsOff")' &gt;&amp; ${logFile}
-      root4star -q -b 'TpcRS.C(4000,"mc.y2019a,TpcRS,StiCA","'${evtsFile}'","Bichsel,PhysicsOff")' &gt;&amp; ${logFile}
+      root4star -q -b 'TpcRS.C(4000,",mc.y2019a,TpcRS,StiCA","'${evtsFile}'","Bichsel,PhysicsOff")' &gt;&amp; ${logFile}
   endif
 </command>
 <!-- <input URL="file:/net/l404/data/fisyak/Tpc/TpcRS/daq2019AuAu19/*MuDst.root" /> -->

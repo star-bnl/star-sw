@@ -108,10 +108,10 @@ Double_t func(Double_t *x, Double_t *par) {
   return res;
 }
 //________________________________________________________________________________
-TH1D *SubstracF(TH1D *hist, TF1* func, const Option_t *opt="b") {
+TH1F *SubstracF(TH1F *hist, TF1* func, const Option_t *opt="b") {
   if (! hist || ! func) return 0;
   Int_t nx = hist->GetNbinsX();
-  TH1D *h = new TH1D(*hist);
+  TH1F *h = new TH1F(*hist);
   h->SetName(Form("%s%s",hist->GetName(),opt));
   for (Int_t bin = 1; bin <= nx; bin++) {
     Double_t x = hist->GetBinCenter(bin);
@@ -123,7 +123,7 @@ TH1D *SubstracF(TH1D *hist, TF1* func, const Option_t *opt="b") {
   return h;
 }
 //________________________________________________________________________________
-void brtw(TH1D *hist, Double_t MMin=1.6, Double_t MMax = 2.2, Int_t Np = 10) {
+void brtw(TH1F *hist, Double_t MMin=0.3, Double_t MMax = 1.3, Int_t Np = 10) {
   TF1 *Func = (TF1 *) gROOT->GetListOfFunctions()->FindObject("Func");
   if (! Func) Func = new TF1("Func",func,MMin,MMax, NoParameters);
   TF1 *Background = (TF1 *) gROOT->GetListOfFunctions()->FindObject("Background");
@@ -174,7 +174,7 @@ void brtw(TH1D *hist, Double_t MMin=1.6, Double_t MMax = 2.2, Int_t Np = 10) {
   reject = kFALSE;
   draw = kTRUE;
 #if 0
-  TH1D *h = SubstracF(hist,Background);
+  TH1F *h = SubstracF(hist,Background);
   h->Draw();
 #endif
   Double_t params[20];
@@ -197,7 +197,7 @@ void brtw(TH1D *hist, Double_t MMin=1.6, Double_t MMax = 2.2, Int_t Np = 10) {
   Func->SetParameter(0,-99);
   Func->SetParameter(3,-99);
   draw = kTRUE;
-  TH1D *h = SubstracF(hist,Func,"r");
+  TH1F *h = SubstracF(hist,Func,"r");
   cFit->cd(2);
   h->Draw();
   //    Func->SetParameters(params);
