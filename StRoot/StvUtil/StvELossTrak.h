@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.h,v 1.11.4.2 2019/08/26 20:31:20 perev Exp $
+// $Id: StvELossTrak.h,v 1.11.4.3 2020/01/14 00:45:20 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -24,7 +24,7 @@ public:
     void Set(const TGeoMaterial *mate,double p);
     void Add(double len);
 //		Last step data
-  double Theta2() 	const 	;//	{return fTotTheta2;	}
+  double Theta2() 	const 		{return fTotTheta2;	}
   double Ort2()   	const		{return fTotOrth2;	}
   double ELoss()  	const 		{return fTotELoss;	}
   double PinvLoss()  	const 		{return fTotPinvLoss;	}
