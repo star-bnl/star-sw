@@ -28,7 +28,7 @@ void DSMAlgo_EE001_2009::operator()(DSM& dsm)
   int highTowerBits = 0;
 
   // Args: dsm, chMin, chMax, step, targetPedestal, sum, highTowerBits
-
+  //printf("r0=%d\n", dsm.registers[0]);
   sumTriggerPatchChannels(dsm, 0, 8, 2, 3,  lowEtaSum, highTowerBits);
   sumTriggerPatchChannels(dsm, 1, 9, 2, 2, highEtaSum, highTowerBits);
 

@@ -1914,11 +1914,18 @@ void StMuMcAnalysisMaker::MinMax(TH1 *h, Double_t &min, Double_t &max, Double_t 
   if (imax < n) h->GetXaxis()->SetRange(imin,imax);
 }
 //________________________________________________________________________________
-void StMuMcAnalysisMaker::DrawH3s(TH3F *h3s[2], Int_t animate, Double_t min, Double_t max, Int_t np) {
-  if (! h3s[0] || ! h3s[1]) return;
-  if (h3s[0]->GetEntries() < 100 || h3s[1]->GetEntries() < 100) {
-    cout << "Histograms " << h3s[0]->GetName() << " has " << h3s[0]->GetEntries() << "entries and " 
-	 << h3s[1]->GetName() << " has " << h3s[1]->GetEntries() << " entries. To few for analysis. Skip" << endl;
+void StMuMcAnalysisMaker::DrawH3s(TH3F *h3[2], Int_t animate, Double_t min, Double_t max, Int_t np) {
+  TH3F *h3s[2] = {h3[0], h3[1]};
+  if (! h3s[0] && ! h3s[1]) return;
+  for (Int_t i = 0; i < 2; i++) {
+    if (! h3s[i]) continue;
+    if (h3s[i]->GetEntries() < 100) {
+      cout << "Histograms " << h3s[i]->GetName() << " has " << h3s[i]->GetEntries() << "entries" << endl;
+      h3s[i] = 0;
+    }
+  }
+  if (! h3s[0] && ! h3s[1]) {
+    cout << "To few for analysis. Skip" << endl;
     return;
   }
   for (Int_t p = 0; p < np; p++) {// zx, zy, x, y, yx
@@ -2103,36 +2110,36 @@ void StMuMcAnalysisMaker::DrawQA(Int_t gp, Int_t pp, Int_t xx, Int_t ii) {// ver
     Int_t subsection = 0;
     for (Int_t particle = p1; particle <= p2; particle++) {
       for (Int_t x = x1; x <= x2; x++) {
-  if (ii >= 0 && ii < kTotalQAll) {i1 = i2 = ii;}
-  TString h4line;
-  TString tag;
-  if (k == kGlobal) tag += "Global ";
-  else              tag += "Primary ";
-  tag += " tracks. ";
-  if (particle == kallP) tag += " All.";
-  else                   tag += " Pions.";
-  h4line += tag;
-  if (x == 0)            {tag += "NoHits"; h4line += " No. of fit and quality.";}
-  else                   {tag += "Kinema"; h4line += "Track parameters";}
-  subsection++;
-  SubSection = Section; SubSection += "."; SubSection += subsection;
-  out << "<h4><a name \"" << tag.Data() << "\">" << SubSection.Data() << ". " <<h4line.Data() << "</a></h4>" << endl;
-  BeginTable();
-  for (Int_t i = i1; i <= i2; i++) {
-    h3s[0] = fHistsT[k][type][particle][kPositive][x][i];
-    h3s[1] = fHistsT[k][type][particle][kNegative][x][i];
-    if (! h3s[0] || ! h3s[1]) {cout << "No. Plots" << endl; continue;}
-    cout << h3s[0]->GetName() << "\t" << h3s[1]->GetName() << endl;
-    Double_t min =  1e9;
-    Double_t max = -1e9;
+	if (ii >= 0 && ii < kTotalQAll) {i1 = i2 = ii;}
+	TString h4line;
+	TString tag;
+	if (k == kGlobal) tag += "Global ";
+	else              tag += "Primary ";
+	tag += " tracks. ";
+	if (particle == kallP) tag += " All.";
+	else                   tag += " Pions.";
+	h4line += tag;
+	if (x == 0)            {tag += "NoHits"; h4line += " No. of fit and quality.";}
+	else                   {tag += "Kinema"; h4line += "Track parameters";}
+	subsection++;
+	SubSection = Section; SubSection += "."; SubSection += subsection;
+	out << "<h4><a name \"" << tag.Data() << "\">" << SubSection.Data() << ". " <<h4line.Data() << "</a></h4>" << endl;
+	BeginTable();
+	for (Int_t i = i1; i <= i2; i++) {
+	  h3s[0] = fHistsT[k][type][particle][kPositive][x][i];
+	  h3s[1] = fHistsT[k][type][particle][kNegative][x][i];
+	  if (! h3s[0] || ! h3s[1]) {cout << "No. Plots" << endl; continue;}
+	  cout << h3s[0]->GetName() << "\t" << h3s[1]->GetName() << endl;
+	  Double_t min =  1e9;
+	  Double_t max = -1e9;
 #if 0
-    if (k == kPrimary) {min = plotPrVar[i].min;  max = plotPrVar[i].max;}
-    else          {min = plotGlVar[i].min;  max = plotGlVar[i].max;}
+	  if (k == kPrimary) {min = plotPrVar[i].min;  max = plotPrVar[i].max;}
+	  else               {min = plotGlVar[i].min;  max = plotGlVar[i].max;}
 #endif
-    if (i == 0) DrawH3s(h3s, animate, min, max, 5);
-    else        DrawH3s(h3s, animate, min, max);
-  }
-  EndTable();
+	  if (i == 0) DrawH3s(h3s, animate, min, max, 5);
+	  else        DrawH3s(h3s, animate, min, max);
+	}
+	EndTable();
       }
     }
   }
@@ -2294,20 +2301,22 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
 	    }
 	    SafeDelete(temp);
 	  }
-	  if (heff[0] && heff[1]) {
-	    Name = FormName(heff[0]);
+	  if (heff[0] || heff[1]) {
+	    if (heff[0]) Name = FormName(heff[0]);
+	    else         Name = FormName(heff[1]);
 	    TCanvas *c = new TCanvas(Name.Data(),Name.Data(),400,400);
 	    if (p == 1) c->SetLogx(1);
 	    TLegend *l = 0;
 	    if (NS > kTotalSigns) l = new TLegend(0.1,0.4,0.4,0.6);
+	    TString same;
 	    for (Int_t pm = kPositive; pm < NS; pm++) {
               if (! heff[pm]) continue; 
-	      if (pm == kPositive) {heff[pm]->SetMinimum(min); heff[pm]->SetMaximum(max); heff[pm]->Draw();}
-	      else                 heff[pm]->Draw("same");
+	      heff[pm]->SetMinimum(min); heff[pm]->SetMaximum(max); heff[pm]->Draw(same);
+	      same = "same";
 	      if (l) l->AddEntry(heff[pm],Form("%s with pT/|q| > %3.1f",TitleCharge[pm%2],pTmins[pm/2]));
-	      if (l && pm == kPositive) l->Draw();
-	      c->Update();
 	    }
+	    if (l) l->Draw();
+	    c->Update();
 	    if (animate) ForceAnimate(0,200);
 	    DrawPng(c);
 	    if (Break) return;

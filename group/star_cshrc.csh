@@ -183,7 +183,7 @@ set history=100
 switch ($shell)
     case "/usr/local/bin/tcsh":
     case "/bin/tcsh":
-	if ( ! -e  $HOME/history) then
+	if ( ! -r  $HOME/history) then
 	    /bin/mkdir -p $HOME/history
 	endif
 	set correct = cmd

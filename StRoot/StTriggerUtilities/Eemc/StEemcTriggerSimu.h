@@ -93,10 +93,6 @@ public:
   void get2009_DSMLayer0();	// Reads output from feeTPTreeADC & process
   void get2009_DSMLayer1();     // Reads output from mE101 & process
  
-  // mod by Danny
-  void get2013_DSMLayer0(Int_t runnumber);	// Reads output from feeTPTreeADC & process
-  void get2013_DSMLayer1(Int_t runnumber);	// Reads output from feeTPTreeADC & process
-
   // Access to 2009 EEMC Layer 0 + 1
  public:
   DSMLayer_E001_2009* get2009_DSMLayer0_Result() { return mE001; };
@@ -105,7 +101,7 @@ public:
   // #### modified end ####
   
   vector<int> mTriggerIds;
-
+  bool mTestMode;
  private:
   // Endcap DSM0...3 Tree only unpacking TRG data, for QA
   EEdsm0Tree  *dsm0TreeTRG;
@@ -167,6 +163,9 @@ public:
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.29  2020/01/13 20:45:51  zchang
+// removing old run13 dsm algo files
+//
 // Revision 1.28  2017/01/02 15:31:56  rfatemi
 // Updated by Danny OLVITT for 2013 dijet analysiss
 //

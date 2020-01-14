@@ -212,7 +212,7 @@ if ($?CERN == 0)       then
 endif
 if ($?CERN_LEVEL == 0) setenv CERN_LEVEL pro
 # add one more check - if does not existing, switch to pro
-if ( ! -e $CERN/$CERN_LEVEL ) then
+if ( ! -r  $CERN/$CERN_LEVEL ) then
     if ( $?DECHO ) echo "$self :: $CERN/$CERN_LEVEL not found, switch to pro"
     setenv CERN_LEVEL pro
 endif
@@ -335,7 +335,7 @@ endif
 # The last part is executed in case
 # a user forgets to do it from within is cshrc
 if ( ! $?star_cshrc_csh) then
-    if ( -e $GROUP_DIR/star_cshrc.csh ) then
+    if ( -r $GROUP_DIR/star_cshrc.csh ) then
 	if ( $?DECHO )  echo "$self :: Sourcing star_cshrc.csh"
 	source $GROUP_DIR/star_cshrc.csh
     endif

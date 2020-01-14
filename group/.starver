@@ -10,7 +10,7 @@ unsetenv ROOT_LEVEL
 unsetenv CERN_LEVEL
         source $GROUP_DIR/group_env.csh
 	if ( $?prompt ) then
-	    if ( ! -e $STAR) then
+	    if ( ! -r $STAR) then
 		echo "$STAR_LEVEL is incompletely defined."
 		echo "Could not find $STAR"
 	    endif

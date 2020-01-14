@@ -99,7 +99,7 @@ source ${GROUP_DIR}/STAR_SYS;#  echo "STAR_HOST_SYS = $STAR_HOST_SYS"
 #if ( ! $?XOPTSTAR ) then
 #    if (-d ${OPTSTAR}/${STAR_HOST_SYS}) setenv XOPTSTAR ${OPTSTAR}/${STAR_HOST_SYS}
 #    # keep a reference to the AFS one
-#    # this -e test may fail - don't do it
+#    # this -r test may fail - don't do it
 #    if ( "$READ_AFS" == "" ) then
 ##	setenv XOPTSTAR ${AFS_RHIC}/star/packages/.DEV2/misc/opt/star/${STAR_HOST_SYS}
 #	setenv XOPTSTAR $OPTSTAR #${AFS_RHIC}/opt/star
@@ -114,7 +114,7 @@ if ( $?STAR_PATH == 0) setenv STAR_PATH ${STAR_ROOT}/packages;
 if ( $?DECHO) echo   "$self :: Value of GROUP_DIR = ${GROUP_DIR}"
 
 # make this additional test ahead
-if ( ! -e $STAR_PATH ) then
+if ( ! -r $STAR_PATH ) then
     set FAIL="$FAIL STAR_PATH"
 endif
 
@@ -142,7 +142,7 @@ if ( "$FAIL" != "") then
 	    set failafs=1
 	endif
 	if ( `echo $STAR_ROOT | $GREP $AFS_RHIC` != "" &&  `echo $STAR_PATH | $GREP $STAR_ROOT` != "" && `echo $FAIL | $GREP STAR_PATH` != "") then
-	    # ! -e STAR_PATH but defined as AFS resident is the second sign of failure
+	    # ! -r STAR_PATH but defined as AFS resident is the second sign of failure
 	    # it does seem like the above but this second test is necessary due to client
 	    # file caching
 	    set failafs=1
@@ -193,10 +193,10 @@ if ( $?DECHO) echo "$self :: Setting STAR_VERSION"
 setenv STAR_VERSION ${STAR_LEVEL}
 #if ($STAR_LEVEL  == "old" || $STAR_LEVEL  == "pro" || $STAR_LEVEL  == "new" || $STAR_LEVEL  == "dev" || $STAR_LEVEL  == ".dev") then
 #  # i.e. replace with link value instead
-#  if ( $?DECHO ) echo "$self :: Will test -e $STAR_PATH/${STAR_LEVEL}"
+#  if ( $?DECHO ) echo "$self :: Will test -r $STAR_PATH/${STAR_LEVEL}"
 #  # exit
 #
-#  if( -e $STAR_PATH/${STAR_LEVEL}) then
+#  if( -r $STAR_PATH/${STAR_LEVEL}) then
 #    # be carefull, it may not be "seen" as a soft link
 #    # at all ... Some AFS client do not show the link.
 #    # No even speaking of absolute path ...
@@ -211,13 +211,13 @@ setenv STAR_VERSION ${STAR_LEVEL}
 #    endif
 #  endif
 #endif
-  if ( $?DECHO ) echo "$self :: Will test -e $STAR_PATH/${STAR_LEVEL}"
+  if ( $?DECHO ) echo "$self :: Will test -r $STAR_PATH/${STAR_LEVEL}"
 
 
 if ( $?DECHO) echo "$self :: Setting STAF_VERSION"
 
 if ($?STAF_LEVEL == 0) then
- if ( -e $STAR_PATH/StAF/${STAR_LEVEL}) then
+ if ( -r $STAR_PATH/StAF/${STAR_LEVEL}) then
     setenv STAF_LEVEL $STAR_LEVEL
  else
     setenv STAF_LEVEL pro
@@ -226,7 +226,7 @@ endif
 
 setenv STAF_VERSION ${STAF_LEVEL}
 if ($STAF_LEVEL  == "old" || $STAF_LEVEL  == "pro" || $STAF_LEVEL  == "new" || $STAF_LEVEL  == "dev" || $STAF_LEVEL  == ".dev") then
-  if( -e $STAR_PATH/StAF/${STAF_LEVEL}) then
+  if( -r $STAR_PATH/StAF/${STAF_LEVEL}) then
     set a = `ls -ld $STAR_PATH/StAF/${STAF_LEVEL}`
     set b = `ls -ld $STAR_PATH/StAF/${STAF_LEVEL} | cut -f2 -d">"`
     if ( "$a" != "$b") then
@@ -276,9 +276,9 @@ endif
 # There is a second chance to define XOPTSTAR
 #if ( $?DECHO) echo "$self :: Checking  XOPTSTAR "
 #if ( ! $?XOPTSTAR ) then
-#    if ( -e ${AFS_RHIC}/star/packages/.DEV2/misc/opt/star/${STAR_HOST_SYS} ) then
+#    if ( -r ${AFS_RHIC}/star/packages/.DEV2/misc/opt/star/${STAR_HOST_SYS} ) then
 #	setenv XOPTSTAR ${AFS_RHIC}/star/packages/.DEV2/misc/opt/star/${STAR_HOST_SYS}
-#    if ( -e ${AFS_RHIC}/${STAR_SYS}/opt/star ) then
+#    if ( -r ${AFS_RHIC}/${STAR_SYS}/opt/star ) then
 #       setenv XOPTSTAR ${AFS_RHIC}/${STAR_SYS}/opt/star
 #    else
 #	# well, as good as anything else (we cannot find a
@@ -291,11 +291,11 @@ if ( $?OPTSTAR ) then
     if (!  $?optstar ) setenv  optstar  ${OPTSTAR}
     if (! $?xoptstar ) setenv xoptstar ${XOPTSTAR}#
 #
-#    if ( -e ${OPTSTAR}/${STAR_HOST_SYS} ) then
+#    if ( -r ${OPTSTAR}/${STAR_HOST_SYS} ) then
 #	# Redhat > 7.3  transition ; adding one level
 #	setenv OPTSTAR    ${optstar}/${STAR_HOST_SYS}
 #    endif
-#    if ( -e ${xoptstar}/${STAR_HOST_SYS} ) then
+#    if ( -r ${xoptstar}/${STAR_HOST_SYS} ) then
 #	setenv XOPTSTAR  ${xoptstar}/${STAR_HOST_SYS}
 #    endif
 endif
@@ -343,7 +343,7 @@ if ( $STAR_LEVEL == "cal" ) then
 	# make a default
 	setenv STAR_BIN $STAR_PATH/dev/.${STAR_HOST_SYS}/bin
     endif
-    if ( -e $STAR_PATH/${STAR_VERSION}/.${STAR_HOST_SYS}/bin ) then
+    if ( -r $STAR_PATH/${STAR_VERSION}/.${STAR_HOST_SYS}/bin ) then
 	# overwrite if exists
 	setenv STAR_BIN $STAR_PATH/${STAR_VERSION}/.${STAR_HOST_SYS}/lib 
     endif
@@ -436,7 +436,7 @@ endif
 # db related
 if ( $?SITE ) then
     #if ( ! $?DB_SERVER_LOCAL_CONFIG ) then
-	if ( -e ${STAR_PATH}/conf/dbLoadBalancerLocalConfig_${SITE}.xml ) then
+	if ( -r ${STAR_PATH}/conf/dbLoadBalancerLocalConfig_${SITE}.xml ) then
 	    # 2008/08 new location and unique for all libraries - SL08e or above
 	    setenv DB_SERVER_LOCAL_CONFIG ${STAR_PATH}/conf/dbLoadBalancerLocalConfig_${SITE}.xml
 	else
@@ -457,7 +457,7 @@ endif
 if ($?INSURE) then
   # Do it conditional because this is a late addition.
   # The directory structure may not exist for all library version.
-  if( -e $STAR/.${STAR_HOST_SYS}/ILIB) then
+  if( -r $STAR/.${STAR_HOST_SYS}/ILIB) then
    if (-f $GROUP_DIR/parasoftenv.csh) then
      source $GROUP_DIR/parasoftenv.csh
      setenv STAR_lib  $STAR/.${STAR_HOST_SYS}/ILIB ;  if ($ECHO) echo   "Setting up STAR_lib  = ${STAR_lib}"
@@ -507,10 +507,10 @@ setenv STAR_CGI  $STAR_PATH/cgi
 setenv STAR_MGR  $STAR/mgr
 setenv STAR_PAMS $STAR/pams;            if ($ECHO) echo   "Setting up STAR_PAMS = ${STAR_PAMS}"
 
-if ( -e ${STAR_ROOT}/data ) then
+if ( -r ${STAR_ROOT}/data ) then
 setenv STAR_DATA ${STAR_ROOT}/data;     if ($ECHO) echo   "Setting up STAR_DATA = ${STAR_DATA}"
 endif
-if ( -e /afs/rhic.bnl.gov/star/packages/repository ) then
+if ( -r /afs/rhic.bnl.gov/star/packages/repository ) then
 setenv CVSROOT   /afs/rhic.bnl.gov/star/packages/repository; if ($ECHO) echo   "Setting up CVSROOT   = ${CVSROOT}"
 endif
 
@@ -546,7 +546,7 @@ if ( -f $STAR/mgr/ROOT_LEVEL && -f $STAR/mgr/CERN_LEVEL ) then
 
   # now check if CERN exists
   if ( $?CERN ) then
-    if ( ! -e $CERN/$CERN_LEVEL ) then
+    if ( ! -r $CERN/$CERN_LEVEL ) then
 	if ( $?DECHO) echo "$self :: Caught $CERN_LEVEL from config in $STAR/mgr/ but not found - reverting to pro"
 	setenv CERN_LEVEL pro
     endif
@@ -584,12 +584,12 @@ endif
  
 # test return value of PTEST from dropit
 if ( $?DECHO && $?DUMPENV ) then
-    if ( -e /tmp/dropit.$USER ) then
+    if ( -r /tmp/dropit.$USER ) then
 	set tmp=`cat /tmp/dropit.$USER`
 	echo "$self :: $tmp"
 	unset tmp
 	rm -f /tmp/dropit.$USER
-	if ( -e /tmp/dropit.ENV.$USER ) then
+	if ( -r /tmp/dropit.ENV.$USER ) then
 	    echo "$self :: ENV dump now --->"
 	    cat /tmp/dropit.ENV.$USER
 	    rm -f /tmp/dropit.ENV.$USER
@@ -841,7 +841,7 @@ endif
 #	setenv GRAXML_HOME ${STAR_PATH}/GeoM/${STAR_LEVEL}/GraXML
 #    else
 #	# revert to a default if exists
-#	if ( -e ${STAR_PATH}/GeoM/dev/GraXML ) then
+#	if ( -r ${STAR_PATH}/GeoM/dev/GraXML ) then
 #	    setenv GRAXML_HOME ${STAR_PATH}/GeoM/dev/GraXML
 #	endif
 #    endif

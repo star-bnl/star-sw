@@ -3,7 +3,7 @@
 #ifndef EEfeeTPTree_h
 #define EEfeeTPTree_h
 /**************************************************************
- * $Id: EEfeeTPTree.h,v 1.3 2011/10/16 17:41:59 pibero Exp $
+ * $Id: EEfeeTPTree.h,v 1.4 2020/01/13 20:45:50 zchang Exp $
  * Emulates functionality of  Endcap FEE TP-tree
  **************************************************************/
 #include <stdlib.h> 
@@ -29,13 +29,16 @@ class EEfeeTPTree  {  // DSM0 tree emulators
   void  compute(int *rawAdc, int *feePed, int *feeMask, int* highTowerMask, int* patchSumMask);
   EEfeeTP * TP(int i) { return feeTP[i]; }
   const EEfeeTP * TP(int i) const { return feeTP[i]; }
-  
+  void test(int *tp, int *ht);  
 };
 
 #endif
 
 /*
  * $Log: EEfeeTPTree.h,v $
+ * Revision 1.4  2020/01/13 20:45:50  zchang
+ * removing old run13 dsm algo files
+ *
  * Revision 1.3  2011/10/16 17:41:59  pibero
  * Implement EEMC FEE HT & TP masks
  *

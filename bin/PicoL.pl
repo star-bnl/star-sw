@@ -1,6 +1,9 @@
 #! /usr/bin/env perl
 use File::Basename;
 use Cwd;
+use File::stat;
+use Time::localtime;
+#my $timestamp = ctime(stat($fh)->mtime);
 #my $glob =  "/net/l404/data/fisyak/Pico/BES-I/AuAu19_production/2011/???/*";
 #my $glob =  "/net/l401/data/scratch2/kehw/reco/2019/???/*";
 #my $glob =  "/net/l401/data/scratch2/kehw/reco/2019/TFG19d/???/*";
@@ -30,8 +33,29 @@ my %Runs= ();
 foreach my $run (glob $glob) {
   my $f = File::Basename::basename($run);
   $Runs{$f}++;
-  my $pico = $f . "_" . $Runs{$f} . ".root";
-  if ( -r $pico) {next};
-  print "string:$run:$pico\n";
+  my $ana = $f . "_" . $Runs{$f} . ".root";
+  if ( -r $ana) {
+    my $mtime = stat($ana)->mtime;
+    my $Mtime = ctime($mtime);
+#     my ($dev,$ino,$mode,$nlink,$uid,$gid,$dev, $size, $atime, $mtime, $ctime, $blksize,$blocks) = stat($ana);
+    my @files = glob $run . "/*.root";
+    if ($#files < 0) {next;}
+    my $mtimeA = -1;
+    my $MtimeA;
+    foreach my $file (@files) {
+      my $mtimeR = stat($file)->mtime;
+      my $MtimeR = ctime($mtimeR);
+      #       my ($devR,$inoR,$modeR,$nlinkR,$uidR,$gidR,$devR, $sizeR, $atimeR, $mtimeR, $ctimeR, $blksizeR,$blocksR) = stat($run);
+      my $dt = $mtime - $mtimeR;
+      #       print "$ana: $mtime,$Mtime  $file: $mtimeR,$MtimeR dt = $dt\n";
+      #       my @list = `ls -l $ana $file`; print "@list\n";
+      if ( $mtimeR > $mtimeA) { $mtimeA =  $mtimeR; $MtimeA = $MtimeR;}
+    }
+    my $dt = $mtime - $mtimeA;
+    print "$ana $mtime,$Mtime, $run $mtimeA,$MtimeA, dt = $dt\n" if ($debug);
+    if ($dt > 0) {next;}
+  };
+  print "string:$run:$ana\n";
 #  last;
+#  die;
 }
