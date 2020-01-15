@@ -147,9 +147,9 @@ void StarKinematics::Kine(Int_t ntrack, const Char_t *_type, Double_t ptlow, Dou
 	p->SetPz( pz );
 	p->SetEnergy( E );
 
-	p->SetVx( 0. ); // put vertex at 0,0,0,0
-	p->SetVy( 0. );
-	p->SetVz( 0. );
+	p->SetVx( 1e-11); // put vertex at 0,0,0,0
+	p->SetVy( 1e-11);
+	p->SetVz( 1e-11);
 	p->SetTof( 0. );
       }
 	
