@@ -1,5 +1,8 @@
-// $Id: StMagFMaker.cxx,v 1.18 2018/06/29 21:46:21 smirnovd Exp $
+// $Id: StMagFMaker.cxx,v 1.19 2020/01/15 02:01:26 perev Exp $
 // $Log: StMagFMaker.cxx,v $
+// Revision 1.19  2020/01/15 02:01:26  perev
+// Option to change mag factor added
+//
 // Revision 1.18  2018/06/29 21:46:21  smirnovd
 // Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
 //
@@ -95,13 +98,27 @@ ClassImp(StMagF)
 //_____________________________________________________________________________
 StMagFMaker::~StMagFMaker(){}
 //_____________________________________________________________________________
-Int_t StMagFMaker::InitRun(Int_t RunNo){
+Int_t StMagFMaker::InitRun(Int_t RunNo)
+{
+  
+
   if (StarMagField::Instance() && StarMagField::Instance()->IsLocked()) {
     // Passive mode, do not change scale factor
     gMessMgr->Info() << "StMagFMaker::InitRun passive mode. Don't update Mag.Field from DB" << endm;
     return kStOK;
   }
+  float myScale = (SAttr("ScaleFactor"))? DAttr("ScaleFactor"):-999;
   Float_t  fScale = St_MagFactorC::instance()->ScaleFactor();
+assert(fabs(fScale)>0.005);
+  if (myScale>-999) {
+    if(myScale != fScale) {
+      printf("StMagFMaker::InitRun Attr scaleFactor %g is different from default %g\n",
+      myScale,fScale);
+      printf("StMagFMaker::InitRun Attr scaleFactor is assumed\n");
+    }
+    fScale = myScale;
+  }
+
   if (TMath::Abs(fScale) < 1e-3) fScale = 1e-3;
   gMessMgr->Info() << "StMagFMaker::InitRun active mode ";
   if (! StarMagField::Instance()) {
@@ -112,6 +129,10 @@ Int_t StMagFMaker::InitRun(Int_t RunNo){
     StarMagField::Instance()->SetFactor(fScale);
     gMessMgr->Info() << "Reset STAR magnetic field with scale factor " << fScale << endm;
   }
+  double myX[3]={0},myB[3];
+  StarMagField::Instance()->BField(myX,myB);
+  printf("StMagFMaker::InitRun Bz(0) = %g\n",myB[2]);
+
   return kStOK;
 }
 //_____________________________________________________________________________
