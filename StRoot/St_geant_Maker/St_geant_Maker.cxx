@@ -1,6 +1,10 @@
-// $Id: St_geant_Maker.cxx,v 1.176 2019/09/30 14:13:27 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.177 2020/01/15 02:18:54 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.177  2020/01/15 02:18:54  perev
+// PhysicsOff added but commented out
+//
 // Revision 1.176  2019/09/30 14:13:27  jwebb
+//
 // Integrate HITS for forward tracking and forward calorimeter.
 //
 // n.b. deprecates the legacy HcalGeo RnD detector.
@@ -958,6 +962,9 @@ int St_geant_Maker::Init(){
       //  Do("next;");
       //  Do("dcut cave z 1 10 10 0.03 0.03;");
       //      if ((m_Mode/1000)%10 == 1) {// phys_off
+
+////      if (IAttr("PhysicsOff")) { PhysicsOff(); }
+
       if (Debug() > 1) {
 	Do("debug on;");
 	Do("swit 2 2;");
@@ -2719,3 +2726,35 @@ void St_geant_Maker::usflux() {
     }
   }
 }
+#if 0
+//________________________________________________________________________________
+void St_geant_Maker::PhysicsOff() 
+{
+  geant3->SetProcess("DCAY", 0);
+  geant3->SetProcess("ANNI", 0);
+  geant3->SetProcess("BREM", 0);
+  geant3->SetProcess("COMP", 0);
+  geant3->SetProcess("HADR", 0);
+  geant3->SetProcess("MUNU", 0);
+  geant3->SetProcess("PAIR", 0);
+  geant3->SetProcess("PFIS", 0);
+  geant3->SetProcess("PHOT", 0);
+  geant3->SetProcess("RAYL", 0);
+  geant3->SetProcess("LOSS", 4); // no fluctuations 
+  //  geant3->SetProcess("LOSS 1"); // with delta electron above dcute
+  geant3->SetProcess("DRAY", 0);
+  geant3->SetProcess("MULS", 0);
+  geant3->SetProcess("STRA", 0);
+  geant3->SetCut("CUTGAM",	1e-3  );
+  geant3->SetCut("CUTELE", 	1e-3  );
+  geant3->SetCut("CUTHAD", 	.001  );
+  geant3->SetCut("CUTNEU", 	.001  );
+  geant3->SetCut("CUTMUO", 	.001  );
+  geant3->SetCut("BCUTE", 	.001  );
+  geant3->SetCut("BCUTM", 	.001  );
+  geant3->SetCut("DCUTE", 	1e-3  );
+  geant3->SetCut("DCUTM", 	.001  );
+  geant3->SetCut("PPCUTM", 	.001  );
+  geant3->SetCut("TOFMAX", 	50.e-6);
+}
+#endif
