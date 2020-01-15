@@ -90,6 +90,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2011",       20101215,     0, "y2011",    "y2011 TOF fix & TPCE redused & honey,AgML"},
   {"y2011a",      20101215,     1, "y2011a",   "y2011a == y2011 now ,AgML"},
   {"y2011b",      20101215,     2, "y2011b",   "y2011a + wall "},
+  {"y2011c",      20101215,     3, "y2011c",   "same as y2011b"},
 
   {"y2012",       20111215,     0, "y2012",    "y2012 Very preliminary,AgML"},
   {"y2012a",      20111215,     1, "y2012a",   "y2012 geometry (MTD missing),AgML"},
