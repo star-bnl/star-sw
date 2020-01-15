@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.143 2019/03/21 19:00:37 jeromel Exp $
+// $Id: St_db_Maker.cxx,v 1.144 2020/01/15 02:07:47 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.144  2020/01/15 02:07:47  perev
+// Cleanup
+//
 // Revision 1.143  2019/03/21 19:00:37  jeromel
 // Added ATTENTION message
 //
@@ -318,7 +321,8 @@
 
 #include <numeric>
 
-enum eDBMAKER {kUNIXOBJ = 0x2000};
+enum eKIND    { kXDFkind = 1, kCkind=2, kROOTkind = 3};
+enum eDBMAKER { kUNIXOBJ = 0x2000};
 
 /////////////////////////////////////////////////////////////////////////
 //
@@ -566,10 +570,10 @@ int St_db_Maker::Kind(const char *filename)
    int lfilename;
 
    lfilename = strlen(filename);
-   if (!strcmp(filename+lfilename-4,".xdf" )) return 1;
-   if (!strcmp(filename+lfilename-2,".C"   )) return 2;
-   if (!strcmp(filename+lfilename-2,".c"   )) return 2;
-   if (!strcmp(filename+lfilename-5,".root")) return 3;
+   if (!strcmp(filename+lfilename-4,".xdf" )) return kXDFkind;
+   if (!strcmp(filename+lfilename-2,".C"   )) return kCkind;
+   if (!strcmp(filename+lfilename-2,".c"   )) return kCkind;
+   if (!strcmp(filename+lfilename-5,".root")) return kROOTkind;
    return 0;
 }
 //_____________________________________________________________________________
@@ -753,6 +757,7 @@ EDataSetPass St_db_Maker::UpdateDB(TDataSet* ds,void *user )
   UInt_t uevent = currenTime.Get();
 
   //            Check validity
+
     if (val->fTimeMin.Get() <= uevent
      && val->fTimeMax.Get() >  uevent)          return kPrune;
 
@@ -912,13 +917,13 @@ TDataSet *St_db_Maker::LoadTable(TDataSet* left)
   int kind = Kind(left->GetName());
   switch (kind) {
 
-    case 1: // .xdf file
+    case kXDFkind: // .xdf file
     assert(0);
  //    newdat = St_XDFFile::GetXdFile(dbfile);assert (newdat);
     if (GetDebug()) printf("Load XdfFile:   %s\n",(const char*)dbfile);
     break;
 
-    case 2: // .C file
+    case kCkind: // .C file
 
       command = ".L "; command += dbfile;
       if (GetDebug()) printf("LoadTable: %s\n",(const char*)command);
@@ -933,7 +938,7 @@ TDataSet *St_db_Maker::LoadTable(TDataSet* left)
 
       break;
 
-    case 3: // .root file
+    case kROOTkind: // .root file
 
       tf = new TFile(dbfile);
       to = StIO::Read (tf, "*");
@@ -988,7 +993,7 @@ EDataSetPass St_db_Maker::PrepareDB(TDataSet* ds, void *user)
       if (strncmp("file",set->GetTitle(),4)!=0) continue;
       if (!(dot = strchr(filename,'.')))        continue;
       int k = Kind(filename);
-      if (k==2) {	//case of *.C
+      if (k==kCkind) {	//case of *.C
       }
       if (!k){ delete set;         continue;}
       set->SetTitle(newTitle);
