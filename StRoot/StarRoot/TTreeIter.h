@@ -60,19 +60,20 @@ class TTreeIterCast
 class TTreeIter : public TNamed{
   
  protected:
-  Int_t         fEntry;             	//!  current entry number
+  Int_t         fEntry;         //!  current entry number
   TChain       *fTree;	      	//!  pointer to TTree/TChain object
-  TObjArray     fMemList;		//!  list of mem objects
-  TObjArray     fBraList;		//!  list of uset branches
+  TObjArray     fMemList;	//!  list of mem objects
+  TObjArray     fBraList;	//!  list of used branches
   Int_t         fUnits;		//!  current number of units
   Int_t         fNErr;		//|
   Int_t         fCint;		//|
-  Int_t         fNFiles;		//|
+  Int_t         fNFiles;	//|
   
-  TTreeIterCast   fCast;		        //!
+  TTreeIterCast   fCast;	//!
  public:
   
   TTreeIter(TTree *tree);
+  TTreeIter(TChain *tree);
   TTreeIter(const char *treeName="");
   virtual ~TTreeIter();
   TChain   *Chain() {return fTree;}

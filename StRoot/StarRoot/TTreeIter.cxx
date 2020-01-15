@@ -263,6 +263,15 @@ TTreeIter::TTreeIter(TTree *tree):fCast(&fNErr)
 }
 //______________________________________________________________________________
 
+TTreeIter::TTreeIter(TChain *tree):fCast(&fNErr)
+{
+  fNFiles = 0;
+  fTree   = 0;
+  fTree  = tree;
+  Init();
+}
+//______________________________________________________________________________
+
 TTreeIter::TTreeIter(const char *treeName):fCast(&fNErr)
 {
   fTree = 0;
