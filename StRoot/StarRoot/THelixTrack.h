@@ -1,13 +1,9 @@
 #ifndef THELIXTRACK_H
 #define THELIXTRACK_H
-#include <assert.h>
 #include "TObject.h"
 #include "TArrayD.h"
 #include "TPolinom.h"
-
-typedef double Mtx33D_t[3][3];
-typedef double Mtx55D_t[5][5];
-
+//..............................................................................
 class TCEmx_t
 { 
 public:
@@ -15,6 +11,8 @@ const double *Arr() const 	{ return &mHH;}
       double *Arr()   	{ return &mHH;}
 const double &operator[](int idx) const 	{ return (&mHH)[idx];}
       double &operator[](int idx)       	{ return (&mHH)[idx];}
+      TCEmx_t &operator*=(double f)       	
+              { for (int i=0;i<6;i++) {Arr()[i]*=f;} return *this;}
 void Clear()  			{ memset(this,0,sizeof(*this));}
      TCEmx_t()			{ Clear();}
 void Set(const double *err);  	
@@ -29,14 +27,17 @@ mHA, mAA,
 mHC, mAC, mCC;
 };
 
+//..............................................................................
 class THEmx_t
 { 
 public:
      THEmx_t()			{ Clear();}
-const double *Arr() const 	{ return &mHH;}
-      double *Arr()   		{ return &mHH;}
 operator const double* ()	{ return &mHH;}		
 operator       double* ()	{ return &mHH;}		
+const double *Arr() const 	{ return &mHH;}
+      double *Arr()   	{ return &mHH;}
+const double &operator[](int idx) const 	{ return (&mHH)[idx];}
+      double &operator[](int idx)       	{ return (&mHH)[idx];}
       THEmx_t &operator*=(double f)       	
               { for (int i=0;i<15;i++) {Arr()[i]*=f;} return *this;}
 void Clear()  			{ memset(this,0,sizeof(*this));}
@@ -46,13 +47,10 @@ void Move(double const F[5][5]);
 void Backward();
 void Print(const char *tit=0) const;
 double Sign() const;
+double MaxCorr() const;
 public:
-//  Let Dx,Dy,Dz direction of track
-//  dH:  along  vector (-Dy,Dx,0)
-//  dZ:  along Zaxis
-//  dA: delta azimuth angle (in X,Y plane; 
-//  dC: delta of curvature;  
-//  dL = dLambda, angle between track and X,Y plane
+//  dA: delta azimuth angle; dH: error along ort to dir and Z axis
+//  dC: error of curvature;  dZ == dZ; dL = dLambda
 double
 mHH,
 mHA, mAA,
@@ -62,6 +60,7 @@ mHL, mAL, mCL, mZL, mLL;
 };
 
 
+//..............................................................................
 class TCircle: public TObject
 {
 friend class THelixTrack;
@@ -78,7 +77,6 @@ virtual void  Clear(const char *opt="");
 const double* Pos() const 	{return fX;  } 
       double* Pos()      	{return fX;  } 
 const double* Dir() const 	{return fD;  } 
-      double* Dir()      	{return fD;  } 
       double  Rho() const       {return fRho;}
       double& Rho()             {return fRho;}
       void    Nor(double *norVec) const; 
@@ -94,7 +92,7 @@ void   Rot(double angle);
 void   Rot(double cosa,double sina);
 void   Backward();
 double Eval(double step,double *xy,double *dir=0) const;
-void   Show(int nPts,const double *Pts,int pstep=2);
+void   Show(int nPts,const double *Pts,int pstep=2) const;
 virtual void   Print(const char* chopt = "") const;
 void   SetStrait(int strait=1) 		{SetBit(1,strait) ;}
 int    IsStrait()  			{return TestBit(1);}
@@ -119,7 +117,7 @@ TCEmx_t *fEmx; //let h = fX[1]*fD[0], a=atan2(fD[1],fD[0]),c=fRho
 		// ch,ca,cc
 ClassDef(TCircle,0)
 };
-class TCircleFitterAux;
+//..............................................................................
 class TCircleFitterAux
 {
   public:
@@ -131,6 +129,7 @@ class TCircleFitterAux
   double wt;		//calculated weight
 
 };
+//..............................................................................
 class TCircleFitter: public TCircle
 {
 public:
@@ -159,6 +158,7 @@ void   Clear(const char *opt ="");
 void   Print(const char* chopt = "") const;
 const double *GetX(int i=0) const;
       double *GetX(int i=0);
+void   Show()  const;
 TCircleFitterAux* GetAux(int i) const;
 
 static void Test(int iTest=0);
@@ -189,8 +189,8 @@ double fPol[6];
 double fXgravity;
 double fYgravity;
 double fXx;
-double fYy;
 double fXy;
+double fYy;
 double fXrr;
 double fYrr;
 double fRrrr;
@@ -213,18 +213,19 @@ ClassDef(TCircleFitter,0)
 };
 
 
+//..............................................................................
 class THelixTrack : public TObject 
 {
 public:
 
 	THelixTrack();
-	THelixTrack(const double *xyz,const double *dir,double rho);
+	THelixTrack(const double *xyz,const double *dir,double rho,double drho=0);
 	THelixTrack(const THelixTrack &from);
 	THelixTrack(const THelixTrack *from);	//Special ctr without errs
 virtual ~THelixTrack();
 THelixTrack &operator=(const THelixTrack &from);
-	void Set   (const double *xyz,const double *dir,double rho);
-	void Set   (double rho){ fRho = rho;}
+	void Set   (const double *xyz,const double *dir,double rho,double drho=0);
+	void Set   (double rho,double drho=0);
 	void SetEmx(const double*  err2xy,const double*  err2z);
 	void SetEmx(const double*  err=0);
     THEmx_t *Emx() const			{return fEmx;}
@@ -237,18 +238,30 @@ THelixTrack &operator=(const THelixTrack &from);
 	double Move(double step);
 	double Move(double step,double F[5][5]);
 ///		Evaluate params with given step along helix
-	double Eval(double step, double *xyz, double *dir=0,double *rho=0) const;
+	double Eval(double step, double *xyz, double *dir,double &rho) const;
+	double Step(double step, double *xyz, double *dir,double &rho) const
+       {return Eval(       step,         xyz,         dir,        rho);}
 ///		Get current parameters
+        void   Get (double *xyz, double *dir,double &rho) const {Step(0.,xyz,dir,rho);}
+	double Eval(double step, double *xyz, double *dir=0) const;
+	double Step(double step, double *xyz, double *dir=0) const
+       {return Eval(       step,         xyz,         dir  );}
+        void   Get (double *xyz, double *dir=0) const {Step(0.,xyz,dir);}
 ///		Distance to crossing 2nd order surface
 ///             surf[0]+surf[1]*x+surf[2]*y+surf[3]*z
 ///            +surf[4]*x*x +surf[5]*y*y+surf[6]*z*z
 ///            +surf[7]*x*y +surf[8]*y*z+surf[9]*z*x  == 0
 ///            nearest==0 search alon direction, else the nearest
-        double Path(double stmax, const double *surf, int nsurf
+        double Step(double stmax, const double *surf, int nsurf
 	           ,double *x=0, double *dir=0, int nearest=0) const;
+        double Path(double stmax, const double *surf, int nsurf
+	           ,double *x=0, double *dir=0, int nearest=0) const
+                   {return Step(stmax,surf,nsurf,x,dir,nearest);}
 
 ///		Distance to nearest point to given space point
-        double Path(const double point[3],double *xyz=0, double *dir=0) const;
+        double Step(const double point[3],double *xyz=0, double *dir=0) const;
+        double Path(const double point[3],double *xyz=0, double *dir=0) const 
+	           {return Step(point,xyz,dir);}
 ///		DCA to given space point (with error matrix)
         double Dca(const double point[3],double *dcaErr=0) const;
 
@@ -277,9 +290,11 @@ THelixTrack &operator=(const THelixTrack &from);
         const double *GetXYZ() 	const {return fX;}
         const double *Pos()    	const {return fX;}
               double *Pos()           {return fX;}
+        const double *GetDir() 	const {return fP;}
         const double *Dir()    	const {return fP;}
               double *Dir()           {return fP;}
         double GetRho() 	const {return fRho ;}
+        double GetDRho()	const {return fDRho ;}
         double GetCos() 	const {return fCosL;}
         double GetSin() 	const {return fP[2];}
         double GetTan() 	const {return fP[2]/fCosL;}
@@ -298,23 +313,22 @@ static  void Test4();
 static  void Test5();
 static	void TestMtx();
 static	void TestDer();
-static	void TestErr();
 static	void TestTwoHlx();
-static	void TestBak();
-protected:
+private:
 ///     	Make transformatiom matrix to transform errors
 ///		called only after Eval()
 	void MakeMtx(double step,double F[5][5]);
 protected:
-        double Path(double stmin,double stmax, const double *surf, int nsurf
+        double Step(double stmin,double stmax, const double *surf, int nsurf
 	           ,double *x=0, double *dir=0,int nearest=0) const;
-        double PathHZ(const double *surf, int nsurf
+        double StepHZ(const double *surf, int nsurf
 	           ,double *x=0, double *dir=0,int nearest=0) const;
 	void Build();
         char   fBeg[1];  
 	double fX[3];
 	double fP[3];
 	double fRho;
+	double fDRho;
 	double fCosL;
         THEmx_t *fEmx;
         char fEnd[1];
@@ -340,8 +354,8 @@ double Chi2() const 			{return fChi2;}
 int    Ndf()  const			{return fCircleFitter.Ndf()+fPoli1Fitter.Ndf();}
 double Chi2XY () const 			{return fCircleFitter.Chi2();}
 double Chi2SZ () const 			{return fPoli1Fitter.Chi2() ;}
-int    NdfXY ()  const 			{return fCircleFitter.Ndf();}
-int    NdfSZ ()  const 			{return fPoli1Fitter.Ndf() ;}
+int    NdfXY ()  const 			{return fCircleFitter.Ndf() ;}
+int    NdfSZ ()  const 			{return fPoli1Fitter.Ndf()  ;}
 TCircleFitterAux* GetAux(int i) const   {return fCircleFitter.GetAux(i);}
 double EvalChi2();
 void   Clear(const char *opt ="");
@@ -358,6 +372,32 @@ double fChi2;
 ClassDef(THelixFitter,0)
 };
 
+//..............................................................................
+#include <vector>
+class THelixKFitterAux { public: double x[3],e[6],wt,xi2; };
+typedef std::vector<THelixKFitterAux> THelixKFitterAuxV;
 
-
+class THelixKFitter: public THelixTrack
+{
+public:
+       THelixKFitter()				{fFitingShow=0;Clear();}
+      ~THelixKFitter(){;}
+void   Add (const double x[3]); 
+void   AddErr(const double err[6]); 
+double Fit();   
+double Chi2() const 				{return fChi2		;}
+int    Ndf()  const			        {return 2*fAux.size()-5	;}
+int    Size() const 				{return fAux.size()	;}
+const THelixKFitterAux* GetAux(int i) const	{return &fAux[i]	;}
+void   Clear(const char * ="")		{fAux.clear();fChi2=0	;}
+void   Print(const char* chopt = "") const;
+void   Show() const;
+void   SetFitingShow() 			{fFitingShow = new std::vector<double>;}
+static void Test(int nev=10000);
+private:
+std::vector<double> *fFitingShow;
+THelixKFitterAuxV fAux;
+double fChi2;
+ClassDef(THelixKFitter,0)
+};
 #endif // THELIXTRACK_H
