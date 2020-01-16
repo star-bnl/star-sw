@@ -1,5 +1,8 @@
-// $Id: StMagFMaker.cxx,v 1.19 2020/01/15 02:01:26 perev Exp $
+// $Id: StMagFMaker.cxx,v 1.20 2020/01/16 18:24:24 perev Exp $
 // $Log: StMagFMaker.cxx,v $
+// Revision 1.20  2020/01/16 18:24:24  perev
+// Buf fix. SAttr(...) always returns non zero pointer
+//
 // Revision 1.19  2020/01/15 02:01:26  perev
 // Option to change mag factor added
 //
@@ -107,7 +110,7 @@ Int_t StMagFMaker::InitRun(Int_t RunNo)
     gMessMgr->Info() << "StMagFMaker::InitRun passive mode. Don't update Mag.Field from DB" << endm;
     return kStOK;
   }
-  float myScale = (SAttr("ScaleFactor"))? DAttr("ScaleFactor"):-999;
+  float myScale = (*SAttr("ScaleFactor"))? DAttr("ScaleFactor"):-9999;
   Float_t  fScale = St_MagFactorC::instance()->ScaleFactor();
 assert(fabs(fScale)>0.005);
   if (myScale>-999) {
