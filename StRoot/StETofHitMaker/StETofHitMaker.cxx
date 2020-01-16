@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHitMaker.cxx,v 1.6 2019/12/17 03:27:51 fseck Exp $
+ * $Id: StETofHitMaker.cxx,v 1.7 2020/01/16 03:40:23 fseck Exp $
  *
  * Author: Philipp Weidenkaff & Florian Seck, April 2018
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StETofHitMaker.cxx,v $
+ * Revision 1.7  2020/01/16 03:40:23  fseck
+ * add possibility to calculate VPD start time + updated deadtime handling for negative hit times
+ *
  * Revision 1.6  2019/12/17 03:27:51  fseck
  * update to histograms for .hist.root files
  *
@@ -426,10 +429,11 @@ StETofHitMaker::processMuDst()
         }
     }
     LOG_INFO << "processMuDst() - storage is filled with " << nDigisInStore << " digis" << endm;
-    
+
     matchSides();
 
-    double tstart = startTime();   
+    double tstart = startTime();
+
     if( mDoQA ) {
         fillUnclusteredHitQA( tstart, isMuDst );
     }
@@ -463,7 +467,7 @@ double
 StETofHitMaker::startTime()
 {
     if( mDebug ) {
-        LOG_INFO << "getTstart(): -- loading start time from bTOF header" << endm;
+        LOG_INFO << "startTime(): -- loading start time from bTOF header" << endm;
     }
 
     StBTofHeader* btofHeader = nullptr; 
@@ -475,7 +479,7 @@ StETofHitMaker::startTime()
             btofHeader = btofCollection->tofHeader();
         }
         else {
-            LOG_WARN << "no StBTofCollection found by getTstart" << endm;
+            LOG_DEBUG << "no StBTofCollection found by getTstart" << endm;
             return -9999.;
         }
     }
@@ -484,21 +488,122 @@ StETofHitMaker::startTime()
     }
 
     if( !btofHeader ) {
-        LOG_WARN << "getTstart(): -- no bTOF header --> no start time avaiable" << endm;
+        LOG_DEBUG << "startTime(): -- no bTOF header --> no start time avaiable" << endm;
         return -9999.;
     }
 
     double tstart = btofHeader->tStart();
 
     if( !isfinite( tstart ) ) {
-        LOG_WARN << "startTime(): -- from bTOF header is NaN" << endm;
+        LOG_DEBUG << "startTime(): -- from bTOF header is NaN" << endm;
         return -9999.;
+    }
+
+    if( tstart != -9999. ) {
+        tstart = fmod( tstart, eTofConst::bTofClockCycle );
+        if( tstart < 0. ) tstart += eTofConst::bTofClockCycle;
     }
 
     if( mDebug ) {
         LOG_INFO << "startTime():  --  start time: " << tstart << endm;
     }
+
     return tstart;
+}
+
+//_____________________________________________________________
+// get the start time (and vertex) -- from VPD
+void
+StETofHitMaker::startTimeVpd( double& tstart, double& vertexVz )
+{
+    tstart   = -9999.;
+    vertexVz = -999.;
+
+    if( mDebug ) {
+        LOG_INFO << "startTimeVpd(): -- calculating VPD start time from bTOF header" << endm;
+    }
+
+    StBTofHeader* btofHeader = nullptr;
+
+    if( mEvent ) {
+        StBTofCollection* btofCollection = ( StBTofCollection* ) mEvent->btofCollection();
+
+        if ( btofCollection ) {
+            btofHeader = btofCollection->tofHeader();
+        }
+        else {
+            LOG_DEBUG << "no StBTofCollection found by getTstart" << endm;
+            return;
+        }
+    }
+    else if( mMuDst ) {
+        btofHeader = mMuDst->btofHeader();
+    }
+
+    if( !btofHeader ) {
+        LOG_DEBUG << "startTimeVpd(): -- no bTOF header --> no start time avaiable" << endm;
+        return;
+    }
+
+    const int nVpd = 19; // number of VPD tubes on each side of STAR
+
+    int nWest = btofHeader->numberOfVpdHits( west );
+    int nEast = btofHeader->numberOfVpdHits( east );
+
+    double vpdLeTime[ 2 * nVpd ];
+
+
+    // check if bTof header is filled with useful information
+    if( fabs( btofHeader->vpdVz() ) > 200. ) {
+        if( mDoQA ) {
+            LOG_INFO << "startTimeVpd(): no valid Vpd data in the bTOF header " << endm;
+        }
+        return;
+    }
+    else {
+        vertexVz = btofHeader->vpdVz();
+        LOG_DEBUG << "startTimeVpd(): Vpd vertex is at: " << vertexVz << endm;
+    }
+
+    double tMean   = 0.;
+    int nTubes     = 0;
+    int nTubesWest = 0;
+    int nTubesEast = 0;
+
+    // west side
+    for( int i=0; i< nVpd; i++ ) {
+        vpdLeTime[ i ] = btofHeader->vpdTime( west, i+1 );
+        if( vpdLeTime[ i ] > 0. ) {
+            updateCyclicRunningMean( vpdLeTime[ i ], tMean, nTubes, eTofConst::bTofClockCycle );
+            nTubesWest++;
+            LOG_DEBUG << "startTimeVpd(): loading VPD west tubeId = " << i+1 << " time " << vpdLeTime[ i ] << endm;
+        }
+    }
+
+    // east side
+    for( int i=0; i< nVpd; i++ ) {
+        vpdLeTime[ i + nVpd ] = btofHeader->vpdTime( east, i+1 );
+        if( vpdLeTime[ i + nVpd ] > 0. ) {
+            updateCyclicRunningMean( vpdLeTime[ i + nVpd ], tMean, nTubes, eTofConst::bTofClockCycle );
+            nTubesEast++;
+            LOG_DEBUG << "startTimeVpd(): loading VPD east tubeId = " << i+1 << " time " << vpdLeTime[ i + nVpd ] << endm;
+        }
+    }
+
+    if( nTubesEast >= 2 && nTubesWest >= 2 ) {
+        tstart = tMean;
+    }
+
+    if( tstart != -9999 ) {
+        tstart = fmod( tstart, eTofConst::bTofClockCycle );
+        if( tstart < 0. ) tstart += eTofConst::bTofClockCycle;
+    }
+
+    if( mDoQA ) {
+        LOG_INFO << "startTimeVpd(): -- sum: " << tMean << " nWest: " << nWest << " nEast: " << nEast;
+        LOG_INFO << " --> compare (if bTofHeader is filled): " << btofHeader->tStart() << endm;
+        LOG_INFO << "startTimeVpd():  --  start time: " << tstart << endm;
+    }
 }
 
 
@@ -714,7 +819,7 @@ StETofHitMaker::matchSides()
         std::vector< double > deadTime( 2, -60. );
 
         for( auto it = digiVec->begin(); it != digiVec->end(); it++ ) {
-            if( (*it)->calibTime() - deadTime.at( (*it)->side() - 1 ) < mSoftwareDeadTime ) {
+            if( fabs( (*it)->calibTime() - deadTime.at( (*it)->side() - 1 ) ) < mSoftwareDeadTime ) {
 
                 if( mDebug ) {
                     LOG_INFO << "digi within dead time --> ignore ... ( geomId : " << stripIndex * 10 + (*it)->side();
@@ -731,7 +836,7 @@ StETofHitMaker::matchSides()
                 }
             }
             else {
-                deadTime.at( (*it)->side() - 1 ) = (*it)->rawTime();
+                deadTime.at( (*it)->side() - 1 ) = (*it)->calibTime();
             }
         }
         //--------------------------------------------------------------------------------
@@ -930,7 +1035,8 @@ StETofHitMaker::matchSides()
 
 
 
-            // correct for single side clock jumps. Sync signal recovers time jumps, so no double jumps should occur
+            // correct for single side clock jumps. Sync signal recovers time jumps, so no double jumps *should* occur
+            // it seems more likely that one Get4 misses one clock pulse and is 6.25ns behind --> need to add half a clock cycle to hit time
             if( mDoClockJumpShift && fabs( posY ) > 0.5 * ( eTofConst::coarseClockCycle * mSigVel.at( detIndex ) - eTofConst::stripLength ) * 0.9 ) {
                 if( mDoQA ) {
                     LOG_INFO << "shifting time on: " << sector << "-" << plane << "-" << counter << endm;
@@ -998,14 +1104,14 @@ StETofHitMaker::fillUnclusteredHitQA( const double& tstart, const bool isMuDst )
     }
 
     // ---------------------------------------
-    if( fabs( tstart + 9999. ) < 0.01 ) {
+    if( fabs( tstart + 9999. ) < 1.e-5 ) {
         LOG_WARN << "-- no valid start time available ... skip filling histograms with time of flight information" << endm;
     }
     // ---------------------------------------
 
     int nHitsPrinted = 0;
 
-    int eventTime = ( this->GetTime() / 10000 ) * 3600 + ( ( this->GetTime() % 10000 ) / 100 ) * 60 + ( this->GetTime() % 100 );
+    //int eventTime = ( this->GetTime() / 10000 ) * 3600 + ( ( this->GetTime() % 10000 ) / 100 ) * 60 + ( this->GetTime() % 100 );
 
     for( const auto& kv : mStoreHit ) {
         unsigned int detIndex  = kv.first;
@@ -1091,12 +1197,12 @@ StETofHitMaker::fillUnclusteredHitQA( const double& tstart, const bool isMuDst )
             //mHistograms.at( histNamePosTime )->Fill( eventTime, hit->localY() );
 
             // ---------------------------------------
-            if( fabs( tstart + 9999. ) < 0.01 ) continue;
+            if( fabs( tstart + 9999. ) < 1.e-5 ) continue;
 
             double tof = fmod( hit->time(), eTofConst::bTofClockCycle ) - tstart;
 
             if( mDebug ) {
-                LOG_DEBUG << "hit time, hit time mod bTofClockRange, start time, time difference: ";
+                LOG_DEBUG << "hit time, hit time mod bTOF clock cycle, start time, time difference: ";
                 LOG_DEBUG << hit->time() << " , " << tof + tstart << " , " << tstart << " , " <<  tof << endm;
                 LOG_DEBUG << "sector, plane, counter: " << hit->sector() << " , " << hit->zPlane() << " , " <<  hit->counter() << endm;
             }
@@ -1297,6 +1403,7 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
 
             // use only the floating point remainder of the time with respect the the bTof clock range
             weightedTime = fmod( weightedTime, eTofConst::bTofClockCycle );
+            if( weightedTime < 0 ) weightedTime += eTofConst::bTofClockCycle;
 
             if( mDebug ) {
                 LOG_DEBUG << "mergeClusters() - MERGED HIT: ";
@@ -1412,6 +1519,13 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
 {
     int bTofCentral = 700;
 
+    double vpdStart = -9999.;
+    double vertexVz = -999.;
+    
+    if( mDoQA ) {
+        startTimeVpd( vpdStart, vertexVz );
+    }
+
     if( !isMuDst ) {
         // --------------------------------------------------------
         // analyze hits in eTOF
@@ -1452,6 +1566,16 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
 
                 mHistograms.at( "etofHit_tof"           )->Fill( tof );
                 mHistograms.at( "etofHit_tof_fullrange" )->Fill( tof );
+            }
+
+            if( mDoQA ) {
+                if( fabs( vpdStart - ( eTofConst::bTofClockCycle - 9999. ) ) > 0.001 ) {
+                    double tofVpd = aHit->time() - vpdStart;
+                    if( tofVpd < -800 ) {
+                        tofVpd += eTofConst::bTofClockCycle;
+                    }
+                    mHistograms.at( "etofHit_vpdVz_tof" )->Fill( vertexVz, tofVpd );
+                }
             }
         }
 
@@ -1592,6 +1716,16 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
                 mHistograms.at( "etofHit_tof"           )->Fill( tof );
                 mHistograms.at( "etofHit_tof_fullrange" )->Fill( tof );
             }
+
+            if( mDoQA ) {
+                if( fabs( vpdStart - ( eTofConst::bTofClockCycle - 9999. ) ) > 0.001 ) {
+                    double tofVpd = aHit->time() - vpdStart;
+                    if( tofVpd < -800 ) {
+                        tofVpd += eTofConst::bTofClockCycle;
+                    }
+                    mHistograms.at( "etofHit_vpdVz_tof" )->Fill( vertexVz, tofVpd );
+                }
+            }
         }
 
         // --------------------------------------------------------
@@ -1725,7 +1859,7 @@ StETofHitMaker::bookHistograms()
 
     mHistograms[ "etofHit_tof"                       ] = new TH1F( "etofHit_tof",           "eTOF hit time of flight;time of flight (ns);# hits", 4000, -100., 150 );
     mHistograms[ "etofHit_tof_fullrange"             ] = new TH1F( "etofHit_tof_fullrange", "eTOF hit time of flight;time of flight (ns);# hits", 5000, -800., eTofConst::bTofClockCycle );
-    mHistograms[ "averageTimeDiff_etofHits_btofHits" ] = new TH1F( "averageTimeDiff_etofHits_btofHits", "difference between average times in bTOF and eTOF hits;#DeltaT (ns);# events", 20000, -500, 500 );
+    mHistograms[ "averageTimeDiff_etofHits_btofHits" ] = new TH1F( "averageTimeDiff_etofHits_btofHits", "difference between average times in bTOF and eTOF hits;#DeltaT (ns);# events", 4000, -500, 500 );
     mHistograms[ "multiplicity_etofHits_btofHits"    ] = new TH2F( "multiplicity_etofHits_btofHits", "multiplicity correlation between bTOF and eTOF;# eTOF hits;# bTOF hits",         300, 0, 300, 500, 0, 1000 );
     mHistograms[ "multiplicity_etofHits_epdEast"     ] = new TH2F( "multiplicity_etofHits_epdEast",  "multiplicity correlation between eTOF and east EPD;# eTOF hits;# hits east EPD", 300, 0, 300, 200, 0, 1000 );
 
@@ -1736,6 +1870,7 @@ StETofHitMaker::bookHistograms()
     AddHist( mHistograms.at( "multiplicity_etofHits_epdEast"     ) );
 
     if( mDoQA ) {
+        mHistograms[ "etofHit_vpdVz_tof"             ] = new TH2F( "etofHit_vpdVz_tof",     "eTOF hit time of flight;VPD Vz (cm);time of flight (ns)", 100, -200, 200, 1000, -50., 50 );
         mHistograms[ "btofHit_tof_fullrange"         ] = new TH1F( "btofHit_tof_fullrange", "bTOF hit time of flight;time of flight (ns);# hits", 5000, -800., eTofConst::bTofClockCycle );
         mHistograms[ "multiplicity_btofHits_epdEast" ] = new TH2F( "multiplicity_btofHits_epdEast", "multiplicity correlation between bTOF and east EPD;# bTOF hits;# hits east EPD", 200, 0, 1000, 200, 0, 1000 );
         mHistograms[ "hitMultiplicityPerModuleCentral" ] = new TH2F( "hitMultiplicityPerModuleCentral", "hit multiplicity per module in central bTOF events", 36, 0, 36, 50, 0, 50 );
@@ -1844,7 +1979,8 @@ StETofHitMaker::writeHistograms()
 
 //_____________________________________________________________
 unsigned int
-StETofHitMaker::detectorToKey( const unsigned int detectorId ) {
+StETofHitMaker::detectorToKey( const unsigned int detectorId )
+{
     unsigned int sector   = (   detectorId / eTofConst::nCountersPerSector  )                           + eTofConst::sectorStart;
     unsigned int zPlane   = ( ( detectorId % eTofConst::nCountersPerSector  ) / eTofConst::nCounters  ) + eTofConst::zPlaneStart;
     unsigned int counter  = (   detectorId % eTofConst::nCounters                                     ) + eTofConst::counterStart;
