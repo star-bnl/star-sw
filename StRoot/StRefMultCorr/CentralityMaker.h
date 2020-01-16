@@ -1,6 +1,9 @@
 //----------------------------------------------------------------------------------------------------
-// $Id: CentralityMaker.h,v 1.2 2019/07/11 03:28:45 tnonaka Exp $
+// $Id: CentralityMaker.h,v 1.3 2020/01/16 23:52:58 tnonaka Exp $
 // $Log: CentralityMaker.h,v $
+// Revision 1.3  2020/01/16 23:52:58  tnonaka
+// gRefmult for Run14 and Run16 added
+//
 // Revision 1.2  2019/07/11 03:28:45  tnonaka
 // Toftray commented out
 //
@@ -52,6 +55,12 @@ class CentralityMaker {
     StRefMultCorr* getRefMult3Corr() ; // For refmult3
    // StRefMultCorr* getTofTrayMultCorr() ; // For TOF tray multiplicity
     StRefMultCorr* getgRefMultCorr()  ; // For grefmult //Run14 AuAu200GeV
+    StRefMultCorr* getgRefMultCorr_Run14_AuAu200_VpdMB5_P16id()  ; 
+    StRefMultCorr* getgRefMultCorr_Run14_AuAu200_VpdMB30_P16id()  ; 
+    StRefMultCorr* getgRefMultCorr_Run14_AuAu200_VpdMBnoVtx_LowMid_P16id()  ; 
+    StRefMultCorr* getgRefMultCorr_Run14_AuAu200_VpdMBnoVtx_High_P15ic()  ; // AuAu_200_production_high_2014
+    StRefMultCorr* getgRefMultCorr_Run16_AuAu200_VpdMB5_P16ij()  ; 
+    StRefMultCorr* getgRefMultCorr_Run16_AuAu200_VpdMBnoVtx_P16ij()  ; 
 
     // Print help messages
     void help() const ;
@@ -66,6 +75,13 @@ class CentralityMaker {
     StRefMultCorr* fRefMult3Corr ; // refmult3 based centrality
    // StRefMultCorr* fTofTrayMultCorr ; // tofTrayMult based centrality
     StRefMultCorr* fgRefMultCorr  ; // grefmult based centrality
+    StRefMultCorr* fgRefMultCorr_Run14_AuAu200_VpdMB5_P16id  ;
+    StRefMultCorr* fgRefMultCorr_Run14_AuAu200_VpdMB30_P16id  ;
+    StRefMultCorr* fgRefMultCorr_Run14_AuAu200_VpdMBnoVtx_P16id  ;
+    StRefMultCorr* fgRefMultCorr_Run14_AuAu200_VpdMBnoVtx_LowMid_P16id  ;
+    StRefMultCorr* fgRefMultCorr_Run14_AuAu200_VpdMBnoVtx_High_P15ic  ; // AuAu_200_production_high_2014
+    StRefMultCorr* fgRefMultCorr_Run16_AuAu200_VpdMB5_P16ij  ;
+    StRefMultCorr* fgRefMultCorr_Run16_AuAu200_VpdMBnoVtx_P16ij  ;
 
     ClassDef(CentralityMaker, 0)
 };

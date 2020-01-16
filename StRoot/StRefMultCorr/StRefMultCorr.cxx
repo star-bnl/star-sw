@@ -1,6 +1,9 @@
 //------------------------------------------------------------------------------
-// $Id: StRefMultCorr.cxx,v 1.4 2019/10/03 15:42:26 tnonaka Exp $
+// $Id: StRefMultCorr.cxx,v 1.5 2020/01/16 23:53:28 tnonaka Exp $
 // $Log: StRefMultCorr.cxx,v $
+// Revision 1.5  2020/01/16 23:53:28  tnonaka
+// gRefmult for Run14 and Run16 added
+//
 // Revision 1.4  2019/10/03 15:42:26  tnonaka
 // Some functions for pile-up rejection and trigger inefficiency corrections are added
 //
@@ -82,12 +85,14 @@ ClassImp(StRefMultCorr)
 
 //______________________________________________________________________________
 // Default constructor
-	StRefMultCorr::StRefMultCorr(const TString name)
-: mName(name)
+	StRefMultCorr::StRefMultCorr(const TString name, const TString subname, const TString libname)
+: mName(name), mSubName(subname), mLibName(libname)
 {
 	mRefMult = 0 ;
 	mVz = -9999. ;
 	mRefMult_corr = -1.0 ;
+
+	cout << mSubName.Data() <<"  "<< mLibName.Data() << endl;
 
 	// Clear all data members
 	clear() ;
@@ -349,6 +354,78 @@ Int_t StRefMultCorr::setParameterIndex(const Int_t RunId)
 			break ;
 		}
 	}
+	
+	// Multiple parameters/definitions for Run14/16 data
+	// Set mParameterIndex by hand
+	// For Run14 P16id production
+	// For Run16 P16ij production
+	if ( mName.CompareTo("grefmult", TString::kIgnoreCase) == 0 ){ 
+		if ( mSubName.CompareTo("Run14_AuAu200_VpdMB5", TString::kIgnoreCase) == 0 ){
+			if(RunId/1000000==15 && mLibName.CompareTo("P16id", TString::kIgnoreCase) == 0 ){
+				mParameterIndex = 0;
+				if(mVzEdgeForWeight.empty()){ 
+				setVzForWeight( nWeightVzBin_Run14_P16id, 
+						WeightVzEdgeMin_Run14_P16id,
+						WeightVzEdgeMax_Run14_P16id );
+				}
+				if(mgRefMultTriggerCorrDiffVzScaleRatio.empty()){ 
+				readScaleForWeight( nWeightgRefmultBin_Run14_P16id, 
+						weight_VpdMB5ToVpdMB30_Run14_P16id );
+				}
+			}
+		}
+		else if ( mSubName.CompareTo("Run16_AuAu200_VpdMB5", TString::kIgnoreCase) == 0 ){
+			if(mLibName.CompareTo("P16ij", TString::kIgnoreCase) == 0){
+				// prod.1
+				if(RunId/1000>=17039&&RunId/1000<=17130){
+					mParameterIndex = 4;
+					if(mVzEdgeForWeight.empty()) 
+					setVzForWeight( nWeightVzBin_Run16_P16ij_prod1, 
+							WeightVzEdgeMin_Run16_P16ij_prod1,
+							WeightVzEdgeMax_Run16_P16ij_prod1 );
+					if(mgRefMultTriggerCorrDiffVzScaleRatio.empty()) 
+					readScaleForWeight( nWeightgRefmultBin_Run16_P16ij_prod1, 
+							weight_VpdMB5ToVpdMBnoVtx_Run16_P16ij_prod1 );
+				}
+				// prod.2
+				else if(RunId/1000>=17169&&RunId/1000<=17179){
+					mParameterIndex = 5;
+					if(mVzEdgeForWeight.empty()) 
+					setVzForWeight( nWeightVzBin_Run16_P16ij_prod2, 
+							WeightVzEdgeMin_Run16_P16ij_prod2,
+							WeightVzEdgeMax_Run16_P16ij_prod2 );
+					if(mgRefMultTriggerCorrDiffVzScaleRatio.empty()) 
+					readScaleForWeight( nWeightgRefmultBin_Run16_P16ij_prod2, 
+							weight_VpdMB5ToVpdMBnoVtx_Run16_P16ij_prod2 );
+				}
+			}
+		}
+		else if ( mSubName.CompareTo("Run14_AuAu200_VpdMB30", TString::kIgnoreCase) == 0 ){
+			if(mLibName.CompareTo("P16id", TString::kIgnoreCase) == 0){
+				mParameterIndex = 1;
+			}
+		}
+		else if ( mSubName.CompareTo("Run14_AuAu200_VpdMBnoVtx_LowMid", TString::kIgnoreCase) == 0 ){
+			if(mLibName.CompareTo("P16id", TString::kIgnoreCase) == 0){
+				mParameterIndex = 2;
+			}
+		}
+		else if ( mSubName.CompareTo("Run14_AuAu200_VpdMBnoVtx_High", TString::kIgnoreCase) == 0 ){
+			if(mLibName.CompareTo("P15ic", TString::kIgnoreCase) == 0){
+				mParameterIndex = 3;
+			}
+		}
+		else if ( mSubName.CompareTo("Run16_AuAu200_VpdMBnoVtx", TString::kIgnoreCase) == 0 ){
+			if(mLibName.CompareTo("P16ij", TString::kIgnoreCase) == 0){
+				mParameterIndex = 6;
+			}
+		}
+		else{
+			mParameterIndex = -1;
+		}
+	}	
+
+//	cout <<"mParameterIndex = "<< mParameterIndex << endl;
 
 	if(mParameterIndex == -1)
 	{
@@ -385,7 +462,24 @@ Double_t StRefMultCorr::getRefMultCorr(
 	// better to check the <Refmult> vs ZDCX to see whether they are flat or not, add by Zaochen
 	const Double_t par0_lum = mPar_luminosity[0][mParameterIndex] ;
 	const Double_t par1_lum = mPar_luminosity[1][mParameterIndex] ;
-	const Double_t correction_luminosity = (par0_lum==0.000) ? 1.0 : 1.0/(1.0 + par1_lum/par0_lum*zdcCoincidenceRate/1000.);
+	Double_t correction_luminosity = (par0_lum==0.000) ? 1.0 : 1.0/(1.0 + par1_lum/par0_lum*zdcCoincidenceRate/1000.);
+
+	// from Run14, P16id, for VpdMB5/VPDMB30/VPDMB-noVtx, use refMult at ZdcX=30, other is at ZdcX=0;  
+	// -->changed by xlchen@lbl.gov, Run16 ~ 50kHz
+        if( 
+	   ( mSubName.CompareTo("Run14_AuAu200_VpdMB5", TString::kIgnoreCase) == 0 && mLibName.CompareTo("P16id", TString::kIgnoreCase) == 0 )
+	|| ( mSubName.CompareTo("Run14_AuAu200_VpdMB30", TString::kIgnoreCase) == 0 && mLibName.CompareTo("P16id", TString::kIgnoreCase) == 0 )
+	|| ( mSubName.CompareTo("Run14_AuAu200_VpdMBnoVtx_LowMid", TString::kIgnoreCase) == 0 && mLibName.CompareTo("P16id", TString::kIgnoreCase) == 0 )
+	|| ( mSubName.CompareTo("Run14_AuAu200_VpdMBnoVtx_High", TString::kIgnoreCase) == 0 && mLibName.CompareTo("P15ic", TString::kIgnoreCase) == 0 )
+	|| ( mSubName.CompareTo("Run16_AuAu200_VpdMB5", TString::kIgnoreCase) == 0 && mLibName.CompareTo("P16ij", TString::kIgnoreCase) == 0 )
+	|| ( mSubName.CompareTo("Run16_AuAu200_VpdMBnoVtx", TString::kIgnoreCase) == 0 && mLibName.CompareTo("P16ij", TString::kIgnoreCase) == 0 )
+	     ) {
+            float zdcmean = 0;
+            if(mYear[mParameterIndex] == 2014) zdcmean = 30.;
+            if(mYear[mParameterIndex] == 2016) zdcmean = 50.;
+            correction_luminosity = (par0_lum==0.0) ? correction_luminosity : correction_luminosity*(par0_lum+par1_lum*zdcmean)/par0_lum; 
+        }
+
 
 	// par0 to par5 define the parameters of a polynomial to parametrize z_vertex dependence of RefMult
 	const Double_t par0 = mPar_z_vertex[0][mParameterIndex];
@@ -480,6 +574,43 @@ void StRefMultCorr::readScaleForWeight(const Char_t* input)
 	cout << " [OK]" << endl;
 }
 
+// NEW version to read Vz dependent weights from header
+// Implemented inside StRefMultCorr::setParameterIndex(RunId)
+//______________________________________________________________________________
+void StRefMultCorr::readScaleForWeight(const Int_t nRefmultbin, const Double_t *weight)
+{
+
+	// Users must set the vz bin size by setVzForWeight() (see below)
+	if(mnVzBinForWeight==0) 
+	{
+		Error("StRefMultCorr::readScaleForWeight",
+				"Please call setVzForWeight() to set vz bin size");
+		return;
+	}
+
+	// Do not allow multiple calls
+	if(!mgRefMultTriggerCorrDiffVzScaleRatio.empty()) 
+	{
+		Error("StRefMultCorr::readScaleForWeight",
+				"scale factor has already set in the array");
+		return;
+	}
+
+	cout << "StRefMultCorr::readScaleForWeight  Read scale factor ..."
+		<< flush;
+	
+
+	for(Int_t i=0; i<nRefmultbin*mnVzBinForWeight; i++){
+		mgRefMultTriggerCorrDiffVzScaleRatio.push_back(weight[i]);
+	}
+
+
+	cout << " [OK]" << endl;
+}
+
+
+// In NEW version, setVzForWeight() is implemented inside StRefMultCorr::setParameterIndex(RunId)
+// It does not need to be called by users.
 //______________________________________________________________________________
 void StRefMultCorr::setVzForWeight(const Int_t nbin, const Double_t min, const Double_t max)
 {
@@ -511,9 +642,8 @@ void StRefMultCorr::setVzForWeight(const Int_t nbin, const Double_t min, const D
 //______________________________________________________________________________
 Double_t StRefMultCorr::getScaleForWeight() const
 {
-	// Special scale factor for global refmult in Run14
-	// to account for the difference between 
-	// VPDMB-30 and VPDMB-5
+	// Special scale factor for global refmult in Run14 (Run16)
+	// to account for the relative difference of VPDMB5 w.r.t VPDMB30 (VPDMBnoVtx) 
 
 	// return 1 if mgRefMultTriggerCorrDiffVzScaleRatio array is empty
 	if(mgRefMultTriggerCorrDiffVzScaleRatio.empty()) return 1.0 ;
@@ -526,6 +656,7 @@ Double_t StRefMultCorr::getScaleForWeight() const
 	{
 		if(mVz>mVzEdgeForWeight[j] && mVz<=mVzEdgeForWeight[j+1]) 
 		{
+			/*
 			//refMultbin=mgRefMultTriggerCorrDiffVzScaleRatio_2[j]->FindBin(mRefMult_corr+1e-6);
 			//VPD5weight=mgRefMultTriggerCorrDiffVzScaleRatio_2[j]->GetBinContent(refMultbin);
 			const Int_t refMultbin=static_cast<Int_t>(mRefMult_corr);
@@ -534,6 +665,15 @@ Double_t StRefMultCorr::getScaleForWeight() const
 			const Double_t tmpContent=VPD5weight;
 			if(tmpContent==0 || (mRefMult_corr>500 && tmpContent<=0.65)) VPD5weight=1.15;//Just because the value of the weight is around 1.15
 			if(mRefMult_corr>500 && tmpContent>=1.35) VPD5weight=1.15;//Remove those Too large weight factor,gRefmult>500
+			// this weight and reweight should be careful, after reweight(most peripheral),Then weight(whole range)
+			*/
+
+			const Int_t refMultbin=static_cast<Int_t>(mRefMult_corr);
+			VPD5weight=mgRefMultTriggerCorrDiffVzScaleRatio[refMultbin*mnVzBinForWeight + j];
+			const Double_t tmpContent=VPD5weight;
+			// 1) Ratios fluctuate too much at very high gRefmult due to low statistics
+			// 2) Avoid some events with too high weight
+			if(mRefMult_corr>550 && (tmpContent>3.0||tmpContent<0.3)) VPD5weight=1.0;
 			// this weight and reweight should be careful, after reweight(most peripheral),Then weight(whole range)
 		}
 	}
@@ -642,12 +782,12 @@ Double_t StRefMultCorr::getWeight() //const
 	}
 
 
-	//------------for Run14----------------
-	// Special scale factor for global refmult
+	//------------for Run14 and Run16----------------
+	// Special scale factor for global refmult depending on Vz window
 	// for others, scale factor = 1
 	const Double_t scale = getScaleForWeight() ; 
 	Weight *= scale ;
-	//------------for Run14----------------
+	//------------for Run14 and Run16----------------
 
 	//------------for Run18 27 GeV AuAu---------------
 	const Double_t RefMult_ShapeWeight_SubVz2Center = getShapeWeight_SubVz2Center();
@@ -827,6 +967,7 @@ void StRefMultCorr::readHeaderFile()
 	//vector<string> sParam_ShapeWeight = StringSplit(getParamX_ShapeWeight(1,1),',');
 	//for(int ib=0;ib<sParam_ShapeWeight.size(); ib++) cout<<"sParam_ShapeWeight[i]: "<<sParam_ShapeWeight[ib]<<endl;
 
+
 	const Int_t refX = getRefX();
 	const Int_t nID =  getNumberOfDatasets();
 
@@ -923,6 +1064,20 @@ void StRefMultCorr::readBadRunsFromHeaderFile()
 	}
 	
 	cout<<"read in nBadRun_refmult_2011: "<<nBadRun_refmult_2011<<endl;
+
+	for(Int_t i=0; i<nBadRun_grefmult_2014; i++)
+	{
+		mBadRun.push_back(badrun_grefmult_2014[i]);
+	}
+	
+	cout<<"read in nBadRun_grefmult_2014: "<<nBadRun_grefmult_2014<<endl;
+
+	for(Int_t i=0; i<nBadRun_grefmult_2016; i++)
+	{
+		mBadRun.push_back(badrun_grefmult_2016[i]);
+	}
+	
+	cout<<"read in nBadRun_grefmult_2016: "<<nBadRun_grefmult_2016<<endl;
 	
 	for(Int_t i=0; i<nBadRun_refmult_2017; i++)
 	{
