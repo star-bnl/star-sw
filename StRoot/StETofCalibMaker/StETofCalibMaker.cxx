@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StETofCalibMaker.cxx,v 1.7 2019/12/19 02:19:23 fseck Exp $
+ * $Id: StETofCalibMaker.cxx,v 1.8 2020/01/16 03:10:33 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofCalibMaker.cxx,v $
+ * Revision 1.8  2020/01/16 03:10:33  fseck
+ * update handling of reset time for new cases in Run20
+ *
  * Revision 1.7  2019/12/19 02:19:23  fseck
  * use known pulser time differences inside one Gbtx to recover missing pulser signals
  *
@@ -1095,7 +1098,7 @@ StETofCalibMaker::processStEvent()
     }
 
     mTriggerTime = triggerTime( etofHeader );
-    mResetTime   = resetTime(   etofHeader );
+    mResetTime   = fmod( resetTime( etofHeader ), eTofConst::bTofClockCycle );
 
     std::map< unsigned int, std::vector< unsigned int > > pulserCandMap;
 
@@ -1204,7 +1207,7 @@ StETofCalibMaker::processMuDst()
     LOG_INFO << "processMuDst() - # fired eTOF digis : " << nDigis << endm;
 
     mTriggerTime = triggerTime( ( StETofHeader* ) etofHeader );
-    mResetTime   = resetTime(   ( StETofHeader* ) etofHeader );
+    mResetTime   = fmod( resetTime( ( StETofHeader* ) etofHeader ), eTofConst::bTofClockCycle );
 
     std::map< unsigned int, std::vector< unsigned int >> pulserCandMap;
 
@@ -1955,8 +1958,6 @@ StETofCalibMaker::resetTime( StETofHeader* header )
     }
 
 
-
-
     while( countsStarTs.size() > 0 ) {
         auto it = std::max_element( countsStarTs.begin(), countsStarTs.end(),
                                     []( const pair< uint64_t, short >& p1, const pair< uint64_t, short >& p2 ) {
@@ -1964,11 +1965,14 @@ StETofCalibMaker::resetTime( StETofHeader* header )
 
         double resetTime = it->first * eTofConst::coarseClockCycle;
 
-        // trigger - reset time should be on the order of a few second up to 45 minutes ( run length )
-        if( fabs( mTriggerTime - resetTime ) * 1.e-9 < 3000 ) {
+
+        // Run19: trigger - reset time should be on the order of a few second up to 120 minutes (7.2*10^12 ns), i.e. max. run length
+        // Run20: difference can be negative due to eTOF DAQ restarts at the beginning of runs while eTOF is put to "BUSY" in run control
+        if( mTriggerTime - resetTime < 7.2e12 ) {
             if( mDebug ) {
-                LOG_DEBUG << "reset time (ns): " << resetTime << " --> difference to trigger time in secoonds: " << ( mTriggerTime - resetTime ) * 1.e-9 << endm;
+                LOG_INFO << "reset time (ns): " << resetTime << " --> difference to trigger time in seconds: " << ( mTriggerTime - resetTime ) * 1.e-9 << endm;
             }
+
             return resetTime;
         }
         else {
