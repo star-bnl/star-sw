@@ -3747,7 +3747,7 @@ double EmxSign(int n,const double *e)
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.78 2017/06/27 23:45:39 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.80 2020/01/15 19:18:00 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -3763,6 +3763,9 @@ double EmxSign(int n,const double *e)
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.80  2020/01/15 19:18:00  perev
+ * BACKWARD
+ *
  * Revision 1.78  2017/06/27 23:45:39  perev
  * Coverity
  *
