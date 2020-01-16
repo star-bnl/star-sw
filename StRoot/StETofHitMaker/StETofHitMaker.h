@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHitMaker.h,v 1.4 2019/12/10 15:58:29 fseck Exp $
+ * $Id: StETofHitMaker.h,v 1.5 2020/01/16 03:39:39 fseck Exp $
  *
  * Author: Philipp Weidenkaff & Florian Seck, April 2018
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StETofHitMaker.h,v $
+ * Revision 1.5  2020/01/16 03:39:39  fseck
+ * add possibility to calculate VPD start time
+ *
  * Revision 1.4  2019/12/10 15:58:29  fseck
  * ignore digis in dead time software-wise + possibility to correct clock jumps based on hit position via setting a flag
  *
@@ -75,8 +78,6 @@ public:
     void setDoQA( const bool doQA );
     void setDebug( const bool debug );
 
-
-
 private:
     // internal subfunctions ----------------------------------------------------------------------
     void bookHistograms();
@@ -96,6 +97,7 @@ private:
     void assignAssociatedHits( const bool isMuDst ); // write associated hits into digis
 
     double startTime();
+    void   startTimeVpd( double& startTime, double& vertexVz );
 
     void fillUnclusteredHitQA( const double& tstart, const bool isMuDst );
 
@@ -135,10 +137,10 @@ private:
     Double_t mSoftwareDeadTime;      // dead time introduced in software to reject after pulses on the same channel
     Bool_t   mDoClockJumpShift;      // correct for clock jumps on one side
 
-
     // histograms for QA --------------------------------------------------------
     Bool_t                    mDoQA;
     Bool_t                    mDebug;
+
     std::string                    mHistFileName;
     std::map< std::string, TH1* >  mHistograms;
 
