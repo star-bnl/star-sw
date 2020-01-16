@@ -11,16 +11,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-<<<<<<< StTriggerSimuMaker.cxx
-// $Id: StTriggerSimuMaker.cxx,v 1.65 2017/12/29 16:54:07 zchang Exp $
-=======
-//<<<<<<< StTriggerSimuMaker.cxx
 // $Id: StTriggerSimuMaker.cxx,v 1.66 2020/01/13 20:45:47 zchang Exp $
-//=======
-// $Id: StTriggerSimuMaker.cxx,v 1.66 2020/01/13 20:45:47 zchang Exp $
-//>>>>>>> 1.61
 
->>>>>>> 1.66
 // MySQL C API
 //#include "mysql.h"
 #include <mysql/mysql.h>

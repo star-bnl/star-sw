@@ -1,7 +1,19 @@
-// $Id: StMagFMaker.cxx,v 1.17 2018/06/21 01:47:12 perev Exp $
+// $Id: StMagFMaker.cxx,v 1.19 2020/01/15 02:01:26 perev Exp $
 // $Log: StMagFMaker.cxx,v $
-// Revision 1.17  2018/06/21 01:47:12  perev
-// iTPCheckIn
+// Revision 1.19  2020/01/15 02:01:26  perev
+// Option to change mag factor added
+//
+// Revision 1.18  2018/06/29 21:46:21  smirnovd
+// Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
+//
+// Revert "NoDead option added"
+// Revert "Fill mag field more carefully"
+// Revert "Assert commented out"
+// Revert "Merging with TPC group code"
+// Revert "Remove too strong assert"
+// Revert "Restore removed by mistake line"
+// Revert "Remove not used anymore file"
+// Revert "iTPCheckIn"
 //
 // Revision 1.16  2010/09/01 20:21:21  fisyak
 // remove dependence on St_geant_Maker
@@ -108,9 +120,31 @@ Int_t StMagFMaker::InitRun(Int_t RunNo)
     StarMagField::Instance()->SetStarMagFieldRotation(&row->r00);
   }
 #endif
-  double x[3]={0},b[3];
-  StarMagField::Instance()->BField(x,b);
-  Info("InitRun","Mag Field(0,0,0) = %g",b[2]);
+  float myScale = (*SAttr("ScaleFactor"))? DAttr("ScaleFactor"):-999;
+  Float_t  fScale = St_MagFactorC::instance()->ScaleFactor();
+  assert(fabs(fScale)>0.005);
+  if (myScale>-999) {
+    if(myScale != fScale) {
+      gMessMgr->Info() <<  Form("StMagFMaker::InitRun Attr scaleFactor %g is different from default %g",
+				myScale,fScale) << endm;
+      gMessMgr->Info() <<  "StMagFMaker::InitRun Attr scaleFactor is assumed" << endm;
+      fScale = myScale;
+    }
+  }
+
+  if (TMath::Abs(fScale) < 1e-3) fScale = 1e-3;
+  gMessMgr->Info() << "StMagFMaker::InitRun active mode ";
+  if (! StarMagField::Instance()) {
+    new StarMagField ( StarMagField::kMapped, fScale);
+    gMessMgr->Info() << "Initialize STAR magnetic field with scale factor " << fScale << endm;
+  }
+  else if (StarMagField::Instance()) {
+    StarMagField::Instance()->SetFactor(fScale);
+    gMessMgr->Info() << "Reset STAR magnetic field with scale factor " << fScale << endm;
+  }
+  double myX[3]={0},myB[3];
+  StarMagField::Instance()->BField(myX,myB);
+  gMessMgr->Info() << "StMagFMaker::InitRun Bz(0) = " << myB[2] << endm;
 
   return kStOK;
 }

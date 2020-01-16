@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.33 2018/06/29 21:46:25 smirnovd Exp $
+ * $Id: StarMagField.cxx,v 1.34 2020/01/15 02:26:57 perev Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.34  2020/01/15 02:26:57  perev
+ * Print++
+ *
  * Revision 1.33  2018/06/29 21:46:25  smirnovd
  * Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
  *
@@ -437,9 +440,14 @@ StarMagField::StarMagField ( EBField map, Float_t factor,
     if (fLock) printf("StarMagField is locked, no modification from DB will be accepted\n");
   }
   ReadField() ;                       // Read the Magnetic
-#if defined(__ROOT__) && defined(__RotateMagField__)
+#if defined(__ROOT__) 
+#if  defined(__RotateMagField__)
   fStarMagFieldRotation = TGeoRotation("StarMagFieldRotation");
-#endif /* __ROOT__ &&  __RotateMagField__*/
+#endif /* __RotateMagField__*/
+  float myX[3]={0},myB[3];
+  BField(myX,myB);
+  printf ("StarMagField(0,0,0) = %g",myB[2]);
+#endif /* __ROOT__ */
 }
 //________________________________________
 /// B field in Cartesian coordinates - 2D field (ie. Phi symmetric)
