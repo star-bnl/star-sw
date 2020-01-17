@@ -627,6 +627,10 @@ int fcs_data_c::event()
 				return 0 ;
 			}
 
+			//if(tb_cou < 5) {
+			//	LOG(TERR,"%d: %d = 0x%04X",ch,tb_cou,d) ;
+			//}
+
 			adc[tb_cou] = d ;	//but store the full data, with flags
 
 			// do I need any of this below? Nah...
@@ -660,7 +664,7 @@ int fcs_data_c::event()
 
 		//LOG(TERR,"0x%08X 0x%08X 0x%08X",dta_p[0],dta_p[1],dta_p[2]) ;
 
-		LOG(DBG,"Ch %d, %d ADCs, trg 0x%05X",ch,tb_cou,trg_word) ;
+		//LOG(TERR,"Ch %d, %d ADCs, trg 0x%05X",ch,tb_cou,trg_word) ;
 		return 1 ;
 	}
 
@@ -938,9 +942,10 @@ void fcs_data_c::ped_stop(int bad_ped)
 	fprintf(pedf,"\n") ;
 
 	for(int c=0;c<32;c++) {
-		LOG(TERR,"PEDs: S%02d:%d: %d: %.1f %.1f - %.1f %.1f",sector,rdo,c,
-		    ped[s][r].mean[c],ped[s][r].rms[c],
-		    ped[s][r].mean_8[c],ped[s][r].rms_8[c]) ;
+		LOG(TERR,"PEDs: S%02d:%d: %d: %.1f [0x%03X] %.2f - %.1f %.1f [cou %d]",sector,rdo,c,
+		    ped[s][r].mean[c],(int)ped[s][r].mean[c],
+		    ped[s][r].rms[c],
+		    ped[s][r].mean_8[c],ped[s][r].rms_8[c],ped[s][r].cou[c]) ;
 
 		
 		fprintf(pedf,"%d %d %d %d %d %d %f %f %f %f\n",sector,rdo,d,n,p,c,

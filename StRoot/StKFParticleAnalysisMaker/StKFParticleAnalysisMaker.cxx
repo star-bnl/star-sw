@@ -184,6 +184,7 @@ Int_t StKFParticleAnalysisMaker::Init()
     gFile = curFile;
     gDirectory = curDirectory;
   }
+#if 0
   const Char_t *path  = "/gpfs01/star/pwg/pfederic/qVectors/StRoot/StRefMultCorr/macros";
   const Char_t *File  = "weight_grefmult_VpdnoVtx_Vpd5_Run16.txt";
   Char_t *file = gSystem->Which(path,File,kReadPermission);
@@ -196,6 +197,7 @@ Int_t StKFParticleAnalysisMaker::Init()
     fRefmultCorrUtil->readScaleForWeight("/gpfs01/star/pwg/pfederic/qVectors/StRoot/StRefMultCorr/macros/weight_grefmult_VpdnoVtx_Vpd5_Run16.txt"); //for new StRefMultCorr, Run16, SL16j
   }
   delete [] file;
+#endif
   //Initialise the chain with files containing centrality and reaction plane
   if(fFlowAnalysis)
   {
