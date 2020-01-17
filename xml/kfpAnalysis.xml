@@ -34,16 +34,17 @@
 #  touch ${bla}
 
 #  rsync -c ${SUBMITTINGDIRECTORY}/${input}/*picoDst.root .
-  rsync  ${input}/*.picoDst.root .
+##  rsync  ${input}/*.picoDst.root .
   set idNdx = kFALSE;
   echo ${SUBMITTINGDIRECTORY} | grep dNdx 
   if (! $? )  set idNdx = kTRUE;
-  root.exe -q -b -x  'kfpAnalysis.C(1000000,"./*.picoDst.root","'${output}'","y2020",'${idNdx}')' &gt;&amp; ${log}
+##  root.exe -q -b -x  'kfpAnalysis.C(1000000,"./*.picoDst.root","'${output}'","y2020",'${idNdx}')' &gt;&amp; ${log}
+  root.exe -q -b -x  'kfpAnalysis.C(1000000,"'${input}'/*.picoDst.root","'${output}'","y2020",'${idNdx}')' &gt;&amp; ${log}
 #  mv ${outputb} ${output}
 #  mv ${logb} ${log}
 #  rm ${bla}
 #end
-  rm -rf ${CURRENT_DIR}
+##  rm -rf ${CURRENT_DIR}
         </command>
     <ResourceUsage>
       <Priority>99</Priority>

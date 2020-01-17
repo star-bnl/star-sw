@@ -1,6 +1,9 @@
 //------------------------------------------------------------------------------
-// $Id: StRefMultCorr.h,v 1.4 2019/10/03 15:44:21 tnonaka Exp $
+// $Id: StRefMultCorr.h,v 1.5 2020/01/16 23:53:31 tnonaka Exp $
 // $Log: StRefMultCorr.h,v $
+// Revision 1.5  2020/01/16 23:53:31  tnonaka
+// gRefmult for Run14 and Run16 added
+//
 // Revision 1.4  2019/10/03 15:44:21  tnonaka
 // Some functions for pile-up rejection and trigger inefficiency corrections are added
 //
@@ -91,7 +94,12 @@ class StRefMultCorr
 		// "refmult3"  - reference multiplicity defined in |eta|<0.5 without protons
 		// "toftray"   - TOF tray multiplicity
 		// "grefmult"  - global reference multiplicity defined in |eta|<0.5,dca<3,nHitsFit>10
-		StRefMultCorr(const TString name="refmult");
+		// Specify the type of data sets (in case there are multiple prameters/definitions in the same runs)
+		// "Def"
+		// "VpdMB5"
+		// "VpdMB30"
+		// "VpdMBnoVtx"
+		StRefMultCorr(const TString name="refmult", const TString subname="Def", const TString libname="Def");
 		virtual ~StRefMultCorr(); /// Default destructor
 
 		// Bad run rejection
@@ -135,6 +143,8 @@ class StRefMultCorr
 
 	private:
 		const TString mName ; // refmult, refmult2, refmult3 or toftray (case insensitive)
+		const TString mSubName ; // specify triggers, in case there are multiple parameters/definitions in the same runs 
+		const TString mLibName ; // specify library, in case the centrality definition depends on productions 
 
 		// Functions
 		void clear() ; /// Clear all arrays
@@ -201,6 +211,9 @@ class StRefMultCorr
 		//weight refmult shape in each Vz bin to what in the center (|Vz|<10cm), add by Zaochen
 		Double_t getShapeWeight_SubVz2Center() ;
 		//---------------------------------------------------------
+		//
+		// Read scale factor from header file
+		void readScaleForWeight(const Int_t nRefmultBin, const Double_t *weight) ;
 
 		ClassDef(StRefMultCorr, 0)
 };

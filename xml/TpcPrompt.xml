@@ -8,7 +8,7 @@
    setenv STARFPE NO
 #   setenv NODEBUG yes
 #   setup 64b
-   starver TFG19d
+#   starver TFG19d
 #   staver .DEV2 
   foreach  evtsFile(`cat $FILELIST`) 
   set file2 = `basename ${evtsFile} .event.root`;
@@ -17,15 +17,17 @@
   set logFile  = ${file}B.log
 #  set f=`find . -maxdepth 1 -type f -name "*${file}*.root"`
 #  if ("${f}" == "") then
-    root.exe -x -q -b 'TpcPrompt.C(1000000,"'${evtsFile}'","'${file}'.root")' &gt;&amp; ${logFile}
+#    root.exe -x -q -b 'TpcPrompt.C(1000000,"'${evtsFile}'","'${file}'.root")' &gt;&amp; ${logFile}
+    root.exe -x -q -b 'TpcPrompt.C(1000,"'${evtsFile}'","'${file}'.root")' &gt;&amp; ${logFile}
 #  endif
   end
 </command>
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/TpcRS_2016sdt/*event.root" /> -->
-<input URL="command:dEdxSample.pl" />
+<!-- <input URL="command:dEdxSample.pl" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2014/TFG17vnoV5/*event.root" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2014/TFG17vnoV5.Altro4/*event.root" /> -->
 <!-- <input URL="file:/net/l401/data/scratch2/fisyak/reco/2019/StiCA/054/*/*event.root" /> -->
 <!-- <input URL="file:/net/l401/data/scratch2/fisyak/reco/2019/StiCA/057/*/*event.root" /> -->
 <!-- <input URL="file:/hlt/cephfs/daq/2019/06*/*/hlt*.daq" /> -->
+<input URL="file:/gpfs01/star/daq/2019/091/20091*/*.daq" />
 </job>
