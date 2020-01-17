@@ -1,5 +1,9 @@
+/* 
+   Imported from Maksym Zyzak 01/14/2020
+   
+ */
 void DrawSignalBg7(TString nSt="") {
-
+#if 1
   TStyle *plain = new TStyle("Plain","Plain Style(no colors/fill areas)");
   plain->SetCanvasBorderMode(0);
   plain->SetPadBorderMode(0);
@@ -20,12 +24,15 @@ void DrawSignalBg7(TString nSt="") {
   plain->SetPadTopMargin(0.075);
   plain->SetPadBottomMargin(0.18);
   plain->cd();
-
+#endif
+#if 0
 //   TString name1 = "../KFParticleFinder_1000M.root";
   TString name1 = "/home/mzyzak/data/STAR_2019/data/14.root";
 
   TFile *f1 = new TFile(name1.Data(),"read");
-
+#else
+  TFile *f1 = gDirectory;
+#endif
   const int NParticles = 22;
 
   TH1D *hPart[NParticles];
@@ -424,6 +431,7 @@ void DrawSignalBg7(TString nSt="") {
     legends[NPad-1]->Draw();
     NPad++;
   }
-
-  c1->SaveAs("2019_14GeV_170M.pdf");
+  TString pngName(gDirectory->GetName());
+  pngName.ReplaceAll(".root",".png");
+  c1->SaveAs(pngName);
 }

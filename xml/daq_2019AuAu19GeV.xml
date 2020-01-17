@@ -3,7 +3,7 @@
         <command>
          cd ${SUBMITTINGDIRECTORY}
    setenv STARFPE NO
-#   setenv NODEBUG yes
+   unsetenv NODEBUG 
 #   setup 64b
 #   starver .DEV2
 #  echo $INPUTFILE0 | grep ':'
