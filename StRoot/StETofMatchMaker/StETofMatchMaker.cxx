@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofMatchMaker.cxx,v 1.9 2020/01/16 03:53:41 fseck Exp $
+ * $Id: StETofMatchMaker.cxx,v 1.10 2020/01/18 02:37:10 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StETofMatchMaker.cxx,v $
+ * Revision 1.10  2020/01/18 02:37:10  fseck
+ * fixing StEvent part of eTOF-only T0 calculation
+ *
  * Revision 1.9  2020/01/16 03:53:41  fseck
  * added etof-only and hybrid btof-etof start time calculations for on-the-fly corrections
  *
@@ -2082,6 +2085,8 @@ StETofMatchMaker::startTimeETof( const eTofHitVec& finalMatchVec, unsigned int& 
     std::vector< double > t0_cand;
     double t0_sum = 0.;
 
+    nCand_etofT0 = 0;
+
     for( auto& match : finalMatchVec ) {
         if( !match.isPrimary ) continue;
 
@@ -2097,16 +2102,20 @@ StETofMatchMaker::startTimeETof( const eTofHitVec& finalMatchVec, unsigned int& 
         double nsigmaP  = -999.;
 
         if( mIsStEventIn ) { // StEvent processing ...
-            StETofHit* aHit = dynamic_cast< StETofHit* > ( mEvent->etofCollection()->etofHits().at( match.index2ETofHit ) );
-            if( !aHit ) continue;
+            StSPtrVecTrackNode& nodes = mEvent->trackNodes();
 
             // global track
-            StTrack* gTrack = aHit->associatedTrack();
-            if( !gTrack ) continue;
+            StGlobalTrack* gTrack = dynamic_cast< StGlobalTrack* > ( nodes[ match.trackId ]->track( global ) );
+            if( !gTrack ) {
+                continue;
+            }
 
             // primary track
-            StTrack* pTrack = gTrack->node()->track( primary );
-            if( pTrack ) continue;
+            StPrimaryTrack* pTrack = dynamic_cast< StPrimaryTrack* > ( gTrack->node()->track( primary ) );
+            if( !pTrack ) {
+                continue;
+            }
+
 
             momentum = pTrack->geometry()->momentum().mag();
             charge   = pTrack->geometry()->charge();
@@ -2124,7 +2133,7 @@ StETofMatchMaker::startTimeETof( const eTofHitVec& finalMatchVec, unsigned int& 
             }
 
             StPhysicalHelixD theHelix = mOuterTrackGeometry ? gTrack->outerGeometry()->helix() : gTrack->geometry()->helix();
-            pathLength = theHelix.pathLength( pTrack->vertex()->position() );
+            pathLength -= theHelix.pathLength( pTrack->vertex()->position() );
         }
         else { // MuDst processing ...
             StMuETofHit* aHit = mMuDst->etofHit( match.index2ETofHit );
@@ -2137,6 +2146,7 @@ StETofMatchMaker::startTimeETof( const eTofHitVec& finalMatchVec, unsigned int& 
             // primary track
             StMuTrack* pTrack = aHit->primaryTrack();
             if( !pTrack ) continue;
+
 
             momentum = pTrack->momentum().mag();
             charge   = pTrack->charge();
@@ -2241,14 +2251,12 @@ StETofMatchMaker::startTime( const eTofHitVec& finalMatchVec ) {
 
     double t0Diff = moduloDist( tstartETof - tstartBTof, eTofConst::bTofClockCycle );
 
-    if( mDoQA ) {
-        LOG_INFO << "startTime(): -- start time comparison: bTOF " << tstartBTof << "  eTOF " << tstartETof;
-        LOG_INFO << " nCand_etofT0: " << nCand_etofT0 << "  difference: " << t0Diff << " mT0corr: " << mT0corr << endm;
+    LOG_INFO << "startTime(): -- start time comparison: bTOF " << tstartBTof << "  eTOF " << tstartETof;
+    LOG_INFO << " nCand_etofT0: " << nCand_etofT0 << "  difference: " << t0Diff << " mT0corr: " << mT0corr << endm;
 
-        if( tstartBTof != -9999. && tstartETof != -9999. ) {
-            mHistograms.at( "startTimeDiff"       )->Fill( t0Diff );
-            mHistograms.at( "startTimeDiff_nCand" )->Fill( t0Diff, nCand_etofT0 );
-        }
+    if( mDoQA && tstartBTof != -9999. && tstartETof != -9999. ) {
+        mHistograms.at( "startTimeDiff"       )->Fill( t0Diff );
+        mHistograms.at( "startTimeDiff_nCand" )->Fill( t0Diff, nCand_etofT0 );
     }
 
     //---------------------------------
