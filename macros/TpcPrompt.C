@@ -9,7 +9,8 @@ Draw();
  root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("Z","GP","R",-1,-1,1,1,10,1,206,212)' >& Z.log &
  root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("ZL","GP","R",-1,-1,1,1,10,1,0,3.0)' >& ZL.log &
  root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("T","GP","R",-1,-1,1,1,10,1,0,12.0)' >& T.log &
- root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("ZLM","Freq","R",-1,-1,1,1,10,1,200,220.0)' >& TFreq.log &
+ root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("ZLM","Freq","R",-1,-1,1,1,10,1,200,220.0)' >& ZLMFreq.log &
+ root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("TM","Freq","R",-1,-1,1,1,10,1,200,220.0)' >& TMFreq.log &
 */
 #if !defined(__CINT__)
 
