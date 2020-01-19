@@ -444,9 +444,11 @@ StarMagField::StarMagField ( EBField map, Float_t factor,
 #if  defined(__RotateMagField__)
   fStarMagFieldRotation = TGeoRotation("StarMagFieldRotation");
 #endif /* __RotateMagField__*/
+#if 0
   float myX[3]={0},myB[3];
   BField(myX,myB);
   printf ("StarMagField(0,0,0) = %g",myB[2]);
+#endif
 #endif /* __ROOT__ */
 }
 //________________________________________

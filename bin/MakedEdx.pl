@@ -1706,7 +1706,7 @@ my $NEvents = 100000;
 # Run XVIII
 # A.Lebedev, 07/24/18: May 3, 2010, about 19:45 TPC gas system failed and in ~ hour I restored. 
 # production_isobar_2018               2018-03-12 16:24:39 GMT - 2018-05-09 11:41:42 GMT days  71 - 129
-# sobar_2018_oldaltro run = 19116020   2018-04-26 12:19:19 GMT - 2018-04-26 12:46:49 GMT day  116
+# Isobar_2018_oldaltro run = 19116020   2018-04-26 12:19:19 GMT - 2018-04-26 12:46:49 GMT day  116
 # production_27GeV_fixedTarget_2018    2018-05-18 23:16:02 GMT - 2018-05-29 01:43:36 GMT days 138 - 149
 # production_3p85GeV_fixedTarget_2018  2018-05-31 07:14:46 GMT - 2018-06-04 12:11:00 GMT days 151 - 155
 # 27GeV_production_2018                2018-06-04 12:11:00 GMT - 2018-06-17 22:40:27 GMT days 155 - 168
