@@ -24,11 +24,14 @@
 #root.exe -q -b 'CheckDistortion.C("CorrY,OSpaceZ2,OGridLeak3D",20190311,0)' >& CorrY,OSpaceZ2,OGridLeak3DRFF.log 
 #root.exe -q -b 'CheckDistortion.C("CorrY,OSpaceZ2,OGridLeakFull",20190311,0)' >& CorrY,OSpaceZ2,OGridLeakFullRFF.log
 #2019 TFG19e "genIn,MC.2019,McTpcAna,-bbcSim,Stx,KFVertex,VFMinuitX,-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrY,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco,sdt20190311,RunG.1"
- set tag = "noinput,MC.2019,McTpcAna,-bbcSim,Stx,KFVertex,VFMinuitX,-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrY,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco,sdt20190311,RunG.1"
- root.exe -q -b 'CheckDistortion.C("NewTpcAlignment,'${tag}'",20191218,114628)' >& ${tag}.log &
-# 2020 CorrY,OSpaceZ2,OGridLeakFull => NewTpcAlignment : OBmap OPr40 OIFC OSpaceZ2 OShortR OGridLeakFull OSectorAlign : 20191218.114628 
+# set tag = "noinput,MC.2019,McTpcAna,-bbcSim,Stx,KFVertex,VFMinuitX,-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrY,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco,sdt20190311,RunG.1"
+# root.exe -q -b 'CheckDistortion.C("NewTpcAlignment,'${tag}'",20191218,114628)' >& ${tag}.log &
 foreach tag (CorrY,OSpaceZ2,OGridLeakFull  OBmap OPr40 OIFC OSpaceZ2 OShortR OGridLeakFull OSectorAlign)
-  root.exe -q -b 'CheckDistortion.C("NewTpcAlignment,'${tag}'",20191218,114628)' >& ${tag}.log &
+  root.exe -q -b 'CheckDistortion.C("NewTpcAlignment,'${tag}',sdt20190311")' >& ${tag}.log &
 end
-set tag = "noinput,P2020a,StiCA,-evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault"
-root.exe -q -b 'CheckDistortion.C("NewTpcAlignment,'${tag}'",20191218,114628)' >& ${tag}.log &
+# 2020 CorrY,OSpaceZ2,OGridLeakFull => NewTpcAlignment : OBmap OPr40 OIFC OSpaceZ2 OShortR OGridLeakFull OSectorAlign : 20191218.114628 
+#foreach tag (CorrY,OSpaceZ2,OGridLeakFull  OBmap OPr40 OIFC OSpaceZ2 OShortR OGridLeakFull OSectorAlign)
+#  root.exe -q -b 'CheckDistortion.C("NewTpcAlignment,'${tag}'",20191218,114628)' >& ${tag}.log &
+#end
+#set tag = "noinput,P2020a,StiCA,-evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault"
+#root.exe -q -b 'CheckDistortion.C("NewTpcAlignment,'${tag}'",20191218,114628)' >& ${tag}.log &
