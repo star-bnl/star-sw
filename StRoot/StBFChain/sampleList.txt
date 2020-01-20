@@ -4,16 +4,17 @@
 
 job0{
 inputfile = /star/rcf/test/daq/2014/171/st_physics_15171039_raw_2000008.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2014/AuHe3_production_2014
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2014/AuHe3_production_2014
 chain = P2014a,btof,mtd,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
+
 
 ## auau 200GeV run 2014 mid with geometry ry2014
 
 job1{
 inputfile = /star/rcf/test/daq/2014/146/st_mtd_15146050_raw_1000030.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2014/AuAu200_production_mid_2014
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2014/AuAu200_production_mid_2014
 chain = P2014a,btof,mtd,mtdCalib,pxlHit,istHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
@@ -22,7 +23,7 @@ nevents = 500
 
 job2{
 inputfile = /star/rcf/test/daq/2014/164/st_physics_15164004_raw_2000022.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2014/AuAu200_production_low_2014
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2014/AuAu200_production_low_2014
 chain = P2014a,btof,mtd,mtdCalib,pxlHit,istHit,sstHit,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
@@ -32,7 +33,7 @@ nevents = 500
 
 job3{
 inputfile = /star/rcf/test/daq/2014/086/st_physics_15086051_raw_2500017.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2014/AuAu200_production_2014
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2014/AuAu200_production_2014
 chain = P2014a,btof,mtd,mtdCalib,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
@@ -41,7 +42,7 @@ nevents = 500
 
 job4{
 inputfile = /star/rcf/test/daq/2014/069/st_physics_15069008_raw_2500008.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2014/production_15GeV_2014
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2014/production_15GeV_2014
 chain = P2014a,btof,mtd,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 1000
 }
@@ -50,7 +51,7 @@ nevents = 1000
 
 job5{
 inputfile = /star/rcf/test/daq/2013/079/st_physics_14079008_raw_1920004.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2013/pp500_production_2013
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2013/pp500_production_2013
 chain = pp2013a,btof,mtd,fmsDat,fgt,fgtPoint,VFPPVnoCTB,beamline,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 1000
 }
@@ -59,758 +60,699 @@ nevents = 1000
 
 job6{
 inputfile = /star/rcf/test/daq/2012/044/st_physics_13044030_raw_2010001.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2012.AgML/pp200_production_2012
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2012.AgML/pp200_production_2012
 chain = pp2012b,AgML,mtdDat,btof,fmsDat,VFPPVnoCTB,beamline,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt
-nevents = 1000
-}
-
-## pp 200GeV run 2012
-
-job7{
-inputfile = /star/rcf/test/daq/2012/044/st_physics_13044030_raw_2010001.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2012/pp200_production_2012
-chain = pp2012b,mtdDat,btof,fmsDat,VFPPVnoCTB,beamline,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 1000
 }
 
 ## pp 500GeV run 2012 with AgML geometry
 
-job8{
+job7{
 inputfile = /star/rcf/test/daq/2012/082/st_physics_13082004_raw_1020004.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2012.AgML/pp500_production_2012
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2012.AgML/pp500_production_2012
 chain = pp2012b,AgML,mtdDat,btof,fmsDat,VFPPVnoCTB,beamline,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt
-nevents = 1000
-}
-
-## pp 500GeV run 2012
-
-job9{
-inputfile = /star/rcf/test/daq/2012/082/st_physics_13082004_raw_1020004.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2012/pp500_production_2012
-chain = pp2012b,mtdDat,btof,fmsDat,VFPPVnoCTB,beamline,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 1000
 }
 
 ## UU 193GeV run 2012 with AgML geometry
 
-job10{
+job8{
 inputfile = /star/rcf/test/daq/2012/115/st_physics_13115004_raw_2010002.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2012.AgML/UU_production_2012
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2012.AgML/UU_production_2012
 chain = P2012b,AgML,mtdDat,btof,fmsDat,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt
-nevents = 1000
-}
-
-## UU 193GeV run 2012 
-
-job11{
-inputfile = /star/rcf/test/daq/2012/115/st_physics_13115004_raw_2010002.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2012/UU_production_2012
-chain = P2012b,mtdDat,btof,fmsDat,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt
-nevents = 1000
+nevents = 500
 }
 
 ## CuAu 200GeV run 2012 with AgML geometry
 
-job12{
+job9{
 inputfile = /star/rcf/test/daq/2012/143/st_physics_13143018_raw_3020009.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2012.AgML/cuAu_production_2012
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2012.AgML/cuAu_production_2012
 chain = P2012b,AgML,mtdDat,btof,fmsDat,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt
-nevents = 1000
-}
-
-## CuAu 200GeV run 2012 
-
-job13{
-inputfile = /star/rcf/test/daq/2012/143/st_physics_13143018_raw_3020009.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2012/cuAu_production_2012
-chain = P2012b,mtdDat,btof,fmsDat,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt
-nevents = 1000
+nevents = 500
 }
 
 ## AuAu 200GeV run 2011
 
-job14{
+job10{
 inputfile = /star/rcf/test/daq/2011/130/st_physics_12130084_raw_5020002.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2011/AuAu200_production
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2011/AuAu200_production
 chain = P2011a,pmdReco,btof,mtdDat,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 100
 }
 
 ## AuAu 27GeV run 2011
 
-job15{
+job11{
 inputfile = /star/rcf/test/daq/2011/174/st_physics_12174106_raw_2040001.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2011/AuAu27_production
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2011/AuAu27_production
 chain = P2011a,pmdReco,btof,mtdDat,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 1000
 }
 
 ## AuAu 19GeV run 2011
 
-job16{
+job12{
 inputfile = /star/rcf/test/daq/2011/122/st_physics_12122018_raw_2010002.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2011/AuAu19_production
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2011/AuAu19_production
 chain = P2011a,pmdReco,btof,mtdDat,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 1000
 }
 
 ## pp 500GeV run 2011
 
-job17{
+job13{
 inputfile = /star/rcf/test/daq/2011/059/st_physics_12059038_raw_2030002.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2011/pp500_production_2011
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2011/pp500_production_2011
 chain = pp2011a,btof,VFPPVnoCTB,beamline,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 1000
 }
 
 ## auau 200GeV run 2010
 
-job18{
+job14{
 inputfile = /star/rcf/test/daq/2010/029/st_physics_11029020_raw_1030002.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2010/auau200_production
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2010/auau200_production
 chain = P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D
-nevents = 200
+nevents = 100
 }
 
 ## auau 62GeV run 2010
 
-job19{
+job15{
 inputfile = /star/rcf/test/daq/2010/098/st_physics_11098050_raw_3020001.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2010/auau62_production
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2010/auau62_production
 chain = P2010a,pmdReco,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D
 nevents = 1000
 }
 
 ## auau 39GeV run 2010
 
-job20{
+job16{
 inputfile = /star/rcf/test/daq/2010/100/st_physics_11100070_raw_1030001.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2010/auau39_production
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2010/auau39_production
 chain = P2010a,pmdReco,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D
 nevents = 1000
 }
 
 ## auau 11GeV run 2010
 
-job21{
+job17{
 inputfile = /star/rcf/test/daq/2010/157/st_physics_11157020_raw_2030001.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2010/auau11_production
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2010/auau11_production
 chain = P2010a,pmdReco,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D
 nevents = 1000
 }
 
 ## auau 7GeV run 2010
 
-job22{
+job18{
 inputfile = /star/rcf/test/daq/2010/143/st_physics_11143043_raw_1020001.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2010/auau7_production
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2010/auau7_production
 chain = P2010a,pmdReco,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D
-nevents = 2000
+nevents = 1000
 }
 
 ## pp 200GeV High luminosity run 2009
 
-job23{
+job19{
 inputfile = /star/rcf/test/daq/2009/115/st_physics_10115020_raw_5020001.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2009/production2009_200Gev_Hi
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2009/production2009_200Gev_Hi
 chain = pp2009c,ITTF,VFPPVnoCTB,beamLine,BEmcChkStat,btof,Corr4,OSpaceZ2,OGridLeak3D
 nevents = 500
 }
 
 ## pp 500GeV run 2009
 
-job24{
+job20{
 inputfile = /star/rcf/test/daq/2009/085/st_physics_10085024_raw_2020001.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2009/production2009_500GeV
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2009/production2009_500GeV
 chain = pp2009c,ITTF,VFPPVnoCTB,beamLine,BEmcChkStat,btof,Corr4,OSpaceZ2,OGridLeak3D
 nevents = 500
 }
 
 ## dAu 200GeV run 2008
 
-job25{
+job21{
 inputfile = /star/rcf/test/daq/2007/352/st_physics_8352025_raw_1030011.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2008/production_dAu2008
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2008/production_dAu2008
 chain = DbV20080712,P2008,ITTF,OSpaceZ2,OGridLeak3D,beamLine
 nevents = 400
 }
 
 ## pp 200GeV run 2008
 
-job26{
+job22{
 inputfile = /star/rcf/test/daq/2008/043/st_physics_9043046_raw_2030002.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2008/ppProduction2008
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2008/ppProduction2008
 chain = DbV20080712,pp2008,ITTF,OSpaceZ2,OGridLeak3D,beamLine
 nevents = 1000
 }
 
 ## auau 200GeV minbias run 2007
 
-job27{
+job23{
 inputfile = /star/rcf/test/daq/2007/113/8113044/st_physics_8113044_raw_1040042.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2007/2007ProductionMinBias
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2007/2007ProductionMinBias
 chain = DbV20080418,B2007g,ITTF,IAna,KeepSvtHit,hitfilt,VFMinuit3,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,ssdIT,pmdReco,Corr4,OSpaceZ2,OGridLeak3D
-nevents = 600
+nevents = 100
 }
 
 ## auau 200GeV central run 2007
 
-job28{
+job24{
 inputfile = /star/rcf/test/daq/2007/112/8112052/st_physics_8112052_raw_1020010.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2007/2007Production
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2007/2007Production
 chain = DbV20080418,B2007g,ITTF,IAna,KeepSvtHit,hitfilt,VFMinuit3,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,ssdIT,pmdReco,Corr4,OSpaceZ2,OGridLeak3D
-nevents = 600
+nevents = 100
 }
 
 ## pp 200GeV transverse polarization run 2006
 
-job29{
+job25{
 inputfile = /star/rcf/test/daq/2006/129/7129023/st_physics_7129023_raw_1020003.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2006/ppProdTrans
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2006/ppProdTrans
 chain = pp2006b,ITTF,OSpaceZ2,OGridLeak3D
 nevents = 1000
 }
 
 ## pp 200GeV longitudenal polarization run 2006
    
-job30{
+job26{
 inputfile = /star/rcf/test/daq/2006/155/7155010/st_physics_7155010_raw_1020003.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2006/ppProdLong
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2006/ppProdLong
 chain = pp2006b,ITTF,OSpaceZ2,OGridLeak3D
-nevents = 1000
+nevents = 500
 }
 
 ## pp 200GeV run 2005
 
-job31{
+job27{
 inputfile = /star/rcf/test/daq/2005/171/st_physics_6171062_raw_2040010.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2005/ppProduction
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2005/ppProduction
 chain = pp2005a,tofdat,ITTF,OSpaceZ2,OGridLeak3D
-nevents = 800
+nevents = 500
 }
 
 ## CuCu 62GeV minbias run 2005
 
-job32{
+job28{
 inputfile = /star/rcf/test/daq/2005/080/st_physics_6080011_raw_1020004.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2005/CuCu62_MinBias
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2005/CuCu62_MinBias
 chain = P2005,tofDat,logger,MakeEvent,ITTF,ssddat,spt,SsdIt,SvtIt,pmdRaw,OShortR,OSpaceZ2
-nevents = 800
+nevents = 200
 }
 
 ## CuCu 22GeV minbias run 2005
 
-job33{
+job29{
 inputfile = /star/rcf/test/daq/2005/083/st_physics_6083006_raw_1040002.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2005/CuCu22_MinBias
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2005/CuCu22_MinBias
 chain = P2005,tofDat,logger,MakeEvent,ITTF,ssddat,spt,SsdIt,SvtIt,pmdRaw,OShortR,OSpaceZ2
 nevents = 800
 }
 
 ## CuCu 200GeV High Tower trigger run 2005
 
-job34{
+job30{
 inputfile = /star/rcf/test/daq/2005/054/st_physics_6054016_raw_1020005.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2005/CuCu200_HighTower
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2005/CuCu200_HighTower
 chain = P2005,tofDat,logger,MakeEvent,ITTF,ssddat,spt,SsdIt,SvtIt,pmdRaw,OShortR,OSpaceZ2
-nevents = 800
+nevents = 500
 }
 
 ## CuCu 200GeV minbias run 2005
 
-job35{
+job31{
 inputfile = /star/rcf/test/daq/2005/048/st_physics_6048025_raw_1020002.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2005/CuCu200_MinBias
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2005/CuCu200_MinBias
 chain = P2005,tofDat,logger,MakeEvent,ITTF,ssddat,spt,SsdIt,SvtIt,pmdRaw,OShortR,OSpaceZ2
-nevents = 800
+nevents = 200
 }
 
 ## AuAu 200GeV minbias run 2004
 
-job36{
+job32{
 inputfile = /star/rcf/test/daq/2004/028/st_physics_5028066_raw_1010003.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2004/AuAuMinBias
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2004/AuAuMinBias
 chain = P2004,DbV20041213,ITTF,-SsdIt,-SvtIt,pmdRaw,logger,clearmem
 nevents = 100
 }
 
 ## AuAu 200GeV High tower trigger for highest luminosity, run 2004
 
-job37{
+job33{
 inputfile = /star/rcf/test/daq/2004/044/st_physics_5044102_raw_1010003.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2004/AuAu_prodHigh
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2004/AuAu_prodHigh
 chain = P2004,DbV20041213,ITTF,-SvtIT,-SsdIT,pmdRaw,logger,clearmem
 nevents = 100
 }
 
 ## AuAu 200GeV, mixture of high tower, central, and minbias trigger id's for low luminosity, run 2004
 
-job38{
+job34{
 inputfile = /star/rcf/test/daq/2004/044/st_physics_5044116_raw_3010002.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2004/AuAu_prodLow
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2004/AuAu_prodLow
 chain = P2004,DbV20041213,ITTF,-SvtIT,-SsdIT,pmdRaw,logger,clearmem
 nevents = 100
 }
 
 ## pp 200GeV run 2004
 
-job39{
+job35{
 inputfile = /star/rcf/test/daq/2004/134/st_physics_5134013_raw_2010010.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2004/prodPP
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2004/prodPP
 chain = pp2004,DbV20041213,beamLine,ITTF,logger
 nevents = 500
 }
 
 ## dAu 200GeV minbias run 2003
 
-job40{
+job36{
 inputfile = /star/rcf/test/daq/2003/041/st_physics_4041002_raw_0020001.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2003/dAuMinBias
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2003/dAuMinBias
 chain = DbV20040520,dau2003i,logger,ITTF,in,-SvtIT,NossdIT
 nevents = 500
 }
 
 ## pp 200GeV minbias run 2003
 
-job41{
+job37{
 inputfile = /star/rcf/test/daq/2003/095/st_physics_4095050_raw_0010002.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2003/ppMinBias
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2003/ppMinBias
 chain = pp2003,VFPPV,v0,xi,l3onl,beamLine,logger,CMuDst,-svtIT,NossdIT,Corr2
 nevents = 900
 }
 
 ## pp 200GeV minbias run 2001
 
-job42{
+job38{
 inputfile = /star/rcf/test/daq/2002/008/st_physics_3008016_raw_0001.daq 
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2001/ppMinBias
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2001/ppMinBias
 chain = pp2001a,genvtx,v02,xi2,fpd,logger,CMuDst,NossdIT
 nevents = 500
 }
 
 ## auau 200GeV minbias run 2001
 
-job43{
+job39{
 inputfile = /star/rcf/test/daq/2001/295/st_physics_2295030_raw_0010.daq 
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2001/minbias
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2001/minbias
 chain = P2001a,VFMinuit,v02,xi2,ZDCvtx,logger,CMuDst,NosvtIT,NossdIT
 nevents = 100
 }
 
 ## auau 200GeV central run 2001
 
-job44{
+job40{
 inputfile = /star/rcf/test/daq/2001/327/st_physics_2327038_raw_0010.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2001/central
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2001/central
 chain = P2001a,VFMinuit,v02,xi2,ZDCvtx,logger,CMuDst,NosvtIT,NossdIT
 nevents = 100
 }
 
 ## auau 130GeV minbias run 2000
 
-job45{
+job41{
 inputfile = /star/rcf/test/daq/2000/08/st_physics_1229021_raw_0003.daq  
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2000/minbias
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2000/minbias
 chain = p2000,VFMinuit,logger,CMuDst,NosvtIT,NossdIT
 nevents = 100
 }
 
 ## auau 130GeV central run 2000
 
-job46{
+job42{
 inputfile = /star/rcf/test/daq/2000/09/st_physics_1248022_raw_0001.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2000/central
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2000/central
 chain = p2000,VFMinuit,logger,CMuDst,NosvtIT,NossdIT
 nevents = 100
 }
 
 ## MC test samples
-## UU 200GeV, hijing minbias, year 2012
-
-job47{
-inputfile = /star/rcf/simu/rcf12002_1_100evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2012/UU200_minbias
-chain = tpcRS,y2012,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,tags,emcY2,EEfs,evout,-dstout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
-nevents = 100
-}
-
 ## UU 200GeV, hijing minbias, year 2012 with AgMl geometry
 
-job48{
+job43{
 inputfile = /star/rcf/simu/rcf12002_1_100evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2012.AgML/UU200_minbias
-chain = tpcRS,y2012,AgML,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,tags,emcY2,EEfs,evout,-dstout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2012.AgML/UU200_minbias
+chain = tpcRS,y2012,AgML,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,vpdSim,tags,emcY2,EEfs,evout,-dstout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
 nevents = 100
-}
-
-## pp 500GeV pythia minbias, year 2012
-
-job49{
-inputfile = /star/rcf/simu/rcf12001_1_1000evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2012/pp500_minbias
-chain = tpcRS,y2012,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,tags,emcY2,EEfs,evout,-dstout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
-nevents = 1000
 }
 
 ## pp 500GeV pythia minbias, year 2012 with AgML geometry
 
-job50{
+job44{
 inputfile = /star/rcf/simu/rcf12001_1_1000evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2012.AgML/pp500_minbias
-chain = tpcRS,y2012,AgML,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,tags,emcY2,EEfs,evout,-dstout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
-nevents = 1000
-}
-
-## pp 200GeV pythia minbias, year 2012
-
-job51{
-inputfile = /star/rcf/simu/rcf12000_1_1000evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2012/pp200_minbias
-chain = tpcRS,y2012,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,tags,emcY2,EEfs,evout,-dstout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
-nevents = 1000
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2012.AgML/pp500_minbias
+chain = tpcRS,y2012,AgML,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,vpdSim,tags,emcY2,EEfs,evout,-dstout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
+nevents = 200
 }
 
 ## pp 200GeV pythia minbias, year 2012 with AgML geometry
 
-job52{
+job45{
 inputfile = /star/rcf/simu/rcf12000_1_1000evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2012.AgML/pp200_minbias
-chain = tpcRS,y2012,AgML,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,tags,emcY2,EEfs,evout,-dstout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
-nevents = 1000
-}
-
-## CuAu 200GeV, hijing minbais, year 2012
-
-job53{
-inputfile = /star/rcf/simu/rcf12003_1_100evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2012/CuAu200_minbias
-chain = tpcRS,y2012,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,tags,emcY2,EEfs,evout,-dstout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
-nevents = 100
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2012.AgML/pp200_minbias
+chain = tpcRS,y2012,AgML,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,vpdSim,tags,emcY2,EEfs,evout,-dstout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
+nevents = 500
 }
 
 ## CuAu 200GeV, hijing minbais, year 2012 with AgML geometry
 
-job54{
+job46{
 inputfile = /star/rcf/simu/rcf12003_1_100evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2012.AgML/CuAu200_minbias
-chain = tpcRS,y2012,AgML,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,tags,emcY2,EEfs,evout,-dstout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2012.AgML/CuAu200_minbias
+chain = tpcRS,y2012,AgML,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,vpdSim,tags,emcY2,EEfs,evout,-dstout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
 nevents = 100
 }
 
 ## pp 500GeV pythia minbias, year 2011
 
-job55{
+job47{
 inputfile = /star/rcf/simu/pp500/pythia/pileup/rcf10100_90_4000evts_minb.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2011/pp500_minbias
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2011/pp500_minbias
 chain = y2011,Test.default.Fast.ITTF,TpcRS,NosvtIT,NossdIT,-sfs,-ssdFast,fzin,VFPPVnoCTB,beamline,emcDY2
 nevents = 200
 }
 
 ## auau 200GeV, hijing central, year 2011
 
-job56{
+job48{
 inputfile = /star/rcf/simu/rcf11023_2060_25evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2011/auau200_central
-chain = tpcRS,y2011,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,tags,emcY2,EEfs,evout,-dstout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2011/auau200_central
+chain = tpcRS,y2011,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,vpdSim,tags,emcY2,EEfs,evout,-dstout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
 nevents = 25
 }
 
 ## auau 200GeV, hijing minbias, year 2010
 
-job57{
+job49{
 inputfile = /star/rcf/simu/rcf9068_305_100evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2010/auau200_minbias
-chain = tpcRS,y2010,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,tags,emcY2,EEfs,evout,-dstout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
-nevents = 20
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2010/auau200_minbias
+chain = tpcRS,y2010,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,vpdSim,tags,emcY2,EEfs,evout,-dstout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
+nevents = 10
 }
 
 ## auau 39GeV, hijing minbias, year 2010
 
-job58{
+job50{
 inputfile = /star/rcf/simu/rcf10032_1_100evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2010/auau39_minbias
-chain = tpcRS,y2010a,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,tags,emcY2,EEfs,evout,-dstout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2010/auau39_minbias
+chain = tpcRS,y2010a,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,vpdSim,tags,emcY2,EEfs,evout,-dstout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
 nevents = 100
 }
 
 ## auau 11GeV, hijing minbias, year 2010
 
-job59{
+job51{
 inputfile = /star/rcf/simu/rcf10031_1_100evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2010/auau11_minbias
-chain = tpcRS,y2010a,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,tags,emcY2,EEfs,evout,-dstout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2010/auau11_minbias
+chain = tpcRS,y2010a,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,vpdSim,tags,emcY2,EEfs,evout,-dstout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
 nevents = 100
 }
 
 ## auau 7GeV, hijing minbias, year 2010
 
-job60{
+job52{
 inputfile = /star/rcf/simu/rcf10030_1_100evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2010/auau7_minbias
-chain = tpcRS,y2010a,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,tags,emcY2,EEfs,evout,-dstout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2010/auau7_minbias
+chain = tpcRS,y2010a,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,vpdSim,tags,emcY2,EEfs,evout,-dstout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
 nevents = 100
 }
 
 ## auau 62GeV, hijing minbias, year 2010
 
-job61{
+job53{
 inputfile = /star/rcf/simu/rcf10033_1_100evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2010/auau62_minbias
-chain = tpcRS,y2010a,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,tags,emcY2,EEfs,evout,-dstout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2010/auau62_minbias
+chain = tpcRS,y2010a,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,vpdSim,tags,emcY2,EEfs,evout,-dstout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
 nevents = 100
 }
 
 ## pp 500GeV, pythia minbias, year 2009
 
-job62{
+job54{
 inputfile = /star/rcf/simu/rcf9994_01_1000evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2009/pp500_minbias
-chain = tpcRS,TpxClu,fss,y2009a,Idst,IAna,l0,tpcI,ftpc,Tree,logger,ITTF,Sti,genvtx,NoSsdIt,NoSvtIt,MakeEvent,bbcSim,btofsim,tags,emcY2,EEfs,evout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
-nevents = 500
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2009/pp500_minbias
+chain = tpcRS,TpxClu,fss,y2009a,Idst,IAna,l0,tpcI,ftpc,Tree,logger,ITTF,Sti,genvtx,NoSsdIt,NoSvtIt,MakeEvent,bbcSim,btofsim,vpdSim,tags,emcY2,EEfs,evout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
+nevents = 1000
 }
 
 ## pp 200GeV, pythia minbias, year 2009
 
-job63{
+job55{
 inputfile = /star/rcf/simu/rcf9993_01_1000evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2009/pp200_minbias
-chain = tpcRS,TpxClu,fss,y2009a,Idst,IAna,l0,tpcI,ftpc,Tree,logger,ITTF,Sti,genvtx,NoSsdIt,NoSvtIt,MakeEvent,bbcSim,btofsim,tags,emcY2,EEfs,evout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
-nevents = 500
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2009/pp200_minbias
+chain = tpcRS,TpxClu,fss,y2009a,Idst,IAna,l0,tpcI,ftpc,Tree,logger,ITTF,Sti,genvtx,NoSsdIt,NoSvtIt,MakeEvent,bbcSim,btofsim,vpdSim,tags,emcY2,EEfs,evout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
+nevents = 1000
 }
 
 ## pp 200GeV, pythia minbias, year 2008
 
-job64{
+job56{
 inputfile = /star/rcf/simu/rcf9992_01_1000evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2008/pp200_minbias
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2008/pp200_minbias
 chain = trs,fss,y2008a,Idst,IAna,l0,tpcI,TpxClu,ftpc,Tree,logger,ITTF,Sti,genvtx,NoSsdIt,NoSvtIt,MakeEvent,bbcSim,tofsim,tags,emcY2,EEfs,evout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
 nevents = 1000
 }
 
-## dau 200GeV, pythia minbias, year 2008
+## dau 200GeV, pythia minbias, year 2009
 
-job65{
+job57{
 inputfile = /star/rcf/simu/rcf9066_20_1000evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2008/dau200_minbias
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2008/dau200_minbias
 chain = trs,fss,y2008a,Idst,IAna,l0,tpcI,TpxClu,ftpc,Tree,logger,ITTF,Sti,genvtx,NoSsdIt,NoSvtIt,MakeEvent,bbcSim,tofsim,tags,emcY2,EEfs,evout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
 nevents = 1000
 }
 
 ## auau 200GeV, hijing minbias, year 2007
 
-job66{
+job58{
 inputfile = /star/rcf/simu/rcf1296_02_100evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2007/auau200_central
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2007/auau200_central
 chain = trs,srs,ssd,fss,y2007,Idst,BAna,l0,tpcI,TpxClu,ftpc,Tree,logger,ITTF,Sti,SvtIt,SsdIt,genvtx,MakeEvent,IdTruth,geant,tags,bbcSim,tofsim,emcY2,EEfs,evout,GeantOut,big,fzin,MiniMcMk,clearmem
 nevents = 50
 }
 
 ## pp 200GeV, pythia minbias, year 2006
 
-job67{
+job59{
 inputfile = /star/rcf/simu/rcf9991_01_1000evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2006/pp200_minbias
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2006/pp200_minbias
 chain = trs,fss,y2006h,Idst,IAna,l0,tpcI,TpxClu,ftpc,Tree,logger,ITTF,Sti,genvtx,NoSsdIt,NoSvtIt,MakeEvent,bbcSim,tofsim,tags,emcY2,EEfs,evout,IdTruth,geantout,big,fzin,MiniMcMk,clearmem
 nevents = 1000
 }
 
 ## cucu 200GeV hijing minbias, year 2005
 
-job68{
+job60{
 inputfile = /star/rcf/simu/rcf1216_05_200evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2005/cucu200_minbias
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2005/cucu200_minbias
 chain = trs,srs,fss,ssd,y2005x,Idst,IAna,l0,tpcI,TpxClu,ftpc,Tree,SvtCL,svtDb,logger,ITTF,Sti,SsdIt,SvtIt,genvtx,geant,evout,tags,bbcSim,tofsim,emcY2,EEfs,GeantOut,big,fzin,MiniMcMk,clearmem
 nevents = 200
 }
 
 ## cucu 62GeV hijing minbias, year 2005
 
-job69{
+job61{
 inputfile = /star/rcf/simu/rcf1237_01_500evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2005/cucu62_minbias
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2005/cucu62_minbias
 chain = trs,srs,fss,ssd,y2005x,Idst,IAna,l0,tpcI,TpxClu,ftpc,Tree,SvtCL,svtDb,logger,ITTF,Sti,SsdIt,SvtIt,genvtx,geant,evout,tags,bbcSim,tofsim,emcY2,EEfs,GeantOut,big,fzin,MiniMcMk,clearmem
 nevents = 200
 }
 
 ## auau 200GeV, hijing minbias, year 2004
 
-job70{
+job62{
 inputfile = /star/rcf/simu/rcf1207_01_225evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2004/auau_minbias
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2004/auau_minbias
 chain = trs,srs,fss,y2004,Idst,BAna,l0,tpcI,TpxClu,ftpc,Tree,ITTF,Sti,genvtx,SvtIt,geant,evout,tags,bbcSim,tofsim,emcY2,EEfs,GeantOut,big,logger,fzin,MiniMcMk,clearmem
-nevents = 100
+nevents = 225
 }
 
 ## auau 200GeV, hijing central, year 2004
 
-job71{
+job63{
 inputfile = /star/rcf/simu/rcf1209_05_80evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2004/auau_central
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2004/auau_central
 chain = trs,srs,fss,y2004a,Idst,BAna,l0,tpcI,TpxClu,ftpc,Tree,ITTF,Sti,genvtx,SvtIt,geant,evout,tags,bbcSim,tofsim,emcY2,EEfs,GeantOut,big,logger,fzin,MiniMcMk,clearmem
-nevents = 100
+nevents = 50
 }
 
 ## dau 200GeV, hijing minbias, year 2003
 
-job72{
+job64{
 inputfile = /star/rcf/simu/rcf1197_05_5940evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2003/dau_minbias
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2003/dau_minbias
 chain = trs,fss,y2003,Idst,IAna,l0,tpcI,TpxClu,ftpc,Tree,logger,ITTF,Sti,genvtx,bbcSim,tofsim,tags,emcY2,evout,IdTruth,geantout,fzin,MiniMcMk,logger,clearmem
 nevents = 900
 }
 
 ## pp 200GeV, pythia minbias, year 2001
 
-job73{
+job65{
 inputfile = /star/rcf/simu/pds0200_04_12812evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2001/pp_minbias
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2001/pp_minbias
 chain = trs,rrs,fss,y2001n,Idst,rich,IAna,l0,tpcI,TpxClu,ftpc,Tree,logger,ITTF,Sti,-Kink2,genvtx,geant,evout,IdTruth,tags,emcY2,MiniMcMk,GeantOut,logger,big,fzin
 nevents = 1000
 }
 
 ## cocktail, default standard, year 2001 geometry
 
-job74{
+job66{
 inputfile = /star/rcf/simu/hc_standard.40_evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2001/hc_standard
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2001/hc_standard
 chain = trs,fss,rrs,y2001n,Idst,rich,IAna,l0,tpcI,TpxClu,ftpc,Tree,logger,ITTF,Sti,-Kink2,genvtx,geant,evout,IdTruth,tags,emcY2,GeantOut,big,fzin,MiniMcMk
 nevents = 40
 }
 
 ## cocktail, default standard, year 2000 geometry
 
-job75{
+job67{
 inputfile = /star/rcf/simu/hc_standard_40evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2000/hc_standard
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2000/hc_standard
 chain = trs,rrs,y1h,Idst,rich,IAna,l0,tpcI,TpxClu,Tree,logger,ITTF,Sti,NosvtIT,NossdIT,-Kink2,genvtx,geant,evout,IdTruth,tags,GeantOut,big,fzin,MiniMcMk
 nevents = 40
 }
 
 ## auau 200GeV run 2014 low (no hft hits) with geometry ry2014
 
-job76{
+job68{
 inputfile = /star/rcf/test/daq/2014/164/st_physics_15164004_raw_2000022.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2014/AuAu200_production_low.nohft_2014
-chain = P2014a,btof,mtd,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2014/AuAu200_production_low.nohft_2014
+chain = P2014a,btof,mtd,mtdCalib,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
 
-
 ## auau 200GeV, hijing minbias, year 2014
 
-job77{
+job69{
 inputfile = /star/rcf/simu/rcf15000_1_100evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2014/auau200_minbias
-chain=fzin,tpcRS,y2014a,AgML,pxlFastSim,istFastSim,usexgeom,FieldOn,MakeEvent,Sti,NoSsdIt,NoSvtIt,StiHftC,TpcHitMover,TpxClu,Idst,BAna,l0,Tree,logger,genvtx,tpcDB,bbcSim,btofsim,mtdSim,tags,emcY2,EEfs,evout,geantout,-dstout,IdTruth,big,MiniMcMk,clearmem
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2014/auau200_minbias
+chain = fzin,tpcRS,y2014a,AgML,pxlFastSim,istFastSim,usexgeom,FieldOn,MakeEvent,Sti,NoSsdIt,NoSvtIt,StiHftC,TpcHitMover,TpxClu,Idst,BAna,l0,Tree,logger,genvtx,tpcDB,bbcSim,btofsim,vpdSim,mtdSim,tags,emcY2,EEfs,geantout,evout,-dstout,IdTruth,big,MiniMcMk,clearmem
 nevents = 50
 }
 
 ## pp 200GeV pythia year 2015  with geometry ry2015
 
-job78{
+job70{
 inputfile = /star/rcf/simu/rcf15001_0_100evts.fzd
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//trs_sl302.ittf/year_2015/pp200_minbias
-chain=fzin,tpcRS,y2015,AgML,pxlFastSim,istFastSim,usexgeom,FieldOn,MakeEvent,Sti,NoSsdIt,NoSvtIt,StiHftC,TpcHitMover,TpxClu,Idst,BAna,l0,Tree,logger,genvtx,tpcDB,bbcSim,btofsim,mtdSim,tags,emcY2,EEfs,evout,geantout,-dstout,IdTruth,big,MiniMcMk,clearmem
+out_dir = /star/rcf/test/dev/trs_sl302.ittf_opt/${thisday}/year_2015/pp200_minbias
+chain = fzin,tpcRS,y2015,AgML,pxlFastSim,istFastSim,usexgeom,FieldOn,MakeEvent,Sti,NoSsdIt,NoSvtIt,StiHftC,TpcHitMover,TpxClu,Idst,BAna,l0,Tree,logger,genvtx,tpcDB,bbcSim,btofsim,vpdSim,mtdSim,tags,emcY2,EEfs,geantout,evout,-dstout,IdTruth,big,MiniMcMk,clearmem
 nevents = 100
 }
 
+
+## auau 200GeV run 2014 low (no hft hits) without HFT geometry ry2014
+
+job71{
+inputfile = /star/rcf/test/daq/2014/164/st_physics_15164004_raw_2000022.daq
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2014/AuAu200_production_low.nohftgeo_2014
+chain = B2014a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
+nevents = 500
+}
+
+
 ## pp 200GeV run 2015  with geometry ry2015
 
-job79{
+job72{
 inputfile = /star/rcf/test/daq/2015/060/st_physics_16060046_raw_5000015.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2015/production_pp200long_2015
-chain = pp2015c,btof,mtd,pp2pp,pxlHit,istHit,sstHit,fmsDat,fmsPoint,fpsDat,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2015/production_pp200long_2015
+chain = pp2015c,btof,mtd,pp2pp,pxlHit,istHit,sstHit,fmsDat,fmsPoint,fpsDat,fmsfps,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 1000
 }
 
+
 ## pp 200GeV run 2015  with geometry ry2015, no HFT reco
 
-job80{
+job73{
 inputfile = /star/rcf/test/daq/2015/060/st_physics_16060046_raw_5000015.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2015/production_pp200long.nohft_2015
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2015/production_pp200long.nohft_2015
 chain = pp2015c,btof,mtd,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 1000
 }
 
 ## pAu 200GeV run 2015  with geometry ry2015
 
-job81{
+job74{
 inputfile = /star/rcf/test/daq/2015/148/st_physics_16148020_raw_4000024.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2015/production_pAu200_2015
-chain = P2015c,btof,mtd,pp2pp,pxlHit,istHit,sstHit,fmsDat,fmsPoint,fpsDat,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2015/production_pAu200_2015
+chain = P2015c,btof,mtd,pp2pp,pxlHit,istHit,sstHit,fmsDat,fmsPoint,fpsDat,fmsfps,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 1000
 }
 
 ## pAl 200GeV run 2015  with geometry ry2015
 
-job82{
+job75{
 inputfile = /star/rcf/test/daq/2015/167/st_physics_16167036_raw_4500040.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2015/production_pAl200_2015
-chain = P2015c,btof,mtd,pp2pp,pxlHit,istHit,sstHit,fmsDat,fmsPoint,fpsDat,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2015/production_pAl200_2015
+chain = P2015c,btof,mtd,pp2pp,pxlHit,istHit,sstHit,fmsDat,fmsPoint,fpsDat,fmsfps,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 1000
 }
 
+
 ## AuAu 200GeV run 2016  with geometry ry2016
 
-job83{
+job76{
 inputfile = /star/rcf/test/daq/2016/078/st_physics_17078006_raw_1000030.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2016/AuAu200_production_2016
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2016/AuAu200_production_2016
 chain = P2016a,btof,mtd,pxlHit,istHit,sstHit,picoWrite,PicoVtxVpd,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
 
 
-## pp 510GeV run 2013 with AgML geometry
+## pp 510GeV run 2013 with AgML geometry, StiCA tracking
 
-job84{
+job77{
 inputfile = /star/rcf/test/daq/2013/079/st_physics_14079008_raw_1920004.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.stica/year_2013/pp500_production_2013
-chain = pp2013a,StiCA,btof,mtd,fmsDat,fgt,fgtPoint,VFPPVnoCTB,beamline,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt
+out_dir = /star/rcf/test/dev/daq_sl302.stica_opt/${thisday}/year_2013/pp500_production_2013
+chain = pp2013a,StiCA,mtd,btof,fmsDat,fgt,fgtPoint,VFPPVnoCTB,beamline,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 1000
 }
 
-## auau 200GeV run 2014 low with geometry ry2014 and StiCA tracking
 
-job85{
+## auau 200GeV run 2014 low with geometry ry2014, StiCA tracking
+
+job78{
 inputfile = /star/rcf/test/daq/2014/164/st_physics_15164004_raw_2000022.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.stica/year_2014/AuAu200_production_low_2014
+out_dir = /star/rcf/test/dev/daq_sl302.stica_opt/${thisday}/year_2014/AuAu200_production_low_2014
 chain = P2014a,StiCA,btof,mtd,mtdCalib,pxlHit,istHit,sstHit,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
 
-## pp 200GeV run 2015  with geometry ry2015  and StiCA tracking
+## pp 200GeV run 2015  with geometry ry2015, StiCA tracking
 
-job86{
+job79{
 inputfile = /star/rcf/test/daq/2015/060/st_physics_16060046_raw_5000015.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.stica/year_2015/production_pp200long_2015
-chain = pp2015c,StiCA,btof,mtd,pp2pp,pxlHit,istHit,sstHit,fmsDat,fmsPoint,fpsDat,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
+out_dir = /star/rcf/test/dev/daq_sl302.stica_opt/${thisday}/year_2015/production_pp200long_2015
+chain = pp2015c,StiCA,btof,mtd,pp2pp,pxlHit,istHit,sstHit,fmsDat,fmsPoint,fpsDat,fmsfps,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 1000
 }
 
-## pAu 200GeV run 2015  with geometry ry2015  and StiCA tracking
 
-job87{
+## pAu 200GeV run 2015  with geometry ry2015, StiCA tracking
+
+job80{
 inputfile = /star/rcf/test/daq/2015/148/st_physics_16148020_raw_4000024.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.stica/year_2015/production_pAu200_2015
-chain = P2015c,StiCA,btof,mtd,pp2pp,pxlHit,istHit,sstHit,fmsDat,fmsPoint,fpsDat,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
+out_dir = /star/rcf/test/dev/daq_sl302.stica_opt/${thisday}/year_2015/production_pAu200_2015
+chain = P2015c,StiCA,btof,mtd,pp2pp,pxlHit,istHit,sstHit,fmsDat,fmsPoint,fpsDat,fmsfps,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 1000
 }
 
-## AuAu 200GeV run 2016  with geometry ry2016  and StiCA tracking
+## AuAu 200GeV run 2016  with geometry ry2016, StiCA tracking
 
-job88{
+job81{
 inputfile = /star/rcf/test/daq/2016/078/st_physics_17078006_raw_1000030.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.stica/year_2016/AuAu200_production_2016
+out_dir = /star/rcf/test/dev/daq_sl302.stica_opt/${thisday}/year_2016/AuAu200_production_2016
 chain = P2016a,StiCA,btof,mtd,pxlHit,istHit,sstHit,picoWrite,PicoVtxVpd,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
 
-
 ## dAu 200GeV run 2016  with geometry ry2016
 
-job89{
+job82{
 inputfile = /star/rcf/test/daq/2016/135/st_physics_17135012_raw_2000025.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2016/dAu200_production_2016
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2016/dAu200_production_2016
 chain = P2016a,btof,mtd,pxlHit,istHit,sstHit,picoWrite,PicoVtxVpd,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
@@ -818,237 +760,244 @@ nevents = 500
 
 ## dAu 200GeV run 2016  with geometry ry2016 with StiCA tracking
 
-job90{
+job83{
 inputfile = /star/rcf/test/daq/2016/135/st_physics_17135012_raw_2000025.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.stica/year_2016/dAu200_production_2016
+out_dir = /star/rcf/test/dev/daq_sl302.stica_opt/${thisday}/year_2016/dAu200_production_2016
 chain = P2016a,StiCA,btof,mtd,pxlHit,istHit,sstHit,picoWrite,PicoVtxVpd,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
 
 ## dAu 20GeV run 2016  with geometry ry2016
 
-job91{
+job84{
 inputfile = /star/rcf/test/daq/2016/155/st_physics_17155014_raw_3000009.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2016/dAu20_production_2016
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2016/dAu20_production_2016
 chain = P2016a,btof,mtd,picoWrite,PicoVtxVpd,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 1000
 }
 
 ## dAu 39GeV run 2016  with geometry ry2016
 
-job92{
+job85{
 inputfile = /star/rcf/test/daq/2016/164/st_physics_17164012_raw_3500010.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2016/dAu39_production_2016
-chain = P2016a,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2016/dAu39_production_2016
+chain = P2016a,btof,mtd,picoWrite,PicoVtxVpd,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 1000
 }
-
 
 ## dAu 62GeV run 2016  with geometry ry2016
 
-job93{
+job86{
 inputfile = /star/rcf/test/daq/2016/146/st_physics_17146025_raw_2000015.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2016/dAu62_production_2016
-chain = P2016a,btof,mtd,pxlHit,istHit,sstHit,picoWrite,PicoVtxVpd,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2016/dAu62_production_2016
+chain = P2016a,btof,mtd,pxlHit,istHit,sstHit,picoWrite,PicoVtxVpd,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt 
 nevents = 1000
 }
 
-
 ## pp 510GeV run 2017  with geometry ry2017
 
-job94{
+job87{
 inputfile = /star/rcf/test/daq/2017/069/st_physics_18069061_raw_2000021.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2017/pp500_production_2017
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2017/pp500_production_2017
 chain = pp2017,btof,mtd,pp2pp,fmsDat,fmsPoint,fpsDat,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
 
-## pp 510GeV run 2017  with geometry ry2017 and StiCA tracking
+## pp 510GeV run 2017  with geometry ry2017 and StCA tracking
 
-job95{
+job88{
 inputfile = /star/rcf/test/daq/2017/069/st_physics_18069061_raw_2000021.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.stica/year_2017/pp500_production_2017
+out_dir = /star/rcf/test/dev/daq_sl302.stica_opt/${thisday}/year_2017/pp500_production_2017
 chain = pp2017,StiCA,btof,mtd,pp2pp,fmsDat,fmsPoint,fpsDat,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
 
 ## pp 510GeV run 2017  with geometry ry2017 and StiHR tracking
 
-job96{
+job89{
 inputfile = /star/rcf/test/daq/2017/069/st_physics_18069061_raw_2000021.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.stihr/year_2017/pp500_production_2017
+out_dir = /star/rcf/test/dev/daq_sl302.stihr_opt/${thisday}/year_2017/pp500_production_2017
 chain = pp2017,Sti,hitreuseon,btof,mtd,pp2pp,fmsDat,fmsPoint,fpsDat,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
 
-## AuAu 54GeV run 2017  with geometry ry2017
+## AuAu 54GeV run 2017  with geometry ry2017 and Sti tracking
 
-job97{
+job90{
 inputfile = /star/rcf/test/daq/2017/155/st_physics_18155036_raw_2000012.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2017/AuAu54_production_2017
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2017/AuAu54_production_2017
 chain = P2017,btof,mtd,fmsDat,fmsPoint,fpsDat,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
 
 ## AuAu 54GeV run 2017  with geometry ry2017 and StiCA tracking
 
-job98{
+job91{
 inputfile = /star/rcf/test/daq/2017/155/st_physics_18155036_raw_2000012.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.stica/year_2017/AuAu54_production_2017
+out_dir = /star/rcf/test/dev/daq_sl302.stica_opt/${thisday}/year_2017/AuAu54_production_2017
 chain = P2017,StiCA,btof,mtd,fmsDat,fmsPoint,fpsDat,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
 
 ## AuAu 54GeV run 2017  with geometry ry2017 and StiHR tracking
 
-job99{
+job92{
 inputfile = /star/rcf/test/daq/2017/155/st_physics_18155036_raw_2000012.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.stihr/year_2017/AuAu54_production_2017
+out_dir = /star/rcf/test/dev/daq_sl302.stihr_opt/${thisday}/year_2017/AuAu54_production_2017
 chain = P2017,Sti,hitreuseon,btof,mtd,fmsDat,fmsPoint,fpsDat,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
 
 ## auau 200GeV run 2014 low with geometry ry2014 and StiHR tracking
 
-job100{
+job93{
 inputfile = /star/rcf/test/daq/2014/164/st_physics_15164004_raw_2000022.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.stihr/year_2014/AuAu200_production_low_2014
+out_dir = /star/rcf/test/dev/daq_sl302.stihr_opt/${thisday}/year_2014/AuAu200_production_low_2014
 chain = P2014a,Sti,hitreuseon,btof,mtd,mtdCalib,pxlHit,istHit,sstHit,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
 
 ## pp 200GeV run 2015  with geometry ry2015  and StiHR tracking
 
-job101{
+job94{
 inputfile = /star/rcf/test/daq/2015/060/st_physics_16060046_raw_5000015.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.stihr/year_2015/production_pp200long_2015
+out_dir = /star/rcf/test/dev/daq_sl302.stihr_opt/${thisday}/year_2015/production_pp200long_2015
 chain = pp2015c,Sti,hitreuseon,btof,mtd,pp2pp,pxlHit,istHit,sstHit,fmsDat,fmsPoint,fpsDat,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 1000
 }
 
 ## pAu 200GeV run 2015  with geometry ry2015  and StiHR tracking
 
-job102{
+job95{
 inputfile = /star/rcf/test/daq/2015/148/st_physics_16148020_raw_4000024.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.stihr/year_2015/production_pAu200_2015
+out_dir = /star/rcf/test/dev/daq_sl302.stihr_opt/${thisday}/year_2015/production_pAu200_2015
 chain = P2015c,Sti,hitreuseon,btof,mtd,pp2pp,pxlHit,istHit,sstHit,fmsDat,fmsPoint,fpsDat,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 1000
 }
 
 ## AuAu 200GeV run 2016  with geometry ry2016  and StiHR tracking
 
-job103{
+job96{
 inputfile = /star/rcf/test/daq/2016/078/st_physics_17078006_raw_1000030.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.stihr/year_2016/AuAu200_production_2016
+out_dir = /star/rcf/test/dev/daq_sl302.stihr_opt/${thisday}/year_2016/AuAu200_production_2016
 chain = P2016a,Sti,hitreuseon,btof,mtd,pxlHit,istHit,sstHit,picoWrite,PicoVtxVpd,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
 
 ## dAu 200GeV run 2016  with geometry ry2016 with StiHR tracking
 
-job104{
+job97{
 inputfile = /star/rcf/test/daq/2016/135/st_physics_17135012_raw_2000025.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.stihr/year_2016/dAu200_production_2016
+out_dir = /star/rcf/test/dev/daq_sl302.stihr_opt/${thisday}/year_2016/dAu200_production_2016
 chain = P2016a,Sti,hitreuseon,btof,mtd,pxlHit,istHit,sstHit,picoWrite,PicoVtxVpd,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
 
 ## ZrZr 200GeV run 2018  with geometry ry2018a and Sti tracking
 
-job105{
+job98{
 inputfile = /star/rcf/test/daq/2018/099/st_physics_19099012_raw_1000031.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2018/production_isobar_2018
-chain = P2018a,Sti,btof,mtd,PicoVtxDefault,BEmcChkStat,QAalltrigs,OSpaceZ2,OGridLeak3D,-hitfilt
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2018/production_isobar_2018
+chain = P2018a,Sti,btof,mtd,ETofDat,PicoVtxDefault,BEmcChkStat,QAalltrigs,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
 
 ## ZrZr 200GeV run 2018  with geometry ry2018a  and StiCA tracking
 
-job106{
+job99{
 inputfile = /star/rcf/test/daq/2018/099/st_physics_19099012_raw_1000031.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.stica/year_2018/production_isobar_2018
-chain = P2018a,StiCA,btof,mtd,PicoVtxDefault,BEmcChkStat,QAalltrigs,OSpaceZ2,OGridLeak3D,-hitfilt
+out_dir = /star/rcf/test/dev/daq_sl302.stica_opt/${thisday}/year_2018/production_isobar_2018
+chain = P2018a,StiCA,btof,mtd,ETofDat,PicoVtxDefault,BEmcChkStat,QAalltrigs,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
 
 ## ZrZr 200GeV run 2018  with geometry ry2018a  and StiHR tracking
 
-job107{
+job100{
 inputfile = /star/rcf/test/daq/2018/099/st_physics_19099012_raw_1000031.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.stihr/year_2018/production_isobar_2018
+out_dir = /star/rcf/test/dev/daq_sl302.stihr_opt/${thisday}/year_2018/production_isobar_2018
 chain = P2018a,Sti,hitreuseon,btof,mtd,PicoVtxDefault,BEmcChkStat,QAalltrigs,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
 
 ## AuAu 27GeV run 2018  with geometry ry2018a and Sti tracking
 
-job108{
+job101{
 inputfile = /star/rcf/test/daq/2018/136/st_physics_19136012_raw_1000016.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2018/27GeV_production_2018
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2018/27GeV_production_2018
 chain = P2018a,Sti,btof,mtd,PicoVtxDefault,BEmcChkStat,QAalltrigs,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
 
 ## AuAu 27GeV  run 2018  with geometry ry2018a  and StiCA tracking
 
-job109{
+job102{
 inputfile = /star/rcf/test/daq/2018/136/st_physics_19136012_raw_1000016.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.stica/year_2018/27GeV_production_2018
+out_dir = /star/rcf/test/dev/daq_sl302.stica_opt/${thisday}/year_2018/27GeV_production_2018
 chain = P2018a,StiCA,btof,mtd,PicoVtxDefault,BEmcChkStat,QAalltrigs,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
 
 ## AuAu 27GeV run 2018  with geometry ry2018a  and StiHR tracking
 
-job110{
+job103{
 inputfile = /star/rcf/test/daq/2018/136/st_physics_19136012_raw_1000016.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.stihr/year_2018/27GeV_production_2018
+out_dir = /star/rcf/test/dev/daq_sl302.stihr_opt/${thisday}/year_2018/27GeV_production_2018
 chain = P2018a,Sti,hitreuseon,btof,mtd,PicoVtxDefault,BEmcChkStat,QAalltrigs,OSpaceZ2,OGridLeak3D,-hitfilt
 nevents = 500
 }
 
-## AuAu 19.6GeV run 2019 with geometry ry2019a and Sti tracking
+## AuAu 54GeV run 2017 with geometry ry2017a and StiCA tracking
 
-job111{
-inputfile = /star/rcf/test/daq/2019/069/st_physics_20069002_raw_1500008.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2019/production_19GeV_2019
-chain = P2019a,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeakFull,-OPr13,OPr40,-hitfilt,QAalltrigs
-nevents = 1000
+job104{
+inputfile = /star/rcf/test/daq/2017/156/st_upc_18156034_raw_5500010.daq
+out_dir = /star/rcf/test/dev/daq_sl302.stica_opt/${thisday}/year_2017/54GeV_production_2017
+chain = P2017a,StiCA,-VFMinuit,VFPPVnoCTB,beamline,btof,mtd,mtdCalib,fmsDat,fmsPoint,fpsDat,BEmcChkStat,PicoVtxVpd,OSpaceZ2,OGridLeakFull
+nevents = 500
 }
-
-## AuAu 14.5GeV run 2019 with geometry ry2019a and Sti tracking
-
-job112{
-inputfile = /star/rcf/test/daq/2019/112/st_physics_20112004_raw_2000001.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2019/production_14p5GeV_2019
-chain = P2019a,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeakFull,-OPr13,OPr40,-hitfilt,QAalltrigs
-nevents = 1000
-}
-
 
 ## AuAu 19.6GeV run 2019 with geometry ry2019a and StiCA tracking
 
-job113{
+job105{
 inputfile = /star/rcf/test/daq/2019/069/st_physics_20069002_raw_1500008.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.stica/year_2019/production_19GeV_2019
+out_dir = /star/rcf/test/dev/daq_sl302.stica_opt/${thisday}/year_2019/production_19GeV_2019
 chain = P2019a,StiCA,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeakFull,-OPr13,OPr40,-hitfilt,QAalltrigs
 nevents = 1000
 }
 
 ## AuAu 14.5GeV run 2019 with geometry ry2019a and StiCA tracking
 
-job114{
+job106{
 inputfile = /star/rcf/test/daq/2019/112/st_physics_20112004_raw_2000001.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.stica/year_2019/production_14p5GeV_2019
+out_dir = /star/rcf/test/dev/daq_sl302.stica_opt/${thisday}/year_2019/production_14p5GeV_2019
 chain = P2019a,StiCA,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeakFull,-OPr13,OPr40,-hitfilt,QAalltrigs
+nevents = 1000
+}
+
+
+## AuAu 19.6GeV run 2019 with geometry ry2019a and Sti tracking
+
+job107{
+inputfile = /star/rcf/test/daq/2019/069/st_physics_20069002_raw_1500008.daq
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2019/production_19GeV_2019
+chain = P2019a,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeakFull,-OPr13,OPr40,-hitfilt,QAalltrigs
+nevents = 1000
+}
+
+## AuAu 14.5GeV run 2019 with geometry ry2019a and Sti tracking
+
+job108{
+inputfile = /star/rcf/test/daq/2019/112/st_physics_20112004_raw_2000001.daq
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2019/production_14p5GeV_2019
+chain = P2019a,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeakFull,-OPr13,OPr40,-hitfilt,QAalltrigs
 nevents = 1000
 }
 
 ## AuAu 7.7GeV run 2019 with geometry ry2019a and StiCA tracking
 
-job115{
+job109{
 inputfile = /star/rcf/test/daq/2019/158/st_physics_20158006_raw_4500001.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.stica/year_2019/production_7p7GeV_2019
+out_dir = /star/rcf/test/dev/daq_sl302.stica_opt/${thisday}/year_2019/production_7p7GeV_2019
 chain = P2019a,StiCA,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeakFull,-OPr13,OPr40,-hitfilt,QAalltrigs
 nevents = 1000
 }
@@ -1056,27 +1005,46 @@ nevents = 1000
 
 ## AuAu 7.7GeV run 2019 with geometry ry2019a and Sti tracking
 
-job116{
+job110{
 inputfile = /star/rcf/test/daq/2019/158/st_physics_20158006_raw_4500001.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2019/production_7p7GeV_2019
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2019/production_7p7GeV_2019
 chain = P2019a,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeakFull,-OPr13,OPr40,-hitfilt,QAalltrigs
 nevents = 1000
 }
 
 ## AuAu 200GeV run 2019 with geometry ry2019a and Sti tracking
 
-job117{
+job111{
 inputfile = /star/rcf/test/daq/2019/192/st_physics_20192002_raw_1500018.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.ittf/year_2019/production_AuAu200_2019
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2019/production_AuAu200_2019
 chain = P2019a,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeakFull,-OPr13,OPr40,-hitfilt,QAalltrigs
 nevents = 500
 
 
 ## AuAu 200GeV run 2019 with geometry ry2019a and StiCA tracking
 
-job118{
+job112{
 inputfile = /star/rcf/test/daq/2019/192/st_physics_20192002_raw_1500018.daq
-out_dir = /gpfs01/star/subsys-tpc/fisyak/nightlies//daq_sl302.stica/year_2019/production_AuAu200_2019
+out_dir = /star/rcf/test/dev/daq_sl302.stica_opt/${thisday}/year_2019/production_AuAu200_2019
 chain = P2019a,StiCA,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeakFull,-OPr13,OPr40,-hitfilt,QAalltrigs
 nevents = 500
+}
+
+
+## AuAu 11.5GeV run 2020 with geometry ry2020a and StiCA tracking
+
+job113{
+inputfile = /star/rcf/test/daq/2020/351/st_physics_20351078_raw_5000001.daq
+out_dir = /star/rcf/test/dev/daq_sl302.stica_opt/${thisday}/year_2020/production_11p5GeV_2020
+chain = P2020a,StiCA,btof,mtd,BEmcChkStat,-hitfilt,QAalltrigs
+nevents = 2000
+}
+
+## AuAu 11.5GeV run 2020 with geometry ry2020a and Sti tracking
+
+job114{
+inputfile = /star/rcf/test/daq/2020/351/st_physics_20351078_raw_5000001.daq
+out_dir =/gpfs01/star/subsys-tpc/fisyak/nightlies/daq_sl302.ittf/year_2020/production_11p5GeV_2020
+chain = P2020a,btof,mtd,BEmcChkStat,-hitfilt,QAalltrigs
+nevents = 2000
 }
