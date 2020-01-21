@@ -5,7 +5,7 @@ cd ~/reco/2020/TFG19m/RF/${dir}
 echo "pwd = $PWD"
 set log =  rsynchPico.`date +%m%d%y%H`.log;
 touch ${log}
-foreach d (`ls -1d 01?`)
+foreach d (`ls -1d 0??`)
   cd ${d}
 rsync -avrz -h                        \
     --include='*picoDst.root'                  \
