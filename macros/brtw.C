@@ -12,8 +12,10 @@
 #include "TF1.h"
 #include "TCanvas.h"
 #endif
-static const Double_t mK = 0.493677;
+static const Double_t mK  = 0.493677;
 static const Double_t mpi = 0.13956995;
+static const Double_t mP  = 0.93827231;
+static TString        nameP("K_S0");
 static       Double_t M1 = mK;
 static       Double_t M2 = mpi;
 static       Int_t    NoSignals = 1; // 0 -> Scalar, 1 -> Vector, 2 => Tensor;
@@ -123,6 +125,9 @@ TH1F *SubstracF(TH1F *hist, TF1* total, const Option_t *opt="b") {
   return h;
 }
 //________________________________________________________________________________
+void brtw() {
+}
+//________________________________________________________________________________
 void brtw(TH1F *hist, Double_t MMin=0.3, Double_t MMax = 1.3, Double_t m1 = mpi, Double_t m2 = mpi, Int_t l = 0, Bool_t baryon = kFALSE) {
   if (! hist) return;
   M1 = m1;
@@ -130,8 +135,9 @@ void brtw(TH1F *hist, Double_t MMin=0.3, Double_t MMax = 1.3, Double_t m1 = mpi,
   Baryon = baryon;
   static TF1 *f[3] = {0};
   for (Int_t k = 0; k < 3; k++) {// total, signal, background
-    TString fName(FuncNames[k]);
-    if (l >= 0)  fName += l; cout << "fname = " << fName << endl;
+    TString fName(nameP);
+    fName += FuncNames[k];
+    if (l >= 0)  fName += l;// cout << "fname = " << fName << endl;
     f[k] = (TF1 *) gROOT->GetListOfFunctions()->FindObject(fName);
     if (f[k]) continue;
     f[k] = new TF1(fName,total,MMin,MMax, NoParameters+1);
@@ -209,10 +215,11 @@ void brtw(TH1F *hist, Double_t MMin=0.3, Double_t MMax = 1.3, Double_t m1 = mpi,
     Background->FixParameter(3*s,-99.);
   }
   Background->Draw("same");
-  Double_t S = Signal->Integral(params[1]-3*params[2],params[1]+3*params[2]);
-  Double_t B = Background->Integral(params[1]-3*params[2],params[1]+3*params[2]);
-  Double_t T = Total->Integral(params[1]-3*params[2],params[1]+3*params[2]);
-  cout << hist->GetName() << "\t S = " << S << "\tB = " << B << "\tS/B = " << S/B << "\tS/sqrt(T+S) = " << S/TMath::Sqrt(T+S);
+  Double_t binWidth = hist->GetBinWidth(1);
+  Double_t S = Signal->Integral(params[1]-3*params[2],params[1]+3*params[2])/binWidth;
+  Double_t B = Background->Integral(params[1]-2*params[2],params[1]+2*params[2])/binWidth;
+  Double_t T = Total->Integral(params[1]-2*params[2],params[1]+2*params[2])/binWidth;
+  cout << hist->GetName() << "\t S = " << S << "\tB = " << B << "\tS/B = " << S/B << "\tS/sqrt(T) = " << S/TMath::Sqrt(T);
   TH1F *z = (TH1F *) gDirectory->Get("/Particles/KFParticlesFinder/PrimaryVertexQA/z");
   if (z) {
     Double_t nevents = z->GetEntries();
@@ -231,7 +238,10 @@ void K0BW(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/Ks/Param
   if (! M) return;
   TH1F *m = new TH1F(*M);
   m->SetName(Form("%s_BW",M->GetName()));
-  brtw(m,0.45,0.55,mpi, mpi, 0);
+  Masses[0] = 0.4977; // Initail parameters
+  Widths[0] = 0.0107;
+  nameP = "K_S0";
+ brtw(m,0.45,0.55,mpi, mpi, 0);
 }
 //________________________________________________________________________________
 void K0G(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/Ks/Parameters/M") {
@@ -239,7 +249,34 @@ void K0G(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/Ks/Parame
   if (! M) return;
   TH1F *m = new TH1F(*M);
   m->SetName(Form("%s_Gaus",M->GetName()));
-  brtw(m,0.45,0.55,mpi, mpi, -1);
+  Masses[0] = 0.4977; // Initail parameters
+  Widths[0] = 0.0107;
+  nameP = "K_S0";
+  brtw(m,0.55,0.55,mpi, mpi, -1);
+}
+//________________________________________________________________________________
+void Lambda(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/Lambda/Parameters/M") {
+  TH1F *M = (TH1F *) gDirectory->Get(histN);
+  if (! M) return;
+  TH1F *m = new TH1F(*M);
+  m->SetName(Form("%s_Gaus",M->GetName()));
+  Masses[0] = 1.115683; // Initail parameters
+  Widths[0] = 0.0020;
+  nameP = "Lambda";
+  NoParameters = 3*NoSignals + 3;
+  brtw(m,1.1,1.2,mpi, mP, -1);
+}
+//________________________________________________________________________________
+void Lambdab(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/Lambdab/Parameters/M") {
+  TH1F *M = (TH1F *) gDirectory->Get(histN);
+  if (! M) return;
+  TH1F *m = new TH1F(*M);
+  m->SetName(Form("%s_Gaus",M->GetName()));
+  Masses[0] = 1.115683; // Initail parameters
+  Widths[0] = 0.0020;
+  nameP = "Lambdab";
+  NoParameters = 3*NoSignals + 3;
+  brtw(m,1.1,1.2,mpi, mP, -1);
 }
 //________________________________________________________________________________
 void phiBW(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/phi_KK/Parameters/M") {
@@ -249,7 +286,9 @@ void phiBW(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/phi_KK/
   Masses[0] = 1.020; // Initail parameters
   Widths[0] = 0.004;
   m->SetName(Form("%s_BW",M->GetName()));
-  brtw(m,0.98,1.06,mK, mK, 1);
+  nameP = "phi";
+  NoParameters = 3*NoSignals + 8;
+  brtw(m,0.98,1.26,mK, mK, 1);
 }
 //________________________________________________________________________________
 /*
