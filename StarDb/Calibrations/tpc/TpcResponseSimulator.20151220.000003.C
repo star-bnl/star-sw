@@ -1,7 +1,7 @@
-// $Id: TpcResponseSimulator.20151220.000003.C,v 1.1 2019/10/09 20:35:28 iraklic Exp $
+// $Id: TpcResponseSimulator.20151220.000003.C,v 1.2 2020/01/22 14:08:26 iraklic Exp $
 // $Log: TpcResponseSimulator.20151220.000003.C,v $
-// Revision 1.1  2019/10/09 20:35:28  iraklic
-// correcting the 20% gap between inner and outer sector dEdx
+// Revision 1.2  2020/01/22 14:08:26  iraklic
+// second order fix for cluster timing and dEdx - this eliminates the issue seen in hitmap for the TPC
 //
 // Revision 1.1  2017/08/08 21:37:17  fisyak
 // The first iteration of dE/dx calibration for Run XVII
@@ -132,9 +132,9 @@ TDataSet *CreateTable() {
   row.T0offset   = 0.50 -1.43663e-01;//g // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
   // root.exe T0offset.C
   // TI->FitSlicesY(); TI_1->Fit("pol2","er","",-100,100);
-  row.T0offsetI =  1.17437e-01 + 8.43584e-03 - 0.1149; // Irakli : added for dAu emebdding Altro4 threshold
+  row.T0offsetI =  1.17437e-01 + 8.43584e-03; // Irakli : added for dAu emebdding Altro4 threshold
   // TO->FitSlicesY(); TO_1->Fit("pol2","er","",-100,100);
-  row.T0offsetO = -9.36725e-03 + 5.74947e-03 - 0.2148; // Irakli : added for dAu emebdding Altro4 threshold
+  row.T0offsetO = -9.36725e-03 + 5.74947e-03 + 0.0208; // Irakli : added for dAu emebdding Altro4 threshold
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
