@@ -34,9 +34,16 @@ void bfcMixer_Hft(Int_t Nevents=1  ,
   TString prodP16ijAuAu200hft  ( "DbV20161018 P2016a StiCA mtd mtdCalib btof PxlHit IstHit BEmcChkStat CorrX OSpaceZ2 OGridLeak3D ODistoSmear -hitfilt -vfminuit vfmce tpxclu pxlslowsim istslowsim nosvtit nossdit "); // remove sstHits picoWrite PicoVtxDefault
   TString prodP16ijAuAu200hftZB( "DbV20161018 P2016a StiCA mtd mtdCalib btof PxlHit IstHit BEmcChkStat CorrX OSpaceZ2 OGridLeak3D ODistoSmear -hitfilt vfminuit -vfmce tpxclu pxlslowsim istslowsim nosvtit nossdit "); // remove sstHits picoWrite PicoVtxDefault
 
+  // Run 16 dAu200 HFT chain
+  TString prodP17iddAu200hft  ( "DbV20161216 P2016a StiCA mtd mtdCalib btof PxlHit IstHit BEmcChkStat CorrX OSpaceZ2 OGridLeak3D ODistoSmear -hitfilt -vfminuit vfmce tpxclu pxlslowsim istslowsim nosvtit nossdit "); // remove sstHits picoWrite PicoVtxDefault
+
+  // Run 16 dAu62 HFT chain
+  TString prodP17iddAu62hft  ( "DbV20170426 P2016a StiCA mtd mtdCalib btof PxlHit IstHit BEmcChkStat CorrX OSpaceZ2 OGridLeak3D ODistoSmear -hitfilt -vfminuit vfmce tpxclu pxlslowsim istslowsim nosvtit nossdit "); // remove sstHits picoWrite PicoVtxDefault
+
   //TString geomP16ij("ry2016x"); // little hack... sets y2016x as the chain2 geometry... loaded by geant... thinking this might be needed to get the geant reader correct...
   TString geomP16ij("ry2016x"); // this is consistent with chain option... but may cause problem with geant reader...
   TString geomP16id("ry2014x"); // this is consistent with chain option... but may cause problem with geant reader...
+  TString geomP17id("ry2016x"); // this is consistent with chain option... but may cause problem with geant reader...
 
   TString chain1Opt(" in magF tpcDb NoDefault TpxRaw -ittf NoOutput");     // chain1 reads event from daq file
   TString chain2Opt(" gen_T geomT sim_T TpcRS -ittf -tpc_daq nodefault");  // chain2 runs simu or reads from mc file
@@ -60,6 +67,14 @@ void bfcMixer_Hft(Int_t Nevents=1  ,
   else if (prodName == "P16ijAuAu200hftZB" )  {
       chain2Opt += geomP16ij;
       chain3Opt += prodP16ijAuAu200hftZB; // nix chain3Opt += " btofSim -vpdSim btofMixer StiPulls ";
+    }
+  else if (prodName == "P17iddAu200hft" ) {
+      chain2Opt += geomP17id;
+      chain3Opt += prodP17iddAu200hft; //chain3Opt += " btofSim vpdSim btofMixer ";
+    }
+  else if (prodName == "P17iddAu62hft" ) {
+      chain2Opt += geomP17id;
+      chain3Opt += prodP17iddAu62hft; //chain3Opt += " btofSim vpdSim btofMixer ";
     }
 
   else {
@@ -252,7 +267,7 @@ void bfcMixer_Hft(Int_t Nevents=1  ,
 
 #if 1
   TString checkProdName( prodName );
-  if ( checkProdName == "P16idAuAu200hft" || checkProdName == "P16ijAuAu200hft" ) {
+  if ( checkProdName == "P16idAuAu200hft" || checkProdName == "P16ijAuAu200hft" || checkProdName == "P17iddAu200hft") {
   //________________________________________________________________________________
   // Setup StarEmbedMaker 
     gSystem->Load( "StarGeneratorUtil.so"  );
@@ -323,9 +338,12 @@ void bfcMixer_Hft(Int_t Nevents, const Char_t *daqfile, Char_t *tagfile,
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Hft.C,v 1.1 2018/09/26 05:21:16 zhux Exp $
+// $Id: bfcMixer_Hft.C,v 1.2 2020/01/22 15:02:56 starembd Exp $
 //
 // $Log: bfcMixer_Hft.C,v $
+// Revision 1.2  2020/01/22 15:02:56  starembd
+// added options for Run16 dAu200 and dAu62 HFT embedding
+//
 // Revision 1.1  2018/09/26 05:21:16  zhux
 // initial version from Jason Webb
 //
