@@ -5,6 +5,7 @@
 #include "THelix3d.h"
 class StvHit;
 typedef float Mtx33F_t[3][3];
+class TkDir_t;
 
 class StvHitErrCalculator : public TNamed {
 public:	
