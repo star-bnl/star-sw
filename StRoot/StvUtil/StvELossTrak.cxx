@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.17.4.5 2020/01/14 00:49:07 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.17.4.6 2020/01/24 20:30:56 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -11,10 +11,6 @@
 #include "StvELossTrak.h"
 
 #include "StvUtil/StvDebug.h"
-
-static double gsigma2(double ZoverA,double DENS,double CHARGE2
-                     ,double AMASS ,double BET2,double STEP  );
-static double gdrelx (double A     ,double Z   ,double DENS ,double T,double HMASS);
 
 static const double kPiMass=0.13956995;
 //static const double kMinP = 0.1,kMinE = sqrt(kMinP*kMinP+kPiMass*kPiMass);
@@ -110,6 +106,7 @@ void StvELossTrak::Add(double len)
 //  assert(fState==2);
   fState = 1;
   assert(fX0>0);
+  fDir = len>0;
   fLen = fabs(len);
   fTheta2 = fLen/fX0*fFak;
   fOrth2  = fTheta2/3*fLen*fLen;
@@ -140,7 +137,7 @@ void StvELossTrak::Add(double len)
 //*-- Author :
 //______________________________________________________________________________
 //      SUBROUTINE GDRELX(A,Z,DENS,T,HMASS,dedx)
-double gdrelx(double A,double Z,double DENS,double T,double HMASS)
+double StvELossTrak::gdrelx(double A,double Z,double DENS,double T,double HMASS)
 {
 //
 //    ******************************************************************
@@ -444,8 +441,8 @@ double f1,f2,f3,f4,f5,tupp,ce,st,sbb,dedx;
 //*CMZ :  3.21/02 29/03/94  15.41.21  by  S.Giani
 //-- Author :
 //______________________________________________________________________________
-double gsigma2(double ZoverA,double DENS,double CHARGE2
-              ,double AMASS ,double BET2,double STEP  )
+double StvELossTrak::gsigma2(double ZoverA,double DENS,double CHARGE2
+                            ,double AMASS ,double BET2,double STEP  )
 {
 //      SUBROUTINE GFLUCT(DEMEAN,DE)
 

@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.h,v 1.11.4.3 2020/01/14 00:45:20 perev Exp $
+// $Id: StvELossTrak.h,v 1.11.4.4 2020/01/24 20:30:12 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -22,7 +22,7 @@ public:
      int Same(const TGeoMaterial *mate) const;
     void Set(double A, double Z, double Dens, double x0,double p);
     void Set(const TGeoMaterial *mate,double p);
-    void Add(double len);
+virtual void Add(double len);
 //		Last step data
   double Theta2() 	const 		{return fTotTheta2;	}
   double Ort2()   	const		{return fTotOrth2;	}
@@ -30,6 +30,7 @@ public:
   double PinvLoss()  	const 		{return fTotPinvLoss;	}
   double ELossErr2() 	const		{return fTotELossErr2;	}
   double PinvErr2() 	const 		{return fTotPinvErr2;	}
+  double d2dEdXdE() 	const 		{return fd2EdXdE;	}
   double Len() 		const		{return fTotLen;	}	
 
   double P() 		        const	{return fP;	}	
@@ -37,9 +38,13 @@ public:
      int GetNMats() 		const	{return fNMats;	}	
 const TGeoMaterial *GetMate()   const	{return fMate ;	}
   static void Test();
-private:
+  static double gdrelx(double A,double Z,double DENS,double T,double HMASS);
+  static double gsigma2(double ZoverA,double DENS,double CHARGE2
+                       ,double AMASS ,double BET2,double STEP  );
+protected:
 char   fBeg[1];
 char   fState;
+char   fDir;
 double fdEdX,fdEdXErr2;
 double fP;		//momentum 
 double fM;		//mass 
@@ -65,6 +70,7 @@ double fTotPinvErr2;	///accumulated error of 1/p loss
 double fTotLen;		///accumulated track length
 double fTotTheta2;
 double fTotOrth2;
+double fd2EdXdE;
 char   fEnd[1];
 ClassDef(StvELossTrak,0) 
 };
