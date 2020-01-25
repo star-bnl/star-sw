@@ -4,9 +4,12 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.52 2018/03/26 02:43:13 zhux Exp $
+// $Id: bfcMixer_Tpx.C,v 1.53 2020/01/22 15:06:31 starembd Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.53  2020/01/22 15:06:31  starembd
+// added options for Run16 dAu39 and dAu20
+//
 // Revision 1.52  2018/03/26 02:43:13  zhux
 // added P17id Run16 dAu200 chain.
 //
@@ -204,7 +207,12 @@ void bfcMixer_Tpx(Int_t Nevents=100,
 
   // Run16 dAu200 chain (P17id)
   TString prodP17iddAu200("DbV20161216,P2016a,StiCA,mtd,mtdCalib,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt");
-
+  
+  // Run16 dAu39 chain (P17id)
+  TString prodP17iddAu39("DbV20170426,P2016a,StiCA,mtd,mtdCalib,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt");
+  
+  // Run16 dAu20 chain (P17id)
+  TString prodP17iddAu20("DbV20170426,P2016a,StiCA,mtd,mtdCalib,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt");
 
   TString geomP08ic("ry2008e");
   TString geomP10ic("ry2009d");
@@ -273,6 +281,8 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   else if (prodName == "P16ijAuAu200") { chain1Opt += xgeom; chain3Opt = prodP16ijAuAu200;  chain3Opt += ",mtdsim";  chain2Opt += geomP16ij;}
   else if (prodName == "P17idAuAu200") { chain1Opt += xgeom; chain3Opt = prodP17idAuAu200;  chain3Opt += ",mtdsim";  chain2Opt += geomP17id;}
   else if (prodName == "P17iddAu200")  { chain1Opt += xgeom; chain3Opt = prodP17iddAu200;   chain3Opt += ",mtdsim";  chain2Opt += geomP17id_run16;}
+  else if (prodName == "P17iddAu39")   { chain1Opt += xgeom; chain3Opt = prodP17iddAu39;    chain3Opt += ",mtdsim";  chain2Opt += geomP17id_run16;}
+  else if (prodName == "P17iddAu20")   { chain1Opt += xgeom; chain3Opt = prodP17iddAu20;    chain3Opt += ",mtdsim";  chain2Opt += geomP17id_run16;}
 
   else {
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;

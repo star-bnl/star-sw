@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: genDst.C,v 1.6 2019/09/18 17:54:48 genevb Exp $
+// $Id: genDst.C,v 1.7 2020/01/25 05:10:00 genevb Exp $
 // Author: G. Van Buren (BNL)
 //
 // Description:
@@ -20,7 +20,7 @@
 //
 // Example lists of options:
 // "picoDst"
-// "picoDst,mtdMatch,y2014a"
+// "DbV20200125,picoDst,mtdMatch,y2014a"
 //
 // Example options for vertex-finding:
 // beamline, beamline1D, beamline3D (otherwise no beamline)
@@ -170,7 +170,7 @@ void genDst(unsigned int First,
   unsigned int LastToRead = Last > 0 ? min(Last, nEntries) : nEntries;
   gMessMgr->Info() << nEntries << " events in chain, " << LastToRead-First+1 << " will be read." << endm;
 
-  St_db_Maker* st_db_maker = new St_db_Maker("db", "StarDb", "MySQL:StarDb", "$STAR/StarDb");
+  St_db_Maker* db = new St_db_Maker("db", "StarDb", "MySQL:StarDb", "$STAR/StarDb");
 
   // Initialize some values and pointers
   StMaker* processMaker = 0;
@@ -293,16 +293,31 @@ void genDst(unsigned int First,
 
   }
 
-  // Set additional options as maker attributes
+  // Set additional options (except DbV) as maker attributes
   if (processMaker) {
     for (int tk=0; tk < optionTokens->GetEntries(); tk++) {
-      TString& tok = ((TObjString*) (optionTokens->At(tk)))->String();
-      Ssiz_t delim = tok.First(':');
+      TString& Tag = ((TObjString*) (optionTokens->At(tk)))->String();
+
+      // copy of DbV code from StBFChain.cxx
+      if (Tag.BeginsWith("dbv")) {
+        int FDate=0,FTime=0;
+        if (Tag.Length() == 11)  (void) sscanf(Tag.Data(),"dbv%8d",&FDate);
+        if (Tag.Length() == 18)  (void) sscanf(Tag.Data(),"dbv%8d.%6d",&FDate,&FTime);
+        if (FDate) {
+          db->SetMaxEntryTime(FDate,FTime);
+          gMessMgr->Info() << "\tSet DataBase max entry time " << FDate << "/" << FTime
+                           << " for St_db_Maker(\"" << db->GetName() <<"\")" << endm;
+        }
+        continue;
+      }
+
+      // assign attributes
+      Ssiz_t delim = Tag.First(':');
       if (delim < 0) {
-        processMaker->SetAttr(tok.Data(),1);
+        processMaker->SetAttr(Tag.Data(),1);
       } else {
-        TString key(tok(0,delim));
-        TString& val = tok.Remove(0,delim+1);
+        TString key(Tag(0,delim));
+        TString& val = Tag.Remove(0,delim+1);
         if (val.IsDigit()) { processMaker->SetAttr(key.Data(),val.Atoi()); }
         else if (val.IsFloat()) { processMaker->SetAttr(key.Data(),val.Atof()); }
         else { processMaker->SetAttr(key.Data(),val.Data()); }
@@ -354,7 +369,7 @@ void genDst(unsigned int First,
     delete outFile;
   }
 
-  delete st_db_maker;
+  delete db;
   delete processMaker;
   delete optionTokens;
 }
@@ -371,6 +386,9 @@ void genDst(unsigned int Last,
 /////////////////////////////////////////////////////////////////////////////
 //
 // $Log: genDst.C,v $
+// Revision 1.7  2020/01/25 05:10:00  genevb
+// Include DbV, more like BFC
+//
 // Revision 1.6  2019/09/18 17:54:48  genevb
 // Acivate additional branches by default
 //

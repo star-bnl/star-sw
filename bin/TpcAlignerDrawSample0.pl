@@ -9,7 +9,8 @@ my $debug = 0;
 foreach my $f (@files) {
   my $b = File::Basename::basename($f,".root");
   my $run = $b; # print "$run\n";
-  $run =~ s/.\/st_//;# print "$run\n";
+  $run =~ s/st_//;# print "$run\n";
+  $run =~ s/physics_//;# print "$run\n";
   $run =~ s/adc_//; #print "$run\n";
   $run =~ s/gmt_//; # print "$run\n";
   $run =~ s/hltcosmic_//;

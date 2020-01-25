@@ -305,7 +305,8 @@ void runEmbeddingSimulation2016(
 
   Kinematics();
 
-#if 1 
+#if 0 
+  // Only for nucleus listed below
   // Load STAR Particle DataBase and add the hypertriton definitions.  Map to the
   // decay modes as defined in gstar_part.g 
   StarParticleData &pdb = StarParticleData::instance();
@@ -321,7 +322,7 @@ void runEmbeddingSimulation2016(
 
 #endif
 
-#if 0 
+#if 1 
   //
   // Setup decay manager
   //

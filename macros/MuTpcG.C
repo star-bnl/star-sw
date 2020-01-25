@@ -1081,11 +1081,11 @@ c1->cd(3)->SetLogz(1);  dZS->Project3D("zx")->Draw("colz"); dZS_zx->FitSlicesY()
 dYS_zx_1->Fit("pol0","er","", 0.5,12.5); cout << Form("dYW = %8.4f +/- %8.4f",pol0->GetParameter(0),pol0->GetParError(0)) << endl;
 dYS_zx_1->Fit("pol0","er","",12.5,24.5); cout << Form("dYE = %8.4f +/- %8.4f",pol0->GetParameter(0),pol0->GetParError(0)) << endl;
 
-TCanvas *c1 = new TCanvas(); c1->Divide(1,4);
-c1->cd(1);  dT->ProjectionY()->Fit("gaus"); cout << Form(" dT: %6.4f +/- %6.4f",gaus->GetParameter(1), gaus->GetParameter(2)) << endl;
-c1->cd(2);  dZ->ProjectionY()->Fit("gaus"); cout << Form(" dZ: %6.4f +/- %6.4f",gaus->GetParameter(1), gaus->GetParameter(2)) << endl;
-c1->cd(3);  dX->ProjectionY()->Fit("gaus"); cout << Form(" dX: %6.4f +/- %6.4f",gaus->GetParameter(1), gaus->GetParameter(2)) << endl;
-c1->cd(4);  dY->ProjectionY()->Fit("gaus"); cout << Form(" dY: %6.4f +/- %6.4f",gaus->GetParameter(1), gaus->GetParameter(2)) << endl;
+TCanvas *c2 = new TCanvas(); c2->Divide(1,4);
+c2->cd(1);  dT->ProjectionY()->Fit("gaus"); cout << Form(" dT: %6.4f +/- %6.4f",gaus->GetParameter(1), gaus->GetParameter(2)) << endl;
+c2->cd(2);  dZ->ProjectionY()->Fit("gaus"); cout << Form(" dZ: %6.4f +/- %6.4f",gaus->GetParameter(1), gaus->GetParameter(2)) << endl;
+c2->cd(3);  dX->ProjectionY()->Fit("gaus"); cout << Form(" dX: %6.4f +/- %6.4f",gaus->GetParameter(1), gaus->GetParameter(2)) << endl;
+c2->cd(4);  dY->ProjectionY()->Fit("gaus"); cout << Form(" dY: %6.4f +/- %6.4f",gaus->GetParameter(1), gaus->GetParameter(2)) << endl;
 
 
 

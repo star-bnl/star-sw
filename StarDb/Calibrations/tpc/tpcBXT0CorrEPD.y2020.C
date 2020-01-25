@@ -26,7 +26,7 @@ memset(&row,0,tableSet->GetRowSize());
     row.a[7]	 =          0;
     row.a[8]	 =          0;
     row.a[9]	 =          0;
-    strcpy(row.comment,"2019_Generic");
+    strcpy(row.comment,"2020_Generic");
 tableSet->AddAt(&row);
 // ----------------- end of code ---------------
  return (TDataSet *)tableSet;

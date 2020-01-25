@@ -54,6 +54,9 @@ foreach my $run (glob $glob) {
     my $dt = $mtime - $mtimeA;
     print "$ana $mtime,$Mtime, $run $mtimeA,$MtimeA, dt = $dt\n" if ($debug);
     if ($dt > 0) {next;}
+    my $cmd = "mv ". $ana ." ". $ana .".BAK";
+    print "$cmd \n" if ($debug);
+    my $flag = system($cmd);
   };
   print "string:$run:$ana\n";
 #  last;
