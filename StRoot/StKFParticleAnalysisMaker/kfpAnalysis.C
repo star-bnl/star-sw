@@ -117,7 +117,7 @@ void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", c
   StKFParticleInterface::instance()->SetChi2CutXiOmega(3);
   StKFParticleInterface::instance()->SetChi2TopoCutXiOmega(3);
   StKFParticleInterface::instance()->SetLdLCutXiOmega(5);  
-
+  ((KFParticlePerformanceBase *)StKFParticleInterface::instance()->GetTopoReconstructor())->DoNotStoreFitPullHistograms(); 
   
 //   StKFParticleInterface::instance()->SetSecondaryCuts(3, 3, 5);
 //________________________________________________________________________________
