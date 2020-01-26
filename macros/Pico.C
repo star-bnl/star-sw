@@ -176,7 +176,6 @@ enum EVar {
   kZ,
   NoDim
 };
-static TH1   *fFitResults = 0;
 TLegend *leg = 0;
 #ifndef __APPLE__
 Int_t nPng = 0;

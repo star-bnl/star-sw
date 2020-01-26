@@ -11,6 +11,10 @@
 #include "TStyle.h"
 #include "TF1.h"
 #include "TCanvas.h"
+#include "TSystem.h"
+#include "TNtuple.h"
+#include "TArrayF.h"
+#include "TFitResultPtr.h"
 #endif
 static const Double_t mK  = 0.493677;
 static const Double_t mpi = 0.13956995;
@@ -21,10 +25,9 @@ static       Double_t M2 = mpi;
 static       Int_t    NoSignals = 1; // 0 -> Scalar, 1 -> Vector, 2 => Tensor;
 static       Int_t NoParameters = 3*NoSignals + 4;
 static Bool_t Baryon = kFALSE; 
-static TCanvas *cFit = 0;
 static Bool_t reject = kFALSE;
 static const Char_t  *SignalNames[3] = {"S","V","T"};
-static Double_t Masses[3] = {0.4977, -1, -1}; // Initail parameters
+static Double_t Masses[3] = {0.497611, -1, -1}; // Initail parameters
 static Double_t Widths[3] = {0.0107, -1, -1};
 static const Char_t  *FuncNames[3] = {"Total","Background","Signal"};
 //________________________________________________________________________________
@@ -128,8 +131,8 @@ TH1F *SubstracF(TH1F *hist, TF1* total, const Option_t *opt="b") {
 void brtw() {
 }
 //________________________________________________________________________________
-void brtw(TH1F *hist, Double_t MMin=0.3, Double_t MMax = 1.3, Double_t m1 = mpi, Double_t m2 = mpi, Int_t l = 0, Bool_t baryon = kFALSE) {
-  if (! hist) return;
+TF1 *brtw(TH1 *hist, Double_t MMin=0.3, Double_t MMax = 1.3, Double_t m1 = mpi, Double_t m2 = mpi, Int_t l = 0, Bool_t baryon = kFALSE) {
+  if (! hist) return 0;
   M1 = m1;
   M2 = m2;
   Baryon = baryon;
@@ -139,8 +142,7 @@ void brtw(TH1F *hist, Double_t MMin=0.3, Double_t MMax = 1.3, Double_t m1 = mpi,
     fName += FuncNames[k];
     if (l >= 0)  fName += l;// cout << "fname = " << fName << endl;
     f[k] = (TF1 *) gROOT->GetListOfFunctions()->FindObject(fName);
-    if (f[k]) continue;
-    f[k] = new TF1(fName,total,MMin,MMax, NoParameters+1);
+    if (! f[k]) f[k] = new TF1(fName,total,MMin,MMax, NoParameters+1);
     f[k]->SetParName(NoParameters,"L");
     f[k]->FixParameter(NoParameters, l);
     f[k]->SetNpx(400);
@@ -154,19 +156,25 @@ void brtw(TH1F *hist, Double_t MMin=0.3, Double_t MMax = 1.3, Double_t m1 = mpi,
 	  f[k]->FixParameter(3*s+1,Masses[s]);
 	  f[k]->SetParName(3*s+2,"#sigma");   
 	  f[k]->FixParameter(3*s+2, Widths[s]);
-	} else {
-	  f[k]->SetParName(3*s+1,Form("Mass%s",SignalNames[s]));   
+	} else if (l + s < 3) {
+	  f[k]->SetParName(3*s+1,Form("M_{%s}",SignalNames[l+s]));   
 	  f[k]->FixParameter(3*s+1,Masses[s]);
-	  f[k]->SetParName(3*s+2,Form("Width%s",SignalNames[s]));   
+	  f[k]->SetParName(3*s+2,Form("#Gamma_{%s}",SignalNames[l+s]));   
+	  f[k]->FixParameter(3*s+2, Widths[s]);
+	} else {
+	  f[k]->SetParName(3*s+1,"M");   
+	  f[k]->FixParameter(3*s+1,Masses[s]);
+	  f[k]->SetParName(3*s+2,"#Gamma");
 	  f[k]->FixParameter(3*s+2, Widths[s]);
 	}
       }
       f[k]->SetParName(3*NoSignals+0,"lBack");     f[k]->SetParameter(3*NoSignals+0,0);
-      f[k]->SetParName(3*NoSignals+1,"alpha");     f[k]->SetParameter(3*NoSignals+1,0);
-      f[k]->SetParName(3*NoSignals+2,"beta0");     f[k]->SetParameter(3*NoSignals+2,0);
+      f[k]->SetParName(3*NoSignals+1,"#alpha");    f[k]->SetParameter(3*NoSignals+1,0);
+      if (MMin - M1 - M2 > 0.010)                  f[k]->FixParameter(3*NoSignals+1,0);
+      f[k]->SetParName(3*NoSignals+2,"#beta_{0}");     f[k]->SetParameter(3*NoSignals+2,0);
       
       for (Int_t i = 3*NoSignals+3, j = 1; i < NoParameters; i++, j++) {
-	f[k]->SetParName(i,Form("beta%i",j));
+	f[k]->SetParName(i,Form("#beta_{%i}",j));
 	f[k]->SetParameter(i,0.);}
     } else {
       f[k]->SetLineColor(k+1);
@@ -195,7 +203,8 @@ void brtw(TH1F *hist, Double_t MMin=0.3, Double_t MMax = 1.3, Double_t m1 = mpi,
     Total->FixParameter(3*s,-99.);
   }
   SetReject(kTRUE);
-  hist->Fit(Total,"r","",MMin,MMax);
+  TFitResultPtr res;
+  res = hist->Fit(Total,"r","",MMin,MMax);
   SetReject(kFALSE);
   for (Int_t s = 0; s < NoSignals; s++) {
     Total->SetParameter(3*s,0.);
@@ -203,8 +212,8 @@ void brtw(TH1F *hist, Double_t MMin=0.3, Double_t MMax = 1.3, Double_t m1 = mpi,
     Total->ReleaseParameter(3*s+1);
     Total->ReleaseParameter(3*s+2);
   }
-  hist->Fit(Total,"r","same",MMin,MMax);
-  hist->Fit(Total,"rim","same",MMin,MMax);
+  res = hist->Fit(Total,"r","same",MMin,MMax);
+  res = hist->Fit(Total,"rim","same",MMin,MMax);
   Double_t params[20];
   Total->GetParameters(params);
   Signal->SetParameters(params);
@@ -220,6 +229,7 @@ void brtw(TH1F *hist, Double_t MMin=0.3, Double_t MMax = 1.3, Double_t m1 = mpi,
   Double_t B = Background->Integral(params[1]-2*params[2],params[1]+2*params[2])/binWidth;
   Double_t T = Total->Integral(params[1]-2*params[2],params[1]+2*params[2])/binWidth;
   cout << hist->GetName() << "\t S = " << S << "\tB = " << B << "\tS/B = " << S/B << "\tS/sqrt(T) = " << S/TMath::Sqrt(T);
+  cout << "\tSignificance = " << 1./Total->GetParError(0);
   TH1F *z = (TH1F *) gDirectory->Get("/Particles/KFParticlesFinder/PrimaryVertexQA/z");
   if (z) {
     Double_t nevents = z->GetEntries();
@@ -228,67 +238,130 @@ void brtw(TH1F *hist, Double_t MMin=0.3, Double_t MMax = 1.3, Double_t m1 = mpi,
       cout << "\tSignal per Event(" << nevents << ")  = " << SperE;
     }
   }
-  cout << "\tM = " << Total->GetParameter(1) << " +/- " << Total->GetParError(1) 
-       << "\tW = " << Total->GetParameter(2) << " +/- " << Total->GetParError(2) 
-       << endl;
+  cout << Form("\tM = %7.2f +/- %5.2f",1e3*Total->GetParameter(1),1e3*Total->GetParError(1))
+       << Form("\tW = %7.2f +/- %5.2f",1e3*Total->GetParameter(2),1e3*Total->GetParError(2)) 
+       << " (MeV)" << endl;
+  return Total;
 }
 //________________________________________________________________________________
-void K0BW(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/Ks/Parameters/M") {
+TF1 *K0BW(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/Ks/Parameters/M") {
   TH1F *M = (TH1F *) gDirectory->Get(histN);
-  if (! M) return;
+  if (! M) return 0;
   TH1F *m = new TH1F(*M);
   m->SetName(Form("%s_BW",M->GetName()));
-  Masses[0] = 0.4977; // Initail parameters
+  Masses[0] = 0.497611; // Initail parameters
   Widths[0] = 0.0107;
   nameP = "K_S0";
- brtw(m,0.45,0.55,mpi, mpi, 0);
+  return brtw(m,0.45,0.55,mpi, mpi, 0);
 }
 //________________________________________________________________________________
-void K0G(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/Ks/Parameters/M") {
+TF1 *K0G(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/Ks/Parameters/M") {
   TH1F *M = (TH1F *) gDirectory->Get(histN);
-  if (! M) return;
+  if (! M) return 0;
   TH1F *m = new TH1F(*M);
   m->SetName(Form("%s_Gaus",M->GetName()));
-  Masses[0] = 0.4977; // Initail parameters
+  Masses[0] = 0.497611; // Initail parameters
   Widths[0] = 0.0107;
   nameP = "K_S0";
-  brtw(m,0.55,0.55,mpi, mpi, -1);
+  return brtw(m,0.45,0.55,mpi, mpi, -1);
 }
 //________________________________________________________________________________
-void Lambda(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/Lambda/Parameters/M") {
+TF1 *Lambda(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/Lambda/Parameters/M") {
   TH1F *M = (TH1F *) gDirectory->Get(histN);
-  if (! M) return;
+  if (! M) return 0;
   TH1F *m = new TH1F(*M);
   m->SetName(Form("%s_Gaus",M->GetName()));
   Masses[0] = 1.115683; // Initail parameters
   Widths[0] = 0.0020;
   nameP = "Lambda";
   NoParameters = 3*NoSignals + 3;
-  brtw(m,1.1,1.2,mpi, mP, -1);
+  return brtw(m,1.1,1.2,mpi, mP, -1);
 }
 //________________________________________________________________________________
-void Lambdab(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/Lambdab/Parameters/M") {
+TF1 *Lambdab(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/Lambdab/Parameters/M") {
   TH1F *M = (TH1F *) gDirectory->Get(histN);
-  if (! M) return;
+  if (! M) return 0;
   TH1F *m = new TH1F(*M);
   m->SetName(Form("%s_Gaus",M->GetName()));
   Masses[0] = 1.115683; // Initail parameters
   Widths[0] = 0.0020;
   nameP = "Lambdab";
   NoParameters = 3*NoSignals + 3;
-  brtw(m,1.1,1.2,mpi, mP, -1);
+  return brtw(m,1.1,1.2,mpi, mP, -1);
 }
 //________________________________________________________________________________
-void phiBW(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/phi_KK/Parameters/M") {
+TF1 *phiBW(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/phi_KK/Parameters/M") {
   TH1F *M = (TH1F *) gDirectory->Get(histN);
-  if (! M) return;
+  if (! M) return 0;
   TH1F *m = new TH1F(*M);
   Masses[0] = 1.020; // Initail parameters
   Widths[0] = 0.004;
   m->SetName(Form("%s_BW",M->GetName()));
   nameP = "phi";
   NoParameters = 3*NoSignals + 8;
-  brtw(m,0.98,1.26,mK, mK, 1);
+  return brtw(m,0.98,1.26,mK, mK, 1);
+}
+//________________________________________________________________________________
+void FitH3(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/Ks/Parameters/y-p_{t}-M") {
+  TH3F *h3 = (TH3F *) gDirectory->Get(histN);
+  if (! h3) return;
+  if (h3->GetDimension() != 3) return;
+  TH1 *h1 = (TH1 *) h3->Project3D("z");
+  TString Name(gSystem->BaseName(histN));
+  Name += "_z";
+  TF1 *T =  brtw(h1,0.45,0.55,mpi, mpi, 0);
+  TString Vars("i:j:x:y");
+  Int_t Npar = T->GetNpar();
+  for (Int_t p = 0; p < Npar; p++) {
+    TString V(T->GetParName(p));
+    V.ReplaceAll("{","");
+    V.ReplaceAll("}","");
+    V.ReplaceAll("#","");
+    Vars += ":";
+    Vars += V;
+    Vars += ":d";
+    Vars += V;
+  }
+  Vars += ":NDF:chisq";
+  TNtuple *FitP = new TNtuple("FitP",Form("Fit results for %s",histN),Vars);
+  TArrayF varsX(2*Npar+6);
+  Float_t *vars = varsX.GetArray();
+  vars[0] = 0; // i
+  vars[1] = 0; // j
+  vars[2] = 0; // x
+  vars[3] = 0; // y
+  for (Int_t p = 0; p < Npar; p++) {
+    vars[4+2*p] = T->GetParameter(p);
+    vars[5+2*p] = T->GetParError(p);
+  }
+  vars[4+2*Npar] = T->GetNDF();
+  vars[5+2*Npar] = T->GetChisquare();
+  FitP->Fill(vars);
+  TAxis *xax = h3->GetXaxis();
+  Int_t nx = xax->GetNbins(); printf ("nx = %i",nx);
+  Axis_t xmin = xax->GetXmin(); printf (" xmin = %f",xmin);
+  Axis_t xmax = xax->GetXmax(); printf (" xmax = %f\n",xmax);
+  TAxis *yax = h3->GetYaxis();
+  Int_t ny = yax->GetNbins();
+  for (int i = 1; i <= nx; i++){
+    for (int j = 1; j <= ny; j++){
+      h1 = h3->ProjectionZ(Form("f%i_%i", i, j ),i,i,j,j); 
+      if (h1->GetEntries() < 1e3) continue;
+      T = brtw(h1,0.45,0.55,mpi, mpi, 0);
+      if (! T) continue;
+      vars[0] = i; // i
+      vars[1] = j; // j
+      vars[2] = xax->GetBinCenter(i); // x
+      vars[3] = yax->GetBinCenter(j); // y
+      for (Int_t p = 0; p < Npar; p++) {
+	vars[4+2*p] = T->GetParameter(p);
+	vars[5+2*p] = T->GetParError(p);
+      }
+      vars[4+2*Npar] = T->GetNDF();
+      vars[5+2*Npar] = T->GetChisquare();
+      FitP->Fill(vars);
+    }
+  }
 }
 //________________________________________________________________________________
 /*
