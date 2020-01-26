@@ -124,7 +124,7 @@ class KFParticlePerformanceBase
   
   /** \brief Number of histograms with parameter distributions: mass, p, pt, rapidity, decay length, c*tau, 
    ** chi/ndf, prob, theta, phi, X, Y, Z, R, L, L/dL, Mt, multiplicity. **/
-  static const int nHistoPartParam = 18;
+  static const int nHistoPartParam = 19;
   /** Number of sets of histograms with parameter distributions: 0 - all candidates, 1 - reconstructed signal, 2 - physics background from other decays, 3 - combinatorial
    ** background (ghost), 4 - reconstructed signal for side bands method, 5- reconstructed background for side bands method, 6 - MC signal. **/
   static const int nParametersSet = 7;
@@ -145,7 +145,7 @@ class KFParticlePerformanceBase
   TH2F *hPartParam2DSecondary[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D]; ///< 2D for secondary candidates.
   TH2F *hPartParam2DSecondaryMass[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D]; ///< 2D for secondary candidates with mass constraint.
 
-  static const int nHistoPartParam3D = 6; ///< Number of 3D histograms: y-pt-M, y-mt-M, b-pt-M, b-y-M, b-mt-M, ct-pt-M
+  static const int nHistoPartParam3D = 8; ///< Number of 3D histograms: y-pt-M, y-mt-M, b-pt-M, b-y-M, b-mt-M, ct-pt-M, y-phi-M for pT > 1 GeV/c, y-pt-dM
   TH3F *hPartParam3D[1][KFPartEfficiencies::nParticles][nHistoPartParam3D]; ///< 3D histograms.
 
   static const int nPartEfficiency = 9; ///< Number of efficiency plots for each decay: vs p, pt, y, z, c*tau, decay length, l, r, Mt.
@@ -201,6 +201,7 @@ class KFParticlePerformanceBase
                                 TH1F* histoFit[KFPartEfficiencies::nParticles][nFitQA], int iPart, bool withWrongPVHypothesis = 0);
   
   TString GetDirectoryPath();
+  ClassDef(KFParticlePerformanceBase,0)
 };
 
 #endif

@@ -1493,6 +1493,10 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
       histoParameters3D[0][iParticle][4]->Fill(fCentralityBin, M_t, M, fCentralityWeight);
     }
     histoParameters3D[0][iParticle][5]->Fill(cT, Pt, M, 1);
+    if (Pt > 1.0) {
+      histoParameters3D[0][iParticle][6]->Fill(Rapidity, Phi, M, 1);
+    }
+    histoParameters3D[0][iParticle][7]->Fill(Rapidity,Pt,ErrM,1);
   }
   
   //Fill histograms for the side bands analysis

@@ -164,6 +164,7 @@ class KFTopoPerformance: public KFParticlePerformanceBase
   
   int fCentralityBin; ///< Centrality bin for the current event. 
   float fCentralityWeight; ///< Centrality weight for the current event.
+    ClassDef(KFTopoPerformance,0)
 };
 
 #endif
