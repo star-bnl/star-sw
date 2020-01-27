@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.43.2.3 2020/01/08 00:25:05 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.43.2.4 2020/01/27 16:51:23 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.43.2.4  2020/01/27 16:51:23  perev
+ * Check nhits < 256 to do not offend StEvenyt
+ *
  * Revision 1.43.2.3  2020/01/08 00:25:05  perev
  * Release condidions(asserts)
  *
@@ -1053,7 +1056,7 @@ void StvStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, const StvT
   for (int i=1;i<kMaxDetectorId;i++) {
     int np = dets[i][1];
     if (!np) continue;
-    assert(np<2560);
+    if (np>255) np = 255;
     detInfo->setNumberOfPoints(np,(StDetectorId)(i));
     assert((int)detInfo->numberOfPoints((StDetectorId)(i)) == np);
   }
@@ -1183,7 +1186,7 @@ static int nCall=0; nCall++;
   for (int i=1;i<kMaxDetectorId;i++) {
     int nf = dets[i][2];
     if (!nf) continue;
-    assert(nf<2560);
+    if (nf>255) nf = 255;
     fitTraits.setNumberOfFitPoints(nf,(StDetectorId)i);
     assert((int)fitTraits.numberOfFitPoints((StDetectorId)i)==nf);
   }
@@ -1313,7 +1316,7 @@ void StvStEventFiller::fillTrack(StTrack* gTrack, const StvTrack* track,StTrackD
   for (int i=1;i<kMaxDetectorId;i++) {
     int np = dets[i][0];
     if(!np) continue;
-    assert(np<2560);
+    if (np>255) np = 255;
     gTrack->setNumberOfPossiblePoints(np,(StDetectorId)i);
     assert((int)gTrack->numberOfPossiblePoints((StDetectorId)i)==np);
   }
