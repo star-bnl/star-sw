@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuFilter.cxx,v 1.6 2015/11/13 00:25:16 perev Exp $
+ * $Id: StMuFilter.cxx,v 1.7 2020/01/27 21:28:31 genevb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -54,6 +54,7 @@ bool StMuFilter::accept(const StTrack* track) {
 
   if ( !track->detectorInfo() ) return false;
   if ( TMath::Abs(track->flag())%100 == 11) return true;
+  if ( TMath::Abs(track->flag())%100 == 12) return true;
   if ( track->detectorInfo()->numberOfPoints(kTpcId     )	<mMinTpcHits 	&&
 #ifdef kFtsIdentifier
        track->detectorInfo()->numberOfPoints(kFtsId     )	<mMinFtsHits 	&& 
@@ -69,6 +70,9 @@ bool StMuFilter::accept(const StTrack* track) {
 /***************************************************************************
  *
  * $Log: StMuFilter.cxx,v $
+ * Revision 1.7  2020/01/27 21:28:31  genevb
+ * Add short tracks toward ETOF
+ *
  * Revision 1.6  2015/11/13 00:25:16  perev
  * Added changable constants and FTS
  *

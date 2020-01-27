@@ -17,7 +17,7 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.cxx,v 2.24 2015/07/19 23:02:44 fisyak Exp $
+ * $Id: StAnalysisMaker.cxx,v 2.25 2020/01/27 21:28:30 genevb Exp $
  *
  */
 
@@ -652,6 +652,7 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
   UInt_t nBeamBackTracks = 0;
   UInt_t nGoodBeamBackTracks = 0;
   UInt_t nShortTrackForEEmc = 0;
+  UInt_t nShortTrackForETOF = 0;
   UInt_t pcTracks = 0; // PostCrossingTrack 
   UInt_t promptTracks = 0; // tracks with prompt hits
   UInt_t crossMembrane = 0;
@@ -667,6 +668,7 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
     if (! gTrack) continue;
     if (gTrack->flag() < 0) continue;
     if (TMath::Abs(gTrack->flag())%100 == 11) nShortTrackForEEmc++;
+    if (TMath::Abs(gTrack->flag())%100 == 12) nShortTrackForETOF++;
     if (gTrack->flag()/100 == 9) {
       nBeamBackTracks++;
       if (! gTrack->bad()) nGoodBeamBackTracks++;
@@ -689,6 +691,7 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
   LOG_QA << endm;
   if (nBeamBackTracks)    {LOG_QA  << "BeamBack tracks: " << nBeamBackTracks << ": good ones: " << nGoodBeamBackTracks;}
   if (nShortTrackForEEmc) {LOG_QA << ": Short tracks pointing to EEMC : " << nShortTrackForEEmc;}
+  if (nShortTrackForETOF) {LOG_QA << ": Short tracks pointing to ETOF : " << nShortTrackForETOF;}
   if (nBeamBackTracks || nShortTrackForEEmc) {LOG_QA << endm;}
   LOG_QA  << "post (C)rossing tracks :" << pcTracks << ": (P)rompt:" << promptTracks 
 	  << ": (X) membrane :" << crossMembrane
@@ -1154,6 +1157,9 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 //________________________________________________________________________________
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.cxx,v $
+ * Revision 2.25  2020/01/27 21:28:30  genevb
+ * Add short tracks toward ETOF
+ *
  * Revision 2.24  2015/07/19 23:02:44  fisyak
  * Add print out for Sst, Gmt, pp2pp
  *
