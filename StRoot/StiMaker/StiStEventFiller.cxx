@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.123 2018/06/29 21:46:33 smirnovd Exp $
+ * $Id: StiStEventFiller.cxx,v 2.124 2020/01/27 21:27:45 genevb Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.124  2020/01/27 21:27:45  genevb
+ * Add short tracks toward ETOF when there, remove toward EEMC when not there
+ *
  * Revision 2.123  2018/06/29 21:46:33  smirnovd
  * Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
  *
@@ -1137,6 +1140,7 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
 ///       = -x10 -> Bad fit, not enough points to start 
 ///
 ///       = -x11 -> Short track pointing to EEMC
+///       = -x12 -> Short track pointing to ETOF
 
 void StiStEventFiller::fillFlags(StTrack* gTrack) 
 {
@@ -1216,27 +1220,44 @@ void StiStEventFiller::fillFlags(StTrack* gTrack)
       if (nW == 0 && nE >  0) gTrack->setEastTpcOnly();
     }
     if (NoTpcFitPoints < 11 && NoFtpcWestId < 5 && NoFtpcEastId < 5) { 
-      // hadrcoded number correspondant to  __MIN_HITS_TPC__ 11 in StMuFilter.cxx
+      // hardcoded number correspondant to  __MIN_HITS_TPC__ 11 in StMuFilter.cxx
       //keep most sig. digit, set last digit to 2, and set negative sign
       gTrack->setRejected();
       flag = - ((flag/100)*100 + 2); // -x02 
-      if (gTrack->geometry()) {
+
+      // Deciding which short tracks to keep based on event time.
+      // Hardcoded times are not optimal, and will need revisiting
+      // when EEMC is turned back on after BES-II, eTOF stays or goes?
+      int evtTime = mEvent->time();
+      bool doShort2EMC = (evtTime < 1538352000 || evtTime > 1633046400); // t < 2018-10-01 or t > 2021-10-01
+      bool doShort2ETOF = (evtTime > 1525910400 && evtTime < 1633046400); // 2018-05-10 < t < 2021-10-01
+
+      if ((doShort2EMC || doShort2ETOF) && gTrack->geometry()) {
 	const StThreeVectorF &momentum = gTrack->geometry()->momentum();
-	if (momentum.pseudoRapidity() > 0.5) {
+	const float eta = momentum.pseudoRapidity();
+	if (TMath::Abs(eta) > 0.5) {
 	  const StTrackDetectorInfo *dinfo = gTrack->detectorInfo();
 	  const StPtrVecHit& hits = dinfo->hits();
 	  Int_t Nhits = hits.size();
 	  Bool_t ShortTrack2EMC = kFALSE;
+	  Bool_t ShortTrack2ETOF = kFALSE;
 	  for (Int_t i = 0; i < Nhits; i++) {
 	    const StHit *hit = hits[i];
-	    if (hit->position().z() > 150.0) {
+	    if (doShort2EMC && eta > 0.5 && hit->position().z() > 150.0) {
 	      ShortTrack2EMC = kTRUE;
+	      break;
+	    }
+	    if (doShort2ETOF && eta < -0.5 && hit->position().z() < -150.0) {
+	      ShortTrack2ETOF = kTRUE;
 	      break;
 	    }
 	  }
 	  if (ShortTrack2EMC) {
 	    gTrack->setShortTrack2EMC();
-	    flag = (TMath::Abs(flag)/100)*100+11; ; // +x11 
+	    flag = (TMath::Abs(flag)/100)*100+11; // +x11 
+	  } else if (ShortTrack2ETOF) {
+	    gTrack->setShortTrack2ETOF();
+	    flag = (TMath::Abs(flag)/100)*100+12; // +x12 
 	  }
 	}
       }
