@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.38 2017/05/04 00:59:36 perev Exp $
+ * $Id: StTrack.h,v 2.39 2020/01/27 21:28:31 genevb Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -54,10 +54,14 @@
  *      = -x10 -> Bad fit, not enough points to start 
  *
  *      = +x11 -> Short track pointing to EEMC
+ *      = +x12 -> Short track pointing to ETOF
  *
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
+ * Revision 2.39  2020/01/27 21:28:31  genevb
+ * Add short tracks toward ETOF
+ *
  * Revision 2.38  2017/05/04 00:59:36  perev
  * Add Fts
  *
@@ -266,6 +270,7 @@ public:
     virtual void setPostCrossingTrack()    {setBit(kPostXTrack);} 
     virtual void setMembraneCrossingTrack(){setBit(kXMembrane);} 
     virtual void setShortTrack2EMC()       {reSetBit(kRejectedTrack); setBit(kShortTrack2EMC);}
+    virtual void setShortTrack2ETOF()      {reSetBit(kRejectedTrack); setBit(kShortTrack2ETOF);}
     virtual void setRejected()             {setBit(kRejectedTrack);}
     virtual void setWestTpcOnly()          {setBit(kWestTpcOnlyTrack);}
     virtual void setEastTpcOnly()          {setBit(kEastTpcOnlyTrack);}

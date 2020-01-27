@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.68 2019/02/11 18:51:31 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.69 2020/01/27 21:28:31 genevb Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.69  2020/01/27 21:28:31  genevb
+ * Add short tracks toward ETOF
+ *
  * Revision 2.68  2019/02/11 18:51:31  ullrich
  * Added EToF.
  *
@@ -366,6 +369,7 @@ enum ETrackStatusBits {
   kRejectedTrack   = BIT(27),   // track rejected by small no. of fit points (< 10)
   kWestTpcOnlyTrack= BIT(28),   // track has hits only from West Tpc (sector <= 12)
   kEastTpcOnlyTrack= BIT(29),   // track has hits only from East Tpc (sector >  12)
+  kShortTrack2ETOF = BIT(30),   // Short track pointing to ETOF
   kEmcEnergyByte   =       0    // bits  0- 2: 1 ==> 0.3 < energy <=  0.6 Mip	 
   //                                           2 ==> 0.6 < energy <=  1.0 Hadron 
   // 	                                       3 ==> 1.0 < energy <=  4.0 Electon
