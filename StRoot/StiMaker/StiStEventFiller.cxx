@@ -1,13 +1,16 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.122 2018/06/21 01:48:46 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.124 2020/01/27 21:27:45 genevb Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
- * Revision 2.122  2018/06/21 01:48:46  perev
- * iTPCheckIn
+ * Revision 2.124  2020/01/27 21:27:45  genevb
+ * Add short tracks toward ETOF when there, remove toward EEMC when not there
+ *
+ * Revision 2.123  2018/06/29 21:46:33  smirnovd
+ * Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
  *
  * Revision 2.119.6.3  2018/05/28 23:17:47  perev
  * Cleanup
@@ -1134,7 +1137,44 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   gTrack->setFitTraits(fitTraits);
   return;
 }
-
+//_____________________________________________________________________________
+void StiStEventFiller::fillFlags(StTrack* gTrack) 
+{
+  StTrackUtilities::instance()->FillFlags(gTrack);
+  if (gTrack->type()==global) {
+    // Match with fast detectors
+    StPhysicalHelixD hlx = gTrack->outerGeometry()->helix();
+    StiTrack2FastDetector t;
+    mFastDetectorMatcher->matchTrack2FastDetectors(&hlx,&t);
+    if (t.btofBin > 0) {
+      if (t.mBtof > 0) gTrack->setToFMatched();
+      else             gTrack->setToFNotMatched();
+    }
+    if (t.ctbBin > 0) {
+      if (t.mCtb  > 0) gTrack->setCtbMatched();
+      else             gTrack->setCtbNotMatched();
+    }
+    if (t.bemcBin > 0 || t.eemcBin > 0) {
+      Int_t W = 0;
+      if (t.bemcBin > 0) {
+	W = StBemcHitList::instance()->getFired(t.bemcBin);
+	if (W > 0) gTrack->setBemcMatched();
+	else      gTrack->setBemcNotMatched();
+      } else if (t.eemcBin > 0) {
+	W = StEemcHitList::instance()->getFired(t.eemcBin);
+	if (W > 0) gTrack->setEemcMatched();
+	else      gTrack->setEemcNotMatched();
+      }
+      if (W > 0) {
+	UInt_t fext = gTrack->flagExtension();
+	if (W > 7) W = 7;
+	fext &= ~7;
+	fext += W;
+	gTrack->setFlagExtension(fext);
+      }
+    }
+  }
+}
 //_____________________________________________________________________________
 void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track,StTrackDetectorInfo* detInfo )
 {
@@ -1173,7 +1213,7 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track,StTrackD
   fillFitTraits(gTrack, track);
   gTrack->setDetectorInfo(detInfo);
   StuFixTopoMap(gTrack);
-  StTrackUtilities::instance()->FillFlags(gTrack);
+  fillFlags(gTrack);
   if (!track->isPrimary()) fillDca(gTrack,track);
   return;
 }
