@@ -25,7 +25,7 @@
 #  set logb = ${dirB}B.log
   set logb = ${filel}B.log
   set log  = ${SUBMITTINGDIRECTORY}/${logb}
-  if (-r ${log}) exit 0;
+#  if (-r ${log}) exit 0;
 #  set outputb = ${dirB}.root;
   set output  =  ${SUBMITTINGDIRECTORY}/${outputb};
   if (-r ${output}) exit 0;

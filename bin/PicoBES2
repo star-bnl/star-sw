@@ -402,7 +402,7 @@ foreach d (`ls -1d */*/Done`)
 end 
 
 ########### Bad drift velocities #####################################################################
-grep -A 2 'table tpcDrift' 02[6-7]/*/*B.log | egrep '(233530|41608|90742)' | tee list_of_bad_files
+grep -A 2 'table tpcDrift' 02[6-7]/*/*B.log | egrep '(233530|41608|90742|42830)' | tee list_of_bad_files
 foreach f (`awk -F\- '{print $1}' list_of_bad_files`)
 	set b = `basename ${f} B.log`; set d = `dirname ${f}`; mv ${d}/${b}* Zombie/
 end

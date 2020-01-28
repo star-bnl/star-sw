@@ -12,7 +12,7 @@
 #   setup 64b
 #   setup gcc
 #   setup 32b
-    starver TFG19m
+    starver TFG20a
      set evtsFile = $INPUTFILE0;
      set f        = 1
      set l        = 5000000
@@ -35,7 +35,7 @@
   endif
 #  echo "cp ${evtsFile} ${evtsFileB}"
 #  cp ${evtsFile} ${evtsFileB}
-# TFG19m 12/26/2019 12/29/2019
+# TFG19m, TFG20a 12/26/2019 12/29/2019
   root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,-evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,-evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFileB}'")' &gt;&amp; ${logFile}
   cp  ${filel}*.picoDst.root ${logFile} ${SUBMITTINGDIRECTORY}

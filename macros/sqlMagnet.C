@@ -33,6 +33,7 @@
 #include "TFile.h"
 #include "TStopwatch.h"
 #endif
+#include "OnDb.h"
 using namespace std;
 struct Vars_t {
   Float_t utime, date, time, mainMagnetCurrent, pttWestCurrent, pttEastCurrent, trimWestCurrent, trimEastCurrent, mainMagnetStatus, pttWestStatus, pttEastStatus, trimWestStatus, trimEastStatus, readoutMode;
@@ -76,8 +77,9 @@ void PrintRes(TSQLResult *res, TNtuple *tuple = 0){
 //________________________________________________________________________________
 void Magnet(Int_t year = 2013) {
   // http://www.star.bnl.gov/protected/common/common2012/trigger2012/sampleEfficiencypp500GeV/getSampleFrac.pl
-  TString database("db04.star.bnl.gov:");
-  database += (1400 + year - 1);
+  //  TString database("db04.star.bnl.gov:");
+  TString database = OnDb(year);
+  //  database += (1400 + year - 1);
   TString dbT("mysql://"); dbT += database; dbT += "/Conditions_rhic";
   TSQLServer *db = TSQLServer::Connect(dbT.Data(),"test", ""); if (! db) {cout << "Can't connect " << dbT.Data() << endl; return;}
   TSQLResult *res;
@@ -107,7 +109,7 @@ void Magnet(Int_t year = 2013) {
 }
 //________________________________________________________________________________
 void sqlMagnet() {
-  for (Int_t y = 2013; y > 2001; y -= 1) {
+  for (Int_t y = 2020; y > 2001; y -= 1) {
     Magnet(y);
   }
 }
