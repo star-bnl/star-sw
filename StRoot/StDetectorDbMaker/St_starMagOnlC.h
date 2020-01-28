@@ -16,6 +16,7 @@ class St_starMagOnlC : public TChair {
   UInt_t 	runNumber(Int_t i = 0) 	{return Struct(i)->runNumber;}
   UInt_t 	time(Int_t i = 0) 	{return Struct(i)->time;}
   Double_t 	current(Int_t i = 0) 	{return Struct(i)->current;}
+  Double_t      ScaleFactor(Int_t i = 0){return current()/(4500*(0.49827/0.497611));} // scale Run 2020 11p5GeV K0s mass to PDG value 
   Double_t      getScaleFactor(UInt_t time=0) {return currentToScaleFactor(getMagnetCurrent(time));}
   Double_t      getMagnetCurrent(UInt_t time=0) {
     if (! instance()) return 0;

@@ -627,7 +627,7 @@
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_geom_gdat_Table.h"
 #include "tables/St_kine_gdat_Table.h"
-#include "StDetectorDbMaker/St_MagFactorC.h"
+#include "StDetectorDbMaker/St_starMagOnlC.h"
 #include "tables/St_det_user_Table.h"
 #include "tables/St_det_hit_Table.h"
 #include "tables/St_det_path_Table.h"
@@ -1037,7 +1037,7 @@ Int_t St_geant_Maker::InitRun(Int_t run){
       }
     } else {
       // set mag. field from already simulated data, only 5 option allowed
-      Float_t  fScale = St_MagFactorC::instance()->ScaleFactor();
+      Float_t  fScale = St_starMagOnlC::instance()->ScaleFactor();
       if (TMath::Abs(fScale) < 1e-3) fScale = 1e-3;
       if (MuDstIter) {
 	// set mag field
@@ -2394,7 +2394,7 @@ Int_t St_geant_Maker::SetDatimeFromMuDst() {
   if (! StarMagField::Instance()) {
     double fScale = 1;
     if (*SAttr("magFactor")) {fScale = DAttr("magFactor");}
-    else                     {fScale = St_MagFactorC::instance()->ScaleFactor();}
+    else                     {fScale = St_starMagOnlC::instance()->ScaleFactor();}
     if (fabs(fScale) < 1e-3) fScale = 1e-3;
     new StarMagField(StarMagField::kMapped, fScale);
   }
