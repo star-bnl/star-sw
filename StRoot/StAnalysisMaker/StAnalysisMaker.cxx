@@ -17,7 +17,7 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.cxx,v 2.25 2020/01/27 21:28:30 genevb Exp $
+ * $Id: StAnalysisMaker.cxx,v 2.26 2020/01/28 15:05:10 genevb Exp $
  *
  */
 
@@ -692,7 +692,7 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
   if (nBeamBackTracks)    {LOG_QA  << "BeamBack tracks: " << nBeamBackTracks << ": good ones: " << nGoodBeamBackTracks;}
   if (nShortTrackForEEmc) {LOG_QA << ": Short tracks pointing to EEMC : " << nShortTrackForEEmc;}
   if (nShortTrackForETOF) {LOG_QA << ": Short tracks pointing to ETOF : " << nShortTrackForETOF;}
-  if (nBeamBackTracks || nShortTrackForEEmc) {LOG_QA << endm;}
+  if (nBeamBackTracks || nShortTrackForEEmc || nShortTrackForETOF) {LOG_QA << endm;}
   LOG_QA  << "post (C)rossing tracks :" << pcTracks << ": (P)rompt:" << promptTracks 
 	  << ": (X) membrane :" << crossMembrane
 	  << "(T)of/ctb matches:" << nToFMatched << " :Emc matches(B/E): " << nBEmcMatched << "/" << nEEmcMatched
@@ -1157,6 +1157,9 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 //________________________________________________________________________________
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.cxx,v $
+ * Revision 2.26  2020/01/28 15:05:10  genevb
+ * end-of-line needed for nShortTrackForETOF
+ *
  * Revision 2.25  2020/01/27 21:28:30  genevb
  * Add short tracks toward ETOF
  *
