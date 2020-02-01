@@ -410,3 +410,4 @@ end
 cd /scratch/fisyak
 find . -type d -cmin +130 -exec ls -ld {} \;
 find . -type d -cmin +130 -exec rm -rf {} \;
+cpu_per_event.csh '*/*B.log'
