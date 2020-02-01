@@ -386,7 +386,7 @@ end
 # ~/reco/2020/TFG19m/RF/11p5GeV
 foreach f (`ls -1d 3*/*/*MuDst.root`) 
   if (-r ../11p5GeV.B/${f}) continue;
-  echo "mv ${f} ../11p5GeV.B/${f}"
+  echo "mv ${f} ../11pgrep missi5GeV.B/${f}"
   mv ${f} ../11p5GeV.B/${f}
 end
 ########################### Clean Done #####################################################
@@ -406,3 +406,7 @@ grep -A 2 'table tpcDrift' 02[6-7]/*/*B.log | egrep '(233530|41608|90742|42830)'
 foreach f (`awk -F\- '{print $1}' list_of_bad_files`)
 	set b = `basename ${f} B.log`; set d = `dirname ${f}`; mv ${d}/${b}* Zombie/
 end
+############# clean scratch ###################################################################
+cd /scratch/fisyak
+find . -type d -cmin +130 -exec ls -ld {} \;
+find . -type d -cmin +130 -exec rm -rf {} \;
