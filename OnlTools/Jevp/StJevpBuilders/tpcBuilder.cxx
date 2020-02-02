@@ -1,4 +1,4 @@
-// $Id: tpcBuilder.cxx,v 1.11 2019/12/10 20:07:48 evpops Exp $
+// $Id: tpcBuilder.cxx,v 1.12 2020/02/02 20:04:39 videbaks Exp $
 //
 #include <stdio.h>
 #include <stdlib.h>
@@ -780,6 +780,13 @@ void tpcBuilder::event(daqReader *rdr)
 	    // remove timebins where GG osc is important.
 	    if(tb>32 && tb<430) {
 
+	      // this pad is sometimes hot mask out
+	      //
+	      if(s==10){
+		if(dd->pad==66 && dd->row==37)
+		  continue;
+	      }
+
 	      if(s==12){
 		if(dd->pad==41 && dd->row==26)
 		  continue;
@@ -1213,27 +1220,35 @@ void tpcBuilder::event(daqReader *rdr)
 	  LPhi=atan(YMIN/Xpads[j]);//find local Phi (LPhi) within sector
 	  LPhi*=DEG;
 	  GPhi=LPhi+SPhi;//find global Phi (GPhi) 
-
+	  
 	  //oth->fill( 	 h1,LPhi);
 	  //oth->fill(          h2,Xpads[j],YMIN);
 	  //oth->fill( 	 h3,Xpads[j],LPhi);
 	  //oth->fill( 	 h4,YMIN,LPhi);
 	  //oth->fill( 	 h5,GPhi);
 	  //oth->fill( 	 h6,sec,SPhi);
-
+	  
 	  //Fill Look up table for pad phi angle
-
+	  
+	  if(sec<12)
+	    if(GPhi<-180) GPhi += 360;
+	  
+	  
+	  if(sec>=12)
+	    if(GPhi>180)
+	      GPhi +=-360.;
+	  
 	  mPhiAngleMap[sec][j][k]=GPhi;
-
-
+	  
+	  
 	}//pad
       }//padrow
     }// sector
   }
 
-  void tpcBuilder::main(int argc, char *argv[])
-  {
-    tpcBuilder me;
-    me.Main(argc, argv);
-  }
+void tpcBuilder::main(int argc, char *argv[])
+{
+  tpcBuilder me;
+  me.Main(argc, argv);
+}
 
