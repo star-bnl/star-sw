@@ -411,3 +411,10 @@ cd /scratch/fisyak
 find . -type d -cmin +130 -exec ls -ld {} \;
 find . -type d -cmin +130 -exec rm -rf {} \;
 cpu_per_event.csh '*/*B.log'
+################################################################################
+hlt_21029055_14_01_000
+
+dir -lt */*picoDst.root | grep Jan | awk '{print $9}' | tee pico.list
+foreach f ( `cat pico.list` )
+  set d = `dirname ${f}`; rm -rf ${d}
+end
