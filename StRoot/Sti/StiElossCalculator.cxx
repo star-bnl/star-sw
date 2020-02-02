@@ -431,3 +431,25 @@ static const double DGEV=0.153536E-3,EMASS=0.0005109990615;
    double sigma2 = xi*(1.-0.5*BET2)*emax;
    return sigma2;
 }
+
+#include "Sti/StiKalmanTrackNode.h"
+//______________________________________________________________________________
+void StiElossCalculator::Test()
+{
+  double A,Z,Dens,X0,P,Len,Theta2,Ort2,dEdX,ELoss,ELossErr2;
+//		Hydrogen
+  A = 1.010,Z=1,Dens=0.071,X0=865,P=0.1,Len=10.;
+  double M = 0.13956995;
+
+  double beta2 = P*P/(P*P+M*M);
+  StiElossCalculator el(Z/A,0,A,Z,Dens); 
+  Theta2 =  StiKalmanTrackNode::mcs2(Len/X0,beta2, P*P);
+  Ort2 		= 0;
+  dEdX 		= el.calculate(1., M, beta2);
+  ELoss 	= dEdX*Len;
+  ELossErr2 	= el.calcError(1., M, beta2);  
+
+  const char* name = "***Hydrogen:*** ";
+  printf ("%s Theta2=%g Ort2=%g dEdX=%g ELoss=%g ELossErr2=%g\n"
+         ,name ,Theta2,Ort2,dEdX,ELoss,ELossErr2);
+}  

@@ -40,6 +40,7 @@ class StiElossCalculator
   double getA() const 		{return _A;} 
   double getZ() const 		{return _Z;}
   double getDens() const 	{return _Dens;}
+  static void Test();
  protected:  
   static const double _k;
 

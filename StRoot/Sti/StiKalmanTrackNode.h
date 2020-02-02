@@ -87,7 +87,7 @@ public:
   virtual ~StiKalmanTrackNode(){reduce();mId=-1;};
   const StiKalmanTrackNode& operator=(const StiKalmanTrackNode &node);  
   
-  static double mcs2(double relRadThickness, double beta2, double p2) {return 14.1*14.1*relRadThickness/(beta2*p2*1e6);}
+  static double mcs2(double relRadThickness, double beta2, double p2);//???? {return 14.1*14.1*relRadThickness/(beta2*p2*1e6);}
   /// Resets the node to a "null" un-used state
   void reset();
   void unset();

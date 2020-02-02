@@ -82,15 +82,16 @@ bool NameMapKey::operator<(const NameMapKey& key2) const{
 //______________________________________________________________________________
 void SetHitUsed::operator()(StiTrackNode& node)
 {
+    if (node.getChi2()>1e3)   	return;
     StiHit* hit = node.getHit();
     if(!hit) 			return;
-    if ( !node.isValid() || node.getChi2()>1e3)	{ node.setHit(0)    ;}
-    else 					{hit->addTimesUsed();}
+    hit->addTimesUsed();
 }
 
 //______________________________________________________________________________
 void SetHitUnused::operator()(StiTrackNode& node)
 {
+    if (node.getChi2()>1e3)   	return;
     StiHit* hit = node.getHit();
     if(!hit) 			return;
     if (hit->timesUsed())	hit->setTimesUsed(0);

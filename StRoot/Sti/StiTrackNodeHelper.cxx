@@ -9,6 +9,8 @@
 #include "TSystem.h"
 #include "TCernLib.h"
 
+#include "StiUtilities/StiDebug.h"
+
 //#define __CHECKIT__ // Enable unused paramter and error checks
 
 #define NICE(a) ( ((a) <= -M_PI)? ((a)+2*M_PI) :\
@@ -69,14 +71,8 @@ void StiTrackNodeHelper::set(StiKalmanTrackNode *pNode,StiKalmanTrackNode *sNode
   if (mParentNode) {
     mParentHz = mParentNode->getHz();
     assert(fabs(mParentHz-mParentNode->mFP.hz()) < EC*0.1); // allow the difference in 100 Gauss. TODO check why 10 is not enough
-#ifdef __CHECKIT__
-    mParentNode->mFP.check("2StiTrackNodeHelper::set");
-#endif
   }
   if (mTargetNode->isValid()) {
-#ifdef __CHECKIT__
-    mTargetNode->mFP.check("1StiTrackNodeHelper::set");
-#endif
     assert(fabs(mTargetHz-mTargetNode->mFP.hz()) < EC*0.1);
   }
 

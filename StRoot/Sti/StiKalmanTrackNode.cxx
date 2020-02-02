@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.182 2018/11/10 00:22:03 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.182.4.1 2020/02/02 00:05:51 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.182.4.1  2020/02/02 00:05:51  perev
+ * New branch StiVP
+ *
  * Revision 2.182  2018/11/10 00:22:03  perev
  * 1. implementation of StiKalmanTrackNode::initialize(const double dirg[3])
  * 2. Replace Step to Path in THelixTrack call
@@ -695,6 +698,16 @@ int    StiKalmanTrackNode::fDerivTestOn=0;
 #ifndef STI_DERIV_TEST
 int    StiKalmanTrackNode::fDerivTestOn=-10;   
 #endif
+
+
+double StiKalmanTrackNode::mcs2(double relRadThickness, double beta2, double p2) 
+{double theta2 = 14.1*14.1*relRadThickness/(beta2*p2*1e6);
+StiDebug::Count("THETA0",sqrt(theta2)*57);
+return theta2;
+
+}
+
+
 
 double StiKalmanTrackNode::fDerivTest[kNPars][kNPars];   
 int gCurrShape=0;
