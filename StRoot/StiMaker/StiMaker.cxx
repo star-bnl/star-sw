@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.241 2018/07/06 22:13:05 smirnovd Exp $
+// $Id: StiMaker.cxx,v 1.241.6.1 2020/02/02 00:24:26 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -222,7 +222,7 @@ static const char *timg[] = {"HitLoa","GlobFnd","VtxFnd","PriFnd","FilFnd",0};
 
   return StMaker::Finish();
 }
-
+#include "Sti/StiElossCalculator.h"
 //_____________________________________________________________________________
 Int_t StiMaker::Init()
 {
@@ -241,7 +241,7 @@ Int_t StiMaker::Init()
     for (int it=0;it<(int)(sizeof(mTimg)/sizeof(mTimg[0]));it++){
       mTimg[it]= new TStopwatch(); mTimg[it]->Stop();
     } }
-
+  StiElossCalculator::Test();
   return StMaker::Init();
 }
 
@@ -727,8 +727,11 @@ void StiMaker::FinishTracks (int gloPri)
 }
 
 
-// $Id: StiMaker.cxx,v 1.241 2018/07/06 22:13:05 smirnovd Exp $
+// $Id: StiMaker.cxx,v 1.241.6.1 2020/02/02 00:24:26 perev Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.241.6.1  2020/02/02 00:24:26  perev
+// New branch StiVP
+//
 // Revision 1.241  2018/07/06 22:13:05  smirnovd
 // [Cosmetic] Changes in white space
 //
