@@ -58,16 +58,16 @@ void StiTpcHitLoader::loadHits(StEvent* source,
       std::tie(stiSector, stiRow) = StiTpcDetectorBuilder::toStiLayer(sector+1, row+1);
 
       const StTpcPadrowHitCollection* padrowHits = secHits->padrow(row);
-      if (!padrowHits) break;
+      if (!padrowHits)	break;
       const StSPtrVecTpcHit& hitvec = padrowHits->hits();
       StiDetector * detector = _detector->getDetector(stiRow,stiSector);
-      if (!detector) throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) -E- Detector element not found");
+      if (!detector) 	throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) -E- Detector element not found");
       StiHitTest hitTest;
       for (const StTpcHit* hit : hitvec)
       {
-	if (StiKalmanTrackNode::IsLaser() && hit->flag()) continue;
-	if (hit->flag() & FCF_CHOPPED || hit->flag() & FCF_SANITY)     continue; // ignore hits marked by AfterBurner as chopped or bad sanity
-	if (hit->pad() > 182 || hit->timeBucket() > 511) continue; // some garbadge  for y2001 daq
+	if (StiKalmanTrackNode::IsLaser() && hit->flag()) 		continue;
+	if (hit->flag() & FCF_CHOPPED || hit->flag() & FCF_SANITY)    	continue; // ignore hits marked by AfterBurner as chopped or bad sanity
+	if (hit->pad() > 182 || hit->timeBucket() > 511) 		continue; // some garbadge  for y2001 daq
         assert(_hitFactory);
         StiHit* stiHit = _hitFactory->getInstance();
         stiHit->reset();
