@@ -169,7 +169,8 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
       Int_t svtLadder = 2*(ladder+1) - (svtLayer-1)%2;
       Int_t wafer = nWafers/2+1;
       index1 = _geometry->getWaferIndex(svtBarrel,svtLadder,wafer);
-      assert (index1 >= 0);
+      int totWafers = _geometry->getTotalNumberOfWafers();
+//VP      assert (index1 >= 0  && index1<totWafers);
       waferGeom = (StSvtWaferGeometry*) _geometry->at(index1);
       if (_debug) waferGeom->print();
       StThreeVectorD centerVector(waferGeom->x(0), waferGeom->x(1), waferGeom->x(2) );
