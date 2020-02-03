@@ -208,13 +208,14 @@ class SyntaxHandler ( ContentHandler ):
         'handler' here is the class ctor).
         """
 
+        print tag, xattr.keys(), xattr.values()
+
         attr = {}                         # Copy to a plain dictionary
         for key in xattr.keys():
             attr[key] = xattr.get(key)
 
         if ( tag == 'Document' ):         # Special action: append command line options
             attr['cmdline']=self.options
-
         
         handler = None
         try:
