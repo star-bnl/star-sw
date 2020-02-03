@@ -1349,12 +1349,13 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
   if(Pt < 0.5f && (abs( TempPart.GetPDG() ) == 3000 ||
                    abs( TempPart.GetPDG() ) == 3001) ) return;
 #endif
-  float parameters[17] = {M, P, Pt, Rapidity, dL, cT, chi2/ndf, prob, Theta, Phi, X, Y, Z, R, l[0], l[0]/dl[0], M_t };
+  float parameters[nHistoPartParam] = {M, P, Pt, Rapidity, dL, cT, chi2/ndf, prob, Theta, Phi, X, Y, Z, R, l[0], l[0]/dl[0], M_t, 0, ErrM};
   const bool drawZR = IsCollectZRHistogram(iParticle);
   if (histoParameters) {
     //for all particle-candidates
-    for(int iParam=0; iParam<17; iParam++)
-      histoParameters[0][iParticle][iParam]->Fill(parameters[iParam]);
+    for(int iParam=0; iParam<nHistoPartParam; iParam++)
+      if (iParam != 17) 
+	histoParameters[0][iParticle][iParam]->Fill(parameters[iParam]);
   }
   if(multiplicities)
     multiplicities[0][iParticle]++;
@@ -1494,6 +1495,7 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
     }
     histoParameters3D[0][iParticle][5]->Fill(cT, Pt, M, 1);
     if (Pt > 1.0) {
+    //    if (Pt > 1.0 && (index1 >= 0 && index2 >= 0) && (negDaughter.NDF() > 45 && posDaughter.NDF() > 45)) {
       histoParameters3D[0][iParticle][6]->Fill(Rapidity, Phi, M, 1);
     }
     histoParameters3D[0][iParticle][7]->Fill(Rapidity,Pt,ErrM,1);
@@ -1504,8 +1506,9 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
   {
     if(fabs(fParteff.GetMass(iParticle)-M) < 3.f*fParteff.GetMassSigma(iParticle))//SignalReco
     {
-      for(int iParam=0; iParam<17; iParam++)
-        histoParameters[4][iParticle][iParam]->Fill(parameters[iParam]);
+      for(int iParam=0; iParam<nHistoPartParam; iParam++)
+	if (iParam != 17) 
+	  histoParameters[4][iParticle][iParam]->Fill(parameters[iParam]);
       
       if(multiplicities)
         multiplicities[4][iParticle]++;
@@ -1525,7 +1528,7 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
     if( fabs(fParteff.GetMass(iParticle)-M) > 3.f*fParteff.GetMassSigma(iParticle) &&
         fabs(fParteff.GetMass(iParticle)-M) <= 6.f*fParteff.GetMassSigma(iParticle) )//BGReco
     {
-      for(int iParam=0; iParam<17; iParam++)
+      for(int iParam=0; iParam<nHistoPartParam; iParam++)
         histoParameters[5][iParticle][iParam]->Fill(parameters[iParam]);
       
       if(multiplicities)
@@ -1585,8 +1588,9 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
       }
     
     //for signal particles
-    for(int iParam=0; iParam<17; iParam++)
-      histoParameters[iSet][iParticle][iParam]->Fill(parameters[iParam]);
+    for(int iParam=0; iParam<nHistoPartParam; iParam++)
+      if (iParam != 17)
+	histoParameters[iSet][iParticle][iParam]->Fill(parameters[iParam]);
     
     if(multiplicities)
       multiplicities[iSet][iParticle]++;
@@ -2218,9 +2222,9 @@ void KFTopoPerformance::FillMCHistos()
     R = sqrt(X*X+Y*Y);
     
     
-    float parameters[17] = {M, P, Pt, Rapidity, 0, 0, 0, 0, 0, 0, X, Y, Z, R, 0, 0, M_t};
+    float parameters[nHistoPartParam] = {M, P, Pt, Rapidity, 0, 0, 0, 0, 0, 0, X, Y, Z, R, 0, 0, M_t, 0, 0};
     //for all particle-candidates
-    for(int iParam=0; iParam<17; iParam++)
+    for(int iParam=0; iParam<nHistoPartParam; iParam++)
       if(hPartParam[6][iPDG][iParam]) hPartParam[6][iPDG][iParam]->Fill(parameters[iParam]);
 
     if(hPartParam2D[6][iPDG][0]) hPartParam2D[6][iPDG][0]->Fill(Rapidity,Pt,1);
