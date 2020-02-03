@@ -467,7 +467,7 @@ class Document( Handler ):
         self.variables  = []
         self.structs    = []
         self.fills      = []        
-        self.fill_count = {}
+        #self.fill_count = {}
         self.content    = []
         self.geometries = []
 
@@ -2440,6 +2440,7 @@ class Filling( Handler ):
 
         self. name = 0
         self. commemt = 0
+
         self. var_list = [] # list of variables
         self. typ_list = [] # list of types
         self. val_list = [] # list of values
@@ -2447,15 +2448,14 @@ class Filling( Handler ):
         
         Handler.__init__(self)
 
-    def addVar(self,name,type,dim,value,comment):
+    def addVar(self,name,mytype,dim,value,comment):
         """
         The <var> tag will result in addVar being called.  This will append
         the variable name, type, value(s) and comments to the lists stored
         in this class.
         """    
-
         self.var_list.append(name.lower())
-        self.typ_list.append(type)
+        self.typ_list.append(mytype)
         self.val_list.append(value)
         self.com_list.append(comment)
 
@@ -2467,12 +2467,12 @@ class Filling( Handler ):
         """
         global document
         
-        name = attr.get('name',None);        self.name = name.lower()
+        name = attr.get('name',   None);     self.name = name.lower()
         comm = attr.get('comment',None);     self.comment = comm        
    
-        name=name.lower()
-        count = document.fill_count.get(name,0)
-        document.fill_count[name]=count+1
+        #name=name.lower()
+        #count = document.fill_count.get(name,0)
+        #document.fill_count[name]=count+1
                 
     def endElement(self,tag):
         global _struct_table, document
@@ -2568,9 +2568,9 @@ class Fill( Handler ):
         name = attr.get('name',None);        self.name = name.lower()
         comm = attr.get('comment',None);     self.comment = comm        
    
-        name=name.lower()
-        count = document.fill_count.get(name,0)
-        document.fill_count[name]=count+1
+        #name=name.lower()
+        #count = document.fill_count.get(name,0)
+        #document.fill_count[name]=count+1
         
 
     def endElement(self,tag):
