@@ -2469,11 +2469,7 @@ class Filling( Handler ):
         
         name = attr.get('name',   None);     self.name = name.lower()
         comm = attr.get('comment',None);     self.comment = comm        
-   
-        #name=name.lower()
-        #count = document.fill_count.get(name,0)
-        #document.fill_count[name]=count+1
-                
+                   
     def endElement(self,tag):
         global _struct_table, document
 
@@ -2568,11 +2564,6 @@ class Fill( Handler ):
         name = attr.get('name',None);        self.name = name.lower()
         comm = attr.get('comment',None);     self.comment = comm        
    
-        #name=name.lower()
-        #count = document.fill_count.get(name,0)
-        #document.fill_count[name]=count+1
-        
-
     def endElement(self,tag):
         """
         On the </Fill> tag, we export the fill statement to the output file.
