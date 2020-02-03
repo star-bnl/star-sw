@@ -5,6 +5,7 @@
 #include "DAQ_READER/daqReader.h"
 #include "DAQ_READER/daq_dta.h"
 #include "DAQ_READER/daq_det.h"
+#include "rtsSystems.h"
 
 #include "StRoot/StEEmcPool/muEztPanitkin/EEMCPlots.h"
 
@@ -414,10 +415,15 @@ void eemcBuilder::startrun(daqReader *rdr) {
 
 void eemcBuilder::event(daqReader *rdr)
 {
+    if((rdr->detectors64 & ((1ll << ETOW_ID) | (1ll << ESMD_ID))) == 0) {
+	LOG(DBG, "No eemc");
+	return;
+    }
+
   // Find trigger data...
   static int eventn;
   eventn++;
-  
+
   StTriggerData *trgd = getStTriggerData(rdr);
   // if(!trgd) return;
 

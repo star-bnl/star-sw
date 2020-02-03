@@ -86,6 +86,7 @@ StTriggerData *JevpBuilder::getStTriggerData(daqReader *rdr)
 	    trgd = (StTriggerData *)NULL;
 	}
 
+	//	LOG("JEFF", "td[3] = 0x%x", td[3]);
 	return trgd;
     }
 

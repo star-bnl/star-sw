@@ -614,15 +614,15 @@ void trgBuilder::event(daqReader *rdr)
     contents.h266_bbc_bunchid_b->Fill(bunch7bit);
     
     //Spin Bits    
-    int ispinb = trgd->spinBit();
-    if(ispinb &   1)contents.h442_bunch_yellow_fill->Fill(bunch7bit);  
-    if(ispinb &   2)contents.h443_bunch_yellow_up->Fill(bunch7bit);  
-    if(ispinb &   4)contents.h444_bunch_yellow_down->Fill(bunch7bit);  
-    if(ispinb &   8)contents.h445_bunch_yellow_unpol->Fill(bunch7bit);  
-    if(ispinb &  16)contents.h446_bunch_blue_fill->Fill(bunch7bit);  
-    if(ispinb &  32)contents.h447_bunch_blue_up->Fill(bunch7bit);  
-    if(ispinb &  64)contents.h448_bunch_blue_down->Fill(bunch7bit);  
-    if(ispinb & 128)contents.h449_bunch_blue_unpol->Fill(bunch7bit); 
+    // int ispinb = trgd->spinBit();
+    if(trgd->spinBitYellowFilled()) contents.h442_bunch_yellow_fill->Fill(bunch7bit);  
+    if(trgd->spinBitYellowUp()) contents.h443_bunch_yellow_up->Fill(bunch7bit);  
+    if(trgd->spinBitYellowDown()) contents.h444_bunch_yellow_down->Fill(bunch7bit);  
+    if(trgd->spinBitYellowUnpol()) contents.h445_bunch_yellow_unpol->Fill(bunch7bit);  
+    if(trgd->spinBitBlueFilled()) contents.h446_bunch_blue_fill->Fill(bunch7bit);  
+    if(trgd->spinBitBlueUp()) contents.h447_bunch_blue_up->Fill(bunch7bit);  
+    if(trgd->spinBitBlueDown()) contents.h448_bunch_blue_down->Fill(bunch7bit);  
+    if(trgd->spinBitBlueUnpol()) contents.h449_bunch_blue_unpol->Fill(bunch7bit); 
 
     
     // zdcsmd...
