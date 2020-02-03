@@ -941,8 +941,10 @@ Int_t StAssociationMaker::Make()
 	      if ( fabs(xDiff)>= parDB->xCutTpc() ||
 		   fabs(yDiff)>= parDB->yCutTpc() ||
 		   fabs(zDiff)>= parDB->zCutTpc(mcTpcHit->position().z())) continue;
-	    } else 
+	    } else {
+	      if (! mcTpcHit->parentTrack()) continue;
 	      if (mcTpcHit->parentTrack()->key() != rcTpcHit->idTruth()) continue;
+	    }
 	    // Note: Association is within sector and pad row, so a Monte Carlo
 	    // looper may have multiple Monte Carlo hits from one track associated
 	    // to one and the same reconstructed hit!

@@ -591,7 +591,8 @@ std::vector<int> StKFParticleInterface::GetPID(double m2, double p, int q, doubl
 }
 
 void StKFParticleInterface::AddTrackToParticleList(const KFPTrack& track, int nHftHitsInTrack, int index, const std::vector<int>& totalPDG, KFVertex& pv, 
-  std::vector<int>& primaryTrackList, std::vector<int>& nHftHits, std::vector<int>& particlesPdg, std::vector<KFParticle>& particles, int& nPartSaved)
+						   std::vector<int>& primaryTrackList, std::vector<int>& nHftHits, std::vector<int>& particlesPdg, std::vector<KFParticle>& particles, int& nPartSaved,
+						   Float_t chi2, Int_t NDF)
 {
   for(unsigned int iPDG=0; iPDG<totalPDG.size(); iPDG++)
   {
@@ -641,6 +642,8 @@ void StKFParticleInterface::AddTrackToParticleList(const KFPTrack& track, int nH
     nHftHits[nPartSaved] = nHftHitsInTrack;
     
     KFParticle particle(trackPDG, pdg);
+    particle.Chi2() = chi2;
+    particle.NDF()  = NDF;
     float chiPrim = particle.GetDeviationFromVertex(pv);
     if(chiPrim < fChiPrimaryCut)
     {
@@ -959,7 +962,9 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
     
     int nPartSaved0 = nPartSaved;
     unsigned int nPrimaryTracks = primaryTrackList.size();
-    AddTrackToParticleList(track, nHftHitsInTrack, index, totalPDG, primaryVertex, primaryTrackList, fNHftHits, fParticlesPdg, fParticles, nPartSaved); 
+    Int_t NDF = 2*gTrack->nHitsFit() - 5;
+    Float_t Chi2 = gTrack->chi2()*NDF;
+    AddTrackToParticleList(track, nHftHitsInTrack, index, totalPDG, primaryVertex, primaryTrackList, fNHftHits, fParticlesPdg, fParticles, nPartSaved, Chi2, NDF); 
     
     if(nPartSaved > nPartSaved0) 
       triggeredTracks.push_back(iTrack);
@@ -1205,7 +1210,9 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
     
     vector<int> totalPDG = GetPID(m2tof, track.GetP(), q, gTrack->dEdx()*1.e6, dEdXPull, isTofm2, index);
         
-    AddTrackToParticleList(track, nHftHitsInTrack, index, totalPDG, primaryVertex, primaryTrackList, fNHftHits, fParticlesPdg, fParticles, nPartSaved);         
+    Int_t NDF = 2*gTrack->nHitsFit() - 5;
+    Float_t Chi2 = gTrack->chi2()*NDF;
+    AddTrackToParticleList(track, nHftHitsInTrack, index, totalPDG, primaryVertex, primaryTrackList, fNHftHits, fParticlesPdg, fParticles, nPartSaved, Chi2, NDF);         
     nUsedTracks++;
   }
   
