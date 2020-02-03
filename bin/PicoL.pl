@@ -26,6 +26,9 @@ if ($pwd =~ /dev/) {
   $glob = $PICOPATH;
   if    ($pwd =~ /5p75GeV_fixedTarget/) {$glob .= "/2020/TFG19m/RF/5p75GeV_fixedTarget.B";}
   elsif ($pwd =~ /11p5GeV/)             {$glob .= "/2020/TFG19m/RF/11p5GeV.B";}
+  elsif ($pwd =~ /31p2GeV_fixedTarget/) {$glob .= "/2020/TFG20a/RF/31p2GeV_fixedTarget";}
+  elsif ($pwd =~ /9p2GeV/) {$glob .= "/2020/TFG20a/RF/9p2GeV";}
+  elsif ($pwd =~ /9p8GeV_fixedTarget/) {$glob .= "/2020/TFG20a/RF/9p8GeV_fixedTarget";}
 }
 $glob .= "/*/*";
 print "glob = $glob\n" if ($debug);

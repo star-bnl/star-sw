@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job  name="LcKppi" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false">
+<stdout URL="file:./sched$JOBID.log" />
+<stderr URL="file:./sched$JOBID.err" />
+<command> 
+# cd ${SUBMITTINGDIRECTORY}  
+  set Name = `basename ${SUBMITTINGDIRECTORY}`
+  setenv NODEBUG yes
+  setenv STARFPE NO
+  setup 64b
+#  starver TFG19g
+  echo $INPUTFILE0 | grep ':'
+  if (! $?) then
+    set rung  = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+    set f     = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+    set N     = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+#   set name  = `echo $INPUTFILE0 | awk -F\: '{print $4}'`
+  else
+    exit 1;
+  endif
+  set name = ""
+  foreach name (K_S0Fixed  Lambda0_barFixed Lambda0Fixed XiM_barFixed XiMFixed  Omega_barFixed OmegaFixed AntiHyper2NeutronFixed AntiHyperH4Fixed AntiHyperNeutronFixed AntiHyperTritonFixed Hyper2NeutronFixed HyperH4Fixed HyperNeutronFixed HyperTritonFixed \
+               K_S01GeV  K_S0       Lambda0_bar      Lambda0      XiM_bar      XiM       Omega_bar      Omega      AntiHyper2Neutron      AntiHyperH4      AntiHyperNeutron      AntiHyperTriton      Hyper2Neutron      HyperH4      HyperNeutron      HyperTriton \
+                Upsilon1SmTsq Upsilon2SmTsq)
+    echo $Name | grep $name
+    if (! $?) break;
+#    if ($name == $Name) break;
+  end
+  echo "name = $name";
+  if ($name == "") exit 1;
+#  setenv StarEndMakerShell
+# set chain = "MC.2019a,P2019a,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name};
+#Stx  set chain = "MC.2019a,P2019a,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name};
+#StiCA
+  set chain = "MC.2020a,P2020a,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name};
+  set sdt = ",sdt20200111.052520"
+  set VFMCE = ",VFMCE";
+  set Chain = ${chain}${VFMCE}${sdt}",Rung."${rung}
+  set base = ${name}_${rung}_${f}_${N};
+  set file = ${base}.MuDst.root
+  set tag  = ${base}.tags.root
+  set logFile  = ${base}B.log
+  echo "${file}"
+  if (-r ${SUBMITTINGDIRECTORY}/../xyz.root) ln -s ${SUBMITTINGDIRECTORY}/../xyz.root PVxyz.root 
+  if ( ! -r ${SUBMITTINGDIRECTORY}/${file}) then 
+    if (! -r ${SUBMITTINGDIRECTORY}/${base}.bla.root) then
+    touch  ${SUBMITTINGDIRECTORY}/${base}.bla.root
+#    root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'","'${tag}'")' &gt;&amp; ${logFile}
+    root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'")' &gt;&amp; ${logFile}
+    cp ${base}*  ${SUBMITTINGDIRECTORY}
+    rm  ${SUBMITTINGDIRECTORY}/${base}.bla.root
+    endif
+  endif
+</command>
+<input URL="command:RunId.pl 1001 19000 100 K_S0" />
+</job>

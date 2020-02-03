@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job  name="Hijing" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false">
+<stdout URL="file:./sched$JOBID.log" />
+<stderr URL="file:./sched$JOBID.err" />
+<command> 
+  cd ${SUBMITTINGDIRECTORY}  
+  set Name = `basename $PWD`
+#  setenv NODEBUG yes
+#  setup 64b
+#   starver TFG19a
+#  starver .DEV2 
+#  starver TFG17u 
+#  starver TFG17v 
+  set file = $INPUTFILE0;
+#  set rung = `echo $file | awk -F\: '{print $1}'`
+#  set f    = `echo $file | awk -F\: '{print $2}'`
+#  set l    = `echo $file | awk -F\: '{print $3}'`
+  set file2 = `basename ${file} .gener.root`;
+  set file1 = `basename ${file2} .event.root`;
+  set name  = `basename ${file1} .daq`;
+  echo "${name}"
+  set logName  = ${name}B.log
+  set generF   = ${name}.MuDst.root
+  set tagf     = ${name}.root
+#  setenv StarEndMakerShell
+  set sdt = "";
+#  echo $Name | grep -i Ideal
+#  if ($?) set sdt = ",sdt20160301";
+  set KFVertex = "";
+  echo $Name | grep -i KFV
+  if (! $?) set KFVertex = ",KFVertex";
+  if (! -r ${generF} ) then
+#    root.exe -q -b -x 'bfc.C(100,"In,P2020a,readAll,sdt20200111.052520,StiCA,StiKFVertex,-hitfilt,-geantOut,-evout,VMCAlignment,CorrY,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco","'${file}'")' &gt;&amp; ${logName}
+   root.exe -q -b -x 'bfc.C(100,"genIn,MC.2020,sdt20200111.052520,McTpcAna,-bbcSim,StiCA,-hitfilt,geantOut,evout,vmc,VMCAlignment,CorrY,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco'${sdt}',RunG.1","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
+  endif
+</command>
+<!-- <input URL="file:/net/l404/data/fisyak/reco/2019/hijingAuAu200.DEV2.StiCA.Minuit.newCut/*.event.root" /> -->
+<input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/Hijing/AuAu200/hijingAuAu200*.gener.root" />
+</job>
+
