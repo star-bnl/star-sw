@@ -271,7 +271,6 @@ def parseArray(array):
     return list(out)
 
 # ----------------------------------------------------------------------------------------------------
-
 def replacements( line ):
     global _struct_dims
 
@@ -331,14 +330,17 @@ def replacements( line ):
 
         # Find all occurences of the structure name which are followed
         # by but not preceded by an "_"
-        for match in re.finditer( "(^|[^_.])%s_"%struct, myline, re.IGNORECASE ):
 
-            Old = match.group()            # This is a non _ followed by STRUCT_
-            New = Old.replace("_",".")     # This is a non _ followed by STRUCT.
+        if ( struct in myline.lower() ): # if the line doesn't contain the struct... no need to finditer
 
-            # This should strip out STRUCT_ and replace with STRUCT.
-            # without changing _STRUCT_
-            myline = myline.replace( Old, New )     
+            for match in re.finditer( "(^|[^_.])%s_"%struct, myline, re.IGNORECASE ):
+
+                Old = match.group()            # This is a non _ followed by STRUCT_
+                New = Old.replace("_",".")     # This is a non _ followed by STRUCT.
+
+                # This should strip out STRUCT_ and replace with STRUCT.
+                # without changing _STRUCT_
+                myline = myline.replace( Old, New )     
                                                     
 
     # NEW STRUCT IMPLEMENTATION
@@ -364,6 +366,8 @@ def replacements( line ):
 
         # Loop over all variables in this struct.  
         for key,value in _struct_dims.iteritems(): # isnt this backward?
+            
+            if ( key not in myline.lower() ): continue # can skip finditer
 
             #
             # Look for things of the form struct.array(index,jndex) and replace with struct.array[int(jndex)-1][int(index)-1]
@@ -2433,6 +2437,7 @@ class ArrayFormatter:
 
         # And now add the comment
         output += ' ! %s' % comment
+
 class Filling( Handler ):
 
     def setParent(self,p): self.parent = p    
@@ -2470,6 +2475,7 @@ class Filling( Handler ):
         name = attr.get('name',   None);     self.name = name.lower()
         comm = attr.get('comment',None);     self.comment = comm        
                    
+
     def endElement(self,tag):
         global _struct_table, document
 
