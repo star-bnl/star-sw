@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.177 2020/01/15 02:18:54 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.178 2020/02/04 17:46:23 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.178  2020/02/04 17:46:23  jwebb
+// Update to forward silicon geometry and associated changes to support.
+//
 // Revision 1.177  2020/01/15 02:18:54  perev
 // PhysicsOff added but commented out
 //
@@ -1280,7 +1283,7 @@ int St_geant_Maker::Make() {
   AddHits<St_g2t_hpd_hit>( "HPDH", {"YPLA"}              , "g2t_hpd_hit", g2t_hpd ); 
   AddHits<St_g2t_gem_hit>( "GEMH", {"GMDI"}              , "g2t_gem_hit", g2t_gem ); 
   AddHits<St_g2t_igt_hit>( "IGTH", {"IGAL"}              , "g2t_igt_hit", g2t_igt ); 
-  AddHits<St_g2t_fst_hit>( "FSTH", {"FDSW"}              , "g2t_fst_hit", g2t_fst ); 
+//AddHits<St_g2t_fst_hit>( "FSTH", {"FDSW"}              , "g2t_fst_hit", g2t_fst ); 
 
   // Forward GEM tracker
   AddHits<St_g2t_fgt_hit>( "FGTH", {"FGZC","FGZD","FZCB"}, "g2t_fgt_hit", g2t_fgt ); 
@@ -1341,7 +1344,7 @@ int St_geant_Maker::Make() {
   // Forward tracker 
   AddHits<St_g2t_fts_hit>( "FTSH",{"FTSA","FSIA", "FSIB", "FSIC"}, "g2t_fts_hit", g2t_fts ); 
 
-  AddHits<St_g2t_fts_hit>( "FSTH",{"FTOS","FTIS"},                 "g2t_fsi_hit", g2t_fts ); 
+  AddHits<St_g2t_fts_hit>( "FSTH",{"FTOS","FTIS","FTUS"},          "g2t_fsi_hit", g2t_fts );
   AddHits<St_g2t_fts_hit>( "STGH",{"TGCG"},                        "g2t_stg_hit", g2t_stg );
   AddHits<St_g2t_emc_hit>( "WCAH",{"WSCI"},                        "g2t_wca_hit", g2t_wca );
   AddHits<St_g2t_hca_hit>( "HCAH",{"HSCI"},                        "g2t_hca_hit", g2t_hca );
