@@ -415,6 +415,15 @@ cpu_per_event.csh '*/*B.log'
 hlt_21029055_14_01_000
 
 dir -lt */*picoDst.root | grep Jan | awk '{print $9}' | tee pico.list
+find . -name "*picoDst.root" -cmin +130 -exec ls -ld {} \; | awk '{print $9}' | tee pico.list
 foreach f ( `cat pico.list` )
   set d = `dirname ${f}`; rm -rf ${d}
+end
+dir /scratch/fisyak/*/hlt_21029055_13_01_000*
+################################################################################
+cd ~/reco/2020/TFG20a/RF 
+foreach d ( `ls -d *` )
+  cd ${d}
+  CleanHLTdaq.pl | tee rm.csh
+  cd -
 end
