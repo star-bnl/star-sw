@@ -699,9 +699,9 @@ void KFParticlePerformanceBase::CreateEfficiencyHistograms(TProfile* histo[3][nP
     float xMinEff[nPartEfficiency] = {   0.,   0.,  0.,  -10.,    0.,    0.,    0.,    0. , 0.};
     float xMaxEff[nPartEfficiency] = {  20.,  5.,   6.,   80.,  100.,  100.,  100.,  50. , 4.};
 #else
-    int nBinsEff[nPartEfficiency]  = { 100 , 100 ,  30  ,   100 ,  100 ,  100 ,  100 ,  100 , 100  };
-    float xMinEff[nPartEfficiency] = {   0.,   0.,  -1.5,   -10.,    0.,    0.,    0.,    0.,   0. };
-    float xMaxEff[nPartEfficiency] = {  10.,  10.,   1.5,    10.,   30.,    5.,    1.,    1.,  10. };
+    int nBinsEff[nPartEfficiency]  = { 100 , 100 ,  50  ,   100 ,  100 ,  100 ,  100 ,  100 , 100  };
+    float xMinEff[nPartEfficiency] = {   0.,   0.,  -3.0,   -10.,    0.,    0.,    0.,    0.,   0. };
+    float xMaxEff[nPartEfficiency] = {  10.,  10.,   2.0,    10.,   30.,    5.,    1.,    1.,  10. };
 #endif
     TString effTypeName[3] = {"All particles",
                               "Reconstructable daughters",
