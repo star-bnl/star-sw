@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.94 2019/10/30 20:29:21 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.95 2020/02/04 17:47:50 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.95  2020/02/04 17:47:50  jwebb
+* Changes to forward silicon geometry, and associated volume ID changes.
+*
 * Revision 1.94  2019/10/30 20:29:21  jwebb
 * Final (?) fix for zfatal bug.  Missing volume id in fast simulator because the fpdmgeo4 module was not properly detected / configured in g2t_volume_id.
 *
@@ -1413,12 +1416,24 @@ c$$$    write (*,*) numbv
     Integer function g2t_fst_volume_id ( numbv )
       Integer, intent(in) :: numbv(15)
       Integer             :: disk, wedge, sensor
+      Integer,parameter   :: mapping(3) = (/ 2, 3, 1 /)
 
       Integer          Iprin,Nvb
       Character(len=4)              cs,cd
       COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
 
-      "Inner wedge assembly"
+
+      IF (cd=='FTUS' ) then
+      
+      disk   = mapping( numbv(1) )
+      wedge  = numbv(2)
+      sensor = 1
+      
+
+      ENDIF
+
+
+      "Inner wedge assembly (deprecated geometry model)"
       IF (cd=='FTIS') then
 
       disk  = numbv(1) "There are 3 silicon disks"
@@ -1427,7 +1442,8 @@ c$$$    write (*,*) numbv
                        "1=inner wedge, 2,3=outer wedge"
 
       ENDIF
-      "Outer wedge assembly"
+
+      "Outer wedge assembly (deprecated geometry model)"
       IF (cd=='FTOS') then
 
       disk  = numbv(1) "There are 3 silicon disks"
