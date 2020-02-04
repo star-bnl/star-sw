@@ -271,7 +271,6 @@ def parseArray(array):
     return list(out)
 
 # ----------------------------------------------------------------------------------------------------
-
 def replacements( line ):
     global _struct_dims
 
@@ -331,14 +330,17 @@ def replacements( line ):
 
         # Find all occurences of the structure name which are followed
         # by but not preceded by an "_"
-        for match in re.finditer( "(^|[^_.])%s_"%struct, myline, re.IGNORECASE ):
 
-            Old = match.group()            # This is a non _ followed by STRUCT_
-            New = Old.replace("_",".")     # This is a non _ followed by STRUCT.
+        if ( struct in myline.lower() ): # if the line doesn't contain the struct... no need to finditer
 
-            # This should strip out STRUCT_ and replace with STRUCT.
-            # without changing _STRUCT_
-            myline = myline.replace( Old, New )     
+            for match in re.finditer( "(^|[^_.])%s_"%struct, myline, re.IGNORECASE ):
+
+                Old = match.group()            # This is a non _ followed by STRUCT_
+                New = Old.replace("_",".")     # This is a non _ followed by STRUCT.
+
+                # This should strip out STRUCT_ and replace with STRUCT.
+                # without changing _STRUCT_
+                myline = myline.replace( Old, New )     
                                                     
 
     # NEW STRUCT IMPLEMENTATION
@@ -364,6 +366,8 @@ def replacements( line ):
 
         # Loop over all variables in this struct.  
         for key,value in _struct_dims.iteritems(): # isnt this backward?
+            
+            if ( key not in myline.lower() ): continue # can skip finditer
 
             #
             # Look for things of the form struct.array(index,jndex) and replace with struct.array[int(jndex)-1][int(index)-1]
@@ -467,7 +471,7 @@ class Document( Handler ):
         self.variables  = []
         self.structs    = []
         self.fills      = []        
-        self.fill_count = {}
+        #self.fill_count = {}
         self.content    = []
         self.geometries = []
 
@@ -2440,6 +2444,7 @@ class ArrayFormatter:
 
         # And now add the comment
         output += ' ! %s' % comment
+
 class Filling( Handler ):
 
     def setParent(self,p): self.parent = p    
@@ -2447,6 +2452,7 @@ class Filling( Handler ):
 
         self. name = 0
         self. commemt = 0
+
         self. var_list = [] # list of variables
         self. typ_list = [] # list of types
         self. val_list = [] # list of values
@@ -2454,15 +2460,14 @@ class Filling( Handler ):
         
         Handler.__init__(self)
 
-    def addVar(self,name,type,dim,value,comment):
+    def addVar(self,name,mytype,dim,value,comment):
         """
         The <var> tag will result in addVar being called.  This will append
         the variable name, type, value(s) and comments to the lists stored
         in this class.
         """    
-
         self.var_list.append(name.lower())
-        self.typ_list.append(type)
+        self.typ_list.append(mytype)
         self.val_list.append(value)
         self.com_list.append(comment)
 
@@ -2474,13 +2479,10 @@ class Filling( Handler ):
         """
         global document
         
-        name = attr.get('name',None);        self.name = name.lower()
+        name = attr.get('name',   None);     self.name = name.lower()
         comm = attr.get('comment',None);     self.comment = comm        
-   
-        name=name.lower()
-        count = document.fill_count.get(name,0)
-        document.fill_count[name]=count+1
-                
+                   
+
     def endElement(self,tag):
         global _struct_table, document
 
@@ -2538,112 +2540,8 @@ class Filling( Handler ):
         #print output
 
         document.impl( output, unit=current )
-class Fill( Handler ):
 
-    def setParent(self,p): self.parent = p    
-    def __init__(self):
 
-        self. name = 0
-        self. commemt = 0
-        self. var_list = [] # list of variables
-        self. typ_list = [] # list of types
-        self. val_list = [] # list of values
-        self. com_list = [] # list of comments    
-        
-        Handler.__init__(self)
-
-    def addVar(self,name,type,dim,value,comment):
-        """
-        The <var> tag will result in addVar being called.  This will append
-        the variable name, type, value(s) and comments to the lists stored
-        in this class.
-        """    
-
-        self.var_list.append(name.lower())
-        self.typ_list.append(type)
-        self.val_list.append(value)
-        self.com_list.append(comment)
-
-    def startElement(self,tag,attr):
-        """
-        On the start of a <Fill> tag we begin collecting the information
-        about the elements of the struct which need to be filled, and'
-        what values.
-        """
-        global document
-        
-        name = attr.get('name',None);        self.name = name.lower()
-        comm = attr.get('comment',None);     self.comment = comm        
-   
-        name=name.lower()
-        count = document.fill_count.get(name,0)
-        document.fill_count[name]=count+1
-        
-
-    def endElement(self,tag):
-        """
-        On the </Fill> tag, we export the fill statement to the output file.
-        """
-        global _struct_table, document
-
-        document.impl( seperator, unit=current)
-        name = self.name
-
-        document.impl( '///@addtogroup %s_doc'%name, unit=current)
-        document.impl( '///@{', unit=current )
-        
-        document.impl('++%s._index;' % self.name, unit=current )
-
-        ###################################################################
-        #
-        # n.b. This may cause problems with structure creation when USE
-        # operators are interleaved with Fill operators... IF this happens
-        # you neec to rethink the scheme used to index the structures
-        #
-        ###################################################################
-
-        selectors = []
-        for i,var in enumerate(self.var_list):
-
-            val = self.val_list[i].lower()
-            com = self.com_list[i]
-
-            try:
-                typ=_struct_table[ self.name ][ var ]
-            except KeyError:
-                print ""
-                print "--> Error: Structure %s has no variable %s <--"%(self.name,var)
-                print ""
-                raise
-                        
-            if typ == 'char' or typ == 'TString':
-                val = val.strip('"') # strip out double quotes
-                val = val.strip("'") # strip out single quotes
-                val = '"%s"' % val   # assign with double quotes
-            
-            if  re.match('\{',val):                             # Array assignment
-                                
-                myval=val.rstrip(';')                           # remove trailing semi
-                myval=myval.strip('{}')
-                myval=myval.replace(';',',')                    # all ; --> , in matrix assignment
-                array=myval.split(',')                          # 
-
-                for i,v in enumerate(array):
-                    if len(v)>0:
-                        document.impl('%s . %s.at(%i) = %s; // %s'%(self.name,var,i,replacements(v),com), unit=current)
-                        document.impl('///%s . %s.at(%i) = %s; // %s'%(self.name,var,i,replacements(v),com), unit=current)                        
-
-            else:          
-
-                document.impl('%s . %s = %s; // %s'%(self.name,var,replacements(val),com), unit=current)
-                document.impl('/// %s . %s = %s; // %s'%(self.name,var,replacements(val),com), unit=current)                
-                val = replacements(val)
-                selectors.append( str(['%s'%var,'%s'%val])   )
-                        
-        document.impl(skip, unit=current)
-        document.impl('%s.fill();'%self.name, unit=current )
-        document.impl( '///@}', unit=current )                                
-        document.impl(skip, unit=current)
 class Use(Handler):
 
     def __init__(self): Handler.__init__(self)
