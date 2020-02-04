@@ -1,6 +1,10 @@
-// $Id: St_geant_Maker.h,v 1.58 2019/09/30 14:13:27 jwebb Exp $
+// $Id: St_geant_Maker.h,v 1.59 2020/02/04 17:46:23 jwebb Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.59  2020/02/04 17:46:23  jwebb
+// Update to forward silicon geometry and associated changes to support.
+//
 // Revision 1.58  2019/09/30 14:13:27  jwebb
+//
 // Integrate HITS for forward tracking and forward calorimeter.
 //
 // n.b. deprecates the legacy HcalGeo RnD detector.
@@ -269,7 +273,7 @@ protected:
    /// @param tablename is the name of the table to be created
    /// @param g2t is the functor of class F passed
    template<typename T, typename F>
-   int AddHits( std::string container, std::vector<std::string> volumes, std::string tablename, F g2t ){
+   int AddHits( std::string container, std::vector<std::string> volumes, std::string tablename, F g2t, bool verbose=false ){
        int ntotal = 0, nhits = 0;
        for ( auto v : volumes ) { 
 	 geant3->Gfnhit( container.c_str(), v.c_str(), nhits ); 
@@ -283,13 +287,13 @@ protected:
        auto* g2t_track = (St_g2t_track*)FindByName("g2t_track"); 
        g2t( g2t_track, table );
        AddData( table ); 
-       if ( Debug() > 1 ) table->Print(0,10);  
+       if ( Debug() > 1 || verbose ) table->Print(0,10);  
        return ntotal;  
    } 
   std::map<std::string, int> mHitCounts;
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.58 2019/09/30 14:13:27 jwebb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.59 2020/02/04 17:46:23 jwebb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 
