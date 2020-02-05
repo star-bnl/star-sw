@@ -984,7 +984,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
     histoParameters3D[iPart][5]->GetYaxis()->SetTitleOffset(1.0);
     histoParameters3D[iPart][5]->GetZaxis()->SetTitle("M");
 
-    histoParameters3D[iPart][6] = new TH3F(parName3D[6].Data(),parTitle3D[6] + " pT > 1 GeV and track with NDF > 45",
+    histoParameters3D[iPart][6] = new TH3F(parName3D[6].Data(),parTitle3D[6] + " pT > 1 GeV", // and track with NDF > 45",
                                       nBins[3],xMin[3],xMax[3],
                                       nBins[9],xMin[9],xMax[9],
                                       nBins[0],xMin[0],xMax[0]);
