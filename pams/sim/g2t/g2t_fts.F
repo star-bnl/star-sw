@@ -6,12 +6,14 @@
       INTEGER   G2T_FTS,G2R_GET_HIT,Iprin/0/,Idigi,i,isys
       logical   Local/.false./
 
+! NOTE: manages several hit collections/subsystems from deprecated geometries... should be
+!       revised when we release y2021  
       CHARACTER (len=4), dimension(*), parameter :: 
-     _             hitcol  = (/'FTSD', 'FTSD', 'FTSD', 'FTSD', 'FSTM', 'FSTM' /)
+     _             hitcol  = (/'FTSD', 'FTSD', 'FTSD', 'FTSD', 'FSTM', 'FSTM', 'FSTM' /)
       CHARACTER (len=4), dimension(*), parameter :: 
-     _             subsys  = (/'FTSA', 'FSIA', 'FSIB', 'FSIC', 'FTOS', 'FTIS' /)
+     _             subsys  = (/'FTSA', 'FSIA', 'FSIB', 'FSIC', 'FTOS', 'FTIS', 'FTUS' /)
       LOGICAL,           dimension(*), parameter :: 
-     _             islocal = (/ .false., .true., .true., .true., .false., .false. /)
+     _             islocal = (/ .false., .true., .true., .true., .false., .false., .false. /)
 
 *
       G2T_FTS=STAFCV_OK
@@ -19,16 +21,11 @@
 *
       i=0
       g2t_fts_hit_h.nok = 0
-
-
-c     call G2R_GET_SYS ('FTSD','FTSA',Iprin,Idigi)
-c     call G2R_GET_SYS ('FTSD','FSIS',Iprin,Idigi)
-
        DO isys=1, size(subsys)
 
        CALL g2r_get_sys( hitcol(isys), subsys(isys), Iprin, Idigi )
 
-       if (Iprin.lt.0) goto 123
+       if (Iprin.lt.0) goto 123 ! negative print flag indicates no hits
 
 *      Local  = Idigi.ge.2
 *      local  = .false. ! Ensure global coordinates
