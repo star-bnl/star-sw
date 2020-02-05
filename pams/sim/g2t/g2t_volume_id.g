@@ -1,5 +1,12 @@
-* $Id: g2t_volume_id.g,v 1.94 2019/10/30 20:29:21 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.96 2020/02/05 15:18:16 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.96  2020/02/05 15:18:16  jwebb
+* Fix g2t_volume_id for forward silicon
+*
+* Revision 1.95  2020/02/04 17:47:50  jwebb
+*
+* Changes to forward silicon geometry, and associated volume ID changes.
+*
 * Revision 1.94  2019/10/30 20:29:21  jwebb
 * Final (?) fix for zfatal bug.  Missing volume id in fast simulator because the fpdmgeo4 module was not properly detected / configured in g2t_volume_id.
 *
@@ -270,6 +277,7 @@
                                           6, 1, 2, 3, 4, 5/
 
       Integer          innout,sector,sub_sector,volume_id,sensor,unknown
+      Integer          G2T_FST_VOLUME_ID, G2T_STG_VOLUME_ID, G2T_WCA_VOLUME_ID, G2T_HCA_VOLUME_ID
       Integer          rileft,eta,phi,phi_sub,superl,forw_back,strip
       Integer          ftpv,padrow,ftpc_sector,innour,lnumber,wafer,lsub,phi_30d
       Integer          section,tpgv,tpss,tpad,isdet,ladder,is,nladder,nwafer
@@ -1308,10 +1316,23 @@ c$$$    write (*,*) numbv
 
 *******************************************************************************************
 ** 27                                                                            Jason Webb
-      ELSE IF (CSYS=='fts') THEN
-         
-           "Disk number is 1st entry in numbv"
-           volume_id = numbv(1)
+      ELSE IF (CSYS=='fts') THEN         
+
+           volume_id = g2t_fst_volume_id( numbv )
+c           write (*,*) csys, volume_id
+
+      ELSE IF (CSYS=='fst') THEN "Forward silicon tracker" 
+
+           volume_id = g2t_fst_volume_id( numbv )
+c           write (*,*) csys, volume_id
+
+      ELSE IF (CSYS=='stg') THEN "Small thin gap chambers"
+           volume_id = g2t_stg_volume_id( numbv )
+      ELSE IF (CSYS=='wca') THEN "FCS EM calorimeter"
+           volume_id = g2t_wca_volume_id( numbv )
+      ELSE IF (CSYS=='hca') THEN "FCS Hadronic calorimeter"
+           volume_id = g2t_hca_volume_id( numbv )
+
 *******************************************************************************************
 ** 28                                                                           Prashanth S 
       ELSE IF (CSYS=='epd') THEN
@@ -1416,4 +1437,242 @@ c$$$    write (*,*) numbv
       if (csys == 'fscg_version')    g2t_version = fscg_version
       if (csys == 'mtdg_version')    g2t_version = mtdg_version
 #endif /* __G2T_VERSION__ */
-      end      
+    end
+
+!//______________________________________________________________________________________      
+    Integer function g2t_tpc_volume_id ( numbv )
+      Integer, intent(in) :: numbv(15)
+
+      Logical :: first = .true.
+      
+      Structure  TPCC  { version,misalign  }      
+      Structure  TPCG  { version,tpadconfig  }
+      Structure  TPRS  { sec,nrow }
+
+
+      Integer ::       Iprin,Nvb
+      Character(len=4) ::           cs,cd
+      COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
+
+      Integer :: npadi = 0, npado = 0, npad = 0
+      Integer,Parameter :: fpad = 1
+      Integer,Parameter :: fsec = 100
+
+      Integer :: tpads(156,24), isdet(156,24), i, j, n, m
+
+      Integer :: tpgv, tpss, pad, det, prompt, sector
+
+      
+
+
+      if ( first ) then
+
+         call rbpushd  "save current zebra directory"
+         first = .false.
+         USE /DETM/TPCE/TPCC       stat=itpcc
+         USE /DETM/TPCE/TPCG       stat=itpcg
+         USE /DETM/TPCE/TPRS       stat=itprs
+         npadi = TPRS_nrow
+         USE /DETM/TPCE/TPRS       stat=itprs 
+         npado = TPRS_nrow
+         call rbpopd   "restore original zebra directory"
+
+
+        !write (*,*) 'We are in FIRST', itpcg, itprs
+        !write (*,*) 'We have TPCC  version    = ', TPCC_version
+        !write (*,*) 'We have TPCG  version    = ', TPCG_version
+        !write (*,*) 'We have TPCG  tpadconfig = ', TPCG_tpadconfig
+        !write (*,*) 'We have TPRS(sec=1) nrow = ', npadi
+        !write (*,*) 'We have TPRS(sec=2) nrow = ', npado
+
+
+         ! zero out both arrays to start
+         tpads(1:156,:) = 0
+         isdet(1:156,:) = 0  
+
+         ! Default will be the TPC pre iTPC upgrade
+
+
+
+         npad = 73 """13 inner + 2x13 fake + 32 outer + 2 fake """
+
+       DO I=1,24
+         tpads(1:73,I) = (/     1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 
+                              4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 
+                              7, 8, 8, 8, 9, 9, 9,10,10,10, 
+                             11,11,11,12,12,12,13,13,13,14, 
+                             14,15,16,17,18,19,20,21,22,23, 
+                             24,25,26,27,28,29,30,31,32,33, 
+                             34,35,36,37,38,39,40,41,42,43, 
+                             44,45,45   /)
+
+         isdet(1:73,I) = (/ 1, 0, 2, 1, 0, 2, 1, 0, 2, 1,
+                          0, 2, 1, 0, 2, 1, 0, 2, 1, 0,
+                          2, 1, 0, 2, 1, 0, 2, 1, 0, 2,
+	                  1, 0, 2, 1, 0, 2, 1, 0, 2, 1,
+	                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		          0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		          0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                          0, 0, 2 /)
+        ENDDO
+
+         ! Otherwise handle the iTPC upgrade inner = 40 rows outer = 32
+         if (TPCC_version.ge.6) then
+
+         write (*,*) 'Info :: g2t_volume_id :: iTPC geometry will be decoded'
+
+         npad = 76 """ 40 inner + 2 fake + 32 outer + 2 fake """
+
+        DO I=1,24
+         tpads(1:76,I) = (/   1,  1,  2,  3,  4,  5,  6,  7,  8,  9,
+                           10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+                           20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+                           30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+                           40, 40, 41, 41, 42, 43, 44, 45, 46, 47, 48, 49,
+                           50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+                           60, 61, 62, 63, 64, 65, 66, 67, 68, 69,
+                           70, 71, 72, 72 /)
+                      
+         isdet(1:76,I) = (/   1,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+                            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+                            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+                            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+                            0,  2,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+                            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+                            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+                            0,  0,  0,  2 /)
+        ENDDO
+                      
+         endif
+
+
+      ! Detect and handle the mixed scenario
+      IF ( tpcc_version .eq. 3.2 ) THEN
+         I = 20
+         tpads(1:73,I) = (/   1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 
+                              4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 
+                              7, 8, 8, 8, 9, 9, 9,10,10,10, 
+                             11,11,11,12,12,12,13,13,13,41, 
+                             41,42,43,44,45,46,47,48,49,50, 
+                             51,52,53,54,55,56,57,58,59,60, 
+                             61,62,63,64,65,66,67,68,69,70, 
+                             71,72,72   /)
+         isdet(1:73,I) = (/ 1, 0, 2, 1, 0, 2, 1, 0, 2, 1,
+                          0, 2, 1, 0, 2, 1, 0, 2, 1, 0,
+                          2, 1, 0, 2, 1, 0, 2, 1, 0, 2,
+	                  1, 0, 2, 1, 0, 2, 1, 0, 2, 1,
+	                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		          0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		          0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                          0, 0, 2 /)
+
+      ENDIF
+
+      endif!first           
+
+      tpgv = numbv(1)
+      tpss = numbv(2)
+      sector  = tpss + 12*(tpgv - 1)    
+      pad  = numbv(3)
+      det  = 0
+
+      If  (tpcg_version==1) then
+
+          If (cd=='TPAI')  det=1
+          If (cd=='TPAO')  det=2
+*PN:      outermost pseudopadrow:
+          If (cd=='TPAO' & pad==14) pad=45
+
+      else
+
+          if (pad .gt. npad) pad = pad - npad
+
+          det = isdet(pad,sector); ! flag as fake or not
+          pad = tpads(pad,sector); ! remap fake padrows onto nearest real one
+          IF ( tpcc_version .eq. 3.2 .and. sector.eq.20 .and. pad .lt.14 ) THEN
+             sector = 99 "Effectively blind TpcRS to these hits"
+          ENDIF
+        endif      
+
+      g2t_tpc_volume_id = 100000*det + 100*sector + pad
+
+      RETURN
+    end
+!//______________________________________________________________________________________      
+    Integer function g2t_fst_volume_id ( numbv )
+      Integer, intent(in) :: numbv(15)
+      Integer             :: disk, wedge, sensor
+      Integer,parameter   :: mapping(3) = (/ 2, 3, 1 /)
+
+      Integer          Iprin,Nvb
+      Character(len=4)              cs,cd
+      COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
+
+      write (*,*) cd, numbv(1:5)
+
+      IF (cd=='FTUS' ) then     
+
+      disk   = numbv(1)         " disk is 4,5,6 for historical reasons"
+      wedge  = numbv(2)         " 12 wedges"   
+      sensor = numbv(3)         " sensor number"
+      sensor = mapping(sensor)  " remap sensor 1=inner, 2,3=outer "
+
+      ENDIF
+
+
+      "Inner wedge assembly (deprecated geometry model)"
+      IF (cd=='FTIS') then
+
+      disk  = numbv(1) "There are 3 silicon disks"
+      wedge = numbv(2) "There are 12 wedges"
+      sensor= 1        "There are 2+1 sensors" 
+                       "1=inner wedge, 2,3=outer wedge"
+
+      ENDIF
+
+      "Outer wedge assembly (deprecated geometry model)"
+      IF (cd=='FTOS') then
+
+      disk  = numbv(1) "There are 3 silicon disks"
+      wedge = numbv(2) "There are 12 wedges"
+      sensor= numbv(3) "There are 2+1 sensors" 
+                       "1=inner wedge, 2,3=outer wedge"
+
+      ENDIF
+
+      g2t_fst_volume_id = 1000*disk + 10*wedge + sensor
+      
+!$$$  write (*,*) cd, numbv(1:5), g2t_fst_volume_id
+
+    End Function g2t_fst_volume_id
+
+!//______________________________________________________________________________________      
+    Integer function g2t_stg_volume_id ( numbv )
+      Integer, intent(in) :: numbv(15)
+      
+      g2t_stg_volume_id = numbv(1)
+
+    End Function g2t_stg_volume_id
+!//______________________________________________________________________________________      
+     Integer function g2t_wca_volume_id( numbv ) 
+       Integer, intent(in) :: numbv(15)
+       Integer             :: mod, tow
+
+       mod = numbv(1)
+       tow = numbv(2) "nx = 22 ny = 34, nx*ny = 748"
+
+       g2t_wca_volume_id = mod*1000 + tow
+
+     End Function g2t_wca_volume_id
+!//______________________________________________________________________________________      
+     Integer function g2t_hca_volume_id( numbv ) 
+       Integer, intent(in) :: numbv(15)
+       Integer             :: mod, tow
+
+       mod = numbv(1)
+       tow = numbv(2) "nx = 13 ny = 20, nx*ny = 260"
+
+       g2t_hca_volume_id = mod*1000 + tow
+
+     End Function g2t_hca_volume_id
+!//______________________________________________________________________________________      

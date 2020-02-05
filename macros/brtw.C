@@ -16,6 +16,7 @@
 #include "TNtuple.h"
 #include "TArrayF.h"
 #include "TFitResultPtr.h"
+#include "TPaveLabel.h"
 #endif
 static const Double_t mK  = 0.493677;
 static const Double_t mpi = 0.13956995;
@@ -363,7 +364,7 @@ void FitH3(
 	  Vars += ":d";
 	  Vars += V;
 	}
-	Vars += ":NDF:chisq";
+	Vars += ":NDF:chisq:mean:rms:entries";
 	FitP = new TNtuple("FitP",Form("Fit results for %s",histN),Vars);
       }
       mean->SetBinContent(i,j,proj->GetMean());
@@ -378,11 +379,11 @@ void FitH3(
       vars[3] = yax->GetBinCenter(j); // y
       Int_t Npar = T->GetNpar();
       for (Int_t p = 0; p < Npar; p++) {
-	vars[4+2*p] = T->GetParameter(p);
+	vars[4+2*p] = T->GetParameter(p)-0.497611;
 	vars[5+2*p] = T->GetParError(p);
 	if (p == 1) {
-	  mu->SetBinContent(i,j,T->GetParameter(p));
-	  mu->SetBinError(i,j,T->GetParError(p));
+	  mu->SetBinContent(i,j,vars[4+2*p]);
+	  mu->SetBinError(i,j,vars[5+2*p]);
 	} else if (p == 2) {
 	  sigma->SetBinContent(i,j,T->GetParameter(p));
 	  sigma->SetBinError(i,j,T->GetParError(p));
@@ -391,12 +392,51 @@ void FitH3(
       vars[4+2*Npar] = T->GetNDF();
       vars[5+2*Npar] = T->GetChisquare();
       chisq->Fill(i,j, T->GetChisquare());
+      vars[6+2*Npar] = proj->GetMean();
+      vars[7+2*Npar] = proj->GetRMS();
+      vars[8+2*Npar] = proj->GetEntries();
       FitP->Fill(vars);
     }
   }
   fOut->Write();
 }
 //________________________________________________________________________________
+void Drawf0_0() {
+  TSeqCollection *files = gROOT->GetListOfFiles();
+  if (! files) return;
+  Int_t nn = files->GetSize();
+  if (! nn) return;
+  TFile **FitFiles = new TFile *[nn];
+  Int_t NF = 0;
+  TIter next(files);
+  TFile *f = 0;
+  while ((f = (TFile *) next())) {
+    TH1 *f0_0 = (TH1 *) f->Get("f0_0");
+    if (! f0_0) continue;
+    FitFiles[NF] = f;
+    NF++;
+  }
+  TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
+  if (! c1 ) c1 = new TCanvas("c1","Reconstructed Mass");
+  c1->Clear();
+  c1->Divide(1,NF);
+  for (Int_t i = 0; i < NF; i++) {
+    f = FitFiles[i];
+    c1->cd(i+1);
+    TH1 *f0_0 = (TH1 *) f->Get("f0_0");
+    f0_0->Draw("e");
+    TString Name(f->GetName());
+    Name.ReplaceAll("FitH3.root","");
+    TPaveLabel *pl = new TPaveLabel(0.2,0.7,0.4,0.9,Name,"NDCbr");
+    pl->Draw();
+  }
+}
+//________________________________________________________________________________
 /*
   11p5GeV.H4.devdEdx.root:/Particles/KFParticlesFinder/Particles/Ks/Parameters
+  root.exe *H3.root
+  
  */
+
+
+

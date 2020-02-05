@@ -1419,8 +1419,10 @@ enum dcaEmx {kImpImp,
       if (!node->isFitted()) 	continue;
 
       const StiDetector *detector = node->getDetector();
-//VP      assert(detector == stiHit->detector());
-      assert(!detector || stiHit->timesUsed());
+//VP
+      assert(detector == stiHit->detector());
+//yf      assert(!detector || stiHit->timesUsed());
+
       StHit *hh = (StHit*)stiHit->stHit();
       fillPulls(hh,stiHit,node,track,dets,gloPri);
       if (gloPri) continue;

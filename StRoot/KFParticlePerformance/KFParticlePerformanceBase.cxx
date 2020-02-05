@@ -699,9 +699,9 @@ void KFParticlePerformanceBase::CreateEfficiencyHistograms(TProfile* histo[3][nP
     float xMinEff[nPartEfficiency] = {   0.,   0.,  0.,  -10.,    0.,    0.,    0.,    0. , 0.};
     float xMaxEff[nPartEfficiency] = {  20.,  5.,   6.,   80.,  100.,  100.,  100.,  50. , 4.};
 #else
-    int nBinsEff[nPartEfficiency]  = { 100 , 100 ,  30  ,   100 ,  100 ,  100 ,  100 ,  100 , 100  };
-    float xMinEff[nPartEfficiency] = {   0.,   0.,  -1.5,   -10.,    0.,    0.,    0.,    0.,   0. };
-    float xMaxEff[nPartEfficiency] = {  10.,  10.,   1.5,    10.,   30.,    5.,    1.,    1.,  10. };
+    int nBinsEff[nPartEfficiency]  = { 100 , 100 ,  50  ,   100 ,  100 ,  100 ,  100 ,  100 , 100  };
+    float xMinEff[nPartEfficiency] = {   0.,   0.,  -3.0,   -10.,    0.,    0.,    0.,    0.,   0. };
+    float xMaxEff[nPartEfficiency] = {  10.,  10.,   2.0,    10.,   30.,    5.,    1.,    1.,  10. };
 #endif
     TString effTypeName[3] = {"All particles",
                               "Reconstructable daughters",
@@ -984,7 +984,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
     histoParameters3D[iPart][5]->GetYaxis()->SetTitleOffset(1.0);
     histoParameters3D[iPart][5]->GetZaxis()->SetTitle("M");
 
-    histoParameters3D[iPart][6] = new TH3F(parName3D[6].Data(),parTitle3D[6] + " pT > 1 GeV and track with NDF > 45",
+    histoParameters3D[iPart][6] = new TH3F(parName3D[6].Data(),parTitle3D[6] + " pT > 1 GeV", // and track with NDF > 45",
                                       nBins[3],xMin[3],xMax[3],
                                       nBins[9],xMin[9],xMax[9],
                                       nBins[0],xMin[0],xMax[0]);

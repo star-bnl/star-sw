@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import cmd;
+import cProfile;
 
 from xml.sax import saxutils
 from xml.sax import make_parser
@@ -42,6 +42,7 @@ def main():
     optparser.add_option("--export", help="Selects the export language (Mortran,AgML,...)", dest="language",default="AgML")
     optparser.add_option("--module", help="Defines the name of the module for export",      dest="module_name", default=None)
     optparser.add_option("--path",   help="Defines the path to export the files",           dest="path_name",   default='./geom/')
+    optparser.add_option("--profile", help="Enables python profileing", dest="profiler", default = False, action = 'store_true' )
         
     (opts, args) = optparser.parse_args()
 
@@ -53,7 +54,12 @@ def main():
     parser.setContentHandler(syntax)
     
     # Parse the document document
-    parser.parse( opts.filename )
+    #cProfile.runctx('parser.parse( opts.filename )')
+
+    if opts.profiler:
+        cProfile.runctx('parse(f)', { 'parse' : parser.parse, 'f' : opts.filename }, {} )
+    else:
+        parser.parse( opts.filename )
     
 
 if __name__ == '__main__':
