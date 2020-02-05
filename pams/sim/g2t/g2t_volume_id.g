@@ -1,6 +1,10 @@
-* $Id: g2t_volume_id.g,v 1.95 2020/02/04 17:47:50 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.96 2020/02/05 15:18:16 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.96  2020/02/05 15:18:16  jwebb
+* Fix g2t_volume_id for forward silicon
+*
 * Revision 1.95  2020/02/04 17:47:50  jwebb
+*
 * Changes to forward silicon geometry, and associated volume ID changes.
 *
 * Revision 1.94  2019/10/30 20:29:21  jwebb
@@ -1184,11 +1188,15 @@ c$$$    write (*,*) numbv
 *******************************************************************************************
 ** 27                                                                            Jason Webb
       ELSE IF (CSYS=='fts') THEN         
-           "Disk number is 1st entry in numbv"
-           volume_id = numbv(1)
+
+           volume_id = g2t_fst_volume_id( numbv )
+c           write (*,*) csys, volume_id
 
       ELSE IF (CSYS=='fst') THEN "Forward silicon tracker" 
+
            volume_id = g2t_fst_volume_id( numbv )
+c           write (*,*) csys, volume_id
+
       ELSE IF (CSYS=='stg') THEN "Small thin gap chambers"
            volume_id = g2t_stg_volume_id( numbv )
       ELSE IF (CSYS=='wca') THEN "FCS EM calorimeter"
@@ -1422,13 +1430,14 @@ c$$$    write (*,*) numbv
       Character(len=4)              cs,cd
       COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
 
+      write (*,*) cd, numbv(1:5)
 
-      IF (cd=='FTUS' ) then
-      
-      disk   = mapping( numbv(1) )
-      wedge  = numbv(2)
-      sensor = 1
-      
+      IF (cd=='FTUS' ) then     
+
+      disk   = numbv(1)         " disk is 4,5,6 for historical reasons"
+      wedge  = numbv(2)         " 12 wedges"   
+      sensor = numbv(3)         " sensor number"
+      sensor = mapping(sensor)  " remap sensor 1=inner, 2,3=outer "
 
       ENDIF
 
@@ -1455,6 +1464,8 @@ c$$$    write (*,*) numbv
 
       g2t_fst_volume_id = 1000*disk + 10*wedge + sensor
       
+!$$$  write (*,*) cd, numbv(1:5), g2t_fst_volume_id
+
     End Function g2t_fst_volume_id
 
 !//______________________________________________________________________________________      
