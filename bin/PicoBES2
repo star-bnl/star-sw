@@ -415,7 +415,9 @@ cpu_per_event.csh '*/*B.log'
 hlt_21029055_14_01_000
 
 dir -lt */*picoDst.root | grep Jan | awk '{print $9}' | tee pico.list
-find . -name "*picoDst.root" -cmin +130 -exec ls -ld {} \; | awk '{print $9}' | tee pico.list
+cd /scratch/fisyak
+find . -name "*picoDst.root" -cmin +30 -exec ls -ld {} \; | awk '{print $9}' | tee pico.list
+#root.exe -q -b 'Chain.C+("@pico.list","PicoDst")' | tee Chain.log
 foreach f ( `cat pico.list` )
   set d = `dirname ${f}`; rm -rf ${d}
 end
