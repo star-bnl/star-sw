@@ -1,9 +1,0 @@
-/*          file:   g2tmain.idl
-*           Module: g2tmain
-*/
-#include "PAM.idl"
-#include "g2t_track.idl"
-#include "g2t_hca_hit.idl"
-
-interface g2t_hca : amiModule{ STAFCV_T call (inout g2t_track g2t_track,
-                                              out g2t_hca_hit g2t_hca_hit ); };
