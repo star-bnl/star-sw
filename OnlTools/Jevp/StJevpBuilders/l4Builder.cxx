@@ -835,7 +835,7 @@ void l4Builder::event(daqReader *rdr)
 
 	omp_set_nested(1);
 	omp_set_dynamic(0);
-#pragma omp parallel sections num_threads(1)
+#pragma omp parallel sections num_threads(30)
 	{
 
 #pragma omp section
@@ -2731,7 +2731,7 @@ void l4Builder::defineHltPlots()
 	HltPlots[index]->addHisto(new PlotHisto(hVertexYZ));
 
         index++; // 49
-        hBunchId = new TH1D("BunchId", "Bunch ID;Bunch ID", 130, -5, 125);
+        hBunchId = new TH1D("BunchId", "All Event Bunch ID;Bunch ID", 130, -5, 125);
         HltPlots[index]->addHisto(new PlotHisto(hBunchId));
 
         index++; // 50
@@ -2784,7 +2784,7 @@ void l4Builder::defineHltPlots()
 
         index++; // 59
         pEtofNhitsPerEvent = new TProfile("EtofNhitsPerEvent", "ETOF <nhits> per event; Second in the run; <nhits>",
-                                          250, 0, 2500);
+                                          370, 0, 3700);
         HltPlots[index]->addHisto(new PlotHisto(pEtofNhitsPerEvent));
 }
 
@@ -2877,7 +2877,7 @@ void l4Builder::defineBesGoodPlots()
 
 	index++; // 6
 	hBesGoodVxT = new TH2D("BesGoodVxT", "Vx vs. time (nPTracks > 200);Seconds in the run;Vx [cm]",
-			       40, 0, 2400, 100, -2, 2);
+			       8, 0, 2400, 100, -2, 2);
 	BesGoodPlots[index]->addHisto(new PlotHisto(hBesGoodVxT));
 
 	index++; // 7
@@ -2886,7 +2886,7 @@ void l4Builder::defineBesGoodPlots()
 
 	index++; // 8
 	hBesGoodVyT = new TH2D("BesGoodVyT", "Vy vs. time (nPTracks > 200);Seconds in the run;Vy [cm]",
-			       40, 0, 2400, 100, -2, 2);
+			       8, 0, 2400, 100, -2, 2);
 	BesGoodPlots[index]->addHisto(new PlotHisto(hBesGoodVyT));
 
 	index++; // 9
@@ -2930,7 +2930,7 @@ void l4Builder::defineHLTGood2Plots()
 
 	index++; //4
 	hHLTGood2VzT = new TH2D("HLTGood2VzT", "Vz vs. time  (nPTracks > 200);Seconds in the run;Vz",
-				40, 0, 2400, 200, -200, 200);
+				8, 0, 2400, 200, -200, 200);
 	HLTGood2Plots[index]->addHisto(new PlotHisto(hHLTGood2VzT));
 
 	index++; //5
