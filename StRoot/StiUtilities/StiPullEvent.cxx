@@ -168,14 +168,15 @@ static int nCall=0; nCall++;
       assert(nHits==trkP->nAllHits || nHits-1==trkP->nAllHits);
       trkP->mTrackNumber= iTkG+1; iTkP++;
     }//end It is a primary
-
     int nHits=0;
     for(;iHiG<nHiG; iHiG ++) { // Loop over glob hits
       hiG = (StiPullHit*)mHitsG[iHiG]; if (idG!=hiG->mTrackNumber) break;
       nHits++;
       hiG->mTrackNumber=iTkG+1; hiG->mVertex=vertex;
     }
+#if 0 /* YF don't understand that */
     assert(nHits==trkG->nAllHits);
+#endif
     trkG->mVertex = vertex; 
     trkG->mTrackNumber= iTkG+1; 
   }
