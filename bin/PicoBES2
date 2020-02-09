@@ -432,13 +432,13 @@ end
 ################################################################################
 rm */*/Done */*/Chain.log */*/Submitted
 ================================================================================
-31p2GeV_fixedTarget/028
+31p2GeV_fixedTarget/028 Done
 31p2GeV_fixedTarget/029
-9p8GeV_fixedTarget/029
+9p8GeV_fixedTarget/029  
 9p8GeV_fixedTarget/030
 9p8GeV_fixedTarget/031
-9p8GeV_fixedTarget/032
-19p5GeV_fixedTarget/032
+9p8GeV_fixedTarget/032  
+19p5GeV_fixedTarget/032 Done
 19p5GeV_fixedTarget/033
 13p5GeV_fixedTarget/033
 13p5GeV_fixedTarget/034
