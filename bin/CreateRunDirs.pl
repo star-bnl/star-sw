@@ -53,6 +53,7 @@ my  @runs  = glob "/hlt/cephfs/daq/2019/???/* /hlt/cephfs/daq/2020/???/*";  prin
 foreach my $run (@runs) {
   my $r = File::Basename::basename($run);
   if (GoodRun($def,$r) < 0) {next;}
+  if ($r < 21040001) {next;}
   my $glob = $run . "/hlt*.daq";
   my @daqfiles = glob $glob;
   if ($#daqfiles < 0) {next;}
