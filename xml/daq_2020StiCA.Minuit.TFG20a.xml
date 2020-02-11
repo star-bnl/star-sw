@@ -15,7 +15,7 @@
     starver TFG20a
      set evtsFile = $INPUTFILE0;
      set f        = 1
-     set l        = 10000
+     set l        = 5000000
   echo "${evtsFile}"
   set evtsFileB = `basename ${evtsFile}`
   set filel    = `basename ${evtsFileB} .daq`
