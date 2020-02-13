@@ -372,7 +372,7 @@ foreach done (`ls -1d */*/Done`)
   cd -;
 end
 
-grep total ???/2*/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fM\n", n/1.e6)}'
+touch `grep total ???/2*/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fM\n", n/1.e6)}'`
 ################################################################################
 root.exe -q -b 'Chain.C+("*/*/*picoDst.root","PicoDst")' | tee Chain.log
 foreach f (`grep missing Chain.log | awk '{print $3}'`)
@@ -403,7 +403,7 @@ end
 
 ########### Bad drift velocities #####################################################################
 grep -A 2 'table tpcDrift' 02[6-7]/*/*B.log | egrep '(233530|41608|90742|42830)' | tee list_of_bad_files
-grep -A 2 'table tpcDrift' 04[2-3]/*/*B.log | egrep '2020021(1|2)/(141636|184732|103302)-' | tee list_of_bad_files
+grep -A 2 'table tpcDrift' 04[2-4]/*/*B.log | egrep '2020021(1|2)/(141636|184732|103302|)111714-' | tee list_of_bad_files
 foreach f (`awk -F\- '{print $1}' list_of_bad_files`)
 	set b = `basename ${f} B.log`; set d = `dirname ${f}`; mv ${d}/${b}* Zombie/
 end
