@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- <job  name="StiPulls" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false"> -->
+<job  name="StiPulls" maxFilesPerProcess="1"  filesPerHour="10"  fileListSyntax="paths" copyInputLocally="false">
+<command> 
+  cd ${SUBMITTINGDIRECTORY}  
+  setenv STARFPE NO
+  set fileD = `basename ${INPUTFILE0} .root`;
+  set fileC = `basename ${fileD} .event`;
+  set fileB = `basename ${fileC} .stipull`;
+  set file  = `basename ${fileB} 1000`;
+  echo "${file}"
+  set logFile  = ${file}B.log
+  root.exe -q -b 'bfc.C(-1)' 'StiPulls.C+(100000,"'${INPUTFILE0}'")'  &gt;&amp; ${logFile}
+</command>
+<stdout URL="file:./sched$JOBID.log" />
+<stderr URL="file:./sched$JOBID.err" />
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2019/mc.StiPulls/*1000.root" /> --> 
+<input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2019/daq.StiPulls/*.stipull.root" />
+<!-- <input URL="command:dEdxSample.pl" /> -->
+<!-- <input URL="file:/net/l403/data/fisyak/reco/2019/DEV2StiCA.Minuit/*event.root" /> -->
+<!-- <input URL="file:/net/l403/data/fisyak/reco/2019/DEV2StiCA.Minuit2/*event.root" /> -->
+<!--
+ <ResourceUsage>
+    <Memory>
+      <MinMemory>3500</MinMemory>
+    </Memory>
+  </ResourceUsage>
+-->
+</job>
