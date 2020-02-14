@@ -18,6 +18,12 @@ if ($pwd =~ /dev/) {
   $glob = $PICOPATH;
   if    ($pwd =~ /5p75GeV_fixedTarget/) {$glob .= "/reco/production_5p75GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
   elsif ($pwd =~ /11p5GeV/)             {$glob .= "/reco/production_11p5GeV_2020/ReversedFullField/dev/20*";}
+  elsif ($pwd =~ /13p5GeV_fixedTarget/) {$glob .= "/reco/production_13p5GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
+  elsif ($pwd =~ /19p5GeV_fixedTarget/) {$glob .= "/reco/production_19p5GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
+  elsif ($pwd =~ /31p2GeV_fixedTarget/) {$glob .= "/reco/production_31p2GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
+  elsif ($pwd =~ /7p3GeV_fixedTarget/)  {$glob .= "/reco/production_7p3GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
+  elsif ($pwd =~ /9p2GeV/)              {$glob .= "/reco/production_9p2GeV_2020/ReversedFullField/dev/20*";}
+  elsif ($pwd =~ /9p8GeV_fixedTarget/)  {$glob .= "/reco/production_9p8GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
   
 } else {# TFG
   $PICOPATH = "/gpfs01/star/pwg_tasks/tfg02";
@@ -25,10 +31,15 @@ if ($pwd =~ /dev/) {
   if (! -r $PICOPATH) {exit 1;}
   $glob = $PICOPATH;
   if    ($pwd =~ /5p75GeV_fixedTarget/) {$glob .= "/2020/TFG19m/RF/5p75GeV_fixedTarget.B";}
+  elsif ($pwd =~ /11p5GeV.C/)           {$glob .= "/2020/TFG20a/RF/11p5GeV";}
   elsif ($pwd =~ /11p5GeV/)             {$glob .= "/2020/TFG19m/RF/11p5GeV.B";}
   elsif ($pwd =~ /31p2GeV_fixedTarget/) {$glob .= "/2020/TFG20a/RF/31p2GeV_fixedTarget";}
-  elsif ($pwd =~ /9p2GeV/) {$glob .= "/2020/TFG20a/RF/9p2GeV";}
-  elsif ($pwd =~ /9p8GeV_fixedTarget/) {$glob .= "/2020/TFG20a/RF/9p8GeV_fixedTarget";}
+  elsif ($pwd =~ /9p2GeV/)              {$glob .= "/2020/TFG20a/RF/9p2GeV";}
+  elsif ($pwd =~ /9p8GeV_fixedTarget/)  {$glob .= "/2020/TFG20a/RF/9p8GeV_fixedTarget";}
+  elsif ($pwd =~ /13p5GeV_fixedTarget/) {$glob .= "/2020/TFG20a/RF/13p5GeV_fixedTarget";}
+  elsif ($pwd =~ /19p5GeV_fixedTarget/) {$glob .= "/2020/TFG20a/RF/19p5GeV_fixedTarget";}
+  elsif ($pwd =~ /7p3GeV_fixedTarget/)  {$glob .= "/2020/TFG20a/RF/7p3GeV_fixedTarget";}
+  elsif ($pwd =~ /9p2GeV/)              {$glob .= "/2020/TFG20a/RF/9p2GeV";}
 }
 $glob .= "/*/*";
 print "glob = $glob\n" if ($debug);

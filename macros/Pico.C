@@ -1,5 +1,6 @@
 /*
   root.exe lMuDst.C 'Pico.C+("/gpfs01/star/pwg_tasks/hf05/Pico/BES-I/AuAu27_production_2011/2011/172/12172013/*.picoDst.root","PicoOut.root")'
+  root.exe lMuDst.C 'Pico.C+("/gpfs01/star/pwg/iraklic/Run2018/IB/SL19e/Ru/0-500/*.picoDst.root","PicoOut.root")'
   root.exe  lMuDst.C Pico.C+
   
   PicoDst->Draw("Track->gMom().Phi():Track->gMom().Eta()","Track->isPrimary()&&Track->nHits()>15&&Track->charge()<0","colz")
@@ -297,17 +298,13 @@ void Pico(const Char_t *files ="./*.picoDst.root",
   for (Int_t i = 0; i <= Nphi; i++) phiBins[i] = -360.5 + (720./Nphi)*i;
   for (Int_t i = 0; i <= Nz;   i++) zBins[i] = -5 + 10./Nz*i;
   for (Int_t i = 0; i <= NL;   i++) LBins[i] = 2*i;
-#if 0
-  TH2F *TPs[3]        = {TPoints70, TPointsF, TPointsN};
-  TH2F *Pulls[3]      = {Pull70, FitPull, PullN};
-#endif
   TH1F *EtaP     = new TH1F("EtaP","Eta(+) distribution",100,-5.,5.);
   TH1F *EtaN     = new TH1F("EtaN","Eta(-) distribution",100,-5.,5.);
   delete [] etaBins;
   delete [] phiBins;
   delete [] zBins;
   delete [] LBins;
-#if 0
+#if 1
   Hists2D I70("I70");
   Hists2D fitZ("fitZ");
   Hists2D fitN("fitN");
@@ -464,8 +461,8 @@ void Pico(const Char_t *files ="./*.picoDst.root",
 	if (sigmas[m] > 0) {
 	  Var.hyp = -1;
 	  Var.z = Zs[m];
-	  //	  TPs[m]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[m]);
-	  //	  Pulls[m]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[m]/sigmas[m]);
+	  //	  if (TPs[m])	  TPs[m]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[m]);
+	  //	  if (Pulls[m])	  Pulls[m]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[m]/sigmas[m]);
 	  fTdEdx[k][0]->Fill(TMath::Log10(p), dEdxL10[k]+6);
 	  dEdxP->Fill(rigity, 1e6*PiD.fFit.I());
 	  if (pMom >= 0.4 && pMom <= 0.5) {
@@ -473,7 +470,7 @@ void Pico(const Char_t *files ="./*.picoDst.root",
 	  }
 	}
       }
-#if 0
+#if 1
       for (Int_t l = kPidElectron; l < KPidParticles; l++) {
 	Int_t k = PiD.PiDkeyU3;
 	if (PiD.fI70.fPiD) {

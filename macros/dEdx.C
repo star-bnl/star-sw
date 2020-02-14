@@ -42,7 +42,7 @@ StBFChain *bfc(Int_t First, const Char_t *Chain = "MC2016,20Muons,vmc,Rung.1",
 //________________________________________________________________________________
 void dEdx(Int_t nevents=1000,
 	  const char *MainFile=	"/star/data08/reco/dAuMinBias/FullField/P03ih/2003/040/st_physics_4040004_raw_0010010.event.root",
-	  const char* rootFile="", Int_t mode = 2, const Char_t *year = "y2019") {
+	  const char* rootFile="", Int_t mode = 2, const Char_t *year = "y2018") {
   TString Year(year);
   if (gClassTable->GetID("TTable") < 0) {
     gSystem->Load("libTable");

@@ -17,6 +17,7 @@ chain->Draw("mHitsR.lZPul>>Z(100,-0.02,0.02)","mHitsR.mDetector==36","colz") // 
 #endif
 #endif
 //#define __StvPull__
+#define __ITPC__
 //________________________________________________________________________________
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "Riostream.h"
@@ -27,6 +28,7 @@ chain->Draw("mHitsR.lZPul>>Z(100,-0.02,0.02)","mHitsR.mDetector==36","colz") // 
 #include <stdio.h>
 #include "TSystem.h"
 #include "TMath.h"
+#include "TKey.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TH3.h"
@@ -36,14 +38,12 @@ chain->Draw("mHitsR.lZPul>>Z(100,-0.02,0.02)","mHitsR.mDetector==36","colz") // 
 #include "TTree.h"
 #include "TChain.h"
 #include "TFile.h"
-#include "TTree.h"
-#include "TChain.h"
-#include "TFile.h"
 #include "TNtuple.h"
 #include "TClassTable.h"
 #include "TClonesArray.h"
 #include "TDirIter.h"
 #include "TCanvas.h"
+#include "TPad.h"
 #include "TFileSet.h"
 #include "TDataSetIter.h"
 #include "TMinuit.h"
@@ -51,8 +51,10 @@ chain->Draw("mHitsR.lZPul>>Z(100,-0.02,0.02)","mHitsR.mDetector==36","colz") // 
 #include "StBichsel/Bichsel.h"
 #include "TROOT.h"
 #include "TString.h"
+#include "TPRegexp.h"
 #include "TLine.h"
 #include "TText.h"
+#include "TPaveText.h"
 #include "TROOT.h"
 #include "TList.h"
 #include "TPolyMarker.h"
@@ -80,6 +82,7 @@ TChain *tree = 0;
 TBranch *branch = 0;
 Int_t nentries = 0;
 Int_t nevent = 0;
+TFile *fOut = 0;
 StiPullEvent *event = 0;
 Int_t ev = 0;
 Int_t nb = 0;
@@ -100,36 +103,39 @@ struct Diff_t {
 };
 Int_t NzBin = 100;
 Diff_t zMax = { 2., 2., 5., 5.};
-enum eNumbers {NDiff = 4, NVar = 6, NGP = 2, NCharge=3, NIO = 3, NPL=16};
+//enum eNumbers {NDiff = 4, NVar = 6, NGP = 2, NCharge=3, NIO = 3, NPL=16};
+enum eNumbers {NDiff = 4, NVar = 6, NGP = 2, NCharge=1, NIO = 1, NPL=16};
 const Char_t *Diff_Name[NDiff] = {"dY", "dZ", "pullY", "pullZ"};
 struct Var_t {
   Double_t Z, R, row, pTinv, Psi, Dip;
 };
-const Char_t *VarName[NVar] = {"Z","R","row","pTinv","Psi","Dip"};
-Int_t nBin[NVar] = { 210, 200, 50, 200,        180,   90};
-Var_t vMin       = {-210,   0, -5, -10,-TMath::Pi(),-1.5};
-Var_t vMax       = { 210, 200, 45,  10, TMath::Pi(), 1.5};
+const Char_t *VarName[NVar] = { "Z", "R","row", "pTinv",       "Psi","Dip"};
+const Char_t *VarNamA[NVar] = { "Z", "R","row","q/p_{T}",     "#psi","#lambda"};
+Int_t nBin[NVar] =            { 210, 200,   78,   200,         180,   90};
+Var_t vMin       =            {-210,   0, -5.5,   -10,-TMath::Pi(), -1.5};
+Var_t vMax       =            { 210, 200, 72.5,    10, TMath::Pi(),  1.5};
 struct Plot_t {
   Int_t z, x, y;
 };
 //________________________________________________________________________________
 void StiTpcPulls() {
+  if (! tree) return;
   const Char_t *GP[NGP] = {"G","P"};
   const Char_t *GPT[NGP] = {"Global","Primary"};
-  const Char_t *Charge[NCharge] = {"A","P","N"};
-  const Char_t *ChargeT[NCharge] = {"All","(+)","(-)"};
-  const Char_t *InOut[NIO]    = {"","I","O"};
-  const Char_t *InOutT[NIO]   = {"All","Inner","Outer"};
+  const Char_t *Charge[NCharge] = {"A"}; //,"P","N"};
+  const Char_t *ChargeT[NCharge] = {"All"}; //,"(+)","(-)"};
+  const Char_t *InOut[NIO]    = {""}; //,"I","O"};
+  const Char_t *InOutT[NIO]   = {"All"}; //,"Inner","Outer"};
   Plot_t xyzplots[NPL] = {
     {0, 0, 1},  // dY vs Z and R
     {1, 0, 1},  // dZ vs Z and R
     {2, 0, 1},  // Ypull vs Z and R
     {3, 0, 1},  // Zpull vs Z and R
 
-    {0, 2, 3},  // dY vs row and pTinv
-    {1, 2, 3},  // dZ vs row and pTinv
-    {2, 2, 3},  // Ypull vs row and pTinv
-    {3, 2, 3},  // Zpull vs row and pTinv
+    {0, 2, 3},  // dY vs row and q/pT
+    {1, 2, 3},  // dZ vs row and q/pT
+    {2, 2, 3},  // Ypull vs row and q/pT
+    {3, 2, 3},  // Zpull vs row and q/pT
     
     {0, 0, 4},  // dY vs Z and Psi
     {1, 0, 4},  // dZ vs Z and Psi
@@ -141,44 +147,59 @@ void StiTpcPulls() {
     {2, 0, 5},  // Ypull vs Z and Dip
     {3, 0, 5}   // Zpull vs Z and Dip
   };
-  TH3F *plots[NCharge][NGP][NIO][NPL]; memset (plots, 0, sizeof(plots));
-  TString Out(gSystem->DirName(gDirectory->GetName()));
-  Out.ReplaceAll("/","_");
-  Out += "APulls.root";
-  TFile *fOut = new TFile(Out,"recreate");
-  for (Int_t s = 0; s < NCharge; s++) {
-    for (Int_t l = 0; l < NGP; l++) {
-      for (Int_t i = 0; i < NIO; i++) {
-	for (Int_t t = 0; t < NPL; t++) {
-	  Int_t iz = xyzplots[t].z;
-	  Int_t ix = xyzplots[t].x;
-	  Int_t iy = xyzplots[t].y;
-	  TString Name(Diff_Name[iz]); Name += InOut[i]; Name += GP[l]; Name += Charge[s]; Name += "vs"; Name += VarName[ix];  Name += VarName[iy];
-	  TString Title(Diff_Name[iz]); Title += " for ", Title += InOutT[i]; Title += " "; Title += GPT[l]; Title += ChargeT[s]; 
-	  Title += " versus "; Title += VarName[ix]; Title += " and "; Title += VarName[iy];
-	  Double_t *min = &vMin.Z;
-	  Double_t *max = &vMax.Z;
-	  Double_t *zmax = &zMax.dy;
-	  plots[s][l][i][t] = new TH3F(Name,Title, 
-				       nBin[ix], min[ix], max[ix],
-				       nBin[iy], min[iy], max[iy],
-				       NzBin, -zmax[iz], zmax[iz]);
-	  plots[s][l][i][t]->SetMarkerStyle(20);
-// 	  plots[s][l][i][t]->SetMarkerColor(s+1);
-// 	  plots[s][l][i][t]->SetLineColor(s+1);
-	  plots[s][l][i][t]->SetXTitle(VarName[ix]);
-	  plots[s][l][i][t]->SetYTitle(VarName[iy]);
-	  plots[s][l][i][t]->SetZTitle(Diff_Name[iz]);
+  static TH3F *plots[NCharge][NGP][NIO][NPL] = {0};
+  TString tt(gSystem->BaseName(tree->GetFile()->GetName()));
+  Int_t dot = tt.Index(".");
+  if (dot < 1) {
+    cout << "Bad input file " << tt << endl;
+    return;
+  }
+  TString Out(tt,dot);
+  Out += ".PullsH.root";
+  if (! fOut) {
+    fOut = new TFile(Out,"recreate");
+    cout << "Open " << Out.Data() << endl;
+    for (Int_t s = 0; s < NCharge; s++) {
+      for (Int_t l = 0; l < NGP; l++) {
+	for (Int_t i = 0; i < NIO; i++) {
+	  for (Int_t t = 0; t < NPL; t++) {
+	    Int_t iz = xyzplots[t].z;
+	    Int_t ix = xyzplots[t].x;
+	    Int_t iy = xyzplots[t].y;
+	    TString Name(Diff_Name[iz]); Name += InOut[i]; Name += GP[l]; Name += Charge[s]; Name += "vs"; Name += VarName[ix];  Name += VarName[iy];
+	    TString Title(Diff_Name[iz]); Title += " for ", Title += InOutT[i]; Title += " "; Title += GPT[l]; Title += ChargeT[s]; 
+	    Title += " versus "; Title += VarName[ix]; Title += " and "; Title += VarName[iy];
+	    Double_t *min = &vMin.Z;
+	    Double_t *max = &vMax.Z;
+	    Double_t *zmax = &zMax.dy;
+	    plots[s][l][i][t] = new TH3F(Name,Title, 
+					 nBin[ix], min[ix], max[ix],
+					 nBin[iy], min[iy], max[iy],
+					 NzBin, -zmax[iz], zmax[iz]);
+	    plots[s][l][i][t]->SetMarkerStyle(20);
+	    // 	  plots[s][l][i][t]->SetMarkerColor(s+1);
+	    // 	  plots[s][l][i][t]->SetLineColor(s+1);
+	    plots[s][l][i][t]->SetXTitle(VarNamA[ix]);
+	    plots[s][l][i][t]->SetYTitle(VarNamA[iy]);
+	    plots[s][l][i][t]->SetZTitle(Diff_Name[iz]);
+	  }
 	}
       }
     }
   }
   // Loop
+#if __PRINT_FILE_NAME__
+  TString currentFileName;
+#endif
   for (ev = 0; ev < nevent; ev++) {
      Long64_t centry = tree->LoadTree(ev);
     //    if (centry < 0) break;
     nb += tree->GetEntry(ev);        //read complete event in memory
-#if 1
+#if __PRINT_FILE_NAME__
+    if (currentFileName != TString(tree->GetFile()->GetName())) {
+      currentFileName = tree->GetFile()->GetName();
+      cout << "Open File " << currentFileName.Data() << endl;
+    }
     cout << "Run/Event" << event->mRun << "/" << event->mEvt << endl;
     cout << "Vtx:\t" << event->mVtx[0] << "\t" << event->mVtx[1] <<"\t" << event->mVtx[2] << endl;
 #endif
@@ -198,7 +219,7 @@ void StiTpcPulls() {
 	Int_t barrel = 0;
 	switch (hit->mDetector) {
 	case 0: row = -5; break; //vtx
-	case 1: row = bits(hit->mHardwarePosition,9,6); break; //tpc
+	case 1: row = bits(hit->mHardwarePosition,9,7); break; //tpc
 	case 2: 
 	  index = bits(hit->mHardwarePosition,4,9); 
 	  if (index >= 0) { 
@@ -221,15 +242,19 @@ void StiTpcPulls() {
 	if (q < 0) s = 2;
 	Int_t         j = 0;
 	if (row >  0) j = 1;
+#ifndef __ITPC__
 	if (row > 13) j = 2;
+#else /* __ITPC__ */
+	if (row > 40) j = 2;
+#endif
 	for (Int_t t = 0; t < NPL; t++) {
 	  Int_t iz = xyzplots[t].z;
 	  Int_t ix = xyzplots[t].x;
 	  Int_t iy = xyzplots[t].y;
-	  plots[0][l][j][t]->Fill(v[ix],v[iy],z[iz]);
-	  plots[s][l][j][t]->Fill(v[ix],v[iy],z[iz]);
+	  //	  plots[0][l][j][t]->Fill(v[ix],v[iy],z[iz]);
+	  //	  plots[s][l][j][t]->Fill(v[ix],v[iy],z[iz]);
 	  plots[0][l][0][t]->Fill(v[ix],v[iy],z[iz]);
-	  plots[s][l][0][t]->Fill(v[ix],v[iy],z[iz]);
+	  //	  plots[s][l][0][t]->Fill(v[ix],v[iy],z[iz]);
 	}
       }
     }
@@ -248,10 +273,7 @@ void StiTpcPulls() {
   fOut->Write();  
 }
 //________________________________________________________________________________
-void StiSvtSsd() {
-}
-//________________________________________________________________________________
-void StiPulls(Int_t NoEvents = 99999999, const Char_t *files = "MuDst/*.tags.root", Int_t opt=0) {
+void StiPulls(Int_t NoEvents = 99999999, const Char_t *files = "*.stipull.root") {
   if (gClassTable->GetID("StiPullEvent") < 0) {gSystem->Load("StiUtilities");}
 #if 0
   tree = (TTree *) gDirectory->Get("StiPulls");
@@ -292,121 +314,167 @@ void StiPulls(Int_t NoEvents = 99999999, const Char_t *files = "MuDst/*.tags.roo
   if (! nentries) return;
   nevent = TMath::Min(NoEvents,nentries);
   cout << "It will be read " << nevent << " events." << endl;
-  if (opt == 0) StiTpcPulls();
-  else          StiSvtSsd();
+  StiTpcPulls();
+}
+//______________________________________________________________________________
+Int_t FindFirstSignificantBin(TH1 *h, Double_t threshold=1, Int_t axis=1)
+{
+   //find first bin with content > threshold for axis (1=x, 2=y, 3=z)
+   //if no bins with content > threshold is found the function returns -1.
+
+   if (axis != 1) {
+      Warning("FindFirstBinAbove","Invalid axis number : %d, axis x assumed\n",axis);
+      axis = 1;
+   }
+   Int_t nbins = h->GetXaxis()->GetNbins();
+   for (Int_t bin=1;bin<=nbins;bin++) {
+     if (h->GetBinError(bin) > 0) {
+       if (TMath::Abs(h->GetBinContent(bin)) > threshold*h->GetBinError(bin)) return bin;
+     }
+   }
+   return -1;
+}
+//______________________________________________________________________________
+Int_t FindLastSignificantBin(TH1 *h, Double_t threshold=1, Int_t axis=1)
+{
+   //find last bin with content > threshold for axis (1=x, 2=y, 3=z)
+   //if no bins with content > threshold is found the function returns -1.
+
+   if (axis != 1) {
+      Warning("FindLastBinAbove","Invalid axis number : %d, axis x assumed\n",axis);
+      axis = 1;
+   }
+   Int_t nbins = h->GetXaxis()->GetNbins();
+   for (Int_t bin=nbins;bin>=1;bin--) {
+     if (h->GetBinError(bin) > 0) {
+       if (TMath::Abs(h->GetBinContent(bin)) > threshold*h->GetBinError(bin)) return bin;
+     }
+   }
+   return -1;
+}
+
+//________________________________________________________________________________
+void Draw3D(const Char_t *histName="lYDifVsZAG", Int_t NF = 0, TFile **Files = 0) {
+  if (! NF) return;
+  TFile *f = 0;
+  TCanvas *c1 = 0;
+  TH1F *frames[2] = {0};
+  TLegend *l[2] = {0};
+  for (Int_t xy = 0; xy < 2; xy++) {
+    Double_t xmin = 9999, xmax = -9999;
+    Double_t ymin = 9999, ymax = -9999;
+    for (Int_t i = 0; i < NF; i++) {
+      f = Files[i];
+      if (! f) {
+	cout << "Fules[" << i << "} = 0" << endl;
+	continue;
+      }
+      TString FT(f->GetName());
+      FT.ReplaceAll(".PullsH.root","");
+      f->cd();
+      TH3F *h3 = (TH3F *) f->Get(histName);
+      if (! h3) continue;
+      //    cout << "Found " << h3->GetName() << "\t in " << f->GetName() << endl;
+      if ( h3->GetDimension() != 3) continue;
+      TH2D *h2;
+      if (xy == 0) h2 = (TH2D *) h3->Project3D("zx");
+      else         h2 = (TH2D *) h3->Project3D("zy");
+      TObjArray* arr =  new TObjArray(4);
+      h2->FitSlicesY(0, 0, -1, 0, "QNR", arr);
+      TH1D *mu = (TH1D *) (*arr)[1]; mu->SetMarkerColor(3*i+1); mu->SetMarkerStyle(20);
+      TH1D *sigma = (TH1D *) (*arr)[2]; sigma->SetMarkerColor(3*i+1); sigma->SetMarkerStyle(21);
+      if (! c1) {
+	Double_t w = 600*2;
+	Double_t h = 400*(NF+1);
+	TString CN("C");
+	CN += h3->GetName();
+	c1 = new TCanvas(CN,CN, w, h);
+	c1->SetWindowSize(w + (w - c1->GetWw()), h + (h - c1->GetWh()));
+	c1->Divide(2,NF+1);
+      }
+      if (! frames[xy]) { 
+	TVirtualPad *pad = c1->cd(2*NF + xy + 1);  
+	Int_t ixminM = FindFirstSignificantBin(mu,3);
+	Int_t ixminS = FindFirstSignificantBin(sigma,3);
+	Int_t ixmin  = ixminS; //TMath::Max(ixminM, ixminS);
+
+	Int_t ixmaxM = FindLastSignificantBin(mu,3);
+	Int_t ixmaxS = FindLastSignificantBin(sigma,3);
+	Int_t ixmax  = ixmaxS; // TMath::Min(ixmaxM, ixmaxS);
+	if (ixmin < ixmax) { 
+	  xmin = mu->GetXaxis()->GetBinLowEdge(ixmin);
+	  xmax = mu->GetXaxis()->GetBinUpEdge(ixmax);
+	  Double_t y, dy, s, ds;
+	  for (Int_t i = ixmin; i <= ixmax; i++) {
+	    y = mu->GetBinContent(i);
+	    dy = mu->GetBinError(i);
+	    s = sigma->GetBinContent(i);
+	    ds = sigma->GetBinError(i);
+	    if (ymin > y - dy) ymin = y - dy;
+            if (ymax < s + ds) ymax = s + ds;
+	  }
+	  frames[xy] = pad->DrawFrame(xmin,1.5*ymin,xmax,1.2*ymax);
+	  l[xy] = new TLegend(0.7,0.3,0.8,0.5);
+	}
+      }
+      c1->cd(2*i+xy+1)->SetLogz(1);
+      h2->Draw("colz");
+      mu->Draw("same");
+      sigma->Draw("same");
+      TPaveText *pt = new TPaveText(.1,.8,.2,.9, "brNDC");
+      pt->SetTextSize(0.10);
+      pt->SetTextFont(22);
+      pt->SetTextColor(1);
+      pt->SetFillColor(0);
+      pt->SetBorderSize(0);
+      pt->AddText(FT.Data());
+      pt->Draw();
+      c1->Update();
+      if (frames[xy]) {
+	c1->cd(2*NF + xy + 1);  
+	TString Line("#mu:");
+	Line += " "; Line += FT;
+	mu->Draw("same");
+	l[xy]->AddEntry(mu,Line);
+	sigma->Draw("same");
+	Line.ReplaceAll("mu","sigma");
+	l[xy]->AddEntry(mu,Line);
+	l[xy]->Draw();
+	c1->Update();
+      }
+    }
+    if (c1) c1->Update();
+  }
+  if (c1) c1->SaveAs(".png");
+  return;
 }
 //________________________________________________________________________________
-void DrawPulls(const Char_t *histName="lYDifVsZAG", Double_t Ymin = -500, Double_t Ymax = 500) {
-  Int_t NF = 0;
+void LoopOverHistograms( const Char_t *pattern = "dYIPNvsrowpTinv") {
+  TPRegexp Pattern(pattern);
   TSeqCollection *files = gROOT->GetListOfFiles();
   if (! files) return;
   Int_t nn = files->GetSize();
   if (! nn) return;
-  TH1 **Hist = new TH1 *[nn];
-  TFile    **Files= new TFile *[nn];
-  TIter next(files);
+  TFile **Files = new TFile *[nn];
+  Int_t NF = 0;
   TFile *f = 0;
-  Double_t xmin = 9999, xmax = -9999;
-  Double_t ymin = 9999, ymax = -9999;
+  TIter next(files);
   while ( (f = (TFile *) next()) ) { 
     TString F(f->GetName());
-    if (! F.Contains("Pull") ) continue;
-    TH1 *hist = (TH1 *) f->Get(histName);
-    if (! hist) continue;
-    //    cout << "Found " << hist->GetName() << "\t in " << f->GetName() << endl;
-    if (! hist->IsA()->InheritsFrom( "TH2D" ) ) {
-      Int_t nxbin = hist->GetNbinsX();
-      Double_t y, dy;
-      for (Int_t bin = 1; bin <= nxbin; bin++) {
-	y = hist->GetBinContent(bin);
-	dy = hist->GetBinError(bin);
-	if (TMath::Abs(y) < 3*dy) continue;
-	if (y + dy > ymax) ymax = y + dy;
-	if (y - dy < ymin) ymin = y - dy;
-      }
-    } else {
-      if (hist->GetYaxis()->GetXmax() > ymax) ymax = hist->GetYaxis()->GetXmax();
-      if (hist->GetYaxis()->GetXmin() < ymin) ymin = hist->GetYaxis()->GetXmin();
-    }
-    if (hist->GetXaxis()->GetXmax() > xmax) xmax = hist->GetXaxis()->GetXmax();
-    if (hist->GetXaxis()->GetXmin() < xmin) xmin = hist->GetXaxis()->GetXmin();
-    Int_t color = NF+1;
-    if (color >= 5) color++;
-    hist->SetMarkerColor(color);
-    Files[NF] = f; Hist[NF] = hist; NF++;
+    if (! F.Contains("PullsH.root")) continue;
+    Files[NF] = f;
+    NF++;
   }
-  //  cout << "NF " << NF << endl;
-  if (! NF) return;
-  TString CName("C");
-  CName += Hist[0]->GetName();
-  if (c1) delete c1;
-  c1 = new TCanvas(CName,Hist[0]->GetTitle(),400,400); c1->SetLeftMargin(0.14);
-  c1->SetLogz(1);
-  if (! Hist[0]->IsA()->InheritsFrom( "TH2D" ) ) {
-    if (ymin < Ymin) ymin = Ymin;
-    if (ymax > Ymax) ymax = Ymax;
-  }
-  TH1F *frame = c1->DrawFrame(xmin,ymin,xmax,ymax);
-  frame->SetTitle(Hist[0]->GetTitle());
-  frame->SetXTitle(Hist[0]->GetXaxis()->GetTitle());
-  frame->SetYTitle(Hist[0]->GetYaxis()->GetTitle());
-  TLegend *leg = new TLegend(0.65,0.75,1.05,0.90,"");
-  //  leg->SetTextSize(0.033);
-  for (int i = 0; i<NF; i++) {
-    TString Title(Files[i]->GetName());
-    Title.ReplaceAll("Pulls","");
-    Title.ReplaceAll("Pull","");
-    Title.ReplaceAll(".root","");
-    Files[i]->cd();
-    TH1 *hist = Hist[i];
-    if (! Hist[0]->IsA()->InheritsFrom( "TH2D" ) ) {
-      hist->Draw("same");
-      leg->AddEntry(hist,Title);
-    } else {
-      TH2D *hist2 = (TH2D*) hist;
-      if (i == 0) hist2->Draw("samecolz");
-      hist2->FitSlicesY();
-      TH1 *mu =  (TH1 *) Files[i]->Get(Form("%s_1",hist2->GetName()));
-      TH1 *sigma =  (TH1 *) Files[i]->Get(Form("%s_2",hist2->GetName()));
-      Int_t color = i+1;
-      if (color >= 5) color++;
-      mu->SetMarkerStyle(20); mu->SetMarkerColor(color); mu->Draw("same");
-      sigma->SetMarkerStyle(21); sigma->SetMarkerColor(color); sigma->Draw("same");
-      TString tTitle("#mu "); tTitle += Title;
-      leg->AddEntry(mu,tTitle);
-      TString sTitle("sigma "); sTitle += Title;
-      leg->AddEntry(sigma,sTitle);
-    }
-  }
-  leg->Draw();
-}
-//________________________________________________________________________________
-void LoopOverPulls(Int_t opt = 0) {
-  const Char_t *names[] = {
-      "lYDifVsZAG",      "lYDifVsZPG",      "lYDifVsZNG",
-      "lZDifVsZAG",      "lZDifVsZPG",      "lZDifVsZNG",
-      "lYDifVsRAG",      "lYDifVsRPG",      "lYDifVsRNG",
-      "lZDifVsRAG",      "lZDifVsRPG",      "lZDifVsRNG",
-      "lYDifVsRowAG",    "lYDifVsRowPG",    "lYDifVsRowNG",
-      "lZDifVsRowAG",    "lZDifVsRowPG",    "lZDifVsRowNG",
-      "lYDifVsZAP",      "lYDifVsZPP",      "lYDifVsZNP",
-      "lZDifVsZAP",      "lZDifVsZPP",      "lZDifVsZNP",
-      "lYDifVsRAP",      "lYDifVsRPP",      "lYDifVsRNP",
-      "lZDifVsRAP",      "lZDifVsRPP",      "lZDifVsRNP",
-      "lYDifVsRowAP",    "lYDifVsRowPP",    "lYDifVsRowNP",
-      "lZDifVsRowAP",    "lZDifVsRowPP",    "lZDifVsRowNP"};
-  Int_t N = sizeof(names)/sizeof(Char_t*);
-  for(Int_t i = 0; i < N; i++) {
-    TString Name(names[i]);
-    if (opt == 0) {
-      DrawPulls(Name);
-      c1->SaveAs(".png");
-    } else {
-      Name.ReplaceAll("Dif","Pull");
-      Name += "2D";
-      DrawPulls(Name);
-      c1->SaveAs(".png");
-    }
+  f = Files[0];
+  if (! f) return;
+  TList *keys = f->GetListOfKeys();
+  if (! keys) return;
+  keys->Sort();
+  TIter nextk(keys);
+  TKey *key = 0;
+  while ((key = (TKey *) nextk())) {
+    TString F(key->GetName());
+    if (Pattern.GetPattern() != ""  && !  F.Contains(Pattern)) continue;
+    Draw3D(F, NF, Files);
   }
 }
-
