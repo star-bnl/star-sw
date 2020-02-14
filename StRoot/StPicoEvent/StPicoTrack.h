@@ -27,6 +27,10 @@
 #include "StarClassLibrary/PhysicalConstants.h"
 #endif
 
+#if defined (__TFG__VERSION__)
+#include "StPicoTrackCovMatrix.h"
+#endif /* __TFG__VERSION__ */
+
 //_________________
 class StPicoTrack : public TObject {
 
@@ -39,6 +43,12 @@ class StPicoTrack : public TObject {
   virtual ~StPicoTrack();
   /// Print track parameters
   virtual void Print(const Char_t *option = "") const;
+
+#if defined (__TFG__VERSION__)
+  enum { eTopologyMap = 3 };
+#else /* !  __TFG__VERSION__ */
+  enum { eTopologyMap = 2 };
+#endif /* __TFG__VERSION__ */
 
   //
   // Getters
@@ -100,8 +110,17 @@ class StPicoTrack : public TObject {
   Float_t dEdx() const                   { return mDedx; }
   /// Return dE/dx error of the track
   Float_t dEdxError() const              { return mDedxError; }
-  //Float_t dNdx() const                   { return mDnDx;}
-  //Float_t dNdxError() const              { return mDnDxError;}
+
+#if defined (__TFG__VERSION__)
+  Float_t dEdxPull(Float_t mass, UChar_t fit = 1, Int_t charge = 1) const;
+  Float_t dEdxPullToF(Float_t mass, UChar_t fit = 1, Int_t charge = 1) const;
+  Float_t dEdxPullPion()      const { return dEdxPull(0.13956995,1); }
+  Float_t dEdxPullKaon()      const { return dEdxPull(0.493677,1); }
+  Float_t dEdxPullProton()    const { return dEdxPull(0.93827231,1); }
+  Float_t dEdxPullElectron()  const { return dEdxPull(0.51099907e-3,1); }
+  Float_t dNdx() const              { return mDnDx; }
+  Float_t dNdxError() const         { return mDnDxError; }
+#endif
 
   /// Return nSigma(pion)
   Float_t nSigmaPion() const             { return (Float_t)mNSigmaPion / 1000.f; }
@@ -114,6 +133,11 @@ class StPicoTrack : public TObject {
 
   /// Return track topology map (return 0 in case when requested index is >1)
   UInt_t  topologyMap(UInt_t idx) const  { return (idx>1) ? 0 : mTopologyMap[idx]; }
+#if !defined (__TFG__VERSION__)
+  /// Return topology map for iTPC
+  ULong64_t iTpcTopologyMap() const      { return mTopoMap_iTpc; }
+#endif
+  
 
   /// Return if the track has an inner PXL hit
   Bool_t hasPxl1Hit() const              { return hftHitsMap() >> 0 & 0x1; }        
@@ -137,6 +161,8 @@ class StPicoTrack : public TObject {
   Bool_t isMtdTrack() const              { return (mMtdPidTraitsIndex<0) ? false : true; }
   /// Return if track has ETOF hit
   Bool_t isETofTrack() const             { return (mETofPidTraitsIndex<0) ? false : true; }
+  /// Checks if track matches any BEMC tower 
+  Bool_t isBemcMatchedTrack() const      { return mBEmcMatchedTowerIndex != 0; }
 
   /// Return if track is primary
   Bool_t isPrimary() const               { return ( pMom().Mag()>0 ); }
@@ -149,6 +175,20 @@ class StPicoTrack : public TObject {
   Int_t mtdPidTraitsIndex() const        { return mMtdPidTraitsIndex; }
   /// Return index to the corresponding ETOF PID trait
   Int_t eTofPidTraitsIndex() const       { return mETofPidTraitsIndex; }
+
+  /// Return index of the BEMC tower index that was matched with the track.
+  /// The indexing scheme was chosen so that towers with an exact match
+  /// are stored with the softid (1, 4800), towers with an close match are
+  /// stored as -softid (-1, -4800), and towers without a match are stored
+  /// as 0. Therefore, returning abs(mBEmcMatchedTowerIndex) - 1 will return
+  /// the array index of the proper tower for matched tracks, and return -1
+  /// for unmatched tracks
+  /// Indices start from 0 and go up to 4799 in order have the trivial access
+  /// to StPicoBTowHit array. 
+  Int_t bemcTowerIndex() const           { return abs(mBEmcMatchedTowerIndex) - 1; }
+  /// If true, the track was found in the material between towers, not in 
+  /// a scintillating pad
+  Bool_t isBemcMatchedExact() const      { return mBEmcMatchedTowerIndex > 0;}
 
   //
   // Setters
@@ -190,6 +230,14 @@ class StPicoTrack : public TObject {
   void setDedx(Float_t dEdx);
   /// Set dE/dx error of the track
   void setDedxError(Float_t dEdxError)     { mDedxError = dEdxError; }
+
+#if defined (__TFG__VERSION__)
+  /// Set dN/dx of the track
+  void setDndx(Float_t dNdx)               { mDnDx = dNdx;}
+  /// Set dN/dx error of the track
+  void setDndxError(Float_t dNdxError)     { mDnDxError = dNdxError; }
+#endif
+  
   /// Set nHitsFit ( charge * nHitsFit )
   void setNHitsFit(Int_t nhits)            { mNHitsFit = (Char_t)nhits; }
   /// Set nHitsPoss
@@ -208,6 +256,10 @@ class StPicoTrack : public TObject {
   void setNSigmaElectron(Float_t ns);
   /// Set topology map (2 words)
   void setTopologyMap(Int_t id, UInt_t word);
+#if !defined (__TFG__VERSION__)
+  /// Set iTPC topology map
+  void setiTpcTopologyMap(ULong64_t map)   { mTopoMap_iTpc = map; }
+#endif
 
   /// Set index to BEMC PID traits
   void setBEmcPidTraitsIndex(Int_t index)  { mBEmcPidTraitsIndex = (Short_t)index; }
@@ -217,6 +269,8 @@ class StPicoTrack : public TObject {
   void setMtdPidTraitsIndex(Int_t index)   { mMtdPidTraitsIndex = (Short_t)index; }
   /// Set index to ETOF PID traits
   void setETofPidTraitsIndex(Int_t index)  { mETofPidTraitsIndex = (Short_t)index; }
+  /// Set index of the BEMC tower that matches the track
+  void setBEmcMatchedTowerIndex(Int_t index) { mBEmcMatchedTowerIndex = (Short_t)index; }
 
  protected:
 
@@ -247,8 +301,13 @@ class StPicoTrack : public TObject {
   Float16_t  mDedx;
   /// dE/dx error (in GeV/cm)
   Float16_t  mDedxError;
-  //Float_t  mDnDx;             // fitted dN/dx
-  //Float_t  mDnDxError;        // fitted dN/dx error
+
+#if defined (__TFG__VERSION__)
+  /// Fitted dN/dx
+  Float_t  mDnDx;
+  /// Fitted dN/dx error
+  Float_t  mDnDxError;
+#endif
   
   /// Charge * nHitsFit
   Char_t   mNHitsFit;
@@ -265,7 +324,7 @@ class StPicoTrack : public TObject {
   /// nSigma(electron)  (encoding = nsigma * 1000)
   Short_t  mNSigmaElectron;
   /// Toplogy Map data0 and data1. See StEvent/StTrackTopologyMap.cxx
-  UInt_t   mTopologyMap[2];
+  UInt_t   mTopologyMap[eTopologyMap];
 
   /// Index of the BEMC pidTratis in the event
   Short_t  mBEmcPidTraitsIndex;
@@ -275,8 +334,18 @@ class StPicoTrack : public TObject {
   Short_t  mMtdPidTraitsIndex;
   /// Index of the ETOF pidTratis in the event
   Short_t  mETofPidTraitsIndex;
+  /// Index of the BEMC-matched tower. The indexing scheme was chosen so that
+  /// towers with an exact match are stored with the softid (1, 4800), towers
+  /// with an close match are stored as -softid (-1, -4800), and towers without
+  /// a match are stored as 0.
+  Short_t  mBEmcMatchedTowerIndex;
 
-  ClassDef(StPicoTrack, 5)
+#if !defined (__TFG__VERSION__)
+  /// Topology map for the iTPC
+  ULong64_t mTopoMap_iTpc;
+#endif
+
+  ClassDef(StPicoTrack, 7)
 };
 
 #endif
