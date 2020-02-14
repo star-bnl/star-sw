@@ -66,3 +66,23 @@ Bool_t StPicoTrackCovMatrix::isBadCovMatrix() {
 	  mCorr[0]==0 && mCorr[1]==0 && mCorr[2]==0 && mCorr[3]==0 && mCorr[4]==0 &&
 	  mCorr[5]==0 && mCorr[6]==0 && mCorr[7]==0 && mCorr[8]==0 && mCorr[9]==0 );
 }
+
+#if defined (__TFG__VERSION__)
+//_________________
+StDcaGeometry &StPicoTrackCovMatrix::dcaGeometry() const {
+  static StDcaGeometry a;
+  Float_t errMatrix[15];
+  Int_t ii = 0;
+  for (int i = 0; i < 5; i++) {
+    errMatrix[ii] = mSigma[i]*mSigma[i];
+    for (int j = 0; j < i; j++) {
+      Int_t ij = ii - i - 1 + j + 1;
+      Int_t ij1 = ij - i;
+      errMatrix[ij] = mCorr[ij1]*mSigma[i]*mSigma[j];
+    }
+    ii += i+2;
+  }
+  a.set(params(), errMatrix);
+  return *&a;
+}      
+#endif /* __TFG__VERSION__ */

@@ -73,8 +73,10 @@ class StPicoDstMaker : public StMaker {
 
   /// Write/Read mode: 1-write, 2-read
   enum PicoIoMode {IoWrite=1, IoRead=2};
+#if !defined (__TFG__VERSION__)
   /// Primary vertex selection mode: 0-NotSet, 1-Default, 2-Vpd, 3-VpdOrDefault
   enum PicoVtxMode {NotSet=0, Default=1, Vpd=2, VpdOrDefault=3};
+#endif /* ! __TFG__VERSION__ */
   /// Write or not write covariance matrix: 0-skip, 1-write
   enum PicoCovMtxMode {Skip=0, Write=1};
   /// Write or not write the BEmc SMD hits associated with a BHT2/3 trigger: 0-skip, 1-write
@@ -121,8 +123,27 @@ class StPicoDstMaker : public StMaker {
   /// 9 is the higher compression level.
   void setCompression(int comp = 9);
 
+#if defined (__TFG__VERSION__)
+  PicoVtxMode vtxMode()                 { return StMuDst::instance()->vtxMode(); }
+  void setVtxMode(const PicoVtxMode vtxMode)
+  { StMuDst::instance()->setVtxMode(vtxMode); }
+  void SetMaxTrackDca(Double_t cut = 50)
+  { StMuDst::instance()->SetMaxTrackDca(cut); }
+  void SetMaxVertexTransError(Double_t cut = 0.0050)
+  { StMuDst::instance()->SetMaxVertexTransError(cut); }
+  void SetVxXYrange(Double_t xmin = -0.3, Double_t xmax = 0.,
+		    Double_t ymin = -0.27, Double_t ymax = -0.13)
+  { StMuDst::instance()->SetVxXYrange(xmin,xmax,ymin,ymax) ;}
+  void SetVxZrange(Double_t zmin = -70, Double_t zmax = 70.)
+  { StMuDst::instance()->SetVxZrange(zmin, zmax); }
+  void SetVxRmax(Double_t rmax = 2)     { StMuDst::instance()->SetVxRmax(rmax); }
+  static StPicoDstMaker *instance()     { return fgPicoDstMaker; }
+  TClonesArray** picoArrays()           { return mPicoArrays; }
+#else /* ! __TFG__VERSION__ */
+
   /// Set vertex selection mode
   void setVtxMode(const PicoVtxMode vtxMode)              { mVtxMode = vtxMode; }
+#endif
   /// Set to write or not to write covariant matrix
   void setCovMtxMode(const PicoCovMtxMode covMtxMode)     { mCovMtxMode = covMtxMode; }
   /// Set to write or not write BEmc Smd hits
@@ -218,11 +239,17 @@ class StPicoDstMaker : public StMaker {
   /// Set BEmc Smd mode attributes
   Int_t  setBEmcSmdModeAttr();
 
+#if defined (__TFG__VERSION__)
+  /// Selects a primary vertex from `muDst` vertex collection according to the
+  /// vertex selection mode `mVtxMode` specified by the user.
+  Bool_t selectVertex()     { return StMuDst::instance()->selectVertex(); }
+#else /* ! __TFG__VERSION__ */
   /// Selects a primary vertex from `muDst` vertex collection according to the
   /// vertex selection mode `mVtxMode` specified by the user.
   Bool_t selectVertex();
   /// VpdVz-Vz cut value. Default is 5 cm.
   Float_t   mTpcVpdVzDiffCut;
+#endif
 
   /// A pointer to the main input source containing all muDst `TObjArray`s
   /// filled from corresponding muDst branches
@@ -293,7 +320,7 @@ class StPicoDstMaker : public StMaker {
 
   /// Get CVS status
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPicoDstMaker.h,v 1.25 2019/08/06 21:40:19 gnigmat Exp $ built " __DATE__ " " __TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StPicoDstMaker.h,v 1.26 2020/02/14 17:05:53 gnigmat Exp $ built " __DATE__ " " __TIME__ ;
     return cvs;
   }
 
