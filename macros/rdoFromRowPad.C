@@ -7,14 +7,32 @@
 #include "TString.h"
 typedef UChar_t u_char;
 #include "RTS/include/TPX/tpx_altro_to_pad.h"
+//#include "RTS/src/DAQ_ITPC/itpcCore.h"
 extern int *tpx_altro_to_row_override ;
 extern int tpx_fy16_map;
 extern void tpx_to_altro(int row, int pad, int &rdo, int &a, int &ch);
 extern void tpx_from_altro(int rdo, int a, int ch, int &row, int &pad);
 static Int_t idx = 0;
+#if 0
+extern void itpc_rowpad_to_rdo(int row, int pad, int &rdo);
+//________________________________________________________________________________
+Int_t itpcRdoFromRowPad(Int_t row, Int_t pad) {
+  static Int_t RowPa2RdoMap[40][182] = {0};
+  if (RowPa2RdoMap[0][0] == 0) {
+    for (Int_t rowC = 1; rowC <= 40; rowC++) {
+      for (Int_t padC = 1; padC <= 182; padC++) {
+	Int_t rdo = 0;
+	itpc_rowpad_to_rd(rowC,padC,rdo);
+	RowPa2RdoMap[rowC-1][padC-1] = do;
+      }
+    }
+  }
+  return RowPa2RdoMap[row-1][pad-1];
+}
+#endif
 //________________________________________________________________________________
 Int_t RdoFromRowPad(Int_t row, Int_t pad) {
-  static Int_t RowPa2RdoMap[45][182] = {0};
+  static Int_t RowPa2RdoMap[72][182] = {0};
   if (RowPa2RdoMap[0][0] == 0) {
     for (Int_t rdo = 1; rdo <= 6; rdo++) {
       for (Int_t altro = 0; altro < 256; altro++) {
@@ -46,7 +64,7 @@ void Print(Int_t row, Int_t pmin, Int_t pmax, Int_t rdo) {
 void rdoFromRowPad() {
   tpx_fy16_map = 1;
   idx = 0;
-  for (int row = 1; row <= 45; row++) {
+  for (int row = 1; row <= 72; row++) {
     Int_t pmin = 999, pmax = -1;
     Int_t rdo_old = -1;
     for (int pad = 1; pad <= 182; pad++) {

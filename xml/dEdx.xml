@@ -25,7 +25,8 @@
   if ("${f}" == "") then
 #    root.exe -x -q -b 'dEdx.C(1000000,"'${INPUTFILE0}'","'${file}'.root",2)' &gt;&amp; ${logFile}
     root.exe -x -q -b 'dEdx.C(10000,"'${INPUTFILE0}'","'${file}'.root",2)' &gt;&amp; ${logFile}
-#    root.exe -x -q -b 'dEdx.C(1000000,"'${fileB}'","'${file}'.root",2)' &gt;&amp; ${logFile}
+#    root.exe -x -q -b 'dEdx.C(10000,"'${INPUTFILE0}'","'${file}'.root",2)' &gt;&amp; ${logFile}
+#    root.exe -x -q -b 'dEdx.C(10000,"'${INPUTFILE0}'","'${file}'.root",102,"y2018")' &gt;&amp; ${logFile}
 #   rm ${fileB}
 #   cp *.root ${SUBMITTINGDIRECTORY} 
    endif
@@ -33,9 +34,11 @@
 <input URL="command:dEdxSample.pl" />
 <!-- <input URL="file:/net/l403/data/fisyak/reco/2019/DEV2StiCA.Minuit/*event.root" /> -->
 <!-- <input URL="file:/net/l403/data/fisyak/reco/2019/DEV2StiCA.Minuit2/*event.root" /> -->
+<!--
  <ResourceUsage>
     <Memory>
       <MinMemory>3500</MinMemory>
     </Memory>
   </ResourceUsage>
+-->c
 </job>
