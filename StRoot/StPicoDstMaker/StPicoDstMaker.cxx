@@ -55,6 +55,7 @@
 #include "StMuDSTMaker/COMMON/StMuFmsUtil.h"
 #include "StMuDSTMaker/COMMON/StMuEpdHit.h"
 #include "StMuDSTMaker/COMMON/StMuETofHit.h"
+#include "StMuDSTMaker/COMMON/StMuETofDigi.h"
 
 #include "StTriggerUtilities/StTriggerSimuMaker.h"
 #include "StTriggerUtilities/Bemc/StBemcTriggerSimu.h"
@@ -80,7 +81,6 @@
 #include "StPicoEvent/StPicoEpdHit.h"
 #include "StPicoEvent/StPicoBTowHit.h"
 #include "StPicoEvent/StPicoBTofHit.h"
-#include "StPicoEvent/StPicoETofHit.h"
 #include "StPicoEvent/StPicoMtdHit.h"
 #include "StPicoEvent/StPicoFmsHit.h"
 #include "StPicoEvent/StPicoBEmcPidTraits.h"
@@ -93,9 +93,8 @@
 #include "StPicoEvent/StPicoETofHit.h"
 #include "StPicoEvent/StPicoETofPidTraits.h"
 #include "StPicoEvent/StPicoArrays.h"
-//#include "StPicoEvent/StPicoDst.h"
 #include "StPicoDstMaker/StPicoDstMaker.h"
-#ifdef __TFG__VERSION__
+#if defined (__TFG__VERSION__)
 #include "StarRoot/TDirIter.h"
 #include "StMuDSTMaker/COMMON/StMuMcTrack.h"
 #include "StMuDSTMaker/COMMON/StMuMcVertex.h"
@@ -111,14 +110,16 @@ StPicoDstMaker *StPicoDstMaker::fgPicoDstMaker = 0;
 //_________________
 StPicoDstMaker::StPicoDstMaker(char const* name) :
   StMaker(name),
-#ifndef __TFG__VERSION__
+#if !defined (__TFG__VERSION__)
   mTpcVpdVzDiffCut(6.),
 #endif /* !__TFG__VERSION__ */
   mMuDst(nullptr), mPicoDst(new StPicoDst()),
   mEmcCollection(nullptr), mEmcPosition(nullptr),
   mEmcGeom{}, mEmcIndex{},
   mBField(0),
+#if !defined (__TFG__VERSION__)
   mVtxMode(PicoVtxMode::NotSet), // This should always be ::NotSet, do not change it, see ::Init()
+#endif /* !__TFG__VERSION__ */
   mCovMtxMode(PicoCovMtxMode::Skip),
   mBEmcSmdMode(PicoBEmcSmdMode::SmdSkip),
   mInputFileName(), mOutputFileName(), mOutputFile(nullptr),
@@ -130,7 +131,8 @@ StPicoDstMaker::StPicoDstMaker(char const* name) :
   streamerOff();
   createArrays();
   std::fill_n(mStatusArrays, sizeof(mStatusArrays) / sizeof(mStatusArrays[0]), 1);
-#ifdef __TFG__VERSION__
+  
+#if defined (__TFG__VERSION__)
   fgPicoDstMaker = this;
 #endif /* __TFG__VERSION__ */
 }
@@ -147,7 +149,8 @@ StPicoDstMaker::StPicoDstMaker(Int_t ioMode, char const* fileName,
 StPicoDstMaker::~StPicoDstMaker() {
   delete mChain;
   delete mPicoDst;
-#ifdef __TFG__VERSION__
+
+#if defined (__TFG__VERSION__)
   fgPicoDstMaker = 0;
 #endif /* __TFG__VERSION__ */
 }
@@ -224,7 +227,6 @@ void StPicoDstMaker::streamerOff() {
   StPicoEvent::Class()->IgnoreTObjectStreamer();
   StPicoTrack::Class()->IgnoreTObjectStreamer();
   StPicoBTofHit::Class()->IgnoreTObjectStreamer();
-  StPicoETofHit::Class()->IgnoreTObjectStreamer();
   StPicoBTowHit::Class()->IgnoreTObjectStreamer();
   StPicoMtdHit::Class()->IgnoreTObjectStreamer();
   StPicoBbcHit::Class()->IgnoreTObjectStreamer();
@@ -235,7 +237,6 @@ void StPicoDstMaker::streamerOff() {
   StPicoEmcTrigger::Class()->IgnoreTObjectStreamer();
   StPicoMtdTrigger::Class()->IgnoreTObjectStreamer();
   StPicoBTofPidTraits::Class()->IgnoreTObjectStreamer();
-  StPicoETofPidTraits::Class()->IgnoreTObjectStreamer();
   StPicoBEmcPidTraits::Class()->IgnoreTObjectStreamer();
   StPicoMtdPidTraits::Class()->IgnoreTObjectStreamer();
   StPicoTrackCovMatrix::Class()->IgnoreTObjectStreamer();
@@ -256,17 +257,20 @@ void StPicoDstMaker::createArrays() {
 //_________________
 Int_t StPicoDstMaker::Init() {
 
-#ifdef __TFG__VERSION__
+#if defined (__TFG__VERSION__)
   TString file;
   Int_t l;
 #endif /* __TFG__VERSION__ */
-  switch (StMaker::m_Mode)  {
+  
+  switch (StMaker::m_Mode) {
   case PicoIoMode::IoWrite:
-#ifdef __TFG__VERSION__
+    
+#if defined (__TFG__VERSION__)
     if (StMuDst::vtxMode() == PicoVtxMode::NotSet) {
 #else /* ! __TFG__VERSION__ */
-    if (mVtxMode == PicoVtxMode::NotSet) { 
+    if (mVtxMode == PicoVtxMode::NotSet) {
 #endif /* __TFG__VERSION__ */
+      
       if (setVtxModeAttr() != kStOK) {
 	LOG_ERROR << "Pico Vertex Mode is not set ... " << endm;
 	return kStErr;
@@ -278,7 +282,6 @@ Int_t StPicoDstMaker::Init() {
       LOG_ERROR << "Pico covariance matrix I/O mode is not set ..." << endm;
       return kStErr;
     }
-#ifndef __TFG__VERSION__    
 
     // To write or not to write BEmc Smd hits into the branch
     if (setBEmcSmdModeAttr() != kStOk) {
@@ -286,6 +289,7 @@ Int_t StPicoDstMaker::Init() {
       return kStErr;
     }
 
+#if !defined (__TFG__VERSION__)
     if (mInputFileName.Length() == 0) {
       // No input file
       mOutputFileName = GetChainOpt()->GetFileOut();
@@ -301,7 +305,6 @@ Int_t StPicoDstMaker::Init() {
 	return kStErr;
       }
     }
-
 #else /* __TFG__VERSION__ */
     if (mInputFileName.Length() == 0) mInputFileName = GetChainOpt()->GetFileOut();
     file = gSystem->BaseName(mInputFileName);
@@ -311,6 +314,7 @@ Int_t StPicoDstMaker::Init() {
     mOutputFileName = TString(file.Data(),l);
     mOutputFileName += ".picoDst.root";
 #endif /* __TFG__VERSION__ */
+
     openWrite();
     initEmc();
     break;
@@ -324,8 +328,8 @@ Int_t StPicoDstMaker::Init() {
     return kStErr;
   }
 
-#ifdef __TFG__VERSION__
-#ifdef __HIST_PV__
+#if defined (__TFG__VERSION__)
+#if defined (__HIST_PV__)
   if (GetTFile()) {
     GetTFile()->cd();
     hists[0] = new TH1F("dca3D","global track dca3D wrt best Vx",2000,0,200);
@@ -335,21 +339,23 @@ Int_t StPicoDstMaker::Init() {
     pVxy     = new TH2F("pVxy","Y Vs X for primary Vertex",2000,-2,2,2000,-2,2);
   }
 #endif /* __HIST_PV__ */
-#endif /* __TFG__VERSION__ */
+#endif /* __TFG__VERSION__ */    
+
   return kStOK;
 }
 //_________________
 Int_t StPicoDstMaker::setVtxModeAttr(){
 
-  //Read the Tpc-Vpd cut from the input
+  // Read the Tpc-Vpd cut from the input
   Float_t cut = DAttr("TpcVpdVzDiffCut");
-#ifdef __TFG__VERSION__
+#if defined (__TFG__VERSION__)
   if ( cut != 0.0)  StMuDst::instance()->SetTpcVpdVzDiffCut(cut);
   LOG_INFO << " StMuDst::instance()->TpcVpdVzDiffCut() = " << StMuDst::instance()->TpcVpdVzDiffCut() << endm;
 #else /*! __TFG__VERSION__ */
   if ( cut != 0.0)  mTpcVpdVzDiffCut = cut;
   LOG_INFO << " mTpcVpdVzDiffCut = " << mTpcVpdVzDiffCut << endm;
 #endif /* __TFG__VERSION__ */
+
   if (strcasecmp(SAttr("PicoVtxMode"), "PicoVtxDefault") == 0) {
     setVtxMode(PicoVtxMode::Default);
     LOG_INFO << " PicoVtxDefault is being used " << endm;
@@ -593,14 +599,16 @@ Int_t StPicoDstMaker::openRead() {
     } // while (getline(inputStream, file))
 
     LOG_INFO << " Total " << nFile << " files have been read in. " << endm;
+
   }
   else if (! gSystem->AccessPathName(dirFile.c_str()) &&
 	   (dirFile.find(".picoDst.root")  != string::npos ||
 	    dirFile.find(".femtoDst.root")  != string::npos)) {
     mChain->Add(dirFile.c_str());
+
   }
   else {
-#ifdef __TFG__VERSION__
+#if defined (__TFG__VERSION__)
     TDirIter Dir(dirFile.c_str());
     Char_t *name = 0;
     Int_t NFiles = 0;
@@ -617,10 +625,10 @@ Int_t StPicoDstMaker::openRead() {
 #endif /* __TFG__VERSION__ */
       LOG_WARN << " No good input file to read ... " << endm;
     }
-#ifdef __TFG__VERSION__
+#if defined(__TFG__VERSION__)
   }
 #endif /* __TFG__VERSION__ */
-
+  
   // Set branch addresses and pointers
   if (mChain) {
     setBranchAddresses(mChain);
@@ -740,8 +748,8 @@ int StPicoDstMaker::Make() {
   }
   else if (StMaker::m_Mode == PicoIoMode::IoRead) {
     returnStarCode = MakeRead();
-#ifdef __TFG__VERSION__
-    if (! mPicoDst->IsGoodTrigger()) return kStSkip;
+#if defined (__TFG__VERSION__)
+    if ( !mPicoDst->IsGoodTrigger()) return kStSkip;
 #endif /* __TFG__VERSION__ */
   }
 
@@ -775,12 +783,12 @@ Int_t StPicoDstMaker::MakeRead() {
 //_________________
 Int_t StPicoDstMaker::MakeWrite() {
 
-#ifdef __TFG__VERSION__
+#if defined (__TFG__VERSION__)
   mMuDst = StMuDst::instance();
 #else /* ! __TFG__VERSION__ */
   StMaker::WhiteBoard("muDst", &mMuDst);
-
 #endif /* __TFG__VERSION__ */
+
   if (!mMuDst) {
     LOG_ERROR << "No \"StMuDst\" object found in this event. It is usually created by StMuDstMaker" << endm;
     return kStErr;
@@ -795,23 +803,30 @@ Int_t StPicoDstMaker::MakeWrite() {
   }
 
   int const originalVertexId = mMuDst->currentVertexIndex();
-#ifdef __TFG__VERSION__
+  
+#if defined (__TFG__VERSION__)
   if (! mMuDst->numberOfMcVertices()) { // for MC it might be no Vpd
 #endif /* __TFG__VERSION__ */
-    if (!selectVertex())  {
-#ifdef __TFG__VERSION__
-      static Int_t count = 0;
-      count++;
-      if (count < 13) {
+    
+  if (!selectVertex()) {
+    
+#if defined (__TFG__VERSION__)
+    static Int_t count = 0;
+    count++;
+    if (count < 13) {
 #endif /* __TFG__VERSION__ */
-	LOG_INFO << "Vertex is not valid" << endm;
-#ifdef __TFG__VERSION__
-      }
-#endif /* __TFG__VERSION__ */
-      mMuDst->setVertexIndex(originalVertexId);
-      return kStOK;
+
+    LOG_INFO << "Vertex is not valid" << endm;
+
+#if defined (__TFG__VERSION__)
     }
-#ifdef __TFG__VERSION__
+#endif /* __TFG__VERSION__ */
+    
+    mMuDst->setVertexIndex(originalVertexId);
+    return kStOK;
+  }
+
+#if defined (__TFG__VERSION__)
   } else {
     if (! mMuDst->primaryVertices()->At(0)) {
       static Int_t count = 0;
@@ -881,9 +896,11 @@ void StPicoDstMaker::fillEventHeader() const {
 
 //_________________
 void StPicoDstMaker::fillTracks() {
-#ifdef __TFG__VERSION__
-  if (! mMuDst->primaryVertex()) return;
+
+#if defined (__TFG__VERSION__)
+  if ( !mMuDst->primaryVertex()) return;
 #endif 
+  
   // We save primary tracks associated with the selected primary vertex only
   // don't use StMuTrack::primary(), it returns primary tracks associated with
   // all vertices
@@ -896,9 +913,11 @@ void StPicoDstMaker::fillTracks() {
   for (int i = 0; i < nPrimarys; ++i) {
     StMuTrack* pTrk = (StMuTrack*)mMuDst->primaryTracks(i);
     if(!pTrk) continue;
-#ifdef __TFG__VERSION__
-    if (! mMuDst->Accept(pTrk)) continue;
+
+#if defined (__TFG__VERSION__)
+    if ( !mMuDst->Accept(pTrk) ) continue;
 #endif /* __TFG__VERSION__ */
+
     index2Primary[pTrk->id()] = i;
   } // for (int i = 0; i < nPrimarys; ++i)
 
@@ -912,10 +931,8 @@ void StPicoDstMaker::fillTracks() {
     StMuTrack* gTrk = (StMuTrack*)mMuDst->globalTracks(i);
 
     // Check the existence and track type
-    if(!gTrk) continue;
-#ifdef __TFG__VERSION__
-    if(gTrk->type()!=global) continue;
-#endif /* __TFG__VERSION__ */
+    if( !gTrk ) continue;
+    if( gTrk->type()!=global ) continue;
 
     // Obtain primary track that corresponds to gTrk
     StMuTrack const* const pTrk = index2Primary.find(gTrk->id()) != index2Primary.end() ?
@@ -937,13 +954,13 @@ void StPicoDstMaker::fillTracks() {
       LOG_WARN << "No dca Geometry for this track !!! " << i << endm;
       continue;
     }
-#ifdef __TFG__VERSION__
+#if defined(__TFG__VERSION__)
     if (StMuDst::dca3Dmax() > 0) {
       // Cut large Dca
       THelixTrack t = dcaG->thelix();
       StThreeVectorD V(mMuDst->primaryVertex()->position());
       Double_t dca3D = t.Dca(V.xyz());
-#ifdef __HIST_PV__
+#if defined(__HIST_PV__)
       if (hists[0]) {
 	hists[0]->Fill(dca3D);
 	Int_t IdMc = gTrk->idTruth();
@@ -983,6 +1000,53 @@ void StPicoDstMaker::fillTracks() {
 #endif /* __TFG__VERSION__ */
     }
 
+#if defined (__TFG__VERSION__)
+    if ( StMuDst::dca3Dmax()>0 ) {
+      // Cut large Dca
+      THelixTrack t = dcaG->thelix();
+      StThreeVectorD V(mMuDst->primaryVertex()->position());
+      Double_t dca3D = t.Dca(V.xyz());
+#if defined (__HIST_PV__)
+      if (hists[0]) {
+	hists[0]->Fill(dca3D);
+	Int_t IdMc = gTrk->idTruth();
+	if (IdMc) {
+	  StMuMcTrack *mcTrk = StMuDst::instance()->MCtrack(IdMc-1);
+	  assert(mcTrk);
+	  assert(IdMc == mcTrk->Id());
+	  Int_t IdVx = mcTrk->IdVx(); // parent vertex
+	  assert(IdVx);
+	  StMuMcVertex *MuVx = StMuDst::instance()->MCvertex(IdVx-1);
+	  assert(MuVx);
+	  Int_t IdParentTk = MuVx->IdParTrk();
+	  if (IdParentTk) {
+	    StMuMcTrack *mcParentTrk = StMuDst::instance()->MCtrack(IdParentTk-1);
+	    assert(mcParentTrk);
+#if 1
+	    Int_t pdg = mcParentTrk->Pdg();
+	    assert(pdg);
+	    if (TMath::Abs(pdg) ==  3122) {
+	      hists[1]->Fill(dca3D);
+	    } else if (pdg == 310) {
+	      hists[2]->Fill(dca3D);
+	    }
+#else
+	    Int_t gePid = mcParentTrk->GePid();
+	    if (gePid == 18 || gePid == 26) {
+	      hists[1]->Fill(dca3D);
+	    } else if (gePid == 16) {
+	      hists[2]->Fill(dca3D);
+	    }
+#endif
+	  }
+	}
+      }
+#endif /* __HIST_PV__ */
+      if (dca3D > StMuDst::dca3Dmax()) continue;
+    }
+#endif /* __TFG__VERSION__ */
+
+
     // Obtain size of the picoTrack array
     int counter = mPicoArrays[StPicoArrays::Track]->GetEntries();
 
@@ -999,7 +1063,7 @@ void StPicoDstMaker::fillTracks() {
     // in order to store the values obrained with the same method:
     // either truncated mean of fit. Starting SL14 the default was
     // changed from thuncated mean to fit.
-#ifndef __TFG__VERSION__
+#if !defined (__TFG__VERSION__)
     static TString Production(mMuDst->event()->runInfo().productionVersion());
     static TString prodYear(Production.Data()+2,2);
     static Int_t defY = prodYear.Atoi();
@@ -1015,9 +1079,10 @@ void StPicoDstMaker::fillTracks() {
       picoTrk->setDedx( gTrk->probPidTraits().dEdxFit() );
       picoTrk->setDedxError( gTrk->probPidTraits().dEdxErrorFit() );
     }
+#if defined (__TFG__VERSION__)
     picoTrk->setDndx( gTrk->probPidTraits().dNdxFit() );
     picoTrk->setDndxError( gTrk->probPidTraits().dNdxErrorFit() );
-
+#endif /* __TFG__VERSION__ */
     // Fill track's hit information
     picoTrk->setNHitsDedx( gTrk->nHitsDedx() );
 
@@ -1045,11 +1110,15 @@ void StPicoDstMaker::fillTracks() {
     picoTrk->setNSigmaKaon( gTrk->nSigmaKaon() );
     picoTrk->setNSigmaProton( gTrk->nSigmaProton() );
 
-    // Fill topology map (3 words)
+    // Fill topology map (2 words for standard && 3 words for TFG_VERSION)
     for(UInt_t iMap=0; iMap<StPicoTrack::eTopologyMap; iMap++) {
       picoTrk->setTopologyMap( iMap, gTrk->topologyMap().data(iMap) );
     }
-
+#if !defined (__TFG__VERSION__)
+    // Fill iTPC topology map
+    picoTrk->setiTpcTopologyMap( gTrk->topologyMap().data(2) );
+#endif
+    
     // Calculate global momentum and position at point of DCA to the pVtx
     // at it is done in MuDst
     if( dcaG ) {
@@ -1141,19 +1210,128 @@ void StPicoDstMaker::fillTracks() {
 	covMatrix->setCorrelations( CorrArr );
       } //if(dcaG)
     } //if( mCovMtxMode == PicoCovMtxMode::Write )
-#ifdef __TFG__VERSION__
+
+#if defined (__TFG__VERSION__)
     if (_debug) {
-      cout << "StPicoDstMaker::fillTracks: MuTrack " << Form("%4i %8.3f %8.3f %8.3f",i,gTrk->p().x() ,gTrk->p().y() ,gTrk->p().z())
-	   << Form("\te/pi/K/p\t%8.3f %8.3f %8.3f %8.3f",gTrk->nSigmaElectron(),gTrk->nSigmaPion(), gTrk->nSigmaKaon(),gTrk->nSigmaProton()) << endl
-	   << "                          PicoTrack " << Form("%4i %8.3f %8.3f %8.3f",i,picoTrk->gMom().x() ,picoTrk->gMom().y() ,picoTrk->gMom().z())
-	   << Form("\te/pi/K/p\t%8.3f %8.3f %8.3f %8.3f",picoTrk->nSigmaElectron(),picoTrk->nSigmaPion(), picoTrk->nSigmaKaon(),picoTrk->nSigmaProton()) << endl;
+      std::cout << "StPicoDstMaker::fillTracks: MuTrack "
+		<< Form( "%4i %8.3f %8.3f %8.3f", i, gTrk->p().x(), gTrk->p().y(), gTrk->p().z() )
+		<< Form( "\te/pi/K/p\t%8.3f %8.3f %8.3f %8.3f",
+			 gTrk->nSigmaElectron(),gTrk->nSigmaPion(),
+			 gTrk->nSigmaKaon(),
+			 gTrk->nSigmaProton())
+		<< std::endl
+		<< "                          PicoTrack "
+		<< Form( "%4i %8.3f %8.3f %8.3f",
+			i, picoTrk->gMom().x(), picoTrk->gMom().y(), picoTrk->gMom().z() )
+		<< Form( "\te/pi/K/p\t%8.3f %8.3f %8.3f %8.3f",
+			 picoTrk->nSigmaElectron(),
+			 picoTrk->nSigmaPion(),
+			 picoTrk->nSigmaKaon(),
+			 picoTrk->nSigmaProton()) << std::endl;
     }
-#endif /* __TFG__VERSION__ */    
-    
+#endif /* __TFG__VERSION__ */   
+
     // Fill pid traits
 
     // BEMC information
     if (mEmcCollection) {
+
+      // Look for the BEMC-matched tower for the track
+      // If the track is outside of the eta range of the towers, set to -1
+      // as was done in the previous implementation. However, if the track
+      // is not matched in phi (track extrapolated to the space between 
+      // modules). In this case, fine the closest tower instead.
+
+      //get inner radius of BEMC
+      StEmcGeom* mBemcGeom = StEmcGeom::instance("bemc");
+      Double_t bemc_radius = mBemcGeom->Radius();
+      
+      // Magnetic field in Tesla 
+      Double_t mBField_tesla = mBField / 10.0;
+
+      // Needed for projection of the track onto the barrel radius
+      StThreeVectorD bemc_pos, bemc_mom;
+
+      // BEMC hardware indices 
+      Int_t h_m, h_e, h_s = 0;
+      // tower index: if no tower can be matched, assign 0
+      picoTrk->setBEmcMatchedTowerIndex(0);
+      Int_t tow_id = 0;
+      Bool_t close_match = false;
+
+      // Check if the track can be projected onto the current radius
+      // if not, track can't be matched.
+      // By JetCorr request the global track projection to BEMC is used.
+      if ( mEmcPosition->projTrack(&bemc_pos, &bemc_mom, gTrk, mBField_tesla, bemc_radius) ) {
+        // First, examine track eta. If it falls in two regions:
+        // 0 < |eta| < etaMin()
+        // etaMax() < |eta| < 1.0
+        // then shift the eta for the projection slightly into the neighboring tower
+        if ( fabs(bemc_pos.pseudoRapidity()) < mBemcGeom->EtaMin() ) {
+          Double_t unsigned_eta = mBemcGeom->EtaMin() + 0.001;
+          Double_t unsigned_theta = 2.0 * atan(exp(-1.0 * unsigned_eta));
+          Double_t signed_theta = (bemc_pos.pseudoRapidity() >= 0 ? 1.0 : -1.0) * unsigned_theta;
+          bemc_pos.setTheta(signed_theta);
+          close_match = true;
+        } 
+        else if ( fabs(bemc_pos.pseudoRapidity()) > mBemcGeom->EtaMax() &&
+		  fabs(bemc_pos.pseudoRapidity()) < 1.0 ) {
+          Double_t unsigned_eta = mBemcGeom->EtaMax() - 0.001;
+          Double_t unsigned_theta = 2.0 * atan(exp(-1.0 * unsigned_eta));
+          Double_t signed_theta = (bemc_pos.pseudoRapidity() >= 0 ? 1.0 : -1.0) * unsigned_theta;
+          bemc_pos.setTheta(signed_theta);
+          close_match = true;
+        } 
+        // Get the BEMC hardware location in (m, e, s) and translate to id
+        // If StEmcGeom::getBin() != 0: track was not matched to a tower.
+        // Its outside of the BEMC eta range (> 1.0).
+        if ( mBemcGeom->getBin(bemc_pos.phi(),bemc_pos.pseudoRapidity(),h_m,h_e,h_s) == 0 ) {
+          // If StEmcGeom::getId() == 0: the track was matched successfully. Otherwise, 
+          // the track was not matched to a tower at this radius, the track was projected
+          // into the gap between modules in phi. 
+          if ( h_s != -1 ) {
+	    mBemcGeom->getId(h_m,h_e,h_s,tow_id);
+            if (close_match) {
+              picoTrk->setBEmcMatchedTowerIndex(-1*tow_id);
+	    }
+            else {
+              picoTrk->setBEmcMatchedTowerIndex(tow_id);
+	    }
+          }
+          // Track fell in between modules in phi. We will find which module it is closer
+          // to by shifting phi slightly.
+          else {
+            // Value of the "dead space" per module in phi:
+            // 2*pi/60 (amount of azimuth covered per module)
+            // 2*0.0495324 (active size of module)
+            Double_t dphi = (TMath::Pi() / 60.0) - 0.0495324;
+            
+            // Shift the projected phi by dphi in positive and negative directions
+            // if we look for the projection for both of these, only one should give
+            // a tower id, and the other should still be in the inter-tower space
+            StThreeVectorD bemc_pos_shift_pos(bemc_pos); 
+            bemc_pos_shift_pos.setPhi(bemc_pos_shift_pos.phi() + dphi);
+            StThreeVectorD bemc_pos_shift_neg(bemc_pos); 
+            bemc_pos_shift_neg.setPhi(bemc_pos_shift_neg.phi() - dphi);
+
+            if ( mBemcGeom->getBin(bemc_pos_shift_pos.phi(),
+				   bemc_pos_shift_pos.pseudoRapidity(),
+				   h_m,h_e,h_s) == 0 &&
+		 h_s != -1 ) {
+	      mBemcGeom->getId(h_m,h_e,h_s,tow_id);
+	      picoTrk->setBEmcMatchedTowerIndex(-1*tow_id);
+            }
+	    else if ( mBemcGeom->getBin(bemc_pos_shift_neg.phi(),
+					bemc_pos_shift_neg.pseudoRapidity(),
+					h_m,h_e,h_s) == 0 &&
+		      h_s != -1 ) {
+	      mBemcGeom->getId(h_m,h_e,h_s,tow_id);
+	      picoTrk->setBEmcMatchedTowerIndex(-1*tow_id);
+            }
+          } // else
+        } // if ( mBemcGeom->getBin(bemc_pos.phi(),bemc_pos.pseudoRapidity(),h_m,h_e,h_s) == 0 )
+      } // if ( mEmcPosition->projTrack(&bemc_pos,&bemc_mom,pTrk,mBField_tesla,bemc_radius) )
+      
       Int_t id = -1;
       Int_t adc0;
       Float_t e[5];
@@ -1214,7 +1392,8 @@ void StPicoDstMaker::fillTracks() {
 
       // Set index of the corresponding btofPidTrait to the pico track
       picoTrk->setBTofPidTraitsIndex(btof_index);
-#ifdef __TFG__VERSION__
+
+#if defined (__TFG__VERSION__)
       // Maksym correction ================================================================================
       const StMuBTofPidTraits &btofPid = gTrk->btofPidTraits();
       Float_t beta       = (pTrk) && ! TMath::IsNaN(btofPid.beta()) ? btofPid.beta() : -999.;
@@ -1227,10 +1406,14 @@ void StPicoDstMaker::fillTracks() {
 	if (StMuDst::instance()->currentVertexIndex() >= 0) {
 	  const StThreeVectorF & dcaPoint  = gTrk->dca(StMuDst::instance()->currentVertexIndex()); 
 	  StPhysicalHelixD innerHelix = gTrk->helix();
-	  dlDCA = fabs( innerHelix.pathLength( StThreeVector<double>(dcaPoint.x(), dcaPoint.y(), dcaPoint.z()) ) );
+	  dlDCA = fabs( innerHelix.pathLength( StThreeVector<double>(dcaPoint.x(),
+								     dcaPoint.y(),
+								     dcaPoint.z()) ) );
 	}
 	StPhysicalHelixD outerHelix = gTrk->outerHelix();
-	double dlTOF = fabs( outerHelix.pathLength( StThreeVector<double>(tofPoint.x(), tofPoint.y(), tofPoint.z()) ) );
+	double dlTOF = fabs( outerHelix.pathLength( StThreeVector<double>(tofPoint.x(),
+									  tofPoint.y(),
+									  tofPoint.z()) ) );
 	
 	double l = gTrk->length();
 	lengthTof = l + dlDCA + dlTOF;
@@ -1241,7 +1424,6 @@ void StPicoDstMaker::fillTracks() {
       btofPidTraits->setBeta( beta );
       // end of Maksym correction ================================================================================
 #endif /* __TFG__VERSION__ */
-      
     } //if (gTrk->tofHit())
 
         // ETOF information
@@ -1351,9 +1533,9 @@ bool StPicoDstMaker::getBEMC(const StMuTrack* t, int* id, int* adc, float* ene, 
 
   double magneticField = mBField * kilogauss / tesla; // in Tesla
 
-  Bool_t ok       = false;
-  Bool_t okBSMDE  = false;
-  Bool_t okBSMDP  = false;
+  Bool_t ok       = kFALSE;
+  Bool_t okBSMDE  = kFALSE;
+  Bool_t okBSMDP  = kFALSE;
 
   if (mEmcPosition) {
     ok      = mEmcPosition->projTrack(&position,      &momentum,      t, magneticField, mEmcGeom[0]->Radius());
@@ -1469,7 +1651,8 @@ bool StPicoDstMaker::getBEMC(const StMuTrack* t, int* id, int* adc, float* ene, 
         energyTemp = emcHit->energy();
         mEmcGeom[0]->getEta(nextTowerId, etaTemp);
         mEmcGeom[0]->getPhi(nextTowerId, phiTemp);
-        distTemp = sqrt((etaTemp - position.pseudoRapidity()) * (etaTemp - position.pseudoRapidity()) + (phiTemp - position.phi()) * (phiTemp - position.phi()));
+        distTemp = sqrt((etaTemp - position.pseudoRapidity()) * (etaTemp - position.pseudoRapidity()) +
+			(phiTemp - position.phi()) * (phiTemp - position.phi()));
 
 	// In case the new tower is closer to the matched tower
 	// than the other closest one we swap them.
@@ -1574,7 +1757,17 @@ void StPicoDstMaker::fillEvent() {
   picoEvent->setNumberOfGlobalTracks( mMuDst->numberOfGlobalTracks() );
   picoEvent->setbTofTrayMultiplicity( ev->btofTrayMultiplicity() );
   picoEvent->setETofHitMultiplicity( ev->etofHitMultiplicity() );
-  picoEvent->setETofDigiMultiplicity( ev->etofDigiMultiplicity() );
+
+  // Save the number of etof digis that were useable in the hit building process
+  unsigned short nUseableETofDigis = 0;
+  for( int i=0; i<ev->etofDigiMultiplicity(); i++ ) {
+    StMuETofDigi* digi = mMuDst->etofDigi( i );
+    if( !digi ) continue;
+    if( fabs( digi->calibTime() ) < 1.e-5 && digi->calibTot() < 0 ) continue;
+    if( digi->sector() == 0 || digi->zPlane() == 0 || digi->counter() == 0 || digi->strip() == 0 ) continue;
+    nUseableETofDigis++;
+  }
+  picoEvent->setETofDigiMultiplicity( nUseableETofDigis );
 
   // Store number of hits in HFT
   picoEvent->setNHitsHFT( 0, ev->numberOfPxlInnerHits() );
@@ -1650,7 +1843,7 @@ void StPicoDstMaker::fillEmcTrigger() {
   StTriggerSimuMaker* trigSimu = (StTriggerSimuMaker*)GetMaker("StarTrigSimu");
   if (!trigSimu) return;
 
-#ifdef __TFG__VERSION__
+#if defined(__TFG__VERSION__)
   if (!trigSimu->bemc) return;
 #endif /* __TFG__VERSION__ */
   // BEMC High Tower trigger
@@ -1715,8 +1908,16 @@ void StPicoDstMaker::fillEmcTrigger() {
 	      mEmcGeom[2]->getId(i, aHit[j]->eta(), aHit[j]->sub(), id);
 	      mEmcGeom[2]->getEtaPhi(id, smdEta, smdPhi);
 	      // Distance from trig in eta/phi space
-	      float dr = TMath::Sqrt( (smdEta - trigEta) * (smdEta - trigEta) +
-				      (smdPhi - trigPhi) * (smdPhi - trigPhi) );
+	      float deltaphi = (smdPhi - trigPhi);	
+	      if (deltaphi >= TMath::Pi()) {
+		deltaphi = deltaphi - TMath::TwoPi();
+	      }
+	      if (deltaphi < -TMath::Pi())  {
+		deltaphi = deltaphi + TMath::TwoPi();
+	      }
+	      float dr = TMath::Sqrt( (smdEta - trigEta)*(smdEta - trigEta) +
+				      deltaphi * deltaphi );
+
 	      if (radius >= dr) {
       		Int_t adc  = aHit[j]->adc();
       		Int_t counterSmde = mPicoArrays[StPicoArrays::BEmcSmdEHit]->GetEntries();
@@ -1742,8 +1943,17 @@ void StPicoDstMaker::fillEmcTrigger() {
 	      mEmcGeom[3]->getId(i, aHit[j]->eta(), aHit[j]->sub(), id);
 	      mEmcGeom[3]->getEtaPhi(id, smdEta, smdPhi);
 	      // Distance from trig in eta/phi space
-	      Float_t dr = TMath::Sqrt( (smdEta - trigEta) * (smdEta - trigEta) +
-					(smdPhi - trigPhi) * (smdPhi - trigPhi) );
+	      float deltaphi = (smdPhi - trigPhi);	
+	      if (deltaphi >= TMath::Pi()) {
+		deltaphi = deltaphi - TMath::TwoPi();
+	      }
+	      if (deltaphi < -TMath::Pi())  {
+		deltaphi = deltaphi + TMath::TwoPi();
+	      }
+	      // Distance from trig in eta/phi space
+	      float dr = TMath::Sqrt( (smdEta - trigEta)*(smdEta - trigEta) +
+				      deltaphi * deltaphi );
+
 	      if (radius >= dr) {
 		int adc  = aHit[j]->adc();
 		Int_t counterSmdp = mPicoArrays[StPicoArrays::BEmcSmdPHit]->GetEntries();
@@ -2112,7 +2322,8 @@ void StPicoDstMaker::fillMtdHits() {
 
   // Check the firing hits
   if (mPicoDst->numberOfMtdTriggers() != 1) {
-#ifdef __TFG__VERSION__
+
+#if defined (__TFG__VERSION__)
     static Int_t count = 0;
     count++;
     if (count < 13) {
@@ -2187,6 +2398,7 @@ void StPicoDstMaker::fillMtdHits() {
   } //while (triggerPos.size() > 0)
 }
 
+ 
 /**
  * Selects a primary vertex from `muDst` vertex collection according to the
  * vertex selection mode `mVtxMode` specified by the user. The mode must be
@@ -2241,7 +2453,7 @@ bool StPicoDstMaker::selectVertex() {
 
 	// Check TpcVz and VpdVz difference
         if (fabs(vzVpd - vtx->position().z()) < 
-#ifdef __TFG__VERSION__
+#if defined(__TFG__VERSION__)
 	    StMuDst::instance()->TpcVpdVzDiffCut()
 #else
 	    mTpcVpdVzDiffCut
@@ -2261,4 +2473,5 @@ bool StPicoDstMaker::selectVertex() {
   // Retrun false if selected vertex is not valid
   return selectedVertex ? true : false;
 }
+
 #endif /* !__TFG__VERSION__ */

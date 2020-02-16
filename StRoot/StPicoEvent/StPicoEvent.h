@@ -16,14 +16,15 @@
 #include "StPicoDst.h"
 #include "TObject.h"
 #include "TVector3.h"
-#ifdef __TFG__VERSION__
+
+#if defined (__TFG__VERSION__)
 #include "TEnv.h"
 #endif /* __TFG__VERSION__ */
+
 //_________________
 class StPicoEvent : public TObject {
 
  public:
-  
   /// Default constructor
   StPicoEvent();
   /// Copy constructor
@@ -67,9 +68,10 @@ class StPicoEvent : public TObject {
   /// that were fired in the current event
   bool isTrigger(unsigned int) const;
 
-#ifdef __TFG__VERSION__
+#if defined (__TFG__VERSION__)
   virtual  Bool_t IsGoodTrigger();                    
 #endif /* __TFG__VERSION__ */
+  
   /// Return RefMult estimated via positive tracks (-0.5<eta<0.5)
   Int_t    refMultPos() const          { return (Int_t)mRefMultPos; }
   /// Return RefMult estimated via negative tracks (-0.5<eta<0.5)
@@ -344,7 +346,12 @@ class StPicoEvent : public TObject {
   void setBunchId(Int_t id);
 
 protected:
+
+#if defined (__TFG__VERSION__)
+  /// Production version
   TString mProductionVersion;
+#endif /* __TFG__VERSION__ */ 
+
   /// Run number (or runId)
   Int_t    mRunId;
   /// Event ID
@@ -371,10 +378,10 @@ protected:
   /// Primary vertex position error Z
   Float_t mPrimaryVertexErrorZ;
 
-#ifdef  __TFG__VERSION__
+#if defined (__TFG__VERSION__)
   Float16_t mPrimaryVertexCorr[3];
 #endif /* __TFG__VERSION__ */ 
-
+  
   /// Primary vertex ranking
   Float_t  mRanking;
   /// Number of BEMC-matched tracks
@@ -440,13 +447,21 @@ protected:
   UInt_t   mZDCx;
   /// BBC coincidence rate
   UInt_t   mBBCx;
-#ifdef __TFG__VERSION__
+
+#if defined (__TFG__VERSION__)
+    /// Background rate
   Float16_t  mBackgroundRate;
+  /// "Blue" beam rate measured in BBC
   Float16_t  mBbcBlueBackgroundRate;
+  /// "Yellow" beam rate measured in BBC
   Float16_t  mBbcYellowBackgroundRate;
+  /// East BBC rate
   Float16_t  mBbcEastRate;
+  /// West BBC rate
   Float16_t  mBbcWestRate;
+  /// East ZDC rate
   Float16_t  mZdcEastRate;
+  /// West ZDC rate
   Float16_t  mZdcWestRate;
 #else /* ! __TFG__VERSION__ */
   /// Background rate
@@ -463,7 +478,6 @@ protected:
   Float_t  mZdcEastRate;
   /// West ZDC rate
   Float_t  mZdcWestRate;
-
 #endif /* __TFG__VERSION__ */
   /// Sum of ADC in east ZDC
   UShort_t mZdcSumAdcEast;
@@ -496,7 +510,7 @@ protected:
   /// Total digi multiplicity in ETOF modules
   UShort_t mETofDigiMultiplicity ;
 
-#ifdef __TFG__VERSION__
+#if defined (__TFG__VERSION__)
   ClassDef(StPicoEvent, 6)
 #else /* ! __TFG__VERSION__ */
   ClassDef(StPicoEvent, 4)

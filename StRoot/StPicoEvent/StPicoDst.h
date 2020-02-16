@@ -48,7 +48,6 @@ class StPicoDst {
   virtual ~StPicoDst() {fgPicoDst = 0;}
   virtual Bool_t IsGoodTrigger() const;
 #else /* ! __TFG__VERSION__ */
-
   /// Default constructor
   StPicoDst() { /* emtpy */}
   /// Destructor
@@ -61,7 +60,6 @@ class StPicoDst {
   static void unset();
   /// Return pointer to the n-th TClonesArray
   static TClonesArray* picoArray(Int_t type) { return picoArrays[type]; }
-
   /// Return pointer to current StPicoEvent (class holding the event wise information)
   static StPicoEvent* event() { return (StPicoEvent*)picoArrays[StPicoArrays::Event]->UncheckedAt(0); }
   /// Return pointer to i-th track
@@ -155,9 +153,6 @@ class StPicoDst {
   static void printBTofPidTraits();
   /// Print MTD PID trait info
   static void printMtdPidTraits();
-#ifdef __TFG__VERSION__
-  static StPicoDst *instance() {return fgPicoDst;}
-#endif /* __TFG__VERSION__ */
   /// Print track covariance matrix info
   static void printTrackCovMatrices();
   /// Print BEMC SMD eta info
@@ -169,13 +164,18 @@ class StPicoDst {
     /// Print ETOF PID trait info
   static void printETofPidTraits();
 
- private:
-#ifdef __TFG__VERSION__
-  static StPicoDst *fgPicoDst; //!
+#if defined (__TFG__VERSION__)
+  static StPicoDst *instance() {return fgPicoDst;}
 #endif /* __TFG__VERSION__ */
+
+ private:
 
   /// Array of TClonesArrays
   static TClonesArray** picoArrays;
+
+#if defined (__TFG__VERSION__)
+  static StPicoDst *fgPicoDst; //!
+#endif /* __TFG__VERSION__ */
 };
 
 #endif

@@ -217,10 +217,10 @@ Int_t StVMCMaker::Init() {
   if (IAttr("VMCAlignment")) fgStarVMCApplication->DoMisAlignment(kTRUE);
   if (IAttr("NoVMCAlignment")) fgStarVMCApplication->DoMisAlignment(kFALSE);
   if (! IAttr("VMCPassive")) {
-    LOG_INFO << "StVMCMaker::Ini => Active mode" << endm; 
+    LOG_INFO << "StVMCMaker::Init => Active mode" << endm; 
     TString CintF(SAttr("GeneratorFile"));
     if (CintF == "" && fInputFile == "" ) {
-      CintF = "20Muons"; // default
+      CintF = "20Muons.C"; // default
     }
     if (CintF != "") {
       static const Char_t *path  = ".:./StarDb/Generators:$STAR/StarDb/Generators";

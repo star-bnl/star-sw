@@ -191,8 +191,8 @@ void  h2mdf(Int_t date = 0, Int_t time = 0){
 	  h2mdf1(histN[m],  5, 1,20); 
 	  PrintRow();
 	}
-	out << "  tableSet->AddAt(&row);" << "// " << gDirectory->GetName() << ";\t" << idx << "\th2mdf1(\"" << histN[m] << "\",5,1,20);" << endl;
       }
+      out << "  tableSet->AddAt(&row);" << "// " << gDirectory->GetName() << ";\t" << idx << "\th2mdf1(\"" << histN[m] << "\",5,1,20);" << endl;
     }
   }
   out << "  return (TDataSet *)tableSet;" << endl;
