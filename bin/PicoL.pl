@@ -13,11 +13,14 @@ my $PICOPATH = "";
 my $debug = 0;
 my $pwd = Cwd::cwd(); print "pwd = $pwd\n" if ($debug);
 my $glob;
+my $dayMin =  0;
+my $dayMax =  0;
 if ($pwd =~ /dev/) {
   $PICOPATH = "/gpfs01/star/data*";
   $glob = $PICOPATH;
   if    ($pwd =~ /5p75GeV_fixedTarget/) {$glob .= "/reco/production_5p75GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
-  elsif ($pwd =~ /11p5GeV/)             {$glob .= "/reco/production_11p5GeV_2020/ReversedFullField/dev/20*";}
+  elsif ($pwd =~ /11p5GeV.C/)           {$glob .= "/reco/production_11p5GeV_2020/ReversedFullField/dev/20*"; $dayMin = 42;}
+  elsif ($pwd =~ /11p5GeV/)             {$glob .= "/reco/production_11p5GeV_2020/ReversedFullField/dev/20*"; $dayMax = 41;}
   elsif ($pwd =~ /13p5GeV_fixedTarget/) {$glob .= "/reco/production_13p5GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
   elsif ($pwd =~ /19p5GeV_fixedTarget/) {$glob .= "/reco/production_19p5GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
   elsif ($pwd =~ /31p2GeV_fixedTarget/) {$glob .= "/reco/production_31p2GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
@@ -40,12 +43,18 @@ if ($pwd =~ /dev/) {
   elsif ($pwd =~ /19p5GeV_fixedTarget/) {$glob .= "/2020/TFG20a/RF/19p5GeV_fixedTarget";}
   elsif ($pwd =~ /7p3GeV_fixedTarget/)  {$glob .= "/2020/TFG20a/RF/7p3GeV_fixedTarget";}
   elsif ($pwd =~ /9p2GeV/)              {$glob .= "/2020/TFG20a/RF/9p2GeV";}
+  elsif ($pwd =~ /3p85GeV_fixedTarget/) {$glob .= "/2018/3p85GeV_fixedTarget";}
 }
 $glob .= "/*/*";
-print "glob = $glob\n" if ($debug);
+print "days = $dayMin  - $dayMax : glob = $glob\n" if ($debug);
 my %Runs= ();
 foreach my $run (glob $glob) {
   my $f = File::Basename::basename($run);
+  my $day = int ($f/1000);       # print "day = $day\n";
+  my $year = int ($day/1000);    # print "year = $year\n";
+  $day -=  1000*$year;           # print "day = $day\n";
+  if ($dayMin > 0 && $day < $dayMin) {next;}
+  if ($dayMax > 0 && $day > $dayMax) {next;}
   $Runs{$f}++;
   my $ana = $f . "_" . $Runs{$f} . ".root";
   if ( -r $ana) {
@@ -66,7 +75,7 @@ foreach my $run (glob $glob) {
       if ( $mtimeR > $mtimeA) { $mtimeA =  $mtimeR; $MtimeA = $MtimeR;}
     }
     my $dt = $mtime - $mtimeA;
-    print "$ana $mtime,$Mtime, $run $mtimeA,$MtimeA, dt = $dt\n" if ($debug);
+    print "$day, $ana $mtime,$Mtime, $run $mtimeA,$MtimeA, dt = $dt\n" if ($debug);
     if ($dt > 0) {next;}
     my $cmd = "mv ". $ana ." ". $ana .".BAK";
     print "$cmd \n" if ($debug);

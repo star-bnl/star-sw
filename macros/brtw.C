@@ -1,3 +1,6 @@
+/*
+  root.exe  11p5GeV.I.dEdx.root brtw.C+
+ */
 //________________________________________________________________________________
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "Riostream.h"
@@ -133,9 +136,6 @@ TH1F *SubstracF(TH1F *hist, TF1* total, const Option_t *opt="b") {
   return h;
 }
 //________________________________________________________________________________
-void brtw() {
-}
-//________________________________________________________________________________
 TF1 *brtw(TH1 *hist, Double_t MMin=0.3, Double_t MMax = 1.3, Double_t m1 = mpi, Double_t m2 = mpi, Int_t l = 0, Bool_t baryon = kFALSE) {
   if (! hist) return 0;
   M1 = m1;
@@ -239,6 +239,8 @@ TF1 *brtw(TH1 *hist, Double_t MMin=0.3, Double_t MMax = 1.3, Double_t m1 = mpi, 
   Double_t S = Signal->Integral(params[1]-3*params[2],params[1]+3*params[2])/binWidth;
   Double_t B = Background->Integral(params[1]-2*params[2],params[1]+2*params[2])/binWidth;
   Double_t T = Total->Integral(params[1]-2*params[2],params[1]+2*params[2])/binWidth;
+  
+  cout << gSystem->BaseName(gDirectory->GetName()) << "\t";
   cout << hist->GetName() << "\t S = " << S << "\tB = " << B << "\tS/B = " << S/B << "\tS/sqrt(T) = " << S/TMath::Sqrt(T);
   cout << "\tSignificance = " << 1./Total->GetParError(0);
   TH1F *z = (TH1F *) gDirectory->Get("/Particles/KFParticlesFinder/PrimaryVertexQA/z");
@@ -429,6 +431,22 @@ void Drawf0_0() {
     Name.ReplaceAll("FitH3.root","");
     TPaveLabel *pl = new TPaveLabel(0.2,0.7,0.4,0.9,Name,"NDCbr");
     pl->Draw();
+  }
+}
+//________________________________________________________________________________
+void brtw() {
+  const Char_t *histN = "/Particles/KFParticlesFinder/Particles/Ks/Parameters/y-#phi-M";
+  TSeqCollection *files = gROOT->GetListOfFiles();
+  if (! files) return;
+  TIter next(files);
+  TFile *f = 0;
+  while ( (f = (TFile *) next()) ) { 
+    f->cd();
+    TString F(f->GetName());
+    TH3F *h3 = (TH3F *) gDirectory->Get(histN);
+    if (! h3) continue;;
+    TH1D *h1 = (TH1D *) h3->Project3D("z");
+    K0BW(h1->GetName());
   }
 }
 //________________________________________________________________________________
