@@ -451,3 +451,8 @@ rm */*/Done */*/Chain.log */*/Submitted
 9p2GeV/037
 9p2GeV/038
 5p75GeV_fixedTarget
+================================================================================
+ ~/tfg02/2018/3p85GeV_fixedTarget $ 
+foreach d ( `ls -1d /gpfs01/star/data*/reco/production_3p85GeV_fixedTarget_2018//ReversedFullField/P19ie/2018` )
+   lndir ${d} .
+end
