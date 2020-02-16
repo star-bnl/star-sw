@@ -86,8 +86,8 @@ TClonesArray* StEpdFastSim::GetPicoHits(TClonesArray* momenta, TVector3 PrimVert
 
     StPicoEpdHit* theHit;
     if (EW<=0) {       // east
-      if (mHitsEast[abs(UniqueID)]!=0){      // this tile has already been struck -- ADD to the nMIP value of this existing StPicoEpdHit
-	theHit = mHitsEast[abs(UniqueID)];
+      if (mHitsEast[TMath::Abs(UniqueID)]!=0){      // this tile has already been struck -- ADD to the nMIP value of this existing StPicoEpdHit
+	theHit = mHitsEast[TMath::Abs(UniqueID)];
         float nMIP = theHit->nMIP() + dE;
 	theHit->setnMIP(nMIP);
       }
@@ -95,12 +95,12 @@ TClonesArray* StEpdFastSim::GetPicoHits(TClonesArray* momenta, TVector3 PrimVert
 	theHit = (StPicoEpdHit*)theHits->ConstructedAt(theHits->GetEntriesFast());
 	theHit->setId(UniqueID);
 	theHit->setnMIP(dE);
-	mHitsEast[abs(UniqueID)] = theHit;
+	mHitsEast[TMath::Abs(UniqueID)] = theHit;
       }
     }
     else{              // west
-      if (mHitsWest[abs(UniqueID)]!=0){      // this tile has already been struck -- ADD to the nMIP value of this existing StPicoEpdHit
-	theHit = mHitsWest[abs(UniqueID)];
+      if (mHitsWest[TMath::Abs(UniqueID)]!=0){      // this tile has already been struck -- ADD to the nMIP value of this existing StPicoEpdHit
+	theHit = mHitsWest[TMath::Abs(UniqueID)];
         float nMIP = theHit->nMIP() + dE;
 	theHit->setnMIP(nMIP);
       }
@@ -108,7 +108,7 @@ TClonesArray* StEpdFastSim::GetPicoHits(TClonesArray* momenta, TVector3 PrimVert
 	theHit = (StPicoEpdHit*)theHits->ConstructedAt(theHits->GetEntriesFast());
 	theHit->setId(UniqueID);
 	theHit->setnMIP(dE);
-	mHitsWest[abs(UniqueID)] = theHit;
+	mHitsWest[TMath::Abs(UniqueID)] = theHit;
       }
     }
   } // end loop over particles
