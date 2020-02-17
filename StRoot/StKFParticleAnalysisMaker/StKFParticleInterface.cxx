@@ -873,7 +873,7 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
     {
       Double_t pL10 = (track.GetP() > 0) ? TMath::Log10(track.GetP()) : -2;
       Double_t dEdxL10 = (gTrack->dEdx() > 0) ? TMath::Log10(gTrack->dEdx()) : dEdxL10min;
-      Double_t dNdxL10 = (gTrack->dEdx() > 0) ? TMath::Log10(gTrack->dNdx()) : dNdxL10min;
+      Double_t dNdxL10 = (gTrack->dNdx() > 0) ? TMath::Log10(gTrack->dNdx()) : dNdxL10min;
       fTrackHistograms2D[0]->Fill(pL10, dEdxL10);
       if(q>0) fTrackHistograms2D[1]->Fill(pL10, dEdxL10);
       else    fTrackHistograms2D[2]->Fill(pL10, dEdxL10);  
