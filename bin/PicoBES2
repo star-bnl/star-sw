@@ -401,7 +401,7 @@ end
  dir -ltdr * | grep -v 'Dec 29 1' | awk '{print $9}' | xargs rm -rf 
 
 ########################## Clean up /hlt/cephfs/daq/ ######################################################
-# Cosmics only 331-343 : day 331-333 *event.root files on /net/l401/data/scratch1/fisyak/2020/Cosmics/RF/
+# Cosmics only 331-343 : day 3x131-333 *event.root files on /net/l401/data/scratch1/fisyak/2020/Cosmics/RF/
 # ~/reco/2020/TFG19m/RF/11p5GeV
 foreach f (`ls -1d 3*/*/*MuDst.root`) 
   if (-r ../11p5GeV.B/${f}) continue;
