@@ -41,6 +41,7 @@
     <Construct sys="wcal" config="WCALv1" simu="1" />
     <Construct sys="hcal" config="HCALv1" simu="1" />
     <Construct sys="plat" config="PLATon" simu="2" />
+    <Construct sys="pres" config="PRESv1" simu="2" /> 
   </Geometry>
 
   <Geometry tag="y2020"  check="false" comment="Y2020 rough cut geometry">
