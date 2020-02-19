@@ -379,7 +379,7 @@ foreach done (`ls -1d */*/Done`)
   ls -ltr | tail -1 | grep Chain	
   if ($?) then	
     rm -rf .sl*
-    lxfn -s ~/macros/.sl73_* .	
+    ln -s ~/macros/.sl73_* .	
     root.exe -q -b 'Chain.C+("./*picoDst.root","PicoDst")' >&  Chain.log  &
     @ count++;  echo "count $count";
     if ($count > 40) then 
