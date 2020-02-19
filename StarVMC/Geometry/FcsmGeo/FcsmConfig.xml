@@ -2,11 +2,11 @@
   
  <Detector name="PRES" comment="Forward Preshower">
     <Modules>
-      PresGeo1, WcalGeo1, HcalGeo1, PlatGeo1
+      PresGeo1
     </Modules>
 
     <Setup name="PRESof" comment="off" module="PresGeo1" onoff="off" simu="1" />
-    <Setup name="PRESv1" comment="v0"  module="PresGeo1" onoff="on"  simu="1" />
+    <Setup name="PRESv1" comment="v0"  module="PresGeo1" onoff="on"  simu="2" />
 
   </Detector>
 
