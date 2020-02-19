@@ -350,7 +350,7 @@ foreach d (`ls -1d */2*`)
   endif
   lsf63 ~/xml/daq_2020StiCA.Minuit.TFG19m.xml
   cd -
-end
+endx[
 #  sleep 60
 
 ================================= Summurizing  ===============================================
@@ -371,6 +371,25 @@ foreach done (`ls -1d */*/Done`)
   endif
   cd -;
 end
+================================= Summurizing  ===============================================
+@ count = 0
+foreach done (`ls -1d */*/Done`)
+  set d = `dirname ${done}`
+  cd ${d}; pwd;
+  ls -ltr | tail -1 | grep Chain	
+  if ($?) then	
+    rm -rf .sl*
+    lxfn -s ~/macros/.sl73_* .	
+    root.exe -q -b 'Chain.C+("./*picoDst.root","PicoDst")' >&  Chain.log  &
+    @ count++;  echo "count $count";
+    if ($count > 40) then 
+        cd -
+	break;
+    endif
+  endif
+  cd -;
+end
+
 
 touch `grep total ???/2*/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fM\n", n/1.e6)}'`
 ################################################################################
@@ -390,10 +409,10 @@ foreach f (`ls -1d 3*/*/*MuDst.root`)
   mv ${f} ../11p5GeV.B/${f}
 end
 ########################### Clean Done #####################################################
+ @ count = 0
 foreach d (`ls -1d */*/Done`)
   set dir = `dirname ${d}`; echo "dir = ${dir}"
   cd ${dir}
-  @ count = 0
   ls -1d *.event.root
   if ($?) then 
 	continue;
@@ -403,7 +422,8 @@ end
 
 ########### Bad drift velocities #####################################################################
 grep -A 2 'table tpcDrift' 02[6-7]/*/*B.log | egrep '(233530|41608|90742|42830)' | tee list_of_bad_files
-grep -A 2 'table tpcDrift' 04[2-4]/*/*B.log | egrep '2020021(1|2)/(141636|184732|103302|)111714-' | tee list_of_bad_files
+grep -A 2 'table tpcDrift' 04?/*/*B.log | egrep '2020021(1|6)/(141636|184732|103302|111714|71125) -' | tee list_of_bad_files
+grep -A 2 'table tpcDrift' 04?/*/*B.log | egrep '73118 -' | tee list_of_bad_files
 foreach f (`awk -F\- '{print $1}' list_of_bad_files`)
 	set b = `basename ${f} B.log`; set d = `dirname ${f}`; mv ${d}/${b}* Zombie/
 end
