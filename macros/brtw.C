@@ -248,7 +248,14 @@ TF1 *brtw(TH1 *hist, Double_t MMin=0.3, Double_t MMax = 1.3, Double_t m1 = mpi, 
     Double_t nevents = z->GetEntries();
     if (nevents > 0) {
       Double_t SperE = S/nevents;
-      cout << "\tSignal per Event(" << nevents << ")  = " << SperE;
+      cout << "\tSignal per Event(";
+      if (nevents < 1000) 
+	cout << Form("%7.0f",nevents);
+      else if (nevents < 1e6)
+	cout << Form("%7.3fK",nevents/1e3);
+      else 
+	cout << Form("%7.3fM",nevents/1e6);
+      cout << ")  = " << SperE;
     }
   }
   cout << Form("\tM = %7.2f +/- %5.2f",1e3*Total->GetParameter(1),1e3*Total->GetParError(1))
