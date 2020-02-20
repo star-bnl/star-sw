@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.56 2019/05/11 02:20:34 genevb Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.57 2020/02/20 18:37:08 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -140,7 +140,7 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
     totalPads += totalSecPads;
     if (maxHitsPerSector > 0) {
       liveFrac = TMath::Max((Float_t) 0.1,
-			  ((Float_t) liveSecPads) / ((Float_t) totalSecPads));
+			  ((Float_t) liveSecPads) / (1e-15 + (Float_t) totalSecPads));
       maxHits[sector-1] = (Int_t) (liveFrac * maxHitsPerSector);
       if (Debug()) {LOG_INFO << "maxHits in sector " << sector
 			     << " = " << maxHits[sector-1] << endm;}
@@ -150,7 +150,7 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
     }
     if (maxBinZeroHits > 0) {
       liveFrac = TMath::Max((Float_t) 0.1,
-			    ((Float_t) livePads) / ((Float_t) totalPads));
+			    ((Float_t) livePads) / (1e-15 + (Float_t) totalPads));
       maxBin0Hits = (Int_t) (liveFrac * maxBinZeroHits);
       if (Debug()) {LOG_INFO << "maxBinZeroHits " << maxBin0Hits << endm;}
     } else {
