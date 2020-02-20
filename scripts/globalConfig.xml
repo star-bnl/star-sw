@@ -631,6 +631,13 @@ initializer. -->
                 </object>
           </void>
 
+          <void method="add">
+               <object id="BNL_condor_online_quick_CpuModelNumber6X" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="getValuesFrom">             <object idref="BNL_condor_cas_long"/>      </void> 
+                    <void method="setID">                     <string>bnl_condor_online_quick_CpuModelNumber6X</string></void>
+                </object>
+          </void>
+
 
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of of quick condor queues, for use with the CondorFastDispatcher ~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
@@ -1252,6 +1259,14 @@ initializer. -->
       <string>bnl_condor_online_CpuModelNumber63</string>
       <object id="bnl_condor_online_Policy_CpuModelNumber63" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
             <void method="addQueue"><object idref="BNL_condor_online_quick_CpuModelNumber63"/></void>
+            <void property="clusterName"><string>star.bnl.gov</string></void>
+      </object>
+    </void>
+   
+    <void method="put">
+      <string>bnl_condor_online_CpuModelNumber6X</string>
+      <object id="bnl_condor_online_Policy_CpuModelNumber6X" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+            <void method="addQueue"><object idref="BNL_condor_online_quick_CpuModelNumber6X"/></void>
             <void property="clusterName"><string>star.bnl.gov</string></void>
       </object>
     </void>
@@ -2629,6 +2644,25 @@ when_to_transfer_output = ON_EXIT</string>
                 </object>
             </void>
 
+
+             <void method="add">
+                <object id="Fast_condor_Dispatcher_CpuModelNumber6X" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">
+                    <void property="submitCommand">      <string>condor_submit</string>   </void>
+                    <void property="condorOptions">
+<string>should_transfer_files = YES
+when_to_transfer_output = ON_EXIT</string>
+                   </void>
+                    <void method="addRequirement"><string> (CpuModelNumber == 63 ||  CpuModelNumber == 62)  </string> </void>
+                    <void property="priorityUsed"><boolean>true</boolean>           </void>
+                    <void property="priorityMax"><double>20</double>                </void>
+                    <void property="priorityMin"><double>0</double>                 </void>
+                    <void property="defaultStorageSpace"><int>-1</int></void>
+                    <void property="maxAttempts">   <int>1</int>                     </void>
+                    <void property="msBtwnFailure"> <int>10000</int>                 </void>
+                    <void property="msBtwnSuccess"> <int>1000</int>                  </void>
+                    <void property="application">   <object idref="CSHApplication"/> </void>
+                </object>
+            </void>
 
 
 
@@ -4450,6 +4484,18 @@ end
                                 <void property="dispatcher">       <object idref="Fast_condor_Dispatcher_CpuModelNumber63"/>     </void>  <!--SHould chaneg to generic name-->
                                 <void property="batchSystem">      <string>condor</string>                 </void>    <!-- This is used for logging -->
                                 <void method="addQueue">           <object idref="BNL_condor_online_quick_CpuModelNumber63"/>    </void>    <!-- Even if batch system does not have a concept of queues a queue object must still be passed which states parameters such as runtime limit. -->
+                            </object>
+                        </void>
+                    </object>
+                </void>
+
+               <void method="addAccessPoint">
+                   <object class="gov.bnl.star.offline.scheduler.LocalAccessPoint">
+                        <void method="addAccessMethod">
+                            <object class="gov.bnl.star.offline.scheduler.AccessMethod">
+                                <void property="dispatcher">       <object idref="Fast_condor_Dispatcher_CpuModelNumber6X"/>     </void>  <!--SHould chaneg to generic name-->
+                                <void property="batchSystem">      <string>condor</string>                 </void>    <!-- This is used for logging -->
+                                <void method="addQueue">           <object idref="BNL_condor_online_quick_CpuModelNumber6X"/>    </void>    <!-- Even if batch system does not have a concept of queues a queue object must still be passed which states parameters such as runtime limit. -->
                             </object>
                         </void>
                     </object>
