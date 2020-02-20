@@ -29,7 +29,7 @@
  @search_files = ();
  my $ROOT_VERSION = `root-config --version`;
  chomp($ROOT_VERSION);
- my ($ROOT_MAIN,$ROOT_MINOR) = split ('/',$ROOT_VERSION); #print "ROOT_VERSION = $ROOT_VERSION => $ROOT_MAIN $ROOT_MINOR\n";
+ my ($ROOT_MAIN,$ROOT_MINOR) = split ('/',$ROOT_VERSION); print "ROOT_VERSION = $ROOT_VERSION => $ROOT_MAIN $ROOT_MINOR\n";
  $PLATFORM      = `root-config --platform`; chomp($PLATFORM);
  $ARCH          = `root-config --arch`; chomp($ARCH);
  $CC           = `root-config  --cc`; chomp($CC); # print "CC = $CC\n";
@@ -226,6 +226,7 @@
  $DEBUG        = "-g";# -Og"; # -fstack-protector-all -fno-omit-frame-pointer"; # add from VP. Check impact on CPU
  $FDEBUG       = $DEBUG;
  $NOOPT        = "";
+ if ($ROOT_MAIN > 6.0) {$NOOPT = $DEBUG;}
  if ( defined( $ARG{NODEBUG} ) || $NODEBUG ) {
    $DEBUG = $ENV{DEBUG_OPTIONS}||"-O2 -g";
    if ($DEBUG !~ /-g/) {$DEBUG = $$DEBUG . " -g";}
