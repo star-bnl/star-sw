@@ -80,6 +80,10 @@ while ( defined($f = <PP>)) {
        
 }
 
+print 
+    "If you are executing this from several windows, please launch ".
+    "the others now ...\n";
+
 # Any $CNT != means we have generated something
 # we could do a cons +StarVMC/Geometry - this will
 # install the age files
