@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.h,v 1.28 2018/10/17 20:45:27 fisyak Exp $
+ * $Id: StTpcHitMaker.h,v 1.29 2020/02/20 18:36:54 genevb Exp $
  * StTpcHitMaker - class to fill the StEvent with TPC clusters from DAQ reader
  * $Log: StTpcHitMaker.h,v $
+ * Revision 1.29  2020/02/20 18:36:54  genevb
+ * Reduce time-expenseive calls to GetInputDS(), some coverity cleanup
+ *
  * Revision 1.28  2018/10/17 20:45:27  fisyak
  * Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
  *
@@ -94,6 +97,7 @@ class StTpcHit;
 class tpc_cl;
 class daq_cld;
 class tpc_t;
+class StEvent;
 class StTpcHitCollection;
 class StTpcHitMaker : public StRTSBaseMaker {
  public:
@@ -146,6 +150,8 @@ class StTpcHitMaker : public StRTSBaseMaker {
   TH1F        *fSectCounts;
   Int_t        RowNumber();
  protected:
+  StEvent* pEvent;
+  StTpcHitCollection* pHitCollection;
   StTpcHit *CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t row);
   StTpcHit *CreateTpcHit(const daq_cld  &cluster, Int_t sector, Int_t row);
     

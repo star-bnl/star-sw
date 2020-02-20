@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.78 2019/05/11 02:20:34 genevb Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.79 2020/02/20 18:36:54 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.79  2020/02/20 18:36:54  genevb
+ * Reduce time-expenseive calls to GetInputDS(), some coverity cleanup
+ *
  * Revision 1.78  2019/05/11 02:20:34  genevb
  * Add TPC-dead status handling
  *
@@ -295,7 +298,9 @@ static  const Char_t *Names[StTpcHitMaker::kAll] = {"undef",
 						    "TpcAvLaser","TpxAvLaser"};
 //_____________________________________________________________
 StTpcHitMaker::StTpcHitMaker(const char *name) : StRTSBaseMaker("tpc",name), kMode(kUndefined),
-						 kReaderType(kUnknown), mQuery(""), fTpc(0), fAvLaser(0), fSectCounts(0) {
+						 kReaderType(kUnknown), mQuery(""), fTpc(0), fId(0),
+                                                 maxBin0Hits(0), bin0Hits(0), fAvLaser(0), fSectCounts(0),
+                                                 pEvent(0),pHitCollection(0) {
   SetAttr("minSector",1);
   SetAttr("maxSector",24);
   SetAttr("minRow",1);
@@ -392,7 +397,7 @@ Int_t StTpcHitMaker::InitRun(Int_t runnumber) {
     }
     if (maxHitsPerSector > 0) {
       liveFrac = TMath::Max((Float_t) 0.1,
-                 ((Float_t) liveSecPads) / ((Float_t) totalSecPads));
+                 ((Float_t) liveSecPads) / (1e-15 + (Float_t) totalSecPads));
       maxHits[sector-1] = (Int_t) (liveFrac * maxHitsPerSector);
       if (Debug()) {LOG_INFO << "maxHits in sector " << sector
                              << " = " << maxHits[sector-1] << endm;}
@@ -428,6 +433,10 @@ Int_t StTpcHitMaker::Make() {
     LOG_WARN << "TPC status indicates it is unusable for this event. Ignoring hits." << endm;
     return kStOK;
   }
+  pEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));
+  if (Debug()) {LOG_INFO << "StTpcHitMaker::Make : StEvent has been retrieved " <<pEvent<< endm;}
+  if (! pEvent) {LOG_INFO << "StTpcHitMaker::Make : StEvent has not been found " << endm; return kStWarn;}
+  pHitCollection = pEvent->tpcHitCollection();
 
   static Int_t minSector = IAttr("minSector");
   static Int_t maxSector = IAttr("maxSector");
@@ -519,11 +528,7 @@ Int_t StTpcHitMaker::Make() {
       return kStSkip;
   }
   if (kMode == kTpc || kMode == kTpx) { // || kMode == kiTPC) { --> no after burner for iTpc
-    StEvent *pEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));
-    if (Debug()) {LOG_INFO << "StTpcHitMaker::Make : StEvent has been retrieved " <<pEvent<< endm;}
-    if (! pEvent) {LOG_INFO << "StTpcHitMaker::Make : StEvent has not been found " << endm; return kStWarn;}
-    StTpcHitCollection *hitCollection = pEvent->tpcHitCollection();
-    if (hitCollection && ! IAttr("NoTpxAfterBurner")) AfterBurner(hitCollection);
+    if (pHitCollection && ! IAttr("NoTpxAfterBurner")) AfterBurner(pHitCollection);
   }
   return kStOK;
 }
@@ -547,18 +552,14 @@ Int_t  StTpcHitMaker::Finish() {
 //_____________________________________________________________
 Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
   // Populate StEvent with StTpcHit collection
-  StEvent *pEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));
-  if (Debug()) {LOG_INFO << "StTpcHitMaker::Make : StEvent has been retrieved " <<pEvent<< endm;}
-  if (! pEvent) {LOG_INFO << "StTpcHitMaker::Make : StEvent has not been found " << endm; return 0;}
-  StTpcHitCollection *hitCollection = pEvent->tpcHitCollection();
-  if ( !hitCollection )  {
+  if ( !pHitCollection )  {
     // Save the hit collection to StEvent...if needed
-    hitCollection = new StTpcHitCollection();
-    pEvent->setTpcHitCollection(hitCollection);
+    pHitCollection = new StTpcHitCollection();
+    pEvent->setTpcHitCollection(pHitCollection);
   }
   Int_t NRows = DaqDta()->GetNRows();
   if (NRows <= 0) return 0;
-  Int_t nhitsBefore = hitCollection->numberOfHits();
+  Int_t nhitsBefore = pHitCollection->numberOfHits();
   Int_t sec = DaqDta()->Sector();
   Int_t row = RowNumber();
   if (kReaderType == kLegacyTpc || kReaderType == kLegacyTpx) {
@@ -572,7 +573,7 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
 	  if (! c || ! c->charge) continue;
 	  if (c->flags &&
 	     (c->flags & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE)))  continue;
-	  Int_t iok = hitCollection->addHit(CreateTpcHit(*c,sector,padrow+1));
+	  Int_t iok = pHitCollection->addHit(CreateTpcHit(*c,sector,padrow+1));
 	  assert(iok);
 	}
       }
@@ -600,11 +601,11 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
       if (cld->tb >= __MaxNumberOfTimeBins__) continue;
       if (cld->flags &&
 	 (cld->flags & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE)))  continue;
-      Int_t iok = hitCollection->addHit(CreateTpcHit(*cld,sector,row));
+      Int_t iok = pHitCollection->addHit(CreateTpcHit(*cld,sector,row));
       assert(iok);
     }
   }
-  Int_t nhits = hitCollection->numberOfHits() - nhitsBefore;
+  Int_t nhits = pHitCollection->numberOfHits() - nhitsBefore;
   if (Debug()) {
     LOG_INFO << " Total hits in Sector : row " << sector << " : " << row << " = " << nhits << endm;
   }
@@ -1286,9 +1287,9 @@ StTpcHit* StTpcHitMaker::StTpcHitFlag(const StThreeVectorF& p,
   // New hit
   StTpcHit* hit = new StTpcHit(p,e,hw,q,c,idTruth,quality,id,mnpad,mxpad,mntmbk,mxtmbk,cl_x,cl_t,adc);
 
-  // Check for sanity
-  if ( mntmbk<0 || mxtmbk<0 || mntmbk>500 || mxtmbk>500
-    || mnpad <0 || mxpad <0 || mnpad >500 || mxpad >500
+  // Check for sanity (no need to check mn,mx for <0 as they are passed unsigned)
+  if ( mntmbk>500 || mxtmbk>500
+    || mnpad >500 || mxpad >500
     || mxpad-mnpad > 100
     || (Float_t) mntmbk>cl_t || (Float_t) mxtmbk<cl_t
     || (Float_t) mnpad >cl_x || (Float_t) mxpad <cl_x
