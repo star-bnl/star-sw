@@ -9,6 +9,22 @@
 #
 set self="star_cshrc_csh"
 
+# support for singularity container
+if ( $?OPTSTAR ) then
+    # either the user has defined it or it is inherited
+    # if inherited, users has forgotten the -e option and
+    # to avoid confusion and a mess, force a full login
+    set IS_VM=`/bin/df / | grep singularity`
+    if ( "$IS_VM" != "" ) then
+	if ( $?DECHO ) echo "$self :: singularity detected - forcing a full login"
+	# we need to force the full login because singularity
+	# propagates some of the host ENV 
+	unsetenv star_login_csh star_cshrc_csh
+	unsetenv XOPTSTAR OPTSTAR optstar xoptstar
+	setenv FLOGIN 1
+    endif
+endif
+
 # have a way to force reloading full login
 if ( $?FLOGIN || $?GNOME_DESKTOP_SESSION_ID ) then
    unsetenv star_login_csh

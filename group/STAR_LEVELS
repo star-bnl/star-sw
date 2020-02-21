@@ -95,12 +95,13 @@ if ($ARGV[0] eq "-g"){
 	$origin = $1;
     }
 
-
+    $dbg  = $ENV{NODEBUG}?"Optimized":"Debug";
+    $arch = ($ENV{USE_64BITS}==1)?"64bits":"32bits";
 
     $ROOT = "ROOT-$ENV{ROOT_LEVEL}";
     if ( defined($tmp = $ENV{QTDIR}) ){ $tmp =~ s/.*\///; $ROOT .= "-$tmp";}
 
-    print "$host;CERN-$ENV{CERN_LEVEL};$ROOT;STAR-$VERSION;root4star-$cmo/$cdy/$year-$chr:$cmin-$pgmf;$origin\n";
+    print "$host;CERN-$ENV{CERN_LEVEL};$ROOT;STAR-$VERSION;root4star-$cmo/$cdy/$year-$chr:$cmin-$pgmf;$dbg:$arch:$origin\n";
 }
 
 
