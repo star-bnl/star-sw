@@ -1,0 +1,28 @@
+StKFParticleAnalysisMaker::Make 
+	StKFParticleInterface::ProcessEvent
+		StKFParticleInterface::ReconstructParticles
+			KFParticleTopoReconstructor::ReconstructParticles 
+				KFParticleTopoReconstructor::TransportPVTracksToPrimVertex
+					fTracks[iTV].SetParameter( tmpPart.GetParameter(iP), iP, iTr );
+					fTracks[iTV].SetCovariance( tmpPart.GetCovariance(iC), iC, iTr )
+				KFParticleTopoReconstructor::GetChiToPrimVertex(&(fPV[0]), fPV.size()
+				KFParticleFinder::FindParticles	                             The main interface which runs reconstruction of short-lived particles
+
+  //Cuts: cuts
+  //track + track
+  //chi2_prim         chi2_geo          ldl: chi2_geo is chi2/NDF to form a secondary vertex
+    chiprimCut
+  fCuts2D[0] = 3.f; fCuts2D[1] = 3.f; fCuts2D[2] = 5.f; 
+  //cuts to select primary and secondary particles: secCuts
+  //mass              chi2_topo          ldl
+  fSecCuts[0] = 3.f; fSecCuts[1] = 5.f; fSecCuts[2] = 10.f;
+
+					KFParticleFinder::Find2DaughterDecay                 Reconstructs all 2-daughter decays.
+					KFParticleFinder::FindTrackV0Decay
+						KFParticleFinder::ConstructV0                Combines two SIMD vectors of particles into 2-daughter candidate.
+							 mother.Construct(vDaughtersPointer, 2, 0);
+					KFParticleFinder::ExtrapolateToPV
+					KFParticleFinder::FindTrackV0Decay
+					KFParticleFinder::SelectParticles	             Selects particles from a set of candidates "vCandidates" according to the provided cuts
+					KFParticleFinder::CombinePartPart                    Combines two already constructed candidates into a new particle.
+				KFParticleTopoReconstructor::SelectParticleCandidates        Cleans reconstructed short-lived particles:
