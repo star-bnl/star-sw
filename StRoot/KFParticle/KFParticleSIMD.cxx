@@ -24,6 +24,11 @@
 #include "KFParticleSIMD.h"
 #include "KFParticle.h"
 #include "KFParticleDatabase.h"
+#ifdef __ROOT__
+#include "TClass.h"
+//#include "TRSymMatrix.h"
+//#include "TRVector.h"
+#endif
 
 #ifdef HomogeneousField
 float_v KFParticleSIMD::fgBz = -5.f;  //* Bz compoment of the magnetic field
@@ -1044,3 +1049,23 @@ void KFParticleSIMD::GetKFParticle(KFParticle* Part, int nPart)
   for(int i=0; i<nPart; i++)
     GetKFParticle(Part[i],i);
 }
+#ifdef __ROOT__
+//________________________________________________________________________________
+void KFParticleSIMD::Print(Option_t *opt) const {
+  std::cout << *this << std::endl;
+//   if (opt && (opt[0] == 'a' || opt[0] == 'A')) {
+//     TRVector P(8,fP); std::cout << "par. " << P << std::endl;
+//     TRSymMatrix C(8,fC); std::cout << "cov. " << C << std::endl;
+    
+//   }
+}
+//________________________________________________________________________________
+std::ostream&  operator<<(std::ostream& os, const KFParticleSIMD& particle) {
+  KFParticle Part;
+  for (int iv = 0; iv < float_vLen; iv++) {
+    particle.GetKFParticle(Part,iv);
+    os << iv << "\t" << Part << std::endl;
+  }
+  return os;
+}
+#endif
