@@ -336,6 +336,9 @@ class KFParticleSIMD :public KFParticleBaseSIMD
   
   void Transport( float_v dS, const float_v* dsdr, float_v P[], float_v C[], float_v* dsdr1=0, float_v* F=0, float_v* F1=0  ) const ;
   void TransportFast( float_v dS, float_v P[] ) const ;
+#ifdef __ROOT__ //for the STAR experiment
+  virtual void Print(Option_t *opt="") const;
+#endif
   
  protected: 
   
@@ -1107,4 +1110,7 @@ inline void KFParticleSIMD::TransportFast( float_v dS, float_v P[] ) const
 #endif
 }
 
+#ifdef __ROOT__ //for the STAR experiment
+std::ostream&  operator<<(std::ostream& os, KFParticleSIMD const & particle);
+#endif
 #endif 
