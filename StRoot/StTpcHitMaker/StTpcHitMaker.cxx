@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.79 2020/02/20 18:36:54 genevb Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.80 2020/02/24 23:15:06 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.80  2020/02/24 23:15:06  genevb
+ * Faster Afterburner(), Remove compiler ambiguity on double vs. float in TMath::Min,Max()
+ *
  * Revision 1.79  2020/02/20 18:36:54  genevb
  * Reduce time-expenseive calls to GetInputDS(), some coverity cleanup
  *
@@ -396,8 +399,8 @@ Int_t StTpcHitMaker::InitRun(Int_t runnumber) {
       totalPads += totalSecPads;
     }
     if (maxHitsPerSector > 0) {
-      liveFrac = TMath::Max((Float_t) 0.1,
-                 ((Float_t) liveSecPads) / (1e-15 + (Float_t) totalSecPads));
+      liveFrac = TMath::Max(0.1f,
+                 ((Float_t) liveSecPads) / (1e-15f + (Float_t) totalSecPads));
       maxHits[sector-1] = (Int_t) (liveFrac * maxHitsPerSector);
       if (Debug()) {LOG_INFO << "maxHits in sector " << sector
                              << " = " << maxHits[sector-1] << endm;}
@@ -407,7 +410,7 @@ Int_t StTpcHitMaker::InitRun(Int_t runnumber) {
     }
   }
   if (maxBinZeroHits > 0) {
-    liveFrac = TMath::Max((Float_t) 0.1,
+    liveFrac = TMath::Max(0.1f,
                ((Float_t) livePads) / ((Float_t) totalPads));
     maxBin0Hits = (Int_t) (liveFrac * maxBinZeroHits);
     if (Debug()) {LOG_INFO << "maxBinZeroHits " << maxBin0Hits << endm;}
@@ -1141,6 +1144,7 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
   }
   TpcHitPair_t pairC;
 #endif
+  Char_t mergedHits[65536];
   UInt_t numberOfSectors = TpcHitCollection->numberOfSectors();
   UInt_t TotNoHits = 0;
   UInt_t RejNoHits = 0;
@@ -1149,7 +1153,7 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
     if (sectorCollection) {
       UInt_t numberOfPadrows = sectorCollection->numberOfPadrows();
       for (UInt_t row = 1; row <= numberOfPadrows; row++) {
-	StTpcPadrowHitCollection *rowCollection = TpcHitCollection->sector(sec-1)->padrow(row-1);
+	StTpcPadrowHitCollection *rowCollection = sectorCollection->padrow(row-1);
 	if (rowCollection) {
 	  UInt_t NoHits = rowCollection->hits().size();
 	  TotNoHits += NoHits;
@@ -1159,8 +1163,19 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
 	       TpcHitLess);
 	  // Merge splitted clusters
 	  Int_t merged = 0;
-	  for (UInt_t k = 0; k < NoHits; k++) {
-	    StTpcHit* kHit = TpcHitCollection->sector(sec-1)->padrow(row-1)->hits().at(k);
+          Char_t mergePass = 0;
+          memset(mergedHits,0,65536*sizeof(Char_t));
+          Int_t newlyMerged = 1;
+          while (newlyMerged > 0) {
+           if (mergePass == 255) {
+             LOG_WARN << "Too many merging passes! Afterburner aborted for sector="
+                      << sec << " row=" << row << endm;
+             break;
+           }
+           newlyMerged = 0;
+	   for (UInt_t k = 0; k < NoHits; k++) {
+	    if (mergedHits[k] != mergePass) continue; // skip any hits not merged in previous pass
+	    StTpcHit* kHit = rowCollection->hits().at(k);
 	    if (_debug) {cout << "k " << k; kHit->Print();}
 	    if (kHit->flag())                          continue;
 #ifdef __MAKE_NTUPLE__
@@ -1176,12 +1191,18 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
 	    pairC.IdTK   = kHit->idTruth();
 	    pairC.QAK    = kHit->qaTruth();
 #endif
-	    for (UInt_t l = 0; l < NoHits; l++) {
-	      if (k == l) continue;
-	      StTpcHit* lHit = TpcHitCollection->sector(sec-1)->padrow(row-1)->hits().at(l);
+	    for (UInt_t l = k+1; l < NoHits; l++) {
+	      StTpcHit* lHit = rowCollection->hits().at(l);
 	      if (_debug) {cout << "l " << l; lHit->Print();}
 	      if (lHit->flag()) continue;
-	      // Are extends overlapped ?
+	      // Most stringent tests first to reduce calls
+	      // check hits near by
+	      bool notNear =  (TMath::Abs(kHit->pad()        - lHit->pad())        > padDiff ||
+		               TMath::Abs(kHit->timeBucket() - lHit->timeBucket()) > timeBucketDiff);
+#ifndef __MAKE_NTUPLE__
+	      if (notNear) continue;
+#endif
+	      // Are extents overlapped ?
 	      Int_t padOverlap = TMath::Min(kHit->maxPad(),lHit->maxPad())
 		-                TMath::Max(kHit->minPad(),lHit->minPad());
 	      if (padOverlap < 0) continue;
@@ -1203,10 +1224,8 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
 		pairC.tbkOv  = tmbkOverlap;
 		tup->Fill(&pairC.sec);
 	      }
+	      if (notNear) continue;
 #endif
-	      // check hits near by
-	      if (TMath::Abs(kHit->pad()        - lHit->pad())        > padDiff ||
-		  TMath::Abs(kHit->timeBucket() - lHit->timeBucket()) > timeBucketDiff) continue;
 #ifdef FCF_CHOPPED
 	      UShort_t flag = lHit->flag() | FCF_CHOPPED; 
 #else
@@ -1249,8 +1268,13 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
 		cout << "m " << k; kHit->Print();
 	      }
 	      merged++;
-	    }
-	  }
+	      newlyMerged++;
+	      mergedHits[k] = mergePass + 1;
+	      break; // done with hit k for now, will look again later
+	    } // l hit loop
+	   } // k hit loop
+	   mergePass++;
+	  } // merging pass
 #ifdef __CORRECT_S_SHAPE__
 	  // Correct S - shape in pad direction
 	  for (UInt_t k = 0; k < NoHits; k++) {
@@ -1266,12 +1290,12 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
 	    transform(padcoord,local,kFALSE);
 	    transform(local,global);
 	    kHit->setPosition(global.position());
-	  }
+	  } // k hit loop
 #endif
-	}
-      }
-    }
-  }
+	} // row collection exists
+      } // rows
+    } // sector collection exists
+  } // sectors
   LOG_INFO << "StTpcHitMaker::AfterBurner from " << TotNoHits << " Total no. of hits "  << RejNoHits << " were rejected" << endm;
   return;
 };
