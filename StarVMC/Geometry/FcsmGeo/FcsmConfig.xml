@@ -6,7 +6,7 @@
     </Modules>
 
     <Setup name="PRESof" comment="off" module="PresGeo1" onoff="off" simu="1" />
-    <Setup name="PRESv1" comment="v0"  module="PresGeo1" onoff="on"  simu="2" />
+    <Setup name="PRESv1" comment="v0"  module="PresGeo1" onoff="on"  simu="1" />
 
   </Detector>
 
