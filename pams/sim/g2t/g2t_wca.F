@@ -27,7 +27,7 @@
 *                  add to track linked list 
 *
 *        g2t_emc_hit(i).next_tr_hit_p = g2t_track(trac).hit_emc_p
-         g2t_track(trac).hit_emc_p    = i
+         g2t_track(trac).hit_wca_p    = i
          g2t_track(trac).n_wca_hit    = g2t_track(trac).n_wca_hit + 1
 
       enddo    
