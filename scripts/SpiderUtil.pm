@@ -287,6 +287,13 @@ sub SetTimeThreshold
     return  $SPDR::THRESHOLD;
 }
 
+#
+# Set a defferent value than the default for the timeout
+# Essentially, after some time, we will leave no matter if
+# we have more tasks to perform. This will allow other
+# processes to complete and give equal share across processes.
+# Cace will take care of not re-doing the records we did before.
+#
 sub SetTimeout
 {
     if ($_[0] =~ m/$SPDR::NAME/) {   shift(@_);} 
