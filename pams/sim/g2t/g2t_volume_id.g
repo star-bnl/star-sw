@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.96 2020/02/05 15:18:16 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.97 2020/02/25 22:53:08 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.97  2020/02/25 22:53:08  jwebb
+* Add FCS preshower volume ID
+*
 * Revision 1.96  2020/02/05 15:18:16  jwebb
 * Fix g2t_volume_id for forward silicon
 *
@@ -261,7 +264,7 @@
 
       integer :: g2t_volume_id
       integer :: g2t_tpc_volume_id, g2t_fst_volume_id, g2t_stg_volume_id
-      integer :: g2t_wca_volume_id, g2t_hca_volume_id
+      integer :: g2t_wca_volume_id, g2t_hca_volume_id, g2t_pre_volume_id
 
 +CDE,gcunit.
 * 
@@ -1203,6 +1206,8 @@ c           write (*,*) csys, volume_id
            volume_id = g2t_wca_volume_id( numbv )
       ELSE IF (CSYS=='hca') THEN "FCS Hadronic calorimeter"
            volume_id = g2t_hca_volume_id( numbv )
+      ELSE IF (CSYS=='pre') THEN "FCS Preshower"
+           volume_id = g2t_pre_volume_id( numbv )
 
 *******************************************************************************************
 ** 28                                                                           Prashanth S 
@@ -1497,4 +1502,15 @@ c           write (*,*) csys, volume_id
        g2t_hca_volume_id = mod*1000 + tow
 
      End Function g2t_hca_volume_id
+!//______________________________________________________________________________________      
+     Integer function g2t_pre_volume_id( numbv ) 
+       Integer, intent(in) :: numbv(15)
+       Integer             :: layer, slat
+
+       layer = numbv(1)
+       slat = numbv(2)
+
+       g2t_pre_volume_id = layer*1000 + slat
+
+     End Function g2t_pre_volume_id
 !//______________________________________________________________________________________      
