@@ -41,6 +41,7 @@
 #include "TError.h"
 #include "TBrowser.h"
 #include "TBenchmark.h"
+#include <sys/times.h>
 #include "TSystem.h"
 #include "StChain.h"
 #include "StEvtHddr.h"
@@ -131,6 +132,12 @@ const StChainOpt *StChain::GetChainOpt()    const
 Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk) 
 {
   TBenchmark evnt;
+  struct tms cpt;
+  Double_t userCpuTime=0;
+  Double_t systemCpuTime=0;
+  Double_t childUserCpuTime=0;
+  Double_t childSystemCpuTime=0;
+  Double_t gTicks = (Double_t) sysconf(_SC_CLK_TCK);
   int jCur=0,iMake=0;
   Bool_t quiet = gEnv->GetValue("quiet", 0);
 #ifdef STAR_TRACKING 
@@ -206,6 +213,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 #endif
   for (jCur=jBeg; jCur<=jEnd; jCur++) {
      evnt.Reset(); evnt.Start("QAInfo:");
+     times(&cpt);
+     userCpuTime = ((Double_t) cpt.tms_utime) / gTicks;
+     systemCpuTime = ((Double_t) cpt.tms_stime) / gTicks;
+     childUserCpuTime = ((Double_t) cpt.tms_cutime) / gTicks;
+     childSystemCpuTime = ((Double_t) cpt.tms_cstime) / gTicks;
 
      Clear();
      iMake = Make(jCur);
@@ -216,6 +228,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
      evnt.Stop("QAInfo:");
      if (! quiet) {
      //  evnt.Show("QAInfo:");
+     times(&cpt);
+     userCpuTime = ((Double_t) cpt.tms_utime) / gTicks - userCpuTime;
+     systemCpuTime = ((Double_t) cpt.tms_stime) / gTicks - systemCpuTime;
+     childUserCpuTime = ((Double_t) cpt.tms_cutime) / gTicks - childUserCpuTime;
+     childSystemCpuTime = ((Double_t) cpt.tms_cstime) / gTicks - childSystemCpuTime;
      
      //
      // ATTENTION - please DO NOT change the format of the next line,
@@ -228,7 +245,10 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 	jCur,GetRunNumber(),GetEventNumber(),GetDate(), GetTime(),
 	     iMake,evnt.GetRealTime("QAInfo:"),evnt.GetCpuTime("QAInfo:")) 
      << endm;
+     LOG_QA << Form("QAInfo: Cpu Times: user / system / user children / system children = %8.2f / %8.2f / %8.2f / %8.2f seconds",
+                    userCpuTime,systemCpuTime,childUserCpuTime,childSystemCpuTime) << endm;
      }
+
 #ifdef STAR_TRACKING 
 #ifdef OLDTRACKING    
   // Add a record to MySQL tracking Db     
@@ -315,8 +335,14 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.83 2019/03/21 18:56:46 jeromel Exp $
+// $Id: StChain.cxx,v 1.85 2020/02/25 15:29:25 genevb Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.85  2020/02/25 15:29:25  genevb
+// Track complete CPU time usage
+//
+// Revision 1.84  2020/02/24 23:20:08  genevb
+// Add timer for user CPU time (TBenchmark reports user+system)
+//
 // Revision 1.83  2019/03/21 18:56:46  jeromel
 // Added ATTENTION message
 //

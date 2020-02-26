@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.178 2020/02/04 17:46:23 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.179 2020/02/25 23:25:41 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.179  2020/02/25 23:25:41  jwebb
+// Include FCS preshower hits
+//
 // Revision 1.178  2020/02/04 17:46:23  jwebb
 //
 // Update to forward silicon geometry and associated changes to support.
@@ -677,6 +680,7 @@
 #include "g2t/St_g2t_etr_Module.h"
 #include "g2t/St_g2t_hca_Module.h"
 #include "g2t/St_g2t_wca_Module.h"
+#include "g2t/St_g2t_pre_Module.h"
 #include "g2t/St_g2t_fts_Module.h"
 #include "g2t/St_g2t_stg_Module.h"
 #include "g2t/St_g2t_epd_Module.h"
@@ -1341,6 +1345,8 @@ Int_t St_geant_Maker::Make() {
   AddHits<St_g2t_fts_hit>( "STGH",{"TGCG"},                        "g2t_stg_hit", g2t_stg );
   AddHits<St_g2t_emc_hit>( "WCAH",{"WSCI"},                        "g2t_wca_hit", g2t_wca );
   AddHits<St_g2t_hca_hit>( "HCAH",{"HSCI"},                        "g2t_hca_hit", g2t_hca );
+  AddHits<St_g2t_emc_hit>( "PRES",{"PSCI"},                        "g2t_emc_hit", g2t_pre );
+
 
   // Event plane detector 
   AddHits<St_g2t_ctf_hit>( "EPDH", {"EPDT"}              , "g2t_epd_hit", g2t_epd ); 

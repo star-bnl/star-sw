@@ -98,7 +98,17 @@ C    Loop here
 C    Check BTEST(IDRUN,IS)                                              
          IF (BTEST(IDRUN,IS)) IRNDM=IBSET(IRNDM,30-IS)                  
 5061  CONTINUE                                                          
-5062  CONTINUE                                                          
+5062  CONTINUE  
+ 
+
+      CALL getopt('-seed',CR)
+      read (CR,*) RUN
+      if ( run .gt. 0 ) then
+         write (*,*) 'Used specified seed = ', run
+         irndm = run
+      endif
+
+                                                        
       CALL RLUXGO (LUX,IRNDM,0,0)                                       
       PRINT *,'CALL RANLUX(RVEC,LEN) to generate random numbers (V115)' 
 *

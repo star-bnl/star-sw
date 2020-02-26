@@ -28,7 +28,7 @@ if ($#ARGV == -1){
 
    -nocache           do not use caching (default)
    -dcache            delete cache entirely
-   -cache             use caching which will allow to process the difference 
+   -cache             use caching which will allow to process the difference
                       only saving querry cycles
    -coff Offsset      add the value Offset to the cache frequency
 
@@ -52,7 +52,7 @@ if ($#ARGV == -1){
 
  Arguments are
    ARGV0   the base path of a disk to scan (default /star/data06)
-   ARGV1   the filetype (default .picoDst.root ). If null, it will
+   ARGV1   the filetype (default .root ). If null, it will
            search for all files
    ARGV2   this scripts limits it to a sub-directory "reco" starting
            from ARGV0. Use this argument to overwrite.
@@ -122,7 +122,7 @@ for ($i=0 ; $i <= $#ARGV ; $i++){
     if ($ARGV[$i] eq "-o"){
 	$FLNM = $ARGV[$i+1];
 
-	# Be sure we check on the tmp file and do 
+	# Be sure we check on the tmp file and do
 	# not have process clashing.
 	if ( -e "$FLNM.tmp"){
 	    my(@items)=stat("$FLNM.tmp");
@@ -132,7 +132,7 @@ for ($i=0 ; $i <= $#ARGV ; $i++){
                 if ( ! open(FO,">>$FLNM") ){
 		    die "Failed to open $FLNM in append mode\n";
 		}
-                print FO 
+                print FO
 		    "$FLNM.tmp detected and more recent than expected. ".
 		    "Process $$ exit.\n";
                 close(FO);
@@ -147,7 +147,7 @@ for ($i=0 ; $i <= $#ARGV ; $i++){
 	    die "Failed to open $FLNM.tmp\n";
 	}
 	# if we were called and there is a .kill file, remove
-	$FLNM =~ m/(.*)(\..*)/; $tmp = $1; 
+	$FLNM =~ m/(.*)(\..*)/; $tmp = $1;
 	if ( -e "$tmp.kill"){
 	    print "Deleting $tmp.kill\n";
 	    unlink("$tmp.kill");
@@ -162,9 +162,9 @@ for ($i=0 ; $i <= $#ARGV ; $i++){
 	$DOCACHE= 0;
     } elsif ($ARGV[$i] eq "-cache"){
 	$DOCACHE= 1;
-    } elsif ($ARGV[$i] eq "-dcache"){	
+    } elsif ($ARGV[$i] eq "-dcache"){
 	$DOCACHE= -1;
-	
+
     } elsif ($ARGV[$i] eq "-k"){
 	$SUBPATH = $ARGV[++$i];
 
@@ -189,7 +189,7 @@ for ($i=0 ; $i <= $#ARGV ; $i++){
 
 	    # this will initialize the caching values
 	    $SPDR->ToFromCache(-2);
-	    
+
 	    # use it as seed
 	    if ( $HOST =~ m/(\d+)/ ){
 		$CACHOFF = ($1 % ($SPDR->SetCacheLimit()*5));
@@ -235,7 +235,7 @@ $failed = $unkn = $old = $new = 0;
 $DOIT   = ($#ALL == -1);
 
 
-if ( ! defined($FTYPE) ){  $FTYPE = ".picoDst.root";}
+if ( ! defined($FTYPE) ){  $FTYPE = ".root";}
 $FTYPE =~ s/^\s*(.*?)\s*$/$1/;   # trim leading/trailing
 
 if ( $DEBUG ){
@@ -272,7 +272,7 @@ $etimer = time()-$stimer;
 if ( $DOCACHE == -1){     $SPDR->ToFromCache(-1); }
 
 
-    
+
 # Eventually, if nothing is to be done, leave now
 if ($#ALL == -1){ goto FINAL_EXIT;}
 
@@ -327,10 +327,34 @@ chomp($NODE    = `/bin/hostname`);
 &Stream("Info : We are on $NODE started on ".localtime());
 &Stream("Info : Arguments [".join(" ",@ARGV)."]");
 
+$PMOD = 500;                # initial modulo
+$IMOD = ($#ALL+1)/20;       # ideal i.e. only 20 but if we have million files ...
+$KNT  = 0;                  # a kounter :-)
+$IMOD = int($IMOD/100)*100; # round to the closest 100
 
 undef(@TEMP);  # to be sure
+
 foreach  $file (@ALL){
-    last if $SPDR->CheckTime(-1);
+    if ( $SPDR->CheckTime(-1)){
+	&Stream("Info : Leaving (timer check indicated we should stop)");
+	last;
+    } elsif ( ($tmp=$new+$old+$failed) % $PMOD == 0 ){
+	if ( $tmp == 0){
+	    &Stream("Info : We are starting our scan PMOD=$PMOD, IMOD=$IMOD");
+	} else {
+	    &Stream("Info : Treated $tmp files (".
+		    sprintf("%.2f%%",100*($tmp/($#ALL+1))).")");
+	}
+	$KNT++;
+	if ( $KNT > 3 && $PMOD < $IMOD ){
+	    if ( $PMOD < $IMOD ){
+		$KNT  = 0;
+		$PMOD = $PMOD*2;
+		$PMOD = $IMOD if ( $PMOD > $IMOD);
+		&Stream("Info : PMOD now set to $PMOD, IMOD=$IMOD");
+	    }
+	}
+    }
 
     chomp($file);
     push(@TEMP,$file);
@@ -417,9 +441,9 @@ foreach  $file (@ALL){
 	if ( $realfile ne ""){
 	    @stat   = stat($realfile);
 	} else {
-	    @stat   = stat("$path/$file");	    
+	    @stat   = stat("$path/$file");
 	}
-	
+
 	if ( $#stat == -1 ){
 	    &Stream("Error : stat () failed -- $path/$file");
 	    next;
@@ -533,7 +557,7 @@ FINAL_EXIT:
 
 	# Check if we have opened a file
 	if ($FO ne STDERR){
-	    print $FO 
+	    print $FO
 		"Scan done on ".localtime()."\n",
 		"Time taken the operation ($SCAND) $ext\n";
 	    close($FO);
@@ -556,7 +580,7 @@ FINAL_EXIT:
 		# BUT this can be done ONLY if we are not using caching
 		if ($DOCACHE){
 		    if ( open(FO,">$FLNM.tmp") ){
-			print FO 
+			print FO
 			    "$SELF :: ".localtime().
 			    "Caching used - Pass done on ".localtime()." found no changes\n".
 			    "\t- cache will expire in ".$SPDR->ToFromCache(-2)." passes\n";
@@ -580,7 +604,7 @@ FINAL_EXIT:
 	if ($FO ne STDERR){
 	    close($FO);
 	    unlink("$FLNM.tmp") if ( -e "$FLNM.tmp");
-	    unlink("$FLNM")     if ( -e "$FLNM" && 
+	    unlink("$FLNM")     if ( -e "$FLNM" &&
 				     ( $failed!=0 || $unkn!=0 || $old!=0 || $new!=0 ));
 	}
     }

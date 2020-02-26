@@ -71,6 +71,7 @@ if ($ARGV[0] eq "-g"){
 
 	# remove path
 	$pgmf =~ s,.*packages/,,g;
+	$pgmf =~ s,.*replicas/,,g;
 	$pgmf =~ s,/bin/root4star,,g;
 	$pgmf =~ s,/BIN/root4star,,g;
 
