@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.96 2020/02/05 15:18:16 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.97 2020/02/25 22:53:08 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.97  2020/02/25 22:53:08  jwebb
+* Add FCS preshower volume ID
+*
 * Revision 1.96  2020/02/05 15:18:16  jwebb
 * Fix g2t_volume_id for forward silicon
 *
@@ -262,7 +265,11 @@
 *              CALB_Nmodule(1) and (2), not on RICH presence !     *
 ********************************************************************
       implicit none
-#include "geant321/gcunit.inc"
+
+      integer :: g2t_tpc_volume_id, g2t_fst_volume_id, g2t_stg_volume_id
+      integer :: g2t_wca_volume_id, g2t_hca_volume_id, g2t_pre_volume_id
+
++CDE,gcunit.
 * 
 #ifndef __G2T_VERSION__
       Character*3      Csys
@@ -277,7 +284,6 @@
                                           6, 1, 2, 3, 4, 5/
 
       Integer          innout,sector,sub_sector,volume_id,sensor,unknown
-      Integer          G2T_FST_VOLUME_ID, G2T_STG_VOLUME_ID, G2T_WCA_VOLUME_ID, G2T_HCA_VOLUME_ID
       Integer          rileft,eta,phi,phi_sub,superl,forw_back,strip
       Integer          ftpv,padrow,ftpc_sector,innour,lnumber,wafer,lsub,phi_30d
       Integer          section,tpgv,tpss,tpad,isdet,ladder,is,nladder,nwafer
@@ -1332,6 +1338,8 @@ c           write (*,*) csys, volume_id
            volume_id = g2t_wca_volume_id( numbv )
       ELSE IF (CSYS=='hca') THEN "FCS Hadronic calorimeter"
            volume_id = g2t_hca_volume_id( numbv )
+      ELSE IF (CSYS=='pre') THEN "FCS Preshower"
+           volume_id = g2t_pre_volume_id( numbv )
 
 *******************************************************************************************
 ** 28                                                                           Prashanth S 
@@ -1675,4 +1683,15 @@ c           write (*,*) csys, volume_id
        g2t_hca_volume_id = mod*1000 + tow
 
      End Function g2t_hca_volume_id
+!//______________________________________________________________________________________      
+     Integer function g2t_pre_volume_id( numbv ) 
+       Integer, intent(in) :: numbv(15)
+       Integer             :: layer, slat
+
+       layer = numbv(1)
+       slat = numbv(2)
+
+       g2t_pre_volume_id = layer*1000 + slat
+
+     End Function g2t_pre_volume_id
 !//______________________________________________________________________________________      
