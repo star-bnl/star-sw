@@ -552,8 +552,41 @@ int tofBuilder::parseData(daqReader *rdr)
 		//	  1078.0-dt0, 1080.0-dt0, 1078.0-dt0, 1078.0-dt0, 1078.0-dt0, 1078.0-dt0, 1069.0-dt0, 1070.0-dt0, 1070.0-dt0, 205.0,214.5  
 		//  };
 
-		// 20180926 run19 AuAu 31.2 GeV FTX
-	  const float dt0 = 0.00;//zaochen change it back to the begining of value of run19
+		//		// 20180926 run19 AuAu 31.2 GeV FTX
+		//	  const float dt0 = 0.00;//zaochen change it back to the begining of value of run19
+		//	  float trigwindowCenterpertray[122] = 
+		//	  {
+		//		  1075.0-dt0, 1075.0-dt0, 1075.0-dt0, 1075.0-dt0, 1082.0-dt0, 1082.0-dt0, 1082.0-dt0, 1082.0-dt0, 1082.0-dt0, 1082.0-dt0, 1083.0-dt0, 
+		//		  1082.0-dt0, 1081.0-dt0, 1081.0-dt0, 1083.0-dt0, 1083.0-dt0, 1076.0-dt0, 1076.0-dt0, 1076.0-dt0, 1076.0-dt0, 1001.0-dt0, 1002.0-dt0, 
+		//		  1002.0-dt0, 1001.0-dt0, 999.0-dt0, 1001.0-dt0, 1007.0-dt0, 1009.0-dt0, 1006.0-dt0, 1006.0-dt0, 1006.0-dt0, 1014.0-dt0, 1016.0-dt0, 
+		//		  1015.0-dt0, 1016.0-dt0, 1014.0-dt0, 1016.0-dt0, 1014.0-dt0, 1016.0-dt0, 1009.0-dt0, 1009.0-dt0, 1009.0-dt0, 1009.0-dt0, 1006.0-dt0, 
+		//		  999.0-dt0, 999.0-dt0, 1001.0-dt0, 1001.0-dt0, 1002.0-dt0, 999.0-dt0, 1057.0-dt0, 1060.0-dt0, 1057.0-dt0, 1065.0-dt0, 1066.0-dt0, 
+		//		  1068.0-dt0, 1068.0-dt0, 1068.0-dt0, 1075.0-dt0, 1075.0-dt0, 1070.0-dt0, 1070.0-dt0, 1062.0-dt0, 1063.0-dt0, 1063.0-dt0, 1067.0-dt0, 
+		//		  1065.0-dt0, 1067.0-dt0, 1066.0-dt0, 1068.0-dt0, 1068.0-dt0, 1073.0-dt0, 1076.0-dt0, 1072.0-dt0, 1075.0-dt0, 1072.0-dt0, 1081.0-dt0, 
+		//		  1082.0-dt0, 1082.0-dt0, 1081.0-dt0, 1081.0-dt0, 1081.0-dt0, 1080.0-dt0, 1081.0-dt0, 1071.0-dt0, 1072.0-dt0, 1072.0-dt0, 1071.0-dt0, 
+		//		  1072.0-dt0, 1065.0-dt0, 1065.0-dt0, 1066.0-dt0, 1066.0-dt0, 1065.0-dt0, 1066.0-dt0, 1079.0-dt0, 1079.0-dt0, 1079.0-dt0, 1079.0-dt0, 
+		//		  1087.0-dt0, 1087.0-dt0, 30.0-dt0, 1087.0-dt0, 1086.0-dt0, 1086.0-dt0, 1086.0-dt0, 1085.0-dt0, 1087.0-dt0, 1086.0-dt0, 1086.0-dt0, 1086.0-dt0, 
+		//		  1078.0-dt0, 1080.0-dt0, 1078.0-dt0, 1078.0-dt0, 1078.0-dt0, 1078.0-dt0, 1069.0-dt0, 1070.0-dt0, 1070.0-dt0, 205.0,214.5  
+		//	  };
+		//
+
+		//int trigwindowHighpertray[122];
+		//int trigwindowLowpertray[122];
+		//int triggeredcrossinghalfwindow = 40;
+		//for(int iii=0;iii<122;iii++)
+	  //{
+	  //    int center	= trigwindowCenterpertray[iii] + 0.5; 	// convert float to nearest integer "NINT"
+
+	  //    if (iii>=120){ triggeredcrossinghalfwindow = 30; }	// not strictly necessary but better than 40
+	  //    trigwindowLowpertray[iii]  = center - triggeredcrossinghalfwindow;
+	  //    trigwindowHighpertray[iii] = center + triggeredcrossinghalfwindow;
+	  //}
+
+
+	  //Run20 AuAu 9.2 GeV, got suggestion from Zhangbu, open the timing window size to be double size 
+	  //as previous, just to cover all lower energy collisions, it is safe to double size, because
+	  //the chance to have more hits on individual tof tray is much lower for low energy
+	  const float dt0 = 55.0;//zaochen change it back to the begining of value of run19
 	  float trigwindowCenterpertray[122] = 
 	  {
 		  1075.0-dt0, 1075.0-dt0, 1075.0-dt0, 1075.0-dt0, 1082.0-dt0, 1082.0-dt0, 1082.0-dt0, 1082.0-dt0, 1082.0-dt0, 1082.0-dt0, 1083.0-dt0, 
@@ -568,26 +601,18 @@ int tofBuilder::parseData(daqReader *rdr)
 		  1087.0-dt0, 1087.0-dt0, 30.0-dt0, 1087.0-dt0, 1086.0-dt0, 1086.0-dt0, 1086.0-dt0, 1085.0-dt0, 1087.0-dt0, 1086.0-dt0, 1086.0-dt0, 1086.0-dt0, 
 		  1078.0-dt0, 1080.0-dt0, 1078.0-dt0, 1078.0-dt0, 1078.0-dt0, 1078.0-dt0, 1069.0-dt0, 1070.0-dt0, 1070.0-dt0, 205.0,214.5  
 	  };
-
-
-
-
-
-
-
-
-	  
-	  
 	  
 	  int trigwindowHighpertray[122];
-      int trigwindowLowpertray[122];
-      int triggeredcrossinghalfwindow = 40;
-      for(int iii=0;iii<122;iii++){
-      	int center	= trigwindowCenterpertray[iii] + 0.5; 	// convert float to nearest integer "NINT"
-		if (iii>=120){ triggeredcrossinghalfwindow = 30; }	// not strictly necessary but better than 40
-        trigwindowLowpertray[iii]	= center - triggeredcrossinghalfwindow;
-        trigwindowHighpertray[iii]	= center + triggeredcrossinghalfwindow;
-      }
+	  int trigwindowLowpertray[122];
+	  int triggeredcrossinghalfwindow = 100;//40;
+	  for(int iii=0;iii<122;iii++)
+	  {
+		  int center	= trigwindowCenterpertray[iii] + 0.5; 	// convert float to nearest integer "NINT"
+
+		  if (iii>=120){ triggeredcrossinghalfwindow = 30; }	// not strictly necessary but better than 40
+		  trigwindowLowpertray[iii]  = center - triggeredcrossinghalfwindow;
+		  trigwindowHighpertray[iii] = center + triggeredcrossinghalfwindow;
+	  }
 			
       for(int ifib=0;ifib<4;ifib++){    
 		int ndataword = tof->ddl_words[ifib];
