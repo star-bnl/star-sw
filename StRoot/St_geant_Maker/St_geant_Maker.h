@@ -1,6 +1,11 @@
-// $Id: St_geant_Maker.h,v 1.59 2020/02/04 17:46:23 jwebb Exp $
+// $Id: St_geant_Maker.h,v 1.60 2020/02/26 21:26:20 jwebb Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.60  2020/02/26 21:26:20  jwebb
+// Accumulate and report total energy deposited in all active elements
+// of the detector modules for the job.
+//
 // Revision 1.59  2020/02/04 17:46:23  jwebb
+//
 // Update to forward silicon geometry and associated changes to support.
 //
 // Revision 1.58  2019/09/30 14:13:27  jwebb
@@ -284,16 +289,22 @@ protected:
        } 
        if ( ntotal <= 0 ) return ntotal;
        T* table = new T( tablename.c_str(), ntotal );
+       double sum = 0.0;
        auto* g2t_track = (St_g2t_track*)FindByName("g2t_track"); 
        g2t( g2t_track, table );
-       AddData( table ); 
+       AddData( table );
+       for ( auto hit : (*table) ) {
+	 sum += hit.de; 
+       }
+       mHitSum[container] = sum; 
        if ( Debug() > 1 || verbose ) table->Print(0,10);  
        return ntotal;  
    } 
-  std::map<std::string, int> mHitCounts;
+  std::map<std::string, int>     mHitCounts; // total number of hits per volume
+  std::map<std::string, double>  mHitSum;    // total energy deposition per table
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.59 2020/02/04 17:46:23 jwebb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.60 2020/02/26 21:26:20 jwebb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 

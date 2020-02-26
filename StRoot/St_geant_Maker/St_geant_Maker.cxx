@@ -1,5 +1,9 @@
-// $Id: St_geant_Maker.cxx,v 1.179 2020/02/25 23:25:41 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.180 2020/02/26 21:26:20 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.180  2020/02/26 21:26:20  jwebb
+// Accumulate and report total energy deposited in all active elements
+// of the detector modules for the job.
+//
 // Revision 1.179  2020/02/25 23:25:41  jwebb
 // Include FCS preshower hits
 //
@@ -1402,6 +1406,11 @@ int St_geant_Maker::Finish() {
   for ( auto i : mHitCounts ) {
     LOG_QA << "St_geant_Maker summary -QA- g2t hits (" << i.first.c_str() << ") nhits = " << i.second << endm;
   }
+  LOG_QA << "St_geant_Maker summary -QA- energy deposition by container:" << endm;
+  for ( auto i : mHitSum ) {
+    LOG_QA << "St_geant_Maker summary -QA- g2t Esum (" << i.first.c_str() << ") Esum  = " << i.second << endm;
+  }
+ 
   return kStOK;
 }
 //_____________________________________________________________________________
