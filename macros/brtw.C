@@ -241,7 +241,9 @@ TF1 *brtw(TH1 *hist, Double_t MMin=0.3, Double_t MMax = 1.3, Double_t m1 = mpi, 
   Double_t T = Total->Integral(params[1]-2*params[2],params[1]+2*params[2])/binWidth;
   
   cout << gSystem->BaseName(gDirectory->GetName()) << "\t";
-  cout << hist->GetName() << "\t S = " << S << "\tB = " << B << "\tS/B = " << S/B << "\tS/sqrt(T) = " << S/TMath::Sqrt(T);
+  cout << hist->GetName() << "\t S = " << S << "\tB = " << B;
+  if (B > 0) cout<< "\tS/B = " << S/B;
+  cout << "\tS/sqrt(T) = " << S/TMath::Sqrt(T);
   cout << "\tSignificance = " << 1./Total->GetParError(0);
   TH1F *z = (TH1F *) gDirectory->Get("/Particles/KFParticlesFinder/PrimaryVertexQA/z");
   if (z) {
@@ -264,8 +266,7 @@ TF1 *brtw(TH1 *hist, Double_t MMin=0.3, Double_t MMax = 1.3, Double_t m1 = mpi, 
   return Total;
 }
 //________________________________________________________________________________
-TF1 *K0BW(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/Ks/Parameters/M") {
-  TH1F *M = (TH1F *) gDirectory->Get(histN);
+TF1 *K0BW(TH1F *M) {
   if (! M) return 0;
   TH1F *m = new TH1F(*M);
   m->SetName(Form("%s_BW",M->GetName()));
@@ -273,6 +274,13 @@ TF1 *K0BW(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/Ks/Param
   Widths[0] = 0.0107;
   nameP = "K_S0";
   return brtw(m,0.45,0.55,mpi, mpi, 0);
+}
+//________________________________________________________________________________
+TF1 *K0BW(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/Ks/Parameters/M") {
+  TH1F *M = (TH1F *) gDirectory->Get(histN);
+  if (! M) return 0;
+  return K0BW(M);
+  TH1F *m = new TH1F(*M);
 }
 //________________________________________________________________________________
 TF1 *K0G(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/Ks/Parameters/M") {
