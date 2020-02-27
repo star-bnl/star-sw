@@ -1,6 +1,6 @@
 /* 
    FPE_OFF
-   root.exe -q -b lBichsel.C dEdxFit.C+  'kfQA.C+("I/dEdx/2*.root")'
+   root.exe -q -b lBichsel.C dEdxFit.C+  'kfQA.C+("I/dEdx/*.root")'
 */
 #if !defined(__CINT__)
 // code that should be seen ONLY by the compiler
