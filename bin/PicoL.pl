@@ -98,7 +98,11 @@ foreach my $run (glob $glob) {
     print "$cmd \n" if ($debug);
     my $flag = system($cmd);
   };
-  print "string:$run:$ana\n";
+  my $picoGlob = $run . "/*picoDst.root";
+  my @picos = glob $picoGlob;
+  if ($#picos > -1) {
+    print "string:$run:$ana\n";
+  }
 #  last;
 #  die;
 }
