@@ -218,7 +218,7 @@ StEpdEpInfo StEpdEpFinder::Results(TClonesArray* EpdHits, TVector3 primVertex, i
     //--------------------------------
 
     double PhiWeightedTileWeight = TileWeight;
-    if (mPhiWeightInput[EW]) PhiWeightedTileWeight /= mPhiWeightInput[EW]->GetBinContent(PP,TT,EventTypeId);
+    if (mPhiWeightInput[EW]) PhiWeightedTileWeight /= mPhiWeightInput[EW]->GetBinContent(PP,TT,EventTypeId+1); // EventTypeId --> EventTypeId+1 on 27feb2020.  Thanks to Xiaoyu Liu for finding this small bug. - MAL
     TotalWeight4Ring[EW][ring-1][0] += TileWeight;
     TotalWeight4Ring[EW][ring-1][1] += PhiWeightedTileWeight;
 
