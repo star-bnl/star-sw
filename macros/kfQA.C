@@ -79,7 +79,7 @@ static const Hist_t Histos[] = {
 
 }; 
 //________________________________________________________________________________
-void kfQA(const Char_t *files = "/gpfs01/star/subsys-tpc/fisyak/kfp/2020/11p5GeV.C/I/dEdx/21042030_1.root"){
+void kfQA(const Char_t *files = "/gpfs01/star/subsys-tpc/fisyak/kfp/2020/11p5GeV.C/I/dEdx/21042030_1.root", const Char_t *Out =""){
   const Int_t N = sizeof(Histos)/sizeof(Hist_t); cout << " N " << N << endl;
 #if 0
   if (gClassTable->GetID("StBichsel") < 0) {
@@ -91,7 +91,9 @@ void kfQA(const Char_t *files = "/gpfs01/star/subsys-tpc/fisyak/kfp/2020/11p5GeV
   }
   gROOT->LoadMacro("dEdxFit.C+");
 #endif
-  TFile *fout = new TFile("kfQAN.root","recreate");
+  TString OutFile(Out);
+  if (OutFile = "") OutFile = "kfQAN.root";
+  TFile *fout = new TFile(OutFile,"recreate");
   TString Tuple("Run:run:no:events");
   for (Int_t i = 0; i < N; i++) {
     TString var(Histos[i].Name);
@@ -221,7 +223,7 @@ void kfQA(const Char_t *files = "/gpfs01/star/subsys-tpc/fisyak/kfp/2020/11p5GeV
 		    params[p+2] = 1./BW->GetParError(0);
 		    Double_t binWidth = hist->GetBinWidth(1);
 		    Double_t S = BW->Integral(params[p]-3*params[p+1],params[p]+3*params[p+1])/binWidth;
-		    params[p+3] = S/params[2];
+		    params[p+3] = S/params[3];
 		    p += 3;
 		    j += 3;
 		  }

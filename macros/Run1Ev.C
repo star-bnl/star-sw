@@ -2,9 +2,10 @@
 void Run1Ev(Int_t NEvents=1, Int_t iD = 5, 
 	    Double_t pTlow=0.1,Double_t pThigh=0.1,
 	    Double_t Ylow=0.5, Double_t Yhigh=0.5,
+#if 0
 	    Double_t Philow=0, Double_t Phihigh=0,
 	    Double_t Zlow=10, Double_t Zhigh=10, Int_t Npart = 1, const Char_t *opt = "G") 
-#if 0
+#else
 	    Double_t Philow=-TMath::DegToRad()*30, Double_t Phihigh=-TMath::DegToRad()*30,
 	    Double_t Zlow=-10, Double_t Zhigh=-10, Int_t Npart = 1, const Char_t *opt = "G") 
 #endif

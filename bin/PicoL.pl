@@ -54,8 +54,9 @@ if ($pwd =~ /dev/) {
   elsif ($pwd =~ /11p5GeV.C/)           {$glob .= "/2020/TFG20a/RF/11p5GeV";}
   elsif ($pwd =~ /11p5GeV/)             {$glob .= "/2020/TFG19m/RF/11p5GeV.B";}
   elsif ($pwd =~ /31p2GeV_fixedTarget/) {$glob .= "/2020/TFG20a/RF/31p2GeV_fixedTarget";}
-  elsif ($pwd =~ /9p2GeV/)              {$glob .= "/2020/TFG20a/RF/9p2GeV";}
   elsif ($pwd =~ /9p8GeV_fixedTarget/)  {$glob .= "/2020/TFG20a/RF/9p8GeV_fixedTarget";}
+  elsif ($pwd =~ /9p2GeVb/)              {$glob .= "/2020/TFG20a/RF/9p2GeVb";}
+  elsif ($pwd =~ /9p2GeV/)              {$glob .= "/2020/TFG20a/RF/9p2GeV";}
   elsif ($pwd =~ /13p5GeV_fixedTarget/) {$glob .= "/2020/TFG20a/RF/13p5GeV_fixedTarget";}
   elsif ($pwd =~ /19p5GeV_fixedTarget/) {$glob .= "/2020/TFG20a/RF/19p5GeV_fixedTarget";}
   elsif ($pwd =~ /7p3GeV_fixedTarget/)  {$glob .= "/2020/TFG20a/RF/7p3GeV_fixedTarget";}
