@@ -1,1 +1,1 @@
-JobSubmit2020_7p3GeV_fixedTarget.csh
+JobSubmit2020_9p2GeVb.csh
