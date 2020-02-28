@@ -2032,10 +2032,7 @@ void StTpcRSSegment::GenerateSignal(StTpcLocalSectorCoordinate &xyzW, Int_t rowM
   Int_t sector = xyzW.fromSector();
   SignalSum_t *SignalSum = StTpcRSMaker::GetSignalSum(sector);
   for(Int_t row = rowMin; row <= rowMax; row++) {              
-    if (St_tpcPadConfigC::instance()->numberOfRows(sector) == 45) { // ! iTpx
-      if ( ! StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row)) continue;
-      if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))  continue;
-    }
+    if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))  continue;
     Int_t io = (row <= St_tpcPadConfigC::instance()->numberOfInnerRows(sector)) ? 0 : 1;
     StTpcLocalSectorCoordinate xyzW(xOnWire, yOnWire, zOnWire, sector, row);
     static StTpcPadCoordinate Pad;
@@ -2073,6 +2070,7 @@ void StTpcRSSegment::GenerateSignal(StTpcLocalSectorCoordinate &xyzW, Int_t rowM
     StTpcRSMaker::GetPadResponseFunction(io,sector)->GetSaveL(Npads,xPadMin,XDirectionCouplings);
     //	      Double_t xPad = padMin - padX;
     for(Int_t pad = padMin; pad <= padMax; pad++) {
+      if ( ! StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row, pad)) continue;
       Double_t gain = QAv*mGainLocal;
       Double_t dt = dT;
       //		if (St_tpcPadConfigC::instance()->numberOfRows(sector) ==45 && ! TESTBIT(m_Mode, kGAINOAtALL)) { 
