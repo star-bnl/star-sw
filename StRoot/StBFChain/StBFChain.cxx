@@ -217,7 +217,7 @@ Int_t StBFChain::Load()
   here which deserves attention
   - The maker's SetMode() mechanism is treated here.
   - Calibration options like NoMySQLDb, NoCintCalDb or NoCintDb and path are set
-  - SetFlavor() sim+ofl or sim, and filestreams is made
+  - SetFlavor() sim+ofl+TFG or sim, and filestreams is made
 
   If a maker is added along with some flag options, this is the place to
   implement the switches.
@@ -332,7 +332,7 @@ Int_t StBFChain::Instantiate()
 	  }
 
 	  // Determine flavors
-	  TString flavors = "ofl"; // default flavor for offline
+	  TString flavors = "ofl+TFG"; // default flavor for offline
 
 	  // simulation flavors
 	  if (GetOption("Simu") && ! GetOption("NoSimuDb")) flavors.Prepend("sim+");

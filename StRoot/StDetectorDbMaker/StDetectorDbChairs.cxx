@@ -1021,6 +1021,21 @@ Float_t St_TpcAvgCurrentC::AcCharge(Int_t sector, Int_t channel) {
   return (sector > 0 && sector <= 24 && channel > 0 && channel <= 8) ?
     Struct()->AcCharge[8*(sector-1)+channel-1] :     0;
 }
+#include "St_itpcRDOMapC.h"
+MakeChairInstance2(tpcRDOMap,St_itpcRDOMapC,Calibrations/tpc/itpcRDOMap);
+//________________________________________________________________________________
+Int_t St_itpcRDOMapC::rdo(Int_t padrow, Int_t pad) const {
+  Int_t rdo = 0;
+  Int_t N = nrows(0);
+  for (Int_t i = 0; i < N; i++) {
+    if (padrow != row(i)) continue;
+    if (pad < padMin(i) || pad > padMax(i)) continue;
+    rdo = rdoI(i);
+    
+    break;
+  }
+  return rdo;
+}
 #include "St_tpcRDOMapC.h"
 MakeChairInstance(tpcRDOMap,Calibrations/tpc/tpcRDOMap);
 //________________________________________________________________________________
@@ -1035,6 +1050,17 @@ Int_t St_tpcRDOMapC::rdo(Int_t padrow, Int_t pad) const {
     break;
   }
   return rdo;
+}
+//________________________________________________________________________________
+Int_t St_tpcRDOMapC::rdo(Int_t sector, Int_t padrow, Int_t pad) const {
+  if (St_tpcPadConfigC::instance()->iTpc(sector)) {
+    Int_t N40 = St_tpcPadConfigC::instance()->innerPadRows(sector);
+    if (padrow <= N40) {
+      return St_itpcRDOMapC::instance()->rdo(padrow,pad);
+    }
+    return St_tpcRDOMapC::instance()->rdo(padrow-N40+13,pad) + 2;
+  }
+  return rdo(padrow, pad);
 }
 #include "St_tpcRDOT0offsetC.h"
 MakeChairInstance(tpcRDOT0offset,Calibrations/tpc/tpcRDOT0offset);
@@ -1152,12 +1178,22 @@ UInt_t       St_tpcRDOMasksC::getSectorMask(UInt_t sector) {
     return MASK;
   }
   MASK = mask(((sector + 1) / 2) - 1); // does the mapping from sector 1-24 to packed sectors
-  if( sector % 2 == 0){ // if its even relevent bits are 6-11
-    MASK = MASK >> 6;
+  if (runNumber() <= 19000000 || (runNumber() < 20000000 && sector != 20)) {// no iTPC
+    if (sector == 16 && MASK == 0 && runNumber() > 8181000 && runNumber() < 9181000) MASK = 4095;
+    if( sector % 2 == 0){ // if its even relevent bits are 6-11
+      MASK = MASK >> 6;
+    }
+    // Otherwise want lower 6 bits
+    MASK &= 0x000003F; // Mask out higher order bits
+  } else   if (runNumber() < 20000000 && sector == 20) { // Run XVIII, sector 20 
+    MASK = 255;
+  } else  { // Run XIX and higher
+    if( sector % 2 == 0){ // if its even relevent bits are 8-13
+      MASK = MASK >> 8;
+    }
+    // Otherwise want lower 6 bits
+    MASK &= 255; // Mask out higher order bits
   }
-  // Otherwise want lower 6 bits
-  MASK &= 0x000003F; // Mask out higher order bits
-  if (sector == 16 && MASK == 0 && runNumber() > 8181000 && runNumber() < 9181000) MASK = 4095;
   return MASK;
 }
 //________________________________________________________________________________

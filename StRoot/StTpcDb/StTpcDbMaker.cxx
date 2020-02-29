@@ -259,23 +259,23 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     // Set Table Flavors
     if (gFactor<-0.8) {
       gMessMgr->Info() << "StTpcDbMaker::Full Reverse Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-      SetFlavor("ofl+FullMagFNegative","tpcGlobalPosition");
+      SetFlavor("ofl+TFG+FullMagFNegative","tpcGlobalPosition");
     }
     else if (gFactor<-0.2) {
       gMessMgr->Info() << "StTpcDbMaker::Half Reverse Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-      SetFlavor("ofl+HalfMagFNegative","tpcGlobalPosition");
+      SetFlavor("ofl+TFG+HalfMagFNegative","tpcGlobalPosition");
     }
     else if (gFactor<0.2) {
       gMessMgr->Info() << "StTpcDbMaker::Zero Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-      SetFlavor("ofl+ZeroMagF","tpcGlobalPosition");
+      SetFlavor("ofl+TFG+ZeroMagF","tpcGlobalPosition");
     }
     else if (gFactor<0.8) {
       gMessMgr->Info() << "StTpcDbMaker::Half Forward Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-      SetFlavor("ofl+HalfMagFPositive","tpcGlobalPosition");
+      SetFlavor("ofl+TFG+HalfMagFPositive","tpcGlobalPosition");
     }
     else if (gFactor<1.2) {
       gMessMgr->Info() << "StTpcDbMaker::Full Forward Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-      SetFlavor("ofl+FullMagFPositive","tpcGlobalPosition");
+      SetFlavor("ofl+TFG+FullMagFPositive","tpcGlobalPosition");
     }
   }
   if         (IAttr("useLDV")) {
@@ -285,10 +285,10 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     SetFlavor("NewlaserDV","tpcDriftVelocity");
     gMessMgr->Info() << "StTpcDbMaker::Using drift velocity from New laser analysis" << endm;
   } else if (IAttr("useCDV")) {
-    SetFlavor("ofl","tpcDriftVelocity");
+    SetFlavor("ofl+TFG","tpcDriftVelocity");
     gMessMgr->Info() << "StTpcDbMaker::Using drift velocity from T0 analysis" << endm;
   } else {
-    SetFlavor("ofl+laserDV","tpcDriftVelocity");
+    SetFlavor("ofl+TFG+laserDV","tpcDriftVelocity");
     gMessMgr->Info() << "StTpcDbMaker::Using any drift velocity" << endm;
   }
   StTpcDb::instance()->SetDriftVelocity();
