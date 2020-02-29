@@ -24,6 +24,7 @@ foreach my $file (@list) {
 }
 my $Njobs = 0;
 my $now = time();
+my $dtmin = 999999;
 foreach my $key ( sort keys %runs ) {
   print "$key => $runs{$key}\n" if ($debug);
   my @files = glob "st_*" . $key . "*.root"; print "@files\n" if ($debug);
@@ -32,10 +33,11 @@ foreach my $key ( sort keys %runs ) {
      my ($dev,$ino,$mode,$nlink,$uid,$gid,$dev, $size, $atime, $mtim, $ctime, $blksize,$blocks) = stat($file);
      my $dt = $now - $ctime;
      print "$file dt = $dt\n" if ($debug);
-     if ($dt < 60) {$finished = 0; last;}
+     if ($dt < $dtmin) {$dtmin = $dt;}
   }
-  if (! $finished) {next;}
-  print "string:$key:$runs{$key}\n";
-  $Njobs++;
+  if ($dtmin > 60) {
+    print "string:$key:$runs{$key}\n";
+    $Njobs++;
+  }
 }
 if (! $Njobs) {die "No jobs";}
