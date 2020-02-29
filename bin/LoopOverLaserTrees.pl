@@ -7,6 +7,7 @@ use Cwd;
 #my @list = glob "/gpfs01/star/subsys-tpc/fisyak/Tpc/Laser/LANA.2014/laser/*.laser.root";
 my @list = glob "./*.laser.root";
 my %runs = ();
+my $debug = 0;
 foreach my $file (@list) {
   my $run = File::Basename::basename($file,".laser.root");
   my $dir = File::Basename::dirname($file);
@@ -15,7 +16,7 @@ foreach my $file (@list) {
   $run =~ s/adc_//;
   my @words = split('_',$run);
   my $r = $words[0];
-#  print "$file => $r\n";
+  print "$file => $r\n" if ($debug);
   my $outfile = "LaserPlots." . $r . ".root";
   if (-r $outfile) {next;}
   if ($runs{$r}) {next;}
@@ -24,13 +25,13 @@ foreach my $file (@list) {
 my $Njobs = 0;
 my $now = time();
 foreach my $key ( sort keys %runs ) {
-#  print "$key => $runs{$key}\n";
-  my @files = glob "st_*" . $key . "*.root";# print "@files\n";
+  print "$key => $runs{$key}\n" if ($debug);
+  my @files = glob "st_*" . $key . "*.root"; print "@files\n" if ($debug);
   my $finished = 1;
   foreach my $file (@files) {
      my ($dev,$ino,$mode,$nlink,$uid,$gid,$dev, $size, $atime, $mtim, $ctime, $blksize,$blocks) = stat($file);
      my $dt = $now - $ctime;
-#     print "$file dt = $dt\n";
+     print "$file dt = $dt\n" if ($debug);
      if ($dt < 60) {$finished = 0; last;}
   }
   if (! $finished) {next;}
