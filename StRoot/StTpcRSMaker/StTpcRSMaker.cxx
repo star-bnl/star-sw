@@ -2030,6 +2030,13 @@ void StTpcRSSegment::Set(g2t_tpc_hit_st *tpc_hit, g2t_vertex_st *gver, Int_t mod
 void StTpcRSSegment::GenerateSignal(StTpcLocalSectorCoordinate &xyzW, Int_t rowMin, Int_t rowMax, Double_t sigmaJitterT, Double_t sigmaJitterX) {
   static StTpcCoordinateTransform transform(gStTpcDb);
   Int_t sector = xyzW.fromSector();
+  UInt_t MASK =St_tpcRDOMasksC::instance()-> getSectorMask(sector);
+  Bool_t CheckMask = kTRUE;
+  if (St_tpcPadConfigC::instance()->iTPC(sector)) {
+    if (MASK == 255) CheckMask = kFALSE;
+  } else { 
+    if (MASK == 63 ) CheckMask = kFALSE;
+  }
   SignalSum_t *SignalSum = StTpcRSMaker::GetSignalSum(sector);
   for(Int_t row = rowMin; row <= rowMax; row++) {              
     if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))  continue;
@@ -2070,7 +2077,9 @@ void StTpcRSSegment::GenerateSignal(StTpcLocalSectorCoordinate &xyzW, Int_t rowM
     StTpcRSMaker::GetPadResponseFunction(io,sector)->GetSaveL(Npads,xPadMin,XDirectionCouplings);
     //	      Double_t xPad = padMin - padX;
     for(Int_t pad = padMin; pad <= padMax; pad++) {
-      if ( ! StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row, pad)) continue;
+      if (CheckMask) {
+	if (! StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row, pad)) continue;
+      }
       Double_t gain = QAv*mGainLocal;
       Double_t dt = dT;
       //		if (St_tpcPadConfigC::instance()->numberOfRows(sector) ==45 && ! TESTBIT(m_Mode, kGAINOAtALL)) { 
