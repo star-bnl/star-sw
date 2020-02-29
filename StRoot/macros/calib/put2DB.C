@@ -124,7 +124,11 @@ void put2DB(const char* files=
     if (NN > 10) NN = 10;
     myTable->Print(0,NN);
     Int_t Nmax = N;
-#if 0
+    Int_t offset = 1; 
+    if (N == 1) offset = 0;
+    if (TName.Contains("tpcDriftVelocity") ||TName.Contains("ssdConfiguration") || TName.Contains("trgTimeOffset")) offset = 0;
+    if (TName.Contains("svtWafersPosition")) {cout << "Un comment SvtIndexMap include" << endl; return;}
+#if 1
     Bool_t ok = myTable->IsA()->InheritsFrom( "St_tpcCorrection" );
     if ( ok ) {
       cout << "==================== St_tpcCorrection ====================" << endl;
@@ -144,12 +148,9 @@ void put2DB(const char* files=
       }
       myTable->Print(0,N+1);
       N = Nmax;
+      offset = 1;
     }
 #endif
-    Int_t offset = 1; 
-    if (N == 1) offset = 0;
-    if (TName.Contains("tpcDriftVelocity") ||TName.Contains("ssdConfiguration") || TName.Contains("trgTimeOffset")) offset = 0;
-    if (TName.Contains("svtWafersPosition")) {cout << "Un comment SvtIndexMap include" << endl; return;}
     Int_t *rowIDs = new Int_t[N];
     for(Int_t ti=0;ti<N;ti++) rowIDs[ti]=ti + offset;
     Char_t* gstr = (Char_t*) myTable->GetTable();
