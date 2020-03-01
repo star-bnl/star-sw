@@ -277,7 +277,7 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                                       "","","",kFALSE},
   {"MC.y2020","","","MC2020",                                                              "","","",kFALSE},
   {"MC2020.Ideal","","","MC.2020,MC.Sti,vmc,NewTpcAlignment,ExB"                          ,"","","",kFALSE},
-  {"MC2020",      "","","MC.2020,sdt20191224,MC.Sti,vmc,NewTpcAlignment,ExB"              ,"","","",kFALSE},
+  {"MC2020",      "","","MC.2020,sdt20200292,MC.Sti,vmc,NewTpcAlignment,ExB"              ,"","","",kFALSE},
   {"MC.2020"  ,"","","MC.2020a",                                                           "","","",kFALSE},
   {"MC2020a"  ,"","","MC.2020a",                                                           "","","",kFALSE},
   {"MC.2020a","","","y2020a,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna,MC.Sti,CorrY,vmc"
@@ -294,7 +294,7 @@ Bfc_st BFC[] = { // standard chains
   {"XC2018",      "","","y2018,XC,sdt20180426.122000",                                     "","","",kFALSE},
   {"XC2019",      "","","y2019,XC,sdt20190301",                                            "","","",kFALSE},
   {"XC2019I",     "","","y2019,XC",                                                        "","","",kFALSE},
-  {"XC2020",      "","","y2020,XC,sdt20191224",                                            "","","",kFALSE},
+  {"XC2020",      "","","y2020,XC,sdt20200229",                                            "","","",kFALSE},
   {"XC2020I",     "","","y2020,XC",                                                        "","","",kFALSE},
   {"RC----------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"RC.y2000"        ,"","","p2000,VFMinuit,CMuDst,NosvtIT,NossdIT,NosstIT"               ,"","","",kFALSE},
