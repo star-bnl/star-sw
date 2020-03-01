@@ -32,10 +32,10 @@ foreach my $key ( sort keys %runs ) {
   foreach my $file (@files) {
      my ($dev,$ino,$mode,$nlink,$uid,$gid,$dev, $size, $atime, $mtim, $ctime, $blksize,$blocks) = stat($file);
      my $dt = $now - $ctime;
-     print "$file dt = $dt\n" if ($debug);
      if ($dt < $dtmin) {$dtmin = $dt;}
+     print "$file dt = $dt  dtmin = $dtmin\n" if ($debug);
   }
-  if ($dtmin > 60) {
+  if ($dtmin > 300) {
     print "string:$key:$runs{$key}\n";
     $Njobs++;
   }
