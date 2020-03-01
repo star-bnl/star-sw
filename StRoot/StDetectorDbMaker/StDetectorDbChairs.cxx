@@ -1177,6 +1177,7 @@ UInt_t       St_tpcRDOMasksC::getSectorMask(UInt_t sector) {
      << "sector= " << sector << " getNumRows()=" << getNumRows() << endm;
     return MASK;
   }
+  //  tpcRDOMasks_st *row = Struct();
   MASK = mask(((sector + 1) / 2) - 1); // does the mapping from sector 1-24 to packed sectors
   if (runNumber() <= 19000000 || (runNumber() < 20000000 && sector != 20)) {// no iTPC
     if (sector == 16 && MASK == 0 && runNumber() > 8181000 && runNumber() < 9181000) MASK = 4095;
