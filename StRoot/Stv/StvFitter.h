@@ -32,6 +32,7 @@ const double *GetHitErrs() const 	{return mHitErrs;}
 
 double Xi2(const StvHit *hit);	//Xi2 for hit or vertex
 double Xi2();			//Xi2 for 2 subtracks joining
+double Xi2Join(const StvHit *hit);	//Xi2 for 5nd line+hit 
 double GetXi2()			{return mXi2;}	//evaluated Xi2
 int  Update();
 static StvFitter *Inst() {return mgFitter;}	

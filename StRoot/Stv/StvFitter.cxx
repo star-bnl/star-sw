@@ -22,12 +22,12 @@ StvFitter *StvFitter::mgFitter=0;
 
 static const double kXtraBigXi2 = 9e9;
 static const double kDeltaFactor = 1.5;
-static inline double MyXi2(const double G[3],double dA,double dB)  
+static inline double MyXi2(const double G[3],double dA,double dB,double dflt)  
 {
   double Gdet = G[0]*G[2]-G[1]*G[1];
   if (Gdet < 1e-11) return kXtraBigXi2;
   double Xi2 =  (G[2]*dA*dA-2*G[1]*dA*dB+G[0]*dB*dB)/Gdet;
-  if (Xi2 > kXtraBigXi2) Xi2 = kXtraBigXi2;
+  if (Xi2 > kXtraBigXi2) Xi2 = dflt;
   return Xi2;
 }
 
@@ -549,6 +549,7 @@ static int nCall = 0;  nCall++;
     
 //  TCL::trsinv(E1aE2i,E1aE2i,nP1);		//E1aE2i = (E1+E2)**(-1)
   int kase = nP1;
+  kase = 999;
 SWITCHa:  switch(kase) {
     case 2: if ((kase=TCLx::trsinv2x2(E1aE2i,E1aE2i))) {goto SWITCHa;}; break;
     case 5: if ((kase=TCLx::trsinv5x5(E1aE2i,E1aE2i))) {goto SWITCHa;}; break;
@@ -772,7 +773,54 @@ double StvFitter::Xi2(const StvHit *hit)
   }// end Include Hit Errs
 
 //  (BB*dX*dX-2*BA*dX*dY+AAdY*dY)/det 
-  mXi2 = MyXi2(G,mDcaP,mDcaL);
+  mXi2 = MyXi2(G,mDcaP,mDcaL,kXtraBigXi2);
+  return mXi2 ; 
+}  
+//______________________________________________________________________________
+double StvFitter::Xi2Join(const StvHit *hit)
+{
+/// Calculate 2 ndf= Xi2 for the 2 traks joinn (5 parameters) 
+///
+static const double kMicron = 1e-4;
+static const double kDefXi2 = 2;
+
+  assert(hit);
+  mHit = hit;
+
+  mHitPlane = mHit->detector();
+
+//		Hit position
+  const float *hP = mHit->x();
+//		Start track position
+  const double *tP = mOtPars->_x;
+//const double *tD = mOtPars->_d;
+  const TkDir_t &tkd = mOtPars->getTkDir();
+//		DCA track position
+  mHitErrCalc = (StvHitErrCalculator*)mHitPlane->GetHitErrCalc();
+  assert(mHitErrCalc);
+  mHitErrCalc->SetTkDir(tkd);
+  int ans = mHitErrCalc->CalcDcaErrs(hit,mHitErrs);
+  if (ans) {mXi2 = 1e11; return mXi2;}
+  assert(mHitErrs[0]>=1e-8);
+  assert(mHitErrs[1]*mHitErrs[1]<=mHitErrs[0]*mHitErrs[2]);
+  assert(mHitErrs[2]*mHitErrs[0]>mHitErrs[1]*mHitErrs[1]);
+
+//		Hit position wrt track 
+  double dca[3] = {hP[0]-tP[0],hP[1]-tP[1],hP[2]-tP[2]};
+
+  mDcaT=VDOT(mDcaFrame[0],dca);
+  mDcaP=VDOT(mDcaFrame[1],dca);
+  mDcaL=VDOT(mDcaFrame[2],dca);
+
+
+  double G[3]; TCL::ucopy(*mOtErrs,G,3);
+  if (mKase==0) {// Include Hit Errs
+    for (int j=0;j<3;j++) {G[j] = mHitErrs[j]-G[j];
+                           if (j!=1 && G[j]<kMicron) return kDefXi2;}
+  }// end Include Hit Errs
+
+//  (BB*dX*dX-2*BA*dX*dY+AAdY*dY)/det 
+  mXi2 = MyXi2(G,mDcaP,mDcaL,kDefXi2);
   return mXi2 ; 
 }  
 //______________________________________________________________________________
@@ -780,37 +828,22 @@ double StvFitter::Xi2()
 {
   mFailed = 0;
   
-
-#if 0
-  double inErr = (*mInErrs)[0]+(*mInErrs)[2];
-  double jnErr = (*mJnErrs)[0]+(*mJnErrs)[2];
-  if (jnErr>inErr) {//Not good order
-    const StvNodePars *swp = mInPars; mInPars=mJnPars; mJnPars=swp;
-    const StvFitErrs  *swe = mInErrs; mInErrs=mJnErrs; mJnErrs=swe;
-  }
-#endif
-
   StvFitPars F   = (*mInPars-*mJnPars);
   double     Zero[5]= {0};
   mXi2 = JoinTwo(5,(const double*)F      ,(const double*)(*mInErrs)
                 ,5,Zero                  ,(const double*)(*mJnErrs)
-		  ,(      double*)mQQPars,(      double*)  mQQErrs );
+		,(        double*)mQQPars,(      double*)  mQQErrs);
   if (mXi2>kXtraBigXi2) mXi2 = kXtraBigXi2; 
   return mXi2;
 }  
 //______________________________________________________________________________
 int StvFitter::Update()
 {
-static int nCall=0; nCall++;
-StvDebug::Break(nCall);
   switch (mKase) {
     case 0: mFailed = Hpdate(); break;		//Hit+Track
     case 1: mFailed = Jpdate();	break; 		//Track join
     case 2: mFailed = Vpdate();	break;		//Vertex+track
   }
-  *mOtErrs = mInErrs->mTkDir;		//set old value of tkdir
-  *mOtPars+= mQQPars;
-  mOtErrs->Update(mOtPars->getTkDir());//now new value of tkdir
   return 0;
 }
 //______________________________________________________________________________
@@ -845,6 +878,9 @@ int StvFitter::Hpdate()
 //////  assert(mXi2>myXi2);
   assert(myXi2<kXtraBigXi2); 
   *mOtPars = *mInPars;
+  *mOtErrs = mInErrs->mTkDir;		//set old value of tkdir
+  *mOtPars+= mQQPars;
+  mOtErrs->Update(mOtPars->getTkDir());//now new value of tkdir
   return 0;
 }  
 //______________________________________________________________________________
@@ -863,6 +899,9 @@ static int nCall=0; nCall++;
   assert(fabs(mXi2-myXi2)<1e-2*mXi2);
   *mOtPars = *mInPars;
   for (int i=0;i<3;i++) {(*mOtErrs)[i]+=mHitErrs[i];}
+  *mOtErrs = mInErrs->mTkDir;		//set old value of tkdir
+  *mOtPars+= mQQPars;
+  mOtErrs->Update(mOtPars->getTkDir());//now new value of tkdir
   return 0;
 }  
 //______________________________________________________________________________
@@ -871,6 +910,9 @@ int StvFitter::Jpdate()
 ///		this is Update for sub track+sub track fit (join)
   *mOtPars = *mJnPars; 
   *mOtErrs =  mQQErrs;   
+  *mOtErrs = mInErrs->mTkDir;		//set old value of tkdir
+  *mOtPars+= mQQPars;
+  mOtErrs->Update(mOtPars->getTkDir());//now new value of tkdir
   return 0;
 }
 //______________________________________________________________________________
