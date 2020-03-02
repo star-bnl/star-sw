@@ -4,6 +4,7 @@
 #define StvKalmanTrackFinder_HH
 #include "StvTrackFinder.h"
 
+class THelixTrack_;
 class THelix3d;
 class StvSeedFinder;
 class StvDiver;
@@ -26,7 +27,7 @@ public:
    ~StvKalmanTrackFinder(){;}
  void   SetCons(const StvKonst_st*);
    int	FindTracks();
-   int	Refit(int idir);
+   int	Refit(int mode);
    int  FindTrack(int idir);
 StvNode *MakeDcaNode(StvTrack *tk);
    int	FindPrimaries(const StvHits &vtxs);
@@ -50,7 +51,7 @@ int mGoodHits;		/*Min umber of Good hits in track MidEta*/
 const StvKonst_st *mKons;
     StvHitCounter *mHitCounter;
     StvSeedFinder *mSeedFinder;
-const THelixTrack *mSeedHelx;
+const THelixTrack_ *mSeedHelx;
       StvTrack    *mCurrTrak;
 StvDiver *mDive;
 StvHitter *mHitter;

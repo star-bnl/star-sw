@@ -8,7 +8,7 @@ class StvHits;
 class StvConstHits;
 class StvNode;
 class StvTrack;
-class THelixTrack;
+class THelixTrack_;
 class StvPoints;
 class TVector3;
 class StvDraw : public StvGrappa
@@ -25,9 +25,9 @@ TObject *Hits(const StvHits                    &hits, EDraw3DStyle sty=kUsedHit)
 TObject *Hits(const std::vector<const float*>  &hits, EDraw3DStyle sty=kUsedHit);
 TObject *Hits(int nHits, const TVector3        *hits, EDraw3DStyle sty=kUsedHit);
 
-TObject *Trak(const THelixTrack &helx,const std::vector<const StvHit*>  &hits, EDraw3DStyle sty=kGlobalTrack);
-TObject *Trak(const THelixTrack &helx,const std::vector<      StvHit*>  &hits, EDraw3DStyle sty=kGlobalTrack);
-   void  Road(const THelixTrack &helx,const std::vector<const StvHit*>  &hits, EDraw3DStyle sty=kGlobalTrack,double wide=10);
+TObject *Trak(const THelixTrack_ &helx,const std::vector<const StvHit*>  &hits, EDraw3DStyle sty=kGlobalTrack);
+TObject *Trak(const THelixTrack_ &helx,const std::vector<      StvHit*>  &hits, EDraw3DStyle sty=kGlobalTrack);
+   void  Road(const THelixTrack_ &helx,const std::vector<const StvHit*>  &hits, EDraw3DStyle sty=kGlobalTrack,double wide=10);
 TObject *Trak(const std::vector<float> &pnts, EDraw3DStyle sty=kGlobalTrack,Color_t col=kRed);
    void  Trak(const StvTrack *tk, int dir = 2, EDraw3DStyle sty=kGlobalTrack);
 

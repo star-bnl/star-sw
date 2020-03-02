@@ -1,8 +1,6 @@
+#include "TSystem.h"
+#define _THelixNew_
 #include "StvSeedFinder.h"
-#include "TSystem.h"
-#include "TVector3.h"
-#include "TSystem.h"
-#include "THelix3d.h"
 #include "TGeoManager.h"
 #include "TGeoVolume.h"
 #include "TGeoMaterial.h"

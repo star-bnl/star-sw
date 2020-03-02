@@ -14,7 +14,7 @@
 #include "StvUtil/StvNodePars.h"
 #include "StarMagField.h"
 #include "StvUtil/StvELossTrak.h"
-#include "THelixTrack.h"
+#include "THelixTrack_.h"
 #include "TRandom.h"
 #include "StvToolkit.h"
 
