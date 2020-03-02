@@ -18,6 +18,7 @@ setenv QT_LIBRARY_DIR ${QTDIR}/lib
 setenv QT_INCLUDE_DIR ${QTDIR}/include
 setenv QT_MOC_EXECUTABLE ${QTDIR}/bin/moc
 setenv Qt4 ${QTDIR}
+rm -f CMakeCache.txt
 #cmake cmake $ROOT/6.99.99/root -DCMAKE_INSTALL_PREFIX=$ROOTSYS -DCMAKE_BUILD_TYPE=Debug -Dall=ON -Dcxx11=ON -Dlibcxx=ON -Dcacoa=ON -Dgdml=ON -Dgsl_shared=ON -Dminuit2=ON -Dqt=ON -Drootfit=ON -Dtable=ON -Dvc=ON 
 cmake $ROOT/6.99.99/root -DCMAKE_INSTALL_PREFIX=$ROOTSYS -DCMAKE_BUILD_TYPE=Debug \
 -DCMAKE_C_COMPILER="${CC}" -DCMAKE_CXX_COMPILER="${CXX}" -DCMAKE_Fortran_COMPILER="${FC}" -Dfortran=ON \
@@ -28,8 +29,8 @@ cmake $ROOT/6.99.99/root -DCMAKE_INSTALL_PREFIX=$ROOTSYS -DCMAKE_BUILD_TYPE=Debu
 -Dvecgeom=OFF  \
 -DXROOTD_ROOT_DIR="${XOPTSTAR}" \
 -Dbuiltin_cfitsio=On -DCMAKE_CXX_FLAGS="-fdiagnostics-color=always -msse4.2" \
--DCMAKE_C_FLAGS="-fdiagnostics-color=always -msse4.2" 
-#-Dtable=ON 
+-DCMAKE_C_FLAGS="-fdiagnostics-color=always -msse4.2" \
+-Dtable=ON 
 #  -Dbuiltin_xrootd=ON 
 #-DPYTHIA6_DIR=${XOPTSTAR} \
 #-DPYTHIA8_DIR=${XOPTSTAR} \
