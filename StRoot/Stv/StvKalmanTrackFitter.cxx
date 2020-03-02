@@ -6,6 +6,8 @@
 
 #include "TCernLib.h"
 #include "TSystem.h"
+
+#define _THelixNew_
 #include "StarRoot/TRungeKutta.h"
 #include "StvKalmanTrackFitter.h"
 #include "Stv/StvToolkit.h"
@@ -20,6 +22,8 @@
 #include "Stv/StvNode.h"
 #include "Stv/StvTrack.h"
 ClassImp(StvKalmanTrackFitter)
+
+
 #define DOT(a,b) (a[0]*b[0]+a[1]*b[1]+a[2]*b[2])
 #define SUB(a,b,c) {c[0]=a[0]-b[0];c[1]=a[1]-b[1];c[2]=a[2]-b[2];}
 #define DIST2(a,b) ((a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1])+(a[2]-b[2])*(a[2]-b[2]))
@@ -45,6 +49,10 @@ void StvKalmanTrackFitter::SetCons(const StvKonst_st *kons)
 {
   mKons = kons;
 }
+
+#include "0.C"
+
+#if 0
 //_____________________________________________________________________________
 int StvKalmanTrackFitter::Refit(StvTrack *trak,int dir, int lane, int mode)
 {
@@ -102,12 +110,15 @@ static StvFitter *fitt = StvFitter::Inst();
   for (it=itBeg; it!=itEnd; (dir)? ++it:--it) {//Main loop
     preNode=node;
     node = *it; iNode++;
+    const StvHit *hit = node->GetHit();
 assert(vsuma(node->GetFE(0).TkDir()[0],3*3)>0.1);
     if (!dir) 	{ innNode = node; outNode = preNode;}
     else 	{ outNode = node; innNode = preNode;}
 enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
-    node->GetFE(lane)[0] = -1;
-    node->GetFE(lane)[2] = -1;
+    if (!(mode&1)) { // Non Join case
+      node->GetFE(lane)[0] = -1;
+      node->GetFE(lane)[2] = -1;
+    }
 
 //         if (node->GetType()==StvNode::kDcaNode) {
 //           printf("DCAInit lane=%d err=%g\n",jane,sqrt(node->mFE[jane].mPP));
@@ -117,7 +128,6 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
     int kase = 0;
     if (nFitLeft) 		kase|=kLeft;
     if (mode && nFitRite) 	kase|=kRite;
-    const StvHit *hit = node->GetHit();
     wasFitted = (mode&1)? node->IsFitted(jane):0;
 //     if (wasFitted ) 		kase|=kHit;
     if (hit)			kase|=kHit;
@@ -241,6 +251,7 @@ StvDebug::Break(nQQQQ);//???????????
        case kRite: 	// Rite fits only, no  Hit
 //		No hit. No own ifo yet. Get everything from opposite fit		
        {
+if (node->mFE[jane][0]<=0) printf("BOTOHO - %g\n",node->mFE[jane][0]);//??????
         assert(node->mFE[jane][0]>0);
         assert(node->mFE[jane][2]>0);
         node->SetFit(node->mFP[jane],node->mFE[jane],2); 
@@ -263,10 +274,13 @@ StvDebug::Break(nQQQQ);//???????????
 	fitt->Set(node->mPP+lane         ,node->mPE+lane
         	 ,node->mPP+jane         ,node->mPE+jane
         	 ,node->mFP+2            ,node->mFE+2   );
-	node->SetXi2(3e33,2);
+	node->SetXi2(3e33,3);
 	myXi2 = fitt->Xi2(); iFailed = fitt->IsFailed();
 //      ==============================================
-	node->SetXi2(myXi2/5*2,3);
+        myXi2*= 2./5;
+        if (hit) myXi2 = fitt->Xi2Join(hit);
+	node->SetXi2(myXi2,3);
+        if (hit) 
 	if (iFailed 		 ) 	nErr+=1000;
 	if (myXi2 > mKons->mXi2Joi) 	nErr+=10000;
 	iFailed = fitt->Update();
@@ -339,14 +353,14 @@ static const double kEps = 1.e-2,kEPS=1e-1;
     int converged = 0;
     for (int refIt=0; refIt<10; refIt++)  	{	//Fit iters
       nIters++;
-      ans = Refit(tk,idir,lane,1);
+      ans = Refit(tk,idir,lane,2);
 //    ==================================
       nHits=NHits();
       if (nHits < mKons->mMinHits) break;
       if (ans>0) break;			//Very bad
       
       StvNodePars lstPars(tstNode->GetFP());	//Remeber params to compare after refit	
-      anz = Refit(tk,1-idir,1-lane,1); 
+      anz = Refit(tk,1-idir,1-lane,2); 
 //        ==========================================
       nHits=NHits();
       if (nHits < mKons->mMinHits) break;
@@ -389,8 +403,7 @@ int StvKalmanTrackFitter::Propagate(StvNode  *node,StvNode *preNode,int dir,int 
 {
 double s=0;
 static int nCall=0; nCall++;
-  StvNode *innNode=0,*outNode=0;
-  if (innNode){}; if (outNode){};
+  StvNode *innNode=0,*outNode=0;  if (innNode){}; if (outNode){};
   if (!dir) {innNode = node; outNode=preNode;}
   else      {outNode = node; innNode=preNode;}
 
@@ -434,6 +447,7 @@ static int nCall=0; nCall++;
   return 0;
   
 }
+#endif
 //_____________________________________________________________________________
 int StvKalmanTrackFitter::Fit(const StvTrack *trak,const StvHit *vtx,StvNode *node)
 {

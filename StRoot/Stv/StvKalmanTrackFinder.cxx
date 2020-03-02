@@ -115,7 +115,7 @@ enum {kRepeatSeedFinder = 2};
         if (nAdded) {
           StvDebug::Count("FindTrack_1",nAdded);
           if (BOTOHO&4) StvDebug::Zhow(mCurrTrak);
-	  ans = Refit(0);
+	  ans = Refit(2);
 	  fail = 4;
 	  if (ans) break;
           StvDebug::Count("Refit_1",mCurrTrak->GetNHits());
@@ -203,7 +203,7 @@ const StHitPlane *prevHitPlane=0;
 
 //  	Skip too big curvature or pti
   if (fabs(par[0].getCurv())>mKons->mMaxCurv)	return 0;	
-  if (fabs(par[0].getPtin())>mKons->mMaxPti)	return 0;	
+  if (fabs(par[0].getPtin())>mKons->mMaxPti )	return 0;	
 //  	skip P too small
   if (par[0].getP2() <  mKons->mMinP2) 		return 0;
   
@@ -232,9 +232,7 @@ const StHitPlane *prevHitPlane=0;
     if (par[0].getRxy()     > mKons->mRxyMax) 	{skip = 14;	break;}
     if (fabs(par[0].getCurv())>mKons->mMaxCurv)	{skip = 15;	break;}	
     if (fabs(par[0].getPtin())>mKons->mMaxPti)	{skip = 16;	break;}	
-double s=0;
-//??assert((s=TCLx::sign(err[0],5))>0);
-    		
+        		
     const StvHits *localHits = 0; 
     if (idive & StvDiver::kDiveHits) {
       float gate[4]={mKons->mCoeWindow,mKons->mCoeWindow
@@ -357,10 +355,10 @@ if(myReject) StvDebug::Count("EndTrk",myReject);
   }
 if (skip && !idir) StvDebug::Count("EndTrk",skip);
 
-
+  double tlen=0;
   if (nHits>3) {
-    double tlen = mCurrTrak->GetLength();
-//????    assert(tlen >0.0 && tlen<1500);
+    tlen = mCurrTrak->GetLength();
+    assert(tlen >0.0 && tlen<3000);
   }
 
   mHitCounter->Reset();
@@ -482,9 +480,17 @@ static     StvToolkit *kit     = StvToolkit::Inst();
   return goodCount;
 }
 //_____________________________________________________________________________
-int StvKalmanTrackFinder::Refit(int idir)
+int StvKalmanTrackFinder::Refit(int mode)
 {
-  int ians = mTrackFitter->Refit(mCurrTrak,idir);
+  int dir,lane,numb;
+  switch ( mode ) {
+    case 0: dir = 1; lane = 0; numb = 2; break; 
+    case 1: dir = 1; lane = 1; numb = 1; break;
+    case 2: dir = 1; lane = 0; numb = 2; break;
+    default: assert(0);
+  }
+
+  int ians = mTrackFitter->RefitLoop(mCurrTrak,dir,lane,numb);
   if (BOTOHO&32) StvDebug::Zhow(mCurrTrak);
   return ians;
 }

@@ -5,7 +5,7 @@
 #include "TNamed.h"
 
 /// \class StvTrackFitter
-class THelixTrack;
+class THelixTrack_;
 class StvTrack;
 class StvNode;
 class StvHit;
@@ -18,15 +18,15 @@ public:
   StvTrackFitter(const char *name);
   virtual ~StvTrackFitter();
   virtual void SetCons(const StvKonst_st*)=0;
-  virtual  int Refit(StvTrack *trak,int dir)=0;
-  virtual  int Refit(StvTrack *trak,int dir,int lane, int mode=1)=0;
+  virtual  int RefitLoop(StvTrack *trak,int idir,int ilane, int numb)=0;
+  virtual  int Refit(StvTrack *trak,int dir,int lane,int mode)=0;
   virtual void Clear(const char *opt="");	
   virtual  int Fit(const StvTrack *trak,const StvHit *vtx,StvNode *node)=0;
   virtual  int Helix(StvTrack *trak,int mode)=0;
   virtual  int Check(StvTrack *trak) 		{return 0;}
   virtual  int Check(const StvNodePars &parA,const StvFitErrs &errA,
 		     const StvNodePars &parB,const StvFitErrs &errB) {return 0;}
-  virtual  THelixTrack* GetHelix() const 	{return     0;}
+  virtual  THelixTrack_* GetHelix() const 	{return     0;}
            int GetNDF()  const 			{return mNDF ;}     
         double GetDca3() const 			{return mDca3;}     
         double GetXi2()  const 			{return mXi2 ;}     
