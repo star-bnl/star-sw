@@ -84,6 +84,7 @@
 #include "StarMagField.h"
 #include "StarCallf77.h"
 #include "tables/St_Survey_Table.h"
+#include "TMath.h"
 #if 0
 #define    agdetpnew	 F77_NAME(agdetpnew,AGDETPNEW)
 #define    agdetpadd	 F77_NAME(agdetpadd,AGDETPADD)
@@ -108,7 +109,15 @@ Int_t StMagFMaker::InitRun(Int_t RunNo)
   } else {
     gMessMgr->Info() << "StMagFMaker::InitRun active mode " << endm;
     Float_t  fScale = St_starMagOnlC::instance()->ScaleFactor();
-    assert(fabs(fScale)>0.005);
+#if 0
+    assert(TMath::Abs(fScale)>0.005);
+#else 
+    if (TMath::Abs(fScale)<=0.005) {
+      gMessMgr->Info() << "StMagFMaker::InitRun reset scale factor from  " << fScale;
+      fScale = 0.006;
+      gMessMgr->Info() << " to " << fScale << 	endm;
+    }
+#endif
     gMessMgr->Info() << "StMagFMaker::InitRun from DB fScale = " << fScale << endm;
     if (*SAttr("magFactor")) {
       fScale = DAttr("magFactor");
