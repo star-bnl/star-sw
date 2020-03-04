@@ -299,7 +299,9 @@ class EvbChooser
 };
 
 #define RHIC_TRG "RHICTRG\0"
+#define RHIC_TRG2 "RHICTRG2"
 #define TRG_UDP_PORT 8060
+#define TRG_UDP_PORT2 8061
 
 struct RHIC_Trigger {
     char marker[8];
@@ -307,6 +309,14 @@ struct RHIC_Trigger {
     int type;          // 1 counter, 2 scaler
     int source;        // 0 - 20 (evb),   100 (L0)
     float value;       // the value...
+};
+
+struct RHIC_Trigger2 {
+    char marker[8];
+    int tmslice;
+    int type;
+    int source;
+    float v0, v1, v2, v3;
 };
 
 struct PrescaleReturnInfo {
