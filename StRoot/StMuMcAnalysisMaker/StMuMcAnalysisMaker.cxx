@@ -13,6 +13,7 @@
 #endif
 #include "TSystem.h"
 #include "TArrayD.h"
+#include "TVirtualX.h"
 ClassImp(StMuMcAnalysisMaker);
 StMuMcAnalysisMaker *StMuMcAnalysisMaker::fgStMuMcAnalysisMaker = 0;
 //                  [gp]     [type]           [particle] [pm]         [x]         [i]                  
