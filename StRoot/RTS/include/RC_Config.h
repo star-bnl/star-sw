@@ -313,6 +313,7 @@ struct RHIC_Trigger {
 
 struct RHIC_Trigger2 {
     char marker[8];
+    int runtime;
     int tmslice;
     int type;
     int source;
