@@ -42,6 +42,8 @@ for (Int_t s = 1; s <= 24; s++) {for (Int_t r = 1; r <=45; r++) {Double_t V = St
 #include "TFileSet.h"
 #include "TDataSetIter.h"
 #include <vector>
+#include "TObjectTable.h"
+#include "TDirIter.h"
 static TLinearFitter *lf = 0;
 static Int_t _debug = 1;
 class Run_t {
@@ -240,8 +242,9 @@ TSQLServer *OnlDbServer(const Char_t *dataset = "Conditions_rich", Int_t year = 
 //________________________________________________________________________________
 Int_t LastProcessedRun(TpcAvgPowerSupply_st *avgI, Double_t AcCharge[2]) {
   Int_t LastRun = -1;
-  TFileSet *dir = new TFileSet(".");
-  TDataSetIter next(dir);
+#if 0
+  TFileSet dir(gSystem->WorkingDirectory());
+  TDataSetIter next(&dir,0);
   TDataSet *s = 0;
   TDataSet *slast = 0;
   Int_t dOld = 0, tOld = 0;
@@ -280,6 +283,45 @@ Int_t LastProcessedRun(TpcAvgPowerSupply_st *avgI, Double_t AcCharge[2]) {
       delete f;
     }
   }
+#else
+  TDirIter Dir("./TpcAvgPowerSupply*.root*");
+  Char_t *file = 0;
+  Int_t dOld = 0, tOld = 0;
+  Int_t d = 0, t = 0;
+  TString name;
+  while ((file = (Char_t *) Dir.NextFile())) {
+    TString nameC(gSystem->BaseName(file));
+    if (! nameC.Contains("TpcAvgPowerSupply") || ! nameC.Contains(".root")) continue;
+    Int_t n = sscanf(nameC.Data(),"TpcAvgPowerSupply.%d.%d.root",&d,&t);
+    if (n != 2) continue;
+    if (d < dOld) continue;
+    if (d == dOld && t < tOld) continue;
+    dOld = d;
+    tOld = t;
+    name = nameC;
+  }
+  if (name != "") {
+    TFile *f = new TFile(name.Data());
+    if (f) {
+      St_TpcAvgPowerSupply *p = (St_TpcAvgPowerSupply *) f->Get("TpcAvgPowerSupply");
+      if (p) {
+	memcpy(avgI, p->GetTable(), sizeof(TpcAvgPowerSupply_st));
+	LastRun = avgI->run;
+	for (Int_t io = 0; io < 2; io++) {
+	  for (Int_t module = 0; module < NUM_CARDS; module++) {
+	    for (Int_t channel = 0; channel < NUM_CHANNELS; channel++) {
+	      Int_t sec  = sector(module,channel);
+	      Int_t socket  = channel%4 + 4*io + 1;
+	      Int_t l    = 8*(sec-1)+socket-1;
+	      AcCharge[io] += avgI->Charge[l];
+	    }
+	  }
+	}
+      }
+      delete f;
+    }
+  }
+#endif
   return LastRun;
 }
 //________________________________________________________________________________
@@ -288,6 +330,7 @@ void MakeTpcAvgPowerSupply(Int_t year = 2020) {
   if (year == 2020) {
     d = TDatime(10000*(year-1) + 1101,0);
   }
+  cout << "Run MakeTpcAvgPowerSupply for "; d.Print();
   Int_t u95 = d.Convert();
   TDatime nextyear(10000*(year+1) + 101, 0);
   Int_t uNext = nextyear.Convert();
@@ -296,7 +339,7 @@ void MakeTpcAvgPowerSupply(Int_t year = 2020) {
   };
   TDatime now;
   
-  TFile *fSumF = new TFile(Form("MakeTpcAvgPowerSupply.%02i%02i%02i_%02i.root",now.GetDay(),now.GetMonth(),now.GetYear()%100,now.GetHour()),"update");
+  TFile *fSumF = new TFile(Form("MakeTpcAvgPowerSupply.%02i%02i%02i_%02i.root",now.GetDay(),now.GetMonth(),now.GetYear()%100,now.GetHour()),"recreate");
   TNtuple *FitP = 0;
   if (fSumF) FitP = (TNtuple *) fSumF->Get("FitP");
   if (!FitP) {
@@ -314,7 +357,7 @@ void MakeTpcAvgPowerSupply(Int_t year = 2020) {
   //  TString sql("SELECT runNumber,from_unixtime(startRunRTS),from_unixtime(endRunRTS) from runUpdateStatus where beginTime > \"2016-01-13\" order by beginTime;");
   //  TString sql("SELECT runNumber,from_unixtime(startRunRTS),from_unixtime(endRunRTS) from runUpdateStatus order by beginTime;");
   //  TString sql("SELECT runNumber,from_unixtime(firstEventTime),from_unixtime(lastEventTime) from daqSummary  order by beginTime;");
-  TString sql("SELECT runNumber,from_unixtime(firstEventTime),from_unixtime(lastEventTime),firstEventTime,lastEventTime from daqSummary  order by beginTime;");
+  TString sql("SELECT runNumber,from_unixtime(firstEventTime),from_unixtime(lastEventTime),firstEventTime,lastEventTime from daqSummary  where beginTime > \"2019-11-01\"  order by beginTime;");
   //  TString sql("SELECT runNumber,from_unixtime(firstEventTime),from_unixtime(lastEventTime),firstEventTime,lastEventTime from daqSummary where beginTime > \"2018-03-15 13:44:00\"  order by beginTime;");
   TSQLResult *res = RunLog->Query(sql.Data());
   Int_t Nruns = res->GetRowCount(); cout << "Got " << Nruns << " rows in result" << endl;
@@ -625,6 +668,7 @@ void MakeTpcAvgPowerSupply(Int_t year = 2020) {
     delete outf;
     delete TpcAvgPowerSupply;
     cout << fOut.Data() << " has been written" << endl;
+    //    gObjectTable->Print();
     if (uTrip > 0 && uLastNonTrip > 0) {
       assert(uTrip > uLastNonTrip);
       TpcAvgPowerSupply = new St_TpcAvgPowerSupply("TpcAvgPowerSupply",1);
@@ -637,6 +681,7 @@ void MakeTpcAvgPowerSupply(Int_t year = 2020) {
       delete outf;
       delete TpcAvgPowerSupply;
       cout << "Tripped " << fOut.Data() << " has been written" << endl;
+      //      gObjectTable->Print();
     }
     FitP->AutoSave("SaveSelf");
     if (! gROOT->IsBatch() && Ask()) return;
