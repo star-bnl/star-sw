@@ -30,6 +30,7 @@ cmake $ROOT/6.99.99/root -DCMAKE_INSTALL_PREFIX=$ROOTSYS -DCMAKE_BUILD_TYPE=Debu
 -DXROOTD_ROOT_DIR="${XOPTSTAR}" \
 -Dbuiltin_cfitsio=On -DCMAKE_CXX_FLAGS="-fdiagnostics-color=always -msse4.2" \
 -DCMAKE_C_FLAGS="-fdiagnostics-color=always -msse4.2" \
+-Dbuiltin_afterimage=ON \
 -Dtable=ON 
 #  -Dbuiltin_xrootd=ON 
 #-DPYTHIA6_DIR=${XOPTSTAR} \
