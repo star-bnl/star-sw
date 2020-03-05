@@ -1,6 +1,10 @@
-// $Id: St_geant_Maker.cxx,v 1.180 2020/02/26 21:26:20 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.181 2020/03/05 16:28:31 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.181  2020/03/05 16:28:31  jwebb
+// Fix two errors in FCS preshower hits.
+//
 // Revision 1.180  2020/02/26 21:26:20  jwebb
+//
 // Accumulate and report total energy deposited in all active elements
 // of the detector modules for the job.
 //
@@ -1357,7 +1361,7 @@ int St_geant_Maker::Make() {
   AddHits<St_g2t_fts_hit>( "STGH",{"TGCG"},                        "g2t_stg_hit", g2t_stg );
   AddHits<St_g2t_emc_hit>( "WCAH",{"WSCI"},                        "g2t_wca_hit", g2t_wca );
   AddHits<St_g2t_hca_hit>( "HCAH",{"HSCI"},                        "g2t_hca_hit", g2t_hca );
-  AddHits<St_g2t_emc_hit>( "PRES",{"PSCI"},                        "g2t_emc_hit", g2t_pre );
+  AddHits<St_g2t_emc_hit>( "PREH",{"PSCI"},                        "g2t_pre_hit", g2t_pre );
 
 
   // Event plane detector 
