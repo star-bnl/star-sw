@@ -12,5 +12,5 @@ foreach my $file (@ARGV) {
 #  my $cmd = "root4star -q -b  put2DB.C\\\(\\\"". $file . "\\\"\\\) | tee " . $file . ".log";
   print "$cmd\n";
   my $status = system($cmd);
-  if ($status) {last;}
+#  if ($status) {last;}
 }
