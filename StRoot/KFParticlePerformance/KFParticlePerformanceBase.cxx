@@ -771,7 +771,8 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
   TString parAxisName[nHistoPartParam] = {"m [GeV/c^{2}]","p [GeV/c]","p_{t} [GeV/c]",
                                           "y","Decay length [cm]","Life time c#tau [cm]",
                                           "chi2/ndf","prob","#theta [rad]",
-                                          "#phi [rad]","x [cm]","y [cm]","z [cm]","Rxy [cm]", "L [cm]", "L/dL","m_{t} [GeV/c^{2}]","Multiplicity","dM [GeV/c^{2}]"};
+                                          "#phi [rad]","x [cm]","y [cm]","z [cm]","Rxy [cm]", "L [cm]",
+					  "L/dL","m_{t} [GeV/c^{2}]","Multiplicity","dM [GeV/c^{2}]"};
 #ifdef CBM
   int nBins[nHistoPartParam] =  {1000, // M
                                   100, // p
