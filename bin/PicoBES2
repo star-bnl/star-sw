@@ -407,9 +407,13 @@ grep -A 2 'table tpcDrift' 02[6-7]/*/*B.log | egrep '(233530|41608|90742|42830)'
 grep -A 2 'table tpcDrift' 04?/*/*B.log | egrep '2020021(1|6)/(141636|184732|103302|111714|71125) -' | tee list_of_bad_files
 grep -A 2 'table tpcDrift' 04?/*/*B.log | egrep '73118 -' | tee list_of_bad_files
 grep -A 2 'table tpcDrift' 06?/*/*B.log | egrep '20200303/12 -' | tee list_of_bad_files
+grep -A 2 'table tpcDrift' 06?/*/*B.log | egrep '20200303/(12|155804) -' | tee list_of_bad_files
 foreach f (`awk -F\- '{print $1}' list_of_bad_files`)
 	set b = `basename ${f} B.log`; set d = `dirname ${f}`; mv ${d}/${b}* Zombie/
 end
+############ bad TpcAvgPowerSupply ####################################################################
+20200304,171244
+grep -A 2 'table TpcAvgPowerSupply' 064/*/*B.log | egrep '20200304/171244 -' | tee list_of_bad_files
 ############# clean scratch ###################################################################
 cd /scratch/fisyak
 find . -type d -cmin +130 -exec ls -ld {} \;
