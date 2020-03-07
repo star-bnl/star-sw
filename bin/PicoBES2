@@ -355,7 +355,7 @@ endx[
 
 ================================= Summurizing  ===============================================
 @ count = 0
-foreach done (`ls -1d */*/Done`)
+foreach done (`ls -1d */*/Done`)s
   set d = `dirname ${done}`
   cd ${d}; pwd;
   ls -ltr | tail -1 | grep Chain	
@@ -408,12 +408,16 @@ grep -A 2 'table tpcDrift' 04?/*/*B.log | egrep '2020021(1|6)/(141636|184732|103
 grep -A 2 'table tpcDrift' 04?/*/*B.log | egrep '73118 -' | tee list_of_bad_files
 grep -A 2 'table tpcDrift' 06?/*/*B.log | egrep '20200303/12 -' | tee list_of_bad_files
 grep -A 2 'table tpcDrift' 06?/*/*B.log | egrep '20200303/(12|155804) -' | tee list_of_bad_files
+grep -A 2 'table tpcDrift' 066/*/*B.log | egrep '20200306/155204 -' | tee list_of_bad_files
 foreach f (`awk -F\- '{print $1}' list_of_bad_files`)
 	set b = `basename ${f} B.log`; set d = `dirname ${f}`; mv ${d}/${b}* Zombie/
 end
 ############ bad TpcAvgPowerSupply ####################################################################
 20200304,171244
 grep -A 2 'table TpcAvgPowerSupply' 064/*/*B.log | egrep '20200304/171244 -' | tee list_of_bad_files
+foreach f (`awk -F\- '{print $1}' list_of_bad_files`)
+	set b = `basename ${f} B.log`; set d = `dirname ${f}`; mv ${d}/${b}* Zombie/
+end
 ############# clean scratch ###################################################################
 cd /scratch/fisyak
 find . -type d -cmin +130 -exec ls -ld {} \;
