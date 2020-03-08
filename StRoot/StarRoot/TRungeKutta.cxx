@@ -1,4 +1,3 @@
-#if 0
 #include <stdlib.h>
 #include <math.h>
 #include "TError.h"
@@ -9,12 +8,12 @@
 #include "TCernLib.h"
 #include "TVector3.h"
 #include "TVectorD.h"
-#include "TRungeKutta.h"
-#include "THelixTrack.h"
 #include "TRandom.h"
 #include "TRandomVector.h"
 #include "TH1.h"
 #include "TCernLib.h"
+#include "TRungeKutta.h"
+
 TRKuttaMag *TRungeKutta::fgMag=0;
 
 
@@ -58,7 +57,7 @@ TRungeKutta::~TRungeKutta()
   delete fDer3d;
 }
 //_____________________________________________________________________________
-TRungeKutta::TRungeKutta(const THelixTrack &from,TRKuttaMag* mag)
+TRungeKutta::TRungeKutta(const THelixTrack_ &from,TRKuttaMag* mag)
 {
   memset(fBeg,0,fEnd-fBeg);
   SetMag(mag);
@@ -757,7 +756,7 @@ void TRungeKutta::Test2()
     for (int is=0;is<nSteps;is++) {
       myMag(myX,myH);
       double myRho = -charge*myH[2]/PtGev;
-      THelixTrack TH(myX,myD,myRho);
+      THelixTrack_ TH(myX,myD,myRho);
       TH.Move(step);
       TCL::ucopy(TH.Pos(),myX,3);
       TCL::ucopy(TH.Dir(),myD,3);
@@ -1561,7 +1560,7 @@ void TRungeKutta::TestSign()
     TestMag myMag(HZ);
     double curv = -(HZ[2]*charge)/PtGev;
 
-    THelixTrack th(ZER,PZ,curv);
+    THelixTrack_ th(ZER,PZ,curv);
     THelix3d    t3(charge,ZER,PZ,HZ);
     TRungeKutta tr(charge,ZER,PZ,&myMag);
 
@@ -1581,4 +1580,3 @@ void TRungeKutta::TestSign()
     printf("\n");
   } } }
 }
-#endif //0

@@ -4,17 +4,6 @@
 #include "TObject.h"
 #include "TArrayD.h"
 #include "TPolinom.h"
-
-#if 0
-#define TCircle 	 TCircle_
-#define THelixTrack 	 THelixTrack_
-#define TCEmx_t          TCEmx_t_
-#define THEmx_t 	 THEmx_t_
-#define TCircleFitterAux TCircleFitterAux_
-#define TCircleFitter	 TCircleFitter_
-#define THelixFitter	 THelixFitter_
-#endif
-
 typedef double Mtx33D_t[3][3];
 typedef double Mtx55D_t[5][5];
 
@@ -366,17 +355,5 @@ TPoliFitter   fPoli1Fitter;
 double fChi2;
 ClassDef(THelixFitter_,0)
 };
-
-#ifdef _THelixNew_
-#define TCircle 	 TCircle_
-#define THelixTrack 	 THelixTrack_
-#define TCEmx_t          TCEmx_t_
-#define THEmx_t 	 THEmx_t_
-#define TCircleFitterAux TCircleFitterAux_
-#define TCircleFitter	 TCircleFitter_
-#define THelixFitter	 THelixFitter_
-#endif
-
-
 
 #endif // THELIXTRACK_H
