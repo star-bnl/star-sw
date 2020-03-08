@@ -6,8 +6,6 @@
 
 #include "TCernLib.h"
 #include "TSystem.h"
-
-#define _THelixNew_
 #include "StarRoot/TRungeKutta.h"
 #include "StvKalmanTrackFitter.h"
 #include "Stv/StvToolkit.h"
@@ -49,7 +47,8 @@ void StvKalmanTrackFitter::SetCons(const StvKonst_st *kons)
 {
   mKons = kons;
 }
-
+#include "0.C"
+#if 0
 //_____________________________________________________________________________
 int StvKalmanTrackFitter::Refit(StvTrack *trak,int dir, int lane, int mode)
 {
@@ -191,7 +190,6 @@ printf("DIFF = %g  %d\n",dif,nIters);
   return state;
 
 }
-
 //_____________________________________________________________________________
 int StvKalmanTrackFitter::Propagate(StvNode  *node,StvNode *preNode,int dir,int lane)
 {
@@ -225,6 +223,7 @@ assert(fabs(dS)<1e3);
   return 0;
   
 }
+#endif
 
 //_____________________________________________________________________________
 int StvKalmanTrackFitter::Fit(const StvTrack *trak,const StvHit *vtx,StvNode *node)
@@ -272,7 +271,7 @@ enum {kDeltaZ = 100};//??????
   return 0;
 }   
 //_____________________________________________________________________________
-THelixTrack* StvKalmanTrackFitter::GetHelix() const {return mHelx;}
+THelixTrack_* StvKalmanTrackFitter::GetHelix() const {return mHelx;}
 
 //_____________________________________________________________________________
 int StvKalmanTrackFitter::Helix(StvTrack *trak,int mode)
@@ -285,9 +284,9 @@ enum {kUseErrs=1, kUpdate=2, kPrint=4};
 
   if (!mode         ) mode = kPrint;
   mXi2 = 0;
-  if (!mHelx) mHelx = new THelixFitter;
+  if (!mHelx) mHelx = new THelixFitter_;
   mHelx->Clear();
-  THelixFitter& hlx = *mHelx;
+  THelixFitter_& hlx = *mHelx;
   StvNode *node=0,*preNode=0; if (preNode){};
   for (StvNodeIter it=trak->begin();it!=trak->end(); ++it) {
     node = *it; 
