@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.60.2.5 2020/01/08 00:05:49 perev Exp $
+// $Id: StvMaker.cxx,v 1.60.2.6 2020/03/08 19:43:08 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -613,8 +613,8 @@ static StvToolkit *kit = StvToolkit::Inst();
     }
 
 
-    int ans = mCurTrackFitter->Refit(kTrack,1);
-    if (ans || kTrack->GetNHits()<4)	{ it = trackContainer.erase(it); continue; }
+///???    int ans = mCurTrackFitter->Refit(kTrack,1);
+///???    if (ans || kTrack->GetNHits()<4)	{ it = trackContainer.erase(it); continue; }
     mCurTrackFinder->MakeDcaNode(kTrack);
     ++it;
   }
