@@ -5,7 +5,7 @@
 #include "TSystem.h"
 #include "TVector3.h"
 #include "StMultiKeyMap.h"
-#include "THelixTrack.h"
+#include "THelixTrack_.h"
 #include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 #include "StvSeed/StvSeedConst.h"
 
@@ -81,7 +81,7 @@ int StvKNSeedFinder::Again(int)
    return 1;
 }
 //_____________________________________________________________________________
-const THelixTrack* StvKNSeedFinder::NextSeed()
+const THelixTrack_* StvKNSeedFinder::NextSeed()
 {
 static int nCall=0; nCall++;
   int nTotHits=0,nAccHits=0;
@@ -126,7 +126,7 @@ StvDebug::Count("KNNHits",nHits);
     if (nHits < fMinHits) 	continue;
     fSeedHits.clear();
     fSeedHits+=mSel.Get();
-    const THelixTrack *hel =  Approx();
+    const THelixTrack_ *hel =  Approx();
 if (!hel) StvDebug::Count("KNNRej",2);
     if (hel)  return hel;	//Good boy
   }// end 1st hit loop

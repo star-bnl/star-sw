@@ -26,7 +26,7 @@ class StvKNSeedFinder : public StvSeedFinder
 public:
   StvKNSeedFinder(const char *name="KN");
    ~StvKNSeedFinder(){;}
-  const THelixTrack* NextSeed();
+  const THelixTrack_* NextSeed();
   void      Clear(const char *opt="");
   int       Again(int repeat);
   void      Reset();

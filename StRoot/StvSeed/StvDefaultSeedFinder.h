@@ -79,7 +79,7 @@ enum { kNDejavu=4 };
 public:
   StvDefaultSeedFinder(const char *name="Default");
    ~StvDefaultSeedFinder(){;}
-  const THelixTrack* NextSeed();
+  const THelixTrack_* NextSeed();
   void      Clear(const char *opt="");
   int       Again(int repeat);
   void      Reset();

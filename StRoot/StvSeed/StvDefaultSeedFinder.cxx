@@ -7,7 +7,6 @@
 #include "StMultiKeyMap.h"
 #include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 #include "Stv/StvHit.h"
-#include "THelixTrack.h"
 //#define APPROX_DEBUG
 #ifdef APPROX_DEBUG
 #include "TCanvas.h"
@@ -150,7 +149,8 @@ inline static float Impact2(const float dir[3],const float pnt[3])
 //	End of Local auxiliary routines
 //_____________________________________________________________________________
 #define NEXT_HIT( reason ) { LOG_DEBUG << __LINE__ << " [" << reason << "]" << endm; continue; }
-const THelixTrack* StvDefaultSeedFinder::NextSeed()
+
+const THelixTrack_* StvDefaultSeedFinder::NextSeed()
 {
 static int nCall = 0; nCall++;
 std::vector<TObject*> mySeedObjs;
@@ -234,7 +234,7 @@ std::vector<TObject*> mySeedObjs;
     if ((int)fSeedHits.size() < fMinHits) continue;
 
 
-    const THelixTrack *hel = Approx();
+    const THelixTrack_ *hel = Approx();
 
 #if 0
   if (hel) { //print all seed hits 
