@@ -5,7 +5,7 @@
 #include "TCernLib.h"
 #include "TMath.h"
 #include "TMath.h"
-#include "StarRoot/THelixTrack.h"
+#include "StarRoot/THelixTrack_.h"
 #include "StarRoot/THelix3d.h"
 #include "StarRoot/TRungeKutta.h"
 #include "StvUtil/StvNodePars.h"
@@ -13,6 +13,7 @@
 #include "StvUtil/StvDebug.h"
 #include "Stv/StvToolkit.h"
 static const double kMaxPti=200,kMaxCurv=(0.000299792458 * 4.98478)*kMaxPti,kMaxEta = 6;
+static const double kMinPti=1./kMaxPti;
 //static const double kMaxLamda = 3.14159265358/2-atan(exp(-kMaxEta))*2;
 //static const double kMaxTanL  = tan(kMaxLamda);
 
@@ -33,6 +34,10 @@ static const double kFitErrs[5]   ={3,3
                                    ,10./180*M_PI
 				   ,10./180*M_PI
 				   ,kMaxPti};
+static const double kMinErrs[5]   ={1e-4,1e-4 
+                                   ,0.1/180*M_PI
+				   ,0.1/180*M_PI
+				   ,kMinPti};
 static const double kPiMass=0.13956995;
 static const double kMinP = 0.01,kMinE = sqrt(kMinP*kMinP+kPiMass*kPiMass);
 static const double kMaxCorr = 0.1;
@@ -154,7 +159,7 @@ assert(fabs(dot(_d,_d)-1)<1e-4);
 
 }
 //______________________________________________________________________________
-void StvNodePars::set(const THelixTrack *th)
+void StvNodePars::set(const THelixTrack_ *th)
 {
 static StvToolkit *kit = StvToolkit::Inst();
   memcpy(_x,th->Pos(),sizeof(_x));   
@@ -421,7 +426,7 @@ static StvFitErrs myFitErrs;
 // }
 
 //______________________________________________________________________________
-void StvFitErrs::Set(const THelixTrack *he)
+void StvFitErrs::Set(const THelixTrack_ *he)
 {
   static StvToolkit *kit = StvToolkit::Inst();
   double h[3];
@@ -495,6 +500,7 @@ int StvFitErrs::Recov()
 //		Check diag errs
   for (int i=0,li=0;i< 5;li+=++i) {
     fak[i]=1;
+    if (e[li+i] < kMinErrs[i]*kMinErrs[i]) e[li+i] = kMinErrs[i]*kMinErrs[i];
     if (e[li+i] < kFitErrs[i]*kFitErrs[i]) continue;
     fak[i] = 0.99*kFitErrs[i]/sqrt(e[li+i]); nerr++;
   };
@@ -1223,7 +1229,7 @@ static TH1F * hcr[10]={0};
 }
 
 //_____________________________________________________________________________
-static void Add(THelixTrack &ht,const double add[5]) 
+static void Add(THelixTrack_ &ht,const double add[5]) 
 {
 // add = H,A,C,Z,L
   TVector3  pos(ht.Pos()),dir(ht.Dir()),ort(-dir[1],dir[0],0.);
@@ -1270,7 +1276,7 @@ double dia[5],*e,*er,*vtx;
   iP.get(&iH);	// nodePar => Helix
   iE.Get(&iH);	// fitErr  => HelixErr
   iE.Set(&iH);
-  iE.Print("Input StvFitErrs => THEmx_t => StvFitErrs");
+  iE.Print("Input StvFitErrs => THEmx_t_ => StvFitErrs");
 
 
   iH.Emx()->Print("Input Helix Errs");
@@ -1301,7 +1307,7 @@ static int iHELIX=0;
       Add(ht,res.GetMatrixArray());
     } else {
       StvFitPars fp(res.GetMatrixArray()); iPR+=fp;
-//		Create THelixTrack from StvNodePars
+//		Create THelixTrack_ from StvNodePars
       iPR.get(&ht);
 //		Set no error matrix to helix
       ht.SetEmx();
@@ -1343,7 +1349,7 @@ static int iHELIX=0;
   oER *= (1./nEv);
   oHER*= (1./nEv);
   
-  printf("*** Check THelixTrack Error matrix ***\n");
+  printf("*** Check THelixTrack_ Error matrix ***\n");
   e = *oH.Emx();
   er = oHER;
   double qA=0,qAmax=0;

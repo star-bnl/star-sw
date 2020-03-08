@@ -4,7 +4,6 @@
 #include <assert.h>
 #include "TVector3.h"
 #include "TCernLib.h"
-#include "StarRoot/THelix3d.h"
 #include "StvHitErrCalculator.h"
 #include "StvUtil/StvDebug.h"
 #include "Stv/StvHit.h"

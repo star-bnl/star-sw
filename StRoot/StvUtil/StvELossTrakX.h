@@ -1,4 +1,4 @@
-// $Id: StvELossTrakX.h,v 1.1.2.1 2020/01/24 20:41:08 perev Exp $
+// $Id: StvELossTrakX.h,v 1.1.2.2 2020/03/08 19:37:53 perev Exp $
 //
 //
 // Class StvELossTrakX
@@ -15,6 +15,6 @@ public:
         ~StvELossTrakX(){;}
 virtual void Add(double len);
 protected:
-ClassDef(StvELossTrak,0) 
+ClassDef(StvELossTrakX,0) 
 };
 #endif //STVELOSSTRAKX_H   

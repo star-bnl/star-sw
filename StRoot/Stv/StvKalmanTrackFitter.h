@@ -32,6 +32,8 @@ protected:
 char mBeg[1];
 const StvKonst_st *mKons;
 THelixFitter_ *mHelx;	//!
+StvNode *mBigNode;
+int      mTally;
 char mEnd[1];
 
 ClassDef(StvKalmanTrackFitter,0);
