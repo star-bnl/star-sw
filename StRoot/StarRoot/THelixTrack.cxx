@@ -6,52 +6,62 @@
 #include "TGraph.h"
 #include "TSystem.h"
 #include "TMath.h"
+#if ROOT_VERSION_CODE < 331013
+#include "TCL.h"
+#else
 #include "TCernLib.h"
+#endif
 #include "TVector3.h"
-#include "TVectorD.h"
 #include "TRandom.h"
 #include "TRandom2.h"
-#include "THelixTrack.h"
 #include "TRandomVector.h"
+#include "TError.h"
+#include "TMatrixD.h"
+
+#include "THelixTrack.h"
 #include "StMatrixD.hh"
 #include "TComplex.h"
 #include "TH1.h"
 #include <cassert>
 
+static const double kMinErr = 1e-4, kBigErr=10;
+static double *myQQQ = 0;
+static double EmxSign(int n,const double *e);
+
 // Complex numbers
 const TComplex Im(0,1);
 //_____________________________________________________________________________
-inline static void spheric(const double D[3]
-                          ,double &cosL,double &sinL
-			  ,double &cosP,double &sinP)
+static void eigen2(double G[3], double lam[2], double eig[2])
 {
-  sinL = D[2];
-  cosL = (1.-sinL)*(1+sinL);
-  cosL = (cosL<=0)? 0.:sqrt(cosL);
-  if (cosL <1e-6) {//track along Z-axis
-    cosP = 1; sinP = 0; cosL = 1e-6;
-  } else {
-    cosP = D[0]/cosL; sinP = D[1]/cosL;
+  double spur = G[0]+G[2];
+  double det  = G[0]*G[2]-G[1]*G[1];
+  double dis  = spur*spur-4*det;
+  if (dis<0) dis = 0;
+  dis = sqrt(dis);
+  if (lam) {
+    lam[0] = 0.5*(spur+dis);
+    lam[1] = 0.5*(spur-dis);
+  }
+  if (eig) {
+    eig[1]=G[0]-G[2]-dis;
+    eig[0]=G[2]-G[0]-dis;
+    if (fabs(eig[1])>fabs(eig[0]))	{eig[0]=  -2*G[1];}
+    else               			{eig[1]=  -2*G[1];}
+    double nor = sqrt(eig[0]*eig[0]+eig[1]*eig[1]);
+    if (nor>1e-11) {
+      if(eig[0]<0) nor = -nor;
+      eig[0]/=nor;eig[1]/=nor;}
+      else {
+      eig[0]=1;eig[1]=0;
+    }
+
   }
 }
-//_____________________________________________________________________________
-inline static void satlit(const double &cosL,const double &sinL
-                         ,const double &cosP,const double &sinP
-                         ,double U[3][3])
-{
-  U[0][0]= cosL*cosP; U[0][1] = cosL*sinP;U[0][2]= sinL;
-  U[1][0]=-     sinP; U[1][1] =       cosP; U[1][2]=0;   
-  U[2][0]=-sinL*cosP; U[2][1] = -sinL*sinP; U[2][2]=cosL;   
-}
-
 //_____________________________________________________________________________
 inline static double dot(const TComplex &a,const TComplex &b)
 {return a.Re()*b.Re()+a.Im()*b.Im();}
 //_____________________________________________________________________________
-inline static double dot(const double *a,const double *b)
-{return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}
-//_____________________________________________________________________________
-inline static TComplex expOne(TComplex x)
+inline static TComplex expOne(const TComplex &x)
 {
   double a = TComplex::Abs(x);
   if (a<0.01) {
@@ -61,7 +71,7 @@ inline static TComplex expOne(TComplex x)
   }
 }
 //_____________________________________________________________________________
-inline static TComplex expOneD(TComplex x)
+inline static TComplex expOneD(const TComplex &x)
 {
   double a = TComplex::Abs(x);
   if (a<0.01) {
@@ -70,6 +80,7 @@ inline static TComplex expOneD(TComplex x)
     return (TComplex::Exp(x)-1.-x)/(x*x);
   }
 }
+
 
 //______________________________________________________________________________
 void TCEmx_t::Set(const double *err)  	
@@ -103,6 +114,20 @@ double TCEmx_t::Sign() const
   return 0;
 
 }
+//_____________________________________________________________________________
+double THEmx_t::MaxCorr() const
+{
+  if (mHH+mZZ<=0) 		return 0;
+  double dia[5],maxCorr=0;const double *e=&mHH;
+  
+  for (int i=0,li=0;i< 5;li+=++i) {
+    dia[i]=e[li+i];
+    for (int j=0;j<i;j++) {
+      double corr = (e[li+j]/dia[i])*(e[li+j]/dia[j]);
+      if (maxCorr<corr) maxCorr=corr;
+  } }
+  return sqrt(maxCorr);
+}     
 
 //______________________________________________________________________________
 void THEmx_t::Set(const double *errxy,const double *errz)
@@ -189,7 +214,6 @@ static void Eigen2(const double err[3], double lam[2], double eig[2][2])
   dis = sqrt(dis);
   lam[0] = 0.5*(spur+dis);
   lam[1] = 0.5*(spur-dis);
-  if (!eig) return;
   eig[0][0] = 1; eig[0][1]=0;
   if (dis>1e-6*spur) {// eigenvalues are different
     if (fabs(err[0]-lam[0])>fabs(err[2]-lam[0])) {
@@ -229,7 +253,8 @@ static TComplex MyFactor(double rho,double drho,double s)
 
 ClassImp(THelixTrack)
 //_____________________________________________________________________________
-THelixTrack::THelixTrack(const double *xyz,const double *dir,double rho)
+THelixTrack::THelixTrack(const double *xyz,const double *dir,double rho
+		        ,double drho)
 {
 //	Made from GEANT3 ghelix by V.Perevoztchikov
 //
@@ -254,22 +279,22 @@ THelixTrack::THelixTrack(const double *xyz,const double *dir,double rho)
 //    ******************************************************************
 //
   fEmx=0;
-  Set(xyz,dir,rho);
+  Set(xyz,dir,rho,drho);
 }
 //_____________________________________________________________________________
 THelixTrack &THelixTrack::operator=(const THelixTrack &from)
 {
+  THEmx_t *save = fEmx;
   memcpy(fBeg,from.fBeg,fEnd-fBeg);
-  fEmx=0;
+  fEmx=save;
   if (from.fEmx) SetEmx(from.fEmx->Arr());
   return *this;
 }
 //_____________________________________________________________________________
 THelixTrack::THelixTrack(const THelixTrack &from)
 {
-  *this = from;
   fEmx=0;
-  if (from.fEmx) SetEmx(from.fEmx->Arr());
+  *this = from;
 }
 //_____________________________________________________________________________
 THelixTrack::THelixTrack(const THelixTrack *fr)
@@ -286,11 +311,12 @@ THelixTrack::THelixTrack()
   memset(fBeg,0,fEnd-fBeg);
 }
 //_____________________________________________________________________________
-void THelixTrack::Set(const double *xyz,const double *dir,double rho)
+void THelixTrack::Set(const double *xyz,const double *dir,double rho
+		     ,double drho)
 {
   fX[0] = xyz[0]; fX[1] = xyz[1]; fX[2] = xyz[2];
   fP[0] = dir[0]; fP[1] = dir[1]; fP[2] = dir[2];
-  fRho = rho; 
+  fRho = rho; fDRho=drho;
   Build();
 }
 //_____________________________________________________________________________
@@ -335,12 +361,17 @@ enum {kXX
    err[kTT] = fEmx->mLL/(      fCosL*fCosL*fCosL*fCosL);
 }
 //_____________________________________________________________________________
+void THelixTrack::Set(double rho,double drho)
+{
+   fRho = rho; fDRho=drho; 
+}
+//_____________________________________________________________________________
 void THelixTrack::Backward()
 {
 
   double d[3];
   for (int i=0;i<3;i++) { d[i]=-fP[i];}
-  Set(fX,d,-fRho); 
+  Set(fX,d,-fRho,-fDRho); 
   if(fEmx) fEmx->Backward();
 }
 //_____________________________________________________________________________
@@ -382,7 +413,7 @@ void THelixTrack::Build()
   if (fabs(tmp-1.) > 1.e-12) {
     tmp = ::sqrt(tmp); fP[0] /=tmp; fP[1] /=tmp; fP[2] /=tmp; }
     
-  fCosL = ::sqrt(fabs((1.-fP[2])*(1.+fP[2])));
+  fCosL = ::sqrt(fP[0]*fP[0]+fP[1]*fP[1]);
 }
 //______________________________________________________________________________
 void THelixTrack::MakeMtx(double step,double F[5][5])
@@ -412,7 +443,7 @@ void THelixTrack::MakeMtx(double step,double F[5][5])
 
   F[kZ][kH] = -dSdH*tanL;
   F[kZ][kA] = -dSdA*tanL;
-  F[kZ][kC] =  dSdC*tanL;
+  F[kZ][kC] = dSdC*tanL;
   F[kZ][kZ] = 1;
   F[kZ][kL] = S/(fCosL*fCosL);
   F[kL][kL] = 1;
@@ -421,8 +452,8 @@ void THelixTrack::MakeMtx(double step,double F[5][5])
 double THelixTrack::Move(double step) 
 {
   double F[5][5];
-  Eval(step,fX,fP,&fRho);
-  if (fEmx && fEmx->mHH>0) {
+  Eval(step,fX,fP,fRho);
+  if (fEmx && fEmx->mHH>0 && step) {
     MakeMtx(step,F);
     fEmx->Move(F);
   } 
@@ -432,15 +463,15 @@ double THelixTrack::Move(double step)
 double THelixTrack::Move(double step,double F[5][5]) 
 {
   double xyz[3],dir[3],rho;
-  Eval(step,xyz,dir,&rho);
-  Set(xyz,dir,rho);
+  Eval(step,xyz,dir,rho);
+  Set(xyz,dir,rho,fDRho);
   MakeMtx(step,F);
-  if (fEmx && fEmx->mHH>0) fEmx->Move(F); 
+  if (fEmx && fEmx->mHH>0 && step) fEmx->Move(F); 
   return step;
 }
 
 //_____________________________________________________________________________
-double THelixTrack::Path(double stmax,const  double *surf, int nsurf,
+double THelixTrack::Step(double stmax,const  double *surf, int nsurf,
                          double *xyz, double *dir, int nearest) const
 {
   int i;
@@ -451,14 +482,14 @@ double THelixTrack::Path(double stmax,const  double *surf, int nsurf,
   if(fabs(tmp-1.)>0.1) {for(i=0;i<nsurf;i++) s[i]/=tmp;}
   double stmin = (nearest)? -stmax:0;
 //  if (!s[3] && !s[6] && !s[8] && !s[9] && fabs(s[4]-s[5])<1.e-12) 
-//         return PathHZ(s,nsurf,xyz,dir,nearest);
-//   else  return Path(stmin,stmax,s,nsurf,xyz,dir,nearest);
-  return Path(stmin,stmax,s,nsurf,xyz,dir,nearest);
+//         return StepHZ(s,nsurf,xyz,dir,nearest);
+//   else  return Step(stmin,stmax,s,nsurf,xyz,dir,nearest);
+  return Step(stmin,stmax,s,nsurf,xyz,dir,nearest);
 }
 
 
 //_____________________________________________________________________________
-double THelixTrack::Path(double stmin,double stmax, const double *s, int nsurf,
+double THelixTrack::Step(double stmin,double stmax, const double *s, int nsurf,
                          double *xyz, double *dir, int nearest) const
 {
   int ix,jx,nx,ip,jp;
@@ -511,7 +542,7 @@ double THelixTrack::Path(double stmin,double stmax, const double *s, int nsurf,
     if (fabs(step)>myMax) {step = (step<0)? -myMax:myMax; nsol=0;}
 
     double x[3],d[3];
-    th.Eval(step,x,d);
+    th.Step(step,x,d);
     if (nsol) {//test it
       ss = s[0]+s[1]*x[0]+s[2]*x[1]+s[3]*x[2];
       if (nsurf > 4) ss += s[4]*x[0]*x[0]+s[5]*x[1]*x[1]+s[6]*x[2]*x[2];
@@ -531,7 +562,7 @@ double THelixTrack::Path(double stmin,double stmax, const double *s, int nsurf,
 }
 
 //_____________________________________________________________________________
-double THelixTrack::PathHZ(const double *su, int nsurf, 
+double THelixTrack::StepHZ(const double *su, int nsurf, 
                            double *xyz, double *dir,int nearest) const
 {
    double tri[3] = {0,0,0};
@@ -582,14 +613,14 @@ double THelixTrack::PathHZ(const double *su, int nsurf,
      if (fabs(tet2)>fabs(tet2-2*M_PI)) tet2 -=2*M_PI;
      if (fabs(tet2)>fabs(tet2+2*M_PI)) tet2 +=2*M_PI;
      if (fabs(tet1)>fabs(tet2)       ) tet1  =tet2;
-     return Eval(tet1*R,xyz,dir);
+     return Step(tet1*R,xyz,dir);
    } else {		//forward seqrch 
      double s1 = tet1*R;
      if (s1<=0) s1 += 2*M_PI*fabs(R);
      double s2 = tet2*R;
      if (s2<=0) s2 += 2*M_PI*fabs(R);
      if (s1>s2) s1=s2;
-     return Eval(s1,xyz,dir);
+     return Step(s1,xyz,dir);
    }
 
 }
@@ -612,10 +643,6 @@ static const double kMinAng = 0.1,kDeltaL=1e-4;
      TVector3 D1(thMe.Dir());
      TVector3 D2(thHe.Dir());
      TVector3 dP =  P1-P2;
-
-//double eps1 = dP.Dot(D1);
-//double eps2 = dP.Dot(D2);
-//printf("%d - eps1 = %g eps2 = %g\n",iter,eps1,eps2);
      TVector3 Dm = D1-D2;
      TVector3 Dp = D1+D2;
      double dPDm = dP.Dot(Dm);
@@ -678,7 +705,7 @@ double THelixTrack::Path(double x,double y) const
    return ht.Path(ar)/fCosL;
 }
 //_____________________________________________________________________________
-double THelixTrack::Path(const double *point,double *xyz, double *dir) const
+double THelixTrack::Step(const double *point,double *xyz, double *dir) const
 {
 
     static int nCount=0; nCount++;
@@ -705,6 +732,8 @@ double THelixTrack::Path(const double *point,double *xyz, double *dir) const
 	  ctst /=TComplex::Abs(ctst);
 	  ctst = TComplex::Log(ctst);
 	  step[2]= ctst.Im()/rho;
+          if (!fDRho) break;
+	  rho = fRho+ 0.5*fDRho*step[2];
         }
       }
       step[2]/=fCosL;
@@ -740,7 +769,7 @@ double THelixTrack::Path(const double *point,double *xyz, double *dir) const
     THelixTrack local(this);
     local.Move(step[0]);
     lMax-=step[0];lMin-=step[0];
-    local.Eval(0.,xnear,pnear);
+    local.Step(0.,xnear,pnear);
     for (; iter; iter--)
     { 
       double diff = (icut)? lMax-lMin: fabs(dstep);
@@ -753,7 +782,7 @@ double THelixTrack::Path(const double *point,double *xyz, double *dir) const
         if (tmpxy+tmpz < 1.e-6) 		break;
       }
       
-      local.Eval(ss,xnear,pnear);
+      local.Step(ss,xnear,pnear);
       dstep = 0; icut = 0;
       for (int i=0;i<3;i++) {dstep += pnear[i]*(point[i]-xnear[i]);}
       if(dstep<0) {
@@ -767,12 +796,12 @@ double THelixTrack::Path(const double *point,double *xyz, double *dir) const
       oldStep=fabs(dstep);
     }
 //    printf("ITERS=%d dSTEP=%g \n",iter,dstep);
-    if (!iter){ printf("*** Problem in THElixTrack::Path(vtx) ***\n");
+    if (!iter){ printf("*** Problem in THElixTrack::Step(vtx) ***\n");
                 printf("double vtx[3]={%g,%g,%g};",point[0],point[1],point[2]);
                 Print();}
     assert(iter);
     step[0]+=ss;
-    return (xyz) ? Eval(step[0],xyz,dir) : step[0];
+    return (xyz) ? Step(step[0],xyz,dir) : step[0];
 }
 //_____________________________________________________________________________
 double THelixTrack::Dca(const double *point,double *dcaErr) const
@@ -905,9 +934,9 @@ iLam=80; 				//******* Tested for big lambda
     memcpy(Fi[0],F[0],sizeof(F));
     tc.InvertMtx(Fi);
     TMatrixD one = TMatrixD(5,5,F[0])*TMatrixD(5,5,Fi[0]);
-//    one.Print();
+    one.Print();
     
-//    printf("TestMtx: Angle=%d Lam=%d \tRad=%d Step=%d \n",iAlf,iLam,iR,int(step));
+    printf("TestMtx: Angle=%d Lam=%d \tRad=%d Step=%d \n",iAlf,iLam,iR,int(step));
 
     for (int iHAR=0;iHAR<5;iHAR++) {
       memcpy(X[2]  ,X[0]  ,sizeof(X[0][0])  *3);
@@ -970,16 +999,18 @@ iLam=80; 				//******* Tested for big lambda
           }
           double est = Dif/Del;
 	  double eps = fabs(est-F[jHAR][iHAR])*2
-	             /(fabs(est)+fabs(F[jHAR][iHAR]+1e-9));
+	             /(fabs(est)+fabs(F[jHAR][iHAR]+1e-6));
           if (eps>maxEps) maxEps=eps;
-          if (eps > 1e-2) nErr++;
-          printf(" m%c%c \tDer= %g \tEst= %g \teps= %g\n",
+          if (eps < 1e-2) continue;
+          nErr++;
+          printf(" m%c%c \t%g \t%g \t%g\n",
 	         T[jHAR],T[iHAR],F[jHAR][iHAR],est,eps);
 	
     } }  
     printf("TestMtx: %d errors maxEps=%g\n",nErr,maxEps);
 
 }
+
 //_____________________________________________________________________________
 int SqEqu(double *cba, double *sol)
 {
@@ -1029,17 +1060,18 @@ int SqEqu(double *cba, double *sol)
   return nsol;
 }
 //_____________________________________________________________________________
-double THelixTrack::Eval(double step, double *xyz, double *dir,double *rho) const
+double THelixTrack::Eval(double step, double *xyz, double *dir,double &rho) const
 {
-  if (rho) *rho = fRho;
-  if (!step) {
-    if (xyz) memcpy(xyz,fX,sizeof(fX));
-    if (dir) memcpy(dir,fP,sizeof(fP));
-    return 0.;
-  }
+   Eval(step,xyz,dir);
+   rho = fRho +(step*fCosL)*fDRho;
+   return step;
+}
+//_____________________________________________________________________________
+double THelixTrack::Eval(double step, double *xyz, double *dir) const
+{
 
   double ztep = step*fCosL;
-  double teta = ztep*fRho;
+  double teta = ztep*(fRho+0.5*ztep*fDRho);
 
   sgCX1   = TComplex(fX[0]  ,fX[1]);
   sgCD1   = TComplex(fP[0],fP[1])/fCosL;
@@ -1082,200 +1114,14 @@ static const int minus[][2] = {{0,1},{1,0},{1,2},{3,0},{3,2},{3,4},{-1,0}};
 }
 
 
-//_____________________________________________________________________________
-//______________________________________________________________________________
-void THelixTrack::TestErr()
-{
-enum {kH,kPhi,kCurv,kZ,kLam};
-  double PtGev = 1.,Curv = 1./100;
-  double Pbeg[3],P1beg[3],Xbeg[3]={0},X1beg[3];
-  double Pend[3],P1end[3],Xend[3]    ,X1end[3];
-
-//		Canvas + Histograms
-enum {kNCanvs=10};
-static TCanvas *myCanvas[kNCanvs] = {0};
-static     int  myDiv[] = {2,5,5,5,5,0};
-  for (int ic = 0;myDiv[ic];ic++) {
-    if (myDiv[ic]<0) continue;
-    TString ts("C"); ts+=ic;
-    if (!myCanvas[ic]) myCanvas[ic] = new TCanvas(ts.Data(),ts.Data(),600,800);
-    myCanvas[ic]->Clear();myCanvas[ic]->Divide(1,myDiv[ic]);
-  }
-static TH1F *hXi2[2] = {0};
-  for (int jk=0;jk<2;jk++) {
-    TString ts("Xi2_"); ts += jk;
-    delete hXi2[jk];
-    hXi2[jk]= new TH1F(ts.Data(),ts.Data(),50,0,0);
-    myCanvas[0]->cd(jk+1);  hXi2[jk]->Draw(); 
-  }
-//		Now test of DCA
-static TH1F * hh[5]={0};
-  for (int ih=0;ih<myDiv[1];ih++) {
-const char * tit[]={"H","Phi","Curv","Z","Lam",0};
-    delete hh[ih];
-    hh[ih] = new TH1F(tit[ih],tit[ih],100,0,0);
-    myCanvas[1]->cd(ih+1); hh[ih]->Draw();
-  }
-//		Now test of TRandomVector
-static TH1F * hrt[5]={0};
-  for (int ih=0;ih<myDiv[1];ih++) {
-const char * tit[]={"H0","Phi0","Curv0","Z0","Lam0",0};
-    delete hrt[ih];
-    hrt[ih] = new TH1F(tit[ih],tit[ih],100,0,0);
-    myCanvas[2]->cd(ih+1); hrt[ih]->Draw();
-  }
-//		Now test of Corr
-static TH1F * hcr[10]={0};
-{
-static const char *tit[]={"HP","HC","PC","HZ","PZ","CZ","HL","PL","CL","ZL"};
-  for (int ih=0;ih<10;ih++) {
-    delete hcr[ih];
-    hcr[ih] = new TH1F(tit[ih],tit[ih],100,0,0);
-    if (ih<5) myCanvas[3]->cd(ih+1  ); 
-    else      myCanvas[4]->cd(ih+1-5);
-    hcr[ih]->Draw();
-  }}
-  
-    
-  TVector3 PbegV(PtGev,0,PtGev*3);
-  PbegV.SetMag(1.);
-  PbegV.RotateZ(gRandom->Rndm()*3.14); PbegV.GetXYZ(Pbeg);
-  TVector3 XbegV(Xbeg);
-
-  double L = 300.;
-
-  TVectorD dia(5);
-  dia[0]= 0.1; dia[1]= 3./360; dia[2]= Curv*0.1; dia[3]= 0.2; dia[4]= 6./360;
-  for (int i=0;i<5;i++) {dia[i]*=dia[i];}
-  
-  TRandomVector RV(dia);
-  auto &EMX = RV.GetMtx();
-  auto &val = RV.GetLam();
-  dia.Print("DIA");
-  val.Print("VAL");
-
-
-  double Gbeg[15],GbegD[5];
-  for (int i=0,li=0;i< 5;li+=++i) {
-    GbegD[i] = sqrt(EMX[i][i]);
-    for (int j=0;j<=i;j++) {
-      Gbeg[li+j] = EMX[i][j];
-  } }
-
-
-  double GbegI[15];
-  TCL::trsinv(Gbeg,GbegI,5);  
-  
-  THelixTrack TH0(Xbeg,Pbeg,Curv);
-
-  const auto *d = TH0.Dir();
-  double cosL = TH0.GetCos();
-  double tkDir[3][3] = {{-d[1]/cosL,d[0]/cosL,0},{0,0,1},{d[0],d[1],d[2]}};
-
-  TH0.SetEmx(Gbeg);
-  TH0.Move(L);
-  TH0.Eval(0,Xend,Pend);
-
-  d = TH0.Dir();
-  double tkDirE[3][3] = {{-d[1]/cosL,d[0]/cosL,0},{0,0,1},{d[0],d[1],d[2]}};
-
-  auto *myEmx = TH0.Emx();
-  const double *Gend = myEmx->Arr();
-  double GendD[5];
-  for (int i=0,li=0;i< 5;li+=++i) {
-    GendD[i] = sqrt(Gend[li+i]);
-  } 
-  double GendI[15];
-  TCL::trsinv(Gend,GendI,5);  
-
-  TVector3 PendV(Pend),XendV(Xend);  
-  double myG[15]={0};
-  int nIter = 100000;  
-  for (int iter=0;iter<nIter;iter++) {
-    TVectorD delta  = RV.Gaus();
-    double chi2;
-    TCL::trasat(delta.GetMatrixArray(),GbegI,&chi2,1,5);
-    assert(chi2>0);
-    hXi2[0]->Fill(chi2);
-
-    for (int ih=0;ih<myDiv[1];ih++) { hrt[ih]->Fill(delta[ih]/GbegD[ih]);}
-    TVector3 P1begV = PbegV;
-    TVector3 X1begV = XbegV;
-
-//     X1begV     += TVector3(tkDir[0])*delta[kH];
-    X1begV[0]  += -Pbeg[1]/cosL*delta[kH];
-    X1begV[1]  +=  Pbeg[0]/cosL*delta[kH];
-    X1begV[2]  +=  delta[kZ];
-    double Curv1 = Curv + delta[kCurv];
-    double Phi =  P1begV.Phi();    Phi+= delta[kPhi];  P1begV.SetPhi  (Phi);
-    double The =  P1begV.Theta();  The-= delta[kLam];  P1begV.SetTheta(The);
-    X1begV.GetXYZ(X1beg);
-    P1begV.GetXYZ(P1beg);
-    THelixTrack TH1(X1beg,P1beg,Curv1);
-    double s = TH1.Path(Xend[0],Xend[1]);
-    TH1.Move(s);
-    TH1.Eval(0,X1end,P1end);
-
-    TVector3 X1endV(X1end),P1endV(P1end);
-    TVectorD UendV(5);
-    TVector3 difX =  X1endV-XendV;
-
-    UendV[kH]    = difX.Dot(TVector3(tkDirE[0]));
-    UendV[kZ]    = difX[2];
-    UendV[kCurv] = (Curv1-Curv);
-    UendV[kLam] = -(P1endV.Theta()-PendV.Theta());
-    UendV[kPhi] =  (P1endV.Phi()  -PendV.Phi()  );
-    for (int i: {kPhi,kLam}) {    
-      if (UendV[i]<-M_PI) UendV[i]+= M_PI*2;
-      if (UendV[i]> M_PI) UendV[i]-= M_PI*2;
-      assert(fabs(UendV[i])<1);
-    }
-
-    for (int ih=0;ih<5;ih++) { hh[ih]->Fill(UendV[ih]/GendD[ih]);}
-    TCL::trasat(UendV.GetMatrixArray(),GendI,&chi2,1,5);
-    hXi2[1]->Fill(chi2);
-
-  for (int i=0,li=0;i<5;li+=++i) {
-    for (int j=0;j<=i;j++) {
-      myG[li+j]+=UendV[i]*UendV[j];
-  } }
-
-  int jk=0;
-  for (int i=0,li=0;i<5;li+=++i) {
-    for (int j=0;j<i;j++) {
-      double d = UendV[i]*UendV[j] - Gend[li+j];
-      d/= GendD[i]*GendD[j];
-      hcr[jk++]->Fill(d);
-  } }
-  }
-
-  TCL::vscale(myG,1./nIter,myG,15);
-
-  printf("Numerical vs Analitical Error matrices:\n");
-  for (int i=0,li=0;i<5;li+=++i) {
-    for (int j=0;j<=i;j++) {
-      printf("\t%g ",myG[li+j]);
-    }
-    printf("\n");
-    for (int j=0;j<=i;j++) {
-      printf("\t%g ",Gend[li+j]);
-    }
-    printf("\n");
-  }
-
-  for (int i=0,li=0;i<5;li+=++i) {
-    for (int j=0;j<=i;j++) {
-      printf("\t%g ",Gend[li+j]/(GendD[i]*GendD[j]));
-    }
-    printf("\n");
-  }
-
-  for (int i=0;myCanvas[i];i++) {
-    if (!myCanvas[i]) continue;
-    myCanvas[i]->Modified();myCanvas[i]->Update();}
-
-  while(!gSystem->ProcessEvents()){gSystem->Sleep(200);}; 
-}
+// //_____________________________________________________________________________
+// void THelixTrack::TestErr()
+// {
+//    double hpar[7];
+//    for (int i=0;i<7;i++) { hpar[i] = (gRandom->Rndm()-0.5)*100;
+//    hpar[6] = 1./hpar[6];
+//    
+// }   
 
 //______________________________________________________________________________
 void THelixTrack::Show(double len, const THelixTrack *other) const
@@ -1350,7 +1196,7 @@ double dir[3] = {0.450295,-0.596426,-0.664463};
 double Rho = 0.00678696;
 THelixTrack TH(xyz,dir,Rho);
 
-double s = TH.Path(100000,surf,4);
+double s = TH.Step(100000,surf,4);
 printf("s=%g = 15.3589\n",s);
 }
 //_____________________________________________________________________________
@@ -1367,8 +1213,8 @@ double MyHit[3]= { -177.673, 41.305, 2.90798};
 double MyClo[3];
 
 printf("%s= %g %g %g\n","MyHit",MyHit[0],MyHit[1],MyHit[2]);
-double s = ht.Path(MyHit,MyClo);
-ht.Eval(s,MyClo);
+double s = ht.Step(MyHit,MyClo);
+ht.Step(s,MyClo);
 TCL::vsub(MyClo,MyHit,diff,3);
 double MyDist = sqrt(TCL::vdot(diff,diff,3));
 printf("%s= %g %g %g\n","MyClo ",MyClo[0],MyClo[1],MyClo[2]);
@@ -1391,14 +1237,14 @@ double sur[8]={-120,1,0,0,0,0,0};
 THelixTrack *ht = new THelixTrack(xyz,dir,Rho);
 double newX[3],newD[3];
 ht->Backward();
-double s = ht->Path(1000.,sur,4,newX,newD);
+double s = ht->Step(1000.,sur,4,newX,newD);
 printf("Result: s=%g newX=(%g %g %g) newD=(%g %g %g)\n"
       ,s,newX[0],newX[1],newX[2],newD[0],newD[1],newD[2]);
       
 printf("MustBe: s=56.1931 newX=(120 222.222 347.285) newD=(0.464979 0.275174 0.841471)\n\n");
 
 sur[6]=1e-6;
-       s = ht->Path(1000.,sur,7,newX,newD);
+       s = ht->Step(1000.,sur,7,newX,newD);
 printf("Result: s=%g newX=(%g %g %g) newD=(%g %g %g)\n"
       ,s,newX[0],newX[1],newX[2],newD[0],newD[1],newD[2]);
 printf("MustBe: s=55.9338 newX=(119.88 222.151 347.067) newD=(0.464206 0.276476 0.841471)\n\n");
@@ -1413,7 +1259,7 @@ double Rho = 0.00678696;
 double xnew[3];
 THelixTrack TH(xyz,dir,Rho);
 
-double s = TH.Path(100000,surf,7,xnew);
+double s = TH.Step(100000,surf,7,xnew);
 double dif = xnew[0]*xnew[0]+xnew[1]*xnew[1]-100;
 printf("s=%g dif=%g\n",s,dif);
 
@@ -1446,175 +1292,91 @@ void THelixTrack::Test5()
 void THelixTrack::TestDer() 
 {
   enum {kH=0,kA,kC,kZ,kL};
-  const char* Enum[]={"H  ","Phi","Rho","Z  ","Lam"};
-  double rho,rho1,step,F[5][5],F1[5][5];
-  int iR = 100+ gRandom->Rndm()*100;
+  double fak = 0.1;
+  double D[5][3],X[5][3]={{0}},Rho[5],step,F[5][5];
+  int iR = 10+ gRandom->Rndm()*100;
   int iAlf=30+ gRandom->Rndm()*100;
   int iLam=10+ gRandom->Rndm()*60;
-  rho = 1./iR;
-  double alf = iAlf/180.*M_PI,alf1 = alf;
-  double lam = iLam/180.*M_PI,lam1 = lam;
-  step = 100;
-
-lam=0;///???
-step = iR*M_PI * 1.0 / cos(lam);
+  step = gRandom->Rndm()*6*iR;
+iLam=80;			//*********Tested for big lamda
+  Rho[0] = 1./iR;
+  double alf = iAlf/180.*M_PI;
+  double lam = iLam/180.*M_PI;
+  D[0][0] = cos(lam)*cos(alf);
+  D[0][1] = cos(lam)*sin(alf);
+  D[0][2] = sin(lam);
+  THelixTrack hlx0(X[0],D[0],Rho[0]);
+  THelixTrack hlx1(hlx0);
+  hlx1.Move(step,F);
+  hlx1.Eval(0,X[2],D[2]);
+  Rho[2]=hlx1.GetRho();
 
 
   printf("TestDer: Angle=%d Lam=%d \tRad=%d Step=%d \n",iAlf,iLam,iR,int(step));
+  hlx0.Eval(0,X[1],D[1]); Rho[1]=hlx0.GetRho();
 
-  TVector3 Xbeg(0.,0.,0.),Xend;
-  TVector3 Dbeg(cos(lam)*cos(alf),cos(lam)*sin(alf),sin(lam)),Dend;
-  TVector3 Hbeg(-sin(alf),cos(alf),0);
+  double dH   = iR	*0.01		*(gRandom->Rndm()-0.5)*fak;
+  double dAlf = M_PI/180*0.1		*(gRandom->Rndm()-0.5)*fak;
+  double dRho = Rho[0]	*0.1		*(gRandom->Rndm()-0.5)*fak;
+  double dZ   = 			 (gRandom->Rndm()-0.5)*fak;
+  double dLam = M_PI/180*0.1		*(gRandom->Rndm()-0.5)*fak;
+  double dA[5] = {dH,dAlf,dRho,dZ ,dLam}, dB[5];
+  D[1][0] = cos(lam+dLam)*cos(alf+dAlf);
+  D[1][1] = cos(lam+dLam)*sin(alf+dAlf);
+  D[1][2] = sin(lam+dLam);
+  X[1][0] += -D[0][1]*dH/cos(lam);
+  X[1][1] +=  D[0][0]*dH/cos(lam);
+  X[1][2] +=  dZ;
+  Rho[1]+=dRho;
+  THelixTrack hlxM(X[1],D[1],Rho[1]);
+  hlxM.Move(step);
+  double dL = hlxM.Path(X[2][0],X[2][1]);
+  hlxM.Move(dL);
+  hlxM.Eval(0,X[3],D[3]); Rho[3]=hlxM.GetRho();
 
-  TVector3 Xbeg1,Xend1;
-  TVector3 Dbeg1,Dend1;
+  TCL::vmatl(F[0],dA,dB,5,5);
+//TCL::vmatr(dA,F[0],dB,5,5);
 
-  THelixTrack hlx((double*)&Xbeg[0],(double*)&Dbeg[0],rho);
-  THelixTrack hlx1(hlx);
-  hlx1.Move(step,F);
-  hlx1.Eval(0,(double*)&Xend[0],(double*)&Dend[0]);
-  TVector3 Hend(-Dend[1],Dend[0],0); Hend.SetMag(1.);
-  double Aend = atan2(Dend[1],Dend[0]);
-  double Lend = asin( Dend[2]);
+  memcpy(X[4],X[2],3*sizeof(double));
+  memcpy(D[4],D[2],3*sizeof(double));
+  Rho[4]=Rho[2];
+  double myAlf = atan2(D[2][1],D[2][0]);
+  double myLam = asin(D[2][2])	       ;
+  D[4][0] =   cos(myLam+dB[kL])*cos(myAlf+dB[kA]);
+  D[4][1] =   cos(myLam+dB[kL])*sin(myAlf+dB[kA]);
+  D[4][2] =   sin(myLam+dB[kL]);
+  X[4][0] += -D[2][1]*dB[kH]/cos(myLam);
+  X[4][1] +=  D[2][0]*dB[kH]/cos(myLam);
+  X[4][2] +=  dB[kZ];
+  Rho[4]  +=  dB[kC];
 
-  for (int JK=0;JK<5;JK++) {
-//    double delta = 1e-5;
-    double delta = 1e-8;
-    Xbeg1 = Xbeg; Dbeg1 = Dbeg;
-    alf1  = alf;  lam1  = lam;
-    rho1 = rho;
-    switch (JK) {
-      case kH:
-      Xbeg1 += Hbeg*delta;
-      break;
+  THelixTrack hlxD(X[4],D[4],Rho[4]);
+  dL = hlxD.Path(X[2][0],X[2][1]);
+  hlxD.Move(dL);
+  hlxD.Eval(0,X[4],D[4]);
+  Rho[4]=hlxD.GetRho();
 
-      case kA:
-      alf1 +=delta ;
-      break;
-      case kC:
-      rho1 += delta;
-      break;
+//  hlx1.Print();
+//  hlxM.Print();
+//  hlxD.Print();
+  double dC[5];
+  dC[kH] = (-(X[3][0]-X[2][0])*D[2][1]+(X[3][1]-X[2][1])*D[2][0])/cos(myLam);
+  dC[kA] = atan2(D[3][1],D[3][0])-atan2(D[2][1],D[2][0]);
+  dC[kC] = Rho[3]-Rho[2];
+  dC[kZ] = X[3][2]-X[2][2];
+  dC[kL] = asin(D[3][2])-asin(D[2][2]);
+  for (int i=0;i<5;i++) {printf(" %d - %g == %g\n",i,dB[i],dC[i]);}
 
-      case kZ:
-      Xbeg1[2]+=delta;
-      break;
+  double myDelta = 0;
+  for (int i=0;i<3;i++){myDelta+=pow(X[4][i]-X[3][i],2);}
+  myDelta = sqrt(myDelta);
 
-      case kL:
-      lam1+=delta;
-      break;
-    }
-    Dbeg1 = TVector3(cos(lam1)*cos(alf1),cos(lam1)*sin(alf1),sin(lam1));
-    THelixTrack hlxM((double*)&Xbeg1[0],(double*)&Dbeg1[0],rho1);
-    hlxM.Move(step);
-    double dL = hlxM.Path(Xend[0],Xend[1]);
-    hlxM.Move(dL); 
-    hlxM.Eval(0,(double*)&Xend1[0],(double*)&Dend1[0]);
-    double Aend1 = atan2(Dend1[1],Dend1[0]);
-    double Lend1 = asin( Dend1[2]);
-    F1[kH][JK] = (Xend1-Xend).Dot(Hend);
-    F1[kA][JK] = Aend1-Aend; 
-    if (F1[kA][JK]<-M_PI*2) F1[kA][JK]+=M_PI*2;
-    if (F1[kA][JK]> M_PI*2) F1[kA][JK]-=M_PI*2;
-    F1[kC][JK] = rho1-rho;
-    F1[kZ][JK] = Xend1[2]-Xend[2];
-    F1[kL][JK] = Lend1-Lend;
-    if (F1[kL][JK]<-M_PI*2) F1[kL][JK]+=M_PI*2;
-    if (F1[kL][JK]> M_PI*2) F1[kL][JK]-=M_PI*2;
-    for(int i=0;i<5;i++) {F1[i][JK]/=delta;}
-  }
-  for (int j=0;j<5;j++) {
-  for (int i=0;i<5;i++) {
-    printf("[%s][%s] Ana=%g Num=%g Dif = %g\n"
-          ,Enum[i],Enum[j]
-	  ,F[i][j],F1[i][j],(F1[i][j]-F[i][j]));
-  } }
+  double ihDelta = 0;
+  for (int i=0;i<3;i++){ihDelta+=pow(X[2][i]-X[3][i],2);}
+  ihDelta = sqrt(ihDelta);
+  printf( "\n***  DELTA = %g << %g   ***\n",myDelta,ihDelta);
 
 }
-//______________________________________________________________________________
-void THelixTrack::TestTwoHlx() 
-{
-   TVector3 dif(0.1,0.,0.);
-   double rnd = gRandom->Rndm();
-   dif.RotateX(rnd);
-   rnd = gRandom->Rndm();
-   dif.RotateY(rnd);
-   rnd = gRandom->Rndm();
-   dif.RotateZ(rnd);
-   TVector3 D1 = dif.Orthogonal();
-   rnd = gRandom->Rndm();
-   D1.Rotate(rnd,dif);
-   TVector3 D2 = dif.Orthogonal();
-   rnd = gRandom->Rndm();
-   D2.Rotate(rnd,dif);
-   double pos[3]={0};
-   double &d1 = D1[0];
-   double R1=20,R2=100;
-   double shift1 = R1*gRandom->Rndm()*0.1; if (shift1>33) shift1=33;
-   double shift2 = R2*gRandom->Rndm()*0.1; if (shift2>33) shift2=33;
-   THelixTrack th1(pos,&d1,1./R1);
-   double &p2 = dif[0]; 
-   double &d2 = D2[0]; 
-   THelixTrack th2(&p2,&d2,1./R2);
-
-   {
-     TVector3 P1(th1.Pos()),P2(th2.Pos());
-//     TVector3 dP = (P1-P2).Unit();
-     TVector3 dP = (P1-P2);
-     TVector3 D1(th1.Dir());
-     TVector3 D2(th2.Dir());
-     double eps1 = dP.Dot(D1);
-     double eps2 = dP.Dot(D2);
-     printf("TestTwoHlx: Eps1 = %g Eps2 = %g\n",eps1,eps2);
-   }
-
-
-
-   th1.Move(shift1); th2.Move(shift2);
-   double s1=0,s2=0;
-   s1 = th1.Path(th2,&s2);
-   th1.Move(s1);
-   th2.Move(s2);
-
-   {
-     
-     TVector3 P1(th1.Pos()),P2(th2.Pos());
-     TVector3 dP = (P1-P2);
-     double dist = dP.Mag();
-     dP = dP.Unit();
-     TVector3 D1(th1.Dir());
-     TVector3 D2(th2.Dir());
-     double eps1 = dP.Dot(D1);
-     double eps2 = dP.Dot(D2);
-
-     printf("TestTwoHlx: Eps1 = %g Eps2 = %g dist = %g\n",eps1,eps2,dist);
-
-     printf("TestTwoHlx: s1=%g(%g),s2 = %g(%g)\n",s1,shift1,s2,shift2);
-   }
-   
-}
-//______________________________________________________________________________
-void THelixTrack::TestBak()
-{
-
-  double X0[3]={0,0,0},D0[3]={1,2,3},Rho0=1./100,L=100;
-  double X1[3],D1[3],Rho1;
-  THelixTrack th(X0,D0,Rho0);
-  TCL::ucopy(th.Dir(),D0,3);
-
-  th.Move(L);
-  th.Backward();
-  th.Move(L);
-  Rho1 = th.GetRho();
-  th.Backward();
-  TCL::ucopy(th.Pos(),X1,3);
-  TCL::ucopy(th.Dir(),D1,3);
-  
-  printf("Rho1=%g Xbak = 0 = %g %g %g\n",Rho1,X1[0],X1[1],X1[2]);
-}    
-
-
-
-
 
 //______________________________________________________________________________
 //______________________________________________________________________________
@@ -1837,7 +1599,7 @@ void TCircle::Test4()
     TCircle tc2(pars[ip][1],pars[ip][1]+2,pars[ip][1][4]); 
     tc1.Move(-20);
     tc2.Move(-20);
-    double s2;
+    double s2=0;
     double s1 = tc1.Path(tc2,&s2);
     printf("s1=%g s2=%g \n",s1,s2);
   }  
@@ -1869,7 +1631,7 @@ double TCircle::Eval(double step,double *X, double *D) const
 double TCircle::Move(double step)
 {
   Eval(step,fX,fD);
-  if (fEmx && fEmx->mHH>0) MoveErrs(step);
+  if (fEmx && fEmx->mHH>0 && step) MoveErrs(step);
   if (fabs(fD[0])>1) fD[0]=(fD[0]<0)? -1:1;
   if (fabs(fD[1])>1) fD[1]=(fD[1]<0)? -1:1;
   return step;
@@ -1897,6 +1659,7 @@ void TCircle::MakeMtx(double S,double F[3][3])
 void TCircle::MoveErrs(double s)
 {
   double F[3][3];
+  if (!s) return;
   MakeMtx(s,F);
   fEmx->Move(F);
 }
@@ -2112,7 +1875,7 @@ void  TCircleFitter::Add(double x,double y,const double *errs)
   if (fArr.GetSize()<n) {fArr.Set(n*2);fAux=0;}
   if (!fAux) fAux = GetAux(0);
   TCircleFitterAux *aux = fAux+fN-1;
-  aux->x = x; aux->y=y; aux->exy[0]=1; aux->exy[2]=1; aux->ezz=1;aux->wt=0;
+  aux->x = x; aux->y=y; aux->exy[0]=0; aux->exy[2]=0; aux->ezz=1;aux->wt=0;
   if (errs) AddErr(errs);
 }
 //______________________________________________________________________________
@@ -2124,24 +1887,17 @@ void  TCircleFitter::Add(double x,double y,double z)
   if (!fAux) fAux = GetAux(0);
   TCircleFitterAux *aux = fAux+fN-1;
   aux->x = x; aux->y=y; aux->z=z;
-  aux->exy[0]=1; aux->exy[1]=0; aux->exy[2]=1;aux->ezz=1;aux->wt=0;
+  aux->exy[0]=0; aux->exy[1]=0; aux->exy[2]=0;aux->ezz=1;aux->wt=0;
 }
 //______________________________________________________________________________
 void  TCircleFitter::AddErr(const double *errs,double ezz) 
 {
   TCircleFitterAux *aux = fAux+fN-1;
-  assert(ezz>=0);
-  assert(errs[0]>=0);
-  assert(errs[2]>=0);
-  double spur = errs[0]+errs[2];
-  assert(spur>0);
   double *e = aux->exy;
   memcpy(e,errs,sizeof(aux->exy));
-
-  if (e[0]<0 && e[0]>-1e-5*spur) {e[0]=0;e[1]=0;}
-  if (e[2]<0 && e[2]>-1e-5*spur) {e[2]=0;e[1]=0;}
-  assert(e[1]*e[1]<=1.01*e[0]*e[2]);
-
+  assert(ezz>=0);
+  assert(e[0]>=0);
+  assert(e[2]>=0);
   aux->wt = 0;
   aux->ezz = ezz;
 }
@@ -2152,7 +1908,7 @@ void  TCircleFitter::AddErr(double errhh,double ezz)
   assert(ezz>=0);
   assert(errhh>0);
   aux->wt = 1./errhh;
-  aux->exy[0]= -1;
+  aux->exy[0]= 0;aux->exy[2]= 0;
   aux->ezz = ezz;
 }
 //______________________________________________________________________________
@@ -2167,74 +1923,107 @@ double TCircleFitter::Fit()
 {
 static const int nAVERs = &fRr-&fXx;
 static int nCall=0; nCall++;
-    double xx, yy, xx2, yy2;
-    double f, g, h, p, q, t, g0, g02, d=0;
-    double xroot, ff, fp;
-    double dx, dy, xnom,wt,hord,tmp,radius2,radiuc2;
+    double xx=0, yy=0, xx2=0, yy2=0;
+    double f=0, g=0, h=0, p=0, q=0, t=0, g0=0, g02=0, d=0;
+    double xroot=0, ff=0, fp=0;
+    double dx=0, dy=0, xnom=0,wt=0,tmp=0,radius2=0,radiuc2=0;
     fKase = fCase;
     if (fNuse < 3) return 3e33;
     TCircleFitterAux *aux = GetAux(0);
-    dx = aux[fN-1].x - aux[0].x;
-    dy = aux[fN-1].y - aux[0].y;
-    hord = sqrt(dx*dx+dy*dy);
-    fCos = dx/hord;
-    fSin = dy/hord;
-    fNor[0] = -fSin,fNor[1] = fCos;
+
+//		Loop over points,fill orientation 
+    double *mm = &fXgravity; memset(mm,0,sizeof(*mm)*5);
+    for (int i=0; i<fN; i++) {
+      double x=aux[i].x, y=aux[i].y;
+      fXgravity+=x; fYgravity+=y;fXx+=x*x;fYy+=y*y;fXy+=x*y;}
+
+    for (int j=0;j<5;j++) {mm[j]/=fN;}
+    fXx-=fXgravity*fXgravity;fYy-=fYgravity*fYgravity;fXy-=fXgravity*fYgravity;
+
+    double eigVal[2]={0};
+    eigen2(&fXx,eigVal,&fCos);    
+    int fastTrak = (eigVal[0]>10*eigVal[1]);
+    fNor[0] = -fSin; fNor[1] = fCos;
+
+
+    enum {kIter=1,kFast=2,kWeit=4,kErr=8};
     const double *exy=0;
+    int wasErrs = 0;
     for (int iter=0;iter<2;iter++) {// one or two iters
       fWtot = 0;
       memset(&fXgravity,0,sizeof(double)*(nAVERs+2));
-      for (int i=0; i<fN; i++) {//Loop over points
-        if (aux[i].wt<0) continue;
+      for (int i=0; i<fN; i++) {//Loop over points,fill wt and center of gravity
+        if (aux[i].wt<0) { if(!i) fNuse--; continue;}
         int kase = iter;
-	if (aux[i].wt    >0) 	kase+=2;	//weight defined
-        if (aux[i].exy[0]>0)	kase+=4;	//error matrix defined
+        if (fastTrak)  kase|=2;
+	if (aux[i].wt >0) 		kase+=4;	//weight defined
+        if (aux[i].exy[0]>0 || aux[i].exy[2]>0) {wasErrs++;kase+=8;}	//error matrix defined
         switch (kase) {
-          case 0: wt = 1; break;
-          case 2: ; case 3: wt = aux[i].wt; break;
-          case 5: ; case 7: {
+          case 0:; 
+	  case kErr:;
+	  case kFast:;
+
+	    wt = 1; break;		//assign Weight =1
+
+          case kWeit:;
+	  case kWeit|kErr:;
+	  case kWeit|kFast:;
+	  case kWeit|kIter:;
+	   wt = aux[i].wt; break;
+
+          case kIter|kWeit|kErr:; 
+          case kIter|kFast|kWeit|kErr:; 
+	   {				// slow error, calculate normal
             fNor[0] = fXCenter - aux[i].x;
             fNor[1] = fYCenter - aux[i].y;
             tmp = sqrt(fNor[0]*fNor[0]+fNor[1]*fNor[1]);
-            fNor[0]/=tmp; fNor[1]/=tmp; }
-          case 4:; case 6: {
+            fNor[0]/=tmp; fNor[1]/=tmp;
+	   }
+          case kFast|kErr:;
+          case kFast|kErr|kWeit:;
+	   {				// fast errors
             exy = aux[i].exy;
             wt = (fNor[0]*fNor[0]*exy[0]
 		 +fNor[0]*fNor[1]*exy[1]*2
 		 +fNor[1]*fNor[1]*exy[2]);
-            if (wt<1e-8) wt = 1e-8;
-            wt = 1/wt; break;}
-          default: assert(0);
+            if (wt<kMinErr*kMinErr) wt = kBigErr*kBigErr;
+            wt = 1/wt; 
+	    break;
+	   }
+            default: assert(0);
 	}//end switch
         aux[i].wt = wt;
-        fWtot += wt;
+        if (wt<0) continue;
+	fWtot += wt;
 	fXgravity += aux[i].x *wt;
 	fYgravity += aux[i].y *wt;
       }//End Loop over points
+
       fXgravity /= fWtot;
       fYgravity /= fWtot;
 
-      for (int i=0; i<fN; i++) {
-	  dx  = aux[i].x-fXgravity;
-	  dy  = aux[i].y-fYgravity;
-	  xx  =  dx*fCos + dy*fSin;
-	  yy  = -dx*fSin + dy*fCos;
-	  xx2 = xx*xx;
-	  yy2 = yy*yy;
-          wt  = aux[i].wt;
-	  fXx    += xx2 		*wt;
-	  fYy    += yy2 		*wt;
-	  fXy    += xx*yy 		*wt;
-	  fXrr   += xx*(xx2+yy2) 	*wt;
-	  fYrr   += yy*(xx2+yy2) 	*wt;
-	  fRrrr += (xx2+yy2)*(xx2+yy2) 	*wt;
+      for (int i=0; i<fN; i++) {		//Calc all averages
+        wt  = aux[i].wt;
+        if (wt<0) continue;
+	dx  = aux[i].x-fXgravity;
+	dy  = aux[i].y-fYgravity;
+	xx  =  dx*fCos + dy*fSin;
+	yy  = -dx*fSin + dy*fCos;
+	xx2 = xx*xx;
+	yy2 = yy*yy;
+	fXx    += xx2 		*wt;
+	fYy    += yy2 		*wt;
+	fXy    += xx*yy 	*wt;
+	fXrr   += xx*(xx2+yy2) 	*wt;
+	fYrr   += yy*(xx2+yy2) 	*wt;
+	fRrrr += (xx2+yy2)*(xx2+yy2) 	*wt;
       }
       double *dd = &fXx;
       for (int i=0;i<nAVERs;i++) {dd[i]/=fWtot;}
       fRr = fXx+fYy;
 
       if (fNuse <= 3 && !fKase) fKase=1;
-      if (!fKase) fKase =(fYy < fXx *(0.5)*(0.5)/210)? 1:2;
+      if (!fKase) fKase =(fastTrak)? 1:2;
 SWIT: switch(fKase) {
         case 1:	{	//Try 1st method
 
@@ -2244,7 +2033,7 @@ SWIT: switch(fKase) {
 //  		Nor1 = fPol[1]+ v1*fPol[2]
 //  		Nor2 = fPol[3]+ v1*fPol[4]+ v2*fPol[5] 
     
-	  double myCof[3];    
+	  double myCof[3]={0};    
 	  fPol[0] = 1;
 	  fPol[1] = 0;    fPol[2] = 1./(2*sqrt(fXx));
 	  fPol[3] = fRr;  fPol[4] = fXrr/(2*fXx);   fPol[5] = 1.;
@@ -2300,7 +2089,8 @@ SWIT: switch(fKase) {
       } //end switch
       fXCenter = fXd*fCos-fYd*fSin + fXgravity;
       fYCenter = fXd*fSin+fYd*fCos + fYgravity;
-      if (!exy)	break;
+      
+      if (fastTrak || !wasErrs) break;	//if track fast,errs accounted or no errs, no more iters
     }// end iters
     
 //	Update TCircle
@@ -2398,7 +2188,6 @@ void TCircleFitter::MakeErrs()
          for (int j=0   ;j<=i;j++    ) {
            fCov[li+j] = d2F(i,j)*0.5;  }}
        TCL::trsinv(fCov,fCov ,3);
-#if 1
 
        double dRho = -fH/(fRd*fR);
        dRho = 1/fRd-1/fR;
@@ -2411,34 +2200,6 @@ void TCircleFitter::MakeErrs()
        F[2][0] = -fXd*aRho3;		// dRho/dXd 
        F[2][1] = -fYd*aRho3;		// dRho/dYd 
        F[2][2] = -0.5*aRho3;		// dRho/dG1 
-#endif
-#if 0
-       fXCenter = fXd*fCos-fYd*fSin + fXgravity;
-       fYCenter = fXd*fSin+fYd*fCos + fYgravity;
-       fNx = fXd*fCos-fYd*fSin; 
-       fNy = fXd*fSin+fYd*fCos; 
-       double nor = sqrt(fNx*fNx+fNy*fNy);
-       fNx/=nor; fNy/=nor;
-//     |fXCenter -fNx*fR|
-//     |fYCenter -fNy*fR|
-//     H = fXCenter*fNx+fYCenter*fNy - fR
-       fX[0] = fXCenter -fNx*fR;
-       fX[1] = fYCenter -fNy*fR;
-       fD[0] = fNy;
-       fD[1] =-fNx;
-
-
-       F[0][0] = ( fNx*fCos+fNy*fSin) -fXd*aRho;	// dH /dXd
-       F[0][1] = (-fNx*fSin+fNy*fCos) -fYd*aRho;	// dH /dYd
-       F[0][2] =                      -0.5*aRho;	// dH /dG1
-       F[1][0] = (-fNy*fCos + fNx*fSin)*aRho;		// dFi/dXd
-       F[1][1] = ( fNy*fSin + fNx*fCos)*aRho;		// dFi/dYd
-       F[1][2] = 0;					// dFi/dG1
-       F[2][0] = -fXd*aRho3;				// dRho/dXd 
-       F[2][1] = -fYd*aRho3;				// dRho/dYd 
-       F[2][2] = -0.5*aRho3;				// dRho/dG1 
-
-#endif
 
        break;
      }
@@ -2606,7 +2367,7 @@ void TCircleFitter::Test(int iTest)
 
 //  enum {nPts=20};
   enum {nPts=5};
-  double e[4],x[5],dir[2];    
+  double e[4],x[3],dir[2];    
   double aShift[6];
   aShift[0]=-acos(0.25);
   aShift[1]=-acos(0.50);
@@ -2665,7 +2426,7 @@ static const int lPads=sizeof(lNams)/sizeof(char*);
 
   for (int ir = 50; ir <= 50; ir +=5) 		{//loop over radius
     double aR = ir;
-    double len = 0.3*aR;
+    double len = 0.3*aR*3;//????
     for (double ang0 = 0; ang0 <= 0; ang0+=0.05)	{//loop over ang 
 	double R = (negRad)? -aR:aR;
 	double dang = len/R/(nPts-1);
@@ -2800,7 +2561,6 @@ static const int nEv = 100000;
     }		//end ang0
   } 		// curv
 
-  if (e[0]) {};
   for (int i=0;myCanvas[i];i++) {
     myCanvas[i]->Modified();myCanvas[i]->Update();}
 
@@ -2859,6 +2619,7 @@ if ((sgn<0) && !(kase&8)) continue;
           double S = sin(ang),C = cos(ang);
           double eR = ran.Gaus(0,RERR)*sgn;
           double shift = aShift[is%5];
+//shift=0;//???????????????????
           double SS = sin(ang+shift);
           double CC = cos(ang+shift);
           e[0] = pow(RERR*SS,2);
@@ -2918,7 +2679,7 @@ if (!(helx.GetCase()&kase)) continue;
 
 }
 //______________________________________________________________________________
-void TCircle::Show(int nPts,const double *Pts,int pstep) 
+void TCircle::Show(int nPts,const double *Pts,int pstep) const
 {
 static TCanvas *myCanvas = 0;
 static TGraph  *ptGraph  = 0;
@@ -3002,28 +2763,36 @@ double THelixFitter::Fit()
   int nDat = Size();
   double Xi2xy = fCircleFitter.Fit();
   if (Xi2xy>1e11) return Xi2xy;
+  
   int ndfXY = fCircleFitter.Ndf();
-  TCircle circ(fCircleFitter);
-  const double *xy=0;
-  xy = &(myAux[nDat-1].x);
-  double z1 = xy[2];
-  double s1 = circ.Path(xy);
+  double arho = fabs(fCircleFitter.Rho());
+  double mm[4]={0},s=0;		//mm[s,z,ss,sz]	
+  double z0 = myAux[nDat/2].z;
+  for (int ip=1;ip<nDat;ip++) {
+    double z = myAux[ip].z-z0;
+    double dx = myAux[ip].x - myAux[ip-1].x;
+    double dy = myAux[ip].y - myAux[ip-1].y;
+    double hord = sqrt(dx*dx+dy*dy);
+    double t = 0.5*hord*arho;
+    if (t>0.9) t=0;
+    double ds = (fabs(t)<0.3)? hord*(1+t*t/6):2*asin(t)/arho;
+    s+=ds; mm[0]+=s; mm[1]+=z;mm[2]+=s*s;mm[3]+=s*z;
+  }
+  for (int j=0;j<4;j++) { mm[j]/=nDat;}
+  mm[2]-=mm[0]*mm[0]; mm[3]-= mm[0]*mm[1];
 
-  xy = &(myAux[0].x);
-  double z0 = xy[2];
-  double s  = circ.Path(xy);
 //	estimation of tan(dip) to correct z errs
-  double tanDip = (z1-z0)/(s1-s);
-
-  circ.Move(s);
+  double tanDip = mm[3]/mm[2];
+  TCircle circ(fCircleFitter);
 //  set lengths
+  s = 0;
   for (int iDat=0;iDat<nDat;iDat++) {
     TCircleFitterAux* aux = myAux+iDat;
-    xy = &(aux->x);
-    double ds = circ.Path(xy,aux->exy);
+    if (aux->wt<0) continue;
+    double ds = circ.Path(&(aux->x));
     circ.Move(ds); s+=ds;
 //		correct errors
-    double corErr = 0;;
+    double corErr = 0;
     if (aux->exy[0]>0) {
       const double *dc = circ.Dir();
       corErr = tanDip*tanDip*
@@ -3033,6 +2802,7 @@ double THelixFitter::Fit()
     }
     fPoli1Fitter.Add(s,aux->z,aux->ezz+corErr);
   }
+
   double Xi2z = fPoli1Fitter.Fit();
 //	Now set THelixTrack
   int ndfSz = fPoli1Fitter.Ndf();
@@ -3194,13 +2964,14 @@ static const char *h3Nams[]={"dcaXY","dcaXYNor","dcaZ","dcaZNor",0};
 
 
   int nFit = 0,isgn;
-for (double idip=-1;idip<=1;idip+=0.2){
-  double dip = idip;
-//  dip = 0;
+//??for (double idip=-80;idip<=80;idip+=20){
+for (int idip=80;idip<=80;idip+=20){
+  double dip = idip/180.*3.1415;
+
   double cosDip = cos(dip);
   double sinDip = sin(dip);
   double tanDip = tan(dip); if(tanDip){};
-  for (int ir = 30; ir <= 100; ir +=20) 		{//loop over radius
+  for (int ir = 50; ir <= 1000; ir +=20) 		{//loop over radius
     double aR = ir;
     double len = 100; if (len>aR*3) len = aR*3;
     for (double ang00 = -3; ang00 < 3.1; ang00+=0.2)	{//loop over ang 
@@ -3225,6 +2996,7 @@ if(sgn<0 && !(kase&8)) continue;
           double eR = ran.Gaus(0,RERR)*sgn;
           double eZ = ran.Gaus(0,ZERR);
           double shift = aShift[is%5];
+//shift=0;//???????????????????
           double SS = sin(ang+shift);
           double CC = cos(ang+shift);
           e[0] = pow(RERR*SS,2);
@@ -3272,7 +3044,7 @@ if (kase&128) helx.Show();
           if ((isgn=helx.Emx()->Sign())<0) {
 	  ::Warning("Test2","Negative errmtx %d",isgn);continue;}
         THEmx_t *emx = helx.Emx();
-        helx.Eval   (0.,pos,dir,&rho);
+        helx.Get   (pos,dir,rho);
 	double psi = atan2(dir[1],dir[0]);
 	double sinPsi = sin(psi);
 	double cosPsi = cos(psi);
@@ -3306,14 +3078,14 @@ if (kase&128) helx.Show();
         spotSurf[0] = -110;
   
         { spotSurf[0] = -x[0]; closePoint=2006;}
-        sIde = trak.Path(200.,spotSurf,4, xIde,pIde,closePoint);if (sIde){};
+        sIde = trak.Step(200.,spotSurf,4, xIde,pIde,closePoint);
  
         if (fabs(spotSurf[0]+TCL::vdot(xIde,spotSurf+1,3))>0.001) {
           printf("***Wrong point found**\n");
           trak.Print();
           assert(0);
 	}
-        sFit = helx.Path(200.,spotSurf,4, xFit,pFit,closePoint);
+        sFit = helx.Step(200.,spotSurf,4, xFit,pFit,closePoint);
         if (sFit>=1000 ) continue;
         if (fabs(pIde[0]-pFit[0])>0.1) continue;
         helx.Move(sFit);
@@ -3490,11 +3262,492 @@ double ans =  1./4*(d2f(i,j)*Rho2()  +df(j)*dRho2(i)
                    +df (i)  *dRho2(j)+f() *d2Rho2(i,j));
 return ans;
 }		    
+//______________________________________________________________________________
+void THelixTrack::TestTwoHlx() 
+{
+   TVector3 dif(0.1,0.,0.);
+   double rnd = gRandom->Rndm();
+   dif.RotateX(rnd);
+   rnd = gRandom->Rndm();
+   dif.RotateY(rnd);
+   rnd = gRandom->Rndm();
+   dif.RotateZ(rnd);
+   TVector3 D1 = dif.Orthogonal();
+   rnd = gRandom->Rndm();
+   D1.Rotate(rnd,dif);
+   TVector3 D2 = dif.Orthogonal();
+   rnd = gRandom->Rndm();
+   D2.Rotate(rnd,dif);
+   double pos[3]={0};
+   double &d1 = D1[0];
+   double R1=20,R2=100;
+   double shift1 = R1*gRandom->Rndm()*0.1; if (shift1>33) shift1=33;
+   double shift2 = R2*gRandom->Rndm()*0.1; if (shift2>33) shift2=33;
+   THelixTrack th1(pos,&d1,1./R1);
+   double &p2 = dif[0]; 
+   double &d2 = D2[0]; 
+   THelixTrack th2(&p2,&d2,1./R2);
 
+   {
+     TVector3 P1(th1.Pos()),P2(th2.Pos());
+//     TVector3 dP = (P1-P2).Unit();
+     TVector3 dP = (P1-P2);
+     TVector3 D1(th1.Dir());
+     TVector3 D2(th2.Dir());
+     double eps1 = dP.Dot(D1);
+     double eps2 = dP.Dot(D2);
+     printf("TestTwoHlx: Eps1 = %g Eps2 = %g\n",eps1,eps2);
+   }
+
+
+
+   th1.Move(shift1); th2.Move(shift2);
+   double s1=0,s2=0;
+   s1 = th1.Path(th2,&s2);
+   th1.Move(s1);
+   th2.Move(s2);
+
+   {
+     
+     TVector3 P1(th1.Pos()),P2(th2.Pos());
+     TVector3 dP = (P1-P2);
+     double dist = dP.Mag();
+     dP = dP.Unit();
+     TVector3 D1(th1.Dir());
+     TVector3 D2(th2.Dir());
+     double eps1 = dP.Dot(D1);
+     double eps2 = dP.Dot(D2);
+
+     printf("TestTwoHlx: Eps1 = %g Eps2 = %g dist = %g\n",eps1,eps2,dist);
+
+     printf("TestTwoHlx: s1=%g(%g),s2 = %g(%g)\n",s1,shift1,s2,shift2);
+   }
+   
+}
+//______________________________________________________________________________
+//______________________________________________________________________________
+void TCircleFitter::Show() const
+{
+   TCircle::Show(fN,&(fAux[0].x),sizeof(fAux[0])/sizeof(double));  
+}
+
+//______________________________________________________________________________
+class myTHFits {
+public:
+myTHFits(double h,double z,double c,double a,double l):mH(h),mZ(z),mC(c),mA(a),mL(l){}
+operator const double* () const	{return &mH;}		
+operator       double* ()	{return &mH;}		
+myTHFits()	{memset(this,0,sizeof(*this));}
+public:
+static const myTHFits& GetRange() { return mgRange;}
+public:
+double mH;	// direction perpendicular movement and Z
+double mZ;	// Z, direction 
+double mC;	// curvature with sign
+double mA;	// Angle in XY. cos(A),sin(A),T moving direction
+double mL;	// Angle lambda in Rxy/Z
+static myTHFits mgRange;
+};
+
+myTHFits myTHFits::mgRange(1,1,1,30*3.14/180,30*3.14/180);
+
+
+//______________________________________________________________________________
+class myTHPars {
+public:
+ void Set(const THelixTrack &th);
+ void Get(      THelixTrack &th);
+void operator+=(const myTHFits &fp);
+operator const double  *() const {return &_x;}
+operator       double  *()       {return &_x;}
+public:
+  /// sin and cosin of cross angle
+  double _cosCA;
+  double _sinCA;
+  double _x;;
+  double _y; 
+  double _z;
+  double _psi;
+  /// signed curvature [sign = sign(-qB)]
+  double _curv;  
+  /// tangent of the track momentum dip angle
+  double _tanl;
+};
+
+#include "TVector3.h"
+//______________________________________________________________________________
+void myTHPars::operator+=(const myTHFits &fp)
+{
+  _x += -_sinCA*fp.mH;
+  _y +=  _cosCA*fp.mH;
+  _z +=         fp.mZ;
+
+  double a = fp.mA,cA,sA;
+  if (fabs(a) < 0.01) {sA = a*(1-a*a/6); cA = 1-a*a/2;}
+  else                {sA = sin(a);      cA = cos(a) ;} 
+ _psi   += a;
+  double cosCA = _cosCA;
+  _cosCA = cosCA*cA-_sinCA*sA;
+  _sinCA = cosCA*sA+_sinCA*cA;
+
+  _curv  += fp.mC;
+
+  double l = fp.mL,tL;
+  if (fabs(l) < 0.1) {tL = l*(1+l*l/3);}
+  else               {tL = tan(l)     ;}
+  _tanl = (_tanl+tL)/(1.-_tanl*tL);
+  if (fabs( _cosCA)>1 || fabs( _sinCA)>=1) { _cosCA = cos(_psi);
+                                             _sinCA = sin(_psi);}
+}
+//______________________________________________________________________________
+void myTHPars::Set(const THelixTrack &th)
+{
+  const double *x = th.Pos();
+  const double *d = th.Dir();
+  _curv = th.GetRho();
+  _x = x[0]; _y=x[1]; _z=x[2];
+  double sL = d[2];
+  double cL = th.GetCos();
+  _cosCA = d[0]/cL;
+  _sinCA = d[1]/cL;
+  _tanl = sL/cL;
+  _psi = atan2(_sinCA,_cosCA);
+}
+//______________________________________________________________________________
+void myTHPars::Get(THelixTrack &th)
+{
+double d[3]={_cosCA,_sinCA,_tanl};
+th.Set(&_x,d,_curv);
+}
+
+//______________________________________________________________________________
+static double JoinTwo(int nP1,const double *P1,const double *C1
+                     ,int nP2,const double *P2,const double *C2
+	             ,              double *PJ,      double *CJ
+		     ,int mode,const double *range=0)
+{
+// 		mode=0 normal case
+//		mode=1 assign to vertex where 1st nP1 words of PJ must be == P1
+  assert(nP1<=nP2);
+  assert(!P2);		//must be zero
+  int nC1 = nP1*(nP1+1)/2;
+  int nC2 = nP2*(nP2+1)/2;
+  TArrayD ard(nC2*6);
+  double *a = ard.GetArray();  
+  double *sumC 		= (a);
+  double *sumCI 	= (a+=nC2);
+  double *sumEI 	= (a+=nC2);
+  double *C1P1   	= (a+=nC2);
+  double *subP 		= (a+=nC2);
+
+  double chi2=3e33;
+
+
+//  	Join Covariant marices
+  TCL::ucopy(C2,sumC,     nC2);
+  TCL::vadd (C1,sumC,sumC,nC1);
+  if (CJ) TCL::ucopy(sumC,CJ,nC2);
+//   if (range) {
+//     for (int i=0,li=0;i<nP2;li+=++i) {
+//       if (i<nP1) continue;
+//       sumC[li+i]+=0.01/(range[i]*range[i]);
+//   } }
+
+  if (C2[0]<=0) { 	//C2 covariant  matrix ==0
+    if (!PJ) return 0;;
+    TCL::ucopy(P1,PJ+0  ,nP1    );
+    TCL::vzero(   PJ+nP1,nP2-nP1);
+    return 0;
+  } else {
+    TCL::trsa(C1   ,P1  ,C1P1,nP1,1);
+    myQQQ = C1P1;
+    assert(EmxSign(nP2,sumC)>1e-10);
+    TCL::trsinv(sumC,sumCI,nP2);		// 1/ (1/C1+1/C2)
+    TCL::ucopy(P1,subP   ,nP1);
+
+    TCL::trqsq (C2  ,sumCI,sumEI,nP2); 
+    TCL::vsub(C2,sumEI,sumEI,nC2);		//sumEi = 1/(E1+E2)==C2-C2/CJ*C2
+    TCL::trasat(subP,sumEI,&chi2,1,nP1); 
+
+//  	Join params
+    if (!PJ) return chi2;
+    TCL::trsa(C1   ,P1  ,C1P1,nP1,1);
+    TCL::trsa(sumCI,C1P1,PJ  ,nP2,1);
+  }
+  return chi2;
+}
+//______________________________________________________________________________
+void THelixKFitter::Add (const double x[3])
+{
+fAux.resize(fAux.size()+1);
+  THelixKFitterAux &aux = fAux.back();
+  memset(&aux,0,sizeof(THelixKFitterAux));
+  for (int i=0,li=0;i<3;li+=++i) {aux.e[li+i]=1;aux.x[i]=x[i];}
+}
+//______________________________________________________________________________
+void THelixKFitter::AddErr (const double e[6])
+{
+  memcpy(fAux.back().e,e,6*sizeof(e[0]));
+}
+//______________________________________________________________________________
+double THelixKFitter::Fit()
+{
+
+static const int konv[15] ={0,6,9,3,8,5,1,7,4,2,10,13,12,11,14};
+  double cmx[15]={0},tmp[15]={0};
+  
+  if (fFitingShow) fFitingShow->clear();
+  myTHPars P;
+  THelixTrack th;
+  double dir[3]={0},myXi2=0;
+  TCL::vsub(fAux[1].x,fAux[0].x,dir,3);
+  th.Set(fAux[0].x,dir,0.);
+  fChi2=0;
+
+  double F[5][5]={{0}};
+  for (int ip=0;ip<(int)fAux.size();ip++) {
+    double s = th.Path(fAux[ip].x[0],fAux[ip].x[1]);
+    th.Move(s,F);
+    TMatrixD Fm(5,5,F[0]); Fm.Invert(); TCL::ucopy(Fm.GetMatrixArray(),F[0],5*5);
+    TCL::tratsa(F[0],cmx,tmp,5,5); 
+    TCL::ucopy(tmp,cmx,15);
+
+    P.Set(th);
+    double T[2][3] = {{-P._sinCA,P._cosCA,0}
+                     ,{        0,       0,1}};
+
+    double hG[3], hit[3];
+    TCL::trasat(T[0],fAux[ip].e,hG,2,3); 
+    TCL::trsinv(hG,hG,2);
+    
+    TCL::vsub(fAux[ip].x,&P._x,hit,3);
+    double hz[2]={ hit[0]*T[0][0]+hit[1]*T[0][1]
+                 , hit[2]                       };
+
+    myTHFits oF;
+    double iG[15],oG[15];
+    if (ip==1) {//Two points not enought for calc curvature.
+      static const int kRho = 2;
+      for (int i=0,li=0;i<5;li+=++i) { 
+        if (i<kRho) continue;
+        cmx[li+kRho]=0;
+        if (i==kRho) cmx[li+kRho] = 1e-20;
+    } }
+  
+    for (int jj=0;jj<15;jj++) {iG[konv[jj]]=cmx[jj];}
+    myXi2 = JoinTwo(2,hz,hG,5,0,iG,oF,oG,0,myTHFits::GetRange());
+    for (int jj=0;jj<15;jj++) {cmx[jj]=oG[konv[jj]];}
+
+    fChi2+=myXi2; fAux[ip].xi2=myXi2;
+    P+= oF; P.Get(th);
+    if (fFitingShow) { //fill xyz of local fit
+      for (int i=0;i<3;i++) {fFitingShow->push_back(P[i]);}}
+  }
+  TCL::trsinv(cmx,cmx,5);
+  th.SetEmx(cmx);
+  double s = th.Path(fAux[0].x);
+  th.Move(s);
+  *((THelixTrack*)this) = th;
+  fChi2/= Ndf()+1e-10;
+  return fChi2;
+}
+//______________________________________________________________________________
+void THelixKFitter::Test(int nEv)
+{
+static TCanvas* myCanvas[9]={0};
+static TH1F *hh[20]={0};
+static const char *hNams[]={
+"pHKalmn","pAKalmn","pCKalmn","pZKalmn","pLKalmn","Xi2Kalmn",
+"pHDubna","pADubna","pCDubna","pZDubna","pLDubna","Xi2Dubna"};
+
+static const double lims[][2]={{-20 ,20},{-20 ,20},{-20 ,20},{-20 ,20},{-20 ,20},{ 0 ,10}
+                              ,{-20 ,20},{-20 ,20},{-20 ,20},{-20 ,20},{-20 ,20},{ 0 ,10}};
+const int maxPads=3;
+const int nPads = sizeof(hNams)/sizeof(void*);
+const int nCans = nPads/maxPads;
+  for (int jCan=0;jCan<nCans;jCan++) {
+    if(!myCanvas[jCan]) {
+      TString ts("THelixKKFitter_Test"); ts+=jCan;
+      myCanvas[jCan]=new TCanvas(ts,ts,600,800);
+    }
+    myCanvas[jCan]->Clear(); myCanvas[jCan]->Divide(1,maxPads);
+  }
+
+  int jH=0;
+  for (int jCan=0;jCan<nCans;jCan++) { 
+    for (int jPad=0;jPad<maxPads;jPad++) { 
+      delete hh[jH]; hh[jH]= new TH1F(hNams[jH],hNams[jH],100,lims[jH][0],lims[jH][1]);
+      myCanvas[jCan]->cd(jPad+1); hh[jH]->Draw(); jH++;
+  }  }
+
+const int kHits = 50;
+   double R = 50 + 100*gRandom->Rndm();
+   double S = 2*R;
+      int iPhi0 =  360*gRandom->Rndm();
+      int iLam0 =  100*(gRandom->Rndm()-0.5);
+iLam0  = 80;    
+   double ToRad = M_PI/180;
+   double Phi0 = ToRad*iPhi0;
+   double Lam0 = ToRad*iLam0;
+   double CL = cos(Lam0), SL =sin(Lam0);
+   double POS[3]={0.1,0.2,0.3};
+   double DIR[3]={ CL*cos(Phi0),CL*sin(Phi0),SL};
+   double NOR[2]={-sin(Phi0)   ,cos(Phi0)      };
+
+   THelixTrack BAS(POS,DIR,1./R);
+   double HitErr[3]={0.1*0.1,0.1*0.1,0.2*0.2};
+   TRandomVector RV(TVectorD(3,HitErr));
+   const TMatrixDSym &HitEmx = RV.GetMtx();
+   double hitErr[6];
+   for (int i=0,li=0;i<3;li+=++i) { for (int j=0;j<=i;++j){hitErr[li+j]=HitEmx[i][j];};}
+   double step =S/kHits;
+   THEmx_t GG[4]; 
+   double Xi2[2]={0},d[5],dif[5];
+   for (int iEv=0;iEv<nEv;iEv++)  {// Events
+     THelixKFitter kf;
+     THelixFitter  hf;
+     THelixTrack   ht(BAS);
+     for (int ih=0;ih<kHits;ih++) {
+       TVectorD res = RV.Gaus();
+       double myHit[3];
+       for (int jj=0;jj<3;jj++) {myHit[jj]=ht.Pos()[jj]+res[jj];}
+       kf.Add(myHit); 				kf.AddErr(hitErr);
+       hf.Add(myHit[0],myHit[1],myHit[2]); 	hf.AddErr(hitErr,hitErr[5]);
+       ht.Move(step);
+     }
+     double myXi2[2];
+     if (!iEv) kf.SetFitingShow();
+     myXi2[0] = kf.Fit();
+     if (!iEv) kf.Show();
+
+     myXi2[1] = hf.Fit(); 
+     hf.MakeErrs();
+     double ds = hf.Path(POS[0],POS[1]); hf.Move(ds);
+            ds = kf.Path(POS[0],POS[1]); kf.Move(ds);
+     
+     THelixTrack *hlx = &kf;
+     for (int jk=0;jk<2;jk++) {
+       Xi2[jk]+=myXi2[jk];
+       hh[jk*6+5]->Fill(myXi2[jk]);
+       TCL::vadd(GG[jk+2],*hlx->Emx(),GG[jk+2],15);
+       TCL::vsub(hlx->Pos(),POS,dif,3);
+       d[0] = TCL::vdot(dif,NOR,2);				//dH   of helix
+       d[1] = TVector3(hlx->Dir()).DeltaPhi(TVector3(DIR));	//dPhi of helix
+       d[2] = hlx->GetRho()-1./R;				//dRho of helix
+       d[3] = dif[2];						//dZ   of helix
+       d[4] = -(TVector3(hlx->Dir()).Theta()-TVector3(DIR).Theta());
+       if (d[4]<=-M_PI) d[4]+=M_PI*2;
+       if (d[4]>= M_PI) d[4]-=M_PI*2;				//dLam of helix
+       double *e = GG[jk];
+       for (int i=0,li=0;i<5;li+=++i) { 
+         double err = (*(hlx->Emx()))[li+i]; err = sqrt(err);
+         hh[jk*6+i]->Fill( d[i]/err);
+         for (int j=0;j<=i;++j)       {e[li+j]+=d[i]*d[j];}}
+       hlx = &hf;
+     }
+
+   }
+//		Now print the result
+  for (int jk=0;jk<4;jk++) {GG[jk]*=1./nEv;if (jk<2) Xi2[jk]/=nEv;}
+
+
+  printf("*** Compare KFit and DubnaFit Error matrices ***\n");
+  printf("*** Average KXi2 =%g DXi2 = %g ***\n",Xi2[0],Xi2[1]);
+
+static const char *tit="HACZL";
+static const char *tsk[2]={"KalmanFit","DubnaFit"};
+  for (int jk=0;jk<2;jk++) {
+    printf("*** Test for %s Xi2=%g   ***\n",tsk[jk],Xi2[jk]);
+    double qA=0,qAmax=0;
+    const double *eK = GG[jk  ];
+    const double *eD = GG[jk+2];
+    double dia[5];
+    for (int i=0,li=0;i< 5;li+=++i) {
+      dia[i]= (eK[li+i]+eD[li+i])/2;
+      for (int j=0;j<=i;j++) {
+      double dif = (eK[li+j]-eD[li+j])/sqrt(dia[i]*dia[j]);
+      printf("(%c%c) \t%g = \t%g \t%g\n",tit[i],tit[j],eK[li+j],eD[li+j],dif);
+      dif = fabs(dif);
+      qA+= (dif); if (dif>qAmax) qAmax=dif;
+    } }
+    qA/=15;
+    printf("Quality %g < %g < 1\n",qA,qAmax);
+  }
+
+  for (int i=0;myCanvas[i];i++) {
+    myCanvas[i]->Modified();myCanvas[i]->Update();}
+
+  while(!gSystem->ProcessEvents()){gSystem->Sleep(200);}; 
+
+
+}
+//______________________________________________________________________________
+void THelixKFitter::Print(const char* txt) const
+{ if(txt){}; }
+//______________________________________________________________________________
+
+#include "StarRoot/StDraw3D.h"
+//______________________________________________________________________________
+void THelixKFitter::Show() const
+{ 
+static StDraw3D *draw = new StDraw3D("");
+
+
+std::vector<double> Pts;
+std::vector<double> Fts;
+
+  THelixTrack th(*this);
+  for (int ip=0;ip<(int)fAux.size();ip++) {
+    double s = th.Path(fAux[ip].x[0],fAux[ip].x[1]);
+    for (int i=0;i<3;i++) {Pts.push_back(fAux[ip].x[i]);}
+                           
+    if (!ip)	{th.Move(s);continue;}
+    double delta = s/10;
+    for (int j=0;j<10;j++) {
+      for (int i=0;i<3;i++) {Fts.push_back(th.Pos()[i]);}
+      th.Move(delta);
+    }
+  }
+  if (fFitingShow)  draw->Points(*fFitingShow,kUnusedHit); 
+  draw->Points(Pts,kUsedHit);
+  draw->Line(Fts,kGlobalTrack);
+  draw->UpdateModified();
+  draw->Animate();
+
+}
+#include "TMatrixT.h"
+#include "TMatrixTSym.h"
+#include "TVectorT.h"
+//_____________________________________________________________________________
+double EmxSign(int n,const double *e)
+{
+  TMatrixDSym S(n);  
+  TVectorD coe(n);
+  for (int i=0,li=0;i< n;li+=++i) {
+    double qwe = e[li+i];
+    if(qwe<=0) return qwe;
+    qwe = pow(2.,-int(log(qwe)/(2*log(2))));
+    coe[i]=qwe;
+    for (int j=0;j<=i;j++    ) {
+       S[i][j]=e[li+j]*coe[i]*coe[j]; S[j][i]=S[i][j];
+  } }
+  TMatrixD EigMtx(n,n);
+  TVectorD EigVal(n);  
+  EigMtx = S.EigenVectors(EigVal);
+  TVectorD EigB = EigMtx*TVectorD(n,myQQQ);
+  double ans = 3e33;
+  for (int i=0;i<n;i++) {if (EigVal[i]<ans) ans = EigVal[i];}
+  if (ans>1e-10) return ans;
+  EigVal.Print("EigVal");
+  EigB.Print("EigB");
+  TVectorD(n,myQQQ).Print();
+  return ans;
+} 
+//______________________________________________________________________________
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.81 2020/03/08 20:11:08 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.82 2020/03/09 17:56:16 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -3510,17 +3763,8 @@ return ans;
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
- * Revision 1.81  2020/03/08 20:11:08  perev
- * _added
- *
- * Revision 1.19  2019/09/23 19:09:52  perev
- * TestErr fix
- *
- * Revision 1.17  2019/01/23 00:07:38  perev
- * More detailed TestDer2() added
- *
- * Revision 1.15  2017/11/22 23:35:15  perev
- * Cleanup
+ * Revision 1.82  2020/03/09 17:56:16  perev
+ * Out old version back
  *
  * Revision 1.78  2017/06/27 23:45:39  perev
  * Coverity
@@ -3567,11 +3811,23 @@ return ans;
  * Revision 1.61  2013/02/20 02:01:44  perev
  * Cleanup
  *
- * Revision 1.9  2017/04/07 14:53:05  perev
- * rename sysCoo==>tkCoo & make it static member
+ * Revision 1.60  2012/12/07 17:47:42  perev
+ * Cleanup
  *
- * Revision 1.2  2015/04/28 18:47:27  perev
- * THelix & Thelix crossing improved. Iterations along directions
+ * Revision 1.59  2012/07/21 18:46:38  perev
+ * Method MaxCorr() added
+ *
+ * Revision 1.58  2012/06/19 23:50:42  perev
+ * Fix KFit::Test
+ *
+ * Revision 1.57  2012/05/28 02:26:31  perev
+ * Helix Kalman fitter added
+ *
+ * Revision 1.56  2012/04/19 16:16:14  perev
+ * Cleanup
+ *
+ * Revision 1.55  2012/01/30 17:27:19  perev
+ * Improve Errors
  *
  * Revision 1.54  2011/07/19 19:29:19  perev
  * set hh & zz errors
@@ -3679,4 +3935,4 @@ return ans;
  * Initial Revision
  *
  **************************************************************************/
- 
+
