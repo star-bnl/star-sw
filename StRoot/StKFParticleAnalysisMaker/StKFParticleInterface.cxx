@@ -1134,52 +1134,48 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
       else    fTrackHistograms2D[11]->Fill(pL10, dNdxL10);
     }
     
-    const StMuBTofPidTraits &btofPid = gTrack->btofPidTraits();
-    double timeTof = btofPid.timeOfFlight();
-    double lengthTof = btofPid.pathLength();
-    if(lengthTof < 0.)
-    {
-      const StThreeVectorF & tofPoint  = btofPid.position();
-      const StThreeVectorF & dcaPoint  = gTrack->dca(bestPV);
-      StPhysicalHelixD innerHelix = gTrack->helix();
-      double dlDCA = fabs( innerHelix.pathLength( StThreeVector<double>(dcaPoint.x(), dcaPoint.y(), dcaPoint.z()) ) );
-      StPhysicalHelixD outerHelix = gTrack->outerHelix();
-      double dlTOF = fabs( outerHelix.pathLength( StThreeVector<double>(tofPoint.x(), tofPoint.y(), tofPoint.z()) ) );
-      
-      double l = gTrack->length();
-      lengthTof = l + dlDCA + dlTOF;
-    }
     double m2tof = -1.e6;
     bool isTofm2 = false;
-    if(timeTof > 0. && lengthTof > 0.)
-    {
-      m2tof = track.GetP()*track.GetP()*(1./((lengthTof/timeTof/29.9792458)*(lengthTof/timeTof/29.9792458))-1.);
-      isTofm2 = true;
-      
+    const StMuBTofPidTraits &btofPid = gTrack->btofPidTraits();
+    double timeTof = btofPid.timeOfFlight();
+    if (timeTof > 0) {
+      double lengthTof = btofPid.pathLength();
+      if(lengthTof < 0.) {
+	const StThreeVectorF & tofPoint  = btofPid.position();
+	const StThreeVectorF & dcaPoint  = gTrack->dca(bestPV);
+	StPhysicalHelixD innerHelix = gTrack->helix();
+	double dlDCA = fabs( innerHelix.pathLength( StThreeVector<double>(dcaPoint.x(), dcaPoint.y(), dcaPoint.z()) ) );
+	StPhysicalHelixD outerHelix = gTrack->outerHelix();
+	double dlTOF = fabs( outerHelix.pathLength( StThreeVector<double>(tofPoint.x(), tofPoint.y(), tofPoint.z()) ) );
+	
+	double l = gTrack->length();
+	lengthTof = l + dlDCA + dlTOF;
+      }
+      if(lengthTof > 0.) {
+	m2tof = track.GetP()*track.GetP()*(1./((lengthTof/timeTof/29.9792458)*(lengthTof/timeTof/29.9792458))-1.);
+	isTofm2 = true;
+      }
     }
-    const StMuETofPidTraits &etofPid = gTrack->etofPidTraits();
-    double timeETof = etofPid.timeOfFlight();
-    double lengthETof = etofPid.pathLength();
-#if 0
-    if(lengthETof < 0.)
-    {
-      const StThreeVectorF & etofPoint  = etofPid.position();
-      const StThreeVectorF & dcaPoint  = gTrack->dca(bestPV);
-      StPhysicalHelixD innerHelix = gTrack->helix();
-      double dlDCA = fabs( innerHelix.pathLength( StThreeVector<double>(dcaPoint.x(), dcaPoint.y(), dcaPoint.z()) ) );
-      StPhysicalHelixD outerHelix = gTrack->outerHelix();
-      double dlTOF = fabs( outerHelix.pathLength( StThreeVector<double>(tofPoint.x(), tofPoint.y(), tofPoint.z()) ) );
-      
-      double l = gTrack->length();
-      lengthTof = l + dlDCA + dlTOF;
-    }
-#endif
     double m2Etof = -1.e6;
     bool isETofm2 = false;
-    if(timeETof > 0. && lengthETof > 0.)
-    {
-      m2Etof = track.GetP()*track.GetP()*(1./((lengthETof/timeETof/29.9792458)*(lengthETof/timeETof/29.9792458))-1.);
-      isETofm2 = true;
+    const StMuETofPidTraits &etofPid = gTrack->etofPidTraits();
+    double timeETof = etofPid.timeOfFlight();
+    if (timeETof > 0) {
+      double lengthETof = etofPid.pathLength();
+      if(lengthETof < 0.) {
+	const StThreeVectorF & etofPoint  = etofPid.position();
+	const StThreeVectorF & dcaPoint  = gTrack->dca(bestPV);
+	StPhysicalHelixD innerHelix = gTrack->helix();
+	double dlDCA = fabs( innerHelix.pathLength( StThreeVector<double>(dcaPoint.x(), dcaPoint.y(), dcaPoint.z()) ) );
+	StPhysicalHelixD outerHelix = gTrack->outerHelix();
+	double dlTOF = fabs( outerHelix.pathLength( StThreeVector<double>(etofPoint.x(), etofPoint.y(), etofPoint.z()) ) );
+	double l = gTrack->length();
+	lengthETof = l + dlDCA + dlTOF;
+      }
+      if(lengthETof > 0.) {
+	m2Etof = track.GetP()*track.GetP()*(1./((lengthETof/timeETof/29.9792458)*(lengthETof/timeETof/29.9792458))-1.);
+	isETofm2 = true;
+      }
     }
     if(fCollectTrackHistograms && (isTofm2 || isETofm2) )
       {

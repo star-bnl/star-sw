@@ -472,12 +472,12 @@ Int_t StiMaker::Make()
   StMaker *KFV = GetMaker("StiKFVertex");
   if (KFV) {
     iAnz = KFV->Make();
+  }
+  if (! _vertexFinder) {
     FinishTracks(1);
   } else {
-    if (_vertexFinder) {
-      iAnz = MakePrimaryTracks(event);
-      if (iAnz) {MyClear(); return iAnz;}
-    }
+    iAnz = MakePrimaryTracks(event);
+    if (iAnz) {MyClear(); return iAnz;}
   }
   if (mPullTTree) {iAns = FillPulls();}
   LOG_INFO << "Make(): Done"<<endm;

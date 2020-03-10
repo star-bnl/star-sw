@@ -6,5 +6,5 @@
 #include "g2t_emc_hit.idl"
 
 interface g2t_pre : amiModule{ STAFCV_T call (inout g2t_track g2t_track,
-                                               out g2t_emc_hit g2t_emc_hit ); };
+                                               out g2t_emc_hit g2t_pre_hit ); };
                       

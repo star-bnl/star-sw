@@ -5,9 +5,9 @@
 <command> 
 # cd ${SUBMITTINGDIRECTORY}  
   set Name = `basename ${SUBMITTINGDIRECTORY}`
-  setenv NODEBUG yes
-  setenv STARFPE NO
-  setup 64b
+#  setenv NODEBUG yes
+#  setenv STARFPE NO
+#  setup 64b
 #  starver TFG19g
   echo $INPUTFILE0 | grep ':'
   if (! $?) then
@@ -19,8 +19,12 @@
     exit 1;
   endif
   set name = ""
-  foreach name (K_S0Fixed  Lambda0_barFixed Lambda0Fixed XiM_barFixed XiMFixed  Omega_barFixed OmegaFixed AntiHyper2NeutronFixed AntiHyperH4Fixed AntiHyperNeutronFixed AntiHyperTritonFixed Hyper2NeutronFixed HyperH4Fixed HyperNeutronFixed HyperTritonFixed \
-                K_S0       Lambda0_bar      Lambda0      XiM_bar      XiM       Omega_bar      Omega      AntiHyper2Neutron      AntiHyperH4      AntiHyperNeutron      AntiHyperTriton      Hyper2Neutron      HyperH4      HyperNeutron      HyperTriton \
+  foreach name (K_S0Fixed  Lambda0_barFixed Lambda0Fixed XiM_barFixed XiMFixed  Omega_barFixed OmegaFixed \
+                AntiHyper2NeutronFixed AntiHyperH4Fixed AntiHyperNeutronFixed \
+                AntiHyperTritonFixed Hyper2NeutronFixed HyperH4Fixed HyperNeutronFixed HyperTritonFixed \
+                K_S0       Lambda0_bar      Lambda0      XiM_bar      XiM       Omega_bar      Omega     \
+                AntiHyper2Neutron      AntiHyperH4      AntiHyperNeutron      AntiHyperTriton      Hyper2Neutron \
+                HyperH4      HyperNeutron      HyperTriton \
                 Upsilon1SmTsq Upsilon2SmTsq)
     echo $Name | grep $name
     if (! $?) break;
@@ -32,7 +36,9 @@
 # set chain = "MC.2019a,P2019a,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name};
 #Stx  set chain = "MC.2019a,P2019a,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name};
 #StiCA
-  set chain = "MC.2019a,P2019a,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name};
+#  set chain = "MC.2019a,P2019a,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name};
+#Stx  (03/06/2020)
+  set chain = "MC.2019a,UseMCTstart,P2019a,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name};
   set sdt = ",sdt20190311"
   set VFMCE = ",VFMCE";
   set Chain = ${chain}${VFMCE}${sdt}",Rung."${rung}
@@ -52,5 +58,5 @@
     endif
   endif
 </command>
-<input URL="command:RunId.pl 1 500 200 K_S0" />
+<input URL="command:RunId.pl 1 500 400 Omega" />
 </job>

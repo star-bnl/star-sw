@@ -261,6 +261,10 @@ StBFChain *bfc(Int_t First, Int_t Last,
   StMaker *sti  = chain->GetMaker("Sti");
   if (sti) sti->SetAttr("useTiming",1);
 #if 0
+  StMaker *btofSim = chain->GetMaker("BTofSim");
+  if (btofSim) btofSim->SetAttr("UseMCTstart",1);
+#endif
+#if 0
   // Insert your maker before "tpc_hits"
   Char_t *myMaker = "St_TLA_Maker";
   if (gClassTable->GetID(myMaker) < 0) {
