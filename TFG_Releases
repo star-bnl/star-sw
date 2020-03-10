@@ -51,4 +51,4 @@
  TFG19m Prepare xProduction of Run XX                                2019-12-24 12:00:04 -0500  (HEAD -> master, tag: TFG19m)
  TFG20a Prepare xProduction of Run XX Fixed Target                   2020-01-28 16:53:27 -0500  (HEAD -> master, tag: TFG20a_1)
  .DEV2  head of TFG git repository
-  DEV2  head of TFG git repository build with ROOT6
+  DEV6  head of TFG git repository build with ROOT6
