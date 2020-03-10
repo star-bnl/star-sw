@@ -156,7 +156,55 @@ endif
   
     cd $sandBox
     pwd
-    cons
+
+    if ( -f ${WRK_DIR}/consdone ) then
+      echo "'cons' was done, make a symlink for .sl${SCHOS}* to sandbox if necessary!"
+      set wconsdir=`find ${WRK_DIR}/ -maxdepth 1 -type d -name ".sl${SCHOS}*"`
+      if ( "$wconsdir" != "" ) then
+         ln -s $wconsdir 
+      endif
+    else 
+      echo "'cons' was not done, do it now."
+      if ( ! -f ${WRK_DIR}/consing ) then
+        echo "no one else is doing 'cons' now, let me do it."
+        touch ${WRK_DIR}/consing
+        echo "put a lock first!"
+        cons
+        echo "cons done!"
+        set consdir=`find . -type d -name ".sl${SCHOS}*"`
+	  if ( "$consdir" == "" ) then
+	    echo "claim that cons is done!"
+	    touch ${WRK_DIR}/consdone
+	    echo "release the lock!"
+	    rm -f ${WRK_DIR}/consing
+	  else
+          if ( ! -d ${WRK_DIR}/$consdir ) then
+		 mv $consdir ${WRK_DIR}/
+		 echo "claim that cons is done!"
+		 touch ${WRK_DIR}/consdone
+		 echo "release the lock!"
+		 rm -f ${WRK_DIR}/consing
+		 echo "copied..."
+		 echo "$consdir"
+		 echo "-->"
+		 echo "${WRK_DIR}"
+		 cp -rpnv ${WRK_DIR}/$consdir .
+	    else
+		 echo "someone else is copying, I do nothing"
+	    endif
+        endif
+      else
+        echo "someone else is doing 'cons' now, I will wait."
+        while ( ! -f ${WRK_DIR}/consdone )
+          sleep 1s 
+        end
+        set wconsdir=`find ${WRK_DIR}/ -maxdepth 1 -type d -name ".sl${SCHOS}*"`
+        if ( "$wconsdir" != "" ) then
+          ln -s $wconsdir 
+        endif
+      endif
+    endif
+
     ls -la  . StRoot/ .sl${SCHOS}* 
     ls -la  .sl${SCHOS}*/lib/  
     echo "===FIRE  $EXEC_NAME for coreN=$coreN fSet=$fSet "`date`
