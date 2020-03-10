@@ -1705,15 +1705,18 @@ Bfc_st BFC[] = { // standard chains
   {"btof"       ,"","","btofDat,vpdCalib,btofMatch,btofCalib"                   ,"","","BTOF Chain",kFALSE},
   {"BtofDat" ,"tof_raw","","db,BTofutil","StBTofHitMaker","StEvent,StBTofHitMaker","BTOF hit maker",kFALSE},
 #if 0
-  {"vpdSim"    ,"","VpdChain","BTofUtil","StVpdSimMaker","StEvent,StMcEvent,StBTofHitMaker,StVpdSimMaker"
+  {"vpdSim"    ,"","","BTofUtil","StVpdSimMaker","StEvent,StMcEvent,StBTofHitMaker,StVpdSimMaker"
    ,                                                                                "Vpd Simulator",kFALSE},
 #else
   {"vpdSim"    ,"","","","",""   ,                                           "ignore Vpd Simulator",kFALSE},
 #endif
-  {"btofSim" ,"","","BTofUtil,vpdSim"  ,"StBTofSimMaker",
+  {"btofSim" ,"","","BTofUtil,vpdOff"  ,"StBTofSimMaker",
                        "StEvent,StMcEvent,StTofUtil,StBTofHitMaker,StBTofSimMaker","BTOF Simulator",kFALSE},
+  {"UseMCTstart"    ,"","","","",""   ,                                   "Use MC tstart for ",kFALSE},  
   {"vpdCalib","","","db,BTofUtil,-vpdSim","StVpdCalibMaker"    ,"StVpdCalibMaker","VPD calibration",kFALSE},
+  //  {"vpdCalib","","","db,BTofUtil","StVpdCalibMaker"            ,"StVpdCalibMaker","VPD calibration",kFALSE},
   //  {"btofSim" ,"","","BTofUtil,vpdSim,UseMCTstart"  ,"StBTofSimMaker",
+  {"vpdOff"    ,"","","-vpdCalib,-vpdSim","",""                             ,"ignore Vpd Simulator",kFALSE},
 #if 0
   {"btofMixer"    ,"","","BTofUtil","StBTofMixerMaker","StEvent,StBTofHitMaker,StBTofMixerMaker"
    ,                                                                                   "BTof Mixer",kFALSE},
@@ -1888,7 +1891,7 @@ Bfc_st BFC[] = { // standard chains
   // second wave of BTOF options needed after Sti
   {"btofMatch" ,"","","db,BTofUtil","StBTofMatchMaker","StBTofMatchMaker","TPC-BTOF track matching",kFALSE},
   {"btofCalib","","","db,BTofUtil",        "StBTofCalibMaker","StBTofCalibMaker","BTOF calibration",kFALSE},
-  {"UseMCTstart","","","",                                       "","","Use MC Time start for BTOF",kFALSE},
+  {"UseMCTstart","","","",                                  "","","Use MC Time start for btofCalib",kFALSE},
   // ETOF hit building and track matching after bTofCalib - needs to be after btof	
   {"ETofHit",   "",      "ETofChain", "db, ETofUtil, muDst", "StETofHitMaker",   "StETofHitMaker",
                                                                                    "ETOF hit maker",kFALSE},

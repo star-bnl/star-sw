@@ -1586,15 +1586,15 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
 	      iSet = 4;
 	  }
       }
-    
+    if (histoParameters) {
     //for signal particles
     for(int iParam=0; iParam<nHistoPartParam; iParam++)
       if (iParam != 17)
 	histoParameters[iSet][iParticle][iParam]->Fill(parameters[iParam]);
-    
+    }
     if(multiplicities)
       multiplicities[iSet][iParticle]++;
-    
+    if (histoParameters2D) {
     histoParameters2D[iSet][iParticle][0]->Fill(Rapidity,Pt,1);
     if(drawZR)
       {
@@ -1604,7 +1604,7 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
 	  histoParameters2D[iSet][iParticle][2]->Fill(QtAlpha[1],QtAlpha[0],1);
       }
     histoParameters2D[iSet][iParticle][3]->Fill(Rapidity,M_t,1);
-    
+    }
     if(iSet != 1) return;
     
     int iMCPart = RtoMCParticleId[iP].GetBestMatchWithPdg();

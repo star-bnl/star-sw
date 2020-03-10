@@ -1003,6 +1003,7 @@ Int_t StBFChain::Instantiate()
 	ProcessLine(Form("((StMaker *) %p)->SetMode(%i);", mk, mode));
     }
     if (maker == "StBTofCalibMaker") {
+      if  (GetOption("UseMCTstart")) mk->SetAttr("UseMCTstart",1);
       if  (GetOption("UseProjectedVertex")) mk->SetAttr("UseProjectedVertex",1);
       if  (GetOption("UseMCTstart") || 
 	   ! GetOption("vpdCalib"))         mk->SetAttr("UseMCTstart",1);

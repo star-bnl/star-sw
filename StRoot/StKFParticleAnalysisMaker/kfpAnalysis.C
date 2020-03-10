@@ -36,6 +36,7 @@ void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", c
 //   StKFParticleInterface::instance()->SetSoftTofPidMode();
   std::cout << "KFParticleAnalysis: running analysis for triggerSet " << triggerSet << "." << std::endl; 
   StKFParticleAnalysisMaker* kfpAnalysis = (StKFParticleAnalysisMaker*) StMaker::GetTopChain()->Maker("KFParticleAnalysis");
+  kfpAnalysis->ProcessSignal();
   kfpAnalysis->AnalyseDsPhiPi();
   kfpAnalysis->CollectPIDHistograms();
   kfpAnalysis->CollectTrackHistograms();

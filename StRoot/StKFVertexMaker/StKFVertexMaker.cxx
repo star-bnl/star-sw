@@ -265,47 +265,16 @@ Int_t StKFVertexMaker::Make() {
   MakeParticles();
   if (fNGoodGlobals < 1) return kStOK;
   // add Fixed Primary vertex if any
-  if (IAttr("VFFV") || IAttr("VFMCE")) {
+  if (IAttr("VFFV") || IAttr("VFMCE") ||IAttr("VFMinuitX") ) {
     StGenericVertexFinder *mGVF = 0;
     StGenericVertexMaker* gvm = (StGenericVertexMaker*)StMaker::GetChain()->GetMaker("GenericVertex");
     if (gvm) mGVF = gvm->GetGenericFinder();
     if (mGVF) {
-      ((StFixedVertexFinder *)mGVF)->SetVertexError(gEnv->GetValue("FixedSigmaX", 0.00176),
-						    gEnv->GetValue("FixedSigmaY", 0.00176),
-						    gEnv->GetValue("FixedSigmaZ", 0.00176));
-      mGVF->fit(pEvent);
-      StKFVertex::ResetTotalNoVertices(0);
-      fgcVertices = new StKFVerticesCollection();
-      mGVF->FillStEvent(pEvent);
-      UInt_t NoPV = pEvent->numberOfPrimaryVertices();
-      for (UInt_t ipv = 0; ipv < NoPV; ipv++) {
-	StPrimaryVertex *Vp = pEvent->primaryVertex(ipv);
-	if (Vp && ! Vp->key()) {
-	  Vp->setKey(ipv+1);
-	}
-	Vp->setIdTruth();
-	StKFVertex KVx;
-	KVx.Initialize();
-	KVx.SetId(Vp->key());
-	TCL::ucopy(Vp->position().xyz(), &KVx.Parameter(0), 3);
-	TCL::ucopy(Vp->covariance(), &KVx.Covariance(0), 6);
-	KVx.NDF() = 1;
-	KVx.SetIdTruth(Vp->idTruth(),Vp->qaTruth());
-	// copy Point fit as MassFit
-	StTrackMassFit *pf = new StTrackMassFit(KVx.Id(),&KVx);
-	PrPP(Make,*pf);
-	Vp->setParent(pf);
-	StTrackNode *nodepf = new StTrackNode;
-	nodepf->addTrack(pf);
-	pEvent->trackNodes().push_back(nodepf);
-	fgcVertices->AddVertex(&KVx);
+      if (IAttr("VFFV") || IAttr("VFMCE")) {
+	((StFixedVertexFinder *)mGVF)->SetVertexError(gEnv->GetValue("FixedSigmaX", 0.0176),
+						      gEnv->GetValue("FixedSigmaY", 0.0176),
+						      gEnv->GetValue("FixedSigmaZ", 0.0176));
       }
-    }
-  } else if (IAttr("VFMinuitX")) {
-    StGenericVertexFinder *mGVF = 0;
-    StGenericVertexMaker* gvm = (StGenericVertexMaker*)StMaker::GetChain()->GetMaker("GenericVertex");
-    if (gvm) mGVF = gvm->GetGenericFinder();
-    if (mGVF) {
       StKFVertex::ResetTotalNoVertices(0);
       fgcVertices = new StKFVerticesCollection();
       mGVF->fit(pEvent);
