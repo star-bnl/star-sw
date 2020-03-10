@@ -280,10 +280,17 @@ Bfc_st BFC[] = { // standard chains
   {"MC2020",      "","","MC.2020,sdt20200292,MC.Sti,vmc,NewTpcAlignment,ExB"              ,"","","",kFALSE},
   {"MC.2020"  ,"","","MC.2020a",                                                           "","","",kFALSE},
   {"MC2020a"  ,"","","MC.2020a",                                                           "","","",kFALSE},
+#if  ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
   {"MC.2020a","","","y2020a,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna,MC.Sti,CorrY,vmc"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,ETofSim,etofa,tags,emcY2,evout,IdTruth"
    ",geantout,big,MiniMcMk,Sti,NewTpcAlignment,AgML",                                     "","","/",kFALSE},
   {"MC.Sti",   "","","Sti,geantOut,noRunco,noHistos,picoWrite,PicoVtxVpd,McTpcAna,tags"   ,"","","",kFALSE},
+#else
+  {"MC.2020a","","","y2020a,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,MC.Sti,CorrY,vmc"
+   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,ETofSim,etofa,tags,emcY2,evout,IdTruth"
+   ",geantout,big,Sti,NewTpcAlignment,AgML",                                              "","","/",kFALSE},
+  {"MC.Sti",   "","","Sti,geantOut,noRunco,noHistos,McTpcAna,tags"                        ,"","","",kFALSE},
+#endif
   {"MC.StiCA",   "","","MC.Sti,StiCA"                                                     ,"","","",kFALSE},
   {"XC",          "","","TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,"
    "OSpaceZ2,OGridLeak3D,CorrX,tpcDB,TpcHitMover"
