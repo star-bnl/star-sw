@@ -355,7 +355,7 @@ endx[
 
 ================================= Summurizing  ===============================================
 @ count = 0
-foreach done (`ls -1d */*/Done`)s
+foreach done (`ls -1d */*/Done`)
   set d = `dirname ${done}`
   cd ${d}; pwd;
   ls -ltr | tail -1 | grep Chain	
@@ -371,11 +371,9 @@ foreach done (`ls -1d */*/Done`)s
   endif
   cd -;
 end
-
-
 touch `grep total ???/2*/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fM\n", n/1.e6)}'`
 ################################################################################
-root.exe -q -b 'Chain.C+("*/*/*picoDst.root","PicoDst")' | tee Chain.log
+root.exe -q -b 'Chain.C+("*/*/*picoDst.root","PicoDst")' | tee Chain.logxf
 foreach f (`grep missing Chain.log | awk '{print $3}'`)
   set d = `dirname ${f}`; set b = `basename ${f} .picoDst.root`; mv ${d}/${b}* Zombie
 end
@@ -409,6 +407,7 @@ grep -A 2 'table tpcDrift' 04?/*/*B.log | egrep '73118 -' | tee list_of_bad_file
 grep -A 2 'table tpcDrift' 06?/*/*B.log | egrep '20200303/12 -' | tee list_of_bad_files
 grep -A 2 'table tpcDrift' 06?/*/*B.log | egrep '20200303/(12|155804) -' | tee list_of_bad_files
 grep -A 2 'table tpcDrift' 066/*/*B.log | egrep '20200306/155204 -' | tee list_of_bad_files
+grep -A 2 'table tpcDrift' 067/*/*B.log | egrep '20200307/91343 -' | tee list_of_bad_files
 foreach f (`awk -F\- '{print $1}' list_of_bad_files`)
 	set b = `basename ${f} B.log`; set d = `dirname ${f}`; mv ${d}/${b}* Zombie/
 end
