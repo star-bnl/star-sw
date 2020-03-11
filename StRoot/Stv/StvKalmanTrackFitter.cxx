@@ -27,7 +27,7 @@ ClassImp(StvKalmanTrackFitter)
 #define DIST2(a,b) ((a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1])+(a[2]-b[2])*(a[2]-b[2]))
 #define OLEG(a,b) (2*fabs(a-b)/(fabs(a)+fabs(b)+1e-11))
 
-static const int    kXtendFactor  = 10;//Xi2 factor that fit sure failed
+static const int    kXtendFactor  = 3;//Xi2 factor that fit sure failed
 static const double kPiMass=0.13956995;
 static const double kMinP = 0.01,kMinE = sqrt(kMinP*kMinP+kPiMass*kPiMass);
 //static const double kMaxCorr = 0.1;
@@ -47,7 +47,193 @@ void StvKalmanTrackFitter::SetCons(const StvKonst_st *kons)
 {
   mKons = kons;
 }
-#include "0.C"
+//_____________________________________________________________________________
+int StvKalmanTrackFitter::Refit(StvTrack *trak,int dir, int lane, int mode)
+{
+///	refit or smouthe track, using the previous Kalman.
+///     dir=0 moving from out to in
+///     lane 
+///     dir=1 moving from in to out 
+///     mode=0 No join
+///     mode=1 Join
+///     fit direction is imagined from left to rite
+static int nCall=0; nCall++;
+
+static StvFitter *fitt = StvFitter::Inst();
+
+//term	LEFT here: Curren Kalman chain of fits from left to rite
+//	Rite here: Previous Kalman chain, allready fitted, in different direction.
+//	It was made from rite to left
+
+  int nErr = 0;
+  mBigNode = 0;
+  double bigXi2=0;
+  mTally = 0;
+  StvNode *node=0,*preNode=0;
+  int iNode=0,iFailed=0;
+  double myXi2=3e33;
+//		Moving out of beam
+  StvNodeIter it,itBeg,itEnd; 
+  for (int iDir = dir, nDir = 0; nDir<mode; iDir = 1-iDir,nDir++) {
+    if (iDir) { //fit in ==> outiDir = 1-iDi
+      itBeg = trak->begin();        itEnd = trak->end();
+    } else   {//fit out ==> in
+      itBeg = trak->end(); --itBeg; itEnd = trak->begin();--itEnd;
+    }
+    node=0,preNode=0,iNode=0;
+    for (it=itBeg; it!=itEnd; (iDir)? ++it:--it) {//Main loop
+      preNode=node;
+      node = *it; iNode++;
+      const StvHit *hit = node->GetHit();
+      if (!preNode)  {	// Empty leading node
+//		It was not fits before(left) but shoulf be now. 
+//		get params from previous dir and set huge errors
+	node->SetFit(node->mFP[2],node->mFE[2],lane); 
+	assert(node->mFE[lane][0]>0);
+	node->mFE[lane].Recov();		//But not too big
+	node->mFE[lane]*=kKalmanErrFact;	//Increase  errors
+        node->mPP[lane] = node->mFP[lane];
+        node->mPE[lane] = node->mFE[lane];
+      } else {
+  //		It was fits before. Propagate it
+	int ierr = Propagate(node,preNode,iDir,lane);		//prediction from last fit
+	if (ierr) return 2;
+      }  
+      if (!hit) { 	// no hit , fitted = predicted 
+	node->SetFit(node->mPP[lane],node->mPE[lane],lane); 
+      } else { // fit now  
+	assert(node->mPE[lane][2]>0);
+	fitt->Set(node->mPP+lane,node->mPE+lane,node->mFP+lane,node->mFE+lane);
+	fitt->Prep();
+	myXi2 = fitt->Xi2(hit); 
+  //    =================================================
+	node->SetXi2(myXi2,lane);
+	if (myXi2> mKons->mXi2Hit*kXtendFactor) {//Xi2 is too big but not too big. May be will improv later
+           mTally++;
+           node->SetHit(0); hit = 0; myXi2 = 3e33;
+        }
+	iFailed  = fitt->Update(); if (iFailed) nErr+=100;		
+        node->mFP[2] = node->mFP[lane];
+        node->mFE[2] = node->mFE[lane];
+//        if (myXi2 > bigXi2) { mBigNode = node; bigXi2 = myXi2;}
+        node->SetXi2(myXi2,lane);
+      }
+    }	// end of nodes 
+    lane = 1 - lane; 
+    
+  } // end of idir
+
+
+   
+  iNode = 0;
+  itBeg = trak->begin(); itEnd = trak->end();
+  for (it=itBeg; it!=itEnd; ++it) {//Main loop
+      node = *it; iNode++;
+      if (iNode==1) { //Beginneng no prediction in second lane
+        node->SetFit(node->mFP[0],node->mFE[0],2); 
+        node->SetXi2(node->GetXi2(0),2);
+      } else {  
+        const StvHit *hit = node->GetHit();
+        fitt->Set(node->mFP+0,node->mFE+0
+                 ,node->mPP+1,node->mPE+1
+                 ,node->mFP+2,node->mFE+2);
+        node->SetXi2(3e33,2);
+        myXi2 = fitt->Xi2(); iFailed = fitt->IsFailed();
+        fitt->Update();        
+
+//    =============================================
+        myXi2*= 2./5;
+        if (hit) {
+	  myXi2 = fitt->Xi2Join(hit);
+	  if (myXi2> mKons->mXi2Hit*kXtendFactor) {//Xi2 is too big but not too big. May be will improv later
+            node->SetHit(0); hit = 0; myXi2 = 3e33; mTally+=10;
+          } else {
+            if (myXi2 > bigXi2) { mBigNode = node; bigXi2 = myXi2;}
+          }
+         node->SetXi2(myXi2,2);
+        }
+      }
+
+  }//endJoinoop
+
+  return 0;
+}
+//_____________________________________________________________________________
+int StvKalmanTrackFitter::RefitLoop(StvTrack *tk, int idir, int ilane,int numb)
+{
+static const double kEps = 1.e-2;
+
+  int ans=0,lane = ilane,state=0,dir=idir;
+  int nHits = tk->GetNHits();
+  if (nHits < mKons->mMinHits) return 1;;
+  nHits = tk->GetNHits();
+  StvNode *tstNode = tk->GetNode(StvTrack::kLastPoint);
+  StvNodePars lstPars(tstNode->GetFP());	//Remeber params to compare after refit	
+  int nIters = 0,converged = 0;
+  for (int refIt=0; refIt<20; refIt++)  	{	//Fit iters
+    nIters++;
+    tk->CutEnds();
+    ans = Refit(tk,dir,lane,numb);
+//    ==================================
+    nHits=tk->GetNHits();
+    dir = 0; lane = 0; numb = 2;
+    if (nHits < mKons->mMinHits) break;
+    double dif = lstPars.diff(tstNode->GetFP(),tstNode->GetFE());
+
+static int iprint = 0;
+if (iprint) printf("@@@@ Iter = %d Tally = %d Dif = %g\n",nIters,mTally,dif);
+
+    if ( dif < kEps) {//Fit converged
+      if (mBigNode->GetXi2(2) > mKons->mXi2Hit) {
+        mBigNode->SetHit(0); mBigNode->SetXi2(3e33,2);
+	nHits--;if (nHits < mKons->mMinHits) break;
+        continue;
+      }
+      converged = 1; break;  
+    }
+    lstPars = tstNode->mFP[2]; 
+  }// End Fit iters
+
+
+  state = (ans>0) 
+	+ 10*((!converged) 
+	+ 10*((nHits < mKons->mMinHits)));
+  return state;
+
+}
+//_____________________________________________________________________________
+int StvKalmanTrackFitter::Propagate(StvNode  *node,StvNode *preNode,int dir,int lane)
+{
+  StvNode *innNode=0,*outNode=0;  if (innNode){}; if (outNode){};
+  if (!dir) {innNode = node; outNode=preNode;}
+  else      {outNode = node; innNode=preNode;}
+
+  TRungeKutta myHlx;
+  myHlx.SetDerOn();
+  const StvNodePars &prePars =  preNode->mFP[lane];
+  const StvFitErrs  &preErrs =  preNode->mFE[lane];
+  prePars.get(&myHlx);
+  preErrs.Get(&myHlx);
+  double Xnode[3];
+  if (node->mHit) 	{ TCL::ucopy(node->mHit->x(),Xnode,3);}
+  else        		{ TCL::ucopy(node->mXDive   ,Xnode,3);}
+//   	double dis = sqrt(DIST2(Xnode,preNode->mFP[lane]._x));
+//   	if (!dir) dis = -dis;
+//   	myHlx.Move(dis);
+  double dS = myHlx.Path(Xnode);		
+  if (fabs(dS)>1e3) return 1;
+  myHlx.Move(dS);
+  node->mPP[lane].set(&myHlx);
+  node->mPE[lane].Set(&myHlx);
+  StvELossTrak *eloss = innNode->ResetELoss(prePars,dir);
+  node->mPP[lane].add(eloss,dS);
+  node->mPE[lane].Add(eloss,dS);
+
+  node->mPE[lane].Recov();
+
+  return 0;
+  
+}
 #if 0
 //_____________________________________________________________________________
 int StvKalmanTrackFitter::Refit(StvTrack *trak,int dir, int lane, int mode)
@@ -271,7 +457,7 @@ enum {kDeltaZ = 100};//??????
   return 0;
 }   
 //_____________________________________________________________________________
-THelixTrack_* StvKalmanTrackFitter::GetHelix() const {return mHelx;}
+THelixTrack* StvKalmanTrackFitter::GetHelix() const {return mHelx;}
 
 //_____________________________________________________________________________
 int StvKalmanTrackFitter::Helix(StvTrack *trak,int mode)
@@ -284,9 +470,9 @@ enum {kUseErrs=1, kUpdate=2, kPrint=4};
 
   if (!mode         ) mode = kPrint;
   mXi2 = 0;
-  if (!mHelx) mHelx = new THelixFitter_;
+  if (!mHelx) mHelx = new THelixFitter;
   mHelx->Clear();
-  THelixFitter_& hlx = *mHelx;
+  THelixFitter& hlx = *mHelx;
   StvNode *node=0,*preNode=0; if (preNode){};
   for (StvNodeIter it=trak->begin();it!=trak->end(); ++it) {
     node = *it; 

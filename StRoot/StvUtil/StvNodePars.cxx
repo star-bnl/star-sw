@@ -5,7 +5,7 @@
 #include "TCernLib.h"
 #include "TMath.h"
 #include "TMath.h"
-#include "StarRoot/THelixTrack_.h"
+#include "StarRoot/THelixTrack.h"
 #include "StarRoot/THelix3d.h"
 #include "StarRoot/TRungeKutta.h"
 #include "StvUtil/StvNodePars.h"
@@ -159,7 +159,7 @@ assert(fabs(dot(_d,_d)-1)<1e-4);
 
 }
 //______________________________________________________________________________
-void StvNodePars::set(const THelixTrack_ *th)
+void StvNodePars::set(const THelixTrack *th)
 {
 static StvToolkit *kit = StvToolkit::Inst();
   memcpy(_x,th->Pos(),sizeof(_x));   
@@ -426,7 +426,7 @@ static StvFitErrs myFitErrs;
 // }
 
 //______________________________________________________________________________
-void StvFitErrs::Set(const THelixTrack_ *he)
+void StvFitErrs::Set(const THelixTrack *he)
 {
   static StvToolkit *kit = StvToolkit::Inst();
   double h[3];
@@ -1229,7 +1229,7 @@ static TH1F * hcr[10]={0};
 }
 
 //_____________________________________________________________________________
-static void Add(THelixTrack_ &ht,const double add[5]) 
+static void Add(THelixTrack &ht,const double add[5]) 
 {
 // add = H,A,C,Z,L
   TVector3  pos(ht.Pos()),dir(ht.Dir()),ort(-dir[1],dir[0],0.);
@@ -1276,7 +1276,7 @@ double dia[5],*e,*er,*vtx;
   iP.get(&iH);	// nodePar => Helix
   iE.Get(&iH);	// fitErr  => HelixErr
   iE.Set(&iH);
-  iE.Print("Input StvFitErrs => THEmx_t_ => StvFitErrs");
+  iE.Print("Input StvFitErrs => THEmx_t => StvFitErrs");
 
 
   iH.Emx()->Print("Input Helix Errs");
@@ -1307,7 +1307,7 @@ static int iHELIX=0;
       Add(ht,res.GetMatrixArray());
     } else {
       StvFitPars fp(res.GetMatrixArray()); iPR+=fp;
-//		Create THelixTrack_ from StvNodePars
+//		Create THelixTrack from StvNodePars
       iPR.get(&ht);
 //		Set no error matrix to helix
       ht.SetEmx();
@@ -1349,7 +1349,7 @@ static int iHELIX=0;
   oER *= (1./nEv);
   oHER*= (1./nEv);
   
-  printf("*** Check THelixTrack_ Error matrix ***\n");
+  printf("*** Check THelixTrack Error matrix ***\n");
   e = *oH.Emx();
   er = oHER;
   double qA=0,qAmax=0;

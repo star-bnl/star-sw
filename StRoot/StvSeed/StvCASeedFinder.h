@@ -21,7 +21,7 @@ class StvCASeedFinder : public StvSeedFinder
 public:
   StvCASeedFinder(const char *name="TpcCaSeedFinder");
    ~StvCASeedFinder(){;}
-  const THelixTrack_* NextSeed();
+  const THelixTrack* NextSeed();
   void      Clear(const char *opt="");
   void      Reset();
   void      Print(const char *opt="") const {;}

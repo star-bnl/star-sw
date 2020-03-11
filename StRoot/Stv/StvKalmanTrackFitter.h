@@ -7,8 +7,8 @@
 /// \class StvKalmanTrackFitter
 class StvTrack;
 class StvNode;
-class THelixTrack_;
-class THelixFitter_;
+class THelixTrack;
+class THelixFitter;
 class StvKonst_st;
 class StvKalmanTrackFitter : public StvTrackFitter
 {
@@ -24,14 +24,14 @@ public:
   virtual  int Check(StvTrack *trak);
   virtual  int Check(const StvNodePars &parA,const StvFitErrs &errA,
 		     const StvNodePars &parB,const StvFitErrs &errB);
-  virtual  THelixTrack_* GetHelix() const;
+  virtual  THelixTrack* GetHelix() const;
   virtual void Clear(const char *opt="");
   
 
 protected:
 char mBeg[1];
 const StvKonst_st *mKons;
-THelixFitter_ *mHelx;	//!
+THelixFitter *mHelx;	//!
 StvNode *mBigNode;
 int      mTally;
 char mEnd[1];

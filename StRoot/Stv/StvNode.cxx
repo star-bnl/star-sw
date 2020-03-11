@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.38.2.2 2019/04/19 20:36:55 perev Exp $
+ * $Id: StvNode.cxx,v 1.38.2.3 2020/03/11 20:57:21 perev Exp $
  *
  * /author Victor Perev
  */
@@ -17,7 +17,7 @@
 #include "StvUtil/StvDebug.h"
 #include "StvUtil/StvELossTrak.h"
 #include "StarVMC/GeoTestMaker/StTGeoProxy.h"
-
+ const StvNode* StvNode::gPreNode = 0;
 
 //______________________________________________________________________________
 void StvNode::reset()
@@ -80,8 +80,17 @@ double StvNode::GetTime() const
 //________________________________________________________________________________
 void StvNode::Print(const char *opt) const
 {
-static const char *txt = "X Y Z Pt Cu H R E Ep L Ps Tl P[ E[ Pa Sg";
+static const char *txt = "X Y Z Pt Cu H R E Ep L Ps Tl P[ E[ Pa Sg Al";
 static const char *hhh = "x y z r e re";
+// Cu - Curvature
+// R  - Rxy
+// Ps - Psi or Phi angle
+// Tl - tangens lambda
+// H  - Hz field
+// Pa - Path
+// Sg - Sign of track
+// Al - Along, Dot(dX,Mom) normalized
+
   if (!opt || !opt[0]) opt = "_";
   TString myOpt(opt);myOpt+=" ";
   int dir = myOpt.Index("=");
@@ -95,10 +104,10 @@ static const char *hhh = "x y z r e re";
 //const StvNodePars &pp= mPP[dkr];
   StvHit *hit = GetHit();
   TString ts; 
-  if (mHitPlane) ts = "h"; 
-  if (hit)       ts = "H"; 
-  if (GetType()==kDcaNode ) ts='D';
-  if (GetType()==kPrimNode) ts='P';
+  if (mHitPlane) ts = "h"; 		//Not used hit
+  if (hit)       ts = "H"; 		//Used hit
+  if (GetType()==kDcaNode ) ts='D';	// It is Dca node
+  if (GetType()==kPrimNode) ts='P';	// it is Orimary
 
   printf("%p(%s)",(void*)this,ts.Data());
   printf("\t%s=%g","Xi2",GetXi2(dir));
@@ -130,6 +139,13 @@ static const char *hhh = "x y z r e re";
       else if (ts=="E[")        {val = fe[idx];}
       else if (ts=="Pa")        {cal = (mHitPlane)? mHitPlane->GetPath():"None";}
       else if (ts=="Sg")        {val = fp.getSign();}
+      else if (ts=="Al")        {
+        val = 0;
+	if  (gPreNode) {
+          auto dx = (TVector3(GetFP()._x)-TVector3(gPreNode->GetFP()._x)).Unit();
+          auto dp =  TVector3(GetFP()._d).Unit();
+          val = dx.Dot(dp);
+      } }
       if (!cal && val==-999 && err[0]==-999) continue;
       printf("\t%s=",ts.Data());
       if (cal)                  { printf("%s ",cal);}
@@ -223,3 +239,6 @@ StvELossTrak *StvNode::ResetELoss(const StvNodePars &pars,int dir)
   mELoss->Set(0,p);	
   return mELoss;
 }
+//________________________________________________________________________________
+//________________________________________________________________________________
+

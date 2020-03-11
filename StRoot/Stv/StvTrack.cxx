@@ -332,13 +332,16 @@ static const char* TypeEnd[]={"Null"
   printf("Track %p\n",(void*)this);
 
   int n=0;
+  StvNode::gPreNode = 0;
   for (StvNodeConstIter it=begin();it!=end();++it) {
     const StvNode *node = (*it);
 //    const StvHit *hit = node->GetHit();
 //    if (!hit && strchr(opt,'H')) continue;
     n++;printf("%3d - ",n);
     node->Print(opt);
+    StvNode::gPreNode = node;
   }
+  StvNode::gPreNode = 0;
   printf("---TypeEnd = %d (%s)\n",mTypeEnd,TypeEnd[mTypeEnd]);
 }
 //_____________________________________________________________________________

@@ -6,7 +6,7 @@
 #include <math.h>
 #include <assert.h>
 #include <vector>
-//#include "THelixTrack_.h"
+//#include "THelixTrack.h"
 
 #define _THelixNew_
 #include "THelix3d.h"
@@ -43,7 +43,7 @@ const StvFitErrs& operator*(const StvFitDers &der) const;
       StvFitErrs& operator= (const THEmx3d_t  &emx  );
       StvFitErrs& operator= (const TkDir_t   &tkdir);
 //????             void Update(const TkDir_t &tkdir);
- void Set(const THelixTrack_ *he);
+ void Set(const THelixTrack *he);
  void Set(const THelix3d *he);
  void Get(      THelix3d *he) const;
  void Set(const TRungeKutta *he);
@@ -109,7 +109,7 @@ public:
   void reset();
   void set(const double h[3]);
   void set(const double x[3],const double d[3],double pinv,const double h[3]);
-  void set(const THelixTrack_ *ht);
+  void set(const THelixTrack *ht);
   void set(const THelix3d *ht);
   void get(      THelix3d *ht) const;
   void set(const TRungeKutta *ht);

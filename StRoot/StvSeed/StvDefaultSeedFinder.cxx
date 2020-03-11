@@ -150,7 +150,7 @@ inline static float Impact2(const float dir[3],const float pnt[3])
 //_____________________________________________________________________________
 #define NEXT_HIT( reason ) { LOG_DEBUG << __LINE__ << " [" << reason << "]" << endm; continue; }
 
-const THelixTrack_* StvDefaultSeedFinder::NextSeed()
+const THelixTrack* StvDefaultSeedFinder::NextSeed()
 {
 static int nCall = 0; nCall++;
 std::vector<TObject*> mySeedObjs;
@@ -234,7 +234,7 @@ std::vector<TObject*> mySeedObjs;
     if ((int)fSeedHits.size() < fMinHits) continue;
 
 
-    const THelixTrack_ *hel = Approx();
+    const THelixTrack *hel = Approx();
 
 #if 0
   if (hel) { //print all seed hits 

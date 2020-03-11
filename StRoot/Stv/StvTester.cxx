@@ -124,7 +124,7 @@ double StvTester::PLoss(const StvNode* curNode,const StvNode* preNode, double *l
 static int nCall = 0; nCall++;
   const StvNodePars &parA = preNode->GetFP();
   const StvNodePars &parB = curNode->GetFP();
-  THelixTrack_ curHlx,preHlx;
+  THelixTrack curHlx,preHlx;
   double momA = sqrt(parA.getP2());
   double momB = sqrt(parB.getP2());
 

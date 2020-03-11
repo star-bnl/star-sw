@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.43.2.5 2020/03/08 19:44:28 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.43.2.6 2020/03/11 20:57:40 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.43.2.6  2020/03/11 20:57:40  perev
+ * To no _THelix
+ *
  * Revision 1.43.2.5  2020/03/08 19:44:28  perev
  * _ added
  *
@@ -1464,7 +1467,7 @@ static int nCall=0; nCall++;
     ar[4] = cos(aux.mDip)*sin(aux.mPsi);
     ar[5] = sin(aux.mDip);
     ar[6] = aux.mCurv;
-    THelixTrack_ th(ar,ar+3,ar[6]);
+    THelixTrack th(ar,ar+3,ar[6]);
     double dL = th.Path(0.,0.);
     th.Eval(dL,ar,ar+3);
     aux.mDca00 = (-ar[0]*ar[4]+ar[1]*ar[3])/cos(aux.mDip);

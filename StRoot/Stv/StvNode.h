@@ -88,6 +88,8 @@ void Print(const char *opt) const;
  private:   
 
  public:   
+static const StvNode* gPreNode;
+
 
  char mBeg[1];  
  char mType; 			//0=regular,1=dca,2=primary

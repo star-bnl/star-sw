@@ -4,7 +4,7 @@
 #define StvKalmanTrackFinder_HH
 #include "StvTrackFinder.h"
 
-class THelixTrack_;
+class THelixTrack;
 class THelix3d;
 class StvSeedFinder;
 class StvDiver;
@@ -51,7 +51,7 @@ int mGoodHits;		/*Min umber of Good hits in track MidEta*/
 const StvKonst_st *mKons;
     StvHitCounter *mHitCounter;
     StvSeedFinder *mSeedFinder;
-const THelixTrack_ *mSeedHelx;
+const THelixTrack *mSeedHelx;
       StvTrack    *mCurrTrak;
 StvDiver *mDive;
 StvHitter *mHitter;

@@ -5,7 +5,7 @@
 #include "TNamed.h"
 
 /// \class StvTrackFitter
-class THelixTrack_;
+class THelixTrack;
 class StvTrack;
 class StvNode;
 class StvHit;
@@ -26,7 +26,7 @@ public:
   virtual  int Check(StvTrack *trak) 		{return 0;}
   virtual  int Check(const StvNodePars &parA,const StvFitErrs &errA,
 		     const StvNodePars &parB,const StvFitErrs &errB) {return 0;}
-  virtual  THelixTrack_* GetHelix() const 	{return     0;}
+  virtual  THelixTrack* GetHelix() const 	{return     0;}
            int GetNDF()  const 			{return mNDF ;}     
         double GetDca3() const 			{return mDca3;}     
         double GetXi2()  const 			{return mXi2 ;}     

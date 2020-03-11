@@ -24,14 +24,14 @@ class StvTrack;
 class StvKonst_st;
 
 
-class THelixTrack_;
+class THelixTrack;
 class StvSeedFinder : public TNamed
 {
 public:
   StvSeedFinder(const char *name);
   virtual ~StvSeedFinder(){;}
           void SetCons(const StvKonst_st *kons); 
-  virtual const THelixTrack_ *NextSeed()	=0;
+  virtual const THelixTrack *NextSeed()	=0;
   virtual void      Reset()		=0;
   virtual void      Clear(const char* opt="");
   virtual int       Again(int)		{return 0;}
@@ -59,7 +59,7 @@ static  StvGrappa *NewDraw();
 
 static StvSeedFinder *fgCurrFinder;
 protected:
-  const THelixTrack_* Approx();
+  const THelixTrack* Approx();
 protected:
 int fMinHits;		//Min number of hits accepted
 int fMaxHits;		//Max number hits fo seed
@@ -68,7 +68,7 @@ int fIdTruth;
 StvHits  fSeedHits;
 float fVtx[3];		//Vertex if already known
 double fXi2[2];		//Xi2[0] without hit errs,[1] with hit errs
-THelixFitter_ fHelix;	//!
+THelixFitter fHelix;	//!
 StvGrappa *fDraw;
 ClassDef(StvSeedFinder,0);
 };

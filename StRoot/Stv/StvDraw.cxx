@@ -10,7 +10,7 @@
 #include "Stv/StvHit.h"
 #include "StvUtil/StvNodePars.h"
 #include "Stv/StvStl.h"
-#include "THelixTrack_.h"
+#include "THelixTrack.h"
 #include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 
 #include "Stv/StvToolkit.h"
@@ -75,13 +75,13 @@ TObject *StvDraw::Hits(int nHits,const TVector3* hits, EDraw3DStyle sty)
   return Points(vec,sty);
 }
 //_____________________________________________________________________________
-TObject *StvDraw::Trak(const THelixTrack_ &helx,const std::vector<StvHit*>  &hits, EDraw3DStyle sty)
+TObject *StvDraw::Trak(const THelixTrack &helx,const std::vector<StvHit*>  &hits, EDraw3DStyle sty)
 {
 const std::vector<const StvHit*>&vc = (std::vector<const StvHit*>&)hits;
 return Trak(helx,vc,sty);
 }
 //_____________________________________________________________________________
-void StvDraw::Road(const THelixTrack_ &helx,const std::vector<const StvHit*> &hits
+void StvDraw::Road(const THelixTrack &helx,const std::vector<const StvHit*> &hits
                   , EDraw3DStyle sty, double wide)
 {
   int n = hits.size();
@@ -95,7 +95,7 @@ void StvDraw::Road(const THelixTrack_ &helx,const std::vector<const StvHit*> &hi
   Trak(helx,hits,sty);
 }
 //_____________________________________________________________________________
-TObject *StvDraw::Trak(const THelixTrack_ &helx
+TObject *StvDraw::Trak(const THelixTrack &helx
                       ,const std::vector<const StvHit*>  &hits
 		      ,EDraw3DStyle sty)
 {
@@ -110,7 +110,7 @@ TObject *StvDraw::Trak(const THelixTrack_ &helx
   double lst[3]={f[0],f[1],f[2]};
 
   std::vector<float> myTrak;  
-  THelixTrack_ th(helx);
+  THelixTrack th(helx);
 
   double l = th.Path(fst); th.Move(l);
   l = th.Path(lst);
@@ -196,13 +196,13 @@ void  StvDraw::Road(const StvTrack *tk, double wide, EDraw3DStyle sty)
 //_____________________________________________________________________________
 void StvDraw::Near(const StvConstHits &inHits,StvConstHits &unHits,double wide)
 {
-  THelixFitter_ hf;
+  THelixFitter hf;
   int nh = inHits.size();
   for (int ih = 0;ih<nh;ih++) {
     const float *f = inHits[ih]->x(); hf.Add(f[0],f[1],f[2]);
   }
   hf.Fit();
-  THelixTrack_ th(hf);
+  THelixTrack th(hf);
 
   StVoidArr *vHits = StTGeoProxy::Inst()->GetAllHits();
   int nHits = vHits->size();

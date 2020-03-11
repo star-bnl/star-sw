@@ -16,7 +16,7 @@
 #include "StvUtil/StvKNNUtil.h"
 #include "Stv/StvConst.h"
 
-//Constants for THelixFitter_ (Approx)
+//Constants for THelixFitter (Approx)
 static const double kBAD_XI2cm2 = 0.9*0.9	// max Xi2 in cm**2 without errs
                   , kBAD_XI2    = 50		// max Xi2 (with errs)
                   , kBAD_RHO=1./66.9		// max curvature(Pt=0.1GeV
@@ -98,13 +98,13 @@ StvGrappa *StvSeedFinder::NewDraw()
 }
 
 //_____________________________________________________________________________
-const THelixTrack_ *StvSeedFinder::Approx()
+const THelixTrack *StvSeedFinder::Approx()
 {
 static int nCall=0; nCall++;
 //		Loop over nodes and collect global xyz
 
   fHelix.Clear();
-  THelixFitter_ circ;
+  THelixFitter circ;
   int nNode=fSeedHits.size();
   const float *fBeg = fSeedHits.front()->x();
   const float *fEnd = fSeedHits.back ()->x();
@@ -174,7 +174,7 @@ static StTGeoProxy *prx = StTGeoProxy::Inst();
 static StvToolkit  *kit = StvToolkit::Inst();
 
   double Xi2 = fHelix.Chi2();
-  THelixTrack_ circ(fHelix);
+  THelixTrack circ(fHelix);
   circ.Backward(); 	//Make direction In to Out
   double s=0,xyz[3]; 
   int iNode = 0;
@@ -264,7 +264,7 @@ void StvSeedFinder::DrawHelix()
 {
   StvDebug::ClearGra();
 
-  THelixTrack_ circ(&fHelix);
+  THelixTrack circ(&fHelix);
   int nNode=fSeedHits.size();
   const float *fBeg = fSeedHits.front()->x();
 

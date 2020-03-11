@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.17.4.6 2020/01/24 20:30:56 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.17.4.7 2020/03/11 20:57:40 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -113,7 +113,18 @@ void StvELossTrak::Add(double len)
   fELoss  = fdEdX *fLen;
   fELossErr2 += fdEdXErr2*fLen;
 
-
+//	Account changing dEdX with energy
+  fd2EdXdE = 0;
+  double Tend = fE-fM;
+  if (Tend < 0.5) {
+    Tend+= (fDir)? -fELoss: fELoss;
+    double dEdXend = gdrelx(fA,fZ,fDens,Tend,fM)*fDens*fCharge2;
+    double dEdXave = (fdEdX + dEdXend)/2;
+    double ELoss = dEdXave*fLen;
+    fd2EdXdE = (dEdXend-fdEdX)/ELoss;
+    if (fDir)fd2EdXdE = -fd2EdXdE; 
+    fELoss = ELoss;
+  }
   fTotTheta2 += fTheta2;
   fTotOrth2  += fOrth2;
   fTotELossErr2 += fELossErr2;
