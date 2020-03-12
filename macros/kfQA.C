@@ -12,6 +12,7 @@
 #endif
 #endif
 //________________________________________________________________________________
+//#define __DRAW__
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "Riostream.h"
 #include <stdio.h>
@@ -179,6 +180,11 @@ void kfQA(const Char_t *files = "/gpfs01/star/subsys-tpc/fisyak/kfp/2020/11p5GeV
 		  if (gaus) {
 		    params[p] = gaus->GetParameter(1);
 		    params[++p] = gaus->GetParameter(2);
+#ifdef __DRAW__
+		    TCanvas *c = new TCanvas(Histos[i].Path,Histos[i].Path);
+		    hist->Draw();
+		    c->Update();
+#endif
 		  } else {
 		    ++p;
 		  }
@@ -209,6 +215,11 @@ void kfQA(const Char_t *files = "/gpfs01/star/subsys-tpc/fisyak/kfp/2020/11p5GeV
 		  proj = h2->ProjectionY();
 		  gp = FitGP(proj);
 		  if (gp) {
+#ifdef __DRAW__
+		    TCanvas *c = new TCanvas(Histos[i].Path,Histos[i].Path);
+		    proj->Draw();
+		    c->Update();
+#endif
 		    params[p] = gp->GetParameter(1);
 		    params[++p] = gp->GetParameter(2);
 		  }
@@ -226,6 +237,11 @@ void kfQA(const Char_t *files = "/gpfs01/star/subsys-tpc/fisyak/kfp/2020/11p5GeV
 		    params[p+3] = S/params[3];
 		    p += 3;
 		    j += 3;
+#ifdef __DRAW__
+		    TCanvas *c = new TCanvas(Histos[i].Path,Histos[i].Path);
+		    hist->Draw();
+		    c->Update();
+#endif
 		  }
 		  break;
 		default: 
@@ -239,7 +255,9 @@ void kfQA(const Char_t *files = "/gpfs01/star/subsys-tpc/fisyak/kfp/2020/11p5GeV
       }
     }
     QA->Fill(params);
+#ifndef __DRAW__
     delete f;
+#endif
   }
   fout->cd();
   QA->Write();
