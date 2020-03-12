@@ -72,6 +72,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TH3.h"
+#include "TAxis.h"
 #include "TStyle.h"
 #include "TF1.h"
 #include "TFitResult.h"
@@ -238,12 +239,17 @@ void Fit() {
 #ifdef ADJUSTABLE_BINNING
     hist[l]->BufferEmpty();
 #endif
-    hist[l]->Write();
+    //    hist[l]->Write();
     hist[l]->FitSlicesY(0,1,0,10,"QNRI");
     TString fitN(hist[l]->GetName());
     fitN += "_1";
     TH1D *fit = (TH1D *) gDirectory->Get(fitN);
     if (! fit) continue;
+    // Disable sector 16 for Run 20
+    TAxis *xax = fit->GetXaxis();
+    Int_t bin16 = xax->FindBin(16.);
+    fit->SetBinError(bin16, 1.0);
+    
     fit->SetMarkerStyle(20);
     Double_t xmin = fit->GetXaxis()->GetXmin();
     Double_t xmax = fit->GetXaxis()->GetXmax();
@@ -258,7 +264,8 @@ void Fit() {
 	  x2 = 12.5;
 	} else if (k == 2) {
 	  opt += "+";
-	  x1 = 12.5;
+	  //	  x1 = 12.5;
+	  x1 = 17.0;
 	}
 	DVAll[l][k]  = -999;
 	dDVAll[l][k] =  999;
@@ -579,6 +586,22 @@ frame->SetTitle("Drift velocitry")
 frame->GetXaxis()->SetTimeDisplay(1)
 c1->Update()
 
+ TH1* frame = c1->DrawFrame(786e6,5.4,794.e6,5.8)
 
+Run XX
+ root.exe 2020F.root 2020P.root
+TCanvas *c1 = new TCanvas("c1","c1");
+TH1* frame = c1->DrawFrame(786e6,5.4,795e6,5.8);
+frame->SetTitle("Tpc drift verlocity versus date");
+.x DrawTime.C(frame)
 
+_file0->cd();
+RunNT->SetMarkerColor(2);
+RunNT->Draw("dvAll:utime-788936400>>W16","ok==1","same");
+TLegend *l = new TLegend(0.7,0.3,0.8,0.4)
+l->AddEntry(W16,"With Sector 16");
+_file1->cd();
+RunNT->Draw("dvAll:utime-788936400>>WO16","ok==1","same");
+l->AddEntry(WO16,"Withot Sector 16");
+l->Draw();
  */
