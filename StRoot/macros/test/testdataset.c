@@ -23,7 +23,7 @@
 {
   gROOT->Reset();
   // Determinate the brand of the OS
-  gSystem.Load("libStar");
+  gSystem->Load("libTable");
 
   TDataSetIter d;
   d.Mkdir("v1/v1_1/v1_1_1");
@@ -79,7 +79,7 @@
   cout  << endl << "-------- 2 test \"FindObject\" ------------ " << endl;
 
   const Char_t *v3212 = "v3212";
-  TDataSet *found = d.FindObject(v3212);
+  TDataSet *found = (TDataSet *)d.FindObject(v3212);
   if (found) {
       const Char_t *t = found->Path();
       cout << "Object: " << v3212 << " found. It\'s path is " << t << endl;
@@ -87,7 +87,7 @@
   else {
       cout <<  "Object: " << v3212 << " has not been found." << endl;
       cout << "Try FindByName" << endl;
-      TDataSet *lost = d.FindByName(v3212);
+      TDataSet *lost = (TDataSet *)d.FindByName(v3212);
       if (lost) {
 	cout << "The wrong implementation of TDataSetIter::FindObject method has been discovered" << endl;
             lost->ls();
