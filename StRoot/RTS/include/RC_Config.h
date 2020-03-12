@@ -313,10 +313,10 @@ struct RHIC_Trigger {
 
 struct RHIC_Trigger2 {
     char marker[8];
-    int runtime;
-    int tmslice;
-    int type;
-    int source;
+    UINT32 evttime;
+    UINT32 tmslice;
+    UINT32 type;
+    UINT32 source;
     float v0, v1, v2, v3;
 };
 
