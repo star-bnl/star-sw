@@ -6,14 +6,15 @@
 
     <Module name="FstmGeo" comment="Forward Silicon Tracker (Full geometry)">
         <Author name="Te-Chuan Huang"/>
-        <Created date="25 December, 2019"/>
+        <Created date="09 March, 2020"/>
         <CDE>AGECOM,GCONST,GCUNIT</CDE>
         <Content>
             FSTM,   <!-- mother volume of FST, a disk -->
             FSTD,   <!-- FST disk container -->
             FSTW,   <!-- Whole wedge container -->
 
-            FTUR,   <!-- Tube segment for FST half ring -->
+            FTUO,   <!-- Tube segment for FST half ring outside wedge container -->
+            FTUR,   <!-- Tube segment for FST half ring inside wedge container -->
 
             FTRO,   <!-- Trapizoid for FST mechanical strucutre (wedge) -->
             FSBW,   <!-- Box for the ribs in FST wedges -->
@@ -353,10 +354,10 @@
             <var name="rmax"     value="34" />
             <var name="phi1"     value="-17" />
             <var name="phi2"     value="17" />
-            <var name="dz"       value="4" />  <!-- cooling tube connect z=3.018 -->
+            <var name="dz"       value="4.0/2" />  <!-- cooling tube connect z=3.018 -->
         </Fill>
 
-        <Fill name="ring" comment=" boxes in a half ring" >
+        <Fill name="ring" comment=" supporting half ring" >
             <var name="version"  value="1.0" />
             <var name="rmin"     value="30.0" />
             <var name="rmid"     value="32.23" />
@@ -713,23 +714,33 @@
             <Shape     type="TUBE" rmin="4.8" rmax="34" dz="5" />
 
             <!-- 12 wedges -->
+            <Create block="FTUO" />
             <Create block="FSTW" />
             <For var="iwedge" from="0" to="5">  <!-- even wedges -->
-                <Placement block="FSTW" in="FSTD" x="0" y="0" z="0" konly="'MANY'">
+                <!-- Support ring outside wedge -->
+                <Placement block="FTUO" in="FSTD" x="0" y="0" z="0.5*ring_dz" rmin="ring_rmid" phi1="-ring_phi1" rmax="ring_rmax" phi2="ring_phi1" dz="0.5*ring_dz" />
+                <Placement block="FTUO" in="FSTD" x="0" y="0" z="0.5*ring_dz" rmin="ring_rmin" phi1="-ring_phi1" rmax="ring_rmid" phi2="-ring_phi2" dz="0.5*ring_dz" />
+                <Placement block="FTUO" in="FSTD" x="0" y="0" z="0.5*ring_dz" rmin="ring_rmin" phi1="ring_phi2" rmax="ring_rmid" phi2="ring_phi1" dz="0.5*ring_dz" />
+                <!-- Wedge -->
+                <Placement block="FSTW" in="FSTD" x="0" y="0" z="-wholewedge_dz" >
                     <Rotation alphax="180"/>
                     <Rotation alphaz="15+30*2*iwedge"/>
                 </Placement>
             </For>
             <For var="iwedge" from="0" to="5">  <!-- odd wedges -->
-                <Placement block="FSTW" in="FSTD" x="0" y="0" z="0" >
+                <!-- Support ring outside wedge -->
+                <Placement block="FTUO" in="FSTD" x="0" y="0" z="-0.5*ring_dz" rmin="ring_rmid" phi1="-ring_phi1" rmax="ring_rmax" phi2="ring_phi1" dz="0.5*ring_dz" />
+                <Placement block="FTUO" in="FSTD" x="0" y="0" z="-0.5*ring_dz" rmin="ring_rmin" phi1="-ring_phi1" rmax="ring_rmid" phi2="-ring_phi2" dz="0.5*ring_dz" />
+                <Placement block="FTUO" in="FSTD" x="0" y="0" z="-0.5*ring_dz" rmin="ring_rmin" phi1="ring_phi2" rmax="ring_rmid" phi2="ring_phi1" dz="0.5*ring_dz" />
+                <!-- Wedge -->
+                <Placement block="FSTW" in="FSTD" x="0" y="0" z="wholewedge_dz" >
                     <Rotation alphaz="15+30*(2*iwedge+1)"/>
                 </Placement>
             </For>
-
         </Volume>
 
         <!-- Whole wedge container -->
-        <Volume name="FSTW" comment="Whole wedge container" assembly="true">
+        <Volume name="FSTW" comment="Whole wedge container">
             <Attribute for="FSTW" seen="1" colo="3" />
             <Material name="air" />
             <Material name="air" isvol="0" />
@@ -741,9 +752,9 @@
             <!-- ///////////////////////////// -->
 
             <Create    block="FTUR" />
-            <Placement block="FTUR" in="FSTW" x="0" y="0" z="0" rmin="ring_rmid" phi1="-ring_phi1" rmax="ring_rmax" phi2="ring_phi1" dz="ring_dz" />
-            <Placement block="FTUR" in="FSTW" x="0" y="0" z="0" rmin="ring_rmin" phi1="-ring_phi1" rmax="ring_rmid" phi2="-ring_phi2" dz="ring_dz" />
-            <Placement block="FTUR" in="FSTW" x="0" y="0" z="0" rmin="ring_rmin" phi1="ring_phi2" rmax="ring_rmid" phi2="ring_phi1" dz="ring_dz" />
+            <Placement block="FTUR" in="FSTW" x="0" y="0" z="-wholewedge_dz+0.5*ring_dz" rmin="ring_rmid" phi1="-ring_phi1" rmax="ring_rmax" phi2="ring_phi1" dz="ring_dz" />
+            <Placement block="FTUR" in="FSTW" x="0" y="0" z="-wholewedge_dz+0.5*ring_dz" rmin="ring_rmin" phi1="-ring_phi1" rmax="ring_rmid" phi2="-ring_phi2" dz="ring_dz" />
+            <Placement block="FTUR" in="FSTW" x="0" y="0" z="-wholewedge_dz+0.5*ring_dz" rmin="ring_rmin" phi1="ring_phi2" rmax="ring_rmid" phi2="ring_phi1" dz="ring_dz" />
 
             <!-- ///////////////////////////// -->
             <!--    Mechanical structure -->
@@ -751,7 +762,7 @@
 
             <!-- outer base -->
             <Create    block="FTRO" />
-            <Placement block="FTRO" in="FSTW" x="outerbase_x" y="outerbase_y" z="outerbase_z" >
+            <Placement block="FTRO" in="FSTW" x="outerbase_x" y="outerbase_y" z="-wholewedge_dz+outerbase_z" >
                 <Rotation alphay="90"/>
                 <Rotation alphax="90"/>
             </Placement>
@@ -759,7 +770,7 @@
             <!-- outer ribs -->
             <Create block="FSBW" />
             <For var="irib" from="1" to="21">
-                <Placement block="FSBW" in="FSTW" x="outerrib_x(irib)" y="outerrib_y(irib)" z="outerrib_z" dx="outerrib_dx(irib)" dy="outerrib_dy(irib)" dz="outerrib_dz" >
+                <Placement block="FSBW" in="FSTW" x="outerrib_x(irib)" y="outerrib_y(irib)" z="-wholewedge_dz+outerrib_z" dx="outerrib_dx(irib)" dy="outerrib_dy(irib)" dz="outerrib_dz" >
                     <Rotation alphaz="outerrib_rotz(irib)"/>
                 </Placement>
             </For>
@@ -767,21 +778,21 @@
             <!-- outer tubes -->
             <Create block="FSWT" />
             <For var="itube" from="1" to="7">
-                <Placement block="FSWT" in="FSTW" x="outertube_x(itube)" y="outertube_y(itube)" z="outertube_z" rmin="outertube_rmin" rmax="outertube_rmax(itube)" dz="outertube_dz" />
+                <Placement block="FSWT" in="FSTW" x="outertube_x(itube)" y="outertube_y(itube)" z="-wholewedge_dz+outertube_z" rmin="outertube_rmin" rmax="outertube_rmax(itube)" dz="outertube_dz" />
             </For>
 
             <!-- inner base -->
             <Create    block="FTUW" />
-            <Placement block="FTUW" in="FSTW" x="0" y="0" z="innerbaseb_z" />
+            <Placement block="FTUW" in="FSTW" x="0" y="0" z="-wholewedge_dz+innerbaseb_z" />
 
             <Create    block="FTIA" />
-            <Placement block="FTIA" in="FSTW" x="innerbasea_x(1)" y="innerbasea_y" z="innerbasea_z" >
+            <Placement block="FTIA" in="FSTW" x="innerbasea_x(1)" y="innerbasea_y" z="-wholewedge_dz+innerbasea_z" >
                 <Rotation alphay="90"/>
                 <Rotation alphax="90"/>
             </Placement>
 
             <Create    block="FTIB" />
-            <Placement block="FTIB" in="FSTW" x="innerbasea_x(2)" y="innerbasea_y" z="innerbasea_z" >
+            <Placement block="FTIB" in="FSTW" x="innerbasea_x(2)" y="innerbasea_y" z="-wholewedge_dz+innerbasea_z" >
                 <Rotation alphay="90"/>
                 <Rotation alphax="90"/>
             </Placement>
@@ -789,12 +800,12 @@
             <!-- inner ribs -->
             <Create block="FSBW" />
             <For var="irib" from="1" to="7">
-                <Placement block="FSBW" in="FSTW" x="innerriba_x(irib)" y="innerriba_y(irib)" z="innerriba_z" dx="innerriba_dx(irib)" dy="innerriba_dy(irib)" dz="innerriba_dz" >
+                <Placement block="FSBW" in="FSTW" x="innerriba_x(irib)" y="innerriba_y(irib)" z="-wholewedge_dz+innerriba_z" dx="innerriba_dx(irib)" dy="innerriba_dy(irib)" dz="innerriba_dz" >
                     <Rotation alphaz="innerriba_rotz(irib)"/>
                 </Placement>
             </For>
             <Create block="FTRB" />
-            <Placement block="FTRB" in="FSTW" x="0" y="0" z="innerriba_z" rmin="innerribb_rmin" phi1="innerribb_phi1" rmax="innerribb_rmax" phi2="innerribb_phi2" dz="innerribb_dz" />
+            <Placement block="FTRB" in="FSTW" x="0" y="0" z="-wholewedge_dz+innerriba_z" rmin="innerribb_rmin" phi1="innerribb_phi1" rmax="innerribb_rmax" phi2="innerribb_phi2" dz="innerribb_dz" />
 
             <!-- ///////////////////////////// -->
             <!--    Cooling tube -->
@@ -803,7 +814,7 @@
             <!-- straight part -->
             <Create block="FSCT" />
             <For var="itube" from="1" to="7">
-                <Placement block="FSCT" in="FSTW" x="coolingtubes_x(itube)" y="coolingtubes_y(itube)" z="coolingtubes_z(itube)" rmin="coolingtubes_rmin" rmax="coolingtubes_rmax" dz="coolingtubes_dz(itube)" >
+                <Placement block="FSCT" in="FSTW" x="coolingtubes_x(itube)" y="coolingtubes_y(itube)" z="-wholewedge_dz+coolingtubes_z(itube)" rmin="coolingtubes_rmin" rmax="coolingtubes_rmax" dz="coolingtubes_dz(itube)" >
                     <Rotation alphay="90.0"/>
                     <Rotation alphaz="coolingtubes_rotz(itube)"/>
                     <Rotation alphax="coolingtubes_rotx(itube)"/>
@@ -811,7 +822,7 @@
             </For>
             <Create block="FSCL" />
             <For var="itube" from="1" to="7">
-                <Placement block="FSCL" in="FSTW" x="coolingtubes_x(itube)" y="coolingtubes_y(itube)" z="coolingtubes_z(itube)" rmin="0.0001" rmax="coolingtubes_rmin" dz="coolingtubes_dz(itube)" >
+                <Placement block="FSCL" in="FSTW" x="coolingtubes_x(itube)" y="coolingtubes_y(itube)" z="-wholewedge_dz+coolingtubes_z(itube)" rmin="0.0001" rmax="coolingtubes_rmin" dz="coolingtubes_dz(itube)" >
                     <Rotation alphay="90.0"/>
                     <Rotation alphaz="coolingtubes_rotz(itube)"/>
                     <Rotation alphax="coolingtubes_rotx(itube)"/>
@@ -820,13 +831,13 @@
 
             <!-- curved part -->
             <For var="itube" from="1" to="90">
-                <Placement block="FSCT" in="FSTW" x="coolingtubec_x(itube)" y="coolingtubec_y(itube)" z="coolingtubec_z(itube)" rmin="coolingtubes_rmin" rmax="coolingtubes_rmax" dz="coolingtubec_dz(itube)" >
+                <Placement block="FSCT" in="FSTW" x="coolingtubec_x(itube)" y="coolingtubec_y(itube)" z="-wholewedge_dz+coolingtubec_z(itube)" rmin="coolingtubes_rmin" rmax="coolingtubes_rmax" dz="coolingtubec_dz(itube)" >
                     <Rotation alphay="90.0+coolingtubec_roty(itube)"/>
                     <Rotation alphaz="coolingtubec_rotz(itube)"/>
                 </Placement>
             </For>
             <For var="itube" from="1" to="90">
-                <Placement block="FSCL" in="FSTW" x="coolingtubec_x(itube)" y="coolingtubec_y(itube)" z="coolingtubec_z(itube)" rmin="0.0001" rmax="coolingtubes_rmin" dz="coolingtubec_dz(itube)" >
+                <Placement block="FSCL" in="FSTW" x="coolingtubec_x(itube)" y="coolingtubec_y(itube)" z="-wholewedge_dz+coolingtubec_z(itube)" rmin="0.0001" rmax="coolingtubes_rmin" dz="coolingtubec_dz(itube)" >
                     <Rotation alphay="90.0+coolingtubec_roty(itube)"/>
                     <Rotation alphaz="coolingtubec_rotz(itube)"/>
                 </Placement>
@@ -837,18 +848,18 @@
             <!-- ///////////////////////////// -->
 
             <Create    block="FHTS" />
-            <Placement block="FHTS" in="FSTW" x="0" y="0" z="holder_z" rmin="holder_rmin" phi1="holder_phi1" rmax="holder_rmax" phi2="holder_phi2" dz="holder_dz" />
+            <Placement block="FHTS" in="FSTW" x="0" y="0" z="-wholewedge_dz+holder_z" rmin="holder_rmin" phi1="holder_phi1" rmax="holder_rmax" phi2="holder_phi2" dz="holder_dz" />
 
             <Create block="FCHT" />
             <For var="itube" from="1" to="4">
-                <Placement block="FCHT" in="FSTW" x="holdertube_x(itube)" y="holdertube_y(itube)" z="holdertube_z" rmin="holdertube_rmin" rmax="holdertube_rmax" dz="holdertube_dz" />
+                <Placement block="FCHT" in="FSTW" x="holdertube_x(itube)" y="holdertube_y(itube)" z="-wholewedge_dz+holdertube_z" rmin="holdertube_rmin" rmax="holdertube_rmax" dz="holdertube_dz" />
             </For>
 
             <Create block="FCHB" />
-            <Placement block="FCHB" in="FSTW" x="holderbox_x" y="holderbox_y(1)" z="holder_z" dx="holderbox_dx" dy="holderbox_dy" dz="holder_dz" >
+            <Placement block="FCHB" in="FSTW" x="holderbox_x" y="holderbox_y(1)" z="-wholewedge_dz+holder_z" dx="holderbox_dx" dy="holderbox_dy" dz="holder_dz" >
                 <Rotation alphaz="holderbox_rotz(1)"/>
             </Placement>
-            <Placement block="FCHB" in="FSTW" x="holderbox_x" y="holderbox_y(2)" z="holder_z" dx="holderbox_dx" dy="holderbox_dy" dz="holder_dz" >
+            <Placement block="FCHB" in="FSTW" x="holderbox_x" y="holderbox_y(2)" z="-wholewedge_dz+holder_z" dx="holderbox_dx" dy="holderbox_dy" dz="holder_dz" >
                 <Rotation alphaz="holderbox_rotz(2)"/>
             </Placement>
 
@@ -865,28 +876,28 @@
             <Create    block="FSHG" />
             <Create    block="FSHH" />
             <!-- outside mechanical structure -->
-            <Placement block="FSHA" in="FSTW" x="heatsink_x(1)" y="heatsink_y(1)" z="heatsink_z(1)" dx="heatsink_dx(1)" dy="heatsink_dy(1)" dz="heatsink_dz(1)" >
+            <Placement block="FSHA" in="FSTW" x="heatsink_x(1)" y="heatsink_y(1)" z="-wholewedge_dz+heatsink_z(1)" dx="heatsink_dx(1)" dy="heatsink_dy(1)" dz="heatsink_dz(1)" >
                 <Rotation alphaz="heatsink_rotz(1)"/>
             </Placement>
-            <Placement block="FSHB" in="FSTW" x="heatsink_x(2)" y="heatsink_y(2)" z="heatsink_z(2)" dx="heatsink_dx(2)" dy="heatsink_dy(2)" dz="heatsink_dz(2)" >
+            <Placement block="FSHB" in="FSTW" x="heatsink_x(2)" y="heatsink_y(2)" z="-wholewedge_dz+heatsink_z(2)" dx="heatsink_dx(2)" dy="heatsink_dy(2)" dz="heatsink_dz(2)" >
                 <Rotation alphaz="heatsink_rotz(2)"/>
             </Placement>
-            <Placement block="FSHC" in="FSTW" x="heatsink_x(3)" y="heatsink_y(3)" z="heatsink_z(3)" dx="heatsink_dx(3)" dy="heatsink_dy(3)" dz="heatsink_dz(3)" >
+            <Placement block="FSHC" in="FSTW" x="heatsink_x(3)" y="heatsink_y(3)" z="-wholewedge_dz+heatsink_z(3)" dx="heatsink_dx(3)" dy="heatsink_dy(3)" dz="heatsink_dz(3)" >
                 <Rotation alphaz="heatsink_rotz(3)"/>
             </Placement>
-            <Placement block="FSHD" in="FSTW" x="heatsink_x(4)" y="heatsink_y(4)" z="heatsink_z(4)" dx="heatsink_dx(4)" dy="heatsink_dy(4)" dz="heatsink_dz(4)" >
+            <Placement block="FSHD" in="FSTW" x="heatsink_x(4)" y="heatsink_y(4)" z="-wholewedge_dz+heatsink_z(4)" dx="heatsink_dx(4)" dy="heatsink_dy(4)" dz="heatsink_dz(4)" >
                 <Rotation alphaz="heatsink_rotz(4)"/>
             </Placement>
-            <Placement block="FSHE" in="FSTW" x="heatsink_x(5)" y="heatsink_y(5)" z="heatsink_z(5)" dx="heatsink_dx(5)" dy="heatsink_dy(5)" dz="heatsink_dz(5)" >
+            <Placement block="FSHE" in="FSTW" x="heatsink_x(5)" y="heatsink_y(5)" z="-wholewedge_dz+heatsink_z(5)" dx="heatsink_dx(5)" dy="heatsink_dy(5)" dz="heatsink_dz(5)" >
                 <Rotation alphaz="heatsink_rotz(5)"/>
             </Placement>
-            <Placement block="FSHF" in="FSTW" x="heatsink_x(6)" y="heatsink_y(6)" z="heatsink_z(6)" dx="heatsink_dx(6)" dy="heatsink_dy(6)" dz="heatsink_dz(6)" >
+            <Placement block="FSHF" in="FSTW" x="heatsink_x(6)" y="heatsink_y(6)" z="-wholewedge_dz+heatsink_z(6)" dx="heatsink_dx(6)" dy="heatsink_dy(6)" dz="heatsink_dz(6)" >
                 <Rotation alphaz="heatsink_rotz(6)"/>
             </Placement>
-            <Placement block="FSHG" in="FSTW" x="heatsink_x(7)" y="heatsink_y(7)" z="heatsink_z(7)" dx="heatsink_dx(7)" dy="heatsink_dy(7)" dz="heatsink_dz(7)" >
+            <Placement block="FSHG" in="FSTW" x="heatsink_x(7)" y="heatsink_y(7)" z="-wholewedge_dz+heatsink_z(7)" dx="heatsink_dx(7)" dy="heatsink_dy(7)" dz="heatsink_dz(7)" >
                 <Rotation alphaz="heatsink_rotz(7)"/>
             </Placement>
-            <Placement block="FSHH" in="FSTW" x="heatsink_x(8)" y="heatsink_y(8)" z="heatsink_z(8)" dx="heatsink_dx(8)" dy="heatsink_dy(8)" dz="heatsink_dz(8)" >
+            <Placement block="FSHH" in="FSTW" x="heatsink_x(8)" y="heatsink_y(8)" z="-wholewedge_dz+heatsink_z(8)" dx="heatsink_dx(8)" dy="heatsink_dy(8)" dz="heatsink_dz(8)" >
                 <Rotation alphaz="heatsink_rotz(8)"/>
             </Placement>
 
@@ -896,7 +907,7 @@
 
             <Create block="FSAC" />
             <For var="ichip" from="1" to="8">
-                <Placement block="FSAC" in="FSTW" x="apvchip_x(ichip)" y="apvchip_y(ichip)" z="apvchip_z(ichip)" dx="apvchip_dx(ichip)" dy="apvchip_dy(ichip)" dz="apvchip_dz" >
+                <Placement block="FSAC" in="FSTW" x="apvchip_x(ichip)" y="apvchip_y(ichip)" z="-wholewedge_dz+apvchip_z(ichip)" dx="apvchip_dx(ichip)" dy="apvchip_dy(ichip)" dz="apvchip_dz" >
                     <Rotation alphaz="apvchip_rotz(ichip)"/>
                 </Placement>
             </For>
@@ -906,35 +917,35 @@
             <!-- ///////////////////////////// -->
 
             <Create block="FSTB" />
-            <Placement block="FSTB" in="FSTW" x="tboard_x" y="tboard_y" z="tboard_z" dx="tboard_dx" dy="tboard_dy" dz="tboard_dz" />
+            <Placement block="FSTB" in="FSTW" x="tboard_x" y="tboard_y" z="-wholewedge_dz+tboard_z" dx="tboard_dx" dy="tboard_dy" dz="tboard_dz" />
 
             <!-- connectors -->
             <!-- Connector of outer hybrid overlap with vacuum part of support ring-->
             <Create block="FTHC" />
-            <Placement block="FTHC" in="FSTW" x="connectors_x(1)" y="connectors_y(1)" z="connectors_z(1)" dx="connectors_dx" dy="connectors_dy" dz="connectors_dz(1)" />
-            <Placement block="FTHC" in="FSTW" x="connectors_x(2)" y="connectors_y(2)" z="connectors_z(2)" dx="connectors_dx" dy="connectors_dy" dz="connectors_dz(2)" />
+            <Placement block="FTHC" in="FSTW" x="connectors_x(1)" y="connectors_y(1)" z="-wholewedge_dz+connectors_z(1)" dx="connectors_dx" dy="connectors_dy" dz="connectors_dz(1)" />
+            <Placement block="FTHC" in="FSTW" x="connectors_x(2)" y="connectors_y(2)" z="-wholewedge_dz+connectors_z(2)" dx="connectors_dx" dy="connectors_dy" dz="connectors_dz(2)" />
 
             <!-- ///////////////////////////// -->
             <!--    hybrid -->
             <!-- ///////////////////////////// -->
 
             <Create    block="FTOH" />
-            <Placement block="FTOH" in="FSTW" x="0" y="0" z="outerhybrida_z" />
+            <Placement block="FTOH" in="FSTW" x="0" y="0" z="-wholewedge_dz+outerhybrida_z" />
             <Create    block="FSBH" />
-            <Placement block="FSBH" in="FSTW" x="outerhybridb_x" y="outerhybridb_y" z="outerhybridb_z" dx="outerhybridb_dx" dy="outerhybridb_dy" dz="outerhybridb_dz" />
+            <Placement block="FSBH" in="FSTW" x="outerhybridb_x" y="outerhybridb_y" z="-wholewedge_dz+outerhybridb_z" dx="outerhybridb_dx" dy="outerhybridb_dy" dz="outerhybridb_dz" />
 
             <Create    block="FTIH" />
-            <Placement block="FTIH" in="FSTW" x="0" y="0" z="innerhybrida_z" />
-            <Placement block="FSBH" in="FSTW" x="innerhybridb_x" y="innerhybridb_y" z="innerhybridb_z" dx="innerhybridb_dx" dy="innerhybridb_dy" dz="innerhybridb_dz" />
+            <Placement block="FTIH" in="FSTW" x="0" y="0" z="-wholewedge_dz+innerhybrida_z" />
+            <Placement block="FSBH" in="FSTW" x="innerhybridb_x" y="innerhybridb_y" z="-wholewedge_dz+innerhybridb_z" dx="innerhybridb_dx" dy="innerhybridb_dy" dz="innerhybridb_dz" />
 
             <!-- ///////////////////////////// -->
             <!--    silicon -->
             <!-- ///////////////////////////// -->
 
             <Create    block="FTUS" />
-            <Placement block="FTUS" in="FSTW" x="0" y="0" z="outersilicon_z" rmin="outersilicon_rmin" phi1="outersilicon_phi1(1)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(1)" dz="outersilicon_dz" />
-            <Placement block="FTUS" in="FSTW" x="0" y="0" z="outersilicon_z" rmin="outersilicon_rmin" phi1="outersilicon_phi1(2)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(2)" dz="outersilicon_dz" />
-            <Placement block="FTUS" in="FSTW" x="0" y="0" z="innersilicon_z" rmin="innersilicon_rmin" phi1="innersilicon_phi1"    rmax="innersilicon_rmax" phi2="innersilicon_phi2"    dz="innersilicon_dz" />
+            <Placement block="FTUS" in="FSTW" x="0" y="0" z="-wholewedge_dz+outersilicon_z" rmin="outersilicon_rmin" phi1="outersilicon_phi1(1)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(1)" dz="outersilicon_dz" />
+            <Placement block="FTUS" in="FSTW" x="0" y="0" z="-wholewedge_dz+outersilicon_z" rmin="outersilicon_rmin" phi1="outersilicon_phi1(2)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(2)" dz="outersilicon_dz" />
+            <Placement block="FTUS" in="FSTW" x="0" y="0" z="-wholewedge_dz+innersilicon_z" rmin="innersilicon_rmin" phi1="innersilicon_phi1"    rmax="innersilicon_rmax" phi2="innersilicon_phi2"    dz="innersilicon_dz" />
 
         </Volume>
 
@@ -943,7 +954,14 @@
                 Declare volumes
         -->
 
-        <Volume name="FTUR" comment="Tube segment for FST half ring">
+        <Volume name="FTUO" comment="Tube segment for FST half ring outside wedge container">
+            <Attribute for="FTUO" seen="1" colo="3" />
+            <Material name="aluminium" />
+            <Material name="aluminium" isvol="0" />
+            <Shape type="TUBS" rmin="0" phi1="0" rmax="0" phi2="0" dz="0" />
+        </Volume>
+
+        <Volume name="FTUR" comment="Tube segment for FST half ring inside wedge container">
             <Attribute for="FTUR" seen="1" colo="3" />
             <Material name="aluminium" />
             <Material name="aluminium" isvol="0" />
