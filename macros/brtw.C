@@ -330,18 +330,6 @@ TF1 *Lambdab(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/Lambd
   return brtw(m,1.1,1.2,mpi, mP, -1);
 }
 //________________________________________________________________________________
-TF1 *LambdaBW(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/Lambda/Parameters/M") {
-  TH1F *M = (TH1F *) gDirectory->Get(histN);
-  if (! M) return 0;
-  TH1F *m = new TH1F(*M);
-  m->SetName(Form("%s_BW",M->GetName()));
-  Masses[0] = 1.115683; // Initail parameters
-  Widths[0] = 0.0020;
-  nameP = "Lambda";
-  NoParameters = 3*NoSignals + 3;
-  return brtw(m,1.1,1.2,mpi, mP, 0);
-}
-//________________________________________________________________________________
 TF1 *phiBW(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/phi_KK/Parameters/M") {
   TH1F *M = (TH1F *) gDirectory->Get(histN);
   if (! M) return 0;
