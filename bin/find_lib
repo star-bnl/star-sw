@@ -66,7 +66,7 @@ set dirlist = $STAR_LIB
 #set dirlist = `gfortran -print-search-dirs | grep libraries | awk -F= '{print $2}' | sed -e 's/:/ /g'`
 #set dirlist = `echo ${STAR_LIB}`;# ${STAR}/.${STAR_HOST_SYS}/lib`
 #set dirlist = `echo ${STAR_OBJ}/StarVMC/Geometry`;# ${STAR}/.${STAR_HOST_SYS}/lib`
-#set dirlist = /usr/lib
+set dirlist = /usr/lib
 #set dirlist = /afs/rhic.bnl.gov/rcassoft/x8664_sl6/gcc492/lib64
 #set dirlist = /software/intel_17/compilers_and_libraries_2017.0.098/linux/bin/intel64;#/opt/rh/devtoolset-4/root/usr/lib/gcc/x86_64-redhat-linux/5.2.1/
 #set dirlist = $STAR_OBJ/StRoot/KFParticle
@@ -75,13 +75,13 @@ set dirlist = $STAR_LIB
 #set  dirlist  = $STAR_LIB
 #set dirlist = "/opt/rh/devtoolset-7/root/usr/lib/gcc/x86_64-redhat-linux/7/"
 #set dirlist = $PGILIB
-set dirlist = $STAR_LIB
+#set dirlist = $STAR_LIB
 foreach p ($dirlist) 
     set list = `echo ${p}/*.so* ${p}/*.a ${p}/*.o` 
 #    set list = `echo ${p}/libboost*.so`
 #    set list = `echo $STAR/.sl44_gcc346/lib/*.so` #echo ${p}/lib*.so*`
     foreach lib ($list) 
 	echo "lib = " $lib 
-	nm -p $lib |  grep -i _ZN12StBemcTablesC1Ebb
+	nm -p $lib |  grep -i curl_easy_strerror
     end
 end
