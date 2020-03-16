@@ -17,13 +17,17 @@
 #include "Jevp/StJevpPlot/RunStatus.h"
 #include "EvpConstants.h"
 #include "Jevp/StJevpPlot/BuilderStatus.h"
+//#include <RTS/include/SUNRT/clockClass.h>
 
 class PdfFileBuilder;
+
 
 #define MAX_DISPLAY_DEFS 20
 
 class JevpServer {
  public:
+
+
     int log_output;
     char *log_dest;
     int log_port;

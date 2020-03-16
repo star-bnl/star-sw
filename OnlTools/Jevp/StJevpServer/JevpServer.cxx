@@ -62,6 +62,13 @@
 
 #include <RTS/include/SUNRT/clockClass.h>
 
+    RtsTimer_root eventHandlingClock;
+    RtsTimer_root waitingClock;
+    RtsTimer_root writingImageClock;
+    double eventHandlingTime;
+    double waitingTime;
+    double writingImageTime;
+
 static int line_number=0;
 static char *line_builder = NULL;
 static int readerTid;
@@ -483,6 +490,16 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	  log_level = (char *)WARN;
 	  throttle_time = .05;
 	}
+	else if (strcmp(argv[i], "-test")==0) {
+	    nodb = 1;
+	    log_output = RTS_LOG_STDERR;
+	    basedir = (char *)"/RTScache/conf/jevp";
+	    pdfdir = (char *)"/a/jevp_test/pdf";
+	    refplotdir = (char *)"/a/jevp_test/refplots";
+	    rootfiledir = (char *)"/a/jevp_test/rootfiles";
+	    myport = JEVP_PORT + 10;
+	    maxevts = 301;
+	}
 	else if (strcmp(argv[i], "-nodie") == 0) {
 	  die = 0;
 	}
@@ -514,15 +531,6 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	}
 	else if (strcmp(argv[i], "-padd")==0) {
 	  myport = JEVP_PORT + 10;
-	}
-	else if (strcmp(argv[i], "-test")==0) {
-	    nodb = 1;
-	    log_output = RTS_LOG_STDERR;
-	    basedir = (char *)"/RTScache/conf/jevp";
-	    pdfdir = (char *)"/a/jevp_test/pdf";
-	    refplotdir = (char *)"/a/jevp_test/refplots";
-	    rootfiledir = (char *)"/a/jevp_test/rootfiles";
-	    myport = JEVP_PORT + 10;
 	}
 	else if (strcmp(argv[i], "-diska")==0) {   // used only to pass to builders on launch...
 	    i++;
@@ -738,12 +746,17 @@ int JevpServer::init(int port, int argc, char *argv[]) {
     debugBuilders(__LINE__);
 
     return 0;
-}  
+}
 
 
 // returns delay in milliseconds
 void JevpServer::handleNewEvent(EvpMessage *m)
 {
+    if(eventHandlingTime != 0) {
+	waitingTime += waitingClock.record_time();
+    }
+    eventHandlingClock.record_time();
+
   // LOG("JEFF", "Maxevts = %d evtsInRun = %d", maxevts, evtsInRun);
 
     if(((maxevts > 0) && (evtsInRun > maxevts)) ||
@@ -803,7 +816,8 @@ void JevpServer::handleNewEvent(EvpMessage *m)
 
 	eventsThisRun++;
     
-	if((eventsThisRun % 100) == 0) LOG(WARN, "Processed %d events this run so far", eventsThisRun);
+	if((eventsThisRun % 100) == 0) LOG(WARN, "Processed %d events this run so far  waiting: %lf, handling: %lf, writeimages: %lf", eventsThisRun,
+					   waitingTime, eventHandlingTime, writingImageTime);
 
 	LOG(DBG, "Sending event #%d(%d)",rdr->seq, rdr->event_number);
 
@@ -862,10 +876,9 @@ void JevpServer::handleNewEvent(EvpMessage *m)
     }
 
 
-  
-}
-
-
+    eventHandlingTime += eventHandlingClock.record_time();
+    waitingClock.record_time();
+}  // end handleNewEvent
 
 
 void JevpServer::handleClient(int delay) {
@@ -887,6 +900,7 @@ void JevpServer::handleClient(int delay) {
 	    LOG(DBG, "Got a timeout or an error: %d (delay was %d)",s,delay);
 	}
 	CP;
+
 	return;
     }
 
@@ -1016,7 +1030,6 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
 
 	//     gSystem->Exec("/usr/bin/convert /tmp/jevp.pdf /tmp/jevp.ps");
 	// }
-    
     }
     else if(strcmp(msg->getCmd(), "getplot") == 0) {
 	LOG(NOTE, "GetPlot");
@@ -1216,6 +1229,10 @@ void JevpServer::clearForNewRun()
   // Delete all from histogram list
   // First free the actual histo, then remove the link...
   LOG(NOTE, "Clear for new run  #%d",runStatus.run);
+
+  eventHandlingTime = 0;
+  waitingTime = 0;
+  writingImageTime = 0;
 
   TListIter next(&builders);
 
