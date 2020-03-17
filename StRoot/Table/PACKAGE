@@ -1,4 +1,0 @@
-# $Id $
-# package Table
-# author: 
-Library:libTable.so:LIBS += -lGeom -lGraf3d -llog4cxx -lStStarLogger
