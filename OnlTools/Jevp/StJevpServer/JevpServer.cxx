@@ -32,6 +32,7 @@
 #include "JTMonitor.h"
 
 #include "PdfFileBuilder.h"
+#include "ImageWriter.h"
 #include "Jevp/StJevpBuilders/baseBuilder.h"
 #include "Jevp/StJevpBuilders/bbcBuilder.h"
 #include "Jevp/StJevpBuilders/daqBuilder.h"
@@ -495,10 +496,13 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    log_output = RTS_LOG_STDERR;
 	    basedir = (char *)"/RTScache/conf/jevp";
 	    pdfdir = (char *)"/a/jevp_test/pdf";
+	    pdfdir = NULL;
 	    refplotdir = (char *)"/a/jevp_test/refplots";
 	    rootfiledir = (char *)"/a/jevp_test/rootfiles";
 	    myport = JEVP_PORT + 10;
-	    maxevts = 301;
+	    maxevts = 101;
+	    die = 1;
+	    runImageWriter = 1;
 	}
 	else if (strcmp(argv[i], "-nodie") == 0) {
 	  die = 0;
@@ -654,8 +658,17 @@ int JevpServer::updateDisplayDefs()
     displays = new DisplayFile();
     displays->Read(tmp);
 
-    printf("update DD: %d %d\n", strlen(displays->textBuff), displays->textBuffLen);
+    LOG("JEFF","new PdfFileBuilder(): %d %d", strlen(displays->textBuff), displays->textBuffLen);
+
+    displays->setDisplay(displays->getDisplayNodeFromIndex(0));
+    displays->updateDisplayRoot();
+
+
+    if(pdfFileBuilder) delete pdfFileBuilder;
     pdfFileBuilder = new PdfFileBuilder(displays, this, NULL);
+
+    if(imageWriter) delete imageWriter;
+    imageWriter = new ImageWriter(displays, this, NULL);
 
     char *args[4];
     args[0] = (char *)"OnlTools/Jevp/archiveHistoDefs.pl";
@@ -669,6 +682,10 @@ int JevpServer::updateDisplayDefs()
 }
 
 int JevpServer::init(int port, int argc, char *argv[]) {
+
+    pdfFileBuilder = NULL;
+    imageWriter = NULL;
+    runImageWriter = 0;
 
     ssocket = new TServerSocket(port,kTRUE,100);
     mon = new JTMonitor();
@@ -875,7 +892,21 @@ void JevpServer::handleNewEvent(EvpMessage *m)
 	LOG(ERR, "handleNewEvent got invalid command: %s",m->cmd);
     }
 
+  
+    if(runImageWriter) {
+	if((eventsThisRun == 99) && imageWriter) {
+	    writingImageClock.record_time();
+	    displays->setServerTags(serverTags ? serverTags : "");
+	    displays->updateDisplayRoot();
+	    imageWriter->writeIndex("/tmp/jevp", "fn");
+	    int cnt = imageWriter->writeImages("/tmp/jevp");
+	    writingImageTime = writingImageClock.record_time();
+	    LOG("JEFF", "wrote %d jpgs in %lf secs\n", cnt, writingImageTime);
+	}
+    }
 
+ 
+    
     eventHandlingTime += eventHandlingClock.record_time();
     waitingClock.record_time();
 }  // end handleNewEvent
