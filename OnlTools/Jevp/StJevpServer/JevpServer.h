@@ -20,6 +20,7 @@
 //#include <RTS/include/SUNRT/clockClass.h>
 
 class PdfFileBuilder;
+class ImageWriter;
 
 
 #define MAX_DISPLAY_DEFS 20
@@ -34,6 +35,8 @@ class JevpServer {
     char *log_level;
 
     PdfFileBuilder *pdfFileBuilder;
+    ImageWriter *imageWriter;
+    int runImageWriter;
 
     TServerSocket *ssocket;
     JTMonitor *mon;

@@ -823,10 +823,12 @@ DisplayNode *DisplayFile::getTab(u_int combo_index)
 
     // "1" == first child...
     //printf("here %p %d\n", displayRoot, combo_index);
-    
+    LOG(DBG, "displayRoot = %p", displayRoot);
+    if(displayRoot == NULL) return NULL;
+
     DisplayNode *node = displayRoot->child;
-    //printf("  ... %p", node);
-  
+    LOG(DBG,"  ... %p", node);
+    
     for(int depth=0;;depth++) {
 	int idx = getTabIdxAtDepth(combo_index, depth);
 	int next_idx = getTabIdxAtDepth(combo_index, depth+1);
