@@ -1,0 +1,2 @@
+get_file_list.pl -keys path,filename,size,events -cond production=P16ij,trgsetupname=AuAu_200_production_2016,filetype=daq_reco_picoDst,filename~st_physics,storage!=hpss -limit 0 -delim / -distinct > picoEnoHpss.list
+get_file_list.pl -keys      filename,size -cond production=P16ij,trgsetupname=AuAu_200_production_2016,filetype=daq_reco_picoDst,filename~st_physics,storage=nfs-limit 10 -delim : -distinct
