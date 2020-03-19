@@ -18,6 +18,42 @@ int ImageWriterDrawingPlot = 0;
 
 RtsTimer_root imageClock;
 
+static void makedir(char *directory) {
+    struct stat64 info;
+    if(stat64(directory, &info) == 0) return;
+
+    char dir[100];
+    strcpy(dir, directory);
+    char *tok = strtok(dir, "/");
+    char path[100];
+    strcpy(path, "/");
+
+    do {
+	strcat(path, tok);
+	if(stat64(path, &info ) != 0) {
+	    //LOG("JEFF","making %s", path);
+ 	    mkdir(path,0777);
+	}
+	else {
+	    //LOG("JEFF","%s exists", path);
+	}
+	strcat(path, "/");
+    } while((tok = strtok(NULL, "/")));
+}
+
+static char *getPath(char *fn) {
+    static char path[256];
+    strcpy(path, fn);
+    int n = strlen(path)-1;
+    for(int i=n;i>0;i--) {
+	if(path[i] == '/') {
+	    path[i] = '\0';
+	    return path;
+	}
+    }
+    return NULL;
+}
+
 void *ImageWriterThread(void *iw) {
     int imageWriterTid = syscall(SYS_gettid);
     
@@ -86,10 +122,15 @@ void ImageWriter::loop() {
 	if(slot.plot == NULL) {
 	    if(nHisto > 0) {
 		LOG("JEFF", "Saved %d plots in %lf seconds", nHisto, imageClock.record_time());
+		
+		nHisto = 0;
+		char o[256];
+		char d[256];
+		strcpy(o, slot.name);
+		strcpy(d, slot.name);
+		strcat(d, "_done");
+		rename(o, d);
 	    }
-	    nHisto = 0;
-
-	    rename("/tmp/jevp", slot.name);
 	}
 	else {
 	    if(nHisto == 0) {
@@ -98,6 +139,15 @@ void ImageWriter::loop() {
 	    
 	    nHisto++;
 
+	    char *path = getPath(slot.name);
+	    if(!path) {
+		LOG("JEFF", "Error finding path for %s", slot.name);
+	    }
+	    else {
+		//LOG("JEFF", "makedir %s", path);
+		makedir(path);
+	    }
+	    
 	    RtsTimer_root ttt;
 	    pthread_mutex_lock(&mux);
 	    double tttt =  ttt.record_time();
