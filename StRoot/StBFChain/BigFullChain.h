@@ -1404,7 +1404,11 @@ Bfc_st BFC[] = { // standard chains
   {"tls"         ,""  ,"","",""                          "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"rts"         ,""  ,"","",""                                                ,"RTS","load libRTS",kFALSE},
   {"daq"         ,""  ,"","rts",""                         ,"StDaqLib,StDAQMaker","Load StDAQMaker",kFALSE},
+#if  ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
   {"SCL"         ,""  ,"","",""                         ,"StarClassLibrary","Load StarClassLibrary",kFALSE},
+#else
+  {"SCL"         ,""  ,"","",""                               ,"WARNING *** Option is OBSOLETE ***",kFALSE},
+#endif
   {"SvtCL"       ,""  ,"","",""                                        ,"Geom,StSvtClassLibrary","",kFALSE},
   {"StBichsel"   ,""  ,"","",""                         ,"StBichsel","Load Bichsel model for dE/dx",kFALSE},
   {"StEvent"   ,"","","globT,SCL,TRGDef,StBichsel,Stu,TbUtil,dbUtil,KFParticle","","StTpcDb,StEvent"
