@@ -1177,7 +1177,7 @@ UInt_t       St_tpcRDOMasksC::getSectorMask(UInt_t sec) {
      << "sector= " << sec << " getNumRows()=" << getNumRows() << endm;
     return MASK;
   }
-  tpcRDOMasks_st *row = Struct();
+  //  tpcRDOMasks_st *row = Struct();
   // Take care about unsorted tpcRDOMaks table
   Int_t i = -1;
   UInt_t j = (sec + 1) / 2 - 1;
