@@ -45,7 +45,7 @@ void ImageWriter::writeImage(char *fn, JevpPlot *plot, double ymax) {
   
     gPad->SetFillColor(BGCOLOR);
  
-   gPad->SetFrameFillColor(HISTOCOLOR);
+    gPad->SetFrameFillColor(HISTOCOLOR);
     gPad->SetTopMargin(.10);
     //gStyle->SetOptTitle(0);
     
