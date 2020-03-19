@@ -447,7 +447,7 @@ Int_t StBFChain::Instantiate()
 	  ProcessLine(Form("new StPicoDstMaker(%i,\"%s\")",io,fFileOut.Data()));
 #endif
 	}
-#if  ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0)
+#if  ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
 	mk = GetMaker("PicoDst");
 #endif
       } else {
