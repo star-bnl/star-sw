@@ -39,7 +39,6 @@ end
 #include "TMinuitMinimizer.h"
 #include "TMath.h"
 #include "TFileSet.h"
-#include "TDataSetIter.h"
 #include "StarRoot/TDirIter.h"
 #include "StarRoot/TTreeIter.h"
 #include "TArrayD.h"
@@ -192,7 +191,7 @@ void TpcAlignerDrawIO(const Char_t *files = "*.root", Bool_t laser = kFALSE) {
   const Int_t&       Out_Nused                                = iter("Out.Nused");
 #endif
   // Book Histograms
-  TString Out(files); 
+  TString Out(gSystem->BaseName(files)); 
   Out.ReplaceAll("st_","");
   Out.ReplaceAll(".root","");
   Out.ReplaceAll("*","");
