@@ -38,7 +38,7 @@ char *removeSpaces(char *s) {
     return _str;
 }
 
-void makedir(char *directory) {
+static void makedir(char *directory) {
     struct stat64 info;
     if(stat64(directory, &info) == 0) return;
 
@@ -179,7 +179,7 @@ int CanvasImageBuilder::writeImageFiles(char *dir, DisplayNode *node, int page) 
     if(node->leaf) {
 	char ndir[256];
 	sprintf(ndir, "%s/%03d", dir, page);
-	makedir(ndir);
+	//makedir(ndir);
 
 	
 	// Do the page...
@@ -237,7 +237,7 @@ int CanvasImageBuilder::writeImages(char *basedir) {
 
     CanvasSlot end;
     end.plot = NULL;
-    strcpy(end.name, "/tmp/jevp_done");
+    strcpy(end.name, basedir);   // image writer appends the "_done"
     imageWriter->writeToImageWriter(&end);
 
     return pages;

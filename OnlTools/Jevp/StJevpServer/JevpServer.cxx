@@ -88,6 +88,7 @@ void PO(char *s) {
     close(fd);
     LOG("JEFF", "(%s): num files: %d", s, fd);
 }
+extern int ImageWriterDrawingPlot;
 
 static void sigHandler(int arg, siginfo_t *sig, void *v)
 {
@@ -104,7 +105,7 @@ static void sigHandler(int arg, siginfo_t *sig, void *v)
 
     int mythread = syscall(SYS_gettid);
 
-    LOG(WARN, "signal %d TID, me: %d,  reader: %d", arg, mythread, readerTid);
+    LOG(WARN, "signal %d TID, me: %d,  reader: %d, ImageWriterDrawingPlot: %d", arg, mythread, readerTid, ImageWriterDrawingPlot);
 
     // If we are trying to cleam up after a builder!
     //
@@ -349,7 +350,7 @@ void JevpServer::readSocket()
 	}
 	else if (strcmp(msg->getSource(), "timerThread") == 0) {
 	    if(runStatus.running()) {
-		LOG("JEFF", "Got timer: %d into run, lastImageBuilderSend: %d", 
+		LOG(DBG, "Got timer: %d into run, lastImageBuilderSend: %d", 
 		    time(NULL) - runStatus.timeOfLastChange,
 		    lastImageBuilderSendTime - runStatus.timeOfLastChange);
 
@@ -357,13 +358,13 @@ void JevpServer::readSocket()
 		    // telapsed is since last send
 		    bool sendNow=false;
 		    if(lastImageBuilderSendTime <= runStatus.timeOfLastChange) {
-			if((time(NULL) - runStatus.timeOfLastChange) > 10) {
+			if((time(NULL) - runStatus.timeOfLastChange) >= 10) {
 			    sendNow = true;
 			}
 		    }
 		    else {
 			int telapsed = time(NULL) - lastImageBuilderSendTime;
-			if(telapsed > 60) {
+			if(telapsed >= 60) {
 			    sendNow = true;
 			}
 		    }
@@ -372,11 +373,11 @@ void JevpServer::readSocket()
 			writingImageClock.record_time();
 			displays->setServerTags(serverTags ? serverTags : "");
 			displays->updateDisplayRoot();
-			canvasImageBuilder->writeIndex("/tmp/jevp", "idx.txt");
-			canvasImageBuilder->writeRunStatus("/tmp/jevp", &runStatus, eventsThisRun);
-			int cnt = canvasImageBuilder->writeImages("/tmp/jevp");
+			canvasImageBuilder->writeIndex(imagewriterdir, "idx.txt");
+			canvasImageBuilder->writeRunStatus(imagewriterdir, &runStatus, eventsThisRun);
+			int cnt = canvasImageBuilder->writeImages(imagewriterdir);
 			writingImageTime = writingImageClock.record_time();
-			LOG("JEFF", "wrote %d jpgs in %lf secs\n", cnt, writingImageTime);
+			LOG("JEFF", "sent %d image pages in %lf secs", cnt, writingImageTime);
 		    }
 		}
 
@@ -552,8 +553,10 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    //pdfdir = NULL;
 	    refplotdir = (char *)"/a/jevp_test/refplots";
 	    rootfiledir = (char *)"/a/jevp_test/rootfiles";
+	    imagewriterdir = (char *)"/tmp/jevptest";
+
 	    myport = JEVP_PORT + 10;
-	    maxevts = 1000001;
+	    maxevts = 1001;
 	    die = 1;
 	    runCanvasImageBuilder = 1;
 	}
@@ -1615,9 +1618,9 @@ void JevpServer::writeRunPdf(int display, int run)
     displays->updateDisplayRoot();
 
     if(runCanvasImageBuilder) {
-	canvasImageBuilder->writeIndex("/tmp/jevp", "idx.txt");	
-	canvasImageBuilder->writeRunStatus("/tmp/jevp", &runStatus, eventsThisRun);
-	int cnt = canvasImageBuilder->writeImages("/tmp/jevp");
+	canvasImageBuilder->writeIndex(imagewriterdir, "idx.txt");	
+	canvasImageBuilder->writeRunStatus(imagewriterdir, &runStatus, eventsThisRun);
+	int cnt = canvasImageBuilder->writeImages(imagewriterdir);
 	LOG("JEFF", "sent %d endrun jpgs", cnt);
     }
 

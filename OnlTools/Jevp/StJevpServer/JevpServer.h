@@ -58,6 +58,7 @@ class JevpServer {
     char *rootfiledir;
     char *refplotdir;    // ref plot dir
     char *basedir;       // base for config files...
+    char *imagewriterdir;
     char *diska;
     int myport;
     int logevent;
@@ -97,6 +98,8 @@ class JevpServer {
 	maxevts = 0;
 	evtsInRun = 0;
 	runCanvasImageBuilder = 0;
+	imagewriterdir = (char *)"/tmp/jevp";
+
 	ssocket = NULL;
 	mon = NULL;
 	refplotdir = (char *)DEFAULT_REF_PLOT_DIR;
