@@ -10,6 +10,26 @@
 // code that should always be seen
 #endif
 #endif
+//    ROOT5
+#if defined(__CINT__) && !defined(__MAKECINT__)
+// source code being actually interpreted by cint
+#elif defined(__MAKECINT__)
+// source code seen by rootcint only
+#elif defined(__ACLIC__)
+// source code being actually compiled by ACLiC
+#else
+// source code suitable for a standalone executable
+#endif
+//    ROOT6 
+#if defined(__CLING__) && !defined(__ROOTCLING__)
+// source code being actually interpreted by Cling
+#elif defined(__ROOTCLING__)
+// source code seen by rootcling only
+#elif defined(__ACLIC__)
+// source code being actually compiled by ACLiC
+#else
+// source code suitable for a standalone executable
+#endif
 //#if ROOT_VERSION_CODE >= ROOT_VERSION(5,34,18)
 //#define __USE_ROOFIT__
 //#endif

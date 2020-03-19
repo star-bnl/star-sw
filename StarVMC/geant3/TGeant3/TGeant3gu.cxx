@@ -875,7 +875,7 @@ void gustep()
   // --- Particle leaving the setup ?
   if (!geant3->IsTrackOut()) {
 #if ROOT_VERSION_CODE >= 396548 /* ROOT_VERSION(6,13,4) */
-    TVirtualMCSensitiveDetector* userSD = geant3->GetCurrentSensitiveDetector();
+    TVirtualMCSensitiveDetector* userSD = 0; //geant3->GetCurrentSensitiveDetector();
     if ( userSD ) {
        userSD->ProcessHits();
     }

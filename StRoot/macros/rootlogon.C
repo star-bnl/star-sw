@@ -56,9 +56,6 @@
   // Settings for statistics information
   gStyle->SetOptFit(1);
   gStyle->SetOptStat(1);
-#ifdef __CLING__1
-  printf("line 60\n"); 
-#endif
   // SetPaperSize wants width & height in cm: A4 is 20,26 & US is 20,24
   gStyle->SetPaperSize(20,24); 
    
@@ -81,15 +78,11 @@
   TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
   gStyle->SetNumberContours(NCont);
   gStyle->SetMarkerStyle(20);
-#ifdef __CLING__1
-  printf("line 85\n"); 
-#endif
   
   // Redefine prompt
   TString gPrompt =  gSystem->BaseName(gROOT->GetApplication()->Argv(0));
   gPrompt += " [%d] ";
   ((TRint*)gROOT->GetApplication())->SetPrompt( gPrompt.Data()); 
-#ifndef __CLING__    
   //  if (gSystem->DynamicPathName("libNet",kTRUE))
   //    gSystem->Load("libNet");
   
@@ -97,11 +90,14 @@
   //  if (gPrompt.Index("root4star")>=0 && !strstr(gSystem->GetLibraries(),"libTable")) {
   gSystem->Load("libMatrix");
   gSystem->Load("libPhysics");
-#if 1
   gSystem->Load("libGraf3d");
   if (!strstr(gSystem->GetLibraries(),"libTable")) {
     gSystem->Load("libGeom"); 
     gSystem->Load("libTable");
+#ifdef __CLING__
+    gSystem->Load("libSt_base"); 
+    gSystem->Load("libStStarLogger"); 
+#endif
   }
   gSystem->Load("libEG");
   gSystem->Load("libVMC");
@@ -121,7 +117,6 @@
     gSystem->Load("libKFParticle");
   }
 #endif
-#endif /* __CLING__ */
   if (TString(gSystem->GetLibraries()).Contains("libTable")) {
     gROOT->ProcessLine("typedef TCL              StCL;");              
     gROOT->ProcessLine("typedef TDataSet         St_DataSet ;");       
@@ -144,8 +139,7 @@
     gROOT->ProcessLine("typedef TTableDescriptor St_tableDescriptor;");
   }
   printf(" *** Start at Date : %s\n",TDatime().AsString());
-#endif
-   
+  
    // 	Assign bif size of hashtable for STAR I/O
    TBufferFile::SetGlobalWriteParam(2003);
 
@@ -180,7 +174,7 @@
     TString QTDIR("$QTDIR");                   gSystem->ExpandPathName(QTDIR);
     cout <<  Form("QAInfo:You are using STAR_LEVEL : %s%s, ROOT_LEVEL : %s and node : %s ",  
 		  STAR_LEVEL.Data(),STAR_GIT_VERSION.Data(),ROOT_LEVEL.Data(),gSystem->HostName());
-#ifndef __CLING__
+#ifndef __CLING__1
     // ROOT and XROOTD
     // some rootd default dummy stuff
     TAuthenticate::SetGlobalUser("starlib");
