@@ -33,6 +33,7 @@
 
 #include "PdfFileBuilder.h"
 #include "ImageWriter.h"
+#include "CanvasImageBuilder.h"
 #include "Jevp/StJevpBuilders/baseBuilder.h"
 #include "Jevp/StJevpBuilders/bbcBuilder.h"
 #include "Jevp/StJevpBuilders/daqBuilder.h"
@@ -219,11 +220,13 @@ void JevpServer::main(int argc, char *argv[])
   for(int i=0;i<argc;i++) {
     LOG("JEFF", "argv[%d]=%s", i, argv[i]);
   }
-
+  
   serv.parseArgs(argc, argv);
 
   gMessMgr->SwitchOff("I");
   gMessMgr->SwitchOff("W");
+
+  gErrorIgnoreLevel = kError;
 
   rtsLogOutput(serv.log_output);
   rtsLogAddDest(serv.log_dest, serv.log_port);
@@ -242,7 +245,17 @@ void JevpServer::main(int argc, char *argv[])
   TThread *rThread = new TThread("readerThread", (void(*)(void *))(&JEVPSERVERreaderThread),(void *)&serv);
   rThread->Run();
 
+
+  TThread *tThread = new TThread("timerThread", (void(*)(void *))(&JEVPSERVERtimerThread),NULL);
+  tThread->Run();
+
   LOG("JEFF", "Readsocket TID = %d", syscall(SYS_gettid));
+
+  serv.imageWriter = new ImageWriter();
+  TThread *imageThread = new TThread("imageWriterThread", (void(*)(void *))(&ImageWriterThread), (void *)serv.imageWriter);
+  imageThread->Run();
+
+
   //LOG("JEFF", "Readsocket TID:   pid %u", getpid());
   for(;;) {
     
@@ -310,7 +323,7 @@ void JevpServer::readSocket()
 	CP;
 	EvpMessage *msg = (EvpMessage *)mess->ReadObject(mess->GetClass());
 	CP;
-
+	
 	if(strcmp(msg->getSource(), "readerThread") == 0) {   // From the daqReader!
 	    CP;
 	    //LOG("JEFF", "Handle message from reader");
@@ -329,6 +342,41 @@ void JevpServer::readSocket()
 	    //PO("EvpMessage readerThread: ");
 
 	    CP;
+	}
+	else if (strcmp(msg->getSource(), "timerThread") == 0) {
+	    if(runStatus.running()) {
+		LOG("JEFF", "Got timer: %d into run, lastImageBuilderSend: %d", 
+		    time(NULL) - runStatus.timeOfLastChange,
+		    lastImageBuilderSendTime - runStatus.timeOfLastChange);
+
+		if(runCanvasImageBuilder) {
+		    // telapsed is since last send
+		    bool sendNow=false;
+		    if(lastImageBuilderSendTime <= runStatus.timeOfLastChange) {
+			if((time(NULL) - runStatus.timeOfLastChange) > 10) {
+			    sendNow = true;
+			}
+		    }
+		    else {
+			int telapsed = time(NULL) - lastImageBuilderSendTime;
+			if(telapsed > 60) {
+			    sendNow = true;
+			}
+		    }
+		    if(sendNow) {
+			lastImageBuilderSendTime = time(NULL);
+			writingImageClock.record_time();
+			displays->setServerTags(serverTags ? serverTags : "");
+			displays->updateDisplayRoot();
+			canvasImageBuilder->writeIndex("/tmp/jevp", "idx.txt");
+			canvasImageBuilder->writeRunStatus("/tmp/jevp", &runStatus, eventsThisRun);
+			int cnt = canvasImageBuilder->writeImages("/tmp/jevp");
+			writingImageTime = writingImageClock.record_time();
+			LOG("JEFF", "wrote %d jpgs in %lf secs\n", cnt, writingImageTime);
+		    }
+		}
+
+	    }
 	}
 	else {                                // from a client!
 	    CP;
@@ -496,13 +544,13 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    log_output = RTS_LOG_STDERR;
 	    basedir = (char *)"/RTScache/conf/jevp";
 	    pdfdir = (char *)"/a/jevp_test/pdf";
-	    pdfdir = NULL;
+	    //pdfdir = NULL;
 	    refplotdir = (char *)"/a/jevp_test/refplots";
 	    rootfiledir = (char *)"/a/jevp_test/rootfiles";
 	    myport = JEVP_PORT + 10;
-	    maxevts = 101;
+	    maxevts = 1001;
 	    die = 1;
-	    runImageWriter = 1;
+	    runCanvasImageBuilder = 1;
 	}
 	else if (strcmp(argv[i], "-nodie") == 0) {
 	  die = 0;
@@ -667,8 +715,8 @@ int JevpServer::updateDisplayDefs()
     if(pdfFileBuilder) delete pdfFileBuilder;
     pdfFileBuilder = new PdfFileBuilder(displays, this, NULL);
 
-    if(imageWriter) delete imageWriter;
-    imageWriter = new ImageWriter(displays, this, NULL);
+    if(canvasImageBuilder) delete canvasImageBuilder;
+    canvasImageBuilder = new CanvasImageBuilder(displays, this, NULL, imageWriter);
 
     char *args[4];
     args[0] = (char *)"OnlTools/Jevp/archiveHistoDefs.pl";
@@ -684,8 +732,7 @@ int JevpServer::updateDisplayDefs()
 int JevpServer::init(int port, int argc, char *argv[]) {
 
     pdfFileBuilder = NULL;
-    imageWriter = NULL;
-    runImageWriter = 0;
+    canvasImageBuilder = NULL;
 
     ssocket = new TServerSocket(port,kTRUE,100);
     mon = new JTMonitor();
@@ -799,7 +846,7 @@ void JevpServer::handleNewEvent(EvpMessage *m)
 	    if(die && (cdaqfilename >= ndaqfilenames)) {
 		LOG("JEFF", "die is set, so now exit");
 		CP;
-	
+		sleep(30);
 		ignoreSignals();
 		gApplication->Terminate();
 		//exit(0);
@@ -893,17 +940,7 @@ void JevpServer::handleNewEvent(EvpMessage *m)
     }
 
   
-    if(runImageWriter) {
-	if((eventsThisRun == 99) && imageWriter) {
-	    writingImageClock.record_time();
-	    displays->setServerTags(serverTags ? serverTags : "");
-	    displays->updateDisplayRoot();
-	    imageWriter->writeIndex("/tmp/jevp", "fn");
-	    int cnt = imageWriter->writeImages("/tmp/jevp");
-	    writingImageTime = writingImageClock.record_time();
-	    LOG("JEFF", "wrote %d jpgs in %lf secs\n", cnt, writingImageTime);
-	}
-    }
+    //LOG("JEFF", "runCanvasImageBuilder = %d", runCanvasImageBuilder);
 
  
     
@@ -1136,6 +1173,7 @@ void JevpServer::performStartRun()
   runStatus.run = rdr->run;
 
   eventsThisRun = 0;
+  lastImageBuilderSendTime = time(NULL);
 
   LOG("JEFF", "Start run #%d  (mem: %d)",runStatus.run, getMemUse());
   clearForNewRun();
@@ -1229,12 +1267,14 @@ void JevpServer::performStopRun()
   }
 
   
-  eventsThisRun = 0;
+ 
 
 
   // Write out the pdfs for all displays...
   displays->setServerTags(serverTags ? serverTags : "");
   displays->ignoreServerTags = 0;
+
+  runStatus.setStatus("stopped");
 
   for(int i=0;i<displays->nDisplays();i++) {
     LOG(NOTE,"Writing pdf for display %d, run %d",i,runStatus.run);
@@ -1243,8 +1283,10 @@ void JevpServer::performStopRun()
     CP;
   }
 
+  
   writeRootFiles();
-
+  eventsThisRun = 0;
+ 
   // Update the palletes and write out xml again
   char fn[256];
   sprintf(fn, "%s/%s", basedir, displays_fn);
@@ -1252,7 +1294,7 @@ void JevpServer::performStopRun()
   LOG(DBG, "fn=%s",fn);
   CP;
 
-  runStatus.setStatus("stopped");
+
 }
 
 void JevpServer::clearForNewRun()
@@ -1562,10 +1604,19 @@ void JevpServer::writeRunPdf(int display, int run)
     RtsTimer_root pdfclock;
     pdfclock.record_time();
 
-    if(pdfdir == NULL) return;
+ 
 
     displays->setDisplay(displays->getDisplayNodeFromIndex(display));
     displays->updateDisplayRoot();
+
+    if(runCanvasImageBuilder) {
+	canvasImageBuilder->writeIndex("/tmp/jevp", "idx.txt");	
+	canvasImageBuilder->writeRunStatus("/tmp/jevp", &runStatus, eventsThisRun);
+	int cnt = canvasImageBuilder->writeImages("/tmp/jevp");
+	LOG("JEFF", "sent %d endrun jpgs", cnt);
+    }
+
+    if(pdfdir == NULL) return;
 
     double t = pdfclock.record_time();
     LOG(NOTE, "write PDF[%d:%s]:  setdisplays took %lf",display,displays->displayRoot->name,t);
@@ -1575,11 +1626,20 @@ void JevpServer::writeRunPdf(int display, int run)
     CP;
        
     if(pdfdir) {
+	RtsTimer_root ttt;
+	ttt.record_time();
+	pthread_mutex_lock(&imageWriter->mux);
+	double tttt =  ttt.record_time();
+	if(tttt > .1) {
+	    LOG("JEFF", "writePDF mux took %lf seconds", tttt);
+	}
 	pdfFileBuilder->writePdf(filename, 1);
+	pthread_mutex_unlock(&imageWriter->mux);
+	
     }
 
     t = pdfclock.record_time();
-    LOG(NOTE, "write PDF[%d:%s]:  writepdf took %lf",display,displays->displayRoot->name,t);
+    LOG("JEFF", "write PDF[%d:%s]:  writepdf took %lf",display,displays->displayRoot->name,t);
     CP;
 
     // Save it in the database...
@@ -2149,6 +2209,33 @@ void readerThreadWait(TSocket *socket)
     free(serv.launchArgs);
     serv.launchArgs = NULL;
   }
+}
+
+void *JEVPSERVERtimerThread(void *) {
+    TSocket *socket = new TSocket("localhost.localdomain", JEVPSERVERport);
+    if(!socket) {
+	LOG(CRIT, "Can not connect to my own socket!");
+	exit(0);
+    }
+    
+    // Now, the rule is that I attempt to get an event.   
+    // Once I have an event, then I send a message to the server
+    // via the socket.   I then wait for a response from the server before I 
+    // next ask the reader for an event!
+    
+    int nevts = 0;
+    
+    for(;;) {
+	usleep(5000000);  // 5 seconds
+	EvpMessage m;
+	m.setSource((char *)"timerThread");
+	m.setCmd("timer");
+	TMessage mess(kMESS_OBJECT);
+	mess.WriteObject(&m);
+	socket->Send(mess);
+    }
+  
+    return NULL;
 }
 
 void *JEVPSERVERreaderThread(void *)
