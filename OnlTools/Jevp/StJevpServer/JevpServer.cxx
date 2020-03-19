@@ -504,6 +504,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	else if (strcmp(argv[i], "-production") == 0) {
 	    nodb = 0;
 	    myport = JEVP_PORT;
+	    runCanvasImageBuilder = 1;
 	}
 	else if (strcmp(argv[i], "-l4production") == 0) {
 	    log_port = 8009;
@@ -548,7 +549,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    refplotdir = (char *)"/a/jevp_test/refplots";
 	    rootfiledir = (char *)"/a/jevp_test/rootfiles";
 	    myport = JEVP_PORT + 10;
-	    maxevts = 1001;
+	    maxevts = 1000001;
 	    die = 1;
 	    runCanvasImageBuilder = 1;
 	}
