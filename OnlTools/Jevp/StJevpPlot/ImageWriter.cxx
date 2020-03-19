@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <sys/syscall.h>
 
 #include <TROOT.h>
 #include <TStyle.h>
@@ -13,9 +14,17 @@
 #define BGCOLOR 17
 #define HISTOCOLOR 10
 
+int ImageWriterDrawingPlot = 0;
+
 RtsTimer_root imageClock;
 
 void *ImageWriterThread(void *iw) {
+    int imageWriterTid = syscall(SYS_gettid);
+    
+    LOG("JEFF", "imageWriter TID = %d", imageWriterTid);
+
+
+
     ImageWriter *imageWriter = (ImageWriter *)iw;
 
     imageWriter->loop();
@@ -49,7 +58,9 @@ void ImageWriter::writeImage(char *fn, JevpPlot *plot, double ymax) {
     gPad->SetTopMargin(.10);
     //gStyle->SetOptTitle(0);
     
+    ImageWriterDrawingPlot = 1;
     plot->draw();
+    ImageWriterDrawingPlot = 0;
    
     //LOG("JEFF", "Wrote images: %s", node->name);
 
