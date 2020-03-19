@@ -232,7 +232,11 @@ void JevpServer::main(int argc, char *argv[])
   rtsLogAddDest(serv.log_dest, serv.log_port);
   rtsLogLevel(serv.log_level);
 
-  LOG("JEFF", "Starting JevpServer: port=%d pid=%d isL4=%d", serv.myport, (int)getpid(),serv.isL4);
+  int serverTid = syscall(SYS_gettid);
+  LOG("JEFF", "Server TID = %d", serverTid);
+
+
+  LOG("JEFF", "Starting JevpServer: port=%d pid=%d TID=%d isL4=%d", serv.myport, serverTid, (int)getpid(),serv.isL4);
 
   // Each time we start, archive the existing display file...
   serv.init(serv.myport, argc, argv);
@@ -2213,6 +2217,11 @@ void readerThreadWait(TSocket *socket)
 }
 
 void *JEVPSERVERtimerThread(void *) {
+    int timerTid = syscall(SYS_gettid);
+    
+    LOG("JEFF", "timer TID = %d", timerTid);
+
+
     TSocket *socket = new TSocket("localhost.localdomain", JEVPSERVERport);
     if(!socket) {
 	LOG(CRIT, "Can not connect to my own socket!");
