@@ -2,4 +2,4 @@
 # package StStarLogger
 # author: 
 Library:libStStarLogger.so:LIBS +=   -lStDbLib  -lmysqlclient
-#Library:libStStarLogger.so:LIBS +=   -lmysqlclient
+#Library:libStStarLogger.so:LIBS +=   -lmysqlclient  -lcurl

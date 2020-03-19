@@ -2,7 +2,7 @@
 #pragma link off all globals;
 #pragma link off all classes;
 #pragma link off all functions;
-#pragme link C++ global gFakeTopoPtr;
+#pragma link C++ global gFakeTopoPtr;
 #pragma link C++ class DcaService+;
 #pragma link C++ class StDecayMode+;
 #pragma link C++ class StKinkI+;

@@ -8,7 +8,7 @@
 #include "assert.h"
 #include "string.h"
  
-const UInt_t kUMAX = (UInt_t)(-1);
+#include "TDsKey.h"
 
 class StUKey
 {

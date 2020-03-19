@@ -63,7 +63,7 @@
  * Initial Revision
  *
  **************************************************************************/
-#if defined(__CINT__) || defined(__CLING__)
+#if defined(__CINT__) || defined(__ROOTCLING__)
 // General:
 #pragma link off all globals;
 #pragma link off all classes;
@@ -79,7 +79,7 @@
 #pragma link C++ class StMatrix<double>-;
 #pragma link C++ class StHelix+;
 #pragma link C++ class StPhysicalHelix+;
-
+#if defined(__CINT__) 
 #pragma link C++ function abs(const StThreeVector<float>&);                                      
 #pragma link C++ function abs(const StThreeVector<double>&);                                      
 #pragma link C++ function cross_product(const StThreeVector<float>&, const StThreeVector<float>&); 
@@ -175,6 +175,7 @@
 #pragma link C++ function operator== (const StHelix&, const StHelix&);                         
 #pragma link C++ function operator!= (const StHelix&, const StHelix&);                         
 #pragma link C++ function operator<<(ostream&, const StHelix&);                         
+#endif
 //IncFile=StThreeVector.hh
 //IncFile=StThreeVectorF.hh
 //IncFile=StThreeVectorD.hh
