@@ -371,7 +371,7 @@ if (($STAR_HOST_SYS !~ /darwin/) && # and $STAR_HOST_SYS !~ /sl53_gcc471/ and $S
 #    print "$qtRoot does not exist\n";
   }
 }
-if ($STAR_HOST_SYS !~ /darwin/ and $STAR_HOST_SYS !~ /icc/ ) {
+if ($STAR_HOST_SYS !~ /darwin/ and $STAR_HOST_SYS !~ /icc/ and  $ROOT_LEVEL =~ /^5/ ) {
   push @packages, "garfield";
 }
 #if ($STAR_HOST_SYS !~ /icc/) {

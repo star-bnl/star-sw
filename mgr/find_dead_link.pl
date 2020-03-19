@@ -16,6 +16,6 @@ sub wanted {
   if (-l $_ and not -e $_) {
     $line .= " " . $File::Find::name;
     print "bogus link: $File::Find::name ==> remove it : $line\n"; 
-    system("rm $File::Find::name") or die "Can't remove $File::Find::name";
+#    system("rm $File::Find::name") or die "Can't remove $File::Find::name";
   }
 }

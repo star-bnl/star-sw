@@ -15,7 +15,7 @@ $RootMap = shift;
 my $Cint_cxx = shift;
 my $Cint_h  = $Cint_cxx;
 $Cint_h  =~ s/_Cint\.cxx/_Cint\.h/g;
-print "Rootcling.pl : Lib = $Lib, LibDep = $LibDep, RootMap = $RootMap Cint_cxx = $Cint_cxx, h_files = @ARGV\n";
+print "Rootcling.pl :\n Lib = $Lib,\n LibDep = $LibDep,\n RootMap = $RootMap\n Cint_cxx = $Cint_cxx,\n h_files = @ARGV\n";
 
 my $DirName = dirname($Cint_cxx);		#print "DirName = $DirName\n";
 my $LinkDef = $DirName . "/" . "LinkDef.h"; 	#print "Cint Files :", $Cint_cxx, ",", $Cint_h,",",$LinkDef,"\n";
@@ -46,23 +46,32 @@ open (Out, ">$LinkDef") or die "Can't open $LinkDef";
 # do not change the comment format  for the library version 
 # It matches the one in stic and ConstructTable
 print Out "/* This was generated for version '".$ENV{STAR_VERSION}."' */\n";
+#print Out "#if defined(__CINT__) && !defined(__ROOTCLING__)\n";
 print Out "#pragma link off all globals;\n";
 print Out "#pragma link off all classes;\n";
 print Out "#pragma link off all functions;\n";;
+#if ($Lib !~ /StarClassLibrary1/) {
 my $off = 1;
 for my $def  (split /\s/,$sources) {		#print "SRC:", $def, "\n";
   if (!($def =~ /LinkDef/  ))		{next;}
   if ( ($def =~/^$LinkDef$/))   	{next;}
   open (In, $def) or die "Can't open $def";
   $LinkDefDirName = dirname($def);
+  my $openedBracket = 0; # for #ifndef __CLING__
+  my $openedelse = 0;
   while ($line = <In>) {
+    #    print "$line";
+    #    if ($openedBracket && $line =~ /^\#else/) {$openedBracket = 0; $openedelse = 1; next;}
+    #    if (($openedBracket || $openedelse) && $line =~ /^\#endif/) {$openedBracket = 0; next;}
+    #    if ($line =~ /^\#ifndef __CLING__/) {$openedBracket = 1; next;}
+    #    if ($openedBracket) {next;}
     if (($line  =~ /^\/\/IncFile *=/))	{
       my @words = split /(=)/, $line;
       chomp(@words[2]);
       $h_files .= " " . @words[2];
       next;
     }
-    if (!($line  =~ /^\#pragma/))	{next;}
+    if (!($line  =~ /^\#pragma/))	{goto PRINT;}
     if ($line =~ /link off all/) 	{next;}
     if (!($line =~ / class / ))		{goto PRINT;}
     my @words = split /([ \(,\)\;\-\!+])/, $line;
@@ -82,6 +91,7 @@ for my $def  (split /\s/,$sources) {		#print "SRC:", $def, "\n";
     $class_written{$classG} = 1; 	#print "class: $class, written: $class_written{$class}\n";
   PRINT: 
     print Out $line;
+    #    print "Out: $line";
   }
 }
 close (Out);
@@ -247,11 +257,13 @@ for my $h  (split /\s/,$sources) {
 	else {print OUTPUT $line;}
       }
       close (OUTPUT);
+#      print "rename $tmp, $new_h\n";
       rename $tmp, $new_h or 
 	`mv $tmp $new_h`;# or die "Can't rename or move $tmp to $new_h;\n";
       
-    } #end Collection Definition
-  }
+    }
+  } #end Collection Definition
+#}
 
 my $opened = "";
 foreach my $class (@classes) {
@@ -261,7 +273,7 @@ foreach my $class (@classes) {
     if (!$class_written{$class}) {
       if (!$opened) {
 	open (Out,">>$LinkDef")  or die "Can't open $LinkDef";
-	print Out "#ifdef __CINT__\n";                  #print  "#ifdef __CINT__\n";
+#	print Out "#ifdef __CINT__\n";                  #print  "#ifdef __CINT__\n";
 	if (! $off) {
 	  print Out "#pragma link off all globals;\n";    #print  "#pragma link off all globals;\n";
 	  print Out "#pragma link off all classes;\n";    #print  "#pragma link off all classes;\n";
@@ -301,7 +313,7 @@ foreach my $class (@classes) {
 }
 
 if ($opened) {
-  print Out "#endif\n";                           	#print  "#endif\n";
+#  print Out "#endif\n";                           	#print  "#endif\n";
   close (Out);
   $opened = "";
 }
@@ -372,7 +384,11 @@ if ($h_files) {
   $h_files .= " " . "LinkDef.h";
   $CPPFLAGS = " -I" . $DirName . " " . $IncDirName . $CPPFLAGS;
 #  my $cmd  = "rootcling -rootbuild -f $Cint_cxx -rml $Lib -rmf $RootMap";
-  my $cmd  = "rootcling -rootbuild -f $Cint_cxx -s $Lib -rml $Lib -rmf $RootMap";
+#  my $cmd  = "rootcling -rootbuild -f $Cint_cxx -s $Lib -rml $Lib -rmf $RootMap";
+#  my $cmd  = "rootcling -rootbuild -f $Cint_cxx -cxxmodule  -s $Lib";
+#  my $cmd  = "rootcling -rootbuild -f $Cint_cxx -s $Lib";
+#  my $cmd  = "rootcling -rootbuild -f $Cint_cxx -cxxmodule -s $Lib -rmf $RootMap";
+  my $cmd  = "rootcling -rootbuild -f $Cint_cxx -inlineInputHeader -s $Lib -rmf $RootMap";
   my $bLib = File::Basename::basename($Lib);
   if ($LibDep) {
     my @libs = split(' ',$LibDep);
@@ -385,9 +401,17 @@ if ($h_files) {
     }
   }
 #  $cmd .= " -c -p -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
+  $cmd .= " -excludePath $ROOT/$ROOT_LEVEL/root -excludePath $ROOTSYS -excludePath $STAR -excludePath $STAR/.$STAR_HOST_SYS/include"; 
   $cmd .= " -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
   print "cmd (normal)= ",$cmd,"\n";
   my $flag = `$cmd`; if ($?) {exit 2;}
+  my $LIBDIR = File::Basename::dirname($Lib);
+  my $pcmfile = File::Basename::basename($Lib);
+  $pcmfile =~ s/\.so/_rdict\.pcm/;
+  my $OBJDIR = File::Basename::dirname($Cint_cxx);
+#  $cmd = "ln -s $LIBDIR/$pcmfile $OBJDIR/$pcmfile"; print "cmd $cmd\n";
+#  $flag = `$cmd`; if ($?) {exit 2;}
+  link $LIBDIR."/".$pcmfile, $OBJDIR."/".$pcmfile
 }
 exit(0);
 # last line
