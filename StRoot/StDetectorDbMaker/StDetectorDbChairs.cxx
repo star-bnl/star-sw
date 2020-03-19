@@ -1169,27 +1169,35 @@ Bool_t        St_beamInfoC::IsFixedTarget() {
 #include "St_tpcRDOMasksC.h"
 MakeChairInstance(tpcRDOMasks,RunLog/onl/tpcRDOMasks);
 //________________________________________________________________________________
-UInt_t       St_tpcRDOMasksC::getSectorMask(UInt_t sector) {
+UInt_t       St_tpcRDOMasksC::getSectorMask(UInt_t sec) {
   UInt_t MASK = 0x0000; // default is to mask it out
   //UInt_t MASK = 0xFFFF; // change to  ON by default ** THIS WAS A HACK
-  if(sector < 1 || sector > 24 || getNumRows() == 0){
+  if(sec < 1 || sec > 24 || getNumRows() == 0){
     LOG_WARN << "St_tpcRDOMasksC:: getSectorMask : return default mask for "
-     << "sector= " << sector << " getNumRows()=" << getNumRows() << endm;
+     << "sector= " << sec << " getNumRows()=" << getNumRows() << endm;
     return MASK;
   }
-  //  tpcRDOMasks_st *row = Struct();
-  MASK = mask(((sector + 1) / 2) - 1); // does the mapping from sector 1-24 to packed sectors
-  if (runNumber() <= 19000000 || (runNumber() < 20000000 && sector != 20)) {// no iTPC
-    if (sector == 16 && MASK == 0 && runNumber() > 8181000 && runNumber() < 9181000) MASK = 4095;
-    if( sector % 2 == 0){ // if its even relevent bits are 6-11
+  tpcRDOMasks_st *row = Struct();
+  // Take care about unsorted tpcRDOMaks table
+  Int_t i = -1;
+  UInt_t j = (sec + 1) / 2 - 1;
+  for (i = 0; i < 12; i++) {
+    if (sector(i) == 2*j + 1) {break;}
+  }
+  assert(i >= 0);
+  //  MASK = mask(((sec + 1) / 2) - 1); // does the mapping from sector 1-24 to packed sectors
+  MASK = mask(i); // does the mapping from sector 1-24 to packed sectors
+  if (runNumber() <= 19000000 || (runNumber() < 20000000 && sec != 20)) {// no iTPC
+    if (sec == 16 && MASK == 0 && runNumber() > 8181000 && runNumber() < 9181000) MASK = 4095;
+    if( sec % 2 == 0){ // if its even relevent bits are 6-11
       MASK = MASK >> 6;
     }
     // Otherwise want lower 6 bits
     MASK &= 0x000003F; // Mask out higher order bits
-  } else   if (runNumber() < 20000000 && sector == 20) { // Run XVIII, sector 20 
+  } else   if (runNumber() < 20000000 && sec == 20) { // Run XVIII, sector 20 
     MASK = 255;
   } else  { // Run XIX and higher
-    if( sector % 2 == 0){ // if its even relevent bits are 8-13
+    if( sec % 2 == 0){ // if its even relevent bits are 8-13
       MASK = MASK >> 8;
     }
     // Otherwise want lower 6 bits
