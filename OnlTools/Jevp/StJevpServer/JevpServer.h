@@ -20,8 +20,8 @@
 //#include <RTS/include/SUNRT/clockClass.h>
 
 class PdfFileBuilder;
+class CanvasImageBuilder;
 class ImageWriter;
-
 
 #define MAX_DISPLAY_DEFS 20
 
@@ -35,8 +35,15 @@ class JevpServer {
     char *log_level;
 
     PdfFileBuilder *pdfFileBuilder;
+
+
+    CanvasImageBuilder *canvasImageBuilder;
+    int runCanvasImageBuilder;
+    int lastImageBuilderSendTime;
+
+
+
     ImageWriter *imageWriter;
-    int runImageWriter;
 
     TServerSocket *ssocket;
     JTMonitor *mon;
@@ -89,6 +96,7 @@ class JevpServer {
 	logevent = 0;
 	maxevts = 0;
 	evtsInRun = 0;
+	runCanvasImageBuilder = 0;
 	ssocket = NULL;
 	mon = NULL;
 	refplotdir = (char *)DEFAULT_REF_PLOT_DIR;
@@ -196,5 +204,5 @@ class JevpServer {
 };
 
 void *JEVPSERVERreaderThread(void *);
-
+void *JEVPSERVERtimerThread(void *);
 #endif
