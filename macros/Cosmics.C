@@ -528,7 +528,7 @@ void Plot(Int_t nevents = 1e9) {
 	  h2->FitSlicesY();
 	  TH1D *h_1 = (TH1D *) gDirectory->Get(Form("%s_1",H2[NF][k][c]->GetName()));
 	  TH1D *h_2 = (TH1D *) gDirectory->Get(Form("%s_2",H2[NF][k][c]->GetName()));
-	  Double_t mu, sigma;
+	  Double_t mu = 0, sigma = 0;
 	  if (h_1) {
 	    h_1->SetMarkerStyle(20); h_1->SetMarkerColor(color);
 	    h_1->Fit("pol0","er","same",-1.5,0.5);

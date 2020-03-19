@@ -6,11 +6,12 @@
   setenv STARFPE NO
 #  setenv NODEBUG yes
 #  setup 64b
-#  starver TFG19a
+#  starver TFG0a
   foreach  evtsFile(`cat $FILELIST`) 
   set evtsFile = $evtsFile;
   set run = `echo $evtsFile | awk -F\: '{print $1}'`
-  set file = `echo $evtsFile | awk -F\: '{print $2}'`  
+  set fileF = `echo $evtsFile | awk -F\: '{print $2}'`  
+  set file  = `basename ${fileF} .root`;
   set logFile  = ${file}B.log
   if ( -r $logFile) continue;
   root.exe -q -b 'TpcAlignerDraw.C+(0,"../*'${run}'*Aligner.root")' &gt;&amp;  ${logFile}
