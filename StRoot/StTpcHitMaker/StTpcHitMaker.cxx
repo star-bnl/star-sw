@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.80 2020/02/24 23:15:06 genevb Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.81 2020/03/20 02:25:35 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.81  2020/03/20 02:25:35  genevb
+ * Only look for StEvent when needed, e.g. not for raw modes such as in embedding
+ *
  * Revision 1.80  2020/02/24 23:15:06  genevb
  * Faster Afterburner(), Remove compiler ambiguity on double vs. float in TMath::Min,Max()
  *
@@ -436,10 +439,15 @@ Int_t StTpcHitMaker::Make() {
     LOG_WARN << "TPC status indicates it is unusable for this event. Ignoring hits." << endm;
     return kStOK;
   }
-  pEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));
-  if (Debug()) {LOG_INFO << "StTpcHitMaker::Make : StEvent has been retrieved " <<pEvent<< endm;}
-  if (! pEvent) {LOG_INFO << "StTpcHitMaker::Make : StEvent has not been found " << endm; return kStWarn;}
-  pHitCollection = pEvent->tpcHitCollection();
+  if ( kMode == kTpx || kMode == kTpc || kMode == kiTPC ) {
+    pEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));
+    if (Debug()) {LOG_INFO << "StTpcHitMaker::Make : StEvent has been retrieved " <<pEvent<< endm;}
+    if (! pEvent) {LOG_INFO << "StTpcHitMaker::Make : StEvent has not been found " << endm; return kStWarn;}
+    pHitCollection = pEvent->tpcHitCollection();
+  } else {
+    pEvent = 0;
+    pHitCollection = 0;
+  }
 
   static Int_t minSector = IAttr("minSector");
   static Int_t maxSector = IAttr("maxSector");
