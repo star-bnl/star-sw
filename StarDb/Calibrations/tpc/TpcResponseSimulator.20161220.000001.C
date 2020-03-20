@@ -1,13 +1,13 @@
-// $Id: TpcResponseSimulator.20171220.000001.C,v 1.2 2020/03/18 20:10:35 iraklic Exp $
-// $Log: TpcResponseSimulator.20171220.000001.C,v $
-// Revision 1.2  2020/03/18 20:10:35  iraklic
+// $Id: TpcResponseSimulator.20161220.000001.C,v 1.1 2020/03/18 20:10:35 iraklic Exp $
+// $Log: TpcResponseSimulator.20161220.000001.C,v $
+// Revision 1.1  2020/03/18 20:10:35  iraklic
 // new Run17 params and Run18 params after separating sector20 from the rest
 //
-// Revision 1.3  2018/10/17 20:45:17  fisyak
-// Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
+// Revision 1.3  2018/12/09 23:21:53  fisyak
+// Adjust TpcRS parameters
 //
-// Revision 1.1  2018/08/06 15:41:44  fisyak
-// RunXVIII isobar dE/dx calibration
+// Revision 1.2  2018/12/03 22:42:18  fisyak
+// Adjust gains in Simulation
 //
 // Revision 1.1  2017/02/07 16:58:37  fisyak
 // Clean up
@@ -86,7 +86,7 @@ TDataSet *CreateTable() {
   row.K3OR       	    = 0.61;//(row)  for a/s = 2.5e-3 and h/s = 1.0 
   row.FanoFactor 	    = 0.3; //                                                                        
   row.AveragePedestal       = 50.0;// 
-  row.AveragePedestalRMS    = 1.4; // Old Tpc electronics or iTPC
+  row.AveragePedestalRMS    = 1.4; // Old Tpc electronics 
   row.AveragePedestalRMSX   = 0.7; // New Tpx electronics 
   row.tauIntegration        = 2.5*74.6e-9;//   secs 
   row.tauF                  = 394.0e-9;// secs Tpc 
@@ -101,23 +101,20 @@ TDataSet *CreateTable() {
   row.SigmaJitterXO         = 0;// 0.107525;  // P: 0.1472*1.05/1.03; //O: 0.1472*1.05;// N: 0.1472; // C:0.;
   row.longitudinalDiffusion = 0.03624; // Magboltz // HD 0.03624*1.5; //HC 0.03624; // Magboltz 
   row.transverseDiffusion   = 0.02218*TMath::Sqrt(1 + row.OmegaTau*row.OmegaTau) ; // Magboltz
-  row.NoElPerAdcI           = 335./TMath::Exp(-0.81625);   // No. of electrons per 1 ADC count for outer TPX
-  row.NoElPerAdcO           = 335./TMath::Exp(-1.09801);   // No. of electrons per 1 ADC count for outer TPX
-  row.NoElPerAdcX           = 335./TMath::Exp(-0.49463);;  // No. of electrons per 1 ADC count for iTPC 
+  row.NoElPerAdc            = 335.;   // No. of electrons per 1 ADC count
   row.OmegaTauScaleI        =  2.145*1.515;// HC 1.;// 2.145*1.515;  //i; 2.145*1.4;  //h 2.145;  //ad 2.145*1.25;  //b effective reduction of OmegaTau near Inner sector anode wire
   row.OmegaTauScaleO        = 1.8  *1.201;  //HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
   // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
   // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
-#if 1
-  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 0.039;//- TMath::Log(0.533*0.843485) -5.84129e-01 + 4.52885e-01 + 3.09117e-02; // IRAKLI
-  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 0.105;//- TMath::Log(0.512*0.725267) -5.47141e-01 + 5.23937e-01 + 1.19154e-02; // IRAKLI
-#endif
+  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 6.99114715017355337e-01 + 3.64059e-02 +2.08149e-02 - 0.035 - 0.015;//- TMath::Log(0.533*0.843485) -5.84129e-01 + 4.52885e-01 + 3.09117e-02; // IRAKLI : adding -0.035
+  row.SecRowCorIW[1] = row.SecRowCorIE[1] =                           3.02959e-03 +1.11576e-03;
+  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 9.79357470004933006e-01 + 8.13816e-02 +2.57211e-02;//- TMath::Log(0.512*0.725267) -5.47141e-01 + 5.23937e-01 + 1.19154e-02;
+  row.SecRowCorOW[1] = row.SecRowCorOE[1] =                                       -2.14501e-04;
   // SecRow3CGFdaq_2011_pp500LowLum => Inner: 3.26428e-01 - -5.01720e-04*y; Outer: 2.68883e-01 + 1.23403e-04*y
   //                                          3.22907e-01                          2.72715e-01
   // SecRow3CGFTpcRS_2011_pp500LowLum_f     : 3.09711e-01                          2.65342e-01
   // diff                                   : 9.13675e-02                          6.29849e-02
   // SecRow3CGFTpcRS_2011_pp500LowLum_g     : 3.12857e-01                          2.67379e-01
-#if 0
   const Double_t RowSigmaTrs[4] = {
     9.13675e-02, 0,  // Inner
     6.29849e-02, 0}; // Outer
@@ -125,15 +122,8 @@ TDataSet *CreateTable() {
   for (Int_t i = 0; i < 8; i++) {
     b[i] = RowSigmaTrs[i%4];
   }
-
-  /* Sigmas 
-     Tpx inner = 0.395
-     Tpx outer = 0.314
-     iTpc      = 0.322 Outer  0.316
-
   row.PolyaInner = 1.38;
   row.PolyaOuter = 1.38;
-#endif
   //  row.T0offset   = 0.50; // From  Lokesh Kumar for Run X
   // TpcT->Draw("fMcHit.mMcl_t+0.165*Frequency-fRcHit.mMcl_t/64:fMcHit.mPosition.mX3>>T(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz")
   // TpcT->Draw("fMcHit.mPosition.mX3-fRcHit.mPosition.mX3:fMcHit.mPosition.mX3>>Z(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz")
@@ -142,9 +132,9 @@ TDataSet *CreateTable() {
   row.T0offset   = 0.50 -1.43663e-01;//g // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
   // root.exe T0offset.C
   // TI->FitSlicesY(); TI_1->Fit("pol2","er","",-100,100);
-  row.T0offsetI =  1.17437e-01 + 8.43584e-03; 
+  row.T0offsetI =  1.17437e-01 + 8.43584e-03 + 0.014; // Irakli : added last value
   // TO->FitSlicesY(); TO_1->Fit("pol2","er","",-100,100);
-  row.T0offsetO = -9.36725e-03 + 5.74947e-03;
+  row.T0offsetO = -9.36725e-03 + 5.74947e-03 + 0.037; // Irakli : added last valiu
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;

@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.18 2018/10/12 13:44:49 zhux Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.19 2020/03/19 20:17:10 genevb Exp $
  *
  */
 
@@ -115,8 +115,20 @@ StPrepEmbedMaker::~StPrepEmbedMaker() {
 Int_t StPrepEmbedMaker::Init() 
 {
   srand((unsigned)time(0));
-  mSettings->rnd1 = abs(int(rand()*10000)+getpid());
-  mSettings->rnd2 = abs(int(rand()*10000)+getpid());
+  // use the SUMS_name environment variable as a flag to fix the random number
+  // generator seeds; Dev/Eval/NewTest are for library tests (e.g. nightly tests)
+  TString jobName = gSystem->Getenv("SUMS_name");
+  if (jobName.Contains("FixRandomSeeds") ||
+      jobName == "DevTest" ||
+      jobName == "EvalTest" ||
+      jobName == "NewTest") {
+    LOG_WARN << "StPrepEmbedMaker::Init  Using fixed random number generator seeds!" << endm;
+    mSettings->rnd1 = 12345;
+    mSettings->rnd2 = 67890;
+  } else {
+    mSettings->rnd1 = abs(int(rand()*10000)+getpid());
+    mSettings->rnd2 = abs(int(rand()*10000)+getpid());
+  }
 
   if (mSettings->mode.CompareTo("strange", TString::kIgnoreCase) == 0)
   {
@@ -893,6 +905,9 @@ void StPrepEmbedMaker::gkine(const Int_t mult, const Double_t vzmin, const Doubl
 
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.19  2020/03/19 20:17:10  genevb
+ * Enabled fixed random number generator seeds
+ *
  * Revision 1.18  2018/10/12 13:44:49  zhux
  * updated vertex errors from moretags
  *
