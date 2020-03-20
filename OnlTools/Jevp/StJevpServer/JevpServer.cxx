@@ -523,12 +523,13 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    pdfdir = (char *)"/a/l4jevp/pdf";
 	    refplotdir = (char *)"/a/l4jevp/refplots";
 	    rootfiledir = (char *)"/a/l4jevp/rootfiles";
+	    runCanvasImageBuilder = 1;
 	}
 	else if (strcmp(argv[i], "-l4test") == 0) {
-	  log_port = 8009;
+	    log_port = 8009;
 	    LOG("JEFF", "Using L4 test");
 	    isL4 = 1;
-	    nodb = 0;
+	    nodb = 1;
 	    myport = JEVP_PORT+10;
 	    clientdatadir = (char *)"/a/l4jevp/client";
 	    basedir = (char *)"/RTScache/conf/l4jevp";
@@ -536,6 +537,8 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    refplotdir = (char *)"/a/l4jevp/refplots";
 	    rootfiledir = (char *)"/a/l4jevp/rootfiles"; 
 	    log_output = RTS_LOG_STDERR;
+	    //maxevts = 1001;
+	    runCanvasImageBuilder = 0;
 	}
 	else if (strcmp(argv[i], "-updatedb")==0) {
 	  log_output = RTS_LOG_STDERR;
