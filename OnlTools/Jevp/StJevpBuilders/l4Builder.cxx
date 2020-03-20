@@ -432,18 +432,21 @@ void l4Builder::stoprun(daqReader *rdr)
 	hBesGoodVxT->FitSlicesY();
 	hBesGoodVxT_2 = (TH1D*)gDirectory->Get("BesGoodVxT_2");
 	LOG("JEFF", "BesGoodPlots[7]->getHisto(0)->histo = %p  hBesGoodVxT_2=%p", BesGoodPlots[7]->getHisto(0)->histo, hBesGoodVxT_2);
+	hBesGoodVxT_2->GetXaxis()->SetNdivisions(505);
 	hBesGoodVxT_2->GetYaxis()->SetTitle("#sigma(Vx) [cm]");
 	BesGoodPlots[7]->getHisto(0)->histo = hBesGoodVxT_2;
 
 	hBesGoodVyT->FitSlicesY();
 	hBesGoodVyT_2 = (TH1D*)gDirectory->Get("BesGoodVyT_2");
 	LOG("JEFF", "BesGoodPlots[9]->getHisto(0)->histo = %p  hBesGoodVyT_2=%p", BesGoodPlots[9]->getHisto(0)->histo, hBesGoodVyT_2);
+	hBesGoodVyT_2->GetXaxis()->SetNdivisions(505);
 	hBesGoodVyT_2->GetYaxis()->SetTitle("#sigma(Vy) [cm]");
 	BesGoodPlots[9]->getHisto(0)->histo = hBesGoodVyT_2;
 
 	hHLTGood2VzT->FitSlicesY();
 	hHLTGood2VzT_2 = (TH1D*)gDirectory->Get("HLTGood2VzT_2");
 	LOG("JEFF", "HLTGood2Plots[5]->getHisto(0)->histo = %p  hHLTGoodVzT_2=%p", HLTGood2Plots[5]->getHisto(0)->histo, hHLTGood2VzT_2);
+	hHLTGood2VzT_2->GetXaxis()->SetNdivisions(505);
 	hHLTGood2VzT_2->GetYaxis()->SetTitle("#sigma(Vz) [cm]");
 	HLTGood2Plots[5]->getHisto(0)->histo = hHLTGood2VzT_2;
 
@@ -968,7 +971,7 @@ void l4Builder::event(daqReader *rdr)
 	      hHLTGood2VertexZ->Fill(vertZ);
 	      hHLTGood2Vr->Fill(vertR);
 
-	      if (hlt_pt->nPrimaryTracks > 200) {
+	      if (hlt_pt->nPrimaryTracks > 2) {
 		  // pHLTGood2VzT->Fill(evt_time - first_evt_time, vertZ);
 		  hHLTGood2VzT->Fill(evt_time - first_evt_time, vertZ);
 	      }
@@ -2878,6 +2881,7 @@ void l4Builder::defineBesGoodPlots()
 	index++; // 6
 	hBesGoodVxT = new TH2D("BesGoodVxT", "Vx vs. time (nPTracks > 200);Seconds in the run;Vx [cm]",
 			       8, 0, 2400, 100, -2, 2);
+	hBesGoodVxT->GetXaxis()->SetNdivisions(505);
 	BesGoodPlots[index]->addHisto(new PlotHisto(hBesGoodVxT));
 
 	index++; // 7
@@ -2887,6 +2891,7 @@ void l4Builder::defineBesGoodPlots()
 	index++; // 8
 	hBesGoodVyT = new TH2D("BesGoodVyT", "Vy vs. time (nPTracks > 200);Seconds in the run;Vy [cm]",
 			       8, 0, 2400, 100, -2, 2);
+	hBesGoodVyT->GetXaxis()->SetNdivisions(505);
 	BesGoodPlots[index]->addHisto(new PlotHisto(hBesGoodVyT));
 
 	index++; // 9
@@ -2929,8 +2934,9 @@ void l4Builder::defineHLTGood2Plots()
 	// HLTGood2Plots[index]->setMinY(-100);
 
 	index++; //4
-	hHLTGood2VzT = new TH2D("HLTGood2VzT", "Vz vs. time  (nPTracks > 200);Seconds in the run;Vz",
-				8, 0, 2400, 200, -200, 200);
+	hHLTGood2VzT = new TH2D("HLTGood2VzT", "Vz vs. time  (nPTracks > 2);Seconds in the run;Vz",
+				8, 0, 2400, 50, -200, 200);
+	hHLTGood2VzT->GetXaxis()->SetNdivisions(505);
 	HLTGood2Plots[index]->addHisto(new PlotHisto(hHLTGood2VzT));
 
 	index++; //5
