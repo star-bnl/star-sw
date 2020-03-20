@@ -9,30 +9,34 @@
   2. a quick edit to StRoot/StEpdUtil/StEpdFastSim/StEpdFastSim.cxx at the very top.
      You will see an //#include statement to un-comment.  Basically, you need to point directly to StPicoEpdHit.h file
 
-  3. go to StRoot/StPicoEvent
+  3. Make a similar edit to StRoot/StEpdUtil/StEpdFinder.cxx
+
+  4. go to StRoot/StPicoEvent
      root
      > .L StPicoEpdHit.cxx++
      > .q
 
-  4. go to StRoot/StEpdUtil
+  5. go to StRoot/StEpdUtil
      root
      > .L StEpdGeom.cxx++
+     > .L StEpdEpInfo.cxx++
+     > .L StEpdEpFinder.cxx++  <-- this one will give you lots of warnings about possibly-undefined variables.  Ignore them.
      > .q
 
-  5. go to StRoot/StEpdUtil/StEpdFastSim
+  6. go to StRoot/StEpdUtil/StEpdFastSim
      root
      > .L ../StEpdGeom_cxx.so
      > .L StEpdTrivialEventGenerator.cxx++
      > .L StEpdFastSim.cxx++
 
-   Now, steps 3-5 above make the .so files.  These files are loaded (see below) with R__LOAD_LIBRARY commands.
+   Now, steps 4-6 above make the .so files.  These files are loaded (see below) with R__LOAD_LIBRARY commands.
    That's how Root 6 does it.  In Root 5, they use the gSystem->Load() commands, and you'll just have to figure
    it out.  (Or, get with the times and install root6.)
 
   And, if you want to run it on RCF rather than at home, that's fine, too.  You'll just need to remove the
   R__LOAD_LIBRARY statements and maybe screw around a bit, but it shouldn't be too hard.
 
-   - Mike Lisa lisa.1@osu.edu - 15feb2020
+   - Mike Lisa lisa.1@osu.edu - 15feb2020 / updated 20march2020
 */
 
 R__LOAD_LIBRARY(./StEpdTrivialEventGenerator_cxx.so)
