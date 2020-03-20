@@ -13,11 +13,11 @@ void lDb(const Char_t *date = 0) {
   gSystem->Load("StStarLogger");
   gSystem->Load("StChain");
   gSystem->Load("StBFChain");
-  gROOT->LoadMacro("bfc.C+");
+  gROOT->LoadMacro("bfc.C");
 #else
   gROOT->LoadMacro("bfc.C");
 #endif
   TString Chain("mysql,tpcDb,detDb,magF,TpcHitMover,CorrX,LaserIT,nodefault");
   if (date) {Chain += ","; Chain += date;}
-  bfc(-1,Chain,0,0,0);
+  bfc(-1,Chain.Data(),0,0,0,0,0);
 }

@@ -95,6 +95,7 @@
     gSystem->Load("libGeom"); 
     gSystem->Load("libTable");
 #ifdef __CLING__
+    //    gSystem->Load("libStUtilities"); 
     gSystem->Load("libSt_base"); 
     gSystem->Load("libStStarLogger"); 
 #endif
@@ -103,6 +104,7 @@
   gSystem->Load("libVMC");
   if (gSystem->DynamicPathName("StarClassLibrary",kTRUE)) gSystem->Load("StarClassLibrary");
   else if (gSystem->DynamicPathName("libStarClassLibrary",kTRUE)) gSystem->Load("libStarClassLibrary");
+  //#ifndef __CLING__
   if (gSystem->DynamicPathName("StarRoot",kTRUE)) {    
     gSystem->Load("StarRoot");
     gROOT->ProcessLine("StCloseFileOnTerminate::Instantiate();",&rootlogon_error);
@@ -110,6 +112,7 @@
     gSystem->Load("libStarRoot");
     gROOT->ProcessLine("StCloseFileOnTerminate::Instantiate();",&rootlogon_error);
   }
+  //#endif
 #if 1
   if (gSystem->DynamicPathName("KFParticle",kTRUE)) {
     gSystem->Load("KFParticle");

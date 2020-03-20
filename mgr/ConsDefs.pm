@@ -83,8 +83,20 @@
  if ($ROOTCINT and ! -e $ROOTCINT) {$ROOTCINT = "";}
  my $RLIBMAP    = $ROOTSYS . "/bin/rlibmap";
  if ($RLIBMAP and ! -e $RLIBMAP) {$RLIBMAP = "";}
+ my $RCINTPL    = "";
  my $ROOTCLING  = $ROOTSYS . "/bin/rootcling";
- if ($ROOTCLING and ! -e $ROOTCLING) {$ROOTCLING = "";}
+ if ($ROOTCLING and ! -e $ROOTCLING) {
+   $ROOTCLING = "";
+   $RCINTPL = cwd() . "/mgr/RootCint.pl";
+   if (! -e $RCINTPL) {
+     $RCINTPL = $STAR . "mgr/RootCint.pl";
+   }
+ } else {
+   $RCINTPL = cwd() . "/mgr/RootCling.pl";
+   if (! -e $RCINTPL) {
+     $RCINTPL = $STAR . "/mgr/RootCling.pl";
+   }
+ }
  if ($RLIBMAP) {
    my ($M,$S,$V) = split('\.',$ROOT_LEVEL);
    if ($M <4 or $M == 4 and $S == 0) {$RLIBMAP = "";}
@@ -825,7 +837,8 @@
 					 'LIBS'  => $ROOTLIBS,
 					 'RLIBMAP'   => $RLIBMAP,
 					 'ROOTCINT'  => $ROOTCINT,
-					 'ROOTCLING' => $ROOTCLING
+					 'ROOTCLING' => $ROOTCLING,
+					 'RCINTPL' => $RCINTPL
 					},
 			      'CERNLIB' => {
 					    'BINDIR' => $CERN . "/bin",
