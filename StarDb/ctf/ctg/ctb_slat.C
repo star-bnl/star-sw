@@ -3,10 +3,10 @@ St_DataSet *CreateTable() {
 // params/ctf/ctg/ctb_slat Allocated rows: 240  Used rows: 240  Row size: 32 bytes
 //  Table: ctg_slat_st[0]--> ctg_slat_st[239]
 // ====================================================================
-ctg_slat_st row;
-St_ctg_slat *tableSet = new St_ctg_slat("ctb_slat",240);
 //
  if (!gROOT->GetClass("St_ctg_slat")) return 0;
+ctg_slat_st row;
+St_ctg_slat *tableSet = new St_ctg_slat("ctb_slat",240);
  memset(&row,0,tableSet->GetRowSize());
  row.cc_adc           =      0.024; // ;
  row.cc_tdc           =    2.5e-11; // ;

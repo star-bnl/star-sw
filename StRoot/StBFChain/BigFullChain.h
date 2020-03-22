@@ -1407,7 +1407,7 @@ Bfc_st BFC[] = { // standard chains
 #if  ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
   {"SCL"         ,""  ,"","",""                         ,"StarClassLibrary","Load StarClassLibrary",kFALSE},
 #else
-  {"SCL"         ,""  ,"","",""                               ,"WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"SCL"         ,""  ,"","",""                         ,"WARNING *** Option is OBSOLETE ***",kFALSE},
 #endif
   {"SvtCL"       ,""  ,"","",""                                        ,"Geom,StSvtClassLibrary","",kFALSE},
   {"StBichsel"   ,""  ,"","",""                         ,"StBichsel","Load Bichsel model for dE/dx",kFALSE},
@@ -1625,7 +1625,7 @@ Bfc_st BFC[] = { // standard chains
   {"SvtSSim","SvtSSimu","svtChain","svtCalDb,SvtCL,Simu,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit"
    ,                               "StSvtSimulationMaker","StSvtSimulationMaker,StSvtCalibMaker","",kFALSE},
   {"SvtEmbed"  ,"","","SvtSSim,SvtEm,SvtOnlSeq"      ,"","","Short cutfor SvtSlowSim and SvtOnlSeq",kFALSE},
-  {"SvtEm","SvtEm","svtChain","svtCalDb,SvtCL,Simu,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit","StSvtEmbeddingMaker"
+  {"SvtEm","SvtEm","svtChain","svtCalDb,SvtCL,Simu,SvtSeqAdj,SstvtClu,SvtCluAnal,SvtHit","StSvtEmbeddingMaker"
    ,                                                      "StSvtSimulationMaker,StSvtCalibMaker","",kFALSE},
   {"SvtOnlSeq"   ,"SvtOnlSeq","svtChain","svtCalDb,SvtCL,Simu,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit"
    ,                                          "StSvtOnlineSeqAdjSimMaker","StSvtSimulationMaker","",kFALSE},
@@ -2058,7 +2058,8 @@ Bfc_st BFC[] = { // standard chains
   {"ppDAQfilter1","","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"ppLPeval1"   ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"QA"     ,"","",                                   "","","","WARNING *** Option is OBSOLETE ***",kFALSE},
-  {"EventQA","EventQA","","QUtils,Event","StEventQAMaker"   ,"St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
+  {"EventQA","EventQA","","StUtilities,QUtils,Event","StEventQAMaker"   
+   ,                                                         "St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
   {"QAalltrigs"  ,"", "","",                                     "","","Analyze all triggers in QA",kFALSE},
   {"HitFilt"     ,"", "","",               "StHitFilterMaker","StHitFilterMaker","Hit filter Maker",kFALSE},

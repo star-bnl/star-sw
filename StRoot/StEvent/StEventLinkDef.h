@@ -13,6 +13,7 @@
 #pragma link C++ class StVertex-;
 #pragma link C++ class StXiVertex-;
 #pragma link C++ class StV0Vertex-;
+#pragma link C++ class StTrackTopologyMap+;
 #pragma link C++ enum StVertexId;
 #pragma link C++ enum StTrackModel;
 #pragma link C++ enum StTrackType;

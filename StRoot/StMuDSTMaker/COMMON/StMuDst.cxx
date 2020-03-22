@@ -2022,7 +2022,7 @@ UInt_t StMuDst::numberOfBTofHit()       { return instance()->btofArrays[muBTofHi
 UInt_t StMuDst::numberOfBTofRawHit()    { return instance()->btofArrays[muBTofRawHit]->GetEntriesFast(); }
 
 UInt_t StMuDst::numberOfETofDigi()     { return instance()->etofArrays[muETofDigi]->GetEntriesFast(); }
-UInt_t StMuDst::numberOfETofHit()      { return instance()->etofArrays[muTofHit]->GetEntriesFast(); }
+UInt_t StMuDst::numberOfETofHit()      { return instance()->etofArrays[muETofHit]->GetEntriesFast(); }
 UInt_t StMuDst::numberOfEpdHit()       { return instance()->epdArrays[muEpdHit]->GetEntriesFast(); }
 
 UInt_t StMuDst::numberOfMTDHit()       { return instance()->mtdArrays[muMTDHit]->GetEntriesFast(); }

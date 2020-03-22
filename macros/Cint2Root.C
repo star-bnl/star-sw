@@ -1,3 +1,7 @@
+/* 
+   cd StarDb
+   root.exe 'bfc.C(-1)' Cint2Root.C
+*/
 void Cint2Root(TString topDir = ".") {
   // set loop optimization level 
   //  gROOT->ProcessLine(".O4"); 
@@ -14,6 +18,27 @@ void Cint2Root(TString topDir = ".") {
     TString path = set->Path();
     if (title != "file") continue;
     if (! name.EndsWith(".C")) continue;
-    cout << set->Path() << "\t" <<name.Data() << endl;
+    cout << path.Data() << "\t" <<name.Data() << endl;
+    cout << "LoadTable:" << path.Data();
+    TString command(".L "); command += path;
+    TInterpreter::EErrorCode ee;
+    gInterpreter->ProcessLine(command,&ee);
+    assert(!ee);
+    TDataSet *newdat = (TDataSet *) gInterpreter->Calc("CreateTable()",&ee);
+    assert(!ee);
+    command.ReplaceAll(".L ",".U ");
+    gInterpreter->ProcessLine(command,&ee);
+    assert(!ee);
+    if (! newdat) {
+      cout << "Fail to make TDataSet from " << path.Data() << endl;
+      continue;
+    }
+    TString rootf(path);
+    rootf.ReplaceAll(".C",".root");
+    TFile *f = new TFile(rootf,"recreate");
+    newdat->Write();
+    delete f;
+    delete newdat;
+    SafeDelete(gGeoManager);
   }
 }

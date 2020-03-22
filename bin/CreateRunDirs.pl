@@ -46,15 +46,16 @@ sub GoodRun($$) {
   return -1;
 }
 my $def = {@Runs};# print "Runs = @Runs\n";
-#PrintHash($def,"Runs") if ($debug);
+PrintHash($def,"Runs") if ($debug);
 #die;
 my  @runs  = glob "/hlt/cephfs/daq/2019/???/* /hlt/cephfs/daq/2020/???/*";  print "runs = @runs\n" if ($debug);
+#my  @runs  = glob "/hlt/cephfs/daq/2019/350/*";  print "runs = @runs\n" if ($debug);
 #my  @runs  = glob "/hlt/cephfs/daq/2020/012/2101202?";  print "runs = @runs\n" if ($debug);
 foreach my $run (@runs) {
   my $r = File::Basename::basename($run);
   if (GoodRun($def,$r) < 0) {next;}
 #  if ($r < 21040001) {next;}
-  if ($r < 21042001) {next;} # exclude 9p2GeV
+#  if ($r < 21042001) {next;} # exclude 9p2GeV
   my $glob = $run . "/hlt*.daq";
   my @daqfiles = glob $glob;
   if ($#daqfiles < 0) {next;}
