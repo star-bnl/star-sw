@@ -5,8 +5,12 @@
  * One can use either picoDst file or a list of picoDst files (inFile.lis or
  * inFile.list) as an input, and preform physics analysis
  *
+ * When using ROOT5, one needs to run RunAnalyzer.C macro when run processing.
+ * This will handle libraries loading, etc.
+ *
  * \author Grigory Nigmatkulov
  * \date May 29, 2018
+ * \email nigmatkulov@gmail.com
  */
 
 // This is needed for calling standalone classes (not needed on RACF)
@@ -142,7 +146,7 @@ void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_30
     std::cout << "Working on event #[" << (iEvent+1)
 	      << "/" << events2read << "]" << std::endl;
 
-    Bool_t readEvent = picoReader->ReadPicoEvent(iEvent);
+    Bool_t readEvent = picoReader->readPicoEvent(iEvent);
     if( !readEvent ) {
       std::cout << "Something went wrong, Master! Nothing to analyze..."
 		<< std::endl;
