@@ -3,7 +3,7 @@
  *
  *  This macros takes inFileName argument with a picoDst.root file
  *  or with a list of files (name.lis or name.list). It sets _VANILLA_ROOT_
- *  (necessary for standalone and can be skipped on RACF), loads pre compiled
+ *  (necessary for standalone and can be skipped on RACF), loads precompiled
  *  libStPicoDst.so (from StPicoEvent), compiles and executes a text
  *  PicoDstAnalyzer.C macro with passing inFileName to it, and
  *  cleans up the directory from the compilation products at the end.
@@ -19,6 +19,7 @@
  *
  * \author Grigory Nigmatkulov
  * \date July 5, 2018
+ * \email nigmatkulov@gmail.com
  */
 
 // ROOT headers
