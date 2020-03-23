@@ -52,6 +52,8 @@ class StPicoDstReader : public TObject {
   void Init();
   /// Read next event in the chain
   Bool_t readPicoEvent(Long64_t iEvent);
+  /// Read next event in the chain
+  Bool_t ReadPicoEvent(Long64_t iEvent) { return readPicoEvent(iEvent); }
   /// Close files and finilize
   void Finish();
 

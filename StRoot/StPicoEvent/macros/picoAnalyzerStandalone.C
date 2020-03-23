@@ -1,20 +1,27 @@
 /**
- * \brief Example of how to read a file (list of files) using StPicoEvent classes
+ * \brief Example of how to read a file (list of files) using StPicoEvent class in a standalone mode
  *
- * RunPicoDstAnalyzer.C is an example of reading STAR picoDst format.
- * One can use either picoDst file or a list of picoDst files (inFile.lis or
- * inFile.list) as an input, and preform physics analysis
+ * picoAnalyzer.C is an example of reading STAR picoDst format in a standalone mode
+ * on your laptop or local computer farm.
+ * Prerequisites:
+ * - StPicoEvent directory with the library (libStPicoDst.so) compiled
+ * - CERN ROOT package
+ * - g++ >= 4.8
+ * - Makefile
  *
- * When using ROOT5, one needs to run RunAnalyzer.C macro when run processing.
- * This will handle libraries loading, etc.
+ * First, the program must be compiled with the Makefile, with simple command in the bash shell:
+ * make
+ *
+ * Then the executable file picoAnalyzerStandalone will be created. The current version of the program
+ * expects 3 arguments: ./picoAnalyzerStandalone inputFile outputFile
+ * The first one is the program name, the second one is the name of the inputfile that 
+ * maybe either the picoDst file itself, in a format dummyname.picoDst.root or a list of
+ * such files called dummyname.list or dummyname.lis. The outputFile assumes the some_output_name.root.
  *
  * \author Grigory Nigmatkulov
- * \date May 29, 2018
+ * \date August 6, 2019
  * \email nigmatkulov@gmail.com
  */
-
-// This is needed for calling standalone classes (not needed on RACF)
-#define _VANILLA_ROOT_
 
 // C++ headers
 #include <iostream>
@@ -30,43 +37,58 @@
 #include "TMath.h"
 
 // PicoDst headers
-#include "../StPicoDstReader.h"
-#include "../StPicoDst.h"
-#include "../StPicoEvent.h"
-#include "../StPicoTrack.h"
-#include "../StPicoBTofHit.h"
-#include "../StPicoBTowHit.h"
-#include "../StPicoEmcTrigger.h"
-#include "../StPicoBTofPidTraits.h"
-#include "../StPicoTrackCovMatrix.h"
-
-// Load libraries (for ROOT_VERSTION_CODE >= 393215)
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0) 
-R__LOAD_LIBRARY(../libStPicoDst)
-#endif
-
-// inFile - is a name of name.picoDst.root file or a name
-//          of a name.lis(t) files that contains a list of
-//          name1.picoDst.root files
+#include "StPicoDstReader.h"
+#include "StPicoDst.h"
+#include "StPicoEvent.h"
+#include "StPicoTrack.h"
+#include "StPicoBTofHit.h"
+#include "StPicoBTowHit.h"
+#include "StPicoEmcTrigger.h"
+#include "StPicoBTofPidTraits.h"
+#include "StPicoTrackCovMatrix.h"
+#include "StPicoFmsHit.h"
+#include "StPicoETofHit.h"
+#include "StPicoEpdHit.h"
 
 //_________________
-void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_3040006.picoDst.root") {
+int main(int argc, char* argv[]) {
+
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0)
+  R__LOAD_LIBRARY(libStPicoDst);
+#else
+  gSystem->Load("../libs/libStPicoDst.so");
+#endif
 
   std::cout << "Hi! Lets do some physics, Master!" << std::endl;
+
+  const char* fileName;
+  const char* oFileName;
+
+  switch (argc) {
+  case 3:
+    fileName = argv[1];
+    oFileName = argv[2];
+    break;
+  default:
+    std::cout << "Usage: picoAnalyzerStandalone inputFileName outputFileName.root" << std::endl;
+    return -1;
+  }
+  std::cout << " inputFileName : " << fileName << std::endl;
+  std::cout << " outputFileName: " << oFileName << std::endl;
   
-  StPicoDstReader* picoReader = new StPicoDstReader(inFile);
+  StPicoDstReader* picoReader = new StPicoDstReader(fileName);
   picoReader->Init();
 
-  //Long64_t events2read = picoReader->chain()->GetEntries();
-  
-  // This is a way if you want to spead up IO
+  // This is a way if you want to spead up I/O
   std::cout << "Explicit read status for some branches" << std::endl;
   picoReader->SetStatus("*",0);
-  picoReader->SetStatus("Event",1);
-  picoReader->SetStatus("Track",1);
-  picoReader->SetStatus("BTofHit",1);
-  picoReader->SetStatus("BTofPidTraits",1);
-  //picoReader->SetStatus("BTowHit",0);
+  picoReader->SetStatus("Event*", 1);
+  picoReader->SetStatus("Track*", 1);
+  picoReader->SetStatus("BTofHit*", 1);
+  picoReader->SetStatus("BTofPidTraits*", 1);
+  picoReader->SetStatus("BTowHit*", 1);
+  picoReader->SetStatus("ETofHit*", 1);
+  picoReader->SetStatus("EpdHit*", 1);
   //picoReader->SetStatus("EmcTrigger",0);
   //picoReader->SetStatus("TrackCovMatrix",1);
   std::cout << "Status has been set" << std::endl;
@@ -83,6 +105,9 @@ void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_30
   std::cout << "Number of events to read: " << events2read
 	    << std::endl;
 
+
+  TFile *oFile = new TFile(oFileName, "recreate");
+  
   // Histogramming
   // Event
   TH1F *hRefMult = new TH1F("hRefMult",
@@ -130,14 +155,25 @@ void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_30
 				 "n#sigma(p);n#sigma(p)",
 				 400, -10., 10.);
     
-  // TofPidTrait
-  TH1F *hTofBeta = new TH1F("hTofBeta",
-			    "BTofPidTraits #beta;#beta",
+  // BTof pid traits
+  TH1F *hTofBeta = new TH1F("hTofBeta", "BTofPidTraits #beta;#beta",
 			    2000, 0., 2.);
 
-  // TofHit
+  // BTOF hit
   TH1F *hBTofTrayHit = new TH1F("hBTofTrayHit","BTof tray number with the hit",
 				120, -0.5, 119.5);
+
+  // BTOW hit
+  TH1F *hBTowAdc = new TH1F("hBTowAdc","Barrel tower ADC;ADC",500,0.,500);
+
+  // FMS hit
+  TH1F *hFmsAdc = new TH1F("hFmsAdc","ADC in FMS modules;ADC",1000, 0.,5000);
+
+  // ETOF hit
+  TH1F *hETofToT = new TH1F("hETofToT","eTOF TOT;Time over threshold (ns)",300, 0.,150);
+
+  // EPD hit
+  TH1F *hEpdAdc = new TH1F("hEpdAdc","ADC in EPD;ADC",4095, 0., 4095);
 
 
   // Loop over events
@@ -232,23 +268,61 @@ void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_30
       
     } //for(Int_t iTrk=0; iTrk<nTracks; iTrk++)
 
-    // Hit analysis
+    //////////////////
+    // Hit analysis //
+    //////////////////
+
+    // BTOF hits
     Int_t nBTofHits = dst->numberOfBTofHits();
     //std::cout << "Number of btofHits in event: " << nBTofHits << std::endl;
-
-    // Hit loop
     for(Int_t iHit=0; iHit<nBTofHits; iHit++) {
-
       StPicoBTofHit *btofHit = dst->btofHit(iHit);
       if( !btofHit ) continue;
+      //std::cout << "BTofHit #[" << (iHit+1) << "/" << nBTofHits << "]"  << std::endl;
       hBTofTrayHit->Fill( btofHit->tray() );
     } //for(Int_t iHit=0; iHit<nBTofHits; iHit++)
 
+    // BTOW hits
+    Int_t nBTowHits = dst->numberOfBTowHits();
+    for(Int_t iHit=0; iHit<nBTowHits; iHit++) {
+      StPicoBTowHit *btowHit = dst->btowHit(iHit);
+      if( !btowHit ) continue;
+      //std::cout << "BTowHit #[" << (iHit+1) << "/" << nBTowHits << "]"  << std::endl;
+      hBTowAdc->Fill( btowHit->adc() );
+    }
 
+    // FMS hits
+    Int_t nFmsHits = dst->numberOfFmsHits();
+    for(Int_t iHit=0; iHit<nFmsHits; iHit++) {
+      StPicoFmsHit *fmsHit = dst->fmsHit(iHit);
+      if( !fmsHit ) continue;
+      //std::cout << "FmsHit #[" << (iHit+1) << "/" << nFmsHits << "]"  << std::endl;
+      hFmsAdc->Fill( fmsHit->adc() );
+    }
+
+    // ETOF hits
+    Int_t nETofHits = dst->numberOfETofHits();
+    for(Int_t iHit=0; iHit<nETofHits; iHit++) {
+      StPicoETofHit *etofHit = dst->etofHit(iHit);
+      if( !etofHit ) continue;
+      //std::cout << "ETofHit #[" << (iHit+1) << "/" << nETofHits << "]"  << std::endl;
+      hETofToT->Fill( etofHit->timeOverThreshold() );
+    }
+    
+    // EPD hits
+    Int_t nEpdHits = dst->numberOfEpdHits();
+    for(Int_t iHit=0; iHit<nEpdHits; iHit++) {
+      StPicoEpdHit *epdHit = dst->epdHit(iHit);
+      if( !epdHit ) continue;
+      //std::cout << "EpdHit #[" << (iHit+1) << "/" << nEpdHits << "]"  << std::endl;
+      hEpdAdc->Fill( epdHit->adc() );
+    }
 
   } //for(Long64_t iEvent=0; iEvent<events2read; iEvent++)
 
   picoReader->Finish();
+  oFile->Write();
+  oFile->Close();
 
   std::cout << "I'm done with analysis. We'll have a Nobel Prize, Master!"
 	    << std::endl;
