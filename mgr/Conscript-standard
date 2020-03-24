@@ -314,11 +314,12 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	#print "-=-=-=-=- LALALA -=-=-=-\n";
 	# 2018/01 issue after updating to AgML 2.0
 	# TODO problem with optimization in xgeometry and StarGeometry
-        $DEBUG = "-O1 -g"; #VP
-	if ( $DEBUG =~ /-O/ ){   # there is an optimization used
-	    $DEBUG = "-O1 -g";   # switch to a lower optimization level
-	    $FDEBUG= "-O1 -g";
-	}
+        #$DEBUG = "-O1 -g"; #VP
+	#if ( $DEBUG =~ /-O/ ){   # there is an optimization used
+	#    $DEBUG = "-O1 -g";   # switch to a lower optimization level
+	#    $FDEBUG= "-O1 -g";
+	#}
+	$DEBUG = " -g ";
 
 	# repack now and make sure only one exists
 	push(@srcL,@src)      if ($#src != 0);
