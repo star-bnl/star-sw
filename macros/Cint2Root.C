@@ -39,6 +39,7 @@ void Cint2Root(TString topDir = ".") {
     newdat->Write();
     delete f;
     delete newdat;
-    SafeDelete(gGeoManager);
+    delete gGeoManager;
+    gGeoManager = 0;
   }
 }
