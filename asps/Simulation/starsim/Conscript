@@ -1,9 +1,12 @@
 #!/opt/star/bin/perl
 #use Env;
 ############################################################
-# $Id: Conscript,v 1.22 2018/11/19 20:52:40 perev Exp $
+# $Id: Conscript,v 1.23 2020/03/24 18:43:28 jeromel Exp $
 #
 # $Log: Conscript,v $
+# Revision 1.23  2020/03/24 18:43:28  jeromel
+# Disable optimization in starsim (may backstep)
+#
 # Revision 1.22  2018/11/19 20:52:40  perev
 # 64bits change the include paths
 #
@@ -53,6 +56,8 @@ $build =~ s/\\/\//g;# print "OBJ = $OBJ build = $build MAIN = $MAIN\n";
 (my $Dir = $ObjDir) =~ s/$build\///g; #print "Dir = $Dir\n";
 $ObjDir = "#" . $ObjDir;# print "ObjDir = $ObjDir\n";
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
+my $DEBUG  = $env->{ENV}->{DEBUG};
+my $FDEBUG = $env->{ENV}->{FDEBUG};
 my $FC     = $env->{FC};
 my $FCPATH = $env->{FCPATH};
 my $FFLAGS = $env->{FFLAGS};
@@ -108,14 +113,19 @@ if (($FC =~ /g77/ || $FC =~ /gfortran/) && ! $PGI) {
     $CPPFLAGS .= " -DWithoutPGI";
 }
 if ($FC =~ /gfortran/) {$FPPFLAGS .= " -DGFORTRAN";}
-# print "DEBUG --> $FC $CPPFLAGS\n";
+
+# JL, force no debug
+$DEBUG = $FDEBUG = " -g ";  
+
 $env2 = $env->clone('FC'           => $FC,
 		    'FPPFLAGS'     => $FPPFLAGS,
 		    'FFLAGS'       => $FFLAGS,
 		    'FCPATH'       => $FCPATH,
 		    'FEXTEND'      => "",
+		    'FDEBUG'       => $FDEBUG,
 		    'CPPFLAGS'     => $CPPFLAGS,
 		    'CPPPATH'      => $CPPPATH,
+		    'DEBUG'        => $DEBUG,
 		    'AGETOFLAGS'   => "",
 		    'LIBS'         => $LIBS,
 		    'ObjDir'       => $obj_dir,
