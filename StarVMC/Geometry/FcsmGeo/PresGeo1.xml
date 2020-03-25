@@ -31,6 +31,7 @@
     
     <Structure name="PVER"   > 
       <var name="Version"   />
+      <var name="active"  type="int"  />
     </Structure>
     
     <Structure name="PGEO"  > 
@@ -72,6 +73,7 @@
     
     <Fill name="PVER" comment="FCS Preshower basic data "  >
       <var name="Version" value="1.0" comment=" Geometry version  "  />
+      <var name="active"  value="1"   comment=" 1=active, 0=gone" /> 
     </Fill>
     <Use struct="PVER" select="version" value="1.0" />
     
@@ -118,14 +120,19 @@
     xtot=PGEO_DBOX(1)
     ztot=PGEO_DBOX(3)
     
-    <Create block="PMOD"  />
-    <Placement block = "PMOD"
-               in    = "CAVE"
-               konly = "ONLY"
-               group = "WestRefSys"
-               x     = "0.0"
-               y     = "0.0"
-               z     = "PGEO_Zoff(2,1)-2.0+PGEO_Dbox(3)/2.0" />
+    <If expr="PVER_active.eq.1">
+      <Create block="PMOD"  />
+      <Placement block = "PMOD"
+                 in    = "CAVE"
+                 konly = "ONLY"
+                 group = "WestRefSys"
+                 x     = "0.0"
+                 y     = "0.0"
+                 z     = "PGEO_Zoff(2,1)-2.0+PGEO_Dbox(3)/2.0" />
+    <Else>
+    <Info format="PresGeo switched off on PVER.active={1i}">PVER_active</Info>
+    </Else> 
+    </If> 
     
     <Block name="PMOD" comment="is mother volume for FCS Pres" >
       <Material  name="Air"  />
