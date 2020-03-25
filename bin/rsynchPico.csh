@@ -7,11 +7,11 @@ set top = `basename  ${topdir}`
 #cd ~/reco/2020/TFG19m/RF/${dir}
 set log =  rsynchPico.`date +%m%d%y%H`.log;
 touch ${log}
-foreach d (`ls -1d 0??`)
+foreach d (`ls -1d ???`)
   cd ${d}
 rsync -avrz -h                        \
     --include='*picoDst.root'                  \
     --exclude='*.*'  --exclude='Sub*' --exclude='Done' --exclude='cpu*' --exclude='.sl*'  \
-    ./ rftpexp01.rhic.bnl.gov:/gpfs01/star/pwg_tasks/tfg02/2020/TFG20a/RF/${dir}/${d} >>& ../${log}
+    ./ rftpexp01.rhic.bnl.gov:/gpfs01/star/pwg_tasks/tfg02/2020/TFG19m/RF/${dir}/${d} >>& ../${log}
 cd -
 end

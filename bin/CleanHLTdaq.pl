@@ -2,8 +2,8 @@
 use File::Basename;
 use Cwd;
 my $daq = "";
-my @List = glob "*/*/Done";
-my $debug = 0;
+my @List = glob "054/*/Done";
+my $debug = 1;
 foreach my $file (@List) {
   my $Dir = File::Basename::dirname($file);
   print "Dir = $Dir\n" if ($debug);
@@ -30,9 +30,10 @@ foreach my $file (@List) {
     my $daq = "/hlt/cephfs/daq/2019/" . $Dir . "/" . $tag . ".daq";
     if (! -r $daq) {
       $daq = "/hlt/cephfs/daq/2020/" . $Dir . "/" . $tag . ".daq";
-      if (! -r $daq) {
-	next;
-      }
+    }
+    if (! -r $daq) {
+      print "daq = $daq is not found \n" if ($debug);
+      next;
     }
     print "rm $daq\n";
   }
