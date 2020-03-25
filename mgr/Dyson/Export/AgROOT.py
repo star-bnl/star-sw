@@ -560,6 +560,11 @@ class Tag( Handler ):
         # Build list of include files from either StarVMC/Geometry or $STAR/StarVMC/Geometry
         for root, dirs, files in os.walk( 'StarVMC/Geometry' ):
             for f in files:
+
+                # Skip anything that looks like a backup file
+                if '~' in f:
+                    continue
+                
                 if 'Config.xml' in f:
                     name = f
                     name = name.replace('.xml','.h')
@@ -772,7 +777,12 @@ class Geometry( Handler ):
         self.includes.append('StarVMC/StarGeometry/StarGeo.h')
         for root, dirs, files in os.walk( 'StarVMC/Geometry' ):
             for f in files:
-                if f[:1] == '.': continue # skip special files
+
+                if f[:1] == '.':
+                    continue # skip special files
+                if '~' in f:
+                    continue # skip backup files
+                    
                 if 'Config.xml' in f:
                     name = f
                     name = name.replace('.xml','.h')
