@@ -18,6 +18,9 @@ void Cint2Root(TString topDir = ".") {
     TString path = set->Path();
     if (title != "file") continue;
     if (! name.EndsWith(".C")) continue;
+    TString rootf(path);
+    rootf.ReplaceAll(".C",".root");
+    if (gSystem->AccessPathName(rootf,kReadPermission)) continue;
     cout << path.Data() << "\t" <<name.Data() << endl;
     cout << "LoadTable:" << path.Data();
     TString command(".L "); command += path;
@@ -30,11 +33,9 @@ void Cint2Root(TString topDir = ".") {
     gInterpreter->ProcessLine(command,&ee);
     assert(!ee);
     if (! newdat) {
-      cout << "Fail to make TDataSet from " << path.Data() << endl;
+      cout << "\tFail to make TDataSet from " << path.Data() << endl;
       continue;
     }
-    TString rootf(path);
-    rootf.ReplaceAll(".C",".root");
     TFile *f = new TFile(rootf,"recreate");
     newdat->Write();
     delete f;
