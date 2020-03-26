@@ -35,6 +35,7 @@
   
   <Structure name="WVER"  > 
     <var name="Version"   />
+    <var name="active"    type="int" />
   </Structure>
         
   <Structure name="WGEO"  >
@@ -80,6 +81,7 @@
 
   <Fill name="WVER" comment="FCS ECal basic data"  >
     <var name="Version" value="1.0" comment=" Geometry version  "  />
+    <var name="active"  value="1"   comment=" 1=on, 0=off" />
   </Fill>
   <Use struct="WVER" select="version" value="1.0" />
 
@@ -145,9 +147,7 @@
   xtot = xtow * WGEO_NX
   ytot = ytow * WGEO_NY
 
-  <Info format="FCS Ecal Module xtot={10.5f}">xtot</Info>
-  <Info format="FCS Ecal Module ytot={10.5f}">ytot</Info>
-  <Info format="FCS Ecal Module ztot={10.5f}">ztot</Info>
+  <If expr="WVER_active.eq.1">
 
   <Create block="WMOD"  />
   <Do var="ns" from="1" to="2"  >
@@ -178,6 +178,11 @@
       <Rotation alphay="aa"  />
     </Placement>
   </Do>
+  <Else>
+
+    <Info format="WcalGeo switched off on WVER.active={1i}">WVER_active</Info>
+
+  </Else></If>
   
   <Block name="WMOD" comment="is a stack of FCS EM nodule"  >
     <Material name="Air"  />
