@@ -24,14 +24,16 @@
   set f=`find . -maxdepth 1 -type f -name "*${file}*.root"`
   if ("${f}" == "") then
 #    root.exe -x -q -b 'dEdx.C(1000000,"'${INPUTFILE0}'","'${file}'.root",2)' &gt;&amp; ${logFile}
-    root.exe -x -q -b 'dEdx.C(10000,"'${INPUTFILE0}'","'${file}'.root",2)' &gt;&amp; ${logFile}
+#    root.exe -x -q -b 'dEdx.C(10000,"'${INPUTFILE0}'","'${file}'.root",2)' &gt;&amp; ${logFile}
 #    root.exe -x -q -b 'dEdx.C(10000,"'${INPUTFILE0}'","'${file}'.root",2)' &gt;&amp; ${logFile}
 #    root.exe -x -q -b 'dEdx.C(10000,"'${INPUTFILE0}'","'${file}'.root",102,"y2018")' &gt;&amp; ${logFile}
 #   rm ${fileB}
 #   cp *.root ${SUBMITTINGDIRECTORY} 
+    root.exe -x -q -b 'dEdx.C(10000,"'${INPUTFILE0}'","'${file}'.root",2,"y2018")' &gt;&amp; ${logFile}
    endif
 </command>
-<input URL="command:dEdxSample.pl" />
+<!-- <input URL="command:dEdxSample.pl" /> -->
+<input URL="file:/star/u/xgn1992/Strangeness/Phi/3p85GeV_fixTarget/SL19e/Simulation/Data/jobs/production/*event.root" />
 <!-- <input URL="file:/net/l403/data/fisyak/reco/2019/DEV2StiCA.Minuit/*event.root" /> -->
 <!-- <input URL="file:/net/l403/data/fisyak/reco/2019/DEV2StiCA.Minuit2/*event.root" /> -->
 <!--
@@ -40,5 +42,5 @@
       <MinMemory>3500</MinMemory>
     </Memory>
   </ResourceUsage>
--->c
+-->
 </job>
