@@ -1891,7 +1891,7 @@ my $NEvents = 100000;
 # 9p2GeV                  20200205.144626
 # 5p75GeV_fixedTarget     20200213.152339, 20200213.152339
 # 9p2GeVb                 20200224.230740
-$hist = "RunXX00"; $NEvents = 2000; $disk = "/hlt/cephfs"; $RECO = "/reco/2020/TFG20b/RF";  $Production = "/"; $year = "/*/*/*/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 03/23/20 check 
+$hist = "RunXX00"; $NEvents = 2000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 03/23/20 check 
 
 my @badruns = ();
 my $prod = $hist; #$Production;
