@@ -24,8 +24,8 @@ setenv SHIFTINCDIR ""#$CERN_ROOT/../../usr.local/include/shift
 setenv x11libdir /usr/X11R6/lib
 setenv xpmlibdir /usr/X11R6/lib
 setenv xftlibdir /usr/X11R6/lib
-#setenv DISABLE "--disable-python --disable-qt --disable-qtgsi --disable-vc"
-setenv DISABLE "--disable-qt --disable-qtgsi --disable-vc"
+setenv DISABLE "--disable-python --disable-qt --disable-qtgsi --disable-vc"
+#setenv DISABLE "--disable-qt --disable-qtgsi --disable-vc"
 #setenv MYSQL /opt/star
 #setenv MYSQLINCDIR $MYSQL/include/mysql	
 #setenv MYSQLCLILIB $MYSQL/lib/mysql

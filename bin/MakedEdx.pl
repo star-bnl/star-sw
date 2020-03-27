@@ -1892,7 +1892,8 @@ my $NEvents = 100000;
 # 5p75GeV_fixedTarget     20200213.152339, 20200213.152339
 # 9p2GeVb                 20200224.230740
 $hist = "RunXX00"; $NEvents = 2000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 03/23/20 check 
-
+my $Year = $year;
+if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
 my $prod = $hist; #$Production;
 $prod =~ s/\*//g;
@@ -1929,6 +1930,9 @@ $script = $prod;# . "O";
 #my $SCR = "/star/institutions/bnl/fisyak/dEdx/";
 #my $SCR = "/star/data05/scratch/fisyak/dEdx/";
 my $SCR = "/gpfs01/star/subsys-tpc/fisyak/dEdx/";
+if (! -r $SCR) {
+  $SCR = "/net/l404/data/fisyak/dEdx/";
+}
 my $hostname = `hostname`; chomp($hostname);
 #my $homedir  = "/afs/rhic/star/users/fisyak/public/.dev/dEdx";
 #my $homedir  = "/star/institutions/bnl/fisyak/dEdx/jobs/SL04i";
@@ -2016,8 +2020,11 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
     $ff =~ s/AuAu200//g;
     if ($badruns and $ff =~ $badruns) {print "============ Bad run $file =============\n"; next;}
 #    print "file = $file\n";
-    my @words = split '/', $file; #for (my $i = 0; $i < $#words; $i++) {print "$i $words[$i]\n";}
+    my @words = split '/', $file;# for (my $i = 0; $i < $#words; $i++) {print "$i $words[$i]\n";}
     my $dd = $words[4] . '_' . $words[5];
+    if ($dd !~ /GeV/) {
+      $dd = $words[7];
+    }
     my $scrr = $scr . $dd . "/"; #print "scrr = $scrr\n";
     my $root = $scrr . $ff . ".root";
     my $logL = $ff . ".log";
@@ -2093,7 +2100,7 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
     my $cmd = "test ! -r " . $root . " && root.exe -q -b  '" . $macro;
 #    if ($Production =~ /P02gi2/ || $Production =~ /P02gi3/) {$cmd .= "N";}
 #    if ($Production =~ /^dAu/ or $Production =~ /^AuAu/) {$cmd .= "S";}
-    $cmd .= ".C(" . $NEvents . ",\"" . $ffile . "\",\"" . $root . "\"," . $Mode . ",\"$year\")\' >& $log";
+    $cmd .= ".C(" . $NEvents . ",\"" . $ffile . "\",\"" . $root . "\"," . $Mode . ",\"$Year\")\' >& $log";
 #    $cmd .= ".C(" . $NEvents . ",\"" . $ffile . "\",\"" . $root . "\"," . $Mode . ")\' >& $logL";
 #    $cmd .= "; cp -p $logL $log;";
 #    $cmd .= ".C(10000,\"" . $ffile . "\",\"" . $root . "\"," . $Mode . ")\'";
