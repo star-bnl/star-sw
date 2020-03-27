@@ -2064,6 +2064,7 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
 #Priority        = +10
 #Queue
 #";
+      
       open (OUT,">$SCRIPT") or die "Can't open $SCRIPT";
       $opened = 1;
       print OUT "#! /usr/local/bin/tcsh -f\n";
