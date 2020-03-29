@@ -20,13 +20,13 @@
 
 #include "StDbLib/StDbMessService.hh"
 
-class StMessMgr;
+//class StMessMgr;
 
 class StDbWrappedMessenger : public StDbMessService {
 
  protected:
 
-  StMessMgr* mMessenger;
+  //  StMessMgr* mMessenger;
 
  public:
 
