@@ -80,7 +80,7 @@ static const Hist_t Histos[] = {
 
 }; 
 //________________________________________________________________________________
-void kfQA(const Char_t *files = "/gpfs01/star/subsys-tpc/fisyak/kfp/2020/11p5GeV.C/I/dEdx/21042030_1.root", const Char_t *Out =0){
+void kfQA(const Char_t *files = "/gpfs01/star/subsys-tpc/fisyak/kfp/2020/11p5GeV.C/I/dEdx/21042030_1.root", const Char_t *Out = 0){
   const Int_t N = sizeof(Histos)/sizeof(Hist_t); cout << " N " << N << endl;
 #if 0
   if (gClassTable->GetID("StBichsel") < 0) {
@@ -93,8 +93,8 @@ void kfQA(const Char_t *files = "/gpfs01/star/subsys-tpc/fisyak/kfp/2020/11p5GeV
   gROOT->LoadMacro("dEdxFit.C+");
 #endif
   TString OutFile;
-  if (Out) OutFile = Out;
-  else     OutFile = "kfQAN.root";
+  if (!Out) OutFile = "kfQAN.root";
+  else      OutFile = Out;
   TFile *fout = new TFile(OutFile,"recreate");
   TString Tuple("Run:run:no:events");
   for (Int_t i = 0; i < N; i++) {

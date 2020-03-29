@@ -80,7 +80,7 @@ my $tags = join '|', @tags;
 print "found tags = $#tags : tags   ==> $tags\n";
 #if ($#tags < 0) {die "No tags found";}
 my $glob = $ARG{files}; print "glob = $glob\n"; 
-my $outn =$glob; $outn =~ s#\*##g; $outn =~ s#\.root##;
+my $outn = basename($glob); $outn =~ s#\*##g; $outn =~ s#\.root##;
 my $FilesPerJob = $ARG{FilesPerJob}; print "FilesPerJob = $FilesPerJob\n";
 my $Out = $ARG{Out}; print "Out = $Out\n";
 my @Files = glob "$glob"; 

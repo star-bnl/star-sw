@@ -20,9 +20,12 @@ void Cint2Root(TString topDir = ".") {
     if (! name.EndsWith(".C")) continue;
     TString rootf(path);
     rootf.ReplaceAll(".C",".root");
-    if (gSystem->AccessPathName(rootf,kReadPermission)) continue;
-    cout << path.Data() << "\t" <<name.Data() << endl;
-    cout << "LoadTable:" << path.Data();
+    if (!gSystem->AccessPathName(rootf,kReadPermission)) {
+      cout << path.Data() << "\t" << rootf.Data() << " already exists" << endl;
+      continue;
+    }
+    cout << path.Data() << "\tCreate " << rootf.Data() << endl;
+    cout << "LoadTable:" << path.Data() << endl;
     TString command(".L "); command += path;
     TInterpreter::EErrorCode ee;
     gInterpreter->ProcessLine(command,&ee);
@@ -40,6 +43,7 @@ void Cint2Root(TString topDir = ".") {
     newdat->Write();
     delete f;
     delete newdat;
-    SafeDelete(gGeoManager);
+    delete gGeoManager;
+    gGeoManager = 0;
   }
 }
