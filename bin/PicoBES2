@@ -468,3 +468,12 @@ foreach d ( `ls -1d /gpfs01/star/data*/reco/production_3p85GeV_fixedTarget_2018/
 end
 ================================================================================
 03/17/2020
+
+ls -l | grep -v 'Mar 28' | awk '{print $9}' | xargs rm -rf
+
+foreach n (19 18 17 16 15 14 13 12 11 10 02 03 04 05 05) 
+ 	set n = 16; rterm -i l4${n}; 
+	cd /scratch/fisyak; dir; find . -type d -cmin +130 -exec rm -rf {} \; 
+        dir 
+        exit
+end

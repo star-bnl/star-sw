@@ -20,7 +20,7 @@
   set evtsFileB = `basename ${evtsFile}`
   set filel    = `basename ${evtsFileB} .daq`
   set output  = ${filel}.event.root
-#  if (! -r ${evtsFile}) exit 1;
+  if (! -r ${evtsFile}) exit 1;
   set logFile  = ${filel}B.log
 #  if ( -r ${SUBMITTINGDIRECTORY}/${logFile}) exit 0;
   set muFile = ${filel}.MuDst.root
@@ -36,8 +36,8 @@
 #  echo "cp ${evtsFile} ${evtsFileB}"
 #  cp ${evtsFile} ${evtsFileB}
 # TFG19m, TFG20a 12/26/2019 12/29/2019
-  root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,-evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
-#  root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFileB}'")' &gt;&amp; ${logFile}
+   root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  cp  ${filel}*.picoDst.root ${logFile} ${SUBMITTINGDIRECTORY}
   cp  ${filel}* ${SUBMITTINGDIRECTORY}
   rm ${bla}
@@ -51,5 +51,6 @@
 <!-- <input URL="file:/gpfs01/star/daq/2019/071/20071001/st_physics_2007100*.daq" /> -->
 <!-- <input URL="file:/hlt/cephfs/daq/2019/354/20354003/hlt*.daq" /> -->
 <!-- <input URL="command:daq_2020.pl" /> -->
-<input URL="command:daq_2020dR.pl" />
+<!-- <input URL="command:daq_2020dR.pl" /> -->
+<input URL="command:daq_2020d.pl" />
 </job>

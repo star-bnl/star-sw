@@ -243,6 +243,7 @@ setenv CFLAGSd   "$cflags"
           ./configure -prefix $XOPTSTAR/qt4 -no-glib -opensource -continue  <<EOF
 yes
 EOF
+	  qmake
           make install
           cp -rp bin $QTDIR
           cp -rp mkspecs $QTDIR
