@@ -6,10 +6,11 @@
 #
 use Env;
 use File::Basename;
-
+use Cwd;
 #
-my $Lib = "";
-$Lib = shift;
+my $Lib = cwd(); $
+Lib .= "/";
+$Lib .= shift;
 $LibDep = shift;
 $RootMap = shift;
 my $Cint_cxx = shift;
@@ -388,7 +389,10 @@ if ($h_files) {
 #  my $cmd  = "rootcling -rootbuild -f $Cint_cxx -cxxmodule  -s $Lib";
 #  my $cmd  = "rootcling -rootbuild -f $Cint_cxx -s $Lib";
 #  my $cmd  = "rootcling -rootbuild -f $Cint_cxx -cxxmodule -s $Lib -rmf $RootMap";
-  my $cmd  = "rootcling -rootbuild -f $Cint_cxx -inlineInputHeader -s $Lib -rmf $RootMap";
+  $ENV{ROOTIGNOREPREFIX} = 1;
+  my $cmd  = "rootcling -rootbuild -f $Cint_cxx";
+#  $cmd .= " -cxxmodule";
+  $cmd .= " -inlineInputHeader -s $Lib -rmf $RootMap";
   my $bLib = File::Basename::basename($Lib);
   if ($LibDep) {
     my @libs = split(' ',$LibDep);
