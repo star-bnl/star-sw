@@ -6,10 +6,14 @@
       replace LOG_INFO << "EPD hit id: " << mId << " QT data: " << mQTdata << " nMIP: " << mnMIP << endm;
       with    std::cout << "EPD hit id: " << mId << " QT data: " << mQTdata << " nMIP: " << mnMIP << std::endl;
 
+      and at the top:
+      replace #include "StPicoMessMgr.h
+      with    #include <iostream>
+
   2. a quick edit to StRoot/StEpdUtil/StEpdFastSim/StEpdFastSim.cxx at the very top.
      You will see an //#include statement to un-comment.  Basically, you need to point directly to StPicoEpdHit.h file
 
-  3. Make a similar edit to StRoot/StEpdUtil/StEpdFinder.cxx
+  3. Make a similar edit to StRoot/StEpdUtil/StEpdEpFinder.cxx
 
   4. go to StRoot/StPicoEvent
      root
