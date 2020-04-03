@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.y2019.C,v 1.3 2019/05/23 11:50:01 fisyak Exp $
+// $Id: TpcResponseSimulator.y2019.C,v 1.4 2020/04/03 23:47:14 fisyak Exp $
 // $Log: TpcResponseSimulator.y2019.C,v $
+// Revision 1.4  2020/04/03 23:47:14  fisyak
+// rename tpcSectorT0offset.20190223.080000.C to tpcSectorT0offset.20190101.000000.C, remove intermidiate tpcSectorT0offset.20190*.C
+//
 // Revision 1.3  2019/05/23 11:50:01  fisyak
 // Add default TpcAdcCorrectionMDF, 2019 version of TpcResponseSimulator
 //
