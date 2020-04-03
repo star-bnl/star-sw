@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.y2019.C,v 1.3 2019/05/23 11:50:01 fisyak Exp $
+// $Id: TpcResponseSimulator.y2019.C,v 1.4 2020/04/03 23:47:14 fisyak Exp $
 // $Log: TpcResponseSimulator.y2019.C,v $
+// Revision 1.4  2020/04/03 23:47:14  fisyak
+// rename tpcSectorT0offset.20190223.080000.C to tpcSectorT0offset.20190101.000000.C, remove intermidiate tpcSectorT0offset.20190*.C
+//
 // Revision 1.3  2019/05/23 11:50:01  fisyak
 // Add default TpcAdcCorrectionMDF, 2019 version of TpcResponseSimulator
 //
@@ -77,7 +80,7 @@ TDataSet *CreateTable() {
   row.K3OR       	    = 0.61;//(row)  for a/s = 2.5e-3 and h/s = 1.0 
   row.FanoFactor 	    = 0.3; //                                                                        
   row.AveragePedestal       = 50.0;// 
-  row.AveragePedestalRMS    = 1.4; // Old Tpc electronics or iTPC
+  row.AveragePedestalRMS    = 1.0; // Old Tpc electronics or iTPC  1.4 => 1.0; Tonko 12/12/2019
   row.AveragePedestalRMSX   = 0.7; // New Tpx electronics 
   row.tauIntegration        = 2.5*74.6e-9;//   secs 
   row.tauF                  = 394.0e-9;// secs Tpc 
@@ -86,12 +89,14 @@ TDataSet *CreateTable() {
   row.tauXO                 =  74.6e-9;// secs Tpx Outer integration time 
   row.tauCI                 =   0;  
   row.tauCO                 =   0;  
-  row.SigmaJitterTI         = 0;// 0.4317;// 0.25;//ad  0.0;// b for Tpx inner 
-  row.SigmaJitterTO         = 0;// 0.4300;// E: 0.4801;//0.25;//ad  0.0;// b for Tpx outer 
-  row.SigmaJitterXI         = 0;// 0.1027785; // P: 0.1353*1.05/1.10; //O: 0.1353*1.05;// N: 0.1353; // C:0.;
-  row.SigmaJitterXO         = 0;// 0.107525;  // P: 0.1472*1.05/1.03; //O: 0.1472*1.05;// N: 0.1472; // C:0.;
+  row.SigmaJitterTI         = 0.4317/4.5;// 0.4317;// 0.25;//ad  0.0;// b for Tpx inner 
+  row.SigmaJitterTO         = 0.4300/5.;// 0.4300;// E: 0.4801;//0.25;//ad  0.0;// b for Tpx outer 
+  row.SigmaJitterXI         = 0.1027785/2.;// 0.1027785; // P: 0.1353*1.05/1.10; //O: 0.1353*1.05;// N: 0.1353; // C:0.;
+  row.SigmaJitterXO         = 0.107525/2.; // 0.107525;  // P: 0.1472*1.05/1.03; //O: 0.1472*1.05;// N: 0.1472; // C:0.;
   row.longitudinalDiffusion = 0.03624; // Magboltz // HD 0.03624*1.5; //HC 0.03624; // Magboltz 
+  row.longitudinalDiffusionI= row.longitudinalDiffusion;
   row.transverseDiffusion   = 0.02218*TMath::Sqrt(1 + row.OmegaTau*row.OmegaTau) ; // Magboltz
+  row.transverseDiffusionI  = 0.83* row.transverseDiffusion;
   row.NoElPerAdc            = 335.;   // No. of electrons per 1 ADC count
   row.OmegaTauScaleI        =  2.145*1.515;// HC 1.;// 2.145*1.515;  //i; 2.145*1.4;  //h 2.145;  //ad 2.145*1.25;  //b effective reduction of OmegaTau near Inner sector anode wire
   row.OmegaTauScaleO        = 1.8  *1.201;  //HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
@@ -105,7 +110,7 @@ TDataSet *CreateTable() {
   // diff                                   : 9.13675e-02                          6.29849e-02
   // SecRow3CGFTpcRS_2011_pp500LowLum_g     : 3.12857e-01                          2.67379e-01
   const Double_t RowSigmaTrs[4] = {
-    9.13675e-02, 0,  // Inner
+    0.2313675,   0,  // 9.13675e-02, 0,  // Inner // 9.13675e-02+0.14
     6.29849e-02, 0}; // Outer
   Float_t *b = &row.SecRowSigIW[0];
   for (Int_t i = 0; i < 8; i++) {
@@ -118,7 +123,8 @@ TDataSet *CreateTable() {
   // TpcT->Draw("fMcHit.mPosition.mX3-fRcHit.mPosition.mX3:fMcHit.mPosition.mX3>>Z(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz")
   // The corection has to be added                                                                    M             P
   //row.T0offset   = 0.50 + 1.65431e-01 -  3.45247e-01 -1.54583e+00 -2.90686e-03+ 1.54353e+00 + 0.0191135  -1.20938e-03 ; //E
-  row.T0offset   = 0.50 -1.43663e-01 -0.00932877;//g // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
+  // row.T0offset   = 0.50 -1.43663e-01 -0.00932877;//g // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
+  row.T0offset   = 0.50 -1.43663e-01 -0.00932877 + 0.0416;//g // 12/18/19 from Run 19 AuAu19.6 GeV simulation
   /* 
      0.05  => -0.154  
     -0.05  => -0.054
