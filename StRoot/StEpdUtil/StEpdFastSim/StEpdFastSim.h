@@ -21,6 +21,7 @@ class StEpdFastSim{
 
   short FindStruckTile(TVector3 HitPosition);
 
+  TClonesArray* mTheHits;
 
  public:
   StEpdFastSim(double WID=0.2);

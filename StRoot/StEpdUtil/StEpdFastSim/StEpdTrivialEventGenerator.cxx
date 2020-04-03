@@ -54,6 +54,7 @@ StEpdTrivialEventGenerator::StEpdTrivialEventGenerator(TH1D* DnDeta, TH1D* V1ver
     }
   mRan = new TRandom3();
   mRan->SetSeed();
+  mTracks = new TClonesArray("TVector3",1000);
 }
 
 // --------------------------------------------------------
@@ -65,7 +66,8 @@ StEpdTrivialEventGenerator::~StEpdTrivialEventGenerator(){
 TClonesArray* StEpdTrivialEventGenerator::Momenta(){
   if (mDnDeta==0) return 0;
 
-  TClonesArray* tracks = new TClonesArray("TVector3",1000);
+  mTracks->Clear();
+
   // first, sample the dNdEta distribution.
   // each bin has an average, and we sample a Poissonian with that average
   
@@ -79,7 +81,7 @@ TClonesArray* StEpdTrivialEventGenerator::Momenta(){
       double v2 = (mV2versusEta==0)?0.0:mV2versusEta->GetBinContent(ibin);
       double phi = FindPhi(v1,v2,mRan->Uniform());
       double pt = 1.0;  // irrelevant, EPD only cares about eta and phi, and the simulator makes everything a MIP
-      TVector3* v = (TVector3*)tracks->ConstructedAt(tracks->GetEntriesFast());
+      TVector3* v = (TVector3*)mTracks->ConstructedAt(mTracks->GetEntriesFast());
       v->SetPtEtaPhi(pt,eta,phi);
     }
     
