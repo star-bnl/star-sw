@@ -16,7 +16,7 @@ class StEpdTrivialEventGenerator{
   TH1D* mV1versusEta;
   TH1D* mV2versusEta;
   TRandom3* mRan;
-
+  TClonesArray* mTracks;
  public:
   // these are the three histograms that will be sampled.  Do whatever you want, but you have to use the same x-axis binning
   void SetDnDeta(TH1D* h);

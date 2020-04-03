@@ -11,6 +11,9 @@
 StEpdFastSim::StEpdFastSim(double WID){
   mRan = new TRandom3();
   mRan->SetSeed();
+
+  mTheHits = new TClonesArray("StPicoEpdHit",1000);
+
   StEpdGeom* mGeom = new StEpdGeom();
   mWID = WID;
 
@@ -62,7 +65,9 @@ TClonesArray* StEpdFastSim::GetPicoHits(TClonesArray* momenta, TVector3 PrimVert
     mHitsWest[uniqueID] = 0;
   }
 
-  TClonesArray* theHits = new TClonesArray("StPicoEpdHit",1000);
+  mTheHits->Clear();
+
+  //  TClonesArray* theHits = new TClonesArray("StPicoEpdHit",1000);
 
   for (int itrk=0; itrk<momenta->GetEntries(); itrk++){
     // project to EPD...
@@ -92,7 +97,7 @@ TClonesArray* StEpdFastSim::GetPicoHits(TClonesArray* momenta, TVector3 PrimVert
 	theHit->setnMIP(nMIP);
       }
       else{                                  // this tile has not yet been struck-- make a StPicoEpdHit
-	theHit = (StPicoEpdHit*)theHits->ConstructedAt(theHits->GetEntriesFast());
+	theHit = (StPicoEpdHit*)mTheHits->ConstructedAt(mTheHits->GetEntriesFast());
 	theHit->setId(UniqueID);
 	theHit->setnMIP(dE);
 	mHitsEast[abs(UniqueID)] = theHit;
@@ -105,7 +110,7 @@ TClonesArray* StEpdFastSim::GetPicoHits(TClonesArray* momenta, TVector3 PrimVert
 	theHit->setnMIP(nMIP);
       }
       else{                                  // this tile has not yet been struck-- make a StPicoEpdHit
-	theHit = (StPicoEpdHit*)theHits->ConstructedAt(theHits->GetEntriesFast());
+	theHit = (StPicoEpdHit*)mTheHits->ConstructedAt(mTheHits->GetEntriesFast());
 	theHit->setId(UniqueID);
 	theHit->setnMIP(dE);
 	mHitsWest[abs(UniqueID)] = theHit;
@@ -113,7 +118,7 @@ TClonesArray* StEpdFastSim::GetPicoHits(TClonesArray* momenta, TVector3 PrimVert
     }
   } // end loop over particles
 
-  return theHits;
+  return mTheHits;
 }
 
 /* =====================================================================================================================
