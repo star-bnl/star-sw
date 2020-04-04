@@ -22,7 +22,7 @@ foreach my $arg (@ARGV) {
 }
 if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0) {
   @histGF = qw (SecRow3 SecRow3C 
-		PressureC  Pressure
+		PressureC Pressure
 		Time TimeC
 		Voltage VoltageC Qcm QcmC AvCurrentC
 		Z3C 
