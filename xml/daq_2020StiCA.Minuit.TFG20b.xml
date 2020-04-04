@@ -20,7 +20,7 @@
   set evtsFileB = `basename ${evtsFile}`
   set filel    = `basename ${evtsFileB} .daq`
   set output  = ${filel}.event.root
-#  if (! -r ${evtsFile}) exit 1;
+  if (! -r ${SUBMITTINGDIRECTORY}/${evtsFile}) exit 1;
   set logFile  = ${filel}B.log
 #  if ( -r ${SUBMITTINGDIRECTORY}/${logFile}) exit 0;
   set muFile = ${filel}.MuDst.root
@@ -39,6 +39,9 @@
   root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,-evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFileB}'")' &gt;&amp; ${logFile}
 #  cp  ${filel}*.picoDst.root ${logFile} ${SUBMITTINGDIRECTORY}
+  gzip ${logFile}
+  rm ${muFile}
+  rm ${piFile}
   cp  ${filel}* ${SUBMITTINGDIRECTORY}
   rm ${bla}
   rm -rf ${CURRENT_DIR}
