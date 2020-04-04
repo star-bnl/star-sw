@@ -214,7 +214,7 @@ Int_t StTpcDigitalSector::getTimeAdc(Int_t row, Int_t pad,
   // no conversion
   UInt_t nTimeSeqs = 0;
   memset (ADCs, 0, __MaxNumberOfTimeBins__*sizeof(Short_t));
-  memset (IDTs, 0, __MaxNumberOfTimeBins__*sizeof(UShort_t));
+  memset (IDTs, 0, __MaxNumberOfTimeBins__*sizeof(Int_t));
   StDigitalTimeBins* TrsPadData = timeBinsOfRowAndPad(row,pad);
   if (! TrsPadData) return nTimeSeqs;
   StDigitalTimeBins &trsPadData = *TrsPadData;
@@ -240,7 +240,7 @@ Int_t StTpcDigitalSector::getTimeAdc(Int_t row, Int_t pad,
   // no conversion
   UInt_t nTimeSeqs = 0;
   memset (ADCs, 0, __MaxNumberOfTimeBins__*sizeof(UChar_t));
-  memset (IDTs, 0, __MaxNumberOfTimeBins__*sizeof(UShort_t));
+  memset (IDTs, 0, __MaxNumberOfTimeBins__*sizeof(Int_t));
   StDigitalTimeBins* TrsPadData = timeBinsOfRowAndPad(row,pad);
   if (! TrsPadData) return nTimeSeqs;
   StDigitalTimeBins &trsPadData = *TrsPadData;
