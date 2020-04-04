@@ -87,7 +87,7 @@ TClonesArray* StEpdTrivialEventGenerator::Momenta(){
     
   }
   
-  return tracks;
+  return mTracks;
 }
 
 
