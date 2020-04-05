@@ -101,7 +101,7 @@ void StvConeRejector::Prepare()
 /// 	Calculation of brik sarrounding our cone sector
 ///	Parameters of brik are used for selection in multy key iterator
 ///	of hits
-static const double kSqrHlf = sqrt(0.5);
+///static const double kSqrHlf = sqrt(0.5);
   double along = mOutRad*mCos;
   double ortho = mOutRad*mSin;
   mDir[1][0]= -mDir[0][1];
