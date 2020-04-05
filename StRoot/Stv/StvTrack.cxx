@@ -163,26 +163,22 @@ StvNode *StvTrack::GetNode(EPointType noTy)
 const StvNode *StvTrack::GetNode(EPointType noTy) const
 { return ((StvTrack*)this)->GetNode(noTy); }
 //_____________________________________________________________________________
-double StvTrack::GetLength(EPointType ept) const
+double StvTrack::GetLength(StvNode::ENodeType ept,double *totLen) const
 {
   const StvNodePars *pre=0;
-  double len = 0;
+  double len = 0,hitLen=0;
   for (StvNodeConstIter it = begin();it != end();++it) 
   {
     StvNode *node = *it;
     if (!pre) {
+      if (!node->GetHit()) 	continue;
       StvNode::ENodeType ty = node->GetType();
-      if (ty == StvNode::kPrimNode) {
-        if (ept!=kPrimPoint) 		continue;
+      if (ty!=ept) 		continue;
+      if (ty == StvNode::kPrimNode
+      ||  ty == StvNode::kDcaNode
+      ||  node->GetXi2()<1000) {
         pre = &(node->GetFP(2)); 	continue;
       }
-      if (ty == StvNode::kDcaNode) {
-        if (ept!=kDcaPoint) 		continue;
-        pre = &(node->GetFP(2)); 	continue;
-      }
-      if (ty != StvNode::kRegNode) 	continue;
-      if (node->GetXi2()>1000) 		continue;
-        pre = &(node->GetFP(2)); 	continue;
     }
     const double *x1 = pre->pos();
     const double *x2 = node->GetFP(2).pos();
@@ -192,9 +188,11 @@ double StvTrack::GetLength(EPointType ept) const
     if (dsin>0.9) dsin=0.9;
     dlen = (dsin<0.1)? dlen*(1.+dsin*dsin/6) : 2*asin(dsin)/curv; 
     len +=sqrt(dlen*dlen + pow(x1[2]-x2[2],2));
+    if (node->GetXi2()<1000) hitLen = len;
     pre = &(node->GetFP(2)); 	
   }
-  return len;
+  if (totLen) *totLen = len;
+  return hitLen;
 
 }
 //_____________________________________________________________________________

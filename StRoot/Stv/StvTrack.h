@@ -7,6 +7,7 @@
 #define StvTrack_H 1
 
 #include "StEvent/StEnumerations.h"
+#include "Stv/StvNode.h"
 #include "Stv/StvStl.h"
 
 class StvHit;
@@ -59,7 +60,7 @@ const StvNode *GetNode(EPointType poTy) const;
       - Primary vertex (kPrimPoint) ;
      to the last point on track. 
     */
-   double GetLength(EPointType ept=kFirstPoint) const;
+   double GetLength(StvNode::ENodeType ept=StvNode::kRegNode,double *totLen=0) const;
       int GetCharge() const;
 
   void Reverse();		// Inverese node order. For debug only
