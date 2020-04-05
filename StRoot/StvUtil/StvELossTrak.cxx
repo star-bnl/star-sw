@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.17.4.7 2020/03/11 20:57:40 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.17.4.8 2020/04/05 22:04:57 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -63,10 +63,10 @@ assert(fM>0); assert(fCharge2>=1);
   fdEdX=0;fdEdXErr2=0;
   double p2 = fP*fP,m2 = fM*fM;
   fE = sqrt(p2+m2);
+  fT = p2/(fE+fM);
   fFak = (14.1*14.1)*(p2+m2)/(p2*p2*1e6);
-  double T = fE-fM;
   if (fA>0) {
-    fdEdX = gdrelx(fA,fZ,fDens,T,fM) * fDens*fCharge2;
+    fdEdX = gdrelx(fA,fZ,fDens,fT,fM) * fDens*fCharge2;
     double beta2 = p2/(p2+m2);
     fdEdXErr2 = gsigma2(fZ/(fA+1e-6),fDens,fCharge2,fM ,beta2,1.);
   }
@@ -115,16 +115,19 @@ void StvELossTrak::Add(double len)
 
 //	Account changing dEdX with energy
   fd2EdXdE = 0;
-  double Tend = fE-fM;
+#if 0
+  double Tend = fT;
   if (Tend < 0.5) {
-    Tend+= (fDir)? -fELoss: fELoss;
+    double de = (fDir)? -fELoss: fELoss;
+    Tend+= de;
+assert(Tend>0);
     double dEdXend = gdrelx(fA,fZ,fDens,Tend,fM)*fDens*fCharge2;
     double dEdXave = (fdEdX + dEdXend)/2;
     double ELoss = dEdXave*fLen;
-    fd2EdXdE = (dEdXend-fdEdX)/ELoss;
-    if (fDir)fd2EdXdE = -fd2EdXdE; 
+    fd2EdXdE = (dEdXend-fdEdX)/de;
     fELoss = ELoss;
   }
+#endif
   fTotTheta2 += fTheta2;
   fTotOrth2  += fOrth2;
   fTotELossErr2 += fELossErr2;
