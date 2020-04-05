@@ -119,6 +119,7 @@ FAILED:
 //______________________________________________________________________________
 double StvNodePars::getCurv() const 
 {
+  if (fabs(_h[3]) < 1e-5) return 1e-5;
   double DH = dot(_d,_h)/_h[3]; double myCosL = sqrt((1-DH)*(1+DH));
   return  _h[3]*_pinv/myCosL;
 }
