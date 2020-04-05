@@ -115,7 +115,7 @@ static StvFitter *fitt = StvFitter::Inst();
 	iFailed  = fitt->Update(); if (iFailed) nErr+=100;		
         node->mFP[2] = node->mFP[lane];
         node->mFE[2] = node->mFE[lane];
-//        if (myXi2 > bigXi2) { mBigNode = node; bigXi2 = myXi2;}
+        if (myXi2 > bigXi2) { mBigNode = node; bigXi2 = myXi2;}
         node->SetXi2(myXi2,lane);
       }
     }	// end of nodes 
