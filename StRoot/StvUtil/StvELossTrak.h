@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.h,v 1.11.4.4 2020/01/24 20:30:12 perev Exp $
+// $Id: StvELossTrak.h,v 1.11.4.5 2020/04/05 21:27:41 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -49,6 +49,7 @@ double fdEdX,fdEdXErr2;
 double fP;		//momentum 
 double fM;		//mass 
 double fE;		//energy 
+double fT;		//kine energy 
 double fCharge2;	//particle charge **2
 double fFak;
 double fA,fZ,fDens,fX0;
