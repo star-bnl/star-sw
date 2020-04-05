@@ -32,7 +32,7 @@ enum {kLittleBit = 5};
 static const double kTouchAngle = 1e-2;
 
 static int nCall=0; nCall++;
-static StTGeoProxy * const myProxy = StTGeoProxy::Inst();
+//static StTGeoProxy * const myProxy = StTGeoProxy::Inst();
   mHits.clear();
   const StHitPlane *myHitPlane = GetHitPlane();
 assert(myHitPlane);
