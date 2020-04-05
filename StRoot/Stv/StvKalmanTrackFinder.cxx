@@ -330,6 +330,8 @@ if (dbMask&1) {
 	nHits++;nTotHits++;assert(nHits<2560);
         curNode->SetHE(fitt->GetHitErrs());
         curNode->SetFit(par[1],err[1],0);
+double along = TVector3(par[0].dir()).Dot(TVector3(par[0].dir()));
+assert(along>0.5);
         par[0]=par[1];
         err[0]=err[1]; 
 static int myDebug = 0;
@@ -355,11 +357,6 @@ if(myReject) StvDebug::Count("EndTrk",myReject);
   }
 if (skip && !idir) StvDebug::Count("EndTrk",skip);
 
-  double tlen=0;
-  if (nHits>3) {
-    tlen = mCurrTrak->GetLength();
-    assert(tlen >0.0 && tlen<3000);
-  }
 
   mHitCounter->Reset();
   return nHits;
