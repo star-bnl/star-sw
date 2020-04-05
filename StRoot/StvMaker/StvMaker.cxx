@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.60.2.6 2020/03/08 19:43:08 perev Exp $
+// $Id: StvMaker.cxx,v 1.60.2.7 2020/04/05 23:47:33 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -419,6 +419,7 @@ static StvToolkit* kit = StvToolkit::Inst();
   for (int reg=0;reg<2;reg++) { //Loop over eta regions
     const auto *par = kons->At(reg);
     if (mHitLoader[reg]){
+//		Setup constants for the region
       mSeedFinders [reg]->SetCons(par);
       mEventFiller [reg]->SetCons(par);
       mTrackFitter [reg]->SetCons(par);
@@ -431,32 +432,33 @@ static StvToolkit* kit = StvToolkit::Inst();
       mVertexFinder[reg]->SetCons(par);
 
     if (mHitLoader[reg]) {
-      mHitLoader[reg]->LoadHits(event);
-      kit->SetSeedFinders(mSeedFinders[reg] );
+      mHitLoader[reg]->LoadHits(event);		//Load hits
+      kit->SetSeedFinders(mSeedFinders[reg] );	//reset seed finders
       kit->Reset();
       int n = (nVtx)? nVtx:1;
       for (int i=0;i<n;i++) {
         const float *V = (nVtx)? (*vertexes)[i]->x():0;
         mSeedFinders[reg]->SetVtx(V);
-        int nTks = mTrackFinder[reg]->FindTracks();
-        if (mMaxTimes>1) nTks = CleanGlobalTracks();
-        TestGlobalTracks();
+        int nTks = mTrackFinder[reg]->FindTracks();	//Find tracks
+        if (mMaxTimes>1) nTks = CleanGlobalTracks();	//Cleanup tracks wuth the same hit
+        TestGlobalTracks();				//Test globals
         mToTracks += nTks;
       }
     }
-    if (mEventFiller[reg]) {
+    if (mEventFiller[reg]) {	// Fill event
       mEventFiller[reg]->Set(event,&kit->GetTracks());
       mEventFiller[reg]->fillEvent();
     }
 
     do {//pseudo loop
       if (!mVertexFinder[reg]) 	break;
-      nVtx = mVertexFinder[reg]->Fit(event);
+      nVtx = mVertexFinder[reg]->Fit(event); 	// Create primary vertex
       if (!nVtx) 		break;
       Info("Make","VertexFinder found %d vertices",nVtx);
       vertexes = &mVertexFinder[reg]->Result();
       if (!vertexes->size()) 	break;       
-  //Set minimal errors
+
+  //Set minimal errors for simu vertex
       for (size_t i=0;i<vertexes->size();i++) {
 	StvHit *vtx=(*vertexes)[i];
 	float *vtxErr = vtx->errMtx();
@@ -467,12 +469,13 @@ static StvToolkit* kit = StvToolkit::Inst();
 	vtxErr[5]=MIN_VTX_ERR2;
       }
     } while(0);
-    //cout << "StvMaker::Make() -I- Got Vertex; extend Tracks"<<endl;
+ 
+//			cout << "StvMaker::Make() -I- Got Vertex; extend Tracks"<<endl;
     if (nVtx) {
       if (mTrackFinder[reg]) 
-        mTrackFinder[reg]->FindPrimaries(*vertexes);
+        mTrackFinder[reg]->FindPrimaries(*vertexes);	// Find Primaries
       if (mEventFiller[reg]) 
-        mEventFiller[reg]->fillEventPrimaries();
+        mEventFiller[reg]->fillEventPrimaries();	// fill Primaries
     }
   }//end regions
   if (mPullTTree) {FillPulls();}
