@@ -170,7 +170,7 @@ static int nCall=0; nCall++;
 void StvSeedFinder::Init( StvTrack *tk) const
 {
 enum {kKalmanFactor = 4};//Tested 4 is the best
-static StTGeoProxy *prx = StTGeoProxy::Inst();
+//static StTGeoProxy *prx = StTGeoProxy::Inst();
 static StvToolkit  *kit = StvToolkit::Inst();
 
   double Xi2 = fHelix.Chi2();
@@ -178,7 +178,7 @@ static StvToolkit  *kit = StvToolkit::Inst();
   circ.Backward(); 	//Make direction In to Out
   double s=0,xyz[3]; 
   int iNode = 0;
-  StvNode *node=0,*preNode = 0;
+  StvNode *node=0;
   for (int ihit=0;ihit<(int)fSeedHits.size();ihit++) {
     iNode++;
     StvHit *hit = fSeedHits[ihit];
