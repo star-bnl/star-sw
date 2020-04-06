@@ -193,7 +193,7 @@ Int_t StJetSkimEventMaker::Make()
 
 		if(theYear >= 2006)
 		{
-			mEvent->setL2Result(muEvent->L2Result().GetArray());
+			if(muEvent->L2Result().GetSize() > 0) mEvent->setL2Result(muEvent->L2Result().GetArray());
 		}
 	}
 	else {
