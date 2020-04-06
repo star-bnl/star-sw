@@ -3,10 +3,10 @@
         <command>
          cd ${SUBMITTINGDIRECTORY}
    setenv STARFPE NO
-   setenv NODEBUG yes
+#   setenv NODEBUG yes
 #.DEV2
-   setup 64b
-   starver .DEV2
+#   setup 64b
+#   starver .DEV2
 #   starver TFG18g
 #dev
 #   setup gcc
@@ -38,7 +38,8 @@
   set muFile = ${filel}.MuDst.root
   if (-r $muFile) exit 0;
 #  root.exe -q -b 'bfc.C(1000,"P2018,useCDV,Tpx,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX,dEdxCalib","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
-  root.exe -q -b 'bfc.C(10000,"P2018,useCDV,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(10000,"P2018,useCDV,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX","'${evtsFile}'")' &gt;&amp; ${logFile}
+  root.exe -q -b 'bfc.C(10000,"P2018,McTpcAna,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noRunco,StiCA,CorrX","'${evtsFile}'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
@@ -49,5 +50,7 @@
 <!-- <input URL="file:/star/data03/daq/2018/113/19113018/st_itpc*.daq" /> -->
 <!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/1911602*/*.daq" />  -->
 <!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/1911602*/*adc*.daq" /> -->
-<input URL="file:/star/data03/daq/2018/109/*/*.daq" /> 
+<!-- <input URL="file:/star/data03/daq/2018/109/*/*.daq" />  -->
+<!-- <input URL="file:/gpfs01/star/daq/2018/151/19151031/st_physics_adc_19151031_raw_1500002.daq" /> -->
+<input URL="file:/gpfs01/star/daq/2018/151/*/st_physics_adc_*.daq" />
 </job>
