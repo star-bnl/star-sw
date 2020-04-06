@@ -40,9 +40,12 @@ void xTCL::vfill(double *a,double f,int na)
 }
 //______________________________________________________________________________
 /*
-* $Id: xTCL.cxx,v 1.5 2014/02/18 19:45:49 perev Exp $
+* $Id: xTCL.cxx,v 1.6 2020/04/05 18:55:08 perev Exp $
 *
 * $Log: xTCL.cxx,v $
+* Revision 1.6  2020/04/05 18:55:08  perev
+* Supress eigen2
+*
 * Revision 1.5  2014/02/18 19:45:49  perev
 * Eigen2 copy of THelix one
 *
@@ -62,6 +65,7 @@ void xTCL::vfill(double *a,double f,int na)
 * Mathlib gen
 */
 //_____________________________________________________________________________
+#if 0
 static void eigen2(double G[3], double lam[2], double eig[2])
 {
   double spur = G[0]+G[2];
@@ -89,8 +93,8 @@ static void eigen2(double G[3], double lam[2], double eig[2])
   else {
     eig[0]=1;eig[1]=0;
   }
-
 }
+#endif
 //_____________________________________________________________________________
 double  xTCL::simpson(const double *F,double A,double B,int NP)
 {

@@ -449,7 +449,8 @@ for (int jkl=0;jkl<nkl;jkl++) {
    nSel = 0;nBad=0;
    for (StMultyKeyNode *node=0;(node = *iter);++iter)
    {
-     nSel++; int good = 0;
+     nSel++; 
+//      int good = 0;
 //      const float *key = node->GetKeys();
 //      for (int j=0;j<nk;j++) {if (key[j]>=dow[j] && key[j]<upp[j]) good++;}
 //      nBad += (good!=nk); 
