@@ -14,7 +14,7 @@ StEpdFastSim::StEpdFastSim(double WID){
 
   mTheHits = new TClonesArray("StPicoEpdHit",1000);
 
-  StEpdGeom* mGeom = new StEpdGeom();
+  mGeom = new StEpdGeom();
   mWID = WID;
 
 
