@@ -123,7 +123,7 @@ TDataSet *CreateTable() {
   /* Sigmas 
      Tpx inner = 0.395
      Tpx outer = 0.314
-     iTpc      = 0.322 Outer  0.316
+     iTpc      = 0.322 Outer  0.316 */
 #endif
   row.PolyaInner = 1.38;
   row.PolyaOuter = 1.38;
