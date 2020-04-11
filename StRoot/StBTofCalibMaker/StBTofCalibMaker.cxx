@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.cxx,v 1.18 2019/04/23 05:49:57 jdb Exp $
+ * $Id: StBTofCalibMaker.cxx,v 1.19 2020/04/10 20:41:38 zye20 Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,8 +10,14 @@
  *              - store into StBTofPidTraits
  *
  *****************************************************************
+ *Revision 1.19 2020/04/09 4pm, Zaochen
+ *implement Xin's updates to allow more pions and protons for the T0s in FXT mode
+ *add a flag mFXTMode: 0 for Collider mode, 1 for FXT mode 
  *
  * $Log: StBTofCalibMaker.cxx,v $
+ * Revision 1.19  2020/04/10 20:41:38  zye20
+ * Xin add more pions and add protons for T0s in the FXT mode
+ *
  * Revision 1.18  2019/04/23 05:49:57  jdb
  * Added function to allow forcing 0 starttime for totally startless BTOF usage in UPC
  *
@@ -122,6 +128,7 @@
 #include "StBTofCalibMaker.h"
 #include "StVpdCalibMaker/StVpdCalibMaker.h"
 #include "StVpdSimMaker/StVpdSimConfig.h"
+#include "StDetectorDbMaker/St_beamInfoC.h"
 
  /// Very High resolution mode, pico-second per bin
 const Double_t StBTofCalibMaker::VHRBIN2PS =  24.4140625; // 1000*25/1024 (ps/chn)
@@ -155,7 +162,8 @@ StBTofCalibMaker::StBTofCalibMaker(const char *name) : StMaker(name)
     mMuDstIn = kFALSE;
     mUseVpdStart = kTRUE;
     mForceTStartZero = false;
-     isMcFlag = kFALSE;
+    isMcFlag = kFALSE;
+    mFXTMode = kFALSE;
     
     setCreateHistoFlag(kFALSE);
     setHistoFileName("btofcalib.root");
@@ -238,7 +246,7 @@ Int_t StBTofCalibMaker::Init()
 Int_t StBTofCalibMaker::InitRun(int runnumber)
 {
   // tof run configurations
-
+  setFXTMode(St_beamInfoC::instance()->IsFixedTarget());
   /// retrieve the BTOF calibration parameters (from database or file)
   Int_t val = initParameters(runnumber);
   if(val==kStOK) {
@@ -1039,19 +1047,18 @@ void StBTofCalibMaker::tstart_NoVpd(const StBTofCollection *btofColl, const StPr
             if(pTrack->vertex() != pVtx) continue;
             StThreeVectorF mom = pTrack->geometry()->momentum();
             double ptot = mom.mag();
-            
-            // use lose cut for low energies to improve the efficiency - resolution is not a big issue
-            if(ptot<0.2 || ptot>0.6) continue;
-            
+            int q = pTrack->geometry()->charge();
+          
             static StTpcDedxPidAlgorithm PidAlgorithm;
             static StPionPlus* Pion = StPionPlus::instance();
+            static StProton* Proton = StProton::instance();
             const StParticleDefinition* pd = pTrack->pidTraits(PidAlgorithm);
             double nSigPi = -999.;
+            double nSigP = -999.;
             if(pd) {
                 nSigPi = PidAlgorithm.numberOfSigma(Pion);
+                nSigP = PidAlgorithm.numberOfSigma(Proton);
             }
-            
-            if( fabs(nSigPi)>2.0 ) continue;
             
             const StPtrVecTrackPidTraits& theTofPidTraits = pTrack->pidTraits(kTofId);
             if(!theTofPidTraits.size()) continue;
@@ -1074,15 +1081,37 @@ void StBTofCalibMaker::tstart_NoVpd(const StBTofCollection *btofColl, const StPr
             StPhysicalHelixD helix = pTrack->geometry()->helix();
             double L = tofPathLength(&primPos, &pidTof->position(), helix.curvature());
             double tofPi = L*sqrt(M_PION_PLUS*M_PION_PLUS+ptot*ptot)/(ptot*(C_C_LIGHT/1.e9));
+            double tofP  = L*sqrt(M_PROTON*M_PROTON+ptot*ptot)/(ptot*(C_C_LIGHT/1.e9));
             
-            tSum += tofcorr - tofPi;
-            t0[nCan] = tofcorr - tofPi;
-            nCan++;
-            
+            // use lose cut for low energies to improve the efficiency
+			if(mFXTMode) //use both Pion and Proton for FXT mode
+			{
+				if(( (q<0 && ptot>0.2) || (q>0 && ptot>0.2 && ptot<1.0)) && fabs(nSigPi)<2.0)//pi selection
+				{
+					tSum     += tofcorr - tofPi;
+					t0[nCan]  = tofcorr - tofPi;
+					nCan++;
+				}
+				else if(q>0 && fabs(nSigP)<2.0)//proton selection
+				{
+					tSum      += tofcorr - tofP;
+					t0[nCan]   = tofcorr - tofP;
+					nCan++;
+				}
+			}
+			else//If not FXT, Only use Pion
+			{
+				if(ptot>0.2 && ptot<0.6 && fabs(nSigPi)< 2.0)
+				{
+					tSum     += tofcorr - tofPi;
+					t0[nCan]  = tofcorr - tofPi;
+					nCan++;
+				}
+			}
+
         }
-        
     }
-    
+
     if(nCan<=0) {
         *tstart = -9999.;
     return;
@@ -1143,13 +1172,10 @@ void StBTofCalibMaker::tstart_NoVpd(const StMuDst *muDst, const StMuPrimaryVerte
             if(aVtx != pVtx) continue;
             StThreeVectorF mom = pTrack->momentum();
             double ptot = mom.mag();
-            
-            // For low energies, lose cut to improve the efficiency in peripheral collisions - resolution should be not a big issue
-            if(ptot<0.2 || ptot>0.6) continue;
+            int q = pTrack->charge();
+           
             double nSigPi = pTrack->nSigmaPion();
-
-            if( fabs(nSigPi)>2. ) continue;
-
+            double nSigP = pTrack->nSigmaProton();
             
             StMuBTofPidTraits pidTof = pTrack->btofPidTraits();
             
@@ -1173,16 +1199,38 @@ void StBTofCalibMaker::tstart_NoVpd(const StMuDst *muDst, const StMuPrimaryVerte
             StPhysicalHelixD helix = pTrack->helix();
             double L = tofPathLength(&primPos, &pidTof.position(), helix.curvature());
             double tofPi = L*sqrt(M_PION_PLUS*M_PION_PLUS+ptot*ptot)/(ptot*(C_C_LIGHT/1.e9));
+            double tofP  = L*sqrt(M_PROTON*M_PROTON+ptot*ptot)/(ptot*(C_C_LIGHT/1.e9));
             
-            tSum += tofcorr - tofPi;
-            t0[nCan] = tofcorr - tofPi;
-            nCan++;
-            
-        }
-        
-    }
-    
-    if(nCan<=0) {
+            // For low energies, lose cut to improve the efficiency in peripheral collisions - resolution should be not a big issue
+			if(mFXTMode) //use both Pion and Proton for FXT mode
+			{
+				if(( (q<0 && ptot>0.2) || (q>0 && ptot>0.2 && ptot<1.0)) && fabs(nSigPi)<2.0)//pi selection
+				{
+					tSum     += tofcorr - tofPi;
+					t0[nCan]  = tofcorr - tofPi;
+					nCan++;
+				}
+				else if(q>0 && fabs(nSigP)<2.0)//proton selection
+				{
+					tSum      += tofcorr - tofP;
+					t0[nCan]   = tofcorr - tofP;
+					nCan++;
+				}
+			}
+			else//If not FXT, Only use Pion
+			{
+				if(ptot>0.2 && ptot<0.6 && fabs(nSigPi)< 2.0)
+				{
+					tSum     += tofcorr - tofPi;
+					t0[nCan]  = tofcorr - tofPi;
+					nCan++;
+				}
+			}
+
+		}//tray
+	}//tof hit
+
+	if(nCan<=0) {
         *tstart = -9999.;
     return;
   }
@@ -1217,16 +1265,16 @@ void StBTofCalibMaker::bookHistograms()
 void StBTofCalibMaker::writeHistograms()
 {
 #if 0
-  // Output file
-  TFile *theHistoFile =  new TFile(mHistoFileName.c_str(), "RECREATE");
-  LOG_INFO << "StBTofCalibMaker::writeHistograms()"
-       << " histogram file " <<  mHistoFileName << endm;
-
-  theHistoFile->cd();
-
-  if(mHisto) {
-    hEventCounter->Write();
-  }
-  return;
+    // Output file
+    TFile *theHistoFile =  new TFile(mHistoFileName.c_str(), "RECREATE");
+    LOG_INFO << "StBTofCalibMaker::writeHistograms()"
+			 << " histogram file " <<  mHistoFileName << endm;
+    
+    theHistoFile->cd();
+    
+    if(mHisto) {
+        hEventCounter->Write();
+    }
+    return;
 #endif
 }

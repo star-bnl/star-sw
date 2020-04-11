@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.h,v 1.12 2019/04/23 05:49:57 jdb Exp $
+ * $Id: StBTofCalibMaker.h,v 1.13 2020/04/10 20:41:38 zye20 Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.h,v $
+ * Revision 1.13  2020/04/10 20:41:38  zye20
+ * Xin add more pions and add protons for T0s in the FXT mode
+ *
  * Revision 1.12  2019/04/23 05:49:57  jdb
  * Added function to allow forcing 0 starttime for totally startless BTOF usage in UPC
  *
@@ -117,6 +120,8 @@ public:
   void setVPDHitsCut(const Int_t, const Int_t);
   /// switch to read in StEvent/MuDst
   void setMuDstIn(const bool val=kTRUE);
+  /// switch to FXT mode to include protons in T0 calculation
+  void setFXTMode(const bool val=kTRUE);
 
   /// enable QA histogram filling
   void setCreateHistoFlag(Bool_t histos=kTRUE);
@@ -233,6 +238,7 @@ private:
     Bool_t            mUseEventVertex; //! switch for using event vertices
     Bool_t            mUseVpdStart;  //! switch for vpd start
     Bool_t            mForceTStartZero = false; //!switch to allow totally startless bTOF
+    Bool_t            mFXTMode = kFALSE; //! FXT mode, protons included in calculating T0
 
     string mCalibFilePvpd; //! filename for pvpd calibration parameters
     string mCalibFileTot;  //! filename for ToT calibration parameters
@@ -244,7 +250,7 @@ private:
     TH1D*    hEventCounter;     //!
             
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.12 2019/04/23 05:49:57 jdb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.13 2020/04/10 20:41:38 zye20 Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StBTofCalibMaker,3)
 };
@@ -263,5 +269,6 @@ inline void StBTofCalibMaker::setCalibFileZhit(const Char_t* filename) {mCalibFi
 inline void StBTofCalibMaker::setCalibFileT0(const Char_t* filename)   {mCalibFileT0 = filename;}
 inline Int_t StBTofCalibMaker::getZCalibType() {return Int_t(mZCalibType);}
 inline Int_t StBTofCalibMaker::getTotCalibType() {return Int_t(mTotCalibType);}
+inline void StBTofCalibMaker::setFXTMode(const Bool_t val) {mFXTMode = val;}
 
 #endif
