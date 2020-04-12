@@ -26,6 +26,10 @@
 #include "DSMLayer_B001_2015.hh"
 #include "DSMLayer_B101_2015.hh"
 #include "DSMLayer_EM201_2015.hh"
+//2017 dsm layers
+#include "DSMLayer_E001_2017.hh"
+#include "DSMLayer_E101_2017.hh"
+#include "DSMLayer_EM201_2017.hh"
 
 #include "TriggerDefinition.hh"
 #include "TCU.hh"

@@ -76,6 +76,18 @@ public:
   //2015 change
   int HTTP() const {return btest(EM201output(), 3);} //Bit 3
   int EB2B() const {return btest(EM201output(), 14);} //Bit 14
+  //2017 change
+  int BHT1_2017() const {return btest(EM201output(), 0);} 
+  int BHT2_2017() const {return btest(EM201output(), 1);} 
+  int BHT3_2017() const {return btest(EM201output(), 2);} 
+  int BJP1_2017() const {return btest(EM201output(), 6);} 
+  int BJP2_2017() const {return btest(EM201output(), 7);} 
+  int JP0_2017() const {return btest(EM201output(), 8);} 
+  int JP1_2017() const {return btest(EM201output(), 9);} 
+  int JP2_2017() const {return btest(EM201output(), 10);} 
+  int EJP1_2017() const {return btest(EM201output(), 11);} 
+  int EJP2_2017() const {return btest(EM201output(), 12);} 
+
   void setHeadMaker(StMaker*) { /* dummy */ }
 
   void InitRun(int runNumber);

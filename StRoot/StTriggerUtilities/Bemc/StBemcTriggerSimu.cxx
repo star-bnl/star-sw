@@ -294,22 +294,29 @@ void StBemcTriggerSimu::InitRun(int runnumber){
   }
   else {
     //Initialize DSM layers based on run number
-    //b001
-    if(year == 2015){
-      mB001 = new DSMLayer_B001_2015;
-    }else if(year == 2016){
-      mB001 = new DSMLayer_B001_2014_B;
-    }else
-      mB001     = new DSMLayer_B001_2009;
-    //b101
-    if(year == 2013 && runnumber >= 14081067){
-      mB101 = new DSMLayer_B101_2013;
+    //b001 and b101
+    if(year == 2009 || year == 2010 || year == 2011 || year == 2012 || year == 2014){
+	mB001 = new DSMLayer_B001_2009;
+        mB101 = new DSMLayer_B101_2009;
+    }else if(year==2013){
+	mB001 = new DSMLayer_B001_2009;
+	if(runnumber >= 14081067){
+          mB101 = new DSMLayer_B101_2013;
+        }else
+          mB101 = new DSMLayer_B101_2009;
     }else if(year == 2015){
+      mB001 = new DSMLayer_B001_2015;
       mB101 = new DSMLayer_B101_2015;
     }else if(year == 2016){
+      mB001 = new DSMLayer_B001_2014_B;
       mB101 = new DSMLayer_B101_2014_B;
-    }else
+    }else if(year == 2017){
+      mB001 = new DSMLayer_B001_2015;
+      mB101 = new DSMLayer_B101_2015;
+    }else{
+      mB001 = new DSMLayer_B001_2009;
       mB101 = new DSMLayer_B101_2009;
+    }
 
     if (mBemcStatus != "") {
       FEEini2009();
