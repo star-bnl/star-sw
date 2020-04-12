@@ -202,17 +202,16 @@ void DSMAlgo_EM201_2015::operator()(DSM& dsm)
   dsm.info[0] = jpSum1;
   dsm.info[1] = jpSum2;
 }
-
-int ajpBarrel(const DSM& em201, int offset)
+int DSMAlgo_EM201_2015::ajpBarrel(const DSM& dsm, int offset)
 {
   int jpBits[6];
 
   // BC101-106
 
   for (int ch = 0; ch < 6; ++ch)
-    jpBits[ch] = em201.channels[ch] >> offset & 0x3;
+    jpBits[ch] = dsm.channels[ch] >> offset & 0x3;
 
-  const int R3 = em201.registers[3]; // AJP-th-sel
+  const int R3 = dsm.registers[3]; // AJP-th-sel
 
   return ((jpBits[0] > R3 && jpBits[1] > R3) ||
 	  (jpBits[1] > R3 && jpBits[2] > R3) ||
@@ -221,24 +220,23 @@ int ajpBarrel(const DSM& em201, int offset)
 	  (jpBits[4] > R3 && jpBits[5] > R3) ||
 	  (jpBits[5] > R3 && jpBits[0] > R3));
 }
-
-int ajpEndcap(const DSM& em201)
+int DSMAlgo_EM201_2015::ajpEndcap(const DSM& dsm)
 {
   int jpBits[6];
 
   // EE101
 
-  jpBits[0] = em201.channels[6]      & 0x3; // JPA (4 o'clock)
-  jpBits[1] = em201.channels[6] >> 2 & 0x3; // JPB (6 o'clock)
-  jpBits[2] = em201.channels[6] >> 4 & 0x3; // JPC (8 o'clock)
+  jpBits[0] = dsm.channels[6]      & 0x3; // JPA (4 o'clock)
+  jpBits[1] = dsm.channels[6] >> 2 & 0x3; // JPB (6 o'clock)
+  jpBits[2] = dsm.channels[6] >> 4 & 0x3; // JPC (8 o'clock)
 
   // EE102
 
-  jpBits[3] = em201.channels[7]      & 0x3; // JPA (10 o'clock)
-  jpBits[4] = em201.channels[7] >> 2 & 0x3; // JPB (12 o'clock)
-  jpBits[5] = em201.channels[7] >> 4 & 0x3; // JPC (2  o'clock)
+  jpBits[3] = dsm.channels[7]      & 0x3; // JPA (10 o'clock)
+  jpBits[4] = dsm.channels[7] >> 2 & 0x3; // JPB (12 o'clock)
+  jpBits[5] = dsm.channels[7] >> 4 & 0x3; // JPC (2  o'clock)
 
-  const int R3 = em201.registers[3]; // AJP-th-sel
+  const int R3 = dsm.registers[3]; // AJP-th-sel
 
   return ((jpBits[0] > R3 && jpBits[1] > R3) ||
 	  (jpBits[1] > R3 && jpBits[2] > R3) ||
@@ -247,35 +245,34 @@ int ajpEndcap(const DSM& em201)
 	  (jpBits[4] > R3 && jpBits[5] > R3) ||
 	  (jpBits[5] > R3 && jpBits[0] > R3));
 }
-
-void getHybridJetPatchSums(const DSM& em201, int& jpSum1, int& jpSum2)
+void DSMAlgo_EM201_2015::getHybridJetPatchSums(const DSM& dsm, int& jpSum1, int& jpSum2)
 {
-  jpSum1 = em201.channels[6] >> 6 & 0x3f; // Partial sum from EE101
-  jpSum2 = em201.channels[7] >> 6 & 0x3f; // Partial sum from EE102
+  jpSum1 = dsm.channels[6] >> 6 & 0x3f; // Partial sum from EE101
+  jpSum2 = dsm.channels[7] >> 6 & 0x3f; // Partial sum from EE102
 
-  int jpId1 = em201.channels[6] >> 12 & 0x3; // Partial jet patch ID from EE101
-  int jpId2 = em201.channels[7] >> 12 & 0x3; // Partial jet patch ID from EE102
+  int jpId1 = dsm.channels[6] >> 12 & 0x3; // Partial jet patch ID from EE101
+  int jpId2 = dsm.channels[7] >> 12 & 0x3; // Partial jet patch ID from EE102
 
   switch (jpId1) {
-  case 1: jpSum1 += em201.channels[3] >> 6 & 0x3f; break; // Add partial sum from BC104 (4')
-  case 2: jpSum1 += em201.channels[4] >> 6 & 0x3f; break; // Add partial sum from BC105 (6')
-  case 3: jpSum1 += em201.channels[5] >> 6 & 0x3f; break; // Add partial sum from BC106 (8')
+  case 1: jpSum1 += dsm.channels[3] >> 6 & 0x3f; break; // Add partial sum from BC104 (4')
+  case 2: jpSum1 += dsm.channels[4] >> 6 & 0x3f; break; // Add partial sum from BC105 (6')
+  case 3: jpSum1 += dsm.channels[5] >> 6 & 0x3f; break; // Add partial sum from BC106 (8')
   }
 
   switch (jpId2) {
-  case 1: jpSum2 += em201.channels[0] >> 6 & 0x3f; break; // Add partial sum from BC101 (10')
-  case 2: jpSum2 += em201.channels[1] >> 6 & 0x3f; break; // Add partial sum from BC102 (12')
-  case 3: jpSum2 += em201.channels[2] >> 6 & 0x3f; break; // Add partial sum from BC103 (2')
+  case 1: jpSum2 += dsm.channels[0] >> 6 & 0x3f; break; // Add partial sum from BC101 (10')
+  case 2: jpSum2 += dsm.channels[1] >> 6 & 0x3f; break; // Add partial sum from BC102 (12')
+  case 3: jpSum2 += dsm.channels[2] >> 6 & 0x3f; break; // Add partial sum from BC103 (2')
   }
 }
 
-void getHTTP(const DSM &em201, int &b2b, int &nonadj)
+void DSMAlgo_EM201_2015::getHTTP(const DSM &dsm, int &b2b, int &nonadj)
 {
   b2b = 0;
   for(int ichn = 0, jchn = 3; ichn < 6 && ichn < jchn; ichn++, jchn = (ichn+3)%6){
-    int ihttp = (em201.channels[ichn] >> 15) & 0x1;
+    int ihttp = (dsm.channels[ichn] >> 15) & 0x1;
 //    jchn = (ichn + 3)%6;
-    int jhttp = (em201.channels[jchn] >> 15) & 0x1;
+    int jhttp = (dsm.channels[jchn] >> 15) & 0x1;
 
     b2b |= ihttp && jhttp;
 //    printf("b2b: %d=%d, %d=%d\n", ichn, ihttp, jchn, jhttp);
@@ -284,30 +281,30 @@ void getHTTP(const DSM &em201, int &b2b, int &nonadj)
   nonadj = 0;
 
   for(int ichn = 0; ichn < 6; ichn++){
-    int ihttp = (em201.channels[ichn] >> 15) & 0x1;
+    int ihttp = (dsm.channels[ichn] >> 15) & 0x1;
     for(int jchn = ichn + 2; jchn < ichn + 5 && jchn < 6; jchn++){
-      int jhttp = (em201.channels[jchn] >> 15) & 0x1;
+      int jhttp = (dsm.channels[jchn] >> 15) & 0x1;
       nonadj |= (ihttp && jhttp);
 //      printf("nonadj: %d=%d, %d=%d\n", ichn, ihttp, jchn, jhttp);
     }
   }
 }
 
-int getEB2B(const DSM& em201)
+int DSMAlgo_EM201_2015::getEB2B(const DSM& dsm)
 {
   int jpBits[6];
 
   // EE101
 
-  jpBits[0] = em201.channels[6]      & 0x3; // JPA (4 o'clock)
-  jpBits[1] = em201.channels[6] >> 2 & 0x3; // JPB (6 o'clock)
-  jpBits[2] = em201.channels[6] >> 4 & 0x3; // JPC (8 o'clock)
+  jpBits[0] = dsm.channels[6]      & 0x3; // JPA (4 o'clock)
+  jpBits[1] = dsm.channels[6] >> 2 & 0x3; // JPB (6 o'clock)
+  jpBits[2] = dsm.channels[6] >> 4 & 0x3; // JPC (8 o'clock)
 
   // EE102
 
-  jpBits[3] = em201.channels[7]      & 0x3; // JPA (10 o'clock)
-  jpBits[4] = em201.channels[7] >> 2 & 0x3; // JPB (12 o'clock)
-  jpBits[5] = em201.channels[7] >> 4 & 0x3; // JPC (2  o'clock)
+  jpBits[3] = dsm.channels[7]      & 0x3; // JPA (10 o'clock)
+  jpBits[4] = dsm.channels[7] >> 2 & 0x3; // JPB (12 o'clock)
+  jpBits[5] = dsm.channels[7] >> 4 & 0x3; // JPC (2  o'clock)
 
   int b2b = 0;
   int JP = 0;

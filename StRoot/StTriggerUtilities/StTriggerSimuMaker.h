@@ -76,6 +76,7 @@ private:
   bool getTriggerDefinitions(int runNumber);
   bool getTriggerThresholds(int runNumber);
 
+  void setTriggerThresholds2017();
 public:
   StTriggerSimuMaker(const char *name="StarTrigSimu");
   
@@ -128,16 +129,19 @@ public:
 
 
   //virtual const char *GetCVS() const
-  //{static const char cvs[]="Tag $Name:  $ $Id: StTriggerSimuMaker.h,v 1.34 2017/01/02 15:31:39 rfatemi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  //{static const char cvs[]="Tag $Name:  $ $Id: StTriggerSimuMaker.h,v 1.35 2020/04/12 03:56:25 zchang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StTriggerSimuMaker,0)
 };
 
 #endif
 
-// $Id: StTriggerSimuMaker.h,v 1.34 2017/01/02 15:31:39 rfatemi Exp $
+// $Id: StTriggerSimuMaker.h,v 1.35 2020/04/12 03:56:25 zchang Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.35  2020/04/12 03:56:25  zchang
+// Add EMC DSM algorithm for the 2017 pp run
+//
 // Revision 1.34  2017/01/02 15:31:39  rfatemi
 // Updated by Danny OLVITT for 2013 dijet analysiss
 //

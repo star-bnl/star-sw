@@ -8,7 +8,7 @@
 DSMLayer_B001_2014_B::DSMLayer_B001_2014_B() : DSMLayer_B001_2009()
 {
   // West
-  printf("DSMLayer_B001_2014_B constructor\n");
+  //printf("DSMLayer_B001_2014_B constructor\n");
   for (int dsm = 0; dsm < 15; ++dsm)
     (*this)[dsm].setName("BW", 0, dsm);
 

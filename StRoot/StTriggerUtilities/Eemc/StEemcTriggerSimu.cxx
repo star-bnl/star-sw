@@ -281,11 +281,23 @@ StEemcTriggerSimu::InitRun(int runnumber){
   // #### modified by Liaoyuan ####
   else if (mYear >= 2009) {
   // 2009
-  mE001 = new DSMLayer_E001_2009;
-  if(mYear == 2013 && runnumber >= 14081067){
-     mE101 = new DSMLayer_E101_2013;
-  }else
+  if(mYear == 2009 || mYear == 2010 || mYear == 2011 || mYear == 2012 || mYear == 2014 || mYear == 2015 || mYear == 2016){
+    mE001 = new DSMLayer_E001_2009;
     mE101 = new DSMLayer_E101_2009;
+  }else if(mYear == 2013){
+     mE001 = new DSMLayer_E001_2009;
+     if(runnumber >= 14081067){
+       mE101 = new DSMLayer_E101_2013;
+     }else{
+       mE101 = new DSMLayer_E101_2009;
+     }
+  }else if(mYear == 2017){
+    mE001 = new DSMLayer_E001_2017;
+    mE101 = new DSMLayer_E101_2017;
+  }else{
+    mE001 = new DSMLayer_E001_2009;
+    mE101 = new DSMLayer_E101_2009;
+  }
 
 #if 0
     DsmThreshold thresholds;
@@ -811,6 +823,9 @@ void StEemcTriggerSimu::fillStEmcTriggerDetector()
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.53  2020/04/12 03:56:25  zchang
+// Add EMC DSM algorithm for the 2017 pp run
+//
 // Revision 1.52  2020/01/13 20:45:50  zchang
 // removing old run13 dsm algo files
 //
