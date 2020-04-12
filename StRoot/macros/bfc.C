@@ -5,11 +5,12 @@
 // Modifications by J. Lauret, V, Prevotchikov, G.V. Buren, L. Didenko  //
 //                  and V. Fine                                         //
 //                                                                      //
-// $Id: bfc.C,v 1.193 2018/01/29 20:18:12 smirnovd Exp $
+// $Id: bfc.C,v 1.194 2020/04/12 20:24:18 perev Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
 #if !defined(__CINT__) || defined(__MAKECINT__)
+
 #include "Stiostream.h"
 #include "TSystem.h"
 #include "TClassTable.h"
@@ -18,6 +19,8 @@ class StMessMgr;
 #include "StBFChain.h"
 #include "StMessMgr.h"
 #include "TROOT.h"
+#include "TAttr.h"
+#include "Rtypes.h"
 #endif
 StBFChain    *chain=0; 
 //_____________________________________________________________________
@@ -53,20 +56,20 @@ void Load(const Char_t *options)
 
     
     if (!nodefault || TString(options).Contains("mysql",TString::kIgnoreCase)) {
-      Char_t *mysql = "libmysqlclient";
+      const Char_t *mysql = "libmysqlclient";
       //Char_t *mysql = "libmimerS"; // just to test it picks from OPTSTAR
 
       //
       // May use USE_64BITS - the x8664 work fine too
       //
-      Char_t *libsLocal[]= {"",
+      const Char_t *libsLocal[]= {"",
 	                    "$OPTSTAR/lib/",
 			    "$OPTSTAR/lib/mysql/",
 			    "/usr/lib/", 
 			    "/usr/lib/mysql/", 
 			    "/usr/mysql/lib/",
 			    NULL}; 
-      Char_t *libsGlbal[]= {"", 
+      const Char_t *libsGlbal[]= {"", 
 			    "/usr/lib/", 
 			    "/usr/lib/mysql/", 
 			    "/usr/mysql/lib/",
@@ -74,7 +77,7 @@ void Load(const Char_t *options)
 			    "$OPTSTAR/lib/mysql/",
 			    NULL}; 
 
-      Char_t **libs;
+      const Char_t **libs;
 
       if ( gSystem->Getenv("USE_LOCAL_MYSQL") ){
 	libs = libsLocal;
@@ -85,7 +88,7 @@ void Load(const Char_t *options)
 
       TString Arch( gSystem->GetBuildArch() );
       Bool_t i64 = kFALSE;
-      if ( gSystem->Getenv("USE_64BITS")==1 || Arch.Contains("x8664")) i64 = kTRUE;
+      if ( gSystem->Getenv("USE_64BITS") || Arch.Contains("x8664")) i64 = kTRUE;
 
       Int_t i = 0;
       while ((libs[i])) {
@@ -106,7 +109,6 @@ void Load(const Char_t *options)
   }
   gSystem->Load("libSt_base");                                        //  StMemStat::PrintMem("load St_base");
   // Look up for the logger option
-  Bool_t needLogger  = kFALSE;
   if (gSystem->Load("liblog4cxx.so") >=  0) {             //  StMemStat::PrintMem("load log4cxx");
     cout << " + liblog4cxx.so";
     if(gSystem->Load("libStStarLogger.so") >= 0) {              //  StMemStat::PrintMem("load log4cxx");
