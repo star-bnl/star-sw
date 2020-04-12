@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.h,v 1.9 2016/06/30 17:09:56 jdb Exp $
+ * $Id: StBTofCalibMaker.h,v 1.11 2017/10/20 17:50:32 smirnovd Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,24 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.h,v $
+ * Revision 1.11  2017/10/20 17:50:32  smirnovd
+ * Squashed commit of the following:
+ *
+ *     StBTof: Remove outdated ClassImp macro
+ *
+ *     Prefer explicit namespace for std:: names in header files
+ *
+ *     Removed unnecessary specification of default std::allocator
+ *
+ * Frank signed-off
+ *
+ * Revision 1.10  2017/03/02 18:30:44  jeromel
+ * Changes by jdb, nl - inData.open() of files on live disk TBF later
+ *
+ * Revision 1.10 2016/11/14 11:32:15  nluttrel
+ * Simulated hits no longer undergo electronics corrections
+ * If StVpdSimMaker used in chain, defaults to use Vpd start time
+ *
  * Revision 1.9  2016/06/30 17:09:56  jdb
  * Fixed Several errors identified by Coverity
  *
@@ -55,10 +73,6 @@
 
 #include <string>
 #include <vector>
-#ifndef ST_NO_NAMESPACES
-using std::string;
-using std::vector;
-#endif
 
 class StEvent;
 class StPrimaryVertex;
@@ -72,13 +86,8 @@ class StMuPrimaryVertex;
 class StMuBTofPidTraits;
 #include "StPhysicalHelixD.hh"
 
-#if !defined(ST_NO_TEMPLATE_DEF_ARGS) || defined(__CINT__)
-typedef vector<Int_t>  IntVec;
-typedef vector<Double_t>  DoubleVec;
-#else
-typedef vector<Int_t, allocator<Int_t>>  IntVec;
-typedef vector<Double_t, allocator<Double_t>>  DoubleVec;
-#endif
+typedef std::vector<Int_t>  IntVec;
+typedef std::vector<Double_t>  DoubleVec;
 
 class StBTofCalibMaker : public StMaker{
 public:
@@ -142,7 +151,7 @@ private:
   void processStEvent();
   ///
   void processMuDst();
-  ///
+
   void cleanCalibMuDst();
   void cleanCalib(StMuBTofPidTraits&);  //! functions to clean up calib done before in MuDst
         
@@ -218,6 +227,7 @@ private:
     StBTofHeader*     mBTofHeader;
     StMuDst*          mMuDst;
     Bool_t            mMuDstIn;
+    Bool_t            isMcFlag;
 
     Bool_t            mOuterGeometry;
     Bool_t            mSlewingCorr;  //! switch for slewing correction since run 8
@@ -235,7 +245,7 @@ private:
     TH1D*    hEventCounter = nullptr;     //!
             
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.9 2016/06/30 17:09:56 jdb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.11 2017/10/20 17:50:32 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StBTofCalibMaker,3)
 };

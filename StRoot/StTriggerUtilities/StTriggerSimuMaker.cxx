@@ -11,7 +11,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.61 2016/03/18 22:49:38 zchang Exp $
+//<<<<<<< StTriggerSimuMaker.cxx
+// $Id: StTriggerSimuMaker.cxx,v 1.67 2020/04/12 03:56:24 zchang Exp $
+//=======
+// $Id: StTriggerSimuMaker.cxx,v 1.67 2020/04/12 03:56:24 zchang Exp $
+//>>>>>>> 1.61
 
 // MySQL C API
 //#include "mysql.h"
@@ -86,10 +90,12 @@ StTriggerSimuMaker::StTriggerSimuMaker(const char *name):StMaker(name) {
       mSimulators[a]=0;
     }
 
-    fill(mBarrelJetPatchTh,mBarrelJetPatchTh+3,-1);
+    //fill(mBarrelJetPatchTh,mBarrelJetPatchTh+3,-1);
+    fill(mBarrelJetPatchTh,mBarrelJetPatchTh+4,-1);
     fill(mBarrelHighTowerTh,mBarrelHighTowerTh+4,-1);
 
-    fill(mEndcapJetPatchTh,mEndcapJetPatchTh+3,-1);
+    //fill(mEndcapJetPatchTh,mEndcapJetPatchTh+3,-1);
+    fill(mEndcapJetPatchTh,mEndcapJetPatchTh+4,-1);
     fill(mEndcapHighTowerTh,mEndcapHighTowerTh+2,-1);
 
     fill(mOverlapJetPatchTh,mOverlapJetPatchTh+3,-1);
@@ -164,44 +170,49 @@ void StTriggerSimuMaker::Clear(const Option_t*){
 }
 
 Int_t StTriggerSimuMaker::InitRun(int runNumber) {
-    const TDatime& dbTime = GetDBTime();
-    mYear = dbTime.GetYear();
-    LOG_INFO << "runNumber=" << runNumber << " with DB timestamp " << dbTime.AsSQLString() << endm;
+ 
+  assert(runNumber != -1); 
+  const TDatime& dbTime = GetDBTime();
+  mYear = dbTime.GetYear();
+  LOG_INFO << "runNumber=" << runNumber << " with DB timestamp " << dbTime.AsSQLString() << endm;
 
-    //Use unified EMC trigger for EEMC/BEMC triggers in year 2009 or later
-    if (mYear >= 2009 && (mSimulators[0] || mSimulators[2])) {
-      emc->setHeadMaker(this);
-      emc->setBemc(bemc);
-      emc->setEemc(eemc);
-      emc->setMC(mMCflag);
-      emc->setYear(mYear);
-      LOG_INFO<<Form("set year %d for emc trigger definition", mYear)<<endm;
-      mSimulators[3] = emc;
-      if (!mUseOnlineDB && !mUseOfflineDB) {
-	LOG_ERROR << "!!! ATTENTION !!! YOU MUST SPECIFY WHICH DATABASE TO USE FOR TRIGGER DEFINITIONS AND THRESHOLDS:" << endm;
-	LOG_ERROR << "StTriggerSimuMaker::useOnlineDB()" << endm;
-	LOG_ERROR << "StTriggerSimuMaker::useOfflineDB()" << endm;
-	assert(mUseOnlineDB || mUseOfflineDB);
-      }
-      assert((mUseOnlineDB  && get2009DsmRegistersFromOnlineDatabase (runNumber)) ||
-	     (mUseOfflineDB && get2009DsmRegistersFromOfflineDatabase(runNumber)));
-      LOG_INFO << "Overwriting the following registers:" << endm;
-      overwrite2009DsmRegisters();
-      if (mChangeJPThresh) {
-	LOG_INFO << "Shift the following registers by " << mChangeJPThresh << ":" << endm;
-	changeJetPatchTh();
-      }
+  for (Int_t i = 0; i < numSimulators; ++i)
+    if (mSimulators[i])
+      mSimulators[i]->InitRun(runNumber);
+  //Use unified EMC trigger for EEMC/BEMC triggers in year 2009 or later
+  if (mYear >= 2009 && (mSimulators[0] || mSimulators[2])) {
+    emc->setHeadMaker(this);
+    emc->setBemc(bemc);
+    emc->setEemc(eemc);
+    emc->setMC(mMCflag);
+    emc->setYear(mYear);
+    emc->InitRun(runNumber); //init run for emc
+    LOG_INFO<<Form("set year %d for emc trigger definition", mYear)<<endm;
+    mSimulators[3] = emc;
+    if (!mUseOnlineDB && !mUseOfflineDB) {
+      LOG_ERROR << "!!! ATTENTION !!! YOU MUST SPECIFY WHICH DATABASE TO USE FOR TRIGGER DEFINITIONS AND THRESHOLDS:" << endm;
+      LOG_ERROR << "StTriggerSimuMaker::useOnlineDB()" << endm;
+      LOG_ERROR << "StTriggerSimuMaker::useOfflineDB()" << endm;
+      assert(mUseOnlineDB || mUseOfflineDB);
     }
-
-    for (Int_t i = 0; i < numSimulators; ++i)
-      if (mSimulators[i])
-	mSimulators[i]->InitRun(runNumber);
-
-    return kStOK;
+    assert((mUseOnlineDB  && get2009DsmRegistersFromOnlineDatabase (runNumber)) ||
+	   (mUseOfflineDB && get2009DsmRegistersFromOfflineDatabase(runNumber)));
+    //LOG_INFO << "Overwriting the following registers:" << endm;
+    //overwrite2009DsmRegisters();
+    if (mChangeJPThresh) {
+      LOG_INFO << "Shift the following registers by " << mChangeJPThresh << ":" << endm;
+      changeJetPatchTh();
+    }
+    if(mYear == 2017){
+      setTriggerThresholds2017();
+    }
+  }
+  
+  return kStOK;
 }
 
 Int_t StTriggerSimuMaker::Make() {
-   
+  
   for(Int_t i=0; i<numSimulators; i++) {
     if (mSimulators[i]){
       mSimulators[i]->Make();
@@ -349,6 +360,7 @@ bool StTriggerSimuMaker::getTriggerDefinitions(int runNumber)
       buf >> a;
       for (int i = 0; i < a->GetEntriesFast(); ++i) {
 	StTriggerDefinition* trigdef = dynamic_cast<StTriggerDefinition*>(a->At(i));
+        if(!trigdef) continue;
 	LOG_INFO << setw(20) << trigdef->triggerIndex
 		 << setw(20) << trigdef->name
 		 << setw(20) << trigdef->triggerId
@@ -382,7 +394,76 @@ bool StTriggerSimuMaker::getTriggerDefinitions(int runNumber)
   }
   return false;
 }
+void StTriggerSimuMaker::setTriggerThresholds2017()
+{
+  LOG_INFO<<"Resetting the following BEMC DSM thresholds for year 2017"<<endm;
+  LOG_INFO<<Form("BEMC-EEMC-overlap-JP-th0: %d", 30)<<endm;
+  LOG_INFO<<Form("BEMC-EEMC-overlap-JP-th1: %d", 43)<<endm;
+  LOG_INFO<<Form("BEMC-EEMC-overlap-JP-th2: %d", 66)<<endm;
+  LOG_INFO<<Form("EMC-HTTP-Sel: %d", 0)<<endm;
 
+  //set BEMC EM201 registers
+  emc->get2009_DSMLayer2_Result()->setRegister(0,30);
+  emc->get2009_DSMLayer2_Result()->setRegister(1,43);
+  emc->get2009_DSMLayer2_Result()->setRegister(2,66);
+  emc->get2009_DSMLayer2_Result()->setRegister(3,0);
+  //crateAt(1).boardAt(20<<24).registerAt((0%100)<<24) = 30;
+  //crateAt(1).boardAt(20<<24).registerAt((1%100)<<24) = 43;
+  //crateAt(1).boardAt(20<<24).registerAt((2%100)<<24) = 66;
+  //set EE101 and EE102 thresholds
+  LOG_INFO<<Form("EEMC-JP-th0: %d", 30)<<endm;
+  LOG_INFO<<Form("EEMC-JP-th1: %d", 43)<<endm;
+  LOG_INFO<<Form("EEMC-JP-th2: %d", 66)<<endm;
+  
+  eemc->get2009_DSMLayer1_Result()->setRegister(0, 30);
+  eemc->get2009_DSMLayer1_Result()->setRegister(1, 43);
+  eemc->get2009_DSMLayer1_Result()->setRegister(2, 66);
+  //crateAt(2).boardAt(21<<24).registerAt((0%100)<<24) = 30;
+  //crateAt(2).boardAt(21<<24).registerAt((1%100)<<24) = 43;
+  //crateAt(2).boardAt(21<<24).registerAt((2%100)<<24) = 66;
+  //crateAt(2).boardAt(22<<24).registerAt((0%100)<<24) = 30;
+  //crateAt(2).boardAt(22<<24).registerAt((1%100)<<24) = 43;
+  //crateAt(2).boardAt(22<<24).registerAt((2%100)<<24) = 66;
+  LOG_INFO<<Form("BEMC-HT-th1: %d", 18)<<endm;
+  LOG_INFO<<Form("BEMC-HT-th2: %d", 25)<<endm;
+  LOG_INFO<<Form("BEMC-HT-th3: %d", 31)<<endm;
+  LOG_INFO<<Form("BEMC-HT-UPC %d", 3)<<endm;
+  LOG_INFO<<Form("BEMC-TP-UPC: %d", 3)<<endm;
+  //BEMC west
+  for (int dsm = 0; dsm < 15; ++dsm){
+    (*bemc->get2009_DSMLayer0_Result())[dsm].registers[0] = 18;
+    (*bemc->get2009_DSMLayer0_Result())[dsm].registers[1] = 25;
+    (*bemc->get2009_DSMLayer0_Result())[dsm].registers[2] = 31;
+    (*bemc->get2009_DSMLayer0_Result())[dsm].registers[3] = 3;
+    (*bemc->get2009_DSMLayer0_Result())[dsm].registers[4] = 3;
+  }
+  //for(int i = 0; i < 15; i++){
+  //crateAt(5).boardAt((16+i)<<24).registerAt((0%100)<<24) = 18;
+  //crateAt(5).boardAt((16+i)<<24).registerAt((1%100)<<24) = 25;
+  //crateAt(5).boardAt((16+i)<<24).registerAt((2%100)<<24) = 31;
+  //crateAt(5).boardAt((16+i)<<24).registerAt((3%100)<<24) = 3;
+  //crateAt(5).boardAt((16+i)<<24).registerAt((4%100)<<24) = 3;
+  //}
+  //BEMC east
+  for (int dsm = 15; dsm < 30; ++dsm){
+    (*bemc->get2009_DSMLayer0_Result())[dsm].registers[0] = 18;
+    (*bemc->get2009_DSMLayer0_Result())[dsm].registers[1] = 25;
+    (*bemc->get2009_DSMLayer0_Result())[dsm].registers[2] = 31;
+    (*bemc->get2009_DSMLayer0_Result())[dsm].registers[3] = 3;
+    (*bemc->get2009_DSMLayer0_Result())[dsm].registers[4] = 3;
+  }
+  //for(int i = 0; i < 15; i++){
+  //crateAt(6).boardAt((16+i)<<24).registerAt((0%100)<<24) = 18;
+  //crateAt(6).boardAt((16+i)<<24).registerAt((1%100)<<24) = 25;
+  //crateAt(6).boardAt((16+i)<<24).registerAt((2%100)<<24) = 31;
+  //crateAt(6).boardAt((16+i)<<24).registerAt((3%100)<<24) = 3;
+  //crateAt(6).boardAt((16+i)<<24).registerAt((4%100)<<24) = 3;
+  //}
+  //eemc->get2009_DSMLayer0_Result()->setRegister(0, 25);  
+  //eemc->get2009_DSMLayer0_Result()->setRegister(1, 31);  
+  //eemc->get2009_DSMLayer0_Result()->setRegister(2, 5);  
+  //eemc->get2009_DSMLayer0_Result()->setRegister(3, 5);  
+}
 bool StTriggerSimuMaker::getTriggerThresholds(int runNumber)
 {
   TDataSet* DB = GetInputDB("Calibrations/trg");
@@ -406,6 +487,7 @@ bool StTriggerSimuMaker::getTriggerThresholds(int runNumber)
       buf >> a;
       for (int i = 0; i < a->GetEntriesFast(); ++i) {
 	StTriggerThreshold* trigthr = dynamic_cast<StTriggerThreshold*>(a->At(i));
+        if(!trigthr) continue;
 	LOG_INFO << setw(20) << trigthr->object
 		 << setw(20) << trigthr->index
 		 << setw(20) << trigthr->reg
@@ -469,7 +551,7 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
   // Open connection to online database
 
   MYSQL mysql;
-  const char* host = "dbbak.starp.bnl.gov";
+  const char* host = "db04.star.bnl.gov";
   const char* user = "";
   const char* pass = "";
 
@@ -542,52 +624,100 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 	       << endm;
 
       if (value == -1) value = defaultvalue;
+      if(mYear >= 2009 && mYear <= 2013)
+	{
+	  switch (object) {
+	  case L1_CONF_NUM:
+	    switch (idx) {
+	    case 20:		// EM201
+	      emc->get2009_DSMLayer2_Result()->setRegister(reg,value);
+	      break;
+	    case 30:		// LD301
+	      emc->get2009_DSMLayer3_Result()->setRegister(reg,value);
+	      break;
+	    }
+	    break;
+	  case BC1_CONF_NUM:
+	    switch (idx) {
+	    case 21:		// EE101
+	      eemc->get2009_DSMLayer1_Result()->setRegister(reg,value);
+	      break;
+	    case 23:		// EE001
+	      eemc->get2009_DSMLayer0_Result()->setRegister(reg,value);
+	      break;
+	    case 33:		// BC101
+	      bemc->get2009_DSMLayer1_Result()->setRegister(reg,value);
+	      break;
+	    }
+	    break;
+	  case BCW_CONF_NUM:
+	    switch (idx) {
+	    case 16:		// BW001
+	      for (int dsm = 0; dsm < 15; ++dsm)
+		(*bemc->get2009_DSMLayer0_Result())[dsm].registers[reg] = value;
+	      break;
+	    }
+	    break;
+	  case BCE_CONF_NUM:
+	    switch (idx) {
+	    case 16:		// BE001
+	      for (int dsm = 15; dsm < 30; ++dsm)
+		(*bemc->get2009_DSMLayer0_Result())[dsm].registers[reg] = value;
+	      break;
+	    }
+	    break;
+	  }
+	}
 
-      switch (object) {
-      case L1_CONF_NUM:
-	switch (idx) {
-	case 20:		// EM201
-	  emc->get2009_DSMLayer2_Result()->setRegister(reg,value);
-	  break;
-	case 30:		// LD301
-	  emc->get2009_DSMLayer3_Result()->setRegister(reg,value);
-	  break;
+  else if(mYear >= 2013)
+	{
+	  switch (object) {
+	  case L1_CONF_NUM:
+	    switch (idx) {
+	    case 20:		// EM201
+	      emc->get2009_DSMLayer2_Result()->setRegister(reg,value);
+	      break;
+	    case 30:		// LD301
+	      emc->get2009_DSMLayer3_Result()->setRegister(reg,value);
+	      break;
+	    }
+	    break;
+	  case BC1_CONF_NUM:
+	    switch (idx) {
+	    case 21:		// EE101
+	      eemc->get2009_DSMLayer1_Result()->setRegister(reg,value);
+	      break;
+	    case 23:		// EE001
+	      eemc->get2009_DSMLayer0_Result()->setRegister(reg,value);
+	      break;
+	    case 33:		// BC101
+	      bemc->get2009_DSMLayer1_Result()->setRegister(reg,value);
+	      break;
+	    }
+	    break;
+	  case BCW_CONF_NUM:
+	    switch (idx) {
+	    case 16:		// BW001
+	      for (int dsm = 0; dsm < 15; ++dsm)
+		(*bemc->get2009_DSMLayer0_Result())[dsm].registers[reg] = value;
+	      break;
+	    }
+	    break;
+	  case BCE_CONF_NUM:
+	    switch (idx) {
+	    case 16:		// BE001
+	      for (int dsm = 15; dsm < 30; ++dsm)
+		(*bemc->get2009_DSMLayer0_Result())[dsm].registers[reg] = value;
+	      break;
+	    }
+	    break;
+	    }
 	}
-	break;
-      case BC1_CONF_NUM:
-	switch (idx) {
-	case 21:		// EE101
-	  eemc->get2009_DSMLayer1_Result()->setRegister(reg,value);
-	  break;
-	case 23:		// EE001
-	  eemc->get2009_DSMLayer0_Result()->setRegister(reg,value);
-	  break;
-	case 33:		// BC101
-	  bemc->get2009_DSMLayer1_Result()->setRegister(reg,value);
-	  break;
-	}
-	break;
-      case BCW_CONF_NUM:
-	switch (idx) {
-	case 16:		// BW001
-	  for (int dsm = 0; dsm < 15; ++dsm)
-	    (*bemc->get2009_DSMLayer0_Result())[dsm].registers[reg] = value;
-	  break;
-	}
-	break;
-      case BCE_CONF_NUM:
-	switch (idx) {
-	case 16:		// BE001
-	  for (int dsm = 15; dsm < 30; ++dsm)
-	    (*bemc->get2009_DSMLayer0_Result())[dsm].registers[reg] = value;
-	  break;
-	}
-	break;
-      }
+      
     }
     mysql_free_result(result);
   }
-
+  
   //  LOG_INFO << "The following registers have new values:" << endm;
 
   // Trigger definitions
@@ -676,7 +806,7 @@ void StTriggerSimuMaker::overwrite2009DsmRegisters()
 	       << setw(20) << value
 	       << endm;
       bemc->get2009_DSMLayer1_Result()->setRegister(reg,value);
-    }
+   }
   }
 
   for (int reg = 0; reg < 4; ++reg) {
@@ -764,6 +894,26 @@ void StTriggerSimuMaker::setLastDsmRegister(int reg, int value)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.67  2020/04/12 03:56:24  zchang
+ * Add EMC DSM algorithm for the 2017 pp run
+ *
+ * Revision 1.66  2020/01/13 20:45:47  zchang
+ * removing old run13 dsm algo files
+ *
+ * Revision 1.65  2017/12/29 16:54:07  zchang
+ * remove direct query to STAR database server in InitRun(int), users need to make sure that the trigger simulator retrives correct run number
+ *
+ * Revision 1.64  2017/12/28 21:14:45  zchang
+ * switch database server from dbbak.starp.bnl.gov to db04.star.bnl.gov
+ *
+ * Revision 1.63  2017/06/09 20:11:25  zchang
+ * Add pointer guard for trigger definition and trigger threshold tables, the pointers can not be null
+ *
+ * Revision 1.62  2017/01/02 15:31:39  rfatemi
+ * Updated by Danny OLVITT for 2013 dijet analysiss
+ *
+<<<<<<< StTriggerSimuMaker.cxx
+=======
  * Revision 1.61  2016/03/18 22:49:38  zchang
  * updating trigger simulator for run12 analysis
  *
@@ -779,6 +929,7 @@ void StTriggerSimuMaker::setLastDsmRegister(int reg, int value)
  * Revision 1.57  2013/11/21 20:52:53  zchang
  * add getpwuid to get user name to access database
  *
+>>>>>>> 1.61
  * Revision 1.53  2012/07/13 16:47:26  pibero
  * Users must now specify database to use for trigger definitions and thresholds
  *

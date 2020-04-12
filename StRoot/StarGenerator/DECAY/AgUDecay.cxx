@@ -25,7 +25,11 @@ extern "C" {
 
   };
 
+  void gsking_(int &igk);
+
 }
+//
+void gsking( int igk ){ gsking_(igk); }
 //
 // --------------------------------------------------------------------------------------------------
 //
@@ -41,7 +45,7 @@ Int_t AgUDecay::operator()()
   float y = gctrak.vect[1];
   float z = gctrak.vect[2];
 
-  LOG_INFO << Form(">>> decay() called x=%f y=%f z=%f <<<",x,y,z) << endm;
+  //  LOG_INFO << Form(">>> decay() called x=%f y=%f z=%f <<<",x,y,z) << endm;
   if (0==mDecayer) return 0; // no decayer registerd
 
   //  int np = 0;
@@ -55,7 +59,7 @@ Int_t AgUDecay::operator()()
   double px   = double( gctrak.vect[3] ) * pmom;
   double py   = double( gctrak.vect[4] ) * pmom;
   double pz   = double( gctrak.vect[5] ) * pmom;
-  double E    = double( gctrak.getot   );
+  double E    = double( gctrak.getot   ); // Input energy
 
   mP[0] = px; mP[1] = py; mP[2] = pz; mP[3] = E;
 
@@ -72,7 +76,10 @@ Int_t AgUDecay::operator()()
   int np = mDecayer -> ImportParticles( mArray ); if ( np<1 ) return np;
 
   // Flag deselected particles
-  vector<int> flags(np);
+  //vector<int> flags(np); // this causes a mystery crash when flags dtor is called
+  int flags[np]; for ( int i=0;i<np;i++ ) flags[i] = 0;
+
+  //  mArray -> Print();
 
   for ( int i=1 /* first daughter */; i < np; i++ )
     {
@@ -88,7 +95,9 @@ Int_t AgUDecay::operator()()
       // If the particle has been deselected skip and deselect its daughters as well
       if ( 1 == flags[i] )
       	{
-      	  if (first>0) for ( int j=first-1;j<last;j++ ) flags[j]=1;
+      	  if (first>0) { for ( int j=first;j<=last;j++ ) flags[j]=1;
+	    //LOG_INFO << "i = " << i << " deselect: j=" << first << " to " << last << endm; 
+	  }
       	  continue;
       	}
 
@@ -102,7 +111,11 @@ Int_t AgUDecay::operator()()
 	  //
 	  if ( kDecay == mDiscovery ) 
 	    {
-	      if (first>0) for ( int j=first-1;j<last;j++ ) flags[j]=0;
+	      if (first>0) { for ( int j=first;j<last+1;j++ ) flags[j]=0;
+		//LOG_INFO << "i = " << i << " DESELECT: j=" << first << " to " << last << endm; 
+	      }
+	      // NOTE: should probably flag this particle before hitting continue...
+	      //    ... who decides which particles get stacker?
 	      continue;
 	    }
 
@@ -117,12 +130,19 @@ Int_t AgUDecay::operator()()
 
 	}
 
+      
+      int kflag = 0;
 
       // Long lived particles are stacked for further tracking.  
       if ( 1 != status )
       	{
+
+	  bool stack = true;
+
+	  if ( pdgid == 15 || pdgid == -15 ) stack=false;
+
       	  double lifetime = mDecayer->GetLifetime(pdgid); 
-      	  if ( true /* lifetime > double( 1.0E-15 ) */ )
+      	  if ( stack /* lifetime > double( 1.0E-15 ) */ )
       	    {
       	      // Particle is stacked, skip daughters
       	      if (first>0) for (int j=first;j<=last;j++ ) flags[j]=1;
@@ -135,23 +155,22 @@ Int_t AgUDecay::operator()()
       	  else if (first>0)
       	    {
       	      // Particle is decayed (skipped), stack daughters
-      	      LOG_INFO << "Decay particle, stack daughters tlife=" << lifetime << endm;
-      	      particlePDG->Print();
+      	      //LOG_INFO << "Decay particle, stack daughters tlife=" << lifetime << endm;
+	      //      	      particlePDG->Print();
       	      flags[i] = 1; 
-      	      continue; 
+	      //	      continue; 
       	    }
       	  else {
-      	    LOG_INFO << "Stack particle, stable tlife=" << lifetime << endm;
+	    //      	    LOG_INFO << "Stack particle, stable tlife=" << lifetime << endm;
       	  }
 	  
       	}
+
 
       // Neutrinos are skipped
       if ( pdgid == 12 || pdgid == -12 ){ flags[i]=1; continue; }
       if ( pdgid == 14 || pdgid == -14 ){ flags[i]=1; continue; }
       if ( pdgid == 16 || pdgid == -16 ){ flags[i]=1; continue; }
-
-
 
       // This is the current stack position
       int &index = gcking.ngkine;
@@ -173,10 +192,26 @@ Int_t AgUDecay::operator()()
       // time of flight offset (mm)... (huh?)
       (gcking.tofd[index])    = 0.;
 
+      // Set the flag to handle the particle in GSKING.   We currently skip particles
+      // which we have decayed with the "continue" statements above.  This is because
+      // the STAR stepping routine drops the iflgk flag before the call to gsking which
+      // processes it.... 
+      //
+      // so in order to preserve the particle in the event record, we will need to add
+      // a call to gsking in this routine.  (And test test test test...) 
+      (gcking.iflgk[index])   = kflag;
+
       // And increase stack counter
       index++;
 
     }
+
+
+  /* call */ gsking(0); // store daughters in the kinematics bank
+
+  gcking.ngkine = 0;     // and reset
+
+
 
   return np;
 }

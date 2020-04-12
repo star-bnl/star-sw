@@ -1,5 +1,5 @@
 /**
- * $Id: StTinyMcTrack.h,v 1.13 2011/04/01 20:00:17 perev Exp $
+ * $Id: StTinyMcTrack.h,v 1.14 2018/01/03 18:18:09 genevb Exp $
  * \file  StTinyMcTrack.h
  * \brief   Persistent MC track class.
  * 
@@ -43,10 +43,10 @@ class StTinyMcTrack : public TObject {
   void setNAssocGl(Short_t val) { mNAssocGl= val; }
   void setNAssocPr(Short_t val) { mNAssocPr= val; }
   void setStopR(Float_t val) { mStopR=val; }
-  void setKey(Short_t val) { mKey=val; }
+  void setKey(Int_t val) { mKey=val; }
   void setPrimary(Bool_t val) { mIsPrimary = val;}
   void setValid() {mIsValid = 1;}
-  void setParentKey(Short_t val) { mParentKey=val; }
+  void setParentKey(Int_t val) { mParentKey=val; }
   void setParentGeantId(int val);
   void setEmcEnergyMcHit(Float_t val,size_t index) {if (index<3) mEmcEnergyMcHit[index]=val;}
   void setEmcEnergyMcSum(Float_t val) {mEmcEnergyMcSum=val;}  
@@ -76,11 +76,11 @@ class StTinyMcTrack : public TObject {
   short nAssocGl() const { return mNAssocGl; }
   short nAssocPr() const { return mNAssocPr; }
   float stopR() const { return mStopR; }
-  short key() const { return mKey; }
+    int key() const { return mKey; }
   Bool_t isPrimary() const {return mIsPrimary;}
   Bool_t isValid() {return  mIsValid;}
   virtual void Print(Option_t *option="") const;
-  short parentKey() const { return mParentKey; }
+    int parentKey() const { return mParentKey; }
     int parentGeantId() const { return mParentGeantId; }
   float emcEnergyMcHit(size_t index) const { if (index<3) return mEmcEnergyMcHit[index]; else return -999;}
   float emcEnergyMcSum() const { return mEmcEnergyMcSum; }
@@ -109,8 +109,8 @@ private:
   Int_t      mPdgId;		//PDG particle id
   Short_t    mChargeMc;
   Float_t    mStopR;
-  Short_t    mKey;		//Geant track id
-  Short_t    mParentKey;	//Geant vertex id
+  Int_t      mKey;		//Geant track id
+  Int_t      mParentKey;	//Geant vertex id
   UShort_t   mParentGeantId;	//Geant Parent particle id
   Float_t    mEmcEnergyMcHit[3];
   Float_t    mEmcEnergyMcSum;
@@ -127,6 +127,9 @@ private:
 #endif
 //
 // $Log: StTinyMcTrack.h,v $
+// Revision 1.14  2018/01/03 18:18:09  genevb
+// idTruths and keys moved from short to int
+//
 // Revision 1.13  2011/04/01 20:00:17  perev
 // Comments++
 //

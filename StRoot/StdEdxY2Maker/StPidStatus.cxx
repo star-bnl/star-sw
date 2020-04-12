@@ -26,7 +26,7 @@ StPidStatus::StPidStatus(StGlobalTrack *Track) : PiDStatus(-1), gTrack(Track) {
 	case kLikelihoodFitId: fFit = StdEdxStatus(pid); break;
 	case kEnsembleTruncatedMeanId: fI70U = StdEdxStatus(pid); break;// == kTruncatedMeanId+1 uncorrected
 	case kWeightedTruncatedMeanId: fFitU = StdEdxStatus(pid); break;  // == kLikelihoodFitId+1; uncorrected
-	case kOtherMethodId:           fdNdx = StdEdxStatus(pid); break;
+	//case kOtherMethodId:           fdNdx = StdEdxStatus(pid); break;
 	case kOtherMethodId2:          fdNdxU= StdEdxStatus(pid); break;
 	default: break;
 	}

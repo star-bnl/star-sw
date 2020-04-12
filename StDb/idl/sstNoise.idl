@@ -1,9 +1,0 @@
-/*    sstNoise.idl
-*
-*  Table: sstNoise
-*
-*  description:  SST noise (new table)
-*/ 
-struct sstNoise { 
-	octet rms[491520]; /*array of noise for strips*/
-};

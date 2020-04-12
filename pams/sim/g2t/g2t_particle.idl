@@ -1,8 +1,0 @@
-/*          file:   g2tmain.idl
-*           Module: g2tmain
-*/
-
-#include "PAM.idl"
-#include "particle.idl"
-interface g2t_particle: amiModule{STAFCV_T call(out particle particle);};
-                      
