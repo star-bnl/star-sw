@@ -9,22 +9,22 @@ beamInfo_st row;
 St_beamInfo *tableSet = new St_beamInfo("beamInfo",1);
 //
 memset(&row,0,tableSet->GetRowSize());
-    row.runNumber	 =   17101001; // ;
+    row.runNumber	 =   18100004; // ;
     row.entryTag	 =          0; // 0=startrun, 1=endrun, 2=runave, 3=std  ;
- memcpy(&row.blueSpecies,"Au",2);// species  
-    row.blueMassNumber	 =        197; // ;
-    row.blueEnergy	 =     99.908; // energy  ;
-    row.blueIntensity	 =    219.761; // Ions  ;
+ memcpy(&row.blueSpecies,"PP",2);// species  
+    row.blueMassNumber	 =          0; // ;
+    row.blueEnergy	 =    254.867; // energy  ;
+    row.blueIntensity	 =   20580.55; // Ions  ;
     row.blueLifeTime	 =          0; // Ions per minute  ;
     row.blueBunchIntensity	 =          0; // bunch intensity  ;
- memcpy(&row.yellowSpecies,"Au",2);// species  
-    row.yellowMassNumber	 =        197; // ;
-    row.yellowEnergy	 =     99.908; // energy  ;
-    row.yellowIntensity	 =    227.272; // Ions  ;
+ memcpy(&row.yellowSpecies,"PP",2);// species  
+    row.yellowMassNumber	 =          0; // ;
+    row.yellowEnergy	 =    254.867; // energy  ;
+    row.yellowIntensity	 =   21687.02; // Ions  ;
     row.yellowLifeTime	 =          0; // Ions per minute  ;
     row.yellowBunchIntensity	 =          0; // bunch intensity  ;
-    row.blueFillNumber	 =      19744; // ;
-    row.yellowFillNumber	 =      19744; // ;
+    row.blueFillNumber	 =      20740; // ;
+    row.yellowFillNumber	 =      20740; // ;
 tableSet->AddAt(&row);
 // ----------------- end of code ---------------
  return (TDataSet *)tableSet;
