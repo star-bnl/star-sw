@@ -92,7 +92,7 @@ int TCU_2009::emcJetPatchBits(int triggerId) const
 
 void TCU_2009::dump() const
 {
-  printf("TCU: 0x%04x\n", mTCUInput);
+  //printf("TCU: 0x%04x\n", mTCUInput);
   for (MapIterator i = mTriggers.begin(); i != mTriggers.end(); ++i)
     printf("%s\t%d\t0x%04x\t%d\n", triggerName(i).c_str(), triggerId(i), triggerMask(i), isTrigger(i));
 }

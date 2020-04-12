@@ -12,9 +12,9 @@
 //////////////////////////////////////////////////////////////////////////
 
 //<<<<<<< StTriggerSimuMaker.cxx
-// $Id: StTriggerSimuMaker.cxx,v 1.66 2020/01/13 20:45:47 zchang Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.67 2020/04/12 03:56:24 zchang Exp $
 //=======
-// $Id: StTriggerSimuMaker.cxx,v 1.66 2020/01/13 20:45:47 zchang Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.67 2020/04/12 03:56:24 zchang Exp $
 //>>>>>>> 1.61
 
 // MySQL C API
@@ -202,6 +202,9 @@ Int_t StTriggerSimuMaker::InitRun(int runNumber) {
     if (mChangeJPThresh) {
       LOG_INFO << "Shift the following registers by " << mChangeJPThresh << ":" << endm;
       changeJetPatchTh();
+    }
+    if(mYear == 2017){
+      setTriggerThresholds2017();
     }
   }
   
@@ -391,7 +394,76 @@ bool StTriggerSimuMaker::getTriggerDefinitions(int runNumber)
   }
   return false;
 }
+void StTriggerSimuMaker::setTriggerThresholds2017()
+{
+  LOG_INFO<<"Resetting the following BEMC DSM thresholds for year 2017"<<endm;
+  LOG_INFO<<Form("BEMC-EEMC-overlap-JP-th0: %d", 30)<<endm;
+  LOG_INFO<<Form("BEMC-EEMC-overlap-JP-th1: %d", 43)<<endm;
+  LOG_INFO<<Form("BEMC-EEMC-overlap-JP-th2: %d", 66)<<endm;
+  LOG_INFO<<Form("EMC-HTTP-Sel: %d", 0)<<endm;
 
+  //set BEMC EM201 registers
+  emc->get2009_DSMLayer2_Result()->setRegister(0,30);
+  emc->get2009_DSMLayer2_Result()->setRegister(1,43);
+  emc->get2009_DSMLayer2_Result()->setRegister(2,66);
+  emc->get2009_DSMLayer2_Result()->setRegister(3,0);
+  //crateAt(1).boardAt(20<<24).registerAt((0%100)<<24) = 30;
+  //crateAt(1).boardAt(20<<24).registerAt((1%100)<<24) = 43;
+  //crateAt(1).boardAt(20<<24).registerAt((2%100)<<24) = 66;
+  //set EE101 and EE102 thresholds
+  LOG_INFO<<Form("EEMC-JP-th0: %d", 30)<<endm;
+  LOG_INFO<<Form("EEMC-JP-th1: %d", 43)<<endm;
+  LOG_INFO<<Form("EEMC-JP-th2: %d", 66)<<endm;
+  
+  eemc->get2009_DSMLayer1_Result()->setRegister(0, 30);
+  eemc->get2009_DSMLayer1_Result()->setRegister(1, 43);
+  eemc->get2009_DSMLayer1_Result()->setRegister(2, 66);
+  //crateAt(2).boardAt(21<<24).registerAt((0%100)<<24) = 30;
+  //crateAt(2).boardAt(21<<24).registerAt((1%100)<<24) = 43;
+  //crateAt(2).boardAt(21<<24).registerAt((2%100)<<24) = 66;
+  //crateAt(2).boardAt(22<<24).registerAt((0%100)<<24) = 30;
+  //crateAt(2).boardAt(22<<24).registerAt((1%100)<<24) = 43;
+  //crateAt(2).boardAt(22<<24).registerAt((2%100)<<24) = 66;
+  LOG_INFO<<Form("BEMC-HT-th1: %d", 18)<<endm;
+  LOG_INFO<<Form("BEMC-HT-th2: %d", 25)<<endm;
+  LOG_INFO<<Form("BEMC-HT-th3: %d", 31)<<endm;
+  LOG_INFO<<Form("BEMC-HT-UPC %d", 3)<<endm;
+  LOG_INFO<<Form("BEMC-TP-UPC: %d", 3)<<endm;
+  //BEMC west
+  for (int dsm = 0; dsm < 15; ++dsm){
+    (*bemc->get2009_DSMLayer0_Result())[dsm].registers[0] = 18;
+    (*bemc->get2009_DSMLayer0_Result())[dsm].registers[1] = 25;
+    (*bemc->get2009_DSMLayer0_Result())[dsm].registers[2] = 31;
+    (*bemc->get2009_DSMLayer0_Result())[dsm].registers[3] = 3;
+    (*bemc->get2009_DSMLayer0_Result())[dsm].registers[4] = 3;
+  }
+  //for(int i = 0; i < 15; i++){
+  //crateAt(5).boardAt((16+i)<<24).registerAt((0%100)<<24) = 18;
+  //crateAt(5).boardAt((16+i)<<24).registerAt((1%100)<<24) = 25;
+  //crateAt(5).boardAt((16+i)<<24).registerAt((2%100)<<24) = 31;
+  //crateAt(5).boardAt((16+i)<<24).registerAt((3%100)<<24) = 3;
+  //crateAt(5).boardAt((16+i)<<24).registerAt((4%100)<<24) = 3;
+  //}
+  //BEMC east
+  for (int dsm = 15; dsm < 30; ++dsm){
+    (*bemc->get2009_DSMLayer0_Result())[dsm].registers[0] = 18;
+    (*bemc->get2009_DSMLayer0_Result())[dsm].registers[1] = 25;
+    (*bemc->get2009_DSMLayer0_Result())[dsm].registers[2] = 31;
+    (*bemc->get2009_DSMLayer0_Result())[dsm].registers[3] = 3;
+    (*bemc->get2009_DSMLayer0_Result())[dsm].registers[4] = 3;
+  }
+  //for(int i = 0; i < 15; i++){
+  //crateAt(6).boardAt((16+i)<<24).registerAt((0%100)<<24) = 18;
+  //crateAt(6).boardAt((16+i)<<24).registerAt((1%100)<<24) = 25;
+  //crateAt(6).boardAt((16+i)<<24).registerAt((2%100)<<24) = 31;
+  //crateAt(6).boardAt((16+i)<<24).registerAt((3%100)<<24) = 3;
+  //crateAt(6).boardAt((16+i)<<24).registerAt((4%100)<<24) = 3;
+  //}
+  //eemc->get2009_DSMLayer0_Result()->setRegister(0, 25);  
+  //eemc->get2009_DSMLayer0_Result()->setRegister(1, 31);  
+  //eemc->get2009_DSMLayer0_Result()->setRegister(2, 5);  
+  //eemc->get2009_DSMLayer0_Result()->setRegister(3, 5);  
+}
 bool StTriggerSimuMaker::getTriggerThresholds(int runNumber)
 {
   TDataSet* DB = GetInputDB("Calibrations/trg");
@@ -640,8 +712,8 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 	    }
 	    break;
 	    }
-	    }
-
+	}
+      
     }
     mysql_free_result(result);
   }
@@ -822,6 +894,9 @@ void StTriggerSimuMaker::setLastDsmRegister(int reg, int value)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.67  2020/04/12 03:56:24  zchang
+ * Add EMC DSM algorithm for the 2017 pp run
+ *
  * Revision 1.66  2020/01/13 20:45:47  zchang
  * removing old run13 dsm algo files
  *
