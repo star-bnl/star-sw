@@ -41,6 +41,8 @@ class AgModule : public AgBlock
   Bool_t AddCut( string block, string cut, Float_t value );
   Bool_t AddPar( string block, string par, Float_t value );
 
+  void SetTrackingFlag( int flag ){ mTrackingFlag = flag; }
+  int  GetTrackingFlag(){ return mTrackingFlag; }
 
  private:
  protected:
@@ -54,13 +56,15 @@ class AgModule : public AgBlock
   TDataSet *mBlocksSet;
   static TDataSet *mGeomSet;
 
+  short mTrackingFlag;
+
  public:
   virtual const Char_t *GetCVS() const {
     static const Char_t cvs[]="Tag  $Name:  $ $Id $ built " __DATE__ " " __TIME__;
     return cvs;
   }
 
-  ClassDef(AgModule,1);
+  ClassDef (AgModule,0);
 
 };
 
