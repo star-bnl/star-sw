@@ -537,12 +537,14 @@ switch ($pkg)
 	unsetenv GPROF
 	setenv NODEBUG "-O3"
 	source ${GROUP_DIR}/.starver $STAR_LEVEL
+	setenv ROOTBUILD nodebug
 	breaksw
     case "nodebug":
     case "NODEBUG":
 	unsetenv GPROF
 	setenv NODEBUG yes
         source ${GROUP_DIR}/.starver $STAR_LEVEL
+	setenv ROOTBUILD nodebug
 	breaksw
     case "debug":
     case "DEBUG":
@@ -552,6 +554,7 @@ switch ($pkg)
 	    setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH LIB`
 	endif
 	 source ${GROUP_DIR}/.starver $STAR_LEVEL
+	setenv ROOTBUILD debug
 	breaksw
 
 
