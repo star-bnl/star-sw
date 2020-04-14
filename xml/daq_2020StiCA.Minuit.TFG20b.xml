@@ -17,10 +17,11 @@
      set f        = 1
      set l        = 5000000
   echo "${evtsFile}"
+ if (! -r ${evtsFile}) exit 1;
   set evtsFileB = `basename ${evtsFile}`
   set filel    = `basename ${evtsFileB} .daq`
   set output  = ${filel}.event.root
-  if (! -r ${SUBMITTINGDIRECTORY}/${evtsFile}) exit 1;
+  if ( -r ${SUBMITTINGDIRECTORY}/${output}) exit 1;
   set logFile  = ${filel}B.log
 #  if ( -r ${SUBMITTINGDIRECTORY}/${logFile}) exit 0;
   set muFile = ${filel}.MuDst.root
