@@ -647,10 +647,11 @@
             <Component name="O" a="16" z="8"  w="0.061" />
             <Component name="H" a="1"  z="1"  w="0.019" />
             <Component name="C" a="12" z="6"  w="0.272"  />
-            <Component name="F" a="9"  z="19" w="0.648"  />
+            <Component name="F" a="19"  z="9" w="0.648"  /><!-- think these were switched -->
         </Mixture>
 
         <!-- Stainless steel 316 for the cooling tube (choose maximum of each element except Fe) -->
+
         <Mixture name="StainlessSteel316" dens="8">  
             <Component name="Fe" a="55.845"         z="26"  w="0.62085" />
             <Component name="C"  a="12.0096"        z="6"   w="0.0008" />
@@ -663,6 +664,9 @@
             <Component name="Ni" a="58.6934"        z="28"  w="0.14" />
             <Component name="N"  a="14.00643"       z="7"   w="0.0001" />
         </Mixture>
+
+
+
 
         <!-- referred from IstdGeo1a.xml for T-board -->
         <Mixture name="G10" dens="1.7"  >  <!-- G10 (60% SiO2 and 40% C8H14O4) -->
