@@ -43,11 +43,11 @@ if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0)
 #		 fitZeP fitZeN fitZprotonP fitZprotonN fitZkaonP fitZkaonN fitZpiP fitZpiN fitZmuP fitZmuN fitZdeuteronP fitZdeuteronN fitZtritonP fitZtritonN fitZHe3P fitZHe3N fitZalphaP fitZalphaN 
 #		 fitNeP fitNeN fitNprotonP fitNprotonN fitNkaonP fitNkaonN fitNpiP fitNpiN fitNmuP fitNmuN fitNdeuteronP fitNdeuteronN fitNtritonP fitNtritonN fitNHe3P fitNHe3N fitNalphaP fitNalphaN 
 #	      );
- @histNF = qw(PressureN VoltageN AvCurrentN QcmN Z3N SecRow3N dX3N TanL3DN); # Edge3N Edge3N PressureTN VoltN Zdc3N  Z3ON 
-#  @histXF = @histNF;
-  @histADC = qw(I3DZ O3DZ X3DZ I3DTanL O3DTanL X3DTanL I3DdX O3DdX X3DdX IC3DZ OC3DZ XC3DZ IC3DTanL OC3DTanL XC3DTanL IC3DdX OC3DdX XC3DdX);
+  @histNF = qw(PressureN VoltageN AvCurrentN QcmN Z3N SecRow3N dX3N TanL3DN); # Edge3N Edge3N PressureTN VoltN Zdc3N  Z3ON 
+  #  @histXF = @histNF;
+  @histADC = qw(I3DZ I3DTanL I3DdX IC3DZ IC3DTanL IC3DdX I3Dnpads I3Dntmbks I3Dnpadtmbks
+		O3DZ O3DTanL O3DdX IC3DZ IC3DTanL IC3DdX O3Dnpads O3Dntmbks O3Dnpadtmbks);
 }
-
 print "fit.pl for  @rootfiles \n"; 
 if ($#histGF >= 0) {print " with GF: @histGF \n";}
 if ($#histGP >= 0) {print " with GP: @histGP \n";}

@@ -13,7 +13,7 @@ switch ($domain)
 endsw
 foreach gcc (${list})
   set opts = "debug opt"
-  if ($gcc == "gcc8" || gcc == "gcc631") set opts = "debug opt opt3"
+#  if ($gcc == "gcc8" || gcc == "gcc631") set opts = "debug opt opt3"
   foreach opt ($opts)
     set bits = "64b";
     if ($gcc == "gcc") set bits = "32b 64b";

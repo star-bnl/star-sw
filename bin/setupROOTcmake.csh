@@ -1,3 +1,9 @@
+#! /usr/bin/env tcsh 
+if (! $?NODEBUG) then
+    set ROOT_BUILD="Debug"
+else
+    set ROOT_BUILD="Release"
+endif
 # -Dafs=ON 
 #cmake cmake $ROOT/6.99.99/root -DCMAKE_INSTALL_PREFIX=$ROOTSYS -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DCMAKE_LINKER=clang++ -Dall=ON -Dcxx11=ON -Dlibcxx=ON -Dcacoa=ON -Dgdml=ON -Dgsl_shared=ON -Dminuit2=ON -Dqt=ON -Drootfit=ON -Dtable=ON -Dvc=ON 
 #cmake cmake $ROOT/6.99.99/root -DCMAKE_INSTALL_PREFIX=$ROOTSYS -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_LINKER=g++ -Dall=ON -Dcxx11=ON -Dlibcxx=ON -Dcacoa=ON -Dgdml=ON -Dgsl_shared=ON -Dminuit2=ON -Dqt=ON -Drootfit=ON -Dtable=ON -Dvc=ON 
@@ -20,7 +26,7 @@ setenv QT_MOC_EXECUTABLE ${QTDIR}/bin/moc
 setenv Qt4 ${QTDIR}
 rm -f CMakeCache.txt
 #cmake cmake $ROOT/6.99.99/root -DCMAKE_INSTALL_PREFIX=$ROOTSYS -DCMAKE_BUILD_TYPE=Debug -Dall=ON -Dcxx11=ON -Dlibcxx=ON -Dcacoa=ON -Dgdml=ON -Dgsl_shared=ON -Dminuit2=ON -Dqt=ON -Drootfit=ON -Dtable=ON -Dvc=ON 
-cmake $ROOT/6.99.99/root -DCMAKE_INSTALL_PREFIX=$ROOTSYS -DCMAKE_BUILD_TYPE=Debug \
+cmake $ROOT/6.99.99/root -DCMAKE_INSTALL_PREFIX=$ROOTSYS -DCMAKE_BUILD_TYPE="${ROOT_BUILD}" \
 -DCMAKE_C_COMPILER="${CC}" -DCMAKE_CXX_COMPILER="${CXX}" -DCMAKE_Fortran_COMPILER="${FC}" -Dfortran=ON \
 -Dall=ON -Dcxx11=ON -Dlibcxx=ON -Dcacoa=ON -Dgdml=ON -Dgsl_shared=ON -Dminuit2=ON -Dqt=OFF -Drootfit=ON -Dvc=OFF -Dunuran=oFF \
 -Dpyroot=ON \
@@ -31,7 +37,8 @@ cmake $ROOT/6.99.99/root -DCMAKE_INSTALL_PREFIX=$ROOTSYS -DCMAKE_BUILD_TYPE=Debu
 -Dbuiltin_cfitsio=On -DCMAKE_CXX_FLAGS="-fdiagnostics-color=always -msse4.2" \
 -DCMAKE_C_FLAGS="-fdiagnostics-color=always -msse4.2" \
 -Dbuiltin_afterimage=ON \
--Dtable=ON 
+-Dtable=ON \
+-Druntime_cxxmodules=On
 #  -Dbuiltin_xrootd=ON 
 #-DPYTHIA6_DIR=${XOPTSTAR} \
 #-DPYTHIA8_DIR=${XOPTSTAR} \

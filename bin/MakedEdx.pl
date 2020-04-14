@@ -1891,7 +1891,16 @@ my $NEvents = 100000;
 # 9p2GeV                  20200205.144626
 # 5p75GeV_fixedTarget     20200213.152339, 20200213.152339
 # 9p2GeVb                 20200224.230740
-$hist = "RunXX00"; $NEvents = 2000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 03/23/20 check 
+#$hist = "RunXX00"; $NEvents = 2000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 03/23/20 check 
+#$hist = "RunXX01"; $NEvents = 2000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 03/29/20 check, adjust time limits
+#$hist = "RunXX02"; $NEvents = 2000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 03/31/20 reset TpcZCorrectionB, TpcSecRowB, TpcLengthCorrectionMDF
+#$hist = "RunXX03"; $NEvents = 2000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 04/01/20 new TpcSecRowB
+#$hist = "RunXX04"; $NEvents = 2000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 04/02/20 new TpcSecRowB.20191121.000003.root
+#$hist = "RunXX05"; $NEvents = 2000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 04/08/20 new TpcAdcCorrectionMDF.r2020.C (lAdc, npad+ntbkt)
+#$hist = "RunXX06"; $NEvents = 2000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 04/09/20 new TpcSecRowB.20191121.000005.root
+#$hist = "RunXX07"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 04/10/20 new TpcZCorrectionB.*GeV*.C
+#$hist = "RunXX08"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 04/10/20 new TpcSecRowB.20191121.000007.root
+$hist = "RunXX09"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 04/11/20 new TpcLengthCorrectionMDF.*.C
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
@@ -1993,7 +2002,7 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
     my $fff = File::Basename::basename($file);
     $fff =~ s/_adc_/_/;
     $fff =~ s/_mtd_/_/;
-    my @words = split '_', $fff; print "fff = $fff => words = @words\n";
+    my @words = split '_', $fff; #print "fff = $fff => words = @words\n";
     my $Run = $words[2];
 #    if ($Run !~ /$listOfRuns/) {next;}
     my @ddd = split '',$Run;
@@ -2003,12 +2012,13 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
     my $f = File::Basename::basename($file);
 #    print "$file\n";    next;
     my $local_file = $f;
-    $f =~ s|_raw_|_|; print "f = $f size = $size\n"; 
+    $f =~ s|_raw_|_|; #print "f = $f size = $size\n"; 
     $Total_Size += $size;
     $f =~ s|\.root||;
     foreach my $ff (@files ){goto ENDL if $ff eq $f;}
     push @files, $f;
     (my $ff = $f) =~ s|st_physics_||;
+    $dd =~ s|hlt_||;
     $ff =~ s|st_fmsslow_||;
     $ff =~ s|st_minbias_||;
     $ff =~ s|st_hlt_||;
@@ -2026,7 +2036,7 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
       $dd = $words[7];
     }
     my $scrr = $scr . $dd . "/"; #print "scrr = $scrr\n";
-    my $root = $scrr . $ff . ".root";
+    my $root = $scrr . $ff . ".root"; print "root = $root\n";
     my $logL = $ff . ".log";
     my $log = $scrr . $logL;
     my $SCRIPT = $script ."_" . $STAR_LEVEL ."_". $ff . ".csh";

@@ -5,7 +5,7 @@ my $disk = "";
 my $DISK = "";
 if ($#ARGV != 0) {
   print "Usage $0 $mount,  valid options: u, tpc, bnl[D]\n";
-  $mount = "bnl";
+  $mount = "gpfs01";
 } else {
   $mount = $ARGV[0];
 }

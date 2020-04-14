@@ -76,6 +76,8 @@ foreach my $run (@runs) {
       my $file = $files[$i];
       my $b = File::Basename::basename($file,".daq");
       #    print "$b\n" if ($debug);
+      my $evfile = $b . ".event.root";
+      if (-r $evfile) {next;}
       my $mufile = $b . ".MuDst.root";
       if (-r $mufile) {next;}
       my $pifile = $b . ".picoDst.root";

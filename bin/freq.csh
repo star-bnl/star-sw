@@ -1,0 +1,16 @@
+root.exe -q 'Db.C("RunLog/onl/starClockOnl",20191208.091308)' >& 20191208.091308
+root.exe -q 'Db.C("RunLog/onl/starClockOnl",20191221.154021)' >& 20191221.154021
+root.exe -q 'Db.C("RunLog/onl/starClockOnl",20191221.190032)' >& 20191221.190032
+root.exe -q 'Db.C("RunLog/onl/starClockOnl",20200128.182912)' >& 20200128.182912
+root.exe -q 'Db.C("RunLog/onl/starClockOnl",20200130.005840)' >& 20200130.005840
+root.exe -q 'Db.C("RunLog/onl/starClockOnl",20200131.012112)' >& 20200131.012112
+root.exe -q 'Db.C("RunLog/onl/starClockOnl",20200131.050328)' >& 20200131.050328
+root.exe -q 'Db.C("RunLog/onl/starClockOnl",20200201.191904)' >& 20200201.191904
+root.exe -q 'Db.C("RunLog/onl/starClockOnl",20200202.160409)' >& 20200202.160409
+root.exe -q 'Db.C("RunLog/onl/starClockOnl",20200203.202534)' >& 20200203.202534
+root.exe -q 'Db.C("RunLog/onl/starClockOnl",20200204.053518)' >& 20200204.053518
+root.exe -q 'Db.C("RunLog/onl/starClockOnl",20200205.144626)' >& 20200205.144626
+root.exe -q 'Db.C("RunLog/onl/starClockOnl",20200210.220428)' >& 20200210.220428
+root.exe -q 'Db.C("RunLog/onl/starClockOnl",20200213.152339)' >& 20200213.152339
+root.exe -q 'Db.C("RunLog/onl/starClockOnl",20200214.143742)' >& 20200214.143742
+root.exe -q 'Db.C("RunLog/onl/starClockOnl",20200224.230740)' >& 20200224.230740
