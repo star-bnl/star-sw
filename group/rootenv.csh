@@ -218,7 +218,7 @@ endif
 if ( $?pself ) then
     set self=$pself
 endif
-
+setenv ROOT_INCLUDE_PATH ${ROOTSYS}/include:${STAR}:${STAR}/StRoot:$STAR/.${STAR_HOST_SYS}/include
 
 # befeore leaving unset
 unset p x
