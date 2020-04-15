@@ -472,7 +472,7 @@
     <Component name="O" a="16" z="8"  w="0.061" />
     <Component name="H" a="1"  z="1"  w="0.019" />
     <Component name="C" a="12" z="6"  w="0.272"  />
-    <Component name="F" a="9"  z="19" w="0.648"  />
+    <Component name="F" a="19"  z="9" w="0.648"  />
   </Mixture>
     
   <Mixture name="PEEKGF30" dens="1.49" radl="25.0" >  <!-- PEEK GF 30 (30% SiO2 and 70% PEEK C19H12O3) for screws and washers -->
@@ -512,7 +512,7 @@
     <Component name="O" a="16" z="8"  w="0.081*0.061" />
     <Component name="H" a="1"  z="1"  w="0.081*0.019" />
     <Component name="C" a="12" z="6"  w="0.081*0.272"  />
-    <Component name="F" a="9"  z="19" w="0.081*0.648"  />
+    <Component name="F" a="19"  z="9" w="0.081*0.648"  />
   </Mixture>
 
   <Mixture name="AlNovecMix" dens="1.961"  >
@@ -520,7 +520,7 @@
   <Component name="O" a="16" z="8"  w="0.43*0.061" />
   <Component name="H" a="1"  z="1"  w="0.43*0.019" />
   <Component name="C" a="12" z="6"  w="0.43*0.272"  />
-  <Component name="F" a="9"  z="19" w="0.43*0.648"  />
+  <Component name="F" a="19"  z="9" w="0.43*0.648"  />
   </Mixture>
 
   raddeg = 3.14159265/180.0
