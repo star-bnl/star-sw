@@ -19,5 +19,5 @@ void lDb(const Char_t *date = 0) {
 #endif
   TString Chain("mysql,tpcDb,detDb,magF,TpcHitMover,CorrX,LaserIT,nodefault");
   if (date) {Chain += ","; Chain += date;}
-  bfc(-1,Chain.Data(),0,0,0,0,0);
+  bfc(-1,Chain.Data());
 }

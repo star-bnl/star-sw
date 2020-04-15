@@ -87,7 +87,8 @@ void SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
 	if (RunOpt.Contains("gstarLib",TString::kIgnoreCase)) {geant->Do("call gstar");}
 	if (pTmin < 0) pTmin = mass*bgMin; if (pTmin <    0.01) pTmin =    0.01;
 	if (pTmax < 0) pTmax = mass*bgMax; if (pTmax >   10.00) pTmax =   10.00;
-	TString Kine(Form("gkine %i %i %f %f -2  2 0 %f -50 50;",NTRACK,ID,pTmin,pTmax,TMath::TwoPi()));
+	//	TString Kine(Form("gkine %i %i %f %f -2  2 0 %f -50 50;",NTRACK,ID,pTmin,pTmax,TMath::TwoPi()));
+	TString Kine(Form("gkine %i %i %f %f -3  3 0 %f -200 200;",NTRACK,ID,pTmin,pTmax,TMath::TwoPi()));
 	cout << "Set kinematics: " << Kine.Data() << endl;
 	geant->Do(Kine.Data());
       }
