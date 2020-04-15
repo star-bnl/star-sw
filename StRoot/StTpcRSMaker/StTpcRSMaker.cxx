@@ -1518,7 +1518,6 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
       Int_t NoTB = 0;
       index = NoOfTimeBins*((row-1)*NoOfPads+pad-1);
       for (bin = 0; bin < NoOfTimeBins; bin++,index++) {
-	//	Int_t index= NoOfTimeBins*((row-1)*NoOfPads+pad-1)+bin;
 	// Digits : gain + ped
 	//  GG TF1F *ff = new TF1F("ff","TMath::Sqrt(4.76658e+01*TMath::Exp(-2.87987e-01*(x-1.46222e+01)))",21,56)
 	Double_t pRMS = pedRMS;
