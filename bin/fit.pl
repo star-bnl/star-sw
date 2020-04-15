@@ -45,7 +45,8 @@ if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0)
 #	      );
  @histNF = qw(PressureN VoltageN AvCurrentN QcmN Z3N SecRow3N dX3N TanL3DN); # Edge3N Edge3N PressureTN VoltN Zdc3N  Z3ON 
 #  @histXF = @histNF;
-  @histADC = qw(I3DZ O3DZ X3DZ I3DTanL O3DTanL X3DTanL I3DdX O3DdX X3DdX IC3DZ OC3DZ XC3DZ IC3DTanL OC3DTanL XC3DTanL IC3DdX OC3DdX XC3DdX);
+#  @histADC = qw(I3DZ O3DZ X3DZ I3DTanL O3DTanL X3DTanL I3DdX O3DdX X3DdX IC3DZ OC3DZ XC3DZ IC3DTanL OC3DTanL XC3DTanL IC3DdX OC3DdX XC3DdX);
+  @histADC = qw(I3DZ O3DZ I3DTanL O3DTanL I3DdX O3DdX IC3DZ OC3DZ IC3DTanL OC3DTanL IC3DdX OC3DdX I3Dnpads I3Dntmbks I3Dnpadtmbks O3Dnpads O3Dntmbks O3Dnpadtmbks );
 }
 
 print "fit.pl for  @rootfiles \n"; 
