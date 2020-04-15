@@ -68,7 +68,7 @@ void FitPDraw(const Char_t *draw="mu:y",
     name.ReplaceAll(".root","");
     //      cout << name << endl;
     F[NF] = f;
-    //      cout << k << "/" << NF << "\t" << F[NF]->GetName() << endl;
+    cout << k << "/" << NF << "\t" << F[NF]->GetName() << endl;
     NF++;
   }
   //  gStyle->SetMarkerSize(0.4);
