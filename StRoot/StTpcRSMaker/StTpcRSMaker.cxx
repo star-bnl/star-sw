@@ -43,6 +43,7 @@
 #include "StDetectorDbMaker/St_TpcAvgCurrentC.h"
 #include "StDetectorDbMaker/St_TpcAvgPowerSupplyC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
+#include "StDetectorDbMaker/St_beamInfoC.h"
 #include "StParticleTable.hh"
 #include "StParticleDefinition.hh"
 #include "Altro.h"
@@ -100,6 +101,8 @@ static Double_t padsdE[StTpcRSMaker::kPadMax];           //!
 static Double_t tbksdE[StTpcRSMaker::kTimeBacketMax];    //!
 static Double_t rowsdE[StTpcRSMaker::kRowMax];          //!
 static Double_t rowsdEH[StTpcRSMaker::kRowMax];          //!
+static Double_t fgTriggerT0 = 0;             //! TPC trigger T0 is supposed to set for the primary ineraction Z = 0
+
 //________________________________________________________________________________
 static const Int_t nx[2] = {200,500};
 static const Double_t xmin[2] =  {-10., -6};
@@ -706,8 +709,20 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   if (g2t_track) tpc_track = g2t_track->GetTable();
   St_g2t_vertex  *g2t_ver = (St_g2t_vertex *) GetDataSet("geant/g2t_vertex");// if (!g2t_ver)      return kStWarn;
   g2t_vertex_st     *gver = 0;
+  fgTriggerT0 = 0; //  TPC trigger T0 is set for the primary ineraction Z = 0
   if (g2t_ver) {
     gver = g2t_ver->GetTable();
+    if (g2t_ver->GetNRows() > 0) {
+      const Double_t kAu2Gev=0.9314943228;
+      UInt_t un = St_beamInfoC::instance()->getYellowMassNumber();
+      Double_t M = kAu2Gev*un;
+      if (!un) {un = 1; M = 0.93827231;}
+      //      if (un == 197) { M = 196.966570*kAu2Gev;}
+      Double_t KinE = un*St_beamInfoC::instance()->getYellowEnergy();
+      Double_t gamma = TMath::Sqrt((KinE+M)*(KinE+M))/M;
+      Double_t beta  = gamma/TMath::Sqrt(gamma*gamma+1);
+      fgTriggerT0 = -gver->ge_x[2]/(beta*TMath::Ccgs());
+    }
   }
   g2t_tpc_hit_st *tpc_hit_begin = g2t_tpc_hit->GetTable();
   g2t_tpc_hit_st *tpc_hit = tpc_hit_begin;
@@ -950,7 +965,14 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    NoElPerAdc = St_TpcResponseSimulatorC::instance()->NoElPerAdcO(); // outer TPX
 	  }
 	}
-	mGainLocal = Gain/dEdxCor/NoElPerAdc; // Account dE/dx calibration
+	// Additional correction versus drift length
+	Double_t zGainCor = 1.;
+	if (St_TpcResponseSimulatorC::instance()->NoZC() > 0) {
+	  Float_t *zC = St_TpcResponseSimulatorC::instance()->ZC() + St_TpcResponseSimulatorC::instance()->NoZC()*iowe;
+	  Double_t Cor = zC[0] + driftLength*(zC[1] + zC[2]*driftLength);
+	  zGainCor = TMath::Exp(Cor);
+	}
+	mGainLocal = Gain/(dEdxCor*zGainCor)/NoElPerAdc; // Account dE/dx calibration
 	// end of dE/dx correction
 	// generate electrons: No. of primary clusters per cm
 #ifdef __LASERINO__
@@ -1529,21 +1551,21 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
       if (St_tpcAltroParamsC::instance()->N(secX) >= 0 && ! mAltro[secX]) {
 	mAltro[secX] = new Altro(__MaxNumberOfTimeBins__,ADCs);
 	if (St_tpcAltroParamsC::instance()->N(secX) > 0) {// Tonko 06/25/08
-	  //      ConfigAltro(ONBaselineCorrection1, ONTailcancellation, ONBaselineCorrection2, ONClipping, ONZerosuppression)
+	  //            ConfigAltro(ONBaselineCorrection1, ONTailcancellation, ONBaselineCorrection2, ONClipping, ONZerosuppression)
 	  mAltro[secX]->ConfigAltro(                    0,                  1,                     0,          1,                 1); 
 	  //       ConfigBaselineCorrection_1(int mode, int ValuePeDestal, int *PedestalMem, int polarity)
 	  //altro->ConfigBaselineCorrection_1(4, 0, PedestalMem, 0);  // Tonko 06/25/08
 	  mAltro[secX]->ConfigTailCancellationFilter(St_tpcAltroParamsC::instance()->K1(secX),
-					       St_tpcAltroParamsC::instance()->K2(secX),
-					       St_tpcAltroParamsC::instance()->K3(secX), // K1-3
-					       St_tpcAltroParamsC::instance()->L1(secX),
-					       St_tpcAltroParamsC::instance()->L2(secX),
-					       St_tpcAltroParamsC::instance()->L3(secX));// L1-3
+						     St_tpcAltroParamsC::instance()->K2(secX),
+						     St_tpcAltroParamsC::instance()->K3(secX), // K1-3
+						     St_tpcAltroParamsC::instance()->L1(secX),
+						     St_tpcAltroParamsC::instance()->L2(secX),
+						     St_tpcAltroParamsC::instance()->L3(secX));// L1-3
 	} else {
 	  mAltro[secX]->ConfigAltro(0,0,0,1,1); 
 	}
-	mAltro[secX]->ConfigZerosuppression(St_tpcAltroParamsC::instance()->Threshold(secX),
-				      St_tpcAltroParamsC::instance()->MinSamplesaboveThreshold(secX),
+	mAltro[secX]->ConfigZerosuppression(St_tpcAltroParamsC::instance()->Threshold(secX),               // Altro_thr
+					    St_tpcAltroParamsC::instance()->MinSamplesaboveThreshold(secX),// Altro_seq
 				      0,0);
 	static Int_t secsX[2] = {-1, 23};
 	if (secX <  24 && secX > secsX[0] ) {secsX[0] = 24; cout << "ALTRO parameters" << endl; mAltro[secX]->PrintParameters();}
@@ -1551,7 +1573,7 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
       }
       if (mAltro[secX]) {
 	//#define PixelDUMP
-#ifdef PixelDUMP
+#if 1 /* PixelDUMP */
 	static Short_t ADCsSaved[__MaxNumberOfTimeBins__];
 	memcpy(ADCsSaved, ADCs,sizeof(ADCsSaved));
 #endif
@@ -1982,7 +2004,7 @@ void StTpcRSSegment::Set(g2t_tpc_hit_st *tpc_hit, g2t_vertex_st *gver, Int_t mod
   transform(coorLT,coorLS); PrPP(Set,coorLS);
   transform( dirLT, dirLS); PrPP(Set,dirLS); 
   transform(   BLT,   BLS); PrPP(Set,BLS);   
-  Double_t tof = gver->ge_tof;
+  Double_t tof = gver->ge_tof + fgTriggerT0;
   //	if (! TESTBIT(m_Mode, kNoToflight)) 
   tof += tpc_hitC->tof;
   Double_t driftLength = coorLS.position().z() + tof*gStTpcDb->DriftVelocity(sector); // ,row); 

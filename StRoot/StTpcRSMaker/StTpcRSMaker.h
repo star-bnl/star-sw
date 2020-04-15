@@ -154,10 +154,10 @@ class StTpcRSMaker : public StMaker {
   Double_t      mtauIntegrationX[2];  //! for TPX inner=0/outer=1
   static Double_t      mtauCX[2];            //! -"- 
   Double_t    mLocalYDirectionCoupling[2][24][7]; //!
-  TArrayI    mNoTpcHitsAll;           //!
-  TArrayI    mNoTpcHitsReal;          //!
   Int_t      mNSplittedHits;          //!
   Char_t end[1];                      //!
+  TArrayI    mNoTpcHitsAll;           //!
+  TArrayI    mNoTpcHitsReal;          //!
   Double_t             mLaserScale;   //!
   const Double_t ElectronRange;       //!
   const Double_t ElectronRangeEnergy; //!
