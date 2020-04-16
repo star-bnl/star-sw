@@ -9,6 +9,8 @@
 #include "AgMaterial.h"
 #include "AgShape.h"
 
+#include "AgMLExtension.h"
+
 #include "TGeoManager.h"
 #include "TGeoMaterial.h"
 #include "TGeoMedium.h"
@@ -43,13 +45,18 @@
 #include "TList.h"
 #include "TString.h"
 #include <assert.h>
+#include <RVersion.h> 
 
 #include "StMessMgr.h"
+#define ENDL endm
 
 #undef min
 #undef max
 
 std::map< Int_t, TString > StarTGeoStacker::mClassMap;
+
+// Map extention by family (==block) name
+std::map< TString, AgMLExtension* > gAgMLExt;
 
 
 // ------------------------------------------------------------------------------------------------------------
@@ -297,13 +304,16 @@ TGeoMaterial *BuildMaterial( AgMaterial &ag_material )
     case( AgMaterial::kMixture ):
       if ( ag_material.sumWeights() - 1.0 < -1.0E-5 ) 
 	{	  
-	  LOG_WARN << "Warning: sum of all weights does not add up to 1.0" << endm;
+	  LOG_WARN << "Warning: sum of all weights does not add up to 1.0" << ENDL;
 	  ag_material.Print();
 	}
       mixture = new TGeoMixture( mat_name, nc, dd );
       for ( ic = 0; ic<nc; ic++ )
 	{
-	  ag_material.Component(ic,name,aa,zz,ww); mixture->DefineElement(ic,aa,zz,ww);
+	  if ( aa<=zz ) {
+	    LOG_INFO << mat_name.Data() << " invalid component: " << name << " A=" << aa << " Z=" << zz << " weight=" << ww << ENDL;
+	  }
+	  ag_material.Component(ic,name,aa,zz,ww); mixture->DefineElement(ic,aa,zz,ww); assert(aa>=zz);
 	}
       if ( ag_material.isSet("radl")) ag_material.Warning(ag_material.GetName(),"The RADL attribute was set, but has no effect in AgSTAR/AgML");
       return (TGeoMaterial*)mixture;
@@ -324,6 +334,7 @@ TGeoMaterial *BuildMaterial( AgMaterial &ag_material )
       //
       if ( ag_material.isSet("radl"))	  material = new TGeoMaterial( mat_name, aa, zz, dd, radl, absl);	
       else                                material = new TGeoMaterial( mat_name, aa, zz, dd);
+      assert(aa>zz);
       return material;
 
       break;
@@ -411,6 +422,7 @@ StarTGeoStacker::StarTGeoStacker( const Char_t *_name, const Char_t *title )
       
     }
   
+   AgModule::SetStacker( this ); 
 
 }
 
@@ -624,6 +636,17 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
       mVolumeTable[nn]=volume;    // Add the nicknamed volume to the volume table
       block -> addNickname( nn ); // Add the nickname to the block
 
+      // AgML extented volume information
+      AgMLExtension* agmlExt = gAgMLExt[ block->GetName() ]; 
+      if ( 0==agmlExt ) { gAgMLExt[ block->GetName() ] = agmlExt = new AgMLExtension(); }
+      agmlExt->SetVolumeName( nn );
+      agmlExt->SetFamilyName( block->GetName() );
+      agmlExt->SetModuleName( module->GetName() );
+      agmlExt->SetSensitive( mMedium.par("isvol") );
+      agmlExt->SetTracking( module->GetTrackingFlag() );
+
+      volume->SetUserExtension( agmlExt );
+
 
       if ( mDebugOptions[block_name].Contains("shape") )
 	{
@@ -692,6 +715,19 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
 	  volume_title += "Division of ";
 	  volume_title += mother_name;
 	  volume_title += " ";
+
+	  // AgML extented volume information
+
+	  AgMLExtension* agmlExt = gAgMLExt[ block->GetName() ]; 
+	  if ( 0==agmlExt ) { gAgMLExt[ block->GetName() ] = agmlExt = new AgMLExtension(); }
+	  agmlExt->SetVolumeName( nn );
+	  agmlExt->SetFamilyName( block->GetName() );
+	  agmlExt->SetModuleName( module->GetName() );
+	  agmlExt->SetSensitive( mMedium.par("isvol") );
+	  agmlExt->SetTracking( module->GetTrackingFlag() );
+
+	  volume->SetUserExtension( agmlExt );
+
 
 	}
 

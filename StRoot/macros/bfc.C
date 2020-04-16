@@ -5,7 +5,7 @@
 // Modifications by J. Lauret, V, Prevoztchikov, G.V. Buren, L. Didenko //
 //                  and V. Fine                                         //
 //                                                                      //
-// $Id: bfc.C,v 1.193 2018/01/29 20:18:12 smirnovd Exp $
+// $Id: bfc.C,v 1.194 2020/04/12 20:24:18 perev Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -22,8 +22,8 @@ class StMessMgr;
 #include "StarRoot/TAttr.h"
 #endif
 #include "TROOT.h"
-//#include "StRoot/St_geant_Maker/St_geant_Maker.h"
-//#include "StarVMC/StVMCMaker/StVMCMaker.h"
+#include "TAttr.h"
+#include "Rtypes.h"
 #endif
 StBFChain    *chain=0; 
 //_____________________________________________________________________

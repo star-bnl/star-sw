@@ -63,6 +63,12 @@ class St_TpcResponseSimulatorC : public TChair {
   Float_t       T0offsetO(Int_t i = 0)      const {return  Struct(i)->T0offsetO;}
   Float_t       FirstRowC(Int_t i = 0)      const {return  Struct(i)->FirstRowC;}
   
+  Int_t         NoZC(Int_t i = 0)           const {return  Struct(i)->NoZC;}
+  Float_t      *ZC(Int_t i = 0)             const {return &Struct(i)->ZCIW[0];}
+  Float_t      *ZCIW(Int_t i = 0)    	    const {return &Struct(i)->ZCIW[0];}
+  Float_t      *ZCOW(Int_t i = 0)    	    const {return &Struct(i)->ZCOW[0];}
+  Float_t      *ZCIE(Int_t i = 0)    	    const {return &Struct(i)->ZCIE[0];}
+  Float_t      *ZCOE(Int_t i = 0)    	    const {return &Struct(i)->ZCOE[0];}
  protected:
   St_TpcResponseSimulatorC(St_TpcResponseSimulator *table=0) : TChair(table) {}
   virtual ~St_TpcResponseSimulatorC() {fgInstance = 0;}

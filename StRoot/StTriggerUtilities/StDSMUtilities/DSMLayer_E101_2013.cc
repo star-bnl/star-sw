@@ -5,7 +5,7 @@
 
 DSMLayer_E101_2013::DSMLayer_E101_2013() : DSMLayer_E101_2009() 
 {
-  printf("DSMLayer_E101_2013 constructor\n");
+  //printf("DSMLayer_E101_2013 constructor\n");
   for (size_t dsm = 0; dsm < size(); ++dsm)
     (*this)[dsm].setName("EE", 1, dsm);
 }

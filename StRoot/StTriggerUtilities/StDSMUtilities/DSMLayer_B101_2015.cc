@@ -4,7 +4,7 @@
 
 DSMLayer_B101_2015::DSMLayer_B101_2015() : DSMLayer_B101_2009()
 {
-  printf("DSMLayer_B101_2015 constructor\n");
+  //printf("DSMLayer_B101_2015 constructor\n");
   for (size_t dsm = 0; dsm < size(); ++dsm)
     (*this)[dsm].setName("BC", 1, dsm);
 }

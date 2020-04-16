@@ -135,6 +135,19 @@ void FitPDraw(const Char_t *draw="mu:rowsigned(y,x)",
   gStyle->SetOptStat(0);
   Int_t icol = 0;
   TLegend *leg = new TLegend(0.5,0.7,1.0,1.0);
+  TIter  iter(fs);
+  TFile *f = 0;  
+  Int_t NF = 0;
+  while ((f = (TFile *) iter())) {
+    TNtuple *FitP = (TNtuple *) f->Get("FitP");
+    if (! FitP) continue;
+    TString name(gSystem->BaseName(f->GetName()));
+    name.ReplaceAll(".root","");
+    //      cout << name << endl;
+    F[NF] = f;
+    cout << k << "/" << NF << "\t" << F[NF]->GetName() << endl;
+    NF++;
+  }
   //  gStyle->SetMarkerSize(0.4);
   for (Int_t k = 0; k < N; k++) {
     if (! F[k]) continue;

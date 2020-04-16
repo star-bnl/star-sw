@@ -205,7 +205,9 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     }
   }
   ChainOpt = RunOpt + ChainOpt;
-  RootFile += Form("_%s_%i_%i",Opt.Data(),First,Last);
+  if (FileIn = "") {
+    RootFile += Form("_%s_%i_%i",Opt.Data(),First,Last);
+  }
   RootFile.ReplaceAll(".root","");
   RootFile.ReplaceAll(",","_");
   if (RootFile.Contains(";")) {

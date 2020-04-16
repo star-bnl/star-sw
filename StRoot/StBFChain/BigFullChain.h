@@ -260,7 +260,7 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                                      "","","/",kFALSE},
   {"MC.y2018","","","MC.2018",                                                             "","","",kFALSE},
   {"MC2018.Ideal","","","MC.2018,MC.Sti,NewTpcAlignment"                                  ,"","","",kFALSE},
-  {"MC2018",      "","","MC2018.Ideal,vmc,VMCAlignment,sdt20180426.122000"                ,"","","",kFALSE},
+  {"MC2018",      "","","MC2018.Ideal,vmc,VMCAlignment,sdt20180601.032240"                ,"","","",kFALSE},
   {"MC.2019","","","y2019,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                       "","","",kFALSE},

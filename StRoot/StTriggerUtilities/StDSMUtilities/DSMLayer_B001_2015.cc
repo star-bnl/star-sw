@@ -7,7 +7,7 @@
 
 DSMLayer_B001_2015::DSMLayer_B001_2015() : DSMLayer_B001_2009()
 {
-  printf("DSMLayer_B001_2015 constructor\n");
+  //printf("DSMLayer_B001_2015 constructor\n");
   // West
 
   for (int dsm = 0; dsm < 15; ++dsm)
