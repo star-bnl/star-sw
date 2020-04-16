@@ -1,5 +1,6 @@
 #ifndef StMuException_hh
 #define StMuException_hh
+#ifndef __ROOTCLING__
 
 #include <string>
 #include "Stiostream.h"
@@ -9,7 +10,6 @@
 #ifndef ST_NO_NAMESPACES
 using namespace std;
 #endif
-
 
 
 enum StMuExceptionTypes {kUnknown=0, kNullPointer, kBadFlag, kBadValue, kEOF};
@@ -45,7 +45,7 @@ EXE(BadValue);
 EXE(BadFlag);
 EXE(EOF);
 
-
+#endif
 
 
 
