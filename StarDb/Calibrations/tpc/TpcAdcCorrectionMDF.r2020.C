@@ -1,0 +1,68 @@
+TDataSet *CreateTable() { 
+  if (!gROOT->GetClass("St_MDFCorrection")) return 0;
+  Int_t nrows = 2;
+  MDFCorrection_st row;
+  St_MDFCorrection *tableSet = new St_MDFCorrection("TpcAdcCorrectionMDF",nrows);
+  memset(&row,0,tableSet->GetRowSize());
+  row.nrows =  nrows; // O3DnpadtmbksADCADC3L
+  row.idx   =  1;
+  row.PolyType =        0;
+  row.NVariables =      2;
+  row.NCoefficients =   10;
+  row.XMin[ 0] =       3.55;  row.XMin[ 1] =          6;
+  row.XMax[ 0] =       9.95;  row.XMax[ 1] =         33;
+  row.Power[ 0] =  1;  row.Power[ 1] =  1;
+  row.Power[ 2] =  1;  row.Power[ 3] =  2;
+  row.Power[ 4] =  2;  row.Power[ 5] =  1;
+  row.Power[ 6] =  2;  row.Power[ 7] =  2;
+  row.Power[ 8] =  3;  row.Power[ 9] =  1;
+  row.Power[10] =  4;  row.Power[11] =  1;
+  row.Power[12] =  4;  row.Power[13] =  2;
+  row.Power[14] =  1;  row.Power[15] =  6;
+  row.Power[16] =  3;  row.Power[17] =  5;
+  row.Power[18] =  1;  row.Power[19] =  3;
+  row.DMean =   0.4767 + 4.31976e-01; // + 1.56802e+00 + 2.40296e-01;
+  row.Coefficients[ 0]    =       -0.027973;  row.Coefficients[ 1]    =         0.10214;
+  row.Coefficients[ 2]    =        -0.42191;  row.Coefficients[ 3]    =         -0.4331;
+  row.Coefficients[ 4]    =          0.3166;  row.Coefficients[ 5]    =         0.25262;
+  row.Coefficients[ 6]    =          0.7515;  row.Coefficients[ 7]    =       -0.080979;
+  row.Coefficients[ 8]    =        -0.35917;  row.Coefficients[ 9]    =        0.055671;
+  row.CoefficientsRMS[ 0] =      4.2529e-05;  row.CoefficientsRMS[ 1] =      0.00014714;
+  row.CoefficientsRMS[ 2] =      0.00024932;  row.CoefficientsRMS[ 3] =      0.00050004;
+  row.CoefficientsRMS[ 4] =      0.00040189;  row.CoefficientsRMS[ 5] =      0.00036315;
+  row.CoefficientsRMS[ 6] =      0.00073985;  row.CoefficientsRMS[ 7] =      0.00014084;
+  row.CoefficientsRMS[ 8] =      0.00048884;  row.CoefficientsRMS[ 9] =      0.00019424;
+  tableSet->AddAt(&row);
+  memset(&row,0,tableSet->GetRowSize());
+  row.nrows =  nrows; // 3DnpadtmbksADCADC3L
+  row.idx   =  2;
+  row.PolyType =        0;
+  row.NVariables =      2;
+  row.NCoefficients =   10;
+  row.XMin[ 0] =       3.05;  row.XMin[ 1] =          6;
+  row.XMax[ 0] =       9.95;  row.XMax[ 1] =         32;
+  row.Power[ 0] =  1;  row.Power[ 1] =  1;
+  row.Power[ 2] =  2;  row.Power[ 3] =  2;
+  row.Power[ 4] =  4;  row.Power[ 5] =  2;
+  row.Power[ 6] =  1;  row.Power[ 7] =  2;
+  row.Power[ 8] =  4;  row.Power[ 9] =  1;
+  row.Power[10] =  2;  row.Power[11] =  1;
+  row.Power[12] =  1;  row.Power[13] =  4;
+  row.Power[14] =  1;  row.Power[15] =  5;
+  row.Power[16] =  4;  row.Power[17] =  6;
+  row.Power[18] =  4;  row.Power[19] =  3;
+  row.DMean =   0.435 + 2.67486e-01; // + 1.49585e+01 - 2.00064e+00;
+  row.Coefficients[ 0]    =       -0.068125;  row.Coefficients[ 1]    =       -0.065216;
+  row.Coefficients[ 2]    =         0.90349;  row.Coefficients[ 3]    =      0.00063408;
+  row.Coefficients[ 4]    =         0.22115;  row.Coefficients[ 5]    =        -0.10226;
+  row.Coefficients[ 6]    =        -0.19728;  row.Coefficients[ 7]    =       -0.086895;
+  row.Coefficients[ 8]    =        -0.19051;  row.Coefficients[ 9]    =         0.12374;
+  row.CoefficientsRMS[ 0] =      1.9808e-05;  row.CoefficientsRMS[ 1] =      0.00018657;
+  row.CoefficientsRMS[ 2] =      0.00061289;  row.CoefficientsRMS[ 3] =      6.7109e-05;
+  row.CoefficientsRMS[ 4] =      0.00053699;  row.CoefficientsRMS[ 5] =      0.00011908;
+  row.CoefficientsRMS[ 6] =      0.00024467;  row.CoefficientsRMS[ 7] =      0.00022149;
+  row.CoefficientsRMS[ 8] =      0.00074721;  row.CoefficientsRMS[ 9] =       0.0010418;
+  tableSet->AddAt(&row);
+  // ----------------- end of code ---------------
+  return (TDataSet *)tableSet;
+}
