@@ -334,7 +334,8 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       l = kTpcOutIn;
       Int_t nrows = ((St_TpcAdcCorrectionMDF *) m_Corrections[k].Chair)->nrows();
       if (l >= nrows) l = nrows - 1;
-      dE = ADC*Adc2GeVReal*((St_TpcAdcCorrectionMDF *) m_Corrections[k].Chair)->Eval(l,xx);
+      Double_t Cor = ((St_TpcAdcCorrectionMDF *) m_Corrections[k].Chair)->Eval(l,xx);
+      dE = ADC*Adc2GeVReal*TMath::Exp(Cor);
       goto ENDL;
     }
     cor = ((St_tpcCorrection *) m_Corrections[k].Chair->Table())->GetTable();
