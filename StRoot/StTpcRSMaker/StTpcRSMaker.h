@@ -62,7 +62,7 @@ public:
   static void SetDebug(Int_t i) {_debug = i;};
   static Int_t Debug() {return _debug;}
   void Print(const Char_t *opt = "") const;
-  void   GenerateSignal(StTpcLocalSectorCoordinate &xyzW, Int_t rowMin, Int_t rowMax, Double_t sigmaJitterT, Double_t sigmaJitterX);
+  void   GenerateSignal(StTpcLocalSectorCoordinate &xyzW, Int_t rowMin, Int_t rowMax, Double_t QAv);
   Double_t dEdxCorrection();
   ClassDef(StTpcRSSegment,1)
 };
@@ -155,6 +155,7 @@ class StTpcRSMaker : public StMaker {
   static Double_t      mtauCX[2];            //! -"- 
   Double_t    mLocalYDirectionCoupling[2][24][7]; //!
   Int_t      mNSplittedHits;          //!
+  Double_t   mTimeBinWidth;           //!
   Char_t end[1];                      //!
   TArrayI    mNoTpcHitsAll;           //!
   TArrayI    mNoTpcHitsReal;          //!
