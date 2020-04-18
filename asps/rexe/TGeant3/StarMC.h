@@ -132,8 +132,8 @@ public:
   ClassDef(StarMC,1) //Generic MonteCarlo Class
 
 };
-
+#if ROOT_VERSION_CODE < 393216 /* ROOT_VERSION(6,0,0) */
 R__EXTERN StarMC *gMC;
-
+#endif
 #endif
 
