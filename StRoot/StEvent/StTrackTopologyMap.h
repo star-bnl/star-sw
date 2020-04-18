@@ -104,10 +104,14 @@ protected:
 private:
     UInt_t  mMap0;
     UInt_t  mMap1;
+#ifndef __ROOT_CINT__
     union {
       UInt_t   mMap2;
       Long64_t mMap_iTpc;
     };
+#else
+      UInt_t   mMap2;
+#endif
     ClassDef(StTrackTopologyMap,3)
 };
 
