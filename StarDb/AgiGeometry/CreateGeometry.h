@@ -17,6 +17,9 @@
 #endif
 //#include "Rotations+"
 //________________________________________________________________________________
+void Geometry() {
+}
+//________________________________________________________________________________
 TGeoMaterial *GetMat(const char *matname) {
   TGeoMaterial *mat = gGeoManager->GetMaterial(matname);
   if (! mat) cout << "GetMat: cannot find material " << matname << endl;
