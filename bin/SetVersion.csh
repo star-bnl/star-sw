@@ -86,6 +86,9 @@ switch ($case)
   case "*.DEV2*":  
     setenv STAR_LEVEL .DEV2
     breaksw
+  case "DEV6":  
+    setenv STAR_LEVEL .DEV2
+    breaksw
   default:
     breaksw
 endsw
