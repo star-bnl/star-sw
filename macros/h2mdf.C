@@ -4,6 +4,11 @@
   .x h2mdf.C("mu",5,1,20)
   .x h2mdf.C("sigma",5,1,20)
   root.exe TPoints*UG*dEdx926.root  h2mdf.C
+
+  foreach d (`ls -1d [0-9]*GeV*.root`)
+     set b = `basename ${d} .root`;
+     root.exe -q -b TPoints*U*${d}  h2mdf.C | tee ${b}.log
+  end 
  */
 #ifndef __CINT__
 #include <stdlib.h>
@@ -163,6 +168,7 @@ void  h2mdf(Int_t date = 0, Int_t time = 0){
       tag.ReplaceAll(".root","");
     }
     fIn[l] = f;
+    cout << "l = " << l << " File = " << fIn[l]->GetName() << endl;
   }
   
   TString fOut;
@@ -177,6 +183,7 @@ void  h2mdf(Int_t date = 0, Int_t time = 0){
   out << "  Int_t nrows = 6;" << endl;
   Int_t idx = 0;
   for (Int_t l = 0; l < 3; l++) {
+    fIn[l]->cd();
     for (Int_t m = 0; m < 2; m++) {
       out << "  memset(&row,0,tableSet->GetRowSize());" << endl;
       out << "  row.nrows =  6; //" << gDirectory->GetName() << endl;

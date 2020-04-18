@@ -43,6 +43,7 @@ TF1* FitTH1R(TH1 *hist, const Char_t *fitF = "pol1") {
     f = (TF1 *) gROOT->GetListOfFunctions()->FindObject(fitF);
     if (! f) return f;
   }
+  //  f->SetParLimits(1,-100,0.);
   
   Int_t n = hist->GetNbinsX();
   Double_t *x = new Double_t[n];
@@ -57,7 +58,8 @@ TF1* FitTH1R(TH1 *hist, const Char_t *fitF = "pol1") {
     N++;
   }
   gr = new TGraphErrors(N, x, y, 0, e);
-  Int_t iok = gr->Fit(fitF,"+rob=0.75");
+  //  Int_t iok = gr->Fit(fitF,"+rob=0.75");
+  Int_t iok = gr->Fit(fitF);
   if (iok < 0) f = 0;
   TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
   if (c1) c1->Clear();
@@ -76,14 +78,14 @@ TF1* FitTH1R(TH1 *hist, const Char_t *fitF = "pol1") {
 void MakeRow(TH2 *mu=0, const Char_t *fName="pol1") {
   if (! mu) return;
   Int_t n = mu->GetNbinsX();
+  ofstream out;
+  TString fOut = "row.C";
+  out.open(fOut.Data(), ios::out);
+  cout << "Create " << fOut << endl;
   for (Int_t i = 1; i <= n; i++) {
     TH1D *proj = mu->ProjectionY(Form("R%i",i),i,i);
     TF1 *f = FitTH1R(proj,fName);
-    ofstream out;
-    TString fOut =  Form("row.%03i.C",i);
     TString Line;
-    cout << "Create " << fOut << endl;
-    out.open(fOut.Data());
     Line = Form("  memset(&row,0,tableSet->GetRowSize()); // %s",gDirectory->GetName()); cout << Line.Data() << endl;  out << Line.Data() << endl;
     Line = Form("  row.idx   = %3i;",i); cout << Line.Data() << endl;  out << Line.Data() << endl;
     Line = Form("  row.nrows = %3i;",n); cout << Line.Data() << endl;  out << Line.Data() << endl;
@@ -97,4 +99,5 @@ void MakeRow(TH2 *mu=0, const Char_t *fName="pol1") {
     }
     Line = Form("  tableSet->AddAt(&row); // row %3i",i); cout << Line.Data() << endl;  out << Line.Data() << endl;  
   }
+  out.close();
 }

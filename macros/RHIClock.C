@@ -42,6 +42,22 @@ production_7p7GeV_2019               9104506 3.847  9203553        1.01087889886
 production_3p85GeV_fixedTarget_2019  9104506 3.947
 
    root.exe -q -b lBichsel.C pionMIP.root 'dEdxFit.C+("SecRow3C","GF")'
+starClockOnl.20191207.235159.C:    row.frequency         =    9083344; // frequency in Hz  ;
+starClockOnl.20191220.235718.C:    row.frequency         =    9337360; // frequency in Hz  ;
+starClockOnl.20200127.212835.C:    row.frequency         =    9399987; // frequency in Hz  ;
+starClockOnl.20200129.235637.C:    row.frequency         =    9361222; // frequency in Hz  ;
+starClockOnl.20200130.220023.C:    row.frequency         =    9188680; // frequency in Hz  ;
+starClockOnl.20200131.015235.C:    row.frequency         =    9188684; // frequency in Hz  ;
+starClockOnl.20200131.210628.C:    row.frequency         =    9188685; // frequency in Hz  ;
+starClockOnl.20200201.230354.C:    row.frequency         =    9372864; // frequency in Hz  ;
+starClockOnl.20200202.232044.C:    row.frequency         =    9361228; // frequency in Hz  ;
+starClockOnl.20200203.230525.C:    row.frequency         =    9188679; // frequency in Hz  ;
+starClockOnl.20200204.230250.C:    row.frequency         =    9307123; // frequency in Hz  ;
+starClockOnl.20200209.233751.C:    row.frequency         =    9188683; // frequency in Hz  ;
+starClockOnl.20200212.234736.C:    row.frequency         =    9337363; // frequency in Hz  ;
+starClockOnl.20200213.225906.C:    row.frequency         =    9337363; // frequency in Hz  ;
+starClockOnl.20200223.234623.C:    row.frequency         =    9337360; // frequency in Hz  ;
+
 */
 #if !defined(__CINT__) && !defined(__CLING__) && ! defined(__MAKECINT__)
 // code that should be seen ONLY by the compiler
@@ -64,12 +80,13 @@ production_3p85GeV_fixedTarget_2019  9104506 3.947
 #include "TMath.h"
 #endif
 //________________________________________________________________________________
-Int_t RHIClock(Double_t e, Double_t m) {
-  Double_t l = 3833.845*9.99988614393081399e-01;// *9.99998896969437556e-01;  // RHIC perimetr
+Double_t RHIClock(Double_t ekin, Double_t m) {
+  //Circumference =  3833.845 m => https://www.slac.stanford.edu/pubs/confproc/biw98/shea.pdf
+  Double_t l       = 3833.845*9.99999253982746361e-01;// *9.99988614393081399e-01;// *9.99998896969437556e-01;  // RHIC perimetr
   Double_t NB = 120;      // no. of buches
-  Double_t beta = TMath::Sqrt(e*e - m*m)/(e);
-  Int_t f = NB*beta*TMath::C()/l;
-  cout << "Freqency = " << f << " for kinetic energy = " << e << " mass = " << m <<endl;
+  Double_t beta = TMath::Sqrt((ekin+m)*(ekin+m) - m*m)/(ekin+m);
+  Double_t f = 1e-6*NB*beta*TMath::C()/l;
+  cout << "Freqency = " << f << " (MHz) for kinetic energy = " << ekin << " mass = " << m <<endl;
   return f;
 }
 //________________________________________________________________________________
@@ -105,8 +122,12 @@ Int_t RHIClock(const Char_t *name="p", Double_t e = 250) {
     e = 249.729;
     A = 1;
     M = 1.00727646688*u;
+  } else if (Name == "pp510") {
+    e = 254.867; // 9.383512 
+    A = 1;
+    M = 1.00727646688*u;
   } else if (Name == "pp200") {
-    e = 100.135;
+    e = 100.135;   
     A = 1;
     M = 1.00727646688*u;
   } else if (Name == "AuAu9") {
@@ -115,11 +136,11 @@ Int_t RHIClock(const Char_t *name="p", Double_t e = 250) {
     Z = 79;
     M = A*u;
  } else if (Name == "AuAu200") {
-    e = 99.908;
+    e = 99.908;   // 9.383161 MHz
     A = 196.96655;
     Z = 79;
     M = A*u;
- } else if (Name == "AuAu62") {
+  } else if (Name == "AuAu62") {
     e = 31.151;
     A = 196.96655;
     Z = 79;
@@ -135,17 +156,29 @@ Int_t RHIClock(const Char_t *name="p", Double_t e = 250) {
     Z = 29;
     M = A*u;
   } else if (Name == "CuCu22") {
-    e = 11.216;
+    e = 11.216; // 9.352 MHz => 9.35629
     A = 63.546;
     Z = 29;
     M = A*u;
+  } else if (Name == "11p5GeV") {
+    e = 5.761; // 9.337363 MHz
+    A = 196.96655;
+    Z = 79;
+    M = A*u;
+  } else if (Name == "9p2GeV") {
+    e = 4.593; // 9.188684 MHz
+    A = 196.96655;
+    Z = 79;
+    M = A*u;
   }
-  Double_t E = e*A;
+  Double_t N = TMath::Nint(A); // no. of nucleons
+  Double_t E = e*N;
+  //  Double_t E = e*A;
   //  e = TMath::Sqrt(p*p + M*M) - M;
   //  Double_t gamma = (e + M)/M;
-  Double_t gamma = E/M;
+  Double_t gamma = (E+M)/M;
   Double_t beta  = TMath::Sqrt(1 - 1./(gamma*gamma));
-  cout << Name.Data() << "\tA\t" << A << "\tZ\t" << Z << "\tM\t" << M << "\tE\t" << e << "\tgamma = " << gamma << "\tbeta = " << beta  << endl; 
+  cout << Name.Data() << "\tA\t" << A << "\tN\t" << N << "\tZ\t" << Z << "\tM\t" << M << "\tE\t" << e << "\tgamma = " << gamma << "\tbeta = " << beta  << endl; 
   return RHIClock(E,M);
 }
 

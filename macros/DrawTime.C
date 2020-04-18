@@ -44,20 +44,37 @@ void DrawTimeU(TH1 *h, const Char_t *opt="%m\/%d\/%y"){//\%F2001-01-01 00:00:00"
   gPad->Update();
 }
 //________________________________________________________________________________
-void TimePeriods() {
-#if 0
-#if 0
+void TimePeriods(Int_t N, Int_t *tp) {
+  TDatime t0(19950101,0);
+  UInt_t u0 = t0.Convert();
+  for (Int_t i = 0; i < N; i+=2) {
+    TDatime t(tp[i],tp[i+1]);
+    Double_t PositionX = (t.Convert() - u0);
+    Double_t PositionY = -0.1;
+    TPolyMarker *pm = new TPolyMarker(1, &PositionX, &PositionY);
+    pm->SetMarkerStyle(20);
+    //    pm->SetMarkerColor(kBlue);
+    pm->SetMarkerColor(kRed);
+    pm->SetMarkerSize(1.3);
+    pm->Draw();
+  }
+}
+//________________________________________________________________________________
+void Run1_4() {
   Int_t tp[] = {
     20010924,000000,
     20031120,000000,
-    20040104,040500,
+    20040104, 40500,
     20040205,180000,
     20040217,160000,
     20040324,210000,
     20040404,200000
-
   };
-#else
+  Int_t N = sizeof(tp)/sizeof(Int_t);
+  TimePeriods(N,tp);
+}
+//________________________________________________________________________________
+void RunX() {
   Int_t tp[] = {
     20100103,      0, // AuAu200FF          day 003  
     20100107, 123300, // AuAu200FFLL        day 007
@@ -68,8 +85,11 @@ void TimePeriods() {
     20100424,  40000, // AuAu7RFF           day 114
     20100527,  20000  // AuAu11RFF          day 147
   };
-#endif
-#endif
+ Int_t N = sizeof(tp)/sizeof(Int_t);
+  TimePeriods(N,tp);
+}
+//________________________________________________________________________________
+void RunXIII() {
   Int_t tp[] = {
     20130313, 100000,
     20130403, 100000,
@@ -81,19 +101,25 @@ void TimePeriods() {
     20130605, 220000,
     20130611, 100000};
   Int_t N = sizeof(tp)/sizeof(Int_t);
-  TDatime t0(19950101,0);
-  UInt_t u0 = t0.Convert();
-  for (Int_t i = 0; i < N; i+=2) {
-    TDatime t(tp[i],tp[i+1]);
-    Double_t PositionX = (t.Convert() - u0);
-    Double_t PositionY = 10;
-    TPolyMarker *pm = new TPolyMarker(1, &PositionX, &PositionY);
-    pm->SetMarkerStyle(20);
-    //    pm->SetMarkerColor(kBlue);
-    pm->SetMarkerColor(kRed);
-    pm->SetMarkerSize(1.3);
-    pm->Draw();
-  }
+  TimePeriods(N,tp);
+}
+//________________________________________________________________________________
+void RunXX() {
+  Int_t tp[] = {
+    20191208,100905, 20191221,190032, 20200210,220428, 20200214,143742, 20200214,143742, // 11p5GeV                
+    20191221,154021, 								         // 5p75GeV_fixedTarget    
+    20200128,182912								       , // 31p2GeV_fixedTarget    
+    20200130,  5840, 20200131, 50328, 20200131, 50328	                 	       , // 9p8GeV_fixedTarget     
+    20200131, 12112, 20200131, 12112, 20200203, 20253				       , // 9p2GeV                 
+    20200201,191904								       , // 19p5GeV_fixedTarget    
+    20200202,160409								       , // 13p5GeV_fixedTarget    
+    20200204, 53518								       , // 7p3GeV_fixedTarget     
+    20200205,144626								       , // 9p2GeV                 
+    20200213,152339, 20200213,152339						       , // 5p75GeV_fixedTarget    
+    20200224,230740								         // 9p2GeVb                
+  };
+  Int_t N = sizeof(tp)/sizeof(Int_t);
+  TimePeriods(N,tp);
 }
 /*
   Drift velocities:

@@ -1,4 +1,5 @@
 /*
+root.exe Z3CGF*.root lDb.C MakeTpcZCorrection.C+
 root.exe Z3CGFRunXVIAuAu200p14.root lDb.C
   .L MakeTpcZCorrection.C++
   Double_t xmin = 25;
@@ -215,7 +216,7 @@ void MakeRows() {
   }
 }
 //________________________________________________________________________________
-void MakeTpcZCorrection() {
+void MakeTpcZCorrection1() {
   const Char_t *tableName = "TpcZCorrectionB";
   TString fileIn(gDirectory->GetName());
   if (! fileIn.BeginsWith("Z3CGF")) return;
@@ -272,4 +273,19 @@ void MakeTpcZCorrection() {
   out << "  return (TDataSet *)tableSet;" << endl;
   out << "}" << endl;
   out.close(); 
+}
+//________________________________________________________________________________
+void MakeTpcZCorrection() {
+  TSeqCollection *files = gROOT->GetListOfFiles();
+  if (! files) return;
+  TIter next(files);
+  TFile *f = 0;
+  while ( (f = (TFile *) next()) ) { 
+    TString F(f->GetName());
+    if (! F.Contains("Z3CGF")) continue;
+    f->cd();
+    TNtuple *FitP = (TNtuple *) gDirectory->Get("FitP");
+    if (! FitP) continue;
+    MakeTpcZCorrection1();
+  }
 }

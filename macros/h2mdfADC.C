@@ -38,17 +38,11 @@ Double_t funcMDF(Double_t *x, Double_t *p=0) {
   return fit->Eval(x, p);
 }
 //________________________________________________________________________________
-#ifndef __CINT__
 void h2mdfADC(Int_t max=5, Int_t t = 0, Int_t maxTerm = 10, Double_t ymin = 0.2, Double_t ymax = 1)
-#else
-void h2mdfADC(Int_t max=5, TMultiDimFit::EMDFPolyType type = TMultiDimFit::kMonomials, Int_t maxTerm = 10, Double_t ymin = 0.2, Double_t ymax = 1)
-#endif
   {
   TH2D *mu = (TH2D *) gDirectory->Get("mu");
   TH2D *sigma = (TH2D *) gDirectory->Get("sigma");
   TH2D *entries = (TH2D *) gDirectory->Get("entries");
-  TH2D *mu = (TH2D *) gDirectory->Get("mu");
-  TH2D *mu = (TH2D *) gDirectory->Get("mu");
   if (! mu) {
     cout << "Histogram  has not been found " << endl;
     return;
@@ -58,8 +52,10 @@ void h2mdfADC(Int_t max=5, TMultiDimFit::EMDFPolyType type = TMultiDimFit::kMono
   
   // make fit object and set parameters on it. 
   //  fit = new TMultiDimFit(nVars, TMultiDimFit::kMonomials,"vk");
-#ifndef __CINT__
+#ifdef __CINT__
   EMDFPolyType type = (EMDFPolyType) t;
+#else
+  TMultiDimFit::EMDFPolyType type = (TMultiDimFit::EMDFPolyType) t;
 #endif
   fit = new TMultiDimFit(nVars, type,"vk");
 

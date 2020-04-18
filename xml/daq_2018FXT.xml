@@ -52,5 +52,6 @@
 <!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/daq/2018/116/1911602*/*adc*.daq" /> -->
 <!-- <input URL="file:/star/data03/daq/2018/109/*/*.daq" />  -->
 <!-- <input URL="file:/gpfs01/star/daq/2018/151/19151031/st_physics_adc_19151031_raw_1500002.daq" /> -->
-<input URL="file:/gpfs01/star/daq/2018/151/*/st_physics_adc_*.daq" />
+<!-- <input URL="file:/gpfs01/star/daq/2018/151/*/st_physics_adc_*.daq" /> -->
+<input URL="file:/hlt/cephfs/daq/2018/15*/*/st_physics_adc_*.daq" /> 
 </job>

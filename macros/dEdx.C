@@ -71,6 +71,24 @@ void dEdx(Int_t nevents=1000,
   //      RootFile.Contains("hijing",TString::IgnoreCase)) Chain += ",Simu";
   chain = bfc(-1,Chain.Data(),MainFile,0,RootFile.Data());
   StdEdxY2Maker *dEdxY2 = (StdEdxY2Maker *) chain->Maker("dEdxY2"); 
+  if (dEdxY2) {
+    Int_t tMin = 20000101;
+    Int_t tMax = 20210101;
+    for (Int_t y = 2000; y < 2026; y++) {
+      TString Y;
+      Y += y;
+      //      cout << "Year = " << Year.Data() << "\tyear " << Y.Data() << endl;
+      if (Year.Contains(Y)) {
+	tMin = 10000*(y-1) + 1101;
+	tMax = 10000* y    +  831;
+	//	cout << "Year for year " << Y.Data() << "\ttMin = " << tMin << "\ttMax = " << tMax << endl;
+	dEdxY2->RemAttr("tMin"); dEdxY2->SetAttr("tMin",tMin);
+	dEdxY2->RemAttr("tMax"); dEdxY2->SetAttr("tMax",tMax);
+	dEdxY2->PrintAttr();
+	break;
+      }
+    }
+  }
   StMaker *tofCalib = chain->Maker("tofCalib");
   if (tofCalib) chain->AddAfter("tofCalib",dEdxY2);
   Int_t Mode = 0;

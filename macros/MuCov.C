@@ -102,6 +102,35 @@ void MuCov(Char_t *files = "*.MuDst.root",const Char_t *out = "") {
 	    } 
       }
     }
+    // Global Tracks
+    for (Int_t kg = 0; kg < NoCovGlobTrack; kg++) {
+      Int_t kgc = GlobalTracks_mIndex2Cov[kg];
+      Double_t VV[3] = { // nV
+	TMath::Sqrt(CovGlobTrack_mPtiPti[kgc])/CovGlobTrack_mPti[kgc], TMath::Sqrt(CovGlobTrack_mTanTan[kgc]), TMath::Sqrt(CovGlobTrack_mPsiPsi[kgc])
+      };
+      Double_t WW[5] = {// nW
+	1./GlobalTracks_mPt[kg], GlobalTracks_mNHitsFit[kg], GlobalTracks_mEta[kg], GlobalTracks_mPhi[kg], GlobalTracks_mPt[kg]
+      };
+      Int_t i = 1; 
+      for (Int_t j = 0; j < nV; j++)
+	for (Int_t m = 0; m < nW; m++) {
+	  if (m != 1 && WW[1] < 15) continue;
+	  hist[i][j][m]->Fill(WW[m], VV[j]);
+	} 
+    }
   }
   fOut->Write();
 }
+/* 
+  MuCov.C
+  ========
+  GldpTpT->Draw("colz")
+  c1->SetLogz(1)
+  GldpTpT->FitSlicesY()
+  GldpTpT_1->Fit("pol1")
+
+
+/net/l404/data/fisyak/reco/Efficiencies/2014/Upsilon2SmTsq.Smeared : dpT/pT = -0.00103092 + 0.00927441*pT;
+/net/l404/data/fisyak/reco/Efficiencies/2019/Upsilon2SmTsq.Smeared : dpT/pT =  0.00481564 + 0.00485789*pT;
+/net/l404/data/fisyak/reco/Efficiencies/2021/Upsilon2SmTsq.Smeared : dpT/pT =  0.0029289  + 0.00538986*pT;
+ */

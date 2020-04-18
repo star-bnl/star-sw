@@ -93,7 +93,7 @@ void MuKFU(Long64_t nevent = 999999,
   TH1D *kMass = new TH1D("kMass","Upsilon mass @VTX",100,9.5,10.5);
   TH1D *lMass = new TH1D("lMass","Upsilon mass",100,9.5,10.5);
   TH1D *upT   = new TH1D("upT","Upsilon pT",100,0.0,10.0);
-
+  TH2D *dpTvspT   = new TH2D("dpTvspT","dpT/pT versus pT",100,0,10.,100,0.0,0.1);
   // ----------------------------------------------
   StMuDebug::setLevel(0);  
   maker = new StMuDstMaker(0,0,"",file,"st:MuDst.root",1e9);   // set up maker in read mode
@@ -156,7 +156,8 @@ void MuKFU(Long64_t nevent = 999999,
     if (! Vtx) continue;
     KFVertex prodVtx;
     prodVtx.SetBeamConstraint(Vtx->position().x(),Vtx->position().y(),Vtx->position().z(),
-			      Vtx->posError().x(),Vtx->posError().y(),Vtx->posError().z());
+			      0.1, 0.1, 0.1);
+			      //			      Vtx->posError().x(),Vtx->posError().y(),Vtx->posError().z());
     if (_debugAsk) cout << "prodVtx: " << prodVtx << endl;
     for (Int_t kg = 0; kg < NoGlobalTracks; kg++) {
       StMuTrack *gTrack = (StMuTrack *) GlobalTracks->UncheckedAt(kg);
@@ -180,6 +181,9 @@ void MuKFU(Long64_t nevent = 999999,
       if (muP.GetQ() <= 0) continue;
       KFParticle muPk(muP);
       muPk.SetProductionVertex(prodVtx);
+      Float_t dpT, pT;
+      muPk.GetP(pT, dpT);
+      dpTvspT->Fill(pT, dpT/pT);
       TVector3 p3P(muPk.GetPx(), muPk.GetPy(), muPk.GetPz());
       TLorentzVector pP(p3P, TMath::Sqrt(p3P.Mag2() + mass*mass));
       if (_debugAsk) {
@@ -222,4 +226,14 @@ void MuKFU(Long64_t nevent = 999999,
   }
   fOut->Write();
 }
+/*
+  TF1 *f = new TF1("f","TMath::Sqrt([0]*[0]+[1]*[1]*x*x)",3,7)
+  dpTvspT->FitSlicesY()
+  dpTvspT_1->Fit(f,"er","",3,8)
 
+
+/net/l404/data/fisyak/reco/Efficiencies/2014/Upsilon2SmTsq.Smeared: dpT/pT = 5.92971e-03 + 5.77886e-03 * pT
+/net/l404/data/fisyak/reco/Efficiencies/2019/Upsilon2SmTsq.Smeared: dpT/pT = 7.68464e-03 + 4.48289e-03 * pT
+/net/l404/data/fisyak/reco/Efficiencies/2021/Upsilon2SmTsq.Smeared: dpT/pT = 7.29367e-03 + 4.64073e-03 * pT
+
+*/
