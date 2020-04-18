@@ -89,7 +89,7 @@
    $ROOTCLING = "";
    $RCINTPL = cwd() . "/mgr/RootCint.pl";
    if (! -e $RCINTPL) {
-     $RCINTPL = $STAR . "mgr/RootCint.pl";
+     $RCINTPL = $STAR . "/mgr/RootCint.pl";
    }
  } else {
    $RCINTPL = cwd() . "/mgr/RootCling.pl";
