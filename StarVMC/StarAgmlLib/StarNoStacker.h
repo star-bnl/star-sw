@@ -27,6 +27,7 @@ class StarNoStacker : public StarAgmlStacker
   void   AddGroup( const Char_t *name ){ /* nada */ };
 
 
+  ClassDef(StarNoStacker,1);
 
 };
 

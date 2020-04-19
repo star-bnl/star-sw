@@ -4,6 +4,7 @@
 #include "TObjectSet.h"
 #include "TGenericTable.h"
 
+ClassImp(AgModule);
 
 TDataSet *AgModule::mGeomSet = 0;
 

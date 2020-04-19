@@ -5,6 +5,7 @@
 #include <iostream>
 #include "StMessMgr.h"
 
+ClassImp(AgMedium);
 // -----------------------------------------------------------------------------------------------------------
 // lifted std::vector< TString >             AgMedium::mParameterList;
 std::map   < TString, AgMedium * > AgMedium::mMediumTable;

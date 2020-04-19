@@ -48,9 +48,10 @@ class AgPlacement : public TNamed, public AgParameterList<double>
 
   enum { kOnly=0, kMany };
 
+#ifdef __ROOTCLING__1
  private:
  protected:
-
+#endif
   bool mHasRotm;
 
   //  std::map< TString, Double_t > mParameters;
@@ -68,14 +69,16 @@ class AgPlacement : public TNamed, public AgParameterList<double>
   {
     Double_t thetax, phix, thetay, phiy, thetaz, phiz;
   };
-public:
+#ifndef __ROOTCLING__
   union Rotation
   {
     Rotation3 rot3;
     Rotation6 rot6;
     Short_t   ort[3];
   };
-
+#else
+  using Rotation = Rotation6;
+#endif
   struct Translation
   {
     Double_t x;
@@ -83,7 +86,7 @@ public:
     Double_t z;
     Translation() : x(0), y(0), z(0){ };
   };
-protected:
+
   enum { kUnknown, kRot3, kRot6, kRotO };
   enum { kAlphaX,  kAlphaY, kAlphaZ };
 
@@ -98,6 +101,7 @@ protected:
     return cvs;
   }
 
+  ClassDef(AgPlacement,1);
 };
 
 #endif

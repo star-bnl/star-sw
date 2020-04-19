@@ -1,4 +1,5 @@
 #include "StarAgmlStacker.h"
+ClassImp(StarAgmlStacker);
 
 #include "TMath.h"
 #include <assert.h>

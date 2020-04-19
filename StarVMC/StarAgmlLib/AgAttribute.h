@@ -42,6 +42,7 @@ class AgAttribute : public TNamed, public AgParameterList<double>
   //  static std::vector< TString > mParList;
   //  std::map< TString, Double_t > mParameters;
   friend class _AttributeDummy;
+  ClassDef(AgAttribute,1);
 
 
  public:

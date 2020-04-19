@@ -1,6 +1,7 @@
 #include "AgAttribute.h"
 #include "AgBlock.h"
 #include "StMessMgr.h"
+ClassImp(AgAttribute);
 // -----------------------------------------------------------------------------------------------------------
 //lift std::vector< TString > AgAttribute::mParList;
 //std::map   < TString, Double_t > AgAttribute::mParameters;

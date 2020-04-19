@@ -1,4 +1,5 @@
 #include "AgCreate.h"
+ClassImp(AgCreate);
 #include "StMessMgr.h"
 #include <iostream>
 

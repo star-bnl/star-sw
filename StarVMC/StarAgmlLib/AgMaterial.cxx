@@ -1,4 +1,5 @@
 #include "AgMaterial.h"
+ClassImp(AgMaterial);
 
 #include <iostream>
 #include <assert.h>

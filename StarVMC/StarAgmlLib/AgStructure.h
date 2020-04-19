@@ -130,6 +130,7 @@ class AgStructure : public TNamed
   }
 
 
+  ClassDef(AgStructure,1);
 
 };
 

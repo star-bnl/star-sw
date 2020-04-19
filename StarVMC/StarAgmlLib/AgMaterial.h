@@ -85,10 +85,10 @@ class AgMaterial : public TNamed, public AgParameterList<double>
   void   lock(){ mLock=true; }
 
   Double_t sumWeights();
- 
+#ifdef __ROOTCLING__1 
  private:
  protected:
-
+#endif
   // lifted  std::map< TString, Double_t > mParameters;
 
   /// Find and return a pointer to the specified material
@@ -97,13 +97,13 @@ class AgMaterial : public TNamed, public AgParameterList<double>
   // Components
   std::vector< TString >  mC;
   std::vector< Double_t > mA, mZ, mW;
-public:	
+
   struct MyComponent {
 	  Double_t a;
 	  Double_t z;
 	  Double_t w;
   };
-protected:
+
   std::map< TString, MyComponent > mComponentTable; // Table storing already defined components
 
   static std::map< TString, AgMaterial * > mMaterialTable; // List of existing materials  
@@ -123,6 +123,7 @@ protected:
 
   friend class _MaterialDummy;
 
+  ClassDef(AgMaterial,1);
 };
 
 // ------------------------------------------------------------------------------------------------------------
