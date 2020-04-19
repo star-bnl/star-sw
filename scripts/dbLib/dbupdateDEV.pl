@@ -583,7 +583,7 @@ foreach  my $eachOutLDir (@OUT_DIR) {
         foreach $fname ( @files) {
             next if !$fname;
             next if $fname =~ /^\.\.?$/;
-#            next if $fname =~ /hijing.log/;
+            next if $fname =~ /hijing.log/;
             next if $fname =~ /starsim.log/;
             next if $fname =~ /simu.log/;
 
