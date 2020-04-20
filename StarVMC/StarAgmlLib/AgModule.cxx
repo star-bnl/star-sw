@@ -8,7 +8,7 @@
 TDataSet *AgModule::mGeomSet = 0;
 
 // ---------------------------------------------------------------------------------------------
-AgModule::AgModule( const Char_t *name, const Char_t *comment ) : AgBlock(name,comment), mDataSet(0), mHitsSet(0), mBlocksSet(0), mTrackingFlag(1)
+AgModule::AgModule( const Char_t *name, const Char_t *comment ) : AgBlock(name,comment)
 {  
   _module = this;
   mDataSet = (TDataSet *)( new TObjectSet( name, this, false ) );
