@@ -263,7 +263,7 @@ struct Gccuts_t {
   Float_t dcutm; 
   Float_t ppcutm; 
   Float_t tofmax; 
-  Float_t gcuts[5];
+  Float_t gcuts[5]; 
   void set( string cut, float val ) { 
     if ( "cutgam" == cut ) cutgam = val;
     if ( "cutele" == cut ) cutele = val;

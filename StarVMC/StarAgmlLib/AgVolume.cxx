@@ -1,4 +1,5 @@
 #include "AgVolume.h"
+ClassImp(AgVolume);
 #include <iostream>
 
 #include "AgBlock.h"

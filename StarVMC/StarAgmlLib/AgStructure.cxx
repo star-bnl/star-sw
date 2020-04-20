@@ -9,6 +9,7 @@
 
 #include "StMessMgr.h"
 
+ClassImp(AgStructure);
 
 TFolder AgStructure::_top("DETP","Detector parameters");
 TFolder *_commands = 0;

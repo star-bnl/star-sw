@@ -65,6 +65,7 @@ class AgMedium : public TNamed, public AgParameterList<double>
     return cvs;
   }
 
+  ClassDef(AgMedium,1);
 
 }; 
 

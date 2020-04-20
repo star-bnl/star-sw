@@ -1,4 +1,5 @@
 #include "AgBlock.h"
+ClassImp(AgBlock);
 
 #include "AgShape.h"
 #include <iostream>

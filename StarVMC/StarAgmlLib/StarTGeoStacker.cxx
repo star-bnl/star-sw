@@ -1,4 +1,5 @@
 #include "StarTGeoStacker.h"
+ClassImp(StarTGeoStacker);
 
 //#define __DEBUG_BUILD__
 //#define __DEBUG_PLACE__
@@ -41,7 +42,7 @@
 
 #include "TDataMember.h"
 #include "TList.h"
-#include "TString.h"
+
 #include <assert.h>
 
 #include "StMessMgr.h"

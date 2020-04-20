@@ -190,6 +190,7 @@ public:
 
   friend class _AgBlockDummy;
 
+  ClassDef(AgBlock,1);
 
  public:
   virtual const Char_t *GetCVS() const {

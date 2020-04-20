@@ -5,7 +5,7 @@
 #include <assert.h>
 #include <iostream>
 #include "TString.h"
-
+//using namespace std;
 #if 1
 // =================================================================================
 // An array type which can accept both Fortran and c++ indexing.
@@ -64,6 +64,7 @@ template <typename T> class Array_t
   Int_t _n, _m;
   Int_t _min, _max;
 
+  ClassDef(Array_t,1);
    
 };
 
