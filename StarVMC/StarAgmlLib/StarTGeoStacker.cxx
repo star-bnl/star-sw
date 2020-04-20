@@ -335,7 +335,7 @@ TGeoMaterial *BuildMaterial( AgMaterial &ag_material )
       //
       if ( ag_material.isSet("radl"))	  material = new TGeoMaterial( mat_name, aa, zz, dd, radl, absl);	
       else                                material = new TGeoMaterial( mat_name, aa, zz, dd);
-      assert(aa>zz);
+      assert(aa>=zz);
       return material;
 
       break;
