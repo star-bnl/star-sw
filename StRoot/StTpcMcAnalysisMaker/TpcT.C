@@ -12,7 +12,9 @@
 // pads :  root.exe -q -b PadsTpcT.C
 //#define __iTpx__
 #define PRINT
-//#define runY2008
+//#define __Y2008__
+#define __Y2018__ 
+//#define __Y2019__   /* >= 2019 */
 //#define __LASER__
 //#define __Cosmics__
 #define __REAL_DATA__
@@ -67,8 +69,13 @@
 #include "TDecompChol.h"
 #include "TDecompSVD.h"
 #endif
+#ifdef __Y2019__
 static Int_t NoInnerRows = 40; //-1; // Tpx
 static Int_t NoOfRows    = 72;; //-1;
+#else
+static Int_t NoInnerRows = 13;
+static Int_t NoOfRows    = 45;
+#endif
 TMultiDimFit* MDfit = 0;
 TFile *fOut = 0;
 //#include "StTpcMcAnalysisMaker/TpcCluster.h"
@@ -412,7 +419,7 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "H", const Char_t *O
     const Char_t *Name;
     const Char_t *Title;
   };
-#ifdef runY2008
+#ifdef __Y2008__
   Name_t InOut[4] = {
     {"Inner","Inner for all except 16"},
     {"Outer","Outer for all except 16"},
@@ -441,7 +448,7 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "H", const Char_t *O
   TProfile  *profdL[4];
   TH2D       *lqa[4]; memset (lqa, 0, sizeof(lqa));
   memset (hist, 0, sizeof(hist));
-#ifdef   runY2008
+#ifdef   __Y2008__
   Int_t NS = 4; // TPC + TPX
 #else
   Int_t NS = 2; // TPX
@@ -548,7 +555,7 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "H", const Char_t *O
 #endif    
     Int_t io = 0;
     if (row > NoInnerRows) io = 1;
-#ifdef runY2008
+#ifdef __Y2008__
     if (sector  == 16) io += 2;
 #endif
     Double_t cosL2I = 1. + fRcTrack_fpz[0]*fRcTrack_fpz[0]/(fRcTrack_fpx[0]*fRcTrack_fpx[0] + fRcTrack_fpy[0]*fRcTrack_fpy[0]);
@@ -619,7 +626,8 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "H", const Char_t *O
     Double_t tax  = (fRcHit_mMcl_t[0])/64.;
     histB[io]->Fill(pav-pax,tav-tax);
     entry++;
-    if (entry%1000 == 1) {
+    static Int_t noEntries2P = 1000;
+    if ((entry-1)%noEntries2P == 0) {
       cout << entry << "\t =======================================================" << endl;
       cout << "Sector/Row = " << sector << " / " << row;
       cout << "\tfNoPixels \t" << fNoPixels << "\tNPads " << endl; // fNoRcHit << endl;
