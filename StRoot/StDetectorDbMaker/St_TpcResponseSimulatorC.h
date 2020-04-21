@@ -69,6 +69,8 @@ class St_TpcResponseSimulatorC : public TChair {
   Float_t      *ZCOW(Int_t i = 0)    	    const {return &Struct(i)->ZCOW[0];}
   Float_t      *ZCIE(Int_t i = 0)    	    const {return &Struct(i)->ZCIE[0];}
   Float_t      *ZCOE(Int_t i = 0)    	    const {return &Struct(i)->ZCOE[0];}
+  Float_t       AttenuationI(Int_t i = 0)   const {return  Struct(i)->AttenuationI;}
+  Float_t       AttenuationO(Int_t i = 0)   const {return  Struct(i)->AttenuationO;}
  protected:
   St_TpcResponseSimulatorC(St_TpcResponseSimulator *table=0) : TChair(table) {}
   virtual ~St_TpcResponseSimulatorC() {fgInstance = 0;}

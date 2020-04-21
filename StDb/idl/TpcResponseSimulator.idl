@@ -63,4 +63,10 @@ struct TpcResponseSimulator {
   float  ZCOW[3];
   float  ZCIE[3];
   float  ZCOE[3];
+  float  AttenuationI;    /* Attetuation factor due to avalanche charge for inner sector */
+  float  AttenuationO;    /* Attetuation factor due to avalanche charge for inner sector */
+  float  dXScreeningI;    /* = 0.0040, electrons screened by previous one */
+  float  dXScreeningO;    /* = 0.0040, electrons screened by previous one */
+  float  dZScreeningI;    /* = 0.2000, electrons screened by previous one */
+  float  dZScreeningO;    /* = 0.2000, electrons screened by previous one */
  };  

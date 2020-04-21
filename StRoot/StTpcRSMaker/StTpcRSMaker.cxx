@@ -11,6 +11,8 @@
   
 */
 #include <assert.h>
+#include <vector>
+#include <functional>
 #include "StTpcRSMaker.h"
 #include "Stiostream.h"
 // ROOT
@@ -77,6 +79,7 @@ TF1F*     StTpcRSMaker::fgTimeShape3[2]    = {0, 0};
 TF1F*     StTpcRSMaker::fgTimeShape0[2]    = {0, 0};
 Double_t  StTpcRSMaker::mtauCX[2] = {0.0};
 SignalSum_t *StTpcRSMaker::m_SignalSum = 0; 
+SignalSum_t *StTpcRSMaker::m_SignalSumOnWire = 0; 
 Double_t  StTpcRSMaker::mCutEle = 1e-5;
 TF1F  *StTpcRSMaker::mShaperResponses[2][24] = {0};     //!
 TF1F  *StTpcRSMaker::mShaperResponse = 0;             //!
@@ -92,7 +95,6 @@ static Int_t     NoOfTimeBins = __MaxNumberOfTimeBins__;
 //static Double_t xOnWire, yOnWire, zOnWire; //!
 static Double_t minSignal = 1e-4;           //!
 //static Double_t QAv;                        //!
-static Double_t mGainLocal;                //!
 //static Double_t TotalSignal;               //!
 //static Double_t TotalSignalInCluster;      //!
 #ifdef __OLD__
@@ -114,6 +116,9 @@ static TH1  *checkList[2][21] = {0};
 #ifdef __SECROW_PLOTS__
 static TProfile2D  *SecRow[16] = {0};
 #endif /* __SECROW_PLOTS__ */
+#ifdef __DEBUG__
+static TH2F *dXonWireI = 0, *dZonWireI = 0. *dXonWireO = 0, *dZonWireO = 0;
+#endif
 static TString TpcMedium("TPCE_SENSITIVE_GAS");
 static const Double_t m_e = .51099907e-3;
 Int_t StTpcRSSegment::_debug = 0;
@@ -577,6 +582,12 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
   }
   delete [] pbins;
   delete [] pbinsL;
+#ifdef __DEBUG__
+  dXonWireI = new TH2F("dXOnWireI","dX on Wire versus Z (Inner)",220,-10.0,210, 200, -0.1, 0.1);
+  dZonWireI = new TH2F("dZOnWireI","dZ on Wire versus Z (Inner)",220,-10.0,210, 200, -1.0, 0.0);
+  dXonWireO = new TH2F("dXOnWireO","dX on Wire versus Z (Outer)",220,-10.0,210, 200, -0.1, 0.1);
+  dZonWireO = new TH2F("dZOnWireO","dZ on Wire versus Z (Outer)",220,-10.0,210, 200, -1.0, 0.0);
+#endif
   return kStOK;
 }
 //________________________________________________________________________________
@@ -721,11 +732,11 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
     free(m_SignalSum); m_SignalSum = 0;
     ResetSignalSum(sector);
     struct Electron_t {
-      Electron_t(StTpcRSSegment *t, Float_t x, Float_t z, Float_t Q) : trackSeg(t), xW(x), zW(z), QAv(Q) {}
+      Electron_t(StTpcRSSegment *t, Float_t x, Float_t z, Float_t g) : trackSeg(t), xW(x), zW(z), Gain(g) {}
       StTpcRSSegment *trackSeg;
       Float_t xW; // On Wire
       Float_t zW; // drift 
-      Float_t QAv; // Polya gain
+      Float_t Gain; // Local gain
     };
     struct Wire_t {
       vector<Electron_t> Electrons;
@@ -955,7 +966,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  Double_t Cor = zC[0] + driftLength*(zC[1] + zC[2]*driftLength);
 	  zGainCor = TMath::Exp(Cor);
 	}
-	mGainLocal = Gain/(dEdxCor*zGainCor)/NoElPerAdc; // Account dE/dx calibration
+	Double_t GainLocal = Gain/(dEdxCor*zGainCor)/NoElPerAdc; // Account dE/dx calibration
 	// end of dE/dx correction
 	// generate electrons: No. of primary clusters per cm
 #ifdef __LASERINO__
@@ -1068,7 +1079,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  Int_t iWire; // global wire index
 	  for (Int_t ie = 0; ie < Nt; ie++) {
 	    nTotal++;
-	    Double_t QAv = mPolya[io]->GetRandom();
 	    // transport to wire
 	    gRandom->Rannor(rX,rY);
 	    StTpcLocalSectorCoordinate xyzE(xyzC.x()+rX*sigmaT,
@@ -1122,16 +1132,17 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    xOnWire += distFocused*tanLorentz; // tanLorentz near wires taken from comparison with data
 	    zOnWire += TMath::Abs(distFocused);
 	    StTpcLocalSectorCoordinate xyzW(xOnWire, yOnWire, zOnWire, sector, row);
+	    Double_t QAv = mPolya[io]->GetRandom();
 	    if (! iGroundWire ) QAv *= TMath::Exp( alphaVariation);
 	    else                QAv *= TMath::Exp(-alphaVariation);
-	    
+	    Float_t gain = QAv*GainLocal;
 	    if (ClusterProfile) {
 	      checkList[io][9]->Fill(TrackSegmentHits.xyzG.position().z(),QAv);
 #ifdef __SECROW_PLOTS__
 	      SecRow[7]->Fill(sector,row,QAv);
 #endif /* __SECROW_PLOTS__ */
 	    }
-	    Wires[iWire].Electrons.push_back(Electron_t(&TrackSegmentHits,xOnWire,zOnWire,QAv));
+	    Wires[iWire].Electrons.push_back(Electron_t(&TrackSegmentHits,xOnWire,zOnWire,gain));
 	    //	    TrackSegmentHits.GenerateSignal(xyzW,rowMin, rowMax);
 	  }  // electrons in Cluster
 // 	  if (ClusterProfile) {
@@ -1170,6 +1181,12 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
       Int_t nwires = Wires.size();
       for (Int_t iwire = 0; iwire < nwires; iwire++) {
 	Int_t noElectrons = Wires[iwire].Electrons.size();
+	if (! noElectrons) continue;
+	std::sort(Wires[iwire].Electrons.begin(), Wires[iwire].Electrons.end(),
+		  [](const Electron_t& a, const Electron_t& b)
+		  {
+		    return a.zW < b.zW;
+		  });
 	Int_t WireIndex = 0;
 	Double_t yOnWire = 0;
 	Int_t io = 0;
@@ -1187,13 +1204,28 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Double_t yLmax = yLmin + 2*dY;
 	Int_t    rowMin  = transform.rowFromLocalY(yLmin,sector);
 	Int_t    rowMax  = transform.rowFromLocalY(yLmax,sector);
+	m_SignalSumOnWire = (SignalSum_t  *) calloc(sizeof(SignalSum_t),NoOfPads*NoOfTimeBins); 
 	for (Int_t ie = 0; ie < noElectrons; ie++) {
 	  Double_t xOnWire =  Wires[iwire].Electrons[ie].xW;
 	  Double_t zOnWire =  Wires[iwire].Electrons[ie].zW;
+#ifdef __DEBUG__
+	  for (Int_t i1 = 0; i1 < ie; i1++) {
+	    Double_t x1OnWire =  Wires[iwire].Electrons[i1].xW;
+	    Double_t z1OnWire =  Wires[iwire].Electrons[i1].zW;
+	    if (iwire < numberOfInnerSectorAnodeWires) {
+	      dXonWireI->Fill(zOnWire, x1OnWire - xOnWire);
+	      dZonWireI->Fill(zOnWire, z1OnWire - zOnWire);
+	    } else {
+	      dXonWireO->Fill(zOnWire, x1OnWire - xOnWire);
+	      dZonWireO->Fill(zOnWire, z1OnWire - zOnWire);
+	    }
+	  }
+#endif
 	  StTpcLocalSectorCoordinate xyzW(xOnWire, yOnWire, zOnWire, sector, row);
-	  Double_t QAv = Wires[iwire].Electrons[ie].QAv;
-	  Wires[iwire].Electrons[ie].trackSeg->GenerateSignal(xyzW,rowMin, rowMax,QAv);
+	  Float_t Gain = Wires[iwire].Electrons[ie].Gain;
+	  Wires[iwire].Electrons[ie].trackSeg->GenerateSignal(xyzW,rowMin, rowMax,Gain);
 	}
+	free(m_SignalSumOnWire); m_SignalSumOnWire = 0;
       }
       // Check digitization
       StTpcDigitalSector *digitalSector = DigitizeSector(sector);   
@@ -1968,7 +2000,7 @@ void StTpcRSSegment::Set(g2t_tpc_hit_st *tpc_hit, g2t_vertex_st *gver, Int_t mod
   return;
 }
 //________________________________________________________________________________
-void StTpcRSSegment::GenerateSignal(StTpcLocalSectorCoordinate &xyzW, Int_t rowMin, Int_t rowMax, Double_t QAv) {
+void StTpcRSSegment::GenerateSignal(StTpcLocalSectorCoordinate &xyzW, Int_t rowMin, Int_t rowMax, Float_t Gain) {
   static StTpcCoordinateTransform transform(gStTpcDb);
   Int_t sector = xyzW.fromSector();
   UInt_t MASK =St_tpcRDOMasksC::instance()-> getSectorMask(sector);
@@ -1980,10 +2012,14 @@ void StTpcRSSegment::GenerateSignal(StTpcLocalSectorCoordinate &xyzW, Int_t rowM
     if (MASK == 63 ) CheckMask = kFALSE;
   }
   SignalSum_t *SignalSum = StTpcRSMaker::GetSignalSum(sector);
+  SignalSum_t *SignalSumOnWire  = StTpcRSMaker::GetSignalSumOnWire();
   Double_t TotalSignalInCluster = 0;
   for(Int_t row = rowMin; row <= rowMax; row++) {              
     if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))  continue;
     Int_t io = (row <= St_tpcPadConfigC::instance()->numberOfInnerRows(sector)) ? 0 : 1;
+    Float_t Attenuation = (io == 0) ? 
+      St_TpcResponseSimulatorC::instance()->AttenuationI() :  
+      St_TpcResponseSimulatorC::instance()->AttenuationO();
     //    StTpcLocalSectorCoordinate xyzW(xOnWire, yOnWire, zOnWire, sector, row);
     Double_t yOnWire = xyzW.position().y();
     static StTpcPadCoordinate Pad;
@@ -2023,7 +2059,7 @@ void StTpcRSSegment::GenerateSignal(StTpcLocalSectorCoordinate &xyzW, Int_t rowM
       if (CheckMask) {
 	if (! StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row, pad)) continue;
       }
-      Double_t gain = QAv*mGainLocal;
+      Double_t gain = Gain;
       Double_t dt = dT;
       //		if (St_tpcPadConfigC::instance()->numberOfRows(sector) ==45 && ! TESTBIT(m_Mode, kGAINOAtALL)) { 
       if (! TESTBIT(m_Mode, StTpcRSMaker::kGAINOAtALL)) { 
@@ -2050,11 +2086,12 @@ void StTpcRSSegment::GenerateSignal(StTpcLocalSectorCoordinate &xyzW, Int_t rowM
       if(XYcoupling < minSignal)  continue;
       Int_t bin_low  = TMath::Max(0             ,binT + TMath::Nint(dt+StTpcRSMaker::GetShaperResponse()->GetXmin()-0.5));
       Int_t bin_high = TMath::Min(NoOfTimeBins-1,binT + TMath::Nint(dt+StTpcRSMaker::GetShaperResponse()->GetXmax()+0.5));
-      Int_t index = NoOfTimeBins*((row-1)*NoOfPads+pad-1)+bin_low;
       Int_t Ntbks = TMath::Min(bin_high-bin_low+1, StTpcRSMaker::kTimeBacketMax);
       Double_t tt = -dt + (bin_low - binT);
       StTpcRSMaker::GetShaperResponse()->GetSaveL(Ntbks,tt,TimeCouplings);
-      for(Int_t itbin=bin_low;itbin<=bin_high;itbin++, index++){
+      Int_t index       = NoOfTimeBins*((row-1)*NoOfPads+pad-1)+bin_low;
+      Int_t indexOnWire = NoOfTimeBins*(                 pad-1)+bin_low;
+      for(Int_t itbin=bin_low;itbin<=bin_high;itbin++, index++, indexOnWire++){
 	Double_t signal = XYcoupling*TimeCouplings[itbin-bin_low];
 	if (signal < minSignal)  continue;
 #ifdef __DEBUG__
@@ -2063,14 +2100,20 @@ void StTpcRSSegment::GenerateSignal(StTpcLocalSectorCoordinate &xyzW, Int_t rowM
 	  iBreak++;
 	}
 #endif
+	if (SignalSumOnWire[indexOnWire].Sum > 0 && Attenuation != 0.0) {
+	  signal *= TMath::Exp(-Attenuation*SignalSumOnWire[indexOnWire].Sum);
+	}
 	TotalSignalInCluster += signal;
 	SignalSum[index].Sum += signal;
+	SignalSumOnWire[indexOnWire].Sum += signal;
 	rowsdEH[row-1]    += signal;
 	if ( TrackId ) {
-	  if (! SignalSum[index].TrackId ) SignalSum[index].TrackId = TrackId;
-	  else  // switch TrackId, works only for 2 tracks, more tracks ?
+	  if (! SignalSum[index].TrackId ) {
+	    SignalSum[index].TrackId = TrackId;
+	  } else { // switch TrackId, works only for 2 tracks, more tracks ?
 	    if ( SignalSum[index].TrackId != TrackId && SignalSum[index].Sum < 2*signal) 
 	      SignalSum[index].TrackId = TrackId;
+	  }
 	}
 #ifdef __DEBUG__
 	if (Debug() > 13 && (SignalSum[index].Sum > 0 || ! TMath::Finite(SignalSum[index].Sum)) ) {
