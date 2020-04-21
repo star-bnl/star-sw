@@ -65,6 +65,9 @@ def setup_parser():
    parser.add_argument("-nThreads", dest="nThreads",help="max number of threads on one node",default='50')
 
    parser.add_argument("-shifter", dest="shifter",help="shifter image",default='custom:pdsf-sl64-star:v9')
+   parser.add_argument("-shifterDb", dest="shifterDb", help="shifter images for database",default='mpoat/mysql_57:v3')
+   parser.add_argument("-snapshotDb",dest="snapshotDb", help="input database snapshot",default='/global/projecta/projectdirs/starprod/db/starDB-master/latest_57')
+
    parser.add_argument("-partition", dest="partition",help="partition selection",default='1')
 
    parser.add_argument("-localDB", dest="localDB",help="local STAR DB on master node",default='1')

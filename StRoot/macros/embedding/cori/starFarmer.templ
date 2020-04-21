@@ -3,6 +3,7 @@
 #SBATCH -N <nodeNumber>  # number of nodes
 # The -c is for SLURM.  THREADS is for tasks farmer.   If you don't include the -c, SLURM will put everything on one core. For Cori: -c 64, Edison -c 48
 #SBATCH -c64 -C haswell # 123 GB RAM
+#SBATCH -k
 #-SBATCH -c48  # Edison, 59 GB RAM
 
 #<debg_part>SBATCH --partition debug -t 00:29:00   -J starFarm-dbg
@@ -73,8 +74,8 @@ export localDB=<localDB>
 if [ "$localDB" == "1" ]; then
 echo "M - - - - -   local STAR DB deployment - - - - "`date`
 usrDbConfXml=dbLoadBalLocConf.xml
-myDbVault=$wrkDir/mysql51Vault
-srcDbVault=/global/projecta/projectdirs/starprod/db/starDB-master/latest
+myDbVault=$wrkDir/mysqlVault
+srcDbVault=<snapshotDb>  
 echo DB-source $srcDbVault
 ls -l $srcDbVault/../
 
@@ -85,15 +86,15 @@ echo redirect to local DB  for STAR jobs
 export DB_SERVER_LOCAL_CONFIG=$DBCONF_PATH
 
 echo "M conf=$DBCONF_PATH ,  copy DB clone ..."
-time cp -rp $srcDbVault/  $wrkDir/mysql51Vault
+time cp -rp $srcDbVault/  $wrkDir/mysqlVault
 cp  ./StRoot/macros/embedding/cori/$usrDbConfXml $wrkDir
 
 #0 echo tmp-hack for one-only local DB 
-#0 myDbVault=/global/project/projectdirs/mpccc/balewski/myStarDB/mysql51Vault-2018-02-22d3d
+#0 myDbVault=/global/project/projectdirs/mpccc/balewski/myStarDB/mysqlVault-2018-02-22d3d
 
 NN=`hostname -f`
 echo   M-$NN before starting DB-server using  $myDbVault '  '`date`
-srun -N 1 -n 1 shifter --image=balewski/mysql51-balewski:c --volume=$myDbVault:/mysqlVault  ./StRoot/macros/embedding/cori/starLocalDb.sh  &
+srun -N 1 -n 1 shifter --image=<shifterDb> --volume=$myDbVault:/mysqlVault  ./StRoot/macros/embedding/cori/starLocalDb.sh  &
 
 
 # wait for DBserver start
