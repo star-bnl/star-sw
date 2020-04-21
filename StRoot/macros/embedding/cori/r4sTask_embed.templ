@@ -150,7 +150,9 @@ endif
     echo star-db-IP=$dbIP  tables seen by st_db_maker
     mysql  --socket=/mysqlVault/mysql.sock -h$dbIP -e 'show databases'
     echo check if loadbalancer sees  processlist
-    mysql -u loadbalancer -P3306 -plbdb -h $dbIP -e 'show processlist';
+    #    mysql -u loadbalancer -P3306 -plbdb -h $dbIP -e 'show processlist';
+    mysql -P3306 -h $dbIP -e 'show processlist';
+
     echo "  DB  DB  DB  DB    DB  DB  DB  DB    DB  DB  DB  DB  --- check end"
     endif
   
