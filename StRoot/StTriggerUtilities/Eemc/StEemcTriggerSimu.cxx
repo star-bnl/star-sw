@@ -190,10 +190,8 @@ StEemcTriggerSimu::InitRun(int runnumber){
   fill(highTowerMask,highTowerMask+90,1); // all channels good
   fill(patchSumMask,patchSumMask+90,1); // all channels good
 
-  // Mod by Danny
-  // Turning on Pibero's run 9 EEMC mask
-  //EemcTrigUtil::getFeeOutMask(dbtime,highTowerMask,patchSumMask);
-  //EemcTrigUtil::getFeeBoardMask(dbtime,highTowerMask);
+  EemcTrigUtil::getFeeOutMask(dbtime,highTowerMask,patchSumMask);
+  EemcTrigUtil::getFeeBoardMask(dbtime,highTowerMask);
 
   switch (mPedMode) {
   case kOnline:
@@ -823,6 +821,9 @@ void StEemcTriggerSimu::fillStEmcTriggerDetector()
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.54  2020/04/23 02:14:45  zchang
+// uncomment lines regarding load EEMC FEE mask
+//
 // Revision 1.53  2020/04/12 03:56:25  zchang
 // Add EMC DSM algorithm for the 2017 pp run
 //
