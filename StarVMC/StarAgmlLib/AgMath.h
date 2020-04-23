@@ -39,7 +39,7 @@ const Double_t keV    = 0.001 * MeV;
 #define dup _dup_
 
 #define tanf _tanf_
-#if __GNUC__ < 6
+#if __GNUC__ < 5
 #define fpos _fpos_
 #endif
 //
