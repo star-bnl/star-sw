@@ -117,11 +117,7 @@ TDataSet *CreateTable() {
 #endif
   // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
   // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
-#if 1
-  row.SecRowCorIW[0] = -0.135623; // TpcRS_2018_3p85GeV_fixedTarget.0.10/dEdx/Fit
-  row.SecRowCorIE[0] = -0.222966;
-  row.SecRowCorOW[0] = row.SecRowCorOE[0] = -0.200582;
-#else 
+#if 0
   row.SecRowCorIW[0] = row.SecRowCorIE[0] = 6.99114715017355337e-01;//- TMath::Log(0.533*0.843485) -5.84129e-01 + 4.52885e-01 + 3.09117e-02;
   row.SecRowCorOW[0] = row.SecRowCorOE[0] = 9.79357470004933006e-01;//- TMath::Log(0.512*0.725267) -5.47141e-01 + 5.23937e-01 + 1.19154e-02;
   // SecRow3CGFdaq_2011_pp500LowLum => Inner: 3.26428e-01 - -5.01720e-04*y; Outer: 2.68883e-01 + 1.23403e-04*y
@@ -154,9 +150,9 @@ TDataSet *CreateTable() {
   row.T0offsetI =  1.17437e-01 + 8.43584e-03; 
   // TO->FitSlicesY(); TO_1->Fit("pol2","er","",-100,100);
   row.T0offsetO = -9.36725e-03 + 5.74947e-03;
-  // 	Extra Attenuation on wire
-  row.AttenuationI = 0.1;
-  row.AttenuationO = 0.1;
+  // 	Extra Screening on wire
+  row.dXScreeningI = row.dXScreeningO = 0.0100;
+  row.dZScreeningI = row.dZScreeningO = 1.0000;
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;

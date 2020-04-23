@@ -367,7 +367,7 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
 	Int_t kPadMax = rHit->maxPad();
 	Int_t kTbMin  = rHit->minTmbk();
 	Int_t kTbMax  = rHit->maxTmbk();
-	if (kTbMax - rHit->timeBucket() >= 15) kTbMax += 10;
+	//?	if (kTbMax - rHit->timeBucket() >= 15) kTbMax += 10;
 	Int_t nPixels = 0;
 	if (tpcRawData) nPixels = tpcRawData->getVecOfPixels(Pixels,sector,row, kPadMin, kPadMax, kTbMin, kTbMax);
 	if (! nPixels) continue;
@@ -386,6 +386,7 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
 			      << rHit->minTmbk() << "/" << rHit->maxTmbk()
 			      << endl;
 	fCluster->SetAdcSum(AdcSum);
+#if 0
 	TClonesArray *pixels = fCluster->Pixels();
 	Int_t N = pixels->GetEntriesFast();
 	if (N > 0) { // add projections 
@@ -415,6 +416,7 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
 	  }
 	  delete [] SumOverPadsD;
 	}
+#endif
       }
       if (theHitMap) {
 	if (rHit->TestBit(StMcHit::kMatched)) {

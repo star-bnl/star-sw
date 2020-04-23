@@ -150,9 +150,9 @@ TDataSet *CreateTable() {
   row.T0offsetI =  1.17437e-01 + 8.43584e-03; 
   // TO->FitSlicesY(); TO_1->Fit("pol2","er","",-100,100);
   row.T0offsetO = -9.36725e-03 + 5.74947e-03;
-  // 	Extra Attenuation on wire
-  row.AttenuationI = 0.1;
-  row.AttenuationO = 0.1;
+  // 	Extra Screening on wire
+  row.dXScreeningI = row.dXScreeningO = 0.0040;
+  row.dZScreeningI = row.dZScreeningO = 0.2000;
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;

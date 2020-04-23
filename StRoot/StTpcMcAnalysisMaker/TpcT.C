@@ -17,11 +17,11 @@
 //#define __Y2019__   /* >= 2019 */
 //#define __LASER__
 //#define __Cosmics__
-#define __REAL_DATA__
 //#define __useGainT0__
 //#define __PADCorrection__
 //#define __PRINCIPLE__
 //#define __MUDIFI_EXT__
+//#define __REAL_DATA__
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <assert.h>
 #include "Riostream.h"
@@ -573,8 +573,15 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "H", const Char_t *O
     }
     if (kPadMin > kPadMax) continue;
     if (kTbMin  > kTbMax) continue;
-    const Int_t NP = kPadMax - kPadMin + 3;
-    const Int_t NT = kTbMax  - kTbMin  + 2;
+    // require match pixels and RC hit in pads and time buckets
+    const Int_t nP = kPadMax - kPadMin + 1;
+    const Int_t nT = kTbMax  - kTbMin  + 1;
+    const Int_t nPR = fRcHit_mMinpad[0] + fRcHit_mMaxpad[0] + 1;
+    const Int_t nTR = fRcHit_mMintmbk[0] + fRcHit_mMaxtmbk[0] + 1;
+    if (nP != nPR) continue;
+    if (nT != nTR) continue; 
+    const Int_t NP = nP + 2;
+    const Int_t NT = nT + 1;
     TRMatrix adcs(NP,NT);
     Int_t tMax = -1;
     Int_t pMax = -1;
@@ -630,7 +637,9 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "H", const Char_t *O
     if ((entry-1)%noEntries2P == 0) {
       cout << entry << "\t =======================================================" << endl;
       cout << "Sector/Row = " << sector << " / " << row;
-      cout << "\tfNoPixels \t" << fNoPixels << "\tNPads " << endl; // fNoRcHit << endl;
+      cout << "\tfNoPixels \t" << fNoPixels << "\tNPads " << NP - 2 << " NT = " << NT -1 << endl; // fNoRcHit << endl;
+      cout << "\tRChit: npads = " << fRcHit_mMinpad[0] + fRcHit_mMaxpad[0] + 1 
+	   << "\tntmbk = " <<  fRcHit_mMintmbk[0] + fRcHit_mMaxtmbk[0] + 1 << endl;
       cout << "Charge(keV) \t" << 1e6*fRcHit_mCharge[0];
       if (TMath::Abs(fRcTrack_fpy[0]) > 1e-7) 
 	cout << "\tpx/py\t" << fRcTrack_fpx[0]/fRcTrack_fpy[0] 
@@ -650,10 +659,10 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "H", const Char_t *O
 	   << endl;
       cout << "kPadMin/kPadMax\t" << kPadMin << "/" << kPadMax
 	   << "\tkTbMin/kTbMax\t" << kTbMin << "/" << kTbMax << endl;
-      cout << "Hit PadMin/Max\t"  << (fRcHit_mMcl_x[0])/64 - fRcHit_mMinpad[0] 
-	   << "/"                 << (fRcHit_mMcl_x[0])/64 + fRcHit_mMaxpad[0] 
-	   << "\tTbMin/Max\t"     << (fRcHit_mMcl_t[0])/64 - fRcHit_mMintmbk[0] 
-	   << "/"                 << (fRcHit_mMcl_t[0])/64 + fRcHit_mMaxtmbk[0] 
+      cout << "Hit PadMin/Max\t"  << TMath::Nint(fRcHit_mMcl_x[0]/64) - fRcHit_mMinpad[0] 
+	   << "/"                 << TMath::Nint(fRcHit_mMcl_x[0]/64) + fRcHit_mMaxpad[0] 
+	   << "\tTbMin/Max\t"     << TMath::Nint(fRcHit_mMcl_t[0]/64) - fRcHit_mMintmbk[0] 
+	   << "/"                 << TMath::Nint(fRcHit_mMcl_t[0]/64) + fRcHit_mMaxtmbk[0] 
 	   << endl;
       cout << " ";
       for (tb = kTbMin; tb <= kTbMax + 1; tb++) cout << "\t|" << tb;
@@ -703,7 +712,7 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "H", const Char_t *O
 	     << "\tR\t" << ((Double_t) fPixels_mAdc[i])/((Double_t) fAdcSum)
 	     << endl;
       for (Int_t i = 0; i < fNoRcHit; i++) 
-	cout << "Rc\t" << i << "\tRow\t" << padrow(fRcHit_mHardwarePosition[i])
+	cout << "Rc\t" << i << "1\tRow\t" << padrow(fRcHit_mHardwarePosition[i])
 	     << "\tPad\t" << (fRcHit_mMcl_x[i])/64.
 	     << "\tTimeBin\t" << (fRcHit_mMcl_t[i])/64.
 	     << endl;
@@ -722,8 +731,6 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "H", const Char_t *O
     //    if (fRcTrack_fSector[0] == 1 && fRcTrack_fRow[0] >= 22 && fRcTrack_fRow[0] <= 29) continue;
 #ifndef __REAL_DATA__
     Double_t zMc = fMcHit_mPosition_mX3[0];
-#endif
-#ifndef __REAL_DATA__
     //    if (fRcHit_mQuality[0] < 95) continue;
 #endif
     for (Int_t i = 0; i < NP - 2; i++) {

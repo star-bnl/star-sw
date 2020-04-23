@@ -103,7 +103,6 @@ class StTpcRSMaker : public StMaker {
   static Double_t fei(Double_t t, Double_t t0, Double_t T);
   static Double_t polya(Double_t *x, Double_t *par);
   static SignalSum_t  *GetSignalSum(Int_t sector);
-  static SignalSum_t  *GetSignalSumOnWire() {return m_SignalSumOnWire;}
   static SignalSum_t  *ResetSignalSum(Int_t sector);
   void SettauIntegrationX(Double_t p =      74.6e-9, Int_t io=0) {mtauIntegrationX[io] = p;}
   static void SettauCX(Double_t           p =    1000.0e-9, Int_t io=0) {mtauCX[io] = p;}
@@ -124,7 +123,6 @@ class StTpcRSMaker : public StMaker {
   Char_t   beg[1];                    //!
   TTree   *fTree;                     //!
   static SignalSum_t     *m_SignalSum;       //!
-  static SignalSum_t     *m_SignalSumOnWire;       //!
   TH1D*    mdNdx;                     //!
   TH1D*    mdNdxL10;                  //!
   TH1D*    mdNdEL10;                  //!xs
