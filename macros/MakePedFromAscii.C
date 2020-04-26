@@ -1,3 +1,8 @@
+/*
+ rts_example -Dtpx st_pedestal_11003025_raw_1080001.daq > Ped.txt 
+ root.exe MakePedFromAscii.C+
+*/
+
 #include "TFile.h"
 #include "TNtuple.h"
 #include <stdio.h>
@@ -8,7 +13,6 @@ struct BPoint_t {
 };
 BPoint_t BPoint;
 void MakePedFromAscii(const Char_t *FileName="./Ped.txt") {
-  /*  rts_example -Dtpx st_pedestal_11003025_raw_1080001.daq > Ped.txt */
   FILE *fp = fopen(FileName,"r");
   if (! fp) {
     cout << "Can't open" << FileName << endl;
@@ -42,7 +46,7 @@ void MakePedFromAscii(const Char_t *FileName="./Ped.txt") {
     FitP->Fill(&BPoint.sec);
     if (i%10000 == 0) {
       printf("%s",line);
-      printf("sec %f row %f ped %f tb %f ped %f rms %f\n",BPoint.sec,BPoint.row,BPoint.pad,BPoint.tb,BPoint.ped,BPoint.rms);
+      printf("sec %f row %f pad %f tb %f ped %f rms %f\n",BPoint.sec,BPoint.row,BPoint.pad,BPoint.tb,BPoint.ped,BPoint.rms);
     }
     i++;
   }
