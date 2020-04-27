@@ -122,13 +122,8 @@ cat >${shellname}<<ROOTMACRO
   gSystem->Load("RTS");
 //printf("c\n");
   if (gROOT->IsBatch()) {
-     printf("Loading QT librares\n");
-     gSystem->Load("libQtCore.so");
-     gSystem->Load("libQtGui.so");
-     gSystem->Load("libGui.so");
-     gSystem->Load("libGQt.so");
-     gSystem->Load("libQt3Support.so");
-  }
+       gSystem->Load("libGui.so");
+   }
   gSystem->Load("StDaqLib");
   gSystem->Load("StDbLib");
 //printf("e\n");

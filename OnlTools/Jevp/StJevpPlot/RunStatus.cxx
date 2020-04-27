@@ -17,16 +17,28 @@ RunStatus::~RunStatus()
 
 void RunStatus::setStatus(const char *s)
 {
-  if(status) {
-    if(strcmp(status, s) == 0) {
-      return;
+    if(status) {
+	if(strcmp(status, s) == 0) {
+	    return;
+	}
     }
-  }
-
-  if(status) delete status;
-  status = new char[strlen(s)+1];
-  strcpy(status, s);
-  timeOfLastChange = time(NULL);
+    
+    
+    // starting the run... clear the counters
+    if(status) {
+	if(strcmp(status, "running") == 0) {
+	    firstEvtTime = 0;
+	    lastEvtTime = 0;
+	    firstEvtNumber = -1;
+	    lastEvtNumber = -1;
+	    nEvts = 0;
+	}
+    }
+    
+    if(status) delete status;
+    status = new char[strlen(s)+1];
+    strcpy(status, s);
+    timeOfLastChange = time(NULL);
 }
 
 void RunStatus::dump()
@@ -54,4 +66,16 @@ int RunStatus::getNumericStatus(char *str)
   }
   return 0;
 }
+
+void RunStatus::addEvent(int seq) {
+    if(firstEvtNumber == -1) {
+	firstEvtNumber = seq;
+	firstEvtTime = time(NULL);
+    }
+
+    lastEvtNumber = seq;
+    lastEvtTime = time(NULL);
+    nEvts++;
+}
+
 
