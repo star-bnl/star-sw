@@ -332,8 +332,8 @@ void JevpServer::readSocket()
 	if(strcmp(msg->getSource(), "readerThread") == 0) {   // From the daqReader!
 	    CP;
 	    //LOG("JEFF", "Handle message from reader");
-
-
+	    
+	    
 	    handleNewEvent(msg);
       
 	    EvpMessage m;
@@ -349,12 +349,16 @@ void JevpServer::readSocket()
 	    CP;
 	}
 	else if (strcmp(msg->getSource(), "timerThread") == 0) {
+	    CP;
+
 	    if(runStatus.running()) {
+		CP;
 		LOG(DBG, "Got timer: %d into run, lastImageBuilderSend: %d", 
 		    time(NULL) - runStatus.timeOfLastChange,
 		    lastImageBuilderSendTime - runStatus.timeOfLastChange);
 
 		if(runCanvasImageBuilder) {
+		    CP;
 		    // telapsed is since last send
 		    bool sendNow=false;
 		    if(lastImageBuilderSendTime <= runStatus.timeOfLastChange) {
@@ -369,15 +373,21 @@ void JevpServer::readSocket()
 			}
 		    }
 		    if(sendNow) {
+			CP;
 			lastImageBuilderSendTime = time(NULL);
 			writingImageClock.record_time();
 			displays->setServerTags(serverTags ? serverTags : "");
 			displays->updateDisplayRoot();
 			canvasImageBuilder->writeIndex(imagewriterdir, "idx.txt");
-			canvasImageBuilder->writeRunStatus(imagewriterdir, &runStatus, eventsThisRun);
+			CP;
+			canvasImageBuilder->writeRunStatus(imagewriterdir, &runStatus, eventsThisRun, serverTags);
+			CP;
 			int cnt = canvasImageBuilder->writeImages(imagewriterdir);
+			CP;
 			writingImageTime = writingImageClock.record_time();
+			CP;
 			LOG("JEFF", "sent %d image pages in %lf secs", cnt, writingImageTime);
+			CP;
 		    }
 		}
 
@@ -559,7 +569,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    imagewriterdir = (char *)"/tmp/jevptest";
 
 	    myport = JEVP_PORT + 10;
-	    maxevts = 1001;
+	    maxevts = 10000001;
 	    die = 1;
 	    runCanvasImageBuilder = 1;
 	}
@@ -888,6 +898,8 @@ void JevpServer::handleNewEvent(EvpMessage *m)
 	    eventsThisRun = 0;
 	    evtsInRun = 0;
 	}
+
+	runStatus.addEvent(rdr->seq);
 
 	eventsThisRun++;
     
@@ -1622,7 +1634,7 @@ void JevpServer::writeRunPdf(int display, int run)
 
     if(runCanvasImageBuilder) {
 	canvasImageBuilder->writeIndex(imagewriterdir, "idx.txt");	
-	canvasImageBuilder->writeRunStatus(imagewriterdir, &runStatus, eventsThisRun);
+	canvasImageBuilder->writeRunStatus(imagewriterdir, &runStatus, eventsThisRun, serverTags);
 	int cnt = canvasImageBuilder->writeImages(imagewriterdir);
 	LOG("JEFF", "sent %d endrun jpgs", cnt);
     }

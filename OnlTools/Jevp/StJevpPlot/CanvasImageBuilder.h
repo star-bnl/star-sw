@@ -47,7 +47,7 @@ class CanvasImageBuilder {
     // Invoke as writeIndex(dir, fn);
     void writeIndex(char *directory, char *fn, int combo_index = 1);
     int writeImages(char *directory);
-    int writeRunStatus(char *directory, RunStatus *rs, int numberOfEvents);
+    int writeRunStatus(char *directory, RunStatus *rs, int numberOfEvents, const char *serverTags);
 
  private:
     void writeIndexFiles(FILE *f, DisplayNode *node, int page, int tabs);

@@ -13,6 +13,13 @@ class RunStatus : public TObject {
  public:
   int run;
   char *status;
+
+  int firstEvtTime;
+  int firstEvtNumber;
+  int lastEvtTime;
+  int lastEvtNumber;
+  int nEvts;
+
   int timeOfLastChange;
 
   RunStatus();
@@ -25,6 +32,7 @@ class RunStatus : public TObject {
   static int getNumericStatus(char *str);
 
   int running();
+  void addEvent(int seq);
 
   ClassDef(RunStatus,1) ;
 };

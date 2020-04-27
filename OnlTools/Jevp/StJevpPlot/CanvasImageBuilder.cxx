@@ -207,24 +207,34 @@ int CanvasImageBuilder::writeImageFiles(char *dir, DisplayNode *node, int page) 
     return npages;
 }
 
-int CanvasImageBuilder::writeRunStatus(char *basedir, RunStatus *rs, int evtCnt)
+int CanvasImageBuilder::writeRunStatus(char *basedir, RunStatus *rs, int evtCnt, const char *serverTags)
 {
     char fn[256];
-    sprintf(fn, "%s/runStatus.txt", basedir);
+    sprintf(fn, "%s/runStatus.json", basedir);
 
-    //LOG("JEFF", "Writing run status to file %s", fn);
+    LOG("JEFF", "Writing run status to file %s", fn);
     FILE *f = fopen(fn, "w");
     if(!f) {
 	LOG("JEFF", "Error opening file for run status");
 	return -1;
     }
-
-    fprintf(f,"%d\n", rs->run);
-    fprintf(f,"%s\n", rs->status);
-    fprintf(f,"%d\n", rs->timeOfLastChange);
-    fprintf(f,"%d\n", time(NULL));
-    fprintf(f,"%d\n", evtCnt);
     
+    if(serverTags == NULL) {
+	serverTags = "none";
+    }
+    
+    fprintf(f, "{ ");
+    fprintf(f,"\"%s\":%d,", "run", rs->run);
+    fprintf(f,"\"%s\":\"%s\",", "status", rs->status);
+    fprintf(f,"\"%s\":%d,", "firstEvtTime", rs->firstEvtTime);   
+    fprintf(f,"\"%s\":%d,", "firstEvtNumber", rs->firstEvtNumber);   
+    fprintf(f,"\"%s\":%d,", "lastEvtTime", rs->lastEvtTime);   
+    fprintf(f,"\"%s\":%d,", "lastEvtNumber", rs->lastEvtNumber);   
+    fprintf(f,"\"%s\":%d,", "nEvts", evtCnt);   
+    fprintf(f,"\"%s\":%d,", "writeTime", time(NULL));
+    fprintf(f,"\"%s\":%d,", "lastStatusChangeTime", rs->timeOfLastChange);
+    fprintf(f,"\"%s\":\"%s\"", "serverTags", serverTags); 
+    fprintf(f, "}");
     fclose(f);
     return 0;
 }
