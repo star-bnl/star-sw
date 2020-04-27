@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.y2018.C,v 1.3 2018/10/17 20:45:17 fisyak Exp $
+// $Id: TpcResponseSimulator.y2018.C,v 1.4 2020/04/27 21:20:13 fisyak Exp $
 // $Log: TpcResponseSimulator.y2018.C,v $
+// Revision 1.4  2020/04/27 21:20:13  fisyak
+// Move to MySQL
+//
 // Revision 1.3  2018/10/17 20:45:17  fisyak
 // Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
 //
@@ -123,7 +126,7 @@ TDataSet *CreateTable() {
   /* Sigmas 
      Tpx inner = 0.395
      Tpx outer = 0.314
-     iTpc      = 0.322 Outer  0.316
+     iTpc      = 0.322 Outer  0.316 */
 #endif
   row.PolyaInner = 1.38;
   row.PolyaOuter = 1.38;
