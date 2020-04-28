@@ -26,7 +26,7 @@ void RunStatus::setStatus(const char *s)
     
     // starting the run... clear the counters
     if(status) {
-	if(strcmp(status, "running") == 0) {
+	if(strcmp(s, "running") == 0) {
 	    firstEvtTime = 0;
 	    lastEvtTime = 0;
 	    firstEvtNumber = -1;
