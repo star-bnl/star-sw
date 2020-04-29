@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.38 2020/01/06 19:14:11 jwebb Exp $
+* $Id: xgeometry.age,v 1.39 2020/04/29 14:01:29 jwebb Exp $
 
 
 
@@ -2523,12 +2523,14 @@ If LL>0
 
   case y2018 { y2018: y2018 first cut geometry; Geom =        'y2018     '; call geom_y2018;} 
   case y2018a { y2018a: y2018 first cut geometry; Geom =        'y2018a    '; call geom_y2018a;} 
+  case y2018b { y2018a: y2018 + FXT; Geom =        'y2018b    '; call geom_y2018b;} 
   case y2018x { y2018x: y2018 experimentap TPC geometry; Geom =        'y2018x    '; call geom_y2018x;} 
 
   case y2019 { y2019: y2019 first cut geometry; Geom =        'y2019     '; call geom_y2019;} 
   case y2019a { y2019: y2019a production release; Geom =        'y2019a    '; call geom_y2019a;} 
 
   case y2020 { y2020: y2020 first cut geometry; Geom =        'y2020     '; call geom_y2020;} 
+  case y2020a { y2020a: y2020a production; Geom =        'y2020a    '; call geom_y2020a;} 
 
   case dev2021 { dev2021:  First cut forward upgrades; Geom =        'dev2021   '; call geom_dev2021;} 
 
@@ -4500,8 +4502,13 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.38 2020/01/06 19:14:11 jwebb Exp $
+* $Id: xgeometry.age,v 1.39 2020/04/29 14:01:29 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.39  2020/04/29 14:01:29  jwebb
+* Add y2018b geometry tag (add fixed target into geometry).
+*
+* Enable y2020a geometry tag in xgeometry.
+*
 * Revision 1.38  2020/01/06 19:14:11  jwebb
 * Add options for fluka and fluka+mikap
 *
