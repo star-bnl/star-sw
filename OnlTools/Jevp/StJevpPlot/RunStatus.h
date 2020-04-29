@@ -32,7 +32,7 @@ class RunStatus : public TObject {
   static int getNumericStatus(char *str);
 
   int running();
-  void addEvent(int seq);
+  void addEvent(int seq, int tm);
 
   ClassDef(RunStatus,1) ;
 };

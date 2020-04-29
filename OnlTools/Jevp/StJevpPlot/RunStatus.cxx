@@ -67,14 +67,14 @@ int RunStatus::getNumericStatus(char *str)
   return 0;
 }
 
-void RunStatus::addEvent(int seq) {
+void RunStatus::addEvent(int seq, int tm) {
     if(firstEvtNumber == -1) {
 	firstEvtNumber = seq;
-	firstEvtTime = time(NULL);
+	firstEvtTime = tm;
     }
 
     lastEvtNumber = seq;
-    lastEvtTime = time(NULL);
+    lastEvtTime = tm;
     nEvts++;
 }
 
