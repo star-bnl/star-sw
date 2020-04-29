@@ -17,6 +17,7 @@
 int ImageWriterDrawingPlot = 0;
 
 RtsTimer_root imageClock;
+RtsTimer_root ic2;
 
 static void makedir(char *directory) {
     struct stat64 info;
@@ -85,7 +86,11 @@ void ImageWriter::writeImage(char *fn, JevpPlot *plot, double ymax) {
     char canvasName[64];
     sprintf(canvasName, "imageCanvas%d", canvasNumber++);
     
-    TCanvas *canvas = new TCanvas(canvasName,canvasName,1000,800);
+    double t1,t2,t3,t4,t5;
+    ic2.record_time();
+
+    //TCanvas *canvas = new TCanvas(canvasName,canvasName,1000,800);
+    TCanvas *canvas = new TCanvas(canvasName,canvasName,1500,1200);
     canvas->cd();
   
     gPad->SetFillColor(BGCOLOR);
@@ -94,13 +99,25 @@ void ImageWriter::writeImage(char *fn, JevpPlot *plot, double ymax) {
     gPad->SetTopMargin(.10);
     //gStyle->SetOptTitle(0);
     
+    t1 = ic2.record_time()*1000;
+
     ImageWriterDrawingPlot = 1;
     plot->draw();
     ImageWriterDrawingPlot = 0;
    
+    t2 = ic2.record_time()*1000;
+
     //LOG("JEFF", "Wrote images: %s", node->name);
 
-    canvas->SaveAs(fn);
+    //canvas->SaveAs(fn);
+
+    t3 = ic2.record_time()*1000;
+
+    canvas->Print(fn);
+
+    t4 = ic2.record_time()*1000;
+
+    //LOG("JEFF", "Write %s: (create=%5.1lfms) (draw=%5.1lfms) (saveas=%5.1lfms) (print=%5.1fms", fn, t1, t2, t3, t4); 
     delete canvas;
     delete plot;
 }

@@ -154,7 +154,8 @@ void CanvasImageBuilder::writeIndex(char *basedir, char *fn, int combo_index) {
 // Clone the plot and send to the image writer...
 int CanvasImageBuilder::writeImageFile(char *dir, DisplayNode *node, double maxy) {
     char fn[256];
-    sprintf(fn, "%s/%s.jpg", dir, removeSpaces(node->name));
+    //sprintf(fn, "%s/%s.jpg", dir, removeSpaces(node->name));
+    sprintf(fn, "%s/%s.svg", dir, removeSpaces(node->name));
  
     JevpPlot *plot = getPlotByName(node->name);
     if(!plot) {

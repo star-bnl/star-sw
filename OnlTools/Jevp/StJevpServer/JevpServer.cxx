@@ -899,7 +899,7 @@ void JevpServer::handleNewEvent(EvpMessage *m)
 	    evtsInRun = 0;
 	}
 
-	runStatus.addEvent(rdr->seq);
+	runStatus.addEvent(rdr->seq, rdr->evt_time);
 
 	eventsThisRun++;
     
