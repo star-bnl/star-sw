@@ -548,7 +548,9 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    rootfiledir = (char *)"/a/l4jevp/rootfiles"; 
 	    log_output = RTS_LOG_STDERR;
 	    //maxevts = 1001;
-	    runCanvasImageBuilder = 0;
+	    runCanvasImageBuilder = 1;
+	    imagewriterdir = (char *)"/tmp/jevptest";
+	    die = 1;
 	}
 	else if (strcmp(argv[i], "-updatedb")==0) {
 	  log_output = RTS_LOG_STDERR;
@@ -846,9 +848,9 @@ void JevpServer::handleNewEvent(EvpMessage *m)
 
     if(((maxevts > 0) && (evtsInRun > maxevts)) ||
        strcmp(m->cmd,"stoprun") == 0) {
-	LOG(DBG, "SERVThread: Got stoprun from reader");
+	LOG("JEFF", "SERVThread: Got stoprun from reader %d",runStatus.running());
 	CP;
-	if(runStatus.running()) {
+	if(runStatus.running() || daqfilename) {
 	    CP;
 	    performStopRun();
 
@@ -2301,7 +2303,11 @@ void *JEVPSERVERreaderThread(void *)
 		continue;
       
 	    case EVP_STAT_EOR:
-		if(nevts > 0) {
+		// The daqfilename is required because
+		// if there is an actual directory specified
+		// you never get EOR until no more events.
+		// but sometimes there is an empty directory!
+		if(nevts > 0 || serv.daqfilename) {
 		    LOG("JEFF", "RDRThread: End of the run!");
 		    readerThreadSend(socket, (char *)"stoprun");
 		    readerThreadWait(socket);
