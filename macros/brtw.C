@@ -408,7 +408,8 @@ void FitH3(
       vars[3] = yax->GetBinCenter(j); // y
       Int_t Npar = T->GetNpar();
       for (Int_t p = 0; p < Npar; p++) {
-	vars[4+2*p] = T->GetParameter(p)-0.497611;
+	vars[4+2*p] = T->GetParameter(p);
+	if (p == 0) vars[4+2*p] -= 0.497611;
 	vars[5+2*p] = T->GetParError(p);
 	if (p == 1) {
 	  mu->SetBinContent(i,j,vars[4+2*p]);

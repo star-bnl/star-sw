@@ -70,7 +70,6 @@ void put2DB(const char* files=
     }
     TString fName(file); cout << "Load " << fName << " to DB: " << DB << endl;
     if (DB == "") return;
-    if (gClassTable->GetID("StDbManager") < 0) Load();
     if (fName.EndsWith(".root")) { 
       f = new TFile(file);
       if (! f) return;

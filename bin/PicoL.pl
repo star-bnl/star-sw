@@ -11,6 +11,9 @@ use Time::localtime;
 #my $glob =  "./Pico*/???/*/*.picoDst.root";
 my $PICOPATH = "";
 my $debug = 0;
+if ($#ARGV >= 0) {
+  $debug = $ARGV[0];
+}
 my $pwd = Cwd::cwd(); print "pwd = $pwd\n" if ($debug);
 my $glob;
 my $dayMin =  0;
@@ -44,8 +47,9 @@ if ($pwd =~ /dev/) {
   elsif ($pwd =~ /2019\/14GeV/)               {$glob = "/2019/14GeV_2019_TFG19e";}
   elsif ($pwd =~ /2019\/19GeV/)               {$glob = "/2019/19GeV_2019_TFG19e";}
   elsif ($pwd =~ /2019\/31GeV_fixedTarget/)   {$glob = "/2019/31GeV_fixedTarget_2019_TFG19l.Minuit";}
-  elsif ($pwd =~ /2019\/4p59GeV_fixedTarget/) {$glob = "/2019/4p59GeV_fixedTarget_2019_TFG19e";}
-  elsif ($pwd =~ /2019\/7\.3GeV_fixedTarget/) {$glob = "/2019/7.3GeV_fixedTarget_2019_TFG19e";}
+  elsif ($pwd =~ /2019\/4p59GeV_fixedTarget/) {$glob = "/2019/4p59GeV_2019_TFG19e";}
+  elsif ($pwd =~ /2019\/3p85GeV_fixedTarget/) {$glob = "/2019/3p85GeV_Fixed_2019_TFG19e";}
+  elsif ($pwd =~ /2019\/7\.3GeV_fixedTarget/) {$glob = "/2019/7.3GeV_Fixed_2019_TFG19e";}
   elsif ($pwd =~ /2019\/7p7GeV/)              {$glob = "/2019/7p7GeV_2019_TFG19e";}
   elsif ($pwd =~ /2019\/9p2GeV/)              {$glob = "/2019/9p2GeV_2019_TFG19e";}
 
