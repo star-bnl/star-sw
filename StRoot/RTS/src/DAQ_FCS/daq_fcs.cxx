@@ -131,9 +131,11 @@ daq_dta *daq_fcs::handle_raw()
 
 	raw->create(1024,"fcs_raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
 
+
+	for(int s=1;s<=12;s++) {
 	for(int r=min_rdo;r<=max_rdo;r++) {
 		if(full_name==0) {
-			sprintf(str,"%s/sec01/rdo%d/raw",sfs_name,r) ;
+			sprintf(str,"%s/sec%02d/rdo%d/raw",sfs_name,s,r) ;
 			full_name = caller->get_sfs_name(str) ;
 
 			LOG(NOTE,"str %s, full_name %s",str,full_name) ;
@@ -159,9 +161,10 @@ daq_dta *daq_fcs::handle_raw()
 
 		LOG(DBG,"sfs read succeeded") ;
 
-		raw->finalize(size,1,r,0) ;
+		raw->finalize(size,s,r,0) ;
 
 		full_name = 0 ;
+	}
 	}
 
 	raw->rewind() ;
@@ -189,7 +192,11 @@ daq_dta *daq_fcs::handle_zs()
 
 
 	// first check the global zs (new in May 2019)
-	sprintf(str,"%s/sec01/zs",sfs_name) ;
+
+	for(int s=1;s<=12;s++) {
+
+	sprintf(str,"%s/sec%02d/zs",sfs_name,s) ;
+
 	full_name = caller->get_sfs_name(str) ;
 
 
@@ -323,7 +330,9 @@ daq_dta *daq_fcs::handle_zs()
 		else return 0 ;
 
 	}
+	}
 
+	// OLD stuff, pre FY19
 	for(u_int r=min_rdo;r<=max_rdo;r++) {
 		int sec, rdo ;
 
@@ -548,24 +557,13 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	d16 = (u_short *)d ;
 
 	if(d[0] != 0xCCCC001C) {
-		LOG(ERR,"Comma word 0x%08X bad, words %d",d[0],words) ;
+		LOG(ERR,"%d: comma word 0x%08X bad, words %d",rdo,d[0],words) ;
 		goto err_end ;
 	}
 
 	hdr = sw16(d[1]) >> 16 ;
 
 
-	switch(hdr) {
-	case 0x9800 :	// FY17
-		break ;
-	case 0x9801 :	// FY18
-		break ;
-	case 0x9802 :	// FY19
-		break ;
-	default :
-		LOG(ERR,"Unexpected event 0x%04X",hdr) ;
-		goto err_end ;
-	}
 	
 //	LOG(TERR,"%d: hdr 0x%X: 0x%X 0x%X 0x%X",rdo,hdr,d[3],d[4],d[5]) ;
 
@@ -574,11 +572,15 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		trg_word = (d16[4]<<16) | d16[3] ;
 		break ;
 	case 0x9802 :
+	case 0x9803 :
 		trg_word = (d16[5]<<16) | d16[4] ;
 		break ;
-	default :
+	case 0x9800 :
 		trg_word = sw16(d[3]) ;	// trigger
 		break ;
+	default :
+		LOG(ERR,"%d: unexpected HDR 0x%04X",hdr) ;
+		goto err_end ;	
 	}
 
 
@@ -604,7 +606,7 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 				t_lo = 4095 ;	// use this particular token!
 			}
 			else {
-				LOG(ERR,"Token-0 in triggered event 0x%04X: trg_cmd 0x%05X",hdr,trg_word) ;
+				LOG(ERR,"%d: token-0 in event HDR 0x%04X: trg_cmd 0x%05X",rdo,hdr,trg_word) ;
 
 				u_short *d16 = (u_short *)d ;
 				for(int i=0;i<16;i++) {
@@ -622,7 +624,7 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 			case 10 :	// pulser
 				break ;
 			default :
-				LOG(WARN,"Unusual trg_cmd=0x%X in event 0x%04X",trg_cmd,hdr) ;
+				LOG(WARN,"%d: unusual trg_cmd=0x%X in event 0x%04X",rdo,trg_cmd,hdr) ;
 				break ;
 			}
 		}
