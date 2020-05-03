@@ -64,6 +64,7 @@ public:
 	u_char log_level ;
 	u_int events ;		// for this instance
 	u_char realtime ;	// to disable some checks
+	char want_saved ;
 
 	u_char id ;		// when I have an array of fcs_data_c classes; id=0 is special
 
@@ -109,7 +110,7 @@ public:
 	int ch_count ;			// debugging
 	u_int rhic_start ;		// debugging
 	unsigned long long ch_mask_seen ;	// debugging
-
+	int first_tb_cou;
 
 	// I don't remember what the stuff is? Pre FY19.
 //	int first_rhic_strobe_tick ;
@@ -134,7 +135,7 @@ public:
 
 		// loaded into DEP for trigger
 		u_short i_ped[32] ;	// integerized, multipled by 8
-		u_char i_gain[32] ;	// integerized in the 4.6 (10 bit) form
+		u_short i_gain[32] ;	// integerized in the 4.8 (12 bit) form
 	} ;
 
 	struct rdo_map_t {
