@@ -82,6 +82,8 @@ void l4Builder::initialize(int argc, char *argv[])
 	cout << "Initialization ...(Timing begin)" << endl;
 	timer.Start();
 
+	/* pointless and misleading code that has no effect!!!!!   (jml)
+
 	l4Builder me2;
 	struct stat64 st2;
 	sprintf(me2.Destindir_dat,"%s/HLT_paras","/a/l4jevp/client");   // /a/jevp/client
@@ -91,7 +93,7 @@ void l4Builder::initialize(int argc, char *argv[])
 		LOG(DBG,"%s does not exist. Create.\n", me2.Destindir_dat);
 		if(mkdir(me2.Destindir_dat, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) LOG(DBG,"mkdir() error");
 	}
-
+	*/
 
 	index = 0;
 	LOG(DBG, "Index defined %d\n",index);
@@ -611,7 +613,10 @@ void l4Builder::stoprun(daqReader *rdr)
 void l4Builder::writeHistogram()
 {
 	char histfile[256];
-	sprintf(histfile, "%s/run14_hlt_%d_current_hist.root", Destindir, runnumber);
+
+	// JML:  cannot use private directories in production code!
+	//sprintf(histfile, "%s/run14_hlt_%d_current_hist.root", Destindir, runnumber);
+	sprintf(histfile, "%s/run14_hlt_%d_current_hist.root", clientdatadir, runnumber);
 	TFile file(histfile, "RECREATE");
 	int initialno = 54;
 
