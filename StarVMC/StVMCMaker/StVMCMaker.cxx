@@ -183,6 +183,7 @@ StVMCMaker::Make
 #include "TGeometry.h"
 #include "TGeoManager.h"
 #include "TObjectSet.h"
+#include "TObjString.h"
 #include "TInterpreter.h"
 #include "TPythia6Decayer.h"
 #include "TPRegexp.h"

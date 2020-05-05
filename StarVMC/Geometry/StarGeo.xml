@@ -204,7 +204,7 @@
     <Construct sys="zcal" config="ZCALon"  />
     <Construct sys="scon" config="SCON14"  />
     <Construct sys="pipe" config="PIPE12"  />
-    <Construct sys="tpce" config="TPCE32"  />
+    <Construct sys="tpce" config="TPCE31"  />
     <Construct sys="btof" config="BTOFv8"  />
     <Construct sys="vpdd" config="VPDD08"  />
     <Construct sys="calb" config="CALB02"  />
