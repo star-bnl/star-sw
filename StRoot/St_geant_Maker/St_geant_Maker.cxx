@@ -2523,7 +2523,7 @@ Int_t St_geant_Maker::KinematicsFromMuDst(Int_t flag) {
 	  ipart = pId[i][s];
 	}
       }
-      if (nSigmaMin > 2) ipart = pId[3][s];
+      if (nSigmaMin < 2) ipart = pId[3][s];
 #else
       ipart = 5; // muon+
       if (PrimaryTracks_mHelix_mQ[k] < 0) ipart = 6; // muon-
