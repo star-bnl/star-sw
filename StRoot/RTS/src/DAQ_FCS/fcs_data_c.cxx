@@ -243,7 +243,8 @@ int fcs_data_c::start(u_short *d16, int shorts)
 	rhic_start = 0;
 	ch_count = 0 ;
 	ch_mask_seen = 0 ;
-
+	want_saved = 0 ;
+	
 	
 //	for(int i=0;i<16;i++) {
 //		LOG(TERR,"...start: %d = 0x%04X",i,d16[i]) ;
@@ -251,6 +252,7 @@ int fcs_data_c::start(u_short *d16, int shorts)
 
 
 	//version = 0 ;	// unknown...
+//	LOG(TERR,"VERSION 0x%X",d[0]) ;
 
 	//check version
 	if(d[0]==0xDDDDDDDD) {	// new FY18 data!
@@ -270,7 +272,8 @@ int fcs_data_c::start(u_short *d16, int shorts)
 			d += 12 ;	// skip event header to go to ADC data
 			break ;
 		default :		// nre
-			if(d16[2]==0x9801) {	// May-2018 to Dec-2018
+			switch(d16[2]) {
+			case 0x9801 :
 				version = 0x18050000 ;	// 15-May-2018
 
 				dta_p = ((u_short *)d)+6 ;	// this is for May18-Dec18
@@ -282,8 +285,8 @@ int fcs_data_c::start(u_short *d16, int shorts)
 
 
 				return 1 ;
-			}
-			else if(d16[2]==0x9802) { 	// Nov 2018
+			case 0x9802 :
+			case 0x9803 :
 				version = 0x18110000 ;
 
 				dta_p = d16 ;
@@ -291,6 +294,7 @@ int fcs_data_c::start(u_short *d16, int shorts)
 				return hdr_event() ;
 
 			}
+
 			LOG(ERR,"uknown version 0x%04X",d16[2]) ;
 			return 0 ;
 
@@ -337,13 +341,13 @@ int fcs_data_c::hdr_event()
 {
 	u_short *start_p = dta_p ;
 
-//	u_short hdr_board_id ;
-
 
 //	for(int i=0;i<32;i++) {
 //		LOG(TERR,"... %d 0x%04X",i,dta_p[i]) ;
 //	}
 
+
+	first_tb_cou = 0 ;
 
 	//I will need the board id as a sector/id combo
 	hdr_board_id = dta_p[3] ;
@@ -374,13 +378,15 @@ int fcs_data_c::hdr_event()
 	hdr_rhic_counter = (dta_p[7]<<16)|dta_p[6] ;
 
 
-//	LOG(TERR,"HDR: trg_word 0x%05X, %d",hdr_trg_word,hdr_rhic_counter) ;
+	LOG(NOTE,"HDR S%d:%d: trg_word 0x%05X, RHIC %u, upper 0x%03X",hdr_sector,hdr_rdo, hdr_trg_word,hdr_rhic_counter,dta_p[5]>>4) ;
 
 	trg_cmd = hdr_trg_word & 0xF ;
 	daq_cmd = (hdr_trg_word>>4) & 0xF ;
 	token = ((hdr_trg_word>>8)&0xF)<<8 ;
 	token |= ((hdr_trg_word>>12)&0xF)<<4 ;
 	token |= ((hdr_trg_word>>16)&0xF) ;
+
+	LOG(NOTE,"HDR: token %d, trg_cmd %d, daq_cmd %d",token,trg_cmd,daq_cmd) ;
 
 	// skip to first datum
 	dta_p += 8 ;
@@ -410,6 +416,7 @@ int fcs_data_c::hdr_event()
 				else {
 					if(c=='\n') {
 						float f_val = 0.0 ;
+						u_int i_val = 0 ;
 						char *c ;
 
 						ctmp[cou] = 0 ;
@@ -419,30 +426,56 @@ int fcs_data_c::hdr_event()
 					
 						if((c=strstr(ctmp,"r0 7"))) {
 							sscanf(c,"r0 7 %f",&f_val) ;
-							//LOG(TERR,"%d: rate %f",rdo,f_val) ;
 
 							ped_lock() ;
 							statistics[rdo-1].ht_rate = (int) f_val ;
 							ped_unlock() ;
+
+
 						}
 						else if((c=strstr(ctmp,"t W "))) {
 							sscanf(c,"t W %f",&f_val) ;
-							//LOG(TERR,"%d: temperature %f",rdo,f_val) ;
 
 							ped_lock() ;
 							statistics[rdo-1].temperature = f_val ;
 							ped_unlock() ;
 						}
+						else if((c=strstr(ctmp,"tb "))) {
+							sscanf(c,"tb 0x%X",&i_val) ;
 
+							f_val = 100.0*(double)(i_val & 0x3FF)/1023.0 ;
+
+							ped_lock() ;
+							statistics[rdo-1].deadtime = f_val ;
+							ped_unlock() ;
+
+							if(f_val > 50.0) {
+								LOG(WARN,"%d: deadtime %.1f",rdo,f_val) ;
+							}
+							else {
+								LOG(INFO,"%d: deadtime %.1f",rdo,f_val) ;
+							}
+						}
 						else if((c=strstr(ctmp,"b "))) {
 							sscanf(c,"b %f",&f_val) ;
-							//LOG(TERR,"%d: deadtime %f",rdo,f_val) ;
 
 							ped_lock() ;
 							statistics[rdo-1].deadtime = f_val ;
 							ped_unlock() ;
 						}
-						   
+						else if((c=strstr(ctmp,"rg 7 "))) {
+							sscanf(c,"rg 7 0x%X",&i_val) ;
+
+							f_val = 100.0*(double)(i_val & 0x3ff)/1023.0 ;
+
+							if(f_val > 50.0) {
+								LOG(WARN,"%d: RX-throttle %.1f",rdo,f_val) ;
+							}
+							else {
+								LOG(INFO,"%d: RX-throttle %.1f",rdo,f_val) ;
+							}
+						}
+					   
 
 					}
 					else {
@@ -452,7 +485,7 @@ int fcs_data_c::hdr_event()
 				}
 			}
 			else if(asc != 0xFFFFFFFF) {
-				LOG(WARN,"ASCII wha %d: 0x%08X",i,asc) ;
+				LOG(ERR,"ASCII wha %d: 0x%08X",i,asc) ;
 			}
 
 			dta_p += 2 ;
@@ -466,21 +499,21 @@ int fcs_data_c::hdr_event()
 
 		ctmp[cou] = 0 ;
 		if(!end_marker) {
-			LOG(WARN,"S%d:%d:%d: ASCII[%d] but no end-marker \"%s\"",sector,rdo,events,cou,ctmp) ;
+			LOG(ERR,"S%d:%d:%d: ASCII[%d] but no end-marker \"%s\"",sector,rdo,events,cou,ctmp) ;
 		}
 		else if(cou) {
-			LOG(WARN,"S%d:%d:%d: ASCII[%d] \"%s\"",sector,rdo,events,cou,ctmp) ;
+			LOG(ERR,"S%d:%d:%d: ASCII[%d] \"%s\"",sector,rdo,events,cou,ctmp) ;
 		}
 
 	}
 	else if(dta_p[0]==0xFFFF && dta_p[1]==0xFFFF) {	// bug: end-of-ascii without ascii
-		LOG(WARN,"S%d:%d:%d: ASCII bug: 0x%X, 0x%X",sector,rdo,events,hdr_trg_word,dta_p[2]) ;
+		LOG(ERR,"S%d:%d:%d: ASCII bug: 0x%X, 0x%X",sector,rdo,events,hdr_trg_word,dta_p[2]) ;
 		for(int i=0;i<32;i++) {
 			LOG(TERR,"... %d = 0x%04X",i,start_p[i]) ;
 		}
 		dta_p += 2 ;
 	}
-#if 0
+#if 1
 	else if(dta_p[0]==0xFFFF) {
 		LOG(ERR,"BAD 0xFFFF bug") ;
 		dta_p++ ;
@@ -509,7 +542,7 @@ int fcs_data_c::event_end(int how)
 	if(!trgd_event) return 0 ;
 
 	if(rdo_map_loaded && (ch_mask_seen != rdo_map[sector-1][rdo-1].ch_mask)) {
-		LOG(ERR,"%d: event_end: %d: RDO %d: mask not-complete 0x%llX",id,events,rdo,ch_mask_seen) ;
+		LOG(ERR,"%d: event_end: %d: RDO %d: mask not-complete 0x%llX (T %d)",id,events,rdo,ch_mask_seen,token) ;
 	}
 
 
@@ -537,9 +570,19 @@ int fcs_data_c::event()
 	// this is pretty critical...
 //	if(*dta_p == 0xFFFF) {
 	while(*dta_p == 0xFFFF) {
-		LOG(ERR,"S%d:%d: events %d: BUG 0xFFFF",sector,rdo,events) ;
-		//event_end(1) ;
-		//return 0 ;
+		want_saved = 1 ;
+
+		LOG(ERR,"S%d:%d: events %d: BUG 0xFFFF: ch %d, bytes left %d",sector,rdo,events,ch_count,dta_stop-dta_p) ;
+		LOG(ERR,"   0x%X 0x%X 0x%X",dta_p[1],dta_p[2],dta_p[3]) ;
+
+//		u_short *dta_use = dta_p - 1000 ;
+//		while(dta_use<dta_stop) {
+//			printf("%d = 0x%04X\n",dta_stop-dta_use,*dta_use++) ;
+//		}
+
+		event_end(1) ;
+		return 0 ;
+		
 		dta_p++ ;
 	}
 
@@ -583,7 +626,7 @@ int fcs_data_c::event()
 		//complain = 1 ;
 		if(realtime && (board_id_xpect != board)) complain = 1 ;
 
-		if(ch>32) complain = 1 ;
+		if(ch>33) complain = 1 ;
 		else {
 			if(ch_mask_seen & (1LL<<ch)) {
 				LOG(ERR,"event %d: ch duplicate %d",events,ch) ;
@@ -660,6 +703,13 @@ int fcs_data_c::event()
 			tb_cou++ ;
 		}
 
+		if(first_tb_cou==0) {
+			first_tb_cou = tb_cou ;
+		}
+		else if(tb_cou != first_tb_cou) {
+			LOG(ERR,"%d: ch length mismatch: expect %d, is %d: ch %d(%d)",rdo,first_tb_cou,tb_cou,ch,ch_count) ;
+		}
+
 		ana_ch() ;
 
 		//LOG(TERR,"0x%08X 0x%08X 0x%08X",dta_p[0],dta_p[1],dta_p[2]) ;
@@ -724,7 +774,7 @@ int fcs_data_c::ana_ch()
 
 int fcs_data_c::accum_pre_fy19(u_int ch, u_int tb, u_short sadc)
 {
-	int fla ;
+//	int fla ;
 
 	//protect structures
 	if(tb>=(sizeof(adc)/sizeof(adc[0]))) {
@@ -737,7 +787,7 @@ int fcs_data_c::accum_pre_fy19(u_int ch, u_int tb, u_short sadc)
 	if(ch>=32) return 0 ;	// skip non-ADC channels
 
 
-	fla = sadc >> 12 ;	// flags
+//	fla = sadc >> 12 ;	// flags
 	sadc &= 0xFFF ;	//zap the flags to get to raw ADC
 
 
@@ -993,7 +1043,7 @@ int fcs_data_c::gain_from_cache(const char *fname)
 
 		FILE *f = fopen(ff,"r") ;
 		if(f==0) {
-			LOG(ERR,"Can't open %s [%s]",ff,strerror(errno)) ;
+			LOG(WARN,"%s [%s]",ff,strerror(errno)) ;
 			continue ;
 		}
 
@@ -1039,9 +1089,12 @@ int fcs_data_c::gain_from_cache(const char *fname)
 		for(int c=0;c<32;c++) {
 
 			double d = ped[s][i].el_gain[c] * ped[s][i].et_gain[c] ;
-			ped[s][i].i_gain[c] = (u_int)(d*64.0+0.5) ;
 
-			if(ped[s][i].i_gain[c]>1023) {	// 10 bit max!
+
+			// pre FY20: ped[s][i].i_gain[c] = (u_int)(d*64.0+0.5) ;
+			ped[s][i].i_gain[c] = (u_int)(d*256.0+0.5) ;
+
+			if(ped[s][i].i_gain[c]>4095) {	// 12 bit max!
 				LOG(ERR,"S%d:%d: ch %d -- gain correction too big",s+1,i+1,c,ped[s][i].i_gain[c]) ;
 			}
 			else {

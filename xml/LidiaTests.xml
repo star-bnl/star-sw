@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<job name="NewTest" fileListSyntax="paths" nProcesses="115"  filesPerHour="25" simulateSubmission="false">
+<job name="NewTest" fileListSyntax="paths" nProcesses="125"  filesPerHour="25" simulateSubmission="false">
 
 <command>
 
@@ -32,8 +32,8 @@ echo "infile0 --> "${infile0}
 #rm ${out_dir}/*.log
 if ( -r ${out_dir}/${logFile}) exit 0;
 if (! -d ${out_dir}) mkdir -p ${out_dir}
-cd $SCRATCH
-
+#cd $SCRATCH
+cd ${out_dir}
 #starver SL19c
 
 echo $STAR
@@ -42,24 +42,24 @@ echo $STAR
 
 setenv StarEndMakerShell
 
-cp ${inputfile} $SCRATCH
-grep sse /proc/cpuinfo | sort -u | tee  ${logFile}
-echo $SCRATCH/${infile0}
+#cp ${inputfile} $SCRATCH
+#grep sse /proc/cpuinfo | sort -u | tee  ${logFile}
+#echo $SCRATCH/${infile0}
 echo ${inputfile} | grep fzd
 if (! $?) then
-  root4star -b -q bfc.C\($nevents,\&quot;${chain}\&quot;,\&quot;${infile0}\&quot;\) &gt;&gt;&amp; ${logFile}
+  root4star -b -q bfc.C\($nevents,\&quot;${chain}\&quot;,\&quot;${inputfile}\&quot;\) &gt;&amp; ${logFile}
 else
-  root.exe -b -q bfc.C\($nevents,\&quot;${chain}\&quot;,\&quot;${infile0}\&quot;\) &gt;&gt;&amp; ${logFile}
+  root.exe -b -q bfc.C\($nevents,\&quot;${chain}\&quot;,\&quot;${inputfile}\&quot;\) &gt;&amp; ${logFile}
 endif
-cp ${logFile} ${out_dir}
-
-foreach OUTPUT_FILE (*.root)
-
-echo ${OUTPUT_FILE}
-
-cp $SCRATCH/${OUTPUT_FILE} ${out_dir}
-
-end
+#cp ${logFile} ${out_dir}
+#
+#foreach OUTPUT_FILE (*.root)
+#
+#echo ${OUTPUT_FILE}
+#
+#cp $SCRATCH/${OUTPUT_FILE} ${out_dir}
+#
+#end
 
 </command>
 
