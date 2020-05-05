@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.55 2018/03/30 14:11:07 jwebb Exp $
+* $Id: gstar_part.g,v 1.56 2020/05/05 21:24:10 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.56  2020/05/05 21:24:10  jwebb
+* Add two pentaquark states
+*
 * Revision 1.55  2018/03/30 14:11:07  jwebb
 * Added Lambda_c- with G3 id of 208.  (note: requires corresponding update to
 * StarClassLibrary...)
@@ -826,6 +829,19 @@ Particle H_dibaryon               code      = 60001,
                        trktyp = kGtHadr  mass = 2.6346       ,
                        charge = +1       tlife = 1.6378e-10  ,
                        bratio = {0.5, 0.5}  mode = { 30 26 08, 31 26 07 }
+
+   Particle PQ1730 "Pentaquark 1730 --> lambda K0s, phase space" _
+            code   = 60008              pdg = 912323         ,
+            trktyp = kGtHadr            mass = 1.730         ,
+            charge = 0                  tlife = 1.0E-16      ,
+            bratio = {0.5,0.5}  mode = {1618,1618} 
+
+   Particle PQ1730 "Pentaquark 1730 --> lambda K0s, phase space" _
+            code   = 60009              pdg = 912323         ,
+            trktyp = kGtHadr            mass = 1.730         ,
+            charge = 1                  tlife = 1.0E-16      ,
+            bratio = {1.0,}  mode = {1118,} 
+
 
 
 ***************************************************************************
