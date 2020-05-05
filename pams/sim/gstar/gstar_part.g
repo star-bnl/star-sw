@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.56 2020/05/05 21:24:10 jwebb Exp $
+* $Id: gstar_part.g,v 1.57 2020/05/05 21:34:33 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.57  2020/05/05 21:34:33  jwebb
+* Add two pentaquark states... small hack for single decay mode.
+*
 * Revision 1.56  2020/05/05 21:24:10  jwebb
 * Add two pentaquark states
 *
@@ -840,7 +843,7 @@ Particle H_dibaryon               code      = 60001,
             code   = 60009              pdg = 912323         ,
             trktyp = kGtHadr            mass = 1.730         ,
             charge = 1                  tlife = 1.0E-16      ,
-            bratio = {1.0,}  mode = {1118,} 
+            bratio = {0.5,0.5}  mode = {1118,1118} 
 
 
 
