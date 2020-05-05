@@ -105,6 +105,7 @@ More detailed: 				<br>
 #include "TFile.h"
 #include "TCanvas.h"
 #include "TEnv.h"
+#include "TObjString.h"
 #include "StDetectorDbMaker/StiKalmanTrackFinderParameters.h"
 #include "StDetectorDbMaker/StiKalmanTrackFitterParameters.h"
 
