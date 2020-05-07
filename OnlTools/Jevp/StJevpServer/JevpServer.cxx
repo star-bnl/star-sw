@@ -557,6 +557,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    pdfdir = (char *)"/a/l4jevp/pdf";
 	    refplotdir = (char *)"/a/l4jevp/refplots";
 	    rootfiledir = (char *)"/a/l4jevp/rootfiles"; 
+	    //log_output = RTS_LOG_STDERR;
 	    //maxevts = 1001;
 	    runCanvasImageBuilder = 1;
 	    imagewriterdir = (char *)"/tmp/jevptest";
@@ -572,7 +573,8 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	}
 	else if (strcmp(argv[i], "-test")==0) {
 	    nodb = 1;
-	    log_output = RTS_LOG_STDERR;
+	    log_dest = (char *)"172.16.0.1";
+	    //log_output = RTS_LOG_STDERR;
 	    basedir = (char *)"/RTScache/conf/jevp";
 	    pdfdir = (char *)"/a/jevp_test/pdf";
 	    //pdfdir = NULL;
