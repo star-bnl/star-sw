@@ -45,6 +45,9 @@
 
 using namespace std;
 
+#define XX(x) l4BuilderSourceLine = 10000*x + __LINE__;
+
+int l4BuilderSourceLine;
 // #include "RTS/trg/include/trgDataDefs.h"
 // #include <DAQ_TOF/daq_tof.h>
 // #include <DAQ_HLT/daq_hlt.h>
@@ -157,11 +160,13 @@ void l4Builder::initialize(int argc, char *argv[])
 	fTheoDedx_He4_pos->SetLineWidth(0.3);
 	fTheoDedx_He4_neg->SetLineWidth(0.3);
 
+#ifdef ILLEGAL
 	// Initialize JevpPlot
 	gStyle->SetPalette(1);
 	gStyle->SetOptLogz(1);
 	gStyle->SetPadGridX(0);
 	gStyle->SetPadGridY(0);
+#endif
 
 	for(int i = 0; i < nHltPlots; i++) {
 	        HltPlots[i] = new JevpPlot();
@@ -384,10 +389,12 @@ void l4Builder::stoprun(daqReader *rdr)
 	hMatchId_fiberId->Add(hMatchId_fiberId_copy);
 	hMatchId_fiberId->Add(hMatchId_fiberId_copy2);
 
+#ifdef ILLEGAL
 	gStyle->SetOptStat(000000);
 	gStyle->SetStatW(0.13);
 	gStyle->SetStatH(0.08);
 	gStyle->SetOptFit(111);
+#endif
 
 	hDiElectronInvMassTpxEmc->SetLineColor(4);
 	hDiElectronInvMassFullRange->SetLineColor(4);
@@ -430,6 +437,8 @@ void l4Builder::stoprun(daqReader *rdr)
 	hMTDQmUpsilonMassUS->SetMarkerColor(1);
 	hMTDQmUpsilonMassUS->SetLineColor(1);
 	hMTDQmUpsilonMassLS->SetLineColor(4);
+
+	LOG("JEFF", "about to use 3 globals");
 
 	hBesGoodVxT->FitSlicesY();
 	hBesGoodVxT_2 = (TH1D*)gDirectory->Get("BesGoodVxT_2");
@@ -603,11 +612,11 @@ void l4Builder::stoprun(daqReader *rdr)
 
 	writeHistogram();
 	timer.Stop();
-	printf("Stopping run #%d\n", runnumber);
-	cout << "Timing end. " << "\n" << "Cpu time: " << timer.CpuTime()
-	     << " Real time: " << timer.RealTime() << endl;
+	//printf("Stopping run #%d\n", runnumber);
+	//cout << "Timing end. " << "\n" << "Cpu time: " << timer.CpuTime()
+	//     << " Real time: " << timer.RealTime() << endl;
 	
-	LOG("JEFF", "Done startrun");
+	LOG("JEFF", "Stoprun done: run #%d, cpu=%lf, time=%lf", runnumber, timer.CpuTime(), timer.RealTime());
 };
 
 void l4Builder::writeHistogram()
@@ -719,8 +728,8 @@ void l4Builder::main(int argc, char *argv[])
 
 void l4Builder::event(daqReader *rdr)
 {
-
-	//   //************************************** SET THE TRIGGER BIT HERE to min bias value *************
+    XX(0);
+    //   //************************************** SET THE TRIGGER BIT HERE to min bias value *************
 	//   //We want all events right now (not just min-bias), min-bias is our main trigger.
 	//   u_int trg = rdr->daqbits;
 	//   //int minbias = 0x20;
@@ -761,6 +770,7 @@ void l4Builder::event(daqReader *rdr)
 
 	if(!dd) {
 		LOG(DBG, "No HLT in this event");
+		XX(0);
 		return;
 	}
 
@@ -2208,7 +2218,8 @@ void l4Builder::event(daqReader *rdr)
 	    }
 	  }
 	}
-};
+	XX(0);
+}
 
 
 /**

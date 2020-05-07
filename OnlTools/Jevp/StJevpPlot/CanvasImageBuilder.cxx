@@ -20,6 +20,9 @@
 #define HISTOCOLOR 10
 #define BLACKCOLOR 1
 
+#define XX(x) canvasBuilderLine = x*10000 + __LINE__
+int canvasBuilderLine=0;
+
 char *removeSpaces(char *s) {
     static char _str[512];
     
@@ -64,7 +67,12 @@ static void makedir(char *directory) {
 
 JevpPlot *CanvasImageBuilder::getPlotByName(char *name) {
   if(server) {
-    return server->getPlot(name);
+      JevpPlot *ptr = server->getPlot(name);
+      //CP;
+      if(ptr == NULL) {
+	  LOG("JEFF", "ptr=null %s",name);
+      }
+      return ptr;
   }
   if(plotset) {
     return plotset->getPlot(name);
@@ -238,6 +246,21 @@ int CanvasImageBuilder::writeRunStatus(char *basedir, RunStatus *rs, int evtCnt,
     fprintf(f, "}");
     fclose(f);
     return 0;
+}
+
+int CanvasImageBuilder::sendToImageWriter(char *directory, RunStatus *rs, int numberOfEvents, const char *serverTags) {
+    XX(0);
+    pthread_mutex_lock(&imageWriter->mux);
+    XX(1);
+    writeIndex(directory, "idx.txt");
+    XX(1);
+    writeRunStatus(directory, rs, numberOfEvents, serverTags);
+    XX(1);
+    int cnt = writeImages(directory);
+    XX(1);
+    pthread_mutex_unlock(&imageWriter->mux);
+    XX(999);
+    return cnt;
 }
 
 // Assumes that the index has been writen, so the directory exists...

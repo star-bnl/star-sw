@@ -88,7 +88,10 @@ void PO(char *s) {
     close(fd);
     LOG("JEFF", "(%s): num files: %d", s, fd);
 }
+
 extern int ImageWriterDrawingPlot;
+extern int canvasBuilderLine;
+extern int l4BuilderSourceLine;
 
 static void sigHandler(int arg, siginfo_t *sig, void *v)
 {
@@ -105,7 +108,7 @@ static void sigHandler(int arg, siginfo_t *sig, void *v)
 
     int mythread = syscall(SYS_gettid);
 
-    LOG(WARN, "signal %d TID, me: %d,  reader: %d, ImageWriterDrawingPlot: %d", arg, mythread, readerTid, ImageWriterDrawingPlot);
+    LOG(WARN, "signal %d TID, me: %d,  reader: %d, (server: %d)(builder: %d)(imageWriter: %d)(canvasBuilder: %d)(l4: %d)", arg, mythread, readerTid, line_number, line_builder,ImageWriterDrawingPlot, canvasBuilderLine, l4BuilderSourceLine);
 
     // If we are trying to cleam up after a builder!
     //
@@ -256,7 +259,7 @@ void JevpServer::main(int argc, char *argv[])
 
   LOG("JEFF", "Readsocket TID = %d", syscall(SYS_gettid));
 
-  serv.imageWriter = new ImageWriter();
+  serv.imageWriter = new ImageWriter(serv.imagewriterdir);
   TThread *imageThread = new TThread("imageWriterThread", (void(*)(void *))(&ImageWriterThread), (void *)serv.imageWriter);
   imageThread->Run();
 
@@ -368,7 +371,7 @@ void JevpServer::readSocket()
 		    }
 		    else {
 			int telapsed = time(NULL) - lastImageBuilderSendTime;
-			if(telapsed >= 60) {
+			if(telapsed >= 10) {
 			    sendNow = true;
 			}
 		    }
@@ -378,11 +381,15 @@ void JevpServer::readSocket()
 			writingImageClock.record_time();
 			displays->setServerTags(serverTags ? serverTags : "");
 			displays->updateDisplayRoot();
-			canvasImageBuilder->writeIndex(imagewriterdir, "idx.txt");
+
 			CP;
-			canvasImageBuilder->writeRunStatus(imagewriterdir, &runStatus, eventsThisRun, serverTags);
-			CP;
-			int cnt = canvasImageBuilder->writeImages(imagewriterdir);
+			int cnt = canvasImageBuilder->sendToImageWriter(imagewriterdir, &runStatus, eventsThisRun, serverTags);
+
+			// canvasImageBuilder->writeIndex(imagewriterdir, "idx.txt");
+			// CP;
+			// canvasImageBuilder->writeRunStatus(imagewriterdir, &runStatus, eventsThisRun, serverTags);
+			// CP;
+			// int cnt = canvasImageBuilder->writeImages(imagewriterdir);
 			CP;
 			writingImageTime = writingImageClock.record_time();
 			CP;
@@ -523,6 +530,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	}
 	else if (strcmp(argv[i], "-l4production") == 0) {
 	    log_port = 8009;
+	    printEventCount=2000;
 	    LOG("JEFF", "Using L4");
 	    isL4 = 1;
 	    log_dest = (char *)"172.17.0.1";
@@ -536,7 +544,10 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    runCanvasImageBuilder = 1;
 	}
 	else if (strcmp(argv[i], "-l4test") == 0) {
+	    log_dest = (char *)"172.17.0.1";
 	    log_port = 8009;
+	    printEventCount=2000;
+	    //log_output = RTS_LOG_STDERR;
 	    LOG("JEFF", "Using L4 test");
 	    isL4 = 1;
 	    nodb = 1;
@@ -546,7 +557,6 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    pdfdir = (char *)"/a/l4jevp/pdf";
 	    refplotdir = (char *)"/a/l4jevp/refplots";
 	    rootfiledir = (char *)"/a/l4jevp/rootfiles"; 
-	    log_output = RTS_LOG_STDERR;
 	    //maxevts = 1001;
 	    runCanvasImageBuilder = 1;
 	    imagewriterdir = (char *)"/tmp/jevptest";
@@ -904,8 +914,8 @@ void JevpServer::handleNewEvent(EvpMessage *m)
 	runStatus.addEvent(rdr->seq, rdr->evt_time);
 
 	eventsThisRun++;
-    
-	if((eventsThisRun % 100) == 0) LOG(WARN, "Processed %d events this run so far  waiting: %lf, handling: %lf, writeimages: %lf", eventsThisRun,
+	
+	if((eventsThisRun % printEventCount) == 0) LOG(WARN, "Processed %d events this run so far  waiting: %lf, handling: %lf, writeimages: %lf", eventsThisRun,
 					   waitingTime, eventHandlingTime, writingImageTime);
 
 	LOG(DBG, "Sending event #%d(%d)",rdr->seq, rdr->event_number);
@@ -1273,78 +1283,80 @@ void JevpServer::justUpdatePallete() {
 
 void JevpServer::performStopRun()
 {
-  LOG("JEFF", "Got run stop for run #%d (%d displays to write out)",runStatus.run, displays->nDisplays());
+    LOG("JEFF", "Got run stop for run #%d (%d displays to write out)",runStatus.run, displays->nDisplays());
 
 
-  JevpPlotSet *curr;
-  TListIter next(&builders);
+    JevpPlotSet *curr;
+    TListIter next(&builders);
   
-  while((curr = (JevpPlotSet *)next())) {
-    CP;
-    LOG(DBG, "End of run report for %s: (%lf secs/event : %d of %d analyzed)",
-	curr->getPlotSetName(), curr->getAverageProcessingTime(), curr->numberOfEventsRun, eventsThisRun);
-    CP;
+    while((curr = (JevpPlotSet *)next())) {
+	CP;
+	LOG(DBG, "End of run report for %s: (%lf secs/event : %d of %d analyzed)",
+	    curr->getPlotSetName(), curr->getAverageProcessingTime(), curr->numberOfEventsRun, eventsThisRun);
+	CP;
 
-    curr->stoprun(rdr);
-    CP;
+	pthread_mutex_lock(&imageWriter->mux);
+	curr->stoprun(rdr);
+	pthread_mutex_unlock(&imageWriter->mux);
+	CP;
 
-    continue;
-  }
+	continue;
+    }
 
   
  
 
 
-  // Write out the pdfs for all displays...
-  displays->setServerTags(serverTags ? serverTags : "");
-  displays->ignoreServerTags = 0;
+    // Write out the pdfs for all displays...
+    displays->setServerTags(serverTags ? serverTags : "");
+    displays->ignoreServerTags = 0;
 
-  runStatus.setStatus("stopped");
+    runStatus.setStatus("stopped");
 
-  for(int i=0;i<displays->nDisplays();i++) {
-    LOG(NOTE,"Writing pdf for display %d, run %d",i,runStatus.run);
-    CP;
-    writeRunPdf(i, runStatus.run);
-    CP;
-  }
+    for(int i=0;i<displays->nDisplays();i++) {
+	LOG(NOTE,"Writing pdf for display %d, run %d",i,runStatus.run);
+	CP;
+	writeRunPdf(i, runStatus.run);
+	CP;
+    }
 
   
-  writeRootFiles();
-  eventsThisRun = 0;
+    writeRootFiles();
+    eventsThisRun = 0;
  
-  // Update the palletes and write out xml again
-  char fn[256];
-  sprintf(fn, "%s/%s", basedir, displays_fn);
+    // Update the palletes and write out xml again
+    char fn[256];
+    sprintf(fn, "%s/%s", basedir, displays_fn);
 
-  LOG(DBG, "fn=%s",fn);
-  CP;
+    LOG(DBG, "fn=%s",fn);
+    CP;
 
 
 }
 
 void JevpServer::clearForNewRun()
 {
-  // Delete all from histogram list
-  // First free the actual histo, then remove the link...
-  LOG(NOTE, "Clear for new run  #%d",runStatus.run);
+    // Delete all from histogram list
+    // First free the actual histo, then remove the link...
+    LOG(NOTE, "Clear for new run  #%d",runStatus.run);
 
-  eventHandlingTime = 0;
-  waitingTime = 0;
-  writingImageTime = 0;
+    eventHandlingTime = 0;
+    waitingTime = 0;
+    writingImageTime = 0;
 
-  TListIter next(&builders);
+    TListIter next(&builders);
 
-  JevpPlotSet *curr;
-  while((curr = (JevpPlotSet *)next())) {
+    JevpPlotSet *curr;
+    while((curr = (JevpPlotSet *)next())) {
 
-    LOG(DBG, "Send startrun for: %s", curr->getPlotSetName());
-    curr->_startrun(rdr);
-  }
+	LOG(DBG, "Send startrun for: %s", curr->getPlotSetName());
+	curr->_startrun(rdr);
+    }
 
-  if(serverTags) {
-    free(serverTags);
-    serverTags = NULL;
-  }
+    if(serverTags) {
+	free(serverTags);
+	serverTags = NULL;
+    }
 }
 
 
@@ -1354,7 +1366,10 @@ JevpPlot *JevpServer::getPlot(char *name) {
     //int nexamined=0;
 
     if(strcmp(name, "serv_JevpSummary") == 0) {
-	return getJevpSummaryPlot();
+	//	CP;
+	JevpPlot *ptr = getJevpSummaryPlot();
+	//	CP;
+	return ptr;
     }
 
     JevpPlotSet *curr;
@@ -1370,6 +1385,7 @@ JevpPlot *JevpServer::getPlot(char *name) {
 	if(strncmp(name,ps_name,len) != 0) continue;
 
 	currplot = curr->getPlot(name);
+	//	CP;
 	//LOG("JEFF", "name: %s currplot: %p", name, currplot);
 	if(currplot) break;
 
@@ -1393,114 +1409,118 @@ JevpPlot *JevpServer::getPlot(char *name) {
     double t1 = clock.record_time();
     LOG(DBG, "Ethernet: getPlot(%s) %lf",name,t1);
 
+    // CP;
     return currplot;
 }
 
 
 void JevpServer::handleGetPlot(TSocket *s, char *argstring) 
 {
-  RtsTimer_root clock;
-  double t1=0,t2=0,t3=0,t4=0;
-  clock.record_time();
-
-  JevpPlot *plot=NULL;
-  char refidstr[20];
-  char runidstr[20];
-  char plotname[80];
-
-  LOG(DBG,"argstring is (%s)\n",argstring);
-  if(!getParamFromString(plotname, argstring)) {
-    LOG(ERR,"No plot indicated in getplot?\n");
-    return;
-  }
- 
-  LOG(DBG,"Plotname is %s\n",plotname);
-
-  t1 = clock.record_time();
-
-  if(getParamFromString(refidstr, argstring, (char *)"refid")) {
-    char fn[256];
-    sprintf(fn, "%s/REF.%s.%d.root", DEFAULT_REF_PLOT_DIR, plotname, atoi(refidstr));
-      
-    LOG(DBG,"Reading [%s] from file %s\n",plotname, fn);
-
-    TFile *f1 = new TFile(fn);
-    if(!f1) {
-      LOG(ERR,"Error opening file: %s",fn);
-      plot = NULL;
-    }
-    else {
-      //f1->GetObject(plotname, plot);
-      // If JevpSummary, build a new one first...
-      f1->GetObject("JevpPlot",plot);
-      f1->Close();
-
-      if(plot) {
-	LOG(DBG,"Got plot.....xxx\n");
-	plot->refid = atoi(refidstr);
-      }
-      else {
-	LOG(WARN,"Didn't get plot %s\n",plotname);
-      }
-    }
-  }
-  else if (getParamFromString(runidstr, argstring, (char *)"run")) {    
-    char fn[256];
-    sprintf(fn, "%s/%d.root",EVP_SAVEPLOT_DIR, atoi(runidstr));
-
-    TFile *f1 = new TFile(fn);
-    if(!f1) {
-      LOG(ERR,"Error opening file: %s",fn);
-      plot = NULL;
-    } 
-    else {
-      f1->GetObject(plotname, plot);
-      f1->Close();
-    }
-  }
-  else {
-    LOG(DBG,"getplot..%s\n", plotname);
-
-//     if(strcmp(plotname, "serv_JevpSummary") == 0) {
-//       plot = getJevpSummaryPlot();
-//     }
-//     else {
-    plot = getPlot(plotname);
-    //    }
-  }
-
-  t2 = clock.record_time();
-    
-  if(!plot) {
-    char tmp[100];
-    sprintf(tmp, "No plot %s",plotname);
-    EvpMessage m;
-    m.setSource((char *)"serv");
-    m.setCmd((char *)"noplot");
-    m.setArgs(tmp);
-    TMessage mess(kMESS_OBJECT);
-    mess.WriteObject(&m);
-    
-    int ret = s->Send(mess);
-    t3=clock.record_time();
-    LOG(DBG, "sent (errmess) %d bytes",ret);
-  } else {
+    RtsTimer_root clock;
+    double t1=0,t2=0,t3=0,t4=0;
     clock.record_time();
-    TMessage mess(kMESS_OBJECT);
-    t1=clock.record_time();
-    mess.WriteObject(plot);
-    t2=clock.record_time();
-    int ret = s->Send(mess);
-    t4=clock.record_time();
-    LOG(DBG, "Sent (plot) %d bytes",ret);
-  }
 
-  LOG(DBG, "getplot %lf %lf %lf %lf",t1,t2,t3,t4);
+    JevpPlot *plot=NULL;
+    char refidstr[20];
+    char runidstr[20];
+    char plotname[80];
+
+    LOG(DBG,"argstring is (%s)\n",argstring);
+    if(!getParamFromString(plotname, argstring)) {
+	LOG(ERR,"No plot indicated in getplot?\n");
+	return;
+    }
+ 
+    LOG(DBG,"Plotname is %s\n",plotname);
+
+    t1 = clock.record_time();
+
+    if(getParamFromString(refidstr, argstring, (char *)"refid")) {
+	char fn[256];
+	sprintf(fn, "%s/REF.%s.%d.root", DEFAULT_REF_PLOT_DIR, plotname, atoi(refidstr));
+      
+	LOG(DBG,"Reading [%s] from file %s\n",plotname, fn);
+
+	TFile *f1 = new TFile(fn);
+	if(!f1) {
+	    LOG(ERR,"Error opening file: %s",fn);
+	    plot = NULL;
+	}
+	else {
+	    //f1->GetObject(plotname, plot);
+	    // If JevpSummary, build a new one first...
+	    f1->GetObject("JevpPlot",plot);
+	    f1->Close();
+
+	    if(plot) {
+		LOG(DBG,"Got plot.....xxx\n");
+		plot->refid = atoi(refidstr);
+	    }
+	    else {
+		LOG(WARN,"Didn't get plot %s\n",plotname);
+	    }
+	}
+    }
+    else if (getParamFromString(runidstr, argstring, (char *)"run")) {    
+	char fn[256];
+	sprintf(fn, "%s/%d.root",EVP_SAVEPLOT_DIR, atoi(runidstr));
+
+	TFile *f1 = new TFile(fn);
+	if(!f1) {
+	    LOG(ERR,"Error opening file: %s",fn);
+	    plot = NULL;
+	} 
+	else {
+	    f1->GetObject(plotname, plot);
+	    f1->Close();
+	}
+    }
+    else {
+	LOG(DBG,"getplot..%s\n", plotname);
+
+	//     if(strcmp(plotname, "serv_JevpSummary") == 0) {
+	//       plot = getJevpSummaryPlot();
+	//     }
+	//     else {
+	plot = getPlot(plotname);
+	CP;
+	//    }
+    }
+
+    t2 = clock.record_time();
+    
+    if(!plot) {
+	char tmp[100];
+	sprintf(tmp, "No plot %s",plotname);
+	EvpMessage m;
+	m.setSource((char *)"serv");
+	m.setCmd((char *)"noplot");
+	m.setArgs(tmp);
+	TMessage mess(kMESS_OBJECT);
+	mess.WriteObject(&m);
+    
+	int ret = s->Send(mess);
+	t3=clock.record_time();
+	LOG(DBG, "sent (errmess) %d bytes",ret);
+    } else {
+	clock.record_time();
+	TMessage mess(kMESS_OBJECT);
+	t1=clock.record_time();
+	mess.WriteObject(plot);
+	t2=clock.record_time();
+	int ret = s->Send(mess);
+	t4=clock.record_time();
+	LOG(DBG, "Sent (plot) %d bytes",ret);
+    }
+
+    LOG(DBG, "getplot %lf %lf %lf %lf",t1,t2,t3,t4);
 
 }
 
 JevpPlot *JevpServer::getJevpSummaryPlot()
 {
+    //pthread_mutex_lock(&imageWriter->mux);
+
     if(jevpSummaryPlot) {
 	delete jevpSummaryPlot;
 	jevpSummaryPlot = NULL;
@@ -1508,7 +1528,7 @@ JevpPlot *JevpServer::getJevpSummaryPlot()
 
     debugBuilders(__LINE__);
 
-    CP;
+    // CP;
     jevpSummaryPlot = new JevpPlot();
     jevpSummaryPlot->needsdata = 0;
     jevpSummaryPlot->setParent((char *)"serv");
@@ -1533,7 +1553,7 @@ JevpPlot *JevpServer::getJevpSummaryPlot()
     jevpSummaryPlot->gridy = 0;
   
   
-    CP;
+    //CP;
     JLatex *l;
   
   
@@ -1554,7 +1574,7 @@ JevpPlot *JevpServer::getJevpSummaryPlot()
     l->SetTextSize(.03);
     jevpSummaryPlot->addElement(l);
 
-    CP;
+    //CP;
     // Now show builders...
     TListIter next(&builders);
     JevpPlotSet *obj;
@@ -1564,9 +1584,9 @@ JevpPlot *JevpServer::getJevpSummaryPlot()
 
     i = 0;
     
-    CP;
+    //CP;
     while((obj = (JevpPlotSet *)next())) {
-	LOG(DBG, "object");
+	//CP;
 	LOG(DBG, "name=%s",obj->getPlotSetName());
 	BuilderStatus *curr = &obj->builderStatus;
 
@@ -1589,17 +1609,19 @@ JevpPlot *JevpServer::getJevpSummaryPlot()
 	jevpSummaryPlot->addElement(l); 
 
 	LOG(DBG, "HEre");
+	//CP;
     }
   
-    CP;
+    //    CP;
     if(n == 0) {
 	sprintf(tmp,"There are no builders");
 	l = new JLatex(2, liney(10), tmp, 1 , 1);
 	l->SetTextSize(.035);
 	jevpSummaryPlot->addElement(l);
     }
-    CP;
+    //   CP;
     
+    // pthread_mutex_unlock(&imageWriter->mux);
     //char *nm = jevpSummaryPlot->GetPlotName();
     //LOG("JEFF", "nm = %s", nm);
     return jevpSummaryPlot;
@@ -1635,9 +1657,12 @@ void JevpServer::writeRunPdf(int display, int run)
     displays->updateDisplayRoot();
 
     if(runCanvasImageBuilder) {
-	canvasImageBuilder->writeIndex(imagewriterdir, "idx.txt");	
-	canvasImageBuilder->writeRunStatus(imagewriterdir, &runStatus, eventsThisRun, serverTags);
-	int cnt = canvasImageBuilder->writeImages(imagewriterdir);
+	LOG("JEFF", "status: %s", runStatus.status);
+	int cnt = canvasImageBuilder->sendToImageWriter(imagewriterdir, &runStatus, eventsThisRun, serverTags);
+
+	//canvasImageBuilder->writeIndex(imagewriterdir, "idx.txt");	
+	//canvasImageBuilder->writeRunStatus(imagewriterdir, &runStatus, eventsThisRun, serverTags);
+	//int cnt = canvasImageBuilder->writeImages(imagewriterdir);
 	LOG("JEFF", "sent %d endrun jpgs", cnt);
     }
 

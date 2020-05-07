@@ -34,6 +34,8 @@ class JevpServer {
     int log_port;
     char *log_level;
 
+    int printEventCount;
+
     PdfFileBuilder *pdfFileBuilder;
 
 
@@ -93,6 +95,7 @@ class JevpServer {
     unsigned long long int getMemUse();
 
     JevpServer() {
+	printEventCount = 100;
 	myport = JEVP_PORT;
 	logevent = 0;
 	maxevts = 0;

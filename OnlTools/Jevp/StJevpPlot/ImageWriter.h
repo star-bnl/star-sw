@@ -19,12 +19,13 @@ struct CanvasSlot {
 
 class ImageWriter {
     thrMsgQueue<CanvasSlot> *slotQ;
-
+    int nHisto;
+    int file_idx;
  public:
     // mutex for any drawing functions...
     pthread_mutex_t mux;
 
-    ImageWriter();
+    ImageWriter(char *basedir);
     void writeImage(char *fn, JevpPlot *plot, double ymax);
     void writeToImageWriter(CanvasSlot *slot);
     void loop();
