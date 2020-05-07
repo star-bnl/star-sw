@@ -383,7 +383,7 @@ void JevpServer::readSocket()
 			displays->updateDisplayRoot();
 
 			CP;
-			int cnt = canvasImageBuilder->sendToImageWriter(imagewriterdir, &runStatus, eventsThisRun, serverTags);
+			int cnt = canvasImageBuilder->sendToImageWriter(imagewriterdir, &runStatus, eventsThisRun, serverTags, false);
 
 			// canvasImageBuilder->writeIndex(imagewriterdir, "idx.txt");
 			// CP;
@@ -1660,7 +1660,7 @@ void JevpServer::writeRunPdf(int display, int run)
 
     if(runCanvasImageBuilder) {
 	LOG("JEFF", "status: %s", runStatus.status);
-	int cnt = canvasImageBuilder->sendToImageWriter(imagewriterdir, &runStatus, eventsThisRun, serverTags);
+	int cnt = canvasImageBuilder->sendToImageWriter(imagewriterdir, &runStatus, eventsThisRun, serverTags, true);
 
 	//canvasImageBuilder->writeIndex(imagewriterdir, "idx.txt");	
 	//canvasImageBuilder->writeRunStatus(imagewriterdir, &runStatus, eventsThisRun, serverTags);
