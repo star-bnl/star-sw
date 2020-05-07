@@ -236,5 +236,8 @@ void ImageWriter::loop() {
 
 void ImageWriter::writeToImageWriter(CanvasSlot *slot)
 {
+    if(slot->plot == NULL) {
+	LOG("JEFF", "slotQ->n = %d", slotQ->entries());
+    }
     slotQ->send(slot);
 }

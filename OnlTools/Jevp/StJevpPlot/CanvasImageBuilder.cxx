@@ -248,8 +248,17 @@ int CanvasImageBuilder::writeRunStatus(char *basedir, RunStatus *rs, int evtCnt,
     return 0;
 }
 
-int CanvasImageBuilder::sendToImageWriter(char *directory, RunStatus *rs, int numberOfEvents, const char *serverTags) {
+int CanvasImageBuilder::sendToImageWriter(char *directory, RunStatus *rs, int numberOfEvents, const char *serverTags, bool force) {
     XX(0);
+    LOG("JEFF", "sendToImageWriter");
+    int nwriting = imageWriter->getNWriting();
+    if((nwriting > 0) && !force) {
+	LOG("JEFF", "skip... nwriting = %d", nwriting);
+	return 0;
+    }
+
+    LOG("JEFF", "do...  nwriting = %d", nwriting);
+
     pthread_mutex_lock(&imageWriter->mux);
     XX(1);
     writeIndex(directory, "idx.txt");
