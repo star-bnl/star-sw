@@ -1,6 +1,11 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/syscall.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <dirent.h>
+#include <string.h>
+
 
 #include <TROOT.h>
 #include <TStyle.h>
@@ -14,6 +19,7 @@
 #define BGCOLOR 17
 #define HISTOCOLOR 10
 
+#define XX(x) ImageWriterDrawingPlot = 10000*x + __LINE__
 int ImageWriterDrawingPlot = 0;
 
 RtsTimer_root imageClock;
@@ -61,7 +67,6 @@ void *ImageWriterThread(void *iw) {
     LOG("JEFF", "imageWriter TID = %d", imageWriterTid);
 
 
-
     ImageWriter *imageWriter = (ImageWriter *)iw;
 
     imageWriter->loop();
@@ -71,7 +76,7 @@ void *ImageWriterThread(void *iw) {
 
 void ImageWriter::writeImage(char *fn, JevpPlot *plot, double ymax) {
     static int canvasNumber=1;
-    
+    XX(nHisto);
     gStyle->SetCanvasColor(BGCOLOR);
     
     if(ymax != -999) {
@@ -100,10 +105,10 @@ void ImageWriter::writeImage(char *fn, JevpPlot *plot, double ymax) {
     //gStyle->SetOptTitle(0);
     
     t1 = ic2.record_time()*1000;
-
-    ImageWriterDrawingPlot = 1;
+    
+    XX(nHisto);
     plot->draw();
-    ImageWriterDrawingPlot = 0;
+    XX(nHisto);
    
     t2 = ic2.record_time()*1000;
 
@@ -113,22 +118,72 @@ void ImageWriter::writeImage(char *fn, JevpPlot *plot, double ymax) {
 
     t3 = ic2.record_time()*1000;
 
-    canvas->Print(fn);
+    //if(canvasNumber == 9 || canvasNumber == 10) {
+    //	LOG("JEFF", "(%d) -- %s", canvasNumber, plot->GetPlotName());
+    //}
+
+    XX(nHisto);
+    //canvas->Print(fn);
+    canvas->SaveAs(fn);
+    XX(nHisto);
 
     t4 = ic2.record_time()*1000;
 
     //LOG("JEFF", "Write %s: (create=%5.1lfms) (draw=%5.1lfms) (saveas=%5.1lfms) (print=%5.1fms", fn, t1, t2, t3, t4); 
+    XX(nHisto);
     delete canvas;
+    XX(nHisto);
     delete plot;
+    XX(nHisto);
 }
 
-ImageWriter::ImageWriter() {
+ImageWriter::ImageWriter(char *basedir) {
+
+    // Figure out initial value for file_idx  (1+ largest filetest_done_%d idx)
+  
+    // get rid of /tmp/ from basedir
+    char *bs = basedir;
+    while(*bs != '\0') {
+	if(*bs == '/') {
+	    bs++;
+	    basedir = bs;
+	}
+	bs++;
+    }
+    LOG("JEFF", "basedir = %s", basedir);
+
+    file_idx = 0;
+    char testdir[256];
+    sprintf(testdir, "%s_done_", basedir);
+    
+    DIR *dp = opendir("/tmp");
+    struct dirent *entry;
+    if(dp == NULL) {
+	LOG("ERR", "No /tmp directory");
+    }
+    else {
+	while((entry = readdir(dp)) != NULL) {
+	    LOG("JEFF", "testdir=%s entry->d_name=%s", testdir, entry->d_name);
+
+	    if(memcmp(testdir,entry->d_name,strlen(testdir)) == 0) {
+		
+		int x = atoi(&entry->d_name[strlen(testdir)]);
+		LOG("JEFF", "got one: %s %d %s %d", entry->d_name, strlen(testdir), &entry->d_name[strlen(testdir)+1], x);
+		if(x > file_idx) file_idx = x;
+	    }
+	}
+	closedir(dp);
+    }
+    file_idx++;
+
+    LOG("JEFF", "starting file_idx = %d", file_idx);
+	    
     slotQ = new thrMsgQueue<CanvasSlot>(MAX_IMAGEWRITER_CANVAS);
     pthread_mutex_init(&mux, NULL);
 }
 
 void ImageWriter::loop() {
-    int nHisto=0;
+    nHisto=0;
 
     LOG("JEFF", "ImageWriter loop starting");
     for(;;) {
@@ -144,8 +199,9 @@ void ImageWriter::loop() {
 		char o[256];
 		char d[256];
 		strcpy(o, slot.name);
-		strcpy(d, slot.name);
-		strcat(d, "_done");
+
+		sprintf(d, "%s_done_%d", slot.name, file_idx);
+		file_idx++;
 		rename(o, d);
 	    }
 	}
