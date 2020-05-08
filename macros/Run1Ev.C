@@ -27,6 +27,7 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
     St_geant_Maker::instance()->SetAttr("phys_off",1);
     St_geant_Maker::instance()->Do("subevent 0;");
 #endif
+    St_geant_Maker::instance()->SetActive();
     //                         NTRACK  ID PTLOW PTHIGH YLOW YHIGH PHILOW PHIHIGH ZLOW ZHIGH
     //                         gkine 1  5     1      1  0.1   0.1      0       0    2     2
     //                         gkine 1  2    25     25  0.1   0.1      0       0   10    10
@@ -147,7 +148,6 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
         cflag->iswit[0] = 2;
         cflag->iswit[1] = 2;
         cflag->iswit[2] = 2; 
-        StGeanePropagator::instance()->SetDebug(1);
       }
     } else {
       cout << "You have to use root4star with St_geant_Maker already loaded" << endl;
@@ -171,6 +171,10 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
     //    StiTrackNodeHelper::SetDebug(8);
   }  
 #endif
+  StMaker *trs = chain->Maker("TpcRS");
+  if (trs) {
+    trs->SAttr("ELECTRONS_TUPLE");
+  }
   if (NEvents) {
     chain->EventLoop(NEvents);
   }

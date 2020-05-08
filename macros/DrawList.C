@@ -38,7 +38,7 @@
 #include "TPolynomial.h"
 #endif
 void DrawList(const Char_t *pattern = "^pad_X_RC*", const Char_t *ctitle = "", 
-	      Int_t nx = 7, Int_t ny = 2, Int_t color = 0, Int_t iSlices=2, Double_t ymin=-0.4, Double_t ymax = 0.6, Int_t NparMax = 9, Bool_t zoom=kTRUE) {
+	      Int_t nx = 7, Int_t ny = 2, Int_t color = 0, Int_t iSlices=2, Double_t ymin=-0.4, Double_t ymax = 0.6, Int_t NparMax = 9, Bool_t zoom=kFALSE) {
 #ifdef __CINT__
   cout << "Please run this script in compiled mode by running \".x DrawList.C+\"" << endl;
    return;
@@ -384,11 +384,13 @@ void DrawFList(const Char_t *pattern = "OuterPadRcNoiseConv*", const Char_t *cti
     leg->Draw();
   }
   c->Update();
+#ifdef __zoom__
   TQtZoomPadWidget *zoomer = new TQtZoomPadWidget();  // Create the Pad zoomer widget
   //  Double_t zoom = 1.;
   //  zoomer->SetZoomFactor(zoom);
   TQtCanvas2Html  TQtCanvas2Html(c,  900, 600, "./", zoomer);
   //  TQtCanvas2Html  TQtCanvas2Html(c, zoom, "./", zoomer);
+#endif
 }
 //________________________________________________________________________________
 void DrawF2List(const Char_t *pattern = "OuterPadRcNoiseConv*", const Char_t *ctitle = "", Int_t nx = 0, Int_t ny = 0) {

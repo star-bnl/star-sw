@@ -76,7 +76,7 @@ class StTpcRSMaker : public StMaker {
 	      kDistortion  = 4,// include distortions
 	      kNoToflight  = 5 // don't account for particle time of flight
   };
-  enum {kPadMax = 32, kTimeBacketMax = 64, kRowMax = 72};
+  enum {kPadMax = 32, kTimeBucketMax = 64, kRowMax = 72};
   StTpcRSMaker(const char *name="TpcRS");
   virtual              ~StTpcRSMaker();
   virtual Int_t         InitRun(int runnumber);
@@ -88,6 +88,8 @@ class StTpcRSMaker : public StMaker {
   static TF1F *GetPolya(Int_t io = 0)       {return (TF1F *) mPolya[io];}
   static TF1F *GetTimeShape0(Int_t io = 0)  {return fgTimeShape0[io];}
   static TF1F *GetTimeShape3(Int_t io = 0)  {return fgTimeShape3[io];}
+  static TF1F *GetTimeShapePASA(Int_t io = 0)  {return fgTimeShapePASA[io];}
+  static TF1F *GetTimeShapePASA4()          {return fgTimeShapePASA4;}
   static TF1  *GetHeed()                    {return mHeed;}
   Double_t GetNoPrimaryClusters(Double_t betaGamma, Int_t charge);
   virtual void Print(Option_t *option="") const;
@@ -100,6 +102,9 @@ class StTpcRSMaker : public StMaker {
   static Double_t shapeEI_I(Double_t *x, Double_t *par=0);
   static Double_t shapeEI3(Double_t *x, Double_t *par=0);
   static Double_t shapeEI3_I(Double_t *x, Double_t *par=0);
+  static Double_t shapeEIPASA(Double_t *x, Double_t *par=0);
+  static Double_t shapeEIPASA_I(Double_t *x, Double_t *par=0);
+  static Double_t shapeEIPASA4_I(Double_t *x, Double_t *par=0);
   static Double_t fei(Double_t t, Double_t t0, Double_t T);
   static Double_t polya(Double_t *x, Double_t *par);
   static SignalSum_t  *GetSignalSum(Int_t sector);
@@ -113,19 +118,23 @@ class StTpcRSMaker : public StMaker {
   static void SetParticleType(g2t_track_st *tpc_track, Int_t Id, Int_t &id3, Int_t &ipart, Int_t &charge, Double_t &mass); 
   static Double_t CalcTmax(g2t_tpc_hit_st *tpc_hitC, Int_t ipart, Double_t mass, Int_t charge, Double_t &betaGamma, Double_t &eKin);
  private:
+#ifdef __OLD__
   static Double_t ShaperFunc(Double_t *x, Double_t *p);
+#endif
   static Double_t PadResponseFunc(Double_t *x, Double_t *p);
   static Double_t Gatti(Double_t *x, Double_t *p);
   static Double_t InducedCharge(Double_t s, Double_t h, Double_t ra, Double_t Va, Double_t &t0);
   static Float_t  GetCutEle();
-  static TF1F     *fgTimeShape3[2];  //!
-  static TF1F     *fgTimeShape0[2];   //!
-  Char_t   beg[1];                    //!
-  TTree   *fTree;                     //!
-  static SignalSum_t     *m_SignalSum;       //!
-  TH1D*    mdNdx;                     //!
-  TH1D*    mdNdxL10;                  //!
-  TH1D*    mdNdEL10;                  //!xs
+  static TF1F     *fgTimeShape3[2];    //!
+  static TF1F     *fgTimeShape0[2];    //!
+  static TF1F     *fgTimeShapePASA[2]; //!
+  static TF1F     *fgTimeShapePASA4;   //!
+  Char_t   beg[1];                     //!
+  TTree   *fTree;                      //!
+  static SignalSum_t     *m_SignalSum; //!
+  TH1D*    mdNdx;                      //!
+  TH1D*    mdNdxL10;                   //!
+  TH1D*    mdNdEL10;                   //!
   static TF1F  *mShaperResponses[2][24];     //!
   static TF1F  *mShaperResponse;             //!
   static TF1F  *mChargeFraction[2][24];      //!

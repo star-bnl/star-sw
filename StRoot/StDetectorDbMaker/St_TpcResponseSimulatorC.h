@@ -30,6 +30,8 @@ class St_TpcResponseSimulatorC : public TChair {
   Float_t      *tauC(Int_t i = 0) 	const {return &Struct(i)->tauCI;}
   Float_t 	tauCI(Int_t i = 0) 	const {return Struct(i)->tauCI;}
   Float_t 	tauCO(Int_t i = 0) 	const {return Struct(i)->tauCO;}
+  Float_t 	tauPASA(Int_t i = 0) 	const {return Struct(i)->tauPASA;}
+  Float_t 	tauPASA4(Int_t i = 0) 	const {return Struct(i)->tauPASA4;}
   Float_t 	SigmaJitterTI(Int_t i = 0) 	const {return Struct(i)->SigmaJitterTI;}
   Float_t 	SigmaJitterTO(Int_t i = 0) 	const {return Struct(i)->SigmaJitterTO;}
   Float_t 	SigmaJitterXI(Int_t i = 0) 	const {return Struct(i)->SigmaJitterXI;}
@@ -69,10 +71,16 @@ class St_TpcResponseSimulatorC : public TChair {
   Float_t      *ZCOW(Int_t i = 0)    	    const {return &Struct(i)->ZCOW[0];}
   Float_t      *ZCIE(Int_t i = 0)    	    const {return &Struct(i)->ZCIE[0];}
   Float_t      *ZCOE(Int_t i = 0)    	    const {return &Struct(i)->ZCOE[0];}
-  Float_t       dXScreeningI(Int_t i = 0)   const {return  Struct(i)->dXScreeningI;}
-  Float_t       dXScreeningO(Int_t i = 0)   const {return  Struct(i)->dXScreeningO;}
-  Float_t       dZScreeningI(Int_t i = 0)   const {return  Struct(i)->dZScreeningI;}
-  Float_t       dZScreeningO(Int_t i = 0)   const {return  Struct(i)->dZScreeningO;}
+  Float_t      *Recombination(Int_t i = 0)  const {return  &Struct(i)->RecombinationI;} 
+  Float_t       RecombinationI(Int_t i = 0) const {return  Struct(i)->RecombinationI;}	 
+  Float_t       RecombinationO(Int_t i = 0) const {return  Struct(i)->RecombinationO;}	 
+  Float_t      *Sigma_xW(Int_t i = 0)       const {return  &Struct(i)->Sigma_xWI;}	 
+  Float_t       Sigma_xWI(Int_t i = 0) 	    const {return  Struct(i)->Sigma_xWI;} 	 
+  Float_t       Sigma_xWO(Int_t i = 0) 	    const {return  Struct(i)->Sigma_xWO;} 	 
+  Float_t      *Slope_zW(Int_t i = 0)       const {return  &Struct(i)->Slope_zWI;}	 
+  Float_t       Slope_zWI(Int_t i = 0) 	    const {return  Struct(i)->Slope_zWI;} 	 
+  Float_t       Slope_zWO(Int_t i = 0) 	    const {return  Struct(i)->Slope_zWO;}       
+
  protected:
   St_TpcResponseSimulatorC(St_TpcResponseSimulator *table=0) : TChair(table) {}
   virtual ~St_TpcResponseSimulatorC() {fgInstance = 0;}

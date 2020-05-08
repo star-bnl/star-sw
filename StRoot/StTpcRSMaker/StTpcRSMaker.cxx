@@ -8,7 +8,9 @@
   "Ionization energy loss in very thin absorbers.", V.M. Grishin, V.K. Ermilova, S.K. Kotelnikov Nucl.Instrum.Meth.A309:476-484,1991
   "A method to improve tracking and particle identification in TPC's and silicon detectors.", Hans Bichsel, Nucl.Instrum.Meth.A562:154-197,2006
   HEED: "Modeling of ionization produced by fast charged particles in gases", I.B. Smirnov, Nucl.Instrum.Meth.A55(2005) 747-493. 
-  
+  PASA + Altro cheap 
+  https://ep-ed-alice-tpc.web.cern.ch/papers.htm 
+  https://www.star.bnl.gov/public/daq/DAQ1000/altro/ALTROsetup.pdf
 */
 #include <assert.h>
 #include <vector>
@@ -22,6 +24,7 @@
 #include "TRandom.h"
 #include "TSystem.h"
 #include "TFile.h"
+#include "TNtuple.h"
 #include "TBenchmark.h"
 #include "TProfile2D.h"
 #include "TVirtualMC.h"
@@ -59,6 +62,7 @@
 //#define ElectronHack
 //#define __LASERINO__
 //#define Old_dNdx_Table
+//#define __ELECTRONS_TUPLE__
 #define __SECROW_PLOTS__
 #define __STOPPED_ELECTRONS__
 #define __DEBUG__
@@ -77,6 +81,8 @@ static       Double_t t0IO[2]   = {1.20868e-9, 1.43615e-9}; // recalculated in I
 static const Double_t tauC[2]   = {999.655e-9, 919.183e-9}; 
 TF1F*     StTpcRSMaker::fgTimeShape3[2]    = {0, 0};
 TF1F*     StTpcRSMaker::fgTimeShape0[2]    = {0, 0};
+TF1F*     StTpcRSMaker::fgTimeShapePASA[2] = {0, 0};
+TF1F*     StTpcRSMaker::fgTimeShapePASA4   = 0;
 Double_t  StTpcRSMaker::mtauCX[2] = {0.0};
 SignalSum_t *StTpcRSMaker::m_SignalSum = 0; 
 Double_t  StTpcRSMaker::mCutEle = 1e-5;
@@ -98,8 +104,7 @@ static Double_t minSignal = 1e-4;           //!
 //static Double_t TotalSignalInCluster;      //!
 #ifdef __OLD__
 static Double_t padsdE[StTpcRSMaker::kPadMax];           //!
-static Double_t tbksdE[StTpcRSMaker::kTimeBacketMax];    //!
-static Double_t rowsdE[StTpcRSMaker::kRowMax];          //!
+static Double_t tbksdE[StTpcRSMaker::kTimeBucketMax];    //!
 #endif /* __OLD__ */
 static Double_t fgTriggerT0 = 0;             //! TPC trigger T0 is supposed to set for the primary ineraction Z = 0
 
@@ -115,12 +120,10 @@ static TH1  *checkList[2][21] = {0};
 #ifdef __SECROW_PLOTS__
 static TProfile2D  *SecRow[16] = {0};
 #endif /* __SECROW_PLOTS__ */
-#ifdef __DEBUG__
-static TH2F *dXonWireI = 0, *dZonWireI = 0, *dXonWireO = 0, *dZonWireO = 0;
-#endif
 static TString TpcMedium("TPCE_SENSITIVE_GAS");
 static const Double_t m_e = .51099907e-3;
 Int_t StTpcRSSegment::_debug = 0;
+static TNtuple *fgTuple = 0;
 //________________________________________________________________________________
 ClassImp(StTpcRSMaker);
 //________________________________________________________________________________
@@ -133,8 +136,8 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
 {
   memset(beg, 0, end-beg+1);
   m_Mode = 0;
-  //  SETBIT(m_Mode,kHEED); 
-  SETBIT(m_Mode,kBICHSEL);  // Default is Bichsel
+  SETBIT(m_Mode,kHEED); 
+  //  SETBIT(m_Mode,kBICHSEL);  // Default is Bichsel
   SETBIT(m_Mode,kdEdxCorr);
   SETBIT(m_Mode,kDistortion);
 }
@@ -300,6 +303,18 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
       }
     }
   }
+  Double_t paramsPASA4[2] = {St_TpcResponseSimulatorC::instance()->tauPASA4(),  mTimeBinWidth};
+  if (paramsPASA4[0] > 0) {
+    // new electronics only integration => PASA shape = 288814(t /τau**4 )*exp(−4(t /τau )**2)
+    // TF1 *f = new TF1("PASA","288814*(x /TMath::Power([0],4))*TMath::Exp(-4*TMath::Power(x /[0],2))",0,100); [0] = 85ns => RMS = 19
+    fgTimeShapePASA4 = new TF1F("TimeShapePASA4%",
+				StTpcRSMaker::shapeEIPASA4_I,timeBinMin*mTimeBinWidth,timeBinMax*mTimeBinWidth,3);
+    fgTimeShapePASA4->SetParNames("tau","width");
+    fgTimeShapePASA4->SetParameters(paramsPASA4);
+    fgTimeShapePASA4->SetTitle(fgTimeShapePASA4->GetName());
+    fgTimeShapePASA4->GetXaxis()->SetTitle("timebuckets");
+    fgTimeShapePASA4->GetYaxis()->SetTitle("signal"); 
+  }
   for (Int_t io = 0; io < 2; io++) {// In/Out
     //  mPolya = new TF1F("Polya;x = G/G_0;signal","sqrt(x)/exp(1.5*x)",0,10); // original Polya 
     //  mPolya = new TF1F("Polya;x = G/G_0;signal","pow(x,0.38)*exp(-1.38*x)",0,10); //  Valeri Cherniatin
@@ -307,7 +322,7 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
     Double_t gamma;
     if (!io ) gamma = St_TpcResponseSimulatorC::instance()->PolyaInner();
     else      gamma = St_TpcResponseSimulatorC::instance()->PolyaOuter();
-    if (gamma <= 0) gamma = 1.38;
+    if (gamma <= 0) gamma = 1.38; //  Valeri Cherniatin
     mPolya[io] = new TF1F(io == 0 ? "PolyaInner;x = G/G_0;signal" : "PolyaOuter;x = G/G_0;signal",polya,0,10,3);
     mPolya[io]->SetParameters(gamma, 0., 1./gamma);
     Double_t params3[7] = {t0IO[io], 
@@ -316,9 +331,10 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
 			   St_TpcResponseSimulatorC::instance()->tauIntegration(), 
 			   mTimeBinWidth,     0, (Double_t ) io};
     Double_t params0[5] = {t0IO[io],             St_TpcResponseSimulatorC::instance()->tauX()[io], mTimeBinWidth,     0, (Double_t ) io};
+    Double_t paramsPASA[5] = {t0IO[io],          St_TpcResponseSimulatorC::instance()->tauPASA(),  mTimeBinWidth,     0, (Double_t ) io};
     if (! fgTimeShape3[io]) {// old electronics, intergation + shaper alltogether
       fgTimeShape3[io] = new TF1F(Form("TimeShape3%s",Names[io]),
-				  shapeEI3,timeBinMin*mTimeBinWidth,timeBinMax*mTimeBinWidth,7);
+				  StTpcRSMaker::shapeEI3,timeBinMin*mTimeBinWidth,timeBinMax*mTimeBinWidth,7);
       fgTimeShape3[io]->SetParNames("t0","tauF","tauP", "tauI","width","tauC","io");
       fgTimeShape3[io]->SetParameters(params3);
       params3[5] = fgTimeShape3[io]->Integral(timeBinMin*mTimeBinWidth,timeBinMax*mTimeBinWidth);
@@ -326,16 +342,31 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
       fgTimeShape3[io]->GetXaxis()->SetTitle("time (secs)");
       fgTimeShape3[io]->GetYaxis()->SetTitle("signal");
     }
-    if (! fgTimeShape0[io]) {// new electronics only integration
+    if (params0[1] > 0 && ! fgTimeShape0[io]) {
+      // new electronics only integration => PASA shape = 288814(t /τau**4 )*exp(−4(t /τau )**2)
+      // TF1 *f = new TF1("PASA","288814*(x /TMath::Power([0],4))*TMath::Exp(-4*TMath::Power(x /[0],2))",0,100); [0] = 85ns => RMS = 19
       fgTimeShape0[io] = new TF1F(Form("TimeShape%s",Names[io]),
-				  shapeEI,timeBinMin*mTimeBinWidth,timeBinMax*mTimeBinWidth,5);
-      fgTimeShape0[io]->SetParNames("t0","tauI","width","tauC","io");
+				  StTpcRSMaker::shapeEI,timeBinMin*mTimeBinWidth,timeBinMax*mTimeBinWidth,5);
+      fgTimeShape0[io]->SetParNames("t0","tauI","width","Integral","io");
       params0[3] = St_TpcResponseSimulatorC::instance()->tauC()[io];
       fgTimeShape0[io]->SetParameters(params0);
       params0[3] = fgTimeShape0[io]->Integral(0,timeBinMax*mTimeBinWidth);
       fgTimeShape0[io]->SetTitle(fgTimeShape0[io]->GetName());
       fgTimeShape0[io]->GetXaxis()->SetTitle("time (secs)");
       fgTimeShape0[io]->GetYaxis()->SetTitle("signal"); 
+    }
+    if (paramsPASA[1] > 0 && ! fgTimeShapePASA[io]) {
+      // new electronics only integration => PASA shape = 288814(t /τau**4 )*exp(−4(t /τau )**2)
+      // TF1 *f = new TF1("PASA","288814*(x /TMath::Power([0],4))*TMath::Exp(-4*TMath::Power(x /[0],2))",0,100); [0] = 85ns => RMS = 19
+      fgTimeShapePASA[io] = new TF1F(Form("TimeShapePASA%s",Names[io]),
+				     StTpcRSMaker::shapeEIPASA,timeBinMin*mTimeBinWidth,timeBinMax*mTimeBinWidth,5);
+      fgTimeShapePASA[io]->SetParNames("t0","tau","width","Integral","io");
+      paramsPASA[3] = St_TpcResponseSimulatorC::instance()->tauPASA();
+      fgTimeShapePASA[io]->SetParameters(paramsPASA);
+      paramsPASA[3] = fgTimeShapePASA[io]->Integral(0,timeBinMax*mTimeBinWidth);
+      fgTimeShapePASA[io]->SetTitle(fgTimeShapePASA[io]->GetName());
+      fgTimeShapePASA[io]->GetXaxis()->SetTitle("time (secs)");
+      fgTimeShapePASA[io]->GetYaxis()->SetTitle("signal"); 
     }
     
     for (Int_t sector = 1; sector <= NoOfSectors; sector++) {
@@ -369,13 +400,11 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
 	mPadResponseFunction[io][sector-1]->GetYaxis()->SetTitle("Signal");
 	// Cut tails
 	Double_t x = 2.5;//cm   xmaxP;
-#if 0
 	Double_t ymax = mPadResponseFunction[io][sector-1]->Eval(0);
 	for (; x > 1.5; x -= 0.05) {
 	  Double_t r = mPadResponseFunction[io][sector-1]->Eval(x)/ymax;
 	  if (r > 1e-2) break;
 	}
-#endif
 	mPadResponseFunction[io][sector-1]->SetRange(-x,x);
 	mPadResponseFunction[io][sector-1]->Save(xminP,xmaxP,0,0,0,0);
       }
@@ -419,14 +448,15 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
       // Valeri Cherniatin (cherniat@bnlarm.bnl.gov) recomends m=1.38
       // Trs uses x**1.5/exp(x)
       // tss used x**0.5/exp(1.5*x)
-      if (St_tpcAltroParamsC::instance()->N(sector-1) < 0) {// old TPC
-	// check if the function has been created
-	for (Int_t sec = 1; sec < sector; sec++) {	 
-	  if (St_tpcAltroParamsC::instance()->N(sec-1) < 0 && mShaperResponses[io][sec-1]) {
-	    mShaperResponses[io][sector-1] = mShaperResponses[io][sec-1];
-	    break;
-	  }
+      // check if the function has been created
+      for (Int_t sec = 1; sec < sector; sec++) {	 
+	if (St_tpcAltroParamsC::instance()->N(sec-1) == St_tpcAltroParamsC::instance()->N(sector-1) && 
+	    mShaperResponses[io][sec-1]) {
+	  mShaperResponses[io][sector-1] = mShaperResponses[io][sec-1];
+	  break;
 	}
+      }
+      if (St_tpcAltroParamsC::instance()->N(sector-1) < 0 || ! fgTimeShape0[io]) {// old TPC
 	if (! mShaperResponses[io][sector-1]) {
 	  mShaperResponses[io][sector-1] = new TF1F(Form("ShaperFunc_%s_S%02i",Names[io],sector), 
 						    StTpcRSMaker::shapeEI3_I,timeBinMin,timeBinMax,7);  
@@ -437,28 +467,33 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
 	  mShaperResponses[io][sector-1]->GetYaxis()->SetTitle("signal");
 	  // Cut tails
 	  Double_t t = timeBinMax;
+#if 1
 	  Double_t ymax = mShaperResponses[io][sector-1]->Eval(0.5);
 	  for (; t > 5; t -= 1) {
 	    Double_t r = mShaperResponses[io][sector-1]->Eval(t)/ymax;
-	    if (r > 1e-2) break;
+	    if (TMath::Abs(r) > 1e-3) break;
 	  }
 	  mShaperResponses[io][sector-1]->SetRange(timeBinMin,t);
+#endif
 	  mShaperResponses[io][sector-1]->Save(timeBinMin,t,0,0,0,0);
 	}
 	continue;
       } 
       //Altro 
-      for (Int_t sec = 1; sec < sector; sec++) {
-	if (St_tpcAltroParamsC::instance()->N(sec-1) >= 0 && mShaperResponses[io][sec-1] ) {
-	  mShaperResponses[io][sector-1] = mShaperResponses[io][sec-1];
-	  break;
+      if (! mShaperResponses[io][sector-1] && fgTimeShape0[io]) {
+	if ( St_TpcResponseSimulatorC::instance()->tauPASA() <= 0 && ! fgTimeShapePASA4) {
+	  mShaperResponses[io][sector-1] = new TF1F(Form("ShaperFunc_%s_S%02i",Names[io],sector),
+						    StTpcRSMaker::shapeEI_I,timeBinMin,timeBinMax,5);  
+	  mShaperResponses[io][sector-1]->SetParameters(params0);
+	  mShaperResponses[io][sector-1]->SetParNames("t0","tauI", "width","norm","io");
+	} else if (fgTimeShapePASA4) { // PASA4
+	  mShaperResponses[io][sector-1] = fgTimeShapePASA4;
+	} else if ( St_TpcResponseSimulatorC::instance()->tauPASA() > 0) { // PASA
+	  mShaperResponses[io][sector-1] = new TF1F(Form("ShaperFunc_%s_S%02i",Names[io],sector), 
+						    StTpcRSMaker::shapeEIPASA_I,timeBinMin,timeBinMax,7);  
+	  mShaperResponses[io][sector-1]->SetParameters(params0);
+	  mShaperResponses[io][sector-1]->SetParNames("t0","tauI", "width","norm","io");
 	}
-      }
-      if (! mShaperResponses[io][sector-1]) {
-	mShaperResponses[io][sector-1] = new TF1F(Form("ShaperFunc_%s_S%02i",Names[io],sector),
-						  StTpcRSMaker::shapeEI_I,timeBinMin,timeBinMax,5);  
-	mShaperResponses[io][sector-1]->SetParameters(params0);
-	mShaperResponses[io][sector-1]->SetParNames("t0","tauI", "width","norm","io");
 	mShaperResponses[io][sector-1]->SetTitle(mShaperResponses[io][sector-1]->GetName());
 	mShaperResponses[io][sector-1]->GetXaxis()->SetTitle("time (buckets)");
 	mShaperResponses[io][sector-1]->GetYaxis()->SetTitle("signal");
@@ -581,12 +616,9 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
   }
   delete [] pbins;
   delete [] pbinsL;
-#ifdef __DEBUG__
-  dXonWireI = new TH2F("dXOnWireI","dX on Wire versus Z (Inner)",220,-10.0,210, 200, -0.1, 0.1);
-  dZonWireI = new TH2F("dZOnWireI","dZ on Wire versus Z (Inner)",220,-10.0,210, 200, -1.0, 0.0);
-  dXonWireO = new TH2F("dXOnWireO","dX on Wire versus Z (Outer)",220,-10.0,210, 200, -0.1, 0.1);
-  dZonWireO = new TH2F("dZOnWireO","dZ on Wire versus Z (Outer)",220,-10.0,210, 200, -1.0, 0.0);
-#endif
+  if (IAttr("ELECTRONS_TUPLE")) {
+    fgTuple = new TNtuple("ELW","Electrons on Wire","sector:wire:xW:zW:Gain:dX:dZ:prob");
+  }
   return kStOK;
 }
 //________________________________________________________________________________
@@ -820,9 +852,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	}
       }
       sortedIndex = sIndex-1; // Irakli 05/06/19, reduce extra step in for loop
-#ifdef __OLD__
-      memset (rowsdE, 0, sizeof(rowsdE));
-#endif /* __OLD__ */
       for (Int_t iSegHits = 0; iSegHits < nSegHits; iSegHits++) { // Segments loop
 	StTpcRSSegment &TrackSegmentHits = *(StTpcRSSegment *) fTrackSegmentHits.ConstructedAt(iSegHits);
 	g2t_tpc_hit_st *tpc_hitC = TrackSegmentHits.tpc_hitC;
@@ -1189,45 +1218,17 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Int_t WireIndex = 0;
 	Double_t yOnWire = 0;
 	Int_t io = 0;
-	Double_t dXScreening = 0;
-	Double_t dZScreening = 0;
 	if (iwire < numberOfInnerSectorAnodeWires) {
 	  WireIndex = iwire + 1;
 	  yOnWire   = anodeWirePitch*(WireIndex - 1) + firstInnerSectorAnodeWire;
-	  dXScreening = St_TpcResponseSimulatorC::instance()->dXScreeningI();
-	  dZScreening = St_TpcResponseSimulatorC::instance()->dZScreeningI();
 	} else {
 	  io = 1;
 	  WireIndex = iwire + 1 - numberOfInnerSectorAnodeWires;
 	  yOnWire   = anodeWirePitch*(WireIndex - 1) + firstOuterSectorAnodeWire;
-	  dXScreening = St_TpcResponseSimulatorC::instance()->dXScreeningO();
-	  dZScreening = St_TpcResponseSimulatorC::instance()->dZScreeningO();
 	}
-	// Account screening 
-	for (Int_t ie = 0; ie < noElectrons; ie++) {
-	  if (Wires[iwire].Electrons[ie].Gain <= 0) continue;
-	  Double_t xOnWire =  Wires[iwire].Electrons[ie].xW;
-	  Double_t zOnWire =  Wires[iwire].Electrons[ie].zW;
-	  for (Int_t i1 = 0; i1 < ie; i1++) {
-	    if (Wires[iwire].Electrons[i1].Gain <= 0) continue;
-	    Double_t x1OnWire =  Wires[iwire].Electrons[i1].xW;
-	    Double_t z1OnWire =  Wires[iwire].Electrons[i1].zW;
-	    Double_t dX = x1OnWire - xOnWire;
-	    Double_t dZ = z1OnWire - zOnWire;
-#ifdef __DEBUG__
-	    if (iwire < numberOfInnerSectorAnodeWires) {
-	      dXonWireI->Fill(zOnWire, dX);
-	      dZonWireI->Fill(zOnWire, dZ);
-	    } else {
-	      dXonWireO->Fill(zOnWire, dX);
-	      dZonWireO->Fill(zOnWire, dZ);
-	    }
-#endif
-	    if (TMath::Abs(dX) < dXScreening && TMath::Abs(dZ) < dZScreening) {
-	      Wires[iwire].Electrons[ie].Gain *= -1;
-	    }
-	  }
-	}
+	Double_t recomb   = St_TpcResponseSimulatorC::instance()->Recombination()[io];
+	Double_t sigma_xW = St_TpcResponseSimulatorC::instance()->Sigma_xW()[io];
+	Double_t slope_zW = St_TpcResponseSimulatorC::instance()->Slope_zW()[io];
 	Int_t    row   = transform.rowFromLocalY(yOnWire,sector);
 	Double_t dY    = mChargeFraction[io][sector-1]->GetXmax();
 	Double_t yLmin = yOnWire - dY;
@@ -1236,10 +1237,33 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Int_t    rowMax  = transform.rowFromLocalY(yLmax,sector);
 	for (Int_t ie = 0; ie < noElectrons; ie++) {
 	  Float_t Gain = Wires[iwire].Electrons[ie].Gain;
-	  if (Gain <= 0.0) continue;
 	  Double_t xOnWire =  Wires[iwire].Electrons[ie].xW;
 	  Double_t zOnWire =  Wires[iwire].Electrons[ie].zW;
 	  StTpcLocalSectorCoordinate xyzW(xOnWire, yOnWire, zOnWire, sector, row);
+	  if (recomb > 0.0) {
+	    Double_t dX = 0;
+	    Double_t dZ = 0;
+	    Double_t prob = 0;
+	    // Kill electron due to "recombination" with ions	  
+	    for (Int_t ie1 = 0; ie1 < ie; ie1++) {
+	      if (Wires[iwire].Electrons[ie1].Gain  < 0) continue;
+	      dZ = zOnWire - Wires[iwire].Electrons[ie1].zW;
+	      if (dZ > 7*slope_zW) continue;
+	      dX = xOnWire - Wires[iwire].Electrons[ie1].xW;
+	      prob = recomb*Wires[iwire].Electrons[ie1].Gain*Wires[iwire].Electrons[ie1].Gain*
+		TMath::Gaus(dX, 0, sigma_xW, kTRUE)*TMath::Exp(-dZ/slope_zW);
+	      if (gRandom->Rndm() < prob) {
+		Wires[iwire].Electrons[ie].Gain = Gain = -1;
+		break;
+	      }
+	    } 
+	    if (fgTuple) {
+	      Float_t array[8] = {(Float_t) sector,(Float_t) iwire,(Float_t) xOnWire,(Float_t) zOnWire,(Float_t) Gain,
+				  (Float_t) dX, (Float_t) dZ, (Float_t) prob};
+	      fgTuple->Fill(array);
+	    }
+	  }
+	  if (Wires[iwire].Electrons[ie].Gain < 0) continue;
 	  Wires[iwire].Electrons[ie].trackSeg->GenerateSignal(xyzW,rowMin, rowMax,Gain);
 	}
       }
@@ -1329,6 +1353,7 @@ Double_t StTpcRSMaker::GetNoPrimaryClusters(Double_t betaGamma, Int_t charge) {
   }
   return Q_eff*Q_eff*dNdx;
 }
+#ifdef __OLD__
 //________________________________________________________________________________
 Double_t StTpcRSMaker::ShaperFunc(Double_t *x, Double_t *par) {
   Double_t tau = par[0];
@@ -1341,6 +1366,7 @@ Double_t StTpcRSMaker::ShaperFunc(Double_t *x, Double_t *par) {
   Double_t val = TMath::Gamma(p,t2) - TMath::Gamma(p,t1);
   return val;
 }
+#endif
 //________________________________________________________________________________
 Double_t StTpcRSMaker::PadResponseFunc(Double_t *x, Double_t *par) {
   Double_t CrossTalk = 0;
@@ -1516,6 +1542,61 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
       }
       if (! NoTB) continue;
       if (St_tpcAltroParamsC::instance()->N(secX) >= 0 && ! mAltro[secX]) {
+#ifdef __AliTPCAltroEmulator__
+  AliTPCAltroEmulator *a1 = new AliTPCAltroEmulator();
+
+  a1->ConfigBaselineCorrection1(4, baseline, 0, 0);
+  a1->ConfigZerosuppression(3,2,0,0);
+	  
+  // modes
+
+  // 0: MAF off / TCF off - ONLY ZS
+
+  // 1: MAF on / TCF off
+  // 2: MAF on / TCF on - params from Rehak (baseline)
+  // 3: MAF on / TCF on - params from Rehak (baseline & pulse shortening)
+  // 4: MAF on / TCF on - params from Rehak (baseline, used in P2)
+  // 5: MAF on - presample 1, postsample 1
+  // 6: MAF on - presample 1, postsample 3
+  // 7: MAF on - presample 1, postsample 5
+   
+  if (mode ==0) { // do nothing, just ZS
+ 
+    a1->ConfigAltro(1,0,0,1,1,0); 
+
+  } else if (mode==1) {  // MAF
+
+    a1->ConfigBaselineCorrection2(3,3,0,0,0);
+    a1->ConfigAltro(1,0,1,1,1,0);
+    
+  } else if (mode==2 || mode ==3 || mode==4) { // MAF and different TCF  
+
+    a1->ConfigTailCancellationFilterForRAWfiles(K0,K1,K2,L0,L1,L2);
+    a1->ConfigBaselineCorrection2(3,3,0,0,0);
+    a1->ConfigAltro(1,1,1,1,1,0); 
+
+  } else if (mode == 5) { // different MAF
+    
+    a1->ConfigBaselineCorrection2(3,3,0,1,1);  // 1 presample, 1 postsamples
+    a1->ConfigAltro(1,0,1,1,1,0);
+
+  } else if (mode == 6) { // different MAF
+    
+    a1->ConfigBaselineCorrection2(3,3,0,1,3);  // 1 presample, 3 postsamples
+    a1->ConfigAltro(1,0,1,1,1,0);
+    
+  } else if (mode == 7) { // different MAF
+    
+    a1->ConfigBaselineCorrection2(3,3,0,1,5);  // 1 presample, 5 postsamples
+    a1->ConfigAltro(1,0,1,1,1,0);
+
+  } 
+
+
+  a1->SetOutputRootFileName(outputRootFileName);
+  a1->RunEmulationOnRAWdata(reader);
+#endif /* __AliTPCAltroEmulator__ */
+
 	mAltro[secX] = new Altro(__MaxNumberOfTimeBins__,ADCs);
 	if (St_tpcAltroParamsC::instance()->N(secX) > 0) {// Tonko 06/25/08
 	  //            ConfigAltro(ONBaselineCorrection1, ONTailcancellation, ONBaselineCorrection2, ONClipping, ONZerosuppression)
@@ -1757,7 +1838,7 @@ Double_t StTpcRSMaker::shapeEI_I(Double_t *x, Double_t *par) { //Integral of sha
   Double_t t1 = TimeBinWidth*(x[0] - 0.5);
   Double_t t2 = t1 + TimeBinWidth;
   Int_t io = (Int_t) par[4];
-  assert(io >= 0 && io <= 1);
+  assert(io >= 0 && io <= 1 && fgTimeShape0[io]);
   return sqrt2*fgTimeShape0[io]->Integral(t1,t2)/norm;
 }
 //________________________________________________________________________________
@@ -1770,6 +1851,35 @@ Double_t StTpcRSMaker::shapeEI3_I(Double_t *x, Double_t *par) { //Integral of sh
   Int_t io = (Int_t) par[6];
   assert(io >= 0 && io <= 1);
   return sqrt2*fgTimeShape3[io]->Integral(t1,t2)/norm;
+}
+//________________________________________________________________________________
+Double_t StTpcRSMaker::shapeEIPASA(Double_t *x, Double_t *par) {// does not work. It is needed to 1/s
+  Double_t t  = x[0];
+  Double_t value = 0;
+  if (t <= 0) return value;
+  Double_t t0    = par[0];
+  Double_t tau = par[1]; // shaper time
+  return TMath::Max(0.,(t + t0)/tau*fei(t,t0,tau) + TMath::Exp(-t/tau) - 1);
+}
+//________________________________________________________________________________
+Double_t StTpcRSMaker::shapeEIPASA_I(Double_t *x, Double_t *par) { //Integral of shape over time bin
+  static Double_t sqrt2 = TMath::Sqrt(2.);
+  Double_t TimeBinWidth = par[2];
+  Double_t norm = par[3];
+  Double_t t1 = TimeBinWidth*(x[0] - 0.5);
+  Double_t t2 = t1 + TimeBinWidth;
+  Int_t io = (Int_t) par[4];
+  assert(io >= 0 && io <= 1 && fgTimeShapePASA[io]);
+  return sqrt2*fgTimeShapePASA[io]->Integral(t1,t2)/norm;
+}
+//________________________________________________________________________________
+Double_t StTpcRSMaker::shapeEIPASA4_I(Double_t *x, Double_t *par) { //Integral of shape over time bin
+  static Double_t pole = 5;
+  Double_t tau = par[0];
+  Double_t TimeBinWidth = par[1];
+  Double_t t1 = TimeBinWidth*(x[0] - 0.5);
+  Double_t t2 = t1 + TimeBinWidth;
+  return TMath::Gamma(pole,t2/tau) - TMath::Gamma(pole,t1/tau);
 }
 //________________________________________________________________________________
 SignalSum_t  *StTpcRSMaker::GetSignalSum(Int_t sector) {
@@ -2019,16 +2129,16 @@ void StTpcRSSegment::Set(g2t_tpc_hit_st *tpc_hit, g2t_vertex_st *gver, Int_t mod
 void StTpcRSSegment::GenerateSignal(StTpcLocalSectorCoordinate &xyzW, Int_t rowMin, Int_t rowMax, Float_t Gain) {
   static StTpcCoordinateTransform transform(gStTpcDb);
   Int_t sector = xyzW.fromSector();
+  //  Int_t isDet = tpc_hitC->volume_id/100000;
+  Int_t padrow = xyzW.fromRow();
   UInt_t MASK =St_tpcRDOMasksC::instance()-> getSectorMask(sector);
   Bool_t CheckMask = kTRUE;
-  Double_t rowsdEH[StTpcRSMaker::kRowMax] = {0};
   if (St_tpcPadConfigC::instance()->iTPC(sector)) {
     if (MASK == 255) CheckMask = kFALSE;
   } else { 
     if (MASK == 63 ) CheckMask = kFALSE;
   }
   SignalSum_t *SignalSum = StTpcRSMaker::GetSignalSum(sector);
-  Double_t TotalSignalInCluster = 0;
   for(Int_t row = rowMin; row <= rowMax; row++) {              
     if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))  continue;
     Int_t io = (row <= St_tpcPadConfigC::instance()->numberOfInnerRows(sector)) ? 0 : 1;
@@ -2063,7 +2173,7 @@ void StTpcRSSegment::GenerateSignal(StTpcLocalSectorCoordinate &xyzW, Int_t rowM
     Int_t Npads = TMath::Min(padMax-padMin+1, StTpcRSMaker::kPadMax);
     Double_t xPadMin = padMin - padX;
     static Double_t XDirectionCouplings[StTpcRSMaker::kPadMax];
-    static Double_t TimeCouplings[StTpcRSMaker::kTimeBacketMax];
+    static Double_t TimeCouplings[StTpcRSMaker::kTimeBucketMax];
     StTpcRSMaker::GetPadResponseFunction(io,sector)->GetSaveL(Npads,xPadMin,XDirectionCouplings);
     //	      Double_t xPad = padMin - padX;
     for(Int_t pad = padMin; pad <= padMax; pad++) {
@@ -2097,23 +2207,28 @@ void StTpcRSSegment::GenerateSignal(StTpcLocalSectorCoordinate &xyzW, Int_t rowM
       if(XYcoupling < minSignal)  continue;
       Int_t bin_low  = TMath::Max(0             ,binT + TMath::Nint(dt+StTpcRSMaker::GetShaperResponse()->GetXmin()-0.5));
       Int_t bin_high = TMath::Min(NoOfTimeBins-1,binT + TMath::Nint(dt+StTpcRSMaker::GetShaperResponse()->GetXmax()+0.5));
-      Int_t Ntbks = TMath::Min(bin_high-bin_low+1, StTpcRSMaker::kTimeBacketMax);
+      Int_t Ntbks = TMath::Min(bin_high-bin_low+1, StTpcRSMaker::kTimeBucketMax);
       Double_t tt = -dt + (bin_low - binT);
       StTpcRSMaker::GetShaperResponse()->GetSaveL(Ntbks,tt,TimeCouplings);
       Int_t index       = NoOfTimeBins*((row-1)*NoOfPads+pad-1)+bin_low;
       Int_t indexOnWire = NoOfTimeBins*(                 pad-1)+bin_low;
       for(Int_t itbin=bin_low;itbin<=bin_high;itbin++, index++, indexOnWire++){
 	Double_t signal = XYcoupling*TimeCouplings[itbin-bin_low];
+#if 0
 	if (signal < minSignal)  continue;
+#endif
 #ifdef __DEBUG__
 	static Int_t iBreak = 0;
 	if (TMath::IsNaN(signal) || TMath::IsNaN(SignalSum[index].Sum)) {
 	  iBreak++;
 	}
 #endif
-	TotalSignalInCluster += signal;
+	tpc_hitC->adc += signal;
+	Int_t m = row - padrow + 1;
+	if (m >= 0 && m <= 2) {
+	  tpc_hitC->adcs[m] += signal;
+	}
 	SignalSum[index].Sum += signal;
-	rowsdEH[row-1]    += signal;
 	if ( TrackId ) {
 	  if (! SignalSum[index].TrackId ) {
 	    SignalSum[index].TrackId = TrackId;
@@ -2129,9 +2244,6 @@ void StTpcRSSegment::GenerateSignal(StTpcLocalSectorCoordinate &xyzW, Int_t rowM
 		   << SignalSum[index].Adc << " /\t" << SignalSum[index].TrackId 
 		   << "\tsignal = " << signal 
 		   << "\trow Min/Max = " << rowMin << "/" << rowMax;
-	  for (Int_t r = rowMin; r <= rowMax; r++) {
-	    LOG_INFO << " [" << r << "] = " << rowsdEH[r-1];
-	  }
 	  LOG_INFO << endm;
 	  if (! TMath::Finite(SignalSum[index].Sum)) {
 	    LOG_INFO << "Not Finite" << endm;
@@ -2141,20 +2253,7 @@ void StTpcRSSegment::GenerateSignal(StTpcLocalSectorCoordinate &xyzW, Int_t rowM
       } // time 
     } // pad limits
   } // row limits
-  tpc_hitC->adc += TotalSignalInCluster;
-  Int_t isDet = tpc_hitC->volume_id/100000;
-  Int_t row = xyzW.fromRow();
-  if (isDet == 1) {
-    tpc_hitC->adcs[2] += rowsdEH[row-1];
-  } else if (isDet == 2) {
-    tpc_hitC->adcs[0] += rowsdEH[row-1];
-  } else {
-    for (Int_t m = 0; m < 3; m++) {
-      Int_t j = row - 1 + m - 1;
-      tpc_hitC->adcs[m] += rowsdEH[j];
-    }
-  }
- }
+}
 //________________________________________________________________________________
 void StTpcRSSegment::Print(const Char_t *opt ) const {
   LOG_INFO << "Seg[" << Form("%5i",indx) << "]\tId " << TrackId << "\ts = " << s 
