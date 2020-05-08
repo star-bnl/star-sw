@@ -1362,8 +1362,9 @@ Int_t StAssociationMaker::Make()
     vector<trackPing, allocator<trackPing> > candidates(20, initializedTrackPing);
 #endif
     vector<const StMcTrack*> pingedMcTracks(16, 0);
+#ifdef __GENE__
     unsigned int nPingedMcTracks = 0;
-
+#endif /* __GENE__ */
     trkNode = rcTrackNodes[trkNodeI]; // For a by-pointer collection we need to dereference once
     if (!mEstTracksOn)
       rcTrack = dynamic_cast<const StGlobalTrack*>(trkNode->track(global));
@@ -1396,7 +1397,9 @@ static int mykount=0; mykount++;
 	rcKeyTpcHit = dynamic_cast<StTpcHit*>(rcHit);
 	
 	if (!rcKeyTpcHit) continue;
+#ifdef __GENE__
         nPingedMcTracks = 0;
+#endif /* __GENE__ */
 	boundsTpc = mRcTpcHitMap->equal_range(rcKeyTpcHit);
 	
 	for (tpcHMIter=boundsTpc.first; tpcHMIter!=boundsTpc.second; ++tpcHMIter) {
@@ -1404,7 +1407,7 @@ static int mykount=0; mykount++;
 	  mcValueTpcHit = (*tpcHMIter).second;
 	  if (! mcValueTpcHit) continue; // I added 0 for unmatched RcTpcHit
 	  trackCand = mcValueTpcHit->parentTrack();
-
+#ifdef __GENE__
           // Skip any candidate Monte Carlo Tracks we already counted for this reconstructed hit
           // This can happen for Monte Carlo loopers that have multiple hits on the same pad row
           bool countedMcTrack = false;
@@ -1418,7 +1421,7 @@ static int mykount=0; mykount++;
           if (nPingedMcTracks>=pingedMcTracks.size()) pingedMcTracks.resize(nPingedMcTracks+16,0);
           pingedMcTracks[nPingedMcTracks] = trackCand;
           nPingedMcTracks++;
-	  
+#endif /* __GENE__ */	  
 	  // At this point we have a candidate Monte Carlo Track
 	  // If there are no candidates, create the first candidate.
 	  // If already there, increment its nPings.
@@ -1469,14 +1472,16 @@ static int mykount=0; mykount++;
 	rcKeySvtHit = dynamic_cast<StSvtHit*>(rcHit);
 	
 	if (!rcKeySvtHit) continue;
+#ifdef __GENE__
         nPingedMcTracks = 0;
+#endif /* __GENE__ */
 	boundsSvt = mRcSvtHitMap->equal_range(rcKeySvtHit);
 	
 	for (svtHMIter=boundsSvt.first; svtHMIter!=boundsSvt.second; ++svtHMIter) {
 	  
 	  mcValueSvtHit = (*svtHMIter).second;
 	  trackCand = mcValueSvtHit->parentTrack();
-
+#ifdef __GENE__
           // Skip any candidate Monte Carlo Tracks we already counted for this reconstructed hit
           // This can happen for Monte Carlo loopers that have multiple hits on the same pad row
           bool countedMcTrack = false;
@@ -1490,7 +1495,7 @@ static int mykount=0; mykount++;
           if (nPingedMcTracks>=pingedMcTracks.size()) pingedMcTracks.resize(nPingedMcTracks+16,0);
           pingedMcTracks[nPingedMcTracks] = trackCand;
           nPingedMcTracks++;
-	  
+#endif /* __GENE__ */	  
 	  // At this point we have a candidate Monte Carlo Track
 	  // If there are no candidates, create the first candidate.
 	  // If already there, increment its nPings.
@@ -1541,14 +1546,16 @@ static int mykount=0; mykount++;
 	rcKeySsdHit = dynamic_cast<StSsdHit*>(rcHit);
 	
 	if (!rcKeySsdHit) continue;
+#ifdef __GENE__
         nPingedMcTracks = 0;
+#endif /* __GENE__ */
 	boundsSsd = mRcSsdHitMap->equal_range(rcKeySsdHit);
 	
 	for (ssdHMIter=boundsSsd.first; ssdHMIter!=boundsSsd.second; ++ssdHMIter) {
 	  
 	  mcValueSsdHit = (*ssdHMIter).second;
 	  trackCand = mcValueSsdHit->parentTrack();
-
+#ifdef __GENE__
           // Skip any candidate Monte Carlo Tracks we already counted for this reconstructed hit
           // This can happen for Monte Carlo loopers that have multiple hits on the same pad row
           bool countedMcTrack = false;
@@ -1562,7 +1569,7 @@ static int mykount=0; mykount++;
           if (nPingedMcTracks>=pingedMcTracks.size()) pingedMcTracks.resize(nPingedMcTracks+16,0);
           pingedMcTracks[nPingedMcTracks] = trackCand;
           nPingedMcTracks++;
-	  
+#endif /* __GENE__ */	  
 	  // At this point we have a candidate Monte Carlo Track
 	  // If there are no candidates, create the first candidate.
 	  // If already there, increment its nPings.
@@ -1618,14 +1625,16 @@ static int mykount=0; mykount++;
 	rcKeyFtpcHit = dynamic_cast<StFtpcHit*>(rcHit);
 	
 	if (!rcKeyFtpcHit) continue;
+#ifdef __GENE__
         nPingedMcTracks = 0;
+#endif /* __GENE__ */
 	boundsFtpc = mRcFtpcHitMap->equal_range(rcKeyFtpcHit);
 	
 	for (ftpcHMIter=boundsFtpc.first; ftpcHMIter!=boundsFtpc.second; ++ftpcHMIter) {
 	  
 	  mcValueFtpcHit = (*ftpcHMIter).second;
 	  trackCand = mcValueFtpcHit->parentTrack();
-
+#ifdef __GENE__
           // Skip any candidate Monte Carlo Tracks we already counted for this reconstructed hit
           // This can happen for Monte Carlo loopers that have multiple hits on the same pad row
           bool countedMcTrack = false;
@@ -1639,7 +1648,7 @@ static int mykount=0; mykount++;
           if (nPingedMcTracks>=pingedMcTracks.size()) pingedMcTracks.resize(nPingedMcTracks+16,0);
           pingedMcTracks[nPingedMcTracks] = trackCand;
           nPingedMcTracks++;
-	  
+#endif /* __GENE__ */	  
 	  // At this point we have a candidate Monte Carlo Track
 	  // If there are no candidates, create the first candidate.
 	  // If already there, increment its nPings.
@@ -1685,14 +1694,16 @@ static int mykount=0; mykount++;
 	rcKeyFtpcHit = dynamic_cast<StFtpcHit*>(rcHit);
 	
 	if (!rcKeyFtpcHit) continue;
+#ifdef __GENE__
         nPingedMcTracks = 0;
+#endif /* __GENE__ */
 	boundsFtpc = mRcFtpcHitMap->equal_range(rcKeyFtpcHit);
 	
 	for (ftpcHMIter=boundsFtpc.first; ftpcHMIter!=boundsFtpc.second; ++ftpcHMIter) {
 	  
 	  mcValueFtpcHit = (*ftpcHMIter).second;
 	  trackCand = mcValueFtpcHit->parentTrack();
-
+#ifdef __GENE__
           // Skip any candidate Monte Carlo Tracks we already counted for this reconstructed hit
           // This can happen for Monte Carlo loopers that have multiple hits on the same pad row
           bool countedMcTrack = false;
@@ -1706,7 +1717,7 @@ static int mykount=0; mykount++;
           if (nPingedMcTracks>=pingedMcTracks.size()) pingedMcTracks.resize(nPingedMcTracks+16,0);
           pingedMcTracks[nPingedMcTracks] = trackCand;
           nPingedMcTracks++;
-	  
+#endif /* __GENE__ */	  
 	  // At this point we have a candidate Monte Carlo Track
 	  // If there are no candidates, create the first candidate.
 	  // If already there, increment its nPings.
