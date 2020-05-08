@@ -120,6 +120,8 @@ public:
 		      Int_t IDTs[__MaxNumberOfTimeBins__]); // with  8 => 10 conversion
     Int_t  getTimeAdc(Int_t row, Int_t pad, UChar_t  ADCs[__MaxNumberOfTimeBins__], 
 		      Int_t IDTs[__MaxNumberOfTimeBins__]);
+    Int_t  putTimeAdc(Int_t row, Int_t pad, Short_t *ADCs, UShort_t *IDTs);     // with 10 =>  8 conversion
+    Int_t  putTimeAdc(Int_t row, Int_t pad, UChar_t  *ADCs, UShort_t *IDTs);
     Int_t  putTimeAdc(Int_t row, Int_t pad, Short_t *ADCs, Int_t *IDTs = 0);     // with 10 =>  8 conversion
     Int_t  putTimeAdc(Int_t row, Int_t pad, UChar_t  *ADCs, Int_t *IDTs = 0);
     void   setSector(Int_t sector) {mSector = sector;} 

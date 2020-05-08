@@ -170,6 +170,7 @@ void StTriggerData::decodeQT(unsigned int ndata, unsigned int* data, unsigned sh
         if (header==1){
             crate =  (d & 0xff000000) >> 24;
             addr  = ((d & 0x00ff0000) >> 16) - 0x10;
+	    if (addr > 15) {printf("QT dataaddr %d is too long\n",addr); return;}
             nline =  (d & 0x000000ff);
             oldch = -1;
             if(nline>0) header=0;
