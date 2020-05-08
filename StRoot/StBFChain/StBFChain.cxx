@@ -1168,6 +1168,7 @@ Int_t StBFChain::Finish()
 {
   if (!fBFC) return kStOK;
   Int_t ians = StChain::Finish();
+#if 0
   TFile *tf = GetTFile();
   if (tf) {
     if (tf->IsWritable()) {
@@ -1175,6 +1176,25 @@ Int_t StBFChain::Finish()
     }
     tf->Close(); delete tf; SetTFile(0);
   }
+#else
+  Error(__FUNCTION__," Closing all TFiles   . . . . ");
+   TSeqCollection   *files = gROOT->GetListOfFiles();
+   int count = 0;
+   if (files && files->GetSize() >0 ) {
+       TIter next(files);
+       while( TFile *f = (TFile *) next() ) { 
+	 if ( f-> IsWritable() ) {
+	   //	   Error(__FUNCTION__, "file %s will be closed", f->GetName());
+	   f->Write();
+	   f->Close(); ++count; 
+	   Error(__FUNCTION__, "file %s has been closed", f->GetName());
+	 }
+       }
+       //       files->Delete();
+   }
+   if (count) Error(__FUNCTION__, "%d files have been closed", count);
+   else Print(" There was no open file to close");
+#endif
   SafeDelete(fchainOpt);
   fBFC = 0;
 //  delete gMessMgr; gMessMgr = 0;
@@ -1878,7 +1898,9 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
   Please, change SetDbOptions()
 */
 void StBFChain::SetGeantOptions(StMaker *geantMk){
-  if (! geantMk || ! geantMk->InheritsFrom("St_geant_Maker")) return;
+  if (! geantMk || ! geantMk->InheritsFrom("St_geant_Maker")) {
+    return;
+  } 
   SetInput("geant",".make/geant/.data");
   TString GeomVersion("");
 #if 0
