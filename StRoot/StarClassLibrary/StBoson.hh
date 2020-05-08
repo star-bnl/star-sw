@@ -46,7 +46,6 @@ public:
 			       iConjugation, iIsospin, iIsospinZ, gParity,
 			       pType, lepton, baryon, encoding, stable,
 			       lifetime) {/* noop */};
-    virtual ~StBoson() {/* noop */};
     
 private:
     const StBoson & operator=(const StBoson& m) {return m;}
