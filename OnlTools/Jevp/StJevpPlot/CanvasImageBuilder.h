@@ -4,6 +4,15 @@
 // This is the program called by the server which produces canvases and 
 // places them in a queue for the ImageWriter thread
 //
+
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <dirent.h>
+#include <string.h>
+
 #include <TROOT.h>
 #include <TClass.h>
 #include "Jevp/StJevpServer/JevpServer.h"
@@ -16,41 +25,34 @@ class RunStatus;
 class CanvasImageBuilder {
 
  private:
+    char basedir[256];
     DisplayFile *displays;
     JevpServer *server;
     JevpPlotSet *plotset;
     ImageWriter *imageWriter;
 
     char *serverTags;
-  
+    int writeIdx;
+
  public:
 
     // One and only one of "server"/"plotset" should be set.
-    CanvasImageBuilder(DisplayFile *displays, JevpServer *server, JevpPlotSet *plotset, ImageWriter *imageWriter) {
-	LOG("JEFF", "Created image writer");
-	this->server = server;
-	this->plotset = plotset;
-	this->displays = displays;
-	this->imageWriter = imageWriter;
+    CanvasImageBuilder(char *basedir, DisplayFile *displays, JevpServer *server, JevpPlotSet *plotset, ImageWriter *imageWriter);
 
-	serverTags = (char *)"";
-    }
+    void setDisplays(DisplayFile *displays) { this->displays = displays; }
 
     // Very strange looking function!   But server and plotset are not
     // derived from same class, even though they do have this function in
     // common...
     JevpPlot *getPlotByName(char *name);  
 
-    //   writePDF(filename, 1) is the method to write all files...
-    //
-
     // Invoke as writeIndex(dir, fn);
-    int sendToImageWriter(char *directory, RunStatus *rs, int numberOfEvents, const char *serverTags, bool force=false);
+    int sendToImageWriter(RunStatus *rs, int numberOfEvents, const char *serverTags, bool force=false);
 
  private:
-    void writeIndex(char *directory, char *fn, int combo_index = 1);
-    int writeImages(char *directory);
-    int writeRunStatus(char *directory, RunStatus *rs, int numberOfEvents, const char *serverTags);
+    void writeIndex(int combo_index = 1);
+    int writeImages();
+    int writeRunStatus(RunStatus *rs, int numberOfEvents, const char *serverTags);
 
  private:
     void writeIndexFiles(FILE *f, DisplayNode *node, int page, int tabs);
@@ -59,23 +61,9 @@ class CanvasImageBuilder {
 
     int writeImageFile(char *dir, DisplayNode *node, double ymax=-999);
     // Does above recursively...
-    int writeImageFiles(char *dir, DisplayNode *node, int page);
-
-    /*
-    void writeAllFiles(char *directory);
-
-    void write(char *filename, int displayNumber, int ignoreServerTags = 1, char *serverTags = (char *)"");
+    int writeImageFiles(DisplayNode *node, int page);
 
  
-  
-    void writePdf(char *filename, int combo_index);
-
- private:
-    int writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page);
-    int writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page);  
-
-    void DrawCrossOfDeath(char *str);
-    */
 };
 
 

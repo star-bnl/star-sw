@@ -15,17 +15,20 @@ class JevpPlot;
 struct CanvasSlot {
     JevpPlot *plot;
     char name[256];
+    int writeIdx;
 };
 
 class ImageWriter {
     thrMsgQueue<CanvasSlot> *slotQ;
     int nHisto;
     int file_idx;
+    char basename[256];
+
  public:
     // mutex for any drawing functions...
     pthread_mutex_t mux;
 
-    ImageWriter(char *basedir);
+    ImageWriter(char *basename);
     void writeImage(char *fn, JevpPlot *plot, double ymax);
     void writeToImageWriter(CanvasSlot *slot);
     void loop();

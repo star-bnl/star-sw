@@ -371,7 +371,7 @@ void JevpServer::readSocket()
 		    }
 		    else {
 			int telapsed = time(NULL) - lastImageBuilderSendTime;
-			if(telapsed >= 10) {
+			if(telapsed >= 20) {
 			    sendNow = true;
 			}
 		    }
@@ -383,7 +383,7 @@ void JevpServer::readSocket()
 			displays->updateDisplayRoot();
 
 			CP;
-			int cnt = canvasImageBuilder->sendToImageWriter(imagewriterdir, &runStatus, eventsThisRun, serverTags, false);
+			int cnt = canvasImageBuilder->sendToImageWriter(&runStatus, eventsThisRun, serverTags, false);
 
 			// canvasImageBuilder->writeIndex(imagewriterdir, "idx.txt");
 			// CP;
@@ -560,7 +560,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    //log_output = RTS_LOG_STDERR;
 	    //maxevts = 1001;
 	    runCanvasImageBuilder = 1;
-	    imagewriterdir = (char *)"/tmp/jevptest";
+	    imagewriterdir = (char *)"jevptest";
 	    die = 1;
 	}
 	else if (strcmp(argv[i], "-updatedb")==0) {
@@ -580,7 +580,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    //pdfdir = NULL;
 	    refplotdir = (char *)"/a/jevp_test/refplots";
 	    rootfiledir = (char *)"/a/jevp_test/rootfiles";
-	    imagewriterdir = (char *)"/tmp/jevptest";
+	    imagewriterdir = (char *)"jevptest";
 
 	    myport = JEVP_PORT + 10;
 	    maxevts = 10000001;
@@ -750,8 +750,9 @@ int JevpServer::updateDisplayDefs()
     if(pdfFileBuilder) delete pdfFileBuilder;
     pdfFileBuilder = new PdfFileBuilder(displays, this, NULL);
 
-    if(canvasImageBuilder) delete canvasImageBuilder;
-    canvasImageBuilder = new CanvasImageBuilder(displays, this, NULL, imageWriter);
+    
+    if(canvasImageBuilder) canvasImageBuilder->setDisplays(displays);
+    canvasImageBuilder = new CanvasImageBuilder(imagewriterdir, displays, this, NULL, imageWriter);
 
     char *args[4];
     args[0] = (char *)"OnlTools/Jevp/archiveHistoDefs.pl";
@@ -772,6 +773,8 @@ int JevpServer::init(int port, int argc, char *argv[]) {
     ssocket = new TServerSocket(port,kTRUE,100);
     mon = new JTMonitor();
     mon->Add(ssocket);
+
+    canvasImageBuilder = new CanvasImageBuilder(imagewriterdir, NULL, this, NULL, imageWriter);
 
     updateDisplayDefs();
 
@@ -1660,7 +1663,7 @@ void JevpServer::writeRunPdf(int display, int run)
 
     if(runCanvasImageBuilder) {
 	LOG("JEFF", "status: %s", runStatus.status);
-	int cnt = canvasImageBuilder->sendToImageWriter(imagewriterdir, &runStatus, eventsThisRun, serverTags, true);
+	int cnt = canvasImageBuilder->sendToImageWriter(&runStatus, eventsThisRun, serverTags, true);
 
 	//canvasImageBuilder->writeIndex(imagewriterdir, "idx.txt");	
 	//canvasImageBuilder->writeRunStatus(imagewriterdir, &runStatus, eventsThisRun, serverTags);
