@@ -1,4 +1,4 @@
-// $Id: tpcBuilder.cxx,v 1.12 2020/02/02 20:04:39 videbaks Exp $
+// $Id: tpcBuilder.cxx,v 1.13 2020/05/08 18:45:03 evpops Exp $
 //
 #include <stdio.h>
 #include <stdlib.h>
@@ -1115,7 +1115,7 @@ void tpcBuilder::event(daqReader *rdr)
 
       drift_vel = contents.h_tpc_drift_vel->GetMean();
 
-      LOG("JEFF", "run=%d nlasers: %d curr_drift=%lf", run, nlasers, drift_vel);
+      //LOG("JEFF", "run=%d nlasers: %d curr_drift=%lf", run, nlasers, drift_vel);
       //if(nlasers == 50) {
       if(1) {    // inneficient!  write all of them :-)
 	FILE *f = fopen("/RTS/conf/handler/.l4_drift_velocity","w");

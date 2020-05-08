@@ -137,47 +137,8 @@ void ImageWriter::writeImage(char *fn, JevpPlot *plot, double ymax) {
     XX(nHisto);
 }
 
-ImageWriter::ImageWriter(char *basedir) {
-
-    // Figure out initial value for file_idx  (1+ largest filetest_done_%d idx)
-  
-    // get rid of /tmp/ from basedir
-    char *bs = basedir;
-    while(*bs != '\0') {
-	if(*bs == '/') {
-	    bs++;
-	    basedir = bs;
-	}
-	bs++;
-    }
-    LOG("JEFF", "basedir = %s", basedir);
-
-    file_idx = 0;
-    char testdir[256];
-    sprintf(testdir, "%s_done_", basedir);
-    
-    DIR *dp = opendir("/tmp");
-    struct dirent *entry;
-    if(dp == NULL) {
-	LOG("ERR", "No /tmp directory");
-    }
-    else {
-	while((entry = readdir(dp)) != NULL) {
-	    LOG("JEFF", "testdir=%s entry->d_name=%s", testdir, entry->d_name);
-
-	    if(memcmp(testdir,entry->d_name,strlen(testdir)) == 0) {
-		
-		int x = atoi(&entry->d_name[strlen(testdir)]);
-		LOG("JEFF", "got one: %s %d %s %d", entry->d_name, strlen(testdir), &entry->d_name[strlen(testdir)+1], x);
-		if(x > file_idx) file_idx = x;
-	    }
-	}
-	closedir(dp);
-    }
-    file_idx++;
-
-    LOG("JEFF", "starting file_idx = %d", file_idx);
-	    
+ImageWriter::ImageWriter(char *basename) {  
+    strcpy(this->basename, basename);
     slotQ = new thrMsgQueue<CanvasSlot>(MAX_IMAGEWRITER_CANVAS);
     pthread_mutex_init(&mux, NULL);
 }
@@ -194,14 +155,16 @@ void ImageWriter::loop() {
 	if(slot.plot == NULL) {
 	    if(nHisto > 0) {
 		LOG("JEFF", "Saved %d plots in %lf seconds", nHisto, imageClock.record_time());
-		
+	       
 		nHisto = 0;
 		char o[256];
 		char d[256];
 		strcpy(o, slot.name);
+		sprintf(o, "/tmp/%s_build_%08d", slot.name, slot.writeIdx);
+		sprintf(d, "/tmp/%s_done_%08d", slot.name, slot.writeIdx);
 
-		sprintf(d, "%s_done_%d", slot.name, file_idx);
-		file_idx++;
+		LOG("JEFF", "DONE: rename %s to %s", o, d);
+
 		rename(o, d);
 	    }
 	}

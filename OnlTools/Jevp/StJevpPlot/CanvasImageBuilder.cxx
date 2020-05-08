@@ -64,6 +64,53 @@ static void makedir(char *directory) {
     } while((tok = strtok(NULL, "/")));
 }
 
+CanvasImageBuilder::CanvasImageBuilder(char *basedir, DisplayFile *displays, JevpServer *server, JevpPlotSet *plotset, ImageWriter *imageWriter) {
+    LOG("JEFF", "Created CanvasImageBuilder");
+    this->server = server;
+    this->plotset = plotset;
+    this->displays = displays;
+    this->imageWriter = imageWriter;
+    strcpy(this->basedir, basedir);
+
+    serverTags = (char *)"";
+
+    // Find initial writeIdx
+    //
+    // The writeIdx indicates the number of calls to the sendToImageWriter()
+    // function.   The reason it is needed is that the control files are
+    // written from the builder, while the images are written by the
+    // imageWriter.  The files must be consitent between the two, and free
+    // race conditions, so we write into:
+    //    /tmp/{basedir}_build_{writeIdx} directory
+    // Then after complete, imageBuilder copies to
+    //    /tmp/{basedir}_done_{writeIdx} directory.
+
+    writeIdx = 0;
+    char testdir[256];
+    sprintf(testdir, "%s_done_", basedir);
+    
+    DIR *dp = opendir("/tmp");
+    struct dirent *entry;
+    if(dp == NULL) {
+	LOG("ERR", "No /tmp directory");
+    }
+    else {
+	while((entry = readdir(dp)) != NULL) {
+	    LOG("JEFF", "testdir=%s entry->d_name=%s", testdir, entry->d_name);
+
+	    if(memcmp(testdir,entry->d_name,strlen(testdir)) == 0) {
+		
+		int x = atoi(&entry->d_name[strlen(testdir)]);
+		LOG("JEFF", "got one: %s %d %s %d", entry->d_name, strlen(testdir), &entry->d_name[strlen(testdir)+1], x);
+		if(x > writeIdx) writeIdx = x;
+	    }
+	}
+	closedir(dp);
+    }
+    writeIdx++;
+
+    LOG("JEFF", "Created CanvasImageBuilder: writeIdx=%d", writeIdx);
+}
 
 JevpPlot *CanvasImageBuilder::getPlotByName(char *name) {
   if(server) {
@@ -124,16 +171,16 @@ int CanvasImageBuilder::writeIndexFromNode(FILE *f, DisplayNode *node, char *cur
     }
 }
 
-// Invoke as writeIndex(dir, fn);
+// Invoke as writeIndex();
 // 
-void CanvasImageBuilder::writeIndex(char *basedir, char *fn, int combo_index) {
+void CanvasImageBuilder::writeIndex(int combo_index) {
     //LOG("JEFF", "Write index: starting combo_index = %d %p", combo_index, displays);
+    char fullbasedir[256];
+    sprintf(fullbasedir, "/tmp/%s_build_%08d", basedir, writeIdx);
 
-    makedir(basedir);
+    makedir(fullbasedir);
     char fullfile[256];
-    strcpy(fullfile, basedir);
-    strcat(fullfile, "/");
-    strcat(fullfile, fn);
+    sprintf(fullfile, "%s/idx.txt", fullbasedir);
     
     FILE *f = fopen(fullfile, "w");
     if(!f) {
@@ -173,21 +220,21 @@ int CanvasImageBuilder::writeImageFile(char *dir, DisplayNode *node, double maxy
     
     CanvasSlot canvasSlot;
     canvasSlot.plot = (JevpPlot *)((TObject *)plot)->Clone();
-    //LOG("JEFF", "plot = %p", canvasSlot.plot);
     strcpy(canvasSlot.name, fn);
+    canvasSlot.writeIdx = writeIdx;
     
     imageWriter->writeToImageWriter(&canvasSlot);
     return 1;
 }
 
 
-int CanvasImageBuilder::writeImageFiles(char *dir, DisplayNode *node, int page) {
+int CanvasImageBuilder::writeImageFiles(DisplayNode *node, int page) {
     int npages = 0;
 
     //LOG("JEFF", "node: %s page %d", node->name, page);
     if(node->leaf) {
 	char ndir[256];
-	sprintf(ndir, "%s/%03d", dir, page);
+	sprintf(ndir, "/tmp/%s_build_%08d/%03d", basedir, writeIdx, page);
 	//makedir(ndir);
 
 	
@@ -202,29 +249,25 @@ int CanvasImageBuilder::writeImageFiles(char *dir, DisplayNode *node, int page) 
     }
     else {
 	if(node->child) {
-	    //char ndir[512];
-	    //strcpy(ndir, dir);
-	    //strcat(ndir, "/");
-	    //strcat(ndir, removeSpaces(node->name));
-	    npages += writeImageFiles(dir, node->child, page + npages);
+	    npages += writeImageFiles(node->child, page + npages);
 	}
 	
 	if(node->next) {
-	    npages += writeImageFiles(dir, node->next, page + npages);
+	    npages += writeImageFiles(node->next, page + npages);
 	}
     }
     return npages;
 }
 
-int CanvasImageBuilder::writeRunStatus(char *basedir, RunStatus *rs, int evtCnt, const char *serverTags)
+int CanvasImageBuilder::writeRunStatus(RunStatus *rs, int evtCnt, const char *serverTags)
 {
     char fn[256];
-    sprintf(fn, "%s/runStatus.json", basedir);
+    sprintf(fn, "/tmp/%s_build_%08d/runStatus.json", basedir, writeIdx);
 
     LOG("JEFF", "Writing run status to file %s", fn);
     FILE *f = fopen(fn, "w");
     if(!f) {
-	LOG("JEFF", "Error opening file for run status");
+	LOG("JEFF", "Error opening file for run status (%s)", strerror(errno));
 	return -1;
     }
     
@@ -240,7 +283,7 @@ int CanvasImageBuilder::writeRunStatus(char *basedir, RunStatus *rs, int evtCnt,
     fprintf(f,"\"%s\":%d,", "lastEvtTime", rs->lastEvtTime);   
     fprintf(f,"\"%s\":%d,", "lastEvtNumber", rs->lastEvtNumber);   
     fprintf(f,"\"%s\":%d,", "nEvts", evtCnt);   
-    fprintf(f,"\"%s\":%d,", "writeTime", time(NULL));
+    fprintf(f,"\"%s\":%ld,", "writeTime", time(NULL));
     fprintf(f,"\"%s\":%d,", "lastStatusChangeTime", rs->timeOfLastChange);
     fprintf(f,"\"%s\":\"%s\"", "serverTags", serverTags); 
     fprintf(f, "}");
@@ -248,7 +291,7 @@ int CanvasImageBuilder::writeRunStatus(char *basedir, RunStatus *rs, int evtCnt,
     return 0;
 }
 
-int CanvasImageBuilder::sendToImageWriter(char *directory, RunStatus *rs, int numberOfEvents, const char *serverTags, bool force) {
+int CanvasImageBuilder::sendToImageWriter(RunStatus *rs, int numberOfEvents, const char *serverTags, bool force) {
     XX(0);
     LOG("JEFF", "sendToImageWriter");
     int nwriting = imageWriter->getNWriting();
@@ -257,32 +300,34 @@ int CanvasImageBuilder::sendToImageWriter(char *directory, RunStatus *rs, int nu
 	return 0;
     }
 
-    LOG("JEFF", "do...  nwriting = %d", nwriting);
-
+    LOG("JEFF", "Write to image writer: nWriting=%d writeIdx=%d", nwriting, writeIdx);
+    XX(2);      // writeIdx is guarenteed to be updated before the mux returns!
     pthread_mutex_lock(&imageWriter->mux);
     XX(1);
-    writeIndex(directory, "idx.txt");
+    writeIndex();
     XX(1);
-    writeRunStatus(directory, rs, numberOfEvents, serverTags);
+    writeRunStatus(rs, numberOfEvents, serverTags);
     XX(1);
-    int cnt = writeImages(directory);
+    int cnt = writeImages();
     XX(1);
+    writeIdx++;
     pthread_mutex_unlock(&imageWriter->mux);
     XX(999);
     return cnt;
 }
 
 // Assumes that the index has been writen, so the directory exists...
-int CanvasImageBuilder::writeImages(char *basedir) {
+int CanvasImageBuilder::writeImages() {
     DisplayNode *root = displays->getTab(1);
   
-    int pages = writeImageFiles(basedir, root, 1);
+    int pages = writeImageFiles(root, 1);
 
     CanvasSlot end;
     end.plot = NULL;
-    strcpy(end.name, basedir);   // image writer appends the "_done"
+    end.writeIdx = writeIdx;
+    sprintf(end.name, basedir);   // image writer appends the "_done"
     imageWriter->writeToImageWriter(&end);
-
+    LOG("JEFF", "Wrote end: %s to imagewriter", end.name);
     return pages;
 }
 
