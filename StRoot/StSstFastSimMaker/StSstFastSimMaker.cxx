@@ -47,8 +47,7 @@ Int_t StSstFastSimMaker::Init()
 Int_t StSstFastSimMaker::InitRun(int RunNo)
 {
   // Define various SSD hit errors from database
-  TDataSet *set = GetDataBase("Calibrations/tracker");
-  St_HitError *tableSet = (St_HitError *)set->Find("sstHitError");
+  St_HitError *tableSet = (St_HitError *) GetDataBase("Calibrations/tracker/sstHitError");
   HitError_st* hitError = tableSet->GetTable();
   mResXSst = sqrt(hitError->coeff[0]);
   mResZSst = sqrt(hitError->coeff[3]);
