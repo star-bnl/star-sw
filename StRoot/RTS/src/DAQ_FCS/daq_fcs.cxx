@@ -547,8 +547,8 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 //	LOG(TERR,"get_l2: %p %d %p %d",addr,words,trg,rdo) ;
 	if(addr==0) return 0 ;
 
-	//LOG(WARN,"get_l2") ;
-//	for(int i=0;i<16;i++) {
+//	LOG(WARN,"get_l2") ;
+//	for(int i=0;i<(words+16);i++) {
 //		LOG(TERR,"... %d/%d = 0x%08X",i,words,d[i]) ;
 //	}
 
