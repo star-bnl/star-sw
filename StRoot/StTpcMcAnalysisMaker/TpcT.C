@@ -698,7 +698,7 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "H", const Char_t *O
 	adcs(i,j) /= adcs(NP-1,NT-1);
       }
     }
-    if (entry%1000 == 1) {
+    if ((entry-1)%noEntries2P == 0) {
 #ifdef PRINT
       adcs.Print();
 #if 0
@@ -2630,19 +2630,23 @@ void FitSlicesT(const Char_t *name="OuterTimeRc", Int_t iy=0, const Char_t *opt=
     Double_t cosL2I = prof->GetBinContent(i);
     if (cosL2I <= 0) continue;
     Double_t tanL   = TMath::Sqrt(cosL2I-1);
-    Double_t spread = lH*tanL/timeBin;
+    Double_t spread = 0; // lH*tanL/timeBin;
     ga->SetParameters(0,1,1,0,1);
+    ga->FixParameter(3, 0);
     ga->FixParameter(4,spread);
 
-    TH1D *proj = h->ProjectionX(Form("%s_%i%s",Name.Data(),i,opt),i,i);
+    TH1D *proj = h->ProjectionX(Form("%s_%i_%s",Name.Data(),i,opt),i,i);
     proj->SetTitle(Form("Projection in [%4.0f,%4.0f] z range",h->GetYaxis()->GetBinLowEdge(i),h->GetYaxis()->GetBinUpEdge(i)));
     if (proj->GetEntries() < 10) {
       delete proj;
       continue;
     }
-    Double_t xFmin = -2.0;
-    Double_t xFmax =  2.5;
+    Int_t ibMax = proj->GetMaximumBin();
+    Double_t xF = proj->GetXaxis()->GetBinCenter(ibMax);
+    Double_t xFmin = xF - 1.5;
+    Double_t xFmax = xF + 1.5;
     Double_t sum = proj->GetSum();
+#if 0
     proj->Reset();
     Double_t xmin =  9999.;
     Double_t xmax = -9999.;
@@ -2662,7 +2666,7 @@ void FitSlicesT(const Char_t *name="OuterTimeRc", Int_t iy=0, const Char_t *opt=
 	err /= (sum*(xue-xle));
 	proj->SetBinContent(j,val);
 	proj->SetBinError(j,err);
-	if (fractionI > 0.10 && fractionI < 0.80) {
+	if (fractionI > 0.20 && fractionI < 0.80) {
 	  if (xmin > xle) xmin = xle;
 	  if (xmax < xue) xmax = xue;
 	}
@@ -2670,6 +2674,7 @@ void FitSlicesT(const Char_t *name="OuterTimeRc", Int_t iy=0, const Char_t *opt=
     }
     xFmin = xmin;
     xFmax = xmax;
+#endif
     //    proj->SetAxisRange(xmin,xmax);
     cout << "Fit: " << proj->GetTitle() << endl;
     //    proj->Fit(ga,"rev","",xFmin,xFmax);
@@ -4569,6 +4574,7 @@ void T0Offsets(const Char_t *files="*.root", const Char_t *Out = "") {
   const UInt_t*&     fRcHit_mHardwarePosition                 = iter("fRcHit.mHardwarePosition");
   Int_t ev = 0;
   while (iter.Next()) {
+    if (fNoMcHit != 1 || fNoRcHit !=1 ) continue;
     for (Int_t l = 0; l < fNoRcHit; l++) {
       Int_t IdTruth = fRcHit_mIdTruth[l];
       Int_t row = padrow(fRcHit_mHardwarePosition[l]);
@@ -4604,6 +4610,7 @@ void T0Offsets(const Char_t *files="*.root", const Char_t *Out = "") {
     cout << T[io]->GetTitle() << endl;
     T[io]->FitSlicesY();
     T1[io] = (TH1D *) gDirectory->Get(Form("%s_1",T[io]->GetName()));
+    T1[io]->SetMarkerColor(io+1);
     if (! T1[io]) continue;
     T1[io]->Fit("pol2","er","",-100,100);
   }
