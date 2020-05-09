@@ -1,6 +1,15 @@
-* $Id: gstar_part.g,v 1.55 2018/03/30 14:11:07 jwebb Exp $
+* $Id: gstar_part.g,v 1.58 2020/05/06 20:33:38 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.58  2020/05/06 20:33:38  jwebb
+* Pentaquark decay chain, all daughters decay to charged states
+*
+* Revision 1.57  2020/05/05 21:34:33  jwebb
+* Add two pentaquark states... small hack for single decay mode.
+*
+* Revision 1.56  2020/05/05 21:24:10  jwebb
+* Add two pentaquark states
+*
 * Revision 1.55  2018/03/30 14:11:07  jwebb
 * Added Lambda_c- with G3 id of 208.  (note: requires corresponding update to
 * StarClassLibrary...)
@@ -827,6 +836,25 @@ Particle H_dibaryon               code      = 60001,
                        charge = +1       tlife = 1.6378e-10  ,
                        bratio = {0.5, 0.5}  mode = { 30 26 08, 31 26 07 }
 
+   Particle PQ1730 "Pentaquark 1730 --> lambda K0s, phase space" _
+            code   = 60008              pdg = 912323         ,
+            trktyp = kGtHadr            mass = 1.730         ,
+            charge = 0                  tlife = 1.0E-16      ,
+            bratio = {0.5,0.5}  mode = {9598,9597} 
+
+   Particle PQ1730 "Pentaquark 1730 --> lambda K0s, phase space" _
+            code   = 60009              pdg = 912323         ,
+            trktyp = kGtHadr            mass = 1.730         ,
+            charge = 1                  tlife = 1.0E-16      ,
+            bratio = {0.5,0.5}  mode = {9698,9697} 
+
+
+   PARTICLE KAON_PLUS code=96 pdg=0 mass=0.4937E+00 charge=+1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={080809,}
+
+  Particle K0short        code=95 TrkTyp=4 mass=.4977  charge=0  tlife= 1.e-24,
+                     pdg=311  bratio= { 0.334, 0.333, 0.333}    mode= { 80809, 80908, 090808 }
+
 
 ***************************************************************************
 **
@@ -851,8 +879,8 @@ Particle H_dibaryon               code      = 60001,
 *
 * --------------------------------------------------------------------------
 *
-*$$$  Subroutine aGuDCAY
-*CDE,gctrak,gckine,gcking.
+  Subroutine aGuDCAY
++CDE,gctrak,gckine,gcking.
 *
 *  If decay modes are not set, this routine will be called to decay the particle
 *
@@ -865,8 +893,10 @@ Particle H_dibaryon               code      = 60001,
 *         P_PART(I)=VECT(I+3)*VECT(7)
 *      ENDDO
 *
-*      write(*,*) 'ivert, ipart: ', ivert, ipart
-*      write(*,*) 'p1, p2, p3: ', P_PART(1), P_PART(2), P_PART(3)
+       write(*,*) 'agudcay ivert, ipart: ', ivert, ipart
+STOP 
+
+*       write(*,*) 'p1, p2, p3: ', P_PART(1), P_PART(2), P_PART(3)
 *
 *      NGKINE = NGKINE + 1
 *      DO I = 1, 4
@@ -879,7 +909,7 @@ Particle H_dibaryon               code      = 60001,
 *         GPOS(I,NGKINE) = VECT(I)
 *     ENDDO
 *
-*$$$  end
+  end
 *
 * --------------------------------------------------------------------------
 *
