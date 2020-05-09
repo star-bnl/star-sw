@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <errno.h>
 #include <math.h>
 #include <time.h>
@@ -27,7 +28,7 @@ static inline u_int sw16(u_int d)
 struct fcs_data_c::fcs_ped_t fcs_data_c::ped[16][8] ;	// 8 RDO
 
 struct fcs_data_c::rdo_map_t fcs_data_c::rdo_map[16][8] ;	// 16 sectors, 8 RDOs each --> det,ns,dep
-struct fcs_data_c::det_map_t fcs_data_c::det_map[4][2][20] ;	// det,ns,dep --> sector RDO
+struct fcs_data_c::det_map_t fcs_data_c::det_map[4][2][24] ;	// det,ns,dep --> sector RDO
 u_char fcs_data_c::rdo_map_loaded ;
 
 
@@ -960,7 +961,7 @@ void fcs_data_c::ped_stop(int bad_ped)
 	char fname[128] ;
 
 	if(run_number) {
-		sprintf(fname,"/RTScache/fcs_pedestals_s%02d_r%d_%08u.txt",sector,rdo,run_number) ;
+		sprintf(fname,"/RTScache/fcs_pedestals_s%02d_r%d_%08u_f%u.txt",sector,rdo,run_number,rhic_freq) ;
 	}
 	else {
 		sprintf(fname,"/RTScache/fcs_pedestals_%d_%d_%d_%d_%d.txt",
@@ -1011,6 +1012,11 @@ void fcs_data_c::ped_stop(int bad_ped)
 // load_map MUST be called before!
 int fcs_data_c::gain_from_cache(const char *fname)
 {
+	int ret ;
+	const char *file_name ;
+	struct stat sstat ;
+	int is_dir ;
+
 	if(!rdo_map_loaded) {
 		LOG(ERR,"You must load the rdo map before!") ;
 	}
@@ -1025,29 +1031,66 @@ int fcs_data_c::gain_from_cache(const char *fname)
 		}
 	}
 
-	for(int v=0;v<2;v++) {
+	if(fname==0) {
+		file_name = "/RTS/conf/fcs" ;
+	}
+	else {
+		file_name = fname ;
+	}
+
+	ret = stat(file_name,&sstat) ;
+	if(ret<0) {
+		LOG(ERR,"gain_from_cache: %s: [%s]",file_name,strerror(errno)) ;
+		return -1 ;
+	}
+
+	if(sstat.st_mode & S_IFDIR) {
+		is_dir = 1 ;
+	}
+	else if(sstat.st_mode & S_IFREG) {
+		is_dir = 0 ;
+	}
+	else {
+		LOG(ERR,"gain_from_cache: %s: incorrect file type",file_name) ;
+		return -1 ;
+	}
+	
+	for(int det_ix=0;det_ix<3;det_ix++) {	// ECAL, HCAL, FPRE
+	for(int v=0;v<2;v++) {		// 0=electronics, 1=et
 		char ff[128] ;
 
-		if(v==1 && fname) continue ;	// if given a filename, just assume el_gain
-		
-		if(fname) {
-			strncpy(ff,fname,sizeof(ff)) ;
-		}
-		else if(v==0) {
-			sprintf(ff,"/RTS/conf/fcs/fcs_electronics_gains.txt") ;
+		if(!is_dir) {
+			strncpy(ff,file_name,sizeof(ff)-1) ;
 		}
 		else {
-			sprintf(ff,"/RTS/conf/fcs/fcs_et_gains.txt") ;
-		}
+			const char *c_det, *c_typ ;
 
+			switch(det_ix) {
+			case 0 :
+				c_det = "ecal" ;
+				break ;
+			case 1 :
+				c_det = "hcal" ;
+				break ;
+			default :
+				c_det = "fpre" ;
+				break ;
+			}
+
+			if(v==0) c_typ = "electronics" ;
+			else c_typ = "et" ;
+
+			sprintf(ff,"%s/fcs_%s_%s_gains.txt",file_name,c_det,c_typ) ;
+		}
 
 		FILE *f = fopen(ff,"r") ;
 		if(f==0) {
-			LOG(WARN,"%s [%s]",ff,strerror(errno)) ;
+			LOG(WARN,"gain_from_cache: %s [%s]",ff,strerror(errno)) ;
+			if(!is_dir) goto read_done ;
 			continue ;
 		}
 
-		LOG(INFO,"Opened gains[%s] %s",v==0?"electronics":"Et",ff) ;
+		LOG(INFO,"gain_from_cache: Opened gains[%s] %s",v==0?"electronics":"Et",ff) ;
 
 
 		while(!feof(f)) {
@@ -1066,6 +1109,13 @@ int fcs_data_c::gain_from_cache(const char *fname)
 
 			if(ret!=5) continue ;
 
+			if(is_dir && (det_ix != det)) {
+				LOG(WARN,"det expect %d, det in file %d",det_ix,det) ;
+				continue ;
+			}
+
+
+				
 			int s = det_map[det][ns][dep].sector - 1 ;
 			int r = det_map[det][ns][dep].rdo - 1 ;
 
@@ -1081,8 +1131,10 @@ int fcs_data_c::gain_from_cache(const char *fname)
 		}
 
 		fclose(f) ;
-		
-	}
+		if(!is_dir) goto read_done ;
+	}}
+
+	read_done: ;
 
 	for(int s=0;s<16;s++) {
 	for(int i=0;i<8;i++) {
@@ -1116,7 +1168,7 @@ int fcs_data_c::ped_from_cache(const char *ff)
 {
 	FILE *f = fopen(ff,"r") ;
 	if(f==0) {
-		LOG(WARN,"ped_from_cache: can't open %s [%s]",ff,strerror(errno)) ;
+		LOG(ERR,"ped_from_cache: can't open %s [%s]",ff,strerror(errno)) ;
 		return -1 ;
 	}
 
@@ -1278,7 +1330,7 @@ int fcs_data_c::load_rdo_map(const char *fname)
 		return -1 ;
 	}
 
-	LOG(INFO,"Opened %s",fname) ;
+	LOG(INFO,"load_rdo_map: opened %s",fname) ;
 
 
 	while(!feof(f)) {
