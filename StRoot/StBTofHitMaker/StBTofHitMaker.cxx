@@ -431,7 +431,7 @@ void StBTofHitMaker::fillStEvent() {
       LOG_INFO << "BTofRawHitCollection: " << rawTofVec.size() << " entries" << endm;
       if(Debug()) {
         for(size_t i=0;i<rawTofVec.size();i++) {
-          LOG_DEBUG << (*rawTofVec[i]) << endm;
+          LOG_INFO << (*rawTofVec[i]) << endm;
         }
       }
     }
@@ -444,7 +444,7 @@ void StBTofHitMaker::fillStEvent() {
       LOG_INFO << "BTofHitCollection: " << tofVec.size() << " entries..." << endm;
       if(Debug()) {
         for(size_t i=0;i<tofVec.size();i++) {
-          LOG_DEBUG << (*tofVec[i]) << endm; 
+          LOG_INFO << (*tofVec[i]) << endm; 
         }
       }  
     }    

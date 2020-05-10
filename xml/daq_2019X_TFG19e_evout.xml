@@ -41,7 +41,7 @@
 #  root.exe -q -b 'bfc.C('${f},${l}',"'{$chain}'","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
 #   root4star -b -q 'bfc.C(1000,"P2019a,StiCA,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeakFull,-OPr13,OPr40,-hitfilt,evout,-beamline3D ","${evtsFile}'")' &gt;&amp; ${logFile}
 #    root.exe -q -b 'bfc.C('${f},${l}',"P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
-   root.exe -q -b 'bfc.C('${f},${l}',"P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
+   root.exe -q -b 'bfc.C('${f},${l}',"P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
 #    root.exe -q -b 'bfc.C('${f},${l}',"P2019a,-hitfilt,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
    cp  ${filel}* ${SUBMITTINGDIRECTORY}
    rm ${bla}

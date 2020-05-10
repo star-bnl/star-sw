@@ -5,10 +5,10 @@
 <command> 
   cd ${SUBMITTINGDIRECTORY}  
   set Name = `basename $PWD`
-  setenv NODEBUG yes
+#  setenv NODEBUG yes
   setenv STARFPE NO
-  setup 64b
-  starver TFG19g
+#  setup 64b
+#  starver TFG19g
   echo $INPUTFILE0 | grep ':'
   if (! $?) then
     set rung  = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
@@ -33,8 +33,9 @@
   if (! $?) set noiTPClu = ",noiTPClu";
 #  setenv StarEndMakerShell
 # set chain = "MC.2019a,P2019a,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name};
-  set chain = "MC.2018,vmc,VMCAlignment,NoiTPCLu,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name}${noiTPClu};
-  set sdt = ",sdt20180426.135000"
+  set chain = "MC.2018,vmc,VMCAlignment,UseMCTstart,NoiTPCLu,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name}${noiTPClu};
+#  set sdt = ",sdt20180426.135000"
+  set sdt = ",sdt20180531.080000"
   set VFMCE = ",VFMCE";
   set Chain = ${chain}${VFMCE}${sdt}",Rung."${rung}
   set base = ${name}_${rung}_${f}_${N};
@@ -47,5 +48,5 @@
     root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'","'${tag}'")' &gt;&amp; ${logFile}
   endif
 </command>
-<input URL="command:RunId.pl 1 100 1000 K_S0" />
+<input URL="command:RunId.pl 1 250 200 K_S0" />
 </job>
