@@ -382,7 +382,7 @@ void StBTofMatchMaker::processStEvent(){
   if(Debug()) { 
     LOG_INFO << "    total # of cells = " << daqCellsHitVec.size() << endm;
     for(size_t iv = 0;iv<validModuleVec.size();iv++) {
-      LOG_DEBUG << " module # " << validModuleVec[iv] << " Valid! " << endm;
+      if (Debug()) {LOG_INFO << " module # " << validModuleVec[iv] << " Valid! " << endm;}
     }
   }
   if(mHisto) {
@@ -534,9 +534,9 @@ void StBTofMatchMaker::processStEvent(){
               }
 
 	      if(Debug()) {
-                LOG_DEBUG <<"B: nodeid=" << iNode << "  projected in " << " tray="<< itray << " module="<<imodule<<" cell="<<icell<<endm;
-	        LOG_DEBUG <<"   hit position " << hitPos << endm;
-	        // LOG_DEBUG <<"   momemtum= " << pt << " " << eta << " " << phi << endm;
+                LOG_INFO <<"B: nodeid=" << iNode << "  projected in " << " tray="<< itray << " module="<<imodule<<" cell="<<icell<<endm;
+	        LOG_INFO <<"   hit position " << hitPos << endm;
+	        // LOG_INFO <<"   momemtum= " << pt << " " << eta << " " << phi << endm;
               }
 	    }
 	} // for (Int_t i=0...)
@@ -682,10 +682,10 @@ void StBTofMatchMaker::processStEvent(){
     }
     
     if(Debug()) { 
-      LOG_DEBUG << "D: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
+      LOG_INFO << "D: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
       idVectorIter ij=trackIdVec.begin();
-      while (ij != trackIdVec.end()) { LOG_DEBUG << " " << *ij; ij++; }
-      LOG_DEBUG << endm;
+      while (ij != trackIdVec.end()) {LOG_INFO << " " << *ij; ij++; }
+      LOG_INFO << endm;
     }
 
     tempVec = erasedVec;
@@ -773,10 +773,10 @@ void StBTofMatchMaker::processStEvent(){
 
       // debugging output
       if(Debug()) {
-        LOG_DEBUG << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
+        LOG_INFO << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
 	idVectorIter ij=vTrackId.begin();
-	while (ij != vTrackId.end()) { LOG_DEBUG << " " << *ij; ij++; }
-        LOG_DEBUG << endm;
+	while (ij != vTrackId.end()) {LOG_INFO << " " << *ij; ij++; }
+        LOG_INFO << endm;
       }
       
     }
@@ -836,7 +836,7 @@ void StBTofMatchMaker::processStEvent(){
 	FinalMatchedCellsVec.push_back(cellHit);
 	
 	// debugging output
-	if(Debug()) { LOG_DEBUG << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:" << vTrackId[thiscandidate] << endm; }
+	if(Debug()) {LOG_INFO << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:" << vTrackId[thiscandidate] << endm; }
       }
 
     } else {
@@ -952,8 +952,8 @@ void StBTofMatchMaker::processStEvent(){
 
   //check StEvent collections --
   if (theTof->hitsPresent()){
-    LOG_DEBUG << " BTofCollection: hit container present."<<endm;
-    if (Debug()){
+    if (Debug()) {
+      LOG_INFO << " BTofCollection: hit container present."<<endm;
       StSPtrVecBTofHit& tmpCellTofVec = theTof->tofHits();
       LOG_INFO << " # of hits in this event:" << tmpCellTofVec.size() << endm;
       for (size_t i = 0; i < tmpCellTofVec.size(); i++) {
@@ -975,7 +975,7 @@ void StBTofMatchMaker::processStEvent(){
 	 << timer.elapsedTime() << " sec" << endm;
   }
 
-  LOG_DEBUG << "StBTofMatchMaker -- bye-bye" << endm;
+  if (Debug()) {LOG_INFO << "StBTofMatchMaker -- bye-bye" << endm;}
 
   return;
 }
@@ -1056,9 +1056,9 @@ void StBTofMatchMaker::processMuDst(){
       
   // end of Sect.A
   if(Debug()) {
-    LOG_DEBUG << "    total # of cells = " << daqCellsHitVec.size() << endm;
+    LOG_INFO << "    total # of cells = " << daqCellsHitVec.size() << endm;
     for(size_t iv = 0;iv<validModuleVec.size();iv++) {
-      LOG_DEBUG << " module # " << validModuleVec[iv] << " Valid! " << endm;
+      LOG_INFO << " module # " << validModuleVec[iv] << " Valid! " << endm;
     }
   }
   if(mHisto) {
@@ -1222,9 +1222,9 @@ void StBTofMatchMaker::processMuDst(){
               }
 
               if(Debug()) {
-     	        LOG_DEBUG <<"B: nodeid=" << iNode << "  projected in " << " tray="<< itray << " module="<<imodule<<" cell="<<icell<<endm;
-  	        LOG_DEBUG <<"   hit position " << hitPos << endm;
-	        // LOG_DEBUG <<"   momemtum= " << pt << " " << eta << " " << phi << endm;
+     	        LOG_INFO <<"B: nodeid=" << iNode << "  projected in " << " tray="<< itray << " module="<<imodule<<" cell="<<icell<<endm;
+  	        LOG_INFO <<"   hit position " << hitPos << endm;
+	        // LOG_INFO <<"   momemtum= " << pt << " " << eta << " " << phi << endm;
               }
 	    }
 	} // for (Int_t i=0...)
@@ -1370,10 +1370,10 @@ void StBTofMatchMaker::processMuDst(){
     }
     
     if(Debug()) {
-      LOG_DEBUG << "D: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
+      LOG_INFO << "D: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
       idVectorIter ij=trackIdVec.begin();
-      while (ij != trackIdVec.end()) { LOG_DEBUG << " " << *ij; ij++; }
-      LOG_DEBUG << endm;
+      while (ij != trackIdVec.end()) { LOG_INFO << " " << *ij; ij++; }
+      LOG_INFO << endm;
     }
 
     tempVec = erasedVec;
@@ -1461,10 +1461,10 @@ void StBTofMatchMaker::processMuDst(){
 
       // debugging output
       if(Debug()) {
-        LOG_DEBUG << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
+        LOG_INFO << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
 	idVectorIter ij=vTrackId.begin();
-	while (ij != vTrackId.end()) { LOG_DEBUG << " " << *ij; ij++; }
-        LOG_DEBUG << endm;
+	while (ij != vTrackId.end()) { LOG_INFO << " " << *ij; ij++; }
+        LOG_INFO << endm;
       }
       
     }
@@ -1524,7 +1524,7 @@ void StBTofMatchMaker::processMuDst(){
 	FinalMatchedCellsVec.push_back(cellHit);
 	
 	// debugging output
-	if(Debug()) { LOG_DEBUG << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:" << vTrackId[thiscandidate] << endm; }
+	if(Debug()) {LOG_INFO << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:" << vTrackId[thiscandidate] << endm; }
       }
 
     } else {
