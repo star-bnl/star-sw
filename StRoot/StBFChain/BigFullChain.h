@@ -111,7 +111,7 @@ Bfc_st BFC[] = { // standard chains
   {"LanaDV",   "","","LanaDVtpx","",""                                                   ,"get LDV",kFALSE},
   {"LanaDVtpx","","","MakeEvent,trgd,in,tpx,TpcHitMover,LaserIT,VFMinuit,Lana,Analysis,Corr4,"
    "NosvtIT,NossdIT,NosstIT", "",""                                             ,"get LDV with TPX",kFALSE},
-  {"LaserDV.Chain","","","in,LaserCal,fcf,TpcHitMover,OGridLeak3D,OShortR,OSpaceZ2","","","get LDV",kFALSE},
+  //  {"LaserDV.Chain","","","in,LaserCal,fcf,TpcHitMover,OGridLeak3D,OShortR,OSpaceZ2","","","get LDV",kFALSE},
   {"Test.default.ITTF","","","TpcRS,Simu,sss,svt,ssd,fss,bbcSim,IdTruth,MakeEvent,genvtx,"
    "miniMcMk,McAna,Test.reco.ITTF,CMuDst"                                                 ,"","","",kFALSE},
   {"Test.default.y2005i.ITTF","","","Test.default.ITTF,sdt20050130,noSimuDb"              ,"","","",kFALSE},
@@ -1228,10 +1228,12 @@ Bfc_st BFC[] = { // standard chains
 
 
   // Other chains/Calibration
+#if 0
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    ,                                                                "Laser Calibration Chain (tcl)",kFALSE},
   {"LaserCal",""  ,"","db,detDb,tpc_daq,tpcDb,fcf,globT,laser,LaserTest","",""
    ,                                                                      "Laser Calibration Chain",kFALSE},
+#endif
   {"L3Counter","" ,"","db,detDb,in,l3count","","",                     "L3 Counter extraction pass",kFALSE},
   {"VtxSeedCal","","","ppOpt,ry2001,in,tpc_daq,tpc,globT,-Tree,Physics,-PreVtx,FindVtxSeed,NoEvent,Corr2"
    ,                                                                 "","","Pass0 Vertex evaluator",kFALSE},
