@@ -76,7 +76,9 @@
 #include "StBTofUtil/StBTofGeometry.h"
 #include "StEventTypes.h"
 #include "StEvent/StBTofCollection.h"
+#if 0
 #include "StDetectorDbMaker/St_tofStatusC.h"
+#endif
 #include "StDetectorDbMaker/St_tofTOffsetC.h"
 #include "StDetectorDbMaker/St_tofTotbCorrC.h"
 #include "StDetectorDbMaker/St_tofZbCorrC.h"
@@ -223,7 +225,7 @@ Int_t StBTofSimMaker::Make()
     LOG_WARN << " No VPD hits in GEANT" << endm; }
   else {
     Int_t nvpdhits = g2t_vpd_hits->GetNRows();
-    LOG_DEBUG << " Found VPD hits: " << nvpdhits << endm; 
+    if (Debug()) {LOG_INFO << " Found VPD hits: " << nvpdhits << endm;}
     g2t_vpd_hit_st* vpd_hit = g2t_vpd_hits->begin();
     for(Int_t i=0; i<nvpdhits; i++, vpd_hit++) {
       VpdResponse(vpd_hit);
@@ -237,7 +239,7 @@ Int_t StBTofSimMaker::Make()
     LOG_WARN << " No TOF hits in GEANT" << endm; }
   else {
     Int_t nhits = g2t_tfr_hits->GetNRows();
-    LOG_DEBUG << " Found GEANT TOF hits: " << nhits << endm;
+    if (Debug()) {LOG_INFO << " Found GEANT TOF hits: " << nhits << endm;}
     g2t_ctf_hit_st* tofHitsFromGeant = g2t_tfr_hits->begin();
     
     if(mSlow) {
@@ -327,7 +329,7 @@ Int_t StBTofSimMaker::CellResponse(g2t_ctf_hit_st* tofHitsFromGeant,
   
   // accepty TOF hit
   if(tofHitsFromGeant->s_track<=0.0 || tofHitsFromGeant->de <=0.0) {
-    LOG_DEBUG << " No deposited energy in this TOF hit!" << endm;
+    if (Debug()) {LOG_INFO << " No deposited energy in this TOF hit!" << endm;}
     return kStWarn;
   }
   
@@ -340,7 +342,10 @@ Int_t StBTofSimMaker::CellResponse(g2t_ctf_hit_st* tofHitsFromGeant,
     LOG_WARN << " Not hit the sensitive MRPC volume!" << endm;
     return kStWarn;
   }
-  if (St_tofStatusC::instance()->status(itray,imodule,icell) != 1) return kStOK;
+#if 0
+  Int_t status = St_tofStatusC::instance()->status(itray,imodule,icell);
+  if (status != 1) return kStOK;
+#endif
   St_g2t_track *g2t_track = (St_g2t_track *) GetDataSet("geant/g2t_track"); //  if (!g2t_track)    return kStWarn;
   if (!g2t_track) {
     LOG_WARN << " No G2T track table!" << endm;
@@ -496,7 +501,7 @@ Int_t StBTofSimMaker::CellTimePassTh(TrackVec& tofResponseVec)
 	sumhit.s_track  = tofResponseVec[j].s_track;
 	sumhit.position = tofResponseVec[j].position;
 	if(tofResponseVec[j].trkId != sumhit.trkId) {
-	  LOG_DEBUG << " Two tracks match to one cell." << endm;
+	  if (Debug()) {LOG_INFO << " Two tracks match to one cell." << endm;}
 	  sumhit.trkId = tofResponseVec[j].trkId;
 	}
       }
@@ -597,7 +602,7 @@ Int_t StBTofSimMaker::CellTimePassTh(TrackVec& tofResponseVec)
 //___________________________________________________________________________
 Int_t StBTofSimMaker::fillEvent()
 {
-  LOG_DEBUG << "Filling McEvent and Event"<<endm;
+  if (Debug()) {LOG_INFO << "Filling McEvent and Event"<<endm;}
   
   static  Float_t totMC  = 15;
   static  Float_t tStartMC = 0; // MC start time
@@ -678,7 +683,7 @@ Int_t StBTofSimMaker::fillEvent()
     Float_t eff = 1.;
     if(trayid>0&&trayid<=120) eff = mSimDb->eff_tof(trayid, moduleid, cellid);
     else if(trayid==121||trayid==122) eff = mSimDb->eff_vpd(trayid, cellid);
-    if (gRandom->Uniform(1.0) > eff){LOG_DEBUG<<"Hit removed by inefficiency cut (at " << eff*100 << "%)"<<endm; continue; } //! inefficiency
+    if (gRandom->Uniform(1.0) > eff){if (Debug()) {LOG_INFO<<"Hit removed by inefficiency cut (at " << eff*100 << "%)"<<endm;} continue; } //! inefficiency
     
     
     Float_t mcTof=aMcBTofHit->tof()/1000.;//from picoseconds to nanoseconds
@@ -737,14 +742,14 @@ Int_t StBTofSimMaker::fillEvent()
 
   // check StMcEvent and StEvent
   if(Debug()) {
-    LOG_DEBUG << " ==== Test McBTofHitCollection ==== " << endm;
+    if (Debug()) {LOG_INFO << " ==== Test McBTofHitCollection ==== " << endm;}
     StSPtrVecMcBTofHit& mcBTofHits = mMcEvent->btofHitCollection()->hits();
     Int_t nCell[mNTray];
     for(Int_t i=0;i<mNTray;i++) nCell[i] = 0;
     Int_t nEast=0;
     Int_t nWest=0;
     for(Int_t i=0;i<(Int_t)mcBTofHits.size();i++) {
-      LOG_DEBUG << (*mcBTofHits[i]) << endm;
+      if (Debug()) {LOG_INFO << (*mcBTofHits[i]) << endm;}
       
       if(mBookHisto) {
 	Int_t itray = mcBTofHits[i]->tray();
@@ -755,7 +760,7 @@ Int_t StBTofSimMaker::fillEvent()
 	Float_t de = mcBTofHits[i]->dE();
 	
 	
-	LOG_DEBUG << "tray# "<<itray << endm;
+	if (Debug()) {LOG_INFO << "tray# "<<itray << endm;}
 	
 	// fill BTOF histograms
 	if(itray>0&&itray<=120) {
@@ -915,7 +920,9 @@ Int_t StBTofSimMaker::FastCellResponse(g2t_ctf_hit_st* tofHitsFromGeant)
     LOG_WARN << " Not hit the sensitive MRPC volume !!! " << endm;
     return kStWarn;
   }
+#if 0
   if (St_tofStatusC::instance()->status(itray,imodule,icell) != 1) return kStOK;
+#endif
   StThreeVectorF local(tofHitsFromGeant->x[0], tofHitsFromGeant->x[1], tofHitsFromGeant->x[2]);
   
   StMcTrack *partnerTrk =  new StMcTrack(&(tof_track[partnerTrkId-1]));
