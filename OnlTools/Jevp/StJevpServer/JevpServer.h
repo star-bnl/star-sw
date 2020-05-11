@@ -27,7 +27,7 @@ class ImageWriter;
 
 class JevpServer {
  public:
-
+    int dieWhenReady;
 
     int log_output;
     char *log_dest;
@@ -95,6 +95,8 @@ class JevpServer {
     unsigned long long int getMemUse();
 
     JevpServer() {
+	dieWhenReady = 0;
+
 	printEventCount = 100;
 	myport = JEVP_PORT;
 	logevent = 0;
@@ -207,6 +209,8 @@ class JevpServer {
     //    3. if different from last HistoDef.txt archives old version
     //
     int updateDisplayDefs();
+
+ 
 };
 
 void *JEVPSERVERreaderThread(void *);

@@ -96,12 +96,12 @@ CanvasImageBuilder::CanvasImageBuilder(char *basedir, DisplayFile *displays, Jev
     }
     else {
 	while((entry = readdir(dp)) != NULL) {
-	    LOG("JEFF", "testdir=%s entry->d_name=%s", testdir, entry->d_name);
+	    //LOG("JEFF", "testdir=%s entry->d_name=%s", testdir, entry->d_name);
 
 	    if(memcmp(testdir,entry->d_name,strlen(testdir)) == 0) {
 		
 		int x = atoi(&entry->d_name[strlen(testdir)]);
-		LOG("JEFF", "got one: %s %d %s %d", entry->d_name, strlen(testdir), &entry->d_name[strlen(testdir)+1], x);
+		//LOG("JEFF", "got one: %s %d %s %d", entry->d_name, strlen(testdir), &entry->d_name[strlen(testdir)+1], x);
 		if(x > writeIdx) writeIdx = x;
 	    }
 	}
@@ -202,7 +202,7 @@ void CanvasImageBuilder::writeIndex(int combo_index) {
     
     fclose(f);
 
-    LOG("JEFF", "Done writeIndex %d pages", pages);
+    //LOG("JEFF", "Done writeIndex %d pages", pages);
 }
 
 
@@ -264,7 +264,7 @@ int CanvasImageBuilder::writeRunStatus(RunStatus *rs, int evtCnt, const char *se
     char fn[256];
     sprintf(fn, "/tmp/%s_build_%08d/runStatus.json", basedir, writeIdx);
 
-    LOG("JEFF", "Writing run status to file %s", fn);
+    // LOG("JEFF", "Writing run status to file %s", fn);
     FILE *f = fopen(fn, "w");
     if(!f) {
 	LOG("JEFF", "Error opening file for run status (%s)", strerror(errno));
@@ -291,16 +291,24 @@ int CanvasImageBuilder::writeRunStatus(RunStatus *rs, int evtCnt, const char *se
     return 0;
 }
 
+void CanvasImageBuilder::sendDieToImageWriter() {
+    CanvasSlot end;
+    end.plot = NULL;
+    end.writeIdx = -1;
+    sprintf(end.name, "");   // image writer appends the "_done"
+    imageWriter->writeToImageWriter(&end);
+}
+    
 int CanvasImageBuilder::sendToImageWriter(RunStatus *rs, int numberOfEvents, const char *serverTags, bool force) {
     XX(0);
-    LOG("JEFF", "sendToImageWriter");
+    //LOG("JEFF", "sendToImageWriter 0x%x", imageWriter);
     int nwriting = imageWriter->getNWriting();
     if((nwriting > 0) && !force) {
-	LOG("JEFF", "skip... nwriting = %d", nwriting);
+	//	LOG("JEFF", "skip... nwriting = %d", nwriting);
 	return 0;
     }
 
-    LOG("JEFF", "Write to image writer: nWriting=%d writeIdx=%d", nwriting, writeIdx);
+    //LOG("JEFF", "Write to image writer: nWriting=%d writeIdx=%d", nwriting, writeIdx);
     XX(2);      // writeIdx is guarenteed to be updated before the mux returns!
     pthread_mutex_lock(&imageWriter->mux);
     XX(1);
@@ -327,7 +335,7 @@ int CanvasImageBuilder::writeImages() {
     end.writeIdx = writeIdx;
     sprintf(end.name, basedir);   // image writer appends the "_done"
     imageWriter->writeToImageWriter(&end);
-    LOG("JEFF", "Wrote end: %s to imagewriter", end.name);
+    //LOG("JEFF", "Wrote end: %s to imagewriter", end.name);
     return pages;
 }
 

@@ -129,7 +129,7 @@ void ImageWriter::writeImage(char *fn, JevpPlot *plot, double ymax) {
 
     t4 = ic2.record_time()*1000;
 
-    //LOG("JEFF", "Write %s: (create=%5.1lfms) (draw=%5.1lfms) (saveas=%5.1lfms) (print=%5.1fms", fn, t1, t2, t3, t4); 
+    //LOG("JEFF", "Write %s", fn); 
     XX(nHisto);
     delete canvas;
     XX(nHisto);
@@ -146,16 +146,22 @@ ImageWriter::ImageWriter(char *basename) {
 void ImageWriter::loop() {
     nHisto=0;
 
-    LOG("JEFF", "ImageWriter loop starting");
+    //LOG("JEFF", "ImageWriter loop starting");
     for(;;) {
 	CanvasSlot slot;
 	
+	//LOG("JEFF", "receive from slotQ %p", slotQ);
 	slotQ->receive(&slot);	
 	
+	//LOG("JEFF", "Got slot: %p %d", slot.plot, slot.writeIdx);
+
 	if(slot.plot == NULL) {
+	    if(slot.writeIdx == -1) {
+		LOG("JEFF", "Got die command, exiting.");
+		return;
+	    }
+
 	    if(nHisto > 0) {
-		LOG("JEFF", "Saved %d plots in %lf seconds", nHisto, imageClock.record_time());
-	       
 		nHisto = 0;
 		char o[256];
 		char d[256];
@@ -163,7 +169,7 @@ void ImageWriter::loop() {
 		sprintf(o, "/tmp/%s_build_%08d", slot.name, slot.writeIdx);
 		sprintf(d, "/tmp/%s_done_%08d", slot.name, slot.writeIdx);
 
-		LOG("JEFF", "DONE: rename %s to %s", o, d);
+		LOG("JEFF", "Saved %d plots in %lf seconds: s", nHisto, imageClock.record_time(), d);
 
 		rename(o, d);
 	    }
@@ -188,9 +194,9 @@ void ImageWriter::loop() {
 	    pthread_mutex_lock(&mux);
 	    double tttt =  ttt.record_time();
 	    if(tttt > .1) {
-		LOG("JEFF", "image mux took %lf seconds", tttt);
+		//LOG("JEFF", "image mux took %lf seconds", tttt);
 	    }
-	    
+	 
 	    writeImage(slot.name, slot.plot, -999); 
 	    pthread_mutex_unlock(&mux);
 	}
@@ -200,7 +206,9 @@ void ImageWriter::loop() {
 void ImageWriter::writeToImageWriter(CanvasSlot *slot)
 {
     if(slot->plot == NULL) {
-	LOG("JEFF", "slotQ->n = %d", slotQ->entries());
+	//LOG("JEFF", "slotQ->n = %d", slotQ->entries());
     }
+
+    //LOG("JEFF", "send to slotQ: %p", slotQ);
     slotQ->send(slot);
 }
