@@ -730,146 +730,158 @@ void l4Builder::event(daqReader *rdr)
 {
     XX(0);
     //   //************************************** SET THE TRIGGER BIT HERE to min bias value *************
-	//   //We want all events right now (not just min-bias), min-bias is our main trigger.
-	//   u_int trg = rdr->daqbits;
-	//   //int minbias = 0x20;
-	//   int vpdtag = 0x200;
-	//   FILL_VPD_HISTOS = kFALSE;
-	//   if (trg & vpdtag) FILL_VPD_HISTOS = kTRUE;
-	//   else FILL_VPD_HISTOS = kFALSE;
-	//   //if (trg & minbias)  //start of check for minbias.
-	//   //***********************************************************************************************
+    //   //We want all events right now (not just min-bias), min-bias is our main trigger.
+    //   u_int trg = rdr->daqbits;
+    //   //int minbias = 0x20;
+    //   int vpdtag = 0x200;
+    //   FILL_VPD_HISTOS = kFALSE;
+    //   if (trg & vpdtag) FILL_VPD_HISTOS = kTRUE;
+    //   else FILL_VPD_HISTOS = kFALSE;
+    //   //if (trg & minbias)  //start of check for minbias.
+    //   //***********************************************************************************************
 
     //LOG("JEFF", "event");
 
+    XX(0);
     PCP;
-	unsigned int triggerBitHighPt             = 0x00010000;
-	unsigned int triggerBitDiElectron         = 0x00020000;
-	unsigned int triggerBitHeavyFragment      = 0x00040000;
-        unsigned int triggerBitAllEvents          = 0x00080000;
-	unsigned int triggerBitBesgoodEvents      = 0x00200000;
-        unsigned int triggerBitLowMult            = 0x01000000;
-	unsigned int triggerBitUPCDiElectron	  = 0x02000000;
-	unsigned int triggerBitUPC		  = 0x04000000;
-	unsigned int triggerBitDiMuon             = 0x08000000;
-	unsigned int triggerBitFixedTarget	  = 0x10000000;
-	unsigned int triggerBitFixedTargetMonitor = 0x20000000;
-	unsigned int triggerBitBesMonitor	  = 0x40000000;
-	unsigned int triggerBitHLTGood2           = 0x80000000;
-	unsigned int triggerBitDiElectron2Twr     = 0x00000001; // start to up lower 16 bit.
-	unsigned int triggerBitMTDQuarkonium	  = 0x00400000;
-        unsigned int triggerBitETOFTrackOnly      = 0x00000002;
-        unsigned int triggerBitETOFTrackMatching  = 0x00000004;
+    XX(0);
+    unsigned int triggerBitHighPt             = 0x00010000;
+    unsigned int triggerBitDiElectron         = 0x00020000;
+    unsigned int triggerBitHeavyFragment      = 0x00040000;
+    unsigned int triggerBitAllEvents          = 0x00080000;
+    unsigned int triggerBitBesgoodEvents      = 0x00200000;
+    unsigned int triggerBitLowMult            = 0x01000000;
+    unsigned int triggerBitUPCDiElectron	  = 0x02000000;
+    unsigned int triggerBitUPC		  = 0x04000000;
+    unsigned int triggerBitDiMuon             = 0x08000000;
+    unsigned int triggerBitFixedTarget	  = 0x10000000;
+    unsigned int triggerBitFixedTargetMonitor = 0x20000000;
+    unsigned int triggerBitBesMonitor	  = 0x40000000;
+    unsigned int triggerBitHLTGood2           = 0x80000000;
+    unsigned int triggerBitDiElectron2Twr     = 0x00000001; // start to up lower 16 bit.
+    unsigned int triggerBitMTDQuarkonium	  = 0x00400000;
+    unsigned int triggerBitETOFTrackOnly      = 0x00000002;
+    unsigned int triggerBitETOFTrackMatching  = 0x00000004;
+    XX(0);
 
-	//EXTRACT L4 TRACK INFO FROM DAQ FILE
-	//daq_dta *dd  = rdr->det("l3")->get("legacy");
-	//daq_dta *dd  = rdr->det("hlt")->get("gl3");
-	daq_dta *dd    = rdr->det("l4")->get("gl3");
-	daq_dta *ddTof = rdr->det("trg")->get("raw");
-	int	 daqID = rdr->daqbits;
+    //EXTRACT L4 TRACK INFO FROM DAQ FILE
+    //daq_dta *dd  = rdr->det("l3")->get("legacy");
+    //daq_dta *dd  = rdr->det("hlt")->get("gl3");
+    daq_dta *dd    = rdr->det("l4")->get("gl3");
+    XX(0);
+    daq_dta *ddTof = rdr->det("trg")->get("raw");
+    XX(0);
+    int	 daqID = rdr->daqbits;
 
-	if(!dd) {
-		LOG(DBG, "No HLT in this event");
-		XX(0);
-		return;
-	}
+    XX(0);
+    if(!dd) {
+	LOG(DBG, "No HLT in this event");
+	XX(0);
+	return;
+    }
 
-        if (!eventCounter) {
-            first_evt_time = rdr->evt_time;
-        }
+    XX(0);
+    if (!eventCounter) {
+	first_evt_time = rdr->evt_time;
+    }
 
-        unsigned int evt_time = rdr->evt_time;
+    unsigned int evt_time = rdr->evt_time;
         
-        eventCounter++;
+    eventCounter++;
 
 
-	HLT_EVE			*hlt_eve     = NULL;
-	HLT_TOF			*hlt_tof     = NULL;
-	HLT_PVPD		*hlt_pvpd    = NULL;
-	HLT_EMC			*hlt_emc     = NULL;
-	HLT_GT			*hlt_gt      = NULL;
-	HLT_RHO			*hlt_dipi    = NULL;
-	HLT_DIEP		*hlt_upcdiep = NULL;
-	HLT_PT			*hlt_pt      = NULL;
-	HLT_NODE		*hlt_node    = NULL;
-	HLT_HIPT		*hlt_hipt    = NULL;
-	HLT_DIEP		*hlt_diep    = NULL;
-	HLT_DIEP		*hlt_Twrdiep = NULL;
-	HLT_HF			*hlt_hf      = NULL;
-	HLT_MTD			*hlt_mtd     = NULL;
-	HLT_MTDQuarkonium	*hlt_mtdqm   = NULL;
-        HLT_ETOF                *hlt_etof    = NULL;
+    HLT_EVE			*hlt_eve     = NULL;
+    HLT_TOF			*hlt_tof     = NULL;
+    HLT_PVPD		*hlt_pvpd    = NULL;
+    HLT_EMC			*hlt_emc     = NULL;
+    HLT_GT			*hlt_gt      = NULL;
+    HLT_RHO			*hlt_dipi    = NULL;
+    HLT_DIEP		*hlt_upcdiep = NULL;
+    HLT_PT			*hlt_pt      = NULL;
+    HLT_NODE		*hlt_node    = NULL;
+    HLT_HIPT		*hlt_hipt    = NULL;
+    HLT_DIEP		*hlt_diep    = NULL;
+    HLT_DIEP		*hlt_Twrdiep = NULL;
+    HLT_HF			*hlt_hf      = NULL;
+    HLT_MTD			*hlt_mtd     = NULL;
+    HLT_MTDQuarkonium	*hlt_mtdqm   = NULL;
+    HLT_ETOF                *hlt_etof    = NULL;
 
-	while(dd && dd->iterate()) {
-		hlt_gl3_t *hlt = (hlt_gl3_t *) dd->Void;
+    XX(0);
+    while(dd && dd->iterate()) {
+	XX(0);
+	hlt_gl3_t *hlt = (hlt_gl3_t *) dd->Void;
 
-		//LOG("JEFF", "(evt: %d) %p %d", rdr->event_number, hlt->buff, hlt->bytes);
+	//LOG("JEFF", "(evt: %d) %p %d", rdr->event_number, hlt->buff, hlt->bytes);
 
-		if(strcmp(hlt->name, "HLT_EVE") == 0) hlt_eve = (HLT_EVE *)hlt->data;
-		else if(strcmp(hlt->name, "HLT_TOF") == 0) hlt_tof = (HLT_TOF *)hlt->data;
-		else if(strcmp(hlt->name, "HLT_PVPD") == 0) hlt_pvpd = (HLT_PVPD *)hlt->data;
-		else if(strcmp(hlt->name, "HLT_EMC") == 0) hlt_emc = (HLT_EMC *)hlt->data;
-		else if(strcmp(hlt->name, "HLT_GT") == 0) hlt_gt = (HLT_GT *)hlt->data;
-		else if(strcmp(hlt->name, "HLT_PT") == 0) hlt_pt = (HLT_PT *)hlt->data;
-		else if(strcmp(hlt->name, "HLT_NODE") == 0) hlt_node = (HLT_NODE *)hlt->data;
-		else if(strcmp(hlt->name, "HLT_HIPT") == 0) hlt_hipt = (HLT_HIPT *)hlt->data;
-		else if(strcmp(hlt->name, "HLT_DIEP") == 0) hlt_diep = (HLT_DIEP *)hlt->data;
-		else if(strcmp(hlt->name, "HLT_HF") == 0) hlt_hf = (HLT_HF *)hlt->data;
-		else if(strcmp(hlt->name, "HLT_UPCRHO") == 0) hlt_dipi = (HLT_RHO *)hlt->data;
-		else if(strcmp(hlt->name, "HLT_UPCDIEP") == 0) hlt_upcdiep = (HLT_DIEP *)hlt->data;
-		else if(strcmp(hlt->name, "HLT_MTDDIMU") == 0) hlt_mtd = (HLT_MTD *)hlt->data;
-		else if(strcmp(hlt->name, "HLT_MTDQuarkonium") == 0) hlt_mtdqm = (HLT_MTDQuarkonium *)hlt->data;
-		else if(strcmp(hlt->name, "HLT_DIEP2Twr") == 0) hlt_Twrdiep = (HLT_DIEP *)hlt->data;
-		else if(strcmp(hlt->name, "HLT_ETOF") == 0) hlt_etof = (HLT_ETOF *)hlt->data;
-	}
+	if(strcmp(hlt->name, "HLT_EVE") == 0) hlt_eve = (HLT_EVE *)hlt->data;
+	else if(strcmp(hlt->name, "HLT_TOF") == 0) hlt_tof = (HLT_TOF *)hlt->data;
+	else if(strcmp(hlt->name, "HLT_PVPD") == 0) hlt_pvpd = (HLT_PVPD *)hlt->data;
+	else if(strcmp(hlt->name, "HLT_EMC") == 0) hlt_emc = (HLT_EMC *)hlt->data;
+	else if(strcmp(hlt->name, "HLT_GT") == 0) hlt_gt = (HLT_GT *)hlt->data;
+	else if(strcmp(hlt->name, "HLT_PT") == 0) hlt_pt = (HLT_PT *)hlt->data;
+	else if(strcmp(hlt->name, "HLT_NODE") == 0) hlt_node = (HLT_NODE *)hlt->data;
+	else if(strcmp(hlt->name, "HLT_HIPT") == 0) hlt_hipt = (HLT_HIPT *)hlt->data;
+	else if(strcmp(hlt->name, "HLT_DIEP") == 0) hlt_diep = (HLT_DIEP *)hlt->data;
+	else if(strcmp(hlt->name, "HLT_HF") == 0) hlt_hf = (HLT_HF *)hlt->data;
+	else if(strcmp(hlt->name, "HLT_UPCRHO") == 0) hlt_dipi = (HLT_RHO *)hlt->data;
+	else if(strcmp(hlt->name, "HLT_UPCDIEP") == 0) hlt_upcdiep = (HLT_DIEP *)hlt->data;
+	else if(strcmp(hlt->name, "HLT_MTDDIMU") == 0) hlt_mtd = (HLT_MTD *)hlt->data;
+	else if(strcmp(hlt->name, "HLT_MTDQuarkonium") == 0) hlt_mtdqm = (HLT_MTDQuarkonium *)hlt->data;
+	else if(strcmp(hlt->name, "HLT_DIEP2Twr") == 0) hlt_Twrdiep = (HLT_DIEP *)hlt->data;
+	else if(strcmp(hlt->name, "HLT_ETOF") == 0) hlt_etof = (HLT_ETOF *)hlt->data;
+    }
 
-	
-	if(hlt_eve     == NULL) { LOG(ERR, "BAD event %d: EVE.  Discard", rdr->event_number); return; }
-	if(hlt_tof     == NULL) { LOG(ERR, "BAD event %d: TOF.  Discard", rdr->event_number); return; }
-	if(hlt_pvpd    == NULL) { LOG(ERR, "BAD event %d: PVPD.  Discard", rdr->event_number); return; }
-	if(hlt_emc     == NULL) { LOG(ERR, "BAD event %d: EMC.  Discard", rdr->event_number); return; }
-	if(hlt_gt      == NULL) { LOG(ERR, "BAD event %d: GT.  Discard", rdr->event_number); return; }
-	if(hlt_dipi    == NULL) { LOG(ERR, "BAD event %d: DIPI.  Discard", rdr->event_number); return; }
-	if(hlt_upcdiep == NULL) { LOG(ERR, "BAD event %d: UPCDIEP.  Discard", rdr->event_number); return; }
-	if(hlt_pt      == NULL) { LOG(ERR, "BAD event %d: PT.  Discard", rdr->event_number); return; }
-	if(hlt_node    == NULL) { LOG(ERR, "BAD event %d: NODE.  Discard", rdr->event_number); return; }
-	if(hlt_hipt    == NULL) { LOG(ERR, "BAD event %d: HIPT.  Discard", rdr->event_number); return; }
-	if(hlt_diep    == NULL) { LOG(ERR, "BAD event %d: DIEP.  Discard", rdr->event_number); return; }
-	if(hlt_Twrdiep == NULL) { LOG(ERR, "BAD event %d: TWRDIEP.  Discard", rdr->event_number); return; }
-	if(hlt_hf      == NULL) { LOG(ERR, "BAD event %d: HF.  Discard", rdr->event_number); return; }
-	if(hlt_mtd     == NULL) { LOG(ERR, "BAD event %d: MTD.  Discard", rdr->event_number); return; }
-	if(hlt_mtdqm   == NULL) { LOG(ERR, "BAD event %d: MTDQM.  Discard", rdr->event_number); return; }
-        if(hlt_etof    == NULL) { LOG(ERR, "BAD event %d: ETOF. Discard", rdr->event_number); return; }
+    XX(0);
+    if(hlt_eve     == NULL) { LOG(ERR, "BAD event %d: EVE.  Discard", rdr->event_number); return; }
+    if(hlt_tof     == NULL) { LOG(ERR, "BAD event %d: TOF.  Discard", rdr->event_number); return; }
+    if(hlt_pvpd    == NULL) { LOG(ERR, "BAD event %d: PVPD.  Discard", rdr->event_number); return; }
+    if(hlt_emc     == NULL) { LOG(ERR, "BAD event %d: EMC.  Discard", rdr->event_number); return; }
+    if(hlt_gt      == NULL) { LOG(ERR, "BAD event %d: GT.  Discard", rdr->event_number); return; }
+    if(hlt_dipi    == NULL) { LOG(ERR, "BAD event %d: DIPI.  Discard", rdr->event_number); return; }
+    if(hlt_upcdiep == NULL) { LOG(ERR, "BAD event %d: UPCDIEP.  Discard", rdr->event_number); return; }
+    if(hlt_pt      == NULL) { LOG(ERR, "BAD event %d: PT.  Discard", rdr->event_number); return; }
+    if(hlt_node    == NULL) { LOG(ERR, "BAD event %d: NODE.  Discard", rdr->event_number); return; }
+    if(hlt_hipt    == NULL) { LOG(ERR, "BAD event %d: HIPT.  Discard", rdr->event_number); return; }
+    if(hlt_diep    == NULL) { LOG(ERR, "BAD event %d: DIEP.  Discard", rdr->event_number); return; }
+    if(hlt_Twrdiep == NULL) { LOG(ERR, "BAD event %d: TWRDIEP.  Discard", rdr->event_number); return; }
+    if(hlt_hf      == NULL) { LOG(ERR, "BAD event %d: HF.  Discard", rdr->event_number); return; }
+    if(hlt_mtd     == NULL) { LOG(ERR, "BAD event %d: MTD.  Discard", rdr->event_number); return; }
+    if(hlt_mtdqm   == NULL) { LOG(ERR, "BAD event %d: MTDQM.  Discard", rdr->event_number); return; }
+    if(hlt_etof    == NULL) { LOG(ERR, "BAD event %d: ETOF. Discard", rdr->event_number); return; }
 
-	// Check Version
-	if(hlt_eve->version != HLT_GL3_VERSION) {
-		LOG(ERR, "ERROR: HLTFormats version doesn't match DAQ file version!");
-		LOG(ERR, "DAQ data version is %X, but HLTFormats version is %X", 
-		    hlt_eve->version, HLT_GL3_VERSION);
-		return;
-	}
+    XX(0);
+    // Check Version
+    if(hlt_eve->version != HLT_GL3_VERSION) {
+	LOG(ERR, "ERROR: HLTFormats version doesn't match DAQ file version!");
+	LOG(ERR, "DAQ data version is %X, but HLTFormats version is %X", 
+	    hlt_eve->version, HLT_GL3_VERSION);
+	return;
+    }
 
-	unsigned int decision = hlt_eve->hltDecision;
+    XX(0);
+    unsigned int decision = hlt_eve->hltDecision;
 
-	omp_set_nested(1);
-	omp_set_dynamic(0);
+    omp_set_nested(1);
+    omp_set_dynamic(0);
+    XX(0);
 #pragma omp parallel sections num_threads(30)
-	{
+    {
 
 #pragma omp section
-	  {
+	{
 	    if(!TriggerFilled) {
 		TriggerFilled = true;
 		addServerTags("L4Trigger");
 	    }
 	    if(decision & triggerBitAllEvents) {
-	      hEvtsAccpt->Fill(0.);
+		hEvtsAccpt->Fill(0.);
 	    }
 	    if(decision & triggerBitBesgoodEvents) {
 		hEvtsAccpt->Fill(1.);
 	    }
 	    if(decision & triggerBitHLTGood2) {
-	      hEvtsAccpt->Fill(2.);
+		hEvtsAccpt->Fill(2.);
 	    }
 	    if(decision & triggerBitFixedTarget) {
 		hEvtsAccpt->Fill(3);
@@ -895,8 +907,8 @@ void l4Builder::event(daqReader *rdr)
 
 	    // fill events
 	    if(!EventFilled) {
-	      EventFilled = true;
-	      addServerTags("L4Event");
+		EventFilled = true;
+		addServerTags("L4Event");
 	    }
 	    float vertX = hlt_eve->vertexX;
 	    float vertY = hlt_eve->vertexY;
@@ -936,165 +948,165 @@ void l4Builder::event(daqReader *rdr)
             hBunchId->Fill(hlt_eve->bunch_id);
 
             if(daqID & upc) {
-	      hVertexX_UPC->Fill(vertX);
-	      hVertexY_UPC->Fill(vertY);
-	      hVertexZ_UPC->Fill(vertZ);
-	      hLm_VertexX_UPC->Fill(lmvertX);
-	      hLm_VertexY_UPC->Fill(lmvertY);
-	      hLm_VertexZ_UPC->Fill(lmvertZ);
-	      hVzvpd_Vz_UPC->Fill(VzVpd, lmvertZ);
-	      hVzDiff_UPC->Fill(VzVpd - lmvertZ);
+		hVertexX_UPC->Fill(vertX);
+		hVertexY_UPC->Fill(vertY);
+		hVertexZ_UPC->Fill(vertZ);
+		hLm_VertexX_UPC->Fill(lmvertX);
+		hLm_VertexY_UPC->Fill(lmvertY);
+		hLm_VertexZ_UPC->Fill(lmvertZ);
+		hVzvpd_Vz_UPC->Fill(VzVpd, lmvertZ);
+		hVzDiff_UPC->Fill(VzVpd - lmvertZ);
 	    }
 
 	    //BesGood
 	    if(decision & triggerBitBesgoodEvents) {
-	      if(!BESGoodFilled) {
-		BESGoodFilled = true;
-		addServerTags("L4BesGoodEvents");
-	      }
-	      hBesGoodVertexXY->Fill(vertX, vertY);
-	      hBesGoodVertexZ->Fill(vertZ);
-	      hBesGoodVr->Fill(vertR);
-	      hBesGoodVrVsVz->Fill(vertZ,vertR);
-              hBesGoodBunchId->Fill(hlt_eve->bunch_id);
+		if(!BESGoodFilled) {
+		    BESGoodFilled = true;
+		    addServerTags("L4BesGoodEvents");
+		}
+		hBesGoodVertexXY->Fill(vertX, vertY);
+		hBesGoodVertexZ->Fill(vertZ);
+		hBesGoodVr->Fill(vertR);
+		hBesGoodVrVsVz->Fill(vertZ,vertR);
+		hBesGoodBunchId->Fill(hlt_eve->bunch_id);
 
 
-	      if (hlt_pt->nPrimaryTracks > 200) {
-		  // pBesGoodVxT->Fill(evt_time - first_evt_time, vertX);
-		  // pBesGoodVyT->Fill(evt_time - first_evt_time, vertY);
-		  hBesGoodVxT->Fill(evt_time - first_evt_time, vertX);
-		  hBesGoodVyT->Fill(evt_time - first_evt_time, vertY);
-	      }
+		if (hlt_pt->nPrimaryTracks > 200) {
+		    // pBesGoodVxT->Fill(evt_time - first_evt_time, vertX);
+		    // pBesGoodVyT->Fill(evt_time - first_evt_time, vertY);
+		    hBesGoodVxT->Fill(evt_time - first_evt_time, vertX);
+		    hBesGoodVyT->Fill(evt_time - first_evt_time, vertY);
+		}
 
-              // Operations only interested in hltgood events
-              hBbceTAC->Fill(hlt_eve->bbce);
-              hBbcwTAC->Fill(hlt_eve->bbcw);
-              hVpdeTAC->Fill(hlt_eve->vpde);
-              hVpdwTAC->Fill(hlt_eve->vpdw);
-              hEpdeTAC->Fill(hlt_eve->epde);
-              hEpdwTAC->Fill(hlt_eve->epdw);
+		// Operations only interested in hltgood events
+		hBbceTAC->Fill(hlt_eve->bbce);
+		hBbcwTAC->Fill(hlt_eve->bbcw);
+		hVpdeTAC->Fill(hlt_eve->vpde);
+		hVpdwTAC->Fill(hlt_eve->vpdw);
+		hEpdeTAC->Fill(hlt_eve->epde);
+		hEpdwTAC->Fill(hlt_eve->epdw);
             }
 	    
 	    //HLTGood2
 	    
 	    if(decision & triggerBitHLTGood2) {
-	      if(!HLTGood2Filled) {
-		HLTGood2Filled = true;
-		addServerTags("L4HLTGood2");
-	      }
-	      hHLTGood2VertexXY->Fill(vertX, vertY);
-	      hHLTGood2VertexZ->Fill(vertZ);
-	      hHLTGood2Vr->Fill(vertR);
+		if(!HLTGood2Filled) {
+		    HLTGood2Filled = true;
+		    addServerTags("L4HLTGood2");
+		}
+		hHLTGood2VertexXY->Fill(vertX, vertY);
+		hHLTGood2VertexZ->Fill(vertZ);
+		hHLTGood2Vr->Fill(vertR);
 
-	      if (hlt_pt->nPrimaryTracks > 2) {
-		  // pHLTGood2VzT->Fill(evt_time - first_evt_time, vertZ);
-		  hHLTGood2VzT->Fill(evt_time - first_evt_time, vertZ);
-	      }
+		if (hlt_pt->nPrimaryTracks > 2) {
+		    // pHLTGood2VzT->Fill(evt_time - first_evt_time, vertZ);
+		    hHLTGood2VzT->Fill(evt_time - first_evt_time, vertZ);
+		}
 	    }
 	    
 	    //BESMonitor
 	    
 	    if(decision & triggerBitBesMonitor) {
-	      if(!BESMonitorFilled) {
-		BESMonitorFilled = true;
-		addServerTags("L4BesMonitor");
-	      }
-	      hBesMonitorVertexXY->Fill(vertX, vertY);
-	      hBesMonitorVr->Fill(vertR);
-              hBesMonitorVz->Fill(vertZ);
-              hBesMonitorVertexRZ->Fill(vertZ, vertR);
+		if(!BESMonitorFilled) {
+		    BESMonitorFilled = true;
+		    addServerTags("L4BesMonitor");
+		}
+		hBesMonitorVertexXY->Fill(vertX, vertY);
+		hBesMonitorVr->Fill(vertR);
+		hBesMonitorVz->Fill(vertZ);
+		hBesMonitorVertexRZ->Fill(vertZ, vertR);
 	    }
 	    
 	    //FixedTarget
 	    
 	    if(decision & triggerBitFixedTarget) {
-	      if(!FixedTargetFilled) {
-		FixedTargetFilled = true;
-		addServerTags("L4FixedTarget");
-	      }
-	      hFixedTargetVertexXY->Fill(vertX, vertY);
-	      hFixedTargetVertexYZ->Fill(vertZ, vertY);
-	      hFixedTargetVr->Fill(vertR);
-	      hFixedTarget_VertexZ->Fill(vertZ);
-              hFixedTargetBbceTAC->Fill(hlt_eve->bbce);
-              hFixedTargetBbcwTAC->Fill(hlt_eve->bbcw);
-              hFixedTargetVpdeTAC->Fill(hlt_eve->vpde);
-              hFixedTargetVpdwTAC->Fill(hlt_eve->vpdw);
-              hFixedTargetEpdeTAC->Fill(hlt_eve->epde);
-              hFixedTargetEpdwTAC->Fill(hlt_eve->epdw);
+		if(!FixedTargetFilled) {
+		    FixedTargetFilled = true;
+		    addServerTags("L4FixedTarget");
+		}
+		hFixedTargetVertexXY->Fill(vertX, vertY);
+		hFixedTargetVertexYZ->Fill(vertZ, vertY);
+		hFixedTargetVr->Fill(vertR);
+		hFixedTarget_VertexZ->Fill(vertZ);
+		hFixedTargetBbceTAC->Fill(hlt_eve->bbce);
+		hFixedTargetBbcwTAC->Fill(hlt_eve->bbcw);
+		hFixedTargetVpdeTAC->Fill(hlt_eve->vpde);
+		hFixedTargetVpdwTAC->Fill(hlt_eve->vpdw);
+		hFixedTargetEpdeTAC->Fill(hlt_eve->epde);
+		hFixedTargetEpdwTAC->Fill(hlt_eve->epdw);
 	    }
 	    
 	    //FixedTargetMonitor
 	    
 	    if(decision & triggerBitFixedTargetMonitor) {
-	      if(!FixedTargetMonitorFilled) {
-		FixedTargetMonitorFilled = true;
-		addServerTags("L4FixedTargetMonitor");
-	      }
-	      hFixedTargetMonitorVertexXY->Fill(vertX, vertY);
-	      hFixedTargetMonitorVertexYZ->Fill(vertZ, vertY);
-	      hFixedTargetMonitorVr->Fill(vertR);
-	      hFixedTargetMonitor_VertexZ->Fill(vertZ);
+		if(!FixedTargetMonitorFilled) {
+		    FixedTargetMonitorFilled = true;
+		    addServerTags("L4FixedTargetMonitor");
+		}
+		hFixedTargetMonitorVertexXY->Fill(vertX, vertY);
+		hFixedTargetMonitorVertexYZ->Fill(vertZ, vertY);
+		hFixedTargetMonitorVr->Fill(vertR);
+		hFixedTargetMonitor_VertexZ->Fill(vertZ);
 	    }
 	    
 	    if(decision & triggerBitDiElectron) {
-	      if(!DiElectronFilled) {
-		DiElectronFilled = true;
-		addServerTags("L4DiElectron");
-	      }
+		if(!DiElectronFilled) {
+		    DiElectronFilled = true;
+		    addServerTags("L4DiElectron");
+		}
 	    }
 	    
 	    if(!GlobalTracksFilled) {
-	      GlobalTracksFilled = true;
-	      addServerTags("L4GlobalTracks");
+		GlobalTracksFilled = true;
+		addServerTags("L4GlobalTracks");
 	    }
 	    
 	    if(!TOFFilled) {
-	      TOFFilled = true;
-	      addServerTags("L4TOF");
+		TOFFilled = true;
+		addServerTags("L4TOF");
 	    }
 
 	    if(!EMCFilled) {
-	      EMCFilled = true;
-	      addServerTags("L4EMC");
+		EMCFilled = true;
+		addServerTags("L4EMC");
 	    }
 	    
 	    if(!PrimaryTracksFilled) {
-	      PrimaryTracksFilled = true;
-	      addServerTags("L4PrimaryTracks");
+		PrimaryTracksFilled = true;
+		addServerTags("L4PrimaryTracks");
 	    }
 	    
 	    if(!HeavyFragmentFilled) {
-	      HeavyFragmentFilled = true;
-	      addServerTags("L4HeavyFragment");
+		HeavyFragmentFilled = true;
+		addServerTags("L4HeavyFragment");
 	    }
 	    
 	    if(decision & triggerBitDiElectron2Twr) {
-	      if(!DiElectron2TwrFilled) {
-		DiElectron2TwrFilled = true;
-		addServerTags("L4DiElectron2Twr");
-	      }
+		if(!DiElectron2TwrFilled) {
+		    DiElectron2TwrFilled = true;
+		    addServerTags("L4DiElectron2Twr");
+		}
 	    }
 	    
 	    if(decision & triggerBitUPC) {
-	      if(!UPCFilled) {
-		UPCFilled = true;
-		addServerTags("L4UPC");
-	      }
+		if(!UPCFilled) {
+		    UPCFilled = true;
+		    addServerTags("L4UPC");
+		}
 	    }
 	    
 	    if(decision & triggerBitDiMuon) {
-	      if(!DiMuonFilled) {
-		DiMuonFilled = true;
-		addServerTags("L4DiMuon");
-	      }
+		if(!DiMuonFilled) {
+		    DiMuonFilled = true;
+		    addServerTags("L4DiMuon");
+		}
 	    }
 	    
 	    if(decision & triggerBitUPCDiElectron) {
-	      if(!UPCDiElectronFilled) {
-		UPCDiElectronFilled = true;
-		addServerTags("L4UPCDiElectron");
-	      }
+		if(!UPCDiElectronFilled) {
+		    UPCDiElectronFilled = true;
+		    addServerTags("L4UPCDiElectron");
+		}
 	    }
 	    
 
@@ -1106,326 +1118,329 @@ void l4Builder::event(daqReader *rdr)
 	    //hBesGoodVyT->Fill(evt_time - first_evt_time, ((rdr->seq % 150) - 75.0)/75.0);
 	    //hHLTGood2VzT->Fill(evt_time - first_evt_time, rdr->seq % 150);
 	    PCP;
-	  }
+	}
 	  
 #pragma omp section
-	  {
+	{
 	    // fill ToF hits
 
 	    for(u_int i = 0; i < hlt_tof->nTofHits; i++) {
-	      short trayId   = hlt_tof->tofHit[i].trayId;
-	      short channel  = hlt_tof->tofHit[i].channel;
-	      float tdc      = hlt_tof->tofHit[i].tdc;
-	      float triggertime = hlt_tof->tofHit[i].triggertime;
-	      hTrayID_TrgTime->Fill(trayId, tdc - triggertime);
-	      hchannelID->Fill(channel);
+		short trayId   = hlt_tof->tofHit[i].trayId;
+		short channel  = hlt_tof->tofHit[i].channel;
+		float tdc      = hlt_tof->tofHit[i].tdc;
+		float triggertime = hlt_tof->tofHit[i].triggertime;
+		hTrayID_TrgTime->Fill(trayId, tdc - triggertime);
+		hchannelID->Fill(channel);
 	    }
 
 	    // fill pVPD hit
 	    
 	    for(u_int i = 0; i < hlt_pvpd->nPvpdHits; i++) {
-	      short trayId      = hlt_pvpd->pvpdHit[i].trayId;
-	      float tdc         = hlt_pvpd->pvpdHit[i].tdc;
-	      float triggertime = hlt_pvpd->pvpdHit[i].triggertime;
-	      hTrayID_TrgTime->Fill(trayId, tdc - triggertime);
+		short trayId      = hlt_pvpd->pvpdHit[i].trayId;
+		float tdc         = hlt_pvpd->pvpdHit[i].tdc;
+		float triggertime = hlt_pvpd->pvpdHit[i].triggertime;
+		hTrayID_TrgTime->Fill(trayId, tdc - triggertime);
 	    }
-	  }
+	}
 
 #pragma omp section
-          {
-              for (int i = 0; i < hlt_etof->nETofHits; ++i) {
-                  const hlt_ETofHit& hit = hlt_etof->etofHit[i];
-                  hEtofHitsXY->Fill(hit.globalX, hit.globalY);
+	{
+	    for (int i = 0; i < hlt_etof->nETofHits; ++i) {
+		const hlt_ETofHit& hit = hlt_etof->etofHit[i];
+		hEtofHitsXY->Fill(hit.globalX, hit.globalY);
 
-                  int mrpcidx = (hit.sector - 13) * 9 + (hit.module - 1 ) * 3 + hit.counter;
-                  hEtofLocalYMrpc->Fill(mrpcidx, hit.localY);
-              }
+		int mrpcidx = (hit.sector - 13) * 9 + (hit.module - 1 ) * 3 + hit.counter;
+		hEtofLocalYMrpc->Fill(mrpcidx, hit.localY);
+	    }
 
-              pEtofNhitsPerEvent->Fill(evt_time - first_evt_time, hlt_etof->nETofHits);
+	    pEtofNhitsPerEvent->Fill(evt_time - first_evt_time, hlt_etof->nETofHits);
               
-              for(u_int i = 0; i < hlt_node->nNodes; i++) {
-                  if (hlt_node->node[i].etofBeta <= 0) continue;
-                  int globalTrackSN = hlt_node->node[i].globalTrackSN;
-                  hlt_track gTrack = hlt_gt->globalTrack[globalTrackSN];
+	    for(u_int i = 0; i < hlt_node->nNodes; i++) {
+		if (hlt_node->node[i].etofBeta <= 0) continue;
+		int globalTrackSN = hlt_node->node[i].globalTrackSN;
+		hlt_track gTrack = hlt_gt->globalTrack[globalTrackSN];
 
-                  int   q  = gTrack.q;
-                  float pt = gTrack.pt;
-                  float pz = gTrack.tanl * gTrack.pt;
-                  float p  = sqrt(pt*pt + pz*pz);
+		int   q  = gTrack.q;
+		float pt = gTrack.pt;
+		float pz = gTrack.tanl * gTrack.pt;
+		float p  = sqrt(pt*pt + pz*pz);
 
-                  hEtofInvBeta->Fill(q*p, 1.0/hlt_node->node[i].etofBeta);
-              }
-          }
-          
+		hEtofInvBeta->Fill(q*p, 1.0/hlt_node->node[i].etofBeta);
+	    }
+	}
+	XX(0);
 #pragma omp section
-	  {
+	{
 	    // fill EMC
 	    
 	    for(u_int i = 0; i < hlt_emc->nEmcTowers; i++) {
-	      float energy     = hlt_emc->emcTower[i].energy;
-	      float phi   = hlt_emc->emcTower[i].phi;
-	      float  eta   = hlt_emc->emcTower[i].eta;
-	      int softId  = hlt_emc->emcTower[i].softId;
-	      int daqId   = hlt_emc->emcTower[i].daqId;
-	      hTowerEnergy->Fill(energy);//run
-	      hTowerDaqId->Fill(daqId);  //run
-	      hTowerSoftId->Fill(softId);  //run
-	      hTowerEtaPhi->Fill(phi, eta); //run
+		float energy     = hlt_emc->emcTower[i].energy;
+		float phi   = hlt_emc->emcTower[i].phi;
+		float  eta   = hlt_emc->emcTower[i].eta;
+		int softId  = hlt_emc->emcTower[i].softId;
+		int daqId   = hlt_emc->emcTower[i].daqId;
+		hTowerEnergy->Fill(energy);//run
+		hTowerDaqId->Fill(daqId);  //run
+		hTowerSoftId->Fill(softId);  //run
+		hTowerEtaPhi->Fill(phi, eta); //run
 	      
-	      if(daqID & upc) {
-		hTowerEnergy_UPC->Fill(energy);//run
-		hTowerDaqId_UPC->Fill(daqId);  //run
-		hTowerSoftId_UPC->Fill(softId);  //run
-		hTowerEtaPhi_UPC->Fill(phi, eta); //run
-	      }
+		if(daqID & upc) {
+		    hTowerEnergy_UPC->Fill(energy);//run
+		    hTowerDaqId_UPC->Fill(daqId);  //run
+		    hTowerSoftId_UPC->Fill(softId);  //run
+		    hTowerEtaPhi_UPC->Fill(phi, eta); //run
+		}
 	    }
-	  }
+	}
 	  
 	  
 #pragma omp section
-	  {
+	{
 	    // global track
             for(u_int i = 0; i < (u_int)hlt_gt->nGlobalTracks; i++) {
-	      int nHits = hlt_gt->globalTrack[i].nHits;
+		int nHits = hlt_gt->globalTrack[i].nHits;
 	     	      
-	      if(hlt_gt->globalTrack[i].flag < 0.) continue;
-	      float pt = hlt_gt->globalTrack[i].pt;
-	      float pz = hlt_gt->globalTrack[i].tanl * pt;
-	      float p  = TMath::Sqrt(pt*pt+pz*pz);
-
-              float phi = hlt_gt->globalTrack[i].psi;
-              if(phi < 0.0) phi += twopi;
-
-              float eta = 0.0;
-	      if(p==pz&&pz>0) eta = 10e10 ;
-	      if(p==pz&&pz<0) eta = -10e10 ;
-	      eta = 0.5*TMath::Log((p+pz)/(p-pz)); 
-	      
-	      hGlob_Eta->Fill(eta);	      
-
-#if 0
-	      if(nHits >= 25 && fabs(eta) < 1.) {
-		hGlob_Pt->Fill(pt);
-		hGlob_Phi->Fill(phi);
-	      }
-# else
-              hGlob_Pt->Fill(pt);
-              hGlob_Phi->Fill(phi);
-#endif
-            }
-	  }
-
-
-#pragma omp section
-	  {
-	    // global track
-	    for(u_int i = 0; i < (u_int)hlt_gt->nGlobalTracks; i++) {
-	      int nHits = hlt_gt->globalTrack[i].nHits;
-	     	      
-	      if(hlt_gt->globalTrack[i].flag < 0.) continue;
-	      float pt = hlt_gt->globalTrack[i].pt;
-	      float pz = hlt_gt->globalTrack[i].tanl * pt;
-	      float p  = TMath::Sqrt(pt*pt+pz*pz);
-	      float eta = 0.0;
-	      if(p==pz&&pz>0) eta = 10e10 ;
-	      if(p==pz&&pz<0) eta = -10e10 ;
-	      eta = 0.5*TMath::Log((p+pz)/(p-pz)); 
-	      
-	      if(nHits >= 25 && fabs(eta) < 1.) {
-		float phi = hlt_gt->globalTrack[i].psi;
-		if(phi < 0.0) phi += twopi;
-		if(daqID & upc) {
-		  hGlob_Pt_UPC->Fill(pt);
-		  hGlob_Phi_UPC->Fill(phi);
-		}
-	      }
-
-	      if(decision & triggerBitFixedTarget) {
-		hFixedTarget_Glob_Eta->Fill(eta);
-	      }
-	        
-	      if(decision & triggerBitFixedTargetMonitor) {
-		hFixedTargetMonitor_Glob_Eta->Fill(eta);
-	      }
-	    }
-	  }
-
-
-#pragma omp section
-	  {
-	 
-	    for(u_int i = 0; i < (u_int)hlt_gt->nGlobalTracks; i++) {
-	      int nHits = hlt_gt->globalTrack[i].nHits;
-	      int ndedx = hlt_gt->globalTrack[i].ndedx;
-
-	      hnhits->Fill(nHits);
-	      hnDedx->Fill(ndedx);
-	   
-	      if(daqID & upc) {
-		hnhits_UPC->Fill(nHits);
-		hnDedx_UPC->Fill(ndedx);
-	      }
-	      
-	      if(hlt_gt->globalTrack[i].flag < 0.) continue;
-	      
-	      if(nHits >= 20 && ndedx >= 15) {
+		if(hlt_gt->globalTrack[i].flag < 0.) continue;
 		float pt = hlt_gt->globalTrack[i].pt;
 		float pz = hlt_gt->globalTrack[i].tanl * pt;
-		int  q  = hlt_gt->globalTrack[i].q;
-		float p = TMath::Sqrt(pt*pt+pz*pz);
-		float dedx = hlt_gt->globalTrack[i].dedx;
-	
-		hGlob_dEdx->Fill(p * q, dedx);
-		if(daqID & upc) {
-		  hGlob_dEdx_UPC->Fill(p * q, dedx);
-		}
+		float p  = TMath::Sqrt(pt*pt+pz*pz);
 
-		if( ndedx >= 20) {
-		  hdEdx->Fill(p * q, dedx); //HeavyFragment Trigger
-		  if(daqID & upc) {
-		    hdEdx_UPC->Fill(p * q, dedx); // for HF reference
-		  }
+		float phi = hlt_gt->globalTrack[i].psi;
+		if(phi < 0.0) phi += twopi;
+
+		float eta = 0.0;
+		if(p==pz&&pz>0) eta = 10e10 ;
+		if(p==pz&&pz<0) eta = -10e10 ;
+		eta = 0.5*TMath::Log((p+pz)/(p-pz)); 
+	      
+		hGlob_Eta->Fill(eta);	      
+
+#if 0
+		if(nHits >= 25 && fabs(eta) < 1.) {
+		    hGlob_Pt->Fill(pt);
+		    hGlob_Phi->Fill(phi);
 		}
-	      }
-	    }
-	  }
+# else
+		hGlob_Pt->Fill(pt);
+		hGlob_Phi->Fill(phi);
+#endif
+            }
+	}
+	XX(0);
 
 
 #pragma omp section
-	  {
+	{
+	    // global track
+	    for(u_int i = 0; i < (u_int)hlt_gt->nGlobalTracks; i++) {
+		int nHits = hlt_gt->globalTrack[i].nHits;
+	     	      
+		if(hlt_gt->globalTrack[i].flag < 0.) continue;
+		float pt = hlt_gt->globalTrack[i].pt;
+		float pz = hlt_gt->globalTrack[i].tanl * pt;
+		float p  = TMath::Sqrt(pt*pt+pz*pz);
+		float eta = 0.0;
+		if(p==pz&&pz>0) eta = 10e10 ;
+		if(p==pz&&pz<0) eta = -10e10 ;
+		eta = 0.5*TMath::Log((p+pz)/(p-pz)); 
+	      
+		if(nHits >= 25 && fabs(eta) < 1.) {
+		    float phi = hlt_gt->globalTrack[i].psi;
+		    if(phi < 0.0) phi += twopi;
+		    if(daqID & upc) {
+			hGlob_Pt_UPC->Fill(pt);
+			hGlob_Phi_UPC->Fill(phi);
+		    }
+		}
+
+		if(decision & triggerBitFixedTarget) {
+		    hFixedTarget_Glob_Eta->Fill(eta);
+		}
+	        
+		if(decision & triggerBitFixedTargetMonitor) {
+		    hFixedTargetMonitor_Glob_Eta->Fill(eta);
+		}
+	    }
+	}
+
+	XX(0);
+#pragma omp section
+	{
+	 
+	    for(u_int i = 0; i < (u_int)hlt_gt->nGlobalTracks; i++) {
+		int nHits = hlt_gt->globalTrack[i].nHits;
+		int ndedx = hlt_gt->globalTrack[i].ndedx;
+
+		hnhits->Fill(nHits);
+		hnDedx->Fill(ndedx);
+	   
+		if(daqID & upc) {
+		    hnhits_UPC->Fill(nHits);
+		    hnDedx_UPC->Fill(ndedx);
+		}
+	      
+		if(hlt_gt->globalTrack[i].flag < 0.) continue;
+	      
+		if(nHits >= 20 && ndedx >= 15) {
+		    float pt = hlt_gt->globalTrack[i].pt;
+		    float pz = hlt_gt->globalTrack[i].tanl * pt;
+		    int  q  = hlt_gt->globalTrack[i].q;
+		    float p = TMath::Sqrt(pt*pt+pz*pz);
+		    float dedx = hlt_gt->globalTrack[i].dedx;
+	
+		    hGlob_dEdx->Fill(p * q, dedx);
+		    if(daqID & upc) {
+			hGlob_dEdx_UPC->Fill(p * q, dedx);
+		    }
+
+		    if( ndedx >= 20) {
+			hdEdx->Fill(p * q, dedx); //HeavyFragment Trigger
+			if(daqID & upc) {
+			    hdEdx_UPC->Fill(p * q, dedx); // for HF reference
+			}
+		    }
+		}
+	    }
+	}
+	XX(0);
+
+#pragma omp section
+	{
 	    
 	    double Array_dcaXy[hlt_node->nNodes];
 	    double Array_dcaZ[hlt_node->nNodes];
 
+	    XX(0);
 #pragma omp parallel for num_threads(4)
 
 	    for(u_int i = 0; i < (u_int)hlt_node->nNodes; i++) {
-	      int     globalTrackSN  = hlt_node->node[i].globalTrackSN;
-	      int     primaryTrackSN = hlt_node->node[i].primaryTrackSN;
-	      hlt_track   GTrack     = hlt_gt->globalTrack[globalTrackSN];
-	      double  dcaX           = GTrack.r0 * cos(GTrack.phi0) - hlt_eve->lmVertexX;
-	      double  dcaY           = GTrack.r0 * sin(GTrack.phi0) - hlt_eve->lmVertexY;
-	      double  cross          = dcaX * sin(GTrack.psi) - dcaY * cos(GTrack.psi);
-	      double  theSign        = (cross >= 0) ? 1. : -1.;
-	      double  dcaXy          = theSign * sqrt(pow(dcaX, 2) + pow(dcaY, 2));
-	      double  dcaZ           = GTrack.z0 - hlt_eve->lmVertexZ;
+		int     globalTrackSN  = hlt_node->node[i].globalTrackSN;
+		int     primaryTrackSN = hlt_node->node[i].primaryTrackSN;
+		hlt_track   GTrack     = hlt_gt->globalTrack[globalTrackSN];
+		double  dcaX           = GTrack.r0 * cos(GTrack.phi0) - hlt_eve->lmVertexX;
+		double  dcaY           = GTrack.r0 * sin(GTrack.phi0) - hlt_eve->lmVertexY;
+		double  cross          = dcaX * sin(GTrack.psi) - dcaY * cos(GTrack.psi);
+		double  theSign        = (cross >= 0) ? 1. : -1.;
+		double  dcaXy          = theSign * sqrt(pow(dcaX, 2) + pow(dcaY, 2));
+		double  dcaZ           = GTrack.z0 - hlt_eve->lmVertexZ;
 
-	      Array_dcaXy[i]=dcaXy;
-	      Array_dcaZ[i]=dcaZ;
+		Array_dcaXy[i]=dcaXy;
+		Array_dcaZ[i]=dcaZ;
 	    }
-	    
+
+	    XX(0);
 	    for(int j = 0; j < hlt_node->nNodes; j++) {
-	      hDcaXy->Fill(Array_dcaXy[j]);
-	      hDcaZ->Fill(Array_dcaZ[j]);
+		hDcaXy->Fill(Array_dcaXy[j]);
+		hDcaZ->Fill(Array_dcaZ[j]);
 	      
-	      if(daqID & upc) {
-		hDcaXy_UPC->Fill(Array_dcaXy[j]);
-		hDcaZ_UPC->Fill(Array_dcaZ[j]);
-	      }
-	    }
-	  }
-	  
-#pragma omp section
-	  {
-	    for(u_int i = 0; i < (u_int)hlt_node->nNodes; i++) {
-	      int     tofHitSN       = hlt_node->node[i].tofHitSN;
-	       if(tofHitSN >= 0) 
-		{
-		  int     globalTrackSN  = hlt_node->node[i].globalTrackSN;
-		  //int     primaryTrackSN = hlt_node->node[i].primaryTrackSN;
-		  hlt_track   GTrack     = hlt_gt->globalTrack[globalTrackSN];
-		  double  dcaX           = GTrack.r0 * cos(GTrack.phi0) - hlt_eve->lmVertexX;
-		  double  dcaY           = GTrack.r0 * sin(GTrack.phi0) - hlt_eve->lmVertexY;
-		  double  cross          = dcaX * sin(GTrack.psi) - dcaY * cos(GTrack.psi);
-		  double  theSign        = (cross >= 0) ? 1. : -1.;
-		  double  dcaXy          = theSign * sqrt(pow(dcaX, 2) + pow(dcaY, 2));
-		  double  dcaZ           = GTrack.z0 - hlt_eve->lmVertexZ;
-
-		  hDcaXy_TofMatch->Fill(dcaXy);
-		  hDcaZ_TofMatch->Fill(dcaZ);
+		if(daqID & upc) {
+		    hDcaXy_UPC->Fill(Array_dcaXy[j]);
+		    hDcaZ_UPC->Fill(Array_dcaZ[j]);
 		}
 	    }
-	  }
+	}
+	  
+#pragma omp section
+	{
+	    for(u_int i = 0; i < (u_int)hlt_node->nNodes; i++) {
+		int     tofHitSN       = hlt_node->node[i].tofHitSN;
+		if(tofHitSN >= 0) 
+		    {
+			int     globalTrackSN  = hlt_node->node[i].globalTrackSN;
+			//int     primaryTrackSN = hlt_node->node[i].primaryTrackSN;
+			hlt_track   GTrack     = hlt_gt->globalTrack[globalTrackSN];
+			double  dcaX           = GTrack.r0 * cos(GTrack.phi0) - hlt_eve->lmVertexX;
+			double  dcaY           = GTrack.r0 * sin(GTrack.phi0) - hlt_eve->lmVertexY;
+			double  cross          = dcaX * sin(GTrack.psi) - dcaY * cos(GTrack.psi);
+			double  theSign        = (cross >= 0) ? 1. : -1.;
+			double  dcaXy          = theSign * sqrt(pow(dcaX, 2) + pow(dcaY, 2));
+			double  dcaZ           = GTrack.z0 - hlt_eve->lmVertexZ;
+
+			hDcaXy_TofMatch->Fill(dcaXy);
+			hDcaZ_TofMatch->Fill(dcaZ);
+		    }
+	    }
+	}
 
 
 #pragma omp section
-	  {
+	{
 	    for(u_int i = 0; i < (u_int)hlt_node->nNodes; i++) {
-	      int     emcTowerSN     = hlt_node->node[i].emcTowerSN;
-	      if(emcTowerSN >= 0)
-		{
-		  int     globalTrackSN  = hlt_node->node[i].globalTrackSN;
-		  int     primaryTrackSN = hlt_node->node[i].primaryTrackSN;
-		  hlt_track   GTrack     = hlt_gt->globalTrack[globalTrackSN];
-		  double  dcaX           = GTrack.r0 * cos(GTrack.phi0) - hlt_eve->lmVertexX;
-		  double  dcaY           = GTrack.r0 * sin(GTrack.phi0) - hlt_eve->lmVertexY;
-		  double  cross          = dcaX * sin(GTrack.psi) - dcaY * cos(GTrack.psi);
-		  double  theSign        = (cross >= 0) ? 1. : -1.;
-		  double  dcaXy          = theSign * sqrt(pow(dcaX, 2) + pow(dcaY, 2));
-		  double  dcaZ           = GTrack.z0 - hlt_eve->lmVertexZ;
+		int     emcTowerSN     = hlt_node->node[i].emcTowerSN;
+		if(emcTowerSN >= 0)
+		    {
+			int     globalTrackSN  = hlt_node->node[i].globalTrackSN;
+			int     primaryTrackSN = hlt_node->node[i].primaryTrackSN;
+			hlt_track   GTrack     = hlt_gt->globalTrack[globalTrackSN];
+			double  dcaX           = GTrack.r0 * cos(GTrack.phi0) - hlt_eve->lmVertexX;
+			double  dcaY           = GTrack.r0 * sin(GTrack.phi0) - hlt_eve->lmVertexY;
+			double  cross          = dcaX * sin(GTrack.psi) - dcaY * cos(GTrack.psi);
+			double  theSign        = (cross >= 0) ? 1. : -1.;
+			double  dcaXy          = theSign * sqrt(pow(dcaX, 2) + pow(dcaY, 2));
+			double  dcaZ           = GTrack.z0 - hlt_eve->lmVertexZ;
 		  
-		  hDcaXy_EMCMatch->Fill(dcaXy);
-		  hDcaZ_EMCMatch->Fill(dcaZ);
-		}
+			hDcaXy_EMCMatch->Fill(dcaXy);
+			hDcaZ_EMCMatch->Fill(dcaZ);
+		    }
 	    }
-	  }
+	}
 	  
 #pragma omp section
-	  {
+	{
 	    
 	    int count = 0;
 	    int count_UPC = 0;
 	    for(u_int i = 0; i < hlt_node->nNodes; i++) {
-	      //int     globalTrackSN  = hlt_node->node[i].globalTrackSN;
-	      int     primaryTrackSN = hlt_node->node[i].primaryTrackSN;
+		//int     globalTrackSN  = hlt_node->node[i].globalTrackSN;
+		int     primaryTrackSN = hlt_node->node[i].primaryTrackSN;
 
-	      if(primaryTrackSN < 0) continue;
-	      count++;
-	      if(daqID & upc) count_UPC++;
-	      hlt_track PTrack = hlt_pt->primaryTrack[primaryTrackSN];
-	      if(PTrack.flag < 0.) continue;
+		if(primaryTrackSN < 0) continue;
+		count++;
+		if(daqID & upc) count_UPC++;
+		hlt_track PTrack = hlt_pt->primaryTrack[primaryTrackSN];
+		if(PTrack.flag < 0.) continue;
 	     	      
-	      int nHits = PTrack.nHits;
-	      int ndedx = PTrack.ndedx;
-	      int q = PTrack.q;
-	      float pt = PTrack.pt;
-	      float px = cos(PTrack.psi) * PTrack.pt;
-	      float py = sin(PTrack.psi) * PTrack.pt;
-	      float pz = PTrack.tanl * PTrack.pt;	      
+		int nHits = PTrack.nHits;
+		int ndedx = PTrack.ndedx;
+		int q = PTrack.q;
+		float pt = PTrack.pt;
+		float px = cos(PTrack.psi) * PTrack.pt;
+		float py = sin(PTrack.psi) * PTrack.pt;
+		float pz = PTrack.tanl * PTrack.pt;	      
 	      
-	      TVector3 mom(px, py, pz);
-	      float eta = mom.PseudoRapidity();
-	      float phi = mom.Phi();
-	      if(phi < 0.0) phi += twopi;
-	      float p = mom.Mag();
-	      float dedx = PTrack.dedx;
+		TVector3 mom(px, py, pz);
+		float eta = mom.PseudoRapidity();
+		float phi = mom.Phi();
+		if(phi < 0.0) phi += twopi;
+		float p = mom.Mag();
+		float dedx = PTrack.dedx;
 	      
-	      hPrim_Eta->Fill(eta);
-	      if(daqID & upc) hPrim_Eta_UPC->Fill(eta);
-	      if(nHits >= 25 && fabs(eta) < 1.) {
-		hPrim_Pt->Fill(pt);
-		hPrim_Phi->Fill(phi);
-		if(daqID & upc) {
-		  hPrim_Pt_UPC->Fill(pt);
-		  hPrim_Phi_UPC->Fill(phi);
+		hPrim_Eta->Fill(eta);
+		if(daqID & upc) hPrim_Eta_UPC->Fill(eta);
+		if(nHits >= 25 && fabs(eta) < 1.) {
+		    hPrim_Pt->Fill(pt);
+		    hPrim_Phi->Fill(phi);
+		    if(daqID & upc) {
+			hPrim_Pt_UPC->Fill(pt);
+			hPrim_Phi_UPC->Fill(phi);
+		    }
 		}
-	      }
-	      if(decision & triggerBitFixedTarget) {
-		hFixedTarget_Prim_Eta->Fill(eta);
-	      }
-	      if(decision & triggerBitFixedTargetMonitor) {
-		hFixedTargetMonitor_Prim_Eta->Fill(eta);
-	      }
+		if(decision & triggerBitFixedTarget) {
+		    hFixedTarget_Prim_Eta->Fill(eta);
+		}
+		if(decision & triggerBitFixedTargetMonitor) {
+		    hFixedTargetMonitor_Prim_Eta->Fill(eta);
+		}
 	      
-	      if(nHits >= 20 && ndedx >= 15) {
-		hPrim_dEdx->Fill(p * q, dedx);
-		if(daqID & upc) hPrim_dEdx_UPC->Fill(p * q, dedx);
+		if(nHits >= 20 && ndedx >= 15) {
+		    hPrim_dEdx->Fill(p * q, dedx);
+		    if(daqID & upc) hPrim_dEdx_UPC->Fill(p * q, dedx);
 
-		if(p >= 0.5 && p <= 0.6) {
-		  hLn_dEdx->Fill(log(dedx));
-		  if(daqID & upc) hLn_dEdx_UPC->Fill(log(dedx));
+		    if(p >= 0.5 && p <= 0.6) {
+			hLn_dEdx->Fill(log(dedx));
+			if(daqID & upc) hLn_dEdx_UPC->Fill(log(dedx));
+		    }
 		}
-	      }
 	    }
 	    
 	    primaryTracks = count;
@@ -1433,405 +1448,410 @@ void l4Builder::event(daqReader *rdr)
 	    hprimaryMult->Fill(count);
 	    
 	    if(daqID & upc) {
-	      primaryTracks_UPC = count_UPC;
-	      hglobalMult_UPC->Fill(hlt_gt->nGlobalTracks);
-	      hprimaryMult_UPC->Fill(count_UPC);
+		primaryTracks_UPC = count_UPC;
+		hglobalMult_UPC->Fill(hlt_gt->nGlobalTracks);
+		hprimaryMult_UPC->Fill(count_UPC);
 	    }
 	    if(decision & triggerBitBesgoodEvents){
-	      hBesGoodprimaryMult->Fill(count);
+		hBesGoodprimaryMult->Fill(count);
 	    }
 	    if(decision & triggerBitHLTGood2){
-	      hHLTGood2primaryMult->Fill(count);
+		hHLTGood2primaryMult->Fill(count);
 	    }
-	  }
+	}
 
+	XX(0);
 #pragma omp section
-	  {
+	{
 	    // fill nodes
 	    
 	    for(u_int i = 0; i < u_int (hlt_node->nNodes*(1.0/3.0)); i++) {
-	      int  tofHitSN       = hlt_node->node[i].tofHitSN;
+		int  tofHitSN       = hlt_node->node[i].tofHitSN;
 	      
-	      if(tofHitSN >= 0) {
-		int  primaryTrackSN = hlt_node->node[i].primaryTrackSN;	
+		if(tofHitSN >= 0) {
+		    int  primaryTrackSN = hlt_node->node[i].primaryTrackSN;	
 
-		if(primaryTrackSN >= 0) {
-		  int  projChannel = hlt_node->node[i].projChannel;
-		  int  Proj_trayId = hlt_tof->tofHit[tofHitSN].trayId;
+		    if(primaryTrackSN >= 0) {
+			int  projChannel = hlt_node->node[i].projChannel;
+			int  Proj_trayId = hlt_tof->tofHit[tofHitSN].trayId;
 	
-		  for(u_int j = 0; j < hlt_tof->nTofHits; j++) {
-		    int fire_trayId = hlt_tof->tofHit[j].trayId;
+			for(u_int j = 0; j < hlt_tof->nTofHits; j++) {
+			    int fire_trayId = hlt_tof->tofHit[j].trayId;
 	
-		    if(Proj_trayId == fire_trayId) {
-		      hMatchId_fiberId->Fill(projChannel, hlt_tof->tofHit[j].channel);
+			    if(Proj_trayId == fire_trayId) {
+				hMatchId_fiberId->Fill(projChannel, hlt_tof->tofHit[j].channel);
+			    }
+			}
 		    }
-		  }
 		}
-	      }
 	    }
 	}
 	  
+	XX(0);
 #pragma omp section
-	  {
+	{
 	    
 	    for(u_int i = u_int (hlt_node->nNodes*(1.0/3.0)); i < u_int (hlt_node->nNodes*(2.0/3.0)); i++) {
-	      int  tofHitSN       = hlt_node->node[i].tofHitSN;
+		int  tofHitSN       = hlt_node->node[i].tofHitSN;
 	      	      
-	      if(tofHitSN >= 0) {
-		int  primaryTrackSN = hlt_node->node[i].primaryTrackSN;	
+		if(tofHitSN >= 0) {
+		    int  primaryTrackSN = hlt_node->node[i].primaryTrackSN;	
 	
-		if(primaryTrackSN >= 0) {
-		  int  projChannel = hlt_node->node[i].projChannel;
-		  int Proj_trayId = hlt_tof->tofHit[tofHitSN].trayId;
+		    if(primaryTrackSN >= 0) {
+			int  projChannel = hlt_node->node[i].projChannel;
+			int Proj_trayId = hlt_tof->tofHit[tofHitSN].trayId;
 		  
-		  for(u_int j = 0; j < hlt_tof->nTofHits; j++) {
-		    int fire_trayId = hlt_tof->tofHit[j].trayId;
-		    if(Proj_trayId == fire_trayId) {
-		      hMatchId_fiberId_copy->Fill(projChannel, hlt_tof->tofHit[j].channel);
+			for(u_int j = 0; j < hlt_tof->nTofHits; j++) {
+			    int fire_trayId = hlt_tof->tofHit[j].trayId;
+			    if(Proj_trayId == fire_trayId) {
+				hMatchId_fiberId_copy->Fill(projChannel, hlt_tof->tofHit[j].channel);
+			    }
+			}
 		    }
-		  }
 		}
-	      }
 	    }
-	  }
+	}
 
+	XX(0);
 #pragma omp section
-	  {
+	{
 	    for(u_int i = u_int (hlt_node->nNodes*(2.0/3.0)); i < hlt_node->nNodes; i++) {
-	      int  tofHitSN       = hlt_node->node[i].tofHitSN;
+		int  tofHitSN       = hlt_node->node[i].tofHitSN;
 	      
-	      if(tofHitSN >= 0) {
-		int  primaryTrackSN = hlt_node->node[i].primaryTrackSN;	
+		if(tofHitSN >= 0) {
+		    int  primaryTrackSN = hlt_node->node[i].primaryTrackSN;	
 	
-		if(primaryTrackSN >= 0) {
-		  int  projChannel = hlt_node->node[i].projChannel;
-		  int Proj_trayId = hlt_tof->tofHit[tofHitSN].trayId;
+		    if(primaryTrackSN >= 0) {
+			int  projChannel = hlt_node->node[i].projChannel;
+			int Proj_trayId = hlt_tof->tofHit[tofHitSN].trayId;
 		  
-		  for(u_int j = 0; j < hlt_tof->nTofHits; j++) {
-		    int fire_trayId = hlt_tof->tofHit[j].trayId;
-		    if(Proj_trayId == fire_trayId) {
-		      hMatchId_fiberId_copy2->Fill(projChannel, hlt_tof->tofHit[j].channel);
+			for(u_int j = 0; j < hlt_tof->nTofHits; j++) {
+			    int fire_trayId = hlt_tof->tofHit[j].trayId;
+			    if(Proj_trayId == fire_trayId) {
+				hMatchId_fiberId_copy2->Fill(projChannel, hlt_tof->tofHit[j].channel);
+			    }
+			}
 		    }
-		  }
 		}
-	      }
 	    }
-	  }
+	}
 	  
+	XX(0);
 #pragma omp section
-	  {
+	{
 
 	    for(u_int i = 0; i < hlt_node->nNodes; i++) {
-	      int     primaryTrackSN = hlt_node->node[i].primaryTrackSN;
-              if (primaryTrackSN < 0) continue;
-	      int     tofHitSN       = hlt_node->node[i].tofHitSN;
-	      int     emcTowerSN     = hlt_node->node[i].emcTowerSN;
-	      hlt_track   NTrack         = hlt_pt->primaryTrack[primaryTrackSN];
-              float   pt         = NTrack.pt;
-	      float   pz         = NTrack.tanl * NTrack.pt;
-	      float   p          = sqrt(pt * pt + pz * pz);
+		int     primaryTrackSN = hlt_node->node[i].primaryTrackSN;
+		if (primaryTrackSN < 0) continue;
+		int     tofHitSN       = hlt_node->node[i].tofHitSN;
+		int     emcTowerSN     = hlt_node->node[i].emcTowerSN;
+		hlt_track   NTrack         = hlt_pt->primaryTrack[primaryTrackSN];
+		float   pt         = NTrack.pt;
+		float   pz         = NTrack.tanl * NTrack.pt;
+		float   p          = sqrt(pt * pt + pz * pz);
 	      
-	      if(tofHitSN >= 0) {
-		float localY = hlt_node->node[i].localY;
-		float localZ = hlt_node->node[i].localZ;
-		float beta   = hlt_node->node[i].beta;
-		hLocalZ->Fill(localZ);
-		hLocalY->Fill(localY);
-		if(primaryTrackSN >= 0) {
-		  hInverseBeta->Fill(p, 1 / beta);
+		if(tofHitSN >= 0) {
+		    float localY = hlt_node->node[i].localY;
+		    float localZ = hlt_node->node[i].localZ;
+		    float beta   = hlt_node->node[i].beta;
+		    hLocalZ->Fill(localZ);
+		    hLocalY->Fill(localY);
+		    if(primaryTrackSN >= 0) {
+			hInverseBeta->Fill(p, 1 / beta);
+		    }
 		}
-	      }
 
-	      if(emcTowerSN >= 0 && NTrack.nHits > 20 && NTrack.ndedx > 15) {
-		double emcMatchPhiDiff = hlt_node->node[i].emcMatchPhiDiff;
-		double emcMatchZEdge   = hlt_node->node[i].emcMatchZEdge;
-		hMatchPhi_Diff->Fill(emcMatchPhiDiff);
-		if(daqID & upc) hMatchPhi_Diff_UPC->Fill(emcMatchPhiDiff);
-		if(emcMatchZEdge > 0.) {
-		  hzEdge->Fill(emcMatchZEdge);
-		  if(daqID & upc) hzEdge_UPC->Fill(emcMatchZEdge);
+		if(emcTowerSN >= 0 && NTrack.nHits > 20 && NTrack.ndedx > 15) {
+		    double emcMatchPhiDiff = hlt_node->node[i].emcMatchPhiDiff;
+		    double emcMatchZEdge   = hlt_node->node[i].emcMatchZEdge;
+		    hMatchPhi_Diff->Fill(emcMatchPhiDiff);
+		    if(daqID & upc) hMatchPhi_Diff_UPC->Fill(emcMatchPhiDiff);
+		    if(emcMatchZEdge > 0.) {
+			hzEdge->Fill(emcMatchZEdge);
+			if(daqID & upc) hzEdge_UPC->Fill(emcMatchZEdge);
+		    }
 		}
-	      }
 	      
 	    }
-	  }
+	}
 
 	  
 #pragma omp section
-	  {
+	{
 	    
 	    // heavy fragment
 	   
 	    for(u_int i = 0; i < hlt_hf->nHeavyFragments; i++) {
 	      
-	      int heavyFrag_NodeSN = hlt_hf->heavyFragmentSN[i];
-	      int heavyFragmentglobSN  = hlt_node->node[heavyFrag_NodeSN].globalTrackSN;
-	      hlt_track HFtrack = hlt_gt->globalTrack[heavyFragmentglobSN];
-	      int nHits =  HFtrack.nHits;
-	      int ndedx =  HFtrack.ndedx;
-	      int q     =  HFtrack.q;
-	      float hfpx    = HFtrack.pt * cos(HFtrack.psi);
-	      float hfpy    = HFtrack.pt * sin(HFtrack.psi);
-	      float hfpz    = HFtrack.pt * HFtrack.tanl;
-	      float hfp     = sqrt(hfpx * hfpx + hfpy * hfpy + hfpz * hfpz);
-	      float hfdedx  =  HFtrack.dedx;
+		int heavyFrag_NodeSN = hlt_hf->heavyFragmentSN[i];
+		int heavyFragmentglobSN  = hlt_node->node[heavyFrag_NodeSN].globalTrackSN;
+		hlt_track HFtrack = hlt_gt->globalTrack[heavyFragmentglobSN];
+		int nHits =  HFtrack.nHits;
+		int ndedx =  HFtrack.ndedx;
+		int q     =  HFtrack.q;
+		float hfpx    = HFtrack.pt * cos(HFtrack.psi);
+		float hfpy    = HFtrack.pt * sin(HFtrack.psi);
+		float hfpz    = HFtrack.pt * HFtrack.tanl;
+		float hfp     = sqrt(hfpx * hfpx + hfpy * hfpy + hfpz * hfpz);
+		float hfdedx  =  HFtrack.dedx;
 	  
-	      if(nHits >= 20 && ndedx >= 15) {
-		hHFM_dEdx->Fill(hfp * q , hfdedx);
-		if(daqID & upc) hHFM_dEdx_UPC->Fill(hfp * q , hfdedx);
-	      }
+		if(nHits >= 20 && ndedx >= 15) {
+		    hHFM_dEdx->Fill(hfp * q , hfdedx);
+		    if(daqID & upc) hHFM_dEdx_UPC->Fill(hfp * q , hfdedx);
+		}
 	    }
-	  }
+	}
 
-
+	XX(0);
 #pragma omp section
-	  {
+	{
 	    // di-pion
 	    if(decision & triggerBitUPC) {
 	      
-	      for(u_int i = 0; i < hlt_dipi->nRhos; i++) {
-		int Daughter1NodeSN = hlt_dipi->PionPair[i].dau1NodeSN;
-		int Daughter2NodeSN = hlt_dipi->PionPair[i].dau2NodeSN;
-		int Daughter1TrackSN = hlt_node->node[Daughter1NodeSN].primaryTrackSN;
-		int Daughter2TrackSN = hlt_node->node[Daughter2NodeSN].primaryTrackSN;
+		for(u_int i = 0; i < hlt_dipi->nRhos; i++) {
+		    int Daughter1NodeSN = hlt_dipi->PionPair[i].dau1NodeSN;
+		    int Daughter2NodeSN = hlt_dipi->PionPair[i].dau2NodeSN;
+		    int Daughter1TrackSN = hlt_node->node[Daughter1NodeSN].primaryTrackSN;
+		    int Daughter2TrackSN = hlt_node->node[Daughter2NodeSN].primaryTrackSN;
 	      
-		if(Daughter1TrackSN < 0) continue;
-		hlt_track Daughter1Track =  hlt_pt->primaryTrack[Daughter1TrackSN];
-		float Daughter1q     = Daughter1Track.q;
-		if(Daughter2TrackSN < 0.) continue;
-		hlt_track Daughter2Track =  hlt_pt->primaryTrack[Daughter2TrackSN];
-		float Daughter2q     =  Daughter2Track.q;
+		    if(Daughter1TrackSN < 0) continue;
+		    hlt_track Daughter1Track =  hlt_pt->primaryTrack[Daughter1TrackSN];
+		    float Daughter1q     = Daughter1Track.q;
+		    if(Daughter2TrackSN < 0.) continue;
+		    hlt_track Daughter2Track =  hlt_pt->primaryTrack[Daughter2TrackSN];
+		    float Daughter2q     =  Daughter2Track.q;
 		
-		float m = hlt_dipi->PionPair[i].invariantMass;
-		float diffphi = hlt_dipi->PionPair[i].deltphi;
-		hDiPionDeltphi->Fill(diffphi);
+		    float m = hlt_dipi->PionPair[i].invariantMass;
+		    float diffphi = hlt_dipi->PionPair[i].deltphi;
+		    hDiPionDeltphi->Fill(diffphi);
 		
-		if(Daughter1q * Daughter2q < 0.) hDiPionInvMassFullRange->Fill(m);
-		else hDiPionInvMassFullRangeBG->Fill(m);
+		    if(Daughter1q * Daughter2q < 0.) hDiPionInvMassFullRange->Fill(m);
+		    else hDiPionInvMassFullRangeBG->Fill(m);
 		
-	      }
+		}
 	    }
-	  }
-
+	}
+	XX(0);
 
 #pragma omp section
-	  {
+	{
 	    // di-muon
 	    if(decision & triggerBitDiMuon) {
-	      const int nNodes = hlt_node->nNodes;
-	      int global2prim[nNodes];
-	      for(int inode = 0; inode<hlt_node->nNodes; inode++)
-		{
-		  int gTrackSN  = hlt_node->node[inode].globalTrackSN;
-		  int pTrackSN  = hlt_node->node[inode].primaryTrackSN;
-		  global2prim[gTrackSN] = pTrackSN;
-		}
-	      
-	      int nMtdHit = hlt_mtd->nMtdHits;
-	      vector<int> pMuTrkId;
-	      pMuTrkId.clear();
-	      for(int i=0; i<nMtdHit; i++)
-		{
-		  int backleg  = (int)hlt_mtd->mtdHit[i].backleg;
-		  int module   = (int)hlt_mtd->mtdHit[i].tray;
-		  int channel  = (int)hlt_mtd->mtdHit[i].channel;
-		  int gchannel = (module-1)*12+channel;
-		  int gmodule  = (backleg-1)*5+module;
-		  
-		  hMtdHitMap->Fill(backleg,gchannel);
-		  
-		  int trkid   = (int)hlt_mtd->mtdHit[i].hlt_trackId;
-		  if(trkid<0) continue;
-		  double deltaz = hlt_mtd->mtdHit[i].delta_z;
-		  double deltay = hlt_mtd->mtdHit[i].delta_y;
-		  hMtdMatchHitMap->Fill(backleg,gchannel);
-		  hMtdDeltaZvsModule->Fill(gmodule,deltaz);
-		  hMtdDeltaZ->Fill(deltaz);
-		  hMtdDeltaYvsModule->Fill(gmodule,deltay);
-		  hMtdDeltaY->Fill(deltay);
-		  if(fabs(deltaz)>20)continue;
-		  if(fabs(deltay)>20)continue;
-		  
-		  int pTrkId  = global2prim[trkid];
-		  if(pTrkId<0) continue;
-		  hlt_track pTrack = hlt_pt->primaryTrack[pTrkId];
-		  float pt = pTrack.pt;
-		  if(pt<1.)continue;
-		  if(pTrack.nHits<15)continue;
-		  if(pTrack.ndedx<10)continue;
-		  pMuTrkId.push_back(pTrkId);
-		}
-
-	  
-	      // J/psi analysis
-	      const float muMass = 0.10566;
-	      unsigned int npmuon = pMuTrkId.size();
-	      for(unsigned int i=0; i<npmuon; i++)
-		{
-		  hlt_track ipTrack = hlt_pt->primaryTrack[pMuTrkId[i]];
-		  char iq = ipTrack.q;
-		  float ipt = ipTrack.pt;
-		  float ipsi = ipTrack.psi;
-		  float itanl = ipTrack.tanl;
-		  float ipx = TMath::Cos(ipsi)*ipt;
-		  float ipy = TMath::Sin(ipsi)*ipt;
-		  float ipz = itanl * ipt;
-		  TLorentzVector imuon;
-		  imuon.SetXYZM(ipx,ipy,ipz,muMass);
-		  
-		  for(UInt_t j=i+1; j<npmuon; j++)
+		const int nNodes = hlt_node->nNodes;
+		int global2prim[nNodes];
+		for(int inode = 0; inode<hlt_node->nNodes; inode++)
 		    {
-		      hlt_track jpTrack = hlt_pt->primaryTrack[pMuTrkId[j]];
-		      char jq = jpTrack.q;
-		      float jpt = jpTrack.pt;
+			int gTrackSN  = hlt_node->node[inode].globalTrackSN;
+			int pTrackSN  = hlt_node->node[inode].primaryTrackSN;
+			global2prim[gTrackSN] = pTrackSN;
+		    }
+	      
+		int nMtdHit = hlt_mtd->nMtdHits;
+		vector<int> pMuTrkId;
+		pMuTrkId.clear();
+		for(int i=0; i<nMtdHit; i++)
+		    {
+			int backleg  = (int)hlt_mtd->mtdHit[i].backleg;
+			int module   = (int)hlt_mtd->mtdHit[i].tray;
+			int channel  = (int)hlt_mtd->mtdHit[i].channel;
+			int gchannel = (module-1)*12+channel;
+			int gmodule  = (backleg-1)*5+module;
+		  
+			hMtdHitMap->Fill(backleg,gchannel);
+		  
+			int trkid   = (int)hlt_mtd->mtdHit[i].hlt_trackId;
+			if(trkid<0) continue;
+			double deltaz = hlt_mtd->mtdHit[i].delta_z;
+			double deltay = hlt_mtd->mtdHit[i].delta_y;
+			hMtdMatchHitMap->Fill(backleg,gchannel);
+			hMtdDeltaZvsModule->Fill(gmodule,deltaz);
+			hMtdDeltaZ->Fill(deltaz);
+			hMtdDeltaYvsModule->Fill(gmodule,deltay);
+			hMtdDeltaY->Fill(deltay);
+			if(fabs(deltaz)>20)continue;
+			if(fabs(deltay)>20)continue;
+		  
+			int pTrkId  = global2prim[trkid];
+			if(pTrkId<0) continue;
+			hlt_track pTrack = hlt_pt->primaryTrack[pTrkId];
+			float pt = pTrack.pt;
+			if(pt<1.)continue;
+			if(pTrack.nHits<15)continue;
+			if(pTrack.ndedx<10)continue;
+			pMuTrkId.push_back(pTrkId);
+		    }
+
+	  
+		// J/psi analysis
+		const float muMass = 0.10566;
+		unsigned int npmuon = pMuTrkId.size();
+		for(unsigned int i=0; i<npmuon; i++)
+		    {
+			hlt_track ipTrack = hlt_pt->primaryTrack[pMuTrkId[i]];
+			char iq = ipTrack.q;
+			float ipt = ipTrack.pt;
+			float ipsi = ipTrack.psi;
+			float itanl = ipTrack.tanl;
+			float ipx = TMath::Cos(ipsi)*ipt;
+			float ipy = TMath::Sin(ipsi)*ipt;
+			float ipz = itanl * ipt;
+			TLorentzVector imuon;
+			imuon.SetXYZM(ipx,ipy,ipz,muMass);
+		  
+			for(UInt_t j=i+1; j<npmuon; j++)
+			    {
+				hlt_track jpTrack = hlt_pt->primaryTrack[pMuTrkId[j]];
+				char jq = jpTrack.q;
+				float jpt = jpTrack.pt;
 		      
-		      double pt_lead = (ipt>jpt) ? ipt : jpt;
-		      if(pt_lead<1.5) continue;
+				double pt_lead = (ipt>jpt) ? ipt : jpt;
+				if(pt_lead<1.5) continue;
 		      
-		      float jpsi = jpTrack.psi;
-		      float jtanl = jpTrack.tanl;
-		      float jpx = TMath::Cos(jpsi)*jpt;
-		      float jpy = TMath::Sin(jpsi)*jpt;
-		      float jpz = jtanl * jpt;
-		      TLorentzVector jmuon;
-		      jmuon.SetXYZM(jpx,jpy,jpz,muMass);
+				float jpsi = jpTrack.psi;
+				float jtanl = jpTrack.tanl;
+				float jpx = TMath::Cos(jpsi)*jpt;
+				float jpy = TMath::Sin(jpsi)*jpt;
+				float jpz = jtanl * jpt;
+				TLorentzVector jmuon;
+				jmuon.SetXYZM(jpx,jpy,jpz,muMass);
 		      
-		      TLorentzVector muPair = imuon + jmuon;
-		      if(iq*jq<0) {
-			hInvMassUS->Fill(muPair.M());
-			hMTDDiMuonJpsiMassUS->Fill(muPair.M());
-			hMTDDiMuonUpsilonMassUS->Fill(muPair.M());
-		      }
-		      else{
-			hInvMassLS->Fill(muPair.M());
-			hMTDDiMuonJpsiMassLS->Fill(muPair.M());
-			hMTDDiMuonUpsilonMassLS->Fill(muPair.M());
-		      }
-		    }//j
-		}//i
+				TLorentzVector muPair = imuon + jmuon;
+				if(iq*jq<0) {
+				    hInvMassUS->Fill(muPair.M());
+				    hMTDDiMuonJpsiMassUS->Fill(muPair.M());
+				    hMTDDiMuonUpsilonMassUS->Fill(muPair.M());
+				}
+				else{
+				    hInvMassLS->Fill(muPair.M());
+				    hMTDDiMuonJpsiMassLS->Fill(muPair.M());
+				    hMTDDiMuonUpsilonMassLS->Fill(muPair.M());
+				}
+			    }//j
+		    }//i
 	      
 
 	  
-	      double jpsi_lowm1=2.7, jpsi_highm1=3.5;
-	      int lowbin = hMTDDiMuonJpsiMassUS->FindBin(jpsi_lowm1);
-	      int highbin = hMTDDiMuonJpsiMassUS->FindBin(jpsi_highm1);
+		double jpsi_lowm1=2.7, jpsi_highm1=3.5;
+		int lowbin = hMTDDiMuonJpsiMassUS->FindBin(jpsi_lowm1);
+		int highbin = hMTDDiMuonJpsiMassUS->FindBin(jpsi_highm1);
 	      
-	      US12=hMTDDiMuonJpsiMassUS->Integral(lowbin, highbin,"");
-	      tlx12_us->SetText(0.15, 0.65, Form("#US = %.0f", double(US12)));
-	      LS12=hMTDDiMuonJpsiMassLS->Integral(lowbin, highbin,"");
-	      tlx12_ls->SetText(0.15, 0.6, Form("#LS = %.0f", double(LS12)));
-	      tlxmass12->SetText(0.6, 0.7, Form("%.2f #leq m_{ee} #leq %.2f", double(jpsi_lowm1), double(jpsi_highm1)) );
+		US12=hMTDDiMuonJpsiMassUS->Integral(lowbin, highbin,"");
+		tlx12_us->SetText(0.15, 0.65, Form("#US = %.0f", double(US12)));
+		LS12=hMTDDiMuonJpsiMassLS->Integral(lowbin, highbin,"");
+		tlx12_ls->SetText(0.15, 0.6, Form("#LS = %.0f", double(LS12)));
+		tlxmass12->SetText(0.6, 0.7, Form("%.2f #leq m_{ee} #leq %.2f", double(jpsi_lowm1), double(jpsi_highm1)) );
 	      
-	      double upsilon_lowm1=9, upsilon_highm1=11;
-	      lowbin = hMTDDiMuonJpsiMassUS->FindBin(upsilon_lowm1);
-	      highbin = hMTDDiMuonJpsiMassUS->FindBin(upsilon_highm1);
+		double upsilon_lowm1=9, upsilon_highm1=11;
+		lowbin = hMTDDiMuonJpsiMassUS->FindBin(upsilon_lowm1);
+		highbin = hMTDDiMuonJpsiMassUS->FindBin(upsilon_highm1);
 	      
-	      US13=hMTDDiMuonUpsilonMassUS->Integral(lowbin, highbin,"");
-	      tlx13_us->SetText(0.15, 0.65, Form("#US = %.0f", double(US13)));
-	      LS13=hMTDDiMuonUpsilonMassLS->Integral(lowbin, highbin,"");
-	      tlx13_ls->SetText(0.15, 0.6, Form("#LS = %.0f", double(LS13)));
-	      tlxmass13->SetText(0.6, 0.7, Form("%.2f #leq m_{ee} #leq %.2f", double(upsilon_lowm1), double(upsilon_highm1)) );
+		US13=hMTDDiMuonUpsilonMassUS->Integral(lowbin, highbin,"");
+		tlx13_us->SetText(0.15, 0.65, Form("#US = %.0f", double(US13)));
+		LS13=hMTDDiMuonUpsilonMassLS->Integral(lowbin, highbin,"");
+		tlx13_ls->SetText(0.15, 0.6, Form("#LS = %.0f", double(LS13)));
+		tlxmass13->SetText(0.6, 0.7, Form("%.2f #leq m_{ee} #leq %.2f", double(upsilon_lowm1), double(upsilon_highm1)) );
 	    }//di muon
-	  }
+	}
 
+	XX(0);
 #pragma omp section
-	  {
+	{
 	
 	    const int tmp_nNodes = hlt_node->nNodes;
 	    int tmp_global2prim[tmp_nNodes];
 	    for(int inode = 0; inode<hlt_node->nNodes; inode++)
-	      {
-		int tmp_gTrackSN  = hlt_node->node[inode].globalTrackSN;
-		int tmp_pTrackSN  = hlt_node->node[inode].primaryTrackSN;
-		tmp_global2prim[tmp_gTrackSN] = tmp_pTrackSN;
-	      }
+		{
+		    int tmp_gTrackSN  = hlt_node->node[inode].globalTrackSN;
+		    int tmp_pTrackSN  = hlt_node->node[inode].primaryTrackSN;
+		    tmp_global2prim[tmp_gTrackSN] = tmp_pTrackSN;
+		}
 	    //-----------------------------------------------------------------
 	    if(decision & triggerBitMTDQuarkonium) 
-	      {   //need the triggerBitMTDQuarkonium
-		int nMTDQmPairs = hlt_mtdqm->nMTDQuarkonium;
-		for(int i=0; i<nMTDQmPairs; i++){
+		{   //need the triggerBitMTDQuarkonium
+		    int nMTDQmPairs = hlt_mtdqm->nMTDQuarkonium;
+		    for(int i=0; i<nMTDQmPairs; i++){
 		  
-		  int mgtrkid1 = hlt_mtdqm->MTDQuarkonium[i].muonTrackId1;
-		  int mgtrkid2 = hlt_mtdqm->MTDQuarkonium[i].muonTrackId2;
+			int mgtrkid1 = hlt_mtdqm->MTDQuarkonium[i].muonTrackId1;
+			int mgtrkid2 = hlt_mtdqm->MTDQuarkonium[i].muonTrackId2;
 
-		  int pTrackSN1 = tmp_global2prim[mgtrkid1];
-		  int pTrackSN2 = tmp_global2prim[mgtrkid2];
-		  if( pTrackSN1<0||pTrackSN2<0 ) continue;
+			int pTrackSN1 = tmp_global2prim[mgtrkid1];
+			int pTrackSN2 = tmp_global2prim[mgtrkid2];
+			if( pTrackSN1<0||pTrackSN2<0 ) continue;
 
-		  hlt_track muPtrk1 =  hlt_pt->primaryTrack[pTrackSN1];
-		  hlt_track muPtrk2 =  hlt_pt->primaryTrack[pTrackSN2];
-		  if(muPtrk1.nHits<15||muPtrk2.nHits<15)continue;
-		  if(muPtrk1.ndedx<10||muPtrk2.ndedx<10)continue;
+			hlt_track muPtrk1 =  hlt_pt->primaryTrack[pTrackSN1];
+			hlt_track muPtrk2 =  hlt_pt->primaryTrack[pTrackSN2];
+			if(muPtrk1.nHits<15||muPtrk2.nHits<15)continue;
+			if(muPtrk1.ndedx<10||muPtrk2.ndedx<10)continue;
 
-		  double mupt1 = muPtrk1.pt;
-		  double mupt2 = muPtrk2.pt;
-		  double mupt_lead = (mupt1>mupt2) ? mupt1 : mupt2;
-		  if(mupt1<1.0||mupt2<1.0||mupt_lead<1.5) continue;
+			double mupt1 = muPtrk1.pt;
+			double mupt2 = muPtrk2.pt;
+			double mupt_lead = (mupt1>mupt2) ? mupt1 : mupt2;
+			if(mupt1<1.0||mupt2<1.0||mupt_lead<1.5) continue;
 
-		  //find the mtd hits for these two muons
-		  int muhit1=-1;
-		  int muhit2=-1;
+			//find the mtd hits for these two muons
+			int muhit1=-1;
+			int muhit2=-1;
 
-		  int nMtdHit = hlt_mtd->nMtdHits;
-		  for(int ihit=0; ihit<nMtdHit; ihit++)
-		    {
-		      if(muhit1>=0&&muhit2>=0) break;
-		      int gtrkid  = (int)hlt_mtd->mtdHit[ihit].hlt_trackId;
-		      if(gtrkid==mgtrkid1){muhit1=ihit; continue;}
-		      if(gtrkid==mgtrkid2){muhit2=ihit; continue;}
-		    }
+			int nMtdHit = hlt_mtd->nMtdHits;
+			for(int ihit=0; ihit<nMtdHit; ihit++)
+			    {
+				if(muhit1>=0&&muhit2>=0) break;
+				int gtrkid  = (int)hlt_mtd->mtdHit[ihit].hlt_trackId;
+				if(gtrkid==mgtrkid1){muhit1=ihit; continue;}
+				if(gtrkid==mgtrkid2){muhit2=ihit; continue;}
+			    }
 
-		  double mudy1 = hlt_mtd->mtdHit[muhit1].delta_y;
-		  double mudy2 = hlt_mtd->mtdHit[muhit2].delta_y;
-		  if(fabs(mudy1)>20||fabs(mudy2)>20)continue;
+			double mudy1 = hlt_mtd->mtdHit[muhit1].delta_y;
+			double mudy2 = hlt_mtd->mtdHit[muhit2].delta_y;
+			if(fabs(mudy1)>20||fabs(mudy2)>20)continue;
 
-		  double mudz1 = hlt_mtd->mtdHit[muhit1].delta_z;
-		  double mudz2 = hlt_mtd->mtdHit[muhit2].delta_z;
-		  if(fabs(mudz1)>20||fabs(mudz2)>20)continue;
+			double mudz1 = hlt_mtd->mtdHit[muhit1].delta_z;
+			double mudz2 = hlt_mtd->mtdHit[muhit2].delta_z;
+			if(fabs(mudz1)>20||fabs(mudz2)>20)continue;
 
-		  const double mumass = 0.10566; 
+			const double mumass = 0.10566; 
 
-		  double mupx1 = mupt1 * cos(muPtrk1.psi);
-		  double mupy1 = mupt1 * sin(muPtrk1.psi);
-		  double mupz1 = mupt1 * muPtrk1.tanl;
+			double mupx1 = mupt1 * cos(muPtrk1.psi);
+			double mupy1 = mupt1 * sin(muPtrk1.psi);
+			double mupz1 = mupt1 * muPtrk1.tanl;
 
-		  double mupx2 = mupt2 * cos(muPtrk2.psi);
-		  double mupy2 = mupt2 * sin(muPtrk2.psi);
-		  double mupz2 = mupt2 * muPtrk2.tanl;
+			double mupx2 = mupt2 * cos(muPtrk2.psi);
+			double mupy2 = mupt2 * sin(muPtrk2.psi);
+			double mupz2 = mupt2 * muPtrk2.tanl;
 
-		  TVector3 muPMom1(mupx1, mupy1, mupz1);
+			TVector3 muPMom1(mupx1, mupy1, mupz1);
 
-		  TVector3 muPMom2(mupx2, mupy2, mupz2);
+			TVector3 muPMom2(mupx2, mupy2, mupz2);
 		
-		  TLorentzVector Muon1(0,0,0,0);
-		  Muon1.SetXYZM(mupx1, mupy1, mupz1, mumass);
-		  TLorentzVector Muon2(0,0,0,0);
-		  Muon2.SetXYZM(mupx2, mupy2, mupz2, mumass);
+			TLorentzVector Muon1(0,0,0,0);
+			Muon1.SetXYZM(mupx1, mupy1, mupz1, mumass);
+			TLorentzVector Muon2(0,0,0,0);
+			Muon2.SetXYZM(mupx2, mupy2, mupz2, mumass);
 
-		  TLorentzVector QmPair = Muon1 + Muon2;
-		  double qmMass=QmPair.M();
-		  double qmPt=QmPair.Pt();
+			TLorentzVector QmPair = Muon1 + Muon2;
+			double qmMass=QmPair.M();
+			double qmPt=QmPair.Pt();
 		
-		  if(muPtrk1.q*muPtrk2.q<0){
+			if(muPtrk1.q*muPtrk2.q<0){
 
-		    hMTDQmInvMassUS->Fill(qmMass);
-		    hMTDQmJpsiMass_ptcut0_US->Fill(qmMass);
-		    if(qmPt>2.)hMTDQmJpsiMass_ptcut2_US->Fill(qmMass);
-		    if(qmPt>4.)hMTDQmJpsiMass_ptcut4_US->Fill(qmMass);
+			    hMTDQmInvMassUS->Fill(qmMass);
+			    hMTDQmJpsiMass_ptcut0_US->Fill(qmMass);
+			    if(qmPt>2.)hMTDQmJpsiMass_ptcut2_US->Fill(qmMass);
+			    if(qmPt>4.)hMTDQmJpsiMass_ptcut4_US->Fill(qmMass);
 
-		    hMTDQmUpsilonMassUS->Fill(qmMass);
-		  }
-		  else{
-		    hMTDQmInvMassLS->Fill(qmMass);
-		    hMTDQmJpsiMass_ptcut0_LS->Fill(qmMass);
-		    if(qmPt>2.)hMTDQmJpsiMass_ptcut2_LS->Fill(qmMass);
-		    if(qmPt>4.)hMTDQmJpsiMass_ptcut4_LS->Fill(qmMass);
+			    hMTDQmUpsilonMassUS->Fill(qmMass);
+			}
+			else{
+			    hMTDQmInvMassLS->Fill(qmMass);
+			    hMTDQmJpsiMass_ptcut0_LS->Fill(qmMass);
+			    if(qmPt>2.)hMTDQmJpsiMass_ptcut2_LS->Fill(qmMass);
+			    if(qmPt>4.)hMTDQmJpsiMass_ptcut4_LS->Fill(qmMass);
 		    
-		    hMTDQmUpsilonMassLS->Fill(qmMass);
-		  }
+			    hMTDQmUpsilonMassLS->Fill(qmMass);
+			}
 		
+		    }
 		}
-	      }
 	    double lowm1=2.7, highm1=3.5;
 	    int lowbin = hMTDQmJpsiMass_ptcut0_US->FindBin(lowm1);
 	    int highbin = hMTDQmJpsiMass_ptcut0_US->FindBin(highm1);
@@ -1860,365 +1880,366 @@ void l4Builder::event(daqReader *rdr)
 	    LS11=hMTDQmUpsilonMassLS->Integral(lowbin, highbin,"");
 	    tlx11_ls->SetText(0.15, 0.6, Form("#LS = %.0f", double(LS11)));
 	   
-	  }
-
+	}
+	XX(0);
 
 #pragma omp section
-	  {
+	{
 	    // upc di-e
 	    if(decision & triggerBitUPCDiElectron) {
 	      
-	      for(u_int i = 0; i < hlt_upcdiep->nEPairs; i++) {
-		int Daughter1NodeSN = hlt_upcdiep->ePair[i].dau1NodeSN;
-		int Daughter2NodeSN = hlt_upcdiep->ePair[i].dau2NodeSN;
-		int Daughter1TrackSN = hlt_node->node[Daughter1NodeSN].primaryTrackSN;
-		int Daughter2TrackSN = hlt_node->node[Daughter2NodeSN].primaryTrackSN;
-		int Daughter1EmcSN = hlt_node->node[Daughter1NodeSN].emcTowerSN;
-		int Daughter2EmcSN = hlt_node->node[Daughter2NodeSN].emcTowerSN;
+		for(u_int i = 0; i < hlt_upcdiep->nEPairs; i++) {
+		    int Daughter1NodeSN = hlt_upcdiep->ePair[i].dau1NodeSN;
+		    int Daughter2NodeSN = hlt_upcdiep->ePair[i].dau2NodeSN;
+		    int Daughter1TrackSN = hlt_node->node[Daughter1NodeSN].primaryTrackSN;
+		    int Daughter2TrackSN = hlt_node->node[Daughter2NodeSN].primaryTrackSN;
+		    int Daughter1EmcSN = hlt_node->node[Daughter1NodeSN].emcTowerSN;
+		    int Daughter2EmcSN = hlt_node->node[Daughter2NodeSN].emcTowerSN;
 		
-		if(Daughter1TrackSN < 0) continue;
-		hlt_track Daughter1Track =  hlt_pt->primaryTrack[Daughter1TrackSN];
+		    if(Daughter1TrackSN < 0) continue;
+		    hlt_track Daughter1Track =  hlt_pt->primaryTrack[Daughter1TrackSN];
 		
-		float Daughter1_EP_ratio = -999.;
+		    float Daughter1_EP_ratio = -999.;
 		
-		float Daughter1q     = Daughter1Track.q;
-		float Daughter1px    = Daughter1Track.pt * cos(Daughter1Track.psi);
-		float Daughter1py    = Daughter1Track.pt * sin(Daughter1Track.psi);
-		float Daughter1pz    = Daughter1Track.pt * Daughter1Track.tanl;
-		float Daughter1dedx  = Daughter1Track.dedx;
+		    float Daughter1q     = Daughter1Track.q;
+		    float Daughter1px    = Daughter1Track.pt * cos(Daughter1Track.psi);
+		    float Daughter1py    = Daughter1Track.pt * sin(Daughter1Track.psi);
+		    float Daughter1pz    = Daughter1Track.pt * Daughter1Track.tanl;
+		    float Daughter1dedx  = Daughter1Track.dedx;
 			
-		TVector3 Daughter1(Daughter1px, Daughter1py, Daughter1pz);
-		float Daughter1p = Daughter1.Mag();
+		    TVector3 Daughter1(Daughter1px, Daughter1py, Daughter1pz);
+		    float Daughter1p = Daughter1.Mag();
 		
-		float Daughter1phi = Daughter1.Phi();
-		if(Daughter1phi < 0.) Daughter1phi += twopi;
+		    float Daughter1phi = Daughter1.Phi();
+		    if(Daughter1phi < 0.) Daughter1phi += twopi;
 		
-		hdEdx_P1_UPC->Fill(Daughter1p , Daughter1dedx);
-		if(Daughter1EmcSN >= 0) {
-		  float Daughter1TowerEnergy = hlt_emc->emcTower[Daughter1EmcSN].energy;
-		  Daughter1_EP_ratio = Daughter1TowerEnergy / Daughter1p;
-		  hDaughter1P_TowerEnergy_UPC->Fill(Daughter1_EP_ratio);
-		}
+		    hdEdx_P1_UPC->Fill(Daughter1p , Daughter1dedx);
+		    if(Daughter1EmcSN >= 0) {
+			float Daughter1TowerEnergy = hlt_emc->emcTower[Daughter1EmcSN].energy;
+			Daughter1_EP_ratio = Daughter1TowerEnergy / Daughter1p;
+			hDaughter1P_TowerEnergy_UPC->Fill(Daughter1_EP_ratio);
+		    }
 		
-		if(Daughter2TrackSN < 0.) continue;
-		hlt_track Daughter2Track =  hlt_pt->primaryTrack[Daughter2TrackSN];
-		float Daughter2_EP_ratio = -999.;
+		    if(Daughter2TrackSN < 0.) continue;
+		    hlt_track Daughter2Track =  hlt_pt->primaryTrack[Daughter2TrackSN];
+		    float Daughter2_EP_ratio = -999.;
 
-		float Daughter2q     =  Daughter2Track.q;
-		float Daughter2px    =  Daughter2Track.pt * cos(Daughter2Track.psi);
-		float Daughter2py    =  Daughter2Track.pt * sin(Daughter2Track.psi);
-		float Daughter2pz    =  Daughter2Track.pt * Daughter2Track.tanl;
-		float Daughter2dedx  =  Daughter2Track.dedx;
+		    float Daughter2q     =  Daughter2Track.q;
+		    float Daughter2px    =  Daughter2Track.pt * cos(Daughter2Track.psi);
+		    float Daughter2py    =  Daughter2Track.pt * sin(Daughter2Track.psi);
+		    float Daughter2pz    =  Daughter2Track.pt * Daughter2Track.tanl;
+		    float Daughter2dedx  =  Daughter2Track.dedx;
 		
-		TVector3 Daughter2(Daughter2px, Daughter2py, Daughter2pz);
-		float Daughter2p = Daughter2.Mag();
+		    TVector3 Daughter2(Daughter2px, Daughter2py, Daughter2pz);
+		    float Daughter2p = Daughter2.Mag();
 
-		float Daughter2phi = Daughter2.Phi();
-		if(Daughter2phi < 0.0) Daughter2phi += twopi;
-		hdEdx_P2_UPC->Fill(Daughter2p , Daughter2dedx);
-		if(Daughter2EmcSN >= 0) {
-		  float Daughter2TowerEnergy = hlt_emc->emcTower[Daughter2EmcSN].energy;
-		  Daughter2_EP_ratio = Daughter2TowerEnergy / Daughter2p;
-		  hDaughter2P_TowerEnergy_UPC->Fill(Daughter2_EP_ratio);
-		}
+		    float Daughter2phi = Daughter2.Phi();
+		    if(Daughter2phi < 0.0) Daughter2phi += twopi;
+		    hdEdx_P2_UPC->Fill(Daughter2p , Daughter2dedx);
+		    if(Daughter2EmcSN >= 0) {
+			float Daughter2TowerEnergy = hlt_emc->emcTower[Daughter2EmcSN].energy;
+			Daughter2_EP_ratio = Daughter2TowerEnergy / Daughter2p;
+			hDaughter2P_TowerEnergy_UPC->Fill(Daughter2_EP_ratio);
+		    }
 		
-		// j/psi
+		    // j/psi
 	
-		float px = cos(hlt_upcdiep->ePair[i].psi) * hlt_upcdiep->ePair[i].pt;
-		float py = sin(hlt_upcdiep->ePair[i].psi) * hlt_upcdiep->ePair[i].pt;
-		float pz = hlt_upcdiep->ePair[i].tanl * hlt_upcdiep->ePair[i].pt;
-		float m = hlt_upcdiep->ePair[i].invariantMass;
+		    float px = cos(hlt_upcdiep->ePair[i].psi) * hlt_upcdiep->ePair[i].pt;
+		    float py = sin(hlt_upcdiep->ePair[i].psi) * hlt_upcdiep->ePair[i].pt;
+		    float pz = hlt_upcdiep->ePair[i].tanl * hlt_upcdiep->ePair[i].pt;
+		    float m = hlt_upcdiep->ePair[i].invariantMass;
 		
-		if(Daughter1q * Daughter2q < 0.) {
-		  hDiElectronInvMassFullRange_UPC->Fill(m);
-		} else {
-		  hDiElectronInvMassFullRangeBG_UPC->Fill(m);
+		    if(Daughter1q * Daughter2q < 0.) {
+			hDiElectronInvMassFullRange_UPC->Fill(m);
+		    } else {
+			hDiElectronInvMassFullRangeBG_UPC->Fill(m);
+		    }
+		    TLorentzVector jpsi(0, 0, 0, 0);
+		    jpsi.SetXYZM(px, py, pz, m);
+		    float rapidity = jpsi.Rapidity();
+		    hDiLeptonRapidity_UPC->Fill(rapidity);
+		
 		}
-		TLorentzVector jpsi(0, 0, 0, 0);
-		jpsi.SetXYZM(px, py, pz, m);
-		float rapidity = jpsi.Rapidity();
-		hDiLeptonRapidity_UPC->Fill(rapidity);
-		
-	      }
 	    }
-	  }
-	    //******************************************************
+	}
+	//******************************************************
 	   
 
 #pragma omp section
-	  {
+	{
 	    //di-e2Twr
 	    if(decision & triggerBitDiElectron2Twr) {
-	      for(u_int i = 0; i < hlt_Twrdiep->nEPairs; i++) {
-		int Daughter1NodeSN = hlt_Twrdiep->ePair[i].dau1NodeSN;
-		int Daughter2NodeSN = hlt_Twrdiep->ePair[i].dau2NodeSN;
-		int Daughter1TrackSN = hlt_node->node[Daughter1NodeSN].primaryTrackSN;
-		int Daughter2TrackSN = hlt_node->node[Daughter2NodeSN].primaryTrackSN;
-		int Daughter1EmcSN = hlt_node->node[Daughter1NodeSN].emcTowerSN;
-		int Daughter2EmcSN = hlt_node->node[Daughter2NodeSN].emcTowerSN;
-		int Daughter1TofSN = hlt_node->node[Daughter1NodeSN].tofHitSN;
-		int Daughter2TofSN = hlt_node->node[Daughter2NodeSN].tofHitSN;
+		for(u_int i = 0; i < hlt_Twrdiep->nEPairs; i++) {
+		    int Daughter1NodeSN = hlt_Twrdiep->ePair[i].dau1NodeSN;
+		    int Daughter2NodeSN = hlt_Twrdiep->ePair[i].dau2NodeSN;
+		    int Daughter1TrackSN = hlt_node->node[Daughter1NodeSN].primaryTrackSN;
+		    int Daughter2TrackSN = hlt_node->node[Daughter2NodeSN].primaryTrackSN;
+		    int Daughter1EmcSN = hlt_node->node[Daughter1NodeSN].emcTowerSN;
+		    int Daughter2EmcSN = hlt_node->node[Daughter2NodeSN].emcTowerSN;
+		    int Daughter1TofSN = hlt_node->node[Daughter1NodeSN].tofHitSN;
+		    int Daughter2TofSN = hlt_node->node[Daughter2NodeSN].tofHitSN;
 	      
-		if(Daughter1TrackSN < 0) continue;
-		hlt_track Daughter1Track =  hlt_pt->primaryTrack[Daughter1TrackSN];
+		    if(Daughter1TrackSN < 0) continue;
+		    hlt_track Daughter1Track =  hlt_pt->primaryTrack[Daughter1TrackSN];
 
-		float Daughter1beta = -999.;
-		float Daughter1phidiff = -999.;
-		float Daughter1_PE_ratio = -999.;
-		float Daughter1_EP_ratio = -999.;
+		    float Daughter1beta = -999.;
+		    float Daughter1phidiff = -999.;
+		    float Daughter1_PE_ratio = -999.;
+		    float Daughter1_EP_ratio = -999.;
 	      
-		float Daughter1q     = Daughter1Track.q;
-		float Daughter1px    = Daughter1Track.pt * cos(Daughter1Track.psi);
-		float Daughter1py    = Daughter1Track.pt * sin(Daughter1Track.psi);
-		float Daughter1pz    = Daughter1Track.pt * Daughter1Track.tanl;
-		float Daughter1dedx  = Daughter1Track.dedx;
-		int Daughter1ndedx = Daughter1Track.ndedx;
+		    float Daughter1q     = Daughter1Track.q;
+		    float Daughter1px    = Daughter1Track.pt * cos(Daughter1Track.psi);
+		    float Daughter1py    = Daughter1Track.pt * sin(Daughter1Track.psi);
+		    float Daughter1pz    = Daughter1Track.pt * Daughter1Track.tanl;
+		    float Daughter1dedx  = Daughter1Track.dedx;
+		    int Daughter1ndedx = Daughter1Track.ndedx;
 	      
-		TVector3 Daughter1(Daughter1px, Daughter1py, Daughter1pz);
-		float Daughter1p = Daughter1.Mag();
+		    TVector3 Daughter1(Daughter1px, Daughter1py, Daughter1pz);
+		    float Daughter1p = Daughter1.Mag();
 	      
-		double dedx1E = getDedx(Daughter1p, e);
-		float nSigma1 = log(Daughter1dedx / dedx1E) / A * sqrt(Daughter1ndedx);
+		    double dedx1E = getDedx(Daughter1p, e);
+		    float nSigma1 = log(Daughter1dedx / dedx1E) / A * sqrt(Daughter1ndedx);
 	      
-		float Daughter1phi = Daughter1.Phi();
-		if(Daughter1phi < 0.) Daughter1phi += twopi;
-		hdEdx_P1_Twr->Fill(Daughter1p , Daughter1dedx);
-		if(Daughter1EmcSN >= 0) {
-		  float Daughter1TowerEnergy = hlt_emc->emcTower[Daughter1EmcSN].energy;
-		  Daughter1_PE_ratio = Daughter1p / Daughter1TowerEnergy;
-		  Daughter1_EP_ratio = Daughter1TowerEnergy / Daughter1p;
-		  hDaughter1P_TowerEnergy_Twr->Fill(Daughter1_EP_ratio);
-		  Daughter1phidiff = hlt_node->node[Daughter1NodeSN].emcMatchPhiDiff;
-		}
-		if(Daughter1TofSN >= 0.) {
-		  Daughter1beta = hlt_node->node[Daughter1NodeSN].beta;
-		}
+		    float Daughter1phi = Daughter1.Phi();
+		    if(Daughter1phi < 0.) Daughter1phi += twopi;
+		    hdEdx_P1_Twr->Fill(Daughter1p , Daughter1dedx);
+		    if(Daughter1EmcSN >= 0) {
+			float Daughter1TowerEnergy = hlt_emc->emcTower[Daughter1EmcSN].energy;
+			Daughter1_PE_ratio = Daughter1p / Daughter1TowerEnergy;
+			Daughter1_EP_ratio = Daughter1TowerEnergy / Daughter1p;
+			hDaughter1P_TowerEnergy_Twr->Fill(Daughter1_EP_ratio);
+			Daughter1phidiff = hlt_node->node[Daughter1NodeSN].emcMatchPhiDiff;
+		    }
+		    if(Daughter1TofSN >= 0.) {
+			Daughter1beta = hlt_node->node[Daughter1NodeSN].beta;
+		    }
 
-		if(Daughter2TrackSN < 0.) continue;
-		hlt_track Daughter2Track =  hlt_pt->primaryTrack[Daughter2TrackSN];
-		float Daughter2phidiff = -999.;
-		float Daughter2beta = -999.;
-		float Daughter2_PE_ratio = -999.;
-		float Daughter2_EP_ratio = -999.;
+		    if(Daughter2TrackSN < 0.) continue;
+		    hlt_track Daughter2Track =  hlt_pt->primaryTrack[Daughter2TrackSN];
+		    float Daughter2phidiff = -999.;
+		    float Daughter2beta = -999.;
+		    float Daughter2_PE_ratio = -999.;
+		    float Daughter2_EP_ratio = -999.;
 	      
-		float Daughter2q     =  Daughter2Track.q;
-		float Daughter2px    =  Daughter2Track.pt * cos(Daughter2Track.psi);
-		float Daughter2py    =  Daughter2Track.pt * sin(Daughter2Track.psi);
-		float Daughter2pz    =  Daughter2Track.pt * Daughter2Track.tanl;
-		float Daughter2dedx  =  Daughter2Track.dedx;
-		int Daughter2ndedx = Daughter2Track.ndedx;
+		    float Daughter2q     =  Daughter2Track.q;
+		    float Daughter2px    =  Daughter2Track.pt * cos(Daughter2Track.psi);
+		    float Daughter2py    =  Daughter2Track.pt * sin(Daughter2Track.psi);
+		    float Daughter2pz    =  Daughter2Track.pt * Daughter2Track.tanl;
+		    float Daughter2dedx  =  Daughter2Track.dedx;
+		    int Daughter2ndedx = Daughter2Track.ndedx;
 	      
-		TVector3 Daughter2(Daughter2px, Daughter2py, Daughter2pz);
-		float Daughter2p = Daughter2.Mag();
+		    TVector3 Daughter2(Daughter2px, Daughter2py, Daughter2pz);
+		    float Daughter2p = Daughter2.Mag();
 	      
-		double dedx2E = getDedx(Daughter2p, e);
-		float nSigma2 = log(Daughter2dedx / dedx2E) / A * sqrt(Daughter2ndedx);
+		    double dedx2E = getDedx(Daughter2p, e);
+		    float nSigma2 = log(Daughter2dedx / dedx2E) / A * sqrt(Daughter2ndedx);
 
-		float Daughter2phi = Daughter2.Phi();
-		if(Daughter2phi < 0.0) Daughter2phi += twopi;
+		    float Daughter2phi = Daughter2.Phi();
+		    if(Daughter2phi < 0.0) Daughter2phi += twopi;
 	      
-		hdEdx_P2_Twr->Fill(Daughter2p , Daughter2dedx);
-		if(Daughter2EmcSN >= 0) {
-		  float Daughter2TowerEnergy = hlt_emc->emcTower[Daughter2EmcSN].energy;
-		  Daughter2_PE_ratio = Daughter2p / Daughter2TowerEnergy;
-		  Daughter2_EP_ratio = Daughter2TowerEnergy / Daughter2p;
-		  hDaughter2P_TowerEnergy_Twr->Fill(Daughter2_EP_ratio);
-		  Daughter2phidiff = hlt_node->node[Daughter2NodeSN].emcMatchPhiDiff;
-		}
-		if(Daughter2TofSN >= 0.) {
-		  Daughter2beta = hlt_node->node[Daughter2NodeSN].beta;
-		}
+		    hdEdx_P2_Twr->Fill(Daughter2p , Daughter2dedx);
+		    if(Daughter2EmcSN >= 0) {
+			float Daughter2TowerEnergy = hlt_emc->emcTower[Daughter2EmcSN].energy;
+			Daughter2_PE_ratio = Daughter2p / Daughter2TowerEnergy;
+			Daughter2_EP_ratio = Daughter2TowerEnergy / Daughter2p;
+			hDaughter2P_TowerEnergy_Twr->Fill(Daughter2_EP_ratio);
+			Daughter2phidiff = hlt_node->node[Daughter2NodeSN].emcMatchPhiDiff;
+		    }
+		    if(Daughter2TofSN >= 0.) {
+			Daughter2beta = hlt_node->node[Daughter2NodeSN].beta;
+		    }
 	      
-		// j/psi
+		    // j/psi
 	
-		float px = cos(hlt_Twrdiep->ePair[i].psi) * hlt_Twrdiep->ePair[i].pt;
-		float py = sin(hlt_Twrdiep->ePair[i].psi) * hlt_Twrdiep->ePair[i].pt;
-		float pz = hlt_Twrdiep->ePair[i].tanl * hlt_Twrdiep->ePair[i].pt;
-		float m = hlt_Twrdiep->ePair[i].invariantMass;
+		    float px = cos(hlt_Twrdiep->ePair[i].psi) * hlt_Twrdiep->ePair[i].pt;
+		    float py = sin(hlt_Twrdiep->ePair[i].psi) * hlt_Twrdiep->ePair[i].pt;
+		    float pz = hlt_Twrdiep->ePair[i].tanl * hlt_Twrdiep->ePair[i].pt;
+		    float m = hlt_Twrdiep->ePair[i].invariantMass;
 	      
-		if(Daughter1q * Daughter2q < 0.) {
-		  hDiElectronInvMassFullRange_Twr->Fill(m);
-		} else {
-		  hDiElectronInvMassFullRangeBG_Twr->Fill(m);
-		}
+		    if(Daughter1q * Daughter2q < 0.) {
+			hDiElectronInvMassFullRange_Twr->Fill(m);
+		    } else {
+			hDiElectronInvMassFullRangeBG_Twr->Fill(m);
+		    }
 	      
-		if(nSigma1 > -0.9 && nSigma2 > -0.9 &&
-		   Daughter1p > 2.3 && Daughter2p > 1.5 &&
-		   Daughter1ndedx > 16 && Daughter2ndedx > 16 &&
-		   Daughter1_PE_ratio < 1.5 && Daughter1_PE_ratio > 0.5 && Daughter2_PE_ratio < 1.5 && Daughter2_PE_ratio > 0.5 &&
-		   Daughter1phidiff > 0. && Daughter1phidiff < 0.05 && Daughter2phidiff > 0. && Daughter2phidiff < 0.05){
-		  if(Daughter1q * Daughter2q < 0.)
-		    {
-		      hDiElectronInvMassTpxEmc_Twr->Fill(m);
-		      if(fabs(1 / Daughter1beta - 1) < 0.04 && fabs(1 / Daughter2beta - 1) < 0.04)
-			{
-			  hDiElectronInvMassCut_Twr->Fill(m);
-			}
+		    if(nSigma1 > -0.9 && nSigma2 > -0.9 &&
+		       Daughter1p > 2.3 && Daughter2p > 1.5 &&
+		       Daughter1ndedx > 16 && Daughter2ndedx > 16 &&
+		       Daughter1_PE_ratio < 1.5 && Daughter1_PE_ratio > 0.5 && Daughter2_PE_ratio < 1.5 && Daughter2_PE_ratio > 0.5 &&
+		       Daughter1phidiff > 0. && Daughter1phidiff < 0.05 && Daughter2phidiff > 0. && Daughter2phidiff < 0.05){
+			if(Daughter1q * Daughter2q < 0.)
+			    {
+				hDiElectronInvMassTpxEmc_Twr->Fill(m);
+				if(fabs(1 / Daughter1beta - 1) < 0.04 && fabs(1 / Daughter2beta - 1) < 0.04)
+				    {
+					hDiElectronInvMassCut_Twr->Fill(m);
+				    }
+			    }
+			else
+			    {
+				hDiElectronInvMassTpxEmcBG_Twr->Fill(m);
+				if(fabs(1 / Daughter1beta - 1) < 0.04 && fabs(1 / Daughter2beta - 1) < 0.04)
+				    {
+					hDiElectronInvMassCutBG_Twr->Fill(m);
+				    } 
+			    }
+			if(Daughter1TofSN >= 0.)
+			    {
+				hDaughter1TpxEmcInverseBeta_Twr->Fill(1 / Daughter1beta);
+			    }
+			if(Daughter2TofSN >= 0.)
+			    {
+				hDaughter2TpxEmcInverseBeta_Twr->Fill(1 / Daughter2beta);
+			    }
 		    }
-		  else
-		    {
-		      hDiElectronInvMassTpxEmcBG_Twr->Fill(m);
-		      if(fabs(1 / Daughter1beta - 1) < 0.04 && fabs(1 / Daughter2beta - 1) < 0.04)
-			{
-			  hDiElectronInvMassCutBG_Twr->Fill(m);
-			} 
-		    }
-		  if(Daughter1TofSN >= 0.)
-		    {
-		      hDaughter1TpxEmcInverseBeta_Twr->Fill(1 / Daughter1beta);
-		    }
-		  if(Daughter2TofSN >= 0.)
-		    {
-		      hDaughter2TpxEmcInverseBeta_Twr->Fill(1 / Daughter2beta);
-		    }
-		}
 		
-		TLorentzVector jpsi(0, 0, 0, 0);
-		jpsi.SetXYZM(px, py, pz, m);
-		float rapidity = jpsi.Rapidity();
-		hDiLeptonRapidity_Twr->Fill(rapidity);
+		    TLorentzVector jpsi(0, 0, 0, 0);
+		    jpsi.SetXYZM(px, py, pz, m);
+		    float rapidity = jpsi.Rapidity();
+		    hDiLeptonRapidity_Twr->Fill(rapidity);
 		
-	      }//nEPair
+		}//nEPair
 	    }
-	  }
+	}
 #pragma omp section
-	  {
+	{
 	    // di-e
 	    if(decision & triggerBitDiElectron) {
 	      
-	      for(u_int i = 0; i < hlt_diep->nEPairs; i++) {
-		int Daughter1NodeSN = hlt_diep->ePair[i].dau1NodeSN;
-		int Daughter2NodeSN = hlt_diep->ePair[i].dau2NodeSN;
-		int Daughter1TrackSN = hlt_node->node[Daughter1NodeSN].primaryTrackSN;
-		int Daughter2TrackSN = hlt_node->node[Daughter2NodeSN].primaryTrackSN;
-		int Daughter1EmcSN = hlt_node->node[Daughter1NodeSN].emcTowerSN;
-		int Daughter2EmcSN = hlt_node->node[Daughter2NodeSN].emcTowerSN;
-		int Daughter1TofSN = hlt_node->node[Daughter1NodeSN].tofHitSN;
-		int Daughter2TofSN = hlt_node->node[Daughter2NodeSN].tofHitSN;
-	      
-		if(Daughter1TrackSN < 0) continue;
-		hlt_track Daughter1Track =  hlt_pt->primaryTrack[Daughter1TrackSN];
-
-		float Daughter1beta = -999.;
-		float Daughter1phidiff = -999.;
-		float Daughter1_PE_ratio = -999.;
-		float Daughter1_EP_ratio = -999.;
-	      
-		float Daughter1q     = Daughter1Track.q;
-		float Daughter1px    = Daughter1Track.pt * cos(Daughter1Track.psi);
-		float Daughter1py    = Daughter1Track.pt * sin(Daughter1Track.psi);
-		float Daughter1pz    = Daughter1Track.pt * Daughter1Track.tanl;
-		float Daughter1dedx  = Daughter1Track.dedx;
-		int Daughter1ndedx = Daughter1Track.ndedx;
-	      
-		TVector3 Daughter1(Daughter1px, Daughter1py, Daughter1pz);
-		float Daughter1p = Daughter1.Mag();
-	      
-		double dedx1E = getDedx(Daughter1p, e);
-		float nSigma1 = log(Daughter1dedx / dedx1E) / A * sqrt(Daughter1ndedx);
-	      
-		float Daughter1phi = Daughter1.Phi();
-		if(Daughter1phi < 0.) Daughter1phi += twopi;
-		hdEdx_P1->Fill(Daughter1p , Daughter1dedx);
-		if(Daughter1EmcSN >= 0) {
-		  float Daughter1TowerEnergy = hlt_emc->emcTower[Daughter1EmcSN].energy;
-		  Daughter1_PE_ratio = Daughter1p / Daughter1TowerEnergy;
-		  Daughter1_EP_ratio = Daughter1TowerEnergy / Daughter1p;
-		  hDaughter1P_TowerEnergy->Fill(Daughter1_EP_ratio);
-		  Daughter1phidiff = hlt_node->node[Daughter1NodeSN].emcMatchPhiDiff;
-		}
-		if(Daughter1TofSN >= 0.) {
-		  Daughter1beta = hlt_node->node[Daughter1NodeSN].beta;
-		}
-	      
-		if(Daughter2TrackSN < 0.) continue;
-		hlt_track Daughter2Track =  hlt_pt->primaryTrack[Daughter2TrackSN];
-		float Daughter2phidiff = -999.;
-		float Daughter2beta = -999.;
-		float Daughter2_PE_ratio = -999.;
-		float Daughter2_EP_ratio = -999.;
-	      
-		float Daughter2q     =  Daughter2Track.q;
-		float Daughter2px    =  Daughter2Track.pt * cos(Daughter2Track.psi);
-		float Daughter2py    =  Daughter2Track.pt * sin(Daughter2Track.psi);
-		float Daughter2pz    =  Daughter2Track.pt * Daughter2Track.tanl;
-		float Daughter2dedx  =  Daughter2Track.dedx;
-		int Daughter2ndedx = Daughter2Track.ndedx;
-	      
-		TVector3 Daughter2(Daughter2px, Daughter2py, Daughter2pz);
-		float Daughter2p = Daughter2.Mag();
-	      
-		double dedx2E = getDedx(Daughter2p, e);
-		float nSigma2 = log(Daughter2dedx / dedx2E) / A * sqrt(Daughter2ndedx);
-	      
-		float Daughter2phi = Daughter2.Phi();
-		if(Daughter2phi < 0.0) Daughter2phi += twopi;
-	      
-		hdEdx_P2->Fill(Daughter2p , Daughter2dedx);
-		if(Daughter2EmcSN >= 0) {
-		  float Daughter2TowerEnergy = hlt_emc->emcTower[Daughter2EmcSN].energy;
-		  Daughter2_PE_ratio = Daughter2p / Daughter2TowerEnergy;
-		  Daughter2_EP_ratio = Daughter2TowerEnergy / Daughter2p;
-		  hDaughter2P_TowerEnergy->Fill(Daughter2_EP_ratio);
-		  Daughter2phidiff = hlt_node->node[Daughter2NodeSN].emcMatchPhiDiff;
-		}
-		if(Daughter2TofSN >= 0.) {
-		  Daughter2beta = hlt_node->node[Daughter2NodeSN].beta;
-		}
-
-		// j/psi
+		for(u_int i = 0; i < hlt_diep->nEPairs; i++) {
+		    int Daughter1NodeSN = hlt_diep->ePair[i].dau1NodeSN;
+		    int Daughter2NodeSN = hlt_diep->ePair[i].dau2NodeSN;
+		    int Daughter1TrackSN = hlt_node->node[Daughter1NodeSN].primaryTrackSN;
+		    int Daughter2TrackSN = hlt_node->node[Daughter2NodeSN].primaryTrackSN;
+		    int Daughter1EmcSN = hlt_node->node[Daughter1NodeSN].emcTowerSN;
+		    int Daughter2EmcSN = hlt_node->node[Daughter2NodeSN].emcTowerSN;
+		    int Daughter1TofSN = hlt_node->node[Daughter1NodeSN].tofHitSN;
+		    int Daughter2TofSN = hlt_node->node[Daughter2NodeSN].tofHitSN;
 	
-		float px = cos(hlt_diep->ePair[i].psi) * hlt_diep->ePair[i].pt;
-		float py = sin(hlt_diep->ePair[i].psi) * hlt_diep->ePair[i].pt;
-		float pz = hlt_diep->ePair[i].tanl * hlt_diep->ePair[i].pt;
-		float m = hlt_diep->ePair[i].invariantMass;
+		    XX(0);
+		    if(Daughter1TrackSN < 0) continue;
+		    hlt_track Daughter1Track =  hlt_pt->primaryTrack[Daughter1TrackSN];
+
+		    float Daughter1beta = -999.;
+		    float Daughter1phidiff = -999.;
+		    float Daughter1_PE_ratio = -999.;
+		    float Daughter1_EP_ratio = -999.;
 	      
-		if(Daughter1q * Daughter2q < 0.) {
-		  hDiElectronInvMassFullRange->Fill(m);
-		}
-		else {
-		  hDiElectronInvMassFullRangeBG->Fill(m);
-		}
+		    float Daughter1q     = Daughter1Track.q;
+		    float Daughter1px    = Daughter1Track.pt * cos(Daughter1Track.psi);
+		    float Daughter1py    = Daughter1Track.pt * sin(Daughter1Track.psi);
+		    float Daughter1pz    = Daughter1Track.pt * Daughter1Track.tanl;
+		    float Daughter1dedx  = Daughter1Track.dedx;
+		    int Daughter1ndedx = Daughter1Track.ndedx;
 	      
-		if(nSigma1 > -0.9 && nSigma2 > -0.9 &&
-		   Daughter1p > 2.3 && Daughter2p > 1.5 &&
-		   Daughter1ndedx > 16 && Daughter2ndedx > 16 &&
-		   Daughter1_PE_ratio < 1.5 && Daughter1_PE_ratio > 0.5 && Daughter2_PE_ratio < 1.5 && Daughter2_PE_ratio > 0.5 &&
-		   Daughter1phidiff > 0. && Daughter1phidiff < 0.05 && Daughter2phidiff > 0. && Daughter2phidiff < 0.05) {
-		  if(Daughter1q * Daughter2q < 0.)
-		    {
-		      hDiElectronInvMassTpxEmc->Fill(m);
-		      if(fabs(1 / Daughter1beta - 1) < 0.04 && fabs(1 / Daughter2beta - 1) < 0.04)
-			{
-			  hDiElectronInvMassCut->Fill(m);
-			}
+		    TVector3 Daughter1(Daughter1px, Daughter1py, Daughter1pz);
+		    float Daughter1p = Daughter1.Mag();
+	      
+		    double dedx1E = getDedx(Daughter1p, e);
+		    float nSigma1 = log(Daughter1dedx / dedx1E) / A * sqrt(Daughter1ndedx);
+	      
+		    float Daughter1phi = Daughter1.Phi();
+		    if(Daughter1phi < 0.) Daughter1phi += twopi;
+		    hdEdx_P1->Fill(Daughter1p , Daughter1dedx);
+		    if(Daughter1EmcSN >= 0) {
+			float Daughter1TowerEnergy = hlt_emc->emcTower[Daughter1EmcSN].energy;
+			Daughter1_PE_ratio = Daughter1p / Daughter1TowerEnergy;
+			Daughter1_EP_ratio = Daughter1TowerEnergy / Daughter1p;
+			hDaughter1P_TowerEnergy->Fill(Daughter1_EP_ratio);
+			Daughter1phidiff = hlt_node->node[Daughter1NodeSN].emcMatchPhiDiff;
 		    }
-		  else
-		    {
-		      hDiElectronInvMassTpxEmcBG->Fill(m);
-		      if(fabs(1 / Daughter1beta - 1) < 0.04 && fabs(1 / Daughter2beta - 1) < 0.04)
-			{
-			  hDiElectronInvMassCutBG->Fill(m);
-			}
+		    if(Daughter1TofSN >= 0.) {
+			Daughter1beta = hlt_node->node[Daughter1NodeSN].beta;
 		    }
+	      
+		    if(Daughter2TrackSN < 0.) continue;
+		    hlt_track Daughter2Track =  hlt_pt->primaryTrack[Daughter2TrackSN];
+		    float Daughter2phidiff = -999.;
+		    float Daughter2beta = -999.;
+		    float Daughter2_PE_ratio = -999.;
+		    float Daughter2_EP_ratio = -999.;
+	      
+		    float Daughter2q     =  Daughter2Track.q;
+		    float Daughter2px    =  Daughter2Track.pt * cos(Daughter2Track.psi);
+		    float Daughter2py    =  Daughter2Track.pt * sin(Daughter2Track.psi);
+		    float Daughter2pz    =  Daughter2Track.pt * Daughter2Track.tanl;
+		    float Daughter2dedx  =  Daughter2Track.dedx;
+		    int Daughter2ndedx = Daughter2Track.ndedx;
+	      
+		    TVector3 Daughter2(Daughter2px, Daughter2py, Daughter2pz);
+		    float Daughter2p = Daughter2.Mag();
+	      
+		    double dedx2E = getDedx(Daughter2p, e);
+		    float nSigma2 = log(Daughter2dedx / dedx2E) / A * sqrt(Daughter2ndedx);
+	      
+		    float Daughter2phi = Daughter2.Phi();
+		    if(Daughter2phi < 0.0) Daughter2phi += twopi;
+	      
+		    hdEdx_P2->Fill(Daughter2p , Daughter2dedx);
+		    if(Daughter2EmcSN >= 0) {
+			float Daughter2TowerEnergy = hlt_emc->emcTower[Daughter2EmcSN].energy;
+			Daughter2_PE_ratio = Daughter2p / Daughter2TowerEnergy;
+			Daughter2_EP_ratio = Daughter2TowerEnergy / Daughter2p;
+			hDaughter2P_TowerEnergy->Fill(Daughter2_EP_ratio);
+			Daughter2phidiff = hlt_node->node[Daughter2NodeSN].emcMatchPhiDiff;
+		    }
+		    if(Daughter2TofSN >= 0.) {
+			Daughter2beta = hlt_node->node[Daughter2NodeSN].beta;
+		    }
+
+		    // j/psi
+	
+		    float px = cos(hlt_diep->ePair[i].psi) * hlt_diep->ePair[i].pt;
+		    float py = sin(hlt_diep->ePair[i].psi) * hlt_diep->ePair[i].pt;
+		    float pz = hlt_diep->ePair[i].tanl * hlt_diep->ePair[i].pt;
+		    float m = hlt_diep->ePair[i].invariantMass;
+	      
+		    if(Daughter1q * Daughter2q < 0.) {
+			hDiElectronInvMassFullRange->Fill(m);
+		    }
+		    else {
+			hDiElectronInvMassFullRangeBG->Fill(m);
+		    }
+	      
+		    if(nSigma1 > -0.9 && nSigma2 > -0.9 &&
+		       Daughter1p > 2.3 && Daughter2p > 1.5 &&
+		       Daughter1ndedx > 16 && Daughter2ndedx > 16 &&
+		       Daughter1_PE_ratio < 1.5 && Daughter1_PE_ratio > 0.5 && Daughter2_PE_ratio < 1.5 && Daughter2_PE_ratio > 0.5 &&
+		       Daughter1phidiff > 0. && Daughter1phidiff < 0.05 && Daughter2phidiff > 0. && Daughter2phidiff < 0.05) {
+			if(Daughter1q * Daughter2q < 0.)
+			    {
+				hDiElectronInvMassTpxEmc->Fill(m);
+				if(fabs(1 / Daughter1beta - 1) < 0.04 && fabs(1 / Daughter2beta - 1) < 0.04)
+				    {
+					hDiElectronInvMassCut->Fill(m);
+				    }
+			    }
+			else
+			    {
+				hDiElectronInvMassTpxEmcBG->Fill(m);
+				if(fabs(1 / Daughter1beta - 1) < 0.04 && fabs(1 / Daughter2beta - 1) < 0.04)
+				    {
+					hDiElectronInvMassCutBG->Fill(m);
+				    }
+			    }
 		
-		  if(Daughter1TofSN >= 0.) {
-		    hDaughter1TpxEmcInverseBeta->Fill(1 / Daughter1beta);
-		  }
-		  if(Daughter2TofSN >= 0.) {
-		    hDaughter2TpxEmcInverseBeta->Fill(1 / Daughter2beta);
-		  }
-		}
+			if(Daughter1TofSN >= 0.) {
+			    hDaughter1TpxEmcInverseBeta->Fill(1 / Daughter1beta);
+			}
+			if(Daughter2TofSN >= 0.) {
+			    hDaughter2TpxEmcInverseBeta->Fill(1 / Daughter2beta);
+			}
+		    }
 	      
-		TLorentzVector jpsi(0, 0, 0, 0);
-		jpsi.SetXYZM(px, py, pz, m);
-		float rapidity = jpsi.Rapidity();
-		hDiLeptonRapidity->Fill(rapidity);
-	      }//nEPair
+		    TLorentzVector jpsi(0, 0, 0, 0);
+		    jpsi.SetXYZM(px, py, pz, m);
+		    float rapidity = jpsi.Rapidity();
+		    hDiLeptonRapidity->Fill(rapidity);
+		}//nEPair
 	    }
-	  }
 	}
-	XX(0);
+    }
+    XX(0);
 }
 
 
