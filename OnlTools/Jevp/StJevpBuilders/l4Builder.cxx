@@ -1168,7 +1168,6 @@ void l4Builder::event(daqReader *rdr)
 		hEtofInvBeta->Fill(q*p, 1.0/hlt_node->node[i].etofBeta);
 	    }
 	}
-	XX(0);
 #pragma omp section
 	{
 	    // fill EMC
@@ -1226,9 +1225,6 @@ void l4Builder::event(daqReader *rdr)
 #endif
             }
 	}
-	XX(0);
-
-
 #pragma omp section
 	{
 	    // global track
@@ -1262,8 +1258,7 @@ void l4Builder::event(daqReader *rdr)
 		}
 	    }
 	}
-
-	XX(0);
+    
 #pragma omp section
 	{
 	 
@@ -1302,7 +1297,6 @@ void l4Builder::event(daqReader *rdr)
 		}
 	    }
 	}
-	XX(0);
 
 #pragma omp section
 	{
@@ -1310,7 +1304,6 @@ void l4Builder::event(daqReader *rdr)
 	    double Array_dcaXy[hlt_node->nNodes];
 	    double Array_dcaZ[hlt_node->nNodes];
 
-	    XX(0);
 #pragma omp parallel for num_threads(4)
 
 	    for(u_int i = 0; i < (u_int)hlt_node->nNodes; i++) {
@@ -1328,7 +1321,6 @@ void l4Builder::event(daqReader *rdr)
 		Array_dcaZ[i]=dcaZ;
 	    }
 
-	    XX(0);
 	    for(int j = 0; j < hlt_node->nNodes; j++) {
 		hDcaXy->Fill(Array_dcaXy[j]);
 		hDcaZ->Fill(Array_dcaZ[j]);
@@ -1460,7 +1452,6 @@ void l4Builder::event(daqReader *rdr)
 	    }
 	}
 
-	XX(0);
 #pragma omp section
 	{
 	    // fill nodes
@@ -1487,7 +1478,7 @@ void l4Builder::event(daqReader *rdr)
 	    }
 	}
 	  
-	XX(0);
+
 #pragma omp section
 	{
 	    
@@ -1512,7 +1503,7 @@ void l4Builder::event(daqReader *rdr)
 	    }
 	}
 
-	XX(0);
+
 #pragma omp section
 	{
 	    for(u_int i = u_int (hlt_node->nNodes*(2.0/3.0)); i < hlt_node->nNodes; i++) {
@@ -1536,7 +1527,7 @@ void l4Builder::event(daqReader *rdr)
 	    }
 	}
 	  
-	XX(0);
+
 #pragma omp section
 	{
 
@@ -1602,7 +1593,7 @@ void l4Builder::event(daqReader *rdr)
 	    }
 	}
 
-	XX(0);
+
 #pragma omp section
 	{
 	    // di-pion
@@ -1631,7 +1622,7 @@ void l4Builder::event(daqReader *rdr)
 		}
 	    }
 	}
-	XX(0);
+
 
 #pragma omp section
 	{
@@ -1753,7 +1744,6 @@ void l4Builder::event(daqReader *rdr)
 	    }//di muon
 	}
 
-	XX(0);
 #pragma omp section
 	{
 	
@@ -1881,7 +1871,6 @@ void l4Builder::event(daqReader *rdr)
 	    tlx11_ls->SetText(0.15, 0.6, Form("#LS = %.0f", double(LS11)));
 	   
 	}
-	XX(0);
 
 #pragma omp section
 	{
@@ -2116,7 +2105,6 @@ void l4Builder::event(daqReader *rdr)
 		    int Daughter1TofSN = hlt_node->node[Daughter1NodeSN].tofHitSN;
 		    int Daughter2TofSN = hlt_node->node[Daughter2NodeSN].tofHitSN;
 	
-		    XX(0);
 		    if(Daughter1TrackSN < 0) continue;
 		    hlt_track Daughter1Track =  hlt_pt->primaryTrack[Daughter1TrackSN];
 
@@ -2238,7 +2226,7 @@ void l4Builder::event(daqReader *rdr)
 		}//nEPair
 	    }
 	}
-    }
+    }   // end parallel...
     XX(0);
 }
 
