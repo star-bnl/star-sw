@@ -45,6 +45,7 @@ class CanvasImageBuilder {
     // derived from same class, even though they do have this function in
     // common...
     JevpPlot *getPlotByName(char *name);  
+    void sendDieToImageWriter();
 
     // Invoke as writeIndex(dir, fn);
     int sendToImageWriter(RunStatus *rs, int numberOfEvents, const char *serverTags, bool force=false);

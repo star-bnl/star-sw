@@ -32,7 +32,7 @@ class ImageWriter {
     void writeImage(char *fn, JevpPlot *plot, double ymax);
     void writeToImageWriter(CanvasSlot *slot);
     void loop();
-    
+ 
     int getNWriting() { return slotQ->entries(); } 
 };
 

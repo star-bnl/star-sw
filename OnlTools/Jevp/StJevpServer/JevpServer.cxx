@@ -15,7 +15,6 @@
 #include <TText.h>
 #include <TSystem.h>
 #include <signal.h>
-#include <TThread.h>
 #include <TApplication.h>
 #include <TList.h>
 #include <setjmp.h>
@@ -89,6 +88,7 @@ void PO(char *s) {
     LOG("JEFF", "(%s): num files: %d", s, fd);
 }
 
+pthread_t imageWriterThread;
 extern int ImageWriterDrawingPlot;
 extern int canvasBuilderLine;
 extern int l4BuilderSourceLine;
@@ -242,6 +242,10 @@ void JevpServer::main(int argc, char *argv[])
 
   LOG("JEFF", "Starting JevpServer: port=%d pid=%d TID=%d isL4=%d", serv.myport, serverTid, (int)getpid(),serv.isL4);
 
+
+  serv.imageWriter = new ImageWriter(serv.imagewriterdir);
+  pthread_create(&imageWriterThread, NULL, ImageWriterThread, (void *)serv.imageWriter);
+  
   // Each time we start, archive the existing display file...
   serv.init(serv.myport, argc, argv);
 
@@ -250,25 +254,38 @@ void JevpServer::main(int argc, char *argv[])
   }
 
   // Start reader thread
-  TThread *rThread = new TThread("readerThread", (void(*)(void *))(&JEVPSERVERreaderThread),(void *)&serv);
-  rThread->Run();
+  //TThread *rThread = new TThread("readerThread", JEVPSERVERreaderThread,(void *)&serv);
+  //rThread->Run();
+  pthread_t rThread;
+  pthread_create(&rThread, NULL, JEVPSERVERreaderThread, NULL);
+  
+  pthread_t tThread;
+  pthread_create(&tThread, NULL, JEVPSERVERtimerThread, NULL);
 
-
-  TThread *tThread = new TThread("timerThread", (void(*)(void *))(&JEVPSERVERtimerThread),NULL);
-  tThread->Run();
+  //TThread *tThread = new TThread("timerThread", JEVPSERVERtimerThread,(void *)&serv);
+  //tThread->Run();
 
   LOG("JEFF", "Readsocket TID = %d", syscall(SYS_gettid));
-
-  serv.imageWriter = new ImageWriter(serv.imagewriterdir);
-  TThread *imageThread = new TThread("imageWriterThread", (void(*)(void *))(&ImageWriterThread), (void *)serv.imageWriter);
-  imageThread->Run();
-
 
   //LOG("JEFF", "Readsocket TID:   pid %u", getpid());
   for(;;) {
     
     serv.readSocket();
     
+    if(serv.dieWhenReady) {
+	LOG("JEFF", "server thread joining...");
+	pthread_join(rThread, NULL);
+	LOG("JEFF", "joining reader thread...");
+	pthread_join(tThread, NULL);
+	LOG("JEFF", "killing imageWriterThread...");
+	serv.canvasImageBuilder->sendDieToImageWriter();
+
+	LOG("JEFF", "joinging imageWriter thread...");
+	pthread_join(imageWriterThread, NULL);
+	LOG("JEFF", "exiting...");
+	return;
+    }
+
     LOG(DBG, "Read socket!");
   }
   
@@ -752,8 +769,7 @@ int JevpServer::updateDisplayDefs()
 
     
     if(canvasImageBuilder) canvasImageBuilder->setDisplays(displays);
-    canvasImageBuilder = new CanvasImageBuilder(imagewriterdir, displays, this, NULL, imageWriter);
-
+ 
     char *args[4];
     args[0] = (char *)"OnlTools/Jevp/archiveHistoDefs.pl";
     args[1] = basedir;
@@ -775,7 +791,6 @@ int JevpServer::init(int port, int argc, char *argv[]) {
     mon->Add(ssocket);
 
     canvasImageBuilder = new CanvasImageBuilder(imagewriterdir, NULL, this, NULL, imageWriter);
-
     updateDisplayDefs();
 
     // Create daq reader...
@@ -883,15 +898,17 @@ void JevpServer::handleNewEvent(EvpMessage *m)
 
 	    if(die && (cdaqfilename >= ndaqfilenames)) {
 		LOG("JEFF", "die is set, so now exit");
+		dieWhenReady = 1;
 		CP;
-		sleep(30);
-		ignoreSignals();
-		gApplication->Terminate();
+		//sleep(30);
+		//ignoreSignals();
+		//gApplication->Terminate();
 		//exit(0);
 	    }
       
 	    CP;
 	}
+
 	CP;
     }
     else if(strcmp(m->cmd, "readerr") == 0) {
@@ -986,7 +1003,7 @@ void JevpServer::handleNewEvent(EvpMessage *m)
     
     eventHandlingTime += eventHandlingClock.record_time();
     waitingClock.record_time();
-}  // end handleNewEvent
+} // end handleNewEvent
 
 
 void JevpServer::handleClient(int delay) {
@@ -2286,6 +2303,11 @@ void *JEVPSERVERtimerThread(void *) {
     int nevts = 0;
     
     for(;;) {
+	if(serv.dieWhenReady) { 
+	    LOG("JEFF", "timer thread exiting...");
+	    return NULL; 
+	};
+
 	usleep(5000000);  // 5 seconds
 	EvpMessage m;
 	m.setSource((char *)"timerThread");
@@ -2322,6 +2344,11 @@ void *JEVPSERVERreaderThread(void *)
     for(;;) {
     
 	usleep(100);  // otherwise we can starve out clients...
+
+	if(serv.dieWhenReady) {
+	    LOG("JEFF", "Reader thread exiting!");
+	    return NULL;
+	}
 
 	char *ret = serv.rdr->get(0, EVP_TYPE_ANY);
     
