@@ -41,28 +41,28 @@ char *removeSpaces(char *s) {
     return _str;
 }
 
-static void makedir(char *directory) {
-    struct stat64 info;
-    if(stat64(directory, &info) == 0) return;
+// static void makedir(char *directory) {
+//     struct stat64 info;
+//     if(stat64(directory, &info) == 0) return;
 
-    char dir[100];
-    strcpy(dir, directory);
-    char *tok = strtok(dir, "/");
-    char path[100];
-    strcpy(path, "/");
+//     char dir[100];
+//     strcpy(dir, directory);
+//     char *tok = strtok(dir, "/");
+//     char path[100];
+//     strcpy(path, "/");
 
-    do {
-	strcat(path, tok);
-	if(stat64(path, &info ) != 0) {
-	    //LOG("JEFF","making %s", path);
- 	    mkdir(path,0777);
-	}
-	else {
-	    //LOG("JEFF","%s exists", path);
-	}
-	strcat(path, "/");
-    } while((tok = strtok(NULL, "/")));
-}
+//     do {
+// 	strcat(path, tok);
+// 	if(stat64(path, &info ) != 0) {
+// 	    //LOG("JEFF","making %s", path);
+//  	    mkdir(path,0777);
+// 	}
+// 	else {
+// 	    //LOG("JEFF","%s exists", path);
+// 	}
+// 	strcat(path, "/");
+//     } while((tok = strtok(NULL, "/")));
+// }
 
 CanvasImageBuilder::CanvasImageBuilder(char *basedir, DisplayFile *displays, JevpServer *server, JevpPlotSet *plotset, ImageWriter *imageWriter) {
     LOG("JEFF", "Created CanvasImageBuilder");
@@ -178,7 +178,6 @@ void CanvasImageBuilder::writeIndex(int combo_index) {
     char fullbasedir[256];
     sprintf(fullbasedir, "/tmp/%s_build_%08d", basedir, writeIdx);
 
-    makedir(fullbasedir);
     char fullfile[256];
     sprintf(fullfile, "%s/idx.txt", fullbasedir);
     
@@ -312,6 +311,18 @@ int CanvasImageBuilder::sendToImageWriter(RunStatus *rs, int numberOfEvents, con
     XX(2);      // writeIdx is guarenteed to be updated before the mux returns!
     pthread_mutex_lock(&imageWriter->mux);
     XX(1);
+
+    char fullbasedir[256];
+    sprintf(fullbasedir, "/tmp/%s_build_%08d", basedir, writeIdx);
+    int ret = mkdir(fullbasedir, 0777);
+    if(ret < 0) {
+	if(errno != EEXIST) {
+	    LOG("JEFF", "Error creating directory %s: (%s)", fullbasedir, strerror(errno));
+	    pthread_mutex_unlock(&imageWriter->mux);
+	    return 0;
+	}
+    }
+
     writeIndex();
     XX(1);
     writeRunStatus(rs, numberOfEvents, serverTags);

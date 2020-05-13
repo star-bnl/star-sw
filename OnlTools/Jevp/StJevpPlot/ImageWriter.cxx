@@ -25,28 +25,28 @@ int ImageWriterDrawingPlot = 0;
 RtsTimer_root imageClock;
 RtsTimer_root ic2;
 
-static void makedir(char *directory) {
-    struct stat64 info;
-    if(stat64(directory, &info) == 0) return;
+// static void makedir(char *directory) {
+//     struct stat64 info;
+//     if(stat64(directory, &info) == 0) return;
 
-    char dir[100];
-    strcpy(dir, directory);
-    char *tok = strtok(dir, "/");
-    char path[100];
-    strcpy(path, "/");
+//     char dir[100];
+//     strcpy(dir, directory);
+//     char *tok = strtok(dir, "/");
+//     char path[100];
+//     strcpy(path, "/");
 
-    do {
-	strcat(path, tok);
-	if(stat64(path, &info ) != 0) {
-	    //LOG("JEFF","making %s", path);
- 	    mkdir(path,0777);
-	}
-	else {
-	    //LOG("JEFF","%s exists", path);
-	}
-	strcat(path, "/");
-    } while((tok = strtok(NULL, "/")));
-}
+//     do {
+// 	strcat(path, tok);
+// 	if(stat64(path, &info ) != 0) {
+// 	    //LOG("JEFF","making %s", path);
+//  	    mkdir(path,0777);
+// 	}
+// 	else {
+// 	    //LOG("JEFF","%s exists", path);
+// 	}
+// 	strcat(path, "/");
+//     } while((tok = strtok(NULL, "/")));
+// }
 
 static char *getPath(char *fn) {
     static char path[256];
@@ -187,7 +187,13 @@ void ImageWriter::loop() {
 	    }
 	    else {
 		//LOG("JEFF", "makedir %s", path);
-		makedir(path);
+		
+		int ret = mkdir(path, 0777);
+		if(ret < 0) {
+		    if(errno != EEXIST) {
+			LOG("JEFF", "Error creating dir %s: (%s)", path, strerror(errno));
+		    }
+		}
 	    }
 	    
 	    RtsTimer_root ttt;
