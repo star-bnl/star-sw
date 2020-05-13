@@ -76,7 +76,7 @@
 #include "StBTofUtil/StBTofGeometry.h"
 #include "StEventTypes.h"
 #include "StEvent/StBTofCollection.h"
-#if 0
+#if 1
 #include "StDetectorDbMaker/St_tofStatusC.h"
 #endif
 #include "StDetectorDbMaker/St_tofTOffsetC.h"
@@ -342,7 +342,7 @@ Int_t StBTofSimMaker::CellResponse(g2t_ctf_hit_st* tofHitsFromGeant,
     LOG_WARN << " Not hit the sensitive MRPC volume!" << endm;
     return kStWarn;
   }
-#if 0
+#if 1
   Int_t status = St_tofStatusC::instance()->status(itray,imodule,icell);
   if (status != 1) return kStOK;
 #endif
@@ -920,7 +920,7 @@ Int_t StBTofSimMaker::FastCellResponse(g2t_ctf_hit_st* tofHitsFromGeant)
     LOG_WARN << " Not hit the sensitive MRPC volume !!! " << endm;
     return kStWarn;
   }
-#if 0
+#if 1
   if (St_tofStatusC::instance()->status(itray,imodule,icell) != 1) return kStOK;
 #endif
   StThreeVectorF local(tofHitsFromGeant->x[0], tofHitsFromGeant->x[1], tofHitsFromGeant->x[2]);
