@@ -68,6 +68,7 @@ class l4Builder : public JevpBuilder {
 
 		l4Builder(JevpServer *parent=NULL) : JevpBuilder(parent) {
 			plotsetname = (char *)"l4";
+
 		}
 
 		void initialize(int argc, char *argv[]);   

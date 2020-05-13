@@ -169,7 +169,7 @@ void ImageWriter::loop() {
 		sprintf(o, "/tmp/%s_build_%08d", slot.name, slot.writeIdx);
 		sprintf(d, "/tmp/%s_done_%08d", slot.name, slot.writeIdx);
 
-		LOG("JEFF", "Saved %d plots in %lf seconds: s", nHisto, imageClock.record_time(), d);
+		LOG("JEFF", "Saved %d plots in %lf seconds: %s", nHisto, imageClock.record_time(), d);
 
 		rename(o, d);
 	    }

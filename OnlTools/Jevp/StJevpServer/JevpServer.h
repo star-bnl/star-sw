@@ -17,18 +17,25 @@
 #include "Jevp/StJevpPlot/RunStatus.h"
 #include "EvpConstants.h"
 #include "Jevp/StJevpPlot/BuilderStatus.h"
+#include "pthread.h"
 //#include <RTS/include/SUNRT/clockClass.h>
 
 class PdfFileBuilder;
 class CanvasImageBuilder;
 class ImageWriter;
 
+
+
 #define MAX_DISPLAY_DEFS 20
 
 class JevpServer {
- public:
-    int dieWhenReady;
+ private:
+    char *serverTags;
 
+ public:
+ 
+    int dieWhenReady;
+    
     int log_output;
     char *log_dest;
     int log_port;
@@ -70,7 +77,7 @@ class JevpServer {
 
     char *displays_fn;      // Display Information...
     DisplayFile *displays;
-    char *serverTags;
+ 
 
 
     int eventsThisRun;
@@ -94,37 +101,9 @@ class JevpServer {
 
     unsigned long long int getMemUse();
 
-    JevpServer() {
-	dieWhenReady = 0;
+    JevpServer();
 
-	printEventCount = 100;
-	myport = JEVP_PORT;
-	logevent = 0;
-	maxevts = 0;
-	evtsInRun = 0;
-	runCanvasImageBuilder = 0;
-	imagewriterdir = (char *)"/tmp/jevp";
 
-	ssocket = NULL;
-	mon = NULL;
-	refplotdir = (char *)DEFAULT_REF_PLOT_DIR;
-	diska = (char *)"/";
- 
-	displays = NULL;
-	displays_fn = NULL;
-    
-	basedir = (char *)DEFAULT_BASEDIR;
-	refplotdir = (char *)DEFAULT_REF_PLOT_DIR;
-	pdfdir = (char *)DEFAULT_PDFDIR;
-	rootfiledir = (char *)DEFAULT_ROOTFILEDIR;
-	nodb = 0;
-	die = 0;
-	daqfilename = NULL;
-	serverTags = NULL;
-	launchArgs = NULL;
-
-	jevpSummaryPlot = NULL;
-    };
   
     void writeRootFiles();
     static void main(int argc, char *argv[]);
@@ -137,7 +116,8 @@ class JevpServer {
     int calculateAndUpdateRunStatus(BuilderStatus *changedBuilder);
     void addServerTag(char *tag);
     void addServerTags(char *tags);
-
+    void getServerTags(char *buffer, int maxlen);
+    void freeServerTags();
 
     void archive_display_file();                           // Archive utilities
 
