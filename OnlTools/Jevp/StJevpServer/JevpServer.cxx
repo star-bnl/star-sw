@@ -63,12 +63,18 @@
 
 #include <RTS/include/SUNRT/clockClass.h>
 
-    RtsTimer_root eventHandlingClock;
-    RtsTimer_root waitingClock;
-    RtsTimer_root writingImageClock;
-    double eventHandlingTime;
-    double waitingTime;
-    double writingImageTime;
+RtsTimer_root eventHandlingClock;
+RtsTimer_root waitingClock;
+RtsTimer_root writingImageClock;
+double eventHandlingTime;
+double waitingTime;
+double writingImageTime;
+
+
+#define MSTL 1024
+static char tmpServerTags[MSTL];
+
+
 
 static int line_number=0;
 static char *line_builder = NULL;
@@ -82,6 +88,8 @@ static sigjmp_buf env;
 int JEVPSERVERport;
 JevpServer serv;
 
+pthread_mutex_t serverTagsMux;
+
 void PO(char *s) {
     int fd = open("boo.txt", O_CREAT | O_WRONLY, 0666);
     close(fd);
@@ -92,6 +100,9 @@ pthread_t imageWriterThread;
 extern int ImageWriterDrawingPlot;
 extern int canvasBuilderLine;
 extern int l4BuilderSourceLine;
+extern int l4ThreadIDs[100];
+extern int l4ThreadLineNumbers[100];
+extern int l4InThreads;
 
 static void sigHandler(int arg, siginfo_t *sig, void *v)
 {
@@ -108,7 +119,22 @@ static void sigHandler(int arg, siginfo_t *sig, void *v)
 
     int mythread = syscall(SYS_gettid);
 
-    LOG(WARN, "signal %d TID, me: %d,  reader: %d, (server: %d)(builder: %d)(imageWriter: %d)(canvasBuilder: %d)(l4: %d)", arg, mythread, readerTid, line_number, line_builder,ImageWriterDrawingPlot, canvasBuilderLine, l4BuilderSourceLine);
+    int l4sourceline;
+    if(l4InThreads) {
+	l4sourceline = -1;
+	for(int i=0;i<100;i++) {
+	    if(mythread == l4ThreadIDs[i]) {
+		l4sourceline = l4ThreadLineNumbers[i];
+		break;
+	    }
+	}
+    }
+    else {
+	l4sourceline = l4BuilderSourceLine;
+    }
+    
+    
+    LOG(WARN, "signal %d TID, me: %d,  reader: %d, (server: %d)(builder: %s)(imageWriter: %d)(canvasBuilder: %d)(l4: %d)", arg, mythread, readerTid, line_number, line_builder ? line_builder: "", ImageWriterDrawingPlot, canvasBuilderLine, l4sourceline);
 
     // If we are trying to cleam up after a builder!
     //
@@ -174,6 +200,41 @@ void _JevpServerMain(int argc, char *argv[])
 
   JevpServer::main(argc, argv);
 }
+
+
+JevpServer::JevpServer() {
+    pthread_mutex_init(&serverTagsMux, NULL);
+
+    dieWhenReady = 0;
+
+    printEventCount = 100;
+    myport = JEVP_PORT;
+    logevent = 0;
+    maxevts = 0;
+    evtsInRun = 0;
+    runCanvasImageBuilder = 0;
+    imagewriterdir = (char *)"/tmp/jevp";
+
+    ssocket = NULL;
+    mon = NULL;
+    refplotdir = (char *)DEFAULT_REF_PLOT_DIR;
+    diska = (char *)"/";
+ 
+    displays = NULL;
+    displays_fn = NULL;
+    
+    basedir = (char *)DEFAULT_BASEDIR;
+    refplotdir = (char *)DEFAULT_REF_PLOT_DIR;
+    pdfdir = (char *)DEFAULT_PDFDIR;
+    rootfiledir = (char *)DEFAULT_ROOTFILEDIR;
+    nodb = 0;
+    die = 0;
+    daqfilename = NULL;
+    serverTags = NULL;
+    launchArgs = NULL;
+
+    jevpSummaryPlot = NULL;
+};
 
 unsigned long long int JevpServer::getMemUse() {
   FILE *f = fopen("/proc/self/status", "r");
@@ -396,11 +457,12 @@ void JevpServer::readSocket()
 			CP;
 			lastImageBuilderSendTime = time(NULL);
 			writingImageClock.record_time();
-			displays->setServerTags(serverTags ? serverTags : "");
+			getServerTags(tmpServerTags, MSTL);
+			displays->setServerTags(tmpServerTags);
 			displays->updateDisplayRoot();
 
 			CP;
-			int cnt = canvasImageBuilder->sendToImageWriter(&runStatus, eventsThisRun, serverTags, false);
+			int cnt = canvasImageBuilder->sendToImageWriter(&runStatus, eventsThisRun, tmpServerTags, false);
 
 			// canvasImageBuilder->writeIndex(imagewriterdir, "idx.txt");
 			// CP;
@@ -1184,15 +1246,9 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
 	EvpMessage m;
 	m.setSource((char *)"serv");
 	m.setCmd((char *)"getServerTags");
-	if(serverTags) {
-	    LOG(DBG, "server tags are: %s",serverTags);
-	    m.setArgs(serverTags);
-	}
-	else {
-	    LOG(DBG, "No server tags?");
-	    m.setArgs("");
-	}
-
+	getServerTags(tmpServerTags, MSTL);
+	m.setArgs(tmpServerTags);
+	
 	TMessage mess(kMESS_OBJECT);
 	mess.WriteObject(&m);
 	s->Send(mess);
@@ -1325,12 +1381,9 @@ void JevpServer::performStopRun()
 	continue;
     }
 
-  
- 
-
-
     // Write out the pdfs for all displays...
-    displays->setServerTags(serverTags ? serverTags : "");
+    getServerTags(tmpServerTags, MSTL);
+    displays->setServerTags(tmpServerTags);
     displays->ignoreServerTags = 0;
 
     runStatus.setStatus("stopped");
@@ -1375,10 +1428,7 @@ void JevpServer::clearForNewRun()
 	curr->_startrun(rdr);
     }
 
-    if(serverTags) {
-	free(serverTags);
-	serverTags = NULL;
-    }
+    freeServerTags();
 }
 
 
@@ -1580,7 +1630,7 @@ JevpPlot *JevpServer::getJevpSummaryPlot()
   
   
     int i = 0;
-    char tmp[512];
+    char tmp[MSTL+20];
 
     sprintf(tmp,"Run #%d: (%s for %ld seconds)",runStatus.run, runStatus.status, time(NULL) - runStatus.timeOfLastChange);
     l = new JLatex(.05, liney(i++), tmp, 1, 1);
@@ -1589,7 +1639,8 @@ JevpPlot *JevpServer::getJevpSummaryPlot()
     l->SetTextSize(.05);
     jevpSummaryPlot->addElement(l);
 
-    sprintf(tmp, "Tags:   %s", serverTags);
+    getServerTags(tmpServerTags, MSTL);
+    sprintf(tmp, "Tags:   %s", tmpServerTags);
     l = new JLatex(.05, liney(i++), tmp, 1, 1);
     l->SetTextFont(82);
     i++;
@@ -1680,7 +1731,8 @@ void JevpServer::writeRunPdf(int display, int run)
 
     if(runCanvasImageBuilder) {
 	LOG("JEFF", "status: %s", runStatus.status);
-	int cnt = canvasImageBuilder->sendToImageWriter(&runStatus, eventsThisRun, serverTags, true);
+	getServerTags(tmpServerTags, MSTL);
+	int cnt = canvasImageBuilder->sendToImageWriter(&runStatus, eventsThisRun, tmpServerTags, true);
 
 	//canvasImageBuilder->writeIndex(imagewriterdir, "idx.txt");	
 	//canvasImageBuilder->writeRunStatus(imagewriterdir, &runStatus, eventsThisRun, serverTags);
@@ -2061,10 +2113,35 @@ void JevpServer::addServerTag(char *tag)
     serverTags = ntag;
 }
 
+void JevpServer::freeServerTags() {
+    pthread_mutex_lock(&serverTagsMux);
+    if(serverTags) {
+	free(serverTags);
+	serverTags = NULL;
+    }
+
+    pthread_mutex_unlock(&serverTagsMux);
+}
+
+void JevpServer::getServerTags(char *dest, int maxlen) {
+    pthread_mutex_lock(&serverTagsMux);
+    if(!serverTags) {
+	dest[0] = '\0';
+    }
+    else {
+	if(strlen(serverTags) > maxlen) {
+	    LOG("CRIT", "server tag length %d too large for buffer %d", strlen(serverTags), maxlen);
+	    exit(0);
+	}
+	strcpy(dest, serverTags);
+    }
+    pthread_mutex_unlock(&serverTagsMux);
+}
 
 // tags delimeted by "|"
 void JevpServer::addServerTags(char *tags)
 {
+    pthread_mutex_lock(&serverTagsMux);
     LOG(DBG, "Adding tag: %s",tags);
 
     char *tmp = (char *)malloc(strlen(tags)+1);
@@ -2073,17 +2150,20 @@ void JevpServer::addServerTags(char *tags)
     if(tmp[0] != '|') {
 	LOG(ERR, "Bad tag string: %s",tags);
 	free(tmp);
+	pthread_mutex_unlock(&serverTagsMux);
 	return;
     }
 
-    char *t = strtok(tmp, "|");
+    char *saveptr = NULL;
+    char *t = strtok_r(tmp, "|", &saveptr);
     while(t) {
 	addServerTag(t);
-	t = strtok(NULL, "|");
+	t = strtok_r(NULL, "|", &saveptr);
     }
   
     LOG(DBG, "server tags are: %s",serverTags);
     free(tmp);
+    pthread_mutex_unlock(&serverTagsMux);
 }
 
 

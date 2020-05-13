@@ -898,6 +898,7 @@ void JevpPlotSet::writePdfFile()
     return;
 }
 
+// ugly, but threadsafe if parent->addServerTags() is threadsafe!
 void JevpPlotSet::addServerTags(char *tags)
 {
     char *tmp = (char *)malloc(strlen(tags) + 3);
