@@ -311,6 +311,11 @@ int CanvasImageBuilder::sendToImageWriter(RunStatus *rs, int numberOfEvents, con
     XX(2);      // writeIdx is guarenteed to be updated before the mux returns!
     pthread_mutex_lock(&imageWriter->mux);
     XX(1);
+    
+    if(rs->run == 0) {
+	pthread_mutex_unlock(&imageWriter->mux);
+	return 0;
+    }
 
     char fullbasedir[256];
     sprintf(fullbasedir, "/tmp/%s_build_%08d", basedir, writeIdx);
