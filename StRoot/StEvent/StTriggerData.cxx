@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.34 2019/06/25 15:50:15 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.35 2020/05/15 15:40:20 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.35  2020/05/15 15:40:20  ullrich
+ * Added protection from corrupt Qt board data (Akio)
+ *
  * Revision 2.34  2019/06/25 15:50:15  ullrich
  * Improved QT board error reports/handling. Added EPD access functions. (Akio)
  *
@@ -115,7 +118,7 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.34 2019/06/25 15:50:15 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.35 2020/05/15 15:40:20 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
@@ -162,35 +165,44 @@ void StTriggerData::decodeQT(unsigned int ndata, unsigned int* data, unsigned sh
     if (ndata>MaxQTData)         { printf("QT data length %d is too long (max is %d)\n",ndata,MaxQTData); return;}
     if (data[ndata-1] != 0xac10) { printf("Wrong QT data last word %x (should be 0xAC10)\n",data[ndata-1]); return;}
     int header=1;
-    int oldch;
+    int oldch, oldcrt=-1;
     unsigned int crate;
     unsigned int addr,ch,nline;
     for (unsigned int i=0; i<ndata-1; i++){
         unsigned int d = data[i];
-        if (header==1){
+        if (header==1) {
             crate =  (d & 0xff000000) >> 24;
             addr  = ((d & 0x00ff0000) >> 16) - 0x10;
             nline =  (d & 0x000000ff);
             oldch = -1;
+	    if (addr > 15 || (oldcrt!=-1 && crate!=oldcrt)){
+		    printf("i=%3d crt=%3d adr=%3d nline=%3d oldcrt=%3d QTBd header bad crt or addr\n",
+			   i,crate,addr,nline,oldcrt);
+		    return;
+	    }
+            // else {
+		//printf("i=%3d crt=%3d adr=%3d nline=%3d\n",i,crate,addr,nline);
+	    // }
             if(nline>0) header=0;
-            //printf("i=%3d  crate=%3d  addr=%3d  nline=%3d\n",i,crate,addr,nline);
-        }else{
+	    if(oldcrt==-1) oldcrt=crate;
+        }
+        else {
             ch = (d & 0xf8000000) >> 27;
 	    unsigned short a = (unsigned short)  (d & 0x00000fff);
 	    unsigned short t = (unsigned char)  ((d & 0x001f0000) >> 16);
-	    //printf("i=%3d crt=%2d adr=%2d ch=%3d adc=%4d tdc=%4d\n",i,crate,addr,ch,a,t);
 	    unsigned int flag=0;
             if(a==0) flag+=1; 
 	    if((int)ch<=oldch) flag+=2;  
 	    if(ch==31 && a==4095 && t==31) flag+=4;
 	    if(flag>0){
-	      printf("i=%3d crt=%2d adr=%2d ch=%3d oldch=%3d adc=%4d tdc=%4d",
+	      printf("i=%3d crt=%3d adr=%3d ch=%3d oldch=%3d adc=%4d tdc=%4d",
 		     i,crate,addr,ch,oldch,a,t);
 	      if((flag & 0x1)>0) printf(" ADC=0!");
 	      if((flag & 0x2)>0) printf(" OrderWrong!");
 	      if((flag & 0x4)>0) printf(" FFFF!");
 	      printf("\n");
 	    }else{
+	      //printf("i=%3d crt=%3d adr=%3d ch=%3d adc=%4d tdc=%4d\n",i,crate,addr,ch,a,t);
 	      adc[addr][ch] = a;
 	      tdc[addr][ch] = t;
 	      oldch=ch;
