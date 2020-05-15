@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2019.cxx,v 2.3 2019/07/03 08:30:25 ullrich Exp $
+ * $Id: StTriggerData2019.cxx,v 2.4 2020/05/15 15:40:20 ullrich Exp $
  *
  * Author: Akio Ogawa, October 13, 2017
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2019.cxx,v $
+ * Revision 2.4  2020/05/15 15:40:20  ullrich
+ * Added protection from corrupt Qt board data (Akio)
+ *
  * Revision 2.3  2019/07/03 08:30:25  ullrich
  * correct blue filled bunch bit, and cleaning up unused spin bits (Akio)
  *
@@ -1747,7 +1750,7 @@ void StTriggerData2019::dump() const
     int buffer = prepostAddress(0);
     if (buffer >=0){
         if (mBBC[buffer]){
-            for (int i = 0;i < 16;i++) printf(" %1x %04X", i, mBBC[buffer]->BBClayer1[i]);
+            for (int i = 0;i < 8;i++) printf(" %1x %04X", i, mBBC[buffer]->BBClayer1[i]);
         }
     }
     printf("\n");
