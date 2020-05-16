@@ -8,7 +8,7 @@
 #  setenv NODEBUG yes
 #  setup 64b
 #  starver .DEV2 
-#  starver TFG17j 
+#  starver TFG19e 
   set file = $INPUTFILE0;
 #  set rung = `echo $file | awk -F\_ '{print $2}'`
   echo "${file}"
@@ -32,14 +32,14 @@
 #     root4star -q -b 'TpcRS.C(1000,"MC.2018,TpcRS,StiCA",0,"heed,PhysicsOff","'${file}'")' &gt;&amp; ${logFile}
 #     root4star -q -b 'bfc.C(1000,"mtin,MC.2018,NoiTPCLu,TpcRS,McTpcAna,StiCA","'${file}'")' &gt;&amp; ${logFile}
 #     root4star -q -b 'bfc.C(1000,"mtin,MC.2018,NoiTPCLu,TpcRS,McTpcAna,StiCA,-geantOut,NoHistos,noRunco","'${file}'")' &gt;&amp; ${logFile}
-     root4star -q -b 'bfc.C(400,"mtin,MC.2018,NoiTPCLu,TpcRS,McTpcAna,StiCA,-geantOut,NoHistos,noRunco","'${file}'")' &gt;&amp; ${logFile}
+     root4star -q -b 'bfc.C(200,"mtin,MC.2018,NoiTPCLu,TpcRS,McTpcAna,StiCA,-geantOut,NoHistos,noRunco","'${file}'")' &gt;&amp; ${logFile}
   endif
 </command>
 <!-- <input URL="command:TpcRS_Part.pl" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/daq_2018_3p85GeV_fixedTarget/*MuDst.root" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/daq_2018_3p85GeV_fixedTarget.B/*MuDst.root" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/daq_2018_3p85GeV_fixedTarget/st_physics_adc_19151031_raw_1500002_121_150.MuDst.root" />  -->
-<input URL="file:/net/l404/data/fisyak/Tpc/TpcRS/daq_2018_3p85GeV_fixedTarget/*.MuDst.root" />
-
+<!-- <input URL="file:/net/l404/data/fisyak/Tpc/TpcRS/daq_2018_3p85GeV_fixedTarget/*.MuDst.root" /> -->
+<input URL="file:/net/l404/data/fisyak/Tpc/TpcRS/daq_2018_AuAu27/*.MuDst.root" />
 </job>
 

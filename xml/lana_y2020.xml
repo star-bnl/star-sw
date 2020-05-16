@@ -4,7 +4,7 @@
 <command> 
 #  source ~/.tcshrc
   cd ${SUBMITTINGDIRECTORY}  
-  starver TFG20b
+#  starver TFG20b
 #  starver TFG19k
 #  setenv NODEBUG yes
 #  setup 64b
