@@ -250,7 +250,7 @@ void Pico(const Char_t *files ="./*.picoDst.root",
   TH1F *GoodPrimTracks = new TH1F("GoodPrimTracks","No. of good Primary track at the first vertex",2000,0,2000);
   TH2F *dcaXYInvpT = new TH2F("dcaXYInvpT","dca_{XY} versus 1/pT", 100,0,10, 500, -2.5, 2.5);
   TH2F *dcaZInvpT = new TH2F("dcaZInvpT","dca_{Z} versus 1/pT", 100,0,10, 500, -2.5, 2.5);
-  TH2F *zZ       = new TH2F("zZ","zTpc - zVpd versus zTpc for highest rank vertex", 200, -200, 200, 100, -50, 50);
+  TH2F *zZ       = new TH2F("zZ","zTpc - zVpd versus zTpc for highest rank vertex", 210, -210, 210, 100, -50, 50);
   TH2F *dEdxP  = new TH2F("dEdxP","dEdx vesus regidity",250,-2.5,2.5,500,0,100);
   TH2F *betaToF  = new TH2F("beta","BToF 1/beta -1 versus regity",350,-3.5,3.5,500,-0.6,4.4);
   TH2F *betaEToF  = new TH2F("Ebeta","EToF 1/beta -1 versus regity",350,-3.5,3.5,500,-0.6,4.4);
@@ -384,7 +384,7 @@ void Pico(const Char_t *files ="./*.picoDst.root",
     Double_t zTpc = xyzV[2];
     Double_t vzVpd = picoEvent->vzVpd();
     zZ->Fill(zTpc, zTpc - vzVpd);
-    if (TMath::Abs(zTpc - vzVpd) > 10.0) continue;
+    if (vzVpd > -998.9 && TMath::Abs(zTpc - vzVpd) > 10.0) continue;
     VxZ->Fill(pRcVx.z());
     Vxy->Fill(pRcVx.x(),pRcVx.y());
     PrimMult->Fill(NoGlobalTracks);
