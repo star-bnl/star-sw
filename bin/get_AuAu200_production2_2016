@@ -1,0 +1,1 @@
+get_file_list.pl -distinct -keys trgsetupname,path,filename,events -cond 'trgsetupname=AuAu200_production2_2016,filename~st_physics,production=P16ij,filetype=daq_reco_picoDst,tpx=1,sanity=1,storage=nfs,library=SL20c' -limit 0 | wc -l
