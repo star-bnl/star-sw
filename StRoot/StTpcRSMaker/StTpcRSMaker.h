@@ -123,7 +123,7 @@ class StTpcRSMaker : public StMaker {
 #endif
   static Double_t PadResponseFunc(Double_t *x, Double_t *p);
   static Double_t Gatti(Double_t *x, Double_t *p);
-  static Double_t InducedCharge(Double_t s, Double_t h, Double_t ra, Double_t Va, Double_t &t0);
+  static Double_t InducedCharge(Double_t s, Double_t h, Double_t ra, Double_t Va, Double_t &t0, Double_t &EffcetiveTime);
   static Float_t  GetCutEle();
   static TF1F     *fgTimeShape3[2];    //!
   static TF1F     *fgTimeShape0[2];    //!
@@ -144,6 +144,8 @@ class StTpcRSMaker : public StMaker {
   static TF1   *mHeed;                       //!
   Double_t InnerAlphaVariation[24];   //!
   Double_t OuterAlphaVariation[24];   //!
+  Double_t InnerEffectiveTime[24];   //!
+  Double_t OuterEffectiveTime[24];   //!
   Altro *mAltro[48];                  //! 0 - 23 => ALTRO, 24 - 47 => SAMPA chips
   // local variables
   Int_t numberOfSectors;              //!

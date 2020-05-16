@@ -282,23 +282,25 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
       if (io == 0) {
 	if (sector > 1 && TMath::Abs(innerSectorAnodeVoltage[sector-1] - innerSectorAnodeVoltage[sector-2]) < 1) {
 	  InnerAlphaVariation[sector-1] = InnerAlphaVariation[sector-2];
+	  InnerEffectiveTime[sector-1] = InnerEffectiveTime[sector-2];
 	} else {
 	  LOG_INFO << "Inner Sector " << sector << " ======================" << endm;
 	  InnerAlphaVariation[sector-1] = InducedCharge(anodeWirePitch,
 							CathodeAnodeGap[io],
 							anodeWireRadius,
-							innerSectorAnodeVoltage[sector-1], t0IO[io]);
+							innerSectorAnodeVoltage[sector-1], t0IO[io], InnerEffectiveTime[sector-1]);
 	}
       }
       else {
 	if (sector > 1 && TMath::Abs(outerSectorAnodeVoltage[sector-1] - outerSectorAnodeVoltage[sector-2]) < 1) {
 	  OuterAlphaVariation[sector-1] = OuterAlphaVariation[sector-2];
+	  OuterEffectiveTime[sector-1] = OuterEffectiveTime[sector-2];
 	} else {
 	  LOG_INFO << "Outer Sector " << sector << " ======================" << endm;
 	  OuterAlphaVariation[sector-1] = InducedCharge(anodeWirePitch,
 							CathodeAnodeGap[io],
 							anodeWireRadius,
-							outerSectorAnodeVoltage[sector-1], t0IO[io]);
+							outerSectorAnodeVoltage[sector-1], t0IO[io], OuterEffectiveTime[sector-1]);
 	}
       }
     }
@@ -773,6 +775,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
       vector<Electron_t> Electrons;
     };
     vector<Wire_t> Wires(numberOfInnerSectorAnodeWires+numberOfOuterSectorAnodeWires);
+    Double_t driftVelocity           = gStTpcDb->DriftVelocity(sector);
 
     // it is assumed that hit are ordered by sector, trackId, pad rows, and track length
     for (; sortedIndex < no_tpc_hits; sortedIndex++) {
@@ -869,7 +872,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Float_t  *AdditionalMcCorrection = St_TpcResponseSimulatorC::instance()->SecRowCor();
 	Float_t  *AddSigmaMcCorrection   = St_TpcResponseSimulatorC::instance()->SecRowSig();
 	// Generate signal 
-	Double_t sigmaJitterT            = St_TpcResponseSimulatorC::instance()->SigmaJitterTI()*gStTpcDb->DriftVelocity(sector)*mTimeBinWidth;
+	Double_t sigmaJitterT            = St_TpcResponseSimulatorC::instance()->SigmaJitterTI()*driftVelocity*mTimeBinWidth;
 	Double_t sigmaJitterX            = St_TpcResponseSimulatorC::instance()->SigmaJitterXI();
 	Double_t transverseDiffusion     = St_TpcResponseSimulatorC::instance()->transverseDiffusion();
 	Double_t longitudinalDiffusion   = St_TpcResponseSimulatorC::instance()->longitudinalDiffusion();
@@ -1218,6 +1221,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Int_t WireIndex = 0;
 	Double_t yOnWire = 0;
 	Int_t io = 0;
+	Double_t EffectiveTime = InnerEffectiveTime[sector-1];
 	if (iwire < numberOfInnerSectorAnodeWires) {
 	  WireIndex = iwire + 1;
 	  yOnWire   = anodeWirePitch*(WireIndex - 1) + firstInnerSectorAnodeWire;
@@ -1225,10 +1229,11 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  io = 1;
 	  WireIndex = iwire + 1 - numberOfInnerSectorAnodeWires;
 	  yOnWire   = anodeWirePitch*(WireIndex - 1) + firstOuterSectorAnodeWire;
+	  EffectiveTime = OuterEffectiveTime[sector-1];
 	}
 	Double_t recomb   = St_TpcResponseSimulatorC::instance()->Recombination()[io];
 	Double_t sigma_xW = St_TpcResponseSimulatorC::instance()->Sigma_xW()[io];
-	Double_t slope_zW = St_TpcResponseSimulatorC::instance()->Slope_zW()[io];
+	//	Double_t slope_zW = St_TpcResponseSimulatorC::instance()->Slope_zW()[io];
 	Int_t    row   = transform.rowFromLocalY(yOnWire,sector);
 	Double_t dY    = mChargeFraction[io][sector-1]->GetXmax();
 	Double_t yLmin = yOnWire - dY;
@@ -1244,14 +1249,18 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    Double_t dX = 0;
 	    Double_t dZ = 0;
 	    Double_t prob = 0;
+	    
 	    // Kill electron due to "recombination" with ions	  
 	    for (Int_t ie1 = 0; ie1 < ie; ie1++) {
 	      if (Wires[iwire].Electrons[ie1].Gain  < 0) continue;
-	      dZ = zOnWire - Wires[iwire].Electrons[ie1].zW;
-	      if (dZ > 7*slope_zW) continue;
 	      dX = xOnWire - Wires[iwire].Electrons[ie1].xW;
-	      prob = recomb*Wires[iwire].Electrons[ie1].Gain*Wires[iwire].Electrons[ie1].Gain*
-		TMath::Gaus(dX, 0, sigma_xW, kTRUE)*TMath::Exp(-dZ/slope_zW);
+	      if (TMath::Abs(dX) > 3* sigma_xW) continue;
+	      dZ = zOnWire - Wires[iwire].Electrons[ie1].zW;
+	      Double_t t = dZ/driftVelocity; // seconds
+	      Double_t r2 = EffectiveTime*t + anodeWireRadius*anodeWireRadius;
+	      Double_t r  = TMath::Sqrt(r2);
+	      prob = recomb*Wires[iwire].Electrons[ie1].Gain*
+		TMath::Gaus(dX, 0, sigma_xW, kTRUE)/(TMath::TwoPi()*r);
 	      if (gRandom->Rndm() < prob) {
 		Wires[iwire].Electrons[ie].Gain = Gain = -1;
 		break;
@@ -1697,7 +1706,7 @@ Int_t StTpcRSMaker::AsicThresholds(Short_t ADCs[__MaxNumberOfTimeBins__]) {
   return noTbleft;
 }
 //________________________________________________________________________________
-Double_t StTpcRSMaker::InducedCharge(Double_t s, Double_t h, Double_t ra, Double_t Va, Double_t &t0) {
+Double_t StTpcRSMaker::InducedCharge(Double_t s, Double_t h, Double_t ra, Double_t Va, Double_t &t0, Double_t &EffcetiveTime) {
   // Calculate variation of induced charge due to different arrived angles 
   // alpha = -26 and -70 degrees
   LOG_INFO << "wire spacing = " << s << " cm"
@@ -1737,6 +1746,9 @@ Double_t StTpcRSMaker::InducedCharge(Double_t s, Double_t h, Double_t ra, Double
   for (Int_t i = 0; i < 2; i++) {
     r = TMath::Log(Gains[i]/GainsAv); LOG_INFO << "Relative gain " << r << " at alpha = " << alpha[i] << endm;
   }
+  // Ion Effective Time *2
+  Double_t mobility = 1.2; LOG_INFO << "Effective Ion moblity " << mobility << " cm^2/(V * sec)" << endm;
+  EffcetiveTime = 2.*mobility*E*ra; LOG_INFO << "Effective radius = sqrt(" << EffcetiveTime << "*time + ra^2)" << endm;
   return r;
 }
 //________________________________________________________________________________
