@@ -245,6 +245,7 @@ Int_t StBFChain::Instantiate()
     StMaker *myChain = 0;
     StMaker *mk = 0;
     Bool_t isInChain = kFALSE;
+    if (gClassTable->GetID("TGiant3") < 0 && maker == "St_geant_Maker") continue; // ! root4star
     // Require only instance for the following named makers
     if (maker == "St_db_Maker"  || maker == "StTpcDbMaker" ||
 	maker == "StSvtDbMaker" || maker == "StSsdDbMaker" || maker == "StSstDbMaker" ||
@@ -334,13 +335,13 @@ Int_t StBFChain::Instantiate()
 			      << "] length is > " << len 
 			      << " - increase BFC Name field length" << endm;
 	  }
-
+	  
 	  // Determine flavors
 	  TString flavors = "ofl+TFG"; // default flavor for offline
-
+	  
 	  // simulation flavors
 	  if (GetOption("Simu") && ! GetOption("NoSimuDb")) flavors.Prepend("sim+");
-
+	  
 	  // filestream flavors
 	  if (fSetFiles) {
 	    TString firstFileName = fSetFiles->GetFileName(0);
@@ -350,7 +351,7 @@ Int_t StBFChain::Instantiate()
 	      if (fileStream.Length()>0) flavors.Prepend(fileStream += '+');
 	    }
 	  }
- 
+	  
 	  LOG_INFO << "Using DB flavors: " << flavors << endm;
 	  dbMk->SetFlavor(flavors.Data());
 	  mk = dbMk;
@@ -379,7 +380,7 @@ Int_t StBFChain::Instantiate()
 			    << "] length is > " << len 
 			    << " - increase BFC Name field length" << endm;
 	}
-
+	
 	SetInput("StDAQReader",".make/inputStream/.make/inputStream_DAQ/.const/StDAQReader");
 	if (GetOption("ReadAll")) {	//activate all branches
 	  // inpMk->SetBranch("*",0,"r");
@@ -459,7 +460,7 @@ Int_t StBFChain::Instantiate()
 	assert(mk);
       }
     }
-
+    
     {
       TString namec = mk->GetName();
       int len       = sizeof(fBFC[i].Name);
@@ -471,27 +472,18 @@ Int_t StBFChain::Instantiate()
 			  << " - increase BFC Name field length" << endm;
       }
     }
-
+    
     if (maker == "StTpcDbMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT"    ,1);
     if (maker == "StDAQMaker") {
       if (GetOption("adcOnly")) mk->SetAttr("adcOnly",1);                        ;
       NoMakersWithInput++;
     }
     if (maker == "StarPrimaryMaker") {
-#if 0
-      StarPrimaryMaker *primary = (StarPrimaryMaker *) mk;
-      if (GetOption("genIn") && fInFile != "") {
-	ProcessLine(Form("StarGenEventReader *EvR = new StarGenEventReader();"
-			 "EvR->SetInputFile(\"%s\",\"genevents\",\"primaryEvent\");"
-			 "((StarPrimaryMaker *) %p)->AddGenerator(EvR);", fInFile.Data(), mk));
-	eventreader -> SetInputFile(fInFile.Data(),"genevents","primaryEvent");
-	primary->AddGenerator(eventreader);
-      }
-#endif
-      if (GetOption("genIn")) mk->SetAttr("FreezePV", 1);
+      if (GetOption("genIn") || GetOption("mtIn")) mk->SetAttr("FreezePV", 1);
     }
-    if (maker == "StarGenEventReader" &&  fInFile != "") {
-      ProcessLine(Form("((StarGenEventReader *) %p)->SetInputFile(\"%s\",\"genevents\",\"primaryEvent\");", mk, fInFile.Data()));
+    if ((maker == "StarGenEventReader" || maker == "StarMuEventReader") &&  fInFile != "") {
+      mk->SetAttr("InputFile",fInFile.Data());
+      NoMakersWithInput++;
     }
     if (maker == "St_geant_Maker") { // takes only first request for geant, if it is active then it should be the first one
       Int_t NwGeant = 10; // default geant parameters
@@ -509,6 +501,7 @@ Int_t StBFChain::Instantiate()
       TString CintF(SAttr("GeneratorFile"));
       if (GetOption("fzin")        || GetOption("fzinSDT")        ||
 	  GetOption("ntin")        || 
+	  GetOption("genIn")       || 
 	  GetOption("gstar")       || 
 	  GetOption("PrepEmbed")   || 
 	  GetOption("mtin")        ||
@@ -530,10 +523,8 @@ Int_t StBFChain::Instantiate()
       if (! mk) goto Error;
       SetGeantOptions(mk);
       if (GetOption("fzin")        || GetOption("fzinSDT")        ||
-	  GetOption("PrepEmbed")   || 
-	  GetOption("mtin")) {
+	  GetOption("PrepEmbed"))
 	NoMakersWithInput++;
-      }
       if (fRunG > 0) {
 	mk->SetAttr("RunG",fRunG);
       }
@@ -541,11 +532,12 @@ Int_t StBFChain::Instantiate()
 	ProcessLine("AgStarReader::Instance();");
       }
     }
+    
     // special maker options
     // m_Mode xyz
     //        x = 1 phys_off                    
     //        y = 1 Passive mode (do not call RunMC()
-    //        z = 1 Mixer Mode
+    //        z = 1 Mixer Modex1
     if (maker == "StVMCMaker") {
       if (GetOption("VMCPassive")) {// don't use mk->SetActive(kFALSE) because we want to have InitRun
 	mk->SetAttr("VMCPassive",1);
@@ -561,10 +553,6 @@ Int_t StBFChain::Instantiate()
 	if (GetOption("Embedding")) mk->SetAttr("Embedding",1);
 	if (fRunG > 0) {
 	  mk->SetAttr("RunG",fRunG);
-	}
-	if (fInFile != "")  {
-	  if (ProcessLine(Form("((StVMCMaker *) %p)->SetInputFile(\"%s\")",mk,fInFile.Data())))
-	    goto Error;
 	} else {
 	  TString CintF(SAttr("GeneratorFile"));
 	  if (CintF != "") {
@@ -584,20 +572,20 @@ Int_t StBFChain::Instantiate()
 	//      mk->SetAttr("seedFinders","CA","Stv");              // for CA seed finder
 	mk->SetAttr("seedFinders","CA,Default","Stv");      // for CA + Default seed finders
       }
-
+      
       // When StiCA library is requested CA will be used as seed finder in StiMaker
       if ( GetOption("StiCA") ) {
-        mk->SetAttr("seedFinders", "CA DEF");
+	mk->SetAttr("seedFinders", "CA DEF");
       }
-
+      
       // Option to re-use hits in other tracks
       if ( GetOption("hitreuseon") ){
 	mk->SetAttr("SetMaxTimes", 100); 
       }
-
+      
       // By default iTpc hits are used in tracking
       mk->SetAttr("activeiTpc", GetOption("iTpcIT") ? kTRUE : kFALSE);
-
+      
       // old logic for svt and ssd
       if (GetOption("NoSvtIT")){
 	mk->SetAttr("useSvt"	,0);
@@ -608,7 +596,7 @@ Int_t StBFChain::Instantiate()
 	}
       }
       if (   GetOption("NoSsdIT") &&
-	    !GetOption("SstIT") ){
+	     !GetOption("SstIT") ){
 	mk->SetAttr("useSsd"	,0);
       } else {
 	if (GetOption("SsdIT")){
@@ -616,53 +604,53 @@ Int_t StBFChain::Instantiate()
 	  mk->SetAttr("activeSsd" ,1);
 	}
       }
-
+      
       // this was an R&D detector never implemented
       // simulations were made nonetheless
       if (GetOption("HpdIT")){
 	mk->SetAttr("useHpd"     ,1);
 	mk->SetAttr("activeHpd"  ,1);
       }
-
+      
       // back to the HFT sub-system
       if (GetOption("NoPxlIT")) {
 	mk->SetAttr("usePxl"	 ,1);
 	mk->SetAttr("usePixel"	 ,1);
       } else {
-        if (GetOption("PixelIT") || GetOption("PxlIT") ){
+	if (GetOption("PixelIT") || GetOption("PxlIT") ){
 	  mk->SetAttr("usePxl"     ,1);
 	  mk->SetAttr("usePixel"	 ,1);
 	  mk->SetAttr("activePxl"  ,1);
 	  mk->SetAttr("activePixel",1);
 	  mk->SetAttr("useSvt"	,0);
 	  mk->SetAttr("useSsd"	,0);
-        }
+	}
       }
       if (GetOption("NoIstIT")) {
 	mk->SetAttr("useIst"	 ,1);
       } else {
-        if (GetOption("IstIT")){
+	if (GetOption("IstIT")){
 	  mk->SetAttr("useIst"     ,1);
 	  mk->SetAttr("activeIst"  ,1);
-        }
+	}
       }
       if (GetOption("NoSstIT")) {
-        mk->SetAttr("useSst"	 ,1);
+	mk->SetAttr("useSst"	 ,1);
       } else {
-        if (GetOption("SstIT")){
+	if (GetOption("SstIT")){
 	  mk->SetAttr("useSst"	 ,1);
 	  mk->SetAttr("activeSst"  ,1);
 	  mk->SetAttr("useSvt"	,0);
 	  mk->SetAttr("useSsd"	,0);
-        }
+	}
       }
-
+      
       // other sub-systems
       if (GetOption("BTofIT")){
 	mk->SetAttr("useBTof"    ,1);
 	mk->SetAttr("activeBTof" ,1);
       }
-
+      
       if (GetOption("StiPulls") || 
 	  GetOption("StvPulls"))  mk->SetAttr("makePulls"  ,1);
       if (GetOption("skip1row"))  mk->SetAttr("skip1row"   ,1);
@@ -689,12 +677,12 @@ Int_t StBFChain::Instantiate()
       if (GetOption("VFppLMV5"   ) ) mk->SetAttr("VFppLMV5"   	, 1);
       if (GetOption("VFPPV"      ) ) mk->SetAttr("VFPPV"      	, 1);
       if ((GetOption("VFPPV") && GetOption("Stv")) || GetOption("VFPPVEv") ) {
-        gSystem->Load("StBTofUtil.so");
-        mk->SetAttr("VFPPVEv"      , 1);
+	gSystem->Load("StBTofUtil.so");
+	mk->SetAttr("VFPPVEv"      , 1);
       } else if (GetOption("VFPPV") && GetOption("Sti")) mk->SetAttr(    "VFPPV", 1);
       if (GetOption("VFPPVEvNoBtof")){
-        gSystem->Load("StBTofUtil.so"); //Not used but loaded to avoid fail
-        mk->SetAttr("VFPPVEvNoBtof", 1);
+	gSystem->Load("StBTofUtil.so"); //Not used but loaded to avoid fail
+	mk->SetAttr("VFPPVEvNoBtof", 1);
       }
       if (GetOption("VFPPVnoCTB" ) )      mk->SetAttr("VFPPVnoCTB" 	, 1);
       if (GetOption("VFFV"       ) )      mk->SetAttr("VFFV"       	, 1);
@@ -709,7 +697,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("usePct4Vtx" ) )      mk->SetAttr("PCT"           	, 1);
       if (GetOption("useBTOF4Vtx") )      mk->SetAttr("BTOF"          	, 1);
       if (GetOption("useBTOFmatchOnly") ) mk->SetAttr("useBTOFmatchOnly", 1);
-
+      
       // X-tended works only for VFPPV, VFPPVnoCTB, VFPPVev for now but could be re-used
       // However, we will change this to a more flexible arbitrarry setting later
       if (GetOption("VFStoreX")    ) mk->SetAttr("VFStore"      , 100); 
@@ -722,9 +710,9 @@ Int_t StBFChain::Instantiate()
       if (GetOption("VFMinuitX"  ) ) mk->SetAttr("VFMinuitX"  	, 1);
     }
     if (maker=="StAssociationMaker") {
-
+      
       LOG_QA << "StBFChain::Instantiate Setting the Parameters for the Association Maker" << endm;
-
+      
       TString cmd("");
       if (GetOption("ITTF") || GetOption("StiVMC") || GetOption("useInTracker"))
 	cmd = Form ("((StAssociationMaker *) %p)->useInTracker();",mk);
@@ -763,7 +751,7 @@ Int_t StBFChain::Instantiate()
       if (maker == "StTrsMaker")
 	mk->SetMode(1);       // Pile-up correction
     }
-
+    
     if (maker == "StStrangeMuDstMaker" && GetOption("CMuDST")&& GetOption("StrngMuDST") ) {
 #if  ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
       TString cmd(Form("StStrangeMuDstMaker *pSMMk = (StStrangeMuDstMaker*) %p;",mk));
@@ -774,16 +762,16 @@ Int_t StBFChain::Instantiate()
       ProcessLine(cmd);
 #endif
     }
-
+    
     // Alex requested an option (not turned by default) to disable all
     // hit reco cuts. This will make allm hits saved to MuDST /ezTree.
     if ( maker == "StEmcRawMaker" && GetOption("BEmcDebug"))
       mk->SetMode(1); // only one option now, bit a bitmask
-
+    
     // Use status tables for raw BEMC data (helpful for QA)
     if ( maker == "StEmcRawMaker" && GetOption("BEmcChkStat"))
       mk->SetAttr("BEmcCheckStatus",1);
-
+    
     // MuDST and ezTree. Combinations are
     //  ezTree         -> ezTree only
     //  CMuDST         -> regular MuDST only
@@ -794,7 +782,7 @@ Int_t StBFChain::Instantiate()
       cmd += "pMuMk->SetStatus(\"EztAll\",1);";
       ProcessLine(cmd);
     }
-
+    
     if ( maker == "StPicoDstMaker"){
       if ( GetOption("picoWrite") ) {mk->SetMode(1);
 	if (GetOption("NoPiCovMtx")) mk->SetAttr("PicoCovMtxMode","PicoCovMtxSkip");
@@ -812,8 +800,8 @@ Int_t StBFChain::Instantiate()
       if ( GetOption("PicoBEmcSmdWrite"))      mk->SetAttr("PicoBEmcSmdMode", "PicoBEmcSmdWrite");
       else if ( GetOption("PicoBEmcSmdSkip"))  mk->SetAttr("PicoBEmcSmdMode", "PicoBEmcSmdSkip"); // Default mode
     }
-
-
+    
+    
     if (maker == "StLaserEventMaker"){
       // Bill stuff - Empty place-holder
     }
@@ -837,7 +825,7 @@ Int_t StBFChain::Instantiate()
     if (maker == "StTofrMatchMaker"){
       mk->SetMode(0);
     }
-
+    
     if (maker == "StSpaceChargeEbyEMaker") {
       if ( GetOption("SpcChgCal") ||
 	   GetOption("SpcChgCalG"))   mk->SetMode(2);
@@ -863,7 +851,7 @@ Int_t StBFChain::Instantiate()
       cmd += "Ximk->SetXiLanguageUsage(5);";
       ProcessLine(cmd);
     }
-
+    
     // TPC
     if (maker == "StTpcRTSHitMaker") {
       if ( GetOption("TpxClu2D")) mk->SetAttr("TpxClu2D", 1);
@@ -876,7 +864,7 @@ Int_t StBFChain::Instantiate()
       mk->SetAttr("UseTonkoClusterAnnotation", 0);
     }
     if (GetOption("Cosmics") && (maker == "StTpcHitMaker" || maker == "StTpcRTSHitMaker")) mk->SetAttr("Cosmics"    ,1);
-
+    
     if (maker == "StTpcDbMaker"){
       if ( GetOption("Simu") && ! GetOption("NoSimuDb")) mk->SetAttr("Simu",1);
       if ( GetOption("useLDV")    ) mk->SetAttr("useLDV",1) ;// uses laserDV database
@@ -953,20 +941,20 @@ Int_t StBFChain::Instantiate()
     if ( ( maker == "StFtpcClusterMaker" || // ?
 	   maker == "StFtpcTrackMaker" ) &&
 	 GetOption("flaser"))                  mk->SetMode(mk->GetMode()+1);
-
+    
     if ((maker == "StFtpcClusterMaker" ||
 	 maker == "StFtpcTrackMaker"    )  &&
 	GetOption("fgain"))                    mk->SetMode(mk->GetMode()+4);
-
-
+    
+    
     // PMD
     if ( maker == "StPmdReadMaker"         &&
-         GetOption("pmdRaw"))                  mk->SetAttr("pmdRaw", 1);
-
+	 GetOption("pmdRaw"))                  mk->SetAttr("pmdRaw", 1);
+    
     // HFT
     if (maker == "StPxlSimMaker"           &&
 	GetOption("pxlSlowSim"))               mk->SetAttr("useDIGMAPSSim", 1);
-
+    
     // Hit filtering will be made from a single maker in
     // future with flexible filtering method
     if (maker == "StHitFilterMaker") {
@@ -1031,16 +1019,16 @@ Int_t StBFChain::Instantiate()
       mk->SetAttr("FiltTrg",(Int_t) (fFiltTrg.BeginsWith('+') ? 1 : -1));
       TString FiltTrgFlavor = fFiltTrg(1,128);
       if (FiltTrgFlavor.Length())
-        SetFlavor((FiltTrgFlavor += "+ofl").Data(),"trgOfflineFilter");
+	SetFlavor((FiltTrgFlavor += "+ofl").Data(),"trgOfflineFilter");
     }
     if (maker == "StIstRawHitMaker" && GetOption("istEmbed")) {
       mk->SetAttr("DoEmbedding", 1);
     }
-
+    
     if (maker == "StTagsMaker"){
       if ( GetOption("shadow")    ) mk->SetAttr("shadow",kTRUE);
     }
-
+    
   Add2Chain:
     if (! mk) continue;
     if (isInChain) continue;
@@ -1066,21 +1054,21 @@ Int_t StBFChain::Instantiate()
   if (GetOption("nohistos")) SetAttr(".histos",0,"*");
   else                       SetAttr(".histos",1,"*");
   if (GetOption("NoRepeat")) gMessMgr->IgnoreRepeats();
-
+  
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"Sti");
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"StiCA");
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"Stv");
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"Stx");
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"StiVMC");
-
+  
   gMessMgr->QAInfo() << "+++ Setting attribute " << Gproperty.Data() << " = " << Gvalue.Data() << endm;
   SetAttr(Gproperty.Data(),Gvalue.Data(),Gpattern.Data());
-
+  
   return status;
 }
 //_____________________________________________________________________
 Int_t StBFChain::Init() {
-
+  
   TDatime td;
   Info("Init","Time=%s Cwd=%s",td.AsString(),gSystem->pwd());
   if (this == GetTopChain()) {
@@ -1121,7 +1109,7 @@ Int_t StBFChain::Init() {
     }
 #if 0    
     // force load of geometry for VMC and Sti
-
+    
     if (GetOption("Sti") || GetOption("StiCA") || 
 	GetOption("Stv") || 
 	GetOption("Stx") || 
@@ -1164,8 +1152,7 @@ Int_t StBFChain::Init() {
 }
 //_____________________________________________________________________
 /// Really the destructor (close files, delete pointers etc ...)
-Int_t StBFChain::Finish()
-{
+Int_t StBFChain::Finish() {
   if (!fBFC) return kStOK;
   Int_t ians = StChain::Finish();
 #if 0
@@ -1177,23 +1164,25 @@ Int_t StBFChain::Finish()
     tf->Close(); delete tf; SetTFile(0);
   }
 #else
-  Error(__FUNCTION__," Closing all TFiles   . . . . ");
-   TSeqCollection   *files = gROOT->GetListOfFiles();
-   int count = 0;
-   if (files && files->GetSize() >0 ) {
-       TIter next(files);
-       while( TFile *f = (TFile *) next() ) { 
-	 if ( f-> IsWritable() ) {
-	   //	   Error(__FUNCTION__, "file %s will be closed", f->GetName());
-	   f->Write();
-	   f->Close(); ++count; 
-	   Error(__FUNCTION__, "file %s has been closed", f->GetName());
-	 }
-       }
-       //       files->Delete();
-   }
-   if (count) Error(__FUNCTION__, "%d files have been closed", count);
-   else Print(" There was no open file to close");
+  TSeqCollection   *files = gROOT->GetListOfFiles();
+  Int_t count = 0;
+  if (files && files->GetSize() >0 ) {
+    TIter next(files);
+    while( TFile *f = (TFile *) next() ) { 
+      if ( f-> IsWritable() ) {
+	//	   Error(__FUNCTION__, "file %s will be closed", f->GetName());
+	if (! count) {
+	  Warning(__FUNCTION__," Closing all writable TFiles   . . . . ");
+	} 
+	f->Write();
+	f->Close(); ++count; 
+	Warning(__FUNCTION__, "file %s has been closed", f->GetName());
+      }
+    }
+    //       files->Delete();
+  }
+  if (count) Warning(__FUNCTION__, "%d files have been closed", count);
+  else Print(" There was no open file to close");
 #endif
   SafeDelete(fchainOpt);
   fBFC = 0;
@@ -1634,7 +1623,6 @@ void StBFChain::SetFlags(const Char_t *Chain)
       << Form(" %4d: %-30s:%-12s:%-12s:%s:%s:%s:%s"
 	      ,k,fBFC[k].Key,fBFC[k].Name,fBFC[k].Chain,fBFC[k].Opts,fBFC[k].Maker,fBFC[k].Libs,fBFC[k].Comment)
       << endm;
-
     return;
   }
   TString STAR_VERSION("$STAR_VERSION");
@@ -1698,15 +1686,13 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("-AgML","Default,-TGiant3");
       SetOption("-AgMLlib","Default,-TGiant3");
       SetOption("-AgMLutil","Default,-TGiant3");
-      if (! (GetOption("Stv") || GetOption("Stx") )) {
-	if (! (GetOption("VMC") || GetOption("VMCPassive"))) {
-	  SetOption("VMCPassive","Default,-TGiant3,-VMC");
-	}
-	//yf	SetOption("pgf77","Default,-TGiant3");
-	SetOption("mysql","Default,-TGiant3");
-	//yf	SetOption("minicern","Default,-TGiant3");
-      }
-      if (GetOption("Stx") && ! GetOption("vmc")) SetOption("VmcPassive","Stx,-Vmc");
+      if (  GetOption("mtin")) SetOption("simu","Default,mtin");
+      if (  GetOption("simu")) SetOption("vmc","Default,simu");
+      if (! GetOption("simu")) SetOption("VMCPassive","Default,-simu");
+      //yf	SetOption("pgf77","Default,-TGiant3");
+      SetOption("mysql","Default,-TGiant3");
+      //yf	SetOption("minicern","Default,-TGiant3");
+      //      if (GetOption("Stx") && ! GetOption("simu")) SetOption("VmcPassive","Stx,-simu");
     }
     if (GetOption("ITTF") && ! (GetOption("Sti") || GetOption("StiCA")  || GetOption("Stv") || 
 				GetOption("Stx") || GetOption("StiVMC"))) {
@@ -1930,7 +1916,7 @@ void StBFChain::SetGeantOptions(StMaker *geantMk){
     if (GetOption("hadr_off")) {geantMk->SetAttr("hadr_off",1);}
   }
 #endif      
-  if ((GetOption("fzin") || GetOption("fzinSDT") ||GetOption("ntin") || GetOption("mtin") || fInFile.Data()[0] == ';') && fInFile != "") {
+  if ((GetOption("fzin") || GetOption("fzinSDT") ||GetOption("ntin") || fInFile.Data()[0] == ';') && fInFile != "") {
     ProcessLine(Form("((St_geant_Maker *) %p)->SetInputFile(\"%s\")",geantMk,fInFile.Data()));
   }
 }

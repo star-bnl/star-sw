@@ -1464,6 +1464,12 @@ Bfc_st BFC[] = { // standard chains
    ,                                                         "StMuDstMaker","","reads Common MuDST",kFALSE},
   {"picoRead"  ,"","","RpicoDST","",""                                 ,"WritesRead picoDST format",kFALSE},
   {"RpicoDST"  ,"RPicoDst","","PicoDeps"                        ,"StPicoDstMaker","","read PicoDST",kFALSE},
+  {"Generators", "Generators", "","sim_T,gen_T", ""
+   ,"VMC,MathMore,StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase",  "Basic STAR Generators",kFALSE},
+  {"StarPrimary0", "StarPrimary", "","Generators", "StarPrimaryMaker", "",  "Basic STAR Generators",kFALSE},
+  {"mtin", "MuTreeReader","StarPrimary","StarPrimary0","StarMuEventReader"
+   ,"StarMuEventReader"                                             ,"Read event from MuDst TTree", kFALSE},
+  //________________________________________________________________________________
   {"picoWrite" ,"","","picoDst,PicoVtxDefault",""                       ,"","Writes picoDST format",kFALSE},
   {"NoPiCovMtx","","","",""                                      ,"","Don't write Pico Cov. Matrix",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1495,8 +1501,6 @@ Bfc_st BFC[] = { // standard chains
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   // for simulation on fly Event time stamp is set outside of the simulation makers
-  {"mtin"        ,"geant"  ,"","-fzin,-geant,-gstar,geantL,gstarLib,-magF","St_geant_Maker"
-   ,                                                                "gstar","read event from MuDst",kFALSE},
   {"gstar"       ,"geant"  ,"","-fzin,-ntin,-geant,Simu,geantL","St_geant_Maker"
    ,                                        "","gstar for 20 muon tracks with pT = 1GeV in |eta|<4",kFALSE},
   {"mickey"      ,"geant"  ,"","-fzin,-geant,-gstar,geantL,gstarLib,-magF","St_geant_Maker"
@@ -1511,23 +1515,23 @@ Bfc_st BFC[] = { // standard chains
   {"PrepEmbed","","","geantEmb","StPrepEmbedMaker","St_geant_Maker"
    ,                                                             "Prepare kinematics for embedding",kFALSE},
   {"PythiaEmbed","","","pythia,-Simu","","",                     "Prepare kinematics for embedding",kFALSE},
-  {"Generators", "Generators", "","sim_T,gen_T", "StarPrimaryMaker"
-   ,"VMC,MathMore,StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase",  "Basic STAR Generators",kFALSE},
-  {"Kinematics", "","Generators","Generators",                "StarKinematics","StarKinematics","", kFALSE},
-  {"Herwig6", "","Generators","Generators",                        "StarHerwig6","Herwig6_5_20","", kFALSE},
-  {"Hijing", "","Generators","Generators",                           "StarHijing","Hijing1_383","", kFALSE},
+  {"StarPrimary", "StarPrimary", "", "Generators,-StarPrimary0", "StarPrimaryMaker",""
+   ,                                                                        "Basic STAR Generators",kFALSE},
+  {"Kinematics", "","StarPrimary","StarPrimary",              "StarKinematics","StarKinematics","", kFALSE},
+  {"Herwig6", "","StarPrimary","StarPrimary",                      "StarHerwig6","Herwig6_5_20","", kFALSE},
+  {"Hijing", "","StarPrimary","StarPrimary",                         "StarHijing","Hijing1_383","", kFALSE},
 #if 0
-  {"Pythia6_2_22", "","Generators","Generators",                   "StarPythia6","Pythia6_2_22","", kFALSE},
-  {"Pythia6_4_23", "","Generators","Generators",                   "StarPythia6","Pythia6_4_23","", kFALSE},
-  {"Pythia6_4_28", "","Generators","Generators",                   "StarPythia6","Pythia6_4_28","", kFALSE},
-  {"Pythia8_1_62", "","Generators","Generators",                   "StarPythia8","Pythia8_1_62","", kFALSE},
-  {"Pythia8_1_86", "","Generators","Generators",                   "StarPythia8","Pythia8_1_86","", kFALSE},
+  {"Pythia6_2_22", "","StarPrimary","StarPrimary",                 "StarPythia6","Pythia6_2_22","", kFALSE},
+  {"Pythia6_4_23", "","StarPrimary","StarPrimary",                 "StarPythia6","Pythia6_4_23","", kFALSE},
+  {"Pythia6_4_28", "","StarPrimary","StarPrimary",                 "StarPythia6","Pythia6_4_28","", kFALSE},
+  {"Pythia8_1_62", "","StarPrimary","StarPrimary",                 "StarPythia8","Pythia8_1_62","", kFALSE},
+  {"Pxfythia8_1_86", "","StarPrimary","StarPrimary",               "StarPythia8","Pythia8_1_86","", kFALSE},
 #endif
-  {"StarLight", "","Generators","Generators",                           "StarLight","StarLight","", kFALSE},
-  {"StarUrQMD" , "","Generators","Generators",                     "StarStarUrQMD","UrQMD3_3_1","", kFALSE},
-  {"genIn", "GenTreeReader","Generators","Generators"
+  {"StarLight", "","StarPrimary","StarPrimary",                         "StarLight","StarLight","", kFALSE},
+  {"StarUrQMD" , "","StarPrimary","StarPrimary",                   "StarStarUrQMD","UrQMD3_3_1","", kFALSE},
+  {"genIn", "GenTreeReader","StarPrimary","StarPrimary,StarPrimary"
    ,                             "StarGenEventReader","StarGenEventReader","Read event from TTree", kFALSE},
-  {"GenFILT", "GenFILT","Generators","Generators"
+  {"GenFILT", "GenFILT","StarPrimary","StarPrimary"
    ,                                 "StarFilterMaker","StarGeneratorFilt","Filt generated events", kFALSE},
   {"geant"       ,"geant","","geantL"                          ,"St_geant_Maker","","passive GEANT",kFALSE},
   {"AgStar","","","Generators,geant,-gstar,-gstarLib","","AgStar","Utility to feed St_geant_Maker", kFALSE},
