@@ -526,7 +526,9 @@ Int_t StMcEventMaker::Make()
     // Now we check if we have the pointer, if we do, then we can access the tables!
   
     if (g2t_vertexTablePointer && g2t_trackTablePointer){
-	
+      long NVertices = g2t_vertexTablePointer->GetNRows();
+      NTracks = g2t_trackTablePointer->GetNRows();
+      if (NVertices > 0 && NTracks > 0) {
 	//
 	// g2t_event Table
 	//
@@ -791,7 +793,6 @@ Int_t StMcEventMaker::Make()
 	//______________________________________________________________________
 	// Step 2 - Fill Vertices - we do not fill parent/daughters until Step 3
 	
-	long NVertices = g2t_vertexTablePointer->GetNRows();
 	  
 	vector<vertexFlag> vtemp(NVertices); // Temporary array for Step 3
        
@@ -840,7 +841,6 @@ Int_t StMcEventMaker::Make()
 	//______________________________________________________________________
 	// Step 3 - Fill Tracks - we do not fill associated hits until Step 4
 	
-	NTracks = g2t_trackTablePointer->GetNRows();
 	size_t usedTracksG2t = 0;
 	long NGeneratorTracks = (particleTablePointer) ? particleTablePointer->GetNRows() : 0;
 	size_t usedTracksEvGen = 0;
@@ -1299,6 +1299,7 @@ Int_t StMcEventMaker::Make()
 	//_______________________________________________________________
 	// At this point StMcEvent should be loaded.
 		
+      }
     }
     
     
