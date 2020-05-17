@@ -203,6 +203,7 @@ StBFChain *bfc(Int_t First, Int_t Last,
     if (Last == -2 && tChain.CompareTo("ittf",TString::kIgnoreCase)) Usage();
     return chain;
   } else {
+#if 0
     // Predefined test chains
     Int_t typeC = 0;
     const Char_t *predChains[4] = {"MC2016","MC2017","MC2018","MC2019"};
@@ -220,6 +221,7 @@ StBFChain *bfc(Int_t First, Int_t Last,
       }
       tChain += ",RunG.1";
     }
+#endif
   }
   if (gClassTable->GetID("StBFChain") < 0) Load(tChain.Data());
   chain = (StBFChain *) StMaker::New("StBFChain", chainName);
