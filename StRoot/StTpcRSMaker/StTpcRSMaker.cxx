@@ -48,6 +48,8 @@
 #include "StDetectorDbMaker/St_TpcAvgCurrentC.h"
 #include "StDetectorDbMaker/St_TpcAvgPowerSupplyC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
+#include "StDetectorDbMaker/St_tpcBXT0CorrEPDC.h"
+#include "StDetectorDbMaker/St_beamInfoC.h"
 #include "StDetectorDbMaker/St_beamInfoC.h"
 #include "StParticleTable.hh"
 #include "StParticleDefinition.hh"
@@ -59,6 +61,7 @@
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_vertex_Table.h" 
 #include "tables/St_g2t_tpc_hit_Table.h"
+#include "StEventTypes.h"
 //#define ElectronHack
 //#define __LASERINO__
 //#define Old_dNdx_Table
@@ -106,7 +109,7 @@ static Double_t minSignal = 1e-4;           //!
 static Double_t padsdE[StTpcRSMaker::kPadMax];           //!
 static Double_t tbksdE[StTpcRSMaker::kTimeBucketMax];    //!
 #endif /* __OLD__ */
-static Double_t fgTriggerT0 = 0;             //! TPC trigger T0 is supposed to set for the primary ineraction Z = 0
+static Double_t fgTriggerT0 = 0;             //! TPC trigger (seconds) T0 is supposed to set for the primary ineraction Z = 0
 
 //________________________________________________________________________________
 static const Int_t nx[2] = {200,500};
@@ -730,7 +733,30 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   fgTriggerT0 = 0; //  TPC trigger T0 is set for the primary ineraction Z = 0
   if (g2t_ver) {
     gver = g2t_ver->GetTable();
-    if (g2t_ver->GetNRows() > 0) {
+    Int_t NV = g2t_ver->GetNRows();
+    StEvent* pEvent = dynamic_cast<StEvent*> (GetInputDS("StEvent")); 
+    if (pEvent && StTpcBXT0CorrEPDC::instance()->nrows()) {
+      int TAC = 0;
+      int maxTAC = -1;
+      StEpdCollection * epdCol = pEvent->epdCollection();
+      if (epdCol) {
+	StSPtrVecEpdHit &epdHits = epdCol->epdHits();
+	int nEpdHits = epdHits.size();
+	for(int i = 0; i < nEpdHits; i++) {
+	  StEpdHit * epdHit = dynamic_cast<StEpdHit*>(epdHits[i]);
+	  TAC = 0;
+	  if (epdHit->tile() > 9)  continue; // only tiles 1 - 9 have timing info
+	  //                          if (epdHit->id() < 0) ew = -1; // tile is on the east
+	  //                          else ew = 1;
+	  if (epdHit->adc() < 100) continue;
+	  TAC = epdHit->tac(); // this is the timing
+	  if (TAC > maxTAC) maxTAC = TAC;
+	}
+      }
+      double mTimeBinWidth = 1./StTpcDb::instance()->Electronics()->samplingFrequency();
+      double driftVelocity = StTpcDb::instance()->DriftVelocity(1);
+      fgTriggerT0 = - StTpcBXT0CorrEPDC::instance()->getCorrection(maxTAC, driftVelocity, mTimeBinWidth)*(1e-6*mTimeBinWidth);
+    } else if (NV > 0) { // Trigger offse t from the primary vertex
       const Double_t kAu2Gev=0.9314943228;
       UInt_t un = St_beamInfoC::instance()->getYellowMassNumber();
       Double_t M = kAu2Gev*un;
