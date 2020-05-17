@@ -1,11 +1,12 @@
 #include "StarGenEventReader.h"
 #include "TTree.h"
-
-Int_t StarGenEventReader::Init()
-{
+//________________________________________________________________________________
+Int_t StarGenEventReader::Init() {
+  TString filename(SAttr("InputFile"));
+  if (filename != "") SetInputFile(filename);
   return kStOK;
-};
-
+}
+//________________________________________________________________________________
 Int_t StarGenEventReader::Generate()
 {
   if ( mInputTree ) mInputTree -> GetEntry( mEntry++ );
