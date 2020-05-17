@@ -173,7 +173,7 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
 #endif
   StMaker *trs = chain->Maker("TpcRS");
   if (trs) {
-    trs->SAttr("ELECTRONS_TUPLE");
+    trs->SetAttr("ELECTRONS_TUPLE",1);
   }
   if (NEvents) {
     chain->EventLoop(NEvents);

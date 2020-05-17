@@ -286,7 +286,8 @@ void DrawFList(const Char_t *pattern = "OuterPadRcNoiseConv*", const Char_t *cti
 	  TH1 *hist = (TH1 *) obj;
 	  if (hist->GetEntries() <= 0) continue;
 	  nh++;
-	  if (! array.FindObject(obj->GetName())) array.Add(obj);
+	  if (array.FindObject(obj->GetName())) continue;
+	  array.Add(obj);
 	}
       }
     }

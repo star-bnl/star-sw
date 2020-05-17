@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<job  name="TpcRS" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false">
+<stdout URL="file:./sched$JOBID.log" />
+<stderr URL="file:./sched$JOBID.err" />
+<command> 
+  cd ${SUBMITTINGDIRECTORY}  
+#  setenv NODEBUG yes
+#  setup 64b
+#  starver .DEV2 
+#  starver TFG19e
+  set file = $INPUTFILE0;
+#  set rung = `echo $file | awk -F\_ '{print $2}'`
+  echo "${file}"
+  set log = `basename $file .MuDst.root`;
+  set logFile  = ${log}B.log
+  set sdt = "";
+  set Name = `basename $PWD`
+#  echo $Name | grep -i Altro3
+#  if (! $?) set sdt = ",sdt20180426.122000";
+#  echo $Name | grep -i Altro4
+#  if (! $?) set sdt = ",sdt20180426.135000";
+#  set KFVertex = "";
+#  echo $Name | grep -i KFV
+#  if (! $?) set KFVertex = ",KFVertex";
+  set f=`find . -maxdepth 1 -type f -name "*${log}*.root"`
+  if ("$f" == "") then
+#    root4star -q -b 'TpcRS.C(4000,"MC.2016,TpcRS,StiCA,KFVertex,rung.'${rung}'",0,"heed,PhysicsOff,'${file}'")' &gt;&amp; ${logFile}
+#    root.exe -x  -q -b 'TpcRS.C(1000,"MC.2016,TpcRS,StiCA,KFVertex,rung.'${rung}'",0,"heed,PhysicsOff,'${file}'")' &gt;&amp; ${logFile}
+#    root4star -q -b 'TpcRS.C(1000,"MC.2016,sdt20160419.051230,TpcRS,StiCA,KFVertex,rung.'${rung}'",0,"heed,PhysicsOff,'${file}'")' &gt;&amp; ${logFile}
+#root.exe -x  -q -b 'TpcRS.C(100,"MC.2018,-bbcSim,StiCA'${KFVertex}',-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco'${sdt}',RunG.1,McTpcAna",0,"heed,PhysicsOff,'${file}'")' &gt;&amp; ${logFile}
+#     root4star -q -b 'TpcRS.C(1000,"MC.2018,TpcRS,StiCA",0,"heed,PhysicsOff","'${file}'")' &gt;&amp; ${logFile}
+#     root4star -q -b 'bfc.C(1000,"mtin,MC.2018,NoiTPCLu,TpcRS,McTpcAna,StiCA","'${file}'")' &gt;&amp; ${logFile}
+#     root4star -q -b 'bfc.C(1000,"mtin,MC.2018,NoiTPCLu,TpcRS,McTpcAna,StiCA,-geantOut,NoHistos,noRunco","'${file}'")' &gt;&amp; ${logFile}
+#     root4star -q -b 'bfc.C(100,"mtin,MC.2018,NoiTPCLu,TpcRS,McTpcAna,StiCA,-geantOut,NoHistos,noRunco","'${file}'")' &gt;&amp; ${logFile}
+     root.exe -q -b 'bfc.C(100,"mtin,MC.2018,NoiTPCLu,TpcRS,McTpcAna,StiCA,-geantOut,NoHistos,noRunco","'${file}'")' &gt;&amp; ${logFile}
+  endif
+</command>
+<!-- <input URL="command:TpcRS_Part.pl" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/daq_2018_3p85GeV_fixedTarget/*MuDst.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/daq_2018_3p85GeV_fixedTarget.B/*MuDst.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/daq_2018_3p85GeV_fixedTarget/st_physics_adc_19151031_raw_1500002_121_150.MuDst.root" />  -->
+<input URL="file:/net/l404/data/fisyak/Tpc/TpcRS/daq_2018_3p85GeV_fixedTarget/*.MuDst.root" />
+
+</job>
+
