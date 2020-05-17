@@ -257,7 +257,7 @@ public:
 ClassImp(TH1FSet);
 #endif
 //--------------------------------------------------------------------------------
-void TpcT(const Char_t *files="*.root", const Char_t *opt = "H", const Char_t *Out = ""){//, const Char_t *Time = "20090415.000000") {
+void TpcT(const Char_t *files="*.root", const Char_t *opt = "P", const Char_t *Out = ""){//, const Char_t *Time = "20090415.000000") {
   //	   Int_t ev, Double_t tanCut, Int_t NpadCut, Double_t pMomin, Double_t pMomax) {
 #ifdef __useGainT0__
   gSystem->Load("libStDb_Tables.so");
@@ -387,7 +387,7 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "H", const Char_t *O
   const Short_t*&    fRcTrack_mMcl_t                          = iter("fRcTrack.mMcl_t");
 #endif
   const Int_t*&      fRcTrack_fNpoints                        = iter("fRcTrack.fNpoints");
-#if 0
+#if 1
   const Int_t*&      fRcTrack_fNfitpoints                     = iter("fRcTrack.fNfitpoints");
   const Int_t*&      fRcTrack_fifPrim                         = iter("fRcTrack.fifPrim");
 #endif
@@ -499,6 +499,7 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "H", const Char_t *O
     if (! fNoPixels ) continue;
     if (fNoRcHit != 1 || fNoRcTrack < 1) continue;
     if (fRcTrack_fNpoints[0] < 10) continue;
+    if (fRcTrack_fifPrim[0] != 1) continue;
     TVector3 mom(fRcTrack_fpx[0],fRcTrack_fpy[0],fRcTrack_fpz[0]);
 #if !defined( __LASER__ ) && !defined(__Cosmics__)
 #if 0
