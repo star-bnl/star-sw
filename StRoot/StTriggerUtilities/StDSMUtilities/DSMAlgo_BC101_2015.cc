@@ -44,23 +44,30 @@ void DSMAlgo_BC101_2015::operator()(DSM& dsm)
   int jpxBits = 0;
   int jpyBits = 0;
   int jpzBits = 0;
+  //register counts
+  int rcounts = 0;
+  for(int ir = 0; ir < 6; ir++){
+     if(dsm.registers[ir] > 0) rcounts++;
+  }
   //BEMC-JP-th2-East BEMC-JP-th2-Mid BEMC-JP-th2-West weren't properly set up in the offlince database therefore still using the th2-East for th2-Mid and th2-West
-  //printf("r2=%d r3=%d r4=%d\n", dsm.registers[2], dsm.registers[3], dsm.registers[4]);
-  for (int reg = 0; reg < 3; ++reg) {
+  //printf("counts=%d r2=%d r3=%d r4=%d\n", rcounts, dsm.registers[2], dsm.registers[3], dsm.registers[4]);
+  for (int reg = 0; reg < 2; ++reg) {
     if (jpx > dsm.registers[reg]) ++jpxBits;
     if (jpy > dsm.registers[reg]) ++jpyBits;
     if (jpz > dsm.registers[reg]) ++jpzBits;
-    //if(reg < 2){
-      //if (jpx > dsm.registers[reg]) ++jpxBits;
-      //if (jpy > dsm.registers[reg]) ++jpyBits;
-      //if (jpz > dsm.registers[reg]) ++jpzBits;
-    //}else if(reg == 2){
-      //if (jpx > dsm.registers[2]) ++jpxBits;
-      //if (jpy > dsm.registers[3]) ++jpyBits;
-      //if (jpz > dsm.registers[4]) ++jpzBits;
-    //}
   }
-
+  if(rcounts >= 5){
+    //2015 pAu 3 registers
+    if (jpx > dsm.registers[2]) ++jpxBits;
+    if (jpy > dsm.registers[3]) ++jpyBits;
+    if (jpz > dsm.registers[4]) ++jpzBits;
+  }else{
+    //2015 pp 3 registers
+    if (jpx > dsm.registers[2]) ++jpxBits;
+    if (jpy > dsm.registers[2]) ++jpyBits;
+    if (jpz > dsm.registers[2]) ++jpzBits;
+  }
+  
   int daq10kBits = 0;
 
   for (int ch = 0; ch < 6; ++ch) {
