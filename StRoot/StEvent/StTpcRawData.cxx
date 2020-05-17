@@ -175,6 +175,39 @@ Int_t StTpcDigitalSector::getPadList(Int_t row, UChar_t **padList) {
   return mPadList.size();
 }
 //________________________________________________________________________________
+Int_t StTpcDigitalSector::putTimeAdc(Int_t row, Int_t pad, Short_t *ADCs, UShort_t *IDTs) {// 10 -> 8 conversion
+  Int_t ntimebins = 0;
+  StDigitalTimeBins  digPadData;
+  Int_t tbC = -999;
+  for (Int_t tb = 0; tb < __MaxNumberOfTimeBins__; tb++) {
+    if (! ADCs[tb]) continue;
+    if (tb != tbC+1) digPadData.push_back(StDigitalPair(tb));
+    tbC = tb;
+    if (IDTs) digPadData.back().add(ADCs[tb],IDTs[tb]);
+    else      digPadData.back().add(ADCs[tb]);
+    ntimebins++;
+  }
+  if (ntimebins) assignTimeBins(row,pad,&digPadData);
+  return ntimebins;
+}
+//________________________________________________________________________________
+Int_t StTpcDigitalSector::putTimeAdc(Int_t row, Int_t pad, UChar_t *ADCs, UShort_t *IDTs) {// no conversion
+  Int_t ntimebins = 0;
+  StDigitalTimeBins  digPadData;
+  Int_t tbC = -999;
+  for (Int_t tb = 0; tb < __MaxNumberOfTimeBins__; tb++) {
+    if (! ADCs[tb]) continue;
+    if (tb != tbC+1) digPadData.push_back(StDigitalPair(tb));
+    tbC = tb;
+    Short_t adc = log8to10_table[ADCs[tb]];
+    if (IDTs) digPadData.back().add(adc,IDTs[tb]);
+    else      digPadData.back().add(adc);
+    ntimebins++;
+  }
+  assignTimeBins(row,pad,&digPadData);
+  return ntimebins;
+}
+//________________________________________________________________________________
 Int_t StTpcDigitalSector::putTimeAdc(Int_t row, Int_t pad, Short_t *ADCs, Int_t *IDTs) {// 10 -> 8 conversion
   Int_t ntimebins = 0;
   StDigitalTimeBins  digPadData;
