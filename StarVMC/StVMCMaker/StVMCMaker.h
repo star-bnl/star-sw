@@ -39,7 +39,6 @@ class StVMCMaker : public StMaker {
   virtual void   SetDateTime(Int_t idat=0,Int_t itim=0);
   virtual void   SetRunNo(Int_t m ) {fRunNo = m < 1 || m >= 1000000 ? 1 : m;}
   virtual Int_t  Skip(Int_t nskip);
-  virtual Int_t  SetInputFile(const Char_t *fileName);
   virtual void   SetDebug(Int_t l=1);          // *MENU*
   virtual Int_t  SetVertex();
   virtual void   SetZminmax(Double_t zmin = -999, Double_t zmax = 999) {fvzlow = zmin; fvzhigh = zmax;}

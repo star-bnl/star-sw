@@ -196,11 +196,11 @@ StVMCMaker::Make
 #include "StarMCHBPrimaryGenerator.h"
 #include "StarMCMuPrimaryGenerator.h"
 #include "StarVMCApplication.h"
-#include "TGeoDrawHelper.h"
 #include "StMessMgr.h"
 #include "StarVMCDetector.h"
 #include "StarVMCDetectorSet.h"
 #include "TTreeIter.h"
+#include "StarGenerator/BASE/StarPrimaryMaker.h"
 ClassImp(StVMCMaker);
 
 StarVMCApplication* StVMCMaker::fgStarVMCApplication = 0;
@@ -219,54 +219,32 @@ Int_t StVMCMaker::Init() {
   if (IAttr("NoVMCAlignment")) fgStarVMCApplication->DoMisAlignment(kFALSE);
   if (! IAttr("VMCPassive")) {
     LOG_INFO << "StVMCMaker::Init => Active mode" << endm; 
-    TString CintF(SAttr("GeneratorFile"));
-    if (CintF == "" && fInputFile == "" ) {
-      CintF = "20Muons.C"; // default
-    }
-    if (CintF != "") {
-      static const Char_t *path  = ".:./StarDb/Generators:$STAR/StarDb/Generators";
-      Char_t *file = gSystem->Which(path,CintF,kReadPermission);
-      if (! file) Fatal("StVMCMaker::Init","File %s has not been found in path %s",CintF.Data(),path);
-      else        Warning("StVMCMaker::Init","File %s has been found as %s",CintF.Data(),file);
-      TString command(Form(".L %s",file));
-      TInterpreter::EErrorCode ee;
-      gInterpreter->ProcessLine(command,&ee);
-      assert(!ee);
-      TDataSet *d = (TDataSet *) gInterpreter->Calc("CreateTable()",&ee);
-      assert(!ee);
-      assert(d);
-      AddConst(d);
+    if (! StarPrimaryMaker::instance()) {
+      TString CintF(SAttr("GeneratorFile"));
+      if (CintF == "" && fInputFile == "" ) {
+	CintF = "20Muons.C"; // default
+      }
+      if (CintF != "") {
+	static const Char_t *path  = ".:./StarDb/Generators:$STAR/StarDb/Generators";
+	Char_t *file = gSystem->Which(path,CintF,kReadPermission);
+	if (! file) Fatal("StVMCMaker::Init","File %s has not been found in path %s",CintF.Data(),path);
+	else        Warning("StVMCMaker::Init","File %s has been found as %s",CintF.Data(),file);
+	TString command(Form(".L %s",file));
+	TInterpreter::EErrorCode ee;
+	gInterpreter->ProcessLine(command,&ee);
+	assert(!ee);
+	TDataSet *d = (TDataSet *) gInterpreter->Calc("CreateTable()",&ee);
+	assert(!ee);
+	assert(d);
+	AddConst(d);
 #if  ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0)
-      /* Don' do this beacuse root will try to unload shared libraries in the macro */
-      command.ReplaceAll(".L ",".U ");
-      gInterpreter->ProcessLine(command,&ee);
-      assert(!ee);
+	/* Don' do this beacuse root will try to unload shared libraries in the macro */
+	command.ReplaceAll(".L ",".U ");
+	gInterpreter->ProcessLine(command,&ee);
+	assert(!ee);
 #endif
-    } 
-    TString MuDstF(SAttr("MuDstFile"));
-    if (MuDstF != "") {
-      TFile *f = TFile::Open(MuDstF);
-      if (! f) {
-       LOG_ERROR << MuDstF.Data() << " file has not been found" << endm;
-      }
-      TTree *tree = (TTree *) f->Get("MuDst");
-      if (! tree) {
-       LOG_ERROR << "MuDst is not found in " << MuDstF.Data() << endm;
-      } else {
-       fMuDstIter = new TTreeIter();
-       fMuDstIter->AddFile(MuDstF);
-      }
-      SafeDelete(f);
+      } 
     }
-    StarMCPrimaryGenerator *generator = StarMCPrimaryGenerator::Instance();
-    if (! generator) {
-      if (fInputFile != "") {
-	if (fInputFile.Contains(".MuDst.root")) generator = new StarMCMuPrimaryGenerator(fInputFile,m_DataSet);
-	else                                    generator = new StarMCHBPrimaryGenerator(fInputFile,m_DataSet);
-      }
-    }
-    assert(generator);
-    if (IAttr("beamLine"))  generator->SetBeamLine();
     StarMCHits *hits = StarMCHits::instance();
     hits->SetHitHolder(m_DataSet);
     fgStarVMCApplication->GetStack()->SetHitHolder(m_DataSet);
@@ -403,7 +381,7 @@ Int_t StVMCMaker::Make(){
   }  
   if (! IAttr("VMCPassive")) {// Active  mode 
     //    TStopwatch sw;
-    if (fMuDstIter) {
+    if (fMuDstIter && ! IAttr("mtin"))  {
       Int_t ok = SetVertex();
       if (ok) return ok;
     }
@@ -445,21 +423,6 @@ TDataSet  *StVMCMaker::FindDataSet (const char* logInput,const StMaker *uppMk,
   if (ds || strcmp(logInput,"HALL")) return ds;
   return fVolume;
 
-}
-//_____________________________________________________________________________
-int StVMCMaker::SetInputFile(const Char_t *fileName)
-{
-  fInputFile = fileName;
-  gSystem->ExpandPathName(fInputFile);
-  if (!fInputFile.Contains(".")) {
-    Error("SetInputFile","File %s has no extention",fInputFile.Data());
-    return 1;
-  }
-  if (gSystem->AccessPathName(fInputFile,kReadPermission)) {
-    Error("SetInputFile","File %s is not readable",fInputFile.Data());
-    return 2;
-  }
-  return 0;
 }
 //________________________________________________________________________________
 void StVMCMaker::SetDebug(Int_t l) {
