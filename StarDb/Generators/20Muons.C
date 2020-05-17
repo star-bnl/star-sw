@@ -30,10 +30,18 @@ TDataSet *CreateTable() {
   if (! StVMCMaker::instance()) return 0;
   if (! StarVMCApplication::Instance()) return 0;
   StarMCSimplePrimaryGenerator *gener = (StarMCSimplePrimaryGenerator *) StarVMCApplication::Instance()->GetPrimaryGenerator();
-  if (! gener) gener =  new 
+  if (! gener) {
+    cout << "Create StarMCSimplePrimaryGenerator(" <<  Npart << "," <<  iD << "," 
+	 << pTlow << "," << pThigh<< "," <<Ylow<< "," << Yhigh<< "," 
+	 << Philow<< "," << Phihigh<< "," << Zlow<< "," << Zhigh<< "," << "G)" << endl;
+    gener =  new 
     StarMCSimplePrimaryGenerator( Npart, iD, pTlow,pThigh,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, "G");
-  else
+  } else {
+    cout << "Set StarMCSimplePrimaryGenerator(" <<  Npart << "," <<  iD << "," 
+	 << pTlow << "," << pThigh<< "," <<Ylow<< "," << Yhigh<< "," 
+	 << Philow<< "," << Phihigh<< "," << Zlow<< "," << Zhigh<< "," << "G)" << endl;
     gener->SetGenerator( Npart, iD, pTlow,pThigh,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, "G");
+  }
   gener->SetSigmasOrigin(.015, 0.015, 42.00);
   StarVMCApplication::Instance()->SetPrimaryGenerator(gener);
   cout << "Set StarMCSimplePrimaryGenerator" << endl;
