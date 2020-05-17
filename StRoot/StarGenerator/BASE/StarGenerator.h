@@ -146,7 +146,7 @@ class StarGenerator : public StMaker
   /// @param bname Name of the branch to be used.  If not provided, will default to the name of the class.
   void SetInputTree ( TTree *tree, const Char_t *bname=0 );
 
-  void SetInputFile ( const Char_t *name, const Char_t *treename="genevents", const Char_t *bname=0 );
+  void SetInputFile ( const Char_t *name, const Char_t *treename="genevents", const Char_t *bname="primaryEvent" );
 
   /// Returns the ID of this event generator
 
