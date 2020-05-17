@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.20171220.000001.C,v 1.2 2020/03/18 20:10:35 iraklic Exp $
-// $Log: TpcResponseSimulator.20171220.000001.C,v $
+// $Id: TpcResponseSimulator.20180531.071405.C,v 1.1 2020/05/17 15:46:34 fisyak Exp $
+// $Log: TpcResponseSimulator.20180531.071405.C,v $
+// Revision 1.1  2020/05/17 15:46:34  fisyak
+// 3p85GeV_fixedTarget_2018
+//
 // Revision 1.2  2020/03/18 20:10:35  iraklic
 // new Run17 params and Run18 params after separating sector20 from the rest
 //
