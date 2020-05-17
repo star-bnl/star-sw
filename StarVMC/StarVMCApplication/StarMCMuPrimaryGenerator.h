@@ -19,28 +19,22 @@
 #include "TDataSet.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "TTreeIter.h"
 
 class StarMCMuPrimaryGenerator : public StarMCPrimaryGenerator {
  public:
-  StarMCMuPrimaryGenerator(const Char_t *rzFile, TDataSet *set=0);
-  virtual ~StarMCMuPrimaryGenerator() {SafeDelete(fMuTree); SafeDelete(fMuFile);}
+ StarMCMuPrimaryGenerator(TTreeIter *MuDstIter, TDataSet *set=0) : fMuDstIter(MuDstIter), fData(set) {}
+  virtual ~StarMCMuPrimaryGenerator() {}
   
   static StarMCMuPrimaryGenerator* Instance() {return (StarMCMuPrimaryGenerator*) StarMCPrimaryGenerator::Instance();}
   virtual void  GeneratePrimaries();
-  virtual void GeneratePrimaries(const TVector3& origin) {}
-  void  SetHbtId(Int_t m = 999)               { fHbtId = m;}
-  void  SetMuFileName(const Char_t *name)     { fMuFileName = name;}
-  TString *MuFileName()                       { return &fMuFileName;}
-  TTree *MuTree()                             { return fMuTree;}
-  TFile *MuFile()                             { return fMuFile;}
+  virtual void  Skip(Int_t nskip);
+  //  virtual void GeneratePrimaries(const TVector3& origin) {}
  private:
-  void GeneratePrimary(const TVector3& origin);
-  TString           fMuFileName;
-  TTree       *fMuTree;
-  TFile       *fMuFile;
-  Long64_t          fEntry;
-  Long64_t          fnEntries;
-  Int_t             fHbtId;
+  virtual void GeneratePrimaries(const TVector3& /* origin */) {}
+  
+  //  void GeneratePrimary(const TVector3& origin);
+  TTreeIter   *fMuDstIter;
   TDataSet         *fData;
   ClassDef(StarMCMuPrimaryGenerator,1)  //StarMCMuPrimaryGenerator
 };

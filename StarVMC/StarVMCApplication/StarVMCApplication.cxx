@@ -52,6 +52,7 @@
 #include "StSsdDbMaker/StSstDbMaker.h"
 #include "StSstUtil/StSstBarrel.hh"
 #include "StarGenerator/BASE/StarPrimaryMaker.h"
+#include "Stypes.h"
 TableClassImpl(St_VMCPath2Detector,VMCPath2Detector_st);
 ClassImp(StarVMCApplication);
 #define PrPV(B)      if (Debug())                {std::cout << (#B) << " = \t"; (B).Print();} 
@@ -117,18 +118,21 @@ void StarVMCApplication::InitGeometry() {
 }
 //_____________________________________________________________________________
 void StarVMCApplication::GeneratePrimaries() {    
-  if (! fPrimaryGenerator) fPrimaryGenerator = new StarMCPrimaryGenerator(fStarStack);
+  if (! StarMCPrimaryGenerator::Instance()) new StarMCPrimaryGenerator(fStarStack);
+  fStatus = kStOK;
   if (StarPrimaryMaker::instance()) {
     // put TParticle from StarParticleStack from StarPrimaryMaker to StarStack
-    fPrimaryGenerator->SetStack(StarPrimaryMaker::instance()->stack());
+    StarMCPrimaryGenerator::Instance()->SetStack(StarPrimaryMaker::instance()->stack());
   } else {
-    fPrimaryGenerator->GeneratePrimaries();
+    StarMCPrimaryGenerator::Instance()->SetStack(fStarStack);
+    StarMCPrimaryGenerator::Instance()->GeneratePrimaries();
+    fStatus = StarMCPrimaryGenerator::Instance()->Status();
   } 
-  Int_t NPrimary = fStarStack->GetNtrack();
-  if (! NPrimary) TVirtualMC::GetMC()->StopRun();
+  if (fStatus == kStEOF) {TVirtualMC::GetMC()->StopRun();}
   if (fMcHits) {
     fMcHits->BeginEvent();
   }
+  return;;
 }
 //_____________________________________________________________________________
 void StarVMCApplication::BeginEvent() {    // User actions at beginning of event

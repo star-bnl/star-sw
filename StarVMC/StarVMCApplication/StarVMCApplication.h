@@ -83,6 +83,7 @@ class StarVMCApplication : public TVirtualMCApplication {
   Int_t                    fDebug;
   Bool_t                   fAlignment;
   Bool_t                   fAlignmentDone;
+  Int_t                    fStatus;
   ClassDef(StarVMCApplication,1)  //Interface to MonteCarlo application
 };
 

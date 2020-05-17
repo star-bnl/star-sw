@@ -51,19 +51,20 @@ class StarMCPrimaryGenerator : public TObject {
   void  UnSetVertex()                         {fSetVertex = kFALSE;}
   void  SetSigmasOrigin(Double_t sigma_x, Double_t sigma_y, Double_t sigma_z) {fSigmasOrigin = TVector3(sigma_x,sigma_y,sigma_z);}
   void  SetSigmasOrigin(const TVector3 &xyz)  { fSigmasOrigin = xyz;}
-  void  SetBeamLine(Bool_t k = kTRUE) {fUseBeamLine = k;}
+  void  SetBeamLine(Bool_t k = kTRUE)         {fUseBeamLine = k;}
+  void  SetStatus(Int_t status = 0)           {fStatus = status;}
   Int_t GetNofPrimaries()                     { return fNofPrimaries;}
   Int_t Skip(Int_t nskip);
   const Option_t* GetOption() const           { return fOption.Data();}
   StarStack *GetStack()                       { return fStarStack;}
   Int_t Debug()                               { return fDebug;}
+  Int_t Status()                              { return fStatus;}
   TVector3 &GetOrigin()                       { return fOrigin;}
   TVector3 &GetSigmasOrigin()                 { return fSigmasOrigin;}
   virtual void GeneratePrimaries() {}
   virtual void GeneratePrimaries(const TVector3& /* origin */) {}
   virtual void Print(Option_t *option="") const;
  protected:
-   
   static StarMCPrimaryGenerator *fgInstance;
   StarStack        *fStarStack;    
   Bool_t            fIsRandom;
@@ -75,6 +76,7 @@ class StarMCPrimaryGenerator : public TObject {
   TVector3          fSigmasOrigin;
   Bool_t            fSetVertex;
   Bool_t            fUseBeamLine;
+  Int_t             fStatus;
   ClassDef(StarMCPrimaryGenerator,1)  //StarMCPrimaryGenerator
 };
 #endif //Star_PRIMARY_GENERATOR_H
