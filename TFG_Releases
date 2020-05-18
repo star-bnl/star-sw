@@ -51,5 +51,6 @@
  TFG19m Prepare xProduction of Run XX                                2019-12-24 12:00:04 -0500  (HEAD -> master, tag: TFG19m)
  TFG20a Prepare xProduction of Run XX Fixed Target                   2020-01-28 16:53:27 -0500  (HEAD -> master, tag: TFG20a_1)
  TFG20b Freeze before moving to Calibration Run XX, fix a few bags   2020-03-21 12:18:11 -0400  (tag: TFG20b_2)
+ TFG20c Freeze as a possible merging poing with "official" STAR      2020-05-17 14:59:15 -0400  (HEAD -> master, tag: TFG20c_1)
  .DEV2  head of TFG git repository
   DEV6  head of TFG git repository build with ROOT6
