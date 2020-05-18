@@ -48,7 +48,7 @@ class StarMCSimplePrimaryGenerator : public StarMCPrimaryGenerator  {
   Bool_t fGun;
   Double_t fGunpX, fGunpY, fGunpZ, fGunX, fGunY, fGunZ;
   Int_t    fGunId;
-  TH1 *fPVX, *fPVY, *fPVZ;
+  TH1 *fPVX, *fPVY, *fPVZ, *fPVxyError; 
   static Double_t fTemperature;
   ClassDef(StarMCSimplePrimaryGenerator,1)  //StarMCSimplePrimaryGenerator
 };

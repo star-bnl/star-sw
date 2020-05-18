@@ -7,6 +7,7 @@
 #include "TRandom.h"
 #include "TSystem.h"
 #include "StDetectorDbMaker/St_vertexSeedC.h"
+#include "StMessMgr.h" 
 ClassImp(StarMCSimplePrimaryGenerator);
 Double_t StarMCSimplePrimaryGenerator::fTemperature = 1; // GeV/c
 //_____________________________________________________________________________
@@ -31,7 +32,7 @@ void StarMCSimplePrimaryGenerator::PreSet() {
   fGun = kFALSE;
   fGunpX = fGunpY = fGunpZ = fGunX = fGunY = fGunZ = 0;
   fGunId = 0;
-  fPVX = fPVY = fPVZ = 0;
+  fPVX = fPVY = fPVZ = fPVxyError = 0;
 }
 //_____________________________________________________________________________
 void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id, 
@@ -55,21 +56,21 @@ void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id,
   } else {
     fId = Id;
   }
-  cout << "Generate " << fNofPrimaries << " primary tracks of type " << fId << " in " << endl;
+  LOG_INFO << "Generate " << fNofPrimaries << " primary tracks of type " << fId << " in " << endm;
   if (! fOption.Contains("BL",TString::kIgnoreCase)) {
-    cout << fpT_min << " <  pT < " << fpT_max << endl;
+    LOG_INFO << fpT_min << " <  pT < " << fpT_max << endm;
   } else {
-    cout << fpT_min << " <  log10(beta*gamma) < " << fpT_max << endl;
+    LOG_INFO << fpT_min << " <  log10(beta*gamma) < " << fpT_max << endm;
   }
   if (fOption.Contains("mtsq",TString::kIgnoreCase)) {
     fTemperature = 0.457;
-    cout << "Use dN/dmT^2 = exp(-mT/T) pT generation with T = " << Temperature() << " GeV/c" << endl;
+    LOG_INFO << "Use dN/dmT^2 = exp(-mT/T) pT generation with T = " << Temperature() << " GeV/c" << endm;
   } else if (fOption.Contains("mt",TString::kIgnoreCase)) {
-    cout << "Use dN/dmT = exp(-mT/T) pT generation with T = " << Temperature() << " GeV/c" << endl;
+    LOG_INFO << "Use dN/dmT = exp(-mT/T) pT generation with T = " << Temperature() << " GeV/c" << endm;
   }
-  cout << fEta_min  << " < eta < " << fEta_max  << endl;
-  cout << fPhi_min<< " < phi < " << fPhi_max<< endl;
-  cout << fZ_min  << " < zVer< " << fZ_max  << endl;
+  LOG_INFO << fEta_min  << " < eta < " << fEta_max  << endm;
+  LOG_INFO << fPhi_min<< " < phi < " << fPhi_max<< endm;
+  LOG_INFO << fZ_min  << " < zVer< " << fZ_max  << endm;
   
   TString path(".");
   TString File("PVxyz.root");
@@ -80,8 +81,11 @@ void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id,
       fPVX = (TH1 *) PVfile->Get("x"); assert(fPVX); fPVX->SetDirectory(0);
       fPVY = (TH1 *) PVfile->Get("y"); assert(fPVY); fPVY->SetDirectory(0);
       fPVZ = (TH1 *) PVfile->Get("z"); assert(fPVZ); fPVZ->SetDirectory(0);
+      fPVxyError = (TH1 *) PVfile->Get("hPVError"); if (fPVxyError) fPVxyError->SetDirectory(0);
       delete PVfile;
-      cout << "PVxyz.root with x, y and z histograms has been found. These histogram will be use to generate primary vertex" << endl;
+      LOG_INFO << "PVxyz.root with x, y and z histograms has been found. These histogram will be use to generate primary vertex x, y, z.";
+      if (fPVxyError) LOG_INFO << " hPVError histogram will be used for transverse PV error.";
+      LOG_INFO << endm;
     }
     delete [] file;
   }
@@ -168,6 +172,11 @@ void StarMCSimplePrimaryGenerator::GeneratePrimaries() {
       fOrigin.SetX(fPVX->GetRandom());
       fOrigin.SetY(fPVY->GetRandom());
       fOrigin.SetZ(fPVZ->GetRandom());
+      if (fPVxyError) {
+	Double_t dxy = fPVxyError->GetRandom()/TMath::Sqrt(2.);
+	gEnv->SetValue("FixedSigmaX", dxy);
+	gEnv->SetValue("FixedSigmaY", dxy);
+      }
     } else {
       if (fUseBeamLine) {
 	St_vertexSeedC* vSeed = St_vertexSeedC::instance();
@@ -180,7 +189,7 @@ void StarMCSimplePrimaryGenerator::GeneratePrimaries() {
 	  Double_t z    = fZ_min + (fZ_max-fZ_min)*gRandom->Rndm();
 	  SetOrigin(x0 + dxdz*z, y0 + dydz*z, z);
 	} else {
-	  cout << "Warning : Requested Beam Line, but there is no beam line" << endl;
+	  LOG_INFO << "Warning : Requested Beam Line, but there is no beam line" << endm;
 	}
       } else {
 	fOrigin.SetZ(fZ_min + (fZ_max-fZ_min)*gRandom->Rndm());
@@ -201,7 +210,7 @@ void StarMCSimplePrimaryGenerator::SetGun(Int_t Id,
   } else {
     fGunId = Id;
   }
-  cout << "StarMCSimplePrimaryGenerator::SetGun\tid = " << fGunId 
+  LOG_INFO << "StarMCSimplePrimaryGenerator::SetGun\tid = " << fGunId 
        << "\tpxyz = (" << fGunpX << "," << fGunpY << "," << fGunpZ
-       << ")\txyz = (" << fGunX << "," << fGunY << "," << fGunZ << ")" << endl;
+       << ")\txyz = (" << fGunX << "," << fGunY << "," << fGunZ << ")" << endm;
 }
