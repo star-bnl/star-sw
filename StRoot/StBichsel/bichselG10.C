@@ -97,7 +97,7 @@ struct Part_t {
   Int_t         Index;
   Double_t      Mass;
 };
-Part_t Part[NMasses] = {
+Part_t Part[NMasses] = {// https://periodictable.com/Isotopes/
   //name,   PiD, Charge,  Index, Mass 
   {"e",       0,      1,      0, 0.51099907e-3},     	      // 3 e   
   {"#mu",     4,      1,      1, 0.1056584},         	      // 5 mu  
