@@ -13,8 +13,8 @@
 //#define __iTpx__
 #define PRINT
 //#define __Y2008__
-#define __Y2018__ 
-//#define __Y2019__   /* >= 2019 */
+//#define __Y2018__ 
+#define __Y2019__   /* >= 2019 */
 //#define __LASER__
 //#define __Cosmics__
 //#define __useGainT0__
