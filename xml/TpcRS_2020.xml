@@ -12,17 +12,20 @@ setenv STARFPE NO
 #  starver TFG17j
 #   starver TFG19e
   set file = $INPUTFILE0;
-  set rung = `echo $file | awk -F\_ '{print $2}'`
+#  set rung = `echo $file | awk -F\_ '{print $2}'`
   echo "${file}"
-  set logFile  = ${file}B.log
+  set fileB = `basename ${file} .MuDst.root`;
+  set logFile  = ${fileB}B.log
   set sdt = "";
   set Name = `basename $PWD`
   set sdt = ",sdt20201224"
   set KFVertex = "";
   echo $Name | grep -i KFV
   if (! $?) set KFVertex = ",StiKFVertex";
-  set f=`find .1 -maxdepth 1 -type f -name "*${file}*.root"`
-  if ("$f" == "") then
+#  set f=`find . -maxdepth 1 -type f -name "*${fileB}*.root"`
+#  if ("$f" == "") then
+  ls -l *${fileB}*.root
+  if ($?) then
 #    root4star -q -b 'TpcRS.C(4000,"MC.2016,TpcRS,StiCA,KFVertex,rung.'${rung}'",0,"heed,PhysicsOff,'${file}'")' &gt;&amp; ${logFile}
 #    root.exe -x  -q -b 'TpcRS.C(1000,"MC.2016,TpcRS,StiCA,KFVertex,rung.'${rung}'",0,"heed,PhysicsOff,'${file}'")' &gt;&amp; ${logFile}
 #    root4star -q -b 'TpcRS.C(1000,"MC.2016,sdt20160419.051230,TpcRS,StiCA,KFVertex,rung.'${rung}'",0,"heed,PhysicsOff,'${file}'")' &gt;&amp; ${logFile}
@@ -34,7 +37,7 @@ setenv STARFPE NO
 #root.exe -x  -q -b 'TpcRS.C(100,"MC2020.Ideal,-bbcSim,StiCA'${KFVertex}',-geantOut,evout,vmc,VMCAlignment,CorrY,OSpaceZ2,OGridLeakFull,NoHistos,noTags,noRunco,McTpcAna",0,"heed,hadr_of,'${file}'")' &gt;&amp; ${logFile}
 #root.exe -x  -q -b 'TpcRS.C(100,"MC.2020,-bbcSim,StiCA'${KFVertex}',-geantOut,evout,vmc,VMCAlignment,CorrY,OSpaceZ2,OGridLeakFull,NoHistos,noTags,noRunco,McTpcAna,rung.'${rung}${sdt}'",0,"heed,hadr_of",0,"'${file}'")' &gt;&amp; ${logFile}
 #root.exe -x  -q -b 'TpcRS.C(100,"MC.2020,-bbcSim,StiCA'${KFVertex}',-geantOut,evout,NoHistos,noTags,noRunco,McTpcAna,rung.'${rung}${sdt}'",0,"",0,"'${file}'")' &gt;&amp; ${logFile}
- root.exe -q -b 'bfc.C(100,"mtin,MC.2020,NoiTPCLu,TpcRS,McTpcAna,StiCA,-geantOut,NoHistos,noRunco","'${file}'")' &gt;&amp; ${logFile}
+ root.exe -q -b 'bfc.C(100,"mtin,MC.2020,TpcRS,McTpcAna,StiCA,-geantOut,NoHistos,noRunco","'${file}'")' &gt;&amp; ${logFile}
   endif
 </command>
 <!-- <input URL="command:TpcRS_Part.pl" /> -->
