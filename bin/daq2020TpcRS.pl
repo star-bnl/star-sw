@@ -11,8 +11,9 @@ my $glob = "/net/l401/data/scratch1/fisyak/Tpc/TpcRS/" . $Trigger . "/st_physics
 my $fNo = 0;
 my @globs = glob $glob;
 foreach my $file (@globs) {
-  my $b = File::Basename::basename($file,".daq");
-  #    print "$b\n" if ($debug);
+#  my $b = File::Basename::basename($file,".daq"); 
+  my $b = File::Basename::basename($file,".MuDst.root"); 
+  print "$b\n" if ($debug);
   my $mufile = $b . ".MuDst.root";
   if (-r $mufile) {next;}
   my $pifile = $b . ".picoDst.root";
