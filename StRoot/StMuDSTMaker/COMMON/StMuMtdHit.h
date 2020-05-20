@@ -48,7 +48,7 @@ public:
   Int_t     mIndex2Global;
 
 
-ClassDef(StMuMtdHit,2)
+ClassDef(StMuMtdHit,3)
 
 };
 
