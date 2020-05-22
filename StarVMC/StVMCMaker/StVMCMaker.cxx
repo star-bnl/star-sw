@@ -257,7 +257,7 @@ Int_t StVMCMaker::Init() {
   LOG_INFO << "Init, Generator type: TRandom3 Seed: " << gRandom->GetSeed() << endm;
   TString GoodTriggers(SAttr("GoodTriggers"));
   if (GoodTriggers != "") SetGoodTriggers(GoodTriggers);
-  return kStOK; 
+  return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t StVMCMaker::InitRun  (Int_t runumber){
