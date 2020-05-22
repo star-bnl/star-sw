@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TRandomVector.cxx,v 1.8 2017/07/25 20:37:02 perev Exp $
+ * $Id: TRandomVector.cxx,v 1.9 2020/05/22 23:41:28 perev Exp $
  *
  ***************************************************************************
  *
@@ -30,13 +30,8 @@ TRandomVector::TRandomVector(const TVectorD& errDia,UInt_t seed)
   fDim = errDia.GetNrows();
   TMatrixDSym mtx(fDim);
   fRandom.SetSeed(seed);
-  for (int i=0;i<fDim;i++){mtx[i][i] =i+1;}
+  for (int i=0;i<fDim;i++){mtx[i][i] = errDia[i];}
   RandRotate(mtx);
-  TVectorD myDia(fDim);
-  for (int i=0;i<fDim;i++) {myDia[i] = sqrt(mtx[i][i]);}
-  for (int i=0;i<fDim;i++) {
-  for (int k=0;k<fDim;k++) {mtx[i][k]*= errDia[i]/myDia[i]*errDia[k]/myDia[k];}}
-
   assert(! Set(mtx,seed)); 
 }
 //_____________________________________________________________________________
@@ -97,43 +92,35 @@ const TVectorD& TRandomVector::Gaus()
 void TRandomVector::RandRotate(TMatrixDSym& errMtx)
 {
   int nDim = errMtx.GetNrows();
-  int nSiz = nDim*(nDim+1)/2;
-
-  std::vector<double> vA(nSiz),vB(nSiz);;
-  for (int i=0,li=0;i< nDim;li+=++i) {
-    for (int j=0;j<=i;j++) {
-      vA[li+j] = errMtx[i][j];
-  } }
-
-  std::vector<double> vT(nDim*nDim); 
-  memset(&vT[0],0, nDim*nDim*sizeof(vT[0]));
-  for (int i=0;i<nDim;i++) { vT[nDim*i+i] = 1;}
-  
-  double *a = &vA[0],*b=&vB[0];
+  TMatrixD A(nDim,nDim),B(nDim,nDim),R(nDim,nDim);
+  A = errMtx;
+  for (int L=0;L<nDim;L++) {
+    R.UnitMatrix();
+    for (int M=(L&1);M+1<nDim;M+=2) {
+      double S = (gRandom->Rndm()-0.5)+0.01;
+      double C = sqrt((1-S)*(1+S)); 
+      R[M+0][M] = C; R[M+0][M+1] = S; 
+      R[M+1][M] =-S; R[M+1][M+1] = C; 
+    }
+    B.Mult(A,R);
+    R.Transpose(R);
+    A.Mult(R,B);
+  }
+//  errMtx = A;
   for (int i=0;i<nDim;i++) {
-  for (int j=0;j<i;   j++) {
-     double c = gRandom->Rndm();
-     double s = sqrt((1-c)*(1+c)); 
-     vT[nDim*i+i] = c; vT[nDim*i+j] =  s;
-     vT[nDim*j+j] = c; vT[nDim*j+i] = -s;
-     TCL::trasat(&vT[0],a,b,nDim,nDim);
-     vT[nDim*i+i] = 1; vT[nDim*i+j] = 0;
-     vT[nDim*j+j] = 1; vT[nDim*j+i] = 0;
-     double *tmp = a; a = b; b = tmp;
+  for (int j=0;j<=i  ;j++) {
+    double a = A[i][j];
+    double b = A[j][i];
+    assert(fabs(a-b)<1e-6);
+    errMtx[i][j] = 0.5*(a+b);
+    errMtx[j][i] = 0.5*(a+b);
   } }
-  for (int i=0,li=0;i< nDim;li+=++i) {
-    for (int j=0;j<=i;j++) {
-      errMtx[i][j] = a[li+j];
-      errMtx[j][i] = a[li+j];
-  } }
-  assert(Sign(errMtx)>0);
 }
-
 //_____________________________________________________________________________
 double TRandomVector::Sign(const TMatrixDSym &Si)
 {
   int n = Si.GetNrows();
-  TMatrixDSym S(Si);
+   TMatrixDSym S(Si);
   TVectorD coe(n);
   for (int i=0;i< n;++i) {
     double qwe = S[i][i];
@@ -156,7 +143,7 @@ double TRandomVector::Sign(const TMatrixDSym &Si)
 //_____________________________________________________________________________
 void TRandomVector::Test(int nevt)
 {
-enum {kMySize=15};
+enum {kMySize=10};
   TRandomVector *RV=0;
   TMatrixDSym S(kMySize);
 
@@ -167,6 +154,14 @@ enum {kMySize=15};
 
   RV = new TRandomVector(V);
   S = RV->GetMtx();
+  for (int i=0;i<kMySize;i++) 	{
+    for (int j=0;j<i;j++) 	{
+      double t = S[i][j]/sqrt(S[i][i]*S[j][j]);
+      printf("%g \t",t);
+    }
+    printf("%g \n",S[i][i]);
+  }   
+
   
 //  S.Print("");
   TVectorD res(kMySize);
@@ -178,11 +173,12 @@ for (int evt=0;evt<nevt;evt++) {
 }
   SS*=(1./nevt);
   
-  double Qa = 0,maxQa=0;;
+  double Qa = 0,maxQa=0,maxCorr=0;
 for (int i=0;i<kMySize;i++) {
 for (int k=0;k<=i;k++) {
   double nor = sqrt(S[i][i]*S[k][k]);
   double dif = (S[i][k]-SS[i][k])/nor;
+  if ( i!=k && fabs(S[i][k]/nor)>fabs(maxCorr)) maxCorr = S[i][k]/nor;
   if (fabs(dif)> 0.1) 
     printf("(%d %d) \t%g = \t%g \t%g\n",i,k,S[i][k]/nor,SS[i][k]/nor,dif);
   dif = fabs(dif);
@@ -190,7 +186,7 @@ for (int k=0;k<=i;k++) {
 }}
 int n = ((kMySize*kMySize+kMySize)/2);
 Qa/=(n);
-printf("Quality %g < %g < 1\n",Qa,maxQa);
+printf("Quality %g < %g < 1  maxCorr=%g\n",Qa,maxQa,maxCorr);
 }
 //_____________________________________________________________________________
 void TRandomVector::TestXi2()
