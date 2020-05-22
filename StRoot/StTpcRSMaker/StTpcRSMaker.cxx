@@ -80,7 +80,7 @@ struct HitPoint_t {
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.91 2020/05/22 20:15:15 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.92 2020/05/22 20:49:19 fisyak Exp $";
 #define __ClusterProfile__
 static Bool_t ClusterProfile = kFALSE;
 #define Laserino 170
@@ -663,7 +663,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	}
 	double mTimeBinWidth = 1./StTpcDb::instance()->Electronics()->samplingFrequency();
 	double driftVelocity = StTpcDb::instance()->DriftVelocity(1);
-	fgTriggerT0 = - StTpcBXT0CorrEPDC::instance()->getCorrection(maxTAC, driftVelocity, mTimeBinWidth)*mTimeBinWidth;
+	fgTriggerT0 = - StTpcBXT0CorrEPDC::instance()->getCorrection(maxTAC, driftVelocity, mTimeBinWidth)*mTimeBinWidth*1e-6;
       } else if (g2t_ver->GetNRows() > 0) {
       const Double_t kAu2Gev=0.9314943228;
       UInt_t un = St_beamInfoC::instance()->getYellowMassNumber();
@@ -2150,8 +2150,11 @@ Double_t StTpcRSMaker::dEdxCorrection(HitPoint_t &TrackSegmentHits) {
 //________________________________________________________________________________
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.91 2020/05/22 20:15:15 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.92 2020/05/22 20:49:19 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.92  2020/05/22 20:49:19  fisyak
+// Wrong alarm, take it back
+//
 // Revision 1.91  2020/05/22 20:15:15  fisyak
 // Fix bug in fgTriggerT0 (seconds <=> microseconds)
 //
