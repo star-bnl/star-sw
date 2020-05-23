@@ -153,6 +153,7 @@ class StTpcHit : public StHit {
     Int_t    volumeID() const {return 100 * sector() + padrow();}
     Short_t  timeBucketsInHit()   const {return maxTmbk() - minTmbk() + 1;} // number of time bucket fired in this hit
     Float_t  timeBucket() const {return static_cast<float>(mMcl_t)/64.;}
+    Float_t  timeBucketC()const {return mTimeBucket;}
     Float_t  pad() const {return static_cast<float>(mMcl_x)/64.;}
     UShort_t adc() const {return mAdc;}
     Float_t  chargeModified() const {return mChargeModified;}
@@ -170,6 +171,7 @@ class StTpcHit : public StHit {
     virtual const StThreeVectorF& positionL() const {return *&mPositionL;}
     virtual void setPositionU(const StThreeVectorF& p) {mPositionU = p;}
     virtual void setPositionL(const StThreeVectorF& p) {mPositionL = p;}
+    virtual void setTimeBucket(Float_t tb) {mTimeBucket = tb;}
     static  const Char_t  *GetFMT()                     {return fgFMT.Data();}  
     static  void           SetFMT(const Char_t *path=0) {fgFMT = path;}  
     virtual const Char_t  *GetPath() const;    
@@ -183,11 +185,12 @@ protected:
     Short_t        mMcl_t;      /* average timebucket*64 */			    
     UShort_t       mAdc;        /* cluster ADC sum */				    
     Float_t        mChargeModified; //!                                                
-    StThreeVectorF mPositionU; //  upper position = y_local + padlength/2.
-    StThreeVectorF mPositionL; //  lower position = y_local - padlength/2.
-    Float_t        mdX;        //  estimated dX from StdEdxY2Maker
+    StThreeVectorF mPositionU;  //  upper position = y_local + padlength/2.
+    StThreeVectorF mPositionL;  //  lower position = y_local - padlength/2.
+    Float_t        mdX;         //  estimated dX from StdEdxY2Maker
+    Float_t        mTimeBucket; // average timebucket corrected
     static TString fgFMT;        
-    ClassDef(StTpcHit,11)
+    ClassDef(StTpcHit,12)
 };
 ostream&              operator<<(ostream& os, StTpcHit const & v);
 

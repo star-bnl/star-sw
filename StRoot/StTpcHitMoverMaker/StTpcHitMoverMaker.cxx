@@ -50,6 +50,7 @@ Int_t StTpcHitMover::Make() {
   static StGlobalCoordinate    coorG;
   Bool_t EmbeddingShortCut = IAttr("EmbeddingShortCut");
   StEvent* pEvent = dynamic_cast<StEvent*> (GetInputDS("StEvent"));
+  Double_t triggerOffset = 0;
   if (! pEvent) {
     LOG_WARN << "StTpcHitMover::Make there is no StEvent " << endm;
     return kStWarn;
@@ -80,6 +81,8 @@ Int_t StTpcHitMover::Make() {
 				if (TAC > maxTAC) maxTAC = TAC;
 			}
 		}
+		double driftVelocity = StTpcDb::instance()->DriftVelocity(1);
+		triggerOffset = StTpcBXT0CorrEPDC::instance()->getCorrection(maxTAC, driftVelocity, mTimeBinWidth);
 	}
 //	======================================================
 //  gMessMgr->Info() << "StTpcHitMover::Make use StEvent " << endm;
@@ -108,7 +111,7 @@ Int_t StTpcHitMover::Make() {
       if (sectorCollection) {
 	Int_t sector = i + 1;
 
-	double driftVelocity = StTpcDb::instance()->DriftVelocity(sector);
+	//	double driftVelocity = StTpcDb::instance()->DriftVelocity(sector);
 
 	Int_t numberOfPadrows = sectorCollection->numberOfPadrows();
 	for (int j = 0; j< numberOfPadrows; j++) {
@@ -151,9 +154,9 @@ Int_t StTpcHitMover::Make() {
 		    }
 		  }
 //		THIS IS A BLOCK TO CORRECT TIMING IN FXT MODE FOR DATA
-		if (doEPDT0Correction) time += StTpcBXT0CorrEPDC::instance()->getCorrection(maxTAC, driftVelocity, mTimeBinWidth);
+		  if (doEPDT0Correction) time += triggerOffset;
 //		======================================================
-
+		  tpcHit->setTimeBucket(time);
 		  StTpcPadCoordinate padcoord(sector, row, pad, time);
 		  StTpcLocalSectorCoordinate  coorS;
 		  transform(padcoord,coorS,kFALSE);

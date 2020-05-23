@@ -1076,6 +1076,13 @@ Float_t St_tpcRDOT0offsetC::T0(Int_t sector, Int_t padrow, Int_t pad) const {
 
 #include "St_tpcBXT0CorrEPDC.h"
 MakeChairInstance2(tpcBXT0Corr,StTpcBXT0CorrEPDC,Calibrations/tpc/tpcBXT0CorrEPD);
+double StTpcBXT0CorrEPDC::getCorrection (double epdTAC, double driftVelocity, double timeBinWidth) {
+  double timeBucketShiftScale = 500000/(driftVelocity*timeBinWidth);
+  double generalOffset = a(0)[0];
+  //			printf("%f, %f, %f, %f, %f\n, ", epdTAC, driftVelocity, timeBinWidth, timeBucketShiftScale, generalOffset);
+  if (epdTAC == -1) return timeBucketShiftScale*generalOffset;
+  else return timeBucketShiftScale*(generalOffset + a(0)[1] + a(0)[2]*epdTAC);
+}
 
 //__________________Calibrations/trg______________________________________________________________
 #include "St_defaultTrgLvlC.h"

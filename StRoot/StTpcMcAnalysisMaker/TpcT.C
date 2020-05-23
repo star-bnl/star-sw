@@ -4563,8 +4563,9 @@ void T0Offsets(const Char_t *files="*.root", const Char_t *Out = "") {
   const Float_t*&    fMcHit_mLocalMomentum_mX3                = iter("fMcHit.mLocalMomentum.mX3");
   const Float_t*&    fMcHit_mTof                              = iter("fMcHit.mTof");
   const Long_t*&     fMcHit_mKey                              = iter("fMcHit.mKey");
-  const Int_t*&   fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
+  const Int_t*&      fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
   const Short_t*&    fRcHit_mMcl_t                            = iter("fRcHit.mMcl_t");
+  const Float_t*&    fRcHit_tb                                = iter("fRcHit.mTimeBucket");
   const UChar_t*&    fRcHit_mMintmbk                          = iter("fRcHit.mMintmbk");
   const UChar_t*&    fRcHit_mMaxtmbk                          = iter("fRcHit.mMaxtmbk");
   const UShort_t*&   fRcHit_mQuality                          = iter("fRcHit.mQuality");
@@ -4594,7 +4595,8 @@ void T0Offsets(const Char_t *files="*.root", const Char_t *Out = "") {
       Int_t io = 0;
       if (row > NoInnerRows) io = 1;
       if (fRcHit_mQuality[l] < 90) continue;
-      Double_t dT = fMcHit_mMcl_t[k]+(0.165+1e6*fMcHit_mTof[k])*Frequency-fRcHit_mMcl_t[l]/64.;
+      //      Double_t dT = fMcHit_mMcl_t[k]+(0.165+1e6*fMcHit_mTof[k])*Frequency-fRcHit_mMcl_t[l]/64.;
+      Double_t dT = fMcHit_mMcl_t[k]+(0.165+1e6*fMcHit_mTof[k])*Frequency-fRcHit_tb[k];
       T[io]->Fill(fMcHit_mPosition_mX3[k],dT);
       Int_t ntbk = fRcHit_mMaxtmbk[l] + fRcHit_mMintmbk[l] + 1;
       B[io]->Fill(ntbk,dT);
