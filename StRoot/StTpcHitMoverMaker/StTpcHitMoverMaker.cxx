@@ -32,10 +32,6 @@ StTpcHitMover::~StTpcHitMover() {
   FlushDB();
 }
 //________________________________________________________________________________
-Int_t StTpcHitMover::Init() {
-  return StMaker::Init();
-}
-//________________________________________________________________________________
 Int_t StTpcHitMover::InitRun(Int_t runnumber) {
   FlushDB();
   return kStOk;
