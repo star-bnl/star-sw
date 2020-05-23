@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.20180531.071405.C,v 1.1 2020/05/17 15:46:34 fisyak Exp $
+// $Id: TpcResponseSimulator.20180531.071405.C,v 1.2 2020/05/23 20:57:26 fisyak Exp $
 // $Log: TpcResponseSimulator.20180531.071405.C,v $
+// Revision 1.2  2020/05/23 20:57:26  fisyak
+// Guannan's checked version
+//
 // Revision 1.1  2020/05/17 15:46:34  fisyak
 // 3p85GeV_fixedTarget_2018
 //
@@ -138,6 +141,7 @@ TDataSet *CreateTable() {
   row.PolyaInner = 1.38;
   row.PolyaOuter = 1.38;
 #endif
+#if 0
   //  row.T0offset   = 0.50; // From  Lokesh Kumar for Run X
   // TpcT->Draw("fMcHit.mMcl_t+0.165*Frequency-fRcHit.mMcl_t/64:fMcHit.mPosition.mX3>>T(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz")
   // TpcT->Draw("fMcHit.mPosition.mX3-fRcHit.mPosition.mX3:fMcHit.mPosition.mX3>>Z(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz")
@@ -149,6 +153,13 @@ TDataSet *CreateTable() {
   row.T0offsetI =  1.17437e-01 + 8.43584e-03; 
   // TO->FitSlicesY(); TO_1->Fit("pol2","er","",-100,100);
   row.T0offsetO = -9.36725e-03 + 5.74947e-03;
+#else
+// You have to add -0.73383303057411764 (average offset from Irakli’s correction)
+  // TI->FitSlicesY(); TI_1->Fit("pol2","er","",-100,100);
+  row.T0offsetI =  1.17437e-01 + 8.43584e-03 - 0.73383303057411764; 
+  // TO->FitSlicesY(); TO_1->Fit("pol2","er","",-100,100);
+  row.T0offsetO = -9.36725e-03 + 5.74947e-03 - 0.73383303057411764;
+#endif
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
