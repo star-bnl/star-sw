@@ -1,13 +1,10 @@
-// $Id: TpcResponseSimulator.20180531.071405.C,v 1.2 2020/05/23 20:57:26 fisyak Exp $
-// $Log: TpcResponseSimulator.20180531.071405.C,v $
-// Revision 1.2  2020/05/23 20:57:26  fisyak
-// Guannan's checked version
+// $Id: TpcResponseSimulator.20180531.071409.C,v 1.1 2020/05/23 22:33:31 fisyak Exp $
+// $Log: TpcResponseSimulator.20180531.071409.C,v $
+// Revision 1.1  2020/05/23 22:33:31  fisyak
+// Guannan parameters for 3p85GeV2018
 //
-// Revision 1.1  2020/05/17 15:46:34  fisyak
-// 3p85GeV_fixedTarget_2018
-//
-// Revision 1.2  2020/03/18 20:10:35  iraklic
-// new Run17 params and Run18 params after separating sector20 from the rest
+// Revision 1.1  2019/10/09 20:40:02  iraklic
+// added 10% gap correction to lower the outer sector dEdx for Run18 AuAu27 GeV
 //
 // Revision 1.3  2018/10/17 20:45:17  fisyak
 // Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
@@ -114,52 +111,48 @@ TDataSet *CreateTable() {
   row.OmegaTauScaleO        = 1.8  *1.201;  //HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
   // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
   // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
+  
+  // row.SecRowCorOW[0] = row.SecRowCorOE[0] = 0.11; // IRAKLI : based on shift seen in the MuDst based simulation;
 #if 1
-  row.SecRowCorIW[0] = 0.039 -0.032165 ;//- TMath::Log(0.533*0.843485) -5.84129e-01 + 4.52885e-01 + 3.09117e-02; // IRAKLI
-  row.SecRowCorIE[0] = 0.039 -0.073489 ;//- TMath::Log(0.533*0.843485) -5.84129e-01 + 4.52885e-01 + 3.09117e-02; // IRAKLI
-  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 0.105 -0.0986937;//- TMath::Log(0.512*0.725267) -5.47141e-01 + 5.23937e-01 + 1.19154e-02; // IRAKLI
-#endif
+  row.SecRowCorIW[0] = 0.013; 
+  row.SecRowCorOW[0] = -0.013;
+  row.SecRowCorIE[0] = -0.035; 
+  row.SecRowCorOE[0] = -0.013;
+  // row.SecRowCorIW[0] = row.SecRowCorIE[0] = 6.99114715017355337e-01;//- TMath::Log(0.533*0.843485) -5.84129e-01 + 4.52885e-01 + 3.09117e-02;
+  // row.SecRowCorOW[0] = row.SecRowCorOE[0] = 9.79357470004933006e-01;//- TMath::Log(0.512*0.725267) -5.47141e-01 + 5.23937e-01 + 1.19154e-02;
   // SecRow3CGFdaq_2011_pp500LowLum => Inner: 3.26428e-01 - -5.01720e-04*y; Outer: 2.68883e-01 + 1.23403e-04*y
   //                                          3.22907e-01                          2.72715e-01
   // SecRow3CGFTpcRS_2011_pp500LowLum_f     : 3.09711e-01                          2.65342e-01
   // diff                                   : 9.13675e-02                          6.29849e-02
   // SecRow3CGFTpcRS_2011_pp500LowLum_g     : 3.12857e-01                          2.67379e-01
-#if 0
-  const Double_t RowSigmaTrs[4] = {
-    9.13675e-02, 0,  // Inner
-    6.29849e-02, 0}; // Outer
+  const Double_t RowSigmaTrs[8] = {
+    -5.00e-03, 0,  // Inner W
+    -5.00e-03, 0,  // Outer W
+    -1.76e-02, 0,  // Inner E
+    -1.76e-02, 0};  // Outer E
   Float_t *b = &row.SecRowSigIW[0];
   for (Int_t i = 0; i < 8; i++) {
-    b[i] = RowSigmaTrs[i%4];
+    b[i] = RowSigmaTrs[i%8];
   }
-
   /* Sigmas 
      Tpx inner = 0.395
      Tpx outer = 0.314
-     iTpc      = 0.322 Outer  0.316
-
+     iTpc      = 0.322 Outer  0.316 */
+#endif
   row.PolyaInner = 1.38;
   row.PolyaOuter = 1.38;
-#endif
-#if 0
   //  row.T0offset   = 0.50; // From  Lokesh Kumar for Run X
   // TpcT->Draw("fMcHit.mMcl_t+0.165*Frequency-fRcHit.mMcl_t/64:fMcHit.mPosition.mX3>>T(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz")
   // TpcT->Draw("fMcHit.mPosition.mX3-fRcHit.mPosition.mX3:fMcHit.mPosition.mX3>>Z(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz")
   // The corection has to be added                                                                    M             P
   //row.T0offset   = 0.50 + 1.65431e-01 -  3.45247e-01 -1.54583e+00 -2.90686e-03+ 1.54353e+00 + 0.0191135  -1.20938e-03 ; //E
-  row.T0offset   = 0.50 -1.43663e-01;//g // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
+  // row.T0offset   = 0.50 -1.43663e-01;//g // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
+  row.T0offset   = 0.50 -1.43663e-01 -0.0839244;
   // root.exe T0offset.C
   // TI->FitSlicesY(); TI_1->Fit("pol2","er","",-100,100);
-  row.T0offsetI =  1.17437e-01 + 8.43584e-03; 
+  row.T0offsetI =  1.17437e-01 + 8.43584e-03 + 7.537344e-02 - 0.73383303057411764; 
   // TO->FitSlicesY(); TO_1->Fit("pol2","er","",-100,100);
-  row.T0offsetO = -9.36725e-03 + 5.74947e-03;
-#else
-// You have to add -0.73383303057411764 (average offset from Irakli’s correction)
-  // TI->FitSlicesY(); TI_1->Fit("pol2","er","",-100,100);
-  row.T0offsetI =  1.17437e-01 + 8.43584e-03 - 0.73383303057411764; 
-  // TO->FitSlicesY(); TO_1->Fit("pol2","er","",-100,100);
-  row.T0offsetO = -9.36725e-03 + 5.74947e-03 - 0.73383303057411764;
-#endif
+  row.T0offsetO = -9.36725e-03 + 5.74947e-03 + 1.140144e-01 - 0.73383303057411764;
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
