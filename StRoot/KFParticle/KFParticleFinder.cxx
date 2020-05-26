@@ -31,7 +31,7 @@ KFParticleFinder::KFParticleFinder():
   fNPV(-1),fNThreads(1),fDistanceCut(1.f),fLCut(-5.f),fCutCharmPt(0.2f),fCutCharmChiPrim(85.f),fCutLVMPt(0.0f),fCutLVMP(0.0f),fCutJPsiPt(1.0f),
   fD0(0), fD0bar(0), fD04(0), fD04bar(0), fD0KK(0), fD0pipi(0), fDPlus(0), fDMinus(0), 
   fDPlus3Pi(0), fDMinus3Pi(0), fDsPlusK2Pi(0), fDsMinusK2Pi(0), fLcPlusP2Pi(0), fLcMinusP2Pi(0),
-  fLPi(0), fLPiPIndex(0), fHe3Pi(0), fHe3PiBar(0), fHe4Pi(0), fHe4PiBar(0), 
+  fLPi(0), fLPiPIndex(0), fDPi(0), fDPiBar(0), fTPi(0), fTPiBar(0), fHe3Pi(0), fHe3PiBar(0), fHe4Pi(0), fHe4PiBar(0), 
   fHe4L(0), fHe5L(0),  fLLn(0), fH5LL(0),
   fSecCandidates(), fPrimCandidates(), fPrimCandidatesTopo(),fPrimCandidatesTopoMass(),
   fEmcClusters(0), fMixedEventAnalysis(0), fDecayReconstructionList()
@@ -98,6 +98,10 @@ void KFParticleFinder::Init(int nPV)
   fLcMinusP2Pi.clear();
   fLPi.clear();
   fLPiPIndex.clear();
+  fDPi.clear();
+  fDPiBar.clear();
+  fTPi.clear();
+  fTPiBar.clear();
   fHe3Pi.clear();
   fHe3PiBar.clear();
   fHe4Pi.clear();
@@ -304,16 +308,28 @@ void KFParticleFinder::FindParticles(KFPTrackVector* vRTracks, kfvector_float* C
       FindTrackV0Decay(fPrimCandidates[10][iPV], -3324, vRTracks[2], 1, vRTracks[2].FirstKaon(), vRTracks[2].LastKaon(),
                         Particles, PrimVtx, iPV, 0);
     //Hypernuclei
-    //He4L -> He3 p pi-
+    //H3L -> d p pi-, H4L -> d d pi-, H5L -> t d pi-
+    FindTrackV0Decay(fDPi     , 3003, vRTracks[0],  1, vRTracks[0].FirstProton(), vRTracks[0].Size(), Particles, PrimVtx, -1, 0);
+    //H3L_bar -> d- p- pi+, H4L_bar -> d- d- pi+, H5L_bar -> t- d- pi+
+    FindTrackV0Decay(fDPi     ,-3003, vRTracks[1], -1, vRTracks[1].FirstProton(), vRTracks[1].Size(), Particles, PrimVtx, -1, 0);  
+    //H4L -> t p pi-, H6L -> t t pi-
+    FindTrackV0Decay(fTPi     , 3103, vRTracks[0],  1, vRTracks[0].FirstProton(), vRTracks[0].Size(), Particles, PrimVtx, -1, 0);
+    //H4L_bar -> t- p- pi+, H6L_bar -> t- t- pi+
+    FindTrackV0Decay(fTPi     ,-3103, vRTracks[1], -1, vRTracks[1].FirstProton(), vRTracks[1].Size(), Particles, PrimVtx, -1, 0);    
+    //He4L -> He3 p pi- 
     FindTrackV0Decay(fHe3Pi   , 3004, vRTracks[0],  1, vRTracks[0].FirstProton(), vRTracks[0].LastProton(), Particles, PrimVtx, -1, 0, 0, &fHe4L);
-    //LLn -> H3L pi-
-    FindTrackV0Decay(fHe3Pi   , 3004, vRTracks[1], -1, vRTracks[1].FirstPion(),   vRTracks[1].LastPion(),   Particles, PrimVtx, -1, 0 );
-    //He4L_bar -> He3_bar p- pi+
-    FindTrackV0Decay(fHe3PiBar,-3004, vRTracks[1], -1, vRTracks[1].FirstProton(), vRTracks[1].LastProton(), Particles, PrimVtx, -1, 0);
+    //He5L -> He3 d pi-, He6L -> He3 t pi-, Li6L-> He3 He3 pi-, Li7L-> He4 He3 pi-
+    FindTrackV0Decay(fHe3Pi   , 3004, vRTracks[0],  1, vRTracks[0].FirstDeuteron(), vRTracks[0].Size(), Particles, PrimVtx, -1, 0);
+    //He4L_bar -> He3- p- pi+, He5L_bar -> He3- d- pi+, He6L_bar -> He3- t- pi+, Li6L_bar -> He3- He3- pi+, Li7L_bar -> He4- He3- pi+
+    FindTrackV0Decay(fHe3PiBar,-3004, vRTracks[1], -1, vRTracks[1].FirstProton(), vRTracks[1].Size(), Particles, PrimVtx, -1, 0);
     //He5L -> He4 p pi-
     FindTrackV0Decay(fHe4Pi   , 3005, vRTracks[0],  1, vRTracks[0].FirstProton(), vRTracks[0].LastProton(), Particles, PrimVtx, -1, 0, 0, &fHe5L);
-    //He5L_bar -> He4_bar p- pi+
-    FindTrackV0Decay(fHe4PiBar,-3005, vRTracks[1], -1, vRTracks[1].FirstProton(), vRTracks[1].LastProton(), Particles, PrimVtx, -1, 0);
+    //He6L -> He4 d pi-, He7L -> He4 t pi-, Li8L-> He4 He4 pi-
+    FindTrackV0Decay(fHe4Pi   , 3005, vRTracks[0],  1, vRTracks[0].FirstDeuteron(), vRTracks[0].Size(), Particles, PrimVtx, -1, 0, 0);
+    //He5L_bar -> He4- p- pi+, He6L_bar -> He4- d- pi+, He7L_bar -> He4- t- pi+, Li8L_bar -> He4- He4- pi+
+    FindTrackV0Decay(fHe4PiBar,-3005, vRTracks[1], -1, vRTracks[1].FirstProton(), vRTracks[1].Size(), Particles, PrimVtx, -1, 0);
+    //LLn -> H3L pi-
+    FindTrackV0Decay(fHe3Pi   , 3004, vRTracks[1], -1, vRTracks[1].FirstPion(),   vRTracks[1].LastPion(),   Particles, PrimVtx, -1, 0 );
     //H4LL -> He4L pi-
     FindTrackV0Decay(fHe4L    , 3006, vRTracks[1], -1, vRTracks[1].FirstPion(),   vRTracks[1].LastPion(),   Particles, PrimVtx, -1, 0 );
     //H5LL -> He5L pi-
@@ -809,6 +825,14 @@ inline void KFParticleFinder::ConstructV0(KFPTrackVector* vTracks,
       fD0pipi.push_back(mother_temp);
       continue;
     }
+    if( mother.PDG()[iv] == 3003)
+      fDPi.push_back(mother_temp);
+    if( mother.PDG()[iv] ==-3003)
+      fDPiBar.push_back(mother_temp);
+    if( mother.PDG()[iv] == 3103)
+      fTPi.push_back(mother_temp);
+    if( mother.PDG()[iv] ==-3103)
+      fTPiBar.push_back(mother_temp);
     if( mother.PDG()[iv] == 3004)
       fHe3Pi.push_back(mother_temp);
     if( mother.PDG()[iv] == -3004)
@@ -1052,7 +1076,7 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
         //K-
         startTCPos[3] = posTracks.FirstPion(); endTCPos[3] = posTracks.LastKaon();
         startTCNeg[3] = negTracks.FirstKaon(); endTCNeg[3] = negTracks.LastKaon();  
-        //p-, d-, t-, he3-, he4-
+        //p-, d-, t-, he3-, he4-, he6-, li6-, li7-, be7-
         startTCPos[4] = posTracks.FirstPion(); endTCPos[4] = posTracks.LastPion();
         startTCNeg[4] = negTracks.FirstProton(); endTCNeg[4] = negTracksSize[0];  
       }
@@ -1217,6 +1241,10 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
                     motherPDG( isSecondary && (abs(trackPdgPos[iPDGPos])== 1000010030) && int_m(abs(trackPdgNeg) ==  211) ) =  3103; //LambdaNN -> t+ pi-
                     motherPDG( isSecondary && (abs(trackPdgPos[iPDGPos])== 1000020030) && int_m(abs(trackPdgNeg) ==  211) ) =  3004; //H3Lambda -> He3+ pi-
                     motherPDG( isSecondary && (abs(trackPdgPos[iPDGPos])== 1000020040) && int_m(abs(trackPdgNeg) ==  211) ) =  3005; //H4Lambda -> He4+ pi-
+                    motherPDG( isSecondary && (abs(trackPdgPos[iPDGPos])== 1000020060) && int_m(abs(trackPdgNeg) ==  211) ) =  3016; //H6Lambda -> He6+ pi-
+                    motherPDG( isSecondary && (abs(trackPdgPos[iPDGPos])== 1000030060) && int_m(abs(trackPdgNeg) ==  211) ) =  3019; //He6Lambda -> Li6+ pi-
+                    motherPDG( isSecondary && (abs(trackPdgPos[iPDGPos])== 1000030070) && int_m(abs(trackPdgNeg) ==  211) ) =  3022; //He7Lambda -> Li7+ pi-
+                    motherPDG( isSecondary && (abs(trackPdgPos[iPDGPos])== 1000040070) && int_m(abs(trackPdgNeg) ==  211) ) =  3025; //Li7Lambda -> Be7+ pi-
                     motherPDG( isSecondary && (abs(trackPdgPos[iPDGPos])==        321) && int_m(abs(trackPdgNeg) ==  211) ) =  -421; //D0_bar -> pi- K+
                     motherPDG( isPrimary   && (abs(trackPdgPos[iPDGPos])==        321) && int_m(abs(trackPdgNeg) ==  211) ) =   313; //K*0 -> K+ pi-
                     motherPDG( isPrimary   && (abs(trackPdgPos[iPDGPos])==        211) && int_m(abs(trackPdgNeg) ==  211) ) =   113; //rho -> pi+ pi-
@@ -1237,6 +1265,10 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
                     motherPDG( isSecondary && (abs(trackPdgPos[iPDGPos])==  211) && int_m(abs(trackPdgNeg) == 1000010030) ) =  -3103; //LambdaNN_bar -> t- pi+
                     motherPDG( isSecondary && (abs(trackPdgPos[iPDGPos])==  211) && int_m(abs(trackPdgNeg) == 1000020030) ) =  -3004; //H3Lambda_bar -> He3- pi+
                     motherPDG( isSecondary && (abs(trackPdgPos[iPDGPos])==  211) && int_m(abs(trackPdgNeg) == 1000020040) ) =  -3005; //H4Lambda_bar -> He4- pi+
+                    motherPDG( isSecondary && (abs(trackPdgPos[iPDGPos])==  211) && int_m(abs(trackPdgNeg) == 1000020060) ) =  -3016; //H6Lambda_bar -> He6- pi+
+                    motherPDG( isSecondary && (abs(trackPdgPos[iPDGPos])==  211) && int_m(abs(trackPdgNeg) == 1000030060) ) =  -3019; //He6Lambda_bar -> Li6- pi+
+                    motherPDG( isSecondary && (abs(trackPdgPos[iPDGPos])==  211) && int_m(abs(trackPdgNeg) == 1000030070) ) =  -3022; //Li6Lambda_bar -> Li7- pi+
+                    motherPDG( isSecondary && (abs(trackPdgPos[iPDGPos])==  211) && int_m(abs(trackPdgNeg) == 1000040070) ) =  -3025; //Li7Lambda_bar -> Be7- pi+
                     motherPDG( isPrimary   && (abs(trackPdgPos[iPDGPos])==  321) && int_m(abs(trackPdgNeg) ==       2212) ) =  -3124; //Lambda*_bar -> p- K+
                     motherPDG( isPrimary   && (abs(trackPdgPos[iPDGPos])== 2212) && int_m(abs(trackPdgNeg) ==       2212) ) = 200443; //JPsi -> p- p
                     motherPDG( isPrimary   && (abs(trackPdgPos[iPDGPos])==  211) && int_m(abs(trackPdgNeg) ==       2212) ) =  -2114; //Delta0_bar -> p- pi+
@@ -1658,7 +1690,8 @@ void KFParticleFinder::ConstructTrackV0Cand(KFPTrackVector& vTracks,
                                               (abs(mother.PDG()) ==    int_v(3006)) ||
                                               (abs(mother.PDG()) ==    int_v(3007)) ||
                                               (abs(mother.PDG()) ==    int_v(3009)) ||
-                                              (abs(mother.PDG()) ==    int_v(3011)) );
+                                              (abs(mother.PDG()) >= int_v(3011) && abs(mother.PDG()) <= int_v(3027))
+                                             );
   if( isSameParticle.isEmpty() )
   {
 #ifdef CBM
@@ -1727,6 +1760,12 @@ void KFParticleFinder::ConstructTrackV0Cand(KFPTrackVector& vTracks,
 
   saveParticle &= ( (float_m(!isPrimary) && ldlMin > cuts[0]) || float_m(isPrimary) );
 
+  float_v p1p2 = track.Px()*V0.Px() + track.Py()*V0.Py() + track.Pz()*V0.Pz();
+  float_v p12  = track.Px()*track.Px() + track.Py()*track.Py() + track.Pz()*track.Pz();
+  float_v p22  = V0.Px()*V0.Px() + V0.Py()*V0.Py() + V0.Pz()*V0.Pz();
+  saveParticle &= p1p2 > -p12;
+  saveParticle &= p1p2 > -p22;
+  
   int_m setLCut = abs(mother.PDG()) == 3312 || abs(mother.PDG()) == 3334 || abs(mother.PDG()) == 3001;
   saveParticle &= ( (simd_cast<float_m>(setLCut) && lMin > float_v(fLCut)) || simd_cast<float_m>(!setLCut) );
 
@@ -2247,17 +2286,67 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
           motherPDG( isPrimary && int_m(trackPdgPos[iPDGPos] == 321) ) =  100323; 
           motherPDG( isPrimary && int_m(trackPdgPos[iPDGPos] == -321) ) =  -100323; 
         }
+        else if( V0PDG == 3003 )
+        {
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == 2212) ) =  3012;
+          const int_v& id = reinterpret_cast<const int_v&>(vTracks.Id()[iTr]);
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == 1000010020) && (id>iPosDaughter)) =  3014;
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == 1000010030) ) =  3015;
+        }
+        else if( V0PDG == -3003 )
+        {
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == -2212) ) = -3012;
+          const int_v& id = reinterpret_cast<const int_v&>(vTracks.Id()[iTr]);
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == -1000010020) && (id>iNegDaughter)) = -3014;
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == -1000010030) ) = -3015;
+        }
+        else if( V0PDG == 3103 )
+        {
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == 2212) ) =  3013;
+          const int_v& id = reinterpret_cast<const int_v&>(vTracks.Id()[iTr]);
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == 1000010030) && (id>iPosDaughter)) =  3017;
+        }
+        else if( V0PDG ==-3103 )
+        {
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == -2212) ) = -3013;
+          const int_v& id = reinterpret_cast<const int_v&>(vTracks.Id()[iTr]);
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == -1000010030) && (id>iNegDaughter)) = -3017;
+        }
         else if( V0PDG == 3004 )
         {
           motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] ==  2212) ) =  3006;
-          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] ==  -211) ) =  3203; 
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] ==  -211) ) =  3203;          
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == 1000010020) ) = 3018;
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == 1000010030) ) = 3020;
+          const int_v& id = reinterpret_cast<const int_v&>(vTracks.Id()[iTr]);
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == 1000020030) && (id>iPosDaughter) ) = 3024;
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == 1000020040) ) = 3026;
         }
         else if( V0PDG == -3004 )
-          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == -2212) ) = -3006; 
+        {
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == -2212) ) = -3006;
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == -1000010020) ) = -3018;
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == -1000010030) ) = -3020;
+          const int_v& id = reinterpret_cast<const int_v&>(vTracks.Id()[iTr]);
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == -1000020030) && (id>iNegDaughter) ) = -3024;
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == -1000020040) ) = -3026;
+        }
         else if( V0PDG == 3005 )
-          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] ==  2212) ) =  3007; 
+        {
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] ==  2212) ) =  3007;
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == 1000010020) ) = 3021;
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == 1000010030) ) = 3023;
+          const int_v& id = reinterpret_cast<const int_v&>(vTracks.Id()[iTr]);
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == 1000020040) && (id>iPosDaughter) ) = 3027;
+        }
         else if( V0PDG == -3005 )
+        {
           motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == -2212) ) = -3007;
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == -1000010020) ) = -3021;
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == -1000010030) ) = -3023;
+          const int_v& id = reinterpret_cast<const int_v&>(vTracks.Id()[iTr]);
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == -1000020040) && (id>iNegDaughter) ) = -3027;
+        }
         else if( V0PDG == 3006 )
           motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == -211) ) = 3008; 
         else if( V0PDG == 3007 )
@@ -2381,8 +2470,21 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
             case    519: motherType = 1; break; //B0
             case   3001: motherType = 1; break; //H0
             case   3222: motherType = 1; break; //Sigma+
+            case   3012: motherType = 1; break; //H3L
+            case   3013: motherType = 1; break; //H4L
+            case   3014: motherType = 1; break; //H4L
+            case   3015: motherType = 1; break; //H5L
+            case   3017: motherType = 1; break; //H6L
             case   3006: motherType = 1; break; //He4L
             case   3007: motherType = 1; break; //He5L
+            case   3018: motherType = 1; break; //He5L
+            case   3020: motherType = 1; break; //He6L
+            case   3021: motherType = 1; break; //He6L
+            case   3023: motherType = 1; break; //He7L
+            case   3024: motherType = 1; break; //Li6L
+            case   3026: motherType = 1; break; //Li7L
+            case   3027: motherType = 1; break; //Li8L
+            case   3203: motherType = 1; break; //LLn
             case   3008: motherType = 1; break; //H4LL
             case   3009: motherType = 1; break; //H4LL
             case   3011: motherType = 1; break; //He6LL

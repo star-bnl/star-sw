@@ -249,6 +249,8 @@ class KFParticleBase :public TObject {
   static void InvertCholetsky3(float a[6]);
   static void MultQSQt( const float Q[], const float S[], float SOut[], const int kN );
 
+  void GetDistanceToVertexLine( const KFParticleBase &Vertex, float &l, float &dl) const;
+
  protected:
   /** Converts a pair of indices {i,j} of the covariance matrix to one index corresponding to the triangular form. */
   static Int_t IJ( Int_t i, Int_t j ){ 

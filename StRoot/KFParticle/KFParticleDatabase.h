@@ -63,10 +63,14 @@ class KFParticleDatabase
       case 1000010030: pdgIndex = 6; break;
       case 1000020030: pdgIndex = 7; break;
       case 1000020040: pdgIndex = 8; break;
-      case       3112: pdgIndex = 9; break;
-      case       3222: pdgIndex = 10; break;
-      case       3312: pdgIndex = 11; break;
-      case       3334: pdgIndex = 12; break;
+      case 1000020060: pdgIndex = 9; break;
+      case 1000030060: pdgIndex = 10; break;
+      case 1000030070: pdgIndex = 11; break;
+      case 1000040070: pdgIndex = 12; break;
+      case       3112: pdgIndex = 13; break;
+      case       3222: pdgIndex = 14; break;
+      case       3312: pdgIndex = 15; break;
+      case       3334: pdgIndex = 16; break;
       default:   pdgIndex = 2; break;
     }
     
@@ -90,10 +94,14 @@ class KFParticleDatabase
     pdgIndex(Vc::abs(pdg) == 1000010030) = 6;
     pdgIndex(Vc::abs(pdg) == 1000020030) = 7;
     pdgIndex(Vc::abs(pdg) == 1000020040) = 8;
-    pdgIndex(Vc::abs(pdg) ==       3112) = 9;
-    pdgIndex(Vc::abs(pdg) ==       3222) = 10;
-    pdgIndex(Vc::abs(pdg) ==       3312) = 11;
-    pdgIndex(Vc::abs(pdg) ==       3334) = 12;
+    pdgIndex(Vc::abs(pdg) == 1000020060) = 9;
+    pdgIndex(Vc::abs(pdg) == 1000030060) = 10;
+    pdgIndex(Vc::abs(pdg) == 1000030070) = 11;
+    pdgIndex(Vc::abs(pdg) == 1000040070) = 12;
+    pdgIndex(Vc::abs(pdg) ==       3112) = 13;
+    pdgIndex(Vc::abs(pdg) ==       3222) = 14;
+    pdgIndex(Vc::abs(pdg) ==       3312) = 15;
+    pdgIndex(Vc::abs(pdg) ==       3334) = 16;
     Vc::float_v mass(fMass, pdgIndex);
     return mass;
   }
@@ -161,9 +169,11 @@ class KFParticleDatabase
 
  private:
   /** Table PDG masses of particles, which can be registered by the tracking detector directly: \n
-   ** [ 0] - electron; \n [ 1] - muon; \n [ 2] - pion; \n [ 3] - kaon; \n [ 4] - proton; \n [ 5] - deutron; \n [ 6] - triton; \n [ 7] - He3; \n
-   ** [ 8] - He4; \n [ 9] - Sigma-; \n [10] - Sigma+; \n [11] - Xi; \n [12] - Omega. */
-  float fMass[13];
+   ** [ 0] - electron; \n [ 1] - muon; \n [ 2] - pion; \n [ 3] - kaon; \n [ 4] - proton; \n 
+   ** [ 5] - deutron; \n [ 6] - triton; \n [ 7] - He3; \n [ 8] - He4;
+   ** [ 9] - He6; \n [10] - Li6; \n [11] - Li7; \n [12] - Be7; \n
+   ** \n [13] - Sigma-; \n [14] - Sigma+; \n [15] - Xi; \n [16] - Omega. */
+  float fMass[17];
 
   /** Table PDG masses of short-lived particles, which are used for reconstruction of the decay trees: \n
    ** [ 0] - K0s; \n [ 1] - Lambda; \n [ 2] - Xi; \n [ 3] - gamma; \n [ 4] - Omega; \n [ 5] - H3Lambda; \n [ 6] - He4Lambda; \n [ 7] - He5Lambda. */

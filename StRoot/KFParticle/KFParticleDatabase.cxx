@@ -52,19 +52,23 @@ KFParticleDatabase::KFParticleDatabase():
   /** The default constructor. Initialises masses and widths of the peaks. 
    ** Be aware, that widths of the peaks are experiment specific.
    **/
-  fMass[0] = 0.000510999;
-  fMass[1] = 0.105658;
-  fMass[2] = 0.13957;
-  fMass[3] = 0.493667;
-  fMass[4] = 0.9382723;
-  fMass[5] = 1.876124;
-  fMass[6] = 2.809432;
-  fMass[7] = 2.809413;
-  fMass[8] = 3.728400;
-  fMass[9] = 1.197449;
-  fMass[10] = 1.18937;
-  fMass[11] = 1.32171;
-  fMass[12] = 1.67245;
+  fMass[ 0] = 0.000510999;
+  fMass[ 1] = 0.105658;
+  fMass[ 2] = 0.13957;
+  fMass[ 3] = 0.493667;
+  fMass[ 4] = 0.9382723;
+  fMass[ 5] = 1.876124;
+  fMass[ 6] = 2.809432;
+  fMass[ 7] = 2.809413;
+  fMass[ 8] = 3.728400;
+  fMass[ 9] = 5.6055375;
+  fMass[10] = 5.6015181;
+  fMass[11] = 6.5338336;
+  fMass[12] = 6.5341844;
+  fMass[13] = 1.197449;
+  fMass[14] = 1.18937;
+  fMass[15] = 1.32171;
+  fMass[16] = 1.67245;
   
   fMassSecPDG[0] = 0.497614; //K0
   fMassSecPDG[1] = 1.115683; //Lambda

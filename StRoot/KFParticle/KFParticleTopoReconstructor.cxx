@@ -435,7 +435,8 @@ void KFParticleTopoReconstructor::SortTracks()
    ** 6) primary positive at the last hit position; \n
    ** 7) primary negative at the last hit position. \n
    ** In each group they are sorted according to PDG: electrons, muons, pions, 
-   ** tracks without PID, kaons, protons, deuterons, tritons, He3, He4.
+   ** tracks without PID, kaons, protons, deuterons, tritons, He3, He4,
+   ** He6, Li6, Li7, Be7.
    **/
 #ifdef USE_TIMERS
   timer.Start();
@@ -646,17 +647,9 @@ bool UseParticleInCompetition(int PDG)
              (abs(PDG) == 3122) ||   //Lambda
              (abs(PDG) == 3312) ||   //Xi
              (abs(PDG) == 3334) ||   //Omega
-             (abs(PDG) == 3003) ||   //LambdaN
              (abs(PDG) == 3103) ||   //LambdaNN
-             (abs(PDG) == 3004) ||   //H3L
-             (abs(PDG) == 3005) ||   //H4L
-             (abs(PDG) == 3006) ||   //He4L
-             (abs(PDG) == 3007) ||   //He5L
              (abs(PDG) == 3203) ||   //LLn
-             (abs(PDG) == 3008) ||   //H4LL
-             (abs(PDG) == 3009) ||   //H4LL
-             (abs(PDG) == 3010) ||   //H5LL
-             (abs(PDG) == 3011);     //He6LL
+             (abs(PDG) >= 3003 && abs(PDG) <= 3027); //hypernuclei
   return use;
 }
 
@@ -698,7 +691,7 @@ void KFParticleTopoReconstructor::SelectParticleCandidates()
     if(isSecondary)
       deleteCandidate[iParticle] = true;
   }
-
+#if 0
 //   for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
 //   {
 //     if(abs(fParticles[iParticle].GetPDG()) == 431 || abs(fParticles[iParticle].GetPDG()) == 4122)
@@ -737,7 +730,7 @@ void KFParticleTopoReconstructor::SelectParticleCandidates()
 //     }
 //   }
   
-#if 0
+
   //clean K0 and Lambda
   for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
   {

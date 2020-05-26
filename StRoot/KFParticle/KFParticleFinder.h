@@ -424,9 +424,13 @@ class KFParticleFinder
   std::vector<KFParticle> fLcPlusP2Pi; ///<Vector with temporary Lambda_c->p pi+pi- candidates.
   std::vector<KFParticle> fLcMinusP2Pi;///<Vector with temporary Lambda_c_bar->p-pi+pi- candidates.
   
-  //vectors with temporary particles for H0
+  //vectors with temporary particles for H0 and hypernuclei
   std::vector<KFParticle> fLPi;      ///< Temporary Lambda pi+ combinations
   std::vector<int> fLPiPIndex;       ///< Index of the proton in Labmda for Lambda pi+ combinations
+  std::vector<KFParticle> fDPi;      ///< Temporary d pi- combinations
+  std::vector<KFParticle> fDPiBar;   ///< Temporary d- pi+ combinations
+  std::vector<KFParticle> fTPi;      ///< Temporary t pi- combinations
+  std::vector<KFParticle> fTPiBar;   ///< Temporary t- pi+ combinations
   std::vector<KFParticle> fHe3Pi;    ///< Temporary He3+ pi- combinations
   std::vector<KFParticle> fHe3PiBar; ///< Temporary He3- pi+ combinations
   std::vector<KFParticle> fHe4Pi;    ///< Temporary He4+ pi- combinations
