@@ -116,7 +116,9 @@ public:
 
       // functions from GBASE
    virtual  void  Ggclos();
+#if 0
    virtual  void  Gprint(const char *name);
+#endif
       // functions from GCONS
    virtual  void  Gsmate(Int_t imat, const char *name, Float_t a, Float_t z,
                          Float_t dens, Float_t radl, Float_t absl);

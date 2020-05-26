@@ -1160,7 +1160,7 @@ public:
   virtual void Init();
   virtual void ProcessEvent();
   virtual Bool_t ProcessRun(Int_t nevent);
-  virtual void AddParticlesToPdgDataBase() const;
+  virtual void AddParticlesToPdgDataBase();
   virtual void SetCollectTracks(Bool_t) {}
   Bool_t IsCollectTracks() const {return kFALSE;}
 
