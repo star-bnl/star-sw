@@ -273,8 +273,13 @@ void StKFParticleInterface::CollectPIDHistograms()
   dirs[1]->cd();
   
   int pdgTrackHisto[NTrackHistoFolders] = { 11, -11, 13, -13, 211, -211, 321, -321, 2212, -2212, 
-                                            1000010020, -1000010020, 1000010030, -1000010030, 1000020030, -1000020030, 1000020040, -1000020040 };
-  TString trackFolderName[NTrackHistoFolders] = {"e-", "e+", "mu-", "mu+", "pi+", "pi-", "K+", "K-", "p", "p-", "d", "d-", "t", "t-", "He3", "He3-", "He4", "He4-"};
+                                            1000010020, -1000010020, 1000010030, -1000010030, 
+                                            1000020030, -1000020030, 1000020040, -1000020040,
+                                            1000020060, -1000020060, 1000030060, -1000030060,
+                                            1000030070, -1000030070, 1000040070, -1000040070 };
+  TString trackFolderName[NTrackHistoFolders] = {"e-", "e+", "mu-", "mu+", "pi+", "pi-", "K+", "K-", "p", "p-", 
+                                                 "d", "d-", "t", "t-", "He3", "He3-", "He4", "He4-", 
+                                                 "He6", "He6-", "Li6", "Li6-", "Li7", "Li7-", "Be7", "Be7-"};
                     
   for(int iTrackHisto=0; iTrackHisto<NTrackHistoFolders; iTrackHisto++)
   {
@@ -437,8 +442,7 @@ std::vector<int> StKFParticleInterface::GetPID(double m2, double p, int q, doubl
   
   bool checkKTof = false;
   if(fCleanKaonsWitTof)
-//     checkKTof = (p > 0.5) && (p < 2.);
-    checkKTof = (p > 0.35);
+    checkKTof = (p > 0.5) && (p < 2.);
   bool checkKHasTof = 0;
   for(unsigned int iTofPDG=0; iTofPDG<ToFPDG.size(); iTofPDG++)
     if(abs(ToFPDG[iTofPDG]) == 321)
@@ -448,22 +452,6 @@ std::vector<int> StKFParticleInterface::GetPID(double m2, double p, int q, doubl
   if(dEdXPull[1] < 2.f && ((checkKTof && checkKHasTof) || !checkKTof) ) dEdXPDG.push_back(321*q);
   if(dEdXPull[2] < nSigmaCut)                                           dEdXPDG.push_back(2212*q); 
   
-//   bool checkPTof = p > 0.5;
-//   bool checkPHasTof = 0;
-//   for(unsigned int iTofPDG=0; iTofPDG<ToFPDG.size(); iTofPDG++)
-//     if(abs(ToFPDG[iTofPDG]) == 2212)
-//       checkPHasTof = 1;
-//   
-//   if(q>0)
-//   {
-//     if(dEdXPull[2] < nSigmaCut)                                           
-//       dEdXPDG.push_back(2212*q); 
-//   }
-//   if(q<0)
-//   {
-//     if(dEdXPull[2] < nSigmaCut && ((checkPTof && checkPHasTof) || !checkPTof) ) 
-//       dEdXPDG.push_back(2212*q);
-//   }
       
   vector<int> totalPDG;
   if(!isTofm2)
@@ -495,33 +483,33 @@ std::vector<int> StKFParticleInterface::GetPID(double m2, double p, int q, doubl
         if( m2 > 6.8 && m2<9.1 )
           totalPDG.push_back(1000010030*q);
     }
-//     else
-//     {
-//       //d
-//       if(p<0.7)
-//       {
-//         double lowerParameters[4] = {9.34099e+00, -1.39588e+00,  6.75213e-03,  4.48929e-02};
-//         double lowerDBound = lowerParameters[0]*TMath::Power(p, lowerParameters[1] + lowerParameters[2]*log(p) + lowerParameters[3]*log(p)*log(p));
-// 
-//         double upperParameters[4] = {1.54857e+01, -1.58706e+00, -2.43286e-02,  8.86096e-02};
-//         double upperDBound = upperParameters[0]*TMath::Power(p, upperParameters[1] + upperParameters[2]*log(p) + upperParameters[3]*log(p)*log(p));
-//         
-//         if(dEdX > lowerDBound && dEdX < upperDBound)
-//           totalPDG.push_back(1000010020*q); 
-//       }
-//       //t
-//       if(p<1.0)
-//       {
-//         double lowerParameters[4] = {1.65856e+01, -1.70116e+00, -2.53917e-01,  7.82259e-03};
-//         double lowerTBound = lowerParameters[0]*TMath::Power(p, lowerParameters[1] + lowerParameters[2]*log(p) + lowerParameters[3]*log(p)*log(p));
-// 
-//         double upperParameters[4] = {2.51004e+01, -1.49819e+00, -1.51865e-01,  2.55032e-02};
-//         double upperTBound = upperParameters[0]*TMath::Power(p, upperParameters[1] + upperParameters[2]*log(p) + upperParameters[3]*log(p)*log(p));
-//         
-//         if(dEdX > lowerTBound && dEdX < upperTBound)
-//           totalPDG.push_back(1000010030*q); 
-//       }
-//     }
+    else
+    {
+      //d
+      if(p<0.7)
+      {
+        double lowerParameters[4] = {9.34099e+00, -1.39588e+00,  6.75213e-03,  4.48929e-02};
+        double lowerDBound = lowerParameters[0]*TMath::Power(p, lowerParameters[1] + lowerParameters[2]*log(p) + lowerParameters[3]*log(p)*log(p));
+
+        double upperParameters[4] = {1.54857e+01, -1.58706e+00, -2.43286e-02,  8.86096e-02};
+        double upperDBound = upperParameters[0]*TMath::Power(p, upperParameters[1] + upperParameters[2]*log(p) + upperParameters[3]*log(p)*log(p));
+        
+        if(dEdX > lowerDBound && dEdX < upperDBound)
+          totalPDG.push_back(1000010020*q); 
+      }
+      //t
+      if(p<1.0)
+      {
+        double lowerParameters[4] = {1.65856e+01, -1.70116e+00, -2.53917e-01,  7.82259e-03};
+        double lowerTBound = lowerParameters[0]*TMath::Power(p, lowerParameters[1] + lowerParameters[2]*log(p) + lowerParameters[3]*log(p)*log(p));
+
+        double upperParameters[4] = {2.51004e+01, -1.49819e+00, -1.51865e-01,  2.55032e-02};
+        double upperTBound = upperParameters[0]*TMath::Power(p, upperParameters[1] + upperParameters[2]*log(p) + upperParameters[3]*log(p)*log(p));
+        
+        if(dEdX > lowerTBound && dEdX < upperTBound)
+          totalPDG.push_back(1000010030*q); 
+      }
+    }
    
     //He3   
     if(p<3.0)
@@ -547,7 +535,7 @@ std::vector<int> StKFParticleInterface::GetPID(double m2, double p, int q, doubl
         }
       }
     }
-    else if(p>=3.0 && dEdX > 12. && dEdX < 18.)
+    else if(p>=3.0 && dEdX > 11. && dEdX < 18.)
     {
       if(dEdXPull[5] < nSigmaCut) 
         if( !isTofm2 || (isTofm2 && (m2>1.) && (m2<3.) ) )
@@ -576,13 +564,95 @@ std::vector<int> StKFParticleInterface::GetPID(double m2, double p, int q, doubl
         }
       }
     }
-    else if(p>=4.0 && dEdX > 12. && dEdX < 18.)
+    else if(p>=4.0 && dEdX > 11. && dEdX < 18.)
     {
       if(dEdXPull[6] < nSigmaCut) 
         if( !isTofm2 || (isTofm2 && (m2>3) && (m2<4.2) ) )
           totalPDG.push_back(1000020040*q);
     } 
+// }
   }
+  
+// if(isTofm2)
+// {
+    //He6
+//     if(p<3)
+//     {
+//       double loweParameters[4] = {4.94182e+01,-1.11587e+00, 6.92555e-01,-7.76954e-01};
+//       double lowerHe6Bound = loweParameters[0]*TMath::Power(p, loweParameters[1] + loweParameters[2]*log(p) + loweParameters[3]*log(p)*log(p));
+// 
+//       double upperParameters[4] = {9.71889e+01,-2.83338e+00, 2.59383e+00,-1.06951e+00};
+//       double upperHe6Bound = upperParameters[0]*TMath::Power(p, upperParameters[1] + upperParameters[2]*log(p) + upperParameters[3]*log(p)*log(p));
+//       
+//       if(dEdX > lowerHe6Bound && dEdX < upperHe6Bound)
+//       {
+//         if(p<2.)
+//         {
+//           if( !isTofm2 || (isTofm2 && m2>6.5) )
+//             totalPDG.push_back(1000010020*q);
+//         }
+//         else
+//         {
+//           if(isTofm2 && m2>6.5)
+//             totalPDG.push_back(1000010020*q);
+//         }
+//       }
+//     }
+//     else if(p>=3.0)// && dEdX > 11. && dEdX < 18.)
+//       if( isTofm2 && m2>6.5 )
+//         totalPDG.push_back(1000010020*q);
+    if(p<3)
+    {
+      double loweParameters[4] = {4.94182e+01,-1.11587e+00, 6.92555e-01,-7.76954e-01};
+      double lowerHe6Bound = loweParameters[0]*TMath::Power(p, loweParameters[1] + loweParameters[2]*log(p) + loweParameters[3]*log(p)*log(p));
+
+      double upperParameters[4] = {9.71889e+01,-2.83338e+00, 2.59383e+00,-1.06951e+00};
+      double upperHe6Bound = upperParameters[0]*TMath::Power(p, upperParameters[1] + upperParameters[2]*log(p) + upperParameters[3]*log(p)*log(p));
+      
+      if(dEdX > lowerHe6Bound && dEdX < upperHe6Bound)
+      {
+        if(p<1. || p>2.3)
+        {
+          if(isTofm2 && m2>6.5)
+            totalPDG.push_back(1000020060*q);
+        }
+        else
+        {
+          if(!isTofm2 || (isTofm2 && m2>6.5))
+            totalPDG.push_back(1000020060*q);
+        }
+      }
+    }
+    else if(p>=3.0 && dEdX > 11.)// && dEdX < 18.)
+      if( (isTofm2 && m2>6.5 ) )
+        totalPDG.push_back(1000020060*q);
+
+    //Li6
+    if(p<4)
+    {
+      double loweParameters[4] = {6.41054e+01,-9.78136e-01, 1.56090e-01, 4.28567e-02};
+      double lowerLi6Bound = loweParameters[0]*TMath::Power(p, loweParameters[1] + loweParameters[2]*log(p) + loweParameters[3]*log(p)*log(p));
+
+      double upperParameters[4] = {1.04312e+02,-1.41641e+00, 5.42703e-01,-4.36049e-02};
+      double upperLi6Bound = upperParameters[0]*TMath::Power(p, upperParameters[1] + upperParameters[2]*log(p) + upperParameters[3]*log(p)*log(p));
+      
+      if(dEdX > lowerLi6Bound && dEdX < upperLi6Bound)
+      {
+        if(p<1.3)
+        {
+          if( isTofm2 && (m2>2.8) && (m2<4.2) )
+            totalPDG.push_back(1000030060*q);
+        }
+        else
+        {
+          if( !isTofm2 || (isTofm2 && (m2>2.8) && (m2<4.2) ) )
+            totalPDG.push_back(1000030060*q);
+        }
+      }
+  }
+    else if(p>=4.0 && dEdX > 25. && dEdX < 37.)
+      if( !isTofm2 || (isTofm2 && (m2>2.8) && (m2<4.2)) )
+        totalPDG.push_back(1000030060*q);
     
   if(totalPDG.size() == 0)
     totalPDG.push_back(-1);
@@ -602,24 +672,68 @@ void StKFParticleInterface::AddTrackToParticleList(const KFPTrack& track, int nH
     
     KFPTrack trackPDG = track;
     
-    if(abs(pdg) == 1000010020 || abs(pdg) == 1000010030)
+    if(abs(pdg) == 1000020060 || abs(pdg) == 1000030060)
     {
-      float r = sqrt(trackPDG.GetX()*trackPDG.GetX() + trackPDG.GetY()*trackPDG.GetY());
+#if 0
       float dx = (trackPDG.GetX() - pv.X());
       float dy = (trackPDG.GetY() - pv.Y());
       float dz = (trackPDG.GetZ() - pv.Z());
+      float r = sqrt(trackPDG.GetX()*trackPDG.GetX() + trackPDG.GetY()*trackPDG.GetY());
       float l = sqrt(dx*dx + dy*dy + dz*dz);
-      if(!(r<2. && l<2.)) continue;
+//       if(!(r<2. && l<2.)) continue;
+#endif      
+      if(pdg == 1000020060)
+      {
+        trackPDG.SetCharge( trackPDG.Charge()*2.f );
+        trackPDG.SetPx( trackPDG.GetPx()*2.f );
+        trackPDG.SetPy( trackPDG.GetPy()*2.f );
+        trackPDG.SetPz( trackPDG.GetPz()*2.f );
+
+        const int index2[9] = { 6,7,8, 10,11,12, 15,16,17 };
+        for(int iIndex=0; iIndex<9; iIndex++)
+        {
+          const int iC = index2[iIndex];
+          trackPDG.SetCovariance( iC, trackPDG.GetCovariance(iC)*2.f );
+        }
+        const int index4[6] = { 9, 13,14, 18,19,20 };
+        for(int iIndex=0; iIndex<6; iIndex++)
+        {
+          const int iC = index4[iIndex];
+          trackPDG.SetCovariance( iC, trackPDG.GetCovariance(iC)*4.f );
+        }
+      }
+      if(pdg == 1000030060)
+      {
+        trackPDG.SetCharge( trackPDG.Charge()*3.f );
+        trackPDG.SetPx( trackPDG.GetPx()*3.f );
+        trackPDG.SetPy( trackPDG.GetPy()*3.f );
+        trackPDG.SetPz( trackPDG.GetPz()*3.f );
+
+        const int index2[9] = { 6,7,8, 10,11,12, 15,16,17 };
+        for(int iIndex=0; iIndex<9; iIndex++)
+        {
+          const int iC = index2[iIndex];
+          trackPDG.SetCovariance( iC, trackPDG.GetCovariance(iC)*3.f );
+        }
+        const int index4[6] = { 9, 13,14, 18,19,20 };
+        for(int iIndex=0; iIndex<6; iIndex++)
+        {
+          const int iC = index4[iIndex];
+          trackPDG.SetCovariance( iC, trackPDG.GetCovariance(iC)*9.f );
+        }
+      }
     }
     
     if(abs(pdg) == 1000020030 || abs(pdg) == 1000020040)
     {
+#if 0
       float r = sqrt(trackPDG.GetX()*trackPDG.GetX() + trackPDG.GetY()*trackPDG.GetY());
       float dx = (trackPDG.GetX() - pv.X());
       float dy = (trackPDG.GetY() - pv.Y());
       float dz = (trackPDG.GetZ() - pv.Z());
       float l = sqrt(dx*dx + dy*dy + dz*dz);
-      if(!(r<2. && l<2.)) continue;
+      //      if(!(r<2. && l<2.)) continue;
+#endif
       trackPDG.SetCharge( trackPDG.Charge()*2.f );
       trackPDG.SetPx( trackPDG.GetPx()*2.f );
       trackPDG.SetPy( trackPDG.GetPy()*2.f );
@@ -645,11 +759,16 @@ void StKFParticleInterface::AddTrackToParticleList(const KFPTrack& track, int nH
     particle.Chi2() = chi2;
     particle.NDF()  = NDF;
     float chiPrim = particle.GetDeviationFromVertex(pv);
-    if(chiPrim < fChiPrimaryCut)
+    if(chiPrim < fChiPrimaryCut && abs(pdg)<1000 )
     {
       if(fTriggerMode) continue;
       primaryTrackList.push_back(nPartSaved);
     }
+//     if(chiPrim < 4 && pdg==2212 )
+//     if(chiPrim < 4 && abs(pdg)>1000 )
+//     {
+//       primaryTrackList.push_back(nPartSaved);
+//     }
     if(fTriggerMode && chiPrim > fChiPrimaryMaxCut) continue;
     if(chiPrim > fChiPrimaryMaxCut) continue;
 //     if( chiPrim > 1.e6 ) continue;
@@ -888,7 +1007,7 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
     
     double m2tof = -1.e6;
     bool isTofm2 = false;
-    if(gTrack->bTofPidTraitsIndex() > 0)
+    if(gTrack->bTofPidTraitsIndex() >= 0)
     {
       const StPicoBTofPidTraits* btofPid = picoDst->btofPidTraits(gTrack->bTofPidTraitsIndex());
       double betaTof2 = btofPid->btofBeta() * btofPid->btofBeta();
@@ -913,7 +1032,7 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
     }
     double m2Etof = -1.e6;
     bool isETofm2 = false;
-    if(gTrack->eTofPidTraitsIndex() > 0)
+    if(gTrack->eTofPidTraitsIndex() >= 0)
     {
       const StPicoETofPidTraits* etofPid = picoDst->etofPidTraits(gTrack->eTofPidTraitsIndex());
       double betaTof2 = etofPid->beta() * etofPid->beta();

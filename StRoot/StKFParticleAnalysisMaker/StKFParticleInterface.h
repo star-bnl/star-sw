@@ -154,7 +154,7 @@ class StKFParticleInterface: public TObject
   // 14 - EToF PID
   TH2F* fTrackHistograms2D[15];
   //PID histograms
-  static const int NTrackHistoFolders = 18;
+  static const int NTrackHistoFolders = 26;
   TH2F* fHistodEdXTracks[NTrackHistoFolders];
   TH2F* fHistodEdXwithToFTracks[NTrackHistoFolders];
   TH2F* fHistoTofPIDTracks[NTrackHistoFolders];

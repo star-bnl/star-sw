@@ -283,7 +283,7 @@ void StKFParticleAnalysisMaker::BookVertexPlots()
   for(UInt_t iDecay=0; iDecay<fDecays.size(); iDecay++)
     fStKFParticleInterface->AddDecayToReconstructionList( fDecays[iDecay] );
   bool storeMCHistograms = false;
-  //  if(!fIsPicoAnalysis && fProcessSignal) storeMCHistograms = true;
+  // if(!fIsPicoAnalysis && fProcessSignal) storeMCHistograms = true;
   if(fProcessSignal) storeMCHistograms = true;
   fStKFParticlePerformanceInterface = new StKFParticlePerformanceInterface(fStKFParticleInterface->GetTopoReconstructor(), storeMCHistograms);
   dirs[0]->cd();
@@ -422,24 +422,14 @@ Int_t StKFParticleAnalysisMaker::Make()
       }      
     }
     
+    int nHe5L = 0;
+    int nHe4L = 0;
     //clean H3L, H4L, Ln, Lnn
     for(int iParticle=0; iParticle<fStKFParticlePerformanceInterface->GetNReconstructedParticles(); iParticle++)
-    {
+      {
       KFParticle particle = fStKFParticleInterface->GetParticles()[iParticle];
       if( abs(particle.GetPDG())==3003 || abs(particle.GetPDG())==3103 || abs(particle.GetPDG())==3004 || abs(particle.GetPDG())==3005)
       {
-//         if(particle.GetP() < 1.)
-//         {
-//           fStKFParticleInterface->RemoveParticle(iParticle);
-//           continue;
-//         }
-
-//         if(particle.GetPhi() > -0.8 && particle.GetPhi() < -0.4)
-//         {
-//           fStKFParticleInterface->RemoveParticle(iParticle);
-//           continue;
-//         }
-        
         for(int iD=0; iD<particle.NDaughters(); iD++)
         {
           const int daughterId = particle.DaughterIds()[iD];
@@ -455,7 +445,124 @@ Int_t StKFParticleAnalysisMaker::Make()
         if(r > 50)// || (r>2.5 && r<3.6) || (r>7.5&&r<8.8))
           fStKFParticleInterface->RemoveParticle(iParticle);
       }
+      
+      //clean He4L and He5L
+      if( (abs(particle.GetPDG()) == 3006) || 
+          (abs(particle.GetPDG()) == 3007) ||
+          (abs(particle.GetPDG()) == 3027) ) 
+      {
+        const int iFragment1 = particle.DaughterIds()[1];
+        const KFParticle fragment1 = fStKFParticleInterface->GetParticles()[iFragment1];
+        const int iFragment2 = particle.DaughterIds()[2];
+        const KFParticle fragment2 = fStKFParticleInterface->GetParticles()[iFragment2];
+        const KFParticle* vDaughters[2] = {&fragment1, &fragment2};
+        KFParticle resonance;
+        resonance.Construct(vDaughters, 2, 0);
+        float massResonance, massResonanceError;
+        resonance.GetMass(massResonance, massResonanceError);
+        if( (abs(particle.GetPDG()) == 3006) && massResonance > 3.777)
+//         if( (abs(particle.GetPDG()) == 3006) && massResonance > 3.765)
+          fStKFParticleInterface->RemoveParticle(iParticle);
+        if( (abs(particle.GetPDG()) == 3007) && massResonance > 4.675)
+          fStKFParticleInterface->RemoveParticle(iParticle);
+        if( (abs(particle.GetPDG()) == 3027) && fabs(massResonance - 7.4548501) > 0.008)
+          fStKFParticleInterface->RemoveParticle(iParticle);
+      }
+      
+#if 0
+      if( (abs(particle.GetPDG()) == 3006) || 
+          (abs(particle.GetPDG()) == 3007) ||
+          (abs(particle.GetPDG()) == 3012) ||
+          (abs(particle.GetPDG()) == 3013) ||
+          (abs(particle.GetPDG()) == 3014) ||
+          (abs(particle.GetPDG()) == 3015) ||
+          (abs(particle.GetPDG()) == 3017) ||
+          (abs(particle.GetPDG()) == 3018) ||
+          (abs(particle.GetPDG()) == 3020) ||
+          (abs(particle.GetPDG()) == 3021) ||
+          (abs(particle.GetPDG()) == 3023) ||
+          (abs(particle.GetPDG()) == 3024) ||
+          (abs(particle.GetPDG()) == 3026) ||
+          (abs(particle.GetPDG()) == 3027) )
+      {
+        //clean high momentum pions
+        for(int iD=0; iD<particle.NDaughters(); iD++)
+        {
+          const int daughterId = particle.DaughterIds()[iD];
+          const KFParticle daughter = fStKFParticleInterface->GetParticles()[daughterId];
+          if(abs(daughter.GetPDG())==211 && daughter.GetP() > 0.7)
+            fStKFParticleInterface->RemoveParticle(iParticle);
+        }
+        //clean gamma and clones
+        for(int iD0=0; iD0<particle.NDaughters(); iD0++)
+        {
+          for(int iD1=0; iD1<iD0; iD1++)
+          {
+            int index0 = particle.DaughterIds()[iD0];
+            int index1 = particle.DaughterIds()[iD1];
+            KFParticle d0 = fStKFParticleInterface->GetParticles()[index0];
+            KFParticle d1 = fStKFParticleInterface->GetParticles()[index1];
+            float vertex[3] = {particle.GetX(), particle.GetY(), particle.GetZ()};
+            d0.TransportToPoint(vertex);
+            d1.TransportToPoint(vertex);
+            float qtAlpha[2];
+            KFParticle::GetArmenterosPodolanski(d0, d1, qtAlpha );
+            if(qtAlpha[0] < 0.005)
+              fStKFParticleInterface->RemoveParticle(iParticle);
+          }
+        }
+
+        if(particle.NDaughters() == 3) {
+          const KFParticle d[3] = {
+            fStKFParticleInterface->GetParticles()[particle.DaughterIds()[0]],
+            fStKFParticleInterface->GetParticles()[particle.DaughterIds()[1]],
+            fStKFParticleInterface->GetParticles()[particle.DaughterIds()[2]]
+          };
+          KFParticle v[3];
+          int index[3][2] = { {1,2}, {0,2}, {0,1} }; 
+          
+          bool ok = true;
+          for(int iD=0; iD<3; iD++){
+            
+            const KFParticle* vd[2] = {&d[index[iD][0]], &d[index[iD][1]]};
+            v[iD].Construct(vd, 2);
+
+            float q1q2 = vd[0]->Px()*vd[1]->Px() + vd[0]->Py()*vd[1]->Py() + vd[0]->Pz()*vd[1]->Pz();
+            float q12  = vd[0]->Px()*vd[0]->Px() + vd[0]->Py()*vd[0]->Py() + vd[0]->Pz()*vd[0]->Pz();
+            float q22  = vd[1]->Px()*vd[1]->Px() + vd[1]->Py()*vd[1]->Py() + vd[1]->Pz()*vd[1]->Pz();
+            ok &= q1q2 > -q12;
+            ok &= q1q2 > -q22;
+            
+
+            float p1p2 = d[iD].Px()*v[iD].Px() + d[iD].Py()*v[iD].Py() + d[iD].Pz()*v[iD].Pz();
+            float p12  = d[iD].Px()*d[iD].Px() + d[iD].Py()*d[iD].Py() + d[iD].Pz()*d[iD].Pz();
+            float p22  = v[iD].Px()*v[iD].Px() + v[iD].Py()*v[iD].Py() + v[iD].Pz()*v[iD].Pz();
+            ok &= p1p2 > -p12;
+            ok &= p1p2 > -p22;
+            
+            v[iD] += d[iD];
+            ok &= v[iD].Chi2()/float(v[iD].NDF()) < 3;
+            
+            float m=0.f, dm=1e6f;
+            ok &= (v[iD].GetMass(m, dm) == 0);
+            
+            float l=0.f, dl=1e6f;
+            v[iD].GetDistanceToVertexLine(particle, l, dl);
+            ok &= l/dl < 3.f;
+          }
+          
+          if(!ok)
+            fStKFParticleInterface->RemoveParticle(iParticle);
+        }
+      }
+#endif
+      
+      if(particle.GetPDG() == 3006) nHe4L++;
+      if(particle.GetPDG() == 3007) nHe5L++;
     }
+
+//     if(nHe5L>10 || nHe4L>10) return kStOK;
+    
     
     int eventId = -1;
     int runId = -1;
