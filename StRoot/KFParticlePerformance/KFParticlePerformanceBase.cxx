@@ -1030,10 +1030,10 @@ bool KFParticlePerformanceBase::IsCollect3DHistogram(int iParticle) const
          abs(fParteff.partPDG[iParticle]) == 3122 ||
          abs(fParteff.partPDG[iParticle]) == 3312 ||
          abs(fParteff.partPDG[iParticle]) == 3334 ||
-         abs(fParteff.partPDG[iParticle]) == 3003 ||
+         (abs(fParteff.partPDG[iParticle]) >= 3000 && 
+          abs(fParteff.partPDG[iParticle]) <= 3027) ||
          abs(fParteff.partPDG[iParticle]) == 3103 ||
-         abs(fParteff.partPDG[iParticle]) == 3004 ||
-         abs(fParteff.partPDG[iParticle]) == 3005 ||
+         abs(fParteff.partPDG[iParticle]) == 3203 ||
 #ifdef CBM
          abs(fParteff.partPDG[iParticle]) == 7003112 ||
          abs(fParteff.partPDG[iParticle]) == 7003222 ||
