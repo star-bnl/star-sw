@@ -222,7 +222,7 @@ Int_t StKFParticleAnalysisMaker::Init()
       fFlowMap[GetUniqueEventId(fFlowRunId, fFlowEventId)] = iEntry;
     }
   }
-  return kStOK;
+  return StMaker::Init();
 }
 //________________________________________________________________________________
 Int_t StKFParticleAnalysisMaker::InitRun(Int_t runumber) 
