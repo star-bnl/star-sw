@@ -551,14 +551,9 @@ Int_t StBFChain::Instantiate()
 	  mk->SetAttr("NoVMCAlignment",1);
 	}
 	if (GetOption("Embedding")) mk->SetAttr("Embedding",1);
-	if (fRunG > 0) {
-	  mk->SetAttr("RunG",fRunG);
-	} else {
-	  TString CintF(SAttr("GeneratorFile"));
-	  if (CintF != "") {
-	    mk->SetAttr("GeneratorFile",CintF.Data());
-	  }
-	}
+	if (fRunG > 0) mk->SetAttr("RunG",fRunG);
+	TString CintF(SAttr("GeneratorFile"));
+	if (CintF != "") mk->SetAttr("GeneratorFile",CintF.Data());
       }
     }
     // ---

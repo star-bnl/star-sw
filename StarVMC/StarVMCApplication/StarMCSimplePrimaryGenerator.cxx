@@ -7,6 +7,7 @@
 #include "TRandom.h"
 #include "TSystem.h"
 #include "StDetectorDbMaker/St_vertexSeedC.h"
+#include "StDetectorDbMaker/St_beamInfoC.h"
 #include "StMessMgr.h" 
 ClassImp(StarMCSimplePrimaryGenerator);
 Double_t StarMCSimplePrimaryGenerator::fTemperature = 1; // GeV/c
@@ -68,7 +69,19 @@ void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id,
   } else if (fOption.Contains("mt",TString::kIgnoreCase)) {
     LOG_INFO << "Use dN/dmT = exp(-mT/T) pT generation with T = " << Temperature() << " GeV/c" << endm;
   }
-  LOG_INFO << fEta_min  << " < eta < " << fEta_max  << endm;
+  if ( fOption.Contains("y",TString::kIgnoreCase)) {
+    if ( St_beamInfoC::instance()->IsFixedTarget()) {
+      Double_t KinE = St_beamInfoC::instance()->getYellowEnergy(); // per nucleon
+      const double kProtonMass = 0.938272321;    // Proton mass in GeV
+      Double_t E = KinE + kProtonMass;
+      Double_t pZ = -TMath::Sqrt(E*E - kProtonMass*kProtonMass);
+      fEta_min = 0.5*TMath::Log((E + pZ)/(E - pZ)) - 0.1;
+      fEta_max = 0.1;
+    }
+    LOG_INFO << fEta_min  << " < rapidity < " << fEta_max  << endm;
+  } else {
+    LOG_INFO << fEta_min  << " < eta < " << fEta_max  << endm;
+  }
   LOG_INFO << fPhi_min<< " < phi < " << fPhi_max<< endm;
   LOG_INFO << fZ_min  << " < zVer< " << fZ_max  << endm;
   
@@ -145,7 +158,12 @@ void StarMCSimplePrimaryGenerator::GeneratePrimary() {
     // Particle momentum
     px = pT*TMath::Cos(phi); 
     py = pT*TMath::Sin(phi);
-    pz = pT*TMath::SinH(eta);
+    if (fOption.Contains("y",TString::kIgnoreCase)) {
+      Double_t mT = TMath::Sqrt(pT*pT + mass*mass);
+      pz = mT*TMath::SinH(eta);
+    } else {
+      pz = pT*TMath::SinH(eta);
+    }
   }
   // Double_t kinEnergy = 0.050;  
   Double_t e  = TMath::Sqrt(mass*mass + px*px +py*py + pz*pz);

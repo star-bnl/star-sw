@@ -143,6 +143,14 @@ void KFTopoPerformance::GetMCParticles()
   for(unsigned int iMC=0; iMC < vMCTracks.size(); iMC++)
   {
     KFMCTrack &mtra = vMCTracks[iMC];
+    if(mtra.PDG()==1010010030)
+      mtra.SetPDG(3004);
+    if(mtra.PDG()==-1010010030)
+      mtra.SetPDG(-3004);
+    if(mtra.PDG()==1010010040)
+      mtra.SetPDG(3005);
+    if(mtra.PDG()==-1010010040)
+      mtra.SetPDG(-3005);
     KFMCParticle part;
     part.SetMCTrackID( iMC );
     part.SetMotherId ( mtra.MotherId() );
@@ -513,6 +521,10 @@ void KFTopoPerformance::CheckMCParticleIsReconstructable(KFMCParticle &part)
        abs(part.GetPDG()) == 1000010030 ||
        abs(part.GetPDG()) == 1000020030 ||
        abs(part.GetPDG()) == 1000020040 ||
+       abs(part.GetPDG()) == 1000020060 ||
+       abs(part.GetPDG()) == 1000030060 ||
+       abs(part.GetPDG()) == 1000030070 ||
+       abs(part.GetPDG()) == 1000040070 ||
        ( (part.GetPDG() == 22) && (vMCTracks[part.GetMCTrackID()].IsReconstructed()) ) )
   {
     int iMCTrack = part.GetMCTrackID();
@@ -576,9 +588,13 @@ void KFTopoPerformance::CheckMCParticleIsReconstructable(KFMCParticle &part)
         if( part.GetDaughterIds().size() != nDaughters ) return;
         vector<int> pdg(nDaughters);
 
-        for(unsigned int iD=0; iD<nDaughters; iD++)
+        std::cout << part.GetPDG() << " :   ";
+        for(unsigned int iD=0; iD<nDaughters; iD++){
           pdg[iD] = vMCParticles[part.GetDaughterIds()[iD]].GetPDG();
 
+          std::cout << pdg[iD] << " ";
+        }
+        std::cout << std::endl;
         vector<bool> isDaughterFound(nDaughters);
         for(unsigned int iDMC=0; iDMC<nDaughters; iDMC++)
           isDaughterFound[iDMC] = 0;
@@ -594,7 +610,7 @@ void KFTopoPerformance::CheckMCParticleIsReconstructable(KFMCParticle &part)
         if(!isReco) return;
       }
     }
-
+std::cin.get();
     const vector<int>& dIds = part.GetDaughterIds();
     const unsigned int nD = dIds.size();
     if(nD == 0) return; //TODO optimize for all species
@@ -1362,6 +1378,8 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
   if (histoParameters2D)  {
     histoParameters2D[0][iParticle][0]->Fill(Rapidity,Pt,1);
     histoParameters2D[0][iParticle][3]->Fill(Rapidity,M_t,1);
+
+    const bool drawZR = IsCollectZRHistogram(iParticle);
     if(histoParameters2D[0][iParticle][1] && drawZR)
       {
 	histoParameters2D[0][iParticle][1]->Fill(Z,R,1);

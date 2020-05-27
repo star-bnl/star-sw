@@ -1617,6 +1617,30 @@ void KFParticleBase::TransportToDS( float dS, const float* dsdr )
   fSFromDecay+= dS;
 }
 
+void KFParticleBase::GetDistanceToVertexLine( const KFParticleBase &Vertex, float &l, float &dl) const 
+{
+  /** Calculates the distance between the particle position and the vertex together with the error.
+   ** Errors of both particle and vertex are taken into account. Also optionally checks if partcile
+   ** is pointing flying from the vertex, not in the direction to the vertex if the pointer to the
+   ** mask isParticleFromVertex is provided.
+   ** \param[in] Vertex - vertex to which the distance should be calculated
+   ** \param[out] l - distance between the current position of the particle and a vertex
+   ** \param[out] dl - the error of the calculated distance
+   **/
+
+  float c[6] = {Vertex.fC[0]+fC[0], Vertex.fC[1]+fC[1], Vertex.fC[2]+fC[2],
+                Vertex.fC[3]+fC[3], Vertex.fC[4]+fC[4], Vertex.fC[5]+fC[5]};
+
+  float dx = (Vertex.fP[0]-fP[0]);
+  float dy = (Vertex.fP[1]-fP[1]);
+  float dz = (Vertex.fP[2]-fP[2]);
+
+  l = sqrt( dx*dx + dy*dy + dz*dz );
+  dl = c[0]*dx*dx + c[2]*dy*dy + c[5]*dz*dz + 2*(c[1]*dx*dy + c[3]*dx*dz + c[4]*dy*dz);
+
+  l = (l < 1.e-8f) ? 1.e-8f : l;
+  dl = (dl > 0.f) ? sqrt(dl)/l : 1e8f;
+}
 
 float KFParticleBase::GetDStoPointLine( const float xyz[3], float dsdr[6] ) const 
 {

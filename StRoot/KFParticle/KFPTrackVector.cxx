@@ -417,6 +417,10 @@ void KFPTrackVector::Print()
             << LastDeuteron() << " "
             << LastTritium() << " "
             << LastHe3() << " "
-            << LastHe4() << std::endl;
+            << LastHe4() << " "
+            << LastHe6() << " "
+            << LastLi6() << " "
+            << LastLi7() << " "
+            << LastBe7() << std::endl;
 }
   
