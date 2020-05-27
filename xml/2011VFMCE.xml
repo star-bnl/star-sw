@@ -20,7 +20,7 @@
     exit 1;
   endif
   set name = ""
-  foreach name (D02KmTsq D0K0s2KmTsq D0K0s2pimTsq D0KpimTsq DK2pimTsq DK0spimTsq DsK0sK0spimTsq DsK0sKmTsq DsKKpimTsq Lc3pimTsq LcKppimTsq 20Muons D0K3pimTsq DK0s3pimTsq DsK0sK2pimTsq DK2pi  DsKKpi  LcKppi HyperTriton) 
+  foreach name (D02KmTsq D0K0s2KmTsq D0K0s2pimTsq D0KpimTsq DK2pimTsq DK0spimTsq DsK0sK0spimTsq DsK0sKmTsq DsKKpimTsq Lc3pimTsq LcKppimTsq 20Muons D0K3pimTsq DK0s3pimTsq DsK0sK2pimTsq DK2pi  DsKKpi  LcKppi H3L) 
     echo $Name | grep $name
     if (! $?) break;
 #    if ($name == $Name) break;
