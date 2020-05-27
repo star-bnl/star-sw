@@ -18,6 +18,7 @@ TDataSet *CreateTable(const Char_t *theFile) {
   Double_t Zlow   =  -70; 
   Double_t Zhigh  =   70; 
   Int_t    Npart  =   20;
+  TString  opt("GmTsq");
   if (NameP.Contains("Fixed")) {
     isFixed = kTRUE;
     NameP.ReplaceAll("Fixed","");
@@ -30,6 +31,7 @@ TDataSet *CreateTable(const Char_t *theFile) {
     Zlow   =  200; 
     Zhigh  =  200; 
     Npart  =   20;
+    opt = "GmTsqy"; // rapidity
   }
   const Char_t *nameP = NameP.Data();
   cout << "nameP = " << nameP << "\tfile = " << theFile << endl;
@@ -80,14 +82,14 @@ TDataSet *CreateTable(const Char_t *theFile) {
     if (! gener) {
       cout << "Create StarMCSimplePrimaryGenerator(" <<  Npart << "," <<  iD << "," 
 	   << pTlow << "," << pThigh<< "," <<Ylow<< "," << Yhigh<< "," 
-	   << Philow<< "," << Phihigh<< "," << Zlow<< "," << Zhigh<< "," << "GmTsq)" << endl;
+	   << Philow<< "," << Phihigh<< "," << Zlow<< "," << Zhigh<< "," << opt.Data() << ")"  << endl;
       gener =  new 
-	StarMCSimplePrimaryGenerator( Npart, iD, pTlow,pThigh,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, "GmTsq");
+	StarMCSimplePrimaryGenerator( Npart, iD, pTlow,pThigh,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, opt);
     } else {
       cout << "Set StarMCSimplePrimaryGenerator(" <<  Npart << "," <<  iD << "," 
 	   << pTlow << "," << pThigh<< "," <<Ylow<< "," << Yhigh<< "," 
-	   << Philow<< "," << Phihigh<< "," << Zlow<< "," << Zhigh<< "," << "GmTsq)" << endl;
-      gener->SetGenerator( Npart, iD, pTlow,pThigh,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, "GmTsq");
+	   << Philow<< "," << Phihigh<< "," << Zlow<< "," << Zhigh<< "," << opt.Data() << ")" << endl;
+      gener->SetGenerator( Npart, iD, pTlow,pThigh,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, opt);
     }
     StarVMCApplication::Instance()->SetPrimaryGenerator(gener);
     cout << "Set StarMCSimplePrimaryGenerator" << endl;
