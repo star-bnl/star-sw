@@ -75,10 +75,10 @@ void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id,
       const double kProtonMass = 0.938272321;    // Proton mass in GeV
       Double_t E = KinE + kProtonMass;
       Double_t pZ = -TMath::Sqrt(E*E - kProtonMass*kProtonMass);
-      fEta_min = 0.5*TMath::Log((E + pZ)/(E - pZ)) - 0.1;
-      fEta_max = 0.1;
+      fEta_min = 0.5*TMath::Log((E + pZ)/(E - pZ))/2;
+      fEta_max = 0.5;
     }
-    LOG_INFO << fEta_min  << " < rapidity < " << fEta_max  << endm;
+    LOG_INFO << "Rapidity is Gaussian with mean =  " << fEta_min  << " and sigma = " << fEta_max << endm;
   } else {
     LOG_INFO << fEta_min  << " < eta < " << fEta_max  << endm;
   }
@@ -160,6 +160,7 @@ void StarMCSimplePrimaryGenerator::GeneratePrimary() {
     py = pT*TMath::Sin(phi);
     if (fOption.Contains("y",TString::kIgnoreCase)) {
       Double_t mT = TMath::Sqrt(pT*pT + mass*mass);
+      eta = gRandom->Gaus( fEta_min, fEta_max);
       pz = mT*TMath::SinH(eta);
     } else {
       pz = pT*TMath::SinH(eta);
