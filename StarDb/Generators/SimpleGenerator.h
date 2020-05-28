@@ -22,15 +22,10 @@ TDataSet *CreateTable(const Char_t *theFile) {
   if (NameP.Contains("Fixed")) {
     isFixed = kTRUE;
     NameP.ReplaceAll("Fixed","");
-    pTlow  =    0;
-    pThigh =   20;
     Ylow   =  -2.4; 
     Yhigh  =   0.1;
-    Philow =   0;
-    Phihigh= 2*TMath::Pi();
     Zlow   =  200; 
     Zhigh  =  200; 
-    Npart  =   20;
     opt = "GmTsqy"; // rapidity
   }
   const Char_t *nameP = NameP.Data();
@@ -77,6 +72,8 @@ TDataSet *CreateTable(const Char_t *theFile) {
       cout << "TGeant3TGeo::IdFromPDG(" << pdg << ") is not found" << endl; 
       return 0;
     }
+    if      (NameP == "Lambda0"    )  StarVMCApplication::Instance()->ForceDecay(nameP, "proton",     "pi-", 0, 100);
+    else if (NameP == "Lambda0_bar")  StarVMCApplication::Instance()->ForceDecay(nameP, "antiproton", "pi+", 0, 100);
     // StarVMCApplication::Instance()->ForceDecay(nameP, "K+", "K-", "", 100);
     StarMCSimplePrimaryGenerator *gener = (StarMCSimplePrimaryGenerator *) StarVMCApplication::Instance()->GetPrimaryGenerator();
     if (! gener) {
