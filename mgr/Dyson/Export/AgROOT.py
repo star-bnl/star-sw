@@ -679,16 +679,20 @@ class StarGeometry(Handler):
         header = """
 #ifndef __StarGeometry_h__
 #define __StarGeometry_h__
-#include "TDataSet.h"        
+#include "TDataSet.h"
+        #include <string>
+        #include <map>
         class StarGeometry {
         public:
         /// Construct geometry with the specified tag, and return wrapped in a TDataSet
-        static TDataSet* Construct( const char* name = "%s" );
+        static TDataSet* Construct( const char* name = "%s");
         static bool      List     ( const char* name = "%s");
+        static void      Whitelist( const char* name, int value=1 ){ whitelist[name]=value; }
         StarGeometry(){ /* nada */ };
         virtual ~StarGeometry(){ /* nada */ }
         private:
         protected:
+        static std::map<std::string,int> whitelist;                        
         ClassDef(StarGeometry,1);
         };
 
@@ -708,7 +712,11 @@ class StarGeometry(Handler):
 #include "StarVMC/StarGeometry/StarGeo.h"
 #include "TObjectSet.h"
 #include "TGeoManager.h"        
-#include <string>        
+#include <string>
+#include <map>
+
+        std::map<std::string,int> StarGeometry::whitelist= {{"all",1}};
+        
         TDataSet* StarGeometry::Construct( const char* name )
         {
         std::string tag = name;
@@ -716,7 +724,7 @@ class StarGeometry(Handler):
         document.impl( implement1, unit='global' )
         for geom in self.geoms:
             name    = geom.name;
-            output = '             if (tag=="%s") { %s::construct(); }'  %(name,name)          
+            output = '             if (tag=="%s") { %s::construct( whitelist ); }'  %(name,name)          
             document.impl( output, unit='global' )
         document.impl( 'if (0 == gGeoManager) return NULL;', unit='global')
         document.impl( 'TObjectSet* dataset = new TObjectSet( "Geometry", gGeoManager, false );', unit='global' )
@@ -795,10 +803,11 @@ class Geometry( Handler ):
         global document
         document.head( '#ifndef __construct_%s_geometry__'%self.name )
         document.head( '#define __construct_%s_geometry__'%self.name )
-           
+        document.head( '#include <string>' )
+        document.head( '#include <map>' )
 #       document.head( 'namespace Star { //$NMSPC' )
         document.head( 'struct %s {' % self.name )
-        document.head( 'static bool construct();' )
+        document.head( 'static bool construct( std::map<std::string,int> whitelist = {{"all",1}} );' )
         document.head( 'static bool list();' )
         #document.head( '#if 0\n  ClassDef(%s,1);\n#endif\n'%self.name )
         document.head( '};' )
@@ -810,14 +819,18 @@ class Geometry( Handler ):
             document.impl('#include "%s"'%i, unit='global' )
 
         # Setup the builder code
-        document.impl( 'bool %s::construct() {'%self.name, unit='global' )
+        document.impl( 'bool %s::construct( std::map<std::string,int> whitelist ) {'%self.name, unit='global' )
         document.impl( 'bool result = true;',                    unit='global' )
         # Loop over detector tags.  Create in order and construct
         for sub in self.sys:
             subup = sub.upper();
             cfg = self.config[sub]
-            document.impl( '%s::%s::setup();'%(subup,cfg), unit='global' )
-            document.impl( '%s::%s::construct();'%(subup,cfg), unit='global' )
+            if subup!="CAVE": # Always create the cave
+                document.impl( 'if (whitelist["%s"]||whitelist["all"])'%(subup), unit='global' )
+            document.impl( '{', unit='global' )
+            document.impl( '\t%s::%s::setup();'%(subup,cfg), unit='global' )
+            document.impl( '\t%s::%s::construct();'%(subup,cfg), unit='global' )
+            document.impl( '} //endif [%s] '%(subup), unit='global' )
         document.impl( 'return result;\n',                      unit='global' )
         document.impl( '};',                                      unit='global' )
 
