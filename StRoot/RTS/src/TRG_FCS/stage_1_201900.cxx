@@ -54,8 +54,6 @@ void fcs_trg_base::stage_1_201900(u_int s0[], geom_t geo, link_t *output)
 		sum[5] = s0[18] + s0[19] + s0[22] + s0[23] ;
 		sum[6] = s0[24] + s0[25] + s0[28] + s0[29] ;
 		sum[7] = s0[26] + s0[27] + s0[30] + s0[31] ;
-
-
 	
 		// outputs to stage_2
 		for(int i=0;i<8;i++) {
