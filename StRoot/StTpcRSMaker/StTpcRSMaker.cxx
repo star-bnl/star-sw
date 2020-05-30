@@ -66,6 +66,7 @@
 //#define __LASERINO__
 //#define Old_dNdx_Table
 //#define __ELECTRONS_TUPLE__
+//#define __GaitingGrid__
 #define __SECROW_PLOTS__
 #define __STOPPED_ELECTRONS__
 #define __DEBUG__
@@ -515,7 +516,9 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
     }
   }
   // tss
+#ifdef  __GaitingGrid__
   mGG = new TF1F("GaitingGridTransperency","TMath::Max(0.,1-6.27594134307865925e+00*TMath::Exp(-2.87987e-01*(x-1.46222e+01)))",10,56);
+#endif
   if (Debug()) Print();
   memset (checkList, 0, sizeof(checkList));
 #ifdef __ClusterProfile__
@@ -945,11 +948,13 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  SecRow[4]->Fill(sector,row,dEdxCor);
 #endif /* __SECROW_PLOTS__ */
 	}
+#ifdef __GaitingGrid__
 	// Apply Gating Grid
 	if (TrackSegmentHits.Pad.timeBucket() > mGG->GetXmin() && 
 	    TrackSegmentHits.Pad.timeBucket() < mGG->GetXmax()) {
 	  dEdxCor *= mGG->Eval(TrackSegmentHits.Pad.timeBucket());
 	}
+#endif
 	if (dEdxCor < minSignal) continue;
 	StThreeVectorD unit = TrackSegmentHits.dirLS.position().unit();
 	Double_t *cxyz = unit.xyz();
