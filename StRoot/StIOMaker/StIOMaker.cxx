@@ -93,7 +93,7 @@ void StIOMaker::Rewind()
 Int_t StIOMaker::Init()
 {
 //VP  return Open();
-  return 0;
+  return StMaker::Init();
 }
 //_____________________________________________________________________________
  void  StIOMaker::SetFile(const char *file)

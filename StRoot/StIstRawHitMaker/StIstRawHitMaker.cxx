@@ -47,7 +47,7 @@ StIstRawHitMaker::~StIstRawHitMaker()
 Int_t StIstRawHitMaker::Init()
 {
 
-   return kStOk;
+   return StMaker::Init();
 }
 
 

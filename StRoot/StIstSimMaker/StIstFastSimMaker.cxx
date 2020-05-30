@@ -27,7 +27,7 @@ StIstFastSimMaker::StIstFastSimMaker( const Char_t *name) : StMaker(name), mIstR
 
 //____________________________________________________________
 Int_t StIstFastSimMaker::Init() {
-  return kStOk;
+  return StMaker::Init();
 }
 
 //____________________________________________________________

@@ -105,7 +105,7 @@ Int_t StIstClusterMaker::Init()
       mClusterAlgoPtr = new StIstScanClusterAlgo();
    }
 
-   return kStOk;
+   return StMaker::Init();
 };
 
 ClassImp(StIstClusterMaker);

@@ -28,7 +28,7 @@ StIstDbMaker::StIstDbMaker(const char *name) : StMaker(name), mIstDb(new StIstDb
 Int_t StIstDbMaker::Init()
 {
    ToWhiteConst("ist_db", mIstDb);
-   return kStOk;
+   return StMaker::Init();
 }
 
 

@@ -69,7 +69,7 @@ StIstSlowSimMaker::StIstSlowSimMaker(const char* name): StMaker(name), mIstDb(NU
 Int_t StIstSlowSimMaker::Init()
 {
 	LOG_DEBUG<<"StIstSlowSimMaker::Init()"<<endm;
-	return kStOk;
+	return StMaker::Init();
 }
 
 //____________________________________________________________
