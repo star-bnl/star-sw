@@ -114,7 +114,7 @@
 #include "TROOT.h"
 #include "TStyle.h"
 #include "TSystem.h"
-
+#include "TLine.h"
 #include "StEmbeddingQADraw.h"
 #include "StEmbeddingQAUtilities.h"
 #include "StMessMgr.h"
