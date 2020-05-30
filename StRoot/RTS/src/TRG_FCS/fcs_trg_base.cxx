@@ -7,8 +7,6 @@
 
 #include "fcs_trg_base.h"
 
-
-
 // statics
 fcs_trg_base::marker_t fcs_trg_base::marker ;
 ped_gain_t fcs_trg_base::p_g[2][3][24][32] ;
@@ -72,10 +70,11 @@ void fcs_trg_base::init()
 	// thresholds to defaults
 	ht_threshold[0] = 90 ;	// ecal
 	ht_threshold[1] = 90 ;	// hcal
-	ht_threshold[2] = 90 ;	// fpRE in FY19
+	ht_threshold[2] = 45 ;	// fpRE in FY19
 
 	// since I can use fcs_trg_base in realtime, all the stuff below is already loaded
-	if(!realtime && !sim_mode) {
+	//	if(!realtime && !sim_mode) {
+	if(!realtime) {
 		LOG(INFO,"init: not realtime -- loading stuff from files") ;
 
 		memset(fcs_data_c::ped,0,sizeof(fcs_data_c::ped)) ;
@@ -83,15 +82,15 @@ void fcs_trg_base::init()
 		fcs_data_c::load_rdo_map() ;
 		fcs_data_c::gain_from_cache() ;
 
-		for(int s=1;s<=1;s++) {
-		for(int r=1;r<=6;r++) {
-			char fname[256] ;
-			sprintf(fname,"/net/fcs%02d/RTScache/fcs_pedestals_s%02d_r%d.txt",s,s,r) ;
-
-			fcs_data_c::ped_from_cache(fname) ;
+		if(!sim_mode){  //no need for pedestal in sim_mode
+		    for(int s=1;s<=1;s++) {
+			for(int r=1;r<=6;r++) {
+			    char fname[256] ;
+			    sprintf(fname,"/net/fcs%02d/RTScache/fcs_pedestals_s%02d_r%d.txt",s,s,r) ;			    
+			    fcs_data_c::ped_from_cache(fname) ;
+			}
+		    }
 		}
-		}
-		
 
 
 	}
@@ -217,6 +216,7 @@ void fcs_trg_base::start_event()
 	got_one = 0 ;		
 
 	memset(tb_cou,0,sizeof(tb_cou)) ;
+	memset(d_in,0,sizeof(d_in)); //akio?
 } ;
 
 
@@ -383,9 +383,11 @@ int fcs_trg_base::end_event()
 
 	verify_event_io() ;
 
-	for(int xing=0;xing<marker.last_xing;xing++) {
+	int dsmout=0;
 
-		run_event_sim(xing,sim_mode) ;
+	for(int xing=0;xing<marker.last_xing;xing++) {
+    
+		dsmout = run_event_sim(xing,sim_mode) ;
 		
 		if(sim_mode) {
 			dump_event_sim(xing) ;
@@ -395,7 +397,7 @@ int fcs_trg_base::end_event()
 		}
 	}
 
-	return 0 ;
+	return dsmout;
 }
 
 int fcs_trg_base::run_stop()
@@ -740,14 +742,13 @@ u_short fcs_trg_base::run_event_sim(int xing, int type)
 		link_t hcal_in[DEP_HCAL_COU] ;
 		link_t fpre_in[DEP_PRE_COU] ;
 
-
 		for(int j=0;j<ADC_DET_COU;j++) {		// DET
 			geo.det = j ;
 
 			for(int k=0;k<DEP_COU;k++) {	// DEP/ADC
 
 				//if(type==0) {	// only for non-GEANT
-					if(tb_cou[i][j][k]==0) continue ;	// this DEP/ADC wasn't filled
+			            if(tb_cou[i][j][k]==0) continue ;	// this DEP/ADC wasn't filled
 				//}
 
 				u_int s0_to_s1[32] ;
@@ -766,9 +767,9 @@ u_short fcs_trg_base::run_event_sim(int xing, int type)
 					s0_to_s1[c] = res ;
 				}
 
-
 				// so that we compare d_out.s1_to_s2 and d_in.s1_to_s2
 				stage_1(s0_to_s1, geo, &d_out.s1[i][j][k].s1_to_s2) ;
+				
 			}
 		}
 
@@ -776,12 +777,11 @@ u_short fcs_trg_base::run_event_sim(int xing, int type)
 		geo.dep = 0 ;	// stage_2's
 		geo.ch = 0 ;	// ignored
 
-
 		if(type==0) {	// running in realtime or through DAQ file
 			if(tb_cou[i][3][0]==0) continue ;	// DEP/Stage_2 wasn't filled
 
-			memset(ecal_in,0,sizeof(fpre_in)) ;
-			memset(hcal_in,0,sizeof(fpre_in)) ;			
+			memset(ecal_in,0,sizeof(ecal_in)) ; //akio
+			memset(hcal_in,0,sizeof(hcal_in)) ; //akio	 		
 			memset(fpre_in,0,sizeof(fpre_in)) ;
 			
 			// FY19 setup
@@ -874,21 +874,25 @@ void fcs_trg_base::stage_1(u_int s0[], geom_t geo, link_t *output)
 	case 0 :
 		stage_1_201900(s0,geo,output) ;
 		break ;
+	case 1 :
+		stage_1_202201(s0,geo,output) ;
+		break ;
 	default :
 		LOG(ERR,"Unknown stage_1 version %d",stage_version[1]) ;
 		break ;
 	}
-
 }
 
 
 // 2 links are output: lo & hi
 void fcs_trg_base::stage_2(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[2]) 
 {
-
 	switch(stage_version[2]) {
 	case 0 :
 		stage_2_201900(ecal,hcal,pres,geo,output) ;
+		break ;
+	case 1 :
+		stage_2_202201(ecal,hcal,pres,geo,output) ;
 		break ;
 	default :
 		LOG(ERR,"Unknown stage_2 version %d",stage_version[2]) ;
@@ -905,6 +909,9 @@ void fcs_trg_base::stage_3(link_t link[4], u_short *dsm_out)
 	switch(stage_version[3]) {
 	case 0 :
 		stage_3_201900(link,dsm_out) ;
+		break ;
+	case 1 :
+		stage_3_202201(link,dsm_out) ;
 		break ;
 	default :
 		LOG(ERR,"Unknown stage_3 version %d",stage_version[3]) ;
