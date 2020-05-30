@@ -277,7 +277,6 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
   Float_t DVW = gStTpcDb->DriftVelocity(1,0), DVE = gStTpcDb->DriftVelocity(13,0);
   Float_t freq  = gStTpcDb->Electronics()->samplingFrequency();
   StMcTpcHitCollection* mcHits = 0;
-  if (mEvent)  mcHits = mEvent->tpcHitCollection();
   StSPtrVecTrackNode& trackNode = rEvent->trackNodes();
   UInt_t nTracks = trackNode.size();
   StPrimaryVertex *primVtx = rEvent->primaryVertex();
@@ -360,6 +359,7 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
       fCluster->SetFrequency(freq);
       fCluster->SetNofPV(rEvent->numberOfPrimaryVertices());
       fCluster->SetNoTracksAtBestPV(NoTracks);
+      fCluster->SetSecRow(sector,row);
       if (primVtx)
 	fCluster->SetXyzPV(primVtx->position().x(),primVtx->position().y(),primVtx->position().z());
       if (tpcRawData) {
@@ -420,12 +420,14 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
       }
       if (theHitMap) {
 	if (rHit->TestBit(StMcHit::kMatched)) {
+	  if (Debug()) rHit->Print();
 	  pair<rcTpcHitMapIter,rcTpcHitMapIter>
 	    recBounds = theHitMap->equal_range(rHit);
 	  for (rcTpcHitMapIter it2=recBounds.first; it2!=recBounds.second; ++it2){
 	    const StMcTpcHit *mHit = dynamic_cast<const StMcTpcHit *> ((*it2).second);
 	    assert ( mHit);
 	    if (mHit->isDet()) continue;
+	    if (Debug()) mHit->Print();
 	    fCluster->AddMcHit(mHit);
 	  }
 	}
@@ -433,7 +435,7 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
       mTpcT->Fill();
     }
   }
-#if 1
+#if 0
   // non matched hits
   if (rcHits) {
     UInt_t numberOfSectors = rcHits->numberOfSectors();
@@ -547,6 +549,7 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
       }
     }
   }
+  if (mEvent)  mcHits = mEvent->tpcHitCollection();
   if (mcHits) {
     for (Int_t sector=0;
 	 sector<(Int_t) mcHits->numberOfSectors(); sector++) {
@@ -574,3 +577,4 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
 #endif
   return kStOK;
 }
+
