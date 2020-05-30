@@ -40,7 +40,7 @@ Int_t StjMCParticleMaker::Init()
 
   _writer = new StjMCParticleListWriter("mcParticles", _file);
 
-  return kStOk;
+  return StMaker::Init();
 }
 
 Int_t StjMCParticleMaker::Make()

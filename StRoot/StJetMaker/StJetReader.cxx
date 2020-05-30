@@ -55,7 +55,7 @@ StJetReader::~StJetReader()
 
 Int_t StJetReader::Init()
 {
-  return kStOk;
+  return StMaker::Init();
 }
 
 void StJetReader::InitFile(const char* file)

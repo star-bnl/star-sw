@@ -58,7 +58,7 @@ Int_t StJetMaker::Init()
 
   _treeWriter->Init();
 
-  return kStOk;
+  return StMaker::Init();
 }
 
 Int_t StJetMaker::Make()

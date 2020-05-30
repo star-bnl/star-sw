@@ -27,7 +27,7 @@ StJetScratch::StJetScratch(const Char_t *name, TDirectory* file, StMuDstMaker* u
 
 Int_t StJetScratch::Init()
 {
-  return kStOk;
+  return StMaker::Init();
 }
 
 Int_t StJetScratch::Make()

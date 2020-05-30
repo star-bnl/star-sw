@@ -25,7 +25,7 @@ Int_t StjTPCTrackMaker::Init()
 
   _writer = new StjTrackListWriter("tpcTracks", _file);
 
-  return kStOk;
+  return StMaker::Init();
 }
 
 Int_t StjTPCTrackMaker::Make()

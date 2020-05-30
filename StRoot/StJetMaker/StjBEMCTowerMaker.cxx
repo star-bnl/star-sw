@@ -43,7 +43,7 @@ Int_t StjBEMCTowerMaker::Init()
 
   _writer = new StjTowerEnergyListWriter("bemcTowers", _file);
 
-  return kStOk;
+   return StMaker::Init();
 }
 
 Int_t StjBEMCTowerMaker::Make()

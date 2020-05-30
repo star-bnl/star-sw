@@ -97,7 +97,7 @@ Int_t StJetSkimEventMaker::Init()
 		isRealData = false;
 	}
 
-	return kStOk;
+	return StMaker::Init();
 }
 
 Int_t StJetSkimEventMaker::InitRun(int runnumber) {

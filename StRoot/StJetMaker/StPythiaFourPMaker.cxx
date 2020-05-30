@@ -27,7 +27,7 @@ Int_t StPythiaFourPMaker::Init()
   _mc = new StjMCMuDst(this);
   _cut = new StjMCParticleListCut();
   _cut->addCut(new StjMCParticleCutEta(-5.0, 5.0));
-  return kStOK;
+  return StMaker::Init();
 }
 
 void StPythiaFourPMaker::Clear(Option_t* opt)
