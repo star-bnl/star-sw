@@ -58,7 +58,7 @@ Int_t StBTofHitMaker::Init()
   LOG_INFO << "Initialized conversion parameter VHRBIN2PS = " 
   	       << VHRBIN2PS << "ps/ch" << endm;  
   Clear("");
-  return kStOK;
+  return StMaker::Init();
 }
 
 //_____________________________________________________________

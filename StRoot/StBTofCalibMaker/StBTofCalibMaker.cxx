@@ -239,7 +239,7 @@ Int_t StBTofCalibMaker::Init()
     }
   }
 #endif
-  return kStOK;
+  return StMaker::Init();
 }
 
 //____________________________________________________________________________

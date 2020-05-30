@@ -223,7 +223,7 @@ Int_t StBTofMatchMaker::Init(){
     mZLocalCut = 5.0;
   }
 
-  return kStOK;
+  return StMaker::Init();
 }
 
 
