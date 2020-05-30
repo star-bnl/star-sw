@@ -170,12 +170,13 @@
  if ($CXX eq "g++" or $CXX eq "gcc") {
     $CXXFLAGS .= " -Wall -Woverloaded-virtual -Wcast-align -fno-threadsafe-statics";
     $CFLAGS   .= " -Wall -Wcast-align";
-    $FFLAGS   .= " -fPIC -pipe";
+#    $FFLAGS   .= " -fPIC -pipe";
+    $FFLAGS   .= " -pipe";
     if ($FC eq 'pgf77') {
       $FFLAGS = "";
       $FEXTEND = "-Mextend";
     } else {
-      $FFLAGS   .= " -std=legacy -fno-second-underscore -fno-automatic -Waliasing -Wampersand -Wsurprising -Wintrinsics-std -Wno-tabs -Wintrinsic-shadow -Wsurprising -Wcast-align"; # -Wline-truncation  -W
+      $FFLAGS   .= " -std=legacy -fno-second-underscore -fno-automatic -Waliasing -Wampersand -Wsurprising -Wintrinsics-std -Wno-tabs -Wintrinsic-shadow -Wcast-align"; # -Wline-truncation  -W
       $FEXTEND = "-ffixed-line-length-132";
     }
    $CERNLIB_FPPFLAGS .= " -DCERNLIB_GCC" . $CXX_MAJOR;
