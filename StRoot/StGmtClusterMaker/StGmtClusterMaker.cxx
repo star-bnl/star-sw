@@ -288,5 +288,5 @@ Int_t StGmtClusterMaker::Make() {
 //________________________________________________________________________________
 Int_t StGmtClusterMaker::Init() {
   if (IAttr("gmtCosmics")) SetAttr(".Privilege",kTRUE);
-  return kStOk;
+  return StMaker::Init();
 }

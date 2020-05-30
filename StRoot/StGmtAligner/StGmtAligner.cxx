@@ -33,7 +33,7 @@ StGmtAligner::StGmtAligner(const Char_t *name) : StMaker(name),fFile(0), fTree(0
 //________________________________________________________________________________
 Int_t StGmtAligner::Init() {
   SetTree();
-  return kStOK;
+  return StMaker::Init();
 }
 //________________________________________________________________________________
 Int_t StGmtAligner::Finish() {
