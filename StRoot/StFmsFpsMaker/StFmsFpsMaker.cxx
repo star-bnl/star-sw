@@ -63,7 +63,7 @@ Int_t StFmsFpsMaker::Init(){
 	LOG_ERROR  << "StFmsFpsMaker::InitRun Failed to get StFmsDbMaker" << endm;
 	return kStFatal;
     }
-    return kStOK;
+    return StMaker::Init();
 }
 
 Int_t StFmsFpsMaker::Make(){

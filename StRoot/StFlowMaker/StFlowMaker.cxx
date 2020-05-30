@@ -261,7 +261,8 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();; 
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
-  return kRETURN;
+  if (kRETURN) return kRETURN;
+  return StMaker::Init();
 }
 
 //-----------------------------------------------------------------------

@@ -45,7 +45,7 @@ Int_t HftMatchedTree::Init()
    fTree->SetAutoSave(1000000000);  // autosave when 1 Gbyte written
    
    SetTree();
-   return kStOK;
+   return StMaker::Init();
 }
 
 

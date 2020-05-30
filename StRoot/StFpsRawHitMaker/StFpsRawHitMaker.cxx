@@ -38,7 +38,7 @@ Int_t StFpsRawHitMaker::InitRun(Int_t runNumber){
     LOG_ERROR  << "StFpsRawHitMaker::InitRun Failed to get StFmsDbMaker" << endm;
     return kStFatal;
   }
-  return kStOK;
+  return StMaker::Init();
 }
 
 /// Searches for StEvent and StFmsCollection, and create StFmsCollection if not found
