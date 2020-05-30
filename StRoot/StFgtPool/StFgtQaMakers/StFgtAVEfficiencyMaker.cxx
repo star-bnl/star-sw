@@ -639,6 +639,7 @@ Int_t StFgtAVEfficiencyMaker::Init(){
       sprintf(buffer,"rPhiRatio_%d",iD);
       rPhiRatioPlots[iD]=new TH1D(buffer,buffer,100,-2,10);
     }
-  return ierr;
+  if (ierr) return ierr;
+  return StMaker::Init();
 };
 ClassImp(StFgtAVEfficiencyMaker);

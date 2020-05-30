@@ -47,7 +47,7 @@ Int_t StFgtJanGainMaker::Init(){
    
    iEvt=-1;
    initHistos();
-   return kStOk;
+   return StMaker::Init();
 };
 
 

@@ -23,7 +23,7 @@
 
 #include <TMath.h>
 #include <TGraphAsymmErrors.h>
-
+#include "TLine.h"
 static const int mDebug=0;      // debug mesasge level
 static const int NTB=15;
 static const char* cquad[kFgtNumQuads]={"A","B","C","D"};  
@@ -69,7 +69,7 @@ Int_t StFgtQAMaker::Init(){
   }
   memset(mNTrace,0,sizeof(mNTrace));
   memset(mNTrace2,0,sizeof(mNTrace2));
-  return kStOK; 
+  return StMaker::Init();
 }
 
 Int_t StFgtQAMaker::InitRun(Int_t runnum){

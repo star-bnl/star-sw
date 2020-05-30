@@ -787,7 +787,7 @@ Int_t StFgtAlignmentMaker::InitRun(Int_t runnum){
   }else{
     readPar(orig_algpar);
   }
-  return kStOK;
+  return StMaker::Init();
 }
 
 static const int mMaxStep=100;

@@ -75,7 +75,8 @@ Int_t StFgtCosmicTrackMaker::Init(){
   if( !ierr )
      mCosmicTrackAlgoPtr->Init();
 
-  return ierr;
+  if (ierr) return ierr;
+  return StMaker::Init();
 };
 
 // extract points, calculate ODR line and calculate chi^2 for an event

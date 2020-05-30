@@ -355,7 +355,8 @@ Int_t StFgtCosmicTrackPlots::Init(){
         }
       }
    };
-   return ierr;
+  if (ierr) return ierr;
+  return StMaker::Init();
 };
 
 //  fill histograms with track data

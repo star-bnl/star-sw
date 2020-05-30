@@ -1007,7 +1007,6 @@ Int_t StFgtStraightTrackMaker::Finish(){
 
 // construct histograms
 Int_t StFgtStraightTrackMaker::Init(){
-  Int_t ierr = kStOk;
-  return ierr;
+  return StMaker::Init();
 };
 ClassImp(StFgtStraightTrackMaker);

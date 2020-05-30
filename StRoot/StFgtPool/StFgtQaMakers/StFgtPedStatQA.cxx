@@ -88,7 +88,7 @@
 #include <TH1.h>
 #include <TH2.h>
 #include <TFile.h>
-
+#include "TLine.h"
 
 // constructor
 StFgtPedStatQA::StFgtPedStatQA( const Char_t* name,
@@ -109,7 +109,7 @@ StFgtPedStatQA::~StFgtPedStatQA(){
 
 // initialize
 Int_t StFgtPedStatQA::Init(){
-   Int_t ierr = kStOk;
+   Int_t ierr = StMaker::Init();
 
    // make sure the file can be opened
 

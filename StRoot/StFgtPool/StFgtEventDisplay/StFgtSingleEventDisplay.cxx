@@ -127,11 +127,10 @@ StFgtSingleEventDisplay::~StFgtSingleEventDisplay(){
 };
 
 Int_t StFgtSingleEventDisplay::Init(){
-   Int_t ierr = kStOk;
 
    mEventNum = 0;
 
-   return ierr;
+   return StMaker::Init();
 };
 
 Int_t StFgtSingleEventDisplay::Make(){

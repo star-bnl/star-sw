@@ -607,6 +607,7 @@ Int_t StFgtGenPlotter::Init(){
 	}
     }
   cout <<"4" <<endl;
-  return ierr;
+  if (ierr) return ierr;
+  return StMaker::Init();
 };
 ClassImp(StFgtGenPlotter);

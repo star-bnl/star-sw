@@ -53,7 +53,7 @@ StFgtTracking::~StFgtTracking(){ /* */ };
 
 Int_t StFgtTracking::Init(){ 
    StFgtTracking::Clear();
-   return kStOk;
+   return StMaker::Init();
 };
 
 Int_t StFgtTracking::Make(){

@@ -54,7 +54,6 @@ StFgtQaHighStrips::~StFgtQaHighStrips(){
 };
 
 Int_t StFgtQaHighStrips::Init(){
-   Int_t ierr = kStOk;
 
    std::stringstream ss;
    ss << "h" << GetName() << "_2D";
@@ -87,7 +86,7 @@ Int_t StFgtQaHighStrips::Init(){
       };
    };
 
-   return ierr;
+   return StMaker::Init();
 };
 
 Int_t StFgtQaHighStrips::Make(){

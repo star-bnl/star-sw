@@ -75,7 +75,7 @@ StFgtStatusMaker::~StFgtStatusMaker(){
 
 // initialize
 Int_t StFgtStatusMaker::Init(){
-   Int_t ierr = kStOk;
+   Int_t ierr = StMaker::Init();
 
    // make sure the file can be opened
    if( !mFilename.empty() ){

@@ -64,7 +64,6 @@ StFgtQaRawOctAdc::~StFgtQaRawOctAdc(){
 };
 
 Int_t StFgtQaRawOctAdc::Init(){
-   Int_t ierr = kStOk;
 
    std::stringstream ss;
 
@@ -91,7 +90,7 @@ Int_t StFgtQaRawOctAdc::Init(){
       };
    };
 
-   return ierr;
+   return StMaker::Init();
 };
 
 Int_t StFgtQaRawOctAdc::Make(){

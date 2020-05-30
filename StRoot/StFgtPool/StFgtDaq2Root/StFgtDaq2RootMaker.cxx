@@ -64,7 +64,8 @@ Int_t StFgtDaq2RootMaker::Init(){
       mTTree->Branch( "branch", &mData, "data[26880]/I" );
    };
 
-   return ierr;
+   if (ierr) return ierr;
+   return StMaker::Init();
 };
 
 void StFgtDaq2RootMaker::Clear(const Option_t* opts ){

@@ -536,6 +536,7 @@ Int_t StFgtClusterPlotter::Init(){
 	   corrPlots[iD*kFgtNumQuads+iQ]=new TH2D(buffer,buffer,100,0,2000,100,0,2000);
 	 }
      }
-   return ierr;
+   if (ierr) return ierr;
+   return StMaker::Init();
 };
 ClassImp(StFgtClusterPlotter);

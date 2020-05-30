@@ -343,7 +343,7 @@ Init function. Not doing anything at the moment.
 Int_t StFgtRawMaker::Init()
 {
   LOG_INFO << "StFgtRawMaker::Init we are named "  << GetName() << endm;
-  return kStOk;
+  return StMaker::Init();
 }
 
 

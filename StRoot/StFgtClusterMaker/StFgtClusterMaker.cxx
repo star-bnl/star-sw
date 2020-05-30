@@ -245,7 +245,8 @@ Int_t StFgtClusterMaker::Init()
     }
   mClusterAlgoPtr->setDb(mDb);
 
-  return ierr;
+  if (ierr) return ierr;
+  return StMaker::Init();
 }
   
 

@@ -72,7 +72,7 @@ Int_t StEEmcFgtLHTrackQa::Init(){
    assert( mEEmcRawMapMkr );
    assert( mFgtLHTkr );
 
-   return kStOK;
+   return StMaker::Init();
 };
 
 Int_t StEEmcFgtLHTrackQa::Make(){

@@ -68,7 +68,7 @@ Int_t StFgtSanityMaker::Init(){
    hh=new TH1F("fgt1","Seen APVs per event; # APVs/event",150,-0.5,149.5);
 
    
-   return kStOk;
+   return StMaker::Init();
 };
 
 //========================================================

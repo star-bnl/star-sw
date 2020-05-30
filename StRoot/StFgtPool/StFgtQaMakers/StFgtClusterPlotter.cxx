@@ -461,7 +461,6 @@ Int_t StFgtClusterPlotter::Init(){
   outTxtFileR->open("clustersR.txt");
 
 
-   Int_t ierr = kStOk;
    hClusterCharge=new TH1D("clusterCharge","clusterCharge",100, 0, 1000);
    char buffer[100];
    hCChargePosSpacePhi=new TH2D*[kFgtNumDiscs*kFgtNumQuads];
@@ -497,6 +496,6 @@ Int_t StFgtClusterPlotter::Init(){
 	   corrPlots[iD*kFgtNumQuads+iQ]=new TH2D(buffer,buffer,100,0,2000,100,0,2000);
 	 }
      }
-   return ierr;
+   return StMaker::Init();
 };
 ClassImp(StFgtClusterPlotter);

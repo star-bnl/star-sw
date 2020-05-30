@@ -9,9 +9,7 @@ class StFgtMCEvalMaker : public StMaker {
 
   virtual ~StFgtMCEvalMaker();
 
-   Int_t Init();
    Int_t Make();
-   Int_t Finish();
 
 
 };

@@ -185,7 +185,8 @@ Int_t StFgtPointMaker::Init()
        ierr = kStFatal;
      }
    }      
-   return ierr;
+   if (ierr) return ierr;
+   return StMaker::Init();
 }
  
 StFgtPointMaker::StFgtPointMaker( const Char_t* name ) : StMaker(name),mPointAlgoPtr(0),mSkipEvent(0),mFakeData(0)

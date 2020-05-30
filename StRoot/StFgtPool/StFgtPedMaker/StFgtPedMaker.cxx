@@ -108,7 +108,8 @@ Int_t StFgtPedMaker::Init(){
       };
    };
 
-   return ierr;
+   if (ierr) return ierr;
+   return StMaker::Init();
 };
 
 // make, i.e. compute sums.

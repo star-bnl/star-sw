@@ -228,7 +228,7 @@ StFgtA2CMaker::~StFgtA2CMaker()
 /// Does nothing else than printing "we are here"
 Int_t StFgtA2CMaker::Init(){
    LOG_INFO << "StFgtA2CMaker::Init we are named "  << GetName() << endm;
-   return kStOk;
+   return StMaker::Init();
 }
 
 /// Get pointer to fgtDb

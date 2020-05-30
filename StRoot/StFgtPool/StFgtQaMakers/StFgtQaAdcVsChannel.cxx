@@ -176,7 +176,8 @@ Int_t StFgtQaAdcVsChannel::Init(){
       mHist = new TH2F( name.data(), title.data(), mXbins/mBinFactorX,  mXmin, mXmax, mYbins/mBinFactorY, mYmin, mYmax );
    };
 
-   return ierr;
+   if (ierr) return ierr;
+   return StMaker::Init();
 };
 
 Int_t StFgtQaAdcVsChannel::Make(){

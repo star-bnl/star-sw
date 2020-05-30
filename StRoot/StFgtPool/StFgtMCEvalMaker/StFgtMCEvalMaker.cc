@@ -29,12 +29,3 @@ Int_t StFgtMCEvalMaker::Make(){
   return ierr;
 };
 
-Int_t StFgtMCEvalMaker::Finish(){
-   Int_t ierr = kStOk;
-   return ierr;
-};
-
-Int_t StFgtMCEvalMaker::Init(){
-   Int_t ierr = kStOk;
-   return ierr;
-};

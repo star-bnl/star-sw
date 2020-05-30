@@ -355,7 +355,8 @@ Int_t StFgtLenTreeMaker::Init(){
   f0=new TF1("f0","[0]+[1]*x",-500,500);
   hh=new TH1F("hh","hh",Ntimebin,0,Ntimebin);
     
-  return ierr;
+  if (ierr) return ierr;
+  return StMaker::Init();
 };
 
 Int_t StFgtLenTreeMaker::InitTree(){

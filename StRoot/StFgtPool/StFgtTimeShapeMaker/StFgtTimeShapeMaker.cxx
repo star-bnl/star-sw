@@ -82,7 +82,8 @@ Int_t StFgtTimeShapeMaker::Init(){
    iEvt=-1;
    hh=new TH1F("hh","hh",Ntimebin,0,Ntimebin);
    
-   return ierr;
+   if(ierr) return ierr;
+   return StMaker::Init();
 };
 
 StFgtTimeShapeMaker::~StFgtTimeShapeMaker(){

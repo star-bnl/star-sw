@@ -92,7 +92,8 @@ Int_t StFgtQaMaker::Init(){
       ierr = mPedReader->Init();
    };
 
-   return ierr;
+   if (ierr) return ierr;
+   return StMaker::Init();
 };
 
 Int_t StFgtQaMaker::Make(){

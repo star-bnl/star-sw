@@ -54,7 +54,7 @@ StEEmcFgtCorrelatorA::~StEEmcFgtCorrelatorA(){ /* */ };
 
 // init
 Int_t StEEmcFgtCorrelatorA::Init(){
-   return kStOk;
+  return StMaker::Init();
 };
 
 Int_t StEEmcFgtCorrelatorA::Make(){

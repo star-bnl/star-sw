@@ -49,7 +49,7 @@ Int_t StFgtPointPlotter::Init()
 	  tbHistos[i*4+iq]=new TH1D(buffer,buffer,15,0,14);
 	}
     }
-  return kStOk;
+  return StMaker::Init();
 }
 
 Int_t StFgtPointPlotter::Make()

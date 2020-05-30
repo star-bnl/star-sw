@@ -128,7 +128,8 @@ Int_t StFgtRawDaqReader::Init(){
 
    //LOG_INFO << "done with init" << endm;
 
-  return ierr;
+   if (ierr) return ierr;
+   return StMaker::Init();
 };
 
 //read next event from daq file and fill the fgtevent
