@@ -87,7 +87,7 @@ StPxlDbMaker::StPxlDbMaker(const char *name) :
 Int_t StPxlDbMaker::Init()
 {
    ToWhiteConst("pxl_db", mPxlDb);
-   return kStOk;
+   return StMaker::Init();
 }
 
 

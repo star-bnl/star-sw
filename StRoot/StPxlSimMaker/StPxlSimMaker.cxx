@@ -112,7 +112,7 @@ Int_t StPxlSimMaker::Init()
      LOG_INFO << "StPxlSimMaker: using StPxlFastSim " << endm;
    }
 
-   return kStOk;
+   return StMaker::Init();
 }
 
 //____________________________________________________________

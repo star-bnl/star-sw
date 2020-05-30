@@ -341,7 +341,7 @@ Int_t StPicoDstMaker::Init() {
 #endif /* __HIST_PV__ */
 #endif /* __TFG__VERSION__ */    
 
-  return kStOK;
+  return StMaker::Init();
 }
 //_________________
 Int_t StPicoDstMaker::setVtxModeAttr(){
