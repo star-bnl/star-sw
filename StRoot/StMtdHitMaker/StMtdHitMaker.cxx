@@ -85,7 +85,7 @@ Int_t StMtdHitMaker::Init()
       mTriggerTimeWindow[i][0] = 0;
       mTriggerTimeWindow[i][1] = 9999;
     }
-  return kStOK;
+  return StMaker::Init();
 }
 
 

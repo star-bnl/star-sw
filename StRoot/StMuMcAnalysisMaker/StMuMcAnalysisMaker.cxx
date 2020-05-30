@@ -198,7 +198,7 @@ Int_t StMuMcAnalysisMaker::Init(){
     gFile = curFile;
     gDirectory = curDirectory;
   }
-  return kStOK;
+  return StMaker::Init();
 }
 //________________________________________________________________________________
 Int_t StMuMcAnalysisMaker::Finish() {

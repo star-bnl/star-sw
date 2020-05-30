@@ -244,7 +244,7 @@ Int_t StMtdQAMaker::Init()
 {
   if(mPrintConfig) printConfig();
   bookHistos();
-  return kStOK;
+  return StMaker::Init();
 }
 
 //_____________________________________________________________________________

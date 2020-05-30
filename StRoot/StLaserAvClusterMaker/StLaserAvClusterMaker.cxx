@@ -68,7 +68,7 @@ Int_t StLaserAvClusterMaker::Init(){
   }
   assert(nEvTot>0);
   fCluster = new Cluster(FitP);
-  return kStOK;
+  return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t StLaserAvClusterMaker::Make(){  

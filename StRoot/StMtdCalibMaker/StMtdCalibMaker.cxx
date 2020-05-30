@@ -99,7 +99,7 @@ Int_t StMtdCalibMaker::Init()
 {
   if (mHisto) bookHistograms();
 
-  return kStOK;
+  return StMaker::Init();
 }
 
 //____________________________________________________________________________

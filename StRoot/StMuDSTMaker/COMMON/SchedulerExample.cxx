@@ -59,7 +59,7 @@ SchedulerExample::~SchedulerExample(){
 Int_t  SchedulerExample::Init() {
   mMuDstMaker = (StMuDstMaker*)GetMaker("MuDstMaker");
   if (!mMuDstMaker) return 1;
-  return 0;
+  return StMaker::Init();
 }
 
 

@@ -78,7 +78,7 @@ Int_t StMtdEvtFilterMaker::Init()
   // book histograms
   bookHistos();
 
-  return kStOK;
+  return StMaker::Init();
 }
 
 //_____________________________________________________________________________

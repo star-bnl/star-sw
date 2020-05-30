@@ -500,7 +500,7 @@ int StMuDstMaker::Init(){
   TDataSet *muDstSet =  AddObj(mStMuDst,".const");   ///< added for Valeri to be able to pick it up in other makers
   if (muDstSet ) muDstSet ->SetName("muDst");          ///< added for Valeri to be able to pick it up in other makers
 
-  return 0;
+  return StMaker::Init();
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
