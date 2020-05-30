@@ -164,7 +164,7 @@ Int_t StEemcGammaFilterMaker::Init()
   }
   
   
-  return kStOK;
+  return StMaker::Init();
   
 }
 

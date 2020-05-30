@@ -125,7 +125,7 @@ Int_t StGammaFilterMaker::Init()
     mPythiaTree = new TTree("pythiaTree", "Pythia Tree");
     mPythiaTree->Branch("PythiaEvents", "StPythiaEvent", &mPythiaEvent);
 
-    return kStOK;
+    return StMaker::Init();
     
 }
 

@@ -55,7 +55,7 @@ Int_t StBemcStatusMaker::Init() {
   mOutputTree->Branch("statusBEMC",mBemcStatusBits,"statusBEMC/F");
   mFirstEvent = kTRUE;
   if (!mOutputFile) return kStErr;
-  return kStOk;
+  return StMaker::Init();
 }
 
 Int_t StBemcStatusMaker::Make() {

@@ -106,7 +106,7 @@ Int_t StEmcSimulatorMaker::Init() {
         mSimulator[det-1]->setMaximumAdcSpread(mMaxAdcSpread[det-1]);
     }
     
-    return kStOk;
+    return StMaker::Init();
 }
 
 void StEmcSimulatorMaker::Clear(const char*) {

@@ -40,7 +40,7 @@ StEpdHitMaker::StEpdHitMaker() : StMaker("epdHit"),
 
 //----------------------------------------------
 int StEpdHitMaker::Init(){
-  return kStOK;
+  return StMaker::Init();
 }
 
 //----------------------------------------------

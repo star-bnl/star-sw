@@ -55,7 +55,7 @@ Int_t StEmcPedestalMaker::Init()
   
   mStarted = false;
   
-  return StEmcCalibMaker::Init();
+  return StMaker::Init();
 }
 //_____________________________________________________________________________
 void StEmcPedestalMaker::Clear(Option_t *option)              
