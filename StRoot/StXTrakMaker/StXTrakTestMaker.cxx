@@ -73,7 +73,7 @@ Int_t StXTrakTestMaker::Finish()
 //_____________________________________________________________________________
 Int_t StXTrakTestMaker::Init()
 {
-  return 0;
+  return StMaker::Init();
 }
 //_____________________________________________________________________________
 TH2 *StXTrakTestMaker::GetTH2(const char *name)
