@@ -56,7 +56,7 @@ Int_t StTpcRTSHitMaker::Init() {
   memset(maxHits,0,sizeof(maxHits));
   maxBin0Hits = 0;
   bin0Hits = 0;
-  return kStOK;
+  return StMaker::Init();
 }
 //________________________________________________________________________________
 Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
