@@ -999,7 +999,7 @@ Int_t St_geant_Maker::Init(){
       Do("CUTS     1e-5   1e-5   1e-3  1e-14   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3     1e3");
     }
   }
-  return kStOK;
+  return StMaker::Init();
 }
 //________________________________________________________________________________
 Int_t St_geant_Maker::InitRun(Int_t run){
