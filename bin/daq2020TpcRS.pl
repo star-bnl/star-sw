@@ -5,7 +5,7 @@ use Env;
 my $debug = 0;
 my $pwd = cwd();
 #my $Trigger =  File::Basename::basename($pwd); $Trigger =~ s/daq_//;
-my $Trigger =  File::Basename::basename($pwd); $Trigger =~ s/TpcRS_/daq_/; print "Trigger = $Trigger\n" if ($debug);
+my $Trigger =  File::Basename::basename($pwd); $Trigger =~ s/TpcRS_/daq_/; $Trigger =~ s/\..*//; print "Trigger = $Trigger\n" if ($debug);
 #my $glob = "/net/l401/data/scratch1/daq/2020/" . $Trigger . "/st_physics_adc*.daq";  print "glob = $glob\n" if ($debug);
 my $glob = "/net/l401/data/scratch1/fisyak/Tpc/TpcRS/" . $Trigger . "/st_physics_adc*.MuDst.root";  print "glob = $glob\n" if ($debug);
 my $fNo = 0;
