@@ -88,7 +88,7 @@ Int_t StTofMuDstEval::Init()
     mTofrGeom->Init(starHall);
   }
 
-  return kStOK;
+  return StMaker::Init();
 }
 //_________________________________________________
 Int_t StTofMuDstEval::Make()

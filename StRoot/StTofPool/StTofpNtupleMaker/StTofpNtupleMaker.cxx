@@ -80,7 +80,7 @@ Int_t StTofpNtupleMaker::Init(){
   mTofpEvents  = 0;
   mTofpEntries = 0;
 
-  return kStOK;
+  return StMaker::Init();
 }
 
 /// write and close the ntuple file

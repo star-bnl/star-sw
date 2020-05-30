@@ -113,7 +113,7 @@ Int_t StTofrNtupleMaker::Init(){
   mTofrEvents  = 0;
   mTofrEntries = 0;
 
-  return kStOK;
+  return StMaker::Init();
 }
 
 

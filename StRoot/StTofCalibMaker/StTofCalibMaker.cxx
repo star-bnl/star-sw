@@ -277,7 +277,7 @@ void StTofCalibMaker::resetPars()
 Int_t StTofCalibMaker::Init()
 {
   initFormulas();
-  return kStOK;
+  return StMaker::Init();
 }
 
 //_____________________________________________________________________________

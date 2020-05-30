@@ -97,7 +97,7 @@ Int_t StBTofMatchEffMaker::Init(){
   mTofEventCounter = 0;
   mAcceptAndBeam = 0;
   
-  return kStOK;
+  return StMaker::Init();
 }
 
 //---------------------------------------------------------------------------

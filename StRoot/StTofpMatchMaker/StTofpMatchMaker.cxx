@@ -143,7 +143,7 @@ Int_t StTofpMatchMaker::Init(){
   mAcceptAndStrobe = 0;
   mAcceptAndBeam = 0;
 
-  return kStOK;
+  return StMaker::Init();
 }
 
 

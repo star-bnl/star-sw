@@ -55,7 +55,7 @@ void StBTofMaker::Clear(Option_t* option)
 Int_t StBTofMaker::Init()
 {
   Clear("");
-  return kStOK;
+  return StMaker::Init();
 }
 
 //_____________________________________________________________

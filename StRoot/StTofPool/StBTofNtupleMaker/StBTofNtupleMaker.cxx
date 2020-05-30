@@ -117,7 +117,7 @@ Int_t StBTofNtupleMaker::Init(){
   mBTofEvents  = 0;
   mBTofEntries = 0;
 
-  return kStOK;
+  return StMaker::Init();
 }
 
 

@@ -110,7 +110,7 @@ void StVpdAnalysisMaker::resetVpdPars()
 //____________________________________________________________________________
 Int_t StVpdAnalysisMaker::Init()
 {
-  return kStOK;
+  return StMaker::Init();
 }
 
 //____________________________________________________________________________

@@ -140,7 +140,7 @@ Int_t StTofMuDstReader::Finish()
 Int_t StTofMuDstReader::Init()
 {
   Clear("C");
-  return kStOK;
+  return StMaker::Init();
 }
 //_________________________________________________
 Int_t StTofMuDstReader::Make()

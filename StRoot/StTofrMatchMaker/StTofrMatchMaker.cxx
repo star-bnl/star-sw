@@ -261,7 +261,7 @@ Int_t StTofrMatchMaker::Init(){
   mAcceptAndStrobe = 0;
   mAcceptAndBeam = 0;
   
-  return kStOK;
+  return StMaker::Init();
 }
 
 
