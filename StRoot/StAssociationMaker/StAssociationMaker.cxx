@@ -240,7 +240,7 @@
  *
  *************************************************/
 
-
+//#define __GENE__
 #include "Stiostream.h"
 #include <iterator>
 #include <stdlib.h>
@@ -858,7 +858,6 @@ Int_t StAssociationMaker::Make()
     
     int matchedR = 0;
     
-    float tpcHitDistance = 9999;
     if (Debug()) cout << "In Sector : ";
     
     for (unsigned int iSector=0;
@@ -875,7 +874,9 @@ Int_t StAssociationMaker::Make()
 	int padrowMatchesDi = 0;
 	if (Debug()>=2 && iPadrow>=0) {
 	  cout << endl;
-	  cout << "Padrow " << iPadrow+1 << endl;
+	  cout << "Padrow " << iPadrow+1 
+	       << "\tRC hits: " << tpcPadRowHitColl->hits().size() 
+	       << "\tMC hits: " <<  mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().size() <<endl;
 	  cout << "Reco hit index \tX pos\tY pos\tZ pos\tmIdTruth" << endl;
 	  // In debug2 mode, print out all the reco hits and all the MC hits in this padrow
 	  for (unsigned int iHit=0;
@@ -904,7 +905,7 @@ Int_t StAssociationMaker::Make()
 	  // if (distance Association || !idTruth) {
 	  //  do distance association
 	  //  } else {
-	  //  do id association
+	  //  do id association for the closest mcTpcHit
 	  //  }
 	  
 	  //gMessMgr->Info() << "Backward compatibility mode:: distance cut association" << endm;
@@ -916,6 +917,7 @@ Int_t StAssociationMaker::Make()
 	  
 	  float xDiff, yDiff, zDiff;
 	  xDiff = yDiff = zDiff = -999;
+	  float tpcHitDistance = 9999;
 	  for (StMcTpcHitIterator jHit = mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().begin();
 	       jHit != mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().end();
 	       jHit++){
@@ -925,26 +927,21 @@ Int_t StAssociationMaker::Make()
 	    //if (mcTpcHit->parentTrack()) idMc = mcTpcHit->parentTrack()->key(); // case 2
 	    //if (idMc != rcTpcHit->idTruth()) continue; // case 2
 	    //if (! mcTpcHit->parentTrack()->key()) { // no Id -> take one in the window 
-	    if (mDistanceAssoc || !rcTpcHit->idTruth()) {
-	      xDiff = mcTpcHit->position().x()-rcTpcHit->position().x();
-	      yDiff = mcTpcHit->position().y()-rcTpcHit->position().y();
-	      zDiff = mcTpcHit->position().z()-rcTpcHit->position().z();
-	      if (!closestTpcHit) {
-		tpcHitDistance=xDiff*xDiff+zDiff*zDiff;
-		closestTpcHit = mcTpcHit;
-	      }
-	      if (xDiff*xDiff+zDiff*zDiff<tpcHitDistance) {
-		tpcHitDistance = xDiff*xDiff+zDiff*zDiff;
-		closestTpcHit = mcTpcHit;
-	      }
-	      
-	      if ( fabs(xDiff)>= parDB->xCutTpc() ||
-		   fabs(yDiff)>= parDB->yCutTpc() ||
-		   fabs(zDiff)>= parDB->zCutTpc(mcTpcHit->position().z())) continue;
-	    } else {
-	      if (! mcTpcHit->parentTrack()) continue;
-	      if (mcTpcHit->parentTrack()->key() != rcTpcHit->idTruth()) continue;
+	    if (! mDistanceAssoc &&  rcTpcHit->idTruth() && mcTpcHit->parentTrack() && mcTpcHit->parentTrack()->key() != rcTpcHit->idTruth()) continue; 
+	    xDiff = mcTpcHit->position().x()-rcTpcHit->position().x();
+	    yDiff = mcTpcHit->position().y()-rcTpcHit->position().y();
+	    zDiff = mcTpcHit->position().z()-rcTpcHit->position().z();
+	    float scale = 1;
+	    if (! mDistanceAssoc) scale = 5;
+	    if ( fabs(xDiff)>= scale*parDB->xCutTpc() ||
+		 fabs(yDiff)>= scale*parDB->yCutTpc() ||
+		 fabs(zDiff)>= scale*parDB->zCutTpc()) continue;
+	    float distance  = xDiff*xDiff + yDiff*yDiff+zDiff*zDiff;
+	    if (distance < tpcHitDistance) {
+	      tpcHitDistance=distance;
+	      closestTpcHit = mcTpcHit;
 	    }
+	  
 	    // Note: Association is within sector and pad row, so a Monte Carlo
 	    // looper may have multiple Monte Carlo hits from one track associated
 	    // to one and the same reconstructed hit!

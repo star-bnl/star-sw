@@ -56,6 +56,7 @@
 class StMcParameterDB {
 public:
     static StMcParameterDB* instance(); // *MENU*
+    virtual ~StMcParameterDB() {}
 
     float xCutTpc() const; // *MENU*
     float yCutTpc() const; // *MENU*
