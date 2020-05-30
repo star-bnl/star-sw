@@ -18,6 +18,7 @@ public:
   Int_t Init();
   Int_t Generate();
   Int_t Skip(Int_t Nskip);
+  Int_t ReadEvent(Int_t N = 0);
   StarGenParticle *AddParticle();
   StarGenParticle *AddParticle( const Char_t *type );
 private:

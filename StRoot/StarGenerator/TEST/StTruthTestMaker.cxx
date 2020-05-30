@@ -74,7 +74,7 @@ Int_t StTruthTestMaker::Init()
   if ( name=="testGeant" ) mDoGeant = true;
   else                     mDoGeant = false;
   
-  return kStOK;
+  return StMaker::Init();
 }
 // ------------------------------------------------------------------------------------------ Init //
 

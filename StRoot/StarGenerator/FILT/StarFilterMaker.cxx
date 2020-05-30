@@ -46,7 +46,7 @@ StarFilterMaker::StarFilterMaker( const Char_t *name )  :
 Int_t StarFilterMaker::Init()
 {
 
-  return kStOK;
+  return StMaker::Init();
 
 }
 // --------------------------------------------------------------------------------------------------------------

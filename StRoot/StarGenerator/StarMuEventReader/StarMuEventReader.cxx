@@ -9,8 +9,7 @@ Int_t StarMuEventReader::Init()
   TString MuDstF(SAttr("InputFile"));
   fMuDstIter = new TTreeIter();
   fMuDstIter->AddFile(MuDstF);
-  
-  return kStOK;
+  return StMaker::Init();
 };
 // ----------------------------------------------------------------------------
 StarGenParticle *StarMuEventReader::AddParticle()
@@ -32,7 +31,11 @@ StarGenParticle *StarMuEventReader::AddParticle( const Char_t *type )
 }	
 //________________________________________________________________________________
 
-Int_t StarMuEventReader::Generate()
+Int_t StarMuEventReader::Generate() {
+  return ReadEvent();
+}
+//________________________________________________________________________________
+Int_t StarMuEventReader::ReadEvent(Int_t N) 
 {
   static const Int_t*&      RunId                                    = (*fMuDstIter)("MuEvent.mEventInfo.mRunId");
   static const Int_t*&      Id                                       = (*fMuDstIter)("MuEvent.mEventInfo.mId");
@@ -56,6 +59,7 @@ Int_t StarMuEventReader::Generate()
   static const Short_t*&    GlobalTracks_mFlag                       = (*fMuDstIter)("GlobalTracks.mFlag");
   static const Double_t __SIGMA_SCALE__ = 1000.;
   if (! fMuDstIter->Next()) {fStatus =  kStEOF; return fStatus;}
+  if (N) return kStOk;
   Int_t id, it;
   TUnixTime ut(MuEvent_mEventInfo_mTime[0]); ut.GetGTime(id,it);
   StEvtHddr *fEvtHddr = (StEvtHddr*) StMaker::GetChain()->GetDataSet("EvtHddr");
@@ -126,7 +130,7 @@ Int_t StarMuEventReader::Generate()
 //________________________________________________________________________________
 Int_t StarMuEventReader::Skip(Int_t Nskip) {
   for (Int_t i = 0; i < Nskip; i++) {
-    if (! fMuDstIter->Next()) break;
+    if (ReadEvent(1)) return kStEOF; 
   }
   return kStOK;
 }

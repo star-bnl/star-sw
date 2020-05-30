@@ -4,7 +4,7 @@
 Int_t StarGenEventReader::Init() {
   TString filename(SAttr("InputFile"));
   if (filename != "") SetInputFile(filename);
-  return kStOK;
+  return StMaker::Init();
 }
 //________________________________________________________________________________
 Int_t StarGenEventReader::Generate()
