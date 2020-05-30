@@ -17,6 +17,7 @@
 #include "StCheckQtEnv.h"
 #include "TStyle.h"
 #include "TVirtualViewer3D.h"
+#include "TCanvasImp.h"
 #include <cassert>
 #include <cmath>
 

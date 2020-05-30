@@ -22,7 +22,9 @@
 #include "TCernLib.h"    
 #include "TVector3.h"    
 #include "TVectorD.h" 
-   
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0)
+using namespace std;
+#endif
 double *Arr(TVector3 &v) {return (double*)&v[0];}
 
 double EmxSign(int n,const double *a);
