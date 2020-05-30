@@ -46,7 +46,7 @@ Int_t StRccCounterMonitor::Init(){
   mTree->Branch("evt",&EVT,"evt/i");  
   mTree->Branch("tcu",&TCU,"tcu/i");  
   mTree->Branch("diff",&DIFF,"d[14]/i");  
-  return kStOK;
+  return StMaker::Init();
 }
 
 int StRccCounterMonitor::Finish(){

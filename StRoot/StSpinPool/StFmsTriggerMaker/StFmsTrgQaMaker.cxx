@@ -56,7 +56,7 @@ int StFmsTrgQaMaker::Init(){
   for(int i=0; i<NBS; i++){ hBS[i]=new TH1F(BSname[i],BSname[i],256,0.0,4096.0); }
   for(int i=0; i<NJP; i++){ hJP[i]=new TH1F(JPname[i],JPname[i],64,0.0,256.0); }  
   readtrgid();
-  return kStOk;
+  return StMaker::Init();
 }
 
 int StFmsTrgQaMaker::Finish(){

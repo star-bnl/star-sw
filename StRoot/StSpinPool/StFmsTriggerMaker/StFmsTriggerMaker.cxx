@@ -179,7 +179,7 @@ int StFmsTriggerMaker::Init()
   hqt3adc = new TH2F("hqt3adc","QT3 crate;QT channel;QT ADC",512,0,512,1024,0,1024);
   hqt4adc = new TH2F("hqt4adc","QT4 crate;QT channel;QT ADC",512,0,512,1024,0,1024);
   hfeqadc = new TH2F("hfeqadc","FEQ crate;QT channel;QT ADC",512,0,512,1024,0,1024);
-  return kStOk;
+  return StMaker::Init();
 }
 
 int StFmsTriggerMaker::InitRun(int runNumber){  

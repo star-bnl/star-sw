@@ -148,7 +148,7 @@ Int_t  St_sls_Maker::InitRun(Int_t runNumber) {
   Float_t B[3]={0,0,0};  
   StarMagField::Instance()->BField(center,B);
   mBField   = B[2]*kilogauss;
-  return kStOk;
+  return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t St_sls_Maker::Make()

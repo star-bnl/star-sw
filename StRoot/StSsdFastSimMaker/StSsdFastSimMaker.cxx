@@ -95,7 +95,7 @@ int StSsdFastSimMaker::Init()
     Ratio->SetLabelSize(0.03,"X");
     Ratio->SetLabelSize(0.03,"Y");
   }
-  return kStOk;
+  return StMaker::Init();
 }
 //____________________________________________________________
 int StSsdFastSimMaker::InitRun(int RunNo)

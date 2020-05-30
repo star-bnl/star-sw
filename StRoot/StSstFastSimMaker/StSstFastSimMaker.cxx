@@ -41,7 +41,7 @@ Int_t StSstFastSimMaker::Init()
   // Define various SSD specific geom. variables.
   mResXSst = 0.0000;				
   mResZSst = 0.0000;
-  return kStOk;
+  return StMaker::Init();
 }
 
 Int_t StSstFastSimMaker::InitRun(int RunNo)

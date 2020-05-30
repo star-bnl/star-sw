@@ -177,7 +177,7 @@ Int_t StFmsOfflineQaMaker::Init(){
 	sprintf(c,"p_r100_c%d",cut); mPr100[cut]=new TH1F(c,c,100,0.0,2.0);    
 	sprintf(c,"p_xy_c%d",cut);   mPxy[cut]=new TH2F(c,c,200,-100.0,100.0,200,-100.0,100.0);    
     }
-    return kStOK;
+    return StMaker::Init();
 }
 
 Int_t StFmsOfflineQaMaker::Finish(){

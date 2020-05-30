@@ -35,7 +35,7 @@ Int_t StFmsBsQaMaker::Init()
 	mFmsDbMk = static_cast<StFmsDbMaker*>(GetMaker("fmsDb"));
 	if (!mFmsDbMk) { LOG_ERROR <<"StFmsBsQaMaker::InitRun - !StFmsDbMaker" <<endl; return kStFatal; }
 
-	return kStOk;
+	return StMaker::Init();
 }//Init
 
 //======================================

@@ -202,7 +202,7 @@ Int_t StFmsCalibMaker::Init()
 		return kStFatal;
 	}
 
-	return kStOk;
+	return StMaker::Init();
 }//Init
 
 //---------------------------------------

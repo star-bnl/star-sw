@@ -233,7 +233,7 @@ int StFmsBitCheckMaker::Init(){
   memset(N2,0,sizeof(N2));
   memset(N3,0,sizeof(N3));
   PRINTLEVEL=mPrint;
-  return kStOk;
+  return StMaker::Init();
 }
 
 int StFmsBitCheckMaker::InitRun(int runNumber){

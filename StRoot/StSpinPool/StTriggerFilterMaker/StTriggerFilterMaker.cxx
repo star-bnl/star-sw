@@ -16,7 +16,7 @@ StTriggerFilterMaker::~StTriggerFilterMaker() {
 Int_t StTriggerFilterMaker::Init() {
     // this allows us to skip an event for other Makers
     SetAttr(".Privilege",1);
-    return kStOk;
+    return StMaker::Init();
 }
 
 Int_t StTriggerFilterMaker::Make() {

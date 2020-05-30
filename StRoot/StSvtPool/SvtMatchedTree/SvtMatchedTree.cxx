@@ -37,7 +37,7 @@ SvtMatchedTree::SvtMatchedTree(const Char_t *name) : StMaker(name),fFile(0), fTr
 //________________________________________________________________________________
 Int_t SvtMatchedTree::Init() {
   SetTree();
-  return kStOK;
+  return StMaker::Init();
 }
 //________________________________________________________________________________
 Int_t SvtMatchedTree::Finish() {

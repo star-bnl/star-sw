@@ -52,7 +52,7 @@ StFmsFastSimMaker::StFmsFastSimMaker(const Char_t* name):StMaker(name),mPrint(0)
 StFmsFastSimMaker::~StFmsFastSimMaker(){}   
 
 Int_t StFmsFastSimMaker::Init(){  
-    return kStOK;
+    return StMaker::Init();
 }
  
 void StFmsFastSimMaker::Clear(Option_t *option){  

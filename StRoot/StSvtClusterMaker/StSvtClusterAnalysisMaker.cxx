@@ -192,7 +192,7 @@ StSvtClusterAnalysisMaker::~StSvtClusterAnalysisMaker()
 //_____________________________________________________________________________________________
 Int_t StSvtClusterAnalysisMaker::InitRun(int runumber)
 {
-  if( Debug()) gMessMgr->Debug() <<"In StSvtClusterAnalysisMaker::Init()"
+  if( Debug()) gMessMgr->Debug() <<"In StSvtClusterAnalysisMaker::InitRun()"
 				 << GetName() <<endm;
 
   mNoEvents=0;
