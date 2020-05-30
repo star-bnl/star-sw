@@ -33,7 +33,7 @@ Int_t
 StEEmcDAQ2Ped::Init() {
   mEeDb = (StEEmcDb*)this->GetDataSet("StEEmcDb");
   assert(mEeDb); // eemcDB must be in the chain, fix it
-  return kStOk;
+  return StMaker::Init();
 }
 
 //------------------------------------

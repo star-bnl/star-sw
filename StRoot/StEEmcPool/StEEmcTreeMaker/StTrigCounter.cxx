@@ -24,11 +24,7 @@ StTrigCounter::~StTrigCounter(){
 
 /// Initialize
 Int_t StTrigCounter::Init(){
-   Int_t ierr = kStOk;
-
-   // nothing else
-
-   return ierr;
+  return StMaker::Init();
 };
 
 

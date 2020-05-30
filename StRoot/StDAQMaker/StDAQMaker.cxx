@@ -39,7 +39,8 @@ Int_t StDAQMaker::Init()
   fEvtHddr = GetEvtHddr();
 // 		Get run parameters from input file
 
-  return Open();  
+  Open();  
+  return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t StDAQMaker::Open(const char*)

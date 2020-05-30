@@ -56,7 +56,8 @@ Int_t StEEmcHitMaker_t::Init(){
       ierr = kStFatal;
    };
 
-   return ierr;
+   if (ierr) return ierr;
+   return StMaker::Init();
 };
 
 /// need so that data is all loaded properly

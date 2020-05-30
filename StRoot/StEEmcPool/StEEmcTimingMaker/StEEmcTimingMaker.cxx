@@ -225,7 +225,7 @@ Int_t StEEmcTimingMaker::Init()
       
 #endif    
 
-  return kStOk;; /* moves histograms to .hist */
+  return StMaker::Init();
 }
 // ----------------------------------------------------------------------------
 // fill raw ADC for each valid detector

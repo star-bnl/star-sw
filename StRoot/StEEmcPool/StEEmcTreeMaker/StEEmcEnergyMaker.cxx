@@ -28,7 +28,8 @@ Int_t StEEmcEnergyMaker_t::Init(){
       ierr = kStFatal;
    };
 
-   return ierr;
+   if (ierr) return ierr;
+   return StMaker::Init();
 };
 
 /// Build an event

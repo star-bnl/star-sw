@@ -22,7 +22,8 @@ Int_t StSpinInfoMaker_t::Init(){
       ierr = kStFatal;
    };
 
-   return ierr;
+   if (ierr) return ierr;
+   return StMaker::Init();
 };
 
 Int_t StSpinInfoMaker_t::Make(){

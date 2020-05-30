@@ -77,7 +77,8 @@ Int_t StTrigTreeMaker_t::Init(){
    cout << "--------------------------------------------------> end of StTrigTreeMaker_t::Init() <--------------------------------------------------" << endl;
 #endif
 
-   return ierr;
+   if (ierr) return ierr;
+   return StMaker::Init();
 };
 
 

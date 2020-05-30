@@ -59,8 +59,8 @@ Int_t StMuEEmcCrateTimingMaker::Init() {
     totalError[i]=0;
     channelIds[i]=0;
   }
-
-  return 0;
+  
+  return StMaker::Init();
 }
 
 // ----------------------------------------------------------------------------
