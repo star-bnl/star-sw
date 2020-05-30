@@ -19,7 +19,6 @@ class StTpcHitMover : public StMaker {
   StTpcHitMover(const char *name="tpc_hit_mover");
   virtual ~StTpcHitMover();
 
-  virtual Int_t Init();
   virtual Int_t InitRun(Int_t runnumber);
   virtual Int_t Make();
   virtual void  FlushDB();
