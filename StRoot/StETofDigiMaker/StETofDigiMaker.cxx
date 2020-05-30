@@ -67,7 +67,7 @@ StETofDigiMaker::Init()
 {
     LOG_INFO << "StETofDigiMaker::Init" << endm;
 
-    return kStOk;
+    return StMaker::Init();
 }
 
 //_____________________________________________________________

@@ -116,7 +116,7 @@ StETofSimMaker::Init()
         LOG_INFO << "StETofCalibMaker::Init() - tot input paramerter file not existing ..." << endm;
     }
 
-    return kStOK;
+    return StMaker::Init();
 }
 
 

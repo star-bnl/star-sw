@@ -116,7 +116,7 @@ StETofHitMaker::Init()
 
     bookHistograms();
 
-    return kStOk;
+    return StMaker::Init();
 }
 
 //_____________________________________________________________

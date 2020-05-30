@@ -173,7 +173,7 @@ StETofQAMaker::Init()
 
     createHistos();
 
-    return kStOk;
+    return StMaker::Init();
 }
 
 

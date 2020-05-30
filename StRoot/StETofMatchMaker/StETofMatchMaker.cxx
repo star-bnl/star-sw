@@ -211,7 +211,7 @@ StETofMatchMaker::Init()
 
     bookHistograms();
 
-    return kStOk;
+    return StMaker::Init();
 }
 
 

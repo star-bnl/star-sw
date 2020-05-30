@@ -64,7 +64,7 @@ Int_t StEmcAsciiDbMaker::Init() {
   LOG_INFO << Form(" %s::Init()  setGain60Et=%d",GetName(),mgain60Et) <<endm;
   
   mMappB =0;
-  return kStOk;
+  return StMaker::Init();
 }
 
 //========================================

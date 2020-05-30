@@ -68,7 +68,7 @@ Int_t StEStructAnalysisMaker::Init()
   mEventProcessedPerType=new int[numAnalysis];
   for(int i=0;i<numAnalysis;i++) mEventProcessedPerType[i]=0;
 
-  return kStOK;
+  return StMaker::Init();
 }
 
 //--------------------------------------------------------------

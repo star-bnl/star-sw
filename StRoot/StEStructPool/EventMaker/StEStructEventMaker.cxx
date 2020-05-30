@@ -154,7 +154,7 @@ void StEStructEventMaker::setName(const char* name, int opt){
 
 //-----------------------------------------------------------------------
 Int_t StEStructEventMaker::Init() {
-  return kStOK;
+  return StMaker::Init();
 }
 
 //-----------------------------------------------------------------------
