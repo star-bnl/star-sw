@@ -251,6 +251,8 @@ void gudcay()
 
     // Initialize 4-momentum vector    
     Int_t ipart = geant3->Gckine()->ipart;
+    Int_t itrtyp = geant3->Gckine()->itrtyp;
+    if (itrtyp == kPTIon) return;
     static TLorentzVector p;
 
     Float_t pmom = geant3->Gctrak()->vect[6];

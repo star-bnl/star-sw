@@ -265,7 +265,7 @@ Int_t StKFVertexMaker::Make() {
   MakeParticles();
   if (fNGoodGlobals < 1) return kStOK;
   // add Fixed Primary vertex if any
-  if (IAttr("VFFV") || IAttr("VFMCE") ||IAttr("VFMinuitX") ) {
+  if (IAttr("VFFV") || IAttr("VFMCE") || IAttr("VFMinuitX") ) {
     StGenericVertexFinder *mGVF = 0;
     StGenericVertexMaker* gvm = (StGenericVertexMaker*)StMaker::GetChain()->GetMaker("GenericVertex");
     if (gvm) mGVF = gvm->GetGenericFinder();
@@ -274,44 +274,45 @@ Int_t StKFVertexMaker::Make() {
 	((StFixedVertexFinder *)mGVF)->SetVertexError(gEnv->GetValue("FixedSigmaX", 0.0176),
 						      gEnv->GetValue("FixedSigmaY", 0.0176),
 						      gEnv->GetValue("FixedSigmaZ", 0.0176));
-      }
-      StKFVertex::ResetTotalNoVertices(0);
-      fgcVertices = new StKFVerticesCollection();
-      mGVF->fit(pEvent);
-      mGVF->FillStEvent(pEvent);
-      UInt_t NoPV = pEvent->numberOfPrimaryVertices();
-      if (! NoPV) return kStOK;
-      for (UInt_t iv = 0; iv < NoPV; iv++) {
-	StPrimaryVertex *primV = pEvent->primaryVertex(iv);
-	if (! primV) continue;
-	primV->setRanking(primV->numTracksUsedInFinder()); 
-      }
-      pEvent->sortVerticiesByRank();
-      for (UInt_t iv = 0; iv < NoPV; iv++) {
-	StPrimaryVertex *primV = pEvent->primaryVertex(iv);
-	if (primV && ! primV->key()) {
-	  primV->setKey(iv+1);
+      } 
+      if (IAttr("VFMinuitX")) {
+	fgcVertices = new StKFVerticesCollection();
+	mGVF->fit(pEvent);
+	mGVF->FillStEvent(pEvent);
+	UInt_t NoPV = pEvent->numberOfPrimaryVertices();
+	if (! NoPV) return kStOK;
+	for (UInt_t iv = 0; iv < NoPV; iv++) {
+	  StPrimaryVertex *primV = pEvent->primaryVertex(iv);
+	  if (! primV) continue;
+	  primV->setRanking(primV->numTracksUsedInFinder()); 
 	}
-	primV->setIdTruth();
-	StKFVertex KVx;
-	KVx.Initialize();
-	KVx.SetId(primV->key());
-	TCL::ucopy(primV->position().xyz(), &KVx.Parameter(0), 3);
-	TCL::ucopy(primV->covariance(), &KVx.Covariance(0), 6);
-	KVx.NDF() = 1;
-	KVx.SetIdTruth(primV->idTruth(),primV->qaTruth());
-	// copy Point fit as MassFit
-	StTrackMassFit *pf = new StTrackMassFit(KVx.Id(),&KVx);
-	PrPP(Make,*pf);
-	primV->setParent(pf);
-	fgcVertices->AddVertex(&KVx);
-	StTrackNode *nodepf = new StTrackNode;
-	nodepf->addTrack(pf);
-	StSPtrVecTrackNode& trNodeVec = pEvent->trackNodes(); 
-	trNodeVec.push_back(nodepf);
+	pEvent->sortVerticiesByRank();
+	for (UInt_t iv = 0; iv < NoPV; iv++) {
+	  StPrimaryVertex *primV = pEvent->primaryVertex(iv);
+	  if (primV && ! primV->key()) {
+	    primV->setKey(iv+1);
+	  }
+	  primV->setIdTruth();
+	  StKFVertex KVx;
+	  KVx.Initialize();
+	  KVx.SetId(primV->key());
+	  TCL::ucopy(primV->position().xyz(), &KVx.Parameter(0), 3);
+	  TCL::ucopy(primV->covariance(), &KVx.Covariance(0), 6);
+	  KVx.NDF() = 1;
+	  KVx.SetIdTruth(primV->idTruth(),primV->qaTruth());
+	  // copy Point fit as MassFit
+	  StTrackMassFit *pf = new StTrackMassFit(KVx.Id(),&KVx);
+	  PrPP(Make,*pf);
+	  primV->setParent(pf);
+	  fgcVertices->AddVertex(&KVx);
+	  StTrackNode *nodepf = new StTrackNode;
+	  nodepf->addTrack(pf);
+	  StSPtrVecTrackNode& trNodeVec = pEvent->trackNodes(); 
+	  trNodeVec.push_back(nodepf);
+	}
+	ReFitToStVertex();
+	pEvent->sortVerticiesByRank();
       }
-      ReFitToStVertex();
-      pEvent->sortVerticiesByRank();
     }
   } else {
     Fit();
