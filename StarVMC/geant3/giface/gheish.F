@@ -142,7 +142,7 @@ C
 C
 C --- SET THE GHEISHA PARTICLE TYPE TO THE ONE OF GEANT ---
       IF(IPART.GT.79) THEN
-         IF(ISTOP.EQ.0) GOTO 9999
+         IF(ISTOP.ne.0) GOTO 9999
          JPA = LQ(JPART-IPART)
          AMAS=Q(JPA+7)
          NCH =Q(JPA+8)

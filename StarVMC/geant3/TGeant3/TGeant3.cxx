@@ -1573,43 +1573,50 @@ Be7: M = 6.5341844, pdg = 1000040070
     FindTrackV0Decay(fLLn     , 3203, vRTracks[0],  1, vRTracks[0].FirstProton(), vRTracks[0].LastProton(), Particles, PrimVtx, -1, 0 );
     //He6LL -> He5L p pi-
     FindTrackV0Decay(fH5LL    , 3010, vRTracks[0],  1, vRTracks[0].FirstProton(), vRTracks[0].LastProton(), Particles, PrimVtx, -1, 0 );
+{ "Li5", "Li5", 4.6676161, kFALSE, 0.0021642217, 9, kPTHadron, 1000030050, {"ALPHA", "proton", 0} } -> He4 p
+{ "He5L", "He5L", 4.865, kFALSE, widthLambda, 6,  kPTHadron, 1003007, {"Li5", "pi-", 0} } -> Li5 pi-
+
+He5L -> Li5 pi-, M = 4.865 GeV, PDG =  1003007
+Li5 -> He4 pi-, M = 4.6676161 GeV, width =  0.0021642217 GeV , PDG =  1000030050
    */
 
   Particle_t Nuclei[] = { // https://periodictable.com/Isotopes/
-    //name          ,title          ,mass                 ,stable,                     width,charge,    TrackingCod,PDGcode           ,decays        
-    {"DEUTERON"     ,"DEUTERON"     ,2.01410177785*kAu2Gev,kTRUE ,                         0,     3,    kPTIon,GetIonPdg(1, 2),  {0,  0,  0}},         
-    {"TRITON"       ,"TRITON"       ,3.01604927767*kAu2Gev,kFALSE,khShGev/(12.32*kYear2Sec) ,     3,    kPTIon,GetIonPdg(1, 3),  {0,  0,  0}},          
-    {"ALPHA"        ,"ALPHA"        ,4.00260325415*kAu2Gev,kTRUE ,                         0,     6,    kPTIon,GetIonPdg(2, 4),  {0,  0,  0}},       
-    {"HE3"          ,"HE3"          ,3.01602931914*kAu2Gev,kFALSE,                         0,     6,    kPTIon,GetIonPdg(2, 3),  {0,  0,  0}},       
-    {"HE6"          ,"HE6"          ,6.018889124*kAu2Gev  ,kFALSE,khShGev/(806.7e-3)        ,     6,    kPTIon,GetIonPdg(2, 6),  {0,  0,  0}}, // <<
-    {"Li6"          ,"Li6"          ,6.015122794*kAu2Gev  ,kFALSE,                         0,     9,    kPTIon,GetIonPdg(3, 6),  {0,  0,  0}},       
-    {"Li7"          ,"Li7"          ,7.016004548*kAu2Gev  ,kFALSE,                         0,     9,    kPTIon,GetIonPdg(3, 7),  {0,  0,  0}},       
-    {"Be7"          ,"Be7"          ,7.016929828*kAu2Gev  ,kFALSE,khShGev/(53.218*kDay2Sec) ,    12,    kPTIon,GetIonPdg(4, 7),  {0,  0,  0}},       
-    {"Be9"          ,"Be9"          ,9.012182201*kAu2Gev  ,kFALSE,                         0,    12,    kPTIon,GetIonPdg(4, 9),  {0,  0,  0}},       
-    {"Be10"         ,"Be10"         ,10.013533818*kAu2Gev ,kFALSE,                         0,    12,    kPTIon,GetIonPdg(4,10),  {0,  0,  0}},      
-    {"B11"          ,"B11"          ,11.0216577497*kAu2Gev,kFALSE,khShGev/13.81             ,    15,    kPTIon,GetIonPdg(5,11),  {0,  0,  0}},      
-    {"LN"           ,"LN"           ,2.050                ,kFALSE,               widthLambda,     0, kPTHadron,           3003,  {"DEUTERON", "pi-"     ,     0}}, //  Deuteron pi-         =>       
-    {"LNN"          ,"LNN"          ,2.9925               ,kFALSE,               widthLambda,     0, kPTHadron,           3103,  {"TRITON"  , "pi-"     ,     0}}, //  pi- Triton         =>                   
-    {"H3L"          ,"H3L"          ,2.9924               ,kFALSE,               widthLambda,     3, kPTHadron,           3004,  {"HE3"     , "pi-"     ,     0}}, // HyperTriton -> He3 pi-    
-    {"H3Ldp"        ,"H3Ldp"        ,2.9924               ,kFALSE,               widthLambda,     3, kPTHadron,           3012,  {"DEUTERON", "proton"  , "pi-"}}, // HyperTriton -> d p pi-    
-    {"H4L"          ,"H4L"          ,3.924                ,kFALSE,               widthLambda,     3, kPTHadron,           3005,  {"ALPHA"   , "pi-"     ,     0}}, // -> He4 pi-    
-    {"H4Ltp"        ,"H4Ltp"        ,3.924                ,kFALSE,               widthLambda,     3, kPTHadron,           3013,  {"TRITON"  , "proton"  , "pi-"}}, // -> t p pi-    		             
-    {"H4L2d"        ,"H4L2d"        ,3.924                ,kFALSE,               widthLambda,     3, kPTHadron,           3014,  {"DEUTERON", "DEUTERON", "pi-"}}, // -> d d pi-    	             
-    {"H5L"          ,"H5L"          ,4.865                ,kFALSE,               widthLambda,     3, kPTHadron,           3015,  {"TRITON"  , "DEUTERON", "pi-"}}, // -> t d pi-    		             
-    {"H6L"          ,"H6L"          ,5.77                 ,kFALSE,               widthLambda,     3, kPTHadron,           3016,  {"HE6"     , "pi-"     ,     0}}, // -> He6 pi-    		             
-    {"H6L3"         ,"H6L3"         ,5.77                 ,kFALSE,               widthLambda,     3, kPTHadron,           3017,  {"TRITON"  , "TRITON"  , "pi-"}}, // -> t t pi-    		             
-    {"He4L"         ,"He4L"         ,3.924                ,kFALSE,               widthLambda,     6, kPTHadron,           3006,  {"HE3"     , "proton"  , "pi-"}}, // -> He3 p pi-    	             
-    {"He5L"         ,"He5L"         ,4.865                ,kFALSE,               widthLambda,     6, kPTHadron,           3007,  {"ALPHA"   , "proton"  , "pi-"}}, // -> He4 p pi-          
-    {"He5L3"        ,"He5L3"        ,4.865                ,kFALSE,               widthLambda,     6, kPTHadron,           3018,  {"HE3"     , "DEUTERON", "pi-"}}, // -> He3 d pi-              
-    {"He6L"         ,"He6L"         ,5.77                 ,kFALSE,               widthLambda,     6, kPTHadron,           3019,  {"Li6"     , "pi-"     ,     0}}, // -> Li6 pi-    	             
-    {"He6L3"        ,"He6L3"        ,5.77                 ,kFALSE,               widthLambda,     6, kPTHadron,           3020,  {"HE3"     , "TRITON"  , "pi-"}}, // -> He3 t pi-  	             
-    {"He6L3ad"      ,"He6L3ad"      ,5.77                 ,kFALSE,               widthLambda,     6, kPTHadron,           3021,  {"ALPHA"   , "DEUTERON", "pi-"}}, // -> He4 d pi-  	             
-    {"He7L"         ,"He7L"         ,6.7                  ,kFALSE,               widthLambda,     6, kPTHadron,           3022,  {"Li7"     , "pi-"     ,     0}}, // -> Li7 pi-     	                        
-    {"He7L3"        ,"He7L3"        ,6.7                  ,kFALSE,               widthLambda,     6, kPTHadron,           3023,  {"ALPHA"   , "TRITON"  , "pi-"}}, // -> He4 t pi-  	             	             
-    {"Li6L"         ,"Li6L"         ,5.77                 ,kFALSE,               widthLambda,     9, kPTHadron,           3024,  {"HE3"     , "HE3"     , "pi-"}}, // -> He3 He3 pi-	             	             
-    {"Li7L"         ,"Li7L"         ,6.7                  ,kFALSE,               widthLambda,     9, kPTHadron,           3025,  {"Be7"     , "pi-"     ,     0}}, // -> Be7 pi-    	             	             
-    {"Li7L3"        ,"Li7L3"        ,6.7                  ,kFALSE,               widthLambda,     9, kPTHadron,           3026,  {"ALPHA"   , "HE3"     , "pi-"}}, // -> He4 He3 pi-	             	             
-    {"Li8L"         ,"Li8L"         ,7.65                 ,kFALSE,               widthLambda,     9, kPTHadron,           3027,  {"ALPHA"   , "ALPHA"   , "pi-"}}  // -> He4 He4 pi-                              
+    //name          ,title          ,mass                 ,stable,        width,charge,    TrackingCod,PDGcode           ,decays        
+    {"DEUTERON"     ,"DEUTERON"     ,2.01410177785*kAu2Gev,kTRUE ,            0,     3,    kPTIon,GetIonPdg(1, 2),  {0,  0,  0}},         
+    {"TRITON"       ,"TRITON"       ,3.01604927767*kAu2Gev,kTRUE ,            0,     3,    kPTIon,GetIonPdg(1, 3),  {0,  0,  0}}, // khShGev/(12.32*kYear2Sec)  
+    {"ALPHA"        ,"ALPHA"        ,4.00260325415*kAu2Gev,kTRUE ,            0,     6,    kPTIon,GetIonPdg(2, 4),  {0,  0,  0}},       
+    {"HE3"          ,"HE3"          ,3.01602931914*kAu2Gev,kTRUE ,            0,     6,    kPTIon,GetIonPdg(2, 3),  {0,  0,  0}},       
+    {"HE6"          ,"HE6"          ,6.018889124*kAu2Gev  ,kTRUE ,            0,     6,    kPTIon,GetIonPdg(2, 6),  {0,  0,  0}}, // khShGev/(806.7e-3) 
+    {"Li5"          ,"Li5"          ,4.6676161            ,kFALSE, 0.0021642217,     9,    kPTHadron , 1000030050,  {"ALPHA", "proton", 0}}, // -> He4 p
+    {"Li6"          ,"Li6"          ,6.015122794*kAu2Gev  ,kTRUE ,            0,     9,    kPTIon,GetIonPdg(3, 6),  {0,  0,  0}},       
+    {"Li7"          ,"Li7"          ,7.016004548*kAu2Gev  ,kTRUE ,            0,     9,    kPTIon,GetIonPdg(3, 7),  {0,  0,  0}},       
+    {"Be7"          ,"Be7"          ,7.016929828*kAu2Gev  ,kTRUE ,            0,    12,    kPTIon,GetIonPdg(4, 7),  {0,  0,  0}},       // ,khShGev/(53.218*kDay2Sec)
+    {"Be9"          ,"Be9"          ,9.012182201*kAu2Gev  ,kTRUE ,            0,    12,    kPTIon,GetIonPdg(4, 9),  {0,  0,  0}},       
+    {"Be10"         ,"Be10"         ,10.013533818*kAu2Gev ,kTRUE ,            0,    12,    kPTIon,GetIonPdg(4,10),  {0,  0,  0}},      
+    {"B11"          ,"B11"          ,11.0216577497*kAu2Gev,kTRUE ,            0,    15,    kPTIon,GetIonPdg(5,11),  {0,  0,  0}},      // ,khShGev/13.81
+    {"LN"           ,"LN"           ,2.050                ,kFALSE,  widthLambda,     0, kPTHadron,           3003,  {"DEUTERON", "pi-"     ,     0}}, //  Deuteron pi-         =>       
+    {"LNN"          ,"LNN"          ,2.9925               ,kFALSE,  widthLambda,     0, kPTHadron,     1010000030,  {"TRITON"  , "pi-"     ,     0}}, //  pi- Triton         =>                   
+    {"H3L"          ,"H3L"          ,2.9924               ,kFALSE,  widthLambda,     3, kPTHadron,           3004,  {"HE3"     , "pi-"     ,     0}}, // HyperTriton -> He3 pi-    
+    {"H3Ldp"        ,"H3Ldp"        ,2.9924               ,kFALSE,  widthLambda,     3, kPTHadron,           3012,  {"DEUTERON", "proton"  , "pi-"}}, // HyperTriton -> d p pi-    
+    {"H4L"          ,"H4L"          ,3.924                ,kFALSE,  widthLambda,     3, kPTHadron,           3005,  {"ALPHA"   , "pi-"     ,     0}}, // -> He4 pi-    
+    {"H4Ltp"        ,"H4Ltp"        ,3.924                ,kFALSE,  widthLambda,     3, kPTHadron,           3013,  {"TRITON"  , "proton"  , "pi-"}}, // -> t p pi-    		             
+    {"H4L2d"        ,"H4L2d"        ,3.924                ,kFALSE,  widthLambda,     3, kPTHadron,           3014,  {"DEUTERON", "DEUTERON", "pi-"}}, // -> d d pi-    	             
+    {"H5L"          ,"H5L"          ,4.865                ,kFALSE,  widthLambda,     3, kPTHadron,           3015,  {"TRITON"  , "DEUTERON", "pi-"}}, // -> t d pi-    		             
+    {"H6L"          ,"H6L"          ,5.77                 ,kFALSE,  widthLambda,     3, kPTHadron,           3016,  {"HE6"     , "pi-"     ,     0}}, // -> He6 pi-    		             
+    {"H6L3"         ,"H6L3"         ,5.77                 ,kFALSE,  widthLambda,     3, kPTHadron,           3017,  {"TRITON"  , "TRITON"  , "pi-"}}, // -> t t pi-    		             
+    {"He4L"         ,"He4L"         ,3.924                ,kFALSE,  widthLambda,     6, kPTHadron,           3006,  {"HE3"     , "proton"  , "pi-"}}, // -> He3 p pi-    	             
+    {"He5L"         ,"He5L"         ,4.865                ,kFALSE,  widthLambda,     6, kPTHadron,           3007,  {"ALPHA"   , "proton"  , "pi-"}}, // -> He4 p pi-          
+    {"He5L3"        ,"He5L3"        ,4.865                ,kFALSE,  widthLambda,     6, kPTHadron,           3018,  {"HE3"     , "DEUTERON", "pi-"}}, // -> He3 d pi-              
+    {"He5Li5"       ,"He5Li5"       ,4.865                ,kFALSE,  widthLambda,     6, kPTHadron,        1003007,  {"Li5"     , "pi-"     ,     0}}, // -> Li5 -> He4 pi-
+    {"He6L"         ,"He6L"         ,5.77                 ,kFALSE,  widthLambda,     6, kPTHadron,           3019,  {"Li6"     , "pi-"     ,     0}}, // -> Li6 pi-    	             
+    {"He6L3"        ,"He6L3"        ,5.77                 ,kFALSE,  widthLambda,     6, kPTHadron,           3020,  {"HE3"     , "TRITON"  , "pi-"}}, // -> He3 t pi-  	             
+    {"He6L3ad"      ,"He6L3ad"      ,5.77                 ,kFALSE,  widthLambda,     6, kPTHadron,           3021,  {"ALPHA"   , "DEUTERON", "pi-"}}, // -> He4 d pi-  	             
+    {"He7L"         ,"He7L"         ,6.7                  ,kFALSE,  widthLambda,     6, kPTHadron,           3022,  {"Li7"     , "pi-"     ,     0}}, // -> Li7 pi-     	                        
+    {"He7L3"        ,"He7L3"        ,6.7                  ,kFALSE,  widthLambda,     6, kPTHadron,           3023,  {"ALPHA"   , "TRITON"  , "pi-"}}, // -> He4 t pi-  	             	             
+    {"Li6L"         ,"Li6L"         ,5.77                 ,kFALSE,  widthLambda,     9, kPTHadron,           3024,  {"HE3"     , "HE3"     , "pi-"}}, // -> He3 He3 pi-	             	             
+    {"Li7L"         ,"Li7L"         ,6.7                  ,kFALSE,  widthLambda,     9, kPTHadron,           3025,  {"Be7"     , "pi-"     ,     0}}, // -> Be7 pi-    	             	             
+    {"Li7L3"        ,"Li7L3"        ,6.7                  ,kFALSE,  widthLambda,     9, kPTHadron,           3026,  {"ALPHA"   , "HE3"     , "pi-"}}, // -> He4 He3 pi-	             	             
+    {"Li8L"         ,"Li8L"         ,7.65                 ,kFALSE,  widthLambda,     9, kPTHadron,           3027,  {"ALPHA"   , "ALPHA"   , "pi-"}}  // -> He4 He4 pi-                              
   };
   Int_t nIons = sizeof(Nuclei)/sizeof(Particle_t);
   for (Int_t i = 0; i < nIons; i++) {
@@ -1620,6 +1627,10 @@ Be7: M = 6.5341844, pdg = 1000040070
       else       {name = "Anti"; name +=  Nuclei[i].name;}
       Double_t charge =  s*Nuclei[i].charge/3.;
       Int_t Id = IdFromPDG(pdg);
+      if (TDatabasePDG::Instance()->GetParticle(pdg)) {
+	cout << "Particle " << name.Data() << " with pdg = " << pdg << " has been taken" << endl;
+	TDatabasePDG::Instance()->GetParticle(pdg)->Print();
+      }
       Double_t tlife = 1e20;
       if (! Nuclei[i].stable &&  Nuclei[i].width > 0) tlife = khShGev/Nuclei[i].width;
       // Add to GEANT
