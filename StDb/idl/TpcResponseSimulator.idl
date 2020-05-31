@@ -27,8 +27,6 @@ struct TpcResponseSimulator {
   float  tauXO;                /* =  74.6e-9  secs Tpx Outer integration time */
   float  tauCI;                /* =   0  */
   float  tauCO;                /* =   0  */
-  float  tauPASA;              /* =   77.7e-9 =>  FWHM = 190.10 ns */
-  float  tauPASA4;             /* =   40e-9 =>  FWHM = 190.2 ns 4 pole PASA */
   float  SigmaJitterTI;        /* = 0.2  for Tpx inner */
   float  SigmaJitterTO;        /* = 0.2  for Tpx outer */
   float  SigmaJitterXI;        /* = 0.0  for Tpx inner */
@@ -60,15 +58,4 @@ struct TpcResponseSimulator {
   float  T0offsetI;       /* = 0.0   extra off set for inner sector */
   float  T0offsetO;       /* = 0.0   extra off set for outer sector */
   float  FirstRowC;       /* = 0.0   extra correction for the first pad row */
-  long   NoZC;            /* No of extra correction vs drift distance */ 
-  float  ZCIW[3];         
-  float  ZCOW[3];
-  float  ZCIE[3];
-  float  ZCOE[3];
-  float  RecombinationI;    /* = 0.10, electron ion recombination probability */
-  float  RecombinationO;    /* = 0.10, electron ion recombination probability */
-  float  Sigma_xWI;    /* = 0.10, effective sigma in X */
-  float  Sigma_xWO;    /* = 0.10, effective sigma in X */
-  float  Slope_zWI;    /* = 0.10, effective Slope in Z */
-  float  Slope_zWO;    /* = 0.10, effective Slope in Z */
  };  
