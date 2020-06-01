@@ -15,6 +15,9 @@
  *   c) Vpd - checks if BTof info is available then loops over primary
  *      vertices and checks if |Vz - VpdVz|<mTpcVpdVzDiffCut. The first
  *      vertex that satisfies the cut is selected.
+ *   d) Mtd - sets the first primary vertex as a default and then loops
+ *      over all primary vertices. The first one that has at least
+ *      2 MTD-matched primary tracks is selected.
  * Default is NotSet. In this case the program execution will be terminated.
  * Has to be explicitly set.
  *
@@ -53,6 +56,10 @@
 #include "StPicoEvent/StPicoArrays.h"
 #include "StPicoDstMaker/StPicoFmsFiller.h"
 
+#if defined (__TFG__VERSION__)
+#include "StMuDSTMaker/COMMON/StMuDst.h"
+#endif /* __TFG__VERSION__ */
+
 class TClonesArray;
 class TChain;
 class TFile;
@@ -74,8 +81,13 @@ class StPicoDstMaker : public StMaker {
   /// Write/Read mode: 1-write, 2-read
   enum PicoIoMode {IoWrite=1, IoRead=2};
 #if !defined (__TFG__VERSION__)
-  /// Primary vertex selection mode: 0-NotSet, 1-Default, 2-Vpd, 3-VpdOrDefault
-  enum PicoVtxMode {NotSet=0, Default=1, Vpd=2, VpdOrDefault=3};
+  /// Primary vertex selection mode
+  /// \par 0 NotSet
+  /// \par 1 Default
+  /// \par 2 Vpd
+  /// \par 3 VpdOrDefault
+  /// \par 4 Mtd
+  enum PicoVtxMode {NotSet=0, Default=1, Vpd=2, VpdOrDefault=3, Mtd=4};
 #endif /* ! __TFG__VERSION__ */
   /// Write or not write covariance matrix: 0-skip, 1-write
   enum PicoCovMtxMode {Skip=0, Write=1};
@@ -270,8 +282,10 @@ class StPicoDstMaker : public StMaker {
   /// Magnetic field of the current event
   Float_t    mBField;
 
+#if !defined (__TFG__VERSION__)
   /// Vertex selection mode
   PicoVtxMode mVtxMode;
+#endif /* ! __TFG__VERSION__ */
   /// Covariant matrix not write/write mode
   PicoCovMtxMode mCovMtxMode;
   /// BEmc Smd not write/write mode
@@ -317,10 +331,13 @@ class StPicoDstMaker : public StMaker {
 
   /// FMS filler
   StPicoFmsFiller  mFmsFiller;
+#if defined (__TFG__VERSION__)
+  static StPicoDstMaker *fgPicoDstMaker; //!
+#endif
 
   /// Get CVS status
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPicoDstMaker.h,v 1.26 2020/02/14 17:05:53 gnigmat Exp $ built " __DATE__ " " __TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StPicoDstMaker.h,v 1.27 2020/06/01 19:54:19 gnigmat Exp $ built " __DATE__ " " __TIME__ ;
     return cvs;
   }
 
